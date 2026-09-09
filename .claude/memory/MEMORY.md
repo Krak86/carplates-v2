@@ -1,0 +1,3 @@
+- [Re-check plan against clarifying-question answers](recheck-plan-after-clarifying-questions.md) — before ExitPlanMode, verify the draft actually reflects every AskUserQuestion answer, revise if not
+- [opusplan model delegation setup](opusplan-model-delegation.md) — carplates-v2 plans on Opus, executes on Sonnet via .claude/settings.local.json; that file is unreadable to me (deny rule)
+- [pnpm 12 launcher fix on this machine](pnpm-launcher-fix.md) — global pnpm shim was repointed at 12.3.4; `pnpm` on PATH now works directly

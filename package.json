@@ -1,0 +1,50 @@
+{
+  "name": "carplates-v2",
+  "version": "0.1.0",
+  "description": "Ukrainian car plate + VIN lookup — monorepo (web + api + shared + scripts)",
+  "private": true,
+  "license": "MIT",
+  "author": "Ruslan Korkin <rukrak86@gmail.com>",
+  "type": "module",
+  "packageManager": "pnpm@12.3.4",
+  "engines": {
+    "node": ">=24 <25",
+    "pnpm": ">=12"
+  },
+  "scripts": {
+    "dev": "pnpm -r --parallel dev",
+    "build": "pnpm --filter @carplates/shared --filter @carplates/db build && pnpm --filter @carplates/api --filter @carplates/web build",
+    "lint": "eslint . --cache --cache-location node_modules/.cache/eslint/",
+    "lint:fix": "eslint . --fix --cache --cache-location node_modules/.cache/eslint/",
+    "lint:types": "eslint . --config eslint.config.types.mjs --cache --cache-location node_modules/.cache/eslint-types/",
+    "type-check": "pnpm -r type-check",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "db:up": "docker compose -f infra/docker-compose.yml up -d",
+    "db:down": "docker compose -f infra/docker-compose.yml down",
+    "db:reset": "docker compose -f infra/docker-compose.yml down -v && docker compose -f infra/docker-compose.yml up -d",
+    "db:migrate": "pnpm --filter @carplates/db db:migrate",
+    "db:generate": "pnpm --filter @carplates/db db:generate",
+    "db:studio": "pnpm --filter @carplates/db db:studio",
+    "db:seed": "pnpm --filter @carplates/scripts seed",
+    "ingest": "pnpm --filter @carplates/scripts ingest"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@tanstack/eslint-plugin-query": "^5.102.8",
+    "eslint": "^10.10.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-import-resolver-typescript": "^4.4.5",
+    "eslint-plugin-drizzle": "^0.2.3",
+    "eslint-plugin-import-x": "^4.17.1",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^17.12.0",
+    "prettier": "^3.9.6",
+    "prettier-plugin-tailwindcss": "^0.8.1",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.70.0",
+    "vitest": "^4.1.11"
+  }
+}

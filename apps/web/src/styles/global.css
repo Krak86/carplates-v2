@@ -1,0 +1,39 @@
+@import 'tailwindcss';
+
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+/* Design tokens. Light is the committed default; dark is wired for later. */
+@theme {
+  --color-bg: hsl(0 0% 100%);
+  --color-surface: hsl(220 20% 98%);
+  --color-border: hsl(220 13% 88%);
+  --color-fg: hsl(222 47% 11%);
+  --color-muted: hsl(220 9% 46%);
+  --color-primary: hsl(222 89% 55%);
+  --color-primary-fg: hsl(0 0% 100%);
+  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+:root[data-theme='dark'] {
+  --color-bg: hsl(222 30% 9%);
+  --color-surface: hsl(222 25% 13%);
+  --color-border: hsl(222 15% 24%);
+  --color-fg: hsl(210 20% 96%);
+  --color-muted: hsl(220 12% 62%);
+  --color-primary: hsl(217 91% 65%);
+  --color-primary-fg: hsl(222 47% 11%);
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}

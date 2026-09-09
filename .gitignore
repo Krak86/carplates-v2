@@ -1,0 +1,32 @@
+# dependencies
+node_modules/
+.pnpm-store/
+
+# build output
+dist/
+apps/*/dist/
+apps/web/dist/
+*.tsbuildinfo
+
+# caches
+.cache/
+.eslintcache
+.vite/
+coverage/
+
+# env / secrets
+.env
+.env.*
+!.env.example
+
+# ingest working files
+scripts/.data/
+*.zip
+
+# editor / OS
+.DS_Store
+.idea/
+*.log
+
+# claude
+.claude/settings.local.json

@@ -1,0 +1,15 @@
+packages:
+  - 'apps/*'
+  - 'packages/*'
+  - 'scripts'
+
+# Native postinstall builds we explicitly trust (pnpm 12 blocks all by default).
+allowBuilds:
+  unrs-resolver: true # native resolver for eslint-import-resolver-typescript / import-x
+  esbuild: true # vite / vitest / tsx / drizzle-kit
+  '@scarf/scarf': false # analytics ping — no build needed
+  core-js: false # only prints a funding message
+
+# Supply-chain age gate. Off during initial scaffolding to avoid churn; revisit
+# (e.g. 10080 = 7 days) once the dependency set is stable.
+minimumReleaseAge: 0

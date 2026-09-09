@@ -1,0 +1,27 @@
+{
+  "name": "@carplates/scripts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "seed": "tsx src/seed.ts",
+    "ingest": "tsx src/ingest.ts",
+    "type-check": "tsc",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@carplates/db": "workspace:*",
+    "@carplates/shared": "workspace:*",
+    "csv-parse": "^7.0.2",
+    "drizzle-orm": "0.45.2",
+    "iconv-lite": "^0.7.3",
+    "unzipper": "^0.12.5"
+  },
+  "devDependencies": {
+    "@types/node": "^24.7.0",
+    "@types/unzipper": "^0.10.11",
+    "tsx": "^4.20.6",
+    "typescript": "~5.9.3",
+    "vitest": "^4.1.11"
+  }
+}

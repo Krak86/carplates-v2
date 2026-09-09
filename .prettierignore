@@ -1,0 +1,11 @@
+node_modules
+dist
+apps/*/dist
+apps/web/dist
+coverage
+.cache
+.vite
+pnpm-lock.yaml
+infra/db/migrations
+*.log
+CHANGELOG.md

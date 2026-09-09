@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "lib": ["ES2023"],
+    "types": ["node"],
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    // decorator metadata needs runtime value imports of injected types
+    "verbatimModuleSyntax": false,
+    "strictPropertyInitialization": false
+  },
+  "include": ["src/**/*.ts"]
+}
