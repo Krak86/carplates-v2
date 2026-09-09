@@ -13,6 +13,11 @@ Postgres; VIN decoding proxies the free NHTSA API.
 Phases 2-5 (RIA similar-cars, Platesmania, image recognition, VPS/deploy,
 accounts) are in `PLAN.md`.
 
+The **v1 app is the sibling folder `../carplates/`** (do not modify it) — the
+reference for Phase 2/3 ports: RIA brand→id matrices
+(`src/js/data/DataCarsRia.ts` etc.), Platesmania and image-recognition proxies
+(`azure/*.js`), and the original homoglyph/plate logic (`src/js/utils/`).
+
 ## Commands
 
 ```bash

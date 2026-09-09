@@ -12,6 +12,9 @@
     "allowJs": false,
     "skipLibCheck": true,
     "noEmit": true,
+    // `incremental` is deliberately NOT set: with per-package `tsc` builds its
+    // .tsbuildinfo lived outside dist/, so `rm -rf dist` left a stale cache and
+    // tsc silently emitted nothing. Do not re-add it here.
 
     "strict": true,
     "alwaysStrict": true,
