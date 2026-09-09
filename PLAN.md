@@ -21,6 +21,44 @@ calls behind our own API.
 | Errors    | Sentry Cloud, free Developer tier                                                                   | official dashboard                                                                                       |
 | i18n      | i18next, `localStorage` + `navigator.language`                                                      | ua/ru/en                                                                                                 |
 
+## Version pins — why not `latest`
+
+Everything is on `latest` **except** the five below. Each is held back for a
+concrete reason with a revisit trigger — not caution for its own sake. Re-check
+by re-reading this section before bumping.
+
+| Package                | `latest` (2026-09)                                                | We use                                         | Why held back                                                                                                                                                                                                                                                                                                | Revisit when                                                                                                                                             |
+| ---------------------- | ----------------------------------------------------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **typescript**         | `7.0.2`                                                           | `~5.9.3`                                       | `typescript-eslint@8.70` peer-requires `typescript >=4.8.4 <6.1.0`. TS 7 (and even 6.1) breaks **all** type-aware linting (`no-floating-promises`, the parser itself).                                                                                                                                       | `typescript-eslint` declares TS 7 support (watch its peerDeps / release notes).                                                                          |
+| **@nestjs/core** & co. | `12.0.1`                                                          | `^11.2.3`                                      | `nestjs-zod@5.5.0` (latest, nothing newer) peer-requires `@nestjs/common ^10 \|\| ^11` and `@nestjs/swagger ^7 \|\| ^8 \|\| ^11` — no Nest 12. `nestjs-zod` is core to the design (one Zod schema → validation pipe **and** OpenAPI).                                                                        | `nestjs-zod` ships a release listing `@nestjs/* ^12` in peerDeps. Then bump all `@nestjs/*` together.                                                    |
+| **drizzle-orm**        | `0.45.2` is the `latest` **tag**; `1.0.0-rc.4` is on the `rc` tag | `0.45.2` (exact)                               | We're on the actual latest **stable**. Not the RC: the maintainers haven't promoted v1 to `latest` (their own signal); `drizzle-kit` + `drizzle-zod` still target 0.4x; the v1 stream ran 23 betas + ≥5 RCs and still iterates. v1's headline features (RQB v2, RLS, generated columns) are irrelevant here. | npm `latest` points at `1.x` **and** `drizzle-kit` + `drizzle-zod` have stable v1 releases. Then follow `/docs/upgrade-v1`; our Drizzle surface is tiny. |
+| **vitest**             | `5.0.0`                                                           | `^4.1.11`                                      | 5.0.0 shipped as a same-window `.0`. 4.1.11 is mature and already supports Vite 8 (`vite: ^6 \|\| ^7 \|\| ^8` peer) and Node 24. Same "stable over shiny" call as Node 24-not-26.                                                                                                                            | 5.x has a few patch releases and the plugin ecosystem (coverage, ui) has caught up. Low urgency.                                                         |
+| **node**               | `26.8.2` (Current)                                                | `24.x` (`24.21.0` is the newest LTS "Krypton") | 26 only becomes LTS in Oct 2026; "entering LTS" ≠ ecosystem-ready — native deps and CI images take months. Conservative for an unattended VPS. Upgrading is a one-line `.nvmrc` / Dockerfile change.                                                                                                         | 26 has been LTS for a few months and `node:26-alpine` is everywhere.                                                                                     |
+
+**Not held back — clarifications so nobody "fixes" them:**
+
+- **pnpm** — we _are_ on `latest` (`12.3.4`, pinned in `packageManager`). This
+  machine's global launcher was broken (pnpm 10's self-management shim can't hand
+  off to pnpm 12's layout, and pnpm 10 can't read a pnpm-12 lockfile); it was
+  repointed at 12.3.4 directly. See `.claude/memory/pnpm-launcher-fix.md`.
+- **@eslint/js** — `^10.0.1` **is** its latest. It versions independently from
+  the `eslint` core package (`10.10.0`). Don't "align" it to `^10.10.0` — that
+  version doesn't exist.
+- **eslint-plugin-react** — `latest` is `7.37.5`; we **removed it**, not pinned
+  it. 7.37.x calls `context.getFilename()`, removed in ESLint 10, so it crashes
+  the linter. `eslint-plugin-react-hooks@7` (ESLint-10-native, incl. the React
+  Compiler rules) covers what matters. Re-add only if a patched
+  `eslint-plugin-react` ships and its extra rules are wanted.
+- **tsconfig `incremental`** — deliberately unset (not a version thing): with
+  per-package `tsc` its `.tsbuildinfo` lived outside `dist/`, so `rm -rf dist`
+  left a stale cache and tsc silently emitted nothing.
+
+Everything else (React 19.3, React Router 8.3, Vite 8.2, Tailwind 4.3, TanStack
+Query 5, Zustand 5, i18next 26, `@sentry/*` 10, `posthog-js`, `drizzle-kit`
+0.31, `pg` 8, `fastify` 5, `csv-parse` 7, `unzipper`, `iconv-lite`, `tsx`,
+`zod` 4, `globals` 17, `eslint` 10, `typescript-eslint` 8, `vite`/`vitest`
+plugins) is on `latest`.
+
 ## Phase 1 — local dev stack ✅ DONE
 
 Plate + VIN search running end-to-end on one machine.
