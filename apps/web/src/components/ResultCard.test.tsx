@@ -29,8 +29,10 @@ const data: PlateLookupResponse = {
     purpose: 'ЗАГАЛЬНИЙ',
     fuel: 'БЕНЗИН',
     capacity: 2494,
+    powerKwt: null,
     ownWeight: 1490,
-    totalWeight: 1990
+    totalWeight: 1990,
+    plateInferred: false
   }
 }
 
@@ -44,5 +46,19 @@ describe('ResultCard', () => {
     expect(screen.getByText(/TOYOTA CAMRY/)).toBeInTheDocument()
     expect(screen.getByText(/ВЕ7116АА, Миколаївська область/)).toBeInTheDocument()
     expect(screen.queryByText('4T1BF1FK5CU000001')).not.toBeInTheDocument()
+  })
+
+  it('shows power in kW instead of capacity for a pure EV, and the inferred-plate badge', () => {
+    const ev: PlateLookupResponse = {
+      ...data,
+      current: { ...data.current, capacity: null, powerKwt: 150, plateInferred: true }
+    }
+    render(
+      <MemoryRouter>
+        <ResultCard data={ev} />
+      </MemoryRouter>
+    )
+    expect(screen.getByText('150')).toBeInTheDocument()
+    expect(screen.getByText('plate reconstructed from VIN')).toBeInTheDocument()
   })
 })

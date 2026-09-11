@@ -24,6 +24,11 @@ export default function ResultCard({ data }: Props): ReactNode {
   const { t } = useTranslation()
   const [expanded, setExpanded] = useState(false)
   const c = data.current
+  // A pure EV has no engine capacity — power_kwt (2026+ only) is its only engine
+  // figure, so it takes the capacity row's place instead of being hidden.
+  const hasCapacity = c.capacity != null
+  const engineLabel = hasCapacity ? t('field.capacity') : t('field.power')
+  const engineValue = hasCapacity ? c.capacity : c.powerKwt
 
   return (
     <Card className="w-full max-w-xl">
@@ -34,12 +39,20 @@ export default function ResultCard({ data }: Props): ReactNode {
         <div className="text-sm text-[var(--color-muted)]">
           {data.plate}
           {data.region ? `, ${data.region}` : ''}
+          {c.plateInferred && (
+            <span
+              title={t('result.plateInferredHint')}
+              className="ml-2 rounded-full border border-[var(--color-border)] px-2 py-0.5 text-xs"
+            >
+              {t('result.plateInferred')}
+            </span>
+          )}
         </div>
       </div>
 
       <div className="divide-y divide-[var(--color-border)]">
         <Row label={t('field.body')} value={c.body} />
-        <Row label={t('field.capacity')} value={c.capacity} />
+        <Row label={engineLabel} value={engineValue} />
         <Row label={t('field.color')} value={c.color} />
         <Row label={t('field.fuel')} value={c.fuel} />
         <Row label={t('field.weight')} value={c.ownWeight && `${c.ownWeight} / ${c.totalWeight ?? '—'}`} />
@@ -49,6 +62,7 @@ export default function ResultCard({ data }: Props): ReactNode {
         <div className="mt-2 divide-y divide-[var(--color-border)]">
           <Row label={t('field.kind')} value={c.kind} />
           <Row label={t('field.purpose')} value={c.purpose} />
+          {hasCapacity && <Row label={t('field.power')} value={c.powerKwt} />}
           <Row label={t('field.owner')} value={c.person === 'P' ? t('field.ownerPrivate') : t('field.ownerCompany')} />
           <Row label={t('field.regDate')} value={c.dReg} />
           <Row label={t('field.dep')} value={c.dep} />

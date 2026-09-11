@@ -2,7 +2,8 @@ import { z } from 'zod'
 
 /** One vehicle-registration action from the state open-data registry. */
 export const registrationSchema = z.object({
-  plate: z.string(),
+  /** null since the 2026 plate-removal (ГСЦ МВС №67/ОД) — such rows key on `vin` instead. */
+  plate: z.string().nullable(),
   person: z.string().nullable(),
   regAddrKoatuu: z.string().nullable(),
   operCode: z.number().int().nullable(),
@@ -20,8 +21,12 @@ export const registrationSchema = z.object({
   purpose: z.string().nullable(),
   fuel: z.string().nullable(),
   capacity: z.number().int().nullable(),
+  /** Engine power in kW — 2026+ only; the only engine figure a pure EV has. */
+  powerKwt: z.number().int().nullable(),
   ownWeight: z.number().int().nullable(),
-  totalWeight: z.number().int().nullable()
+  totalWeight: z.number().int().nullable(),
+  /** true when `plate` was reconstructed (event/VIN match), not published as-is. */
+  plateInferred: z.boolean()
 })
 export type Registration = z.infer<typeof registrationSchema>
 
@@ -42,10 +47,20 @@ export const plateHistoryResponseSchema = z.object({
 })
 export type PlateHistoryResponse = z.infer<typeof plateHistoryResponseSchema>
 
+/** Our own registry rows for a VIN — present when the VIN appears in `registry.registrations`. */
+export const vinRegistrySchema = z.object({
+  plate: z.string().nullable(),
+  plateInferred: z.boolean(),
+  actions: z.array(registrationSchema)
+})
+export type VinRegistry = z.infer<typeof vinRegistrySchema>
+
 /** GET /api/vin/:vin — non-empty variable/value pairs from the NHTSA decoder. */
 export const vinDecodeResponseSchema = z.object({
   vin: z.string(),
-  results: z.array(z.object({ variable: z.string(), value: z.string() }))
+  results: z.array(z.object({ variable: z.string(), value: z.string() })),
+  /** Our own registry data for this VIN, when we have any (undefined otherwise). */
+  registry: vinRegistrySchema.optional()
 })
 export type VinDecodeResponse = z.infer<typeof vinDecodeResponseSchema>
 

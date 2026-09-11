@@ -84,13 +84,57 @@ DISTINCT`), materialized `current_registration` (`DISTINCT ON (plate)`),
 - `scripts`:
   - `seed.ts` — ~1000 deterministic synthetic rows (incl. `ВЕ7116АА`,
     `АА1234ВС`, and `КА0001АА` with 3 registration actions)
-  - `ingest.ts` — CKAN `package_show` → per-year ZIP → stream-parse (win1251,
-    `;`-delimited, 19/20-column layout detected) → `COPY`/upsert → refresh view →
-    record in `ingested_resources`. Flags: `--year`, `--limit`, `--file`, `--dry-run`, `--utf8`.
+  - `ingest.ts` — CKAN `package_show` → per-year ZIP → stream-parse (UTF-8 by
+    default, `;`-delimited, **header-name-driven column mapping** — see
+    "2026 plate removal" below) → batched insert/upsert → refresh view →
+    record in `ingested_resources`. Flags: `--year`, `--limit`, `--file`,
+    `--dry-run`, `--encoding <utf8|win1251>`, `--archive <dir>`, `--backfill-plates`.
+  - `transform.ts` — `buildLayout` resolves a file's header row to a column
+    layout by name (throws if none match); `mapRecord` uses that layout, so
+    field order never has to match across years.
+  - `backfill.ts` — `backfillPlates()`: reconstructs `plate` for rows the
+    registry published without one, via an exact `(vin, d_reg, oper_code)`
+    match first, a VIN-latest-plate fallback second (flagged `plate_inferred`).
 - `infra/docker-compose.yml` — local Postgres only. Note: `postgres:18+` mounts
   the volume at `/var/lib/postgresql` (not `/data`).
 
 **Not in Phase 1:** CI, GitHub repo, VPS, deploy, OG images, real full ingest.
+
+### 2026 plate removal (ГСЦ МВС order №67/ОД, 2026-06-29)
+
+The source layout has changed almost every year, and the header row is the
+only reliable way to tell one from another — verified against the real
+resources, not just the samples:
+
+| Years     | Columns | Plate column | VIN | oper_code                                         | Date format  | Encoding |
+| --------- | ------- | ------------ | --- | ------------------------------------------------- | ------------ | -------- |
+| 2013-2019 | 19      | `N_REG_NEW`  | no  | separate column (redundant prefix in `oper_name`) | `YYYY-MM-DD` | UTF-8    |
+| 2020      | 19      | `N_REG_NEW`  | no  | separate column                                   | `YYYY-MM-DD` | UTF-8    |
+| 2021-2022 | 20      | `N_REG_NEW`  | yes | separate column                                   | `DD.MM.YYYY` | UTF-8    |
+| 2023-2025 | 20      | `N_REG_NEW`  | yes | separate column                                   | `DD.MM.YY`   | UTF-8    |
+| 2026      | 17      | **none**     | yes | fused: `CD.OPER_CODE\|\|'-'\|\|CD.OPERAS`         | `DD.MM.YY`   | UTF-8    |
+
+The 2026-09-01 republish of the year-to-date resource dropped `N_REG_NEW`
+(and `REG_ADDR_KOATUU`, `DEP_CODE`), reordered `KIND;BODY;PURPOSE` to
+`KIND;PURPOSE;BODY`, and added `POWER_KWT` (engine power in kW — the only
+engine figure a pure EV has, since its `CAPACITY` is empty). Reason: **ГСЦ МВС
+order №67/ОД (2026-06-29)** stopped publishing the plate number; a business
+coalition (OTP Bank, PrivatBank, RIA, RST.UA) has asked the ministry to
+rescind it, so this may reverse. Because the change was retroactive — the
+whole year-to-date file was rewritten, not just new rows — the January-2026
+resource snapshot (`reestrTZ2026`, last-modified 2026-05-08) is the _only_
+surviving source of Jan-Apr 2026 plates; data.gov.ua replaces resources in
+place, so that snapshot cannot be re-downloaded once superseded.
+
+Design: `plate` is nullable (`CHECK (plate IS NOT NULL OR vin IS NOT NULL)`
+instead of a second table, so a rollback of the order just needs a re-ingest +
+re-run of `--backfill-plates`, not a migration). Measured recovery, joining the
+two 2026 snapshots on `(vin, d_reg, oper_code)`: **46.6%** of post-order rows
+get an authoritative plate back from the January archive; a further **34.5%**
+link by VIN to a plate already in 2024-2025 data (flagged `plate_inferred`,
+since the vehicle may have been re-plated since). `--archive <dir>` exists
+specifically so this kind of loss doesn't recur — see the backup policy note
+in Phase 4, which this pulls forward to "do it now" rather than "do it later."
 
 ## Phase 2 — RIA "similar cars" proxy
 
@@ -136,6 +180,9 @@ The DB is fully derived and read-only — every row rebuildable by re-running
 - **Primary:** archive each downloaded source ZIP to R2/B2 at ingest time (~1.2
   GB now, +~110 MB/year). data.gov.ua replaces the current-year resource in
   place — this is the only guard against the portal altering/removing data.
+  Already needed once in Phase 1 (see "2026 plate removal" above), so
+  `ingest.ts --archive <dir>` exists from Phase 1 on, writing to a local dir
+  until this graduates to R2/B2 here.
 - **Secondary:** `pg_dump -Fc` once after each successful monthly ingest, keep 2-3.
 - **No nightly job.**
 - ⚠️ **The first user-writable table (Phase 5) flips this to nightly `pg_dump

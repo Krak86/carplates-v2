@@ -46,7 +46,7 @@ First-time local setup: `pnpm install && pnpm db:up && pnpm db:migrate && pnpm d
 | `packages/db/`     | Drizzle schema (`registry` PG schema), pooled client, SQL migrator, `drizzle.config.ts` (generate/studio only)                                             |
 | `apps/api/`        | NestJS + Fastify. Feature modules under `src/<feature>/`. Serves the built web app + injects per-plate `<meta>` tags on deep links.                        |
 | `apps/web/`        | Vite + React 19 + React Router 8 (declarative). `@/` → `src/`.                                                                                             |
-| `scripts/`         | `seed.ts`, `ingest.ts` (+ `transform.ts` pure helpers). Run with `tsx`.                                                                                    |
+| `scripts/`         | `seed.ts`, `ingest.ts` (+ `transform.ts` pure helpers, `backfill.ts`). Run with `tsx`.                                                                     |
 | `infra/`           | `docker-compose.yml` (local Postgres only)                                                                                                                 |
 
 ## Stack
@@ -69,10 +69,19 @@ Vitest 4 · ESLint 10 (flat config)
   extensions (nodenext). `apps/web` uses the `@/` alias — no `../` there.
 - **Plate normalization**: `normalizePlate` from `@carplates/shared` runs on
   every plate at every layer (web input, API param, ingest row). It produces the
-  DB key and the query key — they must match.
-- **DB writes**: Drizzle in `apps/api`; raw `COPY`/SQL only in `scripts/ingest.ts`.
-  Schema changes = a new `packages/db/migrations/NNNN_*.sql` file (the migrator
-  applies them in order, once each).
+  DB key and the query key — they must match. **Exception:** `registrations.plate`
+  is nullable since the 2026 plate-removal (ГСЦ МВС order №67/ОД, see `PLAN.md`)
+  — such rows are keyed on `vin` instead, and the API follows the VIN, not the
+  plate, to reach them (`plate.service.ts`, `vin.service.ts`).
+- **Ingest column mapping is header-name-driven, not positional** — see
+  `scripts/src/transform.ts`. The source layout has changed column set, column
+  order, and date format almost every year; a positional parser silently maps
+  the wrong field the moment two years disagree on order.
+- **DB writes**: Drizzle in `apps/api`; `scripts/ingest.ts` batches plain
+  `INSERT … ON CONFLICT DO NOTHING`, and `scripts/backfill.ts` runs raw SQL for
+  the set-based plate reconstruction (see `PLAN.md`). Schema changes = a new
+  `packages/db/migrations/NNNN_*.sql` file (the migrator applies them in order,
+  once each).
 - **NestJS**: feature modules, Zod-validated inputs, no logic in controllers.
   Controllers return values and never take `@Res()` — except the SPA catch-all.
 - **Telemetry** stays off locally. `.env.example` in each app documents the vars;

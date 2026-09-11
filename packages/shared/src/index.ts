@@ -5,10 +5,12 @@ export {
   plateLookupResponseSchema,
   plateHistoryResponseSchema,
   vinDecodeResponseSchema,
+  vinRegistrySchema,
   apiErrorSchema,
   type Registration,
   type PlateLookupResponse,
   type PlateHistoryResponse,
   type VinDecodeResponse,
+  type VinRegistry,
   type ApiError
 } from './schemas.js'

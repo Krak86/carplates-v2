@@ -25,8 +25,10 @@ describe('toRegistrationDto', () => {
       purpose: 'ЗАГАЛЬНИЙ',
       fuel: 'БЕНЗИН',
       capacity: 2494,
+      powerKwt: null,
       ownWeight: 1490,
-      totalWeight: 1990
+      totalWeight: 1990,
+      plateInferred: false
     }
 
     const dto = toRegistrationDto(row)
@@ -35,12 +37,12 @@ describe('toRegistrationDto', () => {
     expect(dto).not.toHaveProperty('sourceResourceId')
     expect(dto.plate).toBe('ВЕ7116АА')
     expect(dto.makeYear).toBe(2018)
-    expect(Object.keys(dto)).toHaveLength(20)
+    expect(Object.keys(dto)).toHaveLength(22)
   })
 
-  it('passes nulls through', () => {
+  it('passes nulls through, including a plateless (2026) row', () => {
     const dto = toRegistrationDto({
-      plate: 'АА0000АА',
+      plate: null,
       person: null,
       regAddrKoatuu: null,
       operCode: null,
@@ -50,7 +52,7 @@ describe('toRegistrationDto', () => {
       dep: null,
       brand: null,
       model: null,
-      vin: null,
+      vin: 'WBAKV210300R24692',
       makeYear: null,
       color: null,
       kind: null,
@@ -58,10 +60,14 @@ describe('toRegistrationDto', () => {
       purpose: null,
       fuel: null,
       capacity: null,
+      powerKwt: 120,
       ownWeight: null,
-      totalWeight: null
+      totalWeight: null,
+      plateInferred: true
     })
-    expect(dto.vin).toBeNull()
-    expect(dto.plate).toBe('АА0000АА')
+    expect(dto.vin).toBe('WBAKV210300R24692')
+    expect(dto.plate).toBeNull()
+    expect(dto.powerKwt).toBe(120)
+    expect(dto.plateInferred).toBe(true)
   })
 })
