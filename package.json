@@ -29,7 +29,8 @@
     "db:generate": "pnpm --filter @carplates/db db:generate",
     "db:studio": "pnpm --filter @carplates/db db:studio",
     "db:seed": "pnpm --filter @carplates/scripts seed",
-    "ingest": "pnpm --filter @carplates/scripts ingest"
+    "ingest": "pnpm --filter @carplates/scripts ingest",
+    "ingest:full": "pnpm --filter @carplates/scripts ingest:full"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

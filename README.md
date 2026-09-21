@@ -14,17 +14,42 @@ pnpm monorepo · Node 24 · React 19 + Vite 8 · NestJS 11 + Fastify · Drizzle 
 pnpm install
 pnpm db:up            # postgres:18.6 in Docker
 pnpm db:migrate
-pnpm db:seed          # ~1000 synthetic rows
-pnpm dev              # web http://localhost:5173 · api http://localhost:3000
+```
+
+Then load data one of two ways — pick one, both work against the same schema:
+
+### Option A — test data (seconds)
+
+```bash
+pnpm db:seed          # ~1000 deterministic synthetic rows
+pnpm dev               # web http://localhost:5173 · api http://localhost:3000
 ```
 
 Search a seeded plate (`ВЕ7116АА` or its Latin spelling `BE7116AA`), a
 multi-registration plate (`КА0001АА`), or a real 17-char VIN.
 
-For real data instead of the seed:
+### Option B — real data (hours, ~20 GB)
 
 ```bash
-pnpm ingest -- --year 2026 --limit 100000
+pnpm ingest:full       # all 13 years from data.gov.ua + 2026 plate recovery + backfill
+pnpm dev
+```
+
+`ingest:full` chains three steps — see [scripts/src/ingest-full.ts](scripts/src/ingest-full.ts)
+and [PLAN.md](PLAN.md)'s "2026 plate removal" section for what each does and why:
+
+1. `pnpm ingest` — every CKAN year (2013-2026), largest datasets take minutes each
+2. Downloads and ingests an archived pre-redaction 2026 snapshot (government order
+   №67/ОД stripped plates from the live 2026 export mid-year — this restores them
+   for the months it covers). Best-effort: skipped with a warning if that source
+   is temporarily unreachable, the run isn't failed by it.
+3. `pnpm ingest -- --backfill-plates` — reconstructs plates for the rest of the
+   2026 rows by cross-referencing VIN + registration date across the full history
+
+For a faster real-data taste without the full run, ingest a single year, optionally capped:
+
+```bash
+pnpm ingest -- --year 2024 --limit 100000
 ```
 
 ## Workspace
@@ -35,14 +60,14 @@ pnpm ingest -- --year 2026 --limit 100000
 | `packages/db`     | Drizzle schema + client + SQL migrator                                     |
 | `apps/api`        | NestJS + Fastify — plate/VIN endpoints, Swagger, SPA host + meta injection |
 | `apps/web`        | Vite + React + React Router                                                |
-| `scripts`         | `seed.ts`, `ingest.ts`                                                     |
+| `scripts`         | `seed.ts`, `ingest.ts`, `ingest-full.ts`                                    |
 
 See [CLAUDE.md](CLAUDE.md) for conventions and [PLAN.md](PLAN.md) for the roadmap.
 
 ## Scripts
 
 `pnpm dev · build · lint · type-check · test · format` ·
-`pnpm db:up · db:down · db:reset · db:migrate · db:seed · ingest`
+`pnpm db:up · db:down · db:reset · db:migrate · db:seed · ingest · ingest:full`
 
 ## License
 

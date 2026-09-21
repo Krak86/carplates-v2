@@ -6,6 +6,7 @@
   "scripts": {
     "seed": "tsx src/seed.ts",
     "ingest": "tsx src/ingest.ts",
+    "ingest:full": "tsx src/ingest-full.ts",
     "type-check": "tsc",
     "test": "vitest run"
   },

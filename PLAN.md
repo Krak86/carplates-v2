@@ -84,21 +84,39 @@ DISTINCT`), materialized `current_registration` (`DISTINCT ON (plate)`),
 - `scripts`:
   - `seed.ts` — ~1000 deterministic synthetic rows (incl. `ВЕ7116АА`,
     `АА1234ВС`, and `КА0001АА` with 3 registration actions)
-  - `ingest.ts` — CKAN `package_show` → per-year ZIP → stream-parse (UTF-8 by
+  - `ingest.ts` — CKAN `package_show` → per-resource ZIP, processed
+    **chronologically by year** (tiebroken by `created` for same-year
+    duplicates like 2022's three republishes) → stream-parse (UTF-8 by
     default, `;`-delimited, **header-name-driven column mapping** — see
     "2026 plate removal" below) → batched insert/upsert → refresh view →
-    record in `ingested_resources`. Flags: `--year`, `--limit`, `--file`,
-    `--dry-run`, `--encoding <utf8|win1251>`, `--archive <dir>`, `--backfill-plates`.
+    record in `ingested_resources`. Flags: `--year`, `--limit`, `--file`
+    (accepts a raw `.csv` or a `.zip`, downloaded or local), `--after
+    <YYYY-MM-DD>` (skip rows before this `d_reg` — e.g. rows already covered
+    by an archived snapshot), `--dry-run`, `--encoding <utf8|win1251>`,
+    `--archive <dir>`, `--backfill-plates`. The already-ingested check
+    compares `last_modified` as a timestamp, not text — Postgres and CKAN
+    serialize it differently, so a naive string compare never matches.
+  - `ingest-full.ts` (`pnpm ingest:full`) — one command for the full real
+    dataset: `ingest.ts` (all years) → downloads and ingests the archived
+    pre-redaction 2026 snapshot (see below; best-effort, warns and continues
+    if unreachable) → `ingest.ts --backfill-plates`.
   - `transform.ts` — `buildLayout` resolves a file's header row to a column
-    layout by name (throws if none match); `mapRecord` uses that layout, so
-    field order never has to match across years.
+    layout by name (throws if none match, case-insensitive); `mapRecord` uses
+    that layout, so field order — or case — never has to match across years.
   - `backfill.ts` — `backfillPlates()`: reconstructs `plate` for rows the
     registry published without one, via an exact `(vin, d_reg, oper_code)`
-    match first, a VIN-latest-plate fallback second (flagged `plate_inferred`).
+    match first, a VIN-latest-plate fallback second (flagged `plate_inferred`),
+    then dedupes rows the two ingested sources now both cover. Runs inside one
+    transaction that drops/recreates the dedupe indexes — holds an exclusive
+    lock on `registrations` for its full multi-minute duration; nothing else
+    can query that table until it commits.
 - `infra/docker-compose.yml` — local Postgres only. Note: `postgres:18+` mounts
   the volume at `/var/lib/postgresql` (not `/data`).
 
-**Not in Phase 1:** CI, GitHub repo, VPS, deploy, OG images, real full ingest.
+**Not in Phase 1:** CI, GitHub repo, VPS, deploy, OG images. (A real full local
+ingest — all 13 years + 2026 recovery, ~25M rows, ~20 GB — was run and verified
+during Phase 1 to prove the pipeline; it's a one-machine dev-DB exercise, not
+the Phase 4 monthly-cron-on-a-VPS story.)
 
 ### 2026 plate removal (ГСЦ МВС order №67/ОД, 2026-06-29)
 
@@ -121,20 +139,42 @@ engine figure a pure EV has, since its `CAPACITY` is empty). Reason: **ГСЦ М
 order №67/ОД (2026-06-29)** stopped publishing the plate number; a business
 coalition (OTP Bank, PrivatBank, RIA, RST.UA) has asked the ministry to
 rescind it, so this may reverse. Because the change was retroactive — the
-whole year-to-date file was rewritten, not just new rows — the January-2026
-resource snapshot (`reestrTZ2026`, last-modified 2026-05-08) is the _only_
-surviving source of Jan-Apr 2026 plates; data.gov.ua replaces resources in
-place, so that snapshot cannot be re-downloaded once superseded.
+whole year-to-date file was rewritten, not just new rows — plates are gone
+from the live resource for the entire 2026 year-to-date, not just rows added
+after the order.
+
+**Recovery source.** `data.gov.ua` replaces a resource's file in place, so the
+plated version is gone from the documented CKAN API (`package_show`) — but the
+resource's revision history is still browsable on its dataset page (not part
+of the CKAN API, undocumented, and it has 502'd during portal maintenance at
+least once), and each entry there links to that exact revision's file. Reading
+that history: the last revision that still has `N_REG_NEW` populated is dated
+**May 1, 2026** (internal filename `reestrtz01.05.2026.csv`); the very next
+recorded revision, **June 23, 2026**, is already in the redacted 17-column
+layout — so the actual cutover on `data.gov.ua`'s side happened sometime in
+that window, ahead of the order's own 2026-06-29 effective date. `pnpm
+ingest:full` downloads that May 1 revision directly
+(`ingest-full.ts`'s `ARCHIVE_2026_URL`) rather than shipping the file in the
+repo — nothing to keep in sync, but it means that one URL is the sole recovery
+path; if `data.gov.ua` ever prunes that revision for real (not just
+maintenance), this becomes unrecoverable everywhere the file wasn't manually
+archived. `ingest-full.ts` treats the download as best-effort: a failure
+(down, 502, network) logs a warning and the run continues without 2026 plate
+recovery rather than aborting.
 
 Design: `plate` is nullable (`CHECK (plate IS NOT NULL OR vin IS NOT NULL)`
 instead of a second table, so a rollback of the order just needs a re-ingest +
-re-run of `--backfill-plates`, not a migration). Measured recovery, joining the
-two 2026 snapshots on `(vin, d_reg, oper_code)`: **46.6%** of post-order rows
-get an authoritative plate back from the January archive; a further **34.5%**
-link by VIN to a plate already in 2024-2025 data (flagged `plate_inferred`,
-since the vehicle may have been re-plated since). `--archive <dir>` exists
-specifically so this kind of loss doesn't recur — see the backup policy note
-in Phase 4, which this pulls forward to "do it now" rather than "do it later."
+re-run of `--backfill-plates`, not a migration). Measured recovery on the full
+13-year history (2026-09-21 run), joining the May 1 archive against the live
+redacted resource on `(vin, d_reg, oper_code)`: of 1,335,868 rows the live
+resource published without a plate, **41.9% (560,369)** get an authoritative
+plate back from the archive; a further **27.8% (371,269)** link by VIN to a
+plate seen anywhere else in the 13-year history (flagged `plate_inferred`,
+since the vehicle may have been re-plated since) — **69.8% total recovery**,
+404,230 rows remain plateless. `--archive <dir>` still exists for archiving
+*live* CKAN downloads during a regular `ingest.ts` run (see the backup policy
+note in Phase 4) — it's just not how the 2026 recovery file itself is kept,
+per the above.
 
 ## Phase 2 — RIA "similar cars" proxy
 

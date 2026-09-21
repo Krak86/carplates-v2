@@ -34,9 +34,11 @@ pnpm db:down        # stop it   (db:reset also drops the volume)
 pnpm db:migrate     # apply packages/db/migrations/*.sql
 pnpm db:seed        # ~1000 deterministic synthetic rows
 pnpm ingest -- --year 2026 --limit 100000   # real data slice from CKAN
+pnpm ingest:full    # full real dataset: every CKAN year + 2026 plate recovery + backfill
 ```
 
-First-time local setup: `pnpm install && pnpm db:up && pnpm db:migrate && pnpm db:seed && pnpm dev`.
+First-time local setup, test data (seconds): `pnpm install && pnpm db:up && pnpm db:migrate && pnpm db:seed && pnpm dev`.
+First-time local setup, real data (hours, ~20 GB): `pnpm install && pnpm db:up && pnpm db:migrate && pnpm ingest:full && pnpm dev`.
 
 ## Layout
 
@@ -46,7 +48,7 @@ First-time local setup: `pnpm install && pnpm db:up && pnpm db:migrate && pnpm d
 | `packages/db/`     | Drizzle schema (`registry` PG schema), pooled client, SQL migrator, `drizzle.config.ts` (generate/studio only)                                             |
 | `apps/api/`        | NestJS + Fastify. Feature modules under `src/<feature>/`. Serves the built web app + injects per-plate `<meta>` tags on deep links.                        |
 | `apps/web/`        | Vite + React 19 + React Router 8 (declarative). `@/` → `src/`.                                                                                             |
-| `scripts/`         | `seed.ts`, `ingest.ts` (+ `transform.ts` pure helpers, `backfill.ts`). Run with `tsx`.                                                                     |
+| `scripts/`         | `seed.ts`, `ingest.ts`, `ingest-full.ts` (+ `transform.ts` pure helpers, `backfill.ts`). Run with `tsx`.                                                   |
 | `infra/`           | `docker-compose.yml` (local Postgres only)                                                                                                                 |
 
 ## Stack
