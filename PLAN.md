@@ -176,6 +176,29 @@ since the vehicle may have been re-plated since) — **69.8% total recovery**,
 note in Phase 4) — it's just not how the 2026 recovery file itself is kept,
 per the above.
 
+## Phase 1.5 — client-side & reporting additions (no accounts needed)
+
+Doable now, independent of Phases 2-5; each is additive and doesn't block the others.
+
+- **Local search history (IndexedDB)** — client-side only (`apps/web`), no
+  API/DB changes. Store query, kind, found, timestamp per lookup; group in the
+  UI by month/year (collapsible sections); per-record delete + "clear all".
+  Upgrades the Phase 5 "cheaper interim" (`localStorage`) — keep the record
+  shape close to the future `search_history` table so a Phase 5 migration is a
+  straight copy, not a rewrite.
+- **Favorites (IndexedDB)** — same pattern: star toggle on the result card,
+  add/remove client-side, no API/DB changes. Superseded by Phase 5's
+  `favorites` table when accounts land.
+- **Registry statistics** — `GET /api/stats`: total rows, distinct plates,
+  distinct VINs, plateless count, broken down by year (`d_reg`) and by region
+  (plate-prefix → `REGIONS` from `packages/shared`). `COUNT(DISTINCT ...)`
+  live over 24M+ rows is too slow for a request path — needs a summary
+  table/materialized view refreshed at the end of `ingest.ts` /
+  `ingest-full.ts` / `backfill.ts` (e.g. `registry.stats_summary`,
+  `registry.stats_by_year`, `registry.stats_by_region`), never computed on
+  read. Web: a stats page; region breakdown as an oblast-level choropleth
+  matching `REGIONS`.
+
 ## Phase 2 — RIA "similar cars" proxy
 
 `GET /api/ria/similar?brand&model&kind&year` runs the whole `developers.ria.com`
