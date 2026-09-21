@@ -226,6 +226,28 @@ registry brand/model or the NHTSA-decoded values. Same free provider as the VIN 
 
 ## Phase 4 — VPS / production
 
+### VPS sizing (starting point)
+
+`registry` schema is 13.9 GB (24.7M rows in `registrations`) as of 2026-09,
+growing by roughly the ~110 MB/year the backup policy below already assumes
+for archived source ZIPs — the DB grows at a similar rate (one monthly ingest
+of deltas, not a re-ingest of the full history). Containers to fit: Postgres,
+`api`, `web` (served by `api`), Redis, Caddy, and a monthly `ingest-cron` job
+that runs occasionally and holds an exclusive lock on `registrations` for
+minutes.
+
+| Resource | Spec       | Why                                                                                                                                                          |
+| -------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| CPU      | 4 vCPU     | Normal traffic is light indexed lookups; `ingest-cron` is I/O-bound not CPU-bound, but spare cores keep it from starving API traffic during its run           |
+| RAM      | 8 GB       | Only `current_registration` (the hot-path matview) needs to stay resident, not the full 14GB — 8GB covers Postgres `shared_buffers` + OS page cache + Redis + Node without swapping during ingest's index rebuild |
+| Disk     | 80 GB NVMe | 14GB DB + WAL + 2-3 `pg_dump -Fc` backups + archived source ZIPs (~1.2GB, +110MB/year) + Docker images/logs, with years of headroom                          |
+| Network  | default    | Indexed point-lookups; bandwidth isn't the bottleneck                                                                                                        |
+
+Roughly a Hetzner CPX32 / DigitalOcean 4vCPU-8GB class box. A 2 vCPU / 4GB /
+40GB box would also run fine day-to-day and only feel tight during the
+monthly ingest — not an architectural commitment, resize later based on
+PostHog-observed load.
+
 - Prod `docker-compose`: Caddy (auto-TLS + **coarse per-IP rate limit**, see
   below) · Redis (RIA + VIN cache, throttler store) · api · web · ingest-cron
 - GHCR image build + SSH deploy workflow (GitHub Actions, free for public repos)
