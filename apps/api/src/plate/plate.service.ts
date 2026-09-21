@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
+import { Inject, Injectable, NotFoundException } from '@nestjs/common'
 import { currentRegistration, registrations } from '@carplates/db'
 import { normalizePlate, regionName } from '@carplates/shared'
 import type { PlateHistoryResponse, PlateLookupResponse } from '@carplates/shared'
@@ -9,7 +9,7 @@ import { toRegistrationDto } from './plate.dto.js'
 
 @Injectable()
 export class PlateService {
-  constructor(private readonly dbService: DbService) {}
+  constructor(@Inject(DbService) private readonly dbService: DbService) {}
 
   /**
    * Match this exact plate, plus — when it has a VIN — any row that shares

@@ -61,8 +61,14 @@ warns on violations; side-effect imports (`import './x'`) are position-exempt.
 **ESLint-enforced:**
 
 - Inline type imports: `import { type Foo } from 'bar'` (`consistent-type-imports`).
-  **Off in `apps/api`** — Nest DI + `emitDecoratorMetadata` needs constructor-injected
-  types as runtime value imports.
+  **Off in `apps/api`** — constructor-injected types must stay runtime value imports (see below).
+- **`apps/api` runs on `tsx watch` (esbuild), which never emits `design:paramtypes`** —
+  esbuild has no type checker, so `emitDecoratorMetadata` can't reflect constructor
+  param types the way `tsc` does. Nest then silently injects `undefined` instead of
+  throwing. Every constructor-injected dependency in `apps/api` **must** carry an
+  explicit `@Inject(Token)`: `constructor(@Inject(FooService) private readonly foo: FooService) {}`.
+  Applies to controllers and services alike. Property-based injection isn't exempt
+  either — it never worked off reflection in the first place.
 - No explicit `any` (warns). Type fields explicitly.
 - No parent-relative (`../`) imports in `apps/web` — use `@/`. (Node ESM code in
   `api`/`db`/`scripts` legitimately uses `../` and is exempt.)

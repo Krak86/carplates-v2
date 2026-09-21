@@ -21,11 +21,13 @@ export default function SearchField({ initialValue = '' }: Props): ReactNode {
   return (
     <form onSubmit={handleSubmit} className="flex w-full max-w-xl gap-2">
       <input
+        name="carplate-search-query"
         value={value}
         onChange={e => setValue(e.target.value)}
         placeholder={t('search.placeholder')}
         aria-label={t('search.placeholder')}
         autoFocus
+        autoComplete="on"
         className="flex-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 outline-none focus:border-[var(--color-primary)]"
       />
       {value && (

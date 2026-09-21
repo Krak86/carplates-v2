@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common'
+import { Controller, Get, Inject } from '@nestjs/common'
 import { ApiExcludeEndpoint } from '@nestjs/swagger'
 import { sql } from 'drizzle-orm'
 
@@ -6,7 +6,7 @@ import { DbService } from '../db/db.service.js'
 
 @Controller()
 export class HealthController {
-  constructor(private readonly dbService: DbService) {}
+  constructor(@Inject(DbService) private readonly dbService: DbService) {}
 
   @Get('healthz')
   @ApiExcludeEndpoint()

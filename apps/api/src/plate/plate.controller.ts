@@ -1,4 +1,4 @@
-import { Controller, Get, Param } from '@nestjs/common'
+import { Controller, Get, Inject, Param } from '@nestjs/common'
 import { ApiOkResponse, ApiParam, ApiTags } from '@nestjs/swagger'
 import { z } from 'zod'
 
@@ -11,7 +11,7 @@ const PlateParam = zodParam(z.string().min(1).max(20))
 @ApiTags('plate')
 @Controller('api/plate')
 export class PlateController {
-  constructor(private readonly plateService: PlateService) {}
+  constructor(@Inject(PlateService) private readonly plateService: PlateService) {}
 
   @Get(':plate')
   @ApiParam({ name: 'plate', example: 'ВЕ7116АА', description: 'Latin or Cyrillic; normalized server-side' })

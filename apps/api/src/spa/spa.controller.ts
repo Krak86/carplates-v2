@@ -2,7 +2,7 @@ import { createReadStream } from 'node:fs'
 import { readFile, stat } from 'node:fs/promises'
 import { join, normalize, resolve } from 'node:path'
 
-import { Controller, Get, Logger, NotFoundException, Req, Res } from '@nestjs/common'
+import { Controller, Get, Inject, Logger, NotFoundException, Req, Res } from '@nestjs/common'
 import { ApiExcludeController } from '@nestjs/swagger'
 import { classifyQuery } from '@carplates/shared'
 import type { FastifyReply, FastifyRequest } from 'fastify'
@@ -47,8 +47,8 @@ export class SpaController {
   private indexHtmlCache: string | null = null
 
   constructor(
-    private readonly plateService: PlateService,
-    private readonly vinService: VinService
+    @Inject(PlateService) private readonly plateService: PlateService,
+    @Inject(VinService) private readonly vinService: VinService
   ) {}
 
   @Get()

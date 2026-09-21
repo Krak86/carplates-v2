@@ -1,4 +1,4 @@
-import { BadGatewayException, BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
+import { BadGatewayException, BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common'
 import { registrations } from '@carplates/db'
 import { isVin } from '@carplates/shared'
 import type { VinDecodeResponse, VinRegistry } from '@carplates/shared'
@@ -21,7 +21,7 @@ export class VinService {
   /** VIN decodes are immutable — a plain bounded map is enough until Redis (Phase 4). Registry data is not cached here: it's a local DB read, and it changes with every ingest. */
   private readonly cache = new Map<string, VinDecodeResponse>()
 
-  constructor(private readonly dbService: DbService) {}
+  constructor(@Inject(DbService) private readonly dbService: DbService) {}
 
   async decode(rawVin: string): Promise<VinDecodeResponse> {
     const vin = rawVin.trim().toUpperCase()
