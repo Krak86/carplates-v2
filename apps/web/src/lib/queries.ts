@@ -2,6 +2,8 @@ import { queryOptions } from '@tanstack/react-query'
 import { normalizePlate } from '@carplates/shared'
 
 import { decodeVin, lookupPlate, plateHistory } from '@/lib/api'
+import { isFavorited, listFavorites } from '@/lib/favorites-db'
+import type { FavoriteKind } from '@/lib/favorites-db'
 import { listVisits } from '@/lib/history-db'
 
 export function plateQuery(raw: string) {
@@ -21,4 +23,12 @@ export function vinQuery(raw: string) {
 
 export function historyQuery() {
   return queryOptions({ queryKey: ['history'], queryFn: listVisits })
+}
+
+export function favoritesQuery() {
+  return queryOptions({ queryKey: ['favorites'], queryFn: listFavorites })
+}
+
+export function favoriteQuery(kind: FavoriteKind, value: string) {
+  return queryOptions({ queryKey: ['favorite', kind, value], queryFn: () => isFavorited(kind, value) })
 }

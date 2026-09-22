@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { VinDecodeResponse } from '@carplates/shared'
 
+import FavoriteButton from '@/components/FavoriteButton'
 import RegistrationActionsList from '@/components/RegistrationActionsList'
 import Card from '@/components/ui/Card'
 
@@ -14,8 +15,10 @@ export default function VinResult({ data }: Props): ReactNode {
   const registry = data.registry
 
   return (
-    <Card className="w-full max-w-xl">
-      <div className="mb-1 text-lg font-semibold">{t('vin.title')}</div>
+    <Card className="relative w-full max-w-xl">
+      <FavoriteButton kind="vin" value={data.vin} label={null} className="absolute top-3 right-3" />
+
+      <div className="mb-1 pr-8 text-lg font-semibold">{t('vin.title')}</div>
       <div className="mb-3 text-sm text-[var(--color-muted)]">{data.vin}</div>
 
       {registry && (

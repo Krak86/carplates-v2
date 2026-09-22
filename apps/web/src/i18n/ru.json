@@ -7,6 +7,7 @@
   "nav.search": "Поиск",
   "nav.about": "О приложении",
   "nav.history": "История",
+  "nav.favorites": "Избранное",
   "nav.language": "Язык",
   "result.noResults": "Ничего не найдено",
   "result.error": "Ошибка запроса. Попробуйте позже.",
@@ -48,5 +49,9 @@
   "history.empty": "История поиска пуста.",
   "history.clearAll": "Очистить всё",
   "history.confirmClearAll": "Удалить всю историю поиска? Это действие необратимо.",
-  "history.deleteOne": "Удалить"
+  "history.deleteOne": "Удалить",
+  "favorites.title": "Избранное",
+  "favorites.empty": "Список избранного пуст.",
+  "favorites.add": "Добавить в избранное",
+  "favorites.remove": "Убрать из избранного"
 }

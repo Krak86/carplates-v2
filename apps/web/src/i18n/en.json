@@ -7,6 +7,7 @@
   "nav.search": "Search",
   "nav.about": "About",
   "nav.history": "History",
+  "nav.favorites": "Favorites",
   "nav.language": "Language",
   "result.noResults": "Nothing found",
   "result.error": "Request failed. Please try again later.",
@@ -48,5 +49,9 @@
   "history.empty": "No searches yet.",
   "history.clearAll": "Clear all",
   "history.confirmClearAll": "Delete all search history? This cannot be undone.",
-  "history.deleteOne": "Delete"
+  "history.deleteOne": "Delete",
+  "favorites.title": "Favorites",
+  "favorites.empty": "No favorites yet.",
+  "favorites.add": "Add to favorites",
+  "favorites.remove": "Remove from favorites"
 }

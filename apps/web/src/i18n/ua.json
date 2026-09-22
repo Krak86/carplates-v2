@@ -7,6 +7,7 @@
   "nav.search": "Пошук",
   "nav.about": "Про застосунок",
   "nav.history": "Історія",
+  "nav.favorites": "Обране",
   "nav.language": "Мова",
   "result.noResults": "Нічого не знайдено",
   "result.error": "Помилка запиту. Спробуйте пізніше.",
@@ -48,5 +49,9 @@
   "history.empty": "Історія пошуку порожня.",
   "history.clearAll": "Очистити все",
   "history.confirmClearAll": "Видалити всю історію пошуку? Це неможливо скасувати.",
-  "history.deleteOne": "Видалити"
+  "history.deleteOne": "Видалити",
+  "favorites.title": "Обране",
+  "favorites.empty": "Обране порожнє.",
+  "favorites.add": "Додати в обране",
+  "favorites.remove": "Прибрати з обраного"
 }

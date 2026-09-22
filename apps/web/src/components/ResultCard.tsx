@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import type { PlateLookupResponse } from '@carplates/shared'
 
+import FavoriteButton from '@/components/FavoriteButton'
 import RegistrationActionsList from '@/components/RegistrationActionsList'
 import Card from '@/components/ui/Card'
 import { cn } from '@/lib/cn'
@@ -38,8 +39,15 @@ export default function ResultCard({ data }: Props): ReactNode {
   const engineValue = hasCapacity ? c.capacity : c.powerKwt
 
   return (
-    <Card className="w-full max-w-xl">
-      <div className="mb-3">
+    <Card className="relative w-full max-w-xl">
+      <FavoriteButton
+        kind="plate"
+        value={data.plate}
+        label={[c.brand, c.model].filter(Boolean).join(' ') || null}
+        className="absolute top-3 right-3"
+      />
+
+      <div className="mb-3 pr-8">
         <div className="text-lg font-semibold">
           {[c.brand, c.model].filter(Boolean).join(' ')} {c.makeYear ? `(${c.makeYear})` : ''}
         </div>

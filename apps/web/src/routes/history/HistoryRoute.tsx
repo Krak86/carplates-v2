@@ -2,13 +2,13 @@ import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router'
 
+import LocalRecordRow from '@/components/LocalRecordRow'
 import Card from '@/components/ui/Card'
 import Spinner from '@/components/ui/Spinner'
 import { cn } from '@/lib/cn'
 import { historyQuery } from '@/lib/queries'
-import { formatMonthLabel, groupByMonth, toIntlLocale } from '@/routes/history/helpers'
+import { formatMonthLabel, groupByMonth } from '@/routes/history/helpers'
 import { useHistoryActions } from '@/routes/history/use-history-actions'
 
 // Lazy-loaded (see App.tsx).
@@ -82,26 +82,14 @@ export default function HistoryRoute(): ReactNode {
                 <div className="overflow-hidden">
                   <div className="divide-y divide-[var(--color-border)] border-t border-[var(--color-border)]">
                     {group.entries.map(entry => (
-                      <div key={entry.id} className="flex items-center justify-between gap-3 px-4 py-2 text-sm">
-                        <Link
-                          to={`/${entry.value}`}
-                          className="min-w-0 flex-1 truncate text-[var(--color-primary)] underline"
-                        >
-                          {entry.value}
-                          {entry.label ? ` — ${entry.label}` : ''}
-                        </Link>
-                        <span className="shrink-0 text-[var(--color-muted)]">
-                          {new Date(entry.date).toLocaleDateString(toIntlLocale(i18n.language))}
-                        </span>
-                        <button
-                          type="button"
-                          aria-label={t('history.deleteOne')}
-                          onClick={() => deleteOne.mutate(entry.id)}
-                          className="shrink-0 text-[var(--color-muted)] hover:text-[var(--color-fg)]"
-                        >
-                          ✕
-                        </button>
-                      </div>
+                      <LocalRecordRow
+                        key={entry.id}
+                        value={entry.value}
+                        label={entry.label}
+                        date={entry.date}
+                        deleteLabel={t('history.deleteOne')}
+                        onDelete={() => deleteOne.mutate(entry.id)}
+                      />
                     ))}
                   </div>
                 </div>
