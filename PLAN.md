@@ -180,42 +180,71 @@ per the above.
 
 Doable now, independent of Phases 2-5; each is additive and doesn't block the others.
 
-- **Local search history (IndexedDB)** — client-side only (`apps/web`), no
-  API/DB changes. Store query, kind, found, timestamp per lookup; group in the
-  UI by month/year (collapsible sections); per-record delete + "clear all".
-  Upgrades the Phase 5 "cheaper interim" (`localStorage`) — keep the record
-  shape close to the future `search_history` table so a Phase 5 migration is a
-  straight copy, not a rewrite.
-- **Favorites (IndexedDB)** — same pattern: star toggle on the result card,
-  add/remove client-side, no API/DB changes. Superseded by Phase 5's
+- **Local search history (IndexedDB) ✅ DONE (2026-09-22)** — client-side only
+  (`apps/web/src/lib/history-db.ts`, on top of the tiny `idb.ts` wrapper), no
+  API/DB changes. Stores kind/value/label/timestamp per lookup (upserted on
+  revisit); `HistoryRoute` groups entries by calendar month (`routes/history/helpers.ts`)
+  into collapsible sections, each with per-record delete; a header "clear all"
+  clears the whole store. Upgrades the Phase 5 "cheaper interim"
+  (`localStorage`) — keep the record shape close to the future
+  `search_history` table so a Phase 5 migration is a straight copy, not a
+  rewrite.
+- **Favorites (IndexedDB) ✅ DONE (2026-09-22)** — same pattern
+  (`apps/web/src/lib/favorites-db.ts`): a star toggle on the result card
+  (`FavoriteButton.tsx` / `use-favorite-toggle.ts`) add/removes client-side, a
+  `FavoritesRoute` lists them. No API/DB changes. Superseded by Phase 5's
   `favorites` table when accounts land.
 - **Registry statistics** — `GET /api/stats`: total rows, distinct plates,
   distinct VINs, plateless count, broken down by year (`d_reg`) and by region
-  (plate-prefix → `REGIONS` from `packages/shared`). `COUNT(DISTINCT ...)`
-  live over 24M+ rows is too slow for a request path — needs a summary
-  table/materialized view refreshed at the end of `ingest.ts` /
-  `ingest-full.ts` / `backfill.ts` (e.g. `registry.stats_summary`,
-  `registry.stats_by_year`, `registry.stats_by_region`), never computed on
-  read. Web: a stats page; region breakdown as an oblast-level choropleth
-  matching `REGIONS`.
+  (plate-prefix → `REGIONS` from `packages/shared`). Latest known figures
+  (full 13-year ingest, 2026-09-21 run — see "2026 plate removal" above for
+  the plateless recovery math): **24,721,694** total rows, **16,723,888**
+  distinct plates, **6,456,049** distinct VINs, **404,230** still plateless.
+  `COUNT(DISTINCT ...)` live over 24M+ rows is too slow for a request path —
+  needs a summary table/materialized view refreshed at the end of
+  `ingest.ts` / `ingest-full.ts` / `backfill.ts` (e.g.
+  `registry.stats_summary`, `registry.stats_by_year`,
+  `registry.stats_by_region`), never computed on read. Web: a stats page;
+  region breakdown as an oblast-level choropleth matching `REGIONS` — see
+  backlog below, still to discuss.
+- **Plate lookup by camera/photo ✅ DONE (2026-09-22)** — moved up from Phase
+  3+ below; see that section, kept in place to avoid duplicating the design
+  notes.
 
-## Phase 2 — RIA "similar cars" proxy
+## Phase 2 — RIA "similar cars" proxy — **not started, blocked on a token**
 
 `GET /api/ria/similar?brand&model&kind&year` runs the whole `developers.ria.com`
 sequence server-side; the `api_key` leaves the client. The ~4700 lines of
 hardcoded brand→id matrices from the v1 app move server-side, ideally as a
 `ria_marks` table refreshed from RIA's own `/auto/categories/{id}/marks`. Web:
 lazy-loaded card list under the plate result, mounted only after the plate query resolves.
+Needs a free/low-cost `developers.ria.com` API key first — see backlog below.
 
-## Phase 3 — Platesmania
+## Phase 3 — Platesmania — **skipped for now**
 
-Proxy endpoint injecting `PLATES_MANIA_KEY` (needs the key first). Uses
-`denormalizePlate` (Cyrillic→Latin). Lazy-loaded card list.
+Was: a proxy endpoint injecting `PLATES_MANIA_KEY`, using `denormalizePlate`
+(Cyrillic→Latin), lazy-loaded card list. **Parked**: no free API tokens are
+available for platesmania.com, and scraping the site directly instead of
+using an API isn't a viable substitute (ToS risk, fragile against markup
+changes, no stable auth story). Revisit only if a free/affordable token
+becomes available.
 
-### Phase 3+ — plate image recognition
+### Plate image recognition (camera/upload) ✅ DONE (2026-09-22)
 
-v1 camera/upload → platerecognizer.com via a proxy. Needs `@fastify/multipart`,
-a camera/upload UI, and the `changeSymbols1toI` quirk. Own the ML later.
+v1 idea (camera/upload → platerecognizer.com via a proxy) implemented for
+real, ahead of Phases 2/3: `apps/api/src/recognize/` — `POST
+/api/recognize/plate/cloud` proxies Plate Recognizer's Snapshot API
+(`guides.platerecognizer.com/docs/snapshot/getting-started`) via
+`@fastify/multipart`, gated by `plateRecognizerCloudEnabled(env)` (inert
+without `PLATE_RECOGNIZER_CLOUD_TOKEN`) and a per-process monthly request
+budget (`PLATE_RECOGNIZER_MONTHLY_BUDGET`, resets on the 1st — revisit with
+Redis/DB persistence once there's more than one API process); `POST
+/api/recognize/plate/on-prem` is a stub for a future self-hosted/own-ML path.
+Web: `CameraCaptureDialog` + `CameraSearchButton` + `PhotoSearchButton`
+(`SearchField.tsx`), client-side image shrink (`lib/image.ts`) before upload,
+`use-plate-recognition.ts` navigates to the top candidate's plate result on
+success. Owning the ML fully (no upstream API) is still future work — see
+backlog below.
 
 ### Phase 3+ — crash-test ratings (research task)
 
@@ -223,6 +252,55 @@ NHTSA Safety Ratings. **Research the current endpoint** (v1 pointed at
 `one.nhtsa.gov/webapi/...`, now under `api.nhtsa.gov/SafetyRatings/`), how it
 keys (year/make/model path walk vs VIN), rate limits, and whether it joins to the
 registry brand/model or the NHTSA-decoded values. Same free provider as the VIN decoder.
+
+## Backlog (2026-09-22)
+
+Snapshot of what's actually next, split from what still needs a decision
+before it's buildable. Not a phase — items here get folded into Phases 2-5
+above once scoped, or dropped if research says no.
+
+### Actual — ready or in progress
+
+- ✅ Local search history in IndexedDB, grouped/collapsible by month/year,
+  per-record delete + clear-all — done, see Phase 1.5.
+- ✅ Add/remove favorites in IndexedDB — done, see Phase 1.5.
+- ✅ Find plate by camera/photo (Plate Recognizer Snapshot API) — done, see
+  "Plate image recognition" under Phase 3.
+- ⏳ RIA "similar cars" proxy (free token) — Phase 2, blocked on getting a
+  `developers.ria.com` API key; otherwise unchanged from that section's design.
+- ⛔ Platesmania — **skipped**, see Phase 3: no free token, scraping ruled out.
+
+### To discuss / research
+
+- **Registry statistics page** — Phase 1.5 already specs `GET /api/stats` +
+  the summary-table approach; open question is just the UI, in particular
+  whether the region breakdown becomes a real oblast choropleth (data is
+  already keyed by plate-prefix → `REGIONS`) or a simpler ranked list first.
+- **Show key "test drive" facts for a looked-up car** — surface curated
+  specs/review highlights (not just registry fields) for the car's
+  make/model/year. Needs a data source: is there a free API, or does this
+  require licensing/curating content ourselves?
+- **Car images by year/trim/color** — show a representative photo, ideally
+  matching the registered color. **RESEARCH**: is there a free/affordable
+  stock-photo API keyed by make/model/year(/trim/color), or does this need
+  on-the-fly generation (cost, consistency, licensing of generated images)?
+- **Car brand logos** — **RESEARCH**: use an existing logo service/CDN
+  (rate limits, licensing, coverage of Ukrainian-market brands) vs. bundle our
+  own logo asset set (upkeep, storage, redistribution rights).
+- **Auth with Google** — Phase 5 already specs Passport Google OAuth; open
+  question is scope beyond syncing history/favorites to the cloud — what
+  else should be account-gated (cross-device sync, data export, change
+  alerts on a saved plate/VIN)?
+- **Vehicle history/images from other countries, by VIN** — e.g.
+  `copart.com`, `bid.cars` auction listings for imported vehicles. **RESEARCH**:
+  survey providers for free vs. paid APIs, coverage, and ToS/legal constraints
+  per provider before picking one (scraping these sites is the same
+  no-go as Platesmania above, not a fallback).
+- **Use more of the NHTSA vPIC decoder surface** — beyond the plain VIN
+  decode already wired up (`GET /api/vin/:vin`), e.g. Manufacturer detail
+  lookups (`vpic.nhtsa.dot.gov/decoder/Manufacturer/Details/{id}`) and related
+  endpoints under `vpic.nhtsa.dot.gov/decoder/VinDecoder`. Same free provider,
+  just more of its surface — scope which fields are worth showing.
 
 ## Phase 4 — VPS / production
 
