@@ -7,6 +7,7 @@ import Spinner from '@/components/ui/Spinner'
 import SearchRoute from '@/routes/SearchRoute'
 
 const AboutRoute = lazy(() => import('@/routes/AboutRoute'))
+const HistoryRoute = lazy(() => import('@/routes/history/HistoryRoute'))
 
 export default function App(): ReactNode {
   return (
@@ -15,6 +16,7 @@ export default function App(): ReactNode {
         <Routes>
           <Route path="/" element={<SearchRoute />} />
           <Route path="/about" element={<AboutRoute />} />
+          <Route path="/history" element={<HistoryRoute />} />
           <Route path="/:query" element={<SearchRoute />} />
           <Route path="*" element={<SearchRoute />} />
         </Routes>

@@ -1,8 +1,8 @@
 import { useEffect } from 'react'
 import type { ReactNode } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { useParams } from 'react-router'
+import { Link, useParams } from 'react-router'
 import { classifyQuery } from '@carplates/shared'
 
 import ResultCard from '@/components/ResultCard'
@@ -10,12 +10,14 @@ import SearchField from '@/components/SearchField'
 import Spinner from '@/components/ui/Spinner'
 import VinResult from '@/components/VinResult'
 import { ApiError } from '@/lib/api'
-import { plateQuery, vinQuery } from '@/lib/queries'
+import { recordVisit } from '@/lib/history-db'
+import { historyQuery, plateQuery, vinQuery } from '@/lib/queries'
 import { capture } from '@/lib/telemetry'
 
 export default function SearchRoute(): ReactNode {
   const { t } = useTranslation()
   const params = useParams()
+  const queryClient = useQueryClient()
   const raw = params.query ? decodeURIComponent(params.query) : ''
   const kind = raw ? classifyQuery(raw) : null
 
@@ -27,7 +29,20 @@ export default function SearchRoute(): ReactNode {
   useEffect(() => {
     if (!raw || active.isPending) return
     capture(kind === 'vin' ? 'vin_searched' : 'plate_searched', { found: active.isSuccess })
-  }, [raw, kind, active.isPending, active.isSuccess])
+
+    const record = async (visitKind: 'plate' | 'vin', value: string, label: string | null): Promise<void> => {
+      await recordVisit(visitKind, value, label)
+      await queryClient.invalidateQueries({ queryKey: historyQuery().queryKey })
+    }
+
+    if (kind === 'plate' && plate.isSuccess) {
+      const c = plate.data.current
+      void record('plate', plate.data.plate, [c.brand, c.model].filter(Boolean).join(' ') || null)
+    }
+    if (kind === 'vin' && vin.isSuccess) {
+      void record('vin', vin.data.vin, null)
+    }
+  }, [raw, kind, active.isPending, active.isSuccess, plate.isSuccess, plate.data, vin.isSuccess, vin.data, queryClient])
 
   const notFound = active.error instanceof ApiError && active.error.status === 404
 
@@ -51,6 +66,10 @@ export default function SearchRoute(): ReactNode {
 
       {kind === 'plate' && plate.isSuccess && <ResultCard data={plate.data} />}
       {kind === 'vin' && vin.isSuccess && <VinResult data={vin.data} />}
+
+      <Link to="/history" className="text-sm text-[var(--color-primary)] underline hover:no-underline">
+        {t('history.viewLink')}
+      </Link>
     </div>
   )
 }

@@ -2,6 +2,7 @@ import { queryOptions } from '@tanstack/react-query'
 import { normalizePlate } from '@carplates/shared'
 
 import { decodeVin, lookupPlate, plateHistory } from '@/lib/api'
+import { listVisits } from '@/lib/history-db'
 
 export function plateQuery(raw: string) {
   const plate = normalizePlate(raw)
@@ -16,4 +17,8 @@ export function plateHistoryQuery(raw: string) {
 export function vinQuery(raw: string) {
   const vin = raw.trim().toUpperCase()
   return queryOptions({ queryKey: ['vin', vin], queryFn: () => decodeVin(vin) })
+}
+
+export function historyQuery() {
+  return queryOptions({ queryKey: ['history'], queryFn: listVisits })
 }

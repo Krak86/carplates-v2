@@ -6,6 +6,7 @@
   "search.clear": "Clear",
   "nav.search": "Search",
   "nav.about": "About",
+  "nav.history": "History",
   "nav.language": "Language",
   "result.noResults": "Nothing found",
   "result.error": "Request failed. Please try again later.",
@@ -41,5 +42,11 @@
   "vin.source": "Source: NHTSA vPIC",
   "about.heading": "About",
   "about.body": "This app shows vehicle data from the Ukrainian state open-data portal data.gov.ua, maintained by the Ministry of Internal Affairs. Data is updated monthly.",
-  "about.vinBody": "VIN decoding is done with the free NHTSA (USA) API."
+  "about.vinBody": "VIN decoding is done with the free NHTSA (USA) API.",
+  "history.title": "Search history",
+  "history.viewLink": "View search history",
+  "history.empty": "No searches yet.",
+  "history.clearAll": "Clear all",
+  "history.confirmClearAll": "Delete all search history? This cannot be undone.",
+  "history.deleteOne": "Delete"
 }

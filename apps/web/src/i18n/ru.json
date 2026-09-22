@@ -6,6 +6,7 @@
   "search.clear": "Очистить",
   "nav.search": "Поиск",
   "nav.about": "О приложении",
+  "nav.history": "История",
   "nav.language": "Язык",
   "result.noResults": "Ничего не найдено",
   "result.error": "Ошибка запроса. Попробуйте позже.",
@@ -41,5 +42,11 @@
   "vin.source": "Источник: NHTSA vPIC",
   "about.heading": "О приложении",
   "about.body": "Приложение показывает данные о транспортных средствах из единого государственного портала открытых данных data.gov.ua, распорядитель — МВД Украины. Данные обновляются ежемесячно.",
-  "about.vinBody": "Расшифровка VIN выполняется бесплатным API NHTSA (США)."
+  "about.vinBody": "Расшифровка VIN выполняется бесплатным API NHTSA (США).",
+  "history.title": "История поиска",
+  "history.viewLink": "Просмотреть историю поиска",
+  "history.empty": "История поиска пуста.",
+  "history.clearAll": "Очистить всё",
+  "history.confirmClearAll": "Удалить всю историю поиска? Это действие необратимо.",
+  "history.deleteOne": "Удалить"
 }
