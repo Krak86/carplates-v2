@@ -72,7 +72,7 @@ export const plateCandidateSchema = z.object({
 })
 export type PlateCandidate = z.infer<typeof plateCandidateSchema>
 
-/** POST /api/recognize/plate/{cloud,on-prem} — plate reads found in an uploaded photo, best first. */
+/** POST /api/recognize/plate/cloud — plate reads found in an uploaded photo, best first. */
 export const plateRecognizeResponseSchema = z.object({ candidates: z.array(plateCandidateSchema).min(1) })
 export type PlateRecognizeResponse = z.infer<typeof plateRecognizeResponseSchema>
 

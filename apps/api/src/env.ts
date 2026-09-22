@@ -19,8 +19,6 @@ const envSchema = z.object({
   PLATE_RECOGNIZER_CLOUD_URL: z.string().default('https://api.platerecognizer.com/v1/plate-reader/'),
   /** Absent → the cloud recognize route answers 503. */
   PLATE_RECOGNIZER_CLOUD_TOKEN: z.string().optional(),
-  /** Self-hosted SDK container base URL (Phase 4 / VPS). Unset today → the on-prem route answers 501. */
-  PLATE_RECOGNIZER_ONPREM_URL: z.string().optional(),
   /** Soft ceiling on cloud lookups per calendar month, to stay under the free-tier cap with headroom. */
   PLATE_RECOGNIZER_MONTHLY_BUDGET: z.coerce.number().int().positive().default(2000),
 

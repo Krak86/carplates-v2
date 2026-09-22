@@ -238,13 +238,13 @@ real, ahead of Phases 2/3: `apps/api/src/recognize/` — `POST
 `@fastify/multipart`, gated by `plateRecognizerCloudEnabled(env)` (inert
 without `PLATE_RECOGNIZER_CLOUD_TOKEN`) and a per-process monthly request
 budget (`PLATE_RECOGNIZER_MONTHLY_BUDGET`, resets on the 1st — revisit with
-Redis/DB persistence once there's more than one API process); `POST
-/api/recognize/plate/on-prem` is a stub for a future self-hosted/own-ML path.
-Web: `CameraCaptureDialog` + `CameraSearchButton` + `PhotoSearchButton`
+Redis/DB persistence once there's more than one API process). Web:
+`CameraCaptureDialog` + `CameraSearchButton` + `PhotoSearchButton`
 (`SearchField.tsx`), client-side image shrink (`lib/image.ts`) before upload,
 `use-plate-recognition.ts` navigates to the top candidate's plate result on
-success. Owning the ML fully (no upstream API) is still future work — see
-backlog below.
+success. **On-premise SDK ruled out** — same per-lookup licensing as the
+cloud API (no cost win) for photos we're already comfortable sending to
+Plate Recognizer's cloud; not pursuing it.
 
 ### Phase 3+ — crash-test ratings (research task)
 
