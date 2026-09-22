@@ -37,3 +37,13 @@ body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
 }
+
+/* Tailwind preflight resets button cursor to `default` to match native
+   behaviour; every button here acts as a link/control, so restore the
+   pointer affordance app-wide instead of per-component. */
+@layer base {
+  button:not(:disabled),
+  [role='button'] {
+    cursor: pointer;
+  }
+}

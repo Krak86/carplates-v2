@@ -41,7 +41,7 @@ export default function SearchField({ initialValue = '' }: Props): ReactNode {
       )}
       <button
         type="submit"
-        className="rounded-lg bg-[var(--color-primary)] px-4 py-2 font-medium text-[var(--color-primary-fg)]"
+        className="rounded-lg bg-[var(--color-primary)] px-4 py-2 font-medium text-[var(--color-primary-fg)] hover:opacity-90"
       >
         {t('search.button')}
       </button>

@@ -105,10 +105,18 @@ export default function ResultCard({ data }: Props): ReactNode {
       <div className="mt-3 flex items-center justify-between text-sm">
         <span className="text-[var(--color-muted)]">{t('result.historyCount', { count: data.historyCount })}</span>
         <div className="flex items-center gap-3">
-          <button type="button" onClick={() => setShowHistory(v => !v)} className="text-[var(--color-primary)]">
+          <button
+            type="button"
+            onClick={() => setShowHistory(v => !v)}
+            className="text-[var(--color-primary)] underline hover:no-underline"
+          >
             {showHistory ? t('result.hideHistory') : t('result.showHistory')}
           </button>
-          <button type="button" onClick={() => setExpanded(v => !v)} className="text-[var(--color-primary)]">
+          <button
+            type="button"
+            onClick={() => setExpanded(v => !v)}
+            className="text-[var(--color-primary)] underline hover:no-underline"
+          >
             {expanded ? t('result.showLess') : t('result.showMore')}
           </button>
         </div>

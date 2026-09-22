@@ -23,7 +23,7 @@ export default function Layout({ children }: Props): ReactNode {
           type="button"
           aria-label="menu"
           onClick={() => setDrawerOpen(!drawerOpen)}
-          className="rounded-md px-2 py-1 text-xl leading-none"
+          className="rounded-md px-2 py-1 text-xl leading-none hover:bg-[var(--color-surface)]"
         >
           ☰
         </button>
