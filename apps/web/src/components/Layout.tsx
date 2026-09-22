@@ -1,8 +1,9 @@
-import { Suspense, lazy } from 'react'
+import { Suspense, lazy, useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 
+import { cn } from '@/lib/cn'
 import { useUiStore } from '@/store/ui-store'
 
 const Sidebar = lazy(() => import('@/components/Sidebar'))
@@ -15,6 +16,13 @@ export default function Layout({ children }: Props): ReactNode {
   const { t } = useTranslation()
   const drawerOpen = useUiStore(s => s.drawerOpen)
   const setDrawerOpen = useUiStore(s => s.setDrawerOpen)
+  // Sidebar is lazy-loaded (not part of the LCP path) — stay unmounted until
+  // the first open, then keep mounted so close gets a transition instead of a hard unmount.
+  const [hasOpened, setHasOpened] = useState(false)
+
+  useEffect(() => {
+    if (drawerOpen) setHasOpened(true)
+  }, [drawerOpen])
 
   return (
     <div className="flex min-h-full flex-col">
@@ -33,14 +41,23 @@ export default function Layout({ children }: Props): ReactNode {
       </header>
 
       <div className="flex flex-1">
-        {drawerOpen && (
+        {hasOpened && (
           <>
             <div
-              className="fixed inset-0 z-10 bg-black/30 md:hidden"
+              className={cn(
+                'fixed inset-0 z-10 bg-black/30 transition-opacity duration-300 md:hidden',
+                drawerOpen ? 'opacity-100' : 'pointer-events-none opacity-0'
+              )}
               onClick={() => setDrawerOpen(false)}
               aria-hidden
             />
-            <div className="fixed inset-y-0 left-0 z-20 md:static">
+            <div
+              className={cn(
+                'fixed inset-y-0 left-0 z-20 w-64 overflow-hidden transition-transform duration-300 ease-in-out',
+                'md:static md:w-0 md:translate-x-0 md:transition-[width] md:duration-300 md:ease-in-out',
+                drawerOpen ? 'translate-x-0 md:w-64' : '-translate-x-full'
+              )}
+            >
               <Suspense fallback={<div className="w-64 border-r border-[var(--color-border)]" />}>
                 <Sidebar />
               </Suspense>

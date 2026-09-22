@@ -59,7 +59,14 @@ describe('ResultCard', () => {
     expect(screen.getByText(/TOYOTA CAMRY/)).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'ВЕ7116АА' })).toHaveAttribute('href', '/ВЕ7116АА')
     expect(screen.getByText(/Миколаївська область/)).toBeInTheDocument()
-    expect(screen.queryByText('4T1BF1FK5CU000001')).not.toBeInTheDocument()
+
+    const detailsButton = screen.getByRole('button', { name: 'More details' })
+    expect(detailsButton).toHaveAttribute('aria-expanded', 'false')
+    expect(screen.getByText('4T1BF1FK5CU000001').closest('[aria-hidden]')).toHaveAttribute('aria-hidden', 'true')
+
+    fireEvent.click(detailsButton)
+    expect(detailsButton).toHaveAttribute('aria-expanded', 'true')
+    expect(screen.getByText('4T1BF1FK5CU000001').closest('[aria-hidden]')).toHaveAttribute('aria-hidden', 'false')
   })
 
   it('shows power in kW instead of capacity for a pure EV, and the inferred-plate badge', () => {
