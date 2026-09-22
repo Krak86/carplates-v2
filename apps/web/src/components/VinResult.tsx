@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router'
 import type { VinDecodeResponse } from '@carplates/shared'
 
+import RegistrationActionsList from '@/components/RegistrationActionsList'
 import Card from '@/components/ui/Card'
 
 type Props = {
@@ -21,33 +21,7 @@ export default function VinResult({ data }: Props): ReactNode {
       {registry && (
         <div className="mb-4">
           <div className="mb-1 text-sm font-semibold">{t('vin.registryTitle')}</div>
-          <div className="divide-y divide-[var(--color-border)]">
-            {registry.actions.map(action => (
-              <div
-                key={`${action.dReg}-${action.operCode}`}
-                className="flex items-center justify-between gap-4 py-1 text-sm"
-              >
-                <span className="text-[var(--color-muted)]">{action.dReg ?? '—'}</span>
-                <span className="flex items-center gap-2 text-right font-medium">
-                  {action.plate ? (
-                    <Link to={`/${action.plate}`} className="text-[var(--color-primary)] underline">
-                      {action.plate}
-                    </Link>
-                  ) : (
-                    '—'
-                  )}
-                  {action.plateInferred && (
-                    <span
-                      title={t('result.plateInferredHint')}
-                      className="rounded-full border border-[var(--color-border)] px-2 py-0.5 text-xs"
-                    >
-                      {t('result.plateInferred')}
-                    </span>
-                  )}
-                </span>
-              </div>
-            ))}
-          </div>
+          <RegistrationActionsList actions={registry.actions} />
         </div>
       )}
 

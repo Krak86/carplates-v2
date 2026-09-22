@@ -1,10 +1,27 @@
-import { render, screen } from '@testing-library/react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import type { ReactNode } from 'react'
 import { MemoryRouter } from 'react-router'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import type { PlateLookupResponse } from '@carplates/shared'
 
 import '@/i18n'
 import ResultCard from '@/components/ResultCard'
+import { plateHistory } from '@/lib/api'
+
+vi.mock('@/lib/api', async importOriginal => ({
+  ...(await importOriginal<typeof import('@/lib/api')>()),
+  plateHistory: vi.fn()
+}))
+
+function renderWithProviders(ui: ReactNode) {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <MemoryRouter>{ui}</MemoryRouter>
+    </QueryClientProvider>
+  )
+}
 
 const data: PlateLookupResponse = {
   plate: 'ВЕ7116АА',
@@ -38,13 +55,10 @@ const data: PlateLookupResponse = {
 
 describe('ResultCard', () => {
   it('shows the summary and hides detail rows until expanded', () => {
-    render(
-      <MemoryRouter>
-        <ResultCard data={data} />
-      </MemoryRouter>
-    )
+    renderWithProviders(<ResultCard data={data} />)
     expect(screen.getByText(/TOYOTA CAMRY/)).toBeInTheDocument()
-    expect(screen.getByText(/ВЕ7116АА, Миколаївська область/)).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'ВЕ7116АА' })).toHaveAttribute('href', '/ВЕ7116АА')
+    expect(screen.getByText(/Миколаївська область/)).toBeInTheDocument()
     expect(screen.queryByText('4T1BF1FK5CU000001')).not.toBeInTheDocument()
   })
 
@@ -53,12 +67,22 @@ describe('ResultCard', () => {
       ...data,
       current: { ...data.current, capacity: null, powerKwt: 150, plateInferred: true }
     }
-    render(
-      <MemoryRouter>
-        <ResultCard data={ev} />
-      </MemoryRouter>
-    )
+    renderWithProviders(<ResultCard data={ev} />)
     expect(screen.getByText('150')).toBeInTheDocument()
     expect(screen.getByText('plate reconstructed from VIN')).toBeInTheDocument()
+  })
+
+  it('fetches and shows registration history when the history button is clicked', async () => {
+    vi.mocked(plateHistory).mockResolvedValue({
+      plate: data.plate,
+      region: data.region,
+      actions: [{ ...data.current, dReg: '2018-05-11', operCode: 100 }]
+    })
+    renderWithProviders(<ResultCard data={data} />)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Show history' }))
+
+    expect(plateHistory).toHaveBeenCalledWith(data.plate)
+    await waitFor(() => expect(screen.getByText('2018-05-11')).toBeInTheDocument())
   })
 })

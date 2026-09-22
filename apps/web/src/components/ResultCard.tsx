@@ -1,10 +1,14 @@
 import { useState } from 'react'
 import type { ReactNode } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import type { PlateLookupResponse } from '@carplates/shared'
 
+import RegistrationActionsList from '@/components/RegistrationActionsList'
 import Card from '@/components/ui/Card'
+import { depMapsUrl } from '@/lib/maps'
+import { plateHistoryQuery } from '@/lib/queries'
 
 type Props = {
   data: PlateLookupResponse
@@ -23,6 +27,8 @@ function Row({ label, value }: { label: string; value: ReactNode }): ReactNode {
 export default function ResultCard({ data }: Props): ReactNode {
   const { t } = useTranslation()
   const [expanded, setExpanded] = useState(false)
+  const [showHistory, setShowHistory] = useState(false)
+  const history = useQuery({ ...plateHistoryQuery(data.plate), enabled: showHistory })
   const c = data.current
   // A pure EV has no engine capacity — power_kwt (2026+ only) is its only engine
   // figure, so it takes the capacity row's place instead of being hidden.
@@ -37,7 +43,9 @@ export default function ResultCard({ data }: Props): ReactNode {
           {[c.brand, c.model].filter(Boolean).join(' ')} {c.makeYear ? `(${c.makeYear})` : ''}
         </div>
         <div className="text-sm text-[var(--color-muted)]">
-          {data.plate}
+          <Link to={`/${data.plate}`} className="text-[var(--color-primary)] underline">
+            {data.plate}
+          </Link>
           {data.region ? `, ${data.region}` : ''}
           {c.plateInferred && (
             <span
@@ -65,7 +73,21 @@ export default function ResultCard({ data }: Props): ReactNode {
           {hasCapacity && <Row label={t('field.power')} value={c.powerKwt} />}
           <Row label={t('field.owner')} value={c.person === 'P' ? t('field.ownerPrivate') : t('field.ownerCompany')} />
           <Row label={t('field.regDate')} value={c.dReg} />
-          <Row label={t('field.dep')} value={c.dep} />
+          <Row
+            label={t('field.dep')}
+            value={
+              c.dep ? (
+                <a
+                  href={depMapsUrl(c.dep)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[var(--color-primary)] underline"
+                >
+                  {c.dep}
+                </a>
+              ) : null
+            }
+          />
           <Row label={t('field.koatuu')} value={c.regAddrKoatuu} />
           <Row
             label={t('field.vin')}
@@ -82,10 +104,26 @@ export default function ResultCard({ data }: Props): ReactNode {
 
       <div className="mt-3 flex items-center justify-between text-sm">
         <span className="text-[var(--color-muted)]">{t('result.historyCount', { count: data.historyCount })}</span>
-        <button type="button" onClick={() => setExpanded(v => !v)} className="text-[var(--color-primary)]">
-          {expanded ? t('result.showLess') : t('result.showMore')}
-        </button>
+        <div className="flex items-center gap-3">
+          <button type="button" onClick={() => setShowHistory(v => !v)} className="text-[var(--color-primary)]">
+            {showHistory ? t('result.hideHistory') : t('result.showHistory')}
+          </button>
+          <button type="button" onClick={() => setExpanded(v => !v)} className="text-[var(--color-primary)]">
+            {expanded ? t('result.showLess') : t('result.showMore')}
+          </button>
+        </div>
       </div>
+
+      {showHistory && (
+        <div className="mt-3 border-t border-[var(--color-border)] pt-3">
+          <div className="mb-1 text-sm font-semibold">{t('result.historyTitle')}</div>
+          {history.isPending && <p className="text-sm text-[var(--color-muted)]">{t('result.loading')}</p>}
+          {history.isError && <p className="text-sm text-[var(--color-muted)]">{t('result.error')}</p>}
+          {history.isSuccess && (
+            <RegistrationActionsList actions={history.data.actions} currentPlate={data.plate} />
+          )}
+        </div>
+      )}
     </Card>
   )
 }
