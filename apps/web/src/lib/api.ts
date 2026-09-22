@@ -1,5 +1,10 @@
-import { plateHistoryResponseSchema, plateLookupResponseSchema, vinDecodeResponseSchema } from '@carplates/shared'
-import type { PlateHistoryResponse, PlateLookupResponse, VinDecodeResponse } from '@carplates/shared'
+import {
+  plateHistoryResponseSchema,
+  plateLookupResponseSchema,
+  plateRecognizeResponseSchema,
+  vinDecodeResponseSchema
+} from '@carplates/shared'
+import type { PlateHistoryResponse, PlateLookupResponse, PlateRecognizeResponse, VinDecodeResponse } from '@carplates/shared'
 
 const BASE = import.meta.env.VITE_API_BASE ?? ''
 
@@ -13,8 +18,7 @@ export class ApiError extends Error {
   }
 }
 
-async function getJson(path: string): Promise<unknown> {
-  const res = await fetch(`${BASE}${path}`, { headers: { accept: 'application/json' } })
+async function unwrap(res: Response): Promise<unknown> {
   const body: unknown = await res.json().catch(() => null)
   if (!res.ok) {
     const message =
@@ -24,6 +28,10 @@ async function getJson(path: string): Promise<unknown> {
     throw new ApiError(res.status, message)
   }
   return body
+}
+
+async function getJson(path: string): Promise<unknown> {
+  return unwrap(await fetch(`${BASE}${path}`, { headers: { accept: 'application/json' } }))
 }
 
 export async function lookupPlate(plate: string): Promise<PlateLookupResponse> {
@@ -36,4 +44,15 @@ export async function plateHistory(plate: string): Promise<PlateHistoryResponse>
 
 export async function decodeVin(vin: string): Promise<VinDecodeResponse> {
   return vinDecodeResponseSchema.parse(await getJson(`/api/vin/${encodeURIComponent(vin)}`))
+}
+
+export async function recognizePlate(file: File): Promise<PlateRecognizeResponse> {
+  const form = new FormData()
+  form.append('image', file)
+  const res = await fetch(`${BASE}/api/recognize/plate/cloud`, {
+    method: 'POST',
+    body: form,
+    headers: { accept: 'application/json' }
+  })
+  return plateRecognizeResponseSchema.parse(await unwrap(res))
 }

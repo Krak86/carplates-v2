@@ -7,11 +7,12 @@ import { AllExceptionsFilter } from './common/all-exceptions.filter.js'
 import { DbModule } from './db/db.module.js'
 import { HealthController } from './health/health.controller.js'
 import { PlateModule } from './plate/plate.module.js'
+import { RecognizeModule } from './recognize/recognize.module.js'
 import { SpaModule } from './spa/spa.module.js'
 import { VinModule } from './vin/vin.module.js'
 
 @Module({
-  imports: [SentryModule.forRoot(), DbModule, PlateModule, VinModule, SpaModule],
+  imports: [SentryModule.forRoot(), DbModule, PlateModule, VinModule, RecognizeModule, SpaModule],
   controllers: [HealthController],
   providers: [
     { provide: APP_PIPE, useClass: ZodValidationPipe },

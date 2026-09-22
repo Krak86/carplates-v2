@@ -4,6 +4,9 @@
   "search.placeholder": "Номерной знак или VIN",
   "search.button": "Поиск",
   "search.clear": "Очистить",
+  "search.byImage": "Поиск по фото",
+  "search.byCamera": "Камера",
+  "search.closePhoto": "Убрать фото",
   "nav.search": "Поиск",
   "nav.about": "О приложении",
   "nav.history": "История",
@@ -53,5 +56,16 @@
   "favorites.title": "Избранное",
   "favorites.empty": "Список избранного пуст.",
   "favorites.add": "Добавить в избранное",
-  "favorites.remove": "Убрать из избранного"
+  "favorites.remove": "Убрать из избранного",
+  "recognize.noPlate": "На фото не удалось распознать номер. Попробуйте более чёткое и близкое фото.",
+  "recognize.badImage": "Не удалось прочитать изображение — попробуйте фото в формате JPEG, PNG или WebP.",
+  "recognize.rateLimited": "Слишком много попыток — подождите немного и попробуйте снова.",
+  "recognize.unavailable": "Поиск по фото сейчас недоступен.",
+  "recognize.error": "Поиск по фото не удался. Попробуйте ещё раз.",
+  "camera.title": "Сделать фото",
+  "camera.capture": "Снять",
+  "camera.close": "Закрыть",
+  "camera.blocked": "Доступ к камере заблокирован. Разрешите его для этого сайта в настройках браузера и попробуйте снова.",
+  "camera.noDevice": "На этом устройстве не найдено камеры.",
+  "camera.error": "Не удалось получить доступ к камере. Попробуйте ещё раз."
 }

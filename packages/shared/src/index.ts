@@ -1,4 +1,4 @@
-export { normalizePlate, denormalizePlate, isVin, classifyQuery } from './plate.js'
+export { normalizePlate, denormalizePlate, isVin, classifyQuery, repairOcrPlate } from './plate.js'
 export { REGIONS, regionName } from './regions.js'
 export {
   registrationSchema,
@@ -7,10 +7,14 @@ export {
   vinDecodeResponseSchema,
   vinRegistrySchema,
   apiErrorSchema,
+  plateCandidateSchema,
+  plateRecognizeResponseSchema,
   type Registration,
   type PlateLookupResponse,
   type PlateHistoryResponse,
   type VinDecodeResponse,
   type VinRegistry,
-  type ApiError
+  type ApiError,
+  type PlateCandidate,
+  type PlateRecognizeResponse
 } from './schemas.js'

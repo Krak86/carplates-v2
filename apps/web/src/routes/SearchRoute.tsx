@@ -5,9 +5,11 @@ import { useTranslation } from 'react-i18next'
 import { Link, useParams } from 'react-router'
 import { classifyQuery } from '@carplates/shared'
 
+import PhotoThumbnail from '@/components/PhotoThumbnail'
 import ResultCard from '@/components/ResultCard'
 import SearchField from '@/components/SearchField'
 import Spinner from '@/components/ui/Spinner'
+import { usePlateRecognition } from '@/components/use-plate-recognition'
 import VinResult from '@/components/VinResult'
 import { ApiError } from '@/lib/api'
 import { recordVisit } from '@/lib/history-db'
@@ -25,6 +27,18 @@ export default function SearchRoute(): ReactNode {
   const vin = useQuery({ ...vinQuery(raw), enabled: kind === 'vin' })
 
   const active = kind === 'vin' ? vin : plate
+
+  let linkedValue: string | null = null
+  if (kind === 'plate' && plate.isSuccess) linkedValue = plate.data.current.vin
+  else if (kind === 'vin' && vin.isSuccess) linkedValue = vin.data.registry?.plate ?? null
+
+  const {
+    recognize,
+    isPending: isRecognizing,
+    errorKey: recognizeErrorKey,
+    photo,
+    dismissPhoto
+  } = usePlateRecognition({ currentValue: raw || null, linkedValue })
 
   useEffect(() => {
     if (!raw || active.isPending) return
@@ -51,7 +65,12 @@ export default function SearchRoute(): ReactNode {
       <div className="w-full max-w-xl text-center">
         <h1 className="mb-1 text-2xl font-bold">{t('app.title')}</h1>
         <p className="mb-4 text-sm text-[var(--color-muted)]">{t('app.tagline')}</p>
-        <SearchField initialValue={raw} />
+        <SearchField
+          initialValue={raw}
+          isRecognizing={isRecognizing}
+          recognizeErrorKey={recognizeErrorKey}
+          onPickPhoto={recognize}
+        />
       </div>
 
       {raw && active.isPending && (
@@ -63,6 +82,8 @@ export default function SearchRoute(): ReactNode {
       {active.isError && (
         <p className="text-[var(--color-muted)]">{notFound ? t('result.noResults') : t('result.error')}</p>
       )}
+
+      {photo && <PhotoThumbnail url={photo.url} onClose={dismissPhoto} />}
 
       {kind === 'plate' && plate.isSuccess && <ResultCard data={plate.data} />}
       {kind === 'vin' && vin.isSuccess && <VinResult data={vin.data} />}

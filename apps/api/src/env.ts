@@ -16,6 +16,14 @@ const envSchema = z.object({
 
   NHTSA_BASE_URL: z.string().default('https://vpic.nhtsa.dot.gov/api/vehicles'),
 
+  PLATE_RECOGNIZER_CLOUD_URL: z.string().default('https://api.platerecognizer.com/v1/plate-reader/'),
+  /** Absent → the cloud recognize route answers 503. */
+  PLATE_RECOGNIZER_CLOUD_TOKEN: z.string().optional(),
+  /** Self-hosted SDK container base URL (Phase 4 / VPS). Unset today → the on-prem route answers 501. */
+  PLATE_RECOGNIZER_ONPREM_URL: z.string().optional(),
+  /** Soft ceiling on cloud lookups per calendar month, to stay under the free-tier cap with headroom. */
+  PLATE_RECOGNIZER_MONTHLY_BUDGET: z.coerce.number().int().positive().default(2000),
+
   /** Swagger UI at /api/docs — off in production unless explicitly enabled. */
   ENABLE_SWAGGER: boolish,
 
@@ -43,3 +51,4 @@ export function loadEnv(source: NodeJS.ProcessEnv = process.env): Env {
 
 export const telemetryEnabled = (env: Env): boolean => env.ENABLE_TELEMETRY && Boolean(env.SENTRY_DSN)
 export const swaggerEnabled = (env: Env): boolean => env.ENABLE_SWAGGER || env.NODE_ENV !== 'production'
+export const plateRecognizerCloudEnabled = (env: Env): boolean => Boolean(env.PLATE_RECOGNIZER_CLOUD_TOKEN)

@@ -46,6 +46,18 @@ export function denormalizePlate(input: string): string {
     .join('')
 }
 
+/**
+ * ALPR quirk fix: platerecognizer reads Ukrainian "I" as "1", but only in the
+ * two outer letter blocks of the 2-letters + 4-digits + 2-letters format — a
+ * "1" in the middle digit block is a real digit. Ported from v1's
+ * `changeSymbols1toI`. Run this BEFORE normalizePlate (it expects Latin "I").
+ */
+export function repairOcrPlate(input: string): string {
+  const s = stripped(input)
+  if (s.length !== 8) return s // not the UA format — leave alone
+  return s.slice(0, 2).replace(/1/g, 'I') + s.slice(2, 6) + s.slice(6).replace(/1/g, 'I')
+}
+
 const VIN_RE = /^[A-HJ-NPR-Z0-9]{17}$/
 
 /** A query is treated as a VIN when it is 17 chars of the ISO 3779 alphabet (no I, O, Q). */

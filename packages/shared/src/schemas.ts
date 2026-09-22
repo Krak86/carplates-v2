@@ -64,6 +64,18 @@ export const vinDecodeResponseSchema = z.object({
 })
 export type VinDecodeResponse = z.infer<typeof vinDecodeResponseSchema>
 
+/** One OCR read, already normalized to the canonical plate key. */
+export const plateCandidateSchema = z.object({
+  plate: z.string(), // canonical Cyrillic, ready for /:query
+  raw: z.string(), // provider's raw Latin OCR string
+  score: z.number().min(0).max(1)
+})
+export type PlateCandidate = z.infer<typeof plateCandidateSchema>
+
+/** POST /api/recognize/plate/{cloud,on-prem} — plate reads found in an uploaded photo, best first. */
+export const plateRecognizeResponseSchema = z.object({ candidates: z.array(plateCandidateSchema).min(1) })
+export type PlateRecognizeResponse = z.infer<typeof plateRecognizeResponseSchema>
+
 /** Typed error body returned by the API exception filter. */
 export const apiErrorSchema = z.object({
   statusCode: z.number().int(),

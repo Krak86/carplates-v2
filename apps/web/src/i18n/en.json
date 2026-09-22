@@ -4,6 +4,9 @@
   "search.placeholder": "Plate number or VIN",
   "search.button": "Search",
   "search.clear": "Clear",
+  "search.byImage": "Search by image",
+  "search.byCamera": "Use camera",
+  "search.closePhoto": "Remove photo",
   "nav.search": "Search",
   "nav.about": "About",
   "nav.history": "History",
@@ -53,5 +56,16 @@
   "favorites.title": "Favorites",
   "favorites.empty": "No favorites yet.",
   "favorites.add": "Add to favorites",
-  "favorites.remove": "Remove from favorites"
+  "favorites.remove": "Remove from favorites",
+  "recognize.noPlate": "No plate was found in that photo. Try a clearer, closer shot.",
+  "recognize.badImage": "That image couldn't be read — try a JPEG, PNG or WebP photo.",
+  "recognize.rateLimited": "Too many attempts — wait a moment and try again.",
+  "recognize.unavailable": "Photo search isn't available right now.",
+  "recognize.error": "Photo search failed. Please try again.",
+  "camera.title": "Take a photo",
+  "camera.capture": "Capture",
+  "camera.close": "Close",
+  "camera.blocked": "Camera access is blocked. Allow it for this site in your browser settings, then try again.",
+  "camera.noDevice": "No camera was found on this device.",
+  "camera.error": "Couldn't access the camera. Please try again."
 }

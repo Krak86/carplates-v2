@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { classifyQuery, denormalizePlate, isVin, normalizePlate } from './plate.js'
+import { classifyQuery, denormalizePlate, isVin, normalizePlate, repairOcrPlate } from './plate.js'
 
 describe('normalizePlate', () => {
   it('maps each Latin homoglyph to its Cyrillic twin', () => {
@@ -53,5 +53,24 @@ describe('classifyQuery', () => {
   it('routes 17-char alnum to vin, everything else to plate', () => {
     expect(classifyQuery('3VWD17AJ9GM299880')).toBe('vin')
     expect(classifyQuery('BE7116AA')).toBe('plate')
+  })
+})
+
+describe('repairOcrPlate', () => {
+  it('repairs 1→I only in the outer letter blocks', () => {
+    expect(repairOcrPlate('ВН01791С')).toBe('ВН0179IС')
+    expect(repairOcrPlate('B13030B1')).toBe('BI3030BI')
+  })
+
+  it('is idempotent', () => {
+    expect(repairOcrPlate('ВН0179IС')).toBe('ВН0179IС')
+  })
+
+  it('leaves a non-8-char read untouched', () => {
+    expect(repairOcrPlate('AB123CD')).toBe('AB123CD')
+  })
+
+  it('composes with normalizePlate into the canonical key', () => {
+    expect(normalizePlate(repairOcrPlate('BH01791C'))).toBe('ВН0179ІС')
   })
 })

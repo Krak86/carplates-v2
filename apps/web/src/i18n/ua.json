@@ -4,6 +4,9 @@
   "search.placeholder": "Номерний знак або VIN",
   "search.button": "Пошук",
   "search.clear": "Очистити",
+  "search.byImage": "Пошук за фото",
+  "search.byCamera": "Камера",
+  "search.closePhoto": "Прибрати фото",
   "nav.search": "Пошук",
   "nav.about": "Про застосунок",
   "nav.history": "Історія",
@@ -53,5 +56,16 @@
   "favorites.title": "Обране",
   "favorites.empty": "Обране порожнє.",
   "favorites.add": "Додати в обране",
-  "favorites.remove": "Прибрати з обраного"
+  "favorites.remove": "Прибрати з обраного",
+  "recognize.noPlate": "На фото не вдалося розпізнати номер. Спробуйте чіткіше та ближче фото.",
+  "recognize.badImage": "Не вдалося прочитати зображення — спробуйте фото у форматі JPEG, PNG або WebP.",
+  "recognize.rateLimited": "Забагато спроб — зачекайте трохи і спробуйте ще раз.",
+  "recognize.unavailable": "Пошук за фото зараз недоступний.",
+  "recognize.error": "Пошук за фото не вдався. Спробуйте ще раз.",
+  "camera.title": "Зробити фото",
+  "camera.capture": "Зняти",
+  "camera.close": "Закрити",
+  "camera.blocked": "Доступ до камери заблоковано. Дозвольте його для цього сайту в налаштуваннях браузера і спробуйте ще раз.",
+  "camera.noDevice": "На цьому пристрої не знайдено камери.",
+  "camera.error": "Не вдалося отримати доступ до камери. Спробуйте ще раз."
 }

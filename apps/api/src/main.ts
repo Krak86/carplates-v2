@@ -1,5 +1,6 @@
 import './instrument.js' // Sentry — must load before anything it instruments
 
+import multipart from '@fastify/multipart'
 import { Logger } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
 import { FastifyAdapter } from '@nestjs/platform-fastify'
@@ -18,6 +19,7 @@ async function bootstrap(): Promise<void> {
     new FastifyAdapter({ logger: false, bodyLimit: 1_048_576 })
   )
   app.enableShutdownHooks()
+  await app.register(multipart, { limits: { fileSize: 4 * 1024 * 1024, files: 1, fields: 4 } })
   app.enableCors({
     origin: env.NODE_ENV === 'production' ? env.PUBLIC_SITE_URL : true,
     credentials: true
