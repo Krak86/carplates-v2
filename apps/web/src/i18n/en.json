@@ -18,7 +18,7 @@
   "result.loading": "Loading…",
   "result.region": "Region",
   "result.regionUnknown": "Region not determined",
-  "result.historyCount": "Registration actions: {{count}}",
+  "result.historyLabel": "Registration / VIN history",
   "result.showMore": "More details",
   "result.showLess": "Show less",
   "result.historyTitle": "Registration history",

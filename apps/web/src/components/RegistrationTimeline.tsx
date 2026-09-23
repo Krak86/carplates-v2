@@ -30,7 +30,10 @@ export default function RegistrationTimeline({ actions, currentPlate }: Props): 
         const region = (action.plate && regionName(action.plate)) || t('result.regionUnknown')
 
         return (
-          <li key={`${action.dReg}-${action.operCode}`} className="flex gap-3">
+          <li
+            key={`${action.dReg}-${action.operCode}`}
+            className="-mx-4 flex gap-3 rounded-lg px-4 transition-colors hover:bg-[var(--color-border)]/40"
+          >
             <div className="flex flex-col items-center">
               <span
                 aria-hidden
@@ -50,7 +53,7 @@ export default function RegistrationTimeline({ actions, currentPlate }: Props): 
               )}
             </div>
 
-            <div className={cn('min-w-0 flex-1 text-sm', !isLast && 'pb-4')}>
+            <div className={cn('min-w-0 flex-1 text-base', !isLast && 'pb-4')}>
               <div className="flex items-center justify-between gap-4">
                 <span className="font-medium">{action.dReg ?? '—'}</span>
                 <span className="flex items-center gap-2 text-right font-medium">
@@ -74,7 +77,7 @@ export default function RegistrationTimeline({ actions, currentPlate }: Props): 
                 </span>
               </div>
 
-              <div className="mt-0.5 text-xs text-[var(--color-muted)]">
+              <div className="mt-0.5 text-sm text-[var(--color-muted)]">
                 {region}
                 {action.dep && (
                   <>
@@ -91,7 +94,7 @@ export default function RegistrationTimeline({ actions, currentPlate }: Props): 
                 )}
               </div>
 
-              {action.operName && <div className="mt-0.5 text-xs text-[var(--color-muted)]">{action.operName}</div>}
+              {action.operName && <div className="mt-0.5 text-sm text-[var(--color-muted)]">{action.operName}</div>}
             </div>
           </li>
         )

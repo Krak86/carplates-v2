@@ -18,7 +18,7 @@
   "result.loading": "Завантаження…",
   "result.region": "Регіон",
   "result.regionUnknown": "Регіон не визначено",
-  "result.historyCount": "Реєстраційних дій: {{count}}",
+  "result.historyLabel": "Історія реєстрацій / VIN",
   "result.showMore": "Детальніше",
   "result.showLess": "Згорнути",
   "result.historyTitle": "Історія реєстрацій",

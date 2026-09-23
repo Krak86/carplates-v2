@@ -25,7 +25,7 @@ export default function SearchField({ initialValue = '', isRecognizing, recogniz
   }
 
   return (
-    <div className="flex w-full max-w-xl flex-col gap-1">
+    <div className="flex w-full max-w-2xl flex-col gap-1">
       <form onSubmit={handleSubmit} className="flex gap-2">
         <input
           name="carplate-search-query"

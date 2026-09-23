@@ -363,6 +363,29 @@ Doable now, independent of Phases 2-5; each is additive and doesn't block the ot
   meant for matching against crash databases, not end users. `/api/vin/:vin`
   already forwards every non-empty field from `decodevin`, and the UI already
   renders all of them — no gap to close, so staying on the plain endpoint.
+- **Result card visual polish — width, type scale, hover states, icons ✅ DONE (2026-09-23)** —
+  `ResultCard`/`VinResult` widened `max-w-xl` → `max-w-2xl` (matching
+  `SearchField`/`SearchRoute`'s header, bumped the same way) and moved one
+  step up Tailwind's default type scale (`text-sm`→`text-base` body/rows,
+  `text-lg`→`text-xl` titles, `text-xs`→`text-sm` secondary lines) across
+  `ResultCard`, `VinResult`, `VinDecodeFields`, and `RegistrationTimeline` —
+  no custom `@theme` font-size tokens exist here, so staying on the built-in
+  scale keeps it consistent with the rest of the app rather than introducing
+  arbitrary px values. Cards gained a `hover:shadow-md` lift; every row
+  (`ResultCard`'s field rows, `VinDecodeFields`, `RegistrationTimeline`'s
+  history items) now bleeds to the card edges on hover with a shared
+  `hover:bg-[var(--color-border)]/40` treatment. The "More details" toggle's
+  clock SVG was replaced with a ⚙️ emoji (this app's plain-emoji icon
+  convention — see the stats dimension/metric icons — not a custom icon set);
+  the freed-up 🕘 now sits on both "Registration history" headings
+  (`ResultCard`'s expanded section and `VinResult`'s `vin.registryTitle`), and
+  🆔 was added next to every "VIN decode" heading. The dynamic count line
+  ("Registration actions: {{count}}") was replaced with a fixed
+  `result.historyLabel` string ("Registration / VIN history") across all
+  three locales — `historyCount` stays in the API payload/schema, just
+  unrendered now. Doesn't touch the still-open `vin.registryTitle` /
+  `result.historyTitle` text mismatch below — only the icon was harmonized,
+  the label text itself is unchanged.
 - **Open (not yet done): VinResult's history section is mislabeled.** Its
   "Registration history" timeline is titled `vin.registryTitle` ("State
   registry data") while `ResultCard`'s identical section is titled

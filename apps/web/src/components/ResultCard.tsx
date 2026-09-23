@@ -20,7 +20,7 @@ type Props = {
 function Row({ label, value }: { label: string; value: ReactNode }): ReactNode {
   if (value == null || value === '') return null
   return (
-    <div className="flex justify-between gap-4 py-1 text-sm">
+    <div className="-mx-4 flex justify-between gap-4 px-4 py-1.5 text-base transition-colors hover:bg-[var(--color-border)]/40">
       <span className="text-[var(--color-muted)]">{label}</span>
       <span className="text-right font-medium">{value}</span>
     </div>
@@ -48,7 +48,7 @@ export default function ResultCard({ data }: Props): ReactNode {
   const engineValue = hasCapacity ? c.capacity : c.powerKwt
 
   return (
-    <Card className="relative w-full max-w-xl">
+    <Card className="relative w-full max-w-2xl transition-shadow duration-200 hover:shadow-md">
       <FavoriteButton
         kind="plate"
         value={data.plate}
@@ -57,10 +57,10 @@ export default function ResultCard({ data }: Props): ReactNode {
       />
 
       <div className="mb-3 pr-8">
-        <div className="text-lg font-semibold">
+        <div className="text-xl font-semibold">
           {[c.brand, c.model].filter(Boolean).join(' ')} {c.makeYear ? `(${c.makeYear})` : ''}
         </div>
-        <div className="text-sm text-[var(--color-muted)]">
+        <div className="text-base text-[var(--color-muted)]">
           <Link to={`/${data.plate}`} className="text-[var(--color-primary)] underline">
             {data.plate}
           </Link>
@@ -115,28 +115,15 @@ export default function ResultCard({ data }: Props): ReactNode {
         />
       </div>
 
-      <div className="mt-3 flex items-center justify-between text-sm">
-        <span className="text-[var(--color-muted)]">{t('result.historyCount', { count: data.historyCount })}</span>
+      <div className="mt-3 flex items-center justify-between text-base">
+        <span className="text-[var(--color-muted)]">{t('result.historyLabel')}</span>
         <button
           type="button"
           aria-expanded={showMore}
           onClick={() => setShowMore(v => !v)}
           className="group flex items-center gap-1 text-[var(--color-primary)]"
         >
-          <svg
-            aria-hidden
-            viewBox="0 0 16 16"
-            width="14"
-            height="14"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <circle cx="8" cy="8" r="6.25" />
-            <path d="M8 4.5V8l2.5 1.5" />
-          </svg>
+          <span aria-hidden>⚙️</span>
           <span className="underline group-hover:no-underline">
             {showMore ? t('result.showLess') : t('result.showMore')}
           </span>
@@ -155,16 +142,22 @@ export default function ResultCard({ data }: Props): ReactNode {
       >
         <div className="overflow-hidden">
           <div className="mt-3 border-t border-[var(--color-border)] pt-3">
-            <div className="mb-1 text-sm font-semibold">{t('result.historyTitle')}</div>
-            {isPending && <p className="text-sm text-[var(--color-muted)]">{t('result.loading')}</p>}
-            {isError && <p className="text-sm text-[var(--color-muted)]">{t('result.error')}</p>}
+            <div className="mb-1 flex items-center gap-1.5 text-base font-semibold">
+              <span aria-hidden>🕘</span>
+              {t('result.historyTitle')}
+            </div>
+            {isPending && <p className="text-base text-[var(--color-muted)]">{t('result.loading')}</p>}
+            {isError && <p className="text-base text-[var(--color-muted)]">{t('result.error')}</p>}
             {historyActions && <RegistrationTimeline actions={historyActions} currentPlate={data.plate} />}
 
             {hasVin && vinDetail.isSuccess && (
               <div className="mt-4 border-t border-[var(--color-border)] pt-3">
-                <div className="mb-1 text-sm font-semibold">{t('vin.title')}</div>
+                <div className="mb-1 flex items-center gap-1.5 text-base font-semibold">
+                  <span aria-hidden>🆔</span>
+                  {t('vin.title')}
+                </div>
                 <VinDecodeFields results={vinDetail.data.results} />
-                <p className="mt-2 text-xs text-[var(--color-muted)]">{t('vin.source')}</p>
+                <p className="mt-2 text-sm text-[var(--color-muted)]">{t('vin.source')}</p>
               </div>
             )}
           </div>

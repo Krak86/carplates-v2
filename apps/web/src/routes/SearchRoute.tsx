@@ -62,7 +62,7 @@ export default function SearchRoute(): ReactNode {
 
   return (
     <div className="flex flex-col items-center gap-6">
-      <div className="w-full max-w-xl text-center">
+      <div className="w-full max-w-2xl text-center">
         <h1 className="mb-1 text-2xl font-bold">{t('app.title')}</h1>
         <p className="mb-4 text-sm text-[var(--color-muted)]">{t('app.tagline')}</p>
         <SearchField
