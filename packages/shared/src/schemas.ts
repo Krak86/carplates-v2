@@ -76,6 +76,42 @@ export type PlateCandidate = z.infer<typeof plateCandidateSchema>
 export const plateRecognizeResponseSchema = z.object({ candidates: z.array(plateCandidateSchema).min(1) })
 export type PlateRecognizeResponse = z.infer<typeof plateRecognizeResponseSchema>
 
+/** Shared count fields for every stats rollup row. */
+export const statsMetricsSchema = z.object({
+  totalRows: z.number().int().nonnegative(),
+  distinctPlates: z.number().int().nonnegative(),
+  distinctVins: z.number().int().nonnegative()
+})
+export type StatsMetrics = z.infer<typeof statsMetricsSchema>
+
+export const statsByYearRowSchema = statsMetricsSchema.extend({ year: z.number().int().nullable() })
+export type StatsByYearRow = z.infer<typeof statsByYearRowSchema>
+
+export const statsByRegionRowSchema = statsMetricsSchema.extend({ region: z.string() })
+export type StatsByRegionRow = z.infer<typeof statsByRegionRowSchema>
+
+export const statsByRegionYearRowSchema = statsMetricsSchema.extend({
+  region: z.string(),
+  year: z.number().int().nullable()
+})
+export type StatsByRegionYearRow = z.infer<typeof statsByRegionYearRowSchema>
+
+/** A by-body / by-kind / by-color rollup row — one free-text dimension value, null for unset rows. */
+export const statsByDimensionRowSchema = statsMetricsSchema.extend({ value: z.string().nullable() })
+export type StatsByDimensionRow = z.infer<typeof statsByDimensionRowSchema>
+
+/** GET /api/stats — everything the stats table (and, later, the map) needs; fetched once and filtered client-side. */
+export const statsResponseSchema = z.object({
+  summary: statsMetricsSchema.extend({ plateless: z.number().int().nonnegative() }),
+  byYear: z.array(statsByYearRowSchema),
+  byRegion: z.array(statsByRegionRowSchema),
+  byRegionYear: z.array(statsByRegionYearRowSchema),
+  byBody: z.array(statsByDimensionRowSchema),
+  byKind: z.array(statsByDimensionRowSchema),
+  byColor: z.array(statsByDimensionRowSchema)
+})
+export type StatsResponse = z.infer<typeof statsResponseSchema>
+
 /** Typed error body returned by the API exception filter. */
 export const apiErrorSchema = z.object({
   statusCode: z.number().int(),

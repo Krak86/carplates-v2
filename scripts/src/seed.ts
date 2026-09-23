@@ -8,7 +8,7 @@
 
 import { sql } from 'drizzle-orm'
 
-import { createDb, refreshCurrentRegistration, registrations } from '@carplates/db'
+import { createDb, refreshCurrentRegistration, refreshStats, registrations } from '@carplates/db'
 import type { RegistrationInsert } from '@carplates/db'
 import { normalizePlate, REGIONS } from '@carplates/shared'
 
@@ -133,10 +133,11 @@ async function main(): Promise<void> {
         .onConflictDoNothing()
     }
     await refreshCurrentRegistration(db)
+    await refreshStats(db)
     const { rows: countRows } = await db.execute<{ n: number }>(
       sql`SELECT count(*)::int AS n FROM registry.registrations`
     )
-    console.log(`seeded ${countRows[0]?.n ?? 0} rows; current_registration refreshed`)
+    console.log(`seeded ${countRows[0]?.n ?? 0} rows; current_registration + stats rollups refreshed`)
   } finally {
     await close()
   }

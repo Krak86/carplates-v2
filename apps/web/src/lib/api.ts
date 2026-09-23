@@ -2,9 +2,16 @@ import {
   plateHistoryResponseSchema,
   plateLookupResponseSchema,
   plateRecognizeResponseSchema,
+  statsResponseSchema,
   vinDecodeResponseSchema
 } from '@carplates/shared'
-import type { PlateHistoryResponse, PlateLookupResponse, PlateRecognizeResponse, VinDecodeResponse } from '@carplates/shared'
+import type {
+  PlateHistoryResponse,
+  PlateLookupResponse,
+  PlateRecognizeResponse,
+  StatsResponse,
+  VinDecodeResponse
+} from '@carplates/shared'
 
 const BASE = import.meta.env.VITE_API_BASE ?? ''
 
@@ -44,6 +51,10 @@ export async function plateHistory(plate: string): Promise<PlateHistoryResponse>
 
 export async function decodeVin(vin: string): Promise<VinDecodeResponse> {
   return vinDecodeResponseSchema.parse(await getJson(`/api/vin/${encodeURIComponent(vin)}`))
+}
+
+export async function getStats(): Promise<StatsResponse> {
+  return statsResponseSchema.parse(await getJson('/api/stats'))
 }
 
 export async function recognizePlate(file: File): Promise<PlateRecognizeResponse> {

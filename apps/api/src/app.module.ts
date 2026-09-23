@@ -9,10 +9,11 @@ import { HealthController } from './health/health.controller.js'
 import { PlateModule } from './plate/plate.module.js'
 import { RecognizeModule } from './recognize/recognize.module.js'
 import { SpaModule } from './spa/spa.module.js'
+import { StatsModule } from './stats/stats.module.js'
 import { VinModule } from './vin/vin.module.js'
 
 @Module({
-  imports: [SentryModule.forRoot(), DbModule, PlateModule, VinModule, RecognizeModule, SpaModule],
+  imports: [SentryModule.forRoot(), DbModule, PlateModule, VinModule, RecognizeModule, StatsModule, SpaModule],
   controllers: [HealthController],
   providers: [
     { provide: APP_PIPE, useClass: ZodValidationPipe },

@@ -26,7 +26,7 @@
  * with --after 2026-05-01 to skip the now-redundant already-plated months, then
  * run --backfill-plates to reconstruct plates for everything from May onward.
  */
-import { createReadStream, createWriteStream } from 'node:fs'
+import { createReadStream, createWriteStream, existsSync } from 'node:fs'
 import { copyFile, mkdir } from 'node:fs/promises'
 import { basename, join } from 'node:path'
 import { Readable } from 'node:stream'
@@ -39,7 +39,7 @@ import iconv from 'iconv-lite'
 import unzipper from 'unzipper'
 import type { File as ZipFile } from 'unzipper'
 
-import { createDb, ingestedResources, refreshCurrentRegistration, registrations } from '@carplates/db'
+import { createDb, ingestedResources, refreshCurrentRegistration, refreshStats, registrations } from '@carplates/db'
 import type { Db, RegistrationInsert } from '@carplates/db'
 import { backfillPlates } from './backfill.js'
 import { buildLayout, looksLikeHeader, mapRecord } from './transform.js'
@@ -256,9 +256,16 @@ async function processResource(db: Db, r: CkanResource, args: Args): Promise<num
   // exactly how the pre-№67/ОД January-2026 plates would have been lost.
   const cacheName = `${r.id}_${sanitizeForFilename(r.last_modified ?? 'unknown')}.zip`
   const zipPath = join(DATA_DIR, cacheName)
-  log(`downloading ${r.name} …`)
-  await downloadZip(r.url, zipPath)
-  log(`done: downloaded ${r.name}`)
+  // The name is keyed by last_modified, so a cache hit here means data.gov.ua's
+  // copy is byte-identical to what's on disk — safe to skip re-downloading a
+  // (re-)ingest of a resource already fetched in a previous run.
+  if (existsSync(zipPath)) {
+    log(`reusing cached ${r.name} (${cacheName})`)
+  } else {
+    log(`downloading ${r.name} …`)
+    await downloadZip(r.url, zipPath)
+    log(`done: downloaded ${r.name}`)
+  }
 
   if (args.archive) {
     await mkdir(args.archive, { recursive: true })
@@ -313,7 +320,9 @@ async function main(): Promise<void> {
       log(`backfill: ${result.exactMatched} exact, ${result.vinFallback} vin-fallback, ${result.deduped} deduped`)
       log('refreshing current_registration view …')
       await refreshCurrentRegistration(db)
-      log('done: current_registration view refreshed')
+      log('refreshing stats rollups …')
+      await refreshStats(db)
+      log('done: current_registration + stats rollups refreshed')
       return
     }
 
@@ -337,7 +346,9 @@ async function main(): Promise<void> {
         await recordIngestedResource(db, id, basename(args.file), null, null, inserted)
         log('refreshing current_registration view …')
         await refreshCurrentRegistration(db)
-        log('done: current_registration view refreshed')
+        log('refreshing stats rollups …')
+        await refreshStats(db)
+        log('done: current_registration + stats rollups refreshed')
       }
       log(`done: ${args.dryRun ? '[dry-run] would insert' : 'inserted'} ${inserted} rows from ${args.file}`)
       return
@@ -355,7 +366,9 @@ async function main(): Promise<void> {
     if (!args.dryRun) {
       log('refreshing current_registration view …')
       await refreshCurrentRegistration(db)
-      log('done: current_registration view refreshed')
+      log('refreshing stats rollups …')
+      await refreshStats(db)
+      log('done: current_registration + stats rollups refreshed')
     }
     log('done: ingest complete')
   } finally {

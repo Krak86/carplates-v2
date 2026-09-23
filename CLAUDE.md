@@ -84,6 +84,22 @@ Vitest 4 · ESLint 10 (flat config)
   the set-based plate reconstruction (see `PLAN.md`). Schema changes = a new
   `packages/db/migrations/NNNN_*.sql` file (the migrator applies them in order,
   once each).
+- **Never erase a real-data-seeded DB without asking first.** `pnpm db:seed`
+  (`TRUNCATE registry.registrations`) is meant for the ~1000-row synthetic
+  local dataset — running it against a DB already holding a real ingest
+  (`pnpm ingest:full`, hours, ~20 GB) destroys that data and forces a
+  multi-hour re-ingest to recover (this happened once, 2026-09-23 — see
+  PLAN.md's Phase 1.5 "Registry statistics" entry). Before running `db:seed`,
+  or any `TRUNCATE`/`DROP`/bulk `DELETE` against `registry.registrations` or
+  `registry.ingested_resources`, check what's currently loaded first
+  (`SELECT count(*) FROM registry.registrations`, or check
+  `registry.ingested_resources` for real CKAN resource ids) — a few thousand
+  rows is the synthetic seed set, millions is a real ingest. If it looks like
+  real data, **ask the user before erasing it**, and only proceed on explicit
+  approval. The data is technically always re-ingestable (`pnpm ingest:full`
+  reuses cached ZIPs in `scripts/.data/` and is deterministic — see PLAN.md),
+  but that's an hours-long recovery, not a reason to treat erasing it
+  casually.
 - **NestJS**: feature modules, Zod-validated inputs, no logic in controllers.
   Controllers return values and never take `@Res()` — except the SPA catch-all.
 - **Telemetry** stays off locally. `.env.example` in each app documents the vars;

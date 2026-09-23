@@ -1,5 +1,16 @@
 import { sql } from 'drizzle-orm'
-import { bigserial, boolean, date, index, integer, pgSchema, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core'
+import {
+  bigint,
+  bigserial,
+  boolean,
+  date,
+  index,
+  integer,
+  pgSchema,
+  text,
+  timestamp,
+  uniqueIndex
+} from 'drizzle-orm/pg-core'
 
 /**
  * All derived, read-only registry data lives in the `registry` schema so the
@@ -90,6 +101,47 @@ export const currentRegistration = registry
     totalWeight: integer('total_weight'),
     plateInferred: boolean('plate_inferred').notNull()
   })
+  .existing()
+
+const statsMetrics = {
+  totalRows: bigint('total_rows', { mode: 'number' }).notNull(),
+  distinctPlates: bigint('distinct_plates', { mode: 'number' }).notNull(),
+  distinctVins: bigint('distinct_vins', { mode: 'number' }).notNull()
+}
+
+/** Single-row totals — see migrations/0002_stats_rollups.sql. */
+export const statsSummary = registry
+  .materializedView('stats_summary', {
+    ...statsMetrics,
+    platelessCount: bigint('plateless_count', { mode: 'number' }).notNull()
+  })
+  .existing()
+
+/** By registration-action year (`d_reg`); `year` is null for undated rows. */
+export const statsByYear = registry
+  .materializedView('stats_by_year', { year: integer('year'), ...statsMetrics })
+  .existing()
+
+/** By oblast (plate-prefix -> `registry.plate_regions`, mirrors `REGIONS` in `@carplates/shared`). */
+export const statsByRegion = registry
+  .materializedView('stats_by_region', { region: text('region').notNull(), ...statsMetrics })
+  .existing()
+
+/** The one 2D rollup (region x year) — see migrations/0002_stats_rollups.sql. */
+export const statsByRegionYear = registry
+  .materializedView('stats_by_region_year', {
+    region: text('region').notNull(),
+    year: integer('year'),
+    ...statsMetrics
+  })
+  .existing()
+
+export const statsByBody = registry.materializedView('stats_by_body', { body: text('body'), ...statsMetrics }).existing()
+
+export const statsByKind = registry.materializedView('stats_by_kind', { kind: text('kind'), ...statsMetrics }).existing()
+
+export const statsByColor = registry
+  .materializedView('stats_by_color', { color: text('color'), ...statsMetrics })
   .existing()
 
 /** Incremental-ingest bookkeeping: which CKAN resources have been loaded. */

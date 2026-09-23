@@ -88,8 +88,20 @@ export default function SearchRoute(): ReactNode {
       {kind === 'plate' && plate.isSuccess && <ResultCard data={plate.data} />}
       {kind === 'vin' && vin.isSuccess && <VinResult data={vin.data} />}
 
-      <Link to="/history" className="text-sm text-[var(--color-primary)] underline hover:no-underline">
+      <Link
+        to="/history"
+        className="flex items-center gap-1.5 text-sm text-[var(--color-primary)] underline hover:no-underline"
+      >
+        <span aria-hidden>🕘</span>
         {t('history.viewLink')}
+      </Link>
+
+      <Link
+        to="/stats"
+        className="flex items-center gap-1.5 text-sm text-[var(--color-primary)] underline hover:no-underline"
+      >
+        <span aria-hidden>📊</span>
+        {t('stats.viewLink')}
       </Link>
     </div>
   )

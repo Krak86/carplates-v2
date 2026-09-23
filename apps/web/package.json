@@ -14,6 +14,8 @@
     "@carplates/shared": "workspace:*",
     "@sentry/react": "^10.74.0",
     "@tanstack/react-query": "^5.102.8",
+    "@tanstack/react-table": "^8.21.3",
+    "@tanstack/react-virtual": "^3.14.13",
     "clsx": "^2.1.1",
     "i18next": "^26.4.2",
     "posthog-js": "^1.428.11",

@@ -23,7 +23,7 @@ calls behind our own API.
 
 ## Version pins — why not `latest`
 
-Everything is on `latest` **except** the five below. Each is held back for a
+Everything is on `latest` **except** the six below. Each is held back for a
 concrete reason with a revisit trigger — not caution for its own sake. Re-check
 by re-reading this section before bumping.
 
@@ -34,6 +34,7 @@ by re-reading this section before bumping.
 | **drizzle-orm**        | `0.45.2` is the `latest` **tag**; `1.0.0-rc.4` is on the `rc` tag | `0.45.2` (exact)                               | We're on the actual latest **stable**. Not the RC: the maintainers haven't promoted v1 to `latest` (their own signal); `drizzle-kit` + `drizzle-zod` still target 0.4x; the v1 stream ran 23 betas + ≥5 RCs and still iterates. v1's headline features (RQB v2, RLS, generated columns) are irrelevant here. | npm `latest` points at `1.x` **and** `drizzle-kit` + `drizzle-zod` have stable v1 releases. Then follow `/docs/upgrade-v1`; our Drizzle surface is tiny. |
 | **vitest**             | `5.0.0`                                                           | `^4.1.11`                                      | 5.0.0 shipped as a same-window `.0`. 4.1.11 is mature and already supports Vite 8 (`vite: ^6 \|\| ^7 \|\| ^8` peer) and Node 24. Same "stable over shiny" call as Node 24-not-26.                                                                                                                            | 5.x has a few patch releases and the plugin ecosystem (coverage, ui) has caught up. Low urgency.                                                         |
 | **node**               | `26.8.2` (Current)                                                | `24.x` (`24.21.0` is the newest LTS "Krypton") | 26 only becomes LTS in Oct 2026; "entering LTS" ≠ ecosystem-ready — native deps and CI images take months. Conservative for an unattended VPS. Upgrading is a one-line `.nvmrc` / Dockerfile change.                                                                                                         | 26 has been LTS for a few months and `node:26-alpine` is everywhere.                                                                                     |
+| **@tanstack/react-table** | `9.2.4`                                                        | `^8.21.3`                                      | v9 (added 2026-09, Phase 1.5 stats table) is a ground-up rewrite — feature-based internals, no top-level `useReactTable`/`getCoreRowModel`/`getSortedRowModel` (moved under `./legacy`). v8's headless sort/filter API is the one this codebase's usage is built against and is well-established.        | v9's docs/ecosystem (examples, Stack Overflow, this model's training data) catch up to the new API — re-verify against its actual docs before bumping, not from memory.                        |
 
 **Not held back — clarifications so nobody "fixes" them:**
 
@@ -194,19 +195,84 @@ Doable now, independent of Phases 2-5; each is additive and doesn't block the ot
   (`FavoriteButton.tsx` / `use-favorite-toggle.ts`) add/removes client-side, a
   `FavoritesRoute` lists them. No API/DB changes. Superseded by Phase 5's
   `favorites` table when accounts land.
-- **Registry statistics** — `GET /api/stats`: total rows, distinct plates,
-  distinct VINs, plateless count, broken down by year (`d_reg`) and by region
-  (plate-prefix → `REGIONS` from `packages/shared`). Latest known figures
-  (full 13-year ingest, 2026-09-21 run — see "2026 plate removal" above for
-  the plateless recovery math): **24,721,694** total rows, **16,723,888**
-  distinct plates, **6,456,049** distinct VINs, **404,230** still plateless.
-  `COUNT(DISTINCT ...)` live over 24M+ rows is too slow for a request path —
-  needs a summary table/materialized view refreshed at the end of
-  `ingest.ts` / `ingest-full.ts` / `backfill.ts` (e.g.
-  `registry.stats_summary`, `registry.stats_by_year`,
-  `registry.stats_by_region`), never computed on read. Web: a stats page;
-  region breakdown as an oblast-level choropleth matching `REGIONS` — see
-  backlog below, still to discuss.
+- **Registry statistics — step A ✅ DONE (2026-09-23), step B not started**
+  (scoped 2026-09-23, two-step delivery — table first, map second, each
+  independently shippable). Figures confirmed against the real full 13-year
+  dataset after a from-scratch re-ingest (2026-09-23 recovery — see
+  CLAUDE.md's data-safety rule for why one was needed): **24,721,694** total
+  rows, **16,723,888** distinct plates, **6,456,049** distinct VINs,
+  **404,230** still plateless — an exact match to the original 2026-09-21
+  figures, confirming the ingest pipeline is fully deterministic.
+
+  **DB.** `COUNT(DISTINCT ...)` live over 24M+ rows is too slow for a request
+  path — never computed on read. Seven narrow matviews
+  (`migrations/0002_stats_rollups.sql`) refreshed at the end of every
+  `ingest.ts` / `ingest-full.ts` / `backfill.ts` phase, alongside the existing
+  `current_registration` refresh:
+  - `registry.stats_summary` — one row: totals (as above)
+  - `registry.stats_by_year` — by `d_reg` year (~14 rows)
+  - `registry.stats_by_region` — by plate-prefix → `registry.plate_regions`
+    (a static lookup table mirroring `REGIONS` from `@carplates/shared`,
+    seeded by the migration itself — join-then-group so
+    `COUNT(DISTINCT ...)` is computed once per real region, not summed across
+    a region's two historical prefixes; ~27 rows)
+  - `registry.stats_by_body`, `stats_by_kind`, `stats_by_color` — one
+    dimension each (~10-30 rows each)
+  - `registry.stats_by_region_year` — the one 2D rollup worth materializing
+    (region × year, ~27 × 14 ≈ 380 rows), for the map + year-range filter
+    combination. Deliberately not a full region × year × body × color × kind
+    cube (would be 700k+ mostly-empty rows) — add another 2D slice only when
+    a concrete UI need shows up, not preemptively.
+
+  Measured on the real dataset: all seven combined are **~144 KB** —
+  negligible against the ~14 GB base tables and the ~7 GB
+  `current_registration` matview (21 GB database total). No new database,
+  same instance/schema per the Phase 5 precedent (split only if commercially
+  critical, which derived read-only data never is).
+
+  **API.** `GET /api/stats` (`apps/api/src/stats/`), no query params — all
+  seven rollups are small enough to return in one response and filter/sort
+  client-side, so there's nothing to parameterize server-side. Thin
+  controller, logic in `stats.service.ts`, response validated by one Zod
+  schema (`statsResponseSchema` in `@carplates/shared`) per the
+  `plate.dto.ts`/`vin.dto.ts` pattern. Default metric on first load:
+  **distinct plates** (most intuitive "how many vehicles" figure for a
+  general audience; distinct VINs and total records stay selectable, not
+  default).
+
+  **Web — step A (table) ✅ DONE:** `/stats` route
+  (`routes/stats/StatsRoute.tsx`, `React.lazy` per the existing pattern in
+  `App.tsx`), registered as a static path (matches before the `/:query`
+  catch-all), linked from the sidebar nav and a "View statistics" link (with
+  a 📊 icon, next to "View search history") on the search page. Filters
+  (dimension tab, initial sort metric) live in URL search params
+  (`useSearchParams`), not Zustand — this is server state, not client UI
+  state. The whole `/api/stats` payload fetched once via TanStack Query
+  (`queryOptions()`, `staleTime: Infinity` — this data only changes on the
+  monthly ingest cron, never "live"). Sort/filter client-side with
+  **TanStack Table** (pinned to `^8`, not the just-released `9.x` — see the
+  version-pins table above); wrapped in **TanStack Virtual** once a
+  flattened view passes the 50-row virtualization threshold
+  (`stats_by_region_year` at ~380 rows needs it; the 1D tables don't).
+  Also fixed in passing: `ingest.ts` now skips re-downloading a CKAN
+  resource ZIP that's already cached in `scripts/.data/` (keyed by resource
+  id + `last_modified`, so a changed resource still re-downloads) — a real
+  gap found while re-ingesting for recovery, not specific to stats.
+
+  **Web — step B (map, not started):** oblast-level choropleth over
+  `stats_by_region` / `stats_by_region_year`, same `/stats` route and metric
+  switcher as step A. Library: `react-simple-maps` (D3 + `d3-geo`, SVG, MIT,
+  free, no API key/tile server — 27 polygons don't justify Leaflet/Mapbox GL,
+  and are four orders of magnitude below where WebGL/WebGPU would pay off).
+  Boundary data: geoBoundaries.org Ukraine ADM1 (CC-BY-4.0, free), with a
+  small static lookup from that geometry's region names/IDs to the
+  `REGIONS` Ukrainian strings. AR Crimea and Sevastopol render as ordinary
+  regions, matching how `REGIONS` already treats those plate prefixes — no
+  special-casing. One metric encoded as choropleth fill at a time
+  (whichever the table's metric switcher has selected); exact numbers via
+  hover tooltip rather than printed on-shape. A bubble/circle overlay is
+  deferred unless a later need arises to compare two metrics at once — fill
+  alone is the default, to avoid redundant double-encoding of one number.
 - **Plate lookup by camera/photo ✅ DONE (2026-09-22)** — moved up from Phase
   3+ below; see that section, kept in place to avoid duplicating the design
   notes.
@@ -269,13 +335,11 @@ above once scoped, or dropped if research says no.
 - ⏳ RIA "similar cars" proxy (free token) — Phase 2, blocked on getting a
   `developers.ria.com` API key; otherwise unchanged from that section's design.
 - ⛔ Platesmania — **skipped**, see Phase 3: no free token, scraping ruled out.
+- ✅ Registry statistics page, step A (table) — done, see Phase 1.5. Step B
+  (map) is the remaining piece, scoped there, not started.
 
 ### To discuss / research
 
-- **Registry statistics page** — Phase 1.5 already specs `GET /api/stats` +
-  the summary-table approach; open question is just the UI, in particular
-  whether the region breakdown becomes a real oblast choropleth (data is
-  already keyed by plate-prefix → `REGIONS`) or a simpler ranked list first.
 - **Show key "test drive" facts for a looked-up car** — surface curated
   specs/review highlights (not just registry fields) for the car's
   make/model/year. Needs a data source: is there a free API, or does this

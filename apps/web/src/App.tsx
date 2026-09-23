@@ -9,6 +9,7 @@ import SearchRoute from '@/routes/SearchRoute'
 const AboutRoute = lazy(() => import('@/routes/AboutRoute'))
 const HistoryRoute = lazy(() => import('@/routes/history/HistoryRoute'))
 const FavoritesRoute = lazy(() => import('@/routes/favorites/FavoritesRoute'))
+const StatsRoute = lazy(() => import('@/routes/stats/StatsRoute'))
 
 export default function App(): ReactNode {
   return (
@@ -19,6 +20,7 @@ export default function App(): ReactNode {
           <Route path="/about" element={<AboutRoute />} />
           <Route path="/history" element={<HistoryRoute />} />
           <Route path="/favorites" element={<FavoritesRoute />} />
+          <Route path="/stats" element={<StatsRoute />} />
           <Route path="/:query" element={<SearchRoute />} />
           <Route path="*" element={<SearchRoute />} />
         </Routes>

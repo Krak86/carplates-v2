@@ -9,6 +9,12 @@ export {
   apiErrorSchema,
   plateCandidateSchema,
   plateRecognizeResponseSchema,
+  statsMetricsSchema,
+  statsByYearRowSchema,
+  statsByRegionRowSchema,
+  statsByRegionYearRowSchema,
+  statsByDimensionRowSchema,
+  statsResponseSchema,
   type Registration,
   type PlateLookupResponse,
   type PlateHistoryResponse,
@@ -16,5 +22,11 @@ export {
   type VinRegistry,
   type ApiError,
   type PlateCandidate,
-  type PlateRecognizeResponse
+  type PlateRecognizeResponse,
+  type StatsMetrics,
+  type StatsByYearRow,
+  type StatsByRegionRow,
+  type StatsByRegionYearRow,
+  type StatsByDimensionRow,
+  type StatsResponse
 } from './schemas.js'
