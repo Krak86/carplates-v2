@@ -2,13 +2,17 @@ import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
+import type { StatsByDimensionRow, StatsResponse } from '@carplates/shared'
 
 import { FUEL_ICON_FALLBACK, getFuelIcon, isKnownFuel } from '@/components/ResultCard.helpers'
 import { cn } from '@/lib/cn'
 import { statsQuery } from '@/lib/queries'
 
+export type FieldInfoDimension = 'body' | 'kind' | 'color' | 'fuel'
+
 type Props = {
-  current: string
+  dimension: FieldInfoDimension
+  current: string | null
 }
 
 // Grace period before a mouse-leave actually closes the panel — long enough that
@@ -16,9 +20,26 @@ type Props = {
 // toward it to scroll doesn't get read as "left".
 const HOVER_CLOSE_DELAY_MS = 1000
 
+type DimensionConfig = {
+  getRows: (stats: StatsResponse) => StatsByDimensionRow[]
+  // Only `fuel` has a per-value icon (keyword-matched, ResultCard.helpers.ts) and a
+  // known/unknown split (its unknown/absent/garbage source markers collapse into one
+  // row). `body`/`kind`/`color` don't have that classification yet — plain list, no icons.
+  getIcon?: (value: string | null | undefined) => string
+  isKnown?: (value: string | null | undefined) => boolean
+  unknownIcon?: string
+}
+
+const DIMENSION_CONFIG: Readonly<Record<FieldInfoDimension, DimensionConfig>> = {
+  body: { getRows: stats => stats.byBody },
+  kind: { getRows: stats => stats.byKind },
+  color: { getRows: stats => stats.byColor },
+  fuel: { getRows: stats => stats.byFuel, getIcon: getFuelIcon, isKnown: isKnownFuel, unknownIcon: FUEL_ICON_FALLBACK }
+}
+
 /**
- * "?" info button next to a record's fuel value. The full fuel breakdown lives in the
- * (already-fetched-elsewhere, staleTime: Infinity) /api/stats response, so this only
+ * "?" info button next to a record's field value. The full breakdown for that field lives
+ * in the (already-fetched-elsewhere, staleTime: Infinity) /api/stats response, so this only
  * triggers its own fetch — `enabled: <visible>` — the first time it's actually opened.
  *
  * Hovering and clicking are tracked separately (`hovering` vs `pinned`, `visible = either`).
@@ -28,7 +49,7 @@ const HOVER_CLOSE_DELAY_MS = 1000
  * needed for touch, where there is no hover at all, and for the explicit close button (it
  * clears both flags so hovering it while pinned can't keep the panel stuck open).
  */
-export default function FuelInfoButton({ current }: Props): ReactNode {
+export default function FieldInfoButton({ dimension, current }: Props): ReactNode {
   const { t } = useTranslation()
   const [hovering, setHovering] = useState(false)
   const [pinned, setPinned] = useState(false)
@@ -36,6 +57,8 @@ export default function FuelInfoButton({ current }: Props): ReactNode {
   const containerRef = useRef<HTMLSpanElement>(null)
   const closeTimeoutRef = useRef<number | null>(null)
   const stats = useQuery({ ...statsQuery(), enabled: visible })
+  const config = DIMENSION_CONFIG[dimension]
+  const fieldLabel = t(`field.${dimension}`)
 
   function cancelScheduledClose(): void {
     if (closeTimeoutRef.current === null) return
@@ -75,19 +98,16 @@ export default function FuelInfoButton({ current }: Props): ReactNode {
     setHovering(false)
   }
 
-  // Known fuels first (most common first). The unknown/absent/garbage markers ("NULL",
-  // "ВІДСУТНЄ", ".", a blank value) are a source-data artifact, not a meaningful fuel
-  // distinction, so they're merged into one "not specified" row at the bottom rather
-  // than shown as five near-duplicate rows.
-  const allRows = stats.data?.byFuel ?? []
+  const isKnown = config.isKnown ?? ((): boolean => true)
+  const allRows = stats.data ? config.getRows(stats.data) : []
   const known = allRows
-    .filter(row => isKnownFuel(row.value))
-    .map(row => ({ value: row.value, icon: getFuelIcon(row.value), totalRows: row.totalRows, isCurrent: row.value === current }))
+    .filter(row => isKnown(row.value))
+    .map(row => ({ value: row.value, icon: config.getIcon?.(row.value), totalRows: row.totalRows, isCurrent: row.value === current }))
     .sort((a, b) => b.totalRows - a.totalRows)
-  const unknownTotal = allRows.filter(row => !isKnownFuel(row.value)).reduce((sum, row) => sum + row.totalRows, 0)
+  const unknownTotal = allRows.filter(row => !isKnown(row.value)).reduce((sum, row) => sum + row.totalRows, 0)
   const rows =
     unknownTotal > 0
-      ? [...known, { value: null, icon: FUEL_ICON_FALLBACK, totalRows: unknownTotal, isCurrent: !isKnownFuel(current) }]
+      ? [...known, { value: null, icon: config.unknownIcon, totalRows: unknownTotal, isCurrent: !isKnown(current) }]
       : known
 
   return (
@@ -107,7 +127,7 @@ export default function FuelInfoButton({ current }: Props): ReactNode {
     >
       <button
         type="button"
-        aria-label={t('field.fuelInfo')}
+        aria-label={t('field.info', { field: fieldLabel })}
         aria-expanded={visible}
         onClick={() => setPinned(v => !v)}
         className="text-[var(--color-muted)] hover:text-[var(--color-primary)]"
@@ -122,13 +142,13 @@ export default function FuelInfoButton({ current }: Props): ReactNode {
         <div className="absolute top-full right-0 z-10 pt-1">
           <div
             role="tooltip"
-            className="max-h-64 w-[26rem] max-w-[calc(100vw-2rem)] overflow-y-auto rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] p-2 text-sm shadow-lg"
+            className="max-h-64 w-136 max-w-[calc(100vw-2rem)] overflow-y-auto rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] p-2 text-sm shadow-lg"
           >
             <div className="mb-1 flex items-center justify-between gap-2 px-1.5">
-              <span className="font-semibold">{t('field.fuelInfoTitle')}</span>
+              <span className="font-semibold">{t('field.infoTitle', { field: fieldLabel })}</span>
               <button
                 type="button"
-                aria-label={t('field.fuelInfoClose')}
+                aria-label={t('field.infoClose')}
                 onClick={handleClose}
                 className="text-[var(--color-muted)] hover:text-[var(--color-fg)]"
               >
@@ -147,8 +167,8 @@ export default function FuelInfoButton({ current }: Props): ReactNode {
                   )}
                 >
                   <span className="flex items-center gap-1.5">
-                    <span aria-hidden>{row.icon}</span>
-                    {row.value || t('field.fuelUnknown')}
+                    {row.icon && <span aria-hidden>{row.icon}</span>}
+                    {row.value || t('field.unknown')}
                   </span>
                   <span className="text-[var(--color-muted)]">{row.totalRows.toLocaleString()}</span>
                 </li>

@@ -433,6 +433,18 @@ Doable now, independent of Phases 2-5; each is additive and doesn't block the ot
   expression; not worth it for an informational stats page. Also widened the
   `/stats` page (`max-w-4xl` → `max-w-6xl`) so all 7 dimension tabs fit on
   one row instead of wrapping.
+- **"?" breakdown popover extended to body/kind/color ✅ DONE (2026-09-23)** —
+  `body`/`kind`/`color` already had their own `stats_by_*` rollups (unlike
+  `fuel`, which needed the source-value research above), so `FuelInfoButton`
+  was generalized into `FieldInfoButton.tsx` (`dimension: 'body' | 'kind' |
+  'color' | 'fuel'`, picking its rollup/known-filter/icon-getter from a small
+  per-dimension config table) and wired onto `ResultCard`'s body, colour and
+  vehicle-kind rows the same way it was already wired onto fuel. Per-value
+  **icons for `kind` (the "Vehicle-kind icons" backlog item below) were
+  skipped** — unlike fuel's 16 already-enumerated values, `kind`'s real
+  distinct values haven't been enumerated/mapped to icons yet, and a wrong
+  guess is worse than no icon; the popover lists plain text + counts for
+  body/kind/color, same as the fuel popover did before it got icons.
 - **Open (not yet done): VinResult's history section is mislabeled.** Its
   "Registration history" timeline is titled `vin.registryTitle` ("State
   registry data") while `ResultCard`'s identical section is titled
@@ -551,7 +563,8 @@ above once scoped, or dropped if research says no.
   `kind` field (legkovyi/vantazhnyi/etc.) instead of `fuel`. `stats_by_kind`
   already has the real distinct values and counts (`GET /api/stats`) — reuse
   that instead of a fresh `DISTINCT` query, then pick/draw icons for the ones
-  that actually occur.
+  that actually occur. The "?" breakdown popover itself is already live on
+  `kind` (see Phase 1.5 above) — this item is just the per-value icon set.
 - **Auth with Google** — Phase 5 already specs Passport Google OAuth; open
   question is scope beyond syncing history/favorites to the cloud — what
   else should be account-gated (cross-device sync, data export, change

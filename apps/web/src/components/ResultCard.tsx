@@ -6,7 +6,7 @@ import { Link } from 'react-router'
 import type { PlateLookupResponse } from '@carplates/shared'
 
 import FavoriteButton from '@/components/FavoriteButton'
-import FuelInfoButton from '@/components/FuelInfoButton'
+import FieldInfoButton from '@/components/FieldInfoButton'
 import RegistrationTimeline from '@/components/RegistrationTimeline'
 import { getFuelIcon } from '@/components/ResultCard.helpers'
 import Card from '@/components/ui/Card'
@@ -79,9 +79,29 @@ export default function ResultCard({ data }: Props): ReactNode {
       </div>
 
       <div className="divide-y divide-[var(--color-border)]">
-        <Row label={t('field.body')} value={c.body} />
+        <Row
+          label={t('field.body')}
+          value={
+            c.body && (
+              <span className="inline-flex items-center gap-1.5">
+                {c.body}
+                <FieldInfoButton dimension="body" current={c.body} />
+              </span>
+            )
+          }
+        />
         <Row label={engineLabel} value={engineValue} />
-        <Row label={t('field.color')} value={c.color} />
+        <Row
+          label={t('field.color')}
+          value={
+            c.color && (
+              <span className="inline-flex items-center gap-1.5">
+                {c.color}
+                <FieldInfoButton dimension="color" current={c.color} />
+              </span>
+            )
+          }
+        />
         <Row
           label={t('field.fuel')}
           value={
@@ -89,13 +109,23 @@ export default function ResultCard({ data }: Props): ReactNode {
               <span className="inline-flex items-center gap-1.5">
                 <span aria-hidden>{getFuelIcon(c.fuel)}</span>
                 {c.fuel}
-                <FuelInfoButton current={c.fuel} />
+                <FieldInfoButton dimension="fuel" current={c.fuel} />
               </span>
             )
           }
         />
         <Row label={t('field.weight')} value={c.ownWeight && `${c.ownWeight} / ${c.totalWeight ?? '—'}`} />
-        <Row label={t('field.kind')} value={c.kind} />
+        <Row
+          label={t('field.kind')}
+          value={
+            c.kind && (
+              <span className="inline-flex items-center gap-1.5">
+                {c.kind}
+                <FieldInfoButton dimension="kind" current={c.kind} />
+              </span>
+            )
+          }
+        />
         <Row label={t('field.purpose')} value={c.purpose} />
         {hasCapacity && <Row label={t('field.power')} value={c.powerKwt} />}
         <Row label={t('field.owner')} value={c.person === 'P' ? t('field.ownerPrivate') : t('field.ownerCompany')} />

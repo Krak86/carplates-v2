@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { StatsResponse } from '@carplates/shared'
 
 import '@/i18n'
-import FuelInfoButton from '@/components/FuelInfoButton'
+import FieldInfoButton from '@/components/FieldInfoButton'
 import { getStats } from '@/lib/api'
 
 vi.mock('@/lib/api', async importOriginal => ({
@@ -23,7 +23,7 @@ const stats: StatsResponse = {
   byYear: [],
   byRegion: [],
   byRegionYear: [],
-  byBody: [],
+  byBody: [{ value: 'СЕДАН', totalRows: 7, distinctPlates: 7, distinctVins: 6 }],
   byKind: [],
   byColor: [],
   byFuel: [
@@ -32,7 +32,7 @@ const stats: StatsResponse = {
   ]
 }
 
-describe('FuelInfoButton', () => {
+describe('FieldInfoButton', () => {
   beforeEach(() => {
     vi.mocked(getStats).mockResolvedValue(stats)
   })
@@ -43,8 +43,8 @@ describe('FuelInfoButton', () => {
   })
 
   it('stays open through the grace period after the pointer leaves, then closes', async () => {
-    renderWithProviders(<FuelInfoButton current="БЕНЗИН" />)
-    const button = screen.getByRole('button', { name: 'Show all fuel types' })
+    renderWithProviders(<FieldInfoButton dimension="fuel" current="БЕНЗИН" />)
+    const button = screen.getByRole('button', { name: 'Show Fuel breakdown' })
 
     fireEvent.mouseEnter(button.parentElement as HTMLElement)
     await waitFor(() => expect(screen.getByRole('tooltip')).toBeInTheDocument())
@@ -61,8 +61,8 @@ describe('FuelInfoButton', () => {
   })
 
   it('re-entering before the grace period elapses cancels the close', async () => {
-    renderWithProviders(<FuelInfoButton current="БЕНЗИН" />)
-    const button = screen.getByRole('button', { name: 'Show all fuel types' })
+    renderWithProviders(<FieldInfoButton dimension="fuel" current="БЕНЗИН" />)
+    const button = screen.getByRole('button', { name: 'Show Fuel breakdown' })
 
     fireEvent.mouseEnter(button.parentElement as HTMLElement)
     await waitFor(() => expect(screen.getByRole('tooltip')).toBeInTheDocument())
@@ -77,10 +77,18 @@ describe('FuelInfoButton', () => {
   })
 
   it('merges unknown/absent fuel values into one row', async () => {
-    renderWithProviders(<FuelInfoButton current="БЕНЗИН" />)
-    fireEvent.click(screen.getByRole('button', { name: 'Show all fuel types' }))
+    renderWithProviders(<FieldInfoButton dimension="fuel" current="БЕНЗИН" />)
+    fireEvent.click(screen.getByRole('button', { name: 'Show Fuel breakdown' }))
 
     await waitFor(() => expect(screen.getByText('Not specified')).toBeInTheDocument())
     expect(screen.getByText('4')).toBeInTheDocument()
+  })
+
+  it('lists a plain, icon-less breakdown for a dimension without a known/unknown split', async () => {
+    renderWithProviders(<FieldInfoButton dimension="body" current="СЕДАН" />)
+    fireEvent.click(screen.getByRole('button', { name: 'Show Body type breakdown' }))
+
+    await waitFor(() => expect(screen.getByText('СЕДАН')).toBeInTheDocument())
+    expect(screen.getByText('7')).toBeInTheDocument()
   })
 })
