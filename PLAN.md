@@ -445,6 +445,25 @@ Doable now, independent of Phases 2-5; each is additive and doesn't block the ot
   distinct values haven't been enumerated/mapped to icons yet, and a wrong
   guess is worse than no icon; the popover lists plain text + counts for
   body/kind/color, same as the fuel popover did before it got icons.
+- **Vehicle photos (Pixabay) ✅ DONE (2026-09-24)** — resolves the "Car images
+  by year/trim/color" backlog research item below. `GET
+  /api/photos?brand=&model=&year=` (`apps/api/src/photos/`) proxies Pixabay's
+  image search (`pixabay.com/api/docs`), gated by `pixabayEnabled(env)` (inert,
+  503, without `PIXABAY_API_KEY` — same pattern as
+  `plateRecognizerCloudEnabled`), with `category=transportation`,
+  `orientation=horizontal`, `safesearch=true`. Results (id, previewURL,
+  webformatURL, pageURL, tags, user) are trimmed to a `VehiclePhotosResponse`
+  Zod schema and cached in a bounded in-memory `Map` keyed by the `brand model
+  year` query string — same shape as `VinService`'s VIN cache, since stock
+  photos for one query don't change day to day. Web: `VehiclePhotos.tsx` sits
+  below `ResultCard`'s history section, collapsed by default and titled "What
+  it might look like" (ua: "Як це може виглядати") — deliberately not "Photo
+  of this car", since Pixabay is queried by brand/model/year only and returns
+  generic stock photos, not the specific registered vehicle. Only fires its
+  (`staleTime: Infinity`) query once expanded, mirroring `FieldInfoButton`'s
+  on-demand-fetch pattern. A small hand-rolled prev/next carousel (no library
+  added, none existed in the repo) cycles `webformatURL` images with a
+  position counter and a Pixabay attribution line.
 - **Open (not yet done): VinResult's history section is mislabeled.** Its
   "Registration history" timeline is titled `vin.registryTitle` ("State
   registry data") while `ResultCard`'s identical section is titled
@@ -528,14 +547,12 @@ above once scoped, or dropped if research says no.
   specs/review highlights (not just registry fields) for the car's
   make/model/year. Needs a data source: is there a free API, or does this
   require licensing/curating content ourselves?
-- **Car images by year/trim/color** — show a representative photo, ideally
-  matching the registered color. **RESEARCH**: is there a free/affordable
-  stock-photo API keyed by make/model/year(/trim/color), or does this need
-  on-the-fly generation (cost, consistency, licensing of generated images)?
-  Candidate: [pixabay.com's image search API](https://pixabay.com/api/docs/)
-  (free tier, needs its own API key in env — never commit one) — coverage for
-  arbitrary make/model/year queries and rate limits are unverified; scope
-  where a result would even go on the page before wiring it up.
+- **Car images by year/trim/color ✅ DONE (2026-09-24)** — see Phase 1.5
+  "Vehicle photos (Pixabay)" above. Implemented via
+  [pixabay.com's image search API](https://pixabay.com/api/docs/) keyed on
+  brand/model/year only, not trim/color — Pixabay's search doesn't support
+  that granularity, so shown photos are illustrative for the make/model, not
+  matched to the registered vehicle's actual color or trim.
 - **Car brand logos** — **RESEARCH**: use an existing logo service/CDN
   (rate limits, licensing, coverage of Ukrainian-market brands) vs. bundle our
   own logo asset set (upkeep, storage, redistribution rights). Candidate

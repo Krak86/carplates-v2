@@ -52,6 +52,21 @@ For a faster real-data taste without the full run, ingest a single year, optiona
 pnpm ingest -- --year 2024 --limit 100000
 ```
 
+## Optional features (API keys)
+
+Everything above (plate/VIN search) works with zero external keys. Two
+features are optional add-ons, each gated on its own key in `apps/api/.env` —
+absent, the app runs fine and that one feature just answers "unavailable":
+
+| Feature                          | Env var                       | Get a free key at                                                         |
+| --------------------------------- | ------------------------------ | -------------------------------------------------------------------------- |
+| Find a plate by photo/camera      | `PLATE_RECOGNIZER_CLOUD_TOKEN` | [platerecognizer.com](https://platerecognizer.com)                        |
+| "What it might look like" photos  | `PIXABAY_API_KEY`              | [pixabay.com/api/docs](https://pixabay.com/api/docs/)                     |
+
+Add whichever you want to `apps/api/.env` (see `apps/api/.env.example`), then
+restart `pnpm dev` — both are read once at process start, so editing `.env`
+alone while the dev server is already running has no effect.
+
 ## Workspace
 
 | Package           |                                                                            |

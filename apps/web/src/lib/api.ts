@@ -3,6 +3,7 @@ import {
   plateLookupResponseSchema,
   plateRecognizeResponseSchema,
   statsResponseSchema,
+  vehiclePhotosResponseSchema,
   vinDecodeResponseSchema
 } from '@carplates/shared'
 import type {
@@ -10,6 +11,7 @@ import type {
   PlateLookupResponse,
   PlateRecognizeResponse,
   StatsResponse,
+  VehiclePhotosResponse,
   VinDecodeResponse
 } from '@carplates/shared'
 import type { Feature, FeatureCollection, Geometry } from 'geojson'
@@ -60,6 +62,14 @@ export async function decodeVin(vin: string): Promise<VinDecodeResponse> {
 
 export async function getStats(): Promise<StatsResponse> {
   return statsResponseSchema.parse(await getJson('/api/stats'))
+}
+
+export async function getVehiclePhotos(brand: string, model: string, year: number | null): Promise<VehiclePhotosResponse> {
+  const params = new URLSearchParams()
+  if (brand) params.set('brand', brand)
+  if (model) params.set('model', model)
+  if (year != null) params.set('year', String(year))
+  return vehiclePhotosResponseSchema.parse(await getJson(`/api/photos?${params.toString()}`))
 }
 
 // Bundled static asset (apps/web/public/), not an /api/* response — no BASE

@@ -10,6 +10,7 @@ import FieldInfoButton from '@/components/FieldInfoButton'
 import RegistrationTimeline from '@/components/RegistrationTimeline'
 import { getFuelIcon } from '@/components/ResultCard.helpers'
 import Card from '@/components/ui/Card'
+import VehiclePhotos from '@/components/VehiclePhotos'
 import VinDecodeFields from '@/components/VinDecodeFields'
 import { cn } from '@/lib/cn'
 import { depMapsUrl } from '@/lib/maps'
@@ -206,6 +207,8 @@ export default function ResultCard({ data }: Props): ReactNode {
           </div>
         </div>
       </div>
+
+      <VehiclePhotos brand={c.brand} model={c.model} year={c.makeYear} />
     </Card>
   )
 }

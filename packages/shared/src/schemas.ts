@@ -76,6 +76,24 @@ export type PlateCandidate = z.infer<typeof plateCandidateSchema>
 export const plateRecognizeResponseSchema = z.object({ candidates: z.array(plateCandidateSchema).min(1) })
 export type PlateRecognizeResponse = z.infer<typeof plateRecognizeResponseSchema>
 
+/** One stock photo from Pixabay, filtered to only what the UI needs. */
+export const vehiclePhotoSchema = z.object({
+  id: z.number().int(),
+  previewURL: z.string(),
+  webformatURL: z.string(),
+  pageURL: z.string(),
+  tags: z.string(),
+  user: z.string()
+})
+export type VehiclePhoto = z.infer<typeof vehiclePhotoSchema>
+
+/** GET /api/photos — illustrative brand/model/year stock photos, not the specific registered vehicle. */
+export const vehiclePhotosResponseSchema = z.object({
+  query: z.string(),
+  images: z.array(vehiclePhotoSchema)
+})
+export type VehiclePhotosResponse = z.infer<typeof vehiclePhotosResponseSchema>
+
 /** Shared count fields for every stats rollup row. */
 export const statsMetricsSchema = z.object({
   totalRows: z.number().int().nonnegative(),
