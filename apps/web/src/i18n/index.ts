@@ -19,8 +19,8 @@ export function initialLang(): Lang {
   }
   const nav = typeof navigator !== 'undefined' ? navigator.language.slice(0, 2) : 'uk'
   if (nav === 'ru') return 'ru'
-  if (nav === 'en') return 'en'
-  return 'ua'
+  if (nav === 'ua' || nav === 'uk') return 'ua'
+  return 'en'
 }
 
 export function persistLang(lang: Lang): void {
