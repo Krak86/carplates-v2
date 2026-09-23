@@ -96,7 +96,7 @@ export const statsByRegionYearRowSchema = statsMetricsSchema.extend({
 })
 export type StatsByRegionYearRow = z.infer<typeof statsByRegionYearRowSchema>
 
-/** A by-body / by-kind / by-color rollup row — one free-text dimension value, null for unset rows. */
+/** A by-body / by-kind / by-color / by-fuel rollup row — one free-text dimension value, null for unset rows. */
 export const statsByDimensionRowSchema = statsMetricsSchema.extend({ value: z.string().nullable() })
 export type StatsByDimensionRow = z.infer<typeof statsByDimensionRowSchema>
 
@@ -108,7 +108,8 @@ export const statsResponseSchema = z.object({
   byRegionYear: z.array(statsByRegionYearRowSchema),
   byBody: z.array(statsByDimensionRowSchema),
   byKind: z.array(statsByDimensionRowSchema),
-  byColor: z.array(statsByDimensionRowSchema)
+  byColor: z.array(statsByDimensionRowSchema),
+  byFuel: z.array(statsByDimensionRowSchema)
 })
 export type StatsResponse = z.infer<typeof statsResponseSchema>
 

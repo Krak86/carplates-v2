@@ -6,7 +6,9 @@ import { Link } from 'react-router'
 import type { PlateLookupResponse } from '@carplates/shared'
 
 import FavoriteButton from '@/components/FavoriteButton'
+import FuelInfoButton from '@/components/FuelInfoButton'
 import RegistrationTimeline from '@/components/RegistrationTimeline'
+import { getFuelIcon } from '@/components/ResultCard.helpers'
 import Card from '@/components/ui/Card'
 import VinDecodeFields from '@/components/VinDecodeFields'
 import { cn } from '@/lib/cn'
@@ -80,7 +82,18 @@ export default function ResultCard({ data }: Props): ReactNode {
         <Row label={t('field.body')} value={c.body} />
         <Row label={engineLabel} value={engineValue} />
         <Row label={t('field.color')} value={c.color} />
-        <Row label={t('field.fuel')} value={c.fuel} />
+        <Row
+          label={t('field.fuel')}
+          value={
+            c.fuel && (
+              <span className="inline-flex items-center gap-1.5">
+                <span aria-hidden>{getFuelIcon(c.fuel)}</span>
+                {c.fuel}
+                <FuelInfoButton current={c.fuel} />
+              </span>
+            )
+          }
+        />
         <Row label={t('field.weight')} value={c.ownWeight && `${c.ownWeight} / ${c.totalWeight ?? '—'}`} />
         <Row label={t('field.kind')} value={c.kind} />
         <Row label={t('field.purpose')} value={c.purpose} />

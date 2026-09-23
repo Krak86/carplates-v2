@@ -10,6 +10,7 @@ export {
   statsByBody,
   statsByKind,
   statsByColor,
+  statsByFuel,
   ingestedResources,
   type RegistrationRow,
   type RegistrationInsert,

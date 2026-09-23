@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@nestjs/common'
 import {
   statsByBody,
   statsByColor,
+  statsByFuel,
   statsByKind,
   statsByRegion,
   statsByRegionYear,
@@ -19,14 +20,15 @@ export class StatsService {
 
   async get(): Promise<StatsResponse> {
     const db = this.dbService.db
-    const [summaryRows, byYear, byRegion, byRegionYear, byBody, byKind, byColor] = await Promise.all([
+    const [summaryRows, byYear, byRegion, byRegionYear, byBody, byKind, byColor, byFuel] = await Promise.all([
       db.select().from(statsSummary),
       db.select().from(statsByYear),
       db.select().from(statsByRegion),
       db.select().from(statsByRegionYear),
       db.select().from(statsByBody),
       db.select().from(statsByKind),
-      db.select().from(statsByColor)
+      db.select().from(statsByColor),
+      db.select().from(statsByFuel)
     ])
     const summary = summaryRows[0]
 
@@ -42,7 +44,8 @@ export class StatsService {
       byRegionYear,
       byBody: byBody.map(row => ({ ...row, value: row.body })),
       byKind: byKind.map(row => ({ ...row, value: row.kind })),
-      byColor: byColor.map(row => ({ ...row, value: row.color }))
+      byColor: byColor.map(row => ({ ...row, value: row.color })),
+      byFuel: byFuel.map(row => ({ ...row, value: row.fuel }))
     })
   }
 }

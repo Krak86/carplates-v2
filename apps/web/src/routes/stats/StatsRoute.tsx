@@ -78,7 +78,7 @@ export default function StatsRoute(): ReactNode {
   const range = stats.data ? yearRange(stats.data) : null
 
   return (
-    <div className="mx-auto w-full max-w-4xl">
+    <div className="mx-auto w-full max-w-6xl">
       <h1 className="mb-4 text-2xl font-bold">{t('stats.title')}</h1>
 
       {stats.isPending && (

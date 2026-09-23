@@ -1,6 +1,33 @@
 import type { StatsResponse } from '@carplates/shared'
 
+import { isKnownFuel } from '@/components/ResultCard.helpers'
+
 import type { StatsDimension, StatsRow } from './types'
+
+/**
+ * Merges the fuel rollup's unknown/absent/garbage values ("NULL", "ВІДСУТНЄ", ".", a blank
+ * value — see ResultCard.helpers.ts) into one "—" row, same as the ResultCard fuel popover.
+ * `totalRows` sums exactly (count(*) is additive), but distinctPlates/distinctVins are each
+ * already an exact COUNT(DISTINCT ...) *within* one fuel value, so summing them across the
+ * merged values is an upper bound: a plate that wore more than one unknown spelling across
+ * its registration history gets counted once per spelling. Good enough for this table —
+ * an exact figure would need a dedicated rollup grouped by a normalized fuel expression.
+ */
+function fuelRows(stats: StatsResponse): StatsRow[] {
+  const known = stats.byFuel.filter(r => isKnownFuel(r.value)).map(r => ({ ...r, label: r.value ?? '—', year: null }))
+  const unknown = stats.byFuel.filter(r => !isKnownFuel(r.value))
+  if (unknown.length === 0) return known
+  return [
+    ...known,
+    {
+      label: '—',
+      year: null,
+      totalRows: unknown.reduce((sum, r) => sum + r.totalRows, 0),
+      distinctPlates: unknown.reduce((sum, r) => sum + r.distinctPlates, 0),
+      distinctVins: unknown.reduce((sum, r) => sum + r.distinctVins, 0)
+    }
+  ]
+}
 
 /** Flattens whichever rollup `dim` selects into the one row shape the table renders. */
 export function dimensionRows(stats: StatsResponse, dim: StatsDimension): StatsRow[] {
@@ -17,6 +44,8 @@ export function dimensionRows(stats: StatsResponse, dim: StatsDimension): StatsR
       return stats.byKind.map(r => ({ ...r, label: r.value ?? '—', year: null }))
     case 'color':
       return stats.byColor.map(r => ({ ...r, label: r.value ?? '—', year: null }))
+    case 'fuel':
+      return fuelRows(stats)
   }
 }
 

@@ -13,7 +13,12 @@ const stats: StatsResponse = {
   byRegionYear: [{ region: 'Київ', year: 2025, totalRows: 10, distinctPlates: 9, distinctVins: 8 }],
   byBody: [{ value: null, totalRows: 2, distinctPlates: 2, distinctVins: 1 }],
   byKind: [{ value: 'Легковий', totalRows: 3, distinctPlates: 3, distinctVins: 2 }],
-  byColor: [{ value: 'Білий', totalRows: 4, distinctPlates: 4, distinctVins: 3 }]
+  byColor: [{ value: 'Білий', totalRows: 4, distinctPlates: 4, distinctVins: 3 }],
+  byFuel: [
+    { value: 'БЕНЗИН', totalRows: 6, distinctPlates: 6, distinctVins: 5 },
+    { value: null, totalRows: 2, distinctPlates: 2, distinctVins: 2 },
+    { value: 'NULL', totalRows: 1, distinctPlates: 1, distinctVins: 1 }
+  ]
 }
 
 describe('dimensionRows', () => {
@@ -36,12 +41,20 @@ describe('dimensionRows', () => {
     ])
   })
 
-  it('falls back to a dash for an unset dimension value (body/kind/color)', () => {
+  it('falls back to a dash for an unset dimension value (body/kind/color/fuel)', () => {
     expect(dimensionRows(stats, 'body')).toEqual([
       { value: null, totalRows: 2, distinctPlates: 2, distinctVins: 1, label: '—', year: null }
     ])
     expect(dimensionRows(stats, 'kind')[0]?.label).toBe('Легковий')
     expect(dimensionRows(stats, 'color')[0]?.label).toBe('Білий')
+    expect(dimensionRows(stats, 'fuel')[0]?.label).toBe('БЕНЗИН')
+  })
+
+  it('merges the unknown/absent fuel values into one dash row', () => {
+    expect(dimensionRows(stats, 'fuel')).toEqual([
+      { value: 'БЕНЗИН', totalRows: 6, distinctPlates: 6, distinctVins: 5, label: 'БЕНЗИН', year: null },
+      { label: '—', year: null, totalRows: 3, distinctPlates: 3, distinctVins: 3 }
+    ])
   })
 })
 

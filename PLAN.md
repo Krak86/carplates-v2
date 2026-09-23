@@ -386,6 +386,53 @@ Doable now, independent of Phases 2-5; each is additive and doesn't block the ot
   unrendered now. Doesn't touch the still-open `vin.registryTitle` /
   `result.historyTitle` text mismatch below — only the icon was harmonized,
   the label text itself is unchanged.
+- **Fuel-type icon + breakdown popover on the result card, "By fuel" stats dimension ✅ DONE (2026-09-23)** —
+  `fuel` is free text from the source registry, not a fixed enum. Querying the
+  live 24.7M-row `registry.registrations` table turned up **16 distinct raw
+  values**: 5 base fuels (`БЕНЗИН`, `ДИЗЕЛЬНЕ ПАЛИВО`, `ГАЗ`, `ЕЛЕКТРО`,
+  `ВОДЕНЬ`), 6 hybrid/bi-fuel combos written as "X АБО Y" / "X, Y АБО Z" / "X
+  ТА Y", and 5 unknown/absent/garbage markers (`NULL` — a literal string from
+  some year's ingest, distinct from a true empty value —, `ВІДСУТНЄ`, `НЕ
+  ВИЗНАЧЕНО`, `.`, and a genuinely blank value).
+
+  `ResultCard`'s fuel row now shows an icon next to the value
+  (`ResultCard.helpers.ts`'s `getFuelIcon`/`isKnownFuel`), matched by keyword
+  (⛽🛢️💨🔋💧) rather than an exact-value map — a combo stacks every icon it
+  contains, and any future source spelling still resolves correctly. A "?"
+  button (`FuelInfoButton.tsx`) opens a popover listing every fuel type from
+  the registry with its count, highlighting the current record's value;
+  known fuels sort by count, the five unknown/absent markers collapse into
+  one "not specified" row at the bottom (summed count). Opens on hover (with
+  a 1s grace period before closing, so moving the pointer onto the panel to
+  scroll it doesn't dismiss it — verified with `vi.useFakeTimers()`, not
+  timing-sensitive browser automation) or on click (pins it open, e.g. for
+  touch, and matches the panel's own explicit close (✕) button); the
+  hover/pin state split matters because a real click always fires
+  `mouseenter` first, so a naive single-flag toggle would immediately
+  re-close itself.
+
+  **DB/API.** New `registry.stats_by_fuel` matview
+  (`migrations/0003_stats_by_fuel.sql`), same footing as the other six
+  `stats_by_*` rollups from the step-A rollup above — refreshed by the same
+  `refreshStats()`, exposed as `byFuel` on the existing `GET /api/stats`
+  response. No new endpoint: the popover just triggers its own (lazy,
+  `enabled: <popover open>`) fetch of the already-`staleTime: Infinity`
+  `/api/stats` query.
+
+  Reusing that same rollup, `/stats` also gained a "By fuel" dimension tab
+  (`STATS_DIMENSIONS`/`DIMENSION_ICONS` in `routes/stats/types.ts`,
+  `dimensionRows()` in `helpers.ts`) — `StatsTable`/`StatsRoute` are
+  dimension-agnostic, so this needed no other changes. Its unknown/absent
+  values collapse into one dash row here too, for the same reason, with one
+  disclosed caveat: `totalRows` sums exactly (`count(*)` is additive) but
+  `distinctPlates`/`distinctVins` are each already an exact `COUNT(DISTINCT
+  ...)` *within* one fuel value, so summing them across the merged values is
+  an upper bound, not exact — a plate that wore more than one unknown-fuel
+  spelling across its registration history is counted once per spelling. An
+  exact figure would need a dedicated rollup grouped by a normalized fuel
+  expression; not worth it for an informational stats page. Also widened the
+  `/stats` page (`max-w-4xl` → `max-w-6xl`) so all 7 dimension tabs fit on
+  one row instead of wrapping.
 - **Open (not yet done): VinResult's history section is mislabeled.** Its
   "Registration history" timeline is titled `vin.registryTitle` ("State
   registry data") while `ResultCard`'s identical section is titled

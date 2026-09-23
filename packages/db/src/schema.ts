@@ -144,6 +144,8 @@ export const statsByColor = registry
   .materializedView('stats_by_color', { color: text('color'), ...statsMetrics })
   .existing()
 
+export const statsByFuel = registry.materializedView('stats_by_fuel', { fuel: text('fuel'), ...statsMetrics }).existing()
+
 /** Incremental-ingest bookkeeping: which CKAN resources have been loaded. */
 export const ingestedResources = registry.table('ingested_resources', {
   ckanResourceId: text('ckan_resource_id').primaryKey(),
