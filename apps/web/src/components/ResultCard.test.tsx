@@ -2,16 +2,17 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { MemoryRouter } from 'react-router'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { PlateLookupResponse } from '@carplates/shared'
 
 import '@/i18n'
 import ResultCard from '@/components/ResultCard'
-import { plateHistory } from '@/lib/api'
+import { decodeVin, plateHistory } from '@/lib/api'
 
 vi.mock('@/lib/api', async importOriginal => ({
   ...(await importOriginal<typeof import('@/lib/api')>()),
-  plateHistory: vi.fn()
+  plateHistory: vi.fn(),
+  decodeVin: vi.fn()
 }))
 
 function renderWithProviders(ui: ReactNode) {
@@ -54,19 +55,22 @@ const data: PlateLookupResponse = {
 }
 
 describe('ResultCard', () => {
-  it('shows the summary and hides detail rows until expanded', () => {
+  afterEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('shows every registration field immediately, with no local expand step', () => {
     renderWithProviders(<ResultCard data={data} />)
     expect(screen.getByText(/TOYOTA CAMRY/)).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'ВЕ7116АА' })).toHaveAttribute('href', '/ВЕ7116АА')
     expect(screen.getByText(/Миколаївська область/)).toBeInTheDocument()
 
+    // Fields that used to live behind "show more" are now visible right away.
+    expect(screen.getByText('ЛЕГКОВИЙ')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: '4T1BF1FK5CU000001' })).toHaveAttribute('href', '/4T1BF1FK5CU000001')
+
     const detailsButton = screen.getByRole('button', { name: 'More details' })
     expect(detailsButton).toHaveAttribute('aria-expanded', 'false')
-    expect(screen.getByText('4T1BF1FK5CU000001').closest('[aria-hidden]')).toHaveAttribute('aria-hidden', 'true')
-
-    fireEvent.click(detailsButton)
-    expect(detailsButton).toHaveAttribute('aria-expanded', 'true')
-    expect(screen.getByText('4T1BF1FK5CU000001').closest('[aria-hidden]')).toHaveAttribute('aria-hidden', 'false')
   })
 
   it('shows power in kW instead of capacity for a pure EV, and the inferred-plate badge', () => {
@@ -79,17 +83,42 @@ describe('ResultCard', () => {
     expect(screen.getByText('plate reconstructed from VIN')).toBeInTheDocument()
   })
 
-  it('fetches and shows registration history when the history button is clicked', async () => {
-    vi.mocked(plateHistory).mockResolvedValue({
-      plate: data.plate,
-      region: data.region,
-      actions: [{ ...data.current, dReg: '2018-05-11', operCode: 100 }]
+  it('fetches VIN-scoped history and decode data when a VIN is known', async () => {
+    vi.mocked(decodeVin).mockResolvedValue({
+      vin: data.current.vin as string,
+      results: [{ variable: 'Make', value: 'TOYOTA' }],
+      registry: {
+        plate: data.plate,
+        plateInferred: false,
+        actions: [{ ...data.current, dReg: '2016-02-03', plate: 'АА1234ВЕ' }, data.current]
+      }
     })
     renderWithProviders(<ResultCard data={data} />)
 
-    fireEvent.click(screen.getByRole('button', { name: 'Registration history' }))
+    fireEvent.click(screen.getByRole('button', { name: 'More details' }))
+
+    expect(decodeVin).toHaveBeenCalledWith(data.current.vin)
+    expect(plateHistory).not.toHaveBeenCalled()
+
+    // The earlier plate the same VIN wore shows up — this is what a plate-only history would miss.
+    await waitFor(() => expect(screen.getByText('2016-02-03')).toBeInTheDocument())
+    expect(screen.getByRole('link', { name: 'АА1234ВЕ' })).toHaveAttribute('href', '/АА1234ВЕ')
+    expect(screen.getByText('Make')).toBeInTheDocument()
+  })
+
+  it('falls back to plate-scoped history when the current registration has no VIN', async () => {
+    const noVin: PlateLookupResponse = { ...data, current: { ...data.current, vin: null } }
+    vi.mocked(plateHistory).mockResolvedValue({
+      plate: data.plate,
+      region: data.region,
+      actions: [{ ...noVin.current, dReg: '2018-05-11', operCode: 100 }]
+    })
+    renderWithProviders(<ResultCard data={noVin} />)
+
+    fireEvent.click(screen.getByRole('button', { name: 'More details' }))
 
     expect(plateHistory).toHaveBeenCalledWith(data.plate)
+    expect(decodeVin).not.toHaveBeenCalled()
     await waitFor(() => expect(screen.getByText('2018-05-11')).toBeInTheDocument())
   })
 })

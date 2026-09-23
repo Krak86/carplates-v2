@@ -5,6 +5,7 @@ import type { VinDecodeResponse } from '@carplates/shared'
 import FavoriteButton from '@/components/FavoriteButton'
 import RegistrationTimeline from '@/components/RegistrationTimeline'
 import Card from '@/components/ui/Card'
+import VinDecodeFields from '@/components/VinDecodeFields'
 
 type Props = {
   data: VinDecodeResponse
@@ -28,14 +29,7 @@ export default function VinResult({ data }: Props): ReactNode {
         </div>
       )}
 
-      <dl className="divide-y divide-[var(--color-border)]">
-        {data.results.map(r => (
-          <div key={r.variable} className="flex justify-between gap-4 py-1 text-sm">
-            <dt className="text-[var(--color-muted)]">{r.variable}</dt>
-            <dd className="text-right font-medium">{r.value}</dd>
-          </div>
-        ))}
-      </dl>
+      <VinDecodeFields results={data.results} />
       <p className="mt-3 text-xs text-[var(--color-muted)]">{t('vin.source')}</p>
     </Card>
   )
