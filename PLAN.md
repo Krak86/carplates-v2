@@ -338,6 +338,39 @@ Doable now, independent of Phases 2-5; each is additive and doesn't block the ot
   data: `regAddrKoatuu` is a raw KOATUU code with no lookup table in this
   codebase, so the department (`dep`) link to Google Maps search remains the
   closest thing to a city/office location.
+- **Plate-page "more details" now shows the full VIN history + VIN decode, one fetch ✅ DONE (2026-09-23)** —
+  `ResultCard` used to hide 7 registration fields behind a local-only expand
+  (no fetch) and fetch `/api/plate/:plate/history` separately behind a second
+  "Registration history" toggle. Two problems: all registration fields are
+  free (already in the initial `/api/plate/:plate` payload) so hiding any of
+  them behind a click bought nothing, and plate-scoped history is
+  incomplete — `plate.service.ts`'s `identityFilter` only matches the exact
+  plate string (plus plateless rows sharing its VIN), so a car re-plated at
+  some point in its history has earlier plates invisible on this page. Fix:
+  every registration field now shows immediately, and the two toggles merged
+  into one "More details" button that, when a VIN is known, fetches
+  `/api/vin/:vin` — `vin.service.ts`'s `lookupRegistry` filters purely on
+  `WHERE vin = :vin` with no plate condition, so it already returns every
+  plate the car ever wore, plus the NHTSA decode fields, in one request. Falls
+  back to the old plate-scoped fetch only when the current registration has
+  no VIN. `VinDecodeFields.tsx` extracted from `VinResult.tsx` so both the
+  standalone `/vin/:vin` page (left unchanged) and this new inline section
+  share the same field-list markup instead of duplicating it.
+- **NHTSA `decodevin` vs `DecodeVinExtended` — researched, not switching (2026-09-23)** —
+  compared both endpoints for a real VIN: identical field set except
+  `DecodeVinExtended` adds 4 NCSA crash-statistics crosswalk fields (`NCSA
+  Make`/`Model`/`Body Type`/`Note`) that duplicate `Make`/`Model` in a form
+  meant for matching against crash databases, not end users. `/api/vin/:vin`
+  already forwards every non-empty field from `decodevin`, and the UI already
+  renders all of them — no gap to close, so staying on the plain endpoint.
+- **Open (not yet done): VinResult's history section is mislabeled.** Its
+  "Registration history" timeline is titled `vin.registryTitle` ("State
+  registry data") while `ResultCard`'s identical section is titled
+  `result.historyTitle` ("Registration history") — same component, same data,
+  different name. Also, `registry.plate` (the VIN's current known plate) is
+  fetched by `/api/vin/:vin` but never shown anywhere on the VIN page, unlike
+  the plate page which headlines its VIN. Fix agreed in principle, not yet
+  applied — see TODO below.
 
 ## Phase 2 — RIA "similar cars" proxy — **not started, blocked on a token**
 
@@ -399,6 +432,13 @@ above once scoped, or dropped if research says no.
 - ⛔ Platesmania — **skipped**, see Phase 3: no free token, scraping ruled out.
 - ✅ Registry statistics page, step A (table) and step B (map) — both done,
   see Phase 1.5.
+- ⏳ **VinResult history section rename + show current plate** — small,
+  unblocked fix identified 2026-09-23 (see Phase 1.5 "Open" note above):
+  retitle its timeline from `vin.registryTitle` to `result.historyTitle` for
+  consistency with `ResultCard`, and surface `registry.plate` /
+  `registry.plateInferred` as a headline line (mirroring how `ResultCard`
+  headlines its VIN link) since the data already comes back from
+  `/api/vin/:vin` and is currently unused on that page.
 
 ### To discuss / research
 
@@ -410,23 +450,66 @@ above once scoped, or dropped if research says no.
   matching the registered color. **RESEARCH**: is there a free/affordable
   stock-photo API keyed by make/model/year(/trim/color), or does this need
   on-the-fly generation (cost, consistency, licensing of generated images)?
+  Candidate: [pixabay.com's image search API](https://pixabay.com/api/docs/)
+  (free tier, needs its own API key in env — never commit one) — coverage for
+  arbitrary make/model/year queries and rate limits are unverified; scope
+  where a result would even go on the page before wiring it up.
 - **Car brand logos** — **RESEARCH**: use an existing logo service/CDN
   (rate limits, licensing, coverage of Ukrainian-market brands) vs. bundle our
-  own logo asset set (upkeep, storage, redistribution rights).
+  own logo asset set (upkeep, storage, redistribution rights). Candidate
+  sources: [carlogos.org](https://www.carlogos.org/car-brands/) (site, no API —
+  scraping/ToS concern, same class of issue as Platesmania) or the
+  [car-logos-dataset](https://github.com/filippofilip95/car-logos-dataset)
+  GitHub repo (bundle-able SVGs, check its license before redistributing).
+  If bundled, would need a `brand → logo asset` lookup, likely seeded into a
+  small static table the way `plate_regions` was for stats.
+- **Vehicle body-shape / silhouette images** — NHTSA vPIC serves per-body-class
+  silhouette PNGs at `vpic.nhtsa.dot.gov/decoder/images/{bodyClassId}/{n}.png`
+  (e.g. images 1-16 under body class 5). **RESEARCH**: map the registry's free-text
+  `body`/`kind` strings to vPIC's body-class ids (no such mapping exists in this
+  codebase today), confirm the image set is stable/complete enough to rely on
+  and whether hot-linking vs. mirroring locally is acceptable, before building a
+  `body → image` lookup table (same seed-a-static-table pattern as above).
+- **Fuel-type icons** — show an icon per fuel type on the result card.
+  **RESEARCH first**: the registry's `fuel` column is free text with no fixed
+  enum in this codebase (unlike `body`/`kind`/`color`, which already have
+  `stats_by_*` rollups) — enumerate the actual distinct values in the real
+  dataset (e.g. `SELECT DISTINCT fuel FROM registry.registrations`) before
+  picking/drawing an icon set, since Ukrainian-source values won't map 1:1 to
+  a generic fuel-type icon library.
+- **Vehicle-kind icons** — same pattern as fuel-type icons above, for the
+  `kind` field (legkovyi/vantazhnyi/etc.) instead of `fuel`. `stats_by_kind`
+  already has the real distinct values and counts (`GET /api/stats`) — reuse
+  that instead of a fresh `DISTINCT` query, then pick/draw icons for the ones
+  that actually occur.
 - **Auth with Google** — Phase 5 already specs Passport Google OAuth; open
   question is scope beyond syncing history/favorites to the cloud — what
   else should be account-gated (cross-device sync, data export, change
   alerts on a saved plate/VIN)?
-- **Vehicle history/images from other countries, by VIN** — e.g.
-  `copart.com`, `bid.cars` auction listings for imported vehicles. **RESEARCH**:
-  survey providers for free vs. paid APIs, coverage, and ToS/legal constraints
-  per provider before picking one (scraping these sites is the same
-  no-go as Platesmania above, not a fallback).
 - **Use more of the NHTSA vPIC decoder surface** — beyond the plain VIN
   decode already wired up (`GET /api/vin/:vin`), e.g. Manufacturer detail
   lookups (`vpic.nhtsa.dot.gov/decoder/Manufacturer/Details/{id}`) and related
-  endpoints under `vpic.nhtsa.dot.gov/decoder/VinDecoder`. Same free provider,
-  just more of its surface — scope which fields are worth showing.
+  endpoints under `vpic.nhtsa.dot.gov/decoder/VinDecoder` (which also accepts
+  a `ModelYear` param the plain decode endpoints don't). Same free provider,
+  just more of its surface — scope which fields are worth showing. (The
+  `decodevin` vs `DecodeVinExtended` question specifically is resolved, see
+  Phase 1.5 above — this item is about the *other* decoder endpoints.)
+- **Ukraine average fuel prices** — integrate price-per-fuel-type data,
+  e.g. from [serg-ill/ukraine-fuel-prices](https://github.com/serg-ill/ukraine-fuel-prices)
+  (scrape-derived dataset, not a live API — check its update cadence and
+  license before depending on it). **RESEARCH**: where this would surface in
+  the UI (per-result estimated fill-up cost? a standalone page?) before
+  scoping the integration.
+
+### Parked — no free API token (same class as Platesmania)
+
+- ⛔ RIA "similar cars" — see Phase 2, blocked on a `developers.ria.com` key.
+- ⛔ Platesmania — see Phase 3, no free token, scraping ruled out.
+- ⛔ **Vehicle history/images from other countries, by VIN** — e.g.
+  `copart.com`, `bid.cars` auction listings for imported vehicles. No free
+  API token surveyed yet for any provider; scraping these sites is the same
+  ToS/legal no-go as Platesmania, not a fallback. Revisit if a free/affordable
+  token turns up for one of these or a similar provider.
 
 ## Phase 4 — VPS / production
 
