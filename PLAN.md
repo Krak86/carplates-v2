@@ -195,7 +195,7 @@ Doable now, independent of Phases 2-5; each is additive and doesn't block the ot
   (`FavoriteButton.tsx` / `use-favorite-toggle.ts`) add/removes client-side, a
   `FavoritesRoute` lists them. No API/DB changes. Superseded by Phase 5's
   `favorites` table when accounts land.
-- **Registry statistics — step A ✅ DONE (2026-09-23), step B not started**
+- **Registry statistics — step A ✅ DONE (2026-09-23), step B ✅ DONE (2026-09-23)**
   (scoped 2026-09-23, two-step delivery — table first, map second, each
   independently shippable). Figures confirmed against the real full 13-year
   dataset after a from-scratch re-ingest (2026-09-23 recovery — see
@@ -259,20 +259,63 @@ Doable now, independent of Phases 2-5; each is additive and doesn't block the ot
   id + `last_modified`, so a changed resource still re-downloads) — a real
   gap found while re-ingesting for recovery, not specific to stats.
 
-  **Web — step B (map, not started):** oblast-level choropleth over
-  `stats_by_region` / `stats_by_region_year`, same `/stats` route and metric
-  switcher as step A. Library: `react-simple-maps` (D3 + `d3-geo`, SVG, MIT,
-  free, no API key/tile server — 27 polygons don't justify Leaflet/Mapbox GL,
-  and are four orders of magnitude below where WebGL/WebGPU would pay off).
-  Boundary data: geoBoundaries.org Ukraine ADM1 (CC-BY-4.0, free), with a
-  small static lookup from that geometry's region names/IDs to the
-  `REGIONS` Ukrainian strings. AR Crimea and Sevastopol render as ordinary
-  regions, matching how `REGIONS` already treats those plate prefixes — no
-  special-casing. One metric encoded as choropleth fill at a time
-  (whichever the table's metric switcher has selected); exact numbers via
-  hover tooltip rather than printed on-shape. A bubble/circle overlay is
+  **Web — step B (map) ✅ DONE:** oblast-level choropleth over
+  `stats_by_region`, same `/stats` route as step A — a `view=table|map` tab
+  (`StatsRoute.tsx`), scoped to `dim=region` only (switching to `map` forces
+  `dim=region`; switching dimension away from `region` drops `view` back to
+  `table`), plus a metric switcher (`distinctPlates`/`distinctVins`/`totalRows`,
+  reusing `stats.column.*` labels) that now also re-sorts the table, not just
+  the map fill. Library: `react-simple-maps` v5 + `d3-geo` (MIT, no API
+  key/tile server — 27 polygons don't justify Leaflet/Mapbox GL). Boundary
+  data: geoBoundaries.org Ukraine ADM1, simplified with `mapshaper` (761 KB →
+  43 KB) and bundled as a static asset (`apps/web/public/ukraine-adm1.geojson`,
+  fetched once via TanStack Query, `staleTime: Infinity`) — **license is
+  ODC-ODbL-1.0 (OpenStreetMap/Wambacher), not CC-BY-4.0** as originally
+  guessed above; attribution is rendered under the map. A static lookup
+  (`region-geography.ts`, `shapeISO` → the exact `REGIONS` Ukrainian string,
+  regression-tested 1:1 against `REGIONS`) matches map polygons to rollup
+  rows. AR Crimea and Sevastopol render as ordinary regions, matching how
+  `REGIONS` already treats those plate prefixes — no special-casing.
+
+  **Gotcha hit and fixed:** geoBoundaries' source rings (shapefile-derived)
+  are wound clockwise, the opposite of what `d3-geo` expects (RFC 7946
+  counter-clockwise) — `d3.geoArea()` on every feature came back ≈4π (i.e.
+  "the whole sphere minus a hole") instead of a small fraction, and every
+  `<Geography>` path silently grew a second subpath tracing the full clip
+  rectangle, painting one solid color block over the whole SVG instead of
+  Ukraine's outline. Fixed by reversing every ring's point order once at prep
+  time (no separate rewind dependency needed — no holes in this dataset, so
+  reversal is unconditional and safe). Caught by actually opening the page in
+  a browser, not by type-check/lint/tests, which all stayed green throughout.
+
+  One metric encoded as choropleth fill at a time (sequential single-hue blue
+  ramp — steps documented in the project's `dataviz` skill palette, dark mode
+  flips which end recedes into the surface, per-cell hover tooltip + keyboard
+  focus parity via `aria-label`, gradient legend with min/max). Exact numbers
+  via hover tooltip rather than printed on-shape. A bubble/circle overlay is
   deferred unless a later need arises to compare two metrics at once — fill
   alone is the default, to avoid redundant double-encoding of one number.
+
+  **Follow-up polish ✅ DONE (2026-09-23):** the `view=table|map` toggle moved
+  to its own top row and picked up a "segmented control" style (gray track,
+  white active pill) shared with the metric switcher — visually distinct from
+  the dimension tabs' filled-blue-pill style, so the three control groups
+  read as separate clusters at a glance. Dimension chips collapse to `By
+  region` only while `view=map` (the other five aren't applicable to the
+  map). Dimension/metric buttons got emoji icons (🗺️🧭📅🚙🚚🎨 /
+  🏷️🆔📋 — same plain-emoji convention as the rest of the app, not an icon
+  library). All tab/toggle buttons transition color on change, and the
+  table/map content itself fades in (`animate-fade-in` in `global.css`,
+  `prefers-reduced-motion`-aware) on every dimension/metric/view change. The
+  table's scroll height changed from a flat `max-h-[70vh]` to a
+  viewport-adaptive `clamp()` (separate mobile/desktop constants, tuned
+  against measured chrome height so it lands within ~20-30px of the viewport
+  bottom on both) with a `min-height` floor — not applied to the map, which
+  stays aspect-ratio-bound. A `yearRange`/`yearBoundaryLabel` helper pair
+  (unit-tested) now prints the dataset's actual coverage under the title
+  ("Covers registrations from 2013 to September 2026") — the current
+  calendar year gets its month appended, since `byYear` has no month
+  breakdown and this year's total is never actually complete yet.
 - **Plate lookup by camera/photo ✅ DONE (2026-09-22)** — moved up from Phase
   3+ below; see that section, kept in place to avoid duplicating the design
   notes.
@@ -335,8 +378,8 @@ above once scoped, or dropped if research says no.
 - ⏳ RIA "similar cars" proxy (free token) — Phase 2, blocked on getting a
   `developers.ria.com` API key; otherwise unchanged from that section's design.
 - ⛔ Platesmania — **skipped**, see Phase 3: no free token, scraping ruled out.
-- ✅ Registry statistics page, step A (table) — done, see Phase 1.5. Step B
-  (map) is the remaining piece, scoped there, not started.
+- ✅ Registry statistics page, step A (table) and step B (map) — both done,
+  see Phase 1.5.
 
 ### To discuss / research
 

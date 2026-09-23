@@ -70,6 +70,7 @@
   "camera.noDevice": "На этом устройстве не найдено камеры.",
   "camera.error": "Не удалось получить доступ к камере. Попробуйте ещё раз.",
   "stats.title": "Статистика реестра",
+  "stats.yearRange": "Данные охватывают регистрации с {{min}} по {{max}} год",
   "stats.viewLink": "Просмотреть статистику",
   "stats.summary.totalRows": "Всего регистрационных действий",
   "stats.summary.distinctPlates": "Уникальных номеров",
@@ -86,5 +87,9 @@
   "stats.column.distinctPlates": "Уникальных номеров",
   "stats.column.distinctVins": "Уникальных VIN",
   "stats.filterPlaceholder": "Фильтр…",
-  "stats.noRows": "Нет строк"
+  "stats.noRows": "Нет строк",
+  "stats.view.table": "Таблица",
+  "stats.view.map": "Карта",
+  "stats.map.noData": "Нет данных",
+  "stats.map.attribution": "Границы регионов: geoBoundaries.org (данные OpenStreetMap), ODbL 1.0"
 }

@@ -70,6 +70,7 @@
   "camera.noDevice": "No camera was found on this device.",
   "camera.error": "Couldn't access the camera. Please try again.",
   "stats.title": "Registry statistics",
+  "stats.yearRange": "Covers registrations from {{min}} to {{max}}",
   "stats.viewLink": "View statistics",
   "stats.summary.totalRows": "Total registration actions",
   "stats.summary.distinctPlates": "Distinct plates",
@@ -86,5 +87,9 @@
   "stats.column.distinctPlates": "Distinct plates",
   "stats.column.distinctVins": "Distinct VINs",
   "stats.filterPlaceholder": "Filter…",
-  "stats.noRows": "No rows"
+  "stats.noRows": "No rows",
+  "stats.view.table": "Table",
+  "stats.view.map": "Map",
+  "stats.map.noData": "No data",
+  "stats.map.attribution": "Boundaries: geoBoundaries.org (OpenStreetMap contributors), ODbL 1.0"
 }

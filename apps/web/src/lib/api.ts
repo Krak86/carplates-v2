@@ -12,8 +12,13 @@ import type {
   StatsResponse,
   VinDecodeResponse
 } from '@carplates/shared'
+import type { Feature, FeatureCollection, Geometry } from 'geojson'
 
 const BASE = import.meta.env.VITE_API_BASE ?? ''
+
+export type UkraineRegionProperties = { shapeISO: string; shapeName: string }
+export type UkraineRegionFeature = Feature<Geometry, UkraineRegionProperties>
+export type UkraineGeography = FeatureCollection<Geometry, UkraineRegionProperties>
 
 export class ApiError extends Error {
   constructor(
@@ -55,6 +60,14 @@ export async function decodeVin(vin: string): Promise<VinDecodeResponse> {
 
 export async function getStats(): Promise<StatsResponse> {
   return statsResponseSchema.parse(await getJson('/api/stats'))
+}
+
+// Bundled static asset (apps/web/public/), not an /api/* response — no BASE
+// prefix, no Zod (it's our own build artifact, not user-facing API contract).
+export async function getUkraineGeography(): Promise<UkraineGeography> {
+  const res = await fetch('/ukraine-adm1.geojson', { headers: { accept: 'application/geo+json' } })
+  if (!res.ok) throw new ApiError(res.status, res.statusText)
+  return res.json() as Promise<UkraineGeography>
 }
 
 export async function recognizePlate(file: File): Promise<PlateRecognizeResponse> {

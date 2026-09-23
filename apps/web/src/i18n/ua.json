@@ -70,6 +70,7 @@
   "camera.noDevice": "На цьому пристрої не знайдено камери.",
   "camera.error": "Не вдалося отримати доступ до камери. Спробуйте ще раз.",
   "stats.title": "Статистика реєстру",
+  "stats.yearRange": "Дані охоплюють реєстрації з {{min}} по {{max}} рік",
   "stats.viewLink": "Переглянути статистику",
   "stats.summary.totalRows": "Усього реєстраційних дій",
   "stats.summary.distinctPlates": "Унікальних номерів",
@@ -86,5 +87,9 @@
   "stats.column.distinctPlates": "Унікальних номерів",
   "stats.column.distinctVins": "Унікальних VIN",
   "stats.filterPlaceholder": "Фільтр…",
-  "stats.noRows": "Немає рядків"
+  "stats.noRows": "Немає рядків",
+  "stats.view.table": "Таблиця",
+  "stats.view.map": "Карта",
+  "stats.map.noData": "Немає даних",
+  "stats.map.attribution": "Межі регіонів: geoBoundaries.org (дані OpenStreetMap), ODbL 1.0"
 }

@@ -94,7 +94,10 @@ export default function StatsTable({ rows, labelHeader, showYearColumn, defaultS
         className="mb-3 w-full max-w-xs rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-1.5 text-sm"
       />
 
-      <div ref={parentRef} className="max-h-[70vh] overflow-auto rounded-xl border border-[var(--color-border)]">
+      <div
+        ref={parentRef}
+        className="h-[clamp(280px,calc(100dvh-560px),900px)] overflow-auto rounded-xl border border-[var(--color-border)] md:h-[clamp(320px,calc(100dvh-460px),900px)]"
+      >
         <table className="w-full text-sm">
           <thead className="sticky top-0 bg-[var(--color-surface)]">
             {table.getHeaderGroups().map(headerGroup => (

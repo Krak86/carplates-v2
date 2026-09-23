@@ -1,7 +1,7 @@
 import { queryOptions } from '@tanstack/react-query'
 import { normalizePlate } from '@carplates/shared'
 
-import { decodeVin, getStats, lookupPlate, plateHistory } from '@/lib/api'
+import { decodeVin, getStats, getUkraineGeography, lookupPlate, plateHistory } from '@/lib/api'
 import { isFavorited, listFavorites } from '@/lib/favorites-db'
 import type { FavoriteKind } from '@/lib/favorites-db'
 import { listVisits } from '@/lib/history-db'
@@ -36,4 +36,9 @@ export function favoriteQuery(kind: FavoriteKind, value: string) {
 // Only changes on the monthly ingest cron (see PLAN.md, "Registry statistics") — never refetch on its own.
 export function statsQuery() {
   return queryOptions({ queryKey: ['stats'], queryFn: getStats, staleTime: Infinity })
+}
+
+// Static build asset, never changes at runtime.
+export function ukraineGeographyQuery() {
+  return queryOptions({ queryKey: ['ukraine-geography'], queryFn: getUkraineGeography, staleTime: Infinity })
 }

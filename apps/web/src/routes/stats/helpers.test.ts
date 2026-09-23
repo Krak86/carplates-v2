@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { StatsResponse } from '@carplates/shared'
 
-import { dimensionHasYearColumn, dimensionRows } from './helpers'
+import { choroplethColor, dimensionHasYearColumn, dimensionRows, yearBoundaryLabel, yearRange } from './helpers'
 
 const stats: StatsResponse = {
   summary: { totalRows: 100, distinctPlates: 80, distinctVins: 60, plateless: 5 },
@@ -50,5 +50,68 @@ describe('dimensionHasYearColumn', () => {
     expect(dimensionHasYearColumn('regionYear')).toBe(true)
     expect(dimensionHasYearColumn('region')).toBe(false)
     expect(dimensionHasYearColumn('year')).toBe(false)
+  })
+})
+
+describe('yearRange', () => {
+  it('returns the min/max of the dated years, ignoring the undated bucket', () => {
+    expect(yearRange(stats)).toEqual({ min: 2025, max: 2025 })
+  })
+
+  it('spans multiple years out of order', () => {
+    const multiYear: StatsResponse = {
+      ...stats,
+      byYear: [
+        { year: 2019, totalRows: 1, distinctPlates: 1, distinctVins: 1 },
+        { year: null, totalRows: 1, distinctPlates: 1, distinctVins: 1 },
+        { year: 2013, totalRows: 1, distinctPlates: 1, distinctVins: 1 },
+        { year: 2026, totalRows: 1, distinctPlates: 1, distinctVins: 1 }
+      ]
+    }
+    expect(yearRange(multiYear)).toEqual({ min: 2013, max: 2026 })
+  })
+
+  it('returns null when there are no dated years', () => {
+    const noYears: StatsResponse = { ...stats, byYear: [{ year: null, totalRows: 1, distinctPlates: 1, distinctVins: 1 }] }
+    expect(yearRange(noYears)).toBeNull()
+  })
+})
+
+describe('yearBoundaryLabel', () => {
+  const now = new Date(2026, 8, 23) // 2026-09-23, month is 0-indexed
+
+  it('is just the year when it is not the current calendar year', () => {
+    expect(yearBoundaryLabel(2013, 'en-US', now)).toBe('2013')
+    expect(yearBoundaryLabel(2025, 'en-US', now)).toBe('2025')
+  })
+
+  it('appends the current month when the year is the current calendar year', () => {
+    expect(yearBoundaryLabel(2026, 'en-US', now)).toBe('September 2026')
+    expect(yearBoundaryLabel(2026, 'uk-UA', now)).toBe('вересень 2026 р.')
+  })
+})
+
+describe('choroplethColor', () => {
+  it('anchors light mode light-to-dark and dark mode dark-to-light', () => {
+    expect(choroplethColor(0, 'light')).toBe('rgb(205, 226, 251)')
+    expect(choroplethColor(1, 'light')).toBe('rgb(13, 54, 107)')
+    expect(choroplethColor(0, 'dark')).toBe('rgb(13, 54, 107)')
+    expect(choroplethColor(1, 'dark')).toBe('rgb(205, 226, 251)')
+  })
+
+  it('clamps out-of-range t', () => {
+    expect(choroplethColor(-1, 'light')).toBe(choroplethColor(0, 'light'))
+    expect(choroplethColor(2, 'light')).toBe(choroplethColor(1, 'light'))
+  })
+
+  it('is monotonically non-decreasing in lightness as t rises (light mode)', () => {
+    const luminance = (rgb: string): number => {
+      const [r, g, b] = rgb.match(/\d+/g)!.map(Number)
+      return 0.299 * r! + 0.587 * g! + 0.114 * b!
+    }
+    const samples = [0, 0.25, 0.5, 0.75, 1].map(t => luminance(choroplethColor(t, 'light')))
+    for (let i = 1; i < samples.length; i++) {
+      expect(samples[i]).toBeLessThanOrEqual(samples[i - 1]!)
+    }
   })
 })
