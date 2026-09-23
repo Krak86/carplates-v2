@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import type { VinDecodeResponse } from '@carplates/shared'
 
 import FavoriteButton from '@/components/FavoriteButton'
-import RegistrationActionsList from '@/components/RegistrationActionsList'
+import RegistrationTimeline from '@/components/RegistrationTimeline'
 import Card from '@/components/ui/Card'
 
 type Props = {
@@ -24,7 +24,7 @@ export default function VinResult({ data }: Props): ReactNode {
       {registry && (
         <div className="mb-4">
           <div className="mb-1 text-sm font-semibold">{t('vin.registryTitle')}</div>
-          <RegistrationActionsList actions={registry.actions} />
+          <RegistrationTimeline actions={registry.actions} />
         </div>
       )}
 

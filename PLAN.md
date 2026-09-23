@@ -319,6 +319,25 @@ Doable now, independent of Phases 2-5; each is additive and doesn't block the ot
 - **Plate lookup by camera/photo ✅ DONE (2026-09-22)** — moved up from Phase
   3+ below; see that section, kept in place to avoid duplicating the design
   notes.
+- **Registration history as a timeline ✅ DONE (2026-09-23)** — the
+  show/hide history toggle on `ResultCard` (and the equivalent list on
+  `VinResult`) is now a static "Registration history" label (with a clock
+  icon) whose expand state is a rotating chevron, not text that swaps between
+  "Show"/"Hide". `RegistrationActionsList.tsx` was replaced by
+  `RegistrationTimeline.tsx`: a shipping-tracker-style vertical timeline —
+  a point per action, connected by a line with an up-chevron between each
+  pair (the API returns history newest-first and that's still the display
+  order, latest on top, so the arrows point up — the direction the dates
+  actually run in, oldest at the bottom). The most recent action's point is
+  filled/highlighted. Each step now also shows the oblast, derived per-step
+  via `regionName(action.plate)` from `@carplates/shared` (re-plating can
+  move a vehicle between regions across its history, so this is computed per
+  action, not once for the whole card) — falling back to a new
+  `result.regionUnknown` string for plateless (2026+ order) rows or
+  unrecognized/foreign prefixes, rather than going blank. No new city-level
+  data: `regAddrKoatuu` is a raw KOATUU code with no lookup table in this
+  codebase, so the department (`dep`) link to Google Maps search remains the
+  closest thing to a city/office location.
 
 ## Phase 2 — RIA "similar cars" proxy — **not started, blocked on a token**
 

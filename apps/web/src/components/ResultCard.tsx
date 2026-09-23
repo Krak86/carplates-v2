@@ -6,7 +6,7 @@ import { Link } from 'react-router'
 import type { PlateLookupResponse } from '@carplates/shared'
 
 import FavoriteButton from '@/components/FavoriteButton'
-import RegistrationActionsList from '@/components/RegistrationActionsList'
+import RegistrationTimeline from '@/components/RegistrationTimeline'
 import Card from '@/components/ui/Card'
 import { cn } from '@/lib/cn'
 import { depMapsUrl } from '@/lib/maps'
@@ -129,9 +129,29 @@ export default function ResultCard({ data }: Props): ReactNode {
             type="button"
             aria-expanded={showHistory}
             onClick={() => setShowHistory(v => !v)}
-            className="text-[var(--color-primary)] underline hover:no-underline"
+            className="group flex items-center gap-1 text-[var(--color-primary)]"
           >
-            {showHistory ? t('result.hideHistory') : t('result.showHistory')}
+            <svg
+              aria-hidden
+              viewBox="0 0 16 16"
+              width="14"
+              height="14"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx="8" cy="8" r="6.25" />
+              <path d="M8 4.5V8l2.5 1.5" />
+            </svg>
+            <span className="underline group-hover:no-underline">{t('result.historyTitle')}</span>
+            <span
+              aria-hidden
+              className={cn('inline-block transition-transform duration-200', showHistory && 'rotate-180')}
+            >
+              ▾
+            </span>
           </button>
           <button
             type="button"
@@ -153,12 +173,9 @@ export default function ResultCard({ data }: Props): ReactNode {
       >
         <div className="overflow-hidden">
           <div className="mt-3 border-t border-[var(--color-border)] pt-3">
-            <div className="mb-1 text-sm font-semibold">{t('result.historyTitle')}</div>
             {history.isPending && <p className="text-sm text-[var(--color-muted)]">{t('result.loading')}</p>}
             {history.isError && <p className="text-sm text-[var(--color-muted)]">{t('result.error')}</p>}
-            {history.isSuccess && (
-              <RegistrationActionsList actions={history.data.actions} currentPlate={data.plate} />
-            )}
+            {history.isSuccess && <RegistrationTimeline actions={history.data.actions} currentPlate={data.plate} />}
           </div>
         </div>
       </div>

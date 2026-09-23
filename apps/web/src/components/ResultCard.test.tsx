@@ -87,7 +87,7 @@ describe('ResultCard', () => {
     })
     renderWithProviders(<ResultCard data={data} />)
 
-    fireEvent.click(screen.getByRole('button', { name: 'Show history' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Registration history' }))
 
     expect(plateHistory).toHaveBeenCalledWith(data.plate)
     await waitFor(() => expect(screen.getByText('2018-05-11')).toBeInTheDocument())
