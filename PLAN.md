@@ -464,6 +464,70 @@ Doable now, independent of Phases 2-5; each is additive and doesn't block the ot
   on-demand-fetch pattern. A small hand-rolled prev/next carousel (no library
   added, none existed in the repo) cycles `webformatURL` images with a
   position counter and a Pixabay attribution line.
+- **Vehicle-kind icon (animated, colored) + brand logo on the result card ✅ DONE (2026-09-24)** —
+  resolves the "Vehicle-kind icons", "Vehicle body-shape / silhouette images",
+  and "Car brand logos" backlog research items below.
+
+  **Kind/color enums.** Unlike `fuel`, both `kind` and `color` turned out to be
+  small closed sets in the real data — `SELECT DISTINCT kind`/`color FROM
+  registry.current_registration` returned exactly **13** and **14** raw values
+  respectively (two of the 14 are alternate registry spellings of "orange").
+  `resolveVehicleKind`/`resolveVehicleColor` (`packages/shared/src/vehicleKind.ts`,
+  `vehicleColor.ts`) exact-match these onto a canonical `VehicleKind` (13) /
+  `VehicleColor` (11) union — safe to exact-match, unlike fuel's keyword
+  approach, since the source vocabulary is fully enumerated. `VEHICLE_COLOR_HEX`
+  / `VEHICLE_COLOR_SHADOW_HEX` hold a hand-picked lit/shadow hex pair per color.
+
+  **Shapes.** Only 5 body silhouettes exist (sedan/bus/truck/motorcycle/trailer,
+  user-supplied artwork), ported into `apps/web/src/assets/vehicleShapes.tsx` as
+  inline React/SVG (not `<img>` — dynamic per-vehicle coloring and the wheel
+  animation both need the SVG in the DOM). `VehicleKindIcon.tsx` maps all 13
+  kinds onto the closest of the 5 (e.g. `moped`/`quad`/`tricycle`/`motoTricycle`
+  → motorcycle, `specialized`/`special` → truck, `undetermined` → sedan) — no
+  1:1 art for the other 8. The body/shadow fill in each shape is
+  `var(--vehicle-body-color)` / `var(--vehicle-body-shadow-color)`, set inline
+  per instance from the vehicle's resolved color; wheels/windows stay a fixed
+  neutral tone, like real trim/glass. Two `prefers-reduced-motion`-aware
+  animations (`global.css`): `animate-vehicle-sheen` (a brightness/saturation
+  pulse on the whole icon) and `animate-vehicle-wheel-spin` (rotates each
+  wheel's rim+hub+a small off-center highlight dot — without that dot two
+  concentric circles are rotationally symmetric and a "spinning" wheel would
+  look perfectly static). The spin needed no per-wheel coordinate math:
+  `transform-box: fill-box; transform-origin: center` rotates around each
+  wheel `<g>`'s own bounding-box center, which is already the rim's center.
+  Placed in the header next to brand/model, stretched to the full title+plate
+  block height via flexbox's natural cross-axis stretch + `aspect-square` — an
+  earlier attempt using `height: 100%` directly fed back into a ~370px icon,
+  because percentage height against an auto-height flex parent is ambiguous;
+  swapping to stretch-derived height fixed it outright. `VehicleKindIcon`
+  deliberately ships no default size classes — `cn()` here is plain `clsx`
+  (no `tailwind-merge` dedup in this repo), so a built-in `h-*`/`w-*` could
+  never be reliably overridden by a caller's `className`.
+
+  **Brand logos.** Sourced from the MIT-licensed
+  [car-logos-dataset](https://github.com/filippofilip95/car-logos-dataset)
+  (logos themselves remain trademarks of their owners) — its own listing
+  (~650 files) is too large to fetch in one pass (GitHub's contents API,
+  its search API, and jsDelivr's flat-file listing all hit the same
+  content-size ceiling partway through), and `git clone`/`curl` to fetch it
+  in bulk were denied by the sandbox, so each logo was instead pulled
+  individually from its raw GitHub URL (a plain fetch doubles as an existence
+  check — a wrong guess just 404s). **91 logos, 6.3 MB total**
+  (`apps/web/public/logos/`, static — served on demand per result, never
+  bundled into the JS) — every brand in the real ingest's top-volume tier plus
+  every other globally-recognized car/heavy-truck/bus manufacturer guessable
+  by name; not literal 650-file completeness, which would mostly add defunct
+  1900s-1930s coachbuilders with ~zero chance of ever matching a Ukrainian
+  registration. The dataset is cars/trucks only — confirmed no logos exist for
+  motorcycle-only marques (Yamaha, Kawasaki, Harley-Davidson, Ducati, Piaggio
+  all 404). `brandLogoUrl()` (`packages/shared/src/brandLogo.ts`) splits the
+  registry's raw `"BRAND  MODEL"` string on its double-space separator (single
+  space is a legitimate multi-word brand like "LAND ROVER"), and maps Cyrillic
+  legacy names to their modern export slug (ВАЗ→lada, ЗАЗ→zaz, ГАЗ→gaz,
+  УАЗ→uaz). `BrandLogo.tsx` renders nothing on no match or an image load
+  error (`onError`) rather than a broken-image icon; `mix-blend-mode: multiply`
+  drops the source PNGs' flat white background against the light card surface
+  without needing pre-processed transparent assets.
 - **Open (not yet done): VinResult's history section is mislabeled.** Its
   "Registration history" timeline is titled `vin.registryTitle` ("State
   registry data") while `ResultCard`'s identical section is titled
@@ -533,6 +597,8 @@ above once scoped, or dropped if research says no.
 - ⛔ Platesmania — **skipped**, see Phase 3: no free token, scraping ruled out.
 - ✅ Registry statistics page, step A (table) and step B (map) — both done,
   see Phase 1.5.
+- ✅ Vehicle-kind icon (animated, colored by registry color) + brand logo on
+  the result card — done, see Phase 1.5.
 - ⏳ **VinResult history section rename + show current plate** — small,
   unblocked fix identified 2026-09-23 (see Phase 1.5 "Open" note above):
   retitle its timeline from `vin.registryTitle` to `result.historyTitle` for
@@ -553,22 +619,21 @@ above once scoped, or dropped if research says no.
   brand/model/year only, not trim/color — Pixabay's search doesn't support
   that granularity, so shown photos are illustrative for the make/model, not
   matched to the registered vehicle's actual color or trim.
-- **Car brand logos** — **RESEARCH**: use an existing logo service/CDN
-  (rate limits, licensing, coverage of Ukrainian-market brands) vs. bundle our
-  own logo asset set (upkeep, storage, redistribution rights). Candidate
-  sources: [carlogos.org](https://www.carlogos.org/car-brands/) (site, no API —
-  scraping/ToS concern, same class of issue as Platesmania) or the
-  [car-logos-dataset](https://github.com/filippofilip95/car-logos-dataset)
-  GitHub repo (bundle-able SVGs, check its license before redistributing).
-  If bundled, would need a `brand → logo asset` lookup, likely seeded into a
-  small static table the way `plate_regions` was for stats.
-- **Vehicle body-shape / silhouette images** — NHTSA vPIC serves per-body-class
-  silhouette PNGs at `vpic.nhtsa.dot.gov/decoder/images/{bodyClassId}/{n}.png`
-  (e.g. images 1-16 under body class 5). **RESEARCH**: map the registry's free-text
-  `body`/`kind` strings to vPIC's body-class ids (no such mapping exists in this
-  codebase today), confirm the image set is stable/complete enough to rely on
-  and whether hot-linking vs. mirroring locally is acceptable, before building a
-  `body → image` lookup table (same seed-a-static-table pattern as above).
+- **Car brand logos ✅ DONE (2026-09-24)** — see Phase 1.5 "Vehicle-kind icon
+  (animated, colored) + brand logo" above. Went with bundling from
+  car-logos-dataset (MIT-licensed, not carlogos.org — that site states no
+  reuse license at all), not a live logo service/CDN — a `brand → logo asset`
+  lookup (`brandLogoUrl()` in `@carplates/shared`) matching bundled static
+  files, same pattern as `plate_regions` for stats.
+- **Vehicle body-shape / silhouette images ✅ DONE (2026-09-24)** — see Phase
+  1.5 above. **Not** NHTSA vPIC in the end: those per-body-class PNGs
+  (`vpic.nhtsa.dot.gov/decoder/images/{bodyClassId}/{n}.png`) turned out to be
+  an undocumented, unofficial asset path (no stated mapping from image index
+  to body class, no ToS, inconsistent styling between images) keyed to
+  NHTSA's own body-class taxonomy — which the Ukrainian registry's `kind`
+  values don't share, so using them wouldn't have avoided building a
+  `kind → shape` mapping anyway. Used 5 user-supplied SVG silhouettes instead,
+  recolored per-vehicle via CSS custom properties.
 - **Fuel-type icons** — show an icon per fuel type on the result card.
   **RESEARCH first**: the registry's `fuel` column is free text with no fixed
   enum in this codebase (unlike `body`/`kind`/`color`, which already have
@@ -576,12 +641,8 @@ above once scoped, or dropped if research says no.
   dataset (e.g. `SELECT DISTINCT fuel FROM registry.registrations`) before
   picking/drawing an icon set, since Ukrainian-source values won't map 1:1 to
   a generic fuel-type icon library.
-- **Vehicle-kind icons** — same pattern as fuel-type icons above, for the
-  `kind` field (legkovyi/vantazhnyi/etc.) instead of `fuel`. `stats_by_kind`
-  already has the real distinct values and counts (`GET /api/stats`) — reuse
-  that instead of a fresh `DISTINCT` query, then pick/draw icons for the ones
-  that actually occur. The "?" breakdown popover itself is already live on
-  `kind` (see Phase 1.5 above) — this item is just the per-value icon set.
+- **Vehicle-kind icons ✅ DONE (2026-09-24)** — see Phase 1.5 "Vehicle-kind
+  icon (animated, colored) + brand logo" above.
 - **Auth with Google** — Phase 5 already specs Passport Google OAuth; open
   question is scope beyond syncing history/favorites to the cloud — what
   else should be account-gated (cross-device sync, data export, change

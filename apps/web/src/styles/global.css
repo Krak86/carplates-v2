@@ -66,3 +66,39 @@ body {
     animation: none;
   }
 }
+
+@keyframes vehicle-sheen {
+  0%,
+  100% {
+    filter: brightness(1) saturate(1);
+  }
+  50% {
+    filter: brightness(1.2) saturate(1.3);
+  }
+}
+
+@utility animate-vehicle-sheen {
+  animation: vehicle-sheen 2.4s ease-in-out infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+@keyframes vehicle-wheel-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* `fill-box` makes the rotation origin the wheel <g>'s own bounding box center — the rim
+   circle it wraps is symmetric around that point, so no per-wheel coordinate math is needed. */
+@utility animate-vehicle-wheel-spin {
+  animation: vehicle-wheel-spin 1s linear infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}

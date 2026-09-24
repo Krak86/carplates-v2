@@ -3,13 +3,16 @@ import type { ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
+import { resolveVehicleColor, resolveVehicleKind } from '@carplates/shared'
 import type { PlateLookupResponse } from '@carplates/shared'
 
+import BrandLogo from '@/components/BrandLogo'
 import FavoriteButton from '@/components/FavoriteButton'
 import FieldInfoButton from '@/components/FieldInfoButton'
 import RegistrationTimeline from '@/components/RegistrationTimeline'
 import { getFuelIcon } from '@/components/ResultCard.helpers'
 import Card from '@/components/ui/Card'
+import VehicleKindIcon from '@/components/VehicleKindIcon'
 import VehiclePhotos from '@/components/VehiclePhotos'
 import VinDecodeFields from '@/components/VinDecodeFields'
 import { cn } from '@/lib/cn'
@@ -35,6 +38,8 @@ export default function ResultCard({ data }: Props): ReactNode {
   const [showMore, setShowMore] = useState(false)
   const c = data.current
   const hasVin = c.vin != null
+  const vehicleKind = resolveVehicleKind(c.kind)
+  const vehicleColor = resolveVehicleColor(c.color)
 
   // A VIN's own registry rows cover every plate the car ever wore; a plate-scoped
   // history misses plates it wore before this one, so prefer VIN once we have it.
@@ -59,24 +64,30 @@ export default function ResultCard({ data }: Props): ReactNode {
         className="absolute top-3 right-3"
       />
 
-      <div className="mb-3 pr-8">
-        <div className="text-xl font-semibold">
-          {[c.brand, c.model].filter(Boolean).join(' ')} {c.makeYear ? `(${c.makeYear})` : ''}
-        </div>
-        <div className="text-base text-[var(--color-muted)]">
-          <Link to={`/${data.plate}`} className="text-[var(--color-primary)] underline">
-            {data.plate}
-          </Link>
-          {data.region ? `, ${data.region}` : ''}
-          {c.plateInferred && (
-            <span
-              title={t('result.plateInferredHint')}
-              className="ml-2 rounded-full border border-[var(--color-border)] px-2 py-0.5 text-xs"
-            >
-              {t('result.plateInferred')}
+      <div className="mb-3 flex items-stretch gap-3 pr-8">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2 text-xl font-semibold">
+            <BrandLogo brand={c.brand} />
+            <span>
+              {[c.brand, c.model].filter(Boolean).join(' ')} {c.makeYear ? `(${c.makeYear})` : ''}
             </span>
-          )}
+          </div>
+          <div className="text-base text-[var(--color-muted)]">
+            <Link to={`/${data.plate}`} className="text-[var(--color-primary)] underline">
+              {data.plate}
+            </Link>
+            {data.region ? `, ${data.region}` : ''}
+            {c.plateInferred && (
+              <span
+                title={t('result.plateInferredHint')}
+                className="ml-2 rounded-full border border-[var(--color-border)] px-2 py-0.5 text-xs"
+              >
+                {t('result.plateInferred')}
+              </span>
+            )}
+          </div>
         </div>
+        <VehicleKindIcon kind={vehicleKind} color={vehicleColor} className="aspect-square max-h-20 shrink-0" />
       </div>
 
       <div className="divide-y divide-[var(--color-border)]">
