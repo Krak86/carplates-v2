@@ -31,14 +31,16 @@ export default function VehiclePhotos({ brand, model, year }: Props): ReactNode 
   return (
     <div className="mt-3 border-t border-[var(--color-border)] pt-3">
       <div className="flex items-center justify-between text-base">
-        <span className="text-[var(--color-muted)]">{t('photos.title')}</span>
+        <span className="text-base font-semibold">{t('photos.title')}</span>
         <button
           type="button"
           aria-expanded={open}
           onClick={() => setOpen(v => !v)}
           className="group flex items-center gap-1.5 text-[var(--color-primary)]"
         >
-          <span aria-hidden className="no-underline">🖼️</span>
+          <span aria-hidden className="no-underline">
+            🖼️
+          </span>
           <span className="underline group-hover:no-underline">{open ? t('photos.hide') : t('photos.show')}</span>
           <span
             aria-hidden

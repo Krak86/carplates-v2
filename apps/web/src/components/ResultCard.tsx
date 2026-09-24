@@ -16,6 +16,7 @@ import Card from '@/components/ui/Card'
 import VehicleKindIcon from '@/components/VehicleKindIcon'
 import VehiclePhotos from '@/components/VehiclePhotos'
 import VinDecodeFields from '@/components/VinDecodeFields'
+import { useCursorGlow } from '@/hooks/useCursorGlow'
 import { cn } from '@/lib/cn'
 import { depMapsUrl } from '@/lib/maps'
 import { plateHistoryQuery, vinQuery } from '@/lib/queries'
@@ -37,6 +38,7 @@ function Row({ label, value }: { label: string; value: ReactNode }): ReactNode {
 export default function ResultCard({ data }: Props): ReactNode {
   const { t } = useTranslation()
   const [showMore, setShowMore] = useState(false)
+  const glowRef = useCursorGlow<HTMLDivElement>()
   const c = data.current
   const hasVin = c.vin != null
   const vehicleKind = resolveVehicleKind(c.kind)
@@ -56,12 +58,15 @@ export default function ResultCard({ data }: Props): ReactNode {
   const engineValue = hasCapacity ? c.capacity : c.powerKwt
 
   return (
-    <Card className="group relative isolate w-full max-w-2xl overflow-hidden shadow-2xl! transition-shadow duration-200 hover:shadow-xl!">
+    <Card
+      ref={glowRef}
+      className="group relative isolate w-full max-w-2xl overflow-hidden shadow-2xl! transition-shadow duration-200 hover:shadow-xl!"
+    >
       <div
         aria-hidden
-        className="pointer-events-none absolute -inset-12 -z-20 animate-glow-breathe opacity-35 blur-3xl transition-[background] duration-1000 ease-in-out"
+        className="pointer-events-none absolute -inset-12 -z-20 animate-glow-breathe opacity-35 blur-3xl transition-[background] duration-300 ease-out"
         style={{
-          background: `radial-gradient(ellipse at top left, ${VEHICLE_COLOR_HEX[vehicleColor]}, transparent 70%)`
+          background: `radial-gradient(ellipse at var(--glow-x, 0%) var(--glow-y, 0%), ${VEHICLE_COLOR_HEX[vehicleColor]}, transparent 70%)`
         }}
       />
       <BrandLogo brand={c.brand} variant="watermark" />

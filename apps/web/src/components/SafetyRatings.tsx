@@ -8,8 +8,18 @@ import type { SafetyRating } from '@carplates/shared'
 import BrandLogo from '@/components/BrandLogo'
 import CrashVideoModal from '@/components/CrashVideoModal'
 import InfoPopover from '@/components/InfoPopover'
-import { NHTSA_CURRENT_BRANDS, NHTSA_DISCONTINUED_BRANDS, NHTSA_UNCOVERED_EXAMPLE_BRANDS } from '@/components/SafetyRatings.brands'
-import { averageStarRating, firstPicture, formatAverageStars, formatPercent, formatStars } from '@/components/SafetyRatings.helpers'
+import {
+  NHTSA_CURRENT_BRANDS,
+  NHTSA_DISCONTINUED_BRANDS,
+  NHTSA_UNCOVERED_EXAMPLE_BRANDS
+} from '@/components/SafetyRatings.brands'
+import {
+  averageStarRating,
+  firstPicture,
+  formatAverageStars,
+  formatPercent,
+  formatStars
+} from '@/components/SafetyRatings.helpers'
 import { cn } from '@/lib/cn'
 import { safetyRatingsQuery } from '@/lib/queries'
 
@@ -244,7 +254,7 @@ export default function SafetyRatings({ brand, model, year }: Props): ReactNode 
   return (
     <div className="mt-3 border-t border-[var(--color-border)] pt-3">
       <div className="flex items-center justify-between text-base">
-        <span className="flex items-center gap-1.5 text-[var(--color-muted)]">
+        <span className="flex items-center gap-1.5 text-base font-semibold">
           {t('safety.title')}
           <InfoPopover label={t('safety.brandsInfoLabel')} title={t('safety.brandsInfoTitle')}>
             <BrandsInfo />
@@ -256,7 +266,9 @@ export default function SafetyRatings({ brand, model, year }: Props): ReactNode 
           onClick={() => setOpen(v => !v)}
           className="group flex items-center gap-1.5 text-[var(--color-primary)]"
         >
-          <span aria-hidden className="no-underline">🛡️</span>
+          <span aria-hidden className="no-underline">
+            🛡️
+          </span>
           <span className="underline group-hover:no-underline">{open ? t('safety.hide') : t('safety.show')}</span>
           <span
             aria-hidden

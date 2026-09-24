@@ -64,11 +64,19 @@ export class SafetyVideoService {
     try {
       await this.download(url, inputPath)
       await this.runFfmpeg(inputPath, outputPath)
-      await this.evictOldest()
-      return outputPath
+    } catch (err) {
+      // ffmpeg writes -y output incrementally, so a failed or killed run can
+      // leave a truncated but non-empty file at outputPath. existingFile()
+      // only checks size > 0, so without this the corrupt file would be
+      // served as "cached" on every future request for this video.
+      await rm(outputPath, { force: true })
+      throw err
     } finally {
       await rm(inputPath, { force: true })
     }
+
+    await this.evictOldest()
+    return outputPath
   }
 
   private async download(url: string, destination: string): Promise<void> {

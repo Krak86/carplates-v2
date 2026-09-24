@@ -717,6 +717,27 @@ Doable now, independent of Phases 2-5; each is additive and doesn't block the ot
   128px strip to 256/384px and from `max-w-xl` to `max-w-2xl` (matching the
   search field and result card width) in the same pass.
 
+  **Follow-up (2026-09-25): the card's own glow now tracks the cursor.**
+  Previously fixed at a `radial-gradient(ellipse at top left, ...)`; now
+  `ResultCard` and `VinResult` each attach a shared `useCursorGlow` hook
+  (`apps/web/src/hooks/useCursorGlow.ts`) via `Card`'s new optional `ref`
+  prop. The hook listens on `window` (`pointermove`, not scoped to the card's
+  own `onMouseMove`), computes the pointer position relative to the card's
+  `getBoundingClientRect()`, and writes it straight to `--glow-x`/`--glow-y`
+  custom properties on the DOM node — no `setState`, so pointer movement never
+  triggers a React re-render. The gradient background reads
+  `radial-gradient(ellipse at var(--glow-x, 0%) var(--glow-y, 0%), ...)`,
+  falling back to the original top-left corner before the first pointer
+  event (touch devices, initial paint). Window-level (not card-scoped)
+  tracking was a deliberate choice — confirmed with the user — so the glow
+  keeps drifting toward the cursor even outside the card's own boundaries,
+  rather than resetting the moment the pointer leaves it. The existing
+  `transition-[background]` crossfade shortened from 1000ms to 300ms
+  `ease-out` so it reads as the glow trailing the cursor rather than the slow
+  color-change pulse it was tuned for originally. `BackgroundGlow.tsx` (the
+  separate fixed, page-wide glow behind everything on `SearchRoute`) is
+  untouched — still centered at a static `50% 30%`.
+
 ## Phase 2 — RIA "similar cars" proxy — **not started, blocked on a token**
 
 `GET /api/ria/similar?brand&model&kind&year` runs the whole `developers.ria.com`
