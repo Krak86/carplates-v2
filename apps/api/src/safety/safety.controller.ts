@@ -6,6 +6,8 @@ import type { FastifyReply } from 'fastify'
 import { z } from 'zod'
 
 import { zodParam } from '../common/zod-param.pipe.js'
+import { EuroNcapRatingsDto } from './euroncap.dto.js'
+import { EuroNcapService } from './euroncap.service.js'
 import { SafetyRatingsDto } from './safety.dto.js'
 import { SafetyService } from './safety.service.js'
 import { SafetyVideoService } from './safety-video.service.js'
@@ -25,7 +27,8 @@ const videoQuerySchema = z.object({
 export class SafetyController {
   constructor(
     @Inject(SafetyService) private readonly safetyService: SafetyService,
-    @Inject(SafetyVideoService) private readonly safetyVideoService: SafetyVideoService
+    @Inject(SafetyVideoService) private readonly safetyVideoService: SafetyVideoService,
+    @Inject(EuroNcapService) private readonly euroNcapService: EuroNcapService
   ) {}
 
   @Get()
@@ -35,6 +38,16 @@ export class SafetyController {
   @ApiOkResponse({ type: SafetyRatingsDto })
   ratings(@Query(zodParam(querySchema)) query: z.infer<typeof querySchema>): Promise<SafetyRatingsDto> {
     return this.safetyService.ratings(query.make, query.model, query.year)
+  }
+
+  // Persisted (scraped), not proxied live — see euroncap.service.ts / scripts/src/euroncap.ts.
+  @Get('euroncap')
+  @ApiQuery({ name: 'make', required: true })
+  @ApiQuery({ name: 'model', required: true })
+  @ApiQuery({ name: 'year', required: true })
+  @ApiOkResponse({ type: EuroNcapRatingsDto })
+  euroNcapRatings(@Query(zodParam(querySchema)) query: z.infer<typeof querySchema>): Promise<EuroNcapRatingsDto> {
+    return this.euroNcapService.ratings(query.make, query.model, query.year)
   }
 
   // Binary stream, not a Zod DTO response — the one exception to "no @Res()" (see SpaController).

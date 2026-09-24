@@ -78,7 +78,9 @@ export default function SearchRoute(): ReactNode {
 
       <div className="w-full max-w-2xl text-center">
         <h1 className="mb-1 text-2xl font-bold">{t('app.title')}</h1>
-        <p className="mb-4 text-sm text-[var(--color-muted)]">{t('app.tagline')}</p>
+        <p className="mb-4 inline-block rounded bg-[var(--color-surface)]/20 px-1.5 py-0.5 text-sm text-[var(--color-muted)]">
+          {t('app.tagline')}
+        </p>
         <SearchField
           initialValue={raw}
           isRecognizing={isRecognizing}
@@ -102,17 +104,26 @@ export default function SearchRoute(): ReactNode {
       {kind === 'plate' && plate.isSuccess && <ResultCard data={plate.data} />}
       {kind === 'vin' && vin.isSuccess && <VinResult data={vin.data} />}
 
-      <Link to="/history" className="flex items-center gap-1.5 text-sm text-[var(--color-primary)]">
+      <Link
+        to="/history"
+        className="flex items-center gap-1.5 rounded-full bg-[var(--color-surface)]/20 px-3 py-1 text-sm text-[var(--color-primary)]"
+      >
         <span aria-hidden className="no-underline">🕘</span>
         <span className="underline hover:no-underline">{t('history.viewLink')}</span>
       </Link>
 
-      <Link to="/stats" className="flex items-center gap-1.5 text-sm text-[var(--color-primary)]">
+      <Link
+        to="/stats"
+        className="flex items-center gap-1.5 rounded-full bg-[var(--color-surface)]/20 px-3 py-1 text-sm text-[var(--color-primary)]"
+      >
         <span aria-hidden className="no-underline">📊</span>
         <span className="underline hover:no-underline">{t('stats.viewLink')}</span>
       </Link>
 
-      <Link to="/favorites" className="flex items-center gap-1.5 text-sm text-[var(--color-primary)]">
+      <Link
+        to="/favorites"
+        className="flex items-center gap-1.5 rounded-full bg-[var(--color-surface)]/20 px-3 py-1 text-sm text-[var(--color-primary)]"
+      >
         <span aria-hidden className="no-underline">⭐</span>
         <span className="underline hover:no-underline">{t('favorites.viewLink')}</span>
       </Link>

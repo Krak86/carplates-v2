@@ -1,4 +1,5 @@
 import {
+  euroNcapRatingsResponseSchema,
   plateHistoryResponseSchema,
   plateLookupResponseSchema,
   plateRecognizeResponseSchema,
@@ -8,6 +9,7 @@ import {
   vinDecodeResponseSchema
 } from '@carplates/shared'
 import type {
+  EuroNcapRatingsResponse,
   PlateHistoryResponse,
   PlateLookupResponse,
   PlateRecognizeResponse,
@@ -77,6 +79,12 @@ export async function getVehiclePhotos(brand: string, model: string, year: numbe
 export async function getSafetyRatings(make: string, model: string, year: number): Promise<SafetyRatingsResponse> {
   const params = new URLSearchParams({ make, model, year: String(year) })
   return safetyRatingsResponseSchema.parse(await getJson(`/api/safety?${params.toString()}`))
+}
+
+// Persisted (scraped), not proxied live — see apps/api/src/safety/euroncap.service.ts.
+export async function getEuroNcapRatings(make: string, model: string, year: number): Promise<EuroNcapRatingsResponse> {
+  const params = new URLSearchParams({ make, model, year: String(year) })
+  return euroNcapRatingsResponseSchema.parse(await getJson(`/api/safety/euroncap?${params.toString()}`))
 }
 
 // Our own transcode-and-cache proxy (the source .wmv can't play in any modern browser).

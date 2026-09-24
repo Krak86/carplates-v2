@@ -30,7 +30,8 @@
     "db:studio": "pnpm --filter @carplates/db db:studio",
     "db:seed": "pnpm --filter @carplates/scripts seed",
     "ingest": "pnpm --filter @carplates/scripts ingest",
-    "ingest:full": "pnpm --filter @carplates/scripts ingest:full"
+    "ingest:full": "pnpm --filter @carplates/scripts ingest:full",
+    "ingest:euroncap": "pnpm --filter @carplates/scripts ingest:euroncap"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

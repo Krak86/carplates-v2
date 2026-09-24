@@ -122,6 +122,59 @@ export const safetyRatingsResponseSchema = z.object({
 })
 export type SafetyRatingsResponse = z.infer<typeof safetyRatingsResponseSchema>
 
+const EURONCAP_IMAGE_URL_RE = /^https:\/\/data-cdn\.euroncap\.com\/media\/assessment-media\/[\w-]+\/[\w.-]+\.webp$/
+const YOUTUBE_ID_RE = /^[\w-]{11}$/
+
+/** One Euro NCAP crash-test carousel image — always hotlinked from Euro NCAP's own CDN, never rehosted. */
+export const euroNcapImageSchema = z.object({
+  url: z.string().regex(EURONCAP_IMAGE_URL_RE),
+  /** Test code parsed from the filename, e.g. "MPDB", "FW", "O2O1" — null when it can't be parsed. */
+  test: z.string().nullable()
+})
+export type EuroNcapImage = z.infer<typeof euroNcapImageSchema>
+
+/**
+ * One Euro NCAP assessment (one tested variant/generation) — scraped from euroncap.com and
+ * persisted, unlike NHTSA which is fetched live. No API exists, so `stars`/percentages are
+ * only as fresh as the last `pnpm ingest:euroncap` run. Media stays as source URLs/ids: crash
+ * images are hotlinked from Euro NCAP's CDN and videos play via YouTube's own embed — nothing
+ * is downloaded or rehosted (their media is copyrighted; only the factual scores are ours to store).
+ */
+export const euroNcapRatingSchema = z.object({
+  assessmentId: z.string(),
+  /** Link-out target — the official euroncap.com report page. */
+  url: z.string(),
+  /** The tested trim/variant, e.g. "Mercedes-Benz CLA 250+ AMG Line" — this row's headline label. */
+  testedVariant: z.string().nullable(),
+  bodyType: z.string().nullable(),
+  ratingYear: z.number().int().nullable(),
+  /** Null when the page doesn't expose a star count in markup (rare, older protocols). */
+  stars: z.number().int().min(0).max(5).nullable(),
+  adultOccupantPct: z.number().int().min(0).max(100).nullable(),
+  childOccupantPct: z.number().int().min(0).max(100).nullable(),
+  vulnerableRoadUsersPct: z.number().int().min(0).max(100).nullable(),
+  safetyAssistPct: z.number().int().min(0).max(100).nullable(),
+  /** True for a "Safety Pack"/optional-equipment variant of the same generation. */
+  safetyPack: z.boolean(),
+  /** The frontal ("_0_") carousel shot, used as the row thumbnail when present. */
+  frontImageUrl: z.string().regex(EURONCAP_IMAGE_URL_RE).nullable(),
+  images: z.array(euroNcapImageSchema),
+  youtubeIds: z.array(z.string().regex(YOUTUBE_ID_RE)),
+  reportPdfUrl: z.string().nullable()
+})
+export type EuroNcapRating = z.infer<typeof euroNcapRatingSchema>
+
+/** GET /api/safety/euroncap?make=&model=&year= — every persisted rating for the make/model, newest first. */
+export const euroNcapRatingsResponseSchema = z.object({
+  make: z.string(),
+  model: z.string(),
+  year: z.number().int(),
+  ratings: z.array(euroNcapRatingSchema),
+  /** The generation's assessmentId that best matches `year`, or null when none does. */
+  applicableAssessmentId: z.string().nullable()
+})
+export type EuroNcapRatingsResponse = z.infer<typeof euroNcapRatingsResponseSchema>
+
 /** One stock photo from Pixabay, filtered to only what the UI needs. */
 export const vehiclePhotoSchema = z.object({
   id: z.number().int(),

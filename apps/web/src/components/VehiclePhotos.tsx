@@ -36,7 +36,7 @@ export default function VehiclePhotos({ brand, model, year }: Props): ReactNode 
           type="button"
           aria-expanded={open}
           onClick={() => setOpen(v => !v)}
-          className="group flex items-center gap-1.5 text-[var(--color-primary)]"
+          className="group flex items-center gap-1.5 rounded-full bg-[var(--color-surface)]/20 px-3 py-1 text-[var(--color-primary)]"
         >
           <span aria-hidden className="no-underline">
             🖼️

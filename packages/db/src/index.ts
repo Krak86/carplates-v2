@@ -14,9 +14,12 @@ export {
   statsByBrand,
   statsByBrandYear,
   ingestedResources,
+  euroncapRatings,
   type RegistrationRow,
   type RegistrationInsert,
-  type IngestedResourceRow
+  type IngestedResourceRow,
+  type EuroncapRatingRow,
+  type EuroncapRatingInsert
 } from './schema.js'
 export {
   createDb,

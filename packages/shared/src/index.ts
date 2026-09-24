@@ -9,7 +9,8 @@ export {
   fallbackVehicleColor,
   type VehicleColor
 } from './vehicleColor.js'
-export { brandLogoUrl } from './brandLogo.js'
+export { brandLogoUrl, brandSlug } from './brandLogo.js'
+export { makeKey, modelKey } from './vehicleKey.js'
 export {
   registrationSchema,
   plateLookupResponseSchema,
@@ -23,6 +24,8 @@ export {
   vehiclePhotosResponseSchema,
   safetyRatingSchema,
   safetyRatingsResponseSchema,
+  euroNcapRatingSchema,
+  euroNcapRatingsResponseSchema,
   statsMetricsSchema,
   statsByYearRowSchema,
   statsByRegionRowSchema,
@@ -41,6 +44,8 @@ export {
   type VehiclePhotosResponse,
   type SafetyRating,
   type SafetyRatingsResponse,
+  type EuroNcapRating,
+  type EuroNcapRatingsResponse,
   type StatsMetrics,
   type StatsByYearRow,
   type StatsByRegionRow,

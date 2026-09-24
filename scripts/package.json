@@ -7,12 +7,14 @@
     "seed": "tsx src/seed.ts",
     "ingest": "tsx src/ingest.ts",
     "ingest:full": "tsx src/ingest-full.ts",
+    "ingest:euroncap": "tsx src/euroncap.ts",
     "type-check": "tsc",
     "test": "vitest run"
   },
   "dependencies": {
     "@carplates/db": "workspace:*",
     "@carplates/shared": "workspace:*",
+    "cheerio": "^1.2.0",
     "csv-parse": "^7.0.2",
     "drizzle-orm": "0.45.2",
     "iconv-lite": "^0.7.3",

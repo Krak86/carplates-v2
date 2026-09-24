@@ -89,7 +89,9 @@ export default function ResultCard({ data }: Props): ReactNode {
             <Link to={`/${data.plate}`} className="text-[var(--color-primary)] underline">
               {data.plate}
             </Link>
-            {data.region ? `, ${data.region}` : ''}
+            {data.region && (
+              <span className="ml-1 rounded bg-[var(--color-surface)]/20 px-1.5 py-0.5">, {data.region}</span>
+            )}
             {c.plateInferred && (
               <span
                 title={t('result.plateInferredHint')}
@@ -197,23 +199,25 @@ export default function ResultCard({ data }: Props): ReactNode {
         />
       </div>
 
-      <button
-        type="button"
-        aria-expanded={showMore}
-        onClick={() => setShowMore(v => !v)}
-        className="group mt-3 flex w-full items-center justify-end gap-1.5 text-base text-[var(--color-primary)]"
-      >
-        <span aria-hidden className="animate-gear-tick no-underline">
-          ⚙️
-        </span>
-        <span className="underline group-hover:no-underline">{t('result.historyLabel')}</span>
-        <span
-          aria-hidden
-          className={cn('inline-block no-underline transition-transform duration-200', showMore && 'rotate-180')}
+      <div className="mt-3 flex w-full justify-end">
+        <button
+          type="button"
+          aria-expanded={showMore}
+          onClick={() => setShowMore(v => !v)}
+          className="group flex items-center gap-1.5 rounded-full bg-[var(--color-surface)]/20 px-3 py-1 text-base text-[var(--color-primary)]"
         >
-          ▾
-        </span>
-      </button>
+          <span aria-hidden className="animate-gear-tick no-underline">
+            ⚙️
+          </span>
+          <span className="underline group-hover:no-underline">{t('result.historyLabel')}</span>
+          <span
+            aria-hidden
+            className={cn('inline-block no-underline transition-transform duration-200', showMore && 'rotate-180')}
+          >
+            ▾
+          </span>
+        </button>
+      </div>
 
       <div
         aria-hidden={!showMore}

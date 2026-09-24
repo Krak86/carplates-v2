@@ -6,7 +6,9 @@ import {
   date,
   index,
   integer,
+  jsonb,
   pgSchema,
+  smallint,
   text,
   timestamp,
   uniqueIndex
@@ -158,6 +160,45 @@ export const statsByBrandYear = registry
     ...statsMetrics
   })
   .existing()
+
+/**
+ * One Euro NCAP tested assessment (make/model/generation/variant) — scraped from
+ * euroncap.com (no public API) via `scripts/src/euroncap.ts` and refreshed by
+ * re-running it, unlike NHTSA/Pixabay which are fetched live per-request.
+ * `makeKey`/`modelKey` (`@carplates/shared`) drive both the scraper's write key
+ * and the API's lookup — see migrations/0005_euroncap_ratings.sql.
+ */
+export const euroncapRatings = registry.table(
+  'euroncap_ratings',
+  {
+    assessmentId: text('assessment_id').primaryKey(),
+    url: text('url').notNull(),
+    make: text('make').notNull(),
+    model: text('model').notNull(),
+    makeKey: text('make_key').notNull(),
+    modelKey: text('model_key').notNull(),
+    testedVariant: text('tested_variant'),
+    bodyType: text('body_type'),
+    ratingYear: integer('rating_year'),
+    stars: smallint('stars'),
+    adultOccupantPct: smallint('adult_occupant_pct'),
+    childOccupantPct: smallint('child_occupant_pct'),
+    vulnerableRoadUsersPct: smallint('vulnerable_road_users_pct'),
+    safetyAssistPct: smallint('safety_assist_pct'),
+    safetyPack: boolean('safety_pack').notNull().default(false),
+    /** The frontal ("_0_") carousel shot — hotlinked from Euro NCAP's CDN, never rehosted. */
+    frontImageUrl: text('front_image_url'),
+    /** `{ url, test }[]` — carousel images, hotlinked. */
+    images: jsonb('images').$type<{ url: string; test: string | null }[]>().notNull().default([]),
+    /** YouTube video ids, played via youtube-nocookie.com — never downloaded/transcoded. */
+    youtubeIds: text('youtube_ids').array().notNull().default([]),
+    reportPdfUrl: text('report_pdf_url'),
+    scrapedAt: timestamp('scraped_at', { withTimezone: true }).notNull().defaultNow()
+  },
+  t => [index('ix_euroncap_make_model').on(t.makeKey, t.modelKey)]
+)
+export type EuroncapRatingRow = typeof euroncapRatings.$inferSelect
+export type EuroncapRatingInsert = typeof euroncapRatings.$inferInsert
 
 /** Incremental-ingest bookkeeping: which CKAN resources have been loaded. */
 export const ingestedResources = registry.table('ingested_resources', {

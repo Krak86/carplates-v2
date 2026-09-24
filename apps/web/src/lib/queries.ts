@@ -3,6 +3,7 @@ import { normalizePlate } from '@carplates/shared'
 
 import {
   decodeVin,
+  getEuroNcapRatings,
   getSafetyRatings,
   getStats,
   getUkraineGeography,
@@ -60,6 +61,15 @@ export function safetyRatingsQuery(make: string, model: string, year: number) {
   return queryOptions({
     queryKey: ['safety', make, model, year],
     queryFn: () => getSafetyRatings(make, model, year),
+    staleTime: Infinity
+  })
+}
+
+// Euro NCAP ratings — scraped and persisted (pnpm ingest:euroncap), not fetched live.
+export function euroNcapRatingsQuery(make: string, model: string, year: number) {
+  return queryOptions({
+    queryKey: ['safety', 'euroncap', make, model, year],
+    queryFn: () => getEuroNcapRatings(make, model, year),
     staleTime: Infinity
   })
 }

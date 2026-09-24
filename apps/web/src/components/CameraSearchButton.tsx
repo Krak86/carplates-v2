@@ -21,7 +21,7 @@ export default function CameraSearchButton({ isPending, onCapture }: Props): Rea
         type="button"
         onClick={() => setOpen(true)}
         disabled={isPending}
-        className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-[var(--color-muted)] hover:text-[var(--color-fg)] disabled:opacity-50"
+        className="flex items-center gap-1.5 rounded-lg bg-[var(--color-surface)]/20 px-3 py-2 text-[var(--color-muted)] hover:text-[var(--color-fg)] disabled:opacity-50"
       >
         <span aria-hidden>🎥</span>
         {t('search.byCamera')}

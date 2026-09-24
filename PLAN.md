@@ -670,6 +670,166 @@ Doable now, independent of Phases 2-5; each is additive and doesn't block the ot
 
   **Recalls** (the sibling `api.nhtsa.gov/recalls` endpoint) stays parked —
   see Phase 3+ below, reasoning unchanged.
+- **Euro NCAP crash-test ratings, alongside NHTSA ✅ DONE (2026-09-25)** —
+  requested by the user directly after the NHTSA feature shipped, precisely
+  because NHTSA only covers US-spec cars while Euro NCAP tests the EU-spec
+  cars that actually dominate Ukraine's fleet (Skoda, Renault, VW, Kia...).
+
+  **No public API — scraped and persisted, not proxied live.** Unlike NHTSA/
+  vPIC/Pixabay (all live-fetch-and-cache), Euro NCAP has nothing to call
+  per-request: `robots.txt` blocks `/api/` and there is no documented JSON
+  endpoint. `scripts/src/euroncap.ts` discovers every
+  `/assessments/{make}/{model}/{id}/` URL from `sitemap.xml` (~500 pages, all
+  server-rendered Next.js — confirmed the same component markup holds back to
+  at least a 2018-tested car, so one parser covers the whole history) and
+  parses each with `scripts/src/euroncap-parse.ts` (cheerio, new dependency)
+  into `registry.euroncap_ratings` (`packages/db/migrations/0005_*.sql`) via
+  `INSERT ... ON CONFLICT DO UPDATE`. Every fetch is cached to
+  `scripts/.data/euroncap/` and throttled to 1 req/1.5s with an identifying
+  User-Agent; a re-run without `--refresh` makes no network requests at all.
+  Re-run every few months (`pnpm ingest:euroncap`) to pick up new ratings —
+  there's no cron for this yet (Phase 1 has none at all).
+
+  **Media: numbers scraped, media referenced, nothing rehosted** — a
+  deliberate line drawn with the user before building. Euro NCAP's crash
+  photos/videos are their own produced/copyrighted media, not raw government
+  data like NHTSA's, so: carousel images stay as `data-cdn.euroncap.com` URLs
+  and are hotlinked (`referrerPolicy="no-referrer"`), never downloaded;
+  crash videos are YouTube embeds — the id is scraped and played via
+  `youtube-nocookie.com/embed/`, YouTube's own sanctioned embedding, not
+  proxied/transcoded like NHTSA's `.wmv` clips. The per-test PDF link is not
+  in the static HTML (JS-driven download) so `reportPdfUrl` is usually null;
+  every rating always links out to the official `euroncap.com` report page.
+  Every image URL and YouTube id is regex-validated both when scraped
+  (`euroncap-parse.ts`) and in the shared Zod schema
+  (`euroNcapRatingSchema` in `packages/shared/src/schemas.ts`), so a mangled
+  scrape can't inject an arbitrary hotlinked URL.
+
+  **Matching key shared with the scraper — and a real "+" vs "-" bug found
+  after the first full scrape.** `packages/shared/src/vehicleKey.ts` adds
+  `makeKey`/`modelKey`. First cut: `makeKey` reused `brandLogoUrl`'s
+  `BRAND_SLUG_BY_NAME` table (now exported as `brandSlug`) and kept its
+  hyphenated form (`mercedes-benz`), on the assumption Euro NCAP's own URL
+  slugs used the same separator. They don't: Land Rover, Alfa Romeo, Lynk &
+  Co and Changan Deepal (16 ratings across the first full 499-assessment
+  scrape) use `+` instead (`land+rover`, `alfa+romeo`, `lynk+-+co`), so
+  `brandSlug`'s `land-rover` never matched the scraper's raw `land+rover`.
+  Fix: `makeKey` now strips to `[a-z0-9]` only, same as `modelKey`, so both
+  sides collapse to the same key (`landrover`) regardless of which
+  separator Euro NCAP happened to use for that brand. Caught by comparing
+  `SELECT DISTINCT make, make_key FROM registry.euroncap_ratings` against
+  what `makeKey()` computes for the equivalent registry brand string —
+  worth re-running that check after any full re-scrape picks up new brands.
+  `modelKey` strips a model string to `[a-z0-9]` only, and the scraper calls
+  the *same* function on the URL's model slug when writing a row, so the
+  write key and `EuroNcapService`'s query key can never drift apart by
+  construction. `EuroNcapService.ratings()` (`apps/api/src/safety/`) does a
+  prefix match (`registry model key LIKE stored_key || '%'`) since the
+  registry's model is usually more specific than Euro NCAP's own ("CLA 250"
+  vs "cla"), keeping only the longest-matching prefix so a short unrelated
+  key never beats the real one. `selectApplicableAssessmentId()` (unit
+  tested standalone) then picks the newest non-Safety-Pack generation
+  published no later than one year after the car's model year.
+
+  **Web.** `SafetyRatings.tsx` is now a shell with two tabs — Euro NCAP
+  (default, the EU-spec-relevant one) and NHTSA (moved into
+  `NhtsaRatings.tsx` unchanged) — each fetching only while the section is
+  open *and* that tab is active. `EuroNcapRatings.tsx` shows the applicable
+  generation's stars/percentages/photo-strip/video button up top, other
+  tested generations (retests, Safety Pack variants, older gens) as compact
+  rows below, and flags an expired (6-year-old) rating or a missing
+  generation match. `YouTubeModal.tsx` mirrors `CrashVideoModal.tsx`'s shell
+  but embeds instead of transcoding. The "which cars does this cover"
+  explainer moved from a per-tab popover (NHTSA only, initially) to one
+  combined popover at the `SafetyRatings` section-header level covering
+  both sources at once — visible before the viewer even expands the
+  section or picks a tab, and there's now exactly one place this caveat is
+  written down instead of two copies that could drift apart. Euro NCAP's
+  half is a short paragraph (broad EU-spec coverage by brand, but only
+  specific tested trims/generations); NHTSA keeps its
+  current/discontinued/uncovered brand lists, since "which US brands even
+  exist" is a real, brand-level caveat there in a way it isn't for Euro
+  NCAP.
+
+  **Also, while in there:** the translucent chip background already used
+  for field label/value pairs (`bg-[var(--color-surface)]/20`, added with
+  the vehicle-color glow work) got extended to everything else sitting bare
+  on that ambient glow — the search subtitle, search-by-photo/camera
+  buttons, the region text next to a plate, and every toggle/nav link
+  (history, ratings, photos, the three bottom links) — so they stay
+  readable regardless of the glow's color underneath.
+
+- **Crash-test ratings beyond NHTSA/Euro NCAP — researched, not started
+  (2026-09-25).** Both existing sources skew toward specific fleets: NHTSA
+  is US-spec only, Euro NCAP is EU-spec. Ukraine's actual used-import mix
+  leans heavily JDM (Japan) and Korea-spec Hyundai/Kia, plus a fast-growing
+  Chinese-EV segment (BYD, Chery, Omoda, Xpeng... already showing up as
+  brands in the Euro NCAP scrape). Researched the other major bodies to
+  see which are worth a third/fourth scraper, ranked by scrape-friendliness
+  and actual relevance to that import mix — none started yet, in priority
+  order:
+
+  1. **JNCAP (Japan, run by NASVA) — build next.** The best-case scraper of
+     the bunch, arguably easier than Euro NCAP's: `nasva.go.jp/mamoru/en/`
+     runs a full **English**-language mirror of the results catalog, no JS
+     rendering, URL-filterable
+     (`assessment_car/list/{page}?brand_id=&model_id=&type_id=&keyword=&testfy=`)
+     with per-vehicle detail pages at `assessment_car/detail/{id}`. NASVA
+     also publishes a downloadable Excel of all historical results as a
+     fallback/cross-check against the scrape. Data runs FY2003–2025,
+     ~15-25 vehicles/year. No translation layer needed — the single
+     biggest reason this ranks above C-NCAP/KNCAP despite similar
+     relevance. Same shape as the Euro NCAP work: discover URLs (paginate
+     the list endpoint instead of a sitemap), parse each detail page with
+     cheerio into a new `registry.jncap_ratings` table, `makeKey`/`modelKey`
+     reused unchanged for matching, a `JncapService` + third `SafetyRatings`
+     tab.
+  2. **C-NCAP (China, run by CATARC) — real relevance, real extra work.**
+     `c-ncap.org.cn`'s results are static server-rendered HTML (the old
+     `c-ncap.org` domain is dead), so the scrape mechanics are Euro-NCAP-
+     shaped, but everything is **Chinese-only** — labels, model names, the
+     works — so this needs a translation step the other three don't
+     (machine-translate at ingest time and store both, or translate only
+     display strings client-side; ingest-time is simpler and keeps the API
+     language-agnostic). **Confirmed overlap with Euro NCAP**: the same
+     Chinese-EV models (BYD Seal/Dolphin/Sealion 7, Omoda E5, Xpeng P7...)
+     get independently tested by both bodies and the ratings can genuinely
+     disagree — this must stay two separate sourced rows/tabs, never
+     merged into one score, the same principle already applied to
+     NHTSA-vs-Euro-NCAP.
+  3. **KNCAP (Korea, MOLIT/KoROAD) — smaller win, more unknowns.**
+     `car.go.kr/sd/kncap/list.do` — no English version found, and unlike
+     C-NCAP its actual page structure (static vs. JS-rendered) wasn't
+     confirmed in this pass; Korean government `.do`/JSP-style endpoints
+     are sometimes script-heavy. Cumulative corpus is much smaller too
+     (~175 models through 2018, ~10/year since — call it a third to a
+     quarter of JNCAP's or Euro NCAP's size). Worth a proper scrapability
+     check (mirroring the early Euro NCAP research — fetch a real page,
+     inspect what's server-rendered vs. client-rendered) before committing
+     to it; relevant for Korea-spec Hyundai/Kia but not an obvious quick
+     win like JNCAP.
+  4. **IIHS (US, insurance-industry-funded, distinct from NHTSA) — low
+     priority for this fleet.** Methodologically genuinely additive, not
+     redundant with NHTSA (Good/Acceptable/Marginal/Poor across small-
+     overlap frontal, side, headlights, crash-prevention tests, plus "Top
+     Safety Pick" awards — a car can rate well on one scale and not the
+     other), but `iihs.org/ratings` is category/search-driven rather than
+     a clean paginated list like JNCAP's, and US-spec vehicles are already
+     a minor slice of Ukraine's import mix even before adding a *second*
+     US source. Revisit only after JNCAP/C-NCAP ship.
+  5. **ANCAP (Australia/NZ) — skip, confirmed redundant.** Signed an MOU
+     with Euro NCAP in 1999 and aligned protocols by 2018; for any vehicle
+     sold in both markets, ANCAP now directly reuses Euro NCAP's own
+     crash-test data and star rating rather than re-testing. The only
+     unique data is AU/NZ-market vehicles never sold in Europe — a narrow
+     slice that partially overlaps JDM imports, but not enough to justify
+     a fourth-ish scraper on its own. Not worth building unless a specific
+     gap vehicle turns up later.
+
+  **Design note for whichever ships next:** the tab bar in `SafetyRatings.tsx`
+  was built for two sources; a third (JNCAP) still fits as a row of tabs,
+  but a fourth would want a rethink (a dropdown/select instead of a tab
+  row, most likely) rather than mechanically adding more tabs.
 - **Open (not yet done): VinResult's history section is mislabeled.** Its
   "Registration history" timeline is titled `vin.registryTitle` ("State
   registry data") while `ResultCard`'s identical section is titled

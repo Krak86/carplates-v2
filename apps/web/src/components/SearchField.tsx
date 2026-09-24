@@ -41,7 +41,7 @@ export default function SearchField({ initialValue = '', isRecognizing, recogniz
           <button
             type="button"
             onClick={() => setValue('')}
-            className="rounded-lg px-3 py-2 text-[var(--color-muted)] hover:text-[var(--color-fg)]"
+            className="rounded-lg bg-[var(--color-surface)]/20 px-3 py-2 text-[var(--color-muted)] hover:text-[var(--color-fg)]"
           >
             {t('search.clear')}
           </button>

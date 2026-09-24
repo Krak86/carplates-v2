@@ -122,10 +122,20 @@ const BRAND_SLUG_BY_NAME: Readonly<Record<string, string>> = {
   XPENG: 'xpeng'
 }
 
-/** Static logo path for a raw registry `brand` value, or `null` when none is bundled. */
-export function brandLogoUrl(brand: string | null | undefined): string | null {
+/**
+ * Isolate a raw registry `brand` value down to its manufacturer slug (e.g. "volkswagen",
+ * "mercedes-benz") — the same slug scheme Euro NCAP uses in its assessment URLs
+ * (`euroncap.com/assessments/{slug}/...`), which is why `vehicleKey.ts`'s `makeKey`
+ * reuses this rather than duplicating the lookup table.
+ */
+export function brandSlug(brand: string | null | undefined): string | null {
   if (!brand) return null
   const brandOnly = brand.trim().split(/\s{2,}/)[0]?.toUpperCase()
-  const slug = brandOnly ? BRAND_SLUG_BY_NAME[brandOnly] : undefined
+  return brandOnly ? (BRAND_SLUG_BY_NAME[brandOnly] ?? null) : null
+}
+
+/** Static logo path for a raw registry `brand` value, or `null` when none is bundled. */
+export function brandLogoUrl(brand: string | null | undefined): string | null {
+  const slug = brandSlug(brand)
   return slug ? `/logos/${slug}.png` : null
 }

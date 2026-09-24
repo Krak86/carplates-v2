@@ -35,6 +35,7 @@ pnpm db:migrate     # apply packages/db/migrations/*.sql
 pnpm db:seed        # ~1000 deterministic synthetic rows
 pnpm ingest -- --year 2026 --limit 100000   # real data slice from CKAN
 pnpm ingest:full    # full real dataset: every CKAN year + 2026 plate recovery + backfill
+pnpm ingest:euroncap   # scrape/refresh Euro NCAP ratings (no public API — see PLAN.md)
 ```
 
 First-time local setup, test data (seconds): `pnpm install && pnpm db:up && pnpm db:migrate && pnpm db:seed && pnpm dev`.

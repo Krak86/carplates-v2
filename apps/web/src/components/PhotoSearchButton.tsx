@@ -33,7 +33,7 @@ export default function PhotoSearchButton({ isPending, onPick }: Props): ReactNo
         type="button"
         onClick={() => inputRef.current?.click()}
         disabled={isPending}
-        className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-[var(--color-muted)] hover:text-[var(--color-fg)] disabled:opacity-50"
+        className="flex items-center gap-1.5 rounded-lg bg-[var(--color-surface)]/20 px-3 py-2 text-[var(--color-muted)] hover:text-[var(--color-fg)] disabled:opacity-50"
       >
         {isPending ? <Spinner /> : <span aria-hidden>📷</span>}
         {t('search.byImage')}
