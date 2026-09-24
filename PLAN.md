@@ -642,12 +642,36 @@ success. **On-premise SDK ruled out** — same per-lookup licensing as the
 cloud API (no cost win) for photos we're already comfortable sending to
 Plate Recognizer's cloud; not pursuing it.
 
-### Phase 3+ — crash-test ratings (research task)
+### Phase 3+ — crash-test ratings / recalls — **researched, parked (2026-09-24)**
 
-NHTSA Safety Ratings. **Research the current endpoint** (v1 pointed at
-`one.nhtsa.gov/webapi/...`, now under `api.nhtsa.gov/SafetyRatings/`), how it
-keys (year/make/model path walk vs VIN), rate limits, and whether it joins to the
-registry brand/model or the NHTSA-decoded values. Same free provider as the VIN decoder.
+NHTSA Safety Ratings (`api.nhtsa.gov/SafetyRatings`, successor to v1's
+`one.nhtsa.gov/webapi/...`), confirmed live:
+
+- **Not VIN-keyed** — two-step path walk: `/SafetyRatings/modelyear/{y}/make/{make}/model/{model}`
+  returns one `VehicleId` per US-market trim NHTSA tested, then
+  `/SafetyRatings/VehicleId/{id}` returns star ratings (`OverallRating`,
+  front/side/rollover), ESC/FCW/LDW flags, and bundled `Complaints`/`Recalls`/`Investigations`
+  counts. Would join on the `Make`/`Model`/`ModelYear` already coming back from
+  `/api/vin/:vin`'s decode, not on the VIN itself.
+- **Why parked**: ratings only exist for US-market trims NHTSA actually
+  crash-tested. Spot-checked a 2018 Volvo XC60 T6 — came back "Not Rated" on
+  every category despite having a real complaint/recall history. A large share
+  of vehicles registered in Ukraine are Euro/JP/Korea-spec or grey imports that
+  were never in NHTSA's test program, so this would silently return empty for
+  a large share of real lookups — low value for the effort, and risks reading
+  as "this car has no safety data" when it just means "not the US trim."
+- **Recalls** (`api.nhtsa.gov/recalls/recallsByVehicle?make=&model=&modelYear=`,
+  same free provider, separate from SafetyRatings) has the same make/model/year
+  key and the same US-market caveat — a recall campaign may not apply to a
+  non-US-spec unit sharing the model name. Per-recall fields: `Component`,
+  `Summary`, `Consequence`, `Remedy`, `NHTSACampaignNumber`,
+  `ReportReceivedDate`, `parkIt`/`parkOutSide`/`overTheAirUpdate` flags.
+  **Decision: skip** — not pursuing for the same US-market-relevance reason as
+  Safety Ratings, kept as a distinct decision from the VIN-decoder-surface
+  scoping below since this is crash/safety data, not vehicle-attribute data.
+- Revisit only if a future need specifically wants "did NHTSA test/recall the
+  US version of this model" framed as exactly that (not implied to cover the
+  actual registered vehicle).
 
 ## Backlog (2026-09-22)
 
@@ -719,14 +743,37 @@ above once scoped, or dropped if research says no.
   question is scope beyond syncing history/favorites to the cloud — what
   else should be account-gated (cross-device sync, data export, change
   alerts on a saved plate/VIN)?
-- **Use more of the NHTSA vPIC decoder surface** — beyond the plain VIN
-  decode already wired up (`GET /api/vin/:vin`), e.g. Manufacturer detail
-  lookups (`vpic.nhtsa.dot.gov/decoder/Manufacturer/Details/{id}`) and related
-  endpoints under `vpic.nhtsa.dot.gov/decoder/VinDecoder` (which also accepts
-  a `ModelYear` param the plain decode endpoints don't). Same free provider,
-  just more of its surface — scope which fields are worth showing. (The
-  `decodevin` vs `DecodeVinExtended` question specifically is resolved, see
-  Phase 1.5 above — this item is about the *other* decoder endpoints.)
+- **Use more of the NHTSA vPIC decoder surface — researched, nothing left worth adding (2026-09-24)** —
+  full endpoint catalog enumerated from `vpic.nhtsa.dot.gov/api/`: Decode
+  (`DecodeVin`, `DecodeVinValues` flat, `DecodeVinExtended`,
+  `DecodeVinValuesExtended`, `DecodeWMI`, `DecodeVINValuesBatch`), Manufacturer
+  (`GetAllManufacturers`, `GetManufacturerDetails/{id}`,
+  `GetWMIsForManufacturer/{id}`), Make (`GetAllMakes`,
+  `GetMakeForManufacturer`, `GetMakesForManufacturerAndYear`,
+  `GetMakesForVehicleType`), Model (`GetModelsForMake(Id)`,
+  `GetModelsForMake(Id)Year`), reference (`GetVehicleTypesForMake(Id)`,
+  `GetVehicleVariableList`, `GetVehicleVariableValuesList`), misc
+  (`GetEquipmentPlantCodes`, `GetParts`, `GetCanadianVehicleSpecifications`).
+  Checked the two candidates that looked promising against a real VIN:
+  - `GetManufacturerDetails/{id}` — company-registry metadata (address,
+    contact info, `DBAs`, `ManufacturerTypes`, `VehicleTypes` GVWR ranges,
+    `PrimaryProduct`) about the *manufacturer as a company*, not the car. No
+    end-user value on a result card, none of it overlaps or extends the
+    per-VIN decode fields.
+  - `DecodeVinValues` (flat single-object shape) — same ~95 fields
+    `DecodeVin` already returns, just reshaped from variable/value pairs into
+    one object. No new data (this is on top of the already-resolved
+    `decodevin` vs `DecodeVinExtended` comparison from Phase 1.5).
+  - Everything else in the catalog (Make/Model/vehicle-type/WMI/plant-code
+    lookups) is reference data for *building* a decoder, not for enriching a
+    single VIN's result — not applicable here.
+  **Conclusion: not pursuing further vPIC surface.** `/api/vin/:vin` already
+  forwards the richest endpoint (`DecodeVin`) and the UI already renders every
+  non-empty field. Crash-safety/recall data from the separate
+  `api.nhtsa.gov/SafetyRatings` and `/recalls` APIs is a different topic — see
+  "Phase 3+ — crash-test ratings / recalls" above (researched and parked
+  separately, for a different reason: US-market-only relevance, not decoder
+  coverage).
 - **Ukraine average fuel prices** — integrate price-per-fuel-type data,
   e.g. from [serg-ill/ukraine-fuel-prices](https://github.com/serg-ill/ukraine-fuel-prices)
   (scrape-derived dataset, not a live API — check its update cadence and
