@@ -139,9 +139,13 @@ export default function ResultCard({ data }: Props): ReactNode {
                 href={depMapsUrl(c.dep)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[var(--color-primary)] underline"
+                className="inline-flex items-center gap-1 text-[var(--color-primary)]"
               >
-                {c.dep}
+                <span className="underline">{c.dep}</span>
+                <span aria-hidden className="no-underline">
+                  ↗
+                </span>
+                <span className="sr-only">{t('field.opensNewTab')}</span>
               </a>
             ) : null
           }
@@ -151,31 +155,32 @@ export default function ResultCard({ data }: Props): ReactNode {
           label={t('field.vin')}
           value={
             c.vin ? (
-              <Link to={`/${c.vin}`} className="text-[var(--color-primary)] underline">
-                {c.vin}
+              <Link to={`/${c.vin}`} className="inline-flex items-center gap-1 text-[var(--color-primary)]">
+                <span className="underline">{c.vin}</span>
+                <span aria-hidden className="no-underline">
+                  ›
+                </span>
               </Link>
             ) : null
           }
         />
       </div>
 
-      <div className="mt-3 flex items-center justify-between text-base">
-        <span className="text-[var(--color-muted)]">{t('result.historyLabel')}</span>
-        <button
-          type="button"
-          aria-expanded={showMore}
-          onClick={() => setShowMore(v => !v)}
-          className="group flex items-center gap-1 text-[var(--color-primary)]"
+      <button
+        type="button"
+        aria-expanded={showMore}
+        onClick={() => setShowMore(v => !v)}
+        className="group mt-3 flex w-full items-center justify-end gap-1.5 text-base text-[var(--color-primary)]"
+      >
+        <span aria-hidden className="no-underline">⚙️</span>
+        <span className="underline group-hover:no-underline">{t('result.historyLabel')}</span>
+        <span
+          aria-hidden
+          className={cn('inline-block no-underline transition-transform duration-200', showMore && 'rotate-180')}
         >
-          <span aria-hidden>⚙️</span>
-          <span className="underline group-hover:no-underline">
-            {showMore ? t('result.showLess') : t('result.showMore')}
-          </span>
-          <span aria-hidden className={cn('inline-block transition-transform duration-200', showMore && 'rotate-180')}>
-            ▾
-          </span>
-        </button>
-      </div>
+          ▾
+        </span>
+      </button>
 
       <div
         aria-hidden={!showMore}

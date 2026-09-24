@@ -69,7 +69,7 @@ describe('ResultCard', () => {
     expect(screen.getByText('ЛЕГКОВИЙ')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: '4T1BF1FK5CU000001' })).toHaveAttribute('href', '/4T1BF1FK5CU000001')
 
-    const detailsButton = screen.getByRole('button', { name: 'More details' })
+    const detailsButton = screen.getByRole('button', { name: 'Registration / VIN history' })
     expect(detailsButton).toHaveAttribute('aria-expanded', 'false')
   })
 
@@ -95,7 +95,7 @@ describe('ResultCard', () => {
     })
     renderWithProviders(<ResultCard data={data} />)
 
-    fireEvent.click(screen.getByRole('button', { name: 'More details' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Registration / VIN history' }))
 
     expect(decodeVin).toHaveBeenCalledWith(data.current.vin)
     expect(plateHistory).not.toHaveBeenCalled()
@@ -115,7 +115,7 @@ describe('ResultCard', () => {
     })
     renderWithProviders(<ResultCard data={noVin} />)
 
-    fireEvent.click(screen.getByRole('button', { name: 'More details' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Registration / VIN history' }))
 
     expect(plateHistory).toHaveBeenCalledWith(data.plate)
     expect(decodeVin).not.toHaveBeenCalled()
