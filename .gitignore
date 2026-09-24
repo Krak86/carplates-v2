@@ -24,7 +24,7 @@ scripts/.data/
 *.zip
 
 # real registry samples used to verify layout changes — never commit real PII
-scripts/src/DATA/
+# scripts/src/DATA/
 
 # editor / OS
 .DS_Store
