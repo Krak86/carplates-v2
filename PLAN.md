@@ -577,6 +577,27 @@ Doable now, independent of Phases 2-5; each is additive and doesn't block the ot
   (`{ brand, model }`) and labels any row whose brand/model differs from it
   (e.g. "NISSAN ROGUE (2014)") — `Registration` already carried
   brand/model/makeYear per row, so no schema change. No DB/API changes.
+- **Brand-logo watermark on the result card ✅ DONE (2026-09-24)** —
+  user-requested decorative polish, not a pre-scoped backlog item.
+  `BrandLogo.tsx` gained a `variant="watermark"` mode: the same brand PNG
+  used inline next to the title, rendered instead full-card-width at its
+  native aspect ratio (`h-auto` + `object-contain` — no crop, no stretch),
+  pinned to the card's top edge. `mix-blend-multiply` plus a low opacity
+  drawn from a CSS custom property (`--watermark-opacity`, `global.css`) keep
+  it reading as a faint tint rather than a logo; the property (and the
+  animation's duration, below) are deliberately kept in `global.css`, not
+  Tailwind arbitrary values in the component, so both stay one obvious edit
+  away while tuning. It breathes continuously — `animate-watermark-breathe`
+  (`global.css`, `prefers-reduced-motion`-aware) loops `scale(1) →
+  scale(1.06) → scale(1)` — rather than a one-shot entrance, since it's a
+  permanent backdrop, not a transient UI element; no hover interaction (tried
+  brightening on hover, reverted — user wanted a static, testable opacity
+  instead). It sits behind in-flow content via `-z-10`, inside `ResultCard`'s
+  `Card`, now also `isolate overflow-hidden` so the negative z-index stays
+  scoped to the card and the top corners clip the banner instead of it
+  spilling past them. `alt=""` + `aria-hidden` keeps it out of the
+  accessibility tree — the existing inline `BrandLogo` next to the title
+  remains the one screen readers see.
 - **Open (not yet done): VinResult's history section is mislabeled.** Its
   "Registration history" timeline is titled `vin.registryTitle` ("State
   registry data") while `ResultCard`'s identical section is titled

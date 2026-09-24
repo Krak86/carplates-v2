@@ -55,7 +55,8 @@ export default function ResultCard({ data }: Props): ReactNode {
   const engineValue = hasCapacity ? c.capacity : c.powerKwt
 
   return (
-    <Card className="relative w-full max-w-2xl transition-shadow duration-200 hover:shadow-md">
+    <Card className="group relative isolate w-full max-w-2xl overflow-hidden transition-shadow duration-200 hover:shadow-md">
+      <BrandLogo brand={c.brand} variant="watermark" />
       <FavoriteButton
         kind="plate"
         value={data.plate}

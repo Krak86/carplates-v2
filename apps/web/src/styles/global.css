@@ -67,6 +67,29 @@ body {
   }
 }
 
+/* Tune freely while testing — no need to hunt through component classes. */
+:root {
+  --watermark-opacity: 0.05;
+}
+
+@keyframes watermark-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.06);
+  }
+}
+
+@utility animate-watermark-breathe {
+  animation: watermark-breathe 10s ease-in-out infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
 @keyframes vehicle-sheen {
   0%,
   100% {
