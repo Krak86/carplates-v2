@@ -76,6 +76,52 @@ export type PlateCandidate = z.infer<typeof plateCandidateSchema>
 export const plateRecognizeResponseSchema = z.object({ candidates: z.array(plateCandidateSchema).min(1) })
 export type PlateRecognizeResponse = z.infer<typeof plateRecognizeResponseSchema>
 
+/** One trim/variant's NHTSA 5-star crash test rating — US-market vehicles only. */
+export const safetyRatingSchema = z.object({
+  vehicleId: z.number().int(),
+  description: z.string(),
+  overallRating: z.string().nullable(),
+  overallFrontCrashRating: z.string().nullable(),
+  frontCrashDriversideRating: z.string().nullable(),
+  frontCrashPassengersideRating: z.string().nullable(),
+  frontCrashPicture: z.string().nullable(),
+  frontCrashVideo: z.string().nullable(),
+  overallSideCrashRating: z.string().nullable(),
+  sideCrashDriversideRating: z.string().nullable(),
+  sideCrashPassengersideRating: z.string().nullable(),
+  sideCrashPicture: z.string().nullable(),
+  sideCrashVideo: z.string().nullable(),
+  rolloverRating: z.string().nullable(),
+  rolloverRating2: z.string().nullable(),
+  rolloverPossibility: z.number().nullable(),
+  rolloverPossibility2: z.number().nullable(),
+  /** Whether the vehicle tipped up during the dynamic rollover-avoidance maneuver, e.g. "No Tip". */
+  dynamicTipResult: z.string().nullable(),
+  sidePoleCrashRating: z.string().nullable(),
+  sidePolePicture: z.string().nullable(),
+  sidePoleVideo: z.string().nullable(),
+  /** Older/secondary side-impact sub-scores, alongside overallSideCrashRating and sidePoleCrashRating above. */
+  combinedSideBarrierAndPoleRatingFront: z.string().nullable(),
+  combinedSideBarrierAndPoleRatingRear: z.string().nullable(),
+  sideBarrierRatingOverall: z.string().nullable(),
+  electronicStabilityControl: z.string().nullable(),
+  forwardCollisionWarning: z.string().nullable(),
+  laneDepartureWarning: z.string().nullable(),
+  complaintsCount: z.number().int().nullable(),
+  recallsCount: z.number().int().nullable(),
+  investigationCount: z.number().int().nullable()
+})
+export type SafetyRating = z.infer<typeof safetyRatingSchema>
+
+/** GET /api/safety?make=&model=&year= — NHTSA ratings for every matching trim/variant, empty when none exist. */
+export const safetyRatingsResponseSchema = z.object({
+  make: z.string(),
+  model: z.string(),
+  year: z.number().int(),
+  ratings: z.array(safetyRatingSchema)
+})
+export type SafetyRatingsResponse = z.infer<typeof safetyRatingsResponseSchema>
+
 /** One stock photo from Pixabay, filtered to only what the UI needs. */
 export const vehiclePhotoSchema = z.object({
   id: z.number().int(),

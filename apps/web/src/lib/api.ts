@@ -2,6 +2,7 @@ import {
   plateHistoryResponseSchema,
   plateLookupResponseSchema,
   plateRecognizeResponseSchema,
+  safetyRatingsResponseSchema,
   statsResponseSchema,
   vehiclePhotosResponseSchema,
   vinDecodeResponseSchema
@@ -10,6 +11,7 @@ import type {
   PlateHistoryResponse,
   PlateLookupResponse,
   PlateRecognizeResponse,
+  SafetyRatingsResponse,
   StatsResponse,
   VehiclePhotosResponse,
   VinDecodeResponse
@@ -70,6 +72,16 @@ export async function getVehiclePhotos(brand: string, model: string, year: numbe
   if (model) params.set('model', model)
   if (year != null) params.set('year', String(year))
   return vehiclePhotosResponseSchema.parse(await getJson(`/api/photos?${params.toString()}`))
+}
+
+export async function getSafetyRatings(make: string, model: string, year: number): Promise<SafetyRatingsResponse> {
+  const params = new URLSearchParams({ make, model, year: String(year) })
+  return safetyRatingsResponseSchema.parse(await getJson(`/api/safety?${params.toString()}`))
+}
+
+// Our own transcode-and-cache proxy (the source .wmv can't play in any modern browser).
+export function safetyVideoUrl(nhtsaVideoUrl: string): string {
+  return `${BASE}/api/safety/video?${new URLSearchParams({ url: nhtsaVideoUrl }).toString()}`
 }
 
 // Bundled static asset (apps/web/public/), not an /api/* response — no BASE

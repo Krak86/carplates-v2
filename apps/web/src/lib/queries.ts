@@ -1,7 +1,15 @@
 import { queryOptions } from '@tanstack/react-query'
 import { normalizePlate } from '@carplates/shared'
 
-import { decodeVin, getStats, getUkraineGeography, getVehiclePhotos, lookupPlate, plateHistory } from '@/lib/api'
+import {
+  decodeVin,
+  getSafetyRatings,
+  getStats,
+  getUkraineGeography,
+  getVehiclePhotos,
+  lookupPlate,
+  plateHistory
+} from '@/lib/api'
 import { isFavorited, listFavorites } from '@/lib/favorites-db'
 import type { FavoriteKind } from '@/lib/favorites-db'
 import { listVisits } from '@/lib/history-db'
@@ -43,6 +51,15 @@ export function vehiclePhotosQuery(brand: string, model: string, year: number | 
   return queryOptions({
     queryKey: ['photos', brand, model, year],
     queryFn: () => getVehiclePhotos(brand, model, year),
+    staleTime: Infinity
+  })
+}
+
+// NHTSA crash test ratings for a make/model/year (US-market only) — immutable once published.
+export function safetyRatingsQuery(make: string, model: string, year: number) {
+  return queryOptions({
+    queryKey: ['safety', make, model, year],
+    queryFn: () => getSafetyRatings(make, model, year),
     staleTime: Infinity
   })
 }

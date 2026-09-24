@@ -15,6 +15,8 @@ const envSchema = z.object({
   PUBLIC_SITE_URL: z.string().default('http://localhost:3000'),
 
   NHTSA_BASE_URL: z.string().default('https://vpic.nhtsa.dot.gov/api/vehicles'),
+  /** Separate host from vPIC decoding above — NHTSA's 5-star crash test ratings API, US-market vehicles only. */
+  NHTSA_SAFETY_RATINGS_BASE_URL: z.string().default('https://api.nhtsa.gov'),
 
   PLATE_RECOGNIZER_CLOUD_URL: z.string().default('https://api.platerecognizer.com/v1/plate-reader/'),
   /** Absent → the cloud recognize route answers 503. */

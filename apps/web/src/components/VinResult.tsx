@@ -4,7 +4,9 @@ import type { VinDecodeResponse } from '@carplates/shared'
 
 import FavoriteButton from '@/components/FavoriteButton'
 import RegistrationTimeline from '@/components/RegistrationTimeline'
+import SafetyRatings from '@/components/SafetyRatings'
 import Card from '@/components/ui/Card'
+import { extractVehicleInfo } from '@/components/VinResult.helpers'
 import VinDecodeFields from '@/components/VinDecodeFields'
 
 type Props = {
@@ -14,6 +16,7 @@ type Props = {
 export default function VinResult({ data }: Props): ReactNode {
   const { t } = useTranslation()
   const registry = data.registry
+  const vehicle = extractVehicleInfo(data)
 
   return (
     <Card className="relative w-full max-w-2xl transition-shadow duration-200 hover:shadow-md">
@@ -37,6 +40,8 @@ export default function VinResult({ data }: Props): ReactNode {
 
       <VinDecodeFields results={data.results} />
       <p className="mt-3 text-sm text-[var(--color-muted)]">{t('vin.source')}</p>
+
+      <SafetyRatings brand={vehicle.brand} model={vehicle.model} year={vehicle.year} />
     </Card>
   )
 }

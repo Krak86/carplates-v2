@@ -11,6 +11,7 @@ import FavoriteButton from '@/components/FavoriteButton'
 import FieldInfoButton from '@/components/FieldInfoButton'
 import RegistrationTimeline from '@/components/RegistrationTimeline'
 import { getFuelIcon } from '@/components/ResultCard.helpers'
+import SafetyRatings from '@/components/SafetyRatings'
 import Card from '@/components/ui/Card'
 import VehicleKindIcon from '@/components/VehicleKindIcon'
 import VehiclePhotos from '@/components/VehiclePhotos'
@@ -260,6 +261,7 @@ export default function ResultCard({ data }: Props): ReactNode {
         </div>
       </div>
 
+      <SafetyRatings brand={c.brand} model={c.model} year={c.makeYear} />
       <VehiclePhotos brand={c.brand} model={c.model} year={c.makeYear} />
     </Card>
   )

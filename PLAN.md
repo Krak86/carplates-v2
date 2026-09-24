@@ -598,6 +598,78 @@ Doable now, independent of Phases 2-5; each is additive and doesn't block the ot
   spilling past them. `alt=""` + `aria-hidden` keeps it out of the
   accessibility tree — the existing inline `BrandLogo` next to the title
   remains the one screen readers see.
+- **Crash-test safety ratings (NHTSA), reversing the earlier "parked" call ✅ DONE (2026-09-24)** —
+  the Phase 3+ research below had parked this on "ratings only exist for
+  US-market trims NHTSA actually crash-tested... a large share of vehicles
+  registered in Ukraine are Euro/JP/Korea-spec or grey imports... low value
+  for the effort." Revisited after confirming several genuinely common
+  Ukrainian-fleet nameplates — Toyota Corolla/Camry/RAV4, Honda Civic/CR-V,
+  Ford Focus/Escape, Mazda6, VW Tiguan (pre-2018, same platform globally) —
+  do have real NHTSA data; shipped as an "if available" section, not a
+  guarantee, gated on nothing but the make/model/year already resolved
+  elsewhere.
+
+  **API.** `GET /api/safety?make=&model=&year=` (`apps/api/src/safety/`)
+  two-step-walks `api.nhtsa.gov/SafetyRatings` (modelyear/make/model →
+  `VehicleId` per US-tested trim, then `VehicleId` → the full rating) — same
+  free/no-key/public-domain provider as vPIC, but a different host
+  (`NHTSA_SAFETY_RATINGS_BASE_URL`, separate from `NHTSA_BASE_URL`). Returns
+  `ratings: []`, not a 404, when nothing matches — absence is the expected
+  common case here, not an error. Captures every field NHTSA returns,
+  including several easy to miss on a first pass: side-pole rating,
+  rollover-risk percentage + dynamic-tip-test result, ESC/FCW/LDW equipment
+  flags, a secondary/legacy combined-side-barrier sub-score, and
+  investigation count alongside complaints/recalls.
+
+  **Model-name matching, found via a real bug report.** A "no data for my
+  2016 Mazda6, but it's a real US import" report traced to an exact-string
+  miss: the Ukrainian registry (and vPIC's own decode) store Mazda's numeric
+  models bare (`"6"`), while NHTSA indexes them as `"Mazda6"` — Mazda's own
+  naming convention. `SafetyService.findVariants()` now retries with
+  normalized candidates on an empty result — a Mazda-specific `N` → `MazdaN`
+  (2/3/5/6) mapping, then a generic "strip to the leading word" fallback for
+  trim-suffixed registry values (`"3 MPS"`, `"Focus Titanium"`) — trying the
+  raw value first so the common (exact-match) case costs nothing extra.
+
+  **Crash-test video, transcoded.** NHTSA's clips are `.wmv` — confirmed
+  directly in Chrome (`canPlayType('video/x-ms-wmv')` is empty, real playback
+  throws `MEDIA_ERR_SRC_NOT_SUPPORTED`) that no modern browser can decode
+  them, so linking straight to the file would just be a broken inline
+  player. `GET /api/safety/video?url=` (`safety-video.service.ts`) validates
+  the URL against a strict `static.nhtsa.gov/crashTest/videos/...wmv` regex
+  (no open transcoding proxy / SSRF surface), downloads it, transcodes to mp4
+  via a directly-spawned `ffmpeg-static` binary (new dependency; its
+  postinstall binary download needed allowlisting in `pnpm-workspace.yaml`'s
+  `allowBuilds`), and caches the result in the OS temp dir — deliberately
+  outside the repo tree, since `apps/api` runs under `tsx watch` and writing
+  into a watched directory would restart the server on every transcode.
+  `CrashVideoModal.tsx` points a plain `<video>` at that endpoint; each
+  variant also keeps a plain "download the original file" link alongside it,
+  since the transcode is a nice-to-have, not the only way to get the clip.
+
+  **Web.** `SafetyRatings.tsx` sits below the registration history,
+  collapsed by default (fetch-on-expand, mirroring `VehiclePhotos`), one row
+  per NHTSA-tested trim with a brand-logo placeholder (falling back to plain
+  text only if no logo is bundled either) when NHTSA has no crash photo for
+  that trim. An "Overall" headline number leads each summary — deliberately
+  *not* a naive average of Overall+Front+Side+Rollover+SidePole, since
+  Overall is already NHTSA's own computed combination of Front/Side/Rollover
+  and averaging it back in with its own components would double-count them;
+  with more than one matching trim, the headline is the mean of just the
+  independent trims' own Overall figures, with Front/Side/Rollover/SidePole
+  averages kept as smaller supporting detail underneath. Two "?" info
+  popovers (`InfoPopover.tsx`, a static-content sibling of `FieldInfoButton`)
+  explain the rating categories and list which brands this can plausibly
+  cover (current/discontinued US-market brands vs. examples that never sold
+  there — Lada, ZAZ, Renault, Škoda, etc.) — both portal-rendered to
+  `document.body` with viewport-clamped positioning, needed after the first
+  version's inline-positioned popovers were silently clipped by an ancestor's
+  `overflow: hidden` (`ResultCard`'s watermark-clipping wrapper, and
+  `SafetyRatings`' own collapse-animation wrapper) with no way to scroll to
+  the missing content.
+
+  **Recalls** (the sibling `api.nhtsa.gov/recalls` endpoint) stays parked —
+  see Phase 3+ below, reasoning unchanged.
 - **Open (not yet done): VinResult's history section is mislabeled.** Its
   "Registration history" timeline is titled `vin.registryTitle` ("State
   registry data") while `ResultCard`'s identical section is titled
@@ -642,36 +714,29 @@ success. **On-premise SDK ruled out** — same per-lookup licensing as the
 cloud API (no cost win) for photos we're already comfortable sending to
 Plate Recognizer's cloud; not pursuing it.
 
-### Phase 3+ — crash-test ratings / recalls — **researched, parked (2026-09-24)**
+### Phase 3+ — recalls — **researched, parked (2026-09-24)**
 
-NHTSA Safety Ratings (`api.nhtsa.gov/SafetyRatings`, successor to v1's
-`one.nhtsa.gov/webapi/...`), confirmed live:
+Crash-test *ratings* (`api.nhtsa.gov/SafetyRatings`) graduated out of this
+section and shipped for real — see Phase 1.5 above ("Crash-test safety
+ratings (NHTSA), reversing the earlier 'parked' call") for what changed and
+why the original pessimism below turned out to be too broad-brush (it holds
+for grey-import/Euro-only-spec vehicles, but not for the many
+globally-sold-platform nameplates actually common in Ukraine's fleet).
 
-- **Not VIN-keyed** — two-step path walk: `/SafetyRatings/modelyear/{y}/make/{make}/model/{model}`
-  returns one `VehicleId` per US-market trim NHTSA tested, then
-  `/SafetyRatings/VehicleId/{id}` returns star ratings (`OverallRating`,
-  front/side/rollover), ESC/FCW/LDW flags, and bundled `Complaints`/`Recalls`/`Investigations`
-  counts. Would join on the `Make`/`Model`/`ModelYear` already coming back from
-  `/api/vin/:vin`'s decode, not on the VIN itself.
-- **Why parked**: ratings only exist for US-market trims NHTSA actually
-  crash-tested. Spot-checked a 2018 Volvo XC60 T6 — came back "Not Rated" on
-  every category despite having a real complaint/recall history. A large share
-  of vehicles registered in Ukraine are Euro/JP/Korea-spec or grey imports that
-  were never in NHTSA's test program, so this would silently return empty for
-  a large share of real lookups — low value for the effort, and risks reading
-  as "this car has no safety data" when it just means "not the US trim."
-- **Recalls** (`api.nhtsa.gov/recalls/recallsByVehicle?make=&model=&modelYear=`,
-  same free provider, separate from SafetyRatings) has the same make/model/year
-  key and the same US-market caveat — a recall campaign may not apply to a
-  non-US-spec unit sharing the model name. Per-recall fields: `Component`,
-  `Summary`, `Consequence`, `Remedy`, `NHTSACampaignNumber`,
-  `ReportReceivedDate`, `parkIt`/`parkOutSide`/`overTheAirUpdate` flags.
-  **Decision: skip** — not pursuing for the same US-market-relevance reason as
-  Safety Ratings, kept as a distinct decision from the VIN-decoder-surface
-  scoping below since this is crash/safety data, not vehicle-attribute data.
-- Revisit only if a future need specifically wants "did NHTSA test/recall the
-  US version of this model" framed as exactly that (not implied to cover the
-  actual registered vehicle).
+**Recalls** (`api.nhtsa.gov/recalls/recallsByVehicle?make=&model=&modelYear=`,
+same free provider, separate from SafetyRatings) still has the same
+make/model/year key and the same US-market caveat — a recall campaign may not
+apply to a non-US-spec unit sharing the model name, and unlike a star rating
+(where a shared global platform genuinely shares its crashworthiness), a
+recall is about a specific parts/build defect that may simply not exist on a
+non-US production run. Per-recall fields: `Component`, `Summary`,
+`Consequence`, `Remedy`, `NHTSACampaignNumber`, `ReportReceivedDate`,
+`parkIt`/`parkOutSide`/`overTheAirUpdate` flags. **Decision: still skip** —
+the mismatch risk here is sharper than it was for ratings, since a recall
+presented as applicable when it isn't is actively misleading (not just
+"missing data"), not merely low-value. Revisit only alongside a real accuracy
+story for matching recalls to non-US-spec vehicles, not just a shared model
+name.
 
 ## Backlog (2026-09-22)
 
@@ -770,10 +835,10 @@ above once scoped, or dropped if research says no.
   **Conclusion: not pursuing further vPIC surface.** `/api/vin/:vin` already
   forwards the richest endpoint (`DecodeVin`) and the UI already renders every
   non-empty field. Crash-safety/recall data from the separate
-  `api.nhtsa.gov/SafetyRatings` and `/recalls` APIs is a different topic — see
-  "Phase 3+ — crash-test ratings / recalls" above (researched and parked
-  separately, for a different reason: US-market-only relevance, not decoder
-  coverage).
+  `api.nhtsa.gov/SafetyRatings` and `/recalls` APIs was a different topic,
+  researched separately for a different reason (US-market-only relevance, not
+  decoder coverage) — ratings shipped, see Phase 1.5's "Crash-test safety
+  ratings" entry; recalls are still parked, see "Phase 3+ — recalls" below.
 
 ### Parked — no free API token (same class as Platesmania)
 
