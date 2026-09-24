@@ -774,12 +774,6 @@ above once scoped, or dropped if research says no.
   "Phase 3+ — crash-test ratings / recalls" above (researched and parked
   separately, for a different reason: US-market-only relevance, not decoder
   coverage).
-- **Ukraine average fuel prices** — integrate price-per-fuel-type data,
-  e.g. from [serg-ill/ukraine-fuel-prices](https://github.com/serg-ill/ukraine-fuel-prices)
-  (scrape-derived dataset, not a live API — check its update cadence and
-  license before depending on it). **RESEARCH**: where this would surface in
-  the UI (per-result estimated fill-up cost? a standalone page?) before
-  scoping the integration.
 
 ### Parked — no free API token (same class as Platesmania)
 
@@ -790,6 +784,27 @@ above once scoped, or dropped if research says no.
   API token surveyed yet for any provider; scraping these sites is the same
   ToS/legal no-go as Platesmania, not a fallback. Revisit if a free/affordable
   token turns up for one of these or a similar provider.
+- ⛔ **Ukraine average fuel prices — researched, parked (2026-09-24)** —
+  wanted price-per-fuel-type data (e.g. estimated fill-up cost on a result
+  card). [serg-ill/ukraine-fuel-prices](https://github.com/serg-ill/ukraine-fuel-prices)
+  turned out not to be a usable data source at all: it's a Home Assistant
+  custom component (Python) that scrapes 12 gas-station-network sites plus
+  Minfin hourly, with no hosted API and no dataset files — using it means
+  reimplementing its scraping, not consuming an API. Went to the underlying
+  source instead (`index.minfin.com.ua/ua/markets/fuel/`): its A-95/A-92/diesel/LPG
+  averages are licensed from **Консалтингова група А-95** (`a95.ua`) per the
+  page's own schema.org `creator` attribution — a commercial market-research
+  firm whose product *is* this price data. Checked a95.ua directly: no public
+  API, no free tier, no listed licensing terms, contact-them-only access.
+  `robots.txt` doesn't block the page, but that's a weak signal against a
+  paid third party's commercial dataset republished with attribution, not
+  Minfin's own open data. **Decision: skip scraping** — same ToS/licensing
+  risk class as Platesmania and the Copart/bid.cars entry above (no free
+  API, scraping licensed commercial data as the only alternative). Revisit
+  if A-95 Consulting Group offers a free/affordable API or data license
+  (contact: a95@a95.ua), or if a genuinely open fuel-price source turns up
+  (e.g. a state statistics service, or networks that publish their own
+  prices under an open license).
 
 ## Phase 4 — VPS / production
 
