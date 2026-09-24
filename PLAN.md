@@ -557,6 +557,26 @@ Doable now, independent of Phases 2-5; each is additive and doesn't block the ot
   `distinct_vins` is 0 for 2019-2020 rows across every dimension — those two
   years' source data has no VINs at all (confirmed against `stats_by_year`),
   not something this rollup introduced.
+- **Plate-history now shows plate reassignment, not just the current vehicle's
+  own VIN history ✅ DONE (2026-09-24)** — user-requested, found while
+  looking up plate `ВЕ8388СХ`/`BE8388CX`: the state registry reassigns a
+  plate to a different vehicle after the previous one leaves it (here, a
+  2014 Nissan Rogue → a 2026 Mazda CX-5), and `ResultCard.tsx` was hiding
+  that. `plate.service.ts`'s `history()` already matched raw `plate = X`
+  regardless of `vin` (`identityFilter`, unchanged), so `/plate/:plate/history`
+  already returned all reassignment rows — the gap was purely client-side:
+  `ResultCard` picked *either* VIN-scoped history *or* plate-scoped history
+  once a VIN was known, never both, so the VIN-only branch (correctly, for a
+  *different* reason — following one vehicle across the plates it wore)
+  silently dropped the earlier, different vehicle's rows. Fix: both queries
+  now run whenever the history panel is expanded and render as two sections,
+  `result.historyTitle` ("Registration history (by plate)") and
+  `result.historyTitleVin` ("Registration history (by VIN)") — same data
+  source as before, just no longer mutually exclusive.
+  `RegistrationTimeline.tsx` takes a new optional `currentVehicle` prop
+  (`{ brand, model }`) and labels any row whose brand/model differs from it
+  (e.g. "NISSAN ROGUE (2014)") — `Registration` already carried
+  brand/model/makeYear per row, so no schema change. No DB/API changes.
 - **Open (not yet done): VinResult's history section is mislabeled.** Its
   "Registration history" timeline is titled `vin.registryTitle` ("State
   registry data") while `ResultCard`'s identical section is titled

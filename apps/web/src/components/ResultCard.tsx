@@ -41,13 +41,12 @@ export default function ResultCard({ data }: Props): ReactNode {
   const vehicleKind = resolveVehicleKind(c.kind)
   const vehicleColor = resolveVehicleColor(c.color)
 
-  // A VIN's own registry rows cover every plate the car ever wore; a plate-scoped
-  // history misses plates it wore before this one, so prefer VIN once we have it.
+  // Plate history covers every vehicle that ever wore this plate, reassignment
+  // included. A VIN's own registry rows cover every plate that vehicle ever
+  // wore. Neither subsumes the other, so both run and render as separate sections.
+  const plateHistory = useQuery({ ...plateHistoryQuery(data.plate), enabled: showMore })
   const vinDetail = useQuery({ ...vinQuery(c.vin ?? ''), enabled: showMore && hasVin })
-  const plateHistory = useQuery({ ...plateHistoryQuery(data.plate), enabled: showMore && !hasVin })
-  const historyActions = hasVin ? vinDetail.data?.registry?.actions : plateHistory.data?.actions
-  const isPending = hasVin ? vinDetail.isPending : plateHistory.isPending
-  const isError = hasVin ? vinDetail.isError : plateHistory.isError
+  const currentVehicle = { brand: c.brand, model: c.model }
 
   // A pure EV has no engine capacity — power_kwt (2026+ only) is its only engine
   // figure, so it takes the capacity row's place instead of being hidden.
@@ -206,9 +205,33 @@ export default function ResultCard({ data }: Props): ReactNode {
               <span aria-hidden>🕘</span>
               {t('result.historyTitle')}
             </div>
-            {isPending && <p className="text-base text-[var(--color-muted)]">{t('result.loading')}</p>}
-            {isError && <p className="text-base text-[var(--color-muted)]">{t('result.error')}</p>}
-            {historyActions && <RegistrationTimeline actions={historyActions} currentPlate={data.plate} />}
+            {plateHistory.isPending && <p className="text-base text-[var(--color-muted)]">{t('result.loading')}</p>}
+            {plateHistory.isError && <p className="text-base text-[var(--color-muted)]">{t('result.error')}</p>}
+            {plateHistory.data && (
+              <RegistrationTimeline
+                actions={plateHistory.data.actions}
+                currentPlate={data.plate}
+                currentVehicle={currentVehicle}
+              />
+            )}
+
+            {hasVin && (vinDetail.isPending || vinDetail.isError || vinDetail.data?.registry) && (
+              <div className="mt-4 border-t border-[var(--color-border)] pt-3">
+                <div className="mb-1 flex items-center gap-1.5 text-base font-semibold">
+                  <span aria-hidden>🆔</span>
+                  {t('result.historyTitleVin')}
+                </div>
+                {vinDetail.isPending && <p className="text-base text-[var(--color-muted)]">{t('result.loading')}</p>}
+                {vinDetail.isError && <p className="text-base text-[var(--color-muted)]">{t('result.error')}</p>}
+                {vinDetail.data?.registry && (
+                  <RegistrationTimeline
+                    actions={vinDetail.data.registry.actions}
+                    currentPlate={data.plate}
+                    currentVehicle={currentVehicle}
+                  />
+                )}
+              </div>
+            )}
 
             {hasVin && vinDetail.isSuccess && (
               <div className="mt-4 border-t border-[var(--color-border)] pt-3">

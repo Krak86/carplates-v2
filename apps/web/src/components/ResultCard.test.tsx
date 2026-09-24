@@ -83,7 +83,12 @@ describe('ResultCard', () => {
     expect(screen.getByText('plate reconstructed from VIN')).toBeInTheDocument()
   })
 
-  it('fetches VIN-scoped history and decode data when a VIN is known', async () => {
+  it('fetches both plate-scoped and VIN-scoped history when a VIN is known', async () => {
+    vi.mocked(plateHistory).mockResolvedValue({
+      plate: data.plate,
+      region: data.region,
+      actions: [{ ...data.current, dReg: '2018-05-11', operCode: 100 }]
+    })
     vi.mocked(decodeVin).mockResolvedValue({
       vin: data.current.vin as string,
       results: [{ variable: 'Make', value: 'TOYOTA' }],
@@ -98,15 +103,17 @@ describe('ResultCard', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Registration / VIN history' }))
 
     expect(decodeVin).toHaveBeenCalledWith(data.current.vin)
-    expect(plateHistory).not.toHaveBeenCalled()
+    expect(plateHistory).toHaveBeenCalledWith(data.plate)
 
-    // The earlier plate the same VIN wore shows up — this is what a plate-only history would miss.
+    // The plate-scoped section covers this plate's own history...
+    await waitFor(() => expect(screen.getByText('2018-05-11')).toBeInTheDocument())
+    // ...and the VIN-scoped section additionally surfaces an earlier plate the same VIN wore.
     await waitFor(() => expect(screen.getByText('2016-02-03')).toBeInTheDocument())
     expect(screen.getByRole('link', { name: 'АА1234ВЕ' })).toHaveAttribute('href', '/АА1234ВЕ')
     expect(screen.getByText('Make')).toBeInTheDocument()
   })
 
-  it('falls back to plate-scoped history when the current registration has no VIN', async () => {
+  it('fetches only plate-scoped history when the current registration has no VIN', async () => {
     const noVin: PlateLookupResponse = { ...data, current: { ...data.current, vin: null } }
     vi.mocked(plateHistory).mockResolvedValue({
       plate: data.plate,
@@ -120,5 +127,22 @@ describe('ResultCard', () => {
     expect(plateHistory).toHaveBeenCalledWith(data.plate)
     expect(decodeVin).not.toHaveBeenCalled()
     await waitFor(() => expect(screen.getByText('2018-05-11')).toBeInTheDocument())
+  })
+
+  it('labels a plate-history row that belongs to a different vehicle (plate reassigned)', async () => {
+    vi.mocked(plateHistory).mockResolvedValue({
+      plate: data.plate,
+      region: data.region,
+      actions: [
+        data.current,
+        { ...data.current, dReg: '2014-01-10', brand: 'NISSAN', model: 'ROGUE', makeYear: 2014, vin: null }
+      ]
+    })
+    renderWithProviders(<ResultCard data={data} />)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Registration / VIN history' }))
+
+    await waitFor(() => expect(screen.getByText('2014-01-10')).toBeInTheDocument())
+    expect(screen.getByText('NISSAN ROGUE (2014)')).toBeInTheDocument()
   })
 })

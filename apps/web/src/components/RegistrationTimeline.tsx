@@ -11,6 +11,8 @@ type Props = {
   actions: Registration[]
   /** The plate already shown on this page — its own rows render as plain text, not a link to itself. */
   currentPlate?: string
+  /** The vehicle already shown on this page — a row for a different vehicle (plate reassigned to another car) gets its own brand/model/year line. */
+  currentVehicle?: { brand: string | null; model: string | null }
 }
 
 /**
@@ -19,7 +21,7 @@ type Props = {
  * top — but the connecting arrows point up, since that's the direction the dates actually run in
  * (each step is newer than the one below it).
  */
-export default function RegistrationTimeline({ actions, currentPlate }: Props): ReactNode {
+export default function RegistrationTimeline({ actions, currentPlate, currentVehicle }: Props): ReactNode {
   const { t } = useTranslation()
 
   return (
@@ -28,6 +30,9 @@ export default function RegistrationTimeline({ actions, currentPlate }: Props): 
         const isLast = index === actions.length - 1
         // Foreign/transit prefixes and plateless (2026+) rows have no oblast match — say so rather than going blank.
         const region = (action.plate && regionName(action.plate)) || t('result.regionUnknown')
+        const isDifferentVehicle =
+          !!currentVehicle && (action.brand !== currentVehicle.brand || action.model !== currentVehicle.model)
+        const vehicleLabel = [action.brand, action.model].filter(Boolean).join(' ')
 
         return (
           <li
@@ -76,6 +81,12 @@ export default function RegistrationTimeline({ actions, currentPlate }: Props): 
                   )}
                 </span>
               </div>
+
+              {isDifferentVehicle && vehicleLabel && (
+                <div className="mt-0.5 text-sm font-medium">
+                  {vehicleLabel} {action.makeYear ? `(${action.makeYear})` : ''}
+                </div>
+              )}
 
               <div className="mt-0.5 text-sm text-[var(--color-muted)]">
                 {region}
