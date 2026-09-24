@@ -6,6 +6,7 @@ export {
   VEHICLE_COLOR_HEX,
   VEHICLE_COLOR_SHADOW_HEX,
   resolveVehicleColor,
+  fallbackVehicleColor,
   type VehicleColor
 } from './vehicleColor.js'
 export { brandLogoUrl } from './brandLogo.js'

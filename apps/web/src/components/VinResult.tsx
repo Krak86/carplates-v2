@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { fallbackVehicleColor, resolveVehicleColor, VEHICLE_COLOR_HEX } from '@carplates/shared'
 import type { VinDecodeResponse } from '@carplates/shared'
 
 import FavoriteButton from '@/components/FavoriteButton'
@@ -17,9 +18,15 @@ export default function VinResult({ data }: Props): ReactNode {
   const { t } = useTranslation()
   const registry = data.registry
   const vehicle = extractVehicleInfo(data)
+  const vehicleColor = resolveVehicleColor(registry?.actions[0]?.color) ?? fallbackVehicleColor(data.vin)
 
   return (
-    <Card className="relative w-full max-w-2xl transition-shadow duration-200 hover:shadow-md">
+    <Card className="group relative isolate w-full max-w-2xl overflow-hidden shadow-2xl! transition-shadow duration-200 hover:shadow-xl!">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -inset-12 -z-20 animate-glow-breathe opacity-35 blur-3xl transition-[background] duration-1000 ease-in-out"
+        style={{ background: `radial-gradient(ellipse at top left, ${VEHICLE_COLOR_HEX[vehicleColor]}, transparent 70%)` }}
+      />
       <FavoriteButton kind="vin" value={data.vin} label={null} className="absolute top-3 right-3" />
 
       <div className="mb-1 flex items-center gap-1.5 pr-8 text-xl font-semibold">

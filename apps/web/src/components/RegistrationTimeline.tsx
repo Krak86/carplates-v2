@@ -60,8 +60,8 @@ export default function RegistrationTimeline({ actions, currentPlate, currentVeh
 
             <div className={cn('min-w-0 flex-1 text-base', !isLast && 'pb-4')}>
               <div className="flex items-center justify-between gap-4">
-                <span className="font-medium">{action.dReg ?? '—'}</span>
-                <span className="flex items-center gap-2 text-right font-medium">
+                <span className="rounded bg-[var(--color-surface)]/20 px-1 py-0.5 font-medium">{action.dReg ?? '—'}</span>
+                <span className="flex items-center gap-2 rounded bg-[var(--color-surface)]/20 px-1 py-0.5 text-right font-medium">
                   {!action.plate ? (
                     '—'
                   ) : action.plate === currentPlate ? (

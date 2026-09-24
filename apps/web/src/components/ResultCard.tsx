@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
-import { resolveVehicleColor, resolveVehicleKind } from '@carplates/shared'
+import { fallbackVehicleColor, resolveVehicleColor, resolveVehicleKind, VEHICLE_COLOR_HEX } from '@carplates/shared'
 import type { PlateLookupResponse } from '@carplates/shared'
 
 import BrandLogo from '@/components/BrandLogo'
@@ -28,8 +28,8 @@ function Row({ label, value }: { label: string; value: ReactNode }): ReactNode {
   if (value == null || value === '') return null
   return (
     <div className="-mx-4 flex justify-between gap-4 px-4 py-1.5 text-base transition-colors hover:bg-[var(--color-border)]/40">
-      <span className="text-[var(--color-muted)]">{label}</span>
-      <span className="text-right font-medium">{value}</span>
+      <span className="rounded bg-[var(--color-surface)]/20 px-1 py-0.5 text-[var(--color-muted)]">{label}</span>
+      <span className="rounded bg-[var(--color-surface)]/20 px-1 py-0.5 text-right font-medium">{value}</span>
     </div>
   )
 }
@@ -40,7 +40,7 @@ export default function ResultCard({ data }: Props): ReactNode {
   const c = data.current
   const hasVin = c.vin != null
   const vehicleKind = resolveVehicleKind(c.kind)
-  const vehicleColor = resolveVehicleColor(c.color)
+  const vehicleColor = resolveVehicleColor(c.color) ?? fallbackVehicleColor(data.plate)
 
   // Plate history covers every vehicle that ever wore this plate, reassignment
   // included. A VIN's own registry rows cover every plate that vehicle ever
@@ -57,6 +57,13 @@ export default function ResultCard({ data }: Props): ReactNode {
 
   return (
     <Card className="group relative isolate w-full max-w-2xl overflow-hidden shadow-2xl! transition-shadow duration-200 hover:shadow-xl!">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -inset-12 -z-20 animate-glow-breathe opacity-35 blur-3xl transition-[background] duration-1000 ease-in-out"
+        style={{
+          background: `radial-gradient(ellipse at top left, ${VEHICLE_COLOR_HEX[vehicleColor]}, transparent 70%)`
+        }}
+      />
       <BrandLogo brand={c.brand} variant="watermark" />
       <FavoriteButton
         kind="plate"
@@ -92,10 +99,7 @@ export default function ResultCard({ data }: Props): ReactNode {
           kind={vehicleKind}
           color={vehicleColor}
           className="aspect-square max-h-20 shrink-0"
-          title={[
-            c.kind && `${t('field.kind')}: ${c.kind}`,
-            c.color && `${t('field.color')}: ${c.color}`
-          ]
+          title={[c.kind && `${t('field.kind')}: ${c.kind}`, c.color && `${t('field.color')}: ${c.color}`]
             .filter(Boolean)
             .join('\n')}
         />

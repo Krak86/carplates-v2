@@ -10,8 +10,8 @@ export default function PhotoThumbnail({ url, onClose }: Props): ReactNode {
   const { t } = useTranslation()
 
   return (
-    <div className="relative w-full max-w-xl">
-      <img src={url} alt="" className="h-32 w-full rounded-lg object-cover" />
+    <div className="relative w-full max-w-2xl">
+      <img src={url} alt="" className="h-64 w-full rounded-lg object-cover sm:h-80" />
       <button
         type="button"
         onClick={onClose}

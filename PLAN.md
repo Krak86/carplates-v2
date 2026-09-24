@@ -678,6 +678,44 @@ Doable now, independent of Phases 2-5; each is additive and doesn't block the ot
   fetched by `/api/vin/:vin` but never shown anywhere on the VIN page, unlike
   the plate page which headlines its VIN. Fix agreed in principle, not yet
   applied — see TODO below.
+- **Vehicle-color ambient background glow (card + page-wide) ✅ DONE (2026-09-25)** —
+  user-requested decorative polish, not a pre-scoped backlog item. Same idea as
+  the brand-logo watermark above, but tinted by the vehicle's own color instead
+  of its brand: `packages/shared/src/vehicleColor.ts` already had
+  `resolveVehicleColor`/`VEHICLE_COLOR_HEX` (used for the vehicle-kind icon);
+  gained `fallbackVehicleColor(seed)`, a deterministic hash-based pick from
+  `VEHICLE_COLORS` for when the registry's own color is unrecognized/null, so
+  a given plate/VIN still gets a consistent (not flickering-on-rerender) color
+  instead of no glow at all.
+
+  `ResultCard` and `VinResult` each render a blurred `radial-gradient` behind
+  their card content (`-z-20`, `-inset-12`, `blur-3xl`), and `SearchRoute`
+  renders a second, page-wide one (`BackgroundGlow.tsx`, `fixed inset-0 -z-10`)
+  behind everything — both reuse the same `animate-glow-breathe` utility
+  (`global.css`, aliases the existing `watermark-breathe` keyframes, so no new
+  keyframes needed) for a slow 10s pulse, plus a `transition-[background]`
+  crossfade so color changes never hard-cut. On the default route (no search
+  yet, no vehicle color to show), `use-random-vehicle-color.ts` instead cycles
+  a fresh random pick from all `VEHICLE_COLORS` every 10s — paused (an
+  `enabled` flag) once a real search result is driving the color, so the
+  interval isn't running pointlessly in the background.
+
+  **Readability gotcha, found live.** The card's colored backdrop can reduce
+  text contrast for some hues, so each field's key/value text got its own
+  small `bg-[var(--color-surface)]/20` chip (sized to the text, not the full
+  row) rather than a full-row background — applied to `ResultCard`'s `Row`,
+  `RegistrationTimeline`'s date/plate line, and `VinDecodeFields`'s `dt`/`dd`
+  (shared by both `ResultCard`'s VIN-decode panel and `VinResult`). The first
+  version added `backdrop-blur-sm` to those chips for extra smoothing, which
+  broke `FieldInfoButton`'s popover: `backdrop-filter` creates a new CSS
+  stacking context, which trapped the popover's `z-10` inside its own row's
+  context — later rows (each also now a stacking context) then painted on top
+  of it regardless of z-index. Fixed by dropping the blur and keeping only the
+  translucent color.
+
+  `PhotoThumbnail` (the "search by photo" preview) also grew from a fixed
+  128px strip to 256/384px and from `max-w-xl` to `max-w-2xl` (matching the
+  search field and result card width) in the same pass.
 
 ## Phase 2 — RIA "similar cars" proxy — **not started, blocked on a token**
 

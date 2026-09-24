@@ -42,6 +42,17 @@ export function resolveVehicleColor(color: string | null | undefined): VehicleCo
   return COLOR_BY_SOURCE_VALUE[color.trim().toUpperCase()] ?? null
 }
 
+/**
+ * Deterministic pick from `VEHICLE_COLORS`, seeded by an identifier (plate/VIN) — for
+ * decorative color when the registry's own color is unrecognized/absent, so a given
+ * record still gets a consistent color across renders instead of no color at all.
+ */
+export function fallbackVehicleColor(seed: string): VehicleColor {
+  let hash = 0
+  for (let i = 0; i < seed.length; i++) hash = (hash * 31 + seed.charCodeAt(i)) | 0
+  return VEHICLE_COLORS[Math.abs(hash) % VEHICLE_COLORS.length] as VehicleColor
+}
+
 /** Mid-tone swatch per canonical color — tuned to stay legible as an icon fill in both themes. */
 export const VEHICLE_COLOR_HEX: Readonly<Record<VehicleColor, string>> = {
   gray: '#8b8f98',

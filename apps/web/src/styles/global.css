@@ -90,6 +90,14 @@ body {
   }
 }
 
+@utility animate-glow-breathe {
+  animation: watermark-breathe 10s ease-in-out infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
 @keyframes vehicle-sheen {
   0%,
   100% {

@@ -3,13 +3,15 @@ import type { ReactNode } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { Link, useParams } from 'react-router'
-import { classifyQuery } from '@carplates/shared'
+import { classifyQuery, fallbackVehicleColor, resolveVehicleColor } from '@carplates/shared'
 
+import BackgroundGlow from '@/components/BackgroundGlow'
 import PhotoThumbnail from '@/components/PhotoThumbnail'
 import ResultCard from '@/components/ResultCard'
 import SearchField from '@/components/SearchField'
 import Spinner from '@/components/ui/Spinner'
 import { usePlateRecognition } from '@/components/use-plate-recognition'
+import { useRandomVehicleColor } from '@/components/use-random-vehicle-color'
 import VinResult from '@/components/VinResult'
 import { ApiError } from '@/lib/api'
 import { recordVisit } from '@/lib/history-db'
@@ -60,8 +62,20 @@ export default function SearchRoute(): ReactNode {
 
   const notFound = active.error instanceof ApiError && active.error.status === 404
 
+  const seed = kind === 'plate' && plate.isSuccess ? plate.data.plate : kind === 'vin' && vin.isSuccess ? vin.data.vin : null
+  const rawColor =
+    kind === 'plate' && plate.isSuccess
+      ? plate.data.current.color
+      : kind === 'vin' && vin.isSuccess
+        ? (vin.data.registry?.actions[0]?.color ?? null)
+        : null
+  const resultColor = seed ? (resolveVehicleColor(rawColor) ?? fallbackVehicleColor(seed)) : null
+  const randomColor = useRandomVehicleColor(resultColor === null)
+
   return (
     <div className="flex flex-col items-center gap-6">
+      <BackgroundGlow color={resultColor ?? randomColor} />
+
       <div className="w-full max-w-2xl text-center">
         <h1 className="mb-1 text-2xl font-bold">{t('app.title')}</h1>
         <p className="mb-4 text-sm text-[var(--color-muted)]">{t('app.tagline')}</p>
