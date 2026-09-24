@@ -55,7 +55,7 @@ export default function ResultCard({ data }: Props): ReactNode {
   const engineValue = hasCapacity ? c.capacity : c.powerKwt
 
   return (
-    <Card className="group relative isolate w-full max-w-2xl overflow-hidden transition-shadow duration-200 hover:shadow-md">
+    <Card className="group relative isolate w-full max-w-2xl overflow-hidden shadow-2xl! transition-shadow duration-200 hover:shadow-xl!">
       <BrandLogo brand={c.brand} variant="watermark" />
       <FavoriteButton
         kind="plate"
@@ -87,7 +87,17 @@ export default function ResultCard({ data }: Props): ReactNode {
             )}
           </div>
         </div>
-        <VehicleKindIcon kind={vehicleKind} color={vehicleColor} className="aspect-square max-h-20 shrink-0" />
+        <VehicleKindIcon
+          kind={vehicleKind}
+          color={vehicleColor}
+          className="aspect-square max-h-20 shrink-0"
+          title={[
+            c.kind && `${t('field.kind')}: ${c.kind}`,
+            c.color && `${t('field.color')}: ${c.color}`
+          ]
+            .filter(Boolean)
+            .join('\n')}
+        />
       </div>
 
       <div className="divide-y divide-[var(--color-border)]">
@@ -183,7 +193,9 @@ export default function ResultCard({ data }: Props): ReactNode {
         onClick={() => setShowMore(v => !v)}
         className="group mt-3 flex w-full items-center justify-end gap-1.5 text-base text-[var(--color-primary)]"
       >
-        <span aria-hidden className="no-underline">⚙️</span>
+        <span aria-hidden className="no-underline">
+          ⚙️
+        </span>
         <span className="underline group-hover:no-underline">{t('result.historyLabel')}</span>
         <span
           aria-hidden

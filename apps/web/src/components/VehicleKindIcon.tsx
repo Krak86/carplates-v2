@@ -10,6 +10,7 @@ type Props = {
   color?: VehicleColor | null
   animated?: boolean
   className?: string
+  title?: string
 }
 
 /**
@@ -43,7 +44,7 @@ const SHAPE_BY_KIND: Readonly<Record<VehicleKind, (props: { spin: boolean }) => 
  * so a built-in size class could never be reliably overridden by the caller's `className`.
  * Callers must size it themselves.
  */
-export default function VehicleKindIcon({ kind, color, animated = true, className }: Props): ReactNode {
+export default function VehicleKindIcon({ kind, color, animated = true, className, title }: Props): ReactNode {
   if (!kind) return null
   const Shape = SHAPE_BY_KIND[kind]
   const style = {
@@ -59,6 +60,7 @@ export default function VehicleKindIcon({ kind, color, animated = true, classNam
       className={cn('shrink-0', animated && 'animate-vehicle-sheen', className)}
       style={style}
     >
+      {title && <title>{title}</title>}
       <Shape spin={animated} />
     </svg>
   )

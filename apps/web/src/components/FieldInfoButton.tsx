@@ -20,6 +20,12 @@ type Props = {
 // toward it to scroll doesn't get read as "left".
 const HOVER_CLOSE_DELAY_MS = 1000
 
+// Grace period before a mouse-enter actually opens the panel — without it, a fast
+// pointer sweep across a row of "?" buttons (e.g. moving top to bottom down the card)
+// pops every one of them open in passing. Keyboard focus opens immediately (below) —
+// a Tab landing on the button is a deliberate visit, not a passing sweep.
+const HOVER_OPEN_DELAY_MS = 400
+
 type DimensionConfig = {
   getRows: (stats: StatsResponse) => StatsByDimensionRow[]
   // Only `fuel` has a per-value icon (keyword-matched, ResultCard.helpers.ts) and a
@@ -56,6 +62,7 @@ export default function FieldInfoButton({ dimension, current }: Props): ReactNod
   const visible = hovering || pinned
   const containerRef = useRef<HTMLSpanElement>(null)
   const closeTimeoutRef = useRef<number | null>(null)
+  const openTimeoutRef = useRef<number | null>(null)
   const stats = useQuery({ ...statsQuery(), enabled: visible })
   const config = DIMENSION_CONFIG[dimension]
   const fieldLabel = t(`field.${dimension}`)
@@ -71,7 +78,24 @@ export default function FieldInfoButton({ dimension, current }: Props): ReactNod
     closeTimeoutRef.current = window.setTimeout(() => setHovering(false), HOVER_CLOSE_DELAY_MS)
   }
 
-  useEffect(() => cancelScheduledClose, [])
+  function cancelScheduledOpen(): void {
+    if (openTimeoutRef.current === null) return
+    window.clearTimeout(openTimeoutRef.current)
+    openTimeoutRef.current = null
+  }
+
+  function scheduleOpen(): void {
+    cancelScheduledOpen()
+    openTimeoutRef.current = window.setTimeout(() => setHovering(true), HOVER_OPEN_DELAY_MS)
+  }
+
+  useEffect(
+    () => (): void => {
+      cancelScheduledClose()
+      cancelScheduledOpen()
+    },
+    []
+  )
 
   useEffect(() => {
     if (!pinned) return
@@ -116,14 +140,21 @@ export default function FieldInfoButton({ dimension, current }: Props): ReactNod
       className="relative inline-flex"
       onMouseEnter={() => {
         cancelScheduledClose()
-        setHovering(true)
+        scheduleOpen()
       }}
-      onMouseLeave={scheduleClose}
+      onMouseLeave={() => {
+        cancelScheduledOpen()
+        scheduleClose()
+      }}
       onFocus={() => {
         cancelScheduledClose()
+        cancelScheduledOpen()
         setHovering(true)
       }}
-      onBlur={() => setHovering(false)}
+      onBlur={() => {
+        cancelScheduledOpen()
+        setHovering(false)
+      }}
     >
       <button
         type="button"
