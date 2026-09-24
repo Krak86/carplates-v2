@@ -193,7 +193,7 @@ export default function ResultCard({ data }: Props): ReactNode {
         onClick={() => setShowMore(v => !v)}
         className="group mt-3 flex w-full items-center justify-end gap-1.5 text-base text-[var(--color-primary)]"
       >
-        <span aria-hidden className="no-underline">
+        <span aria-hidden className="animate-gear-tick no-underline">
           ⚙️
         </span>
         <span className="underline group-hover:no-underline">{t('result.historyLabel')}</span>

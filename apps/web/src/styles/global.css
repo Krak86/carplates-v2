@@ -125,3 +125,24 @@ body {
     animation: none;
   }
 }
+
+/* Idle most of the cycle, then a single quick spin — reads as a periodic "tick",
+   not a continuously spinning gear. */
+@keyframes gear-tick {
+  0%,
+  85% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@utility animate-gear-tick {
+  display: inline-block;
+  animation: gear-tick 7s ease-in-out infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
