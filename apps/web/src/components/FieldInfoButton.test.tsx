@@ -29,7 +29,9 @@ const stats: StatsResponse = {
   byFuel: [
     { value: 'БЕНЗИН', totalRows: 6, distinctPlates: 6, distinctVins: 5 },
     { value: null, totalRows: 4, distinctPlates: 3, distinctVins: 3 }
-  ]
+  ],
+  byBrand: [],
+  byBrandYear: []
 }
 
 describe('FieldInfoButton', () => {

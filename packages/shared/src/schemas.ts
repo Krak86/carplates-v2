@@ -114,9 +114,15 @@ export const statsByRegionYearRowSchema = statsMetricsSchema.extend({
 })
 export type StatsByRegionYearRow = z.infer<typeof statsByRegionYearRowSchema>
 
-/** A by-body / by-kind / by-color / by-fuel rollup row — one free-text dimension value, null for unset rows. */
+/** A by-body / by-kind / by-color / by-fuel / by-brand rollup row — one free-text dimension value, null for unset rows. */
 export const statsByDimensionRowSchema = statsMetricsSchema.extend({ value: z.string().nullable() })
 export type StatsByDimensionRow = z.infer<typeof statsByDimensionRowSchema>
+
+export const statsByBrandYearRowSchema = statsMetricsSchema.extend({
+  brand: z.string().nullable(),
+  year: z.number().int().nullable()
+})
+export type StatsByBrandYearRow = z.infer<typeof statsByBrandYearRowSchema>
 
 /** GET /api/stats — everything the stats table (and, later, the map) needs; fetched once and filtered client-side. */
 export const statsResponseSchema = z.object({
@@ -127,7 +133,9 @@ export const statsResponseSchema = z.object({
   byBody: z.array(statsByDimensionRowSchema),
   byKind: z.array(statsByDimensionRowSchema),
   byColor: z.array(statsByDimensionRowSchema),
-  byFuel: z.array(statsByDimensionRowSchema)
+  byFuel: z.array(statsByDimensionRowSchema),
+  byBrand: z.array(statsByDimensionRowSchema),
+  byBrandYear: z.array(statsByBrandYearRowSchema)
 })
 export type StatsResponse = z.infer<typeof statsResponseSchema>
 

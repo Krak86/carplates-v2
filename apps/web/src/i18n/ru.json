@@ -95,6 +95,8 @@
   "stats.dimension.kind": "По типу ТС",
   "stats.dimension.color": "По цвету",
   "stats.dimension.fuel": "По топливу",
+  "stats.dimension.brand": "По производителю",
+  "stats.dimension.brandYear": "По производителю и году",
   "stats.column.year": "Год",
   "stats.column.totalRows": "Всего строк",
   "stats.column.distinctPlates": "Уникальных номеров",

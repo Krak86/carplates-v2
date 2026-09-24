@@ -528,6 +528,35 @@ Doable now, independent of Phases 2-5; each is additive and doesn't block the ot
   error (`onError`) rather than a broken-image icon; `mix-blend-mode: multiply`
   drops the source PNGs' flat white background against the light card surface
   without needing pre-processed transparent assets.
+- **Manufacturer/brand breakdown + year filter on the stats page ✅ DONE (2026-09-24)** —
+  user-requested addition, not a pre-scoped backlog item: "By manufacturer"
+  (LEXUS/PEUGEOT/HONDA/...) and "By manufacturer and year" dimensions on
+  `/stats`, same footing as every other `stats_by_*` rollup. Two new matviews
+  (`migrations/0004_stats_by_brand.sql`) mirroring the `region`/`region_year`
+  pair exactly: `registry.stats_by_brand` (one row per raw `brand` value,
+  all-years total) and `registry.stats_by_brand_year` (brand × year 2D
+  rollup — 122,199 rows on the real dataset, well inside the "add a 2D slice
+  only when a concrete UI need shows up" budget from the step-A rollup design
+  above). Refreshed by the same `refreshStats()`, exposed as `byBrand`/
+  `byBrandYear` on the existing `GET /api/stats` response — no new endpoint.
+  Web: `brand`/`brandYear` added to `STATS_DIMENSIONS`, `dimensionRows()` in
+  `helpers.ts` flattens both the same way `region`/`regionYear` already do;
+  `brandYear` reuses `StatsTable`'s existing global-filter text box for the
+  "filter to one year" ask (type e.g. `2020`) rather than adding a dedicated
+  year picker — same UX `regionYear` already shipped, kept consistent instead
+  of introducing a second filtering pattern.
+
+  **Data characteristic, not a bug:** `brand` is unnormalized free text —
+  36,321 distinct raw values on the real 24.7M-row dataset (typos/OCR/encoding
+  variants), unlike `body`/`kind`/`color`'s small enumerated sets. Not merged
+  or normalized (unlike `fuel`'s unknown-value collapsing) since the top
+  values by volume are already the real manufacturers (VOLKSWAGEN, RENAULT,
+  ВАЗ, MERCEDES-BENZ, SKODA, TOYOTA, FORD, ...) and the table's sort/filter
+  already surfaces them; revisit only if the long tail turns out to matter for
+  some concrete use. Also noticed, pre-existing and unrelated to this change:
+  `distinct_vins` is 0 for 2019-2020 rows across every dimension — those two
+  years' source data has no VINs at all (confirmed against `stats_by_year`),
+  not something this rollup introduced.
 - **Open (not yet done): VinResult's history section is mislabeled.** Its
   "Registration history" timeline is titled `vin.registryTitle` ("State
   registry data") while `ResultCard`'s identical section is titled
@@ -597,6 +626,8 @@ above once scoped, or dropped if research says no.
 - ⛔ Platesmania — **skipped**, see Phase 3: no free token, scraping ruled out.
 - ✅ Registry statistics page, step A (table) and step B (map) — both done,
   see Phase 1.5.
+- ✅ Manufacturer/brand breakdown + year filter on the stats page — done, see
+  Phase 1.5.
 - ✅ Vehicle-kind icon (animated, colored by registry color) + brand logo on
   the result card — done, see Phase 1.5.
 - ⏳ **VinResult history section rename + show current plate** — small,

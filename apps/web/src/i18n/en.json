@@ -95,6 +95,8 @@
   "stats.dimension.kind": "By vehicle kind",
   "stats.dimension.color": "By colour",
   "stats.dimension.fuel": "By fuel",
+  "stats.dimension.brand": "By manufacturer",
+  "stats.dimension.brandYear": "By manufacturer and year",
   "stats.column.year": "Year",
   "stats.column.totalRows": "Total rows",
   "stats.column.distinctPlates": "Distinct plates",

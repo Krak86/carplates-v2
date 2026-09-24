@@ -146,6 +146,19 @@ export const statsByColor = registry
 
 export const statsByFuel = registry.materializedView('stats_by_fuel', { fuel: text('fuel'), ...statsMetrics }).existing()
 
+export const statsByBrand = registry
+  .materializedView('stats_by_brand', { brand: text('brand'), ...statsMetrics })
+  .existing()
+
+/** Brand x year 2D rollup — see migrations/0004_stats_by_brand.sql. */
+export const statsByBrandYear = registry
+  .materializedView('stats_by_brand_year', {
+    brand: text('brand'),
+    year: integer('year'),
+    ...statsMetrics
+  })
+  .existing()
+
 /** Incremental-ingest bookkeeping: which CKAN resources have been loaded. */
 export const ingestedResources = registry.table('ingested_resources', {
   ckanResourceId: text('ckan_resource_id').primaryKey(),

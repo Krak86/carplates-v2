@@ -18,7 +18,9 @@ const stats: StatsResponse = {
     { value: 'БЕНЗИН', totalRows: 6, distinctPlates: 6, distinctVins: 5 },
     { value: null, totalRows: 2, distinctPlates: 2, distinctVins: 2 },
     { value: 'NULL', totalRows: 1, distinctPlates: 1, distinctVins: 1 }
-  ]
+  ],
+  byBrand: [{ value: 'LEXUS', totalRows: 7, distinctPlates: 7, distinctVins: 6 }],
+  byBrandYear: [{ brand: 'LEXUS', year: 2025, totalRows: 3, distinctPlates: 3, distinctVins: 3 }]
 }
 
 describe('dimensionRows', () => {
@@ -50,6 +52,18 @@ describe('dimensionRows', () => {
     expect(dimensionRows(stats, 'fuel')[0]?.label).toBe('БЕНЗИН')
   })
 
+  it('labels the brand rollup by brand name, with no year', () => {
+    expect(dimensionRows(stats, 'brand')).toEqual([
+      { value: 'LEXUS', totalRows: 7, distinctPlates: 7, distinctVins: 6, label: 'LEXUS', year: null }
+    ])
+  })
+
+  it('keeps a separate year alongside the brand label for the 2D rollup', () => {
+    expect(dimensionRows(stats, 'brandYear')).toEqual([
+      { brand: 'LEXUS', year: 2025, totalRows: 3, distinctPlates: 3, distinctVins: 3, label: 'LEXUS' }
+    ])
+  })
+
   it('merges the unknown/absent fuel values into one dash row', () => {
     expect(dimensionRows(stats, 'fuel')).toEqual([
       { value: 'БЕНЗИН', totalRows: 6, distinctPlates: 6, distinctVins: 5, label: 'БЕНЗИН', year: null },
@@ -59,9 +73,11 @@ describe('dimensionRows', () => {
 })
 
 describe('dimensionHasYearColumn', () => {
-  it('is true only for the region x year rollup', () => {
+  it('is true only for the 2D rollups (region x year, brand x year)', () => {
     expect(dimensionHasYearColumn('regionYear')).toBe(true)
+    expect(dimensionHasYearColumn('brandYear')).toBe(true)
     expect(dimensionHasYearColumn('region')).toBe(false)
+    expect(dimensionHasYearColumn('brand')).toBe(false)
     expect(dimensionHasYearColumn('year')).toBe(false)
   })
 })

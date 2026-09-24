@@ -46,12 +46,16 @@ export function dimensionRows(stats: StatsResponse, dim: StatsDimension): StatsR
       return stats.byColor.map(r => ({ ...r, label: r.value ?? '—', year: null }))
     case 'fuel':
       return fuelRows(stats)
+    case 'brand':
+      return stats.byBrand.map(r => ({ ...r, label: r.value ?? '—', year: null }))
+    case 'brandYear':
+      return stats.byBrandYear.map(r => ({ ...r, label: r.brand ?? '—', year: r.year }))
   }
 }
 
 /** Whether the flattened table for `dim` needs a separate, sortable Year column. */
 export function dimensionHasYearColumn(dim: StatsDimension): boolean {
-  return dim === 'regionYear'
+  return dim === 'regionYear' || dim === 'brandYear'
 }
 
 /** The registration-year span the dataset actually covers, or `null` if `byYear` has no dated rows. */

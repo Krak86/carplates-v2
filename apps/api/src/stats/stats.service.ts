@@ -1,6 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common'
 import {
   statsByBody,
+  statsByBrand,
+  statsByBrandYear,
   statsByColor,
   statsByFuel,
   statsByKind,
@@ -20,16 +22,19 @@ export class StatsService {
 
   async get(): Promise<StatsResponse> {
     const db = this.dbService.db
-    const [summaryRows, byYear, byRegion, byRegionYear, byBody, byKind, byColor, byFuel] = await Promise.all([
-      db.select().from(statsSummary),
-      db.select().from(statsByYear),
-      db.select().from(statsByRegion),
-      db.select().from(statsByRegionYear),
-      db.select().from(statsByBody),
-      db.select().from(statsByKind),
-      db.select().from(statsByColor),
-      db.select().from(statsByFuel)
-    ])
+    const [summaryRows, byYear, byRegion, byRegionYear, byBody, byKind, byColor, byFuel, byBrand, byBrandYear] =
+      await Promise.all([
+        db.select().from(statsSummary),
+        db.select().from(statsByYear),
+        db.select().from(statsByRegion),
+        db.select().from(statsByRegionYear),
+        db.select().from(statsByBody),
+        db.select().from(statsByKind),
+        db.select().from(statsByColor),
+        db.select().from(statsByFuel),
+        db.select().from(statsByBrand),
+        db.select().from(statsByBrandYear)
+      ])
     const summary = summaryRows[0]
 
     return statsResponseSchema.parse({
@@ -45,7 +50,9 @@ export class StatsService {
       byBody: byBody.map(row => ({ ...row, value: row.body })),
       byKind: byKind.map(row => ({ ...row, value: row.kind })),
       byColor: byColor.map(row => ({ ...row, value: row.color })),
-      byFuel: byFuel.map(row => ({ ...row, value: row.fuel }))
+      byFuel: byFuel.map(row => ({ ...row, value: row.fuel })),
+      byBrand: byBrand.map(row => ({ ...row, value: row.brand })),
+      byBrandYear
     })
   }
 }

@@ -1,4 +1,14 @@
-export const STATS_DIMENSIONS = ['region', 'regionYear', 'year', 'body', 'kind', 'color', 'fuel'] as const
+export const STATS_DIMENSIONS = [
+  'region',
+  'regionYear',
+  'year',
+  'body',
+  'kind',
+  'color',
+  'fuel',
+  'brand',
+  'brandYear'
+] as const
 export type StatsDimension = (typeof STATS_DIMENSIONS)[number]
 
 export const STATS_METRICS = ['distinctPlates', 'distinctVins', 'totalRows'] as const
@@ -22,7 +32,9 @@ export const DIMENSION_ICONS: Readonly<Record<StatsDimension, string>> = {
   body: '🚙',
   kind: '🚚',
   color: '🎨',
-  fuel: '⛽'
+  fuel: '⛽',
+  brand: '🏭',
+  brandYear: '🏭📅'
 }
 
 export const METRIC_ICONS: Readonly<Record<StatsMetric, string>> = {

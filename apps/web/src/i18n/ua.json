@@ -95,6 +95,8 @@
   "stats.dimension.kind": "За типом ТЗ",
   "stats.dimension.color": "За кольором",
   "stats.dimension.fuel": "За пальним",
+  "stats.dimension.brand": "За виробником",
+  "stats.dimension.brandYear": "За виробником і роком",
   "stats.column.year": "Рік",
   "stats.column.totalRows": "Усього рядків",
   "stats.column.distinctPlates": "Унікальних номерів",

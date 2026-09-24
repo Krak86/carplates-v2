@@ -11,6 +11,8 @@ export {
   statsByKind,
   statsByColor,
   statsByFuel,
+  statsByBrand,
+  statsByBrandYear,
   ingestedResources,
   type RegistrationRow,
   type RegistrationInsert,
