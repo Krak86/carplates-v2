@@ -20,7 +20,11 @@ const WIKI_LANG_DOMAIN: Readonly<Record<string, string>> = {
 }
 
 /** Wikipedia search-and-go link for a raw registry brand + model, or `null` when neither is known. */
-export function wikiUrl(brand: string | null | undefined, model: string | null | undefined, lang: string): string | null {
+export function wikiUrl(
+  brand: string | null | undefined,
+  model: string | null | undefined,
+  lang: string
+): string | null {
   const query = [brand, model].filter(Boolean).join(' ').trim()
   if (!query) return null
   const domain = WIKI_LANG_DOMAIN[lang] ?? 'en'

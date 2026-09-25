@@ -42,12 +42,19 @@ export default function CrashVideoModal({ nhtsaVideoUrl, description, onClose }:
           </button>
         </div>
 
-        {!ready && !failed && <p className="py-8 text-center text-sm text-[var(--color-muted)]">{t('safety.videoLoading')}</p>}
+        {!ready && !failed && (
+          <p className="py-8 text-center text-sm text-[var(--color-muted)]">{t('safety.videoLoading')}</p>
+        )}
 
         {failed ? (
           <div className="py-8 text-center text-sm text-[var(--color-muted)]">
             <p className="mb-2">{t('safety.videoError')}</p>
-            <a href={nhtsaVideoUrl} target="_blank" rel="noopener noreferrer" className="text-[var(--color-primary)] underline">
+            <a
+              href={nhtsaVideoUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[var(--color-primary)] underline"
+            >
               {t('safety.videoDownloadOriginal')} ↗
             </a>
           </div>

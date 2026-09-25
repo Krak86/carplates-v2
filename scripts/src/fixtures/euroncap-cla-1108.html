@@ -1,95 +1,133 @@
-<html><body>
-<!-- Trimmed from a real fetch of https://www.euroncap.com/assessments/mercedes-benz/cla/1108/ —
+<html>
+  <body>
+    <!-- Trimmed from a real fetch of https://www.euroncap.com/assessments/mercedes-benz/cla/1108/ —
      kept verbatim class/data-component names, dropped unrelated markup (nav, footer, scripts).
      Duplicated once (star-rating + table-row), same as the real page's desktop/print copies,
      to exercise the parser's "take the first occurrence" behaviour. -->
-<div data-component="vehicle-info">
-  <div class="flex flex-wrap items-center gap-2 justify-end">
-    <div class="flex items-center justify-center gap-2 px-4 py-[5px] rounded-[40px] bg-theme-badge-yellow-bg" data-component="vehicle-badge">
-      <span class="text-body-sm-bold text-center">Best in Class</span>
-    </div>
-  </div>
-  <div class="bg-theme-rating-pill-bg flex items-center justify-center gap-4 px-4 py-[2px] rounded-[39px]" data-component="vehicle-year-stars" data-rating-type="safety">
-    <div class="flex items-center justify-center min-w-[70px]">
-      <span class="text-theme-rating-pill-text font-normal leading-[1.4] text-center text-body-md"><span class="font-normal">2025</span></span>
-    </div>
-    <div class="w-0 h-8 border-l border-theme-rating-pill-border"></div>
-    <div class="flex items-center justify-center gap-2 flex-1" data-component="stars">
-      <div class="flex items-center justify-center gap-[7.37px] " data-component="star-rating">
-        <span class="w-5 h-5 bg-primary-yellow icon-star"></span>
-        <span class="w-5 h-5 bg-primary-yellow icon-star"></span>
-        <span class="w-5 h-5 bg-primary-yellow icon-star"></span>
-        <span class="w-5 h-5 bg-primary-yellow icon-star"></span>
-        <span class="w-5 h-5 bg-primary-yellow icon-star"></span>
+    <div data-component="vehicle-info">
+      <div class="flex flex-wrap items-center justify-end gap-2">
+        <div
+          class="bg-theme-badge-yellow-bg flex items-center justify-center gap-2 rounded-[40px] px-4 py-[5px]"
+          data-component="vehicle-badge"
+        >
+          <span class="text-body-sm-bold text-center">Best in Class</span>
+        </div>
+      </div>
+      <div
+        class="bg-theme-rating-pill-bg flex items-center justify-center gap-4 rounded-[39px] px-4 py-[2px]"
+        data-component="vehicle-year-stars"
+        data-rating-type="safety"
+      >
+        <div class="flex min-w-[70px] items-center justify-center">
+          <span class="text-theme-rating-pill-text text-body-md text-center leading-[1.4] font-normal"
+            ><span class="font-normal">2025</span></span
+          >
+        </div>
+        <div class="border-theme-rating-pill-border h-8 w-0 border-l"></div>
+        <div class="flex flex-1 items-center justify-center gap-2" data-component="stars">
+          <div class="flex items-center justify-center gap-[7.37px]" data-component="star-rating">
+            <span class="bg-primary-yellow icon-star h-5 w-5"></span>
+            <span class="bg-primary-yellow icon-star h-5 w-5"></span>
+            <span class="bg-primary-yellow icon-star h-5 w-5"></span>
+            <span class="bg-primary-yellow icon-star h-5 w-5"></span>
+            <span class="bg-primary-yellow icon-star h-5 w-5"></span>
+          </div>
+        </div>
+      </div>
+
+      <div data-component="table-data">
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3" data-component="table-grid">
+          <div class="mb-1 flex flex-col gap-[2px]" data-component="table-row">
+            <span class="text-subtitle-md" data-component="table-label">Tested model</span>
+            <span class="text-body-sm-bold" data-component="table-value">Mercedes-Benz CLA 250+ AMG Line</span>
+          </div>
+          <div class="mb-1 flex flex-col gap-[2px]" data-component="table-row">
+            <span class="text-subtitle-md" data-component="table-label">Body type</span>
+            <span class="text-body-sm-bold" data-component="table-value">Sedan</span>
+          </div>
+          <div class="mb-1 flex flex-col gap-[2px]" data-component="table-row">
+            <span class="text-subtitle-md" data-component="table-label">Kerb weight</span>
+            <span class="text-body-sm-bold" data-component="table-value">2056 kg</span>
+          </div>
+        </div>
+      </div>
+
+      <div role="list">
+        <div role="listitem">
+          <div data-component="pillar-card" data-pillar-id="202">
+            <h3 class="text-heading-4">Adult Occupant</h3>
+            <span class="text-heading-2 text-theme-pillar-card-score !font-bold">94%</span>
+          </div>
+        </div>
+        <div role="listitem">
+          <div data-component="pillar-card" data-pillar-id="203">
+            <h3 class="text-heading-4">Child Occupant</h3>
+            <span class="text-heading-2 text-theme-pillar-card-score !font-bold">89%</span>
+          </div>
+        </div>
+        <div role="listitem">
+          <div data-component="pillar-card" data-pillar-id="204">
+            <h3 class="text-heading-4">Vulnerable Road Users</h3>
+            <span class="text-heading-2 text-theme-pillar-card-score !font-bold">93%</span>
+          </div>
+        </div>
+        <div role="listitem">
+          <div data-component="pillar-card" data-pillar-id="205">
+            <h3 class="text-heading-4">Safety Assist</h3>
+            <span class="text-heading-2 text-theme-pillar-card-score !font-bold">85%</span>
+          </div>
+        </div>
+      </div>
+
+      <div data-component="assessment-card-carousel">
+        <img
+          alt="CLA frontal view"
+          class="object-contain"
+          src="https://data-cdn.euroncap.com/media/assessment-media/08c28122-8d72-4a88-a25b-82d265957eb6/mercedes-benz-cla-2025-1108_0__0325e0a78959ad5e_xl.webp"
+        />
+        <img
+          alt="test picture"
+          class="object-cover"
+          src="https://data-cdn.euroncap.com/media/assessment-media/08c28122-8d72-4a88-a25b-82d265957eb6/mercedes-benz-cla-2025-1108_MPDB__0e2d18690440c1dc_xl.webp"
+        />
+        <img
+          alt="test picture"
+          class="object-cover"
+          src="https://data-cdn.euroncap.com/media/assessment-media/08c28122-8d72-4a88-a25b-82d265957eb6/mercedes-benz-cla-2025-1108_FW__d1358c91cb8d4a5b_xl.webp"
+        />
+        <img
+          alt="test picture"
+          class="object-cover"
+          src="https://data-cdn.euroncap.com/media/assessment-media/08c28122-8d72-4a88-a25b-82d265957eb6/mercedes-benz-cla-2025-1108_O2O1__122b4a00580e4745_xl.webp"
+        />
+      </div>
+
+      <link rel="preload" as="image" href="https://img.youtube.com/vi/uwm44li8Tqo/hqdefault.jpg" />
+
+      <div data-component="attachments">
+        <button aria-label="Euro NCAP safety report: Download the detailed safety assessment for this vehicle.">
+          <h3>Euro NCAP safety report</h3>
+        </button>
+        <a
+          href="https://euroncaprescuesheets.blob.core.windows.net/rescuesheets/Mercedes-Benz/Mercedes-Benz_CLA__Coup%C3%A9_2025_4d_Electric_EN.pdf"
+          >Emergency rescue sheet</a
+        >
       </div>
     </div>
-  </div>
 
-  <div data-component="table-data">
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6" data-component="table-grid">
-      <div class="flex flex-col gap-[2px] mb-1" data-component="table-row">
-        <span class="text-subtitle-md" data-component="table-label">Tested model</span>
-        <span class="text-body-sm-bold" data-component="table-value">Mercedes-Benz CLA 250+ AMG Line</span>
-      </div>
-      <div class="flex flex-col gap-[2px] mb-1" data-component="table-row">
-        <span class="text-subtitle-md" data-component="table-label">Body type</span>
-        <span class="text-body-sm-bold" data-component="table-value">Sedan</span>
-      </div>
-      <div class="flex flex-col gap-[2px] mb-1" data-component="table-row">
-        <span class="text-subtitle-md" data-component="table-label">Kerb weight</span>
-        <span class="text-body-sm-bold" data-component="table-value">2056 kg</span>
-      </div>
-    </div>
-  </div>
-
-  <div role="list">
-    <div role="listitem"><div data-component="pillar-card" data-pillar-id="202">
-      <h3 class="text-heading-4">Adult Occupant</h3>
-      <span class="text-heading-2 !font-bold text-theme-pillar-card-score">94%</span>
-    </div></div>
-    <div role="listitem"><div data-component="pillar-card" data-pillar-id="203">
-      <h3 class="text-heading-4">Child Occupant</h3>
-      <span class="text-heading-2 !font-bold text-theme-pillar-card-score">89%</span>
-    </div></div>
-    <div role="listitem"><div data-component="pillar-card" data-pillar-id="204">
-      <h3 class="text-heading-4">Vulnerable Road Users</h3>
-      <span class="text-heading-2 !font-bold text-theme-pillar-card-score">93%</span>
-    </div></div>
-    <div role="listitem"><div data-component="pillar-card" data-pillar-id="205">
-      <h3 class="text-heading-4">Safety Assist</h3>
-      <span class="text-heading-2 !font-bold text-theme-pillar-card-score">85%</span>
-    </div></div>
-  </div>
-
-  <div data-component="assessment-card-carousel">
-    <img alt="CLA frontal view" class="object-contain" src="https://data-cdn.euroncap.com/media/assessment-media/08c28122-8d72-4a88-a25b-82d265957eb6/mercedes-benz-cla-2025-1108_0__0325e0a78959ad5e_xl.webp">
-    <img alt="test picture" class="object-cover" src="https://data-cdn.euroncap.com/media/assessment-media/08c28122-8d72-4a88-a25b-82d265957eb6/mercedes-benz-cla-2025-1108_MPDB__0e2d18690440c1dc_xl.webp">
-    <img alt="test picture" class="object-cover" src="https://data-cdn.euroncap.com/media/assessment-media/08c28122-8d72-4a88-a25b-82d265957eb6/mercedes-benz-cla-2025-1108_FW__d1358c91cb8d4a5b_xl.webp">
-    <img alt="test picture" class="object-cover" src="https://data-cdn.euroncap.com/media/assessment-media/08c28122-8d72-4a88-a25b-82d265957eb6/mercedes-benz-cla-2025-1108_O2O1__122b4a00580e4745_xl.webp">
-  </div>
-
-  <link rel="preload" as="image" href="https://img.youtube.com/vi/uwm44li8Tqo/hqdefault.jpg">
-
-  <div data-component="attachments">
-    <button aria-label="Euro NCAP safety report: Download the detailed safety assessment for this vehicle.">
-      <h3>Euro NCAP safety report</h3>
-    </button>
-    <a href="https://euroncaprescuesheets.blob.core.windows.net/rescuesheets/Mercedes-Benz/Mercedes-Benz_CLA__Coup%C3%A9_2025_4d_Electric_EN.pdf">Emergency rescue sheet</a>
-  </div>
-</div>
-
-<!-- print-layout duplicate of the same year/stars block — real pages repeat this; the
+    <!-- print-layout duplicate of the same year/stars block — real pages repeat this; the
      parser must key off the FIRST [data-rating-type="safety"] scope, not this one. -->
-<div class="hidden print:flex" data-component="vehicle-info-left">
-  <div data-component="vehicle-year-stars" data-rating-type="safety">
-    <span class="font-normal">2025</span>
-    <div data-component="star-rating">
-      <span class="w-5 h-5 bg-primary-yellow icon-star"></span>
-      <span class="w-5 h-5 bg-dark-grey icon-star"></span>
-      <span class="w-5 h-5 bg-dark-grey icon-star"></span>
-      <span class="w-5 h-5 bg-dark-grey icon-star"></span>
-      <span class="w-5 h-5 bg-dark-grey icon-star"></span>
+    <div class="hidden print:flex" data-component="vehicle-info-left">
+      <div data-component="vehicle-year-stars" data-rating-type="safety">
+        <span class="font-normal">2025</span>
+        <div data-component="star-rating">
+          <span class="bg-primary-yellow icon-star h-5 w-5"></span>
+          <span class="bg-dark-grey icon-star h-5 w-5"></span>
+          <span class="bg-dark-grey icon-star h-5 w-5"></span>
+          <span class="bg-dark-grey icon-star h-5 w-5"></span>
+          <span class="bg-dark-grey icon-star h-5 w-5"></span>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
-</body></html>
+  </body>
+</html>

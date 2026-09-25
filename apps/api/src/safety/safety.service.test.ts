@@ -14,47 +14,45 @@ beforeEach(() => {
 describe('SafetyService', () => {
   it('resolves variant ids then maps their ratings', async () => {
     const fetchMock = vi.mocked(fetch)
-    fetchMock
-      .mockResolvedValueOnce(jsonResponse({ Count: 1, Results: [{ VehicleId: 9403 }] }))
-      .mockResolvedValueOnce(
-        jsonResponse({
-          Count: 1,
-          Results: [
-            {
-              VehicleId: 9403,
-              VehicleDescription: '2015 Audi A3 4 DR AWD',
-              OverallRating: '5',
-              OverallFrontCrashRating: '4',
-              FrontCrashDriversideRating: '4',
-              FrontCrashPassengersideRating: '5',
-              FrontCrashPicture: 'https://static.nhtsa.gov/front.jpg',
-              FrontCrashVideo: 'https://static.nhtsa.gov/front.wmv',
-              OverallSideCrashRating: '5',
-              SideCrashDriversideRating: '5',
-              SideCrashPassengersideRating: '5',
-              SideCrashPicture: null,
-              SideCrashVideo: null,
-              RolloverRating: '4',
-              RolloverRating2: 'Not Rated',
-              RolloverPossibility: 0.109,
-              RolloverPossibility2: null,
-              dynamicTipResult: 'No Tip',
-              SidePoleCrashRating: '5',
-              SidePolePicture: null,
-              SidePoleVideo: null,
-              'combinedSideBarrierAndPoleRating-Front': '5',
-              'combinedSideBarrierAndPoleRating-Rear': '5',
-              'sideBarrierRating-Overall': '5',
-              NHTSAElectronicStabilityControl: 'Standard',
-              NHTSAForwardCollisionWarning: 'Optional',
-              NHTSALaneDepartureWarning: 'Optional',
-              ComplaintsCount: 179,
-              RecallsCount: 7,
-              InvestigationCount: 1
-            }
-          ]
-        })
-      )
+    fetchMock.mockResolvedValueOnce(jsonResponse({ Count: 1, Results: [{ VehicleId: 9403 }] })).mockResolvedValueOnce(
+      jsonResponse({
+        Count: 1,
+        Results: [
+          {
+            VehicleId: 9403,
+            VehicleDescription: '2015 Audi A3 4 DR AWD',
+            OverallRating: '5',
+            OverallFrontCrashRating: '4',
+            FrontCrashDriversideRating: '4',
+            FrontCrashPassengersideRating: '5',
+            FrontCrashPicture: 'https://static.nhtsa.gov/front.jpg',
+            FrontCrashVideo: 'https://static.nhtsa.gov/front.wmv',
+            OverallSideCrashRating: '5',
+            SideCrashDriversideRating: '5',
+            SideCrashPassengersideRating: '5',
+            SideCrashPicture: null,
+            SideCrashVideo: null,
+            RolloverRating: '4',
+            RolloverRating2: 'Not Rated',
+            RolloverPossibility: 0.109,
+            RolloverPossibility2: null,
+            dynamicTipResult: 'No Tip',
+            SidePoleCrashRating: '5',
+            SidePolePicture: null,
+            SidePoleVideo: null,
+            'combinedSideBarrierAndPoleRating-Front': '5',
+            'combinedSideBarrierAndPoleRating-Rear': '5',
+            'sideBarrierRating-Overall': '5',
+            NHTSAElectronicStabilityControl: 'Standard',
+            NHTSAForwardCollisionWarning: 'Optional',
+            NHTSALaneDepartureWarning: 'Optional',
+            ComplaintsCount: 179,
+            RecallsCount: 7,
+            InvestigationCount: 1
+          }
+        ]
+      })
+    )
 
     const service = new SafetyService()
     const result = await service.ratings('Audi', 'A3', 2015)
@@ -102,7 +100,10 @@ describe('SafetyService', () => {
       .mockResolvedValueOnce(jsonResponse({ Count: 0, Results: [] })) // model=E 200 → miss
       .mockResolvedValueOnce(jsonResponse({ Count: 1, Results: [{ VehicleId: 9224 }] })) // model=E-CLASS → hit
       .mockResolvedValueOnce(
-        jsonResponse({ Count: 1, Results: [{ VehicleId: 9224, VehicleDescription: '2015 Mercedes-Benz E-Class 4 DR RWD' }] })
+        jsonResponse({
+          Count: 1,
+          Results: [{ VehicleId: 9224, VehicleDescription: '2015 Mercedes-Benz E-Class 4 DR RWD' }]
+        })
       )
 
     const service = new SafetyService()

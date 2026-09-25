@@ -101,7 +101,10 @@ describe('yearRange', () => {
   })
 
   it('returns null when there are no dated years', () => {
-    const noYears: StatsResponse = { ...stats, byYear: [{ year: null, totalRows: 1, distinctPlates: 1, distinctVins: 1 }] }
+    const noYears: StatsResponse = {
+      ...stats,
+      byYear: [{ year: null, totalRows: 1, distinctPlates: 1, distinctVins: 1 }]
+    }
     expect(yearRange(noYears)).toBeNull()
   })
 })

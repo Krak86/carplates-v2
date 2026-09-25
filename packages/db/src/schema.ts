@@ -138,15 +138,21 @@ export const statsByRegionYear = registry
   })
   .existing()
 
-export const statsByBody = registry.materializedView('stats_by_body', { body: text('body'), ...statsMetrics }).existing()
+export const statsByBody = registry
+  .materializedView('stats_by_body', { body: text('body'), ...statsMetrics })
+  .existing()
 
-export const statsByKind = registry.materializedView('stats_by_kind', { kind: text('kind'), ...statsMetrics }).existing()
+export const statsByKind = registry
+  .materializedView('stats_by_kind', { kind: text('kind'), ...statsMetrics })
+  .existing()
 
 export const statsByColor = registry
   .materializedView('stats_by_color', { color: text('color'), ...statsMetrics })
   .existing()
 
-export const statsByFuel = registry.materializedView('stats_by_fuel', { fuel: text('fuel'), ...statsMetrics }).existing()
+export const statsByFuel = registry
+  .materializedView('stats_by_fuel', { fuel: text('fuel'), ...statsMetrics })
+  .existing()
 
 export const statsByBrand = registry
   .materializedView('stats_by_brand', { brand: text('brand'), ...statsMetrics })
@@ -199,6 +205,44 @@ export const euroncapRatings = registry.table(
 )
 export type EuroncapRatingRow = typeof euroncapRatings.$inferSelect
 export type EuroncapRatingInsert = typeof euroncapRatings.$inferInsert
+
+/**
+ * One JNCAP (Japan, NASVA) tested assessment — scraped from nasva.go.jp's English mirror
+ * (no public API) via `scripts/src/jncap.ts` and refreshed by re-running it, same rationale
+ * as `euroncapRatings` above. `makeKey`/`modelKey` (`@carplates/shared`) drive both the
+ * scraper's write key and the API's lookup — see migrations/0006_jncap_ratings.sql.
+ */
+export const jncapRatings = registry.table(
+  'jncap_ratings',
+  {
+    assessmentId: text('assessment_id').primaryKey(),
+    url: text('url').notNull(),
+    make: text('make').notNull(),
+    model: text('model').notNull(),
+    makeKey: text('make_key').notNull(),
+    modelKey: text('model_key').notNull(),
+    vehicleType: text('vehicle_type'),
+    ratingYear: integer('rating_year'),
+    stars: smallint('stars'),
+    overallPct: smallint('overall_pct'),
+    preventiveRank: text('preventive_rank'),
+    preventivePct: smallint('preventive_pct'),
+    collisionRank: text('collision_rank'),
+    collisionPct: smallint('collision_pct'),
+    emergencyCallType: text('emergency_call_type'),
+    emergencyCallPct: smallint('emergency_call_pct'),
+    /** Raw ordered `{ label, value }[]` breakdown — JNCAP's own test taxonomy, kept as-is. */
+    testScores: jsonb('test_scores').$type<{ label: string; value: string }[]>().notNull().default([]),
+    /** Hotlinked from NASVA's own site, never rehosted. */
+    imageUrl: text('image_url'),
+    youtubeId: text('youtube_id'),
+    reportPdfUrl: text('report_pdf_url'),
+    scrapedAt: timestamp('scraped_at', { withTimezone: true }).notNull().defaultNow()
+  },
+  t => [index('ix_jncap_make_model').on(t.makeKey, t.modelKey)]
+)
+export type JncapRatingRow = typeof jncapRatings.$inferSelect
+export type JncapRatingInsert = typeof jncapRatings.$inferInsert
 
 /** Incremental-ingest bookkeeping: which CKAN resources have been loaded. */
 export const ingestedResources = registry.table('ingested_resources', {

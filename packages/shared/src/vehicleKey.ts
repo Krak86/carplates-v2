@@ -25,6 +25,9 @@ export function makeKey(brand: string | null | undefined): string | null {
  */
 export function modelKey(model: string | null | undefined): string | null {
   if (!model) return null
-  const key = model.trim().toLowerCase().replace(/[^a-z0-9]+/g, '')
+  const key = model
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '')
   return key || null
 }

@@ -126,7 +126,12 @@ export default function FieldInfoButton({ dimension, current }: Props): ReactNod
   const allRows = stats.data ? config.getRows(stats.data) : []
   const known = allRows
     .filter(row => isKnown(row.value))
-    .map(row => ({ value: row.value, icon: config.getIcon?.(row.value), totalRows: row.totalRows, isCurrent: row.value === current }))
+    .map(row => ({
+      value: row.value,
+      icon: config.getIcon?.(row.value),
+      totalRows: row.totalRows,
+      isCurrent: row.value === current
+    }))
     .sort((a, b) => b.totalRows - a.totalRows)
   const unknownTotal = allRows.filter(row => !isKnown(row.value)).reduce((sum, row) => sum + row.totalRows, 0)
   const rows =

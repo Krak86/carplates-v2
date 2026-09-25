@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 
 import EuroNcapRatings from '@/components/EuroNcapRatings'
 import InfoPopover from '@/components/InfoPopover'
+import JncapRatings from '@/components/JncapRatings'
 import NhtsaRatings from '@/components/NhtsaRatings'
 import {
   NHTSA_CURRENT_BRANDS,
@@ -19,7 +20,7 @@ type Props = {
   body: string | null
 }
 
-type Source = 'euroncap' | 'nhtsa'
+type Source = 'euroncap' | 'nhtsa' | 'jncap'
 
 /**
  * Combined "which cars does this cover" explainer for both sources at once —
@@ -55,15 +56,20 @@ function CoverageInfo(): ReactNode {
           <div className="text-[var(--color-muted)]">{NHTSA_UNCOVERED_EXAMPLE_BRANDS.join(', ')}</div>
         </div>
       </div>
+      <div>
+        <div className="font-medium">{t('safety.coverageInfoJncapTitle')}</div>
+        <p className="text-[var(--color-muted)]">{t('safety.coverageInfoJncapBody')}</p>
+      </div>
     </div>
   )
 }
 
 /**
- * Crash-test safety ratings from two independent sources, tabbed rather than
+ * Crash-test safety ratings from three independent sources, tabbed rather than
  * merged since they use different scales/protocols and cover different cars:
  * Euro NCAP (EU-spec, the dominant import stock in Ukraine) is the default,
- * NHTSA (US-spec only) the secondary tab. Each tab fetches its own data only
+ * NHTSA (US-spec only) and JNCAP (JDM-domestic, never-exported models like
+ * Alphard/Crown/Skyline) the other two. Each tab fetches its own data only
  * once this section is expanded AND that tab is the active one.
  */
 export default function SafetyRatings({ brand, model, year, body }: Props): ReactNode {
@@ -111,7 +117,11 @@ export default function SafetyRatings({ brand, model, year, body }: Props): Reac
       >
         <div className="overflow-hidden">
           <div className="mt-2">
-            <div role="tablist" aria-label={t('safety.title')} className="mb-2 flex gap-1 rounded-full bg-[var(--color-border)]/30 p-1">
+            <div
+              role="tablist"
+              aria-label={t('safety.title')}
+              className="mb-2 flex gap-1 rounded-full bg-[var(--color-border)]/30 p-1"
+            >
               <button
                 type="button"
                 role="tab"
@@ -119,7 +129,9 @@ export default function SafetyRatings({ brand, model, year, body }: Props): Reac
                 onClick={() => setSource('euroncap')}
                 className={cn(
                   'flex-1 rounded-full px-3 py-1 text-sm transition-colors',
-                  source === 'euroncap' ? 'bg-[var(--color-surface)] font-medium shadow-sm' : 'text-[var(--color-muted)]'
+                  source === 'euroncap'
+                    ? 'bg-[var(--color-surface)] font-medium shadow-sm'
+                    : 'text-[var(--color-muted)]'
                 )}
               >
                 {t('safety.tabEuroNcap')}
@@ -136,13 +148,23 @@ export default function SafetyRatings({ brand, model, year, body }: Props): Reac
               >
                 {t('safety.tabNhtsa')}
               </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={source === 'jncap'}
+                onClick={() => setSource('jncap')}
+                className={cn(
+                  'flex-1 rounded-full px-3 py-1 text-sm transition-colors',
+                  source === 'jncap' ? 'bg-[var(--color-surface)] font-medium shadow-sm' : 'text-[var(--color-muted)]'
+                )}
+              >
+                {t('safety.tabJncap')}
+              </button>
             </div>
 
-            {source === 'euroncap' ? (
-              <EuroNcapRatings brand={brand} model={model} year={year} active={open} />
-            ) : (
-              <NhtsaRatings brand={brand} model={model} year={year} body={body} active={open} />
-            )}
+            {source === 'euroncap' && <EuroNcapRatings brand={brand} model={model} year={year} active={open} />}
+            {source === 'nhtsa' && <NhtsaRatings brand={brand} model={model} year={year} body={body} active={open} />}
+            {source === 'jncap' && <JncapRatings brand={brand} model={model} year={year} active={open} />}
           </div>
         </div>
       </div>

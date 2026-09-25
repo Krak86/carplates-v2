@@ -17,7 +17,7 @@ describe('makeKey', () => {
     expect(makeKey('Some New Brand')).toBe('somenewbrand')
   })
 
-  it('matches regardless of which separator Euro NCAP\'s own URL slug uses for the same brand', () => {
+  it("matches regardless of which separator Euro NCAP's own URL slug uses for the same brand", () => {
     // brandSlug('LAND ROVER') is 'land-rover', but Euro NCAP's URL slug is 'land+rover' —
     // both must collapse to the same key, which is the whole reason for stripping to
     // alphanumeric-only rather than preserving a hyphenated canonical form.

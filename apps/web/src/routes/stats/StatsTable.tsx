@@ -80,9 +80,7 @@ export default function StatsTable({ rows, labelHeader, showYearColumn, defaultS
 
   const visibleRows = shouldVirtualize ? virtualizer.getVirtualItems() : tableRows.map((_, index) => ({ index }))
   const topPad = shouldVirtualize ? (virtualizer.getVirtualItems()[0]?.start ?? 0) : 0
-  const bottomPad = shouldVirtualize
-    ? virtualizer.getTotalSize() - (virtualizer.getVirtualItems().at(-1)?.end ?? 0)
-    : 0
+  const bottomPad = shouldVirtualize ? virtualizer.getTotalSize() - (virtualizer.getVirtualItems().at(-1)?.end ?? 0) : 0
 
   return (
     <div>

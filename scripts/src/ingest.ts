@@ -77,7 +77,8 @@ function parseArgs(argv: string[]): Args {
     else if (arg === '--backfill-plates') a.backfillPlates = true
     else if (arg === '--after') {
       const v = argv[++i]
-      if (!v || !/^\d{4}-\d{2}-\d{2}$/.test(v)) throw new Error(`--after must be an ISO date (YYYY-MM-DD), got "${String(v)}"`)
+      if (!v || !/^\d{4}-\d{2}-\d{2}$/.test(v))
+        throw new Error(`--after must be an ISO date (YYYY-MM-DD), got "${String(v)}"`)
       a.after = v
     } else if (arg === '--encoding') {
       const v = argv[++i]
@@ -211,7 +212,9 @@ async function ingestCsv(
     if (args.limit && mapped >= args.limit) break
   }
   await flush()
-  log(`  done: ${mapped} rows mapped, ${args.dryRun ? mapped : inserted} ${args.dryRun ? '(dry-run, not written)' : 'inserted'}`)
+  log(
+    `  done: ${mapped} rows mapped, ${args.dryRun ? mapped : inserted} ${args.dryRun ? '(dry-run, not written)' : 'inserted'}`
+  )
   return args.dryRun ? mapped : inserted
 }
 

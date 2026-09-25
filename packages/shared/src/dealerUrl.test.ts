@@ -12,11 +12,11 @@ describe('dealerUrl', () => {
     expect(dealerUrl('HYUNDAI  TUCSON')).toBe('https://hyundai.com.ua/')
   })
 
-  it('maps a brand sold under another brand\'s UA site to that site', () => {
+  it("maps a brand sold under another brand's UA site to that site", () => {
     expect(dealerUrl('DACIA')).toBe('https://www.renault.ua/')
   })
 
-  it('falls back to the manufacturer\'s global site when no UA-specific site was found', () => {
+  it("falls back to the manufacturer's global site when no UA-specific site was found", () => {
     expect(dealerUrl('TESLA')).toBe('https://www.tesla.com/')
     expect(dealerUrl('FERRARI')).toBe('https://www.ferrari.com/')
   })

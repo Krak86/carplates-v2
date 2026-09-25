@@ -1,5 +1,6 @@
 import {
   euroNcapRatingsResponseSchema,
+  jncapRatingsResponseSchema,
   plateHistoryResponseSchema,
   plateLookupResponseSchema,
   plateRecognizeResponseSchema,
@@ -10,6 +11,7 @@ import {
 } from '@carplates/shared'
 import type {
   EuroNcapRatingsResponse,
+  JncapRatingsResponse,
   PlateHistoryResponse,
   PlateLookupResponse,
   PlateRecognizeResponse,
@@ -68,7 +70,11 @@ export async function getStats(): Promise<StatsResponse> {
   return statsResponseSchema.parse(await getJson('/api/stats'))
 }
 
-export async function getVehiclePhotos(brand: string, model: string, year: number | null): Promise<VehiclePhotosResponse> {
+export async function getVehiclePhotos(
+  brand: string,
+  model: string,
+  year: number | null
+): Promise<VehiclePhotosResponse> {
   const params = new URLSearchParams()
   if (brand) params.set('brand', brand)
   if (model) params.set('model', model)
@@ -85,6 +91,12 @@ export async function getSafetyRatings(make: string, model: string, year: number
 export async function getEuroNcapRatings(make: string, model: string, year: number): Promise<EuroNcapRatingsResponse> {
   const params = new URLSearchParams({ make, model, year: String(year) })
   return euroNcapRatingsResponseSchema.parse(await getJson(`/api/safety/euroncap?${params.toString()}`))
+}
+
+// Persisted (scraped), not proxied live — see apps/api/src/safety/jncap.service.ts.
+export async function getJncapRatings(make: string, model: string, year: number): Promise<JncapRatingsResponse> {
+  const params = new URLSearchParams({ make, model, year: String(year) })
+  return jncapRatingsResponseSchema.parse(await getJson(`/api/safety/jncap?${params.toString()}`))
 }
 
 // Our own transcode-and-cache proxy (the source .wmv can't play in any modern browser).

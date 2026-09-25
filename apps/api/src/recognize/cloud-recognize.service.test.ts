@@ -1,4 +1,9 @@
-import { BadGatewayException, BadRequestException, NotFoundException, ServiceUnavailableException } from '@nestjs/common'
+import {
+  BadGatewayException,
+  BadRequestException,
+  NotFoundException,
+  ServiceUnavailableException
+} from '@nestjs/common'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { CloudRecognizeService } from './cloud-recognize.service.js'

@@ -26,7 +26,9 @@ import type { StatsDimension, StatsMetric, StatsView } from '@/routes/stats/type
 const StatsMap = lazy(() => import('@/routes/stats/StatsMap'))
 
 function parseDimension(value: string | null): StatsDimension {
-  return (STATS_DIMENSIONS as readonly string[]).includes(value ?? '') ? (value as StatsDimension) : DEFAULT_STATS_DIMENSION
+  return (STATS_DIMENSIONS as readonly string[]).includes(value ?? '')
+    ? (value as StatsDimension)
+    : DEFAULT_STATS_DIMENSION
 }
 
 function parseMetric(value: string | null): StatsMetric {
@@ -47,7 +49,8 @@ export default function StatsRoute(): ReactNode {
   const metric = parseMetric(searchParams.get('metric'))
   const view = parseView(searchParams.get('view'))
   const effectiveDim = view === 'map' ? 'region' : dim
-  const visibleDimensions = view === 'map' ? (['region'] as const satisfies readonly StatsDimension[]) : STATS_DIMENSIONS
+  const visibleDimensions =
+    view === 'map' ? (['region'] as const satisfies readonly StatsDimension[]) : STATS_DIMENSIONS
 
   const handleDimensionChange = (next: StatsDimension): void => {
     setSearchParams(prev => {

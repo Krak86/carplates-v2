@@ -1,4 +1,10 @@
-import { BadGatewayException, BadRequestException, HttpException, Injectable, ServiceUnavailableException } from '@nestjs/common'
+import {
+  BadGatewayException,
+  BadRequestException,
+  HttpException,
+  Injectable,
+  ServiceUnavailableException
+} from '@nestjs/common'
 import type { VehiclePhotosResponse } from '@carplates/shared'
 
 import { loadEnv, pixabayEnabled } from '../env.js'
@@ -26,10 +32,7 @@ export class PhotosService {
       throw new ServiceUnavailableException('Vehicle photos are not configured')
     }
 
-    const query = [brand, model, year]
-      .filter(Boolean)
-      .join(' ')
-      .trim()
+    const query = [brand, model, year].filter(Boolean).join(' ').trim()
     if (query.length < 3) {
       throw new BadRequestException('Need a brand or model to search photos')
     }

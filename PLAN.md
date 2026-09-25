@@ -27,14 +27,14 @@ Everything is on `latest` **except** the six below. Each is held back for a
 concrete reason with a revisit trigger — not caution for its own sake. Re-check
 by re-reading this section before bumping.
 
-| Package                | `latest` (2026-09)                                                | We use                                         | Why held back                                                                                                                                                                                                                                                                                                | Revisit when                                                                                                                                             |
-| ---------------------- | ----------------------------------------------------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **typescript**         | `7.0.2`                                                           | `~5.9.3`                                       | `typescript-eslint@8.70` peer-requires `typescript >=4.8.4 <6.1.0`. TS 7 (and even 6.1) breaks **all** type-aware linting (`no-floating-promises`, the parser itself).                                                                                                                                       | `typescript-eslint` declares TS 7 support (watch its peerDeps / release notes).                                                                          |
-| **@nestjs/core** & co. | `12.0.1`                                                          | `^11.2.3`                                      | `nestjs-zod@5.5.0` (latest, nothing newer) peer-requires `@nestjs/common ^10 \|\| ^11` and `@nestjs/swagger ^7 \|\| ^8 \|\| ^11` — no Nest 12. `nestjs-zod` is core to the design (one Zod schema → validation pipe **and** OpenAPI).                                                                        | `nestjs-zod` ships a release listing `@nestjs/* ^12` in peerDeps. Then bump all `@nestjs/*` together.                                                    |
-| **drizzle-orm**        | `0.45.2` is the `latest` **tag**; `1.0.0-rc.4` is on the `rc` tag | `0.45.2` (exact)                               | We're on the actual latest **stable**. Not the RC: the maintainers haven't promoted v1 to `latest` (their own signal); `drizzle-kit` + `drizzle-zod` still target 0.4x; the v1 stream ran 23 betas + ≥5 RCs and still iterates. v1's headline features (RQB v2, RLS, generated columns) are irrelevant here. | npm `latest` points at `1.x` **and** `drizzle-kit` + `drizzle-zod` have stable v1 releases. Then follow `/docs/upgrade-v1`; our Drizzle surface is tiny. |
-| **vitest**             | `5.0.0`                                                           | `^4.1.11`                                      | 5.0.0 shipped as a same-window `.0`. 4.1.11 is mature and already supports Vite 8 (`vite: ^6 \|\| ^7 \|\| ^8` peer) and Node 24. Same "stable over shiny" call as Node 24-not-26.                                                                                                                            | 5.x has a few patch releases and the plugin ecosystem (coverage, ui) has caught up. Low urgency.                                                          |
-| **node**               | `26.8.2` (Current)                                                | `24.x` (`24.21.0` is the newest LTS "Krypton") | 26 only becomes LTS in Oct 2026; "entering LTS" ≠ ecosystem-ready — native deps and CI images take months. Conservative for an unattended VPS. Upgrading is a one-line `.nvmrc` / Dockerfile change.                                                                                                         | 26 has been LTS for a few months and `node:26-alpine` is everywhere.                                                                                      |
-| **@tanstack/react-table** | `9.2.4`                                                        | `^8.21.3`                                      | v9 (added 2026-09, Phase 1.5 stats table) is a ground-up rewrite — feature-based internals, no top-level `useReactTable`/`getCoreRowModel`/`getSortedRowModel` (moved under `./legacy`). v8's headless sort/filter API is the one this codebase's usage is built against and is well-established.        | v9's docs/ecosystem (examples, Stack Overflow, this model's training data) catch up to the new API — re-verify against its actual docs before bumping, not from memory.                        |
+| Package                   | `latest` (2026-09)                                                | We use                                         | Why held back                                                                                                                                                                                                                                                                                                | Revisit when                                                                                                                                                            |
+| ------------------------- | ----------------------------------------------------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **typescript**            | `7.0.2`                                                           | `~5.9.3`                                       | `typescript-eslint@8.70` peer-requires `typescript >=4.8.4 <6.1.0`. TS 7 (and even 6.1) breaks **all** type-aware linting (`no-floating-promises`, the parser itself).                                                                                                                                       | `typescript-eslint` declares TS 7 support (watch its peerDeps / release notes).                                                                                         |
+| **@nestjs/core** & co.    | `12.0.1`                                                          | `^11.2.3`                                      | `nestjs-zod@5.5.0` (latest, nothing newer) peer-requires `@nestjs/common ^10 \|\| ^11` and `@nestjs/swagger ^7 \|\| ^8 \|\| ^11` — no Nest 12. `nestjs-zod` is core to the design (one Zod schema → validation pipe **and** OpenAPI).                                                                        | `nestjs-zod` ships a release listing `@nestjs/* ^12` in peerDeps. Then bump all `@nestjs/*` together.                                                                   |
+| **drizzle-orm**           | `0.45.2` is the `latest` **tag**; `1.0.0-rc.4` is on the `rc` tag | `0.45.2` (exact)                               | We're on the actual latest **stable**. Not the RC: the maintainers haven't promoted v1 to `latest` (their own signal); `drizzle-kit` + `drizzle-zod` still target 0.4x; the v1 stream ran 23 betas + ≥5 RCs and still iterates. v1's headline features (RQB v2, RLS, generated columns) are irrelevant here. | npm `latest` points at `1.x` **and** `drizzle-kit` + `drizzle-zod` have stable v1 releases. Then follow `/docs/upgrade-v1`; our Drizzle surface is tiny.                |
+| **vitest**                | `5.0.0`                                                           | `^4.1.11`                                      | 5.0.0 shipped as a same-window `.0`. 4.1.11 is mature and already supports Vite 8 (`vite: ^6 \|\| ^7 \|\| ^8` peer) and Node 24. Same "stable over shiny" call as Node 24-not-26.                                                                                                                            | 5.x has a few patch releases and the plugin ecosystem (coverage, ui) has caught up. Low urgency.                                                                        |
+| **node**                  | `26.8.2` (Current)                                                | `24.x` (`24.21.0` is the newest LTS "Krypton") | 26 only becomes LTS in Oct 2026; "entering LTS" ≠ ecosystem-ready — native deps and CI images take months. Conservative for an unattended VPS. Upgrading is a one-line `.nvmrc` / Dockerfile change.                                                                                                         | 26 has been LTS for a few months and `node:26-alpine` is everywhere.                                                                                                    |
+| **@tanstack/react-table** | `9.2.4`                                                           | `^8.21.3`                                      | v9 (added 2026-09, Phase 1.5 stats table) is a ground-up rewrite — feature-based internals, no top-level `useReactTable`/`getCoreRowModel`/`getSortedRowModel` (moved under `./legacy`). v8's headless sort/filter API is the one this codebase's usage is built against and is well-established.            | v9's docs/ecosystem (examples, Stack Overflow, this model's training data) catch up to the new API — re-verify against its actual docs before bumping, not from memory. |
 
 **Not held back — clarifications so nobody "fixes" them:**
 
@@ -92,7 +92,7 @@ DISTINCT`), materialized `current_registration` (`DISTINCT ON (plate)`),
     "2026 plate removal" below) → batched insert/upsert → refresh view →
     record in `ingested_resources`. Flags: `--year`, `--limit`, `--file`
     (accepts a raw `.csv` or a `.zip`, downloaded or local), `--after
-    <YYYY-MM-DD>` (skip rows before this `d_reg` — e.g. rows already covered
+<YYYY-MM-DD>` (skip rows before this `d_reg` — e.g. rows already covered
     by an archived snapshot), `--dry-run`, `--encoding <utf8|win1251>`,
     `--archive <dir>`, `--backfill-plates`. The already-ingested check
     compares `last_modified` as a timestamp, not text — Postgres and CKAN
@@ -301,7 +301,7 @@ Doable now, independent of Phases 2-5; each is additive and doesn't block the ot
   white active pill) shared with the metric switcher — visually distinct from
   the dimension tabs' filled-blue-pill style, so the three control groups
   read as separate clusters at a glance. Dimension chips collapse to `By
-  region` only while `view=map` (the other five aren't applicable to the
+region` only while `view=map` (the other five aren't applicable to the
   map). Dimension/metric buttons got emoji icons (🗺️🧭📅🚙🚚🎨 /
   🏷️🆔📋 — same plain-emoji convention as the rest of the app, not an icon
   library). All tab/toggle buttons transition color on change, and the
@@ -360,7 +360,7 @@ Doable now, independent of Phases 2-5; each is additive and doesn't block the ot
 - **NHTSA `decodevin` vs `DecodeVinExtended` — researched, not switching (2026-09-23)** —
   compared both endpoints for a real VIN: identical field set except
   `DecodeVinExtended` adds 4 NCSA crash-statistics crosswalk fields (`NCSA
-  Make`/`Model`/`Body Type`/`Note`) that duplicate `Make`/`Model` in a form
+Make`/`Model`/`Body Type`/`Note`) that duplicate `Make`/`Model` in a form
   meant for matching against crash databases, not end users. `/api/vin/:vin`
   already forwards every non-empty field from `decodevin`, and the UI already
   renders all of them — no gap to close, so staying on the plain endpoint.
@@ -394,7 +394,7 @@ Doable now, independent of Phases 2-5; each is additive and doesn't block the ot
   `ВОДЕНЬ`), 6 hybrid/bi-fuel combos written as "X АБО Y" / "X, Y АБО Z" / "X
   ТА Y", and 5 unknown/absent/garbage markers (`NULL` — a literal string from
   some year's ingest, distinct from a true empty value —, `ВІДСУТНЄ`, `НЕ
-  ВИЗНАЧЕНО`, `.`, and a genuinely blank value).
+ВИЗНАЧЕНО`, `.`, and a genuinely blank value).
 
   `ResultCard`'s fuel row now shows an icon next to the value
   (`ResultCard.helpers.ts`'s `getFuelIcon`/`isKnownFuel`), matched by keyword
@@ -427,7 +427,7 @@ Doable now, independent of Phases 2-5; each is additive and doesn't block the ot
   values collapse into one dash row here too, for the same reason, with one
   disclosed caveat: `totalRows` sums exactly (`count(*)` is additive) but
   `distinctPlates`/`distinctVins` are each already an exact `COUNT(DISTINCT
-  ...)` *within* one fuel value, so summing them across the merged values is
+...)` _within_ one fuel value, so summing them across the merged values is
   an upper bound, not exact — a plate that wore more than one unknown-fuel
   spelling across its registration history is counted once per spelling. An
   exact figure would need a dedicated rollup grouped by a normalized fuel
@@ -439,7 +439,7 @@ Doable now, independent of Phases 2-5; each is additive and doesn't block the ot
   `body`/`kind`/`color` already had their own `stats_by_*` rollups (unlike
   `fuel`, which needed the source-value research above), so `FuelInfoButton`
   was generalized into `FieldInfoButton.tsx` (`dimension: 'body' | 'kind' |
-  'color' | 'fuel'`, picking its rollup/known-filter/icon-getter from a small
+'color' | 'fuel'`, picking its rollup/known-filter/icon-getter from a small
   per-dimension config table) and wired onto `ResultCard`'s body, colour and
   vehicle-kind rows the same way it was already wired onto fuel. Per-value
   **icons for `kind` (the "Vehicle-kind icons" backlog item below) were
@@ -449,14 +449,14 @@ Doable now, independent of Phases 2-5; each is additive and doesn't block the ot
   body/kind/color, same as the fuel popover did before it got icons.
 - **Vehicle photos (Pixabay) ✅ DONE (2026-09-24)** — resolves the "Car images
   by year/trim/color" backlog research item below. `GET
-  /api/photos?brand=&model=&year=` (`apps/api/src/photos/`) proxies Pixabay's
+/api/photos?brand=&model=&year=` (`apps/api/src/photos/`) proxies Pixabay's
   image search (`pixabay.com/api/docs`), gated by `pixabayEnabled(env)` (inert,
   503, without `PIXABAY_API_KEY` — same pattern as
   `plateRecognizerCloudEnabled`), with `category=transportation`,
   `orientation=horizontal`, `safesearch=true`. Results (id, previewURL,
   webformatURL, pageURL, tags, user) are trimmed to a `VehiclePhotosResponse`
   Zod schema and cached in a bounded in-memory `Map` keyed by the `brand model
-  year` query string — same shape as `VinService`'s VIN cache, since stock
+year` query string — same shape as `VinService`'s VIN cache, since stock
   photos for one query don't change day to day. Web: `VehiclePhotos.tsx` sits
   below `ResultCard`'s history section, collapsed by default and titled "What
   it might look like" (ua: "Як це може виглядати") — deliberately not "Photo
@@ -472,7 +472,7 @@ Doable now, independent of Phases 2-5; each is additive and doesn't block the ot
 
   **Kind/color enums.** Unlike `fuel`, both `kind` and `color` turned out to be
   small closed sets in the real data — `SELECT DISTINCT kind`/`color FROM
-  registry.current_registration` returned exactly **13** and **14** raw values
+registry.current_registration` returned exactly **13** and **14** raw values
   respectively (two of the 14 are alternate registry spellings of "orange").
   `resolveVehicleKind`/`resolveVehicleColor` (`packages/shared/src/vehicleKind.ts`,
   `vehicleColor.ts`) exact-match these onto a canonical `VehicleKind` (13) /
@@ -567,7 +567,7 @@ Doable now, independent of Phases 2-5; each is additive and doesn't block the ot
   `pnpm db:migrate` leaves a newly-added one empty until something refreshes
   it — normally `ingest`/`ingest:full`/`db:seed`, which all call
   `refreshCurrentRegistration()` + `refreshStats()` as their last step. That's
-  fine for a from-scratch setup, but adding *another* stats dimension to a DB
+  fine for a from-scratch setup, but adding _another_ stats dimension to a DB
   that's already holding a real ~hours-long ingest (like `stats_by_brand`
   the day before this one) had no good option — re-running `ingest:full`
   just to populate one new matview would mean hours for zero new rows.
@@ -610,7 +610,7 @@ Doable now, independent of Phases 2-5; each is additive and doesn't block the ot
   Tailwind arbitrary values in the component, so both stay one obvious edit
   away while tuning. It breathes continuously — `animate-watermark-breathe`
   (`global.css`, `prefers-reduced-motion`-aware) loops `scale(1) →
-  scale(1.06) → scale(1)` — rather than a one-shot entrance, since it's a
+scale(1.06) → scale(1)` — rather than a one-shot entrance, since it's a
   permanent backdrop, not a transient UI element; no hover interaction (tried
   brightening on hover, reverted — user wanted a static, testable opacity
   instead). It sits behind in-flow content via `-z-10`, inside `ResultCard`'s
@@ -723,7 +723,7 @@ Doable now, independent of Phases 2-5; each is additive and doesn't block the ot
   `scripts/.data/euroncap/` (the HTML cache) is gitignored, so a fresh clone
   or a new VPS had no way to get real Euro NCAP data without re-running the
   ~20-minute scrape from scratch. `euroncap.ts` now also takes `--export-csv
-  <path>` (dump `registry.euroncap_ratings` to CSV, `images`/`youtube_ids`
+<path>` (dump `registry.euroncap_ratings` to CSV, `images`/`youtube_ids`
   JSON-encoded into their cells) and `--from-csv <path>` (load one back via
   the same `upsert()` the scraper uses — no network, no cheerio parsing),
   mirroring the `--file` local-CSV escape hatch `ingest.ts` already has for
@@ -816,21 +816,113 @@ Doable now, independent of Phases 2-5; each is additive and doesn't block the ot
   and actual relevance to that import mix — none started yet, in priority
   order:
 
-  1. **JNCAP (Japan, run by NASVA) — build next.** The best-case scraper of
-     the bunch, arguably easier than Euro NCAP's: `nasva.go.jp/mamoru/en/`
-     runs a full **English**-language mirror of the results catalog, no JS
-     rendering, URL-filterable
-     (`assessment_car/list/{page}?brand_id=&model_id=&type_id=&keyword=&testfy=`)
-     with per-vehicle detail pages at `assessment_car/detail/{id}`. NASVA
-     also publishes a downloadable Excel of all historical results as a
-     fallback/cross-check against the scrape. Data runs FY2003–2025,
-     ~15-25 vehicles/year. No translation layer needed — the single
-     biggest reason this ranks above C-NCAP/KNCAP despite similar
-     relevance. Same shape as the Euro NCAP work: discover URLs (paginate
-     the list endpoint instead of a sitemap), parse each detail page with
-     cheerio into a new `registry.jncap_ratings` table, `makeKey`/`modelKey`
-     reused unchanged for matching, a `JncapService` + third `SafetyRatings`
-     tab.
+  1. **JNCAP (Japan, run by NASVA) — scraper built and verified against real
+     markup (2026-09-25).** The best-case scraper of the bunch, arguably
+     easier than Euro NCAP's: `nasva.go.jp/mamoru/en/` runs a full
+     **English**-language mirror of the results catalog, no JS rendering,
+     URL-filterable per-vehicle detail pages at `assessment_car/detail/{id}`.
+     NASVA also publishes a downloadable Excel of all historical results as a
+     fallback/cross-check against the scrape. Same shape as the Euro NCAP
+     work: discover URLs (paginate the list endpoint instead of a sitemap),
+     parse each detail page with cheerio into `registry.jncap_ratings`
+     (migration `0006_jncap_ratings.sql`), `makeKey`/`modelKey` reused
+     unchanged for matching, a `JncapService`
+     (`apps/api/src/safety/jncap.service.ts`) + third `SafetyRatings` tab
+     (`JncapRatings.tsx`) — full stack wired end to end (schema, API,
+     `GET /api/safety/jncap`, web tab, i18n in all three locales,
+     `pnpm ingest:jncap`/`ingest:jncap:csv`/`export:jncap:csv`).
+
+     **The list-discovery URL guessed from AI-summarized research was wrong
+     — caught by an actual dry-run.** `assessment_car/list/{page}?...&testfy=
+{year}` (a bare year) 404s into NASVA's own "site renewed" notice for
+     every single year; real browser automation (chrome-devtools MCP, since
+     this sandbox has no raw-HTTP network access) against the live site's own
+     search form showed `testfy` is a coded value, not a year — `2025S` for
+     FY2020+'s combined "Vehicle safety performance" round, `2019A`/`2019P`
+     (Preventive/Collision run as two separate rounds) for FY2014-2019, `P`-
+     only before Preventive testing existed (FY2003-2013, with real gaps —
+     no 2004-2006, 2008). `jncap.ts`'s `KNOWN_TESTFY_CODES` hardcodes this
+     confirmed list. This is also the answer to "maybe geo-blocked/needs a
+     VPN?" raised when the first dry-run found 0 assessments: no — the
+     response was NASVA's own generic moved-page notice, not a block, and a
+     real browser from the same network reached the real content fine once
+     the query value was fixed.
+
+     **The parser (`scripts/src/jncap-parse.ts`) was rewritten against three
+     real captured detail pages spanning JNCAP's three distinct eras** —
+     `fixtures/jncap-mini-countryman-269.html` (FY2025, current combined
+     scheme), `fixtures/jncap-cx5-81.html` (FY2017/2018, transitional era —
+     see below), `fixtures/jncap-ad-44.html` (FY2007, legacy) — replacing the
+     earlier label-guessing draft entirely. Confirmed stable anchors:
+     `td.modelname`/`td.brandname`/`th[scope="row"]` for the vehicle-info
+     table (identical across all three eras), `dl.dl_car` > `dt`/`dd` for the
+     per-test breakdown (also identical across all three), and a
+     `.score_rank` block (first two `strong.font_b` = rank + percentage) for
+     Preventive/Collision/Emergency-call sections in the modern scheme —
+     deliberately scoped to `.score_rank` specifically rather than "any
+     `strong.font_b` in the section", since an older-era section has no
+     rank/percentage there at all and would otherwise misread an unrelated
+     per-test level number as a percentage. Real, non-obvious quirks caught
+     along the way: (1) legacy pre-2014 assessments used a **6-star** scale,
+     not 5 (a real FY2007 Nissan AD scored a bare "6") — `jncapRatingSchema.
+stars`'s zod bound widened to 0-6 accordingly, `formatStars` (apps/web)
+     already falls back to the raw number for anything it can't render as 5
+     glyphs; (2) JNCAP's own `model` text bakes the brand name in for some
+     brands ("MINI COUNTRYMAN", not "COUNTRYMAN") but not others ("AD", not
+     "Nissan AD") — `parseAssessment` strips a leading brand-name repeat
+     before computing `modelKey` only, so it still prefix-matches a registry
+     car stored as brand "MINI" / model "COUNTRYMAN"; the stored/displayed
+     `model` value keeps JNCAP's own full text unchanged; (3) a genuine
+     **third page shape** exists for FY2014-2019 (`categoryFallback` in
+     jncap-parse.ts) — Preventive and Collision ran as separate, non-
+     combinable programs with no unified "overall" percentage, expressed as
+     a points fraction ("187.3 / 208 points") rather than a clean "%", with
+     Preventive graded on an "ASV+++"-style scale rather than a letter, and
+     Collision's own "rank" in this era is itself just a star count (no
+     letter/text grade at all — correctly left null rather than invented).
+
+     **A real full scrape has been run — and confirmed exhaustive, not just
+     "what the search happened to find."** 88 real assessments are live in
+     `registry.jncap_ratings` (84 from FY2013 onward — the user's actual
+     ask, since Ukraine's registry only has plates since 2013 — plus 4 older
+     ones from 2003/2007/2009 that came along for free), parsed with zero
+     failures. Exported to `seed-data/jncap-ratings.csv.gz`
+     (`pnpm export:jncap:csv`) for zero-scrape project setup, same as Euro
+     NCAP's. Mechanically: the browser (chrome-devtools MCP) fetched pages —
+     this sandbox has no raw-network Bash access — caching them exactly
+     where `jncap.ts` expects, then the real, tested `pnpm ingest:jncap` did
+     the parsing/DB-writing (added a new `--ids-file <path>` flag: skip
+     discovery, parse exactly the ids in a JSON array — useful generally,
+     not just for this).
+
+     **Investigated why this is so much smaller than Euro NCAP's 499, since
+     that gap looked suspicious rather than merely "Japan tests fewer
+     cars."** Confirmed via NASVA's own official Excel archive (the
+     `car_download.html` cross-check PLAN.md already flagged) that JNCAP's
+     live-searchable site is genuinely incomplete as a historical record: the
+     Excel's "2003" sheet alone lists ~20 real vehicles (Mira, Alto Lapin,
+     Wagon R, Colt, RX-8, Legacy, an original Odyssey, AD Van...), but the
+     live search for that exact year surfaced only 1. The site's own model
+     dropdown added only 4 more ids beyond what the search found (270-273,
+     the newest additions) — not the missing history. **Conclusively ruled
+     out "just probe harder"**: brute-force fetched every `/assessment_car/
+detail/{id}` from 1-290 not already known — zero additional real pages
+     found across all of it. So the ~88-92 live ids are the _entire_
+     scrapeable universe; older/retired models have no web page left at all.
+     Even if they did, it wouldn't matter for ratings: the Excel only has
+     identifying metadata (name/grade/manufacturer/release date/type-approval
+     code) — no star rating, no percentage, no test-level breakdown — so it
+     can't supply real crash-safety scores regardless.
+
+     **One more real quirk found and fixed along the way**: a 2-seat
+     commercial vehicle (no rear seat to assess — e.g. a kei truck) is
+     explicitly exempt from JNCAP's combined rating. Its "Overall evaluation"
+     cell is a bare year ("2025"), not "★★★★☆ (FY 2025)" — `YEAR_RE` needed a
+     `BARE_YEAR_RE` fallback (scoped to "the whole cell is just a 4-digit
+     year") so the test year still gets captured for `selectApplicableAssessmentId`'s
+     matching even with no stars/percentage at all — both correctly null,
+     not a gap. Fixture: `fixtures/jncap-carry-270.html`.
+
   2. **C-NCAP (China, run by CATARC) — real relevance, real extra work.**
      `c-ncap.org.cn`'s results are static server-rendered HTML (the old
      `c-ncap.org` domain is dead), so the scrape mechanics are Euro-NCAP-
@@ -874,8 +966,8 @@ Doable now, independent of Phases 2-5; each is additive and doesn't block the ot
      gap vehicle turns up later.
 
   **Design note for whichever ships next:** the tab bar in `SafetyRatings.tsx`
-  was built for two sources; a third (JNCAP) still fits as a row of tabs,
-  but a fourth would want a rethink (a dropdown/select instead of a tab
+  was built for two sources, then extended to three for JNCAP; a fourth
+  (C-NCAP/KNCAP) would want a rethink (a dropdown/select instead of a tab
   row, most likely) rather than mechanically adding more tabs.
 
 - **BMW/Mercedes-Benz crash-rating matching fix, plus NHTSA body-style
@@ -900,7 +992,7 @@ Doable now, independent of Phases 2-5; each is additive and doesn't block the ot
   that series — 1/3/5/6 today, so 2/4/7/8 series stay correctly unmatched
   rather than guessing a body style); Mercedes-Benz's leading letter-run maps
   to its class via an explicit whitelist (`e`→`eclass`, plus legacy renames
-  `ml`→`gle`, `glk`→`glc`, `gl`→`gls`), matched on the *whole* leading run so
+  `ml`→`gle`, `glk`→`glc`, `gl`→`gls`), matched on the _whole_ leading run so
   a short alias can never swallow a longer current class (`GLE`/`GLS`/`GLA`
   are not `G`- or `GL`-Class). Verified against the real local DB (24.7M
   registrations, real `ingest:full` data, not synthetic): BMW's unmatched
@@ -932,7 +1024,7 @@ Doable now, independent of Phases 2-5; each is additive and doesn't block the ot
   unclassifiable — vans, "ПАСАЖИРСЬКИЙ", hatchback, since door count alone
   can't tell a hatchback from a sedan), `nhtsaBodyBucket()` (same, from
   NHTSA's terse `VehicleDescription` tokens — `SW`, `PU/`, `N DR`), and
-  `filterByBodyStyle()`, which drops a variant only when *both* sides
+  `filterByBodyStyle()`, which drops a variant only when _both_ sides
   classify confidently and disagree, and falls back to the full unfiltered
   list if filtering would zero everything out — so a gap in the bucket
   lists can narrow results but can never produce "no rating" for a car that
@@ -954,7 +1046,7 @@ Doable now, independent of Phases 2-5; each is additive and doesn't block the ot
     commonly show as `N DR` with no distinguishing token) — `vPIC`'s own
     `Body Class` decode field could disambiguate this and fill the VIN-only
     fallback path's `body: null` gap, not wired in yet.
-  - The Euro NCAP tab was deliberately *not* given the same body-style
+  - The Euro NCAP tab was deliberately _not_ given the same body-style
     filter — Euro NCAP tests one representative trim per generation and the
     rating is meant to apply platform-wide, so a body mismatch there is a
     different (and smaller) kind of imprecision than NHTSA mixing unrelated
@@ -1289,15 +1381,15 @@ above once scoped, or dropped if research says no.
     one object. No new data (this is on top of the already-resolved
     `decodevin` vs `DecodeVinExtended` comparison from Phase 1.5).
   - Everything else in the catalog (Make/Model/vehicle-type/WMI/plant-code
-    lookups) is reference data for *building* a decoder, not for enriching a
+    lookups) is reference data for _building_ a decoder, not for enriching a
     single VIN's result — not applicable here.
-  **Conclusion: not pursuing further vPIC surface.** `/api/vin/:vin` already
-  forwards the richest endpoint (`DecodeVin`) and the UI already renders every
-  non-empty field. Crash-safety/recall data from the separate
-  `api.nhtsa.gov/SafetyRatings` and `/recalls` APIs was a different topic,
-  researched separately for a different reason (US-market-only relevance, not
-  decoder coverage) — ratings shipped, see Phase 1.5's "Crash-test safety
-  ratings" entry; recalls are still parked, see "Phase 3+ — recalls" below.
+    **Conclusion: not pursuing further vPIC surface.** `/api/vin/:vin` already
+    forwards the richest endpoint (`DecodeVin`) and the UI already renders every
+    non-empty field. Crash-safety/recall data from the separate
+    `api.nhtsa.gov/SafetyRatings` and `/recalls` APIs was a different topic,
+    researched separately for a different reason (US-market-only relevance, not
+    decoder coverage) — ratings shipped, see Phase 1.5's "Crash-test safety
+    ratings" entry; recalls are still parked, see "Phase 3+ — recalls" below.
 - **Self-host NHTSA's own data instead of proxying it live — researched,
   deferred (2026-09-25).** Prompted by the Euro NCAP CSV export/import work
   (see Phase 1.5) — same instinct ("keep a local copy, depend on the external

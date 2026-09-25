@@ -61,7 +61,8 @@ export function registryBodyBucket(body: string | null): BodyStyleBucket | null 
   const normalized = body.toUpperCase().replace(/[\s-]+/g, '')
   if (normalized.startsWith('УНІВЕРСАЛ') || normalized.startsWith('КОМБІ')) return 'wagon'
   if (normalized.startsWith('ПІКАП')) return 'pickup'
-  if (normalized.startsWith('КУПЕ') || normalized.startsWith('КАБРІОЛЕТ') || normalized.startsWith('ФАЕТОН')) return 'twoDoor'
+  if (normalized.startsWith('КУПЕ') || normalized.startsWith('КАБРІОЛЕТ') || normalized.startsWith('ФАЕТОН'))
+    return 'twoDoor'
   if (normalized.startsWith('СЕДАН')) return 'fourDoor'
   return null
 }

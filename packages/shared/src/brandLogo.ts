@@ -42,7 +42,7 @@ const BRAND_SLUG_BY_NAME: Readonly<Record<string, string>> = {
   ЗАЗ: 'zaz',
   'ЗАЗ-DAEWOO': 'zaz',
   CITROEN: 'citroen',
-  'CITROËN': 'citroen',
+  CITROËN: 'citroen',
   VOLVO: 'volvo',
   FIAT: 'fiat',
   DACIA: 'dacia',
@@ -130,7 +130,10 @@ const BRAND_SLUG_BY_NAME: Readonly<Record<string, string>> = {
  */
 export function brandSlug(brand: string | null | undefined): string | null {
   if (!brand) return null
-  const brandOnly = brand.trim().split(/\s{2,}/)[0]?.toUpperCase()
+  const brandOnly = brand
+    .trim()
+    .split(/\s{2,}/)[0]
+    ?.toUpperCase()
   return brandOnly ? (BRAND_SLUG_BY_NAME[brandOnly] ?? null) : null
 }
 

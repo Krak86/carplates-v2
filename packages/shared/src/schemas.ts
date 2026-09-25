@@ -175,6 +175,58 @@ export const euroNcapRatingsResponseSchema = z.object({
 })
 export type EuroNcapRatingsResponse = z.infer<typeof euroNcapRatingsResponseSchema>
 
+/** One `{ label, value }` row from JNCAP's own raw test-score breakdown, kept as published. */
+export const jncapTestScoreSchema = z.object({
+  label: z.string(),
+  value: z.string()
+})
+export type JncapTestScore = z.infer<typeof jncapTestScoreSchema>
+
+/**
+ * One JNCAP (Japan, NASVA) assessment — scraped from nasva.go.jp's English mirror and
+ * persisted, unlike NHTSA which is fetched live. No public API exists, so this is only as
+ * fresh as the last `pnpm ingest:jncap` run. `testScores` carries JNCAP's own test breakdown
+ * verbatim — its taxonomy has changed substantially across FY2003-2025, so it isn't forced
+ * into fixed per-metric fields the way Euro NCAP's four pillars are. Media stays as source
+ * URLs/ids: the vehicle photo is hotlinked from NASVA's own site and the video plays via
+ * YouTube's own embed — nothing is downloaded or rehosted.
+ */
+export const jncapRatingSchema = z.object({
+  assessmentId: z.string(),
+  /** Link-out target — the official nasva.go.jp assessment detail page. */
+  url: z.string(),
+  vehicleType: z.string().nullable(),
+  ratingYear: z.number().int().nullable(),
+  /** 0-5 on JNCAP's current scale; legacy pre-2010ish assessments used a 6-star scale instead
+   *  (e.g. a real FY2007 Nissan AD scored "6" outright) — kept as-is rather than compressed,
+   *  so the max here is 6, not 5. `formatStars` (apps/web) already falls back to the raw
+   *  number for anything it can't render as a 5-glyph bar. */
+  stars: z.number().int().min(0).max(6).nullable(),
+  overallPct: z.number().int().min(0).max(100).nullable(),
+  preventiveRank: z.string().nullable(),
+  preventivePct: z.number().int().min(0).max(100).nullable(),
+  collisionRank: z.string().nullable(),
+  collisionPct: z.number().int().min(0).max(100).nullable(),
+  emergencyCallType: z.string().nullable(),
+  emergencyCallPct: z.number().int().min(0).max(100).nullable(),
+  testScores: z.array(jncapTestScoreSchema),
+  imageUrl: z.string().nullable(),
+  youtubeId: z.string().regex(YOUTUBE_ID_RE).nullable(),
+  reportPdfUrl: z.string().nullable()
+})
+export type JncapRating = z.infer<typeof jncapRatingSchema>
+
+/** GET /api/safety/jncap?make=&model=&year= — every persisted rating for the make/model, newest first. */
+export const jncapRatingsResponseSchema = z.object({
+  make: z.string(),
+  model: z.string(),
+  year: z.number().int(),
+  ratings: z.array(jncapRatingSchema),
+  /** The generation's assessmentId that best matches `year`, or null when none does. */
+  applicableAssessmentId: z.string().nullable()
+})
+export type JncapRatingsResponse = z.infer<typeof jncapRatingsResponseSchema>
+
 /** One stock photo from Pixabay, filtered to only what the UI needs. */
 export const vehiclePhotoSchema = z.object({
   id: z.number().int(),

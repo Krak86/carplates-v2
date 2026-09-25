@@ -23,7 +23,7 @@ describe('brandLogoUrl', () => {
     expect(brandLogoUrl('ГАЗ')).toBe('/logos/gaz.png')
   })
 
-  it('resolves globally-recognized brands beyond the real ingest\'s top volume tier', () => {
+  it("resolves globally-recognized brands beyond the real ingest's top volume tier", () => {
     expect(brandLogoUrl('FERRARI')).toBe('/logos/ferrari.png')
     expect(brandLogoUrl('ROLLS-ROYCE')).toBe('/logos/rolls-royce.png')
     expect(brandLogoUrl('SCANIA')).toBe('/logos/scania.png')

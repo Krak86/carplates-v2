@@ -13,7 +13,12 @@ type Props = {
   onPickPhoto: (file: File) => void
 }
 
-export default function SearchField({ initialValue = '', isRecognizing, recognizeErrorKey, onPickPhoto }: Props): ReactNode {
+export default function SearchField({
+  initialValue = '',
+  isRecognizing,
+  recognizeErrorKey,
+  onPickPhoto
+}: Props): ReactNode {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [value, setValue] = useState(initialValue)

@@ -22,7 +22,9 @@ export default function LocalRecordRow({ value, label, date, deleteLabel, onDele
         {value}
         {label ? ` — ${label}` : ''}
       </Link>
-      <span className="shrink-0 text-[var(--color-muted)]">{new Date(date).toLocaleDateString(toIntlLocale(i18n.language))}</span>
+      <span className="shrink-0 text-[var(--color-muted)]">
+        {new Date(date).toLocaleDateString(toIntlLocale(i18n.language))}
+      </span>
       <button
         type="button"
         aria-label={deleteLabel}

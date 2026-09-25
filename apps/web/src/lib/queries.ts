@@ -4,6 +4,7 @@ import { normalizePlate } from '@carplates/shared'
 import {
   decodeVin,
   getEuroNcapRatings,
+  getJncapRatings,
   getSafetyRatings,
   getStats,
   getUkraineGeography,
@@ -70,6 +71,15 @@ export function euroNcapRatingsQuery(make: string, model: string, year: number) 
   return queryOptions({
     queryKey: ['safety', 'euroncap', make, model, year],
     queryFn: () => getEuroNcapRatings(make, model, year),
+    staleTime: Infinity
+  })
+}
+
+// JNCAP (Japan, NASVA) ratings — scraped and persisted (pnpm ingest:jncap), not fetched live.
+export function jncapRatingsQuery(make: string, model: string, year: number) {
+  return queryOptions({
+    queryKey: ['safety', 'jncap', make, model, year],
+    queryFn: () => getJncapRatings(make, model, year),
     staleTime: Infinity
   })
 }

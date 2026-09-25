@@ -1,0 +1,120 @@
+<html>
+  <body>
+    <!-- Trimmed from a REAL fetch of https://www.nasva.go.jp/mamoru/en/assessment_car/detail/81
+ (2026-09-25, via a real browser). Transitional 2014-2019 shape — Preventive and Collision ran
+ as two separate programs with no unified "Overall evaluation" percentage: the info table's
+ "Overall evaluation" row rowspans into per-CATEGORY rows (label "Collision safety performance"
+ / "Preventive safety performance" instead of a per-seat label like the legacy shape), each with
+ its own star rating / grade + points-fraction ("187.3 / 208 points", not a clean "%") and its
+ own FY year. Collision's "rank" here is itself a star rating (no letter/text grade — see
+ `categoryFallback` in jncap-parse.ts, which correctly finds no rank for it, only a percentage
+ computed from the points fraction); Preventive's is an "ASV+++"-style textual grade, not a
+ letter. Dropped the page chrome and the sidebar search-form dropdowns, same as the other
+ fixtures. -->
+    <div id="contents" class="grid_3_4 car">
+      <h1><span>CX-5</span></h1>
+
+      <div class="grid_system off">
+        <div class="grid_1_3 sp_center">
+          <img src="/mamoru/images/car/81.jpg" alt="photo" class="flex_img" />
+          <div class="car_icon"></div>
+        </div>
+
+        <div class="grid_2_3">
+          <table cellpadding="0" cellspacing="0" border="0" class="table1 mgb1em" summary="">
+            <tr>
+              <th scope="row">Model/Brand</th>
+              <td class="modelname">CX-5</td>
+              <td class="brandname">MAZDA</td>
+            </tr>
+            <tr>
+              <th scope="row">Type</th>
+              <td colspan="2">Passenger Car</td>
+            </tr>
+            <tr>
+              <th scope="row" rowspan="2">Overall evaluation</th>
+              <td>Collision safety performance</td>
+              <td>★★★★★　187.3 / 208 points (FY 2017)</td>
+            </tr>
+            <tr>
+              <td>Preventive safety performance</td>
+              <td>ASV+++　115.4 / 126 points (FY 2018)</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="result_box car_b">
+        <div class="result_box_in">
+          <div class="grid_system off">
+            <div class="grid_1_2">
+              <h2>Collision safety performance</h2>
+              <p class="score">
+                <strong class="font_b">187.3</strong> points / <strong class="font_b">208</strong> points
+              </p>
+
+              <div id="result_list01">
+                <dl class="dl_car">
+                  <dt>Full-wrap frontal collision test (Driver's seat)</dt>
+                  <dd>
+                    <div class="grid_system on">
+                      <div class="grid_1_3"><img src="/mamoru/images/common/s_01.png" alt="" /></div>
+                      <div class="grid_1_3"><img src="/mamoru/images/common/c_level_5_5.png" alt="Level 5" /></div>
+                      <div class="grid_1_3">Level <strong class="font_b">5</strong> /5</div>
+                    </div>
+                  </dd>
+                  <dt>Pedestrian head protection performance test</dt>
+                  <dd>
+                    <div class="grid_system on">
+                      <div class="grid_1_3"><img src="/mamoru/images/common/s_05.png" alt="" /></div>
+                      <div class="grid_1_3"><img src="/mamoru/images/common/c_level_4_5.png" alt="Level 4" /></div>
+                      <div class="grid_1_3">Level <strong class="font_b">4</strong> /5</div>
+                    </div>
+                  </dd>
+                </dl>
+              </div>
+            </div>
+
+            <div class="grid_1_2">
+              <h2>Preventive safety performance</h2>
+              <p class="score">
+                <strong class="font_b">115.4</strong> points /<strong class="font_b">126.0</strong> points
+              </p>
+
+              <div id="result_list02">
+                <dl class="dl_car">
+                  <dt>Autonomous emergency braking system [car to car] test</dt>
+                  <dd>
+                    <div class="grid_system on">
+                      <div class="grid_1_3"><img src="/mamoru/images/common/y_01.png" alt="" /></div>
+                      <div class="grid_1_3"><img src="/mamoru/images/common/c_score_32_32.png" alt="" /></div>
+                      <div class="grid_1_3">32.0 /32.0</div>
+                    </div>
+                  </dd>
+                  <dt>Pedal misapplication prevention test</dt>
+                  <dd>
+                    <div class="grid_system on">
+                      <div class="grid_1_3"><img src="/mamoru/images/common/y_06.png" alt="" /></div>
+                      <div class="grid_1_3"><img src="/mamoru/images/common/c_score_1_2.png" alt="" /></div>
+                      <div class="grid_1_3">1.6 /2.0</div>
+                    </div>
+                  </dd>
+                </dl>
+                <p class="pdf_lnk"><a href="/mamoru/pdf/psv/detail/en/81.pdf">Detailed results (PDF)</a></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="result_list03">
+        <p class="center">
+          <a href="https://www.youtube.com/embed/hGoiKgNUNKc" class="modaal_movie"
+            ><img src="https://img.youtube.com/vi/hGoiKgNUNKc/0.jpg" alt=""
+          /></a>
+        </p>
+      </div>
+    </div>
+    <!-- contents end -->
+  </body>
+</html>

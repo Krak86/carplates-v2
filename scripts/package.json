@@ -11,6 +11,9 @@
     "ingest:euroncap": "tsx src/euroncap.ts",
     "ingest:euroncap:csv": "tsx src/euroncap.ts --from-csv seed-data/euroncap-ratings.csv.gz",
     "export:euroncap:csv": "tsx src/euroncap.ts --export-csv seed-data/euroncap-ratings.csv.gz",
+    "ingest:jncap": "tsx src/jncap.ts",
+    "ingest:jncap:csv": "tsx src/jncap.ts --from-csv seed-data/jncap-ratings.csv.gz",
+    "export:jncap:csv": "tsx src/jncap.ts --export-csv seed-data/jncap-ratings.csv.gz",
     "type-check": "tsc",
     "test": "vitest run"
   },
@@ -27,6 +30,7 @@
   "devDependencies": {
     "@types/node": "^24.7.0",
     "@types/unzipper": "^0.10.11",
+    "domhandler": "^5.0.3",
     "tsx": "^4.20.6",
     "typescript": "~5.9.3",
     "vitest": "^4.1.11"

@@ -7,7 +7,9 @@ vi.stubEnv('PLATE_RECOGNIZER_CLOUD_TOKEN', 'test-token')
 vi.stubEnv('PLATE_RECOGNIZER_MONTHLY_BUDGET', '1')
 vi.stubGlobal(
   'fetch',
-  vi.fn().mockResolvedValue(new Response(JSON.stringify({ results: [{ plate: 'AA1234BC', score: 0.9 }] }), { status: 200 }))
+  vi
+    .fn()
+    .mockResolvedValue(new Response(JSON.stringify({ results: [{ plate: 'AA1234BC', score: 0.9 }] }), { status: 200 }))
 )
 
 const image = { buffer: Buffer.from('fake-image-bytes'), mimetype: 'image/jpeg', filename: 'plate.jpg' }

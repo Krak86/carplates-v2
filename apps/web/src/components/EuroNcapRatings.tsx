@@ -148,7 +148,12 @@ function RatingCard({ rating, brand, compact, onPlayVideo }: RatingCardProps): R
               {t('safety.euroncapWatchVideo')} ▶
             </button>
           )}
-          <a href={rating.url} target="_blank" rel="noopener noreferrer" className="text-[var(--color-primary)] underline">
+          <a
+            href={rating.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[var(--color-primary)] underline"
+          >
             {t('safety.euroncapFullReport')} ↗
           </a>
           {rating.reportPdfUrl && (
@@ -208,7 +213,12 @@ export default function EuroNcapRatings({ brand, model, year, active }: Props): 
       )}
 
       {applicable && (
-        <RatingCard rating={applicable} brand={brand} compact={false} onPlayVideo={(id, d) => setVideo({ id, description: d })} />
+        <RatingCard
+          rating={applicable}
+          brand={brand}
+          compact={false}
+          onPlayVideo={(id, d) => setVideo({ id, description: d })}
+        />
       )}
 
       {others.length > 0 && (
