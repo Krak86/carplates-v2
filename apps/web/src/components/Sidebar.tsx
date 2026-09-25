@@ -17,10 +17,13 @@ export default function Sidebar(): ReactNode {
   const setDrawerOpen = useUiStore(s => s.setDrawerOpen)
 
   const linkClass = ({ isActive }: { isActive: boolean }): string =>
-    cn('block rounded-lg px-3 py-2', isActive ? 'bg-[var(--color-surface)] font-medium' : 'text-[var(--color-muted)]')
+    cn(
+      'block rounded-lg bg-[var(--color-surface)]/60 px-3 py-2 transition-colors duration-200 hover:bg-[var(--color-surface)]',
+      isActive ? 'bg-[var(--color-surface)] font-medium' : 'text-[var(--color-muted)] hover:text-[var(--color-fg)]'
+    )
 
   return (
-    <nav className="flex h-full w-64 flex-col gap-1 border-r border-[var(--color-border)] bg-[var(--color-bg)] p-3">
+    <nav className="flex h-full w-64 flex-col gap-1 border-r border-[var(--color-border)] bg-[var(--color-bg)]/50 p-3 backdrop-blur-md">
       <NavLink to="/" className={linkClass} onClick={() => setDrawerOpen(false)} end>
         {t('nav.search')}
       </NavLink>
@@ -44,8 +47,8 @@ export default function Sidebar(): ReactNode {
           type="button"
           onClick={() => setLang(l)}
           className={cn(
-            'rounded-lg px-3 py-1.5 text-left text-sm hover:bg-[var(--color-surface)]',
-            l === lang ? 'font-medium text-[var(--color-primary)]' : 'text-[var(--color-muted)]'
+            'rounded-lg bg-[var(--color-surface)]/60 px-3 py-1.5 text-left text-sm transition-colors duration-200 hover:bg-[var(--color-surface)]',
+            l === lang ? 'bg-[var(--color-surface)] font-medium text-[var(--color-primary)]' : 'text-[var(--color-muted)] hover:text-[var(--color-fg)]'
           )}
         >
           {LANG_LABEL[l]}

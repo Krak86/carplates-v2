@@ -30,7 +30,7 @@ export default function Layout({ children }: Props): ReactNode {
     <div className="flex min-h-full flex-col">
       <BackgroundPhotos />
       <BackgroundDevPanel />
-      <header className="sticky top-0 z-30 flex items-center gap-3 border-b border-[var(--color-border)] bg-[var(--color-bg)]/90 px-4 py-3 backdrop-blur-md">
+      <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-[var(--color-border)] bg-[var(--color-bg)]/50 px-4 py-3 backdrop-blur-md">
         <button
           type="button"
           aria-label="menu"
@@ -58,7 +58,7 @@ export default function Layout({ children }: Props): ReactNode {
             <div
               className={cn(
                 'fixed inset-y-0 left-0 z-20 w-64 overflow-hidden transition-transform duration-300 ease-in-out',
-                'md:static md:w-0 md:translate-x-0 md:transition-[width] md:duration-300 md:ease-in-out',
+                'md:sticky md:top-14 md:h-[calc(100vh-3.5rem)] md:w-0 md:translate-x-0 md:self-start md:overflow-y-auto md:transition-[width] md:duration-300 md:ease-in-out',
                 drawerOpen ? 'translate-x-0 md:w-64' : '-translate-x-full'
               )}
             >
