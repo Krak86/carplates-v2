@@ -56,6 +56,14 @@ const UPSTREAM_TIMEOUT_MS = 10_000
 // digit ("6"), so an exact match against NHTSA always misses without this.
 const MAZDA_NUMERIC_MODELS = new Set(['2', '3', '5', '6'])
 
+// Mercedes-Benz's registry model is a trim code ("E 200", "ML 350"), but NHTSA indexes
+// by class ("E-CLASS", "ML-CLASS") — same root mismatch as Euro NCAP's, see
+// euroncap.service.ts's brandCandidateKey, but NHTSA needs no legacy-rename table: it
+// keeps the badge each model year actually shipped under (still "ML-CLASS" for the years
+// that badge was current), which already matches the registry's own leading letters
+// verbatim — just reformatted as "<LETTERS>-CLASS".
+const MERCEDES_BENZ_MAKE = 'mercedes-benz'
+
 @Injectable()
 export class SafetyService {
   private readonly base = loadEnv().NHTSA_SAFETY_RATINGS_BASE_URL
@@ -100,9 +108,15 @@ export class SafetyService {
     const trimmed = model.trim()
     const firstToken = trimmed.split(/\s+/)[0] ?? trimmed
     const candidates = [trimmed]
+    const normalizedMake = make.trim().toLowerCase()
 
-    if (make.trim().toLowerCase() === 'mazda' && MAZDA_NUMERIC_MODELS.has(firstToken)) {
+    if (normalizedMake === 'mazda' && MAZDA_NUMERIC_MODELS.has(firstToken)) {
       candidates.push(`Mazda${firstToken}`)
+    }
+    // Only when there's an actual "<letters> <digits...>" split — a one-word model
+    // ("SPRINTER", "VITO") has no class letters to extract, so leave it alone.
+    if (normalizedMake === MERCEDES_BENZ_MAKE && firstToken !== trimmed) {
+      candidates.push(`${firstToken.toUpperCase()}-CLASS`)
     }
     if (firstToken !== trimmed) candidates.push(firstToken)
 

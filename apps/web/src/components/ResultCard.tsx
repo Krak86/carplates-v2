@@ -328,7 +328,7 @@ export default function ResultCard({ data }: Props): ReactNode {
           </div>
         </div>
 
-        <SafetyRatings brand={c.brand} model={c.model} year={c.makeYear} />
+        <SafetyRatings brand={c.brand} model={c.model} year={c.makeYear} body={c.body} />
         <VehiclePhotos brand={c.brand} model={c.model} year={c.makeYear} />
       </Card>
     </div>

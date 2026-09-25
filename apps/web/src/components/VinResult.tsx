@@ -63,7 +63,7 @@ export default function VinResult({ data }: Props): ReactNode {
         <VinDecodeFields results={data.results} />
         <p className="mt-3 text-sm text-[var(--color-muted)]">{t('vin.source')}</p>
 
-        <SafetyRatings brand={vehicle.brand} model={vehicle.model} year={vehicle.year} />
+        <SafetyRatings brand={vehicle.brand} model={vehicle.model} year={vehicle.year} body={vehicle.body} />
       </Card>
     </div>
   )

@@ -16,6 +16,7 @@ type Props = {
   brand: string | null
   model: string | null
   year: number | null
+  body: string | null
 }
 
 type Source = 'euroncap' | 'nhtsa'
@@ -65,7 +66,7 @@ function CoverageInfo(): ReactNode {
  * NHTSA (US-spec only) the secondary tab. Each tab fetches its own data only
  * once this section is expanded AND that tab is the active one.
  */
-export default function SafetyRatings({ brand, model, year }: Props): ReactNode {
+export default function SafetyRatings({ brand, model, year, body }: Props): ReactNode {
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const [source, setSource] = useState<Source>('euroncap')
@@ -140,7 +141,7 @@ export default function SafetyRatings({ brand, model, year }: Props): ReactNode 
             {source === 'euroncap' ? (
               <EuroNcapRatings brand={brand} model={model} year={year} active={open} />
             ) : (
-              <NhtsaRatings brand={brand} model={model} year={year} active={open} />
+              <NhtsaRatings brand={brand} model={model} year={year} body={body} active={open} />
             )}
           </div>
         </div>

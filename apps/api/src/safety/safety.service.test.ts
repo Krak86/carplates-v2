@@ -96,6 +96,36 @@ describe('SafetyService', () => {
     expect(urls[1]).toContain('model/Mazda6')
   })
 
+  it('retries with the "<LETTERS>-CLASS" name for a Mercedes-Benz trim code', async () => {
+    const fetchMock = vi.mocked(fetch)
+    fetchMock
+      .mockResolvedValueOnce(jsonResponse({ Count: 0, Results: [] })) // model=E 200 → miss
+      .mockResolvedValueOnce(jsonResponse({ Count: 1, Results: [{ VehicleId: 9224 }] })) // model=E-CLASS → hit
+      .mockResolvedValueOnce(
+        jsonResponse({ Count: 1, Results: [{ VehicleId: 9224, VehicleDescription: '2015 Mercedes-Benz E-Class 4 DR RWD' }] })
+      )
+
+    const service = new SafetyService()
+    const result = await service.ratings('Mercedes-Benz', 'E 200', 2015)
+
+    expect(result.ratings).toHaveLength(1)
+    expect(result.ratings[0]).toMatchObject({ vehicleId: 9224 })
+    const urls = fetchMock.mock.calls.map(([url]) => String(url))
+    expect(urls[0]).toContain('model/E%20200')
+    expect(urls[1]).toContain('model/E-CLASS')
+  })
+
+  it('does not add a "-CLASS" candidate for a one-word Mercedes-Benz model', async () => {
+    const fetchMock = vi.mocked(fetch)
+    fetchMock.mockResolvedValueOnce(jsonResponse({ Count: 0, Results: [] })) // model=Sprinter → miss
+
+    const service = new SafetyService()
+    const result = await service.ratings('Mercedes-Benz', 'Sprinter', 2015)
+
+    expect(result.ratings).toEqual([])
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+  })
+
   it('falls back to the leading word when a trim suffix breaks the exact match', async () => {
     const fetchMock = vi.mocked(fetch)
     fetchMock

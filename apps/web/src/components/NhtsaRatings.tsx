@@ -10,6 +10,7 @@ import CrashVideoModal from '@/components/CrashVideoModal'
 import InfoPopover from '@/components/InfoPopover'
 import {
   averageStarRating,
+  filterByBodyStyle,
   firstPicture,
   formatAverageStars,
   formatPercent,
@@ -21,6 +22,7 @@ type Props = {
   brand: string | null
   model: string | null
   year: number | null
+  body: string | null
   active: boolean
 }
 
@@ -213,15 +215,18 @@ function VariantRow({ rating, brand, onPlayVideo }: VariantRowProps): ReactNode 
 /**
  * NHTSA 5-star crash test ratings, keyed on brand/model/year — US-market
  * vehicles only, so most EU/JDM/Soviet-era nameplates sold in Ukraine won't
- * have a match. One of the two tabs inside SafetyRatings; fetched only while
- * the section is open AND this tab is the active one.
+ * have a match. NHTSA's own query has no body-style filter, so it can return
+ * every body configuration tested under that name (sedan, wagon, coupe...) —
+ * `filterByBodyStyle` narrows that down to the registry car's own body where
+ * it confidently can. One of the two tabs inside SafetyRatings; fetched only
+ * while the section is open AND this tab is the active one.
  */
-export default function NhtsaRatings({ brand, model, year, active }: Props): ReactNode {
+export default function NhtsaRatings({ brand, model, year, body, active }: Props): ReactNode {
   const { t } = useTranslation()
   const [video, setVideo] = useState<{ url: string; description: string } | null>(null)
   const hasQuery = Boolean(brand && model && year)
   const result = useQuery({ ...safetyRatingsQuery(brand ?? '', model ?? '', year ?? 0), enabled: active && hasQuery })
-  const ratings = result.data?.ratings ?? []
+  const ratings = filterByBodyStyle(result.data?.ratings ?? [], body)
 
   if (!hasQuery) return <p className="text-base text-[var(--color-muted)]">{t('safety.none')}</p>
 

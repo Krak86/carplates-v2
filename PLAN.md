@@ -878,6 +878,89 @@ Doable now, independent of Phases 2-5; each is additive and doesn't block the ot
   but a fourth would want a rethink (a dropdown/select instead of a tab
   row, most likely) rather than mechanically adding more tabs.
 
+- **BMW/Mercedes-Benz crash-rating matching fix, plus NHTSA body-style
+  filtering ✅ DONE (2026-09-25)** — found by asking how many registered
+  models had zero Euro NCAP match at all: 88.5% of distinct brand+model
+  combos (61.7% of registered `ЛЕГКОВИЙ` vehicles). Most of that turned out
+  to be a matching-key artifact, not a real coverage gap — traced to
+  `E 200`/`320D`-style registry model text not resolving in this project's
+  own logic against ratings that were already scraped and sitting in
+  `registry.euroncap_ratings`.
+
+  **No re-scrape/rescan needed anywhere** — Euro NCAP's fix works entirely
+  against the existing 499-row table; NHTSA has no table to rescan at all
+  (still live-proxied). This was purely a matching-logic gap, not a data gap.
+
+  **Euro NCAP** (`euroncap.service.ts`) — the registry stores a trim/engine
+  code (`320D`, `E 200`), Euro NCAP names by chassis series/class (`3 Series`,
+  `E-Class`), so the existing prefix match never connected them.
+  `brandCandidateKey()` generalizes the pre-existing Mazda-numeric special
+  case into one function: BMW's leading digit maps to its series (`3series`,
+  only matches when Euro NCAP happens to have a bare, non-suffixed entry for
+  that series — 1/3/5/6 today, so 2/4/7/8 series stay correctly unmatched
+  rather than guessing a body style); Mercedes-Benz's leading letter-run maps
+  to its class via an explicit whitelist (`e`→`eclass`, plus legacy renames
+  `ml`→`gle`, `glk`→`glc`, `gl`→`gls`), matched on the *whole* leading run so
+  a short alias can never swallow a longer current class (`GLE`/`GLS`/`GLA`
+  are not `G`- or `GL`-Class). Verified against the real local DB (24.7M
+  registrations, real `ingest:full` data, not synthetic): BMW's unmatched
+  vehicle count dropped from 247K to 55K, Mercedes-Benz's from 350K to 183K —
+  **~475K vehicles recovered**, confirmed live for two real plates
+  (`АЕ9991МА` BMW 320D→3 Series 2019 ★★★★★, `НН5077АН` Mercedes E 200→
+  E-Class 2024 ★★★★★).
+
+  **NHTSA** (`safety.service.ts`) — checked live against `api.nhtsa.gov`
+  rather than assumed: BMW already worked (NHTSA indexes it by the same trim
+  code the registry stores, `320I`→`320I`), but Mercedes-Benz had the same
+  bug — confirmed `model=E%20200` returns `Count:0` while `model=E-CLASS`
+  returns real variants. Fixed by adding an `<LETTERS>-CLASS` candidate to
+  `candidateModels()` for Mercedes-Benz, simpler than Euro NCAP's case since
+  NHTSA keeps whatever badge a model actually shipped under that year (no
+  legacy-rename table needed — `ML-CLASS` stays `ML-CLASS`, confirmed live
+  for MY2013).
+
+  **Body-style filter, NHTSA only ✅ DONE (2026-09-25)** — found by manually
+  checking whether the Mercedes fix's results were actually correct for a
+  real plate (`СЕ5992ЕМ`, E 200, body `УНІВЕРСАЛ`/estate): NHTSA's
+  `SafetyRatings/modelyear/.../model/...` query has no body-style parameter,
+  so it returned 6 variants (2-door coupe, wagon, 4-door sedan) for one
+  make/model/year, not just the wagon this car actually is — a pre-existing,
+  brand-agnostic limitation (every brand's NHTSA lookup already mixed body
+  styles this way), just invisible for Mercedes-Benz until it had any match
+  at all. `SafetyRatings.helpers.ts` gained `registryBodyBucket()` (Ukrainian
+  `body` text → `wagon`/`pickup`/`twoDoor`/`fourDoor`, `null` for anything
+  unclassifiable — vans, "ПАСАЖИРСЬКИЙ", hatchback, since door count alone
+  can't tell a hatchback from a sedan), `nhtsaBodyBucket()` (same, from
+  NHTSA's terse `VehicleDescription` tokens — `SW`, `PU/`, `N DR`), and
+  `filterByBodyStyle()`, which drops a variant only when *both* sides
+  classify confidently and disagree, and falls back to the full unfiltered
+  list if filtering would zero everything out — so a gap in the bucket
+  lists can narrow results but can never produce "no rating" for a car that
+  has one. `body` threaded down through `SafetyRatings` → `NhtsaRatings`
+  from `ResultCard`'s registry data and `VinResult`'s `extractVehicleInfo()`
+  (`null`, unfiltered, on the vPIC-only fallback path — vPIC's decode
+  doesn't carry a body field this app parses yet). Verified against the
+  real 6-variant NHTSA response for `СЕ5992ЕМ`: filters down to exactly the
+  2 `SW` (wagon) variants.
+
+  **Not done / open:**
+  - The same trim-code-vs-class-name pattern likely affects other German
+    brands beyond BMW/Mercedes-Benz (Audi is mostly fine already — its
+    registry model text already matches Euro NCAP's own naming, `A4`/`A6`/
+    `Q5`; Porsche/Volvo not checked). Worth a repeat of the same
+    "distinct-models-with-zero-match" audit after a future re-scrape to see
+    what's newly worth a brand-specific candidate.
+  - Hatchback vs. sedan stays unresolved on the NHTSA body filter (both
+    commonly show as `N DR` with no distinguishing token) — `vPIC`'s own
+    `Body Class` decode field could disambiguate this and fill the VIN-only
+    fallback path's `body: null` gap, not wired in yet.
+  - The Euro NCAP tab was deliberately *not* given the same body-style
+    filter — Euro NCAP tests one representative trim per generation and the
+    rating is meant to apply platform-wide, so a body mismatch there is a
+    different (and smaller) kind of imprecision than NHTSA mixing unrelated
+    body styles into one query. Revisit if it turns out to matter in
+    practice.
+
 - **Open (not yet done): VinResult's history section is mislabeled.** Its
   "Registration history" timeline is titled `vin.registryTitle` ("State
   registry data") while `ResultCard`'s identical section is titled
