@@ -41,7 +41,7 @@ export default function SearchField({ initialValue = '', isRecognizing, recogniz
           <button
             type="button"
             onClick={() => setValue('')}
-            className="rounded-lg bg-[var(--color-surface)]/20 px-3 py-2 text-[var(--color-muted)] hover:text-[var(--color-fg)]"
+            className="rounded-lg bg-[var(--color-surface)]/20 px-3 py-2 text-[var(--color-fg)] hover:text-[var(--color-primary)]"
           >
             {t('search.clear')}
           </button>
@@ -53,7 +53,7 @@ export default function SearchField({ initialValue = '', isRecognizing, recogniz
           {t('search.button')}
         </button>
       </form>
-      <div className="flex gap-2">
+      <div className="flex justify-center gap-2">
         <PhotoSearchButton isPending={isRecognizing} onPick={onPickPhoto} />
         <CameraSearchButton isPending={isRecognizing} onCapture={onPickPhoto} />
       </div>

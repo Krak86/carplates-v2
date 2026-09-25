@@ -122,16 +122,18 @@ export default function StatsMap({ rows, metric }: Props): ReactNode {
         )}
       </div>
 
-      <div className="mt-3 flex items-center gap-2 text-xs text-[var(--color-muted)]">
-        <span>{numberFormat.format(min)}</span>
-        <div
-          className="h-2 flex-1 rounded-full"
-          style={{ background: `linear-gradient(to right, ${legendStops.join(', ')})` }}
-        />
-        <span>{numberFormat.format(max)}</span>
-      </div>
+      <div className="mt-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3">
+        <div className="flex items-center gap-2 text-xs text-[var(--color-muted)]">
+          <span>{numberFormat.format(min)}</span>
+          <div
+            className="h-2 flex-1 rounded-full"
+            style={{ background: `linear-gradient(to right, ${legendStops.join(', ')})` }}
+          />
+          <span>{numberFormat.format(max)}</span>
+        </div>
 
-      <p className="mt-2 text-xs text-[var(--color-muted)]">{t('stats.map.attribution')}</p>
+        <p className="mt-2 text-xs text-[var(--color-muted)]">{t('stats.map.attribution')}</p>
+      </div>
     </div>
   )
 }

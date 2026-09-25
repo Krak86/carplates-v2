@@ -3,6 +3,8 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 
+import BackgroundDevPanel from '@/components/BackgroundDevPanel'
+import BackgroundPhotos from '@/components/BackgroundPhotos'
 import { cn } from '@/lib/cn'
 import { useUiStore } from '@/store/ui-store'
 
@@ -26,7 +28,9 @@ export default function Layout({ children }: Props): ReactNode {
 
   return (
     <div className="flex min-h-full flex-col">
-      <header className="flex items-center gap-3 border-b border-[var(--color-border)] px-4 py-3">
+      <BackgroundPhotos />
+      <BackgroundDevPanel />
+      <header className="sticky top-0 z-30 flex items-center gap-3 border-b border-[var(--color-border)] bg-[var(--color-bg)]/90 px-4 py-3 backdrop-blur-md">
         <button
           type="button"
           aria-label="menu"

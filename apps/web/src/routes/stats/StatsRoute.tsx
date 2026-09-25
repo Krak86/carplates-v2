@@ -79,7 +79,9 @@ export default function StatsRoute(): ReactNode {
 
   return (
     <div className="mx-auto w-full max-w-6xl">
-      <h1 className="mb-4 text-2xl font-bold">{t('stats.title')}</h1>
+      <h1 className="mb-4 inline-block rounded-lg bg-[var(--color-bg)]/85 px-3 py-1.5 text-2xl font-bold backdrop-blur-sm">
+        {t('stats.title')}
+      </h1>
 
       {stats.isPending && (
         <p className="flex items-center gap-2 text-[var(--color-muted)]">
@@ -92,7 +94,7 @@ export default function StatsRoute(): ReactNode {
       {stats.isSuccess && (
         <>
           {range && (
-            <p className="mb-4 -mt-2 text-sm text-[var(--color-muted)]">
+            <p className="mb-4 inline-block rounded bg-[var(--color-bg)]/85 px-2 py-1 text-sm text-[var(--color-muted)] backdrop-blur-sm">
               {t('stats.yearRange', {
                 min: yearBoundaryLabel(range.min, toIntlLocale(i18n.language)),
                 max: yearBoundaryLabel(range.max, toIntlLocale(i18n.language))
@@ -138,17 +140,17 @@ export default function StatsRoute(): ReactNode {
           </div>
 
           <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-            <div className="flex flex-wrap gap-1">
+            <div className="flex flex-wrap gap-1 rounded-lg bg-[var(--color-bg)]/85 p-1 backdrop-blur-sm">
               {visibleDimensions.map(d => (
                 <button
                   key={d}
                   type="button"
                   onClick={() => handleDimensionChange(d)}
                   className={cn(
-                    'rounded-lg px-3 py-1.5 text-sm transition-colors duration-200',
+                    'rounded-md px-3 py-1.5 text-sm transition-colors duration-200',
                     d === effectiveDim
                       ? 'bg-[var(--color-primary)] text-[var(--color-primary-fg)]'
-                      : 'text-[var(--color-muted)] hover:bg-[var(--color-surface)]'
+                      : 'text-[var(--color-muted)] hover:bg-[var(--color-surface)] hover:text-[var(--color-fg)]'
                   )}
                 >
                   <span aria-hidden>{DIMENSION_ICONS[d]}</span> {t(`stats.dimension.${d}`)}

@@ -9,9 +9,9 @@ const CARD_TILT_STORAGE_KEY = 'carplates.cardTiltEnabled'
 
 function initialCardTiltEnabled(): boolean {
   try {
-    return localStorage.getItem(CARD_TILT_STORAGE_KEY) !== 'false'
+    return localStorage.getItem(CARD_TILT_STORAGE_KEY) === 'true'
   } catch {
-    return true
+    return false
   }
 }
 

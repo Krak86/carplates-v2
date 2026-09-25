@@ -96,7 +96,7 @@ export default function StatsTable({ rows, labelHeader, showYearColumn, defaultS
 
       <div
         ref={parentRef}
-        className="h-[clamp(280px,calc(100dvh-560px),900px)] overflow-auto rounded-xl border border-[var(--color-border)] md:h-[clamp(320px,calc(100dvh-460px),900px)]"
+        className="h-[clamp(280px,calc(100dvh-560px),900px)] overflow-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)]/95 backdrop-blur-sm md:h-[clamp(320px,calc(100dvh-460px),900px)]"
       >
         <table className="w-full text-sm">
           <thead className="sticky top-0 bg-[var(--color-surface)]">
