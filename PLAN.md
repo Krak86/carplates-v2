@@ -923,19 +923,65 @@ detail/{id}` from 1-290 not already known — zero additional real pages
      matching even with no stars/percentage at all — both correctly null,
      not a gap. Fixture: `fixtures/jncap-carry-270.html`.
 
-  2. **C-NCAP (China, run by CATARC) — real relevance, real extra work.**
-     `c-ncap.org.cn`'s results are static server-rendered HTML (the old
-     `c-ncap.org` domain is dead), so the scrape mechanics are Euro-NCAP-
-     shaped, but everything is **Chinese-only** — labels, model names, the
-     works — so this needs a translation step the other three don't
-     (machine-translate at ingest time and store both, or translate only
-     display strings client-side; ingest-time is simpler and keeps the API
-     language-agnostic). **Confirmed overlap with Euro NCAP**: the same
-     Chinese-EV models (BYD Seal/Dolphin/Sealion 7, Omoda E5, Xpeng P7...)
-     get independently tested by both bodies and the ratings can genuinely
-     disagree — this must stay two separate sourced rows/tabs, never
-     merged into one score, the same principle already applied to
-     NHTSA-vs-Euro-NCAP.
+  2. **C-NCAP (China, run by CATARC) — shipped 2026-09-25.** The plan's own
+     guess ("static server-rendered HTML, Euro-NCAP-shaped") was wrong, caught
+     by an actual dry-run the same way JNCAP's `testfy` URL guess was: live
+     research found `c-ncap.org.cn` is a clean **JSON API**,
+     `POST /api/crashSearch` (form-encoded `pageNumber`/`pageSize`/`type=1`),
+     one call returns all ~600+ records with a full score breakdown already
+     inline — no detail-page fetch, no cheerio, mechanically simpler than
+     Euro NCAP or JNCAP. Full stack wired end to end: schema
+     (`registry.cncap_ratings`, migration `0007_cncap_ratings.sql`), a
+     `CncapService` (`apps/api/src/safety/cncap.service.ts`) reusing the same
+     `prefixQuery`/`selectApplicableAssessmentId` shape as Euro NCAP/JNCAP,
+     `GET /api/safety/cncap`, a fourth `CncapRatings.tsx` tab, i18n in all
+     three locales, `pnpm ingest:cncap`/`ingest:cncap:csv`/`export:cncap:csv`.
+
+     **Two real protocol eras, confirmed against the full dump, not
+     guessed**: 2006-2018 reports a single raw-points score (`"56.300"`, no
+     fixed maximum, not comparable across years) with one sub-score (乘员保护,
+     occupant protection); 2018-onward reports a clean percentage
+     (`"89.7%"`) across three sub-scores (occupant, 行人保护\VRU保护
+     pedestrian/VRU, 主动安全 active safety). `score_unit` (`'pct' | 'points'`)
+     records which shape a row is; the UI always shows the unit and never
+     converts one to the other. **C-NCAP has no star rating, images, or video at
+     all** — confirmed both from the live table UI (no star icons anywhere)
+     and from the API itself (`carImage`/`brandImage` are `null` on every one
+     of the 601 records, no video/PDF field exists at all; the only image
+     URLs present are generic per-category icons shared across every car, not
+     real crash photos) — unlike Euro NCAP/JNCAP, which both have a photo
+     carousel and video. `CncapRatings.tsx` has no media section at all as a
+     result — there's genuinely nothing to show, not an oversight.
+
+     **Everything is Chinese-only, and unlike brand names, model names
+     couldn't be machine-translated reliably.** `carName` combines brand+model
+     with no separator and no consistent rule (a joint-venture prefix, a
+     sometimes-dropped brand — `鹏G3` means Xiaopeng G3). Brand names are a
+     small bounded set (~124, from `/api/brandList`) but 349 of 601 model
+     names are pure Chinese with zero Latin fallback (福特福克斯 = "Ford
+     Focus", 大众帕萨特 = "VW Passat") — not a lookup-table problem, a real
+     translation problem. Solved with a curated, committed
+     `carId -> {make, model}` table (`scripts/src/cncap-names.ts`, 601
+     entries), spelled the way this app's own registry spells each car,
+     verified with read-only queries against `registry.current_registration`
+     during authoring (confirmed real conventions along the way: GAC/FAW
+     store the sub-brand in the model field — `GAC`/`TRUMPCHI GS8`, not a
+     `TRUMPCHI` brand row; Great Wall/Haval/Ora are three separate registry
+     brands even though two are GWM sub-brands; Voyah's "梦想家" is spelled
+     `DREEMER` in the registry, a genuine baked-in misspelling matched
+     as-is). A `carId` with no entry is skipped with a warning at ingest
+     time, not guessed — new C-NCAP results (~20-30/year) need a table entry
+     added before they show up in the app.
+
+     A real full ingest has been run: 601/601 records upserted, 0
+     untranslated, confirmed matching 723 distinct real registry brand/model
+     pairs (BYD Song Plus → BYD/SONG prefix match, Zeekr 7X, Haval H6 across
+     both eras, ...) and verified end-to-end in the browser (a real Zeekr 7X
+     plate renders the 2025 percentage-era card; a real Haval H6 plate
+     renders the 2018/2012 points-era cards with "pts", not "%", and the
+     applicable/other-generations split working correctly). Exported to
+     `seed-data/cncap-ratings.csv.gz` for zero-fetch project setup, same as
+     the other two sources.
   3. **KNCAP (Korea, MOLIT/KoROAD) — smaller win, more unknowns.**
      `car.go.kr/sd/kncap/list.do` — no English version found, and unlike
      C-NCAP its actual page structure (static vs. JS-rendered) wasn't
@@ -966,9 +1012,22 @@ detail/{id}` from 1-290 not already known — zero additional real pages
      gap vehicle turns up later.
 
   **Design note for whichever ships next:** the tab bar in `SafetyRatings.tsx`
-  was built for two sources, then extended to three for JNCAP; a fourth
-  (C-NCAP/KNCAP) would want a rethink (a dropdown/select instead of a tab
-  row, most likely) rather than mechanically adding more tabs.
+  was extended to four tabs for C-NCAP (`px-2`/`whitespace-nowrap` keeps all
+  four on one row down to phone width) rather than switching to a
+  dropdown/select as earlier drafts of this plan suggested — a fifth source
+  (KNCAP) is where that rethink should actually happen, not before.
+
+- **Known issue, not yet fixed: Euro NCAP's own `tested_variant` label is
+  wrong for at least one real assessment.** Found while spot-checking C-NCAP
+  against Euro NCAP for the same car (CHERY TIGGO 8 PLUG-IN HYBRID, a real
+  registry model): `registry.euroncap_ratings` has two rows under URL slug
+  `chery/tiggo+8/{1190,1223ra}`, but both carry the display text "CHERY
+  TIGGO 7 PHEV, LHD" — scraped verbatim from euroncap.com's own page
+  (`euroncap-parse.ts` reads it as published), so this is a labeling quirk on
+  Euro NCAP's own site, not a scrape bug. C-NCAP's equivalent match (奇瑞瑞虎8,
+  unambiguously "Tiggo 8") doesn't have this problem, which is what surfaced
+  the mismatch. Not fixed as part of the C-NCAP work — flagged here for a
+  future pass if it turns out to affect more than this one model.
 
 - **BMW/Mercedes-Benz crash-rating matching fix, plus NHTSA body-style
   filtering ✅ DONE (2026-09-25)** — found by asking how many registered

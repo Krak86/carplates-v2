@@ -8,6 +8,7 @@ import {
   integer,
   jsonb,
   pgSchema,
+  real,
   smallint,
   text,
   timestamp,
@@ -243,6 +244,41 @@ export const jncapRatings = registry.table(
 )
 export type JncapRatingRow = typeof jncapRatings.$inferSelect
 export type JncapRatingInsert = typeof jncapRatings.$inferInsert
+
+/**
+ * One C-NCAP (China, CATARC) tested car — scraped from c-ncap.org.cn's own JSON API
+ * (no stable public contract, same rationale as `euroncapRatings`/`jncapRatings` above)
+ * via `scripts/src/cncap.ts` and refreshed by re-running it. `makeKey`/`modelKey`
+ * (`@carplates/shared`) drive both the scraper's write key and the API's lookup — see
+ * migrations/0007_cncap_ratings.sql. C-NCAP's own data is Chinese-only, so `make`/`model`
+ * come from a curated translation table (`scripts/src/cncap-names.ts`), not the source
+ * directly — `nameZh`/`manufacturerZh` keep the original text for display and re-curation.
+ */
+export const cncapRatings = registry.table(
+  'cncap_ratings',
+  {
+    assessmentId: text('assessment_id').primaryKey(),
+    carId: integer('car_id').notNull(),
+    make: text('make').notNull(),
+    model: text('model').notNull(),
+    makeKey: text('make_key').notNull(),
+    modelKey: text('model_key').notNull(),
+    nameZh: text('name_zh').notNull(),
+    manufacturerZh: text('manufacturer_zh'),
+    vehicleClass: text('vehicle_class'),
+    ratingYear: integer('rating_year'),
+    /** Which shape `overallScore`/the sub-scores are in — see migration comment for why. */
+    scoreUnit: text('score_unit').$type<'pct' | 'points'>().notNull(),
+    overallScore: real('overall_score'),
+    occupantScore: real('occupant_score'),
+    vruScore: real('vru_score'),
+    activeSafetyScore: real('active_safety_score'),
+    scrapedAt: timestamp('scraped_at', { withTimezone: true }).notNull().defaultNow()
+  },
+  t => [index('ix_cncap_make_model').on(t.makeKey, t.modelKey)]
+)
+export type CncapRatingRow = typeof cncapRatings.$inferSelect
+export type CncapRatingInsert = typeof cncapRatings.$inferInsert
 
 /** Incremental-ingest bookkeeping: which CKAN resources have been loaded. */
 export const ingestedResources = registry.table('ingested_resources', {

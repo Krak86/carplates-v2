@@ -1,4 +1,5 @@
 import {
+  cncapRatingsResponseSchema,
   euroNcapRatingsResponseSchema,
   jncapRatingsResponseSchema,
   plateHistoryResponseSchema,
@@ -10,6 +11,7 @@ import {
   vinDecodeResponseSchema
 } from '@carplates/shared'
 import type {
+  CncapRatingsResponse,
   EuroNcapRatingsResponse,
   JncapRatingsResponse,
   PlateHistoryResponse,
@@ -97,6 +99,12 @@ export async function getEuroNcapRatings(make: string, model: string, year: numb
 export async function getJncapRatings(make: string, model: string, year: number): Promise<JncapRatingsResponse> {
   const params = new URLSearchParams({ make, model, year: String(year) })
   return jncapRatingsResponseSchema.parse(await getJson(`/api/safety/jncap?${params.toString()}`))
+}
+
+// Persisted (scraped), not proxied live — see apps/api/src/safety/cncap.service.ts.
+export async function getCncapRatings(make: string, model: string, year: number): Promise<CncapRatingsResponse> {
+  const params = new URLSearchParams({ make, model, year: String(year) })
+  return cncapRatingsResponseSchema.parse(await getJson(`/api/safety/cncap?${params.toString()}`))
 }
 
 // Our own transcode-and-cache proxy (the source .wmv can't play in any modern browser).

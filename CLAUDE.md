@@ -42,10 +42,13 @@ pnpm export:euroncap:csv   # re-dump the DB table to that CSV — run after ever
 pnpm ingest:jncap      # scrape/refresh JNCAP (Japan, NASVA) ratings (no public API — see PLAN.md)
 pnpm ingest:jncap:csv  # load real JNCAP ratings from the committed CSV — seconds, no scraping
 pnpm export:jncap:csv  # re-dump the DB table to that CSV — run after every real re-scrape
+pnpm ingest:cncap      # ingest C-NCAP (China, CATARC) ratings via its own JSON API — see PLAN.md
+pnpm ingest:cncap:csv  # load real C-NCAP ratings from the committed CSV — seconds, no fetching
+pnpm export:cncap:csv  # re-dump the DB table to that CSV — run after every real re-ingest
 ```
 
 First-time local setup, test data (seconds): `pnpm install && pnpm db:up && pnpm db:migrate && pnpm db:seed && pnpm dev`.
-First-time local setup, real data (hours, ~20 GB): `pnpm install && pnpm db:up && pnpm db:migrate && pnpm ingest:full && pnpm ingest:euroncap:csv && pnpm ingest:jncap:csv && pnpm dev`.
+First-time local setup, real data (hours, ~20 GB): `pnpm install && pnpm db:up && pnpm db:migrate && pnpm ingest:full && pnpm ingest:euroncap:csv && pnpm ingest:jncap:csv && pnpm ingest:cncap:csv && pnpm dev`.
 
 ## Layout
 
@@ -55,7 +58,7 @@ First-time local setup, real data (hours, ~20 GB): `pnpm install && pnpm db:up &
 | `packages/db/`     | Drizzle schema (`registry` PG schema), pooled client, SQL migrator, `drizzle.config.ts` (generate/studio only)                                                                                                                                      |
 | `apps/api/`        | NestJS + Fastify. Feature modules under `src/<feature>/`. Serves the built web app + injects per-plate `<meta>` tags on deep links.                                                                                                                 |
 | `apps/web/`        | Vite + React 19 + React Router 8 (declarative). `@/` → `src/`.                                                                                                                                                                                      |
-| `scripts/`         | `seed.ts`, `ingest.ts`, `ingest-full.ts` (+ `transform.ts` pure helpers, `backfill.ts`), `euroncap.ts`/`jncap.ts` (scrape + CSV export/import), `refresh-stats.ts`. `seed-data/` holds the committed, gzipped Euro NCAP/JNCAP CSVs. Run with `tsx`. |
+| `scripts/`         | `seed.ts`, `ingest.ts`, `ingest-full.ts` (+ `transform.ts` pure helpers, `backfill.ts`), `euroncap.ts`/`jncap.ts`/`cncap.ts` (scrape/fetch + CSV export/import; `cncap-names.ts` is the curated Chinese→registry-spelling translation table `cncap.ts` depends on), `refresh-stats.ts`. `seed-data/` holds the committed, gzipped Euro NCAP/JNCAP/C-NCAP CSVs. Run with `tsx`. |
 | `infra/`           | `docker-compose.yml` (local Postgres only)                                                                                                                                                                                                          |
 
 ## Stack

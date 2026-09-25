@@ -3,6 +3,7 @@ import { normalizePlate } from '@carplates/shared'
 
 import {
   decodeVin,
+  getCncapRatings,
   getEuroNcapRatings,
   getJncapRatings,
   getSafetyRatings,
@@ -80,6 +81,15 @@ export function jncapRatingsQuery(make: string, model: string, year: number) {
   return queryOptions({
     queryKey: ['safety', 'jncap', make, model, year],
     queryFn: () => getJncapRatings(make, model, year),
+    staleTime: Infinity
+  })
+}
+
+// C-NCAP (China, CATARC) ratings — scraped and persisted (pnpm ingest:cncap), not fetched live.
+export function cncapRatingsQuery(make: string, model: string, year: number) {
+  return queryOptions({
+    queryKey: ['safety', 'cncap', make, model, year],
+    queryFn: () => getCncapRatings(make, model, year),
     staleTime: Infinity
   })
 }

@@ -227,6 +227,72 @@ export const jncapRatingsResponseSchema = z.object({
 })
 export type JncapRatingsResponse = z.infer<typeof jncapRatingsResponseSchema>
 
+/**
+ * C-NCAP's own normalized size/body classes (`carKind` in its API) — an enumerable set
+ * confirmed against the full real dump (2026-09-25), not guessed. Declared as a const array
+ * with the type derived from it (never write both, see CLAUDE_RULES.md) so the ingest-time
+ * translation stays exhaustive: a new class the source starts using shows up as a type error,
+ * not a silently-dropped value.
+ */
+export const CNCAP_VEHICLE_CLASSES = [
+  'sedan',
+  'suv',
+  'mpv',
+  'van',
+  'pickup',
+  'midLargeSedan',
+  'midLarge',
+  'midLargeSuv',
+  'aClassSedan',
+  'compactSedan',
+  'compactSuv',
+  'midSuv',
+  'smallSuv',
+  'largeSuv',
+  'smallCar',
+  'classAPassenger',
+  'classBPassenger',
+  'evHev',
+  'miniPassenger'
+] as const
+export type CncapVehicleClass = (typeof CNCAP_VEHICLE_CLASSES)[number]
+
+/**
+ * One C-NCAP (China, CATARC) tested car — scraped from c-ncap.org.cn's own JSON API and
+ * persisted, unlike NHTSA which is fetched live. C-NCAP has no star rating at all (the source
+ * site only ever shows scores), and its scoring shape changed in 2018: `scoreUnit` says
+ * whether `overallScore`/the sub-scores are a 0-100 percentage (2018+, three sub-scores) or
+ * raw points with no fixed maximum (2006-2018, a single occupant-protection sub-score only) —
+ * the two are never comparable, so the UI must always show the unit, never convert one to the
+ * other. `nameZh`/`manufacturerZh` keep the source's own Chinese text for display, since
+ * `make`/`model` come from a curated translation table (`scripts/src/cncap-names.ts`), not
+ * from the source directly — see PLAN.md's C-NCAP section for why.
+ */
+export const cncapRatingSchema = z.object({
+  assessmentId: z.string(),
+  nameZh: z.string(),
+  manufacturerZh: z.string().nullable(),
+  vehicleClass: z.enum(CNCAP_VEHICLE_CLASSES).nullable(),
+  ratingYear: z.number().int().nullable(),
+  scoreUnit: z.enum(['pct', 'points']),
+  overallScore: z.number().nullable(),
+  occupantScore: z.number().nullable(),
+  vruScore: z.number().nullable(),
+  activeSafetyScore: z.number().nullable()
+})
+export type CncapRating = z.infer<typeof cncapRatingSchema>
+
+/** GET /api/safety/cncap?make=&model=&year= — every persisted rating for the make/model, newest first. */
+export const cncapRatingsResponseSchema = z.object({
+  make: z.string(),
+  model: z.string(),
+  year: z.number().int(),
+  ratings: z.array(cncapRatingSchema),
+  /** The generation's assessmentId that best matches `year`, or null when none does. */
+  applicableAssessmentId: z.string().nullable()
+})
+export type CncapRatingsResponse = z.infer<typeof cncapRatingsResponseSchema>
+
 /** One stock photo from Pixabay, filtered to only what the UI needs. */
 export const vehiclePhotoSchema = z.object({
   id: z.number().int(),

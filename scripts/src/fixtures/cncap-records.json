@@ -1,0 +1,50 @@
+[
+  {
+    "evaluationId": "2f8f5f77bedf4da59a80118223967a83",
+    "carId": 109,
+    "carName": "本田思迪",
+    "score": "41.100",
+    "testYear": "2006",
+    "carKind": "A类乘用车",
+    "manufacturer": "广汽本田汽车有限公司",
+    "targetList": [{ "targetName": "乘员保护", "score": "41.050" }]
+  },
+  {
+    "evaluationId": "c435175691974b3dafc0e4288922f00c",
+    "carId": 387,
+    "carName": "丰田凯美瑞",
+    "score": "56.300",
+    "testYear": "2018",
+    "carKind": "B类乘用车",
+    "manufacturer": "广汽丰田汽车有限公司",
+    "targetList": [{ "targetName": "乘员保护", "score": "56.310" }]
+  },
+  {
+    "evaluationId": "376549c028ec42bab33d60f8e5b1284a",
+    "carId": 124,
+    "carName": "中华V7",
+    "score": "83.9%",
+    "testYear": "2018",
+    "carKind": "SUV",
+    "manufacturer": "华晨汽车集团控股有限公司",
+    "targetList": [
+      { "targetName": "乘员保护", "score": "87.10%" },
+      { "targetName": "行人保护\\VRU保护", "score": "75.18%" },
+      { "targetName": "主动安全", "score": "77.48%" }
+    ]
+  },
+  {
+    "evaluationId": "da9cfac5f7693da413eec090a02c10db",
+    "carId": 758,
+    "carName": "别克至境L7",
+    "score": "89.7%",
+    "testYear": "2026",
+    "carKind": "轿车",
+    "manufacturer": "上汽通用汽车有限公司",
+    "targetList": [
+      { "targetName": "乘员保护", "score": "91.97%" },
+      { "targetName": "行人保护\\VRU保护", "score": "86.53%" },
+      { "targetName": "主动安全", "score": "87.47%" }
+    ]
+  }
+]

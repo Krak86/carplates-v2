@@ -37,7 +37,10 @@
     "export:euroncap:csv": "pnpm --filter @carplates/scripts export:euroncap:csv",
     "ingest:jncap": "pnpm --filter @carplates/scripts ingest:jncap",
     "ingest:jncap:csv": "pnpm --filter @carplates/scripts ingest:jncap:csv",
-    "export:jncap:csv": "pnpm --filter @carplates/scripts export:jncap:csv"
+    "export:jncap:csv": "pnpm --filter @carplates/scripts export:jncap:csv",
+    "ingest:cncap": "pnpm --filter @carplates/scripts ingest:cncap",
+    "ingest:cncap:csv": "pnpm --filter @carplates/scripts ingest:cncap:csv",
+    "export:cncap:csv": "pnpm --filter @carplates/scripts export:cncap:csv"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

@@ -377,6 +377,9 @@ importers:
       unzipper:
         specifier: ^0.12.5
         version: 0.12.5
+      zod:
+        specifier: ^4.6.0
+        version: 4.6.0
     devDependencies:
       '@types/node':
         specifier: ^24.7.0
