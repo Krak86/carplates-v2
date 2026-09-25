@@ -3,7 +3,13 @@ import type { ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
-import { fallbackVehicleColor, resolveVehicleColor, resolveVehicleKind, VEHICLE_COLOR_HEX } from '@carplates/shared'
+import {
+  dealerUrl,
+  fallbackVehicleColor,
+  resolveVehicleColor,
+  resolveVehicleKind,
+  VEHICLE_COLOR_HEX
+} from '@carplates/shared'
 import type { PlateLookupResponse } from '@carplates/shared'
 
 import BrandLogo from '@/components/BrandLogo'
@@ -43,6 +49,7 @@ export default function ResultCard({ data }: Props): ReactNode {
   const hasVin = c.vin != null
   const vehicleKind = resolveVehicleKind(c.kind)
   const vehicleColor = resolveVehicleColor(c.color) ?? fallbackVehicleColor(data.plate)
+  const brandDealerUrl = dealerUrl(c.brand)
 
   // Plate history covers every vehicle that ever wore this plate, reassignment
   // included. A VIN's own registry rows cover every plate that vehicle ever
@@ -84,6 +91,20 @@ export default function ResultCard({ data }: Props): ReactNode {
             <span>
               {[c.brand, c.model].filter(Boolean).join(' ')} {c.makeYear ? `(${c.makeYear})` : ''}
             </span>
+            {brandDealerUrl && (
+              <a
+                href={brandDealerUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                title={t('result.officialSite')}
+                className="inline-flex shrink-0 items-center text-base text-[var(--color-primary)]"
+              >
+                <span aria-hidden>↗</span>
+                <span className="sr-only">
+                  {t('result.officialSite')} — {t('field.opensNewTab')}
+                </span>
+              </a>
+            )}
           </div>
           <div className="text-base text-[var(--color-muted)]">
             <Link to={`/${data.plate}`} className="text-[var(--color-primary)] underline">

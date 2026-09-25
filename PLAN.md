@@ -1163,6 +1163,47 @@ above once scoped, or dropped if research says no.
   (contact: a95@a95.ua), or if a genuinely open fuel-price source turns up
   (e.g. a state statistics service, or networks that publish their own
   prices under an open license).
+- ⛔ **New-car MSRP + specs from official distributor sites (UA and
+  EU/US fallback) — researched, parked (2026-09-25)** — asked: can we pull
+  real current model prices from Ukraine's official brand distributors
+  (Toyota/UkrAVTO, Škoda/Eurocar, Hyundai Motor Ukraine, Winner Group
+  (Ford/Volvo/JLR/Porsche/MG), UkrAVTO's other marques (Mercedes, KIA,
+  Chery/Jetour, Geely, ZAZ), BYD/BBCars, etc.), falling back to EU/US
+  manufacturer sites, and is there a free RIA-like API covering all
+  makes' prices + specs. Findings on all three:
+  - **UA distributor sites**: no brand publishes a price API — Škoda's
+    is PDF price-list downloads (`skoda-auto.ua/owners/price-lists`),
+    others are plain marketing HTML with no structured feed. There isn't
+    one "Ukrainian official sites" set either — each brand has its own
+    distributor/dealer-group site (UkrAVTO alone runs Toyota, KIA
+    (Falcon-Auto), Mercedes (Avtokapital), Chery/Jetour, Geely, ZAZ under
+    separate sub-brands), so covering "all real models" means ~15-20
+    independently-run sites, each needing its own PDF/HTML parser that
+    breaks on redesign — before even reaching the ToS question. Same
+    scraping-a-commercial-site's-priced-catalog risk class as Platesmania
+    and the fuel-price entry above, times ~15-20 sites instead of one.
+  - **EU/US fallback**: doesn't solve pricing either. The free, official,
+    no-auth options that exist (`fueleconomy.gov/ws/rest` — EPA/DOE MPG +
+    CO2 + spec data; NHTSA vPIC, already used for VIN decode; the EU
+    type-approval register on `data.europa.eu`) all carry technical specs,
+    **not retail prices** — MSRP is a national/dealer-network decision the
+    EU/US regulators never collect. Manufacturer configurators
+    (toyota.com, vw.com, bmw.com) don't expose a public pricing API either.
+  - **Free RIA-alternative with prices + specs, surveyed**: CarAPI
+    (`carapi.app`) — free tier is unauthenticated but capped to 2015-2020
+    Ford/Toyota only, full MSRP coverage is a paid plan ($199-299/yr).
+    API Ninjas Cars API — free tier has no price/MSRP field at all (specs
+    only), and its own terms forbid commercial use on the free tier
+    regardless. CarQueryAPI — dead, unmaintained since 2019. Auto-data.net
+    / Car2db — paid, demo key only. No free source currently combines
+    current prices with specs across makes, for UA or elsewhere.
+  - **Decision: skip building any distributor-site scraper.** The one
+    actually-viable path for real market prices remains what Phase 2
+    already tracks: a `developers.ria.com` API key (AUTO.RIA already
+    aggregates UA dealer listings/prices under one API) — pursue that
+    token, don't route around its absence with N one-off site scrapers.
+    Revisit only if a free/affordable all-makes pricing API turns up, or
+    a specific brand's distributor ships a real public feed (not a PDF).
 
 ## Phase 4 — VPS / production
 

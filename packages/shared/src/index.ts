@@ -10,6 +10,7 @@ export {
   type VehicleColor
 } from './vehicleColor.js'
 export { brandLogoUrl, brandSlug } from './brandLogo.js'
+export { dealerUrl } from './dealerUrl.js'
 export { makeKey, modelKey } from './vehicleKey.js'
 export {
   registrationSchema,

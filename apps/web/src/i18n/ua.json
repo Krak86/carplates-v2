@@ -23,6 +23,7 @@
   "result.historyTitleVin": "Історія реєстрацій (за VIN)",
   "result.plateInferred": "номер відновлено за VIN",
   "result.plateInferredHint": "Номерний знак не публікується з 2026 року; цей номер відновлено за VIN з попередніх реєстрацій.",
+  "result.officialSite": "Офіційний сайт бренду",
   "field.brandModel": "Марка / модель",
   "field.year": "Рік випуску",
   "field.body": "Тип кузова",
