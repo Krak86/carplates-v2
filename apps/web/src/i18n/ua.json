@@ -25,6 +25,8 @@
   "result.plateInferredHint": "Номерний знак не публікується з 2026 року; цей номер відновлено за VIN з попередніх реєстрацій.",
   "result.officialSite": "Офіційний сайт бренду",
   "result.wikiSite": "Вікіпедія",
+  "result.tiltEnable": "Увімкнути нахил картки",
+  "result.tiltDisable": "Вимкнути нахил картки",
   "field.brandModel": "Марка / модель",
   "field.year": "Рік випуску",
   "field.body": "Тип кузова",

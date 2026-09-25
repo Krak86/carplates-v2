@@ -946,6 +946,115 @@ Doable now, independent of Phases 2-5; each is additive and doesn't block the ot
   separate fixed, page-wide glow behind everything on `SearchRoute`) is
   untouched — still centered at a static `50% 30%`.
 
+  **Follow-up (2026-09-25): 3D cursor tilt added alongside the glow.**
+  `useCursorGlow` was renamed to `useCardMotion`
+  (`apps/web/src/hooks/useCardMotion.ts`) and extended to also write
+  `--tilt-x`/`--tilt-y` custom properties on the same node, consumed by a
+  `transform-[perspective(var(--tilt-perspective,1200px))_rotateX(var(--tilt-x,0deg))_rotateY(var(--tilt-y,0deg))]`
+  utility on `ResultCard`/`VinResult`'s `Card` — the whole card rotates toward
+  the cursor, no zoom (per the frontend.fyi 3D-perspective-card pattern).
+  Unlike the glow's deliberately window-wide tracking, tilt is clamped to
+  `MAX_TILT_DEG` (currently `1`, tuned down from an initial `10` — subtle
+  reads better than dramatic here) and only non-zero while the pointer's
+  computed `x`/`y` percentage actually falls within `[0, 100]` (i.e. over the
+  card) — outside that range both vars reset to `0deg`, and the existing
+  `transition-[transform,box-shadow] duration-200 ease-out` on `Card` eases it
+  back to flat rather than snapping. A physical 3D rotation reading as
+  continuous ambient motion (like the glow) would look wrong the moment the
+  cursor is far from the card, so this is intentionally card-scoped even
+  though it piggybacks on the same window-level `pointermove` listener for
+  the position math. Also gated behind `prefers-reduced-motion` (tilt vars
+  are simply never written when set) since a 3D rotation is a stronger
+  motion cue than the blurred glow, which was left as-is.
+
+  **Bug found live: fixed `perspective(1200px)` "zoomed" once the card grew
+  tall.** `ResultCard`'s history/ratings/photos sections are togglable and
+  can push the card past ~1800px. rotateX/Y's visual swing is proportional to
+  a point's distance from the rotation origin (the box center) divided by the
+  perspective distance — with perspective pinned at `1200px`, a card taller
+  than that starts producing a heavily exaggerated, "zoomed"-looking
+  foreshortening for the very same rotation angle that looked subtle on a
+  short card. Fixed by writing a `--tilt-perspective` custom property
+  alongside `--tilt-x`/`--tilt-y`, computed as `rect.height * PERSPECTIVE_RATIO`
+  (`1.6`, chosen to reproduce the original `1200px` look at the card's typical
+  ~750px closed height) — perspective now scales with the card's own height,
+  so the same `MAX_TILT_DEG` looks the same size whether the card is closed
+  or fully expanded. Confirmed live via Chrome DevTools MCP: with all three
+  sections expanded (~1888px tall) and forced to an 8° tilt for visibility, a
+  fixed `perspective(1200px)` produced an obviously distorted, "zoomed" top
+  edge, while `perspective(var(--tilt-perspective))` (≈3020px for that
+  height) kept the same rotation reading as a plain, proportional tilt.
+
+  **Follow-up (2026-09-25): user-facing on/off toggle for the tilt.**
+  `useCardMotion` now takes a `tiltEnabled: boolean` param — false skips the
+  `--tilt-x`/`--tilt-y` recompute on `pointermove` entirely (the glow keeps
+  tracking regardless) and immediately zeroes both vars on the toggle
+  transition, so the card's existing `transition-[transform,box-shadow]` eases
+  it back flat instead of freezing mid-tilt. The preference lives in
+  `useUiStore` as a new `cardTiltEnabled` field (`apps/web/src/store/ui-store.ts`)
+  — unlike `theme`/`drawerOpen` (in-memory only), it's persisted to
+  `localStorage` (`carplates.cardTiltEnabled`, mirroring `i18n`'s
+  `initialLang`/`persistLang` pattern) since this is a standing preference the
+  user is actively opting out of, not per-session UI state. `CardTiltToggle.tsx`
+  (a new small icon button, styled after `FavoriteButton`'s state-via-color
+  pattern) renders in a `flex justify-end` strip above the `Card` in both
+  `ResultCard` and `VinResult` — both components now return a `<>` fragment
+  (toggle + Card) instead of the bare `Card` root that was there before.
+  Also fixed a real bug surfaced while adding this: `useCardMotion`'s
+  `window.matchMedia(...)` call had no guard, and jsdom (Vitest's test
+  environment) doesn't implement `matchMedia` at all — every `ResultCard.test.tsx`
+  test was failing with `window.matchMedia is not a function` the moment the
+  hook's effect ran, undetected until this follow-up's test run because earlier
+  passes only checked lint/type-check, not `pnpm test`. Fixed at the test-env
+  boundary, not in app code: `apps/web/src/test/setup.ts` now polyfills
+  `window.matchMedia` to always report "no preference," since a real browser
+  always has the API and the gap is jsdom's, not something app code should
+  defend against.
+
+  **Follow-up (2026-09-25): text looked blurry on hover while tilted.**
+  Reported specifically on the `SafetyRatings`/`EuroNcapRatings` "What do
+  these numbers mean?" line — small text, and on Windows this is a known
+  Chromium/Edge rendering quirk where a GPU-composited layer (which any
+  non-zero `perspective()+rotateX/Y()` forces the element into) gets
+  resampled at an angle, and on a display with fractional OS-level scaling
+  (125%/150%, common on Windows) that resampling visibly softens small text
+  — worse than the geometry alone would predict. Couldn't be reproduced
+  pixel-for-pixel in the automated Chrome DevTools MCP session used to build
+  this feature (that instance runs at 100% scale), so the fix applies the two
+  standard, low-risk mitigations rather than a change verified against the
+  exact artifact: `backface-hidden` (Tailwind's `backface-visibility: hidden`
+  utility) on the `Card` in both `ResultCard` and `VinResult` — the commonly
+  cited fix for "blurry content under a CSS 3D transform" — and rounding
+  `--tilt-x`/`--tilt-y` to 2 decimal places in `useCardMotion` (was up to 15
+  significant digits from raw float math) to stop feeding the compositor
+  needless sub-hundredth-of-a-degree noise on every `pointermove`. If this
+  doesn't fully resolve it, the next lever is lowering `MAX_TILT_DEG` further
+  (already 10 → 5 → 1 across earlier follow-ups) — less rotation means less
+  resampling — or moving the tilt off the actual text-bearing DOM entirely
+  (a background-only parallax layer instead of rotating the real content),
+  which would be a real design change, not a one-line fix.
+
+  **Follow-up (2026-09-25): tilt toggle moved beside the card on wide screens.**
+  It originally sat in its own `flex justify-end` row above the `Card`, which
+  pushed the whole card down and added scroll for no real benefit once a
+  screen was wide enough to have empty margin on both sides of the
+  `max-w-2xl` column anyway. `ResultCard`/`VinResult` now wrap `Card` in a
+  `relative w-full max-w-2xl` div and render `CardTiltToggle` **twice**: once
+  `absolute top-3 -right-14 hidden lg:inline-flex` (floated just outside the
+  card's right edge, vertically level with the header, only from the `lg`
+  breakpoint up — below `1024px` there usually isn't 40-50px of true margin
+  beside the card to float into), and once `absolute top-3 right-12 lg:hidden`
+  as a second icon next to `FavoriteButton` inside the card itself, for
+  everything narrower. Both read the same `useUiStore` selector, so they're
+  never out of sync — only one is ever in the accessibility tree at a time,
+  since `hidden` is `display:none`, not just visually hidden. The header rows
+  in both components got `pr-20 lg:pr-8` (was a flat `pr-8`) so long
+  brand/model titles don't run under the extra icon on the narrow layout.
+  Verified via Chrome DevTools MCP at 1280px (toggle floats outside, card sits
+  flush under the search field — no gap), 1024px (the `lg` boundary — no
+  horizontal scrollbar introduced), and 500px (toggle falls back next to the
+  star, title wraps cleanly instead of colliding with the icons).
+
 ## Phase 2 — RIA "similar cars" proxy — **not started, blocked on a token**
 
 `GET /api/ria/similar?brand&model&kind&year` runs the whole `developers.ria.com`
