@@ -5,9 +5,12 @@
   "type": "module",
   "scripts": {
     "seed": "tsx src/seed.ts",
+    "refresh-stats": "tsx src/refresh-stats.ts",
     "ingest": "tsx src/ingest.ts",
     "ingest:full": "tsx src/ingest-full.ts",
     "ingest:euroncap": "tsx src/euroncap.ts",
+    "ingest:euroncap:csv": "tsx src/euroncap.ts --from-csv seed-data/euroncap-ratings.csv.gz",
+    "export:euroncap:csv": "tsx src/euroncap.ts --export-csv seed-data/euroncap-ratings.csv.gz",
     "type-check": "tsc",
     "test": "vitest run"
   },
@@ -16,6 +19,7 @@
     "@carplates/shared": "workspace:*",
     "cheerio": "^1.2.0",
     "csv-parse": "^7.0.2",
+    "csv-stringify": "^6.8.3",
     "drizzle-orm": "0.45.2",
     "iconv-lite": "^0.7.3",
     "unzipper": "^0.12.5"

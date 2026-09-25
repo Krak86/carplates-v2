@@ -32,8 +32,8 @@ by re-reading this section before bumping.
 | **typescript**         | `7.0.2`                                                           | `~5.9.3`                                       | `typescript-eslint@8.70` peer-requires `typescript >=4.8.4 <6.1.0`. TS 7 (and even 6.1) breaks **all** type-aware linting (`no-floating-promises`, the parser itself).                                                                                                                                       | `typescript-eslint` declares TS 7 support (watch its peerDeps / release notes).                                                                          |
 | **@nestjs/core** & co. | `12.0.1`                                                          | `^11.2.3`                                      | `nestjs-zod@5.5.0` (latest, nothing newer) peer-requires `@nestjs/common ^10 \|\| ^11` and `@nestjs/swagger ^7 \|\| ^8 \|\| ^11` — no Nest 12. `nestjs-zod` is core to the design (one Zod schema → validation pipe **and** OpenAPI).                                                                        | `nestjs-zod` ships a release listing `@nestjs/* ^12` in peerDeps. Then bump all `@nestjs/*` together.                                                    |
 | **drizzle-orm**        | `0.45.2` is the `latest` **tag**; `1.0.0-rc.4` is on the `rc` tag | `0.45.2` (exact)                               | We're on the actual latest **stable**. Not the RC: the maintainers haven't promoted v1 to `latest` (their own signal); `drizzle-kit` + `drizzle-zod` still target 0.4x; the v1 stream ran 23 betas + ≥5 RCs and still iterates. v1's headline features (RQB v2, RLS, generated columns) are irrelevant here. | npm `latest` points at `1.x` **and** `drizzle-kit` + `drizzle-zod` have stable v1 releases. Then follow `/docs/upgrade-v1`; our Drizzle surface is tiny. |
-| **vitest**             | `5.0.0`                                                           | `^4.1.11`                                      | 5.0.0 shipped as a same-window `.0`. 4.1.11 is mature and already supports Vite 8 (`vite: ^6 \|\| ^7 \|\| ^8` peer) and Node 24. Same "stable over shiny" call as Node 24-not-26.                                                                                                                            | 5.x has a few patch releases and the plugin ecosystem (coverage, ui) has caught up. Low urgency.                                                         |
-| **node**               | `26.8.2` (Current)                                                | `24.x` (`24.21.0` is the newest LTS "Krypton") | 26 only becomes LTS in Oct 2026; "entering LTS" ≠ ecosystem-ready — native deps and CI images take months. Conservative for an unattended VPS. Upgrading is a one-line `.nvmrc` / Dockerfile change.                                                                                                         | 26 has been LTS for a few months and `node:26-alpine` is everywhere.                                                                                     |
+| **vitest**             | `5.0.0`                                                           | `^4.1.11`                                      | 5.0.0 shipped as a same-window `.0`. 4.1.11 is mature and already supports Vite 8 (`vite: ^6 \|\| ^7 \|\| ^8` peer) and Node 24. Same "stable over shiny" call as Node 24-not-26.                                                                                                                            | 5.x has a few patch releases and the plugin ecosystem (coverage, ui) has caught up. Low urgency.                                                          |
+| **node**               | `26.8.2` (Current)                                                | `24.x` (`24.21.0` is the newest LTS "Krypton") | 26 only becomes LTS in Oct 2026; "entering LTS" ≠ ecosystem-ready — native deps and CI images take months. Conservative for an unattended VPS. Upgrading is a one-line `.nvmrc` / Dockerfile change.                                                                                                         | 26 has been LTS for a few months and `node:26-alpine` is everywhere.                                                                                      |
 | **@tanstack/react-table** | `9.2.4`                                                        | `^8.21.3`                                      | v9 (added 2026-09, Phase 1.5 stats table) is a ground-up rewrite — feature-based internals, no top-level `useReactTable`/`getCoreRowModel`/`getSortedRowModel` (moved under `./legacy`). v8's headless sort/filter API is the one this codebase's usage is built against and is well-established.        | v9's docs/ecosystem (examples, Stack Overflow, this model's training data) catch up to the new API — re-verify against its actual docs before bumping, not from memory.                        |
 
 **Not held back — clarifications so nobody "fixes" them:**
@@ -173,7 +173,7 @@ plate back from the archive; a further **27.8% (371,269)** link by VIN to a
 plate seen anywhere else in the 13-year history (flagged `plate_inferred`,
 since the vehicle may have been re-plated since) — **69.8% total recovery**,
 404,230 rows remain plateless. `--archive <dir>` still exists for archiving
-*live* CKAN downloads during a regular `ingest.ts` run (see the backup policy
+_live_ CKAN downloads during a regular `ingest.ts` run (see the backup policy
 note in Phase 4) — it's just not how the 2026 recovery file itself is kept,
 per the above.
 
@@ -316,6 +316,7 @@ Doable now, independent of Phases 2-5; each is additive and doesn't block the ot
   ("Covers registrations from 2013 to September 2026") — the current
   calendar year gets its month appended, since `byYear` has no month
   breakdown and this year's total is never actually complete yet.
+
 - **Plate lookup by camera/photo ✅ DONE (2026-09-22)** — moved up from Phase
   3+ below; see that section, kept in place to avoid duplicating the design
   notes.
@@ -433,6 +434,7 @@ Doable now, independent of Phases 2-5; each is additive and doesn't block the ot
   expression; not worth it for an informational stats page. Also widened the
   `/stats` page (`max-w-4xl` → `max-w-6xl`) so all 7 dimension tabs fit on
   one row instead of wrapping.
+
 - **"?" breakdown popover extended to body/kind/color ✅ DONE (2026-09-23)** —
   `body`/`kind`/`color` already had their own `stats_by_*` rollups (unlike
   `fuel`, which needed the source-value research above), so `FuelInfoButton`
@@ -528,6 +530,7 @@ Doable now, independent of Phases 2-5; each is additive and doesn't block the ot
   error (`onError`) rather than a broken-image icon; `mix-blend-mode: multiply`
   drops the source PNGs' flat white background against the light card surface
   without needing pre-processed transparent assets.
+
 - **Manufacturer/brand breakdown + year filter on the stats page ✅ DONE (2026-09-24)** —
   user-requested addition, not a pre-scoped backlog item: "By manufacturer"
   (LEXUS/PEUGEOT/HONDA/...) and "By manufacturer and year" dimensions on
@@ -557,6 +560,24 @@ Doable now, independent of Phases 2-5; each is additive and doesn't block the ot
   `distinct_vins` is 0 for 2019-2020 rows across every dimension — those two
   years' source data has no VINs at all (confirmed against `stats_by_year`),
   not something this rollup introduced.
+
+  **Standalone refresh, for a new matview against an already-seeded DB ✅
+  DONE (2026-09-25).** Every `stats_by_*` matview is created `WITH NO DATA`
+  (see `refreshStats()` in `packages/db/src/client.ts`), so a fresh
+  `pnpm db:migrate` leaves a newly-added one empty until something refreshes
+  it — normally `ingest`/`ingest:full`/`db:seed`, which all call
+  `refreshCurrentRegistration()` + `refreshStats()` as their last step. That's
+  fine for a from-scratch setup, but adding *another* stats dimension to a DB
+  that's already holding a real ~hours-long ingest (like `stats_by_brand`
+  the day before this one) had no good option — re-running `ingest:full`
+  just to populate one new matview would mean hours for zero new rows.
+  `scripts/src/refresh-stats.ts` (`pnpm db:refresh-stats`) closes that gap: a
+  thin CLI that calls exactly those same two functions directly against
+  whatever's already in `registrations`, touching no source data — seconds,
+  not hours. The one-time migration checklist for a new stats matview is now:
+  write the migration + add its `REFRESH MATERIALIZED VIEW` line to
+  `refreshStats()` → `pnpm db:migrate` → `pnpm db:refresh-stats`.
+
 - **Plate-history now shows plate reassignment, not just the current vehicle's
   own VIN history ✅ DONE (2026-09-24)** — user-requested, found while
   looking up plate `ВЕ8388СХ`/`BE8388CX`: the state registry reassigns a
@@ -565,9 +586,9 @@ Doable now, independent of Phases 2-5; each is additive and doesn't block the ot
   that. `plate.service.ts`'s `history()` already matched raw `plate = X`
   regardless of `vin` (`identityFilter`, unchanged), so `/plate/:plate/history`
   already returned all reassignment rows — the gap was purely client-side:
-  `ResultCard` picked *either* VIN-scoped history *or* plate-scoped history
+  `ResultCard` picked _either_ VIN-scoped history _or_ plate-scoped history
   once a VIN was known, never both, so the VIN-only branch (correctly, for a
-  *different* reason — following one vehicle across the plates it wore)
+  _different_ reason — following one vehicle across the plates it wore)
   silently dropped the earlier, different vehicle's rows. Fix: both queries
   now run whenever the history panel is expanded and render as two sections,
   `result.historyTitle` ("Registration history (by plate)") and
@@ -652,7 +673,7 @@ Doable now, independent of Phases 2-5; each is additive and doesn't block the ot
   per NHTSA-tested trim with a brand-logo placeholder (falling back to plain
   text only if no logo is bundled either) when NHTSA has no crash photo for
   that trim. An "Overall" headline number leads each summary — deliberately
-  *not* a naive average of Overall+Front+Side+Rollover+SidePole, since
+  _not_ a naive average of Overall+Front+Side+Rollover+SidePole, since
   Overall is already NHTSA's own computed combination of Front/Side/Rollover
   and averaging it back in with its own components would double-count them;
   with more than one matching trim, the headline is the mean of just the
@@ -670,6 +691,7 @@ Doable now, independent of Phases 2-5; each is additive and doesn't block the ot
 
   **Recalls** (the sibling `api.nhtsa.gov/recalls` endpoint) stays parked —
   see Phase 3+ below, reasoning unchanged.
+
 - **Euro NCAP crash-test ratings, alongside NHTSA ✅ DONE (2026-09-25)** —
   requested by the user directly after the NHTSA feature shipped, precisely
   because NHTSA only covers US-spec cars while Euro NCAP tests the EU-spec
@@ -687,8 +709,33 @@ Doable now, independent of Phases 2-5; each is additive and doesn't block the ot
   `INSERT ... ON CONFLICT DO UPDATE`. Every fetch is cached to
   `scripts/.data/euroncap/` and throttled to 1 req/1.5s with an identifying
   User-Agent; a re-run without `--refresh` makes no network requests at all.
-  Re-run every few months (`pnpm ingest:euroncap`) to pick up new ratings —
-  there's no cron for this yet (Phase 1 has none at all).
+  **Re-scrape cadence: monthly, not "every few months"** — checked whether
+  Euro NCAP publishes any advance schedule of upcoming releases (a "calendar"
+  to poll instead of guessing a cadence): they don't. Results ship in batches
+  through the year announced only via their news feed after the fact, with no
+  fixed interval and no forward-looking list — recent batches have landed only
+  weeks apart. Since a re-run's network cost is already near-zero (only
+  genuinely new assessments hit the network; everything cached is skipped),
+  there's no reason to wait longer than monthly. Still no cron for this yet
+  (Phase 1 has none at all) — a manual `pnpm ingest:euroncap` for now.
+
+  **CSV export/import for zero-scrape project setup ✅ DONE (2026-09-25)** —
+  `scripts/.data/euroncap/` (the HTML cache) is gitignored, so a fresh clone
+  or a new VPS had no way to get real Euro NCAP data without re-running the
+  ~20-minute scrape from scratch. `euroncap.ts` now also takes `--export-csv
+  <path>` (dump `registry.euroncap_ratings` to CSV, `images`/`youtube_ids`
+  JSON-encoded into their cells) and `--from-csv <path>` (load one back via
+  the same `upsert()` the scraper uses — no network, no cheerio parsing),
+  mirroring the `--file` local-CSV escape hatch `ingest.ts` already has for
+  CKAN data. A `.gz` path is transparently gzipped/gunzipped (`node:zlib`, no
+  new dependency); a plain `.csv` path is written/read as-is. The actual
+  current scrape is committed at `scripts/seed-data/euroncap-ratings.csv.gz`
+  (499 rows, ~117 KB gzipped, ~870 KB uncompressed) and loads via
+  `pnpm ingest:euroncap:csv` in seconds. After any real re-scrape, re-run
+  `pnpm export:euroncap:csv` and commit the refreshed file so the next
+  zero-project setup stays current — nothing enforces that yet (no cron, no
+  CI, consistent with everything else in Phase 1), it's a manual habit for
+  now.
 
   **Media: numbers scraped, media referenced, nothing rehosted** — a
   deliberate line drawn with the user before building. Euro NCAP's crash
@@ -721,7 +768,7 @@ Doable now, independent of Phases 2-5; each is additive and doesn't block the ot
   what `makeKey()` computes for the equivalent registry brand string —
   worth re-running that check after any full re-scrape picks up new brands.
   `modelKey` strips a model string to `[a-z0-9]` only, and the scraper calls
-  the *same* function on the URL's model slug when writing a row, so the
+  the _same_ function on the URL's model slug when writing a row, so the
   write key and `EuroNcapService`'s query key can never drift apart by
   construction. `EuroNcapService.ratings()` (`apps/api/src/safety/`) does a
   prefix match (`registry model key LIKE stored_key || '%'`) since the
@@ -734,7 +781,7 @@ Doable now, independent of Phases 2-5; each is additive and doesn't block the ot
   **Web.** `SafetyRatings.tsx` is now a shell with two tabs — Euro NCAP
   (default, the EU-spec-relevant one) and NHTSA (moved into
   `NhtsaRatings.tsx` unchanged) — each fetching only while the section is
-  open *and* that tab is active. `EuroNcapRatings.tsx` shows the applicable
+  open _and_ that tab is active. `EuroNcapRatings.tsx` shows the applicable
   generation's stars/percentages/photo-strip/video button up top, other
   tested generations (retests, Safety Pack variants, older gens) as compact
   rows below, and flags an expired (6-year-old) rating or a missing
@@ -815,7 +862,7 @@ Doable now, independent of Phases 2-5; each is additive and doesn't block the ot
      Safety Pick" awards — a car can rate well on one scale and not the
      other), but `iihs.org/ratings` is category/search-driven rather than
      a clean paginated list like JNCAP's, and US-spec vehicles are already
-     a minor slice of Ukraine's import mix even before adding a *second*
+     a minor slice of Ukraine's import mix even before adding a _second_
      US source. Revisit only after JNCAP/C-NCAP ship.
   5. **ANCAP (Australia/NZ) — skip, confirmed redundant.** Signed an MOU
      with Euro NCAP in 1999 and aligned protocols by 2018; for any vehicle
@@ -830,6 +877,7 @@ Doable now, independent of Phases 2-5; each is additive and doesn't block the ot
   was built for two sources; a third (JNCAP) still fits as a row of tabs,
   but a fourth would want a rethink (a dropdown/select instead of a tab
   row, most likely) rather than mechanically adding more tabs.
+
 - **Open (not yet done): VinResult's history section is mislabeled.** Its
   "Registration history" timeline is titled `vin.registryTitle` ("State
   registry data") while `ResultCard`'s identical section is titled
@@ -935,7 +983,7 @@ Plate Recognizer's cloud; not pursuing it.
 
 ### Phase 3+ — recalls — **researched, parked (2026-09-24)**
 
-Crash-test *ratings* (`api.nhtsa.gov/SafetyRatings`) graduated out of this
+Crash-test _ratings_ (`api.nhtsa.gov/SafetyRatings`) graduated out of this
 section and shipped for real — see Phase 1.5 above ("Crash-test safety
 ratings (NHTSA), reversing the earlier 'parked' call") for what changed and
 why the original pessimism below turned out to be too broad-brush (it holds
@@ -1041,7 +1089,7 @@ above once scoped, or dropped if research says no.
   Checked the two candidates that looked promising against a real VIN:
   - `GetManufacturerDetails/{id}` — company-registry metadata (address,
     contact info, `DBAs`, `ManufacturerTypes`, `VehicleTypes` GVWR ranges,
-    `PrimaryProduct`) about the *manufacturer as a company*, not the car. No
+    `PrimaryProduct`) about the _manufacturer as a company_, not the car. No
     end-user value on a result card, none of it overlaps or extends the
     per-VIN decode fields.
   - `DecodeVinValues` (flat single-object shape) — same ~95 fields
@@ -1058,6 +1106,32 @@ above once scoped, or dropped if research says no.
   researched separately for a different reason (US-market-only relevance, not
   decoder coverage) — ratings shipped, see Phase 1.5's "Crash-test safety
   ratings" entry; recalls are still parked, see "Phase 3+ — recalls" below.
+- **Self-host NHTSA's own data instead of proxying it live — researched,
+  deferred (2026-09-25).** Prompted by the Euro NCAP CSV export/import work
+  (see Phase 1.5) — same instinct ("keep a local copy, depend on the external
+  source as little as possible") applied to the two things `VinService` and
+  `SafetyService` still live-fetch per request.
+  - **vPIC VIN-decode database — deferred, bigger lift than it looks.** NHTSA
+    does publish this for exactly this purpose:
+    [vpic.nhtsa.dot.gov/Downloads](https://vpic.nhtsa.dot.gov/Downloads) ships
+    a monthly PostgreSQL custom-format dump (`vPICList_lite_*.custom.zip`,
+    ~70 MB zipped) — no format conversion needed, we're already on Postgres.
+    The catch: it's a decode-_only_ schema (~100 tables of WMI patterns, VDS
+    decode rules, code tables) — `VinService.decode()` would have to
+    reimplement NHTSA's own pattern-matching decode algorithm against those
+    tables, not just persist pre-decoded rows the way the Euro NCAP scraper
+    does. That's a real project on its own, closer to Phase 3/4 scope than a
+    quick follow-up. **Decision: keep `/decodevin` live-proxied as-is** — it
+    already works fine locally behind the existing bounded in-memory cache.
+  - **NHTSA Safety Ratings bulk data — deferred, cheaper if it comes back
+    up.** `data.transportation.gov` hosts "NCAP 5-Star Safety Ratings" as a
+    Socrata dataset, exportable in full as CSV/JSON — the same shape as the
+    Euro NCAP scrape (bulk rows → one table → replace `SafetyService`'s live
+    two-step `api.nhtsa.gov/SafetyRatings` walk). Crash photos/videos would
+    stay referenced URLs, never downloaded — the same "media stays linked,
+    never rehosted" rule already applied to Euro NCAP. Not started; revisit
+    if/when the NHTSA tab's live dependency becomes an actual problem (rate
+    limits, downtime) rather than a theoretical one.
 
 ### Parked — no free API token (same class as Platesmania)
 
@@ -1078,7 +1152,7 @@ above once scoped, or dropped if research says no.
   source instead (`index.minfin.com.ua/ua/markets/fuel/`): its A-95/A-92/diesel/LPG
   averages are licensed from **Консалтингова група А-95** (`a95.ua`) per the
   page's own schema.org `creator` attribution — a commercial market-research
-  firm whose product *is* this price data. Checked a95.ua directly: no public
+  firm whose product _is_ this price data. Checked a95.ua directly: no public
   API, no free tier, no listed licensing terms, contact-them-only access.
   `robots.txt` doesn't block the page, but that's a weak signal against a
   paid third party's commercial dataset republished with attribution, not
@@ -1102,12 +1176,12 @@ of deltas, not a re-ingest of the full history). Containers to fit: Postgres,
 that runs occasionally and holds an exclusive lock on `registrations` for
 minutes.
 
-| Resource | Spec       | Why                                                                                                                                                          |
-| -------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| CPU      | 4 vCPU     | Normal traffic is light indexed lookups; `ingest-cron` is I/O-bound not CPU-bound, but spare cores keep it from starving API traffic during its run           |
+| Resource | Spec       | Why                                                                                                                                                                                                               |
+| -------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| CPU      | 4 vCPU     | Normal traffic is light indexed lookups; `ingest-cron` is I/O-bound not CPU-bound, but spare cores keep it from starving API traffic during its run                                                               |
 | RAM      | 8 GB       | Only `current_registration` (the hot-path matview) needs to stay resident, not the full 14GB — 8GB covers Postgres `shared_buffers` + OS page cache + Redis + Node without swapping during ingest's index rebuild |
-| Disk     | 80 GB NVMe | 14GB DB + WAL + 2-3 `pg_dump -Fc` backups + archived source ZIPs (~1.2GB, +110MB/year) + Docker images/logs, with years of headroom                          |
-| Network  | default    | Indexed point-lookups; bandwidth isn't the bottleneck                                                                                                        |
+| Disk     | 80 GB NVMe | 14GB DB + WAL + 2-3 `pg_dump -Fc` backups + archived source ZIPs (~1.2GB, +110MB/year) + Docker images/logs, with years of headroom                                                                               |
+| Network  | default    | Indexed point-lookups; bandwidth isn't the bottleneck                                                                                                                                                             |
 
 Roughly a Hetzner CPX32 / DigitalOcean 4vCPU-8GB class box. A 2 vCPU / 4GB /
 40GB box would also run fine day-to-day and only feel tight during the

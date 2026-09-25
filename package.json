@@ -29,9 +29,12 @@
     "db:generate": "pnpm --filter @carplates/db db:generate",
     "db:studio": "pnpm --filter @carplates/db db:studio",
     "db:seed": "pnpm --filter @carplates/scripts seed",
+    "db:refresh-stats": "pnpm --filter @carplates/scripts refresh-stats",
     "ingest": "pnpm --filter @carplates/scripts ingest",
     "ingest:full": "pnpm --filter @carplates/scripts ingest:full",
-    "ingest:euroncap": "pnpm --filter @carplates/scripts ingest:euroncap"
+    "ingest:euroncap": "pnpm --filter @carplates/scripts ingest:euroncap",
+    "ingest:euroncap:csv": "pnpm --filter @carplates/scripts ingest:euroncap:csv",
+    "export:euroncap:csv": "pnpm --filter @carplates/scripts export:euroncap:csv"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

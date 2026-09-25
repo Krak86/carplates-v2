@@ -33,24 +33,27 @@ pnpm db:up          # start postgres:18.6 (docker compose)
 pnpm db:down        # stop it   (db:reset also drops the volume)
 pnpm db:migrate     # apply packages/db/migrations/*.sql
 pnpm db:seed        # ~1000 deterministic synthetic rows
+pnpm db:refresh-stats   # rebuild current_registration + stats_by_* from existing rows, no re-ingest
 pnpm ingest -- --year 2026 --limit 100000   # real data slice from CKAN
 pnpm ingest:full    # full real dataset: every CKAN year + 2026 plate recovery + backfill
 pnpm ingest:euroncap   # scrape/refresh Euro NCAP ratings (no public API — see PLAN.md)
+pnpm ingest:euroncap:csv   # load real Euro NCAP ratings from the committed CSV — seconds, no scraping
+pnpm export:euroncap:csv   # re-dump the DB table to that CSV — run after every real re-scrape
 ```
 
 First-time local setup, test data (seconds): `pnpm install && pnpm db:up && pnpm db:migrate && pnpm db:seed && pnpm dev`.
-First-time local setup, real data (hours, ~20 GB): `pnpm install && pnpm db:up && pnpm db:migrate && pnpm ingest:full && pnpm dev`.
+First-time local setup, real data (hours, ~20 GB): `pnpm install && pnpm db:up && pnpm db:migrate && pnpm ingest:full && pnpm ingest:euroncap:csv && pnpm dev`.
 
 ## Layout
 
-| Path               | What                                                                                                                                                       |
-| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `packages/shared/` | plate normalization (`normalizePlate` etc.), regions, Zod schemas + inferred types. **Single source of truth — never re-implement plate logic elsewhere.** |
-| `packages/db/`     | Drizzle schema (`registry` PG schema), pooled client, SQL migrator, `drizzle.config.ts` (generate/studio only)                                             |
-| `apps/api/`        | NestJS + Fastify. Feature modules under `src/<feature>/`. Serves the built web app + injects per-plate `<meta>` tags on deep links.                        |
-| `apps/web/`        | Vite + React 19 + React Router 8 (declarative). `@/` → `src/`.                                                                                             |
-| `scripts/`         | `seed.ts`, `ingest.ts`, `ingest-full.ts` (+ `transform.ts` pure helpers, `backfill.ts`). Run with `tsx`.                                                   |
-| `infra/`           | `docker-compose.yml` (local Postgres only)                                                                                                                 |
+| Path               | What                                                                                                                                                                                                 |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `packages/shared/` | plate normalization (`normalizePlate` etc.), regions, Zod schemas + inferred types. **Single source of truth — never re-implement plate logic elsewhere.**                                           |
+| `packages/db/`     | Drizzle schema (`registry` PG schema), pooled client, SQL migrator, `drizzle.config.ts` (generate/studio only)                                                                                       |
+| `apps/api/`        | NestJS + Fastify. Feature modules under `src/<feature>/`. Serves the built web app + injects per-plate `<meta>` tags on deep links.                                                                  |
+| `apps/web/`        | Vite + React 19 + React Router 8 (declarative). `@/` → `src/`.                                                                                                                                       |
+| `scripts/`         | `seed.ts`, `ingest.ts`, `ingest-full.ts` (+ `transform.ts` pure helpers, `backfill.ts`), `euroncap.ts` (scrape + CSV export/import), `refresh-stats.ts`. `seed-data/` holds the committed, gzipped Euro NCAP CSV. Run with `tsx`. |
+| `infra/`           | `docker-compose.yml` (local Postgres only)                                                                                                                                                           |
 
 ## Stack
 
