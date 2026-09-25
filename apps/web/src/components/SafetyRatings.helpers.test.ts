@@ -29,6 +29,7 @@ describe('nhtsaBodyBucket', () => {
     expect(nhtsaBodyBucket('2015 Toyota Tacoma PU/CC 4WD')).toBe('pickup')
     expect(nhtsaBodyBucket('2015 Honda Civic 2 DR FWD')).toBe('twoDoor')
     expect(nhtsaBodyBucket('2015 Honda Civic 4 DR FWD')).toBe('fourDoor')
+    expect(nhtsaBodyBucket('2014 Honda Odyssey VAN FWD')).toBe('van')
   })
 
   it('returns null for a description with no recognizable body token', () => {
@@ -64,5 +65,10 @@ describe('filterByBodyStyle', () => {
     // filtering would zero everything out, so the original list is returned instead.
     const sedanOnly = [{ description: '2016 Mercedes-Benz E-Class 4 DR RWD' }]
     expect(filterByBodyStyle(sedanOnly, 'ПІКАП')).toEqual(sedanOnly)
+  })
+
+  it('drops a same-name US-market minivan match for a wagon-bodied JDM car (11ІО2081, Honda Odyssey, УНІВЕРСАЛ-B)', () => {
+    const odyssey = [{ description: '2014 Honda Odyssey VAN FWD' }]
+    expect(filterByBodyStyle(odyssey, 'УНІВЕРСАЛ-B')).toEqual([])
   })
 })

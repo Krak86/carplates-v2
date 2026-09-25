@@ -48,7 +48,7 @@ export function formatAverageStars(average: number | null): string {
  * source car actually is. A coarse bucket comparable between the registry's free-text `body` and
  * NHTSA's terse `VehicleDescription` tokens, so mismatched body styles can be filtered out.
  */
-export type BodyStyleBucket = 'wagon' | 'pickup' | 'twoDoor' | 'fourDoor'
+export type BodyStyleBucket = 'wagon' | 'pickup' | 'twoDoor' | 'fourDoor' | 'van'
 
 /**
  * The registry's `body` is Ukrainian free text with a trailing "-B"/"-В"/" В" noise suffix
@@ -68,13 +68,18 @@ export function registryBodyBucket(body: string | null): BodyStyleBucket | null 
 
 /**
  * NHTSA's `VehicleDescription` encodes body style as a terse token, not a word — `"SW"` (station
- * wagon), `"PU/CC"`/`"PU/EC"` (pickup, crew/extended cab), or a bare door count (`"2 DR"`/`"4 DR"`).
- * Hatchbacks and sedans aren't distinguishable this way (both commonly show "4 DR"), so there's no
- * bucket for hatchback — it's intentionally left to fall through to null on the registry side.
+ * wagon), `"PU/CC"`/`"PU/EC"` (pickup, crew/extended cab), `"VAN"`, or a bare door count
+ * (`"2 DR"`/`"4 DR"`). Hatchbacks and sedans aren't distinguishable this way (both commonly show
+ * "4 DR"), so there's no bucket for hatchback — it's intentionally left to fall through to null on
+ * the registry side. `van` has no registry-side counterpart (`registryBodyBucket` treats Ukrainian
+ * van/minibus body text as unclassifiable on purpose) — it exists purely so a US-market minivan
+ * doesn't slip through as an "unclassifiable, so keep it" match for an unrelated wagon-bodied car
+ * that happens to share the same model name (e.g. the JDM Honda Odyssey vs. the US Odyssey minivan).
  */
 export function nhtsaBodyBucket(description: string): BodyStyleBucket | null {
   if (/\bSW\b/.test(description)) return 'wagon'
   if (/\bPU\//.test(description)) return 'pickup'
+  if (/\bVAN\b/.test(description)) return 'van'
   if (/\b2\s*DR\b/.test(description)) return 'twoDoor'
   if (/\b4\s*DR\b/.test(description)) return 'fourDoor'
   return null
@@ -87,6 +92,16 @@ export function nhtsaBodyBucket(description: string): BodyStyleBucket | null {
  * filtered out (a wrong classification, or NHTSA's description format not matching what's expected
  * here), falls back to the full unfiltered list — filtering can only narrow results, never produce
  * "no rating" for a car that genuinely has one.
+ *
+ * One deliberate exception: `van` never gets the unfiltered-fallback safety net. The other buckets
+ * can disagree purely from a labeling-scheme quirk (a crew-cab pickup showing as a bare "4 DR" in
+ * one row and "PU/CC" in another), so a mismatch there might still be the same real car — worth
+ * protecting against hiding it. A `van` token has no such ambiguity: NHTSA never mislabels a wagon,
+ * sedan, coupe, or pickup as "VAN". So when every rating NHTSA returned is a van and the registry
+ * car isn't, that's confident evidence of a same-model-name-different-vehicle collision across
+ * markets (the JDM Honda Odyssey — a wagon-shaped MPV, never exported — vs. the unrelated US
+ * Odyssey minivan NHTSA actually tested) rather than a labeling quirk, and resurrecting it via the
+ * fallback would show crash-test data for a car the plate doesn't have.
  */
 export function filterByBodyStyle<T extends { description: string }>(
   ratings: readonly T[],
@@ -99,5 +114,10 @@ export function filterByBodyStyle<T extends { description: string }>(
     const actual = nhtsaBodyBucket(r.description)
     return actual == null || actual === wanted
   })
-  return filtered.length > 0 ? filtered : [...ratings]
+  if (filtered.length > 0) return filtered
+
+  const allVan = ratings.length > 0 && ratings.every(r => nhtsaBodyBucket(r.description) === 'van')
+  if (wanted !== 'van' && allVan) return []
+
+  return [...ratings]
 }
