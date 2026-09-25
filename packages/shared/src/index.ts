@@ -11,6 +11,7 @@ export {
 } from './vehicleColor.js'
 export { brandLogoUrl, brandSlug } from './brandLogo.js'
 export { dealerUrl } from './dealerUrl.js'
+export { wikiUrl } from './wikiUrl.js'
 export { makeKey, modelKey } from './vehicleKey.js'
 export {
   registrationSchema,

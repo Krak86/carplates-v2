@@ -24,6 +24,7 @@
   "result.plateInferred": "номер восстановлен по VIN",
   "result.plateInferredHint": "Номерной знак не публикуется с 2026 года; этот номер восстановлен по VIN из предыдущих регистраций.",
   "result.officialSite": "Официальный сайт бренда",
+  "result.wikiSite": "Википедия",
   "field.brandModel": "Марка / модель",
   "field.year": "Год выпуска",
   "field.body": "Тип кузова",

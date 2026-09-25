@@ -8,7 +8,8 @@ import {
   fallbackVehicleColor,
   resolveVehicleColor,
   resolveVehicleKind,
-  VEHICLE_COLOR_HEX
+  VEHICLE_COLOR_HEX,
+  wikiUrl
 } from '@carplates/shared'
 import type { PlateLookupResponse } from '@carplates/shared'
 
@@ -42,7 +43,7 @@ function Row({ label, value }: { label: string; value: ReactNode }): ReactNode {
 }
 
 export default function ResultCard({ data }: Props): ReactNode {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const [showMore, setShowMore] = useState(false)
   const glowRef = useCursorGlow<HTMLDivElement>()
   const c = data.current
@@ -50,6 +51,7 @@ export default function ResultCard({ data }: Props): ReactNode {
   const vehicleKind = resolveVehicleKind(c.kind)
   const vehicleColor = resolveVehicleColor(c.color) ?? fallbackVehicleColor(data.plate)
   const brandDealerUrl = dealerUrl(c.brand)
+  const modelWikiUrl = wikiUrl(c.brand, c.model, i18n.language)
 
   // Plate history covers every vehicle that ever wore this plate, reassignment
   // included. A VIN's own registry rows cover every plate that vehicle ever
@@ -102,6 +104,29 @@ export default function ResultCard({ data }: Props): ReactNode {
                 <span aria-hidden>↗</span>
                 <span className="sr-only">
                   {t('result.officialSite')} — {t('field.opensNewTab')}
+                </span>
+              </a>
+            )}
+            {modelWikiUrl && (
+              <a
+                href={modelWikiUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                title={t('result.wikiSite')}
+                className="inline-flex shrink-0 items-center text-base text-[var(--color-primary)]"
+              >
+                <span
+                  aria-hidden
+                  className="inline-block h-3.5 w-3.5 bg-[var(--color-primary)]"
+                  style={{
+                    maskImage: 'url(/icons/wikipedia-w.svg)',
+                    maskSize: 'contain',
+                    maskRepeat: 'no-repeat',
+                    maskPosition: 'center'
+                  }}
+                />
+                <span className="sr-only">
+                  {t('result.wikiSite')} — {t('field.opensNewTab')}
                 </span>
               </a>
             )}
