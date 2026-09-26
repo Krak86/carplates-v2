@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import {
   fallbackVehicleColor,
+  isLightVehicleColor,
   resolveVehicleColor,
   VEHICLE_COLOR_HEX,
   VEHICLE_COLOR_SHADOW_HEX,
@@ -48,6 +49,25 @@ describe('VEHICLE_COLOR_SHADOW_HEX', () => {
     for (const color of VEHICLE_COLORS) {
       expect(VEHICLE_COLOR_SHADOW_HEX[color]).toMatch(/^#[0-9a-f]{6}$/)
     }
+  })
+})
+
+describe('isLightVehicleColor', () => {
+  it('flags the light swatches', () => {
+    expect(isLightVehicleColor('white')).toBe(true)
+    expect(isLightVehicleColor('beige')).toBe(true)
+    expect(isLightVehicleColor('yellow')).toBe(true)
+  })
+
+  it('leaves the rest unflagged', () => {
+    expect(isLightVehicleColor('gray')).toBe(false)
+    expect(isLightVehicleColor('black')).toBe(false)
+    expect(isLightVehicleColor('blue')).toBe(false)
+    expect(isLightVehicleColor('red')).toBe(false)
+    expect(isLightVehicleColor('green')).toBe(false)
+    expect(isLightVehicleColor('brown')).toBe(false)
+    expect(isLightVehicleColor('orange')).toBe(false)
+    expect(isLightVehicleColor('purple')).toBe(false)
   })
 })
 

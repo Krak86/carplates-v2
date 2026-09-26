@@ -16,6 +16,7 @@ import type { PlateLookupResponse } from '@carplates/shared'
 import BrandLogo from '@/components/BrandLogo'
 import CardTiltToggle from '@/components/CardTiltToggle'
 import CarWikiInfo from '@/components/CarWikiInfo'
+import ColorSwatch from '@/components/ColorSwatch'
 import CopyAllInfoButton from '@/components/CopyAllInfoButton'
 import FavoriteButton from '@/components/FavoriteButton'
 import FieldInfoButton from '@/components/FieldInfoButton'
@@ -209,6 +210,7 @@ export default function ResultCard({ data }: Props): ReactNode {
             value={
               c.color && (
                 <span className="inline-flex items-center gap-1.5">
+                  <ColorSwatch value={c.color} />
                   {c.color}
                   <FieldInfoButton dimension="color" current={c.color} />
                 </span>

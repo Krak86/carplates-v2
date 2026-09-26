@@ -68,6 +68,21 @@ export const VEHICLE_COLOR_HEX: Readonly<Record<VehicleColor, string>> = {
   purple: '#8955c4'
 }
 
+/**
+ * True when a color's `VEHICLE_COLOR_HEX` swatch is light enough (WCAG relative luminance)
+ * that it needs a visibly darker border to stay legible against a light card/panel
+ * background — otherwise it just blends in. Derived from the hex table rather than a
+ * hand-picked list, so it can't drift if a swatch shade is ever retuned.
+ */
+export function isLightVehicleColor(color: VehicleColor): boolean {
+  const hex = VEHICLE_COLOR_HEX[color]
+  const r = parseInt(hex.slice(1, 3), 16)
+  const g = parseInt(hex.slice(3, 5), 16)
+  const b = parseInt(hex.slice(5, 7), 16)
+  const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b
+  return luminance > 175
+}
+
 /** A hand-picked darker shade of each color, for the two-tone (lit top / shaded underside) vehicle icons. */
 export const VEHICLE_COLOR_SHADOW_HEX: Readonly<Record<VehicleColor, string>> = {
   gray: '#6b6f77',

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import type { StatsResponse } from '@carplates/shared'
 
 import BrandLogo from '@/components/BrandLogo'
+import ColorSwatch from '@/components/ColorSwatch'
 import Card from '@/components/ui/Card'
 import { cn } from '@/lib/cn'
 import { toIntlLocale } from '@/lib/intl'
@@ -33,11 +34,14 @@ const HIGHLIGHT_DURATION_MS = 2500
 function Leaderboard({
   titleKey,
   icon,
-  entries
+  entries,
+  showColorSwatch
 }: {
   titleKey: string
   icon: string
   entries: LeaderboardEntry[]
+  /** Each entry's `label` is itself a color value — show its swatch circle before the text. */
+  showColorSwatch?: boolean
 }): ReactNode {
   const { t, i18n } = useTranslation()
   const numberFormat = new Intl.NumberFormat(toIntlLocale(i18n.language))
@@ -86,6 +90,7 @@ function Leaderboard({
                     <BrandLogo brand={entry.brand} size="sm" />
                   </span>
                 )}
+                {showColorSwatch && <ColorSwatch value={entry.label} />}
                 {/* title: native tooltip with the untruncated text — same pattern as the dep/kind hints elsewhere. */}
                 <span className="truncate font-medium" title={entry.label}>
                   {entry.label}
@@ -143,7 +148,7 @@ export default function TopStatsPanel({ stats, highlightModel }: Props): ReactNo
     <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
       <Leaderboard titleKey="stats.top.brand" icon="🏭" entries={brandEntries} />
       <Leaderboard titleKey="stats.top.model" icon="🚗" entries={modelEntries} />
-      <Leaderboard titleKey="stats.top.color" icon="🎨" entries={colorEntries} />
+      <Leaderboard titleKey="stats.top.color" icon="🎨" entries={colorEntries} showColorSwatch />
       <Leaderboard titleKey="stats.top.region" icon="🗺️" entries={regionEntries} />
     </div>
   )

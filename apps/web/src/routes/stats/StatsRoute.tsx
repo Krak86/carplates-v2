@@ -208,6 +208,7 @@ export default function StatsRoute(): ReactNode {
                 showYearColumn={dimensionHasYearColumn(effectiveDim)}
                 defaultSortKey={metric}
                 highlightLabel={highlightLabel}
+                showColorSwatch={effectiveDim === 'color'}
               />
             )}
           </div>

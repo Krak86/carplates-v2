@@ -12,6 +12,7 @@ import type { SortingState } from '@tanstack/react-table'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { useTranslation } from 'react-i18next'
 
+import ColorSwatch from '@/components/ColorSwatch'
 import { cn } from '@/lib/cn'
 import { toIntlLocale } from '@/lib/intl'
 import { scrollElementIntoView } from '@/lib/share-section'
@@ -31,6 +32,8 @@ type Props = {
   defaultSortKey: keyof StatsRow
   /** A row's `label` to scroll to and briefly flash on arrival — a badge deep link from ResultCard. */
   highlightLabel?: string
+  /** True when `rows` came from the `color` dimension — each `label` is itself a color value. */
+  showColorSwatch?: boolean
 }
 
 const columnHelper = createColumnHelper<StatsRow>()
@@ -40,7 +43,8 @@ export default function StatsTable({
   labelHeader,
   showYearColumn,
   defaultSortKey,
-  highlightLabel
+  highlightLabel,
+  showColorSwatch
 }: Props): ReactNode {
   const { t, i18n } = useTranslation()
   const [sorting, setSorting] = useState<SortingState>([{ id: defaultSortKey, desc: true }])
@@ -54,7 +58,18 @@ export default function StatsTable({
   const numberFormat = new Intl.NumberFormat(toIntlLocale(i18n.language))
 
   const columns = [
-    columnHelper.accessor('label', { header: labelHeader }),
+    columnHelper.accessor('label', {
+      header: labelHeader,
+      cell: c =>
+        showColorSwatch ? (
+          <span className="inline-flex items-center gap-1.5">
+            <ColorSwatch value={c.getValue()} />
+            {c.getValue()}
+          </span>
+        ) : (
+          c.getValue()
+        )
+    }),
     ...(showYearColumn
       ? [columnHelper.accessor('year', { header: t('stats.column.year'), cell: c => c.getValue() ?? '—' })]
       : []),

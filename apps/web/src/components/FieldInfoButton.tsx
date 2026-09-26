@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import type { StatsByDimensionRow, StatsResponse } from '@carplates/shared'
 
+import ColorSwatch from '@/components/ColorSwatch'
 import { FUEL_ICON_FALLBACK, getFuelIcon, isKnownFuel } from '@/components/ResultCard.helpers'
 import { cn } from '@/lib/cn'
 import { statsQuery } from '@/lib/queries'
@@ -203,6 +204,7 @@ export default function FieldInfoButton({ dimension, current }: Props): ReactNod
                   )}
                 >
                   <span className="flex items-center gap-1.5">
+                    {dimension === 'color' && <ColorSwatch value={row.value} />}
                     {row.icon && <span aria-hidden>{row.icon}</span>}
                     {row.value || t('field.unknown')}
                   </span>
