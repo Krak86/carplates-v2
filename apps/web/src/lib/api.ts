@@ -1,6 +1,7 @@
 import {
   cncapRatingsResponseSchema,
   euroNcapRatingsResponseSchema,
+  iihsRatingsResponseSchema,
   jncapRatingsResponseSchema,
   kncapRatingsResponseSchema,
   plateHistoryResponseSchema,
@@ -14,6 +15,7 @@ import {
 import type {
   CncapRatingsResponse,
   EuroNcapRatingsResponse,
+  IihsRatingsResponse,
   JncapRatingsResponse,
   KncapRatingsResponse,
   PlateHistoryResponse,
@@ -112,6 +114,11 @@ export async function getCncapRatings(make: string, model: string, year: number)
 export async function getKncapRatings(make: string, model: string, year: number): Promise<KncapRatingsResponse> {
   const params = new URLSearchParams({ make, model, year: String(year) })
   return kncapRatingsResponseSchema.parse(await getJson(`/api/safety/kncap?${params.toString()}`))
+}
+
+export async function getIihsRatings(make: string, model: string, year: number): Promise<IihsRatingsResponse> {
+  const params = new URLSearchParams({ make, model, year: String(year) })
+  return iihsRatingsResponseSchema.parse(await getJson(`/api/safety/iihs?${params.toString()}`))
 }
 
 // Our own transcode-and-cache proxy (the source .wmv can't play in any modern browser).

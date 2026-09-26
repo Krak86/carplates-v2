@@ -43,7 +43,10 @@
     "export:cncap:csv": "pnpm --filter @carplates/scripts export:cncap:csv",
     "ingest:kncap": "pnpm --filter @carplates/scripts ingest:kncap",
     "ingest:kncap:csv": "pnpm --filter @carplates/scripts ingest:kncap:csv",
-    "export:kncap:csv": "pnpm --filter @carplates/scripts export:kncap:csv"
+    "export:kncap:csv": "pnpm --filter @carplates/scripts export:kncap:csv",
+    "ingest:iihs": "pnpm --filter @carplates/scripts ingest:iihs",
+    "ingest:iihs:csv": "pnpm --filter @carplates/scripts ingest:iihs:csv",
+    "export:iihs:csv": "pnpm --filter @carplates/scripts export:iihs:csv"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

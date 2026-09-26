@@ -317,6 +317,39 @@ export const kncapRatings = registry.table(
 export type KncapRatingRow = typeof kncapRatings.$inferSelect
 export type KncapRatingInsert = typeof kncapRatings.$inferInsert
 
+/**
+ * One IIHS (US, insurance-industry-funded) vehicle model-year assessment — scraped from
+ * iihs.org's own server-rendered detail pages via `scripts/src/iihs.ts` and refreshed by
+ * re-running it, same rationale as `cncapRatings`/`kncapRatings` above. `makeKey`/`modelKey`
+ * (`@carplates/shared`) drive both the scraper's write key and the API's lookup — see
+ * migrations/0009_iihs_ratings.sql. IIHS's own tested-criteria set changes by era, so `tests`
+ * is a jsonb array rather than fixed columns (see the migration's header comment).
+ */
+export const iihsRatings = registry.table(
+  'iihs_ratings',
+  {
+    assessmentId: text('assessment_id').primaryKey(),
+    make: text('make').notNull(),
+    model: text('model').notNull(),
+    makeKey: text('make_key').notNull(),
+    modelKey: text('model_key').notNull(),
+    variantType: text('variant_type').notNull(),
+    vehicleClass: text('vehicle_class'),
+    modelYear: integer('model_year').notNull(),
+    award: text('award'),
+    /** `{ key, label, rating, qualifier }[]` — see migration header comment for why this isn't fixed columns. */
+    tests: jsonb('tests')
+      .$type<{ key: string; label: string; rating: string | null; qualifier: string | null }[]>()
+      .notNull()
+      .default([]),
+    imageUrl: text('image_url'),
+    scrapedAt: timestamp('scraped_at', { withTimezone: true }).notNull().defaultNow()
+  },
+  t => [index('ix_iihs_make_model').on(t.makeKey, t.modelKey)]
+)
+export type IihsRatingRow = typeof iihsRatings.$inferSelect
+export type IihsRatingInsert = typeof iihsRatings.$inferInsert
+
 /** Incremental-ingest bookkeeping: which CKAN resources have been loaded. */
 export const ingestedResources = registry.table('ingested_resources', {
   ckanResourceId: text('ckan_resource_id').primaryKey(),

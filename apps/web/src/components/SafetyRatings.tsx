@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 
 import CncapRatings from '@/components/CncapRatings'
 import EuroNcapRatings from '@/components/EuroNcapRatings'
+import IihsRatings from '@/components/IihsRatings'
 import InfoPopover from '@/components/InfoPopover'
 import JncapRatings from '@/components/JncapRatings'
 import KncapRatings from '@/components/KncapRatings'
@@ -22,7 +23,7 @@ type Props = {
   body: string | null
 }
 
-type Source = 'euroncap' | 'nhtsa' | 'jncap' | 'cncap' | 'kncap'
+type Source = 'euroncap' | 'nhtsa' | 'jncap' | 'cncap' | 'kncap' | 'iihs'
 
 /**
  * Combined "which cars does this cover" explainer for both sources at once —
@@ -70,20 +71,25 @@ function CoverageInfo(): ReactNode {
         <div className="font-medium">{t('safety.coverageInfoKncapTitle')}</div>
         <p className="text-[var(--color-muted)]">{t('safety.coverageInfoKncapBody')}</p>
       </div>
+      <div>
+        <div className="font-medium">{t('safety.coverageInfoIihsTitle')}</div>
+        <p className="text-[var(--color-muted)]">{t('safety.coverageInfoIihsBody')}</p>
+      </div>
     </div>
   )
 }
 
 /**
- * Crash-test safety ratings from five independent sources, tabbed rather than
+ * Crash-test safety ratings from six independent sources, tabbed rather than
  * merged since they use different scales/protocols and cover different cars:
  * Euro NCAP (EU-spec, the dominant import stock in Ukraine) is the default,
  * NHTSA (US-spec only), JNCAP (JDM-domestic, never-exported models like
  * Alphard/Crown/Skyline), C-NCAP (China-market, the BYD/Geely/Chery/Zeekr
- * fleet Ukraine grey-imports in volume), and KNCAP (Korea-domestic, Hyundai/
- * Kia/Genesis/KGM EVs and other Korea-only models) the other four. Each tab
- * fetches its own data only once this section is expanded AND that tab is the
- * active one.
+ * fleet Ukraine grey-imports in volume), KNCAP (Korea-domestic, Hyundai/
+ * Kia/Genesis/KGM EVs and other Korea-only models), and IIHS (US-spec, same
+ * fleet as NHTSA but a genuinely different rating methodology) the other
+ * five. Each tab fetches its own data only once this section is expanded AND
+ * that tab is the active one.
  */
 export default function SafetyRatings({ brand, model, year, body }: Props): ReactNode {
   const { t } = useTranslation()
@@ -197,6 +203,18 @@ export default function SafetyRatings({ brand, model, year, body }: Props): Reac
               >
                 {t('safety.tabKncap')}
               </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={source === 'iihs'}
+                onClick={() => setSource('iihs')}
+                className={cn(
+                  'shrink-0 rounded-full px-3 py-1 text-sm whitespace-nowrap transition-colors',
+                  source === 'iihs' ? 'bg-[var(--color-surface)] font-medium shadow-sm' : 'text-[var(--color-muted)]'
+                )}
+              >
+                {t('safety.tabIihs')}
+              </button>
             </div>
 
             <div key={source} className="animate-fade-in">
@@ -205,6 +223,7 @@ export default function SafetyRatings({ brand, model, year, body }: Props): Reac
               {source === 'jncap' && <JncapRatings brand={brand} model={model} year={year} active={open} />}
               {source === 'cncap' && <CncapRatings brand={brand} model={model} year={year} active={open} />}
               {source === 'kncap' && <KncapRatings brand={brand} model={model} year={year} active={open} />}
+              {source === 'iihs' && <IihsRatings brand={brand} model={model} year={year} body={body} active={open} />}
             </div>
           </div>
         </div>

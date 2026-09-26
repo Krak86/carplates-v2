@@ -5,6 +5,7 @@ import {
   decodeVin,
   getCncapRatings,
   getEuroNcapRatings,
+  getIihsRatings,
   getJncapRatings,
   getKncapRatings,
   getSafetyRatings,
@@ -100,6 +101,15 @@ export function kncapRatingsQuery(make: string, model: string, year: number) {
   return queryOptions({
     queryKey: ['safety', 'kncap', make, model, year],
     queryFn: () => getKncapRatings(make, model, year),
+    staleTime: Infinity
+  })
+}
+
+// IIHS (US, insurance-industry-funded) ratings — scraped and persisted (pnpm ingest:iihs), not fetched live.
+export function iihsRatingsQuery(make: string, model: string, year: number) {
+  return queryOptions({
+    queryKey: ['safety', 'iihs', make, model, year],
+    queryFn: () => getIihsRatings(make, model, year),
     staleTime: Infinity
   })
 }

@@ -334,6 +334,56 @@ export const kncapRatingsResponseSchema = z.object({
 })
 export type KncapRatingsResponse = z.infer<typeof kncapRatingsResponseSchema>
 
+/** One test entry inside an IIHS assessment's `tests` array — see `iihsRatingSchema`. */
+export const iihsTestSchema = z.object({
+  key: z.string(),
+  label: z.string(),
+  /** IIHS's own word (Good/Acceptable/Marginal/Poor, or Superior/Advanced/Basic for the older
+   *  front-crash-prevention scale — see PLAN.md's IIHS section), or null if not rated. */
+  rating: z.string().nullable(),
+  /** The "Standard system"/"Optional system" availability text next to a crash-prevention test. */
+  qualifier: z.string().nullable()
+})
+export type IihsTest = z.infer<typeof iihsTestSchema>
+
+/**
+ * One IIHS (US, insurance-industry-funded) vehicle model-year assessment — scraped from
+ * iihs.org's own server-rendered detail pages and persisted, same rationale as `cncapRatingSchema`
+ * above (no stable per-request public API). IIHS rates each body variant of a model-year
+ * separately (a sedan and a hatchback of the same nameplate each get their own row), so unlike
+ * the other four sources this carries its own `variantType`/`vehicleClass`/`modelYear` rather
+ * than relying solely on the query's make/model/year — the API's body-style filter (mirrors
+ * NHTSA's) narrows `ratings` down to the variant that matches the registry car. `tests` is a
+ * source-shaped array, not fixed columns, because IIHS's tested-criteria set changes by era (see
+ * PLAN.md).
+ */
+export const iihsRatingSchema = z.object({
+  assessmentId: z.string(),
+  variantType: z.string(),
+  vehicleClass: z.string().nullable(),
+  modelYear: z.number().int(),
+  /** "TSP" / "TSP+" (Top Safety Pick / Top Safety Pick+), or null. */
+  award: z.string().nullable(),
+  tests: z.array(iihsTestSchema),
+  imageUrl: z.string().nullable()
+})
+export type IihsRating = z.infer<typeof iihsRatingSchema>
+
+/**
+ * GET /api/safety/iihs?make=&model=&year= — every persisted rating for the make/model, newest
+ * first. `applicableAssessmentIds` is an array, unlike the other four sources' single
+ * `applicableAssessmentId` — IIHS can have more than one variant applicable to the same car's
+ * model year at once (e.g. a car whose registry data doesn't disambiguate sedan vs. hatchback).
+ */
+export const iihsRatingsResponseSchema = z.object({
+  make: z.string(),
+  model: z.string(),
+  year: z.number().int(),
+  ratings: z.array(iihsRatingSchema),
+  applicableAssessmentIds: z.array(z.string())
+})
+export type IihsRatingsResponse = z.infer<typeof iihsRatingsResponseSchema>
+
 /** One stock photo from Pixabay, filtered to only what the UI needs. */
 export const vehiclePhotoSchema = z.object({
   id: z.number().int(),

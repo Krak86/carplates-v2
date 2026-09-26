@@ -14,7 +14,8 @@ import {
   firstPicture,
   formatAverageStars,
   formatPercent,
-  formatStars
+  formatStars,
+  nhtsaBodyBucket
 } from '@/components/SafetyRatings.helpers'
 import { safetyRatingsQuery } from '@/lib/queries'
 
@@ -226,7 +227,7 @@ export default function NhtsaRatings({ brand, model, year, body, active }: Props
   const [video, setVideo] = useState<{ url: string; description: string } | null>(null)
   const hasQuery = Boolean(brand && model && year)
   const result = useQuery({ ...safetyRatingsQuery(brand ?? '', model ?? '', year ?? 0), enabled: active && hasQuery })
-  const ratings = filterByBodyStyle(result.data?.ratings ?? [], body)
+  const ratings = filterByBodyStyle(result.data?.ratings ?? [], body, r => nhtsaBodyBucket(r.description))
 
   if (!hasQuery) return <p className="text-base text-[var(--color-muted)]">{t('safety.none')}</p>
 

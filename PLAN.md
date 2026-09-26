@@ -1080,15 +1080,174 @@ detail/{id}` from 1-290 not already known — zero additional real pages
        needed, so the earlier note about a sixth source (KNCAP) being where
        a dropdown/select rethink "should actually happen" turned out
        unnecessary here — revisit only if a sixth source ever ships.
-  4. **IIHS (US, insurance-industry-funded, distinct from NHTSA) — low
-     priority for this fleet.** Methodologically genuinely additive, not
-     redundant with NHTSA (Good/Acceptable/Marginal/Poor across small-
-     overlap frontal, side, headlights, crash-prevention tests, plus "Top
-     Safety Pick" awards — a car can rate well on one scale and not the
-     other), but `iihs.org/ratings` is category/search-driven rather than
-     a clean paginated list like JNCAP's, and US-spec vehicles are already
-     a minor slice of Ukraine's import mix even before adding a _second_
-     US source. Revisit only after JNCAP/C-NCAP ship.
+  4. **IIHS (US, insurance-industry-funded, distinct from NHTSA) — shipped
+     as the sixth safety-ratings source (2026-09-26).** Methodologically
+     genuinely additive, not redundant with NHTSA (Good/Acceptable/Marginal/
+     Poor across small-overlap frontal, side, headlights, crash-prevention
+     tests, plus "Top Safety Pick"/"Top Safety Pick+" awards — a car can
+     rate well on one scale and not the other).
+
+     **Re-researched 2026-09-26 with a real browser session (network-tab
+     inspection, same method used to confirm JNCAP/C-NCAP/KNCAP) — the
+     original "category/search-driven, not a clean paginated list" call was
+     wrong**, and this turned out easier to scrape than JNCAP, not harder.
+     The shipped scraper's actual discovery mechanism ended up simpler than
+     first researched: `https://www.iihs.org/sitemap.xml` lists every
+     `/ratings/vehicle/{make}/{variant}/{year}` page directly — 6,023 pages
+     across 660 make/variant combos, model years 1994–2027 — so the a–z
+     search-sweep and `variant-lookup` calls originally scoped turned out
+     unnecessary; the sitemap alone gives a complete, exact page list.
+     `GET /api/ratings/get-class-lookup`/`class-summary` and
+     `/ratings/top-safety-picks/{year}` exist too but weren't needed for a
+     full per-vehicle-year scrape. No bulk CSV/API dump exists (`/topics/data`
+     404s) — unlike NHTSA's Socrata alternative — but the sitemap makes one
+     unnecessary. No Cloudflare/CAPTCHA, no auth beyond a cookie-consent
+     cookie.
+
+     **Schema — `registry.iihs_ratings`** (`migrations/0009_iihs_ratings.sql`):
+     unlike the fixed-column shape of euroncap/jncap/cncap/kncap, IIHS's own
+     tested-criteria set changes by era (small-overlap front split by seat
+     pre-2012, "original" vs. "updated" moderate-overlap/side tests from the
+     mid-2010s redesign, roof strength/head restraints only tested through
+     the original-test era, pedestrian front-crash-prevention only from the
+     2019+ redesign), so each assessment's test results are a `tests jsonb`
+     array of `{key, label, rating, qualifier}` rather than one column per
+     test — same pattern as `jncap_ratings.test_scores`. `assessment_id` is
+     the page's own URL path, doubling as a real "full report" permalink
+     (`GET /ratings/vehicle/{assessmentId}`).
+
+     **Scraper — `scripts/src/iihs.ts` + `iihs-parse.ts`** (self-contained,
+     no `*-names.ts` translation table needed — IIHS's own text is already
+     English, unlike KNCAP/C-NCAP): fetches and caches the sitemap, then each
+     vehicle page sequentially (1.5s delay). `parseVehiclePage()` splits
+     `"2026 Mercedes-Benz E-Class"` into make/model by growing a leading-word
+     prefix of the post-year text until it matches the URL's own make slug —
+     the only reliable boundary for a make that can be one word or several. A
+     test's rating cell is one of two shapes: `abbr[aria-label]` on the
+     modern Good/Acceptable/Marginal/Poor scale (LATCH's "+" grade is a
+     sibling `span.gamp-plus`), or a `div[class*="fcp-"]` on the older
+     Superior/Advanced/Basic front-crash-prevention scale (`fcp-not-tested`
+     → `rating: null`, not the literal text) — both confirmed against real
+     pages spanning both eras. Front-crash-prevention tests span two table
+     rows (a header-only row naming the test, then a row with the
+     availability text and the actual rating) — detected generically by
+     `<td>` count, not by scale, so both eras flow through the same code
+     path. Verified against 4 real fixtures in `scripts/src/fixtures/`
+     (2026 Accord: updated tests + LATCH "+"; 2015 Accord: original tests +
+     Superior/Advanced/Basic FCP; 1994 VW Golf: the single-test minimal era;
+     2020 Mercedes-Benz E-Class: hyphenated two-word make split + a "Not
+     tested" FCP result) — all 5 `iihs-parse.test.ts` cases passed against
+     real captured markup on the first attempt.
+
+     **A real bug caught before the full scrape completed**: the sitemap
+     encodes a space-containing make as `alfa%20romeo`, and the initial
+     scraper didn't decode it — the raw `%20` survived `makeKey()`'s alnum-
+     only normalization as stray literal digits (`"20"`), silently dropping
+     every Alfa Romeo page. Fixed by decoding each sitemap path up front and
+     re-encoding per URL segment only when actually requesting the page.
+     Separately, a real full run hit a sharp, sustained transition from 100%
+     success to ~100% "fetch failed" partway through (not a permanent
+     block — a standalone retry moments later succeeded fine) — added
+     per-request retries (`MAX_ATTEMPTS`, growing delay) plus a single
+     end-of-run cooldown-and-retry pass over whatever's still failed, so a
+     multi-hour scrape doesn't lose a whole stretch of pages to one transient
+     episode.
+
+     **API — `iihs.service.ts`**: same `prefixQuery` shape as the other four
+     sources, but unlike their self-contained duplication, its brand-mismatch
+     fallback imports `brandCandidateKey()` from `euroncap.service.ts`
+     directly rather than re-deriving it — IIHS names BMW's series and
+     Mercedes-Benz's classes (with the same legacy ML/GLK/GL renames) by the
+     exact same convention Euro NCAP does, so a second copy would just be the
+     same facts typed twice. `applicableAssessmentIds` is **plural**, unlike
+     the other five sources' single id — IIHS rates each body variant of a
+     model-year separately (a sedan and a hatchback of the same nameplate
+     both count as "applicable" for one year), so a single id can't
+     represent it. Verified live end-to-end against real DB data
+     (`GET /api/safety/iihs?make=Acura&model=ADX&year=2025` → the 2025
+     variant correctly picked as applicable over the also-present 2026 one).
+
+     **Web — `IihsRatings.tsx`**: sixth tab in `SafetyRatings.tsx`, given a
+     `body` prop like `NhtsaRatings` — `iihsBodyBucket()` (new in
+     `SafetyRatings.helpers.ts`) maps IIHS's plain-English `variantType`
+     ("4-door sedan", "crew cab pickup", "minivan") to the same coarse bucket
+     `nhtsaBodyBucket()` already uses, and `filterByBodyStyle()` was
+     generalized to take a classifier callback instead of being hardcoded to
+     NHTSA's `description` field (both call sites, and the existing test
+     suite, updated to pass their own classifier — no behavior change for
+     NHTSA, confirmed by the untouched assertions still passing). Verified
+     live in a real browser session against the real Acura ADX plate above:
+     correct applicable/other-year split, all 8 tests with ratings and
+     qualifiers, TSP badge, working "Full IIHS report" link — and the NHTSA
+     tab re-checked on the same car to confirm the `filterByBodyStyle`
+     generalization didn't regress it (still correctly narrows to SUV
+     AWD/FWD).
+
+     **Known follow-up, not fixed as part of this work**: at 320px the
+     six-tab bar now genuinely overflows (previously five tabs fit exactly,
+     per the "Design note" above) — the existing `overflow-x-auto` handles
+     it as a horizontally-scrollable strip rather than breaking, but this is
+     the first source to actually trigger that fallback in practice. Revisit
+     the "dropdown/select rethink" question the design note has deferred
+     since KNCAP if a seventh source ever ships.
+
+     **Follow-up fix, same day: collapse re-published model years into one
+     card.** Spotted by the user looking at a real plate's Civic result and
+     asking why the "other tested model years" list ran 1996-2025 — IIHS
+     republishes the *identical* assessment under every model-year page a
+     generation spans (confirmed against real data: this Civic's ~30 scraped
+     rows across 1996-2026 collapse to just 6 genuinely distinct
+     assessments, since e.g. 2006-2008 and 2020-2021 are byte-identical
+     re-publications — the live site itself phrases this as "Rating applies
+     to 2023-26 models"). The DB and scraper are unchanged (each model-year
+     page is still its own real, separately-permalinked row — right for
+     data fidelity); the fix is purely a display grouping, `groupIihsRatings`
+     in `SafetyRatings.helpers.ts`: folds consecutive years sharing the same
+     variant + award + test-content signature into one `IihsRatingGroup`
+     with a year range ("2023–2026"), never bridging a gap year or a
+     genuine content change even if it coincidentally matches something
+     seen earlier. `IihsRatings.tsx`'s `RatingCard` now takes a group
+     instead of a single rating, linking "Full report" to the newest year
+     in the group. 5 new unit tests plus a live re-check of the same real
+     Civic plate (КА7151ОХ) confirmed the fix: ~30 near-duplicate cards
+     became ~18 real ones, correctly keeping 2025/2026 hatchback separate
+     (their content actually differs) while merging 2025-2026 sedan
+     (identical).
+
+     **Second follow-up, same day: dropped the "other tested model years"
+     list entirely.** Even grouped down to ~18 entries, the user pointed out
+     it still wasn't useful — a 2025 Civic buyer doesn't care what a 1996
+     Civic scored. Asked the user how to handle it (limit to nearby years /
+     hide entirely / cap to N entries / leave as-is); they chose hide.
+     Structural reason this doesn't apply the way it does for the other five
+     sources: Euro NCAP/JNCAP/C-NCAP/KNCAP each test a nameplate once per
+     *generation* (a handful of rows total), so "other tested generations"
+     is genuinely useful fallback context when the exact one isn't tested.
+     IIHS tests almost every model year, so it *always* has an exact or
+     near-exact match — the "other" list was never filling a real gap, just
+     surfacing decades of irrelevant history. `IihsRatings.tsx` now renders
+     only the applicable group(s); `groups`/`groupIihsRatings` are unchanged
+     (still needed to collapse the applicable side itself, e.g. this Civic's
+     2025–2026 sedan). Removed the now-dead `iihsOtherRatings` i18n key and
+     the `compact` prop `RatingCard` no longer needs; reworded
+     `iihsNoGenerationMatch` in all three locales since it no longer points
+     at a list "shown below" that doesn't exist. Re-verified against the
+     same real Civic plate: just the two applicable cards (sedan 2025–2026,
+     hatchback 2025), full test detail, straight to the source line.
+
+     **Full-fleet ingest completed 2026-09-26**: all 6,023 pages, **6,023
+     rows landed** (model years 1994–2027, 1,878 carrying a TSP/TSP+ award).
+     Two real issues surfaced and were fixed during the run itself, not
+     found by inspection beforehand: the `alfa%20romeo` decoding bug above,
+     and one single page (`volkswagen/atlas-4-door-suv/2018`) that came back
+     "not a recognizable vehicle page" live but parsed correctly when
+     re-read from its own disk-cached HTML moments later — a one-off,
+     non-reproducible blip (not a parser bug: identical bytes, different
+     outcome), resolved by simply re-running the ingest once more (which
+     replays instantly from cache) rather than chased further. `pnpm
+     export:iihs:csv` committed `scripts/seed-data/iihs-ratings.csv.gz`
+     (139 KB); round-tripped back in via `pnpm ingest:iihs:csv` to confirm
+     6,023 rows in, 6,023 out, no loss.
   5. **ANCAP (Australia/NZ) — skip, confirmed redundant.** Signed an MOU
      with Euro NCAP in 1999 and aligned protocols by 2018; for any vehicle
      sold in both markets, ANCAP now directly reuses Euro NCAP's own

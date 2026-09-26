@@ -25,7 +25,9 @@
       "Bash(docker compose*logs*)",
       "Bash(docker ps*)",
       "Bash(echo \"exit:$?\")",
-      "mcp__chrome-devtools__take_screenshot"
+      "mcp__chrome-devtools__take_screenshot",
+      "Bash(pnpm --filter @carplates/web exec vitest run)",
+      "Bash(pnpm build *)"
     ],
     "deny": [
       "Read(**/.env)",
