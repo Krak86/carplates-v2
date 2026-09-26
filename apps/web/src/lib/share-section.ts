@@ -17,6 +17,11 @@ export async function copyToClipboard(text: string): Promise<boolean> {
   }
 }
 
+// Layout.tsx's app header is `sticky top-0 h-14` (56px) — scrolling a target flush to the
+// viewport top lands it directly behind that header, hidden, not "into view" at all. A little
+// extra breathing room on top of the bare header height keeps the target clear of its edge.
+const STICKY_HEADER_OFFSET_PX = 64
+
 /**
  * `Element.scrollIntoView()` on a descendant of the result Card corrupts its
  * compositor layer geometry (the Card uses a 3D `transform` for its tilt
@@ -26,6 +31,6 @@ export async function copyToClipboard(text: string): Promise<boolean> {
  * computed position doesn't trigger it, so use that instead.
  */
 export function scrollElementIntoView(el: HTMLElement): void {
-  const top = el.getBoundingClientRect().top + window.scrollY
+  const top = el.getBoundingClientRect().top + window.scrollY - STICKY_HEADER_OFFSET_PX
   window.scrollTo({ top, behavior: 'smooth' })
 }

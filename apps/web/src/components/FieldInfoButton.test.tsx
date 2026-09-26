@@ -31,7 +31,9 @@ const stats: StatsResponse = {
     { value: null, totalRows: 4, distinctPlates: 3, distinctVins: 3 }
   ],
   byBrand: [],
-  byBrandYear: []
+  byBrandYear: [],
+  byOrigin: [],
+  topModels: []
 }
 
 describe('FieldInfoButton', () => {

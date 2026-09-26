@@ -159,11 +159,31 @@ export const statsByBrand = registry
   .materializedView('stats_by_brand', { brand: text('brand'), ...statsMetrics })
   .existing()
 
+/**
+ * Imported vs. dealer-bought-domestic rollup, derived from oper_name keywords —
+ * see migrations/0011_stats_by_origin.sql for the classification and its rationale.
+ */
+export const statsByOrigin = registry
+  .materializedView('stats_by_origin', { origin: text('origin'), ...statsMetrics })
+  .existing()
+
 /** Brand x year 2D rollup — see migrations/0004_stats_by_brand.sql. */
 export const statsByBrandYear = registry
   .materializedView('stats_by_brand_year', {
     brand: text('brand'),
     year: integer('year'),
+    ...statsMetrics
+  })
+  .existing()
+
+/**
+ * Brand+model rollup backing the stats-page "top 5 models" leaderboard only
+ * (~79k distinct pairs, mostly ingest noise) — see migrations/0010_stats_by_model.sql.
+ */
+export const statsByModel = registry
+  .materializedView('stats_by_model', {
+    brand: text('brand').notNull(),
+    model: text('model').notNull(),
     ...statsMetrics
   })
   .existing()

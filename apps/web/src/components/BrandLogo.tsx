@@ -7,6 +7,8 @@ import { cn } from '@/lib/cn'
 type Props = {
   brand: string | null
   variant?: 'inline' | 'watermark'
+  /** `inline` only — `sm` fits a fixed-width slot (leaderboard rows) so mixed logo aspect ratios don't misalign the text next to them. */
+  size?: 'default' | 'sm'
   className?: string
 }
 
@@ -28,7 +30,7 @@ type Props = {
  * `relative isolate overflow-hidden` so the negative z-index keeps it under in-flow
  * content and the card's rounded corners/bottom edge clip whatever overflows.
  */
-export default function BrandLogo({ brand, variant = 'inline', className }: Props): ReactNode {
+export default function BrandLogo({ brand, variant = 'inline', size = 'default', className }: Props): ReactNode {
   const [failed, setFailed] = useState(false)
   const src = brandLogoUrl(brand)
 
@@ -55,7 +57,13 @@ export default function BrandLogo({ brand, variant = 'inline', className }: Prop
       src={src}
       alt={brand ?? ''}
       onError={() => setFailed(true)}
-      className={cn('h-8 w-auto object-contain mix-blend-multiply', className)}
+      className={cn(
+        // `cn` doesn't dedupe (plain clsx, no tailwind-merge) — the two sizes must never
+        // both contribute a height/width class, or which one wins is cascade-order luck.
+        size === 'sm' ? 'h-4 w-5' : 'h-8 w-auto',
+        'object-contain mix-blend-multiply',
+        className
+      )}
     />
   )
 }

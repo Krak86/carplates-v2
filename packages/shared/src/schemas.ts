@@ -460,6 +460,13 @@ export const statsByBrandYearRowSchema = statsMetricsSchema.extend({
 })
 export type StatsByBrandYearRow = z.infer<typeof statsByBrandYearRowSchema>
 
+/** One brand+model pair — only ever the top few by distinctPlates, see statsResponseSchema.topModels. */
+export const statsByModelRowSchema = statsMetricsSchema.extend({
+  brand: z.string(),
+  model: z.string()
+})
+export type StatsByModelRow = z.infer<typeof statsByModelRowSchema>
+
 /** GET /api/stats — everything the stats table (and, later, the map) needs; fetched once and filtered client-side. */
 export const statsResponseSchema = z.object({
   summary: statsMetricsSchema.extend({ plateless: z.number().int().nonnegative() }),
@@ -471,7 +478,11 @@ export const statsResponseSchema = z.object({
   byColor: z.array(statsByDimensionRowSchema),
   byFuel: z.array(statsByDimensionRowSchema),
   byBrand: z.array(statsByDimensionRowSchema),
-  byBrandYear: z.array(statsByBrandYearRowSchema)
+  byBrandYear: z.array(statsByBrandYearRowSchema),
+  /** Imported vs. dealer-bought-domestic — see stats_by_origin's migration comment. */
+  byOrigin: z.array(statsByDimensionRowSchema),
+  /** Top 5 brand+model pairs by distinctPlates — not a full dimension, see stats_by_model's migration comment. */
+  topModels: z.array(statsByModelRowSchema)
 })
 export type StatsResponse = z.infer<typeof statsResponseSchema>
 

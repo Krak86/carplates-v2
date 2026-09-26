@@ -22,6 +22,7 @@ import RegistrationTimeline from '@/components/RegistrationTimeline'
 import { getFuelIcon } from '@/components/ResultCard.helpers'
 import SafetyRatings from '@/components/SafetyRatings'
 import ShareButton from '@/components/ShareButton'
+import TopStatBadges from '@/components/TopStatBadges'
 import { useCarWikiActions } from '@/components/use-car-wiki-actions'
 import Card from '@/components/ui/Card'
 import VehicleKindIcon from '@/components/VehicleKindIcon'
@@ -168,6 +169,7 @@ export default function ResultCard({ data }: Props): ReactNode {
                 </span>
               )}
             </div>
+            <TopStatBadges brand={c.brand} model={c.model} color={c.color} region={data.region} />
           </div>
           <VehicleKindIcon
             kind={vehicleKind}

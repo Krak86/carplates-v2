@@ -13,6 +13,8 @@ export {
   statsByFuel,
   statsByBrand,
   statsByBrandYear,
+  statsByModel,
+  statsByOrigin,
   ingestedResources,
   euroncapRatings,
   jncapRatings,

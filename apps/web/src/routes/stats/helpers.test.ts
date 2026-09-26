@@ -1,7 +1,20 @@
 import { describe, expect, it } from 'vitest'
 import type { StatsResponse } from '@carplates/shared'
 
-import { choroplethColor, dimensionHasYearColumn, dimensionRows, yearBoundaryLabel, yearRange } from './helpers'
+import {
+  choroplethColor,
+  dimensionHasYearColumn,
+  dimensionRows,
+  MAX_TOP_N,
+  rankOf,
+  rankOfModel,
+  topBrands,
+  topColors,
+  topModels,
+  topRegions,
+  yearBoundaryLabel,
+  yearRange
+} from './helpers'
 
 const stats: StatsResponse = {
   summary: { totalRows: 100, distinctPlates: 80, distinctVins: 60, plateless: 5 },
@@ -9,18 +22,36 @@ const stats: StatsResponse = {
     { year: 2025, totalRows: 40, distinctPlates: 35, distinctVins: 30 },
     { year: null, totalRows: 5, distinctPlates: 5, distinctVins: 4 }
   ],
-  byRegion: [{ region: 'Київ', totalRows: 20, distinctPlates: 18, distinctVins: 15 }],
+  byRegion: [
+    { region: 'Київ', totalRows: 20, distinctPlates: 18, distinctVins: 15 },
+    { region: 'Львівська область', totalRows: 12, distinctPlates: 10, distinctVins: 9 }
+  ],
   byRegionYear: [{ region: 'Київ', year: 2025, totalRows: 10, distinctPlates: 9, distinctVins: 8 }],
   byBody: [{ value: null, totalRows: 2, distinctPlates: 2, distinctVins: 1 }],
   byKind: [{ value: 'Легковий', totalRows: 3, distinctPlates: 3, distinctVins: 2 }],
-  byColor: [{ value: 'Білий', totalRows: 4, distinctPlates: 4, distinctVins: 3 }],
+  byColor: [
+    { value: 'Білий', totalRows: 4, distinctPlates: 4, distinctVins: 3 },
+    { value: 'Чорний', totalRows: 9, distinctPlates: 9, distinctVins: 7 },
+    { value: null, totalRows: 1, distinctPlates: 1, distinctVins: 1 }
+  ],
   byFuel: [
     { value: 'БЕНЗИН', totalRows: 6, distinctPlates: 6, distinctVins: 5 },
     { value: null, totalRows: 2, distinctPlates: 2, distinctVins: 2 },
     { value: 'NULL', totalRows: 1, distinctPlates: 1, distinctVins: 1 }
   ],
-  byBrand: [{ value: 'LEXUS', totalRows: 7, distinctPlates: 7, distinctVins: 6 }],
-  byBrandYear: [{ brand: 'LEXUS', year: 2025, totalRows: 3, distinctPlates: 3, distinctVins: 3 }]
+  byBrand: [
+    { value: 'LEXUS', totalRows: 7, distinctPlates: 7, distinctVins: 6 },
+    { value: 'TOYOTA', totalRows: 15, distinctPlates: 14, distinctVins: 12 }
+  ],
+  byBrandYear: [{ brand: 'LEXUS', year: 2025, totalRows: 3, distinctPlates: 3, distinctVins: 3 }],
+  byOrigin: [
+    { value: 'Ввезено з-за кордону, дилер', totalRows: 5, distinctPlates: 5, distinctVins: 4 },
+    { value: null, totalRows: 10, distinctPlates: 10, distinctVins: 8 }
+  ],
+  topModels: [
+    { brand: 'TOYOTA', model: 'CAMRY', totalRows: 5, distinctPlates: 5, distinctVins: 4 },
+    { brand: 'LEXUS', model: 'RX', totalRows: 2, distinctPlates: 2, distinctVins: 2 }
+  ]
 }
 
 describe('dimensionRows', () => {
@@ -33,7 +64,15 @@ describe('dimensionRows', () => {
 
   it('labels the region rollup by region name, with no year', () => {
     expect(dimensionRows(stats, 'region')).toEqual([
-      { region: 'Київ', totalRows: 20, distinctPlates: 18, distinctVins: 15, label: 'Київ', year: null }
+      { region: 'Київ', totalRows: 20, distinctPlates: 18, distinctVins: 15, label: 'Київ', year: null },
+      {
+        region: 'Львівська область',
+        totalRows: 12,
+        distinctPlates: 10,
+        distinctVins: 9,
+        label: 'Львівська область',
+        year: null
+      }
     ])
   })
 
@@ -54,13 +93,28 @@ describe('dimensionRows', () => {
 
   it('labels the brand rollup by brand name, with no year', () => {
     expect(dimensionRows(stats, 'brand')).toEqual([
-      { value: 'LEXUS', totalRows: 7, distinctPlates: 7, distinctVins: 6, label: 'LEXUS', year: null }
+      { value: 'LEXUS', totalRows: 7, distinctPlates: 7, distinctVins: 6, label: 'LEXUS', year: null },
+      { value: 'TOYOTA', totalRows: 15, distinctPlates: 14, distinctVins: 12, label: 'TOYOTA', year: null }
     ])
   })
 
   it('keeps a separate year alongside the brand label for the 2D rollup', () => {
     expect(dimensionRows(stats, 'brandYear')).toEqual([
       { brand: 'LEXUS', year: 2025, totalRows: 3, distinctPlates: 3, distinctVins: 3, label: 'LEXUS' }
+    ])
+  })
+
+  it('falls back to a dash for the unclassified (null) origin bucket', () => {
+    expect(dimensionRows(stats, 'origin')).toEqual([
+      {
+        value: 'Ввезено з-за кордону, дилер',
+        totalRows: 5,
+        distinctPlates: 5,
+        distinctVins: 4,
+        label: 'Ввезено з-за кордону, дилер',
+        year: null
+      },
+      { value: null, totalRows: 10, distinctPlates: 10, distinctVins: 8, label: '—', year: null }
     ])
   })
 
@@ -79,6 +133,7 @@ describe('dimensionHasYearColumn', () => {
     expect(dimensionHasYearColumn('region')).toBe(false)
     expect(dimensionHasYearColumn('brand')).toBe(false)
     expect(dimensionHasYearColumn('year')).toBe(false)
+    expect(dimensionHasYearColumn('origin')).toBe(false)
   })
 })
 
@@ -120,6 +175,44 @@ describe('yearBoundaryLabel', () => {
   it('appends the current month when the year is the current calendar year', () => {
     expect(yearBoundaryLabel(2026, 'en-US', now)).toBe('September 2026')
     expect(yearBoundaryLabel(2026, 'uk-UA', now)).toBe('вересень 2026 р.')
+  })
+})
+
+describe('topBrands / topColors / topRegions / topModels', () => {
+  it('ranks by distinctPlates, highest first, dropping null values', () => {
+    expect(topBrands(stats)).toEqual(['TOYOTA', 'LEXUS'])
+    expect(topColors(stats)).toEqual(['Чорний', 'Білий'])
+    expect(topRegions(stats)).toEqual(['Київ', 'Львівська область'])
+    expect(topModels(stats)).toEqual([
+      { brand: 'TOYOTA', model: 'CAMRY', totalRows: 5, distinctPlates: 5, distinctVins: 4 },
+      { brand: 'LEXUS', model: 'RX', totalRows: 2, distinctPlates: 2, distinctVins: 2 }
+    ])
+  })
+
+  it('caps at n', () => {
+    expect(topBrands(stats, 1)).toEqual(['TOYOTA'])
+  })
+
+  it('defaults to the top 10 — the API/panel "show 10" ceiling, not just the panel default 5-row display', () => {
+    expect(MAX_TOP_N).toBe(10)
+  })
+})
+
+describe('rankOf / rankOfModel', () => {
+  it('returns the 1-based rank when present', () => {
+    expect(rankOf(topBrands(stats), 'LEXUS')).toBe(2)
+    expect(rankOf(topBrands(stats), 'TOYOTA')).toBe(1)
+  })
+
+  it('returns null when absent or the value is null', () => {
+    expect(rankOf(topBrands(stats), 'BMW')).toBeNull()
+    expect(rankOf(topBrands(stats), null)).toBeNull()
+  })
+
+  it('matches a brand+model pair by both fields', () => {
+    expect(rankOfModel(topModels(stats), 'LEXUS', 'RX')).toBe(2)
+    expect(rankOfModel(topModels(stats), 'LEXUS', 'CAMRY')).toBeNull()
+    expect(rankOfModel(topModels(stats), null, 'RX')).toBeNull()
   })
 })
 

@@ -1,8 +1,64 @@
-import type { StatsResponse } from '@carplates/shared'
+import type { StatsByModelRow, StatsResponse } from '@carplates/shared'
 
 import { isKnownFuel } from '@/components/ResultCard.helpers'
 
 import type { StatsDimension, StatsRow } from './types'
+
+/**
+ * The leaderboards go this deep — the API's topModels query is capped to match (see
+ * stats.service.ts) — and the ResultCard badges (rankOf/rankOfModel) treat placing anywhere
+ * in this range as "top", not just the panel's default 5-row, collapsed display.
+ */
+export const MAX_TOP_N = 10
+
+/** Non-null labels from a by-dimension rollup, ranked by distinctPlates, highest first. */
+function topLabels(rows: { value: string | null; distinctPlates: number }[], n: number): string[] {
+  return rows
+    .filter((r): r is { value: string; distinctPlates: number } => r.value !== null)
+    .sort((a, b) => b.distinctPlates - a.distinctPlates)
+    .slice(0, n)
+    .map(r => r.value)
+}
+
+/** Top N makes by distinctPlates — backs the stats page's "top makes" panel and the ResultCard badge. */
+export function topBrands(stats: StatsResponse, n = MAX_TOP_N): string[] {
+  return topLabels(stats.byBrand, n)
+}
+
+/** Top N colours by distinctPlates. */
+export function topColors(stats: StatsResponse, n = MAX_TOP_N): string[] {
+  return topLabels(stats.byColor, n)
+}
+
+/** Top N regions by distinctPlates (already the smaller of the two oblast-prefix rollups). */
+export function topRegions(stats: StatsResponse, n = MAX_TOP_N): string[] {
+  return [...stats.byRegion]
+    .sort((a, b) => b.distinctPlates - a.distinctPlates)
+    .slice(0, n)
+    .map(r => r.region)
+}
+
+/**
+ * Top N brand+model pairs. `stats.topModels` already arrives capped and sorted from the API
+ * (see stats.service.ts) — re-sorting/re-slicing here is just defensive, not a real filter.
+ */
+export function topModels(stats: StatsResponse, n = MAX_TOP_N): StatsByModelRow[] {
+  return [...stats.topModels].sort((a, b) => b.distinctPlates - a.distinctPlates).slice(0, n)
+}
+
+/** 1-based rank of `value` in a ranked label list, or null when absent (not top N, or no value to check). */
+export function rankOf(ranked: string[], value: string | null): number | null {
+  if (value === null) return null
+  const idx = ranked.indexOf(value)
+  return idx === -1 ? null : idx + 1
+}
+
+/** 1-based rank of a brand+model pair in a ranked model list, or null when absent. */
+export function rankOfModel(ranked: StatsByModelRow[], brand: string | null, model: string | null): number | null {
+  if (brand === null || model === null) return null
+  const idx = ranked.findIndex(r => r.brand === brand && r.model === model)
+  return idx === -1 ? null : idx + 1
+}
 
 /**
  * Merges the fuel rollup's unknown/absent/garbage values ("NULL", "ВІДСУТНЄ", ".", a blank
@@ -50,6 +106,8 @@ export function dimensionRows(stats: StatsResponse, dim: StatsDimension): StatsR
       return stats.byBrand.map(r => ({ ...r, label: r.value ?? '—', year: null }))
     case 'brandYear':
       return stats.byBrandYear.map(r => ({ ...r, label: r.brand ?? '—', year: r.year }))
+    case 'origin':
+      return stats.byOrigin.map(r => ({ ...r, label: r.value ?? '—', year: null }))
   }
 }
 

@@ -7,7 +7,8 @@ export const STATS_DIMENSIONS = [
   'color',
   'fuel',
   'brand',
-  'brandYear'
+  'brandYear',
+  'origin'
 ] as const
 export type StatsDimension = (typeof STATS_DIMENSIONS)[number]
 
@@ -34,7 +35,8 @@ export const DIMENSION_ICONS: Readonly<Record<StatsDimension, string>> = {
   color: '🎨',
   fuel: '⛽',
   brand: '🏭',
-  brandYear: '🏭📅'
+  brandYear: '🏭📅',
+  origin: '🌍'
 }
 
 export const METRIC_ICONS: Readonly<Record<StatsMetric, string>> = {

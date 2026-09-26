@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import {
   createColumnHelper,
@@ -12,7 +12,9 @@ import type { SortingState } from '@tanstack/react-table'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { useTranslation } from 'react-i18next'
 
+import { cn } from '@/lib/cn'
 import { toIntlLocale } from '@/lib/intl'
+import { scrollElementIntoView } from '@/lib/share-section'
 import type { StatsRow } from '@/routes/stats/types'
 
 // Rows past this many get windowed rendering instead of a plain map — matches
@@ -20,21 +22,34 @@ import type { StatsRow } from '@/routes/stats/types'
 // rows) crosses it today.
 const VIRTUALIZE_THRESHOLD = 50
 const ROW_HEIGHT_PX = 40
+const HIGHLIGHT_DURATION_MS = 2500
 
 type Props = {
   rows: StatsRow[]
   labelHeader: string
   showYearColumn: boolean
   defaultSortKey: keyof StatsRow
+  /** A row's `label` to scroll to and briefly flash on arrival — a badge deep link from ResultCard. */
+  highlightLabel?: string
 }
 
 const columnHelper = createColumnHelper<StatsRow>()
 
-export default function StatsTable({ rows, labelHeader, showYearColumn, defaultSortKey }: Props): ReactNode {
+export default function StatsTable({
+  rows,
+  labelHeader,
+  showYearColumn,
+  defaultSortKey,
+  highlightLabel
+}: Props): ReactNode {
   const { t, i18n } = useTranslation()
   const [sorting, setSorting] = useState<SortingState>([{ id: defaultSortKey, desc: true }])
   const [globalFilter, setGlobalFilter] = useState('')
+  const [highlightedRowId, setHighlightedRowId] = useState<string | null>(null)
   const parentRef = useRef<HTMLDivElement>(null)
+  // Guards against re-scrolling/re-flashing every time tableRows changes reference
+  // (sort, filter, background refetch) — the deep link should only act once.
+  const handledHighlightRef = useRef<string | null>(null)
 
   const numberFormat = new Intl.NumberFormat(toIntlLocale(i18n.language))
 
@@ -60,6 +75,10 @@ export default function StatsTable({ rows, labelHeader, showYearColumn, defaultS
   const table = useReactTable({
     data: rows,
     columns,
+    // A composite id (label survives sorting; +year disambiguates the 2D rollups, where
+    // label alone repeats across years) so the highlight-on-arrival effect below can find
+    // a stable target row regardless of the current sort order.
+    getRowId: row => `${row.label}::${row.year ?? ''}`,
     state: { sorting, globalFilter },
     onSortingChange: setSorting,
     onGlobalFilterChange: setGlobalFilter,
@@ -77,6 +96,18 @@ export default function StatsTable({ rows, labelHeader, showYearColumn, defaultS
     estimateSize: () => ROW_HEIGHT_PX,
     enabled: shouldVirtualize
   })
+
+  useEffect(() => {
+    if (!highlightLabel || handledHighlightRef.current === highlightLabel) return
+    const idx = tableRows.findIndex(r => r.original.label === highlightLabel)
+    if (idx === -1) return
+    handledHighlightRef.current = highlightLabel
+    if (shouldVirtualize) virtualizer.scrollToIndex(idx, { align: 'center' })
+    if (parentRef.current) scrollElementIntoView(parentRef.current)
+    setHighlightedRowId(tableRows[idx]!.id)
+    const timer = setTimeout(() => setHighlightedRowId(null), HIGHLIGHT_DURATION_MS)
+    return (): void => clearTimeout(timer)
+  }, [highlightLabel, tableRows, shouldVirtualize, virtualizer])
 
   const visibleRows = shouldVirtualize ? virtualizer.getVirtualItems() : tableRows.map((_, index) => ({ index }))
   const topPad = shouldVirtualize ? (virtualizer.getVirtualItems()[0]?.start ?? 0) : 0
@@ -127,7 +158,13 @@ export default function StatsTable({ rows, labelHeader, showYearColumn, defaultS
               const row = tableRows[index]
               if (!row) return null
               return (
-                <tr key={row.id} className="border-t border-[var(--color-border)]">
+                <tr
+                  key={row.id}
+                  className={cn(
+                    'border-t border-[var(--color-border)] transition-colors duration-1000',
+                    row.id === highlightedRowId && 'bg-[var(--color-primary)]/20'
+                  )}
+                >
                   {row.getVisibleCells().map(cell => (
                     <td key={cell.id} className="px-3 py-2">
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
