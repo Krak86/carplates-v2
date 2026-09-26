@@ -7,6 +7,10 @@
     "shadcn": {
       "command": "npx",
       "args": ["shadcn@latest", "mcp"]
+    },
+    "webmcp": {
+      "command": "npx",
+      "args": ["-y", "@jason.today/webmcp@latest", "--mcp"]
     }
   }
 }

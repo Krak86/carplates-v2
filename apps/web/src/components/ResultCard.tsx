@@ -16,6 +16,7 @@ import type { PlateLookupResponse } from '@carplates/shared'
 import BrandLogo from '@/components/BrandLogo'
 import CardTiltToggle from '@/components/CardTiltToggle'
 import CarWikiInfo from '@/components/CarWikiInfo'
+import CopyAllInfoButton from '@/components/CopyAllInfoButton'
 import FavoriteButton from '@/components/FavoriteButton'
 import FieldInfoButton from '@/components/FieldInfoButton'
 import RegistrationTimeline from '@/components/RegistrationTimeline'
@@ -152,6 +153,15 @@ export default function ResultCard({ data }: Props): ReactNode {
                   </span>
                 </a>
               )}
+              <CopyAllInfoButton
+                vehicle={{ brand: c.brand, model: c.model, year: c.makeYear, body: c.body }}
+                plate={data.plate}
+                region={data.region}
+                current={c}
+                vin={c.vin}
+                vinDecodeResults={null}
+                vinRegistryActions={null}
+              />
             </div>
             <div className="text-base text-[var(--color-muted)]">
               <Link to={`/${data.plate}`} className="text-[var(--color-primary)] underline">

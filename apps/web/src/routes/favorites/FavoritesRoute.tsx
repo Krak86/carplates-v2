@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 
 import LocalRecordRow from '@/components/LocalRecordRow'
+import LocalRecordsExportButton from '@/components/LocalRecordsExportButton'
 import Card from '@/components/ui/Card'
 import Spinner from '@/components/ui/Spinner'
 import { favoritesQuery } from '@/lib/queries'
@@ -16,7 +17,12 @@ export default function FavoritesRoute(): ReactNode {
 
   return (
     <div className="mx-auto w-full max-w-xl">
-      <h1 className="mb-4 text-2xl font-bold">{t('favorites.title')}</h1>
+      <div className="mb-4 flex items-center justify-between">
+        <h1 className="text-2xl font-bold">{t('favorites.title')}</h1>
+        {favorites.isSuccess && favorites.data.length > 0 && (
+          <LocalRecordsExportButton title={t('favorites.title')} entries={favorites.data} />
+        )}
+      </div>
 
       {favorites.isPending && (
         <p className="flex items-center gap-2 text-[var(--color-muted)]">

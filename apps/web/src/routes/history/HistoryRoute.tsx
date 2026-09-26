@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 
 import LocalRecordRow from '@/components/LocalRecordRow'
+import LocalRecordsExportButton from '@/components/LocalRecordsExportButton'
 import Card from '@/components/ui/Card'
 import Spinner from '@/components/ui/Spinner'
 import { cn } from '@/lib/cn'
@@ -37,16 +38,21 @@ export default function HistoryRoute(): ReactNode {
     <div className="mx-auto w-full max-w-xl">
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-bold">{t('history.title')}</h1>
-        {groups.length > 0 && (
-          <button
-            type="button"
-            onClick={handleDeleteAll}
-            disabled={deleteAll.isPending}
-            className="text-sm text-[var(--color-primary)] underline hover:no-underline disabled:opacity-50"
-          >
-            {t('history.clearAll')}
-          </button>
-        )}
+        <div className="flex items-center gap-3">
+          {history.data && history.data.length > 0 && (
+            <LocalRecordsExportButton title={t('history.title')} entries={history.data} />
+          )}
+          {groups.length > 0 && (
+            <button
+              type="button"
+              onClick={handleDeleteAll}
+              disabled={deleteAll.isPending}
+              className="text-sm text-[var(--color-primary)] underline hover:no-underline disabled:opacity-50"
+            >
+              {t('history.clearAll')}
+            </button>
+          )}
+        </div>
       </div>
 
       {history.isPending && (

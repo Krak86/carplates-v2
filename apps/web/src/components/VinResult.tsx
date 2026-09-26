@@ -1,10 +1,11 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { fallbackVehicleColor, resolveVehicleColor, VEHICLE_COLOR_HEX } from '@carplates/shared'
+import { fallbackVehicleColor, regionName, resolveVehicleColor, VEHICLE_COLOR_HEX } from '@carplates/shared'
 import type { VinDecodeResponse } from '@carplates/shared'
 
 import CardTiltToggle from '@/components/CardTiltToggle'
 import CarWikiInfo from '@/components/CarWikiInfo'
+import CopyAllInfoButton from '@/components/CopyAllInfoButton'
 import FavoriteButton from '@/components/FavoriteButton'
 import RegistrationTimeline from '@/components/RegistrationTimeline'
 import SafetyRatings from '@/components/SafetyRatings'
@@ -24,6 +25,8 @@ export default function VinResult({ data }: Props): ReactNode {
   const registry = data.registry
   const vehicle = extractVehicleInfo(data)
   const vehicleColor = resolveVehicleColor(registry?.actions[0]?.color) ?? fallbackVehicleColor(data.vin)
+  const plate = registry?.plate ?? null
+  const region = plate ? (regionName(plate) ?? null) : null
   const tiltEnabled = useUiStore(s => s.cardTiltEnabled)
   const glowRef = useCardMotion<HTMLDivElement>(tiltEnabled)
   const wiki = useCarWikiActions({ brand: vehicle.brand, model: vehicle.model, key: data.vin })
@@ -51,6 +54,15 @@ export default function VinResult({ data }: Props): ReactNode {
         <div className="mb-1 flex items-center gap-1.5 pr-20 text-xl font-semibold lg:pr-8">
           <span aria-hidden>🆔</span>
           {t('vin.title')}
+          <CopyAllInfoButton
+            vehicle={vehicle}
+            plate={plate}
+            region={region}
+            current={registry?.actions[0] ?? null}
+            vin={data.vin}
+            vinDecodeResults={data.results}
+            vinRegistryActions={registry?.actions ?? null}
+          />
         </div>
         <div className="mb-3 text-base text-[var(--color-muted)]">{data.vin}</div>
 
