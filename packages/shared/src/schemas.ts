@@ -402,6 +402,34 @@ export const vehiclePhotosResponseSchema = z.object({
 })
 export type VehiclePhotosResponse = z.infer<typeof vehiclePhotosResponseSchema>
 
+/** Author/license credit for a wiki-sourced vehicle image — Commons requires attribution for CC-BY/CC-BY-SA (never for public domain), so fields are null when Commons exposes none or the image has none. */
+export const wikiImageAttributionSchema = z.object({
+  author: z.string().nullable(),
+  license: z.string().nullable(),
+  licenseUrl: z.string().nullable()
+})
+export type WikiImageAttribution = z.infer<typeof wikiImageAttributionSchema>
+
+export const wikiImageSchema = z.object({
+  url: z.string(),
+  width: z.number().int(),
+  height: z.number().int(),
+  attribution: wikiImageAttributionSchema.nullable()
+})
+export type WikiImage = z.infer<typeof wikiImageSchema>
+
+/** GET /api/wiki?brand=&model=&lang= — best-effort Wikipedia article match for a brand/model. Live-fetched
+ *  (unlike the NCAP sources, nothing here is persisted) and cached in-process, same rationale as `photos.service.ts`. */
+export const wikiInfoResponseSchema = z.object({
+  query: z.string(),
+  found: z.boolean(),
+  title: z.string().nullable(),
+  extract: z.string().nullable(),
+  pageUrl: z.string().nullable(),
+  image: wikiImageSchema.nullable()
+})
+export type WikiInfo = z.infer<typeof wikiInfoResponseSchema>
+
 /** Shared count fields for every stats rollup row. */
 export const statsMetricsSchema = z.object({
   totalRows: z.number().int().nonnegative(),

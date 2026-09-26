@@ -69,7 +69,7 @@ describe('ResultCard', () => {
     expect(screen.getByText('ЛЕГКОВИЙ')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: '4T1BF1FK5CU000001' })).toHaveAttribute('href', '/4T1BF1FK5CU000001')
 
-    const detailsButton = screen.getByRole('button', { name: 'Registration / VIN history' })
+    const detailsButton = screen.getByRole('button', { name: 'Show history' })
     expect(detailsButton).toHaveAttribute('aria-expanded', 'false')
   })
 
@@ -100,7 +100,7 @@ describe('ResultCard', () => {
     })
     renderWithProviders(<ResultCard data={data} />)
 
-    fireEvent.click(screen.getByRole('button', { name: 'Registration / VIN history' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Show history' }))
 
     expect(decodeVin).toHaveBeenCalledWith(data.current.vin)
     expect(plateHistory).toHaveBeenCalledWith(data.plate)
@@ -122,7 +122,7 @@ describe('ResultCard', () => {
     })
     renderWithProviders(<ResultCard data={noVin} />)
 
-    fireEvent.click(screen.getByRole('button', { name: 'Registration / VIN history' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Show history' }))
 
     expect(plateHistory).toHaveBeenCalledWith(data.plate)
     expect(decodeVin).not.toHaveBeenCalled()
@@ -140,7 +140,7 @@ describe('ResultCard', () => {
     })
     renderWithProviders(<ResultCard data={data} />)
 
-    fireEvent.click(screen.getByRole('button', { name: 'Registration / VIN history' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Show history' }))
 
     await waitFor(() => expect(screen.getByText('2014-01-10')).toBeInTheDocument())
     expect(screen.getByText('NISSAN ROGUE (2014)')).toBeInTheDocument()

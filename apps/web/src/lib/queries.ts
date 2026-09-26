@@ -12,6 +12,7 @@ import {
   getStats,
   getUkraineGeography,
   getVehiclePhotos,
+  getWikiInfo,
   lookupPlate,
   plateHistory
 } from '@/lib/api'
@@ -56,6 +57,15 @@ export function vehiclePhotosQuery(brand: string, model: string, year: number | 
   return queryOptions({
     queryKey: ['photos', brand, model, year],
     queryFn: () => getVehiclePhotos(brand, model, year),
+    staleTime: Infinity
+  })
+}
+
+// Wikipedia summary + image for a brand/model — live-fetched (not persisted), never refetch once fetched.
+export function wikiInfoQuery(brand: string, model: string, lang: string) {
+  return queryOptions({
+    queryKey: ['wiki', brand, model, lang],
+    queryFn: () => getWikiInfo(brand, model, lang),
     staleTime: Infinity
   })
 }

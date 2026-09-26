@@ -11,7 +11,7 @@ export {
 } from './vehicleColor.js'
 export { brandLogoUrl, brandSlug } from './brandLogo.js'
 export { dealerUrl } from './dealerUrl.js'
-export { wikiUrl } from './wikiUrl.js'
+export { wikiUrl, wikiDomain } from './wikiUrl.js'
 export { makeKey, modelKey } from './vehicleKey.js'
 export {
   registrationSchema,
@@ -45,6 +45,9 @@ export {
   statsByRegionYearRowSchema,
   statsByDimensionRowSchema,
   statsResponseSchema,
+  wikiImageAttributionSchema,
+  wikiImageSchema,
+  wikiInfoResponseSchema,
   type Registration,
   type PlateLookupResponse,
   type PlateHistoryResponse,
@@ -75,5 +78,8 @@ export {
   type StatsByRegionRow,
   type StatsByRegionYearRow,
   type StatsByDimensionRow,
-  type StatsResponse
+  type StatsResponse,
+  type WikiImageAttribution,
+  type WikiImage,
+  type WikiInfo
 } from './schemas.js'

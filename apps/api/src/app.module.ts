@@ -13,6 +13,7 @@ import { SafetyModule } from './safety/safety.module.js'
 import { SpaModule } from './spa/spa.module.js'
 import { StatsModule } from './stats/stats.module.js'
 import { VinModule } from './vin/vin.module.js'
+import { WikiModule } from './wiki/wiki.module.js'
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { VinModule } from './vin/vin.module.js'
     StatsModule,
     PhotosModule,
     SafetyModule,
+    WikiModule,
     SpaModule
   ],
   controllers: [HealthController],

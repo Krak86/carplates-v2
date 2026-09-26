@@ -4,9 +4,11 @@ import { fallbackVehicleColor, resolveVehicleColor, VEHICLE_COLOR_HEX } from '@c
 import type { VinDecodeResponse } from '@carplates/shared'
 
 import CardTiltToggle from '@/components/CardTiltToggle'
+import CarWikiInfo from '@/components/CarWikiInfo'
 import FavoriteButton from '@/components/FavoriteButton'
 import RegistrationTimeline from '@/components/RegistrationTimeline'
 import SafetyRatings from '@/components/SafetyRatings'
+import { useCarWikiActions } from '@/components/use-car-wiki-actions'
 import Card from '@/components/ui/Card'
 import { extractVehicleInfo } from '@/components/VinResult.helpers'
 import VinDecodeFields from '@/components/VinDecodeFields'
@@ -24,6 +26,8 @@ export default function VinResult({ data }: Props): ReactNode {
   const vehicleColor = resolveVehicleColor(registry?.actions[0]?.color) ?? fallbackVehicleColor(data.vin)
   const tiltEnabled = useUiStore(s => s.cardTiltEnabled)
   const glowRef = useCardMotion<HTMLDivElement>(tiltEnabled)
+  const wiki = useCarWikiActions({ brand: vehicle.brand, model: vehicle.model, key: data.vin })
+  const hasWikiQuery = Boolean(vehicle.brand || vehicle.model)
 
   return (
     <div className="relative w-full max-w-2xl">
@@ -64,6 +68,7 @@ export default function VinResult({ data }: Props): ReactNode {
         <p className="mt-3 text-sm text-[var(--color-muted)]">{t('vin.source')}</p>
 
         <SafetyRatings brand={vehicle.brand} model={vehicle.model} year={vehicle.year} body={vehicle.body} />
+        <CarWikiInfo wiki={wiki} hasQuery={hasWikiQuery} />
       </Card>
     </div>
   )

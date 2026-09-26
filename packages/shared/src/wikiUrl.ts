@@ -19,6 +19,11 @@ const WIKI_LANG_DOMAIN: Readonly<Record<string, string>> = {
   en: 'en'
 }
 
+/** This app's i18next language code → Wikipedia subdomain, shared by `wikiUrl` and the `/api/wiki` proxy. */
+export function wikiDomain(lang: string): string {
+  return WIKI_LANG_DOMAIN[lang] ?? 'en'
+}
+
 /** Wikipedia search-and-go link for a raw registry brand + model, or `null` when neither is known. */
 export function wikiUrl(
   brand: string | null | undefined,
@@ -27,6 +32,5 @@ export function wikiUrl(
 ): string | null {
   const query = [brand, model].filter(Boolean).join(' ').trim()
   if (!query) return null
-  const domain = WIKI_LANG_DOMAIN[lang] ?? 'en'
-  return `https://${domain}.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(query)}&go=Go`
+  return `https://${wikiDomain(lang)}.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(query)}&go=Go`
 }

@@ -15,11 +15,13 @@ import type { PlateLookupResponse } from '@carplates/shared'
 
 import BrandLogo from '@/components/BrandLogo'
 import CardTiltToggle from '@/components/CardTiltToggle'
+import CarWikiInfo from '@/components/CarWikiInfo'
 import FavoriteButton from '@/components/FavoriteButton'
 import FieldInfoButton from '@/components/FieldInfoButton'
 import RegistrationTimeline from '@/components/RegistrationTimeline'
 import { getFuelIcon } from '@/components/ResultCard.helpers'
 import SafetyRatings from '@/components/SafetyRatings'
+import { useCarWikiActions } from '@/components/use-car-wiki-actions'
 import Card from '@/components/ui/Card'
 import VehicleKindIcon from '@/components/VehicleKindIcon'
 import VehiclePhotos from '@/components/VehiclePhotos'
@@ -55,6 +57,8 @@ export default function ResultCard({ data }: Props): ReactNode {
   const vehicleColor = resolveVehicleColor(c.color) ?? fallbackVehicleColor(data.plate)
   const brandDealerUrl = dealerUrl(c.brand)
   const modelWikiUrl = wikiUrl(c.brand, c.model, i18n.language)
+  const wiki = useCarWikiActions({ brand: c.brand, model: c.model, key: c.vin || data.plate })
+  const hasWikiQuery = Boolean(c.brand || c.model)
 
   // Plate history covers every vehicle that ever wore this plate, reassignment
   // included. A VIN's own registry rows cover every plate that vehicle ever
@@ -253,24 +257,29 @@ export default function ResultCard({ data }: Props): ReactNode {
           />
         </div>
 
-        <div className="mt-3 flex w-full justify-end">
-          <button
-            type="button"
-            aria-expanded={showMore}
-            onClick={() => setShowMore(v => !v)}
-            className="group flex items-center gap-1.5 rounded-full bg-[var(--color-surface)]/20 px-3 py-1 text-base text-[var(--color-primary)]"
-          >
-            <span aria-hidden className="animate-gear-tick no-underline">
-              ⚙️
-            </span>
-            <span className="underline group-hover:no-underline">{t('result.historyLabel')}</span>
-            <span
-              aria-hidden
-              className={cn('inline-block no-underline transition-transform duration-200', showMore && 'rotate-180')}
+        <div className="mt-3 border-t border-[var(--color-border)] pt-3">
+          <div className="flex items-center justify-between text-base">
+            <span className="text-base font-semibold">{t('result.historyLabel')}</span>
+            <button
+              type="button"
+              aria-expanded={showMore}
+              onClick={() => setShowMore(v => !v)}
+              className="group flex items-center gap-1.5 rounded-full bg-[var(--color-surface)]/20 px-3 py-1 text-[var(--color-primary)]"
             >
-              ▾
-            </span>
-          </button>
+              <span aria-hidden className="animate-gear-tick no-underline">
+                ⚙️
+              </span>
+              <span className="underline group-hover:no-underline">
+                {showMore ? t('result.historyHide') : t('result.historyShow')}
+              </span>
+              <span
+                aria-hidden
+                className={cn('inline-block no-underline transition-transform duration-200', showMore && 'rotate-180')}
+              >
+                ▾
+              </span>
+            </button>
+          </div>
         </div>
 
         <div
@@ -329,6 +338,7 @@ export default function ResultCard({ data }: Props): ReactNode {
         </div>
 
         <SafetyRatings brand={c.brand} model={c.model} year={c.makeYear} body={c.body} />
+        <CarWikiInfo wiki={wiki} hasQuery={hasWikiQuery} />
         <VehiclePhotos brand={c.brand} model={c.model} year={c.makeYear} />
       </Card>
     </div>

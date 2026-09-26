@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { useBackgroundParallax } from '@/hooks/useBackgroundParallax'
 import { getBackgroundImages } from '@/lib/background-images'
@@ -9,8 +10,13 @@ const IMAGES = getBackgroundImages()
 const SWAP_DELAY_MS = 700
 
 export default function BackgroundPhotos(): ReactNode {
+  const { t } = useTranslation()
   const layerRef = useRef<HTMLDivElement>(null)
   const [displayIndex, setDisplayIndex] = useState(0)
+
+  const heroOverride = useBackgroundStore(s => s.heroOverride)
+  const activeCss = heroOverride?.css ?? IMAGES[displayIndex]?.css
+  const [renderedCss, setRenderedCss] = useState(activeCss)
   const [visible, setVisible] = useState(true)
 
   const photosEnabled = useBackgroundStore(s => s.photosEnabled)
@@ -36,25 +42,30 @@ export default function BackgroundPhotos(): ReactNode {
     scrollStrength: scrollParallaxStrength
   })
 
-  // Fade out, swap the image while invisible, fade back in — avoids animating
-  // background-image directly (browsers don't interpolate it, so it would just snap).
+  // Advances the rotation index on an interval — paused while a hero override is active,
+  // so it resumes from wherever it left off once the override clears.
   useEffect(() => {
-    if (!cycleEnabled || IMAGES.length < 2) return
-    let swapTimeout: ReturnType<typeof setTimeout>
+    if (!cycleEnabled || heroOverride || IMAGES.length < 2) return
     const intervalId = setInterval(() => {
-      setVisible(false)
-      swapTimeout = setTimeout(() => {
-        setDisplayIndex(i => (i + 1) % IMAGES.length)
-        setVisible(true)
-      }, SWAP_DELAY_MS)
+      setDisplayIndex(i => (i + 1) % IMAGES.length)
     }, cycleIntervalSec * 1000)
-    return (): void => {
-      clearInterval(intervalId)
-      clearTimeout(swapTimeout)
-    }
-  }, [cycleEnabled, cycleIntervalSec])
+    return (): void => clearInterval(intervalId)
+  }, [cycleEnabled, cycleIntervalSec, heroOverride])
 
-  if (!photosEnabled || IMAGES.length === 0) return null
+  // Fade out, swap the image while invisible, fade back in — avoids animating background-image
+  // directly (browsers don't interpolate it, so it would just snap). Reacts to whatever changed
+  // `activeCss` (a rotation tick, or a hero override appearing/clearing) uniformly.
+  useEffect(() => {
+    if (activeCss === renderedCss) return
+    setVisible(false)
+    const swapTimeout = setTimeout(() => {
+      setRenderedCss(activeCss)
+      setVisible(true)
+    }, SWAP_DELAY_MS)
+    return (): void => clearTimeout(swapTimeout)
+  }, [activeCss, renderedCss])
+
+  if (!photosEnabled || (!heroOverride && IMAGES.length === 0)) return null
 
   const filter =
     [
@@ -65,28 +76,48 @@ export default function BackgroundPhotos(): ReactNode {
       .filter(Boolean)
       .join(' ') || undefined
 
+  const creditParts = [heroOverride?.attribution?.author, heroOverride?.attribution?.license].filter(Boolean)
+
   return (
-    <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-      <div
-        ref={layerRef}
-        className="absolute inset-[-10%] bg-cover bg-center transition-opacity duration-700 ease-in-out motion-reduce:transition-none"
-        style={{
-          backgroundImage: IMAGES[displayIndex]?.css,
-          filter,
-          opacity: visible ? 1 : 0,
-          transform:
-            'translate3d(var(--bg-parallax-x, 0px), calc(var(--bg-parallax-y, 0px) + var(--bg-parallax-scroll, 0px)), 0)'
-        }}
-      />
-      {overlayEnabled && (
-        // Mixes toward the theme's own page background (not a fixed black) so foreground
-        // text — sized for --color-fg on --color-bg — keeps its intended contrast no
-        // matter how dark/bright the underlying photo is.
+    <>
+      <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
         <div
-          className="absolute inset-0"
-          style={{ background: `color-mix(in srgb, var(--color-bg) ${overlayOpacity}%, transparent)` }}
+          ref={layerRef}
+          className="absolute inset-[-10%] bg-cover bg-center transition-opacity duration-700 ease-in-out motion-reduce:transition-none"
+          style={{
+            backgroundImage: renderedCss,
+            filter,
+            opacity: visible ? 1 : 0,
+            transform:
+              'translate3d(var(--bg-parallax-x, 0px), calc(var(--bg-parallax-y, 0px) + var(--bg-parallax-scroll, 0px)), 0)'
+          }}
         />
+        {overlayEnabled && (
+          // Mixes toward the theme's own page background (not a fixed black) so foreground
+          // text — sized for --color-fg on --color-bg — keeps its intended contrast no
+          // matter how dark/bright the underlying photo is.
+          <div
+            className="absolute inset-0"
+            style={{ background: `color-mix(in srgb, var(--color-bg) ${overlayOpacity}%, transparent)` }}
+          />
+        )}
+      </div>
+
+      {/* Outside the aria-hidden/pointer-events-none layer above — this is real, clickable
+          attribution (Commons requires crediting CC-BY/CC-BY-SA images), not decoration. */}
+      {creditParts.length > 0 && (
+        <div className="fixed right-2 bottom-1 z-0 text-[10px] text-white/50 hover:text-white/80">
+          {t('wiki.imageCreditBg', { credit: creditParts.join(', ') })}
+          {heroOverride?.sourceUrl && (
+            <>
+              {' '}
+              <a href={heroOverride.sourceUrl} target="_blank" rel="noopener noreferrer" className="underline">
+                {t('wiki.viaCommons')}
+              </a>
+            </>
+          )}
+        </div>
       )}
-    </div>
+    </>
   )
 }
