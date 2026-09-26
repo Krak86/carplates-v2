@@ -15,6 +15,7 @@ import {
   kncapRatingsQuery,
   plateHistoryQuery,
   safetyRatingsQuery,
+  statsQuery,
   vehiclePhotosQuery,
   vinQuery,
   wikiInfoQuery
@@ -64,7 +65,7 @@ export function useCopyAllInfoActions(params: CopyAllInfoParams): UseCopyAllInfo
     const model = vehicle.model ?? ''
     const year = vehicle.year ?? 0
 
-    const [plateHistory, vinDetail, euroncap, nhtsa, jncap, cncap, kncap, iihs, wiki, photos] = await Promise.all([
+    const [plateHistory, vinDetail, euroncap, nhtsa, jncap, cncap, kncap, iihs, wiki, photos, stats] = await Promise.all([
       plate ? safe(queryClient.ensureQueryData(plateHistoryQuery(plate))) : Promise.resolve(null),
       params.vinDecodeResults == null && vin ? safe(queryClient.ensureQueryData(vinQuery(vin))) : Promise.resolve(null),
       hasRatingsQuery ? safe(queryClient.ensureQueryData(euroNcapRatingsQuery(make, model, year))) : Promise.resolve(null),
@@ -74,7 +75,8 @@ export function useCopyAllInfoActions(params: CopyAllInfoParams): UseCopyAllInfo
       hasRatingsQuery ? safe(queryClient.ensureQueryData(kncapRatingsQuery(make, model, year))) : Promise.resolve(null),
       hasRatingsQuery ? safe(queryClient.ensureQueryData(iihsRatingsQuery(make, model, year))) : Promise.resolve(null),
       hasWikiQuery ? safe(queryClient.ensureQueryData(wikiInfoQuery(make, model, i18n.language))) : Promise.resolve(null),
-      hasWikiQuery ? safe(queryClient.ensureQueryData(vehiclePhotosQuery(make, model, vehicle.year))) : Promise.resolve(null)
+      hasWikiQuery ? safe(queryClient.ensureQueryData(vehiclePhotosQuery(make, model, vehicle.year))) : Promise.resolve(null),
+      safe(queryClient.ensureQueryData(statsQuery()))
     ])
 
     return {
@@ -93,7 +95,8 @@ export function useCopyAllInfoActions(params: CopyAllInfoParams): UseCopyAllInfo
       jncap,
       cncap,
       kncap,
-      iihs
+      iihs,
+      stats
     }
   }
 

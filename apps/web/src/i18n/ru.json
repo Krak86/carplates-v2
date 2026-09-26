@@ -331,6 +331,7 @@
   "export.downloadDocx": "Скачать как Word (.docx)",
   "export.downloadPdf": "Скачать как PDF",
   "export.sectionVehicle": "Автомобиль",
+  "export.sectionRankings": "Рейтинги",
   "export.plate": "Номер",
   "export.operation": "Операция",
   "export.wikiTitle": "Заголовок",

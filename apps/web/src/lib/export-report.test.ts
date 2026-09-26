@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { EuroNcapRatingsResponse, Registration } from '@carplates/shared'
+import type { EuroNcapRatingsResponse, Registration, StatsResponse } from '@carplates/shared'
 
 import { buildExportReport, buildLocalRecordsReport } from '@/lib/export-report'
 import type { ExportInput, ExportTableSection, Translate } from '@/lib/export-report'
@@ -57,6 +57,7 @@ function baseInput(overrides: Partial<ExportInput> = {}): ExportInput {
     cncap: null,
     kncap: null,
     iihs: null,
+    stats: null,
     ...overrides
   }
 }
@@ -85,6 +86,52 @@ describe('buildExportReport', () => {
       t
     )
     expect(report.sections.find(s => s.id === 'vehicle')).toBeUndefined()
+  })
+
+  it('adds a Rankings section mirroring the ResultCard badges when stats data is available', () => {
+    const stats: StatsResponse = {
+      summary: { totalRows: 0, distinctPlates: 0, distinctVins: 0, plateless: 0 },
+      byYear: [],
+      byRegion: [{ totalRows: 1, distinctPlates: 1, distinctVins: 1, region: 'Київська область' }],
+      byRegionYear: [],
+      byBody: [],
+      byKind: [],
+      byColor: [{ totalRows: 1, distinctPlates: 1, distinctVins: 1, value: 'ЧОРНИЙ' }],
+      byFuel: [],
+      byBrand: [{ totalRows: 1, distinctPlates: 1, distinctVins: 1, value: 'TOYOTA' }],
+      byBrandYear: [],
+      byOrigin: [],
+      topModels: [{ totalRows: 1, distinctPlates: 1, distinctVins: 1, brand: 'TOYOTA', model: 'CAMRY' }]
+    }
+    const report = buildExportReport(baseInput({ stats }), t)
+    const rankings = report.sections.find(s => s.id === 'rankings')
+    expect(rankings?.type).toBe('text')
+    if (rankings?.type !== 'text') throw new Error('expected text section')
+    expect(rankings.paragraphs).toEqual([
+      '🏭 result.topBrand:1',
+      '🚗 result.topModel:1',
+      '🎨 result.topColor:1',
+      '🗺️ result.topRegion:1'
+    ])
+  })
+
+  it('omits the Rankings section when the vehicle does not place in any leaderboard', () => {
+    const stats: StatsResponse = {
+      summary: { totalRows: 0, distinctPlates: 0, distinctVins: 0, plateless: 0 },
+      byYear: [],
+      byRegion: [],
+      byRegionYear: [],
+      byBody: [],
+      byKind: [],
+      byColor: [],
+      byFuel: [],
+      byBrand: [],
+      byBrandYear: [],
+      byOrigin: [],
+      topModels: []
+    }
+    const report = buildExportReport(baseInput({ stats }), t)
+    expect(report.sections.find(s => s.id === 'rankings')).toBeUndefined()
   })
 
   it('renders plate and VIN registration history as separate table sections', () => {

@@ -35,6 +35,7 @@ import { cn } from '@/lib/cn'
 import { depMapsUrl } from '@/lib/maps'
 import { plateHistoryQuery, vinQuery } from '@/lib/queries'
 import { scrollElementIntoView } from '@/lib/share-section'
+import { formatVehicleLabel } from '@/lib/vehicle-label'
 import { useUiStore } from '@/store/ui-store'
 
 type Props = {
@@ -106,7 +107,7 @@ export default function ResultCard({ data }: Props): ReactNode {
         <FavoriteButton
           kind="plate"
           value={data.plate}
-          label={[c.brand, c.model].filter(Boolean).join(' ') || null}
+          label={formatVehicleLabel({ brand: c.brand, model: c.model, year: c.makeYear, color: c.color })}
           className="absolute top-3 right-3"
         />
 
@@ -280,6 +281,8 @@ export default function ResultCard({ data }: Props): ReactNode {
           />
         </div>
 
+        <CarWikiInfo wiki={wiki} hasQuery={hasWikiQuery} />
+
         <div ref={historyRef} className="mt-3 border-t border-[var(--color-border)] pt-3">
           <div className="flex items-center justify-between text-base">
             <span className="text-base font-semibold">{t('result.historyLabel')}</span>
@@ -369,7 +372,6 @@ export default function ResultCard({ data }: Props): ReactNode {
         </div>
 
         <SafetyRatings brand={c.brand} model={c.model} year={c.makeYear} body={c.body} />
-        <CarWikiInfo wiki={wiki} hasQuery={hasWikiQuery} />
         <VehiclePhotos brand={c.brand} model={c.model} year={c.makeYear} />
       </Card>
     </div>

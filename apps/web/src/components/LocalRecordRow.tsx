@@ -18,7 +18,11 @@ export default function LocalRecordRow({ value, label, date, deleteLabel, onDele
 
   return (
     <div className="flex items-center justify-between gap-3 px-4 py-2 text-sm">
-      <Link to={`/${value}`} className="min-w-0 flex-1 truncate text-[var(--color-primary)] underline">
+      <Link
+        to={`/${value}`}
+        title={label ? `${value} — ${label}` : value}
+        className="min-w-0 flex-1 truncate text-[var(--color-primary)] underline"
+      >
         {value}
         {label ? ` — ${label}` : ''}
       </Link>

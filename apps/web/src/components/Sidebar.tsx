@@ -25,19 +25,19 @@ export default function Sidebar(): ReactNode {
   return (
     <nav className="flex h-full w-64 flex-col gap-1 border-r border-[var(--color-border)] bg-[var(--color-bg)]/50 p-3 backdrop-blur-md">
       <NavLink to="/" className={linkClass} onClick={() => setDrawerOpen(false)} end>
-        {t('nav.search')}
+        <span aria-hidden>🔍</span> {t('nav.search')}
       </NavLink>
       <NavLink to="/about" className={linkClass} onClick={() => setDrawerOpen(false)}>
-        {t('nav.about')}
+        <span aria-hidden>ℹ️</span> {t('nav.about')}
       </NavLink>
       <NavLink to="/history" className={linkClass} onClick={() => setDrawerOpen(false)}>
-        {t('nav.history')}
+        <span aria-hidden>🕘</span> {t('nav.history')}
       </NavLink>
       <NavLink to="/favorites" className={linkClass} onClick={() => setDrawerOpen(false)}>
-        {t('nav.favorites')}
+        <span aria-hidden>⭐</span> {t('nav.favorites')}
       </NavLink>
       <NavLink to="/stats" className={linkClass} onClick={() => setDrawerOpen(false)}>
-        {t('nav.stats')}
+        <span aria-hidden>📊</span> {t('nav.stats')}
       </NavLink>
 
       <div className="mt-4 px-3 text-xs tracking-wide text-[var(--color-muted)] uppercase">{t('nav.language')}</div>

@@ -331,6 +331,7 @@
   "export.downloadDocx": "Завантажити як Word (.docx)",
   "export.downloadPdf": "Завантажити як PDF",
   "export.sectionVehicle": "Транспортний засіб",
+  "export.sectionRankings": "Рейтинги",
   "export.plate": "Номер",
   "export.operation": "Операція",
   "export.wikiTitle": "Заголовок",

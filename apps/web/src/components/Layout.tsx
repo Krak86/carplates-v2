@@ -5,6 +5,7 @@ import { Link } from 'react-router'
 
 import BackgroundDevPanel from '@/components/BackgroundDevPanel'
 import BackgroundPhotos from '@/components/BackgroundPhotos'
+import { useHeaderVehicleLabel } from '@/components/use-header-vehicle-label'
 import { cn } from '@/lib/cn'
 import { useUiStore } from '@/store/ui-store'
 
@@ -18,6 +19,7 @@ export default function Layout({ children }: Props): ReactNode {
   const { t } = useTranslation()
   const drawerOpen = useUiStore(s => s.drawerOpen)
   const setDrawerOpen = useUiStore(s => s.setDrawerOpen)
+  const vehicleLabel = useHeaderVehicleLabel()
   // Sidebar is lazy-loaded (not part of the LCP path) — stay unmounted until
   // the first open, then keep mounted so close gets a transition instead of a hard unmount.
   const [hasOpened, setHasOpened] = useState(false)
@@ -39,9 +41,12 @@ export default function Layout({ children }: Props): ReactNode {
         >
           ☰
         </button>
-        <Link to="/" className="text-lg font-semibold">
+        <Link to="/" className="shrink-0 text-lg font-semibold">
           {t('app.title')}
         </Link>
+        {vehicleLabel && (
+          <span className="min-w-0 truncate text-sm text-[var(--color-muted)]">{vehicleLabel}</span>
+        )}
       </header>
 
       <div className="flex flex-1">

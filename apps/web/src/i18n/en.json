@@ -323,6 +323,7 @@
   "export.downloadDocx": "Download as Word (.docx)",
   "export.downloadPdf": "Download as PDF",
   "export.sectionVehicle": "Vehicle",
+  "export.sectionRankings": "Rankings",
   "export.plate": "Plate",
   "export.operation": "Operation",
   "export.wikiTitle": "Title",

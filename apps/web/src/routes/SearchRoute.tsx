@@ -16,6 +16,7 @@ import { cn } from '@/lib/cn'
 import { recordVisit } from '@/lib/history-db'
 import { historyQuery, plateQuery, vinQuery } from '@/lib/queries'
 import { capture } from '@/lib/telemetry'
+import { formatVehicleLabel } from '@/lib/vehicle-label'
 
 export default function SearchRoute(): ReactNode {
   const { t } = useTranslation()
@@ -54,7 +55,7 @@ export default function SearchRoute(): ReactNode {
 
     if (kind === 'plate' && plate.isSuccess) {
       const c = plate.data.current
-      void record('plate', plate.data.plate, [c.brand, c.model].filter(Boolean).join(' ') || null)
+      void record('plate', plate.data.plate, formatVehicleLabel({ brand: c.brand, model: c.model, year: c.makeYear, color: c.color }))
     }
     if (kind === 'vin' && vin.isSuccess) {
       void record('vin', vin.data.vin, null)
