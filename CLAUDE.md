@@ -51,10 +51,18 @@ pnpm export:kncap:csv  # re-dump the DB table to that CSV — run after every re
 pnpm ingest:iihs       # scrape/refresh IIHS (US, insurance-industry-funded) ratings — see PLAN.md
 pnpm ingest:iihs:csv   # load real IIHS ratings from the committed CSV — seconds, no scraping
 pnpm export:iihs:csv   # re-dump the DB table to that CSV — run after every real re-scrape
+pnpm ingest:ratings:csv   # db:migrate, then all five *:csv rating loads concurrently — each writes
+                          # its own *_ratings table only, doesn't touch registrations
+pnpm ingest:all        # db:migrate, then ingest:full + ingest:ratings:csv concurrently —
+                       # each writes a disjoint table (registrations/current_registration/stats_by_*
+                       # vs. one *_ratings table apiece), so there's no write conflict between them
 ```
 
 First-time local setup, test data (seconds): `pnpm install && pnpm db:up && pnpm db:migrate && pnpm db:seed && pnpm dev`.
 First-time local setup, real data (hours, ~20 GB): `pnpm install && pnpm db:up && pnpm db:migrate && pnpm ingest:full && pnpm ingest:euroncap:csv && pnpm ingest:jncap:csv && pnpm ingest:cncap:csv && pnpm ingest:kncap:csv && pnpm ingest:iihs:csv && pnpm dev`.
+Equivalently, `pnpm install && pnpm db:up && pnpm ingest:all && pnpm dev` runs the six ingests concurrently — same
+end state, since each one writes a disjoint table; only shrinks wall-clock once `scripts/.data/*.zip` is already
+cached (a fresh clone is still bottlenecked on the ~20 GB CKAN download either way).
 
 ## Layout
 
