@@ -1,4 +1,4 @@
-import { Suspense, lazy, useEffect, useState } from 'react'
+import { Suspense, lazy, useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
@@ -23,10 +23,25 @@ export default function Layout({ children }: Props): ReactNode {
   // Sidebar is lazy-loaded (not part of the LCP path) — stay unmounted until
   // the first open, then keep mounted so close gets a transition instead of a hard unmount.
   const [hasOpened, setHasOpened] = useState(false)
+  const drawerRef = useRef<HTMLDivElement>(null)
+  const toggleRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
     if (drawerOpen) setHasOpened(true)
   }, [drawerOpen])
+
+  useEffect(() => {
+    if (!drawerOpen) return
+
+    function handlePointerDown(event: PointerEvent): void {
+      const target = event.target as Node
+      if (drawerRef.current?.contains(target) || toggleRef.current?.contains(target)) return
+      setDrawerOpen(false)
+    }
+
+    document.addEventListener('pointerdown', handlePointerDown)
+    return (): void => document.removeEventListener('pointerdown', handlePointerDown)
+  }, [drawerOpen, setDrawerOpen])
 
   return (
     <div className="flex min-h-full flex-col">
@@ -34,6 +49,7 @@ export default function Layout({ children }: Props): ReactNode {
       <BackgroundDevPanel />
       <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-[var(--color-border)] bg-[var(--color-bg)]/50 px-4 py-3 backdrop-blur-md">
         <button
+          ref={toggleRef}
           type="button"
           aria-label="menu"
           onClick={() => setDrawerOpen(!drawerOpen)}
@@ -61,6 +77,7 @@ export default function Layout({ children }: Props): ReactNode {
               aria-hidden
             />
             <div
+              ref={drawerRef}
               className={cn(
                 'fixed inset-y-0 left-0 z-20 w-64 overflow-hidden transition-transform duration-300 ease-in-out',
                 'md:sticky md:top-14 md:h-[calc(100vh-3.5rem)] md:w-0 md:translate-x-0 md:self-start md:overflow-y-auto md:transition-[width] md:duration-300 md:ease-in-out',

@@ -45,7 +45,10 @@ export default function Sidebar(): ReactNode {
         <button
           key={l}
           type="button"
-          onClick={() => setLang(l)}
+          onClick={() => {
+            setLang(l)
+            setDrawerOpen(false)
+          }}
           className={cn(
             'rounded-lg bg-[var(--color-surface)]/60 px-3 py-1.5 text-left text-sm transition-colors duration-200 hover:bg-[var(--color-surface)]',
             l === lang ? 'bg-[var(--color-surface)] font-medium text-[var(--color-primary)]' : 'text-[var(--color-muted)] hover:text-[var(--color-fg)]'
