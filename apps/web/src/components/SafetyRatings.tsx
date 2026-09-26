@@ -6,6 +6,7 @@ import CncapRatings from '@/components/CncapRatings'
 import EuroNcapRatings from '@/components/EuroNcapRatings'
 import InfoPopover from '@/components/InfoPopover'
 import JncapRatings from '@/components/JncapRatings'
+import KncapRatings from '@/components/KncapRatings'
 import NhtsaRatings from '@/components/NhtsaRatings'
 import {
   NHTSA_CURRENT_BRANDS,
@@ -21,7 +22,7 @@ type Props = {
   body: string | null
 }
 
-type Source = 'euroncap' | 'nhtsa' | 'jncap' | 'cncap'
+type Source = 'euroncap' | 'nhtsa' | 'jncap' | 'cncap' | 'kncap'
 
 /**
  * Combined "which cars does this cover" explainer for both sources at once —
@@ -65,18 +66,24 @@ function CoverageInfo(): ReactNode {
         <div className="font-medium">{t('safety.coverageInfoCncapTitle')}</div>
         <p className="text-[var(--color-muted)]">{t('safety.coverageInfoCncapBody')}</p>
       </div>
+      <div>
+        <div className="font-medium">{t('safety.coverageInfoKncapTitle')}</div>
+        <p className="text-[var(--color-muted)]">{t('safety.coverageInfoKncapBody')}</p>
+      </div>
     </div>
   )
 }
 
 /**
- * Crash-test safety ratings from four independent sources, tabbed rather than
+ * Crash-test safety ratings from five independent sources, tabbed rather than
  * merged since they use different scales/protocols and cover different cars:
  * Euro NCAP (EU-spec, the dominant import stock in Ukraine) is the default,
  * NHTSA (US-spec only), JNCAP (JDM-domestic, never-exported models like
- * Alphard/Crown/Skyline), and C-NCAP (China-market, the BYD/Geely/Chery/Zeekr
- * fleet Ukraine grey-imports in volume) the other three. Each tab fetches its
- * own data only once this section is expanded AND that tab is the active one.
+ * Alphard/Crown/Skyline), C-NCAP (China-market, the BYD/Geely/Chery/Zeekr
+ * fleet Ukraine grey-imports in volume), and KNCAP (Korea-domestic, Hyundai/
+ * Kia/Genesis/KGM EVs and other Korea-only models) the other four. Each tab
+ * fetches its own data only once this section is expanded AND that tab is the
+ * active one.
  */
 export default function SafetyRatings({ brand, model, year, body }: Props): ReactNode {
   const { t } = useTranslation()
@@ -126,7 +133,7 @@ export default function SafetyRatings({ brand, model, year, body }: Props): Reac
             <div
               role="tablist"
               aria-label={t('safety.title')}
-              className="mb-2 flex gap-1 rounded-full bg-[var(--color-border)]/30 p-1"
+              className="mb-2 flex gap-1 overflow-x-auto rounded-full bg-[var(--color-border)]/30 p-1"
             >
               <button
                 type="button"
@@ -134,7 +141,7 @@ export default function SafetyRatings({ brand, model, year, body }: Props): Reac
                 aria-selected={source === 'euroncap'}
                 onClick={() => setSource('euroncap')}
                 className={cn(
-                  'flex-1 rounded-full px-2 py-1 text-sm whitespace-nowrap transition-colors',
+                  'shrink-0 rounded-full px-3 py-1 text-sm whitespace-nowrap transition-colors',
                   source === 'euroncap'
                     ? 'bg-[var(--color-surface)] font-medium shadow-sm'
                     : 'text-[var(--color-muted)]'
@@ -148,7 +155,7 @@ export default function SafetyRatings({ brand, model, year, body }: Props): Reac
                 aria-selected={source === 'nhtsa'}
                 onClick={() => setSource('nhtsa')}
                 className={cn(
-                  'flex-1 rounded-full px-2 py-1 text-sm whitespace-nowrap transition-colors',
+                  'shrink-0 rounded-full px-3 py-1 text-sm whitespace-nowrap transition-colors',
                   source === 'nhtsa' ? 'bg-[var(--color-surface)] font-medium shadow-sm' : 'text-[var(--color-muted)]'
                 )}
               >
@@ -160,7 +167,7 @@ export default function SafetyRatings({ brand, model, year, body }: Props): Reac
                 aria-selected={source === 'jncap'}
                 onClick={() => setSource('jncap')}
                 className={cn(
-                  'flex-1 rounded-full px-2 py-1 text-sm whitespace-nowrap transition-colors',
+                  'shrink-0 rounded-full px-3 py-1 text-sm whitespace-nowrap transition-colors',
                   source === 'jncap' ? 'bg-[var(--color-surface)] font-medium shadow-sm' : 'text-[var(--color-muted)]'
                 )}
               >
@@ -172,18 +179,33 @@ export default function SafetyRatings({ brand, model, year, body }: Props): Reac
                 aria-selected={source === 'cncap'}
                 onClick={() => setSource('cncap')}
                 className={cn(
-                  'flex-1 rounded-full px-2 py-1 text-sm whitespace-nowrap transition-colors',
+                  'shrink-0 rounded-full px-3 py-1 text-sm whitespace-nowrap transition-colors',
                   source === 'cncap' ? 'bg-[var(--color-surface)] font-medium shadow-sm' : 'text-[var(--color-muted)]'
                 )}
               >
                 {t('safety.tabCncap')}
               </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={source === 'kncap'}
+                onClick={() => setSource('kncap')}
+                className={cn(
+                  'shrink-0 rounded-full px-3 py-1 text-sm whitespace-nowrap transition-colors',
+                  source === 'kncap' ? 'bg-[var(--color-surface)] font-medium shadow-sm' : 'text-[var(--color-muted)]'
+                )}
+              >
+                {t('safety.tabKncap')}
+              </button>
             </div>
 
-            {source === 'euroncap' && <EuroNcapRatings brand={brand} model={model} year={year} active={open} />}
-            {source === 'nhtsa' && <NhtsaRatings brand={brand} model={model} year={year} body={body} active={open} />}
-            {source === 'jncap' && <JncapRatings brand={brand} model={model} year={year} active={open} />}
-            {source === 'cncap' && <CncapRatings brand={brand} model={model} year={year} active={open} />}
+            <div key={source} className="animate-fade-in">
+              {source === 'euroncap' && <EuroNcapRatings brand={brand} model={model} year={year} active={open} />}
+              {source === 'nhtsa' && <NhtsaRatings brand={brand} model={model} year={year} body={body} active={open} />}
+              {source === 'jncap' && <JncapRatings brand={brand} model={model} year={year} active={open} />}
+              {source === 'cncap' && <CncapRatings brand={brand} model={model} year={year} active={open} />}
+              {source === 'kncap' && <KncapRatings brand={brand} model={model} year={year} active={open} />}
+            </div>
           </div>
         </div>
       </div>

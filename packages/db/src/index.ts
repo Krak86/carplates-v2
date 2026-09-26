@@ -17,6 +17,7 @@ export {
   euroncapRatings,
   jncapRatings,
   cncapRatings,
+  kncapRatings,
   type RegistrationRow,
   type RegistrationInsert,
   type IngestedResourceRow,
@@ -25,7 +26,9 @@ export {
   type JncapRatingRow,
   type JncapRatingInsert,
   type CncapRatingRow,
-  type CncapRatingInsert
+  type CncapRatingInsert,
+  type KncapRatingRow,
+  type KncapRatingInsert
 } from './schema.js'
 export {
   createDb,

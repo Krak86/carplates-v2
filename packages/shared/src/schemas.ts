@@ -293,6 +293,47 @@ export const cncapRatingsResponseSchema = z.object({
 })
 export type CncapRatingsResponse = z.infer<typeof cncapRatingsResponseSchema>
 
+/**
+ * One KNCAP (Korea, MOLIT/KoROAD) tested car — scraped from kncap.org's own JSON results
+ * catalog (`POST /ncs/KncapResult/selectInitList.json`) and persisted, same rationale as
+ * `cncapRatingSchema` above (no stable per-request public API). KNCAP's own `COMPANY_NAME`/
+ * `BRAND_NAME` are Korean-only, so `make`/`model` come from a curated translation table
+ * (`scripts/src/kncap-names.ts`), not the source directly — `nameKo` keeps the original text
+ * for display and re-curation. Unlike C-NCAP, KNCAP does publish a star rating per category
+ * (crash/pedestrian/accident-prevention) alongside each category's percentage, plus an overall
+ * 1-5 tier (`overallClass`, KNCAP's own "등급") and, for some cars, a 0-100 `overallScore` —
+ * left nullable since not every tested car has one published. Data is scraped from the site's
+ * "current results" catalog only (2021 onward) — KNCAP's own results search doesn't expose
+ * anything older through that endpoint, see PLAN.md's KNCAP section for what a historical
+ * (pre-2021) recovery would need.
+ */
+export const kncapRatingSchema = z.object({
+  assessmentId: z.string(),
+  nameKo: z.string(),
+  ratingYear: z.number().int().nullable(),
+  overallScore: z.number().nullable(),
+  overallClass: z.number().int().nullable(),
+  crashPct: z.number().nullable(),
+  crashStar: z.number().int().nullable(),
+  pedestrianPct: z.number().nullable(),
+  pedestrianStar: z.number().int().nullable(),
+  accidentPct: z.number().nullable(),
+  accidentStar: z.number().int().nullable(),
+  imageUrl: z.string().nullable()
+})
+export type KncapRating = z.infer<typeof kncapRatingSchema>
+
+/** GET /api/safety/kncap?make=&model=&year= — every persisted rating for the make/model, newest first. */
+export const kncapRatingsResponseSchema = z.object({
+  make: z.string(),
+  model: z.string(),
+  year: z.number().int(),
+  ratings: z.array(kncapRatingSchema),
+  /** The generation's assessmentId that best matches `year`, or null when none does. */
+  applicableAssessmentId: z.string().nullable()
+})
+export type KncapRatingsResponse = z.infer<typeof kncapRatingsResponseSchema>
+
 /** One stock photo from Pixabay, filtered to only what the UI needs. */
 export const vehiclePhotoSchema = z.object({
   id: z.number().int(),

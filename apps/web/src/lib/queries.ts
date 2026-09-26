@@ -6,6 +6,7 @@ import {
   getCncapRatings,
   getEuroNcapRatings,
   getJncapRatings,
+  getKncapRatings,
   getSafetyRatings,
   getStats,
   getUkraineGeography,
@@ -90,6 +91,15 @@ export function cncapRatingsQuery(make: string, model: string, year: number) {
   return queryOptions({
     queryKey: ['safety', 'cncap', make, model, year],
     queryFn: () => getCncapRatings(make, model, year),
+    staleTime: Infinity
+  })
+}
+
+// KNCAP (Korea, MOLIT/KoROAD) ratings — scraped and persisted (pnpm ingest:kncap), not fetched live.
+export function kncapRatingsQuery(make: string, model: string, year: number) {
+  return queryOptions({
+    queryKey: ['safety', 'kncap', make, model, year],
+    queryFn: () => getKncapRatings(make, model, year),
     staleTime: Infinity
   })
 }

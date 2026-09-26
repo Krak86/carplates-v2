@@ -193,6 +193,7 @@ export default function EuroNcapRatings({ brand, model, year, active }: Props): 
 
   return (
     <div>
+      <p className="mb-2 text-xs text-[var(--color-muted)]">{t('safety.coverageEuroncap')}</p>
       {result.isPending && <p className="text-base text-[var(--color-muted)]">{t('result.loading')}</p>}
       {result.isError && <p className="text-base text-[var(--color-muted)]">{t('safety.unavailable')}</p>}
       {result.isSuccess && ratings.length === 0 && (

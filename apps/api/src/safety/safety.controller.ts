@@ -12,6 +12,8 @@ import { EuroNcapRatingsDto } from './euroncap.dto.js'
 import { EuroNcapService } from './euroncap.service.js'
 import { JncapRatingsDto } from './jncap.dto.js'
 import { JncapService } from './jncap.service.js'
+import { KncapRatingsDto } from './kncap.dto.js'
+import { KncapService } from './kncap.service.js'
 import { SafetyRatingsDto } from './safety.dto.js'
 import { SafetyService } from './safety.service.js'
 import { SafetyVideoService } from './safety-video.service.js'
@@ -34,7 +36,8 @@ export class SafetyController {
     @Inject(SafetyVideoService) private readonly safetyVideoService: SafetyVideoService,
     @Inject(EuroNcapService) private readonly euroNcapService: EuroNcapService,
     @Inject(JncapService) private readonly jncapService: JncapService,
-    @Inject(CncapService) private readonly cncapService: CncapService
+    @Inject(CncapService) private readonly cncapService: CncapService,
+    @Inject(KncapService) private readonly kncapService: KncapService
   ) {}
 
   @Get()
@@ -74,6 +77,16 @@ export class SafetyController {
   @ApiOkResponse({ type: CncapRatingsDto })
   cncapRatings(@Query(zodParam(querySchema)) query: z.infer<typeof querySchema>): Promise<CncapRatingsDto> {
     return this.cncapService.ratings(query.make, query.model, query.year)
+  }
+
+  // Persisted (scraped), not proxied live — see kncap.service.ts / scripts/src/kncap.ts.
+  @Get('kncap')
+  @ApiQuery({ name: 'make', required: true })
+  @ApiQuery({ name: 'model', required: true })
+  @ApiQuery({ name: 'year', required: true })
+  @ApiOkResponse({ type: KncapRatingsDto })
+  kncapRatings(@Query(zodParam(querySchema)) query: z.infer<typeof querySchema>): Promise<KncapRatingsDto> {
+    return this.kncapService.ratings(query.make, query.model, query.year)
   }
 
   // Binary stream, not a Zod DTO response — the one exception to "no @Res()" (see SpaController).

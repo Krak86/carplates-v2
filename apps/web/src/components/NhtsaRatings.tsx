@@ -232,6 +232,7 @@ export default function NhtsaRatings({ brand, model, year, body, active }: Props
 
   return (
     <div>
+      <p className="mb-2 text-xs text-[var(--color-muted)]">{t('safety.coverageNhtsa')}</p>
       {ratings.length > 0 && (
         <div className="mb-1 flex items-center gap-1.5 text-xs text-[var(--color-muted)]">
           <span>{t('safety.ratingsInfoLabel')}</span>

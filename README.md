@@ -5,6 +5,10 @@ Ukrainian vehicle lookup by **plate number** or **VIN**. Rebuild of
 
 - Plate data: the state open-data registry ([data.gov.ua](https://data.gov.ua/dataset/06779371-308f-42d7-895e-5a39833375f0)) → Postgres
 - VIN data: [NHTSA vPIC](https://vpic.nhtsa.dot.gov/api/vehicles/decodevin) (proxied)
+- Crash-test safety ratings, five sources: [NHTSA](https://api.nhtsa.gov/SafetyRatings) (proxied,
+  US-spec) · [Euro NCAP](https://www.euroncap.com) (scraped, EU-spec) ·
+  [JNCAP](https://www.nasva.go.jp/mamoru/en/) (scraped, JDM-domestic) · [C-NCAP](https://www.c-ncap.org.cn)
+  (scraped, China-market) · [KNCAP](https://www.kncap.org) (scraped, Korea-market)
 
 pnpm monorepo · Node 24 · React 19 + Vite 8 · NestJS 11 + Fastify · Drizzle + Postgres 18.
 
@@ -33,6 +37,9 @@ multi-registration plate (`КА0001АА`), or a real 17-char VIN.
 ```bash
 pnpm ingest:full       # all 13 years from data.gov.ua + 2026 plate recovery + backfill
 pnpm ingest:euroncap:csv   # real Euro NCAP crash-test ratings, from a committed CSV — seconds, no scraping
+pnpm ingest:jncap:csv      # real JNCAP (Japan) ratings, from a committed CSV — seconds, no scraping
+pnpm ingest:cncap:csv      # real C-NCAP (China) ratings, from a committed CSV — seconds, no fetching
+pnpm ingest:kncap:csv      # real KNCAP (Korea) ratings, from a committed CSV — seconds, no fetching
 pnpm dev
 ```
 
@@ -56,13 +63,15 @@ pnpm ingest -- --year 2024 --limit 100000
 ## Database objects
 
 `pnpm db:migrate` creates everything — `registry.registrations` (full history),
-`registry.euroncap_ratings`, `registry.ingested_resources` (idempotency
+`registry.euroncap_ratings`/`jncap_ratings`/`cncap_ratings`/`kncap_ratings`
+(one plain table per scraped crash-test source — NHTSA has none, it's
+proxied live instead), `registry.ingested_resources` (idempotency
 bookkeeping), the static `registry.plate_regions` lookup (populated by the
 migration itself, no separate step), and every materialized view
 (`current_registration` + ten `stats_by_*` rollups — all created `WITH NO
 DATA`, i.e. empty until refreshed). **You don't need a separate refresh
-step for a clean setup**: `db:seed`, `ingest`/`ingest:full`, and
-`ingest:euroncap:csv` each refresh everything they touch as the last step of
+step for a clean setup**: `db:seed`, `ingest`/`ingest:full`, and each
+`ingest:*:csv` command refresh everything they touch as the last step of
 their own run — the Quick start commands above are the complete recipe.
 
 A standalone refresh is only needed when you add data to an **already-seeded**
@@ -76,12 +85,13 @@ DB outside those commands:
   be wasteful, so run `pnpm db:refresh-stats` instead. It rebuilds
   `current_registration` and every `stats_by_*` view from whatever's already
   in `registrations`, touching no source data — seconds, not hours.
-- **Updated Euro NCAP data** (`pnpm ingest:euroncap` picked up new/changed
-  assessments) — `registry.euroncap_ratings` is a plain table, written
-  directly by the scraper's upsert, so nothing needs refreshing; just re-run
-  `pnpm export:euroncap:csv` afterward so the committed
-  `scripts/seed-data/euroncap-ratings.csv.gz` snapshot stays current for the
-  next zero-scrape setup (see `pnpm ingest:euroncap:csv` above).
+- **Updated crash-test rating data** (`pnpm ingest:euroncap`/`ingest:jncap`/
+  `ingest:cncap`/`ingest:kncap` picked up new/changed assessments) — each
+  `registry.*_ratings` table is a plain table, written directly by that
+  scraper's own upsert, so nothing needs refreshing; just re-run the matching
+  `pnpm export:*:csv` afterward so the committed
+  `scripts/seed-data/*-ratings.csv.gz` snapshot stays current for the next
+  zero-scrape setup (see the `ingest:*:csv` commands above).
 
 ## Optional features (API keys)
 
@@ -104,9 +114,9 @@ alone while the dev server is already running has no effect.
 | ----------------- | -------------------------------------------------------------------------- |
 | `packages/shared` | plate normalization, regions, Zod schemas                                  |
 | `packages/db`     | Drizzle schema + client + SQL migrator                                     |
-| `apps/api`        | NestJS + Fastify — plate/VIN endpoints, Swagger, SPA host + meta injection |
+| `apps/api`        | NestJS + Fastify — plate/VIN/safety-ratings endpoints, Swagger, SPA host + meta injection |
 | `apps/web`        | Vite + React + React Router                                                |
-| `scripts`         | `seed.ts`, `ingest.ts`, `ingest-full.ts`, `refresh-stats.ts`               |
+| `scripts`         | `seed.ts`, `ingest.ts`, `ingest-full.ts`, `refresh-stats.ts`, `euroncap.ts`/`jncap.ts`/`cncap.ts`/`kncap.ts` (crash-test rating scrapers) |
 
 See [CLAUDE.md](CLAUDE.md) for conventions and [PLAN.md](PLAN.md) for the roadmap.
 
@@ -114,7 +124,10 @@ See [CLAUDE.md](CLAUDE.md) for conventions and [PLAN.md](PLAN.md) for the roadma
 
 `pnpm dev · build · lint · type-check · test · format` ·
 `pnpm db:up · db:down · db:reset · db:migrate · db:seed · db:refresh-stats · ingest · ingest:full` ·
-`pnpm ingest:euroncap · ingest:euroncap:csv · export:euroncap:csv`
+`pnpm ingest:euroncap · ingest:euroncap:csv · export:euroncap:csv` ·
+`pnpm ingest:jncap · ingest:jncap:csv · export:jncap:csv` ·
+`pnpm ingest:cncap · ingest:cncap:csv · export:cncap:csv` ·
+`pnpm ingest:kncap · ingest:kncap:csv · export:kncap:csv`
 
 ## License
 

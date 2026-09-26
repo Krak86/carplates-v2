@@ -982,17 +982,104 @@ detail/{id}` from 1-290 not already known — zero additional real pages
      applicable/other-generations split working correctly). Exported to
      `seed-data/cncap-ratings.csv.gz` for zero-fetch project setup, same as
      the other two sources.
-  3. **KNCAP (Korea, MOLIT/KoROAD) — smaller win, more unknowns.**
-     `car.go.kr/sd/kncap/list.do` — no English version found, and unlike
-     C-NCAP its actual page structure (static vs. JS-rendered) wasn't
-     confirmed in this pass; Korean government `.do`/JSP-style endpoints
-     are sometimes script-heavy. Cumulative corpus is much smaller too
-     (~175 models through 2018, ~10/year since — call it a third to a
-     quarter of JNCAP's or Euro NCAP's size). Worth a proper scrapability
-     check (mirroring the early Euro NCAP research — fetch a real page,
-     inspect what's server-rendered vs. client-rendered) before committing
-     to it; relevant for Korea-spec Hyundai/Kia but not an obvious quick
-     win like JNCAP.
+  3. **KNCAP (Korea, MOLIT/KoROAD) — shipped 2026-09-26, bigger and easier
+     than the earlier guess suggested.** `car.go.kr/sd/kncap/list.do` turned
+     out **not** to be the data source at all — it's a static informational
+     blurb that links out to a wholly separate site, `kncap.org`, via a
+     "KNCAP로 이동하기" link. Confirmed via a real browser session
+     (chrome-devtools MCP, initially assumed necessary for the same
+     network-access workaround JNCAP/C-NCAP needed — turned out unnecessary
+     for the actual ingest, see below): `kncap.org` is a clean JSON API,
+     `POST /ncs/KncapResult/selectInitList.json`, one call returning every
+     currently-listed assessment with the full score breakdown already
+     inline (crash/pedestrian/accident-prevention percentages **and** stars,
+     plus an overall 1-5 tier and, for some cars, a 0-100 overall score) —
+     mechanically simpler than Euro NCAP/JNCAP, closer to C-NCAP's one-call
+     design, and richer per-row than either. Full stack wired end to end:
+     schema (`registry.kncap_ratings`, migration `0008_kncap_ratings.sql`), a
+     `KncapService` (`apps/api/src/safety/kncap.service.ts`) reusing the same
+     `prefixQuery`/`selectApplicableAssessmentId` shape as Euro NCAP/JNCAP/
+     C-NCAP, `GET /api/safety/kncap`, a fifth `KncapRatings.tsx` tab, i18n in
+     all three locales, `pnpm ingest:kncap`/`ingest:kncap:csv`/`export:kncap:csv`.
+
+     **Scoped to the "current results" catalog only (2021-2026, 52 real
+     assessments after excluding one junk/test row) — a real historical
+     (pre-2021) corpus exists but recovering it is a separate, unbuilt
+     follow-up.** The visible list's own "과거 데이터 포함" (include old
+     data) checkbox and every `CHKOLD` value tried (`Y`/`ALL`/`1`/`true`)
+     make no difference to what `selectInitList.json` returns — 2021 is the
+     hard floor for that endpoint. But it's a real ceiling on the endpoint,
+     not on the data: individual detail pages
+     (`GET /ncs/KncapResultDetail/initView.jsp?DETAIL_IDX=&DETAIL_YEAR=`) for
+     id/year combinations **not** in that 53-row list still return real,
+     fully populated records — confirmed live for a 2020 BMW 320d (idx 100),
+     a 2020 Kia Sorento (idx 101), a 2018 Hyundai Palisade (idx 97), a
+     2017/2018 VW Polo (idx 41), and others back to at least idx 9 (idx 1-3
+     confirmed empty, so 4-9 is roughly the real floor). The true year is
+     baked into the page itself (a `var data = {...}` JSON blob and a
+     `<p class="title">YYYY COMPANY MODEL</p>` line, both independent of
+     whatever `DETAIL_YEAR` was passed to unlock the record), so a future
+     scraper wouldn't need to guess it — but `DETAIL_YEAR` itself doesn't
+     resolve consistently to a single real year per idx (a legacy-era record
+     matched a narrow band like 2013/2017/2018 only; a mid-era one matched
+     every year 2017 through 2026), so recovering this needs a real
+     idx×year sweep with several candidate anchor years per idx, not a clean
+     single-dimension enumeration like JNCAP's. Sample density (idx 4-130,
+     partial sweep) suggests the true historical corpus could run close to
+     the observed max idx (492) — Euro NCAP/JNCAP territory, not the ~50 the
+     "current results" list alone suggests. Not started.
+     - **License is explicit and stricter than the other three sources**:
+       공공누리 제3유형 (KOGL Type 3 — attribution required, **no derivative
+       works/modification**), stated directly on the results page — cited in
+       `kncap.ts`'s own file comment; nothing here alters published figures.
+     - **Model/brand names stay Korean even in English-locale mode** —
+       toggling `top_changeLocale('US')` switches the intro page to an
+       English variant (`initMainUS.jsp`) but the results list/detail data
+       (`COMPANY_NAME`, `BRAND_NAME`, `CAR_TITLE`) is unaffected, still
+       Korean. `make`/`model` come from a curated `idx -> {make, model}`
+       table (`scripts/src/kncap-names.ts`, 52 entries for the shipped
+       2021-2026 corpus), verified against the real registry the same way
+       `cncap-names.ts` was — but unlike C-NCAP's fully-Chinese data, many
+       KNCAP model names are already Latin/alphanumeric (`EV6`, `K8`, `iX2`,
+       `GLB250`) since Korean marketing names for foreign-brand cars are
+       often just the English name spelled out; only Korean-brand and
+       Korean-phonetic model names (`아이오닉5` → "Ioniq 5", `투싼` →
+       "Tucson") needed real translation — a lighter burden than C-NCAP's
+       601-entry table, though a full historical recovery would scale this
+       table back up toward that size.
+     - **A trim/powertrain qualifier in KNCAP's own name is deliberately
+       dropped to the base nameplate** (`캐스퍼 일렉트릭` "Casper Electric" →
+       `Casper`, `XC40 리차지` "XC40 Recharge" → `XC40`) — `KncapService`'s
+       prefix match needs the *stored* key to be the shorter, more generic
+       one, so keeping the qualifier would silently stop matching a registry
+       row that only has the bare nameplate. The one exception splits the
+       other way (`폴스타2` → model `"2"`, not `"Polestar 2"`): Polestar's own
+       naming omits repeating the brand.
+     - **One junk/test row exists in production** (`IDX 492`,
+       `COMPANY_NAME: "테스트"`) — filtered out by having no entry in
+       `kncap-names.ts`, not a special-cased check, same mechanism
+       C-NCAP uses for an untranslated `carId`.
+     - **The sandbox's assumed "no raw-network Bash access" constraint
+       (true for Euro NCAP/JNCAP/C-NCAP) didn't hold for this one** — a
+       plain `pnpm ingest:kncap` (real `fetch`, no browser) reached
+       `kncap.org` directly and completed the real ingest, 52 upserted, 1
+       untranslated (the known junk row) — no cached-then-copied-in HTML
+       workaround was needed here. Verified live in the browser for a real
+       plate (`ВС0594YВ`, a real 2022 Hyundai Ioniq 5 — 2021 KNCAP rating
+       applicable, ★★★★★/★★★★☆/★★★★★ crash/pedestrian/accident-prevention,
+       Class 1/5, working "Full KNCAP report" link out to the source detail
+       page) and a multi-generation case (`СВ1464YА`, a Tesla Model 3 with
+       both a 2021 and a 2025 KNCAP rating — applicable/other-generations
+       split correct), in both English and Ukrainian, at 1280px, 375px, and
+       320px widths.
+     - **Five-tab bar, addressed with a scroll, not a redesign** — the tab
+       list gained `overflow-x-auto` and each tab switched from `flex-1` to
+       `shrink-0` so a narrow viewport can scroll the tab strip instead of
+       squeezing five labels unreadably thin; at every width actually tested
+       (down to 320px) all five still fit on one row with no scrolling
+       needed, so the earlier note about a sixth source (KNCAP) being where
+       a dropdown/select rethink "should actually happen" turned out
+       unnecessary here — revisit only if a sixth source ever ships.
   4. **IIHS (US, insurance-industry-funded, distinct from NHTSA) — low
      priority for this fleet.** Methodologically genuinely additive, not
      redundant with NHTSA (Good/Acceptable/Marginal/Poor across small-
@@ -1013,9 +1100,48 @@ detail/{id}` from 1-290 not already known — zero additional real pages
 
   **Design note for whichever ships next:** the tab bar in `SafetyRatings.tsx`
   was extended to four tabs for C-NCAP (`px-2`/`whitespace-nowrap` keeps all
-  four on one row down to phone width) rather than switching to a
-  dropdown/select as earlier drafts of this plan suggested — a fifth source
-  (KNCAP) is where that rethink should actually happen, not before.
+  four on one row down to phone width), then to five for KNCAP by adding
+  `overflow-x-auto` to the tab list and switching each tab from `flex-1` to
+  `shrink-0` — verified down to 320px with all five still fitting on one row,
+  no scrolling actually triggered. A dropdown/select rethink, floated in
+  earlier drafts of this plan, still hasn't been needed — revisit only if a
+  sixth source's labels actually overflow in practice.
+
+  **Follow-up (2026-09-26): persistent per-source coverage captions, and a
+  smooth tab-switch transition.** Prompted by a real "why is there no rating"
+  question against a genuinely Korean-brand-but-Euro-market car (a Kia
+  Cee'd) — the site's existing "no rating found" messages only explained
+  *market* scope (EU-spec, US-market, JDM-domestic, ...), not the *year*
+  floor each source's real scraped data actually starts at, and that
+  explanation disappeared entirely once at least one rating existed for the
+  make/model (even a wrong-generation one, shown under "other tested
+  generations"). Every one of the five tabs (`EuroNcapRatings.tsx`,
+  `NhtsaRatings.tsx`, `JncapRatings.tsx`, `CncapRatings.tsx`,
+  `KncapRatings.tsx`) now renders a persistent one-line coverage caption
+  unconditionally at the top — before the pending/error/none/no-generation-
+  match branches, so it's visible whether a rating exists, doesn't exist, or
+  exists for the wrong year. The floor year in each caption is the real
+  `min(rating_year)` in that source's own table, checked directly rather
+  than assumed: Euro NCAP 2017, JNCAP 2003 (with the documented 2004-2006/
+  2008 gaps), C-NCAP 2006, KNCAP 2021. NHTSA has no scraped table (it's
+  live-proxied) so its caption states MY2011 instead — the real year NHTSA's
+  current combined 5-star program started, a well-documented redesign, not
+  something derived from local data. The floor-year clause that used to live
+  inside each "none found" message was moved out to the new persistent
+  caption rather than duplicated in both places.
+
+  Separately, `SafetyRatings.tsx`'s tab content (the block rendering
+  whichever of the five `*Ratings` components is active) is now wrapped in a
+  `<div key={source} className="animate-fade-in">` — reusing the existing
+  `animate-fade-in` keyframe utility (`global.css`, already used for the
+  stats page's dimension/metric tab switches) rather than inventing a new
+  transition. Keying on `source` makes React remount the wrapper on every
+  tab change, re-triggering the fade+slide-up on each switch; matches this
+  animation's one existing precedent in being enter-only, not a true
+  crossfade (the outgoing tab's content simply unmounts, it doesn't fade
+  out) — consistent with the stats page's own tab transition rather than a
+  new interaction pattern, and no new dependency (e.g. a presence/animation
+  library) for what a single CSS keyframe already covers.
 
 - **Known issue, not yet fixed: Euro NCAP's own `tested_variant` label is
   wrong for at least one real assessment.** Found while spot-checking C-NCAP

@@ -280,6 +280,43 @@ export const cncapRatings = registry.table(
 export type CncapRatingRow = typeof cncapRatings.$inferSelect
 export type CncapRatingInsert = typeof cncapRatings.$inferInsert
 
+/**
+ * One KNCAP (Korea, MOLIT/KoROAD) tested car — scraped from kncap.org's own JSON results
+ * catalog via `scripts/src/kncap.ts` and refreshed by re-running it, same rationale as
+ * `cncapRatings` above. `makeKey`/`modelKey` (`@carplates/shared`) drive both the scraper's
+ * write key and the API's lookup — see migrations/0008_kncap_ratings.sql. KNCAP's own
+ * `COMPANY_NAME`/`BRAND_NAME` are Korean-only, so `make`/`model` come from a curated
+ * translation table (`scripts/src/kncap-names.ts`), not the source directly — `nameKo` keeps
+ * the original text for display and re-curation. Scraped from the "current results" catalog
+ * only (2021 onward) — see PLAN.md's KNCAP section for the historical-recovery gap.
+ */
+export const kncapRatings = registry.table(
+  'kncap_ratings',
+  {
+    assessmentId: text('assessment_id').primaryKey(),
+    idx: integer('idx').notNull(),
+    make: text('make').notNull(),
+    model: text('model').notNull(),
+    makeKey: text('make_key').notNull(),
+    modelKey: text('model_key').notNull(),
+    nameKo: text('name_ko').notNull(),
+    ratingYear: integer('rating_year'),
+    overallScore: real('overall_score'),
+    overallClass: smallint('overall_class'),
+    crashPct: real('crash_pct'),
+    crashStar: smallint('crash_star'),
+    pedestrianPct: real('pedestrian_pct'),
+    pedestrianStar: smallint('pedestrian_star'),
+    accidentPct: real('accident_pct'),
+    accidentStar: smallint('accident_star'),
+    imageUrl: text('image_url'),
+    scrapedAt: timestamp('scraped_at', { withTimezone: true }).notNull().defaultNow()
+  },
+  t => [index('ix_kncap_make_model').on(t.makeKey, t.modelKey)]
+)
+export type KncapRatingRow = typeof kncapRatings.$inferSelect
+export type KncapRatingInsert = typeof kncapRatings.$inferInsert
+
 /** Incremental-ingest bookkeeping: which CKAN resources have been loaded. */
 export const ingestedResources = registry.table('ingested_resources', {
   ckanResourceId: text('ckan_resource_id').primaryKey(),

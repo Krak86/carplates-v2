@@ -179,6 +179,7 @@ export default function JncapRatings({ brand, model, year, active }: Props): Rea
 
   return (
     <div>
+      <p className="mb-2 text-xs text-[var(--color-muted)]">{t('safety.coverageJncap')}</p>
       {result.isPending && <p className="text-base text-[var(--color-muted)]">{t('result.loading')}</p>}
       {result.isError && <p className="text-base text-[var(--color-muted)]">{t('safety.unavailable')}</p>}
       {result.isSuccess && ratings.length === 0 && (

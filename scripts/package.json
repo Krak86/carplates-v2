@@ -17,6 +17,9 @@
     "ingest:cncap": "tsx src/cncap.ts",
     "ingest:cncap:csv": "tsx src/cncap.ts --from-csv seed-data/cncap-ratings.csv.gz",
     "export:cncap:csv": "tsx src/cncap.ts --export-csv seed-data/cncap-ratings.csv.gz",
+    "ingest:kncap": "tsx src/kncap.ts",
+    "ingest:kncap:csv": "tsx src/kncap.ts --from-csv seed-data/kncap-ratings.csv.gz",
+    "export:kncap:csv": "tsx src/kncap.ts --export-csv seed-data/kncap-ratings.csv.gz",
     "type-check": "tsc",
     "test": "vitest run"
   },
