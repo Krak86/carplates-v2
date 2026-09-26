@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import type { ReactNode } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { Link, useParams } from 'react-router'
+import { Link, useParams, useSearchParams } from 'react-router'
 import { classifyQuery } from '@carplates/shared'
 
 import PhotoThumbnail from '@/components/PhotoThumbnail'
@@ -20,9 +20,11 @@ import { capture } from '@/lib/telemetry'
 export default function SearchRoute(): ReactNode {
   const { t } = useTranslation()
   const params = useParams()
+  const [searchParams] = useSearchParams()
   const queryClient = useQueryClient()
   const raw = params.query ? decodeURIComponent(params.query) : ''
   const kind = raw ? classifyQuery(raw) : null
+  const isSharedSection = searchParams.has('section')
 
   const plate = useQuery({ ...plateQuery(raw), enabled: kind === 'plate' })
   const vin = useQuery({ ...vinQuery(raw), enabled: kind === 'vin' })
@@ -77,6 +79,7 @@ export default function SearchRoute(): ReactNode {
           </p>
           <SearchField
             initialValue={raw}
+            autoFocus={!isSharedSection}
             isRecognizing={isRecognizing}
             recognizeErrorKey={recognizeErrorKey}
             onPickPhoto={recognize}

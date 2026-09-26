@@ -1,10 +1,13 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import type { UseQueryResult } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
+import { useSearchParams } from 'react-router'
 import type { WikiInfo } from '@carplates/shared'
 
+import ShareButton from '@/components/ShareButton'
 import { cn } from '@/lib/cn'
+import { scrollElementIntoView } from '@/lib/share-section'
 
 type Props = {
   wiki: UseQueryResult<WikiInfo>
@@ -18,35 +21,45 @@ type Props = {
  */
 export default function CarWikiInfo({ wiki, hasQuery }: Props): ReactNode {
   const { t } = useTranslation()
-  const [open, setOpen] = useState(false)
+  const [searchParams] = useSearchParams()
+  const isSharedWiki = searchParams.get('section') === 'wiki'
+  const [open, setOpen] = useState(() => isSharedWiki)
+  const sectionRef = useRef<HTMLDivElement>(null)
   const data = wiki.isSuccess ? wiki.data : null
   const image = data?.image
   const creditParts = [image?.attribution?.author, image?.attribution?.license].filter(Boolean)
 
+  useEffect(() => {
+    if (isSharedWiki && sectionRef.current) scrollElementIntoView(sectionRef.current)
+  }, [isSharedWiki])
+
   if (!hasQuery) return null
 
   return (
-    <div className="mt-3 border-t border-[var(--color-border)] pt-3">
+    <div ref={sectionRef} className="mt-3 border-t border-[var(--color-border)] pt-3">
       <div className="flex items-center justify-between text-base">
         <span className="text-base font-semibold">{t('wiki.title')}</span>
-        <button
-          type="button"
-          aria-expanded={open}
-          disabled={wiki.isPending}
-          onClick={() => setOpen(v => !v)}
-          className="group flex items-center gap-1.5 rounded-full bg-[var(--color-surface)]/20 px-3 py-1 text-[var(--color-primary)] disabled:cursor-wait disabled:opacity-50"
-        >
-          <span aria-hidden className="no-underline">
-            📖
-          </span>
-          <span className="underline group-hover:no-underline">{open ? t('wiki.hide') : t('wiki.show')}</span>
-          <span
-            aria-hidden
-            className={cn('inline-block no-underline transition-transform duration-200', open && 'rotate-180')}
+        <div className="flex items-center gap-1.5">
+          {open && <ShareButton section="wiki" label={t('share.button', { section: t('wiki.title') })} />}
+          <button
+            type="button"
+            aria-expanded={open}
+            disabled={wiki.isPending}
+            onClick={() => setOpen(v => !v)}
+            className="group flex items-center gap-1.5 rounded-full bg-[var(--color-surface)]/20 px-3 py-1 text-[var(--color-primary)] disabled:cursor-wait disabled:opacity-50"
           >
-            ▾
-          </span>
-        </button>
+            <span aria-hidden className="no-underline">
+              📖
+            </span>
+            <span className="underline group-hover:no-underline">{open ? t('wiki.hide') : t('wiki.show')}</span>
+            <span
+              aria-hidden
+              className={cn('inline-block no-underline transition-transform duration-200', open && 'rotate-180')}
+            >
+              ▾
+            </span>
+          </button>
+        </div>
       </div>
 
       <div

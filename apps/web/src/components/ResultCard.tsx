@@ -1,8 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router'
+import { Link, useSearchParams } from 'react-router'
 import {
   dealerUrl,
   fallbackVehicleColor,
@@ -21,6 +21,7 @@ import FieldInfoButton from '@/components/FieldInfoButton'
 import RegistrationTimeline from '@/components/RegistrationTimeline'
 import { getFuelIcon } from '@/components/ResultCard.helpers'
 import SafetyRatings from '@/components/SafetyRatings'
+import ShareButton from '@/components/ShareButton'
 import { useCarWikiActions } from '@/components/use-car-wiki-actions'
 import Card from '@/components/ui/Card'
 import VehicleKindIcon from '@/components/VehicleKindIcon'
@@ -30,6 +31,7 @@ import { useCardMotion } from '@/hooks/useCardMotion'
 import { cn } from '@/lib/cn'
 import { depMapsUrl } from '@/lib/maps'
 import { plateHistoryQuery, vinQuery } from '@/lib/queries'
+import { scrollElementIntoView } from '@/lib/share-section'
 import { useUiStore } from '@/store/ui-store'
 
 type Props = {
@@ -48,7 +50,10 @@ function Row({ label, value }: { label: string; value: ReactNode }): ReactNode {
 
 export default function ResultCard({ data }: Props): ReactNode {
   const { t, i18n } = useTranslation()
-  const [showMore, setShowMore] = useState(false)
+  const [searchParams] = useSearchParams()
+  const isSharedHistory = searchParams.get('section') === 'history'
+  const [showMore, setShowMore] = useState(() => isSharedHistory)
+  const historyRef = useRef<HTMLDivElement>(null)
   const tiltEnabled = useUiStore(s => s.cardTiltEnabled)
   const glowRef = useCardMotion<HTMLDivElement>(tiltEnabled)
   const c = data.current
@@ -72,6 +77,10 @@ export default function ResultCard({ data }: Props): ReactNode {
   const hasCapacity = c.capacity != null
   const engineLabel = hasCapacity ? t('field.capacity') : t('field.power')
   const engineValue = hasCapacity ? c.capacity : c.powerKwt
+
+  useEffect(() => {
+    if (isSharedHistory && historyRef.current) scrollElementIntoView(historyRef.current)
+  }, [isSharedHistory])
 
   return (
     <div className="relative w-full max-w-2xl">
@@ -257,28 +266,36 @@ export default function ResultCard({ data }: Props): ReactNode {
           />
         </div>
 
-        <div className="mt-3 border-t border-[var(--color-border)] pt-3">
+        <div ref={historyRef} className="mt-3 border-t border-[var(--color-border)] pt-3">
           <div className="flex items-center justify-between text-base">
             <span className="text-base font-semibold">{t('result.historyLabel')}</span>
-            <button
-              type="button"
-              aria-expanded={showMore}
-              onClick={() => setShowMore(v => !v)}
-              className="group flex items-center gap-1.5 rounded-full bg-[var(--color-surface)]/20 px-3 py-1 text-[var(--color-primary)]"
-            >
-              <span aria-hidden className="animate-gear-tick no-underline">
-                ⚙️
-              </span>
-              <span className="underline group-hover:no-underline">
-                {showMore ? t('result.historyHide') : t('result.historyShow')}
-              </span>
-              <span
-                aria-hidden
-                className={cn('inline-block no-underline transition-transform duration-200', showMore && 'rotate-180')}
+            <div className="flex items-center gap-1.5">
+              {showMore && (
+                <ShareButton section="history" label={t('share.button', { section: t('result.historyLabel') })} />
+              )}
+              <button
+                type="button"
+                aria-expanded={showMore}
+                onClick={() => setShowMore(v => !v)}
+                className="group flex items-center gap-1.5 rounded-full bg-[var(--color-surface)]/20 px-3 py-1 text-[var(--color-primary)]"
               >
-                ▾
-              </span>
-            </button>
+                <span aria-hidden className="animate-gear-tick no-underline">
+                  ⚙️
+                </span>
+                <span className="underline group-hover:no-underline">
+                  {showMore ? t('result.historyHide') : t('result.historyShow')}
+                </span>
+                <span
+                  aria-hidden
+                  className={cn(
+                    'inline-block no-underline transition-transform duration-200',
+                    showMore && 'rotate-180'
+                  )}
+                >
+                  ▾
+                </span>
+              </button>
+            </div>
           </div>
         </div>
 

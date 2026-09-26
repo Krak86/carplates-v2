@@ -309,5 +309,7 @@
   "stats.view.table": "Таблица",
   "stats.view.map": "Карта",
   "stats.map.noData": "Нет данных",
-  "stats.map.attribution": "Границы регионов: geoBoundaries.org (данные OpenStreetMap), ODbL 1.0"
+  "stats.map.attribution": "Границы регионов: geoBoundaries.org (данные OpenStreetMap), ODbL 1.0",
+  "share.button": "Поделиться: {{section}}",
+  "share.copied": "Ссылка скопирована!"
 }

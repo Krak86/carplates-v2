@@ -123,6 +123,12 @@ Vitest 4 · ESLint 10 (flat config)
 - Tests: Vitest, `import { describe, it, expect } from 'vitest'`, colocated
   `*.test.ts(x)` next to source.
 
+## Workflow
+
+- **After each big update** (a feature, a bug fix, a batch of related
+  changes), provide a suggested commit message — don't run `git commit` or
+  `git push` yourself unless explicitly asked to.
+
 ## Rules
 
 @CLAUDE_RULES.md

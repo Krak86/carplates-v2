@@ -309,5 +309,7 @@
   "stats.view.table": "Таблиця",
   "stats.view.map": "Карта",
   "stats.map.noData": "Немає даних",
-  "stats.map.attribution": "Межі регіонів: geoBoundaries.org (дані OpenStreetMap), ODbL 1.0"
+  "stats.map.attribution": "Межі регіонів: geoBoundaries.org (дані OpenStreetMap), ODbL 1.0",
+  "share.button": "Поділитися: {{section}}",
+  "share.copied": "Посилання скопійовано!"
 }

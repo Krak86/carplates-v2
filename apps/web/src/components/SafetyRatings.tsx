@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useSearchParams } from 'react-router'
 
 import CncapRatings from '@/components/CncapRatings'
 import EuroNcapRatings from '@/components/EuroNcapRatings'
@@ -14,7 +15,9 @@ import {
   NHTSA_DISCONTINUED_BRANDS,
   NHTSA_UNCOVERED_EXAMPLE_BRANDS
 } from '@/components/SafetyRatings.brands'
+import ShareButton from '@/components/ShareButton'
 import { cn } from '@/lib/cn'
+import { scrollElementIntoView } from '@/lib/share-section'
 
 type Props = {
   brand: string | null
@@ -23,7 +26,13 @@ type Props = {
   body: string | null
 }
 
-type Source = 'euroncap' | 'nhtsa' | 'jncap' | 'cncap' | 'kncap' | 'iihs'
+const NCAP_SOURCES = ['euroncap', 'nhtsa', 'jncap', 'cncap', 'kncap', 'iihs'] as const
+type Source = (typeof NCAP_SOURCES)[number]
+const DEFAULT_NCAP_SOURCE: Source = 'euroncap'
+
+function parseNcapSource(value: string | null): Source {
+  return (NCAP_SOURCES as readonly string[]).includes(value ?? '') ? (value as Source) : DEFAULT_NCAP_SOURCE
+}
 
 /**
  * Combined "which cars does this cover" explainer for both sources at once —
@@ -93,14 +102,23 @@ function CoverageInfo(): ReactNode {
  */
 export default function SafetyRatings({ brand, model, year, body }: Props): ReactNode {
   const { t } = useTranslation()
-  const [open, setOpen] = useState(false)
-  const [source, setSource] = useState<Source>('euroncap')
+  const [searchParams] = useSearchParams()
+  const isSharedRatings = searchParams.get('section') === 'ratings'
+  const [open, setOpen] = useState(() => isSharedRatings)
+  const [source, setSource] = useState<Source>(() =>
+    isSharedRatings ? parseNcapSource(searchParams.get('tab')) : DEFAULT_NCAP_SOURCE
+  )
+  const sectionRef = useRef<HTMLDivElement>(null)
   const hasQuery = Boolean(brand && model && year)
+
+  useEffect(() => {
+    if (isSharedRatings && sectionRef.current) scrollElementIntoView(sectionRef.current)
+  }, [isSharedRatings])
 
   if (!hasQuery) return null
 
   return (
-    <div className="mt-3 border-t border-[var(--color-border)] pt-3">
+    <div ref={sectionRef} className="mt-3 border-t border-[var(--color-border)] pt-3">
       <div className="flex items-center justify-between text-base">
         <span className="flex items-center gap-1.5 text-base font-semibold">
           {t('safety.title')}
@@ -108,23 +126,28 @@ export default function SafetyRatings({ brand, model, year, body }: Props): Reac
             <CoverageInfo />
           </InfoPopover>
         </span>
-        <button
-          type="button"
-          aria-expanded={open}
-          onClick={() => setOpen(v => !v)}
-          className="group flex items-center gap-1.5 rounded-full bg-[var(--color-surface)]/20 px-3 py-1 text-[var(--color-primary)]"
-        >
-          <span aria-hidden className="no-underline">
-            🛡️
-          </span>
-          <span className="underline group-hover:no-underline">{open ? t('safety.hide') : t('safety.show')}</span>
-          <span
-            aria-hidden
-            className={cn('inline-block no-underline transition-transform duration-200', open && 'rotate-180')}
+        <div className="flex items-center gap-1.5">
+          {open && (
+            <ShareButton section="ratings" tab={source} label={t('share.button', { section: t('safety.title') })} />
+          )}
+          <button
+            type="button"
+            aria-expanded={open}
+            onClick={() => setOpen(v => !v)}
+            className="group flex items-center gap-1.5 rounded-full bg-[var(--color-surface)]/20 px-3 py-1 text-[var(--color-primary)]"
           >
-            ▾
-          </span>
-        </button>
+            <span aria-hidden className="no-underline">
+              🛡️
+            </span>
+            <span className="underline group-hover:no-underline">{open ? t('safety.hide') : t('safety.show')}</span>
+            <span
+              aria-hidden
+              className={cn('inline-block no-underline transition-transform duration-200', open && 'rotate-180')}
+            >
+              ▾
+            </span>
+          </button>
+        </div>
       </div>
 
       <div

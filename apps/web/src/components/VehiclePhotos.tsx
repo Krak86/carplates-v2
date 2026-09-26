@@ -1,10 +1,13 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
+import { useSearchParams } from 'react-router'
 
+import ShareButton from '@/components/ShareButton'
 import { cn } from '@/lib/cn'
 import { vehiclePhotosQuery } from '@/lib/queries'
+import { scrollElementIntoView } from '@/lib/share-section'
 
 type Props = {
   brand: string | null
@@ -19,36 +22,46 @@ type Props = {
  */
 export default function VehiclePhotos({ brand, model, year }: Props): ReactNode {
   const { t } = useTranslation()
-  const [open, setOpen] = useState(false)
+  const [searchParams] = useSearchParams()
+  const isSharedPhotos = searchParams.get('section') === 'photos'
+  const [open, setOpen] = useState(() => isSharedPhotos)
   const [index, setIndex] = useState(0)
+  const sectionRef = useRef<HTMLDivElement>(null)
   const hasQuery = Boolean(brand || model)
   const photos = useQuery({ ...vehiclePhotosQuery(brand ?? '', model ?? '', year), enabled: open && hasQuery })
   const images = photos.data?.images ?? []
   const current = images.length > 0 ? images[index % images.length] : undefined
 
+  useEffect(() => {
+    if (isSharedPhotos && sectionRef.current) scrollElementIntoView(sectionRef.current)
+  }, [isSharedPhotos])
+
   if (!hasQuery) return null
 
   return (
-    <div className="mt-3 border-t border-[var(--color-border)] pt-3">
+    <div ref={sectionRef} className="mt-3 border-t border-[var(--color-border)] pt-3">
       <div className="flex items-center justify-between text-base">
         <span className="text-base font-semibold">{t('photos.title')}</span>
-        <button
-          type="button"
-          aria-expanded={open}
-          onClick={() => setOpen(v => !v)}
-          className="group flex items-center gap-1.5 rounded-full bg-[var(--color-surface)]/20 px-3 py-1 text-[var(--color-primary)]"
-        >
-          <span aria-hidden className="no-underline">
-            🖼️
-          </span>
-          <span className="underline group-hover:no-underline">{open ? t('photos.hide') : t('photos.show')}</span>
-          <span
-            aria-hidden
-            className={cn('inline-block no-underline transition-transform duration-200', open && 'rotate-180')}
+        <div className="flex items-center gap-1.5">
+          {open && <ShareButton section="photos" label={t('share.button', { section: t('photos.title') })} />}
+          <button
+            type="button"
+            aria-expanded={open}
+            onClick={() => setOpen(v => !v)}
+            className="group flex items-center gap-1.5 rounded-full bg-[var(--color-surface)]/20 px-3 py-1 text-[var(--color-primary)]"
           >
-            ▾
-          </span>
-        </button>
+            <span aria-hidden className="no-underline">
+              🖼️
+            </span>
+            <span className="underline group-hover:no-underline">{open ? t('photos.hide') : t('photos.show')}</span>
+            <span
+              aria-hidden
+              className={cn('inline-block no-underline transition-transform duration-200', open && 'rotate-180')}
+            >
+              ▾
+            </span>
+          </button>
+        </div>
       </div>
 
       <div

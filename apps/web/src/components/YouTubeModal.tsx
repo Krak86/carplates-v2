@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 
 type Props = {
@@ -17,7 +18,10 @@ type Props = {
 export default function YouTubeModal({ youtubeId, description, onClose }: Props): ReactNode {
   const { t } = useTranslation()
 
-  return (
+  // The result Card has a 3D `transform` for its tilt effect, which makes it the
+  // containing block for `position: fixed` descendants — without a portal, this
+  // modal centers on the (possibly very tall) Card instead of the viewport.
+  return createPortal(
     <div className="fixed inset-0 z-30 flex items-center justify-center bg-black/50 p-4" role="dialog" aria-modal>
       <div className="w-full max-w-2xl rounded-xl bg-[var(--color-surface)] p-4">
         <div className="mb-3 flex items-center justify-between gap-3">
@@ -43,6 +47,7 @@ export default function YouTubeModal({ youtubeId, description, onClose }: Props)
           allowFullScreen
         />
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }

@@ -301,5 +301,7 @@
   "stats.view.table": "Table",
   "stats.view.map": "Map",
   "stats.map.noData": "No data",
-  "stats.map.attribution": "Boundaries: geoBoundaries.org (OpenStreetMap contributors), ODbL 1.0"
+  "stats.map.attribution": "Boundaries: geoBoundaries.org (OpenStreetMap contributors), ODbL 1.0",
+  "share.button": "Share {{section}}",
+  "share.copied": "Link copied!"
 }
