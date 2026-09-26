@@ -39,6 +39,9 @@ export default function Sidebar(): ReactNode {
       <NavLink to="/stats" className={linkClass} onClick={() => setDrawerOpen(false)}>
         <span aria-hidden>📊</span> {t('nav.stats')}
       </NavLink>
+      <NavLink to="/discuss" className={linkClass} onClick={() => setDrawerOpen(false)}>
+        <span aria-hidden>💬</span> {t('nav.discuss')}
+      </NavLink>
 
       <div className="mt-4 px-3 text-xs tracking-wide text-[var(--color-muted)] uppercase">{t('nav.language')}</div>
       {LANGS.map(l => (
