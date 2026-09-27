@@ -389,6 +389,8 @@
   "advancedSearch.modelPlaceholder": "Start typing a model…",
   "advancedSearch.yearFrom": "Year from",
   "advancedSearch.yearTo": "Year to",
+  "advancedSearch.minChars": "Type at least {{count}} characters",
+  "advancedSearch.yearInvalid": "Enter a 4-digit year",
   "advancedSearch.fuel": "Fuel",
   "advancedSearch.color": "Colour",
   "advancedSearch.kind": "Vehicle kind",

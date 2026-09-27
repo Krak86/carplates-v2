@@ -1,7 +1,7 @@
 import { resolveFuelCategories } from '@carplates/shared'
 import type { VehicleFuel } from '@carplates/shared'
 
-const FUEL_ICON: Readonly<Record<VehicleFuel, string>> = {
+export const FUEL_ICON: Readonly<Record<VehicleFuel, string>> = {
   electric: '🔋',
   petrol: '⛽',
   diesel: '🛢️',

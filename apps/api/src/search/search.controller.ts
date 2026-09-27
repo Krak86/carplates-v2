@@ -7,18 +7,33 @@ import { zodParam } from '../common/zod-param.pipe.js'
 import { BrandSuggestionsDto, ModelSuggestionsDto, SearchResponseDto } from './search.dto.js'
 import { SearchService } from './search.service.js'
 
-const brandsQuerySchema = z.object({ q: z.string().trim().optional().default('') })
+// Below this, pg_trgm's GIN index (packages/db/migrations 0013/0014) can't accelerate an ILIKE
+// substring match -- a 1-2 char pattern isn't a real trigram, so Postgres would fall back to a
+// sequential scan over the 15M+ row table. Same floor applies client-side (see
+// use-advanced-search-actions.ts's MIN_TEXT_FILTER_LENGTH) so this is defense in depth, not the
+// only gate.
+const MIN_TEXT_QUERY_LENGTH = 3
+const freeTextQuery = z
+  .string()
+  .trim()
+  .refine(v => v.length === 0 || v.length >= MIN_TEXT_QUERY_LENGTH, {
+    message: `must be empty or at least ${MIN_TEXT_QUERY_LENGTH} characters`
+  })
+// A positive 4-digit model year (1000-9999) -- matches the client's YEAR_RE.
+const yearParam = z.coerce.number().int().min(1000).max(9999)
+
+const brandsQuerySchema = z.object({ q: freeTextQuery.optional().default('') })
 
 const modelsQuerySchema = z.object({
   brand: z.string().trim().min(1).optional(),
-  q: z.string().trim().optional().default('')
+  q: freeTextQuery.optional().default('')
 })
 
 const searchQuerySchema = z.object({
-  brand: z.string().trim().min(1).optional(),
-  model: z.string().trim().min(1).optional(),
-  yearFrom: z.coerce.number().int().optional(),
-  yearTo: z.coerce.number().int().optional(),
+  brand: z.string().trim().min(MIN_TEXT_QUERY_LENGTH).optional(),
+  model: z.string().trim().min(MIN_TEXT_QUERY_LENGTH).optional(),
+  yearFrom: yearParam.optional(),
+  yearTo: yearParam.optional(),
   fuel: z.enum(VEHICLE_FUELS).optional(),
   color: z.enum(VEHICLE_COLORS).optional(),
   kind: z.enum(VEHICLE_KINDS).optional(),

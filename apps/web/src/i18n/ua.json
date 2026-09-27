@@ -399,6 +399,8 @@
   "advancedSearch.modelPlaceholder": "Почніть вводити модель…",
   "advancedSearch.yearFrom": "Рік від",
   "advancedSearch.yearTo": "Рік до",
+  "advancedSearch.minChars": "Введіть щонайменше {{count}} символи",
+  "advancedSearch.yearInvalid": "Введіть рік у форматі 4 цифр",
   "advancedSearch.fuel": "Пальне",
   "advancedSearch.color": "Колір",
   "advancedSearch.kind": "Тип ТЗ",

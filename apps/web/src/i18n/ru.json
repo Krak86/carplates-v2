@@ -399,6 +399,8 @@
   "advancedSearch.modelPlaceholder": "Начните вводить модель…",
   "advancedSearch.yearFrom": "Год от",
   "advancedSearch.yearTo": "Год до",
+  "advancedSearch.minChars": "Введите не менее {{count}} символов",
+  "advancedSearch.yearInvalid": "Введите год в формате 4 цифр",
   "advancedSearch.fuel": "Топливо",
   "advancedSearch.color": "Цвет",
   "advancedSearch.kind": "Тип ТС",

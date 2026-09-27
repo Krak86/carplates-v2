@@ -55,7 +55,11 @@ export default function SearchRoute(): ReactNode {
 
     if (kind === 'plate' && plate.isSuccess) {
       const c = plate.data.current
-      void record('plate', plate.data.plate, formatVehicleLabel({ brand: c.brand, model: c.model, year: c.makeYear, color: c.color }))
+      void record(
+        'plate',
+        plate.data.plate,
+        formatVehicleLabel({ brand: c.brand, model: c.model, year: c.makeYear, color: c.color })
+      )
     }
     if (kind === 'vin' && vin.isSuccess) {
       void record('vin', vin.data.vin, null)
@@ -85,6 +89,12 @@ export default function SearchRoute(): ReactNode {
             recognizeErrorKey={recognizeErrorKey}
             onPickPhoto={recognize}
           />
+          <Link
+            to="/advanced-search"
+            className="mt-2 inline-block text-sm text-[var(--color-primary)] underline hover:no-underline"
+          >
+            + {t('advancedSearch.viewLink')}
+          </Link>
         </div>
 
         {raw && active.isPending && (
@@ -120,16 +130,6 @@ export default function SearchRoute(): ReactNode {
             📊
           </span>
           <span className="underline hover:no-underline">{t('stats.viewLink')}</span>
-        </Link>
-
-        <Link
-          to="/advanced-search"
-          className="flex items-center gap-1.5 rounded-full bg-[var(--color-surface)]/20 px-3 py-1 text-sm text-[var(--color-primary)]"
-        >
-          <span aria-hidden className="no-underline">
-            🧭
-          </span>
-          <span className="underline hover:no-underline">{t('advancedSearch.viewLink')}</span>
         </Link>
 
         <Link

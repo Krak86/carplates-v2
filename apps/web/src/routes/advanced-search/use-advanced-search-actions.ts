@@ -3,12 +3,27 @@ import { useQuery } from '@tanstack/react-query'
 import type { UseQueryResult } from '@tanstack/react-query'
 import { useSearchParams } from 'react-router'
 import { VEHICLE_COLORS, VEHICLE_FUELS, VEHICLE_KINDS } from '@carplates/shared'
-import type { BrandSuggestion, ModelSuggestion, SearchResponse, VehicleColor, VehicleFuel, VehicleKind } from '@carplates/shared'
+import type {
+  BrandSuggestion,
+  ModelSuggestion,
+  SearchResponse,
+  VehicleColor,
+  VehicleFuel,
+  VehicleKind
+} from '@carplates/shared'
 
 import { brandSuggestionsQuery, modelSuggestionsQuery, vehicleSearchQuery } from '@/lib/queries'
 
 const DEBOUNCE_MS = 300
 const PAGE_SIZE = 20
+// Below this, pg_trgm's GIN index (packages/db/migrations 0013/0014) can't accelerate an ILIKE
+// substring match on the 15M+ row table -- a 1-2 char pattern isn't a real trigram, so Postgres
+// would fall back to a sequential scan. Mirrored server-side in search.controller.ts.
+export const MIN_TEXT_FILTER_LENGTH = 3
+// A positive 4-digit model year -- anything else (fewer/more digits, a leading zero, a sign) is
+// treated as not-yet-a-year rather than coerced, so a half-typed value can't silently narrow (or
+// break) the query.
+const YEAR_RE = /^[1-9]\d{3}$/
 
 export type AdvancedSearchFilters = {
   brand: string
@@ -47,6 +62,13 @@ function useDebouncedValue<T>(value: T): T {
   return debounced
 }
 
+/** Empty stays valid (no filter); anything else must be a positive 4-digit year to be usable. */
+function parseYearFilter(value: string): { year: number | undefined; invalid: boolean } {
+  if (!value) return { year: undefined, invalid: false }
+  if (!YEAR_RE.test(value)) return { year: undefined, invalid: true }
+  return { year: Number(value), invalid: false }
+}
+
 type UseAdvancedSearchActions = {
   filters: AdvancedSearchFilters
   updateFilter: <K extends FilterKey>(key: K, value: AdvancedSearchFilters[K]) => void
@@ -55,6 +77,8 @@ type UseAdvancedSearchActions = {
   setPage: (page: number) => void
   pageSize: number
   hasAnyFilter: boolean
+  yearFromInvalid: boolean
+  yearToInvalid: boolean
   brandSuggestions: BrandSuggestion[]
   modelSuggestions: ModelSuggestion[]
   results: UseQueryResult<SearchResponse, Error>
@@ -74,26 +98,34 @@ export function useAdvancedSearchActions(): UseAdvancedSearchActions {
 
   const debouncedBrand = useDebouncedValue(filters.brand)
   const debouncedModel = useDebouncedValue(filters.model)
+  const debouncedYearFrom = useDebouncedValue(filters.yearFrom)
+  const debouncedYearTo = useDebouncedValue(filters.yearTo)
+
+  const brandFilter = debouncedBrand.length >= MIN_TEXT_FILTER_LENGTH ? debouncedBrand : undefined
+  const modelFilter = debouncedModel.length >= MIN_TEXT_FILTER_LENGTH ? debouncedModel : undefined
+  const { year: yearFrom, invalid: yearFromInvalid } = parseYearFilter(debouncedYearFrom)
+  const { year: yearTo, invalid: yearToInvalid } = parseYearFilter(debouncedYearTo)
 
   const brandSuggestions = useQuery({
     ...brandSuggestionsQuery(debouncedBrand),
-    enabled: debouncedBrand.length > 0
+    enabled: debouncedBrand.length >= MIN_TEXT_FILTER_LENGTH
   })
   const modelSuggestions = useQuery({
     ...modelSuggestionsQuery(filters.brand || undefined, debouncedModel),
-    enabled: debouncedModel.length > 0
+    enabled: debouncedModel.length >= MIN_TEXT_FILTER_LENGTH
   })
 
-  const yearFrom = filters.yearFrom ? Number(filters.yearFrom) : undefined
-  const yearTo = filters.yearTo ? Number(filters.yearTo) : undefined
-  const hasAnyFilter = Boolean(
-    debouncedBrand || debouncedModel || yearFrom != null || yearTo != null || filters.fuel || filters.color || filters.kind
-  )
+  const hasAnyFilter =
+    !yearFromInvalid &&
+    !yearToInvalid &&
+    Boolean(
+      brandFilter || modelFilter || yearFrom != null || yearTo != null || filters.fuel || filters.color || filters.kind
+    )
 
   const results = useQuery({
     ...vehicleSearchQuery({
-      brand: debouncedBrand || undefined,
-      model: debouncedModel || undefined,
+      brand: brandFilter,
+      model: modelFilter,
       yearFrom,
       yearTo,
       fuel: filters.fuel || undefined,
@@ -144,6 +176,8 @@ export function useAdvancedSearchActions(): UseAdvancedSearchActions {
     setPage,
     pageSize: PAGE_SIZE,
     hasAnyFilter,
+    yearFromInvalid,
+    yearToInvalid,
     brandSuggestions: brandSuggestions.data?.suggestions ?? [],
     modelSuggestions: modelSuggestions.data?.suggestions ?? [],
     results

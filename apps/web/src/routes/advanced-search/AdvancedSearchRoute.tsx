@@ -5,18 +5,23 @@ import { regionName, VEHICLE_COLORS, VEHICLE_FUELS, VEHICLE_KINDS } from '@carpl
 import type { SearchResultRow } from '@carplates/shared'
 
 import ColorSwatch from '@/components/ColorSwatch'
-import { getFuelIcon } from '@/components/ResultCard.helpers'
+import { FUEL_ICON, getFuelIcon } from '@/components/ResultCard.helpers'
 import Card from '@/components/ui/Card'
 import Spinner from '@/components/ui/Spinner'
 import { cn } from '@/lib/cn'
 import { formatVehicleLabel } from '@/lib/vehicle-label'
-import { useAdvancedSearchActions } from '@/routes/advanced-search/use-advanced-search-actions'
+import { MIN_TEXT_FILTER_LENGTH, useAdvancedSearchActions } from '@/routes/advanced-search/use-advanced-search-actions'
 
 const inputClass = 'w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-1.5 text-sm'
+const invalidInputClass = 'border-red-500!'
 
 function ResultRow({ row }: { row: SearchResultRow }): ReactNode {
+  const { t } = useTranslation()
   const label = formatVehicleLabel({ brand: row.brand, model: row.model, year: row.makeYear, color: null })
   const region = regionName(row.plate)
+  const iconsTitle = [row.color && `${t('field.color')}: ${row.color}`, row.fuel && `${t('field.fuel')}: ${row.fuel}`]
+    .filter(Boolean)
+    .join('\n')
 
   return (
     <Link
@@ -30,7 +35,7 @@ function ResultRow({ row }: { row: SearchResultRow }): ReactNode {
           {region && <span>· {region}</span>}
         </div>
       </div>
-      <div className="flex shrink-0 items-center gap-2 text-lg">
+      <div className="flex shrink-0 items-center gap-2 text-lg" title={iconsTitle || undefined}>
         <ColorSwatch value={row.color} />
         {row.fuel && <span aria-hidden>{getFuelIcon(row.fuel)}</span>}
       </div>
@@ -41,8 +46,23 @@ function ResultRow({ row }: { row: SearchResultRow }): ReactNode {
 // Lazy-loaded (see App.tsx).
 export default function AdvancedSearchRoute(): ReactNode {
   const { t } = useTranslation()
-  const { filters, updateFilter, reset, page, setPage, pageSize, hasAnyFilter, brandSuggestions, modelSuggestions, results } =
-    useAdvancedSearchActions()
+  const {
+    filters,
+    updateFilter,
+    reset,
+    page,
+    setPage,
+    pageSize,
+    hasAnyFilter,
+    yearFromInvalid,
+    yearToInvalid,
+    brandSuggestions,
+    modelSuggestions,
+    results
+  } = useAdvancedSearchActions()
+
+  const brandTooShort = filters.brand.length > 0 && filters.brand.length < MIN_TEXT_FILTER_LENGTH
+  const modelTooShort = filters.model.length > 0 && filters.model.length < MIN_TEXT_FILTER_LENGTH
 
   // For a very broad match, `total` is the API's capped floor (see search.service.ts's
   // SEARCH_COUNT_CAP), not the real count — paging stops at that boundary rather than letting
@@ -73,6 +93,11 @@ export default function AdvancedSearchRoute(): ReactNode {
                 <option key={s.brand} value={s.brand} />
               ))}
             </datalist>
+            {brandTooShort && (
+              <span className="text-xs text-[var(--color-muted)]">
+                {t('advancedSearch.minChars', { count: MIN_TEXT_FILTER_LENGTH })}
+              </span>
+            )}
           </label>
 
           <label className="flex flex-col gap-1 text-sm">
@@ -90,37 +115,52 @@ export default function AdvancedSearchRoute(): ReactNode {
                 <option key={s.model} value={s.model} />
               ))}
             </datalist>
+            {modelTooShort && (
+              <span className="text-xs text-[var(--color-muted)]">
+                {t('advancedSearch.minChars', { count: MIN_TEXT_FILTER_LENGTH })}
+              </span>
+            )}
           </label>
 
           <label className="flex flex-col gap-1 text-sm">
             {t('advancedSearch.yearFrom')}
             <input
-              type="number"
+              type="text"
               inputMode="numeric"
+              pattern="[0-9]*"
+              maxLength={4}
               value={filters.yearFrom}
-              onChange={e => updateFilter('yearFrom', e.target.value)}
-              className={inputClass}
+              onChange={e => updateFilter('yearFrom', e.target.value.replace(/\D/g, ''))}
+              className={cn(inputClass, yearFromInvalid && invalidInputClass)}
             />
+            {yearFromInvalid && <span className="text-xs text-red-500">{t('advancedSearch.yearInvalid')}</span>}
           </label>
 
           <label className="flex flex-col gap-1 text-sm">
             {t('advancedSearch.yearTo')}
             <input
-              type="number"
+              type="text"
               inputMode="numeric"
+              pattern="[0-9]*"
+              maxLength={4}
               value={filters.yearTo}
-              onChange={e => updateFilter('yearTo', e.target.value)}
-              className={inputClass}
+              onChange={e => updateFilter('yearTo', e.target.value.replace(/\D/g, ''))}
+              className={cn(inputClass, yearToInvalid && invalidInputClass)}
             />
+            {yearToInvalid && <span className="text-xs text-red-500">{t('advancedSearch.yearInvalid')}</span>}
           </label>
 
           <label className="flex flex-col gap-1 text-sm">
             {t('advancedSearch.fuel')}
-            <select value={filters.fuel} onChange={e => updateFilter('fuel', e.target.value as typeof filters.fuel)} className={inputClass}>
+            <select
+              value={filters.fuel}
+              onChange={e => updateFilter('fuel', e.target.value as typeof filters.fuel)}
+              className={inputClass}
+            >
               <option value="">{t('advancedSearch.anyFuel')}</option>
               {VEHICLE_FUELS.map(f => (
                 <option key={f} value={f}>
-                  {t(`vehicleFuel.${f}`)}
+                  {FUEL_ICON[f]} {t(`vehicleFuel.${f}`)}
                 </option>
               ))}
             </select>
@@ -144,7 +184,11 @@ export default function AdvancedSearchRoute(): ReactNode {
 
           <label className="flex flex-col gap-1 text-sm sm:col-span-2">
             {t('advancedSearch.kind')}
-            <select value={filters.kind} onChange={e => updateFilter('kind', e.target.value as typeof filters.kind)} className={inputClass}>
+            <select
+              value={filters.kind}
+              onChange={e => updateFilter('kind', e.target.value as typeof filters.kind)}
+              className={inputClass}
+            >
               <option value="">{t('advancedSearch.anyKind')}</option>
               {VEHICLE_KINDS.map(k => (
                 <option key={k} value={k}>
