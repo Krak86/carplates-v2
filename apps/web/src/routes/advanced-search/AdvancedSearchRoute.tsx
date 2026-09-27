@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
-import { regionName, VEHICLE_COLORS, VEHICLE_FUELS, VEHICLE_KINDS } from '@carplates/shared'
+import { REGION_NAMES, regionName, VEHICLE_COLORS, VEHICLE_FUELS, VEHICLE_KINDS } from '@carplates/shared'
 import type { SearchResultRow } from '@carplates/shared'
 
 import ColorSwatch from '@/components/ColorSwatch'
@@ -182,7 +182,7 @@ export default function AdvancedSearchRoute(): ReactNode {
             </select>
           </label>
 
-          <label className="flex flex-col gap-1 text-sm sm:col-span-2">
+          <label className="flex flex-col gap-1 text-sm">
             {t('advancedSearch.kind')}
             <select
               value={filters.kind}
@@ -193,6 +193,22 @@ export default function AdvancedSearchRoute(): ReactNode {
               {VEHICLE_KINDS.map(k => (
                 <option key={k} value={k}>
                   {t(`vehicleKind.${k}`)}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="flex flex-col gap-1 text-sm">
+            {t('advancedSearch.region')}
+            <select
+              value={filters.region}
+              onChange={e => updateFilter('region', e.target.value)}
+              className={inputClass}
+            >
+              <option value="">{t('advancedSearch.anyRegion')}</option>
+              {REGION_NAMES.map(r => (
+                <option key={r} value={r}>
+                  {r}
                 </option>
               ))}
             </select>

@@ -1,6 +1,6 @@
 import { Controller, Get, Inject, Query } from '@nestjs/common'
 import { ApiOkResponse, ApiQuery, ApiTags } from '@nestjs/swagger'
-import { VEHICLE_COLORS, VEHICLE_FUELS, VEHICLE_KINDS } from '@carplates/shared'
+import { REGION_NAMES, VEHICLE_COLORS, VEHICLE_FUELS, VEHICLE_KINDS } from '@carplates/shared'
 import { z } from 'zod'
 
 import { zodParam } from '../common/zod-param.pipe.js'
@@ -37,6 +37,12 @@ const searchQuerySchema = z.object({
   fuel: z.enum(VEHICLE_FUELS).optional(),
   color: z.enum(VEHICLE_COLORS).optional(),
   kind: z.enum(VEHICLE_KINDS).optional(),
+  region: z
+    .string()
+    .trim()
+    .min(1)
+    .optional()
+    .refine(v => v === undefined || REGION_NAMES.includes(v), { message: 'unknown region' }),
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(50).default(20)
 })
@@ -73,6 +79,7 @@ export class SearchController {
   @ApiQuery({ name: 'fuel', required: false, enum: VEHICLE_FUELS })
   @ApiQuery({ name: 'color', required: false, enum: VEHICLE_COLORS })
   @ApiQuery({ name: 'kind', required: false, enum: VEHICLE_KINDS })
+  @ApiQuery({ name: 'region', required: false, enum: REGION_NAMES })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'pageSize', required: false })
   @ApiOkResponse({ type: SearchResponseDto })

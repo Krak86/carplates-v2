@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import type { UseQueryResult } from '@tanstack/react-query'
 import { useSearchParams } from 'react-router'
-import { VEHICLE_COLORS, VEHICLE_FUELS, VEHICLE_KINDS } from '@carplates/shared'
+import { REGION_NAMES, VEHICLE_COLORS, VEHICLE_FUELS, VEHICLE_KINDS } from '@carplates/shared'
 import type {
   BrandSuggestion,
   ModelSuggestion,
@@ -33,6 +33,7 @@ export type AdvancedSearchFilters = {
   fuel: VehicleFuel | ''
   color: VehicleColor | ''
   kind: VehicleKind | ''
+  region: string
 }
 
 type FilterKey = keyof AdvancedSearchFilters
@@ -49,7 +50,8 @@ function filtersFromParams(params: URLSearchParams): AdvancedSearchFilters {
     yearTo: params.get('yearTo') ?? '',
     fuel: parseEnumParam(VEHICLE_FUELS, params.get('fuel')),
     color: parseEnumParam(VEHICLE_COLORS, params.get('color')),
-    kind: parseEnumParam(VEHICLE_KINDS, params.get('kind'))
+    kind: parseEnumParam(VEHICLE_KINDS, params.get('kind')),
+    region: parseEnumParam(REGION_NAMES, params.get('region'))
   }
 }
 
@@ -119,7 +121,14 @@ export function useAdvancedSearchActions(): UseAdvancedSearchActions {
     !yearFromInvalid &&
     !yearToInvalid &&
     Boolean(
-      brandFilter || modelFilter || yearFrom != null || yearTo != null || filters.fuel || filters.color || filters.kind
+      brandFilter ||
+        modelFilter ||
+        yearFrom != null ||
+        yearTo != null ||
+        filters.fuel ||
+        filters.color ||
+        filters.kind ||
+        filters.region
     )
 
   const results = useQuery({
@@ -131,6 +140,7 @@ export function useAdvancedSearchActions(): UseAdvancedSearchActions {
       fuel: filters.fuel || undefined,
       color: filters.color || undefined,
       kind: filters.kind || undefined,
+      region: filters.region || undefined,
       page,
       pageSize: PAGE_SIZE
     }),

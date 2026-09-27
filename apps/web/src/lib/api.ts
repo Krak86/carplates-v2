@@ -165,6 +165,7 @@ export type VehicleSearchFilters = {
   fuel?: VehicleFuel
   color?: VehicleColor
   kind?: VehicleKind
+  region?: string
   page: number
   pageSize: number
 }
@@ -178,6 +179,7 @@ export async function searchVehicles(filters: VehicleSearchFilters): Promise<Sea
   if (filters.fuel) params.set('fuel', filters.fuel)
   if (filters.color) params.set('color', filters.color)
   if (filters.kind) params.set('kind', filters.kind)
+  if (filters.region) params.set('region', filters.region)
   params.set('page', String(filters.page))
   params.set('pageSize', String(filters.pageSize))
   return searchResponseSchema.parse(await getJson(`/api/search?${params.toString()}`))

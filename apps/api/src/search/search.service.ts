@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common'
 import { currentRegistration, statsByBrand, statsByModel } from '@carplates/db'
-import { fuelKeyword, sourceValueForKind, sourceValuesForColor } from '@carplates/shared'
+import { fuelKeyword, platePrefixesForRegion, sourceValueForKind, sourceValuesForColor } from '@carplates/shared'
 import type {
   BrandSuggestionsResponse,
   ModelSuggestionsResponse,
@@ -21,6 +21,7 @@ export type SearchFilters = {
   fuel?: VehicleFuel
   color?: VehicleColor
   kind?: VehicleKind
+  region?: string
   page: number
   pageSize: number
 }
@@ -106,7 +107,12 @@ export class SearchService {
       filters.yearTo != null ? lte(currentRegistration.makeYear, filters.yearTo) : undefined,
       filters.fuel ? ilike(currentRegistration.fuel, `%${fuelKeyword(filters.fuel)}%`) : undefined,
       filters.color ? inArray(currentRegistration.color, sourceValuesForColor(filters.color)) : undefined,
-      filters.kind ? eq(currentRegistration.kind, sourceValueForKind(filters.kind)) : undefined
+      filters.kind ? eq(currentRegistration.kind, sourceValueForKind(filters.kind)) : undefined,
+      // Matches the ix_current_reg_plate_region expression index (packages/db migration 0015) --
+      // same cost as any other single-column filter here, combined via BitmapAnd.
+      filters.region
+        ? inArray(sql`left(${currentRegistration.plate}, 2)`, platePrefixesForRegion(filters.region))
+        : undefined
     ].filter((c): c is SQL => c != null)
     const where = conditions.length > 0 ? and(...conditions) : undefined
 

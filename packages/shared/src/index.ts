@@ -1,5 +1,5 @@
 export { normalizePlate, denormalizePlate, isVin, classifyQuery, repairOcrPlate } from './plate.js'
-export { REGIONS, regionName } from './regions.js'
+export { REGIONS, REGION_NAMES, regionName, platePrefixesForRegion } from './regions.js'
 export { VEHICLE_KINDS, resolveVehicleKind, sourceValueForKind, type VehicleKind } from './vehicleKind.js'
 export {
   VEHICLE_COLORS,

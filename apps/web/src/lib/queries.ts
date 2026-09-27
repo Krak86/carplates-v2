@@ -158,6 +158,7 @@ export function vehicleSearchQuery(filters: VehicleSearchFilters) {
       filters.fuel,
       filters.color,
       filters.kind,
+      filters.region,
       filters.page,
       filters.pageSize
     ],
