@@ -11,6 +11,7 @@ const HistoryRoute = lazy(() => import('@/routes/history/HistoryRoute'))
 const FavoritesRoute = lazy(() => import('@/routes/favorites/FavoritesRoute'))
 const StatsRoute = lazy(() => import('@/routes/stats/StatsRoute'))
 const DiscussRoute = lazy(() => import('@/routes/DiscussRoute'))
+const AdvancedSearchRoute = lazy(() => import('@/routes/advanced-search/AdvancedSearchRoute'))
 
 export default function App(): ReactNode {
   return (
@@ -23,6 +24,7 @@ export default function App(): ReactNode {
           <Route path="/favorites" element={<FavoritesRoute />} />
           <Route path="/stats" element={<StatsRoute />} />
           <Route path="/discuss" element={<DiscussRoute />} />
+          <Route path="/advanced-search" element={<AdvancedSearchRoute />} />
           <Route path="/:query" element={<SearchRoute />} />
           <Route path="*" element={<SearchRoute />} />
         </Routes>

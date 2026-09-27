@@ -4,6 +4,7 @@ import {
   fallbackVehicleColor,
   isLightVehicleColor,
   resolveVehicleColor,
+  sourceValuesForColor,
   VEHICLE_COLOR_HEX,
   VEHICLE_COLOR_SHADOW_HEX,
   VEHICLE_COLORS
@@ -33,6 +34,20 @@ describe('resolveVehicleColor', () => {
     expect(resolveVehicleColor('НЕВИЗНАЧЕНИЙ')).toBeNull()
     expect(resolveVehicleColor(null)).toBeNull()
     expect(resolveVehicleColor('')).toBeNull()
+  })
+})
+
+describe('sourceValuesForColor', () => {
+  it('round-trips through resolveVehicleColor for every canonical color', () => {
+    for (const color of VEHICLE_COLORS) {
+      for (const source of sourceValuesForColor(color)) {
+        expect(resolveVehicleColor(source)).toBe(color)
+      }
+    }
+  })
+
+  it('returns all three alternate spellings for orange', () => {
+    expect(sourceValuesForColor('orange')).toHaveLength(3)
   })
 })
 

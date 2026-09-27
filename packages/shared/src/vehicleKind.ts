@@ -43,3 +43,13 @@ export function resolveVehicleKind(kind: string | null | undefined): VehicleKind
   if (!kind) return null
   return KIND_BY_SOURCE_VALUE[kind.trim().toUpperCase()] ?? null
 }
+
+/** Inverse of `KIND_BY_SOURCE_VALUE`, derived once from it (never hand-duplicated) — 1:1 since `kind` (unlike `color`) has no alternate source spellings. */
+const SOURCE_VALUE_BY_KIND: Readonly<Record<VehicleKind, string>> = Object.fromEntries(
+  Object.entries(KIND_BY_SOURCE_VALUE).map(([source, kind]) => [kind, source])
+) as Record<VehicleKind, string>
+
+/** The raw registry `kind` value for a canonical kind — for building a search filter (`eq`). */
+export function sourceValueForKind(kind: VehicleKind): string {
+  return SOURCE_VALUE_BY_KIND[kind]
+}

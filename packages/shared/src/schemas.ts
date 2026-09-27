@@ -486,6 +486,57 @@ export const statsResponseSchema = z.object({
 })
 export type StatsResponse = z.infer<typeof statsResponseSchema>
 
+/** One brand and its registered-plate count, ranked by `stats_by_brand` — for the advanced-search autocomplete. */
+export const brandSuggestionSchema = z.object({
+  brand: z.string(),
+  distinctPlates: z.number().int().nonnegative()
+})
+export type BrandSuggestion = z.infer<typeof brandSuggestionSchema>
+
+/** GET /api/search/brands?q= — top-10 matching brands by distinctPlates, so a popular real spelling outranks ingest noise. */
+export const brandSuggestionsResponseSchema = z.object({ suggestions: z.array(brandSuggestionSchema) })
+export type BrandSuggestionsResponse = z.infer<typeof brandSuggestionsResponseSchema>
+
+/** One model (scoped to a single brand) and its registered-plate count, ranked by `stats_by_model`. */
+export const modelSuggestionSchema = z.object({
+  model: z.string(),
+  distinctPlates: z.number().int().nonnegative()
+})
+export type ModelSuggestion = z.infer<typeof modelSuggestionSchema>
+
+/** GET /api/search/models?brand=&q= — top-10 matching models for one brand, same ranking rationale as brand suggestions. */
+export const modelSuggestionsResponseSchema = z.object({ suggestions: z.array(modelSuggestionSchema) })
+export type ModelSuggestionsResponse = z.infer<typeof modelSuggestionsResponseSchema>
+
+/**
+ * One `current_registration` row matching an advanced-search filter set — enough to identify
+ * and link to the plate. `plate` is never null here (unlike `registrationSchema`): this view is
+ * keyed `DISTINCT ON (plate)`, so a plateless (2026+ order №67/ОД) row never appears in it.
+ */
+export const searchResultRowSchema = z.object({
+  plate: z.string(),
+  vin: z.string().nullable(),
+  brand: z.string().nullable(),
+  model: z.string().nullable(),
+  makeYear: z.number().int().nullable(),
+  color: z.string().nullable(),
+  fuel: z.string().nullable(),
+  dReg: z.string().nullable()
+})
+export type SearchResultRow = z.infer<typeof searchResultRowSchema>
+
+/** GET /api/search?brand=&model=&yearFrom=&yearTo=&fuel=&color=&kind=&page=&pageSize= — filtered, paginated `current_registration` rows. */
+export const searchResponseSchema = z.object({
+  results: z.array(searchResultRowSchema),
+  /** Capped for a very broad match (see search.service.ts) — check `totalIsExact` before treating this as the real count. */
+  total: z.number().int().nonnegative(),
+  /** False means `total` is a floor ("at least this many"), not the real count — an exact COUNT(*) over a huge match is too slow to run on every search. */
+  totalIsExact: z.boolean(),
+  page: z.number().int().positive(),
+  pageSize: z.number().int().positive()
+})
+export type SearchResponse = z.infer<typeof searchResponseSchema>
+
 /** Typed error body returned by the API exception filter. */
 export const apiErrorSchema = z.object({
   statusCode: z.number().int(),

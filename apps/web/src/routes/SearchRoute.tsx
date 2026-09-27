@@ -123,6 +123,16 @@ export default function SearchRoute(): ReactNode {
         </Link>
 
         <Link
+          to="/advanced-search"
+          className="flex items-center gap-1.5 rounded-full bg-[var(--color-surface)]/20 px-3 py-1 text-sm text-[var(--color-primary)]"
+        >
+          <span aria-hidden className="no-underline">
+            🧭
+          </span>
+          <span className="underline hover:no-underline">{t('advancedSearch.viewLink')}</span>
+        </Link>
+
+        <Link
           to="/favorites"
           className="flex items-center gap-1.5 rounded-full bg-[var(--color-surface)]/20 px-3 py-1 text-sm text-[var(--color-primary)]"
         >

@@ -14,8 +14,12 @@ import {
   getVehiclePhotos,
   getWikiInfo,
   lookupPlate,
-  plateHistory
+  plateHistory,
+  searchVehicles,
+  suggestBrands,
+  suggestModels
 } from '@/lib/api'
+import type { VehicleSearchFilters } from '@/lib/api'
 import { isFavorited, listFavorites } from '@/lib/favorites-db'
 import type { FavoriteKind } from '@/lib/favorites-db'
 import { listVisits } from '@/lib/history-db'
@@ -127,4 +131,36 @@ export function iihsRatingsQuery(make: string, model: string, year: number) {
 // Static build asset, never changes at runtime.
 export function ukraineGeographyQuery() {
   return queryOptions({ queryKey: ['ukraine-geography'], queryFn: getUkraineGeography, staleTime: Infinity })
+}
+
+// Advanced-search brand autocomplete — ranked by distinctPlates, so a popular real spelling
+// outranks the ~36k distinct ingest-noise variants.
+export function brandSuggestionsQuery(q: string) {
+  return queryOptions({ queryKey: ['search', 'brands', q], queryFn: () => suggestBrands(q) })
+}
+
+// Advanced-search model autocomplete — scoped to one brand when chosen, otherwise aggregated
+// across all brands (same nameplate can appear under several).
+export function modelSuggestionsQuery(brand: string | undefined, q: string) {
+  return queryOptions({ queryKey: ['search', 'models', brand ?? '', q], queryFn: () => suggestModels(brand, q) })
+}
+
+// Advanced-search results — filtered, paginated `current_registration` rows.
+export function vehicleSearchQuery(filters: VehicleSearchFilters) {
+  return queryOptions({
+    queryKey: [
+      'search',
+      'results',
+      filters.brand,
+      filters.model,
+      filters.yearFrom,
+      filters.yearTo,
+      filters.fuel,
+      filters.color,
+      filters.kind,
+      filters.page,
+      filters.pageSize
+    ],
+    queryFn: () => searchVehicles(filters)
+  })
 }

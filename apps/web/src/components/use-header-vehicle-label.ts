@@ -5,8 +5,11 @@ import { classifyQuery } from '@carplates/shared'
 import { extractVehicleInfo } from '@/components/VinResult.helpers'
 import { plateQuery, vinQuery } from '@/lib/queries'
 
-// The other single-segment routes App.tsx matches before falling through to SearchRoute's `/:query`.
-const STATIC_ROUTES = new Set(['about', 'history', 'favorites', 'stats'])
+// The other single-segment routes App.tsx matches before falling through to SearchRoute's
+// `/:query` — keep this in sync whenever a new top-level route is added there, or its segment
+// gets misread as a plate/VIN candidate here (homoglyph-repaired into a bogus lookup, e.g.
+// "advanced-search" -> a Cyrillic-lookalike "plate" -> a wasted 404 /api/plate/... request).
+const STATIC_ROUTES = new Set(['about', 'history', 'favorites', 'stats', 'discuss', 'advanced-search'])
 
 const withYear = (car: string, year: number | null): string => (car ? `${car}${year ? ` (${year})` : ''}` : '')
 

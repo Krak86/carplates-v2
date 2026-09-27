@@ -1,29 +1,38 @@
 import {
+  brandSuggestionsResponseSchema,
   cncapRatingsResponseSchema,
   euroNcapRatingsResponseSchema,
   iihsRatingsResponseSchema,
   jncapRatingsResponseSchema,
   kncapRatingsResponseSchema,
+  modelSuggestionsResponseSchema,
   plateHistoryResponseSchema,
   plateLookupResponseSchema,
   plateRecognizeResponseSchema,
   safetyRatingsResponseSchema,
+  searchResponseSchema,
   statsResponseSchema,
   vehiclePhotosResponseSchema,
   vinDecodeResponseSchema,
   wikiInfoResponseSchema
 } from '@carplates/shared'
 import type {
+  BrandSuggestionsResponse,
   CncapRatingsResponse,
   EuroNcapRatingsResponse,
   IihsRatingsResponse,
   JncapRatingsResponse,
   KncapRatingsResponse,
+  ModelSuggestionsResponse,
   PlateHistoryResponse,
   PlateLookupResponse,
   PlateRecognizeResponse,
   SafetyRatingsResponse,
+  SearchResponse,
   StatsResponse,
+  VehicleColor,
+  VehicleFuel,
+  VehicleKind,
   VehiclePhotosResponse,
   VinDecodeResponse,
   WikiInfo
@@ -133,6 +142,45 @@ export async function getIihsRatings(make: string, model: string, year: number):
 // Our own transcode-and-cache proxy (the source .wmv can't play in any modern browser).
 export function safetyVideoUrl(nhtsaVideoUrl: string): string {
   return `${BASE}/api/safety/video?${new URLSearchParams({ url: nhtsaVideoUrl }).toString()}`
+}
+
+export async function suggestBrands(q: string): Promise<BrandSuggestionsResponse> {
+  const params = new URLSearchParams()
+  if (q) params.set('q', q)
+  return brandSuggestionsResponseSchema.parse(await getJson(`/api/search/brands?${params.toString()}`))
+}
+
+export async function suggestModels(brand: string | undefined, q: string): Promise<ModelSuggestionsResponse> {
+  const params = new URLSearchParams()
+  if (brand) params.set('brand', brand)
+  if (q) params.set('q', q)
+  return modelSuggestionsResponseSchema.parse(await getJson(`/api/search/models?${params.toString()}`))
+}
+
+export type VehicleSearchFilters = {
+  brand?: string
+  model?: string
+  yearFrom?: number
+  yearTo?: number
+  fuel?: VehicleFuel
+  color?: VehicleColor
+  kind?: VehicleKind
+  page: number
+  pageSize: number
+}
+
+export async function searchVehicles(filters: VehicleSearchFilters): Promise<SearchResponse> {
+  const params = new URLSearchParams()
+  if (filters.brand) params.set('brand', filters.brand)
+  if (filters.model) params.set('model', filters.model)
+  if (filters.yearFrom != null) params.set('yearFrom', String(filters.yearFrom))
+  if (filters.yearTo != null) params.set('yearTo', String(filters.yearTo))
+  if (filters.fuel) params.set('fuel', filters.fuel)
+  if (filters.color) params.set('color', filters.color)
+  if (filters.kind) params.set('kind', filters.kind)
+  params.set('page', String(filters.page))
+  params.set('pageSize', String(filters.pageSize))
+  return searchResponseSchema.parse(await getJson(`/api/search?${params.toString()}`))
 }
 
 // Bundled static asset (apps/web/public/), not an /api/* response — no BASE

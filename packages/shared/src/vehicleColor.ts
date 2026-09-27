@@ -42,6 +42,20 @@ export function resolveVehicleColor(color: string | null | undefined): VehicleCo
   return COLOR_BY_SOURCE_VALUE[color.trim().toUpperCase()] ?? null
 }
 
+/** Inverse of `COLOR_BY_SOURCE_VALUE`, derived once from it (never hand-duplicated) — every raw registry `color` value that resolves to a given canonical color. */
+const SOURCE_VALUES_BY_COLOR: Readonly<Record<VehicleColor, string[]>> = Object.entries(COLOR_BY_SOURCE_VALUE).reduce(
+  (acc, [source, color]) => {
+    ;(acc[color] ??= []).push(source)
+    return acc
+  },
+  {} as Record<VehicleColor, string[]>
+)
+
+/** Every raw registry `color` value for a canonical color — for building a search filter (`inArray`). More than one for `orange` (three alternate registry spellings). */
+export function sourceValuesForColor(color: VehicleColor): string[] {
+  return SOURCE_VALUES_BY_COLOR[color] ?? []
+}
+
 /**
  * Deterministic pick from `VEHICLE_COLORS`, seeded by an identifier (plate/VIN) — for
  * decorative color when the registry's own color is unrecognized/absent, so a given

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { resolveVehicleKind, VEHICLE_KINDS } from './vehicleKind.js'
+import { resolveVehicleKind, sourceValueForKind, VEHICLE_KINDS } from './vehicleKind.js'
 
 describe('resolveVehicleKind', () => {
   it('maps every real registry kind value', () => {
@@ -34,5 +34,13 @@ describe('resolveVehicleKind', () => {
 describe('VEHICLE_KINDS', () => {
   it('has one entry per real registry value', () => {
     expect(VEHICLE_KINDS).toHaveLength(13)
+  })
+})
+
+describe('sourceValueForKind', () => {
+  it('round-trips through resolveVehicleKind for every canonical kind', () => {
+    for (const kind of VEHICLE_KINDS) {
+      expect(resolveVehicleKind(sourceValueForKind(kind))).toBe(kind)
+    }
   })
 })

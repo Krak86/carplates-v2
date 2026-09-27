@@ -10,6 +10,7 @@ import { PhotosModule } from './photos/photos.module.js'
 import { PlateModule } from './plate/plate.module.js'
 import { RecognizeModule } from './recognize/recognize.module.js'
 import { SafetyModule } from './safety/safety.module.js'
+import { SearchModule } from './search/search.module.js'
 import { SpaModule } from './spa/spa.module.js'
 import { StatsModule } from './stats/stats.module.js'
 import { VinModule } from './vin/vin.module.js'
@@ -25,6 +26,7 @@ import { WikiModule } from './wiki/wiki.module.js'
     StatsModule,
     PhotosModule,
     SafetyModule,
+    SearchModule,
     WikiModule,
     SpaModule
   ],

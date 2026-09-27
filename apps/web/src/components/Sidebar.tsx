@@ -27,6 +27,9 @@ export default function Sidebar(): ReactNode {
       <NavLink to="/" className={linkClass} onClick={() => setDrawerOpen(false)} end>
         <span aria-hidden>🔍</span> {t('nav.search')}
       </NavLink>
+      <NavLink to="/advanced-search" className={linkClass} onClick={() => setDrawerOpen(false)}>
+        <span aria-hidden>🧭</span> {t('nav.advancedSearch')}
+      </NavLink>
       <NavLink to="/about" className={linkClass} onClick={() => setDrawerOpen(false)}>
         <span aria-hidden>ℹ️</span> {t('nav.about')}
       </NavLink>

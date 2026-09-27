@@ -1,15 +1,17 @@
 export { normalizePlate, denormalizePlate, isVin, classifyQuery, repairOcrPlate } from './plate.js'
 export { REGIONS, regionName } from './regions.js'
-export { VEHICLE_KINDS, resolveVehicleKind, type VehicleKind } from './vehicleKind.js'
+export { VEHICLE_KINDS, resolveVehicleKind, sourceValueForKind, type VehicleKind } from './vehicleKind.js'
 export {
   VEHICLE_COLORS,
   VEHICLE_COLOR_HEX,
   VEHICLE_COLOR_SHADOW_HEX,
   resolveVehicleColor,
+  sourceValuesForColor,
   fallbackVehicleColor,
   isLightVehicleColor,
   type VehicleColor
 } from './vehicleColor.js'
+export { VEHICLE_FUELS, resolveFuelCategories, fuelKeyword, type VehicleFuel } from './vehicleFuel.js'
 export { brandLogoUrl, brandSlug } from './brandLogo.js'
 export { dealerUrl } from './dealerUrl.js'
 export { wikiUrl, wikiDomain } from './wikiUrl.js'
@@ -50,6 +52,12 @@ export {
   wikiImageAttributionSchema,
   wikiImageSchema,
   wikiInfoResponseSchema,
+  brandSuggestionSchema,
+  brandSuggestionsResponseSchema,
+  modelSuggestionSchema,
+  modelSuggestionsResponseSchema,
+  searchResultRowSchema,
+  searchResponseSchema,
   type Registration,
   type PlateLookupResponse,
   type PlateHistoryResponse,
@@ -84,5 +92,11 @@ export {
   type StatsResponse,
   type WikiImageAttribution,
   type WikiImage,
-  type WikiInfo
+  type WikiInfo,
+  type BrandSuggestion,
+  type BrandSuggestionsResponse,
+  type ModelSuggestion,
+  type ModelSuggestionsResponse,
+  type SearchResultRow,
+  type SearchResponse
 } from './schemas.js'
