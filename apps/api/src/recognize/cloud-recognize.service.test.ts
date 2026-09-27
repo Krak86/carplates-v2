@@ -9,6 +9,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { CloudRecognizeService } from './cloud-recognize.service.js'
 
 vi.stubEnv('PLATE_RECOGNIZER_CLOUD_TOKEN', 'test-token')
+vi.stubEnv('PLATE_RECOGNIZER_CLOUD_ENABLED', 'true')
 
 const image = { buffer: Buffer.from('fake-image-bytes'), mimetype: 'image/jpeg', filename: 'plate.jpg' }
 

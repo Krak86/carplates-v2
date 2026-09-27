@@ -6,6 +6,7 @@ import { Link, useParams, useSearchParams } from 'react-router'
 import { classifyQuery } from '@carplates/shared'
 
 import PhotoThumbnail from '@/components/PhotoThumbnail'
+import PlateCandidates from '@/components/PlateCandidates'
 import ResultCard from '@/components/ResultCard'
 import SearchField from '@/components/SearchField'
 import Spinner from '@/components/ui/Spinner'
@@ -41,7 +42,8 @@ export default function SearchRoute(): ReactNode {
     isPending: isRecognizing,
     errorKey: recognizeErrorKey,
     photo,
-    dismissPhoto
+    dismissPhoto,
+    selectCandidate
   } = usePlateRecognition({ currentValue: raw || null, linkedValue })
 
   useEffect(() => {
@@ -98,19 +100,22 @@ export default function SearchRoute(): ReactNode {
         </div>
 
         {raw && active.isPending && (
-          <p className="flex items-center gap-2 text-[var(--color-muted)]">
+          <p className="flex items-center gap-2 rounded bg-[var(--color-surface)]/20 px-1.5 py-0.5 text-[var(--color-muted)]">
             <Spinner /> {t('result.loading')}
           </p>
         )}
 
         {active.isError && (
-          <p className="text-[var(--color-muted)]">{notFound ? t('result.noResults') : t('result.error')}</p>
+          <p className="rounded bg-[var(--color-surface)]/20 px-1.5 py-0.5 text-[var(--color-muted)]">
+            {notFound ? t('result.noResults', { value: raw }) : t('result.error')}
+          </p>
         )}
 
         {photo && <PhotoThumbnail url={photo.url} onClose={dismissPhoto} />}
+        {photo && <PlateCandidates candidates={photo.candidates} active={raw || null} onSelect={selectCandidate} />}
 
-        {kind === 'plate' && plate.isSuccess && <ResultCard data={plate.data} />}
-        {kind === 'vin' && vin.isSuccess && <VinResult data={vin.data} />}
+        {!recognizeErrorKey && kind === 'plate' && plate.isSuccess && <ResultCard data={plate.data} />}
+        {!recognizeErrorKey && kind === 'vin' && vin.isSuccess && <VinResult data={vin.data} />}
 
         <Link
           to="/history"

@@ -23,6 +23,8 @@ const envSchema = z.object({
   PLATE_RECOGNIZER_CLOUD_TOKEN: z.string().optional(),
   /** Soft ceiling on cloud lookups per calendar month, to stay under the free-tier cap with headroom. */
   PLATE_RECOGNIZER_MONTHLY_BUDGET: z.coerce.number().int().positive().default(2000),
+  /** Global opt-in for the paid cloud fallback — off by default even with a token set; must be explicitly enabled. */
+  PLATE_RECOGNIZER_CLOUD_ENABLED: boolish,
 
   /** Own-model ALPR container (services/alpr, `pnpm alpr:up`). Absent → the local recognize route answers 503. */
   ALPR_LOCAL_URL: z.string().optional(),
@@ -58,6 +60,7 @@ export function loadEnv(source: NodeJS.ProcessEnv = process.env): Env {
 
 export const telemetryEnabled = (env: Env): boolean => env.ENABLE_TELEMETRY && Boolean(env.SENTRY_DSN)
 export const swaggerEnabled = (env: Env): boolean => env.ENABLE_SWAGGER || env.NODE_ENV !== 'production'
-export const plateRecognizerCloudEnabled = (env: Env): boolean => Boolean(env.PLATE_RECOGNIZER_CLOUD_TOKEN)
+export const plateRecognizerCloudEnabled = (env: Env): boolean =>
+  env.PLATE_RECOGNIZER_CLOUD_ENABLED && Boolean(env.PLATE_RECOGNIZER_CLOUD_TOKEN)
 export const alprLocalEnabled = (env: Env): boolean => Boolean(env.ALPR_LOCAL_URL)
 export const pixabayEnabled = (env: Env): boolean => Boolean(env.PIXABAY_API_KEY)

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { useNavigate } from 'react-router'
+import type { PlateCandidate } from '@carplates/shared'
 
 import { ApiError, recognizePlate } from '@/lib/api'
 import { shrinkImage } from '@/lib/image'
@@ -9,6 +10,8 @@ export type PhotoThumbnail = {
   url: string
   /** Plate/VIN values this photo is considered relevant to — the recognized plate, plus any linked VIN/plate discovered while viewing a connected page. */
   connected: Set<string>
+  /** All plate reads for this photo, best first — the first one is what we navigated to. */
+  candidates: PlateCandidate[]
   /** True once the recognize request has succeeded or failed (vs. still in flight). */
   settled: boolean
 }
@@ -26,6 +29,7 @@ type UsePlateRecognition = {
   errorKey: string | null
   photo: PhotoThumbnail | null
   dismissPhoto: () => void
+  selectCandidate: (plate: string) => void
 }
 
 function errorKeyFor(error: Error | null): string | null {
@@ -56,7 +60,16 @@ export function usePlateRecognition({ currentValue, linkedValue }: UsePlateRecog
     onSuccess: data => {
       const top = data.candidates[0]
       if (!top) return
-      setPhoto(prev => (prev ? { ...prev, connected: new Set(prev.connected).add(top.plate), settled: true } : prev))
+      setPhoto(prev =>
+        prev
+          ? {
+              ...prev,
+              connected: new Set([...prev.connected, ...data.candidates.map(c => c.plate)]),
+              candidates: data.candidates,
+              settled: true
+            }
+          : prev
+      )
       void navigate(`/${encodeURIComponent(top.plate)}`)
     },
     onError: () => {
@@ -67,9 +80,13 @@ export function usePlateRecognition({ currentValue, linkedValue }: UsePlateRecog
   const recognize = (file: File): void => {
     setPhoto(prev => {
       if (prev) URL.revokeObjectURL(prev.url)
-      return { url: URL.createObjectURL(file), connected: new Set(), settled: false }
+      return { url: URL.createObjectURL(file), connected: new Set(), candidates: [], settled: false }
     })
     mutate(file)
+  }
+
+  const selectCandidate = (plate: string): void => {
+    void navigate(`/${encodeURIComponent(plate)}`)
   }
 
   const dismissPhoto = (): void => {
@@ -109,5 +126,5 @@ export function usePlateRecognition({ currentValue, linkedValue }: UsePlateRecog
     }
   }, [])
 
-  return { recognize, isPending, errorKey: errorKeyFor(error), photo, dismissPhoto }
+  return { recognize, isPending, errorKey: errorKeyFor(error), photo, dismissPhoto, selectCandidate }
 }
