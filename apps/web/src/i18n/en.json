@@ -299,6 +299,7 @@
   "recognize.unavailable": "Photo search isn't available right now.",
   "recognize.error": "Photo search failed. Please try again.",
   "recognize.alsoFound": "Also found:",
+  "recognize.accuracyWarning": "Recognition can misread similar-looking characters (0/O, 1/I, 8/B) — double-check the plate against the photo.",
   "camera.title": "Take a photo",
   "camera.capture": "Capture",
   "camera.close": "Close",

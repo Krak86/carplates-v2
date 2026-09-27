@@ -12,6 +12,8 @@ import SearchField from '@/components/SearchField'
 import Spinner from '@/components/ui/Spinner'
 import { usePlateRecognition } from '@/components/use-plate-recognition'
 import VinResult from '@/components/VinResult'
+import { extractVehicleInfo } from '@/components/VinResult.helpers'
+import WikiHeroImage from '@/components/WikiHeroImage'
 import { ApiError } from '@/lib/api'
 import { cn } from '@/lib/cn'
 import { recordVisit } from '@/lib/history-db'
@@ -36,6 +38,18 @@ export default function SearchRoute(): ReactNode {
   let linkedValue: string | null = null
   if (kind === 'plate' && plate.isSuccess) linkedValue = plate.data.current.vin
   else if (kind === 'vin' && vin.isSuccess) linkedValue = vin.data.registry?.plate ?? null
+
+  // Same brand/model + key `ResultCard`/`VinResult` feed their own `useCarWikiActions` call —
+  // duplicated here (cache-shared, staleTime: Infinity) so the hero slot below can decide
+  // whether a wiki image exists without lifting that query out of either result component.
+  let wikiHeroVehicle: { brand: string | null; model: string | null; key: string | null } | null = null
+  if (kind === 'plate' && plate.isSuccess) {
+    const c = plate.data.current
+    wikiHeroVehicle = { brand: c.brand, model: c.model, key: c.vin || plate.data.plate }
+  } else if (kind === 'vin' && vin.isSuccess) {
+    const vehicle = extractVehicleInfo(vin.data)
+    wikiHeroVehicle = { brand: vehicle.brand, model: vehicle.model, key: vin.data.vin }
+  }
 
   const {
     recognize,
@@ -112,6 +126,15 @@ export default function SearchRoute(): ReactNode {
         )}
 
         {photo && <PhotoThumbnail url={photo.url} onClose={dismissPhoto} />}
+        {photo && photo.settled && photo.candidates.length > 0 && (
+          <p className="flex w-full max-w-2xl items-start gap-1.5 rounded-md border border-amber-500/40 bg-amber-500/15 px-2.5 py-1.5 text-sm font-medium text-amber-800 dark:text-amber-300">
+            <span aria-hidden>⚠️</span>
+            {t('recognize.accuracyWarning')}
+          </p>
+        )}
+        {!photo && !recognizeErrorKey && wikiHeroVehicle && (
+          <WikiHeroImage brand={wikiHeroVehicle.brand} model={wikiHeroVehicle.model} vehicleKey={wikiHeroVehicle.key} />
+        )}
         {photo && <PlateCandidates candidates={photo.candidates} active={raw || null} onSelect={selectCandidate} />}
 
         {!recognizeErrorKey && kind === 'plate' && plate.isSuccess && <ResultCard data={plate.data} />}

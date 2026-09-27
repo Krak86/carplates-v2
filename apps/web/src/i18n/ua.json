@@ -307,6 +307,7 @@
   "recognize.unavailable": "Пошук за фото зараз недоступний.",
   "recognize.error": "Пошук за фото не вдався. Спробуйте ще раз.",
   "recognize.alsoFound": "Також знайдено:",
+  "recognize.accuracyWarning": "Розпізнавання може сплутати схожі символи (0/O, 1/I, 8/B) — звірте номер із фото.",
   "camera.title": "Зробити фото",
   "camera.capture": "Зняти",
   "camera.close": "Закрити",
