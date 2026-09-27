@@ -24,6 +24,9 @@ const envSchema = z.object({
   /** Soft ceiling on cloud lookups per calendar month, to stay under the free-tier cap with headroom. */
   PLATE_RECOGNIZER_MONTHLY_BUDGET: z.coerce.number().int().positive().default(2000),
 
+  /** Own-model ALPR container (services/alpr, `pnpm alpr:up`). Absent → the local recognize route answers 503. */
+  ALPR_LOCAL_URL: z.string().optional(),
+
   PIXABAY_BASE_URL: z.string().default('https://pixabay.com/api/'),
   /** Absent → the photos route answers 503. */
   PIXABAY_API_KEY: z.string().optional(),
@@ -56,4 +59,5 @@ export function loadEnv(source: NodeJS.ProcessEnv = process.env): Env {
 export const telemetryEnabled = (env: Env): boolean => env.ENABLE_TELEMETRY && Boolean(env.SENTRY_DSN)
 export const swaggerEnabled = (env: Env): boolean => env.ENABLE_SWAGGER || env.NODE_ENV !== 'production'
 export const plateRecognizerCloudEnabled = (env: Env): boolean => Boolean(env.PLATE_RECOGNIZER_CLOUD_TOKEN)
+export const alprLocalEnabled = (env: Env): boolean => Boolean(env.ALPR_LOCAL_URL)
 export const pixabayEnabled = (env: Env): boolean => Boolean(env.PIXABAY_API_KEY)

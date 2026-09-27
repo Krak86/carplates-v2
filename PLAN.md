@@ -1609,6 +1609,142 @@ success. **On-premise SDK ruled out** — same per-lookup licensing as the
 cloud API (no cost win) for photos we're already comfortable sending to
 Plate Recognizer's cloud; not pursuing it.
 
+### Own ALPR model + AR overlay — planned (2026-09-27), step 1 shipped
+
+User-requested pair, scoped together because the second depends on the
+first: **AR overlay** (live camera feed, plates read continuously, specs/
+ratings drawn over the video) and **own-model plate recognition** (self-
+hosted, no token, no per-lookup cost — vs. the metered Plate Recognizer cloud
+API above). Written verbosely on purpose — each step below is meant to be
+picked up cold in a **new session**, without re-deriving this research.
+
+**Why one depends on the other.** The camera/photo flow above (Plate
+Recognizer cloud) is metered (`PLATE_RECOGNIZER_MONTHLY_BUDGET`, ~15s per
+call) — fine for "snap one photo, get one plate," structurally unworkable for
+an AR loop that needs to read plates continuously from live video at no
+per-call cost. Own-model recognition is a **prerequisite** for AR overlay,
+not a parallel feature, hence the step order below.
+
+**Chosen approach.**
+
+- Recognition: **hybrid**. A lightweight detector runs client-side (in the
+  browser) every frame, just to draw a live tracking box. Once the box is
+  stable, only the small cropped plate region — not the full video — is sent
+  to a self-hosted OCR service. Rejected: streaming full video to a server
+  (bandwidth, no benefit) and pure on-device OCR (heavier browser model;
+  revisit in step 2 if the client/server split proves annoying in practice).
+- AR: **web-based pseudo-AR** — a `<canvas>` overlay positioned over the
+  existing `<video>` element (`CameraCaptureDialog.tsx`), driven by a
+  `requestAnimationFrame`/Web Worker loop drawing a bounding box + a spec
+  card. Not a native app (nothing else in this stack has a native surface)
+  and not WebXR (a plate is a flat 2D marker in the frame, not a 3D-anchored
+  object — no depth/pose tracking needed).
+
+**Models — researched and verified 2026-09-27 by actually building and
+running the container, not assumed from memory.**
+[ankandrew/fast-alpr](https://github.com/ankandrew/fast-alpr) (MIT) wraps
+[open-image-models](https://github.com/ankandrew/open-image-models) (detector
+`yolo-v9-t-384-license-plate-end2end`, MIT) and
+[fast-plate-ocr](https://github.com/ankandrew/fast-plate-ocr) (OCR
+`cct-xs-v2-global-model`, MIT) — all ONNX Runtime, CPU-only (matches the
+Phase 4 VPS's no-GPU sizing, see its "VPS sizing" table). An initial
+Ultralytics/AGPL licensing worry (network-copyleft on a self-hosted service)
+turned out **moot** — nothing in this chain touches Ultralytics code, it's a
+clean MIT stack end to end. Ukraine's plate format (2 letters + 4 digits + 2
+letters, only 12 fixed Latin-lookalike letters — `packages/shared/src/plate.ts`)
+needs **no Cyrillic OCR and no custom training** for a first cut — a generic
+global OCR model reads plain Latin/Roman characters directly into the
+existing `repairOcrPlate`/`normalizePlate` pipeline unchanged. **Not yet
+verified:** real-world accuracy against actual Ukrainian plate photos — only
+tested so far against fast-alpr's own bundled sample image (US-style plate).
+Do that before trusting accuracy, and before investing in steps 2-4.
+
+**Step 1 — own-model OCR service, single-shot ✅ DONE (2026-09-27).** Ships
+as an automatically-preferred alternative to the Plate Recognizer cloud call,
+inside the *existing* camera/upload flow — validates the model with zero AR
+complexity in the same change.
+
+- `services/alpr/` (new top-level dir, deliberately **outside** the pnpm
+  workspace — it's Python, not in `pnpm-workspace.yaml`'s globs): `app.py`
+  (FastAPI, `POST /recognize` + `GET /healthz`), `requirements.txt`
+  (`fast-alpr[onnx]` — `[onnx]` is the CPU extra; `onnx-gpu`/`onnx-openvino`/
+  `onnx-directml`/`onnx-qnn` exist if a future deploy target has different
+  hardware), `warmup.py` (run once at Docker build time so the ~11 MB of ONNX
+  weights bake into the image layer — the running container needs **no
+  runtime network access**, matching the "always free, no external
+  dependency" goal), `Dockerfile` (`python:3.12-slim` + `libgl1`/
+  `libglib2.0-0`, which headless OpenCV needs even for CPU-only inference).
+- `infra/docker-compose.alpr.yml` — a separate compose file from
+  `docker-compose.yml` (Postgres only), so a dev who just wants the DB isn't
+  forced to build the ML image. New root `package.json` scripts:
+  `alpr:build` / `alpr:up` / `alpr:down`.
+- `apps/api/src/recognize/local-recognize.service.ts` — same contract as
+  `cloud-recognize.service.ts` (`recognize(image) => PlateRecognizeResponse`),
+  POSTs to `${ALPR_LOCAL_URL}/recognize`, reuses `mapPlateReaderResults`
+  unchanged — the Python service's `{results:[{plate,score}]}` response
+  shape was deliberately built to match `PlateReaderResponse` exactly, so no
+  mapping code needed duplicating. New `POST /api/recognize/plate/local`
+  route on the existing `RecognizeController`, throttled looser than cloud
+  (30/60s vs. 6/60s — no per-call cost to protect against here). New
+  `ALPR_LOCAL_URL` in `env.ts` (optional; unset → 503, same
+  inert-unless-configured pattern as `PLATE_RECOGNIZER_CLOUD_TOKEN`/
+  `PIXABAY_API_KEY`). **Not added to `apps/api/.env.example`** — that file is
+  in Claude's deny-list (unreadable/uneditable this session); add
+  `ALPR_LOCAL_URL=http://localhost:8088` there by hand.
+- Web: `recognizePlate()` (`apps/web/src/lib/api.ts`) now tries
+  `/api/recognize/plate/local` first, falling back to `/cloud` only on a 503
+  (not configured) or a network error (container not running) — a genuine
+  "no plate found"/"bad image" answer from the local model is trusted as-is,
+  never retried against the metered cloud API just because the first attempt
+  wasn't a hit. No other web changes — `CameraCaptureDialog.tsx`/
+  `use-plate-recognition.ts` are untouched.
+- **Verified end-to-end 2026-09-27, for real, not just unit tests:**
+  `pnpm alpr:build` was actually run — build log confirms real ONNX weights
+  downloaded (`yolo-v9-t-384-license-plate-end2end`,
+  `cct-xs-v2-global-model`), not placeholders. The built container was
+  started (`pnpm alpr:up`) and hit directly with fast-alpr's own bundled
+  sample plate image: `GET /healthz` → `200 {"status":"ok"}`,
+  `POST /recognize` → `200 {"results":[{"plate":"5AU5341","score":0.999...}]}`
+  — a correct detect+read. `local-recognize.service.test.ts` +
+  `local-recognize.service.disabled.test.ts` (mocked fetch, mirroring the
+  existing cloud test pair exactly) plus `pnpm type-check`/`pnpm lint` on
+  every touched package all pass. **Not exercised:** a full running
+  `apps/api` process calling the live container over HTTP end-to-end — the
+  unit tests (NestJS-side mapping/error-handling) and the direct container
+  test above (Python-side detection/OCR) already cover both halves of the
+  chain independently, so this was judged sufficient for step 1; still worth
+  doing once picking up step 2 or 3 for real confidence.
+
+**Step 2 — client-side live detection box, no OCR yet. Not started.** Run
+just the detector (`yolo-v9-t-384-license-plate-end2end`) in-browser via
+`onnxruntime-web` (WASM, falling back from WebGPU where unsupported — iOS
+Safari's WebGPU support is inconsistent as of this writing), drawing a
+tracking rectangle over the live `<video>`. Decide when starting this step
+whether `CameraCaptureDialog.tsx` is the right host for this or a new
+full-screen AR route is cleaner. Getting the ONNX file into the browser:
+inspect `/root/.cache/open-image-models/` inside the built `services/alpr`
+image (or re-read `open-image-models`' source) for the exact Hugging Face
+Hub URL/filename it downloads server-side, and fetch that same file
+client-side rather than re-deriving/re-exporting it. Pure rendering/perf
+work, **no backend changes**. Running detection on a Web Worker +
+`OffscreenCanvas` (not the main thread) is a hard requirement, not a
+nice-to-have — React 19's render loop shares the main thread and a
+per-frame detector would jank it otherwise.
+
+**Step 3 — wire live detection → stabilization → crop → OCR → overlay. Not
+started.** Once step 2's box is stable for N consecutive frames, crop that
+region from the video frame and POST it to step 1's
+`/api/recognize/plate/local` (a small crop, not a full frame). Run the
+result through the **already-existing, unchanged** `normalizePlate`/
+`repairOcrPlate` → `/api/plate/:plate` (+ `/api/safety`) chain, and render a
+spec card (brand logo, vehicle-kind icon, safety star rating — all already
+built, see Phase 1.5 above) anchored near the tracked box. Debounce so a
+stable, already-answered plate isn't re-queried every frame.
+
+**Step 4 — polish. Not started.** Multi-plate tracking (more than one car in
+frame at once), graceful fallback to the existing single-shot capture flow
+on unsupported/slow devices, telemetry on detection/OCR hit rate.
+
 ### Phase 3+ — recalls — **researched, parked (2026-09-24)**
 
 Crash-test _ratings_ (`api.nhtsa.gov/SafetyRatings`) graduated out of this
@@ -1646,6 +1782,11 @@ above once scoped, or dropped if research says no.
 - ✅ Add/remove favorites in IndexedDB — done, see Phase 1.5.
 - ✅ Find plate by camera/photo (Plate Recognizer Snapshot API) — done, see
   "Plate image recognition" under Phase 3.
+- ⏳ Own ALPR model + AR overlay — step 1 (self-hosted OCR service,
+  preferred over the metered cloud API above) done 2026-09-27; steps 2-4
+  (client-side live detection, AR overlay, polish) not started — see
+  "Own ALPR model + AR overlay" under Phase 3 for the full plan and exact
+  resume point.
 - ⏳ RIA "similar cars" proxy (free token) — Phase 2, blocked on getting a
   `developers.ria.com` API key; otherwise unchanged from that section's design.
 - ⛔ Platesmania — **skipped**, see Phase 3: no free token, scraping ruled out.

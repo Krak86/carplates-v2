@@ -56,6 +56,10 @@ pnpm ingest:ratings:csv   # db:migrate, then all five *:csv rating loads concurr
 pnpm ingest:all        # db:migrate, then ingest:full + ingest:ratings:csv concurrently —
                        # each writes a disjoint table (registrations/current_registration/stats_by_*
                        # vs. one *_ratings table apiece), so there's no write conflict between them
+
+pnpm alpr:build     # build the self-hosted ALPR (own-model plate recognition) Docker image
+pnpm alpr:up        # run it on :8088 (sets ALPR_LOCAL_URL=http://localhost:8088 in apps/api/.env to use it)
+pnpm alpr:down      # stop it
 ```
 
 First-time local setup, test data (seconds): `pnpm install && pnpm db:up && pnpm db:migrate && pnpm db:seed && pnpm dev`.
@@ -73,7 +77,8 @@ cached (a fresh clone is still bottlenecked on the ~20 GB CKAN download either w
 | `apps/api/`        | NestJS + Fastify. Feature modules under `src/<feature>/`. Serves the built web app + injects per-plate `<meta>` tags on deep links.                                                                                                                 |
 | `apps/web/`        | Vite + React 19 + React Router 8 (declarative). `@/` → `src/`.                                                                                                                                                                                      |
 | `scripts/`         | `seed.ts`, `ingest.ts`, `ingest-full.ts` (+ `transform.ts` pure helpers, `backfill.ts`), `euroncap.ts`/`jncap.ts`/`cncap.ts`/`kncap.ts`/`iihs.ts` (scrape/fetch + CSV export/import; `cncap-names.ts`/`kncap-names.ts` are the curated Chinese/Korean→registry-spelling translation tables `cncap.ts`/`kncap.ts` depend on — `iihs.ts` needs no such table, its source data is already English), `refresh-stats.ts`. `seed-data/` holds the committed, gzipped Euro NCAP/JNCAP/C-NCAP/KNCAP/IIHS CSVs. Run with `tsx`. |
-| `infra/`           | `docker-compose.yml` (local Postgres only)                                                                                                                                                                                                          |
+| `infra/`           | `docker-compose.yml` (local Postgres only), `docker-compose.alpr.yml` (own-model ALPR, opt-in)                                                                                                                                                     |
+| `services/alpr/`   | Self-hosted ALPR (license plate recognition) container — FastAPI + `fast-alpr` (ONNX, CPU-only, MIT-licensed). Own model, no token, no per-lookup cost — see `PLAN.md`'s "Own ALPR model" section.                                                 |
 
 ## Stack
 
