@@ -18,6 +18,7 @@ import CardTiltToggle from '@/components/CardTiltToggle'
 import CarWikiInfo from '@/components/CarWikiInfo'
 import ColorSwatch from '@/components/ColorSwatch'
 import CopyAllInfoButton from '@/components/CopyAllInfoButton'
+import CopyButton from '@/components/CopyButton'
 import FavoriteButton from '@/components/FavoriteButton'
 import FieldInfoButton from '@/components/FieldInfoButton'
 import RegistrationTimeline from '@/components/RegistrationTimeline'
@@ -169,6 +170,7 @@ export default function ResultCard({ data }: Props): ReactNode {
               <Link to={`/${data.plate}`} className="text-[var(--color-primary)] underline">
                 {data.plate}
               </Link>
+              <CopyButton text={data.plate} label={t('field.plate')} className="ml-1" />
               {data.region && (
                 <span className="ml-1 rounded bg-[var(--color-surface)]/20 px-1.5 py-0.5">, {data.region}</span>
               )}
@@ -270,12 +272,15 @@ export default function ResultCard({ data }: Props): ReactNode {
             label={t('field.vin')}
             value={
               c.vin ? (
-                <Link to={`/${c.vin}`} className="inline-flex items-center gap-1 text-[var(--color-primary)]">
-                  <span className="underline">{c.vin}</span>
-                  <span aria-hidden className="no-underline">
-                    ›
-                  </span>
-                </Link>
+                <span className="inline-flex items-center gap-1">
+                  <Link to={`/${c.vin}`} className="inline-flex items-center gap-1 text-[var(--color-primary)]">
+                    <span className="underline">{c.vin}</span>
+                    <span aria-hidden className="no-underline">
+                      ›
+                    </span>
+                  </Link>
+                  <CopyButton text={c.vin} label={t('field.vin')} />
+                </span>
               ) : null
             }
           />

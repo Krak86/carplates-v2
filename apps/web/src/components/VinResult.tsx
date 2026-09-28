@@ -6,6 +6,7 @@ import type { VinDecodeResponse } from '@carplates/shared'
 import CardTiltToggle from '@/components/CardTiltToggle'
 import CarWikiInfo from '@/components/CarWikiInfo'
 import CopyAllInfoButton from '@/components/CopyAllInfoButton'
+import CopyButton from '@/components/CopyButton'
 import FavoriteButton from '@/components/FavoriteButton'
 import RegistrationTimeline from '@/components/RegistrationTimeline'
 import SafetyRatings from '@/components/SafetyRatings'
@@ -64,7 +65,10 @@ export default function VinResult({ data }: Props): ReactNode {
             vinRegistryActions={registry?.actions ?? null}
           />
         </div>
-        <div className="mb-3 text-base text-[var(--color-muted)]">{data.vin}</div>
+        <div className="mb-3 flex items-center gap-1.5 text-base text-[var(--color-muted)]">
+          {data.vin}
+          <CopyButton text={data.vin} label={t('field.vin')} />
+        </div>
 
         {registry && (
           <div className="mb-4">
