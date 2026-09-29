@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { Suspense, lazy, useEffect } from 'react'
 import type { ReactNode } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
@@ -17,9 +17,11 @@ import WikiHeroImage from '@/components/WikiHeroImage'
 import { ApiError } from '@/lib/api'
 import { cn } from '@/lib/cn'
 import { recordVisit } from '@/lib/history-db'
-import { historyQuery, plateQuery, vinQuery } from '@/lib/queries'
+import { historyQuery, plateQuery, statsQuery, vinQuery } from '@/lib/queries'
 import { capture } from '@/lib/telemetry'
 import { formatVehicleLabel } from '@/lib/vehicle-label'
+
+const TopStatsPanel = lazy(() => import('@/routes/stats/TopStatsPanel'))
 
 export default function SearchRoute(): ReactNode {
   const { t } = useTranslation()
@@ -34,6 +36,7 @@ export default function SearchRoute(): ReactNode {
   const vin = useQuery({ ...vinQuery(raw), enabled: kind === 'vin' })
 
   const active = kind === 'vin' ? vin : plate
+  const stats = useQuery(statsQuery())
 
   let linkedValue: string | null = null
   if (kind === 'plate' && plate.isSuccess) linkedValue = plate.data.current.vin
@@ -169,6 +172,14 @@ export default function SearchRoute(): ReactNode {
           </span>
           <span className="underline hover:no-underline">{t('favorites.viewLink')}</span>
         </Link>
+
+        {stats.isSuccess && (
+          <Suspense fallback={null}>
+            <div className="w-full max-w-6xl animate-fade-in">
+              <TopStatsPanel stats={stats.data} />
+            </div>
+          </Suspense>
+        )}
       </div>
     </div>
   )
