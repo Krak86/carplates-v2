@@ -21,6 +21,7 @@ import CopyAllInfoButton from '@/components/CopyAllInfoButton'
 import CopyButton from '@/components/CopyButton'
 import FavoriteButton from '@/components/FavoriteButton'
 import FieldInfoButton from '@/components/FieldInfoButton'
+import NearbyServices from '@/components/NearbyServices'
 import RegistrationTimeline from '@/components/RegistrationTimeline'
 import { getFuelIcon } from '@/components/ResultCard.helpers'
 import SafetyRatings from '@/components/SafetyRatings'
@@ -378,6 +379,7 @@ export default function ResultCard({ data }: Props): ReactNode {
 
         <SafetyRatings brand={c.brand} model={c.model} year={c.makeYear} body={c.body} />
         <VehiclePhotos brand={c.brand} model={c.model} year={c.makeYear} />
+        <NearbyServices brand={c.brand} />
       </Card>
     </div>
   )

@@ -8,6 +8,7 @@ interface ImportMetaEnv {
   readonly VITE_POSTHOG_HOST?: string
   readonly VITE_SENTRY_DSN?: string
   readonly VITE_GIT_SHA?: string
+  readonly VITE_GOOGLE_MAPS_EMBED_KEY?: string
 }
 
 interface ImportMeta {
