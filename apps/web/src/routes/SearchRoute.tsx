@@ -2,7 +2,7 @@ import { Suspense, lazy, useEffect } from 'react'
 import type { ReactNode } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { Link, useParams, useSearchParams } from 'react-router'
+import { Link, useLocation, useParams, useSearchParams } from 'react-router'
 import { classifyQuery } from '@carplates/shared'
 
 import PhotoThumbnail from '@/components/PhotoThumbnail'
@@ -28,6 +28,7 @@ export default function SearchRoute(): ReactNode {
   const params = useParams()
   const [searchParams] = useSearchParams()
   const queryClient = useQueryClient()
+  const isHome = useLocation().pathname === '/'
   const raw = params.query ? decodeURIComponent(params.query) : ''
   const kind = raw ? classifyQuery(raw) : null
   const isSharedSection = searchParams.has('section')
@@ -36,7 +37,7 @@ export default function SearchRoute(): ReactNode {
   const vin = useQuery({ ...vinQuery(raw), enabled: kind === 'vin' })
 
   const active = kind === 'vin' ? vin : plate
-  const stats = useQuery(statsQuery())
+  const stats = useQuery({ ...statsQuery(), enabled: isHome })
 
   let linkedValue: string | null = null
   if (kind === 'plate' && plate.isSuccess) linkedValue = plate.data.current.vin
@@ -173,7 +174,7 @@ export default function SearchRoute(): ReactNode {
           <span className="underline hover:no-underline">{t('favorites.viewLink')}</span>
         </Link>
 
-        {stats.isSuccess && (
+        {isHome && stats.isSuccess && (
           <Suspense fallback={null}>
             <div className="w-full max-w-6xl animate-fade-in">
               <TopStatsPanel stats={stats.data} />
