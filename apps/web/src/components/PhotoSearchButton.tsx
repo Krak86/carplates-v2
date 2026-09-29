@@ -6,10 +6,11 @@ import Spinner from '@/components/ui/Spinner'
 
 type Props = {
   isPending: boolean
+  disabled?: boolean
   onPick: (file: File) => void
 }
 
-export default function PhotoSearchButton({ isPending, onPick }: Props): ReactNode {
+export default function PhotoSearchButton({ isPending, disabled = false, onPick }: Props): ReactNode {
   const { t } = useTranslation()
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -32,7 +33,8 @@ export default function PhotoSearchButton({ isPending, onPick }: Props): ReactNo
       <button
         type="button"
         onClick={() => inputRef.current?.click()}
-        disabled={isPending}
+        disabled={isPending || disabled}
+        title={disabled ? t('offline.needsConnection') : undefined}
         className="flex items-center gap-1.5 rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2 text-sm text-[var(--color-fg)] hover:border-[var(--color-muted)] hover:shadow-sm disabled:opacity-50"
       >
         {isPending ? <Spinner /> : <span aria-hidden>📷</span>}

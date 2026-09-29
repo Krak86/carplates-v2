@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { NavLink } from 'react-router'
 
+import OfflineDataSettings from '@/components/OfflineDataSettings'
 import { LANGS } from '@/i18n'
 import type { Lang } from '@/i18n'
 import { cn } from '@/lib/cn'
@@ -57,12 +58,16 @@ export default function Sidebar(): ReactNode {
           }}
           className={cn(
             'rounded-lg bg-[var(--color-surface)]/60 px-3 py-1.5 text-left text-sm transition-colors duration-200 hover:bg-[var(--color-surface)]',
-            l === lang ? 'bg-[var(--color-surface)] font-medium text-[var(--color-primary)]' : 'text-[var(--color-muted)] hover:text-[var(--color-fg)]'
+            l === lang
+              ? 'bg-[var(--color-surface)] font-medium text-[var(--color-primary)]'
+              : 'text-[var(--color-muted)] hover:text-[var(--color-fg)]'
           )}
         >
           {LANG_LABEL[l]}
         </button>
       ))}
+
+      <OfflineDataSettings />
     </nav>
   )
 }

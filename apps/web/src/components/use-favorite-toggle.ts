@@ -15,6 +15,7 @@ export function useFavoriteToggle(kind: FavoriteKind, value: string, label: stri
   const favorite = useQuery(favoriteQuery(kind, value))
 
   const toggle = useMutation({
+    networkMode: 'always',
     mutationFn: async () => {
       if (favorite.data) await removeFavorite(favoriteId(kind, value))
       else await addFavorite(kind, value, label)

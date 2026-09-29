@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router'
 
 import CameraSearchButton from '@/components/CameraSearchButton'
 import PhotoSearchButton from '@/components/PhotoSearchButton'
+import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 
 type Props = {
   initialValue?: string
@@ -23,6 +24,7 @@ export default function SearchField({
 }: Props): ReactNode {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const online = useOnlineStatus()
   const [value, setValue] = useState(initialValue)
 
   const handleSubmit = (e: FormEvent): void => {
@@ -61,8 +63,8 @@ export default function SearchField({
         </button>
       </form>
       <div className="flex justify-center gap-2">
-        <PhotoSearchButton isPending={isRecognizing} onPick={onPickPhoto} />
-        <CameraSearchButton isPending={isRecognizing} onCapture={onPickPhoto} />
+        <PhotoSearchButton isPending={isRecognizing} disabled={!online} onPick={onPickPhoto} />
+        <CameraSearchButton isPending={isRecognizing} disabled={!online} onCapture={onPickPhoto} />
       </div>
       {recognizeErrorKey && <p className="text-sm text-[var(--color-muted)]">{t(recognizeErrorKey)}</p>}
     </div>

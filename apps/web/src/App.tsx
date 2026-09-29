@@ -1,8 +1,9 @@
 import { Suspense, lazy } from 'react'
 import type { ReactNode } from 'react'
-import { Route, Routes } from 'react-router'
+import { Route, Routes, useLocation } from 'react-router'
 
 import Layout from '@/components/Layout'
+import LoadErrorBoundary from '@/components/LoadErrorBoundary'
 import Spinner from '@/components/ui/Spinner'
 import SearchRoute from '@/routes/SearchRoute'
 
@@ -14,21 +15,25 @@ const DiscussRoute = lazy(() => import('@/routes/DiscussRoute'))
 const AdvancedSearchRoute = lazy(() => import('@/routes/advanced-search/AdvancedSearchRoute'))
 
 export default function App(): ReactNode {
+  const { pathname } = useLocation()
+
   return (
     <Layout>
-      <Suspense fallback={<Spinner />}>
-        <Routes>
-          <Route path="/" element={<SearchRoute />} />
-          <Route path="/about" element={<AboutRoute />} />
-          <Route path="/history" element={<HistoryRoute />} />
-          <Route path="/favorites" element={<FavoritesRoute />} />
-          <Route path="/stats" element={<StatsRoute />} />
-          <Route path="/discuss" element={<DiscussRoute />} />
-          <Route path="/advanced-search" element={<AdvancedSearchRoute />} />
-          <Route path="/:query" element={<SearchRoute />} />
-          <Route path="*" element={<SearchRoute />} />
-        </Routes>
-      </Suspense>
+      <LoadErrorBoundary resetKey={pathname}>
+        <Suspense fallback={<Spinner />}>
+          <Routes>
+            <Route path="/" element={<SearchRoute />} />
+            <Route path="/about" element={<AboutRoute />} />
+            <Route path="/history" element={<HistoryRoute />} />
+            <Route path="/favorites" element={<FavoritesRoute />} />
+            <Route path="/stats" element={<StatsRoute />} />
+            <Route path="/discuss" element={<DiscussRoute />} />
+            <Route path="/advanced-search" element={<AdvancedSearchRoute />} />
+            <Route path="/:query" element={<SearchRoute />} />
+            <Route path="*" element={<SearchRoute />} />
+          </Routes>
+        </Suspense>
+      </LoadErrorBoundary>
     </Layout>
   )
 }

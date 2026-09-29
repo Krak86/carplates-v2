@@ -75,7 +75,7 @@ export default tseslint.config(
       // phantom-dependency guard — an import that resolves via the hoisted tree
       // but is not declared in the nearest package.json. tsc does not replicate
       // no-extraneous-dependencies; includeTypes covers `import type … from 'x'`.
-      'import-x/no-unresolved': 'warn',
+      'import-x/no-unresolved': ['warn', { ignore: ['^virtual:'] }],
       'import-x/no-extraneous-dependencies': ['warn', { devDependencies: true, includeTypes: true }],
       'no-restricted-syntax': [
         'error',

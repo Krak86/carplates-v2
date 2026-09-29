@@ -486,6 +486,10 @@ export const statsResponseSchema = z.object({
 })
 export type StatsResponse = z.infer<typeof statsResponseSchema>
 
+/** GET /api/stats/version — opaque token that changes whenever an ingest, stats refresh or ratings load does. */
+export const dataVersionResponseSchema = z.object({ dataVersion: z.string() })
+export type DataVersionResponse = z.infer<typeof dataVersionResponseSchema>
+
 /** One brand and its registered-plate count, ranked by `stats_by_brand` — for the advanced-search autocomplete. */
 export const brandSuggestionSchema = z.object({
   brand: z.string(),

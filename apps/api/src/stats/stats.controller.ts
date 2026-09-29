@@ -1,7 +1,7 @@
 import { Controller, Get, Inject } from '@nestjs/common'
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger'
 
-import { StatsResponseDto } from './stats.dto.js'
+import { DataVersionResponseDto, StatsResponseDto } from './stats.dto.js'
 import { StatsService } from './stats.service.js'
 
 @ApiTags('stats')
@@ -13,5 +13,11 @@ export class StatsController {
   @ApiOkResponse({ type: StatsResponseDto })
   get(): Promise<StatsResponseDto> {
     return this.statsService.get()
+  }
+
+  @Get('version')
+  @ApiOkResponse({ type: DataVersionResponseDto })
+  version(): Promise<DataVersionResponseDto> {
+    return this.statsService.version()
   }
 }

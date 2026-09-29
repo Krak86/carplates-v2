@@ -8,13 +8,21 @@ type Props = {
   value: string
   label: string | null
   date: number
+  savedOffline?: boolean
   deleteLabel: string
   onDelete: () => void
 }
 
 /** A single row in the history/favorites lists: link to the plate/VIN, its date, and a delete button. */
-export default function LocalRecordRow({ value, label, date, deleteLabel, onDelete }: Props): ReactNode {
-  const { i18n } = useTranslation()
+export default function LocalRecordRow({
+  value,
+  label,
+  date,
+  savedOffline = false,
+  deleteLabel,
+  onDelete
+}: Props): ReactNode {
+  const { t, i18n } = useTranslation()
 
   return (
     <div className="flex items-center justify-between gap-3 px-4 py-2 text-sm">
@@ -26,6 +34,14 @@ export default function LocalRecordRow({ value, label, date, deleteLabel, onDele
         {value}
         {label ? ` — ${label}` : ''}
       </Link>
+      {savedOffline && (
+        <span
+          title={t('offline.savedHint')}
+          className="shrink-0 rounded-full bg-emerald-500/15 px-1.5 py-0.5 text-xs text-emerald-700 dark:text-emerald-300"
+        >
+          {t('offline.savedBadge')}
+        </span>
+      )}
       <span className="shrink-0 text-[var(--color-muted)]">
         {new Date(date).toLocaleDateString(toIntlLocale(i18n.language))}
       </span>

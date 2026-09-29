@@ -5,6 +5,9 @@ import { Link } from 'react-router'
 
 import BackgroundDevPanel from '@/components/BackgroundDevPanel'
 import BackgroundPhotos from '@/components/BackgroundPhotos'
+import LoadErrorBoundary from '@/components/LoadErrorBoundary'
+import OfflineBanner from '@/components/OfflineBanner'
+import PwaUpdatePrompt from '@/components/PwaUpdatePrompt'
 import { useHeaderVehicleLabel } from '@/components/use-header-vehicle-label'
 import { cn } from '@/lib/cn'
 import { useUiStore } from '@/store/ui-store'
@@ -60,10 +63,10 @@ export default function Layout({ children }: Props): ReactNode {
         <Link to="/" className="shrink-0 text-lg font-semibold">
           {t('app.title')}
         </Link>
-        {vehicleLabel && (
-          <span className="min-w-0 truncate text-sm text-[var(--color-muted)]">{vehicleLabel}</span>
-        )}
+        {vehicleLabel && <span className="min-w-0 truncate text-sm text-[var(--color-muted)]">{vehicleLabel}</span>}
       </header>
+
+      <OfflineBanner />
 
       <div className="flex flex-1">
         {hasOpened && (
@@ -84,14 +87,18 @@ export default function Layout({ children }: Props): ReactNode {
                 drawerOpen ? 'translate-x-0 md:w-64' : '-translate-x-full'
               )}
             >
-              <Suspense fallback={<div className="w-64 border-r border-[var(--color-border)]" />}>
-                <Sidebar />
-              </Suspense>
+              <LoadErrorBoundary compact>
+                <Suspense fallback={<div className="w-64 border-r border-[var(--color-border)]" />}>
+                  <Sidebar />
+                </Suspense>
+              </LoadErrorBoundary>
             </div>
           </>
         )}
         <main className="flex-1 p-4 md:p-8">{children}</main>
       </div>
+
+      <PwaUpdatePrompt />
     </div>
   )
 }

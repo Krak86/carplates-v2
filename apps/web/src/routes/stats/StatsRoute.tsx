@@ -4,8 +4,10 @@ import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router'
 
+import LoadErrorBoundary from '@/components/LoadErrorBoundary'
 import Card from '@/components/ui/Card'
 import Spinner from '@/components/ui/Spinner'
+import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 import { cn } from '@/lib/cn'
 import { toIntlLocale } from '@/lib/intl'
 import { statsQuery } from '@/lib/queries'
@@ -43,6 +45,7 @@ function parseView(value: string | null): StatsView {
 // Lazy-loaded (see App.tsx).
 export default function StatsRoute(): ReactNode {
   const { t, i18n } = useTranslation()
+  const online = useOnlineStatus()
   const stats = useQuery(statsQuery())
   const [searchParams, setSearchParams] = useSearchParams()
   // Captured once at mount, like ResultCard's `isSharedHistory` — a ResultCard badge deep
@@ -109,7 +112,13 @@ export default function StatsRoute(): ReactNode {
         )}
       </div>
 
-      {stats.isPending && (
+      {!online && (
+        <p className="mb-4 rounded-md border border-amber-500/40 bg-amber-500/15 px-3 py-2 text-sm font-medium text-amber-800 dark:text-amber-300">
+          {t('offline.needsConnection')}
+        </p>
+      )}
+
+      {stats.isPending && stats.fetchStatus !== 'paused' && (
         <p className="flex items-center gap-2 text-[var(--color-muted)]">
           <Spinner /> {t('result.loading')}
         </p>
@@ -198,9 +207,11 @@ export default function StatsRoute(): ReactNode {
 
           <div key={`${view}-${effectiveDim}-${metric}`} className="animate-fade-in">
             {view === 'map' ? (
-              <Suspense fallback={<Spinner />}>
-                <StatsMap rows={dimensionRows(stats.data, 'region')} metric={metric} />
-              </Suspense>
+              <LoadErrorBoundary compact>
+                <Suspense fallback={<Spinner />}>
+                  <StatsMap rows={dimensionRows(stats.data, 'region')} metric={metric} />
+                </Suspense>
+              </LoadErrorBoundary>
             ) : (
               <StatsTable
                 rows={dimensionRows(stats.data, effectiveDim)}

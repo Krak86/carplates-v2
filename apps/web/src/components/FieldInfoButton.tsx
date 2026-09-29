@@ -192,7 +192,12 @@ export default function FieldInfoButton({ dimension, current }: Props): ReactNod
                 ✕
               </button>
             </div>
-            {stats.isPending && <p className="px-1.5 text-[var(--color-muted)]">{t('result.loading')}</p>}
+            {stats.isPending && stats.fetchStatus === 'paused' && (
+              <p className="px-1.5 text-[var(--color-muted)]">{t('offline.needsConnection')}</p>
+            )}
+            {stats.isPending && stats.fetchStatus !== 'paused' && (
+              <p className="px-1.5 text-[var(--color-muted)]">{t('result.loading')}</p>
+            )}
             {stats.isError && <p className="px-1.5 text-[var(--color-muted)]">{t('result.error')}</p>}
             <ul className="flex flex-col gap-0.5">
               {rows.map(row => (

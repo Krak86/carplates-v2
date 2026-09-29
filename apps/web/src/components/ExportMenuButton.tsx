@@ -4,6 +4,8 @@ import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 
 import Spinner from '@/components/ui/Spinner'
+import { useOnlineStatus } from '@/hooks/useOnlineStatus'
+import { ONLINE_ONLY_EXPORT_FORMATS } from '@/lib/export-report'
 import type { ExportFormat } from '@/lib/export-report'
 import { cn } from '@/lib/cn'
 
@@ -41,6 +43,8 @@ export default function ExportMenuButton({
   icon = '📋'
 }: Props): ReactNode {
   const { t } = useTranslation()
+  const online = useOnlineStatus()
+  const visibleFormats = online ? formats : formats.filter(format => !ONLINE_ONLY_EXPORT_FORMATS.includes(format))
   const [open, setOpen] = useState(false)
   const [copied, setCopied] = useState(false)
   const buttonRef = useRef<HTMLButtonElement>(null)
@@ -127,7 +131,7 @@ export default function ExportMenuButton({
             style={{ left: placement.left, top: placement.top, bottom: placement.bottom, width: MENU_WIDTH }}
             className="fixed z-50 max-w-[calc(100vw-2rem)] overflow-hidden rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] p-1 text-sm shadow-lg"
           >
-            {formats.map(format => (
+            {visibleFormats.map(format => (
               <button
                 key={format}
                 type="button"

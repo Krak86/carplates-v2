@@ -47,6 +47,9 @@ async function safe<T>(promise: Promise<T>): Promise<T | null> {
   }
 }
 
+// Stats is never saved offline; a default (paused-while-offline) fetch would hang the export forever.
+const FAIL_FAST_OFFLINE = { networkMode: 'always', retry: false } as const
+
 /**
  * Gathers every section the "Copy all info" button offers — fetching whatever isn't already
  * cached (all six NCAP sources, wiki, stock photos, plate/VIN history) regardless of which
@@ -65,19 +68,38 @@ export function useCopyAllInfoActions(params: CopyAllInfoParams): UseCopyAllInfo
     const model = vehicle.model ?? ''
     const year = vehicle.year ?? 0
 
-    const [plateHistory, vinDetail, euroncap, nhtsa, jncap, cncap, kncap, iihs, wiki, photos, stats] = await Promise.all([
-      plate ? safe(queryClient.ensureQueryData(plateHistoryQuery(plate))) : Promise.resolve(null),
-      params.vinDecodeResults == null && vin ? safe(queryClient.ensureQueryData(vinQuery(vin))) : Promise.resolve(null),
-      hasRatingsQuery ? safe(queryClient.ensureQueryData(euroNcapRatingsQuery(make, model, year))) : Promise.resolve(null),
-      hasRatingsQuery ? safe(queryClient.ensureQueryData(safetyRatingsQuery(make, model, year))) : Promise.resolve(null),
-      hasRatingsQuery ? safe(queryClient.ensureQueryData(jncapRatingsQuery(make, model, year))) : Promise.resolve(null),
-      hasRatingsQuery ? safe(queryClient.ensureQueryData(cncapRatingsQuery(make, model, year))) : Promise.resolve(null),
-      hasRatingsQuery ? safe(queryClient.ensureQueryData(kncapRatingsQuery(make, model, year))) : Promise.resolve(null),
-      hasRatingsQuery ? safe(queryClient.ensureQueryData(iihsRatingsQuery(make, model, year))) : Promise.resolve(null),
-      hasWikiQuery ? safe(queryClient.ensureQueryData(wikiInfoQuery(make, model, i18n.language))) : Promise.resolve(null),
-      hasWikiQuery ? safe(queryClient.ensureQueryData(vehiclePhotosQuery(make, model, vehicle.year))) : Promise.resolve(null),
-      safe(queryClient.ensureQueryData(statsQuery()))
-    ])
+    const [plateHistory, vinDetail, euroncap, nhtsa, jncap, cncap, kncap, iihs, wiki, photos, stats] =
+      await Promise.all([
+        plate ? safe(queryClient.ensureQueryData(plateHistoryQuery(plate))) : Promise.resolve(null),
+        params.vinDecodeResults == null && vin
+          ? safe(queryClient.ensureQueryData(vinQuery(vin)))
+          : Promise.resolve(null),
+        hasRatingsQuery
+          ? safe(queryClient.ensureQueryData(euroNcapRatingsQuery(make, model, year)))
+          : Promise.resolve(null),
+        hasRatingsQuery
+          ? safe(queryClient.ensureQueryData(safetyRatingsQuery(make, model, year)))
+          : Promise.resolve(null),
+        hasRatingsQuery
+          ? safe(queryClient.ensureQueryData(jncapRatingsQuery(make, model, year)))
+          : Promise.resolve(null),
+        hasRatingsQuery
+          ? safe(queryClient.ensureQueryData(cncapRatingsQuery(make, model, year)))
+          : Promise.resolve(null),
+        hasRatingsQuery
+          ? safe(queryClient.ensureQueryData(kncapRatingsQuery(make, model, year)))
+          : Promise.resolve(null),
+        hasRatingsQuery
+          ? safe(queryClient.ensureQueryData(iihsRatingsQuery(make, model, year)))
+          : Promise.resolve(null),
+        hasWikiQuery
+          ? safe(queryClient.ensureQueryData(wikiInfoQuery(make, model, i18n.language)))
+          : Promise.resolve(null),
+        hasWikiQuery
+          ? safe(queryClient.ensureQueryData(vehiclePhotosQuery(make, model, vehicle.year)))
+          : Promise.resolve(null),
+        safe(queryClient.ensureQueryData({ ...statsQuery(), ...FAIL_FAST_OFFLINE }))
+      ])
 
     return {
       vehicle,

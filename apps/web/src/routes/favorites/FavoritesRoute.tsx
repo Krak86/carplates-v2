@@ -6,6 +6,7 @@ import LocalRecordRow from '@/components/LocalRecordRow'
 import LocalRecordsExportButton from '@/components/LocalRecordsExportButton'
 import Card from '@/components/ui/Card'
 import Spinner from '@/components/ui/Spinner'
+import { useOfflineAvailability } from '@/components/use-offline-availability'
 import { favoritesQuery } from '@/lib/queries'
 import { useFavoritesActions } from '@/routes/favorites/use-favorites-actions'
 
@@ -14,6 +15,7 @@ export default function FavoritesRoute(): ReactNode {
   const { t } = useTranslation()
   const favorites = useQuery(favoritesQuery())
   const { deleteOne } = useFavoritesActions()
+  const isSavedOffline = useOfflineAvailability()
 
   return (
     <div className="mx-auto w-full max-w-xl">
@@ -42,6 +44,7 @@ export default function FavoritesRoute(): ReactNode {
               value={entry.value}
               label={entry.label}
               date={entry.date}
+              savedOffline={isSavedOffline(entry.kind, entry.value)}
               deleteLabel={t('favorites.remove')}
               onDelete={() => deleteOne.mutate(entry.id)}
             />

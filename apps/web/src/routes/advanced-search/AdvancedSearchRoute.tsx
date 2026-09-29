@@ -8,6 +8,7 @@ import ColorSwatch from '@/components/ColorSwatch'
 import { FUEL_ICON, getFuelIcon } from '@/components/ResultCard.helpers'
 import Card from '@/components/ui/Card'
 import Spinner from '@/components/ui/Spinner'
+import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 import { cn } from '@/lib/cn'
 import { formatVehicleLabel } from '@/lib/vehicle-label'
 import { MIN_TEXT_FILTER_LENGTH, useAdvancedSearchActions } from '@/routes/advanced-search/use-advanced-search-actions'
@@ -46,6 +47,7 @@ function ResultRow({ row }: { row: SearchResultRow }): ReactNode {
 // Lazy-loaded (see App.tsx).
 export default function AdvancedSearchRoute(): ReactNode {
   const { t } = useTranslation()
+  const online = useOnlineStatus()
   const {
     filters,
     updateFilter,
@@ -75,6 +77,12 @@ export default function AdvancedSearchRoute(): ReactNode {
         <h1 className="text-2xl font-bold">{t('advancedSearch.title')}</h1>
         <p className="text-[var(--color-muted)]">{t('advancedSearch.subtitle')}</p>
       </div>
+
+      {!online && (
+        <p className="mb-4 rounded-md border border-amber-500/40 bg-amber-500/15 px-3 py-2 text-sm font-medium text-amber-800 dark:text-amber-300">
+          {t('offline.needsConnection')}
+        </p>
+      )}
 
       <Card className="mb-6">
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">

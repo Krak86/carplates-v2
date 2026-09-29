@@ -80,6 +80,7 @@ export default function CarWikiInfo({ wiki, hasQuery }: Props): ReactNode {
                   <img
                     src={image.url}
                     alt={data.title ?? ''}
+                    crossOrigin="anonymous"
                     className="mb-2 aspect-video w-full rounded-md border border-[var(--color-border)] object-cover"
                   />
                 )}

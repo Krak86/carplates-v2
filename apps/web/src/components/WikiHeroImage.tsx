@@ -26,7 +26,12 @@ export default function WikiHeroImage({ brand, model, vehicleKey }: Props): Reac
 
   return (
     <div className="relative w-full max-w-2xl">
-      <img src={image.url} alt={data?.title ?? ''} className="h-64 w-full rounded-lg object-cover sm:h-80" />
+      <img
+        src={image.url}
+        alt={data?.title ?? ''}
+        crossOrigin="anonymous"
+        className="h-64 w-full rounded-lg object-cover sm:h-80"
+      />
       {creditParts.length > 0 && (
         <div className="absolute right-2 bottom-2 rounded bg-black/60 px-1.5 py-0.5 text-[10px] text-white/80">
           {t('wiki.imageCredit', { credit: creditParts.join(', ') })}

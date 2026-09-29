@@ -2,11 +2,13 @@ export type BackgroundImage = { id: string; css: string }
 
 // Real photos go in src/assets/backgrounds/cars/ (jpg/jpeg/png/webp) — drop files in,
 // no code changes needed, this glob and the component consuming it pick them up as-is.
+// vite-imagetools re-encodes each one at import time (full-size originals are 0.5-5 MB).
 // Until then (empty dir today), it falls back to generated gradient tiles so the whole
 // mechanism — filters, parallax, cycling, the dev panel — is testable without real assets.
 const modules = import.meta.glob('/src/assets/backgrounds/cars/*.{jpg,jpeg,png,webp}', {
   eager: true,
-  import: 'default'
+  import: 'default',
+  query: '?w=1920&format=webp&quality=70'
 }) as Record<string, string>
 
 const PLACEHOLDER_GRADIENTS: readonly (readonly [string, string])[] = [

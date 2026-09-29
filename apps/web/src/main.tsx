@@ -1,25 +1,42 @@
 import { StrictMode } from 'react'
-import { QueryClientProvider } from '@tanstack/react-query'
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router'
 
 import App from '@/App'
 import '@/i18n'
+import { OFFLINE_MAX_AGE_MS, offlineGroup } from '@/lib/offline-cache'
+import { queryPersister, reportOfflineUsage, syncDataVersion } from '@/lib/offline-storage'
 import { queryClient } from '@/lib/query'
 import { initTelemetry } from '@/lib/telemetry'
 import '@/styles/global.css'
 
-void initTelemetry()
+const telemetryReady = initTelemetry()
 
 const container = document.getElementById('root')
 if (!container) throw new Error('#root not found')
 
 createRoot(container).render(
   <StrictMode>
-    <QueryClientProvider client={queryClient}>
+    <PersistQueryClientProvider
+      client={queryClient}
+      persistOptions={{
+        persister: queryPersister,
+        maxAge: OFFLINE_MAX_AGE_MS,
+        buster: __OFFLINE_CACHE_BUSTER__,
+        dehydrateOptions: {
+          shouldDehydrateQuery: query => query.state.status === 'success' && offlineGroup(query.queryKey) !== null,
+          shouldDehydrateMutation: () => false
+        }
+      }}
+      onSuccess={() => {
+        void syncDataVersion(queryClient)
+        void telemetryReady.then(() => reportOfflineUsage(queryClient))
+      }}
+    >
       <BrowserRouter>
         <App />
       </BrowserRouter>
-    </QueryClientProvider>
+    </PersistQueryClientProvider>
   </StrictMode>
 )

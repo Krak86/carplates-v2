@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { Link, useLocation, useParams, useSearchParams } from 'react-router'
 import { classifyQuery } from '@carplates/shared'
 
+import LoadErrorBoundary from '@/components/LoadErrorBoundary'
 import PhotoThumbnail from '@/components/PhotoThumbnail'
 import PlateCandidates from '@/components/PlateCandidates'
 import ResultCard from '@/components/ResultCard'
@@ -14,9 +15,11 @@ import { usePlateRecognition } from '@/components/use-plate-recognition'
 import VinResult from '@/components/VinResult'
 import { extractVehicleInfo } from '@/components/VinResult.helpers'
 import WikiHeroImage from '@/components/WikiHeroImage'
+import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 import { ApiError } from '@/lib/api'
 import { cn } from '@/lib/cn'
 import { recordVisit } from '@/lib/history-db'
+import { toIntlLocale } from '@/lib/intl'
 import { historyQuery, plateQuery, statsQuery, vinQuery } from '@/lib/queries'
 import { capture } from '@/lib/telemetry'
 import { formatVehicleLabel } from '@/lib/vehicle-label'
@@ -24,10 +27,11 @@ import { formatVehicleLabel } from '@/lib/vehicle-label'
 const TopStatsPanel = lazy(() => import('@/routes/stats/TopStatsPanel'))
 
 export default function SearchRoute(): ReactNode {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const params = useParams()
   const [searchParams] = useSearchParams()
   const queryClient = useQueryClient()
+  const online = useOnlineStatus()
   const isHome = useLocation().pathname === '/'
   const raw = params.query ? decodeURIComponent(params.query) : ''
   const kind = raw ? classifyQuery(raw) : null
@@ -39,18 +43,24 @@ export default function SearchRoute(): ReactNode {
   const active = kind === 'vin' ? vin : plate
   const stats = useQuery({ ...statsQuery(), enabled: isHome })
 
+  // A saved (persisted) result stays renderable when a refetch fails or is paused offline —
+  // render off `data`, not `isSuccess`, which a failed background refetch flips to false.
+  const hasData = active.data !== undefined
+  const showingSavedCopy = hasData && (!online || active.isError)
+  const offlineMiss = !!raw && active.isPending && active.fetchStatus === 'paused'
+
   let linkedValue: string | null = null
-  if (kind === 'plate' && plate.isSuccess) linkedValue = plate.data.current.vin
-  else if (kind === 'vin' && vin.isSuccess) linkedValue = vin.data.registry?.plate ?? null
+  if (kind === 'plate' && plate.data) linkedValue = plate.data.current.vin
+  else if (kind === 'vin' && vin.data) linkedValue = vin.data.registry?.plate ?? null
 
   // Same brand/model + key `ResultCard`/`VinResult` feed their own `useCarWikiActions` call —
   // duplicated here (cache-shared, staleTime: Infinity) so the hero slot below can decide
   // whether a wiki image exists without lifting that query out of either result component.
   let wikiHeroVehicle: { brand: string | null; model: string | null; key: string | null } | null = null
-  if (kind === 'plate' && plate.isSuccess) {
+  if (kind === 'plate' && plate.data) {
     const c = plate.data.current
     wikiHeroVehicle = { brand: c.brand, model: c.model, key: c.vin || plate.data.plate }
-  } else if (kind === 'vin' && vin.isSuccess) {
+  } else if (kind === 'vin' && vin.data) {
     const vehicle = extractVehicleInfo(vin.data)
     wikiHeroVehicle = { brand: vehicle.brand, model: vehicle.model, key: vin.data.vin }
   }
@@ -86,6 +96,10 @@ export default function SearchRoute(): ReactNode {
     }
   }, [raw, kind, active.isPending, active.isSuccess, plate.isSuccess, plate.data, vin.isSuccess, vin.data, queryClient])
 
+  useEffect(() => {
+    if (showingSavedCopy) capture('offline_hit', { kind })
+  }, [showingSavedCopy, kind, raw])
+
   const notFound = active.error instanceof ApiError && active.error.status === 404
   const isIdle = !raw
 
@@ -117,15 +131,32 @@ export default function SearchRoute(): ReactNode {
           </Link>
         </div>
 
-        {raw && active.isPending && (
+        {raw && active.isPending && !offlineMiss && (
           <p className="flex items-center gap-2 rounded bg-[var(--color-surface)]/20 px-1.5 py-0.5 text-[var(--color-muted)]">
             <Spinner /> {t('result.loading')}
           </p>
         )}
 
-        {active.isError && (
+        {offlineMiss && (
+          <p className="rounded bg-[var(--color-surface)]/20 px-1.5 py-0.5 text-[var(--color-muted)]">
+            {t('offline.notSaved', { value: raw })}
+          </p>
+        )}
+
+        {active.isError && !hasData && (
           <p className="rounded bg-[var(--color-surface)]/20 px-1.5 py-0.5 text-[var(--color-muted)]">
             {notFound ? t('result.noResults', { value: raw }) : t('result.error')}
+          </p>
+        )}
+
+        {showingSavedCopy && (
+          <p className="w-full max-w-2xl rounded-md border border-amber-500/40 bg-amber-500/15 px-2.5 py-1.5 text-sm font-medium text-amber-800 dark:text-amber-300">
+            {t('offline.savedCopy', {
+              date: new Date(active.dataUpdatedAt).toLocaleString(toIntlLocale(i18n.language), {
+                dateStyle: 'medium',
+                timeStyle: 'short'
+              })
+            })}
           </p>
         )}
 
@@ -141,8 +172,8 @@ export default function SearchRoute(): ReactNode {
         )}
         {photo && <PlateCandidates candidates={photo.candidates} active={raw || null} onSelect={selectCandidate} />}
 
-        {!recognizeErrorKey && kind === 'plate' && plate.isSuccess && <ResultCard data={plate.data} />}
-        {!recognizeErrorKey && kind === 'vin' && vin.isSuccess && <VinResult data={vin.data} />}
+        {!recognizeErrorKey && kind === 'plate' && plate.data && <ResultCard data={plate.data} />}
+        {!recognizeErrorKey && kind === 'vin' && vin.data && <VinResult data={vin.data} />}
 
         <Link
           to="/history"
@@ -175,11 +206,13 @@ export default function SearchRoute(): ReactNode {
         </Link>
 
         {isHome && stats.isSuccess && (
-          <Suspense fallback={null}>
-            <div className="w-full max-w-6xl animate-fade-in">
-              <TopStatsPanel stats={stats.data} />
-            </div>
-          </Suspense>
+          <LoadErrorBoundary compact>
+            <Suspense fallback={null}>
+              <div className="w-full max-w-6xl animate-fade-in">
+                <TopStatsPanel stats={stats.data} />
+              </div>
+            </Suspense>
+          </LoadErrorBoundary>
         )}
       </div>
     </div>

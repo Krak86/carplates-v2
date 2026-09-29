@@ -6,10 +6,11 @@ import CameraCaptureDialog from '@/components/CameraCaptureDialog'
 
 type Props = {
   isPending: boolean
+  disabled?: boolean
   onCapture: (file: File) => void
 }
 
-export default function CameraSearchButton({ isPending, onCapture }: Props): ReactNode {
+export default function CameraSearchButton({ isPending, disabled = false, onCapture }: Props): ReactNode {
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
 
@@ -20,7 +21,8 @@ export default function CameraSearchButton({ isPending, onCapture }: Props): Rea
       <button
         type="button"
         onClick={() => setOpen(true)}
-        disabled={isPending}
+        disabled={isPending || disabled}
+        title={disabled ? t('offline.needsConnection') : undefined}
         className="flex items-center gap-1.5 rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2 text-sm text-[var(--color-fg)] hover:border-[var(--color-muted)] hover:shadow-sm disabled:opacity-50"
       >
         <span aria-hidden>🎥</span>

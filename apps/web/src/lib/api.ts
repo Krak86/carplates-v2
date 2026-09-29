@@ -1,6 +1,7 @@
 import {
   brandSuggestionsResponseSchema,
   cncapRatingsResponseSchema,
+  dataVersionResponseSchema,
   euroNcapRatingsResponseSchema,
   iihsRatingsResponseSchema,
   jncapRatingsResponseSchema,
@@ -85,6 +86,10 @@ export async function decodeVin(vin: string): Promise<VinDecodeResponse> {
 
 export async function getStats(): Promise<StatsResponse> {
   return statsResponseSchema.parse(await getJson('/api/stats'))
+}
+
+export async function getDataVersion(): Promise<string> {
+  return dataVersionResponseSchema.parse(await getJson('/api/stats/version')).dataVersion
 }
 
 export async function getVehiclePhotos(

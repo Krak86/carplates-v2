@@ -10,6 +10,13 @@ allowBuilds:
   '@scarf/scarf': false # analytics ping — no build needed
   core-js: false # only prints a funding message
   ffmpeg-static: true # postinstall downloads a prebuilt ffmpeg binary (crash-test video transcoding, apps/api)
+  sharp: false # ships prebuilt @img/sharp-* binaries; the script only matters for source builds (vite-imagetools, pwa-assets-generator)
+
+# assets-generator 1.x pins sharp 0.33, and two libvips copies in one Vite process crash the icon build;
+# 2.x shares vite-imagetools' sharp 0.35 and works with vite-plugin-pwa 1.3 despite its ^1 peer range.
+peerDependencyRules:
+  allowedVersions:
+    vite-plugin-pwa>@vite-pwa/assets-generator: '2'
 
 # Supply-chain age gate. Off during initial scaffolding to avoid churn; revisit
 # (e.g. 10080 = 7 days) once the dependency set is stable.

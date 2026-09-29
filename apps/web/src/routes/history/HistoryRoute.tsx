@@ -7,6 +7,7 @@ import LocalRecordRow from '@/components/LocalRecordRow'
 import LocalRecordsExportButton from '@/components/LocalRecordsExportButton'
 import Card from '@/components/ui/Card'
 import Spinner from '@/components/ui/Spinner'
+import { useOfflineAvailability } from '@/components/use-offline-availability'
 import { cn } from '@/lib/cn'
 import { historyQuery } from '@/lib/queries'
 import { formatMonthLabel, groupByMonth } from '@/routes/history/helpers'
@@ -17,6 +18,7 @@ export default function HistoryRoute(): ReactNode {
   const { t, i18n } = useTranslation()
   const history = useQuery(historyQuery())
   const { deleteOne, deleteAll } = useHistoryActions()
+  const isSavedOffline = useOfflineAvailability()
   const [collapsedMonths, setCollapsedMonths] = useState<Set<string>>(new Set())
 
   const handleToggleMonth = (key: string): void => {
@@ -93,6 +95,7 @@ export default function HistoryRoute(): ReactNode {
                         value={entry.value}
                         label={entry.label}
                         date={entry.date}
+                        savedOffline={isSavedOffline(entry.kind, entry.value)}
                         deleteLabel={t('history.deleteOne')}
                         onDelete={() => deleteOne.mutate(entry.id)}
                       />

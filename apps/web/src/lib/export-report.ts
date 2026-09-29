@@ -28,6 +28,9 @@ export type Translate = (key: string, options?: Record<string, unknown>) => stri
 export const EXPORT_FORMATS = ['clipboard', 'txt', 'md', 'csv', 'docx', 'pdf'] as const
 export type ExportFormat = (typeof EXPORT_FORMATS)[number]
 
+// Their libraries (export-* chunks) are deliberately left out of the service worker precache — see vite.config.ts.
+export const ONLINE_ONLY_EXPORT_FORMATS: readonly ExportFormat[] = ['docx', 'pdf']
+
 export const EXPORT_FORMAT_LABEL_KEYS: Readonly<Record<ExportFormat, string>> = {
   clipboard: 'export.copyClipboard',
   txt: 'export.downloadTxt',
@@ -126,7 +129,11 @@ function buildVehicleSection(input: ExportInput, t: Translate): ExportKeyValueSe
     pushRow(rows, t('field.weight'), c.ownWeight != null ? `${c.ownWeight} / ${c.totalWeight ?? '—'}` : null)
     pushRow(rows, t('field.kind'), c.kind)
     pushRow(rows, t('field.purpose'), c.purpose)
-    pushRow(rows, t('field.owner'), c.person === 'P' ? t('field.ownerPrivate') : c.person ? t('field.ownerCompany') : null)
+    pushRow(
+      rows,
+      t('field.owner'),
+      c.person === 'P' ? t('field.ownerPrivate') : c.person ? t('field.ownerCompany') : null
+    )
     pushRow(rows, t('field.regDate'), c.dReg)
     pushRow(rows, t('field.dep'), c.dep)
     pushRow(rows, t('field.koatuu'), c.regAddrKoatuu)
@@ -149,7 +156,11 @@ function buildRankingsSection(input: ExportInput, t: Translate): ExportTextSecti
 
   const badges = [
     { icon: '🏭', rank: rankOf(topBrands(stats), input.vehicle.brand), textKey: 'result.topBrand' },
-    { icon: '🚗', rank: rankOfModel(topModels(stats), input.vehicle.brand, input.vehicle.model), textKey: 'result.topModel' },
+    {
+      icon: '🚗',
+      rank: rankOfModel(topModels(stats), input.vehicle.brand, input.vehicle.model),
+      textKey: 'result.topModel'
+    },
     { icon: '🎨', rank: rankOf(topColors(stats), input.current?.color ?? null), textKey: 'result.topColor' },
     { icon: '🗺️', rank: rankOf(topRegions(stats), input.region), textKey: 'result.topRegion' }
   ].filter((b): b is typeof b & { rank: number } => b.rank !== null)
@@ -368,7 +379,8 @@ function jncapTable(data: JncapRatingsResponse | null, t: Translate): ExportTabl
     r.overallPct != null ? `${r.overallPct}%` : '—',
     [r.preventiveRank, r.preventivePct != null ? `${r.preventivePct}%` : null].filter(Boolean).join(' / ') || '—',
     [r.collisionRank, r.collisionPct != null ? `${r.collisionPct}%` : null].filter(Boolean).join(' / ') || '—',
-    [r.emergencyCallType, r.emergencyCallPct != null ? `${r.emergencyCallPct}%` : null].filter(Boolean).join(' / ') || '—',
+    [r.emergencyCallType, r.emergencyCallPct != null ? `${r.emergencyCallPct}%` : null].filter(Boolean).join(' / ') ||
+      '—',
     r.url,
     r.reportPdfUrl ?? '—',
     r.youtubeId ? `https://youtu.be/${r.youtubeId}` : '—'
@@ -485,7 +497,10 @@ function iihsTable(data: IihsRatingsResponse | null, body: string | null, t: Tra
   return { type: 'table', id: 'iihs', title: t('safety.tabIihs'), note, columns, rows }
 }
 
-function collectMedia(input: ExportInput, t: Translate): { images: ExportLinksSection | null; videos: ExportLinksSection | null } {
+function collectMedia(
+  input: ExportInput,
+  t: Translate
+): { images: ExportLinksSection | null; videos: ExportLinksSection | null } {
   const images = new Map<string, string>()
   const videos = new Map<string, string>()
   const addImage = (label: string, url: string | null | undefined): void => {
@@ -544,9 +559,12 @@ export function buildLocalRecordsReport(title: string, entries: ExportLocalRecor
 
 export function buildExportReport(input: ExportInput, t: Translate): ExportReport {
   const label = [input.vehicle.brand, input.vehicle.model].filter(Boolean).join(' ')
-  const title = [label, input.vehicle.year ? `(${input.vehicle.year})` : null].filter(Boolean).join(' ') || t('export.untitled')
+  const title =
+    [label, input.vehicle.year ? `(${input.vehicle.year})` : null].filter(Boolean).join(' ') || t('export.untitled')
   const subtitle = [input.plate, input.vin].filter(Boolean).join(' · ')
-  const hasAnyRatings = Boolean(input.euroncap || input.nhtsa || input.jncap || input.cncap || input.kncap || input.iihs)
+  const hasAnyRatings = Boolean(
+    input.euroncap || input.nhtsa || input.jncap || input.cncap || input.kncap || input.iihs
+  )
   const media = collectMedia(input, t)
 
   const sections: (ExportSection | null)[] = [

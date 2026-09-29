@@ -4,10 +4,17 @@ import type { WikiImage, WikiImageAttribution, WikiInfo } from '@carplates/share
 
 import { loadEnv } from '../env.js'
 
+interface MediaWikiImage {
+  source: string
+  width: number
+  height: number
+}
+
 interface MediaWikiPage {
   title: string
   extract?: string
-  original?: { source: string; width: number; height: number }
+  original?: MediaWikiImage
+  thumbnail?: MediaWikiImage
 }
 
 interface MediaWikiSearchResponse {
@@ -29,6 +36,8 @@ interface CommonsImageInfoResponse {
 
 const CACHE_MAX = 300
 const UPSTREAM_TIMEOUT_MS = 10_000
+// One of Wikimedia's standard thumbnail steps (non-standard widths get throttled); ~2x the 672px card.
+const THUMB_WIDTH = 1280
 
 @Injectable()
 export class WikiService {
@@ -64,7 +73,7 @@ export class WikiService {
           title: page.title,
           extract: page.extract?.trim() || null,
           pageUrl: `https://${domain}.wikipedia.org/wiki/${encodeURIComponent(page.title.replace(/ /g, '_'))}`,
-          image: page.original ? await this.fetchImage(page.original) : null
+          image: page.original ? await this.fetchImage(page.original, page.thumbnail) : null
         }
       : { query, found: false, title: null, extract: null, pageUrl: null, image: null }
 
@@ -82,7 +91,8 @@ export class WikiService {
     url.searchParams.set('exintro', '1')
     url.searchParams.set('explaintext', '1')
     url.searchParams.set('exchars', '600')
-    url.searchParams.set('piprop', 'original')
+    url.searchParams.set('piprop', 'original|thumbnail')
+    url.searchParams.set('pithumbsize', String(THUMB_WIDTH))
     url.searchParams.set('format', 'json')
 
     const payload = await this.fetchJson<MediaWikiSearchResponse>(url)
@@ -90,10 +100,12 @@ export class WikiService {
     return pages ? (Object.values(pages)[0] ?? null) : null
   }
 
-  /** Best-effort — an image without resolvable attribution is still usable, just shown uncredited. */
-  private async fetchImage(original: { source: string; width: number; height: number }): Promise<WikiImage> {
+  /** Best-effort — an image without resolvable attribution is still usable, just shown uncredited.
+   *  Attribution is looked up by the original's filename; thumbnail URLs carry a `1280px-` prefix. */
+  private async fetchImage(original: MediaWikiImage, thumbnail: MediaWikiImage | undefined): Promise<WikiImage> {
     const attribution = await this.fetchAttribution(original.source).catch(() => null)
-    return { url: original.source, width: original.width, height: original.height, attribution }
+    const shown = thumbnail ?? original
+    return { url: shown.source, width: shown.width, height: shown.height, attribution }
   }
 
   private async fetchAttribution(imageUrl: string): Promise<WikiImageAttribution | null> {

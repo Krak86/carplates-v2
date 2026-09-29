@@ -23,6 +23,7 @@ import type { VehicleSearchFilters } from '@/lib/api'
 import { isFavorited, listFavorites } from '@/lib/favorites-db'
 import type { FavoriteKind } from '@/lib/favorites-db'
 import { listVisits } from '@/lib/history-db'
+import { getStorageEstimate } from '@/lib/offline-storage'
 
 export function plateQuery(raw: string) {
   const plate = normalizePlate(raw)
@@ -39,16 +40,31 @@ export function vinQuery(raw: string) {
   return queryOptions({ queryKey: ['vin', vin], queryFn: () => decodeVin(vin) })
 }
 
+// Local IndexedDB reads — networkMode 'always' so they aren't paused while offline.
 export function historyQuery() {
-  return queryOptions({ queryKey: ['history'], queryFn: listVisits })
+  return queryOptions({ queryKey: ['history'], queryFn: listVisits, networkMode: 'always' })
 }
 
 export function favoritesQuery() {
-  return queryOptions({ queryKey: ['favorites'], queryFn: listFavorites })
+  return queryOptions({ queryKey: ['favorites'], queryFn: listFavorites, networkMode: 'always' })
 }
 
 export function favoriteQuery(kind: FavoriteKind, value: string) {
-  return queryOptions({ queryKey: ['favorite', kind, value], queryFn: () => isFavorited(kind, value) })
+  return queryOptions({
+    queryKey: ['favorite', kind, value],
+    queryFn: () => isFavorited(kind, value),
+    networkMode: 'always'
+  })
+}
+
+// Origin-wide usage (app shell + saved results + cached images), not just the query cache.
+export function storageEstimateQuery() {
+  return queryOptions({
+    queryKey: ['storage-estimate'],
+    queryFn: getStorageEstimate,
+    staleTime: 0,
+    networkMode: 'always'
+  })
 }
 
 // Only changes on the monthly ingest cron (see PLAN.md, "Registry statistics") — never refetch on its own.
@@ -128,9 +144,14 @@ export function iihsRatingsQuery(make: string, model: string, year: number) {
   })
 }
 
-// Static build asset, never changes at runtime.
+// Static build asset, never changes at runtime — precached by the service worker, so try it even offline.
 export function ukraineGeographyQuery() {
-  return queryOptions({ queryKey: ['ukraine-geography'], queryFn: getUkraineGeography, staleTime: Infinity })
+  return queryOptions({
+    queryKey: ['ukraine-geography'],
+    queryFn: getUkraineGeography,
+    staleTime: Infinity,
+    networkMode: 'offlineFirst'
+  })
 }
 
 // Advanced-search brand autocomplete — ranked by distinctPlates, so a popular real spelling

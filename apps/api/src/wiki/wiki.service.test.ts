@@ -14,7 +14,29 @@ const searchPayload = {
         pageid: 425391,
         title: 'Toyota Camry',
         extract: 'Toyota Camry is a car.',
-        original: { source: 'https://upload.wikimedia.org/wikipedia/commons/5/55/Toyota_Camry.jpg', width: 800, height: 600 }
+        original: {
+          source: 'https://upload.wikimedia.org/wikipedia/commons/5/55/Toyota_Camry.jpg',
+          width: 800,
+          height: 600
+        }
+      }
+    }
+  }
+}
+
+const THUMB_URL = 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Toyota_Camry.jpg/1280px-Toyota_Camry.jpg'
+
+const searchPayloadWithThumb = {
+  query: {
+    pages: {
+      '425391': {
+        ...searchPayload.query.pages['425391'],
+        original: {
+          source: 'https://upload.wikimedia.org/wikipedia/commons/5/55/Toyota_Camry.jpg',
+          width: 4000,
+          height: 3000
+        },
+        thumbnail: { source: THUMB_URL, width: 1280, height: 960 }
       }
     }
   }
@@ -43,9 +65,11 @@ beforeEach(() => {
 })
 
 describe('WikiService', () => {
-  it('resolves a page, its image, and the image attribution', async () => {
+  it('resolves a page, its thumbnail image, and the original image attribution', async () => {
     const fetchMock = vi.mocked(fetch)
-    fetchMock.mockResolvedValueOnce(jsonResponse(searchPayload)).mockResolvedValueOnce(jsonResponse(imageInfoPayload))
+    fetchMock
+      .mockResolvedValueOnce(jsonResponse(searchPayloadWithThumb))
+      .mockResolvedValueOnce(jsonResponse(imageInfoPayload))
 
     const service = new WikiService()
     const result = await service.lookup('Toyota', 'Camry', 'en')
@@ -57,9 +81,9 @@ describe('WikiService', () => {
       extract: 'Toyota Camry is a car.',
       pageUrl: 'https://en.wikipedia.org/wiki/Toyota_Camry',
       image: {
-        url: 'https://upload.wikimedia.org/wikipedia/commons/5/55/Toyota_Camry.jpg',
-        width: 800,
-        height: 600,
+        url: THUMB_URL,
+        width: 1280,
+        height: 960,
         attribution: {
           author: 'Someone',
           license: 'CC BY-SA 4.0',
@@ -70,6 +94,7 @@ describe('WikiService', () => {
 
     const [searchUrl, searchInit] = fetchMock.mock.calls[0] ?? []
     expect(String(searchUrl)).toContain('en.wikipedia.org')
+    expect(String(searchUrl)).toContain('pithumbsize=1280')
     expect((searchInit as RequestInit).headers).toMatchObject({ 'user-agent': expect.stringContaining('carsua-app') })
 
     const [imageInfoUrl] = fetchMock.mock.calls[1] ?? []
@@ -105,11 +130,18 @@ describe('WikiService', () => {
     const service = new WikiService()
     const result = await service.lookup('Asdfgh', 'Qwerty', 'en')
 
-    expect(result).toEqual({ query: 'Asdfgh Qwerty', found: false, title: null, extract: null, pageUrl: null, image: null })
+    expect(result).toEqual({
+      query: 'Asdfgh Qwerty',
+      found: false,
+      title: null,
+      extract: null,
+      pageUrl: null,
+      image: null
+    })
     expect(fetchMock).toHaveBeenCalledTimes(1)
   })
 
-  it('still returns the page and image, with null attribution, when the Commons imageinfo call fails', async () => {
+  it('falls back to the original image, with null attribution, when there is no thumbnail and Commons fails', async () => {
     const fetchMock = vi.mocked(fetch)
     fetchMock.mockResolvedValueOnce(jsonResponse(searchPayload)).mockResolvedValueOnce(jsonResponse({}, 500))
 

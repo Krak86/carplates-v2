@@ -33,6 +33,15 @@ const mimeOf = (path: string): string => {
   return (dot >= 0 && MIME[path.slice(dot)]) || 'application/octet-stream'
 }
 
+// Must revalidate every load, or a stale service worker / manifest pins users to an old build.
+const NO_CACHE_FILES = new Set(['sw.js', 'registerSW.js', 'manifest.webmanifest'])
+
+const cacheControlOf = (rel: string): string => {
+  if (rel.startsWith('assets/')) return 'public, max-age=31536000, immutable'
+  if (NO_CACHE_FILES.has(rel)) return 'no-cache'
+  return 'public, max-age=86400'
+}
+
 /**
  * Serves the built web app and injects per-plate / per-VIN meta tags into
  * index.html on deep links. Inactive unless WEB_DIST_DIR is set — in dev the
@@ -67,7 +76,7 @@ export class SpaController {
       if (filePath.startsWith(this.distDir)) {
         try {
           if ((await stat(filePath)).isFile()) {
-            reply.type(mimeOf(filePath)).send(createReadStream(filePath))
+            reply.type(mimeOf(filePath)).header('cache-control', cacheControlOf(rel)).send(createReadStream(filePath))
             return
           }
         } catch {
@@ -87,7 +96,10 @@ export class SpaController {
     }
     const html = await this.loadIndex()
     const meta = await this.metaFor(pathname)
-    reply.type('text/html; charset=utf-8').send(meta ? injectMeta(html, meta) : html)
+    reply
+      .type('text/html; charset=utf-8')
+      .header('cache-control', 'no-cache')
+      .send(meta ? injectMeta(html, meta) : html)
   }
 
   private async loadIndex(): Promise<string> {
