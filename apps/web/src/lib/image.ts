@@ -1,5 +1,5 @@
-const MAX_DIMENSION = 1600
-const TARGET_BYTES = 900_000
+export const MAX_DIMENSION = 3200
+const TARGET_BYTES = 2_500_000
 const MIN_QUALITY = 0.4
 const QUALITY_STEP = 0.15
 

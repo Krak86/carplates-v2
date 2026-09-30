@@ -14,7 +14,7 @@ export function mapPlateReaderResults(results: PlateReaderResult[]): PlateCandid
     const plate = normalizePlate(repairOcrPlate(raw))
     const score = r.score ?? 0
     const seen = byPlate.get(plate)
-    if (!seen || score > seen.score) byPlate.set(plate, { plate, raw, score })
+    if (!seen || score > seen.score) byPlate.set(plate, { plate, raw, score, ...(r.box && { box: r.box }) })
   }
   return [...byPlate.values()].sort((a, b) => b.score - a.score).slice(0, MAX_CANDIDATES)
 }

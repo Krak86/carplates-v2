@@ -14,6 +14,7 @@ changes to consume either backend.
 
 import io
 import logging
+from typing import Any
 
 import numpy as np
 from fast_alpr import ALPR
@@ -39,13 +40,84 @@ def _confidence(value: float | list[float]) -> float:
     return float(value)
 
 
+# The detector letterboxes its input to 384px, so a plate that is ~2-3% of a
+# wide photo's width ends up ~10px and is missed. Besides the full frame we
+# also run overlapping crops of a fixed pixel size (TILE_SIZE), so a small or
+# distant plate is seen at roughly native resolution however large the photo
+# is. MAX_TILES caps the cost on huge frames by growing the tile instead.
+TILE_SIZE = 640
+TILE_OVERLAP = 0.25  # a plate up to ~25% of a tile wide survives a tile seam
+MAX_TILES = 24
+MIN_TILED_SIDE = 768  # smaller frames have nothing to gain from tiling
+DUPLICATE_OVERLAP = 0.5  # intersection / smaller box area above this = same plate
+
+
+def _axis_starts(length: int, tile: int) -> list[int]:
+    if length <= tile:
+        return [0]
+    step = max(1, int(tile * (1 - TILE_OVERLAP)))
+    count = -(-(length - tile) // step) + 1  # ceil
+    return [round(i * (length - tile) / (count - 1)) for i in range(count)]
+
+
+def _tiles(width: int, height: int) -> list[tuple[int, int, int, int]]:
+    tiles = [(0, 0, width, height)]
+    if max(width, height) < MIN_TILED_SIDE:
+        return tiles
+    tile = TILE_SIZE
+    while len(_axis_starts(width, tile)) * len(_axis_starts(height, tile)) > MAX_TILES:
+        tile = int(tile * 1.15)
+    tile_w, tile_h = min(tile, width), min(tile, height)
+    for y0 in _axis_starts(height, tile_h):
+        for x0 in _axis_starts(width, tile_w):
+            tiles.append((x0, y0, x0 + tile_w, y0 + tile_h))
+    return tiles
+
+
+def _overlap(a: tuple[float, float, float, float], b: tuple[float, float, float, float]) -> float:
+    iw = min(a[2], b[2]) - max(a[0], b[0])
+    ih = min(a[3], b[3]) - max(a[1], b[1])
+    if iw <= 0 or ih <= 0:
+        return 0.0
+    smaller = min((a[2] - a[0]) * (a[3] - a[1]), (b[2] - b[0]) * (b[3] - b[1]))
+    return (iw * ih) / smaller if smaller > 0 else 0.0
+
+
+def _predict_tiled(frame: np.ndarray) -> list[dict[str, Any]]:
+    height, width = frame.shape[:2]
+    # (box in full-frame coords, detection confidence, plate, score)
+    found: list[tuple[tuple[float, float, float, float], float, str, float]] = []
+
+    for x0, y0, x1, y1 in _tiles(width, height):
+        for r in alpr.predict(frame[y0:y1, x0:x1]):
+            if r.ocr is None or not r.ocr.text:
+                continue
+            box = r.detection.bounding_box
+            full_box = (box.x1 + x0, box.y1 + y0, box.x2 + x0, box.y2 + y0)
+            found.append((full_box, float(r.detection.confidence), r.ocr.text, _confidence(r.ocr.confidence)))
+
+    # The same plate is seen by several tiles: keep the most confident detection.
+    found.sort(key=lambda f: f[1], reverse=True)
+    kept: list[tuple[tuple[float, float, float, float], float, str, float]] = []
+    for candidate in found:
+        if all(_overlap(candidate[0], k[0]) < DUPLICATE_OVERLAP for k in kept):
+            kept.append(candidate)
+
+    def _box(b: tuple[float, float, float, float]) -> dict[str, float]:
+        x1, y1 = max(0.0, b[0]), max(0.0, b[1])
+        x2, y2 = min(float(width), b[2]), min(float(height), b[3])
+        return {"x": x1 / width, "y": y1 / height, "w": (x2 - x1) / width, "h": (y2 - y1) / height}
+
+    return [{"plate": plate, "score": score, "box": _box(box)} for box, _, plate, score in kept]
+
+
 @app.get("/healthz")
 def healthz() -> dict[str, str]:
     return {"status": "ok"}
 
 
 @app.post("/recognize")
-async def recognize(image: UploadFile = File(...)) -> dict[str, list[dict[str, float | str]]]:
+async def recognize(image: UploadFile = File(...)) -> dict[str, list[dict[str, Any]]]:
     raw = await image.read()
     if not raw:
         raise HTTPException(status_code=400, detail="Uploaded image is empty")
@@ -59,15 +131,9 @@ async def recognize(image: UploadFile = File(...)) -> dict[str, list[dict[str, f
     frame = np.array(pil_image)[:, :, ::-1]
 
     try:
-        results = alpr.predict(frame)
+        results = _predict_tiled(np.ascontiguousarray(frame))
     except Exception:
         logger.exception("ALPR inference failed")
         raise HTTPException(status_code=502, detail="ALPR inference failed")
 
-    return {
-        "results": [
-            {"plate": r.ocr.text, "score": _confidence(r.ocr.confidence)}
-            for r in results
-            if r.ocr is not None and r.ocr.text
-        ]
-    }
+    return {"results": results}

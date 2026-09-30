@@ -28,6 +28,16 @@ describe('mapPlateReaderResults', () => {
     expect(mapPlateReaderResults([{ score: 0.5 }, { plate: '', score: 0.9 }])).toEqual([])
   })
 
+  it('passes the detection box through, keeping the box of the higher-scoring duplicate', () => {
+    const low = { x: 0.1, y: 0.1, w: 0.1, h: 0.05 }
+    const high = { x: 0.6, y: 0.5, w: 0.1, h: 0.05 }
+    const candidates = mapPlateReaderResults([
+      { plate: 'AA1234BC', score: 0.5, box: low },
+      { plate: 'AA1234BC', score: 0.9, box: high }
+    ])
+    expect(candidates).toEqual([{ plate: 'АА1234ВС', raw: 'AA1234BC', score: 0.9, box: high }])
+  })
+
   it('defaults a missing score to 0', () => {
     expect(mapPlateReaderResults([{ plate: 'AA1234BC' }])).toEqual([{ plate: 'АА1234ВС', raw: 'AA1234BC', score: 0 }])
   })

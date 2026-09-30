@@ -16,8 +16,8 @@ export default function PlateCandidates({ candidates, active, onSelect }: Props)
   if (candidates.length < 2) return null
 
   return (
-    <div className="flex w-full max-w-2xl flex-wrap items-center gap-2">
-      <span className="text-sm text-[var(--color-muted)]">{t('recognize.alsoFound')}</span>
+    <div className="flex w-full max-w-2xl flex-wrap items-center gap-2 rounded-md border border-[var(--color-surface)] bg-[var(--color-surface)]/80 px-2.5 py-1.5 backdrop-blur-sm">
+      <span className="text-sm font-medium text-[var(--color-fg)]">{t('recognize.alsoFound')}</span>
       {candidates.map(c => (
         <button
           key={c.plate}

@@ -1769,6 +1769,64 @@ complexity in the same change.
   chain independently, so this was judged sufficient for step 1; still worth
   doing once picking up step 2 or 3 for real confidence.
 
+**Tiled detection (2026-09-30).** The 384px detector missed small plates in
+wide photos (two plates ≈3.5% of frame width → ~13px after letterbox; only one
+was read). `services/alpr/app.py` now runs the full frame plus overlapping
+fixed-size 640px tiles (25% overlap, capped at 24 tiles by growing the tile;
+frames ≥768px only) and merges duplicate boxes by overlap, keeping the most
+confident detection. A first fraction-based 2×2 grid was too weak for plates
+~1.5% of frame width (parking-lot photos). Web upload cap raised
+1600→3200px / 0.9→2.5 MB (`lib/image.ts`; API limit is 4 MB) so tiles keep
+real pixels. **Untested against the container** — rebuild (`pnpm alpr:build`)
+and re-check `DSC_0098.JPG` (2 small plates) before trusting it.
+
+**Photo viewer + limits hint (2026-09-30).** Uploaded-photo preview is now
+`object-contain` (whole image, not a cropped strip) and opens a full-screen
+`PhotoZoomDialog` (wheel zoom toward cursor, drag/arrow pan, `+`/`−`/`0`,
+double-click, Esc; no pinch gesture yet). `SearchField` shows a
+`recognize.photoTips` line (formats, the `MAX_DIMENSION` downscale, what
+tends to be missed) and a 413 error key. **Not yet:** rotating the photo,
+pinch-zoom on touch, drawing the detected plate boxes on the viewer.
+
+**Improving the model on hard images — TODO (not started).** The stock
+`yolo-v9-t-384` detector + `cct-xs-v2-global` OCR miss plates a human reads
+fine: rain, night/dark, motion blur, dirt/mud, steep angles, tiny plates.
+Plan, in order — stop as soon as recall is good enough:
+1. **Build an eval set first.** Collect ~100-300 real Ukrainian photos (incl.
+   the hard cases above) into a gitignored `services/alpr/eval/` with a
+   `labels.csv` (file → plates in the photo, since the count of plates is the
+   issue, not just the text). Add `services/alpr/eval.py` that runs the
+   `/recognize` logic over it and reports plate recall (found/labelled),
+   exact-match OCR accuracy and false positives per image. Every change below
+   must beat this baseline — no tuning by eyeballing single photos.
+2. **Cheap inference-side wins (no training):** detector confidence
+   threshold (`alpr.detector` default may be too strict — sweep it against
+   the eval set), tile size/overlap in `app.py`, test-time augmentation for
+   dark photos (CLAHE/gamma on the crop, retry OCR on the brighter copy,
+   keep the higher score), deblur/sharpen retry for low-score reads, and a
+   second OCR pass on a 2× upscaled crop. Plus accept the result only if
+   `repairOcrPlate` yields a valid Ukrainian format, which filters false
+   detections.
+3. **Fine-tune the OCR** (`fast-plate-ocr` supports custom training; its
+   docs describe the dataset format + config): label ~1-3k cropped Ukrainian
+   plates (export crops from the detector over our photos, correct the text
+   by hand — Ukrainian plates are a closed alphabet of 12 letters + digits,
+   which makes a small custom head realistic). Start from the global model's
+   weights, train with heavy augmentation (blur, noise, brightness, rain
+   streaks, perspective), export ONNX, swap in `app.py`, re-run the eval.
+4. **Fine-tune the detector** only if step 2-3 leave missed *detections*
+   (check per-image whether the box was absent vs. the text wrong): train a
+   YOLOv9-t on labelled boxes (`open-image-models` documents its training
+   recipe; licensing stays MIT as long as nothing Ultralytics is pulled in —
+   re-verify before adopting any other trainer). Needs several hundred
+   boxed photos; annotate with CVAT/Label Studio.
+5. **Feed it from real use.** Optional opt-in "this read was wrong — send
+   the photo" button (needs a privacy/retention decision — plates are
+   personal data; see Phase 5 accounts) to grow the dataset over time.
+
+Data sourcing caveat: only use photos you own or have rights to; public
+Ukrainian plate datasets are scarce, so expect to label your own.
+
 **Step 2 — client-side live detection box, no OCR yet. Not started.** Run
 just the detector (`yolo-v9-t-384-license-plate-end2end`) in-browser via
 `onnxruntime-web` (WASM, falling back from WebGPU where unsupported — iOS

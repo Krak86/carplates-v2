@@ -6,7 +6,6 @@ import { useNavigate } from 'react-router'
 import CameraSearchButton from '@/components/CameraSearchButton'
 import PhotoSearchButton from '@/components/PhotoSearchButton'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
-
 type Props = {
   initialValue?: string
   autoFocus?: boolean

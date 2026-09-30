@@ -19,6 +19,7 @@ import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 import { ApiError } from '@/lib/api'
 import { cn } from '@/lib/cn'
 import { recordVisit } from '@/lib/history-db'
+import { MAX_DIMENSION } from '@/lib/image'
 import { toIntlLocale } from '@/lib/intl'
 import { historyQuery, plateQuery, statsQuery, vinQuery } from '@/lib/queries'
 import { capture } from '@/lib/telemetry'
@@ -160,7 +161,15 @@ export default function SearchRoute(): ReactNode {
           </p>
         )}
 
-        {photo && <PhotoThumbnail url={photo.url} onClose={dismissPhoto} />}
+        {photo && (
+          <PhotoThumbnail url={photo.url} candidates={photo.candidates} active={raw || null} onClose={dismissPhoto} />
+        )}
+        {photo && (
+          <p className="flex w-full max-w-2xl items-start gap-1.5 rounded-md border border-amber-500/40 bg-amber-500/15 px-2.5 py-1.5 text-sm font-medium text-amber-800 dark:text-amber-300">
+            <span aria-hidden>💡</span>
+            {t('recognize.photoTips', { max: MAX_DIMENSION })}
+          </p>
+        )}
         {photo && photo.settled && photo.candidates.length > 0 && (
           <p className="flex w-full max-w-2xl items-start gap-1.5 rounded-md border border-amber-500/40 bg-amber-500/15 px-2.5 py-1.5 text-sm font-medium text-amber-800 dark:text-amber-300">
             <span aria-hidden>⚠️</span>

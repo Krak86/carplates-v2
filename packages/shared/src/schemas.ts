@@ -68,7 +68,17 @@ export type VinDecodeResponse = z.infer<typeof vinDecodeResponseSchema>
 export const plateCandidateSchema = z.object({
   plate: z.string(), // canonical Cyrillic, ready for /:query
   raw: z.string(), // provider's raw Latin OCR string
-  score: z.number().min(0).max(1)
+  score: z.number().min(0).max(1),
+  // Where the plate sits in the uploaded photo, as fractions (0-1) of its width/height so it's
+  // independent of any client-side resize. Only the self-hosted ALPR reports it.
+  box: z
+    .object({
+      x: z.number().min(0).max(1),
+      y: z.number().min(0).max(1),
+      w: z.number().min(0).max(1),
+      h: z.number().min(0).max(1)
+    })
+    .optional()
 })
 export type PlateCandidate = z.infer<typeof plateCandidateSchema>
 

@@ -40,6 +40,8 @@ function errorKeyFor(error: Error | null): string | null {
       return 'recognize.noPlate'
     case 400:
       return 'recognize.badImage'
+    case 413:
+      return 'recognize.tooLarge'
     case 429:
       return 'recognize.rateLimited'
     case 503:
