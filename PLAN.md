@@ -1574,6 +1574,61 @@ detail/{id}` from 1-290 not already known — zero additional real pages
   horizontal scrollbar introduced), and 500px (toggle falls back next to the
   star, title wraps cleanly instead of colliding with the icons).
 
+- **Installable PWA + offline mode ✅ DONE (2026-09-29)** — `vite-plugin-pwa`
+  (config in `apps/web/vite.config.ts`). Client-side plus one small API endpoint.
+
+  **Service worker.** Precaches the app code (~1.8 MB) in the background after
+  page load, takes control of the open page on first install, and serves
+  `index.html` for page loads offline. `PwaUpdatePrompt` shows "Update / Later"
+  for new versions and an offline-ready toast; persistent storage is requested
+  once installed. Runtime caches are all prefixed `carplates-rt-`: brand logos,
+  optimized backgrounds, and Wikimedia images (always fetched in CORS mode so
+  the CSS hero background is cacheable too). **Precache gotcha:**
+  `manifest.webmanifest` was listed twice, which crashed Workbox at startup —
+  nothing was cached or served until fixed. PDF/DOCX libraries are split into
+  `export-*` chunks and kept out of the precache (along with the PDF fonts);
+  the export menu hides PDF/DOCX while offline.
+
+  **Offline results.** The TanStack Query cache is persisted to IndexedDB
+  (`lib/offline-cache.ts`, `lib/offline-storage.ts`) and trimmed on every
+  write: 200 plates / 200 VINs / 1200 ratings / 200 wiki entries, 30 days,
+  favorites never expire. Saved data is discarded when the shared Zod schemas
+  change (so a schema change in `packages/shared` invalidates every user's
+  offline copy — intended). `GET /api/stats/version` (hash of the last ingest,
+  stats row count, ratings scrape times; `dataVersionResponseSchema`) marks
+  saved results "out of date". `/api/stats` (~14 MB) stays online-only, as do
+  photo/camera search and advanced search ("needs connection"). Local-only
+  stores (history, favorites, storage size) keep working offline; deleting a
+  History/Favorites entry removes its saved result unless the other list still
+  has it. Sidebar shows storage used + "Clear cached images" (IndexedDB
+  untouched). Offline banner, "saved copy from {date}" notice, "offline" badge
+  on list rows. `LoadErrorBoundary` wraps lazy routes, sidebar, top-stats panel
+  and stats map so a failed chunk load no longer blanks the app.
+
+  **Supporting changes.** `vite-imagetools` re-encodes background photos to
+  1920px WebP (34 MB → 2.3 MB). `/api/wiki` returns 1280px Wikimedia
+  thumbnails (~300 KB vs. multi-MB originals), attribution still looked up
+  from the original file. SPA `Cache-Control` (`spa.controller.ts`): hashed
+  assets immutable for 1 year; `index.html`/`sw.js`/manifest `no-cache`; other
+  static files 1 day. pnpm: `sharp` added to `allowBuilds`;
+  `@vite-pwa/assets-generator` **v2** required (v1's older sharp crashed the
+  build next to vite-imagetools). Icons/favicon generated from
+  `public/favicon.svg`. Telemetry (only when enabled): `offline_storage`
+  (daily), `offline_hit`, `pwa_installed`, `load_error`.
+
+- **Nearby services map ✅ DONE (2026-09-29)** — collapsible section on the
+  result card (`NearbyServices.tsx`, `use-nearby-location-actions.ts`,
+  `lib/maps.ts`): asks for geolocation on open, handles blocked/failed/non-HTTPS
+  cases with retry, and embeds a localized Google Maps search (brand-specific
+  dealer search) around **rounded** coordinates (privacy). Needs no key by
+  default; optional `VITE_GOOGLE_MAPS_EMBED_KEY` (`apps/web/.env`) switches to
+  the official Embed API.
+
+- **Homepage top-5 leaderboards ✅ DONE (2026-09-29)** — top 5
+  makes/models/colours/regions below the homepage links, lazy-loaded and fed by
+  the shared cached `/api/stats` query; shown on the homepage only (not on
+  result pages).
+
 ## Phase 2 — RIA "similar cars" proxy — **not started, blocked on a token**
 
 `GET /api/ria/similar?brand&model&kind&year` runs the whole `developers.ria.com`

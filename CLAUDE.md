@@ -87,7 +87,8 @@ Vitest 4 · ESLint 10 (flat config)
 
 - **web**: Vite 8 · React 19 · React Router 8 · TanStack Query 5 · Zustand 5 ·
   Tailwind v4 (CSS-first, `@theme` in `src/styles/global.css`) · i18next (ua/ru/en) ·
-  PostHog + Sentry (dynamic-imported, inert unless `VITE_ENABLE_TELEMETRY=true`)
+  PostHog + Sentry (dynamic-imported, inert unless `VITE_ENABLE_TELEMETRY=true`) ·
+  `vite-plugin-pwa` (installable + offline; TanStack Query cache persisted to IndexedDB)
 - **api**: NestJS 11 (not 12 — nestjs-zod peer) on `@nestjs/platform-fastify` ·
   Drizzle ORM 0.45.2 (pinned) · `nestjs-zod` (one Zod schema → validation pipe +
   OpenAPI at `/api/docs`) · `@sentry/nestjs` (inert unless `ENABLE_TELEMETRY=true`)
@@ -129,6 +130,14 @@ Vitest 4 · ESLint 10 (flat config)
   reuses cached ZIPs in `scripts/.data/` and is deterministic — see PLAN.md),
   but that's an hours-long recovery, not a reason to treat erasing it
   casually.
+- **Offline / PWA** (`apps/web`, see PLAN.md Phase 1.5): the service worker only
+  exists in production builds. Changing a Zod schema in `packages/shared` discards
+  every user's saved offline data — intended, but keep it in mind. A new
+  `/api/*` query that should work offline must be added to the persisted-cache
+  rules in `lib/offline-cache.ts` (size-capped); heavy online-only endpoints
+  (`/api/stats`) stay out. Runtime caches are prefixed `carplates-rt-`. SPA
+  cache headers: hashed assets immutable, `index.html`/`sw.js`/manifest `no-cache`
+  (`spa.controller.ts`). `@vite-pwa/assets-generator` must stay on v2 (sharp).
 - **NestJS**: feature modules, Zod-validated inputs, no logic in controllers.
   Controllers return values and never take `@Res()` — except the SPA catch-all.
 - **Telemetry** stays off locally. `.env.example` in each app documents the vars;
