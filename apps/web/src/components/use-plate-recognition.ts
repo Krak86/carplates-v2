@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { useNavigate } from 'react-router'
-import type { PlateCandidate } from '@carplates/shared'
+import type { PhotoMeta, PlateCandidate } from '@carplates/shared'
 
 import { ApiError, recognizePlate } from '@/lib/api'
 import { shrinkImage } from '@/lib/image'
+import { readPhotoMeta } from '@/lib/photo-meta'
 
 export type PhotoThumbnail = {
   url: string
@@ -12,6 +13,8 @@ export type PhotoThumbnail = {
   connected: Set<string>
   /** All plate reads for this photo, best first — the first one is what we navigated to. */
   candidates: PlateCandidate[]
+  /** EXIF capture date/GPS from the original file, when it had any. */
+  meta: PhotoMeta | null
   /** True once the recognize request has succeeded or failed (vs. still in flight). */
   settled: boolean
 }
@@ -82,8 +85,9 @@ export function usePlateRecognition({ currentValue, linkedValue }: UsePlateRecog
   const recognize = (file: File): void => {
     setPhoto(prev => {
       if (prev) URL.revokeObjectURL(prev.url)
-      return { url: URL.createObjectURL(file), connected: new Set(), candidates: [], settled: false }
+      return { url: URL.createObjectURL(file), connected: new Set(), candidates: [], meta: null, settled: false }
     })
+    void readPhotoMeta(file).then(meta => setPhoto(prev => (prev ? { ...prev, meta } : prev)))
     mutate(file)
   }
 

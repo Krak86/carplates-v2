@@ -82,6 +82,14 @@ export const plateCandidateSchema = z.object({
 })
 export type PlateCandidate = z.infer<typeof plateCandidateSchema>
 
+/** EXIF facts read client-side from an uploaded photo before it is downscaled (which drops them). */
+export const photoMetaSchema = z.object({
+  takenAt: z.date().nullable(),
+  latitude: z.number().min(-90).max(90).nullable(),
+  longitude: z.number().min(-180).max(180).nullable()
+})
+export type PhotoMeta = z.infer<typeof photoMetaSchema>
+
 /** POST /api/recognize/plate/cloud — plate reads found in an uploaded photo, best first. */
 export const plateRecognizeResponseSchema = z.object({ candidates: z.array(plateCandidateSchema).min(1) })
 export type PlateRecognizeResponse = z.infer<typeof plateRecognizeResponseSchema>

@@ -1785,14 +1785,59 @@ and re-check `DSC_0098.JPG` (2 small plates) before trusting it.
 `PhotoZoomDialog` (wheel zoom toward cursor, drag/arrow pan, `+`/`−`/`0`,
 double-click, Esc; no pinch gesture yet). `SearchField` shows a
 `recognize.photoTips` line (formats, the `MAX_DIMENSION` downscale, what
-tends to be missed) and a 413 error key. **Not yet:** rotating the photo,
-pinch-zoom on touch, drawing the detected plate boxes on the viewer.
+tends to be missed) and a 413 error key. Plate boxes are drawn on the
+thumbnail and viewer (`PhotoPlateBoxes`, hideable in the viewer). **Not yet:**
+rotating the photo, pinch-zoom on touch.
 
-**Improving the model on hard images — TODO (not started).** The stock
+**Real-photo pass (2026-09-30 / 10-01) — 88 own Ukrainian photos** (kept in a
+gitignored `services/alpr/eval/images/`; `services/alpr/eval.mjs` runs them
+through the container and writes `eval/results.json`, scoring recall once an
+`eval/labels.csv` (`file,plate|plate`) exists — **no labels yet, so no recall
+figure**). Findings and fixes:
+
+- **EXIF orientation was ignored** (the biggest miss): phone portrait shots are
+  stored sideways with an EXIF flag, so plates reached the detector rotated 90°.
+  `app.py` now applies `ImageOps.exif_transpose`. Every previously-empty phone
+  photo then read correctly. (The web flow hid this: the canvas downscale drops
+  EXIF; a direct upload did not.)
+- **Truncated reads.** The detector box is tight/cut on angled plates
+  ("BC15"): `app.py` now OCRs a padded crop and retries with wider padding when
+  the read isn't 8 chars. A box touching an *inner tile edge* is a plate cut by
+  a seam ("388CX" beat "BE8388CX" in the merge) — such boxes are skipped and
+  full-length reads win the duplicate merge.
+- **Candidate filter.** `isUaPlate` (`packages/shared/src/plate.ts`) keeps only
+  complete plates in shapes verified against the registry (16.7M rows):
+  `LLDDDDLL` ~91% — besides the 12 Cyrillic look-alike letters it uses Latin
+  Y/Z/J/F/D/G/… (~6% of rows; all electric-car series, e.g. `ВС1554ZА`) — and
+  the legacy `DDLLDDDD` ~8% (region digits first; registry dates from 2013, so
+  re-registered old plates). Signs ("HOTEL"), foreign plates and partial reads
+  no longer appear as boxes or in "Also found". `repairOcrPlate` is now
+  shape-aware, repairing by slot (0/O, 1/I, 8/B, 2/Z, 5/S).
+  Known cost: the legacy shape lets an occasional junk read through (`98II1166`
+  on a small object) — require a higher score for it if it gets annoying.
+  Not matched on purpose: 6 digits, 4 letters + 4 digits, diplomatic, …
+- **Photo EXIF in the UI.** `lib/photo-meta.ts` reads capture date + GPS from
+  the original file (`exifr`, before the downscale); `PhotoMetaInfo` shows them
+  (GPS links to OpenStreetMap), warns when the photo is ≥1 year old (plate may
+  now be on another car) and when it predates 2013 (registry data starts
+  2013-01-02 — e.g. `АТ9998АХ` is read right but legitimately absent). None of
+  the 88 photos carries GPS (stripped/disabled), so that line is untested on
+  real data. Zoom dialog: 🏷 button / `B` hides the plate labels.
+- **Open — two-row / stacked plates.** The registry has ~119k 4-letter + 4-digit
+  plates (`KA EO` over `3881`); the OCR reads the rows out of order
+  (`KA3881EO`) and the validator doesn't accept that shape. Motorcycle plates
+  (three rows) lose a digit at low resolution. Plan: when a box is nearly
+  square, split it into rows, OCR each, join in order; then add the shape.
+- **Idea, not built:** use the photo date to show who held the plate *on that
+  date* (the registry keeps full history), and flag a read that only matches an
+  older owner as a likely misread.
+
+**Improving the model on hard images — TODO (eval set partly done).** The stock
 `yolo-v9-t-384` detector + `cct-xs-v2-global` OCR miss plates a human reads
 fine: rain, night/dark, motion blur, dirt/mud, steep angles, tiny plates.
 Plan, in order — stop as soon as recall is good enough:
-1. **Build an eval set first.** Collect ~100-300 real Ukrainian photos (incl.
+1. **Build an eval set first — photos collected (88), labels still missing;
+   `eval.mjs` exists, `labels.csv` and the false-positive count don't.** Collect ~100-300 real Ukrainian photos (incl.
    the hard cases above) into a gitignored `services/alpr/eval/` with a
    `labels.csv` (file → plates in the photo, since the count of plates is the
    issue, not just the text). Add `services/alpr/eval.py` that runs the
@@ -1898,7 +1943,9 @@ above once scoped, or dropped if research says no.
   preferred over the metered cloud API above) done 2026-09-27; steps 2-4
   (client-side live detection, AR overlay, polish) not started — see
   "Own ALPR model + AR overlay" under Phase 3 for the full plan and exact
-  resume point.
+  resume point. Accuracy work since (EXIF rotation, padded OCR, tile-seam fix,
+  registry-verified plate shapes, photo EXIF info) — see its "Real-photo pass";
+  next: `labels.csv` for the 88 photos, then two-row plate support.
 - ⏳ RIA "similar cars" proxy (free token) — Phase 2, blocked on getting a
   `developers.ria.com` API key; otherwise unchanged from that section's design.
 - ⛔ Platesmania — **skipped**, see Phase 3: no free token, scraping ruled out.

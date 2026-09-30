@@ -33,3 +33,6 @@ scripts/.data/
 
 # claude
 .claude/settings.local.json
+
+# ALPR eval photos + results (personal data)
+services/alpr/eval/

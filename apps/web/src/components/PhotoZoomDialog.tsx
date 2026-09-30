@@ -40,6 +40,7 @@ export default function PhotoZoomDialog({ url, candidates, active, onClose }: Pr
   const viewportRef = useRef<HTMLDivElement>(null)
   const dragRef = useRef<{ x: number; y: number } | null>(null)
   const [view, setView] = useState<View>(FIT)
+  const [showBoxes, setShowBoxes] = useState(true)
 
   // React attaches wheel listeners as passive, which can't preventDefault the
   // page scroll — so this one is wired by hand.
@@ -103,6 +104,10 @@ export default function PhotoZoomDialog({ url, candidates, active, onClose }: Pr
       case '0':
         setView(FIT)
         break
+      case 'b':
+      case 'B':
+        setShowBoxes(v => !v)
+        break
       case 'ArrowLeft':
         setView(v => (v.scale === MIN_SCALE ? v : { ...v, x: v.x + KEY_PAN_PX }))
         break
@@ -144,11 +149,21 @@ export default function PhotoZoomDialog({ url, candidates, active, onClose }: Pr
           className="relative block"
         >
           <img src={url} alt="" draggable={false} className="block max-h-[100dvh] max-w-[100vw] select-none" />
-          <PhotoPlateBoxes candidates={candidates} active={active} />
+          {showBoxes && <PhotoPlateBoxes candidates={candidates} active={active} />}
         </span>
       </div>
 
       <div className="absolute top-3 right-3 flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => setShowBoxes(v => !v)}
+          aria-pressed={showBoxes}
+          aria-label={showBoxes ? t('photo.boxesHide') : t('photo.boxesShow')}
+          title={showBoxes ? t('photo.boxesHide') : t('photo.boxesShow')}
+          className={`${buttonClass} ${showBoxes ? '' : 'opacity-60'}`}
+        >
+          🏷
+        </button>
         <button
           type="button"
           onClick={() => handleZoomButton(1 / BUTTON_STEP)}

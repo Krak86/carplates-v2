@@ -6,6 +6,7 @@ import { Link, useLocation, useParams, useSearchParams } from 'react-router'
 import { classifyQuery } from '@carplates/shared'
 
 import LoadErrorBoundary from '@/components/LoadErrorBoundary'
+import PhotoMetaInfo from '@/components/PhotoMetaInfo'
 import PhotoThumbnail from '@/components/PhotoThumbnail'
 import PlateCandidates from '@/components/PlateCandidates'
 import ResultCard from '@/components/ResultCard'
@@ -164,6 +165,7 @@ export default function SearchRoute(): ReactNode {
         {photo && (
           <PhotoThumbnail url={photo.url} candidates={photo.candidates} active={raw || null} onClose={dismissPhoto} />
         )}
+        {photo?.meta && <PhotoMetaInfo meta={photo.meta} />}
         {photo && (
           <p className="flex w-full max-w-2xl items-start gap-1.5 rounded-md border border-amber-500/40 bg-amber-500/15 px-2.5 py-1.5 text-sm font-medium text-amber-800 dark:text-amber-300">
             <span aria-hidden>💡</span>

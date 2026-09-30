@@ -1,4 +1,4 @@
-export { normalizePlate, denormalizePlate, isVin, classifyQuery, repairOcrPlate } from './plate.js'
+export { normalizePlate, denormalizePlate, isVin, classifyQuery, repairOcrPlate, isUaPlate } from './plate.js'
 export { REGIONS, REGION_NAMES, regionName, platePrefixesForRegion } from './regions.js'
 export { VEHICLE_KINDS, resolveVehicleKind, sourceValueForKind, type VehicleKind } from './vehicleKind.js'
 export {
@@ -24,6 +24,7 @@ export {
   vinRegistrySchema,
   apiErrorSchema,
   plateCandidateSchema,
+  photoMetaSchema,
   plateRecognizeResponseSchema,
   vehiclePhotoSchema,
   vehiclePhotosResponseSchema,
@@ -65,6 +66,7 @@ export {
   type VinDecodeResponse,
   type VinRegistry,
   type ApiError,
+  type PhotoMeta,
   type PlateCandidate,
   type PlateRecognizeResponse,
   type VehiclePhoto,

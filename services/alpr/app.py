@@ -14,12 +14,13 @@ changes to consume either backend.
 
 import io
 import logging
+import re
 from typing import Any
 
 import numpy as np
 from fast_alpr import ALPR
 from fastapi import FastAPI, File, HTTPException, UploadFile
-from PIL import Image
+from PIL import Image, ImageOps
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("alpr")
@@ -50,6 +51,52 @@ TILE_OVERLAP = 0.25  # a plate up to ~25% of a tile wide survives a tile seam
 MAX_TILES = 24
 MIN_TILED_SIDE = 768  # smaller frames have nothing to gain from tiling
 DUPLICATE_OVERLAP = 0.5  # intersection / smaller box area above this = same plate
+
+
+# The detector box can be tight or cut short on angled plates (the OCR then sees
+# "BC15" instead of "BC1554ZA"). Read a slightly padded crop first; if that is
+# not a full 8-character plate, retry with progressively wider horizontal padding
+# and keep the best full-length read.
+PLATE_LENGTH = 8
+PAD_VARIANTS = [(0.08, 0.15), (0.25, 0.25), (0.45, 0.3)]  # (fraction of box width, of box height)
+
+
+def _compact(text: str) -> str:
+    return re.sub(r"[^A-Z0-9]", "", text.upper())
+
+
+def _read_plate(tile: np.ndarray, box: Any) -> tuple[str, float] | None:
+    height, width = tile.shape[:2]
+    bw, bh = box.x2 - box.x1, box.y2 - box.y1
+    best: tuple[str, float] | None = None
+    for pad_x, pad_y in PAD_VARIANTS:
+        x1, x2 = max(0, int(box.x1 - bw * pad_x)), min(width, int(box.x2 + bw * pad_x))
+        y1, y2 = max(0, int(box.y1 - bh * pad_y)), min(height, int(box.y2 + bh * pad_y))
+        ocr = alpr.ocr.predict(tile[y1:y2, x1:x2])
+        if ocr is None or not ocr.text:
+            continue
+        candidate = (ocr.text, _confidence(ocr.confidence))
+        full = len(_compact(ocr.text)) == PLATE_LENGTH
+        if full and (best is None or len(_compact(best[0])) != PLATE_LENGTH or candidate[1] > best[1]):
+            best = candidate
+        elif best is None:
+            best = candidate
+        if full and candidate[1] >= 0.9:
+            break
+    return best
+
+
+EDGE_MARGIN = 3  # px
+
+
+def _touches_inner_edge(box: Any, tile: tuple[int, int, int, int], width: int, height: int) -> bool:
+    x0, y0, x1, y1 = tile
+    return (
+        (x0 > 0 and box.x1 <= EDGE_MARGIN)
+        or (y0 > 0 and box.y1 <= EDGE_MARGIN)
+        or (x1 < width and box.x2 >= x1 - x0 - EDGE_MARGIN)
+        or (y1 < height and box.y2 >= y1 - y0 - EDGE_MARGIN)
+    )
 
 
 def _axis_starts(length: int, tile: int) -> list[int]:
@@ -89,15 +136,22 @@ def _predict_tiled(frame: np.ndarray) -> list[dict[str, Any]]:
     found: list[tuple[tuple[float, float, float, float], float, str, float]] = []
 
     for x0, y0, x1, y1 in _tiles(width, height):
-        for r in alpr.predict(frame[y0:y1, x0:x1]):
-            if r.ocr is None or not r.ocr.text:
+        tile = frame[y0:y1, x0:x1]
+        for detection in alpr.detector.predict(tile):
+            box = detection.bounding_box
+            # A box touching an inner tile edge is a plate cut by the seam — the
+            # neighbouring tile (or the full frame) sees it whole.
+            if _touches_inner_edge(box, (x0, y0, x1, y1), width, height):
                 continue
-            box = r.detection.bounding_box
+            read = _read_plate(tile, box)
+            if read is None:
+                continue
             full_box = (box.x1 + x0, box.y1 + y0, box.x2 + x0, box.y2 + y0)
-            found.append((full_box, float(r.detection.confidence), r.ocr.text, _confidence(r.ocr.confidence)))
+            found.append((full_box, float(detection.confidence), read[0], read[1]))
 
-    # The same plate is seen by several tiles: keep the most confident detection.
-    found.sort(key=lambda f: f[1], reverse=True)
+    # The same plate is seen by several tiles: keep a full-length read over a
+    # truncated one, then the most confident detection.
+    found.sort(key=lambda f: (len(_compact(f[2])) == PLATE_LENGTH, f[1]), reverse=True)
     kept: list[tuple[tuple[float, float, float, float], float, str, float]] = []
     for candidate in found:
         if all(_overlap(candidate[0], k[0]) < DUPLICATE_OVERLAP for k in kept):
@@ -123,7 +177,9 @@ async def recognize(image: UploadFile = File(...)) -> dict[str, list[dict[str, A
         raise HTTPException(status_code=400, detail="Uploaded image is empty")
 
     try:
-        pil_image = Image.open(io.BytesIO(raw)).convert("RGB")
+        # Phones store portrait shots sideways + an EXIF rotation flag; without
+        # applying it the detector sees plates rotated 90°.
+        pil_image = ImageOps.exif_transpose(Image.open(io.BytesIO(raw))).convert("RGB")
     except Exception as exc:
         raise HTTPException(status_code=400, detail="Could not decode image") from exc
 

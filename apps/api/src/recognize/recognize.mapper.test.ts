@@ -41,4 +41,20 @@ describe('mapPlateReaderResults', () => {
   it('defaults a missing score to 0', () => {
     expect(mapPlateReaderResults([{ plate: 'AA1234BC' }])).toEqual([{ plate: 'АА1234ВС', raw: 'AA1234BC', score: 0 }])
   })
+
+  it('drops reads that are not a complete UA plate (signs, foreign, partial)', () => {
+    expect(
+      mapPlateReaderResults([
+        { plate: 'HOTEL', score: 0.9 },
+        { plate: '2SR', score: 0.9 },
+        { plate: 'BC15', score: 0.9 },
+        { plate: 'B8T81', score: 0.9 },
+        { plate: 'BE0544BB', score: 0.9 }
+      ]).map(c => c.plate)
+    ).toEqual(['ВЕ0544ВВ'])
+  })
+
+  it('repairs 0/O and 8/B look-alikes by block position', () => {
+    expect(mapPlateReaderResults([{ plate: '8E0O44B8', score: 0.9 }])[0]?.plate).toBe('ВЕ0044ВВ')
+  })
 })

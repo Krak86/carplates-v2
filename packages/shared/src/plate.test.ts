@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { classifyQuery, denormalizePlate, isVin, normalizePlate, repairOcrPlate } from './plate.js'
+import { classifyQuery, denormalizePlate, isVin, normalizePlate, repairOcrPlate, isUaPlate } from './plate.js'
 
 describe('normalizePlate', () => {
   it('maps each Latin homoglyph to its Cyrillic twin', () => {
@@ -72,5 +72,32 @@ describe('repairOcrPlate', () => {
 
   it('composes with normalizePlate into the canonical key', () => {
     expect(normalizePlate(repairOcrPlate('BH01791C'))).toBe('ВН0179ІС')
+  })
+})
+describe('isUaPlate', () => {
+  it('accepts a full standard plate in either script', () => {
+    expect(isUaPlate('BE7116AA')).toBe(true)
+    expect(isUaPlate('ВЕ 7116 АА')).toBe(true)
+  })
+
+  it('accepts the extra Latin letters (electric-car series) and the legacy digit-first shape', () => {
+    for (const v of ['BC1554ZA', 'AA2762YA', 'DI0001JA', '50ВТ2782', '11AA1234']) expect(isUaPlate(v)).toBe(true)
+  })
+
+  it('rejects partial, foreign and non-plate text', () => {
+    for (const v of ['BC15', '2SR4491', 'HOTEL', 'BE7116A', 'B8T81', '']) expect(isUaPlate(v)).toBe(false)
+  })
+})
+
+describe('repairOcrPlate by slot', () => {
+  it('repairs the standard shape, including Z read as 2', () => {
+    expect(repairOcrPlate('BC15542A')).toBe('BC1554ZA')
+    expect(repairOcrPlate('8E0O44B8')).toBe('BE0044BB')
+  })
+
+  it('detects the legacy digit-first shape and repairs its letters', () => {
+    expect(repairOcrPlate('50BT2782')).toBe('50BT2782')
+    expect(repairOcrPlate('5OBT27B2')).toBe('50BT2782')
+    expect(repairOcrPlate('11A12345')).toBe('11AI2345')
   })
 })
