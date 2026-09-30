@@ -1746,12 +1746,11 @@ complexity in the same change.
   `PIXABAY_API_KEY`). **Not added to `apps/api/.env.example`** — that file is
   in Claude's deny-list (unreadable/uneditable this session); add
   `ALPR_LOCAL_URL=http://localhost:8088` there by hand.
-- Web: `recognizePlate()` (`apps/web/src/lib/api.ts`) now tries
-  `/api/recognize/plate/local` first, falling back to `/cloud` only on a 503
-  (not configured) or a network error (container not running) — a genuine
-  "no plate found"/"bad image" answer from the local model is trusted as-is,
-  never retried against the metered cloud API just because the first attempt
-  wasn't a hit. No other web changes — `CameraCaptureDialog.tsx`/
+- Web: `recognizePlate()` (`apps/web/src/lib/api.ts`) calls only
+  `/api/recognize/plate/local`. **Cloud fallback removed (2026-09-30)** — it
+  originally fell back to `/cloud` on a 503/network error; now a down
+  container just fails the call. The `/cloud` API route is kept but unused by
+  the web app. No other web changes — `CameraCaptureDialog.tsx`/
   `use-plate-recognition.ts` are untouched.
 - **Verified end-to-end 2026-09-27, for real, not just unit tests:**
   `pnpm alpr:build` was actually run — build log confirms real ONNX weights

@@ -199,29 +199,17 @@ export async function getUkraineGeography(): Promise<UkraineGeography> {
 }
 
 /**
- * Prefers the self-hosted, free own-model recognizer (services/alpr) and
- * falls back to the metered Plate Recognizer cloud API only when the local
- * one is unreachable or unconfigured (503, or the container isn't running) —
- * not on a genuine "no plate found"/"bad image" answer, which is worth
- * trusting as-is rather than spending cloud budget re-asking the same
- * question. See PLAN.md's "Own ALPR model" section.
+ * Uses only the self-hosted, free own-model recognizer (services/alpr). There
+ * is deliberately no fallback to the metered Plate Recognizer cloud API — if
+ * the local container is down the call fails. The `/cloud` API route still
+ * exists but nothing in the web app calls it. See PLAN.md's "Own ALPR model"
+ * section.
  */
 export async function recognizePlate(file: File): Promise<PlateRecognizeResponse> {
   const form = new FormData()
   form.append('image', file)
 
-  try {
-    const res = await fetch(`${BASE}/api/recognize/plate/local`, {
-      method: 'POST',
-      body: form,
-      headers: { accept: 'application/json' }
-    })
-    if (res.status !== 503) return plateRecognizeResponseSchema.parse(await unwrap(res))
-  } catch {
-    // local recognizer container isn't reachable — fall through to the cloud API
-  }
-
-  const res = await fetch(`${BASE}/api/recognize/plate/cloud`, {
+  const res = await fetch(`${BASE}/api/recognize/plate/local`, {
     method: 'POST',
     body: form,
     headers: { accept: 'application/json' }
