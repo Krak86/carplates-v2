@@ -136,7 +136,9 @@ export default defineConfig({
     port: 5173,
     proxy: {
       // dev: the API runs separately on :3000
-      '/api': { target: 'http://localhost:3000', changeOrigin: true }
+      '/api': { target: 'http://localhost:3000', changeOrigin: true },
+      // link-preview cards (rendered by the API) — lets you open /og/<plate>.png on :5173 too
+      '/og': { target: 'http://localhost:3000', changeOrigin: true }
     },
     allowedHosts: true // or ['.ngrok-free.app'] to be specific
   }

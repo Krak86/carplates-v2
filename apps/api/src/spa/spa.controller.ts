@@ -2,15 +2,14 @@ import { createReadStream } from 'node:fs'
 import { readFile, stat } from 'node:fs/promises'
 import { join, normalize, resolve } from 'node:path'
 
-import { Controller, Get, Inject, Logger, NotFoundException, Req, Res } from '@nestjs/common'
+import { Controller, Get, Inject, NotFoundException, Req, Res } from '@nestjs/common'
 import { ApiExcludeController } from '@nestjs/swagger'
-import { classifyQuery } from '@carplates/shared'
 import type { FastifyReply, FastifyRequest } from 'fastify'
 
 import { loadEnv } from '../env.js'
-import { PlateService } from '../plate/plate.service.js'
-import { VinService } from '../vin/vin.service.js'
-import { injectMeta, plateMetaText, renderMetaTags, vinMetaText } from './meta.js'
+import { injectMeta, renderMetaTags } from './meta.js'
+import { PreviewService } from './preview.service.js'
+import { DEFAULT_LANG, STATIC_PAGES, resolveLang, type Lang } from './spa-text.js'
 
 const MIME: Record<string, string> = {
   '.html': 'text/html; charset=utf-8',
@@ -50,19 +49,17 @@ const cacheControlOf = (rel: string): string => {
 @ApiExcludeController()
 @Controller()
 export class SpaController {
-  private readonly logger = new Logger('Spa')
   private readonly env = loadEnv()
   private readonly distDir = this.env.WEB_DIST_DIR ? resolve(this.env.WEB_DIST_DIR) : null
   private indexHtmlCache: string | null = null
+  // Bounded: one entry per known route × language, plus one shared '*' entry per language.
+  private readonly staticMetaCache = new Map<string, string>()
 
-  constructor(
-    @Inject(PlateService) private readonly plateService: PlateService,
-    @Inject(VinService) private readonly vinService: VinService
-  ) {}
+  constructor(@Inject(PreviewService) private readonly previews: PreviewService) {}
 
   @Get()
-  root(@Res() reply: FastifyReply): Promise<void> {
-    return this.render('/', reply)
+  root(@Req() req: FastifyRequest, @Res() reply: FastifyReply): Promise<void> {
+    return this.render('/', req, reply)
   }
 
   @Get('*')
@@ -85,21 +82,19 @@ export class SpaController {
       }
     }
 
-    await this.render(pathname, reply)
+    await this.render(pathname, req, reply)
   }
 
-  private async render(pathname: string, reply: FastifyReply): Promise<void> {
+  private async render(pathname: string, req: FastifyRequest, reply: FastifyReply): Promise<void> {
     if (!this.distDir) {
       throw new NotFoundException(
         'Web app is not built. Run the Vite dev server (pnpm --filter @carplates/web dev) or set WEB_DIST_DIR.'
       )
     }
     const html = await this.loadIndex()
-    const meta = await this.metaFor(pathname)
-    reply
-      .type('text/html; charset=utf-8')
-      .header('cache-control', 'no-cache')
-      .send(meta ? injectMeta(html, meta) : html)
+    const lang = resolveLang((req.query as { lang?: string } | undefined)?.lang)
+    const meta = await this.metaFor(pathname, lang)
+    reply.type('text/html; charset=utf-8').header('cache-control', 'no-cache').send(injectMeta(html, meta))
   }
 
   private async loadIndex(): Promise<string> {
@@ -108,27 +103,48 @@ export class SpaController {
     return this.indexHtmlCache
   }
 
-  private async metaFor(pathname: string): Promise<string | undefined> {
+  /**
+   * Plate/VIN deep links get per-vehicle tags (first load only — in-app navigation never hits the
+   * server); every other path gets its static page tags, rendered once per path+language and cached.
+   */
+  private async metaFor(pathname: string, lang: Lang): Promise<string> {
     const segments = pathname.split('/').filter(Boolean)
-    if (segments.length !== 1) return undefined
-    const query = decodeURIComponent(segments[0] as string)
     const siteUrl = this.env.PUBLIC_SITE_URL
+    const langQuery = lang === DEFAULT_LANG ? '' : `?lang=${lang}`
 
-    try {
-      if (classifyQuery(query) === 'vin') {
-        const res = await this.vinService.decode(query)
-        return renderMetaTags({ siteUrl, path: `/${query}`, ...vinMetaText(res) })
+    if (segments.length === 1 && !(`/${segments[0]}` in STATIC_PAGES)) {
+      const query = decodeURIComponent(segments[0] as string)
+      const preview = await this.previews.describe(query, lang)
+      if (preview) {
+        return renderMetaTags({
+          siteUrl,
+          path: `/${encodeURIComponent(preview.value)}`,
+          lang,
+          title: preview.title,
+          description: preview.description,
+          image: `${siteUrl}/og/${encodeURIComponent(preview.value)}.png${langQuery}`,
+          noindex: true
+        })
       }
-      const res = await this.plateService.lookup(query)
-      return renderMetaTags({
-        siteUrl,
-        path: `/${res.plate}`,
-        image: `${siteUrl}/og/${encodeURIComponent(res.plate)}.png`,
-        ...plateMetaText(res)
-      })
-    } catch (err) {
-      this.logger.debug(`no meta for "${query}": ${(err as Error).message}`)
-      return undefined
     }
+
+    const path = `/${segments.join('/')}`
+    const known = path in STATIC_PAGES
+    const cacheKey = `${known ? path : '*'}:${lang}`
+    let block = this.staticMetaCache.get(cacheKey)
+    if (!block) {
+      const page = (STATIC_PAGES[known ? path : '/'] as NonNullable<(typeof STATIC_PAGES)[string]>)[lang]
+      block = renderMetaTags({
+        siteUrl,
+        path: known && path !== '/' ? path : '',
+        lang,
+        ...page,
+        image: `${siteUrl}/og/default.png${langQuery}`,
+        // Unknown paths (typos, not-found plates) shouldn't be indexed under the home page's tags.
+        noindex: !known
+      })
+      this.staticMetaCache.set(cacheKey, block)
+    }
+    return block
   }
 }

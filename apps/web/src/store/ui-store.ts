@@ -72,6 +72,12 @@ export const useUiStore = create<UiState>(set => ({
   setLang: (lang): void => {
     persistLang(lang)
     void i18n.changeLanguage(lang)
+    // An explicit choice replaces a shared link's ?lang=, so a reload doesn't snap back to it.
+    const url = new URL(window.location.href)
+    if (url.searchParams.has('lang')) {
+      url.searchParams.set('lang', lang)
+      window.history.replaceState(window.history.state, '', url)
+    }
     set({ lang })
   },
   toggleTheme: (): void =>

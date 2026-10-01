@@ -1,11 +1,15 @@
-import type { PlateLookupResponse, VinDecodeResponse } from '@carplates/shared'
+import { OG_HEIGHT, OG_WIDTH } from './og-card.js'
+import { OG_LOCALE, SITE_NAME, type Lang } from './spa-text.js'
 
-export interface MetaInput {
+export type MetaInput = {
   siteUrl: string
   path: string
+  lang: Lang
   title: string
   description: string
-  image?: string
+  image: string
+  /** Plate/VIN pages: keep millions of per-vehicle URLs out of search indexes (link unfurlers still read the tags). */
+  noindex?: boolean
 }
 
 const esc = (s: string): string =>
@@ -17,39 +21,29 @@ export function renderMetaTags(m: MetaInput): string {
   return [
     `<title>${esc(m.title)}</title>`,
     `<meta name="description" content="${esc(m.description)}">`,
+    ...(m.noindex ? [`<meta name="robots" content="noindex, follow">`] : []),
+    `<meta property="og:site_name" content="${SITE_NAME}">`,
     `<meta property="og:title" content="${esc(m.title)}">`,
     `<meta property="og:description" content="${esc(m.description)}">`,
     `<meta property="og:type" content="website">`,
+    `<meta property="og:locale" content="${OG_LOCALE[m.lang]}">`,
     `<meta property="og:url" content="${esc(canonical)}">`,
-    ...(m.image ? [`<meta property="og:image" content="${esc(m.image)}">`] : []),
-    `<meta name="twitter:card" content="${m.image ? 'summary_large_image' : 'summary'}">`,
+    `<meta property="og:image" content="${esc(m.image)}">`,
+    `<meta property="og:image:type" content="image/png">`,
+    `<meta property="og:image:width" content="${OG_WIDTH}">`,
+    `<meta property="og:image:height" content="${OG_HEIGHT}">`,
+    `<meta name="twitter:card" content="summary_large_image">`,
+    `<meta name="twitter:title" content="${esc(m.title)}">`,
+    `<meta name="twitter:description" content="${esc(m.description)}">`,
+    `<meta name="twitter:image" content="${esc(m.image)}">`,
     `<link rel="canonical" href="${esc(canonical)}">`
   ].join('\n    ')
 }
 
-/** Replace the placeholder <title> and inject the meta block before </head>. */
+/** Drop the placeholder <title>/description from index.html and inject the meta block before </head>. */
 export function injectMeta(html: string, metaBlock: string): string {
-  return html.replace(/<title>[\s\S]*?<\/title>\s*/i, '').replace('</head>', `    ${metaBlock}\n  </head>`)
-}
-
-export function plateMetaText(res: PlateLookupResponse): { title: string; description: string } {
-  const c = res.current
-  const car = [c.brand, c.model].filter(Boolean).join(' ')
-  const year = c.makeYear ? ` ${c.makeYear}` : ''
-  const facts = [car || null, c.makeYear ? String(c.makeYear) : null, c.fuel, res.region].filter(Boolean)
-  return {
-    title: `${res.plate} — ${car || 'vehicle'}${year} | Cars UA`,
-    description: `${res.plate}: ${facts.join(', ')}. Data from the state open vehicle registry.`
-  }
-}
-
-export function vinMetaText(res: VinDecodeResponse): { title: string; description: string } {
-  const pick = (name: string): string | undefined => res.results.find(r => r.variable === name)?.value
-  const car = [pick('Make'), pick('Model')].filter(Boolean).join(' ')
-  const year = pick('Model Year')
-  const facts = [car || null, year ?? null, pick('Fuel Type - Primary')].filter(Boolean)
-  return {
-    title: `${res.vin} — ${car || 'VIN'}${year ? ` ${year}` : ''} | Cars UA`,
-    description: `VIN ${res.vin}: ${facts.join(', ') || 'decoded vehicle details'}. Source: NHTSA vPIC.`
-  }
+  return html
+    .replace(/<title>[\s\S]*?<\/title>\s*/i, '')
+    .replace(/<meta\s+name="description"[^>]*>\s*/i, '')
+    .replace('</head>', `    ${metaBlock}\n  </head>`)
 }

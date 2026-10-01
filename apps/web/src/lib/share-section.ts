@@ -1,10 +1,14 @@
+import i18n from '@/i18n'
+
 export const SHARE_SECTIONS = ['history', 'ratings', 'wiki', 'photos'] as const
 export type ShareSection = (typeof SHARE_SECTIONS)[number]
 
+/** The shared link carries the sharer's language so its link preview (and the opened app) match it. */
 export function buildShareUrl(section: ShareSection, tab?: string): string {
   const params = new URLSearchParams()
   params.set('section', section)
   if (tab) params.set('tab', tab)
+  params.set('lang', i18n.language)
   return `${window.location.origin}${window.location.pathname}?${params.toString()}`
 }
 
