@@ -16,6 +16,8 @@ export default function Sidebar(): ReactNode {
   const lang = useUiStore(s => s.lang)
   const setLang = useUiStore(s => s.setLang)
   const setDrawerOpen = useUiStore(s => s.setDrawerOpen)
+  const theme = useUiStore(s => s.theme)
+  const toggleTheme = useUiStore(s => s.toggleTheme)
 
   const linkClass = ({ isActive }: { isActive: boolean }): string =>
     cn(
@@ -66,6 +68,17 @@ export default function Sidebar(): ReactNode {
           {LANG_LABEL[l]}
         </button>
       ))}
+
+      <div className="mt-4 px-3 text-xs tracking-wide text-[var(--color-muted)] uppercase">{t('nav.theme')}</div>
+      <button
+        type="button"
+        aria-pressed={theme === 'dark'}
+        onClick={toggleTheme}
+        className="rounded-lg bg-[var(--color-surface)]/60 px-3 py-1.5 text-left text-sm transition-colors duration-200 hover:bg-[var(--color-surface)]"
+      >
+        <span aria-hidden>{theme === 'dark' ? '🌙' : '☀️'}</span>{' '}
+        {theme === 'dark' ? t('nav.themeDark') : t('nav.themeLight')}
+      </button>
 
       <OfflineDataSettings />
     </nav>

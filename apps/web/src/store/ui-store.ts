@@ -23,6 +23,36 @@ function persistCardTiltEnabled(enabled: boolean): void {
   }
 }
 
+const THEME_STORAGE_KEY = 'carplates.theme'
+const THEME_COLORS: Record<Theme, string> = { light: '#ffffff', dark: '#0f141f' }
+
+function initialTheme(): Theme {
+  try {
+    const saved = localStorage.getItem(THEME_STORAGE_KEY)
+    if (saved === 'light' || saved === 'dark') return saved
+  } catch {
+    /* private mode / disabled storage */
+  }
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+}
+
+function applyTheme(theme: Theme): void {
+  document.documentElement.dataset.theme = theme
+  document.documentElement.style.colorScheme = theme
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', THEME_COLORS[theme])
+}
+
+function persistTheme(theme: Theme): void {
+  try {
+    localStorage.setItem(THEME_STORAGE_KEY, theme)
+  } catch {
+    /* private mode / disabled storage */
+  }
+}
+
+const startTheme = initialTheme()
+applyTheme(startTheme)
+
 interface UiState {
   lang: Lang
   theme: Theme
@@ -36,7 +66,7 @@ interface UiState {
 
 export const useUiStore = create<UiState>(set => ({
   lang: initialLang(),
-  theme: 'light',
+  theme: startTheme,
   drawerOpen: false,
   cardTiltEnabled: initialCardTiltEnabled(),
   setLang: (lang): void => {
@@ -47,7 +77,8 @@ export const useUiStore = create<UiState>(set => ({
   toggleTheme: (): void =>
     set(s => {
       const theme = s.theme === 'light' ? 'dark' : 'light'
-      document.documentElement.dataset.theme = theme
+      applyTheme(theme)
+      persistTheme(theme)
       return { theme }
     }),
   setDrawerOpen: (drawerOpen): void => set({ drawerOpen }),
