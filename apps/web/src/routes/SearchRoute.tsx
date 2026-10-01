@@ -17,6 +17,7 @@ import { usePlateRecognition } from '@/components/use-plate-recognition'
 import VinResult from '@/components/VinResult'
 import { extractVehicleInfo } from '@/components/VinResult.helpers'
 import WikiHeroImage from '@/components/WikiHeroImage'
+import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 import { ApiError } from '@/lib/api'
 import { cn } from '@/lib/cn'
@@ -102,6 +103,17 @@ export default function SearchRoute(): ReactNode {
   useEffect(() => {
     if (showingSavedCopy) capture('offline_hit', { kind })
   }, [showingSavedCopy, kind, raw])
+
+  // Title follows the searched value immediately (found or not); the car is appended once loaded.
+  let titleCar: string | null = null
+  if (kind === 'plate' && plate.data) {
+    const c = plate.data.current
+    titleCar = formatVehicleLabel({ brand: c.brand, model: c.model, year: c.makeYear, color: null })
+  } else if (kind === 'vin' && vin.data) {
+    titleCar = formatVehicleLabel({ ...extractVehicleInfo(vin.data), color: null })
+  }
+  const shownValue = (kind === 'plate' && plate.data?.plate) || (kind === 'vin' && vin.data?.vin) || raw
+  useDocumentTitle(shownValue ? [shownValue, titleCar].filter(Boolean).join(' — ') : null)
 
   const notFound = active.error instanceof ApiError && active.error.status === 404
   const isIdle = !raw

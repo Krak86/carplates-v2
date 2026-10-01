@@ -1,10 +1,12 @@
 import { Suspense, lazy } from 'react'
 import type { ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Route, Routes, useLocation } from 'react-router'
 
 import Layout from '@/components/Layout'
 import LoadErrorBoundary from '@/components/LoadErrorBoundary'
 import Spinner from '@/components/ui/Spinner'
+import { ROUTE_TITLE_KEYS, useDocumentTitle } from '@/hooks/useDocumentTitle'
 import SearchRoute from '@/routes/SearchRoute'
 
 const AboutRoute = lazy(() => import('@/routes/AboutRoute'))
@@ -16,6 +18,9 @@ const AdvancedSearchRoute = lazy(() => import('@/routes/advanced-search/Advanced
 
 export default function App(): ReactNode {
   const { pathname } = useLocation()
+  const { t } = useTranslation()
+  const titleKey = ROUTE_TITLE_KEYS[pathname]
+  useDocumentTitle(titleKey ? t(titleKey) : undefined)
 
   return (
     <Layout>
