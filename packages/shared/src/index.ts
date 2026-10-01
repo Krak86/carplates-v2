@@ -1,4 +1,4 @@
-export { normalizePlate, denormalizePlate, isVin, classifyQuery, repairOcrPlate, isUaPlate } from './plate.js'
+export { normalizePlate, denormalizePlate, isVin, classifyQuery, repairOcrPlate, isUaPlate, isLegacyUaPlate } from './plate.js'
 export { REGIONS, REGION_NAMES, regionName, platePrefixesForRegion } from './regions.js'
 export { VEHICLE_KINDS, resolveVehicleKind, sourceValueForKind, type VehicleKind } from './vehicleKind.js'
 export {

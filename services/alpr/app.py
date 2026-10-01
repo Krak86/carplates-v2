@@ -17,6 +17,7 @@ import logging
 import re
 from typing import Any
 
+import cv2
 import numpy as np
 from fast_alpr import ALPR
 from fastapi import FastAPI, File, HTTPException, UploadFile
@@ -54,36 +55,83 @@ DUPLICATE_OVERLAP = 0.5  # intersection / smaller box area above this = same pla
 
 
 # The detector box can be tight or cut short on angled plates (the OCR then sees
-# "BC15" instead of "BC1554ZA"). Read a slightly padded crop first; if that is
-# not a full 8-character plate, retry with progressively wider horizontal padding
-# and keep the best full-length read.
+# "BC15" instead of "BC1554ZA"). Read crops at several paddings, as-is and then
+# (if still unsure) upscaled 2x + sharpened (small, soft plates — e.g. a motorcycle plate ~110px wide —
+# read "AL1930JA" raw but "AI1920JA" sharpened), and keep the best full-length
+# read. Tight padding comes first: extra context can *hurt* on small plates.
 PLATE_LENGTH = 8
 PAD_VARIANTS = [(0.08, 0.15), (0.25, 0.25), (0.45, 0.3)]  # (fraction of box width, of box height)
+SHARPEN_PAD_VARIANTS = [(0.0, 0.0), *PAD_VARIANTS]  # tight first: padding can hurt a small, sharpened plate
+SHARPEN_SCALE = 2
+SHARPEN_KERNEL = np.array([[0, -1, 0], [-1, 5, -1], [0, -1, 0]], dtype=np.float32)
+GOOD_ENOUGH = 0.97  # a full-length read at least this confident stops the search
 
 
 def _compact(text: str) -> str:
     return re.sub(r"[^A-Z0-9]", "", text.upper())
 
 
+def _sharpened(crop: np.ndarray) -> np.ndarray:
+    big = cv2.resize(crop, None, fx=SHARPEN_SCALE, fy=SHARPEN_SCALE, interpolation=cv2.INTER_CUBIC)
+    return cv2.filter2D(big, -1, SHARPEN_KERNEL)
+
+
 def _read_plate(tile: np.ndarray, box: Any) -> tuple[str, float] | None:
     height, width = tile.shape[:2]
     bw, bh = box.x2 - box.x1, box.y2 - box.y1
     best: tuple[str, float] | None = None
-    for pad_x, pad_y in PAD_VARIANTS:
-        x1, x2 = max(0, int(box.x1 - bw * pad_x)), min(width, int(box.x2 + bw * pad_x))
-        y1, y2 = max(0, int(box.y1 - bh * pad_y)), min(height, int(box.y2 + bh * pad_y))
-        ocr = alpr.ocr.predict(tile[y1:y2, x1:x2])
-        if ocr is None or not ocr.text:
-            continue
-        candidate = (ocr.text, _confidence(ocr.confidence))
-        full = len(_compact(ocr.text)) == PLATE_LENGTH
-        if full and (best is None or len(_compact(best[0])) != PLATE_LENGTH or candidate[1] > best[1]):
-            best = candidate
-        elif best is None:
-            best = candidate
-        if full and candidate[1] >= 0.9:
-            break
+    best_full = False
+    # Plain crops first. Sharpened ones only run when no plain read is confident:
+    # on a confident plate they could only reorder a multi-row plate's characters.
+    for sharpen, pads in ((False, PAD_VARIANTS), (True, SHARPEN_PAD_VARIANTS)):
+        for pad_x, pad_y in pads:
+            x1, x2 = max(0, int(box.x1 - bw * pad_x)), min(width, int(box.x2 + bw * pad_x))
+            y1, y2 = max(0, int(box.y1 - bh * pad_y)), min(height, int(box.y2 + bh * pad_y))
+            crop = tile[y1:y2, x1:x2]
+            if crop.size == 0:
+                continue
+            ocr = alpr.ocr.predict(_sharpened(crop) if sharpen else crop)
+            if ocr is None or not ocr.text:
+                continue
+            candidate = (ocr.text, _confidence(ocr.confidence))
+            full = len(_compact(ocr.text)) == PLATE_LENGTH
+            if best is None or (full and not best_full) or (full == best_full and candidate[1] > best[1]):
+                best, best_full = candidate, full
+            if best_full and best is not None and best[1] >= GOOD_ENOUGH:
+                return best
     return best
+
+
+# Stacked car plates (4 letters over 4 digits, e.g. KA EO / 3881) have a near-square
+# box, and the whole-plate OCR reads them in an unstable order. Split the box into
+# two rows, read each, join top then bottom. Single-row plates are ~4-5x wider than
+# tall; a row only counts if it reads exactly 4 characters. (Three-row motorcycle
+# plates are not handled here: this OCR returns nothing for a lone short row, so
+# they go through the whole-plate read, which keeps their order.)
+STACKED_MAX_ASPECT = 2.4  # box width / height below this is a candidate for two rows
+STACKED_ROW_OVERLAP = 0.06  # of box height, so a row's glyphs aren't clipped at the split
+STACKED_ROW_LENGTH = 4
+
+
+def _read_stacked(tile: np.ndarray, box: Any) -> tuple[str, float] | None:
+    height, width = tile.shape[:2]
+    bw, bh = box.x2 - box.x1, box.y2 - box.y1
+    if bh <= 0 or bw / bh >= STACKED_MAX_ASPECT:
+        return None
+    x1, x2 = max(0, int(box.x1 - bw * 0.05)), min(width, int(box.x2 + bw * 0.05))
+    mid = (box.y1 + box.y2) / 2
+    overlap = bh * STACKED_ROW_OVERLAP
+    rows = [(box.y1 - bh * 0.05, mid + overlap), (mid - overlap, box.y2 + bh * 0.05)]
+    text, score = '', 1.0
+    for top, bottom in rows:
+        crop = tile[max(0, int(top)) : min(height, int(bottom)), x1:x2]
+        ocr = alpr.ocr.predict(crop) if crop.size else None
+        part = _compact(ocr.text) if ocr is not None and ocr.text else ''
+        if len(part) != STACKED_ROW_LENGTH:
+            return None
+        text += part
+        score = min(score, _confidence(ocr.confidence))
+    return text, score
 
 
 EDGE_MARGIN = 3  # px
@@ -143,7 +191,7 @@ def _predict_tiled(frame: np.ndarray) -> list[dict[str, Any]]:
             # neighbouring tile (or the full frame) sees it whole.
             if _touches_inner_edge(box, (x0, y0, x1, y1), width, height):
                 continue
-            read = _read_plate(tile, box)
+            read = _read_stacked(tile, box) or _read_plate(tile, box)
             if read is None:
                 continue
             full_box = (box.x1 + x0, box.y1 + y0, box.x2 + x0, box.y2 + y0)

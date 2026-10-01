@@ -1777,8 +1777,8 @@ frames ≥768px only) and merges duplicate boxes by overlap, keeping the most
 confident detection. A first fraction-based 2×2 grid was too weak for plates
 ~1.5% of frame width (parking-lot photos). Web upload cap raised
 1600→3200px / 0.9→2.5 MB (`lib/image.ts`; API limit is 4 MB) so tiles keep
-real pixels. **Untested against the container** — rebuild (`pnpm alpr:build`)
-and re-check `DSC_0098.JPG` (2 small plates) before trusting it.
+real pixels. Exercised against the rebuilt container on the 88-photo eval set
+(2026-10-01); `DSC_0098.JPG` still reads both plates.
 
 **Photo viewer + limits hint (2026-09-30).** Uploaded-photo preview is now
 `object-contain` (whole image, not a cropped strip) and opens a full-screen
@@ -1823,11 +1823,27 @@ figure**). Findings and fixes:
   2013-01-02 — e.g. `АТ9998АХ` is read right but legitimately absent). None of
   the 88 photos carries GPS (stripped/disabled), so that line is untested on
   real data. Zoom dialog: 🏷 button / `B` hides the plate labels.
-- **Open — two-row / stacked plates.** The registry has ~119k 4-letter + 4-digit
-  plates (`KA EO` over `3881`); the OCR reads the rows out of order
-  (`KA3881EO`) and the validator doesn't accept that shape. Motorcycle plates
-  (three rows) lose a digit at low resolution. Plan: when a box is nearly
-  square, split it into rows, OCR each, join in order; then add the shape.
+- **Two-row / stacked car plates — fixed 2026-10-01.** The registry has ~119k
+  4-letter + 4-digit plates (`KA EO` over `3881`, stored `KAEO3881`); the
+  whole-plate OCR reads them in an unstable order. `app.py` `_read_stacked`: a box
+  with width/height < 2.4 is split into two overlapping rows, each OCR'd (each must
+  read exactly 4 chars), joined top+bottom; otherwise the normal read.
+  `LLLLDDDD` added to `PLATE_SHAPES`/`isUaPlate`/`repairOcrPlate`. Verified on
+  `ua_kaeo3881.jpg`, `images.jpg`, the EV and Passat stacked plates.
+  **Tried and rejected:** reordering LLDDDDLL→LLLLDDDD from box aspect alone —
+  angled single-row plates also have aspect 1.3-2.4 and it scrambled ~25 correct reads.
+- **Motorcycle (3-row) plates — partly fixed 2026-10-01.** Row-by-row OCR does not
+  work (this OCR model returns nothing for a lone short row like `AI`), so
+  they go through the whole-plate read, which keeps their order but misreads
+  small soft plates (`ua_ai1920ja.jpg`: `AL1930JA`, truth `AI1920JA`). Fix in
+  `_read_plate`: when no plain read reaches 0.97 (0.9 was too low: the web's q0.85 JPEG re-encode turned the plain read into `AL1930JA` at 0.94 and the retry never ran), retry on a tight crop upscaled 2x
+  and sharpened → `AI1920JA` 0.98. Padding hurt that plate (wider crops read
+  `AI1930JA`/`AU1533JA`). Cost: ~+13% latency (414→469 ms/photo avg). The
+  sharpened retry also changed 8 other reads among the 88 photos; on the one checked
+  by eye (`20241103_135726.jpg`) it was better (`BC3847EI`), but with no
+  `labels.csv` there is still no recall number.
+- **Legacy-shape junk — fixed 2026-10-01.** `recognize.mapper.ts` drops a
+  digits-first (`DDLLDDDD`) read scoring < 0.7 (`LEGACY_MIN_SCORE`).
 - **Idea, not built:** use the photo date to show who held the plate *on that
   date* (the registry keeps full history), and flag a read that only matches an
   older owner as a likely misread.
@@ -1944,7 +1960,9 @@ above once scoped, or dropped if research says no.
   (client-side live detection, AR overlay, polish) not started — see
   "Own ALPR model + AR overlay" under Phase 3 for the full plan and exact
   resume point. Accuracy work since (EXIF rotation, padded OCR, tile-seam fix,
-  registry-verified plate shapes, photo EXIF info) — see its "Real-photo pass";
+  registry-verified plate shapes, photo EXIF info, stacked two-row plates,
+  sharpened OCR retry for small motorcycle plates, legacy-shape score floor) —
+  see its "Real-photo pass";
   next: `labels.csv` for the 88 photos, then two-row plate support.
 - ⏳ RIA "similar cars" proxy (free token) — Phase 2, blocked on getting a
   `developers.ria.com` API key; otherwise unchanged from that section's design.

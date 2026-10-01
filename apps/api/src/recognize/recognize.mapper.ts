@@ -1,9 +1,11 @@
-import { isUaPlate, normalizePlate, repairOcrPlate } from '@carplates/shared'
+import { isLegacyUaPlate, isUaPlate, normalizePlate, repairOcrPlate } from '@carplates/shared'
 import type { PlateCandidate } from '@carplates/shared'
 
 import type { PlateReaderResult } from './recognize.types.js'
 
 const MAX_CANDIDATES = 5
+// The digits-first legacy shape lets the odd junk read through (`98II1166` on a small object), so it needs a surer read.
+const LEGACY_MIN_SCORE = 0.7
 
 /** Normalizes, drops anything that is not a complete UA plate (signs, foreign or partial reads), dedupes (keeping the higher score) and sorts raw ALPR results, best first. */
 export function mapPlateReaderResults(results: PlateReaderResult[]): PlateCandidate[] {
@@ -14,6 +16,7 @@ export function mapPlateReaderResults(results: PlateReaderResult[]): PlateCandid
     const plate = normalizePlate(repairOcrPlate(raw))
     if (!isUaPlate(plate)) continue
     const score = r.score ?? 0
+    if (isLegacyUaPlate(plate) && score < LEGACY_MIN_SCORE) continue
     const seen = byPlate.get(plate)
     if (!seen || score > seen.score) byPlate.set(plate, { plate, raw, score, ...(r.box && { box: r.box }) })
   }

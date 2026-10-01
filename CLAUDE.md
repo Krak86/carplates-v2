@@ -60,6 +60,8 @@ pnpm ingest:all        # db:migrate, then ingest:full + ingest:ratings:csv concu
 pnpm alpr:build     # build the self-hosted ALPR (own-model plate recognition) Docker image
 pnpm alpr:up        # run it on :8088 (sets ALPR_LOCAL_URL=http://localhost:8088 in apps/api/.env to use it)
 pnpm alpr:down      # stop it
+node services/alpr/eval.mjs   # run services/alpr/eval/images/* through the running container → eval/results.json
+                              # (gitignored photos; rebuild with alpr:build after editing services/alpr/app.py)
 ```
 
 First-time local setup, test data (seconds): `pnpm install && pnpm db:up && pnpm db:migrate && pnpm db:seed && pnpm dev`.

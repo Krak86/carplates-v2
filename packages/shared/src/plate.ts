@@ -65,7 +65,8 @@ const LETTER_TO_DIGIT: Readonly<Record<string, string>> = {
 //             Latin letters (Y, Z, J, F, D, G, …): ~6% of rows, e.g. every electric-car series.
 //   DDLLDDDD  ~8%  — legacy series with the region-code digits first ("11АА1234").
 // Rarer shapes (6 digits, 4 letters, diplomatic, …) are deliberately not matched here.
-const PLATE_SHAPES = ['LLDDDDLL', 'DDLLDDDD'] as const
+//   LLLLDDDD  — stacked two-row plates: the top row's letters, then the bottom row's digits.
+const PLATE_SHAPES = ['LLDDDDLL', 'DDLLDDDD', 'LLLLDDDD'] as const
 
 const isDigit = (c: string): boolean => c >= '0' && c <= '9'
 const isLetter = (c: string): boolean => !isDigit(c) && c.toLowerCase() !== c.toUpperCase()
@@ -83,12 +84,23 @@ export function repairOcrPlate(input: string): string {
   if (s.length !== 8) return s // not a UA plate shape — leave alone
   const chars = Array.from(s)
   const fit = (shape: string): number => chars.filter((c, i) => (shape[i] === 'L' ? isLetter(c) : isDigit(c))).length
-  const shape = fit(PLATE_SHAPES[1]) > fit(PLATE_SHAPES[0]) ? PLATE_SHAPES[1] : PLATE_SHAPES[0]
+  // Strictly-better wins, so a tie keeps the earlier (more common) shape.
+  const shape = PLATE_SHAPES.reduce((best, candidate) => (fit(candidate) > fit(best) ? candidate : best))
   return chars.map((c, i) => (shape[i] === 'L' ? (DIGIT_TO_LETTER[c] ?? c) : (LETTER_TO_DIGIT[c] ?? c))).join('')
 }
 
 // Letters after normalizePlate: the 12 Cyrillic look-alikes, or any other Latin letter.
-const UA_PLATE_RES = [/^[АВСЕНІКМОРТХA-Z]{2}\d{4}[АВСЕНІКМОРТХA-Z]{2}$/, /^\d{2}[АВСЕНІКМОРТХA-Z]{2}\d{4}$/]
+const UA_LEGACY_RE = /^\d{2}[АВСЕНІКМОРТХA-Z]{2}\d{4}$/
+const UA_PLATE_RES = [
+  /^[АВСЕНІКМОРТХA-Z]{2}\d{4}[АВСЕНІКМОРТХA-Z]{2}$/,
+  UA_LEGACY_RE,
+  /^[АВСЕНІКМОРТХA-Z]{4}\d{4}$/
+]
+
+/** True for the legacy region-digits-first shape ("11АА1234"), the one most prone to junk matches. */
+export function isLegacyUaPlate(input: string): boolean {
+  return UA_LEGACY_RE.test(normalizePlate(input))
+}
 
 /** True when the (any-script) input is a complete UA plate in one of the known 8-char shapes. */
 export function isUaPlate(input: string): boolean {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { classifyQuery, denormalizePlate, isVin, normalizePlate, repairOcrPlate, isUaPlate } from './plate.js'
+import { classifyQuery, denormalizePlate, isVin, normalizePlate, repairOcrPlate, isUaPlate, isLegacyUaPlate } from './plate.js'
 
 describe('normalizePlate', () => {
   it('maps each Latin homoglyph to its Cyrillic twin', () => {
@@ -99,5 +99,28 @@ describe('repairOcrPlate by slot', () => {
     expect(repairOcrPlate('50BT2782')).toBe('50BT2782')
     expect(repairOcrPlate('5OBT27B2')).toBe('50BT2782')
     expect(repairOcrPlate('11A12345')).toBe('11AI2345')
+  })
+})
+
+describe('stacked two-row plates', () => {
+  it('accepts 4 letters + 4 digits', () => {
+    expect(isUaPlate('KAEO3881')).toBe(true)
+    expect(isUaPlate('BIAC5142')).toBe(true)
+  })
+
+  it('repairs by slot into that shape', () => {
+    expect(repairOcrPlate('KAE03881')).toBe('KAEO3881')
+    expect(repairOcrPlate('BIAC5I42')).toBe('BIAC5142')
+  })
+
+  it('keeps the common shape on a tie', () => {
+    expect(repairOcrPlate('BC15542A')).toBe('BC1554ZA')
+  })
+})
+
+describe('isLegacyUaPlate', () => {
+  it('flags only the digits-first shape', () => {
+    expect(isLegacyUaPlate('50ВТ2782')).toBe(true)
+    expect(isLegacyUaPlate('BE7116AA')).toBe(false)
   })
 })

@@ -54,6 +54,12 @@ describe('mapPlateReaderResults', () => {
     ).toEqual(['ВЕ0544ВВ'])
   })
 
+  it('needs a surer read for the legacy digits-first shape, and accepts stacked plates', () => {
+    expect(mapPlateReaderResults([{ plate: '98II1166', score: 0.5 }])).toEqual([])
+    expect(mapPlateReaderResults([{ plate: '50BT2782', score: 0.9 }])).toHaveLength(1)
+    expect(mapPlateReaderResults([{ plate: 'KAEO3881', score: 0.5 }])[0]?.plate).toBe('КАЕО3881')
+  })
+
   it('repairs 0/O and 8/B look-alikes by block position', () => {
     expect(mapPlateReaderResults([{ plate: '8E0O44B8', score: 0.9 }])[0]?.plate).toBe('ВЕ0044ВВ')
   })
