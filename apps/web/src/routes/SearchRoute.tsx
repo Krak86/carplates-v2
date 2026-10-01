@@ -6,6 +6,7 @@ import { Link, useLocation, useParams, useSearchParams } from 'react-router'
 import { classifyQuery } from '@carplates/shared'
 
 import LoadErrorBoundary from '@/components/LoadErrorBoundary'
+import NotFoundInfo from '@/components/NotFoundInfo'
 import PhotoMetaInfo from '@/components/PhotoMetaInfo'
 import PhotoThumbnail from '@/components/PhotoThumbnail'
 import PlateCandidates from '@/components/PlateCandidates'
@@ -145,7 +146,8 @@ export default function SearchRoute(): ReactNode {
           </p>
         )}
 
-        {active.isError && !hasData && (
+        {active.isError && !hasData && notFound && kind === 'plate' && <NotFoundInfo value={raw} />}
+        {active.isError && !hasData && !(notFound && kind === 'plate') && (
           <p className="rounded bg-[var(--color-surface)]/20 px-1.5 py-0.5 text-[var(--color-muted)]">
             {notFound ? t('result.noResults', { value: raw }) : t('result.error')}
           </p>
