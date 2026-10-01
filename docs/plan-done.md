@@ -1605,3 +1605,30 @@ detail/{id}` from 1-290 not already known — zero additional real pages
     the HMR socket drops and Vite reloads the page on return, losing the photo. Test camera flows
     against a production build: `pnpm build`, set `WEB_DIST_DIR=../web/dist` in `apps/api/.env`
     (read once at startup — restart the API), `ngrok http 3000`; unset it for normal dev.
+
+- **Link previews + tab title ✅ DONE (2026-10-01)** — first-load meta for shared links, dynamic tab title.
+  - **Tab title** (`hooks/useDocumentTitle.ts`): `document.title` = `"<page> · Cars UA"` and `<html lang>`
+    follow the UI language. Static routes use their `nav.*` key (`ROUTE_TITLE_KEYS`, called from `App.tsx`);
+    `SearchRoute` shows the searched plate/VIN as soon as the URL changes (found or not), then appends
+    "Brand Model (Year)" once data loads. Typing alone never changes it.
+  - **Meta tags** (`apps/api/src/spa/`): only on a **first load / deep link** (in-app navigation never hits the
+    server). `/<plate>` and `/<vin>` get per-vehicle title/description/`og:*`/`twitter:*` + `noindex, follow`
+    (millions of per-vehicle URLs stay out of search indexes; unfurlers still read the tags; no sitemap, so
+    crawlers only reach them via external links). Static routes use `STATIC_PAGES` in `spa-text.ts`
+    (ua/ru/en), rendered once per route×language and cached; unknown paths get home tags + `noindex`.
+    `PreviewService` (10-min LRU) shares one lookup between the meta and the image.
+  - **Language**: `?lang=ua|ru|en` picks the preview language (default `ua` — crawlers send no language).
+    In-app share links (`buildShareUrl`) append the sharer's `?lang=`; opening one applies that language
+    for the visit **without persisting it** (`initialLang` in `i18n/index.ts`); an explicit language
+    switch rewrites the URL param (`ui-store.ts`).
+  - **OG image** `GET /og/<plate|vin|default>.png` (`og.controller.ts`, `og-card.ts`): 1200×630, gradient from
+    the car's registry color (`VEHICLE_COLOR_HEX`, `fallbackVehicleColor` when absent) to brand blue, all text on
+    dark translucent panels so any color stays readable, plate-style box (VIN shrinks to fit), brand logo.
+    **`@resvg/resvg-js` + bundled Noto Sans files** (no system fonts, no Puppeteer); in-memory LRU of 300 PNGs,
+    `Cache-Control` 24h, throttled 60/min/IP; unknown keys → generic card (5-min cache). Reads fonts/logos
+    from `WEB_DIST_DIR`, else `apps/web/public` (so it works with the dev API without a build).
+  - **`robots.txt`**: disallows `/api/` and `/og/` only — plate/VIN pages stay crawlable so `noindex` is seen.
+  - **Testing gotcha**: the meta is injected by the **API**, not Vite — `:5173` and `vite preview` never show it.
+    `pnpm build`, set `WEB_DIST_DIR=../web/dist` in `apps/api/.env`, restart the API, open `localhost:3000/<plate>`
+    in Incognito (an old service worker serves a cached `index.html`). Keep `PORT` at 3000 — the Vite proxy
+    targets it. Covered by `spa.controller.test.ts` (no server needed).

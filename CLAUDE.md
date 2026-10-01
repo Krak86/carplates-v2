@@ -142,6 +142,11 @@ Vitest 4 · ESLint 10 (flat config)
   (`spa.controller.ts`). `@vite-pwa/assets-generator` must stay on v2 (sharp).
 - **NestJS**: feature modules, Zod-validated inputs, no logic in controllers.
   Controllers return values and never take `@Res()` — except the SPA catch-all.
+- **Link previews** (`apps/api/src/spa/`): meta tags + `/og/*.png` are produced by the **API**, only on first
+  load/deep link — Vite (`:5173`, `vite preview`) never shows them. To test: `pnpm build`, set
+  `WEB_DIST_DIR=../web/dist` in `apps/api/.env`, restart the API, open `localhost:3000/<plate>` (Incognito, SW
+  caches `index.html`). Plate/VIN pages are `noindex`; `?lang=` selects the preview language. Details in
+  docs/plan-done.md "Link previews".
 - **Telemetry** stays off locally. `.env.example` in each app documents the vars;
   real `.env*` files are gitignored and `deny`-listed for Claude.
 - Tests: Vitest, `import { describe, it, expect } from 'vitest'`, colocated

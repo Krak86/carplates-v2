@@ -429,6 +429,11 @@ above once scoped, or dropped if research says no.
 - 📋 **Wanted (stolen) vehicles** — planned 2026-10-01, researched, not started.
   See "Wanted vehicles ingest" below.
 
+- 📋 **Link-preview follow-ups** (2026-10-01): (a) e-Ukraine typeface (thedigital.gov.ua/fonts, Dropbox
+  download) for the OG cards — blocked on confirming its license (page only says CC BY 4.0 for "content") and
+  glyph coverage (ї є ґ) + TTF/OTF files; the site itself stays on the system font stack; (b) test a real
+  unfurl through ngrok/prod (Telegram, Facebook debugger) once deployed.
+
 ### Wanted vehicles ingest — planned (2026-10-01), not started
 
 Source: data.gov.ua dataset `ac1a3a9d-512b-446b-9b0c-1383d38ce474` (National
@@ -686,8 +691,9 @@ PostHog-observed load.
   below) · Redis (RIA + VIN cache, throttler store) · api · web · ingest-cron
 - GHCR image build + SSH deploy workflow (GitHub Actions, free for public repos)
 - Monthly CKAN ingest cron on the VPS (`ingest.ts`, self-checks `ingested_resources`)
-- OG image endpoint `GET /og/:plate.png` — `satori` + `resvg` (**never
-  Puppeteer**), cached long, keyed by plate; wired into the meta-injection host
+- ✅ OG image endpoint — done 2026-10-01 (plate **and** VIN, `resvg-js` + bundled Noto Sans, never
+  Puppeteer; see `docs/plan-done.md` "Link previews"). Still for deploy: set `PUBLIC_SITE_URL` to the real
+  domain, make sure `fonts/` + `logos/` ship in `WEB_DIST_DIR`, and put a CDN/Caddy cache in front of `/og/`
 - Telemetry switched on for real (env flags + keys)
 - Full-history ingest of all 16 CKAN resources
 
