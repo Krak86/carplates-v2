@@ -11,7 +11,7 @@ Postgres; VIN decoding proxies the free NHTSA API.
 
 **Phase 1 (current): plate + VIN search, local dev stack only.** No CI, no VPS.
 Phases 2-5 (RIA similar-cars, Platesmania, image recognition, VPS/deploy,
-accounts) are in `PLAN.md`.
+accounts) are in `PLAN.md` (active/planned work only; finished Phase 1/1.5 write-ups live in `docs/plan-done.md` — grep headings, never read it whole).
 
 The **v1 app is the sibling folder `../carplates/`** (do not modify it) — the
 reference for Phase 2/3 ports: RIA brand→id matrices
@@ -104,7 +104,7 @@ Vitest 4 · ESLint 10 (flat config)
 - **Plate normalization**: `normalizePlate` from `@carplates/shared` runs on
   every plate at every layer (web input, API param, ingest row). It produces the
   DB key and the query key — they must match. **Exception:** `registrations.plate`
-  is nullable since the 2026 plate-removal (ГСЦ МВС order №67/ОД, see `PLAN.md`)
+  is nullable since the 2026 plate-removal (ГСЦ МВС order №67/ОД, see `docs/plan-done.md`)
   — such rows are keyed on `vin` instead, and the API follows the VIN, not the
   plate, to reach them (`plate.service.ts`, `vin.service.ts`).
 - **Ingest column mapping is header-name-driven, not positional** — see
@@ -113,7 +113,7 @@ Vitest 4 · ESLint 10 (flat config)
   the wrong field the moment two years disagree on order.
 - **DB writes**: Drizzle in `apps/api`; `scripts/ingest.ts` batches plain
   `INSERT … ON CONFLICT DO NOTHING`, and `scripts/backfill.ts` runs raw SQL for
-  the set-based plate reconstruction (see `PLAN.md`). Schema changes = a new
+  the set-based plate reconstruction (see `docs/plan-done.md`). Schema changes = a new
   `packages/db/migrations/NNNN_*.sql` file (the migrator applies them in order,
   once each).
 - **Never erase a real-data-seeded DB without asking first.** `pnpm db:seed`
@@ -121,7 +121,7 @@ Vitest 4 · ESLint 10 (flat config)
   local dataset — running it against a DB already holding a real ingest
   (`pnpm ingest:full`, hours, ~20 GB) destroys that data and forces a
   multi-hour re-ingest to recover (this happened once, 2026-09-23 — see
-  PLAN.md's Phase 1.5 "Registry statistics" entry). Before running `db:seed`,
+  docs/plan-done.md's Phase 1.5 "Registry statistics" entry). Before running `db:seed`,
   or any `TRUNCATE`/`DROP`/bulk `DELETE` against `registry.registrations` or
   `registry.ingested_resources`, check what's currently loaded first
   (`SELECT count(*) FROM registry.registrations`, or check
@@ -129,10 +129,10 @@ Vitest 4 · ESLint 10 (flat config)
   rows is the synthetic seed set, millions is a real ingest. If it looks like
   real data, **ask the user before erasing it**, and only proceed on explicit
   approval. The data is technically always re-ingestable (`pnpm ingest:full`
-  reuses cached ZIPs in `scripts/.data/` and is deterministic — see PLAN.md),
+  reuses cached ZIPs in `scripts/.data/` and is deterministic — see docs/plan-done.md),
   but that's an hours-long recovery, not a reason to treat erasing it
   casually.
-- **Offline / PWA** (`apps/web`, see PLAN.md Phase 1.5): the service worker only
+- **Offline / PWA** (`apps/web`, see docs/plan-done.md Phase 1.5): the service worker only
   exists in production builds. Changing a Zod schema in `packages/shared` discards
   every user's saved offline data — intended, but keep it in mind. A new
   `/api/*` query that should work offline must be added to the persisted-cache

@@ -47,7 +47,7 @@ pnpm dev
 ```
 
 `ingest:full` chains three steps — see [scripts/src/ingest-full.ts](scripts/src/ingest-full.ts)
-and [PLAN.md](PLAN.md)'s "2026 plate removal" section for what each does and why:
+and [docs/plan-done.md](docs/plan-done.md)'s "2026 plate removal" section for what each does and why:
 
 1. `pnpm ingest` — every CKAN year (2013-2026), largest datasets take minutes each
 2. Downloads and ingests an archived pre-redaction 2026 snapshot (government order
