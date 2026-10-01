@@ -58,7 +58,15 @@ export default defineConfig({
         // makes Workbox throw on startup, leaving a service worker that caches and serves nothing.
         globPatterns: ['**/*.{js,css,html,svg,ico,png,geojson}'],
         // Logos (6 MB) are runtime-cached below; PDF fonts and export-* chunks (PDF/DOCX export) stay online-only.
-        globIgnores: ['logos/**', 'fonts/**', 'assets/export-*.js'],
+        // So does the AR scan (needs the API to read plates): its detector worker, wasm runtime and ONNX model.
+        globIgnores: [
+          'logos/**',
+          'fonts/**',
+          'models/**',
+          'assets/export-*.js',
+          'assets/plate-detector.worker-*.js',
+          'assets/ArCameraDialog-*.js'
+        ],
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/api\//, /^\/og\//, /^\/healthz/],
         cleanupOutdatedCaches: true,

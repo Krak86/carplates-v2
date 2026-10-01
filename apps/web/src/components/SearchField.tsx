@@ -3,6 +3,7 @@ import type { FormEvent, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router'
 
+import ArSearchButton from '@/components/ArSearchButton'
 import CameraSearchButton from '@/components/CameraSearchButton'
 import PhotoSearchButton from '@/components/PhotoSearchButton'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
@@ -64,6 +65,7 @@ export default function SearchField({
       <div className="flex justify-center gap-2">
         <PhotoSearchButton isPending={isRecognizing} disabled={!online} onPick={onPickPhoto} />
         <CameraSearchButton isPending={isRecognizing} disabled={!online} onCapture={onPickPhoto} />
+        <ArSearchButton disabled={!online} />
       </div>
       {recognizeErrorKey && <p className="text-sm text-[var(--color-muted)]">{t(recognizeErrorKey)}</p>}
     </div>
