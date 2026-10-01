@@ -434,6 +434,9 @@ above once scoped, or dropped if research says no.
   glyph coverage (ї є ґ) + TTF/OTF files; the site itself stays on the system font stack; (b) test a real
   unfurl through ngrok/prod (Telegram, Facebook debugger) once deployed.
 
+- 📋 **Fuel economy & emissions (CO2 score + icon)** — planned 2026-10-01, researched, not started.
+  See "Fuel economy & emissions" below.
+
 ### Wanted vehicles ingest — planned (2026-10-01), not started
 
 Source: data.gov.ua dataset `ac1a3a9d-512b-446b-9b0c-1383d38ce474` (National
@@ -480,6 +483,64 @@ tens of MB RAM when streamed, seconds to low tens of seconds of DB work for
 First steps when picked up: download the real file locally, confirm count and
 plate/VIN quality, then migration + Zod schema in `packages/shared` + `wanted.ts`
 with a fixture test.
+
+### Fuel economy & emissions (CO2) — planned (2026-10-01), researched, not started
+
+Goal: on the result card show fuel consumption + CO2 for the car's make/model/year/engine, plus a single
+**0-100 "emissions badness" score** with an easy-to-read CO2 icon (cloud-with-CO2 glyph, green→red gauge/fill;
+0 = clean, 100 = worst). Reference-data feature, same shape as the NCAP ratings — **not** a live API call.
+
+Sources (all free, no key; licence terms not re-verified — check before building):
+
+- **fueleconomy.gov** (US DOE/EPA) — first, easiest. `vehicles.csv.zip` bulk download (also `/ws/rest/` JSON/XML).
+  1984+, MPG city/hwy/comb, CO2 g/mi, fuel type, EV range + kWh/100mi, GHG/smog score. Public domain. EPA test
+  cycle (reads lower than WLTP). Many UA cars are US imports. Key columns: `make`, `model`, `year`, `comb08`,
+  `co2TailpipeGpm`, `fuelType1`, `displ`, `cylinders`, `atvType`.
+- **EEA CO2 monitoring of new passenger cars** (data.europa.eu / EEA Datahub) — EU-origin cars. Per-registration
+  yearly CSVs (large): make, model, variant, engine cc/kW, fuel, CO2 g/km (NEDC → WLTP), consumption on newer
+  years. Aggregate to make/model/year/engine/fuel at load time, don't store raw rows.
+- **NRCan Fuel Consumption Ratings** (open.canada.ca) — CSV 1995+, already L/100km; fallback for N. American models.
+- Optional/later: UK VCA car fuel data (open CSV); Spritmonitor.de (real-world consumption, no API → scraping,
+  check ToS). Skip commercial APIs (CarAPI, Auto.dev, API Ninjas: paid or non-commercial free tiers — see the
+  "no free RIA-alternative" survey in the parked section).
+
+Design (follow the NCAP pattern — `scripts/src/euroncap.ts` + committed gz CSV in `scripts/seed-data/`):
+
+- Tables `registry.fuel_economy_*` (or one `fuel_economy` table with a `source` column): make/model/year range,
+  engine cc, fuel type, `co2_g_km` (**normalize EPA g/mi ÷ 1.609 on load**), `l_100km`, `cycle` (`EPA`|`NEDC`|`WLTP`),
+  `source`. Never mix cycles unlabeled — show the cycle next to the number.
+- `scripts/src/fuel-economy.ts` + `ingest:fuel:csv` / `export:fuel:csv`, wired into `ingest:ratings:csv`.
+  Raw bulk downloads cached in `scripts/.data/` (gitignored); only the aggregated CSV is committed.
+- **Matching** registry row → reference row: fuzzy on normalized make + model + year + fuel + engine capacity
+  (reuse the NCAP model-name normalization/aliases; registry `fuel` is free text — do the "Fuel-type icons"
+  distinct-values research below first, the mapping is shared). Return a **range** when several trims match
+  ("6.5-7.2 L/100km"), and say "similar vehicles", never claim an exact match. Measure the real match rate
+  on the full dataset before building UI.
+- **Refresh cadence — manual/annual, not scheduled.** All sources are bulk files that change rarely, so no
+  cron, no live API calls from the app, and no scraping in the request path:
+  - fueleconomy.gov: DOE republishes `vehicles.csv.zip` as new model years are certified (several times a year,
+    mostly Q4-Q1). Re-run ~**2x/year** (e.g. Jan + Jul) or when a new model year appears; cheap — one ~10 MB zip.
+  - EEA: one release per reporting year, final data lands roughly **once a year** (provisional ~mid-year, final
+    ~autumn/winter). Re-run **annually** when a new year file is published.
+  - NRCan: one new file per model year, **annually** (~autumn).
+  - Spritmonitor (if ever added): scraping, so on demand only, rate-limited, never scheduled.
+  - Fetch via the script's own download (CSV, cached in `scripts/.data/`), then `export:fuel:csv` → commit the
+    aggregated gz CSV. Prod loads the committed CSV (`ingest:fuel:csv`, seconds) — same as the NCAP tables, which
+    also have no scheduler. Store the source file's `last_modified`/release year in the table (or a small
+    `ingested_resources`-style row) so the script can say "already current" and skip. If a VPS exists (Phase 4),
+    optionally a monthly job that only *checks* for a newer release and notifies, never auto-overwrites.
+- **Score (0-100):** linear on CO2 g/km, clamped — e.g. 0 g/km → 0, ≥ ~300 g/km → 100 (constants in
+  `packages/shared`, `CONSTANT_CASE`, tune against the real distribution of matched rows). Pure EV → 0 (tailpipe
+  only; label as "tailpipe"). Bands for the icon colour: green/yellow/orange/red. Hybrids/PHEVs: use the
+  rated combined CO2, note the caveat. Score and colour thresholds live in shared, with unit tests.
+- API: add fields to the plate/VIN response (Zod schema in `packages/shared` — note this discards users' saved
+  offline data) or a separate `/api/fuel/:...` query added to `lib/offline-cache.ts` persisted rules (small, cache it).
+- UI: new `CO2Badge` component (default export, ref-as-prop, hook for logic), i18n keys ua/ru/en, tooltip
+  explaining source + test cycle + "estimate for similar vehicles". Hide entirely when no match.
+
+First steps when picked up: download `vehicles.csv.zip`, run the match-rate check against the real registry
+(make/model/year/fuel/engine), then migration + shared Zod schema + ingest script with a fixture test; add EEA
+second, only if the US-only match rate leaves too many EU cars uncovered.
 
 ### To discuss / research
 
