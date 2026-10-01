@@ -46,6 +46,8 @@ export default function BrandLogo({ brand, variant = 'inline', size = 'default',
         className={cn(
           'pointer-events-none absolute inset-x-0 top-0 -z-10 h-auto w-full animate-watermark-breathe object-contain',
           'opacity-(--watermark-opacity) mix-blend-multiply grayscale-[0.4]',
+          // Multiply would darken an already-dark surface to nothing — render a light silhouette instead.
+          'dark:mix-blend-screen dark:brightness-0 dark:invert',
           className
         )}
       />
@@ -62,6 +64,9 @@ export default function BrandLogo({ brand, variant = 'inline', size = 'default',
         // both contribute a height/width class, or which one wins is cascade-order luck.
         size === 'sm' ? 'h-4 w-5' : 'h-8 w-auto',
         'object-contain mix-blend-multiply',
+        // Dark logos vanish on a dark surface — sit them on a light chip.
+        'dark:rounded dark:bg-white/10 dark:mix-blend-normal',
+        size === 'sm' ? 'dark:p-px' : 'dark:p-1',
         className
       )}
     />

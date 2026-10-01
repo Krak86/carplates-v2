@@ -70,7 +70,7 @@ body {
 
 /* Tune freely while testing — no need to hunt through component classes. */
 :root {
-  --watermark-opacity: 0.05;
+  --watermark-opacity: 0.12;
 }
 
 @keyframes watermark-breathe {
