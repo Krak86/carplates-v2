@@ -137,6 +137,7 @@ export default defineConfig({
     proxy: {
       // dev: the API runs separately on :3000
       '/api': { target: 'http://localhost:3000', changeOrigin: true }
-    }
+    },
+    allowedHosts: true // or ['.ngrok-free.app'] to be specific
   }
 })
