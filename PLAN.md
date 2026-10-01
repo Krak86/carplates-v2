@@ -478,6 +478,18 @@ with a fixture test.
 
 ### To discuss / research
 
+- **Shareable photo-search links** — idea 2026-10-01, deferred (not started).
+  Share button on the photo card uploads the shrunk image + recognition result
+  (candidates with boxes, EXIF meta) to `POST /api/shares`; opening
+  `/<plate>?p=<token>` fetches it and fills the same `photo` state in
+  `use-plate-recognition.ts`, so the UX matches a local upload with no
+  re-recognition. Storage: `registry.shared_photos` (`id` token, `image bytea`,
+  `candidates jsonb`, `meta jsonb`, `created_at`, `expires_at`); image served
+  from `GET /api/shares/:token/image`, also used as `og:image` by the existing
+  meta-injection. Open decisions: strip EXIF GPS by default (opt-in to include),
+  expiry (~30 days), upload throttle (~10/h/IP), re-encode to JPEG/WebP, show
+  "public to anyone with the link" notice, keep `/api/shares` out of the
+  offline cache. Move blobs to disk/S3 in Phase 4.
 - **Show key "test drive" facts for a looked-up car** — surface curated
   specs/review highlights (not just registry fields) for the car's
   make/model/year. Needs a data source: is there a free API, or does this
