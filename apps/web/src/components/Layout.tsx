@@ -1,7 +1,7 @@
 import { Suspense, lazy, useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router'
+import { Link, useLocation } from 'react-router'
 
 import BackgroundDevPanel from '@/components/BackgroundDevPanel'
 import BackgroundPhotos from '@/components/BackgroundPhotos'
@@ -23,11 +23,17 @@ export default function Layout({ children }: Props): ReactNode {
   const drawerOpen = useUiStore(s => s.drawerOpen)
   const setDrawerOpen = useUiStore(s => s.setDrawerOpen)
   const vehicleLabel = useHeaderVehicleLabel()
+  const { pathname } = useLocation()
   // Sidebar is lazy-loaded (not part of the LCP path) — stay unmounted until
   // the first open, then keep mounted so close gets a transition instead of a hard unmount.
   const [hasOpened, setHasOpened] = useState(false)
   const drawerRef = useRef<HTMLDivElement>(null)
   const toggleRef = useRef<HTMLButtonElement>(null)
+
+  // Following a plate/VIN link otherwise keeps the old scroll offset — land on the new result's top.
+  useEffect(() => {
+    window.scrollTo({ top: 0 })
+  }, [pathname])
 
   useEffect(() => {
     if (drawerOpen) setHasOpened(true)
@@ -82,7 +88,7 @@ export default function Layout({ children }: Props): ReactNode {
             <div
               ref={drawerRef}
               className={cn(
-                'fixed inset-y-0 left-0 z-20 w-64 overflow-hidden transition-transform duration-300 ease-in-out',
+                'fixed inset-y-0 top-14 left-0 z-20 w-64 overflow-hidden transition-transform duration-300 ease-in-out',
                 'md:sticky md:top-14 md:h-[calc(100vh-3.5rem)] md:w-0 md:translate-x-0 md:self-start md:overflow-y-auto md:transition-[width] md:duration-300 md:ease-in-out',
                 drawerOpen ? 'translate-x-0 md:w-64' : '-translate-x-full'
               )}
@@ -95,7 +101,7 @@ export default function Layout({ children }: Props): ReactNode {
             </div>
           </>
         )}
-        <main className="flex-1 p-4 md:p-8">{children}</main>
+        <main className="min-w-0 flex-1 p-4 md:p-8">{children}</main>
       </div>
 
       <PwaUpdatePrompt />

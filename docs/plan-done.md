@@ -1579,3 +1579,29 @@ detail/{id}` from 1-290 not already known — zero additional real pages
   the shared cached `/api/stats` query; shown on the homepage only (not on
   result pages).
 
+
+- **Mobile UX pass ✅ DONE (2026-10-01)** — fixes from testing on a Galaxy S24 Ultra over ngrok.
+  - **Layout**: mobile drawer sits below the sticky header (its first item, "Search", was hidden
+    behind it); search input and `<main>` got `min-w-0` and `body` `overflow-x: clip` (the input's
+    intrinsic width caused page-wide horizontal scroll and a header that stopped short); the
+    homepage top-stats grid is 1 column on phones (`TopStatsPanel.tsx`); `Layout.tsx` scrolls to
+    top on route-path change (not on `?section=`/`?tab=` changes, which `share-section.ts` scrolls itself).
+  - **Search buttons**: image/camera/AR buttons are icon-over-label tiles on phones, inline pills
+    from `sm` up; shared classes in `components/search-button-styles.ts`.
+  - **"Search by image"** no longer sets `capture` on its file input → the phone's normal chooser
+    (gallery / files / camera), same as desktop.
+  - **"Use camera"** on touch devices (`(pointer: coarse)`) hands off to the **native camera app**
+    (`<input capture="environment">`) — real lenses, optical zoom, full-resolution photo, which a
+    `getUserMedia` stream can't match (verified: web zoom is digital on one lens, ≈8× cap vs. the
+    native camera's 5× optical lens at 9.6×). Desktop keeps the live `CameraCaptureDialog`
+    (full-screen black viewfinder + round shutter on small screens, high-res stream, `takePhoto()`
+    still with canvas fallback, hardware-zoom slider via `use-camera-zoom.ts`/`CameraZoomControl.tsx`).
+  - **AR scan** (`ArCameraDialog.tsx`): quality switch HD / Full HD (default) / 4K, camera picker
+    when the browser exposes >1 camera (`enumerateDevices`), actual stream resolution shown,
+    zoom slider (range = whatever `getCapabilities().zoom` reports — the browser's cap, not ours).
+    Detector frames are downscaled to 1280px (`use-live-plate-detection.ts`) and boxes scaled back, so
+    a 4K stream keeps detection fast while OCR crops stay sharp.
+  - **Dev gotcha**: opening the native camera backgrounds the tab; through ngrok → Vite dev server
+    the HMR socket drops and Vite reloads the page on return, losing the photo. Test camera flows
+    against a production build: `pnpm build`, set `WEB_DIST_DIR=../web/dist` in `apps/api/.env`
+    (read once at startup — restart the API), `ngrok http 3000`; unset it for normal dev.

@@ -17,6 +17,8 @@ export type DetectionStatus = 'loading' | 'ready' | 'error'
 const COLOR_ACTIVE = '#4ade80'
 const COLOR_READ = '#fbbf24'
 const COLOR_PENDING = '#ffffff'
+// The stream may be 4K (sharp crops for reading); the detector only needs a downscaled copy of each frame.
+const DETECT_MAX_WIDTH = 1280
 const MIN_FRAME_GAP_MS = 80 // ≈12 fps ceiling; the worker's own speed is the real limit
 
 function draw(
@@ -79,6 +81,7 @@ export function useLivePlateDetection(
     let ready = false
     let nextId = 0
     let lastSent = 0
+    let frameScale = 1 // detector-frame width / video width for the frame in flight
     let timer: ReturnType<typeof setTimeout> | undefined
 
     const schedule = (): void => {
@@ -93,7 +96,16 @@ export function useLivePlateDetection(
       }
       busy = true
       lastSent = performance.now()
-      createImageBitmap(video).then(
+      frameScale = Math.min(1, DETECT_MAX_WIDTH / video.videoWidth)
+      const resize =
+        frameScale < 1
+          ? {
+              resizeWidth: Math.round(video.videoWidth * frameScale),
+              resizeHeight: Math.round(video.videoHeight * frameScale),
+              resizeQuality: 'low' as const
+            }
+          : undefined
+      createImageBitmap(video, resize).then(
         frame => {
           const request: DetectorRequest = { id: nextId++, frame }
           worker.postMessage(request, [frame])
@@ -120,8 +132,19 @@ export function useLivePlateDetection(
         busy = false
         const video = videoRef.current
         if (canvas && video && video.videoWidth) {
-          handlersRef.current?.onFrame(data.boxes, video)
-          draw(canvas, video, data.boxes, handlersRef.current?.labelFor)
+          // Boxes come back in detector-frame pixels; the canvas and crops work in full video pixels.
+          const boxes =
+            frameScale < 1
+              ? data.boxes.map(b => ({
+                  ...b,
+                  x1: b.x1 / frameScale,
+                  y1: b.y1 / frameScale,
+                  x2: b.x2 / frameScale,
+                  y2: b.y2 / frameScale
+                }))
+              : data.boxes
+          handlersRef.current?.onFrame(boxes, video)
+          draw(canvas, video, boxes, handlersRef.current?.labelFor)
         }
         timer = setTimeout(tick, Math.max(0, MIN_FRAME_GAP_MS - (performance.now() - lastSent)))
       }

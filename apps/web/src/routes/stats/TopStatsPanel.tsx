@@ -145,7 +145,7 @@ export default function TopStatsPanel({ stats, highlightModel }: Props): ReactNo
   })
 
   return (
-    <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
+    <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
       <Leaderboard titleKey="stats.top.brand" icon="🏭" entries={brandEntries} />
       <Leaderboard titleKey="stats.top.model" icon="🚗" entries={modelEntries} />
       <Leaderboard titleKey="stats.top.color" icon="🎨" entries={colorEntries} showColorSwatch />

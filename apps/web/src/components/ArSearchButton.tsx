@@ -2,6 +2,8 @@ import { lazy, Suspense, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { SEARCH_BUTTON_CLASS, SEARCH_BUTTON_ICON_CLASS } from '@/components/search-button-styles'
+
 // Loaded on first open, so the dialog code (and, from it, the detector worker, ONNX runtime and model) stays out of the main bundle.
 const ArCameraDialog = lazy(() => import('@/components/ArCameraDialog'))
 
@@ -22,9 +24,11 @@ export default function ArSearchButton({ disabled = false }: Props): ReactNode {
         onClick={() => setOpen(true)}
         disabled={disabled}
         title={disabled ? t('offline.needsConnection') : undefined}
-        className="flex items-center gap-1.5 rounded-full border border-[var(--color-border)] bg-surface px-4 py-2 text-sm text-fg hover:border-muted hover:shadow-sm disabled:opacity-50"
+        className={SEARCH_BUTTON_CLASS}
       >
-        <span aria-hidden>🔍</span>
+        <span aria-hidden className={SEARCH_BUTTON_ICON_CLASS}>
+          🔍
+        </span>
         {t('search.byAr')}
       </button>
       <Suspense fallback={null}>{open && <ArCameraDialog onClose={() => setOpen(false)} />}</Suspense>

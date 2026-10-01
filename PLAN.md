@@ -102,6 +102,13 @@ success. **On-premise SDK ruled out** — same per-lookup licensing as the
 cloud API (no cost win) for photos we're already comfortable sending to
 Plate Recognizer's cloud; not pursuing it.
 
+**Mobile follow-ups (2026-10-01; shipped work in `docs/plan-done.md`, "Mobile UX pass").** A web
+page only gets the one stream the browser exposes, so far-away plates on phones are limited by that
+lens/sensor. Open ideas, in order: (1) lens switch labelled 1×/3×/5× once we know which cameras Chrome
+lists on the S24; (2) native wrapper (Capacitor/CameraX) only if long-distance live AR becomes core.
+Not worth doing: extra software zoom beyond the hardware cap (no gain for OCR), and `takePhoto()`
+stills for AR (field of view/aspect differ from the preview, so detector boxes don't map onto them).
+
 ### Own ALPR model + AR overlay — planned (2026-09-27), step 1 shipped
 
 User-requested pair, scoped together because the second depends on the
