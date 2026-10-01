@@ -26,9 +26,12 @@ const PLACEHOLDER_GRADIENTS: readonly (readonly [string, string])[] = [
   ['#1c2b1f', '#4f7a5c']
 ]
 
+// Shown first on load (the rest follow alphabetically in the rotation).
+const FIRST_IMAGE = 'quilia-FcyipqujfGg-unsplash-crop.jpg'
+
 export function getBackgroundImages(): BackgroundImage[] {
   const real = Object.entries(modules)
-    .sort(([a], [b]) => a.localeCompare(b))
+    .sort(([a], [b]) => Number(b.endsWith(FIRST_IMAGE)) - Number(a.endsWith(FIRST_IMAGE)) || a.localeCompare(b))
     .map(([path, url]) => ({ id: path, css: `url(${url})` }))
 
   if (real.length > 0) return real

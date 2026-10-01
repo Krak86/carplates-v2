@@ -108,9 +108,10 @@ describe('stacked two-row plates', () => {
     expect(isUaPlate('BIAC5142')).toBe(true)
   })
 
-  it('repairs by slot into that shape', () => {
-    expect(repairOcrPlate('KAE03881')).toBe('KAEO3881')
-    expect(repairOcrPlate('BIAC5I42')).toBe('BIAC5142')
+  it('repairs by slot, then reorders to the registry shape (top-row letters go around the digits)', () => {
+    expect(repairOcrPlate('KAE03881')).toBe('KA3881EO')
+    expect(repairOcrPlate('BIAC5I42')).toBe('BI5142AC')
+    expect(repairOcrPlate('AIPA8901')).toBe('AI8901PA')
   })
 
   it('keeps the common shape on a tie', () => {

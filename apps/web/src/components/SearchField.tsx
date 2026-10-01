@@ -27,6 +27,14 @@ export default function SearchField({
   const online = useOnlineStatus()
   const [value, setValue] = useState(initialValue)
 
+  // The route's query changed (home, plate -> VIN, photo recognition landing on a plate…):
+  // reset the input to it, dropping whatever was typed. Derived during render, not an effect.
+  const [syncedValue, setSyncedValue] = useState(initialValue)
+  if (syncedValue !== initialValue) {
+    setSyncedValue(initialValue)
+    setValue(initialValue)
+  }
+
   const handleSubmit = (e: FormEvent): void => {
     e.preventDefault()
     const q = value.trim()

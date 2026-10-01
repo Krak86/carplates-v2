@@ -343,7 +343,7 @@
   "photo.zoomReset": "Fit to screen",
   "photo.zoomClose": "Close photo",
   "photo.zoomHint": "Scroll or +/− to zoom · drag or arrows to pan · double-click to toggle · Esc to close",
-  "recognize.accuracyWarning": "Recognition can misread similar-looking characters (0/O, 1/I, 8/B) — double-check the plate against the photo.",
+  "recognize.accuracyWarning": "Recognition can misread similar-looking characters (0/O, 1/I, 8/B) — double-check the plate against the photo. If the plate is dark, at a steep angle or only partly visible, retake a better photo: sharp, well lit, straight on, with the whole plate in frame.",
   "camera.title": "Take a photo",
   "camera.capture": "Capture",
   "camera.close": "Close",

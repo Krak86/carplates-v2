@@ -12,14 +12,13 @@ const MS_PER_YEAR = 365.25 * 24 * 3600 * 1000
  */
 export async function readPhotoMeta(file: File): Promise<PhotoMeta | null> {
   try {
-    const raw: Record<string, unknown> | undefined = await exifr.parse(file, {
-      gps: true,
-      pick: ['DateTimeOriginal', 'CreateDate', 'latitude', 'longitude']
-    })
+    // `pick` can't select the derived latitude/longitude (it filters them out), so GPS is its own read.
+    const [raw, gps]: [Record<string, unknown> | undefined, { latitude?: number; longitude?: number } | undefined] =
+      await Promise.all([exifr.parse(file, { pick: ['DateTimeOriginal', 'CreateDate'] }), exifr.gps(file)])
     const parsed = photoMetaSchema.safeParse({
       takenAt: raw?.DateTimeOriginal ?? raw?.CreateDate ?? null,
-      latitude: raw?.latitude ?? null,
-      longitude: raw?.longitude ?? null
+      latitude: gps?.latitude ?? null,
+      longitude: gps?.longitude ?? null
     })
     if (!parsed.success) return null
     const { takenAt, latitude, longitude } = parsed.data

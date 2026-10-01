@@ -83,6 +83,8 @@ export function usePlateRecognition({ currentValue, linkedValue }: UsePlateRecog
   })
 
   const recognize = (file: File): void => {
+    // Drop the previous result and input: the route goes back to idle until the new photo resolves.
+    void navigate('/')
     setPhoto(prev => {
       if (prev) URL.revokeObjectURL(prev.url)
       return { url: URL.createObjectURL(file), connected: new Set(), candidates: [], meta: null, settled: false }

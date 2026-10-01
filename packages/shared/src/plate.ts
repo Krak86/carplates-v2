@@ -86,7 +86,10 @@ export function repairOcrPlate(input: string): string {
   const fit = (shape: string): number => chars.filter((c, i) => (shape[i] === 'L' ? isLetter(c) : isDigit(c))).length
   // Strictly-better wins, so a tie keeps the earlier (more common) shape.
   const shape = PLATE_SHAPES.reduce((best, candidate) => (fit(candidate) > fit(best) ? candidate : best))
-  return chars.map((c, i) => (shape[i] === 'L' ? (DIGIT_TO_LETTER[c] ?? c) : (LETTER_TO_DIGIT[c] ?? c))).join('')
+  const fixed = chars.map((c, i) => (shape[i] === 'L' ? (DIGIT_TO_LETTER[c] ?? c) : (LETTER_TO_DIGIT[c] ?? c)))
+  // Stacked plate ("AI PA" over "8901") is read top row then bottom row: AIPA8901 → AI8901PA.
+  if (shape === 'LLLLDDDD') return [...fixed.slice(0, 2), ...fixed.slice(4), ...fixed.slice(2, 4)].join('')
+  return fixed.join('')
 }
 
 // Letters after normalizePlate: the 12 Cyrillic look-alikes, or any other Latin letter.
