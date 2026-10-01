@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import CameraZoomControl from '@/components/CameraZoomControl'
+import { useCameraZoom } from '@/components/use-camera-zoom'
 
 type Props = {
   open: boolean
@@ -15,6 +16,7 @@ export default function CameraCaptureDialog({ open, onClose, onCapture }: Props)
   const videoRef = useRef<HTMLVideoElement>(null)
   const streamRef = useRef<MediaStream | null>(null)
   const [activeStream, setActiveStream] = useState<MediaStream | null>(null)
+  const cameraZoom = useCameraZoom(activeStream)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -112,7 +114,7 @@ export default function CameraCaptureDialog({ open, onClose, onCapture }: Props)
         )}
 
         <CameraZoomControl
-          stream={activeStream}
+          camera={cameraZoom}
           className="absolute inset-x-4 bottom-28 z-10 sm:static sm:px-4 sm:pt-3"
         />
 

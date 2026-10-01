@@ -6,7 +6,7 @@ type ZoomRange = { min: number; max: number; step: number }
 type ZoomCapabilities = MediaTrackCapabilities & { zoom?: { min: number; max: number; step?: number } }
 type ZoomConstraint = MediaTrackConstraintSet & { zoom?: number }
 
-type CameraZoom = {
+export type CameraZoom = {
   range: ZoomRange | null
   zoom: number
   setZoom: (value: number) => void

@@ -1,17 +1,17 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { useCameraZoom } from '@/components/use-camera-zoom'
+import type { CameraZoom } from '@/components/use-camera-zoom'
 
 type Props = {
-  stream: MediaStream | null
+  camera: CameraZoom
   className?: string
 }
 
 // Hidden when the device/browser doesn't expose hardware zoom.
-export default function CameraZoomControl({ stream, className }: Props): ReactNode {
+export default function CameraZoomControl({ camera, className }: Props): ReactNode {
   const { t } = useTranslation()
-  const { range, zoom, setZoom } = useCameraZoom(stream)
+  const { range, zoom, setZoom } = camera
 
   if (!range) return null
 
