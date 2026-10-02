@@ -23,6 +23,7 @@ export { VEHICLE_FUELS, resolveFuelCategories, fuelKeyword, type VehicleFuel } f
 export { brandLogoUrl, brandSlug } from './brandLogo.js'
 export { dealerUrl } from './dealerUrl.js'
 export { wikiUrl, wikiDomain } from './wikiUrl.js'
+export { REVIEW_SITES, reviewLinks, type ReviewSiteId, type ReviewSiteLang, type ReviewLink } from './reviewLinks.js'
 export { makeKey, modelKey, brandCandidateKey } from './vehicleKey.js'
 export {
   CRASH_SOURCES,
