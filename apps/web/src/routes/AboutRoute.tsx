@@ -12,7 +12,9 @@ const SOURCES = [
   { key: 'jncap', label: 'JNCAP / NASVA', url: 'https://www.nasva.go.jp' },
   { key: 'cncap', label: 'C-NCAP / CATARC', url: 'https://www.c-ncap.org.cn' },
   { key: 'kncap', label: 'KNCAP', url: 'https://www.kncap.org' },
-  { key: 'iihs', label: 'IIHS', url: 'https://www.iihs.org' }
+  { key: 'iihs', label: 'IIHS', url: 'https://www.iihs.org' },
+  { key: 'epa', label: 'EPA / fueleconomy.gov', url: 'https://www.fueleconomy.gov' },
+  { key: 'eea', label: 'EEA', url: 'https://www.eea.europa.eu' }
 ] as const
 
 // Lazy-loaded (see App.tsx).

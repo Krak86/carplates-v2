@@ -307,6 +307,8 @@
   "about.source.cncap": "C-NCAP crash-test ratings, via CATARC (China-market vehicles).",
   "about.source.kncap": "KNCAP crash-test ratings (Korea-market vehicles).",
   "about.source.iihs": "IIHS crash-test ratings (US-market vehicles).",
+  "about.source.epa": "Fuel economy and CO₂ reference data (US-market vehicles), from fueleconomy.gov.",
+  "about.source.eea": "Official WLTP CO₂ emissions of vehicles registered in the EU, from the European Environment Agency (DiscoData).",
   "discuss.heading": "Discuss",
   "discuss.unavailable": "Comments aren't available right now.",
   "history.title": "Search history",
