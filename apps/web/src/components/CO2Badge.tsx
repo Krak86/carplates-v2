@@ -1,8 +1,9 @@
 import type { ReactNode } from 'react'
 import { co2Band, co2Score } from '@carplates/shared'
 import { useTranslation } from 'react-i18next'
+import { Link } from 'react-router'
 
-import { CO2_BAND_COLOR, CO2_REFERENCE_LINKS, formatRange } from '@/components/CO2Badge.helpers'
+import { CO2_BAND_COLOR, co2ReferenceLinks, formatRange } from '@/components/CO2Badge.helpers'
 import InfoPopover from '@/components/InfoPopover'
 
 type Props = {
@@ -15,6 +16,8 @@ type Props = {
   evKwh100km?: number | null
   /** Test procedure the numbers come from ("EPA" | "NEDC" | "WLTP"); always shown next to them. */
   cycle: string
+  /** Advanced-search link listing the vehicles the estimate was matched on. */
+  similarHref?: string
 }
 
 /** Cloud-with-CO₂ glyph, filled with the band colour. */
@@ -38,8 +41,16 @@ function CloudIcon({ color }: { color: string }): ReactNode {
  * Emissions "badness" badge: 0 = clean, 100 = worst, scored from tailpipe CO2 (g/km) at the midpoint of
  * the matched range. Always framed as an estimate for similar vehicles — never an exact figure for this car.
  */
-export default function CO2Badge({ co2GKmMin, co2GKmMax, l100kmMin, l100kmMax, evKwh100km, cycle }: Props): ReactNode {
-  const { t } = useTranslation()
+export default function CO2Badge({
+  co2GKmMin,
+  co2GKmMax,
+  l100kmMin,
+  l100kmMax,
+  evKwh100km,
+  cycle,
+  similarHref
+}: Props): ReactNode {
+  const { t, i18n } = useTranslation()
   const score = co2Score((co2GKmMin + co2GKmMax) / 2) ?? 0
   const color = CO2_BAND_COLOR[co2Band(score)]
   const co2 = formatRange(co2GKmMin, co2GKmMax)
@@ -80,12 +91,14 @@ export default function CO2Badge({ co2GKmMin, co2GKmMax, l100kmMin, l100kmMax, e
           <div className="space-y-2 text-sm">
             <p>{t('co2.infoScore')}</p>
             <p className="text-[var(--color-muted)]">{t('co2.infoCycle', { cycle })}</p>
+            <p className="text-[var(--color-muted)]">{t('co2.infoWltp')}</p>
+            <p className="text-[var(--color-muted)]">{t('co2.infoSources')}</p>
             <p className="text-[var(--color-muted)]">{t('co2.infoEstimate')}</p>
 
             <div>
               <div className="font-medium">{t('co2.linksTitle')}</div>
               <ul className="mt-1 list-disc space-y-0.5 pl-5">
-                {CO2_REFERENCE_LINKS.map(link => (
+                {co2ReferenceLinks(i18n.language).map(link => (
                   <li key={link.href}>
                     <a
                       href={link.href}
@@ -120,7 +133,14 @@ export default function CO2Badge({ co2GKmMin, co2GKmMax, l100kmMin, l100kmMax, e
           </span>
         )}
         <span className="text-[var(--color-muted)]">
-          {t('co2.cycleNote', { cycle })} · {t('co2.similar')}
+          {t('co2.cycleNote', { cycle })} ·{' '}
+          {similarHref ? (
+            <Link to={similarHref} className="text-[var(--color-primary)] underline hover:no-underline">
+              {t('co2.similar')}
+            </Link>
+          ) : (
+            t('co2.similar')
+          )}
         </span>
       </div>
     </div>

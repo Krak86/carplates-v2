@@ -14,7 +14,6 @@ const HistoryRoute = lazy(() => import('@/routes/history/HistoryRoute'))
 const FavoritesRoute = lazy(() => import('@/routes/favorites/FavoritesRoute'))
 const StatsRoute = lazy(() => import('@/routes/stats/StatsRoute'))
 const FuelStatsRoute = lazy(() => import('@/routes/fuel/FuelStatsRoute'))
-const Co2PreviewRoute = lazy(() => import('@/routes/Co2PreviewRoute'))
 const DiscussRoute = lazy(() => import('@/routes/DiscussRoute'))
 const AdvancedSearchRoute = lazy(() => import('@/routes/advanced-search/AdvancedSearchRoute'))
 
@@ -37,7 +36,6 @@ export default function App(): ReactNode {
             <Route path="/fuel" element={<FuelStatsRoute />} />
             <Route path="/discuss" element={<DiscussRoute />} />
             <Route path="/advanced-search" element={<AdvancedSearchRoute />} />
-            {import.meta.env.DEV && <Route path="/dev/co2" element={<Co2PreviewRoute />} />}
             <Route path="/:query" element={<SearchRoute />} />
             <Route path="*" element={<SearchRoute />} />
           </Routes>

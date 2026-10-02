@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import type { ReactNode } from 'react'
+import { MAX_YEAR_GAP } from '@carplates/shared'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 
 import CO2Badge from '@/components/CO2Badge'
+import { similarVehiclesHref } from '@/components/CO2Badge.helpers'
 import { cn } from '@/lib/cn'
 import { fuelEconomyQuery } from '@/lib/queries'
 
@@ -74,6 +76,7 @@ export default function FuelEconomy({ brand, model, year, fuel, capacity }: Prop
                 l100kmMax={estimate.l100kmMax}
                 evKwh100km={estimate.evKwh100km}
                 cycle={estimate.cycle}
+                similarHref={similarVehiclesHref(brand ?? '', model ?? '', year ?? 0, MAX_YEAR_GAP)}
               />
             )}
           </div>

@@ -527,7 +527,9 @@
   "co2.similar": "similar vehicles",
   "co2.infoScore": "0 = clean, 100 = worst. Scored linearly from tailpipe CO₂ (g/km); a pure EV scores 0 because only the tailpipe is counted.",
   "co2.infoCycle": "Figures come from the {{cycle}} test cycle; different cycles are not directly comparable (EPA reads lower than WLTP).",
-  "co2.infoEstimate": "An estimate for similar vehicles (same make, model and nearby year) — not a measurement of this exact car.",
+  "co2.infoWltp": "WLTP (Worldwide Harmonised Light Vehicles Test Procedure) is the lab test used for new cars in the EU since 2017–2019. A car is driven on a rolling road through a standard cycle of about 30 minutes — city, suburban, rural and motorway phases up to 131 km/h — which is more realistic than the older NEDC (about 20 minutes, max 120 km/h). EPA is the US procedure; NEDC is the old European one.",
+  "co2.infoSources": "Data: EEA (European Environment Agency) — official CO₂ monitoring of new cars registered in the EU, from manufacturers' WLTP/NEDC type approvals; EPA (US Environmental Protection Agency) — fuel economy and CO₂ of US-market vehicles, published at fueleconomy.gov.",
+  "co2.infoEstimate": "An estimate for similar vehicles (same make, model and nearby year) — not a measurement of this exact car. Tap “similar vehicles” to browse them.",
   "co2.show": "Show emissions",
   "co2.hide": "Hide emissions",
   "co2.noData": "No fuel consumption data found for similar vehicles.",
@@ -553,6 +555,7 @@
   "fuel.fuelClass.unknown": "Unknown",
   "co2.linksTitle": "Reference",
   "co2.linkUa": "Euro emission standards (EU, adopted in Ukraine)",
+  "co2.linkWltp": "WLTP test procedure (Wikipedia)",
   "co2.linkEu": "EEA: CO₂ monitoring of new cars (EU, WLTP)",
   "co2.linkUs": "fueleconomy.gov: how to read the label (US, EPA)",
   "co2.linkGlobal": "ICCT: global CO₂ standards comparison"

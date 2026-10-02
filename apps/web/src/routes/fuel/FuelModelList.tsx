@@ -13,7 +13,7 @@ type Props = {
   models: FuelStatsModel[]
 }
 
-/** A short ranked list of models (cleanest or dirtiest) — each links to the stats page's model row. */
+/** A short ranked list of models (cleanest or dirtiest) — each links to an advanced search for that make and model. */
 export default function FuelModelList({ title, models }: Props): ReactNode {
   const { t, i18n } = useTranslation()
   const numberFormat = new Intl.NumberFormat(toIntlLocale(i18n.language))
@@ -27,7 +27,7 @@ export default function FuelModelList({ title, models }: Props): ReactNode {
             <span className="w-5 text-right text-[var(--color-muted)] tabular-nums">{i + 1}</span>
             <BrandLogo brand={m.brand} size="sm" />
             <Link
-              to={`/stats?highlightModel=${encodeURIComponent(`${m.brand}::${m.model}`)}`}
+              to={`/advanced-search?${new URLSearchParams({ brand: m.brand, model: m.model })}`}
               className="min-w-0 flex-1 truncate text-[var(--color-primary)]"
             >
               {m.brand} {m.model}
