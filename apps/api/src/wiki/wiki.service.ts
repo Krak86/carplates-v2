@@ -3,6 +3,7 @@ import { wikiDomain } from '@carplates/shared'
 import type { WikiImage, WikiImageAttribution, WikiInfo } from '@carplates/shared'
 
 import { loadEnv } from '../env.js'
+import { pickCommonsCandidate, titleMentionsModel } from './commons-image.js'
 
 interface MediaWikiImage {
   source: string
@@ -34,6 +35,32 @@ interface CommonsImageInfoResponse {
   }
 }
 
+interface CommonsSearchResponse {
+  query?: {
+    pages?: Record<
+      string,
+      {
+        index?: number
+        title: string
+        imageinfo?: Array<{
+          thumburl?: string
+          thumbwidth?: number
+          thumbheight?: number
+          width: number
+          height: number
+          mime: string
+          extmetadata?: Record<string, { value: string }>
+        }>
+      }
+    >
+  }
+}
+
+export const WIKI_IMAGE_SOURCES = ['commons', 'wiki'] as const
+export type WikiImageSource = (typeof WIKI_IMAGE_SOURCES)[number]
+
+type LookupOptions = { year?: number; source?: WikiImageSource }
+
 const CACHE_MAX = 300
 const UPSTREAM_TIMEOUT_MS = 10_000
 // One of Wikimedia's standard thumbnail steps (non-standard widths get throttled); ~2x the 672px card.
@@ -48,14 +75,17 @@ export class WikiService {
   private readonly cache = new Map<string, WikiInfo>()
   private readonly userAgent = `carsua-app/1.0 (${this.env.PUBLIC_SITE_URL})`
 
-  async lookup(brand: string, model: string, lang: string): Promise<WikiInfo> {
+  async lookup(brand: string, model: string, lang: string, options: LookupOptions = {}): Promise<WikiInfo> {
     const query = [brand, model].filter(Boolean).join(' ').trim()
     if (query.length < 2) {
       throw new BadRequestException('Need a brand or model to search Wikipedia')
     }
 
     const domain = wikiDomain(lang)
-    const cacheKey = `${domain}:${query.toLowerCase()}`
+    const source = options.source ?? this.env.WIKI_IMAGE_SOURCE
+    // Year only matters to the year-aware strategy; keep it out of the key otherwise so `wiki` entries still share.
+    const year = source === 'commons' && brand && model ? (options.year ?? null) : null
+    const cacheKey = `${domain}:${source}:${year ?? ''}:${query.toLowerCase()}`
     const cached = this.cache.get(cacheKey)
     if (cached) return cached
 
@@ -66,6 +96,12 @@ export class WikiService {
       throw new BadGatewayException(`Wikipedia request failed: ${(err as Error).message}`)
     }
 
+    if (page && !titleMentionsModel(page.title, model)) page = null
+
+    // The article's lead image is always the newest generation, so a known year gets a Commons
+    // file search first (best-effort: any failure or no match falls back to the lead image).
+    const yearImage = year ? await this.fetchCommonsYearImage(brand, model, year).catch(() => null) : null
+
     const result = page
       ? {
           query,
@@ -73,7 +109,7 @@ export class WikiService {
           title: page.title,
           extract: page.extract?.trim() || null,
           pageUrl: `https://${domain}.wikipedia.org/wiki/${encodeURIComponent(page.title.replace(/ /g, '_'))}`,
-          image: page.original ? await this.fetchImage(page.original, page.thumbnail) : null
+          image: yearImage ?? (page.original ? await this.fetchImage(page.original, page.thumbnail) : null)
         }
       : { query, found: false, title: null, extract: null, pageUrl: null, image: null }
 
@@ -106,6 +142,48 @@ export class WikiService {
     const attribution = await this.fetchAttribution(original.source).catch(() => null)
     const shown = thumbnail ?? original
     return { url: shown.source, width: shown.width, height: shown.height, attribution }
+  }
+
+  /** Commons files are conventionally named `<year> <Make> <Model> …`, so a quoted make+model plus the year
+   *  finds generation-correct photos. One request returns thumbnails and license metadata together. */
+  private async fetchCommonsYearImage(brand: string, model: string, year: number): Promise<WikiImage | null> {
+    const url = new URL('https://commons.wikimedia.org/w/api.php')
+    url.searchParams.set('action', 'query')
+    url.searchParams.set('generator', 'search')
+    url.searchParams.set('gsrsearch', `"${brand} ${model}" ${year} filetype:bitmap`)
+    url.searchParams.set('gsrnamespace', '6')
+    url.searchParams.set('gsrlimit', '20')
+    url.searchParams.set('prop', 'imageinfo')
+    url.searchParams.set('iiprop', 'url|size|mime|extmetadata')
+    url.searchParams.set('iiurlwidth', String(THUMB_WIDTH))
+    url.searchParams.set('format', 'json')
+
+    const payload = await this.fetchJson<CommonsSearchResponse>(url)
+    const pages = Object.values(payload.query?.pages ?? {}).sort((a, b) => (a.index ?? 0) - (b.index ?? 0))
+
+    const candidates = pages.flatMap(page => {
+      const info = page.imageinfo?.[0]
+      return info?.thumburl
+        ? [{ title: page.title, mime: info.mime, width: info.width, height: info.height, info }]
+        : []
+    })
+    const best = pickCommonsCandidate(candidates, model, year)
+    if (!best) return null
+
+    const { info } = best
+    const meta = info.extmetadata
+    return {
+      url: info.thumburl ?? '',
+      width: info.thumbwidth ?? info.width,
+      height: info.thumbheight ?? info.height,
+      attribution: meta
+        ? {
+            author: this.stripHtml(meta.Artist?.value),
+            license: meta.LicenseShortName?.value ?? null,
+            licenseUrl: meta.LicenseUrl?.value ?? null
+          }
+        : null
+    }
   }
 
   private async fetchAttribution(imageUrl: string): Promise<WikiImageAttribution | null> {

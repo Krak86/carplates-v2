@@ -103,10 +103,10 @@ export function vehiclePhotosQuery(brand: string, model: string, year: number | 
 }
 
 // Wikipedia summary + image for a brand/model — live-fetched (not persisted), never refetch once fetched.
-export function wikiInfoQuery(brand: string, model: string, lang: string) {
+export function wikiInfoQuery(brand: string, model: string, lang: string, year: number | null) {
   return queryOptions({
-    queryKey: ['wiki', brand, model, lang],
-    queryFn: () => getWikiInfo(brand, model, lang),
+    queryKey: ['wiki', brand, model, lang, year],
+    queryFn: () => getWikiInfo(brand, model, lang, year),
     staleTime: Infinity
   })
 }

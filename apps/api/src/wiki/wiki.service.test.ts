@@ -157,6 +157,67 @@ describe('WikiService', () => {
     })
   })
 
+  it('uses a year-matched Commons photo when a year is given, falling back to the lead image otherwise', async () => {
+    const fetchMock = vi.mocked(fetch)
+    const commonsPayload = (title: string) => ({
+      query: {
+        pages: {
+          '1': {
+            index: 1,
+            title,
+            imageinfo: [
+              {
+                thumburl: 'https://upload.wikimedia.org/thumb/crv2008.jpg',
+                thumbwidth: 1280,
+                thumbheight: 853,
+                width: 3000,
+                height: 2000,
+                mime: 'image/jpeg',
+                extmetadata: { Artist: { value: '<a>Jane</a>' }, LicenseShortName: { value: 'CC BY 2.0' } }
+              }
+            ]
+          }
+        }
+      }
+    })
+    fetchMock.mockImplementation(async input => {
+      const url = String(input)
+      if (url.includes('commons.wikimedia.org')) return jsonResponse(commonsPayload('File:2008 Toyota Camry EX.jpg'))
+      return jsonResponse(searchPayloadWithThumb)
+    })
+
+    const service = new WikiService()
+    const withYear = await service.lookup('Toyota', 'Camry', 'en', { year: 2008, source: 'commons' })
+    expect(withYear.image).toEqual({
+      url: 'https://upload.wikimedia.org/thumb/crv2008.jpg',
+      width: 1280,
+      height: 853,
+      attribution: { author: 'Jane', license: 'CC BY 2.0', licenseUrl: null }
+    })
+
+    const leadOnly = await service.lookup('Toyota', 'Camry', 'en', { year: 2008, source: 'wiki' })
+    expect(leadOnly.image?.url).toBe(THUMB_URL)
+  })
+
+  it('treats an article whose title lacks the model as not found', async () => {
+    vi.mocked(fetch).mockResolvedValueOnce(
+      jsonResponse({
+        query: {
+          pages: {
+            '1': {
+              title: 'Mike Schmitz',
+              extract: 'A priest.',
+              original: { source: 'https://x/y.jpg', width: 1, height: 1 }
+            }
+          }
+        }
+      })
+    )
+
+    const result = await new WikiService().lookup('SCHMITZ', 'S 01', 'en')
+    expect(result).toMatchObject({ found: false, image: null, extract: null })
+  })
+
   it('throws BadRequestException when brand and model are both empty', async () => {
     const service = new WikiService()
     await expect(service.lookup('', '', 'en')).rejects.toBeInstanceOf(BadRequestException)

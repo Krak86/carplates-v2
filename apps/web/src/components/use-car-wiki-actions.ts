@@ -10,6 +10,8 @@ import { useBackgroundStore } from '@/store/background-store'
 type Params = {
   brand: string | null
   model: string | null
+  /** Model year — selects a photo of the matching generation rather than the article's newest one. */
+  year: number | null
   /** Identifies the result this override is scoped to — VIN when the row has one, otherwise
    *  the plate (e.g. plates with an empty `vin` column, common pre-2026 data). Null means
    *  there's no result to key on, so the override never fires. */
@@ -22,10 +24,10 @@ type Params = {
  * once a car image resolves, swaps it in as the ambient background in place of the rotation.
  * The override is cleared on unmount so leaving this result reverts to the rotation automatically.
  */
-export function useCarWikiActions({ brand, model, key }: Params): UseQueryResult<WikiInfo> {
+export function useCarWikiActions({ brand, model, year, key }: Params): UseQueryResult<WikiInfo> {
   const { i18n } = useTranslation()
   const hasQuery = Boolean(brand || model)
-  const wiki = useQuery({ ...wikiInfoQuery(brand ?? '', model ?? '', i18n.language), enabled: hasQuery })
+  const wiki = useQuery({ ...wikiInfoQuery(brand ?? '', model ?? '', i18n.language, year), enabled: hasQuery })
   const setHeroOverride = useBackgroundStore(s => s.setHeroOverride)
   const clearHeroOverride = useBackgroundStore(s => s.clearHeroOverride)
   const image = wiki.data?.image

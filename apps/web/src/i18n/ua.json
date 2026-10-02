@@ -86,6 +86,7 @@
   "wiki.none": "Статтю Вікіпедії для цієї марки/моделі не знайдено.",
   "wiki.source": "Читати у Вікіпедії",
   "wiki.imageCredit": "Фото: {{credit}}",
+  "wiki.noImage": "Фото відсутнє",
   "wiki.imageCreditBg": "Фото на фоні: {{credit}}",
   "wiki.viaCommons": "через Wikimedia Commons",
   "photos.title": "Як це може виглядати",

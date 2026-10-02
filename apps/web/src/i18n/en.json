@@ -86,6 +86,7 @@
   "wiki.none": "No Wikipedia article found for this make/model.",
   "wiki.source": "Read more on Wikipedia",
   "wiki.imageCredit": "Photo: {{credit}}",
+  "wiki.noImage": "No photo available",
   "wiki.imageCreditBg": "Background photo: {{credit}}",
   "wiki.viaCommons": "via Wikimedia Commons",
   "photos.title": "What it might look like",

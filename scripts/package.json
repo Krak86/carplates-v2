@@ -28,6 +28,7 @@
     "export:fuel:csv": "tsx src/fuel-economy.ts --export-csv seed-data/fuel-economy.csv.gz",
     "refresh-fuel-stats": "tsx src/fuel-stats.ts",
     "refresh-safety-stats": "tsx src/safety-stats.ts",
+    "build:kind-images": "tsx src/build-kind-images.ts",
     "type-check": "tsc",
     "test": "vitest run"
   },
@@ -46,6 +47,7 @@
     "@types/node": "^24.7.0",
     "@types/unzipper": "^0.10.11",
     "domhandler": "^5.0.3",
+    "sharp": "^0.35.5",
     "tsx": "^4.20.6",
     "typescript": "~5.9.3",
     "vitest": "^4.1.11"

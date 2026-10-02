@@ -94,7 +94,7 @@ export function useCopyAllInfoActions(params: CopyAllInfoParams): UseCopyAllInfo
           ? safe(queryClient.ensureQueryData(iihsRatingsQuery(make, model, year)))
           : Promise.resolve(null),
         hasWikiQuery
-          ? safe(queryClient.ensureQueryData(wikiInfoQuery(make, model, i18n.language)))
+          ? safe(queryClient.ensureQueryData(wikiInfoQuery(make, model, i18n.language, vehicle.year)))
           : Promise.resolve(null),
         hasWikiQuery
           ? safe(queryClient.ensureQueryData(vehiclePhotosQuery(make, model, vehicle.year)))

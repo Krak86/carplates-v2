@@ -72,7 +72,7 @@ export default function ResultCard({ data }: Props): ReactNode {
   const vehicleColor = resolveVehicleColor(c.color) ?? fallbackVehicleColor(data.plate)
   const brandDealerUrl = dealerUrl(c.brand)
   const modelWikiUrl = wikiUrl(c.brand, c.model, i18n.language)
-  const wiki = useCarWikiActions({ brand: c.brand, model: c.model, key: c.vin || data.plate })
+  const wiki = useCarWikiActions({ brand: c.brand, model: c.model, year: c.makeYear, key: c.vin || data.plate })
   const hasWikiQuery = Boolean(c.brand || c.model)
 
   // Plate history covers every vehicle that ever wore this plate, reassignment

@@ -33,6 +33,11 @@ const envSchema = z.object({
   /** Absent → the photos route answers 503. */
   PIXABAY_API_KEY: z.string().optional(),
 
+  /** Default hero-image strategy for /api/wiki (a request's `?source=` overrides it, for A/B comparison).
+   *  `commons` = year-aware Wikimedia Commons file search, falling back to the article lead image;
+   *  `wiki` = the article lead image only (always the newest generation). */
+  WIKI_IMAGE_SOURCE: z.enum(['commons', 'wiki']).default('commons'),
+
   /** Swagger UI at /api/docs — off in production unless explicitly enabled. */
   ENABLE_SWAGGER: boolish,
 

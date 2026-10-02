@@ -66,13 +66,31 @@ export default function SearchRoute(): ReactNode {
   // Same brand/model + key `ResultCard`/`VinResult` feed their own `useCarWikiActions` call —
   // duplicated here (cache-shared, staleTime: Infinity) so the hero slot below can decide
   // whether a wiki image exists without lifting that query out of either result component.
-  let wikiHeroVehicle: { brand: string | null; model: string | null; key: string | null } | null = null
+  let wikiHeroVehicle: {
+    brand: string | null
+    model: string | null
+    year: number | null
+    rawKind: string | null
+    key: string | null
+  } | null = null
   if (kind === 'plate' && plate.data) {
     const c = plate.data.current
-    wikiHeroVehicle = { brand: c.brand, model: c.model, key: c.vin || plate.data.plate }
+    wikiHeroVehicle = {
+      brand: c.brand,
+      model: c.model,
+      year: c.makeYear,
+      rawKind: c.kind,
+      key: c.vin || plate.data.plate
+    }
   } else if (kind === 'vin' && vin.data) {
     const vehicle = extractVehicleInfo(vin.data)
-    wikiHeroVehicle = { brand: vehicle.brand, model: vehicle.model, key: vin.data.vin }
+    wikiHeroVehicle = {
+      brand: vehicle.brand,
+      model: vehicle.model,
+      year: vehicle.year,
+      rawKind: vin.data.registry?.actions[0]?.kind ?? null,
+      key: vin.data.vin
+    }
   }
 
   const {
@@ -190,7 +208,13 @@ export default function SearchRoute(): ReactNode {
           )}
         </Presence>
         {!photo && !recognizeErrorKey && wikiHeroVehicle && (
-          <WikiHeroImage brand={wikiHeroVehicle.brand} model={wikiHeroVehicle.model} vehicleKey={wikiHeroVehicle.key} />
+          <WikiHeroImage
+            brand={wikiHeroVehicle.brand}
+            model={wikiHeroVehicle.model}
+            year={wikiHeroVehicle.year}
+            rawKind={wikiHeroVehicle.rawKind}
+            vehicleKey={wikiHeroVehicle.key}
+          />
         )}
         <Presence show={!!photo && photo.candidates.length > 1}>
           {photo && <PlateCandidates candidates={photo.candidates} active={raw || null} onSelect={selectCandidate} />}

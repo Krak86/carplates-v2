@@ -85,6 +85,16 @@ export default defineConfig({
             }
           },
           {
+            // Greyscale "no photo" hero placeholders (~1.3 MB for all kinds) — only the ones actually seen get cached.
+            urlPattern: ({ url, sameOrigin }): boolean => sameOrigin && url.pathname.startsWith('/kind/'),
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'carplates-rt-kind-images',
+              expiration: { maxEntries: 12, maxAgeSeconds: 365 * DAY_S },
+              cacheableResponse: { statuses: [200] }
+            }
+          },
+          {
             urlPattern: ({ url, sameOrigin }): boolean =>
               sameOrigin && url.pathname.startsWith('/assets/') && /\.(webp|avif|jpe?g)$/.test(url.pathname),
             handler: 'CacheFirst',

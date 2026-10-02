@@ -86,6 +86,7 @@
   "wiki.none": "Статья Википедии для этой марки/модели не найдена.",
   "wiki.source": "Читать в Википедии",
   "wiki.imageCredit": "Фото: {{credit}}",
+  "wiki.noImage": "Фото отсутствует",
   "wiki.imageCreditBg": "Фото на фоне: {{credit}}",
   "wiki.viaCommons": "через Wikimedia Commons",
   "photos.title": "Как это может выглядеть",

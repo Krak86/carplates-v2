@@ -30,7 +30,7 @@ export default function VinResult({ data }: Props): ReactNode {
   const region = plate ? (regionName(plate) ?? null) : null
   const tiltEnabled = useUiStore(s => s.cardTiltEnabled)
   const glowRef = useCardMotion<HTMLDivElement>(tiltEnabled)
-  const wiki = useCarWikiActions({ brand: vehicle.brand, model: vehicle.model, key: data.vin })
+  const wiki = useCarWikiActions({ brand: vehicle.brand, model: vehicle.model, year: vehicle.year, key: data.vin })
   const hasWikiQuery = Boolean(vehicle.brand || vehicle.model)
 
   return (

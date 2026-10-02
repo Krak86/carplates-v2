@@ -123,10 +123,11 @@ export async function getVehiclePhotos(
   return vehiclePhotosResponseSchema.parse(await getJson(`/api/photos?${params.toString()}`))
 }
 
-export async function getWikiInfo(brand: string, model: string, lang: string): Promise<WikiInfo> {
+export async function getWikiInfo(brand: string, model: string, lang: string, year: number | null): Promise<WikiInfo> {
   const params = new URLSearchParams({ lang })
   if (brand) params.set('brand', brand)
   if (model) params.set('model', model)
+  if (year != null) params.set('year', String(year))
   return wikiInfoResponseSchema.parse(await getJson(`/api/wiki?${params.toString()}`))
 }
 

@@ -1,11 +1,16 @@
 import { useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { resolveVehicleKind } from '@carplates/shared'
 
+import VehicleKindPlaceholder from '@/components/VehicleKindPlaceholder'
 import { useCarWikiActions } from '@/components/use-car-wiki-actions'
 
 type Props = {
   brand: string | null
   model: string | null
+  year: number | null
+  /** Raw registry `kind` — drives the placeholder shown when no photo is found. */
+  rawKind: string | null
   /** Same identity `useCarWikiActions` keys the ambient background override on — VIN when the
    *  result has one, otherwise the plate. */
   vehicleKey: string | null
@@ -15,9 +20,9 @@ type Props = {
  * Fills the same hero slot a recognized/attached plate photo occupies (see `PhotoThumbnail`),
  * but with the car's Wikipedia main image — only rendered by the caller when no photo is attached.
  */
-export default function WikiHeroImage({ brand, model, vehicleKey }: Props): ReactNode {
+export default function WikiHeroImage({ brand, model, year, rawKind, vehicleKey }: Props): ReactNode {
   const { t } = useTranslation()
-  const wiki = useCarWikiActions({ brand, model, key: vehicleKey })
+  const wiki = useCarWikiActions({ brand, model, year, key: vehicleKey })
   const data = wiki.isSuccess ? wiki.data : null
   const image = data?.image
   const creditParts = [image?.attribution?.author, image?.attribution?.license].filter(Boolean)
@@ -27,8 +32,16 @@ export default function WikiHeroImage({ brand, model, vehicleKey }: Props): Reac
   const hasQuery = Boolean(brand || model)
   const isPending = hasQuery && wiki.isPending
 
-  // Settled with no image (or the image failed to load) → collapse the space entirely.
-  if (!isPending && (!image || failedUrl === image.url)) return null
+  // Settled with no image (or the image failed to load) → a kind placeholder in the same slot,
+  // or nothing at all when the registry gave no recognizable kind (e.g. a VIN-only decode).
+  if (!isPending && (!image || failedUrl === image.url)) {
+    const kind = resolveVehicleKind(rawKind)
+    return kind ? (
+      <div className="relative -my-3 h-64 w-full max-w-2xl sm:h-80">
+        <VehicleKindPlaceholder kind={kind} />
+      </div>
+    ) : null
+  }
 
   const isLoaded = !!image && loadedUrl === image.url
 
