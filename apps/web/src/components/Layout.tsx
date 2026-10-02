@@ -14,7 +14,8 @@ import { cn } from '@/lib/cn'
 import { setTransitionDirection } from '@/lib/view-transition'
 import { useUiStore } from '@/store/ui-store'
 
-const Sidebar = lazy(() => import('@/components/Sidebar'))
+const loadSidebar = () => import('@/components/Sidebar')
+const Sidebar = lazy(loadSidebar)
 
 type Props = {
   children: ReactNode
@@ -29,6 +30,9 @@ export default function Layout({ children }: Props): ReactNode {
   // Sidebar is lazy-loaded (not part of the LCP path) — stay unmounted until
   // the first open, then keep mounted so close gets a transition instead of a hard unmount.
   const [hasOpened, setHasOpened] = useState(false)
+  // First open: the panel mounts closed, then flips open two frames later so the slide actually transitions.
+  const [entered, setEntered] = useState(false)
+  const open = drawerOpen && entered
 
   const prevPathname = useRef(pathname)
 
@@ -46,6 +50,24 @@ export default function Layout({ children }: Props): ReactNode {
     if (drawerOpen) setHasOpened(true)
   }, [drawerOpen])
 
+  useEffect(() => {
+    if (!hasOpened) return
+    let id2 = 0
+    const id1 = requestAnimationFrame(() => {
+      id2 = requestAnimationFrame(() => setEntered(true))
+    })
+    return () => {
+      cancelAnimationFrame(id1)
+      cancelAnimationFrame(id2)
+    }
+  }, [hasOpened])
+
+  // Warm the lazy chunk shortly after load so the first open doesn't wait on the network.
+  useEffect(() => {
+    const t = setTimeout(() => void loadSidebar(), 1500)
+    return () => clearTimeout(t)
+  }, [])
+
   return (
     <div className="flex min-h-full flex-col">
       <BackgroundPhotos />
@@ -55,6 +77,8 @@ export default function Layout({ children }: Props): ReactNode {
           type="button"
           aria-label="menu"
           onClick={() => setDrawerOpen(!drawerOpen)}
+          onPointerEnter={() => void loadSidebar()}
+          onFocus={() => void loadSidebar()}
           className="rounded-md px-2 py-1 text-xl leading-none hover:bg-[var(--color-surface)]"
         >
           ☰
@@ -73,7 +97,7 @@ export default function Layout({ children }: Props): ReactNode {
             <div
               className={cn(
                 'fixed inset-0 z-10 bg-black/30 transition-opacity duration-300 md:hidden',
-                drawerOpen ? 'opacity-100' : 'pointer-events-none opacity-0'
+                open ? 'opacity-100' :'pointer-events-none opacity-0'
               )}
               onClick={() => setDrawerOpen(false)}
               aria-hidden
@@ -82,13 +106,15 @@ export default function Layout({ children }: Props): ReactNode {
               className={cn(
                 'fixed inset-y-0 top-14 left-0 z-20 w-64 overflow-hidden transition-transform duration-300 ease-in-out',
                 'md:sticky md:top-14 md:h-[calc(100vh-3.5rem)] md:w-0 md:translate-x-0 md:self-start md:overflow-y-auto md:transition-[width] md:duration-300 md:ease-in-out',
-                drawerOpen ? 'translate-x-0 md:w-64' : '-translate-x-full'
+                open ? 'translate-x-0 md:w-64' : '-translate-x-full'
               )}
             >
               <LoadErrorBoundary compact>
-                <Suspense fallback={<div className="w-64 border-r border-[var(--color-border)]" />}>
-                  <Sidebar />
-                </Suspense>
+                <div className="w-64">
+                  <Suspense fallback={<div className="w-64 border-r border-[var(--color-border)]" />}>
+                    <Sidebar />
+                  </Suspense>
+                </div>
               </LoadErrorBoundary>
             </div>
           </>
