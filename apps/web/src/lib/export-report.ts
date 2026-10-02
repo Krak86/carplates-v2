@@ -1,7 +1,8 @@
-import { regionName } from '@carplates/shared'
+import { brandLogoUrl, regionName } from '@carplates/shared'
 import type {
   CncapRatingsResponse,
   EuroNcapRatingsResponse,
+  FuelEconomyResponse,
   IihsRatingsResponse,
   JncapRatingsResponse,
   KncapRatingsResponse,
@@ -12,6 +13,7 @@ import type {
   WikiInfo
 } from '@carplates/shared'
 
+import { formatRange } from '@/components/CO2Badge.helpers'
 import { safetyVideoUrl } from '@/lib/api'
 import {
   filterByBodyStyle,
@@ -76,6 +78,10 @@ export type ExportSection = ExportKeyValueSection | ExportTableSection | ExportL
 export type ExportReport = {
   title: string
   subtitle: string
+  /** Bundled brand logo (same-origin `/logos/*.png`), null for a brand with none. */
+  logo: { url: string; alt: string } | null
+  /** Wikipedia lead image, shown right under the title block when the wiki lookup found one. */
+  heroImage: { url: string; alt: string } | null
   generatedAtLabel: string
   sections: ExportSection[]
 }
@@ -93,6 +99,8 @@ export type ExportInput = {
   plateHistoryActions: Registration[] | null
   vinHistoryActions: Registration[] | null
   wiki: WikiInfo | null
+  /** Fuel/CO2 estimate for similar vehicles — the same data the ResultCard's "Emissions" section shows. */
+  fuel: FuelEconomyResponse | null
   photos: VehiclePhoto[]
   euroncap: EuroNcapRatingsResponse | null
   nhtsa: SafetyRatingsResponse | null
@@ -213,6 +221,18 @@ function buildHistorySection(
 ): ExportTableSection | null {
   if (!actions || actions.length === 0) return null
   return { type: 'table', id, title, columns: historyColumns(t), rows: actions.map(a => historyRow(a, t)) }
+}
+
+function buildEmissionsSection(input: ExportInput, t: Translate): ExportKeyValueSection | null {
+  const e = input.fuel?.estimate
+  if (!e) return null
+  const rows: Row[] = []
+  pushRow(rows, t('co2.unitGKm'), formatRange(e.co2GKmMin, e.co2GKmMax))
+  pushRow(rows, t('co2.unitL100'), formatRange(e.l100kmMin, e.l100kmMax, 1))
+  pushRow(rows, t('co2.unitKwh100'), e.evKwh100km)
+  pushRow(rows, t('co2.cycleNote', { cycle: e.cycle }), e.source)
+  pushRow(rows, t('co2.similar'), t('co2.infoEstimate'))
+  return { type: 'kv', id: 'emissions', title: t('co2.title'), rows }
 }
 
 function buildWikiSection(input: ExportInput, t: Translate): ExportKeyValueSection | null {
@@ -548,6 +568,8 @@ export function buildLocalRecordsReport(title: string, entries: ExportLocalRecor
   return {
     title,
     subtitle: t('export.recordCount', { count: entries.length }),
+    logo: null,
+    heroImage: null,
     generatedAtLabel: t('export.generatedAt', { date: new Date().toLocaleString() }),
     sections: [{ type: 'table', id: 'records', title, columns, rows }]
   }
@@ -557,6 +579,7 @@ export function buildExportReport(input: ExportInput, t: Translate): ExportRepor
   const label = [input.vehicle.brand, input.vehicle.model].filter(Boolean).join(' ')
   const title =
     [label, input.vehicle.year ? `(${input.vehicle.year})` : null].filter(Boolean).join(' ') || t('export.untitled')
+  const logoUrl = brandLogoUrl(input.vehicle.brand)
   const subtitle = [input.plate, input.vin].filter(Boolean).join(' · ')
   const hasAnyRatings = Boolean(
     input.euroncap || input.nhtsa || input.jncap || input.cncap || input.kncap || input.iihs
@@ -566,6 +589,7 @@ export function buildExportReport(input: ExportInput, t: Translate): ExportRepor
   const sections: (ExportSection | null)[] = [
     buildVehicleSection(input, t),
     buildRankingsSection(input, t),
+    buildEmissionsSection(input, t),
     buildVinDecodeSection(input, t),
     buildHistorySection('historyPlate', t('result.historyTitle'), input.plateHistoryActions, t),
     buildHistorySection('historyVin', t('result.historyTitleVin'), input.vinHistoryActions, t),
@@ -585,6 +609,9 @@ export function buildExportReport(input: ExportInput, t: Translate): ExportRepor
   return {
     title,
     subtitle,
+    logo: logoUrl ? { url: logoUrl, alt: input.vehicle.brand ?? title } : null,
+    heroImage:
+      input.wiki?.found && input.wiki.image ? { url: input.wiki.image.url, alt: input.wiki.title ?? title } : null,
     generatedAtLabel: t('export.generatedAt', { date: new Date().toLocaleString() }),
     sections: sections.filter((s): s is ExportSection => s != null)
   }

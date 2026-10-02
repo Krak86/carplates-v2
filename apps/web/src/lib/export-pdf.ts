@@ -1,4 +1,11 @@
+import { fetchImageAsPng } from '@/lib/export-image'
+import type { EmbeddedImage } from '@/lib/export-image'
 import type { ExportReport, ExportSection } from '@/lib/export-report'
+
+const LOGO_MAX_WIDTH_PT = 64
+const LOGO_SOURCE_MAX_WIDTH_PX = 256
+const HERO_MAX_WIDTH_PT = 320
+const HERO_SOURCE_MAX_WIDTH_PX = 800
 
 // `jspdf` is only pulled into the bundle when a viewer actually asks for a PDF download
 // (dynamic import, same rationale as apps/web/src/lib/telemetry.ts).
@@ -81,7 +88,22 @@ export async function toPdfBlob(report: ExportReport): Promise<Blob> {
     }
   }
 
+  function writeImage(image: EmbeddedImage | null, widthPt: number): void {
+    if (!image) return
+    const width = Math.min(maxWidth, widthPt)
+    const height = (image.height / image.width) * width
+    ensureSpace(height)
+    doc.addImage(image.data, 'PNG', PAGE_MARGIN, y, width, height)
+    y += height + LINE_HEIGHT / 2
+  }
+
+  const [logo, hero] = await Promise.all([
+    report.logo ? fetchImageAsPng(report.logo.url, LOGO_SOURCE_MAX_WIDTH_PX) : null,
+    report.heroImage ? fetchImageAsPng(report.heroImage.url, HERO_SOURCE_MAX_WIDTH_PX) : null
+  ])
+  writeImage(logo, LOGO_MAX_WIDTH_PT)
   writeLines(report.title, FONT_SIZE_TITLE, true)
+  writeImage(hero, HERO_MAX_WIDTH_PT)
   writeLines(report.subtitle, FONT_SIZE_BODY, false)
   writeLines(report.generatedAtLabel, FONT_SIZE_BODY, false)
   y += LINE_HEIGHT / 2

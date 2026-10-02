@@ -19,6 +19,7 @@ function sectionToTextLines(section: ExportSection): string[] {
 /** Plain text — used for both the clipboard copy and the .txt download. */
 export function toPlainText(report: ExportReport): string {
   const lines = [report.title, report.subtitle, report.generatedAtLabel, '']
+  if (report.heroImage) lines.splice(1, 0, report.heroImage.url)
   for (const section of report.sections) lines.push(...sectionToTextLines(section), '')
   return lines.join('\n').trim() + '\n'
 }
@@ -46,7 +47,11 @@ function sectionToMarkdown(section: ExportSection): string[] {
 }
 
 export function toMarkdown(report: ExportReport): string {
-  const lines = [`# ${report.title}`, '', `*${report.subtitle}*`, '', `*${report.generatedAtLabel}*`, '']
+  const lines: string[] = []
+  if (report.logo) lines.push(`![${report.logo.alt}](${report.logo.url})`, '')
+  lines.push(`# ${report.title}`, '')
+  if (report.heroImage) lines.push(`![${report.heroImage.alt}](${report.heroImage.url})`, '')
+  lines.push(`*${report.subtitle}*`, '', `*${report.generatedAtLabel}*`, '')
   for (const section of report.sections) lines.push(...sectionToMarkdown(section), '')
   return lines.join('\n').trim() + '\n'
 }
@@ -92,6 +97,7 @@ function sectionToCsvBlock(section: ExportSection): string[] {
  */
 export function toCsv(report: ExportReport): string {
   const lines = [csvLine([report.title]), csvLine([report.subtitle]), csvLine([report.generatedAtLabel]), '']
+  if (report.heroImage) lines.splice(1, 0, csvLine([report.heroImage.url]))
   for (const section of report.sections) lines.push(...sectionToCsvBlock(section), '')
   return '﻿' + lines.join('\r\n').trim() + '\r\n'
 }

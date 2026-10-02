@@ -6,6 +6,8 @@ import type { ExportReport } from '@/lib/export-report'
 const report: ExportReport = {
   title: 'TOYOTA CAMRY (2020)',
   subtitle: 'АА1234АА · JT123456789012345',
+  logo: null,
+  heroImage: { url: 'https://example.org/car.jpg', alt: 'Car' },
   generatedAtLabel: 'Generated: 2026-01-01',
   sections: [
     { type: 'kv', id: 'vehicle', title: 'Vehicle', rows: [{ label: 'VIN', value: 'JT123456789012345' }] },

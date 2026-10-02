@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import CopyIcon from '@/components/CopyIcon'
 import { useCopyFeedback } from '@/components/use-copy-feedback'
 import { cn } from '@/lib/cn'
 
@@ -27,7 +28,7 @@ export default function CopyButton({ text, label, className }: Props): ReactNode
         className
       )}
     >
-      <span aria-hidden>{copied ? '✅' : '📋'}</span>
+      <span aria-hidden>{copied ? '✅' : <CopyIcon />}</span>
       <span className="sr-only" aria-live="polite">
         {copied ? t('copy.copied') : ''}
       </span>

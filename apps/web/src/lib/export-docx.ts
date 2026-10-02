@@ -1,6 +1,10 @@
 import type { Paragraph, Table } from 'docx'
 
+import { fetchImageAsPng } from '@/lib/export-image'
 import type { ExportReport, ExportSection } from '@/lib/export-report'
+
+const HERO_MAX_WIDTH_PX = 480
+const LOGO_MAX_WIDTH_PX = 96
 
 // `docx` the *value* is only pulled into the bundle when a viewer actually asks for a Word
 // download (dynamic import, same rationale as apps/web/src/lib/telemetry.ts) — the `import
@@ -67,13 +71,32 @@ function sectionToDocx(section: ExportSection, docx: Docx): (Paragraph | Table)[
 
 export async function toDocxBlob(report: ExportReport): Promise<Blob> {
   const docx = await loadDocx()
-  const { Document, Paragraph, HeadingLevel, Packer } = docx
+  const { Document, Paragraph, HeadingLevel, ImageRun, Packer } = docx
 
-  const children: (Paragraph | Table)[] = [
-    new Paragraph({ text: report.title, heading: HeadingLevel.HEADING_1 }),
-    new Paragraph({ text: report.subtitle }),
-    new Paragraph({ text: report.generatedAtLabel })
-  ]
+  const imageParagraph = async (image: ExportReport['logo'], maxWidth: number): Promise<Paragraph | null> => {
+    const png = image ? await fetchImageAsPng(image.url, maxWidth) : null
+    if (!image || !png) return null
+    return new Paragraph({
+      children: [
+        new ImageRun({
+          type: 'png',
+          data: png.data,
+          transformation: { width: png.width, height: png.height },
+          altText: { title: image.alt, description: image.alt, name: image.alt }
+        })
+      ]
+    })
+  }
+
+  const [logo, hero] = await Promise.all([
+    imageParagraph(report.logo, LOGO_MAX_WIDTH_PX),
+    imageParagraph(report.heroImage, HERO_MAX_WIDTH_PX)
+  ])
+  const children: (Paragraph | Table)[] = []
+  if (logo) children.push(logo)
+  children.push(new Paragraph({ text: report.title, heading: HeadingLevel.HEADING_1 }))
+  if (hero) children.push(hero)
+  children.push(new Paragraph({ text: report.subtitle }), new Paragraph({ text: report.generatedAtLabel }))
   for (const section of report.sections) children.push(...sectionToDocx(section, docx))
 
   const doc = new Document({ sections: [{ children }] })

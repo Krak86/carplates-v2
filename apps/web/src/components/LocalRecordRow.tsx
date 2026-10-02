@@ -2,7 +2,9 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 
+import BrandLogo from '@/components/BrandLogo'
 import { toIntlLocale } from '@/lib/intl'
+import { brandFromLabel } from '@/lib/vehicle-label'
 
 type Props = {
   value: string
@@ -26,6 +28,9 @@ export default function LocalRecordRow({
 
   return (
     <div className="flex items-center justify-between gap-3 px-4 py-2 text-sm">
+      <span className="flex w-6 shrink-0 justify-center">
+        <BrandLogo brand={brandFromLabel(label)} size="sm" />
+      </span>
       <Link
         to={`/${value}`}
         title={label ? `${value} — ${label}` : value}

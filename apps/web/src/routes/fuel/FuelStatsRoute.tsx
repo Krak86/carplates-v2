@@ -1,9 +1,9 @@
-import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { FUEL_CLASSES } from '@carplates/shared'
 import type { FuelStatsRow } from '@carplates/shared'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
+import { useSearchParams } from 'react-router'
 
 import { CO2_BAND_COLOR } from '@/components/CO2Badge.helpers'
 import Card from '@/components/ui/Card'
@@ -20,6 +20,10 @@ const FUEL_TABS = ['year', 'brand', 'fuelClass'] as const
 type FuelTab = (typeof FUEL_TABS)[number]
 const DEFAULT_FUEL_TAB: FuelTab = 'year'
 
+function parseFuelTab(value: string | null): FuelTab {
+  return (FUEL_TABS as readonly string[]).includes(value ?? '') ? (value as FuelTab) : DEFAULT_FUEL_TAB
+}
+
 /** Years drawn on the by-year chart: recent enough to have emissions data, and real model years. */
 const FIRST_CHART_YEAR = 1990
 
@@ -28,7 +32,17 @@ export default function FuelStatsRoute(): ReactNode {
   const { t, i18n } = useTranslation()
   const online = useOnlineStatus()
   const stats = useQuery(fuelStatsQuery())
-  const [tab, setTab] = useState<FuelTab>(DEFAULT_FUEL_TAB)
+  const [searchParams, setSearchParams] = useSearchParams()
+  const tab = parseFuelTab(searchParams.get('tab'))
+
+  const handleTabChange = (next: FuelTab): void => {
+    setSearchParams(prev => {
+      const params = new URLSearchParams(prev)
+      params.set('tab', next)
+      return params
+    })
+  }
+
   const numberFormat = new Intl.NumberFormat(toIntlLocale(i18n.language))
   const currentYear = new Date().getFullYear()
 
@@ -98,7 +112,7 @@ export default function FuelStatsRoute(): ReactNode {
               <button
                 key={value}
                 type="button"
-                onClick={() => setTab(value)}
+                onClick={() => handleTabChange(value)}
                 className={cn(
                   'rounded-md border px-3 py-1 text-sm transition-colors duration-200',
                   value === tab

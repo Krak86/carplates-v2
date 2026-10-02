@@ -3,13 +3,14 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import type { Registration } from '@carplates/shared'
 
-import { downloadBlob, downloadText, toFileStem } from '@/lib/download'
+import { downloadBlob, downloadText, vehicleFileStem } from '@/lib/download'
 import { buildExportReport } from '@/lib/export-report'
 import type { ExportFormat, ExportInput, ExportVehicleInfo } from '@/lib/export-report'
 import { toCsv, toMarkdown, toPlainText } from '@/lib/export-formats'
 import {
   cncapRatingsQuery,
   euroNcapRatingsQuery,
+  fuelEconomyQuery,
   iihsRatingsQuery,
   jncapRatingsQuery,
   kncapRatingsQuery,
@@ -68,7 +69,7 @@ export function useCopyAllInfoActions(params: CopyAllInfoParams): UseCopyAllInfo
     const model = vehicle.model ?? ''
     const year = vehicle.year ?? 0
 
-    const [plateHistory, vinDetail, euroncap, nhtsa, jncap, cncap, kncap, iihs, wiki, photos, stats] =
+    const [plateHistory, vinDetail, euroncap, nhtsa, jncap, cncap, kncap, iihs, wiki, photos, stats, fuel] =
       await Promise.all([
         plate ? safe(queryClient.ensureQueryData(plateHistoryQuery(plate))) : Promise.resolve(null),
         params.vinDecodeResults == null && vin
@@ -98,7 +99,20 @@ export function useCopyAllInfoActions(params: CopyAllInfoParams): UseCopyAllInfo
         hasWikiQuery
           ? safe(queryClient.ensureQueryData(vehiclePhotosQuery(make, model, vehicle.year)))
           : Promise.resolve(null),
-        safe(queryClient.ensureQueryData({ ...statsTopQuery(), ...FAIL_FAST_OFFLINE }))
+        safe(queryClient.ensureQueryData({ ...statsTopQuery(), ...FAIL_FAST_OFFLINE })),
+        hasRatingsQuery
+          ? safe(
+              queryClient.ensureQueryData(
+                fuelEconomyQuery({
+                  make,
+                  model,
+                  year,
+                  fuel: params.current?.fuel,
+                  capacity: params.current?.capacity
+                })
+              )
+            )
+          : Promise.resolve(null)
       ])
 
     return {
@@ -111,6 +125,7 @@ export function useCopyAllInfoActions(params: CopyAllInfoParams): UseCopyAllInfo
       plateHistoryActions: plateHistory?.actions ?? null,
       vinHistoryActions: params.vinRegistryActions ?? vinDetail?.registry?.actions ?? null,
       wiki,
+      fuel,
       photos: photos?.images ?? [],
       euroncap,
       nhtsa,
@@ -127,7 +142,7 @@ export function useCopyAllInfoActions(params: CopyAllInfoParams): UseCopyAllInfo
     try {
       const input = await gather()
       const report = buildExportReport(input, t)
-      const stem = toFileStem(params.vin ?? params.plate ?? 'vehicle')
+      const stem = vehicleFileStem({ ...params.vehicle, plate: params.plate, vin: params.vin })
 
       switch (format) {
         case 'clipboard':
