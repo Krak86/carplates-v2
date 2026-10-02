@@ -13,7 +13,7 @@ import { cn } from '@/lib/cn'
 import { toIntlLocale } from '@/lib/intl'
 import { fuelStatsQuery } from '@/lib/queries'
 import FuelBarList from '@/routes/fuel/FuelBarList'
-import FuelModelList from '@/routes/fuel/FuelModelList'
+import FuelModelsPanel from '@/routes/fuel/FuelModelsPanel'
 import { bandForCo2, plausibleYear } from '@/routes/fuel/helpers'
 
 const FUEL_TABS = ['year', 'brand', 'fuelClass'] as const
@@ -118,14 +118,7 @@ export default function FuelStatsRoute(): ReactNode {
             </div>
           </Card>
 
-          <div className="mb-6 grid gap-6 md:grid-cols-2">
-            <Card>
-              <FuelModelList title={t('fuel.cleanest')} models={data.cleanestModels} />
-            </Card>
-            <Card>
-              <FuelModelList title={t('fuel.dirtiest')} models={data.dirtiestModels} />
-            </Card>
-          </div>
+          <FuelModelsPanel stats={data} />
 
           <Card>
             <h2 className="mb-3 text-base font-semibold">{t('fuel.distribution')}</h2>

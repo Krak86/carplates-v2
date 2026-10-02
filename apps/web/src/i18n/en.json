@@ -545,6 +545,8 @@
   "fuel.cars": "{{count}} cars",
   "fuel.cleanest": "Cleanest models",
   "fuel.dirtiest": "Most CO₂-heavy models",
+  "fuel.showMore": "Show top {{count}}",
+  "fuel.showLess": "Show top {{count}}",
   "fuel.distribution": "Matched cars by CO₂ (g/km)",
   "fuel.fuelClass.electric": "Electric",
   "fuel.fuelClass.hybrid": "Hybrid / plug-in",

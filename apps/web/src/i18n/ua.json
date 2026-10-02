@@ -559,6 +559,8 @@
   "fuel.cars": "{{count}} авто",
   "fuel.cleanest": "Найчистіші моделі",
   "fuel.dirtiest": "Моделі з найбільшими викидами CO₂",
+  "fuel.showMore": "Показати топ-{{count}}",
+  "fuel.showLess": "Показати топ-{{count}}",
   "fuel.distribution": "Авто зі збігом за викидами CO₂ (г/км)",
   "fuel.fuelClass.electric": "Електро",
   "fuel.fuelClass.hybrid": "Гібрид / плагін",

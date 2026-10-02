@@ -24,11 +24,12 @@ import { cn } from '@/lib/cn'
 import { recordVisit } from '@/lib/history-db'
 import { MAX_DIMENSION } from '@/lib/image'
 import { toIntlLocale } from '@/lib/intl'
-import { historyQuery, plateQuery, statsQuery, vinQuery } from '@/lib/queries'
+import { fuelStatsQuery, historyQuery, plateQuery, statsQuery, vinQuery } from '@/lib/queries'
 import { capture } from '@/lib/telemetry'
 import { formatVehicleLabel } from '@/lib/vehicle-label'
 
 const TopStatsPanel = lazy(() => import('@/routes/stats/TopStatsPanel'))
+const FuelModelsPanel = lazy(() => import('@/routes/fuel/FuelModelsPanel'))
 
 export default function SearchRoute(): ReactNode {
   const { t, i18n } = useTranslation()
@@ -46,6 +47,7 @@ export default function SearchRoute(): ReactNode {
 
   const active = kind === 'vin' ? vin : plate
   const stats = useQuery({ ...statsQuery(), enabled: isHome })
+  const fuelStats = useQuery({ ...fuelStatsQuery(), enabled: isHome })
 
   // A saved (persisted) result stays renderable when a refetch fails or is paused offline —
   // render off `data`, not `isSuccess`, which a failed background refetch flips to false.
@@ -235,6 +237,16 @@ export default function SearchRoute(): ReactNode {
             <Suspense fallback={null}>
               <div className="w-full max-w-6xl animate-fade-in">
                 <TopStatsPanel stats={stats.data} />
+              </div>
+            </Suspense>
+          </LoadErrorBoundary>
+        )}
+
+        {isHome && fuelStats.isSuccess && (
+          <LoadErrorBoundary compact>
+            <Suspense fallback={null}>
+              <div className="w-full max-w-6xl animate-fade-in">
+                <FuelModelsPanel stats={fuelStats.data} />
               </div>
             </Suspense>
           </LoadErrorBoundary>
