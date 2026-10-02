@@ -8,6 +8,7 @@ import { classifyQuery } from '@carplates/shared'
 import LoadErrorBoundary from '@/components/LoadErrorBoundary'
 import NotFoundInfo from '@/components/NotFoundInfo'
 import PhotoMetaInfo from '@/components/PhotoMetaInfo'
+import PhotoWarnings from '@/components/PhotoWarnings'
 import PhotoThumbnail from '@/components/PhotoThumbnail'
 import PlateCandidates from '@/components/PlateCandidates'
 import ResultCard from '@/components/ResultCard'
@@ -121,7 +122,8 @@ export default function SearchRoute(): ReactNode {
   useDocumentTitle(shownValue ? [shownValue, titleCar].filter(Boolean).join(' — ') : null)
 
   const notFound = active.error instanceof ApiError && active.error.status === 404
-  const isIdle = !raw
+  // Centered only on a pristine page — any input, photo, or recognition error pins the search to the top.
+  const isIdle = !raw && !photo && !recognizeErrorKey
   const showNotFound = active.isError && !hasData
   // Any attached photo (pending, failed, or resolved) makes the page about that search — homepage stats step aside.
   const showHomeStats = isHome && !photo
@@ -153,6 +155,36 @@ export default function SearchRoute(): ReactNode {
           </Link>
         </div>
 
+        {showingSavedCopy && (
+          <p className="w-full max-w-2xl rounded-md border border-amber-500/40 bg-amber-500/15 px-2.5 py-1.5 text-sm font-medium text-amber-800 dark:text-amber-300">
+            {t('offline.savedCopy', {
+              date: new Date(active.dataUpdatedAt).toLocaleString(toIntlLocale(i18n.language), {
+                dateStyle: 'medium',
+                timeStyle: 'short'
+              })
+            })}
+          </p>
+        )}
+
+        {photo && (
+          <PhotoThumbnail url={photo.url} candidates={photo.candidates} active={raw || null} onClose={dismissPhoto} />
+        )}
+        {photo?.meta && <PhotoMetaInfo meta={photo.meta} />}
+        {photo && (
+          <PhotoWarnings
+            meta={photo.meta}
+            maxDimension={MAX_DIMENSION}
+            showAccuracy={photo.settled && photo.candidates.length > 0}
+          />
+        )}
+        {!photo && !recognizeErrorKey && wikiHeroVehicle && (
+          <WikiHeroImage brand={wikiHeroVehicle.brand} model={wikiHeroVehicle.model} vehicleKey={wikiHeroVehicle.key} />
+        )}
+        {photo && <PlateCandidates candidates={photo.candidates} active={raw || null} onSelect={selectCandidate} />}
+
+        {!recognizeErrorKey && kind === 'plate' && plate.data && <ResultCard data={plate.data} />}
+        {!recognizeErrorKey && kind === 'vin' && vin.data && <VinResult data={vin.data} />}
+
         {raw && active.isPending && !offlineMiss && (
           <p className="flex items-center gap-2 rounded bg-[var(--color-surface)]/20 px-1.5 py-0.5 text-[var(--color-muted)]">
             <Spinner /> {t('result.loading')}
@@ -180,41 +212,6 @@ export default function SearchRoute(): ReactNode {
             {recognizeErrorKey ? t(recognizeErrorKey) : null}
           </p>
         </Presence>
-
-        {showingSavedCopy && (
-          <p className="w-full max-w-2xl rounded-md border border-amber-500/40 bg-amber-500/15 px-2.5 py-1.5 text-sm font-medium text-amber-800 dark:text-amber-300">
-            {t('offline.savedCopy', {
-              date: new Date(active.dataUpdatedAt).toLocaleString(toIntlLocale(i18n.language), {
-                dateStyle: 'medium',
-                timeStyle: 'short'
-              })
-            })}
-          </p>
-        )}
-
-        {photo && (
-          <PhotoThumbnail url={photo.url} candidates={photo.candidates} active={raw || null} onClose={dismissPhoto} />
-        )}
-        {photo?.meta && <PhotoMetaInfo meta={photo.meta} />}
-        {photo && (
-          <p className="flex w-full max-w-2xl items-start gap-1.5 rounded-md border border-amber-500/40 bg-amber-500/15 px-2.5 py-1.5 text-sm font-medium text-amber-800 dark:text-amber-300">
-            <span aria-hidden>💡</span>
-            {t('recognize.photoTips', { max: MAX_DIMENSION })}
-          </p>
-        )}
-        {photo && photo.settled && photo.candidates.length > 0 && (
-          <p className="flex w-full max-w-2xl items-start gap-1.5 rounded-md border border-amber-500/40 bg-amber-500/15 px-2.5 py-1.5 text-sm font-medium text-amber-800 dark:text-amber-300">
-            <span aria-hidden>⚠️</span>
-            {t('recognize.accuracyWarning')}
-          </p>
-        )}
-        {!photo && !recognizeErrorKey && wikiHeroVehicle && (
-          <WikiHeroImage brand={wikiHeroVehicle.brand} model={wikiHeroVehicle.model} vehicleKey={wikiHeroVehicle.key} />
-        )}
-        {photo && <PlateCandidates candidates={photo.candidates} active={raw || null} onSelect={selectCandidate} />}
-
-        {!recognizeErrorKey && kind === 'plate' && plate.data && <ResultCard data={plate.data} />}
-        {!recognizeErrorKey && kind === 'vin' && vin.data && <VinResult data={vin.data} />}
 
         <Presence show={showHomeStats && stats.isSuccess}>
           {stats.data && (

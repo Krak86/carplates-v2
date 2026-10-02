@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next'
 import type { PhotoMeta } from '@carplates/shared'
 
 import { toIntlLocale } from '@/lib/intl'
-import { REGISTRY_START_YEAR, isBeforeRegistry, photoAgeYears } from '@/lib/photo-meta'
 
 type Props = {
   meta: PhotoMeta
@@ -12,7 +11,6 @@ type Props = {
 export default function PhotoMetaInfo({ meta }: Props): ReactNode {
   const { t, i18n } = useTranslation()
   const { takenAt, latitude, longitude } = meta
-  const years = photoAgeYears(meta)
   const hasPlace = latitude != null && longitude != null
 
   return (
@@ -38,18 +36,6 @@ export default function PhotoMetaInfo({ meta }: Props): ReactNode {
           </a>
         )}
       </p>
-
-      {isBeforeRegistry(meta) && (
-        <p className="rounded-md border border-amber-500/40 bg-amber-500/15 px-2.5 py-1.5 font-medium text-amber-800 dark:text-amber-300">
-          🗄️ {t('photo.meta.preRegistry', { year: REGISTRY_START_YEAR })}
-        </p>
-      )}
-
-      {years >= 1 && (
-        <p className="rounded-md border border-amber-500/40 bg-amber-500/15 px-2.5 py-1.5 font-medium text-amber-800 dark:text-amber-300">
-          ⏳ {t('photo.meta.old', { count: years })}
-        </p>
-      )}
     </div>
   )
 }
