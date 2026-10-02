@@ -33,7 +33,7 @@ export default function WikiHeroImage({ brand, model, vehicleKey }: Props): Reac
   const isLoaded = !!image && loadedUrl === image.url
 
   return (
-    <div className="relative h-64 w-full max-w-2xl sm:h-80">
+    <div className="relative -my-3 h-64 w-full max-w-2xl sm:h-80">
       {!isLoaded && <div className="absolute inset-0 animate-pulse rounded-lg bg-black/10 dark:bg-white/10" />}
       {image && (
         <img

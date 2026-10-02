@@ -192,7 +192,7 @@ export default function SearchRoute(): ReactNode {
         {!photo && !recognizeErrorKey && wikiHeroVehicle && (
           <WikiHeroImage brand={wikiHeroVehicle.brand} model={wikiHeroVehicle.model} vehicleKey={wikiHeroVehicle.key} />
         )}
-        <Presence show={!!photo}>
+        <Presence show={!!photo && photo.candidates.length > 1}>
           {photo && <PlateCandidates candidates={photo.candidates} active={raw || null} onSelect={selectCandidate} />}
         </Presence>
 
