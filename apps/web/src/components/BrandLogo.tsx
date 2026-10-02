@@ -46,8 +46,11 @@ export default function BrandLogo({ brand, variant = 'inline', size = 'default',
         className={cn(
           'pointer-events-none absolute inset-x-0 top-0 -z-10 h-auto w-full animate-watermark-breathe object-contain',
           'opacity-(--watermark-opacity) mix-blend-multiply grayscale-[0.4]',
-          // Multiply would darken an already-dark surface to nothing — render a light silhouette instead.
-          'dark:mix-blend-screen dark:brightness-0 dark:invert',
+          // Multiply would darken an already-dark surface to nothing. Invert flips the PNG's flat
+          // white background to black (which `screen` then drops out) and its dark/colored
+          // artwork to light; grayscale keeps the inverted hues from turning garish. Don't add
+          // `brightness-0` — it blackens the background too, so the whole rectangle glows.
+          'dark:mix-blend-screen dark:grayscale dark:invert',
           className
         )}
       />

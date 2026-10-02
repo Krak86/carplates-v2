@@ -49,10 +49,9 @@ export default function VinResult({ data }: Props): ReactNode {
             background: `radial-gradient(ellipse at var(--glow-x, 0%) var(--glow-y, 0%), ${VEHICLE_COLOR_HEX[vehicleColor]}, transparent 70%)`
           }}
         />
-        <CardTiltToggle className="absolute top-3 right-12 lg:hidden" />
         <FavoriteButton kind="vin" value={data.vin} label={null} className="absolute top-3 right-3" />
 
-        <div className="mb-1 flex items-center gap-1.5 pr-20 text-xl font-semibold lg:pr-8">
+        <div className="mb-1 flex items-center gap-1.5 pr-10 text-xl font-semibold lg:pr-8">
           <span aria-hidden>🆔</span>
           {t('vin.title')}
           <CopyAllInfoButton

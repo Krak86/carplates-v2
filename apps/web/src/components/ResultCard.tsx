@@ -113,7 +113,6 @@ export default function ResultCard({ data }: Props): ReactNode {
           }}
         />
         <BrandLogo brand={c.brand} variant="watermark" />
-        <CardTiltToggle className="absolute top-3 right-12 lg:hidden" />
         <FavoriteButton
           kind="plate"
           value={data.plate}
@@ -121,7 +120,7 @@ export default function ResultCard({ data }: Props): ReactNode {
           className="absolute top-3 right-3"
         />
 
-        <div className="mb-3 flex items-stretch gap-3 pr-20 lg:pr-8">
+        <div className="mb-3 flex items-stretch gap-3 pr-10 lg:pr-8">
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 text-xl font-semibold">
               <BrandLogo brand={c.brand} />
@@ -197,7 +196,7 @@ export default function ResultCard({ data }: Props): ReactNode {
           <VehicleKindIcon
             kind={vehicleKind}
             color={vehicleColor}
-            className="aspect-square max-h-20 shrink-0"
+            className="aspect-square max-h-20 shrink-0 max-md:hidden"
             title={[c.kind && `${t('field.kind')}: ${c.kind}`, c.color && `${t('field.color')}: ${c.color}`]
               .filter(Boolean)
               .join('\n')}
