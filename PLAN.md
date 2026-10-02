@@ -363,6 +363,46 @@ stable, already-answered plate isn't re-queried every frame.
 frame at once), graceful fallback to the existing single-shot capture flow
 on unsupported/slow devices, telemetry on detection/OCR hit rate.
 
+### VIN image recognition (camera/upload) — researched, planned (2026-10-03), not started
+
+**Decision: share the capture UI, not the model.** `fast-alpr` (plate detector +
+`fast-plate-ocr`) is trained on short plate crops — it can't find or emit a 17-char
+VIN. A VIN is a different task (text line on a windshield sticker / door-jamb label /
+stamped metal), so it gets its own recognizer. Shared: the camera/upload dialog,
+`use-plate-recognition.ts` (rename to something generic when starting), the
+`/api/recognize/*` route shape, and "navigate to the result". No published accuracy
+benchmarks exist for VIN readers (Anyline/Dynamsoft/Vincario publish none); only
+data point found: Mindee docTR fine-tuned on 5,000 VIN photos → 80% recognizer-only /
+90% end-to-end exact match, generic OCR clearly worse. We have no such dataset.
+
+**Plan, in order:**
+
+1. **Eval set first.** Copy the `services/alpr/eval/` pattern: 30–50 own VIN photos
+   (windshield, door jamb, glare, angles) + labelled VINs, scored by exact match.
+   Every choice below is decided against it, not vendor claims.
+2. **Barcode path, on-device, free.** Door-jamb VINs are often Code 128 / Code 39 /
+   Data Matrix: browser `BarcodeDetector` (or zxing-wasm fallback) — exact, no OCR
+   errors, no backend call. Mostly US-style labels.
+3. **OCR path for windshield text.** `POST /recognize/vin` in `services/alpr/`
+   (same Docker image, CPU/ONNX): general text detector + recognizer (PaddleOCR or
+   RapidOCR). Post-process: regex `^[A-HJ-NPR-Z0-9]{17}$` (no I/O/Q), remap
+   `O→0`, `I→1`, `Q→0`, pick the best 17-char window across detected lines.
+   Check digit (pos. 9) is a **soft** signal only — mandatory in North America,
+   legitimately fails on many EU/UA-market VINs. A successful NHTSA decode is the
+   stronger confirmation. Put VIN normalization/validation in `packages/shared`
+   (single source of truth, like `normalizePlate`).
+4. **Multi-frame voting** in live camera mode — agreeing reads across frames add more
+   accuracy than any model swap. Reuses the AR steps' stabilization above.
+5. **Optional fallback: multimodal LLM** (Claude vision) for photos OCR rejects. Low
+   volume so cost is small, but adds latency, a privacy question (VIN leaves our
+   infra) and hallucination risk — only accept output that passes the validation in
+   step 3. Compare against step 3 on the eval set before enabling.
+
+**Skipped:** paid VIN SDKs (Anyline from ~€457, Dynamsoft from ~$1,249 — no published
+accuracy, and plate OCR is deliberately self-hosted/no per-lookup cost); stamped
+chassis VINs (low-contrast embossed metal, hard even for specialist OCR); fine-tuning
+a VIN model until there are thousands of labelled photos.
+
 ### Phase 3+ — recalls — **researched, parked (2026-09-24)**
 
 Crash-test _ratings_ (`api.nhtsa.gov/SafetyRatings`) graduated out of this
