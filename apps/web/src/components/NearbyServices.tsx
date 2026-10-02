@@ -11,6 +11,7 @@ import {
   parseNearbyCategory
 } from '@/components/NearbyServices.helpers'
 import type { NearbyCategory } from '@/components/NearbyServices.helpers'
+import SectionInfo from '@/components/SectionInfo'
 import ShareButton from '@/components/ShareButton'
 import { useNearbyLocationActions } from '@/components/use-nearby-location-actions'
 import { cn } from '@/lib/cn'
@@ -53,7 +54,10 @@ export default function NearbyServices({ brand }: Props): ReactNode {
   return (
     <div ref={sectionRef} className="mt-3 border-t border-[var(--color-border)] pt-3">
       <div className="flex items-center justify-between text-base">
-        <span className="text-base font-semibold">{t('nearby.title')}</span>
+        <span className="flex items-center gap-1.5 text-base font-semibold">
+          {t('nearby.title')}
+          <SectionInfo section="nearby" title={t('nearby.title')} />
+        </span>
         <div className="flex items-center gap-1.5">
           {open && (
             <ShareButton section="nearby" tab={category} label={t('share.button', { section: t('nearby.title') })} />

@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router'
 import type { WikiInfo } from '@carplates/shared'
 
+import SectionInfo from '@/components/SectionInfo'
 import ShareButton from '@/components/ShareButton'
 import { cn } from '@/lib/cn'
 import { scrollElementIntoView } from '@/lib/share-section'
@@ -26,8 +27,6 @@ export default function CarWikiInfo({ wiki, hasQuery }: Props): ReactNode {
   const [open, setOpen] = useState(() => isSharedWiki)
   const sectionRef = useRef<HTMLDivElement>(null)
   const data = wiki.isSuccess ? wiki.data : null
-  const image = data?.image
-  const creditParts = [image?.attribution?.author, image?.attribution?.license].filter(Boolean)
 
   useEffect(() => {
     if (isSharedWiki && sectionRef.current) scrollElementIntoView(sectionRef.current)
@@ -38,7 +37,10 @@ export default function CarWikiInfo({ wiki, hasQuery }: Props): ReactNode {
   return (
     <div ref={sectionRef} className="mt-3 border-t border-[var(--color-border)] pt-3">
       <div className="flex items-center justify-between text-base">
-        <span className="text-base font-semibold">{t('wiki.title')}</span>
+        <span className="flex items-center gap-1.5 text-base font-semibold">
+          {t('wiki.title')}
+          <SectionInfo section="wiki" title={t('wiki.title')} />
+        </span>
         <div className="flex items-center gap-1.5">
           {open && <ShareButton section="wiki" label={t('share.button', { section: t('wiki.title') })} />}
           <button
@@ -76,14 +78,6 @@ export default function CarWikiInfo({ wiki, hasQuery }: Props): ReactNode {
 
             {data?.found && (
               <div>
-                {image && (
-                  <img
-                    src={image.url}
-                    alt={data.title ?? ''}
-                    crossOrigin="anonymous"
-                    className="mb-2 aspect-video w-full rounded-md border border-[var(--color-border)] object-cover"
-                  />
-                )}
                 {data.extract && <p className="text-base whitespace-pre-line">{data.extract}</p>}
                 <div className="mt-1 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-sm text-[var(--color-muted)]">
                   {data.pageUrl && (
@@ -96,7 +90,6 @@ export default function CarWikiInfo({ wiki, hasQuery }: Props): ReactNode {
                       {t('wiki.source')}
                     </a>
                   )}
-                  {creditParts.length > 0 && <span>{t('wiki.imageCredit', { credit: creditParts.join(', ') })}</span>}
                 </div>
               </div>
             )}

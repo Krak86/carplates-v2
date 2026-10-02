@@ -7,6 +7,7 @@ import { useSearchParams } from 'react-router'
 
 import CO2Badge from '@/components/CO2Badge'
 import { similarVehiclesHref } from '@/components/CO2Badge.helpers'
+import SectionInfo from '@/components/SectionInfo'
 import ShareButton from '@/components/ShareButton'
 import { cn } from '@/lib/cn'
 import { fuelEconomyQuery } from '@/lib/queries'
@@ -46,7 +47,10 @@ export default function FuelEconomy({ brand, model, year, fuel, capacity }: Prop
   return (
     <div ref={sectionRef} className="mt-3 border-t border-[var(--color-border)] pt-3">
       <div className="flex items-center justify-between text-base">
-        <span className="flex items-center gap-1.5 text-base font-semibold">{t('co2.title')}</span>
+        <span className="flex items-center gap-1.5 text-base font-semibold">
+          {t('co2.title')}
+          <SectionInfo section="emissions" title={t('co2.title')} />
+        </span>
 
         <div className="flex items-center gap-1.5">
           {open && <ShareButton section="emissions" label={t('share.button', { section: t('co2.title') })} />}

@@ -169,9 +169,9 @@ export default function InfoPopover({ label, title, children }: Props): ReactNod
           cancelScheduledOpen()
           setHovering(false)
         }}
-        className="text-[var(--color-muted)] hover:text-[var(--color-primary)]"
+        className="inline-flex size-5 shrink-0 items-center justify-center rounded-full bg-[var(--color-primary)]/15 text-xs leading-none font-bold text-[var(--color-primary)] hover:bg-[var(--color-primary)]/30"
       >
-        ❓
+        ?
       </button>
 
       {visible &&

@@ -26,7 +26,10 @@ import RegistrationTimeline from '@/components/RegistrationTimeline'
 import { getFuelIcon } from '@/components/ResultCard.helpers'
 // import ReviewLinks from '@/components/ReviewLinks' // hidden for now, see the render below
 import FuelEconomy from '@/components/FuelEconomy'
+import InfoPopover from '@/components/InfoPopover'
+import InfoText from '@/components/InfoText'
 import SafetyRatings from '@/components/SafetyRatings'
+import SectionInfo from '@/components/SectionInfo'
 import ShareButton from '@/components/ShareButton'
 import TopStatBadges from '@/components/TopStatBadges'
 import { useCarWikiActions } from '@/components/use-car-wiki-actions'
@@ -37,6 +40,7 @@ import VinDecodeTabs from '@/components/vin/VinDecodeTabs'
 import VinToggleSection from '@/components/vin/VinToggleSection'
 import { useCardMotion } from '@/hooks/useCardMotion'
 import { cn } from '@/lib/cn'
+import { koatuuRegion } from '@/lib/koatuu'
 import { depMapsUrl } from '@/lib/maps'
 import { plateHistoryQuery, vinQuery } from '@/lib/queries'
 import { scrollElementIntoView } from '@/lib/share-section'
@@ -47,11 +51,20 @@ type Props = {
   data: PlateLookupResponse
 }
 
-function Row({ label, value }: { label: string; value: ReactNode }): ReactNode {
+// `info` is a `field.about.<info>` i18n key — adds a ❓ with a plain-language explanation of the field.
+function Row({ label, value, info }: { label: string; value: ReactNode; info?: string }): ReactNode {
+  const { t } = useTranslation()
   if (value == null || value === '') return null
   return (
     <div className="-mx-4 flex justify-between gap-4 px-4 py-1.5 text-base transition-colors hover:bg-[var(--color-border)]/40">
-      <span className="rounded bg-[var(--color-surface)]/20 px-1 py-0.5 text-[var(--color-muted)]">{label}</span>
+      <span className="flex items-center gap-1.5 rounded bg-[var(--color-surface)]/20 px-1 py-0.5 text-[var(--color-muted)]">
+        {label}
+        {info && (
+          <InfoPopover label={t('vin.info.about', { field: label })} title={label}>
+            <InfoText text={t(`field.about.${info}`)} />
+          </InfoPopover>
+        )}
+      </span>
       <span className="rounded bg-[var(--color-surface)]/20 px-1 py-0.5 text-right font-medium">{value}</span>
     </div>
   )
@@ -257,6 +270,7 @@ export default function ResultCard({ data }: Props): ReactNode {
             <div className="divide-y divide-[var(--color-border)]">
               <Row
                 label={t('field.body')}
+                info="body"
                 value={
                   c.body && (
                     <span className="inline-flex items-center gap-1.5">
@@ -266,9 +280,10 @@ export default function ResultCard({ data }: Props): ReactNode {
                   )
                 }
               />
-              <Row label={engineLabel} value={engineValue} />
+              <Row label={engineLabel} value={engineValue} info={hasCapacity ? 'capacity' : 'power'} />
               <Row
                 label={t('field.color')}
+                info="color"
                 value={
                   c.color && (
                     <span className="inline-flex items-center gap-1.5">
@@ -281,6 +296,7 @@ export default function ResultCard({ data }: Props): ReactNode {
               />
               <Row
                 label={t('field.fuel')}
+                info="fuel"
                 value={
                   c.fuel && (
                     <span className="inline-flex items-center gap-1.5">
@@ -291,9 +307,14 @@ export default function ResultCard({ data }: Props): ReactNode {
                   )
                 }
               />
-              <Row label={t('field.weight')} value={c.ownWeight && `${c.ownWeight} / ${c.totalWeight ?? '—'}`} />
+              <Row
+                label={t('field.weight')}
+                value={c.ownWeight && `${c.ownWeight} / ${c.totalWeight ?? '—'} ${t('field.unitKg')}`}
+                info="weight"
+              />
               <Row
                 label={t('field.kind')}
+                info="kind"
                 value={
                   c.kind && (
                     <span className="inline-flex items-center gap-1.5">
@@ -303,15 +324,17 @@ export default function ResultCard({ data }: Props): ReactNode {
                   )
                 }
               />
-              <Row label={t('field.purpose')} value={c.purpose} />
-              {hasCapacity && <Row label={t('field.power')} value={c.powerKwt} />}
+              <Row label={t('field.purpose')} value={c.purpose} info="purpose" />
+              {hasCapacity && <Row label={t('field.power')} value={c.powerKwt} info="power" />}
               <Row
                 label={t('field.owner')}
+                info="owner"
                 value={c.person === 'P' ? t('field.ownerPrivate') : t('field.ownerCompany')}
               />
-              <Row label={t('field.regDate')} value={c.dReg} />
+              <Row label={t('field.regDate')} value={c.dReg} info="regDate" />
               <Row
                 label={t('field.dep')}
+                info="dep"
                 value={
                   c.dep ? (
                     <a
@@ -329,9 +352,17 @@ export default function ResultCard({ data }: Props): ReactNode {
                   ) : null
                 }
               />
-              <Row label={t('field.koatuu')} value={c.regAddrKoatuu} />
+              <Row
+                label={t('field.koatuu')}
+                value={
+                  c.regAddrKoatuu &&
+                  [c.regAddrKoatuu, koatuuRegion(c.regAddrKoatuu, i18n.language)].filter(Boolean).join(' · ')
+                }
+                info="koatuu"
+              />
               <Row
                 label={t('field.vin')}
+                info="vin"
                 value={
                   c.vin ? (
                     <span className="inline-flex items-center gap-1">
@@ -366,6 +397,7 @@ export default function ResultCard({ data }: Props): ReactNode {
               <span className="flex items-center gap-1.5">
                 <span aria-hidden>🆔</span>
                 {t('vin.title')}
+                <SectionInfo section="vin" title={t('vin.title')} />
               </span>
             }
             actions={<ShareButton section="vin" label={t('share.button', { section: t('vin.title') })} />}
@@ -383,7 +415,12 @@ export default function ResultCard({ data }: Props): ReactNode {
           onOpenChange={setShowMore}
           showLabel={t('result.historyShow')}
           hideLabel={t('result.historyHide')}
-          title={t('result.historyLabel')}
+          title={
+            <span className="flex items-center gap-1.5">
+              {t('result.historyLabel')}
+              <SectionInfo section="history" title={t('result.historyLabel')} />
+            </span>
+          }
           actions={<ShareButton section="history" label={t('share.button', { section: t('result.historyLabel') })} />}
         >
           <div className="mb-1 flex items-center gap-1.5 text-base font-semibold">
