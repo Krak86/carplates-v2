@@ -1,8 +1,12 @@
-import type { StatsByModelRow, StatsResponse } from '@carplates/shared'
+import type { StatsByModelRow, StatsResponse, StatsTopResponse } from '@carplates/shared'
 
 import { isKnownFuel } from '@/components/ResultCard.helpers'
 
 import type { StatsDimension, StatsRow } from './types'
+
+// The full StatsResponse is assignable to this too, so the stats page and the light
+// /api/stats/top payload share the same leaderboard helpers.
+type TopStats = StatsTopResponse
 
 /**
  * The leaderboards go this deep — the API's topModels query is capped to match (see
@@ -21,17 +25,17 @@ function topLabels(rows: { value: string | null; distinctPlates: number }[], n: 
 }
 
 /** Top N makes by distinctPlates — backs the stats page's "top makes" panel and the ResultCard badge. */
-export function topBrands(stats: StatsResponse, n = MAX_TOP_N): string[] {
+export function topBrands(stats: TopStats, n = MAX_TOP_N): string[] {
   return topLabels(stats.byBrand, n)
 }
 
 /** Top N colours by distinctPlates. */
-export function topColors(stats: StatsResponse, n = MAX_TOP_N): string[] {
+export function topColors(stats: TopStats, n = MAX_TOP_N): string[] {
   return topLabels(stats.byColor, n)
 }
 
 /** Top N regions by distinctPlates (already the smaller of the two oblast-prefix rollups). */
-export function topRegions(stats: StatsResponse, n = MAX_TOP_N): string[] {
+export function topRegions(stats: TopStats, n = MAX_TOP_N): string[] {
   return [...stats.byRegion]
     .sort((a, b) => b.distinctPlates - a.distinctPlates)
     .slice(0, n)
@@ -42,7 +46,7 @@ export function topRegions(stats: StatsResponse, n = MAX_TOP_N): string[] {
  * Top N brand+model pairs. `stats.topModels` already arrives capped and sorted from the API
  * (see stats.service.ts) — re-sorting/re-slicing here is just defensive, not a real filter.
  */
-export function topModels(stats: StatsResponse, n = MAX_TOP_N): StatsByModelRow[] {
+export function topModels(stats: TopStats, n = MAX_TOP_N): StatsByModelRow[] {
   return [...stats.topModels].sort((a, b) => b.distinctPlates - a.distinctPlates).slice(0, n)
 }
 

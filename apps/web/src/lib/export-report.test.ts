@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { EuroNcapRatingsResponse, Registration, StatsResponse } from '@carplates/shared'
+import type { EuroNcapRatingsResponse, Registration, StatsTopResponse } from '@carplates/shared'
 
 import { buildExportReport, buildLocalRecordsReport } from '@/lib/export-report'
 import type { ExportInput, ExportTableSection, Translate } from '@/lib/export-report'
@@ -95,18 +95,10 @@ describe('buildExportReport', () => {
   })
 
   it('adds a Rankings section mirroring the ResultCard badges when stats data is available', () => {
-    const stats: StatsResponse = {
-      summary: { totalRows: 0, distinctPlates: 0, distinctVins: 0, plateless: 0 },
-      byYear: [],
+    const stats: StatsTopResponse = {
       byRegion: [{ totalRows: 1, distinctPlates: 1, distinctVins: 1, region: 'Київська область' }],
-      byRegionYear: [],
-      byBody: [],
-      byKind: [],
       byColor: [{ totalRows: 1, distinctPlates: 1, distinctVins: 1, value: 'ЧОРНИЙ' }],
-      byFuel: [],
       byBrand: [{ totalRows: 1, distinctPlates: 1, distinctVins: 1, value: 'TOYOTA' }],
-      byBrandYear: [],
-      byOrigin: [],
       topModels: [{ totalRows: 1, distinctPlates: 1, distinctVins: 1, brand: 'TOYOTA', model: 'CAMRY' }]
     }
     const report = buildExportReport(baseInput({ stats }), t)
@@ -122,20 +114,7 @@ describe('buildExportReport', () => {
   })
 
   it('omits the Rankings section when the vehicle does not place in any leaderboard', () => {
-    const stats: StatsResponse = {
-      summary: { totalRows: 0, distinctPlates: 0, distinctVins: 0, plateless: 0 },
-      byYear: [],
-      byRegion: [],
-      byRegionYear: [],
-      byBody: [],
-      byKind: [],
-      byColor: [],
-      byFuel: [],
-      byBrand: [],
-      byBrandYear: [],
-      byOrigin: [],
-      topModels: []
-    }
+    const stats: StatsTopResponse = { byRegion: [], byColor: [], byBrand: [], topModels: [] }
     const report = buildExportReport(baseInput({ stats }), t)
     expect(report.sections.find(s => s.id === 'rankings')).toBeUndefined()
   })

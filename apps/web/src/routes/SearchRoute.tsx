@@ -24,7 +24,7 @@ import { cn } from '@/lib/cn'
 import { recordVisit } from '@/lib/history-db'
 import { MAX_DIMENSION } from '@/lib/image'
 import { toIntlLocale } from '@/lib/intl'
-import { fuelStatsQuery, historyQuery, plateQuery, statsQuery, vinQuery } from '@/lib/queries'
+import { fuelStatsQuery, historyQuery, plateQuery, statsTopQuery, vinQuery } from '@/lib/queries'
 import { capture } from '@/lib/telemetry'
 import { formatVehicleLabel } from '@/lib/vehicle-label'
 
@@ -46,7 +46,7 @@ export default function SearchRoute(): ReactNode {
   const vin = useQuery({ ...vinQuery(raw), enabled: kind === 'vin' })
 
   const active = kind === 'vin' ? vin : plate
-  const stats = useQuery({ ...statsQuery(), enabled: isHome })
+  const stats = useQuery({ ...statsTopQuery(), enabled: isHome })
   const fuelStats = useQuery({ ...fuelStatsQuery(), enabled: isHome })
 
   // A saved (persisted) result stays renderable when a refetch fails or is paused offline —

@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 
-import { statsQuery } from '@/lib/queries'
+import { statsTopQuery } from '@/lib/queries'
 import { rankOf, rankOfModel, topBrands, topColors, topModels, topRegions } from '@/routes/stats/helpers'
 
 type Props = {
@@ -19,16 +19,15 @@ function statsLink(params: Record<string, string>): string {
 }
 
 /**
- * Small "this car places in a top leaderboard" badges — reuses the same cached
- * `statsQuery()` the stats page fills (staleTime: Infinity, see lib/queries.ts), so this
- * is a cache hit whenever the Stats page has been visited, and otherwise a small
- * background fetch that never blocks the rest of the card. Renders nothing until that
+ * Small "this car places in a top leaderboard" badges — backed by `statsTopQuery()`
+ * (a few-KB payload, staleTime: Infinity, see lib/queries.ts — not the ~14 MB full stats),
+ * a small background fetch that never blocks the rest of the card. Renders nothing until that
  * resolves and nothing at all if the car doesn't place in any of the four leaderboards.
  * Each badge deep-links to the exact place on the stats page that shows it.
  */
 export default function TopStatBadges({ brand, model, color, region }: Props): ReactNode {
   const { t } = useTranslation()
-  const stats = useQuery(statsQuery())
+  const stats = useQuery(statsTopQuery())
   if (!stats.data) return null
 
   const badges = [

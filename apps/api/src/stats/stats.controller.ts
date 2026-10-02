@@ -1,7 +1,10 @@
-import { Controller, Get, Inject } from '@nestjs/common'
-import { ApiOkResponse, ApiTags } from '@nestjs/swagger'
+import { Controller, Get, Inject, Param } from '@nestjs/common'
+import { ApiOkResponse, ApiParam, ApiTags } from '@nestjs/swagger'
+import { STATS_FIELD_DIMENSIONS, statsFieldDimensionSchema } from '@carplates/shared'
+import type { StatsFieldDimension, StatsFieldResponse } from '@carplates/shared'
 
-import { DataVersionResponseDto, StatsResponseDto } from './stats.dto.js'
+import { zodParam } from '../common/zod-param.pipe.js'
+import { DataVersionResponseDto, StatsResponseDto, StatsTopResponseDto } from './stats.dto.js'
 import { StatsService } from './stats.service.js'
 
 @ApiTags('stats')
@@ -13,6 +16,19 @@ export class StatsController {
   @ApiOkResponse({ type: StatsResponseDto })
   get(): Promise<StatsResponseDto> {
     return this.statsService.get()
+  }
+
+  @Get('top')
+  @ApiOkResponse({ type: StatsTopResponseDto })
+  top(): Promise<StatsTopResponseDto> {
+    return this.statsService.top()
+  }
+
+  @Get('field/:dimension')
+  @ApiParam({ name: 'dimension', enum: STATS_FIELD_DIMENSIONS })
+  @ApiOkResponse({ description: 'Rows of { value, totalRows, distinctPlates, distinctVins }' })
+  field(@Param('dimension', zodParam(statsFieldDimensionSchema)) dimension: StatsFieldDimension): Promise<StatsFieldResponse> {
+    return this.statsService.field(dimension)
   }
 
   @Get('version')

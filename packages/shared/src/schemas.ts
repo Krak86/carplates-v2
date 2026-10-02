@@ -530,6 +530,23 @@ export const statsResponseSchema = z.object({
 })
 export type StatsResponse = z.infer<typeof statsResponseSchema>
 
+/** GET /api/stats/top — just the four leaderboards (top 10 each, ranked by distinctPlates); a few KB instead of the full /api/stats. */
+export const statsTopResponseSchema = statsResponseSchema.pick({
+  byBrand: true,
+  byColor: true,
+  byRegion: true,
+  topModels: true
+})
+export type StatsTopResponse = z.infer<typeof statsTopResponseSchema>
+
+export const STATS_FIELD_DIMENSIONS = ['body', 'kind', 'color', 'fuel'] as const
+export type StatsFieldDimension = (typeof STATS_FIELD_DIMENSIONS)[number]
+export const statsFieldDimensionSchema = z.enum(STATS_FIELD_DIMENSIONS)
+
+/** GET /api/stats/field/:dimension — one free-text dimension's full breakdown, for the ResultCard "?" popovers. */
+export const statsFieldResponseSchema = z.array(statsByDimensionRowSchema)
+export type StatsFieldResponse = z.infer<typeof statsFieldResponseSchema>
+
 /** GET /api/stats/version — opaque token that changes whenever an ingest, stats refresh or ratings load does. */
 export const dataVersionResponseSchema = z.object({ dataVersion: z.string() })
 export type DataVersionResponse = z.infer<typeof dataVersionResponseSchema>

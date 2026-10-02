@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto'
 
 import { Inject, Injectable } from '@nestjs/common'
-import { desc, max } from 'drizzle-orm'
+import { desc, isNotNull, max } from 'drizzle-orm'
 import {
   cncapRatings,
   euroncapRatings,
@@ -22,10 +22,19 @@ import {
   statsByYear,
   statsSummary
 } from '@carplates/db'
-import { dataVersionResponseSchema, statsResponseSchema } from '@carplates/shared'
-import type { DataVersionResponse, StatsResponse } from '@carplates/shared'
+import { dataVersionResponseSchema, statsFieldResponseSchema, statsResponseSchema, statsTopResponseSchema } from '@carplates/shared'
+import type {
+  DataVersionResponse,
+  StatsFieldDimension,
+  StatsFieldResponse,
+  StatsResponse,
+  StatsTopResponse
+} from '@carplates/shared'
 
 import { DbService } from '../db/db.service.js'
+
+// Leaderboard depth — must match MAX_TOP_N in apps/web/src/routes/stats/helpers.ts.
+const TOP_N = 10
 
 @Injectable()
 export class StatsService {
@@ -50,6 +59,50 @@ export class StatsService {
       })
       .join('|')
     return dataVersionResponseSchema.parse({ dataVersion: createHash('sha1').update(raw).digest('hex').slice(0, 16) })
+  }
+
+  /** The four leaderboards only (top 10 each, null values excluded — same rule as the web's `topLabels`). */
+  async top(): Promise<StatsTopResponse> {
+    const db = this.dbService.db
+    const [byBrand, byColor, byRegion, topModels] = await Promise.all([
+      db
+        .select()
+        .from(statsByBrand)
+        .where(isNotNull(statsByBrand.brand))
+        .orderBy(desc(statsByBrand.distinctPlates))
+        .limit(TOP_N),
+      db
+        .select()
+        .from(statsByColor)
+        .where(isNotNull(statsByColor.color))
+        .orderBy(desc(statsByColor.distinctPlates))
+        .limit(TOP_N),
+      db.select().from(statsByRegion).orderBy(desc(statsByRegion.distinctPlates)).limit(TOP_N),
+      db.select().from(statsByModel).orderBy(desc(statsByModel.distinctPlates)).limit(TOP_N)
+    ])
+    return statsTopResponseSchema.parse({
+      byBrand: byBrand.map(row => ({ ...row, value: row.brand })),
+      byColor: byColor.map(row => ({ ...row, value: row.color })),
+      byRegion,
+      topModels
+    })
+  }
+
+  /** One free-text dimension's full rollup (a few dozen rows) — the ResultCard "?" popover data. */
+  async field(dimension: StatsFieldDimension): Promise<StatsFieldResponse> {
+    const db = this.dbService.db
+    switch (dimension) {
+      case 'body':
+        return statsFieldResponseSchema.parse((await db.select().from(statsByBody)).map(r => ({ ...r, value: r.body })))
+      case 'kind':
+        return statsFieldResponseSchema.parse((await db.select().from(statsByKind)).map(r => ({ ...r, value: r.kind })))
+      case 'color':
+        return statsFieldResponseSchema.parse(
+          (await db.select().from(statsByColor)).map(r => ({ ...r, value: r.color }))
+        )
+      case 'fuel':
+        return statsFieldResponseSchema.parse((await db.select().from(statsByFuel)).map(r => ({ ...r, value: r.fuel })))
+    }
   }
 
   async get(): Promise<StatsResponse> {

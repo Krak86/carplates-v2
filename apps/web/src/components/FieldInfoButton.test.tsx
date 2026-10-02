@@ -2,15 +2,15 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import type { StatsResponse } from '@carplates/shared'
+import type { StatsFieldResponse } from '@carplates/shared'
 
 import '@/i18n'
 import FieldInfoButton from '@/components/FieldInfoButton'
-import { getStats } from '@/lib/api'
+import { getStatsField } from '@/lib/api'
 
 vi.mock('@/lib/api', async importOriginal => ({
   ...(await importOriginal<typeof import('@/lib/api')>()),
-  getStats: vi.fn()
+  getStatsField: vi.fn()
 }))
 
 function renderWithProviders(ui: ReactNode) {
@@ -18,27 +18,15 @@ function renderWithProviders(ui: ReactNode) {
   return render(<QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>)
 }
 
-const stats: StatsResponse = {
-  summary: { totalRows: 10, distinctPlates: 9, distinctVins: 8, plateless: 0 },
-  byYear: [],
-  byRegion: [],
-  byRegionYear: [],
-  byBody: [{ value: 'СЕДАН', totalRows: 7, distinctPlates: 7, distinctVins: 6 }],
-  byKind: [],
-  byColor: [],
-  byFuel: [
-    { value: 'БЕНЗИН', totalRows: 6, distinctPlates: 6, distinctVins: 5 },
-    { value: null, totalRows: 4, distinctPlates: 3, distinctVins: 3 }
-  ],
-  byBrand: [],
-  byBrandYear: [],
-  byOrigin: [],
-  topModels: []
-}
+const bodyRows: StatsFieldResponse = [{ value: 'СЕДАН', totalRows: 7, distinctPlates: 7, distinctVins: 6 }]
+const fuelRows: StatsFieldResponse = [
+  { value: 'БЕНЗИН', totalRows: 6, distinctPlates: 6, distinctVins: 5 },
+  { value: null, totalRows: 4, distinctPlates: 3, distinctVins: 3 }
+]
 
 describe('FieldInfoButton', () => {
   beforeEach(() => {
-    vi.mocked(getStats).mockResolvedValue(stats)
+    vi.mocked(getStatsField).mockImplementation(async dimension => (dimension === 'fuel' ? fuelRows : bodyRows))
   })
 
   afterEach(() => {

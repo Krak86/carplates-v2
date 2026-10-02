@@ -15,7 +15,7 @@ import {
   kncapRatingsQuery,
   plateHistoryQuery,
   safetyRatingsQuery,
-  statsQuery,
+  statsTopQuery,
   vehiclePhotosQuery,
   vinQuery,
   wikiInfoQuery
@@ -98,7 +98,7 @@ export function useCopyAllInfoActions(params: CopyAllInfoParams): UseCopyAllInfo
         hasWikiQuery
           ? safe(queryClient.ensureQueryData(vehiclePhotosQuery(make, model, vehicle.year)))
           : Promise.resolve(null),
-        safe(queryClient.ensureQueryData({ ...statsQuery(), ...FAIL_FAST_OFFLINE }))
+        safe(queryClient.ensureQueryData({ ...statsTopQuery(), ...FAIL_FAST_OFFLINE }))
       ])
 
     return {

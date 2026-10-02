@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { StatsResponse } from '@carplates/shared'
+import type { StatsTopResponse } from '@carplates/shared'
 
 import BrandLogo from '@/components/BrandLogo'
 import ColorSwatch from '@/components/ColorSwatch'
@@ -12,7 +12,7 @@ import { scrollElementIntoView } from '@/lib/share-section'
 import { MAX_TOP_N, topBrands, topColors, topModels, topRegions } from '@/routes/stats/helpers'
 
 type Props = {
-  stats: StatsResponse
+  stats: StatsTopResponse
   /** A ResultCard badge deep link landed here for this brand+model — scroll to it, expanding if needed, and flash it. */
   highlightModel?: { brand: string; model: string } | null
 }

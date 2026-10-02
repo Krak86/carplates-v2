@@ -2,14 +2,14 @@ import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import type { StatsByDimensionRow, StatsResponse } from '@carplates/shared'
+import type { StatsFieldDimension } from '@carplates/shared'
 
 import ColorSwatch from '@/components/ColorSwatch'
 import { FUEL_ICON_FALLBACK, getFuelIcon, isKnownFuel } from '@/components/ResultCard.helpers'
 import { cn } from '@/lib/cn'
-import { statsQuery } from '@/lib/queries'
+import { statsFieldQuery } from '@/lib/queries'
 
-export type FieldInfoDimension = 'body' | 'kind' | 'color' | 'fuel'
+export type FieldInfoDimension = StatsFieldDimension
 
 type Props = {
   dimension: FieldInfoDimension
@@ -28,7 +28,6 @@ const HOVER_CLOSE_DELAY_MS = 1000
 const HOVER_OPEN_DELAY_MS = 400
 
 type DimensionConfig = {
-  getRows: (stats: StatsResponse) => StatsByDimensionRow[]
   // Only `fuel` has a per-value icon (keyword-matched, ResultCard.helpers.ts) and a
   // known/unknown split (its unknown/absent/garbage source markers collapse into one
   // row). `body`/`kind`/`color` don't have that classification yet — plain list, no icons.
@@ -38,16 +37,16 @@ type DimensionConfig = {
 }
 
 const DIMENSION_CONFIG: Readonly<Record<FieldInfoDimension, DimensionConfig>> = {
-  body: { getRows: stats => stats.byBody },
-  kind: { getRows: stats => stats.byKind },
-  color: { getRows: stats => stats.byColor },
-  fuel: { getRows: stats => stats.byFuel, getIcon: getFuelIcon, isKnown: isKnownFuel, unknownIcon: FUEL_ICON_FALLBACK }
+  body: {},
+  kind: {},
+  color: {},
+  fuel: { getIcon: getFuelIcon, isKnown: isKnownFuel, unknownIcon: FUEL_ICON_FALLBACK }
 }
 
 /**
- * "?" info button next to a record's field value. The full breakdown for that field lives
- * in the (already-fetched-elsewhere, staleTime: Infinity) /api/stats response, so this only
- * triggers its own fetch — `enabled: <visible>` — the first time it's actually opened.
+ * "?" info button next to a record's field value. The full breakdown for that field comes
+ * from the small /api/stats/field/:dimension endpoint (staleTime: Infinity), fetched
+ * — `enabled: <visible>` — the first time it's actually opened.
  *
  * Hovering and clicking are tracked separately (`hovering` vs `pinned`, `visible = either`).
  * A real click always fires `mouseenter` first, so a click handler that *toggles* a single
@@ -64,7 +63,7 @@ export default function FieldInfoButton({ dimension, current }: Props): ReactNod
   const containerRef = useRef<HTMLSpanElement>(null)
   const closeTimeoutRef = useRef<number | null>(null)
   const openTimeoutRef = useRef<number | null>(null)
-  const stats = useQuery({ ...statsQuery(), enabled: visible })
+  const stats = useQuery({ ...statsFieldQuery(dimension), enabled: visible })
   const config = DIMENSION_CONFIG[dimension]
   const fieldLabel = t(`field.${dimension}`)
 
@@ -124,7 +123,7 @@ export default function FieldInfoButton({ dimension, current }: Props): ReactNod
   }
 
   const isKnown = config.isKnown ?? ((): boolean => true)
-  const allRows = stats.data ? config.getRows(stats.data) : []
+  const allRows = stats.data ?? []
   const known = allRows
     .filter(row => isKnown(row.value))
     .map(row => ({

@@ -14,7 +14,9 @@ import {
   plateRecognizeResponseSchema,
   safetyRatingsResponseSchema,
   searchResponseSchema,
+  statsFieldResponseSchema,
   statsResponseSchema,
+  statsTopResponseSchema,
   vehiclePhotosResponseSchema,
   vinDecodeResponseSchema,
   wikiInfoResponseSchema
@@ -34,7 +36,10 @@ import type {
   PlateRecognizeResponse,
   SafetyRatingsResponse,
   SearchResponse,
+  StatsFieldDimension,
+  StatsFieldResponse,
   StatsResponse,
+  StatsTopResponse,
   VehicleColor,
   VehicleFuel,
   VehicleKind,
@@ -90,6 +95,14 @@ export async function decodeVin(vin: string): Promise<VinDecodeResponse> {
 
 export async function getStats(): Promise<StatsResponse> {
   return statsResponseSchema.parse(await getJson('/api/stats'))
+}
+
+export async function getStatsTop(): Promise<StatsTopResponse> {
+  return statsTopResponseSchema.parse(await getJson('/api/stats/top'))
+}
+
+export async function getStatsField(dimension: StatsFieldDimension): Promise<StatsFieldResponse> {
+  return statsFieldResponseSchema.parse(await getJson(`/api/stats/field/${dimension}`))
 }
 
 export async function getDataVersion(): Promise<string> {

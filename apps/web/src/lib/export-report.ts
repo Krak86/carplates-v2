@@ -7,7 +7,7 @@ import type {
   KncapRatingsResponse,
   Registration,
   SafetyRatingsResponse,
-  StatsResponse,
+  StatsTopResponse,
   VehiclePhoto,
   WikiInfo
 } from '@carplates/shared'
@@ -101,7 +101,7 @@ export type ExportInput = {
   kncap: KncapRatingsResponse | null
   iihs: IihsRatingsResponse | null
   /** Same rollup TopStatBadges reads on the result card — backs the "Rankings" section below. */
-  stats: StatsResponse | null
+  stats: StatsTopResponse | null
 }
 
 type Row = { label: string; value: string }

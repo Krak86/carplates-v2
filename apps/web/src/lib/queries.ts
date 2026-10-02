@@ -1,5 +1,6 @@
 import { queryOptions } from '@tanstack/react-query'
 import { normalizePlate } from '@carplates/shared'
+import type { StatsFieldDimension } from '@carplates/shared'
 
 import {
   decodeVin,
@@ -12,6 +13,8 @@ import {
   getKncapRatings,
   getSafetyRatings,
   getStats,
+  getStatsField,
+  getStatsTop,
   getUkraineGeography,
   getVehiclePhotos,
   getWikiInfo,
@@ -72,6 +75,21 @@ export function storageEstimateQuery() {
 // Only changes on the monthly ingest cron (see PLAN.md, "Registry statistics") — never refetch on its own.
 export function statsQuery() {
   return queryOptions({ queryKey: ['stats'], queryFn: getStats, staleTime: Infinity })
+}
+
+// The four leaderboards only (a few KB) — what the home panel, ResultCard badges and the export need,
+// instead of the full ~14 MB statsQuery(). Same monthly-ingest cadence, so same never-refetch policy.
+export function statsTopQuery() {
+  return queryOptions({ queryKey: ['stats', 'top'], queryFn: getStatsTop, staleTime: Infinity })
+}
+
+// One dimension's breakdown for a ResultCard "?" popover — a few dozen rows.
+export function statsFieldQuery(dimension: StatsFieldDimension) {
+  return queryOptions({
+    queryKey: ['stats', 'field', dimension],
+    queryFn: () => getStatsField(dimension),
+    staleTime: Infinity
+  })
 }
 
 // Illustrative stock photos for a brand/model/year — never refetch once fetched.
