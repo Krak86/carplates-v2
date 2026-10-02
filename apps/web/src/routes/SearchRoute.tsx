@@ -2,7 +2,7 @@ import { Suspense, lazy, useEffect } from 'react'
 import type { ReactNode } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { Link, useLocation, useParams, useSearchParams } from 'react-router'
+import { useLocation, useParams, useSearchParams } from 'react-router'
 import { classifyQuery } from '@carplates/shared'
 
 import LoadErrorBoundary from '@/components/LoadErrorBoundary'
@@ -124,6 +124,8 @@ export default function SearchRoute(): ReactNode {
   const notFound = active.error instanceof ApiError && active.error.status === 404
   // Centered only on a pristine page — any input, photo, or recognition error pins the search to the top.
   const isIdle = !raw && !photo && !recognizeErrorKey
+  // The header already shows the vehicle once something is searched or a photo attached — the title steps aside.
+  const hideTitle = !!raw || !!photo
   const showNotFound = active.isError && !hasData
   // Any attached photo (pending, failed, or resolved) makes the page about that search — homepage stats step aside.
   const showHomeStats = isHome && !photo
@@ -137,22 +139,28 @@ export default function SearchRoute(): ReactNode {
         )}
       >
         <div className="w-full max-w-2xl text-center">
-          <h1 className="mb-1 text-2xl font-bold">{t('app.title')}</h1>
-          <p className="mb-4 inline-block rounded bg-[var(--color-surface)]/20 px-1.5 py-0.5 text-sm text-[var(--color-fg)]">
-            {t('app.tagline')}
-          </p>
+          <div
+            aria-hidden={hideTitle}
+            className={cn(
+              'grid transition-[grid-template-rows,opacity] duration-300 ease-in-out motion-reduce:transition-none',
+              hideTitle ? 'grid-rows-[0fr] opacity-0' : 'grid-rows-[1fr] opacity-100'
+            )}
+          >
+            <div className="min-h-0 overflow-hidden">
+              <div className="mb-3 flex flex-wrap items-baseline justify-center gap-x-3 gap-y-1">
+                <h1 className="text-2xl font-bold">{t('app.title')}</h1>
+                <p className="rounded bg-[var(--color-surface)]/20 px-1.5 py-0.5 text-sm text-[var(--color-fg)]">
+                  {t('app.tagline')}
+                </p>
+              </div>
+            </div>
+          </div>
           <SearchField
             initialValue={raw}
             autoFocus={!isSharedSection}
             isRecognizing={isRecognizing}
             onPickPhoto={recognize}
           />
-          <Link
-            to="/advanced-search"
-            className="mt-2 inline-block text-sm text-[var(--color-primary)] underline hover:no-underline"
-          >
-            + {t('advancedSearch.viewLink')}
-          </Link>
         </div>
 
         {showingSavedCopy && (
@@ -166,21 +174,27 @@ export default function SearchRoute(): ReactNode {
           </p>
         )}
 
-        {photo && (
-          <PhotoThumbnail url={photo.url} candidates={photo.candidates} active={raw || null} onClose={dismissPhoto} />
-        )}
-        {photo?.meta && <PhotoMetaInfo meta={photo.meta} />}
-        {photo && (
-          <PhotoWarnings
-            meta={photo.meta}
-            maxDimension={MAX_DIMENSION}
-            showAccuracy={photo.settled && photo.candidates.length > 0}
-          />
-        )}
+        <Presence show={!!photo}>
+          {photo && (
+            <PhotoThumbnail url={photo.url} candidates={photo.candidates} active={raw || null} onClose={dismissPhoto} />
+          )}
+        </Presence>
+        <Presence show={!!photo?.meta}>{photo?.meta && <PhotoMetaInfo meta={photo.meta} />}</Presence>
+        <Presence show={!!photo}>
+          {photo && (
+            <PhotoWarnings
+              meta={photo.meta}
+              maxDimension={MAX_DIMENSION}
+              showAccuracy={photo.settled && photo.candidates.length > 0}
+            />
+          )}
+        </Presence>
         {!photo && !recognizeErrorKey && wikiHeroVehicle && (
           <WikiHeroImage brand={wikiHeroVehicle.brand} model={wikiHeroVehicle.model} vehicleKey={wikiHeroVehicle.key} />
         )}
-        {photo && <PlateCandidates candidates={photo.candidates} active={raw || null} onSelect={selectCandidate} />}
+        <Presence show={!!photo}>
+          {photo && <PlateCandidates candidates={photo.candidates} active={raw || null} onSelect={selectCandidate} />}
+        </Presence>
 
         {!recognizeErrorKey && kind === 'plate' && plate.data && <ResultCard data={plate.data} />}
         {!recognizeErrorKey && kind === 'vin' && vin.data && <VinResult data={vin.data} />}

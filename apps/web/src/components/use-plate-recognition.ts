@@ -7,6 +7,8 @@ import { ApiError, recognizePlate } from '@/lib/api'
 import { shrinkImage } from '@/lib/image'
 import { readPhotoMeta } from '@/lib/photo-meta'
 
+const DISMISS_REVOKE_MS = 600
+
 export type PhotoThumbnail = {
   url: string
   /** Plate/VIN values this photo is considered relevant to — the recognized plate, plus any linked VIN/plate discovered while viewing a connected page. */
@@ -98,12 +100,11 @@ export function usePlateRecognition({ currentValue, linkedValue }: UsePlateRecog
   }
 
   const dismissPhoto = (): void => {
-    setPhoto(prev => {
-      if (prev) URL.revokeObjectURL(prev.url)
-      return null
-    })
+    // Stay on the current route; the URL is revoked after the fade-out so the image doesn't vanish mid-animation.
+    const url = photoRef.current?.url
+    if (url) setTimeout(() => URL.revokeObjectURL(url), DISMISS_REVOKE_MS)
+    setPhoto(null)
     reset()
-    void navigate('/')
   }
 
   // Keeps the thumbnail only while the current page is (or becomes, via a
