@@ -24,6 +24,46 @@
   --color-primary-fg: hsl(222 47% 11%);
 }
 
+/* Wide gamut: same hues as the sRGB tokens above, pushed to chroma sRGB can't show. Only on P3
+   displays (`color-gamut: p3`); everything else keeps the sRGB fallback. Dark block comes second
+   so it wins on equal specificity. */
+@media (color-gamut: p3) {
+  :root {
+    --color-primary: oklch(0.56 0.26 264);
+  }
+
+  :root[data-theme='dark'] {
+    --color-primary: oklch(0.7 0.2 258);
+  }
+
+  /* Tailwind palette shades the app actually uses (status banners, VIN segments, plate boxes,
+     schematics). Same lightness + hue as the defaults, chroma ~+15% (+8% on text shades, so
+     they stay calm), so contrast ratios are unchanged. Add a shade here when you start using one. */
+  :root {
+    --color-amber-300: oklch(0.879 0.19 91.6);
+    --color-amber-400: oklch(0.828 0.22 84.4);
+    --color-amber-500: oklch(0.769 0.22 70.1);
+    --color-amber-700: oklch(0.555 0.18 48.4);
+    --color-amber-800: oklch(0.473 0.15 46.2);
+    --color-emerald-300: oklch(0.845 0.16 165);
+    --color-emerald-500: oklch(0.696 0.2 162.5);
+    --color-emerald-700: oklch(0.508 0.13 165.6);
+    --color-emerald-800: oklch(0.432 0.105 166.9);
+    --color-green-400: oklch(0.792 0.24 151.7);
+    --color-red-500: oklch(0.637 0.27 25.3);
+    --color-rose-300: oklch(0.81 0.13 11.6);
+    --color-rose-500: oklch(0.645 0.28 16.4);
+    --color-rose-700: oklch(0.514 0.24 16.9);
+    --color-sky-300: oklch(0.828 0.12 230);
+    --color-sky-400: oklch(0.746 0.19 232.7);
+    --color-sky-500: oklch(0.685 0.2 237.3);
+    --color-sky-700: oklch(0.5 0.145 242.7);
+    --color-violet-300: oklch(0.811 0.12 293.6);
+    --color-violet-500: oklch(0.606 0.29 292.7);
+    --color-violet-700: oklch(0.491 0.29 292.6);
+  }
+}
+
 html,
 body,
 #root {
