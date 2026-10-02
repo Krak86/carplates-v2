@@ -60,6 +60,9 @@ export default function ResultCard({ data }: Props): ReactNode {
   const [searchParams] = useSearchParams()
   const isSharedHistory = searchParams.get('section') === 'history'
   const [showMore, setShowMore] = useState(() => isSharedHistory)
+  const isSharedBasic = searchParams.get('section') === 'basic'
+  const [showBasic, setShowBasic] = useState(true)
+  const basicRef = useRef<HTMLDivElement>(null)
   const historyRef = useRef<HTMLDivElement>(null)
   const tiltEnabled = useUiStore(s => s.cardTiltEnabled)
   const glowRef = useCardMotion<HTMLDivElement>(tiltEnabled)
@@ -88,6 +91,10 @@ export default function ResultCard({ data }: Props): ReactNode {
   useEffect(() => {
     if (isSharedHistory && historyRef.current) scrollElementIntoView(historyRef.current)
   }, [isSharedHistory])
+
+  useEffect(() => {
+    if (isSharedBasic && basicRef.current) scrollElementIntoView(basicRef.current)
+  }, [isSharedBasic])
 
   return (
     <div className="relative w-full max-w-2xl">
@@ -197,95 +204,133 @@ export default function ResultCard({ data }: Props): ReactNode {
           />
         </div>
 
-        <div className="divide-y divide-[var(--color-border)]">
-          <Row
-            label={t('field.body')}
-            value={
-              c.body && (
-                <span className="inline-flex items-center gap-1.5">
-                  {c.body}
-                  <FieldInfoButton dimension="body" current={c.body} />
-                </span>
-              )
-            }
-          />
-          <Row label={engineLabel} value={engineValue} />
-          <Row
-            label={t('field.color')}
-            value={
-              c.color && (
-                <span className="inline-flex items-center gap-1.5">
-                  <ColorSwatch value={c.color} />
-                  {c.color}
-                  <FieldInfoButton dimension="color" current={c.color} />
-                </span>
-              )
-            }
-          />
-          <Row
-            label={t('field.fuel')}
-            value={
-              c.fuel && (
-                <span className="inline-flex items-center gap-1.5">
-                  <span aria-hidden>{getFuelIcon(c.fuel)}</span>
-                  {c.fuel}
-                  <FieldInfoButton dimension="fuel" current={c.fuel} />
-                </span>
-              )
-            }
-          />
-          <Row label={t('field.weight')} value={c.ownWeight && `${c.ownWeight} / ${c.totalWeight ?? '—'}`} />
-          <Row
-            label={t('field.kind')}
-            value={
-              c.kind && (
-                <span className="inline-flex items-center gap-1.5">
-                  {c.kind}
-                  <FieldInfoButton dimension="kind" current={c.kind} />
-                </span>
-              )
-            }
-          />
-          <Row label={t('field.purpose')} value={c.purpose} />
-          {hasCapacity && <Row label={t('field.power')} value={c.powerKwt} />}
-          <Row label={t('field.owner')} value={c.person === 'P' ? t('field.ownerPrivate') : t('field.ownerCompany')} />
-          <Row label={t('field.regDate')} value={c.dReg} />
-          <Row
-            label={t('field.dep')}
-            value={
-              c.dep ? (
-                <a
-                  href={depMapsUrl(c.dep)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-[var(--color-primary)]"
-                >
-                  <span className="underline">{c.dep}</span>
-                  <span aria-hidden className="no-underline">
-                    ↗
-                  </span>
-                  <span className="sr-only">{t('field.opensNewTab')}</span>
-                </a>
-              ) : null
-            }
-          />
-          <Row label={t('field.koatuu')} value={c.regAddrKoatuu} />
-          <Row
-            label={t('field.vin')}
-            value={
-              c.vin ? (
-                <span className="inline-flex items-center gap-1">
-                  <Link to={`/${c.vin}`} className="inline-flex items-center gap-1 text-[var(--color-primary)]">
-                    <span className="underline">{c.vin}</span>
-                    <span aria-hidden className="no-underline">
-                      ›
+        <div ref={basicRef} className="flex items-center justify-between text-base">
+          <span className="text-base font-semibold">{t('result.basicLabel')}</span>
+          <div className="flex items-center gap-1.5">
+            {showBasic && (
+              <ShareButton section="basic" label={t('share.button', { section: t('result.basicLabel') })} />
+            )}
+            <button
+              type="button"
+              aria-expanded={showBasic}
+              onClick={() => setShowBasic(v => !v)}
+              className="group flex items-center gap-1.5 rounded-full bg-[var(--color-surface)]/20 px-3 py-1 text-[var(--color-primary)]"
+            >
+              <span className="underline group-hover:no-underline">
+                {showBasic ? t('result.basicHide') : t('result.basicShow')}
+              </span>
+              <span
+                aria-hidden
+                className={cn('inline-block no-underline transition-transform duration-200', showBasic && 'rotate-180')}
+              >
+                ▾
+              </span>
+            </button>
+          </div>
+        </div>
+
+        <div
+          aria-hidden={!showBasic}
+          className={cn(
+            'grid transition-[grid-template-rows] duration-300 ease-in-out',
+            showBasic ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
+          )}
+        >
+          <div className="overflow-hidden">
+            <div className="divide-y divide-[var(--color-border)]">
+              <Row
+                label={t('field.body')}
+                value={
+                  c.body && (
+                    <span className="inline-flex items-center gap-1.5">
+                      {c.body}
+                      <FieldInfoButton dimension="body" current={c.body} />
                     </span>
-                  </Link>
-                  <CopyButton text={c.vin} label={t('field.vin')} />
-                </span>
-              ) : null
-            }
-          />
+                  )
+                }
+              />
+              <Row label={engineLabel} value={engineValue} />
+              <Row
+                label={t('field.color')}
+                value={
+                  c.color && (
+                    <span className="inline-flex items-center gap-1.5">
+                      <ColorSwatch value={c.color} />
+                      {c.color}
+                      <FieldInfoButton dimension="color" current={c.color} />
+                    </span>
+                  )
+                }
+              />
+              <Row
+                label={t('field.fuel')}
+                value={
+                  c.fuel && (
+                    <span className="inline-flex items-center gap-1.5">
+                      <span aria-hidden>{getFuelIcon(c.fuel)}</span>
+                      {c.fuel}
+                      <FieldInfoButton dimension="fuel" current={c.fuel} />
+                    </span>
+                  )
+                }
+              />
+              <Row label={t('field.weight')} value={c.ownWeight && `${c.ownWeight} / ${c.totalWeight ?? '—'}`} />
+              <Row
+                label={t('field.kind')}
+                value={
+                  c.kind && (
+                    <span className="inline-flex items-center gap-1.5">
+                      {c.kind}
+                      <FieldInfoButton dimension="kind" current={c.kind} />
+                    </span>
+                  )
+                }
+              />
+              <Row label={t('field.purpose')} value={c.purpose} />
+              {hasCapacity && <Row label={t('field.power')} value={c.powerKwt} />}
+              <Row
+                label={t('field.owner')}
+                value={c.person === 'P' ? t('field.ownerPrivate') : t('field.ownerCompany')}
+              />
+              <Row label={t('field.regDate')} value={c.dReg} />
+              <Row
+                label={t('field.dep')}
+                value={
+                  c.dep ? (
+                    <a
+                      href={depMapsUrl(c.dep)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-[var(--color-primary)]"
+                    >
+                      <span className="underline">{c.dep}</span>
+                      <span aria-hidden className="no-underline">
+                        ↗
+                      </span>
+                      <span className="sr-only">{t('field.opensNewTab')}</span>
+                    </a>
+                  ) : null
+                }
+              />
+              <Row label={t('field.koatuu')} value={c.regAddrKoatuu} />
+              <Row
+                label={t('field.vin')}
+                value={
+                  c.vin ? (
+                    <span className="inline-flex items-center gap-1">
+                      <Link to={`/${c.vin}`} className="inline-flex items-center gap-1 text-[var(--color-primary)]">
+                        <span className="underline">{c.vin}</span>
+                        <span aria-hidden className="no-underline">
+                          ›
+                        </span>
+                      </Link>
+                      <CopyButton text={c.vin} label={t('field.vin')} />
+                    </span>
+                  ) : null
+                }
+              />
+            </div>
+          </div>
         </div>
 
         <CarWikiInfo wiki={wiki} hasQuery={hasWikiQuery} />

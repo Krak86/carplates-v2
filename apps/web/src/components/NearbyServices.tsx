@@ -1,17 +1,21 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useSearchParams } from 'react-router'
 
 import {
   DEFAULT_NEARBY_CATEGORY,
   NEARBY_CATEGORIES,
   NEARBY_CATEGORY_ICON,
-  nearbyQueryKey
+  nearbyQueryKey,
+  parseNearbyCategory
 } from '@/components/NearbyServices.helpers'
 import type { NearbyCategory } from '@/components/NearbyServices.helpers'
+import ShareButton from '@/components/ShareButton'
 import { useNearbyLocationActions } from '@/components/use-nearby-location-actions'
 import { cn } from '@/lib/cn'
 import { nearbyEmbedUrl, nearbyMapsUrl } from '@/lib/maps'
+import { scrollElementIntoView } from '@/lib/share-section'
 
 type Props = {
   brand: string | null
@@ -20,8 +24,13 @@ type Props = {
 /** Google Maps search for mechanics / brand dealers / insurance agents around the user's current location. */
 export default function NearbyServices({ brand }: Props): ReactNode {
   const { t, i18n } = useTranslation()
-  const [open, setOpen] = useState(false)
-  const [category, setCategory] = useState<NearbyCategory>(DEFAULT_NEARBY_CATEGORY)
+  const [searchParams] = useSearchParams()
+  const isSharedNearby = searchParams.get('section') === 'nearby'
+  const [open, setOpen] = useState(() => isSharedNearby)
+  const [category, setCategory] = useState<NearbyCategory>(() =>
+    isSharedNearby ? parseNearbyCategory(searchParams.get('tab')) : DEFAULT_NEARBY_CATEGORY
+  )
+  const sectionRef = useRef<HTMLDivElement>(null)
   const { status, coords, handleRequestLocation } = useNearbyLocationActions()
   const query = t(nearbyQueryKey(category, brand), { brand })
   const canRetry = status === 'denied' || status === 'unavailable' || status === 'idle'
@@ -33,27 +42,40 @@ export default function NearbyServices({ brand }: Props): ReactNode {
     if (next && (status === 'idle' || status === 'unavailable')) handleRequestLocation()
   }
 
+  useEffect(() => {
+    if (!isSharedNearby) return
+    if (sectionRef.current) scrollElementIntoView(sectionRef.current)
+    // A shared link opens the section without a click, so ask for the location here.
+    if (status === 'idle') handleRequestLocation()
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- one-shot on mount
+  }, [isSharedNearby])
+
   return (
-    <div className="mt-3 border-t border-[var(--color-border)] pt-3">
+    <div ref={sectionRef} className="mt-3 border-t border-[var(--color-border)] pt-3">
       <div className="flex items-center justify-between text-base">
         <span className="text-base font-semibold">{t('nearby.title')}</span>
-        <button
-          type="button"
-          aria-expanded={open}
-          onClick={handleToggle}
-          className="group flex items-center gap-1.5 rounded-full bg-[var(--color-surface)]/20 px-3 py-1 text-[var(--color-primary)]"
-        >
-          <span aria-hidden className="no-underline">
-            📍
-          </span>
-          <span className="underline group-hover:no-underline">{open ? t('nearby.hide') : t('nearby.show')}</span>
-          <span
-            aria-hidden
-            className={cn('inline-block no-underline transition-transform duration-200', open && 'rotate-180')}
+        <div className="flex items-center gap-1.5">
+          {open && (
+            <ShareButton section="nearby" tab={category} label={t('share.button', { section: t('nearby.title') })} />
+          )}
+          <button
+            type="button"
+            aria-expanded={open}
+            onClick={handleToggle}
+            className="group flex items-center gap-1.5 rounded-full bg-[var(--color-surface)]/20 px-3 py-1 text-[var(--color-primary)]"
           >
-            ▾
-          </span>
-        </button>
+            <span aria-hidden className="no-underline">
+              📍
+            </span>
+            <span className="underline group-hover:no-underline">{open ? t('nearby.hide') : t('nearby.show')}</span>
+            <span
+              aria-hidden
+              className={cn('inline-block no-underline transition-transform duration-200', open && 'rotate-180')}
+            >
+              ▾
+            </span>
+          </button>
+        </div>
       </div>
 
       <div

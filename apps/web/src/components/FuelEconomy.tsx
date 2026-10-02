@@ -1,13 +1,16 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { MAX_YEAR_GAP } from '@carplates/shared'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
+import { useSearchParams } from 'react-router'
 
 import CO2Badge from '@/components/CO2Badge'
 import { similarVehiclesHref } from '@/components/CO2Badge.helpers'
+import ShareButton from '@/components/ShareButton'
 import { cn } from '@/lib/cn'
 import { fuelEconomyQuery } from '@/lib/queries'
+import { scrollElementIntoView } from '@/lib/share-section'
 
 type Props = {
   brand: string | null
@@ -23,38 +26,48 @@ type Props = {
  */
 export default function FuelEconomy({ brand, model, year, fuel, capacity }: Props): ReactNode {
   const { t } = useTranslation()
-  const [open, setOpen] = useState(false)
+  const [searchParams] = useSearchParams()
+  const isSharedEmissions = searchParams.get('section') === 'emissions'
+  const [open, setOpen] = useState(() => isSharedEmissions)
+  const sectionRef = useRef<HTMLDivElement>(null)
   const hasQuery = !!(brand && model && year)
   const result = useQuery({
     ...fuelEconomyQuery({ make: brand ?? '', model: model ?? '', year: year ?? 0, fuel, capacity }),
     enabled: hasQuery && open
   })
 
+  useEffect(() => {
+    if (isSharedEmissions && hasQuery && sectionRef.current) scrollElementIntoView(sectionRef.current)
+  }, [isSharedEmissions, hasQuery])
+
   if (!hasQuery) return null
   const estimate = result.data?.estimate
 
   return (
-    <div className="mt-3 border-t border-[var(--color-border)] pt-3">
+    <div ref={sectionRef} className="mt-3 border-t border-[var(--color-border)] pt-3">
       <div className="flex items-center justify-between text-base">
         <span className="flex items-center gap-1.5 text-base font-semibold">{t('co2.title')}</span>
 
-        <button
-          type="button"
-          aria-expanded={open}
-          onClick={() => setOpen(v => !v)}
-          className="group flex items-center gap-1.5 rounded-full bg-[var(--color-surface)]/20 px-3 py-1 text-[var(--color-primary)]"
-        >
-          <span aria-hidden className="no-underline">
-            🌿
-          </span>
-          <span className="underline group-hover:no-underline">{open ? t('co2.hide') : t('co2.show')}</span>
-          <span
-            aria-hidden
-            className={cn('inline-block no-underline transition-transform duration-200', open && 'rotate-180')}
+        <div className="flex items-center gap-1.5">
+          {open && <ShareButton section="emissions" label={t('share.button', { section: t('co2.title') })} />}
+          <button
+            type="button"
+            aria-expanded={open}
+            onClick={() => setOpen(v => !v)}
+            className="group flex items-center gap-1.5 rounded-full bg-[var(--color-surface)]/20 px-3 py-1 text-[var(--color-primary)]"
           >
-            ▾
-          </span>
-        </button>
+            <span aria-hidden className="no-underline">
+              🌿
+            </span>
+            <span className="underline group-hover:no-underline">{open ? t('co2.hide') : t('co2.show')}</span>
+            <span
+              aria-hidden
+              className={cn('inline-block no-underline transition-transform duration-200', open && 'rotate-180')}
+            >
+              ▾
+            </span>
+          </button>
+        </div>
       </div>
 
       <div

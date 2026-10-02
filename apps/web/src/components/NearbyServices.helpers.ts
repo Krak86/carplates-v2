@@ -9,6 +9,11 @@ export const NEARBY_CATEGORY_ICON: Record<NearbyCategory, string> = {
   insurance: '🛡️'
 }
 
+/** Category from a shared link's `?tab=`, falling back to the default for a missing/unknown value. */
+export function parseNearbyCategory(value: string | null): NearbyCategory {
+  return NEARBY_CATEGORIES.find(c => c === value) ?? DEFAULT_NEARBY_CATEGORY
+}
+
 /** i18n key of the Google Maps search text — a brand-specific dealer search only when the brand is known. */
 export function nearbyQueryKey(category: NearbyCategory, brand: string | null): string {
   if (category === 'dealer' && !brand) return 'nearby.query.dealerAny'
