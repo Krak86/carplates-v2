@@ -434,7 +434,7 @@ above once scoped, or dropped if research says no.
   glyph coverage (ї є ґ) + TTF/OTF files; the site itself stays on the system font stack; (b) test a real
   unfurl through ngrok/prod (Telegram, Facebook debugger) once deployed.
 
-- 📋 **Fuel economy & emissions (CO2 score + icon)** — planned 2026-10-01, researched, not started.
+- ✅ **Fuel economy & emissions (CO2 score + icon)** — built 2026-10-02 (EPA + EEA, result-card badge, /fuel stats page); tuning left.
   See "Fuel economy & emissions" below.
 
 ### Wanted vehicles ingest — planned (2026-10-01), not started
@@ -484,11 +484,20 @@ First steps when picked up: download the real file locally, confirm count and
 plate/VIN quality, then migration + Zod schema in `packages/shared` + `wanted.ts`
 with a fixture test.
 
-### Fuel economy & emissions (CO2) — planned (2026-10-01), researched, not started
+### Fuel economy & emissions (CO2) — built (2026-10-02), tuning left
 
-Goal: on the result card show fuel consumption + CO2 for the car's make/model/year/engine, plus a single
-**0-100 "emissions badness" score** with an easy-to-read CO2 icon (cloud-with-CO2 glyph, green→red gauge/fill;
-0 = clean, 100 = worst). Reference-data feature, same shape as the NCAP ratings — **not** a live API call.
+**Shipped:** one `registry.fuel_economy` table for every source (`source`, `cycle`, `powertrain` columns): EPA
+(fueleconomy.gov zip, 50k rows) + EEA (EU, WLTP from 2018/19, NEDC before; 2010-2025, ~221k rows — the EEA DiscoData SQL
+endpoint groups ~10M registrations a year server-side to ~10-25k groups, so no multi-GB download; the 2023 table name
+is probed). 118 MB in Postgres, 4 MB gz committed CSV. Matching (`packages/shared/src/fuelMatch.ts`, one code path for
+the API and the stats script): same make, model prefix either way, nearest year within +/-3, powertrain from the registry
+fuel combo, engine capacity +/-12%, one source per estimate (EEA before EPA on ties). `GET /api/fuel` + `CO2Badge` in a
+collapsed "Show emissions" section on the result card; `GET /api/fuel/stats` + `/fuel` page backed by `registry.stats_fuel`
+(`pnpm db:refresh-fuel-stats`). **Coverage: 66% of registered passenger cars** (EPA alone ~37%; EEA from 2015 only ~51%).
+**Left / ideas:** the score cap (`CO2_SCORE_MAX_G_KM` = 300) is untuned — EPA numbers read high, EU WLTP low, so the
+scale should be tuned once; cars built before ~2007 can only match US-spec EPA rows (artificial cliff on the /fuel
+by-year chart) — an EEA-independent older source (UK VCA, NRCan) would fix it; VinResult has no emissions section;
+Soviet/Daewoo/ZAZ models have no source at all; reference links live in `CO2Badge.helpers.ts`.
 
 Sources (all free, no key; licence terms not re-verified — check before building):
 

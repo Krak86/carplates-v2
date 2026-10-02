@@ -51,11 +51,17 @@ pnpm export:kncap:csv  # re-dump the DB table to that CSV — run after every re
 pnpm ingest:iihs       # scrape/refresh IIHS (US, insurance-industry-funded) ratings — see PLAN.md
 pnpm ingest:iihs:csv   # load real IIHS ratings from the committed CSV — seconds, no scraping
 pnpm export:iihs:csv   # re-dump the DB table to that CSV — run after every real re-scrape
-pnpm ingest:ratings:csv   # db:migrate, then all five *:csv rating loads concurrently — each writes
-                          # its own *_ratings table only, doesn't touch registrations
-pnpm ingest:all        # db:migrate, then ingest:full + ingest:ratings:csv concurrently —
-                       # each writes a disjoint table (registrations/current_registration/stats_by_*
-                       # vs. one *_ratings table apiece), so there's no write conflict between them
+pnpm ingest:fuel      # fuel/CO2 reference data: EPA (fueleconomy.gov zip) + EEA (DiscoData SQL API, 2010+, grouped
+                       # server-side) -> registry.fuel_economy; --only epa|eea, --dry-run, --refresh. See PLAN.md
+pnpm ingest:fuel:csv  # load the committed fuel CSV (4 MB gz) — seconds, no downloads
+pnpm export:fuel:csv  # re-dump the table to that CSV — run after every real re-ingest
+pnpm db:refresh-fuel-stats   # rebuild registry.stats_fuel (the /fuel page rollup) from the registry + fuel_economy;
+                             # run after any registry ingest or ingest:fuel (ingest:all does it last)
+pnpm ingest:ratings:csv   # db:migrate, then all five *:csv rating loads + the fuel CSV concurrently — each writes
+                          # its own table only, doesn't touch registrations
+pnpm ingest:all        # db:migrate, then ingest:full + ingest:ratings:csv concurrently — each writes a
+                       # disjoint table (registrations/current_registration/stats_by_* vs. one ratings/fuel_economy
+                       # table apiece) — then db:refresh-fuel-stats, which needs both finished
 
 pnpm alpr:build     # build the self-hosted ALPR (own-model plate recognition) Docker image
 pnpm alpr:up        # run it on :8088 (sets ALPR_LOCAL_URL=http://localhost:8088 in apps/api/.env to use it)

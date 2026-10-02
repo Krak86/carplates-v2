@@ -20,8 +20,14 @@ function sectionToDocx(section: ExportSection, docx: Docx): (Paragraph | Table)[
       row =>
         new TableRow({
           children: [
-            new TableCell({ width: { size: 35, type: WidthType.PERCENTAGE }, children: [new Paragraph({ text: row.label })] }),
-            new TableCell({ width: { size: 65, type: WidthType.PERCENTAGE }, children: [new Paragraph({ text: row.value })] })
+            new TableCell({
+              width: { size: 35, type: WidthType.PERCENTAGE },
+              children: [new Paragraph({ text: row.label })]
+            }),
+            new TableCell({
+              width: { size: 65, type: WidthType.PERCENTAGE },
+              children: [new Paragraph({ text: row.value })]
+            })
           ]
         })
     )
@@ -51,7 +57,9 @@ function sectionToDocx(section: ExportSection, docx: Docx): (Paragraph | Table)[
     ...section.links.map(
       link =>
         new Paragraph({
-          children: [new ExternalHyperlink({ link: link.url, children: [new TextRun({ text: link.label, style: 'Hyperlink' })] })]
+          children: [
+            new ExternalHyperlink({ link: link.url, children: [new TextRun({ text: link.label, style: 'Hyperlink' })] })
+          ]
         })
     )
   ]

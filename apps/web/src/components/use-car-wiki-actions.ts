@@ -32,7 +32,12 @@ export function useCarWikiActions({ brand, model, key }: Params): UseQueryResult
 
   useEffect(() => {
     if (!key || !image) return
-    setHeroOverride({ key, css: `url(${image.url})`, sourceUrl: wiki.data?.pageUrl ?? null, attribution: image.attribution })
+    setHeroOverride({
+      key,
+      css: `url(${image.url})`,
+      sourceUrl: wiki.data?.pageUrl ?? null,
+      attribution: image.attribution
+    })
     return (): void => clearHeroOverride(key)
   }, [key, image, wiki.data?.pageUrl, setHeroOverride, clearHeroOverride])
 

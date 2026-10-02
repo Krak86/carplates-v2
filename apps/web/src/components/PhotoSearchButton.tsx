@@ -23,13 +23,7 @@ export default function PhotoSearchButton({ isPending, disabled = false, onPick 
 
   return (
     <>
-      <input
-        ref={inputRef}
-        type="file"
-        accept="image/*"
-        onChange={handleChange}
-        className="hidden"
-      />
+      <input ref={inputRef} type="file" accept="image/*" onChange={handleChange} className="hidden" />
       <button
         type="button"
         onClick={() => inputRef.current?.click()}

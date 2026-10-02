@@ -5,6 +5,8 @@ import {
   decodeVin,
   getCncapRatings,
   getEuroNcapRatings,
+  getFuelEconomy,
+  getFuelStats,
   getIihsRatings,
   getJncapRatings,
   getKncapRatings,
@@ -19,7 +21,7 @@ import {
   suggestBrands,
   suggestModels
 } from '@/lib/api'
-import type { VehicleSearchFilters } from '@/lib/api'
+import type { FuelEconomyParams, VehicleSearchFilters } from '@/lib/api'
 import { isFavorited, listFavorites } from '@/lib/favorites-db'
 import type { FavoriteKind } from '@/lib/favorites-db'
 import { listVisits } from '@/lib/history-db'
@@ -140,6 +142,24 @@ export function iihsRatingsQuery(make: string, model: string, year: number) {
   return queryOptions({
     queryKey: ['safety', 'iihs', make, model, year],
     queryFn: () => getIihsRatings(make, model, year),
+    staleTime: Infinity
+  })
+}
+
+// Fuel consumption + CO2 estimate — persisted reference data (pnpm ingest:fuel), not fetched live.
+export function fuelEconomyQuery(params: FuelEconomyParams) {
+  return queryOptions({
+    queryKey: ['fuel', params.make, params.model, params.year, params.fuel ?? null, params.capacity ?? null],
+    queryFn: () => getFuelEconomy(params),
+    staleTime: Infinity
+  })
+}
+
+// Fleet-wide fuel/CO2 rollup for the /fuel page — heavy-ish and online-only, like statsQuery (not in the offline cache).
+export function fuelStatsQuery() {
+  return queryOptions({
+    queryKey: ['fuel-stats'],
+    queryFn: getFuelStats,
     staleTime: Infinity
   })
 }

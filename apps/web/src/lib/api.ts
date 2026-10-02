@@ -3,6 +3,8 @@ import {
   cncapRatingsResponseSchema,
   dataVersionResponseSchema,
   euroNcapRatingsResponseSchema,
+  fuelEconomyResponseSchema,
+  fuelStatsResponseSchema,
   iihsRatingsResponseSchema,
   jncapRatingsResponseSchema,
   kncapRatingsResponseSchema,
@@ -21,6 +23,8 @@ import type {
   BrandSuggestionsResponse,
   CncapRatingsResponse,
   EuroNcapRatingsResponse,
+  FuelEconomyResponse,
+  FuelStatsResponse,
   IihsRatingsResponse,
   JncapRatingsResponse,
   KncapRatingsResponse,
@@ -142,6 +146,31 @@ export async function getKncapRatings(make: string, model: string, year: number)
 export async function getIihsRatings(make: string, model: string, year: number): Promise<IihsRatingsResponse> {
   const params = new URLSearchParams({ make, model, year: String(year) })
   return iihsRatingsResponseSchema.parse(await getJson(`/api/safety/iihs?${params.toString()}`))
+}
+
+export type FuelEconomyParams = {
+  make: string
+  model: string
+  year: number
+  fuel?: string | null
+  capacity?: number | null
+}
+
+export async function getFuelEconomy({
+  make,
+  model,
+  year,
+  fuel,
+  capacity
+}: FuelEconomyParams): Promise<FuelEconomyResponse> {
+  const params = new URLSearchParams({ make, model, year: String(year) })
+  if (fuel) params.set('fuel', fuel)
+  if (capacity) params.set('capacity', String(capacity))
+  return fuelEconomyResponseSchema.parse(await getJson(`/api/fuel?${params.toString()}`))
+}
+
+export async function getFuelStats(): Promise<FuelStatsResponse> {
+  return fuelStatsResponseSchema.parse(await getJson('/api/fuel/stats'))
 }
 
 // Our own transcode-and-cache proxy (the source .wmv can't play in any modern browser).

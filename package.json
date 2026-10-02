@@ -35,8 +35,8 @@
     "alpr:down": "docker compose -f infra/docker-compose.alpr.yml down",
     "ingest": "pnpm --filter @carplates/scripts ingest",
     "ingest:full": "pnpm --filter @carplates/scripts ingest:full",
-    "ingest:all": "pnpm db:migrate && concurrently -n full,ratings \"pnpm ingest:full\" \"pnpm ingest:ratings:csv\"",
-    "ingest:ratings:csv": "pnpm db:migrate && concurrently -n euroncap,jncap,cncap,kncap,iihs \"pnpm ingest:euroncap:csv\" \"pnpm ingest:jncap:csv\" \"pnpm ingest:cncap:csv\" \"pnpm ingest:kncap:csv\" \"pnpm ingest:iihs:csv\"",
+    "ingest:all": "pnpm db:migrate && concurrently -n full,ratings \"pnpm ingest:full\" \"pnpm ingest:ratings:csv\" && pnpm db:refresh-fuel-stats",
+    "ingest:ratings:csv": "pnpm db:migrate && concurrently -n euroncap,jncap,cncap,kncap,iihs,fuel \"pnpm ingest:euroncap:csv\" \"pnpm ingest:jncap:csv\" \"pnpm ingest:cncap:csv\" \"pnpm ingest:kncap:csv\" \"pnpm ingest:iihs:csv\" \"pnpm ingest:fuel:csv\"",
     "ingest:euroncap": "pnpm --filter @carplates/scripts ingest:euroncap",
     "ingest:euroncap:csv": "pnpm --filter @carplates/scripts ingest:euroncap:csv",
     "export:euroncap:csv": "pnpm --filter @carplates/scripts export:euroncap:csv",
@@ -51,7 +51,11 @@
     "export:kncap:csv": "pnpm --filter @carplates/scripts export:kncap:csv",
     "ingest:iihs": "pnpm --filter @carplates/scripts ingest:iihs",
     "ingest:iihs:csv": "pnpm --filter @carplates/scripts ingest:iihs:csv",
-    "export:iihs:csv": "pnpm --filter @carplates/scripts export:iihs:csv"
+    "export:iihs:csv": "pnpm --filter @carplates/scripts export:iihs:csv",
+    "ingest:fuel": "pnpm --filter @carplates/scripts ingest:fuel",
+    "ingest:fuel:csv": "pnpm --filter @carplates/scripts ingest:fuel:csv",
+    "export:fuel:csv": "pnpm --filter @carplates/scripts export:fuel:csv",
+    "db:refresh-fuel-stats": "pnpm --filter @carplates/scripts refresh-fuel-stats"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

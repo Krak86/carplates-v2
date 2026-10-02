@@ -91,7 +91,9 @@ export function regionName(plate: string): string | undefined {
 }
 
 /** Every distinct region name, derived from `REGIONS` (never hand-duplicated) — sorted for a stable dropdown order. */
-export const REGION_NAMES: readonly string[] = [...new Set(Object.values(REGIONS))].sort((a, b) => a.localeCompare(b, 'uk'))
+export const REGION_NAMES: readonly string[] = [...new Set(Object.values(REGIONS))].sort((a, b) =>
+  a.localeCompare(b, 'uk')
+)
 
 /** The plate prefixes (1-2, per `REGIONS`) for a region name — for building a search filter (`inArray`). Empty if unrecognized. */
 export function platePrefixesForRegion(region: string): string[] {

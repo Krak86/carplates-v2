@@ -94,11 +94,7 @@ export function repairOcrPlate(input: string): string {
 
 // Letters after normalizePlate: the 12 Cyrillic look-alikes, or any other Latin letter.
 const UA_LEGACY_RE = /^\d{2}[АВСЕНІКМОРТХA-Z]{2}\d{4}$/
-const UA_PLATE_RES = [
-  /^[АВСЕНІКМОРТХA-Z]{2}\d{4}[АВСЕНІКМОРТХA-Z]{2}$/,
-  UA_LEGACY_RE,
-  /^[АВСЕНІКМОРТХA-Z]{4}\d{4}$/
-]
+const UA_PLATE_RES = [/^[АВСЕНІКМОРТХA-Z]{2}\d{4}[АВСЕНІКМОРТХA-Z]{2}$/, UA_LEGACY_RE, /^[АВСЕНІКМОРТХA-Z]{4}\d{4}$/]
 
 /** True for the legacy region-digits-first shape ("11АА1234"), the one most prone to junk matches. */
 export function isLegacyUaPlate(input: string): boolean {

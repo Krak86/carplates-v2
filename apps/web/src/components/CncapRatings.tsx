@@ -162,7 +162,12 @@ export default function CncapRatings({ brand, model, year, active }: Props): Rea
       {ratings.length > 0 && (
         <p className="mt-2 text-sm text-[var(--color-muted)]">
           {t('safety.cncapSource')}{' '}
-          <a href={CNCAP_SOURCE_URL} target="_blank" rel="noopener noreferrer" className="text-[var(--color-primary)] underline">
+          <a
+            href={CNCAP_SOURCE_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[var(--color-primary)] underline"
+          >
             c-ncap.org.cn ↗
           </a>
         </p>

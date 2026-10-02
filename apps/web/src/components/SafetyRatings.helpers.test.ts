@@ -70,7 +70,8 @@ describe('filterByBodyStyle', () => {
     { description: '2016 Mercedes-Benz E-Class 4 DR RWD' }, // sedan — wrong body
     { description: '2016 Mercedes-Benz E-Class 4 DR 4WD' } // sedan — wrong body
   ]
-  const byDescription = (r: { description: string }): ReturnType<typeof nhtsaBodyBucket> => nhtsaBodyBucket(r.description)
+  const byDescription = (r: { description: string }): ReturnType<typeof nhtsaBodyBucket> =>
+    nhtsaBodyBucket(r.description)
 
   it('keeps only the matching body style for a real wagon (СЕ5992ЕМ, E 200, УНІВЕРСАЛ)', () => {
     const result = filterByBodyStyle(variants, 'УНІВЕРСАЛ', byDescription)

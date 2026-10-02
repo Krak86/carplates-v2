@@ -122,13 +122,13 @@ export function useAdvancedSearchActions(): UseAdvancedSearchActions {
     !yearToInvalid &&
     Boolean(
       brandFilter ||
-        modelFilter ||
-        yearFrom != null ||
-        yearTo != null ||
-        filters.fuel ||
-        filters.color ||
-        filters.kind ||
-        filters.region
+      modelFilter ||
+      yearFrom != null ||
+      yearTo != null ||
+      filters.fuel ||
+      filters.color ||
+      filters.kind ||
+      filters.region
     )
 
   const results = useQuery({

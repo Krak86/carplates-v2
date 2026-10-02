@@ -11,6 +11,7 @@ export const OFFLINE_LIMITS = {
   plate: 200,
   vin: 200,
   safety: 1200,
+  fuel: 400,
   wiki: 200
 } as const
 

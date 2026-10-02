@@ -402,6 +402,32 @@ export const iihsRatingsResponseSchema = z.object({
 })
 export type IihsRatingsResponse = z.infer<typeof iihsRatingsResponseSchema>
 
+/**
+ * Fuel consumption + tailpipe CO2 estimate for "similar vehicles" (same make/model, nearby year, matching fuel and
+ * powertrain), aggregated to a min–max range over every matched reference row. `cycle` is the test procedure the
+ * numbers come from and must always be shown next to them. `estimate` is null when nothing matched.
+ */
+export const fuelEconomyEstimateSchema = z.object({
+  source: z.string(),
+  cycle: z.string(),
+  modelYear: z.number().int(),
+  matches: z.number().int(),
+  co2GKmMin: z.number(),
+  co2GKmMax: z.number(),
+  l100kmMin: z.number().nullable(),
+  l100kmMax: z.number().nullable(),
+  evKwh100km: z.number().nullable()
+})
+export type FuelEconomyEstimate = z.infer<typeof fuelEconomyEstimateSchema>
+
+export const fuelEconomyResponseSchema = z.object({
+  make: z.string(),
+  model: z.string(),
+  year: z.number().int(),
+  estimate: fuelEconomyEstimateSchema.nullable()
+})
+export type FuelEconomyResponse = z.infer<typeof fuelEconomyResponseSchema>
+
 /** One stock photo from Pixabay, filtered to only what the UI needs. */
 export const vehiclePhotoSchema = z.object({
   id: z.number().int(),
@@ -566,3 +592,39 @@ export const apiErrorSchema = z.object({
   message: z.string()
 })
 export type ApiError = z.infer<typeof apiErrorSchema>
+
+/**
+ * /fuel statistics page payload — every figure comes from `registry.stats_fuel` (passenger cars only). `avgCo2` is the
+ * registration-weighted mean of the matched estimate's midpoint; `matched` counts cars that have an estimate at all,
+ * so a row's coverage is `matched / n`.
+ */
+export const fuelStatsRowSchema = z.object({
+  label: z.string(),
+  n: z.number().int(),
+  matched: z.number().int(),
+  avgCo2: z.number().nullable()
+})
+export type FuelStatsRow = z.infer<typeof fuelStatsRowSchema>
+
+export const fuelStatsModelSchema = z.object({
+  brand: z.string(),
+  model: z.string(),
+  n: z.number().int(),
+  avgCo2: z.number()
+})
+export type FuelStatsModel = z.infer<typeof fuelStatsModelSchema>
+
+export const fuelStatsResponseSchema = z.object({
+  total: z.number().int(),
+  matched: z.number().int(),
+  fleetAvgCo2: z.number().nullable(),
+  byYear: z.array(fuelStatsRowSchema),
+  byBrand: z.array(fuelStatsRowSchema),
+  byFuelClass: z.array(fuelStatsRowSchema),
+  cleanestModels: z.array(fuelStatsModelSchema),
+  dirtiestModels: z.array(fuelStatsModelSchema),
+  /** Matched cars per CO2 band: `from` (inclusive) to `from + bandWidth`. */
+  distribution: z.array(z.object({ from: z.number().int(), n: z.number().int() })),
+  bandWidth: z.number().int()
+})
+export type FuelStatsResponse = z.infer<typeof fuelStatsResponseSchema>

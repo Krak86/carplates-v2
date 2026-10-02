@@ -23,6 +23,10 @@
     "ingest:iihs": "tsx src/iihs.ts",
     "ingest:iihs:csv": "tsx src/iihs.ts --from-csv seed-data/iihs-ratings.csv.gz",
     "export:iihs:csv": "tsx src/iihs.ts --export-csv seed-data/iihs-ratings.csv.gz",
+    "ingest:fuel": "tsx src/fuel-economy.ts",
+    "ingest:fuel:csv": "tsx src/fuel-economy.ts --from-csv seed-data/fuel-economy.csv.gz",
+    "export:fuel:csv": "tsx src/fuel-economy.ts --export-csv seed-data/fuel-economy.csv.gz",
+    "refresh-fuel-stats": "tsx src/fuel-stats.ts",
     "type-check": "tsc",
     "test": "vitest run"
   },

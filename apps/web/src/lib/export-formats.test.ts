@@ -18,7 +18,12 @@ const report: ExportReport = {
       columns: ['Variant', 'Stars'],
       rows: [['Camry 2.5', '5']]
     },
-    { type: 'links', id: 'images', title: 'All images', links: [{ label: 'Photo 1', url: 'https://example.com/1.jpg' }] }
+    {
+      type: 'links',
+      id: 'images',
+      title: 'All images',
+      links: [{ label: 'Photo 1', url: 'https://example.com/1.jpg' }]
+    }
   ]
 }
 

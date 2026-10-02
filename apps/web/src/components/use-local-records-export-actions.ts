@@ -12,7 +12,10 @@ type UseLocalRecordsExportActions = {
 
 /** Bulk export of the whole History/Favorites list — basic saved-record fields only (value,
  *  label, date), not a per-vehicle deep dive; see use-copy-all-info-actions.ts for that. */
-export function useLocalRecordsExportActions(title: string, entries: ExportLocalRecord[]): UseLocalRecordsExportActions {
+export function useLocalRecordsExportActions(
+  title: string,
+  entries: ExportLocalRecord[]
+): UseLocalRecordsExportActions {
   const { t } = useTranslation()
 
   async function run(format: ExportFormat): Promise<boolean> {

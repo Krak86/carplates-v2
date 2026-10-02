@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest'
 
-import { classifyQuery, denormalizePlate, isVin, normalizePlate, repairOcrPlate, isUaPlate, isLegacyUaPlate } from './plate.js'
+import {
+  classifyQuery,
+  denormalizePlate,
+  isVin,
+  normalizePlate,
+  repairOcrPlate,
+  isUaPlate,
+  isLegacyUaPlate
+} from './plate.js'
 
 describe('normalizePlate', () => {
   it('maps each Latin homoglyph to its Cyrillic twin', () => {

@@ -45,6 +45,9 @@ export default function Sidebar(): ReactNode {
       <NavLink to="/stats" className={linkClass} onClick={() => setDrawerOpen(false)}>
         <span aria-hidden>📊</span> {t('nav.stats')}
       </NavLink>
+      <NavLink to="/fuel" className={linkClass} onClick={() => setDrawerOpen(false)}>
+        <span aria-hidden>🌿</span> {t('nav.fuel')}
+      </NavLink>
       <NavLink to="/discuss" className={linkClass} onClick={() => setDrawerOpen(false)}>
         <span aria-hidden>💬</span> {t('nav.discuss')}
       </NavLink>

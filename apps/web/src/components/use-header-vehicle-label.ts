@@ -21,7 +21,8 @@ const withYear = (car: string, year: number | null): string => (car ? `${car}${y
 export function useHeaderVehicleLabel(): string | null {
   const { pathname } = useLocation()
   const segments = pathname.split('/').filter(Boolean)
-  const raw = segments.length === 1 && !STATIC_ROUTES.has(segments[0] as string) ? decodeURIComponent(segments[0] as string) : ''
+  const raw =
+    segments.length === 1 && !STATIC_ROUTES.has(segments[0] as string) ? decodeURIComponent(segments[0] as string) : ''
   const kind = raw ? classifyQuery(raw) : null
 
   const plate = useQuery({ ...plateQuery(raw), enabled: kind === 'plate' })

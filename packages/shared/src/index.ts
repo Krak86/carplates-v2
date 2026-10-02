@@ -1,4 +1,12 @@
-export { normalizePlate, denormalizePlate, isVin, classifyQuery, repairOcrPlate, isUaPlate, isLegacyUaPlate } from './plate.js'
+export {
+  normalizePlate,
+  denormalizePlate,
+  isVin,
+  classifyQuery,
+  repairOcrPlate,
+  isUaPlate,
+  isLegacyUaPlate
+} from './plate.js'
 export { REGIONS, REGION_NAMES, regionName, platePrefixesForRegion } from './regions.js'
 export { VEHICLE_KINDS, resolveVehicleKind, sourceValueForKind, type VehicleKind } from './vehicleKind.js'
 export {
@@ -16,6 +24,27 @@ export { brandLogoUrl, brandSlug } from './brandLogo.js'
 export { dealerUrl } from './dealerUrl.js'
 export { wikiUrl, wikiDomain } from './wikiUrl.js'
 export { makeKey, modelKey } from './vehicleKey.js'
+export {
+  MAX_YEAR_GAP,
+  CAPACITY_TOLERANCE,
+  SOURCE_PRIORITY,
+  matchModelRows,
+  selectFuelEstimate,
+  registryFuelClass,
+  FUEL_CLASSES,
+  type FuelClass,
+  type FuelCriteria,
+  type FuelReferenceRow
+} from './fuelMatch.js'
+export {
+  CO2_SCORE_MAX_G_KM,
+  CO2_BANDS,
+  KM_PER_MILE,
+  gramsPerMileToGramsPerKm,
+  co2Score,
+  co2Band,
+  type Co2Band
+} from './co2Score.js'
 export {
   registrationSchema,
   plateLookupResponseSchema,
@@ -43,6 +72,11 @@ export {
   iihsTestSchema,
   iihsRatingSchema,
   iihsRatingsResponseSchema,
+  fuelEconomyEstimateSchema,
+  fuelEconomyResponseSchema,
+  fuelStatsRowSchema,
+  fuelStatsModelSchema,
+  fuelStatsResponseSchema,
   statsMetricsSchema,
   statsByYearRowSchema,
   statsByRegionRowSchema,
@@ -86,6 +120,11 @@ export {
   type IihsTest,
   type IihsRating,
   type IihsRatingsResponse,
+  type FuelEconomyEstimate,
+  type FuelEconomyResponse,
+  type FuelStatsRow,
+  type FuelStatsModel,
+  type FuelStatsResponse,
   type StatsMetrics,
   type StatsByYearRow,
   type StatsByRegionRow,

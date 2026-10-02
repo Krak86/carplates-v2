@@ -82,7 +82,13 @@ describe('buildExportReport', () => {
 
   it('omits the Vehicle section entirely when there is no current registration and no vehicle info', () => {
     const report = buildExportReport(
-      baseInput({ current: null, plate: null, region: null, vin: null, vehicle: { brand: null, model: null, year: null, body: null } }),
+      baseInput({
+        current: null,
+        plate: null,
+        region: null,
+        vin: null,
+        vehicle: { brand: null, model: null, year: null, body: null }
+      }),
       t
     )
     expect(report.sections.find(s => s.id === 'vehicle')).toBeUndefined()
@@ -197,7 +203,9 @@ describe('buildExportReport', () => {
   it('omits every ratings/coverage section when no source has any data', () => {
     const report = buildExportReport(baseInput(), t)
     expect(report.sections.some(s => s.id === 'safetyCoverage')).toBe(false)
-    expect(report.sections.some(s => ['euroncap', 'nhtsa', 'jncap', 'cncap', 'kncap', 'iihs'].includes(s.id))).toBe(false)
+    expect(report.sections.some(s => ['euroncap', 'nhtsa', 'jncap', 'cncap', 'kncap', 'iihs'].includes(s.id))).toBe(
+      false
+    )
   })
 })
 

@@ -24,6 +24,7 @@ import FieldInfoButton from '@/components/FieldInfoButton'
 import NearbyServices from '@/components/NearbyServices'
 import RegistrationTimeline from '@/components/RegistrationTimeline'
 import { getFuelIcon } from '@/components/ResultCard.helpers'
+import FuelEconomy from '@/components/FuelEconomy'
 import SafetyRatings from '@/components/SafetyRatings'
 import ShareButton from '@/components/ShareButton'
 import TopStatBadges from '@/components/TopStatBadges'
@@ -377,6 +378,7 @@ export default function ResultCard({ data }: Props): ReactNode {
           </div>
         </div>
 
+        <FuelEconomy brand={c.brand} model={c.model} year={c.makeYear} fuel={c.fuel} capacity={c.capacity} />
         <SafetyRatings brand={c.brand} model={c.model} year={c.makeYear} body={c.body} />
         <VehiclePhotos brand={c.brand} model={c.model} year={c.makeYear} />
         <NearbyServices brand={c.brand} />

@@ -370,6 +370,62 @@ export const iihsRatings = registry.table(
 export type IihsRatingRow = typeof iihsRatings.$inferSelect
 export type IihsRatingInsert = typeof iihsRatings.$inferInsert
 
+/**
+ * Fuel consumption + tailpipe CO2 reference rows (fueleconomy.gov first), loaded by
+ * `scripts/src/fuel-economy.ts` — see migrations/0016_fuel_economy.sql. Values are normalized on load
+ * (g/mi → g/km, MPG → L/100km); `cycle` says which test procedure produced them.
+ */
+export const fuelEconomy = registry.table(
+  'fuel_economy',
+  {
+    id: text('id').primaryKey(),
+    source: text('source').notNull(),
+    cycle: text('cycle').notNull(),
+    make: text('make').notNull(),
+    model: text('model').notNull(),
+    makeKey: text('make_key').notNull(),
+    modelKey: text('model_key').notNull(),
+    modelYear: integer('model_year').notNull(),
+    fuelType: text('fuel_type').notNull(),
+    fuelCategory: text('fuel_category').notNull(),
+    /** 'ice' | 'hybrid' | 'phev' | 'ev' | 'fcev' — see migrations/0017. */
+    powertrain: text('powertrain').notNull().default('ice'),
+    engineCc: integer('engine_cc'),
+    cylinders: integer('cylinders'),
+    l100km: real('l_100km'),
+    co2GKm: real('co2_g_km'),
+    evKwh100km: real('ev_kwh_100km'),
+    scrapedAt: timestamp('scraped_at', { withTimezone: true }).notNull().defaultNow()
+  },
+  t => [index('ix_fuel_economy_make_model').on(t.makeKey, t.modelKey, t.modelYear)]
+)
+export type FuelEconomyRow = typeof fuelEconomy.$inferSelect
+export type FuelEconomyInsert = typeof fuelEconomy.$inferInsert
+
+/**
+ * Per-(brand, model, year, fuel, capacity bucket) passenger-car counts joined with the CO2 estimate the reference
+ * data gives them — backs the /fuel statistics page. Rebuilt by `scripts/src/fuel-stats.ts`; see
+ * migrations/0018_stats_fuel.sql.
+ */
+export const statsFuel = registry.table(
+  'stats_fuel',
+  {
+    brand: text('brand').notNull(),
+    model: text('model').notNull(),
+    makeYear: integer('make_year').notNull(),
+    fuel: text('fuel'),
+    fuelClass: text('fuel_class').notNull(),
+    capacityBucket: integer('capacity_bucket'),
+    n: integer('n').notNull(),
+    co2GKm: real('co2_g_km'),
+    l100km: real('l_100km'),
+    source: text('source'),
+    cycle: text('cycle')
+  },
+  t => [index('ix_stats_fuel_year').on(t.makeYear), index('ix_stats_fuel_brand').on(t.brand)]
+)
+export type StatsFuelInsert = typeof statsFuel.$inferInsert
+
 /** Incremental-ingest bookkeeping: which CKAN resources have been loaded. */
 export const ingestedResources = registry.table('ingested_resources', {
   ckanResourceId: text('ckan_resource_id').primaryKey(),

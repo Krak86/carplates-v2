@@ -21,6 +21,8 @@ export {
   cncapRatings,
   kncapRatings,
   iihsRatings,
+  fuelEconomy,
+  statsFuel,
   type RegistrationRow,
   type RegistrationInsert,
   type IngestedResourceRow,
@@ -33,7 +35,10 @@ export {
   type KncapRatingRow,
   type KncapRatingInsert,
   type IihsRatingRow,
-  type IihsRatingInsert
+  type IihsRatingInsert,
+  type FuelEconomyRow,
+  type FuelEconomyInsert,
+  type StatsFuelInsert
 } from './schema.js'
 export {
   createDb,
