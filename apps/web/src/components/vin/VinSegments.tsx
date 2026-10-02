@@ -58,9 +58,9 @@ export default function VinSegments({ vin, fields }: Props): ReactNode {
             onFocus={() => setActive(s.id)}
             onClick={() => setActive(s.id)}
             className={cn(
-              'rounded-md px-1.5 py-0.5 font-semibold tracking-wider transition-shadow',
+              'rounded-md px-1.5 py-0.5 font-semibold tracking-wider ring-0 transition-[box-shadow,opacity,transform] duration-200 ease-out motion-reduce:transition-none',
               SEGMENT_STYLE[s.id],
-              active === s.id ? 'ring-2' : 'opacity-80 hover:opacity-100'
+              active === s.id ? '-translate-y-0.5 scale-105 ring-2' : 'opacity-70 hover:opacity-100 active:scale-95'
             )}
           >
             {s.text}
@@ -69,12 +69,14 @@ export default function VinSegments({ vin, fields }: Props): ReactNode {
       </div>
 
       <div aria-live="polite" className="mt-2 rounded-md bg-[var(--color-border)]/30 px-3 py-2 text-sm">
-        <span className="font-semibold">{t(`vin.seg.${active}.title`)}</span>
-        <span className="text-[var(--color-muted)]">
-          {' '}
-          · {t('vin.seg.positions', { range: VIN_SEGMENT_POSITIONS[active] })}
-        </span>
-        <p className="mt-0.5">{t(`vin.seg.${active}.desc`, params)}</p>
+        <div key={active} className="animate-fade-in">
+          <span className="font-semibold">{t(`vin.seg.${active}.title`)}</span>
+          <span className="text-[var(--color-muted)]">
+            {' '}
+            · {t('vin.seg.positions', { range: VIN_SEGMENT_POSITIONS[active] })}
+          </span>
+          <p className="mt-0.5">{t(`vin.seg.${active}.desc`, params)}</p>
+        </div>
       </div>
     </div>
   )

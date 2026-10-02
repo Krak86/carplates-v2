@@ -74,7 +74,8 @@ export default function VinToggleSection({
           open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
         )}
       >
-        <div className="overflow-hidden">
+        {/* Side padding + matching negative margin: keeps rings/shadows near the edge (VIN chips) from being clipped. */}
+        <div className="-mx-1.5 overflow-hidden px-1.5">
           <div className="pt-2">{children}</div>
         </div>
       </div>

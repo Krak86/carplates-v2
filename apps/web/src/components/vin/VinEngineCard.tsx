@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import InfoPopover from '@/components/InfoPopover'
+import InfoText from '@/components/InfoText'
 import { displacementLiters, enginePower, gvwrClass, parseEngineLayout } from '@/components/vin/helpers'
 import type { FieldMap } from '@/components/vin/helpers'
 import type { EngineLayout } from '@/components/vin/types'
@@ -27,13 +29,13 @@ export default function VinEngineCard({ fields }: Props): ReactNode {
   const gvwr = fields.get('Gross Vehicle Weight Rating From')
   const gvwrCls = gvwrClass(gvwr)
   const chips = [
-    fields.get('Engine Model'),
-    fields.get('Valve Train Design'),
-    fields.get('Engine Configuration'),
-    fields.get('Turbo') ? `${t('vin.engine.turbo')}: ${fields.get('Turbo')}` : undefined,
-    fields.get('Electrification Level'),
-    fields.get('Transmission Style')
-  ].filter((c): c is string => !!c)
+    { text: fields.get('Engine Model'), infoKey: 'engineModel' },
+    { text: fields.get('Valve Train Design'), infoKey: 'valveTrain' },
+    { text: fields.get('Engine Configuration'), infoKey: 'engineConfig' },
+    { text: fields.get('Turbo') ? `${t('vin.engine.turbo')}: ${fields.get('Turbo')}` : undefined, infoKey: 'turbo' },
+    { text: fields.get('Electrification Level'), infoKey: 'electrification' },
+    { text: fields.get('Transmission Style'), infoKey: 'transmission' }
+  ].filter((c): c is Chip => !!c.text)
 
   if (!cylinders && !liters && !hp && !fuel && chips.length === 0) return null
 
@@ -43,10 +45,20 @@ export default function VinEngineCard({ fields }: Props): ReactNode {
         {cylinders && cylinders <= MAX_DRAWN_CYLINDERS && <CylinderGlyph count={cylinders} layout={layout} />}
 
         <div className="grid flex-1 grid-cols-2 gap-x-4 gap-y-1 sm:grid-cols-4">
-          <Stat label={t('vin.engine.cylinders')} value={cylinders ? String(cylinders) : null} />
-          <Stat label={t('vin.engine.displacement')} value={liters ? `${liters.toFixed(1)} L` : null} />
-          <Stat label={t('vin.engine.power')} value={hp ? `${hp} hp` : null} hint={kw ? `${kw} kW` : null} />
-          <Stat label={t('vin.engine.fuel')} value={fuel ?? null} />
+          <Stat label={t('vin.engine.cylinders')} value={cylinders ? String(cylinders) : null} infoKey="cylinders" />
+          <Stat
+            label={t('vin.engine.displacement')}
+            value={liters ? `${liters.toFixed(1)} L` : null}
+            infoKey="displacement"
+          />
+          <Stat
+            label={t('vin.engine.power')}
+            value={hp ? `${hp} hp` : null}
+            infoKey="horsepower"
+            hint={kw ? `${kw} kW` : null}
+            hintInfoKey="kilowatts"
+          />
+          <Stat label={t('vin.engine.fuel')} value={fuel ?? null} infoKey="fuelPrimary" />
         </div>
       </div>
 
@@ -62,7 +74,10 @@ export default function VinEngineCard({ fields }: Props): ReactNode {
         {gvwrCls && (
           <div>
             <div className="mb-0.5 flex justify-between text-sm">
-              <span className="text-[var(--color-muted)]">{t('vin.engine.gvwr')}</span>
+              <span className="flex items-center gap-1.5 text-[var(--color-muted)]">
+                {t('vin.engine.gvwr')}
+                <Info infoKey="gvwr" title={t('vin.engine.gvwr')} />
+              </span>
               <span className="font-medium">{gvwr}</span>
             </div>
             <div className="flex gap-0.5" role="img" aria-label={t('vin.engine.gvwrClass', { n: gvwrCls })}>
@@ -80,8 +95,12 @@ export default function VinEngineCard({ fields }: Props): ReactNode {
       {chips.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-1.5">
           {chips.map(c => (
-            <span key={c} className="rounded-full bg-[var(--color-border)]/50 px-2.5 py-0.5 text-sm">
-              {c}
+            <span
+              key={c.text}
+              className="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-border)]/50 px-2.5 py-0.5 text-sm"
+            >
+              {c.text}
+              <Info infoKey={c.infoKey} title={c.text} />
             </span>
           ))}
         </div>
@@ -90,15 +109,48 @@ export default function VinEngineCard({ fields }: Props): ReactNode {
   )
 }
 
-type StatProps = { label: string; value: string | null; hint?: string | null }
+type Chip = { text: string; infoKey: string }
 
-function Stat({ label, value, hint }: StatProps): ReactNode {
+type InfoProps = { infoKey: string; title: string }
+
+/** "?" popover with the `vin.info.<infoKey>` explanation (same text the field table shows). */
+function Info({ infoKey, title }: InfoProps): ReactNode {
+  const { t } = useTranslation()
+  return (
+    <InfoPopover label={t('vin.info.about', { field: title })} title={title}>
+      <InfoText text={t(`vin.info.${infoKey}`)} />
+    </InfoPopover>
+  )
+}
+
+type StatProps = {
+  label: string
+  value: string | null
+  /** Explains the value itself (shown beside it); without it the "?" sits on the label. */
+  infoKey: string
+  hint?: string | null
+  hintInfoKey?: string
+}
+
+function Stat({ label, value, hint, infoKey, hintInfoKey }: StatProps): ReactNode {
   if (!value) return null
+  const valueInfo = !!hintInfoKey
   return (
     <div>
-      <div className="text-xs text-[var(--color-muted)]">{label}</div>
-      <div className="text-lg leading-tight font-semibold">{value}</div>
-      {hint && <div className="text-xs text-[var(--color-muted)]">{hint}</div>}
+      <div className="flex items-center gap-1 text-xs text-[var(--color-muted)]">
+        {label}
+        {!valueInfo && <Info infoKey={infoKey} title={label} />}
+      </div>
+      <div className="flex items-center gap-1.5 text-lg leading-tight font-semibold">
+        {value}
+        {valueInfo && <Info infoKey={infoKey} title={value} />}
+      </div>
+      {hint && (
+        <div className="flex items-center gap-1.5 text-xs text-[var(--color-muted)]">
+          {hint}
+          {hintInfoKey && <Info infoKey={hintInfoKey} title={hint} />}
+        </div>
+      )}
     </div>
   )
 }

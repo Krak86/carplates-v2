@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import InfoPopover from '@/components/InfoPopover'
+import InfoText from '@/components/InfoText'
 import { useCopyFeedback } from '@/components/use-copy-feedback'
 import { FIELD_INFO } from '@/components/vin/field-info'
 import { formatFieldValue } from '@/components/vin/helpers'
@@ -24,7 +25,7 @@ export default function VinFieldRow({ row }: Props): ReactNode {
         {row.variable}
         {infoKey && (
           <InfoPopover label={t('vin.info.about', { field: row.variable })} title={row.variable}>
-            <p>{t(`vin.info.${infoKey}`)}</p>
+            <InfoText text={t(`vin.info.${infoKey}`)} />
           </InfoPopover>
         )}
       </dt>

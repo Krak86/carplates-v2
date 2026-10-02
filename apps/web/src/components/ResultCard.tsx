@@ -353,7 +353,27 @@ export default function ResultCard({ data }: Props): ReactNode {
           </div>
         </div>
 
-        <CarWikiInfo wiki={wiki} hasQuery={hasWikiQuery} />
+        {hasVin && (
+          <VinToggleSection
+            ref={vinRef}
+            icon="🆔"
+            defaultOpen={isSharedVin}
+            onOpenChange={setShowVin}
+            showLabel={t('vin.show')}
+            hideLabel={t('vin.hide')}
+            title={
+              <span className="flex items-center gap-1.5">
+                <span aria-hidden>🆔</span>
+                {t('vin.title')}
+              </span>
+            }
+            actions={<ShareButton section="vin" label={t('share.button', { section: t('vin.title') })} />}
+          >
+            {vinDetail.isPending && <p className="text-base text-[var(--color-muted)]">{t('result.loading')}</p>}
+            {vinDetail.isError && <p className="text-base text-[var(--color-muted)]">{t('result.error')}</p>}
+            {vinDetail.isSuccess && <VinDecodeTabs data={vinDetail.data} />}
+          </VinToggleSection>
+        )}
 
         <VinToggleSection
           ref={historyRef}
@@ -398,30 +418,9 @@ export default function ResultCard({ data }: Props): ReactNode {
           )}
         </VinToggleSection>
 
-        {hasVin && (
-          <VinToggleSection
-            ref={vinRef}
-            icon="🆔"
-            defaultOpen={isSharedVin}
-            onOpenChange={setShowVin}
-            showLabel={t('vin.show')}
-            hideLabel={t('vin.hide')}
-            title={
-              <span className="flex items-center gap-1.5">
-                <span aria-hidden>🆔</span>
-                {t('vin.title')}
-              </span>
-            }
-            actions={<ShareButton section="vin" label={t('share.button', { section: t('vin.title') })} />}
-          >
-            {vinDetail.isPending && <p className="text-base text-[var(--color-muted)]">{t('result.loading')}</p>}
-            {vinDetail.isError && <p className="text-base text-[var(--color-muted)]">{t('result.error')}</p>}
-            {vinDetail.isSuccess && <VinDecodeTabs data={vinDetail.data} />}
-          </VinToggleSection>
-        )}
-
-        <FuelEconomy brand={c.brand} model={c.model} year={c.makeYear} fuel={c.fuel} capacity={c.capacity} />
         <SafetyRatings brand={c.brand} model={c.model} year={c.makeYear} body={c.body} />
+        <FuelEconomy brand={c.brand} model={c.model} year={c.makeYear} fuel={c.fuel} capacity={c.capacity} />
+        <CarWikiInfo wiki={wiki} hasQuery={hasWikiQuery} />
         <VehiclePhotos brand={c.brand} model={c.model} year={c.makeYear} />
         <NearbyServices brand={c.brand} />
       </Card>
