@@ -436,3 +436,27 @@ export const ingestedResources = registry.table('ingested_resources', {
   rowCount: integer('row_count')
 })
 export type IngestedResourceRow = typeof ingestedResources.$inferSelect
+
+/**
+ * Per-(brand, model, make year) passenger-car counts joined with the combined crash score of the NCAP-style ratings
+ * that apply to them — backs the /safety statistics page. Rebuilt by `scripts/src/safety-stats.ts`; see
+ * migrations/0019_stats_safety.sql.
+ */
+export const statsSafety = registry.table(
+  'stats_safety',
+  {
+    brand: text('brand').notNull(),
+    model: text('model').notNull(),
+    makeYear: integer('make_year').notNull(),
+    n: integer('n').notNull(),
+    score: real('score'),
+    sources: smallint('sources').notNull().default(0),
+    euroncapScore: real('euroncap_score'),
+    jncapScore: real('jncap_score'),
+    cncapScore: real('cncap_score'),
+    kncapScore: real('kncap_score'),
+    iihsScore: real('iihs_score')
+  },
+  t => [index('ix_stats_safety_year').on(t.makeYear), index('ix_stats_safety_brand').on(t.brand)]
+)
+export type StatsSafetyInsert = typeof statsSafety.$inferInsert

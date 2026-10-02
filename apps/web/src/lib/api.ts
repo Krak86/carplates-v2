@@ -5,6 +5,7 @@ import {
   euroNcapRatingsResponseSchema,
   fuelEconomyResponseSchema,
   fuelStatsResponseSchema,
+  safetyStatsResponseSchema,
   iihsRatingsResponseSchema,
   jncapRatingsResponseSchema,
   kncapRatingsResponseSchema,
@@ -27,6 +28,7 @@ import type {
   EuroNcapRatingsResponse,
   FuelEconomyResponse,
   FuelStatsResponse,
+  SafetyStatsResponse,
   IihsRatingsResponse,
   JncapRatingsResponse,
   KncapRatingsResponse,
@@ -180,6 +182,10 @@ export async function getFuelEconomy({
   if (fuel) params.set('fuel', fuel)
   if (capacity) params.set('capacity', String(capacity))
   return fuelEconomyResponseSchema.parse(await getJson(`/api/fuel?${params.toString()}`))
+}
+
+export async function getSafetyStats(): Promise<SafetyStatsResponse> {
+  return safetyStatsResponseSchema.parse(await getJson('/api/safety/stats'))
 }
 
 export async function getFuelStats(): Promise<FuelStatsResponse> {

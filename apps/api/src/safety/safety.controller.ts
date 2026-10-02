@@ -18,6 +18,8 @@ import { KncapRatingsDto } from './kncap.dto.js'
 import { KncapService } from './kncap.service.js'
 import { SafetyRatingsDto } from './safety.dto.js'
 import { SafetyService } from './safety.service.js'
+import { SafetyStatsDto } from './safety-stats.dto.js'
+import { SafetyStatsService } from './safety-stats.service.js'
 import { SafetyVideoService } from './safety-video.service.js'
 
 const querySchema = z.object({
@@ -40,7 +42,8 @@ export class SafetyController {
     @Inject(JncapService) private readonly jncapService: JncapService,
     @Inject(CncapService) private readonly cncapService: CncapService,
     @Inject(KncapService) private readonly kncapService: KncapService,
-    @Inject(IihsService) private readonly iihsService: IihsService
+    @Inject(IihsService) private readonly iihsService: IihsService,
+    @Inject(SafetyStatsService) private readonly safetyStatsService: SafetyStatsService
   ) {}
 
   @Get()
@@ -100,6 +103,13 @@ export class SafetyController {
   @ApiOkResponse({ type: IihsRatingsDto })
   iihsRatings(@Query(zodParam(querySchema)) query: z.infer<typeof querySchema>): Promise<IihsRatingsDto> {
     return this.iihsService.ratings(query.make, query.model, query.year)
+  }
+
+  // Rollup for the /safety page, rebuilt by `pnpm db:refresh-safety-stats` — see safety-stats.service.ts.
+  @Get('stats')
+  @ApiOkResponse({ type: SafetyStatsDto })
+  stats(): Promise<SafetyStatsDto> {
+    return this.safetyStatsService.get()
   }
 
   // Binary stream, not a Zod DTO response — the one exception to "no @Res()" (see SpaController).

@@ -1,60 +1,14 @@
 import { Inject, Injectable } from '@nestjs/common'
 import { euroncapRatings } from '@carplates/db'
 import type { EuroncapRatingRow } from '@carplates/db'
-import { makeKey, modelKey } from '@carplates/shared'
+import { brandCandidateKey, makeKey, modelKey } from '@carplates/shared'
 import type { EuroNcapRating, EuroNcapRatingsResponse } from '@carplates/shared'
 import { and, desc, eq, sql } from 'drizzle-orm'
 
 import { DbService } from '../db/db.service.js'
 
-// Mazda's own Euro NCAP model slug is "mazda2"/"mazda3"/"mazda6" — the Ukrainian registry
-// (and a bare VIN decode) gives just the digit, mirroring the same quirk in safety.service.ts.
-const MAZDA_NUMERIC_MODELS = new Set(['2', '3', '5', '6'])
-
-// BMW's registry model text is a trim/engine code ("320D", "520I", "730D"), while Euro NCAP
-// names by chassis series ("3 Series"). The leading digit is BMW's own series identifier.
-const BMW_SERIES_RE = /^([1-8])\d{2}/
-
-// Mercedes-Benz's registry model text is likewise a trim code ("E 200", "ML 350"), while
-// Euro NCAP names by class. Current classes are a single leading letter (matched generically
-// below); legacy nameplates since renamed/consolidated need an explicit alias. Multi-letter
-// codes (gl/glk/ml) are matched on the WHOLE leading letter-run, never a shorter prefix of
-// it — "gl" must not fire on "GLE 350D" (whose run is "gle"), only on "GL 450" (run "gl"
-// exactly) — otherwise GLA/GLB/GLC/GLE/GLS would misresolve to G-Class or GL-Class.
-const MERCEDES_LEADING_LETTERS_RE = /^([a-z]+)\d/
-const MERCEDES_CLASS_ALIASES: Readonly<Record<string, string>> = {
-  a: 'aclass',
-  b: 'bclass',
-  c: 'cclass',
-  e: 'eclass',
-  g: 'gclass',
-  t: 'tclass',
-  x: 'xclass',
-  gl: 'gls', // GL-Class -> GLS-Class (2016 rename)
-  glk: 'glc', // GLK-Class -> GLC-Class (2015 rename)
-  ml: 'gle' // ML-Class -> GLE-Class (2015 rename)
-}
-
-/**
- * A second lookup key to retry when the direct make/model match misses — for brands whose
- * registry model text is a trim/engine code rather than the series/class name Euro NCAP
- * indexes by. Exported standalone so this can be unit tested without a DB.
- */
-export function brandCandidateKey(mk: string, mdl: string): string | null {
-  if (mk === 'mazda' && MAZDA_NUMERIC_MODELS.has(mdl)) return `mazda${mdl}`
-
-  if (mk === 'bmw') {
-    const m = BMW_SERIES_RE.exec(mdl)
-    return m ? `${m[1]}series` : null
-  }
-
-  if (mk === 'mercedesbenz') {
-    const letters = MERCEDES_LEADING_LETTERS_RE.exec(mdl)?.[1]
-    return letters ? (MERCEDES_CLASS_ALIASES[letters] ?? null) : null
-  }
-
-  return null
-}
+// Lives in @carplates/shared (the stats script needs it too); re-exported so existing imports keep working.
+export { brandCandidateKey }
 
 function toRating(row: EuroncapRatingRow): EuroNcapRating {
   return {

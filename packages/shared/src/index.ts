@@ -23,7 +23,23 @@ export { VEHICLE_FUELS, resolveFuelCategories, fuelKeyword, type VehicleFuel } f
 export { brandLogoUrl, brandSlug } from './brandLogo.js'
 export { dealerUrl } from './dealerUrl.js'
 export { wikiUrl, wikiDomain } from './wikiUrl.js'
-export { makeKey, modelKey } from './vehicleKey.js'
+export { makeKey, modelKey, brandCandidateKey } from './vehicleKey.js'
+export {
+  CRASH_SOURCES,
+  CRASH_BANDS,
+  euroncapScore,
+  jncapScore,
+  cncapScore,
+  kncapScore,
+  iihsScore,
+  matchRatingRows,
+  applicableCrashScore,
+  combineCrashScores,
+  crashBand,
+  type CrashSource,
+  type CrashBand,
+  type ScoredRating
+} from './crashScore.js'
 export {
   MAX_YEAR_GAP,
   CAPACITY_TOLERANCE,
@@ -77,6 +93,10 @@ export {
   fuelStatsRowSchema,
   fuelStatsModelSchema,
   fuelStatsResponseSchema,
+  safetyStatsRowSchema,
+  safetyStatsModelSchema,
+  safetyStatsSourceSchema,
+  safetyStatsResponseSchema,
   statsMetricsSchema,
   statsByYearRowSchema,
   statsByRegionRowSchema,
@@ -129,6 +149,10 @@ export {
   type FuelStatsRow,
   type FuelStatsModel,
   type FuelStatsResponse,
+  type SafetyStatsRow,
+  type SafetyStatsModel,
+  type SafetyStatsSource,
+  type SafetyStatsResponse,
   type StatsMetrics,
   type StatsByYearRow,
   type StatsByRegionRow,

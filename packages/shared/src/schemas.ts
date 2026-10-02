@@ -645,3 +645,46 @@ export const fuelStatsResponseSchema = z.object({
   bandWidth: z.number().int()
 })
 export type FuelStatsResponse = z.infer<typeof fuelStatsResponseSchema>
+
+// Crash-rating statistics (/safety page) — see crashScore.ts for how the five sources are combined.
+export const safetyStatsRowSchema = z.object({
+  label: z.string(),
+  n: z.number().int(),
+  /** Cars in this row that have at least one crash rating. */
+  matched: z.number().int(),
+  avgScore: z.number().nullable()
+})
+export type SafetyStatsRow = z.infer<typeof safetyStatsRowSchema>
+
+export const safetyStatsModelSchema = z.object({
+  brand: z.string(),
+  model: z.string(),
+  n: z.number().int(),
+  avgScore: z.number(),
+  /** Most sources any generation of this model was rated by (1–5). */
+  sources: z.number().int()
+})
+export type SafetyStatsModel = z.infer<typeof safetyStatsModelSchema>
+
+export const safetyStatsSourceSchema = z.object({
+  source: z.enum(['euroncap', 'jncap', 'cncap', 'kncap', 'iihs']),
+  /** Cars with a rating from this source. */
+  matched: z.number().int(),
+  avgScore: z.number().nullable()
+})
+export type SafetyStatsSource = z.infer<typeof safetyStatsSourceSchema>
+
+export const safetyStatsResponseSchema = z.object({
+  total: z.number().int(),
+  matched: z.number().int(),
+  fleetAvgScore: z.number().nullable(),
+  byYear: z.array(safetyStatsRowSchema),
+  byBrand: z.array(safetyStatsRowSchema),
+  bySource: z.array(safetyStatsSourceSchema),
+  safestModels: z.array(safetyStatsModelSchema),
+  leastSafeModels: z.array(safetyStatsModelSchema),
+  /** Rated cars per score band: `from` (inclusive) to `from + bandWidth`. */
+  distribution: z.array(z.object({ from: z.number().int(), n: z.number().int() })),
+  bandWidth: z.number().int()
+})
+export type SafetyStatsResponse = z.infer<typeof safetyStatsResponseSchema>

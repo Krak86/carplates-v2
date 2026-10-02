@@ -23,6 +23,7 @@ export {
   iihsRatings,
   fuelEconomy,
   statsFuel,
+  statsSafety,
   type RegistrationRow,
   type RegistrationInsert,
   type IngestedResourceRow,
@@ -38,7 +39,8 @@ export {
   type IihsRatingInsert,
   type FuelEconomyRow,
   type FuelEconomyInsert,
-  type StatsFuelInsert
+  type StatsFuelInsert,
+  type StatsSafetyInsert
 } from './schema.js'
 export {
   createDb,

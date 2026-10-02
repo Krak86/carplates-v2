@@ -27,6 +27,7 @@
     "ingest:fuel:csv": "tsx src/fuel-economy.ts --from-csv seed-data/fuel-economy.csv.gz",
     "export:fuel:csv": "tsx src/fuel-economy.ts --export-csv seed-data/fuel-economy.csv.gz",
     "refresh-fuel-stats": "tsx src/fuel-stats.ts",
+    "refresh-safety-stats": "tsx src/safety-stats.ts",
     "type-check": "tsc",
     "test": "vitest run"
   },

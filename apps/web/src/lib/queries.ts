@@ -8,6 +8,7 @@ import {
   getEuroNcapRatings,
   getFuelEconomy,
   getFuelStats,
+  getSafetyStats,
   getIihsRatings,
   getJncapRatings,
   getKncapRatings,
@@ -178,6 +179,15 @@ export function fuelStatsQuery() {
   return queryOptions({
     queryKey: ['fuel-stats'],
     queryFn: getFuelStats,
+    staleTime: Infinity
+  })
+}
+
+// Fleet-wide combined crash-rating rollup for the /safety page — online-only, like fuelStatsQuery.
+export function safetyStatsQuery() {
+  return queryOptions({
+    queryKey: ['safety-stats'],
+    queryFn: getSafetyStats,
     staleTime: Infinity
   })
 }
