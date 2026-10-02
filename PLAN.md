@@ -437,6 +437,9 @@ above once scoped, or dropped if research says no.
 - ✅ **Fuel economy & emissions (CO2 score + icon)** — built 2026-10-02 (EPA + EEA, result-card badge, /fuel stats page); tuning left.
   See "Fuel economy & emissions" below.
 
+- ✅ **Year-aware hero image** (2026-10-02) — Wikimedia Commons search by brand/model/year, per-kind placeholder when
+  no photo. Open: pick the default via `WIKI_IMAGE_SOURCE` after A/B comparing `?source=commons|wiki` on real plates.
+
 ### Wanted vehicles ingest — planned (2026-10-01), not started
 
 Source: data.gov.ua dataset `ac1a3a9d-512b-446b-9b0c-1383d38ce474` (National
@@ -498,6 +501,9 @@ collapsed "Show emissions" section on the result card; `GET /api/fuel/stats` + `
 scale should be tuned once; cars built before ~2007 can only match US-spec EPA rows (artificial cliff on the /fuel
 by-year chart) — an EEA-independent older source (UK VCA, NRCan) would fix it; VinResult has no emissions section;
 Soviet/Daewoo/ZAZ models have no source at all; reference links live in `CO2Badge.helpers.ts`.
+**Also shipped 2026-10-02** (details in `docs/plan-done.md`): WLTP/EEA/EPA explainer, expandable cleanest/dirtiest
+lists, `/api/stats` split into `/top` + `/field/:dimension`, fuel/crash-test ranking chips on the result card, `/safety`
+combined crash-rating page.
 
 Sources (all free, no key; licence terms not re-verified — check before building):
 

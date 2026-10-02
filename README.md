@@ -10,6 +10,10 @@ Ukrainian vehicle lookup by **plate number** or **VIN**. Rebuild of
   [JNCAP](https://www.nasva.go.jp/mamoru/en/) (scraped, JDM-domestic) · [C-NCAP](https://www.c-ncap.org.cn)
   (scraped, China-market) · [KNCAP](https://www.kncap.org) (scraped, Korea-market) ·
   [IIHS](https://www.iihs.org) (scraped, US, insurance-industry-funded)
+- Fuel economy / CO2 reference data: [EPA](https://www.fueleconomy.gov) (US) + [EEA](https://www.eea.europa.eu) (EU, WLTP/NEDC)
+  → `registry.fuel_economy`, shown as a badge on the result card and on `/fuel`; `/safety` ranks all crash-test sources
+- Result-card hero photo: year-aware Wikimedia Commons search (falls back to the Wikipedia lead image, then a per-kind placeholder)
+- Light/dark theme, AR plate scan and photo search, link previews for shared plate/VIN URLs
 - Installable PWA with offline mode: recent results, history and favorites stay available without a connection
 
 pnpm monorepo · Node 24 · React 19 + Vite 8 · NestJS 11 + Fastify · Drizzle + Postgres 18.
@@ -145,7 +149,9 @@ See [CLAUDE.md](CLAUDE.md) for conventions and [PLAN.md](PLAN.md) for the roadma
 `pnpm ingest:cncap · ingest:cncap:csv · export:cncap:csv` ·
 `pnpm ingest:kncap · ingest:kncap:csv · export:kncap:csv` ·
 `pnpm ingest:iihs · ingest:iihs:csv · export:iihs:csv` ·
-`pnpm ingest:ratings:csv · ingest:all`
+`pnpm ingest:fuel · ingest:fuel:csv · export:fuel:csv · db:refresh-fuel-stats` ·
+`pnpm ingest:ratings:csv · ingest:all` ·
+`pnpm --filter scripts build:kind-images` (re-encode `apps/web/assets-src/kind/*.jpg` → `public/kind/*.webp`)
 
 ## License
 

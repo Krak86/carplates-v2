@@ -1632,3 +1632,36 @@ detail/{id}` from 1-290 not already known — zero additional real pages
     `pnpm build`, set `WEB_DIST_DIR=../web/dist` in `apps/api/.env`, restart the API, open `localhost:3000/<plate>`
     in Incognito (an old service worker serves a cached `index.html`). Keep `PORT` at 3000 — the Vite proxy
     targets it. Covered by `spa.controller.test.ts` (no server needed).
+
+- **Dark mode + photo/AR polish ✅ DONE (2026-10-01)** — dark theme follows the system preference, with a persisted
+  toggle and a no-flash init script; brand logos made visible on dark. AR scan: pinch zoom, bigger video, overlay
+  settings, "found plates" pill. Photo search: polish, stacked-plate reorder, GPS fix.
+
+- **Fuel/CO2 follow-ups, `/safety`, result-card and search polish ✅ DONE (2026-10-02)** — the fuel design and open
+  items stay in PLAN.md ("Fuel economy & emissions").
+  - **Fuel/CO2**: explains WLTP/EEA/EPA with per-language wiki links; similar vehicles and `/fuel` models link to
+    advanced search; cleanest/dirtiest lists expand 5 → 15 and also show on the homepage; About lists both sources.
+  - **`/safety`** (`SafetyStatsRoute.tsx`): combined crash-rating stats across Euro NCAP, JNCAP, C-NCAP, KNCAP, IIHS.
+    `/fuel` and `/safety` tabs are URL-addressable via `?tab=`, like `/stats ?dim=`.
+  - **Stats perf**: `/api/stats` split into a light `/api/stats/top` and per-dimension `/api/stats/field/:dimension`;
+    `/top` also feeds the fuel and crash-test ranking chips on the result card.
+  - **Result card**: collapsible basic data; share deep links for basic, emissions and nearby sections; wiki hero
+    image reserves its height with a skeleton; tilt toggle and animated vehicle icon hidden on mobile; globe icon on
+    the official-site link.
+  - **Search page**: "+" advanced toggle, inline clear icon, collapsible/consolidated photo warnings, animated
+    notices, clearer list labels, shared quick-links footer.
+  - **Brand logos**: 38 more (ZEEKR, JAC, FAW, TATA, МАЗ, GMC, …) in `packages/shared/src/brandLogo.ts`;
+    Favorites/History rows show the logo (`brandFromLabel` recovers the brand from the stored label).
+  - **Car export** (docx/pdf/md): Emissions section, Wikipedia lead image and brand logo; filename
+    `brand_model_year_plate_vin_YYYYMMDDHHmmss`.
+
+- **Year-aware hero image + kind placeholder ✅ DONE (2026-10-02)**
+  - **API** (`/api/wiki`, `commons-image.ts`): searches Wikimedia Commons for "<brand> <model>" + model year and ranks
+    results (landscape jpeg, standalone year, exterior over detail shots), so an older car gets its own generation's
+    photo instead of the article's newest lead image; falls back to the lead image. Accepts `?year=` and
+    `?source=commons|wiki`; the default is the `WIKI_IMAGE_SOURCE` env var (`commons`). An article whose title lacks
+    the model counts as not found (free-text search once returned a person's article for "SCHMITZ S 01").
+  - **Web**: with no photo, the hero slot shows a greyscale, blurred per-kind photo (`VehicleKindPlaceholder.tsx`)
+    with the kind name and "No photo available"; special/undetermined reuse the specialized photo. Runtime-cached,
+    not precached. `pnpm --filter scripts build:kind-images` (sharp) turns `assets-src/kind/*.jpg` into
+    `public/kind/*.webp` (8.3 MB → 1.3 MB) — rerun after changing a source photo.
