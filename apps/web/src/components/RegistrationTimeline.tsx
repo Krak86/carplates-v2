@@ -69,7 +69,7 @@ export default function RegistrationTimeline({ actions, currentPlate, currentVeh
                   ) : action.plate === currentPlate ? (
                     action.plate
                   ) : (
-                    <Link to={`/${action.plate}`} className="text-[var(--color-primary)] underline">
+                    <Link viewTransition to={`/${action.plate}`} className="text-[var(--color-primary)] underline">
                       {action.plate}
                     </Link>
                   )}

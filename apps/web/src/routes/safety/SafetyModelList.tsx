@@ -34,6 +34,7 @@ export default function SafetyModelList({ title, models }: Props): ReactNode {
             <span className="w-5 text-right text-[var(--color-muted)] tabular-nums">{i + 1}</span>
             <BrandLogo brand={m.brand} size="sm" />
             <Link
+              viewTransition
               to={`/advanced-search?${new URLSearchParams({ brand: m.brand, model: m.model })}`}
               className="min-w-0 flex-1 truncate text-[var(--color-primary)]"
             >

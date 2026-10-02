@@ -155,3 +155,107 @@ body {
     animation: none;
   }
 }
+
+/* Route transitions (View Transitions API). Links/navigate() opt in via `viewTransition`.
+   Layout sets <html data-vt-dir="forward|back"> (see lib/view-transition.ts) from route depth.
+   Named elements are lifted out of the `page` snapshot and animate on their own:
+   - header: held still
+   - search field / vehicle hero / vehicle card: shared elements, morph position + size between routes
+     (a history/favorites row is named `vehicle-card` at click time, so it morphs into the result card)
+   - section-vt: `match-element` + view-transition-class, so each block fades/slides independently
+   Everything else (background photos, sidebar) stays in the default `root` crossfade. */
+:root {
+  --vt-shift: 24px;
+}
+
+:root[data-vt-dir='back'] {
+  --vt-shift: -24px;
+}
+
+.header-vt {
+  view-transition-name: site-header;
+}
+
+.page-vt {
+  view-transition-name: page;
+}
+
+.search-vt {
+  view-transition-name: search-field;
+}
+
+.hero-vt {
+  view-transition-name: vehicle-hero;
+}
+
+.card-vt {
+  view-transition-name: vehicle-card;
+}
+
+.section-vt {
+  view-transition-name: match-element;
+  view-transition-class: vt-section;
+}
+
+@keyframes vt-slide-out {
+  to {
+    opacity: 0;
+    transform: translateX(calc(var(--vt-shift) * -1));
+  }
+}
+
+@keyframes vt-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(var(--vt-shift));
+  }
+}
+
+::view-transition-old(page),
+::view-transition-old(*.vt-section) {
+  animation: vt-slide-out 150ms ease-in both;
+}
+
+::view-transition-new(page) {
+  animation: vt-slide-in 250ms ease-out 100ms both;
+}
+
+::view-transition-new(*.vt-section) {
+  animation: vt-slide-in 300ms ease-out 150ms both;
+}
+
+/* Header is identical on every route — no crossfade, just hold it in place. */
+::view-transition-group(site-header) {
+  animation-duration: 0s;
+}
+
+::view-transition-old(site-header) {
+  display: none;
+}
+
+::view-transition-new(site-header) {
+  animation: none;
+}
+
+::view-transition-group(search-field),
+::view-transition-group(vehicle-hero),
+::view-transition-group(vehicle-card) {
+  animation-duration: 350ms;
+  animation-timing-function: ease-in-out;
+}
+
+/* Photo morph: keep the crop instead of stretching the old snapshot to the new box. */
+::view-transition-old(vehicle-hero),
+::view-transition-new(vehicle-hero) {
+  height: 100%;
+  object-fit: cover;
+  overflow: clip;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}

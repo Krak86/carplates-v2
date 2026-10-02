@@ -255,7 +255,7 @@ export default function SearchRoute(): ReactNode {
           {stats.data && (
             <LoadErrorBoundary compact>
               <Suspense fallback={null}>
-                <div className="w-full max-w-6xl">
+                <div className="section-vt w-full max-w-6xl">
                   <TopStatsPanel stats={stats.data} />
                 </div>
               </Suspense>
@@ -267,7 +267,7 @@ export default function SearchRoute(): ReactNode {
           {fuelStats.data && (
             <LoadErrorBoundary compact>
               <Suspense fallback={null}>
-                <div className="w-full max-w-6xl">
+                <div className="section-vt w-full max-w-6xl">
                   <FuelModelsPanel stats={fuelStats.data} />
                 </div>
               </Suspense>
@@ -279,7 +279,7 @@ export default function SearchRoute(): ReactNode {
           {safetyStats.data && (
             <LoadErrorBoundary compact>
               <Suspense fallback={null}>
-                <div className="w-full max-w-6xl">
+                <div className="section-vt w-full max-w-6xl">
                   <SafetyModelsPanel stats={safetyStats.data} />
                 </div>
               </Suspense>

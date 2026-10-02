@@ -49,6 +49,7 @@ export default function ArPlateCard({ plate, auto, onNavigate }: Props): ReactNo
             </>
           )}
           <Link
+            viewTransition
             to={`/${encodeURIComponent(plate)}`}
             onClick={onNavigate}
             className="mt-1 inline-block text-[var(--color-primary)] hover:underline"

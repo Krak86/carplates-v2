@@ -24,6 +24,7 @@ export default function QuickLinks(): ReactNode {
         <div key={row[0].to} className="flex flex-wrap justify-center gap-3">
           {row.map(link => (
             <Link
+              viewTransition
               key={link.to}
               to={link.to}
               className="flex items-center gap-1.5 rounded-full bg-[var(--color-surface)]/20 px-3 py-1 text-sm text-[var(--color-primary)]"

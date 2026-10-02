@@ -135,7 +135,7 @@ export default function CO2Badge({
         <span className="text-[var(--color-muted)]">
           {t('co2.cycleNote', { cycle })} ·{' '}
           {similarHref ? (
-            <Link to={similarHref} className="text-[var(--color-primary)] underline hover:no-underline">
+            <Link viewTransition to={similarHref} className="text-[var(--color-primary)] underline hover:no-underline">
               {t('co2.similar')}
             </Link>
           ) : (

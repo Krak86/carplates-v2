@@ -26,6 +26,7 @@ function ResultRow({ row }: { row: SearchResultRow }): ReactNode {
 
   return (
     <Link
+      viewTransition
       to={`/${row.plate}`}
       className="-mx-4 flex items-center justify-between gap-3 px-4 py-2.5 transition-colors hover:bg-[var(--color-border)]/40"
     >

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 
 import CameraZoomControl from '@/components/CameraZoomControl'
@@ -85,8 +86,10 @@ export default function CameraCaptureDialog({ open, onClose, onCapture }: Props)
 
   if (!open) return null
 
-  return (
-    <div className="fixed inset-0 z-30 flex items-center justify-center bg-black/50 sm:p-4" role="dialog" aria-modal>
+  // Portaled: view-transition-named ancestors (<main>, search field, card) are stacking contexts and
+  // transformed ancestors are `fixed` containing blocks — inline, this sat under the header and stats panels.
+  return createPortal(
+    <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/50 sm:p-4" role="dialog" aria-modal>
       {/* Phones: full-screen black viewfinder with a round shutter; larger screens: a card. */}
       <div className="relative flex h-dvh w-full flex-col bg-black text-white sm:h-auto sm:max-w-lg sm:overflow-hidden sm:rounded-xl">
         <div className="absolute inset-x-0 top-0 z-10 flex items-center justify-between bg-linear-to-b from-black/70 to-transparent p-4 pt-[max(1rem,env(safe-area-inset-top))] sm:static sm:bg-none">
@@ -131,6 +134,7 @@ export default function CameraCaptureDialog({ open, onClose, onCapture }: Props)
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }

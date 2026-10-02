@@ -33,6 +33,7 @@ export default function TopStatBadges({ brand, model, color, region }: Props): R
     <div className="mt-1 flex flex-col gap-1.5 sm:flex-row sm:flex-wrap">
       {badges.map(badge => (
         <Link
+          viewTransition
           key={badge.key}
           to={badge.to}
           className="flex w-full items-center gap-1 rounded-full border border-[var(--color-border)] bg-[var(--color-surface)]/20 px-2 py-0.5 text-xs text-[var(--color-fg)] transition-colors hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] sm:inline-flex sm:w-auto"

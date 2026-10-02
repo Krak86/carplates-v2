@@ -39,11 +39,11 @@ export default function SearchField({
   const handleSubmit = (e: FormEvent): void => {
     e.preventDefault()
     const q = value.trim()
-    if (q) navigate(`/${encodeURIComponent(q)}`)
+    if (q) navigate(`/${encodeURIComponent(q)}`, { viewTransition: true })
   }
 
   return (
-    <div className="flex w-full max-w-2xl flex-col gap-1">
+    <div className="search-vt flex w-full max-w-2xl flex-col gap-1">
       <form onSubmit={handleSubmit} className="flex gap-2">
         <div className="group relative min-w-0 flex-1">
           <button
@@ -125,7 +125,11 @@ export default function SearchField({
         )}
       >
         <div className="min-h-0 overflow-hidden">
-          <Link to="/advanced-search" className="text-sm text-[var(--color-primary)] underline hover:no-underline">
+          <Link
+            viewTransition
+            to="/advanced-search"
+            className="text-sm text-[var(--color-primary)] underline hover:no-underline"
+          >
             {t('advancedSearch.viewLink')}
           </Link>
         </div>

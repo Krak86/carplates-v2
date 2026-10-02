@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { KeyboardEvent, MouseEvent, PointerEvent, ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import type { PlateCandidate } from '@carplates/shared'
 
@@ -129,8 +130,10 @@ export default function PhotoZoomDialog({ url, candidates, active, onClose }: Pr
   const buttonClass =
     'flex h-9 w-9 items-center justify-center rounded-full bg-black/60 text-lg text-white hover:bg-black/80'
 
-  return (
-    <div className="fixed inset-0 z-30 bg-black/90" role="dialog" aria-modal aria-label={t('photo.zoomTitle')}>
+  // Portaled: view-transition-named ancestors (<main>, search field, card) are stacking contexts and
+  // transformed ancestors are `fixed` containing blocks — inline, this sat under the header and stats panels.
+  return createPortal(
+    <div className="fixed inset-0 z-40 bg-black/90" role="dialog" aria-modal aria-label={t('photo.zoomTitle')}>
       <div
         ref={viewportRef}
         tabIndex={-1}
@@ -191,6 +194,7 @@ export default function PhotoZoomDialog({ url, candidates, active, onClose }: Pr
       <p className="pointer-events-none absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full bg-black/60 px-3 py-1 text-xs text-white">
         {t('photo.zoomHint')}
       </p>
-    </div>
+    </div>,
+    document.body
   )
 }

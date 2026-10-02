@@ -163,6 +163,12 @@ Vitest 4 · ESLint 10 (flat config)
 - **After each big update** (a feature, a bug fix, a batch of related
   changes), provide a suggested commit message — don't run `git commit` or
   `git push` yourself unless explicitly asked to.
+- **The message covers everything uncommitted, not just the latest update.**
+  Check `git status`/`git diff --stat` and, when several updates have piled up
+  since the last commit, give one message summarizing all of them (a subject line
+  plus a bullet per change) — or a separate message per logical change if they
+  should be split into several commits. Never describe only the most recent edit
+  while earlier uncommitted work is left out.
 
 ## Rules
 

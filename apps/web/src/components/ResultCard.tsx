@@ -105,7 +105,7 @@ export default function ResultCard({ data }: Props): ReactNode {
   }, [isSharedBasic])
 
   return (
-    <div className="relative w-full max-w-2xl">
+    <div className="card-vt relative w-full max-w-2xl">
       {/* Wide viewports have room beside the card — float the toggle out there instead
           of stacking it above, which otherwise pushes the card down for no reason. */}
       <CardTiltToggle className="absolute top-3 -right-14 hidden lg:inline-flex" />
@@ -192,7 +192,7 @@ export default function ResultCard({ data }: Props): ReactNode {
               />
             </div>
             <div className="text-base text-[var(--color-muted)]">
-              <Link to={`/${data.plate}`} className="text-[var(--color-primary)] underline">
+              <Link viewTransition to={`/${data.plate}`} className="text-[var(--color-primary)] underline">
                 {data.plate}
               </Link>
               <CopyButton text={data.plate} label={t('field.plate')} className="ml-1" />
@@ -334,7 +334,11 @@ export default function ResultCard({ data }: Props): ReactNode {
                 value={
                   c.vin ? (
                     <span className="inline-flex items-center gap-1">
-                      <Link to={`/${c.vin}`} className="inline-flex items-center gap-1 text-[var(--color-primary)]">
+                      <Link
+                        viewTransition
+                        to={`/${c.vin}`}
+                        className="inline-flex items-center gap-1 text-[var(--color-primary)]"
+                      >
                         <span className="underline">{c.vin}</span>
                         <span aria-hidden className="no-underline">
                           ›

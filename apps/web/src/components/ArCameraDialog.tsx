@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 
 import ArCameraSettings from '@/components/ArCameraSettings'
@@ -82,8 +83,10 @@ export default function ArCameraDialog({ onClose }: Props): ReactNode {
     resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
-  return (
-    <div className="fixed inset-0 z-30 flex items-center justify-center bg-black/50 sm:p-4" role="dialog" aria-modal>
+  // Portaled: view-transition-named ancestors (<main>, search field, card) are stacking contexts and
+  // transformed ancestors are `fixed` containing blocks — inline, this sat under the header and stats panels.
+  return createPortal(
+    <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/50 sm:p-4" role="dialog" aria-modal>
       {/* Full screen on phones (portrait leaves lots of room under the video for info); a card on larger screens. */}
       <div className="flex h-full w-full flex-col overflow-y-auto bg-surface p-4 sm:h-auto sm:max-h-full sm:max-w-lg sm:rounded-xl">
         <div className="mb-3 flex items-center justify-between">
@@ -138,6 +141,7 @@ export default function ArCameraDialog({ onClose }: Props): ReactNode {
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }

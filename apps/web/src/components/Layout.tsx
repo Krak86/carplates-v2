@@ -1,4 +1,4 @@
-import { Suspense, lazy, useEffect, useState } from 'react'
+import { Suspense, lazy, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useLocation } from 'react-router'
@@ -11,6 +11,7 @@ import PwaUpdatePrompt from '@/components/PwaUpdatePrompt'
 import QuickLinks from '@/components/QuickLinks'
 import { useHeaderVehicleLabel } from '@/components/use-header-vehicle-label'
 import { cn } from '@/lib/cn'
+import { setTransitionDirection } from '@/lib/view-transition'
 import { useUiStore } from '@/store/ui-store'
 
 const Sidebar = lazy(() => import('@/components/Sidebar'))
@@ -29,6 +30,13 @@ export default function Layout({ children }: Props): ReactNode {
   // the first open, then keep mounted so close gets a transition instead of a hard unmount.
   const [hasOpened, setHasOpened] = useState(false)
 
+  const prevPathname = useRef(pathname)
+
+  useLayoutEffect(() => {
+    setTransitionDirection(prevPathname.current, pathname)
+    prevPathname.current = pathname
+  }, [pathname])
+
   // Following a plate/VIN link otherwise keeps the old scroll offset — land on the new result's top.
   useEffect(() => {
     window.scrollTo({ top: 0 })
@@ -42,7 +50,7 @@ export default function Layout({ children }: Props): ReactNode {
     <div className="flex min-h-full flex-col">
       <BackgroundPhotos />
       <BackgroundDevPanel />
-      <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-[var(--color-border)] bg-[var(--color-bg)]/50 px-4 py-3 backdrop-blur-md">
+      <header className="header-vt sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-[var(--color-border)] bg-[var(--color-bg)]/50 px-4 py-3 backdrop-blur-md">
         <button
           type="button"
           aria-label="menu"
@@ -51,7 +59,7 @@ export default function Layout({ children }: Props): ReactNode {
         >
           ☰
         </button>
-        <Link to="/" className="shrink-0 text-lg font-semibold">
+        <Link viewTransition to="/" className="shrink-0 text-lg font-semibold">
           {t('app.title')}
         </Link>
         {vehicleLabel && <span className="min-w-0 truncate text-sm text-[var(--color-muted)]">{vehicleLabel}</span>}
@@ -85,7 +93,7 @@ export default function Layout({ children }: Props): ReactNode {
             </div>
           </>
         )}
-        <main className="min-w-0 flex-1 p-4 md:p-8">{children}</main>
+        <main className="page-vt min-w-0 flex-1 p-4 md:p-8">{children}</main>
       </div>
 
       <QuickLinks />

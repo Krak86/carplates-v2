@@ -26,31 +26,31 @@ export default function Sidebar(): ReactNode {
 
   return (
     <nav className="flex h-full w-64 flex-col gap-1 border-r border-[var(--color-border)] bg-[var(--color-bg)]/50 p-3 backdrop-blur-md">
-      <NavLink to="/" className={linkClass} end>
+      <NavLink viewTransition to="/" className={linkClass} end>
         <span aria-hidden>🔍</span> {t('nav.search')}
       </NavLink>
-      <NavLink to="/advanced-search" className={linkClass}>
+      <NavLink viewTransition to="/advanced-search" className={linkClass}>
         <span aria-hidden>🧭</span> {t('nav.advancedSearch')}
       </NavLink>
-      <NavLink to="/about" className={linkClass}>
+      <NavLink viewTransition to="/about" className={linkClass}>
         <span aria-hidden>ℹ️</span> {t('nav.about')}
       </NavLink>
-      <NavLink to="/history" className={linkClass}>
+      <NavLink viewTransition to="/history" className={linkClass}>
         <span aria-hidden>🕘</span> {t('nav.history')}
       </NavLink>
-      <NavLink to="/favorites" className={linkClass}>
+      <NavLink viewTransition to="/favorites" className={linkClass}>
         <span aria-hidden>⭐</span> {t('nav.favorites')}
       </NavLink>
-      <NavLink to="/stats" className={linkClass}>
+      <NavLink viewTransition to="/stats" className={linkClass}>
         <span aria-hidden>📊</span> {t('nav.stats')}
       </NavLink>
-      <NavLink to="/fuel" className={linkClass}>
+      <NavLink viewTransition to="/fuel" className={linkClass}>
         <span aria-hidden>🌿</span> {t('nav.fuel')}
       </NavLink>
-      <NavLink to="/safety" className={linkClass}>
+      <NavLink viewTransition to="/safety" className={linkClass}>
         <span aria-hidden>🛡️</span> {t('nav.safety')}
       </NavLink>
-      <NavLink to="/discuss" className={linkClass}>
+      <NavLink viewTransition to="/discuss" className={linkClass}>
         <span aria-hidden>💬</span> {t('nav.discuss')}
       </NavLink>
 
