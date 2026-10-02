@@ -103,6 +103,7 @@ export function usePlateRecognition({ currentValue, linkedValue }: UsePlateRecog
       return null
     })
     reset()
+    void navigate('/')
   }
 
   // Keeps the thumbnail only while the current page is (or becomes, via a

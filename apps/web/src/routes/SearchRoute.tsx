@@ -12,6 +12,7 @@ import PhotoThumbnail from '@/components/PhotoThumbnail'
 import PlateCandidates from '@/components/PlateCandidates'
 import ResultCard from '@/components/ResultCard'
 import SearchField from '@/components/SearchField'
+import Presence from '@/components/ui/Presence'
 import Spinner from '@/components/ui/Spinner'
 import { usePlateRecognition } from '@/components/use-plate-recognition'
 import VinResult from '@/components/VinResult'
@@ -121,6 +122,9 @@ export default function SearchRoute(): ReactNode {
 
   const notFound = active.error instanceof ApiError && active.error.status === 404
   const isIdle = !raw
+  const showNotFound = active.isError && !hasData
+  // Any attached photo (pending, failed, or resolved) makes the page about that search — homepage stats step aside.
+  const showHomeStats = isHome && !photo
 
   return (
     <div className="flex min-h-[70vh] flex-col items-center">
@@ -139,7 +143,6 @@ export default function SearchRoute(): ReactNode {
             initialValue={raw}
             autoFocus={!isSharedSection}
             isRecognizing={isRecognizing}
-            recognizeErrorKey={recognizeErrorKey}
             onPickPhoto={recognize}
           />
           <Link
@@ -162,12 +165,21 @@ export default function SearchRoute(): ReactNode {
           </p>
         )}
 
-        {active.isError && !hasData && notFound && kind === 'plate' && <NotFoundInfo value={raw} />}
-        {active.isError && !hasData && !(notFound && kind === 'plate') && (
-          <p className="rounded bg-[var(--color-surface)]/20 px-1.5 py-0.5 text-[var(--color-muted)]">
-            {notFound ? t('result.noResults', { value: raw }) : t('result.error')}
+        <Presence show={showNotFound}>
+          {notFound && kind === 'plate' ? (
+            <NotFoundInfo value={raw} />
+          ) : (
+            <p className="rounded bg-[var(--color-surface)]/20 px-1.5 py-0.5 text-[var(--color-muted)]">
+              {notFound ? t('result.noResults', { value: raw }) : t('result.error')}
+            </p>
+          )}
+        </Presence>
+
+        <Presence show={!!recognizeErrorKey}>
+          <p className="w-full max-w-2xl rounded-md bg-[var(--color-surface)]/20 px-3 py-2 text-center text-[var(--color-muted)]">
+            {recognizeErrorKey ? t(recognizeErrorKey) : null}
           </p>
-        )}
+        </Presence>
 
         {showingSavedCopy && (
           <p className="w-full max-w-2xl rounded-md border border-amber-500/40 bg-amber-500/15 px-2.5 py-1.5 text-sm font-medium text-amber-800 dark:text-amber-300">
@@ -204,65 +216,41 @@ export default function SearchRoute(): ReactNode {
         {!recognizeErrorKey && kind === 'plate' && plate.data && <ResultCard data={plate.data} />}
         {!recognizeErrorKey && kind === 'vin' && vin.data && <VinResult data={vin.data} />}
 
-        <Link
-          to="/history"
-          className="flex items-center gap-1.5 rounded-full bg-[var(--color-surface)]/20 px-3 py-1 text-sm text-[var(--color-primary)]"
-        >
-          <span aria-hidden className="no-underline">
-            🕘
-          </span>
-          <span className="underline hover:no-underline">{t('history.viewLink')}</span>
-        </Link>
+        <Presence show={showHomeStats && stats.isSuccess}>
+          {stats.data && (
+            <LoadErrorBoundary compact>
+              <Suspense fallback={null}>
+                <div className="w-full max-w-6xl">
+                  <TopStatsPanel stats={stats.data} />
+                </div>
+              </Suspense>
+            </LoadErrorBoundary>
+          )}
+        </Presence>
 
-        <Link
-          to="/stats"
-          className="flex items-center gap-1.5 rounded-full bg-[var(--color-surface)]/20 px-3 py-1 text-sm text-[var(--color-primary)]"
-        >
-          <span aria-hidden className="no-underline">
-            📊
-          </span>
-          <span className="underline hover:no-underline">{t('stats.viewLink')}</span>
-        </Link>
+        <Presence show={showHomeStats && fuelStats.isSuccess}>
+          {fuelStats.data && (
+            <LoadErrorBoundary compact>
+              <Suspense fallback={null}>
+                <div className="w-full max-w-6xl">
+                  <FuelModelsPanel stats={fuelStats.data} />
+                </div>
+              </Suspense>
+            </LoadErrorBoundary>
+          )}
+        </Presence>
 
-        <Link
-          to="/favorites"
-          className="flex items-center gap-1.5 rounded-full bg-[var(--color-surface)]/20 px-3 py-1 text-sm text-[var(--color-primary)]"
-        >
-          <span aria-hidden className="no-underline">
-            ⭐
-          </span>
-          <span className="underline hover:no-underline">{t('favorites.viewLink')}</span>
-        </Link>
-
-        {isHome && stats.isSuccess && (
-          <LoadErrorBoundary compact>
-            <Suspense fallback={null}>
-              <div className="w-full max-w-6xl animate-fade-in">
-                <TopStatsPanel stats={stats.data} />
-              </div>
-            </Suspense>
-          </LoadErrorBoundary>
-        )}
-
-        {isHome && fuelStats.isSuccess && (
-          <LoadErrorBoundary compact>
-            <Suspense fallback={null}>
-              <div className="w-full max-w-6xl animate-fade-in">
-                <FuelModelsPanel stats={fuelStats.data} />
-              </div>
-            </Suspense>
-          </LoadErrorBoundary>
-        )}
-
-        {isHome && safetyStats.isSuccess && (
-          <LoadErrorBoundary compact>
-            <Suspense fallback={null}>
-              <div className="w-full max-w-6xl animate-fade-in">
-                <SafetyModelsPanel stats={safetyStats.data} />
-              </div>
-            </Suspense>
-          </LoadErrorBoundary>
-        )}
+        <Presence show={showHomeStats && safetyStats.isSuccess}>
+          {safetyStats.data && (
+            <LoadErrorBoundary compact>
+              <Suspense fallback={null}>
+                <div className="w-full max-w-6xl">
+                  <SafetyModelsPanel stats={safetyStats.data} />
+                </div>
+              </Suspense>
+            </LoadErrorBoundary>
+          )}
+        </Presence>
       </div>
     </div>
   )

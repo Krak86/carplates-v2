@@ -8,6 +8,7 @@ import BackgroundPhotos from '@/components/BackgroundPhotos'
 import LoadErrorBoundary from '@/components/LoadErrorBoundary'
 import OfflineBanner from '@/components/OfflineBanner'
 import PwaUpdatePrompt from '@/components/PwaUpdatePrompt'
+import QuickLinks from '@/components/QuickLinks'
 import { useHeaderVehicleLabel } from '@/components/use-header-vehicle-label'
 import { cn } from '@/lib/cn'
 import { useUiStore } from '@/store/ui-store'
@@ -103,6 +104,8 @@ export default function Layout({ children }: Props): ReactNode {
         )}
         <main className="min-w-0 flex-1 p-4 md:p-8">{children}</main>
       </div>
+
+      <QuickLinks />
 
       <PwaUpdatePrompt />
     </div>

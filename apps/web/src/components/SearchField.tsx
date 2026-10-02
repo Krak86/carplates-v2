@@ -11,7 +11,6 @@ type Props = {
   initialValue?: string
   autoFocus?: boolean
   isRecognizing: boolean
-  recognizeErrorKey: string | null
   onPickPhoto: (file: File) => void
 }
 
@@ -19,7 +18,6 @@ export default function SearchField({
   initialValue = '',
   autoFocus = true,
   isRecognizing,
-  recognizeErrorKey,
   onPickPhoto
 }: Props): ReactNode {
   const { t } = useTranslation()
@@ -75,7 +73,6 @@ export default function SearchField({
         <CameraSearchButton isPending={isRecognizing} disabled={!online} onCapture={onPickPhoto} />
         <ArSearchButton disabled={!online} />
       </div>
-      {recognizeErrorKey && <p className="text-sm text-[var(--color-muted)]">{t(recognizeErrorKey)}</p>}
     </div>
   )
 }
