@@ -135,7 +135,16 @@ export default function ResultCard({ data }: Props): ReactNode {
                   title={t('result.officialSite')}
                   className="inline-flex shrink-0 items-center text-base text-[var(--color-primary)]"
                 >
-                  <span aria-hidden>↗</span>
+                  <span
+                    aria-hidden
+                    className="inline-block h-4 w-4 bg-[var(--color-primary)]"
+                    style={{
+                      maskImage: 'url(/icons/official-site.svg)',
+                      maskSize: 'contain',
+                      maskRepeat: 'no-repeat',
+                      maskPosition: 'center'
+                    }}
+                  />
                   <span className="sr-only">
                     {t('result.officialSite')} — {t('field.opensNewTab')}
                   </span>
