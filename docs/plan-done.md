@@ -1665,3 +1665,25 @@ detail/{id}` from 1-290 not already known — zero additional real pages
     with the kind name and "No photo available"; special/undetermined reuse the specialized photo. Runtime-cached,
     not precached. `pnpm --filter scripts build:kind-images` (sharp) turns `assets-src/kind/*.jpg` into
     `public/kind/*.webp` (8.3 MB → 1.3 MB) — rerun after changing a source photo.
+
+- **VIN decode overview + plate-card split ✅ DONE (2026-10-02)** — the VIN view is no longer a flat NHTSA key/value
+  list; code in `apps/web/src/components/vin/`, pure logic (parsing, grouping, formatting) in `vin/helpers.ts` with
+  tests in `helpers.test.ts`. No API or schema change — everything keys off NHTSA's stable English variable names.
+  - **Tabs** (`VinDecodeTabs.tsx`): *Overview* (default) | *Raw data* (the old `VinDecodeFields` list, unfiltered).
+    Used by the VIN page and by the plate card's VIN section.
+  - **Overview**: decoder status chip/banner (Error Code 0 vs. not) · `VinSegments` (WMI/VDS/check digit/year/plant/serial,
+    hover/tap explains each, year/make/plant filled from the decode; model-year letter resolved against NHTSA's
+    `Model Year`) · headline · `VinCarSchematic` (top-down SVG: seats, drive axles, front/side/curtain/knee airbags,
+    TPMS direct vs. indirect, doors; toggleable layers; seat rows inferred when the decode lacks them and says so) ·
+    `VinMotorcycleSchematic` · `VinEngineCard` (cylinder glyph, hp/kW, gauges, GVWR class scale) · `VinOriginCard`
+    (flag emoji, plant, map link) · `VinAssists` (ABS/ESC/… chips, standard vs. optional) · `VinDetails`.
+  - **Which diagram**: `vehicleShape()` — car/MPV/truck → car plan, but only if the decode carries real equipment data
+    (`hasCarSchematicData`); motorcycle → own diagram; bus/trailer/other → none.
+  - **Details**: grouped (identity/body/engine/safety/manufacturing/other), plate-style Show/Hide toggles with "(N)",
+    engine + safety open by default, "Not Applicable" and decoder bookkeeping rows always hidden in Overview, ❓ field
+    explanations (`field-info.ts` → `vin.info.*`), click-to-copy values, tidied numbers (`146.4569…` → `146.5 cu in`).
+  - **Plate card**: the old combined "Registration / VIN history" section is now two `VinToggleSection`s —
+    *Registration history* (plate + VIN timelines, `?section=history`) and *VIN decode* (`?section=vin`, new share
+    section). The VIN query runs when either is opened. On the VIN page the registry timeline is collapsed by default.
+  - VIN card also shows the animated brand watermark; Favorites/History routes widened to `max-w-2xl` to match the card.
+  - Strings in ua/ru/en. Raw-tab labels (NHTSA variable names) stay English for now.

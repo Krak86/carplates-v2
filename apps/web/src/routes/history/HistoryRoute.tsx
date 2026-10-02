@@ -37,7 +37,7 @@ export default function HistoryRoute(): ReactNode {
   const groups = history.data ? groupByMonth(history.data) : []
 
   return (
-    <div className="mx-auto w-full max-w-xl">
+    <div className="mx-auto w-full max-w-2xl">
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-bold">{t('history.title')}</h1>
         <div className="flex items-center gap-3">

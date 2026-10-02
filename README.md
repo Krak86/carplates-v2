@@ -4,7 +4,8 @@ Ukrainian vehicle lookup by **plate number** or **VIN**. Rebuild of
 [carsua.app](https://carsua.app).
 
 - Plate data: the state open-data registry ([data.gov.ua](https://data.gov.ua/dataset/06779371-308f-42d7-895e-5a39833375f0)) → Postgres
-- VIN data: [NHTSA vPIC](https://vpic.nhtsa.dot.gov/api/vehicles/decodevin) (proxied)
+- VIN data: [NHTSA vPIC](https://vpic.nhtsa.dot.gov/api/vehicles/decodevin) (proxied), presented as an Overview
+  (VIN anatomy, equipment map with airbags/drive/seats, engine and origin cards, grouped details) or Raw data
 - Crash-test safety ratings, six sources: [NHTSA](https://api.nhtsa.gov/SafetyRatings) (proxied,
   US-spec) · [Euro NCAP](https://www.euroncap.com) (scraped, EU-spec) ·
   [JNCAP](https://www.nasva.go.jp/mamoru/en/) (scraped, JDM-domestic) · [C-NCAP](https://www.c-ncap.org.cn)

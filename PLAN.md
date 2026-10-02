@@ -418,13 +418,16 @@ above once scoped, or dropped if research says no.
   Phase 1.5.
 - ✅ Vehicle-kind icon (animated, colored by registry color) + brand logo on
   the result card — done, see Phase 1.5.
-- ⏳ **VinResult history section rename + show current plate** — small,
-  unblocked fix identified 2026-09-23 (see Phase 1.5 "Open" note above):
-  retitle its timeline from `vin.registryTitle` to `result.historyTitle` for
-  consistency with `ResultCard`, and surface `registry.plate` /
-  `registry.plateInferred` as a headline line (mirroring how `ResultCard`
-  headlines its VIN link) since the data already comes back from
-  `/api/vin/:vin` and is currently unused on that page.
+- ✅ **VIN decode overview + plate-card split** — done 2026-10-02 (tabs, VIN anatomy, equipment map, engine/origin
+  cards, grouped details; plate card now has separate *Registration history* and *VIN decode* sections) — see
+  `docs/plan-done.md`. Open follow-ups:
+  - ⏳ VIN page: headline the current plate (`registry.plate` / `registry.plateInferred`, already returned by
+    `/api/vin/:vin`, still unused there); retitle the registry timeline to match `result.historyTitle`.
+  - ⏳ Translate the Raw-tab / detail-row labels (NHTSA variable names) and common values into ua/ru — deferred until
+    the new view had been judged.
+  - ⏳ Polish: hide the GVWR class scale for motorcycles (meaningless there); drop the near-duplicate Vehicle Type /
+    Body Class chips; Windows renders flag emoji as letters (consider SVG flags); compute the VIN check digit locally
+    for non-NHTSA-covered markets.
 
 - 📋 **Wanted (stolen) vehicles** — planned 2026-10-01, researched, not started.
   See "Wanted vehicles ingest" below.

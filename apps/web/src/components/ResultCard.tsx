@@ -32,7 +32,8 @@ import { useCarWikiActions } from '@/components/use-car-wiki-actions'
 import Card from '@/components/ui/Card'
 import VehicleKindIcon from '@/components/VehicleKindIcon'
 import VehiclePhotos from '@/components/VehiclePhotos'
-import VinDecodeFields from '@/components/VinDecodeFields'
+import VinDecodeTabs from '@/components/vin/VinDecodeTabs'
+import VinToggleSection from '@/components/vin/VinToggleSection'
 import { useCardMotion } from '@/hooks/useCardMotion'
 import { cn } from '@/lib/cn'
 import { depMapsUrl } from '@/lib/maps'
@@ -60,10 +61,13 @@ export default function ResultCard({ data }: Props): ReactNode {
   const [searchParams] = useSearchParams()
   const isSharedHistory = searchParams.get('section') === 'history'
   const [showMore, setShowMore] = useState(() => isSharedHistory)
+  const isSharedVin = searchParams.get('section') === 'vin'
+  const [showVin, setShowVin] = useState(() => isSharedVin)
   const isSharedBasic = searchParams.get('section') === 'basic'
   const [showBasic, setShowBasic] = useState(true)
   const basicRef = useRef<HTMLDivElement>(null)
   const historyRef = useRef<HTMLDivElement>(null)
+  const vinRef = useRef<HTMLDivElement>(null)
   const tiltEnabled = useUiStore(s => s.cardTiltEnabled)
   const glowRef = useCardMotion<HTMLDivElement>(tiltEnabled)
   const c = data.current
@@ -79,7 +83,7 @@ export default function ResultCard({ data }: Props): ReactNode {
   // included. A VIN's own registry rows cover every plate that vehicle ever
   // wore. Neither subsumes the other, so both run and render as separate sections.
   const plateHistory = useQuery({ ...plateHistoryQuery(data.plate), enabled: showMore })
-  const vinDetail = useQuery({ ...vinQuery(c.vin ?? ''), enabled: showMore && hasVin })
+  const vinDetail = useQuery({ ...vinQuery(c.vin ?? ''), enabled: (showMore || showVin) && hasVin })
   const currentVehicle = { brand: c.brand, model: c.model }
 
   // A pure EV has no engine capacity — power_kwt (2026+ only) is its only engine
@@ -91,6 +95,10 @@ export default function ResultCard({ data }: Props): ReactNode {
   useEffect(() => {
     if (isSharedHistory && historyRef.current) scrollElementIntoView(historyRef.current)
   }, [isSharedHistory])
+
+  useEffect(() => {
+    if (isSharedVin && vinRef.current) scrollElementIntoView(vinRef.current)
+  }, [isSharedVin])
 
   useEffect(() => {
     if (isSharedBasic && basicRef.current) scrollElementIntoView(basicRef.current)
@@ -343,93 +351,70 @@ export default function ResultCard({ data }: Props): ReactNode {
 
         <CarWikiInfo wiki={wiki} hasQuery={hasWikiQuery} />
 
-        <div ref={historyRef} className="mt-3 border-t border-[var(--color-border)] pt-3">
-          <div className="flex items-center justify-between text-base">
-            <span className="text-base font-semibold">{t('result.historyLabel')}</span>
-            <div className="flex items-center gap-1.5">
-              {showMore && (
-                <ShareButton section="history" label={t('share.button', { section: t('result.historyLabel') })} />
-              )}
-              <button
-                type="button"
-                aria-expanded={showMore}
-                onClick={() => setShowMore(v => !v)}
-                className="group flex items-center gap-1.5 rounded-full bg-[var(--color-surface)]/20 px-3 py-1 text-[var(--color-primary)]"
-              >
-                <span aria-hidden className="animate-gear-tick no-underline">
-                  ⚙️
-                </span>
-                <span className="underline group-hover:no-underline">
-                  {showMore ? t('result.historyHide') : t('result.historyShow')}
-                </span>
-                <span
-                  aria-hidden
-                  className={cn(
-                    'inline-block no-underline transition-transform duration-200',
-                    showMore && 'rotate-180'
-                  )}
-                >
-                  ▾
-                </span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div
-          aria-hidden={!showMore}
-          className={cn(
-            'grid transition-[grid-template-rows] duration-300 ease-in-out',
-            showMore ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
-          )}
+        <VinToggleSection
+          ref={historyRef}
+          icon="⚙️"
+          defaultOpen={isSharedHistory}
+          onOpenChange={setShowMore}
+          showLabel={t('result.historyShow')}
+          hideLabel={t('result.historyHide')}
+          title={t('result.historyLabel')}
+          actions={<ShareButton section="history" label={t('share.button', { section: t('result.historyLabel') })} />}
         >
-          <div className="overflow-hidden">
-            <div className="mt-3 border-t border-[var(--color-border)] pt-3">
+          <div className="mb-1 flex items-center gap-1.5 text-base font-semibold">
+            <span aria-hidden>🕘</span>
+            {t('result.historyTitle')}
+          </div>
+          {plateHistory.isPending && <p className="text-base text-[var(--color-muted)]">{t('result.loading')}</p>}
+          {plateHistory.isError && <p className="text-base text-[var(--color-muted)]">{t('result.error')}</p>}
+          {plateHistory.data && (
+            <RegistrationTimeline
+              actions={plateHistory.data.actions}
+              currentPlate={data.plate}
+              currentVehicle={currentVehicle}
+            />
+          )}
+
+          {hasVin && (vinDetail.isPending || vinDetail.isError || vinDetail.data?.registry) && (
+            <div className="mt-4 border-t border-[var(--color-border)] pt-3">
               <div className="mb-1 flex items-center gap-1.5 text-base font-semibold">
-                <span aria-hidden>🕘</span>
-                {t('result.historyTitle')}
+                <span aria-hidden>🆔</span>
+                {t('result.historyTitleVin')}
               </div>
-              {plateHistory.isPending && <p className="text-base text-[var(--color-muted)]">{t('result.loading')}</p>}
-              {plateHistory.isError && <p className="text-base text-[var(--color-muted)]">{t('result.error')}</p>}
-              {plateHistory.data && (
+              {vinDetail.isPending && <p className="text-base text-[var(--color-muted)]">{t('result.loading')}</p>}
+              {vinDetail.isError && <p className="text-base text-[var(--color-muted)]">{t('result.error')}</p>}
+              {vinDetail.data?.registry && (
                 <RegistrationTimeline
-                  actions={plateHistory.data.actions}
+                  actions={vinDetail.data.registry.actions}
                   currentPlate={data.plate}
                   currentVehicle={currentVehicle}
                 />
               )}
-
-              {hasVin && (vinDetail.isPending || vinDetail.isError || vinDetail.data?.registry) && (
-                <div className="mt-4 border-t border-[var(--color-border)] pt-3">
-                  <div className="mb-1 flex items-center gap-1.5 text-base font-semibold">
-                    <span aria-hidden>🆔</span>
-                    {t('result.historyTitleVin')}
-                  </div>
-                  {vinDetail.isPending && <p className="text-base text-[var(--color-muted)]">{t('result.loading')}</p>}
-                  {vinDetail.isError && <p className="text-base text-[var(--color-muted)]">{t('result.error')}</p>}
-                  {vinDetail.data?.registry && (
-                    <RegistrationTimeline
-                      actions={vinDetail.data.registry.actions}
-                      currentPlate={data.plate}
-                      currentVehicle={currentVehicle}
-                    />
-                  )}
-                </div>
-              )}
-
-              {hasVin && vinDetail.isSuccess && (
-                <div className="mt-4 border-t border-[var(--color-border)] pt-3">
-                  <div className="mb-1 flex items-center gap-1.5 text-base font-semibold">
-                    <span aria-hidden>🆔</span>
-                    {t('vin.title')}
-                  </div>
-                  <VinDecodeFields results={vinDetail.data.results} />
-                  <p className="mt-2 text-sm text-[var(--color-muted)]">{t('vin.source')}</p>
-                </div>
-              )}
             </div>
-          </div>
-        </div>
+          )}
+        </VinToggleSection>
+
+        {hasVin && (
+          <VinToggleSection
+            ref={vinRef}
+            icon="🆔"
+            defaultOpen={isSharedVin}
+            onOpenChange={setShowVin}
+            showLabel={t('vin.show')}
+            hideLabel={t('vin.hide')}
+            title={
+              <span className="flex items-center gap-1.5">
+                <span aria-hidden>🆔</span>
+                {t('vin.title')}
+              </span>
+            }
+            actions={<ShareButton section="vin" label={t('share.button', { section: t('vin.title') })} />}
+          >
+            {vinDetail.isPending && <p className="text-base text-[var(--color-muted)]">{t('result.loading')}</p>}
+            {vinDetail.isError && <p className="text-base text-[var(--color-muted)]">{t('result.error')}</p>}
+            {vinDetail.isSuccess && <VinDecodeTabs data={vinDetail.data} />}
+          </VinToggleSection>
+        )}
 
         <FuelEconomy brand={c.brand} model={c.model} year={c.makeYear} fuel={c.fuel} capacity={c.capacity} />
         <SafetyRatings brand={c.brand} model={c.model} year={c.makeYear} body={c.body} />

@@ -18,7 +18,7 @@ export default function FavoritesRoute(): ReactNode {
   const isSavedOffline = useOfflineAvailability()
 
   return (
-    <div className="mx-auto w-full max-w-xl">
+    <div className="mx-auto w-full max-w-2xl">
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-bold">{t('favorites.title')}</h1>
         {favorites.isSuccess && favorites.data.length > 0 && (
