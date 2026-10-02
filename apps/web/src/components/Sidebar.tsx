@@ -15,7 +15,6 @@ export default function Sidebar(): ReactNode {
   const { t } = useTranslation()
   const lang = useUiStore(s => s.lang)
   const setLang = useUiStore(s => s.setLang)
-  const setDrawerOpen = useUiStore(s => s.setDrawerOpen)
   const theme = useUiStore(s => s.theme)
   const toggleTheme = useUiStore(s => s.toggleTheme)
 
@@ -27,31 +26,31 @@ export default function Sidebar(): ReactNode {
 
   return (
     <nav className="flex h-full w-64 flex-col gap-1 border-r border-[var(--color-border)] bg-[var(--color-bg)]/50 p-3 backdrop-blur-md">
-      <NavLink to="/" className={linkClass} onClick={() => setDrawerOpen(false)} end>
+      <NavLink to="/" className={linkClass} end>
         <span aria-hidden>🔍</span> {t('nav.search')}
       </NavLink>
-      <NavLink to="/advanced-search" className={linkClass} onClick={() => setDrawerOpen(false)}>
+      <NavLink to="/advanced-search" className={linkClass}>
         <span aria-hidden>🧭</span> {t('nav.advancedSearch')}
       </NavLink>
-      <NavLink to="/about" className={linkClass} onClick={() => setDrawerOpen(false)}>
+      <NavLink to="/about" className={linkClass}>
         <span aria-hidden>ℹ️</span> {t('nav.about')}
       </NavLink>
-      <NavLink to="/history" className={linkClass} onClick={() => setDrawerOpen(false)}>
+      <NavLink to="/history" className={linkClass}>
         <span aria-hidden>🕘</span> {t('nav.history')}
       </NavLink>
-      <NavLink to="/favorites" className={linkClass} onClick={() => setDrawerOpen(false)}>
+      <NavLink to="/favorites" className={linkClass}>
         <span aria-hidden>⭐</span> {t('nav.favorites')}
       </NavLink>
-      <NavLink to="/stats" className={linkClass} onClick={() => setDrawerOpen(false)}>
+      <NavLink to="/stats" className={linkClass}>
         <span aria-hidden>📊</span> {t('nav.stats')}
       </NavLink>
-      <NavLink to="/fuel" className={linkClass} onClick={() => setDrawerOpen(false)}>
+      <NavLink to="/fuel" className={linkClass}>
         <span aria-hidden>🌿</span> {t('nav.fuel')}
       </NavLink>
-      <NavLink to="/safety" className={linkClass} onClick={() => setDrawerOpen(false)}>
+      <NavLink to="/safety" className={linkClass}>
         <span aria-hidden>🛡️</span> {t('nav.safety')}
       </NavLink>
-      <NavLink to="/discuss" className={linkClass} onClick={() => setDrawerOpen(false)}>
+      <NavLink to="/discuss" className={linkClass}>
         <span aria-hidden>💬</span> {t('nav.discuss')}
       </NavLink>
 
@@ -60,10 +59,7 @@ export default function Sidebar(): ReactNode {
         <button
           key={l}
           type="button"
-          onClick={() => {
-            setLang(l)
-            setDrawerOpen(false)
-          }}
+          onClick={() => setLang(l)}
           className={cn(
             'rounded-lg bg-[var(--color-surface)]/60 px-3 py-1.5 text-left text-sm transition-colors duration-200 hover:bg-[var(--color-surface)]',
             l === lang
