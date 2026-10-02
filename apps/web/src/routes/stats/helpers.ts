@@ -6,7 +6,7 @@ import type { StatsDimension, StatsRow } from './types'
 
 // The full StatsResponse is assignable to this too, so the stats page and the light
 // /api/stats/top payload share the same leaderboard helpers.
-type TopStats = StatsTopResponse
+type TopStats = Pick<StatsTopResponse, 'byBrand' | 'byColor' | 'byRegion' | 'topModels'>
 
 /**
  * The leaderboards go this deep — the API's topModels query is capped to match (see
@@ -58,7 +58,11 @@ export function rankOf(ranked: string[], value: string | null): number | null {
 }
 
 /** 1-based rank of a brand+model pair in a ranked model list, or null when absent. */
-export function rankOfModel(ranked: StatsByModelRow[], brand: string | null, model: string | null): number | null {
+export function rankOfModel(
+  ranked: { brand: string; model: string }[],
+  brand: string | null,
+  model: string | null
+): number | null {
   if (brand === null || model === null) return null
   const idx = ranked.findIndex(r => r.brand === brand && r.model === model)
   return idx === -1 ? null : idx + 1
@@ -183,4 +187,83 @@ export function choroplethColor(t: number, theme: 'light' | 'dark'): string {
   const [r1, g1, b1] = hexToRgb(lo)
   const [r2, g2, b2] = hexToRgb(hi)
   return `rgb(${lerp(r1, r2, localT)}, ${lerp(g1, g2, localT)}, ${lerp(b1, b2, localT)})`
+}
+
+export type RankingBadge = { key: string; icon: string; rank: number; textKey: string; to: string }
+
+/** `highlight`/`highlightModel` are read once by StatsRoute on arrival (see its state comment) to scroll to and flash this exact row. */
+function statsLink(params: Record<string, string>): string {
+  return `/stats?${new URLSearchParams(params).toString()}`
+}
+
+/**
+ * Every "this car places in a top leaderboard" chip, in display order: the four registry leaderboards,
+ * then the fuel/CO2 and crash-test model boards. Only the ones the car actually places in. One source
+ * for the ResultCard chips and the export's Rankings section, both fed by the single /api/stats/top payload.
+ */
+export function rankingBadges(
+  stats: StatsTopResponse,
+  car: { brand: string | null; model: string | null; color: string | null; region: string | null }
+): RankingBadge[] {
+  const { brand, model, color, region } = car
+  return [
+    {
+      key: 'brand',
+      icon: '🏭',
+      rank: rankOf(topBrands(stats), brand),
+      textKey: 'result.topBrand',
+      to: statsLink({ dim: 'brand', highlight: brand ?? '' })
+    },
+    {
+      key: 'model',
+      icon: '🚗',
+      rank: rankOfModel(topModels(stats), brand, model),
+      textKey: 'result.topModel',
+      // No interactive "model" dimension tab exists (see stats_by_model's migration) — this
+      // lands on the always-visible top-models panel instead.
+      to: statsLink({ highlightModel: `${brand ?? ''}::${model ?? ''}` })
+    },
+    {
+      key: 'color',
+      icon: '🎨',
+      rank: rankOf(topColors(stats), color),
+      textKey: 'result.topColor',
+      to: statsLink({ dim: 'color', highlight: color ?? '' })
+    },
+    {
+      key: 'region',
+      icon: '🗺️',
+      rank: rankOf(topRegions(stats), region),
+      textKey: 'result.topRegion',
+      to: statsLink({ dim: 'region', highlight: region ?? '' })
+    },
+    {
+      key: 'cleanest',
+      icon: '🌿',
+      rank: rankOfModel(stats.cleanestModels, brand, model),
+      textKey: 'result.topCleanest',
+      to: '/fuel'
+    },
+    {
+      key: 'dirtiest',
+      icon: '🛢️',
+      rank: rankOfModel(stats.dirtiestModels, brand, model),
+      textKey: 'result.topDirtiest',
+      to: '/fuel'
+    },
+    {
+      key: 'safest',
+      icon: '🛡️',
+      rank: rankOfModel(stats.safestModels, brand, model),
+      textKey: 'result.topSafest',
+      to: '/safety'
+    },
+    {
+      key: 'leastSafe',
+      icon: '⚠️',
+      rank: rankOfModel(stats.leastSafeModels, brand, model),
+      textKey: 'result.topLeastSafe',
+      to: '/safety'
+    }
+  ].filter((b): b is RankingBadge => b.rank !== null)
 }

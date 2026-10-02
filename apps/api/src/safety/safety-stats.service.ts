@@ -80,7 +80,7 @@ export class SafetyStatsService {
   }
 
   /** Ties (many models share a perfect 100) go to the better-evidenced model: more sources, then more cars. */
-  private async modelLeaderboard(direction: 'ASC' | 'DESC'): Promise<ModelShape[]> {
+  async modelLeaderboard(direction: 'ASC' | 'DESC'): Promise<ModelShape[]> {
     const order = direction === 'ASC' ? sql`ASC` : sql`DESC`
     const { rows } = await this.dbService.db.execute<ModelShape>(
       sql`SELECT brand, model, sum(n)::float8 AS n,

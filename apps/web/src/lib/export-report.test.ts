@@ -99,7 +99,11 @@ describe('buildExportReport', () => {
       byRegion: [{ totalRows: 1, distinctPlates: 1, distinctVins: 1, region: 'Київська область' }],
       byColor: [{ totalRows: 1, distinctPlates: 1, distinctVins: 1, value: 'ЧОРНИЙ' }],
       byBrand: [{ totalRows: 1, distinctPlates: 1, distinctVins: 1, value: 'TOYOTA' }],
-      topModels: [{ totalRows: 1, distinctPlates: 1, distinctVins: 1, brand: 'TOYOTA', model: 'CAMRY' }]
+      topModels: [{ totalRows: 1, distinctPlates: 1, distinctVins: 1, brand: 'TOYOTA', model: 'CAMRY' }],
+      cleanestModels: [],
+      dirtiestModels: [],
+      safestModels: [{ brand: 'TOYOTA', model: 'CAMRY', n: 5000, avgScore: 90, sources: 2 }],
+      leastSafeModels: []
     }
     const report = buildExportReport(baseInput({ stats }), t)
     const rankings = report.sections.find(s => s.id === 'rankings')
@@ -109,12 +113,22 @@ describe('buildExportReport', () => {
       '🏭 result.topBrand:1',
       '🚗 result.topModel:1',
       '🎨 result.topColor:1',
-      '🗺️ result.topRegion:1'
+      '🗺️ result.topRegion:1',
+      '🛡️ result.topSafest:1'
     ])
   })
 
   it('omits the Rankings section when the vehicle does not place in any leaderboard', () => {
-    const stats: StatsTopResponse = { byRegion: [], byColor: [], byBrand: [], topModels: [] }
+    const stats: StatsTopResponse = {
+      byRegion: [],
+      byColor: [],
+      byBrand: [],
+      topModels: [],
+      cleanestModels: [],
+      dirtiestModels: [],
+      safestModels: [],
+      leastSafeModels: []
+    }
     const report = buildExportReport(baseInput({ stats }), t)
     expect(report.sections.find(s => s.id === 'rankings')).toBeUndefined()
   })

@@ -22,6 +22,6 @@ import { SafetyVideoService } from './safety-video.service.js'
     IihsService,
     SafetyStatsService
   ],
-  exports: [SafetyService, EuroNcapService, JncapService, CncapService, KncapService, IihsService]
+  exports: [SafetyStatsService, SafetyService, EuroNcapService, JncapService, CncapService, KncapService, IihsService]
 })
 export class SafetyModule {}

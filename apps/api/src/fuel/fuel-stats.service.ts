@@ -60,7 +60,7 @@ export class FuelStatsService {
     })
   }
 
-  private async modelLeaderboard(
+  async modelLeaderboard(
     direction: 'ASC' | 'DESC'
   ): Promise<{ brand: string; model: string; n: number; avgCo2: number }[]> {
     const order = direction === 'ASC' ? sql`ASC` : sql`DESC`

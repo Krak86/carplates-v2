@@ -20,7 +20,7 @@ import {
   iihsBodyBucket,
   nhtsaBodyBucket
 } from '@/components/SafetyRatings.helpers'
-import { rankOf, rankOfModel, topBrands, topColors, topModels, topRegions } from '@/routes/stats/helpers'
+import { rankingBadges } from '@/routes/stats/helpers'
 
 /** Loosely-typed `t` so this module doesn't have to fight i18next's generic overloads. */
 export type Translate = (key: string, options?: Record<string, unknown>) => string
@@ -149,21 +149,17 @@ function buildVehicleSection(input: ExportInput, t: Translate): ExportKeyValueSe
   return { type: 'kv', id: 'vehicle', title: t('export.sectionVehicle'), rows }
 }
 
-/** Mirrors the ResultCard's TopStatBadges — same four leaderboards, same rank source. */
+/** Mirrors the ResultCard's TopStatBadges — same leaderboards, same rank source. */
 function buildRankingsSection(input: ExportInput, t: Translate): ExportTextSection | null {
   const stats = input.stats
   if (!stats) return null
 
-  const badges = [
-    { icon: '🏭', rank: rankOf(topBrands(stats), input.vehicle.brand), textKey: 'result.topBrand' },
-    {
-      icon: '🚗',
-      rank: rankOfModel(topModels(stats), input.vehicle.brand, input.vehicle.model),
-      textKey: 'result.topModel'
-    },
-    { icon: '🎨', rank: rankOf(topColors(stats), input.current?.color ?? null), textKey: 'result.topColor' },
-    { icon: '🗺️', rank: rankOf(topRegions(stats), input.region), textKey: 'result.topRegion' }
-  ].filter((b): b is typeof b & { rank: number } => b.rank !== null)
+  const badges = rankingBadges(stats, {
+    brand: input.vehicle.brand,
+    model: input.vehicle.model,
+    color: input.current?.color ?? null,
+    region: input.region
+  })
 
   if (badges.length === 0) return null
   return {

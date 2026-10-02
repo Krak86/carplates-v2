@@ -22,7 +22,12 @@ import {
   statsByYear,
   statsSummary
 } from '@carplates/db'
-import { dataVersionResponseSchema, statsFieldResponseSchema, statsResponseSchema, statsTopResponseSchema } from '@carplates/shared'
+import {
+  dataVersionResponseSchema,
+  statsFieldResponseSchema,
+  statsResponseSchema,
+  statsTopResponseSchema
+} from '@carplates/shared'
 import type {
   DataVersionResponse,
   StatsFieldDimension,
@@ -32,13 +37,19 @@ import type {
 } from '@carplates/shared'
 
 import { DbService } from '../db/db.service.js'
+import { FuelStatsService } from '../fuel/fuel-stats.service.js'
+import { SafetyStatsService } from '../safety/safety-stats.service.js'
 
 // Leaderboard depth — must match MAX_TOP_N in apps/web/src/routes/stats/helpers.ts.
 const TOP_N = 10
 
 @Injectable()
 export class StatsService {
-  constructor(@Inject(DbService) private readonly dbService: DbService) {}
+  constructor(
+    @Inject(DbService) private readonly dbService: DbService,
+    @Inject(FuelStatsService) private readonly fuelStats: FuelStatsService,
+    @Inject(SafetyStatsService) private readonly safetyStats: SafetyStatsService
+  ) {}
 
   /** Clients key their offline cache on this. `totalRows` covers `db:refresh-stats`/`db:seed`, which touch no timestamps. */
   async version(): Promise<DataVersionResponse> {
@@ -61,30 +72,39 @@ export class StatsService {
     return dataVersionResponseSchema.parse({ dataVersion: createHash('sha1').update(raw).digest('hex').slice(0, 16) })
   }
 
-  /** The four leaderboards only (top 10 each, null values excluded — same rule as the web's `topLabels`). */
+  /** The ranking-chip leaderboards only: registry top 10s (null values excluded — same rule as the web's `topLabels`) + fuel/crash model boards. */
   async top(): Promise<StatsTopResponse> {
     const db = this.dbService.db
-    const [byBrand, byColor, byRegion, topModels] = await Promise.all([
-      db
-        .select()
-        .from(statsByBrand)
-        .where(isNotNull(statsByBrand.brand))
-        .orderBy(desc(statsByBrand.distinctPlates))
-        .limit(TOP_N),
-      db
-        .select()
-        .from(statsByColor)
-        .where(isNotNull(statsByColor.color))
-        .orderBy(desc(statsByColor.distinctPlates))
-        .limit(TOP_N),
-      db.select().from(statsByRegion).orderBy(desc(statsByRegion.distinctPlates)).limit(TOP_N),
-      db.select().from(statsByModel).orderBy(desc(statsByModel.distinctPlates)).limit(TOP_N)
-    ])
+    const [byBrand, byColor, byRegion, topModels, cleanestModels, dirtiestModels, safestModels, leastSafeModels] =
+      await Promise.all([
+        db
+          .select()
+          .from(statsByBrand)
+          .where(isNotNull(statsByBrand.brand))
+          .orderBy(desc(statsByBrand.distinctPlates))
+          .limit(TOP_N),
+        db
+          .select()
+          .from(statsByColor)
+          .where(isNotNull(statsByColor.color))
+          .orderBy(desc(statsByColor.distinctPlates))
+          .limit(TOP_N),
+        db.select().from(statsByRegion).orderBy(desc(statsByRegion.distinctPlates)).limit(TOP_N),
+        db.select().from(statsByModel).orderBy(desc(statsByModel.distinctPlates)).limit(TOP_N),
+        this.fuelStats.modelLeaderboard('ASC'),
+        this.fuelStats.modelLeaderboard('DESC'),
+        this.safetyStats.modelLeaderboard('DESC'),
+        this.safetyStats.modelLeaderboard('ASC')
+      ])
     return statsTopResponseSchema.parse({
       byBrand: byBrand.map(row => ({ ...row, value: row.brand })),
       byColor: byColor.map(row => ({ ...row, value: row.color })),
       byRegion,
-      topModels
+      topModels,
+      cleanestModels,
+      dirtiestModels,
+      safestModels,
+      leastSafeModels
     })
   }
 

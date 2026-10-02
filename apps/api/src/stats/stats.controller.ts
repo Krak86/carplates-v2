@@ -27,7 +27,9 @@ export class StatsController {
   @Get('field/:dimension')
   @ApiParam({ name: 'dimension', enum: STATS_FIELD_DIMENSIONS })
   @ApiOkResponse({ description: 'Rows of { value, totalRows, distinctPlates, distinctVins }' })
-  field(@Param('dimension', zodParam(statsFieldDimensionSchema)) dimension: StatsFieldDimension): Promise<StatsFieldResponse> {
+  field(
+    @Param('dimension', zodParam(statsFieldDimensionSchema)) dimension: StatsFieldDimension
+  ): Promise<StatsFieldResponse> {
     return this.statsService.field(dimension)
   }
 

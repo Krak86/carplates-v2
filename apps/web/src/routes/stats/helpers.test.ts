@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { StatsResponse } from '@carplates/shared'
+import type { StatsResponse, StatsTopResponse } from '@carplates/shared'
 
 import {
   choroplethColor,
@@ -10,6 +10,7 @@ import {
   rankOfModel,
   topBrands,
   topColors,
+  rankingBadges,
   topModels,
   topRegions,
   yearBoundaryLabel,
@@ -238,5 +239,33 @@ describe('choroplethColor', () => {
     for (let i = 1; i < samples.length; i++) {
       expect(samples[i]).toBeLessThanOrEqual(samples[i - 1]!)
     }
+  })
+})
+
+describe('rankingBadges', () => {
+  const top: StatsTopResponse = {
+    byBrand: [],
+    byColor: [],
+    byRegion: [],
+    topModels: [],
+    cleanestModels: [{ brand: 'TOYOTA', model: 'PRIUS', n: 5000, avgCo2: 90 }],
+    dirtiestModels: [],
+    safestModels: [
+      { brand: 'VOLVO', model: 'XC60', n: 4000, avgScore: 95, sources: 3 },
+      { brand: 'TOYOTA', model: 'PRIUS', n: 5000, avgScore: 90, sources: 2 }
+    ],
+    leastSafeModels: []
+  }
+
+  it('adds fuel and crash-test chips for a model that places on those boards, with links to their pages', () => {
+    const car = { brand: 'TOYOTA', model: 'PRIUS', color: null, region: null }
+    expect(rankingBadges(top, car).map(b => [b.key, b.rank, b.to])).toEqual([
+      ['cleanest', 1, '/fuel'],
+      ['safest', 2, '/safety']
+    ])
+  })
+
+  it('returns nothing for a model on no board', () => {
+    expect(rankingBadges(top, { brand: 'LADA', model: '2105', color: null, region: null })).toEqual([])
   })
 })

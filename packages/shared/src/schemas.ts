@@ -530,15 +530,6 @@ export const statsResponseSchema = z.object({
 })
 export type StatsResponse = z.infer<typeof statsResponseSchema>
 
-/** GET /api/stats/top — just the four leaderboards (top 10 each, ranked by distinctPlates); a few KB instead of the full /api/stats. */
-export const statsTopResponseSchema = statsResponseSchema.pick({
-  byBrand: true,
-  byColor: true,
-  byRegion: true,
-  topModels: true
-})
-export type StatsTopResponse = z.infer<typeof statsTopResponseSchema>
-
 export const STATS_FIELD_DIMENSIONS = ['body', 'kind', 'color', 'fuel'] as const
 export type StatsFieldDimension = (typeof STATS_FIELD_DIMENSIONS)[number]
 export const statsFieldDimensionSchema = z.enum(STATS_FIELD_DIMENSIONS)
@@ -688,3 +679,23 @@ export const safetyStatsResponseSchema = z.object({
   bandWidth: z.number().int()
 })
 export type SafetyStatsResponse = z.infer<typeof safetyStatsResponseSchema>
+
+/**
+ * GET /api/stats/top — everything the ResultCard ranking chips need in one small payload: the four registry
+ * leaderboards (top 10 each, ranked by distinctPlates) plus the fuel/CO2 and crash-test model leaderboards
+ * (the same ones /fuel and /safety show); a few KB instead of the full /api/stats.
+ */
+export const statsTopResponseSchema = statsResponseSchema
+  .pick({
+    byBrand: true,
+    byColor: true,
+    byRegion: true,
+    topModels: true
+  })
+  .extend({
+    cleanestModels: z.array(fuelStatsModelSchema),
+    dirtiestModels: z.array(fuelStatsModelSchema),
+    safestModels: z.array(safetyStatsModelSchema),
+    leastSafeModels: z.array(safetyStatsModelSchema)
+  })
+export type StatsTopResponse = z.infer<typeof statsTopResponseSchema>

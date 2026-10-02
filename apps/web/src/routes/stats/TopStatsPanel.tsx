@@ -12,7 +12,7 @@ import { scrollElementIntoView } from '@/lib/share-section'
 import { MAX_TOP_N, topBrands, topColors, topModels, topRegions } from '@/routes/stats/helpers'
 
 type Props = {
-  stats: StatsTopResponse
+  stats: Pick<StatsTopResponse, 'byBrand' | 'byColor' | 'byRegion' | 'topModels'>
   /** A ResultCard badge deep link landed here for this brand+model — scroll to it, expanding if needed, and flash it. */
   highlightModel?: { brand: string; model: string } | null
 }

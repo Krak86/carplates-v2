@@ -6,6 +6,7 @@ import { FuelStatsService } from './fuel-stats.service.js'
 
 @Module({
   controllers: [FuelController],
-  providers: [FuelService, FuelStatsService]
+  providers: [FuelService, FuelStatsService],
+  exports: [FuelStatsService]
 })
 export class FuelModule {}
