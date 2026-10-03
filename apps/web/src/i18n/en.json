@@ -258,6 +258,7 @@
   "reviews.show": "Show reviews",
   "reviews.hide": "Hide reviews",
   "reviews.ruHint": "Russian-language site",
+  "reviews.uaHint": "Ukrainian-language site",
   "reviews.source": "Links to infocar.ua and e-drive.com.ua pages and review-site searches for this make and model. We don't copy their content; videos play from YouTube only when you press play.",
   "reviews.infocarTestDrives": "Test drives",
   "reviews.infocarOwnerReviews": "Owner reviews",

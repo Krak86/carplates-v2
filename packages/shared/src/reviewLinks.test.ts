@@ -17,6 +17,12 @@ describe('reviewLinks', () => {
     expect(urls('MERCEDES-BENZ  VITO', null).drive2).toBe('https://www.drive2.ru/search?text=MERCEDES-BENZ%20VITO')
   })
 
+  it('appends the model year to the drive2 query when known', () => {
+    const url = (year: number | null) => reviewLinks('KIA', "CEE'D", year)[0]?.url
+    expect(url(2012)).toBe("https://www.drive2.ru/search?text=KIA%20CEE'D%202012")
+    expect(url(null)).toBe("https://www.drive2.ru/search?text=KIA%20CEE'D")
+  })
+
   it('tags drive2 as Russian', () => {
     expect(reviewLinks('TOYOTA', 'CAMRY').find(l => l.site === 'drive2')?.lang).toBe('ru')
   })

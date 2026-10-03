@@ -8,6 +8,7 @@ import { useQuery } from '@tanstack/react-query'
 import EdrivePosts from '@/components/EdrivePosts'
 import InfocarReviewRows from '@/components/InfocarReviewRows'
 import InfocarVideos from '@/components/InfocarVideos'
+import LangBadge from '@/components/LangBadge'
 import { REVIEW_SITE_LABEL } from '@/components/ReviewLinks.helpers'
 import SectionInfo from '@/components/SectionInfo'
 import ShareButton from '@/components/ShareButton'
@@ -15,6 +16,9 @@ import SourceGroup from '@/components/SourceGroup'
 import { cn } from '@/lib/cn'
 import { reviewsQuery } from '@/lib/queries'
 import { scrollElementIntoView } from '@/lib/share-section'
+
+/** infocar.ua and e-drive.com.ua publish in both Ukrainian and Russian. */
+const UA_RU: ('ua' | 'ru')[] = ['ua', 'ru']
 
 type Props = {
   brand: string | null
@@ -33,7 +37,7 @@ export default function ReviewLinks({ brand, model, year }: Props): ReactNode {
   const isSharedReviews = searchParams.get('section') === 'reviews'
   const [open, setOpen] = useState(() => isSharedReviews)
   const sectionRef = useRef<HTMLDivElement>(null)
-  const links = reviewLinks(brand, model)
+  const links = reviewLinks(brand, model, year)
   const hasLinks = links.length > 0
   const catalog = useQuery({ ...reviewsQuery(brand ?? '', model ?? '', year), enabled: !!brand && open })
   const videos = catalog.data?.videos ?? []
@@ -87,7 +91,7 @@ export default function ReviewLinks({ brand, model, year }: Props): ReactNode {
         <div className="overflow-hidden">
           <div className="mt-3 space-y-4">
             {hasInfocar && (
-              <SourceGroup icon="/icons/infocar.png" name="infocar.ua">
+              <SourceGroup icon="/icons/infocar.png" name="infocar.ua" langs={UA_RU}>
                 <ul className="space-y-1.5">
                   {catalog.data?.testDrive && (
                     <InfocarReviewRows
@@ -111,7 +115,7 @@ export default function ReviewLinks({ brand, model, year }: Props): ReactNode {
             )}
 
             {posts.length > 0 && (
-              <SourceGroup icon="/icons/edrive.png" name="e-drive.com.ua">
+              <SourceGroup icon="/icons/edrive.png" name="e-drive.com.ua" langs={UA_RU}>
                 <EdrivePosts posts={posts} />
               </SourceGroup>
             )}
@@ -131,14 +135,7 @@ export default function ReviewLinks({ brand, model, year }: Props): ReactNode {
                           <img src="/icons/drive2.png" alt="" width={20} height={20} className="size-5 rounded-sm" />
                         )}
                         <span className="underline">{REVIEW_SITE_LABEL[link.site]}</span>
-                        {link.lang === 'ru' && (
-                          <span
-                            title={t('reviews.ruHint')}
-                            className="rounded-full border border-[var(--color-border)] px-2 py-0.5 text-xs text-[var(--color-muted)]"
-                          >
-                            RU
-                          </span>
-                        )}
+                        {link.lang === 'ru' && <LangBadge lang="ru" />}
                       </span>
                       <span aria-hidden>↗</span>
                       <span className="sr-only">{t('field.opensNewTab')}</span>
