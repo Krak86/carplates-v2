@@ -531,6 +531,113 @@ First steps when picked up: download the real file locally, confirm count and
 plate/VIN quality, then migration + Zod schema in `packages/shared` + `wanted.ts`
 with a fixture test.
 
+### Wikimedia hero-image cache in Postgres + pre-warm — planned (2026-10-03), not started
+
+Scope: **the hero photo only** (url, size, attribution) — not the Wikipedia text. The extract keeps its live lookup
+via `WikiService` for now; if it later needs caching it becomes a separate table/feature (text is language-specific,
+the image is not). Goal: the plate/VIN result gets its car photo from our own DB — no Wikimedia call on the hot path,
+no 429/5xx surfacing to users.
+
+Why: `WikiService` (`apps/api/src/wiki/wiki.service.ts`) caches in a 300-entry in-memory map, lost on restart. A cold
+image lookup is up to 3 Wikimedia calls (Commons year search, article lead image, attribution); any non-OK answer is a
+502 with no retry, and 429s happen in practice.
+
+**Decisions**
+
+- Persist **image metadata only** (url, width, height, author, license, license url). Files stay hotlinked from
+  `upload.wikimedia.org` at the standard 1280px thumb — **not downloaded/rehosted** (same "media stays linked" rule as
+  Euro NCAP; thumbs are CDN-served, the slowness is the API round trips). A self-hosted thumbnail cache is a Phase 4
+  (VPS) option, not now.
+- **Language-free**: Commons search never depended on `lang`; the lead-image fallback is taken from the English article
+  only. One row serves ua/ru/en.
+- Scope: passenger cars only (`kind ILIKE '%легков%'`). IMCDb rejected as a source (movie screenshots, studio
+  copyright, Cloudflare bot challenge, no API).
+
+**Schema** — migration `registry.wiki_image`
+
+- Key `(brand, model, year)` normalized lowercase; `year` empty for the model-level fallback row (lead image).
+- Payload: `image_url`, `image_width`, `image_height`, `attr_author`, `attr_license`, `attr_license_url`, `source`
+  (`commons_year | lead`), `title` (Commons file or article, for debugging).
+- Status: `status` `ok | not_found | failed`, `last_http_status`, `last_error`, `attempts`, `next_retry_at`, `updated_at`.
+- `not_found` = a **200 with no qualifying image** (Wikimedia answers 200, never 404) → TTL ~30 days, then one fresh
+  attempt. `failed` = retries exhausted (429/5xx/timeout) or a non-retryable 4xx → never shown as "no photo".
+
+**Service behaviour** (`wiki.service.ts` image path)
+
+- Order: `(brand, model, year)` row → `(brand, model)` lead row → live fetch (writes the row). The in-memory map stays
+  as a hot layer in front. A missing image falls back to the per-kind placeholder as today.
+- Retry only 429, 5xx, network timeouts; max 3 attempts, exponential backoff + jitter, honor `Retry-After` (cap ~30 s).
+  Other 4xx (400/403) fail immediately and are logged (User-Agent / code problem, would not self-heal).
+- On final failure: store `failed` (`next_retry_at`: 1 h → 6 h → 1 d; 7 d for non-retryable 4xx), serve a stale `ok`
+  row if one exists, else no image (not a 502 — the photo is decoration). Never store an error as `not_found`.
+- Check the User-Agent: Wikimedia wants a real contact URL/email; `PUBLIC_SITE_URL` is localhost in dev and may be
+  throttled harder.
+
+**Pre-warm script** — `scripts/src/wiki-images.ts`, patterned on `ingest:infocar`
+
+- `pnpm ingest:wiki-images` — top brand/model/year groups from `registry.current_registration`; options `--min-cars N`
+  (default 1000), `--limit N`, `--dry-run`, `--refresh`, `--rps` (default 1, max 2). Resumable (skips existing
+  `ok`/`not_found` rows), slows and pauses on repeated 429, ends with a summary
+  ("ok · not_found · failed 429×N, timeout×N"). Commons year search returns thumbnail + license in one request, so
+  attribution costs nothing extra on that path.
+- `pnpm ingest:wiki-images -- --retry-failed` — only `failed` rows past `next_retry_at`; `--retry-failed --all`
+  ignores the wait.
+- `pnpm ingest:wiki-images:csv` / `pnpm export:wiki-images:csv` — committed gzipped CSV in `seed-data/`, `ok` +
+  `not_found` rows only (`failed` is environment noise, stays local). Add to `ingest:ratings:csv` / `ingest:all`;
+  update CLAUDE.md commands.
+- `pnpm wiki-images:coverage` — rows with/without image by status and tier, plus weighted by cars (share of the 24.7M
+  registered cars that get a photo). Replaces ad-hoc SQL.
+
+**Sizing — naive per-year search; superseded by the batching section below** (real registry, 24.7M rows, passenger
+cars; measured 2026-10-03; 1 request ≈ 1 row of work)
+
+Requests = one Commons search per brand/model/year group + one English lead-image lookup per model (+ ~1 attribution
+lookup per lead image, ~1 in 10 models).
+
+| Tier | Groups / models | Requests | At 1 req/s |
+| --- | --- | --- | --- |
+| Start: groups ≥1000 cars + models ≥1000 cars | 2,953 / 1,391 | ~5,700 | ~1.6 h |
+| Groups ≥100 cars + models ≥100 cars | 14,803 / 4,008 | ~19,200 | ~5.3 h |
+| Everything | 97,135 / 15,769 | ~129,000 | ~36 h (18 h at 2 req/s) |
+
+Tiers 1-2 are worth running; the long tail is mostly rare/garbled spellings that come back `not_found` — skip it, a
+user lookup caches itself on first open. Cap at 2 req/s. Rows are well under 1 KB → a few MB in the DB, ≤1 MB gzipped.
+
+**Batching — probed against the live Commons API (2026-10-03), use this instead of one search per year**
+
+The MediaWiki API cannot batch several _searches_ in one call, but it batches everything after the search:
+
+1. **One search per model, not per year** — `list=search` (`srsearch="Kia Ceed" filetype:bitmap`, `srnamespace=6`,
+   `srlimit=500`) returns titles only (cheap). Probe: "Kia Ceed" → 195 hits in one response, no continuation;
+   141 titles carry a standalone year (2018×39, 2021×19, 2025×17, 2012×2, 2013×1 …). Pick the year match locally with
+   the existing `pickCommonsCandidate` rules. Models with >500 hits need `sroffset` paging or a narrower query.
+2. **Batched imageinfo for the chosen files** — `titles=File:A|File:B|…` (up to 50 per request, across any models)
+   with `iiprop=url|size|mime|extmetadata&iiurlwidth=1280`. Probe: 50 titles → 50 thumbnails + 50 licenses, one request,
+   no warnings. (`generator=search` + `prop=imageinfo` is NOT the way: imageinfo with thumbs is capped per request and
+   returns an `iicontinue`.)
+3. **Lead-image fallback only where Commons gave nothing** for the model (English `generator=search` + `pageimages`).
+
+Side benefit: with every file title for a model in hand, a missing year can fall back to the **nearest year** (the Ceed
+has photos for 2012-2013 but none for 2011/2017) with no extra requests — better than per-year search, which returns
+nothing for a gap year. Seen in the probe: Commons spells it `Kia cee'd` / `Ceed` / `Сee'd` — the search normalizes
+most variants, but add a few spelling aliases to the pre-warm query builder.
+
+Revised request counts (replace the sizing table above): stage 1 = one per model; stage 2 ≈ chosen files ÷ 50; stage 3
+≈ ~30% of models (estimate). Start tier (1,391 models): ~1,900 requests ≈ **~30 min**. 100+ tier (4,008 models):
+~5,500 ≈ ~1.5 h. Everything (15,769 models, ≤97,135 groups): ~23,000 ≈ **~6.5 h at 1 req/s** (~3 h at 2 req/s).
+The `--min-cars` tiers then matter far less; running everything becomes reasonable.
+
+Unverified idea for the fallback stage: one Wikidata SPARQL query for all car models with an image (`P18`) and Commons
+category (`P373`) would replace stage 3 with a single request — but Wikidata labels match registry strings loosely.
+Try only if stage 3 turns out to be the slow part.
+
+**Order**
+
+1. Migration + DB-backed image cache in `WikiService` (+ tests: hit, miss, lead fallback, stale-serve, TTL).
+2. Retry/backoff/`Retry-After` + never-cache-errors rule (+ tests with a mocked `fetch` returning 429/503/timeout).
+3. Pre-warm script, `--retry-failed`, CSV export/import, coverage report, CLAUDE.md command list.
+4. Run the start tier in the background, review coverage, then decide on the 100+ tier and the per-model trial.
+
 ### Car reviews (text) then YouTube — planned (2026-10-03), step 0 shipped
 
 **Pick-up point for the next session — start the full infocar video crawl.** Steps 1 and 2 are built and
@@ -1075,6 +1182,15 @@ second, only if the US-only match rate leaves too many EU cars uncovered.
     never rehosted" rule already applied to Euro NCAP. Not started; revisit
     if/when the NHTSA tab's live dependency becomes an actual problem (rate
     limits, downtime) rather than a theoretical one.
+- **Укртрансбезпека КТЗ certificate registry — watch, not usable yet (2026-10-03).**
+  "Реєстр сертифікатів затвердження типу та сертифікатів відповідності колісних ТЗ і обладнання"
+  (КМУ постанова №715, 18.06.2024; pilot since 19.12.2025; fully operational 2026-09-01; electronic-only
+  certificates from 2026-09-27). Holds type-approval, conformity and individual-approval certificates.
+  Per vehicle _type_, not per car, so no help for plate lookup. Possible later value: technical specs
+  (mass, dimensions, engine, emissions) on VIN pages where NHTSA decode is weak (EU/Asian cars).
+  **Blocker:** no public search, open-data download, API or data.gov.ua dataset found — access is for
+  manufacturers, certification bodies and state authorities. Sources: dsbt.gov.ua/reiestry/reiestr-sertyfikativ-ktz.
+  Re-check dsbt.gov.ua and data.gov.ua in a few months (~2027-01) for a public extract.
 
 ### Parked — no free API token (same class as Platesmania)
 
