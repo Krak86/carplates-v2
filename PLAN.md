@@ -750,6 +750,80 @@ only (title, score, date, blurb, url) — never republish review text beyond the
    are TopGear's /10 — label the source clearly; periodic refresh = re-run (new reviews are rare, the sitemap `lastmod`
    could drive a `--since` shortcut).
 
+**Step 2d — Auto news (RSS): planned 2026-10-04, nothing built.** A "News" subsection/toggle that shows recent Ukrainian
+auto-news headlines relevant to the car (make+model+year → make+model → make only). Links + facts only (title, ≤300-char
+description, image URL, date, url) — never republish article text.
+**Feed findings (measured 2026-10-04, all plain HTTP 200, robots allow):**
+- `https://eauto.org.ua/rss` is the *how-to* HTML page; the real feed is `https://eauto.org.ua/rss.xml` (UTF-8, 50 items, uk;
+  `?lang=en` exists). Market analytics from Інститут досліджень авторинку (prices, sales, registrations). **No `<category>`**
+  — make/model must come from title text. Mostly market-wide, few car-specific items.
+- `https://autoua.net/rss/` (UTF-8, ru, 20 items, `autonews.autoua.net` links + `<enclosure>` image). **Has `<category>`
+  tags but dirty** (brand names "Toyota"/"Tesla" mixed with `electric.vehicle`, `china`, `США`) — usable as a hint, but
+  the title is the primary source. Only latest 20 → needs periodic polling to accumulate.
+- infocar.ua page_106 lists the real feeds (windows-1251 — decode with `TextDecoder('windows-1251')`; `<category>` is
+  generic "Авто"/body-type, **not** a brand): `news.infocar.ua/rss/news.php` (**100 items**, uk), `/rss/new-models.php`
+  (20; title = "Volvo XC40", link host `volvo-xc40.infocar.ua` and `_id7424` = **exact catalog model**, already in
+  `infocar_versions` → best match quality), `/rss/articles.php` (50, evergreen history/advice), `/rss/tests.php` (test
+  drives), `/rss/video.php`, `/rss/reviews.php` (30 owner reviews, `<category>` = brand, link has `/brand/model/year/`;
+  overlaps the existing infocar reviews crawl — skip). `avtobazar.infocar.ua/rss/bazar.php` is classifieds — skip.
+- Other candidates to check later (not fetched): autocentre.ua, auto.ria.com/news RSS, avtoradnyk, nv.ua/auto, 24tv auto.
+
+**Agreed strategy (2026-10-04) — supersedes the items below where they differ.** One daily (later every 6 h — infocar
+news' 100-item window is only ~2-4 days) job merges all feeds into a single store; plate requests never touch the
+sources, they filter the store on demand.
+1. **Merge, don't overwrite.** Key by URL, upsert, prune > 180 days. A rolling archive keeps brand-only news available
+   after the short feed windows roll over.
+2. **Tag once at ingest** (`brandSlug`/`modelSlug`/`year` stored per item); the request is a filter, not a title scan.
+3. **Store: table `registry.news_items` preferred** (consistent with `owner_posts`, safe with API and cron on different
+   hosts). A gitignored `data/news.json` (temp file + atomic rename, API caches it in memory and reloads on mtime change)
+   is acceptable only if both run on the same box. Decide when building.
+4. **Fallback tiers, each capped and labelled in the response** (`match: model | brand | general`): brand+model(+year) →
+   brand+model → brand only → general latest. General news only fills slots left over, never displaces real brand news.
+5. **Response caching:** `Cache-Control: public, max-age=3600`; `/api/news` stays out of the persisted offline cache (or a
+   very short maxAge).
+6. **Polite fetching:** conditional GET (ETag/If-Modified-Since), identifying User-Agent, a failing feed must not fail the
+   run, log items per source and warn on a source returning 0 items (feed broke). windows-1251 decode for infocar.
+7. **Display only** title, short summary, image URL, source, date, link out — no article text, images hotlinked lazily.
+8. **Run:** manual `pnpm ingest:news` locally; cron on the VPS in Phase 4.
+Build order: parsers + fixtures (per-feed, pure, tested) → tagger + tests on real titles → table/migration + merge/prune
+→ `newsLookup` in `packages/shared` + `/api/news` → UI section → measure (step 7 below).
+
+**Original design.** Feeds only hold the latest N items, so news is **polled into a table and accumulated**, not fetched
+live per request (same persisted-catalog pattern as `owner_posts`).
+1. **Migration `0026_*`** (renumber if topgear lands first) `registry.news_items`: `url` PK, `source` (enum-ish text),
+   `title`, `summary` (trimmed, tags stripped), `image_url`, `published_at`, `lang`, `brand_slug` (nullable),
+   `model_slug` (nullable), `year_from`/`year_to` (nullable, only when the title names a year/generation), `kind`
+   (`news` | `hot`), `fetched_at`. Indexes `(brand_slug, model_slug, published_at desc)`, `(published_at desc)`.
+2. **Tagging (`scripts/src/news-tag.ts`, pure + unit-tested on real titles).** Reuse `infocarBrandSlug` (alias table
+   already handles Cyrillic/Latin) over title+summary; model = longest catalog model name for that brand found in the
+   title (`infocar_versions` slugs; whole-word, case-insensitive, ≥2 chars, ban ambiguous names like "Up"/"X"/"E"); year =
+   4-digit 2000-2030 in the title only. Source hints: infocar `new-models` link host/`_idN` gives brand+model directly;
+   autoua `<category>` brand if it resolves via `infocarBrandSlug`. Unmatched items keep null brand and still appear in
+   the generic "latest news" strip. Windows-1251 + CDATA + `<img>`-in-description handling in the parser.
+3. **`scripts/src/news.ts` + `pnpm ingest:news`** (`--source eauto|autoua|infocar-news|infocar-new-models`, `--dry-run`):
+   fetch each feed (conditional GET with ETag/Last-Modified if sent, 1 req/s, set UA), upsert by `url` (idempotent).
+   Cheap enough to run hourly; later the VPS cron / a Nest `@Cron` job (Phase 4). No CSV seed (ephemeral data) — but add a
+   tiny retention rule (drop > 18 months, keep rows with a model match longer).
+4. **Hot news.** Define `kind='hot'` at query time, not by a source flag: published ≤ 7 days AND (model match OR
+   source = infocar new-models). Avoids inventing an editorial signal; a real "hot" ranking (clicks) is Phase 5.
+5. **Lookup `newsLookup(rows, brand, model, year)` in `packages/shared`**: tiers 1) brand+model(+year within generation
+   range if the item has one), 2) brand+model, 3) brand only (cap 3 so it doesn't drown tiers 1-2); newest first inside a
+   tier, max ~10 total; each item carries `match: 'model' | 'brand'` so the UI can label "about your model" vs "about
+   {Make}". Zod response schema; `news[]` on `GET /api/reviews` **or** a new `GET /api/news?brand=&model=&year=` — prefer
+   the separate endpoint: news changes hourly while reviews are near-static, and it keeps the persisted offline cache of
+   `/api/reviews` from going stale (add `/api/news` to `lib/offline-cache.ts` with a short maxAge or leave online-only).
+6. **UI — decision to make when building (investigate in a browser):** (a) a **News** `SourceGroup` inside `ReviewLinks`
+   (cheapest, consistent), or (b) its own collapsible `SectionHeader` section under reviews with a **News / Hot** toggle
+   (two chips; Hot hidden if empty). Recommendation: (b) — news is time-bound and a different intent from reviews; reuse
+   `SectionHeader` + the show-5/"Show N more" pattern; source favicon + date + 2-line clamp; en/ua/ru strings. Feed
+   languages are uk/ru — show as-is with a small `UA`/`RU` chip like the DRIVE2 links (no translation).
+7. **Measure:** items/day per source, % tagged with a brand / model, and for the top-50 registry (brand, model) pairs how
+   many have ≥1 news item in 30/180 days (expect most popular brands yes, most models no → the brand-only tier matters).
+8. **Risks / limits:** title-matching false positives (model names that are common words: Polo, Fit, Up, Note, Jazz —
+   require brand co-occurrence); ru text for some sources; feeds only keep recent items so a new DB starts empty until
+   polled (backfill = none; infocar news `news.infocar.ua` paging could backfill, check robots first); copyright → link
+   + short summary only, always link out and attribute the source.
+
 **Step 2 status (2026-10-03): built; full crawl not run yet.** Done: migration `0023_car_videos.sql` + `carVideos` table;
 `scripts/src/infocar-video-parse.ts` (+ tests on `fixtures/infocar/video-kia.html`, `video-19231.html`);
 `infocar-fetch.ts` (fetch/cache/robots helpers extracted from `infocar.ts`); `pnpm ingest:infocar:videos [-- --brand kia
