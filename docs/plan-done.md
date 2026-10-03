@@ -932,6 +932,7 @@ detail/{id}` from 1-290 not already known — zero additional real pages
      applicable/other-generations split working correctly). Exported to
      `seed-data/cncap-ratings.csv.gz` for zero-fetch project setup, same as
      the other two sources.
+
   3. **KNCAP (Korea, MOLIT/KoROAD) — shipped 2026-09-26, bigger and easier
      than the earlier guess suggested.** `car.go.kr/sd/kncap/list.do` turned
      out **not** to be the data source at all — it's a static informational
@@ -1000,7 +1001,7 @@ detail/{id}` from 1-290 not already known — zero additional real pages
      - **A trim/powertrain qualifier in KNCAP's own name is deliberately
        dropped to the base nameplate** (`캐스퍼 일렉트릭` "Casper Electric" →
        `Casper`, `XC40 리차지` "XC40 Recharge" → `XC40`) — `KncapService`'s
-       prefix match needs the *stored* key to be the shorter, more generic
+       prefix match needs the _stored_ key to be the shorter, more generic
        one, so keeping the qualifier would silently stop matching a registry
        row that only has the bare nameplate. The one exception splits the
        other way (`폴스타2` → model `"2"`, not `"Polestar 2"`): Polestar's own
@@ -1030,6 +1031,7 @@ detail/{id}` from 1-290 not already known — zero additional real pages
        needed, so the earlier note about a sixth source (KNCAP) being where
        a dropdown/select rethink "should actually happen" turned out
        unnecessary here — revisit only if a sixth source ever ships.
+
   4. **IIHS (US, insurance-industry-funded, distinct from NHTSA) — shipped
      as the sixth safety-ratings source (2026-09-26).** Methodologically
      genuinely additive, not redundant with NHTSA (Good/Acceptable/Marginal/
@@ -1144,7 +1146,7 @@ detail/{id}` from 1-290 not already known — zero additional real pages
      **Follow-up fix, same day: collapse re-published model years into one
      card.** Spotted by the user looking at a real plate's Civic result and
      asking why the "other tested model years" list ran 1996-2025 — IIHS
-     republishes the *identical* assessment under every model-year page a
+     republishes the _identical_ assessment under every model-year page a
      generation spans (confirmed against real data: this Civic's ~30 scraped
      rows across 1996-2026 collapse to just 6 genuinely distinct
      assessments, since e.g. 2006-2008 and 2020-2021 are byte-identical
@@ -1171,9 +1173,9 @@ detail/{id}` from 1-290 not already known — zero additional real pages
      hide entirely / cap to N entries / leave as-is); they chose hide.
      Structural reason this doesn't apply the way it does for the other five
      sources: Euro NCAP/JNCAP/C-NCAP/KNCAP each test a nameplate once per
-     *generation* (a handful of rows total), so "other tested generations"
+     _generation_ (a handful of rows total), so "other tested generations"
      is genuinely useful fallback context when the exact one isn't tested.
-     IIHS tests almost every model year, so it *always* has an exact or
+     IIHS tests almost every model year, so it _always_ has an exact or
      near-exact match — the "other" list was never filling a real gap, just
      surfacing decades of irrelevant history. `IihsRatings.tsx` now renders
      only the applicable group(s); `groups`/`groupIihsRatings` are unchanged
@@ -1195,9 +1197,10 @@ detail/{id}` from 1-290 not already known — zero additional real pages
      non-reproducible blip (not a parser bug: identical bytes, different
      outcome), resolved by simply re-running the ingest once more (which
      replays instantly from cache) rather than chased further. `pnpm
-     export:iihs:csv` committed `scripts/seed-data/iihs-ratings.csv.gz`
+export:iihs:csv` committed `scripts/seed-data/iihs-ratings.csv.gz`
      (139 KB); round-tripped back in via `pnpm ingest:iihs:csv` to confirm
      6,023 rows in, 6,023 out, no loss.
+
   5. **ANCAP (Australia/NZ) — skip, confirmed redundant.** Signed an MOU
      with Euro NCAP in 1999 and aligned protocols by 2018; for any vehicle
      sold in both markets, ANCAP now directly reuses Euro NCAP's own
@@ -1220,7 +1223,7 @@ detail/{id}` from 1-290 not already known — zero additional real pages
   smooth tab-switch transition.** Prompted by a real "why is there no rating"
   question against a genuinely Korean-brand-but-Euro-market car (a Kia
   Cee'd) — the site's existing "no rating found" messages only explained
-  *market* scope (EU-spec, US-market, JDM-domestic, ...), not the *year*
+  _market_ scope (EU-spec, US-market, JDM-domestic, ...), not the _year_
   floor each source's real scraped data actually starts at, and that
   explanation disappeared entirely once at least one rating existed for the
   make/model (even a wrong-generation one, shown under "other tested
@@ -1579,7 +1582,6 @@ detail/{id}` from 1-290 not already known — zero additional real pages
   the shared cached `/api/stats` query; shown on the homepage only (not on
   result pages).
 
-
 - **Mobile UX pass ✅ DONE (2026-10-01)** — fixes from testing on a Galaxy S24 Ultra over ngrok.
   - **Layout**: mobile drawer sits below the sticky header (its first item, "Search", was hidden
     behind it); search input and `<main>` got `min-w-0` and `body` `overflow-x: clip` (the input's
@@ -1669,7 +1671,7 @@ detail/{id}` from 1-290 not already known — zero additional real pages
 - **VIN decode overview + plate-card split ✅ DONE (2026-10-02)** — the VIN view is no longer a flat NHTSA key/value
   list; code in `apps/web/src/components/vin/`, pure logic (parsing, grouping, formatting) in `vin/helpers.ts` with
   tests in `helpers.test.ts`. No API or schema change — everything keys off NHTSA's stable English variable names.
-  - **Tabs** (`VinDecodeTabs.tsx`): *Overview* (default) | *Raw data* (the old `VinDecodeFields` list, unfiltered).
+  - **Tabs** (`VinDecodeTabs.tsx`): _Overview_ (default) | _Raw data_ (the old `VinDecodeFields` list, unfiltered).
     Used by the VIN page and by the plate card's VIN section.
   - **Overview**: decoder status chip/banner (Error Code 0 vs. not) · `VinSegments` (WMI/VDS/check digit/year/plant/serial,
     hover/tap explains each, year/make/plant filled from the decode; model-year letter resolved against NHTSA's
@@ -1683,7 +1685,13 @@ detail/{id}` from 1-290 not already known — zero additional real pages
     engine + safety open by default, "Not Applicable" and decoder bookkeeping rows always hidden in Overview, ❓ field
     explanations (`field-info.ts` → `vin.info.*`), click-to-copy values, tidied numbers (`146.4569…` → `146.5 cu in`).
   - **Plate card**: the old combined "Registration / VIN history" section is now two `VinToggleSection`s —
-    *Registration history* (plate + VIN timelines, `?section=history`) and *VIN decode* (`?section=vin`, new share
+    _Registration history_ (plate + VIN timelines, `?section=history`) and _VIN decode_ (`?section=vin`, new share
     section). The VIN query runs when either is opened. On the VIN page the registry timeline is collapsed by default.
   - VIN card also shows the animated brand watermark; Favorites/History routes widened to `max-w-2xl` to match the card.
   - Strings in ua/ru/en. Raw-tab labels (NHTSA variable names) stay English for now.
+
+- **Reviews & test drives follow-ups ✅ DONE (2026-10-03)** — on top of the infocar catalog (PLAN.md "Car reviews"):
+  year-filtered owner-reviews link (`yearUrl`, `?y1=&y2=&sort=0`), version list over the year..year+1 window,
+  much broader registry-model -> infocar-slug matching plus `infocarBrandSlug` (mercedes/ssang-yong/vaz aliases) in
+  `packages/shared/src/infocarLookup.ts`; section ❓ info, 🔗 share (`?section=reviews`), infocar and DRIVE2 logos
+  in `apps/web`; Auto-Blog dropped. Match-rate numbers and the hidden watermark experiment are in PLAN.md.

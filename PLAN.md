@@ -533,11 +533,12 @@ with a fixture test.
 
 ### Car reviews (text) then YouTube — planned (2026-10-03), step 0 shipped
 
-**Pick-up point for the next session:** Step 1 (infocar catalog, both trees) is shipped — what is left of it is the
-match-rate measurement (below). Next is **Step 2 (infocar videos)**, as one more `scripts/` ingest
+**Pick-up point for the next session:** Step 1 (infocar catalog, both trees) is shipped and the 2026-10-03 follow-ups
+are done (year-filtered link, share/info on the section, smarter model matching, logos, Auto-Blog dropped — see
+"Follow-ups" below and docs/plan-done.md). Uncommitted at the time of writing; check `git status`. Next is **Step 2 (infocar videos)**, as one more `scripts/` ingest
 (`ingest:infocar:videos`) reusing the fetch/cache/robots helpers in `infocar.ts`, one migration, and a
 `/api/reviews` extension. `GOOGLE_API_KEY` is in `apps/api/.env`. Other sites (avtoporadnyk, auto-blog, drive2,
-driver.top, nv.ua) come after.
+driver.top, nv.ua) come after (auto-blog was dropped from the UI: its site search is irrelevant).
 
 **Step 0 — shipped (2026-10-03): link-only helper, no fetching.**
 `reviewLinks(brand, model)` in `packages/shared/src/reviewLinks.ts` returns each site's
@@ -590,17 +591,32 @@ Drizzle table; `scripts/src/infocar-parse.ts`, `infocar-robots.ts`, `infocar.ts`
 `export:infocar:csv`; `infocarLookup` in `packages/shared`; `GET /api/reviews?brand=&model=&year=`
 (`apps/api/src/reviews/`, `reviewsResponseSchema`); web: `reviewsQuery` + a `reviews` offline-cache group (cap 400),
 `ReviewLinks.tsx` un-hidden in `ResultCard` (fetches when the section is opened) with `InfocarReviewRows.tsx`. The
-guessed infocar URLs were removed from `reviewLinks` (auto-blog + drive2 searches remain).
+guessed infocar URLs were removed from `reviewLinks` (the drive2 search remains; auto-blog was dropped later).
 
 **First full crawl:** 153 brands (88 with test drives) → 5546 rows. Reviews: 1363 models / 1171 versions; test drives:
 1152 models / 1860 versions; 1681 model rows have no version cards (they link to the model page); every version has a
 year range; zero crawl failures. Committed `seed-data/infocar-versions.csv.gz` (85 KB).
 
-**Still to do:** build step 5 — measure the match rate of the registry's top (brand, model, year) combos against the
-catalog and list the misses (a model-slug alias table if misses are common); the year-filtered owner-reviews link
-(needs the filter's real GET param names). **Not verified end to end:** the live endpoint and UI (shell access to
-localhost was denied) — covered by the service unit test and the lookup/helper tests; open a Kia/Skoda result and expand
-"Reviews & test drives" to confirm.
+**Follow-ups (2026-10-03, after the first crawl) — done:**
+
+- Year-filtered owner-reviews link: `yearUrl` on `InfocarMatch` = model page + `?y1=<year>&y2=<year+1>&sort=0` (y2
+  capped at the current year); only the reviews tree has the filter (test-drive pages ignore it). The version list
+  now includes every version overlapping year..year+1, ones covering the year first.
+- Model matching (`infocarLookup.ts`): punctuation squashed (`CEE'D` -> `ceed`), BMW trims -> `N-series`, Mercedes
+  `E 200` -> `e-class` (`ML` -> `m-class`), leading-word / lone-word / shortened-factory-code matches, a few aliases
+  (VW CC/Beetle/e-Golf, Pajero, Forte). `infocarBrandSlug` maps mercedes-benz->mercedes, ssangyong->ssang-yong,
+  lada->vaz (used by the lookup and `ReviewsService`; before this Mercedes/ВАЗ/SsangYong never matched).
+- **Match-rate measurement** (top 800 registry (brand, model) pairs, ~12.2M rows, owner-reviews tree, year 2013):
+  brand-page-only fallbacks 856k -> 441k, unknown-brand 1.8M -> 351k. What is left is mostly not in the catalog
+  (ЗАЗ/ГАЗ/DAF/Geely/Lifan/КАМАЗ variants, some Tesla/Audi/Volvo/Dodge models only in the other tree). Next lever if
+  wanted: per-model aliases for the remaining high-volume misses; the throwaway eval script was deleted (dump
+  `infocar_versions` + top pairs via `docker exec … psql` and run `infocarLookup` over them to redo it).
+- UI: ❓ section info + 🔗 share button (`?section=reviews`, new `ShareSection`), infocar logo (`public/icons/infocar.png`)
+  beside the Infocar labels, DRIVE2 logo (`public/icons/drive2.png`). A large faint infocar watermark behind the
+  Infocar block was tried and **hidden on request** (left-aligned, 224px, 10% opacity) — re-add in `ReviewLinks.tsx`
+  if wanted. Auto-Blog removed from `reviewLinks` (irrelevant search results); drive2 stays link-only.
+- **Not verified end to end in a browser** — covered by unit tests (shared lookup, helpers, reviews service); open
+  ВС6743РН (Kia Ceed 2012) and ВС4170МІ (BMW 328, 2013) and expand "Reviews & test drives" to confirm.
 
 Facts found while parsing: the `/test-drive/` page lists only ~15 brands + a numeric-id `<select>`, so **brands come
 from `reviews/marks.html`** (153) and each is tried in both trees (404 → skipped); marks has no Russian/Soviet section

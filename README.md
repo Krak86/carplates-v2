@@ -13,6 +13,9 @@ Ukrainian vehicle lookup by **plate number** or **VIN**. Rebuild of
   [IIHS](https://www.iihs.org) (scraped, US, insurance-industry-funded)
 - Fuel economy / CO2 reference data: [EPA](https://www.fueleconomy.gov) (US) + [EEA](https://www.eea.europa.eu) (EU, WLTP/NEDC)
   → `registry.fuel_economy`, shown as a badge on the result card and on `/fuel`; `/safety` ranks all crash-test sources
+- Reviews & test drives: links to [infocar.ua](https://www.infocar.ua) test drives and owner reviews matched to the
+  car's make/model/year (from a crawled catalog, `registry.infocar_versions`; owner reviews also get a year-filtered
+  link) plus a DRIVE2 search link — links only, nothing copied
 - Result-card hero photo: year-aware Wikimedia Commons search (falls back to the Wikipedia lead image, then a per-kind placeholder)
 - Light/dark theme, AR plate scan and photo search, link previews for shared plate/VIN URLs
 - Installable PWA with offline mode: recent results, history and favorites stay available without a connection
@@ -131,12 +134,12 @@ marked out of date via `GET /api/stats/version` after a re-ingest.
 
 ## Workspace
 
-| Package           |                                                                            |
-| ----------------- | -------------------------------------------------------------------------- |
-| `packages/shared` | plate normalization, regions, Zod schemas                                  |
-| `packages/db`     | Drizzle schema + client + SQL migrator                                     |
-| `apps/api`        | NestJS + Fastify — plate/VIN/safety-ratings endpoints, Swagger, SPA host + meta injection |
-| `apps/web`        | Vite + React + React Router                                                |
+| Package           |                                                                                                                                                     |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `packages/shared` | plate normalization, regions, Zod schemas                                                                                                           |
+| `packages/db`     | Drizzle schema + client + SQL migrator                                                                                                              |
+| `apps/api`        | NestJS + Fastify — plate/VIN/safety-ratings endpoints, Swagger, SPA host + meta injection                                                           |
+| `apps/web`        | Vite + React + React Router                                                                                                                         |
 | `scripts`         | `seed.ts`, `ingest.ts`, `ingest-full.ts`, `refresh-stats.ts`, `euroncap.ts`/`jncap.ts`/`cncap.ts`/`kncap.ts`/`iihs.ts` (crash-test rating scrapers) |
 
 See [CLAUDE.md](CLAUDE.md) for conventions and [PLAN.md](PLAN.md) for the roadmap.
