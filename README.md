@@ -59,7 +59,7 @@ and [docs/plan-done.md](docs/plan-done.md)'s "2026 plate removal" section for wh
 
 1. `pnpm ingest` — every CKAN year (2013-2026), largest datasets take minutes each
 2. Downloads and ingests an archived pre-redaction 2026 snapshot (government order
-   №67/ОД stripped plates from the live 2026 export mid-year — this restores them
+   №67/ОД stripped plates from the live 2026 export from May 2026 — plates are present for 2013 – 29 April 2026; this restores them
    for the months it covers). Best-effort: skipped with a warning if that source
    is temporarily unreachable, the run isn't failed by it.
 3. `pnpm ingest -- --backfill-plates` — reconstructs plates for the rest of the
