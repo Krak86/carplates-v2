@@ -13,6 +13,7 @@ import {
   plateHistoryResponseSchema,
   plateLookupResponseSchema,
   plateRecognizeResponseSchema,
+  reviewsResponseSchema,
   safetyRatingsResponseSchema,
   searchResponseSchema,
   statsFieldResponseSchema,
@@ -27,6 +28,7 @@ import type {
   CncapRatingsResponse,
   EuroNcapRatingsResponse,
   FuelEconomyResponse,
+  ReviewsResponse,
   FuelStatsResponse,
   SafetyStatsResponse,
   IihsRatingsResponse,
@@ -264,4 +266,11 @@ export async function recognizePlate(file: File): Promise<PlateRecognizeResponse
     headers: { accept: 'application/json' }
   })
   return plateRecognizeResponseSchema.parse(await unwrap(res))
+}
+
+export async function getReviews(brand: string, model: string, year: number | null): Promise<ReviewsResponse> {
+  const params = new URLSearchParams({ brand })
+  if (model) params.set('model', model)
+  if (year != null) params.set('year', String(year))
+  return reviewsResponseSchema.parse(await getJson(`/api/reviews?${params.toString()}`))
 }

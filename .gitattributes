@@ -5,3 +5,5 @@
 *.ico binary
 *.woff2 binary
 pnpm-lock.yaml -diff linguist-generated
+# raw windows-1251 pages saved byte-for-byte (infocar-parse tests decode them) — never normalise line endings
+scripts/src/fixtures/infocar/*.html -text

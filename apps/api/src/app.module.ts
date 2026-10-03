@@ -10,6 +10,7 @@ import { HealthController } from './health/health.controller.js'
 import { PhotosModule } from './photos/photos.module.js'
 import { PlateModule } from './plate/plate.module.js'
 import { RecognizeModule } from './recognize/recognize.module.js'
+import { ReviewsModule } from './reviews/reviews.module.js'
 import { SafetyModule } from './safety/safety.module.js'
 import { SearchModule } from './search/search.module.js'
 import { SpaModule } from './spa/spa.module.js'
@@ -24,6 +25,7 @@ import { WikiModule } from './wiki/wiki.module.js'
     PlateModule,
     VinModule,
     RecognizeModule,
+    ReviewsModule,
     StatsModule,
     PhotosModule,
     SafetyModule,

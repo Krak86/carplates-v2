@@ -8,6 +8,7 @@ import {
   getEuroNcapRatings,
   getFuelEconomy,
   getFuelStats,
+  getReviews,
   getSafetyStats,
   getIihsRatings,
   getJncapRatings,
@@ -232,5 +233,15 @@ export function vehicleSearchQuery(filters: VehicleSearchFilters) {
       filters.pageSize
     ],
     queryFn: () => searchVehicles(filters)
+  })
+}
+
+// infocar.ua catalog links (test drives + owner reviews) for a brand/model/year — persisted reference data
+// (pnpm ingest:infocar), changes only on a re-crawl.
+export function reviewsQuery(brand: string, model: string, year: number | null) {
+  return queryOptions({
+    queryKey: ['reviews', brand, model, year],
+    queryFn: () => getReviews(brand, model, year),
+    staleTime: Infinity
   })
 }

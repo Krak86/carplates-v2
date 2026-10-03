@@ -474,6 +474,28 @@ export const wikiInfoResponseSchema = z.object({
 })
 export type WikiInfo = z.infer<typeof wikiInfoResponseSchema>
 
+/** GET /api/reviews?brand=&model=&year= — links into infocar.ua's persisted catalog (`pnpm ingest:infocar`), per tree:
+ *  the best version page for the year, the model page, or the brand page; `null` when the catalog has no such brand. */
+export const infocarVersionLinkSchema = z.object({
+  name: z.string(),
+  yearFrom: z.number().int().nullable(),
+  yearTo: z.number().int().nullable(),
+  url: z.string()
+})
+export const infocarMatchSchema = z.object({
+  level: z.enum(['version', 'model', 'brand']),
+  url: z.string(),
+  modelName: z.string().nullable(),
+  versions: z.array(infocarVersionLinkSchema),
+  reviewCount: z.number().int().nullable(),
+  avgRating: z.number().nullable()
+})
+export const reviewsResponseSchema = z.object({
+  testDrive: infocarMatchSchema.nullable(),
+  reviews: infocarMatchSchema.nullable()
+})
+export type ReviewsResponse = z.infer<typeof reviewsResponseSchema>
+
 /** Shared count fields for every stats rollup row. */
 export const statsMetricsSchema = z.object({
   totalRows: z.number().int().nonnegative(),

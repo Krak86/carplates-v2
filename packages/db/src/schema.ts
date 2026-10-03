@@ -338,6 +338,34 @@ export type KncapRatingRow = typeof kncapRatings.$inferSelect
 export type KncapRatingInsert = typeof kncapRatings.$inferInsert
 
 /**
+ * One row of infocar.ua's brand -> model -> version catalog (`scripts/src/infocar.ts`), per `tree`
+ * (`test_drive` | `reviews`). `versionName` null = a model-level row (url is the model page). `yearTo` null with a
+ * `yearFrom` = still in production. `reviewCount`/`avgRating` are model-level, reviews tree only. Links and facts
+ * only — see migrations/0020_infocar_versions.sql.
+ */
+export const infocarVersions = registry.table(
+  'infocar_versions',
+  {
+    id: bigserial('id', { mode: 'number' }).primaryKey(),
+    tree: text('tree').notNull(),
+    brandSlug: text('brand_slug').notNull(),
+    modelSlug: text('model_slug').notNull(),
+    modelName: text('model_name').notNull(),
+    versionName: text('version_name'),
+    yearFrom: integer('year_from'),
+    yearTo: integer('year_to'),
+    url: text('url').notNull().unique(),
+    reviewCount: integer('review_count'),
+    avgRating: real('avg_rating'),
+    isRu: boolean('is_ru').notNull().default(false),
+    fetchedAt: timestamp('fetched_at', { withTimezone: true }).notNull().defaultNow()
+  },
+  t => [index('ix_infocar_brand_model_year').on(t.brandSlug, t.modelSlug, t.yearFrom)]
+)
+export type InfocarVersionRow = typeof infocarVersions.$inferSelect
+export type InfocarVersionInsert = typeof infocarVersions.$inferInsert
+
+/**
  * One IIHS (US, insurance-industry-funded) vehicle model-year assessment — scraped from
  * iihs.org's own server-rendered detail pages via `scripts/src/iihs.ts` and refreshed by
  * re-running it, same rationale as `cncapRatings`/`kncapRatings` above. `makeKey`/`modelKey`

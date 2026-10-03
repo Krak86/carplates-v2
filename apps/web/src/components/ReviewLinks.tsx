@@ -2,20 +2,28 @@ import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { reviewLinks } from '@carplates/shared'
+import { useQuery } from '@tanstack/react-query'
 
+import InfocarReviewRows from '@/components/InfocarReviewRows'
 import { REVIEW_SITE_LABEL } from '@/components/ReviewLinks.helpers'
 import { cn } from '@/lib/cn'
+import { reviewsQuery } from '@/lib/queries'
 
 type Props = {
   brand: string | null
   model: string | null
+  year: number | null
 }
 
-/** Outbound links to each Ukrainian/Russian car-review site's own page or search for this make and model. Nothing is fetched. */
-export default function ReviewLinks({ brand, model }: Props): ReactNode {
+/**
+ * Collapsed "Reviews & test drives" section: exact infocar.ua pages from the crawled catalog (fetched once the
+ * section is opened) plus search links to the other review sites. Hidden for a car with no make/model to go on.
+ */
+export default function ReviewLinks({ brand, model, year }: Props): ReactNode {
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const links = reviewLinks(brand, model)
+  const catalog = useQuery({ ...reviewsQuery(brand ?? '', model ?? '', year), enabled: !!brand && open })
 
   if (links.length === 0) return null
 
@@ -52,6 +60,22 @@ export default function ReviewLinks({ brand, model }: Props): ReactNode {
       >
         <div className="overflow-hidden">
           <ul className="mt-3 space-y-1.5">
+            {catalog.data?.testDrive && (
+              <InfocarReviewRows
+                label={t('reviews.infocarTestDrives')}
+                brand={brand ?? ''}
+                match={catalog.data.testDrive}
+              />
+            )}
+
+            {catalog.data?.reviews && (
+              <InfocarReviewRows
+                label={t('reviews.infocarOwnerReviews')}
+                brand={brand ?? ''}
+                match={catalog.data.reviews}
+              />
+            )}
+
             {links.map(link => (
               <li key={link.site}>
                 <a

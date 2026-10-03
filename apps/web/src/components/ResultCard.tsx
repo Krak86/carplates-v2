@@ -24,7 +24,7 @@ import FieldInfoButton from '@/components/FieldInfoButton'
 import NearbyServices from '@/components/NearbyServices'
 import RegistrationTimeline from '@/components/RegistrationTimeline'
 import { getFuelIcon } from '@/components/ResultCard.helpers'
-// import ReviewLinks from '@/components/ReviewLinks' // hidden for now, see the render below
+import ReviewLinks from '@/components/ReviewLinks'
 import FuelEconomy from '@/components/FuelEconomy'
 import InfoPopover from '@/components/InfoPopover'
 import InfoText from '@/components/InfoText'
@@ -460,8 +460,7 @@ export default function ResultCard({ data }: Props): ReactNode {
         <FuelEconomy brand={c.brand} model={c.model} year={c.makeYear} fuel={c.fuel} capacity={c.capacity} />
         <CarWikiInfo wiki={wiki} hasQuery={hasWikiQuery} />
         <VehiclePhotos brand={c.brand} model={c.model} year={c.makeYear} />
-        {/* Hidden until the infocar version catalog is built (PLAN.md "Car reviews"). */}
-        {/* <ReviewLinks brand={c.brand} model={c.model} /> */}
+        <ReviewLinks brand={c.brand} model={c.model} year={c.makeYear} />
         <NearbyServices brand={c.brand} />
       </Card>
     </div>

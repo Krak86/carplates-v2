@@ -24,6 +24,15 @@ export { brandLogoUrl, brandSlug } from './brandLogo.js'
 export { dealerUrl } from './dealerUrl.js'
 export { wikiUrl, wikiDomain } from './wikiUrl.js'
 export { REVIEW_SITES, reviewLinks, type ReviewSiteId, type ReviewSiteLang, type ReviewLink } from './reviewLinks.js'
+export {
+  INFOCAR_TREES,
+  infocarLookup,
+  type InfocarTree,
+  type InfocarRow,
+  type InfocarVersionLink,
+  type InfocarMatch,
+  type InfocarMatches
+} from './infocarLookup.js'
 export { makeKey, modelKey, brandCandidateKey } from './vehicleKey.js'
 export {
   CRASH_SOURCES,
@@ -113,6 +122,7 @@ export {
   wikiImageAttributionSchema,
   wikiImageSchema,
   wikiInfoResponseSchema,
+  reviewsResponseSchema,
   brandSuggestionSchema,
   brandSuggestionsResponseSchema,
   modelSuggestionSchema,
@@ -168,6 +178,7 @@ export {
   type WikiImageAttribution,
   type WikiImage,
   type WikiInfo,
+  type ReviewsResponse,
   type BrandSuggestion,
   type BrandSuggestionsResponse,
   type ModelSuggestion,

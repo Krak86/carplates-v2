@@ -161,7 +161,7 @@ Do that before trusting accuracy, and before investing in steps 2-4.
 
 **Step 1 — own-model OCR service, single-shot ✅ DONE (2026-09-27).** Ships
 as an automatically-preferred alternative to the Plate Recognizer cloud call,
-inside the *existing* camera/upload flow — validates the model with zero AR
+inside the _existing_ camera/upload flow — validates the model with zero AR
 complexity in the same change.
 
 - `services/alpr/` (new top-level dir, deliberately **outside** the pnpm
@@ -247,7 +247,7 @@ figure**). Findings and fixes:
   EXIF; a direct upload did not.)
 - **Truncated reads.** The detector box is tight/cut on angled plates
   ("BC15"): `app.py` now OCRs a padded crop and retries with wider padding when
-  the read isn't 8 chars. A box touching an *inner tile edge* is a plate cut by
+  the read isn't 8 chars. A box touching an _inner tile edge_ is a plate cut by
   a seam ("388CX" beat "BE8388CX" in the merge) — such boxes are skipped and
   full-length reads win the duplicate merge.
 - **Candidate filter.** `isUaPlate` (`packages/shared/src/plate.ts`) keeps only
@@ -289,14 +289,15 @@ figure**). Findings and fixes:
   `labels.csv` there is still no recall number.
 - **Legacy-shape junk — fixed 2026-10-01.** `recognize.mapper.ts` drops a
   digits-first (`DDLLDDDD`) read scoring < 0.7 (`LEGACY_MIN_SCORE`).
-- **Idea, not built:** use the photo date to show who held the plate *on that
-  date* (the registry keeps full history), and flag a read that only matches an
+- **Idea, not built:** use the photo date to show who held the plate _on that
+  date_ (the registry keeps full history), and flag a read that only matches an
   older owner as a likely misread.
 
 **Improving the model on hard images — TODO (eval set partly done).** The stock
 `yolo-v9-t-384` detector + `cct-xs-v2-global` OCR miss plates a human reads
 fine: rain, night/dark, motion blur, dirt/mud, steep angles, tiny plates.
 Plan, in order — stop as soon as recall is good enough:
+
 1. **Build an eval set first — photos collected (88), labels still missing;
    `eval.mjs` exists, `labels.csv` and the false-positive count don't.** Collect ~100-300 real Ukrainian photos (incl.
    the hard cases above) into a gitignored `services/alpr/eval/` with a
@@ -320,7 +321,7 @@ Plan, in order — stop as soon as recall is good enough:
    which makes a small custom head realistic). Start from the global model's
    weights, train with heavy augmentation (blur, noise, brightness, rain
    streaks, perspective), export ONNX, swap in `app.py`, re-run the eval.
-4. **Fine-tune the detector** only if step 2-3 leave missed *detections*
+4. **Fine-tune the detector** only if step 2-3 leave missed _detections_
    (check per-image whether the box was absent vs. the text wrong): train a
    YOLOv9-t on labelled boxes (`open-image-models` documents its training
    recipe; licensing stays MIT as long as nothing Ultralytics is pulled in —
@@ -459,7 +460,7 @@ above once scoped, or dropped if research says no.
 - ✅ Vehicle-kind icon (animated, colored by registry color) + brand logo on
   the result card — done, see Phase 1.5.
 - ✅ **VIN decode overview + plate-card split** — done 2026-10-02 (tabs, VIN anatomy, equipment map, engine/origin
-  cards, grouped details; plate card now has separate *Registration history* and *VIN decode* sections) — see
+  cards, grouped details; plate card now has separate _Registration history_ and _VIN decode_ sections) — see
   `docs/plan-done.md`. Open follow-ups:
   - ⏳ VIN page: headline the current plate (`registry.plate` / `registry.plateInferred`, already returned by
     `/api/vin/:vin`, still unused there); retitle the registry timeline to match `result.historyTitle`.
@@ -493,7 +494,7 @@ place. Fields (all required): `id`, `brand`, `model`, `cartype`, `color`,
 `illegalseizuredate`, `organunit`, `insertdate`. No status / found-date field.
 Record count unverified (~80-100k estimated) — check on first download.
 
-**Key finding:** the file is a full snapshot of the *current* list, so a found
+**Key finding:** the file is a full snapshot of the _current_ list, so a found
 car most likely just disappears from the next file. CKAN revision history is
 patchy (see registry data). We must keep our own history → tombstones, never
 hard-delete.
@@ -532,21 +533,19 @@ with a fixture test.
 
 ### Car reviews (text) then YouTube — planned (2026-10-03), step 0 shipped
 
-**Pick-up point for the next session — infocar full ingest, in this order:** Step 1
-(catalog: test-drive tree + owner-reviews tree) → Step 2 (videos). One `scripts/` ingest
-family (`ingest:infocar`, `ingest:infocar:videos`) with shared fetch/cache/robots helpers,
-one migration per table, one API endpoint (`/api/reviews`), then un-hide the UI block.
-Start by writing the pure parsers + fixture tests from saved HTML (the user runs the real
-crawl: the assistant's shell/fetch calls were denied this session). `GOOGLE_API_KEY` is in
-`apps/api/.env`. Other sites (avtoporadnyk, auto-blog, drive2, driver.top, nv.ua) come after.
+**Pick-up point for the next session:** Step 1 (infocar catalog, both trees) is shipped — what is left of it is the
+match-rate measurement (below). Next is **Step 2 (infocar videos)**, as one more `scripts/` ingest
+(`ingest:infocar:videos`) reusing the fetch/cache/robots helpers in `infocar.ts`, one migration, and a
+`/api/reviews` extension. `GOOGLE_API_KEY` is in `apps/api/.env`. Other sites (avtoporadnyk, auto-blog, drive2,
+driver.top, nv.ua) come after.
 
 **Step 0 — shipped (2026-10-03): link-only helper, no fetching.**
 `reviewLinks(brand, model)` in `packages/shared/src/reviewLinks.ts` returns each site's
 own page/search (URL patterns opened and confirmed 2026-10-03): infocar
 `/test-drive/<brand>/<model>/` + `/reviews/<brand>/<model>/` (brand page when the model
 isn't a plain-Latin slug), auto-blog `/uk/?s=`, drive2 `/search?text=` tagged `ru`.
-**The UI block is currently hidden** (commented out in `ResultCard.tsx`) until the infocar
-brand→model→version catalog (year-range links like Ceed 2018–2021) replaces these. avtoporadnyk (no working search) and nv.ua
+**Superseded by Step 1:** the infocar links now come from the crawled catalog, the UI block is live,
+and the guessed infocar URLs described here were removed. avtoporadnyk (no working search) and nv.ua
 (403, `/search` disallowed) are left out; drive2 model pages need a numeric id so can't
 be built from a name. No year (no verified year/generation URL). Known gap: an infocar
 model slug the registry text doesn't match is a dead link → curate a verified
@@ -565,15 +564,15 @@ Order: **A. text reviews → B. YouTube.**
 
 Sources (checked 2026-10-02/03, robots.txt + one page each — volumes unmeasured):
 
-| Source | Lang | Access | Role |
-|---|---|---|---|
-| infocar.ua `/test-drive/`, `/reviews/` | uk | open; no `/*?`, `/forum/`, `/search.html`; no sitemap → crawl brand pages. URL has brand/model | primary editorial |
-| avtoporadnyk.com.ua | uk | open, sitemap, model-tagged | editorial |
-| auto-blog.com.ua | uk/ru | open, WP REST `/wp-json/wp/v2/posts`; filter to "огляди" category | editorial (low yield) |
-| nv.ua test-drive | uk | robots OK + sitemaps, but fetch got 403 | optional, skip if bot-walled |
-| driver.top | uk | robots fully open, sitemap. **UGC social network** (`/car/ID`, `/exp/ID` posts, car profiles with engine/gearbox) — owner posts, not editorial reviews; some features premium-only | owner experience; check what `/exp/` really contains first |
-| drive2.ru | **ru** (tag `lang='ru'`) | **robots.txt blocks every bot except Google/Bing/Yandex/Twitter/DDG/archive, incl. ClaudeBot/GPTBot; catch-all disallow** | **gated — see below** |
-| autoarmor.com.ua | — | shop reviews, not cars | dropped |
+| Source                                 | Lang                     | Access                                                                                                                                                                             | Role                                                       |
+| -------------------------------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| infocar.ua `/test-drive/`, `/reviews/` | uk                       | open; no `/*?`, `/forum/`, `/search.html`; no sitemap → crawl brand pages. URL has brand/model                                                                                     | primary editorial                                          |
+| avtoporadnyk.com.ua                    | uk                       | open, sitemap, model-tagged                                                                                                                                                        | editorial                                                  |
+| auto-blog.com.ua                       | uk/ru                    | open, WP REST `/wp-json/wp/v2/posts`; filter to "огляди" category                                                                                                                  | editorial (low yield)                                      |
+| nv.ua test-drive                       | uk                       | robots OK + sitemaps, but fetch got 403                                                                                                                                            | optional, skip if bot-walled                               |
+| driver.top                             | uk                       | robots fully open, sitemap. **UGC social network** (`/car/ID`, `/exp/ID` posts, car profiles with engine/gearbox) — owner posts, not editorial reviews; some features premium-only | owner experience; check what `/exp/` really contains first |
+| drive2.ru                              | **ru** (tag `lang='ru'`) | **robots.txt blocks every bot except Google/Bing/Yandex/Twitter/DDG/archive, incl. ClaudeBot/GPTBot; catch-all disallow**                                                          | **gated — see below**                                      |
+| autoarmor.com.ua                       | —                        | shop reviews, not cars                                                                                                                                                             | dropped                                                    |
 
 **drive2 gate (decision needed):** the owner logbooks are the best owner content,
 but the site explicitly disallows our crawler; scraping it would go against its
@@ -582,7 +581,34 @@ rules and we won't evade them (UA spoofing, proxies). Options, in order:
 tagged RU, no fetching — zero risk, ships in MVP; (2) ask drive2 for written
 permission / an API or partnership, then add an adapter; (3) never: bypass.
 
-**Step 1 — infocar catalog ingest (next; start here in a new session)**
+**Step 1 — infocar catalog ingest (shipped 2026-10-03; match-rate measurement left)**
+
+**Status (2026-10-03): shipped, except the match-rate measurement.** Built: migration `0020_infocar_versions.sql` +
+Drizzle table; `scripts/src/infocar-parse.ts`, `infocar-robots.ts`, `infocar.ts` (+ tests on the saved pages in
+`scripts/src/fixtures/infocar/` — raw windows-1251, `-text` in `.gitattributes`, prettier-ignored); `pnpm ingest:infocar
+[-- --brand kia --limit N --dry-run --refresh]`, `ingest:infocar:csv` (also in `ingest:ratings:csv`),
+`export:infocar:csv`; `infocarLookup` in `packages/shared`; `GET /api/reviews?brand=&model=&year=`
+(`apps/api/src/reviews/`, `reviewsResponseSchema`); web: `reviewsQuery` + a `reviews` offline-cache group (cap 400),
+`ReviewLinks.tsx` un-hidden in `ResultCard` (fetches when the section is opened) with `InfocarReviewRows.tsx`. The
+guessed infocar URLs were removed from `reviewLinks` (auto-blog + drive2 searches remain).
+
+**First full crawl:** 153 brands (88 with test drives) → 5546 rows. Reviews: 1363 models / 1171 versions; test drives:
+1152 models / 1860 versions; 1681 model rows have no version cards (they link to the model page); every version has a
+year range; zero crawl failures. Committed `seed-data/infocar-versions.csv.gz` (85 KB).
+
+**Still to do:** build step 5 — measure the match rate of the registry's top (brand, model, year) combos against the
+catalog and list the misses (a model-slug alias table if misses are common); the year-filtered owner-reviews link
+(needs the filter's real GET param names). **Not verified end to end:** the live endpoint and UI (shell access to
+localhost was denied) — covered by the service unit test and the lookup/helper tests; open a Kia/Skoda result and expand
+"Reviews & test drives" to confirm.
+
+Facts found while parsing: the `/test-drive/` page lists only ~15 brands + a numeric-id `<select>`, so **brands come
+from `reviews/marks.html`** (153) and each is tried in both trees (404 → skipped); marks has no Russian/Soviet section
+markup — `is_ru` is the second alphabetical run (the list is sorted by display name, so slugs wobble: only a big
+first-letter drop counts); version-card `title` attrs say "Отзывы про …" in both trees (copy-paste) — name/years are
+read from the card's `<span>`s; a model with no carousel gets just its model row. **infocar never writes an open-ended
+range** — a model still in production ends at the current year (max `year_to` 2026), so the lookup's
+`null year_to = current year` rule is only a safety net.
 
 Goal: crawl infocar's whole brand → model → version tree once and store, per version, the
 name, year range and URL, so a car (brand, model, year) links to its exact generation page
@@ -876,7 +902,7 @@ Design (follow the NCAP pattern — `scripts/src/euroncap.ts` + committed gz CSV
     aggregated gz CSV. Prod loads the committed CSV (`ingest:fuel:csv`, seconds) — same as the NCAP tables, which
     also have no scheduler. Store the source file's `last_modified`/release year in the table (or a small
     `ingested_resources`-style row) so the script can say "already current" and skip. If a VPS exists (Phase 4),
-    optionally a monthly job that only *checks* for a newer release and notifies, never auto-overwrites.
+    optionally a monthly job that only _checks_ for a newer release and notifies, never auto-overwrites.
 - **Score (0-100):** linear on CO2 g/km, clamped — e.g. 0 g/km → 0, ≥ ~300 g/km → 100 (constants in
   `packages/shared`, `CONSTANT_CASE`, tune against the real distribution of matched rows). Pure EV → 0 (tailpipe
   only; label as "tailpipe"). Bands for the icon colour: green/yellow/orange/red. Hybrids/PHEVs: use the
