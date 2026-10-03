@@ -1,11 +1,11 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
-import { regionName } from '@carplates/shared'
 import type { Registration } from '@carplates/shared'
 
 import { cn } from '@/lib/cn'
 import { depMapsUrl } from '@/lib/maps'
+import { plateRegionLabel } from '@/lib/plate-region'
 
 type Props = {
   actions: Registration[]
@@ -29,7 +29,7 @@ export default function RegistrationTimeline({ actions, currentPlate, currentVeh
       {actions.map((action, index) => {
         const isLast = index === actions.length - 1
         // Foreign/transit prefixes and plateless (2026+) rows have no oblast match — say so rather than going blank.
-        const region = (action.plate && regionName(action.plate)) || t('result.regionUnknown')
+        const region = plateRegionLabel(action.plate, t)
         const isDifferentVehicle =
           !!currentVehicle && (action.brand !== currentVehicle.brand || action.model !== currentVehicle.model)
         const vehicleLabel = [action.brand, action.model].filter(Boolean).join(' ')

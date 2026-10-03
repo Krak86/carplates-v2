@@ -2,6 +2,8 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { isUaPlate, normalizePlate, regionName } from '@carplates/shared'
 
+import NoRegionBadge from '@/components/NoRegionBadge'
+
 type Props = {
   value: string
 }
@@ -11,7 +13,6 @@ export default function NotFoundInfo({ value }: Props): ReactNode {
   const { t } = useTranslation()
   const plate = normalizePlate(value)
   const isPlate = isUaPlate(value)
-  const region = isPlate ? regionName(plate) : undefined
 
   return (
     <div className="w-full max-w-2xl rounded-md bg-[var(--color-surface)]/20 px-3 py-2 text-left">
@@ -23,7 +24,7 @@ export default function NotFoundInfo({ value }: Props): ReactNode {
           <dd className="font-mono font-semibold">{plate}</dd>
 
           <dt className="text-[var(--color-muted)]">{t('result.region')}</dt>
-          <dd>{region ?? t('result.regionUnknown')}</dd>
+          <dd>{regionName(plate) ?? <NoRegionBadge plate={plate} />}</dd>
         </dl>
       )}
 

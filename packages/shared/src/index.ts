@@ -7,7 +7,16 @@ export {
   isUaPlate,
   isLegacyUaPlate
 } from './plate.js'
-export { REGIONS, REGION_NAMES, regionName, platePrefixesForRegion } from './regions.js'
+export {
+  LEGACY_REGIONS,
+  PLATE_SERIES,
+  REGIONS,
+  REGION_NAMES,
+  platePrefixesForRegion,
+  plateSeries,
+  regionName,
+  type PlateSeries
+} from './regions.js'
 export { VEHICLE_KINDS, resolveVehicleKind, sourceValueForKind, type VehicleKind } from './vehicleKind.js'
 export {
   VEHICLE_COLORS,

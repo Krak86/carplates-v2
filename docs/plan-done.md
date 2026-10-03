@@ -1695,3 +1695,21 @@ export:iihs:csv` committed `scripts/seed-data/iihs-ratings.csv.gz`
   much broader registry-model -> infocar-slug matching plus `infocarBrandSlug` (mercedes/ssang-yong/vaz aliases) in
   `packages/shared/src/infocarLookup.ts`; section ❓ info, 🔗 share (`?section=reviews`), infocar and DRIVE2 logos
   in `apps/web`; Auto-Blog dropped. Match-rate numbers and the hidden watermark experiment are in PLAN.md.
+
+- **Regionless plates: legacy codes + DІ/ЕD series ✅ DONE (2026-10-03)** — scan of `current_registration` (16.7M rows)
+  for plates `regionName` couldn't place: 68k `LLDDDDLL` with an unknown prefix (63k `DІ`, 4.3k `ОО`, 241 `ЕD`, 51 `ІІ`,
+  ~20 noise), 1.3M legacy digits-first (`11АА1234`) and ~80k other shapes (6 digits, temporary/transit, junk).
+  - `packages/shared/src/regions.ts`: `LEGACY_REGIONS` (numeric codes 01–27 → oblast, each checked against the
+    modal `dep` of that code — 25 = Чернігів, 26 = Чернівці, not alphabetical; stray 34/50 stay unmapped). `regionName`
+    falls back to it for the digits-first shape only; `platePrefixesForRegion` includes the codes (region search).
+    `REGIONS` itself stays letters-only (`seed.ts` builds synthetic plates from its keys).
+  - `PLATE_SERIES` + `plateSeries()`: `DІ` (Latin D + Cyrillic І) = re-registration via Diia, `ЕD` = via the MIA Driver's
+    Cabinet (ГСЦ МВС, 2026-01-20; hsc.gov.ua blocks scrapers — details from search summaries). The letters encode the service
+    channel, not a region. `ОО`/`ІІ` meaning unknown — they get the generic explanation.
+  - `migrations/0022_legacy_plate_regions.sql` adds the 27 codes to `plate_regions` → `stats_by_region*` count the
+    legacy plates after `pnpm db:refresh-stats` (~10 min on the full data). Known gap: odd shapes starting 01–27
+    (`03ВZY191`) are counted by stats/search but show no region on the plate page.
+  - `apps/web`: `lib/plate-region.ts` + `NoRegionBadge` (❓ `InfoPopover`: what Diia / Driver's Cabinet are, or the generic
+    reasons — temporary/transit, foreign, data noise) on the result card and not-found panel; timeline and exports use
+    `plateRegionLabel`. Strings `result.series.*` / `result.noRegion.*` in ua/ru/en. Changing nothing in the Zod
+    schemas, so offline caches stay valid.

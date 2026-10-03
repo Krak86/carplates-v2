@@ -1,4 +1,4 @@
-import { brandLogoUrl, regionName } from '@carplates/shared'
+import { brandLogoUrl } from '@carplates/shared'
 import type {
   CncapRatingsResponse,
   EuroNcapRatingsResponse,
@@ -15,6 +15,7 @@ import type {
 
 import { formatRange } from '@/components/CO2Badge.helpers'
 import { safetyVideoUrl } from '@/lib/api'
+import { plateRegionLabel } from '@/lib/plate-region'
 import {
   filterByBodyStyle,
   formatPercent,
@@ -189,7 +190,7 @@ function buildVinDecodeSection(input: ExportInput, t: Translate): ExportKeyValue
 }
 
 function historyRow(action: Registration, t: Translate): string[] {
-  const region = (action.plate && regionName(action.plate)) || t('result.regionUnknown')
+  const region = plateRegionLabel(action.plate, t)
   return [
     action.dReg ?? '—',
     action.plate ?? '—',

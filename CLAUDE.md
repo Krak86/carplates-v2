@@ -118,6 +118,9 @@ Vitest 4 · ESLint 10 (flat config)
   is nullable since the 2026 plate-removal (ГСЦ МВС order №67/ОД, see `docs/plan-done.md`)
   — such rows are keyed on `vin` instead, and the API follows the VIN, not the
   plate, to reach them (`plate.service.ts`, `vin.service.ts`).
+- **Plate → region**: `regionName` (`packages/shared/src/regions.ts`) = letter prefix (`REGIONS`) or, for digits-first
+  legacy plates, `LEGACY_REGIONS`. `DІ`/`ЕD` plates (`plateSeries`) are online-service series with no region by design.
+  `registry.plate_regions` (stats rollups) mirrors both tables — change them together, in a new migration.
 - **Ingest column mapping is header-name-driven, not positional** — see
   `scripts/src/transform.ts`. The source layout has changed column set, column
   order, and date format almost every year; a positional parser silently maps

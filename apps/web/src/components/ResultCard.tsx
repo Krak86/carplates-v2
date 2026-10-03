@@ -22,6 +22,7 @@ import CopyButton from '@/components/CopyButton'
 import FavoriteButton from '@/components/FavoriteButton'
 import FieldInfoButton from '@/components/FieldInfoButton'
 import NearbyServices from '@/components/NearbyServices'
+import NoRegionBadge from '@/components/NoRegionBadge'
 import RegistrationTimeline from '@/components/RegistrationTimeline'
 import { getFuelIcon } from '@/components/ResultCard.helpers'
 import ReviewLinks from '@/components/ReviewLinks'
@@ -212,6 +213,11 @@ export default function ResultCard({ data }: Props): ReactNode {
               <CopyButton text={data.plate} label={t('field.plate')} className="ml-1" />
               {data.region && (
                 <span className="ml-1 rounded bg-[var(--color-surface)]/20 px-1.5 py-0.5">, {data.region}</span>
+              )}
+              {!data.region && (
+                <span className="ml-1 rounded bg-[var(--color-surface)]/20 px-1.5 py-0.5">
+                  , <NoRegionBadge plate={data.plate} />
+                </span>
               )}
               {c.plateInferred && (
                 <span
