@@ -480,6 +480,8 @@
   "history.clearAll": "Очистити все",
   "history.confirmClearAll": "Видалити всю історію пошуку? Це неможливо скасувати.",
   "history.deleteOne": "Видалити",
+  "history.notFound": "не знайдено",
+  "history.notFoundHint": "Номер коректний, але запису в реєстрі не знайдено",
   "favorites.title": "Обране",
   "favorites.viewLink": "Переглянути обране",
   "favorites.empty": "Обране порожнє.",

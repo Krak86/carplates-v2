@@ -65,6 +65,8 @@ const CACHE_MAX = 300
 const UPSTREAM_TIMEOUT_MS = 10_000
 // One of Wikimedia's standard thumbnail steps (non-standard widths get throttled); ~2x the 672px card.
 const THUMB_WIDTH = 1280
+// Intro-section cap (MediaWiki cuts at a sentence boundary); roughly the whole lead of a typical car article.
+const EXTRACT_CHARS = 1800
 
 @Injectable()
 export class WikiService {
@@ -126,7 +128,7 @@ export class WikiService {
     url.searchParams.set('prop', 'pageimages|extracts')
     url.searchParams.set('exintro', '1')
     url.searchParams.set('explaintext', '1')
-    url.searchParams.set('exchars', '600')
+    url.searchParams.set('exchars', String(EXTRACT_CHARS))
     url.searchParams.set('piprop', 'original|thumbnail')
     url.searchParams.set('pithumbsize', String(THUMB_WIDTH))
     url.searchParams.set('format', 'json')

@@ -5,6 +5,7 @@ import { ZodValidationPipe } from 'nestjs-zod'
 
 import { AllExceptionsFilter } from './common/all-exceptions.filter.js'
 import { DbModule } from './db/db.module.js'
+import { MissedModule } from './missed/missed.module.js'
 import { FuelModule } from './fuel/fuel.module.js'
 import { HealthController } from './health/health.controller.js'
 import { PhotosModule } from './photos/photos.module.js'
@@ -22,6 +23,7 @@ import { WikiModule } from './wiki/wiki.module.js'
   imports: [
     SentryModule.forRoot(),
     DbModule,
+    MissedModule,
     PlateModule,
     VinModule,
     RecognizeModule,

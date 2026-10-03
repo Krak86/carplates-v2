@@ -6,6 +6,7 @@ import { desc, eq } from 'drizzle-orm'
 
 import { DbService } from '../db/db.service.js'
 import { loadEnv } from '../env.js'
+import { MissedService } from '../missed/missed.service.js'
 import { toRegistrationDto } from '../plate/plate.dto.js'
 
 interface NhtsaResult {
@@ -21,7 +22,10 @@ export class VinService {
   /** VIN decodes are immutable — a plain bounded map is enough until Redis (Phase 4). Registry data is not cached here: it's a local DB read, and it changes with every ingest. */
   private readonly cache = new Map<string, VinDecodeResponse>()
 
-  constructor(@Inject(DbService) private readonly dbService: DbService) {}
+  constructor(
+    @Inject(DbService) private readonly dbService: DbService,
+    @Inject(MissedService) private readonly missed: MissedService
+  ) {}
 
   async decode(rawVin: string): Promise<VinDecodeResponse> {
     const vin = rawVin.trim().toUpperCase()
@@ -30,6 +34,7 @@ export class VinService {
     }
 
     const registry = await this.lookupRegistry(vin)
+    if (!registry) this.missed.recordVin(vin)
     const cached = this.cache.get(vin)
     if (cached) return { ...cached, registry }
 

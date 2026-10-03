@@ -8,6 +8,8 @@ export type HistoryEntry = {
   value: string
   label: string | null
   date: number
+  /** `false` = a format-valid search that matched nothing in the registry; absent on older entries (= found). */
+  found?: boolean
 }
 
 const DB_NAME = 'carplates.history'
@@ -15,10 +17,17 @@ const DB_VERSION = 1
 const STORE = 'visits'
 
 /** Upserts a visit keyed by kind+value, refreshing its date on revisit. Silently no-ops if storage is unavailable (private mode). */
-export async function recordVisit(kind: HistoryKind, value: string, label: string | null): Promise<void> {
+export async function recordVisit(kind: HistoryKind, value: string, label: string | null, found = true): Promise<void> {
   try {
     const db = await openDb(DB_NAME, DB_VERSION, STORE)
-    const entry: HistoryEntry = { id: `${kind}:${value}`, kind, value, label, date: Date.now() }
+    const entry: HistoryEntry = {
+      id: `${kind}:${value}`,
+      kind,
+      value,
+      label,
+      date: Date.now(),
+      ...(found ? {} : { found: false })
+    }
     await runTx(db, STORE, 'readwrite', store => store.put(entry))
     db.close()
   } catch {

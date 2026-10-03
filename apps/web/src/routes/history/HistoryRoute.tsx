@@ -95,6 +95,7 @@ export default function HistoryRoute(): ReactNode {
                         value={entry.value}
                         label={entry.label}
                         date={entry.date}
+                        notFound={entry.found === false}
                         savedOffline={isSavedOffline(entry.kind, entry.value)}
                         deleteLabel={t('history.deleteOne')}
                         onDelete={() => deleteOne.mutate(entry.id)}

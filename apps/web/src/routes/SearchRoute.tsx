@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { useLocation, useParams, useSearchParams } from 'react-router'
-import { classifyQuery } from '@carplates/shared'
+import { classifyQuery, isUaPlate, isVin, normalizePlate } from '@carplates/shared'
 
 import LoadErrorBoundary from '@/components/LoadErrorBoundary'
 import NotFoundInfo from '@/components/NotFoundInfo'
@@ -106,8 +106,13 @@ export default function SearchRoute(): ReactNode {
     if (!raw || active.isPending) return
     capture(kind === 'vin' ? 'vin_searched' : 'plate_searched', { found: active.isSuccess })
 
-    const record = async (visitKind: 'plate' | 'vin', value: string, label: string | null): Promise<void> => {
-      await recordVisit(visitKind, value, label)
+    const record = async (
+      visitKind: 'plate' | 'vin',
+      value: string,
+      label: string | null,
+      found = true
+    ): Promise<void> => {
+      await recordVisit(visitKind, value, label, found)
       await queryClient.invalidateQueries({ queryKey: historyQuery().queryKey })
     }
 
@@ -119,10 +124,26 @@ export default function SearchRoute(): ReactNode {
         formatVehicleLabel({ brand: c.brand, model: c.model, year: c.makeYear, color: c.color })
       )
     }
+    // A 404 for a format-valid plate/VIN is kept too (flagged), so the history shows it was looked up.
+    if (active.error instanceof ApiError && active.error.status === 404) {
+      if (kind === 'plate' && isUaPlate(raw)) void record('plate', normalizePlate(raw), null, false)
+      if (kind === 'vin' && isVin(raw)) void record('vin', raw.replace(/\s+/g, '').toUpperCase(), null, false)
+    }
     if (kind === 'vin' && vin.isSuccess) {
       void record('vin', vin.data.vin, null)
     }
-  }, [raw, kind, active.isPending, active.isSuccess, plate.isSuccess, plate.data, vin.isSuccess, vin.data, queryClient])
+  }, [
+    raw,
+    kind,
+    active.isPending,
+    active.isSuccess,
+    active.error,
+    plate.isSuccess,
+    plate.data,
+    vin.isSuccess,
+    vin.data,
+    queryClient
+  ])
 
   useEffect(() => {
     if (showingSavedCopy) capture('offline_hit', { kind })

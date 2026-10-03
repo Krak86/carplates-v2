@@ -21,6 +21,7 @@ export {
   cncapRatings,
   kncapRatings,
   infocarVersions,
+  missedLookups,
   iihsRatings,
   fuelEconomy,
   statsFuel,

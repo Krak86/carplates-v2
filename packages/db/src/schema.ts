@@ -8,6 +8,7 @@ import {
   integer,
   jsonb,
   pgSchema,
+  primaryKey,
   real,
   smallint,
   text,
@@ -488,3 +489,19 @@ export const statsSafety = registry.table(
   t => [index('ix_stats_safety_year').on(t.makeYear), index('ix_stats_safety_brand').on(t.brand)]
 )
 export type StatsSafetyInsert = typeof statsSafety.$inferInsert
+
+/**
+ * Format-valid plate/VIN searches that matched nothing in the registry (e.g. a plate not yet issued or ingested) —
+ * see migrations/0021_missed_lookups.sql. Written by the API only.
+ */
+export const missedLookups = registry.table(
+  'missed_lookups',
+  {
+    kind: text('kind').notNull(),
+    value: text('value').notNull(),
+    hits: integer('hits').notNull().default(1),
+    firstSeen: timestamp('first_seen', { withTimezone: true }).notNull().defaultNow(),
+    lastSeen: timestamp('last_seen', { withTimezone: true }).notNull().defaultNow()
+  },
+  t => [primaryKey({ columns: [t.kind, t.value] }), index('ix_missed_lookups_last_seen').on(t.lastSeen)]
+)

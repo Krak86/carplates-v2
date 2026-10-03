@@ -480,6 +480,8 @@
   "history.clearAll": "Очистить всё",
   "history.confirmClearAll": "Удалить всю историю поиска? Это действие необратимо.",
   "history.deleteOne": "Удалить",
+  "history.notFound": "не найдено",
+  "history.notFoundHint": "Номер корректный, но записи в реестре не найдено",
   "favorites.title": "Избранное",
   "favorites.viewLink": "Просмотреть избранное",
   "favorites.empty": "Список избранного пуст.",

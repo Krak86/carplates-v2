@@ -5,11 +5,15 @@ import type { PlateHistoryResponse, PlateLookupResponse } from '@carplates/share
 import { and, desc, eq, isNull, or, type SQL } from 'drizzle-orm'
 
 import { DbService } from '../db/db.service.js'
+import { MissedService } from '../missed/missed.service.js'
 import { toRegistrationDto } from './plate.dto.js'
 
 @Injectable()
 export class PlateService {
-  constructor(@Inject(DbService) private readonly dbService: DbService) {}
+  constructor(
+    @Inject(DbService) private readonly dbService: DbService,
+    @Inject(MissedService) private readonly missed: MissedService
+  ) {}
 
   /**
    * Match this exact plate, plus — when it has a VIN — any row that shares
@@ -29,6 +33,7 @@ export class PlateService {
     const [current] = await db.select().from(currentRegistration).where(eq(currentRegistration.plate, plate)).limit(1)
 
     if (!current) {
+      this.missed.recordPlate(plate)
       throw new NotFoundException(`No registration found for plate ${plate}`)
     }
 

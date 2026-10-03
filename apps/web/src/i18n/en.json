@@ -472,6 +472,8 @@
   "history.clearAll": "Clear all",
   "history.confirmClearAll": "Delete all search history? This cannot be undone.",
   "history.deleteOne": "Delete",
+  "history.notFound": "not found",
+  "history.notFoundHint": "Valid number, but no registry record was found",
   "favorites.title": "Favorites",
   "favorites.viewLink": "View favorites",
   "favorites.empty": "No favorites yet.",

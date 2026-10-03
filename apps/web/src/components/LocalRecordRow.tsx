@@ -12,6 +12,7 @@ type Props = {
   label: string | null
   date: number
   savedOffline?: boolean
+  notFound?: boolean
   deleteLabel: string
   onDelete: () => void
 }
@@ -22,6 +23,7 @@ export default function LocalRecordRow({
   label,
   date,
   savedOffline = false,
+  notFound = false,
   deleteLabel,
   onDelete
 }: Props): ReactNode {
@@ -48,6 +50,14 @@ export default function LocalRecordRow({
         {value}
         {label ? ` — ${label}` : ''}
       </Link>
+      {notFound && (
+        <span
+          title={t('history.notFoundHint')}
+          className="shrink-0 rounded-full bg-amber-500/15 px-1.5 py-0.5 text-xs text-amber-700 dark:text-amber-300"
+        >
+          {t('history.notFound')}
+        </span>
+      )}
       {savedOffline && (
         <span
           title={t('offline.savedHint')}
