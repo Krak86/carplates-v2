@@ -394,6 +394,32 @@ export type CarVideoRow = typeof carVideos.$inferSelect
 export type CarVideoInsert = typeof carVideos.$inferInsert
 
 /**
+ * One e-drive.com.ua owner post (`scripts/src/edrive.ts`), keyed by its e-drive post id and tagged with the make/model/
+ * generation it was found under. Links and facts only — see migrations/0025_owner_posts.sql.
+ */
+export const ownerPosts = registry.table(
+  'owner_posts',
+  {
+    postId: integer('post_id').primaryKey(),
+    url: text('url').notNull(),
+    title: text('title').notNull(),
+    category: text('category'),
+    coverUrl: text('cover_url'),
+    createdAt: date('created_at', { mode: 'string' }),
+    brandSlug: text('brand_slug').notNull(),
+    modelSlug: text('model_slug').notNull(),
+    modelName: text('model_name').notNull(),
+    generationName: text('generation_name'),
+    yearFrom: integer('year_from'),
+    yearTo: integer('year_to'),
+    fetchedAt: timestamp('fetched_at', { withTimezone: true }).notNull().defaultNow()
+  },
+  t => [index('ix_owner_posts_brand_model').on(t.brandSlug, t.modelSlug)]
+)
+export type OwnerPostRow = typeof ownerPosts.$inferSelect
+export type OwnerPostInsert = typeof ownerPosts.$inferInsert
+
+/**
  * One IIHS (US, insurance-industry-funded) vehicle model-year assessment — scraped from
  * iihs.org's own server-rendered detail pages via `scripts/src/iihs.ts` and refreshed by
  * re-running it, same rationale as `cncapRatings`/`kncapRatings` above. `makeKey`/`modelKey`

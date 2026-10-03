@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { carVideos } from '@carplates/db'
-import type { CarVideoRow, InfocarVersionRow } from '@carplates/db'
+import { carVideos, ownerPosts } from '@carplates/db'
+import type { CarVideoRow, InfocarVersionRow, OwnerPostRow } from '@carplates/db'
 
 import type { DbService } from '../db/db.service.js'
 
@@ -26,10 +26,16 @@ function row(overrides: Partial<InfocarVersionRow>): InfocarVersionRow {
 }
 
 /** A DbService whose  resolves to that table's rows — the real filtering is the DB's job. */
-function serviceWith(rows: InfocarVersionRow[], videos: CarVideoRow[] = []): ReviewsService {
+function serviceWith(
+  rows: InfocarVersionRow[],
+  videos: CarVideoRow[] = [],
+  posts: OwnerPostRow[] = []
+): ReviewsService {
   const db = {
     select: () => ({
-      from: (table: unknown) => ({ where: () => Promise.resolve(table === carVideos ? videos : rows) })
+      from: (table: unknown) => ({
+        where: () => Promise.resolve(table === carVideos ? videos : table === ownerPosts ? posts : rows)
+      })
     })
   }
   return new ReviewsService({ db } as unknown as DbService)
@@ -48,6 +54,22 @@ const video: CarVideoRow = {
   modelSlug: 'ceed',
   generationId: null,
   year: null,
+  fetchedAt: new Date(0)
+}
+
+const post: OwnerPostRow = {
+  postId: 80077,
+  url: 'https://e-drive.com.ua/post/80077',
+  title: 'Shell oil at 300 000 km',
+  category: 'Consumables',
+  coverUrl: null,
+  createdAt: '2025-07-01',
+  brandSlug: 'kia',
+  modelSlug: 'ceed',
+  modelName: "Cee'd",
+  generationName: 'II',
+  yearFrom: 2012,
+  yearTo: 2014,
   fetchedAt: new Date(0)
 }
 
@@ -74,7 +96,8 @@ describe('ReviewsService.lookup', () => {
     expect(await service.lookup({ brand: 'МУССТАНГ', model: 'X', year: 2019 })).toEqual({
       testDrive: null,
       reviews: null,
-      videos: []
+      videos: [],
+      ownerPosts: []
     })
   })
 
@@ -90,5 +113,21 @@ describe('ReviewsService.lookup', () => {
         url: 'https://www.infocar.ua/video/19231.html'
       }
     ])
+  })
+
+  it('returns owner posts of the generation covering the car year, without DB-only fields', async () => {
+    const service = serviceWith([row({})], [], [post])
+    const hit = await service.lookup({ brand: 'KIA', model: "CEE'D", year: 2013 })
+    expect(hit.ownerPosts).toEqual([
+      {
+        postId: 80077,
+        url: 'https://e-drive.com.ua/post/80077',
+        title: 'Shell oil at 300 000 km',
+        category: 'Consumables',
+        coverUrl: null,
+        createdAt: '2025-07-01'
+      }
+    ])
+    expect((await service.lookup({ brand: 'KIA', model: "CEE'D", year: 2019 })).ownerPosts).toEqual([])
   })
 })

@@ -44,6 +44,12 @@ export {
   type InfocarMatches
 } from './infocarLookup.js'
 export { MAX_VIDEOS, videoLookup, type InfocarVideoRow } from './infocarVideoLookup.js'
+export {
+  MAX_OWNER_POSTS,
+  edriveModelSlug,
+  ownerPostLookup,
+  type OwnerPostLookupRow
+} from './edriveLookup.js'
 export { countOwners } from './owners.js'
 export { makeKey, modelKey, brandCandidateKey } from './vehicleKey.js'
 export {

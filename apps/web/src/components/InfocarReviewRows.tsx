@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { InfocarMatch } from '@carplates/shared'
 
+import ExpandableList from '@/components/ExpandableList'
 import { infocarLinks, yearFilterLabel } from '@/components/ReviewLinks.helpers'
 
 type Props = {
@@ -23,10 +24,7 @@ export default function InfocarReviewRows({ label, brand, match }: Props): React
   return (
     <li className="px-2 py-1.5">
       <div className="flex flex-wrap items-center justify-between gap-x-2 text-base">
-        <span className="flex items-center gap-1.5 font-medium">
-          <img src="/icons/infocar.png" alt="" width={20} height={20} className="size-5 rounded-sm" />
-          {label}
-        </span>
+        <span className="font-medium">{label}</span>
         {hasStats && (
           <span className="text-sm text-[var(--color-muted)]">
             {t('reviews.stats', { count: match.reviewCount, rating: match.avgRating?.toFixed(1) })}
@@ -34,8 +32,9 @@ export default function InfocarReviewRows({ label, brand, match }: Props): React
         )}
       </div>
 
-      <ul className="mt-1 space-y-1">
-        {links.map(link => (
+      <ExpandableList
+        className="mt-1 space-y-1"
+        items={links.map(link => (
           <li key={link.url}>
             <a
               href={link.url}
@@ -54,7 +53,7 @@ export default function InfocarReviewRows({ label, brand, match }: Props): React
             </a>
           </li>
         ))}
-      </ul>
+      />
     </li>
   )
 }

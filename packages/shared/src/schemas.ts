@@ -502,10 +502,20 @@ export const infocarVideoSchema = z.object({
   publishedAt: z.string().nullable(),
   url: z.string()
 })
+/** An e-drive.com.ua owner post (persisted by `pnpm ingest:edrive`) filed under this car's make/model/generation. */
+export const ownerPostSchema = z.object({
+  postId: z.number().int(),
+  url: z.string(),
+  title: z.string(),
+  category: z.string().nullable(),
+  coverUrl: z.string().nullable(),
+  createdAt: z.string().nullable()
+})
 export const reviewsResponseSchema = z.object({
   testDrive: infocarMatchSchema.nullable(),
   reviews: infocarMatchSchema.nullable(),
-  videos: z.array(infocarVideoSchema)
+  videos: z.array(infocarVideoSchema),
+  ownerPosts: z.array(ownerPostSchema)
 })
 export type ReviewsResponse = z.infer<typeof reviewsResponseSchema>
 

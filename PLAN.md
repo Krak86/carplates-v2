@@ -594,11 +594,11 @@ cars; measured 2026-10-03; 1 request ≈ 1 row of work)
 Requests = one Commons search per brand/model/year group + one English lead-image lookup per model (+ ~1 attribution
 lookup per lead image, ~1 in 10 models).
 
-| Tier | Groups / models | Requests | At 1 req/s |
-| --- | --- | --- | --- |
-| Start: groups ≥1000 cars + models ≥1000 cars | 2,953 / 1,391 | ~5,700 | ~1.6 h |
-| Groups ≥100 cars + models ≥100 cars | 14,803 / 4,008 | ~19,200 | ~5.3 h |
-| Everything | 97,135 / 15,769 | ~129,000 | ~36 h (18 h at 2 req/s) |
+| Tier                                         | Groups / models | Requests | At 1 req/s              |
+| -------------------------------------------- | --------------- | -------- | ----------------------- |
+| Start: groups ≥1000 cars + models ≥1000 cars | 2,953 / 1,391   | ~5,700   | ~1.6 h                  |
+| Groups ≥100 cars + models ≥100 cars          | 14,803 / 4,008  | ~19,200  | ~5.3 h                  |
+| Everything                                   | 97,135 / 15,769 | ~129,000 | ~36 h (18 h at 2 req/s) |
 
 Tiers 1-2 are worth running; the long tail is mostly rare/garbled spellings that come back `not_found` — skip it, a
 user lookup caches itself on first open. Cap at 2 req/s. Rows are well under 1 KB → a few MB in the DB, ≤1 MB gzipped.
@@ -661,6 +661,36 @@ Uncommitted — check `git status`. **Do next, in this order:**
 4. Optional: YouTube Data API enrichment (view counts, videos not on `/video/`; `GOOGLE_API_KEY` is in
    `apps/api/.env`, untested) — not needed for matching. Other text sources (avtoporadnyk, driver.top, nv.ua) and
    Step 3 (moto) come after.
+5. **Also run the full e-drive owner-posts ingest (`pnpm ingest:edrive`, ~2.5–4 h) — see Step 2b below.** The two
+   crawls hit different hosts, so they can run concurrently.
+
+**Step 2b — e-drive owner posts (e-drive.com.ua): built 2026-10-03; full crawl not run yet.** A car-owner social
+network (user logbook posts: repairs, service, accessories — not editorial reviews), shown as the "e-drive.com.ua"
+subsection of the single combined reviews toggle (`ReviewLinks`: infocar.ua = test drives + owner reviews + videos,
+e-drive.com.ua = owner stories, other sites = search links; each list shows 5, then "Show N more"). Links + facts only
+(title, category, cover URL, date) in `registry.owner_posts` (migration 0025); lookup = `ownerPostLookup` in
+`packages/shared` (infocar's model-slug candidates; only the car's generation year range; newest first, max 30).
+**Pick-up point — run the full ingest:**
+
+1. `pnpm db:up && pnpm db:migrate` (0025), then `pnpm ingest:edrive` — every make/model/generation, in the background
+   (`[n/149] make: N post(s)` log lines). Estimate **~2.5–4 h cold** at the polite 1 req/s: measured Kia = 1,054
+   posts in 4 min 13 s (~250 requests; Kia is a bigger-than-average make, estimate from 5 sampled makes). The site's
+   own JSON API (`api.e-drive.com.ua/v1`: `cars/makes`, `cars/models?makeId=`, `cars/generations?modelId=`,
+   `request/search?filter=posts&makeId=&modelId=&generationId=&lastId=<last createdAt>`; page size fixed at 10, `limit`
+   ignored; robots.txt allows all). A make, then a model, with no posts is skipped before its generations are listed
+   (most of the catalog) and a short page ends paging. Nothing is cached on disk, so a re-run costs the same; upserts by
+   post id make it idempotent and interruption-safe. Optional first pass: `-- --brand toyota` / the top registry brands
+   (~under 1 h) — `--model`, `--limit`, `--max-pages`, `--dry-run` also exist.
+2. Add a gz CSV seed like the other tables (`--export-csv`/`--from-csv` are **not built yet**; copy
+   `infocar-videos.ts`), then `ingest:edrive:csv` into `ingest:ratings:csv` and the CLAUDE.md list.
+3. Measure: posts per brand, share of registry (brand, model) pairs with ≥1 post, and check in a browser (e.g. a Kia
+   Ceed II plate shows only 2012-2017 posts). Makes whose name has no brand slug of ours are skipped — list them from
+   the log and extend the brand table if common.
+4. Known limits: e-drive gives only a generation's **start year** (end = next generation's start − 1, last one open);
+   the API exposes no per-post car/generation, so the crawl goes per generation; posts are owner anecdotes (some
+   about the make generally) — label them as such, never as reviews. Periodic refresh = re-run (new posts only matter
+   for recent generations; a `--since` shortcut could page only until the first already-known `createdAt`).
+5. Logos in `public/icons/` (`edrive.png`, new `infocar.png`) shown by `SourceGroup`.
 
 **Step 2 status (2026-10-03): built; full crawl not run yet.** Done: migration `0023_car_videos.sql` + `carVideos` table;
 `scripts/src/infocar-video-parse.ts` (+ tests on `fixtures/infocar/video-kia.html`, `video-19231.html`);
@@ -679,7 +709,7 @@ generation's year range via the catalog rows, so a 2017 RAV4 gets 2015-2018 vide
 title year within ±3 of the car's year, or no title year, ranked after exact-generation videos. UI toggle now has ❓ info,
 animated open, and plays in `YouTubeModal`. **Left:** full crawl (one request per listing page + per video, hours at 1 req/s — run
 `ingest:infocar:videos`, then `export:infocar:videos:csv`), YouTube API enrichment (optional), add the CSV load to
-`ingest:ratings:csv`, check the strip in a browser (e.g. a Skoda Superb or Toyota RAV4 plate). The section is now titled "Text reviews & test drives" (videos get their own).
+`ingest:ratings:csv`, check the strip in a browser (e.g. a Skoda Superb or Toyota RAV4 plate). UI since merged: videos now sit in the single "Reviews, videos & owner stories" toggle under an infocar.ua heading (Step 2b).
 
 **Step 0 — shipped (2026-10-03): link-only helper, no fetching.**
 `reviewLinks(brand, model)` in `packages/shared/src/reviewLinks.ts` returns each site's

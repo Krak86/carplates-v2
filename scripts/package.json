@@ -26,6 +26,7 @@
     "ingest:infocar": "tsx src/infocar.ts",
     "ingest:infocar:csv": "tsx src/infocar.ts --from-csv seed-data/infocar-versions.csv.gz",
     "export:infocar:csv": "tsx src/infocar.ts --export-csv seed-data/infocar-versions.csv.gz",
+    "ingest:edrive": "tsx src/edrive.ts",
     "ingest:infocar:videos": "tsx src/infocar-videos.ts",
     "ingest:infocar:videos:csv": "tsx src/infocar-videos.ts --from-csv seed-data/infocar-videos.csv.gz",
     "export:infocar:videos:csv": "tsx src/infocar-videos.ts --export-csv seed-data/infocar-videos.csv.gz",

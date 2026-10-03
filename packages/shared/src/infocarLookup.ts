@@ -43,7 +43,7 @@ export type InfocarMatches = Record<InfocarTree, InfocarMatch | null>
 
 const TREE_PATH: Record<InfocarTree, string> = { test_drive: 'test-drive', reviews: 'reviews' }
 
-const slugify = (text: string): string =>
+export const slugify = (text: string): string =>
   text
     .trim()
     .toLowerCase()

@@ -26,7 +26,6 @@ import NoRegionBadge from '@/components/NoRegionBadge'
 import RegistrationTimeline from '@/components/RegistrationTimeline'
 import { getFuelIcon } from '@/components/ResultCard.helpers'
 import ReviewLinks from '@/components/ReviewLinks'
-import VideoReviews from '@/components/VideoReviews'
 import FuelEconomy from '@/components/FuelEconomy'
 import InfoPopover from '@/components/InfoPopover'
 import InfoText from '@/components/InfoText'
@@ -473,7 +472,6 @@ export default function ResultCard({ data }: Props): ReactNode {
         <CarWikiInfo wiki={wiki} hasQuery={hasWikiQuery} />
         <VehiclePhotos brand={c.brand} model={c.model} year={c.makeYear} />
         <ReviewLinks brand={c.brand} model={c.model} year={c.makeYear} />
-        <VideoReviews brand={c.brand} model={c.model} year={c.makeYear} />
         <NearbyServices brand={c.brand} />
       </Card>
     </div>

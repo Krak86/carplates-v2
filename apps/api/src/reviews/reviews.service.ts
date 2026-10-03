@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common'
-import { carVideos, infocarVersions } from '@carplates/db'
-import { INFOCAR_TREES, infocarBrandSlug, infocarLookup, videoLookup } from '@carplates/shared'
+import { carVideos, infocarVersions, ownerPosts } from '@carplates/db'
+import { INFOCAR_TREES, infocarBrandSlug, infocarLookup, ownerPostLookup, videoLookup } from '@carplates/shared'
 import type { InfocarRow, ReviewsResponse } from '@carplates/shared'
 import { eq } from 'drizzle-orm'
 
@@ -13,17 +13,18 @@ export class ReviewsService {
   constructor(@Inject(DbService) private readonly dbService: DbService) {}
 
   /**
-   * Matching lives in `@carplates/shared` (`infocarLookup`, `videoLookup`) — persisted catalogs
-   * (`pnpm ingest:infocar`, `pnpm ingest:infocar:videos`), not live.
+   * Matching lives in `@carplates/shared` (`infocarLookup`, `videoLookup`, `ownerPostLookup`) — persisted catalogs
+   * (`pnpm ingest:infocar`, `pnpm ingest:infocar:videos`, `pnpm ingest:edrive`), not live.
    */
   async lookup(query: Query): Promise<ReviewsResponse> {
     const slug = infocarBrandSlug(query.brand)
-    if (!slug) return { testDrive: null, reviews: null, videos: [] }
+    if (!slug) return { testDrive: null, reviews: null, videos: [], ownerPosts: [] }
 
     const { db } = this.dbService
-    const [rows, videoRows] = await Promise.all([
+    const [rows, videoRows, postRows] = await Promise.all([
       db.select().from(infocarVersions).where(eq(infocarVersions.brandSlug, slug)),
-      db.select().from(carVideos).where(eq(carVideos.brandSlug, slug))
+      db.select().from(carVideos).where(eq(carVideos.brandSlug, slug)),
+      db.select().from(ownerPosts).where(eq(ownerPosts.brandSlug, slug))
     ])
     const catalog = rows.flatMap((r): InfocarRow[] =>
       INFOCAR_TREES.find(tree => tree === r.tree) ? [{ ...r, tree: r.tree as InfocarRow['tree'] }] : []
@@ -38,6 +39,14 @@ export class ReviewsService {
       publishedAt: v.publishedAt,
       url: v.url
     }))
-    return { testDrive: match.test_drive, reviews: match.reviews, videos }
+    const posts = ownerPostLookup(postRows, slug, query.model, query.year).map(p => ({
+      postId: p.postId,
+      url: p.url,
+      title: p.title,
+      category: p.category,
+      coverUrl: p.coverUrl,
+      createdAt: p.createdAt
+    }))
+    return { testDrive: match.test_drive, reviews: match.reviews, videos, ownerPosts: posts }
   }
 }
