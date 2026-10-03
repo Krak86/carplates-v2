@@ -28,6 +28,7 @@ const data: PlateLookupResponse = {
   plate: 'ВЕ7116АА',
   region: 'Миколаївська область',
   historyCount: 2,
+  ownersCount: 1,
   current: {
     plate: 'ВЕ7116АА',
     person: 'P',

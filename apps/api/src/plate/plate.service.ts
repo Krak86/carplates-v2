@@ -1,8 +1,8 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common'
 import { currentRegistration, registrations } from '@carplates/db'
-import { normalizePlate, regionName } from '@carplates/shared'
+import { countOwners, normalizePlate, regionName } from '@carplates/shared'
 import type { PlateHistoryResponse, PlateLookupResponse } from '@carplates/shared'
-import { and, desc, eq, isNull, or, sql, type SQL } from 'drizzle-orm'
+import { and, desc, eq, isNull, or, type SQL } from 'drizzle-orm'
 
 import { DbService } from '../db/db.service.js'
 import { toRegistrationDto } from './plate.dto.js'
@@ -32,16 +32,26 @@ export class PlateService {
       throw new NotFoundException(`No registration found for plate ${plate}`)
     }
 
-    const [counted] = await db
-      .select({ count: sql<number>`count(*)::int` })
+    const actions = await db
+      .select({ operCode: registrations.operCode, operName: registrations.operName })
       .from(registrations)
       .where(this.identityFilter(plate, current.vin))
+
+    // Owners follow the vehicle, not the plate: with a VIN, count its whole history — it
+    // includes earlier registrations under other plates (the same set the VIN page shows).
+    const ownerActions = current.vin
+      ? await db
+          .select({ operCode: registrations.operCode, operName: registrations.operName })
+          .from(registrations)
+          .where(or(eq(registrations.vin, current.vin), eq(registrations.plate, plate)))
+      : actions
 
     return {
       plate,
       region: regionName(plate) ?? null,
       current: toRegistrationDto(current),
-      historyCount: counted?.count ?? 1
+      historyCount: actions.length || 1,
+      ownersCount: countOwners(ownerActions) || 1
     }
   }
 

@@ -331,6 +331,11 @@ export default function ResultCard({ data }: Props): ReactNode {
                 info="owner"
                 value={c.person === 'P' ? t('field.ownerPrivate') : t('field.ownerCompany')}
               />
+              <Row
+                label={t('field.ownersCount')}
+                info="ownersCount"
+                value={t('field.ownersCountValue', { count: data.ownersCount })}
+              />
               <Row label={t('field.regDate')} value={c.dReg} info="regDate" />
               <Row
                 label={t('field.dep')}

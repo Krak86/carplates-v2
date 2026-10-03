@@ -34,6 +34,7 @@ export {
   type InfocarMatch,
   type InfocarMatches
 } from './infocarLookup.js'
+export { countOwners } from './owners.js'
 export { makeKey, modelKey, brandCandidateKey } from './vehicleKey.js'
 export {
   CRASH_SOURCES,

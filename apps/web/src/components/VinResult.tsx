@@ -1,6 +1,12 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { fallbackVehicleColor, regionName, resolveVehicleColor, VEHICLE_COLOR_HEX } from '@carplates/shared'
+import {
+  countOwners,
+  fallbackVehicleColor,
+  regionName,
+  resolveVehicleColor,
+  VEHICLE_COLOR_HEX
+} from '@carplates/shared'
 import type { VinDecodeResponse } from '@carplates/shared'
 
 import BrandLogo from '@/components/BrandLogo'
@@ -9,6 +15,8 @@ import CarWikiInfo from '@/components/CarWikiInfo'
 import CopyAllInfoButton from '@/components/CopyAllInfoButton'
 import CopyButton from '@/components/CopyButton'
 import FavoriteButton from '@/components/FavoriteButton'
+import InfoPopover from '@/components/InfoPopover'
+import InfoText from '@/components/InfoText'
 import SafetyRatings from '@/components/SafetyRatings'
 import { useCarWikiActions } from '@/components/use-car-wiki-actions'
 import Card from '@/components/ui/Card'
@@ -73,6 +81,21 @@ export default function VinResult({ data }: Props): ReactNode {
 
         {registry && (
           <div className="mb-4">
+            <div className="flex justify-between gap-4 py-1.5 text-base">
+              <span className="flex items-center gap-1.5 rounded bg-[var(--color-surface)]/20 px-1 py-0.5 text-[var(--color-muted)]">
+                {t('field.ownersCount')}
+                <InfoPopover
+                  label={t('vin.info.about', { field: t('field.ownersCount') })}
+                  title={t('field.ownersCount')}
+                >
+                  <InfoText text={t('field.about.ownersCount')} />
+                </InfoPopover>
+              </span>
+              <span className="rounded bg-[var(--color-surface)]/20 px-1 py-0.5 text-right font-medium">
+                {t('field.ownersCountValue', { count: countOwners(registry.actions) })}
+              </span>
+            </div>
+
             <VinRegistryHistory registry={registry} />
           </div>
         )}

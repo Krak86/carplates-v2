@@ -35,7 +35,9 @@ export const plateLookupResponseSchema = z.object({
   plate: z.string(),
   region: z.string().nullable(),
   current: registrationSchema,
-  historyCount: z.number().int().nonnegative()
+  historyCount: z.number().int().nonnegative(),
+  /** Estimated owners over the (plate/VIN-stitched) history — see `countOwners`. */
+  ownersCount: z.number().int().nonnegative()
 })
 export type PlateLookupResponse = z.infer<typeof plateLookupResponseSchema>
 
