@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import type { InfocarVersionRow } from '@carplates/db'
+import { carVideos } from '@carplates/db'
+import type { CarVideoRow, InfocarVersionRow } from '@carplates/db'
 
 import type { DbService } from '../db/db.service.js'
 
@@ -24,10 +25,30 @@ function row(overrides: Partial<InfocarVersionRow>): InfocarVersionRow {
   }
 }
 
-/** A DbService whose `select().from().where()` resolves to `rows` — the real filtering is the DB's job. */
-function serviceWith(rows: InfocarVersionRow[]): ReviewsService {
-  const db = { select: () => ({ from: () => ({ where: () => Promise.resolve(rows) }) }) }
+/** A DbService whose  resolves to that table's rows — the real filtering is the DB's job. */
+function serviceWith(rows: InfocarVersionRow[], videos: CarVideoRow[] = []): ReviewsService {
+  const db = {
+    select: () => ({
+      from: (table: unknown) => ({ where: () => Promise.resolve(table === carVideos ? videos : rows) })
+    })
+  }
   return new ReviewsService({ db } as unknown as DbService)
+}
+
+const video: CarVideoRow = {
+  id: 1,
+  youtubeId: 'o1aOohTtV4Y',
+  infocarVideoId: 19231,
+  url: 'https://www.infocar.ua/video/19231.html',
+  title: 'Kia Ceed',
+  thumbUrl: null,
+  durationS: 63,
+  publishedAt: '2026-07-08',
+  brandSlug: 'kia',
+  modelSlug: 'ceed',
+  generationId: null,
+  year: null,
+  fetchedAt: new Date(0)
 }
 
 describe('ReviewsService.lookup', () => {
@@ -52,7 +73,22 @@ describe('ReviewsService.lookup', () => {
     const service = new ReviewsService({} as unknown as DbService)
     expect(await service.lookup({ brand: 'МУССТАНГ', model: 'X', year: 2019 })).toEqual({
       testDrive: null,
-      reviews: null
+      reviews: null,
+      videos: []
     })
+  })
+
+  it('returns the videos tagged with the car model, without DB-only fields', async () => {
+    const res = await serviceWith([row({})], [video]).lookup({ brand: 'KIA', model: 'CEED', year: 2019 })
+    expect(res.videos).toEqual([
+      {
+        youtubeId: 'o1aOohTtV4Y',
+        title: 'Kia Ceed',
+        thumbUrl: null,
+        durationS: 63,
+        publishedAt: '2026-07-08',
+        url: 'https://www.infocar.ua/video/19231.html'
+      }
+    ])
   })
 })

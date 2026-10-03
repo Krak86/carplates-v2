@@ -27,8 +27,7 @@
       "Bash(echo \"exit:$?\")",
       "mcp__chrome-devtools__take_screenshot",
       "Bash(pnpm --filter @carplates/web exec vitest run)",
-      "Bash(pnpm build *)",
-      "Bash(curl:*)"
+      "Bash(pnpm build *)"
     ],
     "deny": [
       "Read(**/.env)",
@@ -62,7 +61,6 @@
       "Bash(grep * .npmrc*)",
       "Bash(sed * .env*)",
       "Bash(awk * .env*)",
-      "Bash(curl *)",
       "Bash(wget *)",
       "Bash(ssh *)",
       "Bash(scp *)",

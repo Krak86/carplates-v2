@@ -367,6 +367,33 @@ export type InfocarVersionRow = typeof infocarVersions.$inferSelect
 export type InfocarVersionInsert = typeof infocarVersions.$inferInsert
 
 /**
+ * One video from infocar.ua's `/video/` section (`scripts/src/infocar-videos.ts`), keyed by its YouTube id. `modelSlug`
+ * (from the video page's canonical URL) and `year` (from the title) are null for brand-level videos. Links and facts
+ * only — see migrations/0023_car_videos.sql.
+ */
+export const carVideos = registry.table(
+  'car_videos',
+  {
+    id: bigserial('id', { mode: 'number' }).primaryKey(),
+    youtubeId: text('youtube_id').notNull().unique(),
+    infocarVideoId: integer('infocar_video_id').notNull().unique(),
+    url: text('url').notNull(),
+    title: text('title').notNull(),
+    thumbUrl: text('thumb_url'),
+    durationS: integer('duration_s'),
+    publishedAt: date('published_at', { mode: 'string' }),
+    brandSlug: text('brand_slug').notNull(),
+    modelSlug: text('model_slug'),
+    generationId: integer('generation_id'),
+    year: integer('year'),
+    fetchedAt: timestamp('fetched_at', { withTimezone: true }).notNull().defaultNow()
+  },
+  t => [index('ix_car_videos_brand_model').on(t.brandSlug, t.modelSlug)]
+)
+export type CarVideoRow = typeof carVideos.$inferSelect
+export type CarVideoInsert = typeof carVideos.$inferInsert
+
+/**
  * One IIHS (US, insurance-industry-funded) vehicle model-year assessment — scraped from
  * iihs.org's own server-rendered detail pages via `scripts/src/iihs.ts` and refreshed by
  * re-running it, same rationale as `cncapRatings`/`kncapRatings` above. `makeKey`/`modelKey`

@@ -533,12 +533,46 @@ with a fixture test.
 
 ### Car reviews (text) then YouTube — planned (2026-10-03), step 0 shipped
 
-**Pick-up point for the next session:** Step 1 (infocar catalog, both trees) is shipped and the 2026-10-03 follow-ups
-are done (year-filtered link, share/info on the section, smarter model matching, logos, Auto-Blog dropped — see
-"Follow-ups" below and docs/plan-done.md). Uncommitted at the time of writing; check `git status`. Next is **Step 2 (infocar videos)**, as one more `scripts/` ingest
-(`ingest:infocar:videos`) reusing the fetch/cache/robots helpers in `infocar.ts`, one migration, and a
-`/api/reviews` extension. `GOOGLE_API_KEY` is in `apps/api/.env`. Other sites (avtoporadnyk, auto-blog, drive2,
-driver.top, nv.ua) come after (auto-blog was dropped from the UI: its site search is irrelevant).
+**Pick-up point for the next session — start the full infocar video crawl.** Steps 1 and 2 are built and
+working on test data (6 brands × 2 pages, 119 videos in the local DB): catalog, video ingest, `videos[]` on
+`/api/reviews`, generation-aware year filter, collapsible "Video reviews" section with ❓ info and a modal player.
+Uncommitted — check `git status`. **Do next, in this order:**
+
+1. `pnpm db:up && pnpm db:migrate` (0023, 0024 — already applied locally), then `pnpm ingest:infocar:videos` — all
+   brands, every listing page. infocar has ~15,800 videos site-wide (`/video/all/` = 1,576 pages × 10, measured
+   2026-10-03; only brand-tagged car videos are kept), one request per listing page + per video at 1 req/s → expect a
+   few hours cold; HTML is cached in `scripts/.data/infocar/`, so an interrupted run resumes without re-fetching
+   (re-run the same command). Trial first with `-- --brand toyota` if wanted; run it in the background and watch the
+   `[n/153] brand: N video(s)` log lines.
+2. `pnpm export:infocar:videos:csv` → commits `scripts/seed-data/infocar-videos.csv.gz`; add
+   `pnpm ingest:infocar:videos:csv` to `ingest:ratings:csv` (root `package.json`, like `ingest:infocar:csv`) and to the
+   CLAUDE.md command list.
+3. Measure (Step 2 item 5): videos per brand, % with a model slug / generation id, % whose generation is in the catalog
+   (the year filter only works for those; the rest use the title year), and what the lookup returns for the top
+   registry (brand, model) pairs. Then check in a browser: КА4845ІО (Toyota RAV4 2017) should show only 2015-2018
+   generation videos; a Skoda Superb / Kia Sportage plate should show videos.
+4. Optional: YouTube Data API enrichment (view counts, videos not on `/video/`; `GOOGLE_API_KEY` is in
+   `apps/api/.env`, untested) — not needed for matching. Other text sources (avtoporadnyk, driver.top, nv.ua) and
+   Step 3 (moto) come after.
+
+**Step 2 status (2026-10-03): built; full crawl not run yet.** Done: migration `0023_car_videos.sql` + `carVideos` table;
+`scripts/src/infocar-video-parse.ts` (+ tests on `fixtures/infocar/video-kia.html`, `video-19231.html`);
+`infocar-fetch.ts` (fetch/cache/robots helpers extracted from `infocar.ts`); `pnpm ingest:infocar:videos [-- --brand kia
+--max-pages N --limit N --dry-run --refresh]` + `:csv`/`export:…:csv` (CSV `seed-data/infocar-videos.csv.gz` not yet
+created). Findings: video pages expose the YouTube id (`iframe` embed) and the model via `link[rel=canonical]`
+(`https://kia-stonic.infocar.ua/video19231_stonic_id7412.html`) — so even generic titles ("Готовий до будь-яких
+завдань") get a model; year only from titles (rare). The RSS feed has just the latest 20 (incremental use only). Trial
+run KIA page 1: 10/10 videos got id + model + date + duration. **API + UI done (same day):** `videoLookup` in `packages/shared` (model slug via `infocarLookup`'s candidates, plus
+variant slugs like `superb-combi`; year-in-title first, then newest; max 6), `videos[]` on `GET /api/reviews`
+(`ReviewsService` reads `car_videos`), `VideoReviews.tsx` under `ReviewLinks` in `ResultCard` (shares the reviews
+query, hidden when empty, thumbnail → `youtube-nocookie` iframe only on click). Test data: 6 brands × 2 pages (119
+videos) in the local DB. **Year filter:** the video page's canonical `…_id7347.html` is infocar's generation id = the catalog version page
+`test_rav4_id7347.html` (RAV4 2026), stored as `car_videos.generation_id` (migration 0024); `videoLookup` maps it to the
+generation's year range via the catalog rows, so a 2017 RAV4 gets 2015-2018 videos only. No generation in the catalog →
+title year within ±3 of the car's year, or no title year, ranked after exact-generation videos. UI toggle now has ❓ info,
+animated open, and plays in `YouTubeModal`. **Left:** full crawl (one request per listing page + per video, hours at 1 req/s — run
+`ingest:infocar:videos`, then `export:infocar:videos:csv`), YouTube API enrichment (optional), add the CSV load to
+`ingest:ratings:csv`, check the strip in a browser (e.g. a Skoda Superb or Toyota RAV4 plate). The section is now titled "Text reviews & test drives" (videos get their own).
 
 **Step 0 — shipped (2026-10-03): link-only helper, no fetching.**
 `reviewLinks(brand, model)` in `packages/shared/src/reviewLinks.ts` returns each site's

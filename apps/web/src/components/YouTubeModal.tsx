@@ -5,6 +5,8 @@ import { useTranslation } from 'react-i18next'
 type Props = {
   youtubeId: string
   description: string
+  /** Heading; defaults to the crash-test one. */
+  title?: string
   onClose: () => void
 }
 
@@ -15,7 +17,7 @@ type Props = {
  * mounts (i.e. only after the viewer clicks play), so rendering a result card
  * never fires a request to YouTube on its own.
  */
-export default function YouTubeModal({ youtubeId, description, onClose }: Props): ReactNode {
+export default function YouTubeModal({ youtubeId, description, title, onClose }: Props): ReactNode {
   const { t } = useTranslation()
 
   // The result Card has a 3D `transform` for its tilt effect, which makes it the
@@ -26,7 +28,7 @@ export default function YouTubeModal({ youtubeId, description, onClose }: Props)
       <div className="w-full max-w-2xl rounded-xl bg-[var(--color-surface)] p-4">
         <div className="mb-3 flex items-center justify-between gap-3">
           <div className="min-w-0">
-            <div className="truncate font-semibold">{t('safety.videoTitle')}</div>
+            <div className="truncate font-semibold">{title ?? t('safety.videoTitle')}</div>
             <div className="truncate text-sm text-[var(--color-muted)]">{description}</div>
           </div>
           <button

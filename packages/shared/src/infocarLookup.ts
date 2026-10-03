@@ -124,7 +124,7 @@ function codePrefixSlugs(model: string, catalogSlugs: string[]): string[] {
 }
 
 /** Model slugs to try, most specific first: the whole model text, its first word, brand aliases, then catalog fuzzy matches. */
-function modelSlugCandidates(brand: string, model: string, catalogSlugs: string[]): string[] {
+export function modelSlugCandidates(brand: string, model: string, catalogSlugs: string[]): string[] {
   const full = slugify(model)
   const firstWord = model.trim().split(/\s+/)[0] ?? ''
   // `squash` drops punctuation entirely: registry `CEE'D` -> `ceed` (slugify alone gives `cee-d`, which isn't a slug).

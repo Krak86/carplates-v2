@@ -493,9 +493,19 @@ export const infocarMatchSchema = z.object({
   avgRating: z.number().nullable(),
   yearUrl: z.string().nullable()
 })
+/** An infocar.ua video (persisted by `pnpm ingest:infocar:videos`) for this car's make/model; embedded from YouTube. */
+export const infocarVideoSchema = z.object({
+  youtubeId: z.string(),
+  title: z.string(),
+  thumbUrl: z.string().nullable(),
+  durationS: z.number().int().nullable(),
+  publishedAt: z.string().nullable(),
+  url: z.string()
+})
 export const reviewsResponseSchema = z.object({
   testDrive: infocarMatchSchema.nullable(),
-  reviews: infocarMatchSchema.nullable()
+  reviews: infocarMatchSchema.nullable(),
+  videos: z.array(infocarVideoSchema)
 })
 export type ReviewsResponse = z.infer<typeof reviewsResponseSchema>
 
