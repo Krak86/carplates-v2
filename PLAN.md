@@ -692,6 +692,64 @@ e-drive.com.ua = owner stories, other sites = search links; each list shows 5, t
    for recent generations; a `--since` shortcut could page only until the first already-known `createdAt`).
 5. Logos in `public/icons/` (`edrive.png`, new `infocar.png`) shown by `SourceGroup`.
 
+**Step 2c — TopGear UK editorial reviews (topgear.com/car-reviews): planned 2026-10-03, nothing built.** English-language
+verdict + score per model, shown as a "TopGear (EN)" subsection of `ReviewLinks` next to infocar/e-drive. Links + facts
+only (title, score, date, blurb, url) — never republish review text beyond the meta description.
+**Findings (measured 2026-10-03):**
+- robots.txt allows `/car-reviews/` (disallows only `/search*`, `/tags*`, `/taxonomy*`, `/node*`, `/mantis*`,
+  `/api/search/*`). Plain HTTP + any UA gets 200, server-rendered; no JS/API reverse-engineering. 340–400 KB/page,
+  ~0.7–1.3 s each.
+- Sitemap `https://www.topgear.com/sitemap.xml?page=1..N` (Drupal simple_sitemap, ~12 pages) lists 4,141 `/car-reviews/`
+  URLs: **1,607 model pages** (`/car-reviews/<make>/<model>`, 193 makes) + variant pages (`first-drive`, `2dr`, `spec`…)
+  + the four section subpages (`/buying`, `/driving`, `/interior`, `/specs`). The **model page alone** has JSON-LD with
+  `Review` + `Rating` (`ratingValue` of `bestRating` 10 — note it is a string `"6"` on some pages, a number on others, and
+  `bestRating` too), `datePublished`, `Car`/`Brand`, plus `meta description` (blurb). Subpages add nothing we need.
+- Some model slugs carry a generation year range (`sportage-2017-2021`, `niro-2017-2022`, `e-niro-2018-2022`),
+  most don't (`ceed`, `ceed-sportswagon`, `octavia`); `-0`/`-1` suffixes are duplicate-slug generations (`sorento-0`,
+  `proceed-0`) — the `datePublished` year is the fallback generation anchor.
+- **Videos are unconfirmed.** Static HTML has no YouTube ids; the player is Brightcove (3 mentions per page), and
+  `bmw/m3` had no video markup at all. Brightcove embeds need TopGear's account/player id and may be domain-restricted.
+- **AutoTrader UK (`autotrader.co.uk/cars/reviews?make=Kia&model=Cee%27d`) is not crawlable** — every request incl.
+  `robots.txt` hits a Cloudflare managed challenge. Do **not** work around it; search link only.
+
+**TODO, in order:**
+1. **Trial (~5 min).** `scripts/src/topgear-fetch.ts` (reuse the fetch/cache/robots helpers from `infocar-fetch.ts` — 1
+   req/s, cache HTML in `scripts/.data/topgear/`, check robots first) + `scripts/src/topgear-parse.ts` (pure: JSON-LD
+   `Review`/`Rating` → `{ rating, bestRating, publishedAt, headline, blurb }`, tolerant of string/number
+   `ratingValue`/`bestRating`; Zod-validate the JSON-LD per CLAUDE_RULES). Commit 2-3 fixtures under
+   `scripts/src/fixtures/topgear/` (`kia-ceed-sportswagon.html` trimmed to the `<script type="application/ld+json">`
+   blocks + `<meta name=description>`, a year-slug model, a no-rating page) and unit-test the parser on them. Run a
+   `--brand kia --dry-run` over ~10 models. **Decision point:** inspect the Brightcove markup (`data-video-id`,
+   `data-account`, `data-player`, a `VideoObject` JSON-LD) on ~10 pages — is a per-review video id extractable and
+   embeddable cross-origin? If not, ship text-only and drop the `video_ref` column/UI (don't add a Brightcove player).
+2. **Migration `0026_topgear_reviews.sql`** + Drizzle `topgearReviews` table in `packages/db`: `url` PK, `make`,
+   `brand_slug` (our brand slug), `model_slug` (TopGear's), `title`, `rating` (numeric, nullable), `best_rating`,
+   `published_at`, `year_from`/`year_to` (nullable, from slug range), `blurb`, `video_ref` (nullable; only if step 1 says
+   yes). Index on `(brand_slug, model_slug)`.
+3. **`scripts/src/topgear.ts` + root script `pnpm ingest:topgear`** (`--brand kia`, `--limit N`, `--dry-run`, `--refresh`):
+   fetch + parse the sitemap pages → keep six-segment `/car-reviews/<make>/<model>` URLs only (drop variant + section
+   pages) → map `<make>` to our brand slug (list makes with no match from the log; extend the brand table if common) →
+   fetch each model page, upsert by `url` (idempotent, interruption-safe; HTML cache makes a re-run seconds). Log
+   `[n/1607] make/model: score`.
+4. **Full cold run — ~35–55 min** (1,607 × ~1 s fetch + 1 s polite delay, background). Then `--export-csv` →
+   `scripts/seed-data/topgear.csv.gz` (small, ~100–200 KB), `pnpm ingest:topgear:csv` + `export:topgear:csv`, add the CSV
+   load to `ingest:ratings:csv` and all three commands to the CLAUDE.md list + Layout row.
+5. **Lookup:** `topgearLookup(brand, model, year)` in `packages/shared` (candidates from `infocarLookup`'s model-slug
+   logic + TopGear variant slugs like `ceed-sportswagon`, `-0`/`-1` suffixes; year range from slug when present, else
+   `published_at` year within the car's generation; newest first; max ~5; Zod schema for the response). Unit tests for the
+   Kia Ceed / Sportage / Niro slug cases above. Changing the schema discards users' offline cache — expected.
+6. **API:** `topgear[]` on `GET /api/reviews` (`ReviewsService`, reads the new table; `@Inject(...)` on ctor deps).
+7. **UI:** "TopGear (EN)" `SourceGroup` in `ReviewLinks` (logo `public/icons/topgear.png`, score badge `7/10`, blurb,
+   "Show N more" like the others); en/ua/ru i18n strings; keep it in `lib/offline-cache.ts`'s persisted `/api/reviews`
+   rule. Add an **AutoTrader UK search link** under "other sites" via `reviewLinks()` (`?make=<Make>&model=<Model>`,
+   URL-encode the apostrophe — open it in a browser to confirm the pattern still works; link only, no fetching).
+8. **Measure + browser check:** reviews per brand, % of registry (brand, model) pairs with a TopGear hit (expect lower than
+   infocar: UK catalog, few Lada/ZAZ/Chinese models), and eyeball a Kia Ceed II, a Skoda Octavia and a Toyota RAV4 plate.
+   Record the numbers here and move this entry to `docs/plan-done.md` when finished.
+9. Known limits to document: TopGear has no per-year pages (coarse generation matching); UK-market models only; scores
+   are TopGear's /10 — label the source clearly; periodic refresh = re-run (new reviews are rare, the sitemap `lastmod`
+   could drive a `--since` shortcut).
+
 **Step 2 status (2026-10-03): built; full crawl not run yet.** Done: migration `0023_car_videos.sql` + `carVideos` table;
 `scripts/src/infocar-video-parse.ts` (+ tests on `fixtures/infocar/video-kia.html`, `video-19231.html`);
 `infocar-fetch.ts` (fetch/cache/robots helpers extracted from `infocar.ts`); `pnpm ingest:infocar:videos [-- --brand kia
