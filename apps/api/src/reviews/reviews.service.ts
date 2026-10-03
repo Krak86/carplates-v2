@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common'
 import { infocarVersions } from '@carplates/db'
-import { INFOCAR_TREES, brandSlug, infocarLookup } from '@carplates/shared'
+import { INFOCAR_TREES, infocarBrandSlug, infocarLookup } from '@carplates/shared'
 import type { InfocarRow, ReviewsResponse } from '@carplates/shared'
 import { eq } from 'drizzle-orm'
 
@@ -14,7 +14,7 @@ export class ReviewsService {
 
   /** Matching lives in `@carplates/shared` (`infocarLookup`) — persisted catalog (`pnpm ingest:infocar`), not live. */
   async lookup(query: Query): Promise<ReviewsResponse> {
-    const slug = brandSlug(query.brand)
+    const slug = infocarBrandSlug(query.brand)
     if (!slug) return { testDrive: null, reviews: null }
 
     const rows = await this.dbService.db.select().from(infocarVersions).where(eq(infocarVersions.brandSlug, slug))

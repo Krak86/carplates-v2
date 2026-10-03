@@ -26,6 +26,7 @@ export { wikiUrl, wikiDomain } from './wikiUrl.js'
 export { REVIEW_SITES, reviewLinks, type ReviewSiteId, type ReviewSiteLang, type ReviewLink } from './reviewLinks.js'
 export {
   INFOCAR_TREES,
+  infocarBrandSlug,
   infocarLookup,
   type InfocarTree,
   type InfocarRow,

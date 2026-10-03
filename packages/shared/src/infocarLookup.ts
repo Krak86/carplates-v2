@@ -35,6 +35,8 @@ export type InfocarMatch = {
   versions: InfocarVersionLink[]
   reviewCount: number | null
   avgRating: number | null
+  /** Model page pre-filtered to the car's year (+1 year of margin) — owner reviews only; null when not applicable. */
+  yearUrl: string | null
 }
 
 export type InfocarMatches = Record<InfocarTree, InfocarMatch | null>
@@ -50,17 +52,102 @@ const slugify = (text: string): string =>
 
 const squash = (text: string): string => text.toLowerCase().replace(/[^a-z0-9]/g, '')
 
-/** Model slugs to try, most specific first: the whole model text, then its first word (`CEED SW` -> `ceed`). */
-function modelSlugCandidates(model: string): string[] {
+/** Our brand slugs that infocar spells differently (`brandSlug` follows Euro NCAP's scheme). */
+const INFOCAR_BRAND_ALIAS: Readonly<Record<string, string>> = {
+  'mercedes-benz': 'mercedes',
+  ssangyong: 'ssang-yong',
+  lada: 'vaz'
+}
+
+/** The brand slug as infocar.ua spells it, or null for an unrecognised brand. */
+export function infocarBrandSlug(brand: string | null | undefined): string | null {
+  const slug = brandSlug(brand)
+  return slug ? (INFOCAR_BRAND_ALIAS[slug] ?? slug) : null
+}
+
+/** Registry models that are a trim of a differently-named infocar model (`328I` -> `3-series`, `E 200` -> `e-class`). */
+function aliasSlugs(brand: string, model: string): string[] {
+  const text = model.trim().toLowerCase()
+  if (brand === 'bmw') {
+    const series = /^([1-8])\d{2}/.exec(text)
+    return series ? [`${series[1]}-series`] : []
+  }
+  if (brand === 'mercedes') {
+    const letters = /^([a-z]{1,3})[\s-]?\d/.exec(text)?.[1]
+    if (!letters) return []
+    return [`${letters === 'ml' ? 'm' : letters}-class`]
+  }
+  if (brand === 'volkswagen') {
+    if (text === 'cc') return ['passat-cc']
+    if (text === 'beetle') return ['new-beetle']
+    if (text.startsWith('e-golf')) return ['golf']
+  }
+  if (brand === 'mitsubishi' && text.startsWith('pajero')) return ['pajero-wagon']
+  if (brand === 'kia' && text === 'forte') return ['cerato']
+  return []
+}
+
+const tokens = (text: string): string[] =>
+  text
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter(Boolean)
+
+/** Catalog slugs whose words are a leading run of the model's words, longest first (`LAND CRUISER PRADO 150`). */
+function prefixSlugs(model: string, catalogSlugs: string[]): string[] {
+  const words = tokens(model)
+  return catalogSlugs
+    .map(slug => ({ slug, parts: slug.split('-') }))
+    .filter(({ parts }) => parts.length <= words.length && parts.every((part, i) => part === words[i]))
+    .sort((x, y) => y.parts.length - x.parts.length)
+    .map(x => x.slug)
+}
+
+/** A single-word model that is one word of exactly one catalog slug (`PRADO` -> `land-cruiser-prado`). */
+function wordSlug(model: string, catalogSlugs: string[]): string[] {
+  const words = tokens(model)
+  if (words.length !== 1) return []
+  const hits = catalogSlugs.filter(slug => slug.split('-').includes(words[0]!))
+  return hits.length === 1 ? hits : []
+}
+
+/** Numeric factory codes lose trailing modification digits until a catalog model matches (`21063` -> `2106`). */
+function codePrefixSlugs(model: string, catalogSlugs: string[]): string[] {
+  const code = /^\d{4,}/.exec(tokens(model)[0] ?? '')?.[0]
+  if (!code) return []
+  const out: string[] = []
+  for (let len = code.length; len >= 3; len--) {
+    const prefix = code.slice(0, len)
+    out.push(prefix, ...wordSlug(prefix, catalogSlugs))
+  }
+  return out
+}
+
+/** Model slugs to try, most specific first: the whole model text, its first word, brand aliases, then catalog fuzzy matches. */
+function modelSlugCandidates(brand: string, model: string, catalogSlugs: string[]): string[] {
   const full = slugify(model)
-  const first = slugify(model.trim().split(/\s+/)[0] ?? '')
-  return [...new Set([full, first].filter(Boolean))]
+  const firstWord = model.trim().split(/\s+/)[0] ?? ''
+  // `squash` drops punctuation entirely: registry `CEE'D` -> `ceed` (slugify alone gives `cee-d`, which isn't a slug).
+  const direct = [full, slugify(firstWord), squash(model), squash(firstWord)]
+  const all = [
+    ...direct,
+    ...aliasSlugs(brand, model),
+    ...prefixSlugs(model, catalogSlugs),
+    ...wordSlug(model, catalogSlugs),
+    ...codePrefixSlugs(model, catalogSlugs)
+  ]
+  return [...new Set(all.filter(Boolean))]
 }
 
 function pickVersions(rows: InfocarRow[], model: string, year: number | null, currentYear: number): InfocarRow[] {
   const versions = rows.filter(r => r.versionName !== null)
   if (year === null) return []
-  const inRange = versions.filter(r => r.yearFrom !== null && r.yearFrom <= year && year <= (r.yearTo ?? currentYear))
+  // Same window as the year-filtered reviews link (year .. year+1): versions overlapping it, ones covering the year first.
+  const windowEnd = Math.min(year + 1, currentYear)
+  const covers = (r: InfocarRow): boolean => r.yearFrom! <= year && year <= (r.yearTo ?? currentYear)
+  const inRange = versions.filter(
+    r => r.yearFrom !== null && r.yearFrom <= windowEnd && year <= (r.yearTo ?? currentYear)
+  )
   const wanted = squash(model)
   const rank = (r: InfocarRow): number => {
     const name = squash(r.versionName ?? '')
@@ -68,7 +155,7 @@ function pickVersions(rows: InfocarRow[], model: string, year: number | null, cu
     if (name === squash(r.modelName)) return 1
     return 2
   }
-  return inRange.sort((a, b) => rank(a) - rank(b))
+  return inRange.sort((a, b) => Number(!covers(a)) - Number(!covers(b)) || rank(a) - rank(b))
 }
 
 function matchTree(
@@ -82,7 +169,8 @@ function matchTree(
   const brandRows = rows.filter(r => r.tree === tree && r.brandSlug === brand)
   if (!brandRows.length) return null
 
-  for (const slug of modelSlugCandidates(model)) {
+  const catalogSlugs = [...new Set(brandRows.map(r => r.modelSlug))]
+  for (const slug of modelSlugCandidates(brand, model, catalogSlugs)) {
     const modelRows = brandRows.filter(r => r.modelSlug === slug)
     if (!modelRows.length) continue
     const versions = pickVersions(modelRows, model, year, currentYear)
@@ -100,10 +188,15 @@ function matchTree(
       yearTo: r.yearTo,
       url: r.url
     })
-    if (versions.length) return { level: 'version', url: versions[0]!.url, versions: versions.map(toLink), ...base }
     // No version for that year: the model page when the catalog has one, else the model's cheapest known link.
     const modelUrl = modelRow?.url ?? `https://www.infocar.ua/${TREE_PATH[tree]}/${brand}/${slug}/`
-    return { level: 'model', url: modelUrl, versions: [], ...base }
+    // Only the owner-reviews tree has the `y1`/`y2` year filter; test-drive pages ignore it.
+    const yearUrl =
+      tree === 'reviews' && year !== null ? `${modelUrl}?y1=${year}&y2=${Math.min(year + 1, currentYear)}&sort=0` : null
+    if (versions.length) {
+      return { level: 'version', url: versions[0]!.url, versions: versions.map(toLink), yearUrl, ...base }
+    }
+    return { level: 'model', url: modelUrl, versions: [], yearUrl, ...base }
   }
 
   return {
@@ -112,7 +205,8 @@ function matchTree(
     modelName: null,
     versions: [],
     reviewCount: null,
-    avgRating: null
+    avgRating: null,
+    yearUrl: null
   }
 }
 
@@ -124,7 +218,7 @@ export function infocarLookup(
   year: number | null | undefined,
   currentYear: number = new Date().getFullYear()
 ): InfocarMatches {
-  const slug = brandSlug(brand)
+  const slug = infocarBrandSlug(brand)
   const none: InfocarMatches = { test_drive: null, reviews: null }
   if (!slug) return none
   const y = year ?? null

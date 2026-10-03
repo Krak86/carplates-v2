@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { InfocarMatch } from '@carplates/shared'
 
-import { infocarLinks } from '@/components/ReviewLinks.helpers'
+import { infocarLinks, yearFilterLabel } from '@/components/ReviewLinks.helpers'
 
 type Props = {
   label: string
@@ -15,11 +15,18 @@ export default function InfocarReviewRows({ label, brand, match }: Props): React
   const { t } = useTranslation()
   const name = match.modelName ?? ''
   const hasStats = match.level !== 'brand' && match.reviewCount !== null && match.avgRating !== null
+  const years = yearFilterLabel(match.yearUrl)
+  const links = infocarLinks(match)
+  if (match.yearUrl && years)
+    links.unshift({ title: t('reviews.forYears', { years }), level: 'model', url: match.yearUrl })
 
   return (
     <li className="px-2 py-1.5">
-      <div className="flex flex-wrap items-baseline justify-between gap-x-2 text-base">
-        <span className="font-medium">{label}</span>
+      <div className="flex flex-wrap items-center justify-between gap-x-2 text-base">
+        <span className="flex items-center gap-1.5 font-medium">
+          <img src="/icons/infocar.png" alt="" width={20} height={20} className="size-5 rounded-sm" />
+          {label}
+        </span>
         {hasStats && (
           <span className="text-sm text-[var(--color-muted)]">
             {t('reviews.stats', { count: match.reviewCount, rating: match.avgRating?.toFixed(1) })}
@@ -28,7 +35,7 @@ export default function InfocarReviewRows({ label, brand, match }: Props): React
       </div>
 
       <ul className="mt-1 space-y-1">
-        {infocarLinks(match).map(link => (
+        {links.map(link => (
           <li key={link.url}>
             <a
               href={link.url}

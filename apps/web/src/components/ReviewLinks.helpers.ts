@@ -2,7 +2,6 @@ import type { InfocarMatch, ReviewSiteId } from '@carplates/shared'
 
 /** Proper-noun display names for the outbound review-site links — not translated. */
 export const REVIEW_SITE_LABEL: Readonly<Record<ReviewSiteId, string>> = {
-  'auto-blog': 'Auto-Blog',
   drive2: 'DRIVE2'
 }
 
@@ -10,6 +9,15 @@ export const REVIEW_SITE_LABEL: Readonly<Record<ReviewSiteId, string>> = {
 export function formatYears(yearFrom: number | null, yearTo: number | null): string {
   if (yearFrom === null) return ''
   return yearTo === null || yearTo === yearFrom ? String(yearFrom) : `${yearFrom}–${yearTo}`
+}
+
+/** "2012–2013" from a year-filtered infocar URL (`?y1=…&y2=…`); '' when the URL carries no usable range. */
+export function yearFilterLabel(yearUrl: string | null): string {
+  if (!yearUrl) return ''
+  const params = new URL(yearUrl).searchParams
+  const from = Number(params.get('y1'))
+  const to = Number(params.get('y2'))
+  return from ? formatYears(from, to || null) : ''
 }
 
 export type InfocarLink = {

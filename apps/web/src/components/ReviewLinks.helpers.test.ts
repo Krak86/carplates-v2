@@ -12,7 +12,8 @@ const base: InfocarMatch = {
     { name: 'Ceed SW', yearFrom: 2018, yearTo: 2021, url: 'https://x/b' }
   ],
   reviewCount: 123,
-  avgRating: 4.5
+  avgRating: 4.5,
+  yearUrl: null
 }
 
 describe('formatYears', () => {

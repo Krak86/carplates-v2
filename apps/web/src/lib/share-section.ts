@@ -1,6 +1,16 @@
 import i18n from '@/i18n'
 
-export const SHARE_SECTIONS = ['basic', 'history', 'vin', 'emissions', 'ratings', 'nearby', 'wiki', 'photos'] as const
+export const SHARE_SECTIONS = [
+  'basic',
+  'history',
+  'vin',
+  'emissions',
+  'ratings',
+  'nearby',
+  'reviews',
+  'wiki',
+  'photos'
+] as const
 export type ShareSection = (typeof SHARE_SECTIONS)[number]
 
 /** The shared link carries the sharer's language so its link preview (and the opened app) match it. */

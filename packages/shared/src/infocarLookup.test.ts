@@ -58,6 +58,47 @@ describe('infocarLookup', () => {
     expect(infocarLookup(ROWS, 'UNKNOWNBRAND', 'X', 2019, 2026).reviews).toBeNull()
   })
 
+  it('builds a year-filtered model page for owner reviews only, capped at the current year', () => {
+    expect(infocarLookup(ROWS, 'KIA', 'CEED', 2012, 2026).reviews!.yearUrl).toBe(
+      'https://www.infocar.ua/reviews/kia/ceed/?y1=2012&y2=2013&sort=0'
+    )
+    expect(infocarLookup(ROWS, 'KIA', 'CEED', 2026, 2026).reviews!.yearUrl).toContain('y2=2026')
+    expect(infocarLookup(ROWS, 'KIA', 'CEED', null, 2026).reviews!.yearUrl).toBeNull()
+    const drives = ROWS.map(r => ({ ...r, tree: 'test_drive' as const }))
+    expect(infocarLookup(drives, 'KIA', 'CEED', 2012, 2026).test_drive!.yearUrl).toBeNull()
+  })
+
+  it("matches a punctuated registry model (CEE'D -> ceed) and lists versions overlapping year..year+1", () => {
+    const m = infocarLookup(ROWS, 'KIA', "CEE'D", 2017, 2026).reviews!
+    expect(m.level).toBe('version')
+    // 2015–2018 covers 2017; the 2018–2021 versions start inside the window (2017–2018) and follow it.
+    expect(m.versions.map(v => v.url)).toEqual(['https://x/ceed-2', 'https://x/ceed-3', 'https://x/ceed-sw'])
+    expect(m.yearUrl).toBe('https://www.infocar.ua/reviews/kia/ceed/?y1=2017&y2=2018&sort=0')
+  })
+
+  describe('registry models that differ from infocar slugs', () => {
+    const rows = (brand: string, slugs: string[]): InfocarRow[] =>
+      slugs.map(slug =>
+        row({ brandSlug: brand, modelSlug: slug, modelName: slug, versionName: null, url: `u/${slug}` })
+      )
+    const level = (brand: string, slugs: string[], registryBrand: string, model: string) =>
+      infocarLookup(rows(brand, slugs), registryBrand, model, 2013, 2026).reviews
+
+    it('maps BMW trims to the series and Mercedes trims to the class', () => {
+      expect(level('bmw', ['3-series', 'x3'], 'BMW', '328I')?.url).toBe('u/3-series')
+      expect(level('mercedes', ['e-class', 'm-class'], 'MERCEDES-BENZ', 'E 200')?.url).toBe('u/e-class')
+      expect(level('mercedes', ['e-class', 'm-class'], 'MERCEDES-BENZ', 'ML 350')?.url).toBe('u/m-class')
+    })
+
+    it('matches a leading run of words, a lone distinctive word, and shortened factory codes', () => {
+      const toyota = ['land-cruiser', 'land-cruiser-prado']
+      expect(level('toyota', toyota, 'TOYOTA', 'LAND CRUISER PRADO 150')?.url).toBe('u/land-cruiser-prado')
+      expect(level('toyota', toyota, 'TOYOTA', 'LAND CRUISER 200')?.url).toBe('u/land-cruiser')
+      expect(level('toyota', toyota, 'TOYOTA', 'PRADO')?.url).toBe('u/land-cruiser-prado')
+      expect(level('vaz', ['2106', '2107'], 'ВАЗ', '21063')?.url).toBe('u/2106')
+    })
+  })
+
   it('tries the first word when the full model text has no slug', () => {
     expect(infocarLookup(ROWS, 'KIA', 'CEED 1.6 CRDI', 2019, 2026).reviews!.level).toBe('version')
   })

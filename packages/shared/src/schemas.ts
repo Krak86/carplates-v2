@@ -488,7 +488,8 @@ export const infocarMatchSchema = z.object({
   modelName: z.string().nullable(),
   versions: z.array(infocarVersionLinkSchema),
   reviewCount: z.number().int().nullable(),
-  avgRating: z.number().nullable()
+  avgRating: z.number().nullable(),
+  yearUrl: z.string().nullable()
 })
 export const reviewsResponseSchema = z.object({
   testDrive: infocarMatchSchema.nullable(),
