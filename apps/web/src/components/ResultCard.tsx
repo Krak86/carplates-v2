@@ -30,6 +30,8 @@ import FuelEconomy from '@/components/FuelEconomy'
 import InfoPopover from '@/components/InfoPopover'
 import InfoText from '@/components/InfoText'
 import SafetyRatings from '@/components/SafetyRatings'
+import PlateSegments from '@/components/PlateSegments'
+import SectionHeader from '@/components/SectionHeader'
 import SectionInfo from '@/components/SectionInfo'
 import ShareButton from '@/components/ShareButton'
 import TopStatBadges from '@/components/TopStatBadges'
@@ -240,29 +242,18 @@ export default function ResultCard({ data }: Props): ReactNode {
           />
         </div>
 
-        <div ref={basicRef} className="flex items-center justify-between text-base">
-          <span className="text-base font-semibold">{t('result.basicLabel')}</span>
-          <div className="flex items-center gap-1.5">
-            {showBasic && (
-              <ShareButton section="basic" label={t('share.button', { section: t('result.basicLabel') })} />
-            )}
-            <button
-              type="button"
-              aria-expanded={showBasic}
-              onClick={() => setShowBasic(v => !v)}
-              className="group flex items-center gap-1.5 rounded-full bg-[var(--color-surface)]/20 px-3 py-1 text-[var(--color-primary)]"
-            >
-              <span className="underline group-hover:no-underline">
-                {showBasic ? t('result.basicHide') : t('result.basicShow')}
-              </span>
-              <span
-                aria-hidden
-                className={cn('inline-block no-underline transition-transform duration-200', showBasic && 'rotate-180')}
-              >
-                ▾
-              </span>
-            </button>
-          </div>
+        <PlateSegments plate={data.plate} region={data.region} />
+
+        <div ref={basicRef}>
+          <SectionHeader
+            icon="📋"
+            title={t('result.basicLabel')}
+            actions={<ShareButton section="basic" label={t('share.button', { section: t('result.basicLabel') })} />}
+            open={showBasic}
+            onToggle={() => setShowBasic(v => !v)}
+            showLabel={t('result.basicShow')}
+            hideLabel={t('result.basicHide')}
+          />
         </div>
 
         <div
@@ -404,13 +395,8 @@ export default function ResultCard({ data }: Props): ReactNode {
             onOpenChange={setShowVin}
             showLabel={t('vin.show')}
             hideLabel={t('vin.hide')}
-            title={
-              <span className="flex items-center gap-1.5">
-                <span aria-hidden>🆔</span>
-                {t('vin.title')}
-                <SectionInfo section="vin" title={t('vin.title')} />
-              </span>
-            }
+            title={t('vin.title')}
+            info={<SectionInfo section="vin" title={t('vin.title')} />}
             actions={<ShareButton section="vin" label={t('share.button', { section: t('vin.title') })} />}
           >
             {vinDetail.isPending && <p className="text-base text-[var(--color-muted)]">{t('result.loading')}</p>}
@@ -426,12 +412,8 @@ export default function ResultCard({ data }: Props): ReactNode {
           onOpenChange={setShowMore}
           showLabel={t('result.historyShow')}
           hideLabel={t('result.historyHide')}
-          title={
-            <span className="flex items-center gap-1.5">
-              {t('result.historyLabel')}
-              <SectionInfo section="history" title={t('result.historyLabel')} />
-            </span>
-          }
+          title={t('result.historyLabel')}
+          info={<SectionInfo section="history" title={t('result.historyLabel')} />}
           actions={<ShareButton section="history" label={t('share.button', { section: t('result.historyLabel') })} />}
         >
           <div className="mb-1 flex items-center gap-1.5 text-base font-semibold">

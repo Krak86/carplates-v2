@@ -6,6 +6,7 @@ import { useSearchParams } from 'react-router'
 import type { WikiInfo } from '@carplates/shared'
 
 import SectionInfo from '@/components/SectionInfo'
+import SectionHeader from '@/components/SectionHeader'
 import ShareButton from '@/components/ShareButton'
 import { cn } from '@/lib/cn'
 import { scrollElementIntoView } from '@/lib/share-section'
@@ -36,33 +37,17 @@ export default function CarWikiInfo({ wiki, hasQuery }: Props): ReactNode {
 
   return (
     <div ref={sectionRef} className="mt-3 border-t border-[var(--color-border)] pt-3">
-      <div className="flex items-center justify-between text-base">
-        <span className="flex items-center gap-1.5 text-base font-semibold">
-          {t('wiki.title')}
-          <SectionInfo section="wiki" title={t('wiki.title')} />
-        </span>
-        <div className="flex items-center gap-1.5">
-          {open && <ShareButton section="wiki" label={t('share.button', { section: t('wiki.title') })} />}
-          <button
-            type="button"
-            aria-expanded={open}
-            disabled={wiki.isPending}
-            onClick={() => setOpen(v => !v)}
-            className="group flex items-center gap-1.5 rounded-full bg-[var(--color-surface)]/20 px-3 py-1 text-[var(--color-primary)] disabled:cursor-wait disabled:opacity-50"
-          >
-            <span aria-hidden className="no-underline">
-              📖
-            </span>
-            <span className="underline group-hover:no-underline">{open ? t('wiki.hide') : t('wiki.show')}</span>
-            <span
-              aria-hidden
-              className={cn('inline-block no-underline transition-transform duration-200', open && 'rotate-180')}
-            >
-              ▾
-            </span>
-          </button>
-        </div>
-      </div>
+      <SectionHeader
+        icon="📖"
+        title={t('wiki.title')}
+        info={<SectionInfo section="wiki" title={t('wiki.title')} />}
+        actions={<ShareButton section="wiki" label={t('share.button', { section: t('wiki.title') })} />}
+        open={open}
+        onToggle={() => setOpen(v => !v)}
+        showLabel={t('wiki.show')}
+        hideLabel={t('wiki.hide')}
+        disabled={wiki.isPending}
+      />
 
       <div
         aria-hidden={!open}

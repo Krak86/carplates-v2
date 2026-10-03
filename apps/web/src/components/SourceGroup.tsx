@@ -30,7 +30,9 @@ export default function SourceGroup({ icon, name, langs, children }: Props): Rea
           />
         )}
         {name}
-        {langs?.map(lang => <LangBadge key={lang} lang={lang} />)}
+        {langs?.map(lang => (
+          <LangBadge key={lang} lang={lang} />
+        ))}
       </h4>
 
       {children}

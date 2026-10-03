@@ -11,6 +11,7 @@ import InfocarVideos from '@/components/InfocarVideos'
 import LangBadge from '@/components/LangBadge'
 import { REVIEW_SITE_LABEL } from '@/components/ReviewLinks.helpers'
 import SectionInfo from '@/components/SectionInfo'
+import SectionHeader from '@/components/SectionHeader'
 import ShareButton from '@/components/ShareButton'
 import SourceGroup from '@/components/SourceGroup'
 import { cn } from '@/lib/cn'
@@ -52,33 +53,16 @@ export default function ReviewLinks({ brand, model, year }: Props): ReactNode {
 
   return (
     <div ref={sectionRef} className="mt-3 border-t border-[var(--color-border)] pt-3">
-      <div className="flex items-center justify-between text-base">
-        <span className="flex items-center gap-1.5 text-base font-semibold">
-          {t('reviews.title')}
-          <SectionInfo section="reviews" title={t('reviews.title')} />
-        </span>
-
-        <div className="flex items-center gap-1.5">
-          {open && <ShareButton section="reviews" label={t('share.button', { section: t('reviews.title') })} />}
-          <button
-            type="button"
-            aria-expanded={open}
-            onClick={() => setOpen(v => !v)}
-            className="group flex items-center gap-1.5 rounded-full bg-[var(--color-surface)]/20 px-3 py-1 text-[var(--color-primary)]"
-          >
-            <span aria-hidden className="no-underline">
-              📝
-            </span>
-            <span className="underline group-hover:no-underline">{open ? t('reviews.hide') : t('reviews.show')}</span>
-            <span
-              aria-hidden
-              className={cn('inline-block no-underline transition-transform duration-200', open && 'rotate-180')}
-            >
-              ▾
-            </span>
-          </button>
-        </div>
-      </div>
+      <SectionHeader
+        icon="📝"
+        title={t('reviews.title')}
+        info={<SectionInfo section="reviews" title={t('reviews.title')} />}
+        actions={<ShareButton section="reviews" label={t('share.button', { section: t('reviews.title') })} />}
+        open={open}
+        onToggle={() => setOpen(v => !v)}
+        showLabel={t('reviews.show')}
+        hideLabel={t('reviews.hide')}
+      />
 
       <div
         aria-hidden={!open}

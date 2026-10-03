@@ -8,6 +8,7 @@ import { useSearchParams } from 'react-router'
 import CO2Badge from '@/components/CO2Badge'
 import { similarVehiclesHref } from '@/components/CO2Badge.helpers'
 import SectionInfo from '@/components/SectionInfo'
+import SectionHeader from '@/components/SectionHeader'
 import ShareButton from '@/components/ShareButton'
 import { cn } from '@/lib/cn'
 import { fuelEconomyQuery } from '@/lib/queries'
@@ -46,33 +47,16 @@ export default function FuelEconomy({ brand, model, year, fuel, capacity }: Prop
 
   return (
     <div ref={sectionRef} className="mt-3 border-t border-[var(--color-border)] pt-3">
-      <div className="flex items-center justify-between text-base">
-        <span className="flex items-center gap-1.5 text-base font-semibold">
-          {t('co2.title')}
-          <SectionInfo section="emissions" title={t('co2.title')} />
-        </span>
-
-        <div className="flex items-center gap-1.5">
-          {open && <ShareButton section="emissions" label={t('share.button', { section: t('co2.title') })} />}
-          <button
-            type="button"
-            aria-expanded={open}
-            onClick={() => setOpen(v => !v)}
-            className="group flex items-center gap-1.5 rounded-full bg-[var(--color-surface)]/20 px-3 py-1 text-[var(--color-primary)]"
-          >
-            <span aria-hidden className="no-underline">
-              🌿
-            </span>
-            <span className="underline group-hover:no-underline">{open ? t('co2.hide') : t('co2.show')}</span>
-            <span
-              aria-hidden
-              className={cn('inline-block no-underline transition-transform duration-200', open && 'rotate-180')}
-            >
-              ▾
-            </span>
-          </button>
-        </div>
-      </div>
+      <SectionHeader
+        icon="🌿"
+        title={t('co2.title')}
+        info={<SectionInfo section="emissions" title={t('co2.title')} />}
+        actions={<ShareButton section="emissions" label={t('share.button', { section: t('co2.title') })} />}
+        open={open}
+        onToggle={() => setOpen(v => !v)}
+        showLabel={t('co2.show')}
+        hideLabel={t('co2.hide')}
+      />
 
       <div
         aria-hidden={!open}

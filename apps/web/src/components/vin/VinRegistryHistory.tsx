@@ -32,12 +32,7 @@ export default function VinRegistryHistory({ registry }: Props): ReactNode {
       defaultOpen={isShared}
       showLabel={t('result.historyShow')}
       hideLabel={t('result.historyHide')}
-      title={
-        <span className="flex items-center gap-1.5">
-          <span aria-hidden>🕘</span>
-          {t('vin.registryTitle')}
-        </span>
-      }
+      title={t('vin.registryTitle')}
       actions={<ShareButton section="history" label={t('share.button', { section: t('vin.registryTitle') })} />}
     >
       <RegistrationTimeline actions={registry.actions} />

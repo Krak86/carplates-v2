@@ -97,7 +97,7 @@ export default function Layout({ children }: Props): ReactNode {
             <div
               className={cn(
                 'fixed inset-0 z-10 bg-black/30 transition-opacity duration-300 md:hidden',
-                open ? 'opacity-100' :'pointer-events-none opacity-0'
+                open ? 'opacity-100' : 'pointer-events-none opacity-0'
               )}
               onClick={() => setDrawerOpen(false)}
               aria-hidden

@@ -1,11 +1,14 @@
 import { useState } from 'react'
 import type { ReactNode, Ref } from 'react'
 
+import SectionHeader from '@/components/SectionHeader'
 import { cn } from '@/lib/cn'
 
 type Props = {
   title: ReactNode
-  /** Emoji in the toggle pill. */
+  /** ❓ explainer beside the title. */
+  info?: ReactNode
+  /** Emoji at the start of the header row. */
   icon: string
   /** Pill text while collapsed / expanded. */
   showLabel: string
@@ -24,6 +27,7 @@ type Props = {
 /** Collapsible block with the same header + pill toggle + animated height the plate view uses. */
 export default function VinToggleSection({
   title,
+  info,
   icon,
   showLabel,
   hideLabel,
@@ -38,33 +42,19 @@ export default function VinToggleSection({
 
   return (
     <div ref={ref} className={cn(bordered && 'border-t border-[var(--color-border)] py-2')}>
-      <div className="flex items-center justify-between gap-2 text-base">
-        <span className="min-w-0 font-semibold">{title}</span>
-
-        <div className="flex shrink-0 items-center gap-1.5">
-          {open && actions}
-          <button
-            type="button"
-            aria-expanded={open}
-            onClick={() => {
-              setOpen(!open)
-              onOpenChange?.(!open)
-            }}
-            className="group flex items-center gap-1.5 rounded-full bg-[var(--color-surface)]/20 px-3 py-1 text-[var(--color-primary)]"
-          >
-            <span aria-hidden className="no-underline">
-              {icon}
-            </span>
-            <span className="underline group-hover:no-underline">{open ? hideLabel : showLabel}</span>
-            <span
-              aria-hidden
-              className={cn('inline-block no-underline transition-transform duration-200', open && 'rotate-180')}
-            >
-              ▾
-            </span>
-          </button>
-        </div>
-      </div>
+      <SectionHeader
+        icon={icon}
+        title={title}
+        info={info}
+        actions={actions}
+        open={open}
+        onToggle={() => {
+          setOpen(!open)
+          onOpenChange?.(!open)
+        }}
+        showLabel={showLabel}
+        hideLabel={hideLabel}
+      />
 
       <div
         aria-hidden={!open}

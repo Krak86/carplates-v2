@@ -1,24 +1,24 @@
-import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import SegmentExplainer from '@/components/SegmentExplainer'
+import type { SegmentColor } from '@/components/SegmentExplainer'
 import { countryFlag, resolveYear, splitVin, VIN_SEGMENT_POSITIONS } from '@/components/vin/helpers'
 import type { FieldMap } from '@/components/vin/helpers'
 import type { VinSegmentId } from '@/components/vin/types'
-import { cn } from '@/lib/cn'
 
 type Props = {
   vin: string
   fields: FieldMap
 }
 
-const SEGMENT_STYLE: Readonly<Record<VinSegmentId, string>> = {
-  wmi: 'bg-sky-500/20 text-sky-700 ring-sky-500/50 dark:text-sky-300',
-  vds: 'bg-violet-500/20 text-violet-700 ring-violet-500/50 dark:text-violet-300',
-  check: 'bg-emerald-500/20 text-emerald-700 ring-emerald-500/50 dark:text-emerald-300',
-  year: 'bg-amber-500/20 text-amber-700 ring-amber-500/50 dark:text-amber-300',
-  plant: 'bg-rose-500/20 text-rose-700 ring-rose-500/50 dark:text-rose-300',
-  serial: 'bg-slate-500/20 text-slate-700 ring-slate-500/50 dark:text-slate-300'
+const SEGMENT_COLOR: Readonly<Record<VinSegmentId, SegmentColor>> = {
+  wmi: 'sky',
+  vds: 'violet',
+  check: 'emerald',
+  year: 'amber',
+  plant: 'rose',
+  serial: 'slate'
 }
 
 /**
@@ -27,7 +27,6 @@ const SEGMENT_STYLE: Readonly<Record<VinSegmentId, string>> = {
  */
 export default function VinSegments({ vin, fields }: Props): ReactNode {
   const { t } = useTranslation()
-  const [active, setActive] = useState<VinSegmentId>('wmi')
   const segments = splitVin(vin)
   if (!segments) return null
 
@@ -45,39 +44,17 @@ export default function VinSegments({ vin, fields }: Props): ReactNode {
   }
 
   return (
-    <div className="mb-4">
-      <div className="mb-1 text-sm text-[var(--color-muted)]">{t('vin.seg.hint')}</div>
-
-      <div role="group" aria-label={t('vin.seg.label')} className="flex flex-wrap gap-1 font-mono text-lg sm:text-xl">
-        {segments.map(s => (
-          <button
-            key={s.id}
-            type="button"
-            aria-pressed={active === s.id}
-            onMouseEnter={() => setActive(s.id)}
-            onFocus={() => setActive(s.id)}
-            onClick={() => setActive(s.id)}
-            className={cn(
-              'rounded-md px-1.5 py-0.5 font-semibold tracking-wider ring-0 transition-[box-shadow,opacity,transform] duration-200 ease-out motion-reduce:transition-none',
-              SEGMENT_STYLE[s.id],
-              active === s.id ? '-translate-y-0.5 scale-105 ring-2' : 'opacity-70 hover:opacity-100 active:scale-95'
-            )}
-          >
-            {s.text}
-          </button>
-        ))}
-      </div>
-
-      <div aria-live="polite" className="mt-2 rounded-md bg-[var(--color-border)]/30 px-3 py-2 text-sm">
-        <div key={active} className="animate-fade-in">
-          <span className="font-semibold">{t(`vin.seg.${active}.title`)}</span>
-          <span className="text-[var(--color-muted)]">
-            {' '}
-            · {t('vin.seg.positions', { range: VIN_SEGMENT_POSITIONS[active] })}
-          </span>
-          <p className="mt-0.5">{t(`vin.seg.${active}.desc`, params)}</p>
-        </div>
-      </div>
-    </div>
+    <SegmentExplainer
+      hint={t('vin.seg.hint')}
+      label={t('vin.seg.label')}
+      segments={segments.map(s => ({
+        id: s.id,
+        text: s.text,
+        color: SEGMENT_COLOR[s.id],
+        title: t(`vin.seg.${s.id}.title`),
+        positions: t('vin.seg.positions', { range: VIN_SEGMENT_POSITIONS[s.id] }),
+        desc: t(`vin.seg.${s.id}.desc`, params)
+      }))}
+    />
   )
 }

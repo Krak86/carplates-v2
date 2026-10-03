@@ -12,6 +12,7 @@ import {
 } from '@/components/NearbyServices.helpers'
 import type { NearbyCategory } from '@/components/NearbyServices.helpers'
 import SectionInfo from '@/components/SectionInfo'
+import SectionHeader from '@/components/SectionHeader'
 import ShareButton from '@/components/ShareButton'
 import { useNearbyLocationActions } from '@/components/use-nearby-location-actions'
 import { cn } from '@/lib/cn'
@@ -53,34 +54,18 @@ export default function NearbyServices({ brand }: Props): ReactNode {
 
   return (
     <div ref={sectionRef} className="mt-3 border-t border-[var(--color-border)] pt-3">
-      <div className="flex items-center justify-between text-base">
-        <span className="flex items-center gap-1.5 text-base font-semibold">
-          {t('nearby.title')}
-          <SectionInfo section="nearby" title={t('nearby.title')} />
-        </span>
-        <div className="flex items-center gap-1.5">
-          {open && (
-            <ShareButton section="nearby" tab={category} label={t('share.button', { section: t('nearby.title') })} />
-          )}
-          <button
-            type="button"
-            aria-expanded={open}
-            onClick={handleToggle}
-            className="group flex items-center gap-1.5 rounded-full bg-[var(--color-surface)]/20 px-3 py-1 text-[var(--color-primary)]"
-          >
-            <span aria-hidden className="no-underline">
-              📍
-            </span>
-            <span className="underline group-hover:no-underline">{open ? t('nearby.hide') : t('nearby.show')}</span>
-            <span
-              aria-hidden
-              className={cn('inline-block no-underline transition-transform duration-200', open && 'rotate-180')}
-            >
-              ▾
-            </span>
-          </button>
-        </div>
-      </div>
+      <SectionHeader
+        icon="📍"
+        title={t('nearby.title')}
+        info={<SectionInfo section="nearby" title={t('nearby.title')} />}
+        actions={
+          <ShareButton section="nearby" tab={category} label={t('share.button', { section: t('nearby.title') })} />
+        }
+        open={open}
+        onToggle={handleToggle}
+        showLabel={t('nearby.show')}
+        hideLabel={t('nearby.hide')}
+      />
 
       <div
         aria-hidden={!open}
