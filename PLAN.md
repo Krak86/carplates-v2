@@ -664,6 +664,38 @@ Uncommitted — check `git status`. **Do next, in this order:**
 5. **Also run the full e-drive owner-posts ingest (`pnpm ingest:edrive`, ~2.5–4 h) — see Step 2b below.** The two
    crawls hit different hosts, so they can run concurrently.
 
+**Step 2a — infocar video crawl: done 2026-10-04; models with no video → YouTube fallback (to do).** Full crawl:
+153 brands, 3,739 videos (`registry.car_videos`, committed as `scripts/seed-data/infocar-videos.csv.gz`, loaded by
+`ingest:ratings:csv`). `youtube_id` is the real YouTube id scraped from infocar's `/video/` pages (infocar embeds
+YouTube), not an infocar-internal id; thumbnails are infocar-hosted. 83% have a model slug + generation id, but only 42%
+of all videos have a generation present in the version catalog (the year filter needs it; 41% fall back to the title
+year, 15% have neither). Measured `videoLookup` over the 400 most-registered (brand, model) pairs: 245 have ≥1 video
+(74.1% of those registrations); on the top 60, 52 have one, only 41 once the car's year is applied. **No-video models,
+by registrations (the to-do list for alternative sources):**
+- Ukrainian/Soviet-built, largely outside infocar's coverage: Daewoo Lanos (~230k incl. ЗАЗ/ZAZ-Daewoo spellings), Sens,
+  Nexia; ВАЗ 2101/2103/2105-2109/21043/21063/21093/21099/2121/21101/21104/211540/217030/21150/21213; ЗАЗ 110307/1102/
+  110557; ГАЗ 3110/3302; Chevrolet Niva.
+- Western passenger cars: VW Touran (63k), Ford Fusion (59k), Mitsubishi Lancer (86k), Fiat Doblo (77k), Renault Laguna
+  (28k), Opel Omega (38k), Volvo V50, Chery Amulet (34k), Dodge Journey, Hyundai Getz (30k) / ix35, Nissan Note /
+  Primera / Tiida, Ford C-Max, Opel Meriva / Movano, Peugeot 307 / 207 / Expert, Fiat Scudo / Ducato, Mercedes Vito,
+  Chevrolet Nubira, VW Bora / LT 35, Audi 100 / 80, Mazda CX-7 / 626 / 5, Mitsubishi Colt.
+- Commercial/odd registry entries (MAN TGX, DAF XF, Krone SD, ПГ/ПА trailers, Honda Dio, Geely MR-7151A, Musstang):
+  skip — not worth video matching.
+- Also: old-year gaps (model has videos but none for a 2007–2008 car): Toyota Camry, Hyundai Tucson / Santa Fe /
+  Accent, Mazda 3, Nissan Qashqai, Mitsubishi Outlander, VW Caddy, Opel Zafira. Intended (no wrong-generation videos).
+- Re-derive/extend the list with the registry query + `videoLookup` (top N pairs, 0 results) — the 400-pair run is
+  what the numbers above come from; the registry spells many models twice ("LANOS LANOS"), collapse them first.
+
+**YouTube fallback design (decided 2026-10-04, not built).** Search YouTube for gap models only, as an **offline batch**
+that stores results next to `car_videos` (new `source` column or a sibling table; links + facts only, same lookup
+path) — never live per request. Per (brand, model, generation), not per year: queries like `<brand> <model> огляд` /
+`тест-драйв` / `обзор` / `review`, a few results each in ua/ru/en; keep a video only if its title names the brand and
+model and (when a year is known) a year in the generation's range; drop non-embeddable (`status.embeddable`, the modal
+player needs it) and shorts. Quota is the constraint: `search.list` costs 100 units against the 10,000/day default
+(≈100 searches/day), `videos.list` enrichment 1 unit per 50 ids — so ~150 gap models × 3 languages ≈ 4–5 days of
+quota; prioritise by registrations and resume per day. Cheaper add-on: pull uploads of a few trusted channels via
+`playlistItems.list` (1 unit/call) and match titles locally. `GOOGLE_API_KEY` is in `apps/api/.env`, untested.
+
 **Step 2b — e-drive owner posts (e-drive.com.ua): built 2026-10-03; full crawl not run yet.** A car-owner social
 network (user logbook posts: repairs, service, accessories — not editorial reviews), shown as the "e-drive.com.ua"
 subsection of the single combined reviews toggle (`ReviewLinks`: infocar.ua = test drives + owner reviews + videos,

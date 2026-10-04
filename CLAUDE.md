@@ -60,6 +60,11 @@ pnpm ingest:infocar   # crawl infocar.ua's brand/model/version catalog (both tre
                        # --dry-run, --refresh. Links + facts only. See PLAN.md "Car reviews"
 pnpm ingest:infocar:csv  # load the committed infocar CSV (85 KB gz) — seconds, no crawling
 pnpm export:infocar:csv  # re-dump the table to that CSV — run after every real re-crawl
+pnpm ingest:infocar:videos  # crawl infocar.ua's /video/ listings per brand (1 req/s, ~10 s/page, a few hours cold, robots-aware,
+                       # HTML cached in scripts/.data/infocar/) -> registry.car_videos (YouTube links + facts only);
+                       # --brand toyota, --limit N, --dry-run, --refresh. See PLAN.md "Car reviews"
+pnpm ingest:infocar:videos:csv  # load the committed videos CSV (185 KB gz) — seconds, no crawling
+pnpm export:infocar:videos:csv  # re-dump the table to that CSV — run after every real re-crawl
 pnpm ingest:edrive    # e-drive.com.ua owner posts per make/model/generation (its own JSON API, 1 req/s, ≥1 call per
                        # generation: hours cold) -> registry.owner_posts; --brand kia --model ceed, --limit N, --max-pages N,
                        # --dry-run. Links + facts only
@@ -67,7 +72,7 @@ pnpm ingest:edrive:csv   # load the committed e-drive posts CSV — seconds, no 
 pnpm export:edrive:csv   # re-dump the table to that CSV — run after every real re-crawl
 pnpm db:refresh-fuel-stats   # rebuild registry.stats_fuel (the /fuel page rollup) from the registry + fuel_economy;
                              # run after any registry ingest or ingest:fuel (ingest:all does it last)
-pnpm ingest:ratings:csv   # db:migrate, then all five *:csv rating loads + the fuel, infocar and e-drive CSVs concurrently — each writes
+pnpm ingest:ratings:csv   # db:migrate, then all five *:csv rating loads + the fuel, infocar, infocar-videos and e-drive CSVs concurrently — each writes
                           # its own table only, doesn't touch registrations
 pnpm ingest:all        # db:migrate, then ingest:full + ingest:ratings:csv concurrently — each writes a
                        # disjoint table (registrations/current_registration/stats_by_* vs. one ratings/fuel_economy
