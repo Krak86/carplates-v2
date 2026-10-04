@@ -41,7 +41,7 @@ export default function VinToggleSection({
   const [open, setOpen] = useState(defaultOpen)
 
   return (
-    <div ref={ref} className={cn(bordered && 'border-t border-[var(--color-border)] py-2')}>
+    <div ref={ref} className={cn(bordered && 'mt-3 border-t border-[var(--color-border)] pt-3')}>
       <SectionHeader
         icon={icon}
         title={title}

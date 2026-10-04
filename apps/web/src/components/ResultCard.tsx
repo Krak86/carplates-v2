@@ -39,6 +39,7 @@ import { useCarWikiActions } from '@/components/use-car-wiki-actions'
 import Card from '@/components/ui/Card'
 import VehicleKindIcon from '@/components/VehicleKindIcon'
 import VehiclePhotos from '@/components/VehiclePhotos'
+import VerificationLinks from '@/components/VerificationLinks'
 import VideoReviews from '@/components/VideoReviews'
 import VinDecodeTabs from '@/components/vin/VinDecodeTabs'
 import VinToggleSection from '@/components/vin/VinToggleSection'
@@ -245,7 +246,9 @@ export default function ResultCard({ data }: Props): ReactNode {
 
         <PlateSegments plate={data.plate} region={data.region} />
 
-        <div ref={basicRef}>
+        <VerificationLinks />
+
+        <div ref={basicRef} className="mt-3 border-t border-[var(--color-border)] pt-3">
           <SectionHeader
             icon="📋"
             title={t('result.basicLabel')}

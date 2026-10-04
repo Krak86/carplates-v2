@@ -44,7 +44,7 @@ export default function SectionHeader({
     <div
       onClick={handleRowClick}
       className={cn(
-        'group -mx-2 -my-1 flex items-center justify-between gap-2 rounded-lg px-2 py-1 text-base transition-colors select-none',
+        'group -mx-2 -my-1 flex min-h-10 items-center justify-between gap-2 rounded-lg px-2 py-1 text-base transition-colors select-none',
         disabled ? 'cursor-wait' : 'cursor-pointer hover:bg-primary/10'
       )}
     >

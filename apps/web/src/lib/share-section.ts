@@ -1,6 +1,7 @@
 import i18n from '@/i18n'
 
 export const SHARE_SECTIONS = [
+  'verification',
   'basic',
   'history',
   'vin',
