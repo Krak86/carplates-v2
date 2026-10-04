@@ -69,9 +69,9 @@ export default function VerificationLinks(): ReactNode {
                   href={site.url}
                   target="_blank"
                   rel="noopener noreferrer nofollow"
-                  className="flex items-center justify-between gap-3 rounded-md px-2 py-1.5 text-base text-[var(--color-primary)] transition-colors hover:bg-[var(--color-border)]/40"
+                  className="flex items-start justify-between gap-3 rounded-md px-2 py-1.5 text-base sm:items-center text-[var(--color-primary)] transition-colors hover:bg-[var(--color-border)]/40"
                 >
-                  <span className="flex min-w-0 items-center gap-3">
+                  <span className="flex min-w-0 flex-col items-start gap-2 sm:flex-row sm:items-center sm:gap-3">
                     <span
                       className={cn(
                         'flex h-9 w-28 shrink-0 items-center justify-center rounded-md px-2',
