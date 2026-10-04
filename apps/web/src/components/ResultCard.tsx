@@ -38,6 +38,7 @@ import TopStatBadges from '@/components/TopStatBadges'
 import { useCarWikiActions } from '@/components/use-car-wiki-actions'
 import Card from '@/components/ui/Card'
 import VehicleKindIcon from '@/components/VehicleKindIcon'
+import Model3dButton from '@/components/Model3dButton'
 import VehiclePhotos from '@/components/VehiclePhotos'
 import VerificationLinks from '@/components/VerificationLinks'
 import VideoReviews from '@/components/VideoReviews'
@@ -232,7 +233,10 @@ export default function ResultCard({ data }: Props): ReactNode {
                 </span>
               )}
             </div>
-            <TopStatBadges brand={c.brand} model={c.model} color={c.color} region={data.region} />
+            <div className="mt-1 flex flex-wrap gap-1.5 empty:hidden">
+              <TopStatBadges brand={c.brand} model={c.model} color={c.color} region={data.region} />
+              <Model3dButton brand={c.brand} model={c.model} />
+            </div>
           </div>
           <VehicleKindIcon
             kind={vehicleKind}

@@ -30,13 +30,14 @@ export default function TopStatBadges({ brand, model, color, region }: Props): R
   if (badges.length === 0) return null
 
   return (
-    <div className="mt-1 flex flex-col gap-1.5 sm:flex-row sm:flex-wrap">
+    // `contents`: the chips flow in the parent's wrapping row, alongside sibling chips (e.g. the 3D view).
+    <div className="contents">
       {badges.map(badge => (
         <Link
           viewTransition
           key={badge.key}
           to={badge.to}
-          className="flex w-full items-center gap-1 rounded-full border border-[var(--color-border)] bg-[var(--color-surface)]/20 px-2 py-0.5 text-xs text-[var(--color-fg)] transition-colors hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] sm:inline-flex sm:w-auto"
+          className="inline-flex items-center gap-1 rounded-full border border-[var(--color-border)] bg-[var(--color-surface)]/20 px-2 py-0.5 text-xs text-[var(--color-fg)] transition-colors hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
         >
           <span aria-hidden>{badge.icon}</span>
           {t(badge.textKey, { rank: badge.rank })}

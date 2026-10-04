@@ -18,6 +18,7 @@ import {
   getStatsField,
   getStatsTop,
   getUkraineGeography,
+  getModels3d,
   getVehiclePhotos,
   getWikiInfo,
   lookupPlate,
@@ -233,6 +234,15 @@ export function vehicleSearchQuery(filters: VehicleSearchFilters) {
       filters.pageSize
     ],
     queryFn: () => searchVehicles(filters)
+  })
+}
+
+// Sketchfab 3D models of a brand/model — persisted reference data (pnpm ingest:sketchfab), changes only on a re-crawl.
+export function models3dQuery(brand: string, model: string) {
+  return queryOptions({
+    queryKey: ['models3d', brand, model],
+    queryFn: () => getModels3d(brand, model),
+    staleTime: Infinity
   })
 }
 

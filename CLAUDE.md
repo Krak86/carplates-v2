@@ -70,9 +70,15 @@ pnpm ingest:edrive    # e-drive.com.ua owner posts per make/model/generation (it
                        # --dry-run. Links + facts only
 pnpm ingest:edrive:csv   # load the committed e-drive posts CSV — seconds, no crawling
 pnpm export:edrive:csv   # re-dump the table to that CSV — run after every real re-crawl
+pnpm ingest:sketchfab  # Sketchfab Data API search per infocar-catalog make/model (anonymous, 1 req/s, ~25 min cold, JSON
+                       # cached in scripts/.data/sketchfab/) -> registry.car_models_3d (embeddable 3D car models, facts + links
+                       # only; shown as the "🧊 3D view" chip/modal on result cards); --brand kia --model ceed, --limit N,
+                       # --dry-run, --refresh. Needs ingest:infocar(:csv) first
+pnpm ingest:sketchfab:csv   # load the committed Sketchfab CSV — seconds, no searching
+pnpm export:sketchfab:csv   # re-dump the table to that CSV — run after every real re-crawl
 pnpm db:refresh-fuel-stats   # rebuild registry.stats_fuel (the /fuel page rollup) from the registry + fuel_economy;
                              # run after any registry ingest or ingest:fuel (ingest:all does it last)
-pnpm ingest:ratings:csv   # db:migrate, then all five *:csv rating loads + the fuel, infocar, infocar-videos and e-drive CSVs concurrently — each writes
+pnpm ingest:ratings:csv   # db:migrate, then all five *:csv rating loads + the fuel, infocar, infocar-videos, e-drive and sketchfab CSVs concurrently — each writes
                           # its own table only, doesn't touch registrations
 pnpm ingest:all        # db:migrate, then ingest:full + ingest:ratings:csv concurrently — each writes a
                        # disjoint table (registrations/current_registration/stats_by_* vs. one ratings/fuel_economy

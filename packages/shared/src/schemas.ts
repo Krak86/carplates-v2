@@ -519,6 +519,22 @@ export const reviewsResponseSchema = z.object({
 })
 export type ReviewsResponse = z.infer<typeof reviewsResponseSchema>
 
+/** A Sketchfab 3D model (persisted by `pnpm ingest:sketchfab`) of this car's make/model; embedded from Sketchfab. */
+export const model3dSchema = z.object({
+  uid: z.string(),
+  name: z.string(),
+  year: z.number().int().nullable(),
+  authorName: z.string(),
+  authorUrl: z.string(),
+  thumbUrl: z.string().nullable(),
+  viewCount: z.number().int(),
+  likeCount: z.number().int(),
+  license: z.string().nullable()
+})
+export const models3dResponseSchema = z.object({ models: z.array(model3dSchema) })
+export type Model3d = z.infer<typeof model3dSchema>
+export type Models3dResponse = z.infer<typeof models3dResponseSchema>
+
 /** Shared count fields for every stats rollup row. */
 export const statsMetricsSchema = z.object({
   totalRows: z.number().int().nonnegative(),

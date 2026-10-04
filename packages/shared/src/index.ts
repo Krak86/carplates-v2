@@ -52,6 +52,7 @@ export {
 } from './infocarLookup.js'
 export { MAX_VIDEOS, videoLookup, type InfocarVideoRow } from './infocarVideoLookup.js'
 export { MAX_OWNER_POSTS, edriveModelSlug, ownerPostLookup, type OwnerPostLookupRow } from './edriveLookup.js'
+export { MAX_MODELS_3D, model3dLookup, type Model3dLookupRow } from './model3dLookup.js'
 export { countOwners } from './owners.js'
 export { makeKey, modelKey, brandCandidateKey } from './vehicleKey.js'
 export {
@@ -143,6 +144,8 @@ export {
   wikiImageSchema,
   wikiInfoResponseSchema,
   reviewsResponseSchema,
+  model3dSchema,
+  models3dResponseSchema,
   brandSuggestionSchema,
   brandSuggestionsResponseSchema,
   modelSuggestionSchema,
@@ -199,6 +202,8 @@ export {
   type WikiImage,
   type WikiInfo,
   type ReviewsResponse,
+  type Model3d,
+  type Models3dResponse,
   type BrandSuggestion,
   type BrandSuggestionsResponse,
   type ModelSuggestion,

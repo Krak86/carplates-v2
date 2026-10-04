@@ -420,6 +420,33 @@ export type OwnerPostRow = typeof ownerPosts.$inferSelect
 export type OwnerPostInsert = typeof ownerPosts.$inferInsert
 
 /**
+ * One Sketchfab 3D car model (`scripts/src/sketchfab.ts`), keyed by its Sketchfab uid and tagged with the make/model
+ * the search was run for. Facts + links only (embedded from Sketchfab) — see migrations/0026_car_models_3d.sql.
+ */
+export const carModels3d = registry.table(
+  'car_models_3d',
+  {
+    uid: text('uid').primaryKey(),
+    name: text('name').notNull(),
+    brandSlug: text('brand_slug').notNull(),
+    modelSlug: text('model_slug').notNull(),
+    modelName: text('model_name').notNull(),
+    year: integer('year'),
+    authorName: text('author_name').notNull(),
+    authorUrl: text('author_url').notNull(),
+    thumbUrl: text('thumb_url'),
+    viewCount: integer('view_count').notNull().default(0),
+    likeCount: integer('like_count').notNull().default(0),
+    license: text('license'),
+    publishedAt: date('published_at', { mode: 'string' }),
+    fetchedAt: timestamp('fetched_at', { withTimezone: true }).notNull().defaultNow()
+  },
+  t => [index('ix_car_models_3d_brand_model').on(t.brandSlug, t.modelSlug)]
+)
+export type CarModel3dRow = typeof carModels3d.$inferSelect
+export type CarModel3dInsert = typeof carModels3d.$inferInsert
+
+/**
  * One IIHS (US, insurance-industry-funded) vehicle model-year assessment — scraped from
  * iihs.org's own server-rendered detail pages via `scripts/src/iihs.ts` and refreshed by
  * re-running it, same rationale as `cncapRatings`/`kncapRatings` above. `makeKey`/`modelKey`

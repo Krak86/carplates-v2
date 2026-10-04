@@ -11,7 +11,8 @@ export const SHARE_SECTIONS = [
   'reviews',
   'videos',
   'wiki',
-  'photos'
+  'photos',
+  'model3d'
 ] as const
 export type ShareSection = (typeof SHARE_SECTIONS)[number]
 
