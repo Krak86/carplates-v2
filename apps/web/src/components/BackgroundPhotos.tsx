@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { useBackgroundMode } from '@/hooks/useBackgroundMode'
 import { useBackgroundParallax } from '@/hooks/useBackgroundParallax'
 import { getBackgroundImages } from '@/lib/background-images'
 import { useBackgroundStore } from '@/store/background-store'
@@ -20,6 +21,7 @@ export default function BackgroundPhotos(): ReactNode {
   const [visible, setVisible] = useState(true)
 
   const photosEnabled = useBackgroundStore(s => s.photosEnabled)
+  const mode = useBackgroundMode()
   const blurEnabled = useBackgroundStore(s => s.blurEnabled)
   const blurPx = useBackgroundStore(s => s.blurPx)
   const grayscaleEnabled = useBackgroundStore(s => s.grayscaleEnabled)
@@ -65,7 +67,7 @@ export default function BackgroundPhotos(): ReactNode {
     return (): void => clearTimeout(swapTimeout)
   }, [activeCss, renderedCss])
 
-  if (!photosEnabled || (!heroOverride && IMAGES.length === 0)) return null
+  if (!photosEnabled || mode !== 'images' || (!heroOverride && IMAGES.length === 0)) return null
 
   const filter =
     [

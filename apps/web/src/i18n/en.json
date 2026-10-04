@@ -103,7 +103,7 @@
   "section.about.wiki": "A short summary of the make and model from Wikipedia, with a photo and a link to the full article.\nIt describes the model in general — generation, history, specs — not this specific car\nThe language follows the app language when an article exists, otherwise English",
   "section.about.nearby": "A Google Maps search around your current location for services this car may need.\nMechanics — repair shops and service stations\nBrand dealers — official dealers of this make\nInsurance — insurance agents\nThe browser asks for your location when you open the section; it is only used for the map and is not stored",
   "section.about.verification": "Quick links to services for checking a vehicle.\nBDR — search for traffic violations recorded automatically by cameras\nMTSBU — check that a compulsory third-party liability (OSCPV) policy is valid\nshtrafua.com — how to pay a parking fine\nThese are external sites that open in a new tab; we send them no data",
-  "section.about.videos":"Video reviews and test drives for this make and model, matched to this car's model and year.\nVideos come from infocar.ua's video section and play from YouTube — nothing loads from YouTube until you press a video\nWe only link to the videos and do not copy them",
+  "section.about.videos": "Video reviews and test drives for this make and model, matched to this car's model and year.\nVideos come from infocar.ua's video section and play from YouTube — nothing loads from YouTube until you press a video\nWe only link to the videos and do not copy them",
   "section.about.reviews": "Written reviews and owner stories for this make and model, grouped by source.\ninfocar.ua — test drives and owner reviews, matched to this car's model and year\ne-drive.com.ua — owners' own logbook posts (repairs, service, accessories) from this car's generation, not professional reviews\nOther sites — search results for this make and model\nWe only link out to these sites and do not copy their content",
   "copy.button": "Copy {{label}}",
   "copy.copied": "Copied!",
@@ -892,5 +892,14 @@
   "oper.catInfo.owner": "The owner changed (purchase, inheritance, gift, auction), or the car was first registered to a buyer from a dealer. The key event of the history.",
   "oper.catInfo.modification": "The car itself was physically changed: colour, LPG equipment, engine or body. Same owner.",
   "oper.catInfo.deregistered": "The car was taken off the register: sold (deregistered for sale), exported or scrapped. It stays unregistered until a new registration appears.",
-  "oper.catInfo.noise": "Administrative operation: same owner and same car (slips, documents, plates, owner details). Not important for the car’s history."
+  "oper.catInfo.noise": "Administrative operation: same owner and same car (slips, documents, plates, owner details). Not important for the car’s history.",
+  "layers.button": "Background layers",
+  "layers.images.title": "Photos",
+  "layers.images.text": "Default car photo backdrop",
+  "layers.earth.title": "Earth from space",
+  "layers.earth.text": "Live ISS stream (low quality)",
+  "layers.map.title": "Map",
+  "layers.map.text": "Map of the plate’s region capital",
+  "layers.map.travic": "Moving vehicles: open Travic in a new tab ↗",
+  "layers.earth.stream.label": "Stream"
 }

@@ -5,17 +5,21 @@ import { Link, useLocation } from 'react-router'
 
 import BackgroundDevPanel from '@/components/BackgroundDevPanel'
 import BackgroundPhotos from '@/components/BackgroundPhotos'
+import LayersButton from '@/components/LayersButton'
 import LoadErrorBoundary from '@/components/LoadErrorBoundary'
 import OfflineBanner from '@/components/OfflineBanner'
 import PwaUpdatePrompt from '@/components/PwaUpdatePrompt'
 import QuickLinks from '@/components/QuickLinks'
 import { useHeaderVehicleLabel } from '@/components/use-header-vehicle-label'
+import { useBackgroundMode } from '@/hooks/useBackgroundMode'
 import { cn } from '@/lib/cn'
 import { setTransitionDirection } from '@/lib/view-transition'
+import { useLiveBackgroundStore } from '@/store/live-background-store'
 import { useUiStore } from '@/store/ui-store'
 
 const loadSidebar = () => import('@/components/Sidebar')
 const Sidebar = lazy(loadSidebar)
+const LiveBackground = lazy(() => import('@/components/LiveBackground'))
 
 type Props = {
   children: ReactNode
@@ -26,6 +30,7 @@ export default function Layout({ children }: Props): ReactNode {
   const drawerOpen = useUiStore(s => s.drawerOpen)
   const setDrawerOpen = useUiStore(s => s.setDrawerOpen)
   const vehicleLabel = useHeaderVehicleLabel()
+  const backgroundMode = useBackgroundMode()
   const { pathname } = useLocation()
   // Sidebar is lazy-loaded (not part of the LCP path) — stay unmounted until
   // the first open, then keep mounted so close gets a transition instead of a hard unmount.
@@ -44,6 +49,8 @@ export default function Layout({ children }: Props): ReactNode {
   // Following a plate/VIN link otherwise keeps the old scroll offset — land on the new result's top.
   useEffect(() => {
     window.scrollTo({ top: 0 })
+    // A live background belongs to the result it was picked on.
+    useLiveBackgroundStore.getState().reset()
   }, [pathname])
 
   useEffect(() => {
@@ -71,6 +78,11 @@ export default function Layout({ children }: Props): ReactNode {
   return (
     <div className="flex min-h-full flex-col">
       <BackgroundPhotos />
+      {backgroundMode !== 'images' && (
+        <Suspense fallback={null}>
+          <LiveBackground />
+        </Suspense>
+      )}
       <BackgroundDevPanel />
       <header className="header-vt sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-[var(--color-border)] bg-[var(--color-bg)]/50 px-4 py-3 backdrop-blur-md">
         <button
@@ -87,6 +99,7 @@ export default function Layout({ children }: Props): ReactNode {
           {t('app.title')}
         </Link>
         {vehicleLabel && <span className="min-w-0 truncate text-sm text-[var(--color-muted)]">{vehicleLabel}</span>}
+        <LayersButton />
       </header>
 
       <OfflineBanner />

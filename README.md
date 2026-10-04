@@ -17,6 +17,9 @@ Ukrainian vehicle lookup by **plate number** or **VIN**. Rebuild of
   car's make/model/year (from a crawled catalog, `registry.infocar_versions`; owner reviews also get a year-filtered
   link) plus a DRIVE2 search link — links only, nothing copied
 - Result-card hero photo: year-aware Wikimedia Commons search (falls back to the Wikipedia lead image, then a per-kind placeholder)
+- Background layers on plate/VIN result pages (button in the header, online only, resets on navigation): car photos
+  (default), a Google Maps view of the plate's region capital, or a live NASA ISS "Earth from space" stream (low
+  quality on purpose, selectable). Advanced search shows an OpenStreetMap view of the chosen region
 - Light/dark theme, AR plate scan and photo search, link previews for shared plate/VIN URLs
 - Installable PWA with offline mode: recent results, history and favorites stay available without a connection
 

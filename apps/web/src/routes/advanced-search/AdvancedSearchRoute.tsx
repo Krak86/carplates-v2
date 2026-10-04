@@ -14,6 +14,7 @@ import type { SearchResultRow } from '@carplates/shared'
 
 import ColorSwatch from '@/components/ColorSwatch'
 import { FUEL_ICON, getFuelIcon } from '@/components/ResultCard.helpers'
+import RegionMap from '@/components/RegionMap'
 import Card from '@/components/ui/Card'
 import Spinner from '@/components/ui/Spinner'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
@@ -237,6 +238,8 @@ export default function AdvancedSearchRoute(): ReactNode {
               </select>
             </label>
           </div>
+
+          {filters.region && <RegionMap region={filters.region} />}
 
           <div className="mt-3 flex items-center gap-4">
             <button

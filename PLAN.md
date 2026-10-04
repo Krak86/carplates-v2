@@ -484,6 +484,19 @@ above once scoped, or dropped if research says no.
 - ✅ **Year-aware hero image** (2026-10-02) — Wikimedia Commons search by brand/model/year, per-kind placeholder when
   no photo. Open: pick the default via `WIKI_IMAGE_SOURCE` after A/B comparing `?source=commons|wiki` on real plates.
 
+- ✅ **Background layers** (2026-10-04) — header layers button on plate/VIN result pages only (`isResultPath`), hidden
+  offline, session-only (`live-background-store`, reset on every route change). Modes: photos (default) · Google Maps
+  embed centred on the plate region's capital (`REGION_CENTERS`, zoom 13; whole-Ukraine view when no region) · NASA ISS
+  YouTube live streams (`EARTH_STREAMS`, 480×270 player scaled up = low quality, mini selector). Lazy-loaded
+  (`LiveBackground`, `LayersPanel`). Advanced search also embeds an OSM view of the chosen region (`RegionMap`).
+  Researched dead ends: **live traffic** — Google/Waze switched it off in Ukraine (Waze works abroad, e.g. Warsaw, but
+  only congestion + reports, nothing moves); **moving vehicles** — travic.app, eway, lad.lviv.ua send
+  `X-Frame-Options` (not embeddable), city.dozor.tech is empty until a route is picked, citybus.in.ua is an app
+  landing page. Open: (a) Lviv publishes free GTFS-Realtime vehicle positions
+  (`track.ua-gis.com/gtfs/lviv/vehicle_position`, ~11 s; licence unchecked) — an API proxy + lazy Leaflet map would
+  give real moving public transport for Львів only; (b) YouTube streams can be retired or embed-blocked — swap ids in
+  `EARTH_STREAMS`.
+
 ### Wanted vehicles ingest — planned (2026-10-01), not started
 
 Source: data.gov.ua dataset `ac1a3a9d-512b-446b-9b0c-1383d38ce474` (National
