@@ -11,8 +11,8 @@ type Props = {
 }
 
 /**
- * infocar.ua's YouTube videos for this make/model, inside the combined reviews section. A thumbnail opens the player
- * in a modal — the iframe is only created then (privacy: no YouTube request until the visitor asks for one).
+ * infocar.ua's YouTube videos for this make/model, the body of the `VideoReviews` section. A thumbnail opens the
+ * player in a modal — the iframe is only created then (privacy: no YouTube request until the visitor asks for one).
  */
 export default function InfocarVideos({ videos }: Props): ReactNode {
   const { t } = useTranslation()
@@ -21,10 +21,8 @@ export default function InfocarVideos({ videos }: Props): ReactNode {
   const current = videos.find(v => v.youtubeId === playing)
 
   return (
-    <div className="px-2 py-1.5">
-      <p className="text-base font-medium">{t('videos.title')}</p>
-
-      <ul className="mt-2 flex gap-3 overflow-x-auto pb-2">
+    <div>
+      <ul className="flex gap-3 overflow-x-auto pb-2">
         {videos.map(video => (
           <li key={video.youtubeId} className="w-56 shrink-0">
             <button

@@ -39,6 +39,7 @@ import { useCarWikiActions } from '@/components/use-car-wiki-actions'
 import Card from '@/components/ui/Card'
 import VehicleKindIcon from '@/components/VehicleKindIcon'
 import VehiclePhotos from '@/components/VehiclePhotos'
+import VideoReviews from '@/components/VideoReviews'
 import VinDecodeTabs from '@/components/vin/VinDecodeTabs'
 import VinToggleSection from '@/components/vin/VinToggleSection'
 import { useCardMotion } from '@/hooks/useCardMotion'
@@ -451,10 +452,11 @@ export default function ResultCard({ data }: Props): ReactNode {
 
         <SafetyRatings brand={c.brand} model={c.model} year={c.makeYear} body={c.body} />
         <FuelEconomy brand={c.brand} model={c.model} year={c.makeYear} fuel={c.fuel} capacity={c.capacity} />
-        <CarWikiInfo wiki={wiki} hasQuery={hasWikiQuery} />
-        <VehiclePhotos brand={c.brand} model={c.model} year={c.makeYear} />
         <ReviewLinks brand={c.brand} model={c.model} year={c.makeYear} />
+        <VideoReviews brand={c.brand} model={c.model} year={c.makeYear} />
+        <CarWikiInfo wiki={wiki} hasQuery={hasWikiQuery} />
         <NearbyServices brand={c.brand} />
+        <VehiclePhotos brand={c.brand} model={c.model} year={c.makeYear} />
       </Card>
     </div>
   )

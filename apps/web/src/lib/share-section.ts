@@ -8,6 +8,7 @@ export const SHARE_SECTIONS = [
   'ratings',
   'nearby',
   'reviews',
+  'videos',
   'wiki',
   'photos'
 ] as const

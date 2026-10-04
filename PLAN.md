@@ -686,20 +686,94 @@ by registrations (the to-do list for alternative sources):**
 - Re-derive/extend the list with the registry query + `videoLookup` (top N pairs, 0 results) — the 400-pair run is
   what the numbers above come from; the registry spells many models twice ("LANOS LANOS"), collapse them first.
 
-**YouTube fallback design (decided 2026-10-04, not built).** Search YouTube for gap models only, as an **offline batch**
-that stores results next to `car_videos` (new `source` column or a sibling table; links + facts only, same lookup
-path) — never live per request. Per (brand, model, generation), not per year: queries like `<brand> <model> огляд` /
-`тест-драйв` / `обзор` / `review`, a few results each in ua/ru/en; keep a video only if its title names the brand and
-model and (when a year is known) a year in the generation's range; drop non-embeddable (`status.embeddable`, the modal
-player needs it) and shorts. Quota is the constraint: `search.list` costs 100 units against the 10,000/day default
-(≈100 searches/day), `videos.list` enrichment 1 unit per 50 ids — so ~150 gap models × 3 languages ≈ 4–5 days of
-quota; prioritise by registrations and resume per day. Cheaper add-on: pull uploads of a few trusted channels via
-`playlistItems.list` (1 unit/call) and match titles locally. `GOOGLE_API_KEY` is in `apps/api/.env`, untested.
+**YouTube fallback — trial done 2026-10-04; full build + crawl is the next session's job.** Search YouTube for gap
+models only, as an **offline batch** that stores results next to `car_videos` (new `source` column or a sibling table;
+links + facts only, same lookup path) — never live per request. Per (brand, model, generation), not per year.
+
+*Trial* (`scripts/src/youtube-videos.ts`, dry-run, uncommitted until the build lands; run with
+`pnpm --filter @carplates/scripts exec tsx --env-file=../apps/api/.env src/youtube-videos.ts [model…]`): 10 gap models
+(Touran, Fusion, Lancer, Doblo, Laguna, Omega, Lanos, ВАЗ 2107, Getz, Note), 3 queries each, 3,010 units total
+(≈301/model). `GOOGLE_API_KEY` is valid (HTTP 200). 16–24 kept per model of ~17–27 found; the kept ones are mostly real
+reviews (carwow, Carbuyer, What Car?, AcademeG, Зенкевич, ArchiLow, Auto BOSS). Calls used: `search.list`
+(`part=id&type=video&videoEmbeddable=true&maxResults=10`) then one `videos.list`
+(`part=snippet,contentDetails,status,statistics`) per model, parsed with Zod.
+
+*Languages — priority cascade ua → ru → en (decided 2026-10-04):* run the ua query first and **stop as soon as ≥3
+videos survive the filter**; only then-missing models get the ru query, then en. ua `"<brand> <model> огляд
+тест-драйв"`, ru `"<brand> <model> обзор тест-драйв"`, en `"<brand> <model> review"` (brand/model in Latin as in the
+registry; for ВАЗ/ЗАЗ/ГАЗ also the Cyrillic + Lada/Zaz spellings), each with `maxResults=50`. Measured on the 10 trial
+models: **all 10 stopped after the ua query** (26–48 kept of 50) — 101 units/model instead of ≈301. Caveat: the ua query
+mostly returns *Russian-titled* videos (only ~2 of 10 models had a `lang=ua` title in the top results), so "ua first"
+is a search-phrase priority, not a guarantee of Ukrainian-language videos. If a real ua video matters, count the
+threshold on `lang=ua` titles instead — that makes most models fall through to ru/en again (≈200–300 units/model);
+decide before the full run. Store a `lang` column (`ua|ru|en`), keep the top ~6–8 per model by views with a **cap per
+language** (≤3 en; en is lowest priority — the trial's English hits skew to PakWheels/US channels); the UI orders by
+the user's `lang` first. Language comes from the title script, not the API (`defaultAudioLanguage` is mostly empty):
+`іїєґ` → ua, `ыэёъ` → ru, other Cyrillic is ambiguous (~⅓ of titles) → treat as `ru`.
+
+*Title filter (works, keep):* require a model alias in the title (Latin + Cyrillic: `touran`/`туран`, `lancer`/`лансер`,
+digits for ВАЗ — hand-curated alias table per gap model; `nissan note` needs the brand because `note` is a common
+word); drop non-embeddable (the modal player needs it), duration < 150 s, and dealer/used-car listings (regex
+`автопідбір|автоподбор|авторинок|під замовлення|з німеччини|продаж|ціни|в наявності|…`). Known false positives of the
+dealer regex: honest reviews titled "…з Німеччини" (e.g. Ivan Rybka's Touran) — accept, or drop `з німеччини` from it
+and rely on channel signals.
+
+*Still missing (build these):* (1) **generation/year matching** — the trial keeps a 2003–2010 and a 2018 Touran video
+for every Touran; parse a year or generation word (`MK1`, `Mk2`, `B`, `3`, `X`) from the title and map it to a
+generation year range via the infocar version catalog (as `videoLookup` already does for infocar videos), else store the
+title year and let `videoLookup` filter by it; (2) the **gap-model target list** — derive from the registry, not a
+hand-written array: top N (brand, model) pairs where `videoLookup` returns 0 (the throwaway script that produced the
+PLAN list; collapse doubled spellings "LANOS LANOS", skip trucks/trailers/odd entries), ordered by registrations;
+(3) **persistence** — migration `NNNN_*.sql` + a **new sibling table `registry.youtube_videos`, not an extension of
+`car_videos`** (that one has `infocar_video_id` NOT NULL UNIQUE and an infocar page `url`, and its crawl/CSV/refresh are
+infocar-specific; YouTube rows need `lang`/`channel`/`views`/`query` and a quota-limited refresh) (`youtube_id` unique, `brand_slug`/`model_slug` as the
+registry-side normalized slugs, `lang`, `year`, `generation_id` null, `channel`, `views`, `duration_s`,
+`published_at`, `query`, `fetched_at`), upsert by `youtube_id`, a **resumable per-day run** (skip models already done;
+stop cleanly when the API returns `quotaExceeded`, 403), `--model`, `--limit`, `--dry-run`, and CSV export/import like
+the other ingests (`export:youtube-videos:csv`, `ingest:youtube-videos:csv` into `ingest:ratings:csv`, CLAUDE.md list);
+(4) **lookup integration** — `videoLookup` (`packages/shared/src/infocarVideoLookup.ts`) takes these rows as a second
+source after the infocar ones (dedupe by `youtube_id`; infocar first), `MAX_VIDEOS` still caps the section, the UI
+labels them as YouTube search results rather than infocar picks; (5) tests for the alias/dealer/duration filter and the
+language bucketing (pure functions, colocated).
+
+*Quota & time:* `search.list` = 100 units, `videos.list` = 1 unit per ≤50 ids, daily default 10,000 (resets midnight
+Pacific). With the cascade ≈101 units/model (measured: 1,010 units for the 10 trial models) → ~99 models/day: ~80 gap
+models (top-400 list, de-duplicated) ≈ 8k units ≈ **under 1 day**; ~150 with the long tail ≈ 15k ≈ **~1.5 days**
+(models that fall through to ru/en cost +100 each; budget ~1.5–2 days to be safe). Without the cascade (3 queries
+always) it was ≈301/model ≈ 2.5–3 days for 80. Runtime per day is only ~10–15 min — quota is the limit. Levers:
+`maxResults=50` costs the same 100 as 10, so one wide query beats several narrow ones; a quota-increase request (free
+form, unknown approval time). Build estimate ≈ 3–4 h. Cheaper add-on: trusted channels' uploads via `playlistItems.list` (1 unit/call), matched locally.
+
+*Done when:* the no-video models in the Step 2a list (Lanos, Touran, Fusion, Lancer, Doblo, Laguna, Omega, ВАЗ 2107…)
+show ≥1 video in the UI, the browser check (КА4845ІО RAV4 → 2015–2018 videos; a Lanos / Touran plate → videos) passes,
+and the CSV is committed.
+
+**Next-session steps, in order (YouTube fallback):**
+1. **Decide the stop rule** (default: ≥3 kept videos of *any* language after the ua query — ~101 units/model; the
+   alternative, ≥1 `lang=ua` title, is ~200–300 units/model). Check `git status`: `scripts/src/youtube-videos.ts` (the
+   trial), the videos CSV and the PLAN edits may still be uncommitted.
+2. **Target list**: query `registry.current_registration` for the top N (brand, model) pairs (start N≈400) where
+   `videoLookup` returns 0 videos; collapse doubled spellings ("LANOS LANOS"), drop trucks/trailers/odd entries, order
+   by registrations. Write it out as a reviewable file (brand, model, registrations) and hand-add the Cyrillic aliases
+   per model (the trial's `aliases` array is the format); models without an alias fall back to the Latin model name.
+3. **Migration + table** `registry.youtube_videos` (next free `NNNN_*.sql`, Drizzle schema in `packages/db`), plus the
+   (brand, model) → done/query-count bookkeeping so a run resumes where it stopped.
+4. **Turn the trial into the ingest** (`youtube-videos.ts` → real, still dry-run-able): the cascade, filter, language
+   bucketing, ≥1 `videos.list` per query, upsert by `youtube_id`, stop cleanly on 403 `quotaExceeded`, `--model`,
+   `--limit`, `--dry-run`; pure helpers (alias/dealer/duration filter, `titleLang`) split out with colocated tests.
+5. **Generation/year matching** (item 1 above), then **`videoLookup` integration** (item 4) and the UI label.
+6. **Run it**: `--limit 10` first, eyeball, then the full list in daily batches (~99 models/day at 10,000 units);
+   watch the units counter the script prints.
+7. **CSV + wiring**: `export:youtube-videos:csv`, `ingest:youtube-videos:csv` into `ingest:ratings:csv`, root
+   `package.json` scripts, the CLAUDE.md command list; commit the seed.
+8. **Verify** (the "Done when" checks) and measure again: share of the top-400 pairs with ≥1 video (was 74.1% of
+   registrations), share of lookups with a year-matched video.
 
 **Step 2b — e-drive owner posts (e-drive.com.ua): built 2026-10-03; full crawl not run yet.** A car-owner social
 network (user logbook posts: repairs, service, accessories — not editorial reviews), shown as the "e-drive.com.ua"
-subsection of the single combined reviews toggle (`ReviewLinks`: infocar.ua = test drives + owner reviews + videos,
-e-drive.com.ua = owner stories, other sites = search links; each list shows 5, then "Show N more"). Links + facts only
+subsection of the text reviews toggle (`ReviewLinks`: infocar.ua = test drives + owner reviews, e-drive.com.ua = owner
+stories, other sites = search links; each list shows 5, then "Show N more"). Videos have their own sibling toggle
+(`VideoReviews`, 🎬, ❓ + share `?section=videos`), split out 2026-10-04. Links + facts only
 (title, category, cover URL, date) in `registry.owner_posts` (migration 0025); lookup = `ownerPostLookup` in
 `packages/shared` (infocar's model-slug candidates; only the car's generation year range; newest first, max 30).
 **Pick-up point — run the full ingest:**

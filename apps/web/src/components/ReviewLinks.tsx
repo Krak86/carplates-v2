@@ -7,7 +7,6 @@ import { useQuery } from '@tanstack/react-query'
 
 import EdrivePosts from '@/components/EdrivePosts'
 import InfocarReviewRows from '@/components/InfocarReviewRows'
-import InfocarVideos from '@/components/InfocarVideos'
 import LangBadge from '@/components/LangBadge'
 import { REVIEW_SITE_LABEL } from '@/components/ReviewLinks.helpers'
 import SectionInfo from '@/components/SectionInfo'
@@ -28,9 +27,9 @@ type Props = {
 }
 
 /**
- * One collapsed "Reviews" section, grouped by source: infocar.ua (test drives, owner reviews, videos), e-drive.com.ua
- * (owner posts) and search links to the other review sites. The persisted catalogs are fetched once the section is
- * opened. Hidden for a car with no make/model to go on.
+ * One collapsed "Reviews" section (all the text material; videos have their own `VideoReviews` section), grouped by
+ * source: infocar.ua (test drives, owner reviews), e-drive.com.ua (owner posts) and search links to the other review
+ * sites. The persisted catalogs are fetched once the section is opened. Hidden for a car with no make/model to go on.
  */
 export default function ReviewLinks({ brand, model, year }: Props): ReactNode {
   const { t } = useTranslation()
@@ -41,9 +40,8 @@ export default function ReviewLinks({ brand, model, year }: Props): ReactNode {
   const links = reviewLinks(brand, model, year)
   const hasLinks = links.length > 0
   const catalog = useQuery({ ...reviewsQuery(brand ?? '', model ?? '', year), enabled: !!brand && open })
-  const videos = catalog.data?.videos ?? []
   const posts = catalog.data?.ownerPosts ?? []
-  const hasInfocar = !!catalog.data?.testDrive || !!catalog.data?.reviews || videos.length > 0
+  const hasInfocar = !!catalog.data?.testDrive || !!catalog.data?.reviews
 
   useEffect(() => {
     if (isSharedReviews && hasLinks && sectionRef.current) scrollElementIntoView(sectionRef.current)
@@ -93,8 +91,6 @@ export default function ReviewLinks({ brand, model, year }: Props): ReactNode {
                     />
                   )}
                 </ul>
-
-                <InfocarVideos videos={videos} />
               </SourceGroup>
             )}
 
