@@ -62,10 +62,12 @@ pnpm ingest:infocar:csv  # load the committed infocar CSV (85 KB gz) — seconds
 pnpm export:infocar:csv  # re-dump the table to that CSV — run after every real re-crawl
 pnpm ingest:edrive    # e-drive.com.ua owner posts per make/model/generation (its own JSON API, 1 req/s, ≥1 call per
                        # generation: hours cold) -> registry.owner_posts; --brand kia --model ceed, --limit N, --max-pages N,
-                       # --dry-run. Links + facts only; no CSV seed yet
+                       # --dry-run. Links + facts only
+pnpm ingest:edrive:csv   # load the committed e-drive posts CSV — seconds, no crawling
+pnpm export:edrive:csv   # re-dump the table to that CSV — run after every real re-crawl
 pnpm db:refresh-fuel-stats   # rebuild registry.stats_fuel (the /fuel page rollup) from the registry + fuel_economy;
                              # run after any registry ingest or ingest:fuel (ingest:all does it last)
-pnpm ingest:ratings:csv   # db:migrate, then all five *:csv rating loads + the fuel and infocar CSVs concurrently — each writes
+pnpm ingest:ratings:csv   # db:migrate, then all five *:csv rating loads + the fuel, infocar and e-drive CSVs concurrently — each writes
                           # its own table only, doesn't touch registrations
 pnpm ingest:all        # db:migrate, then ingest:full + ingest:ratings:csv concurrently — each writes a
                        # disjoint table (registrations/current_registration/stats_by_* vs. one ratings/fuel_economy
