@@ -417,6 +417,14 @@ export default function ResultCard({ data }: Props): ReactNode {
           info={<SectionInfo section="history" title={t('result.historyLabel')} />}
           actions={<ShareButton section="history" label={t('share.button', { section: t('result.historyLabel') })} />}
         >
+          <div className="mb-2">
+            <Row
+              label={t('field.ownersCount')}
+              info="ownersCount"
+              value={t('field.ownersCountValue', { count: data.ownersCount })}
+            />
+          </div>
+
           <div className="mb-1 flex items-center gap-1.5 text-base font-semibold">
             <span aria-hidden>🕘</span>
             {t('result.historyTitle')}

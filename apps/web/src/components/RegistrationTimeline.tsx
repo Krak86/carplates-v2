@@ -3,9 +3,27 @@ import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import type { Registration } from '@carplates/shared'
 
+import InfoPopover from '@/components/InfoPopover'
 import { cn } from '@/lib/cn'
 import { depMapsUrl } from '@/lib/maps'
+import { type OperCategory, operCategory, operInfoKey } from '@/lib/oper-info'
 import { plateRegionLabel } from '@/lib/plate-region'
+
+/** `badge` tints the category pill, `bar` is the matching accent bar left of the operation name. */
+const CATEGORY_STYLES: Record<OperCategory, { badge: string; bar: string }> = {
+  new: { badge: 'bg-green-600/15 text-green-700 dark:text-green-400', bar: 'border-green-600' },
+  import: {
+    badge: 'bg-[var(--color-primary)]/15 text-[var(--color-primary)]',
+    bar: 'border-[var(--color-primary)]'
+  },
+  owner: {
+    badge: 'bg-[var(--color-primary)]/15 text-[var(--color-primary)]',
+    bar: 'border-[var(--color-primary)]'
+  },
+  modification: { badge: 'bg-amber-500/20 text-amber-700 dark:text-amber-400', bar: 'border-amber-500' },
+  deregistered: { badge: 'bg-red-600/15 text-red-700 dark:text-red-400', bar: 'border-red-600' },
+  noise: { badge: 'bg-[var(--color-border)]/60 text-[var(--color-muted)]', bar: 'border-[var(--color-border)]' }
+}
 
 type Props = {
   actions: Registration[]
@@ -32,6 +50,7 @@ export default function RegistrationTimeline({ actions, currentPlate, currentVeh
         const region = plateRegionLabel(action.plate, t)
         const isDifferentVehicle =
           !!currentVehicle && (action.brand !== currentVehicle.brand || action.model !== currentVehicle.model)
+        const category = operCategory(action.operCode)
         const vehicleLabel = [action.brand, action.model].filter(Boolean).join(' ')
 
         return (
@@ -107,7 +126,33 @@ export default function RegistrationTimeline({ actions, currentPlate, currentVeh
                 )}
               </div>
 
-              {action.operName && <div className="mt-0.5 text-sm text-[var(--color-muted)]">{action.operName}</div>}
+              {(action.operName || action.operCode != null) && (
+                <div className={cn('mt-1 text-sm text-[var(--color-muted)]', category === 'noise' && 'opacity-60')}>
+                  <div className="flex items-center gap-1.5">
+                    <span
+                      className={cn(
+                        'shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold',
+                        CATEGORY_STYLES[category].badge
+                      )}
+                    >
+                      {t(`oper.cat.${category}`)}
+                    </span>
+                    <InfoPopover label={t('oper.infoLabel')} title={t('oper.infoTitle')}>
+                      <p className="m-0 font-medium">{t(`oper.catInfo.${category}`)}</p>
+                      <p className="mt-2 mb-0">{t(operInfoKey(action.operCode))}</p>
+                      {action.operCode != null && (
+                        <p className="mt-1.5 mb-0 text-xs text-[var(--color-muted)]">
+                          {t('oper.code')}: {action.operCode}
+                        </p>
+                      )}
+                    </InfoPopover>
+                  </div>
+
+                  {action.operName && (
+                    <div className={cn('mt-1 border-l-2 pl-2', CATEGORY_STYLES[category].bar)}>{action.operName}</div>
+                  )}
+                </div>
+              )}
             </div>
           </li>
         )
