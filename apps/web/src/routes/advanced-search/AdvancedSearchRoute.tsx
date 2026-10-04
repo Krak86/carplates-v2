@@ -1,7 +1,15 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
-import { REGION_NAMES, regionName, VEHICLE_COLORS, VEHICLE_FUELS, VEHICLE_KINDS } from '@carplates/shared'
+import {
+  MIN_BRAND_LENGTH,
+  MIN_INDEXABLE_LENGTH,
+  REGION_NAMES,
+  regionName,
+  VEHICLE_COLORS,
+  VEHICLE_FUELS,
+  VEHICLE_KINDS
+} from '@carplates/shared'
 import type { SearchResultRow } from '@carplates/shared'
 
 import ColorSwatch from '@/components/ColorSwatch'
@@ -11,7 +19,7 @@ import Spinner from '@/components/ui/Spinner'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 import { cn } from '@/lib/cn'
 import { formatVehicleLabel } from '@/lib/vehicle-label'
-import { MIN_TEXT_FILTER_LENGTH, useAdvancedSearchActions } from '@/routes/advanced-search/use-advanced-search-actions'
+import { useAdvancedSearchActions } from '@/routes/advanced-search/use-advanced-search-actions'
 
 const inputClass = 'w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-1.5 text-sm'
 const invalidInputClass = 'border-red-500!'
@@ -53,6 +61,9 @@ export default function AdvancedSearchRoute(): ReactNode {
     filters,
     updateFilter,
     reset,
+    submit,
+    canSearch,
+    textError,
     page,
     setPage,
     pageSize,
@@ -63,9 +74,6 @@ export default function AdvancedSearchRoute(): ReactNode {
     modelSuggestions,
     results
   } = useAdvancedSearchActions()
-
-  const brandTooShort = filters.brand.length > 0 && filters.brand.length < MIN_TEXT_FILTER_LENGTH
-  const modelTooShort = filters.model.length > 0 && filters.model.length < MIN_TEXT_FILTER_LENGTH
 
   // For a very broad match, `total` is the API's capped floor (see search.service.ts's
   // SEARCH_COUNT_CAP), not the real count — paging stops at that boundary rather than letting
@@ -86,153 +94,170 @@ export default function AdvancedSearchRoute(): ReactNode {
       )}
 
       <Card className="mb-6">
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <label className="flex flex-col gap-1 text-sm">
-            {t('advancedSearch.brand')}
-            <input
-              type="text"
-              list="advanced-search-brands"
-              value={filters.brand}
-              onChange={e => updateFilter('brand', e.target.value)}
-              placeholder={t('advancedSearch.brandPlaceholder')}
-              className={inputClass}
-            />
-            <datalist id="advanced-search-brands">
-              {brandSuggestions.map(s => (
-                <option key={s.brand} value={s.brand} />
-              ))}
-            </datalist>
-            {brandTooShort && (
-              <span className="text-xs text-[var(--color-muted)]">
-                {t('advancedSearch.minChars', { count: MIN_TEXT_FILTER_LENGTH })}
-              </span>
+        <form
+          onSubmit={e => {
+            e.preventDefault()
+            submit()
+          }}
+        >
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <label className="flex flex-col gap-1 text-sm">
+              {t('advancedSearch.brand')}
+              <input
+                type="text"
+                list="advanced-search-brands"
+                value={filters.brand}
+                onChange={e => updateFilter('brand', e.target.value)}
+                placeholder={t('advancedSearch.brandPlaceholder')}
+                className={inputClass}
+              />
+              <datalist id="advanced-search-brands">
+                {brandSuggestions.map(s => (
+                  <option key={s.brand} value={s.brand} />
+                ))}
+              </datalist>
+              {textError === 'brandTooShort' && (
+                <span className="text-xs text-[var(--color-muted)]">
+                  {t('advancedSearch.minChars', { count: MIN_BRAND_LENGTH })}
+                </span>
+              )}
+            </label>
+
+            <label className="flex flex-col gap-1 text-sm">
+              {t('advancedSearch.model')}
+              <input
+                type="text"
+                list="advanced-search-models"
+                value={filters.model}
+                onChange={e => updateFilter('model', e.target.value)}
+                placeholder={t('advancedSearch.modelPlaceholder')}
+                className={inputClass}
+              />
+              <datalist id="advanced-search-models">
+                {modelSuggestions.map(s => (
+                  <option key={s.model} value={s.model} />
+                ))}
+              </datalist>
+              {textError === 'needsIndexable' && (
+                <span className="text-xs text-[var(--color-muted)]">
+                  {t('advancedSearch.needsIndexable', { count: MIN_INDEXABLE_LENGTH })}
+                </span>
+              )}
+            </label>
+
+            <label className="flex flex-col gap-1 text-sm">
+              {t('advancedSearch.yearFrom')}
+              <input
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                maxLength={4}
+                value={filters.yearFrom}
+                onChange={e => updateFilter('yearFrom', e.target.value.replace(/\D/g, ''))}
+                className={cn(inputClass, yearFromInvalid && invalidInputClass)}
+              />
+              {yearFromInvalid && <span className="text-xs text-red-500">{t('advancedSearch.yearInvalid')}</span>}
+            </label>
+
+            <label className="flex flex-col gap-1 text-sm">
+              {t('advancedSearch.yearTo')}
+              <input
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                maxLength={4}
+                value={filters.yearTo}
+                onChange={e => updateFilter('yearTo', e.target.value.replace(/\D/g, ''))}
+                className={cn(inputClass, yearToInvalid && invalidInputClass)}
+              />
+              {yearToInvalid && <span className="text-xs text-red-500">{t('advancedSearch.yearInvalid')}</span>}
+            </label>
+
+            <label className="flex flex-col gap-1 text-sm">
+              {t('advancedSearch.fuel')}
+              <select
+                value={filters.fuel}
+                onChange={e => updateFilter('fuel', e.target.value as typeof filters.fuel)}
+                className={inputClass}
+              >
+                <option value="">{t('advancedSearch.anyFuel')}</option>
+                {VEHICLE_FUELS.map(f => (
+                  <option key={f} value={f}>
+                    {FUEL_ICON[f]} {t(`vehicleFuel.${f}`)}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label className="flex flex-col gap-1 text-sm">
+              {t('advancedSearch.color')}
+              <select
+                value={filters.color}
+                onChange={e => updateFilter('color', e.target.value as typeof filters.color)}
+                className={inputClass}
+              >
+                <option value="">{t('advancedSearch.anyColor')}</option>
+                {VEHICLE_COLORS.map(c => (
+                  <option key={c} value={c}>
+                    {t(`vehicleColor.${c}`)}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label className="flex flex-col gap-1 text-sm">
+              {t('advancedSearch.kind')}
+              <select
+                value={filters.kind}
+                onChange={e => updateFilter('kind', e.target.value as typeof filters.kind)}
+                className={inputClass}
+              >
+                <option value="">{t('advancedSearch.anyKind')}</option>
+                {VEHICLE_KINDS.map(k => (
+                  <option key={k} value={k}>
+                    {t(`vehicleKind.${k}`)}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label className="flex flex-col gap-1 text-sm">
+              {t('advancedSearch.region')}
+              <select
+                value={filters.region}
+                onChange={e => updateFilter('region', e.target.value)}
+                className={inputClass}
+              >
+                <option value="">{t('advancedSearch.anyRegion')}</option>
+                {REGION_NAMES.map(r => (
+                  <option key={r} value={r}>
+                    {r}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+
+          <div className="mt-3 flex items-center gap-4">
+            <button
+              type="submit"
+              disabled={!canSearch}
+              className="rounded-lg bg-[var(--color-primary)] px-5 py-1.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {t('advancedSearch.search')}
+            </button>
+
+            {(hasAnyFilter || canSearch) && (
+              <button
+                type="button"
+                onClick={reset}
+                className="text-sm text-[var(--color-primary)] underline hover:no-underline"
+              >
+                {t('advancedSearch.reset')}
+              </button>
             )}
-          </label>
-
-          <label className="flex flex-col gap-1 text-sm">
-            {t('advancedSearch.model')}
-            <input
-              type="text"
-              list="advanced-search-models"
-              value={filters.model}
-              onChange={e => updateFilter('model', e.target.value)}
-              placeholder={t('advancedSearch.modelPlaceholder')}
-              className={inputClass}
-            />
-            <datalist id="advanced-search-models">
-              {modelSuggestions.map(s => (
-                <option key={s.model} value={s.model} />
-              ))}
-            </datalist>
-            {modelTooShort && (
-              <span className="text-xs text-[var(--color-muted)]">
-                {t('advancedSearch.minChars', { count: MIN_TEXT_FILTER_LENGTH })}
-              </span>
-            )}
-          </label>
-
-          <label className="flex flex-col gap-1 text-sm">
-            {t('advancedSearch.yearFrom')}
-            <input
-              type="text"
-              inputMode="numeric"
-              pattern="[0-9]*"
-              maxLength={4}
-              value={filters.yearFrom}
-              onChange={e => updateFilter('yearFrom', e.target.value.replace(/\D/g, ''))}
-              className={cn(inputClass, yearFromInvalid && invalidInputClass)}
-            />
-            {yearFromInvalid && <span className="text-xs text-red-500">{t('advancedSearch.yearInvalid')}</span>}
-          </label>
-
-          <label className="flex flex-col gap-1 text-sm">
-            {t('advancedSearch.yearTo')}
-            <input
-              type="text"
-              inputMode="numeric"
-              pattern="[0-9]*"
-              maxLength={4}
-              value={filters.yearTo}
-              onChange={e => updateFilter('yearTo', e.target.value.replace(/\D/g, ''))}
-              className={cn(inputClass, yearToInvalid && invalidInputClass)}
-            />
-            {yearToInvalid && <span className="text-xs text-red-500">{t('advancedSearch.yearInvalid')}</span>}
-          </label>
-
-          <label className="flex flex-col gap-1 text-sm">
-            {t('advancedSearch.fuel')}
-            <select
-              value={filters.fuel}
-              onChange={e => updateFilter('fuel', e.target.value as typeof filters.fuel)}
-              className={inputClass}
-            >
-              <option value="">{t('advancedSearch.anyFuel')}</option>
-              {VEHICLE_FUELS.map(f => (
-                <option key={f} value={f}>
-                  {FUEL_ICON[f]} {t(`vehicleFuel.${f}`)}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label className="flex flex-col gap-1 text-sm">
-            {t('advancedSearch.color')}
-            <select
-              value={filters.color}
-              onChange={e => updateFilter('color', e.target.value as typeof filters.color)}
-              className={inputClass}
-            >
-              <option value="">{t('advancedSearch.anyColor')}</option>
-              {VEHICLE_COLORS.map(c => (
-                <option key={c} value={c}>
-                  {t(`vehicleColor.${c}`)}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label className="flex flex-col gap-1 text-sm">
-            {t('advancedSearch.kind')}
-            <select
-              value={filters.kind}
-              onChange={e => updateFilter('kind', e.target.value as typeof filters.kind)}
-              className={inputClass}
-            >
-              <option value="">{t('advancedSearch.anyKind')}</option>
-              {VEHICLE_KINDS.map(k => (
-                <option key={k} value={k}>
-                  {t(`vehicleKind.${k}`)}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label className="flex flex-col gap-1 text-sm">
-            {t('advancedSearch.region')}
-            <select
-              value={filters.region}
-              onChange={e => updateFilter('region', e.target.value)}
-              className={inputClass}
-            >
-              <option value="">{t('advancedSearch.anyRegion')}</option>
-              {REGION_NAMES.map(r => (
-                <option key={r} value={r}>
-                  {r}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-
-        {hasAnyFilter && (
-          <button
-            type="button"
-            onClick={reset}
-            className="mt-3 text-sm text-[var(--color-primary)] underline hover:no-underline"
-          >
-            {t('advancedSearch.reset')}
-          </button>
-        )}
+          </div>
+        </form>
       </Card>
 
       {!hasAnyFilter && (

@@ -1,23 +1,28 @@
 import { Controller, Get, Inject, Query } from '@nestjs/common'
 import { ApiOkResponse, ApiQuery, ApiTags } from '@nestjs/swagger'
-import { REGION_NAMES, VEHICLE_COLORS, VEHICLE_FUELS, VEHICLE_KINDS } from '@carplates/shared'
+import {
+  MIN_BRAND_LENGTH,
+  MIN_MODEL_LENGTH,
+  REGION_NAMES,
+  textFilterError,
+  VEHICLE_COLORS,
+  VEHICLE_FUELS,
+  VEHICLE_KINDS
+} from '@carplates/shared'
 import { z } from 'zod'
 
 import { zodParam } from '../common/zod-param.pipe.js'
 import { BrandSuggestionsDto, ModelSuggestionsDto, SearchResponseDto } from './search.dto.js'
 import { SearchService } from './search.service.js'
 
-// Below this, pg_trgm's GIN index (packages/db/migrations 0013/0014) can't accelerate an ILIKE
-// substring match -- a 1-2 char pattern isn't a real trigram, so Postgres would fall back to a
-// sequential scan over the 15M+ row table. Same floor applies client-side (see
-// use-advanced-search-actions.ts's MIN_TEXT_FILTER_LENGTH) so this is defense in depth, not the
-// only gate.
-const MIN_TEXT_QUERY_LENGTH = 3
+// Floors live in @carplates/shared (searchFilters.ts) -- the web form applies the same rules, so this is
+// defense in depth, not the only gate. Suggestions hit the small stats_* rollups, so 2 chars is plenty.
+const MIN_SUGGEST_LENGTH = 2
 const freeTextQuery = z
   .string()
   .trim()
-  .refine(v => v.length === 0 || v.length >= MIN_TEXT_QUERY_LENGTH, {
-    message: `must be empty or at least ${MIN_TEXT_QUERY_LENGTH} characters`
+  .refine(v => v.length === 0 || v.length >= MIN_SUGGEST_LENGTH, {
+    message: `must be empty or at least ${MIN_SUGGEST_LENGTH} characters`
   })
 // A positive 4-digit model year (1000-9999) -- matches the client's YEAR_RE.
 const yearParam = z.coerce.number().int().min(1000).max(9999)
@@ -29,23 +34,27 @@ const modelsQuerySchema = z.object({
   q: freeTextQuery.optional().default('')
 })
 
-const searchQuerySchema = z.object({
-  brand: z.string().trim().min(MIN_TEXT_QUERY_LENGTH).optional(),
-  model: z.string().trim().min(MIN_TEXT_QUERY_LENGTH).optional(),
-  yearFrom: yearParam.optional(),
-  yearTo: yearParam.optional(),
-  fuel: z.enum(VEHICLE_FUELS).optional(),
-  color: z.enum(VEHICLE_COLORS).optional(),
-  kind: z.enum(VEHICLE_KINDS).optional(),
-  region: z
-    .string()
-    .trim()
-    .min(1)
-    .optional()
-    .refine(v => v === undefined || REGION_NAMES.includes(v), { message: 'unknown region' }),
-  page: z.coerce.number().int().min(1).default(1),
-  pageSize: z.coerce.number().int().min(1).max(50).default(20)
-})
+const searchQuerySchema = z
+  .object({
+    brand: z.string().trim().min(MIN_BRAND_LENGTH).optional(),
+    model: z.string().trim().min(MIN_MODEL_LENGTH).optional(),
+    yearFrom: yearParam.optional(),
+    yearTo: yearParam.optional(),
+    fuel: z.enum(VEHICLE_FUELS).optional(),
+    color: z.enum(VEHICLE_COLORS).optional(),
+    kind: z.enum(VEHICLE_KINDS).optional(),
+    region: z
+      .string()
+      .trim()
+      .min(1)
+      .optional()
+      .refine(v => v === undefined || REGION_NAMES.includes(v), { message: 'unknown region' }),
+    page: z.coerce.number().int().min(1).default(1),
+    pageSize: z.coerce.number().int().min(1).max(50).default(20)
+  })
+  .refine(q => textFilterError(q.brand ?? '', q.model ?? '') === null, {
+    message: 'a short make/model needs the other field to have at least 3 characters'
+  })
 
 @ApiTags('search')
 @Controller('api/search')

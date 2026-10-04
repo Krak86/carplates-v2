@@ -2,9 +2,10 @@ import { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import type { UseQueryResult } from '@tanstack/react-query'
 import { useSearchParams } from 'react-router'
-import { REGION_NAMES, VEHICLE_COLORS, VEHICLE_FUELS, VEHICLE_KINDS } from '@carplates/shared'
+import { REGION_NAMES, textFilterError, VEHICLE_COLORS, VEHICLE_FUELS, VEHICLE_KINDS } from '@carplates/shared'
 import type {
   BrandSuggestion,
+  TextFilterError,
   ModelSuggestion,
   SearchResponse,
   VehicleColor,
@@ -16,10 +17,9 @@ import { brandSuggestionsQuery, modelSuggestionsQuery, vehicleSearchQuery } from
 
 const DEBOUNCE_MS = 300
 const PAGE_SIZE = 20
-// Below this, pg_trgm's GIN index (packages/db/migrations 0013/0014) can't accelerate an ILIKE
-// substring match on the 15M+ row table -- a 1-2 char pattern isn't a real trigram, so Postgres
-// would fall back to a sequential scan. Mirrored server-side in search.controller.ts.
-export const MIN_TEXT_FILTER_LENGTH = 3
+// Suggestions (small stats_* rollups) start at 2 chars; the search's own make/model floors are in
+// @carplates/shared's searchFilters.ts, mirrored server-side in search.controller.ts.
+const MIN_SUGGEST_LENGTH = 2
 // A positive 4-digit model year -- anything else (fewer/more digits, a leading zero, a sign) is
 // treated as not-yet-a-year rather than coerced, so a half-typed value can't silently narrow (or
 // break) the query.
@@ -75,9 +75,14 @@ type UseAdvancedSearchActions = {
   filters: AdvancedSearchFilters
   updateFilter: <K extends FilterKey>(key: K, value: AdvancedSearchFilters[K]) => void
   reset: () => void
+  /** Commits the draft filters to the URL, which is what actually triggers the search. */
+  submit: () => void
+  canSearch: boolean
+  textError: TextFilterError | null
   page: number
   setPage: (page: number) => void
   pageSize: number
+  /** The committed (URL) filters have something to search for. */
   hasAnyFilter: boolean
   yearFromInvalid: boolean
   yearToInvalid: boolean
@@ -87,60 +92,74 @@ type UseAdvancedSearchActions = {
 }
 
 /**
- * Every filter (and the page number) lives in the URL, not component state — a filter set is
- * just a link, shareable and bookmarkable, same as SearchRoute's `/:query` and StatsRoute's
- * `?dim=&metric=`. Typing itself stays instant (the input's value is the URL param, written on
- * every keystroke via `replace` so it never spams browser history); only the network calls
- * (suggestions + the actual search) debounce off that value, via `useDebouncedValue` below.
+ * Two layers of filter state. The form edits a local `draft`; nothing is fetched while typing. Clicking
+ * Search (or pressing Enter) `submit`s the draft into the URL, and the URL's filters are what the results
+ * query reads -- so a result set is still just a shareable, bookmarkable link, same as SearchRoute's
+ * `/:query` and StatsRoute's `?dim=&metric=`. Only the autocomplete suggestions fetch off the draft
+ * (debounced). The URL is the source of truth on first load; the draft is seeded from it once.
  */
 export function useAdvancedSearchActions(): UseAdvancedSearchActions {
   const [searchParams, setSearchParams] = useSearchParams()
-  const filters = filtersFromParams(searchParams)
+  const applied = filtersFromParams(searchParams)
   const page = Math.max(1, Number(searchParams.get('page')) || 1)
+  const [draft, setDraft] = useState<AdvancedSearchFilters>(() => filtersFromParams(searchParams))
 
-  const debouncedBrand = useDebouncedValue(filters.brand)
-  const debouncedModel = useDebouncedValue(filters.model)
-  const debouncedYearFrom = useDebouncedValue(filters.yearFrom)
-  const debouncedYearTo = useDebouncedValue(filters.yearTo)
+  const debouncedBrand = useDebouncedValue(draft.brand.trim())
+  const debouncedModel = useDebouncedValue(draft.model.trim())
 
-  const brandFilter = debouncedBrand.length >= MIN_TEXT_FILTER_LENGTH ? debouncedBrand : undefined
-  const modelFilter = debouncedModel.length >= MIN_TEXT_FILTER_LENGTH ? debouncedModel : undefined
-  const { year: yearFrom, invalid: yearFromInvalid } = parseYearFilter(debouncedYearFrom)
-  const { year: yearTo, invalid: yearToInvalid } = parseYearFilter(debouncedYearTo)
+  const { year: draftYearFrom, invalid: yearFromInvalid } = parseYearFilter(draft.yearFrom)
+  const { year: draftYearTo, invalid: yearToInvalid } = parseYearFilter(draft.yearTo)
+  const textError = textFilterError(draft.brand, draft.model)
+
+  const draftHasFilter = Boolean(
+    draft.brand.trim() ||
+    draft.model.trim() ||
+    draftYearFrom != null ||
+    draftYearTo != null ||
+    draft.fuel ||
+    draft.color ||
+    draft.kind ||
+    draft.region
+  )
+  const canSearch = draftHasFilter && !yearFromInvalid && !yearToInvalid && !textError
 
   const brandSuggestions = useQuery({
     ...brandSuggestionsQuery(debouncedBrand),
-    enabled: debouncedBrand.length >= MIN_TEXT_FILTER_LENGTH
+    enabled: debouncedBrand.length >= MIN_SUGGEST_LENGTH
   })
   const modelSuggestions = useQuery({
-    ...modelSuggestionsQuery(filters.brand || undefined, debouncedModel),
-    enabled: debouncedModel.length >= MIN_TEXT_FILTER_LENGTH
+    ...modelSuggestionsQuery(draft.brand.trim() || undefined, debouncedModel),
+    enabled: debouncedModel.length >= MIN_SUGGEST_LENGTH
   })
 
+  // Committed filters. A hand-edited / stale URL that breaks a rule simply doesn't search.
+  const { year: yearFrom, invalid: appliedYearFromInvalid } = parseYearFilter(applied.yearFrom)
+  const { year: yearTo, invalid: appliedYearToInvalid } = parseYearFilter(applied.yearTo)
   const hasAnyFilter =
-    !yearFromInvalid &&
-    !yearToInvalid &&
+    !appliedYearFromInvalid &&
+    !appliedYearToInvalid &&
+    !textFilterError(applied.brand, applied.model) &&
     Boolean(
-      brandFilter ||
-      modelFilter ||
+      applied.brand.trim() ||
+      applied.model.trim() ||
       yearFrom != null ||
       yearTo != null ||
-      filters.fuel ||
-      filters.color ||
-      filters.kind ||
-      filters.region
+      applied.fuel ||
+      applied.color ||
+      applied.kind ||
+      applied.region
     )
 
   const results = useQuery({
     ...vehicleSearchQuery({
-      brand: brandFilter,
-      model: modelFilter,
+      brand: applied.brand.trim() || undefined,
+      model: applied.model.trim() || undefined,
       yearFrom,
       yearTo,
-      fuel: filters.fuel || undefined,
-      color: filters.color || undefined,
-      kind: filters.kind || undefined,
-      region: filters.region || undefined,
+      fuel: applied.fuel || undefined,
+      color: applied.color || undefined,
+      kind: applied.kind || undefined,
+      region: applied.region || undefined,
       page,
       pageSize: PAGE_SIZE
     }),
@@ -148,25 +167,28 @@ export function useAdvancedSearchActions(): UseAdvancedSearchActions {
   })
 
   function updateFilter<K extends FilterKey>(key: K, value: AdvancedSearchFilters[K]): void {
-    setSearchParams(
-      prev => {
-        const next = new URLSearchParams(prev)
-        if (value) next.set(key, value)
-        else next.delete(key)
-        // Changing the make invalidates whatever model was typed for the previous one.
-        if (key === 'brand') next.delete('model')
-        next.delete('page')
-        return next
-      },
-      { replace: true }
-    )
+    setDraft(prev => ({
+      ...prev,
+      [key]: value,
+      // Changing the make invalidates whatever model was typed for the previous one.
+      ...(key === 'brand' ? { model: '' } : {})
+    }))
   }
 
-  function setPage(next: number): void {
+  function submit(): void {
+    if (!canSearch) return
+    const next = new URLSearchParams()
+    for (const [key, value] of Object.entries(draft)) {
+      if (value) next.set(key, value.trim())
+    }
+    setSearchParams(next, { replace: true })
+  }
+
+  function setPage(nextPage: number): void {
     setSearchParams(
       prev => {
         const params = new URLSearchParams(prev)
-        if (next > 1) params.set('page', String(next))
+        if (nextPage > 1) params.set('page', String(nextPage))
         else params.delete('page')
         return params
       },
@@ -175,13 +197,17 @@ export function useAdvancedSearchActions(): UseAdvancedSearchActions {
   }
 
   function reset(): void {
+    setDraft(filtersFromParams(new URLSearchParams()))
     setSearchParams(new URLSearchParams(), { replace: true })
   }
 
   return {
-    filters,
+    filters: draft,
     updateFilter,
     reset,
+    submit,
+    canSearch,
+    textError,
     page,
     setPage,
     pageSize: PAGE_SIZE,

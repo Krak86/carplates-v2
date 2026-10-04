@@ -17,6 +17,13 @@ export {
   regionName,
   type PlateSeries
 } from './regions.js'
+export {
+  MIN_BRAND_LENGTH,
+  MIN_INDEXABLE_LENGTH,
+  MIN_MODEL_LENGTH,
+  textFilterError,
+  type TextFilterError
+} from './searchFilters.js'
 export { VEHICLE_KINDS, resolveVehicleKind, sourceValueForKind, type VehicleKind } from './vehicleKind.js'
 export {
   VEHICLE_COLORS,
@@ -44,12 +51,7 @@ export {
   type InfocarMatches
 } from './infocarLookup.js'
 export { MAX_VIDEOS, videoLookup, type InfocarVideoRow } from './infocarVideoLookup.js'
-export {
-  MAX_OWNER_POSTS,
-  edriveModelSlug,
-  ownerPostLookup,
-  type OwnerPostLookupRow
-} from './edriveLookup.js'
+export { MAX_OWNER_POSTS, edriveModelSlug, ownerPostLookup, type OwnerPostLookupRow } from './edriveLookup.js'
 export { countOwners } from './owners.js'
 export { makeKey, modelKey, brandCandidateKey } from './vehicleKey.js'
 export {
