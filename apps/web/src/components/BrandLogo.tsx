@@ -65,7 +65,7 @@ export default function BrandLogo({ brand, variant = 'inline', size = 'default',
       className={cn(
         // `cn` doesn't dedupe (plain clsx, no tailwind-merge) — the two sizes must never
         // both contribute a height/width class, or which one wins is cascade-order luck.
-        size === 'sm' ? 'h-4 w-5' : 'h-8 w-auto',
+        size === 'sm' ? 'h-4 w-5' : 'h-4 w-auto max-w-15 shrink-0',
         'object-contain mix-blend-multiply',
         // Dark logos vanish on a dark surface — sit them on a light chip.
         'dark:rounded dark:bg-white/10 dark:mix-blend-normal',
