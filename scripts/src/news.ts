@@ -21,7 +21,7 @@ import { tagNews } from '@carplates/shared'
 import { lt, sql } from 'drizzle-orm'
 
 import { isAllowed, parseRobots } from './infocar-robots.js'
-import { decodeFeed, hasCategory, newsSourcesSchema, parseFeed } from './news-parse.js'
+import { decodeFeed, hasCategory, matchesUrl, newsSourcesSchema, parseFeed } from './news-parse.js'
 import type { NewsSource } from './news-parse.js'
 
 const USER_AGENT = 'carsua.app-ingest/1.0'
@@ -113,7 +113,9 @@ async function main(): Promise<void> {
           continue
         }
         const feed = parseFeed(await fetchFeed(source))
-        const parsed = source.onlyCategories ? feed.filter(item => hasCategory(item, source.onlyCategories!)) : feed
+        const parsed = feed
+          .filter(item => !source.onlyCategories || hasCategory(item, source.onlyCategories))
+          .filter(item => !source.excludeUrls || !matchesUrl(item, source.excludeUrls))
         if (!feed.length) {
           log(`${source.id.padEnd(20)} WARNING 0 items — the feed may have changed or broken`)
           continue

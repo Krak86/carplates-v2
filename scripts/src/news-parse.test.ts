@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 // eslint-disable-next-line import-x/default -- CJS `export =` typings; esModuleInterop makes the default real
 import iconv from 'iconv-lite'
 
-import { decodeFeed, hasCategory, newsSourcesSchema, parseFeed, plainSummary } from './news-parse.js'
+import { decodeFeed, hasCategory, matchesUrl, newsSourcesSchema, parseFeed, plainSummary } from './news-parse.js'
 
 const RSS = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:media="http://search.yahoo.com/mrss/"><channel>
@@ -73,5 +73,12 @@ describe('hasCategory', () => {
     expect(hasCategory({ categories: ['Новини', 'авто'] }, ['Авто', 'Електромобілі'])).toBe(true)
     expect(hasCategory({ categories: ['Автоматизація'] }, ['Авто'])).toBe(false)
     expect(hasCategory({ categories: [] }, ['Авто'])).toBe(false)
+  })
+})
+
+describe('matchesUrl', () => {
+  it('matches any pattern, case-insensitively', () => {
+    expect(matchesUrl({ url: 'https://x.com/Photos/a1/' }, ['/photos/'])).toBe(true)
+    expect(matchesUrl({ url: 'https://x.com/news/a1/' }, ['/photos/', '/auto-loans/'])).toBe(false)
   })
 })

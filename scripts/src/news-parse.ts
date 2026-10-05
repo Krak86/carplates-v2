@@ -23,6 +23,8 @@ export const newsSourceSchema = z.object({
   enabled: z.boolean().default(true),
   /** Whole-site feeds: keep only items carrying one of these `<category>` values (exact, case-insensitive); the rest are dropped. */
   onlyCategories: z.array(z.string().min(1)).optional(),
+  /** Drop items whose link matches one of these regexes (e.g. photo galleries in a mixed whole-site feed). */
+  excludeUrls: z.array(z.string().min(1)).optional(),
   note: z.string().optional()
 })
 export const newsSourcesSchema = z.array(newsSourceSchema)
@@ -107,6 +109,11 @@ export function parseFeed(xml: string): FeedItem[] {
     })
   })
   return items
+}
+
+/** Does the item's link match any of the `patterns` (regex sources, case-insensitive)? */
+export function matchesUrl(item: Pick<FeedItem, 'url'>, patterns: string[]): boolean {
+  return patterns.some(p => new RegExp(p, 'i').test(item.url))
 }
 
 /** Does the item carry any of `wanted` as a category (exact match, case-insensitive)? */

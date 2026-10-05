@@ -391,7 +391,7 @@ above once scoped, or dropped if research says no.
 
 - ✅ **Background layers** (2026-10-04) — built, see `docs/plan-done.md`. Open: (a) Lviv publishes free GTFS-Realtime vehicle positions
   (`track.ua-gis.com/gtfs/lviv/vehicle_position`, ~11 s; licence unchecked) — an API proxy + lazy Leaflet map would give real moving public
-  transport for Львів only; (b) YouTube ISS streams can be retired or embed-blocked — swap ids in `EARTH_STREAMS`.
+  transport for Львів only; (b) YouTube ISS streams can be retired or embed-blocked — swap ids in `LIVE_STREAMS` (earth / traffic / city, `apps/web/src/lib/live-background.ts`; traffic/city streams added 2026-10-05).
 
 ### Wanted vehicles ingest — planned (2026-10-01), not started
 
@@ -555,6 +555,7 @@ and the CSV is committed.
 - **Schedule it:** cron / `@Cron` on the VPS (Phase 4) — every ~6 h; hourly if the tiny-window whole-site feed (mezha) should pay off. Not part of `ingest:all`.
 - **Measure** (the plan's step 7): items/day per source, % tagged with a make / model, and for the top-50 registry (brand, model) pairs how many have ≥1 news
   item in 30/180 days — the DB has had one manual run so far.
+- **English sources added 2026-10-05:** Car and Driver, Motor1, Carscoops (news + reviews) — verified, see the table in `docs/plan-done.md`. Open: the Ukrainian UI sends `lang=uk` so it never shows them; decide whether English items should appear for uk/ru users, and re-measure tag rates after a few days.
 - **More sources:** check auto.ria.com/news, autocentre.ua, avtoradnyk, nv.ua/auto (robots first, then categories, then a tagger run on the real items).
 - **Backfill** beyond the feed windows: `news.infocar.ua` paging and mezha's `/tag/avto/` HTML pages (robots check first) — not RSS.
 - **Hot / News toggle** (the original design's `kind='hot'`: ≤7 days AND (model match OR new-models source)) — not built; the News section lists model then make news.

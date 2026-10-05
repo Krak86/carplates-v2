@@ -87,8 +87,8 @@ pnpm ingest:topgear   # TopGear UK editorial reviews (topgear.com/car-reviews/<m
                        # slug), --limit N, --dry-run, --refresh. Score + link + meta blurb only. See PLAN.md "Step 2c"
 pnpm ingest:topgear:csv   # load the committed TopGear CSV (71 KB gz) — seconds, no crawling
 pnpm export:topgear:csv   # re-dump the table to that CSV — run after every real re-crawl
-pnpm ingest:news      # poll the RSS feeds listed in scripts/news-sources.json (edit that file to add/disable feeds; `onlyCategories` filters
-                       # whole-site feeds) -> registry.news_items, tagged brand/model/year from the headline, robots.txt-checked; idempotent,
+pnpm ingest:news      # poll the RSS feeds listed in scripts/news-sources.json (edit that file to add/disable feeds; `onlyCategories`/`excludeUrls` filter
+                       # whole-site feeds by category / link regex) -> registry.news_items, tagged brand/model/year from the headline, robots.txt-checked; idempotent,
                        # run on demand or from a scheduler (every ~6 h; no CSV seed); --source id, --dry-run, --list. See PLAN.md "Step 2d"
 pnpm ingest:press     # itc.ua + mezha.ua "test drive" tag listings (Ukrainian listing paged until empty; each article's hreflang
                        # editions fetched too: itc uk+ru, mezha uk+en; ~310 articles, ~10 min cold, 1 req/s, robots-aware, HTML cached

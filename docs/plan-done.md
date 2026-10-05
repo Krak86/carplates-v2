@@ -1830,12 +1830,15 @@ tends to be missed) and a 413 error key. Plate boxes are drawn on the
 thumbnail and viewer (`PhotoPlateBoxes`, hideable in the viewer). **Not yet:**
 rotating the photo, pinch-zoom on touch.
 
-### Background layers ✅ DONE (2026-10-04)
+### Background layers ✅ DONE (2026-10-04; extended 2026-10-05)
 
-header layers button on plate/VIN result pages only (`isResultPath`), hidden
-  offline, session-only (`live-background-store`, reset on every route change). Modes: photos (default) · Google Maps
-  embed centred on the plate region's capital (`REGION_CENTERS`, zoom 13; whole-Ukraine view when no region) · NASA ISS
-  YouTube live streams (`EARTH_STREAMS`, 480×270 player scaled up = low quality, mini selector). Lazy-loaded
+header layers button on **every page** (hidden offline), session-only (`live-background-store`; routing never changes the
+  picked layer — click opens the panel, a press outside/Esc closes it). Modes: photos (default) · Google Maps embed (view captured when the
+  map is picked: the plate region's capital (`REGION_CENTERS`, zoom 13) on a result page, else all of Ukraine; picking it again re-pins) ·
+  three YouTube live-stream layers (`LIVE_STREAMS` / `DEFAULT_STREAMS` in `lib/live-background.ts`, one selector each, 480×270 player scaled up =
+  low quality): 🌍 earth (NASA ISS ×2) · 🚦 traffic (10 street/traffic-cam streams: Brazil, France, Taiwan, Spain, USA) · 🏙️ city (Taiwan).
+  **Poor-connection guard** (`usePoorConnection`, Network Information API, Chromium-only): on data-saver or ≤3G the stream buttons are
+  disabled with a hint and an active stream layer falls back to the photos, resuming by itself when the link improves. Lazy-loaded
   (`LiveBackground`, `LayersPanel`). Advanced search also embeds an OSM view of the chosen region (`RegionMap`).
   Researched dead ends: **live traffic** — Google/Waze switched it off in Ukraine (Waze works abroad, e.g. Warsaw, but
   only congestion + reports, nothing moves); **moving vehicles** — travic.app, eway, lad.lviv.ua send
@@ -2515,7 +2518,7 @@ Moved from PLAN.md 2026-10-05. Open items (cron, Hot toggle, measure step, more 
   `?section=news`, thumbnail-left rows via `NewsCard horizontal`); and a desktop-only (≥1400 px) fixed right-hand `NewsWidget` that fetches as soon as the
   car is known, renders nothing without news and fades in after ~80 px of scroll. `NewsGroups` ("About <make model>" / "About <make>") is shared.
   A bare-car-name headline from the infocar `new-models` feed is shown as "New model: <name>" (`newsTitle`).
-- Tests: `newsLookup.test.ts` (tagger + lookup), `news-parse.test.ts` (parser, summary cap, windows-1251, sources schema, `hasCategory`).
+- Tests: `newsLookup.test.ts` (tagger + lookup), `news-parse.test.ts` (parser, summary cap, windows-1251, sources schema, `hasCategory`, `matchesUrl`). A source may also set `excludeUrls` (regex list on the item link) — for whole-site feeds with no usable `<category>` (Car and Driver).
 
 **Sources verified 2026-10-05** (`curl` + robots.txt + a tagger run over the real items):
 
@@ -2525,6 +2528,9 @@ Moved from PLAN.md 2026-10-05. Open items (cron, Hot toggle, measure step, more 
 | eauto.org.ua `rss.xml` | ✅ enabled | 50 items, market analytics, mostly untagged (general news) |
 | autoua.net `/rss/` | ✅ enabled | 20 items over ~10 days, ru, all with images, 19/20 make, 11/20 model; its `<category>` is dirty — the title is the source |
 | mezha.ua `/feed/` | ✅ enabled with `onlyCategories: ["Авто","Електромобілі"]` | whole-site tech feed, only 10 items (~3 h); 0 car items at test time; its car articles carry the tags Авто / Електромобілі + the make |
+| caranddriver.com `/rss/all.xml/` | ✅ enabled (en) with `excludeUrls` | added 2026-10-05; 50 items ≈ 1 day, no `<category>`, `<media:content>` images; `excludeUrls: ["/photos/", "/auto-loans/", "/shopping-advice/"]` drops ~40 % (galleries, loans); 22/30 make, 10/30 model |
+| motor1.com `/rss/news/all/` | ✅ enabled (en) | added 2026-10-05; 20 news items, `<enclosure>` images; 16/20 make, 3/20 model |
+| carscoops.com `/category/news/feed/` · `/tag/reviews/feed/` | ✅ enabled (en) | added 2026-10-05; 18 + 18 items; full-content feeds (260 / 800 KB, only the ≤300-char summary is kept), robots.txt empty; 11/18 + 17/18 make, 5 + 9 model; reviews feed updates slowly |
 | novyny.live `/rss/news_ua.rss` | ✅ enabled with `onlyCategories: ["Авто"]` | 146 items ≈ 1 day, ~8 "Авто"/day, empty `<description>`, avif images, only ~1 in 8 names a make (the rest show on the homepage ticker only); "Транспорт" is railways — not kept |
 | itc.ua `/ua/feed/` | ❌ rejected | robots.txt `Disallow: */feed/` — covered by the HTML tag crawl (`ingest:press`) instead |
 | 24tv.ua `rss/all.xml` | ❌ rejected (added, then removed) | whole-site, ~3 h window, no categories, no auto feed (`/rss/auto.xml` is empty); 0 of 60 headlines named a make |

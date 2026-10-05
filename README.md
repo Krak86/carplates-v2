@@ -20,10 +20,10 @@ Ukrainian vehicle lookup by **plate number** or **VIN**. Rebuild of
   only, nothing copied. infocar videos play from YouTube on demand; community 3D models ([Sketchfab](https://sketchfab.com))
   open in a "3D view" modal, and [CarShow360](https://carshow360.net) 360° exterior/interior galleries (every generation/trim of the make/model, links only) in a "360° view" modal
 - Result-card hero photo: year-aware Wikimedia Commons search (falls back to the Wikipedia lead image, then a per-kind placeholder)
-- Background layers on plate/VIN result pages (button in the header, online only, resets on navigation): car photos
-  (default), a Google Maps view of the plate's region capital, or a live NASA ISS "Earth from space" stream (low
-  quality on purpose, selectable). Advanced search shows an OpenStreetMap view of the chosen region
-- Auto news: recent Ukrainian/Russian auto-news headlines (links out, no article text) polled from RSS feeds listed in `scripts/news-sources.json` (`pnpm ingest:news`, `registry.news_items`) — a self-scrolling strip on the homepage, a 📰 News section on result cards (make+model, then make news; Ukrainian UI shows Ukrainian-language items only) and a desktop-only side panel that fades in on scroll
+- Background layers on every page (button in the header, online only, session-only): car photos (default), a Google Maps
+  view (the plate's region capital on a result page, else Ukraine), or a live YouTube stream — NASA ISS "Earth from space",
+  street/traffic cams or a city view (low quality on purpose, selectable; disabled on data-saver/≤3G). Advanced search shows an OpenStreetMap view of the chosen region
+- Auto news: recent Ukrainian/Russian/English auto-news headlines (infocar, eauto, autoua, novyny.live, Car and Driver, Motor1, Carscoops…) (links out, no article text) polled from RSS feeds listed in `scripts/news-sources.json` (`pnpm ingest:news`, `registry.news_items`) — a self-scrolling strip on the homepage, a 📰 News section on result cards (make+model, then make news; Ukrainian UI shows Ukrainian-language items only) and a desktop-only side panel that fades in on scroll
 - Light/dark theme, AR plate scan, plate and VIN photo search (VIN: on-device barcode, else self-hosted OCR; found VINs are outlined on the photo and listed as chips), VIN decode with an offline VIN-prefix fallback for cars NHTSA does not know (labelled "≈" fields), link previews for shared plate/VIN URLs
 - Installable PWA with offline mode: recent results, history and favorites stay available without a connection
 

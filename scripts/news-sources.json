@@ -45,7 +45,10 @@
     "url": "https://mezha.ua/feed/",
     "lang": "uk",
     "enabled": true,
-    "onlyCategories": ["Авто", "Електромобілі"],
+    "onlyCategories": [
+      "Авто",
+      "Електромобілі"
+    ],
     "note": "tech whole-site feed, only 10 items (~3 h) — onlyCategories keeps the car tags (\"Авто\"/\"Електромобілі\", make is also a tag); poll hourly. itc.ua/ua/feed/ is NOT usable: its robots.txt has \"Disallow: */feed/\""
   },
   {
@@ -54,7 +57,46 @@
     "url": "https://novyny.live/rss/news_ua.rss",
     "lang": "uk",
     "enabled": true,
-    "onlyCategories": ["Авто"],
+    "onlyCategories": [
+      "Авто"
+    ],
     "note": "whole-site feed (146 items ≈ 1 day, allowed in robots.txt); onlyCategories keeps \"Авто\" (~8/day, practical car content; \"Транспорт\" is railways — not kept). <description> is empty, so no summary; images are avif"
+  },
+  {
+    "id": "caranddriver",
+    "name": "Car and Driver",
+    "url": "https://www.caranddriver.com/rss/all.xml/",
+    "lang": "en",
+    "enabled": true,
+    "excludeUrls": [
+      "/photos/",
+      "/auto-loans/",
+      "/shopping-advice/"
+    ],
+    "note": "whole-site feed, 50 items (~1 day), no <category>, <media:content> images, robots OK; excludeUrls drops photo galleries, loan and shopping pages (~40%) — news/reviews/features/make pages stay"
+  },
+  {
+    "id": "motor1",
+    "name": "Motor1",
+    "url": "https://www.motor1.com/rss/news/all/",
+    "lang": "en",
+    "enabled": true,
+    "note": "20 items, news only, <enclosure> images, robots OK"
+  },
+  {
+    "id": "carscoops-news",
+    "name": "Carscoops",
+    "url": "https://www.carscoops.com/category/news/feed/",
+    "lang": "en",
+    "enabled": true,
+    "note": "18 items, full-content feed (~260 KB; only a short summary is kept), robots.txt empty"
+  },
+  {
+    "id": "carscoops-reviews",
+    "name": "Carscoops",
+    "url": "https://www.carscoops.com/tag/reviews/feed/",
+    "lang": "en",
+    "enabled": true,
+    "note": "18 items, ~800 KB; low frequency (newest was 4 days old) — reviews"
   }
 ]
