@@ -93,9 +93,16 @@ pnpm ingest:press     # itc.ua + mezha.ua "test drive" tag listings (Ukrainian l
                        # titles/tags, model matched at lookup); --source itc|mezha, --limit N, --dry-run, --refresh. Needs ingest:infocar(:csv)
 pnpm ingest:press:csv  # load the committed press CSV — seconds, no crawling
 pnpm export:press:csv  # re-dump the table to that CSV — run after every real re-crawl
+pnpm ingest:wiki-images  # pre-warm registry.wiki_image (Wikimedia hero photos, metadata only; hotlinked): per model ONE Commons title
+                       # search + batched imageinfo (50/req) + English lead-image fallback; models >= --min-cars (default 1000),
+                       # most cars first, resumable; --brand kia, --limit N, --rps 1|2, --dry-run, --refresh. Every failed request
+                       # (429/5xx/timeout) is listed in scripts/.data/wiki-images/failed.json; --retry-failed [--all] replays them
+pnpm ingest:wiki-images:csv  # load the committed wiki-images CSV (skipped with a message until the first export is committed)
+pnpm export:wiki-images:csv  # re-dump ok + not_found rows to that CSV — run after every real pre-warm
+pnpm wiki-images:coverage    # photo coverage by tier, by group and weighted by registered cars
 pnpm db:refresh-fuel-stats   # rebuild registry.stats_fuel (the /fuel page rollup) from the registry + fuel_economy;
                              # run after any registry ingest or ingest:fuel (ingest:all does it last)
-pnpm ingest:ratings:csv   # db:migrate, then all five *:csv rating loads + the fuel, infocar, infocar-videos, e-drive, sketchfab, carshow360, topgear and press CSVs concurrently — each writes
+pnpm ingest:ratings:csv   # db:migrate, then all five *:csv rating loads + the fuel, infocar, infocar-videos, e-drive, sketchfab, carshow360, topgear, press and wiki-images CSVs concurrently — each writes
                           # its own table only, doesn't touch registrations
 pnpm ingest:all        # db:migrate, then ingest:full + ingest:ratings:csv concurrently — each writes a
                        # disjoint table (registrations/current_registration/stats_by_* vs. one ratings/fuel_economy

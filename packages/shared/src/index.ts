@@ -39,6 +39,55 @@ export { VEHICLE_FUELS, resolveFuelCategories, fuelKeyword, type VehicleFuel } f
 export { brandLogoUrl, brandSlug } from './brandLogo.js'
 export { dealerUrl } from './dealerUrl.js'
 export { wikiUrl, wikiDomain } from './wikiUrl.js'
+export {
+  hasStandaloneYear,
+  pickCommonsCandidate,
+  scoreCommonsCandidate,
+  scoreCommonsTitle,
+  titleMentionsModel,
+  type CommonsCandidate
+} from './commonsImage.js'
+export {
+  COMMONS_API,
+  IMAGEINFO_BATCH,
+  MAX_ATTEMPTS,
+  MAX_RETRY_AFTER_MS,
+  MODEL_LEVEL_YEAR,
+  SEARCH_PAGE_SIZE,
+  THUMB_WIDTH,
+  WIKI_IMAGE_ORIGINS,
+  WIKI_IMAGE_STATUSES,
+  WikimediaError,
+  attributionFromMeta,
+  commonsFilenameFromUrl,
+  commonsImageInfoUrl,
+  commonsPagesInOrder,
+  commonsTitleSearchUrl,
+  commonsYearSearchUrl,
+  fetchWikimediaJson,
+  isRetryableStatus,
+  nextRetryAt,
+  retryDelayMs,
+  stripHtml,
+  wikiImageFromInfo,
+  wikiImageFromRow,
+  wikiImageKey,
+  wikiImageRowIsFinal,
+  wikiImageRowValues,
+  wikipediaSearchUrl,
+  type CommonsImageInfo,
+  type CommonsPages,
+  type CommonsTitleSearch,
+  type ExtMetadata,
+  type FetchWikimediaOptions,
+  type WikiImageKey,
+  type WikiImageOrigin,
+  type WikiImageOutcome,
+  type WikiImageRowValues,
+  type WikiImageStatus,
+  type WikipediaPage,
+  type WikipediaSearch
+} from './wikimedia.js'
 export { REVIEW_SITES, reviewLinks, type ReviewSiteId, type ReviewSiteLang, type ReviewLink } from './reviewLinks.js'
 export {
   INFOCAR_TREES,

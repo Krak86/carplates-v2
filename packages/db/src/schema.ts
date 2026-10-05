@@ -473,6 +473,36 @@ export type TopgearReviewRow = typeof topgearReviews.$inferSelect
 export type TopgearReviewInsert = typeof topgearReviews.$inferInsert
 
 /**
+ * Wikimedia hero-photo cache, keyed by normalized (brand, model, year); `year` 0 = the model-level fallback row.
+ * Image metadata only — files stay hotlinked. See migrations/0030_wiki_image.sql.
+ */
+export const wikiImage = registry.table(
+  'wiki_image',
+  {
+    brand: text('brand').notNull(),
+    model: text('model').notNull(),
+    year: smallint('year').notNull().default(0),
+    status: text('status').notNull(),
+    imageUrl: text('image_url'),
+    imageWidth: integer('image_width'),
+    imageHeight: integer('image_height'),
+    attrAuthor: text('attr_author'),
+    attrLicense: text('attr_license'),
+    attrLicenseUrl: text('attr_license_url'),
+    origin: text('origin'),
+    title: text('title'),
+    lastHttpStatus: integer('last_http_status'),
+    lastError: text('last_error'),
+    attempts: integer('attempts').notNull().default(0),
+    nextRetryAt: timestamp('next_retry_at', { withTimezone: true }),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
+  },
+  t => [primaryKey({ columns: [t.brand, t.model, t.year] }), index('ix_wiki_image_status').on(t.status, t.nextRetryAt)]
+)
+export type WikiImageRow = typeof wikiImage.$inferSelect
+export type WikiImageInsert = typeof wikiImage.$inferInsert
+
+/**
  * One tech-press test drive (`scripts/src/press.ts`: itc.ua, mezha.ua), keyed by its primary (Ukrainian) URL. `langs`
  * holds every language edition (`uk`/`ru`/`en`: url, title, blurb). `brandSlug` is our brand slug found in the titles/tags;
  * the model is matched at lookup from `keywords` + titles. Facts + links only — see migrations/0029_press_reviews.sql.

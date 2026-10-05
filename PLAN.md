@@ -431,7 +431,41 @@ First steps when picked up: download the real file locally, confirm count and
 plate/VIN quality, then migration + Zod schema in `packages/shared` + `wanted.ts`
 with a fixture test.
 
-### Wikimedia hero-image cache in Postgres + pre-warm — planned (2026-10-03), not started
+### Wikimedia hero-image cache in Postgres + pre-warm — built (2026-10-05), pre-warm not yet run at scale
+
+**Status.** Order steps 1-3 are done: migration `0030_wiki_image`, DB-backed `WikiService` with retry/backoff and the
+never-cache-errors rule, `scripts/src/wiki-images.ts` (+ `failed.json`, `--retry-failed`, CSV, `wiki-images:coverage`).
+Smoke-tested on 6 models (Passat, Golf, Octavia, Megane, Focus, Lanos: dry-run + real write, resume, CSV round trip,
+plate lookup served from the table). **Next: step 4 — the runs below.** The "stages" 1-3 (title search → batched
+imageinfo → lead fallback) happen _inside every run_, per chunk of 20 models; they are not separate runs.
+
+**Runbook — what to execute, in order** (local dev stack: `pnpm db:up`, real registry loaded; run from the repo root)
+
+| #   | Command                                                                      | Covers                                 | Est. time (1 req/s / 2 req/s)    |
+| --- | ---------------------------------------------------------------------------- | -------------------------------------- | -------------------------------- |
+| 1   | `pnpm ingest:wiki-images`                                                    | start tier: models ≥1000 cars (~1,400) | ~30-40 min / ~20 min             |
+| 2   | `pnpm wiki-images:coverage`                                                  | check: % of cars with a photo, by tier | seconds (+ ~1 min registry scan) |
+| 3   | `pnpm ingest:wiki-images -- --retry-failed`                                  | replay everything in `failed.json`     | minutes                          |
+| 4   | `pnpm export:wiki-images:csv`, commit `scripts/seed-data/wiki-images.csv.gz` | seed for fresh clones                  | seconds                          |
+| 5   | `pnpm ingest:wiki-images -- --min-cars 100`                                  | next tier: models ≥100 cars (~4,000)   | ~1-1.5 h / ~45 min               |
+| 6   | `pnpm ingest:wiki-images -- --min-cars 1`                                    | everything left (~15.7k models in all) | ~5 h more / ~2.5 h               |
+| 7   | repeat 2-4                                                                   | re-check, retry failures, re-export    |                                  |
+
+Notes for the runs: every run is resumable (done models are skipped) and Ctrl-C stops after the current chunk, so 5-6
+can be split into sessions of ~1 h with `--limit 800` or by brand (`--brand kia`). Models stored `failed` are skipped
+by normal runs — only `--retry-failed` (add `--all` to ignore the wait) retries them; the list is
+`scripts/.data/wiki-images/failed.json`. Use `--rps 2` (the cap) once a first run shows no 429s. Steps 1-4 are enough to
+ship; 5-6 are worth it only if the coverage report shows the ≥100 tier is missing many cars (the tail mostly returns
+`not_found`, and any lookup caches itself on first open). Cached search responses live in `scripts/.data/wiki-images/`
+(gitignored, kept on purpose; `--refresh` ignores them).
+
+Built as designed below, with these differences: `year` is `smallint`, **0 = the model-level row**; `origin` has four
+values (`commons_year | commons_nearest | commons_model | lead`) — `commons_model` is the newest-year photo, `lead` is
+only used when Commons gave the model nothing; nearest-year borrowing is capped at 4 years; a failed request never
+overwrites an `ok` row; Commons rules + request shapes + retry policy are shared in `packages/shared`
+(`commonsImage.ts`, `wikimedia.ts`); `source=wiki` (A/B knob) bypasses the table.
+
+#### Original plan (planned 2026-10-03)
 
 Scope: **the hero photo only** (url, size, attribution) — not the Wikipedia text. The extract keeps its live lookup
 via `WikiService` for now; if it later needs caching it becomes a separate table/feature (text is language-specific,
@@ -482,6 +516,12 @@ image lookup is up to 3 Wikimedia calls (Commons year search, article lead image
   attribution costs nothing extra on that path.
 - `pnpm ingest:wiki-images -- --retry-failed` — only `failed` rows past `next_retry_at`; `--retry-failed --all`
   ignores the wait.
+- **Every failed request is listed, per stage** (like carshow360's `failed.json`): `scripts/.data/wiki-images/failed.json`
+  gets one entry per request that ended in 429/5xx/timeout/other 4xx — `{ stage (search|imageinfo|lead), brand, model,
+titles[] (stage 2 batch), http_status, error, attempts, at }` — written as it happens, so a killed run keeps the list.
+  The end-of-run summary prints the count by status and stage plus the path. `--retry-failed` replays exactly that list
+  (a stage-2 batch is retried as its titles, not re-searched); entries that succeed are removed, the rest stay. Gives
+  the same picture as the `failed` DB rows but as a plain file you can read, diff and re-run without touching the DB.
 - `pnpm ingest:wiki-images:csv` / `pnpm export:wiki-images:csv` — committed gzipped CSV in `seed-data/`, `ok` +
   `not_found` rows only (`failed` is environment noise, stays local). Add to `ingest:ratings:csv` / `ingest:all`;
   update CLAUDE.md commands.
@@ -585,6 +625,7 @@ of all videos have a generation present in the version catalog (the year filter 
 year, 15% have neither). Measured `videoLookup` over the 400 most-registered (brand, model) pairs: 245 have ≥1 video
 (74.1% of those registrations); on the top 60, 52 have one, only 41 once the car's year is applied. **No-video models,
 by registrations (the to-do list for alternative sources):**
+
 - Ukrainian/Soviet-built, largely outside infocar's coverage: Daewoo Lanos (~230k incl. ЗАЗ/ZAZ-Daewoo spellings), Sens,
   Nexia; ВАЗ 2101/2103/2105-2109/21043/21063/21093/21099/2121/21101/21104/211540/217030/21150/21213; ЗАЗ 110307/1102/
   110557; ГАЗ 3110/3302; Chevrolet Niva.
@@ -603,7 +644,7 @@ by registrations (the to-do list for alternative sources):**
 models only, as an **offline batch** that stores results next to `car_videos` (new `source` column or a sibling table;
 links + facts only, same lookup path) — never live per request. Per (brand, model, generation), not per year.
 
-*Trial* (`scripts/src/youtube-videos.ts`, dry-run, uncommitted until the build lands; run with
+_Trial_ (`scripts/src/youtube-videos.ts`, dry-run, uncommitted until the build lands; run with
 `pnpm --filter @carplates/scripts exec tsx --env-file=../apps/api/.env src/youtube-videos.ts [model…]`): 10 gap models
 (Touran, Fusion, Lancer, Doblo, Laguna, Omega, Lanos, ВАЗ 2107, Getz, Note), 3 queries each, 3,010 units total
 (≈301/model). `GOOGLE_API_KEY` is valid (HTTP 200). 16–24 kept per model of ~17–27 found; the kept ones are mostly real
@@ -611,12 +652,12 @@ reviews (carwow, Carbuyer, What Car?, AcademeG, Зенкевич, ArchiLow, Auto
 (`part=id&type=video&videoEmbeddable=true&maxResults=10`) then one `videos.list`
 (`part=snippet,contentDetails,status,statistics`) per model, parsed with Zod.
 
-*Languages — priority cascade ua → ru → en (decided 2026-10-04):* run the ua query first and **stop as soon as ≥3
+_Languages — priority cascade ua → ru → en (decided 2026-10-04):_ run the ua query first and **stop as soon as ≥3
 videos survive the filter**; only then-missing models get the ru query, then en. ua `"<brand> <model> огляд
 тест-драйв"`, ru `"<brand> <model> обзор тест-драйв"`, en `"<brand> <model> review"` (brand/model in Latin as in the
 registry; for ВАЗ/ЗАЗ/ГАЗ also the Cyrillic + Lada/Zaz spellings), each with `maxResults=50`. Measured on the 10 trial
 models: **all 10 stopped after the ua query** (26–48 kept of 50) — 101 units/model instead of ≈301. Caveat: the ua query
-mostly returns *Russian-titled* videos (only ~2 of 10 models had a `lang=ua` title in the top results), so "ua first"
+mostly returns _Russian-titled_ videos (only ~2 of 10 models had a `lang=ua` title in the top results), so "ua first"
 is a search-phrase priority, not a guarantee of Ukrainian-language videos. If a real ua video matters, count the
 threshold on `lang=ua` titles instead — that makes most models fall through to ru/en again (≈200–300 units/model);
 decide before the full run. Store a `lang` column (`ua|ru|en`), keep the top ~6–8 per model by views with a **cap per
@@ -624,14 +665,14 @@ language** (≤3 en; en is lowest priority — the trial's English hits skew to 
 the user's `lang` first. Language comes from the title script, not the API (`defaultAudioLanguage` is mostly empty):
 `іїєґ` → ua, `ыэёъ` → ru, other Cyrillic is ambiguous (~⅓ of titles) → treat as `ru`.
 
-*Title filter (works, keep):* require a model alias in the title (Latin + Cyrillic: `touran`/`туран`, `lancer`/`лансер`,
+_Title filter (works, keep):_ require a model alias in the title (Latin + Cyrillic: `touran`/`туран`, `lancer`/`лансер`,
 digits for ВАЗ — hand-curated alias table per gap model; `nissan note` needs the brand because `note` is a common
 word); drop non-embeddable (the modal player needs it), duration < 150 s, and dealer/used-car listings (regex
 `автопідбір|автоподбор|авторинок|під замовлення|з німеччини|продаж|ціни|в наявності|…`). Known false positives of the
 dealer regex: honest reviews titled "…з Німеччини" (e.g. Ivan Rybka's Touran) — accept, or drop `з німеччини` from it
 and rely on channel signals.
 
-*Still missing (build these):* (1) **generation/year matching** — the trial keeps a 2003–2010 and a 2018 Touran video
+_Still missing (build these):_ (1) **generation/year matching** — the trial keeps a 2003–2010 and a 2018 Touran video
 for every Touran; parse a year or generation word (`MK1`, `Mk2`, `B`, `3`, `X`) from the title and map it to a
 generation year range via the infocar version catalog (as `videoLookup` already does for infocar videos), else store the
 title year and let `videoLookup` filter by it; (2) the **gap-model target list** — derive from the registry, not a
@@ -649,7 +690,7 @@ source after the infocar ones (dedupe by `youtube_id`; infocar first), `MAX_VIDE
 labels them as YouTube search results rather than infocar picks; (5) tests for the alias/dealer/duration filter and the
 language bucketing (pure functions, colocated).
 
-*Quota & time:* `search.list` = 100 units, `videos.list` = 1 unit per ≤50 ids, daily default 10,000 (resets midnight
+_Quota & time:_ `search.list` = 100 units, `videos.list` = 1 unit per ≤50 ids, daily default 10,000 (resets midnight
 Pacific). With the cascade ≈101 units/model (measured: 1,010 units for the 10 trial models) → ~99 models/day: ~80 gap
 models (top-400 list, de-duplicated) ≈ 8k units ≈ **under 1 day**; ~150 with the long tail ≈ 15k ≈ **~1.5 days**
 (models that fall through to ru/en cost +100 each; budget ~1.5–2 days to be safe). Without the cascade (3 queries
@@ -657,12 +698,13 @@ always) it was ≈301/model ≈ 2.5–3 days for 80. Runtime per day is only ~10
 `maxResults=50` costs the same 100 as 10, so one wide query beats several narrow ones; a quota-increase request (free
 form, unknown approval time). Build estimate ≈ 3–4 h. Cheaper add-on: trusted channels' uploads via `playlistItems.list` (1 unit/call), matched locally.
 
-*Done when:* the no-video models in the Step 2a list (Lanos, Touran, Fusion, Lancer, Doblo, Laguna, Omega, ВАЗ 2107…)
+_Done when:_ the no-video models in the Step 2a list (Lanos, Touran, Fusion, Lancer, Doblo, Laguna, Omega, ВАЗ 2107…)
 show ≥1 video in the UI, the browser check (КА4845ІО RAV4 → 2015–2018 videos; a Lanos / Touran plate → videos) passes,
 and the CSV is committed.
 
 **Next-session steps, in order (YouTube fallback):**
-1. **Decide the stop rule** (default: ≥3 kept videos of *any* language after the ua query — ~101 units/model; the
+
+1. **Decide the stop rule** (default: ≥3 kept videos of _any_ language after the ua query — ~101 units/model; the
    alternative, ≥1 `lang=ua` title, is ~200–300 units/model). Check `git status`: `scripts/src/youtube-videos.ts` (the
    trial), the videos CSV and the PLAN edits may still be uncommitted.
 2. **Target list**: query `registry.current_registration` for the top N (brand, model) pairs (start N≈400) where
@@ -686,7 +728,8 @@ and the CSV is committed.
 auto-news headlines relevant to the car (make+model+year → make+model → make only). Links + facts only (title, ≤300-char
 description, image URL, date, url) — never republish article text.
 **Feed findings (measured 2026-10-04, all plain HTTP 200, robots allow):**
-- `https://eauto.org.ua/rss` is the *how-to* HTML page; the real feed is `https://eauto.org.ua/rss.xml` (UTF-8, 50 items, uk;
+
+- `https://eauto.org.ua/rss` is the _how-to_ HTML page; the real feed is `https://eauto.org.ua/rss.xml` (UTF-8, 50 items, uk;
   `?lang=en` exists). Market analytics from Інститут досліджень авторинку (prices, sales, registrations). **No `<category>`**
   — make/model must come from title text. Mostly market-wide, few car-specific items.
 - `https://autoua.net/rss/` (UTF-8, ru, 20 items, `autonews.autoua.net` links + `<enclosure>` image). **Has `<category>`
@@ -703,6 +746,7 @@ description, image URL, date, url) — never republish article text.
 **Agreed strategy (2026-10-04) — supersedes the items below where they differ.** One daily (later every 6 h — infocar
 news' 100-item window is only ~2-4 days) job merges all feeds into a single store; plate requests never touch the
 sources, they filter the store on demand.
+
 1. **Merge, don't overwrite.** Key by URL, upsert, prune > 180 days. A rolling archive keeps brand-only news available
    after the short feed windows roll over.
 2. **Tag once at ingest** (`brandSlug`/`modelSlug`/`year` stored per item); the request is a filter, not a title scan.
@@ -717,11 +761,12 @@ sources, they filter the store on demand.
    run, log items per source and warn on a source returning 0 items (feed broke). windows-1251 decode for infocar.
 7. **Display only** title, short summary, image URL, source, date, link out — no article text, images hotlinked lazily.
 8. **Run:** manual `pnpm ingest:news` locally; cron on the VPS in Phase 4.
-Build order: parsers + fixtures (per-feed, pure, tested) → tagger + tests on real titles → table/migration + merge/prune
-→ `newsLookup` in `packages/shared` + `/api/news` → UI section → measure (step 7 below).
+   Build order: parsers + fixtures (per-feed, pure, tested) → tagger + tests on real titles → table/migration + merge/prune
+   → `newsLookup` in `packages/shared` + `/api/news` → UI section → measure (step 7 below).
 
 **Original design.** Feeds only hold the latest N items, so news is **polled into a table and accumulated**, not fetched
 live per request (same persisted-catalog pattern as `owner_posts`).
+
 1. **Migration `0026_*`** (renumber if topgear lands first) `registry.news_items`: `url` PK, `source` (enum-ish text),
    `title`, `summary` (trimmed, tags stripped), `image_url`, `published_at`, `lang`, `brand_slug` (nullable),
    `model_slug` (nullable), `year_from`/`year_to` (nullable, only when the title names a year/generation), `kind`
@@ -754,7 +799,7 @@ live per request (same persisted-catalog pattern as `owner_posts`).
 8. **Risks / limits:** title-matching false positives (model names that are common words: Polo, Fit, Up, Note, Jazz —
    require brand co-occurrence); ru text for some sources; feeds only keep recent items so a new DB starts empty until
    polled (backfill = none; infocar news `news.infocar.ua` paging could backfill, check robots first); copyright → link
-   + short summary only, always link out and attribute the source.
+   - short summary only, always link out and attribute the source.
 
 **Step 3 — infocar motorcycles (`moto.infocar.ua`), same ingest family, after Steps 1-2**
 
@@ -789,6 +834,7 @@ Build deltas vs Steps 1-2:
   unmeasured).
 
 **YouTube env note (applies to any script using `GOOGLE_API_KEY`):**
+
 - Env: `GOOGLE_API_KEY`. Only `apps/api` loads `.env` (`tsx watch --env-file-if-exists=.env`);
   `scripts/` run plain `tsx src/<file>.ts` and load none. So the video ingest script's
   `package.json` entry must pass `--env-file-if-exists=../apps/api/.env` (cwd is `scripts/`

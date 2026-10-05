@@ -26,6 +26,7 @@ export {
   carModels3d,
   carModels360,
   topgearReviews,
+  wikiImage,
   pressReviews,
   missedLookups,
   iihsRatings,
@@ -64,7 +65,9 @@ export {
   type FuelEconomyRow,
   type FuelEconomyInsert,
   type StatsFuelInsert,
-  type StatsSafetyInsert
+  type StatsSafetyInsert,
+  type WikiImageRow,
+  type WikiImageInsert
 } from './schema.js'
 export {
   createDb,
@@ -75,3 +78,4 @@ export {
   type Db
 } from './client.js'
 export { runMigrations } from './migrate.js'
+export { findWikiImage, upsertWikiImages } from './wikiImage.js'
