@@ -15,6 +15,7 @@ import {
   plateHistoryResponseSchema,
   plateLookupResponseSchema,
   plateRecognizeResponseSchema,
+  vinRecognizeResponseSchema,
   newsResponseSchema,
   reviewsResponseSchema,
   safetyRatingsResponseSchema,
@@ -44,6 +45,7 @@ import type {
   PlateHistoryResponse,
   PlateLookupResponse,
   PlateRecognizeResponse,
+  VinRecognizeResponse,
   SafetyRatingsResponse,
   SearchResponse,
   StatsFieldDimension,
@@ -272,6 +274,18 @@ export async function recognizePlate(file: File): Promise<PlateRecognizeResponse
     headers: { accept: 'application/json' }
   })
   return plateRecognizeResponseSchema.parse(await unwrap(res))
+}
+
+export async function recognizeVin(file: File): Promise<VinRecognizeResponse> {
+  const form = new FormData()
+  form.append('image', file)
+
+  const res = await fetch(`${BASE}/api/recognize/vin`, {
+    method: 'POST',
+    body: form,
+    headers: { accept: 'application/json' }
+  })
+  return vinRecognizeResponseSchema.parse(await unwrap(res))
 }
 
 export async function getModels3d(brand: string, model: string): Promise<Models3dResponse> {

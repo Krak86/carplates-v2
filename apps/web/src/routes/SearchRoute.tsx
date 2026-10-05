@@ -107,6 +107,7 @@ export default function SearchRoute(): ReactNode {
 
   const {
     recognize,
+    recognizeVin,
     isPending: isRecognizing,
     errorKey: recognizeErrorKey,
     photo,
@@ -211,6 +212,7 @@ export default function SearchRoute(): ReactNode {
             autoFocus={!isSharedSection}
             isRecognizing={isRecognizing}
             onPickPhoto={recognize}
+            onPickVinPhoto={recognizeVin}
           />
         </div>
 
@@ -230,13 +232,16 @@ export default function SearchRoute(): ReactNode {
             <PhotoThumbnail url={photo.url} candidates={photo.candidates} active={raw || null} onClose={dismissPhoto} />
           )}
         </Presence>
-        <Presence show={!!photo?.meta}>{photo?.meta && <PhotoMetaInfo meta={photo.meta} />}</Presence>
+        <Presence show={!!photo?.meta && photo.mode === 'plate'}>
+          {photo?.meta && <PhotoMetaInfo meta={photo.meta} />}
+        </Presence>
         <Presence show={!!photo}>
           {photo && (
             <PhotoWarnings
               meta={photo.meta}
               maxDimension={MAX_DIMENSION}
               showAccuracy={photo.settled && photo.candidates.length > 0}
+              mode={photo.mode}
             />
           )}
         </Presence>

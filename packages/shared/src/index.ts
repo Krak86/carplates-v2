@@ -7,6 +7,7 @@ export {
   isUaPlate,
   isLegacyUaPlate
 } from './plate.js'
+export { extractVins, vinCheckDigitOk, type OcrLine, type VinRead } from './vin-read.js'
 export {
   LEGACY_REGIONS,
   PLATE_SERIES,
@@ -166,6 +167,7 @@ export {
   plateCandidateSchema,
   photoMetaSchema,
   plateRecognizeResponseSchema,
+  vinRecognizeResponseSchema,
   vehiclePhotoSchema,
   vehiclePhotosResponseSchema,
   safetyRatingSchema,
@@ -227,6 +229,7 @@ export {
   type PhotoMeta,
   type PlateCandidate,
   type PlateRecognizeResponse,
+  type VinRecognizeResponse,
   type VehiclePhoto,
   type VehiclePhotosResponse,
   type SafetyRating,

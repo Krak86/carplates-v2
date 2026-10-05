@@ -5,7 +5,8 @@ import type { FastifyRequest } from 'fastify'
 
 import { CloudRecognizeService } from './cloud-recognize.service.js'
 import { LocalRecognizeService } from './local-recognize.service.js'
-import { PlateRecognizeDto } from './recognize.dto.js'
+import { PlateRecognizeDto, VinRecognizeDto } from './recognize.dto.js'
+import { VinRecognizeService } from './vin-recognize.service.js'
 
 async function readUpload(req: FastifyRequest): Promise<{ buffer: Buffer; mimetype: string; filename: string }> {
   const part = await req.file()
@@ -18,14 +19,15 @@ async function readUpload(req: FastifyRequest): Promise<{ buffer: Buffer; mimety
 }
 
 @ApiTags('recognize')
-@Controller('api/recognize/plate')
+@Controller('api/recognize')
 export class RecognizeController {
   constructor(
     @Inject(CloudRecognizeService) private readonly cloud: CloudRecognizeService,
-    @Inject(LocalRecognizeService) private readonly local: LocalRecognizeService
+    @Inject(LocalRecognizeService) private readonly local: LocalRecognizeService,
+    @Inject(VinRecognizeService) private readonly vin: VinRecognizeService
   ) {}
 
-  @Post('local')
+  @Post('plate/local')
   @UseGuards(ThrottlerGuard)
   @Throttle({ default: { limit: 30, ttl: 60_000 } })
   @ApiConsumes('multipart/form-data')
@@ -34,12 +36,21 @@ export class RecognizeController {
     return this.local.recognize(await readUpload(req))
   }
 
-  @Post('cloud')
+  @Post('plate/cloud')
   @UseGuards(ThrottlerGuard)
   @Throttle({ default: { limit: 6, ttl: 60_000 } })
   @ApiConsumes('multipart/form-data')
   @ApiOkResponse({ type: PlateRecognizeDto })
   async recognizeCloud(@Req() req: FastifyRequest): Promise<PlateRecognizeDto> {
     return this.cloud.recognize(await readUpload(req))
+  }
+
+  @Post('vin')
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { limit: 30, ttl: 60_000 } })
+  @ApiConsumes('multipart/form-data')
+  @ApiOkResponse({ type: VinRecognizeDto })
+  async recognizeVin(@Req() req: FastifyRequest): Promise<VinRecognizeDto> {
+    return this.vin.recognize(await readUpload(req))
   }
 }

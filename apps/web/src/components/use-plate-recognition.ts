@@ -3,9 +3,10 @@ import { useMutation } from '@tanstack/react-query'
 import { useNavigate } from 'react-router'
 import type { PhotoMeta, PlateCandidate } from '@carplates/shared'
 
-import { ApiError, recognizePlate } from '@/lib/api'
+import { ApiError, recognizePlate, recognizeVin } from '@/lib/api'
 import { shrinkImage } from '@/lib/image'
 import { readPhotoMeta } from '@/lib/photo-meta'
+import { readVinBarcode } from '@/lib/vin-barcode'
 
 const DISMISS_REVOKE_MS = 600
 
@@ -17,6 +18,8 @@ export type PhotoThumbnail = {
   candidates: PlateCandidate[]
   /** EXIF capture date/GPS from the original file, when it had any. */
   meta: PhotoMeta | null
+  /** What the photo was submitted for: VIN photos skip the date/GPS info and plate-specific warnings. */
+  mode: 'plate' | 'vin'
   /** True once the recognize request has succeeded or failed (vs. still in flight). */
   settled: boolean
 }
@@ -30,6 +33,7 @@ type UsePlateRecognitionParams = {
 
 type UsePlateRecognition = {
   recognize: (file: File) => void
+  recognizeVin: (file: File) => void
   isPending: boolean
   errorKey: string | null
   photo: PhotoThumbnail | null
@@ -37,12 +41,28 @@ type UsePlateRecognition = {
   selectCandidate: (plate: string) => void
 }
 
-function errorKeyFor(error: Error | null): string | null {
+type Job = { file: File; mode: 'plate' | 'vin' }
+type Reads = { values: string[]; candidates: PlateCandidate[] }
+
+/** A VIN barcode is read on-device when the browser can; otherwise the photo goes to the server OCR. */
+async function readVin(file: File): Promise<Reads> {
+  const barcode = await readVinBarcode(file)
+  if (barcode) return { values: [barcode], candidates: [] }
+  const res = await recognizeVin(await shrinkImage(file))
+  return { values: res.candidates.map(c => c.vin), candidates: [] }
+}
+
+async function readPlate(file: File): Promise<Reads> {
+  const res = await recognizePlate(await shrinkImage(file))
+  return { values: res.candidates.map(c => c.plate), candidates: res.candidates }
+}
+
+function errorKeyFor(error: Error | null, mode: Job['mode']): string | null {
   if (!error) return null
   if (!(error instanceof ApiError)) return 'recognize.error'
   switch (error.status) {
     case 404:
-      return 'recognize.noPlate'
+      return mode === 'vin' ? 'recognize.noVin' : 'recognize.noPlate'
     case 400:
       return 'recognize.badImage'
     case 413:
@@ -62,38 +82,41 @@ export function usePlateRecognition({ currentValue, linkedValue }: UsePlateRecog
   const photoRef = useRef(photo)
   photoRef.current = photo
 
-  const { mutate, reset, isPending, error } = useMutation({
-    mutationFn: async (file: File) => recognizePlate(await shrinkImage(file)),
+  const { mutate, reset, isPending, error, variables } = useMutation({
+    mutationFn: async ({ file, mode }: Job) => (mode === 'vin' ? readVin(file) : readPlate(file)),
     onSuccess: data => {
-      const top = data.candidates[0]
+      const top = data.values[0]
       if (!top) return
       setPhoto(prev =>
         prev
           ? {
               ...prev,
-              connected: new Set([...prev.connected, ...data.candidates.map(c => c.plate)]),
+              connected: new Set([...prev.connected, ...data.values]),
               candidates: data.candidates,
               settled: true
             }
           : prev
       )
-      void navigate(`/${encodeURIComponent(top.plate)}`, { viewTransition: true })
+      void navigate(`/${encodeURIComponent(top)}`, { viewTransition: true })
     },
     onError: () => {
       setPhoto(prev => (prev ? { ...prev, settled: true } : prev))
     }
   })
 
-  const recognize = (file: File): void => {
+  const start = (file: File, mode: Job['mode']): void => {
     // Drop the previous result and input: the route goes back to idle until the new photo resolves.
     void navigate('/', { viewTransition: true })
     setPhoto(prev => {
       if (prev) URL.revokeObjectURL(prev.url)
-      return { url: URL.createObjectURL(file), connected: new Set(), candidates: [], meta: null, settled: false }
+      return { url: URL.createObjectURL(file), connected: new Set(), candidates: [], meta: null, mode, settled: false }
     })
-    void readPhotoMeta(file).then(meta => setPhoto(prev => (prev ? { ...prev, meta } : prev)))
-    mutate(file)
+    if (mode === 'plate') void readPhotoMeta(file).then(meta => setPhoto(prev => (prev ? { ...prev, meta } : prev)))
+    mutate({ file, mode })
   }
+
+  const recognize = (file: File): void => start(file, 'plate')
+  const recognizeVinPhoto = (file: File): void => start(file, 'vin')
 
   const selectCandidate = (plate: string): void => {
     void navigate(`/${encodeURIComponent(plate)}`, { viewTransition: true })
@@ -136,5 +159,13 @@ export function usePlateRecognition({ currentValue, linkedValue }: UsePlateRecog
     }
   }, [])
 
-  return { recognize, isPending, errorKey: errorKeyFor(error), photo, dismissPhoto, selectCandidate }
+  return {
+    recognize,
+    recognizeVin: recognizeVinPhoto,
+    isPending,
+    errorKey: errorKeyFor(error, variables?.mode ?? 'plate'),
+    photo,
+    dismissPhoto,
+    selectCandidate
+  }
 }

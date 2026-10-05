@@ -10,11 +10,12 @@ type Props = {
   meta?: PhotoMeta | null
   maxDimension: number
   showAccuracy: boolean
+  mode?: 'plate' | 'vin'
 }
 
 type Warning = { key: string; icon: string; text: string }
 
-export default function PhotoWarnings({ meta, maxDimension, showAccuracy }: Props): ReactNode {
+export default function PhotoWarnings({ meta, maxDimension, showAccuracy, mode = 'plate' }: Props): ReactNode {
   const { t } = useTranslation()
   const [expanded, setExpanded] = useState(false)
   const years = meta ? photoAgeYears(meta) : 0
@@ -24,7 +25,11 @@ export default function PhotoWarnings({ meta, maxDimension, showAccuracy }: Prop
     warnings.push({ key: 'preRegistry', icon: '🗄️', text: t('photo.meta.preRegistry', { year: REGISTRY_START_YEAR }) })
   }
   if (years >= 1) warnings.push({ key: 'old', icon: '⏳', text: t('photo.meta.old', { count: years }) })
-  warnings.push({ key: 'tips', icon: '💡', text: t('recognize.photoTips', { max: maxDimension }) })
+  warnings.push({
+    key: 'tips',
+    icon: '💡',
+    text: t(mode === 'vin' ? 'recognize.photoTipsVin' : 'recognize.photoTips', { max: maxDimension })
+  })
   if (showAccuracy) warnings.push({ key: 'accuracy', icon: '⚠️', text: t('recognize.accuracyWarning') })
 
   const [first, ...rest] = warnings

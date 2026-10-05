@@ -96,6 +96,14 @@ export type PhotoMeta = z.infer<typeof photoMetaSchema>
 export const plateRecognizeResponseSchema = z.object({ candidates: z.array(plateCandidateSchema).min(1) })
 export type PlateRecognizeResponse = z.infer<typeof plateRecognizeResponseSchema>
 
+/** POST /api/recognize/vin — VIN reads found in an uploaded photo, best first. */
+export const vinRecognizeResponseSchema = z.object({
+  candidates: z
+    .array(z.object({ vin: z.string().length(17), score: z.number().min(0).max(1), checkDigitOk: z.boolean() }))
+    .min(1)
+})
+export type VinRecognizeResponse = z.infer<typeof vinRecognizeResponseSchema>
+
 /** One trim/variant's NHTSA 5-star crash test rating — US-market vehicles only. */
 export const safetyRatingSchema = z.object({
   vehicleId: z.number().int(),

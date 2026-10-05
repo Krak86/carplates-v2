@@ -260,7 +260,13 @@ stable, already-answered plate isn't re-queried every frame.
 frame at once), graceful fallback to the existing single-shot capture flow
 on unsupported/slow devices, telemetry on detection/OCR hit rate.
 
-### VIN image recognition (camera/upload) — researched, planned (2026-10-03), not started
+### VIN image recognition (camera/upload) — researched 2026-10-03; first slice built 2026-10-05
+
+**Status:** first slice shipped 2026-10-05 (button, barcode + OCR path, ranking) — write-up in
+`docs/plan-done.md` "VIN photo search". Real-photo check: 3 windshield/jamb photos + a registration certificate read
+correctly. Still open below: eval set (step 1), multi-frame voting (step 4), LLM fallback (step 5), tuning for
+water/glare/angle on full 17-char VINs (try contrast + 2x upscale pass, ambiguous-char variants 4/A, 0/O — score
+against the whole eval set), and a partial-VIN (<17) hint.
 
 **Decision: share the capture UI, not the model.** `fast-alpr` (plate detector +
 `fast-plate-ocr`) is trained on short plate crops — it can't find or emit a 17-char

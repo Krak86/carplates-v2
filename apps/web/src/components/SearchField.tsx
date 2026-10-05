@@ -6,6 +6,7 @@ import { Link, useNavigate } from 'react-router'
 import ArSearchButton from '@/components/ArSearchButton'
 import CameraSearchButton from '@/components/CameraSearchButton'
 import PhotoSearchButton from '@/components/PhotoSearchButton'
+import VinSearchButton from '@/components/VinSearchButton'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 import { cn } from '@/lib/cn'
 
@@ -14,13 +15,15 @@ type Props = {
   autoFocus?: boolean
   isRecognizing: boolean
   onPickPhoto: (file: File) => void
+  onPickVinPhoto: (file: File) => void
 }
 
 export default function SearchField({
   initialValue = '',
   autoFocus = true,
   isRecognizing,
-  onPickPhoto
+  onPickPhoto,
+  onPickVinPhoto
 }: Props): ReactNode {
   const { t } = useTranslation()
   const navigate = useNavigate()
@@ -138,6 +141,7 @@ export default function SearchField({
         <PhotoSearchButton isPending={isRecognizing} disabled={!online} onPick={onPickPhoto} />
         <CameraSearchButton isPending={isRecognizing} disabled={!online} onCapture={onPickPhoto} />
         <ArSearchButton disabled={!online} />
+        <VinSearchButton isPending={isRecognizing} disabled={!online} onPick={onPickVinPhoto} />
       </div>
     </div>
   )

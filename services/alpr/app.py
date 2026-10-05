@@ -22,6 +22,7 @@ import numpy as np
 from fast_alpr import ALPR
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from PIL import Image, ImageOps
+from rapidocr_onnxruntime import RapidOCR
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("alpr")
@@ -32,6 +33,11 @@ alpr = ALPR(
     detector_model="yolo-v9-t-384-license-plate-end2end",
     ocr_model="cct-xs-v2-global-model",
 )
+
+# General text OCR (PP-OCR models bundled in the wheel, ONNX CPU) for VIN labels / windshield
+# stickers — fast-alpr's plate OCR can't emit a 17-char line. VIN extraction and validation
+# live in the API (packages/shared extractVins); this only returns the text lines.
+text_ocr = RapidOCR()
 
 
 def _confidence(value: float | list[float]) -> float:
@@ -241,3 +247,25 @@ async def recognize(image: UploadFile = File(...)) -> dict[str, list[dict[str, A
         raise HTTPException(status_code=502, detail="ALPR inference failed")
 
     return {"results": results}
+
+
+@app.post("/recognize/vin")
+async def recognize_vin(image: UploadFile = File(...)) -> dict[str, list[dict[str, Any]]]:
+    raw = await image.read()
+    if not raw:
+        raise HTTPException(status_code=400, detail="Uploaded image is empty")
+
+    try:
+        pil_image = ImageOps.exif_transpose(Image.open(io.BytesIO(raw))).convert("RGB")
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail="Could not decode image") from exc
+
+    frame = np.ascontiguousarray(np.array(pil_image)[:, :, ::-1])
+    try:
+        result, _ = text_ocr(frame)
+    except Exception:
+        logger.exception("VIN OCR failed")
+        raise HTTPException(status_code=502, detail="VIN OCR failed")
+
+    # result: [[box, text, score], ...], or None when no text was detected.
+    return {"lines": [{"text": text, "score": float(score)} for _, text, score in (result or [])]}

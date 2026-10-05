@@ -10,3 +10,7 @@ export interface PlateReaderResult {
 export interface PlateReaderResponse {
   results?: PlateReaderResult[]
 }
+
+export interface VinReaderResponse {
+  lines?: { text: string; score: number }[]
+}

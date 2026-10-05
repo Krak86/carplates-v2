@@ -2612,3 +2612,42 @@ live per request (same persisted-catalog pattern as `owner_posts`).
    require brand co-occurrence); ru text for some sources; feeds only keep recent items so a new DB starts empty until
    polled (backfill = none; infocar news `news.infocar.ua` paging could backfill, check robots first); copyright → link
    - short summary only, always link out and attribute the source.
+
+### VIN photo search ✅ first slice BUILT (2026-10-05)
+
+A "VIN photo" button, **last** in the search row (after AR). Deliberately no AR/live mode: a VIN needs a sharp
+still, and plate-style frame tracking buys nothing. Both phones and desktop use the plain image picker.
+
+**Flow.** `VinSearchButton` → `usePlateRecognition.recognizeVin` (same hook as plates, `mode: 'plate' | 'vin'`) →
+
+1. `lib/vin-barcode.ts`: browser `BarcodeDetector` (Chromium only; code_128/code_39/data_matrix/qr) — exact, free;
+2. else `POST /api/recognize/vin` (`VinRecognizeService`, throttled 30/min, needs `ALPR_LOCAL_URL`) →
+   `services/alpr` `POST /recognize/vin`: RapidOCR (`rapidocr-onnxruntime`, models bundled in the wheel, ONNX CPU)
+   returns raw text lines + scores only;
+3. `extractVins` (`packages/shared/src/vin-read.ts`) finds and ranks VINs; the response is
+   `vinRecognizeResponseSchema` (`candidates: { vin, score, checkDigitOk }[]`); the top one is navigated to.
+   404 → `recognize.noVin`.
+
+The recognize controller moved from `api/recognize/plate` to `api/recognize` (`plate/local`, `plate/cloud`, `vin`) —
+plate URLs are unchanged.
+
+**Why a separate model, shared UI.** `fast-alpr` is trained on short plate crops and can't emit 17 characters; a
+general text OCR can. Capture UI, hook, route shape and navigation are shared.
+
+**Ranking lesson (bug found on a real registration certificate).** The first version sorted candidates by check
+digit, then confidence, over every 17-char window of every line and of each line glued to the next. A certificate is
+full of other text; the I→1 / O→0 remap made labels like "Vehicleidentification number" fit the VIN alphabet, and
+~1 in 11 junk windows pass the check digit by chance — while the real EU-built VIN (Kia, Slovakia) fails it. A junk
+window won. Fix: rank by **source** first (a line that is exactly 17 chars > a window inside a longer line > a VIN
+wrapped over two fragments that are each <17 chars and both used), then check digit, then OCR score; windows must
+end in 4 digits (ISO 3779), exact lines need ≥3 digits. Regression tests use that certificate's OCR lines. The check
+digit stays a ranking hint, never a rejection (mandatory in North America only). Known trade-off: a VIN inside a
+longer line that doesn't end in 4 digits is missed.
+
+**VIN photos skip plate-specific UI.** `PhotoThumbnail.mode`: no EXIF date/GPS row (EXIF isn't even read), no
+"photo is N years old / before registry" or plate-accuracy warnings (a VIN never changes); only a VIN-specific
+quality tip (`recognize.photoTipsVin`).
+
+**Checked on real photos:** 3 windshield/door-jamb photos OK; the registration certificate OK after the ranking fix;
+a stock photo of a VIN on a rain-covered windshield shows only 15 characters (cropped), so it correctly yields "not
+found". **Not done:** eval set, multi-frame voting, LLM fallback, water/glare tuning — see PLAN.md.
