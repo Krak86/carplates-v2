@@ -60,6 +60,7 @@ export {
   WikimediaError,
   attributionFromMeta,
   commonsFilenameFromUrl,
+  leadLanguages,
   commonsImageInfoUrl,
   commonsPagesInOrder,
   commonsTitleSearchUrl,

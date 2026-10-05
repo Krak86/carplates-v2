@@ -431,25 +431,33 @@ First steps when picked up: download the real file locally, confirm count and
 plate/VIN quality, then migration + Zod schema in `packages/shared` + `wanted.ts`
 with a fixture test.
 
-### Wikimedia hero-image cache in Postgres + pre-warm — built (2026-10-05), pre-warm not yet run at scale
+### Wikimedia hero-image cache in Postgres + pre-warm — built (2026-10-05), start tier (≥1000 cars) pre-warmed
 
-**Status.** Order steps 1-3 are done: migration `0030_wiki_image`, DB-backed `WikiService` with retry/backoff and the
-never-cache-errors rule, `scripts/src/wiki-images.ts` (+ `failed.json`, `--retry-failed`, CSV, `wiki-images:coverage`).
-Smoke-tested on 6 models (Passat, Golf, Octavia, Megane, Focus, Lanos: dry-run + real write, resume, CSV round trip,
-plate lookup served from the table). **Next: step 4 — the runs below.** The "stages" 1-3 (title search → batched
-imageinfo → lead fallback) happen _inside every run_, per chunk of 20 models; they are not separate runs.
+**Status.** Built: migration `0030_wiki_image`, DB-backed `WikiService` with retry/backoff and the never-cache-errors
+rule, `scripts/src/wiki-images.ts` (+ `failed.json`, `--retry-failed`, `--retry-not-found`, CSV,
+`wiki-images:coverage`). **Runbook steps 1-4 are done (2026-10-05)** on the ≥1000-car tier (1,385 models): 1,014 models
+with a photo / 370 not_found / 1 failed (chrysler gr.voyager, 400 `cirrussearch-too-busy-error`; the retry resolved it as
+not_found; no 429s). The lead-image fallback now also tries the brand's home-country Wikipedia, then Ukrainian
+(`leadLanguages()` in `packages/shared/src/wikimedia.ts`; `--retry-not-found` re-ran the 370): **+73 models → 1,093
+with a photo, 298 not_found** (mostly VAZ/UAZ numeric codes, Chinese codes, spellings like "bmw 118 i" — no article
+exists under that name). Table: 26,703 rows (14,281 ok / 12,422 not_found). Coverage: **59.4% of all registered cars have
+a photo** (64.6% in the ≥1000 tier; the 100-999 and <100 tiers are not processed yet). Seed CSV re-exported
+(`scripts/seed-data/wiki-images.csv.gz`, 652 KB). **Next: steps 5-6 (optional).** The "stages" 1-3 (title search →
+batched imageinfo → lead fallback over several languages) happen _inside every run_, per chunk of 20 models; they are not
+separate runs. Ideas not done: search by normalized name for odd spellings ("118 i" → "118i"); non-Latin article titles
+(zh/ja/ko) are mostly rejected by the "title mentions the model" guard.
 
 **Runbook — what to execute, in order** (local dev stack: `pnpm db:up`, real registry loaded; run from the repo root)
 
-| #   | Command                                                                      | Covers                                 | Est. time (1 req/s / 2 req/s)    |
-| --- | ---------------------------------------------------------------------------- | -------------------------------------- | -------------------------------- |
-| 1   | `pnpm ingest:wiki-images`                                                    | start tier: models ≥1000 cars (~1,400) | ~30-40 min / ~20 min             |
-| 2   | `pnpm wiki-images:coverage`                                                  | check: % of cars with a photo, by tier | seconds (+ ~1 min registry scan) |
-| 3   | `pnpm ingest:wiki-images -- --retry-failed`                                  | replay everything in `failed.json`     | minutes                          |
-| 4   | `pnpm export:wiki-images:csv`, commit `scripts/seed-data/wiki-images.csv.gz` | seed for fresh clones                  | seconds                          |
-| 5   | `pnpm ingest:wiki-images -- --min-cars 100`                                  | next tier: models ≥100 cars (~4,000)   | ~1-1.5 h / ~45 min               |
-| 6   | `pnpm ingest:wiki-images -- --min-cars 1`                                    | everything left (~15.7k models in all) | ~5 h more / ~2.5 h               |
-| 7   | repeat 2-4                                                                   | re-check, retry failures, re-export    |                                  |
+| #   | Command                                                                      | Covers                                 | Est. time (1 req/s / 2 req/s)               |
+| --- | ---------------------------------------------------------------------------- | -------------------------------------- | ------------------------------------------- |
+| 1   | `pnpm ingest:wiki-images`                                                    | start tier: models ≥1000 cars (~1,400) | done (~35 min at 1 req/s)                   |
+| 2   | `pnpm wiki-images:coverage`                                                  | check: % of cars with a photo, by tier | seconds (+ ~1 min registry scan)            |
+| 3   | `pnpm ingest:wiki-images -- --retry-failed`                                  | replay everything in `failed.json`     | minutes                                     |
+| 4   | `pnpm export:wiki-images:csv`, commit `scripts/seed-data/wiki-images.csv.gz` | seed for fresh clones                  | seconds                                     |
+| 5   | `pnpm ingest:wiki-images -- --min-cars 100`                                  | next tier: models ≥100 cars (~4,000)   | ~1-1.5 h / ~45 min                          |
+| 6   | `pnpm ingest:wiki-images -- --min-cars 1`                                    | everything left (~15.7k models in all) | ~5 h more / ~2.5 h                          |
+| 7   | repeat 2-4 (+ `--retry-not-found` after a new language is added)             | re-check, retry failures, re-export    | minutes — **once, after the last tier run** |
 
 Notes for the runs: every run is resumable (done models are skipped) and Ctrl-C stops after the current chunk, so 5-6
 can be split into sessions of ~1 h with `--limit 800` or by brand (`--brand kia`). Models stored `failed` are skipped

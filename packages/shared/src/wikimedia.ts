@@ -250,6 +250,46 @@ function apiUrl(base: string, params: Record<string, string>): URL {
   return url
 }
 
+const brandLanguages = (brands: string[], langs: string[]): Array<[string, string[]]> => brands.map(b => [b, langs])
+
+const LEAD_LANGUAGES_BY_BRAND: Record<string, string[]> = Object.fromEntries([
+  ...brandLanguages(['ваз', 'уаз', 'заз', 'газ', 'москвич', 'лаз', 'богдан', 'маз', 'камаз', 'луаз'], ['ru']),
+  ...brandLanguages(['fiat', 'lancia', 'alfa romeo', 'maserati', 'ferrari', 'lamborghini', 'iveco'], ['it']),
+  ...brandLanguages(
+    ['geely', 'chery', 'byd', 'great wall', 'jac', 'faw', 'dongfeng', 'lifan', 'changan', 'haval', 'baic'],
+    ['zh']
+  ),
+  ...brandLanguages(
+    [
+      'toyota',
+      'honda',
+      'nissan',
+      'mazda',
+      'mitsubishi',
+      'subaru',
+      'suzuki',
+      'lexus',
+      'daihatsu',
+      'infiniti',
+      'acura',
+      'isuzu'
+    ],
+    ['ja']
+  ),
+  ...brandLanguages(['kia', 'hyundai', 'daewoo', 'ssangyong', 'genesis'], ['ko']),
+  ...brandLanguages(['volkswagen', 'audi', 'bmw', 'mercedes-benz', 'opel', 'porsche', 'smart', 'man'], ['de']),
+  ...brandLanguages(['renault', 'peugeot', 'citroen', 'dacia', 'ds'], ['fr']),
+  ...brandLanguages(['skoda'], ['cs']),
+  ...brandLanguages(['seat'], ['es']),
+  ...brandLanguages(['volvo'], ['sv'])
+])
+
+/** Wikipedias to try for a model's lead image, in order: English (the image is language-free, so one stored row serves
+ *  every UI language), the brand's home-country edition, then Ukrainian (the market this app serves). */
+export function leadLanguages(brand: string): string[] {
+  return [...new Set(['en', ...(LEAD_LANGUAGES_BY_BRAND[brand.trim().toLowerCase()] ?? []), 'uk'])]
+}
+
 /** Wikipedia article search → the first hit's intro extract and/or lead image. */
 export function wikipediaSearchUrl(
   domain: string,

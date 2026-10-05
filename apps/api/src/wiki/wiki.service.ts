@@ -8,6 +8,7 @@ import {
   commonsPagesInOrder,
   commonsYearSearchUrl,
   fetchWikimediaJson,
+  leadLanguages,
   pickCommonsCandidate,
   titleMentionsModel,
   wikiDomain,
@@ -118,7 +119,8 @@ export class WikiService {
     year: number | null,
     source: WikiImageSource
   ): Promise<Resolved> {
-    if (source === 'wiki') return this.fetchLeadImage(query, model).catch(() => ({ image: null, settled: false }))
+    if (source === 'wiki')
+      return this.fetchLeadImage(brand, query, model).catch(() => ({ image: null, settled: false }))
 
     const yearKey = year ? wikiImageKey(brand, model, year) : null
     const modelKey = wikiImageKey(brand, model)
@@ -136,7 +138,7 @@ export class WikiService {
       if (found.image) return found
       settled = found.settled
     }
-    const lead = await this.liveLeadImage(query, model, modelKey, modelRow)
+    const lead = await this.liveLeadImage(brand, query, model, modelKey, modelRow)
     return { image: lead.image, settled: settled && lead.settled }
   }
 
@@ -162,13 +164,14 @@ export class WikiService {
   }
 
   private async liveLeadImage(
+    brand: string,
     query: string,
     model: string,
     key: WikiImageKey,
     previous: WikiImageRow | null
   ): Promise<Resolved> {
     try {
-      const { image } = await this.fetchLeadImage(query, model)
+      const { image } = await this.fetchLeadImage(brand, query, model)
       await this.persist(
         key,
         image ? { kind: 'ok', image, origin: 'lead', title: null } : { kind: 'not_found' },
@@ -181,16 +184,20 @@ export class WikiService {
     }
   }
 
-  /** English article only — one stored row then serves every UI language. Throws on a failed search request. */
-  private async fetchLeadImage(query: string, model: string): Promise<Resolved> {
-    const payload = await this.fetchJson<WikipediaSearch>(wikipediaSearchUrl('en', query, { leadImage: true }))
-    const page = Object.values(payload.query?.pages ?? {})[0]
-    // Same "an article about a vehicle carries the model in its title" guard as the text lookup.
-    if (!page?.original || !titleMentionsModel(page.title, model)) return { image: null, settled: true }
+  /** English article first, then the brand's home-country edition and Ukrainian — the image is language-free, so one
+   *  stored row still serves every UI language. Throws on a failed search request. */
+  private async fetchLeadImage(brand: string, query: string, model: string): Promise<Resolved> {
+    for (const lang of leadLanguages(brand)) {
+      const payload = await this.fetchJson<WikipediaSearch>(wikipediaSearchUrl(lang, query, { leadImage: true }))
+      const page = Object.values(payload.query?.pages ?? {})[0]
+      // Same "an article about a vehicle carries the model in its title" guard as the text lookup.
+      if (!page?.original || !titleMentionsModel(page.title, model)) continue
 
-    const attribution = await this.fetchAttribution(page.original.source).catch(() => null)
-    const shown = page.thumbnail ?? page.original
-    return { image: { url: shown.source, width: shown.width, height: shown.height, attribution }, settled: true }
+      const attribution = await this.fetchAttribution(page.original.source).catch(() => null)
+      const shown = page.thumbnail ?? page.original
+      return { image: { url: shown.source, width: shown.width, height: shown.height, attribution }, settled: true }
+    }
+    return { image: null, settled: true }
   }
 
   /** Commons files are conventionally named `<year> <Make> <Model> …`, so a quoted make+model plus the year

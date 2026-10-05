@@ -12,6 +12,8 @@
  *   pnpm ingest:wiki-images -- --rps 2            # requests per second (default 1, max 2)
  *   pnpm ingest:wiki-images -- --retry-failed     # only models whose request failed (failed.json + failed rows past
  *                                                 # next_retry_at); add --all to ignore the wait
+ *   pnpm ingest:wiki-images -- --retry-not-found  # models stored not_found, ignoring the 30-day wait: re-runs the lead
+ *                                                 # stage over every language in leadLanguages() (cached responses reused)
  *   pnpm ingest:wiki-images -- --export-csv ./x.csv[.gz]   # dump ok + not_found rows, no fetching
  *   pnpm ingest:wiki-images -- --from-csv ./x.csv[.gz]     # load a CSV you already have, no fetching
  *
@@ -43,6 +45,7 @@ import {
   commonsImageInfoUrl,
   commonsTitleSearchUrl,
   fetchWikimediaJson,
+  leadLanguages,
   titleMentionsModel,
   wikiImageKey,
   wikiImageRowValues,
@@ -89,6 +92,7 @@ type Args = {
   refresh: boolean
   rps: number
   retryFailed: boolean
+  retryNotFound: boolean
   all: boolean
   exportCsv?: string
   fromCsv?: string
@@ -102,6 +106,7 @@ function parseArgs(argv: string[]): Args {
     refresh: false,
     rps: 1,
     retryFailed: false,
+    retryNotFound: false,
     all: false
   }
   for (let i = 0; i < argv.length; i++) {
@@ -113,6 +118,7 @@ function parseArgs(argv: string[]): Args {
     else if (arg === '--refresh') a.refresh = true
     else if (arg === '--rps') a.rps = Math.min(2, Math.max(0.1, Number(argv[++i])))
     else if (arg === '--retry-failed') a.retryFailed = true
+    else if (arg === '--retry-not-found') a.retryNotFound = true
     else if (arg === '--all') a.all = true
     else if (arg === '--export-csv') a.exportCsv = argv[++i]
     else if (arg === '--from-csv') a.fromCsv = argv[++i]
@@ -302,19 +308,31 @@ class Runner {
     const found: Array<{ work: Work; image: WikiImage; fileTitle: string }> = []
     for (const work of works) {
       const { group } = work
-      let page = readCache<WikipediaPage | null>('lead', group, this.args.refresh)
-      if (page === undefined) {
-        const res = await this.client.get<WikipediaSearch>(
-          wikipediaSearchUrl('en', `${group.brand} ${group.model}`, { leadImage: true })
-        )
-        if (!res.ok) {
-          this.fail(work, 'lead', res)
-          continue
+      let page: WikipediaPage | null = null
+      let failed = false
+      // English first (its cache keeps the plain 'lead' name), then the brand's home edition, then Ukrainian.
+      for (const lang of leadLanguages(group.brand)) {
+        const kind = lang === 'en' ? 'lead' : `lead-${lang}`
+        let hit = readCache<WikipediaPage | null>(kind, group, this.args.refresh)
+        if (hit === undefined) {
+          const res = await this.client.get<WikipediaSearch>(
+            wikipediaSearchUrl(lang, `${group.brand} ${group.model}`, { leadImage: true })
+          )
+          if (!res.ok) {
+            this.fail(work, 'lead', res)
+            failed = true
+            break
+          }
+          hit = Object.values(res.data.query?.pages ?? {})[0] ?? null
+          writeCache(kind, group, hit)
         }
-        page = Object.values(res.data.query?.pages ?? {})[0] ?? null
-        writeCache('lead', group, page)
+        if (hit?.original && titleMentionsModel(hit.title, group.model)) {
+          page = hit
+          break
+        }
       }
-      if (!page?.original || !titleMentionsModel(page.title, group.model)) continue
+      if (failed) continue
+      if (!page?.original) continue
       const shown = page.thumbnail ?? page.original
       const file = commonsFilenameFromUrl(page.original.source)
       if (file) {
@@ -599,6 +617,7 @@ async function main(): Promise<void> {
         return due || retryIds.has(groupId(g.brand, g.model))
       }
       if (g.total < args.minCars) return false
+      if (args.retryNotFound) return row?.status === 'not_found'
       if (args.refresh || !row) return true
       if (row.status === 'failed') {
         waitingForRetry++
