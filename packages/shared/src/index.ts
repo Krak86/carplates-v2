@@ -7,6 +7,7 @@ export {
   isUaPlate,
   isLegacyUaPlate
 } from './plate.js'
+export { hasKnownWmi, lookupWmi, type WmiMatch } from './wmi.js'
 export { extractVins, vinCheckDigitOk, type OcrLine, type VinRead } from './vin-read.js'
 export {
   LEGACY_REGIONS,

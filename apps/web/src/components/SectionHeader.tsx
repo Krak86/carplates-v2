@@ -70,7 +70,7 @@ export default function SectionHeader({
           type="button"
           aria-expanded={open}
           disabled={disabled}
-          className="flex items-center gap-1.5 rounded-full bg-[var(--color-surface)]/20 px-2.5 py-1 max-sm:size-8 max-sm:justify-center max-sm:px-0 text-[var(--color-primary)] disabled:cursor-wait disabled:opacity-50"
+          className="flex items-center gap-1.5 rounded-full bg-[var(--color-surface)]/20 px-2.5 py-1 text-[var(--color-primary)] disabled:cursor-wait disabled:opacity-50 max-sm:size-8 max-sm:justify-center max-sm:px-0"
         >
           <span className="underline group-hover:no-underline max-sm:sr-only">{open ? hideLabel : showLabel}</span>
           <span

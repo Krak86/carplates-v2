@@ -47,9 +47,9 @@ describe('countOwners', () => {
   })
 
   it('does not count a plain re-registration (replaced plates, colour) as an owner', () => {
-    expect(countOwners([a(1, 'ПЕРЕРЕЄСТРАЦІЯ ТЗ У ЗВ`ЯЗКУ ЗІ ЗАМІНОЮ НОМЕРНОГО ЗНАКА'), a(2, 'ПЕРВИННА РЕЄСТРАЦIЯ')])).toBe(
-      1
-    )
+    expect(
+      countOwners([a(1, 'ПЕРЕРЕЄСТРАЦІЯ ТЗ У ЗВ`ЯЗКУ ЗІ ЗАМІНОЮ НОМЕРНОГО ЗНАКА'), a(2, 'ПЕРВИННА РЕЄСТРАЦIЯ')])
+    ).toBe(1)
   })
 
   it('is at least 1 when the history starts after the first registration', () => {

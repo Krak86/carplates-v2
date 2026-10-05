@@ -24,7 +24,7 @@ Ukrainian vehicle lookup by **plate number** or **VIN**. Rebuild of
   (default), a Google Maps view of the plate's region capital, or a live NASA ISS "Earth from space" stream (low
   quality on purpose, selectable). Advanced search shows an OpenStreetMap view of the chosen region
 - Auto news: recent Ukrainian/Russian auto-news headlines (links out, no article text) polled from RSS feeds listed in `scripts/news-sources.json` (`pnpm ingest:news`, `registry.news_items`) — a self-scrolling strip on the homepage, a 📰 News section on result cards (make+model, then make news; Ukrainian UI shows Ukrainian-language items only) and a desktop-only side panel that fades in on scroll
-- Light/dark theme, AR plate scan, plate and VIN photo search (VIN: on-device barcode, else self-hosted OCR), link previews for shared plate/VIN URLs
+- Light/dark theme, AR plate scan, plate and VIN photo search (VIN: on-device barcode, else self-hosted OCR; found VINs are outlined on the photo and listed as chips), VIN decode with an offline VIN-prefix fallback for cars NHTSA does not know (labelled "≈" fields), link previews for shared plate/VIN URLs
 - Installable PWA with offline mode: recent results, history and favorites stay available without a connection
 
 pnpm monorepo · Node 24 · React 19 + Vite 8 · NestJS 11 + Fastify · Drizzle + Postgres 18.

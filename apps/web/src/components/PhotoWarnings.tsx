@@ -30,7 +30,12 @@ export default function PhotoWarnings({ meta, maxDimension, showAccuracy, mode =
     icon: '💡',
     text: t(mode === 'vin' ? 'recognize.photoTipsVin' : 'recognize.photoTips', { max: maxDimension })
   })
-  if (showAccuracy) warnings.push({ key: 'accuracy', icon: '⚠️', text: t('recognize.accuracyWarning') })
+  if (showAccuracy)
+    warnings.push({
+      key: 'accuracy',
+      icon: '⚠️',
+      text: t(mode === 'vin' ? 'recognize.accuracyWarningVin' : 'recognize.accuracyWarning')
+    })
 
   const [first, ...rest] = warnings
   if (!first) return null

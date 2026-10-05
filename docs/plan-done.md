@@ -2613,7 +2613,7 @@ live per request (same persisted-catalog pattern as `owner_posts`).
    polled (backfill = none; infocar news `news.infocar.ua` paging could backfill, check robots first); copyright → link
    - short summary only, always link out and attribute the source.
 
-### VIN photo search ✅ first slice BUILT (2026-10-05)
+### VIN photo search ✅ BUILT (first slice + second slice, 2026-10-05)
 
 A "VIN photo" button, **last** in the search row (after AR). Deliberately no AR/live mode: a VIN needs a sharp
 still, and plate-style frame tracking buys nothing. Both phones and desktop use the plain image picker.
@@ -2625,7 +2625,7 @@ still, and plate-style frame tracking buys nothing. Both phones and desktop use 
    `services/alpr` `POST /recognize/vin`: RapidOCR (`rapidocr-onnxruntime`, models bundled in the wheel, ONNX CPU)
    returns raw text lines + scores only;
 3. `extractVins` (`packages/shared/src/vin-read.ts`) finds and ranks VINs; the response is
-   `vinRecognizeResponseSchema` (`candidates: { vin, score, checkDigitOk }[]`); the top one is navigated to.
+   `vinRecognizeResponseSchema` (`candidates: { vin, score, checkDigitOk, box? }[]`); the top one is navigated to.
    404 → `recognize.noVin`.
 
 The recognize controller moved from `api/recognize/plate` to `api/recognize` (`plate/local`, `plate/cloud`, `vin`) —
@@ -2645,9 +2645,70 @@ digit stays a ranking hint, never a rejection (mandatory in North America only).
 longer line that doesn't end in 4 digits is missed.
 
 **VIN photos skip plate-specific UI.** `PhotoThumbnail.mode`: no EXIF date/GPS row (EXIF isn't even read), no
-"photo is N years old / before registry" or plate-accuracy warnings (a VIN never changes); only a VIN-specific
-quality tip (`recognize.photoTipsVin`).
+"photo is N years old / before registry" warnings (a VIN never changes); a VIN-specific quality tip
+(`recognize.photoTipsVin`) and, since the second slice, a VIN-specific misread warning (`recognize.accuracyWarningVin`).
 
 **Checked on real photos:** 3 windshield/door-jamb photos OK; the registration certificate OK after the ranking fix;
 a stock photo of a VIN on a rain-covered windshield shows only 15 characters (cropped), so it correctly yields "not
 found". **Not done:** eval set, multi-frame voting, LLM fallback, water/glare tuning — see PLAN.md.
+
+#### Second slice (2026-10-05): outlines + found list, stamped VINs, junk rejection, offline VIN-prefix fallback
+
+Triggered by real user photos that failed or returned junk. What changed and why:
+
+- **Outlines + "Also found" chips.** `services/alpr` `/recognize/vin` now returns each text line with a `box` (fractions
+  of the image, like the plate boxes). `extractVins` carries a box per VIN: a VIN word inside a longer line gets that
+  word's slice of the line box (character position, horizontal lines only), a wrapped VIN gets the union of both lines.
+  The client maps VIN reads onto the plate-candidate shape (`plate: vin`), so `PhotoPlateBoxes` / `PlateCandidates`
+  work unchanged. A barcode read has no box.
+- **Junk rejection (all found on real photos; each has a regression test in `vin-read.test.ts`).**
+  - Badge/watermark text fits the VIN alphabet after the O→0 / I→1 remap ("MINI COOPER CLUBMAN" →
+    `M1N1C00PERCLUBMAN`, stock-photo "IMAGE ID: 2701628693" → `1MAGE1D2701628693`). Rules: a 17-char *line* needs a
+    numeric 4-char tail **or** a passing check digit; a line with `:` `/` `-` or a letters-only word of 5+ letters is
+    never glued into one VIN-shaped string (its words are still read one by one — a 17-char word like the VIN in
+    `V.I.N WMW…` counts as an exact read, which also removes shifted-window junk).
+  - Wrapped-VIN joins need both fragments ≥ 6 chars and, when boxes are known, stacked (second below the first,
+    overlapping horizontally, small gap) — otherwise an approval number (`e9·92/61.0065.00`) or scraps from retry
+    passes get glued onto a partial read.
+  - Stamped VINs are fenced by asterisks that OCR reads as `X` (`XKLATF08Y1VB363636X`, 19 chars) → trimmed.
+  - **Look-alike correction by WMI.** A read whose 3-char prefix isn't in the table but is one look-alike swap
+    (M/N, 8/B, 5/S, 2/Z, 6/G, 0/D, U/V) from one that is (`NNC…` → Ford Thailand's `MNC…`) is replaced by the fixed
+    VIN (the raw read is *not* listed beside it — same text on the plate, one wrong letter). Only first-3-char
+    errors are caught; a misread later in the VIN still needs a human check against the outlined photo.
+- **OCR service tuning (`services/alpr/app.py`, rebuild with `pnpm alpr:build` + `alpr:up`).** `unclip_ratio=2.5`
+  (merges spaced characters; fixed a misread letter on a Nissan chassis plate); the image is **padded** before OCR
+  (a VIN touching the photo edge — a tight crop — lost its first letter once `unclip` grew boxes past the edge), boxes
+  mapped back to the original frame; when the plain pass yields no VIN-shaped line (≥ 12 alnum chars, ≥ 4 digits) it
+  retries on width-**squeezed** copies (×0.5, ×0.35, with/without CLAHE) — embossed/stamped characters with wide gaps
+  are otherwise detected as scraps or not at all (the Audi door-jamb stamp `*WAUZZZ8E02A048406*` only reads this way).
+  Only VIN-shaped lines are taken from the retries. A no-VIN photo now costs up to 4 extra OCR passes (~1-3 s here;
+  the API's upstream timeout is 15 s). Tried and **rejected**: grayscale + CLAHE + 2× upscale, and inverted — made
+  things worse on the dotted-metal photo.
+- **Gotcha: `@carplates/shared` is consumed from `dist`.** The API (and web) resolve the package through its built
+  `dist/`, so a change in `packages/shared/src` is invisible to the running API until `pnpm --filter @carplates/shared
+  build` ("still the old result"). The PWA also needs a hard refresh after a web rebuild.
+- **Offline WMI fallback + labelled gap fields (VIN decode page).** NHTSA vPIC only has detail for US/Canada-market
+  vehicles; for a VIN it doesn't know the Overview used to be empty or "—". `packages/shared/src/wmi.ts` is a curated
+  table (≈190 prefixes: KR/JP/CN/EU/RU/UA/TH/IN/US + a country-by-first-chars fallback; `lookupWmi`, `hasKnownWmi`).
+  `buildFallback` (`apps/web/src/components/vin/helpers.ts`) fills **only** what NHTSA left empty, priority NHTSA >
+  our registry record for that VIN > VIN prefix > year code, each value carrying its source. UI: dashed
+  "≈ registry / VIN prefix / year code" chips (`VinDerivedChip`, tooltip) + an explanatory note (`VinFallbackNote`,
+  lists only the sources used); the Raw tab is untouched. Client-side only — no API/schema change, so users' offline
+  caches survive.
+  - The VIN-parts tooltips now spell out WMI / VDS (positions 1–3: country/region, maker, type; positions 4–8:
+    manufacturer-defined, decodable only by NHTSA for US-market cars or the maker's catalog) and mark prefix-derived
+    values; the VDS tooltip says "NHTSA has no decode, raw code …" when it has none.
+  - Overview sections with no data (Engine & weight / Built in / All details) are hidden entirely, heading included
+    (`hasEngineData` / `hasOriginData` / `groupFields`).
+  - Not offline-decodable by design: model/trim/engine (manufacturer-specific) and Japanese domestic *frame numbers*
+    (`NCP51-1234567` — not a 17-char VIN; only manufacturer parts catalogs decode them).
+- **Checked on real photos (through the live API):** MINI `WMWLN5105J2H03769`, Hyundai `KM8J33A4XMU312822`, Nissan
+  `PN8EAAC24TCA14792` (stock photo with watermark), door-sill stamp `KLATF08Y1VB363636`, Audi stamp
+  `WAUZZZ8E02A048406`, Ford Thailand plate `MNCLSFE405W491230` (after the M/N fix) — all found; a Toyota
+  certification label (model/paint codes, **no VIN printed**) correctly 404s. **Still failing:** a Jincheng engine plate
+  (`LJCPCBLCX11000237`) — the detector reads only the last 14 characters (`PCBLCX11000237`), so nothing is returned
+  (better than the 5 junk candidates it produced before the join rules); a tight crop of the VIN line works.
+  `AAJ3030150S100354` is not a valid VIN (position 10 is `0`, unknown WMI) — NHTSA's error text explains it.
+- **Not done / ideas:** a "VIN looks malformed / prefix not recognised" note and a check-digit warning for VINs
+  where NHTSA gives no verdict; a second recognizer pass on the cropped VIN band (would likely fix the Jincheng
+  case); editing a candidate before searching.

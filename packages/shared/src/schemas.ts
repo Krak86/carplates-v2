@@ -66,6 +66,14 @@ export const vinDecodeResponseSchema = z.object({
 })
 export type VinDecodeResponse = z.infer<typeof vinDecodeResponseSchema>
 
+/** A rectangle in a photo, as fractions (0-1) of its width/height. */
+export const photoBoxSchema = z.object({
+  x: z.number().min(0).max(1),
+  y: z.number().min(0).max(1),
+  w: z.number().min(0).max(1),
+  h: z.number().min(0).max(1)
+})
+
 /** One OCR read, already normalized to the canonical plate key. */
 export const plateCandidateSchema = z.object({
   plate: z.string(), // canonical Cyrillic, ready for /:query
@@ -73,14 +81,7 @@ export const plateCandidateSchema = z.object({
   score: z.number().min(0).max(1),
   // Where the plate sits in the uploaded photo, as fractions (0-1) of its width/height so it's
   // independent of any client-side resize. Only the self-hosted ALPR reports it.
-  box: z
-    .object({
-      x: z.number().min(0).max(1),
-      y: z.number().min(0).max(1),
-      w: z.number().min(0).max(1),
-      h: z.number().min(0).max(1)
-    })
-    .optional()
+  box: photoBoxSchema.optional()
 })
 export type PlateCandidate = z.infer<typeof plateCandidateSchema>
 
@@ -99,7 +100,15 @@ export type PlateRecognizeResponse = z.infer<typeof plateRecognizeResponseSchema
 /** POST /api/recognize/vin — VIN reads found in an uploaded photo, best first. */
 export const vinRecognizeResponseSchema = z.object({
   candidates: z
-    .array(z.object({ vin: z.string().length(17), score: z.number().min(0).max(1), checkDigitOk: z.boolean() }))
+    .array(
+      z.object({
+        vin: z.string().length(17),
+        score: z.number().min(0).max(1),
+        checkDigitOk: z.boolean(),
+        /** Where the VIN sits in the uploaded photo (the self-hosted OCR reports it). */
+        box: photoBoxSchema.optional()
+      })
+    )
     .min(1)
 })
 export type VinRecognizeResponse = z.infer<typeof vinRecognizeResponseSchema>

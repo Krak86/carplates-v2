@@ -249,6 +249,53 @@ async def recognize(image: UploadFile = File(...)) -> dict[str, list[dict[str, A
     return {"results": results}
 
 
+# Stamped / embossed VINs (light, widely spaced characters on dark metal) often defeat the detector on the
+# raw photo. When the plain pass finds nothing VIN-shaped, retry on contrast-boosted, upscaled variants.
+_VIN_LIKE = re.compile(r"[A-Z0-9]{15,}")
+
+
+def _vin_ish(text: str) -> bool:
+    compact = re.sub(r"[^A-Z0-9]", "", text.upper())
+    return len(compact) >= 12 and sum(c.isdigit() for c in compact) >= 4
+
+
+def _has_vin_like(lines: list[dict[str, Any]]) -> bool:
+    for line in lines:
+        compact = re.sub(r"[^A-Z0-9]", "", str(line["text"]).upper())
+        if _VIN_LIKE.fullmatch(compact) and sum(c.isdigit() for c in compact) >= 4:
+            return True
+    return False
+
+
+def _squeeze(frame: np.ndarray, fx: float, enhance: bool) -> np.ndarray:
+    # Widely spaced stamped characters are read as separate scraps (or not at all); narrowing the image
+    # brings them close enough for the detector to see one line.
+    out = cv2.resize(frame, None, fx=fx, fy=1.0, interpolation=cv2.INTER_AREA)
+    if enhance:
+        gray = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8, 8)).apply(cv2.cvtColor(out, cv2.COLOR_BGR2GRAY))
+        out = cv2.cvtColor(gray, cv2.COLOR_GRAY2BGR)
+    return out
+
+
+def _ocr_lines(frame: np.ndarray, **kwargs: Any) -> list[dict[str, Any]]:
+    # A VIN that touches the photo's edge (a tight crop) loses its first/last character when the detector's
+    # box is grown past the image, so OCR a padded copy and map the boxes back onto the original frame.
+    height, width = frame.shape[:2]
+    pad = max(24, round(max(height, width) * 0.04))
+    padded = cv2.copyMakeBorder(frame, pad, pad, pad, pad, cv2.BORDER_REPLICATE)
+    # result: [[polygon, text, score], ...], or None when no text was detected. The polygon becomes an
+    # axis-aligned box in fractions of the original image, so the web app can outline each line on the photo.
+    result, _ = text_ocr(padded, **kwargs)
+    lines: list[dict[str, Any]] = []
+    for polygon, text, score in result or []:
+        xs = [float(p[0]) - pad for p in polygon]
+        ys = [float(p[1]) - pad for p in polygon]
+        x0, y0 = max(0.0, min(xs) / width), max(0.0, min(ys) / height)
+        x1, y1 = min(1.0, max(xs) / width), min(1.0, max(ys) / height)
+        lines.append({"text": text, "score": float(score), "box": {"x": x0, "y": y0, "w": x1 - x0, "h": y1 - y0}})
+    return lines
+
+
 @app.post("/recognize/vin")
 async def recognize_vin(image: UploadFile = File(...)) -> dict[str, list[dict[str, Any]]]:
     raw = await image.read()
@@ -262,10 +309,18 @@ async def recognize_vin(image: UploadFile = File(...)) -> dict[str, list[dict[st
 
     frame = np.ascontiguousarray(np.array(pil_image)[:, :, ::-1])
     try:
-        result, _ = text_ocr(frame)
+        lines = _ocr_lines(frame, unclip_ratio=2.5)
+        if not _has_vin_like(lines):
+            for fx, enhance in ((0.5, False), (0.35, False), (0.5, True), (0.35, True)):
+                extra = _ocr_lines(_squeeze(frame, fx, enhance), unclip_ratio=2.5)
+                logger.info("VIN OCR retry (fx=%s enhance=%s): %s", fx, enhance, [line["text"] for line in extra])
+                seen = {line["text"] for line in lines}
+                # Only VIN-shaped lines are taken from the retries; their other (squeezed, noisy) lines would only add junk.
+                lines += [line for line in extra if line["text"] not in seen and _vin_ish(line["text"])]
+                if _has_vin_like(lines):
+                    break
     except Exception:
         logger.exception("VIN OCR failed")
         raise HTTPException(status_code=502, detail="VIN OCR failed")
 
-    # result: [[box, text, score], ...], or None when no text was detected.
-    return {"lines": [{"text": text, "score": float(score)} for _, text, score in (result or [])]}
+    return {"lines": lines}

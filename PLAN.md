@@ -262,11 +262,13 @@ on unsupported/slow devices, telemetry on detection/OCR hit rate.
 
 ### VIN image recognition (camera/upload) — researched 2026-10-03; first slice built 2026-10-05
 
-**Status:** first slice shipped 2026-10-05 (button, barcode + OCR path, ranking) — write-up in
-`docs/plan-done.md` "VIN photo search". Real-photo check: 3 windshield/jamb photos + a registration certificate read
-correctly. Still open below: eval set (step 1), multi-frame voting (step 4), LLM fallback (step 5), tuning for
-water/glare/angle on full 17-char VINs (try contrast + 2x upscale pass, ambiguous-char variants 4/A, 0/O — score
-against the whole eval set), and a partial-VIN (<17) hint.
+**Status:** two slices shipped 2026-10-05 (button, barcode + OCR path, ranking; then outlines + "Also found" chips,
+stamped-VIN reads, junk rejection, WMI look-alike correction, offline VIN-prefix fallback on the decode page) —
+write-up in `docs/plan-done.md` "VIN photo search". Still open below: eval set (step 1 — every OCR tweak so far was
+judged on ~10 ad-hoc photos), multi-frame voting (step 4), LLM fallback (step 5), a second recognizer pass on the
+cropped VIN band (a Jincheng engine plate with wide-spaced dotted characters still reads only 14 of 17 chars; plain
+contrast/upscale passes made it worse, width-squeezing helped other stamped VINs), look-alike variants beyond the
+3-char prefix (a misread later in the VIN is not caught), and a partial-VIN (<17) hint.
 
 **Decision: share the capture UI, not the model.** `fast-alpr` (plate detector +
 `fast-plate-ocr`) is trained on short plate crops — it can't find or emit a 17-char
@@ -303,7 +305,8 @@ data point found: Mindee docTR fine-tuned on 5,000 VIN photos → 80% recognizer
 
 **Skipped:** paid VIN SDKs (Anyline from ~€457, Dynamsoft from ~$1,249 — no published
 accuracy, and plate OCR is deliberately self-hosted/no per-lookup cost); stamped
-chassis VINs (low-contrast embossed metal, hard even for specialist OCR); fine-tuning
+chassis model (low-contrast embossed metal — plain stamped door-sill VINs now read via the squeeze retry, see
+plan-done.md; only dotted/very wide-spaced ones still fail); fine-tuning
 a VIN model until there are thousands of labelled photos.
 
 ### Phase 3+ — recalls — **researched, parked (2026-09-24)**

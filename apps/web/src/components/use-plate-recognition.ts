@@ -49,7 +49,14 @@ async function readVin(file: File): Promise<Reads> {
   const barcode = await readVinBarcode(file)
   if (barcode) return { values: [barcode], candidates: [] }
   const res = await recognizeVin(await shrinkImage(file))
-  return { values: res.candidates.map(c => c.vin), candidates: [] }
+  // VIN reads reuse the plate-candidate shape (key = the VIN), so the photo outlines and the "also found" chips just work.
+  const candidates: PlateCandidate[] = res.candidates.map(c => ({
+    plate: c.vin,
+    raw: c.vin,
+    score: c.score,
+    ...(c.box ? { box: c.box } : {})
+  }))
+  return { values: candidates.map(c => c.plate), candidates }
 }
 
 async function readPlate(file: File): Promise<Reads> {

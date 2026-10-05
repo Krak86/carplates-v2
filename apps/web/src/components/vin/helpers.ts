@@ -1,4 +1,4 @@
-import type { VinDecodeResponse } from '@carplates/shared'
+import { lookupWmi, type VinDecodeResponse } from '@carplates/shared'
 
 import { VIN_GROUPS } from '@/components/vin/types'
 import type {
@@ -198,6 +198,64 @@ export function countryFlag(country: string | undefined): string | null {
   return String.fromCodePoint(...[...code].map(c => 0x1f1e6 + c.charCodeAt(0) - 65))
 }
 
+/** Flag emoji for an ISO 3166-1 alpha-2 code. */
+export function isoFlag(code: string): string {
+  return String.fromCodePoint(...[...code.toUpperCase()].map(c => 0x1f1e6 + c.charCodeAt(0) - 65))
+}
+
+/** Localized country name for an ISO code; `lang` is the app language (`ua` is the BCP-47 `uk`). */
+export function countryName(iso: string, lang: string): string {
+  return new Intl.DisplayNames([lang === 'ua' ? 'uk' : lang], { type: 'region' }).of(iso) ?? iso
+}
+
+// ---- Fallback for gaps in the NHTSA decode ------------------------------------------------------
+
+export const FALLBACK_SOURCES = ['registry', 'wmi', 'yearCode'] as const
+/** Where a value NHTSA didn't provide came from: our registry record, the VIN's 3-char prefix, or its 10th character. */
+export type FallbackSource = (typeof FALLBACK_SOURCES)[number]
+
+export type Derived<T> = { value: T; source: FallbackSource }
+
+export type VinFallback = {
+  make?: Derived<string>
+  model?: Derived<string>
+  year?: Derived<number>
+  /** ISO 3166-1 alpha-2. */
+  country?: Derived<string>
+}
+
+type RegistryHint = { brand?: string | null; model?: string | null; makeYear?: number | null }
+
+/**
+ * Fills only what NHTSA left empty. Priority: NHTSA > our registry record for this VIN > VIN-prefix table > year code.
+ * Nothing here overwrites a decoded value, and each value carries its source so the UI can label it.
+ */
+export function buildFallback(vin: string, fields: FieldMap, registry: RegistryHint | undefined): VinFallback {
+  const out: VinFallback = {}
+  const wmi = lookupWmi(vin)
+
+  if (!fields.get('Make')) {
+    if (registry?.brand) out.make = { value: registry.brand, source: 'registry' }
+    else if (wmi?.make) out.make = { value: wmi.make, source: 'wmi' }
+  }
+  if (!fields.get('Model') && registry?.model) out.model = { value: registry.model, source: 'registry' }
+  if (!fields.get('Plant Country') && wmi) out.country = { value: wmi.country, source: 'wmi' }
+
+  if (!fields.get('Model Year')) {
+    const yearChar = splitVin(vin)?.find(s => s.id === 'year')?.text
+    const coded = yearChar ? resolveYear(yearChar, registry?.makeYear?.toString()) : null
+    if (registry?.makeYear) out.year = { value: registry.makeYear, source: 'registry' }
+    else if (coded) out.year = { value: coded, source: 'yearCode' }
+  }
+  return out
+}
+
+/** The distinct sources used, in a stable order — drives the explanation note. */
+export function fallbackSources(fallback: VinFallback): FallbackSource[] {
+  const used = new Set(Object.values(fallback).map(d => d.source))
+  return FALLBACK_SOURCES.filter(s => used.has(s))
+}
+
 // ---- Equipment parsing --------------------------------------------------------------------------
 
 /** "1st and 2nd Rows", "1st Row (Driver and Passenger)", "All Rows", … → rows + which sides. */
@@ -278,6 +336,35 @@ export function enginePower(fields: FieldMap): { hp: number | null; kw: number |
     hp: hasHp ? Math.round(hp) : hasKw ? Math.round(kw * HP_PER_KW) : null,
     kw: hasKw ? Math.round(kw) : hasHp ? Math.round(hp / HP_PER_KW) : null
   }
+}
+
+/** Whether the engine card has anything to show (mirrors what VinEngineCard renders). */
+export function hasEngineData(fields: FieldMap): boolean {
+  return !!(
+    Number(fields.get('Engine Number of Cylinders')) ||
+    displacementLiters(fields) ||
+    enginePower(fields).hp ||
+    fields.get('Fuel Type - Primary') ||
+    [
+      'Engine Model',
+      'Valve Train Design',
+      'Engine Configuration',
+      'Turbo',
+      'Electrification Level',
+      'Transmission Style'
+    ].some(v => fields.get(v))
+  )
+}
+
+/** Whether the origin card has anything to show: decoded plant/maker, or a prefix-derived country/make. */
+export function hasOriginData(fields: FieldMap, fallback: VinFallback): boolean {
+  return !!(
+    fields.get('Plant City') ||
+    fields.get('Plant Country') ||
+    fields.get('Manufacturer Name') ||
+    fallback.country ||
+    fallback.make
+  )
 }
 
 /** US GVWR class 1-8 out of "Class 1C: 4,001 - 5,000 lb (1,814 - 2,268 kg)". */

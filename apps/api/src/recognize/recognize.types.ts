@@ -12,5 +12,6 @@ export interface PlateReaderResponse {
 }
 
 export interface VinReaderResponse {
-  lines?: { text: string; score: number }[]
+  /** `box` = fractions (0-1) of the image; set by the self-hosted OCR only. */
+  lines?: { text: string; score: number; box?: { x: number; y: number; w: number; h: number } }[]
 }
