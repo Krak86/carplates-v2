@@ -1,10 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common'
-import { carVideos, infocarVersions, ownerPosts, topgearReviews } from '@carplates/db'
+import { carVideos, infocarVersions, ownerPosts, pressReviews, topgearReviews } from '@carplates/db'
 import {
   INFOCAR_TREES,
   infocarBrandSlug,
   infocarLookup,
   ownerPostLookup,
+  pressLookup,
   topgearLookup,
   videoLookup
 } from '@carplates/shared'
@@ -25,14 +26,15 @@ export class ReviewsService {
    */
   async lookup(query: Query): Promise<ReviewsResponse> {
     const slug = infocarBrandSlug(query.brand)
-    if (!slug) return { testDrive: null, reviews: null, videos: [], ownerPosts: [], topgear: [] }
+    if (!slug) return { testDrive: null, reviews: null, videos: [], ownerPosts: [], topgear: [], press: [] }
 
     const { db } = this.dbService
-    const [rows, videoRows, postRows, topgearRows] = await Promise.all([
+    const [rows, videoRows, postRows, topgearRows, pressRows] = await Promise.all([
       db.select().from(infocarVersions).where(eq(infocarVersions.brandSlug, slug)),
       db.select().from(carVideos).where(eq(carVideos.brandSlug, slug)),
       db.select().from(ownerPosts).where(eq(ownerPosts.brandSlug, slug)),
-      db.select().from(topgearReviews).where(eq(topgearReviews.brandSlug, slug))
+      db.select().from(topgearReviews).where(eq(topgearReviews.brandSlug, slug)),
+      db.select().from(pressReviews).where(eq(pressReviews.brandSlug, slug))
     ])
     const catalog = rows.flatMap((r): InfocarRow[] =>
       INFOCAR_TREES.find(tree => tree === r.tree) ? [{ ...r, tree: r.tree as InfocarRow['tree'] }] : []
@@ -63,6 +65,9 @@ export class ReviewsService {
       publishedAt: r.publishedAt,
       blurb: r.blurb
     }))
-    return { testDrive: match.test_drive, reviews: match.reviews, videos, ownerPosts: posts, topgear }
+    const press = pressLookup(pressRows, slug, query.model, query.year, [
+      ...new Set(catalog.map(r => r.modelSlug))
+    ]).map(r => ({ url: r.url, source: r.source as 'itc' | 'mezha', publishedAt: r.publishedAt, langs: r.langs }))
+    return { testDrive: match.test_drive, reviews: match.reviews, videos, ownerPosts: posts, topgear, press }
   }
 }

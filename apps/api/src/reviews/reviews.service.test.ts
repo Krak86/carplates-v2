@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { carVideos, ownerPosts, topgearReviews } from '@carplates/db'
-import type { CarVideoRow, InfocarVersionRow, OwnerPostRow, TopgearReviewRow } from '@carplates/db'
+import { carVideos, ownerPosts, pressReviews, topgearReviews } from '@carplates/db'
+import type { CarVideoRow, InfocarVersionRow, OwnerPostRow, PressReviewRow, TopgearReviewRow } from '@carplates/db'
 
 import type { DbService } from '../db/db.service.js'
 
@@ -30,10 +30,19 @@ function serviceWith(
   rows: InfocarVersionRow[],
   videos: CarVideoRow[] = [],
   posts: OwnerPostRow[] = [],
-  topgearRows: TopgearReviewRow[] = []
+  topgearRows: TopgearReviewRow[] = [],
+  pressRows: PressReviewRow[] = []
 ): ReviewsService {
   const rowsFor = (table: unknown): unknown[] =>
-    table === carVideos ? videos : table === ownerPosts ? posts : table === topgearReviews ? topgearRows : rows
+    table === carVideos
+      ? videos
+      : table === ownerPosts
+        ? posts
+        : table === topgearReviews
+          ? topgearRows
+          : table === pressReviews
+            ? pressRows
+            : rows
   const db = {
     select: () => ({
       from: (table: unknown) => ({
@@ -91,6 +100,20 @@ const topgear: TopgearReviewRow = {
   fetchedAt: new Date(0)
 }
 
+const press: PressReviewRow = {
+  url: 'https://mezha.ua/articles/test-drayv-kia-ceed/',
+  source: 'mezha',
+  brandSlug: 'kia',
+  keywords: 'Kia Ceed',
+  yearHint: null,
+  publishedAt: '2022-07-02',
+  langs: {
+    uk: { url: 'https://mezha.ua/articles/test-drayv-kia-ceed/', title: 'Тест-драйв Kia Ceed', blurb: null },
+    en: { url: 'https://mezha.ua/en/articles/kia-ceed-test-drive/', title: 'Kia Ceed test drive', blurb: null }
+  },
+  fetchedAt: new Date(0)
+}
+
 describe('ReviewsService.lookup', () => {
   it('returns the matching version per tree, ignoring rows of an unknown tree', async () => {
     const service = serviceWith([
@@ -116,7 +139,8 @@ describe('ReviewsService.lookup', () => {
       reviews: null,
       videos: [],
       ownerPosts: [],
-      topgear: []
+      topgear: [],
+      press: []
     })
   })
 
@@ -163,5 +187,12 @@ describe('ReviewsService.lookup', () => {
         blurb: 'A good egg all round'
       }
     ])
+  })
+
+  it('returns tech-press test drives of the car model with every language edition, without DB-only fields', async () => {
+    const service = serviceWith([row({})], [], [], [], [press])
+    const res = await service.lookup({ brand: 'KIA', model: "CEE'D", year: 2019 })
+    expect(res.press).toEqual([{ url: press.url, source: 'mezha', publishedAt: '2022-07-02', langs: press.langs }])
+    expect((await service.lookup({ brand: 'KIA', model: 'RIO', year: 2019 })).press).toEqual([])
   })
 })

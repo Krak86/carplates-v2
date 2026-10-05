@@ -473,6 +473,31 @@ export type TopgearReviewRow = typeof topgearReviews.$inferSelect
 export type TopgearReviewInsert = typeof topgearReviews.$inferInsert
 
 /**
+ * One tech-press test drive (`scripts/src/press.ts`: itc.ua, mezha.ua), keyed by its primary (Ukrainian) URL. `langs`
+ * holds every language edition (`uk`/`ru`/`en`: url, title, blurb). `brandSlug` is our brand slug found in the titles/tags;
+ * the model is matched at lookup from `keywords` + titles. Facts + links only — see migrations/0029_press_reviews.sql.
+ */
+export type PressLangEntry = { url: string; title: string; blurb: string | null }
+/** Mirrors `PRESS_LANGS` in @carplates/shared (db doesn't depend on it). */
+export type PressLang = 'uk' | 'ru' | 'en'
+export const pressReviews = registry.table(
+  'press_reviews',
+  {
+    url: text('url').primaryKey(),
+    source: text('source').notNull(),
+    brandSlug: text('brand_slug'),
+    keywords: text('keywords').notNull().default(''),
+    yearHint: integer('year_hint'),
+    publishedAt: date('published_at', { mode: 'string' }),
+    langs: jsonb('langs').$type<Partial<Record<PressLang, PressLangEntry>>>().notNull(),
+    fetchedAt: timestamp('fetched_at', { withTimezone: true }).notNull().defaultNow()
+  },
+  t => [index('ix_press_reviews_brand').on(t.brandSlug)]
+)
+export type PressReviewRow = typeof pressReviews.$inferSelect
+export type PressReviewInsert = typeof pressReviews.$inferInsert
+
+/**
  * One IIHS (US, insurance-industry-funded) vehicle model-year assessment — scraped from
  * iihs.org's own server-rendered detail pages via `scripts/src/iihs.ts` and refreshed by
  * re-running it, same rationale as `cncapRatings`/`kncapRatings` above. `makeKey`/`modelKey`

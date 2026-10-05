@@ -8,6 +8,7 @@ import { useQuery } from '@tanstack/react-query'
 import EdrivePosts from '@/components/EdrivePosts'
 import InfocarReviewRows from '@/components/InfocarReviewRows'
 import LangBadge from '@/components/LangBadge'
+import PressReviews from '@/components/PressReviews'
 import { REVIEW_SITE_LABEL } from '@/components/ReviewLinks.helpers'
 import SectionInfo from '@/components/SectionInfo'
 import SectionHeader from '@/components/SectionHeader'
@@ -20,6 +21,8 @@ import { scrollElementIntoView } from '@/lib/share-section'
 
 /** infocar.ua and e-drive.com.ua publish in both Ukrainian and Russian. */
 const UA_RU: ('ua' | 'ru')[] = ['ua', 'ru']
+/** mezha.ua publishes in Ukrainian and English (itc.ua in Ukrainian and Russian, like infocar). */
+const UA_EN: ('ua' | 'en')[] = ['ua', 'en']
 /** TopGear UK reviews are English-only. */
 const EN: 'en'[] = ['en']
 
@@ -31,7 +34,7 @@ type Props = {
 
 /**
  * One collapsed "Reviews" section (all the text material; videos have their own `VideoReviews` section), grouped by
- * source: infocar.ua (test drives, owner reviews), e-drive.com.ua (owner posts), TopGear UK (editorial reviews) and
+ * source: infocar.ua (test drives, owner reviews), ITC.ua and Mezha (tech-press test drives), e-drive.com.ua (owner posts), TopGear UK (editorial reviews) and
  * search links to the other review sites. The persisted catalogs are fetched once the section is opened. Hidden for a car with no make/model to go on.
  */
 export default function ReviewLinks({ brand, model, year }: Props): ReactNode {
@@ -45,6 +48,8 @@ export default function ReviewLinks({ brand, model, year }: Props): ReactNode {
   const catalog = useQuery({ ...reviewsQuery(brand ?? '', model ?? '', year), enabled: !!brand && open })
   const posts = catalog.data?.ownerPosts ?? []
   const topgear = catalog.data?.topgear ?? []
+  const itc = (catalog.data?.press ?? []).filter(r => r.source === 'itc')
+  const mezha = (catalog.data?.press ?? []).filter(r => r.source === 'mezha')
   const hasInfocar = !!catalog.data?.testDrive || !!catalog.data?.reviews
 
   useEffect(() => {
@@ -95,6 +100,18 @@ export default function ReviewLinks({ brand, model, year }: Props): ReactNode {
                     />
                   )}
                 </ul>
+              </SourceGroup>
+            )}
+
+            {itc.length > 0 && (
+              <SourceGroup icon="/icons/itc.webp" name="ITC.ua" langs={UA_RU}>
+                <PressReviews reviews={itc} site="itc.ua" />
+              </SourceGroup>
+            )}
+
+            {mezha.length > 0 && (
+              <SourceGroup icon="/icons/mezha.webp" name="Mezha" langs={UA_EN}>
+                <PressReviews reviews={mezha} site="mezha.ua" />
               </SourceGroup>
             )}
 

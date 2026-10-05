@@ -28,16 +28,18 @@ export default function EdrivePosts({ posts }: Props): ReactNode {
               href={post.url}
               target="_blank"
               rel="noopener noreferrer nofollow"
-              className="flex items-start justify-between gap-2 text-base text-[var(--color-primary)]"
+              className="block rounded-md px-1 py-1 transition-colors hover:bg-[var(--color-border)]/40"
             >
-              <span className="line-clamp-2 underline">{post.title}</span>
-              <span aria-hidden>↗</span>
-              <span className="sr-only">{t('field.opensNewTab')}</span>
-            </a>
+              <span className="flex items-start justify-between gap-2 text-base text-[var(--color-primary)]">
+                <span className="line-clamp-2 underline">{post.title}</span>
+                <span aria-hidden>↗</span>
+                <span className="sr-only">{t('field.opensNewTab')}</span>
+              </span>
 
-            <p className="text-sm text-[var(--color-muted)]">
-              {[post.category, post.createdAt?.slice(0, 4)].filter(Boolean).join(' · ')}
-            </p>
+              <span className="block text-sm text-[var(--color-muted)]">
+                {[post.category, post.createdAt?.slice(0, 4)].filter(Boolean).join(' · ')}
+              </span>
+            </a>
           </li>
         ))}
       />

@@ -16,6 +16,8 @@ const SOURCES = [
   { key: 'epa', label: 'EPA / fueleconomy.gov', url: 'https://www.fueleconomy.gov' },
   { key: 'eea', label: 'EEA', url: 'https://www.eea.europa.eu' },
   { key: 'infocar', label: 'infocar.ua', url: 'https://www.infocar.ua' },
+  { key: 'itc', label: 'ITC.ua', url: 'https://itc.ua/ua/tag/test-drayv-ua/' },
+  { key: 'mezha', label: 'Mezha', url: 'https://mezha.ua/tag/test-drayv/' },
   { key: 'edrive', label: 'e-drive.com.ua', url: 'https://e-drive.com.ua' },
   { key: 'topgear', label: 'TopGear', url: 'https://www.topgear.com/car-reviews' },
   { key: 'carshow360', label: 'CarShow360', url: 'https://carshow360.net' },

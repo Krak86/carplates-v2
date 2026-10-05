@@ -53,6 +53,17 @@ export {
 export { MAX_VIDEOS, videoLookup, type InfocarVideoRow } from './infocarVideoLookup.js'
 export { MAX_OWNER_POSTS, edriveModelSlug, ownerPostLookup, type OwnerPostLookupRow } from './edriveLookup.js'
 export { MAX_TOPGEAR_REVIEWS, topgearLookup, type TopgearLookupRow } from './topgearLookup.js'
+export {
+  MAX_PRESS_REVIEWS,
+  PRESS_LANGS,
+  findBrandSlug,
+  pressLookup,
+  pressTokens,
+  titleYear,
+  type PressLang,
+  type PressLangEntry,
+  type PressLookupRow
+} from './pressLookup.js'
 export { MAX_MODELS_3D, model3dLookup, type Model3dLookupRow } from './model3dLookup.js'
 export { MAX_MODELS_360, model360Lookup, type Model360LookupRow } from './model360Lookup.js'
 export { countOwners } from './owners.js'

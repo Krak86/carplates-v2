@@ -15,7 +15,7 @@ Ukrainian vehicle lookup by **plate number** or **VIN**. Rebuild of
   → `registry.fuel_economy`, shown as a badge on the result card and on `/fuel`; `/safety` ranks all crash-test sources
 - Reviews & test drives: links to [infocar.ua](https://www.infocar.ua) test drives and owner reviews matched to the
   car's make/model/year (from a crawled catalog, `registry.infocar_versions`; owner reviews also get a year-filtered
-  link), [e-drive.com.ua](https://e-drive.com.ua) owner posts for the car's generation, [TopGear](https://www.topgear.com/car-reviews)
+  link), [ITC.ua](https://itc.ua/ua/tag/test-drayv-ua/) and [Mezha](https://mezha.ua/tag/test-drayv/) tech-press test drives of the car's model (every language edition: UA/RU, UA/EN; `registry.press_reviews`), [e-drive.com.ua](https://e-drive.com.ua) owner posts for the car's generation, [TopGear](https://www.topgear.com/car-reviews)
   UK editorial reviews (score out of 10 + blurb, English; `registry.topgear_reviews`) and a DRIVE2 search link — links
   only, nothing copied. infocar videos play from YouTube on demand; community 3D models ([Sketchfab](https://sketchfab.com))
   open in a "3D view" modal, and [CarShow360](https://carshow360.net) 360° exterior/interior galleries (every generation/trim of the make/model, links only) in a "360° view" modal
@@ -146,7 +146,7 @@ marked out of date via `GET /api/stats/version` after a re-ingest.
 | `packages/db`     | Drizzle schema + client + SQL migrator                                                                                                              |
 | `apps/api`        | NestJS + Fastify — plate/VIN/safety-ratings endpoints, Swagger, SPA host + meta injection                                                           |
 | `apps/web`        | Vite + React + React Router                                                                                                                         |
-| `scripts`         | `seed.ts`, `ingest.ts`, `ingest-full.ts`, `refresh-stats.ts`, `euroncap.ts`/`jncap.ts`/`cncap.ts`/`kncap.ts`/`iihs.ts` (crash-test rating scrapers), `infocar.ts`/`edrive.ts`/`topgear.ts`/`sketchfab.ts`/`carshow360.ts` (review, owner-post, 3D-model and 360°-gallery catalogs — links + facts only) |
+| `scripts`         | `seed.ts`, `ingest.ts`, `ingest-full.ts`, `refresh-stats.ts`, `euroncap.ts`/`jncap.ts`/`cncap.ts`/`kncap.ts`/`iihs.ts` (crash-test rating scrapers), `infocar.ts`/`edrive.ts`/`press.ts`/`topgear.ts`/`sketchfab.ts`/`carshow360.ts` (review, owner-post, 3D-model and 360°-gallery catalogs — links + facts only) |
 
 See [CLAUDE.md](CLAUDE.md) for conventions and [PLAN.md](PLAN.md) for the roadmap.
 
@@ -162,6 +162,7 @@ See [CLAUDE.md](CLAUDE.md) for conventions and [PLAN.md](PLAN.md) for the roadma
 `pnpm ingest:fuel · ingest:fuel:csv · export:fuel:csv · db:refresh-fuel-stats` ·
 `pnpm ingest:infocar · ingest:infocar:csv · export:infocar:csv` (+ `:videos` variants) ·
 `pnpm ingest:edrive · ingest:edrive:csv · export:edrive:csv` ·
+`pnpm ingest:press · ingest:press:csv · export:press:csv` (~10 min cold, 1 req/s) ·
 `pnpm ingest:topgear · ingest:topgear:csv · export:topgear:csv` (~20–25 min cold, 1 req/s) ·
 `pnpm ingest:sketchfab · ingest:sketchfab:csv · export:sketchfab:csv` ·
 `pnpm ingest:carshow360 · ingest:carshow360:csv · export:carshow360:csv` (sitemap only; `--enrich`, `--retry-failed`) ·

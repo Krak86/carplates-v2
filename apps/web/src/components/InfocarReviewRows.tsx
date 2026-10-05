@@ -20,6 +20,16 @@ export default function InfocarReviewRows({ label, brand, match }: Props): React
   const links = infocarLinks(match)
   if (match.yearUrl && years)
     links.unshift({ title: t('reviews.forYears', { years }), level: 'model', url: match.yearUrl })
+  const descriptionOf = (link: (typeof links)[number]): string =>
+    link.url === match.yearUrl
+      ? t('reviews.descYears')
+      : t(
+          link.level === 'version'
+            ? 'reviews.descVersion'
+            : link.level === 'model'
+              ? 'reviews.descModel'
+              : 'reviews.descBrand'
+        )
 
   return (
     <li className="px-2 py-1.5">
@@ -40,16 +50,20 @@ export default function InfocarReviewRows({ label, brand, match }: Props): React
               href={link.url}
               target="_blank"
               rel="noopener noreferrer nofollow"
-              className="flex items-center justify-between gap-2 rounded-md px-1 py-1 text-base text-[var(--color-primary)] transition-colors hover:bg-[var(--color-border)]/40"
+              className="block rounded-md px-1 py-1 transition-colors hover:bg-[var(--color-border)]/40"
             >
-              <span className="underline">
-                {link.title ??
-                  (link.level === 'model'
-                    ? t('reviews.allVersions', { name })
-                    : t('reviews.allModels', { name: brand }))}
+              <span className="flex items-center justify-between gap-2 text-base text-[var(--color-primary)]">
+                <span className="underline">
+                  {link.title ??
+                    (link.level === 'model'
+                      ? t('reviews.allVersions', { name })
+                      : t('reviews.allModels', { name: brand }))}
+                </span>
+                <span aria-hidden>↗</span>
+                <span className="sr-only">{t('field.opensNewTab')}</span>
               </span>
-              <span aria-hidden>↗</span>
-              <span className="sr-only">{t('field.opensNewTab')}</span>
+
+              <span className="block text-sm text-[var(--color-muted)]">{descriptionOf(link)}</span>
             </a>
           </li>
         ))}

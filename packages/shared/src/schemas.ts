@@ -520,12 +520,23 @@ export const topgearReviewSchema = z.object({
   publishedAt: z.string().nullable(),
   blurb: z.string().nullable()
 })
+/** A tech-press test drive (itc.ua / mezha.ua, persisted by `pnpm ingest:press`): one entry per language edition (`uk`/`ru`/`en`), link + title + blurb only. */
+export const pressReviewSchema = z.object({
+  url: z.string(),
+  source: z.enum(['itc', 'mezha']),
+  publishedAt: z.string().nullable(),
+  langs: z.partialRecord(
+    z.enum(['uk', 'ru', 'en']),
+    z.object({ url: z.string(), title: z.string(), blurb: z.string().nullable() })
+  )
+})
 export const reviewsResponseSchema = z.object({
   testDrive: infocarMatchSchema.nullable(),
   reviews: infocarMatchSchema.nullable(),
   videos: z.array(infocarVideoSchema),
   ownerPosts: z.array(ownerPostSchema),
-  topgear: z.array(topgearReviewSchema)
+  topgear: z.array(topgearReviewSchema),
+  press: z.array(pressReviewSchema)
 })
 export type ReviewsResponse = z.infer<typeof reviewsResponseSchema>
 

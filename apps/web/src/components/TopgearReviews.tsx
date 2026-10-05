@@ -26,24 +26,28 @@ export default function TopgearReviews({ reviews }: Props): ReactNode {
               href={review.url}
               target="_blank"
               rel="noopener noreferrer nofollow"
-              className="flex items-start justify-between gap-2 text-base text-[var(--color-primary)]"
+              className="block rounded-md px-1 py-1 transition-colors hover:bg-[var(--color-border)]/40"
             >
-              <span className="flex items-start gap-2">
-                {review.rating !== null && (
-                  <span
-                    title={t('topgear.score', { score: review.rating, max: review.bestRating ?? 10 })}
-                    className="shrink-0 rounded-md border border-[var(--color-border)] px-1.5 py-0.5 text-sm font-semibold text-[var(--color-fg)] tabular-nums no-underline"
-                  >
-                    {review.rating}/{review.bestRating ?? 10}
-                  </span>
-                )}
-                <span className="line-clamp-2 underline">{review.title}</span>
+              <span className="flex items-start justify-between gap-2 text-base text-[var(--color-primary)]">
+                <span className="flex items-start gap-2">
+                  {review.rating !== null && (
+                    <span
+                      title={t('topgear.score', { score: review.rating, max: review.bestRating ?? 10 })}
+                      className="shrink-0 rounded-md border border-[var(--color-border)] px-1.5 py-0.5 text-sm font-semibold text-[var(--color-fg)] tabular-nums no-underline"
+                    >
+                      {review.rating}/{review.bestRating ?? 10}
+                    </span>
+                  )}
+                  <span className="line-clamp-2 underline">{review.title}</span>
+                </span>
+                <span aria-hidden>↗</span>
+                <span className="sr-only">{t('field.opensNewTab')}</span>
               </span>
-              <span aria-hidden>↗</span>
-              <span className="sr-only">{t('field.opensNewTab')}</span>
-            </a>
 
-            {review.blurb && <p className="line-clamp-2 text-sm text-[var(--color-muted)]">{review.blurb}</p>}
+              {review.blurb && (
+                <span className="line-clamp-2 block text-sm text-[var(--color-muted)]">{review.blurb}</span>
+              )}
+            </a>
           </li>
         ))}
       />
