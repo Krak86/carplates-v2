@@ -977,8 +977,13 @@
   "layers.images.text": "Стандартний фон із фото авто",
   "layers.earth.title": "Земля з космосу",
   "layers.earth.text": "Пряма трансляція з МКС (низька якість)",
+  "layers.traffic.title": "Трафік",
+  "layers.traffic.text": "Прямі камери дорожнього руху з усього світу",
+  "layers.city.title": "Місто",
+  "layers.city.text": "Пряма трансляція з вулиць міста",
+  "layers.poorConnection": "Слабке з’єднання — відео вимкнено й запуститься автоматично, коли зв’язок покращиться.",
   "layers.map.title": "Карта",
   "layers.map.text": "Карта центру області номера",
   "layers.map.travic": "Рух транспорту: відкрити Travic у новій вкладці ↗",
-  "layers.earth.stream.label": "Трансляція"
+  "layers.stream.label": "Трансляція"
 }

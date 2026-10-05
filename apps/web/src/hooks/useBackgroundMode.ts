@@ -2,15 +2,20 @@ import { useLocation } from 'react-router'
 import { normalizePlate, regionName } from '@carplates/shared'
 
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
-import { isResultPath, mapViewFor, type BackgroundMode, type MapView } from '@/lib/live-background'
+import { usePoorConnection } from '@/hooks/usePoorConnection'
+import { isResultPath, isStreamMode, mapViewFor, type BackgroundMode, type MapView } from '@/lib/live-background'
 import { useLiveBackgroundStore } from '@/store/live-background-store'
 
-/** Live modes need the network and a plate/VIN result on screen — otherwise it resolves to the photos. */
+/**
+ * Live modes need the network — offline it resolves to the photos. The YouTube stream layers also fall back to the
+ * photos on a poor connection and start by themselves once it improves (the picked mode is kept).
+ */
 export function useBackgroundMode(): BackgroundMode {
   const online = useOnlineStatus()
+  const poor = usePoorConnection()
   const mode = useLiveBackgroundStore(s => s.mode)
-  const { pathname } = useLocation()
-  return online && isResultPath(pathname) ? mode : 'images'
+  if (!online || (poor && isStreamMode(mode))) return 'images'
+  return mode
 }
 
 function regionFromSegment(raw: string): string | undefined {
@@ -21,8 +26,8 @@ function regionFromSegment(raw: string): string | undefined {
   }
 }
 
-/** Map view for the plate on screen: its region's capital, else the whole of Ukraine. */
+/** Map view for the page on screen: the plate's region capital on a result page, else the whole of Ukraine. */
 export function useLiveMapView(): MapView {
   const { pathname } = useLocation()
-  return mapViewFor(regionFromSegment(pathname.split('/')[1] ?? ''))
+  return mapViewFor(isResultPath(pathname) ? regionFromSegment(pathname.split('/')[1] ?? '') : undefined)
 }

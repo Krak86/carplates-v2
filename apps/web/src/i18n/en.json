@@ -961,8 +961,13 @@
   "layers.images.text": "Default car photo backdrop",
   "layers.earth.title": "Earth from space",
   "layers.earth.text": "Live ISS stream (low quality)",
+  "layers.traffic.title": "Traffic",
+  "layers.traffic.text": "Live road traffic cameras from around the world",
+  "layers.city.title": "City",
+  "layers.city.text": "Live city street view",
+  "layers.poorConnection": "Poor connection — live video is off and starts automatically when it improves.",
   "layers.map.title": "Map",
   "layers.map.text": "Map of the plate’s region capital",
   "layers.map.travic": "Moving vehicles: open Travic in a new tab ↗",
-  "layers.earth.stream.label": "Stream"
+  "layers.stream.label": "Stream"
 }

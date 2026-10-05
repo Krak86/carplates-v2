@@ -1,21 +1,24 @@
 import { create } from 'zustand'
 
-import { DEFAULT_EARTH_STREAM, type BackgroundMode } from '@/lib/live-background'
+import { DEFAULT_STREAMS, mapViewFor, type BackgroundMode, type MapView, type StreamMode } from '@/lib/live-background'
 
 type LiveBackgroundStore = {
-  /** Session-only on purpose: a live stream/map costs data, so a reload returns to the photos. */
+  /** Session-only on purpose: a live stream/map costs data, so a reload returns to the photos. Routing never changes it. */
   mode: BackgroundMode
-  /** YouTube video id of the Earth stream picked in the layers panel. */
-  earthStream: string
+  /** YouTube video id picked in the layers panel, per stream layer. */
+  streams: Record<StreamMode, string>
+  /** Where the map layer points — captured when the user picks the map, so navigating doesn't move it. */
+  mapView: MapView
   setMode: (mode: BackgroundMode) => void
-  setEarthStream: (id: string) => void
-  reset: () => void
+  setStream: (mode: StreamMode, id: string) => void
+  setMapView: (view: MapView) => void
 }
 
 export const useLiveBackgroundStore = create<LiveBackgroundStore>()(set => ({
   mode: 'images',
-  earthStream: DEFAULT_EARTH_STREAM,
+  streams: { ...DEFAULT_STREAMS },
+  mapView: mapViewFor(undefined),
   setMode: (mode): void => set({ mode }),
-  setEarthStream: (earthStream): void => set({ earthStream }),
-  reset: (): void => set({ mode: 'images', earthStream: DEFAULT_EARTH_STREAM })
+  setStream: (mode, id): void => set(s => ({ streams: { ...s.streams, [mode]: id } })),
+  setMapView: (mapView): void => set({ mapView })
 }))

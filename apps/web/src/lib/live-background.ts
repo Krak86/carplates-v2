@@ -1,6 +1,6 @@
 import { REGION_CENTERS } from '@/lib/region-centers'
 
-export const BACKGROUND_MODES = ['images', 'map', 'earth'] as const
+export const BACKGROUND_MODES = ['images', 'map', 'earth', 'traffic', 'city'] as const
 export type BackgroundMode = (typeof BACKGROUND_MODES)[number]
 
 export type MapView = { lat: number; lon: number; zoom: number }
@@ -37,21 +37,48 @@ export function isResultPath(pathname: string): boolean {
   return segments.length === 1 && !APP_PAGES.has(segments[0]!)
 }
 
-export type EarthStream = { id: string; label: string }
+/** Layers that play a YouTube live stream picked from a selector (the rest are photos / the map). */
+export const STREAM_MODES = ['earth', 'traffic', 'city'] as const
+export type StreamMode = (typeof STREAM_MODES)[number]
 
-/** YouTube live streams offered by the Earth layer — add an entry to extend the selector. */
-export const EARTH_STREAMS: readonly EarthStream[] = [
-  { id: 'M3HKLzjvKPc', label: 'NASA · ISS live video' },
-  { id: 'awQzjn72bI0', label: 'NASA · ISS live HD' }
-]
+export function isStreamMode(mode: BackgroundMode): mode is StreamMode {
+  return (STREAM_MODES as readonly string[]).includes(mode)
+}
 
-/** Explicit, not `EARTH_STREAMS[0]` — list order is presentation, the default is semantics. */
-export const DEFAULT_EARTH_STREAM = 'M3HKLzjvKPc'
+export type LiveStream = { id: string; label: string }
+
+/** YouTube live streams offered by each stream layer — add an entry to extend its selector. */
+export const LIVE_STREAMS: Readonly<Record<StreamMode, readonly LiveStream[]>> = {
+  earth: [
+    { id: 'M3HKLzjvKPc', label: 'NASA · ISS live video' },
+    { id: 'awQzjn72bI0', label: 'NASA · ISS live HD' }
+  ],
+  traffic: [
+    { id: 'ZMcmtGYYg5E', label: 'Brazil · traffic 1' },
+    { id: 'wMLsmSVkJwE', label: 'Brazil · traffic 2' },
+    { id: 'nEN03dHPVsI', label: 'Brazil · traffic 3' },
+    { id: 'z545k7Tcb5o', label: 'France · traffic' },
+    { id: 'pmM2CeSAx0I', label: 'Taiwan · traffic' },
+    { id: 'yn_8QwCWsyI', label: 'Taiwan · traffic cams' },
+    { id: 'xrYXDI5uAoA', label: 'Spain · traffic cams' },
+    { id: 'z-J2i32DUOE', label: 'USA · traffic cams 1' },
+    { id: 'uCbwWg_hr0A', label: 'USA · traffic cams 2' },
+    { id: 'sTF-6_xinUU', label: 'USA · traffic cams 3' }
+  ],
+  city: [{ id: 'z_fY1pj1VBw', label: 'Taiwan · city' }]
+}
+
+/** Explicit, not `LIVE_STREAMS[mode][0]` — list order is presentation, the default is semantics. */
+export const DEFAULT_STREAMS: Readonly<Record<StreamMode, string>> = {
+  earth: 'M3HKLzjvKPc',
+  traffic: 'ZMcmtGYYg5E',
+  city: 'z_fY1pj1VBw'
+}
 
 /** The stream is rendered at this tiny size and scaled up to cover the viewport: YouTube picks the quality from the player size, so this keeps bandwidth low. */
-export const EARTH_PLAYER_SIZE = { width: 480, height: 270 } as const
+export const STREAM_PLAYER_SIZE = { width: 480, height: 270 } as const
 
-export function earthEmbedUrl(videoId: string): string {
+export function streamEmbedUrl(videoId: string): string {
   return (
     `https://www.youtube-nocookie.com/embed/${videoId}` +
     '?autoplay=1&mute=1&controls=0&disablekb=1&playsinline=1&rel=0&modestbranding=1'

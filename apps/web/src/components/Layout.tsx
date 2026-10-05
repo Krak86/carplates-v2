@@ -14,7 +14,6 @@ import { useHeaderVehicleLabel } from '@/components/use-header-vehicle-label'
 import { useBackgroundMode } from '@/hooks/useBackgroundMode'
 import { cn } from '@/lib/cn'
 import { setTransitionDirection } from '@/lib/view-transition'
-import { useLiveBackgroundStore } from '@/store/live-background-store'
 import { useUiStore } from '@/store/ui-store'
 
 const loadSidebar = () => import('@/components/Sidebar')
@@ -49,8 +48,6 @@ export default function Layout({ children }: Props): ReactNode {
   // Following a plate/VIN link otherwise keeps the old scroll offset — land on the new result's top.
   useEffect(() => {
     window.scrollTo({ top: 0 })
-    // A live background belongs to the result it was picked on.
-    useLiveBackgroundStore.getState().reset()
   }, [pathname])
 
   useEffect(() => {

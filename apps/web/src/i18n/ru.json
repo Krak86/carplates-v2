@@ -977,8 +977,13 @@
   "layers.images.text": "Стандартный фон с фото авто",
   "layers.earth.title": "Земля из космоса",
   "layers.earth.text": "Прямая трансляция с МКС (низкое качество)",
+  "layers.traffic.title": "Трафик",
+  "layers.traffic.text": "Прямые камеры дорожного движения со всего мира",
+  "layers.city.title": "Город",
+  "layers.city.text": "Прямая трансляция с улиц города",
+  "layers.poorConnection": "Слабое соединение — видео отключено и запустится автоматически, когда связь улучшится.",
   "layers.map.title": "Карта",
   "layers.map.text": "Карта центра области номера",
   "layers.map.travic": "Движение транспорта: открыть Travic в новой вкладке ↗",
-  "layers.earth.stream.label": "Трансляция"
+  "layers.stream.label": "Трансляция"
 }

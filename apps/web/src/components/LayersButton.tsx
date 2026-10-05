@@ -1,11 +1,8 @@
-import { Suspense, lazy, useState } from 'react'
+import { Suspense, lazy, useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { useLocation } from 'react-router'
-
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
-import { isResultPath } from '@/lib/live-background'
 
 const loadPanel = () => import('@/components/LayersPanel')
 const LayersPanel = lazy(loadPanel)
@@ -14,32 +11,39 @@ const LayersPanel = lazy(loadPanel)
 export default function LayersButton(): ReactNode {
   const { t } = useTranslation()
   const online = useOnlineStatus()
-  const [hovered, setHovered] = useState(false)
-  const [pinned, setPinned] = useState(false)
-  const open = hovered || pinned
+  const [open, setOpen] = useState(false)
+  const rootRef = useRef<HTMLDivElement>(null)
 
-  const { pathname } = useLocation()
+  // Opened by click only; a press outside the button/panel (or Escape) closes it.
+  useEffect(() => {
+    if (!open) return
+    const handlePointerDown = (e: PointerEvent): void => {
+      if (!rootRef.current?.contains(e.target as Node)) setOpen(false)
+    }
+    const handleKeyDown = (e: KeyboardEvent): void => {
+      if (e.key === 'Escape') setOpen(false)
+    }
+    document.addEventListener('pointerdown', handlePointerDown)
+    document.addEventListener('keydown', handleKeyDown)
+    return (): void => {
+      document.removeEventListener('pointerdown', handlePointerDown)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [open])
 
-  if (!online || !isResultPath(pathname)) return null
+  if (!online) return null
 
   return (
-    <div
-      className="relative ml-auto shrink-0"
-      onPointerEnter={e => {
-        if (e.pointerType !== 'mouse') return
-        void loadPanel()
-        setHovered(true)
-      }}
-      onPointerLeave={() => setHovered(false)}
-    >
+    <div ref={rootRef} className="relative ml-auto shrink-0">
       <button
         type="button"
         aria-label={t('layers.button')}
         aria-expanded={open}
         title={t('layers.button')}
+        onPointerEnter={() => void loadPanel()}
         onClick={() => {
           void loadPanel()
-          setPinned(p => !p)
+          setOpen(o => !o)
         }}
         className="flex h-10 w-10 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] shadow hover:bg-[var(--color-surface)]"
       >
