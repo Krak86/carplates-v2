@@ -442,7 +442,14 @@ not_found; no 429s). The lead-image fallback now also tries the brand's home-cou
 with a photo, 298 not_found** (mostly VAZ/UAZ numeric codes, Chinese codes, spellings like "bmw 118 i" — no article
 exists under that name). Table: 26,703 rows (14,281 ok / 12,422 not_found). Coverage: **59.4% of all registered cars have
 a photo** (64.6% in the ≥1000 tier; the 100-999 and <100 tiers are not processed yet). Seed CSV re-exported
-(`scripts/seed-data/wiki-images.csv.gz`, 652 KB). **Next: steps 5-6 (optional).** The "stages" 1-3 (title search →
+(`scripts/seed-data/wiki-images.csv.gz`, 652 KB). **Step 5 done (2026-10-05, ≥100-car tier, `--rps 2`, ~2 h, no
+429s):** 2,616 more models → 1,739 with a photo / 876 not_found / 1 failed (a VAZ-like "уаз 3741" search timeout; the
+`--retry-failed` replay resolved it as not_found). Running totals over both tiers (4,007 models): **2,832 with a photo /
+1,175 not_found / 0 failed** (before step 5: 1,093 / 298 / 0 over 1,391). Table: 58,023 rows (25,851 ok / 32,172
+not_found); CSV re-exported (1.2 MB). Coverage by registered cars: ≥1000 tier 64.6% photo; 100-999 tier 44.2% photo
+(11.4% not_found, 44.5% still shown as "not processed" — unexplained after a full ≥100 run; check the coverage
+script's grouping before step 6); <100 tier 0%; **ALL 62.3% of cars have a photo**
+(was 59.4%). **Next: step 6 (optional, asks first).** The "stages" 1-3 (title search →
 batched imageinfo → lead fallback over several languages) happen _inside every run_, per chunk of 20 models; they are not
 separate runs. Ideas not done: search by normalized name for odd spellings ("118 i" → "118i"); non-Latin article titles
 (zh/ja/ko) are mostly rejected by the "title mentions the model" guard.
