@@ -85,22 +85,9 @@ using an API isn't a viable substitute (ToS risk, fragile against markup
 changes, no stable auth story). Revisit only if a free/affordable token
 becomes available.
 
-### Plate image recognition (camera/upload) ✅ DONE (2026-09-22)
+### Plate image recognition (camera/upload) ✅ DONE (2026-09-22) — archived
 
-v1 idea (camera/upload → platerecognizer.com via a proxy) implemented for
-real, ahead of Phases 2/3: `apps/api/src/recognize/` — `POST
-/api/recognize/plate/cloud` proxies Plate Recognizer's Snapshot API
-(`guides.platerecognizer.com/docs/snapshot/getting-started`) via
-`@fastify/multipart`, gated by `plateRecognizerCloudEnabled(env)` (inert
-without `PLATE_RECOGNIZER_CLOUD_TOKEN`) and a per-process monthly request
-budget (`PLATE_RECOGNIZER_MONTHLY_BUDGET`, resets on the 1st — revisit with
-Redis/DB persistence once there's more than one API process). Web:
-`CameraCaptureDialog` + `CameraSearchButton` + `PhotoSearchButton`
-(`SearchField.tsx`), client-side image shrink (`lib/image.ts`) before upload,
-`use-plate-recognition.ts` navigates to the top candidate's plate result on
-success. **On-premise SDK ruled out** — same per-lookup licensing as the
-cloud API (no cost win) for photos we're already comfortable sending to
-Plate Recognizer's cloud; not pursuing it.
+Write-up moved to `docs/plan-done.md` ("Plate image recognition … Plate Recognizer cloud"). On-premise SDK ruled out (same per-lookup licensing).
 
 **Mobile follow-ups (2026-10-01; shipped work in `docs/plan-done.md`, "Mobile UX pass").** A web
 page only gets the one stream the browser exposes, so far-away plates on phones are limited by that
@@ -140,99 +127,8 @@ not a parallel feature, hence the step order below.
   and not WebXR (a plate is a flat 2D marker in the frame, not a 3D-anchored
   object — no depth/pose tracking needed).
 
-**Models — researched and verified 2026-09-27 by actually building and
-running the container, not assumed from memory.**
-[ankandrew/fast-alpr](https://github.com/ankandrew/fast-alpr) (MIT) wraps
-[open-image-models](https://github.com/ankandrew/open-image-models) (detector
-`yolo-v9-t-384-license-plate-end2end`, MIT) and
-[fast-plate-ocr](https://github.com/ankandrew/fast-plate-ocr) (OCR
-`cct-xs-v2-global-model`, MIT) — all ONNX Runtime, CPU-only (matches the
-Phase 4 VPS's no-GPU sizing, see its "VPS sizing" table). An initial
-Ultralytics/AGPL licensing worry (network-copyleft on a self-hosted service)
-turned out **moot** — nothing in this chain touches Ultralytics code, it's a
-clean MIT stack end to end. Ukraine's plate format (2 letters + 4 digits + 2
-letters, only 12 fixed Latin-lookalike letters — `packages/shared/src/plate.ts`)
-needs **no Cyrillic OCR and no custom training** for a first cut — a generic
-global OCR model reads plain Latin/Roman characters directly into the
-existing `repairOcrPlate`/`normalizePlate` pipeline unchanged. **Not yet
-verified:** real-world accuracy against actual Ukrainian plate photos — only
-tested so far against fast-alpr's own bundled sample image (US-style plate).
-Do that before trusting accuracy, and before investing in steps 2-4.
-
-**Step 1 — own-model OCR service, single-shot ✅ DONE (2026-09-27).** Ships
-as an automatically-preferred alternative to the Plate Recognizer cloud call,
-inside the _existing_ camera/upload flow — validates the model with zero AR
-complexity in the same change.
-
-- `services/alpr/` (new top-level dir, deliberately **outside** the pnpm
-  workspace — it's Python, not in `pnpm-workspace.yaml`'s globs): `app.py`
-  (FastAPI, `POST /recognize` + `GET /healthz`), `requirements.txt`
-  (`fast-alpr[onnx]` — `[onnx]` is the CPU extra; `onnx-gpu`/`onnx-openvino`/
-  `onnx-directml`/`onnx-qnn` exist if a future deploy target has different
-  hardware), `warmup.py` (run once at Docker build time so the ~11 MB of ONNX
-  weights bake into the image layer — the running container needs **no
-  runtime network access**, matching the "always free, no external
-  dependency" goal), `Dockerfile` (`python:3.12-slim` + `libgl1`/
-  `libglib2.0-0`, which headless OpenCV needs even for CPU-only inference).
-- `infra/docker-compose.alpr.yml` — a separate compose file from
-  `docker-compose.yml` (Postgres only), so a dev who just wants the DB isn't
-  forced to build the ML image. New root `package.json` scripts:
-  `alpr:build` / `alpr:up` / `alpr:down`.
-- `apps/api/src/recognize/local-recognize.service.ts` — same contract as
-  `cloud-recognize.service.ts` (`recognize(image) => PlateRecognizeResponse`),
-  POSTs to `${ALPR_LOCAL_URL}/recognize`, reuses `mapPlateReaderResults`
-  unchanged — the Python service's `{results:[{plate,score}]}` response
-  shape was deliberately built to match `PlateReaderResponse` exactly, so no
-  mapping code needed duplicating. New `POST /api/recognize/plate/local`
-  route on the existing `RecognizeController`, throttled looser than cloud
-  (30/60s vs. 6/60s — no per-call cost to protect against here). New
-  `ALPR_LOCAL_URL` in `env.ts` (optional; unset → 503, same
-  inert-unless-configured pattern as `PLATE_RECOGNIZER_CLOUD_TOKEN`/
-  `PIXABAY_API_KEY`). **Not added to `apps/api/.env.example`** — that file is
-  in Claude's deny-list (unreadable/uneditable this session); add
-  `ALPR_LOCAL_URL=http://localhost:8088` there by hand.
-- Web: `recognizePlate()` (`apps/web/src/lib/api.ts`) calls only
-  `/api/recognize/plate/local`. **Cloud fallback removed (2026-09-30)** — it
-  originally fell back to `/cloud` on a 503/network error; now a down
-  container just fails the call. The `/cloud` API route is kept but unused by
-  the web app. No other web changes — `CameraCaptureDialog.tsx`/
-  `use-plate-recognition.ts` are untouched.
-- **Verified end-to-end 2026-09-27, for real, not just unit tests:**
-  `pnpm alpr:build` was actually run — build log confirms real ONNX weights
-  downloaded (`yolo-v9-t-384-license-plate-end2end`,
-  `cct-xs-v2-global-model`), not placeholders. The built container was
-  started (`pnpm alpr:up`) and hit directly with fast-alpr's own bundled
-  sample plate image: `GET /healthz` → `200 {"status":"ok"}`,
-  `POST /recognize` → `200 {"results":[{"plate":"5AU5341","score":0.999...}]}`
-  — a correct detect+read. `local-recognize.service.test.ts` +
-  `local-recognize.service.disabled.test.ts` (mocked fetch, mirroring the
-  existing cloud test pair exactly) plus `pnpm type-check`/`pnpm lint` on
-  every touched package all pass. **Not exercised:** a full running
-  `apps/api` process calling the live container over HTTP end-to-end — the
-  unit tests (NestJS-side mapping/error-handling) and the direct container
-  test above (Python-side detection/OCR) already cover both halves of the
-  chain independently, so this was judged sufficient for step 1; still worth
-  doing once picking up step 2 or 3 for real confidence.
-
-**Tiled detection (2026-09-30).** The 384px detector missed small plates in
-wide photos (two plates ≈3.5% of frame width → ~13px after letterbox; only one
-was read). `services/alpr/app.py` now runs the full frame plus overlapping
-fixed-size 640px tiles (25% overlap, capped at 24 tiles by growing the tile;
-frames ≥768px only) and merges duplicate boxes by overlap, keeping the most
-confident detection. A first fraction-based 2×2 grid was too weak for plates
-~1.5% of frame width (parking-lot photos). Web upload cap raised
-1600→3200px / 0.9→2.5 MB (`lib/image.ts`; API limit is 4 MB) so tiles keep
-real pixels. Exercised against the rebuilt container on the 88-photo eval set
-(2026-10-01); `DSC_0098.JPG` still reads both plates.
-
-**Photo viewer + limits hint (2026-09-30).** Uploaded-photo preview is now
-`object-contain` (whole image, not a cropped strip) and opens a full-screen
-`PhotoZoomDialog` (wheel zoom toward cursor, drag/arrow pan, `+`/`−`/`0`,
-double-click, Esc; no pinch gesture yet). `SearchField` shows a
-`recognize.photoTips` line (formats, the `MAX_DIMENSION` downscale, what
-tends to be missed) and a 413 error key. Plate boxes are drawn on the
-thumbnail and viewer (`PhotoPlateBoxes`, hideable in the viewer). **Not yet:**
-rotating the photo, pinch-zoom on touch.
+**Models, step 1 and the tiled-detection / photo-viewer work are done** — moved to `docs/plan-done.md`
+("Own ALPR model — models, step 1 …"). Open work continues below ("Real-photo pass", hard-image TODO, steps 2-4).
 
 **Real-photo pass (2026-09-30 / 10-01) — 88 own Ukrainian photos** (kept in a
 gitignored `services/alpr/eval/images/`; `services/alpr/eval.mjs` runs them
@@ -484,18 +380,9 @@ above once scoped, or dropped if research says no.
 - ✅ **Year-aware hero image** (2026-10-02) — Wikimedia Commons search by brand/model/year, per-kind placeholder when
   no photo. Open: pick the default via `WIKI_IMAGE_SOURCE` after A/B comparing `?source=commons|wiki` on real plates.
 
-- ✅ **Background layers** (2026-10-04) — header layers button on plate/VIN result pages only (`isResultPath`), hidden
-  offline, session-only (`live-background-store`, reset on every route change). Modes: photos (default) · Google Maps
-  embed centred on the plate region's capital (`REGION_CENTERS`, zoom 13; whole-Ukraine view when no region) · NASA ISS
-  YouTube live streams (`EARTH_STREAMS`, 480×270 player scaled up = low quality, mini selector). Lazy-loaded
-  (`LiveBackground`, `LayersPanel`). Advanced search also embeds an OSM view of the chosen region (`RegionMap`).
-  Researched dead ends: **live traffic** — Google/Waze switched it off in Ukraine (Waze works abroad, e.g. Warsaw, but
-  only congestion + reports, nothing moves); **moving vehicles** — travic.app, eway, lad.lviv.ua send
-  `X-Frame-Options` (not embeddable), city.dozor.tech is empty until a route is picked, citybus.in.ua is an app
-  landing page. Open: (a) Lviv publishes free GTFS-Realtime vehicle positions
-  (`track.ua-gis.com/gtfs/lviv/vehicle_position`, ~11 s; licence unchecked) — an API proxy + lazy Leaflet map would
-  give real moving public transport for Львів only; (b) YouTube streams can be retired or embed-blocked — swap ids in
-  `EARTH_STREAMS`.
+- ✅ **Background layers** (2026-10-04) — built, see `docs/plan-done.md`. Open: (a) Lviv publishes free GTFS-Realtime vehicle positions
+  (`track.ua-gis.com/gtfs/lviv/vehicle_position`, ~11 s; licence unchecked) — an API proxy + lazy Leaflet map would give real moving public
+  transport for Львів only; (b) YouTube ISS streams can be retired or embed-blocked — swap ids in `EARTH_STREAMS`.
 
 ### Wanted vehicles ingest — planned (2026-10-01), not started
 
@@ -651,31 +538,44 @@ Try only if stage 3 turns out to be the slow part.
 3. Pre-warm script, `--retry-failed`, CSV export/import, coverage report, CLAUDE.md command list.
 4. Run the start tier in the background, review coverage, then decide on the 100+ tier and the per-model trial.
 
-### Car reviews (text) then YouTube — planned (2026-10-03), step 0 shipped
+### Car reviews, videos, 3D & 360° — mostly shipped (2026-10-03 → 05); open items below
 
-**Pick-up point for the next session — start the full infocar video crawl.** Steps 1 and 2 are built and
-working on test data (6 brands × 2 pages, 119 videos in the local DB): catalog, video ingest, `videos[]` on
-`/api/reviews`, generation-aware year filter, collapsible "Video reviews" section with ❓ info and a modal player.
-Uncommitted — check `git status`. **Do next, in this order:**
+**Shipped** (details, findings and measurements in `docs/plan-done.md`, "Car reviews, videos, owner stories, press, 3D & 360°"):
+infocar catalog + owner reviews, infocar videos (3,739), e-drive owner posts (62.6k), TopGear UK (1,032), itc.ua/mezha.ua test drives
+(~310), Sketchfab 3D (7.8k) and CarShow360 360° (1,393) — all as committed CSV seeds loaded by `pnpm ingest:ratings:csv`.
 
-1. `pnpm db:up && pnpm db:migrate` (0023, 0024 — already applied locally), then `pnpm ingest:infocar:videos` — all
-   brands, every listing page. infocar has ~15,800 videos site-wide (`/video/all/` = 1,576 pages × 10, measured
-   2026-10-03; only brand-tagged car videos are kept), one request per listing page + per video at 1 req/s → expect a
-   few hours cold; HTML is cached in `scripts/.data/infocar/`, so an interrupted run resumes without re-fetching
-   (re-run the same command). Trial first with `-- --brand toyota` if wanted; run it in the background and watch the
-   `[n/153] brand: N video(s)` log lines.
-2. `pnpm export:infocar:videos:csv` → commits `scripts/seed-data/infocar-videos.csv.gz`; add
-   `pnpm ingest:infocar:videos:csv` to `ingest:ratings:csv` (root `package.json`, like `ingest:infocar:csv`) and to the
-   CLAUDE.md command list.
-3. Measure (Step 2 item 5): videos per brand, % with a model slug / generation id, % whose generation is in the catalog
-   (the year filter only works for those; the rest use the title year), and what the lookup returns for the top
-   registry (brand, model) pairs. Then check in a browser: КА4845ІО (Toyota RAV4 2017) should show only 2015-2018
-   generation videos; a Skoda Superb / Kia Sportage plate should show videos.
-4. Optional: YouTube Data API enrichment (view counts, videos not on `/video/`; `GOOGLE_API_KEY` is in
-   `apps/api/.env`, untested) — not needed for matching. Other text sources (avtoporadnyk, driver.top, nv.ua) and
-   Step 3 (moto) come after.
-5. **Also run the full e-drive owner-posts ingest (`pnpm ingest:edrive`, ~2.5–4 h) — see Step 2b below.** The two
-   crawls hit different hosts, so they can run concurrently.
+**Open checks (nothing blocks them; do in a browser / with the registry query):**
+
+- Browser pass over the whole reviews toggle: ВС6743РН (Kia Ceed 2012) and ВС4170МІ (BMW 328, 2013) for infocar; КА4845ІО (RAV4 2017)
+  should show only 2015-2018 videos; Kia Sportage / BMW X5 / Mercedes for TopGear; ITC/Mezha row layout, logos, UA/RU/EN chips;
+  a Kia Ceed II plate shows only 2012-2017 e-drive posts; the 360° modal (galleries without an interior view are untested).
+- Measure and record: e-drive posts per brand and share of registry (brand, model) pairs with ≥1 post; TopGear coverage vs. infocar
+  (expect lower: UK catalog); press/360° hit rates over the top 400 pairs. infocar match rate was measured 2026-10-03 (brand-page-only
+  fallbacks 856k → 441k of ~12.2M rows over the top 800 pairs; remaining misses are mostly outside the catalog — per-model aliases are the next lever).
+- carshow360: robots allow it but the origin is slow/flaky and ToS for embedding is unchecked — consider asking permission; `--enrich` not run.
+- Small additions not done: AutoTrader UK search link (link only; the site is behind a Cloudflare challenge — never fetch it); an optional
+  "search YouTube for this car" link in the Video reviews section (requested 2026-10-05, scope unconfirmed); YouTube Data API enrichment of
+  the infocar videos (views, videos not on `/video/`; `GOOGLE_API_KEY` is in `apps/api/.env`, untested).
+- Periodic refresh = re-run the ingest and re-export the CSV (new e-drive/TopGear items are rare; a `--since` shortcut could page only to the first known item).
+
+**Further text sources (not started).** Checked 2026-10-02/03 (robots.txt + one page each):
+
+| Source                                 | Lang                     | Access                                                                                                                                                                             | Role                                                       |
+| -------------------------------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| infocar.ua `/test-drive/`, `/reviews/` | uk                       | open; no `/*?`, `/forum/`, `/search.html`; no sitemap → crawl brand pages. URL has brand/model                                                                                     | primary editorial                                          |
+| avtoporadnyk.com.ua                    | uk                       | open, sitemap, model-tagged                                                                                                                                                        | editorial                                                  |
+| auto-blog.com.ua                       | uk/ru                    | open, WP REST `/wp-json/wp/v2/posts`; filter to "огляди" category                                                                                                                  | editorial (low yield)                                      |
+| nv.ua test-drive                       | uk                       | robots OK + sitemaps, but fetch got 403                                                                                                                                            | optional, skip if bot-walled                               |
+| driver.top                             | uk                       | robots fully open, sitemap. **UGC social network** (`/car/ID`, `/exp/ID` posts, car profiles with engine/gearbox) — owner posts, not editorial reviews; some features premium-only | owner experience; check what `/exp/` really contains first |
+| drive2.ru                              | **ru** (tag `lang='ru'`) | **robots.txt blocks every bot except Google/Bing/Yandex/Twitter/DDG/archive, incl. ClaudeBot/GPTBot; catch-all disallow**                                                          | **gated — see below**                                      |
+| autoarmor.com.ua                       | —                        | shop reviews, not cars                                                                                                                                                             | dropped                                                    |
+
+**drive2 gate (decision needed):** the owner logbooks are the best owner content,
+but the site explicitly disallows our crawler; scraping it would go against its
+rules and we won't evade them (UA spoofing, proxies). Options, in order:
+(1) **link-only**: curated `drive2.ru/cars/<brand>/<model>/` URL per make/model,
+tagged RU, no fetching — zero risk, ships in MVP; (2) ask drive2 for written
+permission / an API or partnership, then add an adapter; (3) never: bypass.
 
 **Step 2a — infocar video crawl: done 2026-10-04; models with no video → YouTube fallback (to do).** Full crawl:
 153 brands, 3,739 videos (`registry.car_videos`, committed as `scripts/seed-data/infocar-videos.csv.gz`, loaded by
@@ -782,107 +682,6 @@ and the CSV is committed.
 8. **Verify** (the "Done when" checks) and measure again: share of the top-400 pairs with ≥1 video (was 74.1% of
    registrations), share of lookups with a year-matched video.
 
-**Step 2b — e-drive owner posts (e-drive.com.ua): built 2026-10-03; full crawl not run yet.** A car-owner social
-network (user logbook posts: repairs, service, accessories — not editorial reviews), shown as the "e-drive.com.ua"
-subsection of the text reviews toggle (`ReviewLinks`: infocar.ua = test drives + owner reviews, e-drive.com.ua = owner
-stories, other sites = search links; each list shows 5, then "Show N more"). Videos have their own sibling toggle
-(`VideoReviews`, 🎬, ❓ + share `?section=videos`), split out 2026-10-04. Links + facts only
-(title, category, cover URL, date) in `registry.owner_posts` (migration 0025); lookup = `ownerPostLookup` in
-`packages/shared` (infocar's model-slug candidates; only the car's generation year range; newest first, max 30).
-**Pick-up point — run the full ingest:**
-
-1. `pnpm db:up && pnpm db:migrate` (0025), then `pnpm ingest:edrive` — every make/model/generation, in the background
-   (`[n/149] make: N post(s)` log lines). Estimate **~2.5–4 h cold** at the polite 1 req/s: measured Kia = 1,054
-   posts in 4 min 13 s (~250 requests; Kia is a bigger-than-average make, estimate from 5 sampled makes). The site's
-   own JSON API (`api.e-drive.com.ua/v1`: `cars/makes`, `cars/models?makeId=`, `cars/generations?modelId=`,
-   `request/search?filter=posts&makeId=&modelId=&generationId=&lastId=<last createdAt>`; page size fixed at 10, `limit`
-   ignored; robots.txt allows all). A make, then a model, with no posts is skipped before its generations are listed
-   (most of the catalog) and a short page ends paging. Nothing is cached on disk, so a re-run costs the same; upserts by
-   post id make it idempotent and interruption-safe. Optional first pass: `-- --brand toyota` / the top registry brands
-   (~under 1 h) — `--model`, `--limit`, `--max-pages`, `--dry-run` also exist.
-2. Add a gz CSV seed like the other tables (`--export-csv`/`--from-csv` are **not built yet**; copy
-   `infocar-videos.ts`), then `ingest:edrive:csv` into `ingest:ratings:csv` and the CLAUDE.md list.
-3. Measure: posts per brand, share of registry (brand, model) pairs with ≥1 post, and check in a browser (e.g. a Kia
-   Ceed II plate shows only 2012-2017 posts). Makes whose name has no brand slug of ours are skipped — list them from
-   the log and extend the brand table if common.
-4. Known limits: e-drive gives only a generation's **start year** (end = next generation's start − 1, last one open);
-   the API exposes no per-post car/generation, so the crawl goes per generation; posts are owner anecdotes (some
-   about the make generally) — label them as such, never as reviews. Periodic refresh = re-run (new posts only matter
-   for recent generations; a `--since` shortcut could page only until the first already-known `createdAt`).
-5. Logos in `public/icons/` (`edrive.png`, new `infocar.png`) shown by `SourceGroup`.
-
-**Step 2c — TopGear UK editorial reviews (topgear.com/car-reviews): planned 2026-10-03, built 2026-10-05 (steps 1–7 done; text-only, no video; step 8 measure + browser check still open).** Shipped: `scripts/src/topgear*.ts`, migration `0027_topgear_reviews.sql`, `topgearLookup` (shared), `topgear[]` on `/api/reviews`, `TopgearReviews` UI group after e-drive, committed `seed-data/topgear-reviews.csv.gz`. Measured on the real run: sitemap yields **1,073 model pages / 111 makes** after dropping `first-drive-N`/`report-N` article series (not 1,607); 1,032 reviews, 1,016 scored; 731 matched a catalog brand before `MAKE_ALIASES` (mercedes-benz, mg-motor-uk, vauxhall, gwm), the remaining unmatched makes are absent from infocar. topgear.com's CDN 403s the `(+https://carsua.app)` UA suffix — the fetcher sends plain `carsua.app-ingest/1.0`. Original plan below. English-language
-
-**Step 2d — Ukrainian tech-press test drives (itc.ua, mezha.ua): researched + built 2026-10-05.** Shipped: `scripts/src/press*.ts`, migration `0029_press_reviews.sql`, `pressLookup` (shared), `press[]` on `/api/reviews`, `PressReviews` UI groups (ITC.ua, Mezha) right after infocar, committed `seed-data/press-reviews.csv.gz`. Findings: neither site has a structured make/model, so the **brand is found in the titles/tags** (`findBrandSlug` against the infocar catalog's brand slugs) and the **model is matched at lookup** (infocar's model-slug candidates must spell a run of ≤4 title/tag tokens, `CR-V` = `crv`; 1–2 character models must follow the brand). No year field: `year_hint` = a model year named in a title, else the publication year; articles >10 years from the car's year are dropped, the rest ranked by distance. Seeds are the Ukrainian "test drive" tag listings (itc `/ua/tag/test-drayv-ua/page/N/`, 50 cards/page incl. sidebars → only `tag-test-drayv-ua` cards counted; mezha `/tag/test-drayv/?page=N`, 20/page, articles under both `/articles/` and `/reviews/`), paged until a page adds nothing. Each article's hreflang alternates give the other editions (itc uk+ru, mezha uk+en), fetched too and stored in a `langs` jsonb. robots.txt: itc disallows `*/?page*` (we use `/page/N/`, allowed), mezha allows all of this. Not crawled: the broader `/ua/avto-ua/` and `/tag/avto/` feeds (news, not reviews) and ru-only itc articles without a Ukrainian edition. Facts + links only — article text is never stored. UI polish shipped with it: every review source (infocar, ITC.ua, Mezha, e-drive, TopGear) renders as the same hover row (highlight, underlined label, trailing ↗), and infocar links gained a fixed one-line description (version / model / brand / year-filter; infocar only yields links, years and counts, so no scraped text). Unverified in a browser at the time of writing — still to check: row layout, logos, UA/RU/EN chips.
-verdict + score per model, shown as a "TopGear (EN)" subsection of `ReviewLinks` next to infocar/e-drive. Links + facts
-only (title, score, date, blurb, url) — never republish review text beyond the meta description.
-**Findings (measured 2026-10-03):**
-- robots.txt allows `/car-reviews/` (disallows only `/search*`, `/tags*`, `/taxonomy*`, `/node*`, `/mantis*`,
-  `/api/search/*`). Plain HTTP + any UA gets 200, server-rendered; no JS/API reverse-engineering. 340–400 KB/page,
-  ~0.7–1.3 s each.
-- Sitemap `https://www.topgear.com/sitemap.xml?page=1..N` (Drupal simple_sitemap, ~12 pages) lists 4,141 `/car-reviews/`
-  URLs: **1,607 model pages** (`/car-reviews/<make>/<model>`, 193 makes) + variant pages (`first-drive`, `2dr`, `spec`…)
-  + the four section subpages (`/buying`, `/driving`, `/interior`, `/specs`). The **model page alone** has JSON-LD with
-  `Review` + `Rating` (`ratingValue` of `bestRating` 10 — note it is a string `"6"` on some pages, a number on others, and
-  `bestRating` too), `datePublished`, `Car`/`Brand`, plus `meta description` (blurb). Subpages add nothing we need.
-- Some model slugs carry a generation year range (`sportage-2017-2021`, `niro-2017-2022`, `e-niro-2018-2022`),
-  most don't (`ceed`, `ceed-sportswagon`, `octavia`); `-0`/`-1` suffixes are duplicate-slug generations (`sorento-0`,
-  `proceed-0`) — the `datePublished` year is the fallback generation anchor.
-- **Videos are unconfirmed.** Static HTML has no YouTube ids; the player is Brightcove (3 mentions per page), and
-  `bmw/m3` had no video markup at all. Brightcove embeds need TopGear's account/player id and may be domain-restricted.
-- **AutoTrader UK (`autotrader.co.uk/cars/reviews?make=Kia&model=Cee%27d`) is not crawlable** — every request incl.
-  `robots.txt` hits a Cloudflare managed challenge. Do **not** work around it; search link only.
-
-**Status 2026-10-05 — items 1–7 below are done** (text-only, no Brightcove video: the `video_ref` column was dropped). Differences from the
-plan as written: migration is `0027` (`0026` went to `car_models_3d`); the sitemap has **1,073 model pages / 111 makes** (`first-drive-N`,
-`report-N` and section slugs are filtered), so a cold run is ~20–25 min, not 35–55; the fetcher's UA omits the `(+https://carsua.app)`
-suffix because topgear.com's CDN 403s it; `parseRobots` now merges repeated `User-agent: *` groups (topgear.com repeats it per rule);
-TopGear makes map to infocar brand slugs via `MAKE_ALIASES` in `topgear.ts` (mercedes-benz, mg-motor-uk, vauxhall, gwm). Result: 1,032
-reviews, 1,016 scored; makes absent from infocar (Ferrari, Lotus, McLaren …) can't surface. UI: "TopGear" group + EN badge after e-drive in
-`ReviewLinks`; the About page now also lists infocar.ua, e-drive.com.ua, TopGear, Sketchfab, Google Maps and YouTube.
-**Still open:** item 8 (coverage numbers + browser check of a Kia Sportage / BMW X5 / Mercedes plate); AutoTrader UK search link (item 7, not
-added); an optional "search YouTube for this car" link in the Video reviews section (requested 2026-10-05, scope unconfirmed).
-
-**Step 2d — CarShow360 360° galleries (carshow360.net): researched + built 2026-10-05.** "🔄 360° view" chip + modal next to "🧊 3D view" on result cards. Shipped: `scripts/src/carshow360*.ts`, migration `0028_car_models_360.sql`, `model360Lookup` (shared, same infocar model-slug candidates as 3D), `/api/models360`, `Model360Button`/`Model360Modal`, committed `seed-data/carshow360-galleries.csv.gz` (1,393 galleries / 471 make/models), About-page source. Findings: robots.txt allows crawling, but uncached gallery pages are slow (~15 s) and the origin answered 500/522/524 under light load — so the base ingest reads only the gzipped sitemap (`csSitemapGalleries360_1.xml`; 8 language variants collapse onto the numeric id) and never crawls pages; the generation text ("III FL2021 Hatchback") is derived from the URL slug. Embed = `https://carshow360.net/{uk|ru|en}/{brand}/{model}/{slug}-{id}?iframe` (`interior=&` for the cabin; the slug is optional — the id alone resolves). The modal lists every gallery of the make/model as a chip (facelift year, then newest id first), opens on **Interior** by default, has an Exterior/Interior toggle and its own full-screen button; both 3D and 360° modals are `max-w-5xl` with viewport-height viewers, and both chips are disabled offline. Optional `--enrich` fetches page titles (5 s apart, exponential back-off, stops after 10 consecutive failures); every failed request is logged to `scripts/.data/carshow360/failed.json` and `--retry-failed` re-runs only those ids. **Still open:** no browser check of the modal yet (embed headers/ToS unchecked — consider asking carshow360 for permission); galleries without an interior view are untested; `--enrich` not run.
-
-**TODO (original plan, kept for reference):**
-1. **Trial (~5 min).** `scripts/src/topgear-fetch.ts` (reuse the fetch/cache/robots helpers from `infocar-fetch.ts` — 1
-   req/s, cache HTML in `scripts/.data/topgear/`, check robots first) + `scripts/src/topgear-parse.ts` (pure: JSON-LD
-   `Review`/`Rating` → `{ rating, bestRating, publishedAt, headline, blurb }`, tolerant of string/number
-   `ratingValue`/`bestRating`; Zod-validate the JSON-LD per CLAUDE_RULES). Commit 2-3 fixtures under
-   `scripts/src/fixtures/topgear/` (`kia-ceed-sportswagon.html` trimmed to the `<script type="application/ld+json">`
-   blocks + `<meta name=description>`, a year-slug model, a no-rating page) and unit-test the parser on them. Run a
-   `--brand kia --dry-run` over ~10 models. **Decision point:** inspect the Brightcove markup (`data-video-id`,
-   `data-account`, `data-player`, a `VideoObject` JSON-LD) on ~10 pages — is a per-review video id extractable and
-   embeddable cross-origin? If not, ship text-only and drop the `video_ref` column/UI (don't add a Brightcove player).
-2. **Migration `0026_topgear_reviews.sql`** + Drizzle `topgearReviews` table in `packages/db`: `url` PK, `make`,
-   `brand_slug` (our brand slug), `model_slug` (TopGear's), `title`, `rating` (numeric, nullable), `best_rating`,
-   `published_at`, `year_from`/`year_to` (nullable, from slug range), `blurb`, `video_ref` (nullable; only if step 1 says
-   yes). Index on `(brand_slug, model_slug)`.
-3. **`scripts/src/topgear.ts` + root script `pnpm ingest:topgear`** (`--brand kia`, `--limit N`, `--dry-run`, `--refresh`):
-   fetch + parse the sitemap pages → keep six-segment `/car-reviews/<make>/<model>` URLs only (drop variant + section
-   pages) → map `<make>` to our brand slug (list makes with no match from the log; extend the brand table if common) →
-   fetch each model page, upsert by `url` (idempotent, interruption-safe; HTML cache makes a re-run seconds). Log
-   `[n/1607] make/model: score`.
-4. **Full cold run — ~35–55 min** (1,607 × ~1 s fetch + 1 s polite delay, background). Then `--export-csv` →
-   `scripts/seed-data/topgear.csv.gz` (small, ~100–200 KB), `pnpm ingest:topgear:csv` + `export:topgear:csv`, add the CSV
-   load to `ingest:ratings:csv` and all three commands to the CLAUDE.md list + Layout row.
-5. **Lookup:** `topgearLookup(brand, model, year)` in `packages/shared` (candidates from `infocarLookup`'s model-slug
-   logic + TopGear variant slugs like `ceed-sportswagon`, `-0`/`-1` suffixes; year range from slug when present, else
-   `published_at` year within the car's generation; newest first; max ~5; Zod schema for the response). Unit tests for the
-   Kia Ceed / Sportage / Niro slug cases above. Changing the schema discards users' offline cache — expected.
-6. **API:** `topgear[]` on `GET /api/reviews` (`ReviewsService`, reads the new table; `@Inject(...)` on ctor deps).
-7. **UI:** "TopGear (EN)" `SourceGroup` in `ReviewLinks` (logo `public/icons/topgear.png`, score badge `7/10`, blurb,
-   "Show N more" like the others); en/ua/ru i18n strings; keep it in `lib/offline-cache.ts`'s persisted `/api/reviews`
-   rule. Add an **AutoTrader UK search link** under "other sites" via `reviewLinks()` (`?make=<Make>&model=<Model>`,
-   URL-encode the apostrophe — open it in a browser to confirm the pattern still works; link only, no fetching).
-8. **Measure + browser check:** reviews per brand, % of registry (brand, model) pairs with a TopGear hit (expect lower than
-   infocar: UK catalog, few Lada/ZAZ/Chinese models), and eyeball a Kia Ceed II, a Skoda Octavia and a Toyota RAV4 plate.
-   Record the numbers here and move this entry to `docs/plan-done.md` when finished.
-9. Known limits to document: TopGear has no per-year pages (coarse generation matching); UK-market models only; scores
-   are TopGear's /10 — label the source clearly; periodic refresh = re-run (new reviews are rare, the sitemap `lastmod`
-   could drive a `--since` shortcut).
-
 **Step 2d — Auto news (RSS): planned 2026-10-04, nothing built.** A "News" subsection/toggle that shows recent Ukrainian
 auto-news headlines relevant to the car (make+model+year → make+model → make only). Links + facts only (title, ≤300-char
 description, image URL, date, url) — never republish article text.
@@ -957,257 +756,6 @@ live per request (same persisted-catalog pattern as `owner_posts`).
    polled (backfill = none; infocar news `news.infocar.ua` paging could backfill, check robots first); copyright → link
    + short summary only, always link out and attribute the source.
 
-**Step 2 status (2026-10-03): built; full crawl not run yet.** Done: migration `0023_car_videos.sql` + `carVideos` table;
-`scripts/src/infocar-video-parse.ts` (+ tests on `fixtures/infocar/video-kia.html`, `video-19231.html`);
-`infocar-fetch.ts` (fetch/cache/robots helpers extracted from `infocar.ts`); `pnpm ingest:infocar:videos [-- --brand kia
---max-pages N --limit N --dry-run --refresh]` + `:csv`/`export:…:csv` (CSV `seed-data/infocar-videos.csv.gz` not yet
-created). Findings: video pages expose the YouTube id (`iframe` embed) and the model via `link[rel=canonical]`
-(`https://kia-stonic.infocar.ua/video19231_stonic_id7412.html`) — so even generic titles ("Готовий до будь-яких
-завдань") get a model; year only from titles (rare). The RSS feed has just the latest 20 (incremental use only). Trial
-run KIA page 1: 10/10 videos got id + model + date + duration. **API + UI done (same day):** `videoLookup` in `packages/shared` (model slug via `infocarLookup`'s candidates, plus
-variant slugs like `superb-combi`; year-in-title first, then newest; max 6), `videos[]` on `GET /api/reviews`
-(`ReviewsService` reads `car_videos`), `VideoReviews.tsx` under `ReviewLinks` in `ResultCard` (shares the reviews
-query, hidden when empty, thumbnail → `youtube-nocookie` iframe only on click). Test data: 6 brands × 2 pages (119
-videos) in the local DB. **Year filter:** the video page's canonical `…_id7347.html` is infocar's generation id = the catalog version page
-`test_rav4_id7347.html` (RAV4 2026), stored as `car_videos.generation_id` (migration 0024); `videoLookup` maps it to the
-generation's year range via the catalog rows, so a 2017 RAV4 gets 2015-2018 videos only. No generation in the catalog →
-title year within ±3 of the car's year, or no title year, ranked after exact-generation videos. UI toggle now has ❓ info,
-animated open, and plays in `YouTubeModal`. **Left:** full crawl (one request per listing page + per video, hours at 1 req/s — run
-`ingest:infocar:videos`, then `export:infocar:videos:csv`), YouTube API enrichment (optional), add the CSV load to
-`ingest:ratings:csv`, check the strip in a browser (e.g. a Skoda Superb or Toyota RAV4 plate). UI since merged: videos now sit in the single "Reviews, videos & owner stories" toggle under an infocar.ua heading (Step 2b).
-
-**Step 0 — shipped (2026-10-03): link-only helper, no fetching.**
-`reviewLinks(brand, model)` in `packages/shared/src/reviewLinks.ts` returns each site's
-own page/search (URL patterns opened and confirmed 2026-10-03): infocar
-`/test-drive/<brand>/<model>/` + `/reviews/<brand>/<model>/` (brand page when the model
-isn't a plain-Latin slug), auto-blog `/uk/?s=`, drive2 `/search?text=` tagged `ru`.
-**Superseded by Step 1:** the infocar links now come from the crawled catalog, the UI block is live,
-and the guessed infocar URLs described here were removed. avtoporadnyk (no working search) and nv.ua
-(403, `/search` disallowed) are left out; drive2 model pages need a numeric id so can't
-be built from a name. No year (no verified year/generation URL). Known gap: an infocar
-model slug the registry text doesn't match is a dead link → curate a verified
-(brand, model) list if common. Nothing is crawled or stored. UI: `ReviewLinks.tsx`, a collapsed "Reviews & test drives"
-section in `ResultCard` (between photos and nearby services; `rel="noopener noreferrer
-nofollow"`, "RU" chip on drive2). No share-button/`?section=` deep link yet. Per-model
-direct paths (infocar `/test-drive/<brand>/…`, drive2 `/cars/<brand>/…`) are
-deliberately not guessed — verify in a browser before adding any. autoarmor dropped.
-The crawl/DB steps below stay optional; do them only if links alone aren't enough.
-
-Goal: on each make/model/year page, show "Reviews & test drives" — links with
-title, source, language, thumbnail, ≤300-char excerpt. **Links + short excerpts,
-not copied full text** (Ukrainian TDM exception is research-only; DB right 15 y).
-MVP = 100-1000 top make/model combos from the registry, extend later.
-Order: **A. text reviews → B. YouTube.**
-
-Sources (checked 2026-10-02/03, robots.txt + one page each — volumes unmeasured):
-
-| Source                                 | Lang                     | Access                                                                                                                                                                             | Role                                                       |
-| -------------------------------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
-| infocar.ua `/test-drive/`, `/reviews/` | uk                       | open; no `/*?`, `/forum/`, `/search.html`; no sitemap → crawl brand pages. URL has brand/model                                                                                     | primary editorial                                          |
-| avtoporadnyk.com.ua                    | uk                       | open, sitemap, model-tagged                                                                                                                                                        | editorial                                                  |
-| auto-blog.com.ua                       | uk/ru                    | open, WP REST `/wp-json/wp/v2/posts`; filter to "огляди" category                                                                                                                  | editorial (low yield)                                      |
-| nv.ua test-drive                       | uk                       | robots OK + sitemaps, but fetch got 403                                                                                                                                            | optional, skip if bot-walled                               |
-| driver.top                             | uk                       | robots fully open, sitemap. **UGC social network** (`/car/ID`, `/exp/ID` posts, car profiles with engine/gearbox) — owner posts, not editorial reviews; some features premium-only | owner experience; check what `/exp/` really contains first |
-| drive2.ru                              | **ru** (tag `lang='ru'`) | **robots.txt blocks every bot except Google/Bing/Yandex/Twitter/DDG/archive, incl. ClaudeBot/GPTBot; catch-all disallow**                                                          | **gated — see below**                                      |
-| autoarmor.com.ua                       | —                        | shop reviews, not cars                                                                                                                                                             | dropped                                                    |
-
-**drive2 gate (decision needed):** the owner logbooks are the best owner content,
-but the site explicitly disallows our crawler; scraping it would go against its
-rules and we won't evade them (UA spoofing, proxies). Options, in order:
-(1) **link-only**: curated `drive2.ru/cars/<brand>/<model>/` URL per make/model,
-tagged RU, no fetching — zero risk, ships in MVP; (2) ask drive2 for written
-permission / an API or partnership, then add an adapter; (3) never: bypass.
-
-**Step 1 — infocar catalog ingest (shipped 2026-10-03; match-rate measurement left)**
-
-**Status (2026-10-03): shipped, except the match-rate measurement.** Built: migration `0020_infocar_versions.sql` +
-Drizzle table; `scripts/src/infocar-parse.ts`, `infocar-robots.ts`, `infocar.ts` (+ tests on the saved pages in
-`scripts/src/fixtures/infocar/` — raw windows-1251, `-text` in `.gitattributes`, prettier-ignored); `pnpm ingest:infocar
-[-- --brand kia --limit N --dry-run --refresh]`, `ingest:infocar:csv` (also in `ingest:ratings:csv`),
-`export:infocar:csv`; `infocarLookup` in `packages/shared`; `GET /api/reviews?brand=&model=&year=`
-(`apps/api/src/reviews/`, `reviewsResponseSchema`); web: `reviewsQuery` + a `reviews` offline-cache group (cap 400),
-`ReviewLinks.tsx` un-hidden in `ResultCard` (fetches when the section is opened) with `InfocarReviewRows.tsx`. The
-guessed infocar URLs were removed from `reviewLinks` (the drive2 search remains; auto-blog was dropped later).
-
-**First full crawl:** 153 brands (88 with test drives) → 5546 rows. Reviews: 1363 models / 1171 versions; test drives:
-1152 models / 1860 versions; 1681 model rows have no version cards (they link to the model page); every version has a
-year range; zero crawl failures. Committed `seed-data/infocar-versions.csv.gz` (85 KB).
-
-**Follow-ups (2026-10-03, after the first crawl) — done:**
-
-- Year-filtered owner-reviews link: `yearUrl` on `InfocarMatch` = model page + `?y1=<year>&y2=<year+1>&sort=0` (y2
-  capped at the current year); only the reviews tree has the filter (test-drive pages ignore it). The version list
-  now includes every version overlapping year..year+1, ones covering the year first.
-- Model matching (`infocarLookup.ts`): punctuation squashed (`CEE'D` -> `ceed`), BMW trims -> `N-series`, Mercedes
-  `E 200` -> `e-class` (`ML` -> `m-class`), leading-word / lone-word / shortened-factory-code matches, a few aliases
-  (VW CC/Beetle/e-Golf, Pajero, Forte). `infocarBrandSlug` maps mercedes-benz->mercedes, ssangyong->ssang-yong,
-  lada->vaz (used by the lookup and `ReviewsService`; before this Mercedes/ВАЗ/SsangYong never matched).
-- **Match-rate measurement** (top 800 registry (brand, model) pairs, ~12.2M rows, owner-reviews tree, year 2013):
-  brand-page-only fallbacks 856k -> 441k, unknown-brand 1.8M -> 351k. What is left is mostly not in the catalog
-  (ЗАЗ/ГАЗ/DAF/Geely/Lifan/КАМАЗ variants, some Tesla/Audi/Volvo/Dodge models only in the other tree). Next lever if
-  wanted: per-model aliases for the remaining high-volume misses; the throwaway eval script was deleted (dump
-  `infocar_versions` + top pairs via `docker exec … psql` and run `infocarLookup` over them to redo it).
-- UI: ❓ section info + 🔗 share button (`?section=reviews`, new `ShareSection`), infocar logo (`public/icons/infocar.png`)
-  beside the Infocar labels, DRIVE2 logo (`public/icons/drive2.png`). A large faint infocar watermark behind the
-  Infocar block was tried and **hidden on request** (left-aligned, 224px, 10% opacity) — re-add in `ReviewLinks.tsx`
-  if wanted. Auto-Blog removed from `reviewLinks` (irrelevant search results); drive2 stays link-only.
-- **Not verified end to end in a browser** — covered by unit tests (shared lookup, helpers, reviews service); open
-  ВС6743РН (Kia Ceed 2012) and ВС4170МІ (BMW 328, 2013) and expand "Reviews & test drives" to confirm.
-
-Facts found while parsing: the `/test-drive/` page lists only ~15 brands + a numeric-id `<select>`, so **brands come
-from `reviews/marks.html`** (153) and each is tried in both trees (404 → skipped); marks has no Russian/Soviet section
-markup — `is_ru` is the second alphabetical run (the list is sorted by display name, so slugs wobble: only a big
-first-letter drop counts); version-card `title` attrs say "Отзывы про …" in both trees (copy-paste) — name/years are
-read from the card's `<span>`s; a model with no carousel gets just its model row. **infocar never writes an open-ended
-range** — a model still in production ends at the current year (max `year_to` 2026), so the lookup's
-`null year_to = current year` rule is only a safety net.
-
-Goal: crawl infocar's whole brand → model → version tree once and store, per version, the
-name, year range and URL, so a car (brand, model, year) links to its exact generation page
-(e.g. KIA CEED 2019 → "Ceed 2018–2021"). Facts + links only — no article text. Other sites
-(avtoporadnyk, auto-blog, drive2, driver.top, nv.ua) come later as separate adapters.
-
-Verified structure (2026-10-03, via browser screenshots + page fetches):
-
-- `https://www.infocar.ua/test-drive/` — brand list ("Оберіть марку"/50+ brands).
-- `https://www.infocar.ua/test-drive/<brand>/` — "Оберіть модель KIA": model links
-  `/test-drive/<brand>/<model>/` (kia: avella … venga, 31 models).
-- `https://www.infocar.ua/test-drive/<brand>/<model>/` — "Оберіть версію KIA Ceed": a
-  carousel (arrows) of version cards: name ("Ceed", "Ceed GT", "Ceed SW", "ProCeed", …) +
-  year range ("2018 - 2021") + link to a version page on a **per-model subdomain with a
-  numeric id**: `//kia-ceed.infocar.ua/test_ceed_id5550.html` (protocol-relative `//`).
-  Ceed has 17 versions. The same page also lists test-drive articles
-  (`/test-drive/kia/ceed/<id>.html`), paginated `./page_2.html`…`page_7.html` — not needed
-  for the catalog. Owner reviews live in a parallel tree `/reviews/<brand>/<model>/`
-  (`//skoda-octavia.infocar.ua/review_octavia-a7_id5028.html`) — a possible second pass.
-- Pages appeared windows-1251 in one fetch tool (garbled Cyrillic) — **check the response
-  charset/headers and decode accordingly**; don't assume UTF-8.
-- robots.txt: `Disallow` `/*?`, `/fav/`, `/search.html`, `/reviews/add/`, `/forum/`, `/account/`,
-  `/new_export/`; `BUbiNG` fully blocked; no crawl-delay, no sitemap. Catalog paths are
-  allowed. Fetch plain URLs only (no query strings), ≤1 req/s, honest User-Agent (no
-  personal email in it), respect robots.txt at runtime.
-- Volume estimate (unmeasured): ~50 brands + ~600 models ≈ 650 requests ≈ 11 min at 1 req/s.
-  **Both trees below double that (~22 min), still one run.**
-
-**Second tree — owner reviews (same ingest, `tree = 'reviews'`)**, verified 2026-10-03:
-
-- `https://www.infocar.ua/reviews/marks.html` — all brands, alphabetical, **with review
-  counts** (Acura 37, Audi 312, Hyundai 914, Ford 906, …); sections "international" and
-  "Russian/Soviet" (ВАЗ, ГАЗ, ЗАЗ, УАЗ …) — store both, tag the latter.
-- `https://www.infocar.ua/reviews/<brand>/` — models with **review counts** and a brand
-  average (KIA: 4.5★ from 858 reviews; Sportage 169, Ceed 123, Rio 102 …).
-- `https://www.infocar.ua/reviews/<brand>/<model>/` — "Оберіть версію KIA Ceed": version
-  cards **with their own year ranges that differ from the test-drive tree** (reviews: Ceed
-  2018–2021, 2015–2018, 2012–2015, 2009–2012, 2006–2009, ProCeed 2019–2021, XCeed 2019–2022;
-  test-drive tree has 17 versions incl. GT/SW). Version hrefs are on per-model subdomains
-  (`//skoda-octavia.infocar.ua/review_octavia-a7_id5028.html` is a single review). **Not
-  captured by the page fetcher — read the real version-card hrefs from raw HTML.**
-- Same page: model average rating + review count, a list of reviews (title "KIA Ceed 2020",
-  engine, gearbox, mileage, per-review rating, pagination `page_N`), and a **"Рік виготовлення
-  від … до …" filter** (years 2007–2020 in the dropdown, sort "спочатку з фото") — a GET form
-  whose real parameter names are **unverified** (read them from the form markup / DevTools).
-  `robots.txt` disallows `/*?`, so **never crawl filter URLs**; but a plain link for a user
-  to `…/reviews/kia/ceed/?<year params>` is fine and gives "reviews of this car's year" —
-  build it only after the param names are confirmed, and keep the version-card link as the
-  fallback (works without the filter).
-- Store per model: `review_count`, `avg_rating` (facts, shown in the UI as "Ceed — 123
-  reviews, 4.5★"). Do **not** store review text/authors (copyright, personal data).
-
-Build:
-
-1. `scripts/src/infocar.ts` (style of `euroncap.ts`/`kncap.ts`): `pnpm ingest:infocar`
-   (crawl, cache raw HTML in `scripts/.data/infocar/`, `--refresh` to re-fetch, `--limit`/
-   `--brand` for trial runs, `--dry-run`), `ingest:infocar:csv` / `export:infocar:csv`
-   (committed gz CSV in `seed-data/`, like the ratings). Parsing as pure functions in a
-   `scripts/src/infocar-parse.ts` with saved-HTML fixture tests (brand list, model list,
-   version cards). Version cards: normalise `//` URLs to `https://`, parse "2018 - 2021" →
-   `year_from`/`year_to` (open-ended/"н.в." ranges → null `year_to`; check how infocar writes
-   current models).
-2. Migration `NNNN_infocar_versions.sql`: `registry.infocar_versions` — `tree`
-   (`test_drive`|`reviews`), `brand_slug`, `model_slug`, `model_name`, `version_name`,
-   `year_from`, `year_to`, `url` (UNIQUE), `review_count` + `avg_rating` (model-level,
-   reviews tree only, null otherwise), `fetched_at`. Index (brand_slug, model_slug, year_from). Add the CSV load to
-   `ingest:ratings:csv`/`ingest:all`. Zod schema + types in `packages/shared`.
-3. Lookup (pure, in `packages/shared`, tested): brand via `brandSlug`; model by slug match
-   (registry model text is free-form: try full slug, then first token; infocar slugs like
-   `enyaq-iv`, `ev6`); versions whose `year_from ≤ year ≤ year_to` (ranges overlap at the
-   edges — return all); prefer the version whose name equals the registry model (`CEED SW`),
-   else the plain one; fallbacks: model page → brand page → nothing. Never emit a URL not in
-   the catalog (this is the dead-link fix for `reviewLinks`).
-4. API `GET /api/reviews?brand=&model=&year=` (Zod, no logic in the controller, explicit
-   `@Inject`) returns, per tree, the matching version link(s), the model link and the
-   review count/avg rating; add to the persisted-cache rules in `lib/offline-cache.ts`.
-   Then un-hide `ReviewLinks.tsx` in `ResultCard.tsx`: two infocar rows — test drive
-   (version name + years) and owner reviews ("123 reviews, 4.5★", version link, plus the
-   year-filtered link once its params are confirmed).
-5. Measure after the first real run: brands/models/versions counts, and the match rate of
-   registry (brand, model, year) top combos against the catalog; list the misses.
-
-Open: how infocar prints still-in-production ranges; models with no version cards; whether
-the per-model subdomain pages are the best link or `/test-drive/<brand>/<model>/` is better.
-
-**Step 2 — infocar videos (YouTube channel + infocar's own `/video/` section), after Step 1**
-
-Goal: videos linked to specific cars, with a relation to the infocar catalog from Step 1
-(same brand/model/version rows). Channel: `youtube.com/@InfoCarUa` as given; infocar.ua links
-`youtube.com/infocartv` / `/user/infocartv` — **confirm they are the same channel** (channel id
-via `channels.list?forHandle=InfoCarUa` and `forUsername=infocartv`) before ingesting. The
-YouTube page itself couldn't be read by the page fetcher (JS-rendered, returned only the
-footer), so subscriber/video counts and title style are **unmeasured**.
-
-Two complementary sources (verified 2026-10-03 on the infocar side):
-
-- **infocar `/video/`** — videos are organised by **category** (`/video/test-drive/`,
-  `/video/infocar/`, `/video/chtopochem/`, moto, pranks, crashes …) and by **brand**
-  (`/video/<brand>/`, 100+ brands: volvo, toyota, porsche …); single video
-  `/video/<id>.html` (e.g. `19259.html`); `/video/all/`; **RSS `/rss/video.php`**. This is
-  infocar's own brand tagging, i.e. the car relation for free. Check whether a video page
-  exposes the YouTube id (embed/`data-` attr/iframe `src`) — if so that's the join key.
-  robots.txt does not disallow `/video/` (only `/*?`, forum, account … — re-read at runtime).
-- **YouTube Data API v3** (needs `GOOGLE_API_KEY` — **already added to `apps/api/.env` by the
-  user, 2026-10-03; free, no paid plan, 10,000 units/day quota; not yet tested against the
-  API; make sure "YouTube Data API v3" is enabled in that Cloud project and the key is
-  restricted to it**) — authoritative metadata for the channel:
-  `channels.list` (1 unit) → uploads playlist id → `playlistItems.list`, 50 per page, 1 unit
-  per page → `videos.list` for details, 1 unit per ≤50 ids. A whole channel of a few thousand
-  videos costs on the order of 100-200 units — far below the 10,000/day default; `search.list`
-  (100 units, ~100 searches/day) is **not needed** for a single channel. Store `youtube_id`
-  (permanent) and refresh title/thumb/views at least every 30 days (YouTube ToS: non-authorized
-  data ≤30 days); embed with the standard player/oEmbed; no HTML/transcript scraping.
-
-Ordering: do the **infocar `/video/` + `/rss/video.php` pass first** (no key; brand/category/
-article relation, YouTube id if exposed), then use the API only to fill in what that pass
-lacks (duration, views, exact publish date, videos not on `/video/`). YouTube's own RSS
-(`feeds/videos.xml?channel_id=UC…`, no key) only returns the latest ~15 — fine for
-incremental refresh, not for the back catalogue.
-
-Build:
-
-1. Table `registry.car_videos`: `youtube_id` UNIQUE, `title`, `published_at`, `thumb_url`,
-   `duration_s`, `category` (test_drive|review|other, from infocar's category or title),
-   `infocar_video_url` (nullable), `infocar_article_url` (nullable — the linked test drive
-   if the video page/title points to one), `brand_slug`, `model_slug`, `version_id`
-   (nullable FK → `infocar_versions`), `year_from`/`year_to` (nullable), `match_method`
-   (infocar_brand_page|title|manual), `confidence`, `fetched_at`, `refreshed_at`.
-2. Ingest `pnpm ingest:infocar:videos` (+ `…:csv`/`export:…:csv`): (a) walk
-   `/video/<brand>/` listings (or the RSS for increments) → infocar video url, title, brand,
-   category, youtube id if exposed; (b) pull the channel via the API; (c) join on
-   `youtube_id`, else fuzzy title match; videos only the API knows get brand/model from the
-   shared title matcher (`brand + model + year` against the Step 1 catalog; low confidence →
-   hidden review queue). Quota-aware, resumable, `--dry-run`.
-3. Matching a car's year to a video: the title usually names make/model (and often year or
-   generation, e.g. "KIA Ceed 2018") — parse with the Step 1 catalog's versions: video →
-   version whose range contains the parsed year, else the model. Videos that are generic
-   (pranks/crashes/news) get no car and are skipped.
-4. API: extend `GET /api/reviews` with `videos[]` (youtube_id, title, thumb, published_at,
-   version name); UI: a "Videos" row/strip with thumbnails that **embed on click**
-   (privacy: don't load the iframe until the user clicks), link back to the infocar article.
-5. Measure first: channel video count, % of titles with a parsable make/model/year, % that
-   match a Step 1 version, overlap between the channel and `/video/` listings.
-
-Open: same-channel confirmation; whether to include only test-drive/review categories;
-whether `/video/` pages expose the youtube id; per-brand pagination depth.
-
 **Step 3 — infocar motorcycles (`moto.infocar.ua`), same ingest family, after Steps 1-2**
 
 Same site family and robots.txt (checked 2026-10-03: disallows `/*?`, `/forum/`, `/account/`,
@@ -1240,52 +788,7 @@ Build deltas vs Steps 1-2:
 - Cost: 80+ brands + a few hundred models ≈ a few hundred requests (≈ 5-10 min at 1 req/s,
   unmeasured).
 
-**A. Text reviews — steps**
-
-1. Migration `NNNN_car_reviews.sql`: `registry.car_reviews` — `id`, `source`,
-   `url` UNIQUE, `title`, `kind` (article|owner_post|forum|video), `lang`
-   (uk|ru|en), `make`, `model`, `year_from`, `year_to`, `confidence`
-   (high|medium|low|unmatched), `match_method` (url|tag|title|text|manual),
-   `thumb_url`, `excerpt`, `published_at`, `fetched_at`, `youtube_id` (null
-   until B). Indexes: (make, model), (make, model, year_from). Zod schema +
-   types in `packages/shared`.
-2. Matcher in `scripts/src/reviews/match.ts` (pure, fixture-tested): alias
-   dictionary built from the registry's make/model values (Cyrillic + Latin) →
-   parse in order URL → tags/category → title → first 500 chars; year by
-   `19xx|20xx` regex + a small curated generation→year-range table
-   (`seed-data/generations.csv`, start with the top ~150 models; seed from
-   Wikidata, hand-fix). Unmatched/low go to a review queue, hidden in UI.
-3. Adapters, one file each (`scripts/src/reviews/<source>.ts`), same style as
-   `euroncap.ts`: infocar → avtoporadnyk → auto-blog (WP API) → driver.top
-   (after inspecting `/exp/`; only public pages, only listing metadata) →
-   nv.ua (optional). Shared polite fetcher: honour robots.txt, ≤1 req/s, clear
-   User-Agent, `If-Modified-Since`/ETag, cached raw HTML in `scripts/.data/`
-   so re-parsing needs no re-crawl.
-4. Curated link-only rows for drive2 (and forum links) from
-   `seed-data/review-links.csv` (make, model, url, lang, kind).
-5. CSV export/import like the ratings (`pnpm export:reviews:csv`,
-   `pnpm ingest:reviews:csv`) so a fresh clone loads in seconds.
-6. API: `GET /api/reviews?make=&model=&year=` — ranking: exact generation →
-   same model → same brand; UK before RU; add to the offline cache rules in
-   `lib/offline-cache.ts` (size-capped). UI block on plate/VIN pages with a
-   source badge and a "RU" chip; outbound links `rel="noopener nofollow"`.
-7. Tests: matcher fixtures per source, adapter parse fixtures (saved HTML),
-   API ranking.
-
-Time (estimates): crawl a few hours unattended at 1 req/s; dev ~3-5 working
-days (matcher is the long pole). First step: crawl 20 models from infocar +
-driver.top, measure counts and match rate before building the rest.
-
-**B. YouTube — after A**
-
-- Channel route: `playlistItems.list` over ~20 curated UA channel uploads
-  (1 quota unit / 50 videos) + title→make/model/year via the same matcher.
-- Search route: `search.list` per top model ("<make> <model> <gen> тест-драйв",
-  `regionCode=UA`, `videoCategoryId=2`); 100 searches/day on the default 10k
-  quota → ~3 days for 300 models; `videos.list` (1 unit/50) for details.
-- Store only `youtube_id` + our own match fields; refresh title/thumb/stats
-  ≤ every 30 days (YouTube ToS: non-authorized data ≤30 days). Embed via the
-  standard player/oEmbed. No HTML/transcript scraping.
+**YouTube env note (applies to any script using `GOOGLE_API_KEY`):**
 - Env: `GOOGLE_API_KEY`. Only `apps/api` loads `.env` (`tsx watch --env-file-if-exists=.env`);
   `scripts/` run plain `tsx src/<file>.ts` and load none. So the video ingest script's
   `package.json` entry must pass `--env-file-if-exists=../apps/api/.env` (cwd is `scripts/`
@@ -1294,9 +797,7 @@ driver.top, measure counts and match rate before building the rest.
   is server/script-side only; never ship it to `apps/web`, never log it, never put it in a
   URL that gets logged or cached (`?key=` goes in the request only; redact on errors).
 
-Open questions: driver.top `/exp/` content quality and ToS; drive2 permission
-route; how many generations to curate for MVP; whether to show owner posts
-(driver.top) in the same block as editorial reviews or a separate tab.
+Open questions: driver.top `/exp/` content quality and ToS; drive2 permission route; whether to show owner posts (driver.top) in the same block as editorial reviews or a separate tab.
 
 ### Fuel economy & emissions (CO2) — built (2026-10-02), tuning left
 
@@ -1316,57 +817,7 @@ Soviet/Daewoo/ZAZ models have no source at all; reference links live in `CO2Badg
 lists, `/api/stats` split into `/top` + `/field/:dimension`, fuel/crash-test ranking chips on the result card, `/safety`
 combined crash-rating page.
 
-Sources (all free, no key; licence terms not re-verified — check before building):
-
-- **fueleconomy.gov** (US DOE/EPA) — first, easiest. `vehicles.csv.zip` bulk download (also `/ws/rest/` JSON/XML).
-  1984+, MPG city/hwy/comb, CO2 g/mi, fuel type, EV range + kWh/100mi, GHG/smog score. Public domain. EPA test
-  cycle (reads lower than WLTP). Many UA cars are US imports. Key columns: `make`, `model`, `year`, `comb08`,
-  `co2TailpipeGpm`, `fuelType1`, `displ`, `cylinders`, `atvType`.
-- **EEA CO2 monitoring of new passenger cars** (data.europa.eu / EEA Datahub) — EU-origin cars. Per-registration
-  yearly CSVs (large): make, model, variant, engine cc/kW, fuel, CO2 g/km (NEDC → WLTP), consumption on newer
-  years. Aggregate to make/model/year/engine/fuel at load time, don't store raw rows.
-- **NRCan Fuel Consumption Ratings** (open.canada.ca) — CSV 1995+, already L/100km; fallback for N. American models.
-- Optional/later: UK VCA car fuel data (open CSV); Spritmonitor.de (real-world consumption, no API → scraping,
-  check ToS). Skip commercial APIs (CarAPI, Auto.dev, API Ninjas: paid or non-commercial free tiers — see the
-  "no free RIA-alternative" survey in the parked section).
-
-Design (follow the NCAP pattern — `scripts/src/euroncap.ts` + committed gz CSV in `scripts/seed-data/`):
-
-- Tables `registry.fuel_economy_*` (or one `fuel_economy` table with a `source` column): make/model/year range,
-  engine cc, fuel type, `co2_g_km` (**normalize EPA g/mi ÷ 1.609 on load**), `l_100km`, `cycle` (`EPA`|`NEDC`|`WLTP`),
-  `source`. Never mix cycles unlabeled — show the cycle next to the number.
-- `scripts/src/fuel-economy.ts` + `ingest:fuel:csv` / `export:fuel:csv`, wired into `ingest:ratings:csv`.
-  Raw bulk downloads cached in `scripts/.data/` (gitignored); only the aggregated CSV is committed.
-- **Matching** registry row → reference row: fuzzy on normalized make + model + year + fuel + engine capacity
-  (reuse the NCAP model-name normalization/aliases; registry `fuel` is free text — do the "Fuel-type icons"
-  distinct-values research below first, the mapping is shared). Return a **range** when several trims match
-  ("6.5-7.2 L/100km"), and say "similar vehicles", never claim an exact match. Measure the real match rate
-  on the full dataset before building UI.
-- **Refresh cadence — manual/annual, not scheduled.** All sources are bulk files that change rarely, so no
-  cron, no live API calls from the app, and no scraping in the request path:
-  - fueleconomy.gov: DOE republishes `vehicles.csv.zip` as new model years are certified (several times a year,
-    mostly Q4-Q1). Re-run ~**2x/year** (e.g. Jan + Jul) or when a new model year appears; cheap — one ~10 MB zip.
-  - EEA: one release per reporting year, final data lands roughly **once a year** (provisional ~mid-year, final
-    ~autumn/winter). Re-run **annually** when a new year file is published.
-  - NRCan: one new file per model year, **annually** (~autumn).
-  - Spritmonitor (if ever added): scraping, so on demand only, rate-limited, never scheduled.
-  - Fetch via the script's own download (CSV, cached in `scripts/.data/`), then `export:fuel:csv` → commit the
-    aggregated gz CSV. Prod loads the committed CSV (`ingest:fuel:csv`, seconds) — same as the NCAP tables, which
-    also have no scheduler. Store the source file's `last_modified`/release year in the table (or a small
-    `ingested_resources`-style row) so the script can say "already current" and skip. If a VPS exists (Phase 4),
-    optionally a monthly job that only _checks_ for a newer release and notifies, never auto-overwrites.
-- **Score (0-100):** linear on CO2 g/km, clamped — e.g. 0 g/km → 0, ≥ ~300 g/km → 100 (constants in
-  `packages/shared`, `CONSTANT_CASE`, tune against the real distribution of matched rows). Pure EV → 0 (tailpipe
-  only; label as "tailpipe"). Bands for the icon colour: green/yellow/orange/red. Hybrids/PHEVs: use the
-  rated combined CO2, note the caveat. Score and colour thresholds live in shared, with unit tests.
-- API: add fields to the plate/VIN response (Zod schema in `packages/shared` — note this discards users' saved
-  offline data) or a separate `/api/fuel/:...` query added to `lib/offline-cache.ts` persisted rules (small, cache it).
-- UI: new `CO2Badge` component (default export, ref-as-prop, hook for logic), i18n keys ua/ru/en, tooltip
-  explaining source + test cycle + "estimate for similar vehicles". Hide entirely when no match.
-
-First steps when picked up: download `vehicles.csv.zip`, run the match-rate check against the real registry
-(make/model/year/fuel/engine), then migration + shared Zod schema + ingest script with a fixture test; add EEA
-second, only if the US-only match rate leaves too many EU cars uncovered.
+**Refresh cadence:** manual/annual (EPA ~2x/year, EEA once a year, no cron); `export:fuel:csv`, then commit the gz CSV. Sources, design and full cadence notes: `docs/plan-done.md`.
 
 ### To discuss / research
 
@@ -1386,36 +837,6 @@ second, only if the US-only match rate leaves too many EU cars uncovered.
   specs/review highlights (not just registry fields) for the car's
   make/model/year. Needs a data source: is there a free API, or does this
   require licensing/curating content ourselves?
-- **Car images by year/trim/color ✅ DONE (2026-09-24)** — see Phase 1.5
-  "Vehicle photos (Pixabay)" above. Implemented via
-  [pixabay.com's image search API](https://pixabay.com/api/docs/) keyed on
-  brand/model/year only, not trim/color — Pixabay's search doesn't support
-  that granularity, so shown photos are illustrative for the make/model, not
-  matched to the registered vehicle's actual color or trim.
-- **Car brand logos ✅ DONE (2026-09-24)** — see Phase 1.5 "Vehicle-kind icon
-  (animated, colored) + brand logo" above. Went with bundling from
-  car-logos-dataset (MIT-licensed, not carlogos.org — that site states no
-  reuse license at all), not a live logo service/CDN — a `brand → logo asset`
-  lookup (`brandLogoUrl()` in `@carplates/shared`) matching bundled static
-  files, same pattern as `plate_regions` for stats.
-- **Vehicle body-shape / silhouette images ✅ DONE (2026-09-24)** — see Phase
-  1.5 above. **Not** NHTSA vPIC in the end: those per-body-class PNGs
-  (`vpic.nhtsa.dot.gov/decoder/images/{bodyClassId}/{n}.png`) turned out to be
-  an undocumented, unofficial asset path (no stated mapping from image index
-  to body class, no ToS, inconsistent styling between images) keyed to
-  NHTSA's own body-class taxonomy — which the Ukrainian registry's `kind`
-  values don't share, so using them wouldn't have avoided building a
-  `kind → shape` mapping anyway. Used 5 user-supplied SVG silhouettes instead,
-  recolored per-vehicle via CSS custom properties.
-- **Fuel-type icons** — show an icon per fuel type on the result card.
-  **RESEARCH first**: the registry's `fuel` column is free text with no fixed
-  enum in this codebase (unlike `body`/`kind`/`color`, which already have
-  `stats_by_*` rollups) — enumerate the actual distinct values in the real
-  dataset (e.g. `SELECT DISTINCT fuel FROM registry.registrations`) before
-  picking/drawing an icon set, since Ukrainian-source values won't map 1:1 to
-  a generic fuel-type icon library.
-- **Vehicle-kind icons ✅ DONE (2026-09-24)** — see Phase 1.5 "Vehicle-kind
-  icon (animated, colored) + brand logo" above.
 - **Auth with Google** — Phase 5 already specs Passport Google OAuth; open
   question is scope beyond syncing history/favorites to the cloud — what
   else should be account-gated (cross-device sync, data export, change
