@@ -445,9 +445,17 @@ with a fixture test.
 Built and pre-warmed for the ≥100-car tier (4,007 models: 2,832 with a photo, 1,175 not_found, 0 failed; **62.3% of registered
 cars have a photo**; table 58,023 rows; seed CSV `scripts/seed-data/wiki-images.csv.gz` committed). Design, schema, batching
 probes, runbook and the full run log are in `docs/plan-done.md` ("Wikimedia hero-image cache in Postgres + pre-warm").
-**Open (optional, ask first):** runbook step 6 (`pnpm ingest:wiki-images -- --min-cars 1`, ~15.7k models in all, ~2.5-5 h more) then step 7
-(coverage, retry, re-export the CSV once); the 100-999 tier shows 44.5% "not processed" after a full ≥100 run — check the coverage
-script's grouping first. Ideas not done: search by normalized name for odd spellings ("118 i" → "118i"); non-Latin article titles
+Step 6 (`pnpm ingest:wiki-images -- --min-cars 1`) **started 2026-10-05, stopped at ~6,100 of 11,644 models** (~22 models/min,
+so ~7.5 h in all, not the 2.5-5 h first estimated); CSV re-exported at that point (98,600 rows, 1.8 MB). Now **62.7% of registered
+cars have a photo** (36,098 groups; 9,648 not_found; 9 failed rows pending retry); 51,370 groups (33.1% of cars, almost all in the
+<100-car tail and the rest of the 100-999 tier) are still unprocessed.
+**Left:** (1) resume step 6 — same command, it skips finished models (stopping only kills the pnpm/cmd wrappers on Windows: also
+kill the `tsx`/`node` child running `wiki-images.ts`, or it keeps writing) — then step 7 (`--retry-failed`, coverage, `pnpm
+export:wiki-images:csv`, commit); (2) **bug: `GET /api/wiki` ignores the stored photo when no Wikipedia article is found** —
+`WikiService.lookup` (`apps/api/src/wiki/wiki.service.ts`) fetches the live article first and only calls `resolveImage` if one
+matched `titleMentionsModel`, so e.g. MERCEDES-MAYBACH S 580 2025 (stored `commons_year` row) shows no photo on the result card.
+Fix: resolve the stored/Commons photo independently of the article and let the web card render it when `found` is false;
+(3) the 100-999 tier still shows 44.5% "not processed" — check the coverage script's grouping. Ideas not done: search by normalized name for odd spellings ("118 i" → "118i"); non-Latin article titles
 (zh/ja/ko) are mostly rejected by the "title mentions the model" guard; a Wikidata `P18` query could replace the lead-image stage.
 
 ### Car reviews, videos, 3D & 360° — mostly shipped (2026-10-03 → 05); open items below
