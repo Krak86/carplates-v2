@@ -186,7 +186,7 @@ export default function SearchRoute(): ReactNode {
       <div
         className={cn(
           'flex w-full flex-col items-center gap-6 transition-[margin-top] duration-500 ease-in-out',
-          isIdle ? 'mt-[18vh]' : 'mt-0'
+          isIdle ? 'mt-2 md:mt-[18vh]' : 'mt-0'
         )}
       >
         <div className={cn('w-full text-center', isHome && !photo ? 'max-w-2xl' : 'max-w-content')}>
