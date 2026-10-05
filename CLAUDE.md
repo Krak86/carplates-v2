@@ -100,6 +100,13 @@ pnpm ingest:wiki-images  # pre-warm registry.wiki_image (Wikimedia hero photos, 
 pnpm ingest:wiki-images:csv  # load the committed wiki-images CSV (skipped with a message until the first export is committed)
 pnpm export:wiki-images:csv  # re-dump ok + not_found rows to that CSV — run after every real pre-warm
 pnpm wiki-images:coverage    # photo coverage by tier, by group and weighted by registered cars
+pnpm ingest:youtube-videos   # YouTube Data API fallback for models infocar has NO video for -> registry.youtube_videos (links + facts;
+                       # needs GOOGLE_API_KEY in apps/api/.env). Staged like wiki-images: gap models only, most cars first, --min-cars
+                       # (default 1000), resumable (registry.youtube_model_runs), stops at --daily-units (default 9000 of the 10,000/day
+                       # quota, Pacific day) or on quotaExceeded — re-run daily. --list (gap list + days estimate, no API calls),
+                       # --brand/--model, --limit N, --dry-run, --refresh. See PLAN.md "Step 2a"
+pnpm ingest:youtube-videos:csv   # load the committed YouTube videos CSV — seconds, no API calls (skipped until the first export is committed)
+pnpm export:youtube-videos:csv   # re-dump the table to that CSV — run after every real run
 pnpm db:refresh-fuel-stats   # rebuild registry.stats_fuel (the /fuel page rollup) from the registry + fuel_economy;
                              # run after any registry ingest or ingest:fuel (ingest:all does it last)
 pnpm ingest:ratings:csv   # db:migrate, then all five *:csv rating loads + the fuel, infocar, infocar-videos, e-drive, sketchfab, carshow360, topgear, press and wiki-images CSVs concurrently — each writes

@@ -394,6 +394,50 @@ export type CarVideoRow = typeof carVideos.$inferSelect
 export type CarVideoInsert = typeof carVideos.$inferInsert
 
 /**
+ * YouTube fallback for models infocar has no video for (`scripts/src/youtube-videos.ts`) — a sibling of `carVideos`.
+ * `modelSlug` is the registry model slug with its doubled spelling collapsed. See migrations/0031_youtube_videos.sql.
+ */
+export const youtubeVideos = registry.table(
+  'youtube_videos',
+  {
+    id: bigserial('id', { mode: 'number' }).primaryKey(),
+    youtubeId: text('youtube_id').notNull().unique(),
+    brandSlug: text('brand_slug').notNull(),
+    modelSlug: text('model_slug').notNull(),
+    lang: text('lang').notNull(),
+    title: text('title').notNull(),
+    channel: text('channel').notNull(),
+    views: integer('views').notNull().default(0),
+    durationS: integer('duration_s').notNull(),
+    publishedAt: date('published_at', { mode: 'string' }),
+    year: smallint('year'),
+    query: text('query').notNull(),
+    fetchedAt: timestamp('fetched_at', { withTimezone: true }).notNull().defaultNow()
+  },
+  t => [index('ix_youtube_videos_brand_model').on(t.brandSlug, t.modelSlug)]
+)
+export type YoutubeVideoRow = typeof youtubeVideos.$inferSelect
+export type YoutubeVideoInsert = typeof youtubeVideos.$inferInsert
+
+/** Resume marker + per-day quota ledger of the YouTube search, one row per (brand, model). */
+export const youtubeModelRuns = registry.table(
+  'youtube_model_runs',
+  {
+    brandSlug: text('brand_slug').notNull(),
+    modelSlug: text('model_slug').notNull(),
+    status: text('status').notNull(),
+    kept: integer('kept').notNull().default(0),
+    queries: integer('queries').notNull().default(0),
+    units: integer('units').notNull().default(0),
+    cars: integer('cars').notNull().default(0),
+    runAt: timestamp('run_at', { withTimezone: true }).notNull().defaultNow()
+  },
+  t => [primaryKey({ columns: [t.brandSlug, t.modelSlug] })]
+)
+export type YoutubeModelRunRow = typeof youtubeModelRuns.$inferSelect
+export type YoutubeModelRunInsert = typeof youtubeModelRuns.$inferInsert
+
+/**
  * One e-drive.com.ua owner post (`scripts/src/edrive.ts`), keyed by its e-drive post id and tagged with the make/model/
  * generation it was found under. Links and facts only — see migrations/0025_owner_posts.sql.
  */

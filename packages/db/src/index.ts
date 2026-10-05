@@ -22,6 +22,8 @@ export {
   kncapRatings,
   infocarVersions,
   carVideos,
+  youtubeVideos,
+  youtubeModelRuns,
   ownerPosts,
   carModels3d,
   carModels360,
@@ -67,7 +69,11 @@ export {
   type StatsFuelInsert,
   type StatsSafetyInsert,
   type WikiImageRow,
-  type WikiImageInsert
+  type WikiImageInsert,
+  type YoutubeVideoRow,
+  type YoutubeVideoInsert,
+  type YoutubeModelRunRow,
+  type YoutubeModelRunInsert
 } from './schema.js'
 export {
   createDb,

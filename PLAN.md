@@ -659,7 +659,23 @@ by registrations (the to-do list for alternative sources):**
 models only, as an **offline batch** that stores results next to `car_videos` (new `source` column or a sibling table;
 links + facts only, same lookup path) — never live per request. Per (brand, model, generation), not per year.
 
-_Trial_ (`scripts/src/youtube-videos.ts`, dry-run, uncommitted until the build lands; run with
+**Build status (2026-10-05): ingest built (steps 3, 4, 6-tooling, 7); real run in progress (day 1 done, see below); lookup integration + UI (step 5 / item 1 / item 4) still to do.**
+**Run log:** `pnpm ingest:youtube-videos -- --min-cars 5000`, once per Pacific day (after ~10:00 Kyiv). Day 1 (2026-10-05): 67
+models, 443 videos, 9,090 units, 0 errors; obscure ВАЗ trim codes fell through to 3 queries (303 units each), so fewer than the
+~89 models/day estimate. Afterwards ВАЗ trim codes were folded into the base model (`baseModel`: 21063 → 2106, 210994 → 21099,
+217030 → 2170; day-1 rows re-keyed, their run rows dropped), so the ≥5,000 tier is now 131 models with ~85 left (≈ 1 more
+day). **Next:** run the same command tomorrow; when `done` reports nothing left, `pnpm export:youtube-videos:csv` and commit
+`scripts/seed-data/youtube-videos.csv.gz`; then the lookup/UI integration, then `--min-cars 1000` (374 models, ≈ 3 more days).
+Migration `0031_youtube_videos.sql` (`registry.youtube_videos` + `youtube_model_runs` resume/quota ledger),
+`scripts/src/youtube-videos.ts` (+ `youtube-videos-filter.ts`, tested), CSV export/import wired into `ingest:ratings:csv`.
+The target list is derived (`--list`): 5,142 passenger-car gap models; tiers by registered cars at ~101 units/model, ~89
+models/day: ≥10,000 cars = 99 models ≈ 1.1 d · ≥5,000 = 164 ≈ 1.8 d · ≥2,000 = 299 ≈ 3.4 d · ≥1,000 = 435 ≈ 4.9 d ·
+≥100 = 1,334 ≈ 15 d. So "1.5-2 days" buys the ≥5,000 tier (3.17M of the 4.15M gap cars); run `--min-cars 5000` first.
+Known gaps: the same model under two brand spellings is searched twice (Daewoo/ЗАЗ LANOS); Cyrillic aliases exist only for
+the curated table in `youtube-videos-filter.ts` (others need the Latin model name in the title); no generation matching yet.
+Dry-run on 2 models (Lanos, Lancer): 8 kept each, 101 units each.
+
+_Trial_ (`scripts/src/youtube-videos.ts`, now the real ingest; run with
 `pnpm --filter @carplates/scripts exec tsx --env-file=../apps/api/.env src/youtube-videos.ts [model…]`): 10 gap models
 (Touran, Fusion, Lancer, Doblo, Laguna, Omega, Lanos, ВАЗ 2107, Getz, Note), 3 queries each, 3,010 units total
 (≈301/model). `GOOGLE_API_KEY` is valid (HTTP 200). 16–24 kept per model of ~17–27 found; the kept ones are mostly real

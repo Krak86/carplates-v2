@@ -94,6 +94,7 @@ export {
   INFOCAR_TREES,
   infocarBrandSlug,
   infocarLookup,
+  slugify,
   type InfocarTree,
   type InfocarRow,
   type InfocarVersionLink,
