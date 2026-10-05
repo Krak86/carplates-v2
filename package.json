@@ -55,6 +55,7 @@
     "ingest:infocar": "pnpm --filter @carplates/scripts ingest:infocar",
     "ingest:infocar:csv": "pnpm --filter @carplates/scripts ingest:infocar:csv",
     "export:infocar:csv": "pnpm --filter @carplates/scripts export:infocar:csv",
+    "ingest:news": "pnpm --filter @carplates/scripts ingest:news",
     "ingest:edrive": "pnpm --filter @carplates/scripts ingest:edrive",
     "ingest:edrive:csv": "pnpm --filter @carplates/scripts ingest:edrive:csv",
     "export:edrive:csv": "pnpm --filter @carplates/scripts export:edrive:csv",

@@ -299,3 +299,38 @@ body {
     animation: none !important;
   }
 }
+
+/* Homepage news ticker: the track holds two copies of the list, so sliding it by half loops seamlessly. */
+@keyframes news-marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.news-marquee {
+  overflow: hidden;
+  mask-image: linear-gradient(to right, transparent, #000 4%, #000 96%, transparent);
+}
+
+.news-track {
+  display: flex;
+  width: max-content;
+  gap: 0.75rem;
+  padding-right: 0.75rem;
+  animation: news-marquee 60s linear infinite;
+}
+
+.news-marquee:hover .news-track,
+.news-marquee:focus-within .news-track {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .news-marquee {
+    overflow-x: auto;
+  }
+
+  .news-track {
+    animation: none;
+  }
+}

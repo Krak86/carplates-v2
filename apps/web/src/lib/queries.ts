@@ -8,6 +8,7 @@ import {
   getEuroNcapRatings,
   getFuelEconomy,
   getFuelStats,
+  getNews,
   getReviews,
   getSafetyStats,
   getIihsRatings,
@@ -263,5 +264,14 @@ export function reviewsQuery(brand: string, model: string, year: number | null) 
     queryKey: ['reviews', brand, model, year],
     queryFn: () => getReviews(brand, model, year),
     staleTime: Infinity
+  })
+}
+
+// Auto-news changes hourly (pnpm ingest:news) — a short staleTime, and deliberately outside the persisted offline groups.
+export function newsQuery(brand?: string, model?: string | null, year?: number | null, lang?: 'uk') {
+  return queryOptions({
+    queryKey: ['news', brand ?? null, model ?? null, year ?? null, lang ?? null],
+    queryFn: () => getNews(brand, model, year, lang),
+    staleTime: 10 * 60 * 1000
   })
 }

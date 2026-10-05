@@ -43,7 +43,7 @@ export function pressTokens(text: string): string[] {
     .filter(Boolean)
 }
 
-const squash = (s: string): string => pressTokens(s).join('')
+export const squash = (s: string): string => pressTokens(s).join('')
 
 /** First (earliest, then longest) catalog brand slug named in any of `texts`, tried in order; `null` when none. */
 export function findBrandSlug(texts: string[], brandSlugs: string[]): string | null {
@@ -70,7 +70,7 @@ export function titleYear(text: string): number | null {
 }
 
 /** Does any run of ≤ `MAX_WINDOW` tokens in `words` spell `candidate` (squashed)? Very short candidates must follow the brand. */
-function namesModel(words: string[], candidate: string, brandTokens: string[]): boolean {
+export function namesModel(words: string[], candidate: string, brandTokens: string[]): boolean {
   for (let i = 0; i < words.length; i++) {
     let joined = ''
     for (let j = i; j < Math.min(words.length, i + MAX_WINDOW); j++) {

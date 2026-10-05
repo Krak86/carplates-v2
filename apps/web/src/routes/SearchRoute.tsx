@@ -26,13 +26,24 @@ import { cn } from '@/lib/cn'
 import { recordVisit } from '@/lib/history-db'
 import { MAX_DIMENSION } from '@/lib/image'
 import { toIntlLocale } from '@/lib/intl'
-import { fuelStatsQuery, historyQuery, plateQuery, safetyStatsQuery, statsTopQuery, vinQuery } from '@/lib/queries'
+import { newsLangFilter } from '@/lib/news'
+import {
+  fuelStatsQuery,
+  historyQuery,
+  newsQuery,
+  plateQuery,
+  safetyStatsQuery,
+  statsTopQuery,
+  vinQuery
+} from '@/lib/queries'
 import { capture } from '@/lib/telemetry'
 import { formatVehicleLabel } from '@/lib/vehicle-label'
 
 const TopStatsPanel = lazy(() => import('@/routes/stats/TopStatsPanel'))
 const FuelModelsPanel = lazy(() => import('@/routes/fuel/FuelModelsPanel'))
 const SafetyModelsPanel = lazy(() => import('@/routes/safety/SafetyModelsPanel'))
+const NewsTicker = lazy(() => import('@/components/NewsTicker'))
+const NewsWidget = lazy(() => import('@/components/NewsWidget'))
 
 export default function SearchRoute(): ReactNode {
   const { t, i18n } = useTranslation()
@@ -52,6 +63,7 @@ export default function SearchRoute(): ReactNode {
   const stats = useQuery({ ...statsTopQuery(), enabled: isHome })
   const fuelStats = useQuery({ ...fuelStatsQuery(), enabled: isHome })
   const safetyStats = useQuery({ ...safetyStatsQuery(), enabled: isHome })
+  const latestNews = useQuery({ ...newsQuery(undefined, null, null, newsLangFilter(i18n.language)), enabled: isHome })
 
   // A saved (persisted) result stays renderable when a refetch fails or is paused offline —
   // render off `data`, not `isSuccess`, which a failed background refetch flips to false.
@@ -307,6 +319,27 @@ export default function SearchRoute(): ReactNode {
             </LoadErrorBoundary>
           )}
         </Presence>
+
+        <Presence show={showHomeStats && !!latestNews.data?.items.length}>
+          {latestNews.data && (
+            <LoadErrorBoundary compact>
+              <Suspense fallback={null}>
+                <div className="section-vt w-full max-w-6xl">
+                  <NewsTicker items={latestNews.data.items} />
+                </div>
+              </Suspense>
+            </LoadErrorBoundary>
+          )}
+        </Presence>
+
+        {/* Right-hand news panel (desktop only, appears on scroll) — fetches itself and renders nothing without news. */}
+        {!photo && !recognizeErrorKey && wikiHeroVehicle?.brand && (
+          <LoadErrorBoundary compact>
+            <Suspense fallback={null}>
+              <NewsWidget brand={wikiHeroVehicle.brand} model={wikiHeroVehicle.model} year={wikiHeroVehicle.year} />
+            </Suspense>
+          </LoadErrorBoundary>
+        )}
       </div>
     </div>
   )

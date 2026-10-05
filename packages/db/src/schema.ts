@@ -572,6 +572,35 @@ export type PressReviewRow = typeof pressReviews.$inferSelect
 export type PressReviewInsert = typeof pressReviews.$inferInsert
 
 /**
+ * Auto-news headlines polled from the RSS feeds listed in `scripts/news-sources.json` (`pnpm ingest:news`), accumulated
+ * by `url` because feeds only hold their latest N items. Facts + links only — title, ≤300-char summary, image URL
+ * (hotlinked), date. `brand_slug`/`model_slug` are the infocar catalog's slugs, found in the title once at ingest
+ * (NULL = general news).
+ */
+export const newsItems = registry.table(
+  'news_items',
+  {
+    url: text('url').primaryKey(),
+    source: text('source').notNull(),
+    title: text('title').notNull(),
+    summary: text('summary'),
+    imageUrl: text('image_url'),
+    publishedAt: timestamp('published_at', { withTimezone: true }).notNull(),
+    lang: text('lang').notNull(),
+    brandSlug: text('brand_slug'),
+    modelSlug: text('model_slug'),
+    year: integer('year'),
+    fetchedAt: timestamp('fetched_at', { withTimezone: true }).notNull().defaultNow()
+  },
+  t => [
+    index('ix_news_items_brand').on(t.brandSlug, t.publishedAt),
+    index('ix_news_items_published').on(t.publishedAt)
+  ]
+)
+export type NewsItemRow = typeof newsItems.$inferSelect
+export type NewsItemInsert = typeof newsItems.$inferInsert
+
+/**
  * One IIHS (US, insurance-industry-funded) vehicle model-year assessment — scraped from
  * iihs.org's own server-rendered detail pages via `scripts/src/iihs.ts` and refreshed by
  * re-running it, same rationale as `cncapRatings`/`kncapRatings` above. `makeKey`/`modelKey`

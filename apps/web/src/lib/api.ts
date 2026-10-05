@@ -15,6 +15,7 @@ import {
   plateHistoryResponseSchema,
   plateLookupResponseSchema,
   plateRecognizeResponseSchema,
+  newsResponseSchema,
   reviewsResponseSchema,
   safetyRatingsResponseSchema,
   searchResponseSchema,
@@ -32,6 +33,7 @@ import type {
   FuelEconomyResponse,
   Models3dResponse,
   Models360Response,
+  NewsResponse,
   ReviewsResponse,
   FuelStatsResponse,
   SafetyStatsResponse,
@@ -287,4 +289,19 @@ export async function getReviews(brand: string, model: string, year: number | nu
   if (model) params.set('model', model)
   if (year != null) params.set('year', String(year))
   return reviewsResponseSchema.parse(await getJson(`/api/reviews?${params.toString()}`))
+}
+
+/** Auto-news (persisted RSS headlines): a car's model/brand news, or — without a brand — the latest overall. */
+export async function getNews(
+  brand?: string,
+  model?: string | null,
+  year?: number | null,
+  lang?: 'uk'
+): Promise<NewsResponse> {
+  const params = new URLSearchParams()
+  if (brand) params.set('brand', brand)
+  if (brand && model) params.set('model', model)
+  if (brand && year != null) params.set('year', String(year))
+  if (lang) params.set('lang', lang)
+  return newsResponseSchema.parse(await getJson(`/api/news?${params.toString()}`))
 }

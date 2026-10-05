@@ -797,3 +797,18 @@ export const statsTopResponseSchema = statsResponseSchema
     leastSafeModels: z.array(safetyStatsModelSchema)
   })
 export type StatsTopResponse = z.infer<typeof statsTopResponseSchema>
+
+/** An auto-news headline (persisted by `pnpm ingest:news`): link + facts only. `match` is how it relates to the car asked about. */
+export const newsItemSchema = z.object({
+  url: z.string(),
+  source: z.string(),
+  title: z.string(),
+  summary: z.string().nullable(),
+  imageUrl: z.string().nullable(),
+  publishedAt: z.string(),
+  lang: z.string(),
+  match: z.enum(['model', 'brand']).nullable()
+})
+export const newsResponseSchema = z.object({ items: z.array(newsItemSchema) })
+export type NewsItem = z.infer<typeof newsItemSchema>
+export type NewsResponse = z.infer<typeof newsResponseSchema>

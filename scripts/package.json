@@ -26,6 +26,7 @@
     "ingest:infocar": "tsx src/infocar.ts",
     "ingest:infocar:csv": "tsx src/infocar.ts --from-csv seed-data/infocar-versions.csv.gz",
     "export:infocar:csv": "tsx src/infocar.ts --export-csv seed-data/infocar-versions.csv.gz",
+    "ingest:news": "tsx src/news.ts",
     "ingest:press": "tsx src/press.ts",
     "ingest:press:csv": "tsx src/press.ts --from-csv seed-data/press-reviews.csv.gz",
     "export:press:csv": "tsx src/press.ts --export-csv seed-data/press-reviews.csv.gz",

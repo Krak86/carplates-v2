@@ -23,6 +23,7 @@ Ukrainian vehicle lookup by **plate number** or **VIN**. Rebuild of
 - Background layers on plate/VIN result pages (button in the header, online only, resets on navigation): car photos
   (default), a Google Maps view of the plate's region capital, or a live NASA ISS "Earth from space" stream (low
   quality on purpose, selectable). Advanced search shows an OpenStreetMap view of the chosen region
+- Auto news: recent Ukrainian/Russian auto-news headlines (links out, no article text) polled from RSS feeds listed in `scripts/news-sources.json` (`pnpm ingest:news`, `registry.news_items`) — a self-scrolling strip on the homepage, a 📰 News section on result cards (make+model, then make news; Ukrainian UI shows Ukrainian-language items only) and a desktop-only side panel that fades in on scroll
 - Light/dark theme, AR plate scan and photo search, link previews for shared plate/VIN URLs
 - Installable PWA with offline mode: recent results, history and favorites stay available without a connection
 
@@ -164,6 +165,7 @@ See [CLAUDE.md](CLAUDE.md) for conventions and [PLAN.md](PLAN.md) for the roadma
 `pnpm ingest:edrive · ingest:edrive:csv · export:edrive:csv` ·
 `pnpm ingest:press · ingest:press:csv · export:press:csv` (~10 min cold, 1 req/s) ·
 `pnpm ingest:topgear · ingest:topgear:csv · export:topgear:csv` (~20–25 min cold, 1 req/s) ·
+`pnpm ingest:news` (RSS auto-news; feeds in `scripts/news-sources.json`; `--source`, `--dry-run`, `--list`; no CSV seed — schedule it) ·
 `pnpm ingest:sketchfab · ingest:sketchfab:csv · export:sketchfab:csv` ·
 `pnpm ingest:carshow360 · ingest:carshow360:csv · export:carshow360:csv` (sitemap only; `--enrich`, `--retry-failed`) ·
 `pnpm ingest:ratings:csv · ingest:all` ·

@@ -277,5 +277,20 @@ export {
   type ModelSuggestion,
   type ModelSuggestionsResponse,
   type SearchResultRow,
-  type SearchResponse
+  type SearchResponse,
+  newsItemSchema,
+  newsResponseSchema,
+  type NewsItem,
+  type NewsResponse
 } from './schemas.js'
+export {
+  MAX_BRAND_ONLY_NEWS,
+  MAX_LATEST_NEWS,
+  MAX_NEWS,
+  newsLookup,
+  tagNews,
+  type NewsHit,
+  type NewsMatch,
+  type NewsRow,
+  type NewsTag
+} from './newsLookup.js'

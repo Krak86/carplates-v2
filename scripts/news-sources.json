@@ -1,0 +1,60 @@
+[
+  {
+    "id": "infocar-news",
+    "name": "infocar.ua",
+    "url": "https://news.infocar.ua/rss/news.php",
+    "lang": "uk",
+    "enabled": true,
+    "note": "100 items, ~2-4 days window; windows-1251 (detected from the XML declaration)"
+  },
+  {
+    "id": "infocar-new-models",
+    "name": "infocar.ua",
+    "url": "https://news.infocar.ua/rss/new-models.php",
+    "lang": "uk",
+    "enabled": true,
+    "note": "20 items; title is just \"Make Model\" — best brand+model matches"
+  },
+  {
+    "id": "infocar-tests",
+    "name": "infocar.ua",
+    "url": "https://news.infocar.ua/rss/tests.php",
+    "lang": "uk",
+    "enabled": true,
+    "note": "test drives"
+  },
+  {
+    "id": "eauto",
+    "name": "eauto.org.ua",
+    "url": "https://eauto.org.ua/rss.xml",
+    "lang": "uk",
+    "enabled": true,
+    "note": "market analytics, 50 items, no categories — mostly untagged (general news)"
+  },
+  {
+    "id": "autoua",
+    "name": "autoua.net",
+    "url": "https://autoua.net/rss/",
+    "lang": "ru",
+    "enabled": true,
+    "note": "20 items, has <enclosure> images; <category> is dirty, title is the primary source"
+  },
+  {
+    "id": "mezha",
+    "name": "mezha.ua",
+    "url": "https://mezha.ua/feed/",
+    "lang": "uk",
+    "enabled": true,
+    "onlyCategories": ["Авто", "Електромобілі"],
+    "note": "tech whole-site feed, only 10 items (~3 h) — onlyCategories keeps the car tags (\"Авто\"/\"Електромобілі\", make is also a tag); poll hourly. itc.ua/ua/feed/ is NOT usable: its robots.txt has \"Disallow: */feed/\""
+  },
+  {
+    "id": "novyny-live",
+    "name": "novyny.live",
+    "url": "https://novyny.live/rss/news_ua.rss",
+    "lang": "uk",
+    "enabled": true,
+    "onlyCategories": ["Авто"],
+    "note": "whole-site feed (146 items ≈ 1 day, allowed in robots.txt); onlyCategories keeps \"Авто\" (~8/day, practical car content; \"Транспорт\" is railways — not kept). <description> is empty, so no summary; images are avif"
+  }
+]
