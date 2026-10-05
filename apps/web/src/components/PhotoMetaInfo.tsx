@@ -14,7 +14,7 @@ export default function PhotoMetaInfo({ meta }: Props): ReactNode {
   const hasPlace = latitude != null && longitude != null
 
   return (
-    <div className="flex w-full max-w-2xl flex-col gap-1 text-sm text-[var(--color-fg)]/80">
+    <div className="flex w-full max-w-content flex-col gap-1 text-sm text-[var(--color-fg)]/80">
       <p className="flex flex-wrap items-center gap-x-3 gap-y-0.5">
         {takenAt && (
           <span>

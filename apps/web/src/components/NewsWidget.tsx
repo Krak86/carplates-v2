@@ -16,7 +16,7 @@ type Props = {
   year: number | null
 }
 
-/** Wide enough that the card (max-w-2xl, centred) leaves the right-hand gutter free. Tablets / phones never get the widget. */
+/** Wide enough that the card (max-w-content, centred) leaves the right-hand gutter free. Tablets / phones never get the widget. */
 const DESKTOP_QUERY = '(min-width: 1400px)'
 const SHOW_AFTER_SCROLL_PX = 80
 

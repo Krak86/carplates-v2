@@ -18,7 +18,7 @@ export default function PhotoThumbnail({ url, candidates, active, onClose }: Pro
   const [zoomed, setZoomed] = useState(false)
 
   return (
-    <div className="relative w-full max-w-2xl">
+    <div className="relative w-full max-w-content">
       <button
         type="button"
         onClick={() => setZoomed(true)}

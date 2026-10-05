@@ -37,7 +37,7 @@ export default function WikiHeroImage({ brand, model, year, rawKind, vehicleKey 
   if (!isPending && (!image || failedUrl === image.url)) {
     const kind = resolveVehicleKind(rawKind)
     return kind ? (
-      <div className="hero-vt relative -my-3 h-64 w-full max-w-2xl sm:h-80">
+      <div className="hero-vt relative -my-3 h-64 w-full max-w-content sm:h-80">
         <VehicleKindPlaceholder kind={kind} />
       </div>
     ) : null
@@ -46,7 +46,7 @@ export default function WikiHeroImage({ brand, model, year, rawKind, vehicleKey 
   const isLoaded = !!image && loadedUrl === image.url
 
   return (
-    <div className="hero-vt relative -my-3 h-64 w-full max-w-2xl sm:h-80">
+    <div className="hero-vt relative -my-3 h-64 w-full max-w-content sm:h-80">
       {!isLoaded && <div className="absolute inset-0 animate-pulse rounded-lg bg-black/10 dark:bg-white/10" />}
       {image && (
         <img

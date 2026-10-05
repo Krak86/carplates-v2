@@ -13,7 +13,7 @@ export default function DiscussRoute(): ReactNode {
   const url = `${window.location.origin}/discuss`
 
   return (
-    <article className="mx-auto max-w-2xl space-y-4">
+    <article className="mx-auto max-w-content space-y-4">
       <h1 className="text-2xl font-bold">{t('discuss.heading')}</h1>
 
       <Card>

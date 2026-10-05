@@ -4,6 +4,8 @@
 
 /* Design tokens. Light is the committed default; dark is wired for later. */
 @theme {
+  /* Content column width of the non-stats pages (search results, about, history, favourites, discuss, advanced search) — tweak here. */
+  --container-content: 700px;
   --color-bg: hsl(0 0% 100%);
   --color-surface: hsl(220 20% 98%);
   --color-border: hsl(220 13% 88%);

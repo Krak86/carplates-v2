@@ -43,7 +43,7 @@ export default function VinResult({ data }: Props): ReactNode {
   const hasWikiQuery = Boolean(vehicle.brand || vehicle.model)
 
   return (
-    <div className="card-vt relative w-full max-w-2xl">
+    <div className="card-vt relative w-full max-w-content">
       {/* Wide viewports have room beside the card — float the toggle out there instead
           of stacking it above, which otherwise pushes the card down for no reason. */}
       <CardTiltToggle className="absolute top-3 -right-14 hidden lg:inline-flex" />

@@ -189,7 +189,7 @@ export default function SearchRoute(): ReactNode {
           isIdle ? 'mt-[18vh]' : 'mt-0'
         )}
       >
-        <div className="w-full max-w-2xl text-center">
+        <div className={cn('w-full text-center', isHome && !photo ? 'max-w-2xl' : 'max-w-content')}>
           <div
             aria-hidden={hideTitle}
             className={cn(
@@ -215,7 +215,7 @@ export default function SearchRoute(): ReactNode {
         </div>
 
         {showingSavedCopy && (
-          <p className="w-full max-w-2xl rounded-md border border-amber-500/40 bg-amber-500/15 px-2.5 py-1.5 text-sm font-medium text-amber-800 dark:text-amber-300">
+          <p className="w-full max-w-content rounded-md border border-amber-500/40 bg-amber-500/15 px-2.5 py-1.5 text-sm font-medium text-amber-800 dark:text-amber-300">
             {t('offline.savedCopy', {
               date: new Date(active.dataUpdatedAt).toLocaleString(toIntlLocale(i18n.language), {
                 dateStyle: 'medium',
@@ -279,7 +279,7 @@ export default function SearchRoute(): ReactNode {
         </Presence>
 
         <Presence show={!!recognizeErrorKey}>
-          <p className="w-full max-w-2xl rounded-md bg-[var(--color-surface)]/20 px-3 py-2 text-center text-[var(--color-muted)]">
+          <p className="w-full max-w-content rounded-md bg-[var(--color-surface)]/20 px-3 py-2 text-center text-[var(--color-muted)]">
             {recognizeErrorKey ? t(recognizeErrorKey) : null}
           </p>
         </Presence>

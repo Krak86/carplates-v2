@@ -82,7 +82,7 @@ export default function AdvancedSearchRoute(): ReactNode {
   const totalPages = results.data ? Math.max(1, Math.ceil(results.data.total / pageSize)) : 1
 
   return (
-    <div className="mx-auto w-full max-w-3xl">
+    <div className="mx-auto w-full max-w-content">
       <div className="mb-4 inline-block rounded-lg bg-[var(--color-bg)]/85 px-3 py-1.5 backdrop-blur-sm">
         <h1 className="text-2xl font-bold">{t('advancedSearch.title')}</h1>
         <p className="text-[var(--color-muted)]">{t('advancedSearch.subtitle')}</p>

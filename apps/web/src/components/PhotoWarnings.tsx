@@ -32,7 +32,7 @@ export default function PhotoWarnings({ meta, maxDimension, showAccuracy }: Prop
   const hasMore = rest.length > 0
 
   return (
-    <div className="w-full max-w-2xl rounded-md border border-amber-500/40 bg-amber-500/15 px-2.5 py-1.5 text-sm font-medium text-amber-800 dark:text-amber-300">
+    <div className="w-full max-w-content rounded-md border border-amber-500/40 bg-amber-500/15 px-2.5 py-1.5 text-sm font-medium text-amber-800 dark:text-amber-300">
       <div className="flex items-start gap-1.5">
         <span aria-hidden>{first.icon}</span>
         <span className="min-w-0 flex-1">{first.text}</span>

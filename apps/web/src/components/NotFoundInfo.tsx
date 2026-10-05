@@ -15,7 +15,7 @@ export default function NotFoundInfo({ value }: Props): ReactNode {
   const isPlate = isUaPlate(value)
 
   return (
-    <div className="w-full max-w-2xl rounded-md bg-[var(--color-surface)]/20 px-3 py-2 text-left">
+    <div className="w-full max-w-content rounded-md bg-[var(--color-surface)]/20 px-3 py-2 text-left">
       <p className="text-center text-[var(--color-muted)]">{t('result.noResults', { value })}</p>
 
       {isPlate && (

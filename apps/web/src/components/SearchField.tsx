@@ -43,7 +43,7 @@ export default function SearchField({
   }
 
   return (
-    <div className="search-vt flex w-full max-w-2xl flex-col gap-1">
+    <div className="search-vt flex w-full flex-col gap-1">
       <form onSubmit={handleSubmit} className="flex gap-2">
         <div className="group relative min-w-0 flex-1">
           <button
