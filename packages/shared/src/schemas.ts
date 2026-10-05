@@ -545,6 +545,22 @@ export const models3dResponseSchema = z.object({ models: z.array(model3dSchema) 
 export type Model3d = z.infer<typeof model3dSchema>
 export type Models3dResponse = z.infer<typeof models3dResponseSchema>
 
+/** A CarShow360 360° gallery (persisted by `pnpm ingest:carshow360`) of this car's make/model; embedded from carshow360.net. */
+export const model360Schema = z.object({
+  id: z.number().int(),
+  /** URL slugs — together with `id` they build the embed URL. */
+  brandSlug: z.string(),
+  modelSlug: z.string(),
+  slug: z.string(),
+  /** Generation/trim text from the URL slug, e.g. "III FL2021 Hatchback". */
+  label: z.string(),
+  /** Page title when the optional --enrich pass has fetched it. */
+  title: z.string().nullable()
+})
+export const models360ResponseSchema = z.object({ models: z.array(model360Schema) })
+export type Model360 = z.infer<typeof model360Schema>
+export type Models360Response = z.infer<typeof models360ResponseSchema>
+
 /** Shared count fields for every stats rollup row. */
 export const statsMetricsSchema = z.object({
   totalRows: z.number().int().nonnegative(),

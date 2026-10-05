@@ -9,6 +9,7 @@ import {
   iihsRatingsResponseSchema,
   jncapRatingsResponseSchema,
   models3dResponseSchema,
+  models360ResponseSchema,
   kncapRatingsResponseSchema,
   modelSuggestionsResponseSchema,
   plateHistoryResponseSchema,
@@ -30,6 +31,7 @@ import type {
   EuroNcapRatingsResponse,
   FuelEconomyResponse,
   Models3dResponse,
+  Models360Response,
   ReviewsResponse,
   FuelStatsResponse,
   SafetyStatsResponse,
@@ -273,6 +275,11 @@ export async function recognizePlate(file: File): Promise<PlateRecognizeResponse
 export async function getModels3d(brand: string, model: string): Promise<Models3dResponse> {
   const params = new URLSearchParams({ brand, model })
   return models3dResponseSchema.parse(await getJson(`/api/models3d?${params.toString()}`))
+}
+
+export async function getModels360(brand: string, model: string): Promise<Models360Response> {
+  const params = new URLSearchParams({ brand, model })
+  return models360ResponseSchema.parse(await getJson(`/api/models360?${params.toString()}`))
 }
 
 export async function getReviews(brand: string, model: string, year: number | null): Promise<ReviewsResponse> {

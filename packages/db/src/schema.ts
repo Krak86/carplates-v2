@@ -611,3 +611,23 @@ export const missedLookups = registry.table(
   },
   t => [primaryKey({ columns: [t.kind, t.value] }), index('ix_missed_lookups_last_seen').on(t.lastSeen)]
 )
+
+/**
+ * One CarShow360 360° gallery (`scripts/src/carshow360.ts`), keyed by its carshow360 numeric id and tagged with the
+ * make/model URL slugs. Facts + links only (embedded from carshow360.net) — see migrations/0028_car_models_360.sql.
+ */
+export const carModels360 = registry.table(
+  'car_models_360',
+  {
+    id: integer('id').primaryKey(),
+    brandSlug: text('brand_slug').notNull(),
+    modelSlug: text('model_slug').notNull(),
+    slug: text('slug').notNull(),
+    label: text('label').notNull(),
+    title: text('title'),
+    fetchedAt: timestamp('fetched_at', { withTimezone: true }).notNull().defaultNow()
+  },
+  t => [index('ix_car_models_360_brand_model').on(t.brandSlug, t.modelSlug)]
+)
+export type CarModel360Row = typeof carModels360.$inferSelect
+export type CarModel360Insert = typeof carModels360.$inferInsert

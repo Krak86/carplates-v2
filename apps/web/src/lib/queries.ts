@@ -19,6 +19,7 @@ import {
   getStatsTop,
   getUkraineGeography,
   getModels3d,
+  getModels360,
   getVehiclePhotos,
   getWikiInfo,
   lookupPlate,
@@ -242,6 +243,15 @@ export function models3dQuery(brand: string, model: string) {
   return queryOptions({
     queryKey: ['models3d', brand, model],
     queryFn: () => getModels3d(brand, model),
+    staleTime: Infinity
+  })
+}
+
+// CarShow360 360° galleries of a brand/model — persisted reference data (pnpm ingest:carshow360), changes only on a re-crawl.
+export function models360Query(brand: string, model: string) {
+  return queryOptions({
+    queryKey: ['models360', brand, model],
+    queryFn: () => getModels360(brand, model),
     staleTime: Infinity
   })
 }
