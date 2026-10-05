@@ -100,6 +100,17 @@ describe('extractVins', () => {
   it('leaves a read with a known prefix alone', () => {
     expect(extractVins([{ text: 'MNCLSFE405W491230', score: 0.98 }]).map(r => r.vin)).toEqual(['MNCLSFE405W491230'])
   })
+  it('lists a VIN once even when its label shares the line (no shifted-window copies)', () => {
+    const reads = extractVins([{ text: 'V.I.N. 3KPFT4DE1TE349095', score: 0.97 }])
+    expect(reads.map(r => r.vin)).toEqual(['3KPFT4DE1TE349095'])
+  })
+  it('keeps two genuinely different VINs', () => {
+    const reads = extractVins([
+      { text: '3KPFT4DE1TE349095', score: 0.97 },
+      { text: 'WMWLN5105J2H03769', score: 0.97 }
+    ])
+    expect(reads).toHaveLength(2)
+  })
   it('does not glue a full VIN line to the next line', () => {
     const vins = extractVins([
       { text: 'U5YHN512BDL007162', score: 0.99 },

@@ -111,6 +111,13 @@ const SOURCE_JOINED = 2
 const looksLikeVin = (vin: string, source: number): boolean =>
   /\d{4}$/.test(vin) || (source === SOURCE_EXACT && (vin.match(/\d/g)?.length ?? 0) >= 3 && vinCheckDigitOk(vin))
 
+/** Whether b is a (up to 4 characters) shifted copy of a — they share a run of at least 13 characters. */
+const isShiftedCopy = (a: string, b: string): boolean => {
+  for (let d = 1; d <= 4; d++)
+    if (a.slice(d) === b.slice(0, VIN_LENGTH - d) || b.slice(d) === a.slice(0, VIN_LENGTH - d)) return true
+  return false
+}
+
 type Ranked = VinRead & { source: number; corrected?: boolean }
 
 /** Look-alike pairs OCR swaps in embossed/stamped text (an `M` read as `N`, `8` as `B`…), both directions. */
@@ -211,15 +218,20 @@ export function extractVins(lines: OcrLine[]): VinRead[] {
     for (const fix of fixes) if (!found.has(fix.vin)) found.set(fix.vin, fix)
   }
 
-  return [...found.values()]
-    .sort(
-      (a, b) =>
-        a.source - b.source ||
-        Number(b.checkDigitOk) - Number(a.checkDigitOk) ||
-        Number(!!b.corrected) - Number(!!a.corrected) ||
-        b.score - a.score
-    )
-    .map(({ vin, score, checkDigitOk, box }) =>
-      box ? { vin, score, checkDigitOk, box } : { vin, score, checkDigitOk }
-    )
+  const ranked = [...found.values()].sort(
+    (a, b) =>
+      a.source - b.source ||
+      Number(b.checkDigitOk) - Number(a.checkDigitOk) ||
+      Number(!!b.corrected) - Number(!!a.corrected) ||
+      b.score - a.score
+  )
+
+  // One VIN printed once is one VIN: a read that is just a shifted copy of a better one ("V1N3KPFT…" windows around
+  // "3KPFT4DE1TE349095") is the same text on the plate, not another candidate.
+  const kept: Ranked[] = []
+  for (const read of ranked) if (!kept.some(k => isShiftedCopy(k.vin, read.vin))) kept.push(read)
+
+  return kept.map(({ vin, score, checkDigitOk, box }) =>
+    box ? { vin, score, checkDigitOk, box } : { vin, score, checkDigitOk }
+  )
 }
