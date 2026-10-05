@@ -52,6 +52,7 @@ export {
 } from './infocarLookup.js'
 export { MAX_VIDEOS, videoLookup, type InfocarVideoRow } from './infocarVideoLookup.js'
 export { MAX_OWNER_POSTS, edriveModelSlug, ownerPostLookup, type OwnerPostLookupRow } from './edriveLookup.js'
+export { MAX_TOPGEAR_REVIEWS, topgearLookup, type TopgearLookupRow } from './topgearLookup.js'
 export { MAX_MODELS_3D, model3dLookup, type Model3dLookupRow } from './model3dLookup.js'
 export { countOwners } from './owners.js'
 export { makeKey, modelKey, brandCandidateKey } from './vehicleKey.js'

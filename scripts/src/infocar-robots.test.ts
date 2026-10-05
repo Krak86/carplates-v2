@@ -34,6 +34,12 @@ describe('robots', () => {
     expect(isAllowed(parseRobots(TXT, 'BUbiNG/0.9'), '/test-drive/')).toBe(false)
   })
 
+  it('merges repeated groups for the same agent', () => {
+    const merged = parseRobots('User-agent: *\nAllow: /\n\nUser-agent: *\nDisallow: /search*\n', 'x')
+    expect(isAllowed(merged, '/search?q=1')).toBe(false)
+    expect(isAllowed(merged, '/car-reviews/kia/ceed')).toBe(true)
+  })
+
   it('allows everything when there is no robots.txt content', () => {
     expect(isAllowed(parseRobots('', 'x'), '/anything')).toBe(true)
   })

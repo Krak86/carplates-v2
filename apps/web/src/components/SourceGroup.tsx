@@ -8,11 +8,11 @@ type Props = {
   icon?: string
   name: string
   /** Languages the source offers, shown as UA/RU chips beside the name. */
-  langs?: ('ua' | 'ru')[]
+  langs?: ('ua' | 'ru' | 'en')[]
   children: ReactNode
 }
 
-/** One source (infocar, e-drive, other sites) inside the combined reviews section: its name, then what it offers. */
+/** One source (infocar, e-drive, TopGear, other sites) inside the combined reviews section: its name, then what it offers. */
 export default function SourceGroup({ icon, name, langs, children }: Props): ReactNode {
   const [iconFailed, setIconFailed] = useState(false)
 
@@ -26,7 +26,7 @@ export default function SourceGroup({ icon, name, langs, children }: Props): Rea
             width={20}
             height={20}
             onError={() => setIconFailed(true)}
-            className="size-5 rounded-sm"
+            className="h-5 w-auto rounded-sm"
           />
         )}
         {name}

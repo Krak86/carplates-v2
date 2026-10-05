@@ -447,6 +447,32 @@ export type CarModel3dRow = typeof carModels3d.$inferSelect
 export type CarModel3dInsert = typeof carModels3d.$inferInsert
 
 /**
+ * One TopGear UK editorial review page (`scripts/src/topgear.ts`), keyed by its topgear.com URL. `brandSlug` is our
+ * (infocar-spelled) brand slug, null when TopGear's make has no catalog match; `yearFrom`/`yearTo` only when the model
+ * slug carries a range. Facts + links only (score, date, meta-description blurb) — see migrations/0027_topgear_reviews.sql.
+ */
+export const topgearReviews = registry.table(
+  'topgear_reviews',
+  {
+    url: text('url').primaryKey(),
+    makeSlug: text('make_slug').notNull(),
+    modelSlug: text('model_slug').notNull(),
+    brandSlug: text('brand_slug'),
+    title: text('title').notNull(),
+    rating: real('rating'),
+    bestRating: real('best_rating'),
+    publishedAt: date('published_at', { mode: 'string' }),
+    yearFrom: integer('year_from'),
+    yearTo: integer('year_to'),
+    blurb: text('blurb'),
+    fetchedAt: timestamp('fetched_at', { withTimezone: true }).notNull().defaultNow()
+  },
+  t => [index('ix_topgear_reviews_brand_model').on(t.brandSlug, t.modelSlug)]
+)
+export type TopgearReviewRow = typeof topgearReviews.$inferSelect
+export type TopgearReviewInsert = typeof topgearReviews.$inferInsert
+
+/**
  * One IIHS (US, insurance-industry-funded) vehicle model-year assessment — scraped from
  * iihs.org's own server-rendered detail pages via `scripts/src/iihs.ts` and refreshed by
  * re-running it, same rationale as `cncapRatings`/`kncapRatings` above. `makeKey`/`modelKey`

@@ -511,11 +511,21 @@ export const ownerPostSchema = z.object({
   coverUrl: z.string().nullable(),
   createdAt: z.string().nullable()
 })
+/** A TopGear UK editorial review (persisted by `pnpm ingest:topgear`) of this car's make/model: score out of `bestRating`, link and blurb only. */
+export const topgearReviewSchema = z.object({
+  url: z.string(),
+  title: z.string(),
+  rating: z.number().nullable(),
+  bestRating: z.number().nullable(),
+  publishedAt: z.string().nullable(),
+  blurb: z.string().nullable()
+})
 export const reviewsResponseSchema = z.object({
   testDrive: infocarMatchSchema.nullable(),
   reviews: infocarMatchSchema.nullable(),
   videos: z.array(infocarVideoSchema),
-  ownerPosts: z.array(ownerPostSchema)
+  ownerPosts: z.array(ownerPostSchema),
+  topgear: z.array(topgearReviewSchema)
 })
 export type ReviewsResponse = z.infer<typeof reviewsResponseSchema>
 

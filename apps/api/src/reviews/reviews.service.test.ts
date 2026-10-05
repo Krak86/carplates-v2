@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { carVideos, ownerPosts } from '@carplates/db'
-import type { CarVideoRow, InfocarVersionRow, OwnerPostRow } from '@carplates/db'
+import { carVideos, ownerPosts, topgearReviews } from '@carplates/db'
+import type { CarVideoRow, InfocarVersionRow, OwnerPostRow, TopgearReviewRow } from '@carplates/db'
 
 import type { DbService } from '../db/db.service.js'
 
@@ -29,12 +29,15 @@ function row(overrides: Partial<InfocarVersionRow>): InfocarVersionRow {
 function serviceWith(
   rows: InfocarVersionRow[],
   videos: CarVideoRow[] = [],
-  posts: OwnerPostRow[] = []
+  posts: OwnerPostRow[] = [],
+  topgearRows: TopgearReviewRow[] = []
 ): ReviewsService {
+  const rowsFor = (table: unknown): unknown[] =>
+    table === carVideos ? videos : table === ownerPosts ? posts : table === topgearReviews ? topgearRows : rows
   const db = {
     select: () => ({
       from: (table: unknown) => ({
-        where: () => Promise.resolve(table === carVideos ? videos : table === ownerPosts ? posts : rows)
+        where: () => Promise.resolve(rowsFor(table))
       })
     })
   }
@@ -73,6 +76,21 @@ const post: OwnerPostRow = {
   fetchedAt: new Date(0)
 }
 
+const topgear: TopgearReviewRow = {
+  url: 'https://www.topgear.com/car-reviews/kia/ceed',
+  makeSlug: 'kia',
+  modelSlug: 'ceed',
+  brandSlug: 'kia',
+  title: 'Kia Ceed',
+  rating: 6,
+  bestRating: 10,
+  publishedAt: '2015-01-13',
+  yearFrom: null,
+  yearTo: null,
+  blurb: 'A good egg all round',
+  fetchedAt: new Date(0)
+}
+
 describe('ReviewsService.lookup', () => {
   it('returns the matching version per tree, ignoring rows of an unknown tree', async () => {
     const service = serviceWith([
@@ -97,7 +115,8 @@ describe('ReviewsService.lookup', () => {
       testDrive: null,
       reviews: null,
       videos: [],
-      ownerPosts: []
+      ownerPosts: [],
+      topgear: []
     })
   })
 
@@ -129,5 +148,20 @@ describe('ReviewsService.lookup', () => {
       }
     ])
     expect((await service.lookup({ brand: 'KIA', model: "CEE'D", year: 2019 })).ownerPosts).toEqual([])
+  })
+
+  it('returns TopGear reviews for the car model, without DB-only fields', async () => {
+    const service = serviceWith([row({})], [], [], [topgear])
+    const res = await service.lookup({ brand: 'KIA', model: "CEE'D", year: 2015 })
+    expect(res.topgear).toEqual([
+      {
+        url: 'https://www.topgear.com/car-reviews/kia/ceed',
+        title: 'Kia Ceed',
+        rating: 6,
+        bestRating: 10,
+        publishedAt: '2015-01-13',
+        blurb: 'A good egg all round'
+      }
+    ])
   })
 })

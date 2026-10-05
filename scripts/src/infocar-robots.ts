@@ -5,7 +5,10 @@
  */
 export type RobotsRules = { allow: string[]; disallow: string[] }
 
-/** Rules of the group that names `agent` (case-insensitive substring of a `User-agent` line), else the `*` group. */
+/**
+ * Rules of the group(s) that name `agent` (case-insensitive substring of a `User-agent` line), else the `*` group(s).
+ * Several groups for the same agent are merged (RFC 9309) — topgear.com repeats `User-agent: *` before every rule.
+ */
 export function parseRobots(txt: string, agent: string): RobotsRules {
   const groups: { agents: string[]; rules: RobotsRules }[] = []
   let current: { agents: string[]; rules: RobotsRules } | null = null
@@ -31,8 +34,12 @@ export function parseRobots(txt: string, agent: string): RobotsRules {
     else if (key === 'disallow') current.rules.disallow.push(value)
   }
   const token = agent.toLowerCase()
-  const own = groups.find(g => g.agents.some(a => a !== '*' && token.includes(a)))
-  return (own ?? groups.find(g => g.agents.includes('*')))?.rules ?? { allow: [], disallow: [] }
+  const own = groups.filter(g => g.agents.some(a => a !== '*' && token.includes(a)))
+  const matched = own.length ? own : groups.filter(g => g.agents.includes('*'))
+  return {
+    allow: matched.flatMap(g => g.rules.allow),
+    disallow: matched.flatMap(g => g.rules.disallow)
+  }
 }
 
 function matchLength(pattern: string, path: string): number {

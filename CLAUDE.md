@@ -76,9 +76,14 @@ pnpm ingest:sketchfab  # Sketchfab Data API search per infocar-catalog make/mode
                        # --dry-run, --refresh. Needs ingest:infocar(:csv) first
 pnpm ingest:sketchfab:csv   # load the committed Sketchfab CSV — seconds, no searching
 pnpm export:sketchfab:csv   # re-dump the table to that CSV — run after every real re-crawl
+pnpm ingest:topgear   # TopGear UK editorial reviews (topgear.com/car-reviews/<make>/<model>, sitemap -> ~1,040 pages, 1 req/s, ~20-25 min cold,
+                       # robots-aware, HTML cached in scripts/.data/topgear/) -> registry.topgear_reviews; --brand kia (TopGear make
+                       # slug), --limit N, --dry-run, --refresh. Score + link + meta blurb only. See PLAN.md "Step 2c"
+pnpm ingest:topgear:csv   # load the committed TopGear CSV (71 KB gz) — seconds, no crawling
+pnpm export:topgear:csv   # re-dump the table to that CSV — run after every real re-crawl
 pnpm db:refresh-fuel-stats   # rebuild registry.stats_fuel (the /fuel page rollup) from the registry + fuel_economy;
                              # run after any registry ingest or ingest:fuel (ingest:all does it last)
-pnpm ingest:ratings:csv   # db:migrate, then all five *:csv rating loads + the fuel, infocar, infocar-videos, e-drive and sketchfab CSVs concurrently — each writes
+pnpm ingest:ratings:csv   # db:migrate, then all five *:csv rating loads + the fuel, infocar, infocar-videos, e-drive, sketchfab and topgear CSVs concurrently — each writes
                           # its own table only, doesn't touch registrations
 pnpm ingest:all        # db:migrate, then ingest:full + ingest:ratings:csv concurrently — each writes a
                        # disjoint table (registrations/current_registration/stats_by_* vs. one ratings/fuel_economy

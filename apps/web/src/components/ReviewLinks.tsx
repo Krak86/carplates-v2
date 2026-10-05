@@ -13,12 +13,15 @@ import SectionInfo from '@/components/SectionInfo'
 import SectionHeader from '@/components/SectionHeader'
 import ShareButton from '@/components/ShareButton'
 import SourceGroup from '@/components/SourceGroup'
+import TopgearReviews from '@/components/TopgearReviews'
 import { cn } from '@/lib/cn'
 import { reviewsQuery } from '@/lib/queries'
 import { scrollElementIntoView } from '@/lib/share-section'
 
 /** infocar.ua and e-drive.com.ua publish in both Ukrainian and Russian. */
 const UA_RU: ('ua' | 'ru')[] = ['ua', 'ru']
+/** TopGear UK reviews are English-only. */
+const EN: 'en'[] = ['en']
 
 type Props = {
   brand: string | null
@@ -28,8 +31,8 @@ type Props = {
 
 /**
  * One collapsed "Reviews" section (all the text material; videos have their own `VideoReviews` section), grouped by
- * source: infocar.ua (test drives, owner reviews), e-drive.com.ua (owner posts) and search links to the other review
- * sites. The persisted catalogs are fetched once the section is opened. Hidden for a car with no make/model to go on.
+ * source: infocar.ua (test drives, owner reviews), e-drive.com.ua (owner posts), TopGear UK (editorial reviews) and
+ * search links to the other review sites. The persisted catalogs are fetched once the section is opened. Hidden for a car with no make/model to go on.
  */
 export default function ReviewLinks({ brand, model, year }: Props): ReactNode {
   const { t } = useTranslation()
@@ -41,6 +44,7 @@ export default function ReviewLinks({ brand, model, year }: Props): ReactNode {
   const hasLinks = links.length > 0
   const catalog = useQuery({ ...reviewsQuery(brand ?? '', model ?? '', year), enabled: !!brand && open })
   const posts = catalog.data?.ownerPosts ?? []
+  const topgear = catalog.data?.topgear ?? []
   const hasInfocar = !!catalog.data?.testDrive || !!catalog.data?.reviews
 
   useEffect(() => {
@@ -97,6 +101,12 @@ export default function ReviewLinks({ brand, model, year }: Props): ReactNode {
             {posts.length > 0 && (
               <SourceGroup icon="/icons/edrive.png" name="e-drive.com.ua" langs={UA_RU}>
                 <EdrivePosts posts={posts} />
+              </SourceGroup>
+            )}
+
+            {topgear.length > 0 && (
+              <SourceGroup icon="/icons/topgear.webp" name="TopGear" langs={EN}>
+                <TopgearReviews reviews={topgear} />
               </SourceGroup>
             )}
 

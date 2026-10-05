@@ -14,7 +14,13 @@ const SOURCES = [
   { key: 'kncap', label: 'KNCAP', url: 'https://www.kncap.org' },
   { key: 'iihs', label: 'IIHS', url: 'https://www.iihs.org' },
   { key: 'epa', label: 'EPA / fueleconomy.gov', url: 'https://www.fueleconomy.gov' },
-  { key: 'eea', label: 'EEA', url: 'https://www.eea.europa.eu' }
+  { key: 'eea', label: 'EEA', url: 'https://www.eea.europa.eu' },
+  { key: 'infocar', label: 'infocar.ua', url: 'https://www.infocar.ua' },
+  { key: 'edrive', label: 'e-drive.com.ua', url: 'https://e-drive.com.ua' },
+  { key: 'topgear', label: 'TopGear', url: 'https://www.topgear.com/car-reviews' },
+  { key: 'sketchfab', label: 'Sketchfab', url: 'https://sketchfab.com' },
+  { key: 'googleMaps', label: 'Google Maps', url: 'https://www.google.com/maps' },
+  { key: 'youtube', label: 'YouTube', url: 'https://www.youtube.com' }
 ] as const
 
 // Lazy-loaded (see App.tsx).

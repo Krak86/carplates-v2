@@ -811,7 +811,7 @@ stories, other sites = search links; each list shows 5, then "Show N more"). Vid
    for recent generations; a `--since` shortcut could page only until the first already-known `createdAt`).
 5. Logos in `public/icons/` (`edrive.png`, new `infocar.png`) shown by `SourceGroup`.
 
-**Step 2c — TopGear UK editorial reviews (topgear.com/car-reviews): planned 2026-10-03, nothing built.** English-language
+**Step 2c — TopGear UK editorial reviews (topgear.com/car-reviews): planned 2026-10-03, built 2026-10-05 (steps 1–7 done; text-only, no video; step 8 measure + browser check still open).** Shipped: `scripts/src/topgear*.ts`, migration `0027_topgear_reviews.sql`, `topgearLookup` (shared), `topgear[]` on `/api/reviews`, `TopgearReviews` UI group after e-drive, committed `seed-data/topgear-reviews.csv.gz`. Measured on the real run: sitemap yields **1,073 model pages / 111 makes** after dropping `first-drive-N`/`report-N` article series (not 1,607); 1,032 reviews, 1,016 scored; 731 matched a catalog brand before `MAKE_ALIASES` (mercedes-benz, mg-motor-uk, vauxhall, gwm), the remaining unmatched makes are absent from infocar. topgear.com's CDN 403s the `(+https://carsua.app)` UA suffix — the fetcher sends plain `carsua.app-ingest/1.0`. Original plan below. English-language
 verdict + score per model, shown as a "TopGear (EN)" subsection of `ReviewLinks` next to infocar/e-drive. Links + facts
 only (title, score, date, blurb, url) — never republish review text beyond the meta description.
 **Findings (measured 2026-10-03):**

@@ -1,6 +1,13 @@
 import { Inject, Injectable } from '@nestjs/common'
-import { carVideos, infocarVersions, ownerPosts } from '@carplates/db'
-import { INFOCAR_TREES, infocarBrandSlug, infocarLookup, ownerPostLookup, videoLookup } from '@carplates/shared'
+import { carVideos, infocarVersions, ownerPosts, topgearReviews } from '@carplates/db'
+import {
+  INFOCAR_TREES,
+  infocarBrandSlug,
+  infocarLookup,
+  ownerPostLookup,
+  topgearLookup,
+  videoLookup
+} from '@carplates/shared'
 import type { InfocarRow, ReviewsResponse } from '@carplates/shared'
 import { eq } from 'drizzle-orm'
 
@@ -18,13 +25,14 @@ export class ReviewsService {
    */
   async lookup(query: Query): Promise<ReviewsResponse> {
     const slug = infocarBrandSlug(query.brand)
-    if (!slug) return { testDrive: null, reviews: null, videos: [], ownerPosts: [] }
+    if (!slug) return { testDrive: null, reviews: null, videos: [], ownerPosts: [], topgear: [] }
 
     const { db } = this.dbService
-    const [rows, videoRows, postRows] = await Promise.all([
+    const [rows, videoRows, postRows, topgearRows] = await Promise.all([
       db.select().from(infocarVersions).where(eq(infocarVersions.brandSlug, slug)),
       db.select().from(carVideos).where(eq(carVideos.brandSlug, slug)),
-      db.select().from(ownerPosts).where(eq(ownerPosts.brandSlug, slug))
+      db.select().from(ownerPosts).where(eq(ownerPosts.brandSlug, slug)),
+      db.select().from(topgearReviews).where(eq(topgearReviews.brandSlug, slug))
     ])
     const catalog = rows.flatMap((r): InfocarRow[] =>
       INFOCAR_TREES.find(tree => tree === r.tree) ? [{ ...r, tree: r.tree as InfocarRow['tree'] }] : []
@@ -47,6 +55,14 @@ export class ReviewsService {
       coverUrl: p.coverUrl,
       createdAt: p.createdAt
     }))
-    return { testDrive: match.test_drive, reviews: match.reviews, videos, ownerPosts: posts }
+    const topgear = topgearLookup(topgearRows, slug, query.model, query.year).map(r => ({
+      url: r.url,
+      title: r.title,
+      rating: r.rating,
+      bestRating: r.bestRating,
+      publishedAt: r.publishedAt,
+      blurb: r.blurb
+    }))
+    return { testDrive: match.test_drive, reviews: match.reviews, videos, ownerPosts: posts, topgear }
   }
 }
