@@ -327,6 +327,7 @@
   "topgear.source": "Editorial reviews from topgear.com (UK), scored out of 10. UK-market models only; not tied to a model year.",
   "press.source": "Test drives from {{site}}, matched to this model by title and tags. Not tied to a model year — the year shown is the article's.",
   "news.title": "News",
+  "news.close": "Close news",
   "news.latest": "Latest auto news",
   "news.aboutModel": "About {{model}}",
   "news.aboutBrand": "About {{brand}}",

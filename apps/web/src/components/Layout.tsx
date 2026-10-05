@@ -109,7 +109,7 @@ export default function Layout({ children }: Props): ReactNode {
           <>
             <div
               className={cn(
-                'fixed inset-0 z-10 bg-black/30 transition-opacity duration-300 md:hidden',
+                'fixed inset-0 z-10 bg-black/30 transition-opacity duration-300',
                 open ? 'opacity-100' : 'pointer-events-none opacity-0'
               )}
               onClick={() => setDrawerOpen(false)}
@@ -117,9 +117,8 @@ export default function Layout({ children }: Props): ReactNode {
             />
             <div
               className={cn(
-                'fixed inset-y-0 top-14 left-0 z-20 w-64 overflow-hidden transition-transform duration-300 ease-in-out',
-                'md:sticky md:top-14 md:h-[calc(100vh-3.5rem)] md:w-0 md:translate-x-0 md:self-start md:overflow-y-auto md:transition-[width] md:duration-300 md:ease-in-out',
-                open ? 'translate-x-0 md:w-64' : '-translate-x-full'
+                'fixed inset-y-0 top-14 left-0 z-20 w-64 overflow-x-hidden overflow-y-auto transition-transform duration-300 ease-in-out',
+                open ? 'translate-x-0' : '-translate-x-full'
               )}
             >
               <LoadErrorBoundary compact>

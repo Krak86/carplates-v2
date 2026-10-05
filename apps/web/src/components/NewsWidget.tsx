@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
+import { useLocation } from 'react-router'
 
 import NewsGroups from '@/components/NewsGroups'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
@@ -27,6 +28,9 @@ const SHOW_AFTER_SCROLL_PX = 80
 export default function NewsWidget({ brand, model, year }: Props): ReactNode {
   const { t, i18n } = useTranslation()
   const isDesktop = useMediaQuery(DESKTOP_QUERY)
+  const { pathname } = useLocation()
+  // Dismissal is per route: storing the path it was closed on makes it lapse on the next navigation.
+  const [dismissedPath, setDismissedPath] = useState<string | null>(null)
   const [scrolled, setScrolled] = useState<boolean>(() => window.scrollY > SHOW_AFTER_SCROLL_PX)
   const news = useQuery({ ...newsQuery(brand, model, year, newsLangFilter(i18n.language)), enabled: isDesktop })
 
@@ -37,7 +41,7 @@ export default function NewsWidget({ brand, model, year }: Props): ReactNode {
   }, [])
 
   const items = news.data?.items ?? []
-  if (!isDesktop || !items.length) return null
+  if (!isDesktop || !items.length || dismissedPath === pathname) return null
 
   return (
     <aside
@@ -49,9 +53,21 @@ export default function NewsWidget({ brand, model, year }: Props): ReactNode {
         scrolled ? 'translate-x-0 opacity-100' : 'pointer-events-none translate-x-8 opacity-0'
       )}
     >
-      <h2 className="px-1 text-sm font-semibold">
-        <span aria-hidden>📰</span> {t('news.title')}
-      </h2>
+      <div className="flex items-center justify-between gap-2">
+        <h2 className="px-1 text-sm font-semibold">
+          <span aria-hidden>📰</span> {t('news.title')}
+        </h2>
+
+        <button
+          type="button"
+          aria-label={t('news.close')}
+          title={t('news.close')}
+          onClick={() => setDismissedPath(pathname)}
+          className="rounded-md px-1.5 text-lg leading-none text-[var(--color-muted)] hover:bg-[var(--color-surface)] hover:text-[var(--color-fg)]"
+        >
+          ×
+        </button>
+      </div>
 
       <NewsGroups items={items} brand={brand} model={model} decorative={!scrolled} />
     </aside>
