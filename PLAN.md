@@ -831,7 +831,17 @@ only (title, score, date, blurb, url) — never republish review text beyond the
 - **AutoTrader UK (`autotrader.co.uk/cars/reviews?make=Kia&model=Cee%27d`) is not crawlable** — every request incl.
   `robots.txt` hits a Cloudflare managed challenge. Do **not** work around it; search link only.
 
-**TODO, in order:**
+**Status 2026-10-05 — items 1–7 below are done** (text-only, no Brightcove video: the `video_ref` column was dropped). Differences from the
+plan as written: migration is `0027` (`0026` went to `car_models_3d`); the sitemap has **1,073 model pages / 111 makes** (`first-drive-N`,
+`report-N` and section slugs are filtered), so a cold run is ~20–25 min, not 35–55; the fetcher's UA omits the `(+https://carsua.app)`
+suffix because topgear.com's CDN 403s it; `parseRobots` now merges repeated `User-agent: *` groups (topgear.com repeats it per rule);
+TopGear makes map to infocar brand slugs via `MAKE_ALIASES` in `topgear.ts` (mercedes-benz, mg-motor-uk, vauxhall, gwm). Result: 1,032
+reviews, 1,016 scored; makes absent from infocar (Ferrari, Lotus, McLaren …) can't surface. UI: "TopGear" group + EN badge after e-drive in
+`ReviewLinks`; the About page now also lists infocar.ua, e-drive.com.ua, TopGear, Sketchfab, Google Maps and YouTube.
+**Still open:** item 8 (coverage numbers + browser check of a Kia Sportage / BMW X5 / Mercedes plate); AutoTrader UK search link (item 7, not
+added); an optional "search YouTube for this car" link in the Video reviews section (requested 2026-10-05, scope unconfirmed).
+
+**TODO (original plan, kept for reference):**
 1. **Trial (~5 min).** `scripts/src/topgear-fetch.ts` (reuse the fetch/cache/robots helpers from `infocar-fetch.ts` — 1
    req/s, cache HTML in `scripts/.data/topgear/`, check robots first) + `scripts/src/topgear-parse.ts` (pure: JSON-LD
    `Review`/`Rating` → `{ rating, bestRating, publishedAt, headline, blurb }`, tolerant of string/number

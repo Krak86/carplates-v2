@@ -15,7 +15,10 @@ Ukrainian vehicle lookup by **plate number** or **VIN**. Rebuild of
   → `registry.fuel_economy`, shown as a badge on the result card and on `/fuel`; `/safety` ranks all crash-test sources
 - Reviews & test drives: links to [infocar.ua](https://www.infocar.ua) test drives and owner reviews matched to the
   car's make/model/year (from a crawled catalog, `registry.infocar_versions`; owner reviews also get a year-filtered
-  link) plus a DRIVE2 search link — links only, nothing copied
+  link), [e-drive.com.ua](https://e-drive.com.ua) owner posts for the car's generation, [TopGear](https://www.topgear.com/car-reviews)
+  UK editorial reviews (score out of 10 + blurb, English; `registry.topgear_reviews`) and a DRIVE2 search link — links
+  only, nothing copied. infocar videos play from YouTube on demand; community 3D models ([Sketchfab](https://sketchfab.com))
+  open in a "3D view" modal
 - Result-card hero photo: year-aware Wikimedia Commons search (falls back to the Wikipedia lead image, then a per-kind placeholder)
 - Background layers on plate/VIN result pages (button in the header, online only, resets on navigation): car photos
   (default), a Google Maps view of the plate's region capital, or a live NASA ISS "Earth from space" stream (low
@@ -143,7 +146,7 @@ marked out of date via `GET /api/stats/version` after a re-ingest.
 | `packages/db`     | Drizzle schema + client + SQL migrator                                                                                                              |
 | `apps/api`        | NestJS + Fastify — plate/VIN/safety-ratings endpoints, Swagger, SPA host + meta injection                                                           |
 | `apps/web`        | Vite + React + React Router                                                                                                                         |
-| `scripts`         | `seed.ts`, `ingest.ts`, `ingest-full.ts`, `refresh-stats.ts`, `euroncap.ts`/`jncap.ts`/`cncap.ts`/`kncap.ts`/`iihs.ts` (crash-test rating scrapers) |
+| `scripts`         | `seed.ts`, `ingest.ts`, `ingest-full.ts`, `refresh-stats.ts`, `euroncap.ts`/`jncap.ts`/`cncap.ts`/`kncap.ts`/`iihs.ts` (crash-test rating scrapers), `infocar.ts`/`edrive.ts`/`topgear.ts`/`sketchfab.ts` (review, owner-post and 3D-model catalogs — links + facts only) |
 
 See [CLAUDE.md](CLAUDE.md) for conventions and [PLAN.md](PLAN.md) for the roadmap.
 
@@ -157,6 +160,10 @@ See [CLAUDE.md](CLAUDE.md) for conventions and [PLAN.md](PLAN.md) for the roadma
 `pnpm ingest:kncap · ingest:kncap:csv · export:kncap:csv` ·
 `pnpm ingest:iihs · ingest:iihs:csv · export:iihs:csv` ·
 `pnpm ingest:fuel · ingest:fuel:csv · export:fuel:csv · db:refresh-fuel-stats` ·
+`pnpm ingest:infocar · ingest:infocar:csv · export:infocar:csv` (+ `:videos` variants) ·
+`pnpm ingest:edrive · ingest:edrive:csv · export:edrive:csv` ·
+`pnpm ingest:topgear · ingest:topgear:csv · export:topgear:csv` (~20–25 min cold, 1 req/s) ·
+`pnpm ingest:sketchfab · ingest:sketchfab:csv · export:sketchfab:csv` ·
 `pnpm ingest:ratings:csv · ingest:all` ·
 `pnpm --filter scripts build:kind-images` (re-encode `apps/web/assets-src/kind/*.jpg` → `public/kind/*.webp`)
 
