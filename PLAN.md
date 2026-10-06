@@ -525,7 +525,8 @@ links + facts only, same lookup path) — never live per request. Per (brand, mo
 models, 443 videos, 9,090 units, 0 errors; obscure ВАЗ trim codes fell through to 3 queries (303 units each), so fewer than the
 ~89 models/day estimate. Afterwards ВАЗ trim codes were folded into the base model (`baseModel`: 21063 → 2106, 210994 → 21099,
 217030 → 2170; day-1 rows re-keyed, their run rows dropped), so the ≥5,000 tier is now 131 models with ~85 left (≈ 1 more
-day). **Next:** run the same command tomorrow; when `done` reports nothing left, `pnpm export:youtube-videos:csv` and commit
+day). Day 2 (2026-10-06): 65 models with videos, 4 none (ЗАЗ 1102xx/1103xx), 0 errors, 459 videos, 8,988 units; daily budget
+reached with 16 models left in the tier. **Next:** run the same command tomorrow; when `done` reports nothing left, `pnpm export:youtube-videos:csv` and commit
 `scripts/seed-data/youtube-videos.csv.gz`; then the lookup/UI integration, then `--min-cars 1000` (374 models, ≈ 3 more days).
 Migration `0031_youtube_videos.sql` (`registry.youtube_videos` + `youtube_model_runs` resume/quota ledger),
 `scripts/src/youtube-videos.ts` (+ `youtube-videos-filter.ts`, tested), CSV export/import wired into `ingest:ratings:csv`.
