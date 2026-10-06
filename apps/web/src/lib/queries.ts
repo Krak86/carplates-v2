@@ -22,6 +22,7 @@ import {
   getModels3d,
   getModels360,
   getVehiclePhotos,
+  getWikiImage,
   getWikiInfo,
   lookupPlate,
   plateHistory,
@@ -106,7 +107,16 @@ export function vehiclePhotosQuery(brand: string, model: string, year: number | 
   })
 }
 
-// Wikipedia summary + image for a brand/model — live-fetched (not persisted), never refetch once fetched.
+// Hero photo for a brand/model/year (our stored row, live Wikimedia only as a server-side fallback) — never refetch once fetched.
+export function wikiImageQuery(brand: string, model: string, year: number | null) {
+  return queryOptions({
+    queryKey: ['wiki', 'image', brand, model, year],
+    queryFn: () => getWikiImage(brand, model, year),
+    staleTime: Infinity
+  })
+}
+
+// Wikipedia article text for a brand/model — live-fetched, requested only once the Wikipedia section is opened; never refetch once fetched.
 export function wikiInfoQuery(brand: string, model: string, lang: string, year: number | null) {
   return queryOptions({
     queryKey: ['wiki', brand, model, lang, year],

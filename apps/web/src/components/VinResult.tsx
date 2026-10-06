@@ -18,7 +18,7 @@ import FavoriteButton from '@/components/FavoriteButton'
 import InfoPopover from '@/components/InfoPopover'
 import InfoText from '@/components/InfoText'
 import SafetyRatings from '@/components/SafetyRatings'
-import { useCarWikiActions } from '@/components/use-car-wiki-actions'
+import { useCarHeroImageActions } from '@/components/use-car-hero-image-actions'
 import Card from '@/components/ui/Card'
 import { extractVehicleInfo } from '@/components/VinResult.helpers'
 import VinRegistryHistory from '@/components/vin/VinRegistryHistory'
@@ -39,8 +39,7 @@ export default function VinResult({ data }: Props): ReactNode {
   const region = plate ? (regionName(plate) ?? null) : null
   const tiltEnabled = useUiStore(s => s.cardTiltEnabled)
   const glowRef = useCardMotion<HTMLDivElement>(tiltEnabled)
-  const wiki = useCarWikiActions({ brand: vehicle.brand, model: vehicle.model, year: vehicle.year, key: data.vin })
-  const hasWikiQuery = Boolean(vehicle.brand || vehicle.model)
+  useCarHeroImageActions({ brand: vehicle.brand, model: vehicle.model, year: vehicle.year, key: data.vin })
 
   return (
     <div className="card-vt relative w-full max-w-content">
@@ -103,7 +102,7 @@ export default function VinResult({ data }: Props): ReactNode {
         <VinDecodeTabs data={data} />
 
         <SafetyRatings brand={vehicle.brand} model={vehicle.model} year={vehicle.year} body={vehicle.body} />
-        <CarWikiInfo wiki={wiki} hasQuery={hasWikiQuery} />
+        <CarWikiInfo brand={vehicle.brand} model={vehicle.model} year={vehicle.year} />
       </Card>
     </div>
   )

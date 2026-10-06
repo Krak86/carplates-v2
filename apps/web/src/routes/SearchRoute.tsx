@@ -75,7 +75,7 @@ export default function SearchRoute(): ReactNode {
   if (kind === 'plate' && plate.data) linkedValue = plate.data.current.vin
   else if (kind === 'vin' && vin.data) linkedValue = vin.data.registry?.plate ?? null
 
-  // Same brand/model + key `ResultCard`/`VinResult` feed their own `useCarWikiActions` call —
+  // Same brand/model + key `ResultCard`/`VinResult` feed their own `useCarHeroImageActions` call —
   // duplicated here (cache-shared, staleTime: Infinity) so the hero slot below can decide
   // whether a wiki image exists without lifting that query out of either result component.
   let wikiHeroVehicle: {

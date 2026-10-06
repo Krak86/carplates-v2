@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { resolveVehicleKind } from '@carplates/shared'
 
 import VehicleKindPlaceholder from '@/components/VehicleKindPlaceholder'
-import { useCarWikiActions } from '@/components/use-car-wiki-actions'
+import { useCarHeroImageActions } from '@/components/use-car-hero-image-actions'
 
 type Props = {
   brand: string | null
@@ -11,26 +11,26 @@ type Props = {
   year: number | null
   /** Raw registry `kind` — drives the placeholder shown when no photo is found. */
   rawKind: string | null
-  /** Same identity `useCarWikiActions` keys the ambient background override on — VIN when the
+  /** Same identity `useCarHeroImageActions` keys the ambient background override on — VIN when the
    *  result has one, otherwise the plate. */
   vehicleKey: string | null
 }
 
 /**
  * Fills the same hero slot a recognized/attached plate photo occupies (see `PhotoThumbnail`),
- * but with the car's Wikipedia main image — only rendered by the caller when no photo is attached.
+ * but with the car photo for its make/model/year (our stored copy first, Wikimedia as the server-side fallback) —
+ * only rendered by the caller when no photo is attached.
  */
 export default function WikiHeroImage({ brand, model, year, rawKind, vehicleKey }: Props): ReactNode {
   const { t } = useTranslation()
-  const wiki = useCarWikiActions({ brand, model, year, key: vehicleKey })
-  const data = wiki.isSuccess ? wiki.data : null
-  const image = data?.image
+  const heroImage = useCarHeroImageActions({ brand, model, year, key: vehicleKey })
+  const image = heroImage.isSuccess ? heroImage.data.image : null
   const creditParts = [image?.attribution?.author, image?.attribution?.license].filter(Boolean)
 
   const [loadedUrl, setLoadedUrl] = useState<string | null>(null)
   const [failedUrl, setFailedUrl] = useState<string | null>(null)
   const hasQuery = Boolean(brand || model)
-  const isPending = hasQuery && wiki.isPending
+  const isPending = hasQuery && heroImage.isPending
 
   // Settled with no image (or the image failed to load) → a kind placeholder in the same slot,
   // or nothing at all when the registry gave no recognizable kind (e.g. a VIN-only decode).
@@ -51,7 +51,7 @@ export default function WikiHeroImage({ brand, model, year, rawKind, vehicleKey 
       {image && (
         <img
           src={image.url}
-          alt={data?.title ?? ''}
+          alt={[brand, model].filter(Boolean).join(' ')}
           crossOrigin="anonymous"
           onLoad={() => setLoadedUrl(image.url)}
           onError={() => setFailedUrl(image.url)}

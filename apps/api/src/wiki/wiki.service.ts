@@ -23,6 +23,7 @@ import type {
   CommonsPages,
   WikiImage,
   WikiImageKey,
+  WikiImageResponse,
   WikiImageOutcome,
   WikiInfo,
   WikipediaPage,
@@ -52,6 +53,7 @@ export class WikiService {
   /** Hot layer in front of `registry.wiki_image` (photo) and the live Wikipedia lookup (extract). Also caches
    *  "not found" (`found: false`) so garbled registry brand/model text doesn't re-hit the API. */
   private readonly cache = new Map<string, WikiInfo>()
+  private readonly imageCache = new Map<string, WikiImageResponse>()
   private readonly userAgent = `carsua-app/1.0 (${this.env.PUBLIC_SITE_URL})`
 
   /** Backoff wait between retries — a property so tests can skip the delay. */
@@ -97,6 +99,28 @@ export class WikiService {
       : { query, found: false, title: null, extract: null, pageUrl: null, image: null }
 
     if (resolved.settled) this.remember(cacheKey, result)
+    return result
+  }
+
+  /**
+   * The hero photo alone, independent of any Wikipedia article: stored rows first, a live Commons/Wikipedia lookup
+   * only when nothing is stored (and that answer is stored). Never fetches the article text.
+   */
+  async lookupImage(brand: string, model: string, options: LookupOptions = {}): Promise<WikiImageResponse> {
+    const query = [brand, model].filter(Boolean).join(' ').trim()
+    if (query.length < 2) {
+      throw new BadRequestException('Need a brand or model to look up a photo')
+    }
+
+    const source = options.source ?? this.env.WIKI_IMAGE_SOURCE
+    const year = source === 'commons' && brand && model ? (options.year ?? null) : null
+    const cacheKey = `${source}:${year ?? ''}:${query.toLowerCase()}`
+    const cached = this.imageCache.get(cacheKey)
+    if (cached) return cached
+
+    const resolved = await this.resolveImage(brand, model, query, year, source)
+    const result = { image: resolved.image }
+    if (resolved.settled) this.rememberImage(cacheKey, result)
     return result
   }
 
@@ -257,10 +281,18 @@ export class WikiService {
   }
 
   private remember(key: string, value: WikiInfo): void {
-    if (this.cache.size >= CACHE_MAX) {
-      const oldest = this.cache.keys().next().value
-      if (oldest !== undefined) this.cache.delete(oldest)
-    }
     this.cache.set(key, value)
+    this.evictOldest(this.cache)
+  }
+
+  private rememberImage(key: string, value: WikiImageResponse): void {
+    this.imageCache.set(key, value)
+    this.evictOldest(this.imageCache)
+  }
+
+  private evictOldest(cache: Map<string, unknown>): void {
+    if (cache.size <= CACHE_MAX) return
+    const oldest = cache.keys().next().value
+    if (oldest !== undefined) cache.delete(oldest)
   }
 }

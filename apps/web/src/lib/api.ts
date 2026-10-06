@@ -25,6 +25,7 @@ import {
   statsTopResponseSchema,
   vehiclePhotosResponseSchema,
   vinDecodeResponseSchema,
+  wikiImageResponseSchema,
   wikiInfoResponseSchema
 } from '@carplates/shared'
 import type {
@@ -57,6 +58,7 @@ import type {
   VehicleKind,
   VehiclePhotosResponse,
   VinDecodeResponse,
+  WikiImageResponse,
   WikiInfo
 } from '@carplates/shared'
 import type { Feature, FeatureCollection, Geometry } from 'geojson'
@@ -131,6 +133,14 @@ export async function getVehiclePhotos(
   if (model) params.set('model', model)
   if (year != null) params.set('year', String(year))
   return vehiclePhotosResponseSchema.parse(await getJson(`/api/photos?${params.toString()}`))
+}
+
+export async function getWikiImage(brand: string, model: string, year: number | null): Promise<WikiImageResponse> {
+  const params = new URLSearchParams()
+  if (brand) params.set('brand', brand)
+  if (model) params.set('model', model)
+  if (year != null) params.set('year', String(year))
+  return wikiImageResponseSchema.parse(await getJson(`/api/wiki/image?${params.toString()}`))
 }
 
 export async function getWikiInfo(brand: string, model: string, lang: string, year: number | null): Promise<WikiInfo> {

@@ -493,6 +493,11 @@ export const wikiInfoResponseSchema = z.object({
 })
 export type WikiInfo = z.infer<typeof wikiInfoResponseSchema>
 
+/** GET /api/wiki/image?brand=&model=&year= — the hero photo alone: stored `wiki_image` row first, live Commons/Wikipedia
+ *  lookup only when nothing is stored. No article text, so the first paint never waits on a live Wikipedia request. */
+export const wikiImageResponseSchema = z.object({ image: wikiImageSchema.nullable() })
+export type WikiImageResponse = z.infer<typeof wikiImageResponseSchema>
+
 /** GET /api/reviews?brand=&model=&year= — links into infocar.ua's persisted catalog (`pnpm ingest:infocar`), per tree:
  *  the best version page for the year, the model page, or the brand page; `null` when the catalog has no such brand. */
 export const infocarVersionLinkSchema = z.object({

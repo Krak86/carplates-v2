@@ -341,3 +341,51 @@ describe('WikiService', () => {
 function makeServiceWith(store: FakeStore): WikiService {
   return makeService(store).service
 }
+
+describe('WikiService.lookupImage', () => {
+  it('serves a stored photo with no Wikimedia call at all — no article text either', async () => {
+    routeFetch()
+    const { service, store } = makeService()
+    await store.save({
+      brand: 'mercedes-maybach',
+      model: 's 580',
+      year: 2025,
+      status: 'ok',
+      imageUrl: 'https://upload.wikimedia.org/stored.jpg',
+      imageWidth: 1280,
+      imageHeight: 853,
+      attrAuthor: 'Jane',
+      attrLicense: 'CC BY 2.0',
+      attrLicenseUrl: null,
+      origin: 'commons_year',
+      title: null,
+      lastHttpStatus: null,
+      lastError: null,
+      attempts: 0,
+      nextRetryAt: null
+    })
+
+    const result = await service.lookupImage('MERCEDES-MAYBACH', 'S 580', { year: 2025, source: 'commons' })
+
+    expect(result.image?.url).toBe('https://upload.wikimedia.org/stored.jpg')
+    expect(vi.mocked(fetch)).not.toHaveBeenCalled()
+  })
+
+  it('falls back to a live Commons lookup when nothing is stored, and stores the answer', async () => {
+    routeFetch({ year: () => jsonResponse(yearPayload) })
+    const { service, store } = makeService()
+
+    const result = await service.lookupImage('Toyota', 'Camry', { year: 2008, source: 'commons' })
+
+    expect(result.image?.url).toBe('https://upload.wikimedia.org/thumb/camry2008.jpg')
+    expect(store.rows.size).toBe(1)
+  })
+
+  it('returns image: null when no photo exists, and throws BadRequestException for an empty query', async () => {
+    routeFetch()
+    const { service } = makeService()
+
+    expect(await service.lookupImage('Nobody', 'Nothing', { source: 'commons' })).toEqual({ image: null })
+    await expect(service.lookupImage('', '')).rejects.toBeInstanceOf(BadRequestException)
+  })
+})

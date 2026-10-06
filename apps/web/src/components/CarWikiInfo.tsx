@@ -1,32 +1,35 @@
 import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
-import type { UseQueryResult } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
+import { useQuery } from '@tanstack/react-query'
 import { useSearchParams } from 'react-router'
-import type { WikiInfo } from '@carplates/shared'
 
 import SectionInfo from '@/components/SectionInfo'
 import SectionHeader from '@/components/SectionHeader'
 import ShareButton from '@/components/ShareButton'
 import { cn } from '@/lib/cn'
+import { wikiInfoQuery } from '@/lib/queries'
 import { scrollElementIntoView } from '@/lib/share-section'
 
 type Props = {
-  wiki: UseQueryResult<WikiInfo>
-  hasQuery: boolean
+  brand: string | null
+  model: string | null
+  year: number | null
 }
 
 /**
- * Wikipedia summary toggle — the fetch itself runs eagerly in `useCarWikiActions` (also
- * feeding the hero background), this only gates showing the result. The trigger stays
- * mounted throughout (no layout shift) and is just disabled until the fetch settles.
+ * Wikipedia summary toggle — the article text is fetched only once the section is opened (the hero
+ * photo has its own lightweight query, see `useCarHeroImageActions`). The trigger stays mounted
+ * (no layout shift) and is disabled while the request is in flight.
  */
-export default function CarWikiInfo({ wiki, hasQuery }: Props): ReactNode {
-  const { t } = useTranslation()
+export default function CarWikiInfo({ brand, model, year }: Props): ReactNode {
+  const { t, i18n } = useTranslation()
   const [searchParams] = useSearchParams()
   const isSharedWiki = searchParams.get('section') === 'wiki'
   const [open, setOpen] = useState(() => isSharedWiki)
   const sectionRef = useRef<HTMLDivElement>(null)
+  const hasQuery = !!(brand || model)
+  const wiki = useQuery({ ...wikiInfoQuery(brand ?? '', model ?? '', i18n.language, year), enabled: hasQuery && open })
   const data = wiki.isSuccess ? wiki.data : null
 
   useEffect(() => {
@@ -46,7 +49,7 @@ export default function CarWikiInfo({ wiki, hasQuery }: Props): ReactNode {
         onToggle={() => setOpen(v => !v)}
         showLabel={t('wiki.show')}
         hideLabel={t('wiki.hide')}
-        disabled={wiki.isPending}
+        disabled={wiki.isFetching}
       />
 
       <div

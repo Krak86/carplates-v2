@@ -36,7 +36,7 @@ import SectionHeader from '@/components/SectionHeader'
 import SectionInfo from '@/components/SectionInfo'
 import ShareButton from '@/components/ShareButton'
 import TopStatBadges from '@/components/TopStatBadges'
-import { useCarWikiActions } from '@/components/use-car-wiki-actions'
+import { useCarHeroImageActions } from '@/components/use-car-hero-image-actions'
 import Card from '@/components/ui/Card'
 import VehicleKindIcon from '@/components/VehicleKindIcon'
 import Model3dButton from '@/components/Model3dButton'
@@ -98,8 +98,7 @@ export default function ResultCard({ data }: Props): ReactNode {
   const vehicleColor = resolveVehicleColor(c.color) ?? fallbackVehicleColor(data.plate)
   const brandDealerUrl = dealerUrl(c.brand)
   const modelWikiUrl = wikiUrl(c.brand, c.model, i18n.language)
-  const wiki = useCarWikiActions({ brand: c.brand, model: c.model, year: c.makeYear, key: c.vin || data.plate })
-  const hasWikiQuery = Boolean(c.brand || c.model)
+  useCarHeroImageActions({ brand: c.brand, model: c.model, year: c.makeYear, key: c.vin || data.plate })
 
   // Plate history covers every vehicle that ever wore this plate, reassignment
   // included. A VIN's own registry rows cover every plate that vehicle ever
@@ -472,7 +471,7 @@ export default function ResultCard({ data }: Props): ReactNode {
         <FuelEconomy brand={c.brand} model={c.model} year={c.makeYear} fuel={c.fuel} capacity={c.capacity} />
         <ReviewLinks brand={c.brand} model={c.model} year={c.makeYear} />
         <VideoReviews brand={c.brand} model={c.model} year={c.makeYear} />
-        <CarWikiInfo wiki={wiki} hasQuery={hasWikiQuery} />
+        <CarWikiInfo brand={c.brand} model={c.model} year={c.makeYear} />
         <NearbyServices brand={c.brand} />
         <VehiclePhotos brand={c.brand} model={c.model} year={c.makeYear} />
         <NewsSection brand={c.brand} model={c.model} year={c.makeYear} />
