@@ -41,7 +41,17 @@ export default function CarWikiInfo({ brand, model, year }: Props): ReactNode {
   return (
     <div ref={sectionRef} className="mt-3 border-t border-[var(--color-border)] pt-3">
       <SectionHeader
-        icon="📖"
+        icon={
+          <span
+            className="inline-block h-4 w-4 bg-current align-middle"
+            style={{
+              maskImage: 'url(/icons/wikipedia-w.svg)',
+              maskSize: 'contain',
+              maskRepeat: 'no-repeat',
+              maskPosition: 'center'
+            }}
+          />
+        }
         title={t('wiki.title')}
         info={<SectionInfo section="wiki" title={t('wiki.title')} />}
         actions={<ShareButton section="wiki" label={t('share.button', { section: t('wiki.title') })} />}

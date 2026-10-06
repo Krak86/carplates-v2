@@ -118,9 +118,11 @@ export default function RegistrationTimeline({ actions, currentPlate, currentVeh
                       href={depMapsUrl(action.dep)}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-[var(--color-primary)] underline"
+                      className="inline-flex items-center gap-1 text-[var(--color-primary)]"
                     >
-                      {action.dep}
+                      <span className="underline">{action.dep}</span>
+                      <span aria-hidden>↗</span>
+                      <span className="sr-only">{t('field.opensNewTab')}</span>
                     </a>
                   </>
                 )}

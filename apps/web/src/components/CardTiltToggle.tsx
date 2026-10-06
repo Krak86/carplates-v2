@@ -26,7 +26,7 @@ export default function CardTiltToggle({ className }: Props): ReactNode {
         className
       )}
     >
-      <span aria-hidden>🔄</span>
+      <span aria-hidden>{tiltEnabled ? '☕' : '🍸'}</span>
     </button>
   )
 }

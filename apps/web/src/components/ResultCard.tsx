@@ -8,12 +8,12 @@ import {
   fallbackVehicleColor,
   resolveVehicleColor,
   resolveVehicleKind,
-  VEHICLE_COLOR_HEX,
-  wikiUrl
+  VEHICLE_COLOR_HEX
 } from '@carplates/shared'
 import type { PlateLookupResponse } from '@carplates/shared'
 
 import BrandLogo from '@/components/BrandLogo'
+import BrandSiteChip from '@/components/BrandSiteChip'
 import CardTiltToggle from '@/components/CardTiltToggle'
 import CarWikiInfo from '@/components/CarWikiInfo'
 import ColorSwatch from '@/components/ColorSwatch'
@@ -98,7 +98,6 @@ export default function ResultCard({ data }: Props): ReactNode {
   const vehicleKind = resolveVehicleKind(c.kind)
   const vehicleColor = resolveVehicleColor(c.color) ?? fallbackVehicleColor(data.plate)
   const brandDealerUrl = dealerUrl(c.brand)
-  const modelWikiUrl = wikiUrl(c.brand, c.model, i18n.language)
   useCarHeroImageActions({ brand: c.brand, model: c.model, year: c.makeYear, key: c.vin || data.plate })
 
   // Plate history covers every vehicle that ever wore this plate, reassignment
@@ -111,8 +110,11 @@ export default function ResultCard({ data }: Props): ReactNode {
   // A pure EV has no engine capacity — power_kwt (2026+ only) is its only engine
   // figure, so it takes the capacity row's place instead of being hidden.
   const hasCapacity = c.capacity != null
-  const engineLabel = hasCapacity ? t('field.capacity') : t('field.power')
-  const engineValue = hasCapacity ? c.capacity : c.powerKwt
+  const engineLabel = hasCapacity ? t('field.capacityName') : t('field.power')
+  // Capacity reads best as "1591 cc (~1.6 L)" — the unit sits with the value, like the weight row.
+  const engineValue = hasCapacity
+    ? `${c.capacity} ${t('field.unitCc')} (~${(c.capacity! / 1000).toFixed(1)} ${t('field.unitL')})`
+    : c.powerKwt
 
   useEffect(() => {
     if (isSharedHistory && historyRef.current) scrollElementIntoView(historyRef.current)
@@ -157,52 +159,6 @@ export default function ResultCard({ data }: Props): ReactNode {
               <span>
                 {[c.brand, c.model].filter(Boolean).join(' ')} {c.makeYear ? `(${c.makeYear})` : ''}
               </span>
-              {brandDealerUrl && (
-                <a
-                  href={brandDealerUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  title={t('result.officialSite')}
-                  className="inline-flex shrink-0 items-center text-base text-[var(--color-primary)]"
-                >
-                  <span
-                    aria-hidden
-                    className="inline-block h-4 w-4 bg-[var(--color-primary)]"
-                    style={{
-                      maskImage: 'url(/icons/official-site.svg)',
-                      maskSize: 'contain',
-                      maskRepeat: 'no-repeat',
-                      maskPosition: 'center'
-                    }}
-                  />
-                  <span className="sr-only">
-                    {t('result.officialSite')} — {t('field.opensNewTab')}
-                  </span>
-                </a>
-              )}
-              {modelWikiUrl && (
-                <a
-                  href={modelWikiUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  title={t('result.wikiSite')}
-                  className="inline-flex shrink-0 items-center text-base text-[var(--color-primary)]"
-                >
-                  <span
-                    aria-hidden
-                    className="inline-block h-3.5 w-3.5 bg-[var(--color-primary)]"
-                    style={{
-                      maskImage: 'url(/icons/wikipedia-w.svg)',
-                      maskSize: 'contain',
-                      maskRepeat: 'no-repeat',
-                      maskPosition: 'center'
-                    }}
-                  />
-                  <span className="sr-only">
-                    {t('result.wikiSite')} — {t('field.opensNewTab')}
-                  </span>
-                </a>
-              )}
               <CopyAllInfoButton
                 vehicle={{ brand: c.brand, model: c.model, year: c.makeYear, body: c.body }}
                 plate={data.plate}
@@ -217,12 +173,12 @@ export default function ResultCard({ data }: Props): ReactNode {
               <Link viewTransition to={`/${data.plate}`} className="text-[var(--color-primary)] underline">
                 {data.plate}
               </Link>
-              <CopyButton text={data.plate} label={t('field.plate')} className="ml-1" />
+              <CopyButton text={data.plate} label={t('field.plate')} className="mx-1.5 align-middle" />
               {data.region && (
-                <span className="ml-1 rounded bg-[var(--color-surface)]/20 px-1.5 py-0.5">, {data.region}</span>
+                <span className="rounded bg-[var(--color-surface)]/20 px-1.5 py-0.5">, {data.region}</span>
               )}
               {!data.region && (
-                <span className="ml-1 rounded bg-[var(--color-surface)]/20 px-1.5 py-0.5">
+                <span className="rounded bg-[var(--color-surface)]/20 px-1.5 py-0.5">
                   , <NoRegionBadge plate={data.plate} />
                 </span>
               )}
@@ -239,6 +195,7 @@ export default function ResultCard({ data }: Props): ReactNode {
               <TopStatBadges brand={c.brand} model={c.model} color={c.color} region={data.region} />
               <Model3dButton brand={c.brand} model={c.model} />
               <Model360Button brand={c.brand} model={c.model} />
+              {brandDealerUrl && <BrandSiteChip url={brandDealerUrl} />}
             </div>
           </div>
           <VehicleKindIcon

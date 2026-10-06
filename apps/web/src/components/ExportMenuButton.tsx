@@ -3,7 +3,6 @@ import type { ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 
-import CopyIcon from '@/components/CopyIcon'
 import Spinner from '@/components/ui/Spinner'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 import { ONLINE_ONLY_EXPORT_FORMATS } from '@/lib/export-report'
@@ -17,7 +16,7 @@ type Props = {
   pending: boolean
   onPick: (format: ExportFormat) => Promise<boolean>
   className?: string
-  /** Icon shown at rest — a plain clipboard by default, callers with a different primary
+  /** Icon shown at rest — a floppy disk ("save as") by default, callers with a different primary
    *  action (e.g. a records list export) can swap it for something more specific. */
   icon?: ReactNode
 }
@@ -41,7 +40,7 @@ export default function ExportMenuButton({
   pending,
   onPick,
   className,
-  icon = <CopyIcon />
+  icon = '💾'
 }: Props): ReactNode {
   const { t } = useTranslation()
   const online = useOnlineStatus()

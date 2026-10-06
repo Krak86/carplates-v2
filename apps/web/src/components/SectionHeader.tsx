@@ -3,8 +3,8 @@ import type { MouseEvent, ReactNode } from 'react'
 import { cn } from '@/lib/cn'
 
 type Props = {
-  /** Emoji at the start of the row. */
-  icon: string
+  /** Emoji (or small icon node) at the start of the row. */
+  icon: ReactNode
   title: ReactNode
   /** ❓ explainer next to the title — clicks on it don't toggle the section. */
   info?: ReactNode
@@ -45,7 +45,8 @@ export default function SectionHeader({
       onClick={handleRowClick}
       className={cn(
         'group -mx-2 -my-1 flex min-h-10 flex-wrap items-center justify-between gap-x-2 gap-y-1 rounded-lg px-2 py-1 text-base transition-colors select-none',
-        disabled ? 'cursor-wait' : 'cursor-pointer hover:bg-primary/10'
+        disabled ? 'cursor-wait' : 'cursor-pointer hover:bg-primary/10',
+        open && 'bg-primary/10'
       )}
     >
       <span className="flex min-w-0 items-center gap-1.5 font-semibold">

@@ -63,6 +63,17 @@ export function blueskySearchTerms(brand: string, model: string | null, year: nu
   return year && model ? [`${makeModel} (${year})`, makeModel] : [makeModel]
 }
 
+const NAMED_ENTITIES: Record<string, string> = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ' }
+
+/** Some feed bots (e.g. autoweek) post HTML-escaped text ("Cee&#039;d"); Bluesky shows it verbatim, so decode it here. */
+export function decodeEntities(s: string): string {
+  return s.replace(/&(?:#(\d+)|#x([\da-f]+)|([a-z]+));/gi, (m, dec, hex, name) => {
+    if (name) return NAMED_ENTITIES[name.toLowerCase()] ?? m
+    const code = dec ? Number(dec) : parseInt(hex, 16)
+    return code > 0 && code <= 0x10ffff ? String.fromCodePoint(code) : m
+  })
+}
+
 async function searchPosts(q: string): Promise<BlueskyPost[]> {
   const imagesOf = (e: z.infer<typeof embedSchema> | undefined): BlueskyPost['images'] => {
     const imgs = e?.images ?? e?.media?.images
@@ -82,7 +93,7 @@ async function searchPosts(q: string): Promise<BlueskyPost[]> {
       handle: p.author.handle,
       displayName: p.author.displayName || p.author.handle,
       avatar: p.author.avatar ?? null,
-      text: p.record.text!.trim(),
+      text: decodeEntities(p.record.text!.trim()),
       createdAt: p.record.createdAt ?? p.indexedAt,
       images: imagesOf(p.embed)
     }))
