@@ -59,13 +59,16 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,svg,ico,png,geojson}'],
         // Logos (6 MB) are runtime-cached below; PDF fonts and export-* chunks (PDF/DOCX export) stay online-only.
         // So does the AR scan (needs the API to read plates): its detector worker, wasm runtime and ONNX model.
+        // And the News / Bluesky side widgets: live third-party data, only mounted online after the first scroll.
         globIgnores: [
           'logos/**',
           'fonts/**',
           'models/**',
           'assets/export-*.js',
           'assets/plate-detector.worker-*.js',
-          'assets/ArCameraDialog-*.js'
+          'assets/ArCameraDialog-*.js',
+          'assets/NewsWidget-*.js',
+          'assets/BlueskyWidget-*.js'
         ],
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/api\//, /^\/og\//, /^\/healthz/],

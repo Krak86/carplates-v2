@@ -20,6 +20,7 @@ import VinResult from '@/components/VinResult'
 import { extractVehicleInfo } from '@/components/VinResult.helpers'
 import WikiHeroImage from '@/components/WikiHeroImage'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
+import { useSideWidgetsVisible } from '@/hooks/useSideWidgetsVisible'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 import { ApiError } from '@/lib/api'
 import { cn } from '@/lib/cn'
@@ -44,6 +45,7 @@ const FuelModelsPanel = lazy(() => import('@/routes/fuel/FuelModelsPanel'))
 const SafetyModelsPanel = lazy(() => import('@/routes/safety/SafetyModelsPanel'))
 const NewsTicker = lazy(() => import('@/components/NewsTicker'))
 const NewsWidget = lazy(() => import('@/components/NewsWidget'))
+const BlueskyWidget = lazy(() => import('@/components/BlueskyWidget'))
 
 export default function SearchRoute(): ReactNode {
   const { t, i18n } = useTranslation()
@@ -51,6 +53,8 @@ export default function SearchRoute(): ReactNode {
   const [searchParams] = useSearchParams()
   const queryClient = useQueryClient()
   const online = useOnlineStatus()
+  // Not precached by the service worker (live data), so offline they are never mounted.
+  const sideWidgets = useSideWidgetsVisible() && online
   const isHome = useLocation().pathname === '/'
   const raw = params.query ? decodeURIComponent(params.query) : ''
   const kind = raw ? classifyQuery(raw) : null
@@ -338,7 +342,7 @@ export default function SearchRoute(): ReactNode {
         </Presence>
 
         {/* Right-hand news panel (desktop only, appears on scroll) — fetches itself and renders nothing without news. */}
-        {!photo && !recognizeErrorKey && wikiHeroVehicle?.brand && (
+        {sideWidgets && !photo && !recognizeErrorKey && wikiHeroVehicle?.brand && (
           <LoadErrorBoundary compact>
             <Suspense fallback={null}>
               <NewsWidget brand={wikiHeroVehicle.brand} model={wikiHeroVehicle.model} year={wikiHeroVehicle.year} />
@@ -346,6 +350,14 @@ export default function SearchRoute(): ReactNode {
           </LoadErrorBoundary>
         )}
 
+        {/* Left-hand Bluesky search links (desktop only, appears on scroll) — plate results only. */}
+        {sideWidgets && !photo && !recognizeErrorKey && kind === 'plate' && wikiHeroVehicle?.brand && (
+          <LoadErrorBoundary compact>
+            <Suspense fallback={null}>
+              <BlueskyWidget brand={wikiHeroVehicle.brand} model={wikiHeroVehicle.model} year={wikiHeroVehicle.year} />
+            </Suspense>
+          </LoadErrorBoundary>
+        )}
       </div>
     </div>
   )
