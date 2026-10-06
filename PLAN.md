@@ -470,7 +470,7 @@ infocar catalog + owner reviews, infocar videos (3,739), e-drive owner posts (62
   fallbacks 856k → 441k of ~12.2M rows over the top 800 pairs; remaining misses are mostly outside the catalog — per-model aliases are the next lever).
 - carshow360: robots allow it but the origin is slow/flaky and ToS for embedding is unchecked — consider asking permission; `--enrich` not run.
 - Small additions not done: AutoTrader UK search link (link only; the site is behind a Cloudflare challenge — never fetch it); an optional
-  "search YouTube for this car" link in the Video reviews section (requested 2026-10-05, scope unconfirmed); YouTube Data API enrichment of
+  "search YouTube for this car" link in the Videos section (requested 2026-10-05, scope unconfirmed); YouTube Data API enrichment of
   the infocar videos (views, videos not on `/video/`; `GOOGLE_API_KEY` is in `apps/api/.env`, untested).
 - Periodic refresh = re-run the ingest and re-export the CSV (new e-drive/TopGear items are rare; a `--since` shortcut could page only to the first known item).
 
@@ -526,8 +526,9 @@ models, 443 videos, 9,090 units, 0 errors; obscure ВАЗ trim codes fell throug
 ~89 models/day estimate. Afterwards ВАЗ trim codes were folded into the base model (`baseModel`: 21063 → 2106, 210994 → 21099,
 217030 → 2170; day-1 rows re-keyed, their run rows dropped), so the ≥5,000 tier is now 131 models with ~85 left (≈ 1 more
 day). Day 2 (2026-10-06): 65 models with videos, 4 none (ЗАЗ 1102xx/1103xx), 0 errors, 459 videos, 8,988 units; daily budget
-reached with 16 models left in the tier. **Next:** run the same command tomorrow; when `done` reports nothing left, `pnpm export:youtube-videos:csv` and commit
-`scripts/seed-data/youtube-videos.csv.gz`; then the lookup/UI integration, then `--min-cars 1000` (374 models, ≈ 3 more days).
+reached with 16 models left in the tier. **First partial CSV seed committed 2026-10-06** (`a0b278a`: 881 rows over 110 models in the DB and the CSV; the per-day
+sums above are 902 — the difference was not investigated). **Next:** run the same command tomorrow; when `done` reports nothing left, re-run `pnpm export:youtube-videos:csv`
+and commit `scripts/seed-data/youtube-videos.csv.gz` again; then the lookup/UI integration, then `--min-cars 1000` (374 models, ≈ 3 more days).
 Migration `0031_youtube_videos.sql` (`registry.youtube_videos` + `youtube_model_runs` resume/quota ledger),
 `scripts/src/youtube-videos.ts` (+ `youtube-videos-filter.ts`, tested), CSV export/import wired into `ingest:ratings:csv`.
 The target list is derived (`--list`): 5,142 passenger-car gap models; tiers by registered cars at ~101 units/model, ~89
@@ -541,7 +542,7 @@ Dry-run on 2 models (Lanos, Lancer): 8 kept each, 101 units each.
 ("YouTube fallback for models with no infocar video — design, trial and build notes"):**
 
 1. **Finish the runs:** `pnpm ingest:youtube-videos -- --min-cars 5000` once per Pacific day until `done` reports nothing left
-   (~1 more day), then `pnpm export:youtube-videos:csv` and commit `scripts/seed-data/youtube-videos.csv.gz`; then `--min-cars 1000` (374 models, ≈ 3 days).
+   (~1 more day; the first partial seed is already committed), then re-run `pnpm export:youtube-videos:csv` and commit `scripts/seed-data/youtube-videos.csv.gz`; then `--min-cars 1000` (374 models, ≈ 3 days).
 2. **Generation/year matching** — parse a year or generation word (`MK1`, `Mk2`, `B`, `3`, `X`) from the title and map it to a generation
    year range via the infocar version catalog (as `videoLookup` does for infocar videos), else store the title year.
 3. **`videoLookup` integration + UI label** — `youtube_videos` as a second source after the infocar ones (dedupe by `youtube_id`, infocar
@@ -555,9 +556,10 @@ and the CSV is committed.
 
 **Step 2d — Auto news (RSS): ✅ v1 built (2026-10-05)** — details, the source-verification table and the original plan are in
 `docs/plan-done.md` ("Auto news (RSS)"). `pnpm ingest:news` (feeds in `scripts/news-sources.json`), `registry.news_items`, `GET /api/news`, homepage
-`NewsTicker`, result-card 📰 News section (last) and a desktop-only scroll-in `NewsWidget`. **Open:**
+`NewsTicker`, result-card 📰 News section (last) and a desktop-only scroll-in `NewsWidget`. **/news archive built 2026-10-06** (`c04716c`; write-up in
+`docs/plan-done.md`, "Auto news archive"): paged list with outlet chips, date sort and title search, linked from the sidebar and the ticker. **Open:**
 
-- **Schedule it:** cron / `@Cron` on the VPS (Phase 4) — every ~6 h; hourly if the tiny-window whole-site feed (mezha) should pay off. Not part of `ingest:all`.
+- **Schedule it:** cron on the VPS (Phase 4), daily per `SCHEDULE.md` (every ~6 h / hourly only if the tiny-window whole-site feed, mezha, should pay off). Not part of `ingest:all`.
 - **Measure** (the plan's step 7): items/day per source, % tagged with a make / model, and for the top-50 registry (brand, model) pairs how many have ≥1 news
   item in 30/180 days — the DB has had one manual run so far.
 - **English sources added 2026-10-05:** Car and Driver, Motor1, Carscoops (news + reviews) — verified, see the table in `docs/plan-done.md`. Open: the Ukrainian UI sends `lang=uk` so it never shows them; decide whether English items should appear for uk/ru users, and re-measure tag rates after a few days.
@@ -566,6 +568,21 @@ and the CSV is committed.
 - **Hot / News toggle** (the original design's `kind='hot'`: ≤7 days AND (model match OR new-models source)) — not built; the News section lists model then make news.
 - Tagger limits seen: "Stellantis" resolves to Peugeot, "ID.4 and ID.5 → ID.Tiguan" to the Tiguan; brands outside the infocar catalog (Alpine) stay untagged.
 - Browser-check the widget/section at tablet and phone widths (only desktop was checked); with the left sidebar open at ~1400 px the widget may overlap the card.
+- Browser-check `/news` (chips, search, paging, shared URL, ua/ru/en) — built 2026-10-06, not verified in a browser by the author of this note.
+
+**Step 2f — Brand YouTube channel videos: ✅ built (2026-10-06)** — design, discovery results and rejected options are in `docs/plan-done.md` ("Brand YouTube channel videos").
+`pnpm ingest:social` polls 54 official channels (50 makes + 4 parent groups, `SOCIAL_CHANNELS` in `packages/shared/src/socialChannels.ts`) via their public RSS feeds
+(no key, no quota) into `registry.social_posts`; `GET /api/social?brand=`; shown in the result card's **Videos** section as an "Official channel" strip under the infocar model
+videos, with a Make / Group toggle where a make has a parent group. **Open:**
+
+- **Schedule it:** daily (`SCHEDULE.md`); until a scheduler exists, run it by hand on every other environment (the strip is empty before the first run). Not part of `ingest:all`.
+- **Coverage gaps (feeds were empty or stale on 2026-10-06):** Land Rover, Triumph, Kawasaki, DS, Dacia (own channel; Renault Group still covers it), Volkswagen Group, JLR (last upload 2023);
+  no Stellantis channel found. Re-check from time to time, and add makes outside the table (e.g. Chery, Suzuki, Škoda-group sub-brands) after verifying the channel title with `ingest:social -- --dry-run`.
+- **Regional channels:** Citroën uses Citroën do Brasil, Hyundai/Kia/Mazda/INFINITI the US channels — no active global channel was found. Ukrainian channels exist for Toyota
+  (`UCj4tEdLmxjWXemSLOLu4XLg`), Škoda (`UCBAruWiHKmPN2RerZZVhMnA`) and Renault (`UCKDogp5MchjxMrJRr4EBWbA`) but are not added; decide whether to prefer a Ukrainian channel per UI language.
+- **Not verified in a browser:** the Make / Group toggle, playing a channel video in the modal, narrow widths, ru/en labels (only the Audi plate КА6336СК was checked: 6 model videos + 8 Audi channel videos).
+- Group-channel videos are corporate news, not model content — consider showing the Group tab only when the make channel is empty, or dropping it.
+- The left gutter (1400 px+) is free again: a first "brand videos" side panel was built and removed the same day in favour of the Videos section; other left-hand widgets are to be discussed.
 
 **Step 3 — infocar motorcycles (`moto.infocar.ua`), same ingest family, after Steps 1-2**
 
@@ -793,6 +810,8 @@ combined crash-rating page.
     a specific brand's distributor ships a real public feed (not a PDF).
 
 ## Phase 4 — VPS / production
+
+The recurring-job plan (cadences, locking, run log, alerting, build steps) is drafted in [SCHEDULE.md](SCHEDULE.md) — build it as part of this phase.
 
 ### VPS sizing (starting point)
 

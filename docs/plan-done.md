@@ -2741,3 +2741,58 @@ Triggered by real user photos that failed or returned junk. What changed and why
 - **Not done / ideas:** a "VIN looks malformed / prefix not recognised" note and a check-digit warning for VINs
   where NHTSA gives no verdict; a second recognizer pass on the cropped VIN band (would likely fix the Jincheng
   case); editing a candidate before searching.
+
+### Auto news archive (/news) ✅ BUILT (2026-10-06, `c04716c`)
+
+Follow-up to "Auto news (RSS)" above; open items stay in PLAN.md "Step 2d". Not verified in a browser by the author of this note.
+
+- **Route** `/news` (`apps/web/src/routes/news/NewsRoute.tsx`, lazy-loaded in `App.tsx`): newest first, 10 per page (`NEWS_PAGE_SIZE`), a chip per outlet
+  (`NEWS_SOURCE_GROUPS` in `lib/news.ts`: infocar.ua = 3 feeds, eauto, autoua, mezha, novyny.live, Car and Driver, Motor1, Carscoops = 2 feeds), a date-sort toggle and a title
+  search (opens on demand, 350 ms debounce, ≥ 3 characters = `NEWS_SEARCH_MIN_CHARS`). The whole view lives in URL params `source` / `q` / `order` / `page`, so it is shareable.
+  The UI language narrows the items the same way the plate-page widget does (`newsLangFilter`: Ukrainian UI shows Ukrainian items only).
+- **API** `GET /api/news/list?source=&q=&order=&lang=&page=&pageSize=` (`apps/api/src/news/`): `source` = comma-separated feed ids (≤ 20), `q` = 3-100 characters matched
+  case-insensitively against the title with LIKE wildcards escaped, `order` asc|desc (default desc), `pageSize` 1-50 (default 10); `Cache-Control: public, max-age=600`.
+  The response adds `total`, `page`, `pageSize` and `sources` (per-feed counts over the **language slice only**, so the chips' numbers don't change with the selected chips).
+  Schemas `newsPageResponseSchema` in `@carplates/shared`; `newsItemSchema.match` is `null` for archive rows.
+- **Entry points:** a "📰 News" link in the sidebar (`nav.news`) and a "more →" link beside the homepage ticker's heading (`news.more`); link-preview meta for `/news` in `apps/api/src/spa/spa-text.ts` (ua/ru/en).
+- **Caching:** live data only — not in the persisted offline cache (`['news-page', …]` keys), never prefetched.
+
+### 360° view polish ✅ BUILT (2026-10-06, `65bd114`)
+
+Follow-up to "Step 2e — CarShow360 360° galleries"; only the modal changed (`Model360Modal`, `Model360Button`, `lib/model360.ts`). Not verified in a browser by the author of this note.
+
+- **Readable generation labels:** a gallery whose label is only a roman numeral ("III") read like a dummy chip — `model360ChipLabel` spells it out ("III generation", i18n `model360.generation`); other labels pass through.
+- **Segmented exterior / interior toggle** in the modal.
+- **View in the share link:** the `tab` param is `<galleryId>` for the cabin view (the default) and `<galleryId>-ext` for the exterior (`model360ShareTab` / `parseModel360Tab`); the modal gets `initialInterior` next to `initialId`.
+
+### Brand YouTube channel videos ✅ BUILT (2026-10-06, `68fb513`)
+
+Requested and built the same day (open items are in PLAN.md "Step 2f"). Goal: a free, anonymous "what is the make posting" feed on result cards. The first idea (an X/Twitter timeline panel) did not work; YouTube channel feeds did.
+
+**What was built:**
+
+- **Table** `registry.social_posts` (migration `0033_social_posts.sql`; `url` PK, `platform` default `youtube`, `channel`, `title`, `summary` ≤ 300 chars, `image_url`, `published_at`, `fetched_at`; index on `(channel, published_at desc)`). Facts + links only — nothing is re-hosted.
+- **Channels** are code, not a JSON file: `SOCIAL_CHANNELS` in `packages/shared/src/socialChannels.ts` — **54 channels = 50 makes (keyed by infocar brand slug) + 4 parent groups** (`group:bmw-group`,
+  `group:gm`, `group:renault-group`, `group:hyundai-group`), each with a verified YouTube channel id. `socialChannelsFor(brand)` returns the make's channel first, then its group's; the API and the
+  ingest share the table, so there is one source of truth (a JSON file in `scripts/` would not be visible to the API).
+- **Ingest** `pnpm ingest:social` (`scripts/src/social.ts` + `social-parse.ts`, tested): fetches `youtube.com/feeds/videos.xml?channel_id=…` per channel (1 s apart, 20 s timeout, ~1 min total) —
+  public Atom, **no API key and no quota**, the channel's latest ~15 uploads (title, `media:thumbnail`, `media:description`, date). Upsert by `url`; rows older than `--keep-days` (365) pruned; `--channel`
+  (`audi`, `group:gm`), `--dry-run`, `--list`. A dead feed is reported, never fails the run. **It prints the feed's own channel title next to the configured name**, which is how wrong ids were caught.
+  First run: 783 videos upserted, 749 in the table after pruning. Not part of `ingest:all`; no CSV seed (daily in SCHEDULE.md).
+- **API** `GET /api/social?brand=` (`apps/api/src/social/`): per channel (make, then group) the 8 latest rows; a channel without rows is omitted; unknown brand → `{ channels: [] }`; `Cache-Control: public, max-age=3600`.
+- **UI:** the result card's collapsed section was renamed from "Video reviews" to **"Videos"** (ua "Відео", ru "Видео"; share/export section id stays `videos`). `VideoReviews` shows infocar's model videos ("This model"), then
+  `BrandChannelVideos` ("Official channel": a link to the channel plus a Make / Group toggle when both channels exist). `InfocarVideos` became the generic `VideoStrip` (thumbnail → `YouTubeModal`; the iframe is
+  only created on click), used by both. Both queries run only once the section is opened (`socialQuery`, live data, not in the persisted offline cache); a failing channel feed leaves the model videos untouched.
+  Checked in a browser on Audi КА6336СК only: 6 model videos + 8 Audi channel videos, and no left panel.
+
+**Discovery (2026-10-06, throwaway script in the scratchpad — handles tried: brand name, then variants):**
+
+- **YouTube** `youtube.com/@<handle>` → `<link rel="canonical" …/channel/UC…>` gives the channel id, but handles can resolve to unrelated channels (`@HyundaiGlobal` = a person, `@BYD` / `@TriumphMotorcycles` = spam
+  / a person), so every id was kept only after the feed's own title matched. **Dropped** (empty or stale feed): Dacia, Land Rover, Kawasaki, Triumph (the real "Triumph Motorcycles" channel's feed was empty), Volkswagen Group (`vwgroup`),
+  DS (last upload 2012), JLR (2023), Citroën global (one 2010 video → `Citroën do Brasil` used instead). Geely International has only 2 videos. Stellantis: no channel under any handle tried.
+- **X / Twitter timeline embed — rejected.** Built first (left-hand panel, `platform.twitter.com/widgets.js` `createTimeline`); in a real browser the request
+  `syndication.twitter.com/srv/timeline-profile/screen-name/<handle>` returned **429**, so the box stayed empty, the script reports success anyway (no way to detect it), and it sets X cookies. The X API has no free read tier.
+  All X code was removed before it was ever committed.
+- **Bluesky — rejected.** `public.api.bsky.app` is open and free, but brand-named handles are mostly squatters or random people (`bmw.bsky.social` = "BD - e/acc", `chevrolet.bsky.social` = "Nissan Honda"),
+  the genuine brand accounts have 0-few posts, and ownership cannot be verified automatically.
+- **Left-hand "Brand videos" side panel** (a `NewsWidget` twin on the left gutter) was built on top of the YouTube data and removed the same day in favour of the Videos section; the gutter is free for other widgets.

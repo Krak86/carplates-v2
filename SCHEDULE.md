@@ -24,19 +24,19 @@ Nothing here is built yet — no scheduler exists in the repo. Drafted 2026-10-0
 
 ## Schedule
 
-| Task | Command | Cadence | Notes |
-| --- | --- | --- | --- |
-| RSS news | `pnpm ingest:news` | Daily (PLAN.md suggests every ~6 h) | Idempotent; shorter interval is nearly free. |
-| Brand YouTube channels | `pnpm ingest:social` | Daily (same slot as the news ingest) | ~60 public RSS feeds at 1 req/s (~1 min). Idempotent; a dead feed is reported, never fails the run. |
-| Plates (data.gov.ua) | `pnpm ingest:full` -> backfill -> stats | **Daily**, ~03:00 Kyiv | Real work ~monthly (new month published). Holds an exclusive lock on `registrations` for minutes — run at night. |
-| Wanted-cars list | not built (PLAN.md) | Daily, or every 2-6 h | Same `last_modified` pattern. |
-| Safety ratings | `ingest:euroncap`, `jncap`, `cncap`, `kncap`, `iihs` | Half-yearly | Add a January run for IIHS awards. Quarterly is fine (cheap). |
-| Emissions / fuel | `ingest:fuel` -> `db:refresh-fuel-stats` | Half-yearly | EPA ~2x/year, EEA 1x/year. |
-| Reviews | `ingest:topgear`, `ingest:infocar`, `ingest:press` | Half-yearly | infocar ~25 min, topgear ~20 min; HTML cached, only changed pages refetched. |
-| Videos (infocar) | `ingest:infocar:videos` | Half-yearly | Takes hours — long timeout. |
-| Videos (YouTube) | `ingest:youtube-videos` | **Daily until the gap list is empty**, then half-yearly | Quota-bound (9,000 of 10,000 units/day), resumable. |
-| Wiki images | `ingest:wiki-images` (no `--refresh`) | Half-yearly | Adds new models only. Run `--retry-failed` a day later. |
-| Sketchfab / carshow360 / e-drive | `ingest:sketchfab`, `carshow360`, `edrive` | Half-yearly or yearly | Not in the original list — decide whether to include. |
+| Task                             | Command                                              | Cadence                                                 | Notes                                                                                                                          |
+| -------------------------------- | ---------------------------------------------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| RSS news                         | `pnpm ingest:news`                                   | Daily (PLAN.md suggests every ~6 h)                     | Idempotent; shorter interval is nearly free.                                                                                   |
+| Brand YouTube channels           | `pnpm ingest:social`                                 | Daily (same slot as the news ingest)                    | 54 public RSS feeds (50 makes + 4 groups) at 1 req/s (~1 min). Idempotent; a dead feed is reported, never fails the run.       |
+| Plates (data.gov.ua)             | `pnpm ingest:full` -> backfill -> stats              | **Daily**, ~03:00 Kyiv                                  | Real work ~monthly (new month published). Holds an exclusive lock on `registrations` for minutes — run at night.               |
+| Wanted-cars list                 | not built (PLAN.md)                                  | Daily, or every 2-6 h                                   | Same `last_modified` pattern.                                                                                                  |
+| Safety ratings                   | `ingest:euroncap`, `jncap`, `cncap`, `kncap`, `iihs` | Half-yearly                                             | Add a January run for IIHS awards. Quarterly is fine (cheap).                                                                  |
+| Emissions / fuel                 | `ingest:fuel` -> `db:refresh-fuel-stats`             | Half-yearly                                             | EPA ~2x/year, EEA 1x/year.                                                                                                     |
+| Reviews                          | `ingest:topgear`, `ingest:infocar`, `ingest:press`   | Half-yearly                                             | infocar ~25 min, topgear ~20 min; HTML cached, only changed pages refetched.                                                   |
+| Videos (infocar)                 | `ingest:infocar:videos`                              | Half-yearly                                             | Takes hours — long timeout.                                                                                                    |
+| Videos (YouTube)                 | `ingest:youtube-videos`                              | **Daily until the gap list is empty**, then half-yearly | Quota-bound (9,000 of 10,000 units/day), resumable. First partial CSV seed committed 2026-10-06 (≥5,000 tier, 16 models left). |
+| Wiki images                      | `ingest:wiki-images` (no `--refresh`)                | Half-yearly                                             | Adds new models only. Run `--retry-failed` a day later.                                                                        |
+| Sketchfab / carshow360 / e-drive | `ingest:sketchfab`, `carshow360`, `edrive`           | Half-yearly or yearly                                   | Not in the original list — decide whether to include.                                                                          |
 
 ## Open decisions
 
@@ -51,4 +51,4 @@ Nothing here is built yet — no scheduler exists in the repo. Drafted 2026-10-0
 4. Dry-run each job once on the VPS by hand before enabling its cron entry.
 5. Alerting: healthchecks.io check per job (period + grace matching its cadence).
 6. After first month: confirm the daily plate check no-ops correctly and the monthly load chains through to stats.
-7. Link this file from PLAN.md Phase 4 and CLAUDE.md's intro.
+7. ~~Link this file from PLAN.md Phase 4 and CLAUDE.md's intro.~~ Done 2026-10-06.

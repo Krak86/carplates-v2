@@ -17,13 +17,13 @@ Ukrainian vehicle lookup by **plate number** or **VIN**. Rebuild of
   car's make/model/year (from a crawled catalog, `registry.infocar_versions`; owner reviews also get a year-filtered
   link), [ITC.ua](https://itc.ua/ua/tag/test-drayv-ua/) and [Mezha](https://mezha.ua/tag/test-drayv/) tech-press test drives of the car's model (every language edition: UA/RU, UA/EN; `registry.press_reviews`), [e-drive.com.ua](https://e-drive.com.ua) owner posts for the car's generation, [TopGear](https://www.topgear.com/car-reviews)
   UK editorial reviews (score out of 10 + blurb, English; `registry.topgear_reviews`) and a DRIVE2 search link — links
-  only, nothing copied. infocar videos play from YouTube on demand; community 3D models ([Sketchfab](https://sketchfab.com))
+  only, nothing copied. infocar videos play from YouTube on demand, followed by the latest uploads of the make's (and its parent group's) official YouTube channel (`pnpm ingest:social`, `registry.social_posts`; titles, thumbnails and links only); community 3D models ([Sketchfab](https://sketchfab.com))
   open in a "3D view" modal, and [CarShow360](https://carshow360.net) 360° exterior/interior galleries (every generation/trim of the make/model, links only) in a "360° view" modal
 - Result-card hero photo: served from our stored Wikimedia cache first (`/api/wiki/image`, year-aware Commons search; live Commons/Wikipedia lead image only as a fallback, then a per-kind placeholder); the Wikipedia article text loads only when its section is opened
 - Background layers on every page (button in the header, online only, session-only): car photos (default), a Google Maps
   view (the plate's region capital on a result page, else Ukraine), or a live YouTube stream — NASA ISS "Earth from space",
   street/traffic cams or a city view (low quality on purpose, selectable; disabled on data-saver/≤3G). Advanced search shows an OpenStreetMap view of the chosen region
-- Auto news: recent Ukrainian/Russian/English auto-news headlines (infocar, eauto, autoua, novyny.live, Car and Driver, Motor1, Carscoops…) (links out, no article text) polled from RSS feeds listed in `scripts/news-sources.json` (`pnpm ingest:news`, `registry.news_items`) — a self-scrolling strip on the homepage, a 📰 News section on result cards (make+model, then make news; Ukrainian UI shows Ukrainian-language items only) and a desktop-only side panel that fades in on scroll
+- Auto news: recent Ukrainian/Russian/English auto-news headlines (infocar, eauto, autoua, novyny.live, Car and Driver, Motor1, Carscoops…) (links out, no article text) polled from RSS feeds listed in `scripts/news-sources.json` (`pnpm ingest:news`, `registry.news_items`) — a self-scrolling strip on the homepage, a 📰 News section on result cards (make+model, then make news; Ukrainian UI shows Ukrainian-language items only) and a desktop-only side panel that fades in on scroll; a `/news` archive page lists everything paged (10 per page) with outlet filter chips, date sort and title search, state kept in the URL
 - Light/dark theme, AR plate scan, plate and VIN photo search (VIN: on-device barcode, else self-hosted OCR; found VINs are outlined on the photo and listed as chips), VIN decode with an offline VIN-prefix fallback for cars NHTSA does not know (labelled "≈" fields), link previews for shared plate/VIN URLs
 - Installable PWA with offline mode: recent results, history and favorites stay available without a connection
 
@@ -141,13 +141,13 @@ marked out of date via `GET /api/stats/version` after a re-ingest.
 
 ## Workspace
 
-| Package           |                                                                                                                                                     |
-| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `packages/shared` | plate normalization, regions, Zod schemas                                                                                                           |
-| `packages/db`     | Drizzle schema + client + SQL migrator                                                                                                              |
-| `apps/api`        | NestJS + Fastify — plate/VIN/safety-ratings endpoints, Swagger, SPA host + meta injection                                                           |
-| `apps/web`        | Vite + React + React Router                                                                                                                         |
-| `scripts`         | `seed.ts`, `ingest.ts`, `ingest-full.ts`, `refresh-stats.ts`, `euroncap.ts`/`jncap.ts`/`cncap.ts`/`kncap.ts`/`iihs.ts` (crash-test rating scrapers), `infocar.ts`/`edrive.ts`/`press.ts`/`topgear.ts`/`sketchfab.ts`/`carshow360.ts` (review, owner-post, 3D-model and 360°-gallery catalogs — links + facts only) |
+| Package           |                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `packages/shared` | plate normalization, regions, Zod schemas                                                                                                                                                                                                                                                                                                                                                                                   |
+| `packages/db`     | Drizzle schema + client + SQL migrator                                                                                                                                                                                                                                                                                                                                                                                      |
+| `apps/api`        | NestJS + Fastify — plate/VIN/safety-ratings endpoints, Swagger, SPA host + meta injection                                                                                                                                                                                                                                                                                                                                   |
+| `apps/web`        | Vite + React + React Router                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `scripts`         | `seed.ts`, `ingest.ts`, `ingest-full.ts`, `refresh-stats.ts`, `euroncap.ts`/`jncap.ts`/`cncap.ts`/`kncap.ts`/`iihs.ts` (crash-test rating scrapers), `infocar.ts`/`edrive.ts`/`press.ts`/`topgear.ts`/`sketchfab.ts`/`carshow360.ts` (review, owner-post, 3D-model and 360°-gallery catalogs — links + facts only), `news.ts`/`social.ts` (RSS auto-news and brand YouTube-channel feeds — links + facts only, no CSV seed) |
 
 See [CLAUDE.md](CLAUDE.md) for conventions and [PLAN.md](PLAN.md) for the roadmap.
 
@@ -166,6 +166,7 @@ See [CLAUDE.md](CLAUDE.md) for conventions and [PLAN.md](PLAN.md) for the roadma
 `pnpm ingest:press · ingest:press:csv · export:press:csv` (~10 min cold, 1 req/s) ·
 `pnpm ingest:topgear · ingest:topgear:csv · export:topgear:csv` (~20–25 min cold, 1 req/s) ·
 `pnpm ingest:news` (RSS auto-news; feeds in `scripts/news-sources.json`; `--source`, `--dry-run`, `--list`; no CSV seed — schedule it) ·
+`pnpm ingest:social` (brand + parent-group YouTube channel uploads from public RSS feeds, no key; `--channel`, `--dry-run`, `--list`; no CSV seed — schedule it, see [SCHEDULE.md](SCHEDULE.md)) ·
 `pnpm ingest:sketchfab · ingest:sketchfab:csv · export:sketchfab:csv` ·
 `pnpm ingest:carshow360 · ingest:carshow360:csv · export:carshow360:csv` (sitemap only; `--enrich`, `--retry-failed`) ·
 `pnpm ingest:ratings:csv · ingest:all` ·
