@@ -84,7 +84,10 @@ export default function Sidebar(): ReactNode {
       <button
         type="button"
         aria-pressed={theme === 'dark'}
-        onClick={toggleTheme}
+        onClick={() => {
+          toggleTheme()
+          handleClose()
+        }}
         className="rounded-lg bg-[var(--color-surface)]/60 px-3 py-1.5 text-left text-sm transition-colors duration-200 hover:bg-[var(--color-surface)]"
       >
         <span aria-hidden>{theme === 'dark' ? '🌙' : '☀️'}</span>{' '}

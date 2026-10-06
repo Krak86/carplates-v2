@@ -350,7 +350,7 @@ export default function SearchRoute(): ReactNode {
         </Presence>
 
         {/* Right-hand news panel (desktop only, appears on scroll) — fetches itself and renders nothing without news. */}
-        {sideWidgets && !photo && !recognizeErrorKey && wikiHeroVehicle?.brand && (
+        {sideWidgets && !recognizeErrorKey && wikiHeroVehicle?.brand && (
           <LoadErrorBoundary compact>
             <Suspense fallback={null}>
               <NewsWidget brand={wikiHeroVehicle.brand} model={wikiHeroVehicle.model} year={wikiHeroVehicle.year} />
@@ -359,7 +359,7 @@ export default function SearchRoute(): ReactNode {
         )}
 
         {/* Left column (desktop only, appears on scroll): Bluesky on top, share price below — either one alone takes the top slot. */}
-        {sideWidgets && !photo && !recognizeErrorKey && wikiHeroVehicle?.brand && (
+        {sideWidgets && !recognizeErrorKey && wikiHeroVehicle?.brand && (
           <div className="pointer-events-none fixed top-20 left-4 z-10 flex max-h-[calc(100vh-6rem)] w-60 flex-col gap-3 overflow-y-auto">
             {kind === 'plate' && (
               <LoadErrorBoundary compact>
