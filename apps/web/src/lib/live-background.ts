@@ -51,7 +51,8 @@ export type LiveStream = { id: string; label: string }
 export const LIVE_STREAMS: Readonly<Record<StreamMode, readonly LiveStream[]>> = {
   earth: [
     { id: 'M3HKLzjvKPc', label: 'NASA · ISS live video' },
-    { id: 'awQzjn72bI0', label: 'NASA · ISS live HD' }
+    { id: 'awQzjn72bI0', label: 'NASA · ISS live HD' },
+    { id: '4QJEibrt9B8', label: 'Dream Trips · ISS live 24/7' }
   ],
   traffic: [
     { id: 'ZMcmtGYYg5E', label: 'Brazil · traffic 1' },
