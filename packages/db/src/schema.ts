@@ -592,13 +592,31 @@ export const newsItems = registry.table(
     year: integer('year'),
     fetchedAt: timestamp('fetched_at', { withTimezone: true }).notNull().defaultNow()
   },
-  t => [
-    index('ix_news_items_brand').on(t.brandSlug, t.publishedAt),
-    index('ix_news_items_published').on(t.publishedAt)
-  ]
+  t => [index('ix_news_items_brand').on(t.brandSlug, t.publishedAt), index('ix_news_items_published').on(t.publishedAt)]
 )
 export type NewsItemRow = typeof newsItems.$inferSelect
 export type NewsItemInsert = typeof newsItems.$inferInsert
+
+/**
+ * Brand / group YouTube channel uploads polled from each channel's public RSS feed (`pnpm ingest:social`; channels in
+ * `@carplates/shared` `SOCIAL_CHANNELS`), accumulated by `url`. Facts + links only — see migrations/0033_social_posts.sql.
+ */
+export const socialPosts = registry.table(
+  'social_posts',
+  {
+    url: text('url').primaryKey(),
+    platform: text('platform').notNull().default('youtube'),
+    channel: text('channel').notNull(),
+    title: text('title').notNull(),
+    summary: text('summary'),
+    imageUrl: text('image_url'),
+    publishedAt: timestamp('published_at', { withTimezone: true }).notNull(),
+    fetchedAt: timestamp('fetched_at', { withTimezone: true }).notNull().defaultNow()
+  },
+  t => [index('ix_social_posts_channel').on(t.channel, t.publishedAt)]
+)
+export type SocialPostRow = typeof socialPosts.$inferSelect
+export type SocialPostInsert = typeof socialPosts.$inferInsert
 
 /**
  * One IIHS (US, insurance-industry-funded) vehicle model-year assessment — scraped from

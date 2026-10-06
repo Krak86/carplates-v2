@@ -103,6 +103,13 @@ export {
   type InfocarMatch,
   type InfocarMatches
 } from './infocarLookup.js'
+export {
+  SOCIAL_CHANNELS,
+  socialChannelsFor,
+  youtubeChannelUrl,
+  youtubeFeedUrl,
+  type SocialChannel
+} from './socialChannels.js'
 export { MAX_VIDEOS, videoLookup, type InfocarVideoRow } from './infocarVideoLookup.js'
 export { MAX_OWNER_POSTS, edriveModelSlug, ownerPostLookup, type OwnerPostLookupRow } from './edriveLookup.js'
 export { MAX_TOPGEAR_REVIEWS, topgearLookup, type TopgearLookupRow } from './topgearLookup.js'
@@ -287,9 +294,13 @@ export {
   newsItemSchema,
   newsResponseSchema,
   newsPageResponseSchema,
+  socialPostSchema,
+  socialResponseSchema,
   type NewsItem,
   type NewsPageResponse,
-  type NewsResponse
+  type NewsResponse,
+  type SocialPost,
+  type SocialResponse
 } from './schemas.js'
 export {
   MAX_BRAND_ONLY_NEWS,

@@ -4,12 +4,14 @@ import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router'
 
-import InfocarVideos from '@/components/InfocarVideos'
+import BrandChannelVideos from '@/components/BrandChannelVideos'
 import SectionHeader from '@/components/SectionHeader'
 import SectionInfo from '@/components/SectionInfo'
 import ShareButton from '@/components/ShareButton'
+import VideoStrip from '@/components/VideoStrip'
+import type { StripVideo } from '@/components/VideoStrip'
 import { cn } from '@/lib/cn'
-import { reviewsQuery } from '@/lib/queries'
+import { reviewsQuery, socialQuery } from '@/lib/queries'
 import { scrollElementIntoView } from '@/lib/share-section'
 
 type Props = {
@@ -19,8 +21,10 @@ type Props = {
 }
 
 /**
- * Collapsed "Video reviews" section next to the text `ReviewLinks` one. Same persisted catalog query (`reviewsQuery`,
- * so opening both costs one request); fetched only once the section is opened. Hidden without a make to go on.
+ * Collapsed "Videos" section next to the text `ReviewLinks` one: infocar.ua's videos for this make/model, then the latest
+ * uploads of the make's (and its parent group's) official YouTube channel. Same persisted catalog query (`reviewsQuery`,
+ * so opening both sections costs one request); both are fetched only once the section is opened. Hidden without a make
+ * to go on.
  */
 export default function VideoReviews({ brand, model, year }: Props): ReactNode {
   const { t } = useTranslation()
@@ -29,7 +33,17 @@ export default function VideoReviews({ brand, model, year }: Props): ReactNode {
   const [open, setOpen] = useState(() => isSharedVideos)
   const sectionRef = useRef<HTMLDivElement>(null)
   const catalog = useQuery({ ...reviewsQuery(brand ?? '', model ?? '', year), enabled: !!brand && open })
-  const videos = catalog.data?.videos ?? []
+  const social = useQuery({ ...socialQuery(brand ?? ''), enabled: !!brand && open })
+  const modelVideos = (catalog.data?.videos ?? []).map((v): StripVideo => ({
+    youtubeId: v.youtubeId,
+    title: v.title,
+    url: v.url,
+    thumbUrl: v.thumbUrl,
+    durationS: v.durationS
+  }))
+  // The channel feed is a bonus: if it fails, the section just shows the model videos.
+  const channels = social.data?.channels ?? []
+  const hasVideos = modelVideos.length > 0 || channels.length > 0
 
   useEffect(() => {
     if (isSharedVideos && brand && sectionRef.current) scrollElementIntoView(sectionRef.current)
@@ -60,13 +74,26 @@ export default function VideoReviews({ brand, model, year }: Props): ReactNode {
       >
         <div className="overflow-hidden">
           <div className="mt-3">
-            {catalog.isPending && <p className="text-base text-[var(--color-muted)]">{t('result.loading')}</p>}
+            {(catalog.isPending || social.isPending) && (
+              <p className="text-base text-[var(--color-muted)]">{t('result.loading')}</p>
+            )}
             {catalog.isError && <p className="text-base text-[var(--color-muted)]">{t('result.error')}</p>}
-            {catalog.isSuccess && videos.length === 0 && (
+            {catalog.isSuccess && !social.isPending && !hasVideos && (
               <p className="text-base text-[var(--color-muted)]">{t('videos.none')}</p>
             )}
 
-            <InfocarVideos videos={videos} />
+            <div className="flex flex-col gap-4">
+              {modelVideos.length > 0 && (
+                <div>
+                  {channels.length > 0 && <h3 className="mb-2 text-sm font-medium">{t('videos.model')}</h3>}
+                  <VideoStrip videos={modelVideos} />
+                </div>
+              )}
+
+              <BrandChannelVideos channels={channels} />
+            </div>
+
+            {hasVideos && <p className="text-sm text-[var(--color-muted)]">{t('videos.source')}</p>}
           </div>
         </div>
       </div>

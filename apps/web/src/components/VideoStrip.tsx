@@ -1,20 +1,28 @@
 import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { ReviewsResponse } from '@carplates/shared'
 
 import { formatDuration } from '@/components/VideoReviews.helpers'
 import YouTubeModal from '@/components/YouTubeModal'
 
+export type StripVideo = {
+  youtubeId: string
+  title: string
+  url: string
+  thumbUrl: string | null
+  /** Unknown for channel-feed videos (the RSS has no duration). */
+  durationS: number | null
+}
+
 type Props = {
-  videos: ReviewsResponse['videos']
+  videos: StripVideo[]
 }
 
 /**
- * infocar.ua's YouTube videos for this make/model, the body of the `VideoReviews` section. A thumbnail opens the
- * player in a modal — the iframe is only created then (privacy: no YouTube request until the visitor asks for one).
+ * A horizontally scrolling row of YouTube videos (infocar's model videos, or a brand channel's uploads). A thumbnail opens
+ * the player in a modal — the iframe is only created then (privacy: no YouTube request until the visitor asks for one).
  */
-export default function InfocarVideos({ videos }: Props): ReactNode {
+export default function VideoStrip({ videos }: Props): ReactNode {
   const { t } = useTranslation()
   const [playing, setPlaying] = useState<string | null>(null)
   if (!videos.length) return null
@@ -54,8 +62,6 @@ export default function InfocarVideos({ videos }: Props): ReactNode {
           </li>
         ))}
       </ul>
-
-      <p className="text-sm text-[var(--color-muted)]">{t('videos.source')}</p>
 
       {current && (
         <YouTubeModal

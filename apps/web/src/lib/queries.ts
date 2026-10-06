@@ -10,6 +10,7 @@ import {
   getFuelStats,
   getNews,
   getNewsPage,
+  getSocial,
   getReviews,
   getSafetyStats,
   getIihsRatings,
@@ -285,6 +286,15 @@ export function newsQuery(brand?: string, model?: string | null, year?: number |
     queryKey: ['news', brand ?? null, model ?? null, year ?? null, lang ?? null],
     queryFn: () => getNews(brand, model, year, lang),
     staleTime: 10 * 60 * 1000
+  })
+}
+
+// Channel uploads change a few times a day (pnpm ingest:social) — live data only, outside the persisted offline groups.
+export function socialQuery(brand: string) {
+  return queryOptions({
+    queryKey: ['social', brand],
+    queryFn: () => getSocial(brand),
+    staleTime: 30 * 60 * 1000
   })
 }
 

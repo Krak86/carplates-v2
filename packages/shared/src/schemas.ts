@@ -844,3 +844,27 @@ export const newsPageResponseSchema = z.object({
   sources: z.array(z.object({ source: z.string(), count: z.number().int() }))
 })
 export type NewsPageResponse = z.infer<typeof newsPageResponseSchema>
+
+/** A brand / group channel upload (persisted by `pnpm ingest:social`): link + facts only. */
+export const socialPostSchema = z.object({
+  url: z.string(),
+  platform: z.string(),
+  title: z.string(),
+  summary: z.string().nullable(),
+  imageUrl: z.string().nullable(),
+  publishedAt: z.string()
+})
+/** The channels that speak for a car's brand (its own first, then its group's), each with its latest posts; a channel with none yet is omitted. */
+export const socialResponseSchema = z.object({
+  channels: z.array(
+    z.object({
+      id: z.string(),
+      kind: z.enum(['make', 'group']),
+      name: z.string(),
+      url: z.string(),
+      posts: z.array(socialPostSchema)
+    })
+  )
+})
+export type SocialPost = z.infer<typeof socialPostSchema>
+export type SocialResponse = z.infer<typeof socialResponseSchema>

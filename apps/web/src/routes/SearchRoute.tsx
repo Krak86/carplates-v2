@@ -345,6 +345,7 @@ export default function SearchRoute(): ReactNode {
             </Suspense>
           </LoadErrorBoundary>
         )}
+
       </div>
     </div>
   )

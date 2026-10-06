@@ -18,6 +18,7 @@ import {
   vinRecognizeResponseSchema,
   newsResponseSchema,
   newsPageResponseSchema,
+  socialResponseSchema,
   reviewsResponseSchema,
   safetyRatingsResponseSchema,
   searchResponseSchema,
@@ -38,6 +39,7 @@ import type {
   Models360Response,
   NewsPageResponse,
   NewsResponse,
+  SocialResponse,
   ReviewsResponse,
   FuelStatsResponse,
   SafetyStatsResponse,
@@ -330,6 +332,11 @@ export async function getNews(
   if (brand && year != null) params.set('year', String(year))
   if (lang) params.set('lang', lang)
   return newsResponseSchema.parse(await getJson(`/api/news?${params.toString()}`))
+}
+
+/** Brand / parent-group YouTube channel uploads (persisted by pnpm ingest:social) for a car's brand; empty when the brand has no channel. */
+export async function getSocial(brand: string): Promise<SocialResponse> {
+  return socialResponseSchema.parse(await getJson(`/api/social?brand=${encodeURIComponent(brand)}`))
 }
 
 /** One page of the /news archive, optionally narrowed to some source ids. */

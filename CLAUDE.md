@@ -90,6 +90,10 @@ pnpm export:topgear:csv   # re-dump the table to that CSV — run after every re
 pnpm ingest:news      # poll the RSS feeds listed in scripts/news-sources.json (edit that file to add/disable feeds; `onlyCategories`/`excludeUrls` filter
                        # whole-site feeds by category / link regex) -> registry.news_items, tagged brand/model/year from the headline, robots.txt-checked; idempotent,
                        # run on demand or from a scheduler (every ~6 h; no CSV seed); --source id, --dry-run, --list. See PLAN.md "Step 2d"
+pnpm ingest:social    # brand + parent-group YouTube channel uploads from each channel's public RSS feed (no key, no quota, ~60 channels, 1 req/s ≈ 1 min)
+                       # -> registry.social_posts; channels are SOCIAL_CHANNELS in packages/shared/src/socialChannels.ts (shown in the "Videos" section of result cards, under the infocar model videos
+                       # "Official channel" strip; GET /api/social?brand=; prints each feed's real channel title next to the configured name — a mismatch = wrong id);
+                       # --channel audi|group:gm, --dry-run, --list. No CSV seed; run daily like ingest:news
 pnpm ingest:press     # itc.ua + mezha.ua "test drive" tag listings (Ukrainian listing paged until empty; each article's hreflang
                        # editions fetched too: itc uk+ru, mezha uk+en; ~310 articles, ~10 min cold, 1 req/s, robots-aware, HTML cached
                        # in scripts/.data/press/) -> registry.press_reviews (link + title + blurb per language; brand found in the
