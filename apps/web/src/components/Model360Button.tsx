@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router'
 
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
+import { parseModel360Tab } from '@/lib/model360'
 import { models360Query } from '@/lib/queries'
 
 const Model360Modal = lazy(() => import('@/components/Model360Modal'))
@@ -25,7 +26,7 @@ export default function Model360Button({ brand, model }: Props): ReactNode {
   // A shared link (`?section=model360&tab=<id>`) opens the modal straight on that gallery.
   const isShared = searchParams.get('section') === 'model360'
   const [open, setOpen] = useState(() => isShared)
-  const [sharedId, setSharedId] = useState(() => (isShared ? Number(searchParams.get('tab')) : null))
+  const [shared, setShared] = useState(() => (isShared ? parseModel360Tab(searchParams.get('tab')) : null))
   const hasQuery = !!brand && !!model
   const result = useQuery({ ...models360Query(brand ?? '', model ?? ''), enabled: hasQuery })
   const models = result.data?.models ?? []
@@ -50,10 +51,11 @@ export default function Model360Button({ brand, model }: Props): ReactNode {
           <Model360Modal
             models={models}
             label={[brand, model].filter(Boolean).join(' ')}
-            initialId={sharedId}
+            initialId={shared?.id}
+            initialInterior={shared?.interior}
             onClose={() => {
               setOpen(false)
-              setSharedId(null)
+              setShared(null)
             }}
           />
         </Suspense>

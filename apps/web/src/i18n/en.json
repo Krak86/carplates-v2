@@ -268,6 +268,7 @@
   "model360.shareName": "360° view",
   "model360.exterior": "Exterior",
   "model360.interior": "Interior",
+  "model360.generation": "{{n}} generation",
   "model360.on": "on",
   "model360.note": "Illustrative gallery of this make and model — not this specific car.",
   "photos.title": "What it might look like",

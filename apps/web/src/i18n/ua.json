@@ -268,6 +268,7 @@
   "model360.shareName": "360°-перегляд",
   "model360.exterior": "Екстер’єр",
   "model360.interior": "Салон",
+  "model360.generation": "{{n}} покоління",
   "model360.on": "на",
   "model360.note": "Ілюстративна галерея цієї марки й моделі — не саме це авто.",
   "photos.title": "Як це може виглядати",
