@@ -47,6 +47,7 @@ const SafetyModelsPanel = lazy(() => import('@/routes/safety/SafetyModelsPanel')
 const NewsTicker = lazy(() => import('@/components/NewsTicker'))
 const NewsWidget = lazy(() => import('@/components/NewsWidget'))
 const BlueskyWidget = lazy(() => import('@/components/BlueskyWidget'))
+const StockWidget = lazy(() => import('@/components/StockWidget'))
 
 export default function SearchRoute(): ReactNode {
   const { t, i18n } = useTranslation()
@@ -357,13 +358,27 @@ export default function SearchRoute(): ReactNode {
           </LoadErrorBoundary>
         )}
 
-        {/* Left-hand Bluesky search links (desktop only, appears on scroll) — plate results only. */}
-        {sideWidgets && !photo && !recognizeErrorKey && kind === 'plate' && wikiHeroVehicle?.brand && (
-          <LoadErrorBoundary compact>
-            <Suspense fallback={null}>
-              <BlueskyWidget brand={wikiHeroVehicle.brand} model={wikiHeroVehicle.model} year={wikiHeroVehicle.year} />
-            </Suspense>
-          </LoadErrorBoundary>
+        {/* Left column (desktop only, appears on scroll): Bluesky on top, share price below — either one alone takes the top slot. */}
+        {sideWidgets && !photo && !recognizeErrorKey && wikiHeroVehicle?.brand && (
+          <div className="pointer-events-none fixed top-20 left-4 z-10 flex max-h-[calc(100vh-6rem)] w-60 flex-col gap-3 overflow-y-auto">
+            {kind === 'plate' && (
+              <LoadErrorBoundary compact>
+                <Suspense fallback={null}>
+                  <BlueskyWidget
+                    brand={wikiHeroVehicle.brand}
+                    model={wikiHeroVehicle.model}
+                    year={wikiHeroVehicle.year}
+                  />
+                </Suspense>
+              </LoadErrorBoundary>
+            )}
+
+            <LoadErrorBoundary compact>
+              <Suspense fallback={null}>
+                <StockWidget brand={wikiHeroVehicle.brand} />
+              </Suspense>
+            </LoadErrorBoundary>
+          </div>
         )}
       </div>
     </div>

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { useLocation } from 'react-router'
+import { Link, useLocation } from 'react-router'
 
 import NewsGroups from '@/components/NewsGroups'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
@@ -10,6 +10,9 @@ import { SHOW_AFTER_SCROLL_PX, SIDE_WIDGETS_DESKTOP_QUERY } from '@/hooks/useSid
 import { cn } from '@/lib/cn'
 import { newsLangFilter } from '@/lib/news'
 import { newsQuery } from '@/lib/queries'
+
+/** The side panel is a teaser; the rest is behind the "more news" link. */
+const WIDGET_ITEMS = 3
 
 type Props = {
   brand: string
@@ -37,9 +40,13 @@ export default function NewsWidget({ brand, model, year }: Props): ReactNode {
     return (): void => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  const items = news.data?.items ?? []
-  if (!isDesktop || !items.length || dismissedPath === pathname) return null
+  const all = news.data?.items ?? []
+  if (!isDesktop || !all.length || dismissedPath === pathname) return null
 
+  const items = all.slice(0, WIDGET_ITEMS)
+  // Same filter as the panel: make + model when the model itself has headlines, otherwise the make alone.
+  const query = all.some(i => i.match === 'model') && model ? `${brand} ${model}` : brand
+  const moreTo = `/news?${new URLSearchParams({ q: query })}`
   return (
     <aside
       aria-label={t('news.title')}
@@ -69,6 +76,14 @@ export default function NewsWidget({ brand, model, year }: Props): ReactNode {
       </div>
 
       <NewsGroups items={items} brand={brand} model={model} decorative={!scrolled} />
+
+      <Link
+        to={moreTo}
+        tabIndex={scrolled ? undefined : -1}
+        className="rounded-md px-2 py-1.5 text-center text-sm font-medium text-[var(--color-primary)] hover:bg-[var(--color-surface)]"
+      >
+        {t('news.more')} <span aria-hidden>→</span>
+      </Link>
     </aside>
   )
 }

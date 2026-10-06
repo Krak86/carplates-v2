@@ -77,6 +77,15 @@ export default function NewsRoute(): ReactNode {
     searchInput.current?.focus()
   }
 
+  const isDefault = !selected.length && !q && order === 'desc' && page === 1
+
+  const handleReset = (): void => {
+    clearTimeout(debounce.current)
+    setDraft('')
+    setSearchOpen(false)
+    update({ sources: [], q: '', order: 'desc', page: 1 })
+  }
+
   const tooShort = !!draft.trim() && draft.trim().length < NEWS_SEARCH_MIN_CHARS
   const sortLabel = t(order === 'desc' ? 'news.sortNewest' : 'news.sortOldest')
 
@@ -119,6 +128,30 @@ export default function NewsRoute(): ReactNode {
           </section>
 
           <div className="flex shrink-0 gap-1">
+            {!isDefault && (
+              <button
+                type="button"
+                onClick={handleReset}
+                title={t('news.reset')}
+                aria-label={t('news.reset')}
+                className="flex h-8 items-center gap-1 rounded-full border border-[var(--color-border)] px-3 text-sm hover:bg-[var(--color-surface)] hover:text-[var(--color-primary)]"
+              >
+                <svg
+                  aria-hidden
+                  viewBox="0 0 24 24"
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5" />
+                </svg>
+                <span className="hidden sm:inline">{t('news.reset')}</span>
+              </button>
+            )}
+
             <button
               type="button"
               onClick={() => update({ order: order === 'desc' ? 'asc' : 'desc', page: 1 })}

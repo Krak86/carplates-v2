@@ -1,6 +1,6 @@
 import { queryOptions } from '@tanstack/react-query'
 import { normalizePlate } from '@carplates/shared'
-import type { StatsFieldDimension } from '@carplates/shared'
+import type { StatsFieldDimension, StockRange } from '@carplates/shared'
 
 import {
   decodeVin,
@@ -11,6 +11,7 @@ import {
   getNews,
   getNewsPage,
   getSocial,
+  getStock,
   getReviews,
   getSafetyStats,
   getIihsRatings,
@@ -295,6 +296,15 @@ export function socialQuery(brand: string) {
     queryKey: ['social', brand],
     queryFn: () => getSocial(brand),
     staleTime: 30 * 60 * 1000
+  })
+}
+
+// Share prices move all day: live data only, outside the persisted offline groups.
+export function stockQuery(brand: string, range: StockRange) {
+  return queryOptions({
+    queryKey: ['stock', brand, range],
+    queryFn: () => getStock(brand, range),
+    staleTime: 5 * 60 * 1000
   })
 }
 

@@ -868,3 +868,15 @@ export const socialResponseSchema = z.object({
 })
 export type SocialPost = z.infer<typeof socialPostSchema>
 export type SocialResponse = z.infer<typeof socialResponseSchema>
+
+/** A listed company's price series for a car's brand (live, via the API's Yahoo Finance proxy). */
+export const stockResponseSchema = z.object({
+  company: z.object({ id: z.string(), name: z.string(), symbol: z.string(), url: z.string() }).nullable(),
+  currency: z.string().nullable(),
+  price: z.number().nullable(),
+  /** Reference close the change is measured against (previous close for 1d, first close of the range otherwise). */
+  baseline: z.number().nullable(),
+  /** `[unix seconds, close]` pairs. */
+  points: z.array(z.tuple([z.number(), z.number()]))
+})
+export type StockResponse = z.infer<typeof stockResponseSchema>

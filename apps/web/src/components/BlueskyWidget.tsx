@@ -19,7 +19,7 @@ type Props = {
 /**
  * Left-hand Bluesky panel on a plate result: recent posts matching the car's "make model (year)", found by Bluesky's
  * own search. Same UX as the news panel — desktop only, renders nothing without posts, fades in from the left once the
- * user starts scrolling, dismissible per route.
+ * user starts scrolling, dismissible per route. Positioned by the shared left column in SearchRoute.
  */
 export default function BlueskyWidget({ brand, model, year }: Props): ReactNode {
   const { t } = useTranslation()
@@ -43,11 +43,11 @@ export default function BlueskyWidget({ brand, model, year }: Props): ReactNode 
       aria-label={t('bluesky.title')}
       aria-hidden={!scrolled}
       className={cn(
-        'fixed top-20 left-4 z-10 flex max-h-[calc(100vh-6rem)] w-60 flex-col gap-2 overflow-y-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)]/50 p-3 backdrop-blur-md',
+        'flex w-full flex-col gap-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)]/50 p-3 backdrop-blur-md',
         'transition-[opacity,translate] duration-500 ease-out motion-reduce:transition-none',
         // Mounted only after the first scroll (see useSideWidgetsVisible), so it slides in on insertion.
         'starting:-translate-x-8 starting:opacity-0',
-        scrolled ? 'translate-x-0 opacity-100' : 'pointer-events-none -translate-x-8 opacity-0'
+        scrolled ? 'pointer-events-auto translate-x-0 opacity-100' : 'pointer-events-none -translate-x-8 opacity-0'
       )}
     >
       <div className="flex items-center justify-between gap-2">

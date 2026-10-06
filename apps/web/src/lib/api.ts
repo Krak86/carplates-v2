@@ -19,6 +19,7 @@ import {
   newsResponseSchema,
   newsPageResponseSchema,
   socialResponseSchema,
+  stockResponseSchema,
   reviewsResponseSchema,
   safetyRatingsResponseSchema,
   searchResponseSchema,
@@ -40,6 +41,8 @@ import type {
   NewsPageResponse,
   NewsResponse,
   SocialResponse,
+  StockRange,
+  StockResponse,
   ReviewsResponse,
   FuelStatsResponse,
   SafetyStatsResponse,
@@ -337,6 +340,11 @@ export async function getNews(
 /** Brand / parent-group YouTube channel uploads (persisted by pnpm ingest:social) for a car's brand; empty when the brand has no channel. */
 export async function getSocial(brand: string): Promise<SocialResponse> {
   return socialResponseSchema.parse(await getJson(`/api/social?brand=${encodeURIComponent(brand)}`))
+}
+
+/** Price series of the listed company behind a car's brand (live, proxied); `company: null` when the brand has no listing. */
+export async function getStock(brand: string, range: StockRange): Promise<StockResponse> {
+  return stockResponseSchema.parse(await getJson(`/api/stocks?brand=${encodeURIComponent(brand)}&range=${range}`))
 }
 
 /** One page of the /news archive, optionally narrowed to some source ids. */

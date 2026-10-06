@@ -14,6 +14,7 @@ import { RecognizeModule } from './recognize/recognize.module.js'
 import { Models3dModule } from './models3d/models3d.module.js'
 import { Models360Module } from './models360/models360.module.js'
 import { NewsModule } from './news/news.module.js'
+import { StocksModule } from './stocks/stocks.module.js'
 import { SocialModule } from './social/social.module.js'
 import { ReviewsModule } from './reviews/reviews.module.js'
 import { SafetyModule } from './safety/safety.module.js'
@@ -33,6 +34,7 @@ import { WikiModule } from './wiki/wiki.module.js'
     RecognizeModule,
     NewsModule,
     SocialModule,
+    StocksModule,
     ReviewsModule,
     Models3dModule,
     Models360Module,
