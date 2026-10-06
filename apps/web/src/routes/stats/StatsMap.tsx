@@ -5,12 +5,12 @@ import { geoMercator } from 'd3-geo'
 import { useTranslation } from 'react-i18next'
 import { ComposableMap, Geographies, Geography } from 'react-simple-maps'
 
-import Spinner from '@/components/ui/Spinner'
 import { toIntlLocale } from '@/lib/intl'
 import { ukraineGeographyQuery } from '@/lib/queries'
 import type { UkraineRegionProperties } from '@/lib/api'
 import { choroplethColor } from '@/routes/stats/helpers'
 import { REGION_NAME_BY_SHAPE_ISO } from '@/routes/stats/region-geography'
+import StatsMapSkeleton from '@/routes/stats/StatsMapSkeleton'
 import { useUiStore } from '@/store/ui-store'
 
 import type { StatsMetric, StatsRow } from './types'
@@ -47,11 +47,7 @@ export default function StatsMap({ rows, metric }: Props): ReactNode {
   const legendStops = Array.from({ length: LEGEND_STEPS }, (_, i) => choroplethColor(i / (LEGEND_STEPS - 1), theme))
 
   if (geography.isPending) {
-    return (
-      <p className="flex items-center gap-2 text-[var(--color-muted)]">
-        <Spinner /> {t('result.loading')}
-      </p>
-    )
+    return <StatsMapSkeleton />
   }
 
   if (geography.isError || !projection) {

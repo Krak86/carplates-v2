@@ -6,7 +6,6 @@ import { useSearchParams } from 'react-router'
 
 import { CO2_BAND_COLOR } from '@/components/CO2Badge.helpers'
 import Card from '@/components/ui/Card'
-import Spinner from '@/components/ui/Spinner'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 import { cn } from '@/lib/cn'
 import { toIntlLocale } from '@/lib/intl'
@@ -14,6 +13,7 @@ import { safetyStatsQuery } from '@/lib/queries'
 import { plausibleYear } from '@/routes/fuel/helpers'
 import SafetyBarList from '@/routes/safety/SafetyBarList'
 import SafetyModelsPanel from '@/routes/safety/SafetyModelsPanel'
+import StatsSkeleton from '@/routes/stats/StatsSkeleton'
 import { bandForScore } from '@/routes/safety/helpers'
 
 const SAFETY_TABS = ['year', 'brand', 'source'] as const
@@ -79,11 +79,7 @@ export default function SafetyStatsRoute(): ReactNode {
         </p>
       )}
 
-      {stats.isPending && stats.fetchStatus !== 'paused' && (
-        <p className="flex items-center gap-2 text-[var(--color-muted)]">
-          <Spinner /> {t('result.loading')}
-        </p>
-      )}
+      {stats.isPending && stats.fetchStatus !== 'paused' && <StatsSkeleton variant="rating" />}
 
       {stats.isError && <p className="text-[var(--color-muted)]">{t('result.error')}</p>}
 

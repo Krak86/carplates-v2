@@ -7,13 +7,13 @@ import { useSearchParams } from 'react-router'
 
 import { CO2_BAND_COLOR } from '@/components/CO2Badge.helpers'
 import Card from '@/components/ui/Card'
-import Spinner from '@/components/ui/Spinner'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 import { cn } from '@/lib/cn'
 import { toIntlLocale } from '@/lib/intl'
 import { fuelStatsQuery } from '@/lib/queries'
 import FuelBarList from '@/routes/fuel/FuelBarList'
 import FuelModelsPanel from '@/routes/fuel/FuelModelsPanel'
+import StatsSkeleton from '@/routes/stats/StatsSkeleton'
 import { bandForCo2, plausibleYear } from '@/routes/fuel/helpers'
 
 const FUEL_TABS = ['year', 'brand', 'fuelClass'] as const
@@ -77,11 +77,7 @@ export default function FuelStatsRoute(): ReactNode {
         </p>
       )}
 
-      {stats.isPending && stats.fetchStatus !== 'paused' && (
-        <p className="flex items-center gap-2 text-[var(--color-muted)]">
-          <Spinner /> {t('result.loading')}
-        </p>
-      )}
+      {stats.isPending && stats.fetchStatus !== 'paused' && <StatsSkeleton variant="rating" />}
 
       {stats.isError && <p className="text-[var(--color-muted)]">{t('result.error')}</p>}
 

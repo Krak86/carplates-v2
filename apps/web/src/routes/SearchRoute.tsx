@@ -39,6 +39,7 @@ import {
 } from '@/lib/queries'
 import { capture } from '@/lib/telemetry'
 import { formatVehicleLabel } from '@/lib/vehicle-label'
+import HomeStatsSkeleton from '@/routes/stats/HomeStatsSkeleton'
 
 const TopStatsPanel = lazy(() => import('@/routes/stats/TopStatsPanel'))
 const FuelModelsPanel = lazy(() => import('@/routes/fuel/FuelModelsPanel'))
@@ -293,10 +294,12 @@ export default function SearchRoute(): ReactNode {
           </p>
         </Presence>
 
-        <Presence show={showHomeStats && stats.isSuccess}>
-          {stats.data && (
+        <Presence show={showHomeStats && !stats.isError}>
+          {!stats.data ? (
+            <HomeStatsSkeleton variant="top" />
+          ) : (
             <LoadErrorBoundary compact>
-              <Suspense fallback={null}>
+              <Suspense fallback={<HomeStatsSkeleton variant="top" />}>
                 <div className="section-vt w-full max-w-6xl">
                   <TopStatsPanel stats={stats.data} />
                 </div>
@@ -305,10 +308,12 @@ export default function SearchRoute(): ReactNode {
           )}
         </Presence>
 
-        <Presence show={showHomeStats && fuelStats.isSuccess}>
-          {fuelStats.data && (
+        <Presence show={showHomeStats && !fuelStats.isError}>
+          {!fuelStats.data ? (
+            <HomeStatsSkeleton variant="models" />
+          ) : (
             <LoadErrorBoundary compact>
-              <Suspense fallback={null}>
+              <Suspense fallback={<HomeStatsSkeleton variant="models" />}>
                 <div className="section-vt w-full max-w-6xl">
                   <FuelModelsPanel stats={fuelStats.data} />
                 </div>
@@ -317,10 +322,12 @@ export default function SearchRoute(): ReactNode {
           )}
         </Presence>
 
-        <Presence show={showHomeStats && safetyStats.isSuccess}>
-          {safetyStats.data && (
+        <Presence show={showHomeStats && !safetyStats.isError}>
+          {!safetyStats.data ? (
+            <HomeStatsSkeleton variant="models" />
+          ) : (
             <LoadErrorBoundary compact>
-              <Suspense fallback={null}>
+              <Suspense fallback={<HomeStatsSkeleton variant="models" />}>
                 <div className="section-vt w-full max-w-6xl">
                   <SafetyModelsPanel stats={safetyStats.data} />
                 </div>

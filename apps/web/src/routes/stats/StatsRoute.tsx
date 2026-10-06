@@ -6,12 +6,13 @@ import { useSearchParams } from 'react-router'
 
 import LoadErrorBoundary from '@/components/LoadErrorBoundary'
 import Card from '@/components/ui/Card'
-import Spinner from '@/components/ui/Spinner'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 import { cn } from '@/lib/cn'
 import { toIntlLocale } from '@/lib/intl'
 import { statsQuery } from '@/lib/queries'
 import { dimensionHasYearColumn, dimensionRows, yearBoundaryLabel, yearRange } from '@/routes/stats/helpers'
+import StatsMapSkeleton from '@/routes/stats/StatsMapSkeleton'
+import StatsSkeleton from '@/routes/stats/StatsSkeleton'
 import StatsTable from '@/routes/stats/StatsTable'
 import TopStatsPanel from '@/routes/stats/TopStatsPanel'
 import {
@@ -118,11 +119,7 @@ export default function StatsRoute(): ReactNode {
         </p>
       )}
 
-      {stats.isPending && stats.fetchStatus !== 'paused' && (
-        <p className="flex items-center gap-2 text-[var(--color-muted)]">
-          <Spinner /> {t('result.loading')}
-        </p>
-      )}
+      {stats.isPending && stats.fetchStatus !== 'paused' && <StatsSkeleton variant="registry" />}
 
       {stats.isError && <p className="text-[var(--color-muted)]">{t('result.error')}</p>}
 
@@ -208,7 +205,7 @@ export default function StatsRoute(): ReactNode {
           <div key={`${view}-${effectiveDim}-${metric}`} className="animate-fade-in">
             {view === 'map' ? (
               <LoadErrorBoundary compact>
-                <Suspense fallback={<Spinner />}>
+                <Suspense fallback={<StatsMapSkeleton />}>
                   <StatsMap rows={dimensionRows(stats.data, 'region')} metric={metric} />
                 </Suspense>
               </LoadErrorBoundary>
