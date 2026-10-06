@@ -103,6 +103,7 @@ pnpm ingest:wiki-images  # pre-warm registry.wiki_image (Wikimedia hero photos, 
 pnpm ingest:wiki-images:csv  # load the committed wiki-images CSV (skipped with a message until the first export is committed)
 pnpm export:wiki-images:csv  # re-dump ok + not_found rows to that CSV — run after every real pre-warm
 pnpm wiki-images:coverage    # photo coverage by tier, by group and weighted by registered cars
+                             # (the result-card hero reads this table via GET /api/wiki/image; article text = GET /api/wiki, fetched only when the section is opened)
 pnpm ingest:youtube-videos   # YouTube Data API fallback for models infocar has NO video for -> registry.youtube_videos (links + facts;
                        # needs GOOGLE_API_KEY in apps/api/.env). Staged like wiki-images: gap models only, most cars first, --min-cars
                        # (default 1000), resumable (registry.youtube_model_runs), stops at --daily-units (default 9000 of the 10,000/day

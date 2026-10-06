@@ -2246,7 +2246,7 @@ second, only if the US-only match rate leaves too many EU cars uncovered.
 
 ### Wikimedia hero-image cache in Postgres + pre-warm ✅ BUILT (2026-10-03 … 10-05)
 
-Moved from PLAN.md 2026-10-05 (commits `6d8a444`, `48d0b44`, `2ce88a8`). Open items (optional step 6 of the runbook, ideas not done) stay in PLAN.md.
+Moved from PLAN.md 2026-10-05 (commits `6d8a444`, `48d0b44`, `2ce88a8`); steps 6-7 and the hero endpoint added 2026-10-06. Open items (coverage-script grouping, ideas not done) stay in PLAN.md.
 
 **Status.** Built: migration `0030_wiki_image`, DB-backed `WikiService` with retry/backoff and the never-cache-errors
 rule, `scripts/src/wiki-images.ts` (+ `failed.json`, `--retry-failed`, `--retry-not-found`, CSV,
@@ -2264,10 +2264,33 @@ a photo** (64.6% in the ≥1000 tier; the 100-999 and <100 tiers are not process
 not_found); CSV re-exported (1.2 MB). Coverage by registered cars: ≥1000 tier 64.6% photo; 100-999 tier 44.2% photo
 (11.4% not_found, 44.5% still shown as "not processed" — unexplained after a full ≥100 run; check the coverage
 script's grouping before step 6); <100 tier 0%; **ALL 62.3% of cars have a photo**
-(was 59.4%). **Next: step 6 (optional, asks first).** The "stages" 1-3 (title search →
+(was 59.4%). (Step 6 was then run — see "Steps 6-7 done" below.) The "stages" 1-3 (title search →
 batched imageinfo → lead fallback over several languages) happen _inside every run_, per chunk of 20 models; they are not
 separate runs. Ideas not done: search by normalized name for odd spellings ("118 i" → "118i"); non-Latin article titles
 (zh/ja/ko) are mostly rejected by the "title mentions the model" guard.
+
+**Steps 6-7 done (2026-10-06).** Step 6 (`pnpm ingest:wiki-images -- --min-cars 1`) resumed after the 2026-10-05 stop and ran
+the remaining 5,504 models in ~3.3 h (~21 models/min, no 429s): 2,143 with a photo / 3,360 not_found / 1 failed. Step 7:
+`--retry-failed` replayed the 10 pending failures (9 older + 1 new; transient `cirrussearch` 400s and a timeout) → 4 photo /
+6 not_found / 0 failed; then `wiki-images:coverage` and `export:wiki-images:csv` (**112,398 rows, 2.0 MB**). **ALL 62.8% of
+registered cars have a photo** (≥1000 tier 64.6%, 100-999 tier 44.2%, <100 tier 30.3%); table by status: 72,067 not_found,
+ok = 4,092 commons_model + 11,604 commons_nearest + 20,563 commons_year + 4,072 lead. The coverage script still reports 33.0%
+of cars as "not processed" although every model with a car was run — a grouping mismatch in the script (open in PLAN.md).
+
+**Photo-only hero endpoint + lazy article text (2026-10-06).** Bug fixed: `GET /api/wiki` fetched the live article first and
+only resolved the stored photo when an article matched `titleMentionsModel`, so models with a stored Commons photo but no
+article (e.g. MERCEDES-MAYBACH S 580 2025) showed no photo, and every card waited on a live Wikipedia request.
+- **API:** new `GET /api/wiki/image?brand&model&year[&source]` → `WikiService.lookupImage` (`{ image }` only): stored
+  `(brand, model, year)` row → stored `(brand, model)` row → live Commons/Wikipedia lookup that is then stored. No article fetch,
+  no title guard; own 300-entry in-process cache; never memoizes a failed lookup. `GET /api/wiki` is unchanged (article text).
+  Shared: `wikiImageResponseSchema` / `WikiImageResponse`.
+- **Web:** `use-car-wiki-actions.ts` is replaced by `use-car-hero-image-actions.ts` (`useCarHeroImageActions`: photo query
+  `wikiImageQuery` + the ambient-background override; the override's `sourceUrl` is now `null`, the credit line is kept).
+  `WikiHeroImage` uses it and still falls back to the per-kind placeholder when no photo exists. `CarWikiInfo` now takes
+  `brand/model/year` and runs `wikiInfoQuery` only once the section is open (`enabled: hasQuery && open`; a `?section=wiki`
+  deep link opens it, so it fetches immediately); the trigger is disabled only while fetching. "Copy all" still pulls the text
+  via `ensureQueryData`. Query key `['wiki', 'image', …]` falls in the existing offline `wiki` group.
+- Tests: 3 new `WikiService.lookupImage` cases (stored photo with zero fetches, live fallback + store, null/empty query).
 
 **Runbook — what to execute, in order** (local dev stack: `pnpm db:up`, real registry loaded; run from the repo root)
 
