@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Link } from 'react-router'
 import type { NewsItem } from '@carplates/shared'
 
 import NewsCard from '@/components/NewsCard'
@@ -21,9 +22,19 @@ export default function NewsTicker({ items }: Props): ReactNode {
 
   return (
     <section aria-label={t('news.latest')} className="w-full rounded-xl bg-[var(--color-surface)]/20 p-3">
-      <h2 className="mb-2 px-1 text-lg font-semibold">
-        <span aria-hidden>📰</span> {t('news.latest')}
-      </h2>
+      <div className="mb-2 flex items-baseline justify-between gap-3 px-1">
+        <h2 className="text-lg font-semibold">
+          <span aria-hidden>📰</span> {t('news.latest')}
+        </h2>
+
+        <Link
+          viewTransition
+          to="/news"
+          className="shrink-0 text-sm text-[var(--color-primary)] underline hover:no-underline"
+        >
+          {t('news.more')} →
+        </Link>
+      </div>
 
       <div className="news-marquee">
         <ul className="news-track" style={{ animationDuration: `${items.length * SECONDS_PER_CARD}s` }}>

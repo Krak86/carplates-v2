@@ -67,6 +67,11 @@ export const STATIC_PAGES: Record<string, Record<Lang, PageText>> = {
       description: "Most common makes, colors, fuels and regions in Ukraine's vehicle registry."
     }
   },
+  '/news': {
+    ua: { title: 'Автоновини · Cars UA', description: 'Свіжі автоновини з українських та світових видань.' },
+    ru: { title: 'Автоновости · Cars UA', description: 'Свежие автоновости из украинских и мировых изданий.' },
+    en: { title: 'Auto news · Cars UA', description: 'Fresh car news from Ukrainian and international outlets.' }
+  },
   '/discuss': {
     ua: { title: 'Обговорення · Cars UA', description: 'Відгуки, ідеї та питання про Cars UA.' },
     ru: { title: 'Обсуждение · Cars UA', description: 'Отзывы, идеи и вопросы о Cars UA.' },

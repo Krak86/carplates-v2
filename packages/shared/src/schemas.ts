@@ -834,3 +834,13 @@ export const newsItemSchema = z.object({
 export const newsResponseSchema = z.object({ items: z.array(newsItemSchema) })
 export type NewsItem = z.infer<typeof newsItemSchema>
 export type NewsResponse = z.infer<typeof newsResponseSchema>
+
+/** One page of the /news archive, plus per-source counts (for the filter chips; computed over the language filter only). */
+export const newsPageResponseSchema = z.object({
+  items: z.array(newsItemSchema),
+  total: z.number().int(),
+  page: z.number().int(),
+  pageSize: z.number().int(),
+  sources: z.array(z.object({ source: z.string(), count: z.number().int() }))
+})
+export type NewsPageResponse = z.infer<typeof newsPageResponseSchema>

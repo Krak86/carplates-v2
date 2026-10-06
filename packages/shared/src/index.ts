@@ -286,7 +286,9 @@ export {
   type SearchResponse,
   newsItemSchema,
   newsResponseSchema,
+  newsPageResponseSchema,
   type NewsItem,
+  type NewsPageResponse,
   type NewsResponse
 } from './schemas.js'
 export {

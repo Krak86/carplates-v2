@@ -9,6 +9,7 @@ import {
   getFuelEconomy,
   getFuelStats,
   getNews,
+  getNewsPage,
   getReviews,
   getSafetyStats,
   getIihsRatings,
@@ -34,6 +35,7 @@ import type { FuelEconomyParams, VehicleSearchFilters } from '@/lib/api'
 import { isFavorited, listFavorites } from '@/lib/favorites-db'
 import type { FavoriteKind } from '@/lib/favorites-db'
 import { listVisits } from '@/lib/history-db'
+import { NEWS_PAGE_SIZE } from '@/lib/news'
 import { getStorageEstimate } from '@/lib/offline-storage'
 
 export function plateQuery(raw: string) {
@@ -283,5 +285,21 @@ export function newsQuery(brand?: string, model?: string | null, year?: number |
     queryKey: ['news', brand ?? null, model ?? null, year ?? null, lang ?? null],
     queryFn: () => getNews(brand, model, year, lang),
     staleTime: 10 * 60 * 1000
+  })
+}
+
+// The /news archive page: live data only (never in the persisted offline cache, never prefetched).
+export function newsPageQuery(opts: {
+  page: number
+  sources: string[]
+  q: string
+  order: 'asc' | 'desc'
+  lang?: 'uk'
+}) {
+  return queryOptions({
+    queryKey: ['news-page', opts.page, [...opts.sources].sort(), opts.q, opts.order, opts.lang ?? null],
+    queryFn: () => getNewsPage({ ...opts, pageSize: NEWS_PAGE_SIZE }),
+    staleTime: 10 * 60 * 1000,
+    placeholderData: previous => previous
   })
 }

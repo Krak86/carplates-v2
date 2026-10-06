@@ -1,4 +1,5 @@
 import { createZodDto } from 'nestjs-zod'
-import { newsResponseSchema } from '@carplates/shared'
+import { newsPageResponseSchema, newsResponseSchema } from '@carplates/shared'
 
 export class NewsDto extends createZodDto(newsResponseSchema) {}
+export class NewsPageDto extends createZodDto(newsPageResponseSchema) {}

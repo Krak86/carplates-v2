@@ -17,6 +17,7 @@ import {
   plateRecognizeResponseSchema,
   vinRecognizeResponseSchema,
   newsResponseSchema,
+  newsPageResponseSchema,
   reviewsResponseSchema,
   safetyRatingsResponseSchema,
   searchResponseSchema,
@@ -35,6 +36,7 @@ import type {
   FuelEconomyResponse,
   Models3dResponse,
   Models360Response,
+  NewsPageResponse,
   NewsResponse,
   ReviewsResponse,
   FuelStatsResponse,
@@ -328,4 +330,21 @@ export async function getNews(
   if (brand && year != null) params.set('year', String(year))
   if (lang) params.set('lang', lang)
   return newsResponseSchema.parse(await getJson(`/api/news?${params.toString()}`))
+}
+
+/** One page of the /news archive, optionally narrowed to some source ids. */
+export async function getNewsPage(opts: {
+  page: number
+  pageSize: number
+  sources: string[]
+  q: string
+  order: 'asc' | 'desc'
+  lang?: 'uk'
+}): Promise<NewsPageResponse> {
+  const { page, pageSize, sources, q, order, lang } = opts
+  const params = new URLSearchParams({ page: String(page), pageSize: String(pageSize), order })
+  if (q) params.set('q', q)
+  if (sources.length) params.set('source', sources.join(','))
+  if (lang) params.set('lang', lang)
+  return newsPageResponseSchema.parse(await getJson(`/api/news/list?${params.toString()}`))
 }

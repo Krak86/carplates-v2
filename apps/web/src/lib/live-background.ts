@@ -29,7 +29,7 @@ export function travicUrl({ lat, lon }: MapView): string {
 }
 
 /** Single-segment paths that are app pages, not a plate/VIN query. */
-const APP_PAGES = new Set(['about', 'history', 'favorites', 'stats', 'fuel', 'safety', 'discuss', 'advanced-search'])
+const APP_PAGES = new Set(['about', 'history', 'favorites', 'stats', 'fuel', 'safety', 'news', 'discuss', 'advanced-search'])
 
 /** True on a plate/VIN result route (`/:query`) — the only place the layers UI is offered. */
 export function isResultPath(pathname: string): boolean {
