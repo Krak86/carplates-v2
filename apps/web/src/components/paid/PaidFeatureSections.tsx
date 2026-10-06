@@ -5,7 +5,7 @@ import type { PaidFeature } from '@carplates/shared'
 
 import { useSession } from '@/components/auth/use-session'
 import VinToggleSection from '@/components/vin/VinToggleSection'
-import { PAID_FEATURE_ICON } from '@/lib/paid-features'
+import { AVAILABLE_PAID_FEATURES, PAID_FEATURE_ICON } from '@/lib/paid-features'
 import { featuresQuery } from '@/lib/queries'
 
 type Props = {
@@ -34,7 +34,7 @@ export default function PaidFeatureSections({ hasPlate, hasVin }: Props): ReactN
   if (!user || !features.isSuccess) return null
 
   const active = features.data.features.filter(
-    f => f.enabled && ((hasPlate && APPLIES_TO[f.feature].plate) || (hasVin && APPLIES_TO[f.feature].vin))
+    f => f.enabled && AVAILABLE_PAID_FEATURES.includes(f.feature) && ((hasPlate && APPLIES_TO[f.feature].plate) || (hasVin && APPLIES_TO[f.feature].vin))
   )
 
   return (

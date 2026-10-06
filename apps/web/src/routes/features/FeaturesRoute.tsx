@@ -3,13 +3,18 @@ import type { ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { Navigate } from 'react-router'
-import { PAID_FEATURES } from '@carplates/shared'
 import type { PaidFeature } from '@carplates/shared'
 
 import { useSession } from '@/components/auth/use-session'
 import Card from '@/components/ui/Card'
 import Spinner from '@/components/ui/Spinner'
-import { CONSIDERING_FEATURES, COMING_SOON_FEATURES, FUTURE_FEATURE_ICON, PAID_FEATURE_ICON } from '@/lib/paid-features'
+import {
+  AVAILABLE_PAID_FEATURES,
+  CONSIDERING_FEATURES,
+  COMING_SOON_FEATURES,
+  FUTURE_FEATURE_ICON,
+  PAID_FEATURE_ICON
+} from '@/lib/paid-features'
 import { featuresQuery } from '@/lib/queries'
 import { useFeaturesActions } from '@/routes/features/use-features-actions'
 
@@ -35,7 +40,7 @@ export default function FeaturesRoute(): ReactNode {
 
   const saved = new Map(features.data?.features.map(f => [f.feature, f.enabled]))
   const isOn = (f: PaidFeature): boolean => draft[f] ?? saved.get(f) ?? false
-  const changes = PAID_FEATURES.filter(f => draft[f] !== undefined && draft[f] !== (saved.get(f) ?? false))
+  const changes = AVAILABLE_PAID_FEATURES.filter(f => draft[f] !== undefined && draft[f] !== (saved.get(f) ?? false))
 
   const handleToggle = (feature: PaidFeature, enabled: boolean): void => {
     save.reset()
@@ -66,7 +71,7 @@ export default function FeaturesRoute(): ReactNode {
 
       {features.isSuccess && (
         <Card className="divide-y divide-[var(--color-border)] p-0">
-          {PAID_FEATURES.map(feature => (
+          {AVAILABLE_PAID_FEATURES.map(feature => (
             <label key={feature} className="flex cursor-pointer items-start gap-3 p-4 hover:bg-primary/5">
               <input
                 type="checkbox"

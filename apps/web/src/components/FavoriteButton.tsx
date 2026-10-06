@@ -21,6 +21,7 @@ export default function FavoriteButton({ kind, value, label, className }: Props)
       type="button"
       aria-pressed={isFavorite}
       aria-label={isFavorite ? t('favorites.remove') : t('favorites.add')}
+      title={isFavorite ? t('favorites.remove') : t('favorites.add')}
       onClick={toggle}
       disabled={isPending}
       className={cn(
