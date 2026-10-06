@@ -38,6 +38,12 @@ const envSchema = z.object({
    *  `wiki` = the article lead image only (always the newest generation). */
   WIKI_IMAGE_SOURCE: z.enum(['commons', 'wiki']).default('commons'),
 
+  /** OAuth 2.0 Web client id from Google Cloud Console (Credentials). Absent → sign-in is unavailable
+   *  (`GET /api/auth/config` answers `googleClientId: null`, `POST /api/auth/google` 503). Not a secret. */
+  GOOGLE_CLIENT_ID: z.string().optional(),
+  /** Session cookie lifetime; each request in the second half of it extends the session again (sliding). */
+  SESSION_TTL_DAYS: z.coerce.number().int().positive().default(30),
+
   /** Swagger UI at /api/docs — off in production unless explicitly enabled. */
   ENABLE_SWAGGER: boolish,
 

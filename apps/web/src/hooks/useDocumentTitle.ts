@@ -15,7 +15,9 @@ export const ROUTE_TITLE_KEYS: Record<string, string> = {
   '/safety': 'nav.safety',
   '/news': 'nav.news',
   '/discuss': 'nav.discuss',
-  '/advanced-search': 'nav.advancedSearch'
+  '/advanced-search': 'nav.advancedSearch',
+  '/features': 'nav.features',
+  '/admin': 'nav.admin'
 }
 
 /**

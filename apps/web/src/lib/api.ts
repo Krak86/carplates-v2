@@ -1,4 +1,8 @@
 import {
+  adminUsersResponseSchema,
+  authConfigResponseSchema,
+  featuresResponseSchema,
+  sessionResponseSchema,
   brandSuggestionsResponseSchema,
   cncapRatingsResponseSchema,
   dataVersionResponseSchema,
@@ -32,6 +36,11 @@ import {
   wikiInfoResponseSchema
 } from '@carplates/shared'
 import type {
+  AdminUsersResponse,
+  AuthConfigResponse,
+  FeaturesResponse,
+  FeaturesUpdateRequest,
+  SessionResponse,
   BrandSuggestionsResponse,
   CncapRatingsResponse,
   EuroNcapRatingsResponse,
@@ -100,6 +109,20 @@ async function unwrap(res: Response): Promise<unknown> {
 
 async function getJson(path: string): Promise<unknown> {
   return unwrap(await fetch(`${BASE}${path}`, { headers: { accept: 'application/json' } }))
+}
+
+/** Account calls carry the httpOnly session cookie even when VITE_API_BASE points at another origin. */
+async function sendJson(method: 'GET' | 'POST' | 'PUT' | 'DELETE', path: string, body?: unknown): Promise<unknown> {
+  const headers: Record<string, string> = { accept: 'application/json' }
+  if (body !== undefined) headers['content-type'] = 'application/json'
+  return unwrap(
+    await fetch(`${BASE}${path}`, {
+      method,
+      headers,
+      credentials: 'include',
+      body: body === undefined ? undefined : JSON.stringify(body)
+    })
+  )
 }
 
 export async function lookupPlate(plate: string): Promise<PlateLookupResponse> {
@@ -362,4 +385,37 @@ export async function getNewsPage(opts: {
   if (sources.length) params.set('source', sources.join(','))
   if (lang) params.set('lang', lang)
   return newsPageResponseSchema.parse(await getJson(`/api/news/list?${params.toString()}`))
+}
+
+export async function getAuthConfig(): Promise<AuthConfigResponse> {
+  return authConfigResponseSchema.parse(await getJson('/api/auth/config'))
+}
+
+export async function getSession(): Promise<SessionResponse> {
+  return sessionResponseSchema.parse(await sendJson('GET', '/api/auth/me'))
+}
+
+/** Exchanges the Google Identity Services credential (an ID token) for our own session cookie. */
+export async function signInWithGoogle(credential: string): Promise<SessionResponse> {
+  return sessionResponseSchema.parse(await sendJson('POST', '/api/auth/google', { credential }))
+}
+
+export async function signOut(): Promise<SessionResponse> {
+  return sessionResponseSchema.parse(await sendJson('POST', '/api/auth/logout'))
+}
+
+export async function deleteAccount(): Promise<SessionResponse> {
+  return sessionResponseSchema.parse(await sendJson('DELETE', '/api/auth/me'))
+}
+
+export async function getFeatures(): Promise<FeaturesResponse> {
+  return featuresResponseSchema.parse(await sendJson('GET', '/api/features'))
+}
+
+export async function saveFeatures(request: FeaturesUpdateRequest): Promise<FeaturesResponse> {
+  return featuresResponseSchema.parse(await sendJson('PUT', '/api/features', request))
+}
+
+export async function getAdminUsers(): Promise<AdminUsersResponse> {
+  return adminUsersResponseSchema.parse(await sendJson('GET', '/api/admin/users'))
 }

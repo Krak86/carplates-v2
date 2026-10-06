@@ -69,7 +69,13 @@ export default defineConfig({
           'assets/ArCameraDialog-*.js',
           'assets/NewsWidget-*.js',
           'assets/BlueskyWidget-*.js',
-          'assets/StockWidget-*.js'
+          'assets/StockWidget-*.js',
+          // Sign-in and the paid-feature / admin pages need the API: Google's script, the session cookie and every
+          // account call are online-only, so none of their lazy chunks are worth precaching.
+          'assets/GoogleSignInButton-*.js',
+          'assets/AccountMenu-*.js',
+          'assets/FeaturesRoute-*.js',
+          'assets/AdminRoute-*.js'
         ],
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/api\//, /^\/og\//, /^\/healthz/],

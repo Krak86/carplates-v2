@@ -5,6 +5,7 @@ import { Link, useLocation } from 'react-router'
 
 import BackgroundDevPanel from '@/components/BackgroundDevPanel'
 import BackgroundPhotos from '@/components/BackgroundPhotos'
+import LoginButton from '@/components/auth/LoginButton'
 import LayersButton from '@/components/LayersButton'
 import LoadErrorBoundary from '@/components/LoadErrorBoundary'
 import OfflineBanner from '@/components/OfflineBanner'
@@ -97,6 +98,7 @@ export default function Layout({ children }: Props): ReactNode {
         </Link>
         {vehicleLabel && <span className="min-w-0 truncate text-sm text-[var(--color-muted)]">{vehicleLabel}</span>}
         <LayersButton />
+        <LoginButton />
       </header>
 
       <OfflineBanner />

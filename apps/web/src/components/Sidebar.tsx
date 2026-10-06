@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { NavLink } from 'react-router'
 
+import { useSession } from '@/components/auth/use-session'
 import OfflineDataSettings from '@/components/OfflineDataSettings'
 import { LANGS } from '@/i18n'
 import type { Lang } from '@/i18n'
@@ -18,6 +19,8 @@ export default function Sidebar(): ReactNode {
   const theme = useUiStore(s => s.theme)
   const toggleTheme = useUiStore(s => s.toggleTheme)
   const setDrawerOpen = useUiStore(s => s.setDrawerOpen)
+
+  const { user, isAdmin } = useSession()
 
   const handleClose = (): void => setDrawerOpen(false)
 
@@ -56,6 +59,16 @@ export default function Sidebar(): ReactNode {
       <NavLink viewTransition to="/news" className={linkClass} onClick={handleClose}>
         <span aria-hidden>📰</span> {t('nav.news')}
       </NavLink>
+      {user && (
+        <NavLink viewTransition to="/features" className={linkClass} onClick={handleClose}>
+          <span aria-hidden>💎</span> {t('nav.features')}
+        </NavLink>
+      )}
+      {isAdmin && (
+        <NavLink viewTransition to="/admin" className={linkClass} onClick={handleClose}>
+          <span aria-hidden>🛠️</span> {t('nav.admin')}
+        </NavLink>
+      )}
       <NavLink viewTransition to="/discuss" className={linkClass} onClick={handleClose}>
         <span aria-hidden>💬</span> {t('nav.discuss')}
       </NavLink>

@@ -375,6 +375,14 @@ above once scoped, or dropped if research says no.
     Body Class chips; Windows renders flag emoji as letters (consider SVG flags); compute the VIN check digit locally
     for non-NHTSA-covered markets.
 
+- ✅ **Side widgets — Bluesky posts + share price** (2026-10-06, `037f7a7` / `7b225cb` / `c8d9950`) — built, see `docs/plan-done.md` ("Side widgets"). **Open:** (a) the share price rides Yahoo's
+  _unofficial_ chart endpoint (no key, no SLA, terms unclear) — fine for a side widget, but cache longer / drop it if it ever rate-limits or breaks, and don't build anything on it; (b) `stockCompanies.ts` covers 32 tickers —
+  brands without a listed parent (or private groups) simply show nothing; (c) Bluesky shows whatever the keyword search returns (no relevance/spam filter beyond the opt-out label) — judge on real plates; (d) browser-check at
+  ≥ 1400 px with the left sidebar open (overlap) and on the VIN / photo-result routes.
+- ✅ **Skeleton placeholders** for stats pages and homepage stats (2026-10-06, `de0a53c`) and the **About page sources + icons** (`9b974fd`) — built, see `docs/plan-done.md`.
+- 📋 **"What's new" bell + feature guide** — planned 2026-10-06, not started: [FEATURES_PLAN.md](FEATURES_PLAN.md) (changelog bell, `/features` guide with Playwright screenshots, ua/ru/en). **Conflicts with the
+  paid-features route** — see Phase 5 "Stage A".
+
 - 📋 **Wanted (stolen) vehicles** — planned 2026-10-01, researched, not started.
   See "Wanted vehicles ingest" below.
 
@@ -879,6 +887,75 @@ keyed on the body email** + 20/15min per IP.
 ## Phase 5 — accounts (login + favorites + search history), conditional
 
 Additive to the Nest + Postgres stack; no rewrite.
+
+### Stage A — Google sign-in + paid-feature opt-ins ✅ BUILT (2026-10-06)
+
+Full write-up (flow, DB, API, web, tests) in `docs/plan-done.md` ("Accounts, stage A"). Resume points only:
+
+- **Setup:** Cloud Console → Credentials → OAuth client, type Web → Authorized JavaScript origins `http://localhost:5173`, `http://localhost:3000` (+ the prod domain; redirect URIs are not used) → `GOOGLE_CLIENT_ID` in
+  `apps/api/.env`. Unset = the popover says "not configured". Consent screen in Testing mode only admits listed test users.
+- **Admin = DB only:** `UPDATE app.users SET role='admin' WHERE email='you@gmail.com';` (the user must have signed in once).
+- **Add a paid feature:** extend `PAID_FEATURES` (`packages/shared/src/account.ts`) + `paid.<id>.*` i18n + `PAID_FEATURE_ICON` + `APPLIES_TO` in `PaidFeatureSections`.
+- **⚠ Route clash:** `/features` is the paid-feature toggle page today, but [FEATURES_PLAN.md](FEATURES_PLAN.md) (planned, not started) wants `/features` for the **feature guide** (+ `/features/changelog`). Decide
+  before building the guide: rename the toggles to e.g. `/plan` or `/account/features` (cheap now — it is only `App.tsx`, the sidebar/menu links, `ROUTE_TITLE_KEYS`, the two redirects' source files and the `nav.features` string) or
+  rename the guide. The guide also wants a header bell next to the layers/login buttons — mind the right-hand header order (layers · login).
+- Flip the backup policy to nightly `pg_dump --schema=app` the day this ships to prod.
+
+### Stage B — what to unlock behind the opt-ins (research, 2026-10-06)
+
+Ship each as its own small slice, cheapest/most-certain first, each gated by its `PAID_FEATURES` flag and allow-listed to
+specific users (admin + testers) before opening up:
+
+1. **RIA average price** (`ria_avg_price`) — `developers.ria.com` `average_price` endpoint (same key as Phase 2). Needs the
+   brand/model/year→RIA id matrices (Phase 2 `ria_marks` table). Cache per (make, model, year) for 24 h — the average barely moves.
+2. **RIA similar ads** (`ria_ads`) — Phase 2 `GET /api/ria/similar`; per-user throttle + global daily counter on the shared key.
+3. **Platesmania** (`platesmania`) — only if a token is affordable (~5000 RUB/month and rising with requests per the owner);
+   cache by plate aggressively, since per-request pricing makes repeats the cost driver.
+4. **Foreign auction history by VIN** (`auction_history`) — no official API exists; resellers (e.g. auction-api.app quote:
+   history API $100/mo for 30k requests … $450/mo for 500k; VIN decoder $0.75 full; window sticker $6) front scraped
+   Copart/IAAI data. Treat as **unverified-source risk**: get a trial key, spot-check 20 known VINs against the
+   `bid.cars`/Copart pages before buying, keep the provider behind an interface so it can be swapped, never block the
+   free result on it.
+
+**Pricing model (recommendation):** monthly subscription with one bundle, not per-feature billing and not pay-once.
+Costs are recurring per-request fees, so one-off payment loses money on heavy users; weekly adds churn/support for no
+gain. Concretely: free tier = today's app; **Plus** (monthly, UAH, via monobank/WayForPay recurring) = RIA price + ads
+(cheap, shared key); **Pro** = adds auction history with a monthly VIN quota (the only feature with hard marginal cost).
+Keep the checkbox UI for _opt-in/consent_, but let the plan decide what is allowed server-side (`user_features` becomes
+"requested", plus an `entitlements` check). WayForPay ~2.0% / LiqPay ~2.75% / monobank recurring all support tokenised
+card-on-file subscriptions; revisit with real quotes.
+
+### Stage C — AUTH backlog (deliberately skipped in Stage A, in rough order)
+
+- **Cloud sync** of favorites + search history (`favorites`, `search_history` in `app`; merge local IndexedDB on first
+  sign-in; keep local-first/offline behaviour). Other Google-login perks: per-user saved vehicles with notes, plate watch
+  alerts (re-check on ingest, notify by email), export of all personal data, "my lookups" analytics.
+- **Favorite labels** (shown as "coming soon" on `/features`): user-managed labels for favorites — full CRUD, **max 10 per
+  user** (enforce in the API + a DB check/trigger, not just the UI). `app.favorite_labels (id, user_id, name, color)` +
+  `app.favorite_label_links (favorite_id, label_id)` once favorites live in `app` (needs cloud sync first); filter chips on
+  `/favorites`; unique name per user, case-insensitive.
+- **Background settings** (also "coming soon"): per-user control of the page background — which layers are on (live layer
+  vs. photos) and photo adjustments (brightness, blur, …). Today's background mode lives in Zustand/localStorage
+  (`background-store.ts`, `live-background-store.ts`, `BackgroundDevPanel`): build the UI against those stores first (works
+  signed out), then sync the chosen values to `app.user_settings (user_id, jsonb)` so they follow the account.
+- **Profile page `/profile`** (the menu then shrinks to name · Paid features · Profile · Sign out; account deletion
+  moves here, out of the dropdown). Sections: **Identity** (avatar/name/email from Google, read-only; role; member
+  since) · **Sign-in methods** (Google linked; later "set a password" / change password / link another provider / change
+  email) · **Devices** (active sessions with user-agent + last seen, revoke one, "sign out everywhere" — `app.sessions`
+  already has the data) · **Plan & paid features** (today's `/features` toggles, later subscription + billing history)
+  · **My data** (cloud-sync switches, labels, background settings, **export as JSON**) · **Notifications** (email opt-in for
+  plate alerts) · **Danger zone** (delete account). Security-sensitive actions — change email, set/change password,
+  link/unlink a provider, delete — need a **recent re-login** ("sudo mode", e.g. sign-in < 10 min old) and live only
+  here, never in the dropdown. Deletion today = the confirmation dialog (`DeleteAccountDialog`); on `/profile` add a
+  re-auth step (password if the account has one, else a fresh Google sign-in) and a **14–30-day grace period**
+  (soft-delete flag, sessions revoked at once, "undo" link by email, hard-delete by a scheduled job).
+- **Email + password:** `credentials` table (argon2id), email confirmation, forgot/reset password (single-use hashed
+  tokens, 1 h TTL), change password, session list/revoke, login throttle 5/15 min per email + 20/15 min per IP (see
+  rate-limit section). Needs a transactional email provider (Resend/Postmark/Brevo free tiers; Brevo or SES if cost
+  matters), SPF/DKIM on the domain, and email templates (ua/ru/en). Prefer Better Auth over hand-rolling this part.
+- **Account deletion with grace period** + data export (JSON); admin-side: list/search users, revoke sessions, disable
+  account, per-user feature allow-list for the paid-pilot.
+- **Telemetry:** PostHog `identify()` with the user id once consented.
 
 - **DB:** new `app` schema — `users`, `sessions`, `favorites (user_id, plate,
 created_at)`, `search_history (user_id, query, kind, found, created_at)`. Same

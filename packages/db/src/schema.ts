@@ -13,6 +13,7 @@ import {
   smallint,
   text,
   timestamp,
+  uuid,
   uniqueIndex
 } from 'drizzle-orm/pg-core'
 
@@ -777,3 +778,51 @@ export const carModels360 = registry.table(
 )
 export type CarModel360Row = typeof carModels360.$inferSelect
 export type CarModel360Insert = typeof carModels360.$inferInsert
+
+/**
+ * User-writable account data (Phase 5) — its own `app` schema, kept apart from the derived `registry`.
+ * See migrations/0034_app_accounts.sql. Written by the API only.
+ */
+export const app = pgSchema('app')
+
+export const users = app.table('users', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  email: text('email').notNull(),
+  name: text('name'),
+  avatarUrl: text('avatar_url'),
+  role: text('role').notNull().default('user'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  lastLoginAt: timestamp('last_login_at', { withTimezone: true })
+})
+export type UserRow = typeof users.$inferSelect
+
+export const authIdentities = app.table(
+  'auth_identities',
+  {
+    provider: text('provider').notNull(),
+    subject: text('subject').notNull(),
+    userId: uuid('user_id').notNull(),
+    email: text('email'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow()
+  },
+  t => [primaryKey({ columns: [t.provider, t.subject] })]
+)
+
+export const sessions = app.table('sessions', {
+  tokenHash: text('token_hash').primaryKey(),
+  userId: uuid('user_id').notNull(),
+  userAgent: text('user_agent'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull()
+})
+
+export const userFeatures = app.table(
+  'user_features',
+  {
+    userId: uuid('user_id').notNull(),
+    feature: text('feature').notNull(),
+    enabled: boolean('enabled').notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
+  },
+  t => [primaryKey({ columns: [t.userId, t.feature] })]
+)

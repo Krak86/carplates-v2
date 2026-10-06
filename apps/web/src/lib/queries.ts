@@ -3,6 +3,10 @@ import { normalizePlate } from '@carplates/shared'
 import type { StatsFieldDimension, StockRange } from '@carplates/shared'
 
 import {
+  getAdminUsers,
+  getAuthConfig,
+  getFeatures,
+  getSession,
   decodeVin,
   getCncapRatings,
   getEuroNcapRatings,
@@ -322,4 +326,21 @@ export function newsPageQuery(opts: {
     staleTime: 10 * 60 * 1000,
     placeholderData: previous => previous
   })
+}
+
+// Account state — first keys 'auth' / 'account' / 'admin' are not offline groups, so none of it is ever persisted.
+export function authConfigQuery() {
+  return queryOptions({ queryKey: ['auth', 'config'], queryFn: getAuthConfig, staleTime: Infinity })
+}
+
+export function sessionQuery() {
+  return queryOptions({ queryKey: ['auth', 'session'], queryFn: getSession, staleTime: 5 * 60_000, retry: false })
+}
+
+export function featuresQuery() {
+  return queryOptions({ queryKey: ['account', 'features'], queryFn: getFeatures, staleTime: 5 * 60_000 })
+}
+
+export function adminUsersQuery() {
+  return queryOptions({ queryKey: ['admin', 'users'], queryFn: getAdminUsers })
 }

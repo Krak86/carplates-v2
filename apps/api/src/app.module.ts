@@ -3,9 +3,11 @@ import { APP_FILTER, APP_PIPE } from '@nestjs/core'
 import { SentryModule } from '@sentry/nestjs/setup'
 import { ZodValidationPipe } from 'nestjs-zod'
 
+import { AuthModule } from './auth/auth.module.js'
 import { AllExceptionsFilter } from './common/all-exceptions.filter.js'
 import { DbModule } from './db/db.module.js'
 import { MissedModule } from './missed/missed.module.js'
+import { FeaturesModule } from './features/features.module.js'
 import { FuelModule } from './fuel/fuel.module.js'
 import { HealthController } from './health/health.controller.js'
 import { PhotosModule } from './photos/photos.module.js'
@@ -29,6 +31,8 @@ import { WikiModule } from './wiki/wiki.module.js'
     SentryModule.forRoot(),
     DbModule,
     MissedModule,
+    AuthModule,
+    FeaturesModule,
     PlateModule,
     VinModule,
     RecognizeModule,

@@ -17,6 +17,8 @@ const FuelStatsRoute = lazy(() => import('@/routes/fuel/FuelStatsRoute'))
 const SafetyStatsRoute = lazy(() => import('@/routes/safety/SafetyStatsRoute'))
 const NewsRoute = lazy(() => import('@/routes/news/NewsRoute'))
 const DiscussRoute = lazy(() => import('@/routes/DiscussRoute'))
+const FeaturesRoute = lazy(() => import('@/routes/features/FeaturesRoute'))
+const AdminRoute = lazy(() => import('@/routes/admin/AdminRoute'))
 const AdvancedSearchRoute = lazy(() => import('@/routes/advanced-search/AdvancedSearchRoute'))
 
 export default function App(): ReactNode {
@@ -40,6 +42,8 @@ export default function App(): ReactNode {
             <Route path="/news" element={<NewsRoute />} />
             <Route path="/discuss" element={<DiscussRoute />} />
             <Route path="/advanced-search" element={<AdvancedSearchRoute />} />
+            <Route path="/features" element={<FeaturesRoute />} />
+            <Route path="/admin" element={<AdminRoute />} />
             <Route path="/:query" element={<SearchRoute />} />
             <Route path="*" element={<SearchRoute />} />
           </Routes>

@@ -1833,20 +1833,20 @@ rotating the photo, pinch-zoom on touch.
 ### Background layers ✅ DONE (2026-10-04; extended 2026-10-05)
 
 header layers button on **every page** (hidden offline), session-only (`live-background-store`; routing never changes the
-  picked layer — click opens the panel, a press outside/Esc closes it). Modes: photos (default) · Google Maps embed (view captured when the
-  map is picked: the plate region's capital (`REGION_CENTERS`, zoom 13) on a result page, else all of Ukraine; picking it again re-pins) ·
-  three YouTube live-stream layers (`LIVE_STREAMS` / `DEFAULT_STREAMS` in `lib/live-background.ts`, one selector each, 480×270 player scaled up =
-  low quality): 🌍 earth (NASA ISS ×2) · 🚦 traffic (10 street/traffic-cam streams: Brazil, France, Taiwan, Spain, USA) · 🏙️ city (Taiwan).
-  **Poor-connection guard** (`usePoorConnection`, Network Information API, Chromium-only): on data-saver or ≤3G the stream buttons are
-  disabled with a hint and an active stream layer falls back to the photos, resuming by itself when the link improves. Lazy-loaded
-  (`LiveBackground`, `LayersPanel`). Advanced search also embeds an OSM view of the chosen region (`RegionMap`).
-  Researched dead ends: **live traffic** — Google/Waze switched it off in Ukraine (Waze works abroad, e.g. Warsaw, but
-  only congestion + reports, nothing moves); **moving vehicles** — travic.app, eway, lad.lviv.ua send
-  `X-Frame-Options` (not embeddable), city.dozor.tech is empty until a route is picked, citybus.in.ua is an app
-  landing page. Open: (a) Lviv publishes free GTFS-Realtime vehicle positions
-  (`track.ua-gis.com/gtfs/lviv/vehicle_position`, ~11 s; licence unchecked) — an API proxy + lazy Leaflet map would
-  give real moving public transport for Львів only; (b) YouTube streams can be retired or embed-blocked — swap ids in
-  `EARTH_STREAMS`.
+picked layer — click opens the panel, a press outside/Esc closes it). Modes: photos (default) · Google Maps embed (view captured when the
+map is picked: the plate region's capital (`REGION_CENTERS`, zoom 13) on a result page, else all of Ukraine; picking it again re-pins) ·
+three YouTube live-stream layers (`LIVE_STREAMS` / `DEFAULT_STREAMS` in `lib/live-background.ts`, one selector each, 480×270 player scaled up =
+low quality): 🌍 earth (NASA ISS ×2) · 🚦 traffic (10 street/traffic-cam streams: Brazil, France, Taiwan, Spain, USA) · 🏙️ city (Taiwan).
+**Poor-connection guard** (`usePoorConnection`, Network Information API, Chromium-only): on data-saver or ≤3G the stream buttons are
+disabled with a hint and an active stream layer falls back to the photos, resuming by itself when the link improves. Lazy-loaded
+(`LiveBackground`, `LayersPanel`). Advanced search also embeds an OSM view of the chosen region (`RegionMap`).
+Researched dead ends: **live traffic** — Google/Waze switched it off in Ukraine (Waze works abroad, e.g. Warsaw, but
+only congestion + reports, nothing moves); **moving vehicles** — travic.app, eway, lad.lviv.ua send
+`X-Frame-Options` (not embeddable), city.dozor.tech is empty until a route is picked, citybus.in.ua is an app
+landing page. Open: (a) Lviv publishes free GTFS-Realtime vehicle positions
+(`track.ua-gis.com/gtfs/lviv/vehicle_position`, ~11 s; licence unchecked) — an API proxy + lazy Leaflet map would
+give real moving public transport for Львів only; (b) YouTube streams can be retired or embed-blocked — swap ids in
+`EARTH_STREAMS`.
 
 ### Car reviews, videos, owner stories, press, 3D & 360° ✅ MOSTLY DONE (2026-10-03 … 10-05)
 
@@ -1854,21 +1854,20 @@ Moved from PLAN.md's "Car reviews (text) then YouTube" (2026-10-05). Everything 
 `scripts/seed-data/*.csv.gz` (all loaded by `pnpm ingest:ratings:csv`). Remaining work (YouTube fallback for models with no
 video — daily runs and lookup integration, motorcycles, browser/measurement checks) stays in PLAN.md.
 
-| Source | Table / migration | Committed seed | Lookup (`packages/shared`) | Rows |
-| --- | --- | --- | --- | --- |
-| infocar.ua catalog (test drives + owner reviews) | `infocar_versions` · 0020 | `infocar-versions.csv.gz` | `infocarLookup` | 5,546 |
-| infocar.ua videos (YouTube ids) | `car_videos` · 0023, 0024 | `infocar-videos.csv.gz` | `videoLookup` | 3,739 |
-| e-drive.com.ua owner posts | `owner_posts` · 0025 | `edrive-posts.csv.gz` | `ownerPostLookup` | 62,598 (99 makes) |
-| Sketchfab 3D models | `car_models_3d` · 0026 | `sketchfab-models.csv.gz` | `model3dLookup` | 7.8k (1.1k make/models) |
-| TopGear UK reviews | `topgear_reviews` · 0027 | `topgear-reviews.csv.gz` | `topgearLookup` | 1,032 |
-| CarShow360 360° galleries | `car_models_360` · 0028 | `carshow360-galleries.csv.gz` | `model360Lookup` | 1,393 |
-| itc.ua + mezha.ua test drives | `press_reviews` · 0029 | `press-reviews.csv.gz` | `pressLookup` | ~310 articles |
+| Source                                           | Table / migration         | Committed seed                | Lookup (`packages/shared`) | Rows                    |
+| ------------------------------------------------ | ------------------------- | ----------------------------- | -------------------------- | ----------------------- |
+| infocar.ua catalog (test drives + owner reviews) | `infocar_versions` · 0020 | `infocar-versions.csv.gz`     | `infocarLookup`            | 5,546                   |
+| infocar.ua videos (YouTube ids)                  | `car_videos` · 0023, 0024 | `infocar-videos.csv.gz`       | `videoLookup`              | 3,739                   |
+| e-drive.com.ua owner posts                       | `owner_posts` · 0025      | `edrive-posts.csv.gz`         | `ownerPostLookup`          | 62,598 (99 makes)       |
+| Sketchfab 3D models                              | `car_models_3d` · 0026    | `sketchfab-models.csv.gz`     | `model3dLookup`            | 7.8k (1.1k make/models) |
+| TopGear UK reviews                               | `topgear_reviews` · 0027  | `topgear-reviews.csv.gz`      | `topgearLookup`            | 1,032                   |
+| CarShow360 360° galleries                        | `car_models_360` · 0028   | `carshow360-galleries.csv.gz` | `model360Lookup`           | 1,393                   |
+| itc.ua + mezha.ua test drives                    | `press_reviews` · 0029    | `press-reviews.csv.gz`        | `pressLookup`              | ~310 articles           |
 
 UI: one "Reviews, videos & owner stories" toggle in `ReviewLinks` with `SourceGroup` subsections (infocar.ua, ITC.ua, Mezha,
 e-drive.com.ua, TopGear, other sites), each list 5 rows then "Show N more"; every source renders as the same hover row; videos
 in their own 🎬 toggle (`VideoReviews`, `?section=videos`); 🧊 3D view / 🔄 360° view chips with lazy modals. Data is shown as
 links + facts only (no scraped article text). Share/deep-link sections: `?section=reviews|videos|model3d`.
-
 
 #### Step 0 — link-only helper (shipped 2026-10-03)
 
@@ -1960,7 +1959,7 @@ Verified structure (2026-10-03, via browser screenshots + page fetches):
   personal email in it), respect robots.txt at runtime.
 - Volume estimate (unmeasured): ~50 brands + ~600 models ≈ 650 requests ≈ 11 min at 1 req/s.
   **Both trees below double that (~22 min), still one run.**
-**Second tree — owner reviews (same ingest, `tree = 'reviews'`)**, verified 2026-10-03:
+  **Second tree — owner reviews (same ingest, `tree = 'reviews'`)**, verified 2026-10-03:
 
 - `https://www.infocar.ua/reviews/marks.html` — all brands, alphabetical, **with review
   counts** (Acura 37, Audi 312, Hyundai 914, Ford 906, …); sections "international" and
@@ -2037,7 +2036,6 @@ animated open, and plays in `YouTubeModal`. **Left:** full crawl (one request pe
 
 _Update 2026-10-04: the full crawl ran — 153 brands, 3,739 videos; CSV committed; of the "Left" list above only the optional YouTube API enrichment and a browser check remain (see PLAN.md)._
 
-
 #### Step 2 — infocar videos: verified sources and design (2026-10-03)
 
 **Step 2 — infocar videos (YouTube channel + infocar's own `/video/` section), after Step 1**
@@ -2095,11 +2093,11 @@ How the crawl works / known limits:
    ignored; robots.txt allows all). A make, then a model, with no posts is skipped before its generations are listed
    (most of the catalog) and a short page ends paging. Nothing is cached on disk, so a re-run costs the same; upserts by
    post id make it idempotent and interruption-safe. Optional first pass: `-- --brand toyota` / the top registry brands
-4. Known limits: e-drive gives only a generation's **start year** (end = next generation's start − 1, last one open);
+2. Known limits: e-drive gives only a generation's **start year** (end = next generation's start − 1, last one open);
    the API exposes no per-post car/generation, so the crawl goes per generation; posts are owner anecdotes (some
    about the make generally) — label them as such, never as reviews. Periodic refresh = re-run (new posts only matter
    for recent generations; a `--since` shortcut could page only until the first already-known `createdAt`).
-5. Logos in `public/icons/` (`edrive.png`, new `infocar.png`) shown by `SourceGroup`.
+3. Logos in `public/icons/` (`edrive.png`, new `infocar.png`) shown by `SourceGroup`.
 
 _Still open: measure posts per brand / share of registry (brand, model) pairs with ≥1 post, and a browser check (a Kia Ceed II plate shows only 2012-2017 posts)._
 
@@ -2109,14 +2107,15 @@ _Still open: measure posts per brand / share of registry (brand, model) pairs wi
 verdict + score per model, shown as a "TopGear (EN)" subsection of `ReviewLinks` next to infocar/e-drive. Links + facts
 only (title, score, date, blurb, url) — never republish review text beyond the meta description.
 **Findings (measured 2026-10-03):**
+
 - robots.txt allows `/car-reviews/` (disallows only `/search*`, `/tags*`, `/taxonomy*`, `/node*`, `/mantis*`,
   `/api/search/*`). Plain HTTP + any UA gets 200, server-rendered; no JS/API reverse-engineering. 340–400 KB/page,
   ~0.7–1.3 s each.
 - Sitemap `https://www.topgear.com/sitemap.xml?page=1..N` (Drupal simple_sitemap, ~12 pages) lists 4,141 `/car-reviews/`
   URLs: **1,607 model pages** (`/car-reviews/<make>/<model>`, 193 makes) + variant pages (`first-drive`, `2dr`, `spec`…)
-  + the four section subpages (`/buying`, `/driving`, `/interior`, `/specs`). The **model page alone** has JSON-LD with
-  `Review` + `Rating` (`ratingValue` of `bestRating` 10 — note it is a string `"6"` on some pages, a number on others, and
-  `bestRating` too), `datePublished`, `Car`/`Brand`, plus `meta description` (blurb). Subpages add nothing we need.
+  - the four section subpages (`/buying`, `/driving`, `/interior`, `/specs`). The **model page alone** has JSON-LD with
+    `Review` + `Rating` (`ratingValue` of `bestRating` 10 — note it is a string `"6"` on some pages, a number on others, and
+    `bestRating` too), `datePublished`, `Car`/`Brand`, plus `meta description` (blurb). Subpages add nothing we need.
 - Some model slugs carry a generation year range (`sportage-2017-2021`, `niro-2017-2022`, `e-niro-2018-2022`),
   most don't (`ceed`, `ceed-sportswagon`, `octavia`); `-0`/`-1` suffixes are duplicate-slug generations (`sorento-0`,
   `proceed-0`) — the `datePublished` year is the fallback generation anchor.
@@ -2134,7 +2133,6 @@ reviews, 1,016 scored; makes absent from infocar (Ferrari, Lotus, McLaren …) c
 `ReviewLinks`; the About page now also lists infocar.ua, e-drive.com.ua, TopGear, Sketchfab, Google Maps and YouTube.
 **Still open:** item 8 (coverage numbers + browser check of a Kia Sportage / BMW X5 / Mercedes plate); AutoTrader UK search link (item 7, not
 added); an optional "search YouTube for this car" link in the Video reviews section (requested 2026-10-05, scope unconfirmed).
-
 
 9. Known limits to document: TopGear has no per-year pages (coarse generation matching); UK-market models only; scores
    are TopGear's /10 — label the source clearly; periodic refresh = re-run (new reviews are rare, the sitemap `lastmod`
@@ -2280,6 +2278,7 @@ of cars as "not processed" although every model with a car was run — a groupin
 **Photo-only hero endpoint + lazy article text (2026-10-06).** Bug fixed: `GET /api/wiki` fetched the live article first and
 only resolved the stored photo when an article matched `titleMentionsModel`, so models with a stored Commons photo but no
 article (e.g. MERCEDES-MAYBACH S 580 2025) showed no photo, and every card waited on a live Wikipedia request.
+
 - **API:** new `GET /api/wiki/image?brand&model&year[&source]` → `WikiService.lookupImage` (`{ image }` only): stored
   `(brand, model, year)` row → stored `(brand, model)` row → live Commons/Wikipedia lookup that is then stored. No article fetch,
   no title guard; own 300-entry in-process cache; never memoizes a failed lookup. `GET /api/wiki` is unchanged (article text).
@@ -2545,20 +2544,20 @@ Moved from PLAN.md 2026-10-05. Open items (cron, Hot toggle, measure step, more 
 
 **Sources verified 2026-10-05** (`curl` + robots.txt + a tagger run over the real items):
 
-| Source | Verdict | Notes |
-| --- | --- | --- |
-| news.infocar.ua `news.php` / `new-models.php` / `tests.php` | ✅ enabled | 100 / 20 / 50 items; windows-1251; 66 % / 85 % / 96 % tagged with a make, 23 / 9 / 41 with a model |
-| eauto.org.ua `rss.xml` | ✅ enabled | 50 items, market analytics, mostly untagged (general news) |
-| autoua.net `/rss/` | ✅ enabled | 20 items over ~10 days, ru, all with images, 19/20 make, 11/20 model; its `<category>` is dirty — the title is the source |
-| mezha.ua `/feed/` | ✅ enabled with `onlyCategories: ["Авто","Електромобілі"]` | whole-site tech feed, only 10 items (~3 h); 0 car items at test time; its car articles carry the tags Авто / Електромобілі + the make |
-| caranddriver.com `/rss/all.xml/` | ✅ enabled (en) with `excludeUrls` | added 2026-10-05; 50 items ≈ 1 day, no `<category>`, `<media:content>` images; `excludeUrls: ["/photos/", "/auto-loans/", "/shopping-advice/"]` drops ~40 % (galleries, loans); 22/30 make, 10/30 model |
-| motor1.com `/rss/news/all/` | ✅ enabled (en) | added 2026-10-05; 20 news items, `<enclosure>` images; 16/20 make, 3/20 model |
-| carscoops.com `/category/news/feed/` · `/tag/reviews/feed/` | ✅ enabled (en) | added 2026-10-05; 18 + 18 items; full-content feeds (260 / 800 KB, only the ≤300-char summary is kept), robots.txt empty; 11/18 + 17/18 make, 5 + 9 model; reviews feed updates slowly |
-| novyny.live `/rss/news_ua.rss` | ✅ enabled with `onlyCategories: ["Авто"]` | 146 items ≈ 1 day, ~8 "Авто"/day, empty `<description>`, avif images, only ~1 in 8 names a make (the rest show on the homepage ticker only); "Транспорт" is railways — not kept |
-| itc.ua `/ua/feed/` | ❌ rejected | robots.txt `Disallow: */feed/` — covered by the HTML tag crawl (`ingest:press`) instead |
-| 24tv.ua `rss/all.xml` | ❌ rejected (added, then removed) | whole-site, ~3 h window, no categories, no auto feed (`/rss/auto.xml` is empty); 0 of 60 headlines named a make |
-| rbc.ua `ukrnet.strong.ukr.rss.xml` / `all.ukr.rss.xml` | ❌ rejected | no auto category; 0 of 65 / 402 items name a make |
-| fakty.com.ua `/ua/feed`, telegraf.com.ua `/ukr/rss` | ❌ rejected | no auto category; 0 of 20 / 250 items name a make (telegraf's "авто" hits are traffic, washing machines, enlistment offices) |
+| Source                                                      | Verdict                                                    | Notes                                                                                                                                                                                                   |
+| ----------------------------------------------------------- | ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| news.infocar.ua `news.php` / `new-models.php` / `tests.php` | ✅ enabled                                                 | 100 / 20 / 50 items; windows-1251; 66 % / 85 % / 96 % tagged with a make, 23 / 9 / 41 with a model                                                                                                      |
+| eauto.org.ua `rss.xml`                                      | ✅ enabled                                                 | 50 items, market analytics, mostly untagged (general news)                                                                                                                                              |
+| autoua.net `/rss/`                                          | ✅ enabled                                                 | 20 items over ~10 days, ru, all with images, 19/20 make, 11/20 model; its `<category>` is dirty — the title is the source                                                                               |
+| mezha.ua `/feed/`                                           | ✅ enabled with `onlyCategories: ["Авто","Електромобілі"]` | whole-site tech feed, only 10 items (~3 h); 0 car items at test time; its car articles carry the tags Авто / Електромобілі + the make                                                                   |
+| caranddriver.com `/rss/all.xml/`                            | ✅ enabled (en) with `excludeUrls`                         | added 2026-10-05; 50 items ≈ 1 day, no `<category>`, `<media:content>` images; `excludeUrls: ["/photos/", "/auto-loans/", "/shopping-advice/"]` drops ~40 % (galleries, loans); 22/30 make, 10/30 model |
+| motor1.com `/rss/news/all/`                                 | ✅ enabled (en)                                            | added 2026-10-05; 20 news items, `<enclosure>` images; 16/20 make, 3/20 model                                                                                                                           |
+| carscoops.com `/category/news/feed/` · `/tag/reviews/feed/` | ✅ enabled (en)                                            | added 2026-10-05; 18 + 18 items; full-content feeds (260 / 800 KB, only the ≤300-char summary is kept), robots.txt empty; 11/18 + 17/18 make, 5 + 9 model; reviews feed updates slowly                  |
+| novyny.live `/rss/news_ua.rss`                              | ✅ enabled with `onlyCategories: ["Авто"]`                 | 146 items ≈ 1 day, ~8 "Авто"/day, empty `<description>`, avif images, only ~1 in 8 names a make (the rest show on the homepage ticker only); "Транспорт" is railways — not kept                         |
+| itc.ua `/ua/feed/`                                          | ❌ rejected                                                | robots.txt `Disallow: */feed/` — covered by the HTML tag crawl (`ingest:press`) instead                                                                                                                 |
+| 24tv.ua `rss/all.xml`                                       | ❌ rejected (added, then removed)                          | whole-site, ~3 h window, no categories, no auto feed (`/rss/auto.xml` is empty); 0 of 60 headlines named a make                                                                                         |
+| rbc.ua `ukrnet.strong.ukr.rss.xml` / `all.ukr.rss.xml`      | ❌ rejected                                                | no auto category; 0 of 65 / 402 items name a make                                                                                                                                                       |
+| fakty.com.ua `/ua/feed`, telegraf.com.ua `/ukr/rss`         | ❌ rejected                                                | no auto category; 0 of 20 / 250 items name a make (telegraf's "авто" hits are traffic, washing machines, enlistment offices)                                                                            |
 
 Lesson: general news sites have no car-model news — only auto-section sites do. Untested candidates: auto.ria.com/news, autocentre.ua, avtoradnyk,
 nv.ua/auto. A mezha backfill is possible from the HTML tag pages (`mezha.ua/tag/avto/`, ~110 pages, robots allow it), not from RSS.
@@ -2692,7 +2691,7 @@ Triggered by real user photos that failed or returned junk. What changed and why
   work unchanged. A barcode read has no box.
 - **Junk rejection (all found on real photos; each has a regression test in `vin-read.test.ts`).**
   - Badge/watermark text fits the VIN alphabet after the O→0 / I→1 remap ("MINI COOPER CLUBMAN" →
-    `M1N1C00PERCLUBMAN`, stock-photo "IMAGE ID: 2701628693" → `1MAGE1D2701628693`). Rules: a 17-char *line* needs a
+    `M1N1C00PERCLUBMAN`, stock-photo "IMAGE ID: 2701628693" → `1MAGE1D2701628693`). Rules: a 17-char _line_ needs a
     numeric 4-char tail **or** a passing check digit; a line with `:` `/` `-` or a letters-only word of 5+ letters is
     never glued into one VIN-shaped string (its words are still read one by one — a 17-char word like the VIN in
     `V.I.N WMW…` counts as an exact read, which also removes shifted-window junk).
@@ -2702,7 +2701,7 @@ Triggered by real user photos that failed or returned junk. What changed and why
   - Stamped VINs are fenced by asterisks that OCR reads as `X` (`XKLATF08Y1VB363636X`, 19 chars) → trimmed.
   - **Look-alike correction by WMI.** A read whose 3-char prefix isn't in the table but is one look-alike swap
     (M/N, 8/B, 5/S, 2/Z, 6/G, 0/D, U/V) from one that is (`NNC…` → Ford Thailand's `MNC…`) is replaced by the fixed
-    VIN (the raw read is *not* listed beside it — same text on the plate, one wrong letter). Only first-3-char
+    VIN (the raw read is _not_ listed beside it — same text on the plate, one wrong letter). Only first-3-char
     errors are caught; a misread later in the VIN still needs a human check against the outlined photo.
 - **OCR service tuning (`services/alpr/app.py`, rebuild with `pnpm alpr:build` + `alpr:up`).** `unclip_ratio=2.5`
   (merges spaced characters; fixed a misread letter on a Nissan chassis plate); the image is **padded** before OCR
@@ -2715,7 +2714,7 @@ Triggered by real user photos that failed or returned junk. What changed and why
   things worse on the dotted-metal photo.
 - **Gotcha: `@carplates/shared` is consumed from `dist`.** The API (and web) resolve the package through its built
   `dist/`, so a change in `packages/shared/src` is invisible to the running API until `pnpm --filter @carplates/shared
-  build` ("still the old result"). The PWA also needs a hard refresh after a web rebuild.
+build` ("still the old result"). The PWA also needs a hard refresh after a web rebuild.
 - **Offline WMI fallback + labelled gap fields (VIN decode page).** NHTSA vPIC only has detail for US/Canada-market
   vehicles; for a VIN it doesn't know the Overview used to be empty or "—". `packages/shared/src/wmi.ts` is a curated
   table (≈190 prefixes: KR/JP/CN/EU/RU/UA/TH/IN/US + a country-by-first-chars fallback; `lookupWmi`, `hasKnownWmi`).
@@ -2729,7 +2728,7 @@ Triggered by real user photos that failed or returned junk. What changed and why
     values; the VDS tooltip says "NHTSA has no decode, raw code …" when it has none.
   - Overview sections with no data (Engine & weight / Built in / All details) are hidden entirely, heading included
     (`hasEngineData` / `hasOriginData` / `groupFields`).
-  - Not offline-decodable by design: model/trim/engine (manufacturer-specific) and Japanese domestic *frame numbers*
+  - Not offline-decodable by design: model/trim/engine (manufacturer-specific) and Japanese domestic _frame numbers_
     (`NCP51-1234567` — not a 17-char VIN; only manufacturer parts catalogs decode them).
 - **Checked on real photos (through the live API):** MINI `WMWLN5105J2H03769`, Hyundai `KM8J33A4XMU312822`, Nissan
   `PN8EAAC24TCA14792` (stock photo with watermark), door-sill stamp `KLATF08Y1VB363636`, Audi stamp
@@ -2794,5 +2793,61 @@ Requested and built the same day (open items are in PLAN.md "Step 2f"). Goal: a 
   `syndication.twitter.com/srv/timeline-profile/screen-name/<handle>` returned **429**, so the box stayed empty, the script reports success anyway (no way to detect it), and it sets X cookies. The X API has no free read tier.
   All X code was removed before it was ever committed.
 - **Bluesky — rejected.** `public.api.bsky.app` is open and free, but brand-named handles are mostly squatters or random people (`bmw.bsky.social` = "BD - e/acc", `chevrolet.bsky.social` = "Nissan Honda"),
-  the genuine brand accounts have 0-few posts, and ownership cannot be verified automatically.
-- **Left-hand "Brand videos" side panel** (a `NewsWidget` twin on the left gutter) was built on top of the YouTube data and removed the same day in favour of the Videos section; the gutter is free for other widgets.
+  the genuine brand accounts have 0-few posts, and ownership cannot be verified automatically. (A keyword-search Bluesky widget that needs no handles was built later the same day — see "Side widgets".)
+- **Left-hand "Brand videos" side panel** (a `NewsWidget` twin on the left gutter) was built on top of the YouTube data and removed the same day in favour of the Videos section; the gutter is free for other widgets (the Bluesky + share-price column now uses it — see "Side widgets").
+
+### Side widgets: Bluesky posts + share price ✅ BUILT (2026-10-06, `037f7a7`, `7b225cb`, `c8d9950`)
+
+Desktop-only widgets in the gutters beside a plate result. Open items are in PLAN.md "Side widgets".
+
+- **Gating** (`useSideWidgetsVisible`): the widgets mount — chunk **and** fetch — only at ≥ 1400 px, online, after the first scroll, and slide in with `starting:` variants. Each is dismissible for the current route. Their chunks
+  (`NewsWidget`, `BlueskyWidget`, `StockWidget`) are excluded from the PWA precache in `vite.config.ts` (live third-party data, only mounted online). They also show after a _photo_ search that resolves to a vehicle (`c8d9950` dropped
+  the `!photo` gate in `SearchRoute`; recognition errors still hide them).
+- **Layout:** News on the right; **Bluesky (top) and share price (below) share one fixed left column** — either alone takes the top slot, and `BlueskyWidget` flows inside that column instead of being fixed itself.
+- **Bluesky** (`lib/bluesky.ts`, `BlueskyPostCard`, `BlueskyWidget`): a keyword _search_, not brand handles — `app.bsky.feed.searchPosts` on `MAKE MODEL (YEAR)`, falling back to `MAKE MODEL`; fetches 25, drops text-less
+  posts and authors carrying the `!no-unauthenticated` opt-out label, shows 2 (text + image / link-card thumb) with a "More on Bluesky" link. Zod-validated in the browser (`zod` added to `apps/web`); plate results only; hidden when
+  there are no posts. This is a different use from the "Bluesky — rejected" handle idea under _Brand YouTube channel videos_ (that one needed verified brand accounts; a search needs none).
+- **Share price** (`GET /api/stocks?brand=&range=1d|1mo|1y`, `apps/api/src/stocks/`; `stockCompanies.ts` + `stockResponseSchema` in `@carplates/shared`): the listed company behind the make (infocar brand slug → company, parent-group
+  fallback; **32 Yahoo tickers**). The API proxies Yahoo Finance's unofficial chart endpoint (`query1.finance.yahoo.com/v8/finance/chart`; browsers can't call it — CORS), 5-min in-memory cache (200 entries), stale-on-error, 10 s timeout;
+  `company: null` when the brand has no listing. Web: `StockWidget` + a dependency-free SVG `StockChart` (price, ▲/▼ %, 1D/1M/1Y chips, Yahoo link).
+- **News widget:** shows at most 3 items plus a "More news" link to `/news?q=<make model>` (make only when there are no model-level headlines). The `/news` page got a **Reset** button (visible when not at defaults) restoring
+  source chips, search and sort order. `NewsSection` on the result card now fetches after the first scroll on wide screens (or for `?section=news`), so `/api/news` loads together with the side widgets through the shared query.
+- **Sidebar:** the drawer now also closes after toggling the theme, like the nav links and language buttons.
+
+### Skeleton placeholders ✅ BUILT (2026-10-06, `de0a53c`)
+
+`ui/Skeleton` (pulse block); `StatsSkeleton` (registry + rating variants) and `StatsMapSkeleton` replace the "Loading…" spinners on `/stats`, `/fuel`, `/safety` and the map view; `HomeStatsSkeleton` (top + models
+variants) fills the homepage top-5, CO₂ and crash-test sections while loading, so the news ticker below doesn't jump when the data arrives.
+
+### About page: new sources and icons ✅ BUILT (2026-10-06, `9b974fd`)
+
+Wikimedia Commons, Bluesky, Yahoo Finance and Travic added to the sources list (ua/ru/en); the YouTube entry mentions Dream Trips ISS and the brand channel uploads. Each source shows a 32 px `SourceAvatar` from
+`apps/web/public/icons/sources/` (24 logos, 64 px WebP plus 4 SVGs).
+
+### Accounts, stage A — Google sign-in, paid-feature opt-ins, admin ✅ BUILT (2026-10-06, uncommitted when written)
+
+Phase 5's first slice; the open stages (pricing, backlog, profile page) stay in PLAN.md "Phase 5".
+
+- **Decision: own thin auth — no auth SaaS, no Passport, no `google-auth-library`.** The stack already has Nest + Postgres; an ID-token verify is ~100 lines and avoids a vendor, per-MAU pricing and a second user store
+  (Auth0/Clerk/Firebase/Supabase rejected for that reason; Better Auth is the pick if email + password lands).
+- **Flow:** Google Identity Services renders the button (script loaded only when the sign-in popover opens, online only) → the page gets an ID token → `POST /api/auth/google` verifies it locally against Google's JWKS
+  (`apps/api/src/auth/google-id-token.ts`: RS256 signature, `iss`, `aud` = our client id, `exp`/`iat` with 60 s skew, `email_verified`; keys cached per `Cache-Control: max-age`, re-fetched at most once a minute on an unknown `kid`)
+  → an opaque 256-bit session token in an **httpOnly, SameSite=Lax, Secure (production) cookie `carsua_sid`**; the DB stores only its SHA-256. Sliding `SESSION_TTL_DAYS` (30) lifetime, extended once past half. SameSite=Lax is the
+  CSRF guard (JSON-only API, no mutating GETs). Expired sessions are purged on each sign-in.
+- **Button language:** Google ignores `renderButton({ locale })` (the button iframe URL carries no language); the language comes from `?hl=` on the script URL, so `loadGoogleIdentity(hl)` drops the old script and loads a fresh
+  copy on every UI-language change (ua→`uk`, ru, en). Checked in a browser: one script, one button, "Вход через аккаунт Google" in Russian.
+- **DB** — new **`app` schema**, migration `0034_app_accounts.sql` (kept apart from the derived `registry`): `users` (unique lower-cased email, `role user|admin`), `auth_identities (provider, subject)` (one user can later link
+  password/other providers by verified email), `sessions`, `user_features (user_id, feature, enabled, updated_at)`. All FKs `ON DELETE CASCADE`, so deleting a user wipes everything.
+- **API:** `GET /api/auth/config` · `GET /api/auth/me` (anonymous = `200 {user:null}`) · `POST /api/auth/google` (20 / 15 min) · `POST /api/auth/logout` · `DELETE /api/auth/me` · `GET|PUT /api/features` (SessionGuard) ·
+  `GET /api/admin/users` (AdminGuard). Controllers return `WithSessionCookie` and a global interceptor sets/clears the cookie (no `@Res()`). Contract in `packages/shared/src/account.ts` — **deliberately not in `schemas.ts`**, whose
+  hash is the offline-cache buster. Env: `GOOGLE_CLIENT_ID` (not a secret; absent → `auth/config` says `null`, sign-in answers 503), `SESSION_TTL_DAYS`.
+- **Admin = DB only:** `UPDATE app.users SET role='admin' WHERE email='you@gmail.com';` (the user must have signed in once). Admins see everything a user sees plus `/admin` (accounts + which features each switched on). No API grants roles.
+- **Web:** `LoginButton` in the header right of the layers button (person icon → avatar), `AccountMenu` (name/email, admin badge, Paid features, Admin, Sign out, Delete account), `DeleteAccountDialog` (portaled `alertdialog`: what is
+  deleted, Cancel focused, Escape/backdrop cancel except while deleting; the header menu ignores clicks from it), `/features` (a checkbox per feature + Save, then "Coming soon" and "Under consideration" lists) and `/admin`. Both routes
+  redirect to the homepage when not signed in / not admin / offline. `PaidFeatureSections` adds a **placeholder section on the result card per enabled feature** (platesmania only for plate results, auction history only for VIN
+  ones). Auth is server state (`useSession`, TanStack Query), never persisted; **offline the user counts as anonymous** and all account UI disappears. The account chunks (`GoogleSignInButton`, `AccountMenu`, `FeaturesRoute`,
+  `AdminRoute`) are excluded from the PWA precache; `/api/*` is not runtime-cached.
+- **Adding a paid feature:** extend `PAID_FEATURES` (`packages/shared/src/account.ts`), add `paid.<id>.title|desc|placeholder` i18n keys, `PAID_FEATURE_ICON`, and `APPLIES_TO` in `PaidFeatureSections`.
+- **Tests:** `google-id-token.test.ts` (valid token, wrong aud/iss, expired, future, unverified email, tampered payload, unknown kid refetch limit, bad alg) and `session-cookie.test.ts`; endpoints exercised by hand with a throwaway
+  user + session (401/403/400 paths, save, admin list, delete). A real Google sign-in has worked end to end (the owner's account exists with a login timestamp, later promoted to admin by SQL).
+- **Not done on purpose:** billing, real RIA/Platesmania/auction calls, cloud sync, email login, cookie-consent surface (the session cookie is strictly necessary).

@@ -24,6 +24,9 @@ Ukrainian vehicle lookup by **plate number** or **VIN**. Rebuild of
   view (the plate's region capital on a result page, else Ukraine), or a live YouTube stream — NASA ISS "Earth from space",
   street/traffic cams or a city view (low quality on purpose, selectable; disabled on data-saver/≤3G). Advanced search shows an OpenStreetMap view of the chosen region
 - Auto news: recent Ukrainian/Russian/English auto-news headlines (infocar, eauto, autoua, novyny.live, Car and Driver, Motor1, Carscoops…) (links out, no article text) polled from RSS feeds listed in `scripts/news-sources.json` (`pnpm ingest:news`, `registry.news_items`) — a self-scrolling strip on the homepage, a 📰 News section on result cards (make+model, then make news; Ukrainian UI shows Ukrainian-language items only) and a desktop-only side panel that fades in on scroll; a `/news` archive page lists everything paged (10 per page) with outlet filter chips, date sort and title search, state kept in the URL
+- Side widgets (desktop ≥ 1400 px, online, appear after the first scroll on a plate result): recent auto-news on the right; on the left recent [Bluesky](https://bsky.app) posts about the car (keyword search, links out) above the share price of the listed company behind the make ([Yahoo Finance](https://finance.yahoo.com) chart data, 1D/1M/1Y, proxied and cached by the API)
+- Accounts (optional): **Sign in with Google** (button in the header; own session cookie, no third-party auth service), a **Paid features** page where a signed-in user ticks the extras they want (RIA ads, RIA average price, Platesmania, auction history by VIN — placeholders on the result card for now, nothing is charged), account deletion, and an **admin** page listing accounts and the features they asked for. Admins are made directly in the DB. Everything account-related is online-only and is not precached by the PWA
+- Skeleton placeholders while the stats pages and homepage stats load; the About page lists every data source with its icon
 - Light/dark theme, AR plate scan, plate and VIN photo search (VIN: on-device barcode, else self-hosted OCR; found VINs are outlined on the photo and listed as chips), VIN decode with an offline VIN-prefix fallback for cars NHTSA does not know (labelled "≈" fields), link previews for shared plate/VIN URLs
 - Installable PWA with offline mode: recent results, history and favorites stay available without a connection
 
@@ -92,6 +95,11 @@ step for a clean setup**: `db:seed`, `ingest`/`ingest:full`, and each
 `ingest:*:csv` command refresh everything they touch as the last step of
 their own run — the Quick start commands above are the complete recipe.
 
+User-writable account data lives in its own **`app` schema** (`users`, `auth_identities`, `sessions`,
+`user_features`; migration `0034`), separate from the derived, re-ingestable `registry` — `db:seed` and the ingests never touch it.
+To make someone an admin (they must have signed in once):
+`UPDATE app.users SET role = 'admin' WHERE email = 'you@gmail.com';`
+
 A standalone refresh is only needed when you add data to an **already-seeded**
 DB outside those commands:
 
@@ -113,18 +121,24 @@ DB outside those commands:
 
 ## Optional features (API keys)
 
-Everything above (plate/VIN search) works with zero external keys. Two
+Everything above (plate/VIN search) works with zero external keys. These
 features are optional add-ons, each gated on its own key in `apps/api/.env` —
 absent, the app runs fine and that one feature just answers "unavailable":
 
-| Feature                          | Env var                        | Get a free key at                                     |
-| -------------------------------- | ------------------------------ | ----------------------------------------------------- |
-| Find a plate by photo/camera     | `PLATE_RECOGNIZER_CLOUD_TOKEN` | [platerecognizer.com](https://platerecognizer.com)    |
-| "What it might look like" photos | `PIXABAY_API_KEY`              | [pixabay.com/api/docs](https://pixabay.com/api/docs/) |
+| Feature                          | Env var                        | Get a free key at                                                             |
+| -------------------------------- | ------------------------------ | ----------------------------------------------------------------------------- |
+| Find a plate by photo/camera     | `PLATE_RECOGNIZER_CLOUD_TOKEN` | [platerecognizer.com](https://platerecognizer.com)                            |
+| "What it might look like" photos | `PIXABAY_API_KEY`              | [pixabay.com/api/docs](https://pixabay.com/api/docs/)                         |
+| Sign in with Google              | `GOOGLE_CLIENT_ID`             | [console.cloud.google.com](https://console.cloud.google.com/apis/credentials) |
 
 Add whichever you want to `apps/api/.env` (see `apps/api/.env.example`), then
 restart `pnpm dev` — both are read once at process start, so editing `.env`
 alone while the dev server is already running has no effect.
+
+Google sign-in needs an OAuth client of type **Web application** (no client secret is used): add
+`http://localhost:5173` and `http://localhost:3000` as Authorized JavaScript origins (redirect URIs stay empty / unused),
+put the client id in `GOOGLE_CLIENT_ID`, and — while the consent screen is in Testing — add your Google account as a
+test user. Without the id the sign-in popover just says it is not configured.
 
 One more optional add-on lives in the web app: `VITE_GOOGLE_MAPS_EMBED_KEY` in
 `apps/web/.env` (see `apps/web/.env.example`) switches the "Nearby services" map
@@ -145,7 +159,7 @@ marked out of date via `GET /api/stats/version` after a re-ingest.
 | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `packages/shared` | plate normalization, regions, Zod schemas                                                                                                                                                                                                                                                                                                                                                                                   |
 | `packages/db`     | Drizzle schema + client + SQL migrator                                                                                                                                                                                                                                                                                                                                                                                      |
-| `apps/api`        | NestJS + Fastify — plate/VIN/safety-ratings endpoints, Swagger, SPA host + meta injection                                                                                                                                                                                                                                                                                                                                   |
+| `apps/api`        | NestJS + Fastify — plate/VIN/safety-ratings endpoints, auth + paid-feature opt-ins, Swagger, SPA host + meta injection                                                                                                                                                                                                                                                                                                      |
 | `apps/web`        | Vite + React + React Router                                                                                                                                                                                                                                                                                                                                                                                                 |
 | `scripts`         | `seed.ts`, `ingest.ts`, `ingest-full.ts`, `refresh-stats.ts`, `euroncap.ts`/`jncap.ts`/`cncap.ts`/`kncap.ts`/`iihs.ts` (crash-test rating scrapers), `infocar.ts`/`edrive.ts`/`press.ts`/`topgear.ts`/`sketchfab.ts`/`carshow360.ts` (review, owner-post, 3D-model and 360°-gallery catalogs — links + facts only), `news.ts`/`social.ts` (RSS auto-news and brand YouTube-channel feeds — links + facts only, no CSV seed) |
 

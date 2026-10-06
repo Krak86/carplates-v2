@@ -10,6 +10,7 @@ DB). Data comes from the state open-data portal (`data.gov.ua`), loaded into
 Postgres; VIN decoding proxies the free NHTSA API.
 
 **Phase 1 (current): plate + VIN search, local dev stack only.** No CI, no VPS.
+Accounts (Phase 5 stage A: Google sign-in, paid-feature opt-ins, admin page) are built — see "Accounts" under Conventions.
 Phases 2-5 (RIA similar-cars, Platesmania, image recognition, VPS/deploy,
 accounts) are in `PLAN.md` (active/planned work only; finished Phase 1/1.5 write-ups live in `docs/plan-done.md` — grep headings, never read it whole). The post-deploy plan for recurring ingest jobs is `SCHEDULE.md`.
 
@@ -219,6 +220,15 @@ Vitest 4 · ESLint 10 (flat config)
   `WEB_DIST_DIR=../web/dist` in `apps/api/.env`, restart the API, open `localhost:3000/<plate>` (Incognito, SW
   caches `index.html`). Plate/VIN pages are `noindex`; `?lang=` selects the preview language. Details in
   docs/plan-done.md "Link previews".
+- **Accounts** (`apps/api/src/auth/`, `features/`; web `components/auth/`, `routes/features|admin/`): user data lives in the
+  separate `app` Postgres schema (migration 0034) — never mix it into `registry`, and treat it as the one part of the DB that
+  is **not** re-ingestable. Own thin auth: Google ID token verified locally → httpOnly `carsua_sid` cookie, only its SHA-256 in
+  `app.sessions`. Admins are granted by SQL only (`UPDATE app.users SET role='admin' …`); never add an API that grants roles.
+  The account contract is `packages/shared/src/account.ts`, **not** `schemas.ts` (that file's hash busts users' offline caches).
+  Account UI is online-only: `useSession()` reports anonymous while offline, query keys `auth|account|admin` stay out of
+  `lib/offline-cache.ts`, and the account chunks are `globIgnores`d from the PWA precache (add new ones there too).
+  Controllers use `SessionGuard`/`AdminGuard` + `@CurrentUser()`; cookies are set via `WithSessionCookie`, not `@Res()`.
+  `GOOGLE_CLIENT_ID` is documented in `apps/api/.env.example`. `/features` is the paid-feature toggles route (FEATURES_PLAN.md wants it too — see PLAN.md Phase 5).
 - **Telemetry** stays off locally. `.env.example` in each app documents the vars;
   real `.env*` files are gitignored and `deny`-listed for Claude.
 - Tests: Vitest, `import { describe, it, expect } from 'vitest'`, colocated
