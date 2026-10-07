@@ -141,7 +141,7 @@ async function main(): Promise<void> {
           `${source.id.padEnd(20)} ${rows.length} items · ${withBrand} with brand · ${withModel} with model${dropped}`
         )
         total += rows.length
-        if (args.dryRun) continue
+        if (args.dryRun || !rows.length) continue
 
         await db
           .insert(newsItems)

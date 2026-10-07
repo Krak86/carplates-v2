@@ -98,5 +98,13 @@
     "lang": "en",
     "enabled": true,
     "note": "18 items, ~800 KB; low frequency (newest was 4 days old) — reviews"
+  },
+  {
+    "id": "autoevolution",
+    "name": "autoevolution",
+    "url": "https://www.autoevolution.com/rss/backend-auto.xml",
+    "lang": "en",
+    "enabled": true,
+    "note": "cars-only feed (backend-auto.xml, no motorcycles), 30 items, ttl 5 min; robots.txt is checked by the ingest"
   }
 ]

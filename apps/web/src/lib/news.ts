@@ -29,7 +29,8 @@ export const NEWS_SOURCE_GROUPS = [
   { key: 'novyny-live', label: 'novyny.live', ids: ['novyny-live'] },
   { key: 'caranddriver', label: 'Car and Driver', ids: ['caranddriver'] },
   { key: 'motor1', label: 'Motor1', ids: ['motor1'] },
-  { key: 'carscoops', label: 'Carscoops', ids: ['carscoops-news', 'carscoops-reviews'] }
+  { key: 'carscoops', label: 'Carscoops', ids: ['carscoops-news', 'carscoops-reviews'] },
+  { key: 'autoevolution', label: 'autoevolution', ids: ['autoevolution'] }
 ] as const
 
 /** Feed ids behind the selected chip keys. */

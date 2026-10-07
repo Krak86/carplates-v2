@@ -32,6 +32,12 @@ const SOURCES = [
   },
   { key: 'motor1', label: 'Motor1', url: 'https://www.motor1.com', icon: '/icons/sources/motor1.webp' },
   { key: 'carscoops', label: 'Carscoops', url: 'https://www.carscoops.com', icon: '/icons/sources/carscoops.webp' },
+  {
+    key: 'autoevolution',
+    label: 'autoevolution',
+    url: 'https://www.autoevolution.com',
+    icon: '/icons/sources/autoevolution.webp'
+  },
   { key: 'edrive', label: 'e-drive.com.ua', url: 'https://e-drive.com.ua', icon: '/icons/edrive.png' },
   { key: 'topgear', label: 'TopGear', url: 'https://www.topgear.com/car-reviews', icon: '/icons/topgear.webp' },
   { key: 'carshow360', label: 'CarShow360', url: 'https://carshow360.net', icon: '/icons/sources/carshow360.webp' },
