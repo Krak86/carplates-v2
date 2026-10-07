@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { NewsItem } from '@carplates/shared'
+import { brandLogoUrl, type NewsItem } from '@carplates/shared'
 
+import BrandLogo from '@/components/BrandLogo'
 import { cn } from '@/lib/cn'
 import { toIntlLocale } from '@/lib/intl'
 import { newsTitle } from '@/lib/news'
@@ -15,6 +16,8 @@ type Props = {
   horizontal?: boolean
   /** Duplicate copies in the looping ticker: out of the tab order and hidden from screen readers. */
   decorative?: boolean
+  /** Make shown as a logo tile when the article has no (working) image. */
+  fallbackBrand?: string | null
 }
 
 const hostOf = (url: string): string => {
@@ -26,7 +29,13 @@ const hostOf = (url: string): string => {
 }
 
 /** One headline: a link out to the source with its image (hotlinked, hidden if it fails), title and `source · date`. Nothing else is copied. */
-export default function NewsCard({ item, compact = false, horizontal = false, decorative = false }: Props): ReactNode {
+export default function NewsCard({
+  item,
+  compact = false,
+  horizontal = false,
+  decorative = false,
+  fallbackBrand = null
+}: Props): ReactNode {
   const { t, i18n } = useTranslation()
   const [imageFailed, setImageFailed] = useState(false)
   const showImage = !!item.imageUrl && !imageFailed
@@ -48,6 +57,17 @@ export default function NewsCard({ item, compact = false, horizontal = false, de
         compact ? 'w-full' : 'w-72 shrink-0'
       )}
     >
+      {!showImage && !!fallbackBrand && !!brandLogoUrl(fallbackBrand) && (
+        <div
+          className={cn(
+            'flex items-center justify-center bg-white/90 p-3 dark:bg-white/10',
+            horizontal ? 'w-28 shrink-0 self-stretch sm:w-36' : cn('w-full', compact ? 'h-24' : 'h-32')
+          )}
+        >
+          <BrandLogo brand={fallbackBrand} className="h-full max-h-14 w-full max-w-20 object-contain" />
+        </div>
+      )}
+
       {showImage && (
         <img
           src={item.imageUrl!}

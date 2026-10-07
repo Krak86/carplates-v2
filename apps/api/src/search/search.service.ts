@@ -1,7 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common'
-import { currentRegistration, statsByBrand, statsByModel } from '@carplates/db'
+import { currentRegistration, statsByBody, statsByBrand, statsByModel } from '@carplates/db'
 import { fuelKeyword, platePrefixesForRegion, sourceValueForKind, sourceValuesForColor } from '@carplates/shared'
 import type {
+  BodySuggestionsResponse,
   BrandSuggestionsResponse,
   ModelSuggestionsResponse,
   SearchResponse,
@@ -21,6 +22,7 @@ export type SearchFilters = {
   fuel?: VehicleFuel
   color?: VehicleColor
   kind?: VehicleKind
+  body?: string
   region?: string
   page: number
   pageSize: number
@@ -58,6 +60,18 @@ export class SearchService {
       .limit(10)
 
     return { suggestions: rows.filter((r): r is { brand: string; distinctPlates: number } => r.brand != null) }
+  }
+
+  /** Top-10 raw body values by distinctPlates matching `q` ("МІКРОАВТОБУС МЕДДОПОМОГА", "СЕДАН-B"...). */
+  async suggestBodies(q: string): Promise<BodySuggestionsResponse> {
+    const rows = await this.dbService.db
+      .select({ body: statsByBody.body, distinctPlates: statsByBody.distinctPlates })
+      .from(statsByBody)
+      .where(and(isNotNull(statsByBody.body), q ? ilike(statsByBody.body, `%${q}%`) : undefined))
+      .orderBy(desc(statsByBody.distinctPlates))
+      .limit(10)
+
+    return { suggestions: rows.filter((r): r is { body: string; distinctPlates: number } => r.body != null) }
   }
 
   /**
@@ -108,6 +122,8 @@ export class SearchService {
       filters.fuel ? ilike(currentRegistration.fuel, `%${fuelKeyword(filters.fuel)}%`) : undefined,
       filters.color ? inArray(currentRegistration.color, sourceValuesForColor(filters.color)) : undefined,
       filters.kind ? eq(currentRegistration.kind, sourceValueForKind(filters.kind)) : undefined,
+      // Substring, served by ix_current_reg_body_trgm (migration 0042).
+      filters.body ? ilike(currentRegistration.body, `%${filters.body}%`) : undefined,
       // Matches the ix_current_reg_plate_region expression index (packages/db migration 0015) --
       // same cost as any other single-column filter here, combined via BitmapAnd.
       filters.region

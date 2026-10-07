@@ -75,7 +75,7 @@ export default function NewsWidget({ brand, model, year }: Props): ReactNode {
         </button>
       </div>
 
-      <NewsGroups items={items} brand={brand} model={model} decorative={!scrolled} />
+      <NewsGroups items={items} brand={brand} decorative={!scrolled} />
 
       <Link
         to={moreTo}

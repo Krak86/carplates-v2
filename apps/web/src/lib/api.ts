@@ -7,6 +7,7 @@ import {
   sessionResponseSchema,
   settingsResponseSchema,
   syncResponseSchema,
+  bodySuggestionsResponseSchema,
   brandSuggestionsResponseSchema,
   cncapRatingsResponseSchema,
   dataVersionResponseSchema,
@@ -53,6 +54,7 @@ import type {
   SettingsUpdateRequest,
   SyncRequest,
   SyncResponse,
+  BodySuggestionsResponse,
   BrandSuggestionsResponse,
   CncapRatingsResponse,
   EuroNcapRatingsResponse,
@@ -277,6 +279,12 @@ export function safetyVideoUrl(nhtsaVideoUrl: string): string {
   return `${BASE}/api/safety/video?${new URLSearchParams({ url: nhtsaVideoUrl }).toString()}`
 }
 
+export async function suggestBodies(q: string): Promise<BodySuggestionsResponse> {
+  const params = new URLSearchParams()
+  if (q) params.set('q', q)
+  return bodySuggestionsResponseSchema.parse(await getJson(`/api/search/bodies?${params.toString()}`))
+}
+
 export async function suggestBrands(q: string): Promise<BrandSuggestionsResponse> {
   const params = new URLSearchParams()
   if (q) params.set('q', q)
@@ -298,6 +306,7 @@ export type VehicleSearchFilters = {
   fuel?: VehicleFuel
   color?: VehicleColor
   kind?: VehicleKind
+  body?: string
   region?: string
   page: number
   pageSize: number
@@ -312,6 +321,7 @@ export async function searchVehicles(filters: VehicleSearchFilters): Promise<Sea
   if (filters.fuel) params.set('fuel', filters.fuel)
   if (filters.color) params.set('color', filters.color)
   if (filters.kind) params.set('kind', filters.kind)
+  if (filters.body) params.set('body', filters.body)
   if (filters.region) params.set('region', filters.region)
   params.set('page', String(filters.page))
   params.set('pageSize', String(filters.pageSize))

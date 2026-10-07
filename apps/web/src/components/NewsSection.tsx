@@ -72,7 +72,7 @@ export default function NewsSection({ brand, model, year }: Props): ReactNode {
       >
         <div className="overflow-hidden">
           <div className="mt-3 space-y-3">
-            <NewsGroups items={items} brand={brand} model={model} horizontal decorative={!open} />
+            <NewsGroups items={items} brand={brand} horizontal decorative={!open} />
 
             <p className="text-sm text-[var(--color-muted)]">{t('news.disclaimer')}</p>
           </div>

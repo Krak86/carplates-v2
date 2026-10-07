@@ -2,8 +2,16 @@ import { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import type { UseQueryResult } from '@tanstack/react-query'
 import { useSearchParams } from 'react-router'
-import { REGION_NAMES, textFilterError, VEHICLE_COLORS, VEHICLE_FUELS, VEHICLE_KINDS } from '@carplates/shared'
+import {
+  MIN_INDEXABLE_LENGTH,
+  REGION_NAMES,
+  textFilterError,
+  VEHICLE_COLORS,
+  VEHICLE_FUELS,
+  VEHICLE_KINDS
+} from '@carplates/shared'
 import type {
+  BodySuggestion,
   BrandSuggestion,
   TextFilterError,
   ModelSuggestion,
@@ -13,7 +21,7 @@ import type {
   VehicleKind
 } from '@carplates/shared'
 
-import { brandSuggestionsQuery, modelSuggestionsQuery, vehicleSearchQuery } from '@/lib/queries'
+import { bodySuggestionsQuery, brandSuggestionsQuery, modelSuggestionsQuery, vehicleSearchQuery } from '@/lib/queries'
 
 const DEBOUNCE_MS = 300
 const PAGE_SIZE = 20
@@ -33,6 +41,7 @@ export type AdvancedSearchFilters = {
   fuel: VehicleFuel | ''
   color: VehicleColor | ''
   kind: VehicleKind | ''
+  body: string
   region: string
 }
 
@@ -51,6 +60,7 @@ function filtersFromParams(params: URLSearchParams): AdvancedSearchFilters {
     fuel: parseEnumParam(VEHICLE_FUELS, params.get('fuel')),
     color: parseEnumParam(VEHICLE_COLORS, params.get('color')),
     kind: parseEnumParam(VEHICLE_KINDS, params.get('kind')),
+    body: params.get('body') ?? '',
     region: parseEnumParam(REGION_NAMES, params.get('region'))
   }
 }
@@ -79,6 +89,8 @@ type UseAdvancedSearchActions = {
   submit: () => void
   canSearch: boolean
   textError: TextFilterError | null
+  /** The body text is non-empty but shorter than the trigram-indexable minimum. */
+  bodyTooShort: boolean
   page: number
   setPage: (page: number) => void
   pageSize: number
@@ -88,6 +100,7 @@ type UseAdvancedSearchActions = {
   yearToInvalid: boolean
   brandSuggestions: BrandSuggestion[]
   modelSuggestions: ModelSuggestion[]
+  bodySuggestions: BodySuggestion[]
   results: UseQueryResult<SearchResponse, Error>
 }
 
@@ -106,10 +119,12 @@ export function useAdvancedSearchActions(): UseAdvancedSearchActions {
 
   const debouncedBrand = useDebouncedValue(draft.brand.trim())
   const debouncedModel = useDebouncedValue(draft.model.trim())
+  const debouncedBody = useDebouncedValue(draft.body.trim())
 
   const { year: draftYearFrom, invalid: yearFromInvalid } = parseYearFilter(draft.yearFrom)
   const { year: draftYearTo, invalid: yearToInvalid } = parseYearFilter(draft.yearTo)
   const textError = textFilterError(draft.brand, draft.model)
+  const bodyTooShort = draft.body.trim().length > 0 && draft.body.trim().length < MIN_INDEXABLE_LENGTH
 
   const draftHasFilter = Boolean(
     draft.brand.trim() ||
@@ -119,9 +134,10 @@ export function useAdvancedSearchActions(): UseAdvancedSearchActions {
     draft.fuel ||
     draft.color ||
     draft.kind ||
+    draft.body ||
     draft.region
   )
-  const canSearch = draftHasFilter && !yearFromInvalid && !yearToInvalid && !textError
+  const canSearch = draftHasFilter && !yearFromInvalid && !yearToInvalid && !textError && !bodyTooShort
 
   const brandSuggestions = useQuery({
     ...brandSuggestionsQuery(debouncedBrand),
@@ -132,6 +148,11 @@ export function useAdvancedSearchActions(): UseAdvancedSearchActions {
     enabled: debouncedModel.length >= MIN_SUGGEST_LENGTH
   })
 
+  const bodySuggestions = useQuery({
+    ...bodySuggestionsQuery(debouncedBody),
+    enabled: debouncedBody.length >= MIN_SUGGEST_LENGTH
+  })
+
   // Committed filters. A hand-edited / stale URL that breaks a rule simply doesn't search.
   const { year: yearFrom, invalid: appliedYearFromInvalid } = parseYearFilter(applied.yearFrom)
   const { year: yearTo, invalid: appliedYearToInvalid } = parseYearFilter(applied.yearTo)
@@ -139,6 +160,7 @@ export function useAdvancedSearchActions(): UseAdvancedSearchActions {
     !appliedYearFromInvalid &&
     !appliedYearToInvalid &&
     !textFilterError(applied.brand, applied.model) &&
+    (applied.body.trim().length === 0 || applied.body.trim().length >= MIN_INDEXABLE_LENGTH) &&
     Boolean(
       applied.brand.trim() ||
       applied.model.trim() ||
@@ -147,6 +169,7 @@ export function useAdvancedSearchActions(): UseAdvancedSearchActions {
       applied.fuel ||
       applied.color ||
       applied.kind ||
+      applied.body ||
       applied.region
     )
 
@@ -159,6 +182,7 @@ export function useAdvancedSearchActions(): UseAdvancedSearchActions {
       fuel: applied.fuel || undefined,
       color: applied.color || undefined,
       kind: applied.kind || undefined,
+      body: applied.body.trim() || undefined,
       region: applied.region || undefined,
       page,
       pageSize: PAGE_SIZE
@@ -208,6 +232,7 @@ export function useAdvancedSearchActions(): UseAdvancedSearchActions {
     submit,
     canSearch,
     textError,
+    bodyTooShort,
     page,
     setPage,
     pageSize: PAGE_SIZE,
@@ -216,6 +241,7 @@ export function useAdvancedSearchActions(): UseAdvancedSearchActions {
     yearToInvalid,
     brandSuggestions: brandSuggestions.data?.suggestions ?? [],
     modelSuggestions: modelSuggestions.data?.suggestions ?? [],
+    bodySuggestions: bodySuggestions.data?.suggestions ?? [],
     results
   }
 }

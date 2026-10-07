@@ -26,7 +26,13 @@ export {
   textFilterError,
   type TextFilterError
 } from './searchFilters.js'
-export { VEHICLE_KINDS, resolveVehicleKind, sourceValueForKind, type VehicleKind } from './vehicleKind.js'
+export {
+  bodySuggestionSchema,
+  bodySuggestionsResponseSchema,
+  type BodySuggestion,
+  type BodySuggestionsResponse
+} from './vehicleBody.js'
+export { VEHICLE_KINDS,resolveVehicleKind, sourceValueForKind, type VehicleKind } from './vehicleKind.js'
 export {
   VEHICLE_COLORS,
   VEHICLE_COLOR_HEX,

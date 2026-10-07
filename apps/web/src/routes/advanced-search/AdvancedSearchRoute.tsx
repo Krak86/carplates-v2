@@ -65,6 +65,7 @@ export default function AdvancedSearchRoute(): ReactNode {
     submit,
     canSearch,
     textError,
+    bodyTooShort,
     page,
     setPage,
     pageSize,
@@ -73,6 +74,7 @@ export default function AdvancedSearchRoute(): ReactNode {
     yearToInvalid,
     brandSuggestions,
     modelSuggestions,
+    bodySuggestions,
     results
   } = useAdvancedSearchActions()
 
@@ -220,6 +222,28 @@ export default function AdvancedSearchRoute(): ReactNode {
                   </option>
                 ))}
               </select>
+            </label>
+
+            <label className="flex flex-col gap-1 text-sm">
+              {t('advancedSearch.body')}
+              <input
+                type="text"
+                list="advanced-search-bodies"
+                value={filters.body}
+                onChange={e => updateFilter('body', e.target.value)}
+                placeholder={t('advancedSearch.bodyPlaceholder')}
+                className={inputClass}
+              />
+              <datalist id="advanced-search-bodies">
+                {bodySuggestions.map(s => (
+                  <option key={s.body} value={s.body} />
+                ))}
+              </datalist>
+              {bodyTooShort && (
+                <span className="text-xs text-[var(--color-muted)]">
+                  {t('advancedSearch.needsIndexable', { count: MIN_INDEXABLE_LENGTH })}
+                </span>
+              )}
             </label>
 
             <label className="flex flex-col gap-1 text-sm">

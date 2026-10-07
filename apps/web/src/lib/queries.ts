@@ -38,6 +38,7 @@ import {
   lookupPlate,
   plateHistory,
   searchVehicles,
+  suggestBodies,
   suggestBrands,
   suggestModels
 } from '@/lib/api'
@@ -261,6 +262,11 @@ export function brandSuggestionsQuery(q: string) {
   return queryOptions({ queryKey: ['search', 'brands', q], queryFn: () => suggestBrands(q) })
 }
 
+// Advanced-search body autocomplete — raw registry body values ranked by distinctPlates.
+export function bodySuggestionsQuery(q: string) {
+  return queryOptions({ queryKey: ['search', 'bodies', q], queryFn: () => suggestBodies(q) })
+}
+
 // Advanced-search model autocomplete — scoped to one brand when chosen, otherwise aggregated
 // across all brands (same nameplate can appear under several).
 export function modelSuggestionsQuery(brand: string | undefined, q: string) {
@@ -280,6 +286,7 @@ export function vehicleSearchQuery(filters: VehicleSearchFilters) {
       filters.fuel,
       filters.color,
       filters.kind,
+      filters.body,
       filters.region,
       filters.page,
       filters.pageSize
