@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest'
 
-import { pickCommonsCandidate, scoreCommonsTitle, type CommonsCandidate } from './commonsImage.js'
+import {
+  hasStandaloneYear,
+  isModelYearTitle,
+  pickCommonsCandidate,
+  scoreCommonsTitle,
+  type CommonsCandidate
+} from './commonsImage.js'
 
 const file = (title: string, width = 3000, height = 2000, mime = 'image/jpeg'): CommonsCandidate => ({
   title: `File:${title}`,
@@ -57,5 +63,31 @@ describe('scoreCommonsTitle', () => {
     const interior = scoreCommonsTitle('File:2018 Kia Ceed interior.jpg', 'Ceed', 2018)!
     expect(front).toBeGreaterThan(rear)
     expect(rear).toBeGreaterThan(interior)
+  })
+})
+
+describe('model-year-only scoring', () => {
+  const OLD_CAR = 'File:Auto BMW 5 Series (E28) Moscow Marshala Zhukova Prospekt Т203РА50 2026-09 1788629036.jpg'
+
+  it('does not read a year-month photo stamp as the year', () => {
+    expect(hasStandaloneYear(OLD_CAR, 2026)).toBe(false)
+    expect(hasStandaloneYear('File:Kia Ceed 2026-09-03.jpg', 2026)).toBe(false)
+    expect(hasStandaloneYear('File:Kia Ceed 2026.jpg', 2026)).toBe(true)
+  })
+
+  it('accepts a title that starts with the year or carries it in the generation parentheses', () => {
+    expect(isModelYearTitle('File:2026 Toyota RAV4 PHEV GR Sport.jpg', 2026)).toBe(true)
+    expect(isModelYearTitle('File:Mercedes-Benz GLC 300 4MATIC (X254, 2026) (55212389860).jpg', 2026)).toBe(true)
+  })
+
+  it('rejects a bare year that is only an event or a photo date', () => {
+    expect(isModelYearTitle('File:Škoda Elroq RS Rutesheimer Autoschau 2026 IMG 6752.jpg', 2026)).toBe(false)
+    expect(isModelYearTitle('File:2026-09-03 Kia Ceed.jpg', 2026)).toBe(false)
+  })
+
+  it('only the strict mode drops an event photo', () => {
+    const title = 'File:Mazda CX-5 at GIIAS 2026 front.jpg'
+    expect(scoreCommonsTitle(title, 'CX-5', 2026)).not.toBeNull()
+    expect(scoreCommonsTitle(title, 'CX-5', 2026, true)).toBeNull()
   })
 })

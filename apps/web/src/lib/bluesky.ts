@@ -2,8 +2,7 @@ import { queryOptions } from '@tanstack/react-query'
 import { z } from 'zod'
 
 const SEARCH_URL = 'https://api.bsky.app/xrpc/app.bsky.feed.searchPosts'
-const SHOWN_POSTS = 2
-/** Fetched generously: opted-out authors and text-less posts are dropped afterwards, and 3 must still be left. */
+/** Posts requested per search. Opted-out authors and text-less posts are dropped afterwards, and every remaining post is shown (the Social section lists them all; the side widget slices off its own few). */
 const FETCH_LIMIT = 25
 const SEARCH_PAGE_URL = 'https://bsky.app/search'
 /** Authors who opted out of logged-out viewing carry this self-label — their posts are never shown here. */
@@ -97,17 +96,20 @@ async function searchPosts(q: string): Promise<BlueskyPost[]> {
       createdAt: p.record.createdAt ?? p.indexedAt,
       images: imagesOf(p.embed)
     }))
-    .slice(0, SHOWN_POSTS)
 }
 
-/** Tries the make+model+year phrase first, then falls back to make+model when that finds nothing. */
+/** Posts for the make+model+year phrase first, topped up from the broader make+model phrase (deduped) while fewer than `FETCH_LIMIT` were found. */
 async function getBlueskyPosts(brand: string, model: string | null, year: number | null): Promise<BlueskyResult> {
-  const terms = blueskySearchTerms(brand, model, year)
-  for (const term of terms) {
-    const posts = await searchPosts(term)
-    if (posts.length) return { posts, searchUrl: `${SEARCH_PAGE_URL}?q=${encodeURIComponent(term)}` }
+  const posts: BlueskyPost[] = []
+  let searchUrl = SEARCH_PAGE_URL
+  for (const term of blueskySearchTerms(brand, model, year)) {
+    const found = await searchPosts(term)
+    if (!found.length) continue
+    if (!posts.length) searchUrl = `${SEARCH_PAGE_URL}?q=${encodeURIComponent(term)}`
+    for (const post of found) if (!posts.some(p => p.id === post.id)) posts.push(post)
+    if (posts.length >= FETCH_LIMIT) break
   }
-  return { posts: [], searchUrl: SEARCH_PAGE_URL }
+  return { posts, searchUrl }
 }
 
 // Live third-party data: short staleTime, outside the persisted offline groups.

@@ -14,6 +14,9 @@ import type { PlateLookupResponse } from '@carplates/shared'
 
 import BrandLogo from '@/components/BrandLogo'
 import BrandSiteChip from '@/components/BrandSiteChip'
+import NewCarsLink from '@/components/NewCarsLink'
+import StockSection from '@/components/StockSection'
+import SocialSection from '@/components/SocialSection'
 import CardTiltToggle from '@/components/CardTiltToggle'
 import CarWikiInfo from '@/components/CarWikiInfo'
 import ColorSwatch from '@/components/ColorSwatch'
@@ -199,6 +202,7 @@ export default function ResultCard({ data }: Props): ReactNode {
               <Model360Button brand={c.brand} model={c.model} />
               {brandDealerUrl && <BrandSiteChip url={brandDealerUrl} />}
             </div>
+            <NewCarsLink brand={c.brand} />
           </div>
           <VehicleKindIcon
             kind={vehicleKind}
@@ -435,6 +439,8 @@ export default function ResultCard({ data }: Props): ReactNode {
         <NearbyServices brand={c.brand} />
         <VehiclePhotos brand={c.brand} model={c.model} year={c.makeYear} />
         <NewsSection brand={c.brand} model={c.model} year={c.makeYear} />
+        <SocialSection brand={c.brand} model={c.model} year={c.makeYear} />
+        <StockSection brand={c.brand} />
         <PaidFeatureSections hasPlate={!!data.plate} hasVin={hasVin} />
       </Card>
     </div>

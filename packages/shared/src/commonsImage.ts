@@ -33,14 +33,26 @@ export function titleMentionsModel(title: string, model: string): boolean {
 
 /** The year as its own token — not part of a date stamp like `(2008-11-12)` or a longer number. */
 export function hasStandaloneYear(title: string, year: number): boolean {
-  const withoutDates = title.replace(/\d{4}-\d{2}-\d{2}/g, ' ')
+  // Full dates (2008-11-12) and year-month stamps (2026-09) say when a photo was taken, not which model year it shows.
+  const withoutDates = title.replace(/\d{4}-\d{2}(?:-\d{2})?(?!\d)/g, ' ')
   return new RegExp(`(?<!\\d)${year}(?!\\d)`).test(withoutDates)
+}
+
+/**
+ * The year is the model year by Commons naming convention: the title starts with it ("2026 Toyota RAV4 …") or carries it in
+ * the generation parentheses ("Mercedes-Benz GLC 300 (X254, 2026)"). A bare year elsewhere is usually a photo date or an
+ * event ("Autoschau 2026"), which can show a decades-old car.
+ */
+export function isModelYearTitle(title: string, year: number): boolean {
+  const name = title.replace(/^File:/i, '').replace(/_/g, ' ')
+  return new RegExp(`^${year}(?![\\d-])`).test(name) || new RegExp(`\\([^)]*(?<!\\d)${year}(?!\\d)[^)]*\\)`).test(name)
 }
 
 /** Title-only half of the score (no image metadata needed): null = reject, higher is better. The pre-warm script
  *  uses it to shortlist search hits before spending an imageinfo request on them. */
-export function scoreCommonsTitle(title: string, model: string, year: number): number | null {
+export function scoreCommonsTitle(title: string, model: string, year: number, modelYearOnly = false): number | null {
   if (!hasStandaloneYear(title, year)) return null
+  if (modelYearOnly && !isModelYearTitle(title, year)) return null
   if (!titleMentionsModel(title, model)) return null
 
   let score = 10
@@ -51,22 +63,28 @@ export function scoreCommonsTitle(title: string, model: string, year: number): n
 }
 
 /** Higher is better; null = reject. Search order breaks ties (Commons ranks by its own relevance). */
-export function scoreCommonsCandidate(c: CommonsCandidate, model: string, year: number): number | null {
+export function scoreCommonsCandidate(
+  c: CommonsCandidate,
+  model: string,
+  year: number,
+  modelYearOnly = false
+): number | null {
   if (c.mime !== 'image/jpeg') return null
   if (c.width < MIN_WIDTH || c.width / c.height < MIN_ASPECT) return null
-  return scoreCommonsTitle(c.title, model, year)
+  return scoreCommonsTitle(c.title, model, year, modelYearOnly)
 }
 
-/** Best candidate for `model`/`year`, or null when none qualifies. */
+/** Best candidate for `model`/`year`, or null when none qualifies. `modelYearOnly` also demands the year be the model year (see `isModelYearTitle`). */
 export function pickCommonsCandidate<T extends CommonsCandidate>(
   candidates: T[],
   model: string,
-  year: number
+  year: number,
+  modelYearOnly = false
 ): T | null {
   let best: T | null = null
   let bestScore = -Infinity
   for (const c of candidates) {
-    const score = scoreCommonsCandidate(c, model, year)
+    const score = scoreCommonsCandidate(c, model, year, modelYearOnly)
     if (score !== null && score > bestScore) {
       best = c
       bestScore = score

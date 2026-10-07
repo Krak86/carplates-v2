@@ -47,6 +47,7 @@ const SafetyModelsPanel = lazy(() => import('@/routes/safety/SafetyModelsPanel')
 const NewsTicker = lazy(() => import('@/components/NewsTicker'))
 const NewsWidget = lazy(() => import('@/components/NewsWidget'))
 const BlueskyWidget = lazy(() => import('@/components/BlueskyWidget'))
+const NewCarsWidget = lazy(() => import('@/components/NewCarsWidget'))
 const StockWidget = lazy(() => import('@/components/StockWidget'))
 
 export default function SearchRoute(): ReactNode {
@@ -349,18 +350,26 @@ export default function SearchRoute(): ReactNode {
           )}
         </Presence>
 
-        {/* Right-hand news panel (desktop only, appears on scroll) — fetches itself and renders nothing without news. */}
+        {/* Right column (desktop only, appears on scroll): news on top, the new-cars brand card below — either one alone takes the top slot. */}
         {sideWidgets && !recognizeErrorKey && wikiHeroVehicle?.brand && (
-          <LoadErrorBoundary compact>
-            <Suspense fallback={null}>
-              <NewsWidget brand={wikiHeroVehicle.brand} model={wikiHeroVehicle.model} year={wikiHeroVehicle.year} />
-            </Suspense>
-          </LoadErrorBoundary>
+          <div className="pointer-events-none fixed top-20 right-4 z-10 flex max-h-[calc(100vh-6rem)] w-60 flex-col gap-3 overflow-x-hidden overflow-y-auto">
+            <LoadErrorBoundary compact>
+              <Suspense fallback={null}>
+                <NewsWidget brand={wikiHeroVehicle.brand} model={wikiHeroVehicle.model} year={wikiHeroVehicle.year} />
+              </Suspense>
+            </LoadErrorBoundary>
+
+            <LoadErrorBoundary compact>
+              <Suspense fallback={null}>
+                <NewCarsWidget key={wikiHeroVehicle.brand} brand={wikiHeroVehicle.brand} />
+              </Suspense>
+            </LoadErrorBoundary>
+          </div>
         )}
 
         {/* Left column (desktop only, appears on scroll): Bluesky on top, share price below — either one alone takes the top slot. */}
         {sideWidgets && !recognizeErrorKey && wikiHeroVehicle?.brand && (
-          <div className="pointer-events-none fixed top-20 left-4 z-10 flex max-h-[calc(100vh-6rem)] w-60 flex-col gap-3 overflow-y-auto">
+          <div className="pointer-events-none fixed top-20 left-4 z-10 flex max-h-[calc(100vh-6rem)] w-60 flex-col gap-3 overflow-x-hidden overflow-y-auto">
             {kind === 'plate' && (
               <LoadErrorBoundary compact>
                 <Suspense fallback={null}>

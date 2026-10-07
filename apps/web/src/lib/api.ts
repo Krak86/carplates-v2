@@ -179,8 +179,14 @@ export async function getVehiclePhotos(
   return vehiclePhotosResponseSchema.parse(await getJson(`/api/photos?${params.toString()}`))
 }
 
-export async function getWikiImage(brand: string, model: string, year: number | null): Promise<WikiImageResponse> {
+export async function getWikiImage(
+  brand: string,
+  model: string,
+  year: number | null,
+  yearOnly = false
+): Promise<WikiImageResponse> {
   const params = new URLSearchParams()
+  if (yearOnly) params.set('yearOnly', 'true')
   if (brand) params.set('brand', brand)
   if (model) params.set('model', model)
   if (year != null) params.set('year', String(year))

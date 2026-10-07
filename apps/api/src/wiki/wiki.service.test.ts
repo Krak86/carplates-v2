@@ -381,6 +381,26 @@ describe('WikiService.lookupImage', () => {
     expect(store.rows.size).toBe(1)
   })
 
+  it('yearOnly never falls back to the article lead image, and remembers "no photo" for that year', async () => {
+    routeFetch() // Commons year search finds nothing; the lead image exists but must not be used
+    const { service, store } = makeService()
+
+    const result = await service.lookupImage('Toyota', 'Camry', { year: 2026, source: 'commons', yearOnly: true })
+
+    expect(result).toEqual({ image: null })
+    expect(callsTo('pithumbsize')).toBe(0)
+    expect(store.rows.size).toBe(1)
+  })
+
+  it('yearOnly returns a photo of that year when Commons has one', async () => {
+    routeFetch({ year: () => jsonResponse(yearPayload) })
+    const { service } = makeService()
+
+    const result = await service.lookupImage('Toyota', 'Camry', { year: 2008, source: 'commons', yearOnly: true })
+
+    expect(result.image?.url).toBe('https://upload.wikimedia.org/thumb/camry2008.jpg')
+  })
+
   it('returns image: null when no photo exists, and throws BadRequestException for an empty query', async () => {
     routeFetch()
     const { service } = makeService()

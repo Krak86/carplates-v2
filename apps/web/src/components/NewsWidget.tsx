@@ -21,7 +21,7 @@ type Props = {
 }
 
 /**
- * Right-hand news panel on a plate / VIN result: the car's make+model(+year) news first, then make-only news (decided
+ * Right-hand news panel on a plate / VIN result (positioned by the shared right column in SearchRoute): the car's make+model(+year) news first, then make-only news (decided
  * server-side). The request runs as soon as the result is known, so with nothing to show nothing is ever rendered;
  * with news, the panel fades in from the right once the user starts scrolling.
  */
@@ -52,11 +52,11 @@ export default function NewsWidget({ brand, model, year }: Props): ReactNode {
       aria-label={t('news.title')}
       aria-hidden={!scrolled}
       className={cn(
-        'fixed top-20 right-4 z-10 flex max-h-[calc(100vh-6rem)] w-60 flex-col gap-2 overflow-y-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)]/50 p-3 backdrop-blur-md',
+        'flex w-full flex-col gap-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)]/50 p-3 backdrop-blur-md',
         'transition-[opacity,translate] duration-500 ease-out motion-reduce:transition-none',
         // Mounted only after the first scroll (see useSideWidgetsVisible), so it slides in on insertion.
         'starting:translate-x-8 starting:opacity-0',
-        scrolled ? 'translate-x-0 opacity-100' : 'pointer-events-none translate-x-8 opacity-0'
+        scrolled ? 'pointer-events-auto translate-x-0 opacity-100' : 'pointer-events-none translate-x-8 opacity-0'
       )}
     >
       <div className="flex items-center justify-between gap-2">

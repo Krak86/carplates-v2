@@ -14,7 +14,9 @@ export const SHARE_SECTIONS = [
   'photos',
   'model3d',
   'model360',
-  'news'
+  'news',
+  'social',
+  'stock'
 ] as const
 export type ShareSection = (typeof SHARE_SECTIONS)[number]
 

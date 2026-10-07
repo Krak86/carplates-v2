@@ -10,6 +10,9 @@ import { SHOW_AFTER_SCROLL_PX, SIDE_WIDGETS_DESKTOP_QUERY } from '@/hooks/useSid
 import { blueskyQuery } from '@/lib/bluesky'
 import { cn } from '@/lib/cn'
 
+/** The side panel is a teaser; the Social section on the card lists the rest. */
+const WIDGET_POSTS = 2
+
 type Props = {
   brand: string
   model: string | null
@@ -35,7 +38,7 @@ export default function BlueskyWidget({ brand, model, year }: Props): ReactNode 
     return (): void => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  const items = posts.data?.posts ?? []
+  const items = (posts.data?.posts ?? []).slice(0, WIDGET_POSTS)
   if (!isDesktop || !items.length || dismissedPath === pathname) return null
 
   return (

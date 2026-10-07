@@ -36,7 +36,8 @@ import { WikiImageStore } from './wiki-image.store.js'
 export const WIKI_IMAGE_SOURCES = ['commons', 'wiki'] as const
 export type WikiImageSource = (typeof WIKI_IMAGE_SOURCES)[number]
 
-type LookupOptions = { year?: number; source?: WikiImageSource }
+/** `yearOnly`: a photo of exactly that model year or nothing — never the stored model row / article lead image. */
+type LookupOptions = { year?: number; source?: WikiImageSource; yearOnly?: boolean }
 
 /** `settled: false` = the answer came from a failed request, so it must not be memoized as "no photo". */
 type Resolved = { image: WikiImage | null; settled: boolean }
@@ -114,11 +115,14 @@ export class WikiService {
 
     const source = options.source ?? this.env.WIKI_IMAGE_SOURCE
     const year = source === 'commons' && brand && model ? (options.year ?? null) : null
-    const cacheKey = `${source}:${year ?? ''}:${query.toLowerCase()}`
+    const yearOnly = !!options.yearOnly && !!year && source === 'commons'
+    const cacheKey = `${source}:${yearOnly ? 'y' : ''}${year ?? ''}:${query.toLowerCase()}`
     const cached = this.imageCache.get(cacheKey)
     if (cached) return cached
 
-    const resolved = await this.resolveImage(brand, model, query, year, source)
+    const resolved = yearOnly
+      ? await this.resolveYearOnlyImage(brand, model, year!)
+      : await this.resolveImage(brand, model, query, year, source)
     const result = { image: resolved.image }
     if (resolved.settled) this.rememberImage(cacheKey, result)
     return result
@@ -130,6 +134,16 @@ export class WikiService {
     )
     const pages = payload.query?.pages
     return pages ? (Object.values(pages)[0] ?? null) : null
+  }
+
+  /** Stored `(brand, model, year)` row, else one live Commons year search (whose answer is stored, "none" included). */
+  private async resolveYearOnlyImage(brand: string, model: string, year: number): Promise<Resolved> {
+    // Own key space: a strict (model-year-only) answer must neither be poisoned by, nor overwrite, the hero photo's looser year row.
+    const key = wikiImageKey(`showcase ${brand}`, model, year)
+    const row = await this.readRow(key)
+    if (row?.status === 'ok') return { image: wikiImageFromRow(row), settled: true }
+    if (row && wikiImageRowIsFinal(row)) return { image: null, settled: true }
+    return this.liveYearImage(brand, model, year, key, row, true)
   }
 
   /**
@@ -171,10 +185,11 @@ export class WikiService {
     model: string,
     year: number,
     key: WikiImageKey,
-    previous: WikiImageRow | null
+    previous: WikiImageRow | null,
+    modelYearOnly = false
   ): Promise<Resolved> {
     try {
-      const image = await this.fetchCommonsYearImage(brand, model, year)
+      const image = await this.fetchCommonsYearImage(brand, model, year, modelYearOnly)
       await this.persist(
         key,
         image ? { kind: 'ok', image, origin: 'commons_year', title: null } : { kind: 'not_found' },
@@ -226,14 +241,19 @@ export class WikiService {
 
   /** Commons files are conventionally named `<year> <Make> <Model> …`, so a quoted make+model plus the year
    *  finds generation-correct photos. One request returns thumbnails and license metadata together. */
-  private async fetchCommonsYearImage(brand: string, model: string, year: number): Promise<WikiImage | null> {
+  private async fetchCommonsYearImage(
+    brand: string,
+    model: string,
+    year: number,
+    modelYearOnly = false
+  ): Promise<WikiImage | null> {
     const payload = await this.fetchJson<CommonsPages>(commonsYearSearchUrl(brand, model, year))
     const candidates = commonsPagesInOrder(payload).flatMap(({ title, info }) =>
       info.thumburl && info.mime && info.width && info.height
         ? [{ title, mime: info.mime, width: info.width, height: info.height, info }]
         : []
     )
-    const best = pickCommonsCandidate(candidates, model, year)
+    const best = pickCommonsCandidate(candidates, model, year, modelYearOnly)
     return best ? wikiImageFromInfo(best.info) : null
   }
 

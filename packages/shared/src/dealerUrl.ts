@@ -98,6 +98,118 @@ const DEALER_URL_BY_SLUG: Readonly<Record<string, string>> = {
   polestar: 'https://www.polestar.com/'
 }
 
+/**
+ * Deep link to the importer's own "new cars / model range" list page — again outbound only, nothing is
+ * fetched or copied (the sites' terms forbid republishing their content; a plain link is fine). Each URL
+ * was checked to return 200 on 2026-10-07. Brands with an empty string have no verified list page yet
+ * (404, bot-blocked, or only per-model pages) and fall back to `dealerUrl`'s homepage.
+ */
+const NEW_CARS_URL_BY_SLUG: Readonly<Record<string, string>> = {
+  toyota: 'https://www.toyota.ua/new-cars',
+  lexus: 'https://www.lexus.ua/new-cars',
+  skoda: 'https://www.skoda-auto.ua/models/range',
+  volkswagen: 'https://www.volkswagen.ua/models',
+  hyundai: 'https://hyundai.com.ua/all-models',
+  'mercedes-benz': 'https://www.mercedes-benz.ua/models/',
+  audi: 'https://www.audi.ua/models/all-models',
+  nissan: 'https://www.nissan.ua/vehicles/offers.html',
+  mazda: 'https://mazda.ua/cars/',
+  mitsubishi: 'https://mitsubishi-motors.com.ua/models',
+  honda: 'https://honda.ua/cars/',
+  suzuki: 'https://suzuki.ua/cars/',
+  chery: 'https://chery.ua/buy-a-car.html',
+  renault: 'https://stock.renault.ua/',
+  ford: 'https://stock.winner.ua/',
+  opel: 'https://store.opel.ua/',
+  bmw: 'https://www.bmw.ua/uk/stocklocator.html#/',
+  kia: 'https://buy-a-car.kia.ua/',
+  peugeot: 'https://cars.peugeot.ua/',
+  citroen: 'https://cars.citroen.ua/',
+  dacia: 'https://stock.renault.ua/',
+  volvo: 'https://www.volvocars.com/uk-ua/inventory/',
+  jeep: 'https://www.store.jeep.ua/',
+  daf: 'https://daf.ua/trucks/',
+  subaru: 'https://subaru.ua/avto-v-nayavnosti',
+  'land-rover': 'https://landrover.com.ua/novi-avtomobili',
+  geely: 'https://geely.com.ua/',
+  seat: 'https://sklad.seat.ua/search?stock-cars=true',
+  cupra: 'https://sklad.cupraofficial.com.ua/',
+  infiniti: 'https://www.infiniti.ua/vehicles/new-vehicles.html',
+  porsche: 'https://finder.porsche.com/ua/uk-UA/dealer/search?condition=new&dealership=2476',
+  jaguar: 'https://jaguar.com.ua/novi-avtomobili',
+  bentley: 'https://bentley-kyiv.com/available-auto/',
+  mg: 'https://mgmotor.com.ua/',
+  jetour: 'https://jetour.com.ua/avto-v-nayavnosti.html',
+  haval: 'https://www.haval-ukraine.com/w/',
+  'great-wall': 'https://www.haval-ukraine.com/w/',
+  greatwall: 'https://www.haval-ukraine.com/w/'
+}
+
+/**
+ * Where "new cars of this make" should link: the importer's model-list page when one is known, else the
+ * brand's site (`dealerUrl`), else `null`. `isList` tells the UI which of the two it got.
+ */
+export function newCarsUrl(brand: string | null | undefined): { url: string; isList: boolean } | null {
+  const slug = brandSlug(brand)
+  const list = slug ? NEW_CARS_URL_BY_SLUG[slug] : undefined
+  if (list) return { url: list, isList: true }
+  const site = dealerUrl(brand)
+  return site ? { url: site, isList: false } : null
+}
+
+/**
+ * The importer's own used / pre-owned (trade-in, certified) cars page — outbound link only, like the new-cars table.
+ * Brands without a verified page are `''` (or missing) and get no used-cars row.
+ */
+const USED_CARS_URL_BY_SLUG: Readonly<Record<string, string>> = {
+  lexus: 'https://usedcars.lexus.ua/',
+  bmw: 'https://usedcars.bmw.ua/uk',
+  'land-rover': 'https://landrover.com.ua/avtomobili-z-probigom',
+  porsche: 'https://finder.porsche.com/ua/uk-UA/dealer/search?dealership=2476&condition=used',
+  bentley: 'https://bentley-kyiv.com/tradein/',
+  haval: 'https://www.haval-ukraine.com/w/sp/favoritess/',
+
+  // Not filled in yet — an empty string means no used-cars row. Add the importer's used-cars page by hand.
+  toyota: '',
+  skoda: '',
+  volkswagen: '',
+  hyundai: '',
+  'mercedes-benz': '',
+  audi: '',
+  nissan: '',
+  mazda: '',
+  mitsubishi: '',
+  honda: '',
+  suzuki: '',
+  chery: '',
+  renault: '',
+  ford: '',
+  opel: '',
+  kia: '',
+  peugeot: '',
+  citroen: '',
+  dacia: '',
+  volvo: '',
+  jeep: '',
+  daf: '',
+  subaru: '',
+  geely: '',
+  seat: '',
+  cupra: '',
+  infiniti: '',
+  jaguar: '',
+  mg: '',
+  jetour: '',
+  'great-wall': '',
+  greatwall: ''
+}
+
+/** The importer's used-cars page for a raw registry `brand` value, or `null` when none is known. */
+export function usedCarsUrl(brand: string | null | undefined): string | null {
+  const slug = brandSlug(brand)
+  return (slug ? USED_CARS_URL_BY_SLUG[slug] : undefined) || null
+}
+
 /** Official brand website for a raw registry `brand` value, or `null` when none is known. */
 export function dealerUrl(brand: string | null | undefined): string | null {
   const slug = brandSlug(brand)

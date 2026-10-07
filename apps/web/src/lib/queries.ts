@@ -128,6 +128,15 @@ export function wikiImageQuery(brand: string, model: string, year: number | null
   })
 }
 
+// Photo of exactly this model year (no older-generation fallback) for the new-cars side widget — never refetch once fetched.
+export function showcaseImageQuery(brand: string, model: string, year: number) {
+  return queryOptions({
+    queryKey: ['wiki', 'showcase', brand, model, year],
+    queryFn: () => getWikiImage(brand, model, year, true),
+    staleTime: Infinity
+  })
+}
+
 // Wikipedia article text for a brand/model — live-fetched, requested only once the Wikipedia section is opened; never refetch once fetched.
 export function wikiInfoQuery(brand: string, model: string, lang: string, year: number | null) {
   return queryOptions({
