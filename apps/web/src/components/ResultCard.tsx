@@ -29,6 +29,7 @@ import NewsSection from '@/components/NewsSection'
 import PaidFeatureSections from '@/components/paid/PaidFeatureSections'
 import ReviewLinks from '@/components/ReviewLinks'
 import FuelEconomy from '@/components/FuelEconomy'
+import VdbChips from '@/components/VdbChips'
 import InfoPopover from '@/components/InfoPopover'
 import InfoText from '@/components/InfoText'
 import SafetyRatings from '@/components/SafetyRatings'
@@ -193,6 +194,7 @@ export default function ResultCard({ data }: Props): ReactNode {
             </div>
             <div className="mt-1 flex flex-wrap gap-1.5 empty:hidden">
               <TopStatBadges brand={c.brand} model={c.model} color={c.color} region={data.region} />
+              <VdbChips brand={c.brand} model={c.model} />
               <Model3dButton brand={c.brand} model={c.model} />
               <Model360Button brand={c.brand} model={c.model} />
               {brandDealerUrl && <BrandSiteChip url={brandDealerUrl} />}

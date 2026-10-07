@@ -35,8 +35,8 @@
     "alpr:down": "docker compose -f infra/docker-compose.alpr.yml down",
     "ingest": "pnpm --filter @carplates/scripts ingest",
     "ingest:full": "pnpm --filter @carplates/scripts ingest:full",
-    "ingest:all": "pnpm db:migrate && concurrently -n full,ratings \"pnpm ingest:full\" \"pnpm ingest:ratings:csv\" && pnpm db:refresh-fuel-stats && pnpm db:refresh-safety-stats",
-    "ingest:ratings:csv": "pnpm db:migrate && concurrently -n euroncap,jncap,cncap,kncap,iihs,fuel,infocar,videos,edrive,sketchfab,carshow360,topgear,press,wikiimg \"pnpm ingest:euroncap:csv\" \"pnpm ingest:jncap:csv\" \"pnpm ingest:cncap:csv\" \"pnpm ingest:kncap:csv\" \"pnpm ingest:iihs:csv\" \"pnpm ingest:fuel:csv\" \"pnpm ingest:infocar:csv\" \"pnpm ingest:infocar:videos:csv\" \"pnpm ingest:edrive:csv\" \"pnpm ingest:sketchfab:csv\" \"pnpm ingest:carshow360:csv\" \"pnpm ingest:topgear:csv\" \"pnpm ingest:press:csv\" \"pnpm ingest:wiki-images:csv\" \"pnpm ingest:youtube-videos:csv\"",
+    "ingest:all": "pnpm db:migrate && concurrently -n full,ratings \"pnpm ingest:full -- --skip-derived\" \"pnpm ingest:ratings:csv\" && pnpm db:refresh-derived",
+    "ingest:ratings:csv": "pnpm db:migrate && concurrently -n euroncap,jncap,cncap,kncap,iihs,fuel,infocar,videos,edrive,sketchfab,carshow360,topgear,press,wikiimg,vehiclesdb \"pnpm ingest:euroncap:csv\" \"pnpm ingest:jncap:csv\" \"pnpm ingest:cncap:csv\" \"pnpm ingest:kncap:csv\" \"pnpm ingest:iihs:csv\" \"pnpm ingest:fuel:csv\" \"pnpm ingest:infocar:csv\" \"pnpm ingest:infocar:videos:csv\" \"pnpm ingest:edrive:csv\" \"pnpm ingest:sketchfab:csv\" \"pnpm ingest:carshow360:csv\" \"pnpm ingest:topgear:csv\" \"pnpm ingest:press:csv\" \"pnpm ingest:wiki-images:csv\" \"pnpm ingest:youtube-videos:csv\" \"pnpm ingest:vehiclesdb:csv\"",
     "ingest:euroncap": "pnpm --filter @carplates/scripts ingest:euroncap",
     "ingest:euroncap:csv": "pnpm --filter @carplates/scripts ingest:euroncap:csv",
     "export:euroncap:csv": "pnpm --filter @carplates/scripts export:euroncap:csv",
@@ -86,7 +86,12 @@
     "ingest:fuel:csv": "pnpm --filter @carplates/scripts ingest:fuel:csv",
     "export:fuel:csv": "pnpm --filter @carplates/scripts export:fuel:csv",
     "db:refresh-fuel-stats": "pnpm --filter @carplates/scripts refresh-fuel-stats",
-    "db:refresh-safety-stats": "pnpm --filter @carplates/scripts refresh-safety-stats"
+    "ingest:vehiclesdb": "pnpm --filter @carplates/scripts ingest:vehiclesdb",
+    "ingest:vehiclesdb:csv": "pnpm --filter @carplates/scripts ingest:vehiclesdb:csv",
+    "export:vehiclesdb:csv": "pnpm --filter @carplates/scripts export:vehiclesdb:csv",
+    "db:refresh-safety-stats": "pnpm --filter @carplates/scripts refresh-safety-stats",
+    "db:refresh-vdb-stats": "pnpm --filter @carplates/scripts refresh-vdb-stats",
+    "db:refresh-derived": "pnpm --filter @carplates/scripts refresh-derived"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

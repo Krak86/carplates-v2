@@ -42,6 +42,7 @@ import type { File as ZipFile } from 'unzipper'
 import { createDb, ingestedResources, refreshCurrentRegistration, refreshStats, registrations } from '@carplates/db'
 import type { Db, RegistrationInsert } from '@carplates/db'
 import { backfillPlates } from './backfill.js'
+import { refreshDerived } from './derived-refresh.js'
 import { buildLayout, looksLikeHeader, mapRecord } from './transform.js'
 import type { Layout } from './transform.js'
 
@@ -61,12 +62,14 @@ interface Args {
   encoding: Encoding
   archive?: string
   backfillPlates: boolean
+  /** Leave the fuel/safety/markets rollups alone — a caller (ingest:full, ingest:all) refreshes them once at the end. */
+  skipDerived: boolean
   /** Skip mapped rows with `d_reg` before this ISO date — already covered by an archived snapshot. */
   after?: string
 }
 
 function parseArgs(argv: string[]): Args {
-  const a: Args = { dryRun: false, encoding: 'utf8', backfillPlates: false }
+  const a: Args = { dryRun: false, encoding: 'utf8', backfillPlates: false, skipDerived: false }
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i]
     if (arg === '--year') a.year = Number(argv[++i])
@@ -75,6 +78,7 @@ function parseArgs(argv: string[]): Args {
     else if (arg === '--dry-run') a.dryRun = true
     else if (arg === '--archive') a.archive = argv[++i]
     else if (arg === '--backfill-plates') a.backfillPlates = true
+    else if (arg === '--skip-derived') a.skipDerived = true
     else if (arg === '--after') {
       const v = argv[++i]
       if (!v || !/^\d{4}-\d{2}-\d{2}$/.test(v))
@@ -326,6 +330,7 @@ async function main(): Promise<void> {
       log('refreshing stats rollups …')
       await refreshStats(db)
       log('done: current_registration + stats rollups refreshed')
+      if (!args.skipDerived) refreshDerived()
       return
     }
 
@@ -352,6 +357,7 @@ async function main(): Promise<void> {
         log('refreshing stats rollups …')
         await refreshStats(db)
         log('done: current_registration + stats rollups refreshed')
+        if (!args.skipDerived) refreshDerived()
       }
       log(`done: ${args.dryRun ? '[dry-run] would insert' : 'inserted'} ${inserted} rows from ${args.file}`)
       return
@@ -372,6 +378,7 @@ async function main(): Promise<void> {
       log('refreshing stats rollups …')
       await refreshStats(db)
       log('done: current_registration + stats rollups refreshed')
+      if (!args.skipDerived) refreshDerived()
     }
     log('done: ingest complete')
   } finally {

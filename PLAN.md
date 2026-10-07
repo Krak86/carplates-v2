@@ -659,6 +659,16 @@ combined crash-rating page.
 
 **Refresh cadence:** manual/annual (EPA ~2x/year, EEA once a year, no cron); `export:fuel:csv`, then commit the gz CSV. Sources, design and full cadence notes: `docs/plan-done.md`.
 
+### VehiclesDB cross-market data — ✅ built (2026-10-07), small follow-ups left
+
+Catalog (`registry.vdb_models`, CC BY 4.0), shared matcher, `GET /api/vdb` + `/api/vdb/stats`, result-card chips (UA-only, also sold
+in, popularity band, rare elsewhere, "?" popover with all 15 countries), `/stats` Markets panel, About credit. **Coverage: 92.6% of
+passenger cars** (models with a catalog entry). Full write-up: `docs/plan-done.md` "VehiclesDB cross-market data"; status, gaps, matching
+rules and refresh rules: `DATASETS_PLAN.md`. **Left:** cross-make alias (Renault Dokker -> Dacia Dokker), one decimal for <1% bar
+shares, use `how` to soften prefix matches, the `plates/ua.yml` cross-check of `normalizePlate`/`regions.ts`; the gor3a/autoevolution
+specs source stays blocked on the reply to our 2026-10-07 permission request. **Gate before deploy (Phase 4):** every external dataset
+needs its licence/permission recorded and attribution on About (VehiclesDB done).
+
 ### Car dimensions (automobiledimension.com) — **waiting for the owner's permission (asked 2026-10-07)**
 
 Source: `automobiledimension.com/<make>-car-dimensions.html` (per brand: model, year, thumbnail, L×W×H mm, boot dm³, fuel
@@ -667,6 +677,7 @@ robots.txt allows everything, but **Terms and Privacy (`/terms-privacy.html`) fo
 "inclusion, in whole or in part, on other websites … without prior authorization"; linking is allowed with attribution.
 So showing their data/images (hotlinked or re-hosted) needs written permission. **Message sent via their contact form
 (≤283 chars) — blocked until they answer; do not build before that.**
+
 - **If they agree:** crawler `scripts/src/dimensions.ts` like `ingest:infocar` (1 req/s, robots-aware, HTML cached, `--brand`/
   `--limit`/`--dry-run`/`--refresh`) -> `registry.car_dimensions` (make, model, generation/year, length, width, width with
   mirrors, height, boot, `source_url`, `image_url`) + `:csv`/`export:*:csv` seed; match to registry models like press/infocar;

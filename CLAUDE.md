@@ -11,6 +11,7 @@ Postgres; VIN decoding proxies the free NHTSA API.
 
 **Phase 1 (current): plate + VIN search, local dev stack only.** No CI, no VPS.
 Accounts (Phase 5 stage A: Google sign-in, paid-feature opt-ins, admin page) are built — see "Accounts" under Conventions.
+External-dataset enrichment (VehiclesDB built; gor3a/autoevolution waiting for permission) is tracked in `DATASETS_PLAN.md`.
 Phases 2-5 (RIA similar-cars, Platesmania, image recognition, VPS/deploy,
 accounts) are in `PLAN.md` (active/planned work only; finished Phase 1/1.5 write-ups live in `docs/plan-done.md` — grep headings, never read it whole). The post-deploy plan for recurring ingest jobs is `SCHEDULE.md`.
 
@@ -116,13 +117,23 @@ pnpm ingest:youtube-videos   # YouTube Data API fallback for models infocar has 
                        # --brand/--model, --limit N, --dry-run, --refresh. See PLAN.md "Step 2a"
 pnpm ingest:youtube-videos:csv   # load the committed YouTube videos CSV — seconds, no API calls (partial seed from 2026-10-06: 881 videos / 110 models)
 pnpm export:youtube-videos:csv   # re-dump the table to that CSV — run after every real run
+pnpm ingest:vehiclesdb   # VehiclesDB (CC BY 4.0) make/model catalog: download dist/vehicles.csv -> registry.vdb_models (markets + popularity
+                       # decile; result-card chips via GET /api/vdb); --dry-run, --refresh. See DATASETS_PLAN.md
+pnpm ingest:vehiclesdb:csv   # load the committed VehiclesDB CSV (305 KB gz) — seconds, no download (part of ingest:ratings:csv)
+pnpm export:vehiclesdb:csv   # re-dump the table to that CSV — run after every real re-ingest
+pnpm db:refresh-vdb-stats   # rebuild registry.stats_vdb (the /stats "Markets" panel) from the registry + vdb_models
+pnpm db:refresh-derived     # rebuild ALL rollups computed from current_registration: fuel-stats + safety-stats + vdb-stats
+                            # (scripts/src/derived-refresh.ts — add new rollups of that kind there). `ingest` runs it itself
+                            # after the registry refresh unless given --skip-derived; ingest:full refreshes once at its end;
+                            # ingest:all skips it in ingest:full and runs it after the CSV loads. ingest:ratings:csv /
+                            # ingest:vehiclesdb alone do NOT — run this after them
 pnpm db:refresh-fuel-stats   # rebuild registry.stats_fuel (the /fuel page rollup) from the registry + fuel_economy;
                              # run after any registry ingest or ingest:fuel (ingest:all does it last)
 pnpm ingest:ratings:csv   # db:migrate, then all five *:csv rating loads + the fuel, infocar, infocar-videos, e-drive, sketchfab, carshow360, topgear, press and wiki-images CSVs concurrently — each writes
                           # its own table only, doesn't touch registrations
 pnpm ingest:all        # db:migrate, then ingest:full + ingest:ratings:csv concurrently — each writes a
                        # disjoint table (registrations/current_registration/stats_by_* vs. one ratings/fuel_economy
-                       # table apiece) — then db:refresh-fuel-stats, which needs both finished
+                       # table apiece) — then db:refresh-derived (fuel/safety/vdb rollups), which needs both finished
 
 pnpm alpr:build     # build the self-hosted ALPR (own-model plate recognition) Docker image
 pnpm alpr:up        # run it on :8088 (sets ALPR_LOCAL_URL=http://localhost:8088 in apps/api/.env to use it)
@@ -220,6 +231,15 @@ Vitest 4 · ESLint 10 (flat config)
   `WEB_DIST_DIR=../web/dist` in `apps/api/.env`, restart the API, open `localhost:3000/<plate>` (Incognito, SW
   caches `index.html`). Plate/VIN pages are `noindex`; `?lang=` selects the preview language. Details in
   docs/plan-done.md "Link previews".
+- **VehiclesDB cross-market data** (`packages/shared/src/vdbMatch.ts` + `vdb.ts`, `apps/api/src/vdb/`, web `components/VdbChips.tsx`,
+  `routes/stats/VdbStatsPanel.tsx`, `scripts/src/vehiclesdb*.ts` + `vdb-stats.ts`; migrations 0039 `registry.vdb_models`, 0040
+  `registry.stats_vdb`): CC BY 4.0 catalog of makes/models with the countries they are sold in and a popularity decile, used for the
+  result-card chips (top chip row) and the `/stats` Markets panel. A separate, removable block — credit "Vehicle data by VehiclesDB"
+  on About. The registry↔catalog link is only the `make_key`/`model_key` strings (no FK); matching is TypeScript
+  (`matchVdbModel`, one code path for API/chips/rollup; curated `MODEL_ALIASES` only for pairs verified in both sides; a miss hides
+  the data). The seed CSV stores the computed keys, so after changing `makeKey`/`modelKey`/`brandSlug` re-run `ingest:vehiclesdb`
+  from the download, not `:csv`. `stats_vdb` is stale until `pnpm db:refresh-derived`. Full status, gaps and refresh rules:
+  DATASETS_PLAN.md ("VehiclesDB — built").
 - **Accounts** (`apps/api/src/auth/`, `features/`; web `components/auth/`, `routes/features|admin/`): user data lives in the
   separate `app` Postgres schema (migration 0034) — never mix it into `registry`, and treat it as the one part of the DB that
   is **not** re-ingestable. Own thin auth: Google ID token verified locally → httpOnly `carsua_sid` cookie, only its SHA-256 in

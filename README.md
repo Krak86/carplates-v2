@@ -183,6 +183,7 @@ See [CLAUDE.md](CLAUDE.md) for conventions and [PLAN.md](PLAN.md) for the roadma
 `pnpm ingest:social` (brand + parent-group YouTube channel uploads from public RSS feeds, no key; `--channel`, `--dry-run`, `--list`; no CSV seed — schedule it, see [SCHEDULE.md](SCHEDULE.md)) ·
 `pnpm ingest:sketchfab · ingest:sketchfab:csv · export:sketchfab:csv` ·
 `pnpm ingest:carshow360 · ingest:carshow360:csv · export:carshow360:csv` (sitemap only; `--enrich`, `--retry-failed`) ·
+`pnpm ingest:vehiclesdb · ingest:vehiclesdb:csv · export:vehiclesdb:csv · db:refresh-vdb-stats · db:refresh-derived` (VehiclesDB cross-market catalog, CC BY 4.0; `db:refresh-derived` rebuilds the fuel/safety/markets rollups) ·
 `pnpm ingest:ratings:csv · ingest:all` ·
 `pnpm --filter scripts build:kind-images` (re-encode `apps/web/assets-src/kind/*.jpg` → `public/kind/*.webp`)
 

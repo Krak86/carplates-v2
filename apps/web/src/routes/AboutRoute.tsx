@@ -17,6 +17,7 @@ const SOURCES = [
   { key: 'iihs', label: 'IIHS', url: 'https://www.iihs.org', icon: '/icons/sources/iihs.webp' },
   { key: 'epa', label: 'EPA / fueleconomy.gov', url: 'https://www.fueleconomy.gov', icon: '/icons/sources/epa.webp' },
   { key: 'eea', label: 'EEA', url: 'https://www.eea.europa.eu', icon: '/icons/sources/eea.svg' },
+  { key: 'vehiclesdb', label: 'VehiclesDB', url: 'https://vehiclesdb.com' },
   { key: 'infocar', label: 'infocar.ua', url: 'https://www.infocar.ua', icon: '/icons/infocar.png' },
   { key: 'itc', label: 'ITC.ua', url: 'https://itc.ua/ua/tag/test-drayv-ua/', icon: '/icons/itc.webp' },
   { key: 'mezha', label: 'Mezha', url: 'https://mezha.ua/tag/test-drayv/', icon: '/icons/mezha.webp' },

@@ -1,0 +1,189 @@
+import { describe, expect, it } from 'vitest'
+
+import { makeKey, modelKey } from './vehicleKey.js'
+import {
+  collapseDoubledModel,
+  isUkraineOnly,
+  matchVdbModel,
+  otherMarkets,
+  vdbCandidateKeys,
+  type VdbReferenceRow
+} from './vdbMatch.js'
+
+type Row = VdbReferenceRow & { name: string }
+
+const row = (make: string, name: string, extra: Partial<VdbReferenceRow> = {}): Row => ({
+  name,
+  kind: 'car',
+  makeKey: makeKey(make)!,
+  modelKey: modelKey(name)!,
+  bodyTypes: [],
+  countries: ['nl'],
+  regions: ['eu'],
+  globalDecile: 5,
+  aliases: [],
+  ...extra
+})
+
+/** Rows copied from VehiclesDB 2026.10.0 (make → model names); the registry strings in the tests are real ones. */
+const CATALOG: Row[] = [
+  row('BMW', '3 Series'),
+  row('BMW', '5 Series'),
+  row('Mazda', '3'),
+  row('Mazda', '626'),
+  row('Mercedes-Benz', 'S-Class'),
+  row('Mercedes-Benz', 'V-Class'),
+  row('Mercedes-Benz', 'GLE'),
+  row('Mercedes-Benz', 'GL'),
+  row('Mercedes-Benz', 'Sprinter'),
+  row('Mercedes-Benz', 'Vito'),
+  row('Lexus', 'RX'),
+  row('Lexus', 'ES'),
+  row('Lexus', 'LX'),
+  row('Toyota', 'Land Cruiser Prado'),
+  row('Toyota', 'Land Cruiser'),
+  row('Toyota', 'Camry'),
+  row('Toyota', 'Camry Hybrid LE'),
+  row('Suzuki', 'SX4'),
+  row('Suzuki', 'SX4 S-Cross'),
+  row('Skoda', 'Octavia'),
+  row('Ford', 'Transit'),
+  row('Ford', 'Focus'),
+  row('Honda', 'Accord'),
+  row('Honda', 'Accord 2'),
+  row('Lada', '2108'),
+  row('Lada', '2121', { countries: ['ua', 'nl'] }),
+  row('Lada', '2107', { aliases: ['Semyorka'], countries: ['ua'] }),
+  row('GAZ', 'Volga'),
+  row('Renault', 'Megane'),
+  row('Renault', 'Clio'),
+  row('Volkswagen', 'Transporter', { kind: 'van' }),
+  row('Volkswagen', 'Transporter', { kind: 'car', globalDecile: 3 }),
+  row('Opel', 'Astra')
+]
+
+function match(brand: string, model: string): { name: string; how: string } | null {
+  const mk = makeKey(brand)!
+  const m = matchVdbModel(
+    CATALOG.filter(r => r.makeKey === mk),
+    mk,
+    model
+  )
+  return m ? { name: m.row.name, how: m.how } : null
+}
+
+describe('collapseDoubledModel', () => {
+  it('keeps one copy of a doubled model name', () => {
+    expect(collapseDoubledModel('TRANSIT TRANSIT')).toBe('TRANSIT')
+    expect(collapseDoubledModel('LAND CRUISER LAND CRUISER')).toBe('LAND CRUISER')
+  })
+
+  it('leaves everything else alone', () => {
+    expect(collapseDoubledModel('GOLF GOLF PLUS')).toBe('GOLF GOLF PLUS')
+    expect(collapseDoubledModel('  CR-V  LX ')).toBe('CR-V LX')
+  })
+})
+
+describe('matchVdbModel — exact and alias', () => {
+  it('matches the same key regardless of punctuation and doubled names', () => {
+    expect(match('FORD', 'TRANSIT TRANSIT')).toEqual({ name: 'Transit', how: 'exact' })
+    expect(match('SUZUKI', 'sx-4')).toEqual({ name: 'SX4', how: 'exact' })
+  })
+
+  it('strips a marketing "NEW" prefix (SUZUKI | NEW SX4)', () => {
+    expect(match('SUZUKI', 'NEW SX4')).toEqual({ name: 'SX4', how: 'exact' })
+  })
+
+  it('matches a catalog alias (Lada 2107 "Semyorka")', () => {
+    expect(match('ВАЗ', 'semyorka')).toEqual({ name: '2107', how: 'alias' })
+  })
+
+  it('prefers a car row over a van row of the same name, then the more popular decile', () => {
+    const mk = makeKey('Volkswagen')!
+    const m = matchVdbModel(
+      CATALOG.filter(r => r.makeKey === mk),
+      mk,
+      'TRANSPORTER'
+    )
+    expect(m?.row.kind).toBe('car')
+  })
+})
+
+describe('matchVdbModel — series, nameplate and curated aliases', () => {
+  it('maps BMW trim codes to the series (320D, 520I, 116 I)', () => {
+    expect(match('BMW', '320D')).toEqual({ name: '3 Series', how: 'series' })
+    expect(match('BMW', '520I')).toEqual({ name: '5 Series', how: 'series' })
+  })
+
+  it('maps the Mazda digit to its model', () => {
+    expect(match('MAZDA', '3')).toEqual({ name: '3', how: 'exact' })
+  })
+
+  it('maps Mercedes S/V letter + figure codes to the class', () => {
+    expect(match('MERCEDES-BENZ', 'S 500')).toEqual({ name: 'S-Class', how: 'alias' })
+    expect(match('MERCEDES-BENZ', 'V 300 D')).toEqual({ name: 'V-Class', how: 'alias' })
+  })
+
+  it('does not fire the short GL rule on GLE', () => {
+    expect(match('MERCEDES-BENZ', 'GLE 350D')).toEqual({ name: 'GLE', how: 'prefix' })
+  })
+
+  it('reduces Lexus "RX 350" to the nameplate', () => {
+    expect(match('LEXUS', 'RX 350')).toEqual({ name: 'RX', how: 'prefix' })
+    expect(match('LEXUS', 'LX 570')).toEqual({ name: 'LX', how: 'prefix' })
+  })
+
+  it('maps the bare PRADO to Land Cruiser Prado, and GAZ-3110 to Volga', () => {
+    expect(match('TOYOTA', 'PRADO')).toEqual({ name: 'Land Cruiser Prado', how: 'alias' })
+    expect(match('ГАЗ', '3110')).toEqual({ name: 'Volga', how: 'alias' })
+  })
+})
+
+describe('matchVdbModel — prefix', () => {
+  it('finds the shorter catalog model when the registry adds a variant (OCTAVIA A5, SPRINTER 316 CDI)', () => {
+    expect(match('SKODA', 'OCTAVIA A5')).toEqual({ name: 'Octavia', how: 'prefix' })
+    expect(match('MERCEDES-BENZ', 'SPRINTER 316 CDI')).toEqual({ name: 'Sprinter', how: 'prefix' })
+    expect(match('OPEL', 'ASTRA SPORTS TOURER')).toEqual({ name: 'Astra', how: 'prefix' })
+  })
+
+  it('takes the closest catalog key when the registry key extends several (Camry)', () => {
+    expect(match('TOYOTA', 'CAMRY SE')).toEqual({ name: 'Camry', how: 'prefix' })
+  })
+
+  it('matches a Lada five/six-digit factory code to its four-digit model (21083, 212140)', () => {
+    expect(match('ВАЗ', '21083')).toEqual({ name: '2108', how: 'prefix' })
+    expect(match('ВАЗ', '212140')).toEqual({ name: '2121', how: 'prefix' })
+  })
+
+  it('does not let a digit-ending catalog key swallow a longer number (ACCORD 2.0 is not "Accord 2")', () => {
+    expect(match('HONDA', 'ACCORD 2.0')).toEqual({ name: 'Accord', how: 'prefix' })
+  })
+
+  it('never prefix-matches on a key shorter than three characters', () => {
+    const mk = makeKey('Mazda')!
+    const rows = [row('Mazda', 'MX')]
+    expect(matchVdbModel(rows, mk, 'MX-5')).toBeNull()
+  })
+})
+
+describe('matchVdbModel — misses stay misses', () => {
+  it('returns null for models the catalog lacks (hide the data, never guess)', () => {
+    expect(match('ВАЗ', '21104')).toBeNull()
+    expect(match('RENAULT', 'DOKKER')).toBeNull()
+    expect(match('TOYOTA', 'VENZA')).toBeNull()
+    expect(match('FORD', '')).toBeNull()
+  })
+
+  it('gives vdbCandidateKeys nothing for an empty model', () => {
+    expect(vdbCandidateKeys('ford', '  ')).toEqual([])
+  })
+})
+
+describe('markets helpers', () => {
+  it('flags UA-only nameplates and lists the other markets', () => {
+    expect(isUkraineOnly({ countries: ['ua'] })).toBe(true)
+    expect(isUkraineOnly({ countries: ['ua', 'nl'] })).toBe(false)
+    expect(isUkraineOnly({ countries: [] })).toBe(false)
+    expect(otherMarkets({ countries: ['ua', 'nl', 'de'] })).toEqual(['nl', 'de'])
+  })
+})

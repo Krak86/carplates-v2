@@ -12,6 +12,8 @@ import {
   dataVersionResponseSchema,
   euroNcapRatingsResponseSchema,
   fuelEconomyResponseSchema,
+  vdbResponseSchema,
+  vdbStatsResponseSchema,
   fuelStatsResponseSchema,
   safetyStatsResponseSchema,
   iihsRatingsResponseSchema,
@@ -55,6 +57,8 @@ import type {
   CncapRatingsResponse,
   EuroNcapRatingsResponse,
   FuelEconomyResponse,
+  VdbResponse,
+  VdbStatsResponse,
   Models3dResponse,
   Models360Response,
   NewsPageResponse,
@@ -222,6 +226,15 @@ export async function getKncapRatings(make: string, model: string, year: number)
 export async function getIihsRatings(make: string, model: string, year: number): Promise<IihsRatingsResponse> {
   const params = new URLSearchParams({ make, model, year: String(year) })
   return iihsRatingsResponseSchema.parse(await getJson(`/api/safety/iihs?${params.toString()}`))
+}
+
+export async function getVdb(brand: string, model: string): Promise<VdbResponse> {
+  const params = new URLSearchParams({ brand, model })
+  return vdbResponseSchema.parse(await getJson(`/api/vdb?${params.toString()}`))
+}
+
+export async function getVdbStats(): Promise<VdbStatsResponse> {
+  return vdbStatsResponseSchema.parse(await getJson('/api/vdb/stats'))
 }
 
 export type FuelEconomyParams = {

@@ -13,6 +13,8 @@ import {
   getCncapRatings,
   getEuroNcapRatings,
   getFuelEconomy,
+  getVdb,
+  getVdbStats,
   getFuelStats,
   getNews,
   getNewsPage,
@@ -194,6 +196,24 @@ export function fuelEconomyQuery(params: FuelEconomyParams) {
   return queryOptions({
     queryKey: ['fuel', params.make, params.model, params.year, params.fuel ?? null, params.capacity ?? null],
     queryFn: () => getFuelEconomy(params),
+    staleTime: Infinity
+  })
+}
+
+// VehiclesDB cross-market facts (pnpm ingest:vehiclesdb) — persisted reference data, cached offline like fuel.
+export function vdbQuery(brand: string, model: string) {
+  return queryOptions({
+    queryKey: ['vdb', brand, model],
+    queryFn: () => getVdb(brand, model),
+    staleTime: Infinity
+  })
+}
+
+// Registry-by-popularity rollup for the /stats markets panel — online-only, like fuelStatsQuery.
+export function vdbStatsQuery() {
+  return queryOptions({
+    queryKey: ['vdb-stats'],
+    queryFn: getVdbStats,
     staleTime: Infinity
   })
 }

@@ -57,7 +57,12 @@
     "ingest:fuel:csv": "tsx src/fuel-economy.ts --from-csv seed-data/fuel-economy.csv.gz",
     "export:fuel:csv": "tsx src/fuel-economy.ts --export-csv seed-data/fuel-economy.csv.gz",
     "refresh-fuel-stats": "tsx src/fuel-stats.ts",
+    "ingest:vehiclesdb": "tsx src/vehiclesdb.ts",
+    "ingest:vehiclesdb:csv": "tsx src/vehiclesdb.ts --from-csv seed-data/vehiclesdb.csv.gz",
+    "export:vehiclesdb:csv": "tsx src/vehiclesdb.ts --export-csv seed-data/vehiclesdb.csv.gz",
     "refresh-safety-stats": "tsx src/safety-stats.ts",
+    "refresh-vdb-stats": "tsx src/vdb-stats.ts",
+    "refresh-derived": "tsx src/refresh-derived.ts",
     "build:kind-images": "tsx src/build-kind-images.ts",
     "type-check": "tsc",
     "test": "vitest run"

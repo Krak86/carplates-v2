@@ -15,6 +15,7 @@ import StatsMapSkeleton from '@/routes/stats/StatsMapSkeleton'
 import StatsSkeleton from '@/routes/stats/StatsSkeleton'
 import StatsTable from '@/routes/stats/StatsTable'
 import TopStatsPanel from '@/routes/stats/TopStatsPanel'
+import VdbStatsPanel from '@/routes/stats/VdbStatsPanel'
 import {
   DEFAULT_STATS_DIMENSION,
   DEFAULT_STATS_METRIC,
@@ -145,6 +146,8 @@ export default function StatsRoute(): ReactNode {
           </div>
 
           <TopStatsPanel stats={stats.data} highlightModel={highlightModel} />
+
+          <VdbStatsPanel />
 
           <div className="mb-4 inline-flex gap-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-1">
             {STATS_VIEWS.map(v => (

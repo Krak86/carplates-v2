@@ -685,6 +685,36 @@ export type FuelEconomyRow = typeof fuelEconomy.$inferSelect
 export type FuelEconomyInsert = typeof fuelEconomy.$inferInsert
 
 /**
+ * VehiclesDB (https://vehiclesdb.com, CC-BY 4.0) make/model catalog: markets a model is sold in + cross-market
+ * popularity decile. Facts only; loaded from dist/vehicles.csv by `scripts/src/vehiclesdb.ts`, see
+ * migrations/0039_vdb_models.sql. Removable block — attribution lives on the About sources page.
+ */
+export const vdbModels = registry.table(
+  'vdb_models',
+  {
+    id: text('id').primaryKey(),
+    kind: text('kind').notNull(),
+    makeSlug: text('make_slug').notNull(),
+    makeName: text('make_name').notNull(),
+    modelSlug: text('model_slug').notNull(),
+    modelName: text('model_name').notNull(),
+    makeKey: text('make_key').notNull(),
+    modelKey: text('model_key').notNull(),
+    bodyTypes: text('body_types').array().notNull().default([]),
+    countries: text('countries').array().notNull().default([]),
+    regions: text('regions').array().notNull().default([]),
+    /** 1 (most popular) .. 10, mean of per-country deciles; null when VehiclesDB has no ranking. */
+    globalDecile: smallint('global_decile'),
+    aliases: text('aliases').array().notNull().default([]),
+    formerIds: text('former_ids').array().notNull().default([]),
+    scrapedAt: timestamp('scraped_at', { withTimezone: true }).notNull().defaultNow()
+  },
+  t => [index('ix_vdb_models_make_model').on(t.makeKey, t.modelKey)]
+)
+export type VdbModelRow = typeof vdbModels.$inferSelect
+export type VdbModelInsert = typeof vdbModels.$inferInsert
+
+/**
  * Per-(brand, model, year, fuel, capacity bucket) passenger-car counts joined with the CO2 estimate the reference
  * data gives them — backs the /fuel statistics page. Rebuilt by `scripts/src/fuel-stats.ts`; see
  * migrations/0018_stats_fuel.sql.
@@ -707,6 +737,25 @@ export const statsFuel = registry.table(
   t => [index('ix_stats_fuel_year').on(t.makeYear), index('ix_stats_fuel_brand').on(t.brand)]
 )
 export type StatsFuelInsert = typeof statsFuel.$inferInsert
+
+/**
+ * Registry passenger cars per matched VehiclesDB model (vdb_id null = the unmatched bucket) — backs the /stats markets
+ * panel. Rebuilt by `scripts/src/vdb-stats.ts`; see migrations/0040_stats_vdb.sql.
+ */
+export const statsVdb = registry.table(
+  'stats_vdb',
+  {
+    vdbId: text('vdb_id'),
+    makeName: text('make_name'),
+    modelName: text('model_name'),
+    globalDecile: smallint('global_decile'),
+    countries: text('countries').array().notNull().default([]),
+    uaOnly: boolean('ua_only').notNull().default(false),
+    n: integer('n').notNull()
+  },
+  t => [index('ix_stats_vdb_decile').on(t.globalDecile)]
+)
+export type StatsVdbInsert = typeof statsVdb.$inferInsert
 
 /** Incremental-ingest bookkeeping: which CKAN resources have been loaded. */
 export const ingestedResources = registry.table('ingested_resources', {

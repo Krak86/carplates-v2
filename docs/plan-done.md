@@ -2866,3 +2866,30 @@ Five commits on top of stage A; open items stay in PLAN.md "Phase 5 → Stage C"
 
 - **Result card** (`4469fa0`): brand-site chip with a dealer badge (`BrandSiteChip`), engine capacity with units, tilt-toggle ("drunk mode") tweak, section-header/export-menu cleanup, Bluesky entity-decoding fix (`lib/bluesky.ts`, tested). Favorites star got a tooltip.
 - **YouTube fallback videos** (`9602cd7`): `ReviewsService.lookup` falls back to `registry.youtube_videos` when infocar has no video for the model (dedupe by `youtube_id`, infocar first, `MAX_VIDEOS` caps the section); `videos[].source` (`infocar|youtube`) + `lang` added to the schema; the Videos section notes that fallback videos come from a YouTube search. Ingest: ≥ 5,000-car tier finished and ≥ 1,000 tier started on 2026-10-07 (Day 3; seed CSV re-exported).
+
+### VehiclesDB cross-market data ✅ BUILT (2026-10-07, uncommitted when written)
+
+Research and decisions: `DATASETS_PLAN.md` (four candidate datasets; carguru and sortedcars skipped, gor3a blocked on autoevolution's
+reply). Built from the VehiclesDB catalog (https://vehiclesdb.com, release 2026.10.0, **CC BY 4.0**, 14,997 model rows from 15 official
+registers incl. Ukraine's).
+
+- **Data layer.** Migration `0039_vdb_models.sql` -> `registry.vdb_models`; `scripts/src/vehiclesdb.ts` (+ `vehiclesdb-parse.ts`, Zod,
+  tests) downloads `dist/vehicles.csv` (cache `scripts/.data/vehiclesdb/`) or loads/exports the committed `scripts/seed-data/vehiclesdb.csv.gz`
+  (305 KB); `pnpm ingest:vehiclesdb[:csv]`, `export:vehiclesdb:csv`, the `:csv` load is in `ingest:ratings:csv`.
+- **Matcher** `packages/shared/src/vdbMatch.ts` (`matchVdbModel`; rules and gaps in DATASETS_PLAN.md). Real-registry coverage ~84% of rows
+  (models >= 20 cars), 92.6% of passenger cars in the rollup. Tests use real registry strings, including must-stay-unmatched cases.
+- **API** `apps/api/src/vdb/`: `GET /api/vdb?brand=&model=` (live match, contract in `packages/shared/src/vdb.ts` — own file so the offline
+  cache is not busted) and `GET /api/vdb/stats`. Offline cache group `vdb` (400); `vdb-stats` stays online-only.
+- **Result card.** `VdbChips` sits in the TOP chip row (after the stats chips, before 3D/360°/brand site): 🇺🇦 UA-only, 🌍 also sold in
+  (flags; country names on hover and for screen readers), 📊 "Top X% of models in N markets" (X = decile band; it is the mean of the
+  model's per-country deciles over the markets listing it, equal weight — NOT a Ukrainian rank), 💎 rare elsewhere (decile >= 8), and a
+  "?" InfoPopover with one bullet per chip + the CC-BY credit + a `CODE — Country` legend of all 15 registers (names localized; gotcha:
+  `Intl.DisplayNames` needs UPPER-case codes). Flag emoji show as letters on Windows.
+- **/stats Markets panel.** Migration `0040_stats_vdb.sql` -> `registry.stats_vdb` (per matched model, `vdb_id` NULL = unmatched bucket);
+  `scripts/src/vdb-stats.ts` (`pnpm db:refresh-vdb-stats`, ~11 s); `VdbStatsPanel` shows cars by popularity band (most of the fleet is in
+  the 10-30% bands), "common here, rare elsewhere" (Lada 2172, Toyota Venza, ZAZ 968…) and "only in Ukraine" (ZAZ Lanos/Sens, Lada 2108…).
+- **Refresh automation.** New `scripts/src/derived-refresh.ts` (+ CLI `refresh-derived.ts`, `pnpm db:refresh-derived`) runs fuel-stats,
+  safety-stats and vdb-stats. `ingest.ts` calls it after every registry refresh unless `--skip-derived`; `ingest-full.ts` skips it in its
+  child ingests and runs it once at the end; `ingest:all` passes `--skip-derived` and runs `db:refresh-derived` after the CSV loads.
+- **About** lists VehiclesDB with the CC-BY credit; i18n keys `vdb.*`, `stats.vdb.*`, `about.source.vehiclesdb` in ua/ru/en.
+- **Not done / follow-ups:** see DATASETS_PLAN.md "Known gaps" and "Remaining ideas".

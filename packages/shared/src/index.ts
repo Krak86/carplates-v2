@@ -136,7 +136,28 @@ export {
 export { MAX_MODELS_3D, model3dLookup, type Model3dLookupRow } from './model3dLookup.js'
 export { MAX_MODELS_360, model360Lookup, type Model360LookupRow } from './model360Lookup.js'
 export { countOwners } from './owners.js'
+export {
+  vdbMatchSchema,
+  vdbResponseSchema,
+  vdbStatsModelSchema,
+  vdbStatsResponseSchema,
+  type VdbMatchInfo,
+  type VdbResponse,
+  type VdbStatsModel,
+  type VdbStatsResponse
+} from './vdb.js'
 export { makeKey, modelKey, brandCandidateKey } from './vehicleKey.js'
+export {
+  MIN_PREFIX_KEY_LENGTH,
+  collapseDoubledModel,
+  vdbCandidateKeys,
+  matchVdbModel,
+  isUkraineOnly,
+  otherMarkets,
+  type VdbReferenceRow,
+  type VdbMatchHow,
+  type VdbMatch
+} from './vdbMatch.js'
 export {
   CRASH_SOURCES,
   CRASH_BANDS,

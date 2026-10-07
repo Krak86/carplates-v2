@@ -1,7 +1,8 @@
 /**
  * Single-command full local ingest: every CKAN year, the archived pre-redaction
- * 2026 snapshot, then plate backfill. Equivalent to running these three
- * `pnpm ingest` invocations in order:
+ * 2026 snapshot, then plate backfill, then one refresh of the derived rollups (fuel/safety/markets stats;
+ * `--skip-derived` leaves that to the caller, as `ingest:all` does). Equivalent to running these three
+ * `pnpm ingest` invocations in order (each also refreshes the rollups unless given `--skip-derived`):
  *
  *   pnpm ingest
  *   pnpm ingest --file .data/archive/reestrTZ2026_pre-redaction_2026-05-01.zip
@@ -23,6 +24,8 @@ import { spawnSync } from 'node:child_process'
 import { join } from 'node:path'
 import { Readable } from 'node:stream'
 import { pipeline } from 'node:stream/promises'
+
+import { refreshDerived } from './derived-refresh.js'
 
 const SCRIPTS_DIR = join(import.meta.dirname, '..')
 const ARCHIVE_2026 = join(SCRIPTS_DIR, '.data', 'archive', 'reestrTZ2026_pre-redaction_2026-05-01.zip')
@@ -54,10 +57,14 @@ async function ensureArchive2026(): Promise<boolean> {
   }
 }
 
+/** Each child ingest would otherwise rebuild the derived rollups itself; this command does it once, at the very end. */
+const SKIP_DERIVED = '--skip-derived'
+
 async function main(): Promise<void> {
-  runIngest([])
-  if (await ensureArchive2026()) runIngest(['--file', ARCHIVE_2026])
-  runIngest(['--backfill-plates'])
+  runIngest([SKIP_DERIVED])
+  if (await ensureArchive2026()) runIngest(['--file', ARCHIVE_2026, SKIP_DERIVED])
+  runIngest(['--backfill-plates', SKIP_DERIVED])
+  if (!process.argv.includes(SKIP_DERIVED)) refreshDerived()
 }
 
 main().catch((err: unknown) => {
