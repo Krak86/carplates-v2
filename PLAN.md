@@ -309,7 +309,7 @@ chassis model (low-contrast embossed metal — plain stamped door-sill VINs now 
 plan-done.md; only dotted/very wide-spaced ones still fail); fine-tuning
 a VIN model until there are thousands of labelled photos.
 
-### Phase 3+ — recalls — **researched, parked (2026-09-24)**
+### Phase 3+ — recalls — **researched, parked (2026-09-24)** — _revisited 2026-10-07: RDW (EU) recall data is CC0, see "Open-data round 2"_
 
 Crash-test _ratings_ (`api.nhtsa.gov/SafetyRatings`) graduated out of this
 section and shipped for real — see Phase 1.5 above ("Crash-test safety
@@ -668,6 +668,18 @@ rules and refresh rules: `DATASETS_PLAN.md`. **Left:** cross-make alias (Renault
 shares, use `how` to soften prefix matches, the `plates/ua.yml` cross-check of `normalizePlate`/`regions.ts`; the gor3a/autoevolution
 specs source stays blocked on the reply to our 2026-10-07 permission request. **Gate before deploy (Phase 4):** every external dataset
 needs its licence/permission recorded and attribution on About (VehiclesDB done).
+
+### Open-data round 2 — recalls, complaints, specs, MOT faults, EV data — **licences verified 2026-10-07, not started**
+
+Details, licences, URLs, caveats and the skip list: `DATASETS_PLAN.md` ("Round 2"). Buildable (all free, own tables, each a
+removable card block, credit on About): **RDW** registered vehicles (CC0; "Specs") + RDW recalls (CC0), **NHTSA** recalls +
+complaints (public domain, live API like `api/safety`), **UK MOT** (OGL v3; "Common faults", newest file 2023), **Transport
+Canada** recalls (OGL-Canada, low priority), **Open EV Data** (MIT; "Electric" block). Order: RDW -> NHTSA -> EV -> Canada -> MOT. **Refresh cadences** (RDW specs 6 mo, RDW recalls monthly, NHTSA live + cache
+7/30 d, MOT yearly, Canada quarterly, EV quarterly) are in `DATASETS_PLAN.md`; **each source's ingest, seed, refresh command and
+`SCHEDULE.md` entry are implemented only when its card block is built** — nothing ahead of the feature.
+Recalls are model-level and market-labelled, never "your car has a recall"; this revisits the 2026-09-24 park in "Phase 3+ —
+recalls" above (open owner call: NHTSA recalls or RDW/EU only). **Skipped:** Eurostat (country totals only), ANCAP / Latin NCAP /
+ASEAN NCAP (no licence/permission), Kaggle sets, DVSA recalls API. Wikidata deferred. data.gov.ua is a separate session.
 
 ### Car dimensions (automobiledimension.com) — **waiting for the owner's permission (asked 2026-10-07)**
 

@@ -5,6 +5,8 @@ Research (2026-10-07) on four external GitHub datasets and how they could enrich
 credit) — see "VehiclesDB — built" below and the write-up in `docs/plan-done.md` ("VehiclesDB cross-market data").
 gor3a/autoevolution is still **blocked on a reply**; carguru and sortedcars are skipped. Phase/priority context lives in
 `PLAN.md`; this file only tracks this thread.
+**Round 2 (2026-10-07):** licences checked for RDW, NHTSA recalls/complaints, UK MOT, Transport Canada, Open EV Data,
+Eurostat, ANCAP/Latin NCAP — see "Round 2 — what can be built, what is skipped" below.
 
 ## Decisions
 
@@ -192,7 +194,90 @@ not a scraper of their site. Do not crawl autoevolution without an explicit yes.
    can be hidden. Note users' PWA caches (IndexedDB) keep already-fetched data, and ODbL share-alike applies to what was
    already publicly used.
 
+## Round 2 — what can be built, what is skipped (licences checked 2026-10-07)
+
+Licences were read from the portals' own pages or their catalogue entries (GitHub API for Open EV Data). Items marked
+_(memory)_ were not re-fetched. Same rule as above: each source = own tables, ingest script, card section, i18n keys, About
+credit; a source with an unresolved licence is hidden before any deploy.
+
+### Can be built
+
+| Source | Licence (verified) | Gives | Attribution | Delivery |
+| --- | --- | --- | --- | --- |
+| **RDW registered vehicles** — [opendata.rdw.nl/d/m9d7-ebf2](https://opendata.rdw.nl/d/m9d7-ebf2) ([catalogue](https://data.overheid.nl/en/dataset/11441-open-data-rdw--gekentekende-voertuigen)) | CC0 1.0 | Power, displacement, mass, dimensions, fuel, CO2, body per Dutch-registered vehicle -> aggregate per make/model/year ("Specs" block) | none required; credit anyway | bulk CSV/JSON (SODA), aggregate, ship a CSV seed |
+| **RDW recalls** — [terugroep_actie](https://data.overheid.nl/dataset/11369-open-data-rdw--terugroep-actie), [_status](https://data.overheid.nl/en/dataset/11394-open-data-rdw--terugroep-actie-status), `_risico`, `_informeren_eigenaar` | CC0 1.0 | EU-market recall actions: defect, risk, repair status | none required | bulk, own table |
+| **NHTSA recalls + complaints** — `api.nhtsa.gov/recalls/recallsByVehicle`, `api.nhtsa.gov/complaints/complaintsByVehicle` ([flat file](https://catalog.data.gov/dataset/nhtsas-office-of-defects-investigation-odi-recalls-recalls-flat-file) = offline option) | Public domain (`us-pd`) | US recalls (component, summary, consequence, remedy, campaign no., `parkIt`) and owner complaints per make/model/year | none required | **live API**, no key, rate limit unpublished -> cache; next to the existing `api/safety` |
+| **UK DVSA MOT results** — [data.gov.uk](https://ckan.publishing.service.gov.uk/dataset/anonymised_mot_test) | OGL v3 | Pass rate, failure reasons, mileage per make/model/year (~43M tests/yr, 2005->) | **required** (OGL statement on About) | bulk ZIPs -> aggregate; newest file is **2023** (check for 2024/25 before building); schema changed 2018, 2017/2022 files corrected — needs a cleaning step |
+| **Transport Canada recalls** — [open.canada.ca](https://open.canada.ca/data/en/dataset/1ec92326-47ef-4110-b7ca-959fab03f96d), CSV `opendatatc.tc.canada.ca/vrdb_full_monthly.csv` | OGL – Canada | Canadian safety recalls (monthly); excludes non-safety recalls | **required** | bulk CSV, own table; low priority (mostly overlaps NHTSA/RDW) |
+| **Open EV Data** — [OpenChargingCloud/open-ev-data](https://github.com/OpenChargingCloud/open-ev-data) (`data/ev-data.json`; originally chargeprice/open-ev-data) | **MIT**, (c) 2019 Niklas Hösl (GitHub licence API) | Usable battery kWh, consumption, AC/DC ports and kW, charging curves | keep the MIT copyright notice (credit on About) | one JSON file, tiny; show an "Electric" block only on a make/model match or when vPIC reports battery-electric |
+
+Already done, no work: **NHTSA vPIC** (live VIN decode) and **NHTSA NCAP stars** (live `api.nhtsa.gov/SafetyRatings`, with
+crash videos, a tab in `SafetyRatings.tsx`).
+
+### Caveats to design in (not blockers)
+
+- **Recalls are model-level, never per car.** Neither RDW nor NHTSA exposes recalls by Ukrainian plate/VIN (RDW's per-vehicle
+  open-recall flag exists for Dutch plates only). Wording: "recalls issued for this model in <market>", never "this car has
+  an open recall"; label each row with its market (US / EU / CA).
+- **PLAN.md "Phase 3+ — recalls" parked recalls (2026-09-24)** because a US recall shown for a non-US-spec unit is
+  actively misleading. Round 2 changes the odds, not the rule: RDW gives an **EU-spec** source (most of the UA fleet), and
+  the market label + "may not apply to your build" copy covers the rest. Re-confirm with the owner before shipping NHTSA
+  recalls specifically.
+- **Matching** reuses the VehiclesDB approach: one TypeScript matcher on `makeKey`/`modelKey` (RDW and NHTSA spell models
+  differently — e.g. NHTSA "Mazda6" vs registry "6"; `SafetyService.findVariants()` already has that retry logic to reuse);
+  a miss hides the section.
+- **MOT is UK-market** (RHD, UK trims/engines): show as "UK inspection statistics for this model", not as a UA reliability score.
+
+### Skipped (with reason)
+
+| Source | Reason |
+| --- | --- |
+| **Eurostat vehicle stock** (`road_eqs_carmot`; free reuse with source credit) | Licence is fine, but data is country-level fleet totals by fuel/engine size — nothing per make/model, so nothing for a result card. Optional `/stats` country comparison only; not planned |
+| **ANCAP** | data.gov.au record says "No Licence Provided" and links only to an HTML page; no download, no grant. Blocked unless ANCAP permits |
+| **Latin NCAP / ASEAN NCAP** | Latin NCAP material is shared for non-commercial/educational use only; nothing found for ASEAN NCAP. Blocked unless permitted; ratings are also region-specific |
+| **UK DVSA Recalls API** | write API for manufacturers, not a data source |
+| **Kaggle car datasets** | small, US/India-oriented, licences unclear |
+| **autoevolution-derived** (gor3a, ilyasozkurt), **ddpc**, **carguru**, **sortedcars** | see sections above |
+| **data.gov.ua** | out of scope here — separate session |
+
+### Deferred
+
+- **Wikidata (CC0 _(memory)_)** — generations, production years, successor links, Commons image links; maybe extend the wiki
+  section. Discuss later; nothing planned.
+- **NHTSA vPIC offline dump** — only if the live-API dependency becomes a problem.
+
+### Suggested order
+
+1. RDW specs + recalls (cleanest licence, biggest gain; builds the match + aggregate pipeline the rest reuse).
+2. NHTSA recalls + complaints (live, cached) — after the recall-wording decision above.
+3. Open EV Data (small).
+4. Transport Canada recalls.
+5. UK MOT (largest ingest; check newer files first).
+
+### Refresh cadence (data that lands in our local DB)
+
+**Rule: implement a source's ingest, CSV seed, refresh command and schedule entry only when its card block is built** —
+nothing below exists yet, and no table/script is created ahead of its feature. When a feature ships, add its row to
+`SCHEDULE.md` (post-deploy recurring jobs) and its commands to CLAUDE.md. Until deploy (Phase 4) everything is manual;
+cadence = how often to run it by hand, then by scheduler. Each bulk source follows the existing pattern: `ingest:<x>`
+(download), `ingest:<x>:csv` (committed seed), `export:<x>:csv`, idempotent, then `db:refresh-derived` if a rollup depends on it.
+
+| Source | Stored in DB? | Upstream changes | Refresh | Notes |
+| --- | --- | --- | --- | --- |
+| RDW specs (aggregate per make/model/year) | yes, aggregated table (not the ~15M raw rows) | daily | **every 6 months** (new models/years only add rows) | re-run also after a registry ingest adds new models, so matching stays current |
+| RDW recalls (+ status) | yes | continuous, new campaigns weekly | **monthly** (weekly if recalls get prominence) | status (open/repaired) changes, so upsert, not insert-only |
+| NHTSA recalls + complaints | **no raw copy** — live API behind a cache (in-memory or small cache table) | continuous | cache TTL **7 days** recalls, **30 days** complaints; no scheduled job | like `api/safety`; flat-file bulk load only if the live API proves unreliable (then monthly) |
+| UK MOT | yes, aggregated per make/model/year/failure item (not raw tests) | one new annual file | **once a year**, after the new year's ZIP appears; re-aggregate only that year | portal's newest file was 2023 — check before building |
+| Transport Canada recalls | yes | monthly | **quarterly** | low value; can be dropped |
+| Open EV Data | yes, tiny | irregular commits | **quarterly** (check repo for new commits) | re-run `ingest:<x>:csv` seed is enough between pulls |
+
+Result-card blocks: **Recalls** (RDW + NHTSA + CA, market-labelled), **Complaints** (NHTSA), **Common faults** (MOT),
+**Specs** (RDW), **Electric** (Open EV Data). Status of every item: **not started**.
+
 ## Open questions
+
+- Recalls: ship NHTSA recalls given the 2026-09-24 "misleading" decision, or RDW (EU) only? (open — owner call)
+- RDW specs: aggregate by (make, model, year) with median/range, or keep per-generation? Decide after looking at the data.
 
 - Is the VehiclesDB per-country decile (catalog files) worth loading for a "rank in NL/DE/GB" detail, or is global enough? (still open)
 - Do we want VehiclesDB's other kinds (motorcycle, truck, bus) for the registry's non-car rows? (all kinds are LOADED; matching
