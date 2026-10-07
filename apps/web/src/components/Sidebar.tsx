@@ -30,6 +30,14 @@ export default function Sidebar(): ReactNode {
       isActive ? 'bg-[var(--color-surface)] font-medium' : 'text-[var(--color-muted)] hover:text-[var(--color-fg)]'
     )
 
+  const accountLinkClass = ({ isActive }: { isActive: boolean }): string =>
+    cn(
+      'block rounded-lg px-3 py-2 transition-colors duration-200 hover:bg-[var(--color-primary)]/20',
+      isActive
+        ? 'bg-[var(--color-primary)]/20 font-medium'
+        : 'bg-[var(--color-primary)]/10 text-[var(--color-muted)] hover:text-[var(--color-fg)]'
+    )
+
   return (
     <nav className="flex h-full w-64 flex-col gap-1 border-r border-[var(--color-border)] bg-[var(--color-bg)]/50 p-3 backdrop-blur-md">
       <NavLink viewTransition to="/" className={linkClass} onClick={handleClose} end>
@@ -59,19 +67,19 @@ export default function Sidebar(): ReactNode {
       <NavLink viewTransition to="/news" className={linkClass} onClick={handleClose}>
         <span aria-hidden>📰</span> {t('nav.news')}
       </NavLink>
+      <NavLink viewTransition to="/discuss" className={linkClass} onClick={handleClose}>
+        <span aria-hidden>💬</span> {t('nav.discuss')}
+      </NavLink>
       {user && (
-        <NavLink viewTransition to="/features" className={linkClass} onClick={handleClose}>
+        <NavLink viewTransition to="/features" className={accountLinkClass} onClick={handleClose}>
           <span aria-hidden>💎</span> {t('nav.features')}
         </NavLink>
       )}
       {isAdmin && (
-        <NavLink viewTransition to="/admin" className={linkClass} onClick={handleClose}>
+        <NavLink viewTransition to="/admin" className={accountLinkClass} onClick={handleClose}>
           <span aria-hidden>🛠️</span> {t('nav.admin')}
         </NavLink>
       )}
-      <NavLink viewTransition to="/discuss" className={linkClass} onClick={handleClose}>
-        <span aria-hidden>💬</span> {t('nav.discuss')}
-      </NavLink>
 
       <div className="mt-4 px-3 text-xs tracking-wide text-[var(--color-muted)] uppercase">{t('nav.language')}</div>
       {LANGS.map(l => (

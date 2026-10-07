@@ -1062,7 +1062,6 @@
   "paid.auction_history.title": "Історія з-за кордону (за VIN)",
   "paid.auction_history.desc": "Історія аукціонів, фінальні ставки та фото з американських аукціонів (дані класу Copart/IAAI).",
   "paid.auction_history.placeholder": "Тут буде історія закордонних аукціонів і фото для цього VIN.",
-  "paid.soon.cloud_sync": "Хмарна синхронізація обраного та історії",
   "paid.soon.plate_alerts": "Сповіщення про зміни за номером",
   "paid.soon.full_report": "Повний звіт про авто (PDF)",
   "paid.soon.email_login": "Вхід за email і паролем",

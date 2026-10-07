@@ -1046,7 +1046,6 @@
   "paid.auction_history.title": "History from abroad (by VIN)",
   "paid.auction_history.desc": "Auction history, final bids and photos from US auctions (Copart/IAAI class data).",
   "paid.auction_history.placeholder": "Here will be the foreign auction history and photos for this VIN.",
-  "paid.soon.cloud_sync": "Cloud sync of favorites and search history",
   "paid.soon.plate_alerts": "Alerts when a watched plate changes",
   "paid.soon.full_report": "Full vehicle report (PDF)",
   "paid.soon.email_login": "Email + password sign-in",

@@ -15,7 +15,7 @@ export const PAID_FEATURE_ICON: Record<PaidFeature, string> = {
 export const AVAILABLE_PAID_FEATURES: readonly PaidFeature[] = ['ria_ads']
 
 /** Planned account features shown as "coming soon" on /features — not toggleable yet. i18n: `paid.soon.<id>`. */
-export const COMING_SOON_FEATURES = ['cloud_sync', 'email_login', 'background_settings', 'favorite_labels'] as const
+export const COMING_SOON_FEATURES = ['email_login', 'background_settings', 'favorite_labels'] as const
 
 /** Ideas not yet decided on — listed last on /features under "under consideration". i18n: `paid.soon.<id>`. */
 export const CONSIDERING_FEATURES = [
@@ -30,7 +30,6 @@ export const CONSIDERING_FEATURES = [
 export type FutureFeature = (typeof COMING_SOON_FEATURES)[number] | (typeof CONSIDERING_FEATURES)[number]
 
 export const FUTURE_FEATURE_ICON: Record<FutureFeature, string> = {
-  cloud_sync: '☁️',
   email_login: '✉️',
   background_settings: '🎨',
   favorite_labels: '🏷️',
