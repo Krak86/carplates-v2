@@ -37,6 +37,7 @@ import InfoPopover from '@/components/InfoPopover'
 import InfoText from '@/components/InfoText'
 import SafetyRatings from '@/components/SafetyRatings'
 import PlateSegments from '@/components/PlateSegments'
+import UaPlateBadge from '@/components/UaPlateBadge'
 import SectionHeader from '@/components/SectionHeader'
 import SectionInfo from '@/components/SectionInfo'
 import ShareButton from '@/components/ShareButton'
@@ -174,8 +175,8 @@ export default function ResultCard({ data }: Props): ReactNode {
               />
             </div>
             <div className="text-base text-[var(--color-muted)]">
-              <Link viewTransition to={`/${data.plate}`} className="text-[var(--color-primary)] underline">
-                {data.plate}
+              <Link viewTransition to={`/${data.plate}`} aria-label={data.plate} className="align-middle">
+                <UaPlateBadge plate={data.plate} />
               </Link>
               <CopyButton text={data.plate} label={t('field.plate')} className="mx-1.5 align-middle" />
               {data.region && (

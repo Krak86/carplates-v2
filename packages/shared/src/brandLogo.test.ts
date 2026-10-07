@@ -28,6 +28,8 @@ describe('brandLogoUrl', () => {
     expect(brandLogoUrl('ROLLS-ROYCE')).toBe('/logos/rolls-royce.png')
     expect(brandLogoUrl('SCANIA')).toBe('/logos/scania.png')
     expect(brandLogoUrl('УАЗ')).toBe('/logos/uaz.png')
+    expect(brandLogoUrl('KRASZ  RMZ20B')).toBe('/logos/kraz.svg')
+    expect(brandLogoUrl('КРАЗ')).toBe('/logos/kraz.svg')
   })
 
   it('has no logo for a motorcycle-only marque — the source dataset is cars/trucks only', () => {

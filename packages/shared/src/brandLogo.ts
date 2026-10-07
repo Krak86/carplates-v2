@@ -157,8 +157,14 @@ const BRAND_SLUG_BY_NAME: Readonly<Record<string, string>> = {
   'KING LONG': 'king-long',
   'LYNK & CO': 'lynk-and-co',
   JMC: 'jmc',
-  МАЗ: 'maz'
+  МАЗ: 'maz',
+  KRAZ: 'kraz',
+  KRASZ: 'kraz',
+  КРАЗ: 'kraz'
 }
+
+/** Slugs whose bundled logo is an SVG, not the dataset's PNG. */
+const SVG_LOGO_SLUGS: ReadonlySet<string> = new Set(['kraz'])
 
 /**
  * Isolate a raw registry `brand` value down to its manufacturer slug (e.g. "volkswagen",
@@ -178,5 +184,5 @@ export function brandSlug(brand: string | null | undefined): string | null {
 /** Static logo path for a raw registry `brand` value, or `null` when none is bundled. */
 export function brandLogoUrl(brand: string | null | undefined): string | null {
   const slug = brandSlug(brand)
-  return slug ? `/logos/${slug}.png` : null
+  return slug ? `/logos/${slug}.${SVG_LOGO_SLUGS.has(slug) ? 'svg' : 'png'}` : null
 }
