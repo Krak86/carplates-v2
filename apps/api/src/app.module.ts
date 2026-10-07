@@ -25,6 +25,7 @@ import { SafetyModule } from './safety/safety.module.js'
 import { SearchModule } from './search/search.module.js'
 import { SpaModule } from './spa/spa.module.js'
 import { StatsModule } from './stats/stats.module.js'
+import { UsageModule } from './usage/usage.module.js'
 import { VinModule } from './vin/vin.module.js'
 import { WikiModule } from './wiki/wiki.module.js'
 
@@ -37,6 +38,7 @@ import { WikiModule } from './wiki/wiki.module.js'
     FeaturesModule,
     SyncModule,
     SettingsModule,
+    UsageModule,
     PlateModule,
     VinModule,
     RecognizeModule,

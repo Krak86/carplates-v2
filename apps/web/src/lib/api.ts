@@ -1,4 +1,6 @@
 import {
+  adminAnalyticsResponseSchema,
+  adminStatsResponseSchema,
   adminUsersResponseSchema,
   authConfigResponseSchema,
   featuresResponseSchema,
@@ -38,6 +40,8 @@ import {
   wikiInfoResponseSchema
 } from '@carplates/shared'
 import type {
+  AdminAnalyticsResponse,
+  AdminStatsResponse,
   AdminUsersResponse,
   AuthConfigResponse,
   FeaturesResponse,
@@ -424,6 +428,14 @@ export async function saveFeatures(request: FeaturesUpdateRequest): Promise<Feat
 
 export async function getAdminUsers(): Promise<AdminUsersResponse> {
   return adminUsersResponseSchema.parse(await sendJson('GET', '/api/admin/users'))
+}
+
+export async function getAdminStats(): Promise<AdminStatsResponse> {
+  return adminStatsResponseSchema.parse(await sendJson('GET', '/api/admin/stats'))
+}
+
+export async function getAdminAnalytics(): Promise<AdminAnalyticsResponse> {
+  return adminAnalyticsResponseSchema.parse(await sendJson('GET', '/api/admin/analytics'))
 }
 
 /** Pushes this device's favorites/history (tombstones included) and returns the merged server state. */

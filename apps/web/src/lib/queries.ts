@@ -3,6 +3,8 @@ import { normalizePlate } from '@carplates/shared'
 import type { StatsFieldDimension, StockRange } from '@carplates/shared'
 
 import {
+  getAdminAnalytics,
+  getAdminStats,
   getAdminUsers,
   getAuthConfig,
   getFeatures,
@@ -343,4 +345,12 @@ export function featuresQuery() {
 
 export function adminUsersQuery() {
   return queryOptions({ queryKey: ['admin', 'users'], queryFn: getAdminUsers })
+}
+
+export function adminStatsQuery() {
+  return queryOptions({ queryKey: ['admin', 'stats'], queryFn: getAdminStats, staleTime: 60_000 })
+}
+
+export function adminAnalyticsQuery() {
+  return queryOptions({ queryKey: ['admin', 'analytics'], queryFn: getAdminAnalytics, staleTime: 5 * 60_000 })
 }

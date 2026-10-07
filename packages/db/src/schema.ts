@@ -843,6 +843,15 @@ export const userSavedEntries = app.table(
   t => [primaryKey({ columns: [t.userId, t.list, t.kind, t.value] })]
 )
 
+export const usageEvents = app.table('usage_events', {
+  id: bigint('id', { mode: 'number' }).primaryKey().generatedAlwaysAsIdentity(),
+  at: timestamp('at', { withTimezone: true }).notNull().defaultNow(),
+  kind: text('kind').notNull(),
+  lang: text('lang'),
+  found: boolean('found'),
+  signedIn: boolean('signed_in').notNull().default(false)
+})
+
 export const userSettings = app.table('user_settings', {
   userId: uuid('user_id').primaryKey(),
   data: jsonb('data').notNull(),

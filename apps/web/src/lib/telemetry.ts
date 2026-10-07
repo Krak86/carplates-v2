@@ -30,7 +30,8 @@ export async function initTelemetry(): Promise<void> {
     posthog.init(env.VITE_POSTHOG_KEY, {
       api_host: env.VITE_POSTHOG_HOST ?? 'https://eu.i.posthog.com',
       person_profiles: 'identified_only',
-      capture_pageview: false
+      // SPA: fire $pageview on every router navigation (history API), not only the first load.
+      capture_pageview: 'history_change'
     })
     posthogRef = posthog
   }

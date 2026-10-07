@@ -44,6 +44,15 @@ const envSchema = z.object({
   /** Session cookie lifetime; each request in the second half of it extends the session again (sliding). */
   SESSION_TTL_DAYS: z.coerce.number().int().positive().default(30),
 
+  /** Admin Statistics tab: live PostHog numbers via the HogQL query API. Needs a *personal* API key (scope: query:read),
+   *  not the public project key the web app uses. Absent → the tab shows only first-party counts + dashboard links. */
+  POSTHOG_PERSONAL_API_KEY: z.string().optional(),
+  POSTHOG_PROJECT_ID: z.string().optional(),
+  /** Use https://us.posthog.com for a US-cloud project. */
+  POSTHOG_API_HOST: z.string().default('https://eu.posthog.com'),
+  /** Sentry organization slug — only used to build the dashboard link on the admin Statistics tab. */
+  SENTRY_ORG_SLUG: z.string().optional(),
+
   /** Swagger UI at /api/docs — off in production unless explicitly enabled. */
   ENABLE_SWAGGER: boolish,
 
@@ -73,5 +82,7 @@ export const telemetryEnabled = (env: Env): boolean => env.ENABLE_TELEMETRY && B
 export const swaggerEnabled = (env: Env): boolean => env.ENABLE_SWAGGER || env.NODE_ENV !== 'production'
 export const plateRecognizerCloudEnabled = (env: Env): boolean =>
   env.PLATE_RECOGNIZER_CLOUD_ENABLED && Boolean(env.PLATE_RECOGNIZER_CLOUD_TOKEN)
+export const posthogQueryEnabled = (env: Env): boolean =>
+  Boolean(env.POSTHOG_PERSONAL_API_KEY) && Boolean(env.POSTHOG_PROJECT_ID)
 export const alprLocalEnabled = (env: Env): boolean => Boolean(env.ALPR_LOCAL_URL)
 export const pixabayEnabled = (env: Env): boolean => Boolean(env.PIXABAY_API_KEY)

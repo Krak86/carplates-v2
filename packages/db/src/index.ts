@@ -40,6 +40,7 @@ export {
   userFeatures,
   userSavedEntries,
   userSettings,
+  usageEvents,
   type UserRow,
   iihsRatings,
   fuelEconomy,

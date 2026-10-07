@@ -1,73 +1,57 @@
 import type { ReactNode } from 'react'
-import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { Navigate } from 'react-router'
+import { Navigate, useSearchParams } from 'react-router'
 
 import { useSession } from '@/components/auth/use-session'
-import Card from '@/components/ui/Card'
 import Spinner from '@/components/ui/Spinner'
-import { PAID_FEATURE_ICON } from '@/lib/paid-features'
-import { adminUsersQuery } from '@/lib/queries'
+import { cn } from '@/lib/cn'
+import AdminStatsTab from '@/routes/admin/AdminStatsTab'
+import AdminUsersTab from '@/routes/admin/AdminUsersTab'
 
-const formatDate = (iso: string | null, locale: string): string =>
-  iso ? new Date(iso).toLocaleString(locale, { dateStyle: 'medium', timeStyle: 'short' }) : '—'
+const ADMIN_TABS = ['users', 'stats'] as const
+type AdminTab = (typeof ADMIN_TABS)[number]
+const DEFAULT_TAB: AdminTab = 'users'
+
+const isTab = (value: string | null): value is AdminTab => ADMIN_TABS.some(tab => tab === value)
 
 // Lazy-loaded (see App.tsx). The API enforces the role too (AdminGuard); this check is only for the UI.
 export default function AdminRoute(): ReactNode {
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
   const { isAdmin, isPending } = useSession()
-  const users = useQuery({ ...adminUsersQuery(), enabled: isAdmin })
+  const [searchParams, setSearchParams] = useSearchParams()
 
   if (isPending) return <Spinner />
   if (!isAdmin) return <Navigate to="/" replace />
 
+  const requested = searchParams.get('tab')
+  const tab = isTab(requested) ? requested : DEFAULT_TAB
+
   return (
     <div className="mx-auto w-full max-w-content">
-      <h1 className="mb-4 text-2xl font-bold">{t('admin.title')}</h1>
+      <h1 className="mb-3 text-2xl font-bold">{t('admin.title')}</h1>
 
-      {users.isPending && <Spinner />}
-      {users.isError && <p className="text-red-600">{t('result.error')}</p>}
-      {users.isSuccess && users.data.users.length === 0 && (
-        <p className="text-[var(--color-muted)]">{t('admin.empty')}</p>
-      )}
+      <div role="tablist" className="mb-4 flex gap-2">
+        {ADMIN_TABS.map(id => (
+          <button
+            key={id}
+            type="button"
+            role="tab"
+            aria-selected={tab === id}
+            onClick={() => setSearchParams(id === DEFAULT_TAB ? {} : { tab: id }, { replace: true })}
+            className={cn(
+              'rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors',
+              tab === id
+                ? 'border-[var(--color-primary)] bg-primary/10 text-[var(--color-primary)]'
+                : 'border-[var(--color-border)] hover:bg-[var(--color-bg)]'
+            )}
+          >
+            {t(`admin.tabs.${id}`)}
+          </button>
+        ))}
+      </div>
 
-      {users.isSuccess && users.data.users.length > 0 && (
-        <Card className="overflow-x-auto p-0">
-          <table className="w-full text-left text-sm">
-            <thead className="border-b border-[var(--color-border)] text-[var(--color-muted)]">
-              <tr>
-                <th className="p-3 font-medium">{t('admin.user')}</th>
-                <th className="p-3 font-medium">{t('admin.features')}</th>
-                <th className="p-3 font-medium">{t('admin.updated')}</th>
-                <th className="p-3 font-medium">{t('admin.lastLogin')}</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[var(--color-border)]">
-              {users.data.users.map(u => (
-                <tr key={u.id}>
-                  <td className="p-3">
-                    <div className="font-medium">{u.email}</div>
-                    <div className="text-xs text-[var(--color-muted)]">
-                      {u.name ?? '—'} · {u.role}
-                    </div>
-                  </td>
-                  <td className="p-3">
-                    {u.features.length === 0
-                      ? t('admin.none')
-                      : u.features.map(f => (
-                          <div key={f}>
-                            <span aria-hidden>{PAID_FEATURE_ICON[f]}</span> {t(`paid.${f}.title`)}
-                          </div>
-                        ))}
-                  </td>
-                  <td className="p-3 whitespace-nowrap">{formatDate(u.featuresUpdatedAt, i18n.language)}</td>
-                  <td className="p-3 whitespace-nowrap">{formatDate(u.lastLoginAt, i18n.language)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </Card>
-      )}
+      {tab === 'users' && <AdminUsersTab />}
+      {tab === 'stats' && <AdminStatsTab />}
     </div>
   )
 }

@@ -62,6 +62,43 @@ export type AdminUser = z.infer<typeof adminUserSchema>
 export const adminUsersResponseSchema = z.object({ users: z.array(adminUserSchema) })
 export type AdminUsersResponse = z.infer<typeof adminUsersResponseSchema>
 
+/** What the first-party usage log counts (app.usage_events.kind). */
+export const USAGE_KINDS = ['plate_search', 'vin_search', 'photo_search', 'login'] as const
+export type UsageKind = (typeof USAGE_KINDS)[number]
+
+export const adminStatsResponseSchema = z.object({
+  totals: z.object({
+    users: z.number(),
+    newUsers7d: z.number(),
+    activeUsers7d: z.number(),
+    favorites: z.number()
+  }),
+  /** Per-kind counts for the last 1 / 7 / 30 days. */
+  windows: z.array(z.object({ kind: z.enum(USAGE_KINDS), d1: z.number(), d7: z.number(), d30: z.number() })),
+  /** Last 30 days, one row per UTC day (gaps filled with zeros), oldest first. */
+  daily: z.array(z.object({ day: z.string(), searches: z.number(), notFound: z.number(), logins: z.number() })),
+  /** Searches by UI language, last 30 days. */
+  languages: z.array(z.object({ lang: z.string(), count: z.number() })),
+  signedInSearches30d: z.number(),
+  anonymousSearches30d: z.number(),
+  featureOptIns: z.array(z.object({ feature: z.enum(PAID_FEATURES), users: z.number() }))
+})
+export type AdminStatsResponse = z.infer<typeof adminStatsResponseSchema>
+
+/** PostHog numbers pulled server-side (HogQL). `configured: false` = no POSTHOG_PERSONAL_API_KEY / project id. */
+export const adminAnalyticsResponseSchema = z.object({
+  configured: z.boolean(),
+  error: z.string().nullable(),
+  pageviews7d: z.number().nullable(),
+  visitors7d: z.number().nullable(),
+  pageviews30d: z.number().nullable(),
+  visitors30d: z.number().nullable(),
+  topPaths: z.array(z.object({ path: z.string(), views: z.number() })),
+  /** Dashboards of the connected services (only the ones the API has ids for). */
+  links: z.array(z.object({ id: z.string(), label: z.string(), url: z.string() }))
+})
+export type AdminAnalyticsResponse = z.infer<typeof adminAnalyticsResponseSchema>
+
 /** Favorites / history cross-device sync. Each list is capped; past the cap the OLDEST entries are dropped. Nothing expires by age. */
 export const FAVORITES_LIMIT = 100
 export const HISTORY_LIMIT = 200
