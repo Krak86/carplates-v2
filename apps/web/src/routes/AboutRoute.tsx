@@ -55,7 +55,15 @@ const SOURCES = [
     url: 'https://www.google.com/maps',
     icon: '/icons/sources/googlemaps.webp'
   },
-  { key: 'youtube', label: 'YouTube', url: 'https://www.youtube.com', icon: '/icons/sources/youtube.webp' }
+  { key: 'youtube', label: 'YouTube', url: 'https://www.youtube.com', icon: '/icons/sources/youtube.webp' },
+  {
+    key: 'googleSignIn',
+    label: 'Google Sign-In',
+    url: 'https://developers.google.com/identity',
+    icon: '/icons/sources/googlesignin.webp'
+  },
+  { key: 'posthog', label: 'PostHog', url: 'https://posthog.com', icon: '/icons/sources/posthog.webp' },
+  { key: 'sentry', label: 'Sentry', url: 'https://sentry.io', icon: '/icons/sources/sentry.webp' }
 ] as const satisfies readonly Source[]
 
 function SourceAvatar({ source }: { source: Source }): ReactNode {
