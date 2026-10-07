@@ -534,7 +534,10 @@ models, 443 videos, 9,090 units, 0 errors; obscure ВАЗ trim codes fell throug
 ~89 models/day estimate. Afterwards ВАЗ trim codes were folded into the base model (`baseModel`: 21063 → 2106, 210994 → 21099,
 217030 → 2170; day-1 rows re-keyed, their run rows dropped), so the ≥5,000 tier is now 131 models with ~85 left (≈ 1 more
 day). Day 2 (2026-10-06): 65 models with videos, 4 none (ЗАЗ 1102xx/1103xx), 0 errors, 459 videos, 8,988 units; daily budget
-reached with 16 models left in the tier. **First partial CSV seed committed 2026-10-06** (`a0b278a`: 881 rows over 110 models in the DB and the CSV; the per-day
+reached with 16 models left in the tier. Day 3 (2026-10-07): **≥5,000 tier finished** — 16 models with videos, 0 none, 0 errors, 112 videos,
+2,222 units; the remaining budget went to `--min-cars 1000`: 44 models with videos, 5 none (ЗАЗ TF698K, Mercedes 200, Fiat NUOVO DOBLO,
+Daewoo T13110, ЗАЗ 110307-40), 0 errors, 308 videos, 6,764 units (8,986 total); 194 of 243 models left in that tier (≈ 2 more days;
+next in line: Mercedes-Benz ML 320 down to 3,033 cars). **First partial CSV seed committed 2026-10-06** (`a0b278a`: 881 rows over 110 models in the DB and the CSV; the per-day
 sums above are 902 — the difference was not investigated). **Next:** run the same command tomorrow; when `done` reports nothing left, re-run `pnpm export:youtube-videos:csv`
 and commit `scripts/seed-data/youtube-videos.csv.gz` again; then the lookup/UI integration, then `--min-cars 1000` (374 models, ≈ 3 more days).
 Migration `0031_youtube_videos.sql` (`registry.youtube_videos` + `youtube_model_runs` resume/quota ledger),
