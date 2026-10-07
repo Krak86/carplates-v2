@@ -933,10 +933,10 @@ card-on-file subscriptions; revisit with real quotes.
 - **Cloud sync** of favorites + search history (`favorites`, `search_history` in `app`; merge local IndexedDB on first
   sign-in; keep local-first/offline behaviour). Other Google-login perks: per-user saved vehicles with notes, plate watch
   alerts (re-check on ingest, notify by email), export of all personal data, "my lookups" analytics.
-- **Favorite labels** (shown as "coming soon" on `/features`): user-managed labels for favorites — full CRUD, **max 10 per
-  user** (enforce in the API + a DB check/trigger, not just the UI). `app.favorite_labels (id, user_id, name, color)` +
-  `app.favorite_label_links (favorite_id, label_id)` once favorites live in `app` (needs cloud sync first); filter chips on
-  `/favorites`; unique name per user, case-insensitive.
+- **Favorite labels — built** (no longer "coming soon"): ≤ 10 labels per user in `userSettings.labels` (managed on
+  `/settings` → Labels, colors auto-assigned from the `--label-N` HDR palette), label ids on each favorite
+  (`app.user_saved_entries.tags`, migration 0037), tagged from the result card / favorites list. Still open: filter chips on
+  `/favorites`; unique (case-insensitive) label names; a server-side cap on `labels` beyond the Zod `.max(10)`.
 - **Background settings** (also "coming soon"): per-user control of the page background — which layers are on (live layer
   vs. photos) and photo adjustments (brightness, blur, …). Today's background mode lives in Zustand/localStorage
   (`background-store.ts`, `live-background-store.ts`, `BackgroundDevPanel`): build the UI against those stores first (works

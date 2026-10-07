@@ -13,7 +13,8 @@ export const DEFAULT_USER_SETTINGS: UserSettings = {
   streams: { ...DEFAULT_STREAMS },
   presets: [],
   activePresetId: null,
-  useDefaultBackground: false
+  useDefaultBackground: false,
+  labels: []
 }
 
 /** The photo-background settings that apply: the built-in defaults, or the active preset's. */

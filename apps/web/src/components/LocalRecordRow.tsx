@@ -1,8 +1,10 @@
 import type { MouseEvent, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
+import type { FavoriteLabel } from '@carplates/shared'
 
 import BrandLogo from '@/components/BrandLogo'
+import LabelChip from '@/components/LabelChip'
 import { toIntlLocale } from '@/lib/intl'
 import { brandFromLabel } from '@/lib/vehicle-label'
 import { markTransitionSource } from '@/lib/view-transition'
@@ -11,6 +13,10 @@ type Props = {
   value: string
   label: string | null
   date: number
+  /** Favorite labels to show under the plate (favorites list only). */
+  labels?: FavoriteLabel[]
+  /** Extra controls between the badges and the date (the favorites list puts the label picker here). */
+  actions?: ReactNode
   savedOffline?: boolean
   notFound?: boolean
   deleteLabel: string
@@ -23,6 +29,8 @@ export default function LocalRecordRow({
   value,
   label,
   date,
+  labels = [],
+  actions,
   savedOffline = false,
   notFound = false,
   deleteLabel,
@@ -42,16 +50,26 @@ export default function LocalRecordRow({
       <span className="flex w-6 shrink-0 justify-center">
         <BrandLogo brand={brandFromLabel(label)} size="sm" />
       </span>
-      <Link
-        viewTransition
-        onClick={handleOpen}
-        to={`/${value}`}
-        title={label ? `${value} — ${label}` : value}
-        className="min-w-0 flex-1 truncate text-[var(--color-primary)] underline"
-      >
-        {value}
-        {label ? ` — ${label}` : ''}
-      </Link>
+      <div className="min-w-0 flex-1">
+        <Link
+          viewTransition
+          onClick={handleOpen}
+          to={`/${value}`}
+          title={label ? `${value} — ${label}` : value}
+          className="block truncate text-[var(--color-primary)] underline"
+        >
+          {value}
+          {label ? ` — ${label}` : ''}
+        </Link>
+
+        {labels.length > 0 && (
+          <div className="mt-1 flex flex-wrap gap-1">
+            {labels.map(l => (
+              <LabelChip key={l.id} label={l} />
+            ))}
+          </div>
+        )}
+      </div>
       {notFound && (
         <span
           title={t('history.notFoundHint')}
@@ -68,6 +86,7 @@ export default function LocalRecordRow({
           {t('offline.savedBadge')}
         </span>
       )}
+      {actions}
       <span className="shrink-0 text-[var(--color-muted)]">
         {new Date(date).toLocaleDateString(toIntlLocale(i18n.language))}
       </span>

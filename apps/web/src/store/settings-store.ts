@@ -9,6 +9,7 @@ import {
   type UserSettings
 } from '@carplates/shared'
 
+import { addLabel, deleteLabel, renameLabel as renameLabelIn } from '@/lib/favorite-labels'
 import { DEFAULT_USER_SETTINGS, addPreset, deletePreset, updatePreset } from '@/lib/user-settings'
 
 type SettingsStore = {
@@ -27,6 +28,9 @@ type SettingsStore = {
   createPreset: (preset: BackgroundPreset) => void
   savePreset: (preset: BackgroundPreset) => void
   removePreset: (id: string) => void
+  createLabel: (id: string, name: string) => void
+  renameLabel: (id: string, name: string) => void
+  removeLabel: (id: string) => void
 }
 
 export const useSettingsStore = create<SettingsStore>()(
@@ -60,7 +64,10 @@ export const useSettingsStore = create<SettingsStore>()(
           edit(s => ({ ...s, activePresetId, useDefaultBackground: false })),
         createPreset: (preset): void => edit(s => addPreset({ ...s, useDefaultBackground: false }, preset)),
         savePreset: (preset): void => edit(s => updatePreset(s, preset)),
-        removePreset: (id): void => edit(s => deletePreset(s, id))
+        removePreset: (id): void => edit(s => deletePreset(s, id)),
+        createLabel: (id, name): void => edit(s => addLabel(s, id, name)),
+        renameLabel: (id, name): void => edit(s => renameLabelIn(s, id, name)),
+        removeLabel: (id): void => edit(s => deleteLabel(s, id))
       }
     },
     {

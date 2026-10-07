@@ -7,9 +7,10 @@ import Card from '@/components/ui/Card'
 import Spinner from '@/components/ui/Spinner'
 import { cn } from '@/lib/cn'
 import AppearanceTab from '@/routes/settings/AppearanceTab'
+import LabelsTab from '@/routes/settings/LabelsTab'
 
 /** One entry per settings tab — add the id, its `settings.tabs.<id>` label and a panel below to grow the page. */
-const SETTINGS_TABS = ['appearance'] as const
+const SETTINGS_TABS = ['appearance', 'labels'] as const
 type SettingsTab = (typeof SETTINGS_TABS)[number]
 const DEFAULT_TAB: SettingsTab = 'appearance'
 
@@ -58,6 +59,7 @@ export default function SettingsRoute(): ReactNode {
 
       <div role="tabpanel" id={`settings-panel-${tab}`} aria-labelledby={`settings-tab-${tab}`}>
         {tab === 'appearance' && <AppearanceTab />}
+        {tab === 'labels' && <LabelsTab />}
       </div>
     </div>
   )

@@ -13,6 +13,8 @@ export type FavoriteEntry = {
   label: string | null
   /** Last-write time (ms): when it was added, or — on a tombstone — when it was removed. */
   date: number
+  /** Ids of the user's favorite labels on this entry (signed-in users only); absent = none. */
+  tags?: string[]
   /** Tombstone: removed locally, kept so the deletion syncs to the user's other devices. Never listed. */
   deleted?: boolean
 }
@@ -86,17 +88,55 @@ export async function listFavorites(): Promise<FavoriteEntry[]> {
   }
 }
 
+/**
+ * Edits the labels on one favorite. Counts as a write — the entry's `date` moves — so it wins the sync conflict
+ * against older copies on other devices.
+ */
+export async function updateFavoriteTags(id: string, change: (tags: string[]) => string[]): Promise<void> {
+  try {
+    const db = await openDb(DB_NAME, DB_VERSION, STORE)
+    const entry = await getOne<FavoriteEntry>(db, STORE, id)
+    if (entry && !entry.deleted) {
+      const tags = change(entry.tags ?? [])
+      await runTx(db, STORE, 'readwrite', store => store.put({ ...entry, tags, date: Date.now() }))
+    }
+    db.close()
+    notifySavedChanged()
+  } catch {
+    /* private mode / disabled storage */
+  }
+}
+
+/** Removes a deleted label's id from every favorite that carries it. */
+export async function stripFavoriteTag(tagId: string): Promise<void> {
+  try {
+    const db = await openDb(DB_NAME, DB_VERSION, STORE)
+    const now = Date.now()
+    const carrying = (await getAll<FavoriteEntry>(db, STORE)).filter(e => !e.deleted && e.tags?.includes(tagId))
+    if (carrying.length) {
+      await runTx(db, STORE, 'readwrite', store => {
+        for (const e of carrying) store.put({ ...e, tags: e.tags?.filter(t => t !== tagId), date: now })
+      })
+    }
+    db.close()
+    if (carrying.length) notifySavedChanged()
+  } catch {
+    /* private mode / disabled storage */
+  }
+}
+
 /** Everything the server needs to merge: live entries and tombstones. */
 export async function exportFavoritesForSync(): Promise<SyncEntry[]> {
   try {
     const db = await openDb(DB_NAME, DB_VERSION, STORE)
     const entries = await getAll<FavoriteEntry>(db, STORE)
     db.close()
-    return entries.map(({ kind, value, label, date, deleted }) => ({
+    return entries.map(({ kind, value, label, date, deleted, tags }) => ({
       kind,
       value,
       label,
       date,
+      ...(tags?.length ? { tags } : {}),
       ...(deleted ? { deleted } : {})
     }))
   } catch {
@@ -114,6 +154,7 @@ export async function applySyncedFavorites(entries: readonly SyncEntry[]): Promi
       value: e.value,
       label: e.label,
       date: e.date,
+      ...(e.tags?.length ? { tags: e.tags } : {}),
       ...(e.deleted ? { deleted: true } : {})
     }))
     await mergeEntries(db, STORE, incoming, Date.now() - SYNC_TOMBSTONE_TTL_MS)

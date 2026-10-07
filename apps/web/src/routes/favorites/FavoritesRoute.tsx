@@ -2,12 +2,15 @@ import type { ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 
+import FavoriteLabelsButton from '@/components/FavoriteLabelsButton'
 import LocalRecordRow from '@/components/LocalRecordRow'
 import LocalRecordsExportButton from '@/components/LocalRecordsExportButton'
 import Card from '@/components/ui/Card'
 import Spinner from '@/components/ui/Spinner'
+import { useFavoriteLabels } from '@/components/use-favorite-labels'
 import { useOfflineAvailability } from '@/components/use-offline-availability'
 import { useIsSyncing } from '@/components/use-saved-sync-actions'
+import { labelsOf } from '@/lib/favorite-labels'
 import { favoritesQuery } from '@/lib/queries'
 import { useFavoritesActions } from '@/routes/favorites/use-favorites-actions'
 
@@ -18,6 +21,7 @@ export default function FavoritesRoute(): ReactNode {
   const { deleteOne } = useFavoritesActions()
   const isSavedOffline = useOfflineAvailability()
   const isSyncing = useIsSyncing()
+  const labels = useFavoriteLabels()
 
   return (
     <div className="mx-auto w-full max-w-content">
@@ -39,13 +43,15 @@ export default function FavoritesRoute(): ReactNode {
       )}
 
       {favorites.isSuccess && favorites.data.length > 0 && (
-        <Card className="divide-y divide-[var(--color-border)] p-0">
+        <Card className="divide-y divide-[var(--color-border)] p-2!">
           {favorites.data.map(entry => (
             <LocalRecordRow
               key={entry.id}
               value={entry.value}
               label={entry.label}
               date={entry.date}
+              labels={labelsOf(labels, entry.tags)}
+              actions={<FavoriteLabelsButton kind={entry.kind} value={entry.value} />}
               savedOffline={isSavedOffline(entry.kind, entry.value)}
               deleteLabel={t('favorites.remove')}
               onDelete={() => deleteOne.mutate(entry.id)}

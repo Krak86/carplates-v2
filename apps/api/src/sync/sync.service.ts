@@ -19,6 +19,7 @@ export const toSyncEntry = (row: Row): SyncEntry => ({
   label: row.label,
   date: row.date,
   ...(row.found === null ? {} : { found: row.found }),
+  ...(row.tags?.length ? { tags: row.tags } : {}),
   ...(row.deleted ? { deleted: true } : {})
 })
 
@@ -44,6 +45,7 @@ export class SyncService {
           value: e.value,
           label: e.label,
           found: e.found ?? null,
+          tags: list === 'favorite' && e.tags?.length ? e.tags : null,
           date: Math.min(e.date, now + MAX_CLOCK_SKEW_MS),
           deleted: e.deleted ?? false
         }))
@@ -58,6 +60,7 @@ export class SyncService {
             set: {
               label: sql`excluded.label`,
               found: sql`excluded.found`,
+              tags: sql`excluded.tags`,
               date: sql`excluded.date`,
               deleted: sql`excluded.deleted`
             },

@@ -836,6 +836,7 @@ export const userSavedEntries = app.table(
     value: text('value').notNull(),
     label: text('label'),
     found: boolean('found'),
+    tags: text('tags').array(),
     date: bigint('date', { mode: 'number' }).notNull(),
     deleted: boolean('deleted').notNull().default(false)
   },

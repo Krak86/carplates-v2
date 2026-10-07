@@ -65,6 +65,21 @@ export type AdminUsersResponse = z.infer<typeof adminUsersResponseSchema>
 /** Favorites / history cross-device sync. Each list is capped; past the cap the OLDEST entries are dropped. Nothing expires by age. */
 export const FAVORITES_LIMIT = 100
 export const HISTORY_LIMIT = 200
+
+/** A user may define this many favorite labels; each gets its own color (an index into the web palette). */
+export const FAVORITE_LABEL_LIMIT = 10
+export const FAVORITE_LABEL_COLOR_COUNT = FAVORITE_LABEL_LIMIT
+
+export const favoriteLabelSchema = z.object({
+  id: z.string().min(1).max(40),
+  name: z.string().trim().min(1).max(24),
+  color: z
+    .number()
+    .int()
+    .min(0)
+    .max(FAVORITE_LABEL_COLOR_COUNT - 1)
+})
+export type FavoriteLabel = z.infer<typeof favoriteLabelSchema>
 /** How long a deletion marker (tombstone) is kept so a device that was offline can still learn about it. */
 export const SYNC_TOMBSTONE_TTL_MS = 30 * 24 * 60 * 60 * 1000
 
@@ -78,7 +93,9 @@ export const syncEntrySchema = z.object({
   label: z.string().max(200).nullable(),
   date: z.number().int().positive(),
   found: z.boolean().optional(),
-  deleted: z.boolean().optional()
+  deleted: z.boolean().optional(),
+  /** Favorites only: ids of the user's favorite labels (`userSettings.labels`) put on this entry. */
+  tags: z.array(z.string().min(1).max(40)).max(FAVORITE_LABEL_LIMIT).optional()
 })
 export type SyncEntry = z.infer<typeof syncEntrySchema>
 
@@ -149,7 +166,9 @@ export const userSettingsSchema = z.object({
   /** Preset in use; null = the built-in defaults. */
   activePresetId: z.string().max(40).nullable(),
   /** Use the built-in defaults even though presets exist (the active one is kept for later). */
-  useDefaultBackground: z.boolean()
+  useDefaultBackground: z.boolean(),
+  /** Favorite labels (≤ FAVORITE_LABEL_LIMIT). Defaulted so documents saved before labels existed still parse. */
+  labels: z.array(favoriteLabelSchema).max(FAVORITE_LABEL_LIMIT).default([])
 })
 export type UserSettings = z.infer<typeof userSettingsSchema>
 
