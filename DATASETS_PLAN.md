@@ -23,6 +23,20 @@ gor3a/autoevolution is still **blocked on a reply**; carguru and sortedcars are 
 | [gor3a/vehicle-makes-models](https://github.com/gor3a/vehicle-makes-models)       | Generations + engine variants + specs (hp, torque, dimensions, weight) | ODbL 1.0, but compiled from autoevolution.com | **Pending autoevolution reply**                       |
 | [rebrowser/carguruscom-dataset](https://github.com/rebrowser/carguruscom-dataset) | Scraped US used-car listings                                           | Non-commercial, paid commercial               | **Skip** — US-only, dealer/price data, nothing for UA |
 | [visnkmr/sortedcars](https://github.com/visnkmr/sortedcars)                       | ~20 brands' dimensions, India-heavy, TS objects                        | AGPL-3.0, proprietary data                    | **Skip** — tiny, wrong market, AGPL                   |
+| [ilyasozkurt/automobile-models-and-specs](https://github.com/ilyasozkurt/automobile-models-and-specs) | 124 brands / 7,207 models / ~30k engine variants, scraped from autoevolution.com | **None** (no LICENSE, `license: null`) | **Skip** — same autoevolution content as gor3a, no grant at all |
+| [T33R0/ddpc-vehicle-specs](https://github.com/T33R0/ddpc-vehicle-specs)           | ~100k US specs (EPA/NHTSA + manufacturer), 48 fields                   | Sample/docs CC BY 4.0; full sets paid, single-user, no redistribution | **Skip for now** — US-centric, overlaps `ingest:fuel` + NHTSA |
+
+### Verified 2026-10-07 (extra datasets)
+
+- **ilyasozkurt/automobile-models-and-specs:** README says "scrapped from autoevolution.com" (2024-10-23); no license or
+  terms anywhere. Unlicensed = all rights reserved, and the data is autoevolution's (see gor3a section for their terms),
+  so it is **not** a way around the pending permission request. Usable only if autoevolution says yes.
+- **T33R0/ddpc-vehicle-specs:** LICENSE = sample data + docs CC BY 4.0 (commercial OK with attribution to DDPC); the
+  full datasets (US autos $199, motorcycles $149, bundle $299; REST API priced separately) are a single-user commercial
+  license, redistribution of the files prohibited. Underlying EPA (fueleconomy.gov) and NHTSA data are public domain —
+  the same EPA source `ingest:fuel` already loads, and NHTSA already backs VIN decoding. Real gain would be only
+  dimensions/weight/engine specs for US models. If ever bought: get written confirmation that serving derived data to
+  paying subscribers inside a hosted app is covered by "single-user" before paying.
 
 ## VehiclesDB (release 2026.10.0, built 2026-10-03)
 
