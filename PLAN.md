@@ -552,11 +552,11 @@ Dry-run on 2 models (Lanos, Lancer): 8 kept each, 101 units each.
 **Remaining (YouTube fallback) — the design, trial, language cascade, title filter and quota notes moved to `docs/plan-done.md`
 ("YouTube fallback for models with no infocar video — design, trial and build notes"):**
 
-1. **Finish the runs:** `pnpm ingest:youtube-videos -- --min-cars 5000` once per Pacific day until `done` reports nothing left
-   (~1 more day; the first partial seed is already committed), then re-run `pnpm export:youtube-videos:csv` and commit `scripts/seed-data/youtube-videos.csv.gz`; then `--min-cars 1000` (374 models, ≈ 3 days).
+1. **Finish the runs:** the ≥ 5,000 tier finished 2026-10-07 (Day 3) and the ≥ 1,000 tier is started — keep running
+   `pnpm ingest:youtube-videos -- --min-cars 1000` once per Pacific day until `done` reports nothing left, then re-run `pnpm export:youtube-videos:csv` and commit `scripts/seed-data/youtube-videos.csv.gz`; then `--min-cars 1000` (374 models, ≈ 3 days).
 2. **Generation/year matching** — parse a year or generation word (`MK1`, `Mk2`, `B`, `3`, `X`) from the title and map it to a generation
    year range via the infocar version catalog (as `videoLookup` does for infocar videos), else store the title year.
-3. **`videoLookup` integration + UI label** — `youtube_videos` as a second source after the infocar ones (dedupe by `youtube_id`, infocar
+3. ✅ _done 2026-10-07_ — **`videoLookup` integration + UI label** — `youtube_videos` as a second source after the infocar ones (dedupe by `youtube_id`, infocar
    first, `MAX_VIDEOS` still caps the section), labelled as YouTube search results rather than infocar picks.
 4. **Verify** (the "Done when" below) and measure again: share of the top-400 pairs with ≥1 video (was 74.1% of registrations), share of
    lookups with a year-matched video.
@@ -930,14 +930,15 @@ card-on-file subscriptions; revisit with real quotes.
 
 ### Stage C — AUTH backlog (deliberately skipped in Stage A, in rough order)
 
-- **Cloud sync** of favorites + search history (`favorites`, `search_history` in `app`; merge local IndexedDB on first
-  sign-in; keep local-first/offline behaviour). Other Google-login perks: per-user saved vehicles with notes, plate watch
+- **Cloud sync** of favorites + search history — ✅ built (2026-10-07, `app.user_saved_entries`, migration 0035; see
+  `docs/plan-done.md` "Accounts, stage A+"). Other Google-login perks: per-user saved vehicles with notes, plate watch
   alerts (re-check on ingest, notify by email), export of all personal data, "my lookups" analytics.
 - **Favorite labels — built** (no longer "coming soon"): ≤ 10 labels per user in `userSettings.labels` (managed on
   `/settings` → Labels, colors auto-assigned from the `--label-N` HDR palette), label ids on each favorite
   (`app.user_saved_entries.tags`, migration 0037), tagged from the result card / favorites list. Still open: filter chips on
   `/favorites`; unique (case-insensitive) label names; a server-side cap on `labels` beyond the Zod `.max(10)`.
-- **Background settings** (also "coming soon"): per-user control of the page background — which layers are on (live layer
+- **Background settings** — ✅ built (2026-10-07: `/settings`, `app.user_settings`, migration 0036; ≤ 5 presets, default
+  layer, saved streams). Original brief: per-user control of the page background — which layers are on (live layer
   vs. photos) and photo adjustments (brightness, blur, …). Today's background mode lives in Zustand/localStorage
   (`background-store.ts`, `live-background-store.ts`, `BackgroundDevPanel`): build the UI against those stores first (works
   signed out), then sync the chosen values to `app.user_settings (user_id, jsonb)` so they follow the account.
@@ -958,6 +959,8 @@ card-on-file subscriptions; revisit with real quotes.
   matters), SPF/DKIM on the domain, and email templates (ua/ru/en). Prefer Better Auth over hand-rolling this part.
 - **Account deletion with grace period** + data export (JSON); admin-side: list/search users, revoke sessions, disable
   account, per-user feature allow-list for the paid-pilot.
+- **Admin Statistics** — ✅ built (2026-10-07, `app.usage_events`, migration 0038, PostHog HogQL proxy). Open: retention
+  purge of `usage_events`, per-day chart.
 - **Telemetry:** PostHog `identify()` with the user id once consented.
 
 - **DB:** new `app` schema — `users`, `sessions`, `favorites (user_id, plate,
