@@ -175,7 +175,13 @@ export default function ResultCard({ data }: Props): ReactNode {
               />
             </div>
             <div className="text-base text-[var(--color-muted)]">
-              <Link viewTransition to={`/${data.plate}`} aria-label={data.plate} className="align-middle">
+              <Link
+                viewTransition
+                to={`/${data.plate}`}
+                aria-label={data.plate}
+                draggable={false}
+                className="align-middle select-text"
+              >
                 <UaPlateBadge plate={data.plate} />
               </Link>
               <CopyButton text={data.plate} label={t('field.plate')} className="mx-1.5 align-middle" />
@@ -376,7 +382,7 @@ export default function ResultCard({ data }: Props): ReactNode {
           >
             {vinDetail.isPending && <p className="text-base text-[var(--color-muted)]">{t('result.loading')}</p>}
             {vinDetail.isError && <p className="text-base text-[var(--color-muted)]">{t('result.error')}</p>}
-            {vinDetail.isSuccess && <VinDecodeTabs data={vinDetail.data} />}
+            {vinDetail.isSuccess && <VinDecodeTabs data={vinDetail.data} withBarcode />}
           </VinToggleSection>
         )}
 

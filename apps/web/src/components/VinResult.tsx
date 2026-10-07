@@ -13,7 +13,6 @@ import BrandLogo from '@/components/BrandLogo'
 import CardTiltToggle from '@/components/CardTiltToggle'
 import CarWikiInfo from '@/components/CarWikiInfo'
 import CopyAllInfoButton from '@/components/CopyAllInfoButton'
-import CopyButton from '@/components/CopyButton'
 import FavoriteButton from '@/components/FavoriteButton'
 import InfoPopover from '@/components/InfoPopover'
 import InfoText from '@/components/InfoText'
@@ -21,6 +20,7 @@ import SafetyRatings from '@/components/SafetyRatings'
 import { useCarHeroImageActions } from '@/components/use-car-hero-image-actions'
 import Card from '@/components/ui/Card'
 import { extractVehicleInfo } from '@/components/VinResult.helpers'
+import VinBarcode from '@/components/vin/VinBarcode'
 import VinRegistryHistory from '@/components/vin/VinRegistryHistory'
 import VinDecodeTabs from '@/components/vin/VinDecodeTabs'
 import { useCardMotion } from '@/hooks/useCardMotion'
@@ -73,10 +73,7 @@ export default function VinResult({ data }: Props): ReactNode {
             vinRegistryActions={registry?.actions ?? null}
           />
         </div>
-        <div className="mb-3 flex items-center gap-1.5 text-base text-[var(--color-muted)]">
-          {data.vin}
-          <CopyButton text={data.vin} label={t('field.vin')} />
-        </div>
+        <VinBarcode vin={data.vin} />
 
         {registry && (
           <div className="mb-4">

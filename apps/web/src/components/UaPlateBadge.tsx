@@ -17,7 +17,7 @@ function formatPlate(plate: string): string {
 export default function UaPlateBadge({ plate, className = '' }: Props): ReactNode {
   return (
     <span
-      className={`inline-flex items-stretch overflow-hidden rounded-md border-2 border-slate-700 bg-white align-middle shadow-sm ${className}`}
+      className={`inline-flex items-stretch overflow-hidden rounded-md border-2 border-slate-700 bg-white align-middle shadow-sm dark:border-slate-600 dark:bg-slate-400 ${className}`}
     >
       <span
         aria-hidden
@@ -30,7 +30,7 @@ export default function UaPlateBadge({ plate, className = '' }: Props): ReactNod
         <span>UA</span>
       </span>
 
-      <span className="px-2.5 py-0.5 font-mono text-xl leading-tight font-semibold tracking-wider whitespace-nowrap text-slate-900">
+      <span className="px-2.5 py-0.5 font-mono text-xl leading-tight font-semibold tracking-wider whitespace-nowrap text-slate-900 select-text">
         {formatPlate(plate)}
       </span>
     </span>
