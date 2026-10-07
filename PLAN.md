@@ -659,6 +659,22 @@ combined crash-rating page.
 
 **Refresh cadence:** manual/annual (EPA ~2x/year, EEA once a year, no cron); `export:fuel:csv`, then commit the gz CSV. Sources, design and full cadence notes: `docs/plan-done.md`.
 
+### Car dimensions (automobiledimension.com) — **waiting for the owner's permission (asked 2026-10-07)**
+
+Source: `automobiledimension.com/<make>-car-dimensions.html` (per brand: model, year, thumbnail, L×W×H mm, boot dm³, fuel
+icons) -> `/model/<make>/<model>` detail pages (width incl. mirrors), `/previous/<make>` for older generations. No API.
+robots.txt allows everything, but **Terms and Privacy (`/terms-privacy.html`) forbid** commercial use/public exhibition and
+"inclusion, in whole or in part, on other websites … without prior authorization"; linking is allowed with attribution.
+So showing their data/images (hotlinked or re-hosted) needs written permission. **Message sent via their contact form
+(≤283 chars) — blocked until they answer; do not build before that.**
+- **If they agree:** crawler `scripts/src/dimensions.ts` like `ingest:infocar` (1 req/s, robots-aware, HTML cached, `--brand`/
+  `--limit`/`--dry-run`/`--refresh`) -> `registry.car_dimensions` (make, model, generation/year, length, width, width with
+  mirrors, height, boot, `source_url`, `image_url`) + `:csv`/`export:*:csv` seed; match to registry models like press/infocar;
+  "Dimensions" block + thumbnail on the result card with credit and a link to their full page (images stored as the owner
+  allows). ~1.5-3k pages, ~30-60 min cold.
+- **If only a link/credit is allowed:** store just `source_url` per model, no facts/images.
+- **If no / no reply:** drop it; alternative = Wikidata/Wikipedia infobox dimensions (CC) like the Wikimedia hero photos.
+
 ### To discuss / research
 
 - **Shareable photo-search links** — idea 2026-10-01, deferred (not started).
