@@ -826,3 +826,18 @@ export const userFeatures = app.table(
   },
   t => [primaryKey({ columns: [t.userId, t.feature] })]
 )
+
+export const userSavedEntries = app.table(
+  'user_saved_entries',
+  {
+    userId: uuid('user_id').notNull(),
+    list: text('list').notNull(),
+    kind: text('kind').notNull(),
+    value: text('value').notNull(),
+    label: text('label'),
+    found: boolean('found'),
+    date: bigint('date', { mode: 'number' }).notNull(),
+    deleted: boolean('deleted').notNull().default(false)
+  },
+  t => [primaryKey({ columns: [t.userId, t.list, t.kind, t.value] })]
+)

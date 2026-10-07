@@ -14,6 +14,7 @@ type Props = {
   savedOffline?: boolean
   notFound?: boolean
   deleteLabel: string
+  disabled?: boolean
   onDelete: () => void
 }
 
@@ -25,6 +26,7 @@ export default function LocalRecordRow({
   savedOffline = false,
   notFound = false,
   deleteLabel,
+  disabled = false,
   onDelete
 }: Props): ReactNode {
   const { t, i18n } = useTranslation()
@@ -73,7 +75,8 @@ export default function LocalRecordRow({
         type="button"
         aria-label={deleteLabel}
         onClick={onDelete}
-        className="shrink-0 text-[var(--color-muted)] hover:text-[var(--color-fg)]"
+        disabled={disabled}
+        className="shrink-0 text-[var(--color-muted)] hover:text-[var(--color-fg)] disabled:opacity-50"
       >
         ✕
       </button>

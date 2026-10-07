@@ -11,6 +11,7 @@ import LoadErrorBoundary from '@/components/LoadErrorBoundary'
 import OfflineBanner from '@/components/OfflineBanner'
 import PwaUpdatePrompt from '@/components/PwaUpdatePrompt'
 import QuickLinks from '@/components/QuickLinks'
+import SyncBanner from '@/components/SyncBanner'
 import { useHeaderVehicleLabel } from '@/components/use-header-vehicle-label'
 import { useBackgroundMode } from '@/hooks/useBackgroundMode'
 import { cn } from '@/lib/cn'
@@ -102,6 +103,7 @@ export default function Layout({ children }: Props): ReactNode {
       </header>
 
       <OfflineBanner />
+      <SyncBanner />
 
       <div className="flex flex-1">
         {hasOpened && (

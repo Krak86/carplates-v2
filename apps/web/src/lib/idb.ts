@@ -34,6 +34,40 @@ export function getAll<T>(db: IDBDatabase, storeName: string): Promise<T[]> {
   })
 }
 
+type Dated = { id: string; date: number; deleted?: boolean }
+
+function isExpiredTombstone(entry: Dated, cutoff: number): boolean {
+  return entry.deleted === true && entry.date < cutoff
+}
+
+/**
+ * Applies synced entries in ONE transaction, last-write-wins: an incoming entry replaces the stored one only if it is
+ * newer, so a local change made while the sync request was in flight survives. Expired tombstones are purged.
+ */
+export function mergeEntries<T extends Dated>(
+  db: IDBDatabase,
+  storeName: string,
+  incoming: readonly T[],
+  tombstoneCutoff: number
+): Promise<void> {
+  return runTx(db, storeName, 'readwrite', store => {
+    for (const entry of incoming) {
+      store.get(entry.id).onsuccess = (event): void => {
+        const local = (event.target as IDBRequest<T | undefined>).result
+        if (local && local.date >= entry.date) return
+        if (isExpiredTombstone(entry, tombstoneCutoff)) store.delete(entry.id)
+        else store.put(entry)
+      }
+    }
+    store.openCursor().onsuccess = (event): void => {
+      const cursor = (event.target as IDBRequest<IDBCursorWithValue | null>).result
+      if (!cursor) return
+      if (isExpiredTombstone(cursor.value as T, tombstoneCutoff)) cursor.delete()
+      cursor.continue()
+    }
+  })
+}
+
 export function getOne<T>(db: IDBDatabase, storeName: string, id: string): Promise<T | undefined> {
   return new Promise((resolve, reject) => {
     const req = db.transaction(storeName, 'readonly').objectStore(storeName).get(id)

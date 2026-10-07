@@ -3,6 +3,7 @@ import {
   authConfigResponseSchema,
   featuresResponseSchema,
   sessionResponseSchema,
+  syncResponseSchema,
   brandSuggestionsResponseSchema,
   cncapRatingsResponseSchema,
   dataVersionResponseSchema,
@@ -41,6 +42,8 @@ import type {
   FeaturesResponse,
   FeaturesUpdateRequest,
   SessionResponse,
+  SyncRequest,
+  SyncResponse,
   BrandSuggestionsResponse,
   CncapRatingsResponse,
   EuroNcapRatingsResponse,
@@ -418,4 +421,9 @@ export async function saveFeatures(request: FeaturesUpdateRequest): Promise<Feat
 
 export async function getAdminUsers(): Promise<AdminUsersResponse> {
   return adminUsersResponseSchema.parse(await sendJson('GET', '/api/admin/users'))
+}
+
+/** Pushes this device's favorites/history (tombstones included) and returns the merged server state. */
+export async function syncSaved(request: SyncRequest): Promise<SyncResponse> {
+  return syncResponseSchema.parse(await sendJson('POST', '/api/sync', request))
 }

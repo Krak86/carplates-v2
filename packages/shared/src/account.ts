@@ -61,3 +61,39 @@ export type AdminUser = z.infer<typeof adminUserSchema>
 
 export const adminUsersResponseSchema = z.object({ users: z.array(adminUserSchema) })
 export type AdminUsersResponse = z.infer<typeof adminUsersResponseSchema>
+
+/** Favorites / history cross-device sync. Each list is capped; past the cap the OLDEST entries are dropped. Nothing expires by age. */
+export const FAVORITES_LIMIT = 100
+export const HISTORY_LIMIT = 200
+/** How long a deletion marker (tombstone) is kept so a device that was offline can still learn about it. */
+export const SYNC_TOMBSTONE_TTL_MS = 30 * 24 * 60 * 60 * 1000
+
+/**
+ * One favorite / history entry on the wire. `date` is the last-write time (ms): the newer write of the same
+ * `kind:value` wins a conflict on either side, and a `deleted` entry is a tombstone carrying its deletion time.
+ */
+export const syncEntrySchema = z.object({
+  kind: z.enum(['plate', 'vin']),
+  value: z.string().min(1).max(32),
+  label: z.string().max(200).nullable(),
+  date: z.number().int().positive(),
+  found: z.boolean().optional(),
+  deleted: z.boolean().optional()
+})
+export type SyncEntry = z.infer<typeof syncEntrySchema>
+
+const SYNC_MAX_ENTRIES = 1000
+
+export const syncRequestSchema = z.object({
+  favorites: z.array(syncEntrySchema).max(SYNC_MAX_ENTRIES),
+  history: z.array(syncEntrySchema).max(SYNC_MAX_ENTRIES)
+})
+export type SyncRequest = z.infer<typeof syncRequestSchema>
+
+/** The merged server state (tombstones included) after applying the request, plus how many favorites the cap dropped. */
+export const syncResponseSchema = z.object({
+  favorites: z.array(syncEntrySchema),
+  history: z.array(syncEntrySchema),
+  evictedFavorites: z.number().int().min(0)
+})
+export type SyncResponse = z.infer<typeof syncResponseSchema>

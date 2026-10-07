@@ -38,6 +38,7 @@ export {
   authIdentities,
   sessions,
   userFeatures,
+  userSavedEntries,
   type UserRow,
   iihsRatings,
   fuelEconomy,

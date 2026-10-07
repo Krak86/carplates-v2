@@ -228,6 +228,7 @@ Vitest 4 · ESLint 10 (flat config)
   Account UI is online-only: `useSession()` reports anonymous while offline, query keys `auth|account|admin` stay out of
   `lib/offline-cache.ts`, and the account chunks are `globIgnores`d from the PWA precache (add new ones there too).
   Controllers use `SessionGuard`/`AdminGuard` + `@CurrentUser()`; cookies are set via `WithSessionCookie`, not `@Res()`.
+  Favorites/history sync (`apps/api/src/sync/`, `use-saved-sync-actions.ts`): IndexedDB stays the source of truth, deletes are tombstones (`deleted: true`, 30-day TTL), conflicts = newest `date` wins per `kind:value`, lists capped at `FAVORITES_LIMIT` 100 / `HISTORY_LIMIT` 200 (oldest dropped, no age expiry). Table `app.user_saved_entries`.
   `GOOGLE_CLIENT_ID` is documented in `apps/api/.env.example`. `/features` is the paid-feature toggles route (FEATURES_PLAN.md wants it too — see PLAN.md Phase 5).
 - **Telemetry** stays off locally. `.env.example` in each app documents the vars;
   real `.env*` files are gitignored and `deny`-listed for Claude.

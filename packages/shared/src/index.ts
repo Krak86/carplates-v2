@@ -336,6 +336,12 @@ export {
   googleSignInRequestSchema,
   sessionResponseSchema,
   sessionUserSchema,
+  FAVORITES_LIMIT,
+  HISTORY_LIMIT,
+  SYNC_TOMBSTONE_TTL_MS,
+  syncEntrySchema,
+  syncRequestSchema,
+  syncResponseSchema,
   type AdminUser,
   type AdminUsersResponse,
   type AuthConfigResponse,
@@ -346,5 +352,8 @@ export {
   type PaidFeature,
   type SessionResponse,
   type SessionUser,
+  type SyncEntry,
+  type SyncRequest,
+  type SyncResponse,
   type UserRole
 } from './account.js'

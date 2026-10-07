@@ -8,6 +8,7 @@ import LocalRecordsExportButton from '@/components/LocalRecordsExportButton'
 import Card from '@/components/ui/Card'
 import Spinner from '@/components/ui/Spinner'
 import { useOfflineAvailability } from '@/components/use-offline-availability'
+import { useIsSyncing } from '@/components/use-saved-sync-actions'
 import { cn } from '@/lib/cn'
 import { historyQuery } from '@/lib/queries'
 import { formatMonthLabel, groupByMonth } from '@/routes/history/helpers'
@@ -19,6 +20,7 @@ export default function HistoryRoute(): ReactNode {
   const history = useQuery(historyQuery())
   const { deleteOne, deleteAll } = useHistoryActions()
   const isSavedOffline = useOfflineAvailability()
+  const isSyncing = useIsSyncing()
   const [collapsedMonths, setCollapsedMonths] = useState<Set<string>>(new Set())
 
   const handleToggleMonth = (key: string): void => {
@@ -48,7 +50,7 @@ export default function HistoryRoute(): ReactNode {
             <button
               type="button"
               onClick={handleDeleteAll}
-              disabled={deleteAll.isPending}
+              disabled={deleteAll.isPending || isSyncing}
               className="text-sm text-[var(--color-primary)] underline hover:no-underline disabled:opacity-50"
             >
               {t('history.clearAll')}
@@ -99,6 +101,7 @@ export default function HistoryRoute(): ReactNode {
                         savedOffline={isSavedOffline(entry.kind, entry.value)}
                         deleteLabel={t('history.deleteOne')}
                         onDelete={() => deleteOne.mutate(entry.id)}
+                        disabled={isSyncing}
                       />
                     ))}
                   </div>

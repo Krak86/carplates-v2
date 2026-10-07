@@ -1,4 +1,8 @@
-import { getAll, getOne, openDb, runTx } from '@/lib/idb'
+import { FAVORITES_LIMIT, SYNC_TOMBSTONE_TTL_MS } from '@carplates/shared'
+import type { SyncEntry } from '@carplates/shared'
+
+import { getAll, getOne, mergeEntries, openDb, runTx } from '@/lib/idb'
+import { notifySavedChanged } from '@/lib/saved-events'
 
 export type FavoriteKind = 'plate' | 'vin'
 
@@ -7,7 +11,10 @@ export type FavoriteEntry = {
   kind: FavoriteKind
   value: string
   label: string | null
+  /** Last-write time (ms): when it was added, or — on a tombstone — when it was removed. */
   date: number
+  /** Tombstone: removed locally, kept so the deletion syncs to the user's other devices. Never listed. */
+  deleted?: boolean
 }
 
 const DB_NAME = 'carplates.favorites'
@@ -23,29 +30,46 @@ export async function isFavorited(kind: FavoriteKind, value: string): Promise<bo
     const db = await openDb(DB_NAME, DB_VERSION, STORE)
     const entry = await getOne<FavoriteEntry>(db, STORE, favoriteId(kind, value))
     db.close()
-    return entry != null
+    return entry != null && !entry.deleted
   } catch {
     return false
   }
 }
 
-/** Silently no-ops if storage is unavailable (private mode). */
-export async function addFavorite(kind: FavoriteKind, value: string, label: string | null): Promise<void> {
+/**
+ * Adds a favorite; past FAVORITES_LIMIT the oldest ones are dropped. Returns the dropped entries so the caller can
+ * tell the user. Silently no-ops if storage is unavailable (private mode).
+ */
+export async function addFavorite(kind: FavoriteKind, value: string, label: string | null): Promise<FavoriteEntry[]> {
   try {
     const db = await openDb(DB_NAME, DB_VERSION, STORE)
-    const entry: FavoriteEntry = { id: favoriteId(kind, value), kind, value, label, date: Date.now() }
+    const now = Date.now()
+    const entry: FavoriteEntry = { id: favoriteId(kind, value), kind, value, label, date: now }
     await runTx(db, STORE, 'readwrite', store => store.put(entry))
+
+    const live = (await getAll<FavoriteEntry>(db, STORE)).filter(e => !e.deleted).sort((a, b) => a.date - b.date)
+    const evicted = live.slice(0, Math.max(0, live.length - FAVORITES_LIMIT))
+    if (evicted.length) {
+      await runTx(db, STORE, 'readwrite', store => {
+        for (const e of evicted) store.put({ ...e, deleted: true, date: now })
+      })
+    }
     db.close()
+    notifySavedChanged()
+    return evicted
   } catch {
     /* private mode / disabled storage */
+    return []
   }
 }
 
 export async function removeFavorite(id: string): Promise<void> {
   try {
     const db = await openDb(DB_NAME, DB_VERSION, STORE)
-    await runTx(db, STORE, 'readwrite', store => store.delete(id))
+    const entry = await getOne<FavoriteEntry>(db, STORE, id)
+    if (entry) await runTx(db, STORE, 'readwrite', store => store.put({ ...entry, deleted: true, date: Date.now() }))
     db.close()
+    notifySavedChanged()
   } catch {
     /* private mode / disabled storage */
   }
@@ -56,8 +80,45 @@ export async function listFavorites(): Promise<FavoriteEntry[]> {
     const db = await openDb(DB_NAME, DB_VERSION, STORE)
     const entries = await getAll<FavoriteEntry>(db, STORE)
     db.close()
-    return entries.sort((a, b) => b.date - a.date)
+    return entries.filter(e => !e.deleted).sort((a, b) => b.date - a.date)
   } catch {
     return []
+  }
+}
+
+/** Everything the server needs to merge: live entries and tombstones. */
+export async function exportFavoritesForSync(): Promise<SyncEntry[]> {
+  try {
+    const db = await openDb(DB_NAME, DB_VERSION, STORE)
+    const entries = await getAll<FavoriteEntry>(db, STORE)
+    db.close()
+    return entries.map(({ kind, value, label, date, deleted }) => ({
+      kind,
+      value,
+      label,
+      date,
+      ...(deleted ? { deleted } : {})
+    }))
+  } catch {
+    return []
+  }
+}
+
+/** Applies the server's merged state (last-write-wins against what is stored here). */
+export async function applySyncedFavorites(entries: readonly SyncEntry[]): Promise<void> {
+  try {
+    const db = await openDb(DB_NAME, DB_VERSION, STORE)
+    const incoming: FavoriteEntry[] = entries.map(e => ({
+      id: favoriteId(e.kind, e.value),
+      kind: e.kind,
+      value: e.value,
+      label: e.label,
+      date: e.date,
+      ...(e.deleted ? { deleted: true } : {})
+    }))
+    await mergeEntries(db, STORE, incoming, Date.now() - SYNC_TOMBSTONE_TTL_MS)
+    db.close()
+  } catch {
+    /* private mode / disabled storage */
   }
 }

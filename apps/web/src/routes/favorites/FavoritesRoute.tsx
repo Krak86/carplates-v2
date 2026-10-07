@@ -7,6 +7,7 @@ import LocalRecordsExportButton from '@/components/LocalRecordsExportButton'
 import Card from '@/components/ui/Card'
 import Spinner from '@/components/ui/Spinner'
 import { useOfflineAvailability } from '@/components/use-offline-availability'
+import { useIsSyncing } from '@/components/use-saved-sync-actions'
 import { favoritesQuery } from '@/lib/queries'
 import { useFavoritesActions } from '@/routes/favorites/use-favorites-actions'
 
@@ -16,6 +17,7 @@ export default function FavoritesRoute(): ReactNode {
   const favorites = useQuery(favoritesQuery())
   const { deleteOne } = useFavoritesActions()
   const isSavedOffline = useOfflineAvailability()
+  const isSyncing = useIsSyncing()
 
   return (
     <div className="mx-auto w-full max-w-content">
@@ -47,6 +49,7 @@ export default function FavoritesRoute(): ReactNode {
               savedOffline={isSavedOffline(entry.kind, entry.value)}
               deleteLabel={t('favorites.remove')}
               onDelete={() => deleteOne.mutate(entry.id)}
+              disabled={isSyncing}
             />
           ))}
         </Card>
