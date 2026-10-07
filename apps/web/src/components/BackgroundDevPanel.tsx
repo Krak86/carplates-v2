@@ -3,74 +3,14 @@ import type { ReactNode } from 'react'
 import { useSearchParams } from 'react-router'
 
 import BackgroundDevPanelRow from '@/components/BackgroundDevPanelRow'
+import { BACKGROUND_CONTROLS } from '@/lib/background-controls'
 import { useBackgroundStore } from '@/store/background-store'
-import type { BackgroundSettings } from '@/store/background-store'
 
-const CONTROLS = [
-  { enabledKey: 'blurEnabled', valueKey: 'blurPx', label: 'Blur', min: 0, max: 40, step: 1, unit: 'px' },
-  {
-    enabledKey: 'grayscaleEnabled',
-    valueKey: 'grayscalePercent',
-    label: 'Grayscale',
-    min: 0,
-    max: 100,
-    step: 5,
-    unit: '%'
-  },
-  {
-    enabledKey: 'brightnessEnabled',
-    valueKey: 'brightnessPercent',
-    label: 'Brightness',
-    min: 20,
-    max: 150,
-    step: 5,
-    unit: '%'
-  },
-  {
-    enabledKey: 'overlayEnabled',
-    valueKey: 'overlayOpacity',
-    label: 'Dark overlay',
-    min: 0,
-    max: 100,
-    step: 5,
-    unit: '%'
-  },
-  {
-    enabledKey: 'mouseParallaxEnabled',
-    valueKey: 'mouseParallaxStrength',
-    label: 'Mouse parallax',
-    min: 0,
-    max: 60,
-    step: 2,
-    unit: 'px'
-  },
-  {
-    enabledKey: 'scrollParallaxEnabled',
-    valueKey: 'scrollParallaxStrength',
-    label: 'Scroll parallax',
-    min: 0,
-    max: 100,
-    step: 5,
-    unit: '%'
-  },
-  {
-    enabledKey: 'cycleEnabled',
-    valueKey: 'cycleIntervalSec',
-    label: 'Auto-cycle every',
-    min: 3,
-    max: 60,
-    step: 1,
-    unit: 's'
-  }
-] as const satisfies readonly {
-  enabledKey: keyof BackgroundSettings
-  valueKey: keyof BackgroundSettings
-  label: string
-  min: number
-  max: number
-  step: number
-  unit: string
-}[]
+// 'mouseParallax' -> 'Mouse parallax' (the shared control ids double as i18n keys on /settings).
+const devLabel = (id: string): string => {
+  const words = id.replace(/([A-Z])/g, ' $1').toLowerCase()
+  return words.charAt(0).toUpperCase() + words.slice(1)
+}
 
 // Dev-only tuning panel for BackgroundPhotos — never shown to regular visitors.
 // Opens via ?debug=bg on first load, or Ctrl+Shift+B at any time. Not i18n'd:
@@ -110,8 +50,8 @@ export default function BackgroundDevPanel(): ReactNode {
         <input type="checkbox" checked={photosEnabled} onChange={e => setField('photosEnabled', e.target.checked)} />
       </label>
 
-      {CONTROLS.map(control => (
-        <BackgroundDevPanelRow key={control.valueKey} {...control} />
+      {BACKGROUND_CONTROLS.map(control => (
+        <BackgroundDevPanelRow key={control.valueKey} {...control} label={devLabel(control.label)} />
       ))}
 
       <button

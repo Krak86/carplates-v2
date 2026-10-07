@@ -39,6 +39,9 @@ export default function AccountMenu({ user, onNavigate }: Props): ReactNode {
       <Link viewTransition to="/features" onClick={onNavigate} className={linkClass}>
         <span aria-hidden>💎</span> {t('auth.myFeatures')}
       </Link>
+      <Link viewTransition to="/settings" onClick={onNavigate} className={linkClass}>
+        <span aria-hidden>⚙️</span> {t('auth.mySettings')}
+      </Link>
       {user.role === 'admin' && (
         <Link viewTransition to="/admin" onClick={onNavigate} className={linkClass}>
           <span aria-hidden>🛠️</span> {t('auth.adminPage')}

@@ -1,23 +1,8 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import type { BackgroundSettings } from '@carplates/shared'
 
-export interface BackgroundSettings {
-  photosEnabled: boolean
-  blurEnabled: boolean
-  blurPx: number
-  grayscaleEnabled: boolean
-  grayscalePercent: number
-  brightnessEnabled: boolean
-  brightnessPercent: number
-  overlayEnabled: boolean
-  overlayOpacity: number
-  mouseParallaxEnabled: boolean
-  mouseParallaxStrength: number
-  scrollParallaxEnabled: boolean
-  scrollParallaxStrength: number
-  cycleEnabled: boolean
-  cycleIntervalSec: number
-}
+export type { BackgroundSettings }
 
 export const BACKGROUND_DEFAULTS: BackgroundSettings = {
   photosEnabled: true,
@@ -50,6 +35,8 @@ interface BackgroundStore extends BackgroundSettings {
   heroOverride: HeroOverride | null
   setField: (key: keyof BackgroundSettings, value: BackgroundSettings[keyof BackgroundSettings]) => void
   reset: () => void
+  /** Swaps in a whole settings object at once (a user preset, or the built-in defaults). */
+  replace: (settings: BackgroundSettings) => void
   setHeroOverride: (override: HeroOverride) => void
   /** No-ops unless `key` still matches the active override — guards against a stale unmount
    *  clearing an override a newer result already set (route transitions can race). */
@@ -66,6 +53,9 @@ export const useBackgroundStore = create<BackgroundStore>()(
       },
       reset: (): void => {
         set(BACKGROUND_DEFAULTS)
+      },
+      replace: (settings): void => {
+        set(settings)
       },
       setHeroOverride: (override): void => {
         set({ heroOverride: override })

@@ -1,7 +1,16 @@
+import { BACKGROUND_MODES, STREAM_MODES, type BackgroundMode, type StreamMode } from '@carplates/shared'
+
 import { REGION_CENTERS } from '@/lib/region-centers'
 
-export const BACKGROUND_MODES = ['images', 'map', 'earth', 'traffic', 'city'] as const
-export type BackgroundMode = (typeof BACKGROUND_MODES)[number]
+export { BACKGROUND_MODES, STREAM_MODES, type BackgroundMode, type StreamMode }
+
+export const MODE_ICON: Readonly<Record<BackgroundMode, string>> = {
+  images: '🖼️',
+  map: '🗺️',
+  earth: '🌍',
+  traffic: '🚦',
+  city: '🏙️'
+}
 
 export type MapView = { lat: number; lon: number; zoom: number }
 
@@ -29,17 +38,26 @@ export function travicUrl({ lat, lon }: MapView): string {
 }
 
 /** Single-segment paths that are app pages, not a plate/VIN query. */
-const APP_PAGES = new Set(['about', 'history', 'favorites', 'stats', 'fuel', 'safety', 'news', 'discuss', 'advanced-search'])
+const APP_PAGES = new Set([
+  'about',
+  'history',
+  'favorites',
+  'stats',
+  'fuel',
+  'safety',
+  'news',
+  'discuss',
+  'advanced-search',
+  'features',
+  'admin',
+  'settings'
+])
 
 /** True on a plate/VIN result route (`/:query`) — the only place the layers UI is offered. */
 export function isResultPath(pathname: string): boolean {
   const segments = pathname.split('/').filter(Boolean)
   return segments.length === 1 && !APP_PAGES.has(segments[0]!)
 }
-
-/** Layers that play a YouTube live stream picked from a selector (the rest are photos / the map). */
-export const STREAM_MODES = ['earth', 'traffic', 'city'] as const
-export type StreamMode = (typeof STREAM_MODES)[number]
 
 export function isStreamMode(mode: BackgroundMode): mode is StreamMode {
   return (STREAM_MODES as readonly string[]).includes(mode)

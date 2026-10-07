@@ -1,19 +1,21 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { useSession } from '@/components/auth/use-session'
 import { useLiveMapView } from '@/hooks/useBackgroundMode'
 import { usePoorConnection } from '@/hooks/usePoorConnection'
 import { cn } from '@/lib/cn'
-import { BACKGROUND_MODES, LIVE_STREAMS, isStreamMode, travicUrl, type BackgroundMode } from '@/lib/live-background'
+import {
+  BACKGROUND_MODES,
+  LIVE_STREAMS,
+  MODE_ICON,
+  isStreamMode,
+  travicUrl,
+  type BackgroundMode,
+  type StreamMode
+} from '@/lib/live-background'
 import { useLiveBackgroundStore } from '@/store/live-background-store'
-
-const MODE_ICON: Readonly<Record<BackgroundMode, string>> = {
-  images: '🖼️',
-  map: '🗺️',
-  earth: '🌍',
-  traffic: '🚦',
-  city: '🏙️'
-}
+import { useSettingsStore } from '@/store/settings-store'
 
 // Lazy-loaded (see LayersButton.tsx).
 export default function LayersPanel(): ReactNode {
@@ -22,6 +24,8 @@ export default function LayersPanel(): ReactNode {
   const setMode = useLiveBackgroundStore(s => s.setMode)
   const streams = useLiveBackgroundStore(s => s.streams)
   const setStream = useLiveBackgroundStore(s => s.setStream)
+  const { user } = useSession()
+  const saveStream = useSettingsStore(s => s.setStream)
   const setMapView = useLiveBackgroundStore(s => s.setMapView)
   const view = useLiveMapView()
   const poor = usePoorConnection()
@@ -30,6 +34,12 @@ export default function LayersPanel(): ReactNode {
   const handleSelect = (m: BackgroundMode): void => {
     if (m === 'map') setMapView(view)
     setMode(m)
+  }
+
+  // For a signed-in user a picked video source becomes their saved stream for that layer (/settings, synced).
+  const handleStreamChange = (m: StreamMode, id: string): void => {
+    setStream(m, id)
+    if (user) saveStream(m, id)
   }
 
   return (
@@ -62,7 +72,10 @@ export default function LayersPanel(): ReactNode {
       </div>
 
       {poor && (
-        <p role="status" className="mt-2 border-t border-[var(--color-border)] px-1 pt-2 text-xs text-[var(--color-muted)]">
+        <p
+          role="status"
+          className="mt-2 border-t border-[var(--color-border)] px-1 pt-2 text-xs text-[var(--color-muted)]"
+        >
           {t('layers.poorConnection')}
         </p>
       )}
@@ -72,7 +85,7 @@ export default function LayersPanel(): ReactNode {
           {t('layers.stream.label')}
           <select
             value={streams[mode]}
-            onChange={e => setStream(mode, e.target.value)}
+            onChange={e => handleStreamChange(mode, e.target.value)}
             className="rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-2 py-1 text-sm"
           >
             {LIVE_STREAMS[mode].map(s => (

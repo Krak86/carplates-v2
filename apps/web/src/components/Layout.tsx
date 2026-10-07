@@ -13,6 +13,7 @@ import PwaUpdatePrompt from '@/components/PwaUpdatePrompt'
 import QuickLinks from '@/components/QuickLinks'
 import SyncBanner from '@/components/SyncBanner'
 import { useHeaderVehicleLabel } from '@/components/use-header-vehicle-label'
+import { useUserSettingsActions } from '@/components/use-user-settings-actions'
 import { useBackgroundMode } from '@/hooks/useBackgroundMode'
 import { cn } from '@/lib/cn'
 import { setTransitionDirection } from '@/lib/view-transition'
@@ -32,6 +33,7 @@ export default function Layout({ children }: Props): ReactNode {
   const setDrawerOpen = useUiStore(s => s.setDrawerOpen)
   const vehicleLabel = useHeaderVehicleLabel()
   const backgroundMode = useBackgroundMode()
+  useUserSettingsActions()
   const { pathname } = useLocation()
   // Sidebar is lazy-loaded (not part of the LCP path) — stay unmounted until
   // the first open, then keep mounted so close gets a transition instead of a hard unmount.

@@ -325,8 +325,17 @@ export {
   type NewsTag
 } from './newsLookup.js'
 export {
+  BACKGROUND_MODES,
+  BACKGROUND_PRESET_LIMIT,
   PAID_FEATURES,
+  STREAM_MODES,
   USER_ROLES,
+  backgroundPresetSchema,
+  backgroundSettingsSchema,
+  settingsDocumentSchema,
+  settingsResponseSchema,
+  settingsUpdateRequestSchema,
+  userSettingsSchema,
   adminUserSchema,
   adminUsersResponseSchema,
   authConfigResponseSchema,
@@ -355,5 +364,13 @@ export {
   type SyncEntry,
   type SyncRequest,
   type SyncResponse,
-  type UserRole
+  type BackgroundMode,
+  type BackgroundPreset,
+  type BackgroundSettings,
+  type SettingsDocument,
+  type SettingsResponse,
+  type SettingsUpdateRequest,
+  type StreamMode,
+  type UserRole,
+  type UserSettings
 } from './account.js'

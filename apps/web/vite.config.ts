@@ -75,6 +75,7 @@ export default defineConfig({
           'assets/GoogleSignInButton-*.js',
           'assets/AccountMenu-*.js',
           'assets/FeaturesRoute-*.js',
+          'assets/SettingsRoute-*.js',
           'assets/AdminRoute-*.js'
         ],
         navigateFallback: '/index.html',

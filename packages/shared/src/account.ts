@@ -97,3 +97,72 @@ export const syncResponseSchema = z.object({
   evictedFavorites: z.number().int().min(0)
 })
 export type SyncResponse = z.infer<typeof syncResponseSchema>
+
+/** Page-background layers (photos, map, three YouTube live streams). Order = presentation order in the layers panel. */
+export const BACKGROUND_MODES = ['images', 'map', 'earth', 'traffic', 'city'] as const
+export type BackgroundMode = (typeof BACKGROUND_MODES)[number]
+
+/** Layers that play a YouTube live stream picked from a selector (the rest are photos / the map). */
+export const STREAM_MODES = ['earth', 'traffic', 'city'] as const
+export type StreamMode = (typeof STREAM_MODES)[number]
+
+/** Tunables of the photo background — `ranges` mirror the sliders on /settings. */
+export const backgroundSettingsSchema = z.object({
+  photosEnabled: z.boolean(),
+  blurEnabled: z.boolean(),
+  blurPx: z.number().int().min(0).max(40),
+  grayscaleEnabled: z.boolean(),
+  grayscalePercent: z.number().int().min(0).max(100),
+  brightnessEnabled: z.boolean(),
+  brightnessPercent: z.number().int().min(20).max(150),
+  overlayEnabled: z.boolean(),
+  overlayOpacity: z.number().int().min(0).max(100),
+  mouseParallaxEnabled: z.boolean(),
+  mouseParallaxStrength: z.number().int().min(0).max(60),
+  scrollParallaxEnabled: z.boolean(),
+  scrollParallaxStrength: z.number().int().min(0).max(100),
+  cycleEnabled: z.boolean(),
+  cycleIntervalSec: z.number().int().min(3).max(60)
+})
+export type BackgroundSettings = z.infer<typeof backgroundSettingsSchema>
+
+/** A user may keep this many named background presets. */
+export const BACKGROUND_PRESET_LIMIT = 5
+
+export const backgroundPresetSchema = z.object({
+  id: z.string().min(1).max(40),
+  name: z.string().trim().min(1).max(40),
+  settings: backgroundSettingsSchema
+})
+export type BackgroundPreset = z.infer<typeof backgroundPresetSchema>
+
+/**
+ * The signed-in user's preferences, stored as one JSON document (`app.user_settings.data`) and mirrored in
+ * localStorage. New settings tabs add fields here; the whole document is last-write-wins by `updatedAt`.
+ */
+export const userSettingsSchema = z.object({
+  /** Layer shown on load (the layers panel only changes it for the session). */
+  defaultMode: z.enum(BACKGROUND_MODES),
+  /** Live stream per stream layer — updated automatically when the user picks a stream in the layers panel. */
+  streams: z.record(z.enum(STREAM_MODES), z.string().min(1).max(32)),
+  presets: z.array(backgroundPresetSchema).max(BACKGROUND_PRESET_LIMIT),
+  /** Preset in use; null = the built-in defaults. */
+  activePresetId: z.string().max(40).nullable(),
+  /** Use the built-in defaults even though presets exist (the active one is kept for later). */
+  useDefaultBackground: z.boolean()
+})
+export type UserSettings = z.infer<typeof userSettingsSchema>
+
+/** `updatedAt` is the last-edit time in ms (client clock, clamped by the API) — the newer document wins. */
+export const settingsDocumentSchema = z.object({
+  settings: userSettingsSchema,
+  updatedAt: z.number().int().min(0)
+})
+export type SettingsDocument = z.infer<typeof settingsDocumentSchema>
+
+/** `document: null` = nothing saved yet for this account. */
+export const settingsResponseSchema = z.object({ document: settingsDocumentSchema.nullable() })
+export type SettingsResponse = z.infer<typeof settingsResponseSchema>
+
+export const settingsUpdateRequestSchema = settingsDocumentSchema
+export type SettingsUpdateRequest = SettingsDocument

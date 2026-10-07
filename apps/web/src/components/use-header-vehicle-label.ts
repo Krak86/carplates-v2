@@ -9,7 +9,18 @@ import { plateQuery, vinQuery } from '@/lib/queries'
 // `/:query` — keep this in sync whenever a new top-level route is added there, or its segment
 // gets misread as a plate/VIN candidate here (homoglyph-repaired into a bogus lookup, e.g.
 // "advanced-search" -> a Cyrillic-lookalike "plate" -> a wasted 404 /api/plate/... request).
-const STATIC_ROUTES = new Set(['about', 'history', 'favorites', 'stats', 'news', 'discuss', 'advanced-search'])
+const STATIC_ROUTES = new Set([
+  'about',
+  'history',
+  'favorites',
+  'stats',
+  'news',
+  'discuss',
+  'advanced-search',
+  'features',
+  'admin',
+  'settings'
+])
 
 const withYear = (car: string, year: number | null): string => (car ? `${car}${year ? ` (${year})` : ''}` : '')
 

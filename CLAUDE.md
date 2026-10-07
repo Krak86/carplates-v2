@@ -229,6 +229,7 @@ Vitest 4 · ESLint 10 (flat config)
   `lib/offline-cache.ts`, and the account chunks are `globIgnores`d from the PWA precache (add new ones there too).
   Controllers use `SessionGuard`/`AdminGuard` + `@CurrentUser()`; cookies are set via `WithSessionCookie`, not `@Res()`.
   Favorites/history sync (`apps/api/src/sync/`, `use-saved-sync-actions.ts`): IndexedDB stays the source of truth, deletes are tombstones (`deleted: true`, 30-day TTL), conflicts = newest `date` wins per `kind:value`, lists capped at `FAVORITES_LIMIT` 100 / `HISTORY_LIMIT` 200 (oldest dropped, no age expiry). Table `app.user_saved_entries`.
+  Settings (`/settings`, tabs; `apps/api/src/settings/`, `store/settings-store.ts`, `use-user-settings-actions.ts`): one JSON document per user in `app.user_settings` (migration 0036), schema `userSettingsSchema` in `account.ts` — new tabs add fields there. localStorage (`carplates.user-settings`) is the working copy; sync is whole-document last-write-wins by `updatedAt`. Holds the default layer, saved streams (auto-saved when a stream is picked in the layers panel) and ≤ 5 background presets; the active preset (or built-in defaults) is pushed into `useBackgroundStore` for signed-in users only.
   `GOOGLE_CLIENT_ID` is documented in `apps/api/.env.example`. `/features` is the paid-feature toggles route (FEATURES_PLAN.md wants it too — see PLAN.md Phase 5).
 - **Telemetry** stays off locally. `.env.example` in each app documents the vars;
   real `.env*` files are gitignored and `deny`-listed for Claude.

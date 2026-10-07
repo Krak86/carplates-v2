@@ -3,6 +3,7 @@ import {
   authConfigResponseSchema,
   featuresResponseSchema,
   sessionResponseSchema,
+  settingsResponseSchema,
   syncResponseSchema,
   brandSuggestionsResponseSchema,
   cncapRatingsResponseSchema,
@@ -42,6 +43,8 @@ import type {
   FeaturesResponse,
   FeaturesUpdateRequest,
   SessionResponse,
+  SettingsResponse,
+  SettingsUpdateRequest,
   SyncRequest,
   SyncResponse,
   BrandSuggestionsResponse,
@@ -426,4 +429,13 @@ export async function getAdminUsers(): Promise<AdminUsersResponse> {
 /** Pushes this device's favorites/history (tombstones included) and returns the merged server state. */
 export async function syncSaved(request: SyncRequest): Promise<SyncResponse> {
   return syncResponseSchema.parse(await sendJson('POST', '/api/sync', request))
+}
+
+export async function getSettings(): Promise<SettingsResponse> {
+  return settingsResponseSchema.parse(await sendJson('GET', '/api/settings'))
+}
+
+/** Saves the settings document if it is newer than the server's; returns whichever document is now current. */
+export async function putSettings(request: SettingsUpdateRequest): Promise<SettingsResponse> {
+  return settingsResponseSchema.parse(await sendJson('PUT', '/api/settings', request))
 }

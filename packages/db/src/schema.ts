@@ -841,3 +841,9 @@ export const userSavedEntries = app.table(
   },
   t => [primaryKey({ columns: [t.userId, t.list, t.kind, t.value] })]
 )
+
+export const userSettings = app.table('user_settings', {
+  userId: uuid('user_id').primaryKey(),
+  data: jsonb('data').notNull(),
+  updatedAt: bigint('updated_at', { mode: 'number' }).notNull()
+})

@@ -8,6 +8,7 @@ import { AllExceptionsFilter } from './common/all-exceptions.filter.js'
 import { DbModule } from './db/db.module.js'
 import { MissedModule } from './missed/missed.module.js'
 import { FeaturesModule } from './features/features.module.js'
+import { SettingsModule } from './settings/settings.module.js'
 import { SyncModule } from './sync/sync.module.js'
 import { FuelModule } from './fuel/fuel.module.js'
 import { HealthController } from './health/health.controller.js'
@@ -35,6 +36,7 @@ import { WikiModule } from './wiki/wiki.module.js'
     AuthModule,
     FeaturesModule,
     SyncModule,
+    SettingsModule,
     PlateModule,
     VinModule,
     RecognizeModule,
