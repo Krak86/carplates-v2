@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common'
-import { carVideos, infocarVersions, ownerPosts, pressReviews, topgearReviews } from '@carplates/db'
+import { carVideos, infocarVersions, ownerPosts, pressReviews, topgearReviews, youtubeVideos } from '@carplates/db'
 import {
   INFOCAR_TREES,
   infocarBrandSlug,
@@ -9,10 +9,13 @@ import {
   topgearLookup,
   videoLookup
 } from '@carplates/shared'
-import type { InfocarRow, ReviewsResponse } from '@carplates/shared'
+import type { InfocarRow, InfocarVideoRow, ReviewsResponse } from '@carplates/shared'
 import { eq } from 'drizzle-orm'
 
 import { DbService } from '../db/db.service.js'
+
+const LANGS = ['ua', 'ru', 'en'] as const
+type Lang = (typeof LANGS)[number]
 
 type Query = { brand: string; model?: string; year?: number }
 
@@ -41,7 +44,38 @@ export class ReviewsService {
     )
 
     const match = infocarLookup(catalog, query.brand, query.model, query.year)
-    const videos = videoLookup(videoRows, catalog, query.brand, query.model, query.year).map(v => ({
+    let videoHits = videoLookup(videoRows, catalog, query.brand, query.model, query.year)
+    const isFallback = !videoHits.length
+    const langById = new Map<string, Lang>()
+    if (isFallback) {
+      // Fallback for models infocar has no video for (`pnpm ingest:youtube-videos`); queried only when needed.
+      const ytRows = await db.select().from(youtubeVideos).where(eq(youtubeVideos.brandSlug, slug))
+      for (const r of ytRows) {
+        const lang = LANGS.find(l => l === r.lang)
+        if (lang) langById.set(r.youtubeId, lang)
+      }
+      videoHits = videoLookup(
+        ytRows.map((r): InfocarVideoRow => ({
+          youtubeId: r.youtubeId,
+          title: r.title,
+          thumbUrl: `https://i.ytimg.com/vi/${r.youtubeId}/mqdefault.jpg`,
+          durationS: r.durationS,
+          publishedAt: r.publishedAt,
+          brandSlug: r.brandSlug,
+          modelSlug: r.modelSlug,
+          generationId: null,
+          year: r.year,
+          url: `https://www.youtube.com/watch?v=${r.youtubeId}`
+        })),
+        catalog,
+        query.brand,
+        query.model,
+        query.year
+      )
+    }
+    const videos = videoHits.map(v => ({
+      source: isFallback ? ('youtube' as const) : ('infocar' as const),
+      lang: langById.get(v.youtubeId) ?? null,
       youtubeId: v.youtubeId,
       title: v.title,
       thumbUrl: v.thumbUrl,

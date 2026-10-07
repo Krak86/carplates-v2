@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest'
-import { carVideos, ownerPosts, pressReviews, topgearReviews } from '@carplates/db'
-import type { CarVideoRow, InfocarVersionRow, OwnerPostRow, PressReviewRow, TopgearReviewRow } from '@carplates/db'
+import { carVideos, ownerPosts, pressReviews, topgearReviews, youtubeVideos } from '@carplates/db'
+import type {
+  CarVideoRow,
+  InfocarVersionRow,
+  OwnerPostRow,
+  PressReviewRow,
+  TopgearReviewRow,
+  YoutubeVideoRow
+} from '@carplates/db'
 
 import type { DbService } from '../db/db.service.js'
 
@@ -31,18 +38,21 @@ function serviceWith(
   videos: CarVideoRow[] = [],
   posts: OwnerPostRow[] = [],
   topgearRows: TopgearReviewRow[] = [],
-  pressRows: PressReviewRow[] = []
+  pressRows: PressReviewRow[] = [],
+  ytRows: YoutubeVideoRow[] = []
 ): ReviewsService {
   const rowsFor = (table: unknown): unknown[] =>
-    table === carVideos
-      ? videos
-      : table === ownerPosts
-        ? posts
-        : table === topgearReviews
-          ? topgearRows
-          : table === pressReviews
-            ? pressRows
-            : rows
+    table === youtubeVideos
+      ? ytRows
+      : table === carVideos
+        ? videos
+        : table === ownerPosts
+          ? posts
+          : table === topgearReviews
+            ? topgearRows
+            : table === pressReviews
+              ? pressRows
+              : rows
   const db = {
     select: () => ({
       from: (table: unknown) => ({
@@ -148,6 +158,8 @@ describe('ReviewsService.lookup', () => {
     const res = await serviceWith([row({})], [video]).lookup({ brand: 'KIA', model: 'CEED', year: 2019 })
     expect(res.videos).toEqual([
       {
+        source: 'infocar',
+        lang: null,
         youtubeId: 'o1aOohTtV4Y',
         title: 'Kia Ceed',
         thumbUrl: null,
@@ -156,6 +168,47 @@ describe('ReviewsService.lookup', () => {
         url: 'https://www.infocar.ua/video/19231.html'
       }
     ])
+  })
+
+  it('falls back to YouTube videos only when infocar has none for the model', async () => {
+    const yt: YoutubeVideoRow = {
+      id: 1,
+      youtubeId: 'abc123',
+      brandSlug: 'kia',
+      modelSlug: 'ceed',
+      lang: 'ru',
+      title: 'Kia Ceed review',
+      channel: 'Some channel',
+      views: 10,
+      durationS: 600,
+      publishedAt: '2020-01-02',
+      year: null,
+      query: 'kia ceed',
+      fetchedAt: new Date(0)
+    }
+    const fallback = await serviceWith([row({})], [], [], [], [], [yt]).lookup({
+      brand: 'KIA',
+      model: 'CEED',
+      year: 2019
+    })
+    expect(fallback.videos).toEqual([
+      {
+        source: 'youtube',
+        lang: 'ru',
+        youtubeId: 'abc123',
+        title: 'Kia Ceed review',
+        thumbUrl: 'https://i.ytimg.com/vi/abc123/mqdefault.jpg',
+        durationS: 600,
+        publishedAt: '2020-01-02',
+        url: 'https://www.youtube.com/watch?v=abc123'
+      }
+    ])
+    const preferred = await serviceWith([row({})], [video], [], [], [], [yt]).lookup({
+      brand: 'KIA',
+      model: 'CEED',
+      year: 2019
+    })
+    expect(preferred.videos.map(v => v.youtubeId)).toEqual(['o1aOohTtV4Y'])
   })
 
   it('returns owner posts of the generation covering the car year, without DB-only fields', async () => {

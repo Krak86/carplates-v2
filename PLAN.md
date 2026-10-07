@@ -528,7 +528,7 @@ by registrations (the to-do list for alternative sources):**
 models only, as an **offline batch** that stores results next to `car_videos` (new `source` column or a sibling table;
 links + facts only, same lookup path) — never live per request. Per (brand, model, generation), not per year.
 
-**Build status (2026-10-05): ingest built (steps 3, 4, 6-tooling, 7); real run in progress (day 1 done, see below); lookup integration + UI (step 5 / item 1 / item 4) still to do.**
+**Build status (2026-10-05): ingest built (steps 3, 4, 6-tooling, 7); real run in progress (day 3 done, see below); lookup integration done 2026-10-07 (`ReviewsService.lookup` falls back to `youtube_videos` through `videoLookup` when infocar has no video for the model; the Videos section needed no UI change, only the source footnote); the response video now carries `source` (infocar|youtube) + `lang`, the Videos section shows a "found by a YouTube search" note for fallback videos and lists the UI language first (`preferLanguage`, client-side — the API still caps at 6 newest, language-blind).**
 **Run log:** `pnpm ingest:youtube-videos -- --min-cars 5000`, once per Pacific day (after ~10:00 Kyiv). Day 1 (2026-10-05): 67
 models, 443 videos, 9,090 units, 0 errors; obscure ВАЗ trim codes fell through to 3 queries (303 units each), so fewer than the
 ~89 models/day estimate. Afterwards ВАЗ trim codes were folded into the base model (`baseModel`: 21063 → 2106, 210994 → 21099,

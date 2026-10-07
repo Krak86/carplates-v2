@@ -10,6 +10,7 @@ import SectionInfo from '@/components/SectionInfo'
 import ShareButton from '@/components/ShareButton'
 import VideoStrip from '@/components/VideoStrip'
 import type { StripVideo } from '@/components/VideoStrip'
+import { preferLanguage } from '@/components/VideoReviews.helpers'
 import { cn } from '@/lib/cn'
 import { reviewsQuery, socialQuery } from '@/lib/queries'
 import { scrollElementIntoView } from '@/lib/share-section'
@@ -27,14 +28,15 @@ type Props = {
  * to go on.
  */
 export default function VideoReviews({ brand, model, year }: Props): ReactNode {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const [searchParams] = useSearchParams()
   const isSharedVideos = searchParams.get('section') === 'videos'
   const [open, setOpen] = useState(() => isSharedVideos)
   const sectionRef = useRef<HTMLDivElement>(null)
   const catalog = useQuery({ ...reviewsQuery(brand ?? '', model ?? '', year), enabled: !!brand && open })
   const social = useQuery({ ...socialQuery(brand ?? ''), enabled: !!brand && open })
-  const modelVideos = (catalog.data?.videos ?? []).map((v): StripVideo => ({
+  const isSearched = catalog.data?.videos.some(v => v.source === 'youtube') ?? false
+  const modelVideos = preferLanguage(catalog.data?.videos ?? [], i18n.language).map((v): StripVideo => ({
     youtubeId: v.youtubeId,
     title: v.title,
     url: v.url,
@@ -86,6 +88,7 @@ export default function VideoReviews({ brand, model, year }: Props): ReactNode {
               {modelVideos.length > 0 && (
                 <div>
                   {channels.length > 0 && <h3 className="mb-2 text-sm font-medium">{t('videos.model')}</h3>}
+                  {isSearched && <p className="mb-2 text-sm text-[var(--color-muted)]">{t('videos.searched')}</p>}
                   <VideoStrip videos={modelVideos} />
                 </div>
               )}
