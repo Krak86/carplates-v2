@@ -22,8 +22,12 @@ describe('textFilterError', () => {
     expect(textFilterError('a', 'golf')).toBe('brandTooShort')
   })
 
-  it('rejects when neither field is indexable', () => {
+  it('allows a 2-char make on its own or with a short model', () => {
+    expect(textFilterError('ИЖ', '')).toBeNull()
+    expect(textFilterError('mg', 'zs')).toBeNull()
+  })
+
+  it('rejects a short model without a make', () => {
     expect(textFilterError('', 'a6')).toBe('needsIndexable')
-    expect(textFilterError('mg', 'zs')).toBe('needsIndexable')
   })
 })
