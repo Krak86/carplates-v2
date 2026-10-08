@@ -1,4 +1,4 @@
-import type { RdwSpecs } from '@carplates/shared'
+import { resolveFuelCategories, type RdwSpecs } from '@carplates/shared'
 
 export type SpecRange = NonNullable<RdwSpecs['powerKw']>
 
@@ -58,7 +58,32 @@ export type OwnFigures = {
   grossMassKg: number | null
 }
 
+/** The Specs block's groups, in display order; the heading is `rdw.group.<key>`. */
+export const SPEC_GROUPS = ['engine', 'mass', 'body', 'price', 'fleet', 'economy'] as const
+export type SpecGroup = (typeof SPEC_GROUPS)[number]
+
+/** Which powertrain a row describes: electric-only rows are hidden for a combustion car and vice versa. */
+export type SpecPowertrain = 'electric' | 'combustion'
+
+/**
+ * Whether a row about `powertrain` applies to a car with the registry fuel `fuel`. A model's Dutch aggregate mixes its
+ * versions, so a diesel car must not be shown the electric range of the same model's EV. Unknown fuel hides nothing;
+ * a hybrid ("ЕЛЕКТРО АБО БЕНЗИН") keeps both kinds of rows.
+ */
+export function appliesToFuel(powertrain: SpecPowertrain | undefined, fuel: string | null | undefined): boolean {
+  if (!powertrain) return true
+  const categories = resolveFuelCategories(fuel)
+  if (categories.length === 0) return true
+  const electric = categories.includes('electric')
+  const combustion = categories.some(c => c !== 'electric')
+  return powertrain === 'electric' ? electric : combustion
+}
+
 export type SpecRowDef = {
+  /** Heading the row sits under. */
+  group: SpecGroup
+  /** Only for cars of this powertrain; none = every car. */
+  powertrain?: SpecPowertrain
   /** Suffix of the `rdw.<key>` label and `rdw.about.<key>` explainer i18n keys. */
   key:
     | 'power'
@@ -101,37 +126,72 @@ export type SpecRowDef = {
  * field in the `rdw` contract and the ingest, and its `rdw.<key>` + `rdw.about.<key>` i18n strings.
  */
 export const SPEC_ROWS: readonly SpecRowDef[] = [
-  { key: 'power', pick: s => s.powerKw, unitKey: 'rdw.unitKw', own: o => o.powerKw, alt: 'hp' },
-  { key: 'displacement', pick: s => s.displacementCc, unitKey: 'rdw.unitCc', own: o => o.displacementCc, alt: 'l' },
-  { key: 'cylinders', pick: s => s.cylinders ?? null },
-  { key: 'topSpeed', pick: s => s.topSpeedKmh ?? null, unitKey: 'rdw.unitKmh' },
-  { key: 'consumption', pick: s => s.consumptionL100 ?? null, unitKey: 'rdw.unitL100', format: { decimals: 1 } },
-  { key: 'evKwh', pick: s => s.evKwh100 ?? null, unitKey: 'rdw.unitKwh100', format: { decimals: 1 } },
-  { key: 'evRange', pick: s => s.evRangeKm ?? null, unitKey: 'rdw.unitKm' },
-  // Masses together: unladen, kerb, gross, then what it may tow.
-  { key: 'mass', pick: s => s.massKg, unitKey: 'field.unitKg', own: o => o.massKg, alt: 't' },
-  { key: 'kerbMass', pick: s => s.kerbMassKg ?? null, unitKey: 'field.unitKg', alt: 't' },
-  { key: 'grossMass', pick: s => s.grossMassKg ?? null, unitKey: 'field.unitKg', own: o => o.grossMassKg, alt: 't' },
-  { key: 'towBraked', pick: s => s.towBrakedKg ?? null, unitKey: 'field.unitKg', alt: 't' },
-  { key: 'towUnbraked', pick: s => s.towUnbrakedKg ?? null, unitKey: 'field.unitKg', alt: 't' },
-  { key: 'seats', pick: s => s.seats ?? null },
-  { key: 'doors', pick: s => s.doors ?? null },
-  { key: 'length', pick: s => s.lengthCm ?? null, unitKey: 'rdw.unitCm', alt: 'm' },
-  { key: 'width', pick: s => s.widthCm ?? null, unitKey: 'rdw.unitCm', alt: 'm' },
-  { key: 'height', pick: s => s.heightCm ?? null, unitKey: 'rdw.unitCm', alt: 'm' },
-  { key: 'wheelbase', pick: s => s.wheelbaseCm ?? null, unitKey: 'rdw.unitCm', alt: 'm' },
-  // The Dutch list price includes 21 % VAT and BPM — labelled as such, never shown as a Ukrainian price.
-  { key: 'price', pick: s => s.priceEur ?? null, unitKey: 'rdw.unitEur', format: { step: 100, grouped: true } },
+  { group: 'engine', key: 'power', pick: s => s.powerKw, unitKey: 'rdw.unitKw', own: o => o.powerKw, alt: 'hp' },
   {
+    group: 'engine',
+    key: 'displacement',
+    powertrain: 'combustion',
+    pick: s => s.displacementCc,
+    unitKey: 'rdw.unitCc',
+    own: o => o.displacementCc,
+    alt: 'l'
+  },
+  { group: 'engine', key: 'cylinders', powertrain: 'combustion', pick: s => s.cylinders ?? null },
+  { group: 'engine', key: 'topSpeed', pick: s => s.topSpeedKmh ?? null, unitKey: 'rdw.unitKmh' },
+  {
+    group: 'economy',
+    key: 'consumption',
+    powertrain: 'combustion',
+    pick: s => s.consumptionL100 ?? null,
+    unitKey: 'rdw.unitL100',
+    format: { decimals: 1 }
+  },
+  {
+    group: 'economy',
+    key: 'evKwh',
+    powertrain: 'electric',
+    pick: s => s.evKwh100 ?? null,
+    unitKey: 'rdw.unitKwh100',
+    format: { decimals: 1 }
+  },
+  { group: 'economy', key: 'evRange', powertrain: 'electric', pick: s => s.evRangeKm ?? null, unitKey: 'rdw.unitKm' },
+  { group: 'economy', key: 'co2', powertrain: 'combustion', pick: s => s.co2GKm, unitKey: 'rdw.unitCo2' },
+  { group: 'economy', key: 'noise', pick: s => s.noiseDb ?? null, unitKey: 'rdw.unitDb' },
+  // Masses together: unladen, kerb, gross, then what it may tow.
+  { group: 'mass', key: 'mass', pick: s => s.massKg, unitKey: 'field.unitKg', own: o => o.massKg, alt: 't' },
+  { group: 'mass', key: 'kerbMass', pick: s => s.kerbMassKg ?? null, unitKey: 'field.unitKg', alt: 't' },
+  {
+    group: 'mass',
+    key: 'grossMass',
+    pick: s => s.grossMassKg ?? null,
+    unitKey: 'field.unitKg',
+    own: o => o.grossMassKg,
+    alt: 't'
+  },
+  { group: 'mass', key: 'towBraked', pick: s => s.towBrakedKg ?? null, unitKey: 'field.unitKg', alt: 't' },
+  { group: 'mass', key: 'towUnbraked', pick: s => s.towUnbrakedKg ?? null, unitKey: 'field.unitKg', alt: 't' },
+  { group: 'body', key: 'length', pick: s => s.lengthCm ?? null, unitKey: 'rdw.unitCm', alt: 'm' },
+  { group: 'body', key: 'width', pick: s => s.widthCm ?? null, unitKey: 'rdw.unitCm', alt: 'm' },
+  { group: 'body', key: 'height', pick: s => s.heightCm ?? null, unitKey: 'rdw.unitCm', alt: 'm' },
+  { group: 'body', key: 'wheelbase', pick: s => s.wheelbaseCm ?? null, unitKey: 'rdw.unitCm', alt: 'm' },
+  { group: 'body', key: 'seats', pick: s => s.seats ?? null },
+  { group: 'body', key: 'doors', pick: s => s.doors ?? null },
+  // The Dutch list price includes 21 % VAT and BPM — labelled as such, never shown as a Ukrainian price.
+  {
+    group: 'price',
+    key: 'price',
+    pick: s => s.priceEur ?? null,
+    unitKey: 'rdw.unitEur',
+    format: { step: 100, grouped: true }
+  },
+  {
+    group: 'price',
     key: 'priceExTax',
     pick: s => s.priceExTaxEur ?? null,
     unitKey: 'rdw.unitEur',
     format: { step: 100, grouped: true }
   },
-  { key: 'bpm', pick: s => s.bpmEur ?? null, unitKey: 'rdw.unitEur', format: { step: 10, grouped: true } },
-  // Emissions last.
-  { key: 'noise', pick: s => s.noiseDb ?? null, unitKey: 'rdw.unitDb' },
-  { key: 'co2', pick: s => s.co2GKm, unitKey: 'rdw.unitCo2' }
+  { group: 'price', key: 'bpm', pick: s => s.bpmEur ?? null, unitKey: 'rdw.unitEur', format: { step: 10, grouped: true } }
 ]
 
 /** One categorical measure of the Specs block: the shares of the vehicles per class, shown as small chips. */

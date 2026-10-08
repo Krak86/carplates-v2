@@ -376,7 +376,7 @@ Fields and how well RDW fills them for cars (VW Golf sample, 2026-10-08):
 - **Categorical measures** (fuel mix, colours, body types, energy labels) are **jsonb `[value, count]` pairs** + a `*_n` of vehicles that have the
   attribute; one query still, via fixed lists of conditional counts (`count(case(col='X',1))`) since SoQL cannot pivot. Colours (11 Dutch names), body types
   (11) and labels (A-G) keep the top 3; the fuel mix keeps every class. The API turns counts into shares (hidden under `RDW_MIN_DISPLAY_N` = 10), the UI
-  shows classes >= 2 % as chips (new `RdwShareRow`, `SHARE_ROWS`).
+  shows classes >= 2 % as chips (new `RdwShareRow`, `SHARE_ROWS`). **Layout follow-up (2026-10-08):** Specs rows are grouped into 📂 folder sub-sections (`SPEC_GROUPS`, `VinToggleSection`, Engine open by default; the NL-fleet chips are their own "Dutch fleet" group; consumption & emissions last), the "Typical figures … Similar vehicles" footnote moved to the top, electric rows are hidden for combustion cars and combustion rows for EVs (`appliesToFuel`), and the Emissions section sits right after Specs.
 - **Fuel mix: shown, not used to group the other measures.** Classes: petrol, diesel, electric, hybrid (RDW `NOVC-HEV`, includes mild hybrids), plug-in
   hybrid (`OVC-HEV`), gas. Grouping every measure by fuel would multiply rows/columns by ~6 and break matching to a registry fuel that is often wrong;
   the mix chip tells the reader why a range is wide (VW Golf 2015: 53 % petrol, 34 % plug-in hybrid (GTE), 11 % diesel).
@@ -388,7 +388,7 @@ Fields and how well RDW fills them for cars (VW Golf sample, 2026-10-08):
   ::number; 40-120 dB, RDW has typos like 884). Each partial one has a `*_n`; the API hides a row with fewer than 10 vehicles (`partial()`). Kerb mass follows
   the group's own small-sample flag.
 - **Recall share:** `recall_open_n` / `recall_n` (indicator Ja / Nee); API `openRecallShare` 0-1, hidden under 10 known vehicles. Wording is model-level
-  ("X % of Dutch vehicles"), explainer says it cannot describe a particular car. Stage D reuses it. Spot values: Skoda Octavia 2020 1.5 %, Tesla Model 3 2020 7 %.
+  ("X % of Dutch vehicles"), explainer says it cannot describe a particular car. **No longer shown in Specs (2026-10-08): the row, its i18n strings and info text were removed; the ingested data and `openRecallShare` stay for stage D.** Spot values: Skoda Octavia 2020 1.5 %, Tesla Model 3 2020 7 %.
 - **Source limits found:** RDW's body label `stationwagen` is used for many hatchbacks (VW Golf 2015 reads 98 % "estate") — shown as RDW states it. `TOYOTA
   COROLLA` is filed as "TOYOTA COROLLA" in recent years (5,795 in 2021), so a registry "COROLLA" still matches only the tiny bare "COROLLA" group — a
   matcher issue (unchanged, not C3). Old rows of the table that the re-ingest no longer produced stay (upsert only): 106,041 rows vs 102,862 upserted.

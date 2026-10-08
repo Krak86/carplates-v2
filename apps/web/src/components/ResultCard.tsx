@@ -459,9 +459,9 @@ export default function ResultCard({ data }: Props): ReactNode {
           model={c.model}
           year={c.makeYear}
           kind={c.kind}
+          fuel={c.fuel}
           own={{ powerKw: c.powerKwt, displacementCc: c.capacity, massKg: c.ownWeight, grossMassKg: c.totalWeight }}
         />
-        <SafetyRatings brand={c.brand} model={c.model} year={c.makeYear} body={c.body} />
         <FuelEconomy
           brand={c.brand}
           model={c.model}
@@ -470,6 +470,7 @@ export default function ResultCard({ data }: Props): ReactNode {
           capacity={c.capacity}
           kind={c.kind}
         />
+        <SafetyRatings brand={c.brand} model={c.model} year={c.makeYear} body={c.body} />
         <ReviewLinks brand={c.brand} model={c.model} year={c.makeYear} />
         <VideoReviews brand={c.brand} model={c.model} year={c.makeYear} />
         <CarWikiInfo brand={c.brand} model={c.model} year={c.makeYear} />

@@ -12,7 +12,7 @@ type Props = {
 }
 
 /**
- * A non-range row of the Specs block (fuel mix, body type, colours, label, recall share): the same label chip with a ❓
+ * A non-range row of the Specs block (fuel mix, body type, colours, energy label): the same label chip with a ❓
  * explainer as `SpecRow`, and the value side as a few small pills instead of a median and a range.
  */
 export default function RdwShareRow({ rowKey, chips }: Props): ReactNode {

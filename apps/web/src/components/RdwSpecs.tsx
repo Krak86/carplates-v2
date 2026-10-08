@@ -9,11 +9,13 @@ import { similarVehiclesHref } from '@/components/CO2Badge.helpers'
 import InfoPopover from '@/components/InfoPopover'
 import InfoText from '@/components/InfoText'
 import {
+  appliesToFuel,
   approxCount,
   describeRange,
   altFigure,
   formatPercent,
   SHARE_ROWS,
+  SPEC_GROUPS,
   SPEC_ROWS,
   visibleShares,
   type OwnFigures,
@@ -23,6 +25,7 @@ import {
 import RdwShareRow from '@/components/RdwShareRow'
 import SectionHeader from '@/components/SectionHeader'
 import ShareButton from '@/components/ShareButton'
+import VinToggleSection from '@/components/vin/VinToggleSection'
 import { cn } from '@/lib/cn'
 import { rdwQuery } from '@/lib/queries'
 import { scrollElementIntoView } from '@/lib/share-section'
@@ -33,6 +36,8 @@ type Props = {
   year: number | null
   /** Registry kind text (ЛЕГКОВИЙ, МОТОЦИКЛ …): picks which RDW vehicle kinds the model may match. */
   kind?: string | null
+  /** Registry fuel text: hides the electric rows for a combustion car and the fuel rows for an electric one. */
+  fuel?: string | null
   /** What the registry says about this exact car — shown under the typical figure for comparison. */
   own?: OwnFigures
 }
@@ -87,7 +92,7 @@ function SpecRow({ def, range, own, locale }: SpecRowProps): ReactNode {
  * the same make/model/year as registered in the Netherlands. EU-spec, so labelled as such. Collapsed by default (open
  * from a `?section=specs` share link); renders nothing while loading, on error, or without a match — a miss hides it.
  */
-export default function RdwSpecs({ brand, model, year, kind, own }: Props): ReactNode {
+export default function RdwSpecs({ brand, model, year, kind, fuel, own }: Props): ReactNode {
   const { t, i18n } = useTranslation()
   const [searchParams] = useSearchParams()
   const isShared = searchParams.get('section') === 'specs'
@@ -109,7 +114,6 @@ export default function RdwSpecs({ brand, model, year, kind, own }: Props): Reac
   const isSmall = isSmallRdwSample(specs.n)
   const locale = i18n.language === 'ua' ? 'uk' : i18n.language
   const count = approxCount(specs.n, locale)
-  const recallShare = specs.openRecallShare ?? null
   const name = `${match.makeName} ${match.modelName}`
   const info = [
     t('rdw.info.lead', { name }),
@@ -123,11 +127,39 @@ export default function RdwSpecs({ brand, model, year, kind, own }: Props): Reac
     t('rdw.info.co2'),
     SPEC_ROWS.some(def => def.key === 'price' && def.pick(specs)) && t('rdw.info.price'),
     t('rdw.info.fuelMix'),
-    recallShare != null && t('rdw.info.recall'),
     t('rdw.info.credit')
   ]
     .filter(Boolean)
     .join('\n')
+
+  // Rows grouped under headings; a group with nothing to show (no data, or wrong powertrain for this car) is dropped.
+  const groups = SPEC_GROUPS.map(key => {
+    const rows =
+      key === 'fleet'
+        ? SHARE_ROWS.map(def => {
+            const items = visibleShares(def.pick(specs), def.limit)
+            if (items.length === 0) return null
+            const chips = items.map(
+              i =>
+                `${def.itemPrefix ? t(`rdw.${def.itemPrefix}.${i.key}`, { defaultValue: i.key }) : i.key} ${formatPercent(i.share)}`
+            )
+            return <RdwShareRow key={def.key} rowKey={def.key} chips={chips} />
+          })
+        : SPEC_ROWS.filter(def => def.group === key && appliesToFuel(def.powertrain, fuel)).map(def => {
+            const range = def.pick(specs)
+            if (!range) return null
+            return (
+              <SpecRow
+                key={def.key}
+                def={def}
+                range={range}
+                own={own ? (def.own?.(own) ?? null) : null}
+                locale={locale}
+              />
+            )
+          })
+    return { key, rows: rows.filter(Boolean) }
+  }).filter(group => group.rows.length > 0)
 
   return (
     <div ref={sectionRef} className="mt-3 border-t border-[var(--color-border)] pt-3">
@@ -166,40 +198,6 @@ export default function RdwSpecs({ brand, model, year, kind, own }: Props): Reac
             </span>
           </div>
 
-          {isSmall && (
-            <p className="mt-2 text-xs text-[var(--color-muted)]">⚠️ {t('rdw.smallSample', { n: specs.n })}</p>
-          )}
-
-          <div className="mt-1 divide-y divide-[var(--color-border)]">
-            {SPEC_ROWS.map(def => {
-              const range = def.pick(specs)
-              if (!range) return null
-              return (
-                <SpecRow
-                  key={def.key}
-                  def={def}
-                  range={range}
-                  own={own ? (def.own?.(own) ?? null) : null}
-                  locale={locale}
-                />
-              )
-            })}
-
-            {SHARE_ROWS.map(def => {
-              const items = visibleShares(def.pick(specs), def.limit)
-              if (items.length === 0) return null
-              const chips = items.map(
-                i =>
-                  `${def.itemPrefix ? t(`rdw.${def.itemPrefix}.${i.key}`, { defaultValue: i.key }) : i.key} ${formatPercent(i.share)}`
-              )
-              return <RdwShareRow key={def.key} rowKey={def.key} chips={chips} />
-            })}
-
-            {recallShare != null && (
-              <RdwShareRow rowKey="recall" chips={[t('rdw.recallShare', { pct: formatPercent(recallShare) })]} />
-            )}
-          </div>
-
           <p className="mt-2 text-xs text-[var(--color-muted)]">
             {t('rdw.footnote', { name, n: count, year: specs.year })}{' '}
             {brand && model && year && (
@@ -212,6 +210,28 @@ export default function RdwSpecs({ brand, model, year, kind, own }: Props): Reac
               </Link>
             )}
           </p>
+
+          {isSmall && (
+            <p className="mt-2 text-xs text-[var(--color-muted)]">⚠️ {t('rdw.smallSample', { n: specs.n })}</p>
+          )}
+
+          {groups.map(group => (
+            <VinToggleSection
+              key={group.key}
+              icon="📂"
+              defaultOpen={group.key === 'engine'}
+              showLabel={t('vin.group.show')}
+              hideLabel={t('vin.group.hide')}
+              title={
+                <>
+                  {t(`rdw.group.${group.key}`)}{' '}
+                  <span className="text-sm font-normal text-[var(--color-muted)]">({group.rows.length})</span>
+                </>
+              }
+            >
+              <div className="divide-y divide-[var(--color-border)]">{group.rows}</div>
+            </VinToggleSection>
+          ))}
         </div>
       </div>
     </div>

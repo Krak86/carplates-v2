@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+  appliesToFuel,
   approxCount,
   ccToLitres,
   cmToMetres,
@@ -105,5 +106,21 @@ describe('approxCount', () => {
   it('reads the C2 rows defensively: an answer cached before C2 has none of the new keys', () => {
     const old = { year: 2018, n: 100, powerKw: null, displacementCc: null, massKg: null, co2GKm: null }
     expect(SPEC_ROWS.map(r => r.pick(old))).toEqual(SPEC_ROWS.map(() => null))
+  })
+})
+
+describe('appliesToFuel', () => {
+  it('hides electric rows for a diesel car and combustion rows for an EV', () => {
+    expect(appliesToFuel('electric', 'ДИЗЕЛЬНЕ ПАЛИВО')).toBe(false)
+    expect(appliesToFuel('combustion', 'ДИЗЕЛЬНЕ ПАЛИВО')).toBe(true)
+    expect(appliesToFuel('combustion', 'ЕЛЕКТРО')).toBe(false)
+    expect(appliesToFuel('electric', 'ЕЛЕКТРО')).toBe(true)
+  })
+
+  it('keeps everything for a hybrid, an unknown fuel and unrestricted rows', () => {
+    expect(appliesToFuel('electric', 'ЕЛЕКТРО АБО БЕНЗИН')).toBe(true)
+    expect(appliesToFuel('combustion', 'ЕЛЕКТРО АБО БЕНЗИН')).toBe(true)
+    expect(appliesToFuel('electric', null)).toBe(true)
+    expect(appliesToFuel(undefined, 'ЕЛЕКТРО')).toBe(true)
   })
 })
