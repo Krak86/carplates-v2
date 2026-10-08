@@ -401,6 +401,17 @@ above once scoped, or dropped if research says no.
   (`track.ua-gis.com/gtfs/lviv/vehicle_position`, ~11 s; licence unchecked) — an API proxy + lazy Leaflet map would give real moving public
   transport for Львів only; (b) YouTube ISS streams can be retired or embed-blocked — swap ids in `LIVE_STREAMS` (earth / traffic / city, `apps/web/src/lib/live-background.ts`; traffic/city streams added 2026-10-05).
 
+### Test-drive racer game ("Free test drive" banner) — ✅ built (2026-10-08), follow-ups left
+
+Built: a desktop-only promo banner beside the result card (xl+; a 🎮 circle on lg; eases in 3 s after the card shows) opens a pseudo-3D racer in a modal. Write-up, file map and gotchas: `docs/plan-done.md` "Test-drive racer game".
+
+- [ ] Optional **music**: the original's track is licensed to that project only (Lucky Lion Studios) — not reusable. A CC0/CC-BY loop would be a separate lazy download (~1-3 MB) behind the sound toggle, with a credit line in the modal.
+- [ ] Credit **javascript-racer** (MIT) on the About page as well (today only in the modal footer + the engine file header).
+- [ ] Remember the sound choice and the last settings in localStorage (today: sound off every open; settings only via the share link).
+- [ ] Touch/mobile controls — deliberately out of scope (desktop only, keyboard).
+- [ ] Track variety / a second track, ghost of the best lap, a local top-N lap table.
+- [ ] Count game opens in `app.usage_events` (new kind in `ROUTE_KINDS` + `USAGE_KINDS` + the `admin.stats.kind.*` i18n keys) to see whether the banner earns its space.
+
 ### Wanted vehicles ingest — planned (2026-10-01), not started
 
 Source: data.gov.ua dataset `ac1a3a9d-512b-446b-9b0c-1383d38ce474` (National

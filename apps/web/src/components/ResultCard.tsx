@@ -18,6 +18,7 @@ import NewCarsLink from '@/components/NewCarsLink'
 import StockSection from '@/components/StockSection'
 import SocialSection from '@/components/SocialSection'
 import CardTiltToggle from '@/components/CardTiltToggle'
+import RaceGameButton from '@/components/game/RaceGameButton'
 import CarWikiInfo from '@/components/CarWikiInfo'
 import ColorSwatch from '@/components/ColorSwatch'
 import CopyAllInfoButton from '@/components/CopyAllInfoButton'
@@ -138,7 +139,12 @@ export default function ResultCard({ data }: Props): ReactNode {
     <div className="card-vt relative w-full max-w-content">
       {/* Wide viewports have room beside the card — float the toggle out there instead
           of stacking it above, which otherwise pushes the card down for no reason. */}
-      <CardTiltToggle className="absolute top-3 -right-14 hidden lg:inline-flex" />
+      <CardTiltToggle className="absolute top-0 -left-14 hidden lg:inline-flex" />
+      <RaceGameButton
+        color={VEHICLE_COLOR_HEX[vehicleColor]}
+        kind={vehicleKind}
+        plate={data.plate}
+      />
       <Card
         ref={glowRef}
         className="group relative isolate w-full transform-[perspective(var(--tilt-perspective,1200px))_rotateX(var(--tilt-x,0deg))_rotateY(var(--tilt-y,0deg))] overflow-hidden shadow-2xl! transition-[transform,box-shadow] duration-200 ease-out will-change-transform backface-hidden hover:shadow-xl!"

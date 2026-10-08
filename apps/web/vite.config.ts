@@ -76,7 +76,10 @@ export default defineConfig({
           'assets/AccountMenu-*.js',
           'assets/FeaturesRoute-*.js',
           'assets/SettingsRoute-*.js',
-          'assets/AdminRoute-*.js'
+          'assets/AdminRoute-*.js',
+          // The "test your car" racer is desktop-only and fetched on demand after an explicit confirmation.
+          'assets/RaceGameModal-*.js',
+          'assets/engine-*.js'
         ],
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/api\//, /^\/og\//, /^\/healthz/],

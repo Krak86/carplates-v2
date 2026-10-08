@@ -5,12 +5,14 @@ import {
   fallbackVehicleColor,
   regionName,
   resolveVehicleColor,
+  resolveVehicleKind,
   VEHICLE_COLOR_HEX
 } from '@carplates/shared'
 import type { VinDecodeResponse } from '@carplates/shared'
 
 import BrandLogo from '@/components/BrandLogo'
 import CardTiltToggle from '@/components/CardTiltToggle'
+import RaceGameButton from '@/components/game/RaceGameButton'
 import CarWikiInfo from '@/components/CarWikiInfo'
 import CopyAllInfoButton from '@/components/CopyAllInfoButton'
 import FavoriteButton from '@/components/FavoriteButton'
@@ -45,7 +47,12 @@ export default function VinResult({ data }: Props): ReactNode {
     <div className="card-vt relative w-full max-w-content">
       {/* Wide viewports have room beside the card — float the toggle out there instead
           of stacking it above, which otherwise pushes the card down for no reason. */}
-      <CardTiltToggle className="absolute top-3 -right-14 hidden lg:inline-flex" />
+      <CardTiltToggle className="absolute top-0 -left-14 hidden lg:inline-flex" />
+      <RaceGameButton
+        color={VEHICLE_COLOR_HEX[vehicleColor]}
+        kind={resolveVehicleKind(registry?.actions[0]?.kind)}
+        plate={registry?.plate ?? ''}
+      />
       <Card
         ref={glowRef}
         className="group relative isolate w-full transform-[perspective(var(--tilt-perspective,1200px))_rotateX(var(--tilt-x,0deg))_rotateY(var(--tilt-y,0deg))] overflow-hidden shadow-2xl! transition-[transform,box-shadow] duration-200 ease-out will-change-transform backface-hidden hover:shadow-xl!"

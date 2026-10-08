@@ -243,6 +243,7 @@ Vitest 4 · ESLint 10 (flat config)
   the data). The seed CSV stores the computed keys, so after changing `makeKey`/`modelKey`/`brandSlug` re-run `ingest:vehiclesdb`
   from the download, not `:csv`. `stats_vdb` is stale until `pnpm db:refresh-derived`. Full status, gaps and refresh rules:
   DATASETS_PLAN.md ("VehiclesDB — built").
+- **Test-drive racer** (`apps/web/src/lib/racer/`, `components/game/`; docs/plan-done.md "Test-drive racer game"): desktop-only, online-only game in a modal, opened from the promo banner beside the result card. Engine ported from javascript-racer (MIT) — **never import its sprites/music (OutRun-derived / licensed to that project)**; all art and sound are procedural. The engine is a dynamic-imported chunk (import it only with `import type` elsewhere) and `RaceGameModal`/`engine` chunks are `globIgnores`d from the PWA precache. Settings are shareable via `?section=race&tab=…` (`encodeRaceConfig`/`decodeRaceConfig`, validated). Update `RACER_SIZE_KB` after big changes.
 - **Accounts** (`apps/api/src/auth/`, `features/`; web `components/auth/`, `routes/features|admin/`): user data lives in the
   separate `app` Postgres schema (migration 0034) — never mix it into `registry`, and treat it as the one part of the DB that
   is **not** re-ingestable. Own thin auth: Google ID token verified locally → httpOnly `carsua_sid` cookie, only its SHA-256 in
