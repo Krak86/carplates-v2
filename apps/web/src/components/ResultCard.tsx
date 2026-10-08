@@ -143,6 +143,7 @@ export default function ResultCard({ data }: Props): ReactNode {
       <RaceGameButton
         color={VEHICLE_COLOR_HEX[vehicleColor]}
         kind={vehicleKind}
+        bodyText={c.body}
         plate={data.plate}
       />
       <Card

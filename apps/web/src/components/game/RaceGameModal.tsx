@@ -15,6 +15,7 @@ import {
   bodyForKind,
   decodeRaceConfig,
   encodeRaceConfig,
+  randomBackdrop,
   sceneryForHour,
   type RacerConfig
 } from '@/lib/racer/config'
@@ -23,6 +24,8 @@ type Props = {
   /** `#rrggbb` of the looked-up car — the starting paint. */
   color: string
   kind: VehicleKind | null
+  /** The registry's free-text body type — picks the starting car (a fire engine for a ПОЖЕЖНИЙ, …). */
+  bodyText?: string | null
   plate: string
   /** Settings token of a shared link (`?section=race&tab=…`), applied over the defaults. */
   shared: string | null
@@ -34,12 +37,13 @@ type Props = {
  * screen says what will be downloaded, and the engine chunk is only requested after the viewer confirms. Portal for
  * the same reason as Model3dModal: the Card's 3D tilt would otherwise become the `position: fixed` containing block.
  */
-export default function RaceGameModal({ color, kind, plate, shared, onClose }: Props): ReactNode {
+export default function RaceGameModal({ color, kind, bodyText, plate, shared, onClose }: Props): ReactNode {
   const { t } = useTranslation()
   const [config, setConfig] = useState<RacerConfig>(() => ({
     color,
-    body: bodyForKind(kind),
+    body: bodyForKind(kind, bodyText),
     scenery: sceneryForHour(new Date().getHours()),
+    backdrop: randomBackdrop(),
     lanes: DEFAULT_LANES,
     traffic: DEFAULT_TRAFFIC,
     quality: DEFAULT_QUALITY,

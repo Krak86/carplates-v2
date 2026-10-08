@@ -51,6 +51,7 @@ export default function VinResult({ data }: Props): ReactNode {
       <RaceGameButton
         color={VEHICLE_COLOR_HEX[vehicleColor]}
         kind={resolveVehicleKind(registry?.actions[0]?.kind)}
+        bodyText={registry?.actions[0]?.body}
         plate={registry?.plate ?? ''}
       />
       <Card

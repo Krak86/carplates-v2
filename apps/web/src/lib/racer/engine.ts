@@ -2,19 +2,32 @@
  * Pseudo-3D road engine ported from Jake Gordon's javascript-racer (MIT, Copyright (c) 2012-2016 Jake Gordon and
  * contributors) — https://github.com/jakesgordon/javascript-racer. Physics, projection and road building follow the
  * original v4 ("final"); sprites, backdrop and music are NOT taken from it (those are OutRun-derived / licensed to that
- * project only) — every sprite is drawn procedurally in ./sprites.ts.
+ * project only) — scenery is drawn in ./sprites.ts, cars come from ./vehicle-assets.ts (Kenney renders).
  */
 import {
   QUALITY_SIZE,
   THEMES,
+  TOP_SPEED_KMH,
   TRAFFIC_COUNT,
   type RacerConfig,
   type RacerHud,
   type RoadColor,
   type Theme
 } from './config'
+import { preloadBackdrop } from './backdrop-assets'
 import { createSound } from './sound'
-import { BACKDROP_H, BACKDROP_W, makeAtlas, makeBackdrop, type Atlas, type Backdrop, type Sprite } from './sprites'
+import {
+  BACKDROP_H,
+  BACKDROP_W,
+  makeAtlas,
+  makeBackdrop,
+  makePlayerSprites,
+  type Atlas,
+  type Backdrop,
+  type Sprite
+} from './sprites'
+
+export { preloadBackdrop }
 
 export type Racer = {
   /** Applies new settings live (car, scenery, lanes, traffic, resolution) without resetting the lap. */
@@ -127,6 +140,7 @@ function sameConfig(a: RacerConfig, b: RacerConfig): boolean {
     a.color === b.color &&
     a.body === b.body &&
     a.scenery === b.scenery &&
+    a.backdrop === b.backdrop &&
     a.lanes === b.lanes &&
     a.traffic === b.traffic &&
     a.quality === b.quality &&
@@ -145,7 +159,7 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
   let cfg = initial
   let theme: Theme = THEMES[cfg.scenery]
   let atlas: Atlas = makeAtlas(theme, cfg.body, cfg.color, cfg.plate)
-  let backdrop: Backdrop = makeBackdrop(theme)
+  let backdrop: Backdrop = makeBackdrop(theme, cfg.scenery, cfg.backdrop)
   let width = 1024
   let height = 768
   let resolution = 1.6
@@ -257,7 +271,7 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
 
     playerX -= dx * speedPercent * playerSegment.curve * CENTRIFUGAL
 
-    if (keyFaster) speed += ACCEL * dt
+    if (keyFaster) speed += ACCEL * (0.5 + 0.5 * (topSpeed() / MAX_SPEED)) * dt
     else if (keySlower) speed += BREAKING * dt
     else speed += DECEL * dt
 
@@ -286,7 +300,7 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
     }
 
     playerX = limit(playerX, -3, 3)
-    speed = limit(speed, 0, MAX_SPEED)
+    speed = limit(speed, 0, topSpeed())
 
     const travelled = (position - startPosition) / SEGMENT_LENGTH
     skyOffset = increase(skyOffset, SKY_SPEED * playerSegment.curve * travelled, 1)
@@ -673,10 +687,15 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
     resolution = h / 480
   }
 
+  /** Speed ceiling of the chosen vehicle category (HUD km/h x 100), never above the engine's own MAX_SPEED. */
+  function topSpeed(): number {
+    return Math.min(MAX_SPEED, TOP_SPEED_KMH[cfg.body] * 100)
+  }
+
   function rebuildLook(): void {
     theme = THEMES[cfg.scenery]
     atlas = makeAtlas(theme, cfg.body, cfg.color, cfg.plate)
-    backdrop = makeBackdrop(theme)
+    backdrop = makeBackdrop(theme, cfg.scenery, cfg.backdrop)
   }
 
   function frame(): void {
@@ -740,7 +759,23 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
     setConfig(next): void {
       if (sameConfig(cfg, next)) return
       const resized = next.quality !== cfg.quality
+      const backdropChanged = next.backdrop !== cfg.backdrop
+      const sameWorld =
+        !resized && next.scenery === cfg.scenery && next.lanes === cfg.lanes && next.traffic === cfg.traffic
       cfg = next
+      if (backdropChanged) {
+        // photo layers are fetched on demand; the generated ones show until they arrive
+        const wanted = next.backdrop
+        void preloadBackdrop(wanted).then(() => {
+          if (!destroyed && cfg.backdrop === wanted) backdrop = makeBackdrop(theme, cfg.scenery, wanted)
+        })
+      }
+      if (sameWorld) {
+        // only the car changed (colour, body, plate): swap its sprites, the road, scenery and traffic stay as they are
+        atlas.player = makePlayerSprites(cfg.body, cfg.color, cfg.plate)
+        speed = Math.min(speed, topSpeed())
+        return
+      }
       if (resized) applyCanvasSize()
       rebuildLook()
       // same geometry, new colours/sprites/traffic: the lap carries on from where the car is

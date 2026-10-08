@@ -56,7 +56,9 @@ export function useRaceGameActions(config: RacerConfig, sound: boolean) {
   const handleStart = (): void => {
     setPhase('loading')
     import('@/lib/racer/engine').then(
-      mod => {
+      async mod => {
+        // the first frame already has the chosen photo backdrop (a failed fetch just keeps the generated one)
+        await mod.preloadBackdrop(configRef.current.backdrop)
         setEngine(mod)
         try {
           localStorage.setItem(LOADED_KEY, '1')

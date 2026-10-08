@@ -6,11 +6,13 @@ import RaceGameChip from '@/components/game/RaceGameChip'
 import RaceGameGroup from '@/components/game/RaceGameGroup'
 import { cn } from '@/lib/cn'
 import {
+  BACKDROPS,
   CAR_BODIES,
   LANE_OPTIONS,
   QUALITIES,
   SCENERIES,
   TRAFFIC_LEVELS,
+  randomBackdrop,
   type CarBody,
   type RacerConfig,
   type SceneryId
@@ -28,7 +30,13 @@ const BODY_EMOJI: Readonly<Record<CarBody, string>> = {
   sport: '🏎️',
   pickup: '🛻',
   van: '🚐',
-  moto: '🏍️'
+  moto: '🏍️',
+  taxi: '🚕',
+  police: '🚓',
+  ambulance: '🚑',
+  firetruck: '🚒',
+  garbage: '🚛',
+  bus: '🚌'
 }
 
 const SCENERY_EMOJI: Readonly<Record<SceneryId, string>> = { day: '☀️', sunset: '🌇', night: '🌙', winter: '❄️' }
@@ -72,6 +80,17 @@ export default function RaceGameSettings({ config, onChange }: Props): ReactNode
             <span aria-hidden>{BODY_EMOJI[body]}</span> {t(`race.body.${body}`)}
           </RaceGameChip>
         ))}
+      </RaceGameGroup>
+
+      <RaceGameGroup label={t('race.backdrop')}>
+        {BACKDROPS.map(backdrop => (
+          <RaceGameChip key={backdrop} active={config.backdrop === backdrop} onClick={() => onChange({ backdrop })}>
+            {t(`race.backdrop.${backdrop}`)}
+          </RaceGameChip>
+        ))}
+        <RaceGameChip active={false} onClick={() => onChange({ backdrop: randomBackdrop() })}>
+          <span aria-hidden>🎲</span> {t('race.backdrop.random')}
+        </RaceGameChip>
       </RaceGameGroup>
 
       <RaceGameGroup label={t('race.scenery')}>

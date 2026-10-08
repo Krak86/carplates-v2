@@ -1,0 +1,79 @@
+<!doctype html>
+<meta charset="utf-8" />
+<title>racer model preview</title>
+<body style="margin:0;background:#556;color:#fff;font:12px sans-serif">
+<script type="importmap">
+{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/" } }
+</script>
+<script type="module">
+import * as THREE from 'three'
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
+import { OBJLoader } from 'three/addons/loaders/OBJLoader.js'
+import { MTLLoader } from 'three/addons/loaders/MTLLoader.js'
+
+const S = 360
+const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, preserveDrawingBuffer: true })
+renderer.setSize(S, S)
+
+async function loadAny(file) {
+  if (file.endsWith('.glb')) return (await new GLTFLoader().loadAsync('/' + file)).scene
+  const mats = await new MTLLoader().loadAsync('/' + file.replace('.obj', '.mtl'))
+  mats.preload()
+  return await new OBJLoader().setMaterials(mats).loadAsync('/' + file)
+}
+
+window.preview = async (files, yaws = [0, 35, 180]) => {
+  document.body.innerHTML = ''
+  const info = {}
+  for (const file of files) {
+    const model = await loadAny(file)
+    const mats = new Set()
+    model.traverse(m => m.isMesh && [].concat(m.material).forEach(x => mats.add(x.name + '#' + (x.color ? x.color.getHexString() : '') + (x.map ? '+map' : ''))))
+    const box = new THREE.Box3().setFromObject(model)
+    const size = box.getSize(new THREE.Vector3()), c = box.getCenter(new THREE.Vector3())
+    info[file] = { size: size.toArray().map(v => +v.toFixed(2)), mats: [...mats] }
+    for (const yaw of yaws) {
+      const scene = new THREE.Scene()
+      scene.add(model)
+      scene.add(new THREE.HemisphereLight(0xffffff, 0x8890a0, 1.2))
+      const sun = new THREE.DirectionalLight(0xffffff, 1.6); sun.position.set(2, 5, 4); scene.add(sun)
+      const r = Math.max(size.x, size.y, size.z) * 3.2
+      const cam = new THREE.PerspectiveCamera(20, 1, 0.01, 1000)
+      const a = (yaw * Math.PI) / 180
+      cam.position.set(c.x + Math.sin(a) * r, c.y + r * 0.18, c.z + Math.cos(a) * r)
+      cam.lookAt(c)
+      renderer.render(scene, cam)
+      const cv = document.createElement('canvas'); cv.width = cv.height = S
+      cv.getContext('2d').drawImage(renderer.domElement, 0, 0)
+      const d = document.createElement('div'); d.style.cssText = 'display:inline-block;margin:2px'
+      d.append(cv, document.createElement('br'), file + ' yaw ' + yaw)
+      document.body.append(d)
+    }
+  }
+  return info
+}
+/** Each material in its own flat colour + legend, to find which one is the body paint. */
+window.parts = async (file, yaws) => {
+  document.body.innerHTML = ''
+  const model = await loadAny(file)
+  const names = []
+  model.traverse(m => { if (m.isMesh) { const arr = [].concat(m.material); m.material = arr.map(x => { if (!names.includes(x.name)) names.push(x.name); return new THREE.MeshBasicMaterial({ color: new THREE.Color().setHSL((names.indexOf(x.name) * 0.137) % 1, 0.9, 0.5) }) }); if (m.material.length === 1) m.material = m.material[0] } })
+  const box = new THREE.Box3().setFromObject(model), size = box.getSize(new THREE.Vector3()), c = box.getCenter(new THREE.Vector3())
+  for (const yaw of yaws) {
+    const scene = new THREE.Scene(); scene.add(model)
+    const r = Math.max(size.x, size.y, size.z) * 3.2
+    const cam = new THREE.PerspectiveCamera(20, 1, 0.01, 1000)
+    const a = (yaw * Math.PI) / 180
+    cam.position.set(c.x + Math.sin(a) * r, c.y + r * 0.18, c.z + Math.cos(a) * r); cam.lookAt(c)
+    renderer.render(scene, cam)
+    const cv = document.createElement('canvas'); cv.width = cv.height = S; cv.getContext('2d').drawImage(renderer.domElement, 0, 0)
+    const d = document.createElement('div'); d.style.cssText = 'display:inline-block;margin:2px'; d.append(cv, document.createElement('br'), file + ' yaw ' + yaw); document.body.append(d)
+  }
+  const lg = document.createElement('div')
+  names.forEach((n, i) => { const sp = document.createElement('span'); sp.style.cssText = 'margin:4px;padding:2px 6px;color:#000;background:' + new THREE.Color().setHSL((i * 0.137) % 1, 0.9, 0.5).getStyle(); sp.textContent = n; lg.append(sp) })
+  document.body.append(lg)
+  return names
+}
+window.ready = true
+</script>

@@ -1,10 +1,33 @@
 import { type VehicleKind } from '@carplates/shared'
 
-export const CAR_BODIES = ['sedan', 'hatch', 'suv', 'sport', 'pickup', 'van', 'moto'] as const
+export const CAR_BODIES = [
+  'sedan',
+  'hatch',
+  'suv',
+  'sport',
+  'pickup',
+  'van',
+  'moto',
+  'taxi',
+  'police',
+  'ambulance',
+  'firetruck',
+  'garbage',
+  'bus'
+] as const
 export type CarBody = (typeof CAR_BODIES)[number]
 
 export const SCENERIES = ['day', 'sunset', 'night', 'winter'] as const
 export type SceneryId = (typeof SCENERIES)[number]
+
+/** Photo backdrops behind the road (files in ./backdrops). */
+export const BACKDROPS = ['carpathians', 'spruce', 'forest', 'grove'] as const
+export type BackdropId = (typeof BACKDROPS)[number]
+
+/** A random backdrop — the starting choice; the player can pick another in the settings. */
+export function randomBackdrop(): BackdropId {
+  return BACKDROPS[Math.floor(Math.random() * BACKDROPS.length)] ?? DEFAULT_BACKDROP
+}
 
 export const LANE_OPTIONS = [2, 3, 4] as const
 export type Lanes = (typeof LANE_OPTIONS)[number]
@@ -16,6 +39,27 @@ export const QUALITIES = ['low', 'medium', 'high'] as const
 export type Quality = (typeof QUALITIES)[number]
 
 export const DEFAULT_BODY: CarBody = 'sedan'
+export const DEFAULT_BACKDROP: BackdropId = 'carpathians'
+
+/**
+ * Top speed per vehicle category, in the HUD's km/h (the game's absolute ceiling is 120). Spelled out per body rather
+ * than derived: it is game balance, not geometry.
+ */
+export const TOP_SPEED_KMH: Readonly<Record<CarBody, number>> = {
+  sedan: 110,
+  hatch: 105,
+  suv: 100,
+  sport: 120,
+  pickup: 95,
+  van: 90,
+  moto: 120,
+  taxi: 105,
+  police: 120,
+  ambulance: 100,
+  firetruck: 80,
+  garbage: 70,
+  bus: 80
+}
 export const DEFAULT_LANES: Lanes = 3
 export const DEFAULT_TRAFFIC: TrafficLevel = 'normal'
 export const DEFAULT_QUALITY: Quality = 'medium'
@@ -28,13 +72,14 @@ export const QUALITY_SIZE: Readonly<Record<Quality, readonly [number, number]>> 
 }
 
 /** Approximate gzipped size of the lazy game chunk, shown before the download is confirmed. */
-export const RACER_SIZE_KB = 10
+export const RACER_SIZE_KB = 560
 
 export type RacerConfig = {
   /** `#rrggbb` body colour of the player's car. */
   color: string
   body: CarBody
   scenery: SceneryId
+  backdrop: BackdropId
   lanes: Lanes
   traffic: TrafficLevel
   quality: Quality
@@ -141,13 +186,28 @@ export const THEMES: Readonly<Record<SceneryId, Theme>> = {
   }
 }
 
-/** The body type that matches the looked-up vehicle, as the starting choice. */
-export function bodyForKind(kind: VehicleKind | null): CarBody {
+/**
+ * The body type that matches the looked-up vehicle, as the starting choice. `bodyText` is the registry's free-text
+ * body (e.g. "ПОЖЕЖНИЙ-C", "УНІВЕРСАЛ-B"): it names the special vehicles and the passenger body shapes, which
+ * `kind` alone cannot.
+ */
+export function bodyForKind(kind: VehicleKind | null, bodyText?: string | null): CarBody {
+  const text = (bodyText ?? '').toUpperCase()
+  if (/ПОЖЕЖ/.test(text)) return 'firetruck'
+  if (/МЕДДОП|САНІТАР|ШВИДК/.test(text)) return 'ambulance'
+  if (/СМІТТЄВОЗ|ПІДМІТАЛЬНО/.test(text)) return 'garbage'
+  if (/ТАКСІ/.test(text)) return 'taxi'
+  if (/ПОЛІЦ|ОПЕРАТИВН/.test(text)) return 'police'
+  if (/ПІКАП/.test(text)) return 'pickup'
+  if (/ХЕТЧБЕК/.test(text)) return 'hatch'
+  if (/КУПЕ|КАБРІОЛЕТ|РОДСТЕР/.test(text)) return 'sport'
+  if (/ПОЗАШЛЯХ/.test(text)) return 'suv'
+  if (/МІКРОАВТОБУС|ФУРГОН/.test(text) && kind !== 'truck') return 'van'
   switch (kind) {
     case 'truck':
       return 'pickup'
     case 'bus':
-      return 'van'
+      return 'bus'
     case 'motorcycle':
     case 'moped':
     case 'motoTricycle':
@@ -171,17 +231,19 @@ export function sceneryForHour(hour: number): SceneryId {
 
 /** Settings (everything but the plate, which comes from the page) as one compact share-link token. */
 export function encodeRaceConfig(c: RacerConfig): string {
-  return [c.body, c.scenery, c.lanes, c.traffic, c.quality, c.color.slice(1)].join('-')
+  return [c.body, c.scenery, c.lanes, c.traffic, c.quality, c.color.slice(1), c.backdrop].join('-')
 }
 
 /** Reads a share-link token back; every part is validated, anything unknown is dropped (it is external input). */
 export function decodeRaceConfig(token: string | null): Partial<Omit<RacerConfig, 'plate'>> {
-  const [body, scenery, lanes, traffic, quality, color] = (token ?? '').split('-')
+  const [body, scenery, lanes, traffic, quality, color, backdrop] = (token ?? '').split('-')
   const out: Partial<Omit<RacerConfig, 'plate'>> = {}
   const body_ = CAR_BODIES.find(v => v === body)
   if (body_) out.body = body_
   const scenery_ = SCENERIES.find(v => v === scenery)
   if (scenery_) out.scenery = scenery_
+  const backdrop_ = BACKDROPS.find(v => v === backdrop)
+  if (backdrop_) out.backdrop = backdrop_
   const lanes_ = LANE_OPTIONS.find(v => String(v) === lanes)
   if (lanes_) out.lanes = lanes_
   const traffic_ = TRAFFIC_LEVELS.find(v => v === traffic)

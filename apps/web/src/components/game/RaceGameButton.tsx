@@ -19,6 +19,7 @@ const REVEAL_CLASS =
 type Props = {
   color: string
   kind: VehicleKind | null
+  bodyText?: string | null
   plate: string
 }
 
@@ -27,7 +28,7 @@ type Props = {
  * a banner on wide screens (`xl`, where the side gutter has room), a compact 🎮 circle on `lg`, nothing below — the game
  * needs a keyboard. Online only: the game is a lazy chunk kept out of the PWA precache.
  */
-export default function RaceGameButton({ color, kind, plate }: Props): ReactNode {
+export default function RaceGameButton({ color, kind, bodyText, plate }: Props): ReactNode {
   const { t } = useTranslation()
   const online = useOnlineStatus()
   const [searchParams] = useSearchParams()
@@ -101,7 +102,14 @@ export default function RaceGameButton({ color, kind, plate }: Props): ReactNode
 
       {open && online && (
         <Suspense fallback={null}>
-          <RaceGameModal color={color} kind={kind} plate={plate} shared={sharedTab} onClose={() => setOpen(false)} />
+          <RaceGameModal
+            color={color}
+            kind={kind}
+            bodyText={bodyText}
+            plate={plate}
+            shared={sharedTab}
+            onClose={() => setOpen(false)}
+          />
         </Suspense>
       )}
     </>

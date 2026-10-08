@@ -1,0 +1,103 @@
+<!doctype html>
+<meta charset="utf-8" />
+<title>racer backdrop</title>
+<body style="margin:0;background:#333;color:#fff;font:12px sans-serif">
+<script>
+const load = name => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = '/photos/' + name })
+window.names = null
+window.contact = async names => {
+  document.body.innerHTML = ''
+  for (const [i, n] of names.entries()) {
+    const im = await load(n)
+    const c = document.createElement('canvas'); c.width = 480; c.height = 300
+    const s = Math.min(480 / im.naturalWidth, 300 / im.naturalHeight)
+    c.getContext('2d').drawImage(im, 0, 0, im.naturalWidth * s, im.naturalHeight * s)
+    const d = document.createElement('div'); d.style.cssText = 'display:inline-block;margin:2px;vertical-align:top'
+    d.append(c, document.createTextNode(i + ' ' + n)); d.firstChild.style.display = 'block'
+    document.body.append(d)
+  }
+}
+window.ready = true
+</script>
+<script>
+const W = 1280
+const H = 480
+const HORIZON = 256 // layer y where the road meets the horizon (the old tree layer's base)
+
+const cv = (w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return c }
+
+/** 640-wide strip + its mirror = a 1280 layer that tiles seamlessly. */
+function mirror640(strip, h) {
+  const out = cv(W, h), g = out.getContext('2d')
+  g.drawImage(strip, 0, 0)
+  g.save(); g.translate(W, 0); g.scale(-1, 1); g.drawImage(strip, 0, 0); g.restore()
+  return out
+}
+
+window.build = async (photo, o = {}) => {
+  const { skyX = [0, 0.55], skyY = [0, 0.4], ridgeY = [0.33, 0.8], ridgeX = [0, 1], ridgeScale = 1 } = o
+  const im = await load(photo)
+  const iw = im.naturalWidth, ih = im.naturalHeight
+
+  // sky: top-left of the photo, scaled to 640 wide, hanging from y 0; the rest is a flat fill of its last row
+  const sx = skyX[0] * iw, sw = (skyX[1] - skyX[0]) * iw, sy = skyY[0] * ih, sh = (skyY[1] - skyY[0]) * ih
+  const sk = cv(640, Math.round((640 / sw) * sh)), sg = sk.getContext('2d')
+  sg.drawImage(im, sx, sy, sw, sh, 0, 0, sk.width, sk.height)
+  const sky = cv(W, H), kg = sky.getContext('2d')
+  const m = mirror640(sk, sk.height)
+  kg.drawImage(m, 0, 0)
+  const last = kg.getImageData(0, sk.height - 1, W, 1)
+  const grad = kg.createLinearGradient(0, sk.height - 40, 0, HORIZON + 4)
+  // below the photo: stretch a blurred copy of its last rows so the fade into the horizon haze is soft
+  for (let y = sk.height; y < H; y++) kg.putImageData(last, 0, y)
+  kg.fillStyle = 'rgba(214,236,248,0.0)'
+
+  // ridge + trees: cut the sky out, scale to 640 wide, base on the horizon, dark fill below
+  const ry = ridgeY[0] * ih, rh = (ridgeY[1] - ridgeY[0]) * ih
+  const rx = ridgeX[0] * iw, rw = (ridgeX[1] - ridgeX[0]) * iw
+  const rs = (640 / rw) * ridgeScale
+  const rc = cv(Math.round(rw * rs), Math.round(rh * rs)), rg = rc.getContext('2d')
+  rg.drawImage(im, rx, ry, rw, rh, 0, 0, rc.width, rc.height)
+  const px = rg.getImageData(0, 0, rc.width, rc.height), d = px.data
+  for (let i = 0; i < d.length; i += 4) {
+    const r = d[i], g = d[i + 1], b = d[i + 2]
+    const blueish = b - Math.max(r, g)          // sky: blue clearly above red/green
+    const bright = Math.min(r, g, b)            // clouds: bright, near-neutral
+    let a = 1
+    if (blueish > 6) a = Math.max(0, 1 - (blueish - 6) / 22)
+    if (bright > 175 && Math.abs(b - r) < 40) a = Math.min(a, Math.max(0, 1 - (bright - 175) / 30))
+    d[i + 3] = Math.round(d[i + 3] * a)
+  }
+  rg.putImageData(px, 0, 0)
+  const strip = cv(640, rc.height), tg = strip.getContext('2d')
+  tg.drawImage(rc, (rc.width - 640) / 2, 0, 640, rc.height, 0, 0, 640, rc.height)
+  const ridge = cv(W, H), gg = ridge.getContext('2d')
+  const top = HORIZON - rc.height
+  gg.drawImage(mirror640(strip, rc.height), 0, top)
+  // dark base under the tree line (the bottom row's average colour), so the layer is opaque below the horizon
+  const row = tg.getImageData(0, rc.height - 1, 640, 1).data
+  let r = 0, g = 0, b = 0
+  for (let i = 0; i < row.length; i += 4) { r += row[i]; g += row[i + 1]; b += row[i + 2] }
+  const n = row.length / 4
+  gg.fillStyle = `rgb(${Math.round(r / n)},${Math.round(g / n)},${Math.round(b / n)})`
+  gg.fillRect(0, HORIZON, W, H - HORIZON)
+  window.layers = { sky, ridge }
+
+  // preview: grass + both layers, as the engine would show them
+  document.body.innerHTML = ''
+  const pv = cv(W, 340), pg = pv.getContext('2d')
+  pg.fillStyle = '#2a9d2a'; pg.fillRect(0, 0, W, 340)
+  pg.drawImage(sky, 0, 0, W, H, 0, 0, W, H)
+  pg.drawImage(ridge, 0, 0, W, H, 0, 0, W, H)
+  pv.style.width = '1280px'
+  document.body.append(pv)
+  return { skyH: sk.height, ridgeH: rc.height }
+}
+
+window.save = async id => {
+  for (const [k, c] of Object.entries(window.layers)) {
+    const blob = await new Promise(r => c.toBlob(r, 'image/webp', 0.85))
+    await fetch('/save?name=' + encodeURIComponent('bg-' + id + '-' + k + '.webp'), { method: 'POST', body: blob })
+  }
+}
+</script>

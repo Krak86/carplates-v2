@@ -1,8 +1,10 @@
 import { VEHICLE_COLOR_HEX } from '@carplates/shared'
 
-import { type CarBody, type Theme } from './config'
+import { backdropLayers } from './backdrop-assets'
+import { type BackdropId, type CarBody, type SceneryId, type Theme } from './config'
+import { BODY_MODEL, TRAFFIC_HEAVY, TRAFFIC_LIVERY, vehicleSprite } from './vehicle-assets'
 
-/** Every sprite is drawn here at load time — no image files, so nothing to download and nothing licensed. */
+/** Cars are Kenney renders (see ./vehicle-assets.ts); scenery and the motorbike are drawn here at load time. */
 export type Sprite = { img: HTMLCanvasElement; w: number; h: number; heavy?: boolean }
 
 export type Atlas = {
@@ -80,7 +82,25 @@ type Spec = {
   bed?: boolean
 }
 
-const SPECS: Readonly<Record<Exclude<CarBody, 'moto'>, Spec>> = {
+type ProceduralBody = 'sedan' | 'hatch' | 'suv' | 'sport' | 'pickup' | 'van'
+
+/** What is drawn when a model has no rendered sprite: the closest of the hand-drawn bodies. */
+function proceduralBody(body: CarBody): ProceduralBody | 'moto' {
+  switch (body) {
+    case 'taxi':
+    case 'police':
+      return 'sedan'
+    case 'ambulance':
+    case 'firetruck':
+    case 'garbage':
+    case 'bus':
+      return 'van'
+    default:
+      return body
+  }
+}
+
+const SPECS: Readonly<Record<ProceduralBody, Spec>> = {
   sedan: { w: 80, h: 50, wheel: 11, bodyTop: 20, cabinTop: 5, cabinInset: 16, cabinBase: 12 },
   hatch: { w: 80, h: 54, wheel: 11, bodyTop: 22, cabinTop: 3, cabinInset: 12, cabinBase: 8 },
   suv: { w: 84, h: 62, wheel: 14, bodyTop: 26, cabinTop: 3, cabinInset: 9, cabinBase: 6 },
@@ -218,7 +238,10 @@ function paintSemi(ctx: Ctx, accent: string): void {
 }
 
 /** A player or traffic car; `steer` leans the sprite to fake turning. */
-function carSprite(body: CarBody, color: string, plate: string | null, steer = 0): Sprite {
+function carSprite(body: CarBody, color: string, plate: string | null, steer: -1 | 0 | 1 = 0): Sprite {
+  const rendered = vehicleSprite(BODY_MODEL[body], color, plate, steer)
+  if (rendered) return rendered
+  const fallback = proceduralBody(body)
   const draw = (ctx: Ctx, paint: (c: Ctx) => void, w: number, h: number): void => {
     if (steer !== 0) {
       ctx.translate(w / 2, h)
@@ -228,8 +251,8 @@ function carSprite(body: CarBody, color: string, plate: string | null, steer = 0
     }
     paint(ctx)
   }
-  if (body === 'moto') return makeSprite(44, 60, 4, ctx => draw(ctx, c => paintMoto(c, color, plate), 44, 60))
-  const spec = SPECS[body]
+  if (fallback === 'moto') return makeSprite(44, 60, 4, ctx => draw(ctx, c => paintMoto(c, color, plate), 44, 60))
+  const spec = SPECS[fallback]
   return makeSprite(spec.w, spec.h, 4, ctx => draw(ctx, c => paintCar(c, spec, color, plate), spec.w, spec.h))
 }
 
@@ -435,7 +458,7 @@ function cloud(ctx: Ctx, x: number, y: number, s: number): void {
   }
 }
 
-export function makeBackdrop(theme: Theme): Backdrop {
+export function makeBackdrop(theme: Theme, scenery: SceneryId, backdropId: BackdropId): Backdrop {
   const sky = makeLayer(ctx => {
     const g = ctx.createLinearGradient(0, 0, 0, 260)
     theme.skyStops.forEach(([at, color]) => g.addColorStop(at, color))
@@ -496,7 +519,42 @@ export function makeBackdrop(theme: Theme): Backdrop {
     ctx.fillRect(0, 240, BACKDROP_W, BACKDROP_H - 240)
   })
 
-  return { sky, hills, trees }
+  const photo = photoBackdrop(scenery, backdropId)
+  return photo ? { sky: photo.sky ?? sky, hills: makeLayer(() => {}), trees: photo.trees } : { sky, hills, trees }
+}
+
+/** Per-scenery wash laid over the photo's opaque pixels (source-atop leaves the cut-out sky untouched). */
+const PHOTO_WASH: Readonly<Record<SceneryId, { sky: boolean; ridge: string | null }>> = {
+  day: { sky: true, ridge: null },
+  sunset: { sky: false, ridge: 'rgba(150,60,45,0.5)' },
+  night: { sky: false, ridge: 'rgba(6,14,38,0.82)' },
+  winter: { sky: false, ridge: 'rgba(236,243,250,0.55)' }
+}
+
+/**
+ * The author's own Carpathian photo as the backdrop: a cloud sky (day only — the other scenery keeps its generated
+ * gradient, stars and moon) and a mountain + spruce line, washed with a colour for sunset / night / winter. Both
+ * images are 1280 px wide and mirror-tiled, so they wrap like the generated layers. Returns null when the images are missing.
+ */
+function photoBackdrop(
+  scenery: SceneryId,
+  backdropId: BackdropId
+): { sky: HTMLCanvasElement | null; trees: HTMLCanvasElement } | null {
+  const layers = backdropLayers(backdropId)
+  if (!layers) return null
+  const ridge = layers.ridge
+  const wash = PHOTO_WASH[scenery]
+  const trees = makeLayer(ctx => {
+    ctx.drawImage(ridge, 0, 0, BACKDROP_W, BACKDROP_H)
+    if (wash.ridge) {
+      ctx.globalCompositeOperation = 'source-atop'
+      ctx.fillStyle = wash.ridge
+      ctx.fillRect(0, 0, BACKDROP_W, BACKDROP_H)
+    }
+  })
+  const skyImg = wash.sky ? layers.sky : undefined
+  const sky = skyImg ? makeLayer(ctx => ctx.drawImage(skyImg, 0, 0, BACKDROP_W, BACKDROP_H)) : null
+  return { sky, trees }
 }
 
 //=========================================================================
@@ -510,6 +568,15 @@ const BOARD_COLORS: readonly (readonly [string, string])[] = [
   ['#c2410c', '#ffffff']
 ]
 
+export function makePlayerSprites(body: CarBody, color: string, plate: string): Atlas['player'] {
+  const text = plate || 'AA0000AA'
+  return {
+    straight: carSprite(body, color, text),
+    left: carSprite(body, color, text, -1),
+    right: carSprite(body, color, text, 1)
+  }
+}
+
 export function makeAtlas(theme: Theme, body: CarBody, color: string, plate: string): Atlas {
   const text = plate || 'AA0000AA'
   const colors = Object.values(VEHICLE_COLOR_HEX)
@@ -517,8 +584,15 @@ export function makeAtlas(theme: Theme, body: CarBody, color: string, plate: str
 
   const cars: Sprite[] = []
   for (const b of trafficBodies) for (let i = 0; i < 2; i++) cars.push(carSprite(b, pick(colors), null))
-  for (const accent of [pick(colors), pick(colors)])
-    cars.push(makeSprite(110, 140, 3, ctx => paintSemi(ctx, accent), true))
+  for (const model of TRAFFIC_LIVERY) {
+    const livery = vehicleSprite(model, null, null)
+    if (livery) cars.push(livery)
+  }
+  const heavies = TRAFFIC_HEAVY.map(model => vehicleSprite(model, null, null, 0, true)).filter(s => !!s)
+  if (heavies.length > 0) cars.push(...heavies)
+  else
+    for (const accent of [pick(colors), pick(colors)])
+      cars.push(makeSprite(110, 140, 3, ctx => paintSemi(ctx, accent), true))
 
   const pine = makeSprite(240, 380, 1.5, ctx => paintPine(ctx, theme))
   const oak = makeSprite(300, 330, 1.5, ctx => paintOak(ctx, theme))
@@ -537,11 +611,7 @@ export function makeAtlas(theme: Theme, body: CarBody, color: string, plate: str
   ]
 
   return {
-    player: {
-      straight: carSprite(body, color, text),
-      left: carSprite(body, color, text, -1),
-      right: carSprite(body, color, text, 1)
-    },
+    player: makePlayerSprites(body, color, plate),
     cars,
     plants,
     poplar,

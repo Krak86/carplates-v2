@@ -406,7 +406,8 @@ above once scoped, or dropped if research says no.
 Built: a desktop-only promo banner beside the result card (xl+; a 🎮 circle on lg; eases in 3 s after the card shows) opens a pseudo-3D racer in a modal. Write-up, file map and gotchas: `docs/plan-done.md` "Test-drive racer game".
 
 - [ ] Optional **music**: the original's track is licensed to that project only (Lucky Lion Studios) — not reusable. A CC0/CC-BY loop would be a separate lazy download (~1-3 MB) behind the sound toggle, with a credit line in the modal.
-- [ ] Credit **javascript-racer** (MIT) on the About page as well (today only in the modal footer + the engine file header).
+- ✅ Credits (javascript-racer, Kenney, Quaternius, animanyarty CC BY 4.0) are in `about.source.racer` since the art pass.
+- [ ] **Art-pass leftovers** (details: docs/plan-done.md "Racer art pass"): (a) re-render + copy the `truck*` / `van*` sprites — 9 files stayed on the older, darker grey base because Windows held them open; (b) verify in the game: bus/moto steering direction, the per-category top speed, the sunset/night/winter washes on all four backdrops; (c) more models from the owner (better sport/SUV/pickup/van, tractor, tow truck…): GLB/OBJ, CC0 or CC-BY, closed rear, separate body material; (d) roadside trees/signs are still generated; (e) tune bus/moto size and plate rects; (f) the backdrop ridges are mirrored, so the centre peak is symmetric — more photos or a wider crop would fix it; (g) the banner appears 3 s after the card (xl+ only) — confirm that is what the owner meant.
 - [ ] Remember the sound choice and the last settings in localStorage (today: sound off every open; settings only via the share link).
 - [ ] Touch/mobile controls — deliberately out of scope (desktop only, keyboard).
 - [ ] Track variety / a second track, ghost of the best lap, a local top-N lap table.
