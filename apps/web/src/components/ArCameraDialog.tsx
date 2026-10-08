@@ -7,6 +7,7 @@ import ArCameraSettings from '@/components/ArCameraSettings'
 import { DEFAULT_CAMERA_QUALITY, videoConstraints } from '@/components/camera-quality'
 import type { CameraQuality } from '@/components/camera-quality'
 import CameraZoomControl from '@/components/CameraZoomControl'
+import ShareButton from '@/components/ShareButton'
 import { useCameraZoom } from '@/components/use-camera-zoom'
 import { usePinchZoom } from '@/components/use-pinch-zoom'
 
@@ -91,9 +92,12 @@ export default function ArCameraDialog({ onClose }: Props): ReactNode {
       <div className="flex h-full w-full flex-col overflow-y-auto bg-surface p-4 sm:h-auto sm:max-h-full sm:max-w-lg sm:rounded-xl">
         <div className="mb-3 flex items-center justify-between">
           <span className="font-semibold">{t('ar.title')}</span>
-          <button type="button" onClick={onClose} aria-label={t('camera.close')} className="text-muted hover:text-fg">
-            ✕
-          </button>
+          <div className="flex items-center gap-3">
+            <ShareButton section="ar" label={t('share.button', { section: t('ar.shareName') })} />
+            <button type="button" onClick={onClose} aria-label={t('camera.close')} className="text-muted hover:text-fg">
+              ✕
+            </button>
+          </div>
         </div>
 
         {error ? (

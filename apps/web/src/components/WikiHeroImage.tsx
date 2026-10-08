@@ -47,7 +47,12 @@ export default function WikiHeroImage({ brand, model, year, rawKind, vehicleKey 
 
   return (
     <div className="hero-vt relative -my-3 h-64 w-full max-w-content sm:h-80">
-      {!isLoaded && <div className="absolute inset-0 animate-pulse rounded-lg bg-black/10 dark:bg-white/10" />}
+      {!isLoaded && (
+        <div
+          aria-hidden
+          className="absolute inset-0 animate-pulse rounded-lg border border-border bg-surface/70"
+        />
+      )}
       {image && (
         <img
           src={image.url}

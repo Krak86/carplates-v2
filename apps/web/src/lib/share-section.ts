@@ -16,6 +16,7 @@ export const SHARE_SECTIONS = [
   'model3d',
   'model360',
   'race',
+  'ar',
   'news',
   'social',
   'stock'

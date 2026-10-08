@@ -24,11 +24,14 @@ const FUTURE_SECTIONS = [
   { titleKey: 'features.considering', ids: CONSIDERING_FEATURES }
 ] as const
 
+/** With nothing live yet the toggles, save button and their query are all hidden. */
+const HAS_TOGGLES = AVAILABLE_PAID_FEATURES.length > 0
+
 // Lazy-loaded (see App.tsx). Admins use this same page (and additionally see /admin).
 export default function FeaturesRoute(): ReactNode {
   const { t } = useTranslation()
   const { user, isPending } = useSession()
-  const features = useQuery({ ...featuresQuery(), enabled: !!user })
+  const features = useQuery({ ...featuresQuery(), enabled: !!user && HAS_TOGGLES })
   const { save } = useFeaturesActions()
   // Only the user's unsaved edits live here; everything else is derived from the server state.
   const [draft, setDraft] = useState<Partial<Record<PaidFeature, boolean>>>({})
@@ -59,17 +62,16 @@ export default function FeaturesRoute(): ReactNode {
       {/* Opaque-ish panel: the page sits over a user-chosen photo/live background, so bare text isn't always legible. */}
       <Card className="mb-4">
         <h1 className="mb-2 text-2xl font-bold">{t('features.title')}</h1>
-        <p className="mb-1 text-[var(--color-muted)]">{t('features.intro')}</p>
-        <p className="text-sm text-[var(--color-muted)]">{t('features.pricing')}</p>
+        <p className="text-[var(--color-muted)]">{t('features.intro')}</p>
       </Card>
 
-      {features.isPending && (
+      {HAS_TOGGLES && features.isPending && (
         <p className="flex items-center gap-2 text-[var(--color-muted)]">
           <Spinner /> {t('result.loading')}
         </p>
       )}
 
-      {features.isSuccess && (
+      {HAS_TOGGLES && features.isSuccess && (
         <Card className="divide-y divide-[var(--color-border)] p-0">
           {AVAILABLE_PAID_FEATURES.map(feature => (
             <label key={feature} className="flex cursor-pointer items-start gap-3 p-4 hover:bg-primary/5">
@@ -90,9 +92,9 @@ export default function FeaturesRoute(): ReactNode {
         </Card>
       )}
 
-      {features.isError && <p className="text-red-600">{t('result.error')}</p>}
+      {HAS_TOGGLES && features.isError && <p className="text-red-600">{t('result.error')}</p>}
 
-      {features.isSuccess && (
+      {HAS_TOGGLES && features.isSuccess && (
         <div className="mt-4 flex items-center gap-3">
           <button
             type="button"

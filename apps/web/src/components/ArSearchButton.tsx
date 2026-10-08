@@ -1,6 +1,7 @@
-import { lazy, Suspense, useState } from 'react'
+import { lazy, Suspense } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useSearchParams } from 'react-router'
 
 import { SEARCH_BUTTON_CLASS, SEARCH_BUTTON_ICON_CLASS } from '@/components/search-button-styles'
 
@@ -13,7 +14,31 @@ type Props = {
 
 export default function ArSearchButton({ disabled = false }: Props): ReactNode {
   const { t } = useTranslation()
-  const [open, setOpen] = useState(false)
+  // The open state lives in the URL (`?section=ar`), so the scanner is a shareable link and survives a reload.
+  const [searchParams, setSearchParams] = useSearchParams()
+  const open = searchParams.get('section') === 'ar'
+
+  const handleOpen = (): void => {
+    setSearchParams(
+      prev => {
+        const next = new URLSearchParams(prev)
+        next.set('section', 'ar')
+        return next
+      },
+      { replace: true }
+    )
+  }
+
+  const handleClose = (): void => {
+    setSearchParams(
+      prev => {
+        const next = new URLSearchParams(prev)
+        next.delete('section')
+        return next
+      },
+      { replace: true }
+    )
+  }
 
   if (!navigator.mediaDevices?.getUserMedia) return null
 
@@ -21,7 +46,7 @@ export default function ArSearchButton({ disabled = false }: Props): ReactNode {
     <>
       <button
         type="button"
-        onClick={() => setOpen(true)}
+        onClick={handleOpen}
         disabled={disabled}
         title={disabled ? t('offline.needsConnection') : undefined}
         className={SEARCH_BUTTON_CLASS}
@@ -31,7 +56,7 @@ export default function ArSearchButton({ disabled = false }: Props): ReactNode {
         </span>
         {t('search.byAr')}
       </button>
-      <Suspense fallback={null}>{open && <ArCameraDialog onClose={() => setOpen(false)} />}</Suspense>
+      <Suspense fallback={null}>{open && !disabled && <ArCameraDialog onClose={handleClose} />}</Suspense>
     </>
   )
 }

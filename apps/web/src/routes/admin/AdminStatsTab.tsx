@@ -18,6 +18,15 @@ function Tile({ label, value }: TileProps): ReactNode {
   )
 }
 
+/** PostHog reports percent-encoded paths (`/%D0%92…` for a Cyrillic plate); show them as typed. */
+function readablePath(path: string): string {
+  try {
+    return decodeURIComponent(path)
+  } catch {
+    return path
+  }
+}
+
 export default function AdminStatsTab(): ReactNode {
   const { t } = useTranslation()
   const stats = useQuery(adminStatsQuery())
@@ -122,7 +131,9 @@ export default function AdminStatsTab(): ReactNode {
           <div className="mt-3 text-sm">
             {a.topPaths.map(p => (
               <div key={p.path} className="flex justify-between gap-3 tabular-nums">
-                <span className="truncate">{p.path}</span>
+                <span className="truncate" title={p.path}>
+                  {readablePath(p.path)}
+                </span>
                 <span>{p.views}</span>
               </div>
             ))}
