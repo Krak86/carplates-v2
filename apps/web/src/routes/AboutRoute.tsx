@@ -3,9 +3,9 @@ import { useTranslation } from 'react-i18next'
 
 import Card from '@/components/ui/Card'
 
-type Source = { key: string; label: string; url: string; icon?: string; mask?: string }
+type Source = { key: string; label: string; url?: string; icon?: string; mask?: string }
 
-const SOURCES = [
+const SOURCES: readonly Source[] = [
   { key: 'dataGovUa', label: 'data.gov.ua', url: 'https://data.gov.ua', icon: '/icons/sources/datagovua.webp' },
   { key: 'nhtsa', label: 'NHTSA', url: 'https://www.nhtsa.gov', icon: '/icons/sources/nhtsa.webp' },
   { key: 'wikipedia', label: 'Wikipedia', url: 'https://www.wikipedia.org', mask: '/icons/wikipedia-w.svg' },
@@ -19,6 +19,7 @@ const SOURCES = [
   { key: 'eea', label: 'EEA', url: 'https://www.eea.europa.eu', icon: '/icons/sources/eea.svg' },
   { key: 'vehiclesdb', label: 'VehiclesDB', url: 'https://vehiclesdb.com', icon: '/icons/sources/vehiclesdb.webp' },
   { key: 'infocar', label: 'infocar.ua', url: 'https://www.infocar.ua', icon: '/icons/infocar.png' },
+  { key: 'hondaUa', label: 'honda.ua', url: 'https://www.honda.ua', icon: '/icons/sources/honda.webp' },
   { key: 'itc', label: 'ITC.ua', url: 'https://itc.ua/ua/tag/test-drayv-ua/', icon: '/icons/itc.webp' },
   { key: 'mezha', label: 'Mezha', url: 'https://mezha.ua/tag/test-drayv/', icon: '/icons/mezha.webp' },
   { key: 'eauto', label: 'eauto.org.ua', url: 'https://eauto.org.ua', icon: '/icons/sources/eauto.svg' },
@@ -41,6 +42,7 @@ const SOURCES = [
   { key: 'edrive', label: 'e-drive.com.ua', url: 'https://e-drive.com.ua', icon: '/icons/edrive.png' },
   { key: 'topgear', label: 'TopGear', url: 'https://www.topgear.com/car-reviews', icon: '/icons/topgear.webp' },
   { key: 'carshow360', label: 'CarShow360', url: 'https://carshow360.net', icon: '/icons/sources/carshow360.webp' },
+  { key: 'winner', label: 'Winner Imports', url: 'https://stock.winner.ua', icon: '/icons/sources/winner.svg' },
   { key: 'sketchfab', label: 'Sketchfab', url: 'https://sketchfab.com', icon: '/icons/sources/sketchfab.webp' },
   {
     key: 'wikimedia',
@@ -62,6 +64,13 @@ const SOURCES = [
     url: 'https://www.google.com/maps',
     icon: '/icons/sources/googlemaps.webp'
   },
+  { key: 'brandSites', label: 'Importer & brand sites', icon: '/icons/official-site.svg' },
+  {
+    key: 'racer',
+    label: 'javascript-racer',
+    url: 'https://github.com/jakesgordon/javascript-racer',
+    mask: '/icons/sources/github.webp'
+  },
   { key: 'youtube', label: 'YouTube', url: 'https://www.youtube.com', icon: '/icons/sources/youtube.webp' },
   {
     key: 'googleSignIn',
@@ -71,7 +80,7 @@ const SOURCES = [
   },
   { key: 'posthog', label: 'PostHog', url: 'https://posthog.com', icon: '/icons/sources/posthog.webp' },
   { key: 'sentry', label: 'Sentry', url: 'https://sentry.io', icon: '/icons/sources/sentry.webp' }
-] as const satisfies readonly Source[]
+]
 
 function SourceAvatar({ source }: { source: Source }): ReactNode {
   if (source.icon) {
@@ -157,14 +166,18 @@ export default function AboutRoute(): ReactNode {
               <SourceAvatar source={source} />
 
               <div className="min-w-0">
-                <a
-                  href={source.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-medium text-[var(--color-primary)] underline"
-                >
-                  {source.label} ↗
-                </a>
+                {source.url ? (
+                  <a
+                    href={source.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-medium text-[var(--color-primary)] underline"
+                  >
+                    {source.label} ↗
+                  </a>
+                ) : (
+                  <span className="font-medium">{source.label}</span>
+                )}
                 <span className="text-[var(--color-muted)]"> — {t(`about.source.${source.key}`)}</span>
               </div>
             </li>
