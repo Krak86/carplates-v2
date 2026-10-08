@@ -155,8 +155,12 @@ async function loadCustom(file) {
 }
 
 window.renderCustom = async (spec, yaw, mask) => {
-  const { file, rearYaw, width, widthAxis = 'x', body = [], colors = {}, elev = 8, fov = 14 } = spec
+  const { file, rearYaw, width, widthAxis = 'x', body = [], colors = {}, hide = [], elev = 8, fov = 14 } = spec
   const model = (await loadCustom(file)).clone(true)
+  // `hide`: materials of helper meshes baked into the model (ground-shadow planes) — removed so they don't widen the crop
+  const drop = []
+  model.traverse(m => { if (m.isMesh && [].concat(m.material).every(x => hide.includes(x.name))) drop.push(m) })
+  drop.forEach(m => m.parent.remove(m))
   model.traverse(m => {
     if (!m.isMesh) return
     const swap = x => {

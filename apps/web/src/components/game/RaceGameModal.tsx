@@ -8,15 +8,15 @@ import ShareButton from '@/components/ShareButton'
 import RaceGameSettings from '@/components/game/RaceGameSettings'
 import { useRaceGameActions } from '@/components/game/use-race-game-actions'
 import {
-  DEFAULT_LANES,
-  DEFAULT_QUALITY,
-  DEFAULT_TRAFFIC,
   RACER_SIZE_KB,
   bodyForKind,
   decodeRaceConfig,
   encodeRaceConfig,
   randomBackdrop,
-  sceneryForHour,
+  randomLanes,
+  randomQuality,
+  randomScenery,
+  randomTraffic,
   type RacerConfig
 } from '@/lib/racer/config'
 
@@ -42,11 +42,11 @@ export default function RaceGameModal({ color, kind, bodyText, plate, shared, on
   const [config, setConfig] = useState<RacerConfig>(() => ({
     color,
     body: bodyForKind(kind, bodyText),
-    scenery: sceneryForHour(new Date().getHours()),
+    scenery: randomScenery(),
     backdrop: randomBackdrop(),
-    lanes: DEFAULT_LANES,
-    traffic: DEFAULT_TRAFFIC,
-    quality: DEFAULT_QUALITY,
+    lanes: randomLanes(),
+    traffic: randomTraffic(),
+    quality: randomQuality(),
     plate,
     ...decodeRaceConfig(shared)
   }))
@@ -99,27 +99,9 @@ export default function RaceGameModal({ color, kind, bodyText, plate, shared, on
                 <canvas ref={setCanvas} className="block aspect-[4/3] w-full" />
 
                 {hud && (
-                  <div className="pointer-events-none absolute inset-x-0 top-0 flex justify-between p-3 font-mono text-white [text-shadow:0_1px_3px_#000]">
-                    <div>
-                      <div className="text-3xl leading-none font-bold">{hud.speed}</div>
-                      <div className="text-xs opacity-80">{t('race.hud.speed')}</div>
-                    </div>
-                    <div className="text-right text-sm leading-tight">
-                      <div>
-                        {t('race.hud.lap')}: {hud.lap}
-                      </div>
-                      {hud.last && (
-                        <div className={hud.record ? 'text-yellow-300' : undefined}>
-                          {t('race.hud.last')}: {hud.last}
-                          {hud.record ? ' 🏆' : ''}
-                        </div>
-                      )}
-                      {hud.best && (
-                        <div>
-                          {t('race.hud.best')}: {hud.best}
-                        </div>
-                      )}
-                    </div>
+                  <div className="pointer-events-none absolute inset-x-0 top-0 p-3 font-mono text-white [text-shadow:0_1px_3px_#000]">
+                    <div className="text-3xl leading-none font-bold">{hud.speed}</div>
+                    <div className="text-xs opacity-80">{t('race.hud.speed')}</div>
                   </div>
                 )}
               </div>

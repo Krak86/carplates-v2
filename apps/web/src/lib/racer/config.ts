@@ -24,9 +24,31 @@ export type SceneryId = (typeof SCENERIES)[number]
 export const BACKDROPS = ['carpathians', 'spruce', 'forest', 'grove'] as const
 export type BackdropId = (typeof BACKDROPS)[number]
 
+function pickRandom<T>(options: readonly T[], fallback: T): T {
+  return options[Math.floor(Math.random() * options.length)] ?? fallback
+}
+
 /** A random backdrop — the starting choice; the player can pick another in the settings. */
 export function randomBackdrop(): BackdropId {
-  return BACKDROPS[Math.floor(Math.random() * BACKDROPS.length)] ?? DEFAULT_BACKDROP
+  return pickRandom(BACKDROPS, DEFAULT_BACKDROP)
+}
+
+/** Random starting scenery (day / sunset / night / winter); the player can switch it live in the settings. */
+export function randomScenery(): SceneryId {
+  return pickRandom(SCENERIES, 'day')
+}
+
+/** Random starting lanes / traffic / resolution, so every opening of the game feels a little different. */
+export function randomLanes(): Lanes {
+  return pickRandom(LANE_OPTIONS, DEFAULT_LANES)
+}
+
+export function randomTraffic(): TrafficLevel {
+  return pickRandom(TRAFFIC_LEVELS, DEFAULT_TRAFFIC)
+}
+
+export function randomQuality(): Quality {
+  return pickRandom(QUALITIES, DEFAULT_QUALITY)
 }
 
 export const LANE_OPTIONS = [2, 3, 4] as const
@@ -72,7 +94,7 @@ export const QUALITY_SIZE: Readonly<Record<Quality, readonly [number, number]>> 
 }
 
 /** Approximate gzipped size of the lazy game chunk, shown before the download is confirmed. */
-export const RACER_SIZE_KB = 560
+export const RACER_SIZE_KB = 470
 
 export type RacerConfig = {
   /** `#rrggbb` body colour of the player's car. */
@@ -217,16 +239,6 @@ export function bodyForKind(kind: VehicleKind | null, bodyText?: string | null):
     default:
       return DEFAULT_BODY
   }
-}
-
-/**
- * Starting scenery from the viewer's local clock (their browser's time zone). Winter is never picked automatically —
- * it is a look, not a time of day — but stays selectable in the settings.
- */
-export function sceneryForHour(hour: number): SceneryId {
-  if (hour >= 7 && hour < 18) return 'day'
-  if (hour >= 18 && hour < 21) return 'sunset'
-  return 'night'
 }
 
 /** Settings (everything but the plate, which comes from the page) as one compact share-link token. */

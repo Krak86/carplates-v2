@@ -18,29 +18,38 @@ type Sprite = { img: HTMLCanvasElement; w: number; h: number; heavy?: boolean }
 /** Logical sprite units per pixel: sets the on-road size of a model (the sedan lands at the old 80 units). */
 const LOGICAL_PER_PX = 0.26
 
-/** Body type → rendered model (Kenney Car Kit, plus the Quaternius bus and the Sketchfab motorbike). */
+/** Body type → rendered model (Kenney Car Kit, plus the CC-BY Sketchfab models — see docs/plan-done.md "Racer art pass"). */
 export const BODY_MODEL: Readonly<Record<CarBody, string>> = {
-  sedan: 'sedan',
-  hatch: 'hatchback-sports',
-  suv: 'suv',
-  sport: 'sedan-sports',
-  pickup: 'truck',
-  van: 'van',
+  sedan: 'sedan-toyama',
+  hatch: 'hatch-mag80',
+  suv: 'suv-hummer',
+  sport: 'sport-juff',
+  pickup: 'pickup-silv',
+  van: 'van-gmc',
   taxi: 'taxi',
   police: 'police',
   ambulance: 'ambulance',
   firetruck: 'firetruck',
   garbage: 'garbage-truck',
-  bus: 'bus',
+  bus: 'bus-green',
   moto: 'moto'
 }
 
 /** Models that keep their own livery in traffic (never recoloured) and the slow, wide ones. */
 export const TRAFFIC_LIVERY: readonly string[] = ['taxi', 'police', 'ambulance']
-export const TRAFFIC_HEAVY: readonly string[] = ['bus', 'delivery', 'garbage-truck', 'truck-flat', 'firetruck']
+export const TRAFFIC_HEAVY: readonly string[] = ['bus-green', 'delivery', 'garbage-truck', 'truck-flat', 'firetruck']
 
 /** Models rendered by renderCustom (scripts/racer-render/render.html), not the Kenney colormap path. */
-const CUSTOM_RENDERED: readonly string[] = ['bus', 'moto']
+const CUSTOM_RENDERED: readonly string[] = [
+  'bus-green',
+  'moto',
+  'hatch-mag80',
+  'sport-juff',
+  'sedan-toyama',
+  'van-gmc',
+  'suv-hummer',
+  'pickup-silv'
+]
 
 const URLS = import.meta.glob<string>('./assets/*.webp', { eager: true, query: '?url', import: 'default' })
 

@@ -10,7 +10,7 @@ const [modelsDir, outDir, photosDir] = process.argv.slice(2)
 if (!modelsDir || !outDir) throw new Error('usage: serve.mjs <modelsDir> <outDir>')
 mkdirSync(outDir, { recursive: true })
 
-const TYPES = { '.html': 'text/html', '.glb': 'model/gltf-binary', '.png': 'image/png', '.js': 'text/javascript', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg' }
+const TYPES = { '.html': 'text/html', '.glb': 'model/gltf-binary', '.png': 'image/png', '.js': 'text/javascript', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp' }
 
 createServer((req, res) => {
   const url = new URL(req.url, 'http://localhost')
@@ -32,7 +32,9 @@ createServer((req, res) => {
         ? join(here, 'backdrop.html')
         : url.pathname.startsWith('/photos/') && photosDir
           ? join(photosDir, basename(url.pathname))
-          : join(modelsDir, basename(url.pathname))
+          : existsSync(join(modelsDir, basename(url.pathname)))
+            ? join(modelsDir, basename(url.pathname))
+            : join(outDir, basename(url.pathname)) // already-saved sprites, to inspect them (plate rects)
   if (!existsSync(file)) {
     res.statusCode = 404
     return res.end('nf')
