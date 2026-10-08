@@ -71,6 +71,7 @@ const SOURCES: readonly Source[] = [
     url: 'https://github.com/jakesgordon/javascript-racer',
     mask: '/icons/sources/github.webp'
   },
+  { key: 'kenney', label: 'Kenney', url: 'https://kenney.nl', icon: '/icons/sources/kenney.webp' },
   { key: 'youtube', label: 'YouTube', url: 'https://www.youtube.com', icon: '/icons/sources/youtube.webp' },
   {
     key: 'googleSignIn',
