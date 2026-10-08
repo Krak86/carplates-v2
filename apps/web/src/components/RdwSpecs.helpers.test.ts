@@ -9,9 +9,30 @@ import {
   formatPercent,
   kgToTonnes,
   kwToHp,
+  scaleClass,
+  scalePosition,
   SPEC_ROWS,
-  visibleShares
+  visibleShares,
+  type SpecScale
 } from '@/components/RdwSpecs.helpers'
+
+describe('spec scales', () => {
+  const scale: SpecScale = { min: 220, max: 340, cuts: [250, 270, 290], labels: 'size' }
+
+  it('classifies a value by the cuts, boundary moving up', () => {
+    expect([240, 250, 269, 270, 289, 290, 400].map(v => scaleClass(scale, v))).toEqual([0, 1, 1, 2, 2, 3, 3])
+  })
+
+  it('positions a value on the track and clamps outliers', () => {
+    expect(scalePosition(scale, 280)).toBeCloseTo(0.5)
+    expect(scalePosition(scale, 100)).toBe(0)
+    expect(scalePosition(scale, 500)).toBe(1)
+  })
+
+  it('gives every scaled row a class label per class', () => {
+    for (const def of SPEC_ROWS) if (def.scale) expect(def.scale.cuts).toHaveLength(3)
+  })
+})
 
 describe('describeRange', () => {
   it('shows the median and the spread when they differ', () => {

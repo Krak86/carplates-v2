@@ -2,20 +2,23 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import CopyIcon from '@/components/CopyIcon'
-import { useCopyFeedback } from '@/components/use-copy-feedback'
+import { type UseCopyFeedback, useCopyFeedback } from '@/components/use-copy-feedback'
 import { cn } from '@/lib/cn'
 
 type Props = {
   text: string
   label: string
   className?: string
+  /** Pass a shared `useCopyFeedback()` so other triggers (e.g. clicking the plate itself) drive the same icon. */
+  feedback?: UseCopyFeedback
 }
 
 /** Copies `text` (a plate or VIN) to the clipboard, swapping the icon to a
  *  checkmark and announcing "Copied!" for screen readers for a couple seconds. */
-export default function CopyButton({ text, label, className }: Props): ReactNode {
+export default function CopyButton({ text, label, className, feedback }: Props): ReactNode {
   const { t } = useTranslation()
-  const { copied, copy } = useCopyFeedback()
+  const own = useCopyFeedback()
+  const { copied, copy } = feedback ?? own
 
   return (
     <button

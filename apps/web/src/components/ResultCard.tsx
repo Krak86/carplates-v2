@@ -46,6 +46,7 @@ import SectionInfo from '@/components/SectionInfo'
 import ShareButton from '@/components/ShareButton'
 import TopStatBadges from '@/components/TopStatBadges'
 import { useCarHeroImageActions } from '@/components/use-car-hero-image-actions'
+import { useCopyFeedback } from '@/components/use-copy-feedback'
 import Card from '@/components/ui/Card'
 import VehicleKindIcon from '@/components/VehicleKindIcon'
 import Model3dButton from '@/components/Model3dButton'
@@ -99,6 +100,8 @@ export default function ResultCard({ data }: Props): ReactNode {
   const basicRef = useRef<HTMLDivElement>(null)
   const historyRef = useRef<HTMLDivElement>(null)
   const vinRef = useRef<HTMLDivElement>(null)
+  const plateCopy = useCopyFeedback()
+  const vinCopy = useCopyFeedback()
   const tiltEnabled = useUiStore(s => s.cardTiltEnabled)
   const glowRef = useCardMotion<HTMLDivElement>(tiltEnabled)
   const c = data.current
@@ -183,13 +186,14 @@ export default function ResultCard({ data }: Props): ReactNode {
               <Link
                 viewTransition
                 to={`/${data.plate}`}
+                onClick={() => plateCopy.copy(data.plate)}
                 aria-label={data.plate}
                 draggable={false}
                 className="align-middle select-text"
               >
                 <UaPlateBadge plate={data.plate} />
               </Link>
-              <CopyButton text={data.plate} label={t('field.plate')} className="mx-1.5 align-middle" />
+              <CopyButton text={data.plate} label={t('field.plate')} feedback={plateCopy} className="mx-1.5 align-middle" />
               {data.region && (
                 <span className="rounded bg-[var(--color-surface)]/20 px-1.5 py-0.5">, {data.region}</span>
               )}
@@ -368,6 +372,7 @@ export default function ResultCard({ data }: Props): ReactNode {
                       <Link
                         viewTransition
                         to={`/${c.vin}`}
+                        onClick={() => vinCopy.copy(c.vin ?? '')}
                         className="inline-flex items-center gap-1 text-[var(--color-primary)]"
                       >
                         <span className="underline">{c.vin}</span>
@@ -375,7 +380,7 @@ export default function ResultCard({ data }: Props): ReactNode {
                           ›
                         </span>
                       </Link>
-                      <CopyButton text={c.vin} label={t('field.vin')} />
+                      <CopyButton text={c.vin} label={t('field.vin')} feedback={vinCopy} />
                     </span>
                   ) : null
                 }

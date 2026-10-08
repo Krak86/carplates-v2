@@ -119,7 +119,34 @@ export type SpecRowDef = {
   alt?: 'hp' | 'l' | 't' | 'm'
   /** Number formatting for the row; none = whole numbers. */
   format?: Omit<DescribeOptions, 'locale'> & { grouped?: boolean }
+  /** Typical-car scale drawn under the value, so "272 cm" reads as small / mid-size / large. */
+  scale?: SpecScale
 }
+
+/**
+ * A fixed reference scale for a body dimension. `cuts` are the ascending class boundaries (value >= cut moves up a
+ * class), so N cuts make N + 1 classes; the class label is `rdw.<labels>.<index>`. Boundaries are rule-of-thumb
+ * European segment sizes, not a statistic of the register.
+ */
+export type SpecScale = {
+  min: number
+  max: number
+  cuts: readonly number[]
+  labels: 'size' | 'tall'
+}
+
+/** 0-1 position of `value` on the scale, clamped so an outlier pins to the end instead of leaving the track. */
+export const scalePosition = (scale: SpecScale, value: number): number =>
+  Math.min(1, Math.max(0, (value - scale.min) / (scale.max - scale.min)))
+
+/** Index of the class `value` falls in: 0 for under the first cut … `cuts.length` for over the last. */
+export const scaleClass = (scale: SpecScale, value: number): number => scale.cuts.filter(cut => value >= cut).length
+
+// Passenger-car segments (cm): A/B city cars, C compact, D/E mid-size and family, F/SUV/van large.
+const WHEELBASE_SCALE: SpecScale = { min: 220, max: 340, cuts: [250, 270, 290], labels: 'size' }
+const LENGTH_SCALE: SpecScale = { min: 330, max: 540, cuts: [380, 430, 480], labels: 'size' }
+const WIDTH_SCALE: SpecScale = { min: 150, max: 210, cuts: [170, 180, 190], labels: 'size' }
+const HEIGHT_SCALE: SpecScale = { min: 130, max: 210, cuts: [150, 165, 180], labels: 'tall' }
 
 /**
  * The rows of the Specs block, in order. Adding a measure (length, width, height, gross mass …) is one entry here, one
@@ -170,10 +197,17 @@ export const SPEC_ROWS: readonly SpecRowDef[] = [
   },
   { group: 'mass', key: 'towBraked', pick: s => s.towBrakedKg ?? null, unitKey: 'field.unitKg', alt: 't' },
   { group: 'mass', key: 'towUnbraked', pick: s => s.towUnbrakedKg ?? null, unitKey: 'field.unitKg', alt: 't' },
-  { group: 'body', key: 'length', pick: s => s.lengthCm ?? null, unitKey: 'rdw.unitCm', alt: 'm' },
-  { group: 'body', key: 'width', pick: s => s.widthCm ?? null, unitKey: 'rdw.unitCm', alt: 'm' },
-  { group: 'body', key: 'height', pick: s => s.heightCm ?? null, unitKey: 'rdw.unitCm', alt: 'm' },
-  { group: 'body', key: 'wheelbase', pick: s => s.wheelbaseCm ?? null, unitKey: 'rdw.unitCm', alt: 'm' },
+  { group: 'body', key: 'length', pick: s => s.lengthCm ?? null, unitKey: 'rdw.unitCm', alt: 'm', scale: LENGTH_SCALE },
+  { group: 'body', key: 'width', pick: s => s.widthCm ?? null, unitKey: 'rdw.unitCm', alt: 'm', scale: WIDTH_SCALE },
+  { group: 'body', key: 'height', pick: s => s.heightCm ?? null, unitKey: 'rdw.unitCm', alt: 'm', scale: HEIGHT_SCALE },
+  {
+    group: 'body',
+    key: 'wheelbase',
+    pick: s => s.wheelbaseCm ?? null,
+    unitKey: 'rdw.unitCm',
+    alt: 'm',
+    scale: WHEELBASE_SCALE
+  },
   { group: 'body', key: 'seats', pick: s => s.seats ?? null },
   { group: 'body', key: 'doors', pick: s => s.doors ?? null },
   // The Dutch list price includes 21 % VAT and BPM — labelled as such, never shown as a Ukrainian price.

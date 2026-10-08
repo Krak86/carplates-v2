@@ -22,6 +22,7 @@ import {
   type SpecRange,
   type SpecRowDef
 } from '@/components/RdwSpecs.helpers'
+import RdwScaleBar from '@/components/RdwScaleBar'
 import RdwShareRow from '@/components/RdwShareRow'
 import SectionHeader from '@/components/SectionHeader'
 import ShareButton from '@/components/ShareButton'
@@ -77,6 +78,7 @@ function SpecRow({ def, range, own, locale }: SpecRowProps): ReactNode {
         {spread && (
           <span className="text-xs text-[var(--color-muted)]">{t('rdw.range', { range: spread, unit }).trim()}</span>
         )}
+        {def.scale && <RdwScaleBar scale={def.scale} range={range} unit={unit} />}
         {own != null && (
           <span className="text-xs text-[var(--color-muted)]">
             {t('rdw.thisCar', { value: `${own} ${unit}`.trim() })}

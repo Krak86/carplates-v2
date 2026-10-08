@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 
 import { copyToClipboard } from '@/lib/share-section'
 
-type UseCopyFeedback = {
+export type UseCopyFeedback = {
   copied: boolean
   copy: (text: string) => void
 }
