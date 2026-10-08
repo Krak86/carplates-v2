@@ -13,7 +13,7 @@ import {
 import type { SearchResultRow } from '@carplates/shared'
 
 import ColorSwatch from '@/components/ColorSwatch'
-import { FUEL_ICON, getFuelIcon } from '@/components/ResultCard.helpers'
+import { FUEL_ICON, getBodyInfo, getFuelIcon } from '@/components/ResultCard.helpers'
 import RegionMap from '@/components/RegionMap'
 import Card from '@/components/ui/Card'
 import Spinner from '@/components/ui/Spinner'
@@ -235,9 +235,16 @@ export default function AdvancedSearchRoute(): ReactNode {
                 className={inputClass}
               />
               <datalist id="advanced-search-bodies">
-                {bodySuggestions.map(s => (
-                  <option key={s.body} value={s.body} />
-                ))}
+                {bodySuggestions.map(s => {
+                  const info = getBodyInfo(s.body)
+                  return (
+                    <option
+                      key={s.body}
+                      value={s.body}
+                      label={info ? `${info.icon} ${t(info.descriptionKey)}` : undefined}
+                    />
+                  )
+                })}
               </datalist>
               {bodyTooShort && (
                 <span className="text-xs text-[var(--color-muted)]">

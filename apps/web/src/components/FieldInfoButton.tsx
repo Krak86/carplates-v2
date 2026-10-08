@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 import type { StatsFieldDimension } from '@carplates/shared'
 
 import ColorSwatch from '@/components/ColorSwatch'
-import { FUEL_ICON_FALLBACK, getFuelIcon, isKnownFuel } from '@/components/ResultCard.helpers'
+import { FUEL_ICON_FALLBACK, getBodyInfo, getFuelIcon, isKnownFuel } from '@/components/ResultCard.helpers'
 import { cn } from '@/lib/cn'
 import { statsFieldQuery } from '@/lib/queries'
 
@@ -28,16 +28,21 @@ const HOVER_CLOSE_DELAY_MS = 1000
 const HOVER_OPEN_DELAY_MS = 400
 
 type DimensionConfig = {
-  // Only `fuel` has a per-value icon (keyword-matched, ResultCard.helpers.ts) and a
-  // known/unknown split (its unknown/absent/garbage source markers collapse into one
-  // row). `body`/`kind`/`color` don't have that classification yet — plain list, no icons.
+  // `fuel` and `body` have a per-value icon (keyword-matched, ResultCard.helpers.ts); only
+  // `fuel` also has a known/unknown split (its unknown/absent/garbage source markers
+  // collapse into one row). `kind`/`color` don't have that classification — plain list.
   getIcon?: (value: string | null | undefined) => string
+  // i18n key of a tooltip describing the value (shown on the icon).
+  getDescriptionKey?: (value: string | null | undefined) => string | undefined
   isKnown?: (value: string | null | undefined) => boolean
   unknownIcon?: string
 }
 
 const DIMENSION_CONFIG: Readonly<Record<FieldInfoDimension, DimensionConfig>> = {
-  body: {},
+  body: {
+    getIcon: value => getBodyInfo(value)?.icon ?? '',
+    getDescriptionKey: value => getBodyInfo(value)?.descriptionKey
+  },
   kind: {},
   color: {},
   fuel: { getIcon: getFuelIcon, isKnown: isKnownFuel, unknownIcon: FUEL_ICON_FALLBACK }
@@ -129,6 +134,7 @@ export default function FieldInfoButton({ dimension, current }: Props): ReactNod
     .map(row => ({
       value: row.value,
       icon: config.getIcon?.(row.value),
+      descriptionKey: config.getDescriptionKey?.(row.value),
       totalRows: row.totalRows,
       isCurrent: row.value === current
     }))
@@ -136,7 +142,16 @@ export default function FieldInfoButton({ dimension, current }: Props): ReactNod
   const unknownTotal = allRows.filter(row => !isKnown(row.value)).reduce((sum, row) => sum + row.totalRows, 0)
   const rows =
     unknownTotal > 0
-      ? [...known, { value: null, icon: config.unknownIcon, totalRows: unknownTotal, isCurrent: !isKnown(current) }]
+      ? [
+          ...known,
+          {
+            value: null,
+            icon: config.unknownIcon,
+            descriptionKey: undefined,
+            totalRows: unknownTotal,
+            isCurrent: !isKnown(current)
+          }
+        ]
       : known
 
   return (
@@ -209,7 +224,11 @@ export default function FieldInfoButton({ dimension, current }: Props): ReactNod
                 >
                   <span className="flex items-center gap-1.5">
                     {dimension === 'color' && <ColorSwatch value={row.value} />}
-                    {row.icon && <span aria-hidden>{row.icon}</span>}
+                    {row.icon && (
+                      <span aria-hidden title={row.descriptionKey && t(row.descriptionKey)}>
+                        {row.icon}
+                      </span>
+                    )}
                     {row.value || t('field.unknown')}
                   </span>
                   <span className="text-[var(--color-muted)]">{row.totalRows.toLocaleString()}</span>

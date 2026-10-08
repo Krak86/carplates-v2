@@ -29,6 +29,9 @@ export {
 export {
   bodySuggestionSchema,
   bodySuggestionsResponseSchema,
+  BODY_CATEGORIES,
+  resolveBodyCategory,
+  type BodyCategory,
   type BodySuggestion,
   type BodySuggestionsResponse
 } from './vehicleBody.js'

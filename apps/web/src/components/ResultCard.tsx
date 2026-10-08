@@ -27,7 +27,7 @@ import FieldInfoButton from '@/components/FieldInfoButton'
 import NearbyServices from '@/components/NearbyServices'
 import NoRegionBadge from '@/components/NoRegionBadge'
 import RegistrationTimeline from '@/components/RegistrationTimeline'
-import { getFuelIcon } from '@/components/ResultCard.helpers'
+import { getBodyInfo, getFuelIcon } from '@/components/ResultCard.helpers'
 import NewsSection from '@/components/NewsSection'
 import PaidFeatureSections from '@/components/paid/PaidFeatureSections'
 import ReviewLinks from '@/components/ReviewLinks'
@@ -101,6 +101,7 @@ export default function ResultCard({ data }: Props): ReactNode {
   const c = data.current
   const hasVin = c.vin != null
   const vehicleKind = resolveVehicleKind(c.kind)
+  const bodyInfo = getBodyInfo(c.body)
   const vehicleColor = resolveVehicleColor(c.color) ?? fallbackVehicleColor(data.plate)
   const brandDealerUrl = dealerUrl(c.brand)
   useCarHeroImageActions({ brand: c.brand, model: c.model, year: c.makeYear, key: c.vin || data.plate })
@@ -251,9 +252,17 @@ export default function ResultCard({ data }: Props): ReactNode {
                 info="body"
                 value={
                   c.body && (
-                    <span className="inline-flex items-center gap-1.5">
-                      {c.body}
-                      <FieldInfoButton dimension="body" current={c.body} />
+                    <span className="flex flex-col items-end">
+                      <span className="inline-flex items-center gap-1.5">
+                        {bodyInfo && (
+                          <span aria-hidden title={t(bodyInfo.descriptionKey)}>
+                            {bodyInfo.icon}
+                          </span>
+                        )}
+                        {c.body}
+                        <FieldInfoButton dimension="body" current={c.body} />
+                      </span>
+                      {bodyInfo && <span className="text-right text-xs text-muted">{t(bodyInfo.descriptionKey)}</span>}
                     </span>
                   )
                 }
