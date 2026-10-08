@@ -30,11 +30,16 @@ describe('brandLogoUrl', () => {
     expect(brandLogoUrl('УАЗ')).toBe('/logos/uaz.png')
     expect(brandLogoUrl('KRASZ  RMZ20B')).toBe('/logos/kraz.svg')
     expect(brandLogoUrl('КРАЗ')).toBe('/logos/kraz.svg')
+    expect(brandLogoUrl('ГАЗ-САЗ  3507')).toBe('/logos/saz.png')
+    expect(brandLogoUrl('САЗ')).toBe('/logos/saz.png')
+    expect(brandLogoUrl('Еталон')).toBe('/logos/etal.png')
+    expect(brandLogoUrl('Одисей')).toBe('/logos/odysey.svg')
+    expect(brandLogoUrl('Одісей')).toBe('/logos/odysey.svg')
   })
 
-  it('has no logo for a motorcycle-only marque — the source dataset is cars/trucks only', () => {
-    expect(brandLogoUrl('YAMAHA')).toBeNull()
-    expect(brandLogoUrl('HARLEY-DAVIDSON')).toBeNull()
+  it('resolves unknown brands to null', () => {
+    expect(brandLogoUrl('NOSUCHBRAND')).toBeNull()
+    expect(brandLogoUrl('YAMAHA')).toBe('/logos/yamaha.png')
   })
 
   it('returns null for a brand with no bundled logo, or no brand at all', () => {

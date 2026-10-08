@@ -12,8 +12,7 @@
  * is too large to fetch in one pass to begin with. This map instead covers every brand
  * actually worth having: the real ingest's highest-volume brands, plus every other
  * globally-recognized car, heavy-truck and bus manufacturer the dataset has a logo for.
- * It does not cover motorcycle-only marques (Yamaha, Kawasaki, Harley-Davidson, …) — the
- * source dataset is cars/trucks only and has no logos for those. Anything unmatched resolves
+ * Motorcycle marques and small Ukrainian makers were added by hand from other sources. Anything unmatched resolves
  * to `null`, and callers must render nothing rather than a broken image.
  */
 const BRAND_SLUG_BY_NAME: Readonly<Record<string, string>> = {
@@ -162,6 +161,58 @@ const BRAND_SLUG_BY_NAME: Readonly<Record<string, string>> = {
   KRASZ: 'kraz',
   КРАЗ: 'kraz',
 
+  // Motorcycles, scooters, ATVs and small Ukrainian makers (hand-added logos)
+  APRILIA: 'aprilia',
+  BAJAJ: 'bajaj',
+  BENELLI: 'benelli',
+  CFMOTO: 'cfmoto',
+  'CF MOTO': 'cfmoto',
+  'CAN-AM': 'can-am',
+  'CAN AM': 'can-am',
+  DUCATI: 'ducati',
+  FORTE: 'forte',
+  GEON: 'geon',
+  'HARLEY-DAVIDSON': 'harley-davidson',
+  'HARLEY DAVIDSON': 'harley-davidson',
+  HUSQVARNA: 'husqvarna',
+  HYOSUNG: 'hyosung',
+  INDIAN: 'indian',
+  JAWA: 'jawa',
+  KAWASAKI: 'kawasaki',
+  KEEWAY: 'keeway',
+  KYMCO: 'kymco',
+  LONCIN: 'loncin',
+  MUSSTANG: 'musstang',
+  PIAGGIO: 'piaggio',
+  QINGQI: 'qingqi',
+  SEGWAY: 'segway',
+  SHINERAY: 'shineray',
+  SIMSON: 'simson',
+  SKYBIKE: 'skybike',
+  SKYMOTO: 'skymoto',
+  SOUL: 'soul',
+  SPARK: 'spark',
+  SYM: 'sym',
+  TEKKEN: 'tekken',
+  VIPER: 'viper',
+  YAMAHA: 'yamaha',
+  ZONGSHEN: 'zongshen',
+  АМС: 'ams',
+  ДНІПРО: 'dnipro',
+  ЕТАЛ: 'etal',
+  ЕТАЛОН: 'etal',
+  КМЗ: 'kmz',
+  ЛЕВ: 'lev',
+  ЛІДЕР: 'lider',
+  ОДАЗ: 'odaz',
+  ОДІСЕЙ: 'odysey',
+  ОДИСЕЙ: 'odysey',
+  ПАЛІЧ: 'palich',
+  ПРАГМАТЕК: 'pragmatek',
+  РУТА: 'ruta',
+  САЗ: 'saz',
+  'ГАЗ-САЗ': 'saz',
+
   ЗИЛ: 'zil',
   'ЗИЛ-ММЗ': 'zil',
   ИЖ: 'izh',
@@ -218,7 +269,7 @@ const BRAND_SLUG_BY_NAME: Readonly<Record<string, string>> = {
 }
 
 /** Slugs whose bundled logo is an SVG, not the dataset's PNG. */
-const SVG_LOGO_SLUGS: ReadonlySet<string> = new Set(['kraz'])
+const SVG_LOGO_SLUGS: ReadonlySet<string> = new Set(['kraz', 'odysey'])
 
 /**
  * Isolate a raw registry `brand` value down to its manufacturer slug (e.g. "volkswagen",
