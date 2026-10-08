@@ -1,6 +1,6 @@
 /**
  * One-off asset build: apps/web/assets-src/kind/<n>.<kind>.jpg (full-size originals, not shipped) →
- * apps/web/public/kind/<kind>.webp (the grey "no photo" hero placeholders, ~2x the 672px card).
+ * apps/web/public/kind/<kind>.{avif,webp} (the grey "no photo" hero placeholders, ~2x the 672px card).
  * Re-run (`pnpm build:kind-images`) only when an original changes.
  */
 import { mkdir, readdir } from 'node:fs/promises'
@@ -18,12 +18,12 @@ await mkdir(OUT_DIR, { recursive: true })
 for (const file of (await readdir(SRC_DIR)).filter(f => /\.jpe?g$/i.test(f))) {
   // "11.specialized.jpg" → "specialized"
   const kind = basename(file, extname(file)).replace(/^\d+\./, '')
-  const out = new URL(`${kind}.webp`, OUT_DIR)
-  const info = await sharp(fileURLToPath(new URL(file, SRC_DIR)))
+  const base = sharp(fileURLToPath(new URL(file, SRC_DIR)))
     .resize({ width: WIDTH, withoutEnlargement: true })
     .grayscale()
     .modulate({ brightness: 0.9 })
-    .webp({ quality: 66 })
-    .toFile(fileURLToPath(out))
-  console.log(`${kind}.webp  ${info.width}x${info.height}  ${(info.size / 1024).toFixed(0)} KB`)
+  // AVIF first, WebP as the <picture> fallback for browsers without AVIF.
+  const avif = await base.clone().avif({ quality: 50 }).toFile(fileURLToPath(new URL(`${kind}.avif`, OUT_DIR)))
+  const webp = await base.clone().webp({ quality: 66 }).toFile(fileURLToPath(new URL(`${kind}.webp`, OUT_DIR)))
+  console.log(`${kind}  ${avif.width}x${avif.height}  avif ${(avif.size / 1024).toFixed(0)} KB  webp ${(webp.size / 1024).toFixed(0)} KB`)
 }

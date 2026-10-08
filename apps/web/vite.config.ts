@@ -99,7 +99,7 @@ export default defineConfig({
             }
           },
           {
-            // Greyscale "no photo" hero placeholders (~1.3 MB for all kinds) — only the ones actually seen get cached.
+            // Greyscale "no photo" hero placeholders (~0.9 MB AVIF (+ WebP fallback) for all kinds) — only the ones actually seen get cached.
             urlPattern: ({ url, sameOrigin }): boolean => sameOrigin && url.pathname.startsWith('/kind/'),
             handler: 'CacheFirst',
             options: {

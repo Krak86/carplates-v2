@@ -30,12 +30,16 @@ export default function VehicleKindPlaceholder({ kind }: Props): ReactNode {
 
   return (
     <div className="relative h-full w-full overflow-hidden rounded-lg bg-black/10 dark:bg-white/10">
-      <img
-        src={`/kind/${IMAGE_BY_KIND[kind]}.webp`}
-        alt=""
-        crossOrigin="anonymous"
-        className="h-full w-full scale-105 object-cover blur-[3px]"
-      />
+      <picture>
+        <source srcSet={`/kind/${IMAGE_BY_KIND[kind]}.avif`} type="image/avif" />
+
+        <img
+          src={`/kind/${IMAGE_BY_KIND[kind]}.webp`}
+          alt=""
+          crossOrigin="anonymous"
+          className="h-full w-full scale-105 object-cover blur-[3px]"
+        />
+      </picture>
 
       <div className="absolute inset-0 flex items-center justify-center px-4">
         <div className="flex flex-col items-center gap-2 text-center text-white">
