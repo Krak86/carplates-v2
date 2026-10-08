@@ -20,7 +20,7 @@ type Props = {
   onImageError: (imageUrl: string) => void
 }
 
-/** One labelled row of ≤ 3 link cards (photo + ad line + host); scrolls sideways when the cards don't fit, like the videos strip. */
+/** One labelled row of ≤ 3 link cards (photo + ad line + host); fixed-width cards (a lone card stays small, not full width) that scroll sideways when they don't fit, like the videos strip. */
 export default function StockRow({
   label,
   icon,
@@ -47,7 +47,7 @@ export default function StockRow({
         {cards.map(({ model, year: photoYear, image }, i) => {
           const credit = [image.attribution?.author, image.attribution?.license].filter(Boolean).join(' · ')
           return (
-            <li key={image.url} className="min-w-48 flex-1">
+            <li key={image.url} className="w-56 shrink-0">
               <a
                 href={url}
                 target="_blank"

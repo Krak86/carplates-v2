@@ -48,7 +48,6 @@
   "result.officialSite": "Официальный сайт бренда",
   "result.newCars": "Новые {{brand}} {{year}}",
   "result.newCarsList": "Модельный ряд на сайте официального импортера в Украине",
-  "result.newCarsSite": "Официальный сайт бренда",
   "newCarsWidget.title": "{{brand}} {{year}}",
   "newCarsWidget.aria": "Новые автомобили {{brand}}",
   "newCarsWidget.close": "Закрыть",

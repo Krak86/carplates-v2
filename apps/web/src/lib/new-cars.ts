@@ -2,6 +2,8 @@
 export const NEW_CARS_AD_COUNT = 8
 /** Ad lines `newCarsSection.used1` … `used<N>` for the used-cars row (same rule: at least 6). */
 export const USED_CARS_AD_COUNT = 6
+/** How many model years back a new-cars photo may come from when the current year has none (2026 → 2021). */
+export const NEW_CARS_YEARS_BACK = 5
 /** Cards per row in the stock section. */
 export const STOCK_ROW_MAX = 3
 

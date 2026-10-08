@@ -48,7 +48,6 @@
   "result.officialSite": "Official brand website",
   "result.newCars": "New {{brand}} {{year}}",
   "result.newCarsList": "Model range on the official Ukrainian importer's site",
-  "result.newCarsSite": "Official brand website",
   "newCarsWidget.title": "{{brand}} {{year}}",
   "newCarsWidget.aria": "New {{brand}} cars",
   "newCarsWidget.close": "Close",

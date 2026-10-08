@@ -78,11 +78,15 @@ describe('model-year-only scoring', () => {
   it('accepts a title that starts with the year or carries it in the generation parentheses', () => {
     expect(isModelYearTitle('File:2026 Toyota RAV4 PHEV GR Sport.jpg', 2026)).toBe(true)
     expect(isModelYearTitle('File:Mercedes-Benz GLC 300 4MATIC (X254, 2026) (55212389860).jpg', 2026)).toBe(true)
+    expect(isModelYearTitle('File:Audi Q3 2.0 TFSI (2026) (55206166457).jpg', 2026)).toBe(true)
   })
 
   it('rejects a bare year that is only an event or a photo date', () => {
     expect(isModelYearTitle('File:Škoda Elroq RS Rutesheimer Autoschau 2026 IMG 6752.jpg', 2026)).toBe(false)
     expect(isModelYearTitle('File:2026-09-03 Kia Ceed.jpg', 2026)).toBe(false)
+    expect(isModelYearTitle('File:Land Rover Defender (Lugano, 2026).jpg', 2026)).toBe(false)
+    expect(isModelYearTitle('File:Toyota Land Cruiser FJ40 Hardtop (GIIAS 2026).jpg', 2026)).toBe(false)
+    expect(isModelYearTitle('File:Einsatzfahrzeug Skoda Superb der KaPo (2026).jpg', 2026)).toBe(false)
   })
 
   it('only the strict mode drops an event photo', () => {

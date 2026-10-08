@@ -47,6 +47,7 @@ import { isFavorited, listFavorites } from '@/lib/favorites-db'
 import type { FavoriteKind } from '@/lib/favorites-db'
 import { listVisits } from '@/lib/history-db'
 import { NEWS_PAGE_SIZE } from '@/lib/news'
+import { upperBrand } from '@/lib/display-brand'
 import { getStorageEstimate } from '@/lib/offline-storage'
 
 export function plateQuery(raw: string) {
@@ -129,11 +130,13 @@ export function wikiImageQuery(brand: string, model: string, year: number | null
   })
 }
 
-// Photo of exactly this model year (no older-generation fallback) for the new-cars side widget — never refetch once fetched.
-export function showcaseImageQuery(brand: string, model: string, year: number) {
+// Photo of this model year — or, with `yearBack`, the nearest of that many earlier years — for the new-cars side widget — never refetch once fetched.
+export function showcaseImageQuery(brand: string, model: string, year: number, yearBack = 0) {
+  // Registry brands can carry the model ("LAND ROVER  RANGE ROVER EVOQUE"): the showcase row is per bare make.
+  const make = upperBrand(brand)
   return queryOptions({
-    queryKey: ['wiki', 'showcase', brand, model, year],
-    queryFn: () => getWikiImage(brand, model, year, true),
+    queryKey: ['wiki', 'showcase', 'v2', make, model, year, yearBack],
+    queryFn: () => getWikiImage(make, model, year, true, yearBack),
     staleTime: Infinity
   })
 }

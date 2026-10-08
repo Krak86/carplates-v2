@@ -48,7 +48,6 @@
   "result.officialSite": "Офіційний сайт бренду",
   "result.newCars": "Нові {{brand}} {{year}}",
   "result.newCarsList": "Модельний ряд на сайті офіційного імпортера в Україні",
-  "result.newCarsSite": "Офіційний сайт бренду",
   "newCarsWidget.title": "{{brand}} {{year}}",
   "newCarsWidget.aria": "Нові автомобілі {{brand}}",
   "newCarsWidget.close": "Закрити",

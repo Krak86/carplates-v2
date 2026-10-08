@@ -18,7 +18,7 @@ export default function NewCarsLink({ brand }: Props): ReactNode {
   const target = newCarsUrl(brand)
   if (!brand || !target) return null
 
-  const title = target.isList ? t('result.newCarsList') : t('result.newCarsSite')
+  const title = t('result.newCarsList')
 
   return (
     <a

@@ -39,13 +39,16 @@ export function hasStandaloneYear(title: string, year: number): boolean {
 }
 
 /**
- * The year is the model year by Commons naming convention: the title starts with it ("2026 Toyota RAV4 …") or carries it in
- * the generation parentheses ("Mercedes-Benz GLC 300 (X254, 2026)"). A bare year elsewhere is usually a photo date or an
- * event ("Autoschau 2026"), which can show a decades-old car.
+ * The year is the model year by Commons naming convention: the title starts with it ("2026 Toyota RAV4 …") or carries it after a
+ * generation code in parentheses ("Mercedes-Benz GLC 300 (X254, 2026)", or a Flickr-import "(2026) (55206166457)"). A bare year elsewhere is usually a photo date, an
+ * event or a place ("Autoschau 2026", "(Lugano, 2026)", "(2026)"), which can show a decades-old car.
  */
 export function isModelYearTitle(title: string, year: number): boolean {
   const name = title.replace(/^File:/i, '').replace(/_/g, ' ')
-  return new RegExp(`^${year}(?![\\d-])`).test(name) || new RegExp(`\\([^)]*(?<!\\d)${year}(?!\\d)[^)]*\\)`).test(name)
+  const afterGenerationCode = new RegExp(`\\([^()]*?[A-Za-z0-9-]*\\d[A-Za-z0-9-]*\\s*,\\s*${year}(?!\\d)[^()]*\\)`)
+  // Flickr imports: "Range Rover Velar D300 (2024) (54732316186).jpg" — the lone year is followed by the photo id.
+  const beforeFlickrId = new RegExp(`\\(${year}\\)\\s*\\(\\d{6,}\\)`)
+  return new RegExp(`^${year}(?![\\d-])`).test(name) || afterGenerationCode.test(name) || beforeFlickrId.test(name)
 }
 
 /** Title-only half of the score (no image metadata needed): null = reject, higher is better. The pre-warm script

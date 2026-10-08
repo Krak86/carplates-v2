@@ -3,16 +3,19 @@ import { useQueries } from '@tanstack/react-query'
 import type { UseQueryResult } from '@tanstack/react-query'
 import { showcaseModels, type WikiImage } from '@carplates/shared'
 
-import { pickRandom, STOCK_ROW_MAX } from '@/lib/new-cars'
+import { NEW_CARS_YEARS_BACK, pickRandom, STOCK_ROW_MAX } from '@/lib/new-cars'
 import { showcaseImageQuery } from '@/lib/queries'
 
 /** Showcase models probed per view — a few more than a row shows, since some have no photo for a given year. */
 const MODELS_PROBED = 6
 
+/** Older-year stand-ins in the "New" row: one card only, so the "Used" row (which draws from the same years) keeps its photos. */
+const FALLBACK_NEW_MAX = 1
+
 export type StockPhoto = { model: string; year: number; image: WikiImage }
 
 type StockPhotos = {
-  /** ≤ 3 photos of the current model year (the previous year only when the brand has none at all). */
+  /** ≤ 3 photos of the current model year (one photo of the 5 years before only when the brand has none at all). */
   fresh: StockPhoto[]
   /** ≤ 3 photos of the previous 1–2 model years — pre-owned cars — never the same picture as a fresh one. */
   used: StockPhoto[]
@@ -60,8 +63,19 @@ export function useStockPhotosActions(brand: string, enabled: boolean, wantUsed:
   const currentSettled = isSettled(current, enabled)
   const currentPhotos = photosOf(models, current, year)
 
-  // Last year: for the used row — or, when the brand has no current-year photo at all, as the new row's fallback.
-  const lastOn = enabled && currentSettled && (wantUsed || currentPhotos.length === 0)
+  // New row fallback: no current-year photo at all → nearest photo of the 5 years before (server walks year-1 … year-5).
+  const fallbackOn = enabled && currentSettled && currentPhotos.length === 0
+  const fallback = useQueries({
+    queries: models.map(model => ({
+      ...showcaseImageQuery(brand, model, year - 1, NEW_CARS_YEARS_BACK - 1),
+      enabled: fallbackOn
+    }))
+  })
+  const fallbackSettled = isSettled(fallback, fallbackOn)
+  const fallbackPhotos = photosOf(models, fallback, year - 1)
+
+  // Last year: for the used row.
+  const lastOn = enabled && currentSettled && wantUsed
   const last = useQueries({
     queries: models.map(model => ({ ...showcaseImageQuery(brand, model, year - 1), enabled: lastOn }))
   })
@@ -70,7 +84,7 @@ export function useStockPhotosActions(brand: string, enabled: boolean, wantUsed:
 
   const fresh = currentPhotos.length
     ? takeDistinct(currentPhotos, [], STOCK_ROW_MAX)
-    : takeDistinct(lastPhotos, [], STOCK_ROW_MAX)
+    : takeDistinct(fallbackPhotos, [], FALLBACK_NEW_MAX)
   const usedFromLast = wantUsed ? takeDistinct(lastPhotos, fresh, STOCK_ROW_MAX) : []
 
   // Two years back: only to top the used row up.
@@ -82,6 +96,6 @@ export function useStockPhotosActions(brand: string, enabled: boolean, wantUsed:
   const olderPhotos = photosOf(models, older, year - 2)
 
   const used = wantUsed ? takeDistinct([...lastPhotos, ...olderPhotos], fresh, STOCK_ROW_MAX) : []
-  const isPending = enabled && !(currentSettled && lastSettled && olderSettled)
+  const isPending = enabled && !(currentSettled && fallbackSettled && lastSettled && olderSettled)
   return { fresh, used, isPending }
 }

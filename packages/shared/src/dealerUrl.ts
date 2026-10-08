@@ -102,7 +102,7 @@ const DEALER_URL_BY_SLUG: Readonly<Record<string, string>> = {
  * Deep link to the importer's own "new cars / model range" list page — again outbound only, nothing is
  * fetched or copied (the sites' terms forbid republishing their content; a plain link is fine). Each URL
  * was checked to return 200 on 2026-10-07. Brands with an empty string have no verified list page yet
- * (404, bot-blocked, or only per-model pages) and fall back to `dealerUrl`'s homepage.
+ * (404, bot-blocked, or only per-model pages) and get no new-cars link.
  */
 const NEW_CARS_URL_BY_SLUG: Readonly<Record<string, string>> = {
   toyota: 'https://www.toyota.ua/new-cars',
@@ -146,15 +146,13 @@ const NEW_CARS_URL_BY_SLUG: Readonly<Record<string, string>> = {
 }
 
 /**
- * Where "new cars of this make" should link: the importer's model-list page when one is known, else the
- * brand's site (`dealerUrl`), else `null`. `isList` tells the UI which of the two it got.
+ * Where "new cars of this make" should link: the importer's new-cars / model-list page, or `null` when none is
+ * known — the UI then shows no new-cars button, widget or stock row (a bare brand homepage is not a new-cars link).
  */
-export function newCarsUrl(brand: string | null | undefined): { url: string; isList: boolean } | null {
+export function newCarsUrl(brand: string | null | undefined): { url: string } | null {
   const slug = brandSlug(brand)
   const list = slug ? NEW_CARS_URL_BY_SLUG[slug] : undefined
-  if (list) return { url: list, isList: true }
-  const site = dealerUrl(brand)
-  return site ? { url: site, isList: false } : null
+  return list ? { url: list } : null
 }
 
 /**

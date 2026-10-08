@@ -32,8 +32,8 @@ export default function Model360Button({ brand, model }: Props): ReactNode {
   const result = useQuery({ ...models360Query(brand ?? '', model ?? ''), enabled: hasQuery })
   const models = result.data?.models ?? []
   const winner = result.data?.winner ?? []
-  // Count of what the modal offers: CarShow360 galleries, or (when the make/model has none) the dealer-stock interiors.
-  const count = models.length || winner.length
+  // Count of what the modal offers: CarShow360 galleries plus the dealer-stock alternative interiors.
+  const count = models.length + winner.length
 
   if (count === 0) return null
 

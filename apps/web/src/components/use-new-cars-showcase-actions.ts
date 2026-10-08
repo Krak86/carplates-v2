@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useQueries } from '@tanstack/react-query'
 import { showcaseModels, type WikiImage } from '@carplates/shared'
 
-import { pickRandom } from '@/lib/new-cars'
+import { NEW_CARS_YEARS_BACK, pickRandom } from '@/lib/new-cars'
 import { showcaseImageQuery } from '@/lib/queries'
 
 type Options = {
@@ -23,7 +23,7 @@ type Showcase = {
 
 /**
  * Photos of current-year models of `brand` for the new-cars widget / section: a few random showcase models are tried for
- * this calendar year, and the previous year only for the models that had no photo and only while fewer than `take` were
+ * this calendar year, and the earlier years (down to `NEW_CARS_YEARS_BACK` back) only for the models that had no photo and only while fewer than `take` were
  * found. The server answers from `registry.wiki_image` (Commons, hotlinked) and stores what it finds, so repeat views cost nothing.
  */
 export function useNewCarsShowcaseActions(brand: string, enabled: boolean, { probe, take }: Options): Showcase {
@@ -36,7 +36,7 @@ export function useNewCarsShowcaseActions(brand: string, enabled: boolean, { pro
 
   const previous = useQueries({
     queries: models.map((model, i) => ({
-      ...showcaseImageQuery(brand, model, year - 1),
+      ...showcaseImageQuery(brand, model, year - 1, NEW_CARS_YEARS_BACK - 1),
       enabled: enabled && currentSettled && currentFound < take && !current[i]?.data?.image
     }))
   })

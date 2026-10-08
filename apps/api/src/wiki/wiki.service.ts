@@ -36,8 +36,8 @@ import { WikiImageStore } from './wiki-image.store.js'
 export const WIKI_IMAGE_SOURCES = ['commons', 'wiki'] as const
 export type WikiImageSource = (typeof WIKI_IMAGE_SOURCES)[number]
 
-/** `yearOnly`: a photo of exactly that model year or nothing — never the stored model row / article lead image. */
-type LookupOptions = { year?: number; source?: WikiImageSource; yearOnly?: boolean }
+/** `yearOnly`: a photo of that model year (or, with `yearBack`, the nearest of that many earlier years) or nothing — never the stored model row / article lead image. */
+type LookupOptions = { year?: number; source?: WikiImageSource; yearOnly?: boolean; yearBack?: number }
 
 /** `settled: false` = the answer came from a failed request, so it must not be memoized as "no photo". */
 type Resolved = { image: WikiImage | null; settled: boolean }
@@ -116,12 +116,13 @@ export class WikiService {
     const source = options.source ?? this.env.WIKI_IMAGE_SOURCE
     const year = source === 'commons' && brand && model ? (options.year ?? null) : null
     const yearOnly = !!options.yearOnly && !!year && source === 'commons'
-    const cacheKey = `${source}:${yearOnly ? 'y' : ''}${year ?? ''}:${query.toLowerCase()}`
+    const yearBack = yearOnly ? (options.yearBack ?? 0) : 0
+    const cacheKey = `${source}:${yearOnly ? `y${yearBack || ''}` : ''}${year ?? ''}:${query.toLowerCase()}`
     const cached = this.imageCache.get(cacheKey)
     if (cached) return cached
 
     const resolved = yearOnly
-      ? await this.resolveYearOnlyImage(brand, model, year!)
+      ? await this.resolveYearOnlyLadder(brand, model, year!, yearBack)
       : await this.resolveImage(brand, model, query, year, source)
     const result = { image: resolved.image }
     if (resolved.settled) this.rememberImage(cacheKey, result)
@@ -134,6 +135,17 @@ export class WikiService {
     )
     const pages = payload.query?.pages
     return pages ? (Object.values(pages)[0] ?? null) : null
+  }
+
+  /** `year`, then each earlier year down to `year - back`: the first photo wins; each year is its own stored row. */
+  private async resolveYearOnlyLadder(brand: string, model: string, year: number, back: number): Promise<Resolved> {
+    let settled = true
+    for (let y = year; y >= year - back; y--) {
+      const found = await this.resolveYearOnlyImage(brand, model, y)
+      if (found.image) return found
+      settled = settled && found.settled
+    }
+    return { image: null, settled }
   }
 
   /** Stored `(brand, model, year)` row, else one live Commons year search (whose answer is stored, "none" included). */

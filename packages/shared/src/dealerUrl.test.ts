@@ -4,16 +4,16 @@ import { dealerUrl, newCarsUrl, usedCarsUrl } from './dealerUrl.js'
 
 describe('newCarsUrl', () => {
   it('links to the importer model-list page when one is known', () => {
-    expect(newCarsUrl('TOYOTA')).toEqual({ url: 'https://www.toyota.ua/new-cars', isList: true })
-    expect(newCarsUrl('HYUNDAI  TUCSON')).toEqual({ url: 'https://hyundai.com.ua/all-models', isList: true })
+    expect(newCarsUrl('TOYOTA')).toEqual({ url: 'https://www.toyota.ua/new-cars' })
+    expect(newCarsUrl('HYUNDAI  TUCSON')).toEqual({ url: 'https://hyundai.com.ua/all-models' })
   })
 
-  it('falls back to the brand site when no list page is known', () => {
-    expect(newCarsUrl('TESLA')).toEqual({ url: 'https://www.tesla.com/', isList: false })
-    expect(newCarsUrl('FERRARI')).toEqual({ url: 'https://www.ferrari.com/', isList: false })
+  it('returns null when no list page is known, even if the brand has a site', () => {
+    expect(newCarsUrl('TESLA')).toBeNull()
+    expect(newCarsUrl('FERRARI')).toBeNull()
   })
 
-  it('returns null when the brand has no site at all', () => {
+  it('returns null for an unknown brand', () => {
     expect(newCarsUrl('ВАЗ')).toBeNull()
     expect(newCarsUrl(null)).toBeNull()
   })

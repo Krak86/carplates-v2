@@ -40,7 +40,14 @@ const SHOWCASE_MODELS_BY_SLUG: Readonly<Record<string, readonly string[]>> = {
   mg: ['MG4', 'ZS', 'HS'],
   haval: ['Jolion', 'H6', 'Dargo'],
   mini: ['Cooper', 'Countryman'],
-  fiat: ['500', 'Panda', 'Tipo']
+  fiat: ['500', 'Panda', 'Tipo'],
+  bentley: ['Continental GT', 'Bentayga', 'Flying Spur'],
+  daf: ['XF', 'XG', 'CF'],
+  geely: ['Coolray', 'Monjaro', 'Emgrand'],
+  'great-wall': ['Poer', 'Wingle 7'],
+  infiniti: ['QX50', 'QX60', 'Q50'],
+  jaguar: ['F-Pace', 'E-Pace', 'I-Pace'],
+  jetour: ['X70', 'Dashing', 'X90']
 }
 
 /** Showcase models for a raw registry `brand` value (possibly empty), in the order they are listed above. */
