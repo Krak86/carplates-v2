@@ -1,7 +1,7 @@
 # DATASETS_PLAN.md
 
-> **Resume here (2026-10-08).** Stage A (+A2 plate-region fix, +A3 alias chips) is DONE; next is **stage B** (VehiclesDB
-> motorcycle/truck/bus matching) — see "Staged plan" near the end. **Rule: do not start a stage until the owner says "go stage X".**
+> **Resume here (2026-10-08).** Stages A (+A2 plate-region fix, +A3 alias chips) and **B** (motorcycle/truck/bus matching) are DONE;
+> next is **stage C** (RDW specs) — see "Staged plan" near the end. **Rule: do not start a stage until the owner says "go stage X".**
 > autoevolution (stage Z) is waiting on their reply; no reply = no. Stage A is code-complete but may be uncommitted: check
 > `git status`. After a registry/plate-table change run `pnpm db:refresh-stats` (slow, ~15+ min, rebuilds the materialized views
 > from existing rows) and `pnpm db:refresh-derived`; restart `pnpm dev` after any `@carplates/shared` rebuild.
@@ -95,7 +95,7 @@ from `@carplates/shared`, doubled model spellings collapsed, car+van kinds):
 | Contracts (own file, so no offline-cache bust): `VdbResponse`, `VdbStatsResponse`                                                                                                                                                                                                                                                   | `packages/shared/src/vdb.ts`                              |
 | API: `GET /api/vdb?brand=&model=` (live match against `vdb_models`), `GET /api/vdb/stats`                                                                                                                                                                                                                                           | `apps/api/src/vdb/`                                       |
 | Result card: chips in the TOP chip row between the stats chips and 3D/360° — 🇺🇦 UA-only, 🌍 also sold in (flags; names on hover), 📊 "Top X% of models in N markets", 💎 rare elsewhere (decile ≥ 8) + one "?" popover (every chip explained, `CODE — Country` legend of all 15 registers, CC-BY credit). Offline cache group `vdb` | `apps/web/src/components/VdbChips.tsx` (+ `.helpers.ts`)  |
-| Rollup `registry.stats_vdb` (passenger cars per matched model; `vdb_id` NULL = unmatched bucket), migration 0040; `pnpm db:refresh-vdb-stats`                                                                                                                                                                                       | `scripts/src/vdb-stats.ts`                                |
+| Rollup `registry.stats_vdb` (per vehicle class and matched model; `vdb_id` NULL = that class's unmatched bucket), migrations 0040 + 0046; `pnpm db:refresh-vdb-stats`                                                                                                                                                                                       | `scripts/src/vdb-stats.ts`                                |
 | `/stats` "Ринки / Markets" panel: cars by popularity band, "common here, rare elsewhere", "only in Ukraine" (online-only, not offline-cached)                                                                                                                                                                                       | `apps/web/src/routes/stats/VdbStatsPanel.tsx`             |
 | About sources entry "VehiclesDB — Vehicle data by VehiclesDB, CC BY 4.0"                                                                                                                                                                                                                                                            | `AboutRoute.tsx`, `about.source.vehiclesdb`               |
 
@@ -137,6 +137,18 @@ ambiguous). `modelKey` strips Cyrillic, so a Cyrillic catalog alias (e.g. "Жи�
 below that) in the /stats panel; an "approximate match" line in the chip "?" popover when `how` is `prefix` (series/alias/exact
 are not loose); `regions.statute.test.ts` cross-check of the plate tables (findings below).
 **Remaining ideas:** per-country decile detail (decided: not planned).
+
+**Stage B — done (2026-10-08): motorcycle / truck / bus.** `vdbVehicleClass(registryKind)` (`vdbMatch.ts`) maps the registry's
+`kind` text to car / motorcycle / truck / bus (МОТОЦИКЛ, МОТОТРИЦИКЛ, КВАДРОЦИКЛ, ТРИЦИКЛ, МОПЕД -> motorcycle; ПРИЧІП, НАПІВПРИЧІП,
+СПЕЦ… -> no class, no lookup). `vdbCatalogKinds(cls)` restricts `matchVdbModel` / `matchVdbModelAcrossMakes` to catalog kinds,
+ranked in order: motorcycle = motorcycle, moped · truck = truck, van, car (the registry files vans and pickups under ВАНТАЖНИЙ) ·
+bus = bus, van (minibuses) · car = unrestricted, so car coverage is unchanged (92.7%). `GET /api/vdb` takes an optional
+`kind` (registry text; omitted = the old any-kind lookup, so old clients and cached answers keep working); the chips pass the
+card's kind and the query key carries it. Migration `0046` adds `stats_vdb.vehicle_kind` (default `car`); `vdb-stats.ts`
+rolls up all four classes (an unmatched bucket per class); `GET /api/vdb/stats?kind=car|motorcycle|truck|bus` and a class
+selector on the /stats Markets panel. **Measured coverage (rows with a catalog match):** car 92.7%, truck 66.5%, motorcycle
+46.7%, bus 37.5% — the misses are data limits (Chinese motorcycles beyond Musstang/Lifan, Bogdan/BAZ/PAZ buses, trucks
+with engine-code names like "FT XF …"). A miss hides the chips, as before.
 
 **Route decision:** add a panel to `/stats` rather than a new route (two thin charts don't justify a page, `/stats` already
 has the `/top` + `/field/:dimension` structure). Revisit a `/markets` page only if per-country content grows.
@@ -297,7 +309,7 @@ at the end of a stage give a commit message and stop. Order = value / risk, clea
 | Stage | What | Size | Depends on |
 | --- | --- | --- | --- |
 | **A. VehiclesDB polish** — **done 2026-10-08** (see "Stage A polish"; A2 plate-table fix and A3 alias info added the same day) | Cross-make alias (Renault Dokker -> Dacia Dokker: let the matcher try a second make); one decimal for `/stats` bar shares < 1%; use `how` (exact/prefix/series) to soften loose matches in the chip copy; test that cross-checks `normalizePlate` / `regions.ts` / `plate_regions` against VehiclesDB `plates/ua.yml` (a test, not a dependency) | small | — |
-| **B. VehiclesDB non-car kinds** | Widen `matchVdbModel` + `stats_vdb` to motorcycle / truck / bus via a `kind` mapping from the registry's `kind` text; chips for those cards | small-medium | A |
+| **B. VehiclesDB non-car kinds** — **done 2026-10-08** (see "Stage B" below) | Widen `matchVdbModel` + `stats_vdb` to motorcycle / truck / bus via a `kind` mapping from the registry's `kind` text; chips for those cards | small-medium | A |
 | **C. RDW specs** | Aggregate table per (make, model, year): median + min/max power, displacement, mass, CO2, count; `ingest:rdw` + CSV seed + export; "Specs" card block; matcher on `makeKey`/`modelKey`; About credit; SCHEDULE.md row (6 months). Builds the pipeline D-H reuse | medium | — |
 | **D. RDW recalls** | Recall campaigns + status (upsert); "Recalls" block, labelled "EU (NL)", model-level wording; monthly refresh | medium | C (matcher) |
 | **E. Open EV Data** | One JSON -> small table; "Electric" block on a match or when vPIC says battery-electric; MIT notice on About; quarterly | small | C |

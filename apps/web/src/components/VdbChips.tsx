@@ -12,6 +12,8 @@ import { useUiStore } from '@/store/ui-store'
 type Props = {
   brand: string | null
   model: string | null
+  /** Registry kind text (ЛЕГКОВИЙ, МОТОЦИКЛ …): picks which catalog kinds the model may match. */
+  kind?: string | null
 }
 
 const CHIP =
@@ -22,10 +24,10 @@ const CHIP =
  * those markets, plus one "?" explaining every chip. Flows in the parent's wrapping chip row (`contents`) and renders
  * nothing while loading, on error, or without a catalog match.
  */
-export default function VdbChips({ brand, model }: Props): ReactNode {
+export default function VdbChips({ brand, model, kind }: Props): ReactNode {
   const { t } = useTranslation()
   const lang = useUiStore(s => s.lang)
-  const { data } = useQuery({ ...vdbQuery(brand ?? '', model ?? ''), enabled: !!(brand && model) })
+  const { data } = useQuery({ ...vdbQuery(brand ?? '', model ?? '', kind), enabled: !!(brand && model) })
   const match = data?.match
   if (!match) return null
 

@@ -1,5 +1,5 @@
 /**
- * Rebuilds `registry.stats_vdb` — the /stats markets panel rollup — from `current_registration` + `vdb_models`.
+ * Rebuilds `registry.stats_vdb` — the /stats markets panel rollup, per vehicle class (car, motorcycle, truck, bus) — from `current_registration` + `vdb_models`.
  *
  *   pnpm db:refresh-vdb-stats
  *
@@ -9,12 +9,23 @@
  */
 import { createDb, statsVdb, vdbModels } from '@carplates/db'
 import type { StatsVdbInsert, VdbModelRow } from '@carplates/db'
-import { isUkraineOnly, makeKey, matchVdbModelAcrossMakes, vdbRelatedMakeKeys } from '@carplates/shared'
+import {
+  isUkraineOnly,
+  makeKey,
+  matchVdbModelAcrossMakes,
+  vdbCatalogKinds,
+  vdbRelatedMakeKeys,
+  VDB_VEHICLE_CLASSES,
+  vdbVehicleClass,
+  type VdbVehicleClass
+} from '@carplates/shared'
 import { sql } from 'drizzle-orm'
 
 const BATCH = 2000
+/** Registry `kind` values that map to a vehicle class (see `vdbVehicleClass`). */
+const KINDS = ['ЛЕГКОВИЙ', 'МОТОЦИКЛ', 'МОТОТРИЦИКЛ', 'КВАДРОЦИКЛ', 'ТРИЦИКЛ', 'МОПЕД', 'ВАНТАЖНИЙ', 'АВТОБУС']
 
-type Group = { brand: string; model: string; n: number }
+type Group = { kind: string; brand: string; model: string; n: number }
 
 const log = (...m: unknown[]): void => {
   console.log(...m)
@@ -29,34 +40,42 @@ async function main(): Promise<void> {
     log(`loaded ${refRows.length} catalog row(s) for ${byMake.size} make(s)`)
 
     const { rows: groups } = await db.execute<Group>(sql`
-      SELECT brand, model, count(*)::int AS n
+      SELECT kind, brand, model, count(*)::int AS n
       FROM registry.current_registration
-      WHERE kind = 'ЛЕГКОВИЙ' AND brand IS NOT NULL AND model IS NOT NULL
-      GROUP BY brand, model
+      WHERE kind IN (${sql.join(
+        KINDS.map(k => sql`${k}`),
+        sql`, `
+      )}) AND brand IS NOT NULL AND model IS NOT NULL
+      GROUP BY kind, brand, model
     `)
     log(`${groups.length} registry group(s)`)
 
     const perModel = new Map<string, StatsVdbInsert>()
-    let unmatched = 0
+    const unmatched = new Map<VdbVehicleClass, number>()
     for (const g of groups) {
+      const cls = vdbVehicleClass(g.kind)
+      if (!cls) continue
       const mk = makeKey(g.brand)
       const found = mk
         ? matchVdbModelAcrossMakes(
             vdbRelatedMakeKeys(mk, g.model).flatMap(k => byMake.get(k) ?? []),
             mk,
-            g.model
+            g.model,
+            vdbCatalogKinds(cls)
           )
         : null
       if (!found) {
-        unmatched += g.n
+        unmatched.set(cls, (unmatched.get(cls) ?? 0) + g.n)
         continue
       }
       const { row } = found
-      const cur = perModel.get(row.id)
+      const key = `${cls}|${row.id}`
+      const cur = perModel.get(key)
       if (cur) cur.n += g.n
       else
-        perModel.set(row.id, {
+        perModel.set(key, {
           vdbId: row.id,
+          vehicleKind: cls,
           makeName: row.makeName,
           modelName: row.modelName,
           globalDecile: row.globalDecile,
@@ -67,17 +86,20 @@ async function main(): Promise<void> {
     }
 
     const out: StatsVdbInsert[] = [...perModel.values()]
-    if (unmatched > 0) out.push({ vdbId: null, makeName: null, modelName: null, globalDecile: null, n: unmatched })
+    for (const [cls, n] of unmatched)
+      out.push({ vdbId: null, vehicleKind: cls, makeName: null, modelName: null, globalDecile: null, n })
 
     await db.transaction(async tx => {
       await tx.execute(sql`TRUNCATE registry.stats_vdb`)
       for (let i = 0; i < out.length; i += BATCH) await tx.insert(statsVdb).values(out.slice(i, i + BATCH))
     })
 
-    const matched = [...perModel.values()].reduce((s, r) => s + r.n, 0)
-    log(
-      `wrote ${out.length} row(s); ${matched} of ${matched + unmatched} passenger cars matched (${((matched / (matched + unmatched)) * 100).toFixed(1)}%)`
-    )
+    for (const cls of VDB_VEHICLE_CLASSES) {
+      const matched = [...perModel.values()].filter(r => r.vehicleKind === cls).reduce((s, r) => s + r.n, 0)
+      const total = matched + (unmatched.get(cls) ?? 0)
+      log(`${cls}: ${matched} of ${total} matched (${total ? ((matched / total) * 100).toFixed(1) : '0'}%)`)
+    }
+    log(`wrote ${out.length} row(s)`)
   } finally {
     await close()
   }

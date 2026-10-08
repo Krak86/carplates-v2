@@ -1,6 +1,6 @@
 import { queryOptions } from '@tanstack/react-query'
 import { normalizePlate } from '@carplates/shared'
-import type { StatsFieldDimension, StockRange } from '@carplates/shared'
+import type { StatsFieldDimension, StockRange, VdbVehicleClass } from '@carplates/shared'
 
 import {
   getAdminAnalytics,
@@ -214,19 +214,19 @@ export function fuelEconomyQuery(params: FuelEconomyParams) {
 }
 
 // VehiclesDB cross-market facts (pnpm ingest:vehiclesdb) — persisted reference data, cached offline like fuel.
-export function vdbQuery(brand: string, model: string) {
+export function vdbQuery(brand: string, model: string, kind?: string | null) {
   return queryOptions({
-    queryKey: ['vdb', brand, model],
-    queryFn: () => getVdb(brand, model),
+    queryKey: ['vdb', brand, model, kind ?? null],
+    queryFn: () => getVdb(brand, model, kind),
     staleTime: Infinity
   })
 }
 
 // Registry-by-popularity rollup for the /stats markets panel — online-only, like fuelStatsQuery.
-export function vdbStatsQuery() {
+export function vdbStatsQuery(kind: VdbVehicleClass = 'car') {
   return queryOptions({
-    queryKey: ['vdb-stats'],
-    queryFn: getVdbStats,
+    queryKey: ['vdb-stats', kind],
+    queryFn: () => getVdbStats(kind),
     staleTime: Infinity
   })
 }

@@ -212,7 +212,7 @@ export default function ResultCard({ data }: Props): ReactNode {
             </div>
             <div className="mt-1 flex flex-wrap gap-1.5 empty:hidden">
               <TopStatBadges brand={c.brand} model={c.model} color={c.color} region={data.region} />
-              <VdbChips brand={c.brand} model={c.model} />
+              <VdbChips brand={c.brand} model={c.model} kind={c.kind} />
               <Model3dButton brand={c.brand} model={c.model} />
               <Model360Button brand={c.brand} model={c.model} />
               {brandDealerUrl && <BrandSiteChip url={brandDealerUrl} />}

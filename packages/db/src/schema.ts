@@ -739,13 +739,15 @@ export const statsFuel = registry.table(
 export type StatsFuelInsert = typeof statsFuel.$inferInsert
 
 /**
- * Registry passenger cars per matched VehiclesDB model (vdb_id null = the unmatched bucket) — backs the /stats markets
- * panel. Rebuilt by `scripts/src/vdb-stats.ts`; see migrations/0040_stats_vdb.sql.
+ * Registry vehicles per vehicle class and matched VehiclesDB model (vdb_id null = that class's unmatched bucket) — backs
+ * the /stats markets panel. Rebuilt by `scripts/src/vdb-stats.ts`; see migrations 0040 and 0046.
  */
 export const statsVdb = registry.table(
   'stats_vdb',
   {
     vdbId: text('vdb_id'),
+    /** Vehicle class: car | motorcycle | truck | bus (`VdbVehicleClass` in @carplates/shared). */
+    vehicleKind: text('vehicle_kind').notNull().default('car'),
     makeName: text('make_name'),
     modelName: text('model_name'),
     globalDecile: smallint('global_decile'),
@@ -753,7 +755,7 @@ export const statsVdb = registry.table(
     uaOnly: boolean('ua_only').notNull().default(false),
     n: integer('n').notNull()
   },
-  t => [index('ix_stats_vdb_decile').on(t.globalDecile)]
+  t => [index('ix_stats_vdb_decile').on(t.globalDecile), index('ix_stats_vdb_kind').on(t.vehicleKind)]
 )
 export type StatsVdbInsert = typeof statsVdb.$inferInsert
 

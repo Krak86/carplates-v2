@@ -22,7 +22,45 @@ export const MIN_PREFIX_KEY_LENGTH = 3
 
 /** Car-like kinds win over motorcycles/trucks when a name exists in several ("Transit" is a van, "Boxer" too). */
 const KIND_RANK: Readonly<Record<string, number>> = { car: 0, van: 1 }
-const kindRank = (kind: string): number => KIND_RANK[kind] ?? 2
+const kindRank = (kind: string, kinds?: readonly string[]): number => {
+  if (!kinds) return KIND_RANK[kind] ?? 2
+  const i = kinds.indexOf(kind)
+  return i < 0 ? kinds.length : i
+}
+
+/** Vehicle classes the catalog can speak for; trailers, special machines and the like have no catalog counterpart. */
+export const VDB_VEHICLE_CLASSES = ['car', 'motorcycle', 'truck', 'bus'] as const
+export type VdbVehicleClass = (typeof VDB_VEHICLE_CLASSES)[number]
+
+/** Registry `kind` text (upper-case, as published) → vehicle class. */
+const VEHICLE_CLASS_BY_REGISTRY_KIND: Readonly<Record<string, VdbVehicleClass>> = {
+  ЛЕГКОВИЙ: 'car',
+  МОТОЦИКЛ: 'motorcycle',
+  МОТОТРИЦИКЛ: 'motorcycle',
+  КВАДРОЦИКЛ: 'motorcycle',
+  ТРИЦИКЛ: 'motorcycle',
+  МОПЕД: 'motorcycle',
+  ВАНТАЖНИЙ: 'truck',
+  АВТОБУС: 'bus'
+}
+
+/** Null when the registry kind has no catalog counterpart (trailers, special vehicles, unknown). */
+export function vdbVehicleClass(registryKind: string | null | undefined): VdbVehicleClass | null {
+  return VEHICLE_CLASS_BY_REGISTRY_KIND[registryKind?.trim().toUpperCase() ?? ''] ?? null
+}
+
+/**
+ * Catalog kinds a class may match, most preferred first. Cars stay unrestricted (undefined: car and van rows win, the
+ * rest still match) so passenger-car coverage is unchanged. The registry files vans and pickups under ВАНТАЖНИЙ and
+ * minibuses under АВТОБУС, hence the van/car rows in those lists.
+ */
+const CATALOG_KINDS_BY_CLASS: Readonly<Record<VdbVehicleClass, readonly string[] | undefined>> = {
+  car: undefined,
+  motorcycle: ['motorcycle', 'moped'],
+  truck: ['truck', 'van', 'car'],
+  bus: ['bus', 'van']
+}
+export const vdbCatalogKinds = (cls: VdbVehicleClass): readonly string[] | undefined => CATALOG_KINDS_BY_CLASS[cls]
 
 /**
  * The registry sometimes doubles the model name ("TRANSIT TRANSIT", "ABARTH  500" style padding) —
@@ -95,10 +133,10 @@ export function vdbCandidateKeys(mk: string, model: string): { key: string; how:
 }
 
 /** Preferred row among equals: car-like kind, then the closest (shortest) key, then the most popular decile. */
-function best<T extends VdbReferenceRow>(rows: readonly T[]): T {
+function best<T extends VdbReferenceRow>(rows: readonly T[], kinds?: readonly string[]): T {
   return [...rows].sort(
     (a, b) =>
-      kindRank(a.kind) - kindRank(b.kind) ||
+      kindRank(a.kind, kinds) - kindRank(b.kind, kinds) ||
       a.modelKey.length - b.modelKey.length ||
       (a.globalDecile ?? 99) - (b.globalDecile ?? 99)
   )[0]!
@@ -109,27 +147,30 @@ function best<T extends VdbReferenceRow>(rows: readonly T[]): T {
  * `makeKey`); `mk` is that make key. Order: exact key → alias key → series/nameplate keys (BMW, Mazda,
  * Mercedes, Lexus …) → catalog keys that START WITH the registry key ("Octavia" for "OCTAVIA A5") →
  * the longest catalog key that is a prefix of the registry key ("LAND CRUISER 200" → "landcruiser").
+ * `kinds` (see `vdbCatalogKinds`) restricts the catalog rows to those kinds and ranks them in that order.
  * Null when nothing fits — callers must hide the data then, never guess.
  */
 export function matchVdbModel<T extends VdbReferenceRow>(
-  makeRows: readonly T[],
+  allMakeRows: readonly T[],
   mk: string,
-  model: string
+  model: string,
+  kinds?: readonly string[]
 ): VdbMatch<T> | null {
+  const makeRows = kinds ? allMakeRows.filter(r => kinds.includes(r.kind)) : allMakeRows
   const candidates = vdbCandidateKeys(mk, model)
   if (candidates.length === 0) return null
 
   for (const { key, how } of candidates) {
     const exact = makeRows.filter(r => r.modelKey === key)
-    if (exact.length > 0) return { row: best(exact), how }
+    if (exact.length > 0) return { row: best(exact, kinds), how }
     const alias = makeRows.filter(r => r.aliases.some(a => modelKey(a) === key))
-    if (alias.length > 0) return { row: best(alias), how: how === 'exact' ? 'alias' : how }
+    if (alias.length > 0) return { row: best(alias, kinds), how: how === 'exact' ? 'alias' : how }
   }
 
   const direct = candidates[0]!.key
   if (direct.length >= MIN_PREFIX_KEY_LENGTH) {
     const forward = makeRows.filter(r => r.modelKey.startsWith(direct))
-    if (forward.length > 0) return { row: best(forward), how: 'prefix' }
+    if (forward.length > 0) return { row: best(forward, kinds), how: 'prefix' }
   }
   // A catalog key like "accord2" must not swallow "accord20" (Accord 2.0): when it is a name ending in a digit, the
   // registry key may only continue with a non-digit.
@@ -140,7 +181,13 @@ export function matchVdbModel<T extends VdbReferenceRow>(
   )
   if (reverse.length === 0) return null
   const longest = Math.max(...reverse.map(r => r.modelKey.length))
-  return { row: best(reverse.filter(r => r.modelKey.length === longest)), how: 'prefix' }
+  return {
+    row: best(
+      reverse.filter(r => r.modelKey.length === longest),
+      kinds
+    ),
+    how: 'prefix'
+  }
 }
 
 /**
@@ -151,13 +198,15 @@ export function matchVdbModel<T extends VdbReferenceRow>(
 export function matchVdbModelAcrossMakes<T extends VdbReferenceRow>(
   rows: readonly T[],
   mk: string,
-  model: string
+  model: string,
+  kinds?: readonly string[]
 ): VdbMatch<T> | null {
   for (const key of vdbRelatedMakeKeys(mk, model)) {
     const found = matchVdbModel(
       rows.filter(r => r.makeKey === key),
       key,
-      model
+      model,
+      kinds
     )
     if (found) return found
   }

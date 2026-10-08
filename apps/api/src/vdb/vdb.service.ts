@@ -1,6 +1,14 @@
 import { Inject, Injectable } from '@nestjs/common'
 import { vdbModels } from '@carplates/db'
-import { displayAliases, isUkraineOnly, makeKey, matchVdbModelAcrossMakes, vdbRelatedMakeKeys } from '@carplates/shared'
+import {
+  displayAliases,
+  isUkraineOnly,
+  makeKey,
+  matchVdbModelAcrossMakes,
+  vdbCatalogKinds,
+  vdbRelatedMakeKeys,
+  vdbVehicleClass
+} from '@carplates/shared'
 import type { VdbResponse } from '@carplates/shared'
 import { inArray } from 'drizzle-orm'
 
@@ -11,15 +19,20 @@ export class VdbService {
   constructor(@Inject(DbService) private readonly dbService: DbService) {}
 
   /** Persisted catalog (pnpm ingest:vehiclesdb); matching lives in `@carplates/shared` (`matchVdbModel`). */
-  async lookup(brand: string, model: string): Promise<VdbResponse> {
+  async lookup(brand: string, model: string, registryKind?: string): Promise<VdbResponse> {
     const mk = makeKey(brand)
     if (!mk) return { brand, model, match: null }
+
+    // No kind = the original any-kind lookup; a kind the catalog can't speak for (trailers, special vehicles) = no match.
+    const cls = registryKind ? vdbVehicleClass(registryKind) : 'car'
+    if (!cls) return { brand, model, match: null }
+    const kinds = vdbCatalogKinds(cls)
 
     const rows = await this.dbService.db
       .select()
       .from(vdbModels)
       .where(inArray(vdbModels.makeKey, vdbRelatedMakeKeys(mk, model)))
-    const found = matchVdbModelAcrossMakes(rows, mk, model)
+    const found = matchVdbModelAcrossMakes(rows, mk, model, kinds)
     if (!found) return { brand, model, match: null }
 
     const { row, how } = found

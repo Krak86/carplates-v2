@@ -168,6 +168,9 @@ export {
 export { makeKey, modelKey, brandCandidateKey } from './vehicleKey.js'
 export {
   MIN_PREFIX_KEY_LENGTH,
+  VDB_VEHICLE_CLASSES,
+  vdbCatalogKinds,
+  vdbVehicleClass,
   collapseDoubledModel,
   vdbCandidateKeys,
   vdbRelatedMakeKeys,
@@ -177,6 +180,7 @@ export {
   isUkraineOnly,
   otherMarkets,
   type VdbReferenceRow,
+  type VdbVehicleClass,
   type VdbMatchHow,
   type VdbMatch
 } from './vdbMatch.js'

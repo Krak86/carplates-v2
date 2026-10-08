@@ -9,7 +9,9 @@ import {
   matchVdbModelAcrossMakes,
   otherMarkets,
   vdbCandidateKeys,
+  vdbCatalogKinds,
   vdbRelatedMakeKeys,
+  vdbVehicleClass,
   type VdbReferenceRow
 } from './vdbMatch.js'
 
@@ -224,5 +226,44 @@ describe('markets helpers', () => {
     expect(isUkraineOnly({ countries: ['ua', 'nl'] })).toBe(false)
     expect(isUkraineOnly({ countries: [] })).toBe(false)
     expect(otherMarkets({ countries: ['ua', 'nl', 'de'] })).toEqual(['nl', 'de'])
+  })
+})
+
+describe('vehicle classes and kind-restricted matching', () => {
+  it('maps registry kinds to classes and leaves trailers/specials unmapped', () => {
+    expect(vdbVehicleClass('ЛЕГКОВИЙ')).toBe('car')
+    expect(vdbVehicleClass(' мопед ')).toBe('motorcycle')
+    expect(vdbVehicleClass('КВАДРОЦИКЛ')).toBe('motorcycle')
+    expect(vdbVehicleClass('ВАНТАЖНИЙ')).toBe('truck')
+    expect(vdbVehicleClass('АВТОБУС')).toBe('bus')
+    expect(vdbVehicleClass('ПРИЧІП')).toBeNull()
+    expect(vdbVehicleClass(null)).toBeNull()
+  })
+
+  const MIXED: Row[] = [
+    row('Honda', 'Civic'),
+    row('Honda', 'CBR', { kind: 'motorcycle' }),
+    row('Honda', 'Dio', { kind: 'moped' }),
+    row('MAN', 'TGX', { kind: 'truck' }),
+    row('Ford', 'Transit', { kind: 'van' }),
+    row('Mercedes-Benz', 'Sprinter', { kind: 'van' }),
+    row('Mercedes-Benz', 'Citaro', { kind: 'bus' })
+  ]
+  const pick = (cls: Parameters<typeof vdbCatalogKinds>[0], make: string, model: string): string | undefined =>
+    matchVdbModelAcrossMakes(MIXED, makeKey(make)!, model, vdbCatalogKinds(cls))?.row.name
+
+  it('only matches catalog kinds of the card’s class', () => {
+    expect(pick('motorcycle', 'HONDA', 'CBR 600')).toBe('CBR')
+    expect(pick('motorcycle', 'HONDA', 'DIO')).toBe('Dio')
+    expect(pick('motorcycle', 'HONDA', 'CIVIC')).toBeUndefined()
+    expect(pick('car', 'HONDA', 'CIVIC')).toBe('Civic')
+    expect(pick('truck', 'MAN', 'TGX 18.440')).toBe('TGX')
+    expect(pick('bus', 'MERCEDES-BENZ', 'CITARO')).toBe('Citaro')
+  })
+
+  it('lets vans stand in for trucks and buses (the registry files vans and minibuses there)', () => {
+    expect(pick('truck', 'FORD', 'TRANSIT')).toBe('Transit')
+    expect(pick('bus', 'MERCEDES-BENZ', 'SPRINTER 316 CDI')).toBe('Sprinter')
+    expect(pick('bus', 'FORD', 'TRANSIT')).toBe('Transit')
   })
 })

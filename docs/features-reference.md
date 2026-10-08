@@ -6,7 +6,7 @@ Moved out of CLAUDE.md to save tokens each session. Read only the section for th
 
 Files: `packages/shared/src/vdbMatch.ts` + `vdb.ts`, `apps/api/src/vdb/`, web `components/VdbChips.tsx`,
 `routes/stats/VdbStatsPanel.tsx`, `scripts/src/vehiclesdb*.ts` + `vdb-stats.ts`; migrations 0039 `registry.vdb_models`, 0040
-`registry.stats_vdb`.
+`registry.stats_vdb` (+ 0046 `vehicle_kind`: car/motorcycle/truck/bus; `vdbVehicleClass` maps the registry `kind`, `vdbCatalogKinds` limits catalog kinds).
 
 CC BY 4.0 catalog of makes/models with the countries they are sold in and a popularity decile, used for the result-card chips
 (top chip row) and the `/stats` Markets panel. A separate, removable block — credit "Vehicle data by VehiclesDB" on About. The

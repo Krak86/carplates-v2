@@ -1,6 +1,6 @@
-import type { ReactNode } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import type { VdbStatsModel } from '@carplates/shared'
+import { useState, type ReactNode } from 'react'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { VDB_VEHICLE_CLASSES, type VdbStatsModel, type VdbStatsResponse, type VdbVehicleClass } from '@carplates/shared'
 import { useTranslation } from 'react-i18next'
 
 import InfoPopover from '@/components/InfoPopover'
@@ -10,6 +10,8 @@ import { isoFlag } from '@/components/vin/helpers'
 import { decileBand, formatShare, MAX_FLAGS } from '@/components/VdbChips.helpers'
 import { toIntlLocale } from '@/lib/intl'
 import { vdbStatsQuery } from '@/lib/queries'
+
+const DEFAULT_KIND: VdbVehicleClass = 'car'
 
 function ModelList({ titleKey, icon, rows }: { titleKey: string; icon: string; rows: VdbStatsModel[] }): ReactNode {
   const { t, i18n } = useTranslation()
@@ -51,13 +53,11 @@ function ModelList({ titleKey, icon, rows }: { titleKey: string; icon: string; r
  * Online-only (not in the offline cache); renders nothing while loading, on error, or before the rollup is built.
  */
 export default function VdbStatsPanel(): ReactNode {
-  const { t, i18n } = useTranslation()
-  const numberFormat = new Intl.NumberFormat(toIntlLocale(i18n.language))
-  const { data } = useQuery(vdbStatsQuery())
-  if (!data || data.total === 0) return null
-
-  const max = Math.max(...data.byDecile.map(d => d.n), 1)
-  const pct = (n: number, of: number): string => formatShare(n, of, toIntlLocale(i18n.language))
+  const { t } = useTranslation()
+  const [kind, setKind] = useState<VdbVehicleClass>(DEFAULT_KIND)
+  // Keep the previous class's numbers on screen while another one loads, so the selector doesn't flicker away.
+  const { data } = useQuery({ ...vdbStatsQuery(kind), placeholderData: keepPreviousData })
+  if (!data) return null
 
   return (
     <Card className="mb-6">
@@ -68,6 +68,41 @@ export default function VdbStatsPanel(): ReactNode {
           <InfoText text={t('stats.vdb.info')} />
         </InfoPopover>
       </div>
+      <div role="group" aria-label={t('stats.vdb.kind')} className="mb-3 flex flex-wrap gap-1.5">
+        {VDB_VEHICLE_CLASSES.map(k => (
+          <button
+            key={k}
+            type="button"
+            aria-pressed={k === kind}
+            onClick={() => setKind(k)}
+            className={`rounded-full border px-2.5 py-0.5 text-xs ${
+              k === kind
+                ? 'border-[var(--color-primary)] bg-[var(--color-primary)] text-white'
+                : 'border-[var(--color-border)] text-[var(--color-fg)]'
+            }`}
+          >
+            {t(`stats.vdb.kind.${k}`)}
+          </button>
+        ))}
+      </div>
+
+      {data.total === 0 ? (
+        <p className="text-sm text-[var(--color-muted)]">{t('stats.noRows')}</p>
+      ) : (
+        <VdbStatsBody data={data} />
+      )}
+    </Card>
+  )
+}
+
+function VdbStatsBody({ data }: { data: VdbStatsResponse }): ReactNode {
+  const { t, i18n } = useTranslation()
+  const numberFormat = new Intl.NumberFormat(toIntlLocale(i18n.language))
+  const max = Math.max(...data.byDecile.map(d => d.n), 1)
+  const pct = (n: number, of: number): string => formatShare(n, of, toIntlLocale(i18n.language))
+
+  return (
+    <>
       <p className="mb-3 text-sm text-[var(--color-muted)]">
         {t('stats.vdb.coverage', {
           matched: pct(data.matched, data.total),
@@ -100,6 +135,6 @@ export default function VdbStatsPanel(): ReactNode {
         <ModelList titleKey="stats.vdb.rare" icon="💎" rows={data.rareElsewhere} />
         <ModelList titleKey="stats.vdb.uaOnly" icon="🇺🇦" rows={data.uaOnlyModels} />
       </div>
-    </Card>
+    </>
   )
 }

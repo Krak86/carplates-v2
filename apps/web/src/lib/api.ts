@@ -61,6 +61,7 @@ import type {
   FuelEconomyResponse,
   VdbResponse,
   VdbStatsResponse,
+  VdbVehicleClass,
   Models3dResponse,
   Models360Response,
   NewsPageResponse,
@@ -238,13 +239,14 @@ export async function getIihsRatings(make: string, model: string, year: number):
   return iihsRatingsResponseSchema.parse(await getJson(`/api/safety/iihs?${params.toString()}`))
 }
 
-export async function getVdb(brand: string, model: string): Promise<VdbResponse> {
+export async function getVdb(brand: string, model: string, kind?: string | null): Promise<VdbResponse> {
   const params = new URLSearchParams({ brand, model })
+  if (kind) params.set('kind', kind)
   return vdbResponseSchema.parse(await getJson(`/api/vdb?${params.toString()}`))
 }
 
-export async function getVdbStats(): Promise<VdbStatsResponse> {
-  return vdbStatsResponseSchema.parse(await getJson('/api/vdb/stats'))
+export async function getVdbStats(kind: VdbVehicleClass = 'car'): Promise<VdbStatsResponse> {
+  return vdbStatsResponseSchema.parse(await getJson(`/api/vdb/stats?kind=${kind}`))
 }
 
 export type FuelEconomyParams = {
