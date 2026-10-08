@@ -139,6 +139,8 @@ export default defineConfig({
     alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) }
   },
   build: {
+    // Supported-browser floor: Tailwind v4 (Safari 16.4 / Chrome 111 / Firefox 128) + AVIF + OffscreenCanvas.
+    target: ['chrome111', 'edge111', 'firefox128', 'safari16.4'],
     rolldownOptions: {
       output: {
         codeSplitting: {
