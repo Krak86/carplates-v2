@@ -52,3 +52,8 @@ export function similarVehiclesHref(brand: string, model: string, year: number, 
   })
   return `/advanced-search?${params}`
 }
+
+/** Fewer matched reference entries than this is a "small sample": shown, but flagged as a rough guide. */
+export const EMISSIONS_SMALL_SAMPLE = 5
+
+export const isSmallEmissionsSample = (matches: number): boolean => matches < EMISSIONS_SMALL_SAMPLE

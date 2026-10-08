@@ -715,6 +715,42 @@ export type VdbModelRow = typeof vdbModels.$inferSelect
 export type VdbModelInsert = typeof vdbModels.$inferInsert
 
 /**
+ * RDW (Dutch vehicle authority, CC0) specs aggregated per make/model/year — min / median / max of power, displacement,
+ * unladen mass and combined CO2. Loaded by `scripts/src/rdw.ts`, see migrations/0047_rdw_specs.sql. Removable block.
+ */
+export const rdwSpecs = registry.table(
+  'rdw_specs',
+  {
+    kind: text('kind').notNull(),
+    make: text('make').notNull(),
+    model: text('model').notNull(),
+    makeKey: text('make_key').notNull(),
+    modelKey: text('model_key').notNull(),
+    modelYear: smallint('model_year').notNull(),
+    n: integer('n').notNull(),
+    powerKwMin: real('power_kw_min'),
+    powerKwMedian: real('power_kw_median'),
+    powerKwMax: real('power_kw_max'),
+    displacementCcMin: real('displacement_cc_min'),
+    displacementCcMedian: real('displacement_cc_median'),
+    displacementCcMax: real('displacement_cc_max'),
+    massKgMin: real('mass_kg_min'),
+    massKgMedian: real('mass_kg_median'),
+    massKgMax: real('mass_kg_max'),
+    co2GKmMin: real('co2_g_km_min'),
+    co2GKmMedian: real('co2_g_km_median'),
+    co2GKmMax: real('co2_g_km_max'),
+    scrapedAt: timestamp('scraped_at', { withTimezone: true }).notNull().defaultNow()
+  },
+  t => [
+    primaryKey({ columns: [t.kind, t.makeKey, t.modelKey, t.modelYear] }),
+    index('ix_rdw_specs_make_model').on(t.makeKey, t.modelKey)
+  ]
+)
+export type RdwSpecsRow = typeof rdwSpecs.$inferSelect
+export type RdwSpecsInsert = typeof rdwSpecs.$inferInsert
+
+/**
  * Per-(brand, model, year, fuel, capacity bucket) passenger-car counts joined with the CO2 estimate the reference
  * data gives them — backs the /fuel statistics page. Rebuilt by `scripts/src/fuel-stats.ts`; see
  * migrations/0018_stats_fuel.sql.

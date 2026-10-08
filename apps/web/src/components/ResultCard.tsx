@@ -28,11 +28,13 @@ import FieldInfoButton from '@/components/FieldInfoButton'
 import NearbyServices from '@/components/NearbyServices'
 import NoRegionBadge from '@/components/NoRegionBadge'
 import RegistrationTimeline from '@/components/RegistrationTimeline'
+import { kgToTonnes } from '@/components/RdwSpecs.helpers'
 import { getBodyInfo, getFuelIcon } from '@/components/ResultCard.helpers'
 import NewsSection from '@/components/NewsSection'
 import PaidFeatureSections from '@/components/paid/PaidFeatureSections'
 import ReviewLinks from '@/components/ReviewLinks'
 import FuelEconomy from '@/components/FuelEconomy'
+import RdwSpecs from '@/components/RdwSpecs'
 import VdbChips from '@/components/VdbChips'
 import InfoPopover from '@/components/InfoPopover'
 import InfoText from '@/components/InfoText'
@@ -140,12 +142,7 @@ export default function ResultCard({ data }: Props): ReactNode {
       {/* Wide viewports have room beside the card — float the toggle out there instead
           of stacking it above, which otherwise pushes the card down for no reason. */}
       <CardTiltToggle className="absolute top-0 -left-14 hidden lg:inline-flex" />
-      <RaceGameButton
-        color={VEHICLE_COLOR_HEX[vehicleColor]}
-        kind={vehicleKind}
-        bodyText={c.body}
-        plate={data.plate}
-      />
+      <RaceGameButton color={VEHICLE_COLOR_HEX[vehicleColor]} kind={vehicleKind} bodyText={c.body} plate={data.plate} />
       <Card
         ref={glowRef}
         className="group relative isolate w-full transform-[perspective(var(--tilt-perspective,1200px))_rotateX(var(--tilt-x,0deg))_rotateY(var(--tilt-y,0deg))] overflow-hidden shadow-2xl! transition-[transform,box-shadow] duration-200 ease-out will-change-transform backface-hidden hover:shadow-xl!"
@@ -303,7 +300,10 @@ export default function ResultCard({ data }: Props): ReactNode {
               />
               <Row
                 label={t('field.weight')}
-                value={c.ownWeight && `${c.ownWeight} / ${c.totalWeight ?? '—'} ${t('field.unitKg')}`}
+                value={
+                  c.ownWeight &&
+                  `${c.ownWeight} / ${c.totalWeight ?? '—'} ${t('field.unitKg')} (~${kgToTonnes(c.ownWeight)}${c.totalWeight ? ` / ${kgToTonnes(c.totalWeight)}` : ''} ${t('field.unitT')})`
+                }
                 info="weight"
               />
               <Row
@@ -454,8 +454,22 @@ export default function ResultCard({ data }: Props): ReactNode {
           )}
         </VinToggleSection>
 
+        <RdwSpecs
+          brand={c.brand}
+          model={c.model}
+          year={c.makeYear}
+          kind={c.kind}
+          own={{ powerKw: c.powerKwt, displacementCc: c.capacity, massKg: c.ownWeight }}
+        />
         <SafetyRatings brand={c.brand} model={c.model} year={c.makeYear} body={c.body} />
-        <FuelEconomy brand={c.brand} model={c.model} year={c.makeYear} fuel={c.fuel} capacity={c.capacity} />
+        <FuelEconomy
+          brand={c.brand}
+          model={c.model}
+          year={c.makeYear}
+          fuel={c.fuel}
+          capacity={c.capacity}
+          kind={c.kind}
+        />
         <ReviewLinks brand={c.brand} model={c.model} year={c.makeYear} />
         <VideoReviews brand={c.brand} model={c.model} year={c.makeYear} />
         <CarWikiInfo brand={c.brand} model={c.model} year={c.makeYear} />

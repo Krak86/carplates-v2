@@ -1,0 +1,98 @@
+import { Inject, Injectable } from '@nestjs/common'
+import { rdwSpecs } from '@carplates/db'
+import type { RdwSpecsRow } from '@carplates/db'
+import {
+  makeKey,
+  matchRdwModel,
+  isSmallRdwSample,
+  pickRdwYear,
+  vdbRelatedMakeKeys,
+  vdbVehicleClass
+} from '@carplates/shared'
+import type { RdwReferenceRow, RdwResponse, RdwSpecs } from '@carplates/shared'
+import { and, eq, inArray, sql } from 'drizzle-orm'
+
+import { DbService } from '../db/db.service.js'
+
+type Range = NonNullable<RdwSpecs['powerKw']>
+
+/** min / median / max triple → a range; null unless the median exists (the other two always come with it). */
+const range = (min: number | null, median: number | null, max: number | null): Range | null =>
+  median == null ? null : { min: min ?? median, median, max: max ?? median }
+
+const toSpecs = (r: RdwSpecsRow): RdwSpecs => ({
+  year: r.modelYear,
+  n: r.n,
+  powerKw: range(r.powerKwMin, r.powerKwMedian, r.powerKwMax),
+  displacementCc: range(r.displacementCcMin, r.displacementCcMedian, r.displacementCcMax),
+  massKg: range(r.massKgMin, r.massKgMedian, r.massKgMax),
+  co2GKm: range(r.co2GKmMin, r.co2GKmMedian, r.co2GKmMax)
+})
+
+@Injectable()
+export class RdwService {
+  constructor(@Inject(DbService) private readonly dbService: DbService) {}
+
+  /** Persisted aggregates (pnpm ingest:rdw); matching lives in `@carplates/shared` (`matchRdwModel`). */
+  async lookup(brand: string, model: string, year: number, registryKind?: string): Promise<RdwResponse> {
+    const none: RdwResponse = { brand, model, year, match: null }
+    const mk = makeKey(brand)
+    if (!mk) return none
+
+    // No kind = a passenger car; a kind RDW can't speak for (trailers, special vehicles) = no match.
+    const cls = registryKind ? vdbVehicleClass(registryKind) : 'car'
+    if (!cls) return none
+
+    const { db } = this.dbService
+    const models: (RdwReferenceRow & { maxN: number })[] = (
+      await db
+        .select({
+          kind: rdwSpecs.kind,
+          makeKey: rdwSpecs.makeKey,
+          modelKey: rdwSpecs.modelKey,
+          make: sql<string>`max(${rdwSpecs.make})`,
+          maxN: sql<number>`max(${rdwSpecs.n})`,
+          model: sql<string>`max(${rdwSpecs.model})`
+        })
+        .from(rdwSpecs)
+        .where(inArray(rdwSpecs.makeKey, vdbRelatedMakeKeys(mk, model)))
+        .groupBy(rdwSpecs.kind, rdwSpecs.makeKey, rdwSpecs.modelKey)
+    ).map(r => ({ ...r, maxN: Number(r.maxN), aliases: [] }))
+
+    // A well-sampled spelling wins over a stray thin one (RDW has Mazda "6" with 6 cars beside "MAZDA6" with 4,700); only
+    // when nothing well-sampled fits does a thin model still get shown (flagged as a small sample in the UI).
+    const found =
+      matchRdwModel(
+        models.filter(m => !isSmallRdwSample(m.maxN)),
+        mk,
+        model,
+        cls
+      ) ?? matchRdwModel(models, mk, model, cls)
+    if (!found) return none
+
+    const { row, how } = found
+    const years = await db
+      .select()
+      .from(rdwSpecs)
+      .where(and(eq(rdwSpecs.kind, row.kind), eq(rdwSpecs.makeKey, row.makeKey), eq(rdwSpecs.modelKey, row.modelKey)))
+    const picked = pickRdwYear(
+      years.map(r => ({ year: r.modelYear, n: r.n, row: r })),
+      year
+    )
+    if (!picked) return none
+
+    return {
+      brand,
+      model,
+      year,
+      match: {
+        makeName: picked.row.make,
+        modelName: picked.row.model,
+        how,
+        crossMake: row.makeKey !== mk,
+        exactYear: picked.year === year,
+        specs: toSpecs(picked.row)
+      }
+    }
+  }
+}

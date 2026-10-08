@@ -13,6 +13,7 @@ import {
   getCncapRatings,
   getEuroNcapRatings,
   getFuelEconomy,
+  getRdw,
   getVdb,
   getVdbStats,
   getFuelStats,
@@ -218,6 +219,15 @@ export function vdbQuery(brand: string, model: string, kind?: string | null) {
   return queryOptions({
     queryKey: ['vdb', brand, model, kind ?? null],
     queryFn: () => getVdb(brand, model, kind),
+    staleTime: Infinity
+  })
+}
+
+// RDW (Dutch register) specs aggregates (pnpm ingest:rdw) — persisted reference data, cached offline like vdb.
+export function rdwQuery(brand: string, model: string, year: number, kind?: string | null) {
+  return queryOptions({
+    queryKey: ['rdw', brand, model, year, kind ?? null],
+    queryFn: () => getRdw(brand, model, year, kind),
     staleTime: Infinity
   })
 }

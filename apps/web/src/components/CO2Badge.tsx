@@ -1,9 +1,10 @@
 import type { ReactNode } from 'react'
-import { co2Band, co2Score } from '@carplates/shared'
+import { co2Band, co2Score, isSmallRdwSample } from '@carplates/shared'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 
-import { CO2_BAND_COLOR, co2ReferenceLinks, formatRange } from '@/components/CO2Badge.helpers'
+import { approxCount } from '@/components/RdwSpecs.helpers'
+import { CO2_BAND_COLOR, co2ReferenceLinks, formatRange, isSmallEmissionsSample } from '@/components/CO2Badge.helpers'
 import InfoPopover from '@/components/InfoPopover'
 
 type Props = {
@@ -18,6 +19,15 @@ type Props = {
   cycle: string
   /** Advanced-search link listing the vehicles the estimate was matched on. */
   similarHref?: string
+  /** Reference entries (trim / engine versions) the range was taken from. */
+  matches?: number
+  /** Model year of those entries, and the car's own year — differ when the nearest year stood in. */
+  modelYear?: number
+  carYear?: number | null
+  /** Where the figures come from: the EPA / EEA reference data (default) or the Dutch register when that has none. */
+  source?: 'rdw'
+  /** The g/km the score is computed from, when the range midpoint would misrepresent it (e.g. a skewed median). */
+  scoreGKm?: number
 }
 
 /** Cloud-with-CO₂ glyph, filled with the band colour. */
@@ -48,16 +58,39 @@ export default function CO2Badge({
   l100kmMax,
   evKwh100km,
   cycle,
-  similarHref
+  similarHref,
+  matches,
+  modelYear,
+  carYear,
+  source,
+  scoreGKm
 }: Props): ReactNode {
   const { t, i18n } = useTranslation()
-  const score = co2Score((co2GKmMin + co2GKmMax) / 2) ?? 0
+  const score = co2Score(scoreGKm ?? (co2GKmMin + co2GKmMax) / 2) ?? 0
   const color = CO2_BAND_COLOR[co2Band(score)]
   const co2 = formatRange(co2GKmMin, co2GKmMax)
   const consumption = formatRange(l100kmMin, l100kmMax, 1)
+  const isRdw = source === 'rdw'
+  const isSmall = matches != null && (isRdw ? isSmallRdwSample(matches) : isSmallEmissionsSample(matches))
+  const count =
+    matches == null ? 0 : isRdw ? approxCount(matches, i18n.language === 'ua' ? 'uk' : i18n.language) : matches
+  const isNearYear = modelYear != null && carYear != null && modelYear !== carYear
 
   return (
     <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-3">
+      {matches != null && modelYear != null && (
+        <div className="mb-2 space-y-0.5 text-xs text-[var(--color-muted)]">
+          <p>
+            {t(isRdw ? 'co2.sampleRdw' : isNearYear ? 'co2.sampleNear' : 'co2.sample', {
+              n: count,
+              year: modelYear,
+              carYear
+            })}
+          </p>
+          {isSmall && <p>⚠️ {t(isRdw ? 'rdw.smallSample' : 'co2.smallSample', { n: matches })}</p>}
+        </div>
+      )}
+
       <div className="flex items-center gap-3">
         <CloudIcon color={color} />
 
@@ -66,7 +99,7 @@ export default function CO2Badge({
             <span className="text-xl leading-none font-bold" style={{ color }}>
               {score}
             </span>
-            <span className="text-xs text-[var(--color-muted)]">/ 100 · {t('co2.title')}</span>
+            <span className="text-xs text-[var(--color-muted)]">/ 100 · {t('co2.score')}</span>
           </div>
 
           <div
@@ -94,6 +127,15 @@ export default function CO2Badge({
             <p className="text-[var(--color-muted)]">{t('co2.infoWltp')}</p>
             <p className="text-[var(--color-muted)]">{t('co2.infoSources')}</p>
             <p className="text-[var(--color-muted)]">{t('co2.infoEstimate')}</p>
+            {matches != null && !isRdw && (
+              <p className="text-[var(--color-muted)]">{t('co2.infoSample', { n: matches })}</p>
+            )}
+            {isRdw && <p className="text-[var(--color-muted)]">{t('co2.infoRdw')}</p>}
+            {isSmall && (
+              <p className="text-[var(--color-muted)]">
+                ⚠️ {t(isRdw ? 'rdw.info.small' : 'co2.infoSmall', { n: matches })}
+              </p>
+            )}
 
             <div>
               <div className="font-medium">{t('co2.linksTitle')}</div>

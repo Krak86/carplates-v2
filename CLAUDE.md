@@ -12,7 +12,7 @@ from the state open-data portal (`data.gov.ua`), loaded into Postgres; VIN decod
 - `PLAN.md` — active/planned work (Phases 2-5). `docs/plan-done.md` — finished write-ups; **grep headings, never read whole**.
 - `DATASETS_PLAN.md` — external-dataset enrichment. `SCHEDULE.md` — post-deploy plan for recurring ingest jobs.
 - `docs/commands-reference.md` — every `ingest:*` / `export:*` / ALPR command with flags (grep the one you need).
-- `docs/features-reference.md` — detailed conventions for VehiclesDB, the racer game and Accounts. **Read the matching section before
+- `docs/features-reference.md` — detailed conventions for VehiclesDB, RDW specs, the racer game and Accounts. **Read the matching section before
   touching those areas.**
 
 The **v1 app is the sibling folder `../carplates/`** (do not modify it) — the reference for Phase 2/3 ports (RIA matrices, Platesmania and
@@ -42,7 +42,7 @@ pnpm ingest:ratings:csv   # all committed CSV seeds (ratings, fuel, infocar, …
 
 Every other source has `ingest:<x>` (scrape/fetch), `ingest:<x>:csv` (load committed seed, seconds) and `export:<x>:csv` (re-dump after a
 real re-ingest). Sources: euroncap, jncap, cncap, kncap, iihs, fuel, infocar, infocar:videos, edrive, sketchfab, carshow360, topgear,
-press, wiki-images, youtube-videos, vehiclesdb. No-CSV (re-run on demand): news, social, winner360. Flags/details:
+press, wiki-images, youtube-videos, vehiclesdb, rdw. No-CSV (re-run on demand): news, social, winner360. Flags/details:
 `docs/commands-reference.md`. ALPR: `pnpm alpr:build|up|down`.
 
 First-time setup, test data (seconds): `pnpm install && pnpm db:up && pnpm db:migrate && pnpm db:seed && pnpm dev`.
@@ -107,7 +107,7 @@ pnpm 12 · Node 24 LTS · TypeScript 5.9 (7.x blocked — typescript-eslint peer
 - **Link previews** (`apps/api/src/spa/`): meta tags + `/og/*.png` are produced by the **API** on first load/deep link — Vite
   (`:5173`) never shows them. To test: `pnpm build`, set `WEB_DIST_DIR=../web/dist` in `apps/api/.env`, restart the API, open
   `localhost:3000/<plate>` (Incognito, SW caches `index.html`). Plate/VIN pages are `noindex`; `?lang=` selects the language.
-- **Feature areas with their own detail docs** (read `docs/features-reference.md` first): VehiclesDB cross-market data, the
+- **Feature areas with their own detail docs** (read `docs/features-reference.md` first): VehiclesDB cross-market data, RDW specs, the
   test-drive racer game, and Accounts (separate `app` schema, **not** re-ingestable; `account.ts`, not `schemas.ts`; admins by SQL
   only; account UI online-only).
 - **Telemetry** stays off locally. `.env.example` in each app documents the vars; real `.env*` files are gitignored and `deny`-listed.

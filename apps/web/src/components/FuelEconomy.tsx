@@ -11,7 +11,7 @@ import SectionInfo from '@/components/SectionInfo'
 import SectionHeader from '@/components/SectionHeader'
 import ShareButton from '@/components/ShareButton'
 import { cn } from '@/lib/cn'
-import { fuelEconomyQuery } from '@/lib/queries'
+import { fuelEconomyQuery, rdwQuery } from '@/lib/queries'
 import { scrollElementIntoView } from '@/lib/share-section'
 
 type Props = {
@@ -20,13 +20,15 @@ type Props = {
   year: number | null
   fuel?: string | null
   capacity?: number | null
+  /** Registry kind text — picks which Dutch-register kinds the RDW fallback may match. */
+  kind?: string | null
 }
 
 /**
  * Collapsed "Show emissions" section (same toggle as the safety ratings): the estimate is only fetched once it
  * is opened, and the section is hidden entirely for a car with no make/model/year to match on.
  */
-export default function FuelEconomy({ brand, model, year, fuel, capacity }: Props): ReactNode {
+export default function FuelEconomy({ brand, model, year, fuel, capacity, kind }: Props): ReactNode {
   const { t } = useTranslation()
   const [searchParams] = useSearchParams()
   const isSharedEmissions = searchParams.get('section') === 'emissions'
@@ -37,6 +39,15 @@ export default function FuelEconomy({ brand, model, year, fuel, capacity }: Prop
     ...fuelEconomyQuery({ make: brand ?? '', model: model ?? '', year: year ?? 0, fuel, capacity }),
     enabled: hasQuery && open
   })
+
+  // EPA / EEA cover little before 2010 and few non-EU models; the Dutch register's CO2 (same query the Specs block uses) fills that gap.
+  const noEstimate = result.isSuccess && !result.data?.estimate
+  const rdw = useQuery({
+    ...rdwQuery(brand ?? '', model ?? '', year ?? 0, kind),
+    enabled: hasQuery && open && noEstimate
+  })
+  const rdwMatch = rdw.data?.match
+  const rdwCo2 = rdwMatch?.specs.co2GKm ?? null
 
   useEffect(() => {
     if (isSharedEmissions && hasQuery && sectionRef.current) scrollElementIntoView(sectionRef.current)
@@ -68,7 +79,25 @@ export default function FuelEconomy({ brand, model, year, fuel, capacity }: Prop
         <div className="overflow-hidden">
           <div className="mt-2">
             {result.isPending && open && <p className="text-sm text-[var(--color-muted)]">…</p>}
-            {result.isSuccess && !estimate && <p className="text-sm text-[var(--color-muted)]">{t('co2.noData')}</p>}
+            {noEstimate && rdw.isPending && <p className="text-sm text-[var(--color-muted)]">…</p>}
+            {noEstimate && !rdw.isPending && !rdwCo2 && (
+              <p className="text-sm text-[var(--color-muted)]">{t('co2.noData')}</p>
+            )}
+            {noEstimate && rdwMatch && rdwCo2 && (
+              <CO2Badge
+                co2GKmMin={rdwCo2.min}
+                co2GKmMax={rdwCo2.max}
+                scoreGKm={rdwCo2.median}
+                l100kmMin={null}
+                l100kmMax={null}
+                cycle="WLTP / NEDC"
+                source="rdw"
+                similarHref={similarVehiclesHref(brand ?? '', model ?? '', year ?? 0, MAX_YEAR_GAP)}
+                matches={rdwMatch.specs.n}
+                modelYear={rdwMatch.specs.year}
+                carYear={year}
+              />
+            )}
             {estimate && (
               <CO2Badge
                 co2GKmMin={estimate.co2GKmMin}
@@ -78,6 +107,9 @@ export default function FuelEconomy({ brand, model, year, fuel, capacity }: Prop
                 evKwh100km={estimate.evKwh100km}
                 cycle={estimate.cycle}
                 similarHref={similarVehiclesHref(brand ?? '', model ?? '', year ?? 0, MAX_YEAR_GAP)}
+                matches={estimate.matches}
+                modelYear={estimate.modelYear}
+                carYear={year}
               />
             )}
           </div>

@@ -106,6 +106,11 @@ pnpm ingest:vehiclesdb   # VehiclesDB (CC BY 4.0) make/model catalog: download d
                        # decile; result-card chips via GET /api/vdb); --dry-run, --refresh. See DATASETS_PLAN.md
 pnpm ingest:vehiclesdb:csv   # load the committed VehiclesDB CSV (305 KB gz) — seconds, no download (part of ingest:ratings:csv)
 pnpm export:vehiclesdb:csv   # re-dump the table to that CSV — run after every real re-ingest
+pnpm ingest:rdw   # RDW (Dutch register, CC0) specs -> registry.rdw_specs: min/median/max power, capacity, mass, CO2 per make/model/year, aggregated
+                  # server-side by RDW's SODA API (one joined query per make, cached in scripts/.data/rdw/; ~1 h cold). Flags: --make SKODA,
+                  # --min-vehicles N (default 50), --dry-run, --refresh. Result-card "Specs" block via GET /api/rdw
+pnpm ingest:rdw:csv   # load the committed RDW seed (seed-data/rdw-specs.csv.gz) — seconds, no download (part of ingest:ratings:csv)
+pnpm export:rdw:csv   # re-dump the table to that CSV — run after every real re-ingest
 pnpm db:refresh-vdb-stats   # rebuild registry.stats_vdb (the /stats "Markets" panel) from the registry + vdb_models
 pnpm db:refresh-derived     # rebuild ALL rollups computed from current_registration: fuel-stats + safety-stats + vdb-stats
                             # (scripts/src/derived-refresh.ts — add new rollups of that kind there). `ingest` runs it itself
@@ -114,7 +119,7 @@ pnpm db:refresh-derived     # rebuild ALL rollups computed from current_registra
                             # ingest:vehiclesdb alone do NOT — run this after them
 pnpm db:refresh-fuel-stats   # rebuild registry.stats_fuel (the /fuel page rollup) from the registry + fuel_economy;
                              # run after any registry ingest or ingest:fuel (ingest:all does it last)
-pnpm ingest:ratings:csv   # db:migrate, then all five *:csv rating loads + the fuel, infocar, infocar-videos, e-drive, sketchfab, carshow360, topgear, press and wiki-images CSVs concurrently — each writes
+pnpm ingest:ratings:csv   # db:migrate, then all five *:csv rating loads + the fuel, RDW, infocar, infocar-videos, e-drive, sketchfab, carshow360, topgear, press and wiki-images CSVs concurrently — each writes
                           # its own table only, doesn't touch registrations
 pnpm ingest:all        # db:migrate, then ingest:full + ingest:ratings:csv concurrently — each writes a
                        # disjoint table (registrations/current_registration/stats_by_* vs. one ratings/fuel_economy

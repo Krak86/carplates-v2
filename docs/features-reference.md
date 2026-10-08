@@ -16,6 +16,24 @@ for pairs verified in both sides; a miss hides the data). The seed CSV stores
 the computed keys, so after changing `makeKey`/`modelKey`/`brandSlug` re-run `ingest:vehiclesdb` from the download, not `:csv`.
 `stats_vdb` is stale until `pnpm db:refresh-derived`. Full status, gaps and refresh rules: DATASETS_PLAN.md ("VehiclesDB — built").
 
+## RDW specs (EU / NL)
+
+Files: `packages/shared/src/rdw.ts` (contract, own file) + `rdwMatch.ts`, `apps/api/src/rdw/`, web `components/RdwSpecs.tsx` +
+`.helpers.ts`, `scripts/src/rdw.ts` + `rdw-parse.ts`; migration 0047 `registry.rdw_specs`.
+
+CC0 data from RDW (Dutch vehicle authority): power, engine capacity, unladen mass and combined CO2 as min / median / max per
+(kind, make, model, first-registration year) — the "Specs" result-card block, labelled "EU (NL) data" (EU-spec, may differ from a
+Ukrainian build). RDW's SODA server does the work: `ingest:rdw` posts one grouped, server-side-joined query per make (main
+dataset `m9d7-ebf2` LEFT JOIN fuel/emissions dataset `8ys7-d773` on kenteken, first fuel row only) — the ~17M raw rows are never
+downloaded. Power/CO2 live only in the fuel dataset and are TEXT columns there (cast with `::number`); EVs report power in
+`netto_max_vermogen_elektrisch`; CO2 is WLTP where present, else NEDC. Each measure is plausibility-bounded in the query so a typo row
+can't become a min/max. Matching is the VehiclesDB matcher (`matchRdwModel` → `matchVdbModelAcrossMakes`, widened to
+`ModelReferenceRow`) over distinct RDW models, then `pickRdwYear` (nearest year within `MAX_YEAR_GAP`); a miss hides the block. Groups of 3-9 vehicles (`RDW_MIN_DISPLAY_N` = 10) are still shown but flagged "small sample" (owner: more info beats less); matching and year picking prefer well-sampled models/years and only fall back to thin ones (a stray thin spelling must not shadow the real one).
+RDW `voertuigsoort` → kind: Personenauto=car, Bedrijfsauto=truck (vans), Motorfiets=motorcycle, Bus=bus; trailers etc. skipped.
+UI: collapsible block with per-row ❓ explainers, brackets (hp / litres / tonnes), a "this car (registry)" comparison line, share link `?section=specs`, approximate vehicle count, and a small-sample ⚠️. Rows come from `SPEC_ROWS` (`RdwSpecs.helpers.ts`) — a new measure is one entry. The Emissions section (`FuelEconomy.tsx`) falls back to RDW CO2 (labelled, same score scale) when EPA/EEA has no estimate; the score is CO2/300 g/km capped at 100, a scale not a percentage.
+Two RDW spellings that share a key collapse to the larger group (medians don't merge). Seed: `seed-data/rdw-specs.csv.gz`; after
+changing `makeKey`/`modelKey`/`brandSlug` re-run `ingest:rdw` (cached per make in `scripts/.data/rdw/`, `--refresh` to re-query), not `:csv`.
+
 ## Test-drive racer
 
 Files: `apps/web/src/lib/racer/`, `components/game/`; docs/plan-done.md "Test-drive racer game". Follow-ups: PLAN.md "Test-drive racer game".

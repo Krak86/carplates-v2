@@ -165,6 +165,15 @@ export {
   type VdbStatsModel,
   type VdbStatsResponse
 } from './vdb.js'
+export {
+  rdwMatchSchema,
+  rdwResponseSchema,
+  rdwSpecsSchema,
+  type RdwMatchInfo,
+  type RdwResponse,
+  type RdwSpecs
+} from './rdw.js'
+export { RDW_MIN_N, RDW_MIN_DISPLAY_N, isSmallRdwSample, rdwCatalogKinds, matchRdwModel, pickRdwYear, type RdwReferenceRow } from './rdwMatch.js'
 export { makeKey, modelKey, brandCandidateKey } from './vehicleKey.js'
 export {
   MIN_PREFIX_KEY_LENGTH,
@@ -179,6 +188,7 @@ export {
   displayAliases,
   isUkraineOnly,
   otherMarkets,
+  type ModelReferenceRow,
   type VdbReferenceRow,
   type VdbVehicleClass,
   type VdbMatchHow,

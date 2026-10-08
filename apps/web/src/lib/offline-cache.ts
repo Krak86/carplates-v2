@@ -13,6 +13,7 @@ export const OFFLINE_LIMITS = {
   safety: 1200,
   fuel: 400,
   vdb: 400,
+  rdw: 400,
   wiki: 200,
   reviews: 400
 } as const

@@ -12,10 +12,20 @@ export type VdbReferenceRow = {
   aliases: string[]
 }
 
+/** The fields matching itself needs — shared by the VehiclesDB catalog and the RDW specs (`rdwMatch.ts`). */
+export type ModelReferenceRow = {
+  kind: string
+  makeKey: string
+  modelKey: string
+  aliases: string[]
+  /** Tie-break among equals; absent for sources with no popularity ranking. */
+  globalDecile?: number | null
+}
+
 /** How a registry model reached its catalog row, strongest first. */
 export type VdbMatchHow = 'exact' | 'alias' | 'series' | 'prefix'
 
-export type VdbMatch<T extends VdbReferenceRow> = { row: T; how: VdbMatchHow }
+export type VdbMatch<T extends ModelReferenceRow> = { row: T; how: VdbMatchHow }
 
 /** A prefix match on a shorter key is too ambiguous ("a" would hit every model starting with a). */
 export const MIN_PREFIX_KEY_LENGTH = 3
@@ -95,10 +105,10 @@ const MODEL_ALIASES: Readonly<Record<string, readonly (readonly [RegExp, string]
 /**
  * Models the catalog files under a DIFFERENT make than the registry does, per registry make key:
  * [registry model key pattern, catalog make key]. The Renault Dokker is the Dacia Dokker (the catalog has no Renault
- * entry). Same rule as `MODEL_ALIASES`: only pairs verified in both the registry and the catalog.
+ * entry); Logan/Sandero/Duster have their own Renault catalog rows but RDW files them under Dacia, so the own make is tried first. Same rule as `MODEL_ALIASES`: only pairs verified in both the registry and the catalog.
  */
 const CROSS_MAKE_ALIASES: Readonly<Record<string, readonly (readonly [RegExp, string])[]>> = {
-  renault: [[/^dokker/, 'dacia']]
+  renault: [[/^(dokker|logan|sandero|duster)/, 'dacia']]
 }
 
 /** Make keys whose catalog rows can hold this registry model: its own make first, then any curated cross-make home. */
@@ -133,7 +143,7 @@ export function vdbCandidateKeys(mk: string, model: string): { key: string; how:
 }
 
 /** Preferred row among equals: car-like kind, then the closest (shortest) key, then the most popular decile. */
-function best<T extends VdbReferenceRow>(rows: readonly T[], kinds?: readonly string[]): T {
+function best<T extends ModelReferenceRow>(rows: readonly T[], kinds?: readonly string[]): T {
   return [...rows].sort(
     (a, b) =>
       kindRank(a.kind, kinds) - kindRank(b.kind, kinds) ||
@@ -150,7 +160,7 @@ function best<T extends VdbReferenceRow>(rows: readonly T[], kinds?: readonly st
  * `kinds` (see `vdbCatalogKinds`) restricts the catalog rows to those kinds and ranks them in that order.
  * Null when nothing fits — callers must hide the data then, never guess.
  */
-export function matchVdbModel<T extends VdbReferenceRow>(
+export function matchVdbModel<T extends ModelReferenceRow>(
   allMakeRows: readonly T[],
   mk: string,
   model: string,
@@ -195,7 +205,7 @@ export function matchVdbModel<T extends VdbReferenceRow>(
  * (`vdbRelatedMakeKeys`). `rows` may hold any makes — load at least the related ones. The one code path for the API
  * and the stats script.
  */
-export function matchVdbModelAcrossMakes<T extends VdbReferenceRow>(
+export function matchVdbModelAcrossMakes<T extends ModelReferenceRow>(
   rows: readonly T[],
   mk: string,
   model: string,
