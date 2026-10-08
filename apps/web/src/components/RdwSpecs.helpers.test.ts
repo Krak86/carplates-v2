@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { approxCount, ccToLitres, describeRange, kgToTonnes, kwToHp } from '@/components/RdwSpecs.helpers'
+import { approxCount, ccToLitres, cmToMetres, describeRange, kgToTonnes, kwToHp, SPEC_ROWS } from '@/components/RdwSpecs.helpers'
 
 describe('describeRange', () => {
   it('shows the median and the spread when they differ', () => {
@@ -49,5 +49,15 @@ describe('approxCount', () => {
     expect(approxCount(516, 'en')).toBe('~520')
     expect(approxCount(4738, 'en')).toBe('~4,700')
     expect(approxCount(26612, 'en')).toBe('~27,000')
+  })
+
+  it('converts centimetres to metres', () => {
+    expect(cmToMetres(428)).toBe('4.28')
+    expect(cmToMetres(180)).toBe('1.8')
+  })
+
+  it('reads the C2 rows defensively: an answer cached before C2 has none of the new keys', () => {
+    const old = { year: 2018, n: 100, powerKw: null, displacementCc: null, massKg: null, co2GKm: null }
+    expect(SPEC_ROWS.map(r => r.pick(old))).toEqual(SPEC_ROWS.map(() => null))
   })
 })

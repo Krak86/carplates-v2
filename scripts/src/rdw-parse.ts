@@ -27,6 +27,10 @@ const bounded = (expr: string, lo: number, hi: number): string => `case(${expr} 
 const range = (name: string, expr: string, lo: number, hi: number): string =>
   ['min', 'median', 'max'].map(fn => `${fn}(${bounded(expr, lo, hi)}) as ${name}_${fn}`).join(', ')
 
+/** Count of the vehicles that have the (plausible) value — for the measures RDW fills for only a third of the cars. */
+const filled = (name: string, expr: string, lo: number, hi: number): string =>
+  `count(${bounded(expr, lo, hi)}) as ${name}_n`
+
 const VOERTUIGSOORT_LIST = Object.keys(KIND_BY_VOERTUIGSOORT).map(soqlString).join(',')
 
 /** Dates before the motor car are data-entry noise. */
@@ -47,7 +51,16 @@ export function specsQuery(make: string, year?: number): string {
   return (
     `SELECT voertuigsoort, handelsbenaming, date_extract_y(datum_eerste_toelating_dt) as y, count(*) as n, ` +
     `${range('kw', POWER_KW, 1, 1500)}, ${range('cc', 'cilinderinhoud', 49, 16000)}, ` +
-    `${range('kg', 'massa_ledig_voertuig', 50, 60000)}, ${range('co2', CO2_G_KM, 1, 800)} ` +
+    `${range('kg', 'massa_ledig_voertuig', 50, 60000)}, ${range('co2', CO2_G_KM, 1, 800)}, ` +
+      // Stage C2 — same dataset, no join. Dimensions are centimetres. Lengths/speed are partial (30-40 % of cars), so
+      // they carry a count of the vehicles that have them; min/median/max skip NULLs.
+      `${range('gross', 'toegestane_maximum_massa_voertuig', 100, 60000)}, ${range('wb', 'wielbasis', 100, 1000)}, ` +
+      `${range('seats', 'aantal_zitplaatsen', 1, 120)}, ${range('doors', 'aantal_deuren', 1, 6)}, ` +
+      `${range('tb', 'maximum_trekken_massa_geremd', 1, 60000)}, ${range('tu', 'maximum_massa_trekken_ongeremd', 1, 5000)}, ` +
+      `${range('len', 'lengte', 100, 2500)}, ${filled('len', 'lengte', 100, 2500)}, ` +
+      `${range('wid', 'breedte', 40, 300)}, ${filled('wid', 'breedte', 40, 300)}, ` +
+      `${range('hgt', 'hoogte_voertuig', 50, 450)}, ${filled('hgt', 'hoogte_voertuig', 50, 450)}, ` +
+      `${range('spd', 'maximale_constructiesnelheid', 20, 400)}, ${filled('spd', 'maximale_constructiesnelheid', 20, 400)} ` +
     `LEFT OUTER JOIN (SELECT * FROM @${FUEL_DATASET} WHERE brandstof_volgnummer='1') AS f ON kenteken = @f.kenteken ` +
     `WHERE merk=${soqlString(make)} AND voertuigsoort IN (${VOERTUIGSOORT_LIST})${yearFilter} ` +
     `GROUP BY voertuigsoort, handelsbenaming, y LIMIT 100000`
@@ -94,7 +107,41 @@ export function parseSpecsRecord(
     massKgMax: num(rec.kg_max),
     co2GKmMin: num(rec.co2_min),
     co2GKmMedian: num(rec.co2_median),
-    co2GKmMax: num(rec.co2_max)
+    co2GKmMax: num(rec.co2_max),
+    grossMassKgMin: num(rec.gross_min),
+    grossMassKgMedian: num(rec.gross_median),
+    grossMassKgMax: num(rec.gross_max),
+    wheelbaseCmMin: num(rec.wb_min),
+    wheelbaseCmMedian: num(rec.wb_median),
+    wheelbaseCmMax: num(rec.wb_max),
+    seatsMin: num(rec.seats_min),
+    seatsMedian: num(rec.seats_median),
+    seatsMax: num(rec.seats_max),
+    doorsMin: num(rec.doors_min),
+    doorsMedian: num(rec.doors_median),
+    doorsMax: num(rec.doors_max),
+    towBrakedKgMin: num(rec.tb_min),
+    towBrakedKgMedian: num(rec.tb_median),
+    towBrakedKgMax: num(rec.tb_max),
+    towUnbrakedKgMin: num(rec.tu_min),
+    towUnbrakedKgMedian: num(rec.tu_median),
+    towUnbrakedKgMax: num(rec.tu_max),
+    lengthCmMin: num(rec.len_min),
+    lengthCmMedian: num(rec.len_median),
+    lengthCmMax: num(rec.len_max),
+    lengthCmN: num(rec.len_n),
+    widthCmMin: num(rec.wid_min),
+    widthCmMedian: num(rec.wid_median),
+    widthCmMax: num(rec.wid_max),
+    widthCmN: num(rec.wid_n),
+    heightCmMin: num(rec.hgt_min),
+    heightCmMedian: num(rec.hgt_median),
+    heightCmMax: num(rec.hgt_max),
+    heightCmN: num(rec.hgt_n),
+    topSpeedKmhMin: num(rec.spd_min),
+    topSpeedKmhMedian: num(rec.spd_median),
+    topSpeedKmhMax: num(rec.spd_max),
+    topSpeedKmhN: num(rec.spd_n)
   }
 }
 

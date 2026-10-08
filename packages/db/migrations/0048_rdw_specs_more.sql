@@ -1,0 +1,40 @@
+-- RDW specs, stage C2: more measures from the same dataset (m9d7-ebf2), min / median / max like the first four.
+-- Lengths are centimetres (RDW's unit), masses kg, speed km/h. The dimensions and top speed are filled for only 30-40 %
+-- of cars, so their aggregates are over the vehicles that have the value and `*_n` says how many that was (the API hides
+-- a row built from too few). Existing rows stay valid with NULLs until `pnpm ingest:rdw -- --refresh`.
+
+ALTER TABLE registry.rdw_specs
+  ADD COLUMN gross_mass_kg_min real,
+  ADD COLUMN gross_mass_kg_median real,
+  ADD COLUMN gross_mass_kg_max real,
+  ADD COLUMN wheelbase_cm_min real,
+  ADD COLUMN wheelbase_cm_median real,
+  ADD COLUMN wheelbase_cm_max real,
+  ADD COLUMN seats_min real,
+  ADD COLUMN seats_median real,
+  ADD COLUMN seats_max real,
+  ADD COLUMN doors_min real,
+  ADD COLUMN doors_median real,
+  ADD COLUMN doors_max real,
+  ADD COLUMN tow_braked_kg_min real,
+  ADD COLUMN tow_braked_kg_median real,
+  ADD COLUMN tow_braked_kg_max real,
+  ADD COLUMN tow_unbraked_kg_min real,
+  ADD COLUMN tow_unbraked_kg_median real,
+  ADD COLUMN tow_unbraked_kg_max real,
+  ADD COLUMN length_cm_min real,
+  ADD COLUMN length_cm_median real,
+  ADD COLUMN length_cm_max real,
+  ADD COLUMN length_cm_n integer,
+  ADD COLUMN width_cm_min real,
+  ADD COLUMN width_cm_median real,
+  ADD COLUMN width_cm_max real,
+  ADD COLUMN width_cm_n integer,
+  ADD COLUMN height_cm_min real,
+  ADD COLUMN height_cm_median real,
+  ADD COLUMN height_cm_max real,
+  ADD COLUMN height_cm_n integer,
+  ADD COLUMN top_speed_kmh_min real,
+  ADD COLUMN top_speed_kmh_median real,
+  ADD COLUMN top_speed_kmh_max real,
+  ADD COLUMN top_speed_kmh_n integer;

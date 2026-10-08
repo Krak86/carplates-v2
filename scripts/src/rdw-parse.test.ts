@@ -30,6 +30,25 @@ describe('parseSpecsRecord', () => {
     })
   })
 
+  it('maps the stage C2 measures and the counts of the partially filled ones', () => {
+    const row = parseSpecsRecord(
+      'VOLKSWAGEN',
+      { ...rec, gross_median: '1840', wb_median: '264', seats_median: '5', len_median: '429', len_n: '31', spd_n: '4' },
+      3,
+      2027
+    )
+    expect(row).toMatchObject({
+      grossMassKgMedian: 1840,
+      wheelbaseCmMedian: 264,
+      seatsMedian: 5,
+      lengthCmMedian: 429,
+      lengthCmN: 31,
+      topSpeedKmhN: 4,
+      doorsMedian: null,
+      widthCmN: null
+    })
+  })
+
   it('maps Bedrijfsauto to the truck class', () => {
     expect(parseSpecsRecord('FORD', { ...rec, voertuigsoort: 'Bedrijfsauto' }, 3, 2027)?.kind).toBe('truck')
   })
@@ -52,6 +71,14 @@ describe('dedupeByKey', () => {
 })
 
 describe('specsQuery', () => {
+  it('aggregates the C2 columns NULL-safe and bounded, counting the partial ones', () => {
+    const q = specsQuery('VOLVO')
+    expect(q).toContain('toegestane_maximum_massa_voertuig')
+    expect(q).toContain('median(case(lengte >= 100 AND lengte <= 2500, lengte)) as len_median')
+    expect(q).toContain('count(case(maximale_constructiesnelheid >= 20')
+    expect(q).toContain('as spd_n')
+  })
+
   it('escapes quotes in the make and adds the year filter only when asked', () => {
     expect(specsQuery("D'IETEREN")).toContain("merk='D''IETEREN'")
     expect(specsQuery('VOLVO')).not.toContain('date_extract_y(datum_eerste_toelating_dt) = ')

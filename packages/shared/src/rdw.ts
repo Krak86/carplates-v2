@@ -3,6 +3,12 @@ import { z } from 'zod'
 /** min / median / max of one measure over the Dutch vehicles of a make/model/year; null when RDW gave none. */
 const rangeSchema = z.object({ min: z.number(), median: z.number(), max: z.number() }).nullable()
 
+/**
+ * Stage C2 measures. `optional` as well as nullable: an offline-cached answer from before C2 has no such key at all
+ * (the persisted cache is rehydrated without re-parsing), so readers use `?? null`.
+ */
+const extraRangeSchema = rangeSchema.optional()
+
 /** One make/model/year aggregate of RDW's open register (CC0). */
 export const rdwSpecsSchema = z.object({
   /** Year of first registration in the Netherlands — close to the model year, but imports run later. */
@@ -14,7 +20,24 @@ export const rdwSpecsSchema = z.object({
   /** Unladen mass (massa ledig voertuig), kg. */
   massKg: rangeSchema,
   /** Combined CO2, g/km — WLTP where the vehicle has it, else the older NEDC figure. */
-  co2GKm: rangeSchema
+  co2GKm: rangeSchema,
+  /** Permitted maximum (gross) mass, kg — unladen mass plus the load. */
+  grossMassKg: extraRangeSchema,
+  /** Wheelbase, cm. */
+  wheelbaseCm: extraRangeSchema,
+  seats: extraRangeSchema,
+  doors: extraRangeSchema,
+  /** Maximum towed mass with / without trailer brakes, kg. */
+  towBrakedKg: extraRangeSchema,
+  towUnbrakedKg: extraRangeSchema,
+  /**
+   * Outer dimensions, cm, and top speed, km/h. RDW fills these for only a third of the cars, so the figures cover
+   * the vehicles that have them; the API drops one built from fewer than `RDW_MIN_DISPLAY_N` vehicles.
+   */
+  lengthCm: extraRangeSchema,
+  widthCm: extraRangeSchema,
+  heightCm: extraRangeSchema,
+  topSpeedKmh: extraRangeSchema
 })
 export type RdwSpecs = z.infer<typeof rdwSpecsSchema>
 

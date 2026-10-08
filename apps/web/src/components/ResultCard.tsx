@@ -459,7 +459,7 @@ export default function ResultCard({ data }: Props): ReactNode {
           model={c.model}
           year={c.makeYear}
           kind={c.kind}
-          own={{ powerKw: c.powerKwt, displacementCc: c.capacity, massKg: c.ownWeight }}
+          own={{ powerKw: c.powerKwt, displacementCc: c.capacity, massKg: c.ownWeight, grossMassKg: c.totalWeight }}
         />
         <SafetyRatings brand={c.brand} model={c.model} year={c.makeYear} body={c.body} />
         <FuelEconomy

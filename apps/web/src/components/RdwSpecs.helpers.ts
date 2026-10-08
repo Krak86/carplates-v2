@@ -2,6 +2,9 @@ import type { RdwSpecs } from '@carplates/shared'
 
 export type SpecRange = NonNullable<RdwSpecs['powerKw']>
 
+/** "4.28" metres for 428 cm — two decimals, trailing zeros dropped. */
+export const cmToMetres = (cm: number): string => String(Number((cm / 100).toFixed(2)))
+
 /** Metric horsepower per kW. */
 const HP_PER_KW = 1.35962
 
@@ -35,17 +38,38 @@ export function describeRange(range: SpecRange): SpecValue {
 }
 
 /** What the registry itself says about this exact car, for the same measures (null = not recorded). */
-export type OwnFigures = { powerKw: number | null; displacementCc: number | null; massKg: number | null }
+export type OwnFigures = {
+  powerKw: number | null
+  displacementCc: number | null
+  massKg: number | null
+  grossMassKg: number | null
+}
 
 export type SpecRowDef = {
   /** Suffix of the `rdw.<key>` label and `rdw.about.<key>` explainer i18n keys. */
-  key: 'power' | 'displacement' | 'mass' | 'co2'
+  key:
+    | 'power'
+    | 'displacement'
+    | 'topSpeed'
+    | 'mass'
+    | 'grossMass'
+    | 'towBraked'
+    | 'towUnbraked'
+    | 'seats'
+    | 'doors'
+    | 'length'
+    | 'width'
+    | 'height'
+    | 'wheelbase'
+    | 'co2'
+  /** Offline-cached answers from before stage C2 lack the newer keys, hence the `?? null` in the picks. */
   pick: (specs: RdwSpecs) => SpecRange | null
-  unitKey: string
+  /** Unit i18n key; none for counts (seats, doors). */
+  unitKey?: string
   /** The registry's own figure for this car, when it records one. */
   own?: (own: OwnFigures) => number | null
   /** Second unit shown in brackets after the value: horsepower, litres or tonnes. */
-  alt?: 'hp' | 'l' | 't'
+  alt?: 'hp' | 'l' | 't' | 'm'
 }
 
 /**
@@ -55,14 +79,25 @@ export type SpecRowDef = {
 export const SPEC_ROWS: readonly SpecRowDef[] = [
   { key: 'power', pick: s => s.powerKw, unitKey: 'rdw.unitKw', own: o => o.powerKw, alt: 'hp' },
   { key: 'displacement', pick: s => s.displacementCc, unitKey: 'rdw.unitCc', own: o => o.displacementCc, alt: 'l' },
+  { key: 'topSpeed', pick: s => s.topSpeedKmh ?? null, unitKey: 'rdw.unitKmh' },
   { key: 'mass', pick: s => s.massKg, unitKey: 'field.unitKg', own: o => o.massKg, alt: 't' },
+  { key: 'grossMass', pick: s => s.grossMassKg ?? null, unitKey: 'field.unitKg', own: o => o.grossMassKg, alt: 't' },
+  { key: 'towBraked', pick: s => s.towBrakedKg ?? null, unitKey: 'field.unitKg', alt: 't' },
+  { key: 'towUnbraked', pick: s => s.towUnbrakedKg ?? null, unitKey: 'field.unitKg', alt: 't' },
+  { key: 'seats', pick: s => s.seats ?? null },
+  { key: 'doors', pick: s => s.doors ?? null },
+  { key: 'length', pick: s => s.lengthCm ?? null, unitKey: 'rdw.unitCm', alt: 'm' },
+  { key: 'width', pick: s => s.widthCm ?? null, unitKey: 'rdw.unitCm', alt: 'm' },
+  { key: 'height', pick: s => s.heightCm ?? null, unitKey: 'rdw.unitCm', alt: 'm' },
+  { key: 'wheelbase', pick: s => s.wheelbaseCm ?? null, unitKey: 'rdw.unitCm', alt: 'm' },
   { key: 'co2', pick: s => s.co2GKm, unitKey: 'rdw.unitCo2' }
 ]
 
-/** The bracketed second unit of a row: "136 hp", "~1.8 L", "~1.24 t". */
+/** The bracketed second unit of a row: "136 hp", "~1.8 L", "~1.24 t", "~4.28 m". */
 export function altFigure(alt: NonNullable<SpecRowDef['alt']>, value: number, t: (key: string) => string): string {
   if (alt === 'hp') return `${kwToHp(value)} ${t('rdw.unitHp')}`
   if (alt === 'l') return `~${ccToLitres(value)} ${t('field.unitL')}`
+  if (alt === 'm') return `~${cmToMetres(value)} ${t('rdw.unitM')}`
   return `~${kgToTonnes(value)} ${t('field.unitT')}`
 }
 

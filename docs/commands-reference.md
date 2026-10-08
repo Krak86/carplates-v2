@@ -106,7 +106,7 @@ pnpm ingest:vehiclesdb   # VehiclesDB (CC BY 4.0) make/model catalog: download d
                        # decile; result-card chips via GET /api/vdb); --dry-run, --refresh. See DATASETS_PLAN.md
 pnpm ingest:vehiclesdb:csv   # load the committed VehiclesDB CSV (305 KB gz) — seconds, no download (part of ingest:ratings:csv)
 pnpm export:vehiclesdb:csv   # re-dump the table to that CSV — run after every real re-ingest
-pnpm ingest:rdw   # RDW (Dutch register, CC0) specs -> registry.rdw_specs: min/median/max power, capacity, mass, CO2 per make/model/year, aggregated
+pnpm ingest:rdw   # RDW (Dutch register, CC0) specs -> registry.rdw_specs: min/median/max power, capacity, unladen+gross mass, CO2, top speed, towing, seats, doors, dimensions per make/model/year, aggregated
                   # server-side by RDW's SODA API (one joined query per make, cached in scripts/.data/rdw/; ~1 h cold). Flags: --make SKODA,
                   # --min-vehicles N (default 50), --dry-run, --refresh. Result-card "Specs" block via GET /api/rdw
 pnpm ingest:rdw:csv   # load the committed RDW seed (seed-data/rdw-specs.csv.gz) — seconds, no download (part of ingest:ratings:csv)

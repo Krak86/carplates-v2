@@ -43,7 +43,7 @@ type SpecRowProps = {
 function SpecRow({ def, range, own }: SpecRowProps): ReactNode {
   const { t } = useTranslation()
   const label = t(`rdw.${def.key}`)
-  const unit = t(def.unitKey)
+  const unit = def.unitKey ? t(def.unitKey) : ''
   const { main, spread } = describeRange(range)
 
   return (
@@ -57,14 +57,15 @@ function SpecRow({ def, range, own }: SpecRowProps): ReactNode {
 
       <span className="flex flex-col items-end rounded bg-[var(--color-surface)]/20 px-1 py-0.5 text-right">
         <span className="font-medium">
-          {main} {unit}
+          {main}
+          {unit && ` ${unit}`}
           {def.alt && (
             <span className="ml-1 font-normal text-[var(--color-muted)]">({altFigure(def.alt, range.median, t)})</span>
           )}
         </span>
-        {spread && <span className="text-xs text-[var(--color-muted)]">{t('rdw.range', { range: spread, unit })}</span>}
+        {spread && <span className="text-xs text-[var(--color-muted)]">{t('rdw.range', { range: spread, unit }).trim()}</span>}
         {own != null && (
-          <span className="text-xs text-[var(--color-muted)]">{t('rdw.thisCar', { value: `${own} ${unit}` })}</span>
+          <span className="text-xs text-[var(--color-muted)]">{t('rdw.thisCar', { value: `${own} ${unit}`.trim() })}</span>
         )}
       </span>
     </div>

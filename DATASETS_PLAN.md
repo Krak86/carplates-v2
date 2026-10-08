@@ -311,7 +311,9 @@ at the end of a stage give a commit message and stop. Order = value / risk, clea
 | **A. VehiclesDB polish** — **done 2026-10-08** (see "Stage A polish"; A2 plate-table fix and A3 alias info added the same day) | Cross-make alias (Renault Dokker -> Dacia Dokker: let the matcher try a second make); one decimal for `/stats` bar shares < 1%; use `how` (exact/prefix/series) to soften loose matches in the chip copy; test that cross-checks `normalizePlate` / `regions.ts` / `plate_regions` against VehiclesDB `plates/ua.yml` (a test, not a dependency) | small        | —                        |
 | **B. VehiclesDB non-car kinds** — **done 2026-10-08** (see "Stage B" below)                                                    | Widen `matchVdbModel` + `stats_vdb` to motorcycle / truck / bus via a `kind` mapping from the registry's `kind` text; chips for those cards                                                                                                                                                                                                      | small-medium | A                        |
 | **C. RDW specs** — **done 2026-10-08** (see "Stage C" below)                                                                   | Aggregate table per (make, model, year): median + min/max power, displacement, mass, CO2, count; `ingest:rdw` + CSV seed + export; "Specs" card block; matcher on `makeKey`/`modelKey`; About credit; SCHEDULE.md row (6 months). Builds the pipeline D-H reuse                                                                                  | medium       | —                        |
-| **C2. RDW specs, more fields**                                                                                                 | Extend stage C: gross mass, wheelbase, seats, doors, towing, dimensions, top speed (details under "Stage C2" below). Needs a migration + full re-ingest; a few new `SPEC_ROWS` entries + i18n                                                                                                                                                    | small-medium | C                        |
+| **C2. RDW specs, more fields** — **done 2026-10-08** (see "Stage C2" below)                                                    | Extend stage C: gross mass, wheelbase, seats, doors, towing, dimensions, top speed (details under "Stage C2" below). Needs a migration + full re-ingest; a few new `SPEC_ROWS` entries + i18n                                                                                                                                                    | small-medium | C                        |
+| **C3. RDW specs, price + more** — planned (owner asked 2026-10-08, not started)                                                | New list price (ex-tax and original), body type, colours, cylinders, fuel mix, consumption, EV range, energy label, open-recall share (see "Stage C3")                                                                                                                                                                                           | small-medium | C2 committed             |
+| **C4. Estimated value** — planned, needs research                                                                              | Rough current value = EU new price x depreciation curve by age, clearly labelled; price-over-years chart from C3 data                                                                                                                                                                                                                            | medium       | C3                       |
 | **D. RDW recalls**                                                                                                             | Recall campaigns + status (upsert); "Recalls" block, labelled "EU (NL)", model-level wording; monthly refresh                                                                                                                                                                                                                                    | medium       | C (matcher)              |
 | **E. Open EV Data**                                                                                                            | One JSON -> small table; "Electric" block on a match or when vPIC says battery-electric; MIT notice on About; quarterly                                                                                                                                                                                                                          | small        | C                        |
 | **F. NHTSA recalls + complaints**                                                                                              | Live API behind a cache (7 d / 30 d), next to `api/safety`; market label "US" + "may not apply to your build" copy                                                                                                                                                                                                                               | medium       | D (shared Recalls block) |
@@ -337,7 +339,19 @@ Renault Logan/Sandero/Duster -> Dacia added (own make is tried first, so Vehicle
 sold in NL, so RDW has no rows; do not chase them. No chip and no `/stats` panel was built (owner to decide: a "136 hp" chip is cheap;
 a `/stats` panel would mostly show the unmatched Soviet/Korean fleet). Follow-ups done the same day: small-sample warning + approximate counts, Emissions falls back to RDW CO2, tonnes/litres brackets, share link, per-row explainers. **Not browser-checked in the UI yet.**
 
-**Stage C2 — planned (owner asked 2026-10-08): more RDW fields in the Specs block.** Same dataset (`m9d7-ebf2`, no join needed for
+**Stage C2 — done (2026-10-08): more RDW fields in the Specs block.** Built: migration 0048 (34 columns on `rdw_specs`: min / median /
+max of gross mass, wheelbase, seats, doors, braked and unbraked towing, length, width, height, top speed; plus `*_n` for the four
+partial ones), the aggregates in `specsQuery` (each bounded and NULL-safe; `count(bounded)` gives the partial counts), contract fields
+in `packages/shared/src/rdw.ts` (`nullable().optional()` — cached pre-C2 answers lack the keys), `SPEC_ROWS` entries + `rdw.<key>` /
+`rdw.about.<key>` strings in ua/ru/en, the registry's gross mass ("This car (registry)", from `totalWeight`) under the gross-mass row.
+Rows: power, capacity, top speed, unladen mass, gross mass, towing x2, seats, doors, length, width, height, wheelbase, CO2. Kg rows
+show tonnes in brackets, cm rows metres. **Decided: catalogue price skipped; the partial measures (length, width, height, top speed)
+are hidden when fewer than `RDW_MIN_DISPLAY_N` (10) vehicles of that make/model/year have the value** — the same bar as the
+"small sample" flag, applied per field in the API (`partial()` in `rdw.service.ts`), so the threshold can change without a
+re-ingest. Complete measures (mass, wheelbase, seats …) follow the group's own small-sample flag. Bounds in the query: gross
+100-60,000 kg, wheelbase 100-1000 cm, seats 1-120, doors 1-6, braked tow 1-60,000 kg, unbraked 1-5,000 kg, length 100-2500 cm, width
+40-300, height 50-450, top speed 20-400 km/h. Towing/dimension 0 values are treated as "not recorded". Original plan notes:
+**(was planned, owner asked 2026-10-08)** Same dataset (`m9d7-ebf2`, no join needed for
 these), so the same per-make ingest with extra aggregates. Needs: a migration adding the columns to `registry.rdw_specs`
 (min/median/max like the rest, or just median for counts), the new aggregates in `rdw-parse.ts` (`specsQuery` + `parseSpecsRecord` +
 CSV columns), the contract fields in `packages/shared/src/rdw.ts`, one `SPEC_ROWS` entry each in `RdwSpecs.helpers.ts` (+ `rdw.<key>` /
@@ -351,7 +365,38 @@ Fields and how well RDW fills them for cars (VW Golf sample, 2026-10-08):
   aggregate only over rows that have them and hide the row when too few vehicles (e.g. n < 10), never show a figure from a handful of cars.
 - Min sample: **done in stage C follow-up (owner: show thin data too, with an explanation)** — groups of 3-9 vehicles are shown with a "small sample" warning and an "approximate figures" explainer; matching and year picking prefer well-sampled models/years (>= 10 vehicles) and only fall back to thin ones, so a stray thin spelling (RDW has Mazda "6" with 6 cars beside "MAZDA6" with 4,700) cannot shadow the real one. Found on DІ7635ІА (Mazda 6 2016 first showed 208 g/km from a US-spec grey import, vs 104–150 in Emissions).
 - Known limit: the aggregate mixes fuels/engines of a model-year (petrol + diesel + hybrid), so the range is wide; grouping by fuel (and matching the registry fuel) is a candidate for C2.
-  Do not start until the owner says "go stage C2".
+
+**Stage C3 / C4 / later RDW datasets — planned (discussed 2026-10-08; nothing started, owner says "go stage X").**
+RDW publishes 68 datasets; the vehicle ones worth syncing (checked against the live catalogue, ids in brackets). All are CC0 for the
+vehicle and recall data; **check the licence on the dataset page before adding any TGK or APK dataset.**
+
+- **C3 — main (`m9d7-ebf2`) + fuel (`8ys7-d773`) fields, same per-make ingest, one migration, one re-ingest (~1 h). Do this before D so
+  the recall share rides along.** `catalogusprijs` (new list price, ~100 % filled from 2010; incl. 21 % VAT and BPM, so also store
+  ex-tax = price / 1.21 - `bruto_bpm`), `bruto_bpm`, `inrichting` (body type: hatchback / stationwagen / MPV, 100 %), `eerste_kleur`
+  (colour distribution, top 3 colours), `aantal_cilinders` (96 %), `massa_rijklaar`, `zuinigheidsclassificatie` (Dutch energy label,
+  ~70 %), fuel mix share per model-year (`brandstof_omschrijving` — fixes the known "petrol + diesel + hybrid mixed in one range"
+  limit), combined consumption l/100 km, EV kWh/100 km and WLTP range, noise `geluidsniveau_rijdend`, and
+  `openstaande_terugroepactie_indicator` aggregated as a **share of Dutch vehicles of the model with an open recall** (an EU-only
+  statistic; per-plate it cannot apply to a Ukrainian car, so wording stays model-level). Skip: taxi / export / wheelchair flags.
+- **C4 — estimated value.** `catalogusprijs` is the **new** price, not a resale price; RDW has no used prices. Plan: median new price
+  per model-year gives a real "price when new over the years" series; an approximate current value needs an assumed depreciation curve
+  (published ~15-20 % in year one then ~8-12 %/yr, or the official Dutch BPM depreciation table). Must read "rough estimate based on EU
+  new price, not a market price" and never be shown as a Ukrainian price. Research first: other open price / index datasets (Eurostat,
+  ECB car price indices) and depreciation sources. No paid RIA price API.
+- **D — RDW recalls (campaigns).** Join key = `referentiecode_rdw`: campaign `j9yg-7rg9` (defect, remedy, risk, dates, vehicle count),
+  make/type `mu2x-mu5e`, risk `9ihi-jgpf`, per-plate status `t49b-isb7` (open vs repaired counts per model), owner informed
+  `mh8w-8cup`. One **Recalls** block, rows labelled by market (EU now, US from stage F, CA from H); the open-recall share from C3 is an
+  EU-only line in it. Group the same global campaign across markets by defect description where it matches; otherwise show both,
+  labelled. Never "this car has an open recall".
+- **TGK gearbox / drivetrain (new, needs a feasibility test).** Type-approval catalogue joined through `typegoedkeuringsnummer` /
+  `variant` / `uitvoering` from the main dataset: gearbox type + number of gears (`7rjk-eycs`; manual vs automatic is what UA buyers
+  ask and the registry lacks it), drivetrain / engine code / hybrid & plug-in flags (`4by9-ammk`). Heaviest join (structured keys,
+  a mapping step); extra detail in `gr7t-qfnb` (82 columns) and `byxc-wwua` (48) only if wanted.
+- **APK defects (last, needs a feasibility test).** `a34c-vvps` (defects found per vehicle per inspection) + `hx2c-gt7k` (defect codes) +
+  `sgfe-77wx` / `vkij-7mwc` (inspections): defects per vehicle by model and age = a free reliability signal, "Common faults"-style
+  block labelled as Dutch inspection stats. Tens of millions of rows; check the server-side aggregate does not time out first.
+- Not worth syncing: axles `3huj-srit` (trucks), odometer-verdict texts `jqs4-4kvw` (a verdict, not mileage — real mileage is not open),
+  body / class / special-feature side tables (the main dataset's body field is enough), all "Parkeren" / garage / carpool datasets.
 
 Not planned (decided): VehiclesDB per-country deciles, derived body-type label, Wikidata, vPIC offline dump, Eurostat.
 

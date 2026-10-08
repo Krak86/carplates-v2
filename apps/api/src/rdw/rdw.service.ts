@@ -5,6 +5,7 @@ import {
   makeKey,
   matchRdwModel,
   isSmallRdwSample,
+  RDW_MIN_DISPLAY_N,
   pickRdwYear,
   vdbRelatedMakeKeys,
   vdbVehicleClass
@@ -20,13 +21,26 @@ type Range = NonNullable<RdwSpecs['powerKw']>
 const range = (min: number | null, median: number | null, max: number | null): Range | null =>
   median == null ? null : { min: min ?? median, median, max: max ?? median }
 
+/** A partially filled measure (dimensions, top speed): hidden when fewer than `RDW_MIN_DISPLAY_N` vehicles have it. */
+const partial = (r: Range | null, n: number | null): Range | null => (r && (n ?? 0) >= RDW_MIN_DISPLAY_N ? r : null)
+
 const toSpecs = (r: RdwSpecsRow): RdwSpecs => ({
   year: r.modelYear,
   n: r.n,
   powerKw: range(r.powerKwMin, r.powerKwMedian, r.powerKwMax),
   displacementCc: range(r.displacementCcMin, r.displacementCcMedian, r.displacementCcMax),
   massKg: range(r.massKgMin, r.massKgMedian, r.massKgMax),
-  co2GKm: range(r.co2GKmMin, r.co2GKmMedian, r.co2GKmMax)
+  co2GKm: range(r.co2GKmMin, r.co2GKmMedian, r.co2GKmMax),
+  grossMassKg: range(r.grossMassKgMin, r.grossMassKgMedian, r.grossMassKgMax),
+  wheelbaseCm: range(r.wheelbaseCmMin, r.wheelbaseCmMedian, r.wheelbaseCmMax),
+  seats: range(r.seatsMin, r.seatsMedian, r.seatsMax),
+  doors: range(r.doorsMin, r.doorsMedian, r.doorsMax),
+  towBrakedKg: range(r.towBrakedKgMin, r.towBrakedKgMedian, r.towBrakedKgMax),
+  towUnbrakedKg: range(r.towUnbrakedKgMin, r.towUnbrakedKgMedian, r.towUnbrakedKgMax),
+  lengthCm: partial(range(r.lengthCmMin, r.lengthCmMedian, r.lengthCmMax), r.lengthCmN),
+  widthCm: partial(range(r.widthCmMin, r.widthCmMedian, r.widthCmMax), r.widthCmN),
+  heightCm: partial(range(r.heightCmMin, r.heightCmMedian, r.heightCmMax), r.heightCmN),
+  topSpeedKmh: partial(range(r.topSpeedKmhMin, r.topSpeedKmhMedian, r.topSpeedKmhMax), r.topSpeedKmhN)
 })
 
 @Injectable()
