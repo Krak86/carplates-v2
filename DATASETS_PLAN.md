@@ -412,6 +412,25 @@ vehicle and recall data; **check the licence on the dataset page before adding a
   (published ~15-20 % in year one then ~8-12 %/yr, or the official Dutch BPM depreciation table). Must read "rough estimate based on EU
   new price, not a market price" and never be shown as a Ukrainian price. Research first: other open price / index datasets (Eurostat,
   ECB car price indices) and depreciation sources. No paid RIA price API.
+  **Design (decided 2026-10-09, owner approves each step; estimate ~3-5 h, one session):**
+  - **Research step first, then stop for sign-off.** Find a published, citable depreciation curve (% of new price left by age).
+    Candidates: the Dutch BPM depreciation table (official, but a tax schedule, not market prices), published used-car studies
+    (~15-20 % year one, then ~8-12 %/yr; check licence/citation), Eurostat/ECB price indices (likely too coarse). Record the chosen
+    source in a code comment and on About.
+  - **Storage: none.** No migration, ingest, CSV seed or refresh job. New price already lives in the C3 columns of `rdw_specs`; the
+    curve is a constant table in `packages/shared` (own file, so no offline-cache bust). Estimate = median new price x curve(age),
+    computed per API request, so changing the curve needs no re-ingest.
+  - **Charts (card):** an "Estimated value" block beside Specs (folder sections): (1) new price by model-year for the model — real RDW
+    data; (2) estimated value by age with this car's year marked, shown as a range — real price x assumed curve, so labelled as such.
+    Info popover wording: "rough estimate based on EU new price, not a market price, not a Ukrainian price". ua/ru/en strings, tests
+    for the helper.
+  - **Chip + popover (decided 2026-10-09, supersedes "block beside Specs" as the only placement):** a green "~ € X–Y" chip
+    ("Est. value") in the result-card chip area, between the chips/"New <make>" row and the plate explainer, with a "?" popover
+    (same pattern as the VehiclesDB chips) holding the explanation and the charts. Hidden when there is no RDW match or the sample
+    is small. **Currency: euro** (the data is EUR; no exchange-rate dependency). Rounded, "~" prefix, range not a point value.
+    The Specs-folder "Estimated value" block stays too for now (like Emissions, it duplicates the chip's data); easy to remove later.
+  - **Stats view: not in C4.** Per-make/model averages would stack an assumption on an assumption; skip. A `/stats` panel later only
+    from the real new-price data (e.g. models whose new price rose/fell most by year), and only if the card block proves useful.
 - **D — RDW recalls (campaigns).** Join key = `referentiecode_rdw`: campaign `j9yg-7rg9` (defect, remedy, risk, dates, vehicle count),
   make/type `mu2x-mu5e`, risk `9ihi-jgpf`, per-plate status `t49b-isb7` (open vs repaired counts per model), owner informed
   `mh8w-8cup`. One **Recalls** block, rows labelled by market (EU now, US from stage F, CA from H); the open-recall share from C3 is an
