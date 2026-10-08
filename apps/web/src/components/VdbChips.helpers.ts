@@ -1,3 +1,6 @@
+/** Aliases shown in the chip ("Also known as: Rabbit"); the popover lists them all. */
+export const MAX_ALIASES = 3
+
 /** Flags shown inline before collapsing the rest into "+N". */
 export const MAX_FLAGS = 6
 
@@ -31,3 +34,13 @@ export const COVERED_MARKETS = [
   'ua',
   'us'
 ] as const
+
+/** "13%", but one decimal under 1% ("0.4%") so a small band is not shown as "0%"; "<0.1%" when tinier still. */
+export function formatShare(n: number, of: number, locale: string): string {
+  if (of <= 0 || n <= 0) return '0%'
+  const share = (n / of) * 100
+  const format = (value: number, digits: number): string =>
+    new Intl.NumberFormat(locale, { maximumFractionDigits: digits }).format(value)
+  if (share < 0.1) return `<${format(0.1, 1)}%`
+  return `${format(share, share < 1 ? 1 : 0)}%`
+}

@@ -84,7 +84,8 @@ pnpm 12 · Node 24 LTS · TypeScript 5.9 (7.x blocked — typescript-eslint peer
   (`plate.service.ts`, `vin.service.ts`).
 - **Plate → region**: `regionName` (`packages/shared/src/regions.ts`) = letter prefix (`REGIONS`) or, for digits-first legacy plates,
   `LEGACY_REGIONS`. `DІ`/`ЕD` plates (`plateSeries`) are online-service series with no region by design. `registry.plate_regions`
-  (stats rollups) mirrors both tables — change them together, in a new migration.
+  (stats rollups) mirrors both tables — change them together, in a new migration (0045 holds all 108 statutory pairs + code 31);
+  `regions.statute.test.ts` asserts the tables equal the statute, so edit it with them. A pair is the region at issue, not the car's location.
 - **Ingest column mapping is header-name-driven, not positional** (`scripts/src/transform.ts`). The source layout changes column set,
   order and date format almost every year.
 - **DB writes**: Drizzle in `apps/api`; `scripts/ingest.ts` batches plain `INSERT … ON CONFLICT DO NOTHING`, `scripts/backfill.ts` runs
@@ -95,7 +96,9 @@ pnpm 12 · Node 24 LTS · TypeScript 5.9 (7.x blocked — typescript-eslint peer
   `SELECT count(*) FROM registry.registrations` — a few thousand = synthetic, millions = real. If real, **ask the user** and proceed
   only on explicit approval.
 - **Offline / PWA** (`apps/web`): the service worker only exists in production builds. Changing a Zod schema in `packages/shared`
-  discards every user's saved offline data — intended, but keep it in mind. A new `/api/*` query that should work offline must be added
+  discards every user's saved offline data — intended, but keep it in mind. Contracts in their own file (`vdb.ts`, `account.ts`) do NOT: the
+  persisted IndexedDB cache is rehydrated without re-parsing, so Zod `.default()` on a new field never reaches old cached answers — read new
+  fields defensively (`match.aliases ?? []`). A new `/api/*` query that should work offline must be added
   to the persisted-cache rules in `lib/offline-cache.ts` (size-capped); heavy online-only endpoints (`/api/stats`) stay out. Runtime
   caches are prefixed `carplates-rt-`. SPA cache headers: hashed assets immutable, `index.html`/`sw.js`/manifest `no-cache`
   (`spa.controller.ts`). `@vite-pwa/assets-generator` must stay on v2 (sharp).

@@ -7,7 +7,7 @@ import InfoPopover from '@/components/InfoPopover'
 import InfoText from '@/components/InfoText'
 import Card from '@/components/ui/Card'
 import { isoFlag } from '@/components/vin/helpers'
-import { decileBand, MAX_FLAGS } from '@/components/VdbChips.helpers'
+import { decileBand, formatShare, MAX_FLAGS } from '@/components/VdbChips.helpers'
 import { toIntlLocale } from '@/lib/intl'
 import { vdbStatsQuery } from '@/lib/queries'
 
@@ -57,7 +57,7 @@ export default function VdbStatsPanel(): ReactNode {
   if (!data || data.total === 0) return null
 
   const max = Math.max(...data.byDecile.map(d => d.n), 1)
-  const pct = (n: number, of: number): string => `${of > 0 ? Math.round((n / of) * 100) : 0}%`
+  const pct = (n: number, of: number): string => formatShare(n, of, toIntlLocale(i18n.language))
 
   return (
     <Card className="mb-6">

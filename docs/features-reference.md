@@ -10,8 +10,9 @@ Files: `packages/shared/src/vdbMatch.ts` + `vdb.ts`, `apps/api/src/vdb/`, web `c
 
 CC BY 4.0 catalog of makes/models with the countries they are sold in and a popularity decile, used for the result-card chips
 (top chip row) and the `/stats` Markets panel. A separate, removable block — credit "Vehicle data by VehiclesDB" on About. The
-registry↔catalog link is only the `make_key`/`model_key` strings (no FK); matching is TypeScript (`matchVdbModel`, one code path
-for API/chips/rollup; curated `MODEL_ALIASES` only for pairs verified in both sides; a miss hides the data). The seed CSV stores
+registry↔catalog link is only the `make_key`/`model_key` strings (no FK); matching is TypeScript (`matchVdbModelAcrossMakes` →
+`matchVdbModel`, one code path for API/chips/rollup; curated `MODEL_ALIASES` / `CROSS_MAKE_ALIASES` (Renault Dokker → Dacia) only
+for pairs verified in both sides; a miss hides the data). The seed CSV stores
 the computed keys, so after changing `makeKey`/`modelKey`/`brandSlug` re-run `ingest:vehiclesdb` from the download, not `:csv`.
 `stats_vdb` is stale until `pnpm db:refresh-derived`. Full status, gaps and refresh rules: DATASETS_PLAN.md ("VehiclesDB — built").
 

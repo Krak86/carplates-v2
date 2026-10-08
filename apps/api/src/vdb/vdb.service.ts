@@ -1,8 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common'
 import { vdbModels } from '@carplates/db'
-import { isUkraineOnly, makeKey, matchVdbModel } from '@carplates/shared'
+import { displayAliases, isUkraineOnly, makeKey, matchVdbModelAcrossMakes, vdbRelatedMakeKeys } from '@carplates/shared'
 import type { VdbResponse } from '@carplates/shared'
-import { eq } from 'drizzle-orm'
+import { inArray } from 'drizzle-orm'
 
 import { DbService } from '../db/db.service.js'
 
@@ -15,8 +15,11 @@ export class VdbService {
     const mk = makeKey(brand)
     if (!mk) return { brand, model, match: null }
 
-    const makeRows = await this.dbService.db.select().from(vdbModels).where(eq(vdbModels.makeKey, mk))
-    const found = matchVdbModel(makeRows, mk, model)
+    const rows = await this.dbService.db
+      .select()
+      .from(vdbModels)
+      .where(inArray(vdbModels.makeKey, vdbRelatedMakeKeys(mk, model)))
+    const found = matchVdbModelAcrossMakes(rows, mk, model)
     if (!found) return { brand, model, match: null }
 
     const { row, how } = found
@@ -30,7 +33,9 @@ export class VdbService {
         bodyTypes: row.bodyTypes,
         countries: row.countries,
         globalDecile: row.globalDecile,
-        uaOnly: isUkraineOnly(row)
+        uaOnly: isUkraineOnly(row),
+        crossMake: row.makeKey !== mk,
+        aliases: displayAliases(row.aliases, row.modelName)
       }
     }
   }

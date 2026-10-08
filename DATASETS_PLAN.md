@@ -1,9 +1,16 @@
 # DATASETS_PLAN.md
 
+> **Resume here (2026-10-08).** Stage A (+A2 plate-region fix, +A3 alias chips) is DONE; next is **stage B** (VehiclesDB
+> motorcycle/truck/bus matching) — see "Staged plan" near the end. **Rule: do not start a stage until the owner says "go stage X".**
+> autoevolution (stage Z) is waiting on their reply; no reply = no. Stage A is code-complete but may be uncommitted: check
+> `git status`. After a registry/plate-table change run `pnpm db:refresh-stats` (slow, ~15+ min, rebuilds the materialized views
+> from existing rows) and `pnpm db:refresh-derived`; restart `pnpm dev` after any `@carplates/shared` rebuild.
+
 Research (2026-10-07) on four external GitHub datasets and how they could enrich result cards and `/stats`.
 **Status (2026-10-07): VehiclesDB is built end to end** (catalog, matcher, API, result-card chips, `/stats` panel, About
 credit) — see "VehiclesDB — built" below and the write-up in `docs/plan-done.md` ("VehiclesDB cross-market data").
-gor3a/autoevolution is still **blocked on a reply**; carguru and sortedcars are skipped. Phase/priority context lives in
+gor3a/autoevolution is still **blocked** — autoevolution replied 2026-10-08 (the GitHub copy is unauthorized; no permission
+granted yet, they asked about our app) — see its section below; carguru and sortedcars are skipped. Phase/priority context lives in
 `PLAN.md`; this file only tracks this thread.
 **Round 2 (2026-10-07):** licences checked for RDW, NHTSA recalls/complaints, UK MOT, Transport Canada, Open EV Data,
 Eurostat, ANCAP/Latin NCAP — see "Round 2 — what can be built, what is skipped" below.
@@ -22,7 +29,7 @@ Eurostat, ANCAP/Latin NCAP — see "Round 2 — what can be built, what is skipp
 | Source                                                                            | What                                                                   | License                                       | Verdict                                               |
 | --------------------------------------------------------------------------------- | ---------------------------------------------------------------------- | --------------------------------------------- | ----------------------------------------------------- |
 | [vehiclesdb/vehiclesdb](https://github.com/vehiclesdb/vehiclesdb)                 | Make/model catalog, popularity deciles, markets                        | CC-BY 4.0 (visible attribution)               | **Use** (see below)                                   |
-| [gor3a/vehicle-makes-models](https://github.com/gor3a/vehicle-makes-models)       | Generations + engine variants + specs (hp, torque, dimensions, weight) | ODbL 1.0, but compiled from autoevolution.com | **Pending autoevolution reply**                       |
+| [gor3a/vehicle-makes-models](https://github.com/gor3a/vehicle-makes-models)       | Generations + engine variants + specs (hp, torque, dimensions, weight) | ODbL 1.0, but compiled from autoevolution.com | **Blocked** — repo unauthorized (autoevolution, 2026-10-08) |
 | [rebrowser/carguruscom-dataset](https://github.com/rebrowser/carguruscom-dataset) | Scraped US used-car listings                                           | Non-commercial, paid commercial               | **Skip** — US-only, dealer/price data, nothing for UA |
 | [visnkmr/sortedcars](https://github.com/visnkmr/sortedcars)                       | ~20 brands' dimensions, India-heavy, TS objects                        | AGPL-3.0, proprietary data                    | **Skip** — tiny, wrong market, AGPL                   |
 | [ilyasozkurt/automobile-models-and-specs](https://github.com/ilyasozkurt/automobile-models-and-specs) | 124 brands / 7,207 models / ~30k engine variants, scraped from autoevolution.com | **None** (no LICENSE, `license: null`) | **Skip** — same autoevolution content as gor3a, no grant at all |
@@ -32,7 +39,8 @@ Eurostat, ANCAP/Latin NCAP — see "Round 2 — what can be built, what is skipp
 
 - **ilyasozkurt/automobile-models-and-specs:** README says "scrapped from autoevolution.com" (2024-10-23); no license or
   terms anywhere. Unlicensed = all rights reserved, and the data is autoevolution's (see gor3a section for their terms),
-  so it is **not** a way around the pending permission request. Usable only if autoevolution says yes.
+  so it is **not** a way around the pending permission request. Usable only if autoevolution says yes — and since their
+  2026-10-08 reply calls the gor3a copy of the same data an unauthorized scrape, treat this repo the same way: do not use it.
 - **T33R0/ddpc-vehicle-specs:** LICENSE = sample data + docs CC BY 4.0 (commercial OK with attribution to DDPC); the
   full datasets (US autos $199, motorcycles $149, bundle $299; REST API priced separately) are a single-user commercial
   license, redistribution of the files prohibited. Underlying EPA (fueleconomy.gov) and NHTSA data are public domain —
@@ -105,8 +113,8 @@ prefix 13.8%, series 4.4%, alias 0.6%; no make 8.3% (trailers/trucks: Schmitz, K
 
 **Known gaps (data limits, not bugs):** VehiclesDB has no Lada 2110/2111/2112/2114/2115/Priora(2170)/Kalina entries (the
 biggest unmatched ВАЗ groups: 21104, 217030, 21150, 21114), no ZAZ Vida/Tavria/Slavuta, Geely CK, Chery QQ, Gazelle (GAZ
-3302), DAF "FT XF …" truck codes. Renault Dokker exists only as Dacia Dokker (needs a cross-make alias — the matcher takes
-one make's rows at a time, so it is a small API/script change). VW Multivan is left unmatched on purpose (Transporter family,
+3302), DAF "FT XF …" truck codes. Renault Dokker exists only as Dacia Dokker — solved in stage A by the curated
+`CROSS_MAKE_ALIASES` (`vdbRelatedMakeKeys` / `matchVdbModelAcrossMakes`; Renault Lodgy has no catalog row anywhere). VW Multivan is left unmatched on purpose (Transporter family,
 ambiguous). `modelKey` strips Cyrillic, so a Cyrillic catalog alias (e.g. "Жигули") can never match.
 
 **What to refresh when** (no foreign keys — the link is the `make_key`/`model_key` strings):
@@ -124,9 +132,11 @@ ambiguous). `modelKey` strips Cyrillic, so a Cyrillic catalog alias (e.g. "Жи�
   stored keys, so `:csv` would keep stale ones), export, refresh. Rebuild `@carplates/shared` (`dist`) + restart the API
   after any shared edit. Users' PWA caches keep old `/api/vdb` answers until refetched (30 days max).
 
-**Remaining ideas (not started):** cross-make alias (Renault Dokker -> Dacia Dokker); show one decimal for bar shares < 1% on
-the `/stats` panel ("0%" for 13k cars); use `how` (exact/prefix/series) in the UI to soften loose matches; per-country
-decile detail (needs `catalog/car/models.json`); the `plates/` cross-check below.
+**Stage A polish — done (2026-10-08):** cross-make alias Renault Dokker -> Dacia Dokker (+15,031 cars, `stats_vdb` coverage
+92.6% -> 92.7%; API and `vdb-stats.ts` share `matchVdbModelAcrossMakes`); `formatShare` shows one decimal under 1% ("<0.1%"
+below that) in the /stats panel; an "approximate match" line in the chip "?" popover when `how` is `prefix` (series/alias/exact
+are not loose); `regions.statute.test.ts` cross-check of the plate tables (findings below).
+**Remaining ideas:** per-country decile detail (decided: not planned).
 
 **Route decision:** add a panel to `/stats` rather than a new route (two thin charts don't justify a page, `/stats` already
 has the `/top` + `/field/:dimension` structure). Revisit a `/markets` page only if per-country content grows.
@@ -134,8 +144,29 @@ has the `/top` + `/field/:dimension` structure). Revisit a `/markets` page only 
 **Side find — `plates/` folder:** VehiclesDB also has a license-plate dataset (`plates/ua.yml`, `plates/_decode/ua-regions.yml`)
 citing MVS order №166 (rev. 16.12.2025): statutory 12 Cyrillic plate letters, closed series lists (144 pairs), region
 letter table (27 regions x 4 pairs) vs. numeric region codes (01-27, 31), and plates with no region since Dec 2022.
-Only the header of `ua.yml` was read. **Idea:** cross-check `normalizePlate`, `regions.ts` and `registry.plate_regions`
-against it (a test, not a dependency).
+**Cross-check done and fixed (2026-10-08, stage A2).** `packages/shared/src/regions.statute.test.ts` holds a fixture copied from
+`ua-regions.yml` (no dependency) and now asserts `REGIONS` / `LEGACY_REGIONS` equal the statute exactly. What it found and what
+changed:
+
+- `REGIONS` had 54 of the statute's 108 letter pairs (v1 only had two of four columns per region) — e.g. `ОО` (Odesa; 4,338
+  registry plates), `ТІ`, `ТТ`, Crimea's `МА`/`МК`/`ТК`. All 108 are in now.
+- `КК` was mapped to АР Крим; the statute (and the registry: the one КК plate has Kyiv service centre 8045) says Kyiv city. Fixed.
+- `LEGACY_REGIONS` gained numeric code **31** (Kyiv city's second code).
+- Migration `0045_plate_regions_statute.sql` mirrors it all into `registry.plate_regions` (136 rows, verified equal to the TS
+  tables); the `stats_by_region*` views pick it up on `pnpm db:refresh-stats`.
+- Why "same letters, different region" can still happen: a pair is the region AT ISSUE (owners may keep a combination and move
+  it to another car; since 2023 they may choose it), and the 1995-2004 letter series reused some pairs on a different map —
+  the table is read against today's statute only. The plate-segment popover now says so (`plate.seg.region.desc`).
+- Still open (not a table gap): the statute's region-less online codes — we handle `DІ` and `ЕD`; `DC` and `PD` are untested.
+
+**Stage A3 — done (2026-10-08): model aliases in the chips.** `GET /api/vdb` now returns `crossMake` (catalog files the model
+under another make: Renault Dokker = Dacia Dokker) and `aliases` (Latin-script catalog aliases that are not just a spelling
+variant — `displayAliases`; only 57 of 14,997 rows have any, e.g. Golf = Rabbit, Duster = Renault Duster). Shown as a
+ONE "🏷️ Also known as: Dacia Dokker, Rabbit" chip (the cross-make name first, then the aliases; first 3 shown, all in the hover title — a rebadge and
+a catalog alias mean the same thing to a user, so they share a chip) and as separate lines in
+the "?" popover, where the matched catalog name and the aliases are bold + underlined (`InfoText` `highlight` prop) so the model stands
+out. Old cached answers lack the new fields (IndexedDB is not re-parsed) — the chips read them defensively. The catalog has no "different name in
+different years/regions" data beyond this; per-model history would be hand-written text, not planned.
 
 ### How to resume / extend (VehiclesDB)
 
@@ -179,17 +210,29 @@ automobiledimension.com item in `PLAN.md`.
 
 **Action taken:** permission request sent via autoevolution's contact form on **2026-10-07** (free non-commercial lookup
 app; asks whether the GitHub copy or the site may be used for specs, attribution wording, conditions). Mentioned the GitHub
-repo openly. **Status: awaiting reply.**
+repo openly.
 
-**Source choice:** if permitted, use the **GitHub snapshot** (one download, no crawling, no load on their servers),
-not a scraper of their site. Do not crawl autoevolution without an explicit yes.
+**Reply received 2026-10-08 (Webmaster, autoevolution.com) — NOT a permission yet:**
 
-**Next steps once a reply arrives** (save the email as the license record):
+- They state the gor3a repository is **unauthorized**: it scraped their database without permission and republished it under
+  its own "license" (the ODbL grant has no upstream right behind it). They are trying to take it down via DMCA, which is slow.
+- They did **not** say yes or no to our use. They asked us to say more about the app: what kind it is, mobile or web.
+- **Consequence:** the GitHub snapshot (gor3a, and likewise ilyasozkurt's) is **off the table** for good — even if autoevolution
+  later permits use of their data, it would be their data via a channel they agree to, not that repo. If the repo is taken down,
+  the download URL and the ODbL licence disappear anyway. Nothing was ever ingested, so nothing to remove.
+- **Owner's answer sent:** web-only pet project (v2), only wants data it is allowed to use, asks what can be reused from the
+  site. **Status: awaiting their reply** (no answer to the first or the follow-up with specific questions: use as specs, how to
+  get the data, attribution wording, limits). Keep the whole thread as the licence record. No reply = treat as no.
 
-1. If yes: run the same overlap check as for VehiclesDB (registry coverage, years/engine presence per generation, name
-   agreement via `makeKey`/`modelKey`), then decide on tables (`registry.model_generations`, `registry.engine_specs`) and a
-   "Specs" card section; attribution on About sources as they request.
-2. If no / no reply: leave it out. Nothing from it is ingested before then, so there is nothing to remove.
+**Source choice (revised 2026-10-08):** only whatever autoevolution itself agrees to provide or allow, in writing. No GitHub
+copy, and still no crawling of their site without an explicit yes.
+
+**Next steps** (save every email as the license record):
+
+1. If they grant permission and a way to get the data: run the same overlap check as for VehiclesDB (registry coverage,
+   years/engine presence per generation, name agreement via `makeKey`/`modelKey`), then decide on tables
+   (`registry.model_generations`, `registry.engine_specs`) and a "Specs" card section; attribution on About sources as they request.
+2. If no / no further reply: leave it out. Nothing from it is ingested before then, so there is nothing to remove.
 3. If the app later gets paid features: re-check whether the permission still applies; the specs block is isolated so it
    can be hidden. Note users' PWA caches (IndexedDB) keep already-fetched data, and ODbL share-alike applies to what was
    already publicly used.
@@ -246,13 +289,24 @@ crash videos, a tab in `SafetyRatings.tsx`).
   section. Discuss later; nothing planned.
 - **NHTSA vPIC offline dump** — only if the live-API dependency becomes a problem.
 
-### Suggested order
+### Staged plan (decided 2026-10-08; owner approves each stage before it starts)
 
-1. RDW specs + recalls (cleanest licence, biggest gain; builds the match + aggregate pipeline the rest reuse).
-2. NHTSA recalls + complaints (live, cached) — after the recall-wording decision above.
-3. Open EV Data (small).
-4. Transport Canada recalls.
-5. UK MOT (largest ingest; check newer files first).
+**Rule: nothing below is started until the owner says "go stage X".** Each stage is independently shippable and removable;
+at the end of a stage give a commit message and stop. Order = value / risk, cleanest licence first.
+
+| Stage | What | Size | Depends on |
+| --- | --- | --- | --- |
+| **A. VehiclesDB polish** — **done 2026-10-08** (see "Stage A polish"; A2 plate-table fix and A3 alias info added the same day) | Cross-make alias (Renault Dokker -> Dacia Dokker: let the matcher try a second make); one decimal for `/stats` bar shares < 1%; use `how` (exact/prefix/series) to soften loose matches in the chip copy; test that cross-checks `normalizePlate` / `regions.ts` / `plate_regions` against VehiclesDB `plates/ua.yml` (a test, not a dependency) | small | — |
+| **B. VehiclesDB non-car kinds** | Widen `matchVdbModel` + `stats_vdb` to motorcycle / truck / bus via a `kind` mapping from the registry's `kind` text; chips for those cards | small-medium | A |
+| **C. RDW specs** | Aggregate table per (make, model, year): median + min/max power, displacement, mass, CO2, count; `ingest:rdw` + CSV seed + export; "Specs" card block; matcher on `makeKey`/`modelKey`; About credit; SCHEDULE.md row (6 months). Builds the pipeline D-H reuse | medium | — |
+| **D. RDW recalls** | Recall campaigns + status (upsert); "Recalls" block, labelled "EU (NL)", model-level wording; monthly refresh | medium | C (matcher) |
+| **E. Open EV Data** | One JSON -> small table; "Electric" block on a match or when vPIC says battery-electric; MIT notice on About; quarterly | small | C |
+| **F. NHTSA recalls + complaints** | Live API behind a cache (7 d / 30 d), next to `api/safety`; market label "US" + "may not apply to your build" copy | medium | D (shared Recalls block) |
+| **G. UK MOT** | Check newer files first; aggregate per make/model/year/failure item; "Common faults" block, worded as UK inspection stats; OGL statement on About; yearly | large | C |
+| **H. Transport Canada recalls** | Quarterly CSV into the Recalls block, market "CA". Lowest value (mostly overlaps NHTSA/RDW) — build last or drop | small | D |
+| **Z. autoevolution specs** | Only if they grant written permission and a data channel; then overlap check + "Specs" section (would sit beside or replace the RDW specs for models RDW lacks) | — | their reply |
+
+Not planned (decided): VehiclesDB per-country deciles, derived body-type label, Wikidata, vPIC offline dump, Eurostat.
 
 ### Refresh cadence (data that lands in our local DB)
 
@@ -274,17 +328,19 @@ cadence = how often to run it by hand, then by scheduler. Each bulk source follo
 Result-card blocks: **Recalls** (RDW + NHTSA + CA, market-labelled), **Complaints** (NHTSA), **Common faults** (MOT),
 **Specs** (RDW), **Electric** (Open EV Data). Status of every item: **not started**.
 
-## Open questions
+## Decisions on the former open questions (2026-10-08, best-practice defaults; owner may override)
 
-- Recalls: ship NHTSA recalls given the 2026-09-24 "misleading" decision, or RDW (EU) only? (open — owner call)
-- RDW specs: aggregate by (make, model, year) with median/range, or keep per-generation? Decide after looking at the data.
-
-- Is the VehiclesDB per-country decile (catalog files) worth loading for a "rank in NL/DE/GB" detail, or is global enough? (still open)
-- Do we want VehiclesDB's other kinds (motorcycle, truck, bus) for the registry's non-car rows? (all kinds are LOADED; matching
-  and the stats rollup only use passenger cars — widening needs a `kind` mapping from the registry's `kind` text.)
-- Does a derived body-type label add anything over the registry's own `body`? (still open; `body_types` is stored, unused.)
+- **Recalls, NHTSA or RDW only?** RDW (EU) first (stage D), because most of the UA fleet is EU-spec; NHTSA later (stage F) with
+  an explicit "US" market label and "may not apply to your build" copy. Never "this car has an open recall". Owner re-confirms
+  before stage F ships.
+- **RDW specs granularity?** Aggregate per (make, model, year) with median + min/max + count; no per-generation (RDW has no
+  generation field, and inventing one would be a guess). Look at the data at the start of stage C and adjust only if it is clearly unusable.
+- **VehiclesDB per-country decile?** No — global decile is enough; per-country needs another file for little card value.
+- **VehiclesDB motorcycle/truck/bus?** Yes, small and later (stage B); all kinds are already loaded.
+- **Derived body-type label?** No — the registry's own `body` is better; `body_types` stays stored, unused.
 - ~~Which Cyrillic make aliases would close the ВАЗ/ЗАЗ gap?~~ None needed — `brandSlug` covers them; see "Known gaps".
-- gor3a/autoevolution: waiting for the permission reply (see above) — nothing ingested.
+- gor3a/autoevolution: autoevolution replied 2026-10-08 (repo unauthorized, DMCA in progress, no permission yet); owner
+  answered, awaiting their reply (= stage Z); the GitHub copy is not usable; nothing ingested.
 
 ## Method notes (to reproduce the overlap numbers)
 

@@ -16,7 +16,11 @@ export const vdbMatchSchema = z.object({
   /** 1 (most popular) .. 10, mean of per-country deciles; null = not ranked. */
   globalDecile: z.number().int().min(1).max(10).nullable(),
   /** Sold in Ukraine's register and nowhere else. */
-  uaOnly: z.boolean()
+  uaOnly: z.boolean(),
+  /** The catalog files the model under another make than the registry (Renault Dokker = Dacia Dokker). */
+  crossMake: z.boolean().default(false),
+  /** Other names the catalog knows the model by (Latin script only: "Rabbit" for the Golf). */
+  aliases: z.array(z.string()).default([])
 })
 export type VdbMatchInfo = z.infer<typeof vdbMatchSchema>
 

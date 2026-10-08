@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { normalizePlate } from './plate.js'
-import { LEGACY_REGIONS, platePrefixesForRegion, plateSeries, REGIONS, regionName } from './regions.js'
+import { LEGACY_REGIONS, platePrefixesForRegion, plateSeries, REGION_NAMES, REGIONS, regionName } from './regions.js'
 
 describe('regionName', () => {
   it('resolves a plate prefix to its region', () => {
@@ -32,8 +32,8 @@ describe('legacy region codes', () => {
   })
 
   it('adds the numeric codes to a region search filter', () => {
-    expect(platePrefixesForRegion('Київ')).toEqual(['АА', 'КА', '11'])
-    expect(Object.keys(LEGACY_REGIONS)).toHaveLength(27)
+    expect(platePrefixesForRegion('Київ')).toEqual(['АА', 'КА', 'ТТ', 'КК', '11', '31'])
+    expect(Object.keys(LEGACY_REGIONS)).toHaveLength(28)
   })
 })
 
@@ -50,7 +50,8 @@ describe('plateSeries', () => {
 })
 
 describe('REGIONS', () => {
-  it('has the full v1 prefix table', () => {
-    expect(Object.keys(REGIONS)).toHaveLength(54)
+  it('has all 108 statutory letter pairs (27 regions × 4)', () => {
+    expect(Object.keys(REGIONS)).toHaveLength(108)
+    expect(REGION_NAMES).toHaveLength(27)
   })
 })

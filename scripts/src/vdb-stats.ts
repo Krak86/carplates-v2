@@ -9,7 +9,7 @@
  */
 import { createDb, statsVdb, vdbModels } from '@carplates/db'
 import type { StatsVdbInsert, VdbModelRow } from '@carplates/db'
-import { isUkraineOnly, makeKey, matchVdbModel } from '@carplates/shared'
+import { isUkraineOnly, makeKey, matchVdbModelAcrossMakes, vdbRelatedMakeKeys } from '@carplates/shared'
 import { sql } from 'drizzle-orm'
 
 const BATCH = 2000
@@ -40,7 +40,13 @@ async function main(): Promise<void> {
     let unmatched = 0
     for (const g of groups) {
       const mk = makeKey(g.brand)
-      const found = mk ? matchVdbModel(byMake.get(mk) ?? [], mk, g.model) : null
+      const found = mk
+        ? matchVdbModelAcrossMakes(
+            vdbRelatedMakeKeys(mk, g.model).flatMap(k => byMake.get(k) ?? []),
+            mk,
+            g.model
+          )
+        : null
       if (!found) {
         unmatched += g.n
         continue

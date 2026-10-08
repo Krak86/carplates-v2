@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 import InfoPopover from '@/components/InfoPopover'
 import InfoText from '@/components/InfoText'
 import { countryName, isoFlag } from '@/components/vin/helpers'
-import { COVERED_MARKETS, decileBand, isRareElsewhere, MAX_FLAGS } from '@/components/VdbChips.helpers'
+import { COVERED_MARKETS, decileBand, isRareElsewhere, MAX_ALIASES, MAX_FLAGS } from '@/components/VdbChips.helpers'
 import { vdbQuery } from '@/lib/queries'
 import { useUiStore } from '@/store/ui-store'
 
@@ -34,6 +34,10 @@ export default function VdbChips({ brand, model }: Props): ReactNode {
   const names = (codes: readonly string[]): string => codes.map(nameOf).join(', ')
   // One "ES — Spain" bullet per covered register: the short code the flags stand for, with the full name.
   const legend = COVERED_MARKETS.map(c => `${c.toUpperCase()} — ${nameOf(c)}`)
+  // Answers persisted in IndexedDB before crossMake/aliases existed lack them (the cache is not re-parsed with Zod).
+  const aliases = match.aliases ?? []
+  // Other names of the same car: the catalog's make+model when it files it under another make, then its aliases.
+  const otherNames = [...(match.crossMake ? [`${match.makeName} ${match.modelName}`] : []), ...aliases]
   const others = match.countries.filter(c => c !== 'ua')
   const decile = match.globalDecile
   const showDecile = decile != null && !match.uaOnly
@@ -43,6 +47,9 @@ export default function VdbChips({ brand, model }: Props): ReactNode {
   // One "name — description" bullet per chip actually shown, then the covered registers and the credit.
   const info = [
     t('vdb.info.lead', { name: `${match.makeName} ${match.modelName}` }),
+    match.how === 'prefix' && t('vdb.info.loose'),
+    match.crossMake && t('vdb.info.crossMake', { name: `${match.makeName} ${match.modelName}` }),
+    aliases.length > 0 && t('vdb.info.aliases', { names: aliases.join(', ') }),
     match.uaOnly && t('vdb.info.uaOnly'),
     others.length > 0 && t('vdb.info.alsoSold', { countries: names(others) }),
     showDecile && t('vdb.info.decile', { band, count: match.countries.length, markets: names(match.countries) }),
@@ -55,6 +62,13 @@ export default function VdbChips({ brand, model }: Props): ReactNode {
 
   return (
     <div className="contents">
+      {otherNames.length > 0 && (
+        <span className={CHIP} title={otherNames.join(', ')}>
+          <span aria-hidden>🏷️</span>
+          {t('vdb.aliases', { names: otherNames.slice(0, MAX_ALIASES).join(', ') })}
+        </span>
+      )}
+
       {match.uaOnly && (
         <span className={CHIP}>
           <span aria-hidden>🇺🇦</span>
@@ -87,7 +101,7 @@ export default function VdbChips({ brand, model }: Props): ReactNode {
       )}
 
       <InfoPopover label={t('vin.info.about', { field: t('vdb.info.title') })} title={t('vdb.info.title')}>
-        <InfoText text={info} />
+        <InfoText text={info} highlight={[`${match.makeName} ${match.modelName}`, ...aliases]} />
       </InfoPopover>
     </div>
   )

@@ -3,10 +3,13 @@ import { describe, expect, it } from 'vitest'
 import { makeKey, modelKey } from './vehicleKey.js'
 import {
   collapseDoubledModel,
+  displayAliases,
   isUkraineOnly,
   matchVdbModel,
+  matchVdbModelAcrossMakes,
   otherMarkets,
   vdbCandidateKeys,
+  vdbRelatedMakeKeys,
   type VdbReferenceRow
 } from './vdbMatch.js'
 
@@ -57,6 +60,8 @@ const CATALOG: Row[] = [
   row('GAZ', 'Volga'),
   row('Renault', 'Megane'),
   row('Renault', 'Clio'),
+  row('Dacia', 'Dokker', { kind: 'van' }),
+  row('Dacia', 'Duster'),
   row('Volkswagen', 'Transporter', { kind: 'van' }),
   row('Volkswagen', 'Transporter', { kind: 'car', globalDecile: 3 }),
   row('Opel', 'Astra')
@@ -176,6 +181,40 @@ describe('matchVdbModel — misses stay misses', () => {
 
   it('gives vdbCandidateKeys nothing for an empty model', () => {
     expect(vdbCandidateKeys('ford', '  ')).toEqual([])
+  })
+})
+
+describe('cross-make aliases', () => {
+  const across = (brand: string, model: string): string | null => {
+    const found = matchVdbModelAcrossMakes(CATALOG, makeKey(brand)!, model)
+    return found ? `${found.row.makeKey}/${found.row.name}` : null
+  }
+
+  it('finds the Renault Dokker under Dacia, spelled as the registry does', () => {
+    expect(across('RENAULT', 'DOKKER')).toBe('dacia/Dokker')
+    expect(across('RENAULT', 'DOKKER DOKKER')).toBe('dacia/Dokker')
+    expect(across('RENAULT', 'NEW DOKKER')).toBe('dacia/Dokker')
+  })
+
+  it('lists the own make first and only curated extras', () => {
+    expect(vdbRelatedMakeKeys('renault', 'DOKKER')).toEqual(['renault', 'dacia'])
+    expect(vdbRelatedMakeKeys('renault', 'MEGANE')).toEqual(['renault'])
+    expect(vdbRelatedMakeKeys('opel', 'DOKKER')).toEqual(['opel'])
+  })
+
+  it('does not borrow another make for other models, and prefers the own make', () => {
+    expect(across('RENAULT', 'LODGY')).toBeNull()
+    expect(across('RENAULT', 'MEGANE')).toBe('renault/Megane')
+    expect(across('OPEL', 'ASTRA')).toBe('opel/Astra')
+  })
+})
+
+describe('displayAliases', () => {
+  it('keeps Latin names that differ from the model, drops spelling variants and non-Latin names', () => {
+    expect(displayAliases(['Rabbit', 'ゴルフ'], 'Golf')).toEqual(['Rabbit'])
+    expect(displayAliases(['ID3', 'ID 3'], 'ID.3')).toEqual([])
+    expect(displayAliases(['Renault Duster'], 'Duster')).toEqual(['Renault Duster'])
+    expect(displayAliases([], 'Golf')).toEqual([])
   })
 })
 

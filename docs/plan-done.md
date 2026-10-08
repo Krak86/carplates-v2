@@ -2894,6 +2894,17 @@ registers incl. Ukraine's).
 - **About** lists VehiclesDB with the CC-BY credit; i18n keys `vdb.*`, `stats.vdb.*`, `about.source.vehiclesdb` in ua/ru/en.
 - **Not done / follow-ups:** see DATASETS_PLAN.md "Known gaps" and "Remaining ideas".
 
+### VehiclesDB polish + plate-region table fix ✅ BUILT (2026-10-08, stages A/A2/A3 of DATASETS_PLAN.md)
+
+- **Cross-make alias**: `CROSS_MAKE_ALIASES` / `vdbRelatedMakeKeys` / `matchVdbModelAcrossMakes` in `packages/shared/src/vdbMatch.ts` (Renault
+  Dokker = Dacia Dokker; +15,031 cars, `stats_vdb` 92.7%); API and `scripts/src/vdb-stats.ts` share it.
+- **Result card**: `/api/vdb` returns `crossMake` + `aliases` (`displayAliases`); one "🏷️ Also known as …" chip (cross-make name + aliases), popover names
+  bold+underlined via `InfoText`'s `highlight` prop, alias lines and an "approximate match"
+  line (`how === 'prefix'`) in the "?" popover. **/stats** Markets panel: `formatShare` (one decimal under 1%).
+- **Plate regions**: `REGIONS` was the v1 table with 54 of the statute's 108 pairs and `КК` wrongly = Crimea; now all 108 (МВС order № 166
+  Додаток 4), `КК` = Kyiv, `LEGACY_REGIONS` + code 31; migration 0045 mirrors it to `registry.plate_regions`; `regions.statute.test.ts` holds
+  a fixture copied from VehiclesDB's `plates/_decode/ua-regions.yml`. Needs `pnpm db:refresh-stats` to reach the region rollups.
+
 ### Test-drive racer game ✅ BUILT (2026-10-08, uncommitted when written)
 
 A "Free test drive" promo opens a pseudo-3D racer in a modal. Desktop only, online only, no PWA precache.

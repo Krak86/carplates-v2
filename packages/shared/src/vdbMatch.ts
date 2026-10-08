@@ -54,6 +54,22 @@ const MODEL_ALIASES: Readonly<Record<string, readonly (readonly [RegExp, string]
   ]
 }
 
+/**
+ * Models the catalog files under a DIFFERENT make than the registry does, per registry make key:
+ * [registry model key pattern, catalog make key]. The Renault Dokker is the Dacia Dokker (the catalog has no Renault
+ * entry). Same rule as `MODEL_ALIASES`: only pairs verified in both the registry and the catalog.
+ */
+const CROSS_MAKE_ALIASES: Readonly<Record<string, readonly (readonly [RegExp, string])[]>> = {
+  renault: [[/^dokker/, 'dacia']]
+}
+
+/** Make keys whose catalog rows can hold this registry model: its own make first, then any curated cross-make home. */
+export function vdbRelatedMakeKeys(mk: string, model: string): string[] {
+  const key = modelKey(collapseDoubledModel(model).replace(/^new\s+(?=\S)/i, '')) ?? ''
+  const extra = (CROSS_MAKE_ALIASES[mk] ?? []).filter(([pattern]) => pattern.test(key)).map(([, make]) => make)
+  return [mk, ...extra]
+}
+
 /** Lexus "RX 350" → "rx": the nameplate in front of a space-separated engine figure ("MX-5" is not "MX"). */
 const SPACED_NAMEPLATE_RE = /^([a-z]{1,4})\s+\d/i
 
@@ -125,6 +141,33 @@ export function matchVdbModel<T extends VdbReferenceRow>(
   if (reverse.length === 0) return null
   const longest = Math.max(...reverse.map(r => r.modelKey.length))
   return { row: best(reverse.filter(r => r.modelKey.length === longest)), how: 'prefix' }
+}
+
+/**
+ * `matchVdbModel` over catalog rows of several makes: tries the registry make first, then each curated cross-make home
+ * (`vdbRelatedMakeKeys`). `rows` may hold any makes — load at least the related ones. The one code path for the API
+ * and the stats script.
+ */
+export function matchVdbModelAcrossMakes<T extends VdbReferenceRow>(
+  rows: readonly T[],
+  mk: string,
+  model: string
+): VdbMatch<T> | null {
+  for (const key of vdbRelatedMakeKeys(mk, model)) {
+    const found = matchVdbModel(
+      rows.filter(r => r.makeKey === key),
+      key,
+      model
+    )
+    if (found) return found
+  }
+  return null
+}
+
+/** Latin-script aliases that differ from the model name itself ("ID3" is just "ID.3"; the catalog also lists Japanese names). */
+export function displayAliases(aliases: readonly string[], modelName: string): string[] {
+  const own = modelKey(modelName)
+  return aliases.filter(a => /[a-z]/i.test(a) && modelKey(a) !== own)
 }
 
 /** True when the model is sold in Ukraine's own register but in no other country — a UA-only nameplate. */
