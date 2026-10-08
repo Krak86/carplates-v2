@@ -678,14 +678,17 @@ combined crash-rating page.
 Catalog (`registry.vdb_models`, CC BY 4.0), shared matcher, `GET /api/vdb` + `/api/vdb/stats`, result-card chips (UA-only, also sold
 in, popularity band, rare elsewhere, "?" popover with all 15 countries), `/stats` Markets panel, About credit. **Coverage: 92.6% of
 passenger cars** (models with a catalog entry). Full write-up: `docs/plan-done.md` "VehiclesDB cross-market data"; status, gaps, matching
-rules and refresh rules: `DATASETS_PLAN.md`. **Left:** cross-make alias (Renault Dokker -> Dacia Dokker), one decimal for <1% bar
-shares, use `how` to soften prefix matches, the `plates/ua.yml` cross-check of `normalizePlate`/`regions.ts`; the gor3a/autoevolution
-specs source stays blocked on the reply to our 2026-10-07 permission request. **Gate before deploy (Phase 4):** every external dataset
+rules and refresh rules: `DATASETS_PLAN.md`. **Built since (2026-10-08):** cross-make alias chip, one decimal for <1% shares, "approximate match" note
+for prefix matches, the full 108-pair plate-region table (stage A), motorcycle/truck/bus matching + per-class `/stats` (stage B) — see
+`docs/plan-done.md`. **Left:** the `plates/ua.yml` cross-check of `normalizePlate`/`regions.ts`; the gor3a/autoevolution specs source
+stays blocked (they want to see the public app first). **Gate before deploy (Phase 4):** every external dataset
 needs its licence/permission recorded and attribution on About (VehiclesDB done).
 
-### Open-data round 2 — recalls, complaints, specs, MOT faults, EV data — **licences verified 2026-10-07, not started**
+### Open-data round 2 — recalls, complaints, specs, MOT faults, EV data — **licences verified 2026-10-07; RDW specs built 2026-10-08, rest not started**
 
-Details, licences, URLs, caveats and the skip list: `DATASETS_PLAN.md` ("Round 2"). Buildable (all free, own tables, each a
+**Built:** RDW specs (the "Specs" block, stages C/C2/C3 + regroup) — `docs/plan-done.md` "RDW specs (EU / NL)". **Next: stage D (RDW
+recalls)**, only on the owner's "go stage D"; C4 (price sources) is research only. Details, licences, URLs, caveats and the skip list:
+`DATASETS_PLAN.md` ("Round 2"). Buildable (all free, own tables, each a
 removable card block, credit on About): **RDW** registered vehicles (CC0; "Specs") + RDW recalls (CC0), **NHTSA** recalls +
 complaints (public domain, live API like `api/safety`), **UK MOT** (OGL v3; "Common faults", newest file 2023), **Transport
 Canada** recalls (OGL-Canada, low priority), **Open EV Data** (MIT; "Electric" block). Order: RDW -> NHTSA -> EV -> Canada -> MOT. **Refresh cadences** (RDW specs 6 mo, RDW recalls monthly, NHTSA live + cache
@@ -952,7 +955,8 @@ Full write-up (flow, DB, API, web, tests) in `docs/plan-done.md` ("Accounts, sta
   `apps/api/.env`. Unset = the popover says "not configured". Consent screen in Testing mode only admits listed test users.
 - **Admin = DB only:** `UPDATE app.users SET role='admin' WHERE email='you@gmail.com';` (the user must have signed in once).
 - **Add a paid feature:** extend `PAID_FEATURES` (`packages/shared/src/account.ts`) + `paid.<id>.*` i18n + `PAID_FEATURE_ICON` + `APPLIES_TO` in `PaidFeatureSections`.
-- **⚠ Route clash:** `/features` is the paid-feature toggle page today, but [FEATURES_PLAN.md](FEATURES_PLAN.md) (planned, not started) wants `/features` for the **feature guide** (+ `/features/changelog`). Decide
+- **Since 2026-10-08 the site shows no "paid" wording:** nav/page title say "Features", `AVAILABLE_PAID_FEATURES` is empty, so the opt-in toggles, Save button and result-card placeholder are hidden until a feature is built ("Similar ads on AUTO.RIA" is listed under "Under consideration").
+- **⚠ Route clash:** `/features` is the feature-toggle page today, but [FEATURES_PLAN.md](FEATURES_PLAN.md) (planned, not started) wants `/features` for the **feature guide** (+ `/features/changelog`). Decide
   before building the guide: rename the toggles to e.g. `/plan` or `/account/features` (cheap now — it is only `App.tsx`, the sidebar/menu links, `ROUTE_TITLE_KEYS`, the two redirects' source files and the `nav.features` string) or
   rename the guide. The guide also wants a header bell next to the layers/login buttons — mind the right-hand header order (layers · login).
 - Flip the backup policy to nightly `pg_dump --schema=app` the day this ships to prod.

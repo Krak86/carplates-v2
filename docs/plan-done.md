@@ -2928,3 +2928,45 @@ A "Free test drive" promo opens a pseudo-3D racer in a modal. Desktop only, onli
 - **Top speed per category** `TOP_SPEED_KMH` (config.ts; sport/police/moto 120 … garbage 70; HUD km/h = speed/100, engine ceiling 120); acceleration scales with it. The numbers are guesses.
 - **Photo backdrops.** `backdrops/bg-<id>-sky|ridge.webp` (1280x480, mirror-tiled so they wrap; ridge = the photo with the sky colour-keyed out, opaque dark base below the horizon at y=256) for `BACKDROPS` = carpathians (SAM_2970), spruce (DSC_0026), forest (SAM_2922), grove (20150819), all the owner's own photos (~50-120 KB per id, 408 KB in total). **Lazy**: `backdrop-assets.ts` fetches only the chosen id; the hook awaits it before the first frame and `setConfig` swaps it live. Day uses the photo sky; sunset/night/winter keep the generated sky (stars/moon) and wash the ridge (`PHOTO_WASH` in sprites.ts, `source-atop`). Random id at modal open, chips + 🎲 in settings, last part of the share token (`…-<hex>-<backdrop>`). Rebuild: `serve.mjs` + `/bg`, `build(photo, {skyX, skyY, ridgeX, ridgeY})` then `save(id)`.
 - **Live updates.** `setConfig` only swaps the player sprites when just colour/body/plate changed (road, scenery and traffic keep their state); scenery/lanes/traffic/quality still rebuild the world.
+
+### VehiclesDB stage B — motorcycle / truck / bus matching ✅ BUILT (2026-10-08, stage B of DATASETS_PLAN.md)
+
+- Migration 0046 adds `vehicle_kind` (car/motorcycle/truck/bus) to `registry.vdb_models` / `stats_vdb`; `vdbVehicleClass` maps the registry `kind`,
+  `vdbCatalogKinds` limits which catalog kinds a class may match, so a truck never matches a car with the same name.
+- `/api/vdb/stats` and the `/stats` Markets panel report coverage per class. Open items and gaps: DATASETS_PLAN.md "Known gaps".
+
+### RDW specs (EU / NL) ✅ BUILT (2026-10-08, stages C / C2 / C3 + regroup of DATASETS_PLAN.md)
+
+CC0 Dutch-registry aggregates shown as a collapsible "Specs" block ("EU (NL) data") on the result card. Convention, file map and gotchas:
+`docs/features-reference.md` "RDW specs"; flags: `docs/commands-reference.md`; refresh cadence: `SCHEDULE.md` (6 months).
+
+- **C** (`51f8395`, migration 0047): min / median / max of power, displacement, unladen mass and CO2 per kind/make/model/year from one
+  server-side joined SoQL query per make (~17M raw rows never downloaded); `GET /api/rdw`, `rdwMatch.ts`, Specs block, About credit, Emissions
+  section falls back to RDW CO2.
+- **C2** (`26296e8`, migration 0048): gross mass, wheelbase, seats, doors, towing, length/width/height, top speed; partially filled measures
+  carry `*_n` and are hidden under `RDW_MIN_DISPLAY_N` (10).
+- **C3** (`495e77f`, migration 0049): NL new price (incl. VAT/BPM), kerb mass, cylinders, consumption, EV kWh/100 km and range, noise, jsonb
+  tallies (fuel mix, colours, body types, energy labels) shown as `RdwShareRow` chips; hybrid fuel-row-2 join; ingest BATCH 500 (114 columns
+  hit the bind-parameter limit).
+- **Regroup** (`4e0927f`): rows in 📂 folders (`SPEC_GROUPS`), electric rows hidden for combustion cars and vice versa (`appliesToFuel`), the
+  open-recalls row removed (data kept for stage D), Emissions rendered right after Specs.
+- **Size-class scale bars** (`fd56f1f`): `RdwScaleBar` under wheelbase/length/width/height (class ticks, model min-max shade, median dot).
+
+### VIN page: typical model data + localized decode ✅ BUILT (2026-10-08, `1bb6bfd`, `9334754`)
+
+- **Typical data** (`components/vin/VinTypicalData.tsx`, `typicalLookup` in `helpers.ts`): VehiclesDB chips + RDW Specs + Emissions for the VIN's
+  make/model/year, framed "≈ typical, not decoded"; NHTSA make/model/year/fuel/type/displacement are mapped to the registry-style inputs the
+  plate-card components expect, and the block says so when those inputs were themselves estimates (registry / VIN prefix / year code).
+- **Localized decode** (`vin-text.ts`, `use-vin-text.ts`): all 140 NHTSA variable names and ~330 enumerated values translated for ua/ru
+  (compound values part by part, context overrides, localized units, plant country via `Intl`), English original shown beside; keys
+  `vin.var.* / vin.val.* / vin.vv.* / vin.unit.*`. The Raw tab stays English. Fixed the wrong NHTSA names for ABS and rear cross-traffic assists.
+- Crash ratings and wiki info render in the Overview tab only (`overviewExtras` slot of `VinDecodeTabs`), so Raw stays exact decode data.
+
+### Small web polish (2026-10-08)
+
+- **Copy on click:** clicking the plate or VIN on the result card copies it and still navigates (`use-copy-feedback.ts` shared with `CopyButton`).
+- **Shareable AR scan:** the AR dialog's open state is `?section=ar` (`'ar'` in `SHARE_SECTIONS`) with a 🔗 button in the header.
+- **No paid wording:** see PLAN.md Phase 5 Stage A.
+- **AVIF-first images** (`ba6a5b5`, `d8abc4e`): backgrounds via vite-imagetools avif q50 + webp q70 in `image-set(type())` with a `CSS.supports()`
+  guard; kind placeholders as `<picture>`; `public/logos` PNGs downscaled (8.45 -> 5.0 MB, kept PNG for the OG renderer / report export);
+  `build.target` pinned to Chrome/Edge 111, Firefox 128, Safari 16.4.

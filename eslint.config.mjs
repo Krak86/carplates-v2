@@ -163,7 +163,7 @@ export default tseslint.config(
 
   // ---- scripts : CLIs may print ---------------------------------------------
   {
-    files: ['scripts/**/*.ts'],
+    files: ['scripts/**/*.ts', 'scripts/**/*.mjs'],
     languageOptions: { globals: { ...globals.node } },
     rules: { 'console-rules/no-raw-console': 'off' }
   },

@@ -81,5 +81,39 @@ lookups and sign-ins into `app.usage_events` (kind, UI language, found, has-cook
 `POSTHOG_PERSONAL_API_KEY` + `POSTHOG_PROJECT_ID`, optional `POSTHOG_API_HOST`, `SENTRY_ORG_SLUG` for the link). Add a new counted
 route in `ROUTE_KINDS` + `USAGE_KINDS` (`account.ts`) + the `admin.stats.kind.*` i18n keys.
 
-`GOOGLE_CLIENT_ID` is documented in `apps/api/.env.example`. `/features` is the paid-feature toggles route (FEATURES_PLAN.md wants
-it too — see PLAN.md Phase 5).
+`GOOGLE_CLIENT_ID` is documented in `apps/api/.env.example`. `/features` is the feature opt-in route (no "paid" wording on the site;
+toggles hidden while `AVAILABLE_PAID_FEATURES` is empty); FEATURES_PLAN.md wants the same URL for the guide — see PLAN.md Phase 5.
+
+## VIN page
+
+Files: `apps/web/src/components/vin/` (`VinResult`, `VinDecodeTabs`, `VinTypicalData`, `vin-text.ts` + `use-vin-text.ts`, `helpers.ts`).
+
+NHTSA field names/values are localized client-side: every NHTSA variable and enumerated value has a `vin.var.* / vin.val.* / vin.vv.* /
+vin.unit.*` key (ua/ru; the English original is shown beside it, the Raw tab stays English). A new NHTSA value shows untranslated until
+a key is added — `vin-text.test.ts` covers labels, values, units, weight class and countries. "Typical model data" (`VinTypicalData`)
+reuses the plate-card components (VehiclesDB chips, RDW Specs, Emissions) through `typicalLookup`, which maps NHTSA make/model/year/
+fuel/type/displacement to registry-style inputs; it is labelled "≈ typical, not decoded". Crash ratings and wiki info go through the
+`overviewExtras` slot so only the Overview tab shows them.
+
+## Offline / PWA details
+
+Rules in CLAUDE.md are the short form. Full detail: the service worker only exists in production builds. Changing a Zod schema in
+`packages/shared/src/schemas.ts` discards every user's saved offline data (intended). Contracts in their own file (`vdb.ts`, `rdw.ts`,
+`account.ts`) do not: the persisted IndexedDB cache is rehydrated without re-parsing, so a Zod `.default()` on a new field never reaches
+old cached answers — make new fields `.nullable().optional()` and read them defensively (`match.aliases ?? []`). A new `/api/*` query
+that should work offline goes into the persisted-cache rules in `lib/offline-cache.ts` (size-capped); heavy online-only endpoints
+(`/api/stats`) stay out. Runtime caches are prefixed `carplates-rt-`. SPA cache headers: hashed assets immutable, `index.html` / `sw.js` /
+manifest `no-cache` (`spa.controller.ts`). `@vite-pwa/assets-generator` must stay on v2 (sharp).
+
+## Link previews
+
+Meta tags + `/og/*.png` are produced by the **API** (`apps/api/src/spa/`) on first load/deep link — Vite (`:5173`) never shows them. To
+test: `pnpm build`, set `WEB_DIST_DIR=../web/dist` in `apps/api/.env`, restart the API, open `localhost:3000/<plate>` (Incognito, the
+SW caches `index.html`). Plate/VIN pages are `noindex`; `?lang=` selects the language.
+
+## Plate regions
+
+`regionName` (`packages/shared/src/regions.ts`) = letter prefix (`REGIONS`) or, for digits-first legacy plates, `LEGACY_REGIONS`.
+`DІ`/`ЕD` plates (`plateSeries`) are online-service series with no region by design. `registry.plate_regions` (stats rollups) mirrors both
+tables — change them together, in a new migration (0045 holds all 108 statutory pairs + code 31); `regions.statute.test.ts` asserts the
+tables equal the statute, so edit it with them. A pair is the region at issue, not the car's location.

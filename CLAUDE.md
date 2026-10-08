@@ -82,10 +82,8 @@ pnpm 12 · Node 24 LTS · TypeScript 5.9 (7.x blocked — typescript-eslint peer
   key and the query key — they must match. **Exception:** `registrations.plate` is nullable since the 2026 plate-removal (ГСЦ МВС
   order №67/ОД, see `docs/plan-done.md`) — such rows are keyed on `vin`, and the API follows the VIN to reach them
   (`plate.service.ts`, `vin.service.ts`).
-- **Plate → region**: `regionName` (`packages/shared/src/regions.ts`) = letter prefix (`REGIONS`) or, for digits-first legacy plates,
-  `LEGACY_REGIONS`. `DІ`/`ЕD` plates (`plateSeries`) are online-service series with no region by design. `registry.plate_regions`
-  (stats rollups) mirrors both tables — change them together, in a new migration (0045 holds all 108 statutory pairs + code 31);
-  `regions.statute.test.ts` asserts the tables equal the statute, so edit it with them. A pair is the region at issue, not the car's location.
+- **Plate → region**: `regions.ts` (`REGIONS` / `LEGACY_REGIONS`) is mirrored by `registry.plate_regions` — change both together in a
+  new migration, and edit `regions.statute.test.ts` with them. Details: `docs/features-reference.md` "Plate regions".
 - **Ingest column mapping is header-name-driven, not positional** (`scripts/src/transform.ts`). The source layout changes column set,
   order and date format almost every year.
 - **DB writes**: Drizzle in `apps/api`; `scripts/ingest.ts` batches plain `INSERT … ON CONFLICT DO NOTHING`, `scripts/backfill.ts` runs
@@ -95,20 +93,14 @@ pnpm 12 · Node 24 LTS · TypeScript 5.9 (7.x blocked — typescript-eslint peer
   `TRUNCATE`/`DROP`/bulk `DELETE` on `registry.registrations` or `registry.ingested_resources`, check
   `SELECT count(*) FROM registry.registrations` — a few thousand = synthetic, millions = real. If real, **ask the user** and proceed
   only on explicit approval.
-- **Offline / PWA** (`apps/web`): the service worker only exists in production builds. Changing a Zod schema in `packages/shared`
-  discards every user's saved offline data — intended, but keep it in mind. Contracts in their own file (`vdb.ts`, `account.ts`) do NOT: the
-  persisted IndexedDB cache is rehydrated without re-parsing, so Zod `.default()` on a new field never reaches old cached answers — read new
-  fields defensively (`match.aliases ?? []`). A new `/api/*` query that should work offline must be added
-  to the persisted-cache rules in `lib/offline-cache.ts` (size-capped); heavy online-only endpoints (`/api/stats`) stay out. Runtime
-  caches are prefixed `carplates-rt-`. SPA cache headers: hashed assets immutable, `index.html`/`sw.js`/manifest `no-cache`
-  (`spa.controller.ts`). `@vite-pwa/assets-generator` must stay on v2 (sharp).
+- **Offline / PWA** (`apps/web`): the service worker exists only in production builds. Editing `schemas.ts` discards users' saved offline
+  data; contracts in their own file (`vdb.ts`, `rdw.ts`, `account.ts`) don't, so new fields there are `.nullable().optional()` and read
+  defensively. A new `/api/*` query that should work offline goes into `lib/offline-cache.ts`. Details: `docs/features-reference.md`.
 - **NestJS**: feature modules, Zod-validated inputs, no logic in controllers. Controllers return values and never take `@Res()` —
   except the SPA catch-all.
-- **Link previews** (`apps/api/src/spa/`): meta tags + `/og/*.png` are produced by the **API** on first load/deep link — Vite
-  (`:5173`) never shows them. To test: `pnpm build`, set `WEB_DIST_DIR=../web/dist` in `apps/api/.env`, restart the API, open
-  `localhost:3000/<plate>` (Incognito, SW caches `index.html`). Plate/VIN pages are `noindex`; `?lang=` selects the language.
-- **Feature areas with their own detail docs** (read `docs/features-reference.md` first): VehiclesDB cross-market data, RDW specs, the
-  test-drive racer game, and Accounts (separate `app` schema, **not** re-ingestable; `account.ts`, not `schemas.ts`; admins by SQL
+- **Link previews** (`apps/api/src/spa/`) are produced by the API, never by Vite (`:5173`); how to test: `docs/features-reference.md`.
+- **Feature areas with their own detail docs** (read `docs/features-reference.md` first): VehiclesDB cross-market data, RDW specs, the VIN
+  page, the test-drive racer game, and Accounts (separate `app` schema, **not** re-ingestable; `account.ts`, not `schemas.ts`; admins by SQL
   only; account UI online-only).
 - **Telemetry** stays off locally. `.env.example` in each app documents the vars; real `.env*` files are gitignored and `deny`-listed.
 - Tests: Vitest, `import { describe, it, expect } from 'vitest'`, colocated `*.test.ts(x)` next to source.
