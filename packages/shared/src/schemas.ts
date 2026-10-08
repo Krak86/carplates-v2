@@ -594,7 +594,21 @@ export const model360Schema = z.object({
   /** Page title when the optional --enrich pass has fetched it. */
   title: z.string().nullable()
 })
-export const models360ResponseSchema = z.object({ models: z.array(model360Schema) })
+/** A Winner Imports (stock.winner.ua) interior 360° panorama (`pnpm ingest:winner360`) of this make/model; viewed on Winner's own page. */
+export const winner360Schema = z.object({
+  /** Winner's id — builds `https://stock.winner.ua/360.php?photo_recid=<id>`. */
+  photoRecid: z.number().int(),
+  year: z.number().int().nullable(),
+  /** Trim text from the stock card, e.g. "XC60 B5 Core MY27". */
+  version: z.string().nullable(),
+  fuel: z.string().nullable()
+})
+export const models360ResponseSchema = z.object({
+  models: z.array(model360Schema),
+  /** Alternative interiors (dealer stock photos); empty when the make/model has none. */
+  winner: z.array(winner360Schema).default([])
+})
+export type Winner360 = z.infer<typeof winner360Schema>
 export type Model360 = z.infer<typeof model360Schema>
 export type Models360Response = z.infer<typeof models360ResponseSchema>
 

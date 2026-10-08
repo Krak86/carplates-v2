@@ -80,6 +80,7 @@
     "ingest:sketchfab:csv": "pnpm --filter @carplates/scripts ingest:sketchfab:csv",
     "export:sketchfab:csv": "pnpm --filter @carplates/scripts export:sketchfab:csv",
     "ingest:carshow360": "pnpm --filter @carplates/scripts ingest:carshow360",
+    "ingest:winner360": "pnpm --filter @carplates/scripts ingest:winner360",
     "ingest:carshow360:csv": "pnpm --filter @carplates/scripts ingest:carshow360:csv",
     "export:carshow360:csv": "pnpm --filter @carplates/scripts export:carshow360:csv",
     "ingest:fuel": "pnpm --filter @carplates/scripts ingest:fuel",

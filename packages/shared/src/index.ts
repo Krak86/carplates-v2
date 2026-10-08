@@ -145,7 +145,14 @@ export {
   type PressLookupRow
 } from './pressLookup.js'
 export { MAX_MODELS_3D, model3dLookup, type Model3dLookupRow } from './model3dLookup.js'
-export { MAX_MODELS_360, model360Lookup, type Model360LookupRow } from './model360Lookup.js'
+export {
+  MAX_MODELS_360,
+  model360Lookup,
+  winner360ModelSlug,
+  winner360Lookup,
+  type Model360LookupRow,
+  type Winner360LookupRow
+} from './model360Lookup.js'
 export { countOwners } from './owners.js'
 export {
   vdbMatchSchema,
@@ -263,6 +270,7 @@ export {
   model3dSchema,
   model360Schema,
   models360ResponseSchema,
+  winner360Schema,
   models3dResponseSchema,
   brandSuggestionSchema,
   brandSuggestionsResponseSchema,
@@ -326,6 +334,7 @@ export {
   type Models3dResponse,
   type Model360,
   type Models360Response,
+  type Winner360,
   type BrandSuggestion,
   type BrandSuggestionsResponse,
   type ModelSuggestion,

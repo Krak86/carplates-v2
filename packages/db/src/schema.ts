@@ -829,6 +829,29 @@ export type CarModel360Row = typeof carModels360.$inferSelect
 export type CarModel360Insert = typeof carModels360.$inferInsert
 
 /**
+ * One Winner Imports interior 360° panorama (`scripts/src/winner360.ts`), keyed by Winner's `photo_recid`. Links + facts
+ * only (viewed on stock.winner.ua) — see migrations/0043_winner_360.sql.
+ */
+export const winner360 = registry.table(
+  'winner_360',
+  {
+    photoRecid: bigint('photo_recid', { mode: 'number' }).primaryKey(),
+    brandSlug: text('brand_slug').notNull(),
+    modelSlug: text('model_slug').notNull(),
+    brand: text('brand').notNull(),
+    model: text('model').notNull(),
+    year: integer('year'),
+    version: text('version'),
+    fuel: text('fuel'),
+    photoUrl: text('photo_url').notNull(),
+    fetchedAt: timestamp('fetched_at', { withTimezone: true }).notNull().defaultNow()
+  },
+  t => [index('ix_winner_360_brand_model').on(t.brandSlug, t.modelSlug)]
+)
+export type Winner360Row = typeof winner360.$inferSelect
+export type Winner360Insert = typeof winner360.$inferInsert
+
+/**
  * User-writable account data (Phase 5) — its own `app` schema, kept apart from the derived `registry`.
  * See migrations/0034_app_accounts.sql. Written by the API only.
  */

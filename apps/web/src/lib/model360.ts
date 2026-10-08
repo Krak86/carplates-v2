@@ -1,4 +1,4 @@
-import type { Model360 } from '@carplates/shared'
+import type { Model360, Winner360 } from '@carplates/shared'
 
 const SITE_LANG: Readonly<Record<string, string>> = { ua: 'uk', ru: 'ru', en: 'en' }
 
@@ -21,14 +21,32 @@ const BARE_GENERATION = /^(?:i{1,3}|iv|vi{0,3}|ix|x{1,2})$/i
 export const model360ChipLabel = (m: Model360, generation: (n: string) => string): string =>
   BARE_GENERATION.test(m.label.trim()) ? generation(m.label.trim().toUpperCase()) : m.label
 
-const EXTERIOR_SUFFIX = '-ext'
+const WINNER_ORIGIN = 'https://stock.winner.ua'
 
-/** Share-link `tab` value: `<id>` opens the cabin view (the default), `<id>-ext` the exterior. */
+/** Winner Imports' own interior viewer page for one stock panorama (embeddable, and the attribution link). */
+export const winner360Url = (w: Winner360): string => `${WINNER_ORIGIN}/360.php?photo_recid=${w.photoRecid}`
+
+/** "2026 · XC60 B5 Core MY27" — the chip text of an alternative interior (whatever of year/version is known). */
+export const winner360ChipLabel = (w: Winner360): string =>
+  [w.year, w.version].filter(Boolean).join(' · ') || String(w.photoRecid)
+
+const EXTERIOR_SUFFIX = '-ext'
+const WINNER_PREFIX = 'w'
+
+/** Share-link `tab` value: `<id>` opens the cabin view (the default), `<id>-ext` the exterior, `w<photoRecid>` an alternative interior. */
 export const model360ShareTab = (id: number, interior: boolean): string => `${id}${interior ? '' : EXTERIOR_SUFFIX}`
 
-/** Inverse of `model360ShareTab`; an unparsable tab gives a null id. */
-export const parseModel360Tab = (tab: string | null): { id: number | null; interior: boolean } => {
+export const winner360ShareTab = (photoRecid: number): string => `${WINNER_PREFIX}${photoRecid}`
+
+/** Inverse of the share-tab builders; an unparsable tab gives null ids. */
+export const parseModel360Tab = (
+  tab: string | null
+): { id: number | null; interior: boolean; winnerId: number | null } => {
   const raw = tab ?? ''
+  if (raw.startsWith(WINNER_PREFIX)) {
+    const winnerId = Number.parseInt(raw.slice(WINNER_PREFIX.length), 10)
+    return { id: null, interior: true, winnerId: Number.isFinite(winnerId) ? winnerId : null }
+  }
   const id = Number.parseInt(raw, 10)
-  return { id: Number.isFinite(id) ? id : null, interior: !raw.endsWith(EXTERIOR_SUFFIX) }
+  return { id: Number.isFinite(id) ? id : null, interior: !raw.endsWith(EXTERIOR_SUFFIX), winnerId: null }
 }

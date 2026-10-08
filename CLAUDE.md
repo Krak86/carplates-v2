@@ -84,6 +84,9 @@ pnpm ingest:carshow360  # carshow360.net 360° galleries from its gallery sitema
                        # where every 5xx/52x/timeout is logged), --dry-run
 pnpm ingest:carshow360:csv   # load the committed carshow360 CSV (24 KB gz) — seconds, no fetching
 pnpm export:carshow360:csv   # re-dump the table to that CSV — run after every real re-ingest
+pnpm ingest:winner360  # Winner Imports (stock.winner.ua) dealer-stock interior 360° panoramas: ONE request to its public JSON endpoint -> registry.winner_360
+                       # (the "Alt. interior" tab of the 360° modal, viewer = Winner's own /360.php?photo_recid= page, embedded); live inventory, so each run
+                       # replaces the set (rows that left the stock are deleted); --dry-run. No CSV seed — re-run on demand
 pnpm ingest:topgear   # TopGear UK editorial reviews (topgear.com/car-reviews/<make>/<model>, sitemap -> ~1,040 pages, 1 req/s, ~20-25 min cold,
                        # robots-aware, HTML cached in scripts/.data/topgear/) -> registry.topgear_reviews; --brand kia (TopGear make
                        # slug), --limit N, --dry-run, --refresh. Score + link + meta blurb only. See PLAN.md "Step 2c"

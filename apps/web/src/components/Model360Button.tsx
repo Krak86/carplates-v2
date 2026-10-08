@@ -16,8 +16,9 @@ type Props = {
 }
 
 /**
- * "360° view" chip: renders nothing unless the persisted CarShow360 catalog (pnpm ingest:carshow360) has galleries for
- * this make/model. The lookup is a tiny cached request; the modal and its carshow360.net iframe are only loaded on click.
+ * "360° view" chip: renders nothing unless the persisted CarShow360 catalog (pnpm ingest:carshow360) has galleries, or the
+ * Winner Imports catalog (pnpm ingest:winner360) has alternative interiors, for this make/model. The lookup is a tiny cached
+ * request; the modal and its iframes are only loaded on click.
  */
 export default function Model360Button({ brand, model }: Props): ReactNode {
   const { t } = useTranslation()
@@ -30,8 +31,11 @@ export default function Model360Button({ brand, model }: Props): ReactNode {
   const hasQuery = !!brand && !!model
   const result = useQuery({ ...models360Query(brand ?? '', model ?? ''), enabled: hasQuery })
   const models = result.data?.models ?? []
+  const winner = result.data?.winner ?? []
+  // Count of what the modal offers: CarShow360 galleries, or (when the make/model has none) the dealer-stock interiors.
+  const count = models.length || winner.length
 
-  if (models.length === 0) return null
+  if (count === 0) return null
 
   return (
     <div className="contents">
@@ -43,15 +47,17 @@ export default function Model360Button({ brand, model }: Props): ReactNode {
         className="inline-flex cursor-pointer items-center gap-1 rounded-full border border-[var(--color-border)] bg-[var(--color-surface)]/20 px-2 py-0.5 text-xs text-[var(--color-fg)] transition-colors hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-[var(--color-border)] disabled:hover:text-[var(--color-fg)]"
       >
         <span aria-hidden>🔄</span>
-        {t('model360.open', { n: models.length })}
+        {t('model360.open', { n: count })}
       </button>
 
       {open && online && (
         <Suspense fallback={null}>
           <Model360Modal
             models={models}
+            winner={winner}
             label={[brand, model].filter(Boolean).join(' ')}
             initialId={shared?.id}
+            initialWinnerId={shared?.winnerId}
             initialInterior={shared?.interior}
             onClose={() => {
               setOpen(false)

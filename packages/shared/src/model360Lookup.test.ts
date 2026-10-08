@@ -1,6 +1,12 @@
 import { describe, it, expect } from 'vitest'
 
-import { model360Lookup, type Model360LookupRow } from './model360Lookup.js'
+import {
+  model360Lookup,
+  winner360Lookup,
+  winner360ModelSlug,
+  type Model360LookupRow,
+  type Winner360LookupRow
+} from './model360Lookup.js'
 
 const row = (id: number, brandSlug: string, modelSlug: string, label: string): Model360LookupRow => ({
   id,
@@ -31,5 +37,40 @@ describe('model360Lookup', () => {
     expect(model360Lookup(ROWS, 'kia', 'Sportage')).toEqual([])
     expect(model360Lookup(ROWS, null, 'Ceed')).toEqual([])
     expect(model360Lookup(ROWS, 'kia', ' ')).toEqual([])
+  })
+})
+
+const wrow = (photoRecid: number, brandSlug: string, modelSlug: string, year: number | null): Winner360LookupRow => ({
+  photoRecid,
+  brandSlug,
+  modelSlug,
+  year
+})
+
+describe('winner360ModelSlug', () => {
+  it('slugifies and drops the trailing New', () => {
+    expect(winner360ModelSlug('XC60 New')).toBe('xc60')
+    expect(winner360ModelSlug('Range Rover Evoque')).toBe('range-rover-evoque')
+    expect(winner360ModelSlug('S5 EV')).toBe('s5-ev')
+  })
+})
+
+describe('winner360Lookup', () => {
+  const rows = [
+    wrow(1, 'volvo', 'xc60', 2025),
+    wrow(2, 'volvo', 'xc60', 2026),
+    wrow(3, 'volvo', 'xc90', 2026),
+    wrow(4, 'land-rover', 'range-rover-evoque', 2026)
+  ]
+  it('returns the make/model panoramas, newest model year first', () => {
+    expect(winner360Lookup(rows, 'volvo', 'XC60').map(r => r.photoRecid)).toEqual([2, 1])
+  })
+  it('matches a registry model name that carries trim words', () => {
+    expect(winner360Lookup(rows, 'land-rover', 'RANGE ROVER EVOQUE').map(r => r.photoRecid)).toEqual([4])
+  })
+  it('is empty for an unknown model, brand or blank input', () => {
+    expect(winner360Lookup(rows, 'volvo', 'V40')).toEqual([])
+    expect(winner360Lookup(rows, null, 'XC60')).toEqual([])
+    expect(winner360Lookup(rows, 'volvo', ' ')).toEqual([])
   })
 })

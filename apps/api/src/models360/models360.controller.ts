@@ -17,7 +17,7 @@ const querySchema = z.object({
 export class Models360Controller {
   constructor(@Inject(Models360Service) private readonly models360Service: Models360Service) {}
 
-  // Links into the persisted CarShow360 catalog (pnpm ingest:carshow360), not proxied live — see models360.service.ts.
+  // Links into the persisted CarShow360 + Winner catalogs (pnpm ingest:carshow360 / ingest:winner360), not proxied live — see models360.service.ts.
   @Get()
   @ApiQuery({ name: 'brand', required: true })
   @ApiQuery({ name: 'model', required: true })
