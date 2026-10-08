@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common'
 import { rdwSpecs } from '@carplates/db'
-import type { RdwSpecsRow } from '@carplates/db'
+import type { RdwSpecsRow, RdwTally } from '@carplates/db'
 import {
   makeKey,
   matchRdwModel,
@@ -24,6 +24,12 @@ const range = (min: number | null, median: number | null, max: number | null): R
 /** A partially filled measure (dimensions, top speed): hidden when fewer than `RDW_MIN_DISPLAY_N` vehicles have it. */
 const partial = (r: Range | null, n: number | null): Range | null => (r && (n ?? 0) >= RDW_MIN_DISPLAY_N ? r : null)
 
+/** [value, count] pairs → shares of the `n` vehicles that have the attribute; hidden when too few have it. */
+const shares = (tally: RdwTally | null, n: number | null): RdwSpecs['fuelMix'] =>
+  tally && (n ?? 0) >= RDW_MIN_DISPLAY_N
+    ? tally.map(([key, count]) => ({ key, share: Math.min(1, count / (n ?? 1)) }))
+    : null
+
 const toSpecs = (r: RdwSpecsRow): RdwSpecs => ({
   year: r.modelYear,
   n: r.n,
@@ -40,7 +46,27 @@ const toSpecs = (r: RdwSpecsRow): RdwSpecs => ({
   lengthCm: partial(range(r.lengthCmMin, r.lengthCmMedian, r.lengthCmMax), r.lengthCmN),
   widthCm: partial(range(r.widthCmMin, r.widthCmMedian, r.widthCmMax), r.widthCmN),
   heightCm: partial(range(r.heightCmMin, r.heightCmMedian, r.heightCmMax), r.heightCmN),
-  topSpeedKmh: partial(range(r.topSpeedKmhMin, r.topSpeedKmhMedian, r.topSpeedKmhMax), r.topSpeedKmhN)
+  topSpeedKmh: partial(range(r.topSpeedKmhMin, r.topSpeedKmhMedian, r.topSpeedKmhMax), r.topSpeedKmhN),
+  priceEur: partial(range(r.priceEurMin, r.priceEurMedian, r.priceEurMax), r.priceEurN),
+  priceExTaxEur: partial(range(r.priceExTaxEurMin, r.priceExTaxEurMedian, r.priceExTaxEurMax), r.priceEurN),
+  bpmEur: partial(range(r.bpmEurMin, r.bpmEurMedian, r.bpmEurMax), r.bpmEurN),
+  kerbMassKg: range(r.kerbMassKgMin, r.kerbMassKgMedian, r.kerbMassKgMax),
+  cylinders: partial(range(r.cylindersMin, r.cylindersMedian, r.cylindersMax), r.cylindersN),
+  consumptionL100: partial(
+    range(r.consumptionL100Min, r.consumptionL100Median, r.consumptionL100Max),
+    r.consumptionL100N
+  ),
+  evKwh100: partial(range(r.evKwh100Min, r.evKwh100Median, r.evKwh100Max), r.evKwh100N),
+  evRangeKm: partial(range(r.evRangeKmMin, r.evRangeKmMedian, r.evRangeKmMax), r.evRangeKmN),
+  noiseDb: partial(range(r.noiseDbMin, r.noiseDbMedian, r.noiseDbMax), r.noiseDbN),
+  fuelMix: shares(r.fuelMix, r.fuelMixN),
+  colours: shares(r.colours, r.coloursN),
+  bodyTypes: shares(r.bodyTypes, r.bodyTypesN),
+  energyLabels: shares(r.energyLabels, r.energyLabelsN),
+  openRecallShare:
+    r.recallOpenN != null && (r.recallN ?? 0) >= RDW_MIN_DISPLAY_N
+      ? Math.min(1, r.recallOpenN / (r.recallN ?? 1))
+      : null
 })
 
 @Injectable()

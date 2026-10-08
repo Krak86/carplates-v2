@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { dedupeByKey, parseSpecsRecord, specsQuery } from './rdw-parse.js'
+import { BODY_TYPES, COLOURS, dedupeByKey, parseSpecsRecord, parseTally, specsQuery } from './rdw-parse.js'
 
 const rec = {
   voertuigsoort: 'Personenauto',
@@ -49,6 +49,68 @@ describe('parseSpecsRecord', () => {
     })
   })
 
+  it('maps the stage C3 ranges, counts and the recall tally', () => {
+    const row = parseSpecsRecord(
+      'VOLKSWAGEN',
+      {
+        ...rec,
+        price_min: '20000',
+        price_median: '31000',
+        price_max: '60000',
+        price_n: '118',
+        pxt_median: '21518.3760330579',
+        bpm_n: '0',
+        cons_median: '5.8',
+        cons_n: '90',
+        rc_open: '4',
+        rc_n: '120',
+        fuel_n: '120'
+      },
+      3,
+      2027
+    )
+    expect(row).toMatchObject({
+      priceEurMin: 20000,
+      priceEurMedian: 31000,
+      priceEurN: 118,
+      priceExTaxEurMedian: 21518.3760330579,
+      bpmEurN: 0,
+      bpmEurMedian: null,
+      consumptionL100Median: 5.8,
+      consumptionL100N: 90,
+      recallOpenN: 4,
+      recallN: 120,
+      fuelMixN: 120,
+      fuelMix: null,
+      colours: null,
+      evKwh100N: null
+    })
+  })
+
+  it('maps the fuel mix by class, largest first, skipping empty classes', () => {
+    const row = parseSpecsRecord(
+      'VOLKSWAGEN',
+      {
+        ...rec,
+        fuel_petrol: '70',
+        fuel_diesel: '10',
+        fuel_ev: '0',
+        fuel_hev: '25',
+        fuel_phev: '5',
+        fuel_gas: '0',
+        fuel_n: '110'
+      },
+      3,
+      2027
+    )
+    expect(row?.fuelMix).toEqual([
+      ['petrol', 70],
+      ['hev', 25],
+      ['diesel', 10],
+      ['phev', 5]
+    ])
+  })
+
   it('maps Bedrijfsauto to the truck class', () => {
     expect(parseSpecsRecord('FORD', { ...rec, voertuigsoort: 'Bedrijfsauto' }, 3, 2027)?.kind).toBe('truck')
   })
@@ -70,7 +132,40 @@ describe('dedupeByKey', () => {
   })
 })
 
+describe('parseTally', () => {
+  it('turns indexed conditional counts into the top values, largest first', () => {
+    const rec = { col_0: '1864', col_1: '1706', col_2: '625', col_3: '613', col_4: '0' }
+    expect(parseTally(rec, 'col', COLOURS, 3)).toEqual([
+      ['GRIJS', 1864],
+      ['ZWART', 1706],
+      ['WIT', 625]
+    ])
+  })
+
+  it('is null when nothing was counted', () => {
+    expect(parseTally({ body_0: '0' }, 'body', BODY_TYPES, 3)).toBeNull()
+    expect(parseTally({}, 'body', BODY_TYPES, 3)).toBeNull()
+  })
+})
+
 describe('specsQuery', () => {
+  it('adds the C3 aggregates: bounded price with an ex-tax variant, tallies, recall counts', () => {
+    const q = specsQuery('VOLVO')
+    expect(q).toContain(
+      'median(case(catalogusprijs >= 1000 AND catalogusprijs <= 2000000, catalogusprijs)) as price_median'
+    )
+    expect(q).toContain('catalogusprijs / 1.21 - bruto_bpm')
+    expect(q).toContain("count(case(eerste_kleur='GRIJS', 1)) as col_0")
+    expect(q).toContain("count(case(@f.klasse_hybride_elektrisch_voertuig='OVC-HEV', 1)) as fuel_phev")
+    expect(q).toContain("count(case(openstaande_terugroepactie_indicator='Ja', 1)) as rc_open")
+    expect(q).toContain('::number')
+  })
+
+  it('joins one fuel row per vehicle: the second row for a hybrid whose first is electricity', () => {
+    const q = specsQuery('TOYOTA')
+    expect(q).toContain("brandstof_volgnummer='2' AND klasse_hybride_elektrisch_voertuig IS NOT NULL")
+  })
+
   it('aggregates the C2 columns NULL-safe and bounded, counting the partial ones', () => {
     const q = specsQuery('VOLVO')
     expect(q).toContain('toegestane_maximum_massa_voertuig')

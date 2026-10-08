@@ -718,6 +718,9 @@ export type VdbModelInsert = typeof vdbModels.$inferInsert
  * RDW (Dutch vehicle authority, CC0) specs aggregated per make/model/year — min / median / max of power, displacement,
  * unladen mass and combined CO2. Loaded by `scripts/src/rdw.ts`, see migrations/0047_rdw_specs.sql. Removable block.
  */
+/** A categorical RDW measure as [value, vehicle count] pairs, largest first. */
+export type RdwTally = [string, number][]
+
 export const rdwSpecs = registry.table(
   'rdw_specs',
   {
@@ -775,6 +778,51 @@ export const rdwSpecs = registry.table(
     topSpeedKmhMedian: real('top_speed_kmh_median'),
     topSpeedKmhMax: real('top_speed_kmh_max'),
     topSpeedKmhN: integer('top_speed_kmh_n'),
+    // Stage C3 (migration 0049). Prices in euros; `*N` = vehicles that have the value; tallies = [value, count] pairs.
+    priceEurMin: real('price_eur_min'),
+    priceEurMedian: real('price_eur_median'),
+    priceEurMax: real('price_eur_max'),
+    priceExTaxEurMin: real('price_ex_tax_eur_min'),
+    priceExTaxEurMedian: real('price_ex_tax_eur_median'),
+    priceExTaxEurMax: real('price_ex_tax_eur_max'),
+    bpmEurMin: real('bpm_eur_min'),
+    bpmEurMedian: real('bpm_eur_median'),
+    bpmEurMax: real('bpm_eur_max'),
+    kerbMassKgMin: real('kerb_mass_kg_min'),
+    kerbMassKgMedian: real('kerb_mass_kg_median'),
+    kerbMassKgMax: real('kerb_mass_kg_max'),
+    cylindersMin: real('cylinders_min'),
+    cylindersMedian: real('cylinders_median'),
+    cylindersMax: real('cylinders_max'),
+    consumptionL100Min: real('consumption_l100_min'),
+    consumptionL100Median: real('consumption_l100_median'),
+    consumptionL100Max: real('consumption_l100_max'),
+    evKwh100Min: real('ev_kwh100_min'),
+    evKwh100Median: real('ev_kwh100_median'),
+    evKwh100Max: real('ev_kwh100_max'),
+    evRangeKmMin: real('ev_range_km_min'),
+    evRangeKmMedian: real('ev_range_km_median'),
+    evRangeKmMax: real('ev_range_km_max'),
+    noiseDbMin: real('noise_db_min'),
+    noiseDbMedian: real('noise_db_median'),
+    noiseDbMax: real('noise_db_max'),
+    priceEurN: integer('price_eur_n'),
+    bpmEurN: integer('bpm_eur_n'),
+    cylindersN: integer('cylinders_n'),
+    consumptionL100N: integer('consumption_l100_n'),
+    evKwh100N: integer('ev_kwh100_n'),
+    evRangeKmN: integer('ev_range_km_n'),
+    noiseDbN: integer('noise_db_n'),
+    fuelMix: jsonb('fuel_mix').$type<RdwTally>(),
+    fuelMixN: integer('fuel_mix_n'),
+    colours: jsonb('colours').$type<RdwTally>(),
+    coloursN: integer('colours_n'),
+    bodyTypes: jsonb('body_types').$type<RdwTally>(),
+    bodyTypesN: integer('body_types_n'),
+    energyLabels: jsonb('energy_labels').$type<RdwTally>(),
+    energyLabelsN: integer('energy_labels_n'),
+    recallOpenN: integer('recall_open_n'),
+    recallN: integer('recall_n'),
     scrapedAt: timestamp('scraped_at', { withTimezone: true }).notNull().defaultNow()
   },
   t => [

@@ -12,11 +12,15 @@ import {
   approxCount,
   describeRange,
   altFigure,
+  formatPercent,
+  SHARE_ROWS,
   SPEC_ROWS,
+  visibleShares,
   type OwnFigures,
   type SpecRange,
   type SpecRowDef
 } from '@/components/RdwSpecs.helpers'
+import RdwShareRow from '@/components/RdwShareRow'
 import SectionHeader from '@/components/SectionHeader'
 import ShareButton from '@/components/ShareButton'
 import { cn } from '@/lib/cn'
@@ -37,14 +41,16 @@ type SpecRowProps = {
   def: SpecRowDef
   range: SpecRange
   own: number | null
+  locale: string
 }
 
 /** Same look as the basic-section rows: muted label chip with a ❓ explainer, value chip on the right. */
-function SpecRow({ def, range, own }: SpecRowProps): ReactNode {
+function SpecRow({ def, range, own, locale }: SpecRowProps): ReactNode {
   const { t } = useTranslation()
   const label = t(`rdw.${def.key}`)
   const unit = def.unitKey ? t(def.unitKey) : ''
-  const { main, spread } = describeRange(range)
+  const { grouped, ...format } = def.format ?? {}
+  const { main, spread } = describeRange(range, { ...format, locale: grouped ? locale : undefined })
 
   return (
     <div className="-mx-4 flex justify-between gap-4 px-4 py-1.5 text-base transition-colors hover:bg-[var(--color-border)]/40">
@@ -63,9 +69,13 @@ function SpecRow({ def, range, own }: SpecRowProps): ReactNode {
             <span className="ml-1 font-normal text-[var(--color-muted)]">({altFigure(def.alt, range.median, t)})</span>
           )}
         </span>
-        {spread && <span className="text-xs text-[var(--color-muted)]">{t('rdw.range', { range: spread, unit }).trim()}</span>}
+        {spread && (
+          <span className="text-xs text-[var(--color-muted)]">{t('rdw.range', { range: spread, unit }).trim()}</span>
+        )}
         {own != null && (
-          <span className="text-xs text-[var(--color-muted)]">{t('rdw.thisCar', { value: `${own} ${unit}`.trim() })}</span>
+          <span className="text-xs text-[var(--color-muted)]">
+            {t('rdw.thisCar', { value: `${own} ${unit}`.trim() })}
+          </span>
         )}
       </span>
     </div>
@@ -97,7 +107,9 @@ export default function RdwSpecs({ brand, model, year, kind, own }: Props): Reac
 
   const { specs } = match
   const isSmall = isSmallRdwSample(specs.n)
-  const count = approxCount(specs.n, i18n.language === 'ua' ? 'uk' : i18n.language)
+  const locale = i18n.language === 'ua' ? 'uk' : i18n.language
+  const count = approxCount(specs.n, locale)
+  const recallShare = specs.openRecallShare ?? null
   const name = `${match.makeName} ${match.modelName}`
   const info = [
     t('rdw.info.lead', { name }),
@@ -109,6 +121,9 @@ export default function RdwSpecs({ brand, model, year, kind, own }: Props): Reac
     match.crossMake && t('rdw.info.crossMake', { name }),
     t('rdw.info.spread'),
     t('rdw.info.co2'),
+    SPEC_ROWS.some(def => def.key === 'price' && def.pick(specs)) && t('rdw.info.price'),
+    t('rdw.info.fuelMix'),
+    recallShare != null && t('rdw.info.recall'),
     t('rdw.info.credit')
   ]
     .filter(Boolean)
@@ -159,8 +174,30 @@ export default function RdwSpecs({ brand, model, year, kind, own }: Props): Reac
             {SPEC_ROWS.map(def => {
               const range = def.pick(specs)
               if (!range) return null
-              return <SpecRow key={def.key} def={def} range={range} own={own ? (def.own?.(own) ?? null) : null} />
+              return (
+                <SpecRow
+                  key={def.key}
+                  def={def}
+                  range={range}
+                  own={own ? (def.own?.(own) ?? null) : null}
+                  locale={locale}
+                />
+              )
             })}
+
+            {SHARE_ROWS.map(def => {
+              const items = visibleShares(def.pick(specs), def.limit)
+              if (items.length === 0) return null
+              const chips = items.map(
+                i =>
+                  `${def.itemPrefix ? t(`rdw.${def.itemPrefix}.${i.key}`, { defaultValue: i.key }) : i.key} ${formatPercent(i.share)}`
+              )
+              return <RdwShareRow key={def.key} rowKey={def.key} chips={chips} />
+            })}
+
+            {recallShare != null && (
+              <RdwShareRow rowKey="recall" chips={[t('rdw.recallShare', { pct: formatPercent(recallShare) })]} />
+            )}
           </div>
 
           <p className="mt-2 text-xs text-[var(--color-muted)]">

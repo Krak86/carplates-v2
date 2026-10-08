@@ -9,6 +9,16 @@ const rangeSchema = z.object({ min: z.number(), median: z.number(), max: z.numbe
  */
 const extraRangeSchema = rangeSchema.optional()
 
+/**
+ * A categorical measure (fuel mix, colours, body types, energy labels): the share of the vehicles that have the
+ * attribute, largest first. `key` is the RDW-side class or value ("hybrid", "GRIJS", "hatchback", "B"); the web
+ * translates it. Same `optional` rule as `extraRangeSchema`.
+ */
+const shareListSchema = z
+  .array(z.object({ key: z.string(), share: z.number() }))
+  .nullable()
+  .optional()
+
 /** One make/model/year aggregate of RDW's open register (CC0). */
 export const rdwSpecsSchema = z.object({
   /** Year of first registration in the Netherlands — close to the model year, but imports run later. */
@@ -37,7 +47,36 @@ export const rdwSpecsSchema = z.object({
   lengthCm: extraRangeSchema,
   widthCm: extraRangeSchema,
   heightCm: extraRangeSchema,
-  topSpeedKmh: extraRangeSchema
+  topSpeedKmh: extraRangeSchema,
+  /**
+   * Stage C3. New list price in the NETHERLANDS, euros — includes 21 % VAT and BPM (Dutch registration tax), so it is
+   * neither a Ukrainian price nor a resale value; `priceExTaxEur` is price / 1.21 - BPM.
+   */
+  priceEur: extraRangeSchema,
+  priceExTaxEur: extraRangeSchema,
+  /** BPM (Dutch registration tax) inside the price; absent for the exempt (electric) cars. */
+  bpmEur: extraRangeSchema,
+  /** Kerb mass (massa rijklaar: unladen plus a 75 kg driver), kg. */
+  kerbMassKg: extraRangeSchema,
+  cylinders: extraRangeSchema,
+  /** Combined consumption, l/100 km (WLTP where the vehicle has it). */
+  consumptionL100: extraRangeSchema,
+  /** Electric consumption, kWh/100 km, and range, km — battery-electric cars only. */
+  evKwh100: extraRangeSchema,
+  evRangeKm: extraRangeSchema,
+  /** Pass-by noise, dB. */
+  noiseDb: extraRangeSchema,
+  /** Share of the vehicles per fuel class: petrol, diesel, ev, hev (non-plug-in hybrid), phev, gas. */
+  fuelMix: shareListSchema,
+  /** Top colours (Dutch names, GRIJS …) and body types (RDW names, hatchback …); the Dutch energy label A-G. */
+  colours: shareListSchema,
+  bodyTypes: shareListSchema,
+  energyLabels: shareListSchema,
+  /**
+   * Share (0-1) of the Dutch vehicles of this model-year with an open recall campaign when the register was read. A
+   * statistic about the model in the Netherlands — never a statement about a particular car.
+   */
+  openRecallShare: z.number().nullable().optional()
 })
 export type RdwSpecs = z.infer<typeof rdwSpecsSchema>
 

@@ -1,6 +1,7 @@
 /**
  * Loads RDW (Dutch vehicle authority) specs into `registry.rdw_specs`: power, displacement, unladen and gross mass,
- * combined CO2, wheelbase, seats, doors, towing, dimensions and top speed as min / median / max per make/model/year. CC0 data from opendata.rdw.nl, aggregated by RDW's own SODA server
+ * combined CO2, wheelbase, seats, doors, towing, dimensions, top speed, new list price, cylinders, consumption, EV range and
+ * noise as min / median / max per make/model/year, plus fuel mix, colours, body types, energy labels and the open-recall share. CC0 data from opendata.rdw.nl, aggregated by RDW's own SODA server
  * (a join of "Gekentekende voertuigen" m9d7-ebf2 and its fuel/emissions dataset 8ys7-d773 on kenteken) — never the
  * ~17M raw rows. One query per make, cached on disk in scripts/.data/rdw/ (gitignored).
  *
@@ -19,7 +20,7 @@ import { gunzipSync, gzipSync } from 'node:zlib'
 
 import { RDW_MIN_N } from '@carplates/shared'
 import { createDb, rdwSpecs } from '@carplates/db'
-import type { Db, RdwSpecsInsert, RdwSpecsRow } from '@carplates/db'
+import type { Db, RdwSpecsInsert, RdwSpecsRow, RdwTally } from '@carplates/db'
 import { parse as parseCsv } from 'csv-parse/sync'
 import { stringify as stringifyCsv } from 'csv-stringify/sync'
 import { sql } from 'drizzle-orm'
@@ -29,7 +30,8 @@ import { dedupeByKey, makesQuery, MIN_YEAR, parseSpecsRecord, specsQuery } from 
 const QUERY_URL = 'https://opendata.rdw.nl/api/v3/views/m9d7-ebf2/query.json'
 const USER_AGENT = 'carsua.app-ingest/1.0 (+https://carsua.app)'
 const DATA_DIR = join(import.meta.dirname, '..', '.data', 'rdw')
-const BATCH = 1000
+// 114 columns per row: 500 rows stay under the 65,535 bind-parameter limit.
+const BATCH = 500
 const DEFAULT_MIN_VEHICLES = 50
 const QUERY_TIMEOUT_MS = 280_000
 const RETRIES = 3
@@ -168,6 +170,50 @@ async function upsertAll(db: Db, rows: RdwSpecsInsert[]): Promise<void> {
           topSpeedKmhMedian: sql`excluded.top_speed_kmh_median`,
           topSpeedKmhMax: sql`excluded.top_speed_kmh_max`,
           topSpeedKmhN: sql`excluded.top_speed_kmh_n`,
+          priceEurMin: sql`excluded.price_eur_min`,
+          priceEurMedian: sql`excluded.price_eur_median`,
+          priceEurMax: sql`excluded.price_eur_max`,
+          priceEurN: sql`excluded.price_eur_n`,
+          priceExTaxEurMin: sql`excluded.price_ex_tax_eur_min`,
+          priceExTaxEurMedian: sql`excluded.price_ex_tax_eur_median`,
+          priceExTaxEurMax: sql`excluded.price_ex_tax_eur_max`,
+          bpmEurMin: sql`excluded.bpm_eur_min`,
+          bpmEurMedian: sql`excluded.bpm_eur_median`,
+          bpmEurMax: sql`excluded.bpm_eur_max`,
+          bpmEurN: sql`excluded.bpm_eur_n`,
+          kerbMassKgMin: sql`excluded.kerb_mass_kg_min`,
+          kerbMassKgMedian: sql`excluded.kerb_mass_kg_median`,
+          kerbMassKgMax: sql`excluded.kerb_mass_kg_max`,
+          cylindersMin: sql`excluded.cylinders_min`,
+          cylindersMedian: sql`excluded.cylinders_median`,
+          cylindersMax: sql`excluded.cylinders_max`,
+          cylindersN: sql`excluded.cylinders_n`,
+          consumptionL100Min: sql`excluded.consumption_l100_min`,
+          consumptionL100Median: sql`excluded.consumption_l100_median`,
+          consumptionL100Max: sql`excluded.consumption_l100_max`,
+          consumptionL100N: sql`excluded.consumption_l100_n`,
+          evKwh100Min: sql`excluded.ev_kwh100_min`,
+          evKwh100Median: sql`excluded.ev_kwh100_median`,
+          evKwh100Max: sql`excluded.ev_kwh100_max`,
+          evKwh100N: sql`excluded.ev_kwh100_n`,
+          evRangeKmMin: sql`excluded.ev_range_km_min`,
+          evRangeKmMedian: sql`excluded.ev_range_km_median`,
+          evRangeKmMax: sql`excluded.ev_range_km_max`,
+          evRangeKmN: sql`excluded.ev_range_km_n`,
+          noiseDbMin: sql`excluded.noise_db_min`,
+          noiseDbMedian: sql`excluded.noise_db_median`,
+          noiseDbMax: sql`excluded.noise_db_max`,
+          noiseDbN: sql`excluded.noise_db_n`,
+          fuelMix: sql`excluded.fuel_mix`,
+          fuelMixN: sql`excluded.fuel_mix_n`,
+          colours: sql`excluded.colours`,
+          coloursN: sql`excluded.colours_n`,
+          bodyTypes: sql`excluded.body_types`,
+          bodyTypesN: sql`excluded.body_types_n`,
+          energyLabels: sql`excluded.energy_labels`,
+          energyLabelsN: sql`excluded.energy_labels_n`,
+          recallOpenN: sql`excluded.recall_open_n`,
+          recallN: sql`excluded.recall_n`,
           scrapedAt: new Date()
         }
       })
@@ -272,11 +318,57 @@ const CSV_COLUMNS = [
   'top_speed_kmh_median',
   'top_speed_kmh_max',
   'top_speed_kmh_n',
+  'price_eur_min',
+  'price_eur_median',
+  'price_eur_max',
+  'price_eur_n',
+  'price_ex_tax_eur_min',
+  'price_ex_tax_eur_median',
+  'price_ex_tax_eur_max',
+  'bpm_eur_min',
+  'bpm_eur_median',
+  'bpm_eur_max',
+  'bpm_eur_n',
+  'kerb_mass_kg_min',
+  'kerb_mass_kg_median',
+  'kerb_mass_kg_max',
+  'cylinders_min',
+  'cylinders_median',
+  'cylinders_max',
+  'cylinders_n',
+  'consumption_l100_min',
+  'consumption_l100_median',
+  'consumption_l100_max',
+  'consumption_l100_n',
+  'ev_kwh100_min',
+  'ev_kwh100_median',
+  'ev_kwh100_max',
+  'ev_kwh100_n',
+  'ev_range_km_min',
+  'ev_range_km_median',
+  'ev_range_km_max',
+  'ev_range_km_n',
+  'noise_db_min',
+  'noise_db_median',
+  'noise_db_max',
+  'noise_db_n',
+  'fuel_mix',
+  'fuel_mix_n',
+  'colours',
+  'colours_n',
+  'body_types',
+  'body_types_n',
+  'energy_labels',
+  'energy_labels_n',
+  'recall_open_n',
+  'recall_n',
   'scraped_at'
 ] as const
 
 const numToCell = (v: number | null): string => (v == null ? '' : String(v))
 const cellToNum = (v: string | undefined): number | null => (v ? Number(v) : null)
+const tallyToCell = (v: RdwTally | null): string => (v == null ? '' : JSON.stringify(v))
+const cellToTally = (v: string | undefined): RdwTally | null => (v ? (JSON.parse(v) as RdwTally) : null)
 
 function rowToCsvRecord(r: RdwSpecsRow): Record<(typeof CSV_COLUMNS)[number], string> {
   return {
@@ -333,6 +425,50 @@ function rowToCsvRecord(r: RdwSpecsRow): Record<(typeof CSV_COLUMNS)[number], st
     top_speed_kmh_median: numToCell(r.topSpeedKmhMedian),
     top_speed_kmh_max: numToCell(r.topSpeedKmhMax),
     top_speed_kmh_n: numToCell(r.topSpeedKmhN),
+    price_eur_min: numToCell(r.priceEurMin),
+    price_eur_median: numToCell(r.priceEurMedian),
+    price_eur_max: numToCell(r.priceEurMax),
+    price_eur_n: numToCell(r.priceEurN),
+    price_ex_tax_eur_min: numToCell(r.priceExTaxEurMin),
+    price_ex_tax_eur_median: numToCell(r.priceExTaxEurMedian),
+    price_ex_tax_eur_max: numToCell(r.priceExTaxEurMax),
+    bpm_eur_min: numToCell(r.bpmEurMin),
+    bpm_eur_median: numToCell(r.bpmEurMedian),
+    bpm_eur_max: numToCell(r.bpmEurMax),
+    bpm_eur_n: numToCell(r.bpmEurN),
+    kerb_mass_kg_min: numToCell(r.kerbMassKgMin),
+    kerb_mass_kg_median: numToCell(r.kerbMassKgMedian),
+    kerb_mass_kg_max: numToCell(r.kerbMassKgMax),
+    cylinders_min: numToCell(r.cylindersMin),
+    cylinders_median: numToCell(r.cylindersMedian),
+    cylinders_max: numToCell(r.cylindersMax),
+    cylinders_n: numToCell(r.cylindersN),
+    consumption_l100_min: numToCell(r.consumptionL100Min),
+    consumption_l100_median: numToCell(r.consumptionL100Median),
+    consumption_l100_max: numToCell(r.consumptionL100Max),
+    consumption_l100_n: numToCell(r.consumptionL100N),
+    ev_kwh100_min: numToCell(r.evKwh100Min),
+    ev_kwh100_median: numToCell(r.evKwh100Median),
+    ev_kwh100_max: numToCell(r.evKwh100Max),
+    ev_kwh100_n: numToCell(r.evKwh100N),
+    ev_range_km_min: numToCell(r.evRangeKmMin),
+    ev_range_km_median: numToCell(r.evRangeKmMedian),
+    ev_range_km_max: numToCell(r.evRangeKmMax),
+    ev_range_km_n: numToCell(r.evRangeKmN),
+    noise_db_min: numToCell(r.noiseDbMin),
+    noise_db_median: numToCell(r.noiseDbMedian),
+    noise_db_max: numToCell(r.noiseDbMax),
+    noise_db_n: numToCell(r.noiseDbN),
+    fuel_mix: tallyToCell(r.fuelMix),
+    fuel_mix_n: numToCell(r.fuelMixN),
+    colours: tallyToCell(r.colours),
+    colours_n: numToCell(r.coloursN),
+    body_types: tallyToCell(r.bodyTypes),
+    body_types_n: numToCell(r.bodyTypesN),
+    energy_labels: tallyToCell(r.energyLabels),
+    energy_labels_n: numToCell(r.energyLabelsN),
+    recall_open_n: numToCell(r.recallOpenN),
+    recall_n: numToCell(r.recallN),
     scraped_at: r.scrapedAt.toISOString()
   }
 }
@@ -392,6 +528,50 @@ function csvRecordToRow(rec: Record<string, string>): RdwSpecsInsert {
     topSpeedKmhMedian: cellToNum(rec.top_speed_kmh_median),
     topSpeedKmhMax: cellToNum(rec.top_speed_kmh_max),
     topSpeedKmhN: cellToNum(rec.top_speed_kmh_n),
+    priceEurMin: cellToNum(rec.price_eur_min),
+    priceEurMedian: cellToNum(rec.price_eur_median),
+    priceEurMax: cellToNum(rec.price_eur_max),
+    priceEurN: cellToNum(rec.price_eur_n),
+    priceExTaxEurMin: cellToNum(rec.price_ex_tax_eur_min),
+    priceExTaxEurMedian: cellToNum(rec.price_ex_tax_eur_median),
+    priceExTaxEurMax: cellToNum(rec.price_ex_tax_eur_max),
+    bpmEurMin: cellToNum(rec.bpm_eur_min),
+    bpmEurMedian: cellToNum(rec.bpm_eur_median),
+    bpmEurMax: cellToNum(rec.bpm_eur_max),
+    bpmEurN: cellToNum(rec.bpm_eur_n),
+    kerbMassKgMin: cellToNum(rec.kerb_mass_kg_min),
+    kerbMassKgMedian: cellToNum(rec.kerb_mass_kg_median),
+    kerbMassKgMax: cellToNum(rec.kerb_mass_kg_max),
+    cylindersMin: cellToNum(rec.cylinders_min),
+    cylindersMedian: cellToNum(rec.cylinders_median),
+    cylindersMax: cellToNum(rec.cylinders_max),
+    cylindersN: cellToNum(rec.cylinders_n),
+    consumptionL100Min: cellToNum(rec.consumption_l100_min),
+    consumptionL100Median: cellToNum(rec.consumption_l100_median),
+    consumptionL100Max: cellToNum(rec.consumption_l100_max),
+    consumptionL100N: cellToNum(rec.consumption_l100_n),
+    evKwh100Min: cellToNum(rec.ev_kwh100_min),
+    evKwh100Median: cellToNum(rec.ev_kwh100_median),
+    evKwh100Max: cellToNum(rec.ev_kwh100_max),
+    evKwh100N: cellToNum(rec.ev_kwh100_n),
+    evRangeKmMin: cellToNum(rec.ev_range_km_min),
+    evRangeKmMedian: cellToNum(rec.ev_range_km_median),
+    evRangeKmMax: cellToNum(rec.ev_range_km_max),
+    evRangeKmN: cellToNum(rec.ev_range_km_n),
+    noiseDbMin: cellToNum(rec.noise_db_min),
+    noiseDbMedian: cellToNum(rec.noise_db_median),
+    noiseDbMax: cellToNum(rec.noise_db_max),
+    noiseDbN: cellToNum(rec.noise_db_n),
+    fuelMix: cellToTally(rec.fuel_mix),
+    fuelMixN: cellToNum(rec.fuel_mix_n),
+    colours: cellToTally(rec.colours),
+    coloursN: cellToNum(rec.colours_n),
+    bodyTypes: cellToTally(rec.body_types),
+    bodyTypesN: cellToNum(rec.body_types_n),
+    energyLabels: cellToTally(rec.energy_labels),
+    energyLabelsN: cellToNum(rec.energy_labels_n),
+    recallOpenN: cellToNum(rec.recall_open_n),
+    recallN: cellToNum(rec.recall_n),
     scrapedAt: new Date(rec.scraped_at!)
   }
 }
