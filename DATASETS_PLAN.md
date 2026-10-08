@@ -431,6 +431,48 @@ vehicle and recall data; **check the licence on the dataset page before adding a
     The Specs-folder "Estimated value" block stays too for now (like Emissions, it duplicates the chip's data); easy to remove later.
   - **Stats view: not in C4.** Per-make/model averages would stack an assumption on an assumption; skip. A `/stats` panel later only
     from the real new-price data (e.g. models whose new price rose/fell most by year), and only if the card block proves useful.
+  - **Price-source research (2026-10-09) — what is and is not allowed.** No free model-level used-car price dataset exists for UA, US
+    or EU; everything below was checked on 2026-10-09 (terms may change; re-read before use).
+    - **Forbidden / unusable:** AUTO.RIA — public offer `oferta.ria.com/auto` bans automated collection (cl. 1.6.1), parsing the
+      database (1.16, 2.18), phone numbers entirely; EUR 500 per violation (1.6.6). Its API (cl. 2.19) bars redistribution and commercial
+      use without consent; median price is freemium, period/AI price paid. Needs a written agreement with RIA before any price is shown.
+      RST.ua — terms not retrieved (rules page 404); treat as forbidden until read. AutoScout24 — terms not retrieved, bot-protected;
+      RWI-GEO-CARMKT (AutoScout24 listings, 30.8 M rows, 2019-2024) is non-commercial / research only. Cox Manheim index — data files
+      login-gated, no public terms found. Mendeley "Used Car Price Prediction" (CC BY 4.0, 5,997 rows, scraped from unnamed sites) —
+      too small and provenance unclear.
+    - **Allowed, low value:** Eurostat / ECB HICP second-hand cars index (series `ICP.*.071120`, 2015 = 100, EU only; reuse with
+      acknowledgement of Eurostat, state modifications). Market-timing only (range ~97 to ~117 since 2020), not per model/age, and no
+      Ukraine series. Optional: one constant "market vs long-run" factor beside the curve; no ingest job.
+    - **Worth checking after C4 (none verified as datasets):**
+      - **Ukrainian customs (Держмитслужба) — checked 2026-10-09, usable but weak.** Open dataset
+        `data.gov.ua/dataset/scsu-register-export-import-declarations-source`: licence **CC BY** (commercial reuse OK with credit
+        to the publisher + link), monthly gzip JSON `CD_UA_YYYY-MM` (~30 MB each), no API. Published months only 2020-02 to 2024-01
+        with gaps (nothing after 2024-01, despite "updated 2026"). Per goods item: month submitted, 10-digit UKTZED code, origin /
+        export country, weight, units, `customsCostInUah`. **No make, model, year or VIN.** Sample (2024-01 file): 237,571
+        declarations, 28,139 import items under 8703 (cars), median customs value per unit e.g. EV code 8703809010 ~ 710 k UAH,
+        petrol 8703239013 ~ 155 k UAH. Gives a UA level by engine class / age bracket / origin country only. Declared value, often
+        understated (bill 10380 cites manipulation). Possible use: one UA-vs-EU level factor; not per car. Not built.
+        **Backlog, on demand (not scheduled after C4; start only if the C4 chip proves useful).** Placement if built: a separate line
+        in the C4 card popover ("Ukrainian import declarations, 2024-01, were ~N % lower/higher than this EU estimate for this engine
+        class"), never blended into the chip's EUR range; optional second marker on the value chart; `/stats` panel only later.
+        Wording: declared customs value, mostly imports, as of January 2024, not a market price; credit the State Customs Service with
+        a link (CC BY). **Estimate ~4-6 h, one session; DB < 100 KB** (stream ~36 monthly files, ~1 GB gz, keep 8703 import items,
+        store a few hundred aggregate rows; committed gz CSV seed of a few tens of KB):
+        1. `ingest:customs` + `:csv` + `export:customs:csv` (~1 h). 2. Migration, seed, refresh wiring (~0.5 h).
+        3. UKTZED 10-digit decode (engine type, size, age bracket) from the official table, helper in `packages/shared` + tests
+        (~1 h, **riskiest: mapping not yet verified**). 4. Match a car to a code from RDW / our fuel, cc and age; no line when
+        missing (~0.5-1 h). 5. UAH -> EUR via a constant monthly NBU rate table (~0.5 h). 6. API field + popover line + ua/ru/en
+        strings + attribution (~1 h). 7. Tests (~0.5 h). Risks: data ends 2024-01, extra FX assumption, partial car coverage.
+      - **eAuto.org.ua** (Ukrainian market analytics from listing data: average age and price of used cars, imports vs domestic).
+        Aggregate figures only; ask permission before reusing numbers. Could calibrate a UA-vs-EU level factor.
+      - **KSE master's thesis 2021** (pricing used cars in Ukraine, 100,000+ deals) — find the full text for a citable age / mileage
+        effect; only the table of contents was seen.
+      - **Mileage:** none of the above has it. RDW registers odometer readings (cars from 2014, NAP before) but only a per-plate
+        report with a logical / illogical verdict was seen; no open dataset of mileage values was found. NL cars only, so it would
+        give an EU mileage-by-age profile, not a Ukrainian one. Low priority.
+      - **eAuto.org.ua / KSE terms (checked):** eAuto data comes from Automoto.ua (~300 k ads, AUTO.RIA + OLX + RST), "All rights
+        reserved", data only on request / paid reports. KSE thesis PDF could not be read by the fetch tool (download manually).
+      - **Official registers (NL, DK, EE, PL, NO)** carry no sale prices (searched, nothing found); useful for fleet age mix only.
 - **D — RDW recalls (campaigns).** Join key = `referentiecode_rdw`: campaign `j9yg-7rg9` (defect, remedy, risk, dates, vehicle count),
   make/type `mu2x-mu5e`, risk `9ihi-jgpf`, per-plate status `t49b-isb7` (open vs repaired counts per model), owner informed
   `mh8w-8cup`. One **Recalls** block, rows labelled by market (EU now, US from stage F, CA from H); the open-recall share from C3 is an
