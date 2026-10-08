@@ -852,6 +852,30 @@ export type Winner360Row = typeof winner360.$inferSelect
 export type Winner360Insert = typeof winner360.$inferInsert
 
 /**
+ * A YouTube video embedded in a brand's own-site article (`scripts/src/honda-videos.ts`), per (video, model). Links + facts
+ * only — see migrations/0044_site_videos.sql.
+ */
+export const siteVideos = registry.table(
+  'site_videos',
+  {
+    youtubeId: text('youtube_id').notNull(),
+    modelSlug: text('model_slug').notNull(),
+    brandSlug: text('brand_slug').notNull(),
+    year: integer('year'),
+    title: text('title').notNull(),
+    articleUrl: text('article_url').notNull(),
+    publishedAt: date('published_at', { mode: 'string' }),
+    fetchedAt: timestamp('fetched_at', { withTimezone: true }).notNull().defaultNow()
+  },
+  t => [
+    primaryKey({ columns: [t.youtubeId, t.modelSlug] }),
+    index('ix_site_videos_brand_model').on(t.brandSlug, t.modelSlug)
+  ]
+)
+export type SiteVideoRow = typeof siteVideos.$inferSelect
+export type SiteVideoInsert = typeof siteVideos.$inferInsert
+
+/**
  * User-writable account data (Phase 5) — its own `app` schema, kept apart from the derived `registry`.
  * See migrations/0034_app_accounts.sql. Written by the API only.
  */

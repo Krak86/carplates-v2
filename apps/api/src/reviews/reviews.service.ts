@@ -1,7 +1,16 @@
 import { Inject, Injectable } from '@nestjs/common'
-import { carVideos, infocarVersions, ownerPosts, pressReviews, topgearReviews, youtubeVideos } from '@carplates/db'
+import {
+  carVideos,
+  infocarVersions,
+  ownerPosts,
+  pressReviews,
+  siteVideos,
+  topgearReviews,
+  youtubeVideos
+} from '@carplates/db'
 import {
   INFOCAR_TREES,
+  MAX_VIDEOS,
   infocarBrandSlug,
   infocarLookup,
   ownerPostLookup,
@@ -32,9 +41,10 @@ export class ReviewsService {
     if (!slug) return { testDrive: null, reviews: null, videos: [], ownerPosts: [], topgear: [], press: [] }
 
     const { db } = this.dbService
-    const [rows, videoRows, postRows, topgearRows, pressRows] = await Promise.all([
+    const [rows, videoRows, siteRows, postRows, topgearRows, pressRows] = await Promise.all([
       db.select().from(infocarVersions).where(eq(infocarVersions.brandSlug, slug)),
       db.select().from(carVideos).where(eq(carVideos.brandSlug, slug)),
+      db.select().from(siteVideos).where(eq(siteVideos.brandSlug, slug)),
       db.select().from(ownerPosts).where(eq(ownerPosts.brandSlug, slug)),
       db.select().from(topgearReviews).where(eq(topgearReviews.brandSlug, slug)),
       db.select().from(pressReviews).where(eq(pressReviews.brandSlug, slug))
@@ -44,7 +54,29 @@ export class ReviewsService {
     )
 
     const match = infocarLookup(catalog, query.brand, query.model, query.year)
-    let videoHits = videoLookup(videoRows, catalog, query.brand, query.model, query.year)
+    const infocarHits = videoLookup(videoRows, catalog, query.brand, query.model, query.year)
+    // The brand's own-site articles (`pnpm ingest:honda-videos`) add to infocar's; the same video is shown once.
+    const siteHits = videoLookup(
+      siteRows.map((r): InfocarVideoRow => ({
+        youtubeId: r.youtubeId,
+        title: r.title,
+        thumbUrl: `https://i.ytimg.com/vi/${r.youtubeId}/mqdefault.jpg`,
+        durationS: null,
+        publishedAt: r.publishedAt,
+        brandSlug: r.brandSlug,
+        modelSlug: r.modelSlug,
+        generationId: null,
+        year: r.year,
+        url: `https://www.youtube.com/watch?v=${r.youtubeId}`
+      })),
+      catalog,
+      query.brand,
+      query.model,
+      query.year
+    )
+    const infocarIds = new Set(infocarHits.map(v => v.youtubeId))
+    const siteIds = new Set(siteHits.map(v => v.youtubeId))
+    let videoHits = [...infocarHits, ...siteHits.filter(v => !infocarIds.has(v.youtubeId))].slice(0, MAX_VIDEOS)
     const isFallback = !videoHits.length
     const langById = new Map<string, Lang>()
     if (isFallback) {
@@ -74,7 +106,11 @@ export class ReviewsService {
       )
     }
     const videos = videoHits.map(v => ({
-      source: isFallback ? ('youtube' as const) : ('infocar' as const),
+      source: isFallback
+        ? ('youtube' as const)
+        : infocarIds.has(v.youtubeId) || !siteIds.has(v.youtubeId)
+          ? ('infocar' as const)
+          : ('site' as const),
       lang: langById.get(v.youtubeId) ?? null,
       youtubeId: v.youtubeId,
       title: v.title,

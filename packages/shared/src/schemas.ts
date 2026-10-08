@@ -516,10 +516,10 @@ export const infocarMatchSchema = z.object({
   yearUrl: z.string().nullable()
 })
 /** An infocar.ua video (persisted by `pnpm ingest:infocar:videos`) for this car's make/model; embedded from YouTube.
- *  `source` 'youtube' = the YouTube-search fallback (`pnpm ingest:youtube-videos`, models infocar has none for), which
+ *  `source` 'site' = a video from the brand's own-site articles (`pnpm ingest:honda-videos`); 'youtube' = the YouTube-search fallback (`pnpm ingest:youtube-videos`, models infocar has none for), which
  *  also knows the video's language (`lang`, the UI language codes); infocar videos have none. */
 export const infocarVideoSchema = z.object({
-  source: z.enum(['infocar', 'youtube']),
+  source: z.enum(['infocar', 'youtube', 'site']),
   lang: z.enum(['ua', 'ru', 'en']).nullable(),
   youtubeId: z.string(),
   title: z.string(),

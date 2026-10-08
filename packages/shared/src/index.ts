@@ -137,6 +137,7 @@ export {
   MAX_PRESS_REVIEWS,
   PRESS_LANGS,
   findBrandSlug,
+  namesModel,
   pressLookup,
   pressTokens,
   titleYear,
