@@ -12,13 +12,15 @@ type Props = {
   data: VinDecodeResponse
   /** Show the VIN barcode + text + copy button as the first row (the plate card; the VIN page has it in its header). */
   withBarcode?: boolean
+  /** Extra blocks rendered at the end of the Overview tab only (derived/enriched data — Raw stays exact). */
+  overviewExtras?: ReactNode
 }
 
 const VIEWS = ['overview', 'raw'] as const
 type View = (typeof VIEWS)[number]
 
 /** Overview | Raw data switcher over a VIN decode — shared by the VIN page and the plate card's VIN section. */
-export default function VinDecodeTabs({ data, withBarcode }: Props): ReactNode {
+export default function VinDecodeTabs({ data, withBarcode, overviewExtras }: Props): ReactNode {
   const { t } = useTranslation()
   const [view, setView] = useState<View>('overview')
 
@@ -50,6 +52,8 @@ export default function VinDecodeTabs({ data, withBarcode }: Props): ReactNode {
 
       {view === 'overview' ? <VinOverview data={data} /> : <VinDecodeFields results={data.results} />}
       <p className="mt-3 text-sm text-[var(--color-muted)]">{t('vin.source')}</p>
+
+      {view === 'overview' && overviewExtras}
     </div>
   )
 }

@@ -104,10 +104,15 @@ export default function VinResult({ data }: Props): ReactNode {
           </div>
         )}
 
-        <VinDecodeTabs data={data} />
-
-        <SafetyRatings brand={vehicle.brand} model={vehicle.model} year={vehicle.year} body={vehicle.body} />
-        <CarWikiInfo brand={vehicle.brand} model={vehicle.model} year={vehicle.year} />
+        <VinDecodeTabs
+          data={data}
+          overviewExtras={
+            <>
+              <SafetyRatings brand={vehicle.brand} model={vehicle.model} year={vehicle.year} body={vehicle.body} />
+              <CarWikiInfo brand={vehicle.brand} model={vehicle.model} year={vehicle.year} />
+            </>
+          }
+        />
       </Card>
     </div>
   )
