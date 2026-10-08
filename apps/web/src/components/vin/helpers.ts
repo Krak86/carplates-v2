@@ -191,9 +191,14 @@ const COUNTRY_CODES: Readonly<Record<string, string>> = {
   KAZAKHSTAN: 'KZ'
 }
 
+/** ISO 3166-1 alpha-2 for an NHTSA "Plant Country" name, or null when unmapped. */
+export function countryIso(country: string | undefined): string | null {
+  return (country ? COUNTRY_CODES[country.trim().toUpperCase()] : undefined) ?? null
+}
+
 /** Regional-indicator flag emoji for an NHTSA "Plant Country" name, or null when unmapped. */
 export function countryFlag(country: string | undefined): string | null {
-  const code = country ? COUNTRY_CODES[country.trim().toUpperCase()] : undefined
+  const code = countryIso(country)
   if (!code) return null
   return String.fromCodePoint(...[...code].map(c => 0x1f1e6 + c.charCodeAt(0) - 65))
 }
@@ -248,6 +253,67 @@ export function buildFallback(vin: string, fields: FieldMap, registry: RegistryH
     else if (coded) out.year = { value: coded, source: 'yearCode' }
   }
   return out
+}
+
+/** NHTSA fuel names → the registry keywords the shared fuel resolver (and the RDW powertrain filter) understand. */
+const REGISTRY_FUEL_BY_NHTSA: readonly (readonly [RegExp, string])[] = [
+  [/electric/i, 'ЕЛЕКТРО'],
+  [/diesel/i, 'ДИЗЕЛЬНЕ'],
+  [/gasoline|petrol/i, 'БЕНЗИН'],
+  [/hydrogen|fuel cell/i, 'ВОДЕНЬ'],
+  [/natural gas|propane|lpg|cng/i, 'ГАЗ']
+]
+
+/** Registry `kind` text for the vehicle shape, so the RDW / catalog matchers pick the right vehicle kinds. */
+function registryKindFor(fields: FieldMap): string | undefined {
+  const type = fields.get('Vehicle Type') ?? ''
+  if (vehicleShape(fields) === 'motorcycle') return 'МОТОЦИКЛ'
+  if (/passenger car|multipurpose/i.test(type)) return 'ЛЕГКОВИЙ'
+  if (/truck/i.test(type)) return 'ВАНТАЖНИЙ'
+  if (/bus/i.test(type)) return 'АВТОБУС'
+  return undefined
+}
+
+export type TypicalLookup = {
+  brand: string
+  model: string
+  year: number | null
+  kind?: string
+  fuel?: string
+  capacity: number | null
+  /** Distinct fallback sources behind make / model / year — non-empty means the match inputs are themselves estimates. */
+  inputSources: FallbackSource[]
+}
+
+/**
+ * What to look the VIN's make / model / year up by in the NL-register, catalog and emissions data. NHTSA first, then the
+ * ≈ fallback; null without a make and model (a VIN-prefix-only make can't match anything).
+ */
+export function typicalLookup(fields: FieldMap, fallback: VinFallback): TypicalLookup | null {
+  const brand = fields.get('Make') ?? fallback.make?.value
+  const model = fields.get('Model') ?? fallback.model?.value
+  if (!brand || !model) return null
+
+  const yearText = Number(fields.get('Model Year'))
+  const year = yearText > 0 ? yearText : (fallback.year?.value ?? null)
+  const nhtsaFuel = fields.get('Fuel Type - Primary') ?? ''
+  const liters = displacementLiters(fields)
+  const used = [
+    fields.get('Make') ? null : fallback.make,
+    fields.get('Model') ? null : fallback.model,
+    yearText > 0 ? null : fallback.year
+  ]
+  const sources = new Set(used.flatMap(d => (d ? [d.source] : [])))
+
+  return {
+    brand,
+    model,
+    year,
+    kind: registryKindFor(fields),
+    fuel: REGISTRY_FUEL_BY_NHTSA.find(([re]) => re.test(nhtsaFuel))?.[1],
+    capacity: liters ? Math.round(liters * 1000) : null,
+    inputSources: FALLBACK_SOURCES.filter(s => sources.has(s))
+  }
 }
 
 /** The distinct sources used, in a stable order — drives the explanation note. */
@@ -377,7 +443,7 @@ export function gvwrClass(value: string | undefined): number | null {
 // ---- Safety assists -----------------------------------------------------------------------------
 
 export const ASSISTS = [
-  { key: 'abs', variable: 'Anti-lock Braking System (ABS)' },
+  { key: 'abs', variable: 'Antilock Braking System (ABS)' },
   { key: 'esc', variable: 'Electronic Stability Control (ESC)' },
   { key: 'tc', variable: 'Traction Control' },
   { key: 'fcw', variable: 'Forward Collision Warning (FCW)' },
@@ -387,7 +453,7 @@ export const ASSISTS = [
   { key: 'ldw', variable: 'Lane Departure Warning (LDW)' },
   { key: 'lka', variable: 'Lane Keeping Assistance (LKA)' },
   { key: 'bsw', variable: 'Blind Spot Warning (BSW)' },
-  { key: 'rcta', variable: 'Rear Cross Traffic Alert (RCTA)' },
+  { key: 'rcta', variable: 'Rear Cross Traffic Alert' },
   { key: 'camera', variable: 'Backup Camera' },
   { key: 'keyless', variable: 'Keyless Ignition' },
   { key: 'drl', variable: 'Daytime Running Light (DRL)' }

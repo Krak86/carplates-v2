@@ -13,7 +13,7 @@ export default function VinMotorcycleSchematic({ fields }: Props): ReactNode {
   const { t } = useTranslation()
   const seats = Number(fields.get('Number of Seats'))
   const hasPillion = seats >= 2
-  const abs = assistLevel(fields.get('Anti-lock Braking System (ABS)'))
+  const abs = assistLevel(fields.get('Antilock Braking System (ABS)'))
   const chips = [
     seats >= 1 ? t('vin.moto.seats', { count: seats }) : undefined,
     fields.get('Motorcycle Chassis Type'),

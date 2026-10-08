@@ -13,6 +13,7 @@ import VinOriginCard from '@/components/vin/VinOriginCard'
 import VinSegments from '@/components/vin/VinSegments'
 import VinSection from '@/components/vin/VinSection'
 import VinStatusBanner from '@/components/vin/VinStatusBanner'
+import VinTypicalData from '@/components/vin/VinTypicalData'
 import {
   buildFallback,
   buildSchematicModel,
@@ -73,6 +74,8 @@ export default function VinOverview({ data }: Props): ReactNode {
           <VinAssists fields={fields} />
         </VinSection>
       )}
+
+      <VinTypicalData fields={fields} fallback={fallback} />
 
       {groupFields(data.results).length > 0 && (
         <VinSection icon="📋" title={t('vin.details.title')}>

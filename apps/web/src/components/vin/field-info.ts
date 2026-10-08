@@ -34,7 +34,7 @@ export const FIELD_INFO: Readonly<Record<string, string>> = {
   'Side Air Bag Locations': 'airbagSide',
   'Curtain Air Bag Locations': 'airbagCurtain',
   'Knee Air Bag Locations': 'airbagKnee',
-  'Anti-lock Braking System (ABS)': 'abs',
+  'Antilock Braking System (ABS)': 'abs',
   'Electronic Stability Control (ESC)': 'esc',
   'Traction Control': 'tc',
   'Forward Collision Warning (FCW)': 'fcw',
@@ -44,7 +44,7 @@ export const FIELD_INFO: Readonly<Record<string, string>> = {
   'Lane Departure Warning (LDW)': 'ldw',
   'Lane Keeping Assistance (LKA)': 'lka',
   'Blind Spot Warning (BSW)': 'bsw',
-  'Rear Cross Traffic Alert (RCTA)': 'rcta',
+  'Rear Cross Traffic Alert': 'rcta',
   'Keyless Ignition': 'keyless',
   'Daytime Running Light (DRL)': 'drl'
 }

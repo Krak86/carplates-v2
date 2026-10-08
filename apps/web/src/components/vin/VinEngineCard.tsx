@@ -5,6 +5,7 @@ import InfoPopover from '@/components/InfoPopover'
 import InfoText from '@/components/InfoText'
 import { displacementLiters, enginePower, gvwrClass, parseEngineLayout } from '@/components/vin/helpers'
 import type { FieldMap } from '@/components/vin/helpers'
+import { useVinText } from '@/components/vin/use-vin-text'
 import type { EngineLayout } from '@/components/vin/types'
 
 type Props = {
@@ -21,23 +22,34 @@ const BORE = 7
 /** Engine summary: cylinder layout glyph, headline numbers, and gauges for power, size and weight class. */
 export default function VinEngineCard({ fields }: Props): ReactNode {
   const { t } = useTranslation()
+  const text = useVinText()
+  const { l: unitL, hp: unitHp, kw: unitKw } = text.units
   const cylinders = Number(fields.get('Engine Number of Cylinders')) || null
   const liters = displacementLiters(fields)
   const { hp, kw } = enginePower(fields)
   const layout = parseEngineLayout(fields.get('Engine Configuration'))
-  const fuel = fields.get('Fuel Type - Primary')
-  const gvwr = fields.get('Gross Vehicle Weight Rating From')
-  const gvwrCls = gvwrClass(gvwr)
+  const fuelRaw = fields.get('Fuel Type - Primary')
+  const fuel = fuelRaw ? text.value('Fuel Type - Primary', fuelRaw) : null
+  const gvwrRaw = fields.get('Gross Vehicle Weight Rating From')
+  const gvwr = gvwrRaw ? text.value('Gross Vehicle Weight Rating From', gvwrRaw) : null
+  const gvwrCls = gvwrClass(gvwrRaw)
   const chips = [
-    { text: fields.get('Engine Model'), infoKey: 'engineModel' },
-    { text: fields.get('Valve Train Design'), infoKey: 'valveTrain' },
-    { text: fields.get('Engine Configuration'), infoKey: 'engineConfig' },
-    { text: fields.get('Turbo') ? `${t('vin.engine.turbo')}: ${fields.get('Turbo')}` : undefined, infoKey: 'turbo' },
-    { text: fields.get('Electrification Level'), infoKey: 'electrification' },
-    { text: fields.get('Transmission Style'), infoKey: 'transmission' }
-  ].filter((c): c is Chip => !!c.text)
+    chip('Engine Model', 'engineModel'),
+    chip('Valve Train Design', 'valveTrain'),
+    chip('Engine Configuration', 'engineConfig'),
+    chip('Turbo', 'turbo', `${t('vin.engine.turbo')}: `),
+    chip('Electrification Level', 'electrification'),
+    chip('Transmission Style', 'transmission')
+  ].filter((c): c is Chip => !!c)
 
   if (!cylinders && !liters && !hp && !fuel && chips.length === 0) return null
+
+  function chip(variable: string, infoKey: string, prefix = ''): Chip | null {
+    const raw = fields.get(variable)
+    if (!raw) return null
+    const value = text.value(variable, raw)
+    return { text: `${prefix}${value.text}`, en: value.en ? `${prefix}${value.en}` : null, infoKey }
+  }
 
   return (
     <div>
@@ -48,27 +60,27 @@ export default function VinEngineCard({ fields }: Props): ReactNode {
           <Stat label={t('vin.engine.cylinders')} value={cylinders ? String(cylinders) : null} infoKey="cylinders" />
           <Stat
             label={t('vin.engine.displacement')}
-            value={liters ? `${liters.toFixed(1)} L` : null}
+            value={liters ? `${liters.toFixed(1)} ${unitL}` : null}
             infoKey="displacement"
           />
           <Stat
             label={t('vin.engine.power')}
-            value={hp ? `${hp} hp` : null}
+            value={hp ? `${hp} ${unitHp}` : null}
             infoKey="horsepower"
-            hint={kw ? `${kw} kW` : null}
+            hint={kw ? `${kw} ${unitKw}` : null}
             hintInfoKey="kilowatts"
           />
-          <Stat label={t('vin.engine.fuel')} value={fuel ?? null} infoKey="fuelPrimary" />
+          <Stat label={t('vin.engine.fuel')} value={fuel?.text ?? null} hint={fuel?.en} infoKey="fuelPrimary" />
         </div>
       </div>
 
       <div className="mt-3 space-y-2">
-        {hp && <Gauge label={t('vin.engine.power')} ratio={hp / HP_GAUGE_MAX} text={`${hp} hp`} />}
+        {hp && <Gauge label={t('vin.engine.power')} ratio={hp / HP_GAUGE_MAX} text={`${hp} ${unitHp}`} />}
         {liters && (
           <Gauge
             label={t('vin.engine.displacement')}
             ratio={liters / LITERS_GAUGE_MAX}
-            text={`${liters.toFixed(1)} L`}
+            text={`${liters.toFixed(1)} ${unitL}`}
           />
         )}
         {gvwrCls && (
@@ -78,7 +90,10 @@ export default function VinEngineCard({ fields }: Props): ReactNode {
                 {t('vin.engine.gvwr')}
                 <Info infoKey="gvwr" title={t('vin.engine.gvwr')} />
               </span>
-              <span className="font-medium">{gvwr}</span>
+              <span className="text-right font-medium">
+                {gvwr?.text}
+                {gvwr?.en && <span className="block text-xs font-normal opacity-70">{gvwr.en}</span>}
+              </span>
             </div>
             <div className="flex gap-0.5" role="img" aria-label={t('vin.engine.gvwrClass', { n: gvwrCls })}>
               {GVWR_CLASSES.map(c => (
@@ -100,6 +115,7 @@ export default function VinEngineCard({ fields }: Props): ReactNode {
               className="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-border)]/50 px-2.5 py-0.5 text-sm"
             >
               {c.text}
+              {c.en && <span className="text-xs opacity-70">{c.en}</span>}
               <Info infoKey={c.infoKey} title={c.text} />
             </span>
           ))}
@@ -109,7 +125,7 @@ export default function VinEngineCard({ fields }: Props): ReactNode {
   )
 }
 
-type Chip = { text: string; infoKey: string }
+type Chip = { text: string; en: string | null; infoKey: string }
 
 type InfoProps = { infoKey: string; title: string }
 

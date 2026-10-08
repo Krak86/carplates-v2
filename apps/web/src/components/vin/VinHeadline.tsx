@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 
 import VinDerivedChip from '@/components/vin/VinDerivedChip'
+import { useVinText } from '@/components/vin/use-vin-text'
 import type { FieldMap, VinFallback } from '@/components/vin/helpers'
 
 type Props = {
@@ -10,6 +11,7 @@ type Props = {
 
 /** "KIA Sportage 2017" plus trim / vehicle type / body chips. Values NHTSA lacked are filled from `fallback` and tagged. */
 export default function VinHeadline({ fields, fallback }: Props): ReactNode {
+  const vinText = useVinText()
   const parts = [
     { key: 'make', text: fields.get('Make'), derived: fallback.make },
     { key: 'model', text: fields.get('Model'), derived: fallback.model },
@@ -18,9 +20,10 @@ export default function VinHeadline({ fields, fallback }: Props): ReactNode {
     const text = p.text ?? (p.derived ? String(p.derived.value) : undefined)
     return text ? [{ key: p.key, text, source: p.text ? undefined : p.derived?.source }] : []
   })
-  const chips = [fields.get('Trim'), fields.get('Series'), fields.get('Body Class'), fields.get('Vehicle Type')].filter(
-    (c): c is string => !!c
-  )
+  const chips = ['Trim', 'Series', 'Body Class', 'Vehicle Type'].flatMap(variable => {
+    const raw = fields.get(variable)
+    return raw ? [vinText.value(variable, raw)] : []
+  })
   if (parts.length === 0) return null
 
   // One tag per distinct source — repeating it after every word is noise.
@@ -41,8 +44,9 @@ export default function VinHeadline({ fields, fallback }: Props): ReactNode {
       {chips.length > 0 && (
         <div className="mt-1.5 flex flex-wrap gap-1.5">
           {chips.map(c => (
-            <span key={c} className="rounded-full bg-[var(--color-border)]/50 px-2.5 py-0.5 text-sm">
-              {c}
+            <span key={c.text} className="rounded-full bg-[var(--color-border)]/50 px-2.5 py-0.5 text-sm">
+              {c.text}
+              {c.en && <span className="ml-1.5 text-xs opacity-70">{c.en}</span>}
             </span>
           ))}
         </div>
