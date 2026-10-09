@@ -1149,3 +1149,30 @@ export const rdwRecallTexts = registry.table(
   t => [primaryKey({ columns: [t.textHash, t.lang, t.engine] })]
 )
 export type RdwRecallTextInsert = typeof rdwRecallTexts.$inferInsert
+
+/** Open EV Data variants (MIT): battery, consumption and charging of electric / plug-in hybrid models. */
+export const openEv = registry.table(
+  'open_ev',
+  {
+    id: text('id').primaryKey(),
+    make: text('make').notNull(),
+    model: text('model').notNull(),
+    variant: text('variant').notNull().default(''),
+    makeKey: text('make_key').notNull(),
+    modelKey: text('model_key').notNull(),
+    /** `bev` | `phev`. */
+    powertrain: text('powertrain').notNull(),
+    releaseYear: smallint('release_year'),
+    batteryKwh: real('battery_kwh'),
+    consumptionKwh100: real('consumption_kwh100'),
+    acMaxKw: real('ac_max_kw'),
+    acPhases: smallint('ac_phases'),
+    acPorts: jsonb('ac_ports').$type<string[]>(),
+    dcMaxKw: real('dc_max_kw'),
+    dcPorts: jsonb('dc_ports').$type<string[]>(),
+    scrapedAt: timestamp('scraped_at', { withTimezone: true }).notNull().defaultNow()
+  },
+  t => [index('ix_open_ev_model').on(t.makeKey, t.modelKey)]
+)
+export type OpenEvRow = typeof openEv.$inferSelect
+export type OpenEvInsert = typeof openEv.$inferInsert

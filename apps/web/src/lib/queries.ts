@@ -15,6 +15,7 @@ import {
   getFuelEconomy,
   getFx,
   getRdw,
+  getOpenEv,
   getRdwRecalls,
   getVdb,
   getVdbStats,
@@ -239,6 +240,15 @@ export function rdwRecallsQuery(brand: string, model: string) {
   return queryOptions({
     queryKey: ['rdw', 'recalls', brand, model],
     queryFn: () => getRdwRecalls(brand, model),
+    staleTime: Infinity
+  })
+}
+
+// Open EV Data variants for a model (pnpm ingest:open-ev) — persisted reference data, cached offline in the rdw group.
+export function openEvQuery(brand: string, model: string) {
+  return queryOptions({
+    queryKey: ['rdw', 'ev', brand, model],
+    queryFn: () => getOpenEv(brand, model),
     staleTime: Infinity
   })
 }

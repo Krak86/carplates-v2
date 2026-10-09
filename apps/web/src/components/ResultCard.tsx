@@ -26,6 +26,7 @@ import FieldInfoButton from '@/components/FieldInfoButton'
 import NoRegionBadge from '@/components/NoRegionBadge'
 import RegistrationTimeline from '@/components/RegistrationTimeline'
 import { kgToTonnes } from '@/components/RdwSpecs.helpers'
+import ElectricLink from '@/components/ElectricLink'
 import { getBodyInfo, getFuelIcon } from '@/components/ResultCard.helpers'
 import PaidFeatureSections from '@/components/paid/PaidFeatureSections'
 import VdbChips from '@/components/VdbChips'
@@ -69,6 +70,7 @@ const ReviewLinks = lazy(() => import('@/components/ReviewLinks'))
 const FuelEconomy = lazy(() => import('@/components/FuelEconomy'))
 const RdwSpecs = lazy(() => import('@/components/RdwSpecs'))
 const RdwRecalls = lazy(() => import('@/components/RdwRecalls'))
+const OpenEv = lazy(() => import('@/components/OpenEv'))
 const SafetyRatings = lazy(() => import('@/components/SafetyRatings'))
 
 type Props = {
@@ -335,6 +337,7 @@ export default function ResultCard({ data }: Props): ReactNode {
                       <span aria-hidden>{getFuelIcon(c.fuel)}</span>
                       {c.fuel}
                       <FieldInfoButton dimension="fuel" current={c.fuel} />
+                      <ElectricLink brand={c.brand} model={c.model} fuel={c.fuel} />
                     </span>
                   )
                 }
@@ -508,6 +511,9 @@ export default function ResultCard({ data }: Props): ReactNode {
         </LazySection>
         <LazySection sections={['recalls']}>
           <RdwRecalls brand={c.brand} model={c.model} year={c.makeYear} kind={c.kind} />
+        </LazySection>
+        <LazySection sections={['electric']}>
+          <OpenEv brand={c.brand} model={c.model} year={c.makeYear} fuel={c.fuel} />
         </LazySection>
         <LazySection sections={['emissions']}>
           <FuelEconomy

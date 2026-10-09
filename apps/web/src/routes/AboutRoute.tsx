@@ -20,6 +20,12 @@ const SOURCES: readonly Source[] = [
   { key: 'vehiclesdb', label: 'VehiclesDB', url: 'https://vehiclesdb.com', icon: '/icons/sources/vehiclesdb.webp' },
   { key: 'rdw', label: 'RDW', url: 'https://opendata.rdw.nl', icon: '/icons/sources/rdw.webp' },
   {
+    key: 'ev',
+    label: 'Open EV Data',
+    url: 'https://github.com/OpenChargingCloud/open-ev-data',
+    icon: '/icons/sources/github.webp'
+  },
+  {
     key: 'belastingdienst',
     label: 'Belastingdienst',
     url: 'https://www.belastingdienst.nl/wps/wcm/connect/nl/bpm/content/bpm-afschrijving-koerslijst-taxatierapport-forfaitaire-tabel',

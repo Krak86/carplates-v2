@@ -14,6 +14,7 @@ import {
   euroNcapRatingsResponseSchema,
   fuelEconomyResponseSchema,
   fxResponseSchema,
+  openEvResponseSchema,
   rdwRecallsResponseSchema,
   rdwResponseSchema,
   vdbResponseSchema,
@@ -63,6 +64,7 @@ import type {
   EuroNcapRatingsResponse,
   FuelEconomyResponse,
   FxResponse,
+  OpenEvResponse,
   RdwRecallsResponse,
   RdwResponse,
   VdbResponse,
@@ -260,6 +262,11 @@ export async function getRdw(brand: string, model: string, year: number, kind?: 
 export async function getRdwRecalls(brand: string, model: string): Promise<RdwRecallsResponse> {
   const params = new URLSearchParams({ brand, model })
   return rdwRecallsResponseSchema.parse(await getJson(`/api/rdw/recalls?${params.toString()}`))
+}
+
+export async function getOpenEv(brand: string, model: string): Promise<OpenEvResponse> {
+  const params = new URLSearchParams({ brand, model })
+  return openEvResponseSchema.parse(await getJson(`/api/ev?${params.toString()}`))
 }
 
 export async function getFx(): Promise<FxResponse> {

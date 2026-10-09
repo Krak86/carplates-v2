@@ -35,6 +35,12 @@ UI: collapsible block, the "Typical figures … Similar vehicles" footnote on to
 Two RDW spellings that share a key collapse to the larger group (medians don't merge). Seed: `seed-data/rdw-specs.csv.gz`; after
 changing `makeKey`/`modelKey`/`brandSlug` re-run `ingest:rdw` (cached per make in `scripts/.data/rdw/`, `--refresh` to re-query), not `:csv`.
 
+### Open EV Data — "Electric" block (stage E)
+
+Files: migration 0056 (`registry.open_ev`), `scripts/src/open-ev.ts` + `-parse.ts`, `packages/shared/src/openEv.ts` (own file, no offline-cache bust), `EvService.lookup` (`GET /api/ev`, `apps/api/src/ev/`), web `OpenEv.tsx` / `OpenEv.helpers.ts`.
+
+Model-level, European spec, **data frozen at 2020** (118 variants) — the popover says so. Same VehiclesDB matcher as Specs/Recalls (placeholder kind `any`). The block renders only when `resolveFuelCategories(c.fuel)` includes `electric`, so a petrol car of an EV-sharing nameplate (Kona, Golf) never shows it. Query key starts with `rdw` (offline group). Refresh yearly at most: `pnpm ingest:open-ev` then `export:open-ev:csv`; `ingest:open-ev:csv` is part of `ingest:ratings:csv`. MIT notice is the About source entry.
+
 ### RDW recalls (stage D)
 
 Files: migration 0054 (`rdw_recalls`, `rdw_recall_models`), `scripts/src/rdw-recalls.ts` + `-parse.ts`, `packages/shared/src/rdwRecalls.ts` (own file, so no offline-cache bust), `RdwService.recalls`

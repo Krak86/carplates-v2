@@ -181,6 +181,7 @@ export {
   type RdwResponse,
   type RdwSpecs
 } from './rdw.js'
+export { openEvResponseSchema, openEvVariantSchema, type OpenEvResponse, type OpenEvVariant } from './openEv.js'
 export {
   RDW_RECALLS_LIMIT,
   rdwRecallSchema,
