@@ -488,6 +488,12 @@ export const wikiInfoResponseSchema = z.object({
   found: z.boolean(),
   title: z.string().nullable(),
   extract: z.string().nullable(),
+  /** One-line Wikipedia short description ("Mid-size car by Toyota"). */
+  description: z.string().nullable().optional(),
+  /** Sections after the intro, behind the UI's "Read more"; headings are `## Title` lines. */
+  more: z.string().nullable().optional(),
+  /** Wikipedia edition the article came from (`uk`/`ru`/`en`) — differs from the UI language after the English fallback. */
+  articleLang: z.string().nullable().optional(),
   pageUrl: z.string().nullable(),
   image: wikiImageSchema.nullable()
 })

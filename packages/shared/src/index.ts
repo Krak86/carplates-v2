@@ -82,6 +82,7 @@ export {
   isRetryableStatus,
   nextRetryAt,
   retryDelayMs,
+  shapeWikiExtract,
   stripHtml,
   wikiImageFromInfo,
   wikiImageFromRow,

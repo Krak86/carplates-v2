@@ -125,6 +125,9 @@ describe('WikiService', () => {
       found: true,
       title: 'Toyota Camry',
       extract: 'Toyota Camry is a car.',
+      description: null,
+      more: null,
+      articleLang: 'en',
       pageUrl: 'https://en.wikipedia.org/wiki/Toyota_Camry',
       image: {
         url: THUMB_URL,
@@ -142,6 +145,24 @@ describe('WikiService', () => {
     })
     expect(callsTo('titles=File%3AToyota_Camry.jpg')).toBe(1)
     expect(store.rows.get('toyota|camry|0')).toMatchObject({ status: 'ok', origin: 'lead', imageUrl: THUMB_URL })
+  })
+
+  it('falls back to the English article when the UI-language edition has none', async () => {
+    vi.mocked(fetch).mockImplementation(async input => {
+      const url = String(input)
+      if (url.includes('commons.wikimedia.org')) return jsonResponse({ query: {} })
+      if (url.includes('pithumbsize')) return jsonResponse(leadPayload)
+      return url.includes('uk.wikipedia.org') ? jsonResponse({ query: {} }) : jsonResponse(textPayload)
+    })
+    const { service } = makeService()
+
+    const result = await service.lookup('Toyota', 'Camry', 'ua')
+
+    expect(result).toMatchObject({
+      found: true,
+      articleLang: 'en',
+      pageUrl: 'https://en.wikipedia.org/wiki/Toyota_Camry'
+    })
   })
 
   it('maps a UA language code to the uk.wikipedia.org domain, but takes the photo from the English article', async () => {

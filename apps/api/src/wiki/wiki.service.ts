@@ -10,6 +10,7 @@ import {
   fetchWikimediaJson,
   leadLanguages,
   pickCommonsCandidate,
+  shapeWikiExtract,
   titleMentionsModel,
   wikiDomain,
   wikiImageFromInfo,
@@ -44,8 +45,6 @@ type Resolved = { image: WikiImage | null; settled: boolean }
 
 const CACHE_MAX = 300
 const UPSTREAM_TIMEOUT_MS = 10_000
-// Intro-section cap (MediaWiki cuts at a sentence boundary); roughly the whole lead of a typical car article.
-const EXTRACT_CHARS = 1800
 
 @Injectable()
 export class WikiService {
@@ -76,25 +75,37 @@ export class WikiService {
     const cached = this.cache.get(cacheKey)
     if (cached) return cached
 
-    let page: WikipediaPage | null
+    // The UI-language edition first, then English — a rare model often has an article only there.
+    const domains = domain === 'en' ? [domain] : [domain, 'en']
+    let page: WikipediaPage | null = null
+    let articleDomain = domain
     try {
-      page = await this.fetchPage(domain, query)
+      for (const d of domains) {
+        const hit = await this.fetchPage(d, query)
+        if (hit && titleMentionsModel(hit.title, model)) {
+          page = hit
+          articleDomain = d
+          break
+        }
+      }
     } catch (err) {
       throw new BadGatewayException(`Wikipedia request failed: ${(err as Error).message}`)
     }
 
-    if (page && !titleMentionsModel(page.title, model)) page = null
-
     // The photo is decoration: whatever happens resolving it, the article text is still returned.
     const resolved = page ? await this.resolveImage(brand, model, query, year, source) : { image: null, settled: true }
 
+    const text = page ? shapeWikiExtract(page.extract ?? '') : null
     const result = page
       ? {
           query,
           found: true,
           title: page.title,
-          extract: page.extract?.trim() || null,
-          pageUrl: `https://${domain}.wikipedia.org/wiki/${encodeURIComponent(page.title.replace(/ /g, '_'))}`,
+          extract: text?.intro || null,
+          description: page.description?.trim() || null,
+          more: text?.more ?? null,
+          articleLang: articleDomain,
+          pageUrl: `https://${articleDomain}.wikipedia.org/wiki/${encodeURIComponent(page.title.replace(/ /g, '_'))}`,
           image: resolved.image
         }
       : { query, found: false, title: null, extract: null, pageUrl: null, image: null }
@@ -130,9 +141,7 @@ export class WikiService {
   }
 
   private async fetchPage(domain: string, query: string): Promise<WikipediaPage | null> {
-    const payload = await this.fetchJson<WikipediaSearch>(
-      wikipediaSearchUrl(domain, query, { extractChars: EXTRACT_CHARS })
-    )
+    const payload = await this.fetchJson<WikipediaSearch>(wikipediaSearchUrl(domain, query, { extract: true }))
     const pages = payload.query?.pages
     return pages ? (Object.values(pages)[0] ?? null) : null
   }

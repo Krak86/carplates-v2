@@ -6,9 +6,32 @@ import {
   fetchWikimediaJson,
   nextRetryAt,
   retryDelayMs,
+  shapeWikiExtract,
   wikiImageFromInfo,
   wikiImageKey
 } from './wikimedia.js'
+
+describe('shapeWikiExtract', () => {
+  const raw =
+    'Toyota Camry ([ˈkæmri]; яп. トヨタ・カムリ) — car.\nSecond intro paragraph.\n\n\n== History ==\n\nFirst gen text.\n\n\n== Empty ==\n\n\n=== Sub ===\n\nSub text.'
+
+  it('splits the intro from the sections and drops noisy parentheticals', () => {
+    const { intro, more } = shapeWikiExtract(raw)
+    expect(intro).toBe('Toyota Camry — car.\nSecond intro paragraph.')
+    expect(more).toBe('## History\n\nFirst gen text.\n\n## Sub\n\nSub text.')
+  })
+
+  it('returns no body for an intro-only article', () => {
+    expect(shapeWikiExtract('Just a stub.')).toEqual({ intro: 'Just a stub.', more: null })
+  })
+
+  it('caps the intro at a sentence boundary', () => {
+    const long = `${'A sentence here. '.repeat(200)}`
+    const { intro } = shapeWikiExtract(long)
+    expect(intro.length).toBeLessThanOrEqual(1800)
+    expect(intro.endsWith('.')).toBe(true)
+  })
+})
 
 const json = (body: unknown, status = 200, headers: Record<string, string> = {}): Response =>
   new Response(JSON.stringify(body), { status, headers })

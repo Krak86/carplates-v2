@@ -294,16 +294,20 @@ export function leadLanguages(brand: string): string[] {
 export function wikipediaSearchUrl(
   domain: string,
   query: string,
-  what: { extractChars?: number; leadImage?: boolean }
+  what: { extract?: boolean; leadImage?: boolean }
 ): URL {
-  const props = [what.extractChars ? 'extracts' : '', what.leadImage ? 'pageimages' : ''].filter(Boolean).join('|')
+  const props = [what.extract ? 'extracts|description' : '', what.leadImage ? 'pageimages' : '']
+    .filter(Boolean)
+    .join('|')
   return apiUrl(`https://${domain}.wikipedia.org/w/api.php`, {
     action: 'query',
     generator: 'search',
     gsrsearch: query,
     gsrlimit: '1',
     prop: props,
-    ...(what.extractChars ? { exintro: '1', explaintext: '1', exchars: String(what.extractChars) } : {}),
+    // No `exchars`: the API caps it at 1200 (silently clamping anything larger), so the whole article comes back and
+    // `shapeWikiExtract` trims it. No `exintro` either — the intro is split off from the sections afterwards.
+    ...(what.extract ? { explaintext: '1' } : {}),
     ...(what.leadImage ? { piprop: 'original|thumbnail', pithumbsize: String(THUMB_WIDTH) } : {})
   })
 }
@@ -374,11 +378,62 @@ export type CommonsTitleSearch = {
 export type WikipediaPage = {
   title: string
   extract?: string
+  description?: string
   original?: { source: string; width: number; height: number }
   thumbnail?: { source: string; width: number; height: number }
 }
 
 export type WikipediaSearch = { query?: { pages?: Record<string, WikipediaPage> } }
+
+const INTRO_MAX_CHARS = 1800
+const MORE_MAX_CHARS = 6000
+// A parenthetical full of IPA brackets, CJK/Hangul script or a "(listen)" cue — noise in the first sentence.
+const NOISY_PARENTHETICAL = /\s*\((?=[^()]*(?:\[[^\]]*\]|[぀-ヿ㐀-鿿가-힯]|listen))[^()]*\)/giu
+const SECTION_HEADING = /\n+={2,}[^=\n]+={2,}[ \t]*\n/u
+const HEADING_LINE = /^={2,}\s*(.+?)\s*={2,}$/u
+
+/** Cuts at the last paragraph (else sentence, else word) boundary at or before `max`. */
+function cutAtBoundary(text: string, max: number): string {
+  if (text.length <= max) return text
+  const head = text.slice(0, max)
+  const para = head.lastIndexOf('\n')
+  if (para > max * 0.5) return head.slice(0, para)
+  const sentence = Math.max(head.lastIndexOf('. '), head.lastIndexOf('! '), head.lastIndexOf('? '))
+  if (sentence > max * 0.5) return head.slice(0, sentence + 1)
+  return `${head.slice(0, head.lastIndexOf(' '))}…`
+}
+
+/**
+ * Plain-text article → the intro (before the first `== section ==`) and an optional "read more" body (the
+ * following sections, headings flattened to their own line). Pronunciation / native-script parentheticals are dropped
+ * and empty sections left by stripped tables or lists are collapsed.
+ */
+export function shapeWikiExtract(raw: string): { intro: string; more: string | null } {
+  const text = raw
+    .replace(NOISY_PARENTHETICAL, '')
+    .replace(/\(\s*\)/gu, '')
+    .replace(/[ \t]{2,}/gu, ' ')
+    .trim()
+  const match = SECTION_HEADING.exec(text)
+  const intro = cutAtBoundary(match ? text.slice(0, match.index) : text, INTRO_MAX_CHARS).trim()
+  if (!match) return { intro, more: null }
+
+  const blocks = text
+    .slice(match.index)
+    .split(/\n{2,}/u)
+    .map(block => block.trim())
+    .filter(Boolean)
+  // Keep a heading only when real text follows it (before the next heading).
+  const kept: string[] = []
+  blocks.forEach((block, i) => {
+    const heading = HEADING_LINE.exec(block)
+    if (!heading) return void kept.push(block)
+    const next = blocks[i + 1]
+    if (next && !HEADING_LINE.test(next)) kept.push(`## ${heading[1]}`)
+  })
+  const more = cutAtBoundary(kept.join('\n\n'), MORE_MAX_CHARS).trim()
+  return { intro, more: more || null }
+}
 
 export const stripHtml = (value: string | undefined): string | null => value?.replace(/<[^>]+>/g, '').trim() || null
 

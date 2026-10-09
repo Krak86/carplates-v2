@@ -534,7 +534,8 @@ function buildWikiSection(input: ExportInput, t: Translate): ExportKeyValueSecti
   const wiki = input.wiki
   if (!wiki?.found) return null
   const rows: Row[] = []
-  pushRow(rows, t('export.wikiTitle'), wiki.title)
+  pushRow(rows, t('export.wikiTitle'), [wiki.title, wiki.description].filter(Boolean).join(' — '))
+  // Intro only: the "Read more" body is long and overlaps the other sections.
   pushRow(rows, t('export.wikiSummary'), wiki.extract)
   pushRow(rows, t('export.wikiPage'), wiki.pageUrl)
   if (rows.length === 0) return null
