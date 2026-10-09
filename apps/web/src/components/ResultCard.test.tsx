@@ -67,7 +67,7 @@ describe('ResultCard', () => {
     expect(screen.getByText(/TOYOTA CAMRY/)).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'ВЕ7116АА' })).toHaveAttribute('href', '/ВЕ7116АА')
     // Also named in the plate explainer's default (region) description.
-    expect(screen.getAllByText(/Миколаївська область/).length).toBeGreaterThan(0)
+    expect(screen.getAllByText(/Mykolaiv Oblast/).length).toBeGreaterThan(0)
 
     // Fields that used to live behind "show more" are now visible right away.
     expect(screen.getByText('ЛЕГКОВИЙ')).toBeInTheDocument()

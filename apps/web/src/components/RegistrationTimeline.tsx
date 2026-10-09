@@ -40,14 +40,14 @@ type Props = {
  * (each step is newer than the one below it).
  */
 export default function RegistrationTimeline({ actions, currentPlate, currentVehicle }: Props): ReactNode {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
 
   return (
     <ol className="m-0 list-none p-0">
       {actions.map((action, index) => {
         const isLast = index === actions.length - 1
         // Foreign/transit prefixes and plateless (2026+) rows have no oblast match — say so rather than going blank.
-        const region = plateRegionLabel(action.plate, t)
+        const region = plateRegionLabel(action.plate, t, i18n.language)
         const isDifferentVehicle =
           !!currentVehicle && (action.brand !== currentVehicle.brand || action.model !== currentVehicle.model)
         const category = operCategory(action.operCode)

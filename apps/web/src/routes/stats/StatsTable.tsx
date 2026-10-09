@@ -15,6 +15,7 @@ import { useTranslation } from 'react-i18next'
 import ColorSwatch from '@/components/ColorSwatch'
 import { cn } from '@/lib/cn'
 import { toIntlLocale } from '@/lib/intl'
+import { localizeRegion } from '@/lib/region-label'
 import { scrollElementIntoView } from '@/lib/share-section'
 import type { StatsRow } from '@/routes/stats/types'
 
@@ -67,7 +68,7 @@ export default function StatsTable({
             {c.getValue()}
           </span>
         ) : (
-          c.getValue()
+          localizeRegion(c.getValue(), i18n.language)
         )
     }),
     ...(showYearColumn

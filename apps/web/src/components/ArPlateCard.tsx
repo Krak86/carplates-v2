@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 
 import { plateQuery } from '@/lib/queries'
+import { useRegionLabel } from '@/lib/region-label'
 import { formatVehicleLabel } from '@/lib/vehicle-label'
 
 type Props = {
@@ -16,6 +17,7 @@ type Props = {
 
 export default function ArPlateCard({ plate, auto, onNavigate }: Props): ReactNode {
   const { t } = useTranslation()
+  const regionLabel = useRegionLabel()
   const [shown, setShown] = useState(false)
   const expanded = auto || shown
   const { data, isPending, isError } = useQuery({ ...plateQuery(plate), enabled: expanded, retry: false })
@@ -45,7 +47,7 @@ export default function ArPlateCard({ plate, auto, onNavigate }: Props): ReactNo
               <p className="font-medium">
                 {formatVehicleLabel({ brand: car.brand, model: car.model, year: car.makeYear, color: car.color })}
               </p>
-              <p className="text-muted">{[car.fuel, car.body, data.region].filter(Boolean).join(' · ')}</p>
+              <p className="text-muted">{[car.fuel, car.body, regionLabel(data.region)].filter(Boolean).join(' · ')}</p>
             </>
           )}
           <Link

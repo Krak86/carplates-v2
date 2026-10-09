@@ -8,6 +8,7 @@ import ColorSwatch from '@/components/ColorSwatch'
 import Card from '@/components/ui/Card'
 import { cn } from '@/lib/cn'
 import { toIntlLocale } from '@/lib/intl'
+import { useRegionLabel } from '@/lib/region-label'
 import { scrollElementIntoView } from '@/lib/share-section'
 import { MAX_TOP_N, topBrands, topColors, topModels, topRegions } from '@/routes/stats/helpers'
 
@@ -121,6 +122,7 @@ function Leaderboard({
  * that places in one.
  */
 export default function TopStatsPanel({ stats, highlightModel }: Props): ReactNode {
+  const regionLabel = useRegionLabel()
   const brandEntries: LeaderboardEntry[] = topBrands(stats).map(brand => {
     const row = stats.byBrand.find(r => r.value === brand)
     return { key: brand, brand, label: brand, count: row?.distinctPlates ?? 0 }
@@ -141,7 +143,7 @@ export default function TopStatsPanel({ stats, highlightModel }: Props): ReactNo
 
   const regionEntries: LeaderboardEntry[] = topRegions(stats).map(region => {
     const row = stats.byRegion.find(r => r.region === region)
-    return { key: region, label: region, count: row?.distinctPlates ?? 0 }
+    return { key: region, label: regionLabel(region), count: row?.distinctPlates ?? 0 }
   })
 
   return (

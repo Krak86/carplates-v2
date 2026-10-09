@@ -259,8 +259,8 @@ function buildVinDecodeSection(input: ExportInput, t: Translate): ExportKeyValue
   }
 }
 
-function historyRow(action: Registration, t: Translate): string[] {
-  const region = plateRegionLabel(action.plate, t)
+function historyRow(action: Registration, t: Translate, lang: string): string[] {
+  const region = plateRegionLabel(action.plate, t, lang)
   return [
     action.dReg ?? '—',
     action.plate ?? '—',
@@ -288,10 +288,11 @@ function buildHistorySection(
   id: string,
   title: string,
   actions: Registration[] | null,
-  t: Translate
+  t: Translate,
+  lang: string
 ): ExportTableSection | null {
   if (!actions || actions.length === 0) return null
-  return { type: 'table', id, title, columns: historyColumns(t), rows: actions.map(a => historyRow(a, t)) }
+  return { type: 'table', id, title, columns: historyColumns(t), rows: actions.map(a => historyRow(a, t, lang)) }
 }
 
 function buildEmissionsSection(input: ExportInput, t: Translate): ExportKeyValueSection | null {
@@ -889,8 +890,8 @@ export function buildExportReport(input: ExportInput, t: Translate): ExportRepor
     buildRankingsSection(input, t),
     buildEmissionsSection(input, t),
     buildVinDecodeSection(input, t),
-    buildHistorySection('historyPlate', t('result.historyTitle'), input.plateHistoryActions, t),
-    buildHistorySection('historyVin', t('result.historyTitleVin'), input.vinHistoryActions, t),
+    buildHistorySection('historyPlate', t('result.historyTitle'), input.plateHistoryActions, t, input.lang),
+    buildHistorySection('historyVin', t('result.historyTitleVin'), input.vinHistoryActions, t, input.lang),
     hasAnyRatings ? buildSafetyCoverageSection(t) : null,
     euroncapTable(input.euroncap, t),
     nhtsaTable(input.nhtsa, input.vehicle.body, t),

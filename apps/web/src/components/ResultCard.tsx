@@ -50,6 +50,7 @@ import VinToggleSection from '@/components/vin/VinToggleSection'
 import { useCardMotion } from '@/hooks/useCardMotion'
 import { cn } from '@/lib/cn'
 import { koatuuRegion } from '@/lib/koatuu'
+import { useRegionLabel } from '@/lib/region-label'
 import { depMapsUrl } from '@/lib/maps'
 import { plateHistoryQuery, vinQuery } from '@/lib/queries'
 import { scrollElementIntoView } from '@/lib/share-section'
@@ -98,6 +99,7 @@ function Row({ label, value, info }: { label: string; value: ReactNode; info?: s
 
 export default function ResultCard({ data }: Props): ReactNode {
   const { t, i18n } = useTranslation()
+  const regionLabel = useRegionLabel()
   const [searchParams] = useSearchParams()
   const isSharedHistory = searchParams.get('section') === 'history'
   const [showMore, setShowMore] = useState(() => isSharedHistory)
@@ -194,7 +196,7 @@ export default function ResultCard({ data }: Props): ReactNode {
               <CopyAllInfoButton
                 vehicle={{ brand: c.brand, model: c.model, year: c.makeYear, body: c.body }}
                 plate={data.plate}
-                region={data.region}
+                region={regionLabel(data.region)}
                 current={c}
                 vin={c.vin}
                 vinDecodeResults={null}
@@ -219,11 +221,11 @@ export default function ResultCard({ data }: Props): ReactNode {
                 className="mx-1.5 align-middle"
               />
               {data.region && (
-                <span className="rounded bg-[var(--color-surface)]/20 px-1.5 py-0.5">, {data.region}</span>
+                <span className="rounded bg-[var(--color-surface)]/20 px-1.5 py-0.5">{regionLabel(data.region)}</span>
               )}
               {!data.region && (
                 <span className="rounded bg-[var(--color-surface)]/20 px-1.5 py-0.5">
-                  , <NoRegionBadge plate={data.plate} />
+                  <NoRegionBadge plate={data.plate} />
                 </span>
               )}
               {c.plateInferred && (

@@ -11,8 +11,8 @@ type Props = {
 
 /** For a plate without a region: why it has none ("Diia series (no region)" etc.), with a ❓ explaining it. */
 export default function NoRegionBadge({ plate }: Props): ReactNode {
-  const { t } = useTranslation()
-  const label = plateRegionLabel(plate, t)
+  const { t, i18n } = useTranslation()
+  const label = plateRegionLabel(plate, t, i18n.language)
 
   return (
     <span className="inline-flex items-center gap-1.5">

@@ -5,6 +5,7 @@ import { normalizePlate, plateSeries } from '@carplates/shared'
 import { splitPlate } from '@/components/PlateSegments.helpers'
 import type { PlateSegmentId } from '@/components/PlateSegments.helpers'
 import SegmentExplainer from '@/components/SegmentExplainer'
+import { useRegionLabel } from '@/lib/region-label'
 import type { SegmentColor } from '@/components/SegmentExplainer'
 
 type Props = {
@@ -25,11 +26,12 @@ const SEGMENT_COLOR: Readonly<Record<PlateSegmentId, SegmentColor>> = {
  */
 export default function PlateSegments({ plate, region }: Props): ReactNode {
   const { t } = useTranslation()
+  const regionLabel = useRegionLabel()
   const segments = splitPlate(plate)
   if (!segments) return null
 
   const params = {
-    region: region ?? '—',
+    region: regionLabel(region) ?? '—',
     service: t(`plate.seg.service.${plateSeries(normalizePlate(plate)) ?? 'diia'}`)
   }
 

@@ -7,6 +7,7 @@ import { ComposableMap, Geographies, Geography } from 'react-simple-maps'
 
 import { toIntlLocale } from '@/lib/intl'
 import { ukraineGeographyQuery } from '@/lib/queries'
+import { localizeRegion } from '@/lib/region-label'
 import type { UkraineRegionProperties } from '@/lib/api'
 import { choroplethColor } from '@/routes/stats/helpers'
 import { REGION_NAME_BY_SHAPE_ISO } from '@/routes/stats/region-geography'
@@ -63,7 +64,7 @@ export default function StatsMap({ rows, metric }: Props): ReactNode {
               geographies.map(geo => {
                 const properties = geo.properties as UkraineRegionProperties
                 const name = REGION_NAME_BY_SHAPE_ISO[properties.shapeISO]
-                const regionName = name ?? properties.shapeISO
+                const regionName = localizeRegion(name, i18n.language) ?? properties.shapeISO
                 const value = name ? valueByRegion.get(name) : undefined
                 const isHovered = hover?.name === regionName
                 const fill =

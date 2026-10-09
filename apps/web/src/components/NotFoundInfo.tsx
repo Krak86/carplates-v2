@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { isUaPlate, normalizePlate, regionName } from '@carplates/shared'
 
 import NoRegionBadge from '@/components/NoRegionBadge'
+import { useRegionLabel } from '@/lib/region-label'
 
 type Props = {
   value: string
@@ -11,6 +12,7 @@ type Props = {
 /** What we can still say about a plate with no registry match: its normalized form, region, and why it may be missing. */
 export default function NotFoundInfo({ value }: Props): ReactNode {
   const { t } = useTranslation()
+  const regionLabel = useRegionLabel()
   const plate = normalizePlate(value)
   const isPlate = isUaPlate(value)
 
@@ -24,7 +26,7 @@ export default function NotFoundInfo({ value }: Props): ReactNode {
           <dd className="font-mono font-semibold">{plate}</dd>
 
           <dt className="text-[var(--color-muted)]">{t('result.region')}</dt>
-          <dd>{regionName(plate) ?? <NoRegionBadge plate={plate} />}</dd>
+          <dd>{regionLabel(regionName(plate)) ?? <NoRegionBadge plate={plate} />}</dd>
         </dl>
       )}
 

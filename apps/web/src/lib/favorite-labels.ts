@@ -1,4 +1,5 @@
 import {
+  normalizePlate,
   FAVORITE_LABEL_COLOR_COUNT,
   FAVORITE_LABEL_LIMIT,
   type FavoriteLabel,
@@ -43,3 +44,26 @@ export const labelsOf = (labels: readonly FavoriteLabel[], tags: readonly string
 export const labelColorVar = (color: number): string => `var(--label-${color})`
 
 export const newLabelId = (): string => crypto.randomUUID()
+
+type Searchable = { value: string; label: string | null; tags?: readonly string[] }
+
+/**
+ * Favorites matching the search text (plate/VIN or vehicle label, case-insensitive; a plate typed in Latin matches via
+ * `normalizePlate`) AND carrying at least one of the selected label ids. An empty query / selection filters nothing.
+ */
+export function filterFavorites<T extends Searchable>(
+  entries: readonly T[],
+  query: string,
+  labelIds: readonly string[]
+): T[] {
+  const text = query.trim().toLowerCase()
+  const plate = normalizePlate(query).toLowerCase()
+  return entries.filter(entry => {
+    if (labelIds.length > 0 && !labelIds.some(id => entry.tags?.includes(id))) return false
+    if (!text) return true
+    const value = entry.value.toLowerCase()
+    return (
+      value.includes(text) || (plate.length > 0 && value.includes(plate)) || !!entry.label?.toLowerCase().includes(text)
+    )
+  })
+}

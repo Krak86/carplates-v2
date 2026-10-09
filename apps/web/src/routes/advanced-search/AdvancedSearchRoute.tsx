@@ -19,6 +19,7 @@ import Card from '@/components/ui/Card'
 import Spinner from '@/components/ui/Spinner'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 import { cn } from '@/lib/cn'
+import { useRegionLabel } from '@/lib/region-label'
 import { formatVehicleLabel } from '@/lib/vehicle-label'
 import { useAdvancedSearchActions } from '@/routes/advanced-search/use-advanced-search-actions'
 
@@ -28,7 +29,8 @@ const invalidInputClass = 'border-red-500!'
 function ResultRow({ row }: { row: SearchResultRow }): ReactNode {
   const { t } = useTranslation()
   const label = formatVehicleLabel({ brand: row.brand, model: row.model, year: row.makeYear, color: null })
-  const region = regionName(row.plate)
+  const regionLabel = useRegionLabel()
+  const region = regionLabel(regionName(row.plate))
   const iconsTitle = [row.color && `${t('field.color')}: ${row.color}`, row.fuel && `${t('field.fuel')}: ${row.fuel}`]
     .filter(Boolean)
     .join('\n')
@@ -57,6 +59,7 @@ function ResultRow({ row }: { row: SearchResultRow }): ReactNode {
 // Lazy-loaded (see App.tsx).
 export default function AdvancedSearchRoute(): ReactNode {
   const { t } = useTranslation()
+  const regionLabel = useRegionLabel()
   const online = useOnlineStatus()
   const {
     filters,
@@ -263,7 +266,7 @@ export default function AdvancedSearchRoute(): ReactNode {
                 <option value="">{t('advancedSearch.anyRegion')}</option>
                 {REGION_NAMES.map(r => (
                   <option key={r} value={r}>
-                    {r}
+                    {regionLabel(r)}
                   </option>
                 ))}
               </select>
