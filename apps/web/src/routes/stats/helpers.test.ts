@@ -254,7 +254,11 @@ describe('rankingBadges', () => {
       { brand: 'VOLVO', model: 'XC60', n: 4000, avgScore: 95, sources: 3 },
       { brand: 'TOYOTA', model: 'PRIUS', n: 5000, avgScore: 90, sources: 2 }
     ],
-    leastSafeModels: []
+    leastSafeModels: [],
+    weightBoards: {
+      passenger: { heaviest: [{ brand: 'LADA', model: '2105', n: 3000, weightKg: 2500 }], lightest: [] },
+      truck: { heaviest: [{ brand: 'КАМАЗ', model: '55111', n: 900, weightKg: 9250 }], lightest: [] }
+    }
   }
 
   it('adds fuel and crash-test chips for a model that places on those boards, with links to their pages', () => {
@@ -265,7 +269,18 @@ describe('rankingBadges', () => {
     ])
   })
 
+  it('adds a weight chip linking to /stats, ranked within the vehicle group', () => {
+    const lada = { brand: 'LADA', model: '2105', color: null, region: null, kind: 'ЛЕГКОВИЙ' }
+    expect(rankingBadges(top, lada).map(b => [b.key, b.to])).toEqual([['heaviest', '/stats']])
+  })
+
+  it('ranks a truck on the truck board only', () => {
+    const kamaz = { brand: 'КАМАЗ', model: '55111', color: null, region: null }
+    expect(rankingBadges(top, { ...kamaz, kind: 'ВАНТАЖНИЙ' }).map(b => b.key)).toEqual(['heaviest'])
+    expect(rankingBadges(top, { ...kamaz, kind: 'ЛЕГКОВИЙ' })).toEqual([])
+  })
+
   it('returns nothing for a model on no board', () => {
-    expect(rankingBadges(top, { brand: 'LADA', model: '2105', color: null, region: null })).toEqual([])
+    expect(rankingBadges(top, { brand: 'LADA', model: '2107', color: null, region: null })).toEqual([])
   })
 })

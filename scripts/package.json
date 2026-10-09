@@ -69,6 +69,7 @@
     "export:vehiclesdb:csv": "tsx src/vehiclesdb.ts --export-csv seed-data/vehiclesdb.csv.gz",
     "refresh-safety-stats": "tsx src/safety-stats.ts",
     "refresh-vdb-stats": "tsx src/vdb-stats.ts",
+    "refresh-weight-stats": "tsx src/weight-stats.ts",
     "refresh-derived": "tsx src/refresh-derived.ts",
     "build:kind-images": "tsx src/build-kind-images.ts",
     "build:logo-images": "tsx src/build-logo-images.ts",

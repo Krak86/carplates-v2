@@ -11,6 +11,8 @@ type Props = {
   model: string | null
   color: string | null
   region: string | null
+  /** Raw registry kind — weight ranks are within the vehicle's own group. */
+  kind: string | null
 }
 
 /**
@@ -21,12 +23,12 @@ type Props = {
  * resolves and nothing at all if the car doesn't place in any leaderboard.
  * Each chip deep-links to the exact place on the stats / fuel / safety page that shows it.
  */
-export default function TopStatBadges({ brand, model, color, region }: Props): ReactNode {
+export default function TopStatBadges({ brand, model, color, region, kind }: Props): ReactNode {
   const { t } = useTranslation()
   const stats = useQuery(statsTopQuery())
   if (!stats.data) return null
 
-  const badges = rankingBadges(stats.data, { brand, model, color, region })
+  const badges = rankingBadges(stats.data, { brand, model, color, region, kind })
   if (badges.length === 0) return null
 
   return (

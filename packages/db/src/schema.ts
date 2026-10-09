@@ -861,6 +861,26 @@ export const statsFuel = registry.table(
 export type StatsFuelInsert = typeof statsFuel.$inferInsert
 
 /**
+ * Per vehicle group and model: Ukrainian vehicle count with the model's lightest / heaviest unladen mass (kg) — RDW year-medians
+ * for matched passenger cars, registry 1st / 99th percentiles otherwise (`source`). Backs the /stats heaviest / lightest
+ * boards. Rebuilt by `scripts/src/weight-stats.ts`; see migrations 0051-0053.
+ */
+export const statsWeight = registry.table(
+  'stats_weight',
+  {
+    kindGroup: text('kind_group').notNull(),
+    source: text('source').notNull(),
+    brand: text('brand').notNull(),
+    model: text('model').notNull(),
+    n: integer('n').notNull(),
+    minKg: real('min_kg').notNull(),
+    maxKg: real('max_kg').notNull()
+  },
+  t => [primaryKey({ columns: [t.kindGroup, t.brand, t.model] })]
+)
+export type StatsWeightInsert = typeof statsWeight.$inferInsert
+
+/**
  * Registry vehicles per vehicle class and matched VehiclesDB model (vdb_id null = that class's unmatched bucket) — backs
  * the /stats markets panel. Rebuilt by `scripts/src/vdb-stats.ts`; see migrations 0040 and 0046.
  */

@@ -9,12 +9,14 @@ type Props = {
   variant?: 'inline' | 'watermark'
   /** `inline` only — `sm` fits a fixed-width slot (leaderboard rows) so mixed logo aspect ratios don't misalign the text next to them. */
   size?: 'default' | 'sm'
+  /** `inline` + `sm` only — keep the logo's slot as a dummy rectangle when there is no logo, so rows stay aligned. */
+  placeholder?: boolean
   className?: string
 }
 
 /**
- * Renders nothing when the brand has no bundled logo (unknown/unmatched) or the image fails
- * to load — a broken-image icon would be worse than no logo at all.
+ * Renders nothing (or, with `placeholder`, a dummy rectangle) when the brand has no bundled logo (unknown/unmatched)
+ * or the image fails to load — a broken-image icon would be worse than no logo at all.
  *
  * `mix-blend-mode: multiply` drops the source PNGs' flat white background against this
  * app's light card surface without needing pre-processed transparent assets.
@@ -30,11 +32,21 @@ type Props = {
  * `relative isolate overflow-hidden` so the negative z-index keeps it under in-flow
  * content and the card's rounded corners/bottom edge clip whatever overflows.
  */
-export default function BrandLogo({ brand, variant = 'inline', size = 'default', className }: Props): ReactNode {
+export default function BrandLogo({
+  brand,
+  variant = 'inline',
+  size = 'default',
+  placeholder,
+  className
+}: Props): ReactNode {
   const [failed, setFailed] = useState(false)
   const src = brandLogoUrl(brand)
 
-  if (!src || failed) return null
+  if (!src || failed) {
+    return placeholder && variant === 'inline' && size === 'sm' ? (
+      <span aria-hidden className="inline-block h-4 w-5 shrink-0 rounded-sm bg-border/60" />
+    ) : null
+  }
 
   if (variant === 'watermark') {
     return (

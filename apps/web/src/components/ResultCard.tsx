@@ -235,7 +235,7 @@ export default function ResultCard({ data }: Props): ReactNode {
             {/* Reserves one chip-height up front so late-arriving chips never push the card down. */}
             <div className="mt-1 flex min-h-6 flex-wrap items-center gap-1.5">
               {chipsPending && <span aria-hidden className="h-6 w-24 animate-pulse rounded-full bg-border" />}
-              <TopStatBadges brand={c.brand} model={c.model} color={c.color} region={data.region} />
+              <TopStatBadges brand={c.brand} model={c.model} color={c.color} region={data.region} kind={c.kind} />
               <VdbChips brand={c.brand} model={c.model} kind={c.kind} />
               <Model3dButton brand={c.brand} model={c.model} />
               <Model360Button brand={c.brand} model={c.model} />

@@ -1,4 +1,4 @@
-import type { StatsByModelRow, StatsResponse, StatsTopResponse } from '@carplates/shared'
+import { weightGroupOfKind, type StatsByModelRow, type StatsResponse, type StatsTopResponse } from '@carplates/shared'
 
 import { isKnownFuel } from '@/components/ResultCard.helpers'
 
@@ -203,9 +203,12 @@ function statsLink(params: Record<string, string>): string {
  */
 export function rankingBadges(
   stats: StatsTopResponse,
-  car: { brand: string | null; model: string | null; color: string | null; region: string | null }
+  car: { brand: string | null; model: string | null; color: string | null; region: string | null; kind?: string | null }
 ): RankingBadge[] {
   const { brand, model, color, region } = car
+  // Weight ranks are within the vehicle's own group (a КАМАЗ among trucks, not against a Fiat 500).
+  const group = weightGroupOfKind(car.kind)
+  const weightBoard = group ? stats.weightBoards[group] : undefined
   return [
     {
       key: 'brand',
@@ -264,6 +267,20 @@ export function rankingBadges(
       rank: rankOfModel(stats.leastSafeModels, brand, model),
       textKey: 'result.topLeastSafe',
       to: '/safety'
+    },
+    {
+      key: 'heaviest',
+      icon: '🏋️',
+      rank: rankOfModel(weightBoard?.heaviest ?? [], brand, model),
+      textKey: 'result.topHeaviest',
+      to: '/stats'
+    },
+    {
+      key: 'lightest',
+      icon: '🪶',
+      rank: rankOfModel(weightBoard?.lightest ?? [], brand, model),
+      textKey: 'result.topLightest',
+      to: '/stats'
     }
   ].filter((b): b is RankingBadge => b.rank !== null)
 }

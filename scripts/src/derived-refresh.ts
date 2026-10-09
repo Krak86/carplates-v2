@@ -8,7 +8,12 @@ const SCRIPTS_DIR = join(import.meta.dirname, '..')
  * the /fuel, /safety and /stats "Markets" pages. They go stale on every registry ingest, so ingests rebuild them.
  * A new rollup of this kind belongs in this list.
  */
-export const DERIVED_REFRESH_SCRIPTS = ['src/fuel-stats.ts', 'src/safety-stats.ts', 'src/vdb-stats.ts'] as const
+export const DERIVED_REFRESH_SCRIPTS = [
+  'src/fuel-stats.ts',
+  'src/safety-stats.ts',
+  'src/vdb-stats.ts',
+  'src/weight-stats.ts'
+] as const
 
 /** Runs each derived-stats script in turn (own process each — they are CLIs); throws on the first failure. */
 export function refreshDerived(): void {

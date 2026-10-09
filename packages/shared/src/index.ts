@@ -35,6 +35,13 @@ export {
   type BodySuggestion,
   type BodySuggestionsResponse
 } from './vehicleBody.js'
+export {
+  WEIGHT_GROUPS,
+  DEFAULT_WEIGHT_GROUP,
+  weightGroupOfKind,
+  type WeightGroup,
+  type WeightKindGroup
+} from './weightGroups.js'
 export { VEHICLE_KINDS, resolveVehicleKind, sourceValueForKind, type VehicleKind } from './vehicleKind.js'
 export {
   VEHICLE_COLORS,
@@ -287,6 +294,8 @@ export {
   fuelEconomyResponseSchema,
   fuelStatsRowSchema,
   fuelStatsModelSchema,
+  weightStatsModelSchema,
+  weightBoardSchema,
   fuelStatsResponseSchema,
   safetyStatsRowSchema,
   safetyStatsModelSchema,
@@ -351,6 +360,8 @@ export {
   type FuelEconomyResponse,
   type FuelStatsRow,
   type FuelStatsModel,
+  type WeightStatsModel,
+  type WeightBoard,
   type FuelStatsResponse,
   type SafetyStatsRow,
   type SafetyStatsModel,

@@ -226,7 +226,8 @@ function buildRankingsSection(input: ExportInput, t: Translate): ExportTextSecti
     brand: input.vehicle.brand,
     model: input.vehicle.model,
     color: input.current?.color ?? null,
-    region: input.region
+    region: input.region,
+    kind: input.current?.kind ?? null
   })
 
   if (badges.length === 0) return null

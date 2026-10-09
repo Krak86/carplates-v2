@@ -824,6 +824,24 @@ export const safetyStatsResponseSchema = z.object({
 })
 export type SafetyStatsResponse = z.infer<typeof safetyStatsResponseSchema>
 
+/** A model on the heaviest / lightest boards: its edge unladen mass (kg) and `n` registered Ukrainian vehicles of it. */
+export const weightStatsModelSchema = z.object({
+  brand: z.string(),
+  model: z.string(),
+  n: z.number().int(),
+  weightKg: z.number(),
+  /** The model's vehicle group (a `WEIGHT_GROUPS` member, never "all"); absent in answers cached before it existed. */
+  group: z.string().nullable().optional()
+})
+export type WeightStatsModel = z.infer<typeof weightStatsModelSchema>
+
+/** One tab of the weight panel: the ten heaviest and ten lightest models of a vehicle group. */
+export const weightBoardSchema = z.object({
+  heaviest: z.array(weightStatsModelSchema),
+  lightest: z.array(weightStatsModelSchema)
+})
+export type WeightBoard = z.infer<typeof weightBoardSchema>
+
 /**
  * GET /api/stats/top — everything the ResultCard ranking chips need in one small payload: the four registry
  * leaderboards (top 10 each, ranked by distinctPlates) plus the fuel/CO2 and crash-test model leaderboards
@@ -840,7 +858,9 @@ export const statsTopResponseSchema = statsResponseSchema
     cleanestModels: z.array(fuelStatsModelSchema),
     dirtiestModels: z.array(fuelStatsModelSchema),
     safestModels: z.array(safetyStatsModelSchema),
-    leastSafeModels: z.array(safetyStatsModelSchema)
+    leastSafeModels: z.array(safetyStatsModelSchema),
+    // Per weight group (see `WEIGHT_GROUPS`); the default keeps a pre-weight cached answer (offline PWA cache) parsing.
+    weightBoards: z.record(z.string(), weightBoardSchema).default({})
   })
 export type StatsTopResponse = z.infer<typeof statsTopResponseSchema>
 

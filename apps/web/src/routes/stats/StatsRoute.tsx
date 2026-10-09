@@ -16,6 +16,7 @@ import StatsSkeleton from '@/routes/stats/StatsSkeleton'
 import StatsTable from '@/routes/stats/StatsTable'
 import TopStatsPanel from '@/routes/stats/TopStatsPanel'
 import VdbStatsPanel from '@/routes/stats/VdbStatsPanel'
+import WeightModelsPanel from '@/routes/stats/WeightModelsPanel'
 import {
   DEFAULT_STATS_DIMENSION,
   DEFAULT_STATS_METRIC,
@@ -146,6 +147,8 @@ export default function StatsRoute(): ReactNode {
           </div>
 
           <TopStatsPanel stats={stats.data} highlightModel={highlightModel} />
+
+          <WeightModelsPanel />
 
           <VdbStatsPanel />
 

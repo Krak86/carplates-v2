@@ -49,6 +49,8 @@ export {
   vdbModels,
   rdwSpecs,
   statsFuel,
+  statsWeight,
+  type StatsWeightInsert,
   statsVdb,
   statsSafety,
   type RegistrationRow,
