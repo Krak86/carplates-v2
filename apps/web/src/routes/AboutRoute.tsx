@@ -59,6 +59,14 @@ const SOURCES: readonly Source[] = [
   },
   { key: 'bluesky', label: 'Bluesky', url: 'https://bsky.app', icon: '/icons/sources/bluesky.webp' },
   {
+    key: 'stackexchange',
+    label: 'Stack Exchange',
+    url: 'https://mechanics.stackexchange.com',
+    icon: '/icons/sources/stackexchange.webp'
+  },
+  { key: 'lemmy', label: 'Lemmy', url: 'https://lemmy.world', icon: '/icons/sources/lemmy.webp' },
+  { key: 'nbu', label: 'NBU', url: 'https://bank.gov.ua', icon: '/icons/sources/nbu.webp' },
+  {
     key: 'yahooFinance',
     label: 'Yahoo Finance',
     url: 'https://finance.yahoo.com',
