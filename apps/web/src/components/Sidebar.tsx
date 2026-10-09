@@ -4,6 +4,7 @@ import { NavLink } from 'react-router'
 
 import { useSession } from '@/components/auth/use-session'
 import OfflineDataSettings from '@/components/OfflineDataSettings'
+import Spinner from '@/components/ui/Spinner'
 import { LANGS } from '@/i18n'
 import type { Lang } from '@/i18n'
 import { cn } from '@/lib/cn'
@@ -16,6 +17,7 @@ export default function Sidebar(): ReactNode {
   const { t } = useTranslation()
   const lang = useUiStore(s => s.lang)
   const setLang = useUiStore(s => s.setLang)
+  const langLoading = useUiStore(s => s.langLoading)
   const theme = useUiStore(s => s.theme)
   const toggleTheme = useUiStore(s => s.toggleTheme)
   const setDrawerOpen = useUiStore(s => s.setDrawerOpen)
@@ -91,11 +93,13 @@ export default function Sidebar(): ReactNode {
         <button
           key={l}
           type="button"
+          disabled={langLoading !== null}
+          aria-busy={langLoading === l}
           onClick={() => {
-            setLang(l)
-            handleClose()
+            void setLang(l).then(handleClose)
           }}
           className={cn(
+            'flex items-center justify-between gap-2 disabled:cursor-wait',
             'rounded-lg bg-[var(--color-surface)]/60 px-3 py-1.5 text-left text-sm transition-colors duration-200 hover:bg-[var(--color-surface)]',
             l === lang
               ? 'bg-[var(--color-surface)] font-medium text-[var(--color-primary)]'
@@ -103,6 +107,7 @@ export default function Sidebar(): ReactNode {
           )}
         >
           {LANG_LABEL[l]}
+          {langLoading === l && <Spinner />}
         </button>
       ))}
 

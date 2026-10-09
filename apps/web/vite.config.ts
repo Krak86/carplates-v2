@@ -17,6 +17,24 @@ const BRAND_COLOR = '#1d4ed8'
 const EXPORT_LIB =
   /[\\/]node_modules[\\/](jspdf|docx|html2canvas|canvg|dompurify|jszip|fflate|fast-png|iobuffer|pako|core-js|@babel[\\/]runtime|raf|rgbcolor|stackblur-canvas|svg-pathdata|performance-now)[\\/]/
 
+// Stable vendor chunks (a deploy that only touches app code keeps them cached) and pure-helper chunks per feature
+// area (many lazy sections share these — one cacheable file per area instead of one tiny file per pair of sections).
+// Only side-effect-free *.helpers / lib modules are grouped: grouping a component a lazy chunk shares with the entry
+// would drag the whole group into the first load.
+// Module ids are matched with forward slashes (normalised below), so one pattern covers Windows and POSIX paths.
+const VENDOR_GROUPS: Array<[string, RegExp]> = [
+  ['vendor-react', /\/node_modules\/(react|react-dom|scheduler|react-router)\//],
+  ['vendor-query', /\/node_modules\/@tanstack\//],
+  ['vendor-i18n', /\/node_modules\/(i18next|react-i18next)\//]
+]
+const HELPER_GROUPS: Array<[string, RegExp]> = [
+  ['helpers-ratings', /\/src\/components\/SafetyRatings\.(helpers|brands)\.ts$/],
+  ['helpers-specs', /\/src\/components\/(RdwSpecs\.helpers|CO2Badge\.helpers|VdbChips\.helpers)\.ts$/],
+  ['helpers-value', /\/src\/components\/EstimatedValue\.helpers\.ts$/],
+  ['helpers-media', /\/src\/components\/(VideoReviews|ReviewLinks|PressReviews)\.helpers\.ts$/]
+]
+const CODE_GROUPS = [...VENDOR_GROUPS, ...HELPER_GROUPS]
+
 // Persisted query data is only safe to restore while the response shapes it was saved under still hold.
 const schemasSource = readFileSync(fileURLToPath(new URL('../../packages/shared/src/schemas.ts', import.meta.url)))
 const OFFLINE_CACHE_BUSTER = createHash('sha1').update(schemasSource).digest('hex').slice(0, 12)
@@ -150,7 +168,9 @@ export default defineConfig({
             {
               name: (moduleId: string): string | null => {
                 const pkg = EXPORT_LIB.exec(moduleId)?.[1]
-                return pkg ? `export-${pkg.replace(/^@/, '').replace(/[\\/]/g, '-')}` : null
+                if (pkg) return `export-${pkg.replace(/^@/, '').replace(/[\\/]/g, '-')}`
+                const id = moduleId.replaceAll('\\', '/')
+                return CODE_GROUPS.find(([, re]) => re.test(id))?.[0] ?? null
               }
             }
           ]

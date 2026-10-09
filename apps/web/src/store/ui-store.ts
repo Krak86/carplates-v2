@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-import i18n, { initialLang, persistLang } from '@/i18n'
+import i18n, { initialLang, loadLang, persistLang } from '@/i18n'
 import type { Lang } from '@/i18n'
 
 type Theme = 'light' | 'dark'
@@ -55,30 +55,43 @@ applyTheme(startTheme)
 
 interface UiState {
   lang: Lang
+  /** The language being fetched after a switch (null when idle) — the UI shows a spinner and keeps the old one until it lands. */
+  langLoading: Lang | null
   theme: Theme
   drawerOpen: boolean
   cardTiltEnabled: boolean
-  setLang: (lang: Lang) => void
+  setLang: (lang: Lang) => Promise<void>
   toggleTheme: () => void
   setDrawerOpen: (open: boolean) => void
   toggleCardTilt: () => void
 }
 
-export const useUiStore = create<UiState>(set => ({
+export const useUiStore = create<UiState>((set, get) => ({
   lang: initialLang(),
+  langLoading: null,
   theme: startTheme,
   drawerOpen: false,
   cardTiltEnabled: initialCardTiltEnabled(),
-  setLang: (lang): void => {
+  setLang: async lang => {
+    set({ langLoading: lang })
+    try {
+      await loadLang(lang)
+    } catch {
+      // Offline and not cached: stay on the current language.
+      if (get().langLoading === lang) set({ langLoading: null })
+      return
+    }
+    // A newer pick superseded this one while it loaded.
+    if (get().langLoading !== lang) return
     persistLang(lang)
-    void i18n.changeLanguage(lang)
+    await i18n.changeLanguage(lang)
     // An explicit choice replaces a shared link's ?lang=, so a reload doesn't snap back to it.
     const url = new URL(window.location.href)
     if (url.searchParams.has('lang')) {
       url.searchParams.set('lang', lang)
       window.history.replaceState(window.history.state, '', url)
     }
-    set({ lang })
+    set({ lang, langLoading: null })
   },
   toggleTheme: (): void =>
     set(s => {

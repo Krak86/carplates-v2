@@ -902,6 +902,16 @@ Roughly a Hetzner CPX32 / DigitalOcean 4vCPU-8GB class box. A 2 vCPU / 4GB /
 monthly ingest — not an architectural commitment, resize later based on
 PostHog-observed load.
 
+- ✅ Load-performance pass done 2026-10-09 (lazy sections, per-language i18n, chunk groups — `docs/plan-done.md` "Load-performance pass").
+  **Remaining load-performance actions (value order; context in "Load-performance pass"):**
+  1. [ ] Measure for real — Lighthouse + DevTools trace on the VPS behind Caddy (Fast 4G, 4× CPU); LCP/CLS before vs after were never measured.
+  2. [ ] Preload the active language chunk (it is fetched only after the entry script runs: one extra round trip) — inline script in `index.html` + a build-time hook for the hashed filename.
+  3. [ ] Brotli at the proxy (Caddy `encode zstd br gzip`) — the API does not compress; local numbers overstate transfer.
+  4. [ ] Short-TTL edge cache for read-only `/api/*` lookups (stats, vdb, rdw, wiki) — see `docs/vps-http2-http3.md`.
+  5. [ ] Make `FuelEconomy` / `RdwSpecs` lazy for real: move the helpers they share with `CO2Badge` and the VIN code into the grouped helper chunks in `vite.config.ts`.
+  6. [ ] Hero/LCP: confirm the largest image is the hero and add a preload hint; check fonts.
+  7. [ ] Delay PostHog extras (recorder, surveys, dead-clicks, web-vitals scripts) until idle / first interaction (telemetry is off locally).
+- HTTP/2 + HTTP/3 + Brotli + caching setup: [docs/vps-http2-http3.md](docs/vps-http2-http3.md) (open UDP 443!)
 - Prod `docker-compose`: Caddy (auto-TLS + **coarse per-IP rate limit**, see
   below) · Redis (RIA + VIN cache, throttler store) · api · web · ingest-cron
 - GHCR image build + SSH deploy workflow (GitHub Actions, free for public repos)

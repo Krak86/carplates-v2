@@ -225,7 +225,13 @@ export const SPEC_ROWS: readonly SpecRowDef[] = [
     unitKey: 'rdw.unitEur',
     format: { step: 100, grouped: true }
   },
-  { group: 'price', key: 'bpm', pick: s => s.bpmEur ?? null, unitKey: 'rdw.unitEur', format: { step: 10, grouped: true } }
+  {
+    group: 'price',
+    key: 'bpm',
+    pick: s => s.bpmEur ?? null,
+    unitKey: 'rdw.unitEur',
+    format: { step: 10, grouped: true }
+  }
 ]
 
 /** One categorical measure of the Specs block: the shares of the vehicles per class, shown as small chips. */

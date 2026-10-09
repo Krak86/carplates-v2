@@ -34,7 +34,10 @@ export default function PaidFeatureSections({ hasPlate, hasVin }: Props): ReactN
   if (!user || !features.isSuccess) return null
 
   const active = features.data.features.filter(
-    f => f.enabled && AVAILABLE_PAID_FEATURES.includes(f.feature) && ((hasPlate && APPLIES_TO[f.feature].plate) || (hasVin && APPLIES_TO[f.feature].vin))
+    f =>
+      f.enabled &&
+      AVAILABLE_PAID_FEATURES.includes(f.feature) &&
+      ((hasPlate && APPLIES_TO[f.feature].plate) || (hasVin && APPLIES_TO[f.feature].vin))
   )
 
   return (

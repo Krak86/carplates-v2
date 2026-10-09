@@ -5,9 +5,11 @@ import { MemoryRouter } from 'react-router'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { PlateLookupResponse } from '@carplates/shared'
 
-import '@/i18n'
+import { i18nReady } from '@/i18n'
 import ResultCard from '@/components/ResultCard'
 import { decodeVin, plateHistory } from '@/lib/api'
+
+await i18nReady
 
 vi.mock('@/lib/api', async importOriginal => ({
   ...(await importOriginal<typeof import('@/lib/api')>()),

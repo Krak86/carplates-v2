@@ -2970,3 +2970,28 @@ CC0 Dutch-registry aggregates shown as a collapsible "Specs" block ("EU (NL) dat
 - **AVIF-first images** (`ba6a5b5`, `d8abc4e`): backgrounds via vite-imagetools avif q50 + webp q70 in `image-set(type())` with a `CSS.supports()`
   guard; kind placeholders as `<picture>`; `public/logos` PNGs downscaled (8.45 -> 5.0 MB, kept PNG for the OG renderer / report export);
   `build.target` pinned to Chrome/Edge 111, Firefox 128, Safari 16.4.
+
+### Load-performance pass ✅ BUILT (2026-10-09, uncommitted when written)
+
+Trigger: the dev server showed ~22 MB / 337 requests before the first result. That was Vite's unbundled dev serving (HTTP/1.1,
+`.tsx` sources), not production; the real first view was 446 kB gzipped JS+CSS (`pnpm preview:prod` + summing the
+`index.html` references). After this pass: **302 kB gzipped** + one ~60 kB language file.
+
+- **`LazySection`** (`components/LazySection.tsx`): result-card sections below the fold (specs, emissions, ratings, reviews, videos,
+  wiki, nearby, photos, news, social, stock) mount only within 600 px of the viewport (`IntersectionObserver`), behind a
+  collapsed-header-height placeholder, or at once when `?section=<id>` targets them (`sections` prop). Latched. Each section still
+  scrolls/opens itself on mount, so share links keep working (a short delay while the chunk loads). Not lazy: basic, VIN, history,
+  verification, value chip, paid sections (session-dependent).
+- **Idle UI:** photo/camera/AR/VIN-photo buttons moved to `SearchButtons` (loaded via `useIdleReady`, reserved row height); favorite
+  button and vehicle SVG icon lazy with reserved slots; `VinResult` lazy in `SearchRoute` (keeps VIN-only sections out of the entry graph);
+  hero image `fetchPriority="high"`.
+- **i18n per language:** `ua/ru/en.json` are separate chunks; non-ua also loads `ua` (the fallback — en lacks ~480 keys). `main.tsx`
+  awaits `i18nReady`; `setLang` is async with `langLoading` (sidebar spinner, buttons disabled meanwhile, last pick wins, offline failure
+  keeps the current language). Tests `await i18nReady`.
+- **Chunking** (`vite.config.ts`): `vendor-react|query|i18n` for cache stability, `helpers-ratings|specs|value|media` for pure helpers
+  shared by lazy chunks. Components are never grouped (would pull a group into the first load).
+- **Tooling/docs:** `pnpm preview:prod` (+ `apps/api/preview.env`) builds and serves the SPA from Nest; `docs/vps-http2-http3.md`
+  (Caddy/nginx/Cloudflare h2/h3, Brotli, UDP 443).
+- **Verified in Chrome** on the production build: no console errors; `?section=news` opens and scrolls to News. Not measured: Lighthouse,
+  LCP/CLS before vs after.
+- **Left:** the full prioritised list (measure for real, language preload, Brotli, edge cache, eager chunks, hero preload, PostHog delay) is tracked in PLAN.md Phase 4.

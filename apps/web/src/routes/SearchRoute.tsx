@@ -16,7 +16,6 @@ import SearchField from '@/components/SearchField'
 import Presence from '@/components/ui/Presence'
 import Spinner from '@/components/ui/Spinner'
 import { usePlateRecognition } from '@/components/use-plate-recognition'
-import VinResult from '@/components/VinResult'
 import { extractVehicleInfo } from '@/components/VinResult.helpers'
 import WikiHeroImage from '@/components/WikiHeroImage'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
@@ -41,6 +40,7 @@ import { capture } from '@/lib/telemetry'
 import { formatVehicleLabel } from '@/lib/vehicle-label'
 import HomeStatsSkeleton from '@/routes/stats/HomeStatsSkeleton'
 
+const VinResult = lazy(() => import('@/components/VinResult'))
 const TopStatsPanel = lazy(() => import('@/routes/stats/TopStatsPanel'))
 const FuelModelsPanel = lazy(() => import('@/routes/fuel/FuelModelsPanel'))
 const SafetyModelsPanel = lazy(() => import('@/routes/safety/SafetyModelsPanel'))
@@ -266,7 +266,11 @@ export default function SearchRoute(): ReactNode {
         </Presence>
 
         {!recognizeErrorKey && kind === 'plate' && plate.data && <ResultCard data={plate.data} />}
-        {!recognizeErrorKey && kind === 'vin' && vin.data && <VinResult data={vin.data} />}
+        {!recognizeErrorKey && kind === 'vin' && vin.data && (
+          <Suspense fallback={null}>
+            <VinResult data={vin.data} />
+          </Suspense>
+        )}
 
         {raw && active.isPending && !offlineMiss && (
           <p className="flex items-center gap-2 rounded bg-[var(--color-surface)]/20 px-1.5 py-0.5 text-[var(--color-muted)]">

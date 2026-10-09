@@ -97,11 +97,7 @@ export default function LabelsTab(): ReactNode {
                   >
                     {t('settings.labels.rename')}
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => handleDelete(label)}
-                    className={`${BUTTON_CLASS} text-red-600`}
-                  >
+                  <button type="button" onClick={() => handleDelete(label)} className={`${BUTTON_CLASS} text-red-600`}>
                     {t('settings.labels.delete')}
                   </button>
                 </>

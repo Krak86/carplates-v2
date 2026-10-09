@@ -4,9 +4,11 @@ import type { ReactNode } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { StatsFieldResponse } from '@carplates/shared'
 
-import '@/i18n'
+import { i18nReady } from '@/i18n'
 import FieldInfoButton from '@/components/FieldInfoButton'
 import { getStatsField } from '@/lib/api'
+
+await i18nReady
 
 vi.mock('@/lib/api', async importOriginal => ({
   ...(await importOriginal<typeof import('@/lib/api')>()),

@@ -11,6 +11,7 @@ from the state open-data portal (`data.gov.ua`), loaded into Postgres; VIN decod
 
 - `PLAN.md` — active/planned work (Phases 2-5). `docs/plan-done.md` — finished write-ups; **grep headings, never read whole**.
 - `DATASETS_PLAN.md` — external-dataset enrichment. `SCHEDULE.md` — post-deploy plan for recurring ingest jobs.
+- `docs/vps-http2-http3.md` — reverse proxy (Caddy/nginx) for h2/h3, compression, cache headers; `pnpm preview:prod` production-like run.
 - `docs/commands-reference.md` — every `ingest:*` / `export:*` / ALPR command with flags (grep the one you need).
 - `docs/features-reference.md` — detailed conventions for VehiclesDB, RDW specs, the racer game and Accounts. **Read the matching section before
   touching those areas.**
@@ -22,6 +23,7 @@ image-recognition proxies, original plate logic).
 
 ```bash
 pnpm dev            # web (:5173) + api (:3000) in parallel
+pnpm preview:prod   # build, then Nest serves the built SPA (production-like; port 3000, PORT=3100 if dev is running)
 pnpm build          # packages first, then apps (topological)
 pnpm lint           # eslint, cached
 pnpm lint:types     # opt-in type-checked lint (no-floating-promises); slow
@@ -102,6 +104,8 @@ pnpm 12 · Node 24 LTS · TypeScript 5.9 (7.x blocked — typescript-eslint peer
 - **Feature areas with their own detail docs** (read `docs/features-reference.md` first): VehiclesDB cross-market data, RDW specs, the estimated-value chip (C4: depreciation curve, UA customs, NBU `/api/fx`), the VIN
   page, the test-drive racer game, and Accounts (separate `app` schema, **not** re-ingestable; `account.ts`, not `schemas.ts`; admins by SQL
   only; account UI online-only).
+- **i18n is loaded per language** (`apps/web/src/i18n`): `ua.json`/`ru.json`/`en.json` are separate lazy chunks (non-ua also loads ua, the fallback). `main.tsx` awaits `i18nReady`; switching goes through the async `setLang` (`langLoading` drives the sidebar spinner). Tests that render translated text `await i18nReady` — never `import '@/i18n'` for its side effect.
+- **Result-card sections below the fold are `LazySection`s** (mounted near the viewport or by a `?section=` share link). A new shareable section must list its id in `sections`, or its share link will not open it. Pure helpers shared by lazy chunks are grouped per area in `vite.config.ts` (`HELPER_GROUPS`).
 - **Telemetry** stays off locally. `.env.example` in each app documents the vars; real `.env*` files are gitignored and `deny`-listed.
 - Tests: Vitest, `import { describe, it, expect } from 'vitest'`, colocated `*.test.ts(x)` next to source.
 

@@ -14,6 +14,7 @@
   "scripts": {
     "dev": "pnpm -r --parallel dev",
     "build": "pnpm --filter @carplates/shared --filter @carplates/db build && pnpm --filter @carplates/api --filter @carplates/web build",
+    "preview:prod": "pnpm build && pnpm --filter @carplates/api preview",
     "lint": "eslint . --cache --cache-location node_modules/.cache/eslint/",
     "lint:fix": "eslint . --fix --cache --cache-location node_modules/.cache/eslint/",
     "lint:types": "eslint . --config eslint.config.types.mjs --cache --cache-location node_modules/.cache/eslint-types/",

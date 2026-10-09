@@ -48,16 +48,15 @@ export default function WikiHeroImage({ brand, model, year, rawKind, vehicleKey 
   return (
     <div className="hero-vt relative -my-3 h-64 w-full max-w-content sm:h-80">
       {!isLoaded && (
-        <div
-          aria-hidden
-          className="absolute inset-0 animate-pulse rounded-lg border border-border bg-surface/70"
-        />
+        <div aria-hidden className="absolute inset-0 animate-pulse rounded-lg border border-border bg-surface/70" />
       )}
       {image && (
         <img
           src={image.url}
           alt={[brand, model].filter(Boolean).join(' ')}
           crossOrigin="anonymous"
+          fetchPriority="high"
+          decoding="async"
           onLoad={() => setLoadedUrl(image.url)}
           onError={() => setFailedUrl(image.url)}
           className={`h-full w-full rounded-lg object-cover transition-opacity duration-200 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}

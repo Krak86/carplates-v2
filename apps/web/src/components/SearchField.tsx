@@ -1,14 +1,16 @@
-import { useState } from 'react'
+import { Suspense, lazy, useState } from 'react'
 import type { FormEvent, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from 'react-router'
 
-import ArSearchButton from '@/components/ArSearchButton'
-import CameraSearchButton from '@/components/CameraSearchButton'
-import PhotoSearchButton from '@/components/PhotoSearchButton'
-import VinSearchButton from '@/components/VinSearchButton'
+import { useIdleReady } from '@/hooks/useIdleReady'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 import { cn } from '@/lib/cn'
+
+const SearchButtons = lazy(() => import('@/components/SearchButtons'))
+
+// Same footprint as the real row (tiles on phones, one pill row from `sm`), so loading it in causes no shift.
+const BUTTONS_ROW_CLASS = 'flex min-h-[3.4rem] justify-center gap-1.5 sm:min-h-8'
 
 type Props = {
   initialValue?: string
@@ -28,6 +30,7 @@ export default function SearchField({
   const { t } = useTranslation()
   const navigate = useNavigate()
   const online = useOnlineStatus()
+  const idle = useIdleReady()
   const [value, setValue] = useState(initialValue)
   const [advancedOpen, setAdvancedOpen] = useState(false)
 
@@ -137,11 +140,17 @@ export default function SearchField({
           </Link>
         </div>
       </div>
-      <div className="flex justify-center gap-1.5">
-        <PhotoSearchButton isPending={isRecognizing} disabled={!online} onPick={onPickPhoto} />
-        <CameraSearchButton isPending={isRecognizing} disabled={!online} onCapture={onPickPhoto} />
-        <ArSearchButton disabled={!online} />
-        <VinSearchButton isPending={isRecognizing} disabled={!online} onPick={onPickVinPhoto} />
+      <div className={BUTTONS_ROW_CLASS}>
+        {idle && (
+          <Suspense fallback={null}>
+            <SearchButtons
+              isRecognizing={isRecognizing}
+              online={online}
+              onPickPhoto={onPickPhoto}
+              onPickVinPhoto={onPickVinPhoto}
+            />
+          </Suspense>
+        )}
       </div>
     </div>
   )

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { Suspense, lazy, useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
@@ -15,31 +15,22 @@ import type { PlateLookupResponse } from '@carplates/shared'
 import BrandLogo from '@/components/BrandLogo'
 import BrandSiteChip from '@/components/BrandSiteChip'
 import NewCarsLink from '@/components/NewCarsLink'
-import StockSection from '@/components/StockSection'
-import SocialSection from '@/components/SocialSection'
 import EstimatedValueChip from '@/components/EstimatedValueChip'
 import CardTiltToggle from '@/components/CardTiltToggle'
 import RaceGameButton from '@/components/game/RaceGameButton'
-import CarWikiInfo from '@/components/CarWikiInfo'
 import ColorSwatch from '@/components/ColorSwatch'
 import CopyAllInfoButton from '@/components/CopyAllInfoButton'
 import CopyButton from '@/components/CopyButton'
-import FavoriteButton from '@/components/FavoriteButton'
+import LazySection from '@/components/LazySection'
 import FieldInfoButton from '@/components/FieldInfoButton'
-import NearbyServices from '@/components/NearbyServices'
 import NoRegionBadge from '@/components/NoRegionBadge'
 import RegistrationTimeline from '@/components/RegistrationTimeline'
 import { kgToTonnes } from '@/components/RdwSpecs.helpers'
 import { getBodyInfo, getFuelIcon } from '@/components/ResultCard.helpers'
-import NewsSection from '@/components/NewsSection'
 import PaidFeatureSections from '@/components/paid/PaidFeatureSections'
-import ReviewLinks from '@/components/ReviewLinks'
-import FuelEconomy from '@/components/FuelEconomy'
-import RdwSpecs from '@/components/RdwSpecs'
 import VdbChips from '@/components/VdbChips'
 import InfoPopover from '@/components/InfoPopover'
 import InfoText from '@/components/InfoText'
-import SafetyRatings from '@/components/SafetyRatings'
 import PlateSegments from '@/components/PlateSegments'
 import UaPlateBadge from '@/components/UaPlateBadge'
 import SectionHeader from '@/components/SectionHeader'
@@ -50,12 +41,9 @@ import { useCarHeroImageActions } from '@/components/use-car-hero-image-actions'
 import { useChipsPending } from '@/components/use-chips-pending'
 import { useCopyFeedback } from '@/components/use-copy-feedback'
 import Card from '@/components/ui/Card'
-import VehicleKindIcon from '@/components/VehicleKindIcon'
 import Model3dButton from '@/components/Model3dButton'
 import Model360Button from '@/components/Model360Button'
-import VehiclePhotos from '@/components/VehiclePhotos'
 import VerificationLinks from '@/components/VerificationLinks'
-import VideoReviews from '@/components/VideoReviews'
 import VinDecodeTabs from '@/components/vin/VinDecodeTabs'
 import VinToggleSection from '@/components/vin/VinToggleSection'
 import { useCardMotion } from '@/hooks/useCardMotion'
@@ -66,6 +54,21 @@ import { plateHistoryQuery, vinQuery } from '@/lib/queries'
 import { scrollElementIntoView } from '@/lib/share-section'
 import { formatVehicleLabel } from '@/lib/vehicle-label'
 import { useUiStore } from '@/store/ui-store'
+
+// Everything below the fold loads on demand (near the viewport, or a `?section=` share link): see LazySection.
+const FavoriteButton = lazy(() => import('@/components/FavoriteButton'))
+const VehicleKindIcon = lazy(() => import('@/components/VehicleKindIcon'))
+const StockSection = lazy(() => import('@/components/StockSection'))
+const SocialSection = lazy(() => import('@/components/SocialSection'))
+const NewsSection = lazy(() => import('@/components/NewsSection'))
+const NearbyServices = lazy(() => import('@/components/NearbyServices'))
+const CarWikiInfo = lazy(() => import('@/components/CarWikiInfo'))
+const VehiclePhotos = lazy(() => import('@/components/VehiclePhotos'))
+const VideoReviews = lazy(() => import('@/components/VideoReviews'))
+const ReviewLinks = lazy(() => import('@/components/ReviewLinks'))
+const FuelEconomy = lazy(() => import('@/components/FuelEconomy'))
+const RdwSpecs = lazy(() => import('@/components/RdwSpecs'))
+const SafetyRatings = lazy(() => import('@/components/SafetyRatings'))
 
 type Props = {
   data: PlateLookupResponse
@@ -161,12 +164,14 @@ export default function ResultCard({ data }: Props): ReactNode {
           }}
         />
         <BrandLogo brand={c.brand} variant="watermark" />
-        <FavoriteButton
-          kind="plate"
-          value={data.plate}
-          label={formatVehicleLabel({ brand: c.brand, model: c.model, year: c.makeYear, color: c.color })}
-          className="absolute top-3 right-3"
-        />
+        <Suspense fallback={null}>
+          <FavoriteButton
+            kind="plate"
+            value={data.plate}
+            label={formatVehicleLabel({ brand: c.brand, model: c.model, year: c.makeYear, color: c.color })}
+            className="absolute top-3 right-3"
+          />
+        </Suspense>
 
         <div className="mb-3 flex items-stretch gap-3 pr-10 lg:pr-8">
           <div className="min-w-0 flex-1">
@@ -196,7 +201,12 @@ export default function ResultCard({ data }: Props): ReactNode {
               >
                 <UaPlateBadge plate={data.plate} />
               </Link>
-              <CopyButton text={data.plate} label={t('field.plate')} feedback={plateCopy} className="mx-1.5 align-middle" />
+              <CopyButton
+                text={data.plate}
+                label={t('field.plate')}
+                feedback={plateCopy}
+                className="mx-1.5 align-middle"
+              />
               {data.region && (
                 <span className="rounded bg-[var(--color-surface)]/20 px-1.5 py-0.5">, {data.region}</span>
               )}
@@ -227,14 +237,16 @@ export default function ResultCard({ data }: Props): ReactNode {
               {brandDealerUrl && <BrandSiteChip url={brandDealerUrl} />}
             </div>
           </div>
-          <VehicleKindIcon
-            kind={vehicleKind}
-            color={vehicleColor}
-            className="aspect-square max-h-20 shrink-0 max-md:hidden"
-            title={[c.kind && `${t('field.kind')}: ${c.kind}`, c.color && `${t('field.color')}: ${c.color}`]
-              .filter(Boolean)
-              .join('\n')}
-          />
+          <Suspense fallback={<div aria-hidden className="aspect-square max-h-20 shrink-0 max-md:hidden" />}>
+            <VehicleKindIcon
+              kind={vehicleKind}
+              color={vehicleColor}
+              className="aspect-square max-h-20 shrink-0 max-md:hidden"
+              title={[c.kind && `${t('field.kind')}: ${c.kind}`, c.color && `${t('field.color')}: ${c.color}`]
+                .filter(Boolean)
+                .join('\n')}
+            />
+          </Suspense>
         </div>
 
         <EstimatedValueChip
@@ -475,31 +487,53 @@ export default function ResultCard({ data }: Props): ReactNode {
           )}
         </VinToggleSection>
 
-        <RdwSpecs
-          brand={c.brand}
-          model={c.model}
-          year={c.makeYear}
-          kind={c.kind}
-          fuel={c.fuel}
-          own={{ powerKw: c.powerKwt, displacementCc: c.capacity, massKg: c.ownWeight, grossMassKg: c.totalWeight }}
-        />
-        <FuelEconomy
-          brand={c.brand}
-          model={c.model}
-          year={c.makeYear}
-          fuel={c.fuel}
-          capacity={c.capacity}
-          kind={c.kind}
-        />
-        <SafetyRatings brand={c.brand} model={c.model} year={c.makeYear} body={c.body} />
-        <ReviewLinks brand={c.brand} model={c.model} year={c.makeYear} />
-        <VideoReviews brand={c.brand} model={c.model} year={c.makeYear} />
-        <CarWikiInfo brand={c.brand} model={c.model} year={c.makeYear} />
-        <NearbyServices brand={c.brand} />
-        <VehiclePhotos brand={c.brand} model={c.model} year={c.makeYear} />
-        <NewsSection brand={c.brand} model={c.model} year={c.makeYear} />
-        <SocialSection brand={c.brand} model={c.model} year={c.makeYear} />
-        <StockSection brand={c.brand} />
+        <LazySection sections={['specs']}>
+          <RdwSpecs
+            brand={c.brand}
+            model={c.model}
+            year={c.makeYear}
+            kind={c.kind}
+            fuel={c.fuel}
+            own={{ powerKw: c.powerKwt, displacementCc: c.capacity, massKg: c.ownWeight, grossMassKg: c.totalWeight }}
+          />
+        </LazySection>
+        <LazySection sections={['emissions']}>
+          <FuelEconomy
+            brand={c.brand}
+            model={c.model}
+            year={c.makeYear}
+            fuel={c.fuel}
+            capacity={c.capacity}
+            kind={c.kind}
+          />
+        </LazySection>
+        <LazySection sections={['ratings']}>
+          <SafetyRatings brand={c.brand} model={c.model} year={c.makeYear} body={c.body} />
+        </LazySection>
+        <LazySection sections={['reviews']}>
+          <ReviewLinks brand={c.brand} model={c.model} year={c.makeYear} />
+        </LazySection>
+        <LazySection sections={['videos']}>
+          <VideoReviews brand={c.brand} model={c.model} year={c.makeYear} />
+        </LazySection>
+        <LazySection sections={['wiki']}>
+          <CarWikiInfo brand={c.brand} model={c.model} year={c.makeYear} />
+        </LazySection>
+        <LazySection sections={['nearby']}>
+          <NearbyServices brand={c.brand} />
+        </LazySection>
+        <LazySection sections={['photos']}>
+          <VehiclePhotos brand={c.brand} model={c.model} year={c.makeYear} />
+        </LazySection>
+        <LazySection sections={['news']}>
+          <NewsSection brand={c.brand} model={c.model} year={c.makeYear} />
+        </LazySection>
+        <LazySection sections={['social']}>
+          <SocialSection brand={c.brand} model={c.model} year={c.makeYear} />
+        </LazySection>
+        <LazySection sections={['stock']}>
+          <StockSection brand={c.brand} />
+        </LazySection>
         <PaidFeatureSections hasPlate={!!data.plate} hasVin={hasVin} />
       </Card>
     </div>
