@@ -35,6 +35,14 @@ UI: collapsible block, the "Typical figures … Similar vehicles" footnote on to
 Two RDW spellings that share a key collapse to the larger group (medians don't merge). Seed: `seed-data/rdw-specs.csv.gz`; after
 changing `makeKey`/`modelKey`/`brandSlug` re-run `ingest:rdw` (cached per make in `scripts/.data/rdw/`, `--refresh` to re-query), not `:csv`.
 
+### Estimated value (stage C4)
+
+Chip `~ € X–Y 💶` on the result card = Dutch NEW price (C3 median, `rdw_specs`) x depreciation curve, plus Ukrainian import customs, computed per request — no table, ingest or seed. Details: `DATASETS_PLAN.md` "Stage C4 — done".
+- **Shared (`packages/shared`, own files, not `schemas.ts`):** `rdwValue.ts` (BPM curve constant — source in its header comment; `retainedShare`, `estimateValue`, `valueCurve`; the 5 % old-car floor is our assumption), `ukrCustoms.ts` (duty / excise / VAT, cites Law 2611-VIII), `fx.ts` (`Currency`, `convertEur`, `/api/fx` schema). Rebuild `@carplates/shared` after editing.
+- **Contract:** `rdwMatchSchema` gained `priceByYear` and `valueEstimate` (all new fields `.nullable().optional()`, read defensively — offline caches predate them). `rough` = the price has < `RDW_MIN_DISPLAY_N` vehicles; `extrapolated` = past the table.
+- **Web:** `EstimatedValueChip.tsx` (chip, chevron, hover tip, "?"), `EstimatedValuePanel.tsx` (bordered block, lazy), `UkrPriceBreakdown.tsx`, `EstimatedValueTip/Details.tsx`, `ValueByAgeChart/ValueLineChart.tsx` (dependency-free SVG), helpers + tests in `EstimatedValue.helpers.ts` (`ukrPrice`, `valueWarnings`, `formatMoneyRange`, `riaSearchUrl`). Customs run in the browser from the registry fuel and capacity. `effectiveCurrency` falls back to euros without NBU rates. Share link `?section=value` (in `SHARE_SECTIONS`). `InfoPopover` takes an optional `trigger` / `triggerClassName` (the chip is a hover target).
+- **Rules:** the figure is never called a market price; every caveat is a ⚠️ line (`value.warn.*`); AUTO.RIA is a link only — its terms ban collecting data. A new caveat = a `valueWarnings` entry + `value.warn.<key>` strings in ua/ru/en.
+
 ## Test-drive racer
 
 Files: `apps/web/src/lib/racer/`, `components/game/`; docs/plan-done.md "Test-drive racer game". Follow-ups: PLAN.md "Test-drive racer game".

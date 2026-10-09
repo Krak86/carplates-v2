@@ -17,6 +17,7 @@ import BrandSiteChip from '@/components/BrandSiteChip'
 import NewCarsLink from '@/components/NewCarsLink'
 import StockSection from '@/components/StockSection'
 import SocialSection from '@/components/SocialSection'
+import EstimatedValueChip from '@/components/EstimatedValueChip'
 import CardTiltToggle from '@/components/CardTiltToggle'
 import RaceGameButton from '@/components/game/RaceGameButton'
 import CarWikiInfo from '@/components/CarWikiInfo'
@@ -229,6 +230,15 @@ export default function ResultCard({ data }: Props): ReactNode {
               .join('\n')}
           />
         </div>
+
+        <EstimatedValueChip
+          brand={c.brand}
+          model={c.model}
+          year={c.makeYear}
+          kind={c.kind}
+          fuel={c.fuel}
+          capacity={c.capacity}
+        />
 
         <PlateSegments plate={data.plate} region={data.region} />
 

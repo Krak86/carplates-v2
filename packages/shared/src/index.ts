@@ -35,7 +35,7 @@ export {
   type BodySuggestion,
   type BodySuggestionsResponse
 } from './vehicleBody.js'
-export { VEHICLE_KINDS,resolveVehicleKind, sourceValueForKind, type VehicleKind } from './vehicleKind.js'
+export { VEHICLE_KINDS, resolveVehicleKind, sourceValueForKind, type VehicleKind } from './vehicleKind.js'
 export {
   VEHICLE_COLORS,
   VEHICLE_COLOR_HEX,
@@ -173,7 +173,27 @@ export {
   type RdwResponse,
   type RdwSpecs
 } from './rdw.js'
-export { RDW_MIN_N, RDW_MIN_DISPLAY_N, isSmallRdwSample, rdwCatalogKinds, matchRdwModel, pickRdwYear, type RdwReferenceRow } from './rdwMatch.js'
+export {
+  estimateValue,
+  OLD_CAR_FLOOR_SHARE,
+  retainedShare,
+  valueCurve,
+  VALUE_RANGE_SPREAD,
+  type ValueEstimate
+} from './rdwValue.js'
+export { customsAgeK, customsFuel, customsTax, UKR_DUTY_RATE, UKR_VAT_RATE } from './ukrCustoms.js'
+export type { CustomsFuel, CustomsTax } from './ukrCustoms.js'
+export { convertEur, CURRENCIES, fxResponseSchema } from './fx.js'
+export type { Currency, FxResponse } from './fx.js'
+export {
+  RDW_MIN_N,
+  RDW_MIN_DISPLAY_N,
+  isSmallRdwSample,
+  rdwCatalogKinds,
+  matchRdwModel,
+  pickRdwYear,
+  type RdwReferenceRow
+} from './rdwMatch.js'
 export { makeKey, modelKey, brandCandidateKey } from './vehicleKey.js'
 export {
   MIN_PREFIX_KEY_LENGTH,

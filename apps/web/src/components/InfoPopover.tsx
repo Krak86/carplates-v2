@@ -7,6 +7,9 @@ type Props = {
   label: string
   title: string
   children: ReactNode
+  /** Replaces the round "?" as the thing to hover / tap (a chip); `triggerClassName` then styles the button. */
+  trigger?: ReactNode
+  triggerClassName?: string
 }
 
 // Same timing as FieldInfoButton, whose hover/pin logic this mirrors for static content.
@@ -31,7 +34,7 @@ type Placement = { left: number; top?: number; bottom?: number; maxHeight: numbe
  * space is actually available in whichever direction it opens, so it can never
  * extend past the viewport edge.
  */
-export default function InfoPopover({ label, title, children }: Props): ReactNode {
+export default function InfoPopover({ label, title, children, trigger, triggerClassName }: Props): ReactNode {
   const { t } = useTranslation()
   const [hovering, setHovering] = useState(false)
   const [pinned, setPinned] = useState(false)
@@ -169,9 +172,12 @@ export default function InfoPopover({ label, title, children }: Props): ReactNod
           cancelScheduledOpen()
           setHovering(false)
         }}
-        className="inline-flex size-5 shrink-0 items-center justify-center rounded-full bg-[var(--color-primary)]/15 text-xs leading-none font-bold text-[var(--color-primary)] hover:bg-[var(--color-primary)]/30"
+        className={
+          triggerClassName ??
+          'inline-flex size-5 shrink-0 items-center justify-center rounded-full bg-[var(--color-primary)]/15 text-xs leading-none font-bold text-[var(--color-primary)] hover:bg-[var(--color-primary)]/30'
+        }
       >
-        ?
+        {trigger ?? '?'}
       </button>
 
       {visible &&

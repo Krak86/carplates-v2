@@ -13,6 +13,7 @@ import {
   getCncapRatings,
   getEuroNcapRatings,
   getFuelEconomy,
+  getFx,
   getRdw,
   getVdb,
   getVdbStats,
@@ -229,6 +230,16 @@ export function rdwQuery(brand: string, model: string, year: number, kind?: stri
     queryKey: ['rdw', brand, model, year, kind ?? null],
     queryFn: () => getRdw(brand, model, year, kind),
     staleTime: Infinity
+  })
+}
+
+// NBU official UAH rates (cached daily by the API) — online-only; the value chip falls back to euros without them.
+export function fxQuery() {
+  return queryOptions({
+    queryKey: ['fx'],
+    queryFn: getFx,
+    staleTime: 60 * 60 * 1000,
+    retry: false
   })
 }
 

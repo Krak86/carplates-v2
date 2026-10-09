@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@nestjs/common'
 import { rdwSpecs } from '@carplates/db'
 import type { RdwSpecsRow, RdwTally } from '@carplates/db'
 import {
+  estimateValue,
   makeKey,
   matchRdwModel,
   isSmallRdwSample,
@@ -121,6 +122,18 @@ export class RdwService {
     )
     if (!picked) return none
 
+    const specs = toSpecs(picked.row)
+    // Unlike the Specs price row (hidden below `RDW_MIN_DISPLAY_N`), a thin price still gives an estimate — flagged `rough`.
+    const newPrice = picked.row.priceEurMedian == null ? null : Number(picked.row.priceEurMedian)
+    const priceN = picked.row.priceEurN ?? 0
+    const base = estimateValue(newPrice, new Date().getFullYear() - year)
+    const valueEstimate =
+      base && newPrice != null ? { ...base, newPriceEur: newPrice, priceN, rough: isSmallRdwSample(priceN) } : null
+    const priceByYear = years
+      .filter(r => r.priceEurMedian != null && (r.priceEurN ?? 0) >= RDW_MIN_DISPLAY_N)
+      .map(r => ({ year: r.modelYear, priceEur: Math.round(Number(r.priceEurMedian) / 100) * 100 }))
+      .sort((a, b) => a.year - b.year)
+
     return {
       brand,
       model,
@@ -131,7 +144,9 @@ export class RdwService {
         how,
         crossMake: row.makeKey !== mk,
         exactYear: picked.year === year,
-        specs: toSpecs(picked.row)
+        specs,
+        priceByYear: priceByYear.length ? priceByYear : null,
+        valueEstimate
       }
     }
   }

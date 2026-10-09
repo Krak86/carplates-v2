@@ -13,6 +13,7 @@ import {
   dataVersionResponseSchema,
   euroNcapRatingsResponseSchema,
   fuelEconomyResponseSchema,
+  fxResponseSchema,
   rdwResponseSchema,
   vdbResponseSchema,
   vdbStatsResponseSchema,
@@ -60,6 +61,7 @@ import type {
   CncapRatingsResponse,
   EuroNcapRatingsResponse,
   FuelEconomyResponse,
+  FxResponse,
   RdwResponse,
   VdbResponse,
   VdbStatsResponse,
@@ -251,6 +253,10 @@ export async function getRdw(brand: string, model: string, year: number, kind?: 
   const params = new URLSearchParams({ brand, model, year: String(year) })
   if (kind) params.set('kind', kind)
   return rdwResponseSchema.parse(await getJson(`/api/rdw?${params.toString()}`))
+}
+
+export async function getFx(): Promise<FxResponse> {
+  return fxResponseSchema.parse(await getJson('/api/fx'))
 }
 
 export async function getVdbStats(kind: VdbVehicleClass = 'car'): Promise<VdbStatsResponse> {

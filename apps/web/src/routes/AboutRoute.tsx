@@ -19,6 +19,11 @@ const SOURCES: readonly Source[] = [
   { key: 'eea', label: 'EEA', url: 'https://www.eea.europa.eu', icon: '/icons/sources/eea.svg' },
   { key: 'vehiclesdb', label: 'VehiclesDB', url: 'https://vehiclesdb.com', icon: '/icons/sources/vehiclesdb.webp' },
   { key: 'rdw', label: 'RDW', url: 'https://opendata.rdw.nl' },
+  {
+    key: 'belastingdienst',
+    label: 'Belastingdienst',
+    url: 'https://www.belastingdienst.nl/wps/wcm/connect/nl/bpm/content/bpm-afschrijving-koerslijst-taxatierapport-forfaitaire-tabel'
+  },
   { key: 'infocar', label: 'infocar.ua', url: 'https://www.infocar.ua', icon: '/icons/infocar.png' },
   { key: 'hondaUa', label: 'honda.ua', url: 'https://www.honda.ua', icon: '/icons/sources/honda.webp' },
   { key: 'itc', label: 'ITC.ua', url: 'https://itc.ua/ua/tag/test-drayv-ua/', icon: '/icons/itc.webp' },

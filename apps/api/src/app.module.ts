@@ -11,6 +11,7 @@ import { FeaturesModule } from './features/features.module.js'
 import { SettingsModule } from './settings/settings.module.js'
 import { SyncModule } from './sync/sync.module.js'
 import { FuelModule } from './fuel/fuel.module.js'
+import { FxModule } from './fx/fx.module.js'
 import { RdwModule } from './rdw/rdw.module.js'
 import { VdbModule } from './vdb/vdb.module.js'
 import { HealthController } from './health/health.controller.js'
@@ -54,6 +55,7 @@ import { WikiModule } from './wiki/wiki.module.js'
     PhotosModule,
     SafetyModule,
     FuelModule,
+    FxModule,
     RdwModule,
     VdbModule,
     SearchModule,

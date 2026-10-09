@@ -94,7 +94,37 @@ export const rdwMatchSchema = z.object({
   crossMake: z.boolean(),
   /** False when the asked year has no data and the nearest year within the allowed gap is shown. */
   exactYear: z.boolean(),
-  specs: rdwSpecsSchema
+  specs: rdwSpecsSchema,
+  /**
+   * Stage C4. Median Dutch NEW price by model year (euros, rounded to 100) for the matched model — real RDW data; years
+   * with a small sample are left out. Optional like `extraRangeSchema`: older offline-cached answers lack it.
+   */
+  priceByYear: z
+    .array(z.object({ year: z.number().int(), priceEur: z.number() }))
+    .nullable()
+    .optional(),
+  /**
+   * Stage C4. Rough value: Dutch new price x the BPM depreciation curve (`rdwValue.ts`) for the asked year, as a rounded
+   * range. An assumption on top of EU list prices — not a market price, never a Ukrainian one. Null when the model has
+   * no price at all or the curve has no value for the age. A price from fewer than `RDW_MIN_DISPLAY_N` vehicles is still
+   * used but flagged `rough` (the UI warns), unlike the Specs price row, which is hidden then.
+   */
+  valueEstimate: z
+    .object({
+      ageYears: z.number().int(),
+      retained: z.number(),
+      /** Past the end of the depreciation table: the old-car floor was used (very rough). Optional for old caches. */
+      extrapolated: z.boolean().optional(),
+      midEur: z.number(),
+      lowEur: z.number(),
+      highEur: z.number(),
+      /** The median new price the estimate starts from (euros) and how many vehicles gave it. */
+      newPriceEur: z.number().optional(),
+      priceN: z.number().int().optional(),
+      rough: z.boolean().optional()
+    })
+    .nullable()
+    .optional()
 })
 export type RdwMatchInfo = z.infer<typeof rdwMatchSchema>
 

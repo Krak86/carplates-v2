@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { isSmallRdwSample, MAX_YEAR_GAP } from '@carplates/shared'
 import { useQuery } from '@tanstack/react-query'
@@ -30,6 +30,9 @@ import VinToggleSection from '@/components/vin/VinToggleSection'
 import { cn } from '@/lib/cn'
 import { rdwQuery } from '@/lib/queries'
 import { scrollElementIntoView } from '@/lib/share-section'
+
+// Shares its chunk with the value chip; only fetched when the folder is shown.
+const EstimatedValueDetails = lazy(() => import('@/components/EstimatedValueDetails'))
 
 type Props = {
   brand: string | null
@@ -234,6 +237,21 @@ export default function RdwSpecs({ brand, model, year, kind, fuel, own }: Props)
               <div className="divide-y divide-[var(--color-border)]">{group.rows}</div>
             </VinToggleSection>
           ))}
+
+          {/* Duplicates the card's "Est. value" chip popover for now; delete this block to drop it. */}
+          {match.valueEstimate && (
+            <VinToggleSection
+              icon="💶"
+              defaultOpen={false}
+              showLabel={t('vin.group.show')}
+              hideLabel={t('vin.group.hide')}
+              title={t('value.title')}
+            >
+              <Suspense fallback={null}>
+                <EstimatedValueDetails match={match} estimate={match.valueEstimate} locale={locale} />
+              </Suspense>
+            </VinToggleSection>
+          )}
         </div>
       </div>
     </div>

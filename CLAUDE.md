@@ -99,7 +99,7 @@ pnpm 12 · Node 24 LTS · TypeScript 5.9 (7.x blocked — typescript-eslint peer
 - **NestJS**: feature modules, Zod-validated inputs, no logic in controllers. Controllers return values and never take `@Res()` —
   except the SPA catch-all.
 - **Link previews** (`apps/api/src/spa/`) are produced by the API, never by Vite (`:5173`); how to test: `docs/features-reference.md`.
-- **Feature areas with their own detail docs** (read `docs/features-reference.md` first): VehiclesDB cross-market data, RDW specs, the VIN
+- **Feature areas with their own detail docs** (read `docs/features-reference.md` first): VehiclesDB cross-market data, RDW specs, the estimated-value chip (C4: depreciation curve, UA customs, NBU `/api/fx`), the VIN
   page, the test-drive racer game, and Accounts (separate `app` schema, **not** re-ingestable; `account.ts`, not `schemas.ts`; admins by SQL
   only; account UI online-only).
 - **Telemetry** stays off locally. `.env.example` in each app documents the vars; real `.env*` files are gitignored and `deny`-listed.
