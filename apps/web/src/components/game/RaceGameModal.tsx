@@ -1,14 +1,12 @@
 import { useEffect, useState } from 'react'
-import type { MouseEvent, ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import { type VehicleKind } from '@carplates/shared'
 
 import ShareButton from '@/components/ShareButton'
-import RaceGameSettings from '@/components/game/RaceGameSettings'
-import { useRaceGameActions } from '@/components/game/use-race-game-actions'
+import RaceGameStage from '@/components/game/RaceGameStage'
 import {
-  RACER_SIZE_KB,
   bodyForKind,
   decodeRaceConfig,
   encodeRaceConfig,
@@ -38,7 +36,15 @@ type Props = {
  * screen says what will be downloaded, and the engine chunk is only requested after the viewer confirms. Portal for
  * the same reason as Model3dModal: the Card's 3D tilt would otherwise become the `position: fixed` containing block.
  */
-export default function RaceGameModal({ color, kind, bodyText, plate, vehicleLabel, shared, onClose }: Props): ReactNode {
+export default function RaceGameModal({
+  color,
+  kind,
+  bodyText,
+  plate,
+  vehicleLabel,
+  shared,
+  onClose
+}: Props): ReactNode {
   const { t } = useTranslation()
   const [config, setConfig] = useState<RacerConfig>(() => ({
     color,
@@ -51,8 +57,6 @@ export default function RaceGameModal({ color, kind, bodyText, plate, vehicleLab
     plate,
     ...decodeRaceConfig(shared)
   }))
-  const [sound, setSound] = useState(false)
-  const { phase, hud, wasLoaded, handleStart, handleRestart, setCanvas } = useRaceGameActions(config, sound)
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent): void => {
@@ -61,11 +65,6 @@ export default function RaceGameModal({ color, kind, bodyText, plate, vehicleLab
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [onClose])
-
-  const handleToggleSound = (e: MouseEvent<HTMLButtonElement>): void => {
-    setSound(on => !on)
-    e.currentTarget.blur() // keys must keep steering the car
-  }
 
   const handleChange = (patch: Partial<RacerConfig>): void => setConfig(c => ({ ...c, ...patch }))
 
@@ -94,64 +93,7 @@ export default function RaceGameModal({ color, kind, bodyText, plate, vehicleLab
           </div>
         </div>
 
-        {phase === 'playing' ? (
-          <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_16rem]">
-            <div>
-              <div className="relative overflow-hidden rounded-lg bg-black">
-                <canvas ref={setCanvas} className="block aspect-[4/3] w-full" />
-
-                {hud && (
-                  <div className="pointer-events-none absolute inset-x-0 top-0 p-3 font-mono text-white [text-shadow:0_1px_3px_#000]">
-                    <div className="text-3xl leading-none font-bold">{hud.speed}</div>
-                    <div className="text-xs opacity-80">{t('race.hud.speed')}</div>
-                  </div>
-                )}
-              </div>
-
-              <div className="mt-2 flex items-center justify-between gap-3 text-sm text-[var(--color-muted)]">
-                <span>{t('race.controls')}</span>
-                <button
-                  type="button"
-                  onClick={handleToggleSound}
-                  aria-pressed={sound}
-                  className="ml-auto shrink-0 cursor-pointer rounded-full border border-[var(--color-border)] px-3 py-0.5 hover:border-[var(--color-primary)]"
-                >
-                  {sound ? t('race.soundOn') : t('race.soundOff')}
-                </button>
-                <button
-                  type="button"
-                  onClick={handleRestart}
-                  className="shrink-0 cursor-pointer rounded-full border border-[var(--color-border)] px-3 py-0.5 hover:border-[var(--color-primary)]"
-                >
-                  {t('race.restart')}
-                </button>
-              </div>
-            </div>
-
-            <RaceGameSettings config={config} onChange={handleChange} />
-          </div>
-        ) : (
-          <div className="mx-auto flex max-w-xl flex-col items-center gap-3 py-6 text-center">
-            <div className="text-5xl" aria-hidden>
-              🏁
-            </div>
-            <p>{wasLoaded ? t('race.introReady') : t('race.intro', { size: RACER_SIZE_KB })}</p>
-            <p className="text-sm text-[var(--color-muted)]">{t('race.introNote')}</p>
-            {phase === 'error' && <p className="text-sm text-red-500">{t('race.error')}</p>}
-            <button
-              type="button"
-              onClick={handleStart}
-              disabled={phase === 'loading'}
-              className="cursor-pointer rounded-full bg-[var(--color-primary)] px-5 py-2 font-semibold text-white disabled:cursor-wait disabled:opacity-60"
-            >
-              {phase === 'loading'
-                ? t('race.loading')
-                : wasLoaded
-                  ? t('race.startReady')
-                  : t('race.start', { size: RACER_SIZE_KB })}
-            </button>
-          </div>
-        )}
+        <RaceGameStage config={config} onChange={handleChange} />
 
         <p className="mt-3 text-xs text-[var(--color-muted)]">
           {t('race.credit')}{' '}

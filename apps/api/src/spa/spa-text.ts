@@ -77,6 +77,20 @@ export const STATIC_PAGES: Record<string, Record<Lang, PageText>> = {
     ru: { title: 'Обсуждение · Cars UA', description: 'Отзывы, идеи и вопросы о Cars UA.' },
     en: { title: 'Discuss · Cars UA', description: 'Feedback, ideas and questions about Cars UA.' }
   },
+  '/race': {
+    ua: {
+      title: 'Тест-драйв · Cars UA',
+      description: 'Безкоштовна гра: проїдьтесь на седані, хетчбеку, позашляховику та іншому.'
+    },
+    ru: {
+      title: 'Тест-драйв · Cars UA',
+      description: 'Бесплатная игра: прокатитесь на седане, хэтчбеке, внедорожнике и другом.'
+    },
+    en: {
+      title: 'Test drive · Cars UA',
+      description: 'A free racing game: take a sedan, hatchback, SUV or anything else for a spin.'
+    }
+  },
   '/advanced-search': {
     ua: {
       title: 'Розширений пошук · Cars UA',

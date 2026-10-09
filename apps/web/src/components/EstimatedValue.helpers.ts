@@ -47,6 +47,20 @@ export function formatMoneyRange(
   return `~ ${SIGN[currency]} ${low}–${high}`
 }
 
+/** Plain text for the clipboard, in the shown currency only: "€ 10 600–14 400" (no "~", plain spaces). */
+export function formatMoneyCopy(
+  lowEur: number,
+  highEur: number,
+  currency: Currency,
+  rates: Rates | null,
+  locale: string
+): string {
+  const shown = effectiveCurrency(currency, rates)
+  const low = formatMoney(lowEur, shown, rates, locale)
+  const high = formatMoney(highEur, shown, rates, locale)
+  return `${SIGN[shown]} ${low}–${high}`.replace(/\s+/g, ' ') // toLocaleString groups digits with no-break spaces
+}
+
 /** Euros with the sign and no "~", for axis labels: "€11 700". */
 export const formatEur = (eur: number, locale: string): string => `€${formatMoney(eur, 'EUR', null, locale)}`
 

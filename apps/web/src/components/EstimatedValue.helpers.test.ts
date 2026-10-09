@@ -5,6 +5,7 @@ import {
   effectiveCurrency,
   formatEur,
   formatMoney,
+  formatMoneyCopy,
   formatMoneyRange,
   plotSeries,
   riaSearchUrl,
@@ -13,6 +14,17 @@ import {
 } from '@/components/EstimatedValue.helpers'
 
 const FX = { eurUah: 50, usdUah: 40 }
+
+describe('formatMoneyCopy', () => {
+  it('copies the shown currency only, with plain spaces and no "~"', () => {
+    expect(formatMoneyCopy(10600, 14400, 'EUR', FX, 'uk')).toBe('€ 10 600–14 400')
+    expect(formatMoneyCopy(10600, 14400, 'UAH', FX, 'uk')).toBe('₴ 530 000–720 000')
+  })
+
+  it('is euros without rates', () => {
+    expect(formatMoneyCopy(10600, 14400, 'UAH', null, 'en')).toBe('€ 10,600–14,400')
+  })
+})
 
 describe('formatMoneyRange', () => {
   it('reads as an approximate signed range, rounded per currency', () => {

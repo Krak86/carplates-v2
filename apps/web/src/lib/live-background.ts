@@ -48,6 +48,7 @@ const APP_PAGES = new Set([
   'news',
   'discuss',
   'advanced-search',
+  'race',
   'features',
   'admin',
   'settings'

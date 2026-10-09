@@ -17,6 +17,7 @@ const STATIC_ROUTES = new Set([
   'news',
   'discuss',
   'advanced-search',
+  'race',
   'features',
   'admin',
   'settings'

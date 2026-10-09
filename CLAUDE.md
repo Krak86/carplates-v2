@@ -10,7 +10,7 @@ from the state open-data portal (`data.gov.ua`), loaded into Postgres; VIN decod
 **Phase 1 (current): plate + VIN search, local dev stack only.** No CI, no VPS. Accounts (Phase 5 stage A) are built. Docs map:
 
 - `PLAN.md` — active/planned work (Phases 2-5). `docs/plan-done.md` — finished write-ups; **grep headings, never read whole**.
-- `DATASETS_PLAN.md` — external-dataset enrichment. `SCHEDULE.md` — post-deploy plan for recurring ingest jobs.
+- `GAME_PLAN.md` — racer game: full screen + mobile (planned). `DATASETS_PLAN.md` — external-dataset enrichment. `SCHEDULE.md` — post-deploy plan for recurring ingest jobs.
 - `docs/vps-http2-http3.md` — reverse proxy (Caddy/nginx) for h2/h3, compression, cache headers; `pnpm preview:prod` production-like run.
 - `docs/commands-reference.md` — every `ingest:*` / `export:*` / ALPR command with flags (grep the one you need).
 - `docs/features-reference.md` — detailed conventions for VehiclesDB, RDW specs, the racer game and Accounts. **Read the matching section before

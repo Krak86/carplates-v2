@@ -5,7 +5,8 @@ import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router'
 import type { Currency } from '@carplates/shared'
 
-import { effectiveCurrency, formatMoneyRange, ukrPrice } from '@/components/EstimatedValue.helpers'
+import CopyButton from '@/components/CopyButton'
+import { effectiveCurrency, formatMoneyCopy, formatMoneyRange, ukrPrice } from '@/components/EstimatedValue.helpers'
 import InfoPopover from '@/components/InfoPopover'
 import { cn } from '@/lib/cn'
 import { fxQuery, rdwQuery } from '@/lib/queries'
@@ -48,12 +49,13 @@ export default function EstimatedValueChip({ brand, model, year, kind, fuel, cap
     ...rdwQuery(brand ?? '', model ?? '', year ?? 0, kind),
     enabled: !!(brand && model && year)
   })
-  // The NBU rates are only needed once the panel is opened; until they arrive (or if they fail) the chip stays in euros.
-  const fxResult = useQuery({ ...fxQuery(), enabled: open })
-  const fx = fxResult.data ?? null
   const match = data?.match
   const estimate = match?.valueEstimate
   const hasEstimate = !!estimate
+  // The NBU rates feed the currency switch and the hryvnia part of the copy button; until they arrive (or if they fail)
+  // the chip stays in euros.
+  const fxResult = useQuery({ ...fxQuery(), enabled: hasEstimate })
+  const fx = fxResult.data ?? null
 
   // A shared link opens the panel (initial state) and scrolls to it once the estimate has rendered.
   useEffect(() => {
@@ -99,6 +101,12 @@ export default function EstimatedValueChip({ brand, model, year, kind, fuel, cap
             />
           </Suspense>
         </InfoPopover>
+
+        <CopyButton
+          text={formatMoneyCopy(price.low.totalEur, price.high.totalEur, currency, fx, locale)}
+          label={t('value.title')}
+          className="size-6 justify-center rounded-full bg-emerald-500/15 text-emerald-800 hover:bg-emerald-500/30 hover:text-emerald-800 dark:text-emerald-300 dark:hover:text-emerald-300"
+        />
 
         <button
           type="button"

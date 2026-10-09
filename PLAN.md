@@ -405,6 +405,8 @@ above once scoped, or dropped if research says no.
 
 Built: a desktop-only promo banner beside the result card (xl+; a 🎮 circle on lg; eases in 3 s after the card shows) opens a pseudo-3D racer in a modal. Write-up, file map and gotchas: `docs/plan-done.md` "Test-drive racer game".
 
+- ✅ (2026-10-09) Standalone **`/race`** route (no plate; random famous car + hardcoded presets per body type in `lib/racer/presets.ts`; HUD km odometer for the session) — see `docs/features-reference.md` "Test-drive racer".
+- [ ] **Full screen + mobile (virtual buttons, tilt)** — researched, not started: `GAME_PLAN.md`.
 - [ ] Optional **music**: the original's track is licensed to that project only (Lucky Lion Studios) — not reusable. A CC0/CC-BY loop would be a separate lazy download (~1-3 MB) behind the sound toggle, with a credit line in the modal.
 - ✅ Credits (javascript-racer, Kenney, and the CC BY 4.0 Sketchfab authors: animanyarty, MaG80, JUFF, mk2design, snafuj, Houdini1561, Han66st, cgart.com) are in `about.source.racer`.
 - ✅ Models (2026-10-08): sedan, hatch, sport, SUV, pickup, van and bus are now CC-BY Sketchfab renders; the owner's other candidates were rejected for licence (CC BY-NC / "Sketchfab Standard") or because the body can't be tinted — see docs/plan-done.md "Racer art pass".

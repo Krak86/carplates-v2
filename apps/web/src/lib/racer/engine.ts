@@ -173,6 +173,7 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
   let playerX = 0
   let position = 0
   let speed = 0
+  let driven = 0 // km, never reset: the HUD's session odometer
   let currentLapTime = 0
   let lastLapTime: number | null = null
   let bestLap: number | null = readBest()
@@ -200,6 +201,7 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
     lastEmit = now
     onHud({
       speed: 5 * Math.round(speed / 500),
+      km: driven,
       lap: formatTime(currentLapTime),
       last: lastLapTime == null ? null : formatTime(lastLapTime),
       best: bestLap == null ? null : formatTime(bestLap),
@@ -301,6 +303,7 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
 
     playerX = limit(playerX, -3, 3)
     speed = limit(speed, 0, topSpeed())
+    driven += ((speed / 100) * dt) / 3600 // the HUD shows speed / 100 as km/h
 
     const travelled = (position - startPosition) / SEGMENT_LENGTH
     skyOffset = increase(skyOffset, SKY_SPEED * playerSegment.curve * travelled, 1)

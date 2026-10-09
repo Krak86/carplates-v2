@@ -21,6 +21,8 @@ import {
 type Props = {
   config: RacerConfig
   onChange: (patch: Partial<RacerConfig>) => void
+  /** Replaces the plain "switch the car type" click (the plate-less route also applies a famous example's paint). */
+  onPickBody?: (body: CarBody) => void
 }
 
 const BODY_EMOJI: Readonly<Record<CarBody, string>> = {
@@ -41,7 +43,7 @@ const BODY_EMOJI: Readonly<Record<CarBody, string>> = {
 
 const SCENERY_EMOJI: Readonly<Record<SceneryId, string>> = { day: '☀️', sunset: '🌇', night: '🌙', winter: '❄️' }
 
-export default function RaceGameSettings({ config, onChange }: Props): ReactNode {
+export default function RaceGameSettings({ config, onChange, onPickBody }: Props): ReactNode {
   const { t } = useTranslation()
 
   return (
@@ -76,7 +78,11 @@ export default function RaceGameSettings({ config, onChange }: Props): ReactNode
 
       <RaceGameGroup label={t('race.body')}>
         {CAR_BODIES.map(body => (
-          <RaceGameChip key={body} active={config.body === body} onClick={() => onChange({ body })}>
+          <RaceGameChip
+            key={body}
+            active={config.body === body}
+            onClick={() => (onPickBody ? onPickBody(body) : onChange({ body }))}
+          >
             <span aria-hidden>{BODY_EMOJI[body]}</span> {t(`race.body.${body}`)}
           </RaceGameChip>
         ))}

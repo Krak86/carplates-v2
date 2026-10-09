@@ -112,6 +112,8 @@ export type RacerConfig = {
 export type RacerHud = {
   /** km/h */
   speed: number
+  /** Kilometres driven since the engine started (this opening of the game only; a restart keeps counting). */
+  km: number
   lap: string
   last: string | null
   best: string | null

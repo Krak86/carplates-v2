@@ -37,6 +37,8 @@ changing `makeKey`/`modelKey`/`brandSlug` re-run `ingest:rdw` (cached per make i
 
 ### Estimated value (stage C4)
 
+A copy button beside the chip copies the range in the **shown** currency only (`formatMoneyCopy`: `€ 10 600–14 400`, plain spaces, no "~"); the NBU rates are fetched as soon as the estimate shows (not only on panel open) so ₴/$ can be copied.
+
 Chip `~ € X–Y 💶` on the result card = Dutch NEW price (C3 median, `rdw_specs`) x depreciation curve, plus Ukrainian import customs, computed per request; the only stored extra is `rdw_specs.price_by_fuel` (migration 0050, filled by `ingest:rdw`, in the RDW CSV seed). Details: `DATASETS_PLAN.md` "Stage C4 — done".
 
 - **Shared (`packages/shared`, own files, not `schemas.ts`):** `rdwValue.ts` (BPM curve constant — source in its header comment; `retainedShare`, `estimateValue`, `valueCurve`; the 5 % old-car floor is our assumption), `ukrCustoms.ts` (duty / excise / VAT, cites Law 2611-VIII), `fx.ts` (`Currency`, `convertEur`, `/api/fx` schema). Rebuild `@carplates/shared` after editing.
@@ -63,6 +65,8 @@ and `RaceGameModal`/`engine` chunks are `globIgnores`d from the PWA precache. Se
 random on every opening (`randomScenery`/`randomBackdrop`/`randomLanes`/`randomTraffic`/`randomQuality` in `config.ts`). The HUD
 shows speed only (the lap readout is hidden; lap timing still runs in the engine). Update `RACER_SIZE_KB` after big changes (470
 now: sprites ~365 KB + one ~100 KB backdrop + the engine).
+
+**Standalone route `/race`** (`routes/RaceRoute.tsx`, sidebar 🎮, also in `ROUTE_TITLE_KEYS`, `STATIC_ROUTES`/`APP_PAGES` and the API's `spa-text.ts`): no plate or VIN — a random famous car of a random category (`lib/racer/presets.ts`: hardcoded make/model/year + paint per `CarBody`, `randomPreset`/`randomCar`), everything else random. The car-type chips pick a random example of that type (`onPickBody` on `RaceGameSettings`); a hand-picked colour clears the label; "🎲 Random car" re-rolls. The plate reads "CARS UA". No share link. `RaceGameStage.tsx` (intro, canvas, HUD, settings) is shared by the route and `RaceGameModal`. The HUD also shows a **km odometer** (`RacerHud.km`, engine `driven`: HUD speed / 100 = km/h integrated over time; counts this opening only, a restart keeps it). Next: `GAME_PLAN.md` (full screen, mobile controls, tilt).
 
 ## Accounts
 
