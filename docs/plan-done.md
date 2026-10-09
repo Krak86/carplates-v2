@@ -2430,6 +2430,25 @@ Try only if stage 3 turns out to be the slow part.
 3. Pre-warm script, `--retry-failed`, CSV export/import, coverage report, CLAUDE.md command list.
 4. Run the start tier in the background, review coverage, then decide on the 100+ tier and the per-model trial.
 
+#### Alias passes — factory indexes and engine-code names (2026-10-09)
+
+The registry stores factory indexes (`21104`, `110307-42`, `T13110`) and engine-code names (`E 270 CDI`, `116 i`, `corolla 1.33l`) that Commons /
+Wikipedia know under a marketing name. `packages/shared/src/wikiAliases.ts` (`wikiSearchName(brand, model)`, unit-tested) returns the search
+brand/model + a Wikipedia `leadQuery` (Cyrillic where the article is ru/uk-named); `scripts/src/wiki-images.ts` uses it for the Commons title search,
+year/title matching and the lead-image stage (cached under a `-alias` slug). **Rows keep the registry key** — only the search is aliased.
+`--aliased` selects every aliased model of any size and redoes it even when stored `not_found`. Rules key on the **first word of `brand`**, because many
+registry rows carry the model inside `brand` (`ваз 21063`, `заз-daewoo t13110`, `mercedes-benz e 200`) — the first pass missed those (the biggest groups).
+
+Runs: pass 1 = 447 models, pass 2 (brand-with-model rows) = 752, pass 3 (GAZ/UAZ/LuAZ/IZh, Geely MK, Mercedes ML/GL/Sprinter, Smart, Lexus,
+Kia Magentis, … + trailing-engine-size strip) = 919 (834 photo, 83 not_found, all tiny trim-code models); 0 failures left; seed CSV re-exported.
+
+**Coverage-script bug found on the way:** `wiki-images-coverage.ts` grouped by `lower(btrim())` without collapsing whitespace while the pre-warm
+(`wikiImageKey`) collapses it — the registry holds `DAEWOO  LANOS`, so ~⅓ of cars showed as "not processed". Fixed (`[[:space:]]+` → one space;
+a JS template literal turns `'s+'` into `'s+'`, so use the POSIX class). **Real coverage: 62.8% → 98.0% of registered cars** (13.10M; 266k cars / 2.0% still not_found).
+
+Not used: autoussr.ru, zaz.drive.place, zaz.ua, 24tv, sovietcarmodels.com — copyrighted press/manufacturer photos; only freely licensed Commons files are
+stored (hotlinked, author + licence kept). They remain a reference for index → model names. Open items: PLAN.md "Wikimedia hero-image cache".
+
 ### YouTube fallback for models with no infocar video — design, trial and build notes (ingest built 2026-10-05)
 
 Moved from PLAN.md 2026-10-05 (commit `0efd54f`). The staged ingest (`pnpm ingest:youtube-videos`, migration `0031_youtube_videos.sql`,

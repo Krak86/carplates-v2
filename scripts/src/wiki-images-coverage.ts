@@ -21,7 +21,8 @@ async function main(): Promise<void> {
   try {
     const { rows } = await db.execute<Line>(sql`
       WITH g AS (
-        SELECT lower(btrim(brand)) AS brand, lower(btrim(model)) AS model, make_year AS year, count(*)::int AS n
+        SELECT regexp_replace(lower(btrim(brand)), '[[:space:]]+', ' ', 'g') AS brand,
+               regexp_replace(lower(btrim(model)), '[[:space:]]+', ' ', 'g') AS model, make_year AS year, count(*)::int AS n
         FROM registry.current_registration
         WHERE kind ILIKE '%легков%' AND btrim(coalesce(brand, '')) <> '' AND btrim(coalesce(model, '')) <> ''
           AND make_year IS NOT NULL

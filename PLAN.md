@@ -472,9 +472,19 @@ Pre-warm finished over every model (steps 1-7 done 2026-10-05/06; table 112,398 
 `GET /api/wiki/image` (stored row → live fallback → per-kind placeholder) and the Wikipedia text loads only when its section
 is opened. Design, schema, runbook, run log and the endpoint write-up are in `docs/plan-done.md` ("Wikimedia hero-image cache
 in Postgres + pre-warm").
-**Left:** (1) **coverage script grouping** — `pnpm wiki-images:coverage` shows 33.0% of cars (46,683 groups; 44.5% of the 100-999
-tier) as "not processed" although every model with a car was run: its `(brand, model, year)` grouping does not match the
-stored keys — fix the script or the key normalization; (2) optional: offline-cache rule for the new `['wiki','image',…]` query
+**2026-10-09 — alias passes done (✅):** `packages/shared/src/wikiAliases.ts` (`wikiSearchName`) maps registry factory indexes / engine-code
+names to searchable names (VAZ 21104 → VAZ-2110, Niva, Priora, Kalina, ZAZ Sens/Slavuta/Tavria, GAZ, UAZ, Geely MK, Mercedes
+E-Class/ML/Sprinter, BMW "116 i" → 1 Series, trailing engine sizes stripped); rows keep the registry key, only the search uses the alias.
+`pnpm ingest:wiki-images -- --aliased` ran 3 passes (447 + 752 + 919 models, 0 failures left). The coverage script had a whitespace
+mismatch (registry `DAEWOO  LANOS`) and showed a false "33% not processed"; fixed. **Real coverage: 62.8% → 98.0% of cars** (13.10M;
+266k cars / 2.0% still `not_found`, mostly tiny trim-code models like "307 xs 2.0 e"). No wider pre-warm is needed. Soviet/UA photo sites
+(autoussr.ru, zaz.drive.place, sovietcarmodels.com, 24tv) were **not** used: copyrighted. Write-up: `docs/plan-done.md`.
+**Left (all optional):** (1) live fallback `apps/api/src/wiki/wiki.service.ts` does not use `wikiSearchName` yet — aliased models not in the
+table miss; (2) spot-check matches visually on real plates (Niva, Priora, Sens, Gazelle, Geely MK, engine-size-stripped models; Cyrillic lead
+titles are accepted loosely for aliased models; ВАЗ 211040 confirmed OK); (3) strip trim words ("307 xs 2.0 e", "pajero wgn 3.2 did") and
+alias the rest of the `not_found` tail — Geely JL7162 / FE-1, Honda M-NV, СКС RDS-02РП, Seat Leon/Cordoba, Fiat Grande Punto (searched, none
+found — check why), ZAZ TF698K / TF69Y0 (verify the Chance mapping); re-rank with `pnpm wiki-images:coverage`; use autoussr.ru /
+sovietcarmodels.com only to confirm index → model names; (4) optional: offline-cache rule for the new `['wiki','image',…]` query
 is covered by the existing `wiki` group (200 entities) — check the cap is enough now that every result fetches it. Ideas not done:
 search by normalized name for odd spellings ("118 i" → "118i"); non-Latin article titles (zh/ja/ko) are mostly rejected by
 the "title mentions the model" guard; a Wikidata `P18` query could replace the lead-image stage.

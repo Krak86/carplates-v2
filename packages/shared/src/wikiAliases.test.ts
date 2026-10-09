@@ -31,6 +31,16 @@ describe('wikiSearchName', () => {
     expect(wikiSearchName('bmw', 'x5')).toBeNull()
   })
 
+  it('maps GAZ / UAZ / Geely / Mercedes vans and strips engine sizes', () => {
+    expect(wikiSearchName('газ', '2705')?.model).toBe('Gazelle')
+    expect(wikiSearchName('уаз', '3962')?.model).toBe('452')
+    expect(wikiSearchName('geely mr-7151a', 'mr-7151a')).toMatchObject({ brand: 'Geely', model: 'MK' })
+    expect(wikiSearchName('mercedes-benz ml 350', 'ml 350')?.model).toBe('M-Class')
+    expect(wikiSearchName('mercedes-benz', '313 cdi')?.model).toBe('Sprinter')
+    expect(wikiSearchName('toyota corolla 1.33l', 'corolla 1.33l')).toMatchObject({ brand: 'toyota', model: 'corolla' })
+    expect(wikiSearchName('fiat', 'nuovo doblo 1.3')?.model).toBe('doblo')
+  })
+
   it('leaves searchable models alone', () => {
     expect(wikiSearchName('toyota', 'camry')).toBeNull()
     expect(wikiSearchName('ваз', 'granta')).toBeNull()
