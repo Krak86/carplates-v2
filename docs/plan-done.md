@@ -2449,6 +2449,15 @@ a JS template literal turns `'s+'` into `'s+'`, so use the POSIX class). **Real 
 Not used: autoussr.ru, zaz.drive.place, zaz.ua, 24tv, sovietcarmodels.com — copyrighted press/manufacturer photos; only freely licensed Commons files are
 stored (hotlinked, author + licence kept). They remain a reference for index → model names. Open items: PLAN.md "Wikimedia hero-image cache".
 
+**2026-10-10 follow-up — live fallback + not_found tail:** `wiki.service.ts` (`fetchLeadImage`, `fetchCommonsYearImage`) now searches under `wikiSearchName` too (Cyrillic lead
+titles accepted for aliased models, as in the script), so an aliased model missing from the table no longer misses live. New alias rules for the biggest
+`not_found` models: a model repeated in the brand (`seat leon` + `leon` → brand `seat`; guarded so `land rover` + `range rover` is untouched), Geely JL7152 / CK-2 / FE-1,
+UAZ 3151/469/3163/2206, GAZ 3221/2217/31105, IZh 2125/2717, Lada Granta (2190/2191), Daewoo Sens `t1311` / Nubira / `lanos tf69y`, Mercedes Vito / T1 / G-Class /
+old numeric names (200, 230 е, 190 → E-Class / 190; Cyrillic "е" normalised), BMW `330е`, Infiniti G/EX/QX/JX/M, Mazda `2`, Citroen `c 2`, Volvo `v40cc`, Peugeot `e2008`, VW CC / LT.
+`--aliased` was run and **stopped early** (≈1,800 of 2,212 models; cache on disk, re-run resumes). Seed CSV re-exported (112,833 rows).
+**Coverage 98.0% → 99.0%** of cars (not_found 266k → 126k cars; 12.2k groups). Left: Geely JL7162 / FE-2, Honda M-NV, СКС RDS-02РП (special vehicles), Fiat Grande Punto /
+Doblo Panorama / Nuovo Doblo, Kia Optima, Renault Taliant, ZAZ T13010 / TF69 (check the Chance mapping), 47 groups `failed` (run `--retry-failed`).
+
 ### YouTube fallback for models with no infocar video — design, trial and build notes (ingest built 2026-10-05)
 
 Moved from PLAN.md 2026-10-05 (commit `0efd54f`). The staged ingest (`pnpm ingest:youtube-videos`, migration `0031_youtube_videos.sql`,

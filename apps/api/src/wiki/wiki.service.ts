@@ -18,6 +18,7 @@ import {
   wikiImageKey,
   wikiImageRowIsFinal,
   wikiImageRowValues,
+  wikiSearchName,
   wikipediaSearchUrl
 } from '@carplates/shared'
 import type {
@@ -268,11 +269,19 @@ export class WikiService {
   /** English article first, then the brand's home-country edition and Ukrainian — the image is language-free, so one
    *  stored row still serves every UI language. Throws on a failed search request. */
   private async fetchLeadImage(brand: string, query: string, model: string): Promise<Resolved> {
+    // Factory indexes / engine codes ("21104", "e 270 cdi") are searched under their marketing name.
+    const alias = wikiSearchName(brand, model)
     for (const lang of leadLanguages(brand)) {
-      const payload = await this.fetchJson<WikipediaSearch>(wikipediaSearchUrl(lang, query, { leadImage: true }))
+      const payload = await this.fetchJson<WikipediaSearch>(
+        wikipediaSearchUrl(lang, alias?.leadQuery ?? query, { leadImage: true })
+      )
       const page = Object.values(payload.query?.pages ?? {})[0]
-      // Same "an article about a vehicle carries the model in its title" guard as the text lookup.
-      if (!page?.original || !titleMentionsModel(page.title, model)) continue
+      if (!page?.original) continue
+      // Same "an article about a vehicle carries the model in its title" guard as the text lookup; a Cyrillic title
+      // (ВАЗ-2110, ЗАЗ Сенс) has nothing the Latin matcher can compare, so the specific alias query vouches for it.
+      const titleOk =
+        titleMentionsModel(page.title, alias?.model ?? model) || (!!alias && /[а-яіїєґ]/i.test(page.title))
+      if (!titleOk) continue
 
       const attribution = await this.fetchAttribution(page.original.source).catch(() => null)
       const shown = page.thumbnail ?? page.original
@@ -289,13 +298,15 @@ export class WikiService {
     year: number,
     modelYearOnly = false
   ): Promise<WikiImage | null> {
-    const payload = await this.fetchJson<CommonsPages>(commonsYearSearchUrl(brand, model, year))
+    const alias = wikiSearchName(brand, model)
+    const searchModel = alias?.model ?? model
+    const payload = await this.fetchJson<CommonsPages>(commonsYearSearchUrl(alias?.brand ?? brand, searchModel, year))
     const candidates = commonsPagesInOrder(payload).flatMap(({ title, info }) =>
       info.thumburl && info.mime && info.width && info.height
         ? [{ title, mime: info.mime, width: info.width, height: info.height, info }]
         : []
     )
-    const best = pickCommonsCandidate(candidates, model, year, modelYearOnly)
+    const best = pickCommonsCandidate(candidates, searchModel, year, modelYearOnly)
     return best ? wikiImageFromInfo(best.info) : null
   }
 

@@ -479,13 +479,8 @@ E-Class/ML/Sprinter, BMW "116 i" → 1 Series, trailing engine sizes stripped); 
 mismatch (registry `DAEWOO  LANOS`) and showed a false "33% not processed"; fixed. **Real coverage: 62.8% → 98.0% of cars** (13.10M;
 266k cars / 2.0% still `not_found`, mostly tiny trim-code models like "307 xs 2.0 e"). No wider pre-warm is needed. Soviet/UA photo sites
 (autoussr.ru, zaz.drive.place, sovietcarmodels.com, 24tv) were **not** used: copyrighted. Write-up: `docs/plan-done.md`.
-**Left (all optional):** (1) live fallback `apps/api/src/wiki/wiki.service.ts` does not use `wikiSearchName` yet — aliased models not in the
-table miss; (2) spot-check matches visually on real plates (Niva, Priora, Sens, Gazelle, Geely MK, engine-size-stripped models; Cyrillic lead
-titles are accepted loosely for aliased models; ВАЗ 211040 confirmed OK); (3) strip trim words ("307 xs 2.0 e", "pajero wgn 3.2 did") and
-alias the rest of the `not_found` tail — Geely JL7162 / FE-1, Honda M-NV, СКС RDS-02РП, Seat Leon/Cordoba, Fiat Grande Punto (searched, none
-found — check why), ZAZ TF698K / TF69Y0 (verify the Chance mapping); re-rank with `pnpm wiki-images:coverage`; use autoussr.ru /
-sovietcarmodels.com only to confirm index → model names; (4) optional: offline-cache rule for the new `['wiki','image',…]` query
-is covered by the existing `wiki` group (200 entities) — check the cap is enough now that every result fetches it. Ideas not done:
+**2026-10-10 follow-up (✅):** live fallback now uses `wikiSearchName`; ~40 new alias rules; `--aliased` stopped early (≈1,800/2,212 models); **coverage 98.0% → 99.0%** (126k cars still not_found). Details: `docs/plan-done.md`.
+**Left (all optional):** (1) resume `pnpm ingest:wiki-images -- --aliased` (re-run skips finished models), then `--retry-failed` (47 groups) and `export:wiki-images:csv`; (2) spot-check matches visually on real plates (Niva, Priora, Sens, Gazelle, Geely MK, Mercedes 200/230 → E-Class, UAZ 469 — needs plates from the user); (3) remaining `not_found` tail: Geely JL7162 / FE-2, Honda M-NV, СКС RDS-02РП, Fiat Grande Punto / Doblo Panorama, Kia Optima, Renault Taliant, ZAZ T13010 / TF69 (verify Chance), trim words ("307 xs 2.0 e", "pajero wgn 3.2 did") — each model < 300 cars; (4) check the offline `wiki` cap (200 entities) is enough now that every result fetches the photo. Ideas not done:
 search by normalized name for odd spellings ("118 i" → "118i"); non-Latin article titles (zh/ja/ko) are mostly rejected by
 the "title mentions the model" guard; a Wikidata `P18` query could replace the lead-image stage.
 
@@ -727,6 +722,77 @@ So showing their data/images (hotlinked or re-hosted) needs written permission. 
   allows). ~1.5-3k pages, ~30-60 min cold.
 - **If only a link/credit is allowed:** store just `source_url` per model, no facts/images.
 - **If no / no reply:** drop it; alternative = Wikidata/Wikipedia infobox dimensions (CC) like the Wikimedia hero photos.
+
+### Spec-page ideas from carsized.com / autosize.org — **researched 2026-10-10, nothing started**
+
+**Policy: do not scrape or reuse either site.** carsized.com robots.txt blocks only `/cdn-cgi/` (plus Meta crawlers); its terms
+could not be fetched. autosize.org answers 403 to bots (bot protection) and its footer says "© 2026 AutoSize. All rights reserved".
+Their photos, 0-1000 ratings, "who it suits" texts and compiled tables are theirs; the underlying facts (dimensions, fuel use,
+recalls, NCAP stars) come from public sources we already use. Everything below is built from our own / open data. Owner decisions
+(2026-10-10): **no multi-car compare / duel / overlay** (skipped); no contact with the site owners.
+
+**Group 1 — own data, new UI (no new source)**
+
+- Single-car **dimension callouts** over the hero photo (length / width / height / clearance lines, like the AutoSize hero) from RDW
+  Specs; no second car.
+- **Fits my garage / parking bay** check: user enters a space (stored per account or localStorage), card shows pass/fail from RDW width
+  (+ mirrors if known) and length.
+- **Running-cost line**: consumption (RDW/EPA) x current UA fuel price; reuse C4 customs + NBU currencies. Fuel-price source TBD.
+- **Ukrainian cost items to verify**: OSAGO category by engine volume, luxury-car tax (price/age thresholds), road-tax-free band.
+  Each needs an official source read first; hide when unsure.
+- **Rule-based "Who it suits"** sentence generated from our numbers (length, boot, seats, power, 0-100), translated via i18n keys.
+  Our own template text, never AutoSize's wording.
+- **Engine/trim table** (RDW variants grouped by engine: kW/hp, torque, 0-100, top speed, Euro class, CO2, gearbox, drive, L/100 km,
+  MPG) as a collapsible block; tyre-size column only if a verified source appears.
+- **Fleet context** (already unique to us): units in UA, regions, colours, years; **import-market view** (EU / US / JP share via
+  registry + VehiclesDB markets); **variants actually sold in UA** from registrations.
+- **Segment-peer list** — skipped with compare (it is a mini-compare).
+
+**Group 2 — Euro NCAP (already ingested; improvements only)**
+
+- State: `scripts/src/euroncap.ts` scrapes euroncap.com (sitemap discovery, 1 req/1.5 s, identifying UA, robots-aware) into
+  `registry.euroncap_ratings`, committed as `euroncap-ratings.csv.gz`. **No licence/terms review is recorded** for it (the round-2
+  sources each got one). **Terms read 2026-10-10 (`DATASETS_PLAN.md` "Euro NCAP terms"): not cleared** — content is copyrighted,
+  commercial reproduction "not authorised", prior permission needed for text and multimedia. **Before deploy: stars + percentages +
+  source link only; drop images/videos/logos and copied wording unless Euro NCAP permits.**
+- Ideas: stars + the four percentages (adult / child / vulnerable road users / safety assist) in the spec summary; test year and
+  protocol badge ("2012 results, older protocol — not comparable to current stars"); link every star line to the source page.
+
+**Group 3 — more open sources (already in DATASETS_PLAN, order unchanged)**
+
+- NHTSA recalls + complaints (stage F, owner call pending), UK MOT "common faults" (OGL, newest file 2023), Transport Canada recalls
+  (low), RDW recall refresh. Maybe: other national open registers (Norway, Sweden, Estonia, Latvia) as an RDW cross-check for models
+  RDW lacks; **each needs a licence read before use**.
+
+**Group 4 — Wikidata (CC0)** _(kept separate from Wikipedia and Commons)_
+
+- Generation list via P179 "part of series" + P155/P156 previous/next; ua/ru labels from sitelinks (stage I, step 1).
+- Predecessor / successor model links, production start/end (only ~58 of 943 generation items have dates), body type, platform,
+  manufacturer, country of origin, assembly plants.
+- Stable `wikidata_id` as a join key for generations, photos and links across the other sources.
+- P18 (image) and Commons-category pointers for the Group 6 photo work.
+
+**Group 5 — Wikipedia text + infobox (CC BY-SA; facts only, credit + link)**
+
+- Generation fallback when Wikidata has no items: prefix search ("BMW 3 Series (") and main-article **section headings**
+  ("Third generation (J12; 2021)") give number, code and start year (stage I, steps 2-3).
+- `{{Infobox automobile}}`: production / model years, body styles, platform, **dimensions, wheelbase, kerb weight, engines,
+  transmissions** — a free fallback for models RDW lacks, and the "if no" alternative already noted under automobiledimension.com.
+  Parsing traps: regional production years, `<ref>`, nested templates.
+- Localised article titles (ua/ru) and the existing wiki text/summary on the card; facelift and regional articles as flagged rows.
+- Per-model **"also sold as"** (badge-engineered twins) from infobox / disambiguation lines — complements VehiclesDB aliases.
+
+**Group 6 — Wikimedia Commons (per-file licences; credit author + licence)**
+
+- **Generation-specific photos**: file names carry the code (XV40, JD); pick by the car's year (stage I UI idea). Extends the
+  existing wiki-images pipeline and `wiki-images-coverage.ts`.
+- Side-profile / front-three-quarter selection for the dimension-callout hero (Group 1), with a licence + author field per image.
+- Colour variants, interior and engine-bay photos for an optional gallery; a background-removal pass for cut-outs only if the
+  licence allows derivatives (CC BY-SA = share-alike, check before storing edited copies).
+- Coverage report: which (brand, model, generation) pairs have no usable photo, to drive manual picks.
+
+**Suggested order:** Group 2 licence check (small, unblocks honest credits) -> stage I (Groups 4+5 core) -> Group 6 generation photos ->
+Group 1 dimension callouts + garage-fit -> Group 3 (existing order). Owner says "go" per item.
 
 ### To discuss / research
 

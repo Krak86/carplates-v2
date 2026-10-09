@@ -191,13 +191,10 @@ describe('buildExportReport', () => {
 
     const images = report.sections.find(s => s.id === 'images')
     const videos = report.sections.find(s => s.id === 'videos')
-    expect(images?.type).toBe('links')
     expect(videos?.type).toBe('links')
-    if (images?.type === 'links') {
-      const urls = images.links.map(l => l.url)
-      expect(urls).toContain('https://data-cdn.euroncap.com/media/assessment-media/a1/front_0_.webp')
-      expect(urls).toContain('https://data-cdn.euroncap.com/media/assessment-media/a1/side_1_.webp')
-    }
+    // Euro NCAP's photos are not cleared for reuse (DATASETS_PLAN "Euro NCAP terms") — never exported.
+    const imageUrls = images?.type === 'links' ? images.links.map(l => l.url) : []
+    expect(imageUrls.some(u => u.includes('euroncap.com'))).toBe(false)
     if (videos?.type === 'links') expect(videos.links.map(l => l.url)).toContain('https://youtu.be/abcdefghijk')
   })
 

@@ -41,6 +41,23 @@ describe('wikiSearchName', () => {
     expect(wikiSearchName('fiat', 'nuovo doblo 1.3')?.model).toBe('doblo')
   })
 
+  it('drops a model repeated in the brand, and maps the not_found tail', () => {
+    expect(wikiSearchName('seat leon', 'leon')).toMatchObject({ brand: 'seat', model: 'leon' })
+    expect(wikiSearchName('daewoo sens t1311', 'sens t1311')?.model).toBe('Sens')
+    expect(wikiSearchName('geely', 'fe-1')?.model).toBe('LC')
+    expect(wikiSearchName('geely mk jl7152', 'mk jl7152')?.model).toBe('MK')
+    expect(wikiSearchName('уаз', '31514')?.model).toBe('469')
+    expect(wikiSearchName('газ', '32213')?.model).toBe('Gazelle')
+    expect(wikiSearchName('ваз', '219010')?.model).toBe('Granta')
+    expect(wikiSearchName('mercedes-benz', '230 е')?.model).toBe('E-Class')
+    expect(wikiSearchName('mercedes-benz', 'vito 112cdi')?.model).toBe('Vito')
+    expect(wikiSearchName('mercedes-benz', '208 d')?.model).toBe('T1')
+    expect(wikiSearchName('mercedes-benz', 'g 55 amg')?.model).toBe('G-Class')
+    expect(wikiSearchName('bmw', '330е')?.model).toBe('3 Series')
+    expect(wikiSearchName('infiniti', 'qx56')?.model).toBe('QX')
+    expect(wikiSearchName('land rover', 'range rover')).toBeNull()
+  })
+
   it('leaves searchable models alone', () => {
     expect(wikiSearchName('toyota', 'camry')).toBeNull()
     expect(wikiSearchName('ваз', 'granta')).toBeNull()

@@ -826,8 +826,6 @@ function collectMedia(
 
   input.euroncap?.ratings.forEach(r => {
     const label = r.testedVariant ?? t('safety.tabEuroNcap')
-    addImage(`${t('safety.tabEuroNcap')} — ${label}`, r.frontImageUrl)
-    r.images.forEach(img => addImage(`${t('safety.tabEuroNcap')} — ${label} (${img.test ?? 'photo'})`, img.url))
     r.youtubeIds.forEach(id => addVideo(`${t('safety.tabEuroNcap')} — ${label}`, `https://youtu.be/${id}`))
   })
   input.nhtsa?.ratings.forEach(r => {

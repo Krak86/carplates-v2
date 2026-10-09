@@ -3,14 +3,15 @@ import { useTranslation } from 'react-i18next'
 
 import Card from '@/components/ui/Card'
 
-type Source = { key: string; label: string; url?: string; icon?: string; mask?: string }
+/** `tile`: a plain coloured square (Tailwind bg class) for a source whose logo we are not cleared to show. */
+type Source = { key: string; label: string; url?: string; icon?: string; mask?: string; tile?: string }
 
 const SOURCES: readonly Source[] = [
   { key: 'dataGovUa', label: 'data.gov.ua', url: 'https://data.gov.ua', icon: '/icons/sources/datagovua.webp' },
   { key: 'nhtsa', label: 'NHTSA', url: 'https://www.nhtsa.gov', icon: '/icons/sources/nhtsa.webp' },
   { key: 'wikipedia', label: 'Wikipedia', url: 'https://www.wikipedia.org', mask: '/icons/wikipedia-w.svg' },
   { key: 'pixabay', label: 'Pixabay', url: 'https://pixabay.com', icon: '/icons/sources/pixabay.webp' },
-  { key: 'euroncap', label: 'Euro NCAP', url: 'https://www.euroncap.com', icon: '/icons/sources/euroncap.webp' },
+  { key: 'euroncap', label: 'Euro NCAP', url: 'https://www.euroncap.com', tile: 'bg-yellow-400' },
   { key: 'jncap', label: 'JNCAP / NASVA', url: 'https://www.nasva.go.jp', icon: '/icons/sources/jncap.webp' },
   { key: 'cncap', label: 'C-NCAP / CATARC', url: 'https://www.c-ncap.org.cn', icon: '/icons/sources/cncap.webp' },
   { key: 'kncap', label: 'KNCAP', url: 'https://www.kncap.org', icon: '/icons/sources/kncap.webp' },
@@ -108,6 +109,10 @@ const SOURCES: readonly Source[] = [
 function SourceAvatar({ source }: { source: Source }): ReactNode {
   if (source.icon) {
     return <img src={source.icon} alt="" width={32} height={32} className="size-8 shrink-0 rounded-md object-contain" />
+  }
+
+  if (source.tile) {
+    return <span aria-hidden className={`size-8 shrink-0 rounded-md ${source.tile}`} />
   }
 
   if (source.mask) {

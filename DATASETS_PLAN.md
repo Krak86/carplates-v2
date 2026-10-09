@@ -48,6 +48,25 @@ Eurostat, ANCAP/Latin NCAP — see "Round 2 — what can be built, what is skipp
   dimensions/weight/engine specs for US models. If ever bought: get written confirmation that serving derived data to
   paying subscribers inside a hosted app is covered by "single-user" before paying.
 
+### Euro NCAP terms — verified 2026-10-10 (already ingested, `ingest:euroncap`)
+
+Source: [euroncap.com/terms-conditions](https://www.euroncap.com/terms-conditions/) (no last-updated date; footer "Copyright © 2026
+Euro NCAP"). robots.txt: `Allow: /`, `Disallow: /admin`, `/api/`, `/preview/`, `/*?id=*` — our sitemap-based scrape stays inside it.
+
+- "This site and its content are subject to the copyright of Euro NCAP." / "Reproduction is not authorised for commercial purposes." /
+  "Prior permission from Euro NCAP must be obtained for the reproduction or use of textual and multimedia information"
+  (video, pictures, illustrations). Nothing on automated access or linking. The press page also bars images, videos and logos in
+  advertising/commercial contexts without permission; protocol PDFs allow non-commercial, educational sharing with the notice kept.
+- **Verdict: not cleared.** Ratings are facts (stars, percentages, test year), but the page text, images and videos are copyrighted
+  and our use is a public product, so the committed CSV's `images` / `youtube_ids` columns and any copied wording are the risk.
+- **Done 2026-10-10:** the Euro NCAP photos (front thumbnail, carousel, credit line) are no longer rendered or exported — the card
+  shows the brand logo; the `frontImageUrl` / `images` fields stay in the schema, DB and CSV, unused. The crash-test video stays as
+  the YouTube no-cookie embed (play on click) plus an "Open on YouTube" link. The source credit on About stays (text link + logo);
+  the logo is the only grey item (press page bars logos in commercial contexts) — owner decided to keep it for now.
+- **Action before any public deploy (remaining):** (1) show stars + percentages + a link to the source page only; (2) stop displaying Euro NCAP
+  images/videos/logos (or get written permission); (3) credit "Euro NCAP" on About; (4) optionally ask permission. Until then treat the
+  section as **hidden-before-deploy** like any unresolved licence (rule in "Round 2"). Local dev use is unaffected.
+
 ## VehiclesDB (release 2026.10.0, built 2026-10-03)
 
 **Content:** 6,242 car + van models (5,510 cars), 373 makes; kinds car/motorcycle/moped/van/truck/bus; 15 countries.
@@ -294,6 +313,22 @@ crash videos, a tab in `SafetyRatings.tsx`).
 | **Kaggle car datasets**                                                               | small, US/India-oriented, licences unclear                                                                                                                                                 |
 | **autoevolution-derived** (gor3a, ilyasozkurt), **ddpc**, **carguru**, **sortedcars** | see sections above                                                                                                                                                                         |
 | **data.gov.ua**                                                                       | out of scope here — separate session                                                                                                                                                       |
+| **USSR / UA-built model sites** (checked 2026-10-10, see below)                       | no stated data licence; `drive.place` is bot-blocked (403); photos/text copyrighted. Facts only via Wikidata/Wikipedia                                                                     |
+
+#### USSR / Ukrainian-built models — sites checked 2026-10-10 (none ingested)
+
+Idea: extend the local DB with Soviet/UA cars (VAZ, GAZ, ZAZ, Moskvich, IZH, UAZ), poorly covered by VehiclesDB/RDW/NHTSA.
+
+- **autoussr.ru/en** — ~139 models (cars 34, trucks 26, buses 31, off-road 16, dump trucks 16, tractor units 16), 15 factories, 1924–1991;
+  per model: factory, years, hp, top speed, displacement; photos from Wikimedia Commons. © 2026, no licence stated. Best of the set,
+  usable only as a facts **cross-check**.
+- **sovietcarmodels.com** — ~840 cards over 14 listing pages (title + photo only); looks like a model-car shop. "All Rights Reserved © 2022". Skip.
+- **zaz.drive.place / drive.place** — 403 to automated fetch (bot protection). Its privacy policy names **Automdb.com**: an ad-funded
+  car-encyclopedia family on a shared template. No reuse licence; do not scrape or bypass the block. Skip.
+- **zaz.ua** (manufacturer, not fetched) and the **24tv.ua** article (editorial, not a dataset): nothing to ingest.
+- **Plan if the gap is real**: first measure it (read-only SQL: registry rows of those makes with no `vdb_models` / `rdw_specs`
+  match). Then a small separate, removable seed table sourced from **Wikidata (CC0) / Wikipedia (CC BY-SA)** — years, engine,
+  mass — with autoussr.ru as cross-check only; credit on About. Fits the existing deferred Wikidata stage I. Not started.
 
 ### Deferred
 

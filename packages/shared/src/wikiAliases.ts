@@ -36,12 +36,15 @@ function vazAlias(model: string): WikiSearchName | null {
   if (four === '2108' || four === '2109') return vaz(four)
   if (four === '2110' || four === '2111' || four === '2112' || four === '2113') return vaz(four)
   if (four === '2114' || four === '2115') return vaz(four)
+  if (four === '2190' || four === '2191') return named('Lada', 'Granta', 'Lada Granta')
   return null
 }
 
 function zazAlias(model: string): WikiSearchName | null {
   const m = model.toLowerCase()
-  if (m.startsWith('t13110')) return named('ZAZ', 'Sens', 'ЗАЗ Сенс')
+  if (/^(sens )?t1311/.test(m)) return named('ZAZ', 'Sens', 'ЗАЗ Сенс')
+  if (/^lanos\s\S/.test(m)) return named('Daewoo', 'Lanos')
+  if (m === 'nubira') return named('Daewoo', 'Nubira')
   if (/^1102/.test(m)) return named('ZAZ', 'Tavria', 'ЗАЗ-1102 Таврія')
   if (/^1103/.test(m)) return named('ZAZ', 'Slavuta', 'ЗАЗ-1103 Славута')
   if (/^1105/.test(m)) return named('ZAZ', 'Dana', 'ЗАЗ-1105 Дана')
@@ -60,32 +63,60 @@ export function wikiSearchName(registryBrand: string, model: string): WikiSearch
   if (alias) return alias
   // "corolla 1.33l", "a4 1.8", "mazda 6 2.5": the engine size is not part of the model name.
   const base = ENGINE_SIZE_SUFFIX.exec(model)?.[1]
-  return base ? named(brand, base.replace(/^nuovo /, '')) : null
+  if (base) return named(brand, base.replace(/^nuovo /, ''))
+  // "seat leon" + "leon": the model is repeated in the brand, and a search for "seat leon leon" finds nothing.
+  const rest = registryBrand.slice(brand.length).trim()
+  if (rest && (model === rest || model.startsWith(`${rest} `))) return named(brand, model)
+  return null
 }
 
 const ENGINE_SIZE_SUFFIX = /^(.*?[a-zа-я0-9])\s+\d\.\d.*$/
 
 function brandAlias(brand: string, model: string): WikiSearchName | null {
   if (brand === 'geely') {
-    if (model.replace(/\s/g, '-').startsWith('mr-7151')) return named('Geely', 'MK')
+    if (/^mr-?7151/.test(model.replace(/\s/g, '-'))) return named('Geely', 'MK')
     if (model === 'mk cross') return named('Geely', 'MK Cross')
+    if (/^(mk )?jl7152/.test(model)) return named('Geely', 'MK')
+    if (/^ck-?2/.test(model)) return named('Geely', 'CK')
+    if (/^fe-?1/.test(model)) return named('Geely', 'LC')
   }
   if (brand === 'газ') {
     if (model.startsWith('2410')) return named('GAZ', '24', 'ГАЗ-24 Волга')
-    if (model.startsWith('2705')) return named('GAZ', 'Gazelle', 'ГАЗель')
-    if (model.startsWith('2752')) return named('GAZ', 'Sobol', 'ГАЗ Соболь')
+    if (model.startsWith('2705') || model.startsWith('3221')) return named('GAZ', 'Gazelle', 'ГАЗель')
+    if (model.startsWith('2752') || model.startsWith('2217')) return named('GAZ', 'Sobol', 'ГАЗ Соболь')
+    if (model.startsWith('31105')) return named('GAZ', '31105', 'ГАЗ-31105 Волга')
   }
-  if (brand === 'уаз' && (model.startsWith('3909') || model.startsWith('3962'))) return named('UAZ', '452', 'УАЗ-452')
+  if (brand === 'уаз') {
+    if (model.startsWith('3909') || model.startsWith('3962') || model.startsWith('2206'))
+      return named('UAZ', '452', 'УАЗ-452')
+    if (/^(3151|469)/.test(model)) return named('UAZ', '469', 'УАЗ-469')
+    if (model.startsWith('3163')) return named('UAZ', 'Patriot', 'УАЗ Патріот')
+  }
+  if (brand === 'иж') {
+    if (model.startsWith('2125')) return named('IZh', '2125', 'ИЖ-2125 Комби')
+    if (model.startsWith('2717')) return named('IZh', '2717', 'ИЖ-2717')
+  }
+  if (brand === 'hyundai' && model === 'h200') return named('Hyundai', 'H-1')
+  if (brand === 'mazda' && /^\d$/.test(model)) return named('Mazda', `Mazda${model}`)
+  if (brand === 'citroen' && /^c \d$/.test(model)) return named('Citroen', model.replace(' ', ''))
+  if (brand === 'volvo' && /^v\d{2}cc$/.test(model)) return named('Volvo', model.slice(0, 3))
+  if (brand === 'peugeot' && model === 'e2008') return named('Peugeot', '2008')
+  if (brand === 'renault' && model === 'clio simbol') return named('Renault', 'Symbol')
+  if (brand === 'volkswagen' && model.startsWith('cc ')) return named('Volkswagen', 'CC')
   if (brand === 'луаз' && model.startsWith('969')) return named('LuAZ', '969', 'ЛуАЗ-969')
   if (brand === 'иж' && model.startsWith('412')) return named('Moskvich', '412', 'Москвич-412')
   if (brand === 'smart' && model === 'mc 01') return named('Smart', 'Fortwo')
   if (brand === 'chevrolet' && model === 'evanda') return named('Daewoo', 'Evanda')
   if (brand === 'renault' && model === 'megane scenic') return named('Renault', 'Scenic')
   if (brand === 'byd' && model === 'f-3') return named('BYD', 'F3')
-  if (brand === 'infiniti' && /^fx\s?\d{2}$/.test(model)) return named('Infiniti', 'FX')
-  if (brand === 'volkswagen' && model === 'lt 35') return named('Volkswagen', 'LT')
+  if (brand === 'infiniti') {
+    const family = /^(fx|ex|qx|jx|g|m)\s?\d{2}$/.exec(model)?.[1]
+    if (family) return named('Infiniti', family.toUpperCase())
+  }
+  if (brand === 'volkswagen' && /^lt\s?\d{2}$/.test(model)) return named('Volkswagen', 'LT')
   if (brand === 'daewoo' || brand === 'fso') {
-    if (model.startsWith('t13110')) return named('ZAZ', 'Sens', 'ЗАЗ Сенс')
+    if (/^(sens )?t1311/.test(model)) return named('ZAZ', 'Sens', 'ЗАЗ Сенс')
+    if (model.includes('nubira')) return named('Daewoo', 'Nubira')
     if (model.includes('lanos')) return named('Daewoo', 'Lanos')
   }
   if (brand === 'lexus') {
@@ -94,19 +125,27 @@ function brandAlias(brand: string, model: string): WikiSearchName | null {
   }
   if (brand === 'kia' && model === 'magentis') return named('Kia', 'Optima', 'Kia Magentis')
   if (brand === 'mitsubishi' && model === 'l 200') return named('Mitsubishi', 'L200')
-  if (brand === 'suzuki' && model === 'new sx4') return named('Suzuki', 'SX4')
+  if (brand === 'suzuki' && model.startsWith('new sx4')) return named('Suzuki', 'SX4')
   if (VAZ_BRANDS.has(brand)) return vazAlias(model)
   if (ZAZ_BRANDS.has(brand)) return zazAlias(model)
   if (brand === 'азлк' || brand === 'москвич')
     return model.startsWith('2141') ? named('Moskvich', '2141', 'Москвич-2141') : null
   if (brand === 'mercedes-benz') {
-    if (/^(ml|gl)\s?\d{2,3}/.test(model)) return named('Mercedes-Benz', model.startsWith('ml') ? 'M-Class' : 'GL-Class')
-    if (/^3\d{2}\s?cdi/.test(model)) return named('Mercedes-Benz', 'Sprinter')
-    const letter = MERCEDES_CLASS.exec(model)?.[1]
+    // The registry types the Cyrillic "е" in "230 е" / "200 е".
+    const m = model.replace(/е/g, 'e')
+    if (/^(ml|gl)\s?\d{2,3}/.test(m)) return named('Mercedes-Benz', m.startsWith('ml') ? 'M-Class' : 'GL-Class')
+    if (/^g\s?\d{2,3}/.test(m)) return named('Mercedes-Benz', 'G-Class')
+    if (/^3\d{2}\s?cdi/.test(m)) return named('Mercedes-Benz', 'Sprinter')
+    if (/^(vito )?1\d{2}\s?(cdi|d)$/.test(m)) return named('Mercedes-Benz', 'Vito')
+    if (/^[23](08|10|11|12|14)\s?d$/.test(m)) return named('Mercedes-Benz', 'T1')
+    if (/^190(\s?[de])?$/.test(m)) return named('Mercedes-Benz', '190')
+    // Pre-1995 numeric names (200, 230 e, 250 d): the W123/W124 era, which Commons files under the E-Class.
+    if (/^2[0-9]{2}(\s?[de])?$/.test(m) || m === '320') return named('Mercedes-Benz', 'E-Class')
+    const letter = MERCEDES_CLASS.exec(m)?.[1]
     return letter ? named('Mercedes-Benz', `${letter.toUpperCase()}-Class`) : null
   }
   if (brand === 'bmw') {
-    const series = BMW_SERIES.exec(model)?.[1]
+    const series = BMW_SERIES.exec(model.replace(/е/g, 'e'))?.[1]
     return series ? named('BMW', `${series} Series`) : null
   }
   return null

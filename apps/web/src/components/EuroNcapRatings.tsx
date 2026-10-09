@@ -42,31 +42,6 @@ function PillarBar({ label, pct }: PillarProps): ReactNode {
   )
 }
 
-type ImageStripProps = { images: EuroNcapRating['images'] }
-
-function ImageStrip({ images }: ImageStripProps): ReactNode {
-  const { t } = useTranslation()
-  if (images.length === 0) return null
-  return (
-    <div className="mt-2">
-      <div className="flex gap-1.5 overflow-x-auto pb-1">
-        {images.map(img => (
-          <a key={img.url} href={img.url} target="_blank" rel="noopener noreferrer" className="shrink-0">
-            <img
-              src={img.url}
-              alt={img.test ?? ''}
-              loading="lazy"
-              referrerPolicy="no-referrer"
-              className="h-16 w-24 rounded object-cover"
-            />
-          </a>
-        ))}
-      </div>
-      <p className="mt-1 text-[11px] text-[var(--color-muted)]">{t('safety.euroncapPhotosCredit')}</p>
-    </div>
-  )
-}
-
 /** Mirrors NhtsaRatings' RatingsInfo popover — same "what do these numbers mean?" role, Euro NCAP's own categories. */
 function RatingsInfo(): ReactNode {
   const { t } = useTranslation()
@@ -98,19 +73,9 @@ function RatingCard({ rating, brand, compact, onPlayVideo }: RatingCardProps): R
 
   return (
     <div className="flex gap-3 border-t border-[var(--color-border)] py-2 first:border-t-0">
-      {rating.frontImageUrl ? (
-        <img
-          src={rating.frontImageUrl}
-          alt=""
-          loading="lazy"
-          referrerPolicy="no-referrer"
-          className="h-16 w-16 shrink-0 rounded object-cover"
-        />
-      ) : (
-        <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded bg-[var(--color-border)]/40 p-3">
-          <BrandLogo brand={brand} className="h-full w-full object-contain" />
-        </div>
-      )}
+      <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded bg-[var(--color-border)]/40 p-3">
+        <BrandLogo brand={brand} className="h-full w-full object-contain" />
+      </div>
 
       <div className="min-w-0 flex-1 text-sm">
         <div className="truncate font-medium">{label}</div>
@@ -136,17 +101,25 @@ function RatingCard({ rating, brand, compact, onPlayVideo }: RatingCardProps): R
           </div>
         )}
 
-        {!compact && <ImageStrip images={rating.images} />}
-
         <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs">
           {rating.youtubeIds[0] && (
-            <button
-              type="button"
-              onClick={() => onPlayVideo(rating.youtubeIds[0]!, label)}
-              className="text-[var(--color-primary)] underline"
-            >
-              {t('safety.euroncapWatchVideo')} ▶
-            </button>
+            <>
+              <button
+                type="button"
+                onClick={() => onPlayVideo(rating.youtubeIds[0]!, label)}
+                className="text-[var(--color-primary)] underline"
+              >
+                {t('safety.euroncapWatchVideo')} ▶
+              </button>
+              <a
+                href={`https://www.youtube.com/watch?v=${rating.youtubeIds[0]}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[var(--color-primary)] underline"
+              >
+                {t('safety.euroncapOpenOnYoutube')} ↗
+              </a>
+            </>
           )}
           <a
             href={rating.url}
