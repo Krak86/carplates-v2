@@ -67,8 +67,9 @@ export default function BrandLogo({ brand, variant = 'inline', size = 'default',
         // both contribute a height/width class, or which one wins is cascade-order luck.
         size === 'sm' ? 'h-4 w-5' : 'h-4 w-auto max-w-15 shrink-0',
         'object-contain mix-blend-multiply',
-        // Dark logos vanish on a dark surface — sit them on a light chip.
-        'dark:rounded dark:bg-white/10 dark:mix-blend-normal',
+        // Dark logos vanish on a dark surface — sit them on an opaque white chip (a translucent one
+        // leaves dark-blue marks like Ford's low-contrast, and washes out the logos' own white backdrop).
+        'dark:rounded dark:bg-white dark:mix-blend-normal',
         size === 'sm' ? 'dark:p-px' : 'dark:p-1',
         className
       )}

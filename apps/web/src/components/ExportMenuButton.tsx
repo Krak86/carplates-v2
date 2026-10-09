@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 
+import ExportFormatIcon from '@/components/ExportFormatIcon'
 import Spinner from '@/components/ui/Spinner'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 import { ONLINE_ONLY_EXPORT_FORMATS } from '@/lib/export-report'
@@ -137,8 +138,9 @@ export default function ExportMenuButton({
                 type="button"
                 role="menuitem"
                 onClick={() => void handlePick(format)}
-                className="block w-full rounded px-2 py-1.5 text-left hover:bg-[var(--color-border)]/40"
+                className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left hover:bg-[var(--color-border)]/40"
               >
+                <ExportFormatIcon format={format} />
                 {t(formatLabelKey[format])}
               </button>
             ))}
