@@ -37,7 +37,7 @@ export default function TopStatBadges({ brand, model, color, region }: Props): R
           viewTransition
           key={badge.key}
           to={badge.to}
-          className="inline-flex items-center gap-1 rounded-full border border-[var(--color-border)] bg-[var(--color-surface)]/20 px-2 py-0.5 text-xs text-[var(--color-fg)] transition-colors hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
+          className="inline-flex animate-chip-in items-center gap-1 rounded-full border border-[var(--color-border)] bg-[var(--color-surface)]/20 px-2 py-0.5 text-xs text-[var(--color-fg)] transition-colors hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
         >
           <span aria-hidden>{badge.icon}</span>
           {t(badge.textKey, { rank: badge.rank })}

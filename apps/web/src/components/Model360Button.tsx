@@ -44,7 +44,7 @@ export default function Model360Button({ brand, model }: Props): ReactNode {
         onClick={() => setOpen(true)}
         disabled={!online}
         title={online ? undefined : t('offline.needsConnection')}
-        className="inline-flex cursor-pointer items-center gap-1 rounded-full border border-[var(--color-border)] bg-[var(--color-surface)]/20 px-2 py-0.5 text-xs text-[var(--color-fg)] transition-colors hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-[var(--color-border)] disabled:hover:text-[var(--color-fg)]"
+        className="inline-flex animate-chip-in cursor-pointer items-center gap-1 rounded-full border border-[var(--color-border)] bg-[var(--color-surface)]/20 px-2 py-0.5 text-xs text-[var(--color-fg)] transition-colors hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-[var(--color-border)] disabled:hover:text-[var(--color-fg)]"
       >
         <span aria-hidden>🔄</span>
         {t('model360.open', { n: count })}

@@ -17,7 +17,7 @@ type Props = {
 }
 
 const CHIP =
-  'inline-flex items-center gap-1 rounded-full border border-[var(--color-border)] bg-[var(--color-surface)]/20 px-2 py-0.5 text-xs text-[var(--color-fg)]'
+  'inline-flex animate-chip-in items-center gap-1 rounded-full border border-[var(--color-border)] bg-[var(--color-surface)]/20 px-2 py-0.5 text-xs text-[var(--color-fg)]'
 
 /**
  * Cross-market chips from the VehiclesDB catalog (CC-BY): where else the model is sold and how popular it is across

@@ -47,6 +47,7 @@ import SectionInfo from '@/components/SectionInfo'
 import ShareButton from '@/components/ShareButton'
 import TopStatBadges from '@/components/TopStatBadges'
 import { useCarHeroImageActions } from '@/components/use-car-hero-image-actions'
+import { useChipsPending } from '@/components/use-chips-pending'
 import { useCopyFeedback } from '@/components/use-copy-feedback'
 import Card from '@/components/ui/Card'
 import VehicleKindIcon from '@/components/VehicleKindIcon'
@@ -111,6 +112,7 @@ export default function ResultCard({ data }: Props): ReactNode {
   const bodyInfo = getBodyInfo(c.body)
   const vehicleColor = resolveVehicleColor(c.color) ?? fallbackVehicleColor(data.plate)
   const brandDealerUrl = dealerUrl(c.brand)
+  const chipsPending = useChipsPending({ brand: c.brand, model: c.model, kind: c.kind })
   useCarHeroImageActions({ brand: c.brand, model: c.model, year: c.makeYear, key: c.vin || data.plate })
 
   // Plate history covers every vehicle that ever wore this plate, reassignment
@@ -212,14 +214,18 @@ export default function ResultCard({ data }: Props): ReactNode {
                 </span>
               )}
             </div>
-            <div className="mt-1 flex flex-wrap gap-1.5 empty:hidden">
+            {/* Reserves one chip-height up front so late-arriving chips never push the card down. */}
+            <div className="mt-1 flex min-h-6 flex-wrap items-center gap-1.5">
+              {chipsPending && <span aria-hidden className="h-6 w-24 animate-pulse rounded-full bg-border" />}
               <TopStatBadges brand={c.brand} model={c.model} color={c.color} region={data.region} />
               <VdbChips brand={c.brand} model={c.model} kind={c.kind} />
               <Model3dButton brand={c.brand} model={c.model} />
               <Model360Button brand={c.brand} model={c.model} />
+            </div>
+            <div className="mt-2 flex flex-wrap items-center gap-2 empty:hidden">
+              <NewCarsLink brand={c.brand} />
               {brandDealerUrl && <BrandSiteChip url={brandDealerUrl} />}
             </div>
-            <NewCarsLink brand={c.brand} />
           </div>
           <VehicleKindIcon
             kind={vehicleKind}

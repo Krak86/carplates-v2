@@ -26,7 +26,7 @@ export default function NewCarsLink({ brand }: Props): ReactNode {
       target="_blank"
       rel="noopener noreferrer nofollow"
       title={title}
-      className="mt-2 inline-flex items-center gap-2 rounded-lg border border-border bg-surface/20 px-3 py-1.5 text-sm font-medium text-fg transition-colors hover:border-primary hover:text-primary"
+      className="inline-flex items-center gap-2 rounded-lg border border-border bg-surface/20 px-3 py-1.5 text-sm font-medium text-fg transition-colors hover:border-primary hover:text-primary"
     >
       <BrandLogo brand={brand} size="sm" />
       {t('result.newCars', { brand: displayBrand(brand), year: new Date().getFullYear() })}

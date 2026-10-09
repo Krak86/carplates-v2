@@ -158,6 +158,26 @@ body {
   }
 }
 
+/* Header chips that resolve asynchronously ease in instead of popping. */
+@keyframes chip-in {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@utility animate-chip-in {
+  animation: chip-in 250ms ease-out backwards;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
 /* Tune freely while testing — no need to hunt through component classes. */
 :root {
   --watermark-opacity: 0.12;
