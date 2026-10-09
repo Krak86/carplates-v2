@@ -27,6 +27,7 @@ import { usePlateRecognition } from '@/components/use-plate-recognition'
 import { extractVehicleInfo } from '@/components/VinResult.helpers'
 import WikiHeroImage from '@/components/WikiHeroImage'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
+import { useSideCommunity } from '@/hooks/useSideCommunity'
 import { useSideWidgetsVisible } from '@/hooks/useSideWidgetsVisible'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 import { ApiError } from '@/lib/api'
@@ -50,6 +51,7 @@ const WeightModelsCards = lazy(() => import('@/routes/stats/WeightModelsCards'))
 const EMPTY_WEIGHT_BOARD: WeightBoard = { heaviest: [], lightest: [] }
 const NewsWidget = lazy(() => import('@/components/NewsWidget'))
 const BlueskyWidget = lazy(() => import('@/components/BlueskyWidget'))
+const CommunityWidget = lazy(() => import('@/components/CommunityWidget'))
 const NewCarsWidget = lazy(() => import('@/components/NewCarsWidget'))
 const StockWidget = lazy(() => import('@/components/StockWidget'))
 
@@ -123,6 +125,14 @@ export default function SearchRoute(): ReactNode {
     dismissPhoto,
     selectCandidate
   } = usePlateRecognition({ currentValue: raw || null, linkedValue })
+
+  const community = useSideCommunity(
+    sideWidgets && !recognizeErrorKey,
+    wikiHeroVehicle?.brand ?? undefined,
+    wikiHeroVehicle?.model ?? null,
+    wikiHeroVehicle?.year ?? null,
+    kind === 'plate'
+  )
 
   useEffect(() => {
     if (!raw || active.isPending) return
@@ -358,9 +368,28 @@ export default function SearchRoute(): ReactNode {
               </Suspense>
             </LoadErrorBoundary>
 
+            {community.rightFirst && (
+              <LoadErrorBoundary compact>
+                <Suspense fallback={null}>
+                  <CommunityWidget icon="🔧" title={t('social.stackexchange')} side="right" {...community.rightFirst} />
+                </Suspense>
+              </LoadErrorBoundary>
+            )}
+
             <LoadErrorBoundary compact>
               <Suspense fallback={null}>
                 <NewCarsWidget key={wikiHeroVehicle.brand} brand={wikiHeroVehicle.brand} />
+              </Suspense>
+            </LoadErrorBoundary>
+          </div>
+        )}
+
+        {/* Second right column, beside the first (very wide screens, ~1s after it): mechanics Q&A. */}
+        {community.rightSecond && (
+          <div className="pointer-events-none fixed top-20 right-67 z-10 flex max-h-[calc(100vh-6rem)] w-60 flex-col gap-3 overflow-x-hidden overflow-y-auto">
+            <LoadErrorBoundary compact>
+              <Suspense fallback={null}>
+                <CommunityWidget icon="🔧" title={t('social.stackexchange')} side="right" {...community.rightSecond} />
               </Suspense>
             </LoadErrorBoundary>
           </div>
@@ -381,9 +410,28 @@ export default function SearchRoute(): ReactNode {
               </LoadErrorBoundary>
             )}
 
+            {community.leftFirst && (
+              <LoadErrorBoundary compact>
+                <Suspense fallback={null}>
+                  <CommunityWidget icon="🐭" title={t('social.lemmy')} side="left" {...community.leftFirst} />
+                </Suspense>
+              </LoadErrorBoundary>
+            )}
+
             <LoadErrorBoundary compact>
               <Suspense fallback={null}>
                 <StockWidget brand={wikiHeroVehicle.brand} />
+              </Suspense>
+            </LoadErrorBoundary>
+          </div>
+        )}
+
+        {/* Second left column, beside the first (very wide screens, ~1s after it): Lemmy. */}
+        {community.leftSecond && (
+          <div className="pointer-events-none fixed top-20 left-67 z-10 flex max-h-[calc(100vh-6rem)] w-60 flex-col gap-3 overflow-x-hidden overflow-y-auto">
+            <LoadErrorBoundary compact>
+              <Suspense fallback={null}>
+                <CommunityWidget icon="🐭" title={t('social.lemmy')} side="left" {...community.leftSecond} />
               </Suspense>
             </LoadErrorBoundary>
           </div>

@@ -5,12 +5,15 @@ import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router'
 
 import BlueskyPostCard from '@/components/BlueskyPostCard'
+import CommunityPostCard from '@/components/CommunityPostCard'
 import SectionInfo from '@/components/SectionInfo'
 import ShareButton from '@/components/ShareButton'
+import SocialGroup from '@/components/SocialGroup'
 import VinToggleSection from '@/components/vin/VinToggleSection'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { SIDE_WIDGETS_DESKTOP_QUERY, useSideWidgetsVisible } from '@/hooks/useSideWidgetsVisible'
 import { blueskyQuery } from '@/lib/bluesky'
+import { lemmyQuery, stackExchangeQuery } from '@/lib/community'
 import { scrollElementIntoView } from '@/lib/share-section'
 
 type Props = {
@@ -20,11 +23,11 @@ type Props = {
 }
 
 /**
- * Collapsed "Social" section under the news (shareable via `?section=social`): one labelled group per social network
- * (Bluesky for now — add the next network as another group). Each group is every public post found about the car's
- * make/model in a sideways-scrolling row like the videos strip, plus a "more" link to the network's own search. Same
- * query as the left-hand side widget (one request); on wide screens it waits for the first scroll like the news section.
- * Hidden for a car with no make or no posts.
+ * Collapsed "Social" section under the news (shareable via `?section=social`): one labelled group per source —
+ * Bluesky posts plus Stack Exchange (Mechanics) and Lemmy threads, all keyless browser-side searches. Each group is a
+ * sideways-scrolling row like the videos strip, plus a "more" link to the source's own search. The Bluesky query is
+ * shared with the left-hand side widget (one request); on wide screens everything waits for the first scroll like the
+ * news section. Hidden for a car with no make or no results anywhere.
  */
 export default function SocialSection({ brand, model, year }: Props): ReactNode {
   const { t } = useTranslation()
@@ -33,12 +36,14 @@ export default function SocialSection({ brand, model, year }: Props): ReactNode 
   const sectionRef = useRef<HTMLDivElement>(null)
   const isDesktop = useMediaQuery(SIDE_WIDGETS_DESKTOP_QUERY)
   const widgetsVisible = useSideWidgetsVisible()
-  const posts = useQuery({
-    ...blueskyQuery(brand ?? '', model, year),
-    enabled: !!brand && (!isDesktop || widgetsVisible || isShared)
-  })
-  const items = posts.data?.posts ?? []
-  const hasPosts = items.length > 0
+  const enabled = !!brand && (!isDesktop || widgetsVisible || isShared)
+  const blueskyPosts = useQuery({ ...blueskyQuery(brand ?? '', model, year), enabled })
+  const stackPosts = useQuery({ ...stackExchangeQuery(brand ?? '', model), enabled })
+  const lemmyPosts = useQuery({ ...lemmyQuery(brand ?? '', model), enabled })
+  const bluesky = blueskyPosts.data?.posts ?? []
+  const stack = stackPosts.data?.posts ?? []
+  const lemmy = lemmyPosts.data?.posts ?? []
+  const hasPosts = bluesky.length + stack.length + lemmy.length > 0
 
   useEffect(() => {
     if (isShared && hasPosts && sectionRef.current) scrollElementIntoView(sectionRef.current)
@@ -57,32 +62,37 @@ export default function SocialSection({ brand, model, year }: Props): ReactNode 
       hideLabel={t('social.hide')}
       defaultOpen={isShared}
     >
-      <div className="mb-2 flex items-center gap-2">
-        <span className="inline-flex items-center gap-1 rounded-full border border-[var(--color-border)] bg-[var(--color-surface)]/20 px-2.5 py-0.5 text-sm font-medium">
-          <span aria-hidden>🦋</span> {t('bluesky.title')}
-        </span>
-      </div>
+      {bluesky.length > 0 && (
+        <SocialGroup icon="🦋" title={t('bluesky.title')} moreUrl={blueskyPosts.data?.searchUrl}>
+          {bluesky.map(post => (
+            <li key={post.id} className="w-64 shrink-0">
+              <BlueskyPostCard post={post} />
+            </li>
+          ))}
+        </SocialGroup>
+      )}
 
-      <ul className="flex items-start gap-3 overflow-x-auto pb-2">
-        {items.map(post => (
-          <li key={post.id} className="w-64 shrink-0">
-            <BlueskyPostCard post={post} />
-          </li>
-        ))}
-      </ul>
+      {stack.length > 0 && (
+        <SocialGroup icon="🔧" title={t('social.stackexchange')} moreUrl={stackPosts.data?.searchUrl}>
+          {stack.map(post => (
+            <li key={post.id} className="w-64 shrink-0">
+              <CommunityPostCard post={post} />
+            </li>
+          ))}
+        </SocialGroup>
+      )}
 
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="text-sm text-[var(--color-muted)]">{t('social.disclaimer')}</p>
+      {lemmy.length > 0 && (
+        <SocialGroup icon="🐭" title={t('social.lemmy')} moreUrl={lemmyPosts.data?.searchUrl}>
+          {lemmy.map(post => (
+            <li key={post.id} className="w-64 shrink-0">
+              <CommunityPostCard post={post} />
+            </li>
+          ))}
+        </SocialGroup>
+      )}
 
-        <a
-          href={posts.data?.searchUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="rounded-md px-2 py-1.5 text-sm font-medium text-[var(--color-primary)] hover:bg-[var(--color-surface)]"
-        >
-          {t('bluesky.more')} <span aria-hidden>↗</span>
-        </a>
-      </div>
+      <p className="text-sm text-[var(--color-muted)]">{t('social.disclaimer')}</p>
     </VinToggleSection>
   )
 }
