@@ -2,11 +2,15 @@ import {
   convertEur,
   customsFuel,
   customsTax,
+  floorStartYears,
+  OLD_CAR_FLOOR_SHARE,
   type Currency,
   type CustomsTax,
   type FxResponse,
   type RdwMatchInfo
 } from '@carplates/shared'
+
+import { approxCount } from '@/components/RdwSpecs.helpers'
 
 type Estimate = NonNullable<RdwMatchInfo['valueEstimate']>
 
@@ -140,4 +144,29 @@ export function plotSeries(
   const plotted = points.map(point => ({ px: toPx(point.x), py: toPy(point.y), point }))
   const path = plotted.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.px.toFixed(1)} ${p.py.toFixed(1)}`).join(' ')
   return { plotted, toPx, toPy, path, xMin, xMax, yMax }
+}
+
+/** Loosely-typed `t`, so these helpers don't fight i18next's generic overloads. */
+type Translate = (key: string, options?: Record<string, unknown>) => string
+
+/** The "how is this estimated" explanation, one line per fact — shared by the on-screen details and the export. */
+export function valueInfoLines(match: RdwMatchInfo, estimate: Estimate, locale: string, t: Translate): string[] {
+  const newPrice = estimate.newPriceEur ?? match.specs.priceEur?.median
+  const name = `${match.makeName} ${match.modelName}`
+  return [
+    t('value.info.lead'),
+    t('value.info.how', {
+      name,
+      age: estimate.ageYears,
+      percent: Math.round(estimate.retained * 100),
+      price: formatEur(Math.round((newPrice ?? 0) / 100) * 100, locale)
+    }),
+    t('rdw.info.sample', { n: approxCount(estimate.priceN ?? match.specs.n, locale), year: match.specs.year }),
+    estimate.rough && t('value.info.rough', { n: estimate.priceN ?? 0 }),
+    !match.exactYear && t('value.info.nearYear', { year: match.specs.year }),
+    t('value.info.range', { percent: Math.round((estimate.spread ?? 0.15) * 100) }),
+    estimate.extrapolated &&
+      t('value.info.floor', { years: floorStartYears(), percent: Math.round(OLD_CAR_FLOOR_SHARE * 100) }),
+    t('value.info.credit')
+  ].filter((line): line is string => typeof line === 'string' && line !== '')
 }

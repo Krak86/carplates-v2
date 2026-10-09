@@ -1,4 +1,4 @@
-import { fetchImageAsPng } from '@/lib/export-image'
+import { fetchImageAsPng, renderChartPng } from '@/lib/export-image'
 import type { EmbeddedImage } from '@/lib/export-image'
 import type { ExportReport, ExportSection } from '@/lib/export-report'
 
@@ -6,6 +6,7 @@ const LOGO_MAX_WIDTH_PT = 64
 const LOGO_SOURCE_MAX_WIDTH_PX = 256
 const HERO_MAX_WIDTH_PT = 320
 const HERO_SOURCE_MAX_WIDTH_PX = 800
+const CHART_WIDTH_PT = 400
 
 // `jspdf` is only pulled into the bundle when a viewer actually asks for a PDF download
 // (dynamic import, same rationale as apps/web/src/lib/telemetry.ts).
@@ -116,7 +117,8 @@ export async function toPdfBlob(report: ExportReport): Promise<Blob> {
       for (const row of section.rows) writeLines(`${row.label}: ${row.value}`, FONT_SIZE_BODY, false)
     } else if (section.type === 'text') {
       for (const p of section.paragraphs) writeLines(p, FONT_SIZE_BODY, false)
-    } else if (section.type === 'table') {
+    } else if (section.type === 'table' || section.type === 'chart') {
+      if (section.type === 'chart') writeImage(renderChartPng(section), CHART_WIDTH_PT)
       if (section.note) writeLines(section.note, FONT_SIZE_BODY, false)
       for (const row of section.rows) {
         const line = section.columns.map((col, i) => `${col}: ${row[i] ?? '—'}`).join(' · ')

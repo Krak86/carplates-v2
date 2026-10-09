@@ -25,6 +25,7 @@ import { extractVehicleInfo } from '@/components/VinResult.helpers'
 import VinBarcode from '@/components/vin/VinBarcode'
 import VinRegistryHistory from '@/components/vin/VinRegistryHistory'
 import VinDecodeTabs from '@/components/vin/VinDecodeTabs'
+import VinTypicalData from '@/components/vin/VinTypicalData'
 import { useCardMotion } from '@/hooks/useCardMotion'
 import { useUiStore } from '@/store/ui-store'
 
@@ -110,6 +111,7 @@ export default function VinResult({ data }: Props): ReactNode {
             <>
               <SafetyRatings brand={vehicle.brand} model={vehicle.model} year={vehicle.year} body={vehicle.body} />
               <CarWikiInfo brand={vehicle.brand} model={vehicle.model} year={vehicle.year} />
+              <VinTypicalData data={data} />
             </>
           }
         />

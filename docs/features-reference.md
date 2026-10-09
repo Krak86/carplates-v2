@@ -104,7 +104,7 @@ vin.unit.*` key (ua/ru; the English original is shown beside it, the Raw tab sta
 a key is added — `vin-text.test.ts` covers labels, values, units, weight class and countries. "Typical model data" (`VinTypicalData`)
 reuses the plate-card components (VehiclesDB chips, RDW Specs, Emissions) through `typicalLookup`, which maps NHTSA make/model/year/
 fuel/type/displacement to registry-style inputs; it is labelled "≈ typical, not decoded". Crash ratings and wiki info go through the
-`overviewExtras` slot so only the Overview tab shows them.
+`overviewExtras` slot so only the Overview tab shows them; so does `VinTypicalData` (VehiclesDB chips + RDW specs + emissions) — VIN page only, the plate card has its own sections for those. The "Copy all info" export (`export-report.ts`) also gathers RDW specs, VehiclesDB and the reviews catalog.
 
 ## Offline / PWA details
 

@@ -1,15 +1,14 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import type { VinDecodeResponse } from '@carplates/shared'
 
 import FuelEconomy from '@/components/FuelEconomy'
 import RdwSpecs from '@/components/RdwSpecs'
 import VdbChips from '@/components/VdbChips'
-import { typicalLookup } from '@/components/vin/helpers'
-import type { FieldMap, VinFallback } from '@/components/vin/helpers'
+import { buildFallback, toFieldMap, typicalLookup } from '@/components/vin/helpers'
 
 type Props = {
-  fields: FieldMap
-  fallback: VinFallback
+  data: VinDecodeResponse
 }
 
 /**
@@ -17,8 +16,10 @@ type Props = {
  * decoded from this VIN, so the whole group carries a dashed "≈ typical" tag — the same visual language as the
  * fallback tags — and says when the make / model / year it was looked up by were estimates themselves.
  */
-export default function VinTypicalData({ fields, fallback }: Props): ReactNode {
+export default function VinTypicalData({ data }: Props): ReactNode {
   const { t } = useTranslation()
+  const fields = toFieldMap(data.results)
+  const fallback = buildFallback(data.vin, fields, data.registry?.actions[0])
   const lookup = typicalLookup(fields, fallback)
   if (!lookup) return null
 

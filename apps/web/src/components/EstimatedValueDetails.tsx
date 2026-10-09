@@ -1,15 +1,8 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import {
-  floorStartYears,
-  OLD_CAR_FLOOR_SHARE,
-  type Currency,
-  type FxResponse,
-  type RdwMatchInfo
-} from '@carplates/shared'
+import type { Currency, FxResponse, RdwMatchInfo } from '@carplates/shared'
 
-import { formatEur, formatMoneyRange } from '@/components/EstimatedValue.helpers'
-import { approxCount } from '@/components/RdwSpecs.helpers'
+import { formatEur, formatMoneyRange, valueInfoLines } from '@/components/EstimatedValue.helpers'
 import InfoText from '@/components/InfoText'
 import ValueByAgeChart from '@/components/ValueByAgeChart'
 import ValueLineChart from '@/components/ValueLineChart'
@@ -40,24 +33,7 @@ export default function EstimatedValueDetails({
   const name = `${match.makeName} ${match.modelName}`
   const eur = (v: number): string => formatEur(v, locale)
 
-  const text = [
-    t('value.info.lead'),
-    t('value.info.how', {
-      name,
-      age: estimate.ageYears,
-      percent: Math.round(estimate.retained * 100),
-      price: eur(Math.round((newPrice ?? 0) / 100) * 100)
-    }),
-    t('rdw.info.sample', { n: approxCount(estimate.priceN ?? match.specs.n, locale), year: match.specs.year }),
-    estimate.rough && t('value.info.rough', { n: estimate.priceN ?? 0 }),
-    !match.exactYear && t('value.info.nearYear', { year: match.specs.year }),
-    t('value.info.range', { percent: Math.round((estimate.spread ?? 0.15) * 100) }),
-    estimate.extrapolated &&
-      t('value.info.floor', { years: floorStartYears(), percent: Math.round(OLD_CAR_FLOOR_SHARE * 100) }),
-    t('value.info.credit')
-  ]
-    .filter(Boolean)
-    .join('\n')
+  const text = valueInfoLines(match, estimate, locale, t).join('\n')
 
   return (
     <div className="space-y-3">

@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import type { Registration } from '@carplates/shared'
 
+import { useVinText } from '@/components/vin/use-vin-text'
 import { downloadBlob, downloadText, vehicleFileStem } from '@/lib/download'
 import { buildExportReport } from '@/lib/export-report'
 import type { ExportFormat, ExportInput, ExportVehicleInfo } from '@/lib/export-report'
@@ -11,12 +12,16 @@ import {
   cncapRatingsQuery,
   euroNcapRatingsQuery,
   fuelEconomyQuery,
+  fxQuery,
   iihsRatingsQuery,
   jncapRatingsQuery,
   kncapRatingsQuery,
   plateHistoryQuery,
+  rdwQuery,
+  reviewsQuery,
   safetyRatingsQuery,
   statsTopQuery,
+  vdbQuery,
   vehiclePhotosQuery,
   vinQuery,
   wikiInfoQuery
@@ -59,6 +64,7 @@ const FAIL_FAST_OFFLINE = { networkMode: 'always', retry: false } as const
 export function useCopyAllInfoActions(params: CopyAllInfoParams): UseCopyAllInfoActions {
   const queryClient = useQueryClient()
   const { t, i18n } = useTranslation()
+  const vinText = useVinText()
   const [pending, setPending] = useState(false)
 
   async function gather(): Promise<ExportInput> {
@@ -69,51 +75,67 @@ export function useCopyAllInfoActions(params: CopyAllInfoParams): UseCopyAllInfo
     const model = vehicle.model ?? ''
     const year = vehicle.year ?? 0
 
-    const [plateHistory, vinDetail, euroncap, nhtsa, jncap, cncap, kncap, iihs, wiki, photos, stats, fuel] =
-      await Promise.all([
-        plate ? safe(queryClient.ensureQueryData(plateHistoryQuery(plate))) : Promise.resolve(null),
-        params.vinDecodeResults == null && vin
-          ? safe(queryClient.ensureQueryData(vinQuery(vin)))
-          : Promise.resolve(null),
-        hasRatingsQuery
-          ? safe(queryClient.ensureQueryData(euroNcapRatingsQuery(make, model, year)))
-          : Promise.resolve(null),
-        hasRatingsQuery
-          ? safe(queryClient.ensureQueryData(safetyRatingsQuery(make, model, year)))
-          : Promise.resolve(null),
-        hasRatingsQuery
-          ? safe(queryClient.ensureQueryData(jncapRatingsQuery(make, model, year)))
-          : Promise.resolve(null),
-        hasRatingsQuery
-          ? safe(queryClient.ensureQueryData(cncapRatingsQuery(make, model, year)))
-          : Promise.resolve(null),
-        hasRatingsQuery
-          ? safe(queryClient.ensureQueryData(kncapRatingsQuery(make, model, year)))
-          : Promise.resolve(null),
-        hasRatingsQuery
-          ? safe(queryClient.ensureQueryData(iihsRatingsQuery(make, model, year)))
-          : Promise.resolve(null),
-        hasWikiQuery
-          ? safe(queryClient.ensureQueryData(wikiInfoQuery(make, model, i18n.language, vehicle.year)))
-          : Promise.resolve(null),
-        hasWikiQuery
-          ? safe(queryClient.ensureQueryData(vehiclePhotosQuery(make, model, vehicle.year)))
-          : Promise.resolve(null),
-        safe(queryClient.ensureQueryData({ ...statsTopQuery(), ...FAIL_FAST_OFFLINE })),
-        hasRatingsQuery
-          ? safe(
-              queryClient.ensureQueryData(
-                fuelEconomyQuery({
-                  make,
-                  model,
-                  year,
-                  fuel: params.current?.fuel,
-                  capacity: params.current?.capacity
-                })
-              )
+    const [
+      plateHistory,
+      vinDetail,
+      euroncap,
+      nhtsa,
+      jncap,
+      cncap,
+      kncap,
+      iihs,
+      wiki,
+      photos,
+      stats,
+      fuel,
+      rdw,
+      vdb,
+      reviews,
+      fx
+    ] = await Promise.all([
+      plate ? safe(queryClient.ensureQueryData(plateHistoryQuery(plate))) : Promise.resolve(null),
+      params.vinDecodeResults == null && vin ? safe(queryClient.ensureQueryData(vinQuery(vin))) : Promise.resolve(null),
+      hasRatingsQuery
+        ? safe(queryClient.ensureQueryData(euroNcapRatingsQuery(make, model, year)))
+        : Promise.resolve(null),
+      hasRatingsQuery
+        ? safe(queryClient.ensureQueryData(safetyRatingsQuery(make, model, year)))
+        : Promise.resolve(null),
+      hasRatingsQuery ? safe(queryClient.ensureQueryData(jncapRatingsQuery(make, model, year))) : Promise.resolve(null),
+      hasRatingsQuery ? safe(queryClient.ensureQueryData(cncapRatingsQuery(make, model, year))) : Promise.resolve(null),
+      hasRatingsQuery ? safe(queryClient.ensureQueryData(kncapRatingsQuery(make, model, year))) : Promise.resolve(null),
+      hasRatingsQuery ? safe(queryClient.ensureQueryData(iihsRatingsQuery(make, model, year))) : Promise.resolve(null),
+      hasWikiQuery
+        ? safe(queryClient.ensureQueryData(wikiInfoQuery(make, model, i18n.language, vehicle.year)))
+        : Promise.resolve(null),
+      hasWikiQuery
+        ? safe(queryClient.ensureQueryData(vehiclePhotosQuery(make, model, vehicle.year)))
+        : Promise.resolve(null),
+      safe(queryClient.ensureQueryData({ ...statsTopQuery(), ...FAIL_FAST_OFFLINE })),
+      hasRatingsQuery
+        ? safe(
+            queryClient.ensureQueryData(
+              fuelEconomyQuery({
+                make,
+                model,
+                year,
+                fuel: params.current?.fuel,
+                capacity: params.current?.capacity
+              })
             )
-          : Promise.resolve(null)
-      ])
+          )
+        : Promise.resolve(null),
+      hasRatingsQuery
+        ? safe(queryClient.ensureQueryData(rdwQuery(make, model, year, params.current?.kind)))
+        : Promise.resolve(null),
+      vehicle.brand && vehicle.model
+        ? safe(queryClient.ensureQueryData(vdbQuery(make, model, params.current?.kind)))
+        : Promise.resolve(null),
+      vehicle.brand
+        ? safe(queryClient.ensureQueryData(reviewsQuery(make, model, vehicle.year)))
+        : Promise.resolve(null),
+      safe(queryClient.ensureQueryData({ ...fxQuery(), ...FAIL_FAST_OFFLINE }))
+    ])
 
     return {
       vehicle,
@@ -121,6 +143,7 @@ export function useCopyAllInfoActions(params: CopyAllInfoParams): UseCopyAllInfo
       region: params.region,
       current: params.current,
       vin,
+      vinText,
       vinDecodeResults: params.vinDecodeResults ?? vinDetail?.results ?? null,
       plateHistoryActions: plateHistory?.actions ?? null,
       vinHistoryActions: params.vinRegistryActions ?? vinDetail?.registry?.actions ?? null,
@@ -133,7 +156,12 @@ export function useCopyAllInfoActions(params: CopyAllInfoParams): UseCopyAllInfo
       cncap,
       kncap,
       iihs,
-      stats
+      stats,
+      rdw,
+      vdb,
+      reviews,
+      fx,
+      lang: i18n.language
     }
   }
 

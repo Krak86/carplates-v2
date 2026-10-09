@@ -59,6 +59,11 @@ function baseInput(overrides: Partial<ExportInput> = {}): ExportInput {
     kncap: null,
     iihs: null,
     stats: null,
+    rdw: null,
+    vdb: null,
+    reviews: null,
+    fx: null,
+    lang: 'en',
     ...overrides
   }
 }
@@ -200,6 +205,115 @@ describe('buildExportReport', () => {
     expect(report.sections.some(s => ['euroncap', 'nhtsa', 'jncap', 'cncap', 'kncap', 'iihs'].includes(s.id))).toBe(
       false
     )
+  })
+
+  it('adds VehiclesDB, RDW specs and review sections when those sources were gathered', () => {
+    const report = buildExportReport(
+      baseInput({
+        vdb: {
+          brand: 'TOYOTA',
+          model: 'CAMRY',
+          match: {
+            makeName: 'Toyota',
+            modelName: 'Camry',
+            how: 'exact',
+            bodyTypes: [],
+            countries: ['ua', 'de'],
+            globalDecile: 2,
+            uaOnly: false,
+            crossMake: false,
+            aliases: []
+          }
+        },
+        rdw: {
+          brand: 'TOYOTA',
+          model: 'CAMRY',
+          year: 2020,
+          match: {
+            makeName: 'Toyota',
+            modelName: 'Camry',
+            how: 'exact',
+            crossMake: false,
+            exactYear: true,
+            specs: {
+              year: 2020,
+              n: 120,
+              powerKw: { min: 100, median: 130, max: 160 },
+              displacementCc: null,
+              massKg: null,
+              co2GKm: null
+            }
+          }
+        },
+        reviews: {
+          testDrive: null,
+          reviews: null,
+          videos: [],
+          ownerPosts: [],
+          press: [],
+          topgear: [
+            {
+              url: 'https://topgear.com/x',
+              title: 'Camry review',
+              rating: 8,
+              bestRating: 10,
+              publishedAt: null,
+              blurb: null
+            }
+          ]
+        }
+      }),
+      t
+    )
+    expect(report.sections.find(s => s.id === 'vdb')?.type).toBe('kv')
+    expect(report.sections.find(s => s.id === 'rdw')?.type).toBe('kv')
+    const reviews = report.sections.find(s => s.id === 'reviews') as ExportTableSection
+    expect(reviews.rows).toEqual([['TopGear', 'Camry review', '8/10', 'https://topgear.com/x']])
+  })
+
+  it('adds the price sections (breakdown, both charts, per-fuel table, explanation) when RDW has a value estimate', () => {
+    const report = buildExportReport(
+      baseInput({
+        rdw: {
+          brand: 'TOYOTA',
+          model: 'CAMRY',
+          year: 2020,
+          match: {
+            makeName: 'Toyota',
+            modelName: 'Camry',
+            how: 'exact',
+            crossMake: false,
+            exactYear: true,
+            specs: { year: 2020, n: 120, powerKw: null, displacementCc: null, massKg: null, co2GKm: null },
+            priceByYear: [
+              { year: 2018, priceEur: 30000 },
+              { year: 2020, priceEur: 34000 }
+            ],
+            priceByFuel: [
+              { fuel: 'petrol', priceEur: 33000, n: 80 },
+              { fuel: 'hev', priceEur: 36000, n: 40 }
+            ],
+            valueEstimate: {
+              ageYears: 6,
+              retained: 0.5,
+              midEur: 17000,
+              lowEur: 14500,
+              highEur: 19500,
+              newPriceEur: 34000
+            }
+          }
+        }
+      }),
+      t
+    )
+    const ids = report.sections.map(s => s.id)
+    expect(ids).toEqual(expect.arrayContaining(['value', 'valueNewPrice', 'valueByAge', 'valueFuel', 'valueInfo']))
+    const chart = report.sections.find(s => s.id === 'valueByAge')
+    expect(chart?.type).toBe('chart')
+    if (chart?.type === 'chart') {
+      expect(chart.points.length).toBeGreaterThan(2)
+      expect(chart.mark?.x).toBe(6)
+    }
   })
 })
 

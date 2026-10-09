@@ -6,7 +6,7 @@ function sectionToTextLines(section: ExportSection): string[] {
     for (const row of section.rows) lines.push(`${row.label}: ${row.value}`)
   } else if (section.type === 'text') {
     lines.push(...section.paragraphs)
-  } else if (section.type === 'table') {
+  } else if (section.type === 'table' || section.type === 'chart') {
     if (section.note) lines.push(section.note, '')
     lines.push(section.columns.join(' | '))
     for (const row of section.rows) lines.push(row.join(' | '))
@@ -35,7 +35,7 @@ function sectionToMarkdown(section: ExportSection): string[] {
     for (const row of section.rows) lines.push(`| ${escapeMd(row.label)} | ${escapeMd(row.value)} |`)
   } else if (section.type === 'text') {
     for (const p of section.paragraphs) lines.push(p, '')
-  } else if (section.type === 'table') {
+  } else if (section.type === 'table' || section.type === 'chart') {
     if (section.note) lines.push(`_${section.note}_`, '')
     lines.push(`| ${section.columns.map(escapeMd).join(' | ')} |`)
     lines.push(`| ${section.columns.map(() => '---').join(' | ')} |`)
@@ -73,7 +73,7 @@ function sectionToCsvBlock(section: ExportSection): string[] {
     for (const row of section.rows) lines.push(csvLine([row.label, row.value]))
   } else if (section.type === 'text') {
     for (const p of section.paragraphs) lines.push(csvLine([p]))
-  } else if (section.type === 'table') {
+  } else if (section.type === 'table' || section.type === 'chart') {
     if (section.note) lines.push(csvLine([section.note]))
     lines.push(csvLine(section.columns))
     for (const row of section.rows) lines.push(csvLine(row))

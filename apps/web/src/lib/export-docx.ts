@@ -1,6 +1,6 @@
 import type { Paragraph, Table } from 'docx'
 
-import { fetchImageAsPng } from '@/lib/export-image'
+import { fetchImageAsPng, renderChartPng } from '@/lib/export-image'
 import type { ExportReport, ExportSection } from '@/lib/export-report'
 
 const HERO_MAX_WIDTH_PX = 480
@@ -16,7 +16,7 @@ async function loadDocx(): Promise<typeof import('docx')> {
 type Docx = Awaited<ReturnType<typeof loadDocx>>
 
 function sectionToDocx(section: ExportSection, docx: Docx): (Paragraph | Table)[] {
-  const { Paragraph, TextRun, HeadingLevel, Table, TableRow, TableCell, WidthType, ExternalHyperlink } = docx
+  const { Paragraph, TextRun, HeadingLevel, Table, TableRow, TableCell, WidthType, ExternalHyperlink, ImageRun } = docx
   const heading = new Paragraph({ text: section.title, heading: HeadingLevel.HEADING_2 })
 
   if (section.type === 'kv') {
@@ -42,7 +42,22 @@ function sectionToDocx(section: ExportSection, docx: Docx): (Paragraph | Table)[
     return [heading, ...section.paragraphs.map(p => new Paragraph({ text: p }))]
   }
 
-  if (section.type === 'table') {
+  if (section.type === 'table' || section.type === 'chart') {
+    const picture = section.type === 'chart' ? renderChartPng(section) : null
+    const chart = picture
+      ? [
+          new Paragraph({
+            children: [
+              new ImageRun({
+                type: 'png',
+                data: picture.data,
+                transformation: { width: picture.width, height: picture.height },
+                altText: { title: section.title, description: section.title, name: section.title }
+              })
+            ]
+          })
+        ]
+      : []
     const note = section.note ? [new Paragraph({ children: [new TextRun({ text: section.note, italics: true })] })] : []
     const header = new TableRow({
       children: section.columns.map(
@@ -52,7 +67,12 @@ function sectionToDocx(section: ExportSection, docx: Docx): (Paragraph | Table)[
     const rows = section.rows.map(
       row => new TableRow({ children: row.map(cell => new TableCell({ children: [new Paragraph({ text: cell })] })) })
     )
-    return [heading, ...note, new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, rows: [header, ...rows] })]
+    return [
+      heading,
+      ...chart,
+      ...note,
+      new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, rows: [header, ...rows] })
+    ]
   }
 
   // links
