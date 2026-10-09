@@ -2962,6 +2962,11 @@ CC0 Dutch-registry aggregates shown as a collapsible "Specs" block ("EU (NL) dat
   `vin.var.* / vin.val.* / vin.vv.* / vin.unit.*`. The Raw tab stays English. Fixed the wrong NHTSA names for ABS and rear cross-traffic assists.
 - Crash ratings and wiki info render in the Overview tab only (`overviewExtras` slot of `VinDecodeTabs`), so Raw stays exact decode data.
 
+### RDW recalls (stage D of DATASETS_PLAN.md) ✅ BUILT (2026-10-09, uncommitted when written)
+
+Model-level recall campaigns from RDW open data as a collapsible "Recalls" block on the result card (EU (NL) data, RDW's Dutch text). Details, file map and decisions:
+`DATASETS_PLAN.md` "Stage D — done"; conventions: `docs/features-reference.md` "RDW recalls".
+
 ### Small web polish (2026-10-08)
 
 - **Copy on click:** clicking the plate or VIN on the result card copies it and still navigates (`use-copy-feedback.ts` shared with `CopyButton`).

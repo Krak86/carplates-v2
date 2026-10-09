@@ -836,6 +836,43 @@ export const rdwSpecs = registry.table(
 export type RdwSpecsRow = typeof rdwSpecs.$inferSelect
 export type RdwSpecsInsert = typeof rdwSpecs.$inferInsert
 
+/** One RDW recall campaign (open data, CC0); the covered models are in `rdwRecallModels`. */
+export const rdwRecalls = registry.table('rdw_recalls', {
+  referenceCode: text('reference_code').primaryKey(),
+  publishedAt: date('published_at'),
+  announcedAt: date('announced_at'),
+  producer: text('producer'),
+  defect: text('defect'),
+  category: text('category'),
+  consequences: text('consequences'),
+  remedy: text('remedy'),
+  moreInfoUrl: text('more_info_url'),
+  riskCode: text('risk_code'),
+  hazards: jsonb('hazards').$type<string[]>(),
+  vehiclesTotal: integer('vehicles_total'),
+  vehiclesNational: integer('vehicles_national'),
+  scrapedAt: timestamp('scraped_at', { withTimezone: true }).notNull().defaultNow()
+})
+export type RdwRecallRow = typeof rdwRecalls.$inferSelect
+export type RdwRecallInsert = typeof rdwRecalls.$inferInsert
+
+/** The make/type pairs (RDW spelling + our keys) a recall campaign covers. */
+export const rdwRecallModels = registry.table(
+  'rdw_recall_models',
+  {
+    referenceCode: text('reference_code').notNull(),
+    make: text('make').notNull(),
+    model: text('model').notNull(),
+    makeKey: text('make_key').notNull(),
+    modelKey: text('model_key').notNull()
+  },
+  t => [
+    primaryKey({ columns: [t.referenceCode, t.makeKey, t.modelKey] }),
+    index('ix_rdw_recall_models_make').on(t.makeKey, t.modelKey)
+  ]
+)
+export type RdwRecallModelInsert = typeof rdwRecallModels.$inferInsert
+
 /**
  * Per-(brand, model, year, fuel, capacity bucket) passenger-car counts joined with the CO2 estimate the reference
  * data gives them — backs the /fuel statistics page. Rebuilt by `scripts/src/fuel-stats.ts`; see

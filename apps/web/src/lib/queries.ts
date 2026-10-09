@@ -15,6 +15,7 @@ import {
   getFuelEconomy,
   getFx,
   getRdw,
+  getRdwRecalls,
   getVdb,
   getVdbStats,
   getFuelStats,
@@ -229,6 +230,15 @@ export function rdwQuery(brand: string, model: string, year: number, kind?: stri
   return queryOptions({
     queryKey: ['rdw', brand, model, year, kind ?? null],
     queryFn: () => getRdw(brand, model, year, kind),
+    staleTime: Infinity
+  })
+}
+
+// RDW recall campaigns for a model (pnpm ingest:rdw-recalls) — persisted reference data, cached offline in the rdw group.
+export function rdwRecallsQuery(brand: string, model: string) {
+  return queryOptions({
+    queryKey: ['rdw', 'recalls', brand, model],
+    queryFn: () => getRdwRecalls(brand, model),
     staleTime: Infinity
   })
 }

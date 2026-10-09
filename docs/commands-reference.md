@@ -112,6 +112,9 @@ pnpm ingest:rdw   # RDW (Dutch register, CC0) specs -> registry.rdw_specs: min/m
                   # Also fills price_by_fuel (migration 0050) for the value panel's per-fuel table; a new aggregate column needs --refresh (~1 h) + export:rdw:csv
 pnpm ingest:rdw:csv   # load the committed RDW seed (seed-data/rdw-specs.csv.gz) — seconds, no download (part of ingest:ratings:csv)
 pnpm export:rdw:csv   # re-dump the table to that CSV — run after every real re-ingest
+pnpm ingest:rdw-recalls   # RDW recall campaigns (CC0) -> registry.rdw_recalls + rdw_recall_models; ~21k small rows read page by page (seconds). --dry-run. Block "Recalls" via GET /api/rdw/recalls
+pnpm ingest:rdw-recalls:csv   # load the committed seed (seed-data/rdw-recalls.csv.gz) — part of ingest:ratings:csv
+pnpm export:rdw-recalls:csv   # re-dump both tables to that CSV — run after every real re-ingest
 pnpm db:refresh-vdb-stats   # rebuild registry.stats_vdb (the /stats "Markets" panel) from the registry + vdb_models
 pnpm db:refresh-derived     # rebuild ALL rollups computed from current_registration: fuel-stats + safety-stats + vdb-stats
                             # (scripts/src/derived-refresh.ts — add new rollups of that kind there). `ingest` runs it itself

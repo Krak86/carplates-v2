@@ -68,6 +68,7 @@ const VideoReviews = lazy(() => import('@/components/VideoReviews'))
 const ReviewLinks = lazy(() => import('@/components/ReviewLinks'))
 const FuelEconomy = lazy(() => import('@/components/FuelEconomy'))
 const RdwSpecs = lazy(() => import('@/components/RdwSpecs'))
+const RdwRecalls = lazy(() => import('@/components/RdwRecalls'))
 const SafetyRatings = lazy(() => import('@/components/SafetyRatings'))
 
 type Props = {
@@ -504,6 +505,9 @@ export default function ResultCard({ data }: Props): ReactNode {
             fuel={c.fuel}
             own={{ powerKw: c.powerKwt, displacementCc: c.capacity, massKg: c.ownWeight, grossMassKg: c.totalWeight }}
           />
+        </LazySection>
+        <LazySection sections={['recalls']}>
+          <RdwRecalls brand={c.brand} model={c.model} year={c.makeYear} kind={c.kind} />
         </LazySection>
         <LazySection sections={['emissions']}>
           <FuelEconomy

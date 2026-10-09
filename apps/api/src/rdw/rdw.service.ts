@@ -1,18 +1,20 @@
 import { Inject, Injectable } from '@nestjs/common'
-import { rdwSpecs } from '@carplates/db'
+import { rdwRecallModels, rdwRecalls, rdwSpecs } from '@carplates/db'
 import type { RdwSpecsRow, RdwTally } from '@carplates/db'
 import {
   estimateValue,
   makeKey,
   matchRdwModel,
   isSmallRdwSample,
+  matchVdbModelAcrossMakes,
+  RDW_RECALLS_LIMIT,
   RDW_MIN_DISPLAY_N,
   pickRdwYear,
   vdbRelatedMakeKeys,
   vdbVehicleClass
 } from '@carplates/shared'
-import type { RdwReferenceRow, RdwResponse, RdwSpecs } from '@carplates/shared'
-import { and, eq, inArray, sql } from 'drizzle-orm'
+import type { RdwRecallsResponse, RdwReferenceRow, RdwResponse, RdwSpecs } from '@carplates/shared'
+import { and, desc, eq, inArray, sql } from 'drizzle-orm'
 
 import { DbService } from '../db/db.service.js'
 
@@ -154,6 +156,68 @@ export class RdwService {
         priceByYear: priceByYear.length ? priceByYear : null,
         priceByFuel: priceByFuel.length ? priceByFuel : null,
         valueEstimate
+      }
+    }
+  }
+
+  /**
+   * Recall campaigns RDW lists for the model (`pnpm ingest:rdw-recalls`), newest first. Campaigns carry no model-year, so
+   * the year is not asked; the vehicle class is not either — recall rows have no kind, any registry kind may match.
+   */
+  async recalls(brand: string, model: string): Promise<RdwRecallsResponse> {
+    const none: RdwRecallsResponse = { brand, model, match: null }
+    const mk = makeKey(brand)
+    if (!mk) return none
+
+    const { db } = this.dbService
+    const models = (
+      await db
+        .select({
+          makeKey: rdwRecallModels.makeKey,
+          modelKey: rdwRecallModels.modelKey,
+          make: sql<string>`max(${rdwRecallModels.make})`,
+          model: sql<string>`max(${rdwRecallModels.model})`
+        })
+        .from(rdwRecallModels)
+        .where(inArray(rdwRecallModels.makeKey, vdbRelatedMakeKeys(mk, model)))
+        .groupBy(rdwRecallModels.makeKey, rdwRecallModels.modelKey)
+    ).map(r => ({ ...r, kind: 'any', aliases: [] }))
+
+    const found = matchVdbModelAcrossMakes(models, mk, model, ['any'])
+    if (!found) return none
+
+    const { row, how } = found
+    const rows = await db
+      .select({ recall: rdwRecalls })
+      .from(rdwRecallModels)
+      .innerJoin(rdwRecalls, eq(rdwRecalls.referenceCode, rdwRecallModels.referenceCode))
+      .where(and(eq(rdwRecallModels.makeKey, row.makeKey), eq(rdwRecallModels.modelKey, row.modelKey)))
+      .orderBy(desc(rdwRecalls.publishedAt), desc(rdwRecalls.referenceCode))
+    if (rows.length === 0) return none
+
+    return {
+      brand,
+      model,
+      match: {
+        makeName: row.make,
+        modelName: row.model,
+        how,
+        crossMake: row.makeKey !== mk,
+        total: rows.length,
+        recalls: rows.slice(0, RDW_RECALLS_LIMIT).map(({ recall: r }) => ({
+          code: r.referenceCode,
+          market: 'NL',
+          publishedAt: r.publishedAt,
+          producer: r.producer,
+          defect: r.defect,
+          category: r.category,
+          consequences: r.consequences,
+          remedy: r.remedy,
+          moreInfoUrl: r.moreInfoUrl,
+          hazards: r.hazards ?? [],
+          vehiclesTotal: r.vehiclesTotal,
+          vehiclesNational: r.vehiclesNational
+        }))
       }
     }
   }

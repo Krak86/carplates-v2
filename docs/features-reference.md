@@ -35,6 +35,18 @@ UI: collapsible block, the "Typical figures … Similar vehicles" footnote on to
 Two RDW spellings that share a key collapse to the larger group (medians don't merge). Seed: `seed-data/rdw-specs.csv.gz`; after
 changing `makeKey`/`modelKey`/`brandSlug` re-run `ingest:rdw` (cached per make in `scripts/.data/rdw/`, `--refresh` to re-query), not `:csv`.
 
+### RDW recalls (stage D)
+
+Files: migration 0054 (`rdw_recalls`, `rdw_recall_models`), `scripts/src/rdw-recalls.ts` + `-parse.ts`, `packages/shared/src/rdwRecalls.ts` (own file, so no offline-cache bust), `RdwService.recalls`
+(`GET /api/rdw/recalls`), web `RdwRecalls.tsx` / `RdwRecallField.tsx` / `.helpers.ts`.
+
+Model-level only: a campaign covers a make/type, never a plate or VIN, so wording is "recalls RDW lists for this model", never "this car has an open recall". The model is matched with the VehiclesDB matcher
+(`matchVdbModelAcrossMakes`, recall rows carry the placeholder kind `any`), so aliases and cross-make homes work as for Specs. Campaigns have no model-year -> no year filter. The API returns the newest
+`RDW_RECALLS_LIMIT` (30) and the total. Texts are RDW's Dutch (`lang="nl"`, labelled in the popover). The web query key starts with `rdw`, so it is cached offline in the `rdw` group. Refresh monthly:
+`pnpm ingest:rdw-recalls` then `export:rdw-recalls:csv` (campaigns are upserted, the links replaced); `ingest:rdw-recalls:csv` loads the seed and is part of `ingest:ratings:csv`.
+
+UI details: the first `RECALLS_PREVIEW` (3) campaigns show, then "Show N more"; each row has a market tag (`market`, default `NL`); every field has a "?" (`recalls.about.*`); category and hazard are translated from RDW's fixed wording via `categoryKey` / `hazardKey` (an unknown wording stays Dutch, `lang="nl"`) while defect / consequences / remedy stay Dutch until stage D2 (planned in `DATASETS_PLAN.md`: `rdw_recall_texts` with an `engine` column, "AI translation" label, original-text switch).
+
 ### Estimated value (stage C4)
 
 A copy button beside the chip copies the range in the **shown** currency only (`formatMoneyCopy`: `€ 10 600–14 400`, plain spaces, no "~"); the NBU rates are fetched as soon as the estimate shows (not only on panel open) so ₴/$ can be copied.

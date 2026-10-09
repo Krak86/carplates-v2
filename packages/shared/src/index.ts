@@ -182,6 +182,13 @@ export {
   type RdwSpecs
 } from './rdw.js'
 export {
+  RDW_RECALLS_LIMIT,
+  rdwRecallSchema,
+  rdwRecallsResponseSchema,
+  type RdwRecall,
+  type RdwRecallsResponse
+} from './rdwRecalls.js'
+export {
   estimateValue,
   floorStartYears,
   OLD_CAR_FLOOR_SHARE,

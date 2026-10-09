@@ -1,7 +1,7 @@
 # DATASETS_PLAN.md
 
-> **Resume here (2026-10-09).** Stages A (+A2 plate-region fix, +A3 alias chips), **B** (motorcycle/truck/bus matching), **C** (RDW specs, C2, C3) and **C4** (estimated value) are DONE;
-> next is **stage D** (RDW recalls) — see "Staged plan" near the end. **Rule: do not start a stage until the owner says "go stage X".**
+> **Resume here (2026-10-09).** Stages A (+A2 plate-region fix, +A3 alias chips), **B** (motorcycle/truck/bus matching), **C** (RDW specs, C2, C3) **C4** (estimated value) and **D** (RDW recalls) are DONE;
+> next is **stage E** (Open EV Data) — see "Staged plan" near the end. **Rule: do not start a stage until the owner says "go stage X".**
 > autoevolution (stage Z): they replied again 2026-10-08 ("we can sort something out, but first we would like to see this app; if it is still a work in progress we can wait") — answer once the app is public (after the Phase 4 deploy); revisit after stage H whether we need them at all (gap list below). Do NOT download the unauthorized GitHub copy, not even for internal comparison. Stage A is code-complete but may be uncommitted: check
 > `git status`. After a registry/plate-table change run `pnpm db:refresh-stats` (slow, ~15+ min, rebuilds the materialized views
 > from existing rows) and `pnpm db:refresh-derived`; restart `pnpm dev` after any `@carplates/shared` rebuild.
@@ -314,7 +314,7 @@ at the end of a stage give a commit message and stop. Order = value / risk, clea
 | **C2. RDW specs, more fields** — **done 2026-10-08** (see "Stage C2" below)                                                    | Extend stage C: gross mass, wheelbase, seats, doors, towing, dimensions, top speed (details under "Stage C2" below). Needs a migration + full re-ingest; a few new `SPEC_ROWS` entries + i18n                                                                                                                                                    | small-medium | C                                 |
 | **C3. RDW specs, price + more** — **done 2026-10-08** (see "Stage C3 — done" below)                                            | New list price (ex-tax and original), body type, colours, cylinders, fuel mix, consumption, EV range, energy label, open-recall share (see "Stage C3")                                                                                                                                                                                           | small-medium | C2 committed                      |
 | **C4. Estimated value** — **done 2026-10-09** (see "Stage C4 — done" below)                                                    | Rough current value = EU new price x depreciation curve by age, clearly labelled; price-over-years chart from C3 data                                                                                                                                                                                                                            | medium       | C3                                |
-| **D. RDW recalls**                                                                                                             | Recall campaigns + status (upsert); "Recalls" block, labelled "EU (NL)", model-level wording; monthly refresh                                                                                                                                                                                                                                    | medium       | C (matcher)                       |
+| **D. RDW recalls** — **done 2026-10-09** (see "Stage D — done" below)                                                          | Recall campaigns + status (upsert); "Recalls" block, labelled "EU (NL)", model-level wording; monthly refresh                                                                                                                                                                                                                                    | medium       | C (matcher)                       |
 | **E. Open EV Data**                                                                                                            | One JSON -> small table; "Electric" block on a match or when vPIC says battery-electric; MIT notice on About; quarterly                                                                                                                                                                                                                          | small        | C                                 |
 | **F. NHTSA recalls + complaints**                                                                                              | Live API behind a cache (7 d / 30 d), next to `api/safety`; market label "US" + "may not apply to your build" copy                                                                                                                                                                                                                               | medium       | D (shared Recalls block)          |
 | **G. UK MOT**                                                                                                                  | Check newer files first; aggregate per make/model/year/failure item; "Common faults" block, worded as UK inspection stats; OGL statement on About; yearly                                                                                                                                                                                        | large        | C                                 |
@@ -519,6 +519,46 @@ vehicle and recall data; **check the licence on the dataset page before adding a
   block labelled as Dutch inspection stats. Tens of millions of rows; check the server-side aggregate does not time out first.
 - Not worth syncing: axles `3huj-srit` (trucks), odometer-verdict texts `jqs4-4kvw` (a verdict, not mileage — real mileage is not open),
   body / class / special-feature side tables (the main dataset's body field is enough), all "Parkeren" / garage / carpool datasets.
+
+**Stage D — done (2026-10-09): RDW recalls.** Source: opendata.rdw.nl (CC0), three small datasets read page by page (no aggregation needed):
+campaigns `j9yg-7rg9` (5,319), make/type links `mu2x-mu5e` (10,787 -> 10,780 after key collisions), hazard texts `9ihi-jgpf`. Built: migration 0054
+(`registry.rdw_recalls` keyed on RDW reference code, `registry.rdw_recall_models` keyed on campaign + make_key + model_key), `scripts/src/rdw-recalls.ts` +
+`rdw-recalls-parse.ts` (campaigns upserted, links replaced; `--dry-run`, `--export-csv`, `--from-csv`), seed `seed-data/rdw-recalls.csv.gz` (601 KB, one file with a `part`
+column), `GET /api/rdw/recalls?brand&model` (`RdwService.recalls`: the VehiclesDB matcher over distinct recall make/types, newest `RDW_RECALLS_LIMIT` = 30 plus the total),
+contract `packages/shared/src/rdwRecalls.ts` (own file), web "Recalls" block (`RdwRecalls.tsx`, `LazySection`, share link `?section=recalls`, 📣, "EU (NL) data" pill,
+a `<details>` per campaign), ua/ru/en strings. The C3 open-recall share is a line under the block's footnote (read from the cached specs query). **Decisions:** the texts are RDW's
+Dutch (no open translation) and are marked `lang="nl"`; campaigns have no model-year so the year is not filtered; the per-plate status dataset `t49b-isb7` is Dutch plates
+and was not used; no cross-market grouping yet (that comes with NHTSA, stage F). Wording is model-level, never "this car has an open recall". **Not browser-checked in the UI yet;
+the monthly refresh row is in SCHEDULE.md.**
+
+**Stage D follow-up 1 — done (2026-10-09, same session): list, tags, explainers, static translations.** The block shows the first 3 campaigns, then "Show N more"
+(`RECALLS_PREVIEW`); each row carries a market tag (`market` field on the recall contract, `NL` now, "🇳🇱 EU (NL)", so other countries slot in with stages F / H); every field label in an
+expanded campaign has a "?" (`recalls.about.*`, `RdwRecallField`); a visible box at the top explains what a recall campaign is and how it relates to Ukraine (hedged: "no comparable open
+register found"; `recalls.what.*`). **Category (19 fixed values) and hazard (5 fixed values) are translated statically** (`categoryKey` / `hazardKey` in `RdwRecalls.helpers.ts`,
+`recalls.cat.*` / `recalls.hazard.*` in ua/ru/en; an unknown new wording falls back to the Dutch original).
+
+**Stage D follow-up 2 — PLANNED, not started (decided 2026-10-09; owner opens a new session and says "go stage D2"): translate the free-text fields.**
+Defect, consequences and remedy are free Dutch: **11,490 distinct texts, ~1.66 M characters** (4,146 / 3,605 / 3,731 distinct per field). Decision: **translate all of them with a free local
+model now, via a script, no API key (the owner has none); keep the schema open so a paid translation API can replace the engine later without a migration.**
+
+- **Storage (one table, deduplicated by text):** `registry.rdw_recall_texts` — `text_hash` (sha256 of the Dutch text), `lang` (`en` / `uk` / `ru`), `text`, **`engine`** (e.g. `opus-mt`,
+  `nllb-600m`, later `claude-…` / `deepl`), `quality` (nullable; e.g. `machine` / `reviewed`), `translated_at`; PK (`text_hash`, `lang`, `engine`). The API returns, per campaign, the
+  best translation for the user's language (a later engine or a reviewed row wins over an older one) plus the Dutch original. Into the CSV seed (a second `part`, or its own file);
+  expected size ~2-3 MB gzipped for three languages. **Not a web lang file** (3.3 MB per language would ship to every browser). App language `ua` = stored lang `uk`.
+- **Script:** `pnpm ingest:rdw-recalls:translate` — resumable, only translates texts without a row for that (lang, engine), runs after `ingest:rdw-recalls` in the monthly refresh. Node only
+  (**this PC has no Python**): `@huggingface/transformers` (ONNX, `dtype: 'q8'`) in `scripts/`; models download on first run (check size; keep them out of git).
+- **UI:** per text a switch to see the original (swap, or both side by side); a visible **"AI translation"** label (i18n) on every translated text; the Dutch text stays the default fallback
+  while there is no translation; fields without a translation show `lang="nl"` as today.
+- **Quality findings (tested 2026-10-09 on 5 campaigns, scratchpad `mt/`, not in the repo):** OPUS-MT `Xenova/opus-mt-nl-en` (+ `opus-mt-en-uk` pivot for UK) runs in Node at ~0.45 s per call, but
+  mangles technical words: "barsten" -> "bart", "merkdealer" -> "Grandler" / "mark-dealer", "airbag" -> "ящик для повітря" (UK), "bezwijken" -> "збанкрутувати" (UK). Simple sentences are fine.
+  **A wrong word in safety text is worse than the Dutch original, so the label and the original-text switch are mandatory, not optional.** The owner accepted this trade-off for the free route
+  but wanted to see more samples first. **Next step of D2 = compare, before the full run:** (1) `Xenova/nllb-200-distilled-600M` (direct nl -> eng / ukr / rus, no pivot; expected better but
+  ~3-4x slower; script `scratchpad/mt/nllb.mjs` was written but not run), (2) a **glossary / pre-processing pass** for recurring terms (merkdealer = brand dealer, airbag, gasgenerator,
+  voertuigeigenaar, remleiding, …) applied before or after the model, (3) a sample of ~50 texts the owner reviews (EN and UK), then pick the engine. Estimated time of the full run:
+  OPUS-MT ~4-5 h single-threaded for 3 languages (parallel workers cut it); NLLB maybe 15 h single-threaded — measure on a sample first; the PC has an RTX 3070 but onnxruntime-node uses the CPU
+  unless a CUDA build is set up. Per-language option: translate only EN + UK first (RU later) if time matters.
+- **Fallbacks considered:** Claude translation (needs an API key; ~30-60 min and a few dollars, best quality; the schema above allows adding it later as `engine` and it then wins); translating the
+  campaigns of the ~50 most common models in a Claude Code session (no key, high usage); in-browser Translator API (Chrome only, no storage, Dutch -> Ukrainian may be missing); Dutch only.
 
 **Stage I — proposal (2026-10-09, last stage; nothing started, owner says "go stage I").** Car generations from Wikipedia + Wikidata.
 Prototype: `scripts/src/wiki-generations-probe.ts` (prints a table, writes nothing; run from `scripts/`:

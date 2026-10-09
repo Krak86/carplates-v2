@@ -4,7 +4,7 @@ import { z } from 'zod'
 
 import { zodParam } from '../common/zod-param.pipe.js'
 
-import { RdwResponseDto } from './rdw.dto.js'
+import { RdwRecallsResponseDto, RdwResponseDto } from './rdw.dto.js'
 import { RdwService } from './rdw.service.js'
 
 const querySchema = z.object({
@@ -13,6 +13,11 @@ const querySchema = z.object({
   year: z.coerce.number().int().min(1900).max(2100),
   /** Registry `kind` text (ЛЕГКОВИЙ, МОТОЦИКЛ, ВАНТАЖНИЙ, АВТОБУС …); omitted = passenger car. */
   kind: z.string().trim().min(1).optional()
+})
+
+const recallsQuerySchema = z.object({
+  brand: z.string().trim().min(1),
+  model: z.string().trim().min(1)
 })
 
 @ApiTags('rdw')
@@ -28,5 +33,16 @@ export class RdwController {
   @ApiOkResponse({ type: RdwResponseDto })
   lookup(@Query(zodParam(querySchema)) query: z.infer<typeof querySchema>): Promise<RdwResponseDto> {
     return this.rdwService.lookup(query.brand, query.model, query.year, query.kind)
+  }
+
+  /** Model-level recall campaigns from RDW (EU market) — never a statement about a particular car. */
+  @Get('recalls')
+  @ApiQuery({ name: 'brand', required: true })
+  @ApiQuery({ name: 'model', required: true })
+  @ApiOkResponse({ type: RdwRecallsResponseDto })
+  recalls(
+    @Query(zodParam(recallsQuerySchema)) query: z.infer<typeof recallsQuerySchema>
+  ): Promise<RdwRecallsResponseDto> {
+    return this.rdwService.recalls(query.brand, query.model)
   }
 }
