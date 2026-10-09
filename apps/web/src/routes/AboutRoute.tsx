@@ -32,6 +32,7 @@ const SOURCES: readonly Source[] = [
   { key: 'eauto', label: 'eauto.org.ua', url: 'https://eauto.org.ua', icon: '/icons/sources/eauto.svg' },
   { key: 'autoua', label: 'autoua.net', url: 'https://autoua.net', icon: '/icons/sources/autoua.webp' },
   { key: 'novynyLive', label: 'novyny.live', url: 'https://novyny.live', icon: '/icons/sources/novynylive.svg' },
+  { key: 'topgir', label: 'topgir.com.ua', url: 'https://topgir.com.ua', icon: '/icons/sources/topgir.webp' },
   {
     key: 'caranddriver',
     label: 'Car and Driver',

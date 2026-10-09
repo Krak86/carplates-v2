@@ -60,13 +60,15 @@ export default function EstimatedValuePanel(props: Props): ReactNode {
         hideLabel={t('vin.group.hide')}
         title={t('value.details.title')}
       >
-        <EstimatedValueDetails
-          match={match}
-          estimate={estimate}
-          locale={locale}
-          currency={props.currency}
-          fx={props.fx}
-        />
+        <div className="p-3">
+          <EstimatedValueDetails
+            match={match}
+            estimate={estimate}
+            locale={locale}
+            currency={props.currency}
+            fx={props.fx}
+          />
+        </div>
       </VinToggleSection>
     </div>
   )

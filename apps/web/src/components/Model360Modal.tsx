@@ -153,6 +153,51 @@ export default function Model360Modal({
           </button>
         </div>
 
+        {isAlt
+          ? winner.length > 1 && (
+              <ul className="mb-2 flex flex-wrap gap-1.5">
+                {winner.map((w, i) => (
+                  <li key={w.photoRecid}>
+                    <button
+                      type="button"
+                      onClick={() => setWinnerIndex(i)}
+                      aria-current={i === winnerIndex}
+                      className={cn(
+                        'rounded-full border px-2.5 py-0.5 text-xs',
+                        i === winnerIndex
+                          ? 'border-[var(--color-primary)] text-[var(--color-primary)]'
+                          : 'border-[var(--color-border)] hover:border-[var(--color-primary)]'
+                      )}
+                    >
+                      {winner360ChipLabel(w)}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )
+          : models.length > 1 && (
+              <ul className="mb-2 flex flex-wrap gap-1.5">
+                {models.map((m, i) => (
+                  <li key={m.id}>
+                    <button
+                      type="button"
+                      onClick={() => setIndex(i)}
+                      aria-current={i === index}
+                      title={m.title ?? model360ChipLabel(m, generation)}
+                      className={cn(
+                        'rounded-full border px-2.5 py-0.5 text-xs',
+                        i === index
+                          ? 'border-[var(--color-primary)] text-[var(--color-primary)]'
+                          : 'border-[var(--color-border)] hover:border-[var(--color-primary)]'
+                      )}
+                    >
+                      {model360ChipLabel(m, generation)}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+
         <iframe
           ref={frameRef}
           key={isAlt ? `w-${currentWinner.photoRecid}` : `${current?.id}-${view}`}
@@ -189,51 +234,6 @@ export default function Model360Modal({
           </a>
           . {t(isAlt ? 'model360.noteAlt' : 'model360.note')}
         </p>
-
-        {isAlt
-          ? winner.length > 1 && (
-              <ul className="mt-3 flex flex-wrap gap-1.5">
-                {winner.map((w, i) => (
-                  <li key={w.photoRecid}>
-                    <button
-                      type="button"
-                      onClick={() => setWinnerIndex(i)}
-                      aria-current={i === winnerIndex}
-                      className={cn(
-                        'rounded-full border px-2.5 py-0.5 text-xs',
-                        i === winnerIndex
-                          ? 'border-[var(--color-primary)] text-[var(--color-primary)]'
-                          : 'border-[var(--color-border)] hover:border-[var(--color-primary)]'
-                      )}
-                    >
-                      {winner360ChipLabel(w)}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )
-          : models.length > 1 && (
-              <ul className="mt-3 flex flex-wrap gap-1.5">
-                {models.map((m, i) => (
-                  <li key={m.id}>
-                    <button
-                      type="button"
-                      onClick={() => setIndex(i)}
-                      aria-current={i === index}
-                      title={m.title ?? model360ChipLabel(m, generation)}
-                      className={cn(
-                        'rounded-full border px-2.5 py-0.5 text-xs',
-                        i === index
-                          ? 'border-[var(--color-primary)] text-[var(--color-primary)]'
-                          : 'border-[var(--color-border)] hover:border-[var(--color-primary)]'
-                      )}
-                    >
-                      {model360ChipLabel(m, generation)}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
       </div>
     </div>,
     document.body

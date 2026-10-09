@@ -3024,3 +3024,11 @@ and brand logos"); this entry records what shipped and why.
   row with a skeleton + `animate-chip-in` (`useChipsPending`); side widgets latch once shown (`useScrolledOnRoute`); test-drive banner click hint.
 - **Race** (`fb512f5`, `b202abb`): standalone `/race` route with presets per body type and a km odometer; car label in the modal title.
 - **YouTube fallback Day 5** (`5c08787`): +39 models, CSV 1,792 videos (104 models left in the >= 1,000-car tier).
+
+### topgir.com.ua feed and UI polish ✅ BUILT (2026-10-09, uncommitted when written)
+
+- **News source `topgir`** (`scripts/news-sources.json`, `https://topgir.com.ua/feed/`, uk): WordPress automotive portal, 10 items (~1 day), robots.txt only blocks `/wp-admin/`. All 10 sampled items were car news and the `<category>` values are useless (mostly "Новини", some junk tags), so there is **no `onlyCategories`**. First run: 10 items, 5 with a brand, 2 with a model. `/news` chip in `NEWS_SOURCE_GROUPS`; About entry `about.source.topgir` (ua/ru/en) with `icons/sources/topgir.webp` (the site's square "ТЖ" icon at 64x64 webp, ~1 KB — the wide wordmark does not fit the 32 px slot).
+- **360° modal:** the model/year chips row moved from the bottom to directly under the Exterior / Interior / Alt. interior tabs (all three views; hidden when there is only one model). Only the "… on CarShow360 / Winner Imports" note stays at the bottom.
+- **Advanced-search tooltip** (`SearchField`): bold title `search.advancedToggle` ("Advanced search") + a muted second line `search.advancedHint`, `max-w` 13rem so it wraps instead of covering the "Advanced search" link; the button's `aria-label` is the short title only.
+- **Estimated value:** the "Charts and explanation" folder content has `p-3` on all sides (wrapper in `EstimatedValuePanel`, not in `EstimatedValueDetails`, which the chip popover also renders and which is already padded).
+- **`SegmentExplainer`** (plate and VIN segment chips + hint): root has `mt-3` above the chips.

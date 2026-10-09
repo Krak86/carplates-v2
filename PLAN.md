@@ -591,7 +591,7 @@ and the CSV is committed.
 - **Measure** (the plan's step 7): items/day per source, % tagged with a make / model, and for the top-50 registry (brand, model) pairs how many have ≥1 news
   item in 30/180 days — the DB has had one manual run so far.
 - **English sources added 2026-10-05:** Car and Driver, Motor1, Carscoops (news + reviews) — verified, see the table in `docs/plan-done.md`. Open: the Ukrainian UI sends `lang=uk` so it never shows them; decide whether English items should appear for uk/ru users, and re-measure tag rates after a few days.
-- **More sources:** check auto.ria.com/news, autocentre.ua, avtoradnyk, nv.ua/auto (robots first, then categories, then a tagger run on the real items).
+- **More sources:** topgir.com.ua added 2026-10-09 (`docs/plan-done.md`, "topgir.com.ua feed"); still to check: auto.ria.com/news, autocentre.ua, avtoradnyk, nv.ua/auto (robots first, then categories, then a tagger run on the real items).
 - **Backfill** beyond the feed windows: `news.infocar.ua` paging and mezha's `/tag/avto/` HTML pages (robots check first) — not RSS.
 - **Hot / News toggle** (the original design's `kind='hot'`: ≤7 days AND (model match OR new-models source)) — not built; the News section lists model then make news.
 - Tagger limits seen: "Stellantis" resolves to Peugeot, "ID.4 and ID.5 → ID.Tiguan" to the Tiguan; brands outside the infocar catalog (Alpine) stay untagged.

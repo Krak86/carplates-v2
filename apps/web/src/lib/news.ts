@@ -27,6 +27,7 @@ export const NEWS_SOURCE_GROUPS = [
   { key: 'autoua', label: 'autoua.net', ids: ['autoua'] },
   { key: 'mezha', label: 'mezha.ua', ids: ['mezha'] },
   { key: 'novyny-live', label: 'novyny.live', ids: ['novyny-live'] },
+  { key: 'topgir', label: 'topgir.com.ua', ids: ['topgir'] },
   { key: 'caranddriver', label: 'Car and Driver', ids: ['caranddriver'] },
   { key: 'motor1', label: 'Motor1', ids: ['motor1'] },
   { key: 'carscoops', label: 'Carscoops', ids: ['carscoops-news', 'carscoops-reviews'] },

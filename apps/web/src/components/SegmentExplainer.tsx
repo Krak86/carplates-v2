@@ -41,7 +41,7 @@ export default function SegmentExplainer({ segments, hint, label, hintInline }: 
   if (!current) return null
 
   return (
-    <div className="mb-4">
+    <div className="mt-3 mb-4">
       {!hintInline && <div className="mb-1 text-sm text-[var(--color-muted)]">{hint}</div>}
 
       <div className={cn(hintInline && 'flex flex-col gap-y-1 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-6')}>

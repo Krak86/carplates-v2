@@ -58,6 +58,14 @@
     "note": "whole-site feed (146 items ≈ 1 day, allowed in robots.txt); onlyCategories keeps \"Авто\" (~8/day, practical car content; \"Транспорт\" is railways — not kept). <description> is empty, so no summary; images are avif"
   },
   {
+    "id": "topgir",
+    "name": "topgir.com.ua",
+    "url": "https://topgir.com.ua/feed/",
+    "lang": "uk",
+    "enabled": true,
+    "note": "automotive portal (WordPress), 10 items (~1 day), robots.txt allows it; every item is car news, so no category filter (<category> is mostly just \"Новини\" and sometimes holds junk tags)"
+  },
+  {
     "id": "caranddriver",
     "name": "Car and Driver",
     "url": "https://www.caranddriver.com/rss/all.xml/",
