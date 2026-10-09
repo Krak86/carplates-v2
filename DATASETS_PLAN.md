@@ -1,6 +1,6 @@
 # DATASETS_PLAN.md
 
-> **Resume here (2026-10-08).** Stages A (+A2 plate-region fix, +A3 alias chips), **B** (motorcycle/truck/bus matching) and **C** (RDW specs) are DONE;
+> **Resume here (2026-10-09).** Stages A (+A2 plate-region fix, +A3 alias chips), **B** (motorcycle/truck/bus matching), **C** (RDW specs, C2, C3) and **C4** (estimated value) are DONE;
 > next is **stage D** (RDW recalls) — see "Staged plan" near the end. **Rule: do not start a stage until the owner says "go stage X".**
 > autoevolution (stage Z): they replied again 2026-10-08 ("we can sort something out, but first we would like to see this app; if it is still a work in progress we can wait") — answer once the app is public (after the Phase 4 deploy); revisit after stage H whether we need them at all (gap list below). Do NOT download the unauthorized GitHub copy, not even for internal comparison. Stage A is code-complete but may be uncommitted: check
 > `git status`. After a registry/plate-table change run `pnpm db:refresh-stats` (slow, ~15+ min, rebuilds the materialized views

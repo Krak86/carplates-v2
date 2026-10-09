@@ -48,6 +48,24 @@ Chip `~ € X–Y 💶` on the result card = Dutch NEW price (C3 median, `rdw_sp
 - **Web:** `EstimatedValueChip.tsx` (chip, chevron, hover tip, "?"), `EstimatedValuePanel.tsx` (bordered block, lazy), `UkrPriceBreakdown.tsx`, `EstimatedValueTip/Details.tsx`, `ValueByAgeChart/ValueLineChart.tsx` (dependency-free SVG), helpers + tests in `EstimatedValue.helpers.ts` (`ukrPrice`, `valueWarnings`, `formatMoneyRange`, `riaSearchUrl`). Customs run in the browser from the registry fuel and capacity. `effectiveCurrency` falls back to euros without NBU rates. Share link `?section=value` (in `SHARE_SECTIONS`). `InfoPopover` takes an optional `trigger` / `triggerClassName` (the chip is a hover target).
 - **Rules:** the figure is never called a market price; every caveat is a ⚠️ line (`value.warn.*`); AUTO.RIA is a link only — its terms ban collecting data. A new caveat = a `valueWarnings` entry + `value.warn.<key>` strings in ua/ru/en.
 
+## Weight rankings
+
+Files: migrations 0051-0053 (`registry.stats_weight`), `scripts/src/weight-stats.ts` (`pnpm db:refresh-weight-stats`, also in `db:refresh-derived`), `packages/shared/src/weightGroups.ts` (`WEIGHT_GROUPS`, `weightGroupOfKind`: passenger / truck / bus / motorcycle / trailer / other, plus "all"), web `routes/stats/WeightModels*.tsx`.
+
+Per (kind_group, source, brand, model): n, min_kg, max_kg. Registry weights are sanity-checked against `total_weight` and a per-kind minimum mass (300 kg cars/trucks, 50 kg two-wheelers/trailers); a model's edges are its 1st/99th percentile. Passenger cars that RDW recognises (`matchRdwModel`) use RDW's year-median unladen mass instead. `/api/stats/top` returns `weightBoards` per group (top 10 heaviest + lightest, per-group vehicle floor; defaults to `{}` so offline-cached answers still parse). UI: group tabs on `/stats` ("all" default), cards on the home page (a lazy `Home*Section`), and 🏋️ / 🪶 chips on the result card and in the export, ranked within the vehicle's own group. Weights show in kg, with tonnes in brackets from 1000 kg.
+
+## Community posts (Stack Exchange, Lemmy, Bluesky)
+
+Files: `lib/community.ts` (keyless browser-side searches, Zod-validated), `lib/bluesky.ts`, `SocialGroup` + `CommunityPostCard`, `CommunityWidget`, `useSideCommunity`.
+
+The Social section lists Bluesky, Mechanics Q&A (Stack Exchange "Motor Vehicle Maintenance & Repair") and Lemmy, each with a "More" link to the source's own search. The search term is "make model" — **without the year** (it empties the results). Side widgets (desktop, appear on scroll, latch via `useScrolledOnRoute`): left column = Bluesky, then Lemmy beside it (or in its place if no Bluesky); right = news, then Q&A beside it (or in its place); the second column needs >= 1760 px and shows ~1 s after the first. All widget chunks are excluded from the PWA precache (live third-party data).
+
+## Export, wiki text and brand logos
+
+- **"Copy all info"** (`lib/export-*`, `use-copy-all-info-actions`): sections come from the lookup plus RDW specs, VehiclesDB, the reviews catalog and videos, the value breakdown (EU value, Ukrainian customs in EUR/USD/UAH, per-fuel prices, caveats) and NBU rates. A `chart` section type is a table in clipboard/txt/md/csv and a canvas PNG (`renderChartPng`) in docx/pdf. VIN decode labels are localized with the English original in brackets (`useVinText`). `valueInfoLines` is shared with the on-screen value details (`EstimatedValue.helpers`).
+- **Wiki:** `/api/wiki` fetches the full plain-text article (the `exchars` extract is capped at 1200), splits intro / sections server-side, falls back to the English edition (with a note) and strips IPA / CJK / "(listen)" parentheticals. The UI shows the intro with a "Read more…" toggle; the export uses the intro only.
+- **Brand logos:** PNG-sourced logos ship as capped WebP (`pnpm --filter scripts build:logo-images`, originals gitignored in `apps/web/assets-src/kind/logos/`); `brandLogoUrl` returns `.webp` for those slugs, SVG logos unchanged. WebP, not AVIF — lossy AVIF fringes the white background under `mix-blend-multiply`. `BrandLogo` puts a solid white chip behind inline logos in dark theme.
+
 ## Test-drive racer
 
 Files: `apps/web/src/lib/racer/`, `components/game/`; docs/plan-done.md "Test-drive racer game". Follow-ups: PLAN.md "Test-drive racer game".

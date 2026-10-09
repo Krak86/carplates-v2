@@ -17,7 +17,7 @@ Nothing here is built yet — no scheduler exists in the repo. Drafted 2026-10-0
    healthchecks.io (or similar) on success so a dead scheduler alerts, not just a failed job.
 5. **UTC or Europe/Kyiv, with jitter.** Don't start two jobs at the same second. Keep 1 req/s and robots.txt rules;
    use conditional GET (ETag / If-Modified-Since) where the source supports it.
-6. **Chain derived data after the source.** Registry load -> backfill -> `db:refresh-stats` -> `db:refresh-derived` (fuel + safety + VehiclesDB-markets rollups; `pnpm ingest` / `ingest:full` already do this last step themselves).
+6. **Chain derived data after the source.** Registry load -> backfill -> `db:refresh-stats` -> `db:refresh-derived` (fuel + safety + VehiclesDB-markets + weight rollups; `pnpm ingest` / `ingest:full` already do this last step themselves).
    Use `REFRESH MATERIALIZED VIEW CONCURRENTLY` so reads never block.
 7. **CSV seeds stay human-reviewed.** Scrapers write to the DB; `export:*:csv` + commit is a manual/PR step so a bad
    scrape doesn't silently become the seed.

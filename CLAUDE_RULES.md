@@ -1,7 +1,6 @@
 # CLAUDE_RULES.md
 
-Team coding standards + performance rules. Auto-loaded via @import in CLAUDE.md.
-To save tokens, comment out `@CLAUDE_RULES.md` in CLAUDE.md.
+Auto-loaded via @import in CLAUDE.md (comment it out there to save tokens).
 
 ## Code Standards
 
@@ -90,18 +89,12 @@ The theme lives in the `@theme` block at the top of
 are wired but there's no UI toggle yet.
 
 - Use v4 directives: `@theme`, `@utility`, `@custom-variant`, `@plugin`, `@import 'tailwindcss'`, `@source`.
-- **Removed in v4 — never emit:** `@tailwind base/components/utilities`, `@screen`, `theme()`, `safelist`.
-- `!important` is the trailing bang: `@apply inline-block!` (not `!important`).
-- Keyframes go top-level, not inside `@theme`.
-- Class names written in `.md` files and CSS comments are **not** scanned.
+- Removed in v4, never emit: `@tailwind base/components/utilities`, `@screen`, `theme()`, `safelist`. `!important` is a trailing bang (`@apply inline-block!`). Keyframes go top-level. Class names in `.md` files and CSS comments are not scanned.
 
 ## Performance Rules
 
 **Zustand selectors (CRITICAL):** never a zero-arg `useUiStore()`. 1 field →
 `useUiStore(s => s.field)`; 2+ → a shallow-compared selector.
-
-**V8 JIT stability:** no `any` in store slices · no `delete obj.prop` (use
-`null`/`undefined`) · no try/catch in hot render paths · keep array element types consistent.
 
 **Effects:**
 
@@ -122,5 +115,3 @@ plain — the compiler auto-memoizes. Keep a manual `useMemo`/`useCallback` only
 when you need narrower deps than inferred, or the value feeds an
 imperative/non-React consumer, or the component is compiler-skipped. If you keep
 one, deps must be complete.
-
-**Lists:** virtualize 50+ rows. (Not needed anywhere in Phase 1.)

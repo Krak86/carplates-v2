@@ -380,6 +380,7 @@ above once scoped, or dropped if research says no.
   brands without a listed parent (or private groups) simply show nothing; (c) Bluesky shows whatever the keyword search returns (no relevance/spam filter beyond the opt-out label) — judge on real plates; (d) browser-check at
   ≥ 1400 px with the left sidebar open (overlap) and on the VIN / photo-result routes.
 - ✅ **Skeleton placeholders** for stats pages and homepage stats (2026-10-06, `de0a53c`) and the **About page sources + icons** (`9b974fd`) — built, see `docs/plan-done.md`.
+- ✅ **Weight rankings, Stack Exchange + Lemmy community posts, richer "Copy all info" export, WebP brand logos** (2026-10-09, `3f7a596` … `bb9f055`) — built, see `docs/plan-done.md` and `docs/features-reference.md`. **Open:** Stack Exchange / Lemmy are unauthenticated public APIs (rate limits unmeasured — judge on real traffic, drop the widget column if they throttle); weight edges for models with few vehicles are percentile-based, so tiny samples are noisy (per-group floor only); Lighthouse/LCP not yet measured after the perf pass (Phase 4).
 - 📋 **"What's new" bell + feature guide** — planned 2026-10-06, not started: [FEATURES_PLAN.md](FEATURES_PLAN.md) (changelog bell, `/features` guide with Playwright screenshots, ua/ru/en). **Conflicts with the
   paid-features route** — see Phase 5 "Stage A".
 
@@ -689,7 +690,7 @@ needs its licence/permission recorded and attribution on About (VehiclesDB done)
 ### Open-data round 2 — recalls, complaints, specs, MOT faults, EV data — **licences verified 2026-10-07; RDW specs built 2026-10-08, rest not started**
 
 **Built:** RDW specs (the "Specs" block, stages C/C2/C3 + regroup) — `docs/plan-done.md` "RDW specs (EU / NL)". **Next: stage D (RDW
-recalls)**, only on the owner's "go stage D"; C4 (price sources) is research only. Details, licences, URLs, caveats and the skip list:
+recalls)**, only on the owner's "go stage D"; C4 (estimated value) is built (2026-10-09). Details, licences, URLs, caveats and the skip list:
 `DATASETS_PLAN.md` ("Round 2"). Buildable (all free, own tables, each a
 removable card block, credit on About): **RDW** registered vehicles (CC0; "Specs") + RDW recalls (CC0), **NHTSA** recalls +
 complaints (public domain, live API like `api/safety`), **UK MOT** (OGL v3; "Common faults", newest file 2023), **Transport

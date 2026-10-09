@@ -2995,3 +2995,27 @@ Trigger: the dev server showed ~22 MB / 337 requests before the first result. Th
 - **Verified in Chrome** on the production build: no console errors; `?section=news` opens and scrolls to News. Not measured: Lighthouse,
   LCP/CLS before vs after.
 - **Left:** the full prioritised list (measure for real, language preload, Brotli, edge cache, eager chunks, hero preload, PostHog delay) is tracked in PLAN.md Phase 4.
+
+### Estimated value, weight rankings, community widgets and export ✅ BUILT (2026-10-09, `86cc500` … `bb9f055`)
+
+Write-ups of the conventions are in `docs/features-reference.md` ("Estimated value", "Weight rankings", "Community posts", "Export, wiki text
+and brand logos"); this entry records what shipped and why.
+
+- **C4 estimated value** (`86cc500`, `1bd058a`, `fb512f5`, `ca1fe0a`): chip `~ € X–Y` = Dutch new price (RDW C3 median) x BPM depreciation
+  curve, plus Ukrainian import customs (duty 10 %, excise, VAT 20 %) and NBU EUR/USD/UAH (`GET /api/fx`, cached 6 h, stale on error). No ingest
+  except `rdw_specs.price_by_fuel` (migration 0050; RDW re-ingested, 106k rows). Range ±15 % to 10 y widening to ±35 % at 20 y+; 5 % old-car
+  floor (our assumption, flagged). Per-fuel "New price by version" table, copy button (shown currency only), NBU "?" popover and dated-table
+  link in the UI language. Never called a market price; AUTO.RIA is a link only. Design notes: `DATASETS_PLAN.md` "Stage C4 — done".
+- **Weight rankings** (`3f7a596`, `131e5ba`): migrations 0051-0053 `registry.stats_weight`, `db:refresh-weight-stats`, `/api/stats/top`
+  `weightBoards`, `/stats` panel with vehicle-group tabs, home cards, 🏋️ / 🪶 chips. Home fuel/safety/weight/news sections are `LazySection`s
+  that start their fetch and chunk only on approach (`fallback` prop keeps placeholder height).
+- **Stack Exchange + Lemmy** (`5e26e82`, `bb9f055`): keyless browser-side searches in the Social section and as a second side-widget column
+  (>= 1760 px); About sources entries with icons (Stack Exchange, Lemmy, NBU, plus RDW / Belastingdienst from `565e57f`).
+- **Export** (`2458f32`, `d360c7e`): "Copy all info" gathers RDW, VehiclesDB, reviews, value breakdown and NBU rates; new `chart` section; per-format
+  icons in the menu. VIN typical data moved to the VIN page only.
+- **Wiki** (`5606461`): "Read more" body, description subtitle, English fallback. Stage I (car generations) proposed in `DATASETS_PLAN.md`
+  with a probe script (`scripts/src/wiki-generations-probe.ts`), not started.
+- **Logos / chips** (`fb93ac6`, `f1d5cd5`, `565e57f`): brand logos as capped WebP (4.8 -> 1.8 MB), logo in the sticky header; stable header chip
+  row with a skeleton + `animate-chip-in` (`useChipsPending`); side widgets latch once shown (`useScrolledOnRoute`); test-drive banner click hint.
+- **Race** (`fb512f5`, `b202abb`): standalone `/race` route with presets per body type and a km odometer; car label in the modal title.
+- **YouTube fallback Day 5** (`5c08787`): +39 models, CSV 1,792 videos (104 models left in the >= 1,000-car tier).

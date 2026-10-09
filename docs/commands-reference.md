@@ -118,6 +118,9 @@ pnpm db:refresh-derived     # rebuild ALL rollups computed from current_registra
                             # after the registry refresh unless given --skip-derived; ingest:full refreshes once at its end;
                             # ingest:all skips it in ingest:full and runs it after the CSV loads. ingest:ratings:csv /
                             # ingest:vehiclesdb alone do NOT — run this after them
+pnpm db:refresh-weight-stats # rebuild registry.stats_weight (heaviest/lightest models per vehicle group; migrations 0051-0053) from the registry
+                             # + rdw_specs (scripts/src/weight-stats.ts); part of db:refresh-derived. Run after a registry or RDW ingest
+pnpm --filter scripts build:logo-images   # gitignored apps/web/assets-src/kind/logos/*.png -> public/logos/*.webp (max 700 px, q75); WebP only
 pnpm db:refresh-fuel-stats   # rebuild registry.stats_fuel (the /fuel page rollup) from the registry + fuel_economy;
                              # run after any registry ingest or ingest:fuel (ingest:all does it last)
 pnpm ingest:ratings:csv   # db:migrate, then all five *:csv rating loads + the fuel, RDW, infocar, infocar-videos, e-drive, sketchfab, carshow360, topgear, press and wiki-images CSVs concurrently — each writes
