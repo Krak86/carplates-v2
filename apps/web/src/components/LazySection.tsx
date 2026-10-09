@@ -10,6 +10,8 @@ type Props = {
   sections?: readonly ShareSection[]
   /** Pass `<LazyThing />` (a `React.lazy` component): its chunk and its queries start only when this mounts. */
   children: ReactNode
+  /** Replaces the default collapsed-header placeholder (before mount and while the chunk loads) — size it like the real section. */
+  fallback?: ReactNode
 }
 
 // Pre-load a screenful early so the section is ready by the time it scrolls in.
@@ -29,7 +31,8 @@ function SectionPlaceholder(): ReactNode {
  * placeholder. Latched: once mounted it stays mounted. Sections in the shared-link path need no extra scroll logic —
  * each already scrolls itself into view when it mounts.
  */
-export default function LazySection({ sections = [], children }: Props): ReactNode {
+export default function LazySection({ sections = [], children, fallback }: Props): ReactNode {
+  const placeholder = fallback ?? <SectionPlaceholder />
   const [searchParams] = useSearchParams()
   const target = searchParams.get('section')
   const isShared = sections.some(s => s === target)
@@ -54,11 +57,7 @@ export default function LazySection({ sections = [], children }: Props): ReactNo
     return (): void => observer.disconnect()
   }, [visible, node])
 
-  if (visible) return <Suspense fallback={<SectionPlaceholder />}>{children}</Suspense>
+  if (visible) return <Suspense fallback={placeholder}>{children}</Suspense>
 
-  return (
-    <div ref={setNode}>
-      <SectionPlaceholder />
-    </div>
-  )
+  return <div ref={setNode}>{placeholder}</div>
 }
