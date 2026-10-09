@@ -151,7 +151,15 @@ export default function ResultCard({ data }: Props): ReactNode {
       {/* Wide viewports have room beside the card — float the toggle out there instead
           of stacking it above, which otherwise pushes the card down for no reason. */}
       <CardTiltToggle className="absolute top-0 -left-14 hidden lg:inline-flex" />
-      <RaceGameButton color={VEHICLE_COLOR_HEX[vehicleColor]} kind={vehicleKind} bodyText={c.body} plate={data.plate} />
+      <RaceGameButton
+        color={VEHICLE_COLOR_HEX[vehicleColor]}
+        kind={vehicleKind}
+        bodyText={c.body}
+        plate={data.plate}
+        vehicleLabel={[[c.brand, c.model].filter(Boolean).join(' '), c.makeYear ? `(${c.makeYear})` : '', data.plate]
+          .filter(Boolean)
+          .join(' ')}
+      />
       <Card
         ref={glowRef}
         className="group relative isolate w-full transform-[perspective(var(--tilt-perspective,1200px))_rotateX(var(--tilt-x,0deg))_rotateY(var(--tilt-y,0deg))] overflow-hidden shadow-2xl! transition-[transform,box-shadow] duration-200 ease-out will-change-transform backface-hidden hover:shadow-xl!"

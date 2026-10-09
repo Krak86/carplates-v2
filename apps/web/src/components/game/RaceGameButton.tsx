@@ -21,6 +21,8 @@ type Props = {
   kind: VehicleKind | null
   bodyText?: string | null
   plate: string
+  /** "BRAND MODEL (year)" shown beside the modal title. */
+  vehicleLabel?: string
 }
 
 /**
@@ -28,7 +30,7 @@ type Props = {
  * a banner on wide screens (`xl`, where the side gutter has room), a compact 🎮 circle on `lg`, nothing below — the game
  * needs a keyboard. Online only: the game is a lazy chunk kept out of the PWA precache.
  */
-export default function RaceGameButton({ color, kind, bodyText, plate }: Props): ReactNode {
+export default function RaceGameButton({ color, kind, bodyText, plate, vehicleLabel }: Props): ReactNode {
   const { t } = useTranslation()
   const online = useOnlineStatus()
   const [searchParams] = useSearchParams()
@@ -127,6 +129,7 @@ export default function RaceGameButton({ color, kind, bodyText, plate }: Props):
             kind={kind}
             bodyText={bodyText}
             plate={plate}
+            vehicleLabel={vehicleLabel}
             shared={sharedTab}
             onClose={() => setOpen(false)}
           />

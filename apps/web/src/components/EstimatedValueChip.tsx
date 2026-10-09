@@ -144,7 +144,7 @@ export default function EstimatedValueChip({ brand, model, year, kind, fuel, cap
         inert={!open}
         className={cn(
           'grid transition-[grid-template-rows,opacity,translate] duration-300 ease-out will-change-[opacity,translate] motion-reduce:transition-none',
-          open ? 'mt-1.5 translate-y-0 grid-rows-[1fr] opacity-100' : '-translate-y-1 grid-rows-[0fr] opacity-0'
+          open ? 'mt-1.5 mb-4 translate-y-0 grid-rows-[1fr] opacity-100' : '-translate-y-1 grid-rows-[0fr] opacity-0'
         )}
       >
         <div className="overflow-hidden">

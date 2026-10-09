@@ -27,6 +27,7 @@ type Props = {
   /** The registry's free-text body type — picks the starting car (a fire engine for a ПОЖЕЖНИЙ, …). */
   bodyText?: string | null
   plate: string
+  vehicleLabel?: string
   /** Settings token of a shared link (`?section=race&tab=…`), applied over the defaults. */
   shared: string | null
   onClose: () => void
@@ -37,7 +38,7 @@ type Props = {
  * screen says what will be downloaded, and the engine chunk is only requested after the viewer confirms. Portal for
  * the same reason as Model3dModal: the Card's 3D tilt would otherwise become the `position: fixed` containing block.
  */
-export default function RaceGameModal({ color, kind, bodyText, plate, shared, onClose }: Props): ReactNode {
+export default function RaceGameModal({ color, kind, bodyText, plate, vehicleLabel, shared, onClose }: Props): ReactNode {
   const { t } = useTranslation()
   const [config, setConfig] = useState<RacerConfig>(() => ({
     color,
@@ -74,6 +75,7 @@ export default function RaceGameModal({ color, kind, bodyText, plate, shared, on
         <div className="mb-3 flex items-center justify-between gap-3">
           <div className="font-semibold">
             <span aria-hidden>🎮</span> {t('race.title')}
+            {vehicleLabel && <span className="ml-2 font-normal text-[var(--color-muted)]">{vehicleLabel}</span>}
           </div>
           <div className="flex shrink-0 items-center gap-3">
             <ShareButton
