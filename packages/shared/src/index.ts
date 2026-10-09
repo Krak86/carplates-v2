@@ -67,6 +67,7 @@ export {
   titleMentionsModel,
   type CommonsCandidate
 } from './commonsImage.js'
+export { wikiSearchName, type WikiSearchName } from './wikiAliases.js'
 export {
   COMMONS_API,
   IMAGEINFO_BATCH,

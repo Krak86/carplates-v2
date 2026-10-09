@@ -1,13 +1,18 @@
 import { describe, it, expect } from 'vitest'
 
-import { communitySearchTerm } from './community'
+import { matchesAllWords } from './community'
 
-describe('communitySearchTerm', () => {
-  it('joins make and model without the year', () => {
-    expect(communitySearchTerm('VOLKSWAGEN', 'PASSAT')).toBe('VOLKSWAGEN PASSAT')
+describe('matchesAllWords', () => {
+  it('rejects "audio" for "audi"', () => {
+    expect(matchesAllWords('Best audio setup for my car', 'AUDI Q5')).toBe(false)
   })
 
-  it('falls back to the make alone', () => {
-    expect(communitySearchTerm(' Skoda ', null)).toBe('Skoda')
+  it('requires every word', () => {
+    expect(matchesAllWords('Audi A4 oil change', 'AUDI Q5')).toBe(false)
+    expect(matchesAllWords('2019 Audi Q5 reliability?', 'AUDI Q5')).toBe(true)
+  })
+
+  it('matches whole words next to punctuation', () => {
+    expect(matchesAllWords('Audi, Q5: any issues', 'audi q5')).toBe(true)
   })
 })

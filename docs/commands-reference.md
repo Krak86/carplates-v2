@@ -86,6 +86,8 @@ pnpm ingest:wiki-images  # pre-warm registry.wiki_image (Wikimedia hero photos, 
                        # search + batched imageinfo (50/req) + English lead-image fallback; models >= --min-cars (default 1000),
                        # most cars first, resumable; --brand kia, --limit N, --rps 1|2, --dry-run, --refresh. Every failed request
                        # (429/5xx/timeout) is listed in scripts/.data/wiki-images/failed.json; --retry-failed [--all] replays them
+                       # --aliased: only models with a packages/shared wikiAliases.ts alias (VAZ 21104 -> VAZ-2110, ZAZ T13110 -> Sens,
+                       # Mercedes "E 270 CDI" -> E-Class ...), any size, redone even if stored not_found; add new rules there
 pnpm ingest:wiki-images:csv  # load the committed wiki-images CSV (112k rows, seconds)
 pnpm export:wiki-images:csv  # re-dump ok + not_found rows to that CSV — run after every real pre-warm
 pnpm wiki-images:coverage    # photo coverage by tier, by group and weighted by registered cars

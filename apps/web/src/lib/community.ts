@@ -92,16 +92,32 @@ const lemmySchema = z.object({
   )
 })
 
+/** Lemmy matches stems/substrings ("audi" finds "audio"): over-fetch, then keep titles holding every word whole. */
+const LEMMY_FETCH_LIMIT = 50
+
+export function matchesAllWords(title: string, q: string): boolean {
+  const haystack = title.toLowerCase()
+  return q
+    .toLowerCase()
+    .split(/\s+/)
+    .filter(Boolean)
+    .every(word => {
+      const escaped = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+      return new RegExp(`(?<![\\p{L}\\p{N}])${escaped}(?![\\p{L}\\p{N}])`, 'u').test(haystack)
+    })
+}
+
 async function getLemmyPosts(brand: string, model: string | null): Promise<CommunityResult> {
   const q = communitySearchTerm(brand, model)
-  const params = new URLSearchParams({ q, type_: 'Posts', sort: 'TopAll', limit: String(LIMIT) })
+  const params = new URLSearchParams({ q, type_: 'Posts', sort: 'TopAll', limit: String(LEMMY_FETCH_LIMIT) })
   const res = await fetch(`${LEMMY_HOST}/api/v3/search?${params}`)
   if (!res.ok) throw new Error(`Lemmy search failed: ${res.status}`)
   const { posts } = lemmySchema.parse(await res.json())
   return {
     searchUrl: `${LEMMY_HOST}/search?${new URLSearchParams({ q, type: 'Posts', sort: 'TopAll' })}`,
     posts: posts
-      .filter(p => !p.post.removed && !p.post.deleted && !p.post.nsfw)
+      .filter(p => !p.post.removed && !p.post.deleted && !p.post.nsfw && matchesAllWords(p.post.name, q))
+      .slice(0, LIMIT)
       .map(p => ({
         id: `lemmy-${p.post.id}`,
         url: `${LEMMY_HOST}/post/${p.post.id}`,

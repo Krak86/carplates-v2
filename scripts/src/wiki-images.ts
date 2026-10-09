@@ -6,6 +6,8 @@
  *   pnpm ingest:wiki-images                       # models with >= 1000 registered passenger cars, most cars first
  *   pnpm ingest:wiki-images -- --min-cars 100     # a wider tier (resumable: models already done are skipped)
  *   pnpm ingest:wiki-images -- --brand kia        # one brand (repeatable)
+ *   pnpm ingest:wiki-images -- --aliased          # only models with a wikiSearchName alias (VAZ 21104 → VAZ-2110 …), any size,
+ *                                                 # redone even when stored not_found
  *   pnpm ingest:wiki-images -- --limit 50         # first N models, for a trial / a time-boxed session
  *   pnpm ingest:wiki-images -- --dry-run          # fetch + resolve + count, write nothing to the DB
  *   pnpm ingest:wiki-images -- --refresh          # redo models even if stored (ignores the on-disk response cache too)
@@ -49,6 +51,7 @@ import {
   titleMentionsModel,
   wikiImageKey,
   wikiImageRowValues,
+  wikiSearchName,
   wikipediaSearchUrl
 } from '@carplates/shared'
 import type {
@@ -93,6 +96,7 @@ type Args = {
   rps: number
   retryFailed: boolean
   retryNotFound: boolean
+  aliased: boolean
   all: boolean
   exportCsv?: string
   fromCsv?: string
@@ -107,6 +111,7 @@ function parseArgs(argv: string[]): Args {
     rps: 1,
     retryFailed: false,
     retryNotFound: false,
+    aliased: false,
     all: false
   }
   for (let i = 0; i < argv.length; i++) {
@@ -119,6 +124,7 @@ function parseArgs(argv: string[]): Args {
     else if (arg === '--rps') a.rps = Math.min(2, Math.max(0.1, Number(argv[++i])))
     else if (arg === '--retry-failed') a.retryFailed = true
     else if (arg === '--retry-not-found') a.retryNotFound = true
+    else if (arg === '--aliased') a.aliased = true
     else if (arg === '--all') a.all = true
     else if (arg === '--export-csv') a.exportCsv = argv[++i]
     else if (arg === '--from-csv') a.fromCsv = argv[++i]
@@ -212,8 +218,16 @@ type Work = {
 
 type Stats = { ok: number; notFound: number; failed: number; rows: number }
 
+/** What Commons / Wikipedia are searched for: the registry name, or its alias (factory index → marketing name). */
+const searchOf = (g: ModelGroup): { brand: string; model: string; leadQuery: string; aliased: boolean } => {
+  const alias = wikiSearchName(g.brand, g.model)
+  return alias
+    ? { ...alias, aliased: true }
+    : { brand: g.brand, model: g.model, leadQuery: `${g.brand} ${g.model}`, aliased: false }
+}
+
 const slug = (g: ModelGroup): string =>
-  `${`${g.brand}__${g.model}`.replace(/[^a-z0-9]+/g, '-').slice(0, 80)}-${createHash('sha1').update(groupId(g.brand, g.model)).digest('hex').slice(0, 8)}`
+  `${`${g.brand}__${g.model}`.replace(/[^a-z0-9]+/g, '-').slice(0, 80)}-${createHash('sha1').update(groupId(g.brand, g.model)).digest('hex').slice(0, 8)}${searchOf(g).aliased ? '-alias' : ''}`
 
 function readCache<T>(kind: string, g: ModelGroup, refresh: boolean): T | undefined {
   const path = join(DATA_DIR, kind, `${slug(g)}.json`)
@@ -260,7 +274,8 @@ class Runner {
     const titles: string[] = []
     let offset = 0
     for (let page = 0; page < MAX_SEARCH_PAGES; page++) {
-      const res = await this.client.get<CommonsTitleSearch>(commonsTitleSearchUrl(group.brand, group.model, offset))
+      const q = searchOf(group)
+      const res = await this.client.get<CommonsTitleSearch>(commonsTitleSearchUrl(q.brand, q.model, offset))
       if (!res.ok) return this.fail(work, 'search', res)
       titles.push(...(res.data.query?.search ?? []).map(s => s.title))
       const next = res.data.continue?.sroffset
@@ -308,6 +323,7 @@ class Runner {
     const found: Array<{ work: Work; image: WikiImage; fileTitle: string }> = []
     for (const work of works) {
       const { group } = work
+      const q = searchOf(group)
       let page: WikipediaPage | null = null
       let failed = false
       // English first (its cache keeps the plain 'lead' name), then the brand's home edition, then Ukrainian.
@@ -315,9 +331,7 @@ class Runner {
         const kind = lang === 'en' ? 'lead' : `lead-${lang}`
         let hit = readCache<WikipediaPage | null>(kind, group, this.args.refresh)
         if (hit === undefined) {
-          const res = await this.client.get<WikipediaSearch>(
-            wikipediaSearchUrl(lang, `${group.brand} ${group.model}`, { leadImage: true })
-          )
+          const res = await this.client.get<WikipediaSearch>(wikipediaSearchUrl(lang, q.leadQuery, { leadImage: true }))
           if (!res.ok) {
             this.fail(work, 'lead', res)
             failed = true
@@ -326,7 +340,8 @@ class Runner {
           hit = Object.values(res.data.query?.pages ?? {})[0] ?? null
           writeCache(kind, group, hit)
         }
-        if (hit?.original && titleMentionsModel(hit.title, group.model)) {
+        // Cyrillic article titles (ВАЗ-2110, ЗАЗ Сенс) carry nothing the Latin matcher can compare — the specific alias query vouches.
+        if (hit?.original && (titleMentionsModel(hit.title, q.model) || (q.aliased && /[а-яіїєґ]/i.test(hit.title)))) {
           page = hit
           break
         }
@@ -395,7 +410,7 @@ class Runner {
       if (!w.failure)
         w.plans = planYears(
           w.titles,
-          w.group.model,
+          searchOf(w.group).model,
           [...w.group.years.keys()].sort((a, b) => b - a)
         )
     }
@@ -406,7 +421,7 @@ class Runner {
       const { brand, model } = w.group
       let newest: { image: WikiImage; title: string } | null = null // plans are newest-year first
       for (const plan of w.plans) {
-        const hit = resolveYearImage(plan, model, info)
+        const hit = resolveYearImage(plan, searchOf(w.group).model, info)
         const key = wikiImageKey(brand, model, plan.year)
         w.rows.push(
           wikiImageRowValues(
@@ -616,6 +631,7 @@ async function main(): Promise<void> {
         const due = row?.status === 'failed' && (args.all || !row.nextRetryAt || row.nextRetryAt.getTime() <= now)
         return due || retryIds.has(groupId(g.brand, g.model))
       }
+      if (args.aliased) return !!wikiSearchName(g.brand, g.model) && (args.refresh || row?.status !== 'ok')
       if (g.total < args.minCars) return false
       if (args.retryNotFound) return row?.status === 'not_found'
       if (args.refresh || !row) return true
