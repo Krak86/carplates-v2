@@ -126,7 +126,7 @@ export type ExportSection =
 export type ExportReport = {
   title: string
   subtitle: string
-  /** Bundled brand logo (same-origin `/logos/*.png`), null for a brand with none. */
+  /** Bundled brand logo (same-origin `/logos/*.webp`), null for a brand with none. */
   logo: { url: string; alt: string } | null
   /** Wikipedia lead image, shown right under the title block when the wiki lookup found one. */
   heroImage: { url: string; alt: string } | null

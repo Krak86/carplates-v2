@@ -289,5 +289,5 @@ export function brandSlug(brand: string | null | undefined): string | null {
 /** Static logo path for a raw registry `brand` value, or `null` when none is bundled. */
 export function brandLogoUrl(brand: string | null | undefined): string | null {
   const slug = brandSlug(brand)
-  return slug ? `/logos/${slug}.${SVG_LOGO_SLUGS.has(slug) ? 'svg' : 'png'}` : null
+  return slug ? `/logos/${slug}.${SVG_LOGO_SLUGS.has(slug) ? 'svg' : 'webp'}` : null
 }

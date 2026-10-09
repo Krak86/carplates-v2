@@ -30,7 +30,9 @@ const withYear = (car: string, year: number | null): string => (car ? `${car}${y
  * shown in the result card, so identity stays visible once the page is scrolled past it. Reads
  * off the query cache SearchRoute already populated for the current URL — no extra fetch.
  */
-export function useHeaderVehicleLabel(): string | null {
+export type HeaderVehicleLabel = { text: string; brand: string | null }
+
+export function useHeaderVehicleLabel(): HeaderVehicleLabel | null {
   const { pathname } = useLocation()
   const segments = pathname.split('/').filter(Boolean)
   const raw =
@@ -43,13 +45,13 @@ export function useHeaderVehicleLabel(): string | null {
   if (kind === 'plate' && plate.isSuccess) {
     const c = plate.data.current
     const car = withYear([c.brand, c.model].filter(Boolean).join(' '), c.makeYear)
-    return [car || null, plate.data.plate].filter(Boolean).join(' ')
+    return { text: [car || null, plate.data.plate].filter(Boolean).join(' '), brand: c.brand ?? null }
   }
 
   if (kind === 'vin' && vin.isSuccess) {
     const { brand, model, year } = extractVehicleInfo(vin.data)
     const car = withYear([brand, model].filter(Boolean).join(' '), year)
-    return [car || null, vin.data.vin].filter(Boolean).join(' ')
+    return { text: [car || null, vin.data.vin].filter(Boolean).join(' '), brand: brand ?? null }
   }
 
   return null

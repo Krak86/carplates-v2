@@ -6,6 +6,7 @@ import { Link, useLocation } from 'react-router'
 import BackgroundDevPanel from '@/components/BackgroundDevPanel'
 import BackgroundPhotos from '@/components/BackgroundPhotos'
 import LoginButton from '@/components/auth/LoginButton'
+import BrandLogo from '@/components/BrandLogo'
 import LayersButton from '@/components/LayersButton'
 import LoadErrorBoundary from '@/components/LoadErrorBoundary'
 import OfflineBanner from '@/components/OfflineBanner'
@@ -99,7 +100,12 @@ export default function Layout({ children }: Props): ReactNode {
         <Link viewTransition to="/" className="shrink-0 text-lg font-semibold">
           {t('app.title')}
         </Link>
-        {vehicleLabel && <span className="min-w-0 truncate text-sm text-[var(--color-muted)]">{vehicleLabel}</span>}
+        {vehicleLabel && (
+          <span className="flex h-full min-w-0 items-center gap-1.5 text-sm text-[var(--color-muted)]">
+            <BrandLogo brand={vehicleLabel.brand} className="self-center" />
+            <span className="truncate leading-5">{vehicleLabel.text}</span>
+          </span>
+        )}
         <LayersButton />
         <LoginButton />
       </header>

@@ -36,3 +36,6 @@ scripts/.data/
 
 # ALPR eval photos + results (personal data)
 services/alpr/eval/
+
+# full-size logo originals (not shipped; built into public/logos by build:logo-images)
+apps/web/assets-src/kind/logos/

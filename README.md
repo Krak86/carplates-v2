@@ -187,7 +187,8 @@ See [CLAUDE.md](CLAUDE.md) for conventions and [PLAN.md](PLAN.md) for the roadma
 `pnpm ingest:carshow360 · ingest:carshow360:csv · export:carshow360:csv` (sitemap only; `--enrich`, `--retry-failed`) ·
 `pnpm ingest:vehiclesdb · ingest:vehiclesdb:csv · export:vehiclesdb:csv · db:refresh-vdb-stats · db:refresh-derived` (VehiclesDB cross-market catalog, CC BY 4.0; `db:refresh-derived` rebuilds the fuel/safety/markets rollups) ·
 `pnpm ingest:ratings:csv · ingest:all` ·
-`pnpm --filter scripts build:kind-images` (re-encode `apps/web/assets-src/kind/*.jpg` → `public/kind/*.{avif,webp}`)
+`pnpm --filter scripts build:kind-images` (re-encode `apps/web/assets-src/kind/*.jpg` → `public/kind/*.{avif,webp}`) ·
+`pnpm --filter scripts build:logo-images` (re-encode gitignored originals `apps/web/assets-src/kind/logos/*.png` → `public/logos/*.webp`, max 700px; WebP only — AVIF fringes under `mix-blend-multiply`)
 
 ## License
 
