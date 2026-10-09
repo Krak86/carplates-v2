@@ -422,7 +422,8 @@ COROLLA` is filed as "TOYOTA COROLLA" in recent years (5,795 in 2021), so a regi
   `rdw_specs.price_by_fuel` (jsonb `[class, median EUR, n]`), the ingest query adds `pf_<class>` / `pfn_<class>` medians per fuel class (`FUEL_CLASSES`),
   `RdwMatchInfo.priceByFuel` feeds a "New price by version (fuel)" table (`ValuePriceByFuel.tsx`) in the value panel, shown when >= 2 classes; rows under
   `RDW_MIN_DISPLAY_N` cars are dimmed ("only 5 cars"). Needs `pnpm ingest:rdw -- --refresh` (+ `pnpm export:rdw:csv`) to fill; until then the table is absent.
-  The Charts-folder headline follows the EUR / USD / UAH switch.
+  The Charts-folder headline follows the EUR / USD / UAH switch. (4) **Link preview for `?section=value`:** `PreviewService.describeValue` looks up the
+  RDW estimate and prepends "Estimated EU value: ~€X–Y" (EU range, no customs) to the plate description; falls back to the plain preview without an estimate. Other sections still share the plain plate preview.
 - **Not done / ideas:** RIA price data (forbidden without a written agreement; owner chose not to contact RIA); a licensed old-car curve (would replace the floor in `rdwValue.ts`);
   customs-declaration data (backlog below); no `/stats` panel; **not browser-checked on real devices**.
 

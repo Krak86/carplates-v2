@@ -32,7 +32,11 @@ describe('SpaController meta injection', () => {
               card: {},
               brandSlug: null
             }
-          : null
+          : null,
+      describeValue: async (p: { title: string; description: string }) => ({
+        title: p.title,
+        description: `Estimated EU value: ~€3,000–4,000. ${p.description}`
+      })
     }
     const moduleRef = await Test.createTestingModule({
       controllers: [SpaController],
@@ -60,6 +64,11 @@ describe('SpaController meta injection', () => {
 
   it('passes ?lang= through to the og:image URL', async () => {
     expect(await get('/AA1234BB?lang=en')).toContain('/og/AA1234BB.png?lang=en')
+  })
+
+  it('puts the estimated value in the description for ?section=value only', async () => {
+    expect(await get('/AA1234BB?section=value')).toContain('content="Estimated EU value: ~€3,000–4,000. AA1234BB')
+    expect(await get('/AA1234BB')).not.toContain('Estimated EU value')
   })
 
   it('serves static page tags without noindex', async () => {

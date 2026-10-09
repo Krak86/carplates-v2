@@ -93,7 +93,8 @@ export class SpaController {
     }
     const html = await this.loadIndex()
     const lang = resolveLang((req.query as { lang?: string } | undefined)?.lang)
-    const meta = await this.metaFor(pathname, lang)
+    const section = (req.query as { section?: string } | undefined)?.section
+    const meta = await this.metaFor(pathname, lang, section)
     reply.type('text/html; charset=utf-8').header('cache-control', 'no-cache').send(injectMeta(html, meta))
   }
 
@@ -107,7 +108,7 @@ export class SpaController {
    * Plate/VIN deep links get per-vehicle tags (first load only — in-app navigation never hits the
    * server); every other path gets its static page tags, rendered once per path+language and cached.
    */
-  private async metaFor(pathname: string, lang: Lang): Promise<string> {
+  private async metaFor(pathname: string, lang: Lang, section?: string): Promise<string> {
     const segments = pathname.split('/').filter(Boolean)
     const siteUrl = this.env.PUBLIC_SITE_URL
     const langQuery = lang === DEFAULT_LANG ? '' : `?lang=${lang}`
@@ -116,12 +117,13 @@ export class SpaController {
       const query = decodeURIComponent(segments[0] as string)
       const preview = await this.previews.describe(query, lang)
       if (preview) {
+        const text = section === 'value' ? await this.previews.describeValue(preview, lang) : preview
         return renderMetaTags({
           siteUrl,
           path: `/${encodeURIComponent(preview.value)}`,
           lang,
-          title: preview.title,
-          description: preview.description,
+          title: text.title,
+          description: text.description,
           image: `${siteUrl}/og/${encodeURIComponent(preview.value)}.png${langQuery}`,
           noindex: true
         })

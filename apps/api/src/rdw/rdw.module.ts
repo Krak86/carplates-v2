@@ -5,6 +5,7 @@ import { RdwService } from './rdw.service.js'
 
 @Module({
   controllers: [RdwController],
-  providers: [RdwService]
+  providers: [RdwService],
+  exports: [RdwService]
 })
 export class RdwModule {}

@@ -3,9 +3,10 @@ import { brandSlug, classifyQuery, fallbackVehicleColor, resolveVehicleColor } f
 import type { VehicleColor } from '@carplates/shared'
 
 import { PlateService } from '../plate/plate.service.js'
+import { RdwService } from '../rdw/rdw.service.js'
 import { VinService } from '../vin/vin.service.js'
 import { Lru } from './lru.js'
-import { vehiclePageText, type Lang } from './spa-text.js'
+import { valuePageText, vehiclePageText, type Lang } from './spa-text.js'
 
 export type Preview = {
   kind: 'plate' | 'vin'
@@ -15,6 +16,8 @@ export type Preview = {
   description: string
   card: { plate: string; title: string; subtitle: string; color: VehicleColor }
   brandSlug: string | null
+  /** Plates only: what the RDW estimate needs for a `?section=value` link. */
+  vehicle?: { brand: string; model: string; year: number; kind: string | null }
 }
 
 const TTL_MS = 10 * 60_000
@@ -30,7 +33,8 @@ export class PreviewService {
 
   constructor(
     @Inject(PlateService) private readonly plateService: PlateService,
-    @Inject(VinService) private readonly vinService: VinService
+    @Inject(VinService) private readonly vinService: VinService,
+    @Inject(RdwService) private readonly rdwService: RdwService
   ) {}
 
   /** `null` when the query isn't a known plate/VIN (or a lookup fails) — callers fall back to the generic preview. */
@@ -66,7 +70,25 @@ export class PreviewService {
         subtitle: [res.region, cap(c.fuel), color].filter(Boolean).join(' · '),
         color: resolveVehicleColor(c.color) ?? fallbackVehicleColor(res.plate)
       },
-      brandSlug: brandSlug(c.brand)
+      brandSlug: brandSlug(c.brand),
+      vehicle:
+        c.brand && c.model && c.makeYear
+          ? { brand: c.brand, model: c.model, year: c.makeYear, kind: c.kind }
+          : undefined
+    }
+  }
+
+  /** Title/description for a `?section=value` link; the plain preview when there is no estimate. */
+  async describeValue(preview: Preview, lang: Lang): Promise<{ title: string; description: string }> {
+    const v = preview.vehicle
+    if (!v) return preview
+    try {
+      const res = await this.rdwService.lookup(v.brand, v.model, v.year, v.kind ?? undefined)
+      const est = res.match?.valueEstimate
+      return est ? valuePageText(lang, preview, est.lowEur, est.highEur) : preview
+    } catch (err) {
+      this.logger.debug(`no value preview for "${preview.value}": ${(err as Error).message}`)
+      return preview
     }
   }
 

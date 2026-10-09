@@ -115,6 +115,23 @@ const REGISTRY_NOTE: Record<Lang, string> = {
 
 const UNKNOWN_VEHICLE: Record<Lang, string> = { ua: 'авто', ru: 'авто', en: 'vehicle' }
 
+const VALUE_NOTE: Record<Lang, (range: string) => string> = {
+  ua: range =>
+    `Орієнтовна вартість в ЄС: ${range}. Груба оцінка від нової ціни в Нідерландах, не ринкова ціна в Україні.`,
+  ru: range =>
+    `Ориентировочная стоимость в ЕС: ${range}. Грубая оценка от новой цены в Нидерландах, не рыночная цена в Украине.`,
+  en: range => `Estimated EU value: ${range}. A rough estimate from the Dutch new price, not a Ukrainian market price.`
+}
+
+/** `?section=value` share link: the plate text with the estimated-value range put first. */
+export function valuePageText(lang: Lang, base: PageText, lowEur: number, highEur: number): PageText {
+  const fmt = (n: number): string => n.toLocaleString('en-US')
+  return {
+    title: base.title,
+    description: `${VALUE_NOTE[lang](`~€${fmt(lowEur)}–${fmt(highEur)}`)} ${base.description}`
+  }
+}
+
 type Facts = { value: string; car: string | null; year: string | null; extra: Array<string | null | undefined> }
 
 /** Title/description for a plate or VIN page — "AA1234BB — Toyota Camry 2015 · Cars UA". */
