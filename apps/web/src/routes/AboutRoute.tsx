@@ -18,11 +18,12 @@ const SOURCES: readonly Source[] = [
   { key: 'epa', label: 'EPA / fueleconomy.gov', url: 'https://www.fueleconomy.gov', icon: '/icons/sources/epa.webp' },
   { key: 'eea', label: 'EEA', url: 'https://www.eea.europa.eu', icon: '/icons/sources/eea.svg' },
   { key: 'vehiclesdb', label: 'VehiclesDB', url: 'https://vehiclesdb.com', icon: '/icons/sources/vehiclesdb.webp' },
-  { key: 'rdw', label: 'RDW', url: 'https://opendata.rdw.nl' },
+  { key: 'rdw', label: 'RDW', url: 'https://opendata.rdw.nl', icon: '/icons/sources/rdw.webp' },
   {
     key: 'belastingdienst',
     label: 'Belastingdienst',
-    url: 'https://www.belastingdienst.nl/wps/wcm/connect/nl/bpm/content/bpm-afschrijving-koerslijst-taxatierapport-forfaitaire-tabel'
+    url: 'https://www.belastingdienst.nl/wps/wcm/connect/nl/bpm/content/bpm-afschrijving-koerslijst-taxatierapport-forfaitaire-tabel',
+    icon: '/icons/sources/belastingdienst.webp'
   },
   { key: 'infocar', label: 'infocar.ua', url: 'https://www.infocar.ua', icon: '/icons/infocar.png' },
   { key: 'hondaUa', label: 'honda.ua', url: 'https://www.honda.ua', icon: '/icons/sources/honda.webp' },

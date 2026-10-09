@@ -36,6 +36,7 @@ export default function PlateSegments({ plate, region }: Props): ReactNode {
   return (
     <SegmentExplainer
       hint={t('plate.seg.hint')}
+      hintInline
       label={t('plate.seg.label')}
       segments={segments.map(s => ({
         id: s.id,

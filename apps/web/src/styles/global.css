@@ -266,6 +266,93 @@ body {
   }
 }
 
+/* "Click me" hint on the test-drive banner CTA: after a rest, a pointer glides in, presses, a ripple rings out and the
+   pill pulses. One 8s cycle shared by all three parts so the click, ripple and pulse stay in sync. */
+@keyframes cta-cursor {
+  0%,
+  58% {
+    opacity: 0;
+    transform: translate(26px, 18px) scale(1);
+  }
+  64% {
+    opacity: 1;
+    transform: translate(26px, 18px) scale(1);
+  }
+  76% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+  80% {
+    transform: translate(0, 0) scale(0.82);
+  }
+  84% {
+    transform: translate(0, 0) scale(1);
+  }
+  94% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(0, 0) scale(1);
+  }
+}
+
+@keyframes cta-ripple {
+  0%,
+  79% {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+  80% {
+    opacity: 0.6;
+    transform: scale(0.2);
+  }
+  92%,
+  100% {
+    opacity: 0;
+    transform: scale(1.8);
+  }
+}
+
+@keyframes cta-pulse {
+  0%,
+  79%,
+  88%,
+  100% {
+    transform: scale(1);
+  }
+  82% {
+    transform: scale(0.94);
+  }
+}
+
+@utility animate-cta-cursor {
+  animation: cta-cursor 8s ease-in-out infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+    opacity: 0;
+  }
+}
+
+@utility animate-cta-ripple {
+  animation: cta-ripple 8s ease-out infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+    opacity: 0;
+  }
+}
+
+@utility animate-cta-pulse {
+  animation: cta-pulse 8s ease-in-out infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
 /* Route transitions (View Transitions API). Links/navigate() opt in via `viewTransition`.
    Layout sets <html data-vt-dir="forward|back"> (see lib/view-transition.ts) from route depth.
    Named elements are lifted out of the `page` snapshot and animate on their own:

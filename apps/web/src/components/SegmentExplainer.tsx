@@ -27,39 +27,49 @@ type Props = {
   segments: ExplainedSegment[]
   hint: string
   label: string
+  /** Put the hint on the chips' row, right-aligned, instead of above them. */
+  hintInline?: boolean
 }
 
 /**
  * Colour-coded chips with a "what does this part mean" panel underneath — shared by the VIN and plate views.
  * Hover, focus or tap a chip to read about it; the first segment is selected initially.
  */
-export default function SegmentExplainer({ segments, hint, label }: Props): ReactNode {
+export default function SegmentExplainer({ segments, hint, label, hintInline }: Props): ReactNode {
   const [selected, setSelected] = useState(segments[0]?.id)
   const current = segments.find(s => s.id === selected) ?? segments[0]
   if (!current) return null
 
   return (
     <div className="mb-4">
-      <div className="mb-1 text-sm text-[var(--color-muted)]">{hint}</div>
+      {!hintInline && <div className="mb-1 text-sm text-[var(--color-muted)]">{hint}</div>}
 
-      <div role="group" aria-label={label} className="flex flex-wrap gap-1 font-mono text-lg sm:text-xl">
-        {segments.map(s => (
-          <button
-            key={s.id}
-            type="button"
-            aria-pressed={current.id === s.id}
-            onMouseEnter={() => setSelected(s.id)}
-            onFocus={() => setSelected(s.id)}
-            onClick={() => setSelected(s.id)}
-            className={cn(
-              'rounded-md px-1.5 py-0.5 font-semibold tracking-wider ring-0 transition-[box-shadow,opacity,transform] duration-200 ease-out motion-reduce:transition-none',
-              SEGMENT_COLORS[s.color],
-              current.id === s.id ? '-translate-y-0.5 scale-105 ring-2' : 'opacity-70 hover:opacity-100 active:scale-95'
-            )}
-          >
-            {s.text}
-          </button>
-        ))}
+      <div className={cn(hintInline && 'flex flex-col gap-y-1 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-6')}>
+        <div role="group" aria-label={label} className="flex flex-wrap gap-1 font-mono text-lg sm:text-xl">
+          {segments.map(s => (
+            <button
+              key={s.id}
+              type="button"
+              aria-pressed={current.id === s.id}
+              onMouseEnter={() => setSelected(s.id)}
+              onFocus={() => setSelected(s.id)}
+              onClick={() => setSelected(s.id)}
+              className={cn(
+                'rounded-md px-1.5 py-0.5 font-semibold tracking-wider ring-0 transition-[box-shadow,opacity,transform] duration-200 ease-out motion-reduce:transition-none',
+                SEGMENT_COLORS[s.color],
+                current.id === s.id
+                  ? '-translate-y-0.5 scale-105 ring-2'
+                  : 'opacity-70 hover:opacity-100 active:scale-95'
+              )}
+            >
+              {s.text}
+            </button>
+          ))}
+        </div>
+
+        {hintInline && (
+          <div className="order-first text-left text-sm text-[var(--color-muted)] sm:order-none">{hint}</div>
+        )}
       </div>
 
       <div aria-live="polite" className="mt-2 rounded-md bg-[var(--color-border)]/30 px-3 py-2 text-sm">

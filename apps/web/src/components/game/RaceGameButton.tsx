@@ -78,8 +78,28 @@ export default function RaceGameButton({ color, kind, bodyText, plate }: Props):
               🚗
             </span>
 
-            <span className="inline-flex items-center gap-1 self-center rounded-full bg-sky-900 px-3 py-1.5 text-xs font-bold text-white transition-colors group-hover:bg-sky-700">
-              {t('race.banner.cta')} <span aria-hidden>→</span>
+            <span className="relative self-center">
+              <span className="inline-flex animate-cta-pulse items-center gap-1 rounded-full bg-sky-900 px-3 py-1.5 text-xs font-bold text-white transition-colors group-hover:bg-sky-700">
+                {t('race.banner.cta')} <span aria-hidden>→</span>
+              </span>
+
+              <span
+                aria-hidden
+                className="pointer-events-none absolute top-1/2 left-1/2 -mt-5 -ml-5 size-10 animate-cta-ripple rounded-full bg-sky-500/50"
+              />
+              <svg
+                aria-hidden
+                viewBox="0 0 24 24"
+                className="pointer-events-none absolute top-1/2 left-1/2 size-6 -translate-x-1 -translate-y-1 animate-cta-cursor opacity-0 drop-shadow-md group-hover:hidden"
+              >
+                <path
+                  d="M5 3l14 8-6 2 4 7-3 1.5-4-7-5 4z"
+                  fill="white"
+                  stroke="#0c4a6e"
+                  strokeWidth="1.5"
+                  strokeLinejoin="round"
+                />
+              </svg>
             </span>
           </button>
         </div>

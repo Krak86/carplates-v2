@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useLocation } from 'react-router'
 
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 
@@ -25,4 +26,26 @@ export function useSideWidgetsVisible(): boolean {
   }, [isDesktop, hasScrolled])
 
   return isDesktop && hasScrolled
+}
+
+/**
+ * True once the page has been scrolled past the threshold on the current route, and stays true while scrolling back to
+ * the top. A navigation (new pathname) starts over: at the top, nothing shown until the user scrolls again.
+ */
+export function useScrolledOnRoute(): boolean {
+  const { pathname } = useLocation()
+  const [scrolledPath, setScrolledPath] = useState<string | null>(() =>
+    window.scrollY > SHOW_AFTER_SCROLL_PX ? pathname : null
+  )
+
+  useEffect(() => {
+    if (scrolledPath === pathname) return
+    const handleScroll = (): void => {
+      if (window.scrollY > SHOW_AFTER_SCROLL_PX) setScrolledPath(pathname)
+    }
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return (): void => window.removeEventListener('scroll', handleScroll)
+  }, [pathname, scrolledPath])
+
+  return scrolledPath === pathname
 }

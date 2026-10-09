@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
@@ -6,7 +6,7 @@ import { Link, useLocation } from 'react-router'
 
 import NewsGroups from '@/components/NewsGroups'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
-import { SHOW_AFTER_SCROLL_PX, SIDE_WIDGETS_DESKTOP_QUERY } from '@/hooks/useSideWidgetsVisible'
+import { SIDE_WIDGETS_DESKTOP_QUERY, useScrolledOnRoute } from '@/hooks/useSideWidgetsVisible'
 import { cn } from '@/lib/cn'
 import { newsLangFilter } from '@/lib/news'
 import { newsQuery } from '@/lib/queries'
@@ -31,14 +31,8 @@ export default function NewsWidget({ brand, model, year }: Props): ReactNode {
   const { pathname } = useLocation()
   // Dismissal is per route: storing the path it was closed on makes it lapse on the next navigation.
   const [dismissedPath, setDismissedPath] = useState<string | null>(null)
-  const [scrolled, setScrolled] = useState<boolean>(() => window.scrollY > SHOW_AFTER_SCROLL_PX)
+  const scrolled = useScrolledOnRoute()
   const news = useQuery({ ...newsQuery(brand, model, year, newsLangFilter(i18n.language)), enabled: isDesktop })
-
-  useEffect(() => {
-    const handleScroll = (): void => setScrolled(window.scrollY > SHOW_AFTER_SCROLL_PX)
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    return (): void => window.removeEventListener('scroll', handleScroll)
-  }, [])
 
   const all = news.data?.items ?? []
   if (!isDesktop || !all.length || dismissedPath === pathname) return null

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
@@ -6,7 +6,7 @@ import { useLocation } from 'react-router'
 
 import BlueskyPostCard from '@/components/BlueskyPostCard'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
-import { SHOW_AFTER_SCROLL_PX, SIDE_WIDGETS_DESKTOP_QUERY } from '@/hooks/useSideWidgetsVisible'
+import { SIDE_WIDGETS_DESKTOP_QUERY, useScrolledOnRoute } from '@/hooks/useSideWidgetsVisible'
 import { blueskyQuery } from '@/lib/bluesky'
 import { cn } from '@/lib/cn'
 
@@ -29,14 +29,8 @@ export default function BlueskyWidget({ brand, model, year }: Props): ReactNode 
   const isDesktop = useMediaQuery(SIDE_WIDGETS_DESKTOP_QUERY)
   const { pathname } = useLocation()
   const [dismissedPath, setDismissedPath] = useState<string | null>(null)
-  const [scrolled, setScrolled] = useState<boolean>(() => window.scrollY > SHOW_AFTER_SCROLL_PX)
+  const scrolled = useScrolledOnRoute()
   const posts = useQuery({ ...blueskyQuery(brand, model, year), enabled: isDesktop })
-
-  useEffect(() => {
-    const handleScroll = (): void => setScrolled(window.scrollY > SHOW_AFTER_SCROLL_PX)
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    return (): void => window.removeEventListener('scroll', handleScroll)
-  }, [])
 
   const items = (posts.data?.posts ?? []).slice(0, WIDGET_POSTS)
   if (!isDesktop || !items.length || dismissedPath === pathname) return null

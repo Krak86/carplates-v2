@@ -7,7 +7,7 @@ import { newCarsUrl } from '@carplates/shared'
 import BrandLogo from '@/components/BrandLogo'
 import { useNewCarsShowcaseActions } from '@/components/use-new-cars-showcase-actions'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
-import { SHOW_AFTER_SCROLL_PX, SIDE_WIDGETS_DESKTOP_QUERY } from '@/hooks/useSideWidgetsVisible'
+import { SIDE_WIDGETS_DESKTOP_QUERY, useScrolledOnRoute } from '@/hooks/useSideWidgetsVisible'
 import { cn } from '@/lib/cn'
 import { displayBrand, upperBrand } from '@/lib/display-brand'
 import { hostOf, NEW_CARS_AD_COUNT } from '@/lib/new-cars'
@@ -33,16 +33,10 @@ export default function NewCarsWidget({ brand }: Props): ReactNode {
   const isDesktop = useMediaQuery(SIDE_WIDGETS_DESKTOP_QUERY)
   const { pathname } = useLocation()
   const [dismissedPath, setDismissedPath] = useState<string | null>(null)
-  const [scrolled, setScrolled] = useState<boolean>(() => window.scrollY > SHOW_AFTER_SCROLL_PX)
+  const scrolled = useScrolledOnRoute()
   const [ad, setAd] = useState(() => Math.floor(Math.random() * NEW_CARS_AD_COUNT))
   const [failedUrl, setFailedUrl] = useState<string | null>(null)
   const showcase = useNewCarsShowcaseActions(brand, isDesktop, { probe: 3, take: 1 })
-
-  useEffect(() => {
-    const handleScroll = (): void => setScrolled(window.scrollY > SHOW_AFTER_SCROLL_PX)
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    return (): void => window.removeEventListener('scroll', handleScroll)
-  }, [])
 
   useEffect(() => {
     const timer = setInterval(() => setAd(nextAd), AD_ROTATE_MS)
