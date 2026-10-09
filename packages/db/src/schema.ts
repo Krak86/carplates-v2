@@ -1134,3 +1134,18 @@ export const userSettings = app.table('user_settings', {
   data: jsonb('data').notNull(),
   updatedAt: bigint('updated_at', { mode: 'number' }).notNull()
 })
+
+/** Machine translation of one Dutch recall text (keyed by its sha256) into one language by one engine. */
+export const rdwRecallTexts = registry.table(
+  'rdw_recall_texts',
+  {
+    textHash: text('text_hash').notNull(),
+    lang: text('lang').notNull(),
+    engine: text('engine').notNull(),
+    text: text('text').notNull(),
+    quality: text('quality'),
+    translatedAt: timestamp('translated_at', { withTimezone: true }).notNull().defaultNow()
+  },
+  t => [primaryKey({ columns: [t.textHash, t.lang, t.engine] })]
+)
+export type RdwRecallTextInsert = typeof rdwRecallTexts.$inferInsert

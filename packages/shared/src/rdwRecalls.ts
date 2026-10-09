@@ -1,5 +1,15 @@
 import { z } from 'zod'
 
+/** Machine translation of a campaign's free-text fields into one language (`uk` | `ru` | `en`); a field is null when it had no text. */
+export const rdwRecallTranslationSchema = z.object({
+  defect: z.string().nullable(),
+  consequences: z.string().nullable(),
+  remedy: z.string().nullable(),
+  /** Engine that produced it (`nllb-600m` …): shown as "AI translation", never as RDW's wording. */
+  engine: z.string()
+})
+export type RdwRecallTranslation = z.infer<typeof rdwRecallTranslationSchema>
+
 /**
  * One recall campaign from RDW's open data (CC0). The texts are RDW's own Dutch wording — there is no open translation —
  * so the UI labels them as such. A campaign covers a make/type for every vehicle the producer built to that spec: it
@@ -24,7 +34,9 @@ export const rdwRecallSchema = z.object({
   hazards: z.array(z.string()),
   /** Vehicles in the campaign worldwide / in the Netherlands, as the producer reported them. */
   vehiclesTotal: z.number().int().nullable(),
-  vehiclesNational: z.number().int().nullable()
+  vehiclesNational: z.number().int().nullable(),
+  /** Machine translations by language code (`uk`, `ru`, `en`), only where every present field has one. Optional for old caches. */
+  translations: z.record(z.string(), rdwRecallTranslationSchema).optional()
 })
 export type RdwRecall = z.infer<typeof rdwRecallSchema>
 

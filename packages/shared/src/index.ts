@@ -185,7 +185,9 @@ export {
   RDW_RECALLS_LIMIT,
   rdwRecallSchema,
   rdwRecallsResponseSchema,
+  rdwRecallTranslationSchema,
   type RdwRecall,
+  type RdwRecallTranslation,
   type RdwRecallsResponse
 } from './rdwRecalls.js'
 export {

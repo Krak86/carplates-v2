@@ -537,28 +537,25 @@ expanded campaign has a "?" (`recalls.about.*`, `RdwRecallField`); a visible box
 register found"; `recalls.what.*`). **Category (19 fixed values) and hazard (5 fixed values) are translated statically** (`categoryKey` / `hazardKey` in `RdwRecalls.helpers.ts`,
 `recalls.cat.*` / `recalls.hazard.*` in ua/ru/en; an unknown new wording falls back to the Dutch original).
 
-**Stage D follow-up 2 — PLANNED, not started (decided 2026-10-09; owner opens a new session and says "go stage D2"): translate the free-text fields.**
-Defect, consequences and remedy are free Dutch: **11,490 distinct texts, ~1.66 M characters** (4,146 / 3,605 / 3,731 distinct per field). Decision: **translate all of them with a free local
-model now, via a script, no API key (the owner has none); keep the schema open so a paid translation API can replace the engine later without a migration.**
+**Stage D follow-up 2 — built + piloted (2026-10-09); the FULL translation run is the last stage, see the end of this file.** Free-text fields (defect, consequences,
+remedy) are Dutch: **~11.4k distinct texts, ~1.66 M characters**. Translated with a free **local** model, no API key (the owner has none).
 
-- **Storage (one table, deduplicated by text):** `registry.rdw_recall_texts` — `text_hash` (sha256 of the Dutch text), `lang` (`en` / `uk` / `ru`), `text`, **`engine`** (e.g. `opus-mt`,
-  `nllb-600m`, later `claude-…` / `deepl`), `quality` (nullable; e.g. `machine` / `reviewed`), `translated_at`; PK (`text_hash`, `lang`, `engine`). The API returns, per campaign, the
-  best translation for the user's language (a later engine or a reviewed row wins over an older one) plus the Dutch original. Into the CSV seed (a second `part`, or its own file);
-  expected size ~2-3 MB gzipped for three languages. **Not a web lang file** (3.3 MB per language would ship to every browser). App language `ua` = stored lang `uk`.
-- **Script:** `pnpm ingest:rdw-recalls:translate` — resumable, only translates texts without a row for that (lang, engine), runs after `ingest:rdw-recalls` in the monthly refresh. Node only
-  (**this PC has no Python**): `@huggingface/transformers` (ONNX, `dtype: 'q8'`) in `scripts/`; models download on first run (check size; keep them out of git).
-- **UI:** per text a switch to see the original (swap, or both side by side); a visible **"AI translation"** label (i18n) on every translated text; the Dutch text stays the default fallback
-  while there is no translation; fields without a translation show `lang="nl"` as today.
-- **Quality findings (tested 2026-10-09 on 5 campaigns, scratchpad `mt/`, not in the repo):** OPUS-MT `Xenova/opus-mt-nl-en` (+ `opus-mt-en-uk` pivot for UK) runs in Node at ~0.45 s per call, but
-  mangles technical words: "barsten" -> "bart", "merkdealer" -> "Grandler" / "mark-dealer", "airbag" -> "ящик для повітря" (UK), "bezwijken" -> "збанкрутувати" (UK). Simple sentences are fine.
-  **A wrong word in safety text is worse than the Dutch original, so the label and the original-text switch are mandatory, not optional.** The owner accepted this trade-off for the free route
-  but wanted to see more samples first. **Next step of D2 = compare, before the full run:** (1) `Xenova/nllb-200-distilled-600M` (direct nl -> eng / ukr / rus, no pivot; expected better but
-  ~3-4x slower; script `scratchpad/mt/nllb.mjs` was written but not run), (2) a **glossary / pre-processing pass** for recurring terms (merkdealer = brand dealer, airbag, gasgenerator,
-  voertuigeigenaar, remleiding, …) applied before or after the model, (3) a sample of ~50 texts the owner reviews (EN and UK), then pick the engine. Estimated time of the full run:
-  OPUS-MT ~4-5 h single-threaded for 3 languages (parallel workers cut it); NLLB maybe 15 h single-threaded — measure on a sample first; the PC has an RTX 3070 but onnxruntime-node uses the CPU
-  unless a CUDA build is set up. Per-language option: translate only EN + UK first (RU later) if time matters.
-- **Fallbacks considered:** Claude translation (needs an API key; ~30-60 min and a few dollars, best quality; the schema above allows adding it later as `engine` and it then wins); translating the
-  campaigns of the ~50 most common models in a Claude Code session (no key, high usage); in-browser Translator API (Chrome only, no storage, Dutch -> Ukrainian may be missing); Dutch only.
+- **Built:** migration 0055 `registry.rdw_recall_texts` (`text_hash` = sha256 of the whitespace-collapsed Dutch text, `lang` en / uk / ru, `engine`, `quality`, `translated_at`; PK hash + lang + engine, so a
+  paid API or a reviewed row can be added later as another engine without a migration; the API serves the newest / `reviewed` row per language and only when **every** present field of a campaign has it).
+  `recallTextHash` in `packages/db`. `GET /api/rdw/recalls` returns `translations` per campaign (`rdwRecallTranslationSchema`, optional field). UI: the campaign header and the Defect / Consequences /
+  Remedy rows show the translation first with an "AI translation (may contain errors)" label and a "Show original" switch (`RdwRecallField`, header state in `RdwRecalls`); no translation = Dutch with `lang="nl"` as before.
+  Not a web lang file (it would ship to every browser). App language `ua` = stored `uk`. **Not browser-checked yet** (API and type-check verified).
+- **Script:** `pnpm ingest:rdw-recalls:translate` (`scripts/src/rdw-recalls-translate.ts`). Node only (this PC has no Python): `@huggingface/transformers` 4.3.1 + NLLB-200-distilled-600M, **GPU via DirectML fp16**
+  (`--device cpu` = q8; DirectML + q8 segfaults). Model downloads to `scripts/.cache/models` (git-ignored). Resumable and sliceable: `--max-minutes 60`, `--limit N` / `--offset N`, `--make`/`--model` (registry keys),
+  `--langs`, `--dump file.md` (no DB writes). Saves every 100 texts. Sentence-level, each distinct sentence once. **Degeneration guard:** a segment that is empty, runaway-long or repeats a 3-gram 3× is retried
+  with a harsher repetition penalty; still bad = that text gets no row in that language and shows Dutch. Speed measured: 100 texts x 3 languages in ~6 min incl. model load.
+- **Findings (pilot on Toyota Camry, Škoda Fabia, Honda Accord, 90 texts x 3 languages; owner reviewed the UI and liked it, "leave it as is for now"):**
+  - OPUS-MT (nl-en + en-uk) mangled technical words ("airbag" -> "ящик для повітря", "bezwijken" -> "збанкрутувати").
+  - NLLB direct Dutch -> uk / ru still garbled airbag / dealer / owner ("сідма", "торговий дилер").
+  - A glossary with placeholder tokens (`QX1Z`) made NLLB loop; tokens were dropped. A glossary of English rewrites (`rdw-recalls-glossary.ts`, `--gloss`) fixes dealer / owner but not airbag; **off by default**.
+  - **Pivot Dutch -> English -> uk / ru (engine `nllb-600m-pivot`, the default) was clearly best.** Remaining errors are real ("ввільонник", "аероспад", "дилер товарних знаків" for brand dealer), hence the label and switch.
+  - **fp16 batches > 1 hallucinate (repeated English)**: translate one segment at a time.
+- **Fallbacks if quality is not enough later:** a larger NLLB model, more glossary terms, Claude / DeepL as a higher-ranked engine (needs a key), Dutch only for a language.
 
 **Stage I — proposal (2026-10-09, last stage; nothing started, owner says "go stage I").** Car generations from Wikipedia + Wikidata.
 Prototype: `scripts/src/wiki-generations-probe.ts` (prints a table, writes nothing; run from `scripts/`:
@@ -633,3 +630,8 @@ Download `dist/vehicles.csv` from the VehiclesDB repo into a scratch folder (unt
 `select brand, model, total_rows from registry.stats_by_model`, then match with `makeKey`/`modelKey` from
 `@carplates/shared/dist` — exact key first, then same-make model prefix (≥3 chars) either way; collapse doubled model
 spellings ("TRANSIT TRANSIT"). Scripts were scratch-only and are not committed.
+
+**Last stage — Stage D2 full translation run (owner will do it later; nothing to build).** The pilot rows (engine `nllb-600m-pivot`, 3 models + ~200 texts from two test slices) are already in the DB; the rest is a backlog run:
+`pnpm ingest:rdw-recalls:translate -- --max-minutes 60` repeated (or `--limit 1000` slices; resumable, stops on its own, no double work). ~11.2k texts left; roughly 3-4 s per text for all three languages on the RTX 3070.
+After it: `pnpm export:rdw-recalls:csv` must also dump `rdw_recall_texts` (a second `part`, **not done yet** — the seed CSV carries campaigns and links only), then add the translate command to the monthly refresh row in SCHEDULE.md
+(new campaigns only: it translates just the texts without a row).

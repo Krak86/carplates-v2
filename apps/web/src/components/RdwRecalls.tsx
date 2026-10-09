@@ -40,6 +40,8 @@ export default function RdwRecalls({ brand, model, year, kind }: Props): ReactNo
   const isShared = searchParams.get('section') === 'recalls'
   const [open, setOpen] = useState(() => isShared)
   const [expanded, setExpanded] = useState(false)
+  // Campaign codes whose header shows RDW's Dutch instead of the machine translation.
+  const [originals, setOriginals] = useState<string[]>([])
   const sectionRef = useRef<HTMLDivElement>(null)
   const { data } = useQuery({ ...rdwRecallsQuery(brand ?? '', model ?? ''), enabled: !!(brand && model) })
   // Same query key as the Specs block: shared cache, no second request.
@@ -130,6 +132,7 @@ export default function RdwRecalls({ brand, model, year, kind }: Props): ReactNo
                 const key = hazardKey(h)
                 return key ? t(key) : h
               })
+              const tr = recall.translations?.[locale]
               return (
                 <li key={recall.code} className="py-2">
                   <details>
@@ -137,7 +140,31 @@ export default function RdwRecalls({ brand, model, year, kind }: Props): ReactNo
                       <span className="mr-2 inline-block rounded-full border border-[var(--color-border)] px-2 py-0.5 align-middle text-xs text-[var(--color-muted)]">
                         {t(`recalls.market.${recall.market ?? 'NL'}`, { defaultValue: recall.market ?? 'NL' })}
                       </span>
-                      <span lang="nl">{recall.defect ?? recall.category ?? recall.code}</span>
+                      {tr?.defect && !originals.includes(recall.code) ? (
+                        <span>{tr.defect}</span>
+                      ) : (
+                        <span lang="nl">{recall.defect ?? recall.category ?? recall.code}</span>
+                      )}
+                      {tr?.defect && (
+                        <span className="ml-2 text-xs text-[var(--color-muted)]">
+                          {originals.includes(recall.code) ? t('recalls.originalNl') : t('recalls.aiTranslation')}
+                          {' · '}
+                          <button
+                            type="button"
+                            onClick={e => {
+                              e.preventDefault() // inside <summary>: do not toggle the <details>
+                              setOriginals(list =>
+                                list.includes(recall.code)
+                                  ? list.filter(c => c !== recall.code)
+                                  : [...list, recall.code]
+                              )
+                            }}
+                            className="underline hover:no-underline"
+                          >
+                            {originals.includes(recall.code) ? t('recalls.showTranslation') : t('recalls.showOriginal')}
+                          </button>
+                        </span>
+                      )}
                       <span className="ml-2 text-xs text-[var(--color-muted)]">
                         {[date, recall.producer].filter(Boolean).join(' · ')}
                       </span>
@@ -152,10 +179,20 @@ export default function RdwRecalls({ brand, model, year, kind }: Props): ReactNo
                           info={t('recalls.about.category')}
                         />
                       )}
+                      {recall.defect && tr?.defect && (
+                        <RdwRecallField
+                          label={t('recalls.defect')}
+                          value={recall.defect}
+                          translated={tr.defect}
+                          dutch
+                          info={t('recalls.about.defect')}
+                        />
+                      )}
                       {recall.consequences && (
                         <RdwRecallField
                           label={t('recalls.consequences')}
                           value={recall.consequences}
+                          translated={tr?.consequences}
                           dutch
                           info={t('recalls.about.consequences')}
                         />
@@ -171,6 +208,7 @@ export default function RdwRecalls({ brand, model, year, kind }: Props): ReactNo
                         <RdwRecallField
                           label={t('recalls.remedy')}
                           value={recall.remedy}
+                          translated={tr?.remedy}
                           dutch
                           info={t('recalls.about.remedy')}
                         />

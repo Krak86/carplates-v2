@@ -115,6 +115,7 @@ pnpm export:rdw:csv   # re-dump the table to that CSV — run after every real r
 pnpm ingest:rdw-recalls   # RDW recall campaigns (CC0) -> registry.rdw_recalls + rdw_recall_models; ~21k small rows read page by page (seconds). --dry-run. Block "Recalls" via GET /api/rdw/recalls
 pnpm ingest:rdw-recalls:csv   # load the committed seed (seed-data/rdw-recalls.csv.gz) — part of ingest:ratings:csv
 pnpm export:rdw-recalls:csv   # re-dump both tables to that CSV — run after every real re-ingest
+pnpm ingest:rdw-recalls:translate   # local-model (NLLB, GPU) translation of recall texts -> rdw_recall_texts; resumable, --max-minutes N / --limit N --offset N / --make --model / --langs / --dump f.md. See DATASETS_PLAN "Stage D follow-up 2"
 pnpm db:refresh-vdb-stats   # rebuild registry.stats_vdb (the /stats "Markets" panel) from the registry + vdb_models
 pnpm db:refresh-derived     # rebuild ALL rollups computed from current_registration: fuel-stats + safety-stats + vdb-stats
                             # (scripts/src/derived-refresh.ts — add new rollups of that kind there). `ingest` runs it itself

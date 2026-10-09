@@ -50,9 +50,11 @@ export {
   rdwSpecs,
   rdwRecalls,
   rdwRecallModels,
+  rdwRecallTexts,
   type RdwRecallRow,
   type RdwRecallInsert,
   type RdwRecallModelInsert,
+  type RdwRecallTextInsert,
   statsFuel,
   statsWeight,
   type StatsWeightInsert,
@@ -123,3 +125,4 @@ export {
 } from './client.js'
 export { runMigrations } from './migrate.js'
 export { findWikiImage, upsertWikiImages } from './wikiImage.js'
+export { recallTextHash } from './recallText.js'

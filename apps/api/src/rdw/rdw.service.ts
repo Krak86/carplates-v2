@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common'
-import { rdwRecallModels, rdwRecalls, rdwSpecs } from '@carplates/db'
-import type { RdwSpecsRow, RdwTally } from '@carplates/db'
+import { rdwRecallModels, rdwRecalls, rdwRecallTexts, recallTextHash, rdwSpecs } from '@carplates/db'
+import type { RdwRecallRow, RdwSpecsRow, RdwTally } from '@carplates/db'
 import {
   estimateValue,
   makeKey,
@@ -13,7 +13,13 @@ import {
   vdbRelatedMakeKeys,
   vdbVehicleClass
 } from '@carplates/shared'
-import type { RdwRecallsResponse, RdwReferenceRow, RdwResponse, RdwSpecs } from '@carplates/shared'
+import type {
+  RdwRecallTranslation,
+  RdwRecallsResponse,
+  RdwReferenceRow,
+  RdwResponse,
+  RdwSpecs
+} from '@carplates/shared'
 import { and, desc, eq, inArray, sql } from 'drizzle-orm'
 
 import { DbService } from '../db/db.service.js'
@@ -71,6 +77,8 @@ const toSpecs = (r: RdwSpecsRow): RdwSpecs => ({
       ? Math.min(1, r.recallOpenN / (r.recallN ?? 1))
       : null
 })
+
+const RECALL_LANGS = ['uk', 'ru', 'en'] as const
 
 @Injectable()
 export class RdwService {
@@ -195,6 +203,9 @@ export class RdwService {
       .orderBy(desc(rdwRecalls.publishedAt), desc(rdwRecalls.referenceCode))
     if (rows.length === 0) return none
 
+    const shown = rows.slice(0, RDW_RECALLS_LIMIT).map(({ recall }) => recall)
+    const translations = await this.recallTranslations(shown)
+
     return {
       brand,
       model,
@@ -204,7 +215,7 @@ export class RdwService {
         how,
         crossMake: row.makeKey !== mk,
         total: rows.length,
-        recalls: rows.slice(0, RDW_RECALLS_LIMIT).map(({ recall: r }) => ({
+        recalls: shown.map(r => ({
           code: r.referenceCode,
           market: 'NL',
           publishedAt: r.publishedAt,
@@ -216,9 +227,55 @@ export class RdwService {
           moreInfoUrl: r.moreInfoUrl,
           hazards: r.hazards ?? [],
           vehiclesTotal: r.vehiclesTotal,
-          vehiclesNational: r.vehiclesNational
+          vehiclesNational: r.vehiclesNational,
+          translations: translations.get(r.referenceCode)
         }))
       }
     }
+  }
+
+  /**
+   * Machine translations of the campaigns' defect / consequences / remedy: per language, the newest row of the first
+   * engine that has every present field (reviewed rows win over machine ones). Languages with a gap are left out.
+   */
+  private async recallTranslations(
+    recalls: RdwRecallRow[]
+  ): Promise<Map<string, Record<string, RdwRecallTranslation>>> {
+    const out = new Map<string, Record<string, RdwRecallTranslation>>()
+    const hashOf = (text: string | null): string | null => (text?.trim() ? recallTextHash(text) : null)
+    const hashes = [
+      ...new Set(recalls.flatMap(r => [r.defect, r.consequences, r.remedy].map(hashOf)).filter((h): h is string => !!h))
+    ]
+    if (hashes.length === 0) return out
+
+    const rows = await this.dbService.db.select().from(rdwRecallTexts).where(inArray(rdwRecallTexts.textHash, hashes))
+    // hash -> lang -> engine -> text; `reviewed` quality sorts first, then newest engine insertion.
+    const byHash = new Map<string, Map<string, { engine: string; text: string; rank: number }>>()
+    for (const row of rows) {
+      const rank = (row.quality === 'reviewed' ? 2 : 1) * 1e13 + row.translatedAt.getTime()
+      const langs = byHash.get(row.textHash) ?? new Map()
+      const best = langs.get(row.lang)
+      if (!best || rank > best.rank) langs.set(row.lang, { engine: row.engine, text: row.text, rank })
+      byHash.set(row.textHash, langs)
+    }
+
+    for (const r of recalls) {
+      const fields = [r.defect, r.consequences, r.remedy].map(hashOf)
+      const result: Record<string, RdwRecallTranslation> = {}
+      for (const lang of RECALL_LANGS) {
+        const picked = fields.map(h => (h ? (byHash.get(h)?.get(lang) ?? null) : undefined))
+        if (picked.some(p => p === null)) continue // a present field lacks this language
+        if (picked.every(p => p === undefined)) continue
+        const real = picked.filter((p): p is { engine: string; text: string; rank: number } => !!p)
+        result[lang] = {
+          defect: picked[0]?.text ?? null,
+          consequences: picked[1]?.text ?? null,
+          remedy: picked[2]?.text ?? null,
+          engine: real[0]!.engine
+        }
+      }
+      if (Object.keys(result).length > 0) out.set(r.referenceCode, result)
+    }
+    return out
   }
 }

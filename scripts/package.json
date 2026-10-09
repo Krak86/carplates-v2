@@ -64,6 +64,7 @@
     "ingest:rdw:csv": "tsx src/rdw.ts --from-csv seed-data/rdw-specs.csv.gz",
     "ingest:rdw-recalls": "tsx src/rdw-recalls.ts",
     "ingest:rdw-recalls:csv": "tsx src/rdw-recalls.ts --from-csv seed-data/rdw-recalls.csv.gz",
+    "ingest:rdw-recalls:translate": "tsx src/rdw-recalls-translate.ts",
     "export:rdw-recalls:csv": "tsx src/rdw-recalls.ts --export-csv seed-data/rdw-recalls.csv.gz",
     "export:rdw:csv": "tsx src/rdw.ts --export-csv seed-data/rdw-specs.csv.gz",
     "refresh-fuel-stats": "tsx src/fuel-stats.ts",
@@ -82,6 +83,7 @@
   "dependencies": {
     "@carplates/db": "workspace:*",
     "@carplates/shared": "workspace:*",
+    "@huggingface/transformers": "4.3.1",
     "cheerio": "^1.2.0",
     "csv-parse": "^7.0.2",
     "csv-stringify": "^6.8.3",
