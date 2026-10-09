@@ -52,15 +52,17 @@ function renderWithProviders(ui: React.ReactNode) {
 describe('OpenEv', () => {
   afterEach(() => vi.clearAllMocks())
 
-  it('shows only the variant count until the header is clicked', async () => {
+  it('fetches nothing until the header is clicked, then shows the variants and their count', async () => {
     vi.mocked(getOpenEv).mockResolvedValue(response)
     renderWithProviders(<OpenEv brand="TESLA" model="MODEL 3" year={2019} fuel="ЕЛЕКТРО" />)
 
-    expect(await screen.findByText('(2)')).toBeInTheDocument()
-    expect(screen.queryByText('Usable battery')).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Show charging data' })).toBeInTheDocument()
+    expect(getOpenEv).not.toHaveBeenCalled()
+    expect(screen.queryByText('(2)')).not.toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: 'Show charging data' }))
-    expect(screen.getAllByText('Usable battery')).toHaveLength(2)
+    expect(await screen.findByText('(2)')).toBeInTheDocument()
+    expect(await screen.findAllByText('Usable battery')).toHaveLength(2)
     expect(screen.getByText('74 kWh')).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: 'Hide charging data' }))
@@ -83,8 +85,6 @@ describe('OpenEv', () => {
         <OpenEv brand="TESLA" model="MODEL 3" year={2019} fuel="ЕЛЕКТРО" />
       </>
     )
-    await waitFor(() => expect(screen.getByText('(2)')).toBeInTheDocument())
-
     // The first match is the 🔌 link (rendered first); the header pill carries the same label.
     fireEvent.click(screen.getAllByRole('button', { name: 'Show charging data' })[0]!)
     await waitFor(() => expect(screen.getAllByText('Usable battery')).toHaveLength(2))

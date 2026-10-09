@@ -5,6 +5,7 @@ import { EvService } from './ev.service.js'
 
 @Module({
   controllers: [EvController],
-  providers: [EvService]
+  providers: [EvService],
+  exports: [EvService]
 })
 export class EvModule {}

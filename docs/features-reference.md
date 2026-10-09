@@ -35,6 +35,16 @@ UI: collapsible block, the "Typical figures … Similar vehicles" footnote on to
 Two RDW spellings that share a key collapse to the larger group (medians don't merge). Seed: `seed-data/rdw-specs.csv.gz`; after
 changing `makeKey`/`modelKey`/`brandSlug` re-run `ingest:rdw` (cached per make in `scripts/.data/rdw/`, `--refresh` to re-query), not `:csv`.
 
+### Result-card sections load on expand
+
+A section's own request starts only when it is opened (`enabled: open`): Recalls list, Electric, News, Social, Stock photos — plus every section that was already click-only. Their headers always render (Electric only for electric fuels, Stock only for brands with an importer link), carry no count until the data is in, and show `section.empty` after an empty result. The exception is the RDW specs query: `EstimatedValueChip` in the card header shares its key with Specs/Recalls, so it fires on render. Side widgets (≥1400px, after the first scroll) share the News/Bluesky keys with the sections.
+
+### Card bundle — one parallel request for the chips
+
+`GET /api/card/:plate` (`apps/api/src/card/`, contract `packages/shared/src/card.ts` — own file, no offline-cache bust) answers, from the plate alone, what the card's chips would otherwise fetch after the plate row arrives: `vdb`, `rdw`, `ev` (electric fuel only), `models3d`, `models360`, `fx`, `wikiImage`. Each part is exactly its own endpoint's answer; `plateQuery` (`lib/queries.ts`) fetches it **in parallel** with the plate lookup (4 s timeout, failure ignored) and `seedCardBundle` writes the parts into the chips' own query keys, never over existing data — so chips and sections are unchanged and a null part just falls back to its own request.
+
+Rules: the bundle uses **local data only** — `WikiService.peekImage` (stored rows, never Commons) and `FxService.peek` (cached NBU rates, starts a background refresh when cold; never waits). New chip data that depends on brand/model → add it to `CardService` + the schema + `seedCardBundle` with the same key its query uses. `statsTopQuery` (global, ~19 kB) is prefetched with the plate on plate routes. Persisted-offline keys (`plate`, `vdb`, `rdw`, `wiki`) come back from IndexedDB without a bundle; `models3d` / `models360` / `fx` are not persisted and refetch on their own.
+
 ### Open EV Data — "Electric" block (stage E)
 
 Files: migration 0056 (`registry.open_ev`), `scripts/src/open-ev.ts` + `-parse.ts`, `packages/shared/src/openEv.ts` (own file, no offline-cache bust), `EvService.lookup` (`GET /api/ev`, `apps/api/src/ev/`), web `OpenEv.tsx` / `OpenEv.helpers.ts`.

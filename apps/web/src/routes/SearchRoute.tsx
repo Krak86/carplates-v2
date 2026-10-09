@@ -72,7 +72,8 @@ export default function SearchRoute(): ReactNode {
   const vin = useQuery({ ...vinQuery(raw), enabled: kind === 'vin' })
 
   const active = kind === 'vin' ? vin : plate
-  const stats = useQuery({ ...statsTopQuery(), enabled: isHome })
+  // Not plate-specific, so it starts with the plate lookup instead of after it — the rank chips need it the moment the card renders.
+  const stats = useQuery({ ...statsTopQuery(), enabled: isHome || kind === 'plate' })
   // The "all vehicles" heaviest / lightest board rides on the same small payload as the top panel; undefined while it loads.
   const weightBoard = stats.data ? (stats.data.weightBoards[DEFAULT_WEIGHT_GROUP] ?? EMPTY_WEIGHT_BOARD) : undefined
 

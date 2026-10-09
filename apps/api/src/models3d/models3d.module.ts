@@ -5,6 +5,7 @@ import { Models3dService } from './models3d.service.js'
 
 @Module({
   controllers: [Models3dController],
-  providers: [Models3dService]
+  providers: [Models3dService],
+  exports: [Models3dService]
 })
 export class Models3dModule {}

@@ -8,8 +8,6 @@ import NewsGroups from '@/components/NewsGroups'
 import SectionHeader from '@/components/SectionHeader'
 import SectionInfo from '@/components/SectionInfo'
 import ShareButton from '@/components/ShareButton'
-import { useMediaQuery } from '@/hooks/useMediaQuery'
-import { SIDE_WIDGETS_DESKTOP_QUERY, useSideWidgetsVisible } from '@/hooks/useSideWidgetsVisible'
 import { cn } from '@/lib/cn'
 import { newsLangFilter } from '@/lib/news'
 import { newsQuery } from '@/lib/queries'
@@ -23,8 +21,8 @@ type Props = {
 
 /**
  * Collapsed "News" section, last on a result card (same pattern as the other sections, shareable via `?section=news`):
- * the car's model news, then make news. Works on every screen size — the right-hand widget is its desktop-only twin (on desktop both load after the first scroll).
- * Hidden for a car with no make or no news.
+ * the car's model news, then make news. Works on every screen size — the right-hand widget is its desktop-only twin.
+ * News is fetched only once the section is opened. Hidden for a car with no make.
  */
 export default function NewsSection({ brand, model, year }: Props): ReactNode {
   const { t, i18n } = useTranslation()
@@ -32,22 +30,19 @@ export default function NewsSection({ brand, model, year }: Props): ReactNode {
   const isShared = searchParams.get('section') === 'news'
   const [open, setOpen] = useState(() => isShared)
   const sectionRef = useRef<HTMLDivElement>(null)
-  // On wide screens the side widget is this section's twin and loads news after the first scroll — so does this section
-  // (same query, one request), instead of firing it as soon as the result renders. A shared `?section=news` link loads at once.
-  const isDesktop = useMediaQuery(SIDE_WIDGETS_DESKTOP_QUERY)
-  const widgetsVisible = useSideWidgetsVisible()
+  // Fetched only once opened (a shared `?section=news` link opens at once). On wide screens the side widget shares the
+  // query key, so an already loaded widget makes opening instant.
   const news = useQuery({
     ...newsQuery(brand ?? '', model, year, newsLangFilter(i18n.language)),
-    enabled: !!brand && (!isDesktop || widgetsVisible || isShared)
+    enabled: !!brand && open
   })
   const items = news.data?.items ?? []
-  const hasNews = items.length > 0
 
   useEffect(() => {
-    if (isShared && hasNews && sectionRef.current) scrollElementIntoView(sectionRef.current)
-  }, [isShared, hasNews])
+    if (isShared && sectionRef.current) scrollElementIntoView(sectionRef.current)
+  }, [isShared])
 
-  if (!brand || !hasNews) return null
+  if (!brand) return null
 
   return (
     <div ref={sectionRef} className="mt-3 border-t border-[var(--color-border)] pt-3">
@@ -72,9 +67,19 @@ export default function NewsSection({ brand, model, year }: Props): ReactNode {
       >
         <div className="overflow-hidden">
           <div className="mt-3 space-y-3">
-            <NewsGroups items={items} brand={brand} horizontal decorative={!open} />
+            {news.isLoading && <p className="text-base text-[var(--color-muted)]">{t('result.loading')}</p>}
+            {news.isError && <p className="text-base text-[var(--color-muted)]">{t('result.error')}</p>}
+            {news.isSuccess && items.length === 0 && (
+              <p className="text-base text-[var(--color-muted)]">{t('section.empty')}</p>
+            )}
 
-            <p className="text-sm text-[var(--color-muted)]">{t('news.disclaimer')}</p>
+            {items.length > 0 && (
+              <>
+                <NewsGroups items={items} brand={brand} horizontal decorative={!open} />
+
+                <p className="text-sm text-[var(--color-muted)]">{t('news.disclaimer')}</p>
+              </>
+            )}
           </div>
         </div>
       </div>

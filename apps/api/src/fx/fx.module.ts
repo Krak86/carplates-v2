@@ -5,6 +5,7 @@ import { FxService } from './fx.service.js'
 
 @Module({
   controllers: [FxController],
-  providers: [FxService]
+  providers: [FxService],
+  exports: [FxService]
 })
 export class FxModule {}

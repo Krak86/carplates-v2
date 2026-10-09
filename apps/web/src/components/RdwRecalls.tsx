@@ -43,7 +43,8 @@ export default function RdwRecalls({ brand, model, year, kind }: Props): ReactNo
   // Campaign codes whose header shows RDW's Dutch instead of the machine translation.
   const [originals, setOriginals] = useState<string[]>([])
   const sectionRef = useRef<HTMLDivElement>(null)
-  const { data } = useQuery({ ...rdwRecallsQuery(brand ?? '', model ?? ''), enabled: !!(brand && model) })
+  const recalls = useQuery({ ...rdwRecallsQuery(brand ?? '', model ?? ''), enabled: !!(brand && model) && open })
+  const data = recalls.data
   // Same query key as the Specs block: shared cache, no second request.
   const { data: specs } = useQuery({
     ...rdwQuery(brand ?? '', model ?? '', year ?? 0, kind),
@@ -52,26 +53,28 @@ export default function RdwRecalls({ brand, model, year, kind }: Props): ReactNo
   const match = data?.match
 
   useEffect(() => {
-    if (isShared && match && sectionRef.current) scrollElementIntoView(sectionRef.current)
-  }, [isShared, match])
+    if (isShared && sectionRef.current) scrollElementIntoView(sectionRef.current)
+  }, [isShared])
 
-  if (!match) return null
+  if (!brand || !model) return null
 
-  const shown = expanded ? match.recalls : match.recalls.slice(0, RECALLS_PREVIEW)
-  const hiddenCount = match.recalls.length - shown.length
+  const shown = match ? (expanded ? match.recalls : match.recalls.slice(0, RECALLS_PREVIEW)) : []
+  const hiddenCount = match ? match.recalls.length - shown.length : 0
   const locale = i18n.language === 'ua' ? 'uk' : i18n.language
-  const name = `${match.makeName} ${match.modelName}`
+  const name = match ? `${match.makeName} ${match.modelName}` : ''
   const openShare = formatOpenShare(specs?.match?.specs.openRecallShare)
-  const info = [
-    t('recalls.info.lead', { name }),
-    t('recalls.info.model'),
-    match.how === 'prefix' && t('recalls.info.loose'),
-    match.crossMake && t('recalls.info.crossMake', { name }),
-    t('recalls.info.dutch'),
-    t('recalls.info.credit')
-  ]
-    .filter(Boolean)
-    .join('\n')
+  const info = match
+    ? [
+        t('recalls.info.lead', { name }),
+        t('recalls.info.model'),
+        match.how === 'prefix' && t('recalls.info.loose'),
+        match.crossMake && t('recalls.info.crossMake', { name }),
+        t('recalls.info.dutch'),
+        t('recalls.info.credit')
+      ]
+        .filter(Boolean)
+        .join('\n')
+    : ''
 
   return (
     <div ref={sectionRef} className="mt-3 border-t border-[var(--color-border)] pt-3">
@@ -79,13 +82,16 @@ export default function RdwRecalls({ brand, model, year, kind }: Props): ReactNo
         icon="📣"
         title={
           <>
-            {t('recalls.title')} <span className="text-sm font-normal text-[var(--color-muted)]">({match.total})</span>
+            {t('recalls.title')}{' '}
+            {match && <span className="text-sm font-normal text-[var(--color-muted)]">({match.total})</span>}
           </>
         }
         info={
-          <InfoPopover label={t('vin.info.about', { field: t('recalls.title') })} title={t('recalls.title')}>
-            <InfoText text={info} highlight={[name, 'RDW']} />
-          </InfoPopover>
+          match && (
+            <InfoPopover label={t('vin.info.about', { field: t('recalls.title') })} title={t('recalls.title')}>
+              <InfoText text={info} highlight={[name, 'RDW']} />
+            </InfoPopover>
+          )
         }
         actions={<ShareButton section="recalls" label={t('share.button', { section: t('recalls.title') })} />}
         open={open}
@@ -102,156 +108,172 @@ export default function RdwRecalls({ brand, model, year, kind }: Props): ReactNo
         )}
       >
         <div className="overflow-hidden">
-          <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1">
-            <span
-              title={t('recalls.marketHint')}
-              className="inline-block rounded-full border border-[var(--color-border)] px-2 py-0.5 text-xs text-[var(--color-muted)]"
-            >
-              {t('recalls.market')}
-            </span>
-          </div>
-
-          <div className="mt-2 space-y-1 rounded-lg bg-[var(--color-surface)]/20 p-3 text-sm">
-            <p className="font-medium">{t('recalls.what.title')}</p>
-            <p>{t('recalls.what.body')}</p>
-            <p className="text-[var(--color-muted)]">{t('recalls.what.ukraine')}</p>
-          </div>
-
-          <p className="mt-2 text-xs text-[var(--color-muted)]">
-            {t('recalls.footnote', { name, count: match.total })}
-            {openShare && ` ${t('recalls.openShare', { share: openShare, year: specs?.match?.specs.year })}`}
-          </p>
-
-          <ul className="mt-2 divide-y divide-[var(--color-border)]">
-            {shown.map(recall => {
-              const date = formatRecallDate(recall.publishedAt, locale)
-              const total = formatVehicleCount(recall.vehiclesTotal, locale)
-              const local = formatVehicleCount(recall.vehiclesNational, locale)
-              const catKey = recall.category ? categoryKey(recall.category) : null
-              const hazards = recall.hazards.map(h => {
-                const key = hazardKey(h)
-                return key ? t(key) : h
-              })
-              const tr = recall.translations?.[locale]
-              return (
-                <li key={recall.code} className="py-2">
-                  <details>
-                    <summary className="cursor-pointer text-base">
-                      <span className="mr-2 inline-block rounded-full border border-[var(--color-border)] px-2 py-0.5 align-middle text-xs text-[var(--color-muted)]">
-                        {t(`recalls.market.${recall.market ?? 'NL'}`, { defaultValue: recall.market ?? 'NL' })}
-                      </span>
-                      {tr?.defect && !originals.includes(recall.code) ? (
-                        <span>{tr.defect}</span>
-                      ) : (
-                        <span lang="nl">{recall.defect ?? recall.category ?? recall.code}</span>
-                      )}
-                      {tr?.defect && (
-                        <span className="ml-2 text-xs text-[var(--color-muted)]">
-                          {originals.includes(recall.code) ? t('recalls.originalNl') : t('recalls.aiTranslation')}
-                          {' · '}
-                          <button
-                            type="button"
-                            onClick={e => {
-                              e.preventDefault() // inside <summary>: do not toggle the <details>
-                              setOriginals(list =>
-                                list.includes(recall.code)
-                                  ? list.filter(c => c !== recall.code)
-                                  : [...list, recall.code]
-                              )
-                            }}
-                            className="underline hover:no-underline"
-                          >
-                            {originals.includes(recall.code) ? t('recalls.showTranslation') : t('recalls.showOriginal')}
-                          </button>
-                        </span>
-                      )}
-                      <span className="ml-2 text-xs text-[var(--color-muted)]">
-                        {[date, recall.producer].filter(Boolean).join(' · ')}
-                      </span>
-                    </summary>
-
-                    <dl className="mt-2 space-y-2 text-sm">
-                      {recall.category && (
-                        <RdwRecallField
-                          label={t('recalls.category')}
-                          value={catKey ? t(catKey) : recall.category}
-                          dutch={!catKey}
-                          info={t('recalls.about.category')}
-                        />
-                      )}
-                      {recall.defect && tr?.defect && (
-                        <RdwRecallField
-                          label={t('recalls.defect')}
-                          value={recall.defect}
-                          translated={tr.defect}
-                          dutch
-                          info={t('recalls.about.defect')}
-                        />
-                      )}
-                      {recall.consequences && (
-                        <RdwRecallField
-                          label={t('recalls.consequences')}
-                          value={recall.consequences}
-                          translated={tr?.consequences}
-                          dutch
-                          info={t('recalls.about.consequences')}
-                        />
-                      )}
-                      {hazards.length > 0 && (
-                        <RdwRecallField
-                          label={t('recalls.hazards')}
-                          value={hazards.join('; ')}
-                          info={t('recalls.about.hazards')}
-                        />
-                      )}
-                      {recall.remedy && (
-                        <RdwRecallField
-                          label={t('recalls.remedy')}
-                          value={recall.remedy}
-                          translated={tr?.remedy}
-                          dutch
-                          info={t('recalls.about.remedy')}
-                        />
-                      )}
-                      {total && (
-                        <RdwRecallField
-                          label={t('recalls.vehicles')}
-                          value={local ? t('recalls.vehiclesBoth', { total, local }) : total}
-                          info={t('recalls.about.vehicles')}
-                        />
-                      )}
-                      <RdwRecallField label={t('recalls.code')} value={recall.code} info={t('recalls.about.code')} />
-                    </dl>
-
-                    {recall.moreInfoUrl && (
-                      <a
-                        href={recall.moreInfoUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="mt-2 inline-block text-sm text-[var(--color-primary)] underline hover:no-underline"
-                      >
-                        {t('recalls.moreInfo')}
-                      </a>
-                    )}
-                  </details>
-                </li>
-              )
-            })}
-          </ul>
-
-          {hiddenCount > 0 && (
-            <button
-              type="button"
-              onClick={() => setExpanded(true)}
-              className="mt-2 rounded-lg border border-[var(--color-border)] px-3 py-1.5 text-sm hover:bg-[var(--color-border)]/40"
-            >
-              {t('recalls.showMore', { count: hiddenCount })}
-            </button>
+          {recalls.isLoading && <p className="mt-2 text-base text-[var(--color-muted)]">{t('result.loading')}</p>}
+          {recalls.isError && <p className="mt-2 text-base text-[var(--color-muted)]">{t('result.error')}</p>}
+          {recalls.isSuccess && !match && (
+            <p className="mt-2 text-base text-[var(--color-muted)]">{t('section.empty')}</p>
           )}
-          {expanded && match.total > match.recalls.length && (
-            <p className="mt-2 text-xs text-[var(--color-muted)]">
-              {t('recalls.truncated', { shown: match.recalls.length, total: match.total })}
-            </p>
+
+          {match && (
+            <>
+              <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1">
+                <span
+                  title={t('recalls.marketHint')}
+                  className="inline-block rounded-full border border-[var(--color-border)] px-2 py-0.5 text-xs text-[var(--color-muted)]"
+                >
+                  {t('recalls.market')}
+                </span>
+              </div>
+
+              <div className="mt-2 space-y-1 rounded-lg bg-[var(--color-surface)]/20 p-3 text-sm">
+                <p className="font-medium">{t('recalls.what.title')}</p>
+                <p>{t('recalls.what.body')}</p>
+                <p className="text-[var(--color-muted)]">{t('recalls.what.ukraine')}</p>
+              </div>
+
+              <p className="mt-2 text-xs text-[var(--color-muted)]">
+                {t('recalls.footnote', { name, count: match.total })}
+                {openShare && ` ${t('recalls.openShare', { share: openShare, year: specs?.match?.specs.year })}`}
+              </p>
+
+              <ul className="mt-2 divide-y divide-[var(--color-border)]">
+                {shown.map(recall => {
+                  const date = formatRecallDate(recall.publishedAt, locale)
+                  const total = formatVehicleCount(recall.vehiclesTotal, locale)
+                  const local = formatVehicleCount(recall.vehiclesNational, locale)
+                  const catKey = recall.category ? categoryKey(recall.category) : null
+                  const hazards = recall.hazards.map(h => {
+                    const key = hazardKey(h)
+                    return key ? t(key) : h
+                  })
+                  const tr = recall.translations?.[locale]
+                  return (
+                    <li key={recall.code} className="py-2">
+                      <details>
+                        <summary className="cursor-pointer text-base">
+                          <span className="mr-2 inline-block rounded-full border border-[var(--color-border)] px-2 py-0.5 align-middle text-xs text-[var(--color-muted)]">
+                            {t(`recalls.market.${recall.market ?? 'NL'}`, { defaultValue: recall.market ?? 'NL' })}
+                          </span>
+                          {tr?.defect && !originals.includes(recall.code) ? (
+                            <span>{tr.defect}</span>
+                          ) : (
+                            <span lang="nl">{recall.defect ?? recall.category ?? recall.code}</span>
+                          )}
+                          {tr?.defect && (
+                            <span className="ml-2 text-xs text-[var(--color-muted)]">
+                              {originals.includes(recall.code) ? t('recalls.originalNl') : t('recalls.aiTranslation')}
+                              {' · '}
+                              <button
+                                type="button"
+                                onClick={e => {
+                                  e.preventDefault() // inside <summary>: do not toggle the <details>
+                                  setOriginals(list =>
+                                    list.includes(recall.code)
+                                      ? list.filter(c => c !== recall.code)
+                                      : [...list, recall.code]
+                                  )
+                                }}
+                                className="underline hover:no-underline"
+                              >
+                                {originals.includes(recall.code)
+                                  ? t('recalls.showTranslation')
+                                  : t('recalls.showOriginal')}
+                              </button>
+                            </span>
+                          )}
+                          <span className="ml-2 text-xs text-[var(--color-muted)]">
+                            {[date, recall.producer].filter(Boolean).join(' · ')}
+                          </span>
+                        </summary>
+
+                        <dl className="mt-2 space-y-2 text-sm">
+                          {recall.category && (
+                            <RdwRecallField
+                              label={t('recalls.category')}
+                              value={catKey ? t(catKey) : recall.category}
+                              dutch={!catKey}
+                              info={t('recalls.about.category')}
+                            />
+                          )}
+                          {recall.defect && tr?.defect && (
+                            <RdwRecallField
+                              label={t('recalls.defect')}
+                              value={recall.defect}
+                              translated={tr.defect}
+                              dutch
+                              info={t('recalls.about.defect')}
+                            />
+                          )}
+                          {recall.consequences && (
+                            <RdwRecallField
+                              label={t('recalls.consequences')}
+                              value={recall.consequences}
+                              translated={tr?.consequences}
+                              dutch
+                              info={t('recalls.about.consequences')}
+                            />
+                          )}
+                          {hazards.length > 0 && (
+                            <RdwRecallField
+                              label={t('recalls.hazards')}
+                              value={hazards.join('; ')}
+                              info={t('recalls.about.hazards')}
+                            />
+                          )}
+                          {recall.remedy && (
+                            <RdwRecallField
+                              label={t('recalls.remedy')}
+                              value={recall.remedy}
+                              translated={tr?.remedy}
+                              dutch
+                              info={t('recalls.about.remedy')}
+                            />
+                          )}
+                          {total && (
+                            <RdwRecallField
+                              label={t('recalls.vehicles')}
+                              value={local ? t('recalls.vehiclesBoth', { total, local }) : total}
+                              info={t('recalls.about.vehicles')}
+                            />
+                          )}
+                          <RdwRecallField
+                            label={t('recalls.code')}
+                            value={recall.code}
+                            info={t('recalls.about.code')}
+                          />
+                        </dl>
+
+                        {recall.moreInfoUrl && (
+                          <a
+                            href={recall.moreInfoUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="mt-2 inline-block text-sm text-[var(--color-primary)] underline hover:no-underline"
+                          >
+                            {t('recalls.moreInfo')}
+                          </a>
+                        )}
+                      </details>
+                    </li>
+                  )
+                })}
+              </ul>
+
+              {hiddenCount > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setExpanded(true)}
+                  className="mt-2 rounded-lg border border-[var(--color-border)] px-3 py-1.5 text-sm hover:bg-[var(--color-border)]/40"
+                >
+                  {t('recalls.showMore', { count: hiddenCount })}
+                </button>
+              )}
+              {expanded && match.total > match.recalls.length && (
+                <p className="mt-2 text-xs text-[var(--color-muted)]">
+                  {t('recalls.truncated', { shown: match.recalls.length, total: match.total })}
+                </p>
+              )}
+            </>
           )}
         </div>
       </div>

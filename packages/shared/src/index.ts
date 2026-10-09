@@ -206,6 +206,7 @@ export { customsAgeK, customsFuel, customsTax, UKR_DUTY_RATE, UKR_VAT_RATE } fro
 export type { CustomsFuel, CustomsTax } from './ukrCustoms.js'
 export { convertEur, CURRENCIES, fxResponseSchema } from './fx.js'
 export type { Currency, FxResponse } from './fx.js'
+export { cardBundleResponseSchema, type CardBundleResponse } from './card.js'
 export {
   RDW_MIN_N,
   RDW_MIN_DISPLAY_N,

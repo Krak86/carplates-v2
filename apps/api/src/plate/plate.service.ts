@@ -1,7 +1,7 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common'
 import { currentRegistration, registrations } from '@carplates/db'
 import { countOwners, normalizePlate, regionName } from '@carplates/shared'
-import type { PlateHistoryResponse, PlateLookupResponse } from '@carplates/shared'
+import type { PlateHistoryResponse, PlateLookupResponse, Registration } from '@carplates/shared'
 import { and, desc, eq, isNull, or, type SQL } from 'drizzle-orm'
 
 import { DbService } from '../db/db.service.js'
@@ -58,6 +58,16 @@ export class PlateService {
       historyCount: actions.length || 1,
       ownersCount: countOwners(ownerActions) || 1
     }
+  }
+
+  /** The plate's current registration alone (one query), null when unknown — no history, no owner count, never recorded as missed. */
+  async current(rawPlate: string): Promise<Registration | null> {
+    const [row] = await this.dbService.db
+      .select()
+      .from(currentRegistration)
+      .where(eq(currentRegistration.plate, normalizePlate(rawPlate)))
+      .limit(1)
+    return row ? toRegistrationDto(row) : null
   }
 
   async history(rawPlate: string): Promise<PlateHistoryResponse> {

@@ -36,12 +36,12 @@ export default function OpenEv({ brand, model, year, fuel }: Props): ReactNode {
   const [open, setOpen] = useState(() => isShared)
   const sectionRef = useRef<HTMLDivElement>(null)
   const isElectric = resolveFuelCategories(fuel).includes('electric')
-  const { data } = useQuery({ ...openEvQuery(brand ?? '', model ?? ''), enabled: !!(brand && model) && isElectric })
-  const match = isElectric ? data?.match : null
+  const ev = useQuery({ ...openEvQuery(brand ?? '', model ?? ''), enabled: !!(brand && model) && isElectric && open })
+  const match = isElectric ? ev.data?.match : null
 
   useEffect(() => {
-    if (isShared && match && sectionRef.current) scrollElementIntoView(sectionRef.current)
-  }, [isShared, match])
+    if (isShared && sectionRef.current) scrollElementIntoView(sectionRef.current)
+  }, [isShared])
 
   // The basic-data 🔌 link asks an already mounted block to open and scroll into view.
   useEffect(() => {
@@ -53,20 +53,22 @@ export default function OpenEv({ brand, model, year, fuel }: Props): ReactNode {
     return (): void => window.removeEventListener(OPEN_ELECTRIC_EVENT, handleOpen)
   }, [])
 
-  if (!match) return null
+  if (!isElectric || !brand || !model) return null
 
-  const name = `${match.makeName} ${match.modelName}`
-  const nearest = closestVariantIndex(match.variants, year)
-  const info = [
-    t('ev.info.lead', { name }),
-    t('ev.info.model'),
-    match.how === 'prefix' && t('ev.info.loose'),
-    match.crossMake && t('ev.info.crossMake', { name }),
-    t('ev.info.old'),
-    t('ev.info.credit')
-  ]
-    .filter(Boolean)
-    .join('\n')
+  const name = match ? `${match.makeName} ${match.modelName}` : ''
+  const nearest = match ? closestVariantIndex(match.variants, year) : -1
+  const info = match
+    ? [
+        t('ev.info.lead', { name }),
+        t('ev.info.model'),
+        match.how === 'prefix' && t('ev.info.loose'),
+        match.crossMake && t('ev.info.crossMake', { name }),
+        t('ev.info.old'),
+        t('ev.info.credit')
+      ]
+        .filter(Boolean)
+        .join('\n')
+    : ''
 
   return (
     <div ref={sectionRef} className="mt-3 border-t border-[var(--color-border)] pt-3">
@@ -75,13 +77,15 @@ export default function OpenEv({ brand, model, year, fuel }: Props): ReactNode {
         title={
           <>
             {t('ev.title')}{' '}
-            <span className="text-sm font-normal text-[var(--color-muted)]">({match.variants.length})</span>
+            {match && <span className="text-sm font-normal text-[var(--color-muted)]">({match.variants.length})</span>}
           </>
         }
         info={
-          <InfoPopover label={t('vin.info.about', { field: t('ev.title') })} title={t('ev.title')}>
-            <InfoText text={info} highlight={[name, 'Open EV Data']} />
-          </InfoPopover>
+          match && (
+            <InfoPopover label={t('vin.info.about', { field: t('ev.title') })} title={t('ev.title')}>
+              <InfoText text={info} highlight={[name, 'Open EV Data']} />
+            </InfoPopover>
+          )
         }
         actions={<ShareButton section="electric" label={t('share.button', { section: t('ev.title') })} />}
         open={open}
@@ -90,7 +94,13 @@ export default function OpenEv({ brand, model, year, fuel }: Props): ReactNode {
         hideLabel={t('ev.hide')}
       />
 
-      {open && (
+      {open && ev.isLoading && <p className="mt-2 text-base text-[var(--color-muted)]">{t('result.loading')}</p>}
+      {open && ev.isError && <p className="mt-2 text-base text-[var(--color-muted)]">{t('result.error')}</p>}
+      {open && ev.isSuccess && !match && (
+        <p className="mt-2 text-base text-[var(--color-muted)]">{t('section.empty')}</p>
+      )}
+
+      {open && match && (
         <div>
           <p className="mt-2 text-xs text-[var(--color-muted)]">{t('ev.footnote', { name })}</p>
 

@@ -140,6 +140,27 @@ export class WikiService {
     return result
   }
 
+  /**
+   * What `lookupImage` (default options) would answer from storage alone — the hot cache, then the stored
+   * `(brand, model, year)` / `(brand, model)` rows — or null when only a live Commons/Wikipedia lookup could tell. Never
+   * reaches the network, so it is safe on the card-bundle path; the client asks `lookupImage` itself on a null.
+   */
+  async peekImage(brand: string, model: string, year: number | null): Promise<WikiImageResponse | null> {
+    const query = [brand, model].filter(Boolean).join(' ').trim()
+    const source = this.env.WIKI_IMAGE_SOURCE
+    if (query.length < 2 || source !== 'commons') return null
+
+    const askedYear = brand && model ? year : null
+    const cached = this.imageCache.get(`${source}:${askedYear ?? ''}:${query.toLowerCase()}`)
+    if (cached) return cached
+
+    const yearRow = askedYear ? await this.readRow(wikiImageKey(brand, model, askedYear)) : null
+    if (yearRow?.status === 'ok') return { image: wikiImageFromRow(yearRow) }
+    const modelRow = await this.readRow(wikiImageKey(brand, model))
+    if (modelRow?.status === 'ok') return { image: wikiImageFromRow(modelRow) }
+    return null
+  }
+
   private async fetchPage(domain: string, query: string): Promise<WikipediaPage | null> {
     const payload = await this.fetchJson<WikipediaSearch>(wikipediaSearchUrl(domain, query, { extract: true }))
     const pages = payload.query?.pages

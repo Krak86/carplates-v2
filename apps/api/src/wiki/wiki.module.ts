@@ -6,6 +6,7 @@ import { WikiService } from './wiki.service.js'
 
 @Module({
   controllers: [WikiController],
-  providers: [WikiService, WikiImageStore]
+  providers: [WikiService, WikiImageStore],
+  exports: [WikiService]
 })
 export class WikiModule {}

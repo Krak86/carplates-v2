@@ -1,12 +1,20 @@
 import { queryOptions } from '@tanstack/react-query'
+import type { QueryClient, QueryKey } from '@tanstack/react-query'
 import { normalizePlate } from '@carplates/shared'
-import type { StatsFieldDimension, StockRange, VdbVehicleClass } from '@carplates/shared'
+import type {
+  CardBundleResponse,
+  PlateLookupResponse,
+  StatsFieldDimension,
+  StockRange,
+  VdbVehicleClass
+} from '@carplates/shared'
 
 import {
   getAdminAnalytics,
   getAdminStats,
   getAdminUsers,
   getAuthConfig,
+  getCardBundle,
   getFeatures,
   getSession,
   decodeVin,
@@ -54,9 +62,51 @@ import { NEWS_PAGE_SIZE } from '@/lib/news'
 import { upperBrand } from '@/lib/display-brand'
 import { getStorageEstimate } from '@/lib/offline-storage'
 
+/** The bundle is a nicety: past this it is dropped and the chips ask for their data themselves. */
+const CARD_BUNDLE_TIMEOUT_MS = 4000
+
+/**
+ * Writes the card bundle's parts into the query keys the card's chips and sections read, so they find their data in the
+ * cache instead of each asking the server. Never over data already there; a null part is simply left to its own query.
+ */
+export function seedCardBundle(
+  client: QueryClient,
+  vehicle: Pick<PlateLookupResponse['current'], 'brand' | 'model' | 'makeYear' | 'kind'>,
+  bundle: CardBundleResponse | null
+): void {
+  if (!bundle) return
+  const { brand, model, makeYear: year, kind } = vehicle
+  const seed = (key: QueryKey, data: unknown): void => {
+    if (data != null && client.getQueryData(key) === undefined) client.setQueryData(key, data)
+  }
+
+  if (brand && model) {
+    seed(vdbQuery(brand, model, kind).queryKey, bundle.vdb)
+    if (year) seed(rdwQuery(brand, model, year, kind).queryKey, bundle.rdw)
+    seed(openEvQuery(brand, model).queryKey, bundle.ev)
+    seed(models3dQuery(brand, model).queryKey, bundle.models3d)
+    seed(models360Query(brand, model).queryKey, bundle.models360)
+  }
+  seed(fxQuery().queryKey, bundle.fx)
+  if (brand || model) seed(wikiImageQuery(brand ?? '', model ?? '', year).queryKey, bundle.wikiImage)
+}
+
+// The plate row plus — in parallel, not after it — the card bundle: the chips' reference data resolved server-side from
+// the plate alone, seeded into the chips' own query keys before the card first renders. A failed or slow bundle never
+// fails the lookup; the chips then fetch as they always did.
 export function plateQuery(raw: string) {
   const plate = normalizePlate(raw)
-  return queryOptions({ queryKey: ['plate', plate], queryFn: () => lookupPlate(plate) })
+  return queryOptions({
+    queryKey: ['plate', plate],
+    queryFn: async ({ client }) => {
+      const [data, bundle] = await Promise.all([
+        lookupPlate(plate),
+        getCardBundle(plate, AbortSignal.timeout(CARD_BUNDLE_TIMEOUT_MS)).catch(() => null)
+      ])
+      seedCardBundle(client, data.current, bundle)
+      return data
+    }
+  })
 }
 
 export function plateHistoryQuery(raw: string) {

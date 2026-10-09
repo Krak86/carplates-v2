@@ -5,6 +5,7 @@ import { Models360Service } from './models360.service.js'
 
 @Module({
   controllers: [Models360Controller],
-  providers: [Models360Service]
+  providers: [Models360Service],
+  exports: [Models360Service]
 })
 export class Models360Module {}

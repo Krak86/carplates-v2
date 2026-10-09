@@ -27,6 +27,7 @@
   "result.noResults": "Nothing found for \"{{value}}\"",
   "result.error": "Request failed. Please try again later.",
   "result.loading": "Loading…",
+  "section.empty": "Nothing found for this vehicle.",
   "result.region": "Region",
   "result.regionUnknown": "Region not determined",
   "result.noRegion.diia": "Plates of the DІ series are issued when a vehicle is re-registered online through Diia, instead of at a service centre (TSC).\nWhat is Diia — Ukraine's state app and portal for e-services (documents, registers, vehicle services).\nWhat registering via Diia means — the new owner re-registers the vehicle remotely, with the sale contract concluded through e-services, and gets a plate of the DІ series.\nWhy there is no region — the letters show how the service was ordered, not where the car is registered, so the plate says nothing about the owner's oblast.",

@@ -6,6 +6,7 @@ import { VdbStatsService } from './vdb-stats.service.js'
 
 @Module({
   controllers: [VdbController],
-  providers: [VdbService, VdbStatsService]
+  providers: [VdbService, VdbStatsService],
+  exports: [VdbService]
 })
 export class VdbModule {}

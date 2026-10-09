@@ -35,6 +35,16 @@ export class FxService {
     }
   }
 
+  /**
+   * The cached rates when still fresh, else null — never waits on the NBU (the card bundle must not). A stale or empty
+   * cache starts a background refresh, so the next card finds it warm.
+   */
+  peek(): FxResponse | null {
+    if (this.cached && Date.now() - this.cached.at < REFRESH_MS) return this.cached.value
+    void this.rates().catch(() => undefined)
+    return this.cached?.value ?? null
+  }
+
   private async fetchRates(): Promise<FxResponse> {
     const res = await fetch(NBU_URL, { signal: AbortSignal.timeout(TIMEOUT_MS) })
     if (!res.ok) throw new Error(`NBU status ${res.status}`)

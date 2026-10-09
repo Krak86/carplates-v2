@@ -18,7 +18,8 @@ type Props = {
 }
 
 /**
- * Collapsed "Cars in stock" section above the paid-feature sections (shareable via `?section=stock`): a "New" row of
+ * Collapsed "Cars in stock" section above the paid-feature sections (shareable via `?section=stock`); the photos are
+ * looked up only once it is opened. A "New" row of
  * current-model-year photos linking to the importer's new-cars page and — for brands with one — a "Used" row of the previous
  * 1–2 model years linking to its used-cars page. Each row has up to 3 cards; every photo and every ad line is distinct
  * across both rows, and a row shrinks to the photos found (hidden with none). Link-out only — nothing is copied from the importer's site.
@@ -33,7 +34,9 @@ export default function StockSection({ brand }: Props): ReactNode {
   const [usedAds] = useState(() => pickDistinctAds(STOCK_ROW_MAX, USED_CARS_AD_COUNT))
   const [failedUrls, setFailedUrls] = useState<readonly string[]>([])
   const usedUrl = usedCarsUrl(brand)
-  const photos = useStockPhotosActions(brand ?? '', !!brand, !!usedUrl)
+  const [open, setOpen] = useState(() => isShared)
+  // The photo lookups (up to ~24 requests) start only once the section is opened.
+  const photos = useStockPhotosActions(brand ?? '', !!brand && open, !!usedUrl)
   const newTarget = newCarsUrl(brand)
 
   const newCards = photos.fresh.filter(p => !failedUrls.includes(p.image.url))
@@ -41,10 +44,10 @@ export default function StockSection({ brand }: Props): ReactNode {
   const hasCards = (!!newTarget && newCards.length > 0) || (!!usedUrl && usedCards.length > 0)
 
   useEffect(() => {
-    if (isShared && hasCards && sectionRef.current) scrollElementIntoView(sectionRef.current)
-  }, [isShared, hasCards])
+    if (isShared && sectionRef.current) scrollElementIntoView(sectionRef.current)
+  }, [isShared])
 
-  if (!brand || !hasCards) return null
+  if (!brand || (!newTarget && !usedUrl)) return null
 
   const name = displayBrand(brand)
   const year = new Date().getFullYear()
@@ -61,7 +64,11 @@ export default function StockSection({ brand }: Props): ReactNode {
       showLabel={t('newCarsSection.show')}
       hideLabel={t('newCarsSection.hide')}
       defaultOpen={isShared}
+      onOpenChange={setOpen}
     >
+      {open && photos.isPending && <p className="text-base text-muted">{t('result.loading')}</p>}
+      {open && !photos.isPending && !hasCards && <p className="text-base text-muted">{t('section.empty')}</p>}
+
       <StockRow
         label={t('newCarsSection.rowNew')}
         icon="🆕"
@@ -88,7 +95,7 @@ export default function StockSection({ brand }: Props): ReactNode {
         />
       )}
 
-      <p className="text-sm text-muted">{t('newCarsSection.disclaimer')}</p>
+      {hasCards && <p className="text-sm text-muted">{t('newCarsSection.disclaimer')}</p>}
     </VinToggleSection>
   )
 }

@@ -9,6 +9,7 @@ import {
   syncResponseSchema,
   bodySuggestionsResponseSchema,
   brandSuggestionsResponseSchema,
+  cardBundleResponseSchema,
   cncapRatingsResponseSchema,
   dataVersionResponseSchema,
   euroNcapRatingsResponseSchema,
@@ -60,6 +61,7 @@ import type {
   SyncResponse,
   BodySuggestionsResponse,
   BrandSuggestionsResponse,
+  CardBundleResponse,
   CncapRatingsResponse,
   EuroNcapRatingsResponse,
   FuelEconomyResponse,
@@ -132,8 +134,8 @@ async function unwrap(res: Response): Promise<unknown> {
   return body
 }
 
-async function getJson(path: string): Promise<unknown> {
-  return unwrap(await fetch(`${BASE}${path}`, { headers: { accept: 'application/json' } }))
+async function getJson(path: string, signal?: AbortSignal): Promise<unknown> {
+  return unwrap(await fetch(`${BASE}${path}`, { headers: { accept: 'application/json' }, signal }))
 }
 
 /** Account calls carry the httpOnly session cookie even when VITE_API_BASE points at another origin. */
@@ -152,6 +154,11 @@ async function sendJson(method: 'GET' | 'POST' | 'PUT' | 'DELETE', path: string,
 
 export async function lookupPlate(plate: string): Promise<PlateLookupResponse> {
   return plateLookupResponseSchema.parse(await getJson(`/api/plate/${encodeURIComponent(plate)}`))
+}
+
+/** The above-the-fold reference data of a plate's card in one answer (see `cardBundleResponseSchema`); asked alongside the plate lookup. */
+export async function getCardBundle(plate: string, signal?: AbortSignal): Promise<CardBundleResponse> {
+  return cardBundleResponseSchema.parse(await getJson(`/api/card/${encodeURIComponent(plate)}`, signal))
 }
 
 export async function plateHistory(plate: string): Promise<PlateHistoryResponse> {
