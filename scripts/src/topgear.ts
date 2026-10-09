@@ -82,7 +82,8 @@ const MAKE_ALIASES: Record<string, string> = {
 /** TopGear make slug -> our brand slug, matched via `MAKE_ALIASES`, exactly, or ignoring hyphens (`land-rover` vs `landrover`). */
 async function loadBrandResolver(db: Db): Promise<(makeSlug: string) => string | null> {
   const rows = await db.selectDistinct({ slug: infocarVersions.brandSlug }).from(infocarVersions)
-  if (!rows.length) log('warning: registry.infocar_versions is empty — brand_slug will be null (run ingest:infocar:csv first)')
+  if (!rows.length)
+    log('warning: registry.infocar_versions is empty — brand_slug will be null (run ingest:infocar:csv first)')
   const bySquashed = new Map(rows.map(r => [squash(r.slug), r.slug]))
   return makeSlug => bySquashed.get(squash(MAKE_ALIASES[makeSlug] ?? makeSlug)) ?? null
 }
@@ -246,7 +247,9 @@ async function main(): Promise<void> {
         blurb: review.blurb
       }
       rows.push(row)
-      log(`[${n}/${refs.length}] ${ref.makeSlug}/${ref.modelSlug}: ${review.rating === null ? 'no score' : `${review.rating}/${review.bestRating ?? 10}`}`)
+      log(
+        `[${n}/${refs.length}] ${ref.makeSlug}/${ref.modelSlug}: ${review.rating === null ? 'no score' : `${review.rating}/${review.bestRating ?? 10}`}`
+      )
       if (!args.dryRun && rows.length % 50 === 0) await upsert(db, rows.slice(-50))
     }
     if (!args.dryRun) await upsert(db, rows.slice(rows.length - (rows.length % 50)))
@@ -255,7 +258,8 @@ async function main(): Promise<void> {
       `done${args.dryRun ? ' (dry-run, nothing written)' : ''}: ${rows.length} review(s), ${rated} with a score, ` +
         `${missing} page(s) without a review`
     )
-    if (unmatched.size) log(`makes with no catalog brand match (${unmatched.size}): ${[...unmatched].sort().join(', ')}`)
+    if (unmatched.size)
+      log(`makes with no catalog brand match (${unmatched.size}): ${[...unmatched].sort().join(', ')}`)
   } finally {
     await close()
   }

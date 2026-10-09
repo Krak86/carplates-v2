@@ -131,11 +131,7 @@ function fetchUrlFor(urlPath: string): string {
  * Retries a real network fetch up to `MAX_ATTEMPTS` times with a growing delay — a lone request
  * failure is treated as transient, not a reason to drop that page for the whole run.
  */
-async function fetchHtml(
-  url: string,
-  cachePath: string,
-  refresh: boolean
-): Promise<{ html: string; cached: boolean }> {
+async function fetchHtml(url: string, cachePath: string, refresh: boolean): Promise<{ html: string; cached: boolean }> {
   if (!refresh && existsSync(cachePath)) {
     return { html: await readFile(cachePath, 'utf8'), cached: true }
   }

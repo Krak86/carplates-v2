@@ -86,7 +86,10 @@ const log = (...m: unknown[]): void => {
 const sleep = (ms: number): Promise<void> => new Promise(resolve => setTimeout(resolve, ms))
 
 /** Returns the page's JSON plus whether it came from disk (so the caller knows whether to throttle). */
-async function fetchPage(pageNumber: number, refresh: boolean): Promise<{ json: CrashSearchResponse; cached: boolean }> {
+async function fetchPage(
+  pageNumber: number,
+  refresh: boolean
+): Promise<{ json: CrashSearchResponse; cached: boolean }> {
   const cachePath = join(DATA_DIR, `page_${pageNumber}.json`)
   if (!refresh && existsSync(cachePath)) {
     return { json: JSON.parse(await readFile(cachePath, 'utf8')) as CrashSearchResponse, cached: true }

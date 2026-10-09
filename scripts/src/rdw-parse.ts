@@ -1,5 +1,5 @@
 import { makeKey, modelKey, type VdbVehicleClass } from '@carplates/shared'
-import type { RdwSpecsInsert, RdwTally } from '@carplates/db'
+import type { RdwFuelPrices, RdwSpecsInsert, RdwTally } from '@carplates/db'
 
 /** RDW `voertuigsoort` → the vehicle class the matcher speaks (vans are "Bedrijfsauto", like the registry's trucks). */
 export const KIND_BY_VOERTUIGSOORT: Readonly<Record<string, VdbVehicleClass>> = {
@@ -85,6 +85,15 @@ export const FUEL_CLASSES = {
   gas: `@f.brandstof_omschrijving IN ('LPG','CNG','LNG') AND ${NOT_HYBRID}`
 } as const
 
+/** Median new price and priced-vehicle count per fuel class (`pf_<class>`, `pfn_<class>`), same plausibility window as `price`. */
+const priceByFuelColumns = (): string =>
+  Object.entries(FUEL_CLASSES)
+    .map(([k, cond]) => {
+      const priced = `${cond} AND catalogusprijs >= 1000 AND catalogusprijs <= 2000000`
+      return `median(case(${priced}, catalogusprijs)) as pf_${k}, count(case(${priced}, 1)) as pfn_${k}`
+    })
+    .join(', ')
+
 /** One conditional count per listed value (aliased `<prefix>_<i>`) — SoQL can't group a category into columns. */
 const tallyCounts = (prefix: string, column: string, values: readonly string[]): string =>
   values.map((v, i) => `count(case(${column}=${soqlString(v)}, 1)) as ${prefix}_${i}`).join(', ')
@@ -142,6 +151,7 @@ export function specsQuery(make: string, year?: number): string {
     `${Object.entries(FUEL_CLASSES)
       .map(([k, cond]) => `count(case(${cond}, 1)) as fuel_${k}`)
       .join(', ')}, count(@f.brandstof_omschrijving) as fuel_n, ` +
+    `${priceByFuelColumns()}, ` +
     "count(case(openstaande_terugroepactie_indicator='Ja', 1)) as rc_open, " +
     "count(case(openstaande_terugroepactie_indicator IN ('Ja','Nee'), 1)) as rc_n " +
     `LEFT OUTER JOIN (SELECT * FROM @${FUEL_DATASET} WHERE ${FUEL_ROW}) AS f ON kenteken = @f.kenteken ` +
@@ -178,6 +188,15 @@ function parseFuelMix(rec: Record<string, unknown>): RdwTally | null {
     .filter(([, c]) => c > 0)
     .sort((a, b) => b[1] - a[1])
   return pairs.length > 0 ? pairs : null
+}
+
+/** Per-fuel-class median new price as [class, euros, vehicles] triples, most vehicles first; null when none was priced. */
+function parseFuelPrices(rec: Record<string, unknown>): RdwFuelPrices | null {
+  const triples = Object.keys(FUEL_CLASSES)
+    .map((k): [string, number, number] => [k, num(rec[`pf_${k}`]) ?? 0, num(rec[`pfn_${k}`]) ?? 0])
+    .filter(([, price, n]) => price > 0 && n > 0)
+    .sort((a, b) => b[2] - a[2])
+  return triples.length > 0 ? triples : null
 }
 
 /** SODA row (all values strings, missing = absent) → an insert row, or null when it can't be keyed or is noise. */
@@ -285,6 +304,7 @@ export function parseSpecsRecord(
     noiseDbN: num(rec.db_n),
     fuelMix: parseFuelMix(rec),
     fuelMixN: num(rec.fuel_n),
+    priceByFuel: parseFuelPrices(rec),
     colours: parseTally(rec, 'col', COLOURS, 3),
     coloursN: num(rec.col_n),
     bodyTypes: parseTally(rec, 'body', BODY_TYPES, 3),

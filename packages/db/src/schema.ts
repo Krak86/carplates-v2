@@ -720,6 +720,8 @@ export type VdbModelInsert = typeof vdbModels.$inferInsert
  */
 /** A categorical RDW measure as [value, vehicle count] pairs, largest first. */
 export type RdwTally = [string, number][]
+/** Median Dutch new price per fuel class as [class, euros, priced vehicles] triples. */
+export type RdwFuelPrices = [string, number, number][]
 
 export const rdwSpecs = registry.table(
   'rdw_specs',
@@ -815,6 +817,7 @@ export const rdwSpecs = registry.table(
     noiseDbN: integer('noise_db_n'),
     fuelMix: jsonb('fuel_mix').$type<RdwTally>(),
     fuelMixN: integer('fuel_mix_n'),
+    priceByFuel: jsonb('price_by_fuel').$type<RdwFuelPrices>(),
     colours: jsonb('colours').$type<RdwTally>(),
     coloursN: integer('colours_n'),
     bodyTypes: jsonb('body_types').$type<RdwTally>(),

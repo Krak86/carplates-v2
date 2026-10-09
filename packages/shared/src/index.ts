@@ -175,10 +175,13 @@ export {
 } from './rdw.js'
 export {
   estimateValue,
+  floorStartYears,
   OLD_CAR_FLOOR_SHARE,
+  rangeSpread,
   retainedShare,
   valueCurve,
   VALUE_RANGE_SPREAD,
+  VALUE_RANGE_SPREAD_OLD,
   type ValueEstimate
 } from './rdwValue.js'
 export { customsAgeK, customsFuel, customsTax, UKR_DUTY_RATE, UKR_VAT_RATE } from './ukrCustoms.js'

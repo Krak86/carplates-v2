@@ -312,8 +312,8 @@ at the end of a stage give a commit message and stop. Order = value / risk, clea
 | **B. VehiclesDB non-car kinds** — **done 2026-10-08** (see "Stage B" below)                                                    | Widen `matchVdbModel` + `stats_vdb` to motorcycle / truck / bus via a `kind` mapping from the registry's `kind` text; chips for those cards                                                                                                                                                                                                      | small-medium | A                        |
 | **C. RDW specs** — **done 2026-10-08** (see "Stage C" below)                                                                   | Aggregate table per (make, model, year): median + min/max power, displacement, mass, CO2, count; `ingest:rdw` + CSV seed + export; "Specs" card block; matcher on `makeKey`/`modelKey`; About credit; SCHEDULE.md row (6 months). Builds the pipeline D-H reuse                                                                                  | medium       | —                        |
 | **C2. RDW specs, more fields** — **done 2026-10-08** (see "Stage C2" below)                                                    | Extend stage C: gross mass, wheelbase, seats, doors, towing, dimensions, top speed (details under "Stage C2" below). Needs a migration + full re-ingest; a few new `SPEC_ROWS` entries + i18n                                                                                                                                                    | small-medium | C                        |
-| **C3. RDW specs, price + more** — **done 2026-10-08** (see "Stage C3 — done" below)                                                | New list price (ex-tax and original), body type, colours, cylinders, fuel mix, consumption, EV range, energy label, open-recall share (see "Stage C3")                                                                                                                                                                                           | small-medium | C2 committed             |
-| **C4. Estimated value** — **done 2026-10-09** (see "Stage C4 — done" below) | Rough current value = EU new price x depreciation curve by age, clearly labelled; price-over-years chart from C3 data                                                                                                                                                                                                                            | medium       | C3                       |
+| **C3. RDW specs, price + more** — **done 2026-10-08** (see "Stage C3 — done" below)                                            | New list price (ex-tax and original), body type, colours, cylinders, fuel mix, consumption, EV range, energy label, open-recall share (see "Stage C3")                                                                                                                                                                                           | small-medium | C2 committed             |
+| **C4. Estimated value** — **done 2026-10-09** (see "Stage C4 — done" below)                                                    | Rough current value = EU new price x depreciation curve by age, clearly labelled; price-over-years chart from C3 data                                                                                                                                                                                                                            | medium       | C3                       |
 | **D. RDW recalls**                                                                                                             | Recall campaigns + status (upsert); "Recalls" block, labelled "EU (NL)", model-level wording; monthly refresh                                                                                                                                                                                                                                    | medium       | C (matcher)              |
 | **E. Open EV Data**                                                                                                            | One JSON -> small table; "Electric" block on a match or when vPIC says battery-electric; MIT notice on About; quarterly                                                                                                                                                                                                                          | small        | C                        |
 | **F. NHTSA recalls + complaints**                                                                                              | Live API behind a cache (7 d / 30 d), next to `api/safety`; market label "US" + "may not apply to your build" copy                                                                                                                                                                                                                               | medium       | D (shared Recalls block) |
@@ -380,7 +380,7 @@ Fields and how well RDW fills them for cars (VW Golf sample, 2026-10-08):
 - **Fuel mix: shown, not used to group the other measures.** Classes: petrol, diesel, electric, hybrid (RDW `NOVC-HEV`, includes mild hybrids), plug-in
   hybrid (`OVC-HEV`), gas. Grouping every measure by fuel would multiply rows/columns by ~6 and break matching to a registry fuel that is often wrong;
   the mix chip tells the reader why a range is wide (VW Golf 2015: 53 % petrol, 34 % plug-in hybrid (GTE), 11 % diesel).
-- **Join fix (deviation, flag for review):** RDW lists a full hybrid's electricity as its *first* fuel row and keeps CO2, consumption, noise and engine
+- **Join fix (deviation, flag for review):** RDW lists a full hybrid's electricity as its _first_ fuel row and keeps CO2, consumption, noise and engine
   power on the second row. With the old first-row-only join only 1,566 of 5,795 Toyota Corollas (2021) had CO2. `FUEL_ROW` in `rdw-parse.ts` now joins row 2
   for those hybrids (14 duplicate matches in 788,000 Toyotas). This also corrects C/C2 power and CO2 for hybrids (engine, not electric motor).
 - **Other fields:** kerb mass (`massa_rijklaar`, 50-60,000), cylinders (1-16; EVs report 0, excluded), consumption l/100 km (WLTP, else weighted PHEV,
@@ -390,12 +390,13 @@ Fields and how well RDW fills them for cars (VW Golf sample, 2026-10-08):
 - **Recall share:** `recall_open_n` / `recall_n` (indicator Ja / Nee); API `openRecallShare` 0-1, hidden under 10 known vehicles. Wording is model-level
   ("X % of Dutch vehicles"), explainer says it cannot describe a particular car. **No longer shown in Specs (2026-10-08): the row, its i18n strings and info text were removed; the ingested data and `openRecallShare` stay for stage D.** Spot values: Skoda Octavia 2020 1.5 %, Tesla Model 3 2020 7 %.
 - **Source limits found:** RDW's body label `stationwagen` is used for many hatchbacks (VW Golf 2015 reads 98 % "estate") — shown as RDW states it. `TOYOTA
-  COROLLA` is filed as "TOYOTA COROLLA" in recent years (5,795 in 2021), so a registry "COROLLA" still matches only the tiny bare "COROLLA" group — a
+COROLLA` is filed as "TOYOTA COROLLA" in recent years (5,795 in 2021), so a registry "COROLLA" still matches only the tiny bare "COROLLA" group — a
   matcher issue (unchanged, not C3). Old rows of the table that the re-ingest no longer produced stay (upsert only): 106,041 rows vs 102,862 upserted.
 - Bind-parameter fix: `BATCH` 1000 -> 500 (114 columns x 1000 rows > 65,535 parameters).
 - **Not browser-checked** (the UI was verified by types, lint, unit tests and the `/api/rdw` output only).
 
 **Stage C4 — done (2026-10-09): estimated value chip, Ukrainian customs, NBU currencies.** No migration or ingest; everything is computed per request from the C3 columns.
+
 - **Curve:** the Dutch BPM forfaitaire afschrijvingstabel (Belastingdienst, read 2026-10-09; licence not stated, numbers only, credited on About),
   `packages/shared/src/rdwValue.ts`. After 3 years it leaves 46 % of the new price (Autovista 47-59 % across Western Europe, cross-check). It
   reaches 100 % depreciation at ~17-18 years; **past that the estimate holds at a 5 % floor (`OLD_CAR_FLOOR_SHARE`) — OUR assumption, flagged
@@ -414,8 +415,15 @@ Fields and how well RDW fills them for cars (VW Golf sample, 2026-10-08):
   with the Dutch vehicle count); a chevron opens one bordered block: clean EU value, duty / excise / VAT at the middle of the range, EUR / USD / UAH switch (NBU), caveats,
   AUTO.RIA link (`auto.ria.com/uk/car/{make}/{model}/year/{year}/`, a plain link; no RIA data is read) and a collapsed "Charts and explanation" folder. Share link `?section=value`.
   The "?" popover and a Specs-folder "Estimated value" block repeat the EU explanation (easy to delete). The panel and popover bodies are lazy chunks (preloaded on chevron hover).
+- **Follow-up (2026-10-09, owner: "show as much data as possible, no new chips"):** (1) the range now widens with age — `rangeSpread()` in `rdwValue.ts`:
+  ±15 % to 10 years, linear to ±35 % at 20+ (OUR choice; `estimate.spread` carries it and the explanation prints it); (2) an old-car note in the
+  "Charts and explanation" folder when the 5 % floor is in use (`value.info.floor`, `floorStartYears()`); (3) **per-fuel prices**: migration 0050 adds
+  `rdw_specs.price_by_fuel` (jsonb `[class, median EUR, n]`), the ingest query adds `pf_<class>` / `pfn_<class>` medians per fuel class (`FUEL_CLASSES`),
+  `RdwMatchInfo.priceByFuel` feeds a "New price by version (fuel)" table (`ValuePriceByFuel.tsx`) in the value panel, shown when >= 2 classes; rows under
+  `RDW_MIN_DISPLAY_N` cars are dimmed ("only 5 cars"). Needs `pnpm ingest:rdw -- --refresh` (+ `pnpm export:rdw:csv`) to fill; until then the table is absent.
+  The Charts-folder headline follows the EUR / USD / UAH switch.
 - **Not done / ideas:** RIA price data (forbidden without a written agreement; owner chose not to contact RIA); a licensed old-car curve (would replace the floor in `rdwValue.ts`);
-  per-fuel prices for models RDW files in few cars (e-Golf has 5); customs-declaration data (backlog below); no `/stats` panel; **not browser-checked on real devices**.
+  customs-declaration data (backlog below); no `/stats` panel; **not browser-checked on real devices**.
 
 **Stage C3 / C4 / later RDW datasets — planned (discussed 2026-10-08; nothing started, owner says "go stage X").**
 RDW publishes 68 datasets; the vehicle ones worth syncing (checked against the live catalogue, ids in brackets). All are CC0 for the
@@ -481,10 +489,10 @@ vehicle and recall data; **check the licence on the dataset page before adding a
         a link (CC BY). **Estimate ~4-6 h, one session; DB < 100 KB** (stream ~36 monthly files, ~1 GB gz, keep 8703 import items,
         store a few hundred aggregate rows; committed gz CSV seed of a few tens of KB):
         1. `ingest:customs` + `:csv` + `export:customs:csv` (~1 h). 2. Migration, seed, refresh wiring (~0.5 h).
-        3. UKTZED 10-digit decode (engine type, size, age bracket) from the official table, helper in `packages/shared` + tests
-        (~1 h, **riskiest: mapping not yet verified**). 4. Match a car to a code from RDW / our fuel, cc and age; no line when
-        missing (~0.5-1 h). 5. UAH -> EUR via a constant monthly NBU rate table (~0.5 h). 6. API field + popover line + ua/ru/en
-        strings + attribution (~1 h). 7. Tests (~0.5 h). Risks: data ends 2024-01, extra FX assumption, partial car coverage.
+        2. UKTZED 10-digit decode (engine type, size, age bracket) from the official table, helper in `packages/shared` + tests
+           (~1 h, **riskiest: mapping not yet verified**). 4. Match a car to a code from RDW / our fuel, cc and age; no line when
+           missing (~0.5-1 h). 5. UAH -> EUR via a constant monthly NBU rate table (~0.5 h). 6. API field + popover line + ua/ru/en
+           strings + attribution (~1 h). 7. Tests (~0.5 h). Risks: data ends 2024-01, extra FX assumption, partial car coverage.
       - **eAuto.org.ua** (Ukrainian market analytics from listing data: average age and price of used cars, imports vs domestic).
         Aggregate figures only; ask permission before reusing numbers. Could calibrate a UA-vs-EU level factor.
       - **KSE master's thesis 2021** (pricing used cars in Ukraine, 100,000+ deals) — find the full text for a citable age / mileage

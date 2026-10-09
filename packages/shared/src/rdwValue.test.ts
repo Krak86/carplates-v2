@@ -1,6 +1,13 @@
 import { describe, it, expect } from 'vitest'
 
-import { estimateValue, OLD_CAR_FLOOR_SHARE, retainedShare, valueCurve } from './rdwValue.js'
+import {
+  estimateValue,
+  floorStartYears,
+  OLD_CAR_FLOOR_SHARE,
+  rangeSpread,
+  retainedShare,
+  valueCurve
+} from './rdwValue.js'
 
 describe('retainedShare', () => {
   it('follows the BPM table at whole years', () => {
@@ -31,6 +38,7 @@ describe('estimateValue', () => {
       ageYears: 3,
       retained: 0.46,
       extrapolated: false,
+      spread: 0.15,
       midEur: 13800,
       lowEur: 11700,
       highEur: 15900
@@ -51,6 +59,31 @@ describe('estimateValue', () => {
     expect(e.retained).toBe(OLD_CAR_FLOOR_SHARE)
     expect(e.midEur).toBe(1000)
     expect(estimateValue(30000, 3)!.extrapolated).toBe(false)
+  })
+})
+
+describe('rangeSpread', () => {
+  it('is 15 % up to 10 years, grows in a line, and stops at 35 % from 20 years', () => {
+    expect(rangeSpread(0)).toBe(0.15)
+    expect(rangeSpread(10)).toBe(0.15)
+    expect(rangeSpread(15)).toBe(0.25)
+    expect(rangeSpread(20)).toBe(0.35)
+    expect(rangeSpread(40)).toBe(0.35)
+  })
+
+  it('widens the estimate range of an old car', () => {
+    const e = estimateValue(20000, 25)!
+    expect(e.spread).toBe(0.35)
+    expect(e.lowEur).toBe(700)
+    expect(e.highEur).toBe(1400)
+  })
+})
+
+describe('floorStartYears', () => {
+  it('is the first age the table has fully depreciated', () => {
+    const start = floorStartYears()
+    expect(retainedShare(start - 1)).not.toBeNull()
+    expect(retainedShare(start)).toBeNull()
   })
 })
 

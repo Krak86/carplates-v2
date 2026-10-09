@@ -28,8 +28,22 @@ const BANDS: readonly Band[] = [
   { fromMonths: 114, base: 81, perMonth: 0.19 }
 ]
 
-/** Half-width of the shown range around the point estimate: the table is a tax schedule, and mileage / condition vary. */
+/**
+ * Half-width of the shown range around the point estimate: the table is a tax schedule, and mileage / condition vary —
+ * more for an old car, where one example can be a wreck or a collector's piece. OUR choice: 15 % up to 10 years, growing
+ * in a straight line to 35 % at 20 years and beyond.
+ */
 export const VALUE_RANGE_SPREAD = 0.15
+export const VALUE_RANGE_SPREAD_OLD = 0.35
+const SPREAD_GROWS_FROM_YEARS = 10
+const SPREAD_FULL_AT_YEARS = 20
+
+/** Range half-width (0-1) for a car of `ageYears`. */
+export function rangeSpread(ageYears: number): number {
+  if (!(ageYears > SPREAD_GROWS_FROM_YEARS)) return VALUE_RANGE_SPREAD
+  const t = Math.min(1, (ageYears - SPREAD_GROWS_FROM_YEARS) / (SPREAD_FULL_AT_YEARS - SPREAD_GROWS_FROM_YEARS))
+  return Math.round((VALUE_RANGE_SPREAD + t * (VALUE_RANGE_SPREAD_OLD - VALUE_RANGE_SPREAD)) * 100) / 100
+}
 
 /** Estimates below this many euros are not worth showing (they would round to a meaningless range). */
 const MIN_ESTIMATE_EUR = 100
@@ -54,12 +68,21 @@ export function retainedShare(ageYears: number): number | null {
   return depreciation >= 100 ? null : (100 - depreciation) / 100
 }
 
+/** First whole age (years) at which the table has depreciated the car fully and the old-car floor takes over. */
+export function floorStartYears(): number {
+  let age = 0
+  while (retainedShare(age) != null) age++
+  return age
+}
+
 export type ValueEstimate = {
   ageYears: number
   /** Share (0-1) of the new price left. */
   retained: number
   /** True when the age is past the table and `OLD_CAR_FLOOR_SHARE` was used. */
   extrapolated: boolean
+  /** Half-width (0-1) of the range, see `rangeSpread`. */
+  spread: number
   /** Point estimate and the range around it, euros rounded to 100. */
   midEur: number
   lowEur: number
@@ -76,13 +99,15 @@ export function estimateValue(newPriceEur: number | null | undefined, ageYears: 
   const retained = tabled ?? OLD_CAR_FLOOR_SHARE
   const mid = newPriceEur * retained
   if (mid < MIN_ESTIMATE_EUR) return null
+  const spread = rangeSpread(ageYears)
   return {
     ageYears,
     retained,
     extrapolated: tabled == null,
     midEur: round100(mid),
-    lowEur: round100(mid * (1 - VALUE_RANGE_SPREAD)),
-    highEur: round100(mid * (1 + VALUE_RANGE_SPREAD))
+    spread,
+    lowEur: round100(mid * (1 - spread)),
+    highEur: round100(mid * (1 + spread))
   }
 }
 

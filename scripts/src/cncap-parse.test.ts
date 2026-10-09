@@ -87,7 +87,7 @@ describe('parseRecord', () => {
   })
 
   it('returns null for a carId missing from the translation table', () => {
-    const untranslated = cncapApiRecordSchema.parse({ ...fixtures[3] as object, carId: 999999 })
+    const untranslated = cncapApiRecordSchema.parse({ ...(fixtures[3] as object), carId: 999999 })
     expect(parseRecord(untranslated, NAMES)).toBeNull()
   })
 

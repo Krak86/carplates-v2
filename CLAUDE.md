@@ -113,6 +113,8 @@ pnpm 12 · Node 24 LTS · TypeScript 5.9 (7.x blocked — typescript-eslint peer
 
 - **After each big update** (feature, bug fix, batch of related changes), provide a suggested commit message — don't run `git commit`
   or `git push` unless explicitly asked.
+- **Run `pnpm format` before suggesting a commit message** so Prettier drift never piles up in unrelated files (test fixtures under
+  `scripts/src/fixtures` are in `.prettierignore` — never reformat them).
 - **The message covers everything uncommitted, not just the latest update.** Check `git status`/`git diff --stat`; give one message
   (subject line plus a bullet per change) or a separate message per logical change if they should be split.
 

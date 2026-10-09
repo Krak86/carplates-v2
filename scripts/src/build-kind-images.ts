@@ -23,7 +23,15 @@ for (const file of (await readdir(SRC_DIR)).filter(f => /\.jpe?g$/i.test(f))) {
     .grayscale()
     .modulate({ brightness: 0.9 })
   // AVIF first, WebP as the <picture> fallback for browsers without AVIF.
-  const avif = await base.clone().avif({ quality: 50 }).toFile(fileURLToPath(new URL(`${kind}.avif`, OUT_DIR)))
-  const webp = await base.clone().webp({ quality: 66 }).toFile(fileURLToPath(new URL(`${kind}.webp`, OUT_DIR)))
-  console.log(`${kind}  ${avif.width}x${avif.height}  avif ${(avif.size / 1024).toFixed(0)} KB  webp ${(webp.size / 1024).toFixed(0)} KB`)
+  const avif = await base
+    .clone()
+    .avif({ quality: 50 })
+    .toFile(fileURLToPath(new URL(`${kind}.avif`, OUT_DIR)))
+  const webp = await base
+    .clone()
+    .webp({ quality: 66 })
+    .toFile(fileURLToPath(new URL(`${kind}.webp`, OUT_DIR)))
+  console.log(
+    `${kind}  ${avif.width}x${avif.height}  avif ${(avif.size / 1024).toFixed(0)} KB  webp ${(webp.size / 1024).toFixed(0)} KB`
+  )
 }

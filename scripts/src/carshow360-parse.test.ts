@@ -5,7 +5,9 @@ import { labelFromSlug, parseGalleryUrl, parsePageTitle, parseSitemap } from './
 describe('parseGalleryUrl', () => {
   it('splits brand, model, slug and id', () => {
     expect(
-      parseGalleryUrl('https://carshow360.net/uk/kia/ceed/iii-fl2021-hatchback-buissnes-line-iii-11334?interior=&iframe')
+      parseGalleryUrl(
+        'https://carshow360.net/uk/kia/ceed/iii-fl2021-hatchback-buissnes-line-iii-11334?interior=&iframe'
+      )
     ).toEqual({ brandSlug: 'kia', modelSlug: 'ceed', slug: 'iii-fl2021-hatchback-buissnes-line-iii', id: 11334 })
   })
   it('rejects make/model pages', () => {

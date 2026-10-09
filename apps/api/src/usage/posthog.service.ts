@@ -38,7 +38,11 @@ const dashboardLinks = (): AdminAnalyticsResponse['links'] => {
   )
   links.push(
     { id: 'gsc', label: 'Google Search Console', url: 'https://search.google.com/search-console' },
-    { id: 'cloudflare', label: 'Cloudflare Web Analytics', url: 'https://dash.cloudflare.com/?to=/:account/web-analytics' }
+    {
+      id: 'cloudflare',
+      label: 'Cloudflare Web Analytics',
+      url: 'https://dash.cloudflare.com/?to=/:account/web-analytics'
+    }
   )
   return links
 }

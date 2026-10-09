@@ -134,6 +134,12 @@ export class RdwService {
       .map(r => ({ year: r.modelYear, priceEur: Math.round(Number(r.priceEurMedian) / 100) * 100 }))
       .sort((a, b) => a.year - b.year)
 
+    const priceByFuel = (picked.row.priceByFuel ?? []).map(([fuel, price, n]) => ({
+      fuel,
+      priceEur: Math.round(price / 100) * 100,
+      n
+    }))
+
     return {
       brand,
       model,
@@ -146,6 +152,7 @@ export class RdwService {
         exactYear: picked.year === year,
         specs,
         priceByYear: priceByYear.length ? priceByYear : null,
+        priceByFuel: priceByFuel.length ? priceByFuel : null,
         valueEstimate
       }
     }

@@ -146,7 +146,7 @@ function Row({ label, value, strong }: { label: string; value: string; strong?: 
       )}
     >
       <dt>{label}</dt>
-      <dd className="tabular-nums">{value}</dd>
+      <dd className="whitespace-nowrap tabular-nums">{value}</dd>
     </div>
   )
 }

@@ -9,4 +9,4 @@ pnpm-lock.yaml
 infra/db/migrations
 *.log
 CHANGELOG.md
-scripts/src/fixtures/infocar
+scripts/src/fixtures

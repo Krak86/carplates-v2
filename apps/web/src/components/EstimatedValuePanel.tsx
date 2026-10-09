@@ -6,6 +6,7 @@ import EstimatedValueDetails from '@/components/EstimatedValueDetails'
 import type { UkrPrice } from '@/components/EstimatedValue.helpers'
 import ShareButton from '@/components/ShareButton'
 import UkrPriceBreakdown from '@/components/UkrPriceBreakdown'
+import ValuePriceByFuel from '@/components/ValuePriceByFuel'
 import VinToggleSection from '@/components/vin/VinToggleSection'
 
 type Props = {
@@ -41,6 +42,16 @@ export default function EstimatedValuePanel(props: Props): ReactNode {
 
       <UkrPriceBreakdown {...props} />
 
+      {(match.priceByFuel?.length ?? 0) >= 2 && (
+        <ValuePriceByFuel
+          fuels={match.priceByFuel ?? []}
+          retained={estimate.retained}
+          currency={props.currency}
+          fx={props.fx}
+          locale={locale}
+        />
+      )}
+
       {/* Same folder pattern as the VIN section: everything the "?" and the chip tip say, charts included, in one place. */}
       <VinToggleSection
         icon="📊"
@@ -49,7 +60,13 @@ export default function EstimatedValuePanel(props: Props): ReactNode {
         hideLabel={t('vin.group.hide')}
         title={t('value.details.title')}
       >
-        <EstimatedValueDetails match={match} estimate={estimate} locale={locale} />
+        <EstimatedValueDetails
+          match={match}
+          estimate={estimate}
+          locale={locale}
+          currency={props.currency}
+          fx={props.fx}
+        />
       </VinToggleSection>
     </div>
   )

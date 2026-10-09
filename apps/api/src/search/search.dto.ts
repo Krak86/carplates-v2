@@ -1,7 +1,10 @@
 import { createZodDto } from 'nestjs-zod'
 import {
   bodySuggestionsResponseSchema,
-  brandSuggestionsResponseSchema, modelSuggestionsResponseSchema, searchResponseSchema } from '@carplates/shared'
+  brandSuggestionsResponseSchema,
+  modelSuggestionsResponseSchema,
+  searchResponseSchema
+} from '@carplates/shared'
 
 /** OpenAPI response models (schema-derived, single source with runtime validation). */
 export class BodySuggestionsDto extends createZodDto(bodySuggestionsResponseSchema) {}

@@ -23,7 +23,12 @@ describe('parseVehiclePage', () => {
     })
     expect(row?.tests).toEqual([
       { key: 'small-overlap-front', label: 'Small overlap front', rating: 'Good', qualifier: null },
-      { key: 'moderate-overlap-front-updated-test', label: 'Moderate overlap front: updated test', rating: 'Good', qualifier: null },
+      {
+        key: 'moderate-overlap-front-updated-test',
+        label: 'Moderate overlap front: updated test',
+        rating: 'Good',
+        qualifier: null
+      },
       { key: 'side-updated-test', label: 'Side: updated test', rating: 'Good', qualifier: null },
       { key: 'headlights', label: 'Headlights', rating: 'Good', qualifier: null },
       {
@@ -46,14 +51,24 @@ describe('parseVehiclePage', () => {
       award: 'TSP'
     })
     expect(row?.tests).toEqual([
-      { key: 'small-overlap-front-driver-side', label: 'Small overlap front: driver-side', rating: 'Good', qualifier: null },
+      {
+        key: 'small-overlap-front-driver-side',
+        label: 'Small overlap front: driver-side',
+        rating: 'Good',
+        qualifier: null
+      },
       {
         key: 'small-overlap-front-passenger-side',
         label: 'Small overlap front: passenger-side',
         rating: 'Good',
         qualifier: null
       },
-      { key: 'moderate-overlap-front-original-test', label: 'Moderate overlap front: original test', rating: 'Good', qualifier: null },
+      {
+        key: 'moderate-overlap-front-original-test',
+        label: 'Moderate overlap front: original test',
+        rating: 'Good',
+        qualifier: null
+      },
       { key: 'side-original-test', label: 'Side: original test', rating: 'Good', qualifier: null },
       { key: 'roof-strength', label: 'Roof strength', rating: 'Good', qualifier: null },
       { key: 'head-restraints-and-seats', label: 'Head restraints & seats', rating: 'Good', qualifier: null },
@@ -81,7 +96,12 @@ describe('parseVehiclePage', () => {
       imageUrl: null
     })
     expect(row?.tests).toEqual([
-      { key: 'moderate-overlap-front-original-test', label: 'Moderate overlap front: original test', rating: 'Marginal', qualifier: null }
+      {
+        key: 'moderate-overlap-front-original-test',
+        label: 'Moderate overlap front: original test',
+        rating: 'Marginal',
+        qualifier: null
+      }
     ])
   })
 

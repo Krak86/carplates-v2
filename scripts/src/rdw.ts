@@ -20,7 +20,7 @@ import { gunzipSync, gzipSync } from 'node:zlib'
 
 import { RDW_MIN_N } from '@carplates/shared'
 import { createDb, rdwSpecs } from '@carplates/db'
-import type { Db, RdwSpecsInsert, RdwSpecsRow, RdwTally } from '@carplates/db'
+import type { Db, RdwFuelPrices, RdwSpecsInsert, RdwSpecsRow, RdwTally } from '@carplates/db'
 import { parse as parseCsv } from 'csv-parse/sync'
 import { stringify as stringifyCsv } from 'csv-stringify/sync'
 import { sql } from 'drizzle-orm'
@@ -206,6 +206,7 @@ async function upsertAll(db: Db, rows: RdwSpecsInsert[]): Promise<void> {
           noiseDbN: sql`excluded.noise_db_n`,
           fuelMix: sql`excluded.fuel_mix`,
           fuelMixN: sql`excluded.fuel_mix_n`,
+          priceByFuel: sql`excluded.price_by_fuel`,
           colours: sql`excluded.colours`,
           coloursN: sql`excluded.colours_n`,
           bodyTypes: sql`excluded.body_types`,
@@ -354,6 +355,7 @@ const CSV_COLUMNS = [
   'noise_db_n',
   'fuel_mix',
   'fuel_mix_n',
+  'price_by_fuel',
   'colours',
   'colours_n',
   'body_types',
@@ -367,7 +369,8 @@ const CSV_COLUMNS = [
 
 const numToCell = (v: number | null): string => (v == null ? '' : String(v))
 const cellToNum = (v: string | undefined): number | null => (v ? Number(v) : null)
-const tallyToCell = (v: RdwTally | null): string => (v == null ? '' : JSON.stringify(v))
+const tallyToCell = (v: RdwTally | RdwFuelPrices | null): string => (v == null ? '' : JSON.stringify(v))
+const cellToFuelPrices = (v: string | undefined): RdwFuelPrices | null => (v ? (JSON.parse(v) as RdwFuelPrices) : null)
 const cellToTally = (v: string | undefined): RdwTally | null => (v ? (JSON.parse(v) as RdwTally) : null)
 
 function rowToCsvRecord(r: RdwSpecsRow): Record<(typeof CSV_COLUMNS)[number], string> {
@@ -461,6 +464,7 @@ function rowToCsvRecord(r: RdwSpecsRow): Record<(typeof CSV_COLUMNS)[number], st
     noise_db_n: numToCell(r.noiseDbN),
     fuel_mix: tallyToCell(r.fuelMix),
     fuel_mix_n: numToCell(r.fuelMixN),
+    price_by_fuel: tallyToCell(r.priceByFuel),
     colours: tallyToCell(r.colours),
     colours_n: numToCell(r.coloursN),
     body_types: tallyToCell(r.bodyTypes),
@@ -564,6 +568,7 @@ function csvRecordToRow(rec: Record<string, string>): RdwSpecsInsert {
     noiseDbN: cellToNum(rec.noise_db_n),
     fuelMix: cellToTally(rec.fuel_mix),
     fuelMixN: cellToNum(rec.fuel_mix_n),
+    priceByFuel: cellToFuelPrices(rec.price_by_fuel),
     colours: cellToTally(rec.colours),
     coloursN: cellToNum(rec.colours_n),
     bodyTypes: cellToTally(rec.body_types),

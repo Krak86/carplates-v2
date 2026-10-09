@@ -32,7 +32,10 @@ describe('selectApplicableAssessmentIds', () => {
   })
 
   it('prefers the exact year over the +1 fallback when both exist', () => {
-    const ratings = [rating({ assessmentId: 'exact', modelYear: 2020 }), rating({ assessmentId: 'next', modelYear: 2021 })]
+    const ratings = [
+      rating({ assessmentId: 'exact', modelYear: 2020 }),
+      rating({ assessmentId: 'next', modelYear: 2021 })
+    ]
     expect(selectApplicableAssessmentIds(ratings, 2020)).toEqual(['exact'])
   })
 

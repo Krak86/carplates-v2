@@ -94,7 +94,9 @@ async function fetchRecords(refresh: boolean): Promise<KncapApiRecord[]> {
         'content-type': 'application/json; charset=UTF-8',
         'user-agent': USER_AGENT
       },
-      body: JSON.stringify({ requestParam: { HDN_KEYWORD: '', CHKOLD: '', DETAIL_IDX: '', DETAIL_YEAR: '', _menu_code_: '' } })
+      body: JSON.stringify({
+        requestParam: { HDN_KEYWORD: '', CHKOLD: '', DETAIL_IDX: '', DETAIL_YEAR: '', _menu_code_: '' }
+      })
     })
     if (!res.ok) throw new Error(`status ${res.status}`)
     json = (await res.json()) as ListResponse

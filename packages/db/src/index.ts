@@ -93,6 +93,7 @@ export {
   type VdbModelRow,
   type RdwSpecsRow,
   type RdwSpecsInsert,
+  type RdwFuelPrices,
   type RdwTally,
   type VdbModelInsert,
   type StatsFuelInsert,

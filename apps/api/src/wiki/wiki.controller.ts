@@ -33,7 +33,11 @@ export class WikiController {
   @ApiQuery({ name: 'year', required: false, description: 'Model year — picks a matching-generation photo' })
   @ApiQuery({ name: 'source', required: false, enum: WIKI_IMAGE_SOURCES })
   @ApiQuery({ name: 'yearOnly', required: false, description: "'true': only a photo of exactly that model year" })
-  @ApiQuery({ name: 'yearBack', required: false, description: 'With yearOnly: also try up to this many earlier years (max 5), nearest first' })
+  @ApiQuery({
+    name: 'yearBack',
+    required: false,
+    description: 'With yearOnly: also try up to this many earlier years (max 5), nearest first'
+  })
   @ApiOkResponse({ type: WikiImageDto })
   lookupImage(@Query(zodParam(imageQuerySchema)) query: z.infer<typeof imageQuerySchema>): Promise<WikiImageDto> {
     return this.wikiService.lookupImage(query.brand ?? '', query.model ?? '', {

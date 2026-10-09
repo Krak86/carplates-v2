@@ -214,7 +214,8 @@ async function enrich(db: Db, args: Args, failures: Failure[]): Promise<void> {
   log(`enriching ${todo.length} gallery page(s), ${BASE_INTERVAL_MS / 1000}s apart (slower when the site is)`)
 
   const failedById = new Map(failures.filter(f => f.kind === 'page').map(f => [f.id, f]))
-  const persist = (): Promise<void> => writeFailures([...failures.filter(f => f.kind === 'sitemap'), ...failedById.values()])
+  const persist = (): Promise<void> =>
+    writeFailures([...failures.filter(f => f.kind === 'sitemap'), ...failedById.values()])
   let interval = BASE_INTERVAL_MS
   let consecutive = 0
   let ok = 0
@@ -229,7 +230,11 @@ async function enrich(db: Db, args: Args, failures: Failure[]): Promise<void> {
         const title = parsePageTitle(res.body.toString('utf8'))
         failedById.delete(row.id)
         ok++
-        if (title) await db.update(carModels360).set({ title, fetchedAt: sql`now()` }).where(eq(carModels360.id, row.id))
+        if (title)
+          await db
+            .update(carModels360)
+            .set({ title, fetchedAt: sql`now()` })
+            .where(eq(carModels360.id, row.id))
         if (n % 25 === 0) log(`[${n}/${todo.length}] ok=${ok} failed=${failedById.size} interval=${interval}ms`)
       } else {
         consecutive++
@@ -247,7 +252,9 @@ async function enrich(db: Db, args: Args, failures: Failure[]): Promise<void> {
         })
         await persist()
         if (consecutive >= MAX_CONSECUTIVE_FAILURES) {
-          log(`stopping: ${consecutive} failures in a row — the site looks unhealthy. Re-run later with --retry-failed.`)
+          log(
+            `stopping: ${consecutive} failures in a row — the site looks unhealthy. Re-run later with --retry-failed.`
+          )
           process.exitCode = 2
           break
         }

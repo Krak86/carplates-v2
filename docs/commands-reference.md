@@ -108,7 +108,8 @@ pnpm ingest:vehiclesdb:csv   # load the committed VehiclesDB CSV (305 KB gz) —
 pnpm export:vehiclesdb:csv   # re-dump the table to that CSV — run after every real re-ingest
 pnpm ingest:rdw   # RDW (Dutch register, CC0) specs -> registry.rdw_specs: min/median/max power, capacity, unladen+gross mass, CO2, top speed, towing, seats, doors, dimensions per make/model/year, aggregated
                   # server-side by RDW's SODA API (one joined query per make, cached in scripts/.data/rdw/; ~1 h cold). Flags: --make SKODA,
-                  # --min-vehicles N (default 50), --dry-run, --refresh. Result-card "Specs" block via GET /api/rdw
+                  # --min-vehicles N (default 50), --dry-run, --refresh. Result-card "Specs" block via GET /api/rdw.
+                  # Also fills price_by_fuel (migration 0050) for the value panel's per-fuel table; a new aggregate column needs --refresh (~1 h) + export:rdw:csv
 pnpm ingest:rdw:csv   # load the committed RDW seed (seed-data/rdw-specs.csv.gz) — seconds, no download (part of ingest:ratings:csv)
 pnpm export:rdw:csv   # re-dump the table to that CSV — run after every real re-ingest
 pnpm db:refresh-vdb-stats   # rebuild registry.stats_vdb (the /stats "Markets" panel) from the registry + vdb_models

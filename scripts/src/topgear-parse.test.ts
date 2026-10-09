@@ -16,7 +16,7 @@ describe('parseTopgearPage', () => {
       bestRating: 10,
       publishedAt: '2015-01-13',
       blurb:
-        'Second generation Cee\'d estate illustrates the fast-developing maturity of the Korean giant. Near premium-look alternative to the Focus and Golf.'
+        "Second generation Cee'd estate illustrates the fast-developing maturity of the Korean giant. Near premium-look alternative to the Focus and Golf."
     })
   })
 
@@ -39,7 +39,11 @@ describe('parseTopgearPage', () => {
   })
 
   it('gives a null rating (and bestRating) when the page has no score', () => {
-    const ld = JSON.stringify({ '@type': 'Car', name: 'Foo Bar Review 2024', review: { datePublished: '2024-05-16T05:00:00+0100' } })
+    const ld = JSON.stringify({
+      '@type': 'Car',
+      name: 'Foo Bar Review 2024',
+      review: { datePublished: '2024-05-16T05:00:00+0100' }
+    })
     const html = `<head><script type="application/ld+json">${ld}</script></head>`
     expect(parseTopgearPage(html)).toEqual({
       title: 'Foo Bar',
@@ -51,7 +55,11 @@ describe('parseTopgearPage', () => {
   })
 
   it('skips malformed JSON-LD blocks', () => {
-    const ld = JSON.stringify({ '@type': 'Car', name: 'Ok', review: { reviewRating: { ratingValue: 8, bestRating: '10' } } })
+    const ld = JSON.stringify({
+      '@type': 'Car',
+      name: 'Ok',
+      review: { reviewRating: { ratingValue: 8, bestRating: '10' } }
+    })
     const html = `<script type="application/ld+json">{oops</script><script type="application/ld+json">${ld}</script>`
     expect(parseTopgearPage(html)).toMatchObject({ title: 'Ok', rating: 8, bestRating: 10 })
   })

@@ -60,7 +60,12 @@ export class UsageService {
     const byKind = new Map(windows.rows.map(w => [w.kind, w]))
     const byFeature = new Map(optIns.rows.map(o => [o.feature, o.users]))
     return adminStatsResponseSchema.parse({
-      totals: { users: t?.users ?? 0, newUsers7d: t?.new7d ?? 0, activeUsers7d: t?.active7d ?? 0, favorites: t?.favorites ?? 0 },
+      totals: {
+        users: t?.users ?? 0,
+        newUsers7d: t?.new7d ?? 0,
+        activeUsers7d: t?.active7d ?? 0,
+        favorites: t?.favorites ?? 0
+      },
       windows: USAGE_KINDS.map(kind => ({
         kind,
         d1: byKind.get(kind)?.d1 ?? 0,

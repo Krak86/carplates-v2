@@ -20,7 +20,10 @@ for (const f of files) {
   try {
     const res = await fetch(`${URL_}/recognize`, { method: 'POST', body: form })
     const json = await res.json()
-    results[f] = { ms: Date.now() - t, plates: (json.results ?? []).map(r => ({ plate: r.plate, score: +r.score.toFixed(3) })) }
+    results[f] = {
+      ms: Date.now() - t,
+      plates: (json.results ?? []).map(r => ({ plate: r.plate, score: +r.score.toFixed(3) }))
+    }
   } catch (e) {
     results[f] = { error: String(e), plates: [] }
   }
@@ -30,7 +33,9 @@ await writeFile(join(dir, 'results.json'), JSON.stringify(results, null, 1))
 
 const labelsPath = join(dir, 'labels.csv')
 if (existsSync(labelsPath)) {
-  let labelled = 0, found = 0, falsePos = 0
+  let labelled = 0,
+    found = 0,
+    falsePos = 0
   const misses = []
   for (const line of (await readFile(labelsPath, 'utf8')).split(/\r?\n/).slice(1)) {
     if (!line.trim()) continue
@@ -41,6 +46,8 @@ if (existsSync(labelsPath)) {
     for (const w of want) got.includes(w) ? found++ : misses.push(`${file}: want ${w}, got [${got}]`)
     falsePos += got.filter(g => !want.includes(g)).length
   }
-  console.log(`\nrecall (exact) ${found}/${labelled} = ${((found / labelled) * 100).toFixed(1)}%  extra reads: ${falsePos}`)
+  console.log(
+    `\nrecall (exact) ${found}/${labelled} = ${((found / labelled) * 100).toFixed(1)}%  extra reads: ${falsePos}`
+  )
   console.log(misses.join('\n'))
 }

@@ -1,6 +1,12 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { type RdwMatchInfo } from '@carplates/shared'
+import {
+  floorStartYears,
+  OLD_CAR_FLOOR_SHARE,
+  type Currency,
+  type FxResponse,
+  type RdwMatchInfo
+} from '@carplates/shared'
 
 import { formatEur, formatMoneyRange } from '@/components/EstimatedValue.helpers'
 import { approxCount } from '@/components/RdwSpecs.helpers'
@@ -12,13 +18,22 @@ type Props = {
   match: RdwMatchInfo
   estimate: NonNullable<RdwMatchInfo['valueEstimate']>
   locale: string
+  /** Currency of the headline range; euros by default (the tip and the Specs folder have no switch). */
+  currency?: Currency
+  fx?: FxResponse | null
 }
 
 /**
  * Explanation plus the two charts behind the "Est. value" chip: the Dutch new price by model year (real RDW data) and
  * the estimated value by age (that price x an assumed curve). Shared by the chip's popover and the Specs folder.
  */
-export default function EstimatedValueDetails({ match, estimate, locale }: Props): ReactNode {
+export default function EstimatedValueDetails({
+  match,
+  estimate,
+  locale,
+  currency = 'EUR',
+  fx = null
+}: Props): ReactNode {
   const { t } = useTranslation()
   const newPrice = estimate.newPriceEur ?? match.specs.priceEur?.median
   const byYear = match.priceByYear ?? []
@@ -36,7 +51,9 @@ export default function EstimatedValueDetails({ match, estimate, locale }: Props
     t('rdw.info.sample', { n: approxCount(estimate.priceN ?? match.specs.n, locale), year: match.specs.year }),
     estimate.rough && t('value.info.rough', { n: estimate.priceN ?? 0 }),
     !match.exactYear && t('value.info.nearYear', { year: match.specs.year }),
-    t('value.info.range'),
+    t('value.info.range', { percent: Math.round((estimate.spread ?? 0.15) * 100) }),
+    estimate.extrapolated &&
+      t('value.info.floor', { years: floorStartYears(), percent: Math.round(OLD_CAR_FLOOR_SHARE * 100) }),
     t('value.info.credit')
   ]
     .filter(Boolean)
@@ -44,7 +61,7 @@ export default function EstimatedValueDetails({ match, estimate, locale }: Props
 
   return (
     <div className="space-y-3">
-      <p className="font-semibold">{formatMoneyRange(estimate.lowEur, estimate.highEur, 'EUR', null, locale)}</p>
+      <p className="font-semibold">{formatMoneyRange(estimate.lowEur, estimate.highEur, currency, fx, locale)}</p>
       <InfoText text={text} highlight={[name]} />
 
       {byYear.length >= 2 && (

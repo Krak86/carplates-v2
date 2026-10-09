@@ -104,6 +104,14 @@ export const rdwMatchSchema = z.object({
     .nullable()
     .optional(),
   /**
+   * Stage C4. Median Dutch NEW price per fuel class of the matched model-year (euros, rounded to 100) with the priced
+   * vehicle count; most vehicles first. Thin classes are kept (the UI dims them). Optional: older caches lack it.
+   */
+  priceByFuel: z
+    .array(z.object({ fuel: z.string(), priceEur: z.number(), n: z.number().int() }))
+    .nullable()
+    .optional(),
+  /**
    * Stage C4. Rough value: Dutch new price x the BPM depreciation curve (`rdwValue.ts`) for the asked year, as a rounded
    * range. An assumption on top of EU list prices — not a market price, never a Ukrainian one. Null when the model has
    * no price at all or the curve has no value for the age. A price from fewer than `RDW_MIN_DISPLAY_N` vehicles is still
@@ -118,6 +126,8 @@ export const rdwMatchSchema = z.object({
       midEur: z.number(),
       lowEur: z.number(),
       highEur: z.number(),
+      /** Half-width (0-1) of the range around `midEur`; it widens with age (`rangeSpread`). Optional for old caches. */
+      spread: z.number().optional(),
       /** The median new price the estimate starts from (euros) and how many vehicles gave it. */
       newPriceEur: z.number().optional(),
       priceN: z.number().int().optional(),

@@ -111,6 +111,20 @@ describe('parseSpecsRecord', () => {
     ])
   })
 
+  it('maps the median new price per fuel class, most vehicles first, skipping unpriced classes', () => {
+    const row = parseSpecsRecord(
+      'VOLKSWAGEN',
+      { ...rec, pf_petrol: '28000', pfn_petrol: '90', pf_ev: '38000', pfn_ev: '5', pf_diesel: '', pfn_diesel: '0' },
+      3,
+      2027
+    )
+    expect(row?.priceByFuel).toEqual([
+      ['petrol', 28000, 90],
+      ['ev', 38000, 5]
+    ])
+    expect(parseSpecsRecord('VOLKSWAGEN', rec, 3, 2027)?.priceByFuel).toBeNull()
+  })
+
   it('maps Bedrijfsauto to the truck class', () => {
     expect(parseSpecsRecord('FORD', { ...rec, voertuigsoort: 'Bedrijfsauto' }, 3, 2027)?.kind).toBe('truck')
   })
@@ -158,6 +172,8 @@ describe('specsQuery', () => {
     expect(q).toContain("count(case(eerste_kleur='GRIJS', 1)) as col_0")
     expect(q).toContain("count(case(@f.klasse_hybride_elektrisch_voertuig='OVC-HEV', 1)) as fuel_phev")
     expect(q).toContain("count(case(openstaande_terugroepactie_indicator='Ja', 1)) as rc_open")
+    expect(q).toContain('as pf_ev')
+    expect(q).toContain('as pfn_petrol')
     expect(q).toContain('::number')
   })
 
