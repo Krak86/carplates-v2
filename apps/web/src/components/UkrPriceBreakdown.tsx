@@ -16,6 +16,7 @@ import {
   valueWarnings,
   type UkrPrice
 } from '@/components/EstimatedValue.helpers'
+import InfoPopover from '@/components/InfoPopover'
 import { cn } from '@/lib/cn'
 
 type Props = {
@@ -29,6 +30,12 @@ type Props = {
   /** NBU rates, or null while loading / unavailable (then only euros can be shown). */
   fx: FxResponse | null
   locale: string
+}
+
+/** The NBU's own rate table for that day, in the page language (it has no Russian version). */
+const nbuRatesUrl = (lang: string, isoDate: string): string => {
+  const [y, m, d] = isoDate.split('-')
+  return `https://bank.gov.ua/${lang === 'en' ? 'en' : 'ua'}/markets/exchangerates?date=${d}.${m}.${y}&period=daily`
 }
 
 const PERCENT = (rate: number): number => Math.round(rate * 100)
@@ -48,7 +55,7 @@ export default function UkrPriceBreakdown({
   fx,
   locale
 }: Props): ReactNode {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const money = (eur: number): string => formatMoney(eur, currency, fx, locale)
   const warnings = valueWarnings(match, estimate, price, fuel)
   const mid = price.mid
@@ -102,19 +109,25 @@ export default function UkrPriceBreakdown({
           ))}
         </div>
         {fx && (
-          <a
-            href="https://bank.gov.ua/ua/markets/exchangerates"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-xs text-[var(--color-muted)] underline"
-          >
-            {t('value.ua.rate', {
-              eur: fx.eurUah.toFixed(2),
-              usd: fx.usdUah.toFixed(2),
-              date: new Date(fx.date).toLocaleDateString(locale)
-            })}{' '}
-            ↗
-          </a>
+          <>
+            <a
+              href={nbuRatesUrl(i18n.language, fx.date)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-[var(--color-muted)] underline"
+            >
+              {t('value.ua.rate', {
+                eur: fx.eurUah.toFixed(2),
+                usd: fx.usdUah.toFixed(2),
+                date: new Date(fx.date).toLocaleDateString(locale)
+              })}{' '}
+              ↗
+            </a>
+
+            <InfoPopover label={t('value.ua.nbuInfoLabel')} title={t('value.ua.nbuInfoTitle')}>
+              <p className="text-sm">{t('value.ua.nbuInfo')}</p>
+            </InfoPopover>
+          </>
         )}
       </div>
 
