@@ -3116,3 +3116,7 @@ Strategy, profiling numbers, decisions, size report and the all-years forecast: 
 - **Opel = Vauxhall:** the MOT-only alias `opel -> vauxhall` lifts Opel matches from a few hundred tests to millions (Astra 2.2M); the service takes the larger of the two samples.
 - **Browser-checked** on the dev stack (real DB): shared link `?section=faults` opens and loads, band highlight across charts, group → reasons expand, dark and light, 390 px mobile (no horizontal overflow), English and Ukrainian, no console errors. Not checked: Russian visually, a real touch device, the production build / service worker (`/api/mot` is online-only), a car with no MOT match in the browser (API returns `match: null`, the section shows the usual empty line).
 - **Known gaps:** shares use a "." decimal in ua / ru; motorcycles match only 18 % of the registry (Chinese / UA-market brands are absent from MOT); the stored band edges and the 200-test cutoff are fixed at ingest time (re-run to change).
+
+### Registration status — last-operation chip + advanced-search filter ✅ BUILT (2026-10-10)
+
+Result card shows a chip with the latest operation (🪖 Тимчасовий облік (військовослужбовець) · 2024, 🚫 Знято з обліку, 🔁 Зміна власника …); Advanced search got a "Registration status" dropdown (grouped by status, with a vehicle count per operation code). Migration 0059 (`ix_current_reg_oper_code`, `stats_by_oper`). Conventions: `docs/features-reference.md` → "Registration status".

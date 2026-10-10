@@ -38,6 +38,7 @@ export async function refreshStats(db: Db): Promise<void> {
   await db.execute(sql`REFRESH MATERIALIZED VIEW registry.stats_by_brand_year`)
   await db.execute(sql`REFRESH MATERIALIZED VIEW registry.stats_by_model`)
   await db.execute(sql`REFRESH MATERIALIZED VIEW registry.stats_by_origin`)
+  await db.execute(sql`REFRESH MATERIALIZED VIEW registry.stats_by_oper`)
 }
 
 export const LOCAL_DATABASE_URL = 'postgres://carplates:carplates@localhost:5432/carplates'

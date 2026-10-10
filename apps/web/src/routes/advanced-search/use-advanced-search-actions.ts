@@ -12,6 +12,7 @@ import {
 } from '@carplates/shared'
 import type {
   BodySuggestion,
+  OperSuggestion,
   BrandSuggestion,
   TextFilterError,
   ModelSuggestion,
@@ -21,7 +22,13 @@ import type {
   VehicleKind
 } from '@carplates/shared'
 
-import { bodySuggestionsQuery, brandSuggestionsQuery, modelSuggestionsQuery, vehicleSearchQuery } from '@/lib/queries'
+import {
+  bodySuggestionsQuery,
+  brandSuggestionsQuery,
+  modelSuggestionsQuery,
+  operationsQuery,
+  vehicleSearchQuery
+} from '@/lib/queries'
 
 const DEBOUNCE_MS = 300
 const PAGE_SIZE = 20
@@ -32,6 +39,8 @@ const MIN_SUGGEST_LENGTH = 2
 // treated as not-yet-a-year rather than coerced, so a half-typed value can't silently narrow (or
 // break) the query.
 const YEAR_RE = /^[1-9]\d{3}$/
+// An operation code from the status dropdown ("215"); anything else in a hand-edited URL is ignored.
+const OPER_RE = /^\d{1,4}$/
 
 export type AdvancedSearchFilters = {
   brand: string
@@ -43,6 +52,8 @@ export type AdvancedSearchFilters = {
   kind: VehicleKind | ''
   body: string
   region: string
+  /** Latest operation code as a string ("" = any). */
+  oper: string
 }
 
 type FilterKey = keyof AdvancedSearchFilters
@@ -61,7 +72,8 @@ function filtersFromParams(params: URLSearchParams): AdvancedSearchFilters {
     color: parseEnumParam(VEHICLE_COLORS, params.get('color')),
     kind: parseEnumParam(VEHICLE_KINDS, params.get('kind')),
     body: params.get('body') ?? '',
-    region: parseEnumParam(REGION_NAMES, params.get('region'))
+    region: parseEnumParam(REGION_NAMES, params.get('region')),
+    oper: OPER_RE.test(params.get('oper') ?? '') ? (params.get('oper') ?? '') : ''
   }
 }
 
@@ -101,6 +113,8 @@ type UseAdvancedSearchActions = {
   brandSuggestions: BrandSuggestion[]
   modelSuggestions: ModelSuggestion[]
   bodySuggestions: BodySuggestion[]
+  /** Every operation code with its current vehicle count, for the registration-status dropdown. */
+  operations: OperSuggestion[]
   results: UseQueryResult<SearchResponse, Error>
 }
 
@@ -135,7 +149,8 @@ export function useAdvancedSearchActions(): UseAdvancedSearchActions {
     draft.color ||
     draft.kind ||
     draft.body ||
-    draft.region
+    draft.region ||
+    draft.oper
   )
   const canSearch = draftHasFilter && !yearFromInvalid && !yearToInvalid && !textError && !bodyTooShort
 
@@ -152,6 +167,8 @@ export function useAdvancedSearchActions(): UseAdvancedSearchActions {
     ...bodySuggestionsQuery(debouncedBody),
     enabled: debouncedBody.length >= MIN_SUGGEST_LENGTH
   })
+
+  const operations = useQuery(operationsQuery())
 
   // Committed filters. A hand-edited / stale URL that breaks a rule simply doesn't search.
   const { year: yearFrom, invalid: appliedYearFromInvalid } = parseYearFilter(applied.yearFrom)
@@ -170,7 +187,8 @@ export function useAdvancedSearchActions(): UseAdvancedSearchActions {
       applied.color ||
       applied.kind ||
       applied.body ||
-      applied.region
+      applied.region ||
+      applied.oper
     )
 
   const results = useQuery({
@@ -184,6 +202,7 @@ export function useAdvancedSearchActions(): UseAdvancedSearchActions {
       kind: applied.kind || undefined,
       body: applied.body.trim() || undefined,
       region: applied.region || undefined,
+      oper: applied.oper ? Number(applied.oper) : undefined,
       page,
       pageSize: PAGE_SIZE
     }),
@@ -242,6 +261,7 @@ export function useAdvancedSearchActions(): UseAdvancedSearchActions {
     brandSuggestions: brandSuggestions.data?.suggestions ?? [],
     modelSuggestions: modelSuggestions.data?.suggestions ?? [],
     bodySuggestions: bodySuggestions.data?.suggestions ?? [],
+    operations: operations.data?.operations ?? [],
     results
   }
 }

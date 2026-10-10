@@ -169,6 +169,15 @@ export const statsByOrigin = registry
   .materializedView('stats_by_origin', { origin: text('origin'), ...statsMetrics })
   .existing()
 
+/** Vehicles by their latest operation code (current status) — see migrations/0059_current_oper.sql. */
+export const statsByOper = registry
+  .materializedView('stats_by_oper', {
+    operCode: integer('oper_code').notNull(),
+    operName: text('oper_name'),
+    distinctPlates: bigint('distinct_plates', { mode: 'number' }).notNull()
+  })
+  .existing()
+
 /** Brand x year 2D rollup — see migrations/0004_stats_by_brand.sql. */
 export const statsByBrandYear = registry
   .materializedView('stats_by_brand_year', {

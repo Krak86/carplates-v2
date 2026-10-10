@@ -13,7 +13,13 @@ import {
 import { z } from 'zod'
 
 import { zodParam } from '../common/zod-param.pipe.js'
-import { BodySuggestionsDto, BrandSuggestionsDto, ModelSuggestionsDto, SearchResponseDto } from './search.dto.js'
+import {
+  BodySuggestionsDto,
+  BrandSuggestionsDto,
+  ModelSuggestionsDto,
+  OperSuggestionsDto,
+  SearchResponseDto
+} from './search.dto.js'
 import { SearchService } from './search.service.js'
 
 // Floors live in @carplates/shared (searchFilters.ts) -- the web form applies the same rules, so this is
@@ -47,6 +53,7 @@ const searchQuerySchema = z
     color: z.enum(VEHICLE_COLORS).optional(),
     kind: z.enum(VEHICLE_KINDS).optional(),
     body: z.string().trim().min(MIN_INDEXABLE_LENGTH).optional(),
+    oper: z.coerce.number().int().min(0).max(9999).optional(),
     region: z
       .string()
       .trim()
@@ -83,6 +90,12 @@ export class SearchController {
     return this.searchService.suggestBodies(query.q)
   }
 
+  @Get('operations')
+  @ApiOkResponse({ type: OperSuggestionsDto })
+  suggestOperations(): Promise<OperSuggestionsDto> {
+    return this.searchService.suggestOperations()
+  }
+
   @Get('models')
   @ApiQuery({ name: 'brand', required: false })
   @ApiQuery({ name: 'q', required: false })
@@ -103,6 +116,7 @@ export class SearchController {
   @ApiQuery({ name: 'kind', required: false, enum: VEHICLE_KINDS })
   @ApiQuery({ name: 'body', required: false })
   @ApiQuery({ name: 'region', required: false, enum: REGION_NAMES })
+  @ApiQuery({ name: 'oper', required: false })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'pageSize', required: false })
   @ApiOkResponse({ type: SearchResponseDto })

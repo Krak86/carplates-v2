@@ -205,3 +205,10 @@ tables — change them together, in a new migration (0045 holds all 108 statutor
 tables equal the statute, so edit it with them. A pair is the region at issue, not the car's location.
 
 - **Top-models boards read `stats_model_grouped`, not `stats_by_model`:** ZAZ / Daewoo / Chevrolet spellings are folded by `modelFamily` into one row. Rebuild with `pnpm db:refresh-model-family-stats` (after `db:refresh-stats`; `db:refresh-derived` does it). Raw `stats_by_model` still feeds the search model suggestions.
+
+## Registration status (last operation)
+
+- **What it is:** a vehicle's status = its latest registry operation (`current_registration.oper_code`, e.g. 215 = ТИМЧАСОВИЙ ДЕРЖАВНИЙ ОБЛІК ТЗ ЗА ВІЙСЬКОВОСЛУЖБОВЦЕМ). `operStatus()` in `apps/web/src/lib/oper-info.ts` maps a code to one of 9 statuses (military / temporary / properUser / new / import / owner / modification / deregistered / other); it reuses `operCategory` and splits out 2xx.
+- **Result-card chip** `LastOperationChip` — built from the plate payload (`current.operCode/operName/dReg`), no extra request; links to `/advanced-search?oper=<code>`.
+- **Advanced-search filter** `oper=<code>` (exact code, `ix_current_reg_oper_code`); dropdown from `GET /api/search/operations` (`stats_by_oper`: one row per code, most common name, vehicle count by _current_ status). Contract in `packages/shared/src/operStatus.ts` (not `schemas.ts`). `stats_by_oper` is rebuilt by `db:refresh-stats`.
+- Filter by **code, not name**: the names have many spelling variants per code. (`0011_stats_by_origin.sql` warns codes can be reused across years; for the codes surfaced here the name is consistent.)

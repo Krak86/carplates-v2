@@ -37,6 +37,12 @@ export {
   type BodySuggestionsResponse
 } from './vehicleBody.js'
 export {
+  operSuggestionSchema,
+  operSuggestionsResponseSchema,
+  type OperSuggestion,
+  type OperSuggestionsResponse
+} from './operStatus.js'
+export {
   WEIGHT_GROUPS,
   DEFAULT_WEIGHT_GROUP,
   weightGroupOfKind,

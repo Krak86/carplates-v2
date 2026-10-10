@@ -8,6 +8,7 @@ import {
   settingsResponseSchema,
   syncResponseSchema,
   bodySuggestionsResponseSchema,
+  operSuggestionsResponseSchema,
   brandSuggestionsResponseSchema,
   cardBundleResponseSchema,
   cncapRatingsResponseSchema,
@@ -63,6 +64,7 @@ import type {
   SyncRequest,
   SyncResponse,
   BodySuggestionsResponse,
+  OperSuggestionsResponse,
   BrandSuggestionsResponse,
   CardBundleResponse,
   CncapRatingsResponse,
@@ -346,6 +348,10 @@ export async function suggestBodies(q: string): Promise<BodySuggestionsResponse>
   return bodySuggestionsResponseSchema.parse(await getJson(`/api/search/bodies?${params.toString()}`))
 }
 
+export async function getOperations(): Promise<OperSuggestionsResponse> {
+  return operSuggestionsResponseSchema.parse(await getJson('/api/search/operations'))
+}
+
 export async function suggestBrands(q: string): Promise<BrandSuggestionsResponse> {
   const params = new URLSearchParams()
   if (q) params.set('q', q)
@@ -369,6 +375,7 @@ export type VehicleSearchFilters = {
   kind?: VehicleKind
   body?: string
   region?: string
+  oper?: number
   page: number
   pageSize: number
 }
@@ -384,6 +391,7 @@ export async function searchVehicles(filters: VehicleSearchFilters): Promise<Sea
   if (filters.kind) params.set('kind', filters.kind)
   if (filters.body) params.set('body', filters.body)
   if (filters.region) params.set('region', filters.region)
+  if (filters.oper != null) params.set('oper', String(filters.oper))
   params.set('page', String(filters.page))
   params.set('pageSize', String(filters.pageSize))
   return searchResponseSchema.parse(await getJson(`/api/search?${params.toString()}`))

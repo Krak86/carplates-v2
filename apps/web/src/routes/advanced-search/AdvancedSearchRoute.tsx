@@ -21,6 +21,7 @@ import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 import { cn } from '@/lib/cn'
 import { useRegionLabel } from '@/lib/region-label'
 import { formatVehicleLabel } from '@/lib/vehicle-label'
+import OperStatusSelect from '@/routes/advanced-search/OperStatusSelect'
 import { useAdvancedSearchActions } from '@/routes/advanced-search/use-advanced-search-actions'
 
 const inputClass = 'w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-1.5 text-sm'
@@ -78,6 +79,7 @@ export default function AdvancedSearchRoute(): ReactNode {
     brandSuggestions,
     modelSuggestions,
     bodySuggestions,
+    operations,
     results
   } = useAdvancedSearchActions()
 
@@ -270,6 +272,16 @@ export default function AdvancedSearchRoute(): ReactNode {
                   </option>
                 ))}
               </select>
+            </label>
+            <label className="flex flex-col gap-1 text-sm sm:col-span-2">
+              {t('advancedSearch.oper')}
+              <OperStatusSelect
+                value={filters.oper}
+                onChange={value => updateFilter('oper', value)}
+                operations={operations}
+                className={inputClass}
+              />
+              <span className="text-xs text-[var(--color-muted)]">{t('advancedSearch.operHint')}</span>
             </label>
           </div>
 

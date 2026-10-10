@@ -1,10 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common'
-import { currentRegistration, statsByBody, statsByBrand, statsByModel } from '@carplates/db'
+import { currentRegistration, statsByBody, statsByBrand, statsByModel, statsByOper } from '@carplates/db'
 import { fuelKeyword, platePrefixesForRegion, sourceValueForKind, sourceValuesForColor } from '@carplates/shared'
 import type {
   BodySuggestionsResponse,
   BrandSuggestionsResponse,
   ModelSuggestionsResponse,
+  OperSuggestionsResponse,
   SearchResponse,
   VehicleColor,
   VehicleFuel,
@@ -24,6 +25,8 @@ export type SearchFilters = {
   kind?: VehicleKind
   body?: string
   region?: string
+  /** Latest operation code (current status), e.g. 215 = temporary state registration for a serviceman. */
+  oper?: number
   page: number
   pageSize: number
 }
@@ -72,6 +75,16 @@ export class SearchService {
       .limit(10)
 
     return { suggestions: rows.filter((r): r is { body: string; distinctPlates: number } => r.body != null) }
+  }
+
+  /** Every operation code with its most common name and current vehicle count (~190 rows from the stats_by_oper rollup). */
+  async suggestOperations(): Promise<OperSuggestionsResponse> {
+    const rows = await this.dbService.db
+      .select({ code: statsByOper.operCode, name: statsByOper.operName, distinctPlates: statsByOper.distinctPlates })
+      .from(statsByOper)
+      .orderBy(desc(statsByOper.distinctPlates))
+
+    return { operations: rows }
   }
 
   /**
@@ -124,6 +137,8 @@ export class SearchService {
       filters.kind ? eq(currentRegistration.kind, sourceValueForKind(filters.kind)) : undefined,
       // Substring, served by ix_current_reg_body_trgm (migration 0042).
       filters.body ? ilike(currentRegistration.body, `%${filters.body}%`) : undefined,
+      // Exact code, served by ix_current_reg_oper_code (migration 0059).
+      filters.oper != null ? eq(currentRegistration.operCode, filters.oper) : undefined,
       // Matches the ix_current_reg_plate_region expression index (packages/db migration 0015) --
       // same cost as any other single-column filter here, combined via BitmapAnd.
       filters.region

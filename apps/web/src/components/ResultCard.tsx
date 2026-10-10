@@ -21,6 +21,7 @@ import RaceGameButton from '@/components/game/RaceGameButton'
 import ColorSwatch from '@/components/ColorSwatch'
 import CopyAllInfoButton from '@/components/CopyAllInfoButton'
 import CopyButton from '@/components/CopyButton'
+import LastOperationChip from '@/components/LastOperationChip'
 import LazySection from '@/components/LazySection'
 import FieldInfoButton from '@/components/FieldInfoButton'
 import NoRegionBadge from '@/components/NoRegionBadge'
@@ -272,6 +273,7 @@ export default function ResultCard({ data }: Props): ReactNode {
             {/* Reserves one chip-height up front so late-arriving chips never push the card down. */}
             <div className="mt-1 flex min-h-6 flex-wrap items-center gap-1.5">
               {chipsPending && <span aria-hidden className="h-6 w-24 animate-pulse rounded-full bg-border" />}
+              <LastOperationChip operCode={c.operCode} operName={c.operName} dReg={c.dReg} />
               <TopStatBadges brand={c.brand} model={c.model} color={c.color} region={data.region} kind={c.kind} />
               <VdbChips brand={c.brand} model={c.model} kind={c.kind} />
               <Model3dButton brand={c.brand} model={c.model} />

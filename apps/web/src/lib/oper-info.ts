@@ -41,3 +41,44 @@ export function operCategory(code: number | null | undefined): OperCategory {
   if (code >= 500 && code < 600) return 'deregistered'
   return 'noise'
 }
+
+export const OPER_STATUSES = [
+  'military',
+  'temporary',
+  'properUser',
+  'new',
+  'import',
+  'owner',
+  'modification',
+  'deregistered',
+  'other'
+] as const
+export type OperStatus = (typeof OPER_STATUSES)[number]
+
+export const OPER_STATUS_ICON: Record<OperStatus, string> = {
+  military: '🪖',
+  temporary: '⏳',
+  properUser: '👤',
+  new: '🆕',
+  import: '🌍',
+  owner: '🔁',
+  modification: '🔧',
+  deregistered: '🚫',
+  other: '📄'
+}
+
+const PROPER_USER_CODES: ReadonlySet<number> = new Set([254, 257, 284])
+
+/**
+ * The vehicle's status as told by its LAST operation — what the result-card chip and the advanced-search filter groups
+ * show. Like `operCategory` but also splits out the temporary-registration family (2xx, incl. the serviceman's
+ * temporary state registration, 215) and "proper user" registrations, which `operCategory` lumps into `noise`.
+ */
+export function operStatus(code: number | null | undefined): OperStatus {
+  if (code == null) return 'other'
+  if (code === 215) return 'military'
+  if (PROPER_USER_CODES.has(code)) return 'properUser'
+  if (code >= 200 && code < 300) return 'temporary'
+  const category = operCategory(code)
+  return category === 'noise' ? 'other' : category
+}

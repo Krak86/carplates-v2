@@ -54,6 +54,7 @@ import {
   plateHistory,
   searchVehicles,
   suggestBodies,
+  getOperations,
   suggestBrands,
   suggestModels
 } from '@/lib/api'
@@ -391,6 +392,11 @@ export function bodySuggestionsQuery(q: string) {
   return queryOptions({ queryKey: ['search', 'bodies', q], queryFn: () => suggestBodies(q) })
 }
 
+// Advanced-search registration-status options — ~190 operation codes with current vehicle counts (a rollup that changes only on re-ingest).
+export function operationsQuery() {
+  return queryOptions({ queryKey: ['search', 'operations'], queryFn: getOperations, staleTime: Infinity })
+}
+
 // Advanced-search model autocomplete — scoped to one brand when chosen, otherwise aggregated
 // across all brands (same nameplate can appear under several).
 export function modelSuggestionsQuery(brand: string | undefined, q: string) {
@@ -412,6 +418,7 @@ export function vehicleSearchQuery(filters: VehicleSearchFilters) {
       filters.kind,
       filters.body,
       filters.region,
+      filters.oper,
       filters.page,
       filters.pageSize
     ],
