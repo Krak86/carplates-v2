@@ -16,12 +16,15 @@ describe('mapPlateReaderResults', () => {
     expect(candidates).toEqual([{ plate: 'ВЕ7116АА', raw: 'BE7116AA', score: 0.8 }])
   })
 
-  it('sorts by score descending and caps at 5 candidates', () => {
-    const results = Array.from({ length: 7 }, (_, i) => ({ plate: `AA000${i}BC`, score: i / 10 }))
+  it('sorts by score descending and caps at 12 candidates', () => {
+    const results = Array.from({ length: 14 }, (_, i) => ({
+      plate: `AA00${String(i).padStart(2, '0')}BC`,
+      score: i / 20
+    }))
     const candidates = mapPlateReaderResults(results)
-    expect(candidates).toHaveLength(5)
-    expect(candidates[0]?.score).toBe(0.6)
-    expect(candidates.at(-1)?.score).toBe(0.2)
+    expect(candidates).toHaveLength(12)
+    expect(candidates[0]?.score).toBe(0.65)
+    expect(candidates.at(-1)?.score).toBe(0.1)
   })
 
   it('skips results with no plate string', () => {

@@ -17,7 +17,7 @@ type Props = {
 }
 
 const CHIP =
-  'inline-flex animate-chip-in items-center gap-1 rounded-full border border-[var(--color-border)] bg-[var(--color-surface)]/20 px-2 py-0.5 text-xs text-[var(--color-fg)]'
+  'chip-market chip-tone inline-flex animate-chip-in items-center gap-1 rounded-full border px-2 py-0.5 text-xs text-[var(--color-fg)]'
 
 /**
  * Cross-market chips from the VehiclesDB catalog (CC-BY): where else the model is sold and how popular it is across
@@ -65,41 +65,86 @@ export default function VdbChips({ brand, model, kind }: Props): ReactNode {
   return (
     <div className="contents">
       {otherNames.length > 0 && (
-        <span className={CHIP} title={otherNames.join(', ')}>
-          <span aria-hidden>🏷️</span>
-          {t('vdb.aliases', { names: otherNames.slice(0, MAX_ALIASES).join(', ') })}
-        </span>
+        <InfoPopover
+          label={t('vdb.info.title')}
+          title={t('vdb.info.title')}
+          anchor={
+            <span className={CHIP}>
+              <span aria-hidden>🏷️</span>
+              {t('vdb.aliases', { names: otherNames.slice(0, MAX_ALIASES).join(', ') })}
+            </span>
+          }
+        >
+          {[
+            match.crossMake && t('vdb.info.crossMake', { name: `${match.makeName} ${match.modelName}` }),
+            aliases.length > 0 && t('vdb.info.aliases', { names: aliases.join(', ') })
+          ]
+            .filter(Boolean)
+            .join(' ')}
+        </InfoPopover>
       )}
 
       {match.uaOnly && (
-        <span className={CHIP}>
-          <span aria-hidden>🇺🇦</span>
-          {t('vdb.uaOnly')}
-        </span>
+        <InfoPopover
+          label={t('vdb.uaOnly')}
+          title={t('vdb.uaOnly')}
+          anchor={
+            <span className={CHIP}>
+              <span aria-hidden>🇺🇦</span>
+              {t('vdb.uaOnly')}
+            </span>
+          }
+        >
+          {t('vdb.info.uaOnly')}
+        </InfoPopover>
       )}
 
       {others.length > 0 && (
-        <span className={CHIP} title={names(others)}>
-          <span aria-hidden>🌍</span>
-          {t('vdb.alsoSold')}
-          <span aria-hidden>{others.slice(0, MAX_FLAGS).map(isoFlag).join(' ')}</span>
-          {others.length > MAX_FLAGS && <span aria-hidden>+{others.length - MAX_FLAGS}</span>}
-          <span className="sr-only">{names(others)}</span>
-        </span>
+        <InfoPopover
+          label={t('vdb.alsoSold')}
+          title={t('vdb.alsoSold')}
+          anchor={
+            <span className={CHIP}>
+              <span aria-hidden>🌍</span>
+              {t('vdb.alsoSold')}
+              <span aria-hidden>{others.slice(0, MAX_FLAGS).map(isoFlag).join(' ')}</span>
+              {others.length > MAX_FLAGS && <span aria-hidden>+{others.length - MAX_FLAGS}</span>}
+              <span className="sr-only">{names(others)}</span>
+            </span>
+          }
+        >
+          {t('vdb.info.alsoSold', { countries: names(others) })}
+        </InfoPopover>
       )}
 
       {showDecile && (
-        <span className={CHIP} title={names(match.countries)}>
-          <span aria-hidden>📊</span>
-          {t('vdb.decile', { band, count: match.countries.length })}
-        </span>
+        <InfoPopover
+          label={t('vdb.decile', { band, count: match.countries.length })}
+          title={t('vdb.decile', { band, count: match.countries.length })}
+          anchor={
+            <span className={CHIP}>
+              <span aria-hidden>📊</span>
+              {t('vdb.decile', { band, count: match.countries.length })}
+            </span>
+          }
+        >
+          {t('vdb.info.decile', { band, count: match.countries.length, markets: names(match.countries) })}
+        </InfoPopover>
       )}
 
       {rare && (
-        <span className={CHIP}>
-          <span aria-hidden>💎</span>
-          {t('vdb.rare')}
-        </span>
+        <InfoPopover
+          label={t('vdb.rare')}
+          title={t('vdb.rare')}
+          anchor={
+            <span className={CHIP}>
+              <span aria-hidden>💎</span>
+              {t('vdb.rare')}
+            </span>
+          }
+        >
+          {t('vdb.info.rare')}
+        </InfoPopover>
       )}
 
       <InfoPopover label={t('vin.info.about', { field: t('vdb.info.title') })} title={t('vdb.info.title')}>

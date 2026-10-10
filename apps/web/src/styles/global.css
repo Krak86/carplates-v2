@@ -223,6 +223,65 @@ body {
   }
 }
 
+/* Header chips are tinted by data group, so the row reads at a glance: registry (green), cross-market (violet), stats
+   leaderboards (blue), 3D / 360 views (pink), weight (amber), fuel (lime), safety (red). sRGB fallbacks first, then
+   wide-gamut versions on P3 displays. `chip-tone` derives border / fill / glow from the group's `--chip`. */
+:root {
+  --chip-registry: hsl(160 84% 40%);
+  --chip-market: hsl(262 83% 62%);
+  --chip-stats: hsl(217 91% 55%);
+  --chip-view: hsl(330 81% 58%);
+  --chip-weight: hsl(38 92% 50%);
+  --chip-fuel: hsl(84 70% 42%);
+  --chip-safety: hsl(0 84% 58%);
+}
+
+@media (color-gamut: p3) {
+  :root {
+    --chip-registry: oklch(0.74 0.2 160);
+    --chip-market: oklch(0.62 0.27 295);
+    --chip-stats: oklch(0.62 0.24 255);
+    --chip-view: oklch(0.66 0.28 355);
+    --chip-weight: oklch(0.78 0.2 70);
+    --chip-fuel: oklch(0.8 0.26 128);
+    --chip-safety: oklch(0.64 0.27 25);
+  }
+}
+
+@utility chip-tone {
+  border-color: color-mix(in oklch, var(--chip) 45%, transparent);
+  background-color: color-mix(in oklch, var(--chip) 15%, transparent);
+  box-shadow: 0 0 6px -1px color-mix(in oklch, var(--chip) 30%, transparent);
+}
+
+@utility chip-registry {
+  --chip: var(--chip-registry);
+}
+
+@utility chip-market {
+  --chip: var(--chip-market);
+}
+
+@utility chip-stats {
+  --chip: var(--chip-stats);
+}
+
+@utility chip-view {
+  --chip: var(--chip-view);
+}
+
+@utility chip-weight {
+  --chip: var(--chip-weight);
+}
+
+@utility chip-fuel {
+  --chip: var(--chip-fuel);
+}
+
+@utility chip-safety {
+  --chip: var(--chip-safety);
+}
+
 /* Header chips that resolve asynchronously ease in instead of popping. */
 @keyframes chip-in {
   from {

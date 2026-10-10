@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef, useState } from 'react'
-import type { ReactNode } from 'react'
+import type { ReactNode, RefObject } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 
@@ -10,6 +10,8 @@ type Props = {
   /** Replaces the round "?" as the thing to hover / tap (a chip); `triggerClassName` then styles the button. */
   trigger?: ReactNode
   triggerClassName?: string
+  /** Hover-only mode: wraps an existing chip (a link or button of its own) instead of rendering a button — no click pinning. */
+  anchor?: ReactNode
 }
 
 // Same timing as FieldInfoButton, whose hover/pin logic this mirrors for static content.
@@ -34,12 +36,12 @@ type Placement = { left: number; top?: number; bottom?: number; maxHeight: numbe
  * space is actually available in whichever direction it opens, so it can never
  * extend past the viewport edge.
  */
-export default function InfoPopover({ label, title, children, trigger, triggerClassName }: Props): ReactNode {
+export default function InfoPopover({ label, title, children, trigger, triggerClassName, anchor }: Props): ReactNode {
   const { t } = useTranslation()
   const [hovering, setHovering] = useState(false)
   const [pinned, setPinned] = useState(false)
   const visible = hovering || pinned
-  const buttonRef = useRef<HTMLButtonElement>(null)
+  const buttonRef = useRef<HTMLElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
   const [placement, setPlacement] = useState<Placement | null>(null)
   const closeTimeoutRef = useRef<number | null>(null)
@@ -153,32 +155,52 @@ export default function InfoPopover({ label, title, children, trigger, triggerCl
     // eslint-disable-next-line react-hooks/exhaustive-deps -- handleClose is stable enough for this listener's lifetime
   }, [pinned])
 
+  const hoverHandlers = {
+    onMouseEnter: handlePointerEnter,
+    onMouseLeave: handlePointerLeave,
+    onFocus: () => {
+      cancelScheduledClose()
+      cancelScheduledOpen()
+      setHovering(true)
+    },
+    onBlur: () => {
+      cancelScheduledOpen()
+      setHovering(false)
+    }
+  }
+
   return (
     <>
-      <button
-        ref={buttonRef}
-        type="button"
-        aria-label={label}
-        aria-expanded={visible}
-        onClick={() => setPinned(v => !v)}
-        onMouseEnter={handlePointerEnter}
-        onMouseLeave={handlePointerLeave}
-        onFocus={() => {
-          cancelScheduledClose()
-          cancelScheduledOpen()
-          setHovering(true)
-        }}
-        onBlur={() => {
-          cancelScheduledOpen()
-          setHovering(false)
-        }}
-        className={
-          triggerClassName ??
-          'inline-flex size-5 shrink-0 items-center justify-center rounded-full bg-[var(--color-primary)]/15 text-xs leading-none font-bold text-[var(--color-primary)] hover:bg-[var(--color-primary)]/30'
-        }
-      >
-        {trigger ?? '?'}
-      </button>
+      {anchor ? (
+        <span ref={buttonRef} className="inline-flex" {...hoverHandlers}>
+          {anchor}
+        </span>
+      ) : (
+        <button
+          ref={buttonRef as RefObject<HTMLButtonElement>}
+          type="button"
+          aria-label={label}
+          aria-expanded={visible}
+          onClick={() => setPinned(v => !v)}
+          onMouseEnter={handlePointerEnter}
+          onMouseLeave={handlePointerLeave}
+          onFocus={() => {
+            cancelScheduledClose()
+            cancelScheduledOpen()
+            setHovering(true)
+          }}
+          onBlur={() => {
+            cancelScheduledOpen()
+            setHovering(false)
+          }}
+          className={
+            triggerClassName ??
+            'inline-flex size-5 shrink-0 items-center justify-center rounded-full bg-[var(--color-primary)]/15 text-xs leading-none font-bold text-[var(--color-primary)] hover:bg-[var(--color-primary)]/30'
+          }
+        >
+          {trigger ?? '?'}
+        </button>
+      )}
 
       {visible &&
         placement &&

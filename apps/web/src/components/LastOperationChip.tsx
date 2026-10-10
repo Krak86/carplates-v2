@@ -39,7 +39,7 @@ export default function LastOperationChip({ operCode, operName, dReg }: Props): 
   return (
     <span
       className={cn(
-        'inline-flex animate-chip-in items-center gap-1 rounded-full border border-emerald-400/40 bg-emerald-400/15 py-0.5 pr-1 pl-2 text-xs text-[var(--color-fg)] shadow-[0_0_6px_-1px] shadow-emerald-400/30 transition-colors'
+        'inline-flex animate-chip-in items-center gap-1 rounded-full border chip-tone py-0.5 pr-1 pl-2 text-xs text-[var(--color-fg)] transition-colors chip-registry'
       )}
     >
       <Link

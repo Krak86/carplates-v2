@@ -3,7 +3,8 @@ import type { PlateCandidate } from '@carplates/shared'
 
 import type { PlateReaderResult } from './recognize.types.js'
 
-const MAX_CANDIDATES = 5
+// A busy parking-lot photo easily shows 8+ readable plates; 5 silently dropped the rest.
+const MAX_CANDIDATES = 12
 // The digits-first legacy shape lets the odd junk read through (`98II1166` on a small object), so it needs a surer read.
 const LEGACY_MIN_SCORE = 0.7
 

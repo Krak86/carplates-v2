@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router'
 
+import InfoPopover from '@/components/InfoPopover'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 import { parseModel360Tab } from '@/lib/model360'
 import { models360Query } from '@/lib/queries'
@@ -39,16 +40,24 @@ export default function Model360Button({ brand, model }: Props): ReactNode {
 
   return (
     <div className="contents">
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        disabled={!online}
-        title={online ? undefined : t('offline.needsConnection')}
-        className="inline-flex animate-chip-in cursor-pointer items-center gap-1 rounded-full border border-[var(--color-border)] bg-[var(--color-surface)]/20 px-2 py-0.5 text-xs text-[var(--color-fg)] transition-colors hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-[var(--color-border)] disabled:hover:text-[var(--color-fg)]"
+      <InfoPopover
+        label={t('model360.open', { n: count })}
+        title={t('model360.open', { n: count })}
+        anchor={
+          <button
+            type="button"
+            onClick={() => setOpen(true)}
+            disabled={!online}
+            title={online ? undefined : t('offline.needsConnection')}
+            className="inline-flex animate-chip-in cursor-pointer items-center gap-1 rounded-full border chip-tone px-2 py-0.5 text-xs text-[var(--color-fg)] transition-colors chip-view hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-[var(--color-border)] disabled:hover:text-[var(--color-fg)]"
+          >
+            <span aria-hidden>🔄</span>
+            {t('model360.open', { n: count })}
+          </button>
+        }
       >
-        <span aria-hidden>🔄</span>
-        {t('model360.open', { n: count })}
-      </button>
+        {t('chip.tip.view360')}
+      </InfoPopover>
 
       {open && online && (
         <Suspense fallback={null}>

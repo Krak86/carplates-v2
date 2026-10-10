@@ -67,6 +67,18 @@ describe('scoreCommonsTitle', () => {
   })
 })
 
+describe('cabin shots without the word "interior"', () => {
+  it('ranks "front row … from behind" below a plain exterior', () => {
+    const cabin = scoreCommonsTitle(
+      'File:Front row of Mazda CX-5 as seen from behind during GIIAS 2026.jpg',
+      'CX-5',
+      2026
+    )!
+    const outside = scoreCommonsTitle('File:2026 Mazda CX-5 front right.jpg', 'CX-5', 2026)!
+    expect(outside).toBeGreaterThan(cabin)
+  })
+})
+
 describe('model-year-only scoring', () => {
   const OLD_CAR = 'File:Auto BMW 5 Series (E28) Moscow Marshala Zhukova Prospekt Т203РА50 2026-09 1788629036.jpg'
 

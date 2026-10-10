@@ -10,7 +10,7 @@ const MIN_WIDTH = 800
 // The hero slot is a wide, object-cover frame — portrait shots crop badly.
 const MIN_ASPECT = 1.2
 const DETAIL_SHOT =
-  /interior|engine|dashboard|cockpit|steering|wheel|badge|logo|emblem|seat|trunk|boot|headlight|taillight|detail|speedometer|odometer|console/i
+  /interior|engine|dashboard|cockpit|steering|wheel|badge|logo|emblem|seat|trunk|boot|headlight|taillight|detail|speedometer|odometer|console|\b(?:front|rear|second|third|back) rows?\b|cabin|inside|from behind|infotainment|upholstery/i
 
 // Diacritics are folded first, or "Doblò" / "Citroën" would shrink to "dobl" / "citron" and miss "doblo" / "citroen".
 const normalize = (value: string): string =>
@@ -66,7 +66,7 @@ export function scoreCommonsTitle(title: string, model: string, year: number, mo
 
   let score = 10
   if (DETAIL_SHOT.test(title)) score -= 6
-  if (/front|\b3\/4\b/i.test(title)) score += 2
+  if (/front(?! rows?\b)|\b3\/4\b/i.test(title)) score += 2
   if (/\brear\b/i.test(title)) score -= 1
   return score
 }
