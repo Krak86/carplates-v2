@@ -5,6 +5,7 @@ import { useSearchParams } from 'react-router'
 import type { VinRegistry } from '@carplates/shared'
 
 import RegistrationTimeline from '@/components/RegistrationTimeline'
+import SectionCount from '@/components/SectionCount'
 import ShareButton from '@/components/ShareButton'
 import VinToggleSection from '@/components/vin/VinToggleSection'
 import { scrollElementIntoView } from '@/lib/share-section'
@@ -32,7 +33,11 @@ export default function VinRegistryHistory({ registry }: Props): ReactNode {
       defaultOpen={isShared}
       showLabel={t('result.historyShow')}
       hideLabel={t('result.historyHide')}
-      title={t('vin.registryTitle')}
+      title={
+        <>
+          {t('vin.registryTitle')} <SectionCount count={registry.actions.length} />
+        </>
+      }
       actions={<ShareButton section="history" label={t('share.button', { section: t('vin.registryTitle') })} />}
     >
       <RegistrationTimeline actions={registry.actions} />

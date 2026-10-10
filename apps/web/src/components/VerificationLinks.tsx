@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router'
 
+import SectionCount from '@/components/SectionCount'
 import SectionHeader from '@/components/SectionHeader'
 import SectionInfo from '@/components/SectionInfo'
 import ShareButton from '@/components/ShareButton'
@@ -44,7 +45,11 @@ export default function VerificationLinks(): ReactNode {
     <div ref={sectionRef} className="mt-3 border-t border-[var(--color-border)] pt-3">
       <SectionHeader
         icon="✅"
-        title={t('verification.title')}
+        title={
+          <>
+            {t('verification.title')} <SectionCount count={VERIFICATION_SITES.length} />
+          </>
+        }
         info={<SectionInfo section="verification" title={t('verification.title')} />}
         actions={<ShareButton section="verification" label={t('share.button', { section: t('verification.title') })} />}
         open={open}

@@ -9,6 +9,7 @@ import InfoPopover from '@/components/InfoPopover'
 import InfoText from '@/components/InfoText'
 import { closestVariantIndex, formatKw, formatPorts, OPEN_ELECTRIC_EVENT } from '@/components/OpenEv.helpers'
 import OpenEvRow from '@/components/OpenEvRow'
+import SectionCount from '@/components/SectionCount'
 import SectionHeader from '@/components/SectionHeader'
 import ShareButton from '@/components/ShareButton'
 import { cn } from '@/lib/cn'
@@ -76,8 +77,7 @@ export default function OpenEv({ brand, model, year, fuel }: Props): ReactNode {
         icon="🔌"
         title={
           <>
-            {t('ev.title')}{' '}
-            {match && <span className="text-sm font-normal text-[var(--color-muted)]">({match.variants.length})</span>}
+            {t('ev.title')} <SectionCount count={match?.variants.length} />
           </>
         }
         info={

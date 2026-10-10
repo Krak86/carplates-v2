@@ -17,6 +17,10 @@ describe('extractVins', () => {
     expect(top?.vin).toBe('1M8GDM9AXKP042788')
     expect(top?.checkDigitOk).toBe(true)
   })
+  it('skips a brand logo read as leading characters ("K1" for the KIA oval)', () => {
+    const [top] = extractVins([{ text: 'K1U5YHN512BDL007162', score: 0.9 }])
+    expect(top?.vin).toBe('U5YHN512BDL007162')
+  })
   it('joins a VIN wrapped over two lines', () => {
     const reads = extractVins([
       { text: '1M8GDM9A', score: 0.95 },

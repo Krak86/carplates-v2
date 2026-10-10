@@ -24,6 +24,7 @@ import {
 } from '@/components/RdwSpecs.helpers'
 import RdwScaleBar from '@/components/RdwScaleBar'
 import RdwShareRow from '@/components/RdwShareRow'
+import SectionCount from '@/components/SectionCount'
 import SectionHeader from '@/components/SectionHeader'
 import ShareButton from '@/components/ShareButton'
 import VinToggleSection from '@/components/vin/VinToggleSection'
@@ -167,7 +168,11 @@ export default function RdwSpecs({ brand, model, year, kind, fuel, own }: Props)
     <div ref={sectionRef} className="mt-3 border-t border-[var(--color-border)] pt-3">
       <SectionHeader
         icon="📐"
-        title={t('rdw.title')}
+        title={
+          <>
+            {t('rdw.title')} <SectionCount count={groups.reduce((sum, g) => sum + g.rows.length, 0)} />
+          </>
+        }
         info={
           <InfoPopover label={t('vin.info.about', { field: t('rdw.title') })} title={t('rdw.title')}>
             <InfoText text={info} highlight={[name, 'RDW']} />
@@ -227,8 +232,7 @@ export default function RdwSpecs({ brand, model, year, kind, fuel, own }: Props)
               hideLabel={t('vin.group.hide')}
               title={
                 <>
-                  {t(`rdw.group.${group.key}`)}{' '}
-                  <span className="text-sm font-normal text-[var(--color-muted)]">({group.rows.length})</span>
+                  {t(`rdw.group.${group.key}`)} <SectionCount count={group.rows.length} />
                 </>
               }
             >

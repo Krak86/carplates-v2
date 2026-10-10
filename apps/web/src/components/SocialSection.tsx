@@ -6,6 +6,7 @@ import { useSearchParams } from 'react-router'
 
 import BlueskyPostCard from '@/components/BlueskyPostCard'
 import CommunityPostCard from '@/components/CommunityPostCard'
+import SectionCount from '@/components/SectionCount'
 import SectionInfo from '@/components/SectionInfo'
 import ShareButton from '@/components/ShareButton'
 import SocialGroup from '@/components/SocialGroup'
@@ -33,8 +34,8 @@ export default function SocialSection({ brand, model, year }: Props): ReactNode 
   const isShared = searchParams.get('section') === 'social'
   const sectionRef = useRef<HTMLDivElement>(null)
   const [open, setOpen] = useState(() => isShared)
-  // Fetched only once opened; on wide screens the Bluesky query is shared with the side widget.
-  const enabled = !!brand && open
+  // Fetched as soon as the section mounts (for the count); on wide screens the queries are shared with the side widgets.
+  const enabled = !!brand
   const blueskyPosts = useQuery({ ...blueskyQuery(brand ?? '', model, year), enabled })
   const stackPosts = useQuery({ ...stackExchangeQuery(brand ?? '', model), enabled })
   const lemmyPosts = useQuery({ ...lemmyQuery(brand ?? '', model), enabled })
@@ -56,7 +57,11 @@ export default function SocialSection({ brand, model, year }: Props): ReactNode 
     <VinToggleSection
       ref={sectionRef}
       icon="💬"
-      title={t('social.title')}
+      title={
+        <>
+          {t('social.title')} <SectionCount count={bluesky.length + stack.length + lemmy.length} />
+        </>
+      }
       info={<SectionInfo section="social" title={t('social.title')} />}
       actions={<ShareButton section="social" label={t('share.button', { section: t('social.title') })} />}
       showLabel={t('social.show')}

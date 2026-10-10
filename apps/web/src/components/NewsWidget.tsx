@@ -6,7 +6,7 @@ import { Link, useLocation } from 'react-router'
 
 import NewsGroups from '@/components/NewsGroups'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
-import { SIDE_WIDGETS_DESKTOP_QUERY, useScrolledOnRoute } from '@/hooks/useSideWidgetsVisible'
+import { SIDE_WIDGETS_DESKTOP_QUERY } from '@/hooks/useSideWidgetsVisible'
 import { cn } from '@/lib/cn'
 import { newsLangFilter } from '@/lib/news'
 import { newsQuery } from '@/lib/queries'
@@ -31,7 +31,6 @@ export default function NewsWidget({ brand, model, year }: Props): ReactNode {
   const { pathname } = useLocation()
   // Dismissal is per route: storing the path it was closed on makes it lapse on the next navigation.
   const [dismissedPath, setDismissedPath] = useState<string | null>(null)
-  const scrolled = useScrolledOnRoute()
   const news = useQuery({ ...newsQuery(brand, model, year, newsLangFilter(i18n.language)), enabled: isDesktop })
 
   const all = news.data?.items ?? []
@@ -44,13 +43,12 @@ export default function NewsWidget({ brand, model, year }: Props): ReactNode {
   return (
     <aside
       aria-label={t('news.title')}
-      aria-hidden={!scrolled}
       className={cn(
         'flex w-full flex-col gap-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)]/50 p-3 backdrop-blur-md',
         'transition-[opacity,translate] duration-500 ease-out motion-reduce:transition-none',
-        // Mounted only after the first scroll (see useSideWidgetsVisible), so it slides in on insertion.
+        // Mounted only after the delay (see useSideWidgetsVisible), so it slides in on insertion.
         'starting:translate-x-8 starting:opacity-0',
-        scrolled ? 'pointer-events-auto translate-x-0 opacity-100' : 'pointer-events-none translate-x-8 opacity-0'
+        'pointer-events-auto translate-x-0 opacity-100'
       )}
     >
       <div className="flex items-center justify-between gap-2">
@@ -69,11 +67,10 @@ export default function NewsWidget({ brand, model, year }: Props): ReactNode {
         </button>
       </div>
 
-      <NewsGroups items={items} brand={brand} decorative={!scrolled} />
+      <NewsGroups items={items} brand={brand} />
 
       <Link
         to={moreTo}
-        tabIndex={scrolled ? undefined : -1}
         className="rounded-md px-2 py-1.5 text-center text-sm font-medium text-[var(--color-primary)] hover:bg-[var(--color-surface)]"
       >
         {t('news.more')} <span aria-hidden>→</span>

@@ -26,6 +26,7 @@ import {
 import MotHelp from '@/components/MotHelp'
 import MotIssueRow from '@/components/MotIssueRow'
 import { reasonLabel } from '@/components/MotReasons'
+import SectionCount from '@/components/SectionCount'
 import SectionHeader from '@/components/SectionHeader'
 import ShareButton from '@/components/ShareButton'
 import VinToggleSection from '@/components/vin/VinToggleSection'
@@ -66,7 +67,7 @@ export default function MotFaults({ brand, model, year, kind }: Props): ReactNod
   const sectionRef = useRef<HTMLDivElement>(null)
   const query = useQuery({
     ...motQuery(brand ?? '', model ?? '', year ?? 0, kind),
-    enabled: !!(brand && model && year) && open
+    enabled: !!(brand && model && year)
   })
   const match = query.data?.match
 
@@ -108,7 +109,11 @@ export default function MotFaults({ brand, model, year, kind }: Props): ReactNod
     <div ref={sectionRef} className="mt-3 border-t border-[var(--color-border)] pt-3">
       <SectionHeader
         icon="🔧"
-        title={t('mot.title')}
+        title={
+          <>
+            {t('mot.title')} <SectionCount count={match?.groups.length} />
+          </>
+        }
         info={
           match && (
             <InfoPopover label={t('vin.info.about', { field: t('mot.title') })} title={t('mot.title')}>

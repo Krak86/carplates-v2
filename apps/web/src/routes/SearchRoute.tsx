@@ -360,7 +360,7 @@ export default function SearchRoute(): ReactNode {
           </LazySection>
         </Presence>
 
-        {/* Right column (desktop only, appears on scroll): news on top, the new-cars brand card below — either one alone takes the top slot. */}
+        {/* Right column (desktop only, appears after a delay): news on top, the new-cars brand card below — either one alone takes the top slot. */}
         {sideWidgets && !recognizeErrorKey && wikiHeroVehicle?.brand && (
           <div className="pointer-events-none fixed top-20 right-4 z-10 flex max-h-[calc(100vh-6rem)] w-60 flex-col gap-3 overflow-x-hidden overflow-y-auto">
             <LoadErrorBoundary compact>
@@ -396,7 +396,7 @@ export default function SearchRoute(): ReactNode {
           </div>
         )}
 
-        {/* Left column (desktop only, appears on scroll): Bluesky on top, share price below — either one alone takes the top slot. */}
+        {/* Left column (desktop only, appears after a delay): Bluesky on top, share price below — either one alone takes the top slot. */}
         {sideWidgets && !recognizeErrorKey && wikiHeroVehicle?.brand && (
           <div className="pointer-events-none fixed top-20 left-4 z-10 flex max-h-[calc(100vh-6rem)] w-60 flex-col gap-3 overflow-x-hidden overflow-y-auto">
             {kind === 'plate' && (

@@ -11,6 +11,7 @@ import LangBadge from '@/components/LangBadge'
 import PressReviews from '@/components/PressReviews'
 import { REVIEW_SITE_LABEL } from '@/components/ReviewLinks.helpers'
 import SectionInfo from '@/components/SectionInfo'
+import SectionCount from '@/components/SectionCount'
 import SectionHeader from '@/components/SectionHeader'
 import ShareButton from '@/components/ShareButton'
 import SourceGroup from '@/components/SourceGroup'
@@ -45,12 +46,19 @@ export default function ReviewLinks({ brand, model, year }: Props): ReactNode {
   const sectionRef = useRef<HTMLDivElement>(null)
   const links = reviewLinks(brand, model, year)
   const hasLinks = links.length > 0
-  const catalog = useQuery({ ...reviewsQuery(brand ?? '', model ?? '', year), enabled: !!brand && open })
+  const catalog = useQuery({ ...reviewsQuery(brand ?? '', model ?? '', year), enabled: !!brand })
   const posts = catalog.data?.ownerPosts ?? []
   const topgear = catalog.data?.topgear ?? []
   const itc = (catalog.data?.press ?? []).filter(r => r.source === 'itc')
   const mezha = (catalog.data?.press ?? []).filter(r => r.source === 'mezha')
   const hasInfocar = !!catalog.data?.testDrive || !!catalog.data?.reviews
+  const total =
+    posts.length +
+    topgear.length +
+    itc.length +
+    mezha.length +
+    Number(!!catalog.data?.testDrive) +
+    Number(!!catalog.data?.reviews)
 
   useEffect(() => {
     if (isSharedReviews && hasLinks && sectionRef.current) scrollElementIntoView(sectionRef.current)
@@ -62,7 +70,11 @@ export default function ReviewLinks({ brand, model, year }: Props): ReactNode {
     <div ref={sectionRef} className="mt-3 border-t border-[var(--color-border)] pt-3">
       <SectionHeader
         icon="📝"
-        title={t('reviews.title')}
+        title={
+          <>
+            {t('reviews.title')} <SectionCount count={total} />
+          </>
+        }
         info={<SectionInfo section="reviews" title={t('reviews.title')} />}
         actions={<ShareButton section="reviews" label={t('share.button', { section: t('reviews.title') })} />}
         open={open}

@@ -6,6 +6,7 @@ import { useSearchParams } from 'react-router'
 
 import NewsGroups from '@/components/NewsGroups'
 import SectionHeader from '@/components/SectionHeader'
+import SectionCount from '@/components/SectionCount'
 import SectionInfo from '@/components/SectionInfo'
 import ShareButton from '@/components/ShareButton'
 import { cn } from '@/lib/cn'
@@ -30,11 +31,11 @@ export default function NewsSection({ brand, model, year }: Props): ReactNode {
   const isShared = searchParams.get('section') === 'news'
   const [open, setOpen] = useState(() => isShared)
   const sectionRef = useRef<HTMLDivElement>(null)
-  // Fetched only once opened (a shared `?section=news` link opens at once). On wide screens the side widget shares the
-  // query key, so an already loaded widget makes opening instant.
+  // Fetched as soon as the section mounts (near the viewport) so the header can show the count. On wide screens the
+  // side widget shares the query key.
   const news = useQuery({
     ...newsQuery(brand ?? '', model, year, newsLangFilter(i18n.language)),
-    enabled: !!brand && open
+    enabled: !!brand
   })
   const items = news.data?.items ?? []
 
@@ -48,7 +49,11 @@ export default function NewsSection({ brand, model, year }: Props): ReactNode {
     <div ref={sectionRef} className="mt-3 border-t border-[var(--color-border)] pt-3">
       <SectionHeader
         icon="📰"
-        title={t('news.title')}
+        title={
+          <>
+            {t('news.title')} <SectionCount count={items.length} />
+          </>
+        }
         info={<SectionInfo section="news" title={t('news.title')} />}
         actions={<ShareButton section="news" label={t('share.button', { section: t('news.title') })} />}
         open={open}

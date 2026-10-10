@@ -6,7 +6,7 @@ import { useLocation } from 'react-router'
 
 import BlueskyPostCard from '@/components/BlueskyPostCard'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
-import { SIDE_WIDGETS_DESKTOP_QUERY, useScrolledOnRoute } from '@/hooks/useSideWidgetsVisible'
+import { SIDE_WIDGETS_DESKTOP_QUERY } from '@/hooks/useSideWidgetsVisible'
 import { blueskyQuery } from '@/lib/bluesky'
 import { cn } from '@/lib/cn'
 
@@ -29,7 +29,6 @@ export default function BlueskyWidget({ brand, model, year }: Props): ReactNode 
   const isDesktop = useMediaQuery(SIDE_WIDGETS_DESKTOP_QUERY)
   const { pathname } = useLocation()
   const [dismissedPath, setDismissedPath] = useState<string | null>(null)
-  const scrolled = useScrolledOnRoute()
   const posts = useQuery({ ...blueskyQuery(brand, model, year), enabled: isDesktop })
 
   const items = (posts.data?.posts ?? []).slice(0, WIDGET_POSTS)
@@ -38,13 +37,12 @@ export default function BlueskyWidget({ brand, model, year }: Props): ReactNode 
   return (
     <aside
       aria-label={t('bluesky.title')}
-      aria-hidden={!scrolled}
       className={cn(
         'flex w-full flex-col gap-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)]/50 p-3 backdrop-blur-md',
         'transition-[opacity,translate] duration-500 ease-out motion-reduce:transition-none',
-        // Mounted only after the first scroll (see useSideWidgetsVisible), so it slides in on insertion.
+        // Mounted only after the delay (see useSideWidgetsVisible), so it slides in on insertion.
         'starting:-translate-x-8 starting:opacity-0',
-        scrolled ? 'pointer-events-auto translate-x-0 opacity-100' : 'pointer-events-none -translate-x-8 opacity-0'
+        'pointer-events-auto translate-x-0 opacity-100'
       )}
     >
       <div className="flex items-center justify-between gap-2">
@@ -66,7 +64,7 @@ export default function BlueskyWidget({ brand, model, year }: Props): ReactNode 
       <ul className="flex flex-col gap-2">
         {items.map(post => (
           <li key={post.id}>
-            <BlueskyPostCard post={post} decorative={!scrolled} />
+            <BlueskyPostCard post={post} />
           </li>
         ))}
       </ul>
@@ -75,7 +73,6 @@ export default function BlueskyWidget({ brand, model, year }: Props): ReactNode 
         href={posts.data?.searchUrl}
         target="_blank"
         rel="noopener noreferrer"
-        tabIndex={scrolled ? undefined : -1}
         className="rounded-md px-2 py-1.5 text-center text-sm font-medium text-[var(--color-primary)] hover:bg-[var(--color-surface)]"
       >
         {t('bluesky.more')} <span aria-hidden>↗</span>

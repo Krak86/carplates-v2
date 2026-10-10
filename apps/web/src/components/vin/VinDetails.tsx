@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { VinDecodeResponse } from '@carplates/shared'
 
+import SectionCount from '@/components/SectionCount'
 import VinFieldRow from '@/components/vin/VinFieldRow'
 import VinToggleSection from '@/components/vin/VinToggleSection'
 import { groupFields } from '@/components/vin/helpers'
@@ -29,8 +30,7 @@ export default function VinDetails({ results }: Props): ReactNode {
           hideLabel={t('vin.group.hide')}
           title={
             <>
-              {t(`vin.group.${group}`)}{' '}
-              <span className="text-sm font-normal text-[var(--color-muted)]">({rows.length})</span>
+              {t(`vin.group.${group}`)} <SectionCount count={rows.length} />
             </>
           }
         >

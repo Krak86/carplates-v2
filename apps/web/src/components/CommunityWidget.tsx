@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next'
 import { useLocation } from 'react-router'
 
 import CommunityPostCard from '@/components/CommunityPostCard'
-import { useScrolledOnRoute } from '@/hooks/useSideWidgetsVisible'
 import { cn } from '@/lib/cn'
 import type { CommunityPost } from '@/lib/community'
 
@@ -28,20 +27,17 @@ export default function CommunityWidget({ icon, title, posts, moreUrl, side }: P
   const { t } = useTranslation()
   const { pathname } = useLocation()
   const [dismissedPath, setDismissedPath] = useState<string | null>(null)
-  const scrolled = useScrolledOnRoute()
 
   if (!posts.length || dismissedPath === pathname) return null
 
-  const hidden = side === 'left' ? '-translate-x-8' : 'translate-x-8'
   return (
     <aside
       aria-label={title}
-      aria-hidden={!scrolled}
       className={cn(
         'flex w-full flex-col gap-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)]/50 p-3 backdrop-blur-md',
         'transition-[opacity,translate] duration-500 ease-out motion-reduce:transition-none',
         side === 'left' ? 'starting:-translate-x-8 starting:opacity-0' : 'starting:translate-x-8 starting:opacity-0',
-        scrolled ? 'pointer-events-auto translate-x-0 opacity-100' : cn('pointer-events-none opacity-0', hidden)
+        'pointer-events-auto translate-x-0 opacity-100'
       )}
     >
       <div className="flex items-center justify-between gap-2">
@@ -73,7 +69,6 @@ export default function CommunityWidget({ icon, title, posts, moreUrl, side }: P
           href={moreUrl}
           target="_blank"
           rel="noopener noreferrer"
-          tabIndex={scrolled ? undefined : -1}
           className="rounded-md px-2 py-1.5 text-center text-sm font-medium text-[var(--color-primary)] hover:bg-[var(--color-surface)]"
         >
           {t('social.more')} <span aria-hidden>↗</span>

@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router'
 
 import BrandChannelVideos from '@/components/BrandChannelVideos'
+import SectionCount from '@/components/SectionCount'
 import SectionHeader from '@/components/SectionHeader'
 import SectionInfo from '@/components/SectionInfo'
 import ShareButton from '@/components/ShareButton'
@@ -24,7 +25,7 @@ type Props = {
 /**
  * Collapsed "Videos" section next to the text `ReviewLinks` one: infocar.ua's videos for this make/model, then the latest
  * uploads of the make's (and its parent group's) official YouTube channel. Same persisted catalog query (`reviewsQuery`,
- * so opening both sections costs one request); both are fetched only once the section is opened. Hidden without a make
+ * so opening both sections costs one request); the catalog is fetched as soon as the section mounts (for the count), the channel feed only once it is opened. Hidden without a make
  * to go on.
  */
 export default function VideoReviews({ brand, model, year }: Props): ReactNode {
@@ -33,7 +34,7 @@ export default function VideoReviews({ brand, model, year }: Props): ReactNode {
   const isSharedVideos = searchParams.get('section') === 'videos'
   const [open, setOpen] = useState(() => isSharedVideos)
   const sectionRef = useRef<HTMLDivElement>(null)
-  const catalog = useQuery({ ...reviewsQuery(brand ?? '', model ?? '', year), enabled: !!brand && open })
+  const catalog = useQuery({ ...reviewsQuery(brand ?? '', model ?? '', year), enabled: !!brand })
   const social = useQuery({ ...socialQuery(brand ?? ''), enabled: !!brand && open })
   const isSearched = catalog.data?.videos.some(v => v.source === 'youtube') ?? false
   const modelVideos = preferLanguage(catalog.data?.videos ?? [], i18n.language).map((v): StripVideo => ({
@@ -57,7 +58,11 @@ export default function VideoReviews({ brand, model, year }: Props): ReactNode {
     <div ref={sectionRef} className="mt-3 border-t border-[var(--color-border)] pt-3">
       <SectionHeader
         icon="🎬"
-        title={t('videos.title')}
+        title={
+          <>
+            {t('videos.title')} <SectionCount count={modelVideos.length} />
+          </>
+        }
         info={<SectionInfo section="videos" title={t('videos.title')} />}
         actions={<ShareButton section="videos" label={t('share.button', { section: t('videos.title') })} />}
         open={open}

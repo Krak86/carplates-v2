@@ -17,6 +17,7 @@ import {
   hazardKey,
   RECALLS_PREVIEW
 } from '@/components/RdwRecalls.helpers'
+import SectionCount from '@/components/SectionCount'
 import SectionHeader from '@/components/SectionHeader'
 import ShareButton from '@/components/ShareButton'
 import VinToggleSection from '@/components/vin/VinToggleSection'
@@ -97,8 +98,7 @@ export default function RdwRecalls({ brand, model, year, kind }: Props): ReactNo
         icon="📣"
         title={
           <>
-            {t('recalls.title')}{' '}
-            {recallTotal > 0 && <span className="text-sm font-normal text-[var(--color-muted)]">({recallTotal})</span>}
+            {t('recalls.title')} <SectionCount count={recallTotal} />
           </>
         }
         info={

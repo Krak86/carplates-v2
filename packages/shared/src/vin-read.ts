@@ -221,6 +221,7 @@ export function extractVins(lines: OcrLine[]): VinRead[] {
   const ranked = [...found.values()].sort(
     (a, b) =>
       a.source - b.source ||
+      Number(hasKnownWmi(b.vin)) - Number(hasKnownWmi(a.vin)) ||
       Number(b.checkDigitOk) - Number(a.checkDigitOk) ||
       Number(!!b.corrected) - Number(!!a.corrected) ||
       b.score - a.score

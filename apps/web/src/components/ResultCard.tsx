@@ -35,6 +35,7 @@ import InfoText from '@/components/InfoText'
 import PlateSegments from '@/components/PlateSegments'
 import UaPlateBadge from '@/components/UaPlateBadge'
 import SectionHeader from '@/components/SectionHeader'
+import SectionCount from '@/components/SectionCount'
 import SectionInfo from '@/components/SectionInfo'
 import ShareButton from '@/components/ShareButton'
 import TopStatBadges from '@/components/TopStatBadges'
@@ -46,6 +47,7 @@ import Model3dButton from '@/components/Model3dButton'
 import Model360Button from '@/components/Model360Button'
 import VerificationLinks from '@/components/VerificationLinks'
 import VinDecodeTabs from '@/components/vin/VinDecodeTabs'
+import { groupFields } from '@/components/vin/helpers'
 import VinToggleSection from '@/components/vin/VinToggleSection'
 import { useCardMotion } from '@/hooks/useCardMotion'
 import { cn } from '@/lib/cn'
@@ -143,6 +145,30 @@ export default function ResultCard({ data }: Props): ReactNode {
   const engineValue = hasCapacity
     ? `${c.capacity} ${t('field.unitCc')} (~${(c.capacity! / 1000).toFixed(1)} ${t('field.unitL')})`
     : c.powerKwt
+
+  // Rows the Basic section actually renders (empty ones are skipped; owner type and owners count always show).
+  const basicCount =
+    [
+      c.body,
+      engineValue,
+      c.color,
+      c.fuel,
+      c.ownWeight,
+      c.kind,
+      c.purpose,
+      hasCapacity && c.powerKwt,
+      c.dReg,
+      c.dep,
+      c.regAddrKoatuu,
+      c.vin
+    ].filter(Boolean).length + 2
+  const vinFieldCount = vinDetail.data
+    ? groupFields(vinDetail.data.results).reduce((sum, g) => sum + g.rows.length, 0)
+    : undefined
+  const plateActions = plateHistory.data?.actions.length
+  const vinActions = vinDetail.data?.registry?.actions.length
+  const historyCount =
+    plateActions != null && vinActions != null ? `${plateActions}/${vinActions}` : (plateActions ?? vinActions)
 
   useEffect(() => {
     if (isSharedHistory && historyRef.current) scrollElementIntoView(historyRef.current)
@@ -286,7 +312,11 @@ export default function ResultCard({ data }: Props): ReactNode {
         <div ref={basicRef} className="mt-3 border-t border-[var(--color-border)] pt-3">
           <SectionHeader
             icon="📋"
-            title={t('result.basicLabel')}
+            title={
+              <>
+                {t('result.basicLabel')} <SectionCount count={basicCount} />
+              </>
+            }
             actions={<ShareButton section="basic" label={t('share.button', { section: t('result.basicLabel') })} />}
             open={showBasic}
             onToggle={() => setShowBasic(v => !v)}
@@ -448,7 +478,11 @@ export default function ResultCard({ data }: Props): ReactNode {
             onOpenChange={setShowVin}
             showLabel={t('vin.show')}
             hideLabel={t('vin.hide')}
-            title={t('vin.title')}
+            title={
+              <>
+                {t('vin.title')} <SectionCount count={vinFieldCount} />
+              </>
+            }
             info={<SectionInfo section="vin" title={t('vin.title')} />}
             actions={<ShareButton section="vin" label={t('share.button', { section: t('vin.title') })} />}
           >
@@ -465,7 +499,11 @@ export default function ResultCard({ data }: Props): ReactNode {
           onOpenChange={setShowMore}
           showLabel={t('result.historyShow')}
           hideLabel={t('result.historyHide')}
-          title={t('result.historyLabel')}
+          title={
+            <>
+              {t('result.historyLabel')} <SectionCount count={historyCount} />
+            </>
+          }
           info={<SectionInfo section="history" title={t('result.historyLabel')} />}
           actions={<ShareButton section="history" label={t('share.button', { section: t('result.historyLabel') })} />}
         >
