@@ -5,6 +5,8 @@
  * and the title matching use the alias.
  */
 
+import { ZAZ_FAMILY_SEARCH, zazFactoryFamily } from './modelFamily.js'
+
 export type WikiSearchName = {
   /** Commons file-title search brand, e.g. `VAZ`. */
   brand: string
@@ -42,14 +44,9 @@ function vazAlias(model: string): WikiSearchName | null {
 
 function zazAlias(model: string): WikiSearchName | null {
   const m = model.toLowerCase()
-  if (/^(sens )?t1311/.test(m)) return named('ZAZ', 'Sens', 'ЗАЗ Сенс')
-  if (/^lanos\s\S/.test(m)) return named('Daewoo', 'Lanos')
-  if (m === 'nubira') return named('Daewoo', 'Nubira')
-  if (/^1102/.test(m)) return named('ZAZ', 'Tavria', 'ЗАЗ-1102 Таврія')
-  if (/^1103/.test(m)) return named('ZAZ', 'Slavuta', 'ЗАЗ-1103 Славута')
-  if (/^1105/.test(m)) return named('ZAZ', 'Dana', 'ЗАЗ-1105 Дана')
-  if (/^tf69/.test(m)) return named('ZAZ', 'Chance', 'ЗАЗ Шанс')
-  return null
+  // A bare `lanos` stays searchable as is; only "lanos <trim>" is renamed. Families without a search name map to null.
+  const family = /^lanos\s\S/.test(m) ? 'Lanos' : m === 'nubira' ? 'Nubira' : zazFactoryFamily(m, true)
+  return (family && ZAZ_FAMILY_SEARCH[family]) || null
 }
 
 const MERCEDES_CLASS = /^([abces])\s?\d{2,3}[a-z]{0,3}(?:\s|$)/
@@ -76,7 +73,7 @@ function brandAlias(brand: string, model: string): WikiSearchName | null {
   if (brand === 'geely') {
     if (/^mr-?7151/.test(model.replace(/\s/g, '-'))) return named('Geely', 'MK')
     if (model === 'mk cross') return named('Geely', 'MK Cross')
-    if (/^(mk )?jl7152/.test(model)) return named('Geely', 'MK')
+    if (/^(mk )?jl71[56]2/.test(model)) return named('Geely', 'MK')
     if (/^ck-?2/.test(model)) return named('Geely', 'CK')
     if (/^fe-?1/.test(model) || /^lc-?1/.test(model)) return named('Geely', 'LC')
     if (/^(fc )?mr-?7180/.test(model)) return named('Geely', 'FC')
@@ -114,6 +111,10 @@ function brandAlias(brand: string, model: string): WikiSearchName | null {
   if (brand === 'hyundai' && model === 'h200') return named('Hyundai', 'H-1')
   if (brand === 'mazda' && /^\d$/.test(model)) return named('Mazda', `Mazda${model}`)
   if (brand === 'citroen' && /^c \d$/.test(model)) return named('Citroen', model.replace(' ', ''))
+  // "c1sx" is a typo for the C1 (the registry has no SX trim).
+  if (brand === 'citroen' && model === 'c1sx') return named('Citroen', 'C1')
+  if (brand === 'chrysler' && /^gr\.? ?voyager/.test(model)) return named('Chrysler', 'Grand Voyager')
+  if (brand === 'skoda' && model.startsWith('octavia a8')) return named('Skoda', 'Octavia')
   if (brand === 'volvo' && /^v\d{2}cc$/.test(model)) return named('Volvo', model.slice(0, 3))
   if (brand === 'peugeot' && model === 'e2008') return named('Peugeot', '2008')
   if (brand === 'renault' && model === 'clio simbol') return named('Renault', 'Symbol')
@@ -130,9 +131,9 @@ function brandAlias(brand: string, model: string): WikiSearchName | null {
   }
   if (brand === 'volkswagen' && /^lt\s?\d{2}$/.test(model)) return named('Volkswagen', 'LT')
   if (brand === 'daewoo' || brand === 'fso') {
-    if (/^(sens )?t1311/.test(model)) return named('ZAZ', 'Sens', 'ЗАЗ Сенс')
-    if (model.includes('nubira')) return named('Daewoo', 'Nubira')
-    if (model.includes('lanos')) return named('Daewoo', 'Lanos')
+    if (zazFactoryFamily(model, true) === 'Sens') return ZAZ_FAMILY_SEARCH.Sens ?? null
+    if (model.includes('nubira')) return ZAZ_FAMILY_SEARCH.Nubira ?? null
+    if (model.includes('lanos')) return ZAZ_FAMILY_SEARCH.Lanos ?? null
   }
   if (brand === 'lexus') {
     const lexus = /^(rx|es|is|gs|nx|ls|lx|gx|ux)\s?\d{3}/.exec(model)?.[1]

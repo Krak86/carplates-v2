@@ -698,7 +698,7 @@ little to a result card (same finding as Eurostat), so value comes from **model-
 - **Priority:** stage J is optional; its realistic yield is KBA + DataVic (clean licences, popularity / survival lines) and MLIT recalls (if the PDL note
   is fine). Everything else depends on the terms checklist above. **Estimate:** 0.5 session for the terms checklist; 1 session per source after.
 
-**Stage M — model alias unification (prerequisite for stage F and J; owner chose "asap, new session", 2026-10-10; not started until "go stage M").**
+**Stage M — model alias unification (prerequisite for stage F and J; owner chose "asap, new session", 2026-10-10; M1–M3 built 2026-10-10 (write-up: `docs/plan-done.md` "Model alias unification"); M4 not started until "go M4").**
 Why: three alias layers exist today — `vdbMatch.ts` (`MODEL_ALIASES`, `CROSS_MAKE_ALIASES`, `makeKey`/`modelKey`; VehiclesDB, RDW specs, recalls),
 `wikiAliases.ts` (`wikiSearchName`; photo search only, used by `wiki.service.ts` and `scripts/src/wiki-images.ts`) and `modelFamily.ts` (ZAZ / Daewoo /
 Chevrolet Lanos families; used by nothing but `export:model-families:csv`). A rule added to one does not reach the others (verified gaps in the

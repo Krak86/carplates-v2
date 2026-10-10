@@ -31,6 +31,40 @@ const DAEWOO_MODELS = [
   'Damas'
 ] as const
 
+/**
+ * The ZAZ family a factory code names, in model text that is already lower-cased: `t1311x` / `t13010` → Sens, `tf69…` →
+ * Chance, `1102…` → Tavria, `1103…` → Slavuta, `1105…` → Dana, `968…` → 968. By default a code counts at the start of the
+ * text or after a space (`sens t1311`); `leading` accepts it only at the start, after an optional "sens " (the photo search,
+ * where a trailing code such as "lanos t13110" is still a Lanos). Null for anything else; explicit names are the caller's job.
+ */
+export function zazFactoryFamily(text: string, leading = false): string | null {
+  const at = leading ? '^(?:sens )?' : '(?:^|\\s)'
+  if (new RegExp(`${at}t1311|${at}t13010`).test(text)) return 'Sens'
+  if (new RegExp(`${at}tf69`).test(text)) return 'Chance'
+  const code = (leading ? /^(\d{4})/ : /(?:^|\s)(\d{4,6})(?:\D|$)/).exec(text)?.[1]
+  if (code) {
+    if (code.startsWith('1102')) return 'Tavria'
+    if (code.startsWith('1103')) return 'Slavuta'
+    if (code.startsWith('1105')) return 'Dana'
+  }
+  if (!leading && /(^|\s)968/.test(text)) return '968'
+  return null
+}
+
+/**
+ * Photo-search names (Commons title search + Wikipedia lead query) for the families Commons / Wikipedia know under another
+ * name than the registry does. `wikiSearchName` reads this table; keys are `ModelFamily.family`.
+ */
+export const ZAZ_FAMILY_SEARCH: Readonly<Record<string, { brand: string; model: string; leadQuery: string }>> = {
+  Sens: { brand: 'ZAZ', model: 'Sens', leadQuery: 'ЗАЗ Сенс' },
+  Lanos: { brand: 'Daewoo', model: 'Lanos', leadQuery: 'Daewoo Lanos' },
+  Nubira: { brand: 'Daewoo', model: 'Nubira', leadQuery: 'Daewoo Nubira' },
+  Tavria: { brand: 'ZAZ', model: 'Tavria', leadQuery: 'ЗАЗ-1102 Таврія' },
+  Slavuta: { brand: 'ZAZ', model: 'Slavuta', leadQuery: 'ЗАЗ-1103 Славута' },
+  Dana: { brand: 'ZAZ', model: 'Dana', leadQuery: 'ЗАЗ-1105 Дана' },
+  Chance: { brand: 'ZAZ', model: 'Chance', leadQuery: 'ЗАЗ Шанс' }
+}
+
 const zaz = (family: string): ModelFamily => ({ brand: 'ZAZ', family })
 
 /**
@@ -52,16 +86,10 @@ export function modelFamily(registryBrand: string, registryModel: string): Model
 
   const model = registryModel.toLowerCase().trim()
   const modelOrBrandCode = `${registryBrand.slice(brand.length)} ${model}`.trim().toLowerCase()
-  if (/(^|\s)t1311\d?|(^|\s)t13010/.test(modelOrBrandCode)) return zaz('Sens')
-  if (/(^|\s)tf69/.test(modelOrBrandCode) || text.includes('chance') || text.includes('шанс')) return zaz('Chance')
-
-  const code = /(?:^|\s)(\d{4,6})(?:\D|$)/.exec(modelOrBrandCode)?.[1]
-  if (code) {
-    if (code.startsWith('1102')) return zaz('Tavria')
-    if (code.startsWith('1103')) return zaz('Slavuta')
-    if (code.startsWith('1105')) return zaz('Dana')
-  }
-  if (/(^|\s)968/.test(modelOrBrandCode)) return zaz('968')
+  const byCode = zazFactoryFamily(modelOrBrandCode)
+  if (byCode === 'Sens') return zaz(byCode)
+  if (byCode === 'Chance' || text.includes('chance') || text.includes('шанс')) return zaz('Chance')
+  if (byCode) return zaz(byCode)
 
   for (const name of DAEWOO_MODELS) {
     if (text.includes(name.toLowerCase())) return { brand: 'Daewoo', family: name }

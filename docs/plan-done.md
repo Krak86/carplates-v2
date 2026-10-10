@@ -3072,3 +3072,29 @@ and brand logos"); this entry records what shipped and why.
 - **Advanced-search tooltip** (`SearchField`): bold title `search.advancedToggle` ("Advanced search") + a muted second line `search.advancedHint`, `max-w` 13rem so it wraps instead of covering the "Advanced search" link; the button's `aria-label` is the short title only.
 - **Estimated value:** the "Charts and explanation" folder content has `p-3` on all sides (wrapper in `EstimatedValuePanel`, not in `EstimatedValueDetails`, which the chip popover also renders and which is already padded).
 - **`SegmentExplainer`** (plate and VIN segment chips + hint): root has `mt-3` above the chips.
+
+### Model alias unification (stage M1–M3 of DATASETS_PLAN.md) ✅ BUILT (2026-10-10, uncommitted when written)
+
+- **M1 — one source.** `modelFamily.ts` now holds the ZAZ / Daewoo / Lanos / Sens knowledge: `modelFamily`, `zazFactoryFamily(text, leading?)` and
+  the `ZAZ_FAMILY_SEARCH` photo-name table. `wikiAliases.ts` reads the table and the code rules instead of its own copies. Checked against a snapshot of
+  `wikiSearchName` / `modelFamily` / `vdbCandidateKeys` over all 74,988 distinct registry brand/model pairs before the change: the only difference
+  was the intended `T13010` → Sens photo rule (4 pairs). Existing tests unchanged; new `aliasUnification.test.ts` pins the four Lanos spellings and both Sens codes.
+- **M2 — the matcher.** `vdbCandidateKeys` appends the family name and the make-glued name (`lanos`, `daewoolanos`) as `alias` candidates, and
+  `vdbRelatedMakeKeys` adds the `daewoo` / `zaz` catalog makes for family rows only. Own make and all earlier keys still win; a miss still hides the section.
+
+  |                                             | before               | after               |
+  | ------------------------------------------- | -------------------- | ------------------- |
+  | `stats_vdb` cars matched                    | 12,397,984 (92.7 %)  | 12,406,985 (92.8 %) |
+  | motorcycles / trucks / buses                | 46.7 / 66.5 / 37.5 % | unchanged           |
+  | RDW-matched passenger cars (`stats_weight`) | 9,615,654            | 9,982,106           |
+
+  Explained per group with the HEAD matcher against the new one: stats_vdb +9,001 cars = Sens 4,839 (`daewoo|sens`, `zaz|sens`), Lanos 2,829, Nubira 1,286,
+  Leganza 47 (previously no match); RDW ≈ +333k newly matched = Lanos 327,577 (RDW files it as `daewoolanos`, so the plain key never hit), Leganza 2,613,
+  Nexia 1,491, Nubira 1,286; a further 39k Nexia cars move from a trim row (`nexia15igl3d`) to the generic `daewoonexia`. The `stats_weight` delta (+366,452)
+  is ~33k above that sum; not attributed (the rollup runs the RDW matcher twice, over a different candidate set and only for weight-valid groups of ≥ 200 cars, so it is not
+  comparable one-to-one). Prefix → alias flips only drop the "loose match" caveat.
+
+- **M3 — photo rules.** Geely `jl7162` (and `jl7152`) → MK, Chrysler `gr.voyager` → Grand Voyager, Citroen `c1sx` → C1, Skoda `octavia a8` → Octavia, ZAZ
+  `t13010` → Sens (from M1). 21 stale `-alias` cache files deleted (`search`, `lead`, `lead-uk`), `ingest:wiki-images -- --aliased` re-run, `wiki-images.csv.gz` re-exported
+  (112,846 rows). **`pnpm wiki-images:coverage`: 99.3 % of cars have a photo (13,272,102 of 13,371,190; was 99.1 %), 88.2 % of groups (was 88.0 %).**
+- **Not done:** M4 (group `stats_by_model` by family), waits for the owner.

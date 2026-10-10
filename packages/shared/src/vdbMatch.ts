@@ -1,3 +1,4 @@
+import { modelFamily } from './modelFamily.js'
 import { brandCandidateKey, modelKey } from './vehicleKey.js'
 
 /** The catalog fields matching needs — structurally satisfied by `registry.vdb_models` rows. */
@@ -111,11 +112,28 @@ const CROSS_MAKE_ALIASES: Readonly<Record<string, readonly (readonly [RegExp, st
   renault: [[/^(dokker|logan|sandero|duster)/, 'dacia']]
 }
 
+/** Catalog makes that file the ZAZ / Daewoo / Chevrolet Lanos lines (ZAZ Lanos, Daewoo Sens, Chevrolet Lanos …). */
+const ZAZ_DAEWOO_CATALOG_MAKES = ['daewoo', 'zaz'] as const
+
+/**
+ * Model keys of the ZAZ / Daewoo family (`modelFamily`) a registry row belongs to: the family name ("lanos") and the name
+ * with its canonical make glued on ("daewoolanos", how RDW spells it). Empty for every other row. Lets "ЗАЗ LANOS",
+ * "CHEVROLET LANOS" and "ЗАЗ-DAEWOO T13110" reach the catalog row their sibling spelling already reaches.
+ */
+function zazDaewooFamilyKeys(mk: string, model: string): string[] {
+  const found = modelFamily(mk, model)
+  const name = modelKey(found?.family)
+  if (!found || !name) return []
+  return [name, `${found.brand === 'ZAZ' ? 'zaz' : 'daewoo'}${name}`]
+}
+
 /** Make keys whose catalog rows can hold this registry model: its own make first, then any curated cross-make home. */
 export function vdbRelatedMakeKeys(mk: string, model: string): string[] {
-  const key = modelKey(collapseDoubledModel(model).replace(/^new\s+(?=\S)/i, '')) ?? ''
+  const collapsed = collapseDoubledModel(model).replace(/^new\s+(?=\S)/i, '')
+  const key = modelKey(collapsed) ?? ''
   const extra = (CROSS_MAKE_ALIASES[mk] ?? []).filter(([pattern]) => pattern.test(key)).map(([, make]) => make)
-  return [mk, ...extra]
+  const family = zazDaewooFamilyKeys(mk, collapsed).length > 0 ? ZAZ_DAEWOO_CATALOG_MAKES : []
+  return [...new Set([mk, ...extra, ...family])]
 }
 
 /** Lexus "RX 350" → "rx": the nameplate in front of a space-separated engine figure ("MX-5" is not "MX"). */
@@ -139,6 +157,9 @@ export function vdbCandidateKeys(mk: string, model: string): { key: string; how:
   if (series && series !== key) out.push({ key: series, how: 'series' })
   const letters = SPACED_NAMEPLATE_RE.exec(collapsed)?.[1]?.toLowerCase()
   if (letters && letters !== key && letters !== series) out.push({ key: letters, how: 'prefix' })
+  for (const familyKey of zazDaewooFamilyKeys(mk, collapsed)) {
+    if (!out.some(c => c.key === familyKey)) out.push({ key: familyKey, how: 'alias' })
+  }
   return out
 }
 
