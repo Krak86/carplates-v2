@@ -352,7 +352,7 @@ at the end of a stage give a commit message and stop. Order = value / risk, clea
 | **D. RDW recalls** — **done 2026-10-09** (see "Stage D — done" below)                                                          | Recall campaigns + status (upsert); "Recalls" block, labelled "EU (NL)", model-level wording; monthly refresh                                                                                                                                                                                                                                    | medium       | C (matcher)                       |
 | **E. Open EV Data** — **done 2026-10-09** (see "Stage E — done" below)                                                         | One JSON -> small table; "Electric" block on a match for a car the register calls electric; MIT notice on About; **yearly at most (upstream data frozen at 2020)**                                                                                                                                                                               | small        | C                                 |
 | **F. NHTSA recalls + complaints** — **done 2026-10-10** (see "Stage F — done" below)                                           | Live API behind a cache (7 d / 30 d), next to `api/safety`; market label "US" + "may not apply to your build" copy                                                                                                                                                                                                                               | medium       | D (shared Recalls block)          |
-| **G. UK MOT** — **planned 2026-10-10, strategy agreed, not started** (see "Stage G" below)                                     | 2021–2023 pooled, cars + vans + motorcycles; aggregate per make/model/model-year/mileage band; own lazy "Common faults" section with mileage charts (fails + "worn, watch for it" advisories), worded as UK inspection stats; OGL statement on About; yearly                                                                                      | large        | C                                 |
+| **G. UK MOT** — **planned 2026-10-10, strategy agreed, not started** (see "Stage G" below)                                     | 2021–2023 pooled, cars + vans + motorcycles; aggregate per make/model/model-year/mileage band; own lazy "Common faults" section with mileage charts (fails + "worn, watch for it" advisories), worded as UK inspection stats; OGL statement on About; yearly                                                                                     | large        | C                                 |
 | **H. Transport Canada recalls**                                                                                                | Quarterly CSV into the Recalls block, market "CA". Lowest value (mostly overlaps NHTSA/RDW) — build last or drop                                                                                                                                                                                                                                 | small        | D                                 |
 | **Z. autoevolution specs**                                                                                                     | Only if they grant written permission and a data channel; then overlap check + "Specs" section (would sit beside or replace the RDW specs for models RDW lacks)                                                                                                                                                                                  | —            | their reply                       |
 | **I. Car generations (Wikipedia + Wikidata)** — proposal 2026-10-09, last stage, not started                                   | Generation per (brand, model, year): code, label, production years, body styles, platform; "Generation XV40 (2006–2011)" line on the card (details under "Stage I" below)                                                                                                                                                                        | medium-large | — (reuses the C pipeline pattern) |
@@ -620,7 +620,7 @@ queries `nhtsaRecallsQuery` / `nhtsaComplaintsQuery` (key head `safety`, so they
 - **Coverage is thin by nature:** only US-market models. Spot checks 2026-10-10: Mazda "6" 2015 → 3 recalls / 60 complaints (via "Mazda6"), Toyota Camry 2015 → 1 recall / 271 complaints, ZAZ Lanos → nothing (section hidden).
   **Not browser-checked** (verified by types, lint, 884 unit tests and the live `/api/nhtsa/*` output only). Not done: Transport Canada (stage H); a persistent cache (add a table only if NHTSA proves unreliable — flat-file bulk load is the fallback in the cadence table).
 
-**Stage G — planned (2026-10-10; strategy agreed with the owner, nothing built, no migration/script yet).** UK DVSA anonymised MOT results → new lazy
+**Stage G — built (2026-10-10; 2021–2023 loaded; migration 0058, `ingest:mot`, `GET /api/mot`, lazy section `faults`; write-up `docs/plan-done.md` "UK MOT Common faults").** UK DVSA anonymised MOT results → new lazy
 **"Common faults"** result-card section with mileage charts. Source: `data.gov.uk/dataset/anonymised_mot_test`, **OGL v3 (attribution statement on About required)**.
 
 **Source facts (verified 2026-10-10 on the real 2023 files, owner downloaded to `C:\Users\rkor\Downloads\UK_MOT\`):**
@@ -641,6 +641,76 @@ queries `nhtsaRecallsQuery` / `nhtsaComplaintsQuery` (key head `safety`, so they
   (Honda, Yamaha, Suzuki, Kawasaki, BMW, Harley-Davidson, KTM, Ducati…). The other 59 % are Chinese/UA-market brands MOT lacks (Musstang, Spark, Viper, Forte, Geon, Lifan, Bajaj, Shineray, Kovi, Loncin, Jawa, ИЖ, КМЗ).
   Model-level overlap is lower. Cars/vans overlap is not measured yet — **measure it first** (read-only SQL against the aggregate vs `registrations`) and write the number here.
 
+**Step 1 results (profiled 2026-10-10 on 2021 + 2022 + 2023, `scripts/src/mot-profile*.ts` throwaway — deleted after the build):**
+
+- **Years available locally: 2021, 2022, 2023** (no 2019/2020). **File quirks found:** the DVSA ZIPs use **Deflate64** (Node's zlib and the `unzipper` package fail with `Z_DATA_ERROR`) → `mot-zip.ts` streams
+  through `unzip -p` (Git for Windows) with bsdtar `tar.exe` as fallback; the **2021 ZIPs hold 12 part CSVs, each with its own header, comma-delimited with every text field quoted** (2022/23 are single pipe-delimited files);
+  the 2021 item ZIP is 2.1 GB unzipped / 82.4M rows, 2021 results 40.4M rows (`mot-zip.ts` handles all three layouts). `rfr_id` → top-level group is **class-independent** (5,768 ids in 2+ classes, 0 differ), so items need no class join.
+- **Rows (all test types / NT completed = P + PRS + F, cars+vans+motorcycles):** 2021 40.4M / 33.1M, 2022 41.6M / 34.3M, 2023 42.2M / 34.8M. **Fail rate (F ÷ NT completed):** cars 23.2 / 22.5 / 22.8 %, vans 30.9 / 29.8 / 29.4 %,
+  motorcycles 9.2 / 9.0 / 8.7 % (2021 / 2022 / 2023). No mileage on 0.25 % of tests. Item rows: 82.4M / 86.4M / 89.3M. 2,515 distinct `rfr_id`s over the three years, all present in the lookup;
+  lookup categories (Dangerous / Major / Minor) cover the post-2018 ids and "Pre-EU Directive" the old ones (the old tree still shows up in ~9.8M of 230M fail+advisory rows → treated as Major-equivalent, not dangerous).
+- **Km-vs-miles check (the user-guide warning):** median car mileage per vehicle age (miles) — age 5: 38,750 (2021) / 37,750 (2022) / 36,750 (2023); age 8: 62,750 / 61,750 / 61,250; age 12: 86,750 / 88,250 / 89,750; age 16: 103,250 / 103,250 / 104,750.
+  Quartiles and p90 agree within 1–4 % at ages 3–20 and the overall km quantiles q05–q99 differ by ≤ 2 thousand km between the years; 2021 is, if anything, slightly _above_ 2023 at young ages (a few per cent), which a km-in-miles mix-up would exaggerate, not produce evenly.
+  **Verdict: 2021 is NOT visibly inflated → kept (2021–2023 pooled).** Only age 2 (n ≈ 150k) shows a fatter tail (p90 72k vs 58k miles), so the ingest still drops a test whose mileage is above 40,000 miles × max(age, 1) as implausible.
+- **Overall car mileage quantiles (km, k):** q05 25 · q10 34 · q20 51 · q30 67 · q40 83 · q50 101 · q60 120 · q70 144 · q80 171 · q90 214 · q95 252 · q99 340. Vans: median 165k, q05 44k, q95 383k. Motorcycles: median 23k, q10 4k, q90 65k.
+  **Band edges (km, decided):** cars + vans **0–25k, 25–50k, 50–75k, 75–100k, 100–150k, 150–200k, 200–250k, 250k+** (≈ 5/15/16/14/21/15/8/6 % of car tests); motorcycles (they ride far less) **0–5k, 5–10k, 10–20k, 20–35k, 35–50k, 50k+**.
+  Edges live in one shared constant per kind (band = index, edges are never stored).
+- **Sample cutoff (decided):** a make/model key (after `makeKey`/`modelKey`, kinds kept apart) needs **≥ 200 normal tests pooled over the three years** to be stored: cars 2,900 of 45,977 keys (**99.5 %** of car tests), vans 173 of 2,911 (98.9 %),
+  motorcycles 1,851 of 25,740 (88.1 %). The band-level rule stays "< 200 tests in the window → drawn as 'not enough data'".
+- **Overlap with the registry (current fleet, `current_registration`, read-only; matcher = `matchVdbModelAcrossMakes` over the MOT keys):**
+
+  | registry kind (→ MOT kinds tried) | vehicles | brand present | model matched, cutoff 200 | cutoff 50 | cutoff 1000 |
+  | --------------------------------- | -------: | ------------: | ------------------------: | --------: | ----------: |
+  | ЛЕГКОВИЙ cars (car, van)          |  13.37 M |        83.6 % |                **76.0 %** |    79.3 % |      71.7 % |
+  | ВАНТАЖНИЙ (van, car)              |   1.66 M |        62.2 % |                    36.3 % |    38.6 % |      35.4 % |
+  | motorcycles + mopeds (motorcycle) |   0.66 M |        38.8 % |                    17.7 % |    21.4 % |      11.9 % |
+
+  **Cars: three of four registry cars get a section.** Misses are (a) **Opel ≠ Vauxhall** — the UK sells Opel's cars as Vauxhall (Vectra 88k, Vivaro 72k, Movano, Omega, Astra…): a MOT-side make alias `opel → vauxhall` is worth ~+1 pp of cars and most vans;
+  (b) Soviet/Ukrainian models (ВАЗ, ЗАЗ, ГАЗ, Daewoo Nexia) and US-market names (Nissan Rogue = X-Trail) that the UK never tests. Trucks are mostly heavy trucks (MAN, DAF, Volvo FH, КамАЗ) outside classes 4/7, so the 36 % is not a loss;
+  motorcycles are mostly Chinese/Honda-Dio-class mopeds. The motorcycle number is much lower than the earlier "41 % brand" estimate because model keys, not brands, must match.
+
+- **Reasons:** 2,515 `rfr_id`s merge to **2,022 reason codes** (`group/item/fault wording`); **top 50 codes cover 84 %**, top 80 90.6 %, top 150 95.5 % of fail+advisory item rows. Top groups by item rows: tyres (8.3M F / 49.3M A), brakes (12.1M / 45.0M),
+  suspension (13.8M / 35.5M), lamps (13.2M / 3.7M), body (4.6M / 6.6M), exhaust/emissions (3.7M / 7.3M), steering, visibility (4.3M fails, almost no advisories), identification/plates (0.4M / 3.3M), seat belts, wheels.
+  The "other" group is mostly _non-component advisories_ (child seat in the way, nail in tyre, steering-rack play…).
+- **Stored shape (changed from the first idea to keep the table small):** per-cell group counters would make ~470k cells × ~300 B. Instead: `mot_stats` = the chart-1 cells (key × model year × band: tests, fails, advisories — three integers),
+  `mot_issues` = per (key × band) pooled over model years: tests + dangerous fails + per-group `[fails, advisories]` + top-10 reasons `[fails, advisories]` as jsonb, `mot_baseline` = the same per (kind × band) for every model together,
+  `mot_reasons` = the reason dictionary (group, item, DVSA fail wording, advisory wording).
+
+**Size report (measured 2026-10-10 after the real 2021–2023 ingest; the 2021 + 2022 + 2023 ZIPs on disk = 1.88 + 1.60 + 1.65 GB):**
+
+| table                                                                             |        rows |                           `pg_total_relation_size` |
+| --------------------------------------------------------------------------------- | ----------: | -------------------------------------------------: |
+| `mot_keys` (stored make/models: 2,709 cars, 168 vans, 1,545 motorcycles)          |       4,422 |                                             728 kB |
+| `mot_stats` (key × model year × band)                                             |     217,528 |                                              29 MB |
+| `mot_issues` (key × band; groups + top-10 reasons as jsonb, 19.3 MB of JSON text) |      28,528 |                                              34 MB |
+| `mot_baseline`                                                                    |          22 |                                              64 kB |
+| `mot_reasons`                                                                     |         265 |                                             128 kB |
+| **total**                                                                         | **250,766** | **≈ 64 MB** (the registry holds ~14 GB, so +0.5 %) |
+
+Seed `scripts/seed-data/mot.csv.gz` (one wide CSV, `part` column): **3.22 MB** gzipped. Sanity: 95.7M car tests pooled, overall car fail rate 22.8 % (profile: 22.5–23.2 % by year), fail rate by band 5.4 % (0–25k km) → 35.8 % (250k+), advisory share 18.5 % → 66.8 %, dangerous 1.3 % → 12.2 %.
+Ingest cost (this machine, ZIPs on local disk): census 3 × ~100 s (cached afterwards in `scripts/.data/mot/`) + 3 × ~2.5 min result/item passes ≈ **12 min** and ~**1.6 GB RAM** (2021, with the exact per-test bookkeeping its scattered item rows need: ~2.5 GB).
+Dropped by the filters: 259k tests without mileage and 197k with an implausible odometer (> 40,000 miles × age) out of ~104M normal tests.
+
+**Forecast — loading every upstream year 2005–2023 (extrapolated; only 2021–2023 were downloaded, nothing older was measured):**
+
+| item              | 2019–2020 (new layout, 2 more years)                                                                                                                                                             | 2005–2018 (old layout, 14 years) | all 19 years                                                       |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------- | ------------------------------------------------------------------ |
+| extra download    | ~3.5 GB (≈ 1.7 GB / year, as 2021–23)                                                                                                                                                            | ~22–27 GB (1.6–1.9 GB / year)    | **≈ 31 GB** of ZIPs (today 5.1 GB)                                 |
+| extra ingest time | ~8 min (≈ 4 min / year)                                                                                                                                                                          | ~55 min                          | **≈ 75 min** (RAM unchanged ~1.6–2.5 GB)                           |
+| extra rows        | key is model year, not test year, so rows grow only with models that left the road before 2021 and with older model years: ~+60–100 % keys (≈ 4.4k → 7–9k with the 200-test cutoff)              |                                  | **stats ≈ 400–450k, issues ≈ 50–60k rows ≈ 450–500k total (≈ 2×)** |
+| table size        |                                                                                                                                                                                                  |                                  | **≈ 110–135 MB** (≈ 2×)                                            |
+| seed size         |                                                                                                                                                                                                  |                                  | **≈ 5.5–7 MB gz** (≈ 2×)                                           |
+| API / UI          | unchanged — same endpoint, more models matched (older Ukrainian-fleet cars are the gain: the UA fleet is old, and models absent in 2021–23 such as Vauxhall Vectra / older Mondeo get a section) |                                  |                                                                    |
+
+What the pre-2018 layout needs (a separate parser path, **not loaded without the owner's decision**):
+
+- **2018 file** straddles the 20 May 2018 directive (old and new defect categories mixed) — skip or split by test date; **2005 – 31 Mar 2006** is incomplete (MOT computerisation was not complete until 1 Apr 2006).
+- **Severity:** no `rfr_deficiency_category` — the lookup rows of the old tree are all "Pre-EU Directive", so "dangerous" can only come from the item file's `dangerous_mark` (tester's discretion, _not comparable_ with the post-2018 Dangerous category) → show pre-2018 as fail/advisory only, or keep two dangerous series.
+- **Item ids / groups:** old `rfr_id`s and the old item tree (top groups like "Tyres and Road Wheels", "Lamps, Reflectors and Electrical Equipment") are in the same `lookup.zip` (12,595 "Pre-EU Directive" rows), so `mot-lookup.ts` already maps them by name rules; reason codes (`group/item/fault`) of renumbered items need a check that the wording matches the new tree, otherwise the same fault appears as two reasons.
+- **Mileage:** the km-in-miles mix-up (user guide: "prior to 2022 … sometimes holds kilometres") applies to every year before 2022 — the per-age median check must be repeated, and the plausibility filter may need to be stricter.
+- **Layout:** every pre-2022 pair so far is multi-part and quoted/comma-delimited (2021 is; older ones unverified): the reader (`mot-zip.ts`) already handles that, the scattered-rows bookkeeping switches on by itself (`MotFiles.scattered`) and needs the extra ~1 GB.
+- `location_id` is wrong before 2022 (not used).
+
 **Decisions (owner, 2026-10-10):**
 
 0. **"New layout" = 2019–2023 (owner 2026-10-10: skip the old layout for now, decide later).** The EU roadworthiness directive started **20 May 2018**, so the **2018 file straddles both regimes — skip it**;
@@ -651,9 +721,9 @@ queries `nhtsaRecallsQuery` / `nhtsaComplaintsQuery` (key head `safety`, so they
 1. **Years: 2021–2023 pooled** (post-2018 schema; 2022 file was corrected Dec 2023). Aggregated per file, streamed (`unzip -p`-style / a streaming unzip in Node), **raw rows never stored**, no extracting 6 GB to disk.
    Re-run yearly when a 2024+ file appears; keep pooling the latest three. Earliest year available upstream: **2005**; all-years option is sized and decided after the first ingest (see "Size report" below).
 2. **Classes: cars (4) + vans (7) + motorcycles (1, 2)**, one table with a `kind` column mapped from the registry kind like stage B (`vdbVehicleClass`). Normal tests (`NT`) only.
-3. **No odometer input from the user.** The chart *is* the interaction: the user reads off their own km. Dimension = **mileage band** (km): 0–25k, 25–50k, 50–75k, 75–100k, 100–150k, 150–200k, 200k+ (finalise after profiling),
+3. **No odometer input from the user.** The chart _is_ the interaction: the user reads off their own km. Dimension = **mileage band** (km): 0–25k, 25–50k, 50–75k, 75–100k, 100–150k, 150–200k, 200k+ (finalise after profiling),
    plus model year. A band with < ~200 tests is not drawn (shown as "not enough data").
-4. **Two signals from one table:** *Fails* (`rfr_type_code` F, plus dangerous flag) = what actually made the car fail the MOT; *Watch for* (advisories, A) = "worn, still legal" — the early stage of the same wear.
+4. **Two signals from one table:** _Fails_ (`rfr_type_code` F, plus dangerous flag) = what actually made the car fail the MOT; _Watch for_ (advisories, A) = "worn, still legal" — the early stage of the same wear.
    Shown as two series (solid = fails, dashed = watch for) on the same charts. Minor (M) and PRS are counted into pass/fail totals but not charted as issues.
 5. **What is stored (aggregates only):** per (kind, make_key, model_key, model_year, band): tests, failed tests, tests with ≥ 1 advisory, and per **top-level group** the failed / advisory test counts;
    per (make, model, group-or-reason) the **top 10 specific reasons** with fail/advisory counts per band. Plus a global per-band baseline (all models of a kind) so the card can say "above/below the UK average".

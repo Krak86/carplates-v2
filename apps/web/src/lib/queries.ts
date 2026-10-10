@@ -24,6 +24,7 @@ import {
   getFx,
   getRdw,
   getOpenEv,
+  getMot,
   getNhtsaComplaints,
   getNhtsaRecalls,
   getRdwRecalls,
@@ -319,6 +320,15 @@ export function openEvQuery(brand: string, model: string) {
   return queryOptions({
     queryKey: ['rdw', 'ev', brand, model],
     queryFn: () => getOpenEv(brand, model),
+    staleTime: Infinity
+  })
+}
+
+// UK MOT fail / advisory rates by mileage for a model (pnpm ingest:mot) — online-only, loaded when the "Common faults" section opens.
+export function motQuery(brand: string, model: string, year: number, kind?: string | null) {
+  return queryOptions({
+    queryKey: ['mot', brand, model, year, kind ?? null],
+    queryFn: () => getMot(brand, model, year, kind),
     staleTime: Infinity
   })
 }

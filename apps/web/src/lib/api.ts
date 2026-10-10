@@ -17,6 +17,7 @@ import {
   fxResponseSchema,
   nhtsaComplaintsResponseSchema,
   nhtsaRecallsResponseSchema,
+  motResponseSchema,
   openEvResponseSchema,
   rdwRecallsResponseSchema,
   rdwResponseSchema,
@@ -70,6 +71,7 @@ import type {
   FxResponse,
   NhtsaComplaintsResponse,
   NhtsaRecallsResponse,
+  MotResponse,
   OpenEvResponse,
   RdwRecallsResponse,
   RdwResponse,
@@ -288,6 +290,12 @@ export async function getNhtsaComplaints(make: string, model: string, year: numb
 export async function getOpenEv(brand: string, model: string): Promise<OpenEvResponse> {
   const params = new URLSearchParams({ brand, model })
   return openEvResponseSchema.parse(await getJson(`/api/ev?${params.toString()}`))
+}
+
+export async function getMot(brand: string, model: string, year: number, kind?: string | null): Promise<MotResponse> {
+  const params = new URLSearchParams({ brand, model, year: String(year) })
+  if (kind) params.set('kind', kind)
+  return motResponseSchema.parse(await getJson(`/api/mot?${params.toString()}`))
 }
 
 export async function getFx(): Promise<FxResponse> {

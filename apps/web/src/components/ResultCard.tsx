@@ -72,6 +72,7 @@ const FuelEconomy = lazy(() => import('@/components/FuelEconomy'))
 const EstimatedValueSection = lazy(() => import('@/components/EstimatedValueSection'))
 const RdwSpecs = lazy(() => import('@/components/RdwSpecs'))
 const RdwRecalls = lazy(() => import('@/components/RdwRecalls'))
+const MotFaults = lazy(() => import('@/components/MotFaults'))
 const OpenEv = lazy(() => import('@/components/OpenEv'))
 const SafetyRatings = lazy(() => import('@/components/SafetyRatings'))
 
@@ -534,6 +535,9 @@ export default function ResultCard({ data }: Props): ReactNode {
         </LazySection>
         <LazySection sections={['recalls']}>
           <RdwRecalls brand={c.brand} model={c.model} year={c.makeYear} kind={c.kind} />
+        </LazySection>
+        <LazySection sections={['faults']}>
+          <MotFaults brand={c.brand} model={c.model} year={c.makeYear} kind={c.kind} />
         </LazySection>
         <LazySection sections={['electric']}>
           <OpenEv brand={c.brand} model={c.model} year={c.makeYear} fuel={c.fuel} />

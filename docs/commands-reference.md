@@ -121,6 +121,12 @@ pnpm export:rdw-recalls:csv   # re-dump both tables to that CSV — run after ev
 pnpm ingest:open-ev   # Open EV Data (MIT) -> registry.open_ev; one ~130 KB JSON, 118 variants (seconds). --dry-run. Block "Electric" via GET /api/ev
 pnpm ingest:open-ev:csv   # load the committed seed (seed-data/open-ev.csv.gz) — part of ingest:ratings:csv
 pnpm export:open-ev:csv   # re-dump the table to that CSV — run after every real re-ingest
+pnpm ingest:mot -- --dir <folder with the DVSA ZIPs>   # UK MOT (DVSA anonymised results, OGL v3) -> registry.mot_*: streams dft_test_result_<Y>.zip + dft_test_item_<Y>.zip (+ lookup.zip) of every year >= 2019 found in the folder
+                  # (default ~/Downloads/UK_MOT; needs Info-ZIP `unzip` on PATH — Git for Windows has it — else Windows tar.exe; the ZIPs are Deflate64). Raw tests are never stored: only counts per make/model/model year/mileage band.
+                  # ~12 min for three years and ~1.6 GB of RAM. Flags: --years 2022,2023, --dry-run (aggregate + print sizes, no DB write), --reuse-aggregate (load scripts/.data/mot/aggregate.json again), --refresh-census.
+                  # Download: https://data.dft.gov.uk/anonymised-mot-test/test_data/dft_test_result_<Y>.zip, …/dft_test_item_<Y>.zip, …/anonymised-mot-test/lookup.zip. Block "Common faults" via GET /api/mot. Replaces all six mot_* tables.
+pnpm ingest:mot:csv   # load the committed seed (seed-data/mot.csv.gz) — seconds, no ZIPs (part of ingest:ratings:csv)
+pnpm export:mot:csv   # re-dump the tables to that CSV — run after every real re-ingest
 pnpm ingest:rdw-recalls:translate   # local-model (NLLB, GPU) translation of recall texts -> rdw_recall_texts; resumable, --max-minutes N / --limit N --offset N / --make --model / --langs / --dump f.md. See DATASETS_PLAN "Stage D follow-up 2"
 pnpm db:refresh-vdb-stats   # rebuild registry.stats_vdb (the /stats "Markets" panel) from the registry + vdb_models
 pnpm db:refresh-derived     # rebuild ALL rollups computed from current_registration: fuel-stats + safety-stats + vdb-stats

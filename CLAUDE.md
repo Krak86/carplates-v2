@@ -32,6 +32,7 @@ pnpm ingest -- --year 2026 --limit 100000   # real data slice;  ingest:full = ev
 pnpm ingest:all     # ingest:full + all CSV seeds, then derived rollups;  ingest:ratings:csv = committed seeds only (seconds)
 ```
 
+UK MOT ("Common faults") is the odd one out: `ingest:mot -- --dir <folder with the DVSA ZIPs>` streams ~6 GB of ZIPs (manual download, `docs/commands-reference.md`); `ingest:mot:csv` loads the committed seed.
 Each source has `ingest:<x>`, `ingest:<x>:csv` (committed seed) and `export:<x>:csv` (re-dump after a real re-ingest); no-CSV sources
 (news, social, winner360) are re-run on demand. Names and flags: `docs/commands-reference.md`.
 

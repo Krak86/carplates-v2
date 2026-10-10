@@ -1191,3 +1191,84 @@ export const statsModelGrouped = registry.table(
   t => [primaryKey({ columns: [t.brand, t.model] })]
 )
 export type StatsModelGroupedInsert = typeof statsModelGrouped.$inferInsert
+
+/** UK MOT (stage G) — see migration 0058. Kinds: car | van | motorcycle. */
+export const motKeys = registry.table(
+  'mot_keys',
+  {
+    kind: text('kind').notNull(),
+    makeKey: text('make_key').notNull(),
+    modelKey: text('model_key').notNull(),
+    make: text('make').notNull(),
+    model: text('model').notNull(),
+    tests: integer('tests').notNull()
+  },
+  t => [primaryKey({ columns: [t.kind, t.makeKey, t.modelKey] }), index('ix_mot_keys_make').on(t.makeKey)]
+)
+export type MotKeyInsert = typeof motKeys.$inferInsert
+
+export const motStats = registry.table(
+  'mot_stats',
+  {
+    kind: text('kind').notNull(),
+    makeKey: text('make_key').notNull(),
+    modelKey: text('model_key').notNull(),
+    modelYear: smallint('model_year').notNull(),
+    band: smallint('band').notNull(),
+    tests: integer('tests').notNull(),
+    fails: integer('fails').notNull(),
+    advisories: integer('advisories').notNull()
+  },
+  t => [primaryKey({ columns: [t.kind, t.makeKey, t.modelKey, t.modelYear, t.band] })]
+)
+export type MotStatsInsert = typeof motStats.$inferInsert
+
+/** `[tests with a failing item, tests with an advisory]` per group code / reason code. */
+export type MotCounts = Record<string, [number, number]>
+
+export const motIssues = registry.table(
+  'mot_issues',
+  {
+    kind: text('kind').notNull(),
+    makeKey: text('make_key').notNull(),
+    modelKey: text('model_key').notNull(),
+    band: smallint('band').notNull(),
+    tests: integer('tests').notNull(),
+    dangerous: integer('dangerous').notNull(),
+    groups: jsonb('groups').$type<MotCounts>().notNull(),
+    reasons: jsonb('reasons').$type<MotCounts>().notNull()
+  },
+  t => [primaryKey({ columns: [t.kind, t.makeKey, t.modelKey, t.band] })]
+)
+export type MotIssuesInsert = typeof motIssues.$inferInsert
+
+export const motBaseline = registry.table(
+  'mot_baseline',
+  {
+    kind: text('kind').notNull(),
+    band: smallint('band').notNull(),
+    tests: integer('tests').notNull(),
+    fails: integer('fails').notNull(),
+    advisories: integer('advisories').notNull(),
+    dangerous: integer('dangerous').notNull(),
+    groups: jsonb('groups').$type<MotCounts>().notNull()
+  },
+  t => [primaryKey({ columns: [t.kind, t.band] })]
+)
+export type MotBaselineInsert = typeof motBaseline.$inferInsert
+
+export const motReasons = registry.table('mot_reasons', {
+  code: text('code').primaryKey(),
+  groupCode: text('group_code').notNull(),
+  item: text('item').notNull(),
+  failText: text('fail_text').notNull(),
+  watchText: text('watch_text').notNull()
+})
+export type MotReasonInsert = typeof motReasons.$inferInsert
+
+export const motMeta = registry.table('mot_meta', {
+  id: smallint('id').primaryKey().default(1),
+  yearFrom: smallint('year_from').notNull(),
+  yearTo: smallint('year_to').notNull(),
+  loadedAt: timestamp('loaded_at', { withTimezone: true }).notNull().defaultNow()
+})

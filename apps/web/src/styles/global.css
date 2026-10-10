@@ -26,6 +26,19 @@
   --color-primary-fg: hsl(222 47% 11%);
 }
 
+/* UK MOT charts ("Common faults"): two categorical slots of the dataviz reference palette — orange = failed tests, blue = "watch for"
+   advisories — each stepped for its surface and checked with the palette validator (all checks pass in light and dark).
+   Wide-gamut versions follow in the color-gamut block. */
+:root {
+  --color-mot-fail: #eb6834;
+  --color-mot-watch: #2a78d6;
+}
+
+:root[data-theme='dark'] {
+  --color-mot-fail: #d95926;
+  --color-mot-watch: #3987e5;
+}
+
 /* Favorite-label palette (index = `label.color`, see FAVORITE_LABEL_COLOR_COUNT): ten well-separated hues, the sRGB
    fallback here and the wide-gamut versions in the `color-gamut` blocks below. Labels are always shown with their
    name too, so color is never the only signal. */
@@ -80,10 +93,14 @@
 @media (color-gamut: p3) {
   :root {
     --color-primary: oklch(0.56 0.26 264);
+    --color-mot-fail: oklch(0.671 0.2 40.6);
+    --color-mot-watch: oklch(0.575 0.19 255.5);
   }
 
   :root[data-theme='dark'] {
     --color-primary: oklch(0.7 0.2 258);
+    --color-mot-fail: oklch(0.622 0.2 40.1);
+    --color-mot-watch: oklch(0.622 0.185 255);
   }
 
   /* Tailwind palette shades the app actually uses (status banners, VIN segments, plate boxes,

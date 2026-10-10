@@ -19,6 +19,12 @@ const SOURCES: readonly Source[] = [
   { key: 'epa', label: 'EPA / fueleconomy.gov', url: 'https://www.fueleconomy.gov', icon: '/icons/sources/epa.webp' },
   { key: 'eea', label: 'EEA', url: 'https://www.eea.europa.eu', icon: '/icons/sources/eea.svg' },
   { key: 'vehiclesdb', label: 'VehiclesDB', url: 'https://vehiclesdb.com', icon: '/icons/sources/vehiclesdb.webp' },
+  {
+    key: 'mot',
+    label: 'DVSA MOT',
+    url: 'https://www.data.gov.uk/dataset/anonymised_mot_test',
+    tile: 'bg-slate-700'
+  },
   { key: 'rdw', label: 'RDW', url: 'https://opendata.rdw.nl', icon: '/icons/sources/rdw.webp' },
   {
     key: 'ev',

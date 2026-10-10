@@ -501,3 +501,23 @@ export {
   type UserRole,
   type UserSettings
 } from './account.js'
+export {
+  MILES_TO_KM,
+  MOT_BAND_EDGES_KM,
+  MOT_GROUP_CODES,
+  MOT_KINDS,
+  MOT_MAX_BANDS,
+  MOT_MIN_BAND_TESTS,
+  MOT_MIN_KEY_TESTS,
+  motBandOf,
+  motBandSchema,
+  motIssueSchema,
+  motReasonSchema,
+  motResponseSchema,
+  type MotBand,
+  type MotGroupCode,
+  type MotIssue,
+  type MotKind,
+  type MotReason,
+  type MotResponse
+} from './mot.js'
