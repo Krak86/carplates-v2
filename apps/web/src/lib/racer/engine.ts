@@ -16,6 +16,7 @@ import {
 } from './config'
 import { preloadBackdrop } from './backdrop-assets'
 import { createSound } from './sound'
+import { preloadBrandLogo } from './vehicle-assets'
 import {
   BACKDROP_H,
   BACKDROP_W,
@@ -27,7 +28,7 @@ import {
   type Sprite
 } from './sprites'
 
-export { preloadBackdrop }
+export { preloadBackdrop, preloadBrandLogo }
 
 export type Racer = {
   /** Applies new settings live (car, scenery, lanes, traffic, resolution) without resetting the lap. */
@@ -57,6 +58,11 @@ const BREAKING = -MAX_SPEED
 const DECEL = -MAX_SPEED / 5
 const OFF_ROAD_DECEL = -MAX_SPEED / 2
 const OFF_ROAD_LIMIT = MAX_SPEED / 4
+/** Auto mode: the cruise speed steps in HUD km/h (0 = stand still); ↑ / ↓ move one step. The vehicle's top speed caps the list. */
+const CRUISE_KMH = [0, 20, 40, 60, 80, 100, 120] as const
+const DEFAULT_CRUISE_KMH = 40
+/** Brake lights stay on while the car is this much (game units, 100 = 1 km/h) over its cruise speed. */
+const BRAKE_MARGIN = 300
 const SKY_SPEED = 0.001
 const HILL_SPEED = 0.002
 const TREE_SPEED = 0.003
@@ -144,7 +150,9 @@ function sameConfig(a: RacerConfig, b: RacerConfig): boolean {
     a.lanes === b.lanes &&
     a.traffic === b.traffic &&
     a.quality === b.quality &&
-    a.plate === b.plate
+    a.plate === b.plate &&
+    a.brand === b.brand &&
+    a.auto === b.auto
   )
 }
 
@@ -158,7 +166,7 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
 
   let cfg = initial
   let theme: Theme = THEMES[cfg.scenery]
-  let atlas: Atlas = makeAtlas(theme, cfg.body, cfg.color, cfg.plate)
+  let atlas: Atlas = makeAtlas(theme, cfg.body, cfg.color, cfg.plate, cfg.brand)
   let backdrop: Backdrop = makeBackdrop(theme, cfg.scenery, cfg.backdrop)
   let width = 1024
   let height = 768
@@ -184,6 +192,8 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
   let keyRight = false
   let keyFaster = false
   let keySlower = false
+  let cruise = DEFAULT_CRUISE_KMH // auto mode: the chosen cruise speed, km/h
+  let braking = false // brake lights on
 
   let raf = 0
   let destroyed = false
@@ -205,7 +215,8 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
       lap: formatTime(currentLapTime),
       last: lastLapTime == null ? null : formatTime(lastLapTime),
       best: bestLap == null ? null : formatTime(bestLap),
-      record
+      record,
+      level: cfg.auto ? { current: cruiseSteps().indexOf(cruise), max: cruiseSteps().length - 1 } : null
     })
   }
 
@@ -273,9 +284,19 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
 
     playerX -= dx * speedPercent * playerSegment.curve * CENTRIFUGAL
 
-    if (keyFaster) speed += ACCEL * (0.5 + 0.5 * (topSpeed() / MAX_SPEED)) * dt
-    else if (keySlower) speed += BREAKING * dt
-    else speed += DECEL * dt
+    const accel = ACCEL * (0.5 + 0.5 * (topSpeed() / MAX_SPEED)) * dt
+    if (cfg.auto) {
+      // the car rolls on by itself and settles at the chosen cruise speed; ↓ / ↑ presses change that speed
+      const target = Math.min(cruise * 100, topSpeed())
+      if (speed < target) speed += accel
+      else if (speed > target) speed += BREAKING * 0.5 * dt
+      braking = speed > target + BRAKE_MARGIN
+    } else {
+      if (keyFaster) speed += accel
+      else if (keySlower) speed += BREAKING * dt
+      else speed += DECEL * dt
+      braking = keySlower
+    }
 
     if (playerX < -1 || playerX > 1) {
       if (speed > OFF_ROAD_LIMIT) speed += OFF_ROAD_DECEL * dt
@@ -438,6 +459,8 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
     const bounce = 1.5 * Math.random() * (speed / MAX_SPEED) * resolution * randomChoice([-1, 1])
     const sprite = steer < 0 ? atlas.player.left : steer > 0 ? atlas.player.right : atlas.player.straight
     drawSprite(sprite, scale, destX, destY + bounce, -0.5, -1)
+    // brake lights glow while ↓ is held
+    if (braking && sprite.brake) drawSprite({ ...sprite, img: sprite.brake }, scale, destX, destY + bounce, -0.5, -1)
   }
 
   function render(): void {
@@ -695,9 +718,15 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
     return Math.min(MAX_SPEED, TOP_SPEED_KMH[cfg.body] * 100)
   }
 
+  /** The cruise steps this vehicle can take: the fixed ladder up to its top speed, which is the last step. */
+  function cruiseSteps(): number[] {
+    const top = Math.round(topSpeed() / 100)
+    return [...CRUISE_KMH.filter(k => k < top), top]
+  }
+
   function rebuildLook(): void {
     theme = THEMES[cfg.scenery]
-    atlas = makeAtlas(theme, cfg.body, cfg.color, cfg.plate)
+    atlas = makeAtlas(theme, cfg.body, cfg.color, cfg.plate, cfg.brand)
     backdrop = makeBackdrop(theme, cfg.scenery, cfg.backdrop)
   }
 
@@ -715,21 +744,39 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
     if (!destroyed) raf = requestAnimationFrame(frame)
   }
 
-  const KEY_ACTIONS: Readonly<Record<string, (down: boolean) => void>> = {
+  /** Auto mode: each press (not a held-key repeat) moves the cruise speed one step up (+1) or down (-1). */
+  function stepCruise(dir: 1 | -1): void {
+    const steps = cruiseSteps()
+    const i = limit(steps.indexOf(cruise) + dir, 0, steps.length - 1)
+    cruise = steps[i] ?? cruise
+    emitHud(true)
+  }
+
+  function handleFaster(down: boolean, repeat: boolean): void {
+    keyFaster = down
+    if (down && !repeat && cfg.auto) stepCruise(1)
+  }
+
+  function handleSlower(down: boolean, repeat: boolean): void {
+    keySlower = down
+    if (down && !repeat && cfg.auto) stepCruise(-1)
+  }
+
+  const KEY_ACTIONS: Readonly<Record<string, (down: boolean, repeat: boolean) => void>> = {
     ArrowLeft: d => (keyLeft = d),
     KeyA: d => (keyLeft = d),
     ArrowRight: d => (keyRight = d),
     KeyD: d => (keyRight = d),
-    ArrowUp: d => (keyFaster = d),
-    KeyW: d => (keyFaster = d),
-    ArrowDown: d => (keySlower = d),
-    KeyS: d => (keySlower = d)
+    ArrowUp: handleFaster,
+    KeyW: handleFaster,
+    ArrowDown: handleSlower,
+    KeyS: handleSlower
   }
 
   function handleKey(e: KeyboardEvent): void {
     const action = KEY_ACTIONS[e.code]
     if (!action || e.ctrlKey || e.metaKey || e.altKey) return
-    action(e.type === 'keydown')
+    action(e.type === 'keydown', e.repeat)
     e.preventDefault() // arrows must not scroll the page behind the dialog
   }
 
@@ -740,6 +787,8 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
   function restart(): void {
     position = 0
     speed = 0
+    cruise = DEFAULT_CRUISE_KMH
+    braking = false
     playerX = 0
     currentLapTime = 0
     lastLapTime = null
@@ -765,7 +814,17 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
       const backdropChanged = next.backdrop !== cfg.backdrop
       const sameWorld =
         !resized && next.scenery === cfg.scenery && next.lanes === cfg.lanes && next.traffic === cfg.traffic
+      const brandChanged = next.brand !== cfg.brand
       cfg = next
+      cruise = Math.min(cruise, Math.round(topSpeed() / 100)) // a slower vehicle caps the cruise speed
+      if (brandChanged) {
+        // the logo is fetched on demand; the car shows without it until it arrives
+        const wanted = next.brand
+        void preloadBrandLogo(wanted).then(() => {
+          if (!destroyed && cfg.brand === wanted)
+            atlas.player = makePlayerSprites(cfg.body, cfg.color, cfg.plate, wanted)
+        })
+      }
       if (backdropChanged) {
         // photo layers are fetched on demand; the generated ones show until they arrive
         const wanted = next.backdrop
@@ -775,7 +834,7 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
       }
       if (sameWorld) {
         // only the car changed (colour, body, plate): swap its sprites, the road, scenery and traffic stay as they are
-        atlas.player = makePlayerSprites(cfg.body, cfg.color, cfg.plate)
+        atlas.player = makePlayerSprites(cfg.body, cfg.color, cfg.plate, cfg.brand)
         speed = Math.min(speed, topSpeed())
         return
       }

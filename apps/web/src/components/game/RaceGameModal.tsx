@@ -4,9 +4,11 @@ import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import { type VehicleKind } from '@carplates/shared'
 
+import BrandLogo from '@/components/BrandLogo'
 import ShareButton from '@/components/ShareButton'
 import RaceGameStage from '@/components/game/RaceGameStage'
 import {
+  DEFAULT_AUTO,
   bodyForKind,
   decodeRaceConfig,
   encodeRaceConfig,
@@ -25,6 +27,8 @@ type Props = {
   /** The registry's free-text body type — picks the starting car (a fire engine for a ПОЖЕЖНИЙ, …). */
   bodyText?: string | null
   plate: string
+  /** The car's brand: its logo goes on the back of the player's car. */
+  brand?: string | null
   vehicleLabel?: string
   /** Settings token of a shared link (`?section=race&tab=…`), applied over the defaults. */
   shared: string | null
@@ -41,6 +45,7 @@ export default function RaceGameModal({
   kind,
   bodyText,
   plate,
+  brand,
   vehicleLabel,
   shared,
   onClose
@@ -55,6 +60,8 @@ export default function RaceGameModal({
     traffic: randomTraffic(),
     quality: randomQuality(),
     plate,
+    brand: brand ?? null,
+    auto: DEFAULT_AUTO,
     ...decodeRaceConfig(shared)
   }))
 
@@ -72,9 +79,17 @@ export default function RaceGameModal({
     <div className="fixed inset-0 z-30 flex items-center justify-center bg-black/60 p-4" role="dialog" aria-modal>
       <div className="max-h-full w-full max-w-6xl overflow-y-auto rounded-xl bg-[var(--color-surface)] p-4">
         <div className="mb-3 flex items-center justify-between gap-3">
-          <div className="font-semibold">
-            <span aria-hidden>🎮</span> {t('race.title')}
-            {vehicleLabel && <span className="ml-2 font-normal text-[var(--color-muted)]">{vehicleLabel}</span>}
+          <div className="flex items-center gap-1.5 font-semibold">
+            <span aria-hidden className="leading-none">
+              🎮
+            </span>
+            <span>{t('race.title')}</span>
+            {vehicleLabel && (
+              <span className="ml-1 inline-flex items-center gap-1.5 font-normal text-[var(--color-muted)]">
+                <BrandLogo brand={brand ?? null} />
+                {vehicleLabel}
+              </span>
+            )}
           </div>
           <div className="flex shrink-0 items-center gap-3">
             <ShareButton

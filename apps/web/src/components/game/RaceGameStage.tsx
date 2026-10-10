@@ -61,6 +61,14 @@ export default function RaceGameStage({ config, onChange, onPickBody }: Props): 
                 <div className="text-3xl leading-none font-bold">{hud.speed}</div>
                 <div className="text-xs opacity-80">{t('race.hud.speed')}</div>
               </div>
+              {hud.level && (
+                <div className="text-center">
+                  <div className="text-3xl leading-none font-bold tabular-nums">
+                    {hud.level.current}/{hud.level.max}
+                  </div>
+                  <div className="text-xs opacity-80">{t('race.hud.level')}</div>
+                </div>
+              )}
               <div className="text-right">
                 <div className="text-3xl leading-none font-bold tabular-nums">{hud.km.toFixed(2)}</div>
                 <div className="text-xs opacity-80">{t('race.hud.km')}</div>
@@ -70,7 +78,7 @@ export default function RaceGameStage({ config, onChange, onPickBody }: Props): 
         </div>
 
         <div className="mt-2 flex items-center justify-between gap-3 text-sm text-[var(--color-muted)]">
-          <span>{t('race.controls')}</span>
+          <span>{config.auto ? t('race.controlsAuto') : t('race.controls')}</span>
           <button
             type="button"
             onClick={handleToggleSound}

@@ -54,6 +54,7 @@ export default function VinResult({ data }: Props): ReactNode {
         kind={resolveVehicleKind(registry?.actions[0]?.kind)}
         bodyText={registry?.actions[0]?.body}
         plate={registry?.plate ?? ''}
+        brand={vehicle.brand}
         vehicleLabel={[
           [vehicle.brand, vehicle.model].filter(Boolean).join(' '),
           vehicle.year ? `(${vehicle.year})` : '',

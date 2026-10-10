@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router'
 import { type VehicleKind } from '@carplates/shared'
 
+import BrandLogo from '@/components/BrandLogo'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 
 const RaceGameModal = lazy(() => import('@/components/game/RaceGameModal'))
@@ -21,6 +22,7 @@ type Props = {
   kind: VehicleKind | null
   bodyText?: string | null
   plate: string
+  brand?: string | null
   /** "BRAND MODEL (year)" shown beside the modal title. */
   vehicleLabel?: string
 }
@@ -30,7 +32,7 @@ type Props = {
  * a banner on wide screens (`xl`, where the side gutter has room), a compact 🎮 circle on `lg`, nothing below — the game
  * needs a keyboard. Online only: the game is a lazy chunk kept out of the PWA precache.
  */
-export default function RaceGameButton({ color, kind, bodyText, plate, vehicleLabel }: Props): ReactNode {
+export default function RaceGameButton({ color, kind, bodyText, plate, brand, vehicleLabel }: Props): ReactNode {
   const { t } = useTranslation()
   const online = useOnlineStatus()
   const [searchParams] = useSearchParams()
@@ -73,11 +75,16 @@ export default function RaceGameButton({ color, kind, bodyText, plate, vehicleLa
             </span>
             <span className="text-xs leading-snug text-sky-900/80">{t('race.banner.sub')}</span>
 
-            <span
-              aria-hidden
-              className="my-1 self-center text-5xl leading-none transition-transform duration-300 group-hover:scale-110"
-            >
-              🚗
+            <span className="my-1 flex items-center gap-2 self-center">
+              <span className="flex h-12 items-center justify-center [&>img]:h-9 [&>img]:max-w-12">
+                <BrandLogo brand={brand ?? null} />
+              </span>
+              <span
+                aria-hidden
+                className="flex h-12 items-center justify-center text-5xl leading-none transition-transform duration-300 group-hover:scale-110"
+              >
+                🚗
+              </span>
             </span>
 
             <span className="relative self-center">
@@ -129,6 +136,7 @@ export default function RaceGameButton({ color, kind, bodyText, plate, vehicleLa
             kind={kind}
             bodyText={bodyText}
             plate={plate}
+            brand={brand}
             vehicleLabel={vehicleLabel}
             shared={sharedTab}
             onClose={() => setOpen(false)}

@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { brandLogoUrl } from '@carplates/shared'
 
 import { type CarBody } from './config'
 import platesJson from './assets/plates.json'
@@ -13,7 +14,7 @@ import platesJson from './assets/plates.json'
  * existing "loading" phase of the modal honest and `makeAtlas` synchronous.
  */
 
-type Sprite = { img: HTMLCanvasElement; w: number; h: number; heavy?: boolean }
+type Sprite = { img: HTMLCanvasElement; w: number; h: number; heavy?: boolean; brake?: HTMLCanvasElement }
 
 /** Logical sprite units per pixel: sets the on-road size of a model (the sedan lands at the old 80 units). */
 const LOGICAL_PER_PX = 0.26
@@ -129,6 +130,103 @@ function paintPlate(ctx: CanvasRenderingContext2D, rect: Rect, text: string | nu
   ctx.fillText(text, px + pw / 2, py + ph / 2 + 0.5, pw - 3)
 }
 
+const LOGOS = new Map<string, HTMLImageElement | null>()
+
+/** Fetches the brand's logo once (a missing or broken one is remembered as `null`) so `vehicleSprite` can stick it on. */
+export async function preloadBrandLogo(brand: string | null): Promise<void> {
+  const url = brandLogoUrl(brand)
+  if (!url || LOGOS.has(url)) return
+  LOGOS.set(url, await loadImage(url).catch(() => null))
+}
+
+function brandLogo(brand: string | null): HTMLImageElement | null {
+  const url = brandLogoUrl(brand)
+  return (url && LOGOS.get(url)) || null
+}
+
+/** A round chrome badge with the brand logo, centred at (cx, cy), like the emblem on a real tailgate. */
+function paintLogo(ctx: CanvasRenderingContext2D, logo: HTMLImageElement, cx: number, cy: number, d: number): void {
+  const r = d / 2
+  const ring = ctx.createLinearGradient(cx, cy - r, cx, cy + r)
+  ring.addColorStop(0, '#f2f2f2')
+  ring.addColorStop(1, '#7d7d7d')
+  ctx.fillStyle = ring
+  ctx.beginPath()
+  ctx.arc(cx, cy, r, 0, Math.PI * 2)
+  ctx.fill()
+
+  ctx.save()
+  ctx.beginPath()
+  ctx.arc(cx, cy, r * 0.84, 0, Math.PI * 2)
+  ctx.clip()
+  ctx.fillStyle = '#fff'
+  ctx.fillRect(cx - r, cy - r, d, d)
+  const iw = logo.naturalWidth || 1
+  const ih = logo.naturalHeight || 1
+  const fit = (d * 0.74) / Math.max(iw, ih)
+  ctx.drawImage(logo, cx - (iw * fit) / 2, cy - (ih * fit) / 2, iw * fit, ih * fit)
+  ctx.restore()
+}
+
+const BRAKE_RGB = [255, 70, 55] as const
+const BRAKES = new Map<string, HTMLCanvasElement>()
+
+/**
+ * The lit brake lights of one sprite: its saturated-red pixels (the tail lamps) recoloured bright and bloomed. A model
+ * whose body is itself red (no lamps stand out) gets two plain blobs at the usual lamp spots instead.
+ */
+function brakeOverlay(key: string, base: HTMLImageElement): HTMLCanvasElement {
+  const cached = BRAKES.get(key)
+  if (cached) return cached
+  const { width: w, height: h } = base
+  const mask = canvasLike(w, h)
+  const mctx = mask.getContext('2d', { willReadFrequently: true })
+  const out = canvasLike(w, h)
+  const octx = out.getContext('2d')
+  if (!mctx || !octx) return out
+
+  mctx.drawImage(base, 0, 0)
+  const px = mctx.getImageData(0, 0, w, h)
+  const d = px.data
+  let lamp = 0
+  let opaque = 0
+  for (let i = 0; i < d.length; i += 4) {
+    const r = d[i] as number
+    const g = d[i + 1] as number
+    const b = d[i + 2] as number
+    const isLamp = (d[i + 3] as number) > 200 && r > 150 && r > g * 2 && r > b * 2
+    if ((d[i + 3] as number) > 200) opaque++
+    if (isLamp) {
+      lamp++
+      d[i] = BRAKE_RGB[0]
+      d[i + 1] = BRAKE_RGB[1]
+      d[i + 2] = BRAKE_RGB[2]
+      d[i + 3] = 255
+    } else {
+      d[i + 3] = 0
+    }
+  }
+  if (lamp >= 30 && lamp / opaque <= 0.06) {
+    mctx.putImageData(px, 0, 0)
+  } else {
+    mctx.clearRect(0, 0, w, h)
+    mctx.fillStyle = `rgb(${BRAKE_RGB.join(',')})`
+    for (const x of [0.14, 0.86]) {
+      mctx.beginPath()
+      mctx.ellipse(w * x, h * 0.47, w * 0.05, h * 0.035, 0, 0, Math.PI * 2)
+      mctx.fill()
+    }
+  }
+
+  octx.filter = `blur(${Math.max(2, w * 0.016)}px)`
+  octx.drawImage(mask, 0, 0)
+  octx.drawImage(mask, 0, 0)
+  octx.filter = 'none'
+  octx.drawImage(mask, 0, 0)
+  BRAKES.set(key, out)
+  return out
+}
+
 /** True when this model's straight view was loaded. */
 export function hasVehicle(model: string): boolean {
   return IMAGES.has(model)
@@ -143,7 +241,8 @@ export function vehicleSprite(
   color: string | null,
   plate: string | null,
   steer: -1 | 0 | 1 = 0,
-  heavy = false
+  heavy = false,
+  player?: { brand: string | null }
 ): Sprite | null {
   // the -l/-r files are named by camera yaw, which leans the car the opposite way: left steering uses the -r file.
   // The Kenney cars and the custom-rendered models (bus, motorbike) were rendered with opposite camera handedness.
@@ -176,5 +275,19 @@ export function vehicleSprite(
 
   const rect = plateRect(key)
   if (rect) paintPlate(ctx, rect, plate)
-  return { img: out, w: base.width * LOGICAL_PER_PX, h: base.height * LOGICAL_PER_PX, heavy }
+
+  const logo = player ? brandLogo(player.brand) : null
+  if (rect && logo) {
+    // on the boot lid, centred above the plate
+    const d = rect[2] * 0.55
+    paintLogo(ctx, logo, rect[0] + rect[2] / 2, rect[1] - d * 1.1, d)
+  }
+
+  return {
+    img: out,
+    w: base.width * LOGICAL_PER_PX,
+    h: base.height * LOGICAL_PER_PX,
+    heavy,
+    brake: player ? brakeOverlay(key, base) : undefined
+  }
 }

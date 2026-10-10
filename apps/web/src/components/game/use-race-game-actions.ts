@@ -58,7 +58,10 @@ export function useRaceGameActions(config: RacerConfig, sound: boolean) {
     import('@/lib/racer/engine').then(
       async mod => {
         // the first frame already has the chosen photo backdrop (a failed fetch just keeps the generated one)
-        await mod.preloadBackdrop(configRef.current.backdrop)
+        await Promise.all([
+          mod.preloadBackdrop(configRef.current.backdrop),
+          mod.preloadBrandLogo(configRef.current.brand)
+        ])
         setEngine(mod)
         try {
           localStorage.setItem(LOADED_KEY, '1')

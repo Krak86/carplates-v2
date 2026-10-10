@@ -61,6 +61,11 @@ export const CAR_PRESETS: Readonly<Record<CarBody, readonly CarPreset[]>> = {
   ]
 }
 
+/** The make is the first word of the label ("Mercedes-Benz Sprinter (2016)"). */
+export function presetBrand(preset: CarPreset): string {
+  return preset.label.split(' ')[0] ?? preset.label
+}
+
 /** A random example of the category; the list is never empty, the fallback only satisfies the index type. */
 export function randomPreset(body: CarBody): CarPreset {
   const list = CAR_PRESETS[body]

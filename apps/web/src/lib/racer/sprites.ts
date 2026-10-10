@@ -5,7 +5,7 @@ import { type BackdropId, type CarBody, type SceneryId, type Theme } from './con
 import { BODY_MODEL, TRAFFIC_HEAVY, TRAFFIC_LIVERY, vehicleSprite } from './vehicle-assets'
 
 /** Cars are Kenney renders (see ./vehicle-assets.ts); scenery and the motorbike are drawn here at load time. */
-export type Sprite = { img: HTMLCanvasElement; w: number; h: number; heavy?: boolean }
+export type Sprite = { img: HTMLCanvasElement; w: number; h: number; heavy?: boolean; brake?: HTMLCanvasElement }
 
 export type Atlas = {
   player: { straight: Sprite; left: Sprite; right: Sprite }
@@ -238,8 +238,14 @@ function paintSemi(ctx: Ctx, accent: string): void {
 }
 
 /** A player or traffic car; `steer` leans the sprite to fake turning. */
-function carSprite(body: CarBody, color: string, plate: string | null, steer: -1 | 0 | 1 = 0): Sprite {
-  const rendered = vehicleSprite(BODY_MODEL[body], color, plate, steer)
+function carSprite(
+  body: CarBody,
+  color: string,
+  plate: string | null,
+  steer: -1 | 0 | 1 = 0,
+  player?: { brand: string | null }
+): Sprite {
+  const rendered = vehicleSprite(BODY_MODEL[body], color, plate, steer, false, player)
   if (rendered) return rendered
   const fallback = proceduralBody(body)
   const draw = (ctx: Ctx, paint: (c: Ctx) => void, w: number, h: number): void => {
@@ -568,16 +574,17 @@ const BOARD_COLORS: readonly (readonly [string, string])[] = [
   ['#c2410c', '#ffffff']
 ]
 
-export function makePlayerSprites(body: CarBody, color: string, plate: string): Atlas['player'] {
+export function makePlayerSprites(body: CarBody, color: string, plate: string, brand: string | null): Atlas['player'] {
   const text = plate || 'AA0000AA'
+  const player = { brand }
   return {
-    straight: carSprite(body, color, text),
-    left: carSprite(body, color, text, -1),
-    right: carSprite(body, color, text, 1)
+    straight: carSprite(body, color, text, 0, player),
+    left: carSprite(body, color, text, -1, player),
+    right: carSprite(body, color, text, 1, player)
   }
 }
 
-export function makeAtlas(theme: Theme, body: CarBody, color: string, plate: string): Atlas {
+export function makeAtlas(theme: Theme, body: CarBody, color: string, plate: string, brand: string | null): Atlas {
   const text = plate || 'AA0000AA'
   const colors = Object.values(VEHICLE_COLOR_HEX)
   const trafficBodies: readonly CarBody[] = ['sedan', 'hatch', 'suv', 'sport', 'pickup', 'van']
@@ -611,7 +618,7 @@ export function makeAtlas(theme: Theme, body: CarBody, color: string, plate: str
   ]
 
   return {
-    player: makePlayerSprites(body, color, plate),
+    player: makePlayerSprites(body, color, plate, brand),
     cars,
     plants,
     poplar,

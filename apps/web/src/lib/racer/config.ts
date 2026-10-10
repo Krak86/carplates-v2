@@ -82,6 +82,8 @@ export const TOP_SPEED_KMH: Readonly<Record<CarBody, number>> = {
   garbage: 70,
   bus: 80
 }
+/** Manual (gas pedal) is the default; auto-forward is opt-in: the car keeps rolling, ←/→ steer, ↑/↓ step the cruise speed. */
+export const DEFAULT_AUTO = false
 export const DEFAULT_LANES: Lanes = 3
 export const DEFAULT_TRAFFIC: TrafficLevel = 'normal'
 export const DEFAULT_QUALITY: Quality = 'medium'
@@ -107,6 +109,10 @@ export type RacerConfig = {
   quality: Quality
   /** Printed on the player's number plate and on one of the roadside billboards. */
   plate: string
+  /** Brand of the looked-up car (any registry spelling); its logo is stuck on the back of the player's car. */
+  brand: string | null
+  /** Auto-forward mode: no gas pedal, the car cruises at a speed level that ↑ raises one step at a time. */
+  auto: boolean
 }
 
 export type RacerHud = {
@@ -119,6 +125,8 @@ export type RacerHud = {
   best: string | null
   /** True while `last` is a new personal best. */
   record: boolean
+  /** Auto mode: the chosen cruise level (1-based) and how many there are; `null` in manual mode. */
+  level: { current: number; max: number } | null
 }
 
 export type RoadColor = { road: string; grass: string; rumble: string; lane?: string }
@@ -243,15 +251,16 @@ export function bodyForKind(kind: VehicleKind | null, bodyText?: string | null):
   }
 }
 
-/** Settings (everything but the plate, which comes from the page) as one compact share-link token. */
+/** Settings (everything but the plate and brand, which come from the page) as one compact share-link token. */
 export function encodeRaceConfig(c: RacerConfig): string {
-  return [c.body, c.scenery, c.lanes, c.traffic, c.quality, c.color.slice(1), c.backdrop].join('-')
+  return [c.body, c.scenery, c.lanes, c.traffic, c.quality, c.color.slice(1), c.backdrop, c.auto ? 'a' : 'm'].join('-')
 }
 
 /** Reads a share-link token back; every part is validated, anything unknown is dropped (it is external input). */
-export function decodeRaceConfig(token: string | null): Partial<Omit<RacerConfig, 'plate'>> {
-  const [body, scenery, lanes, traffic, quality, color, backdrop] = (token ?? '').split('-')
-  const out: Partial<Omit<RacerConfig, 'plate'>> = {}
+export function decodeRaceConfig(token: string | null): Partial<Omit<RacerConfig, 'plate' | 'brand'>> {
+  const [body, scenery, lanes, traffic, quality, color, backdrop, mode] = (token ?? '').split('-')
+  const out: Partial<Omit<RacerConfig, 'plate' | 'brand'>> = {}
+  if (mode === 'a' || mode === 'm') out.auto = mode === 'a'
   const body_ = CAR_BODIES.find(v => v === body)
   if (body_) out.body = body_
   const scenery_ = SCENERIES.find(v => v === scenery)

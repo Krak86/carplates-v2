@@ -7,6 +7,7 @@ import RaceGameStage from '@/components/game/RaceGameStage'
 import Card from '@/components/ui/Card'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 import {
+  DEFAULT_AUTO,
   randomBackdrop,
   randomLanes,
   randomQuality,
@@ -15,7 +16,7 @@ import {
   type CarBody,
   type RacerConfig
 } from '@/lib/racer/config'
-import { randomCar, randomPreset, type CarPreset } from '@/lib/racer/presets'
+import { presetBrand, randomCar, randomPreset, type CarPreset } from '@/lib/racer/presets'
 
 /** Printed on the number plate and the billboard — there is no looked-up car here. */
 const GENERIC_PLATE = 'CARS UA'
@@ -34,7 +35,9 @@ function randomStart(): Start {
       lanes: randomLanes(),
       traffic: randomTraffic(),
       quality: randomQuality(),
-      plate: GENERIC_PLATE
+      plate: GENERIC_PLATE,
+      brand: presetBrand(preset),
+      auto: DEFAULT_AUTO
     }
   }
 }
@@ -58,7 +61,7 @@ export default function RaceRoute(): ReactNode {
   }
 
   const applyPreset = (body: CarBody, preset: CarPreset): void => {
-    setConfig(c => ({ ...c, body, color: preset.color }))
+    setConfig(c => ({ ...c, body, color: preset.color, brand: presetBrand(preset) }))
     setLabel(preset.label)
   }
 

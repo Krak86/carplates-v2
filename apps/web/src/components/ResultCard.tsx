@@ -161,6 +161,7 @@ export default function ResultCard({ data }: Props): ReactNode {
         kind={vehicleKind}
         bodyText={c.body}
         plate={data.plate}
+        brand={c.brand}
         vehicleLabel={[[c.brand, c.model].filter(Boolean).join(' '), c.makeYear ? `(${c.makeYear})` : '', data.plate]
           .filter(Boolean)
           .join(' ')}

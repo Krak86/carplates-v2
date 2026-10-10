@@ -48,6 +48,15 @@ export default function RaceGameSettings({ config, onChange, onPickBody }: Props
 
   return (
     <div className="flex flex-col gap-4 text-sm">
+      <RaceGameGroup label={t('race.drive')}>
+        <RaceGameChip active={config.auto} onClick={() => onChange({ auto: true })}>
+          {t('race.drive.auto')}
+        </RaceGameChip>
+        <RaceGameChip active={!config.auto} onClick={() => onChange({ auto: false })}>
+          {t('race.drive.manual')}
+        </RaceGameChip>
+      </RaceGameGroup>
+
       <RaceGameGroup label={t('race.color')}>
         {Object.values(VEHICLE_COLOR_HEX).map(hex => (
           <button

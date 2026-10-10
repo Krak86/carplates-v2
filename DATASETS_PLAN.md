@@ -1,7 +1,7 @@
 # DATASETS_PLAN.md
 
 > **Resume here (2026-10-09).** Stages A (+A2 plate-region fix, +A3 alias chips), **B** (motorcycle/truck/bus matching), **C** (RDW specs, C2, C3) **C4** (estimated value) **D** (RDW recalls) and **E** (Open EV Data) are DONE;
-> next is **stage F** (NHTSA recalls + complaints) — see "Staged plan" near the end. **Rule: do not start a stage until the owner says "go stage X".**
+> next is **stage M** (model alias unification, prerequisite, see near the end) and then **stage F** (NHTSA recalls + complaints) — see "Staged plan" near the end. **Rule: do not start a stage until the owner says "go stage X".**
 > autoevolution (stage Z): they replied again 2026-10-08 ("we can sort something out, but first we would like to see this app; if it is still a work in progress we can wait") — answer once the app is public (after the Phase 4 deploy); revisit after stage H whether we need them at all (gap list below). Do NOT download the unauthorized GitHub copy, not even for internal comparison. Stage A is code-complete but may be uncommitted: check
 > `git status`. After a registry/plate-table change run `pnpm db:refresh-stats` (slow, ~15+ min, rebuilds the materialized views
 > from existing rows) and `pnpm db:refresh-derived`; restart `pnpm dev` after any `@carplates/shared` rebuild.
@@ -626,7 +626,101 @@ year_to, body_styles, platform, wiki_title, wikidata_id, source)`; `ingest:gener
   must simply show nothing); the data ages slowly — refresh yearly. **Estimate: 1-2 sessions** for the prototype-to-table step, +1 for
   API/UI. Not browser-checked (nothing built).
 
-Not planned (decided): VehiclesDB per-country deciles, derived body-type label, vPIC offline dump, Eurostat. (Wikidata moved into stage I.)
+**Stage J — proposal (2026-10-10, last stage; research only, nothing started, owner says "go stage J").** Other countries' open vehicle
+data. Input: `scripts/src/DATA/countries.research.txt` — an AI-search summary (Google-redirect links), **not authoritative**: terms below were
+re-checked on 2026-10-10 against the portals; where a page was bot-blocked (Regitra, CAPTCHA) or 404 (Transpordiamet) it says so. Status
+words: **clean** = licence read and compatible with a public product + credit; **research** = licence/dataset unconfirmed; **skip**.
+
+- **Errors in the research file** (do not copy from it): INSEE does not publish the new-car series — SDES does, from the SIV register, and SIV
+  reuse is licensed case by case; HistoVec is a per-owner lookup (needs the registration document), not a dataset; KBA's open data is
+  statistics tables (stock / new registrations by make and model series) — no evidence of a Parquet feed or a public HSN/TSN → specs
+  catalogue; Dataful states **no licence** (citation format only), a mirror says "License not specified"; the "China Data Portal" is a private
+  aggregator, not MIIT/CAAM; Lithuania/Estonia "free CSV catalogues" were not found (see below); Korea "approved instantly" is true for the key,
+  but the licence is per dataset.
+
+| Source                                                                                                              | Terms found (2026-10-10)                                                                                                                                        | Verdict                                                                            |
+| ------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| 🇩🇪 KBA open data ([kba.de](https://www.kba.de/EN/Service_en/OpenData_en/opendata_node_en.html))                     | "Data licence Germany – attribution – 2.0" (free use, copying, transfer if the source is named; licence PDF itself not readable by the fetch tool)              | **clean** (read the PDF once for the exact credit wording); FZ10 / FZ11 tables     |
+| 🇦🇺 DataVic ([discover.data.vic.gov.au](https://discover.data.vic.gov.au/dataset/monthly-new-vehicle-registrations)) | CC BY 4.0 on the DTP datasets (a data.gov.au mirror says CC BY 3.0 AU — use the DataVic page). Make+model+colour counts; make+postcode+fuel counts, no model    | **clean**; only the by-model snapshots + monthly new registrations are useful      |
+| 🇯🇵 MLIT ([terms](https://www.mlit.go.jp/links/terms-of-use.html))                                                   | PDL 1.0, compatible with CC BY 4.0, plus a per-dataset "important note"                                                                                         | **research** the exact recall + registration dataset pages (not located)           |
+| 🇰🇷 data.go.kr                                                                                                       | Per dataset: many "제한 없음" (no restriction), some "출처표시 + 상업적 이용금지 + 변경금지" (no commercial use), some blank. Seoul new-car file is KOGL type 1 | **research** each candidate dataset's licence field before any build               |
+| 🇱🇹 Regitra                                                                                                          | No open licence found; register data is released on request after a legal-basis / proportionality review. Open-data page is CAPTCHA-blocked                     | **research** by hand in a browser (regitra.lt/atviri-duomenys, data.gov.lt)        |
+| 🇪🇪 Transpordiamet / avaandmed                                                                                       | No open vehicle dataset confirmed; `/en/open-data` 404; register is served via X-Road to institutions                                                           | **research** avaandmed.eesti.ee for "liiklusregister" / "sõidukid"                 |
+| 🇪🇺 ACEA                                                                                                             | Only a 2015 notice found: reproduction needs prior written consent, ACEA named as source. Current terms not found                                               | **research** the footer legal notice; likely permission request (like Euro NCAP)   |
+| 🇦🇺 NSW (TfNSW), ABS Motor Vehicle Census                                                                            | Not checked (ABS is normally CC BY 4.0)                                                                                                                         | **research**                                                                       |
+| 🇮🇳 VAHAN / Dataful / indiadataportal                                                                                | Dataful: no licence; mirror: "not specified"; GODL-India probably applies upstream but not confirmed                                                            | **skip** (aggregates by RTO/fuel; nothing per model we lack); Roboflow plates: n/a |
+| 🇫🇷 INSEE / SDES / SIV, HistoVec                                                                                     | SIV reuse = case-by-case licence; no open licence statement found for the series                                                                                | **skip**                                                                           |
+| 🇨🇳 "China Data Portal", CAAM                                                                                        | Private aggregator, no licence; border/regulatory limits                                                                                                        | **skip**                                                                           |
+| Encar / EnCarAPI, Japan Vehicle Data, auction sheets                                                                | Commercial listings / paid                                                                                                                                      | **skip** (same reason as carguru)                                                  |
+
+- **Terms still to research (hand checklist, in value order):** (1) Lithuania — is there any per-vehicle open file at all; if yes licence,
+  fields, whether plate/VIN are absent. (2) Korea — which data.go.kr datasets hold per-model registrations or type-approval specs and their
+  licence field. (3) MLIT — recall announcements (リコール) dataset page + its PDL note. (4) KBA licence PDF wording + the FZ10/FZ11 file list and
+  download URLs (and whether the `fzXX` xlsx are under the same licence as the portal). (5) ACEA legal notice. (6) Estonia. (7) ABS / NSW. For
+  each: write the licence text, URL, date and attribution wording into this section (as for Euro NCAP above) before building anything.
+- **Aggregation rule for every source here:** store only aggregates per (make, model, year) or per country; never plates, VINs or owner
+  fields. Each source is its own removable block (own table, ingest, CSV seed, card section, i18n keys, About credit) like stages C–E.
+
+**What could be added to the DB (only after its terms are read), with feature ideas** — the honest summary: country-level fleet totals add
+little to a result card (same finding as Eurostat), so value comes from **model-level** facts and **name bridges**:
+
+| Candidate                                                | New table / fields                                                                                         | Feature it would enable                                                                                                                                                                                                                                                  |
+| -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| KBA stock + new registrations by make / model series     | `market_stock(country, brand_key, model_key, year, count, source)`                                         | "Germany: #4 among new cars in 2019, 310k still registered" chip next to the VehiclesDB decile; a `/stats` page "what Ukraine imports vs what Germany registered" (a large share of the UA used fleet is ex-German), flagging models common in DE but rare here          |
+| DataVic whole-fleet by model + monthly new registrations | same table, `country='AU'`; `registered_new` per month vs `on_road` per model                              | **Survival curve**: "of the 2008 Corolla registered new in Victoria, 61% are still on the road" — a durability / rarity line for old models and a second axis for the C4 value curve. Only RHD market: label it, never as a UA statistic                                 |
+| Korea registrations by model, type-approval specs, EV    | `market_stock(country='KR', …)`, maybe `kr_specs`                                                          | Korean **domestic-market names ↔ export names** (Kia K5 = Optima, Hyundai Grandeur = Azera, Kia K3 = Cerato/Forte): UA imports many KR-spec cars under either name → alias rows for the matcher (see below); an "Electric" fallback for KR EVs missing from Open EV Data |
+| MLIT recalls (Japan)                                     | `jp_recalls` shaped like the RDW recall tables, market label `JP`                                          | Recalls block gets a third market for the large JDM-import share (Toyota / Nissan / Honda / Mazda / Subaru); same wording rule as stage D/F: "recalls issued for this model in Japan", never "this car has an open recall"                                               |
+| Lithuania per-vehicle register (if open)                 | aggregate like `rdw_specs` (median power / mass / displacement / fuel, count) keyed by make / model / year | A **second EU-spec source** for models RDW lacks, and a neighbouring used-car feeder market for the "Specs" block; no plates / VIN stored. Highest value but lowest odds of being open                                                                                   |
+| ACEA monthly EU registrations by fuel                    | `eu_fuel_mix(month, fuel, count)`                                                                          | One `/stats` line "EV share of new cars: EU x% vs Ukraine y%". Cosmetic, needs permission — last priority                                                                                                                                                                |
+
+**Wiki / model normalization state (verified 2026-10-10 against commits `f7f3292…cede223`)** — new sources spell models yet another way
+(KBA "Modellreihe", DataVic ALL CAPS, Korean in Hangul), so the matching layer decides how cheap each import is:
+
+- **Three separate layers exist, not one:** (1) `makeKey` / `modelKey` + `MODEL_ALIASES` / `CROSS_MAKE_ALIASES` (`vdbMatch`) drives VehiclesDB, RDW specs
+  and recalls; (2) `wikiSearchName` (`wikiAliases.ts`) feeds only the Commons / Wikipedia photo search; (3) `modelFamily` (`modelFamily.ts`,
+  ZAZ / Daewoo / Chevrolet Lanos) is **used by nothing except `export:model-families:csv`** (a review CSV). The photo aliases do not help VehiclesDB / RDW
+  matching, and `modelFamily` does not feed stats grouping or any matcher. The Lanos alone sits on **63 raw brand/model pairs (335,210 cars)**, so
+  `stats_by_model` and every per-model source split it.
+- **Checked and working:** `vitest` on `wikiAliases` / `modelFamily` / `commonsImage` = 23 passed. `pnpm wiki-images:coverage` = **99.1 % of cars have a
+  photo** (13,256,199 of 13,371,190; commit claim holds), but only **88.0 % of brand/model/year groups**; for models under 100 cars it is 76.6 %.
+  Probes: `ваз 21063` → VAZ-2106, `заз t13110` → Sens, `bmw 320d` → 3 Series, `mercedes-benz e 200` → E-Class, `lexus rx350` → RX,
+  `infiniti fx 35` → FX, `toyota corolla 1.33l` → corolla, diacritic-folded titles ("Doblò" = "doblo") all behave as described.
+- **Verified gaps (all small, none visible to users yet):**
+  1. `заз-daewoo t13010` / `заз-daewoo|t13010` (1,689 cars) are `not_found`: `modelFamily` knows `t13010` (Sens) but `wikiAliases` matches only `t1311…`.
+  2. `wikiSearchName` returns null for `заз|lanos`, `chevrolet|lanos`, `заз-daewoo|sens`, which `modelFamily` maps to a family — harmless today (the rows
+     are `ok`, via the lead-image fallback), but the two modules disagree; one table should feed both.
+  3. Engine-size stripping skips the brand rules: `mazda|6 2.5` searches "mazda 6", `mazda|6` searches "Mazda6" (both found; cosmetic).
+  4. Largest remaining `not_found` rows: Geely `jl7162` (9.8k cars; only `jl7152` is aliased), Honda `m-nv` (4.3k), Chrysler `gr.voyager` (1.5k),
+     Skoda `octavia a8` (1.0k), Renault `taliant`, BYD `leopard 3`, Citroen `c1sx` (typo of C1), Smart `cabrio`. Cheap rules, ~0.2 % of cars.
+- **Recommendation before stage J (or any new model-keyed source):** (a) make `modelFamily` / the wiki alias table feed the VehiclesDB / RDW matcher
+  (one alias source, one test file), and group `stats_by_model` by family; (b) add a Korean / Japanese **domestic-name alias list** only when KR / JP data is
+  actually built; (c) keep matching misses hidden — a new source never shows a section on a fuzzy guess.
+- **Priority:** stage J is optional; its realistic yield is KBA + DataVic (clean licences, popularity / survival lines) and MLIT recalls (if the PDL note
+  is fine). Everything else depends on the terms checklist above. **Estimate:** 0.5 session for the terms checklist; 1 session per source after.
+
+**Stage M — model alias unification (prerequisite for stage F and J; owner chose "asap, new session", 2026-10-10; not started until "go stage M").**
+Why: three alias layers exist today — `vdbMatch.ts` (`MODEL_ALIASES`, `CROSS_MAKE_ALIASES`, `makeKey`/`modelKey`; VehiclesDB, RDW specs, recalls),
+`wikiAliases.ts` (`wikiSearchName`; photo search only, used by `wiki.service.ts` and `scripts/src/wiki-images.ts`) and `modelFamily.ts` (ZAZ / Daewoo /
+Chevrolet Lanos families; used by nothing but `export:model-families:csv`). A rule added to one does not reach the others (verified gaps in the
+Stage J "Wiki / model normalization state" list). Every new model-keyed source would otherwise need its aliases in three places.
+
+- **M1 — one alias source (pure refactor, no behaviour change).** Put the ZAZ / Daewoo / Lanos / Sens knowledge in one module in `packages/shared`; `modelFamily`
+  and `wikiSearchName` both read it. Existing tests (`wikiAliases`, `modelFamily`, `commonsImage`, `vdbMatch`) must pass unchanged; add a test that pins that
+  `заз|lanos`, `chevrolet|lanos`, `daewoo|lanos 1.5`, `fso|lanos` give the same family and that `t13010` / `t1311x` both reach Sens.
+- **M2 — feed the matcher.** `vdbCandidateKeys` / `matchVdbModel` try the family (so `ЗАЗ|lanos` hits the same VehiclesDB / RDW / recall row as `Daewoo|lanos`).
+  Measure before / after with `stats_vdb` coverage and the RDW match count; a changed number needs an explanation, not a shrug. Keep "a miss hides the section".
+- **M3 — cheap photo rules** from the verified `not_found` list: Geely `jl7162`, ZAZ `t13010`, Chrysler `gr.voyager`, Citroen `c1sx` → C1, Skoda `octavia a8`; then
+  `--aliased` pre-warm, re-export `wiki-images.csv.gz`, delete the brand's `-alias` cache files first (cache is not keyed by the query). Re-run
+  `pnpm wiki-images:coverage` and note the new figure (now 99.1 % of cars / 88.0 % of groups).
+- **M4 — stats grouping (separate step, optional).** Group `stats_by_model` by family (Lanos is 63 raw pairs / 335,210 cars): a new migration + `pnpm db:refresh-stats`
+  (slow, ~15+ min) + `pnpm db:refresh-derived`. Raw rows stay keyed by raw brand/model; the family is an extra column or a view, never a rewrite. Ask the owner before
+  running the refresh on the real-data DB.
+- **Out of scope:** Korean / Japanese domestic-name aliases (only when that data is built), any new data source, UI changes.
+- **Definition of done:** `pnpm format`, `pnpm lint`, `pnpm type-check`, `pnpm test` green; `pnpm --filter @carplates/shared build` run (API / web consume `dist/`); docs updated
+  (`docs/features-reference.md` alias convention, `docs/plan-done.md` write-up, one ✅ line in `PLAN.md`); then a commit message and stop.
+- **Estimate:** M1 + M2 + M3 = 1 session; M4 = +0.5 (mostly the wait for the refresh).
+
+Not planned (decided): VehiclesDB per-country deciles, derived body-type label, vPIC offline dump, Eurostat. (Wikidata moved into stage I; other countries into stage J.)
 
 ### Refresh cadence (data that lands in our local DB)
 
