@@ -11,9 +11,10 @@ import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 import { cn } from '@/lib/cn'
 import { toIntlLocale } from '@/lib/intl'
 import { fuelStatsQuery } from '@/lib/queries'
+import FuelSkeleton from '@/routes/fuel/FuelSkeleton'
 import FuelBarList from '@/routes/fuel/FuelBarList'
 import FuelModelsPanel from '@/routes/fuel/FuelModelsPanel'
-import StatsSkeleton from '@/routes/stats/StatsSkeleton'
+import PowertrainPanel from '@/routes/fuel/PowertrainPanel'
 import { bandForCo2, plausibleYear } from '@/routes/fuel/helpers'
 
 const FUEL_TABS = ['year', 'brand', 'fuelClass'] as const
@@ -77,7 +78,7 @@ export default function FuelStatsRoute(): ReactNode {
         </p>
       )}
 
-      {stats.isPending && stats.fetchStatus !== 'paused' && <StatsSkeleton variant="rating" />}
+      {stats.isPending && stats.fetchStatus !== 'paused' && <FuelSkeleton />}
 
       {stats.isError && <p className="text-[var(--color-muted)]">{t('result.error')}</p>}
 
@@ -102,6 +103,8 @@ export default function FuelStatsRoute(): ReactNode {
               <div className="text-xl font-semibold">{numberFormat.format(data.total)}</div>
             </Card>
           </div>
+
+          <PowertrainPanel />
 
           <div className="mb-3 inline-flex gap-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-1">
             {FUEL_TABS.map(value => (

@@ -25,6 +25,7 @@ import {
   vdbResponseSchema,
   vdbStatsResponseSchema,
   fuelStatsResponseSchema,
+  powertrainStatsResponseSchema,
   safetyStatsResponseSchema,
   iihsRatingsResponseSchema,
   jncapRatingsResponseSchema,
@@ -89,6 +90,7 @@ import type {
   StockResponse,
   ReviewsResponse,
   FuelStatsResponse,
+  PowertrainStatsResponse,
   SafetyStatsResponse,
   IihsRatingsResponse,
   JncapRatingsResponse,
@@ -335,6 +337,10 @@ export async function getSafetyStats(): Promise<SafetyStatsResponse> {
 
 export async function getFuelStats(): Promise<FuelStatsResponse> {
   return fuelStatsResponseSchema.parse(await getJson('/api/fuel/stats'))
+}
+
+export async function getPowertrainStats(): Promise<PowertrainStatsResponse> {
+  return powertrainStatsResponseSchema.parse(await getJson('/api/fuel/powertrains'))
 }
 
 // Our own transcode-and-cache proxy (the source .wmv can't play in any modern browser).

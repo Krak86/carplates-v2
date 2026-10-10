@@ -4,9 +4,10 @@ import { z } from 'zod'
 
 import { zodParam } from '../common/zod-param.pipe.js'
 
-import { FuelEconomyDto, FuelStatsDto } from './fuel.dto.js'
+import { FuelEconomyDto, FuelStatsDto, PowertrainStatsDto } from './fuel.dto.js'
 import { FuelService } from './fuel.service.js'
 import { FuelStatsService } from './fuel-stats.service.js'
+import { PowertrainStatsService } from './powertrain-stats.service.js'
 
 const querySchema = z.object({
   make: z.string().trim().min(1),
@@ -21,7 +22,8 @@ const querySchema = z.object({
 export class FuelController {
   constructor(
     @Inject(FuelService) private readonly fuelService: FuelService,
-    @Inject(FuelStatsService) private readonly fuelStatsService: FuelStatsService
+    @Inject(FuelStatsService) private readonly fuelStatsService: FuelStatsService,
+    @Inject(PowertrainStatsService) private readonly powertrainStatsService: PowertrainStatsService
   ) {}
 
   // Persisted reference data (pnpm ingest:fuel), not proxied live — see fuel.service.ts.
@@ -41,5 +43,12 @@ export class FuelController {
   @ApiOkResponse({ type: FuelStatsDto })
   stats(): Promise<FuelStatsDto> {
     return this.fuelStatsService.get()
+  }
+
+  // Fuel-class breakdown (counts, shares, top/rare models and brands) from the same rollup table.
+  @Get('powertrains')
+  @ApiOkResponse({ type: PowertrainStatsDto })
+  powertrains(): Promise<PowertrainStatsDto> {
+    return this.powertrainStatsService.get()
   }
 }

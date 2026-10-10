@@ -31,6 +31,7 @@ import {
   getVdb,
   getVdbStats,
   getFuelStats,
+  getPowertrainStats,
   getNews,
   getNewsPage,
   getSocial,
@@ -358,6 +359,15 @@ export function fuelStatsQuery() {
   return queryOptions({
     queryKey: ['fuel-stats'],
     queryFn: getFuelStats,
+    staleTime: Infinity
+  })
+}
+
+// Fuel-class breakdown for the /fuel Powertrains panel — online-only, like fuelStatsQuery.
+export function powertrainStatsQuery() {
+  return queryOptions({
+    queryKey: ['powertrain-stats'],
+    queryFn: getPowertrainStats,
     staleTime: Infinity
   })
 }

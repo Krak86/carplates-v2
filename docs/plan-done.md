@@ -3120,3 +3120,7 @@ Strategy, profiling numbers, decisions, size report and the all-years forecast: 
 ### Registration status — last-operation chip + advanced-search filter ✅ BUILT (2026-10-10)
 
 Result card shows a chip with the latest operation (🪖 Тимчасовий облік (військовослужбовець) · 2024, 🚫 Знято з обліку, 🔁 Зміна власника …); Advanced search got a "Registration status" dropdown (grouped by status, with a vehicle count per operation code). Migration 0059 (`ix_current_reg_oper_code`, `stats_by_oper`). Conventions: `docs/features-reference.md` → "Registration status".
+
+### /fuel Powertrains panel ✅ BUILT (2026-10-10)
+
+Electric/hybrid/gas/… breakdown on `/fuel`: table of classes (cars, % of fleet, models, brands, top model, avg CO₂) with a drill-down for top models, top brands, rare models and the model-year trend. Details: `docs/features-reference.md` "Powertrains panel".

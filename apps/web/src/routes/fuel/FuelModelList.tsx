@@ -32,7 +32,7 @@ export default function FuelModelList({ title, models }: Props): ReactNode {
         {visible.map((m, i) => (
           <li key={`${m.brand}-${m.model}`} className="flex items-center gap-2">
             <span className="w-5 text-right text-[var(--color-muted)] tabular-nums">{i + 1}</span>
-            <BrandLogo brand={m.brand} size="sm" />
+            <BrandLogo brand={m.brand} size="sm" placeholder />
             <Link
               viewTransition
               to={`/advanced-search?${new URLSearchParams({ brand: m.brand, model: m.model })}`}

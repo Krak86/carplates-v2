@@ -189,6 +189,18 @@ export {
   type RdwResponse,
   type RdwSpecs
 } from './rdw.js'
+export {
+  powertrainModelSchema,
+  powertrainBrandSchema,
+  powertrainYearSchema,
+  powertrainClassSchema,
+  powertrainStatsResponseSchema,
+  type PowertrainModel,
+  type PowertrainBrand,
+  type PowertrainYear,
+  type PowertrainClass,
+  type PowertrainStatsResponse
+} from './fuelPowertrains.js'
 export { openEvResponseSchema, openEvVariantSchema, type OpenEvResponse, type OpenEvVariant } from './openEv.js'
 export {
   RDW_RECALLS_LIMIT,
