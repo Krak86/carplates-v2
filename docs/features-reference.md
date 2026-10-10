@@ -63,6 +63,15 @@ Model-level only: a campaign covers a make/type, never a plate or VIN, so wordin
 
 UI details: the first `RECALLS_PREVIEW` (3) campaigns show, then "Show N more"; each row has a market tag (`market`, default `NL`); every field has a "?" (`recalls.about.*`); category and hazard are translated from RDW's fixed wording via `categoryKey` / `hazardKey` (an unknown wording stays Dutch, `lang="nl"`) while defect / consequences / remedy stay Dutch until stage D2 (planned in `DATASETS_PLAN.md`: `rdw_recall_texts` with an `engine` column, "AI translation" label, original-text switch).
 
+#### Canada recalls without a US twin (stage H)
+
+Files: migration 0060 (`ca_recalls`, `ca_recall_models`), `scripts/src/ca-recalls.ts` + `-parse.ts`, `packages/shared/src/caRecalls.ts` (own file), `CaRecallsService` (`GET /api/ca/recalls?brand&model&year`),
+web `CaRecallList.tsx` / `CaRecalls.helpers.ts` (third group in `RdwRecalls.tsx`). Only Transport Canada safety campaigns since 2010 that have **no** NHTSA twin are stored (twin = same make + same
+manufacturer campaign number, or same model within 120 days; decided at ingest from NHTSA's flat file), so the list adds to the US one instead of repeating it. Matching = the VehiclesDB matcher, as RDW recalls;
+a `year` keeps campaigns covering that model year (or recording none). Text is TC's English ("Issue / Safety Risk / Corrective Actions", `multiline` on `RdwRecallField`); the 19 system labels are translated
+(`ca.sys.*`, `systemKey`). Link: `wwwapps.tc.gc.ca/Saf-Sec-Sur/7/VRDB-BDRV/search-recherche/detail.aspx?lang=eng&rn=<number>`. Compliance/label notices are not recalls and are dropped. Refresh quarterly:
+`pnpm ingest:ca-recalls` then `export:ca-recalls:csv`; `ingest:ca-recalls:csv` loads the seed and is part of `ingest:ratings:csv`. A new market needs its flag in `MarketFlag`.
+
 #### NHTSA recalls + complaints (stage F)
 
 Live, **no table**: `apps/api/src/nhtsa/` calls `api.nhtsa.gov` (`recallsByVehicle`, `complaintsByVehicle`) behind an in-memory TTL cache (recalls 7 d, complaints 30 d; errors are 502 and not cached). Contract

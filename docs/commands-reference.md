@@ -127,6 +127,9 @@ pnpm ingest:mot -- --dir <folder with the DVSA ZIPs>   # UK MOT (DVSA anonymised
                   # Download: https://data.dft.gov.uk/anonymised-mot-test/test_data/dft_test_result_<Y>.zip, …/dft_test_item_<Y>.zip, …/anonymised-mot-test/lookup.zip. Block "Common faults" via GET /api/mot. Replaces all six mot_* tables.
 pnpm ingest:mot:csv   # load the committed seed (seed-data/mot.csv.gz) — seconds, no ZIPs (part of ingest:ratings:csv)
 pnpm export:mot:csv   # re-dump the tables to that CSV — run after every real re-ingest
+pnpm ingest:ca-recalls   # Transport Canada recalls (OGL) with NO US twin -> registry.ca_recalls + ca_recall_models; downloads ~200 MB CSV + NHTSA flat file (cached in scripts/.data/ca-recalls/), ~10 s. --dry-run, --refresh. Block "Recalls" via GET /api/ca/recalls
+pnpm ingest:ca-recalls:csv   # load the committed seed (seed-data/ca-recalls.csv.gz) — part of ingest:ratings:csv
+pnpm export:ca-recalls:csv   # re-dump both tables to that CSV — run after every real re-ingest
 pnpm ingest:rdw-recalls:translate   # local-model (NLLB, GPU) translation of recall texts -> rdw_recall_texts; resumable, --max-minutes N / --limit N --offset N / --make --model / --langs / --dump f.md. See DATASETS_PLAN "Stage D follow-up 2"
 pnpm db:refresh-vdb-stats   # rebuild registry.stats_vdb (the /stats "Markets" panel) from the registry + vdb_models
 pnpm db:refresh-derived     # rebuild ALL rollups computed from current_registration: fuel-stats + safety-stats + vdb-stats

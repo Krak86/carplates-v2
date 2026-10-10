@@ -25,6 +25,12 @@ const SOURCES: readonly Source[] = [
     url: 'https://www.data.gov.uk/dataset/anonymised_mot_test',
     tile: 'bg-slate-700'
   },
+  {
+    key: 'ca',
+    label: 'Transport Canada',
+    url: 'https://tc.canada.ca/en/road-transportation/motor-vehicle-safety',
+    tile: 'bg-red-700'
+  },
   { key: 'rdw', label: 'RDW', url: 'https://opendata.rdw.nl', icon: '/icons/sources/rdw.webp' },
   {
     key: 'ev',

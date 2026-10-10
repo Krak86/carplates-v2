@@ -25,6 +25,7 @@ import {
   getRdw,
   getOpenEv,
   getMot,
+  getCaRecalls,
   getNhtsaComplaints,
   getNhtsaRecalls,
   getRdwRecalls,
@@ -295,6 +296,15 @@ export function rdwRecallsQuery(brand: string, model: string) {
   return queryOptions({
     queryKey: ['rdw', 'recalls', brand, model],
     queryFn: () => getRdwRecalls(brand, model),
+    staleTime: Infinity
+  })
+}
+
+// Canadian recall campaigns without a US twin for a model-year (pnpm ingest:ca-recalls) — persisted reference data, cached offline in the rdw group.
+export function caRecallsQuery(brand: string, model: string, year: number) {
+  return queryOptions({
+    queryKey: ['rdw', 'ca-recalls', brand, model, year],
+    queryFn: () => getCaRecalls(brand, model, year),
     staleTime: Infinity
   })
 }

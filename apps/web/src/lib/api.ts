@@ -16,6 +16,7 @@ import {
   euroNcapRatingsResponseSchema,
   fuelEconomyResponseSchema,
   fxResponseSchema,
+  caRecallsResponseSchema,
   nhtsaComplaintsResponseSchema,
   nhtsaRecallsResponseSchema,
   motResponseSchema,
@@ -72,6 +73,7 @@ import type {
   EuroNcapRatingsResponse,
   FuelEconomyResponse,
   FxResponse,
+  CaRecallsResponse,
   NhtsaComplaintsResponse,
   NhtsaRecallsResponse,
   MotResponse,
@@ -279,6 +281,11 @@ export async function getRdw(brand: string, model: string, year: number, kind?: 
 export async function getRdwRecalls(brand: string, model: string): Promise<RdwRecallsResponse> {
   const params = new URLSearchParams({ brand, model })
   return rdwRecallsResponseSchema.parse(await getJson(`/api/rdw/recalls?${params.toString()}`))
+}
+
+export async function getCaRecalls(brand: string, model: string, year: number): Promise<CaRecallsResponse> {
+  const params = new URLSearchParams({ brand, model, year: String(year) })
+  return caRecallsResponseSchema.parse(await getJson(`/api/ca/recalls?${params.toString()}`))
 }
 
 export async function getNhtsaRecalls(make: string, model: string, year: number): Promise<NhtsaRecallsResponse> {

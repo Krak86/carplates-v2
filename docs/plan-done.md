@@ -3124,3 +3124,9 @@ Result card shows a chip with the latest operation (🪖 Тимчасовий о
 ### /fuel Powertrains panel ✅ BUILT (2026-10-10)
 
 Electric/hybrid/gas/… breakdown on `/fuel`: table of classes (cars, % of fleet, models, brands, top model, avg CO₂) with a drill-down for top models, top brands, rare models and the model-year trend. Details: `docs/features-reference.md` "Powertrains panel".
+
+### Canada recalls ✅ BUILT (2026-10-10, stage H cut down)
+
+Third market group ("Canada (Transport Canada)") in the Recalls block, holding only the Canadian safety campaigns with no US (NHTSA) twin: 1,595 campaigns / 10,762 model-year links of 7,648 since 2010 (79.1 % have a twin).
+Why cut down: overlap research the same day showed ~97 % of Canadian campaigns repeat NHTSA; the rest are Canada-specific rules and models the US does not sell (Qashqai, X-Trail, Sprinter CDI names).
+Full write-up, twin rule, numbers and files: `DATASETS_PLAN.md` "Stage H — done"; conventions: `docs/features-reference.md` "Canada recalls without a US twin".

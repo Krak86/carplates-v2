@@ -352,10 +352,11 @@ at the end of a stage give a commit message and stop. Order = value / risk, clea
 | **D. RDW recalls** — **done 2026-10-09** (see "Stage D — done" below)                                                          | Recall campaigns + status (upsert); "Recalls" block, labelled "EU (NL)", model-level wording; monthly refresh                                                                                                                                                                                                                                    | medium       | C (matcher)                       |
 | **E. Open EV Data** — **done 2026-10-09** (see "Stage E — done" below)                                                         | One JSON -> small table; "Electric" block on a match for a car the register calls electric; MIT notice on About; **yearly at most (upstream data frozen at 2020)**                                                                                                                                                                               | small        | C                                 |
 | **F. NHTSA recalls + complaints** — **done 2026-10-10** (see "Stage F — done" below)                                           | Live API behind a cache (7 d / 30 d), next to `api/safety`; market label "US" + "may not apply to your build" copy                                                                                                                                                                                                                               | medium       | D (shared Recalls block)          |
-| **G. UK MOT** — **planned 2026-10-10, strategy agreed, not started** (see "Stage G" below)                                     | 2021–2023 pooled, cars + vans + motorcycles; aggregate per make/model/model-year/mileage band; own lazy "Common faults" section with mileage charts (fails + "worn, watch for it" advisories), worded as UK inspection stats; OGL statement on About; yearly                                                                                     | large        | C                                 |
-| **H. Transport Canada recalls**                                                                                                | Quarterly CSV into the Recalls block, market "CA". Lowest value (mostly overlaps NHTSA/RDW) — build last or drop                                                                                                                                                                                                                                 | small        | D                                 |
+| **G. UK MOT** — **built 2026-10-10** (see "Stage G" below)                                                                     | 2021–2023 pooled, cars + vans + motorcycles; aggregate per make/model/model-year/mileage band; own lazy "Common faults" section with mileage charts (fails + "worn, watch for it" advisories), worded as UK inspection stats; OGL statement on About; yearly                                                                                     | large        | C                                 |
+| **H. Transport Canada recalls** — **done 2026-10-10** (cut down, see "Stage H — done" below)                                   | Only the Canadian safety campaigns with no US (NHTSA) twin (1,595 of 7,648 since 2010) as a third "Canada" group in the Recalls block; twin test at ingest; quarterly                                                                                                                                                                            | small        | D, F                              |
 | **Z. autoevolution specs**                                                                                                     | Only if they grant written permission and a data channel; then overlap check + "Specs" section (would sit beside or replace the RDW specs for models RDW lacks)                                                                                                                                                                                  | —            | their reply                       |
 | **I. Car generations (Wikipedia + Wikidata)** — proposal 2026-10-09, last stage, not started                                   | Generation per (brand, model, year): code, label, production years, body styles, platform; "Generation XV40 (2006–2011)" line on the card (details under "Stage I" below)                                                                                                                                                                        | medium-large | — (reuses the C pipeline pattern) |
+| **K. Wikipedia spec sheet** — proposal 2026-10-10, not started                                                                 | Engines, dimensions, mass, layout, transmission per generation from infoboxes + Wikidata; per-field language fallback (UI lang -> en -> ru -> ua -> make's home-language edition); fills what RDW lacks (VAZ/ZAZ/Daewoo, motorcycles, buses) (details under "Stage K" below)                                                                     | medium-large | I (generations), M (aliases)      |
 
 **Stage C — done (2026-10-08): RDW specs.** Source: opendata.rdw.nl (CC0). Power and CO2 are NOT in the main dataset
 `m9d7-ebf2` (which has displacement, mass, dimensions) but in the fuel/emissions dataset `8ys7-d773`, keyed by kenteken, as TEXT
@@ -619,6 +620,29 @@ queries `nhtsaRecallsQuery` / `nhtsaComplaintsQuery` (key head `safety`, so they
 - **Wording:** "recalls issued for this model year in the US", never "this car has an open recall"; the footnote and popover say a US-spec car can differ and a Ukrainian car may not be affected.
 - **Coverage is thin by nature:** only US-market models. Spot checks 2026-10-10: Mazda "6" 2015 → 3 recalls / 60 complaints (via "Mazda6"), Toyota Camry 2015 → 1 recall / 271 complaints, ZAZ Lanos → nothing (section hidden).
   **Not browser-checked** (verified by types, lint, 884 unit tests and the live `/api/nhtsa/*` output only). Not done: Transport Canada (stage H); a persistent cache (add a table only if NHTSA proves unreliable — flat-file bulk load is the fallback in the cadence table).
+
+**Stage H — done (2026-10-10): Transport Canada recalls with no US twin (cut down).** Owner decision after the overlap research (below): a full
+Canadian list would repeat NHTSA/RDW for ~97 % of models, so only campaigns **without** a US counterpart are kept. Source: TC's Vehicle Recalls Database CSV
+(`opendatatc.tc.canada.ca/vrdb_full_monthly.csv`, ~200 MB, **Open Government Licence – Canada**, About credit + `ca.info.credit`). Built: migration 0060
+(`registry.ca_recalls` keyed on the TC recall number, `registry.ca_recall_models` = campaign x make x model x model-year with our `makeKey`/`modelKey`;
+year 0 = not recorded), `scripts/src/ca-recalls.ts` + `ca-recalls-parse.ts` (+ test), seed `seed-data/ca-recalls.csv.gz` (276 KB, one file with a `part`
+column; `ingest:ca-recalls:csv` is part of `ingest:ratings:csv`), `GET /api/ca/recalls?brand&model&year` (`apps/api/src/ca-recalls/`, the VehiclesDB matcher
+over the stored make/models, a year filter that keeps campaigns covering the year or recording none), contract `packages/shared/src/caRecalls.ts` (own file),
+web `CaRecallList.tsx` + `CaRecalls.helpers.ts` as a third collapsible group in `RdwRecalls.tsx` ("Canada (Transport Canada)", flag in `MarketFlag`, enabled only
+when the section is open and the year is known; query key head `rdw` -> offline group), ua/ru/en strings (`ca.*`, `ca.sys.*` = the 19 fixed system labels
+translated statically; the campaign text stays TC's English), About source. SCHEDULE.md row (quarterly).
+**How "no US twin" is decided** (at ingest, `hasUsTwin`): NHTSA's `FLAT_RCL_POST_2010.zip` (15 MB, streamed through the existing extractor) is read and a TC
+campaign counts as a twin when an NHTSA campaign of the same make has the same manufacturer campaign number (within 400 days) or a shared model spelling within
+120 days. Only safety notifications are kept (`Safety Mfr`, `Safety TC`, `Service Campaign Mfr`); `Compliance *` (labels, CMVSS — "This is not a recall"),
+`Inconsequential`, `Superseded` and `Recalls Audit` are dropped, and nothing before 2010 (NHTSA's file starts there). **Result (run 2026-10-10):** 7,648 TC safety
+campaigns since 2010, 6,053 (79.1 %) have a US twin, **1,595 Canada-only campaigns / 10,762 model-year links** stored. Both tables are replaced as a whole on every
+run (the twin set changes with NHTSA); downloads are cached in `scripts/.data/ca-recalls/` (`--refresh` fetches again; `--dry-run` prints the counts only).
+**Overlap research behind the decision (2026-10-10):** on the 400 most common registry models, TC had 3.3 % more campaign matches than NHTSA; the Canada-only ones
+are real differences (Canada-specific rules such as daytime running lights, models the US does not sell: Nissan Qashqai 41k cars / X-Trail 25k have 0 US campaigns,
+Mercedes Sprinter "NNN CDI" names), not a matching artefact — nearest US campaigns for sampled ones were unrelated. EU-only makes (Skoda, Renault, Opel, Daewoo)
+have nothing in either file; RDW stays the only source for them. **Not done:** translating the campaign text (English like NHTSA); "Service Campaign Mfr" rows are
+shown like recalls (16 of 1,595). Quarterly refresh: `pnpm ingest:ca-recalls` then `pnpm export:ca-recalls:csv`. **Browser-checked:** Nissan Qashqai 2018 (1 campaign,
+no US group), types, lint and tests green.
 
 **Stage G — built (2026-10-10; 2021–2023 loaded; migration 0058, `ingest:mot`, `GET /api/mot`, lazy section `faults`; write-up `docs/plan-done.md` "UK MOT Common faults").** UK DVSA anonymised MOT results → new lazy
 **"Common faults"** result-card section with mileage charts. Source: `data.gov.uk/dataset/anonymised_mot_test`, **OGL v3 (attribution statement on About required)**.
@@ -893,6 +917,45 @@ Stage J "Wiki / model normalization state" list). Every new model-keyed source w
 - **Definition of done:** `pnpm format`, `pnpm lint`, `pnpm type-check`, `pnpm test` green; `pnpm --filter @carplates/shared build` run (API / web consume `dist/`); docs updated
   (`docs/features-reference.md` alias convention, `docs/plan-done.md` write-up, one ✅ line in `PLAN.md`); then a commit message and stop.
 - **Estimate:** M1 + M2 + M3 = 1 session; M4 = +0.5.
+
+**Stage K — proposal (2026-10-10, owner idea; nothing started, owner says "go stage K").** Wikipedia / Wikidata spec sheet per generation
+(engines, dimensions, mass, drivetrain …), multi-language fallback. **Build after stage I** (it reuses I's generation list, titles and
+infobox fetcher) and after M (one alias source). Licence posture = stage I: facts only, CC BY-SA credit + link per row, removable table.
+
+- **Why it is worth it:** RDW specs (stage C/C2/C3) cover ~81 % of cars but are weak exactly where our fleet is not Dutch: VAZ/Lada, ZAZ,
+  Daewoo, Chery, Soviet models, most motorcycles (18 %), buses (33 %). Wikipedia infoboxes usually have those, and for popular models they add
+  what RDW never records (engine list per generation, drivetrain layout, transmission, fuel tank, 0–100, body styles, platform). RDW stays
+  the primary source where it matches (measured, per model-year); Wikipedia fills the misses and adds the per-generation engine list.
+- **What is in the infobox** (`{{Infobox automobile}}`, `{{Infobox motorcycle}}`; wikitext via `prop=revisions&rvslots=main`, 50 titles per
+  request — never scrape rendered HTML): `engine`, `transmission`, `layout`, `wheelbase`, `length`, `width`, `height`, `weight`,
+  `fuel_capacity`, `related`, `platform`, `body_style`, `assembly`. Wikidata adds a few numeric properties (length P2043, width P2049, height
+  P2048, mass P2067, wheelbase P3039) but is **sparse for cars** — try it first per item, fall back to the infobox.
+- **Language fallback is per field, not per article:** order = UI language edition → en → ru → ua (existing `wikiDomainChain`), taking the
+  first edition that has the field filled; store which edition each field came from (`src_lang`). Titles come from Wikidata sitelinks /
+  `prop=langlinks`, not from guessing. **Other countries:** for a make whose home market is not en/ru/ua, add the home edition to the chain —
+  `ja` (Toyota, Honda, Nissan, Mazda, Subaru, Suzuki …), `ko` (Hyundai, Kia, SsangYong, Genesis), `de` (VW, BMW, Audi, Mercedes, Opel, Porsche),
+  `fr` (Renault, Peugeot, Citroën), `it` (Fiat, Alfa, Lancia), `cs`/`pl` (Skoda, FSO), `zh` (Chery, Geely, BYD, Great Wall). Small table
+  `HOME_WIKI_LANGS[make] -> lang[]`; home-language infoboxes often list JDM / domestic-only trims the en article lacks.
+- **Parsing is the hard part** (same traps as stage I plus): values are free text with `{{convert|2700|mm|in}}`, `{{cvt}}`, `<br>` lists,
+  `<ref>`, ranges, mixed units (cu in, lb, mph); engines arrive as one prose string per variant (`1.6 L I4 (petrol) 110 PS`). Plan: a small
+  tolerant template parser in `packages/shared` (strip refs, expand `convert`/`cvt` to the metric value, split on `<br>` / `{{plainlist}}`
+  / `{{unbulleted list}}`), numeric parse only when exactly one number+unit is found, otherwise keep the raw string for the "details" view
+  and show nothing as a headline figure. Sanity bounds per field like the RDW query (wheelbase 100–1000 cm, length 100–2500 cm …).
+  Engines: store as a list per generation (`displacement_cc`, `cylinders`, `power_kw`, `fuel`, `raw`), never one merged number.
+- **Storage / pipeline** (follows stage C/I): migration `registry.model_spec_wiki(brand_key, model_key, gen_code, year_from, year_to,
+wheelbase_mm, length_mm, width_mm, height_mm, kerb_kg, fuel_tank_l, layout, transmission, engines jsonb, src_lang, src_title,
+wikidata_id, revid)` (keyed on the stage I generation row; `revid` makes the credit link permanent); `ingest:wikispecs` (cache per
+  article in `scripts/.data/wikispecs/`, resumable, polite: UA header with contact, <= 1 request in flight, backoff on 429 — the API already
+  rate-limited the stage I check), `:csv` seed + `export:wikispecs:csv`, SCHEDULE.md row (yearly). Start from the same top ~300
+  (brand, model) pairs as stage I and measure how many fields fill before widening; commit a small override CSV for hand fixes.
+- **UI:** extra rows in the existing "Specs" block (`RdwSpecs.tsx`) labelled "Wikipedia (EN)" etc. when RDW has no row, or a second
+  "Engines of this generation" list under it; the generation chip from stage I opens it. Never shows a section on a fuzzy match (keep
+  "a miss hides the section"); About gets the CC BY-SA credit.
+- **Risks:** a generation spans 6–8 years and many engines, so the figures are catalogue values for the generation, not for this car —
+  copy must say so (as RDW's "approximate" explainer does); regional variants (US vs EU wheelbase) — prefer the main-market line;
+  vandalised or stale infoboxes — bounds + `revid` pin; matching to the registry's messy model strings (depends on M).
+- **Estimate:** 1 session for the parser + probe on 15 models (read-only, like `wiki-generations-probe.ts`) and a hit-rate report;
+  1 session for table + ingest + UI. Decide after the probe whether the multi-language fallback pays off (measure fields gained per language).
 
 Not planned (decided): VehiclesDB per-country deciles, derived body-type label, vPIC offline dump, Eurostat. (Wikidata moved into stage I; other countries into stage J.)
 

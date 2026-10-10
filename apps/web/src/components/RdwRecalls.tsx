@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router'
 
+import CaRecallList from '@/components/CaRecallList'
 import InfoPopover from '@/components/InfoPopover'
 import InfoText from '@/components/InfoText'
 import MarketFlag from '@/components/MarketFlag'
@@ -22,7 +23,7 @@ import SectionHeader from '@/components/SectionHeader'
 import ShareButton from '@/components/ShareButton'
 import VinToggleSection from '@/components/vin/VinToggleSection'
 import { cn } from '@/lib/cn'
-import { nhtsaComplaintsQuery, nhtsaRecallsQuery, rdwQuery, rdwRecallsQuery } from '@/lib/queries'
+import { caRecallsQuery, nhtsaComplaintsQuery, nhtsaRecallsQuery, rdwQuery, rdwRecallsQuery } from '@/lib/queries'
 import { scrollElementIntoView } from '@/lib/share-section'
 
 type Props = {
@@ -62,10 +63,13 @@ export default function RdwRecalls({ brand, model, year, kind }: Props): ReactNo
   const usComplaints = useQuery({ ...nhtsaComplaintsQuery(brand ?? '', model ?? '', year ?? 0), enabled: usEnabled })
   const us = usRecalls.data && usRecalls.data.total > 0 ? usRecalls.data : null
   const complaints = usComplaints.data && usComplaints.data.total > 0 ? usComplaints.data : null
-  const hasAny = !!(match || us || complaints)
+  // Canadian campaigns with no US twin (persisted reference data), per model-year like the US ones.
+  const caRecalls = useQuery({ ...caRecallsQuery(brand ?? '', model ?? '', year ?? 0), enabled: usEnabled })
+  const ca = caRecalls.data?.match ?? null
+  const hasAny = !!(match || us || complaints || ca)
   // Complaints are not recalls: a complaints-only car shows no count rather than "(0)".
-  const recallTotal = (match?.total ?? 0) + (us?.total ?? 0)
-  const usPending = usEnabled && (usRecalls.isLoading || usComplaints.isLoading)
+  const recallTotal = (match?.total ?? 0) + (us?.total ?? 0) + (ca?.total ?? 0)
+  const usPending = usEnabled && (usRecalls.isLoading || usComplaints.isLoading || caRecalls.isLoading)
 
   useEffect(() => {
     if (isShared && sectionRef.current) scrollElementIntoView(sectionRef.current)
@@ -86,7 +90,8 @@ export default function RdwRecalls({ brand, model, year, kind }: Props): ReactNo
         match?.crossMake && t('recalls.info.crossMake', { name }),
         match && t('recalls.info.dutch'),
         match && t('recalls.info.credit'),
-        (us || complaints) && t('nhtsa.info.credit')
+        (us || complaints) && t('nhtsa.info.credit'),
+        ca && t('ca.info.credit')
       ]
         .filter(Boolean)
         .join('\n')
@@ -104,7 +109,7 @@ export default function RdwRecalls({ brand, model, year, kind }: Props): ReactNo
         info={
           hasAny && (
             <InfoPopover label={t('vin.info.about', { field: t('recalls.title') })} title={t('recalls.title')}>
-              <InfoText text={info} highlight={[name, 'RDW', 'NHTSA']} />
+              <InfoText text={info} highlight={[name, 'RDW', 'NHTSA', 'Transport Canada']} />
             </InfoPopover>
           )
         }
@@ -320,6 +325,28 @@ export default function RdwRecalls({ brand, model, year, kind }: Props): ReactNo
               }
             >
               <NhtsaRecallList data={us} complaints={complaints} locale={locale} />
+            </VinToggleSection>
+          )}
+
+          {ca && (
+            <VinToggleSection
+              nested
+              icon="📂"
+              showLabel={t('vin.group.show')}
+              hideLabel={t('vin.group.hide')}
+              title={
+                <>
+                  <MarketFlag market="CA" /> {t('ca.market')}{' '}
+                  <span className="text-sm font-normal text-[var(--color-muted)]">({ca.total})</span>
+                </>
+              }
+              info={
+                <InfoPopover label={t('vin.info.about', { field: t('ca.market') })} title={t('ca.market')}>
+                  <InfoText text={t('ca.marketHint')} highlight={['Transport Canada']} />
+                </InfoPopover>
+              }
+            >
+              <CaRecallList data={ca} year={year} locale={locale} />
             </VinToggleSection>
           )}
         </div>

@@ -68,6 +68,14 @@ export function openZipCsv(zipPath: string, namePart: string): Readable {
   )
 }
 
+/** The single entry of a ZIP whose name ends with `suffix` (any type, e.g. NHTSA's `.txt` flat file), as a decompressed byte stream. */
+export function openZipEntry(zipPath: string, suffix: string): Readable {
+  const x = extractor()
+  const entry = x.list(zipPath).find(n => n.toLowerCase().endsWith(suffix.toLowerCase()))
+  if (!entry) throw new Error(`${zipPath}: no entry ending in ${suffix}`)
+  return x.stream(zipPath, entry)
+}
+
 /** Splits one CSV line on commas, honouring double quotes ("" = a quote inside a quoted field). */
 export function splitQuoted(line: string): string[] {
   const out: string[] = []

@@ -882,6 +882,39 @@ export const rdwRecallModels = registry.table(
 )
 export type RdwRecallModelInsert = typeof rdwRecallModels.$inferInsert
 
+/** One Transport Canada safety recall with no US (NHTSA) twin (OGL - Canada); the covered models are in `caRecallModels`. */
+export const caRecalls = registry.table('ca_recalls', {
+  recallNumber: text('recall_number').primaryKey(),
+  recalledAt: date('recalled_at'),
+  notification: text('notification'),
+  category: text('category'),
+  system: text('system'),
+  mfrRecallNo: text('mfr_recall_no'),
+  comment: text('comment'),
+  units: integer('units'),
+  scrapedAt: timestamp('scraped_at', { withTimezone: true }).notNull().defaultNow()
+})
+export type CaRecallRow = typeof caRecalls.$inferSelect
+export type CaRecallInsert = typeof caRecalls.$inferInsert
+
+/** The make / model / model-year rows (TC spelling + our keys) a Canadian recall covers; `modelYear` 0 = not recorded. */
+export const caRecallModels = registry.table(
+  'ca_recall_models',
+  {
+    recallNumber: text('recall_number').notNull(),
+    make: text('make').notNull(),
+    model: text('model').notNull(),
+    makeKey: text('make_key').notNull(),
+    modelKey: text('model_key').notNull(),
+    modelYear: smallint('model_year').notNull().default(0)
+  },
+  t => [
+    primaryKey({ columns: [t.recallNumber, t.makeKey, t.modelKey, t.modelYear] }),
+    index('ix_ca_recall_models_make').on(t.makeKey, t.modelKey)
+  ]
+)
+export type CaRecallModelInsert = typeof caRecallModels.$inferInsert
+
 /**
  * Per-(brand, model, year, fuel, capacity bucket) passenger-car counts joined with the CO2 estimate the reference
  * data gives them — backs the /fuel statistics page. Rebuilt by `scripts/src/fuel-stats.ts`; see

@@ -212,6 +212,13 @@ export {
   type RdwRecallsResponse
 } from './rdwRecalls.js'
 export {
+  CA_RECALLS_LIMIT,
+  caRecallSchema,
+  caRecallsResponseSchema,
+  type CaRecall,
+  type CaRecallsResponse
+} from './caRecalls.js'
+export {
   NHTSA_COMPLAINT_COMPONENTS,
   NHTSA_RECALLS_LIMIT,
   nhtsaComplaintsResponseSchema,
