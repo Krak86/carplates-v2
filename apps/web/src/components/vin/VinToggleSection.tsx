@@ -20,6 +20,8 @@ type Props = {
   actions?: ReactNode
   /** Draws the divider + padding of a top-level section; off for nested groups. */
   bordered?: boolean
+  /** Small left inset so a sub-section reads as belonging to the opened parent section. */
+  nested?: boolean
   ref?: Ref<HTMLDivElement>
   children: ReactNode
 }
@@ -35,13 +37,14 @@ export default function VinToggleSection({
   onOpenChange,
   actions,
   bordered = true,
+  nested = false,
   ref,
   children
 }: Props): ReactNode {
   const [open, setOpen] = useState(defaultOpen)
 
   return (
-    <div ref={ref} className={cn(bordered && 'mt-3 border-t border-[var(--color-border)] pt-3')}>
+    <div ref={ref} className={cn(bordered && 'mt-3 border-t border-[var(--color-border)] pt-3', nested && 'pl-3')}>
       <SectionHeader
         icon={icon}
         title={title}

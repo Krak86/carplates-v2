@@ -223,6 +223,7 @@ export default function RdwSpecs({ brand, model, year, kind, fuel, own }: Props)
           {groups.map(group => (
             <VinToggleSection
               key={group.key}
+              nested
               icon="📂"
               defaultOpen={group.key === 'engine'}
               showLabel={t('vin.group.show')}
@@ -241,6 +242,7 @@ export default function RdwSpecs({ brand, model, year, kind, fuel, own }: Props)
           {/* Duplicates the card's "Est. value" chip popover for now; delete this block to drop it. */}
           {match.valueEstimate && (
             <VinToggleSection
+              nested
               icon="💶"
               defaultOpen={false}
               showLabel={t('vin.group.show')}

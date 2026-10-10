@@ -22,6 +22,7 @@ export default function VinDetails({ results }: Props): ReactNode {
       {groupFields(results).map(({ group, rows }) => (
         <VinToggleSection
           key={group}
+          nested
           icon="📂"
           defaultOpen={OPEN_BY_DEFAULT.has(group)}
           showLabel={t('vin.group.show')}

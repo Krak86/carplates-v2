@@ -62,6 +62,8 @@ export default function RdwRecalls({ brand, model, year, kind }: Props): ReactNo
   const us = usRecalls.data && usRecalls.data.total > 0 ? usRecalls.data : null
   const complaints = usComplaints.data && usComplaints.data.total > 0 ? usComplaints.data : null
   const hasAny = !!(match || us || complaints)
+  // Complaints are not recalls: a complaints-only car shows no count rather than "(0)".
+  const recallTotal = (match?.total ?? 0) + (us?.total ?? 0)
   const usPending = usEnabled && (usRecalls.isLoading || usComplaints.isLoading)
 
   useEffect(() => {
@@ -96,11 +98,7 @@ export default function RdwRecalls({ brand, model, year, kind }: Props): ReactNo
         title={
           <>
             {t('recalls.title')}{' '}
-            {hasAny && (
-              <span className="text-sm font-normal text-[var(--color-muted)]">
-                ({(match?.total ?? 0) + (us?.total ?? 0)})
-              </span>
-            )}
+            {recallTotal > 0 && <span className="text-sm font-normal text-[var(--color-muted)]">({recallTotal})</span>}
           </>
         }
         info={
@@ -141,6 +139,7 @@ export default function RdwRecalls({ brand, model, year, kind }: Props): ReactNo
 
           {match && (
             <VinToggleSection
+              nested
               icon="📂"
               showLabel={t('vin.group.show')}
               hideLabel={t('vin.group.hide')}
@@ -304,6 +303,7 @@ export default function RdwRecalls({ brand, model, year, kind }: Props): ReactNo
 
           {(us || complaints) && (
             <VinToggleSection
+              nested
               icon="📂"
               showLabel={t('vin.group.show')}
               hideLabel={t('vin.group.hide')}
