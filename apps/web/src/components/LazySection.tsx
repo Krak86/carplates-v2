@@ -12,6 +12,8 @@ type Props = {
   children: ReactNode
   /** Replaces the default collapsed-header placeholder (before mount and while the chunk loads) — size it like the real section. */
   fallback?: ReactNode
+  /** Mount right away (e.g. a control elsewhere on the card asks for this section). */
+  forceMount?: boolean
 }
 
 // Pre-load a screenful early so the section is ready by the time it scrolls in.
@@ -31,7 +33,7 @@ function SectionPlaceholder(): ReactNode {
  * placeholder. Latched: once mounted it stays mounted. Sections in the shared-link path need no extra scroll logic —
  * each already scrolls itself into view when it mounts.
  */
-export default function LazySection({ sections = [], children, fallback }: Props): ReactNode {
+export default function LazySection({ sections = [], children, fallback, forceMount = false }: Props): ReactNode {
   const placeholder = fallback ?? <SectionPlaceholder />
   const [searchParams] = useSearchParams()
   const target = searchParams.get('section')
@@ -39,7 +41,7 @@ export default function LazySection({ sections = [], children, fallback }: Props
   const [visible, setVisible] = useState(false)
   const [node, setNode] = useState<HTMLDivElement | null>(null)
 
-  if (isShared && !visible) setVisible(true)
+  if ((isShared || forceMount) && !visible) setVisible(true)
 
   useEffect(() => {
     if (visible || !node) return

@@ -1,178 +1,58 @@
-import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
-import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { useSearchParams } from 'react-router'
 import type { Currency } from '@carplates/shared'
 
-import CopyButton from '@/components/CopyButton'
-import { effectiveCurrency, formatMoneyCopy, formatMoneyRange, ukrPrice } from '@/components/EstimatedValue.helpers'
-import InfoPopover from '@/components/InfoPopover'
-import { cn } from '@/lib/cn'
-import { fxQuery, rdwQuery } from '@/lib/queries'
-import { scrollElementIntoView } from '@/lib/share-section'
+import EstimatedValuePill from '@/components/EstimatedValuePill'
+import { useEstimatedValue, type ValueInput } from '@/components/use-estimated-value'
 
-// Closed parts load on demand: the panel on first open (or hover / focus of the chevron), the popover bodies on first show.
-const loadPanel = (): Promise<typeof import('@/components/EstimatedValuePanel')> =>
-  import('@/components/EstimatedValuePanel')
-const EstimatedValuePanel = lazy(loadPanel)
-const EstimatedValueTip = lazy(() => import('@/components/EstimatedValueTip'))
-const EstimatedValueDetails = lazy(() => import('@/components/EstimatedValueDetails'))
+// Hovering / focusing the chevron warms the section's chunk, so the scroll lands on a ready section.
+const loadSection = (): Promise<typeof import('@/components/EstimatedValueSection')> =>
+  import('@/components/EstimatedValueSection')
 
-type Props = {
-  brand: string | null
-  model: string | null
-  year: number | null
-  /** Registry kind text (ЛЕГКОВИЙ, МОТОЦИКЛ …): picks which RDW vehicle kinds the model may match. */
-  kind?: string | null
-  /** Registry fuel text and engine capacity: the inputs to Ukrainian excise. */
-  fuel?: string | null
-  capacity?: number | null
+type Props = ValueInput & {
+  currency: Currency
+  /** The chevron: mount the Estimated value section, open it and scroll to it. */
+  onOpenSection: () => void
 }
 
 /**
- * Green "~ € X–Y" chip: the EU value estimate (Dutch new price x depreciation curve) plus Ukrainian customs — what the
- * car would cost to import today. A chevron opens the clean EU value, the duty / excise / VAT breakdown, the NBU
- * currency switch and the caveats; a "?" explains everything. Shares the Specs block's `/api/rdw` query; renders
- * nothing while loading, on error or when there is no RDW price to start from.
+ * Green "~ € X–Y" chip in the card header: the EU value estimate (Dutch new price x depreciation curve) plus Ukrainian
+ * customs. The chevron scrolls to the "Estimated value" section, which holds the breakdown, the NBU currency switch,
+ * the per-fuel table and the charts. Shares the Specs block's `/api/rdw` query; renders nothing while loading, on error
+ * or when there is no RDW price to start from.
  */
-export default function EstimatedValueChip({ brand, model, year, kind, fuel, capacity }: Props): ReactNode {
-  const { t, i18n } = useTranslation()
-  const [searchParams] = useSearchParams()
-  const isShared = searchParams.get('section') === 'value'
-  const [open, setOpen] = useState(() => isShared)
-  // The panel is mounted (and its chunk fetched) on first open and then kept, so closing still animates.
-  const [panelRequested, setPanelRequested] = useState(() => isShared)
-  const sectionRef = useRef<HTMLDivElement>(null)
-  const [wanted, setWanted] = useState<Currency>('EUR')
-  const { data } = useQuery({
-    ...rdwQuery(brand ?? '', model ?? '', year ?? 0, kind),
-    enabled: !!(brand && model && year)
-  })
-  const match = data?.match
-  const estimate = match?.valueEstimate
-  const hasEstimate = !!estimate
-  // The NBU rates feed the currency switch and the hryvnia part of the copy button; until they arrive (or if they fail)
-  // the chip stays in euros.
-  const fxResult = useQuery({ ...fxQuery(), enabled: hasEstimate })
-  const fx = fxResult.data ?? null
+export default function EstimatedValueChip({ currency, onOpenSection, ...input }: Props): ReactNode {
+  const { t } = useTranslation()
+  const value = useEstimatedValue(input, currency)
 
-  // A shared link opens the panel (initial state) and scrolls to it once the estimate has rendered.
-  useEffect(() => {
-    if (isShared && hasEstimate && sectionRef.current) scrollElementIntoView(sectionRef.current)
-  }, [isShared, hasEstimate])
-
-  if (!match || !estimate || !year) return null
-
-  const locale = i18n.language === 'ua' ? 'uk' : i18n.language
-  const currency = effectiveCurrency(wanted, fx)
-  const price = ukrPrice(match, estimate, { fuel, capacityCc: capacity, makeYear: year }, new Date().getFullYear())
-  const range = formatMoneyRange(price.low.totalEur, price.high.totalEur, currency, fx, locale)
-  const rough = estimate.rough || estimate.extrapolated
-
-  function handleToggle(): void {
-    setPanelRequested(true)
-    setOpen(v => !v)
-  }
+  if (!value) return null
 
   return (
     <div className="mt-1.5">
-      <div className="flex flex-wrap items-center justify-end gap-1.5">
-        <InfoPopover
-          label={t('value.chipHint')}
-          title={t('value.title')}
-          triggerClassName="inline-flex cursor-help items-center gap-1 rounded-full bg-emerald-500/15 px-3 py-0.5 text-base font-semibold text-emerald-800 dark:text-emerald-300"
-          trigger={
-            <>
-              {range}
-              <span aria-hidden>💶</span>
-              {rough && <span aria-hidden>⚠️</span>}
-            </>
-          }
-        >
-          <Suspense fallback={null}>
-            <EstimatedValueTip
-              match={match}
-              estimate={estimate}
-              price={price}
-              currency={currency}
-              fx={fx}
-              locale={locale}
-            />
-          </Suspense>
-        </InfoPopover>
-
-        <CopyButton
-          text={formatMoneyCopy(price.low.totalEur, price.high.totalEur, currency, fx, locale)}
-          label={t('value.title')}
-          className="size-6 justify-center rounded-full bg-emerald-500/15 text-emerald-800 hover:bg-emerald-500/30 hover:text-emerald-800 dark:text-emerald-300 dark:hover:text-emerald-300"
-        />
-
-        <button
-          type="button"
-          aria-expanded={open}
-          aria-controls="value-breakdown"
-          aria-label={t(open ? 'value.ua.collapse' : 'value.ua.expand')}
-          onClick={handleToggle}
-          onPointerEnter={() => void loadPanel()}
-          onFocus={() => void loadPanel()}
-          className="inline-flex size-6 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-800 hover:bg-emerald-500/30 dark:text-emerald-300"
-        >
-          <svg
-            viewBox="0 0 12 12"
-            aria-hidden
-            className={cn(
-              'size-3 transition-transform duration-300 ease-out motion-reduce:transition-none',
-              open && 'rotate-180'
-            )}
+      <EstimatedValuePill
+        value={value}
+        trailing={
+          <button
+            type="button"
+            aria-label={t('value.ua.expand')}
+            onClick={onOpenSection}
+            onPointerEnter={() => void loadSection()}
+            onFocus={() => void loadSection()}
+            className="inline-flex size-6 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-800 hover:bg-emerald-500/30 dark:text-emerald-300"
           >
-            <path
-              d="M2 4.5 6 8.5 10 4.5"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={1.8}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
-
-        <InfoPopover label={t('vin.info.about', { field: t('value.title') })} title={t('value.title')}>
-          <Suspense fallback={null}>
-            <EstimatedValueDetails match={match} estimate={estimate} locale={locale} />
-          </Suspense>
-        </InfoPopover>
-      </div>
-
-      {/* grid-rows 0fr -> 1fr animates the height; opacity + translate (compositor-only) carry the visible motion. */}
-      <div
-        id="value-breakdown"
-        ref={sectionRef}
-        aria-hidden={!open}
-        inert={!open}
-        className={cn(
-          'grid transition-[grid-template-rows,opacity,translate] duration-300 ease-out will-change-[opacity,translate] motion-reduce:transition-none',
-          open ? 'mt-1.5 mb-4 translate-y-0 grid-rows-[1fr] opacity-100' : '-translate-y-1 grid-rows-[0fr] opacity-0'
-        )}
-      >
-        <div className="overflow-hidden">
-          {panelRequested && (
-            <Suspense fallback={<p className="p-2 text-sm text-[var(--color-muted)]">{t('result.loading')}</p>}>
-              <EstimatedValuePanel
-                match={match}
-                estimate={estimate}
-                price={price}
-                fuel={fuel}
-                makeYear={year}
-                currency={currency}
-                onCurrencyChange={setWanted}
-                fx={fx}
-                locale={locale}
+            <svg viewBox="0 0 12 12" aria-hidden className="size-3">
+              <path
+                d="M2 4.5 6 8.5 10 4.5"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={1.8}
+                strokeLinecap="round"
+                strokeLinejoin="round"
               />
-            </Suspense>
-          )}
-        </div>
-      </div>
+            </svg>
+          </button>
+        }
+      />
     </div>
   )
 }

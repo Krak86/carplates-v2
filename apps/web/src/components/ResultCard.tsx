@@ -10,7 +10,7 @@ import {
   resolveVehicleKind,
   VEHICLE_COLOR_HEX
 } from '@carplates/shared'
-import type { PlateLookupResponse } from '@carplates/shared'
+import type { Currency, PlateLookupResponse } from '@carplates/shared'
 
 import BrandLogo from '@/components/BrandLogo'
 import BrandSiteChip from '@/components/BrandSiteChip'
@@ -69,6 +69,7 @@ const VehiclePhotos = lazy(() => import('@/components/VehiclePhotos'))
 const VideoReviews = lazy(() => import('@/components/VideoReviews'))
 const ReviewLinks = lazy(() => import('@/components/ReviewLinks'))
 const FuelEconomy = lazy(() => import('@/components/FuelEconomy'))
+const EstimatedValueSection = lazy(() => import('@/components/EstimatedValueSection'))
 const RdwSpecs = lazy(() => import('@/components/RdwSpecs'))
 const RdwRecalls = lazy(() => import('@/components/RdwRecalls'))
 const OpenEv = lazy(() => import('@/components/OpenEv'))
@@ -107,6 +108,9 @@ export default function ResultCard({ data }: Props): ReactNode {
   const [showVin, setShowVin] = useState(() => isSharedVin)
   const isSharedBasic = searchParams.get('section') === 'basic'
   const [showBasic, setShowBasic] = useState(true)
+  // The header chip's chevron and the Estimated value section share the currency; each chevron click bumps the signal.
+  const [valueCurrency, setValueCurrency] = useState<Currency>('EUR')
+  const [valueOpenSignal, setValueOpenSignal] = useState(0)
   const basicRef = useRef<HTMLDivElement>(null)
   const historyRef = useRef<HTMLDivElement>(null)
   const vinRef = useRef<HTMLDivElement>(null)
@@ -270,6 +274,8 @@ export default function ResultCard({ data }: Props): ReactNode {
           kind={c.kind}
           fuel={c.fuel}
           capacity={c.capacity}
+          currency={valueCurrency}
+          onOpenSection={() => setValueOpenSignal(n => n + 1)}
         />
 
         <PlateSegments plate={data.plate} region={data.region} />
@@ -510,6 +516,19 @@ export default function ResultCard({ data }: Props): ReactNode {
             kind={c.kind}
             fuel={c.fuel}
             own={{ powerKw: c.powerKwt, displacementCc: c.capacity, massKg: c.ownWeight, grossMassKg: c.totalWeight }}
+          />
+        </LazySection>
+        <LazySection sections={['value']} forceMount={valueOpenSignal > 0}>
+          <EstimatedValueSection
+            brand={c.brand}
+            model={c.model}
+            year={c.makeYear}
+            kind={c.kind}
+            fuel={c.fuel}
+            capacity={c.capacity}
+            currency={valueCurrency}
+            onCurrencyChange={setValueCurrency}
+            openSignal={valueOpenSignal}
           />
         </LazySection>
         <LazySection sections={['recalls']}>
