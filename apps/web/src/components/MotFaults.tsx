@@ -147,8 +147,15 @@ export default function MotFaults({ brand, model, year, kind }: Props): ReactNod
                     <MarketFlag market="GB" />
                     {t('mot.ukOnly')}
                   </span>
+                  {match.crossMake && (
+                    <span className="inline-flex items-center gap-1 rounded-full border border-[var(--color-border)] px-2 py-0.5 text-xs font-normal">
+                      <span aria-hidden>🏷️</span>
+                      {t('mot.aka', { name })}
+                    </span>
+                  )}
                 </p>
                 <p>{t('mot.what.body')}</p>
+                {match.crossMake && <p>{t('mot.info.crossMake', { name })}</p>}
                 <p className="text-[var(--color-muted)]">{t('mot.what.uk')}</p>
                 <p className="text-[var(--color-muted)]">
                   {t('mot.sample', { name, tests: formatTests(match.tests), years })}

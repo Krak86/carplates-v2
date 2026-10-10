@@ -1746,6 +1746,7 @@
   "mot.info.lead": "UK MOT inspection results for {{name}}: how often this model fails the yearly test, and for what, at each mileage.",
   "mot.info.model": "Model-level statistics from real UK tests of right-hand-drive cars on UK roads — not a forecast for this particular car.",
   "mot.info.crossMake": "In the UK this model is sold as {{name}}.",
+  "mot.aka": "UK name: {{name}}",
   "mot.info.credit": "Data: DVSA anonymised MOT results (data.gov.uk), Open Government Licence v3.0.",
   "mot.what.title": "What is this?",
   "mot.what.body": "The MOT is the yearly roadworthiness test every UK car over three years old must pass. These are anonymous results of millions of real tests: what made the car fail, and what the tester only noted as \"worn, watch for it\" (an advisory).",

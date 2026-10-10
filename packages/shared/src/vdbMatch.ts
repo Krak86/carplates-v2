@@ -250,6 +250,15 @@ export function displayAliases(aliases: readonly string[], modelName: string): s
   return aliases.filter(a => /[a-z]/i.test(a) && modelKey(a) !== own)
 }
 
+/** Makes sold under another badge elsewhere (UK: Opel → Vauxhall): registry make key → the other make's display name. */
+export const MARKET_MAKE_SYNONYMS: Readonly<Record<string, string>> = { opel: 'Vauxhall', vauxhall: 'Opel' }
+
+/** "Vauxhall Astra" for an Opel Astra: the same car under its other-market make, `[]` for makes without one. */
+export function makeSynonymAliases(mk: string, modelName: string): string[] {
+  const make = MARKET_MAKE_SYNONYMS[mk]
+  return make ? [`${make} ${modelName}`] : []
+}
+
 /** True when the model is sold in Ukraine's own register but in no other country — a UA-only nameplate. */
 export function isUkraineOnly(row: Pick<VdbReferenceRow, 'countries'>): boolean {
   return row.countries.length > 0 && row.countries.every(c => c === 'ua')

@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@nestjs/common'
 import { motBaseline, motIssues, motKeys, motMeta, motReasons, motStats } from '@carplates/db'
 import type { MotCounts } from '@carplates/db'
 import {
+  MARKET_MAKE_SYNONYMS,
   MOT_BAND_EDGES_KM,
   MOT_GROUP_CODES,
   MOT_MIN_BAND_TESTS,
@@ -23,7 +24,7 @@ const KINDS_BY_CLASS: Readonly<Partial<Record<VdbVehicleClass, readonly MotKind[
 }
 
 /** The UK sells Opel cars as Vauxhall; the MOT files know them only by that name. */
-const MOT_MAKE_ALIASES: Readonly<Record<string, string>> = { opel: 'vauxhall' }
+const MOT_MAKE_ALIASES: Readonly<Record<string, string>> = { opel: makeKey(MARKET_MAKE_SYNONYMS.opel!)! }
 
 /** Model years around the car's: first ± 2, then ± 5, then every year, until the window holds `MIN_WINDOW_TESTS` tests. */
 const WINDOW_RADII = [2, 5] as const

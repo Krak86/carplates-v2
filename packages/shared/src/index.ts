@@ -240,6 +240,8 @@ export {
   matchVdbModel,
   matchVdbModelAcrossMakes,
   displayAliases,
+  MARKET_MAKE_SYNONYMS,
+  makeSynonymAliases,
   isUkraineOnly,
   otherMarkets,
   type ModelReferenceRow,

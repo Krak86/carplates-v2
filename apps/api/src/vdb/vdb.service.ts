@@ -4,6 +4,7 @@ import {
   displayAliases,
   isUkraineOnly,
   makeKey,
+  makeSynonymAliases,
   matchVdbModelAcrossMakes,
   vdbCatalogKinds,
   vdbRelatedMakeKeys,
@@ -48,7 +49,9 @@ export class VdbService {
         globalDecile: row.globalDecile,
         uaOnly: isUkraineOnly(row),
         crossMake: row.makeKey !== mk,
-        aliases: displayAliases(row.aliases, row.modelName)
+        aliases: [
+          ...new Set([...makeSynonymAliases(mk, row.modelName), ...displayAliases(row.aliases, row.modelName)])
+        ].filter(a => a.toLowerCase() !== `${row.makeName} ${row.modelName}`.toLowerCase())
       }
     }
   }
