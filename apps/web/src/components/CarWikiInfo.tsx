@@ -18,6 +18,9 @@ type Props = {
   year: number | null
 }
 
+/** Wikipedia subdomain → chip label (Ukrainian's subdomain is `uk`, the app's code `ua`). */
+const WIKI_LANG_CHIP: Readonly<Record<string, string>> = { uk: 'UA', ru: 'RU', en: 'EN' }
+
 /**
  * Wikipedia summary toggle — the article text is fetched only once the section is opened (the hero
  * photo has its own lightweight query, see `useCarHeroImageActions`). The trigger stays mounted
@@ -29,10 +32,14 @@ export default function CarWikiInfo({ brand, model, year }: Props): ReactNode {
   const isSharedWiki = searchParams.get('section') === 'wiki'
   const [open, setOpen] = useState(() => isSharedWiki)
   const [expanded, setExpanded] = useState(false)
+  const [showFallback, setShowFallback] = useState(false)
   const sectionRef = useRef<HTMLDivElement>(null)
   const hasQuery = !!(brand || model)
   const wiki = useQuery({ ...wikiInfoQuery(brand ?? '', model ?? '', i18n.language, year), enabled: hasQuery && open })
   const data = wiki.isSuccess ? wiki.data : null
+  // The article exists only in another edition: its text stays behind a language chip until clicked.
+  const isFallback = !!data?.articleLang && data.articleLang !== wikiDomain(i18n.language)
+  const textVisible = !isFallback || showFallback
 
   useEffect(() => {
     if (isSharedWiki && sectionRef.current) scrollElementIntoView(sectionRef.current)
@@ -73,19 +80,35 @@ export default function CarWikiInfo({ brand, model, year }: Props): ReactNode {
       >
         <div className="overflow-hidden">
           <div className="mt-3">
-            {wiki.isError && <p className="text-base text-[var(--color-muted)]">{t('wiki.unavailable')}</p>}
-            {data && !data.found && <p className="text-base text-[var(--color-muted)]">{t('wiki.none')}</p>}
+            {wiki.isError && <p className="text-base text-muted">{t('wiki.unavailable')}</p>}
+            {data && !data.found && <p className="text-base text-muted">{t('wiki.none')}</p>}
 
             {data?.found && (
               <div>
                 {data.description && (
-                  <p className="mb-1 text-sm text-[var(--color-muted)]">
+                  <p className="mb-1 text-sm text-muted">
                     {[data.title, data.description].filter(Boolean).join(' — ')}
                   </p>
                 )}
-                {data.extract && <p className="text-base whitespace-pre-line">{data.extract}</p>}
+                {isFallback && (
+                  <div className="mb-1 flex flex-wrap items-center gap-2 text-sm text-muted">
+                    <span>{t('wiki.otherLang')}</span>
+                    <button
+                      type="button"
+                      onClick={() => setShowFallback(v => !v)}
+                      aria-expanded={showFallback}
+                      className="inline-flex cursor-pointer items-center gap-1 rounded-full border border-border px-3 py-0.5 font-medium transition-colors hover:text-fg"
+                    >
+                      {WIKI_LANG_CHIP[data.articleLang ?? ''] ?? data.articleLang?.toUpperCase()}
+                      <span aria-hidden className={cn('transition-transform', showFallback && 'rotate-180')}>
+                        ▾
+                      </span>
+                    </button>
+                  </div>
+                )}
+                {data.extract && textVisible && <p className="text-base whitespace-pre-line">{data.extract}</p>}
 
-                {data.more && (
+                {data.more && textVisible && (
                   <>
                     <div
                       className={cn(
@@ -124,11 +147,7 @@ export default function CarWikiInfo({ brand, model, year }: Props): ReactNode {
                   </>
                 )}
 
-                {data.articleLang && data.articleLang !== wikiDomain(i18n.language) && (
-                  <p className="mt-1 text-sm text-[var(--color-muted)]">{t('wiki.inEnglish')}</p>
-                )}
-
-                <div className="mt-1 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-sm text-[var(--color-muted)]">
+                <div className="mt-1 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-sm text-muted">
                   {data.pageUrl && (
                     <a
                       href={data.pageUrl}

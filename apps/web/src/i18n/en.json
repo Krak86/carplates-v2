@@ -349,7 +349,7 @@
   "wiki.source": "Read more on Wikipedia",
   "wiki.readMore": "Read more…",
   "wiki.readLess": "Show less",
-  "wiki.inEnglish": "No article in your language — showing the English one.",
+  "wiki.otherLang": "No article in your language. Available in another one:",
   "wiki.imageCredit": "Photo: {{credit}}",
   "wiki.noImage": "No photo available",
   "wiki.imageCreditBg": "Background photo: {{credit}}",

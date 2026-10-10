@@ -492,7 +492,7 @@ export const wikiInfoResponseSchema = z.object({
   description: z.string().nullable().optional(),
   /** Sections after the intro, behind the UI's "Read more"; headings are `## Title` lines. */
   more: z.string().nullable().optional(),
-  /** Wikipedia edition the article came from (`uk`/`ru`/`en`) — differs from the UI language after the English fallback. */
+  /** Wikipedia edition the article came from (`uk`/`ru`/`en`) — differs from the UI language after a fallback (ua → uk, ru, en · ru → ru, uk, en · en → en, uk, ru). */
   articleLang: z.string().nullable().optional(),
   pageUrl: z.string().nullable(),
   image: wikiImageSchema.nullable()

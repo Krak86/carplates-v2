@@ -13,6 +13,7 @@ import {
   shapeWikiExtract,
   titleMentionsModel,
   wikiDomain,
+  wikiDomainChain,
   wikiImageFromInfo,
   wikiImageFromRow,
   wikiImageKey,
@@ -76,8 +77,8 @@ export class WikiService {
     const cached = this.cache.get(cacheKey)
     if (cached) return cached
 
-    // The UI-language edition first, then English — a rare model often has an article only there.
-    const domains = domain === 'en' ? [domain] : [domain, 'en']
+    // The UI-language edition first, then the other two (ua → uk, ru, en) — a rare model often has an article in one only.
+    const domains = wikiDomainChain(lang)
     let page: WikipediaPage | null = null
     let articleDomain = domain
     try {

@@ -811,7 +811,7 @@
   "wiki.source": "Читать в Википедии",
   "wiki.readMore": "Читать далее…",
   "wiki.readLess": "Свернуть",
-  "wiki.inEnglish": "Статьи на вашем языке нет — показана английская.",
+  "wiki.otherLang": "Статьи на вашем языке нет. Есть на другом языке:",
   "wiki.imageCredit": "Фото: {{credit}}",
   "wiki.noImage": "Фото отсутствует",
   "wiki.imageCreditBg": "Фото на фоне: {{credit}}",

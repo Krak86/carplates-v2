@@ -24,6 +24,17 @@ export function wikiDomain(lang: string): string {
   return WIKI_LANG_DOMAIN[lang] ?? 'en'
 }
 
+/** Editions tried for an article, in order: the UI language first, then the other two (ua → uk, ru, en · ru → ru, uk, en · en → en, uk, ru). */
+const WIKI_FALLBACK_CHAINS: Readonly<Record<string, readonly string[]>> = {
+  ua: ['uk', 'ru', 'en'],
+  ru: ['ru', 'uk', 'en'],
+  en: ['en', 'uk', 'ru']
+}
+
+export function wikiDomainChain(lang: string): readonly string[] {
+  return WIKI_FALLBACK_CHAINS[lang] ?? WIKI_FALLBACK_CHAINS.en!
+}
+
 /** Wikipedia search-and-go link for a raw registry brand + model, or `null` when neither is known. */
 export function wikiUrl(
   brand: string | null | undefined,

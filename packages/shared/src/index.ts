@@ -58,7 +58,7 @@ export { VEHICLE_FUELS, resolveFuelCategories, fuelKeyword, type VehicleFuel } f
 export { brandLogoUrl, brandSlug } from './brandLogo.js'
 export { dealerUrl, newCarsUrl, usedCarsUrl } from './dealerUrl.js'
 export { showcaseModels } from './newCarShowcase.js'
-export { wikiUrl, wikiDomain } from './wikiUrl.js'
+export { wikiUrl, wikiDomain, wikiDomainChain } from './wikiUrl.js'
 export {
   hasStandaloneYear,
   isModelYearTitle,

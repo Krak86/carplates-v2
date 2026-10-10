@@ -152,7 +152,7 @@ describe('WikiService', () => {
       const url = String(input)
       if (url.includes('commons.wikimedia.org')) return jsonResponse({ query: {} })
       if (url.includes('pithumbsize')) return jsonResponse(leadPayload)
-      return url.includes('uk.wikipedia.org') ? jsonResponse({ query: {} }) : jsonResponse(textPayload)
+      return url.includes('en.wikipedia.org') ? jsonResponse(textPayload) : jsonResponse({ query: {} })
     })
     const { service } = makeService()
 
@@ -163,6 +163,22 @@ describe('WikiService', () => {
       articleLang: 'en',
       pageUrl: 'https://en.wikipedia.org/wiki/Toyota_Camry'
     })
+  })
+
+  it('tries uk, then ru, then en for a Ukrainian UI and takes the first edition with the article', async () => {
+    vi.mocked(fetch).mockImplementation(async input => {
+      const url = String(input)
+      if (url.includes('commons.wikimedia.org')) return jsonResponse({ query: {} })
+      if (url.includes('pithumbsize')) return jsonResponse(leadPayload)
+      return url.includes('ru.wikipedia.org') ? jsonResponse(textPayload) : jsonResponse({ query: {} })
+    })
+    const { service } = makeService()
+
+    const result = await service.lookup('Toyota', 'Camry', 'ua')
+
+    expect(result).toMatchObject({ found: true, articleLang: 'ru' })
+    const hosts = vi.mocked(fetch).mock.calls.map(([url]) => new URL(String(url)).host)
+    expect(hosts.slice(0, 2)).toEqual(['uk.wikipedia.org', 'ru.wikipedia.org'])
   })
 
   it('maps a UA language code to the uk.wikipedia.org domain, but takes the photo from the English article', async () => {
@@ -186,7 +202,7 @@ describe('WikiService', () => {
   })
 
   it('returns found: false, without touching the image API, when the search has no results', async () => {
-    vi.mocked(fetch).mockResolvedValue(jsonResponse({ query: { pages: {} } }))
+    vi.mocked(fetch).mockImplementation(async () => jsonResponse({ query: { pages: {} } }))
     const { service } = makeService()
 
     expect(await service.lookup('Asdfgh', 'Qwerty', 'en')).toEqual({
@@ -197,7 +213,7 @@ describe('WikiService', () => {
       pageUrl: null,
       image: null
     })
-    expect(fetch).toHaveBeenCalledTimes(1)
+    expect(fetch).toHaveBeenCalledTimes(3)
   })
 
   it('serves a stored year photo with no Wikimedia call besides the article text', async () => {
@@ -339,7 +355,7 @@ describe('WikiService', () => {
   })
 
   it('treats an article whose title lacks the model as not found', async () => {
-    vi.mocked(fetch).mockResolvedValueOnce(
+    vi.mocked(fetch).mockImplementation(async () =>
       jsonResponse({ query: { pages: { '1': { title: 'Mike Schmitz', extract: 'A priest.' } } } })
     )
 
