@@ -12,6 +12,24 @@ export function setTransitionDirection(from: string, to: string): void {
   document.documentElement.dataset.vtDir = routeDepth(to) < routeDepth(from) ? 'back' : 'forward'
 }
 
+/** Runs a synchronous DOM-affecting `update` (flush React inside it) as a view transition, so text that
+ *  changes length morphs the layout instead of jumping. `<html data-vt-dir="lang">` swaps the route
+ *  slide for a plain cross-fade (see global.css). Runs `update` directly without the API / with reduced motion. */
+export function runLangTransition(update: () => void): void {
+  const root = document.documentElement
+  if (!document.startViewTransition || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    update()
+    return
+  }
+  const previousDir = root.dataset.vtDir
+  root.dataset.vtDir = 'lang'
+  const restore = (): void => {
+    if (previousDir) root.dataset.vtDir = previousDir
+    else delete root.dataset.vtDir
+  }
+  document.startViewTransition(update).finished.then(restore, restore)
+}
+
 let marked: HTMLElement | null = null
 
 /** Names `el` as the old side of a shared-element transition for the click that is about to navigate.

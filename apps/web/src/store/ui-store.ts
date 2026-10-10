@@ -1,6 +1,8 @@
+import { flushSync } from 'react-dom'
 import { create } from 'zustand'
 
 import i18n, { initialLang, loadLang, persistLang } from '@/i18n'
+import { runLangTransition } from '@/lib/view-transition'
 import type { Lang } from '@/i18n'
 
 type Theme = 'light' | 'dark'
@@ -84,14 +86,20 @@ export const useUiStore = create<UiState>((set, get) => ({
     // A newer pick superseded this one while it loaded.
     if (get().langLoading !== lang) return
     persistLang(lang)
-    await i18n.changeLanguage(lang)
     // An explicit choice replaces a shared link's ?lang=, so a reload doesn't snap back to it.
     const url = new URL(window.location.href)
     if (url.searchParams.has('lang')) {
       url.searchParams.set('lang', lang)
       window.history.replaceState(window.history.state, '', url)
     }
-    set({ lang, langLoading: null })
+    // Resources are loaded, so changeLanguage emits synchronously; flushSync commits the new text
+    // inside the view-transition callback, where the browser snapshots the "after" state.
+    runLangTransition(() => {
+      flushSync(() => {
+        void i18n.changeLanguage(lang)
+        set({ lang, langLoading: null })
+      })
+    })
   },
   toggleTheme: (): void =>
     set(s => {

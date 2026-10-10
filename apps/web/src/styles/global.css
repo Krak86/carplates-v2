@@ -475,6 +475,17 @@ body {
   --vt-shift: -24px;
 }
 
+/* Language switch: no sideways slide, a short vertical settle; blocks that change height morph
+   (match-element groups animate position + size). */
+:root[data-vt-dir='lang'] {
+  --vt-shift: 0px;
+}
+
+:root[data-vt-dir='lang'] ::view-transition-group(*.vt-section) {
+  animation-duration: 350ms;
+  animation-timing-function: ease-in-out;
+}
+
 .header-vt {
   view-transition-name: site-header;
 }
