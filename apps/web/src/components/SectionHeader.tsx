@@ -42,6 +42,8 @@ export default function SectionHeader({
 
   return (
     <div
+      data-section-header
+      data-open={open || undefined}
       onClick={handleRowClick}
       className={cn(
         'group -mx-3 -my-1 flex min-h-10 flex-wrap items-center justify-between gap-x-2 gap-y-1 rounded-lg px-3 py-1 text-base transition-colors select-none',

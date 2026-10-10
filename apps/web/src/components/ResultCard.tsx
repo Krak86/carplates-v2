@@ -296,6 +296,7 @@ export default function ResultCard({ data }: Props): ReactNode {
 
         <div
           aria-hidden={!showBasic}
+          data-thread={showBasic || undefined}
           className={cn(
             'grid transition-[grid-template-rows] duration-300 ease-in-out',
             showBasic ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'

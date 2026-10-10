@@ -139,6 +139,33 @@ body {
   }
 }
 
+/* Thread line (SectionHeader sets `data-open`): like a comment thread, a thin vertical line runs down the left of an
+   open section's body, under the header's icon. Sub-sections get their own, so nested lines stack; they are lighter. */
+@layer components {
+  [data-section-header][data-open] ~ *,
+  [data-thread] {
+    margin-top: 0.25rem; /* the header row's -my-1 tint hangs this far below it; start the line under it */
+    margin-left: 0.75rem;
+    padding-left: 0.75rem;
+    border-left: 2px solid color-mix(in oklab, var(--color-primary) 35%, var(--color-border));
+    transition: border-color 150ms;
+  }
+
+  [data-section-header][data-open] ~ *:hover,
+  [data-thread]:hover {
+    border-left-color: var(--color-primary);
+  }
+
+  /* Sub-sections: a dotted amber line (the folder colour), so it reads as a different level. */
+  [data-nested] > [data-section-header][data-open] ~ * {
+    border-left: 2px dotted color-mix(in oklab, #f5b301 35%, transparent);
+  }
+
+  [data-nested] > [data-section-header][data-open] ~ *:hover {
+    border-left-color: color-mix(in oklab, #f5b301 60%, transparent);
+  }
+}
+
 @keyframes fade-in {
   from {
     opacity: 0;
