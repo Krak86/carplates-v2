@@ -72,6 +72,18 @@ describe('summarizeComplaints', () => {
     expect(summary).toMatchObject({ total: 2, crashes: 1, fires: 1, injuries: 4, deaths: 1, latestFiled: '2026-09-04' })
     expect(summary.components[0]).toEqual({ name: 'ELECTRICAL SYSTEM', count: 2 })
   })
+
+  it('keeps the comma inside "FUEL SYSTEM, GASOLINE" and "SERVICE BRAKES, HYDRAULIC"', () => {
+    const summary = summarizeComplaints([
+      { components: 'FUEL SYSTEM, GASOLINE,SERVICE BRAKES, HYDRAULIC,STEERING' },
+      { components: 'FUEL SYSTEM, GASOLINE' }
+    ])
+    expect(summary.components).toEqual([
+      { name: 'FUEL SYSTEM, GASOLINE', count: 2 },
+      { name: 'SERVICE BRAKES, HYDRAULIC', count: 1 },
+      { name: 'STEERING', count: 1 }
+    ])
+  })
 })
 
 describe('NhtsaService', () => {

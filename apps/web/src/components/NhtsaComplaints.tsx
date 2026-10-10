@@ -5,6 +5,7 @@ import type { NhtsaComplaintsResponse } from '@carplates/shared'
 import MarketFlag from '@/components/MarketFlag'
 import InfoPopover from '@/components/InfoPopover'
 import InfoText from '@/components/InfoText'
+import { componentKey } from '@/components/NhtsaRecalls.helpers'
 import { formatRecallDate } from '@/components/RdwRecalls.helpers'
 
 type Props = {
@@ -51,15 +52,19 @@ export default function NhtsaComplaints({ data, locale }: Props): ReactNode {
         <>
           <p className="mt-2 text-xs text-[var(--color-muted)]">{t('nhtsa.complaints.components')}</p>
           <ul className="mt-1 flex flex-wrap gap-1">
-            {data.components.map(component => (
-              <li
-                key={component.name}
-                lang="en"
-                className="rounded-full border border-[var(--color-border)] px-2 py-0.5 text-xs"
-              >
-                {component.name} · {number.format(component.count)}
-              </li>
-            ))}
+            {data.components.map(component => {
+              const key = componentKey(component.name)
+              return (
+                <li
+                  key={component.name}
+                  lang={key ? undefined : 'en'}
+                  title={key ? component.name : undefined}
+                  className="rounded-full border border-[var(--color-border)] px-2 py-0.5 text-xs"
+                >
+                  {key ? t(key) : component.name} · {number.format(component.count)}
+                </li>
+              )
+            })}
           </ul>
         </>
       )}

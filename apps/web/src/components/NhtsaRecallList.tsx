@@ -6,6 +6,7 @@ import type { NhtsaComplaintsResponse, NhtsaRecallsResponse } from '@carplates/s
 import MarketFlag from '@/components/MarketFlag'
 import NhtsaComplaints from '@/components/NhtsaComplaints'
 import RdwRecallField from '@/components/RdwRecallField'
+import { componentKey } from '@/components/NhtsaRecalls.helpers'
 import { formatRecallDate, RECALLS_PREVIEW } from '@/components/RdwRecalls.helpers'
 
 type Props = {
@@ -38,6 +39,8 @@ export default function NhtsaRecallList({ data, complaints, locale }: Props): Re
       <ul className="mt-2 divide-y divide-[var(--color-border)]">
         {shown.map(recall => {
           const date = formatRecallDate(recall.publishedAt, locale)
+          const compKey = recall.component ? componentKey(recall.component) : null
+          const componentLabel = compKey ? t(compKey) : null
           return (
             <li key={recall.code} className="py-2">
               <details>
@@ -46,13 +49,25 @@ export default function NhtsaRecallList({ data, complaints, locale }: Props): Re
                     <MarketFlag market="US" className="h-3 w-4" />
                     {t('recalls.market.US')}
                   </span>
-                  <span lang="en">{recall.component ?? recall.code}</span>
+                  {componentLabel ? (
+                    <span>{componentLabel}</span>
+                  ) : (
+                    <span lang="en">{recall.component ?? recall.code}</span>
+                  )}
                   <span className="ml-2 text-xs text-[var(--color-muted)]">
                     {[date, recall.producer].filter(Boolean).join(' · ')}
                   </span>
                 </summary>
 
                 <dl className="mt-2 space-y-2 text-sm">
+                  {recall.component && compKey && (
+                    <RdwRecallField
+                      label={t('nhtsa.component')}
+                      value={recall.component}
+                      lang="en"
+                      info={t('nhtsa.about.component')}
+                    />
+                  )}
                   {recall.summary && (
                     <RdwRecallField
                       label={t('recalls.defect')}

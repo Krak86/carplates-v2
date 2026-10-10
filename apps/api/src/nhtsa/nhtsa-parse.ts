@@ -79,6 +79,9 @@ export function mapRecalls(rows: UpstreamRecall[]): { total: number; recalls: Nh
   return { total: all.length, recalls: all.slice(0, NHTSA_RECALLS_LIMIT) }
 }
 
+/** Complaint components are comma-joined, but "FUEL SYSTEM, GASOLINE" and "SERVICE BRAKES, HYDRAULIC" contain a comma themselves. */
+const COMPONENT_SEPARATOR = /(?<!FUEL SYSTEM|SERVICE BRAKES),/
+
 /** Counts only: crashes, fires, injuries, deaths and the most-named components. The narratives are dropped on purpose. */
 export function summarizeComplaints(
   rows: UpstreamComplaint[]
@@ -99,7 +102,7 @@ export function summarizeComplaints(
     if (filed && (!latestFiled || filed > latestFiled)) latestFiled = filed
     for (const name of new Set(
       (row.components ?? '')
-        .split(',')
+        .split(COMPONENT_SEPARATOR)
         .map(part => part.trim())
         .filter(Boolean)
     )) {
