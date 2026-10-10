@@ -16,6 +16,7 @@ import SyncBanner from '@/components/SyncBanner'
 import { useHeaderVehicleLabel } from '@/components/use-header-vehicle-label'
 import { useUserSettingsActions } from '@/components/use-user-settings-actions'
 import { useBackgroundMode } from '@/hooks/useBackgroundMode'
+import { useScrolledOnRoute } from '@/hooks/useSideWidgetsVisible'
 import { cn } from '@/lib/cn'
 import { setTransitionDirection } from '@/lib/view-transition'
 import { useUiStore } from '@/store/ui-store'
@@ -23,6 +24,7 @@ import { useUiStore } from '@/store/ui-store'
 const loadSidebar = () => import('@/components/Sidebar')
 const Sidebar = lazy(loadSidebar)
 const LiveBackground = lazy(() => import('@/components/LiveBackground'))
+const ScrollButtons = lazy(() => import('@/components/ScrollButtons'))
 
 type Props = {
   children: ReactNode
@@ -34,6 +36,8 @@ export default function Layout({ children }: Props): ReactNode {
   const setDrawerOpen = useUiStore(s => s.setDrawerOpen)
   const vehicleLabel = useHeaderVehicleLabel()
   const backgroundMode = useBackgroundMode()
+  // The scroll buttons' chunk is only fetched once the user first scrolls.
+  const hasScrolled = useScrolledOnRoute()
   useUserSettingsActions()
   const { pathname } = useLocation()
   // Sidebar is lazy-loaded (not part of the LCP path) — stay unmounted until
@@ -149,6 +153,11 @@ export default function Layout({ children }: Props): ReactNode {
         </div>
       </div>
 
+      {hasScrolled && (
+        <Suspense fallback={null}>
+          <ScrollButtons />
+        </Suspense>
+      )}
       <PwaUpdatePrompt />
     </div>
   )

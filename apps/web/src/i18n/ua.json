@@ -3,6 +3,8 @@
   "app.tagline": "Дані про транспортний засіб за номером або VIN",
   "search.placeholder": "Номерний знак або VIN",
   "search.button": "Пошук",
+  "scroll.top": "Нагору",
+  "scroll.collapseAll": "Згорнути всі секції",
   "search.clear": "Очистити",
   "search.advancedToggle": "Розширений пошук",
   "search.advancedHint": "Марка, модель, рік, пальне, колір, тип, регіон",

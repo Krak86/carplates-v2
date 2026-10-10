@@ -3,6 +3,8 @@
   "app.tagline": "Vehicle data by plate number or VIN",
   "search.placeholder": "Plate number or VIN",
   "search.button": "Search",
+  "scroll.top": "Back to top",
+  "scroll.collapseAll": "Collapse all sections",
   "search.clear": "Clear",
   "search.advancedToggle": "Advanced search",
   "search.advancedHint": "Make, model, year, fuel, colour, kind, region",

@@ -49,3 +49,16 @@ export function useScrolledOnRoute(): boolean {
 
   return scrolledPath === pathname
 }
+
+/** True while the page is scrolled past the threshold; unlike the latched hooks above it flips back at the top. */
+export function useScrolledNow(): boolean {
+  const [scrolled, setScrolled] = useState<boolean>(() => window.scrollY > SHOW_AFTER_SCROLL_PX)
+
+  useEffect(() => {
+    const handleScroll = (): void => setScrolled(window.scrollY > SHOW_AFTER_SCROLL_PX)
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return (): void => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  return scrolled
+}
