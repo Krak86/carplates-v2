@@ -2,6 +2,11 @@
 
 Auto-loaded via @import in CLAUDE.md (comment it out there to save tokens).
 
+## Environment
+
+**No Python on this machine.** For bulk or scripted edits use the Edit tool (`replace_all` where it fits), or a Node/`tsx`
+one-off — never `python`/`python3`. Don't announce this each time; just do it.
+
 ## Code Standards
 
 **Formatting** (enforced by `.prettierrc`): tabWidth 2, singleQuote, no semi,
