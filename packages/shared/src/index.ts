@@ -213,10 +213,14 @@ export {
 } from './rdwRecalls.js'
 export {
   CA_RECALLS_LIMIT,
+  caHeading,
   caRecallSchema,
   caRecallsResponseSchema,
+  joinCaText,
+  splitCaText,
   type CaRecall,
-  type CaRecallsResponse
+  type CaRecallsResponse,
+  type CaTextSection
 } from './caRecalls.js'
 export {
   NHTSA_COMPLAINT_COMPONENTS,

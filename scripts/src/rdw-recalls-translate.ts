@@ -11,7 +11,8 @@
  *   pnpm ingest:rdw-recalls:translate -- --make toyota --model camry         # one model's campaigns (keys as in the registry)
  *   pnpm ingest:rdw-recalls:translate -- --limit 50 --dump ./pilot.md        # translate 50 texts to a file, no DB writes
  *   pnpm ingest:rdw-recalls:translate -- --limit 1000                       # slices: the next 1000 texts still missing
- *   flags: --offset N (skip N of the missing texts) · --langs en,uk,ru · --engine nllb-600m-pivot · --device dml|cpu (cpu = q8) · --direct (no English pivot) · --gloss
+ *   pnpm ingest:ca-recalls:translate -- --max-minutes 60                     # Transport Canada (English) -> uk, ru, per section
+ *   flags: --source rdw|ca · --offset N (skip N of the missing texts) · --langs en,uk,ru · --engine nllb-600m-pivot · --device dml|cpu (cpu = q8) · --direct (no English pivot) · --gloss
  *
  * A segment whose output looks degenerate (empty, runaway length, repeated phrases) is retried once with a harsher repetition
  * penalty; if it still fails, the whole text gets NO row for that language and keeps showing the Dutch original.
@@ -20,7 +21,8 @@ import { writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { createDb, rdwRecallModels, rdwRecalls, rdwRecallTexts, recallTextHash } from '@carplates/db'
+import { caRecalls, createDb, rdwRecallModels, rdwRecalls, rdwRecallTexts, recallTextHash } from '@carplates/db'
+import { splitCaText } from '@carplates/shared'
 import { env, pipeline } from '@huggingface/transformers'
 import { and, eq } from 'drizzle-orm'
 
@@ -31,6 +33,8 @@ const NLLB: Record<string, string> = { en: 'eng_Latn', uk: 'ukr_Cyrl', ru: 'rus_
 const CHUNK = 100 // texts per save point
 
 type Args = {
+  /** `rdw`: Dutch campaign texts; `ca`: Transport Canada's English text, translated section by section. */
+  source: 'rdw' | 'ca'
   langs: string[]
   make?: string
   model?: string
@@ -45,11 +49,21 @@ type Args = {
 }
 
 function parseArgs(argv: string[]): Args {
-  const a: Args = { langs: ['en', 'uk', 'ru'], device: 'dml', engine: 'nllb-600m-pivot', gloss: false, pivot: true }
+  const a: Args = {
+    source: 'rdw',
+    langs: ['en', 'uk', 'ru'],
+    device: 'dml',
+    engine: 'nllb-600m-pivot',
+    gloss: false,
+    pivot: true
+  }
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i]
     if (arg === '--langs') a.langs = (argv[++i] ?? '').split(',').filter(l => NLLB[l])
-    else if (arg === '--make') a.make = argv[++i]
+    else if (arg === '--source') {
+      a.source = argv[++i] === 'ca' ? 'ca' : 'rdw'
+      if (a.source === 'ca') a.langs = ['uk', 'ru']
+    } else if (arg === '--make') a.make = argv[++i]
     else if (arg === '--model') a.model = argv[++i]
     else if (arg === '--limit') a.limit = Number(argv[++i])
     else if (arg === '--offset') a.offset = Number(argv[++i])
@@ -129,6 +143,8 @@ async function main(): Promise<void> {
   const deadline = args.maxMinutes ? Date.now() + args.maxMinutes * 60_000 : Infinity
   const { db, close } = createDb()
   try {
+    const from = args.source === 'ca' ? 'en' : 'nl'
+    const texts = new Map<string, string>() // hash -> normalized source text
     let query = db
       .selectDistinct({ defect: rdwRecalls.defect, consequences: rdwRecalls.consequences, remedy: rdwRecalls.remedy })
       .from(rdwRecalls)
@@ -138,13 +154,18 @@ async function main(): Promise<void> {
         .innerJoin(rdwRecallModels, eq(rdwRecallModels.referenceCode, rdwRecalls.referenceCode))
         .where(and(eq(rdwRecallModels.makeKey, args.make), eq(rdwRecallModels.modelKey, args.model)))
     }
-    const rows = await query
-    const texts = new Map<string, string>() // hash -> normalized Dutch text
+    const rows = args.source === 'ca' ? [] : await query
     for (const r of rows) {
       for (const t of [r.defect, r.consequences, r.remedy]) {
         const text = t?.replace(/\s+/g, ' ').trim()
         if (text) texts.set(recallTextHash(text), text)
       }
+    }
+    if (args.source === 'ca') {
+      // Each heading's body is a text of its own (hashed alone), so boilerplate repeated across campaigns is done once.
+      const caRows = await db.selectDistinct({ comment: caRecalls.comment }).from(caRecalls)
+      for (const r of caRows) for (const s of splitCaText(r.comment ?? '')) texts.set(recallTextHash(s.body), s.body)
+      rows.length = caRows.length
     }
     log(`${rows.length} campaign text set(s) -> ${texts.size} distinct text(s)`)
 
@@ -195,7 +216,7 @@ async function main(): Promise<void> {
         const cache = byLang.get(lang)!
         const need = [...new Set(mine.flatMap(([h]) => pieces.get(h)!))].filter(s => !cache.has(s))
 
-        if (args.pivot && lang !== 'en') {
+        if (args.source === 'rdw' && args.pivot && lang !== 'en') {
           const missingEn = need.filter(s => !english.has(s))
           const en = await translate(missingEn, 'en')
           missingEn.forEach((s, i) => english.set(s, en[i] ?? null))
@@ -208,7 +229,7 @@ async function main(): Promise<void> {
           viaEn.forEach((s, i) => cache.set(s, out[i] ?? null))
           for (const s of need) if (!cache.has(s)) cache.set(s, null)
         } else {
-          const out = await translate(need, lang)
+          const out = await translate(need, lang, from)
           need.forEach((s, i) => {
             cache.set(s, out[i] ?? null)
             if (lang === 'en') english.set(s, out[i] ?? null)
@@ -220,14 +241,16 @@ async function main(): Promise<void> {
           const parts = pieces.get(h)!.map(s => cache.get(s) ?? null)
           if (parts.some(p => p === null)) {
             failed++
-            log(`  ${lang}: no usable translation, keeping Dutch: ${original.slice(0, 80)}`)
+            log(`  ${lang}: no usable translation, keeping the original:${original.slice(0, 80)}`)
             continue
           }
           results.push({ hash: h, original, text: parts.join(' ') })
         }
         if (args.dump) {
           for (const r of results)
-            dumpRows.push(`### ${lang}\n**NL:** ${r.original}\n\n**${lang.toUpperCase()}:** ${r.text}\n`)
+            dumpRows.push(
+              `### ${lang}\n**${from.toUpperCase()}:** ${r.original}\n\n**${lang.toUpperCase()}:** ${r.text}\n`
+            )
         } else if (results.length > 0) {
           await db
             .insert(rdwRecallTexts)

@@ -72,6 +72,12 @@ a `year` keeps campaigns covering that model year (or recording none). Text is T
 (`ca.sys.*`, `systemKey`). Link: `wwwapps.tc.gc.ca/Saf-Sec-Sur/7/VRDB-BDRV/search-recherche/detail.aspx?lang=eng&rn=<number>`. Compliance/label notices are not recalls and are dropped. Refresh quarterly:
 `pnpm ingest:ca-recalls` then `export:ca-recalls:csv`; `ingest:ca-recalls:csv` loads the seed and is part of `ingest:ratings:csv`. A new market needs its flag in `MarketFlag`.
 
+**CA text translation:** `pnpm ingest:ca-recalls:translate` (the RDW NLLB script with `--source ca`, en → uk/ru, resumable) stores each heading's body in `rdw_recall_texts` (hash of the body, so repeats are done once). `splitCaText` / `joinCaText` (`packages/shared/src/caRecalls.ts`) cut the text at "Issue: / Safety Risk: / Corrective Actions:" (variants mapped by `caHeading`); `CaRecallsService.translations` reassembles it with localized headings, only when every section has the language, as `recall.translations[lang]`.
+
+#### "Translate" on untranslated recall text
+
+`GoogleTranslateLink` sits under every untranslated field (and the RDW header): a **Translate** button that lazy-opens `TranslateDialog`, plus the always-visible external link (`GoogleTranslateAnchor`: logo + ↗, `translate.google.com/?sl=<source>&tl=<UI language>&text=…`, text capped at 2000 chars; Google cannot be iframed). The dialog (`lib/local-translate.ts`, `use-translate-dialog-actions.ts`) lists on-device engines for the pair, downloading nothing until the reader picks one: the Chrome/Edge built-in Translator API (size not reported) and OPUS-MT through transformers.js (lazy chunk; ~110 MB nl→en, ~105 MB en→uk, ~107 MB en→ru, nl→uk/ru pivots through English; shown before the download, then cached by the browser). The transformers chunk is excluded from the service-worker precache.
+
 #### NHTSA recalls + complaints (stage F)
 
 Live, **no table**: `apps/api/src/nhtsa/` calls `api.nhtsa.gov` (`recallsByVehicle`, `complaintsByVehicle`) behind an in-memory TTL cache (recalls 7 d, complaints 30 d; errors are 502 and not cached). Contract

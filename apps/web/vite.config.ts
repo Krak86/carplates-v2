@@ -84,6 +84,8 @@ export default defineConfig({
           'models/**',
           'assets/export-*.js',
           'assets/plate-detector.worker-*.js',
+          // On-device text translation (transformers.js): opened on demand, models come from Hugging Face.
+          'assets/transformers.web-*.js',
           'assets/ArCameraDialog-*.js',
           'assets/NewsWidget-*.js',
           'assets/BlueskyWidget-*.js',

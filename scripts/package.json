@@ -75,6 +75,7 @@
     "ingest:rdw-recalls": "tsx src/rdw-recalls.ts",
     "ingest:rdw-recalls:csv": "tsx src/rdw-recalls.ts --from-csv seed-data/rdw-recalls.csv.gz",
     "ingest:rdw-recalls:translate": "tsx src/rdw-recalls-translate.ts",
+    "ingest:ca-recalls:translate": "tsx src/rdw-recalls-translate.ts --source ca",
     "export:rdw-recalls:csv": "tsx src/rdw-recalls.ts --export-csv seed-data/rdw-recalls.csv.gz",
     "export:rdw:csv": "tsx src/rdw.ts --export-csv seed-data/rdw-specs.csv.gz",
     "refresh-fuel-stats": "tsx src/fuel-stats.ts",

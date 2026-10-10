@@ -6,6 +6,7 @@ import type { NhtsaComplaintsResponse, NhtsaRecallsResponse } from '@carplates/s
 import MarketFlag from '@/components/MarketFlag'
 import NhtsaComplaints from '@/components/NhtsaComplaints'
 import RdwRecallField from '@/components/RdwRecallField'
+import RecallTranslateAll from '@/components/RecallTranslateAll'
 import { componentKey } from '@/components/NhtsaRecalls.helpers'
 import { formatRecallDate, RECALLS_PREVIEW } from '@/components/RdwRecalls.helpers'
 
@@ -107,6 +108,8 @@ export default function NhtsaRecallList({ data, complaints, locale }: Props): Re
                   )}
                   <RdwRecallField label={t('nhtsa.code')} value={recall.code} info={t('nhtsa.about.code')} />
                 </dl>
+
+                <RecallTranslateAll texts={[recall.summary, recall.consequence, recall.remedy]} from="en" />
 
                 <a
                   href={`https://www.nhtsa.gov/recalls?nhtsaId=${encodeURIComponent(recall.code)}`}

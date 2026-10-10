@@ -106,6 +106,7 @@
     "ingest:rdw-recalls": "pnpm --filter @carplates/scripts ingest:rdw-recalls",
     "ingest:rdw-recalls:csv": "pnpm --filter @carplates/scripts ingest:rdw-recalls:csv",
     "ingest:rdw-recalls:translate": "pnpm --filter @carplates/scripts ingest:rdw-recalls:translate",
+    "ingest:ca-recalls:translate": "pnpm --filter @carplates/scripts ingest:ca-recalls:translate",
     "export:rdw-recalls:csv": "pnpm --filter @carplates/scripts export:rdw-recalls:csv",
     "db:refresh-fuel-stats": "pnpm --filter @carplates/scripts refresh-fuel-stats",
     "ingest:vehiclesdb": "pnpm --filter @carplates/scripts ingest:vehiclesdb",

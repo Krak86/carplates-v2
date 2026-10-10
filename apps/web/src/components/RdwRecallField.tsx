@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import GoogleTranslateLink from '@/components/GoogleTranslateLink'
 import InfoPopover from '@/components/InfoPopover'
 import InfoText from '@/components/InfoText'
 
@@ -33,6 +34,7 @@ export default function RdwRecallField({
   const { t } = useTranslation()
   const [showOriginal, setShowOriginal] = useState(false)
   const isTranslated = !!translated && !showOriginal
+  const sourceLang = dutch ? 'nl' : lang
   return (
     <div>
       <dt className="flex items-center gap-1 text-xs text-[var(--color-muted)]">
@@ -49,9 +51,20 @@ export default function RdwRecallField({
       >
         {isTranslated ? translated : value}
       </dd>
+      {sourceLang && !isTranslated && (
+        <dd className="mt-0.5 text-xs">
+          <GoogleTranslateLink text={value} from={sourceLang} />
+        </dd>
+      )}
       {translated && (
         <dd className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-[var(--color-muted)]">
-          <span>{isTranslated ? t('recalls.aiTranslation') : t('recalls.originalNl')}</span>
+          <span>
+            {isTranslated
+              ? t('recalls.aiTranslation')
+              : sourceLang === 'en'
+                ? t('recalls.originalEn')
+                : t('recalls.originalNl')}
+          </span>
           <button type="button" onClick={() => setShowOriginal(v => !v)} className="underline hover:no-underline">
             {isTranslated ? t('recalls.showOriginal') : t('recalls.showTranslation')}
           </button>

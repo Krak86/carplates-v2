@@ -53,16 +53,17 @@ export default function CaRecallList({ data, year, locale }: Props): ReactNode {
                     <RdwRecallField
                       label={t('recalls.defect')}
                       value={recall.text}
+                      translated={recall.translations?.[locale]?.text}
                       lang="en"
                       multiline
                       info={t('ca.about.text')}
                     />
                   )}
-                  {recall.system && sysKey && (
+                  {recall.system && (
                     <RdwRecallField
                       label={t('ca.system')}
-                      value={recall.system}
-                      lang="en"
+                      value={sysKey ? t(sysKey) : recall.system}
+                      lang={sysKey ? undefined : 'en'}
                       info={t('ca.about.system')}
                     />
                   )}

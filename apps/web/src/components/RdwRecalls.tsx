@@ -5,11 +5,13 @@ import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router'
 
 import CaRecallList from '@/components/CaRecallList'
+import GoogleTranslateLink from '@/components/GoogleTranslateLink'
 import InfoPopover from '@/components/InfoPopover'
 import InfoText from '@/components/InfoText'
 import MarketFlag from '@/components/MarketFlag'
 import NhtsaRecallList from '@/components/NhtsaRecallList'
 import RdwRecallField from '@/components/RdwRecallField'
+import RecallTranslateAll from '@/components/RecallTranslateAll'
 import {
   categoryKey,
   formatOpenShare,
@@ -211,6 +213,11 @@ export default function RdwRecalls({ brand, model, year, kind }: Props): ReactNo
                               </button>
                             </span>
                           )}
+                          {recall.defect && (!tr?.defect || originals.includes(recall.code)) && (
+                            <span className="ml-2">
+                              <GoogleTranslateLink text={recall.defect} from="nl" />
+                            </span>
+                          )}
                           <span className="ml-2 text-xs text-[var(--color-muted)]">
                             {[date, recall.producer].filter(Boolean).join(' · ')}
                           </span>
@@ -272,6 +279,10 @@ export default function RdwRecalls({ brand, model, year, kind }: Props): ReactNo
                             info={t('recalls.about.code')}
                           />
                         </dl>
+
+                        {!tr && (
+                          <RecallTranslateAll texts={[recall.defect, recall.consequences, recall.remedy]} from="nl" />
+                        )}
 
                         {recall.moreInfoUrl && (
                           <a
