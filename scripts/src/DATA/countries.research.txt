@@ -1,0 +1,57 @@
+🇬🇧 United Kingdom (DVLA)
+ACEA Market Data: The European Automobile Manufacturers' Association (ACEA) (https://www.google.com/url?sa=i&source=web&rct=j&url=https://www.acea.auto/&ved=2ahUKEwjD_-C7gK6XAxVQRvEDHRpHHiYQy_kOegYIAAgVEAM&opi=89978449&cd&psig=AOvVaw0XcK0XU0uuc412CGAI789W&ust=1791672003360000) tracks monthly new passenger and commercial vehicle registrations across all 27 EU member states
+
+Germany: Kraftfahrt-Bundesamt (KBA Open Data)
+What it is: Germany’s Federal Motor Transport Authority provides extensive vehicle open data through the KBA Open Data Portal (https://www.google.com/url?sa=i&source=web&rct=j&url=https://www.kba.de/EN/Service_en/OpenData_en/opendata_node_en.html&ved=2ahUKEwj5hParga6XAxUJRPEDHRdmAmEQy_kOegYIAAgVEAU&opi=89978449&cd&psig=AOvVaw2KacuJ-_lfrhvaxVs4lSTd&ust=1791672238664000).
+How it works: Instead of license plates, Germany registers models via a type-approval code known as the HSN/TSN (Manufacturer/Type code). The KBA releases monthly updated datasets (available in CSV/Parquet formats) under a free "Data licence Germany – attribution" framework, detailing exact mechanical specs, registrations, and vehicle populations
+
+France: INSEE & HistoVec Open Data
+What it is: France provides bulk registration timelines through its national statistics institute agency INSEE (https://www.google.com/url?sa=i&source=web&rct=j&url=https://www.insee.fr/en/statistiques/serie/010756763&ved=2ahUKEwj5hParga6XAxUJRPEDHRdmAmEQy_kOegYIAAgVEA0&opi=89978449&cd&psig=AOvVaw2KacuJ-_lfrhvaxVs4lSTd&ust=1791672238664000) and car history reporting through HistoVec (https://www.google.com/url?sa=i&source=web&rct=j&url=https://www.eplaque.fr/en/mot-checker&ved=2ahUKEwj5hParga6XAxUJRPEDHRdmAmEQy_kOegYIAAgVEA4&opi=89978449&cd&psig=AOvVaw2KacuJ-_lfrhvaxVs4lSTd&ust=1791672238664000).
+How it works: The INSEE Transport Dataset lets you download raw, historical, and monthly updated tables tracking every single newly registered passenger car variant in France. For individual car histories, the French government's official platform HistoVec is completely free to verify safety certifications, though it requires specific documentation numbers to pull records. [1 (https://www.insee.fr/en/statistiques/serie/010756763), 2 (https://www.eplaque.fr/en/mot-checker)]
+
+🇰🇷 South Korea: Open Data Portal (Data.go.kr)
+
+South Korea features one of the most advanced open-data infrastructures globally. Vehicle data is managed centrally by the Ministry of Land, Infrastructure and Transport (MOLIT).
+• The Hub: data.go.kr runs thousands of free JSON/XML APIs.
+• What you can get for free: You can query endpoint metrics like “Automobile Registration Status by Model”, “Eco-friendly (EV/Hybrid) Vehicle Registration Stats”, and manufacturer type-approval specifications.
+• Access: It requires creating a free developer account to request an API service key, which is approved instantly.
+• Commercial Alternative: If you specifically need live used-car pricing and vehicle condition records, third-party platforms like EnCarAPI track listings from Korea's top auto marketplace, Encar
+
+🇯🇵 Japan: MLIT Data Platform
+
+Japan's transport registry is tightly controlled by the Ministry of Land, Infrastructure, Transport and Tourism (MLIT).
+• The Hub: Japan distributes its data via the MLIT Data Platform and the broader national index at e-Gov Data Portal.
+• What you can get for free: You can download extensive open datasets covering national vehicle registration totals by prefecture, public recall announcements, and green vehicle adoption rates.
+• The Catch: Japan's structural chassis configurations (used to decode Japanese VINs/Frame numbers) are highly proprietary. If you are tracking individual car export histories or auction sheets, you usually have to use paid verification tools like Japan Vehicle Data.
+
+🇨🇳 China: MIIT & CAAM Open Portals
+
+Automotive data inside China is subject to strict regulatory compliance regarding what can cross international borders. For statistical and production analysis, free options are open to the public:
+• The Hub: Macro-level trends are overseen by the Ministry of Industry and Information Technology (MIIT) and compiled by the China Association of Automobile Manufacturers (CAAM).
+• What you can get for free: Public portals like the China Data Portal offer free developer endpoints for tracking macroeconomic auto trends. For instance, you can call their Vehicle Ownership API or their Vehicle Exports API to retrieve JSON and CSV packets tracking registration growth trends.
+
+🇮🇳 India Free Vehicle Options
+India’s vehicle data is maintained by VAHAN, the official centralized national vehicle registry managed by the Ministry of Road Transport and Highways (MoRTH). [1 (https://indiadataportal.com/p/vehicle-registrations)]
+The VAHAN Analytics Portal: The government provides a massive public interface via the Parivahan Data Analytics Portal (https://www.google.com/url?sa=i&source=web&rct=j&url=https://analytics.parivahan.gov.in/&ved=2ahUKEwjki6agg66XAxXDXfEDHZLMKSoQy_kOegYIAAgUEAM&opi=89978449&cd&psig=AOvVaw2rWRKyCJwrAPuRyx3GxJDS&ust=1791672751092000). You can explore and filter real-time metrics tracking total active vehicles, regional emissions, and driver licensing trends. [1 (https://analytics.parivahan.gov.in/), 2 (https://indiadataportal.com/p/vehicle-registrations)]
+Dataful / Open Data Portal India: For raw statistical research, portals like Dataful host processed versions of VAHAN's master registry. You can download large, free CSV, Excel, and Parquet data packages containing millions of rows. These tables detail historical monthly registration metrics broken down by vehicle category, manufacturer name (e.g., Tata, Maruti, Mahindra), fuel type, and regional RTO (Regional Transport Office). [1 (https://dataful.in/datasets/21581/), 2 (https://dataful.in/datasets/18267/), 3 (https://opendata.stackexchange.com/questions/6390/any-apis-available-that-provide-data-of-indian-vehicles), 4 (https://dataful.in/datasets/18262/)]
+Computer Vision Datasets: If you are building an AI project, the open-source platform Roboflow Universe hosts the Indian Vehicle Plate Dataset (https://www.google.com/url?sa=i&source=web&rct=j&url=https://universe.roboflow.com/vehicle-license-plate/indian-vehicle-plate&ved=2ahUKEwjki6agg66XAxXDXfEDHZLMKSoQy_kOegYIAAgUEAw&opi=89978449&cd&psig=AOvVaw2rWRKyCJwrAPuRyx3GxJDS&ust=1791672751092000) containing free annotated training images designed for bounding-box and object-detection models. [1 (https://universe.roboflow.com/vehicle-license-plate/indian-vehicle-plate)]
+🇦🇺 Australia Free Vehicle Options
+
+In Australia, vehicle registrations are compiled by individual states but aggregated broadly through state open-data portals and the Australian Bureau of Statistics (ABS).
+• DataVic (Victoria Open Data): Victoria’s government regularly updates and publishes its raw vehicle registries on the DataVic Portal. You can download extensive tabular datasets detailing the exact Vehicle Make, Vehicle Model, Year of Manufacture, Fuel Type, and Postcode of registered cars. It strips personal details but leaves full mechanical specs intact.
+• Transport for NSW Developer Portal: New South Wales manages an interactive statistics platform via the TfNSW Open Data Hub. They offer free, downloadable historical logs tracking hundreds of thousands of vehicle transactions, usage patterns, heavy vehicle metrics, and vehicle fleet age distribution.
+• Australian Bureau of Statistics (ABS): The federal government publishes aggregated national insights through the ABS Motor Vehicle Census. While it does not feature an endpoint for raw VIN parsing, it tracks long-term data on the country's total vehicular composition.
+
+🇱🇹 Lithuania: Regitra Open Fleet Data
+
+Lithuania offers excellent developer-friendly vehicle datasets provided directly by Regitra (the state vehicle registry).
+• The Hub: You can access the official Regitra Open Data Hub.
+• What is free: They supply full raw CSV downloads of registered road vehicles and active driver registries.
+• Technical note: These datasets are massive (often exceeding 1 million rows per file). They contain extensive data points including vehicle make, model, age, weight, engine capacity, fuel type, and regional distribution. Regitra explicitly advises against using Microsoft Excel to open them due to size constraints
+
+🇪🇪 Estonia: Avaandmed Portal
+
+Estonia’s entire public sector is digitalized via its secure data exchange layer.
+• The Hub: The national open data storehouse is found via the Estonian Transport Administration and the public Estonian Open Data Portal.
+• What is free: You can fetch structured CSV historical catalogs containing the statuses and active parameters of registered motor vehicles.
+• Bonus data: The Estonian Transport Administration also releases free rolling datasets on traffic volumes, mapping real-time and 24/7 weekly vehicle counters across national road sections.

@@ -5,6 +5,7 @@ import {
   isModelYearTitle,
   pickCommonsCandidate,
   scoreCommonsTitle,
+  titleMentionsModel,
   type CommonsCandidate
 } from './commonsImage.js'
 
@@ -87,6 +88,12 @@ describe('model-year-only scoring', () => {
     expect(isModelYearTitle('File:Land Rover Defender (Lugano, 2026).jpg', 2026)).toBe(false)
     expect(isModelYearTitle('File:Toyota Land Cruiser FJ40 Hardtop (GIIAS 2026).jpg', 2026)).toBe(false)
     expect(isModelYearTitle('File:Einsatzfahrzeug Skoda Superb der KaPo (2026).jpg', 2026)).toBe(false)
+  })
+
+  it('folds diacritics when matching a model in a title', () => {
+    expect(titleMentionsModel('Fiat Doblò', 'Doblo')).toBe(true)
+    expect(titleMentionsModel('Citroën C4', 'c4')).toBe(true)
+    expect(scoreCommonsTitle('File:2012 Fiat Doblò Mk3.jpg', 'Doblo', 2012)).not.toBeNull()
   })
 
   it('only the strict mode drops an event photo', () => {

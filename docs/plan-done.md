@@ -2458,6 +2458,18 @@ old numeric names (200, 230 е, 190 → E-Class / 190; Cyrillic "е" normalised)
 **Coverage 98.0% → 99.0%** of cars (not_found 266k → 126k cars; 12.2k groups). Left: Geely JL7162 / FE-2, Honda M-NV, СКС RDS-02РП (special vehicles), Fiat Grande Punto /
 Doblo Panorama / Nuovo Doblo, Kia Optima, Renault Taliant, ZAZ T13010 / TF69 (check the Chance mapping), 47 groups `failed` (run `--retry-failed`).
 
+**2026-10-10 second session — tail pass:** `--aliased` resumed to the end (1,838 models; 300 gained a photo), `--retry-failed` cleared the failed groups
+(one left, `вс cj cj`, now `not_found`). New rules: Fiat (Nuovo) Doblo / Doblo Panorama → Doblo, Kia Sorento `jc 5248`, Mitsubishi L400 / Space Star ("speace star") /
+Carisma ("carizma") / Pajero trims, Peugeot Expert and trim words after the number (`307 xs 2.0 e` → 307), Geely LC (`lc-1a`) and FC (`mr-7180`). Two findings:
+
+- **Diacritics broke title matching.** `normalize` in `commonsImage.ts` dropped every non-`a-z0-9` character, so "Doblò" became "dobl" and never matched "doblo"
+  (same for Citroën, Škoda …). It now folds diacritics (NFD) first; this also helps the live API fallback.
+- **The pre-warm cache is not keyed by the search query**, only by the group plus an `-alias` suffix. After changing an alias rule, delete that group's `-alias`
+  files from `scripts/.data/wiki-images/{search,lead*}/` (glob by brand) before re-running `--aliased`, or the stale `null` lead is reused (that hid Sorento / Pajero / L400).
+  **Coverage 99.0% → 99.1%** of cars (not_found 126.1k → 114.7k cars; 11.4k groups). Seed CSV re-exported (112,842 rows). Still `not_found` (left unmapped on purpose):
+  Geely JL7162 (~9.8k cars; model line unclear), Honda M-NV (4.3k, Chinese EV with no Commons photos), СКС trailers (~10k, no photos expected), Fiat 220L / 223L / 230L,
+  Renault Taliant / FCT, ZAZ T13010 / TF48YP, Geely FE-2 / CE-1 / CE-2 / GC2 / MK-2. Fiat Doblo resolved only through the lead image.
+
 ### YouTube fallback for models with no infocar video — design, trial and build notes (ingest built 2026-10-05)
 
 Moved from PLAN.md 2026-10-05 (commit `0efd54f`). The staged ingest (`pnpm ingest:youtube-videos`, migration `0031_youtube_videos.sql`,

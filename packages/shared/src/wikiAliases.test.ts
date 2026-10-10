@@ -38,7 +38,7 @@ describe('wikiSearchName', () => {
     expect(wikiSearchName('mercedes-benz ml 350', 'ml 350')?.model).toBe('M-Class')
     expect(wikiSearchName('mercedes-benz', '313 cdi')?.model).toBe('Sprinter')
     expect(wikiSearchName('toyota corolla 1.33l', 'corolla 1.33l')).toMatchObject({ brand: 'toyota', model: 'corolla' })
-    expect(wikiSearchName('fiat', 'nuovo doblo 1.3')?.model).toBe('doblo')
+    expect(wikiSearchName('fiat', 'nuovo doblo 1.3')?.model).toBe('Doblo')
   })
 
   it('drops a model repeated in the brand, and maps the not_found tail', () => {
@@ -55,6 +55,16 @@ describe('wikiSearchName', () => {
     expect(wikiSearchName('mercedes-benz', 'g 55 amg')?.model).toBe('G-Class')
     expect(wikiSearchName('bmw', '330е')?.model).toBe('3 Series')
     expect(wikiSearchName('infiniti', 'qx56')?.model).toBe('QX')
+    expect(wikiSearchName('geely fc mr-7180', 'fc mr-7180')?.model).toBe('FC')
+    expect(wikiSearchName('geely', 'lc-1a')?.model).toBe('LC')
+    expect(wikiSearchName('fiat nuovo doblo', 'nuovo doblo')?.model).toBe('Doblo')
+    expect(wikiSearchName('fiat', 'doblo panorama')?.model).toBe('Doblo')
+    expect(wikiSearchName('kia', 'sorento jc 5248')?.model).toBe('Sorento')
+    expect(wikiSearchName('mitsubishi l 400', 'l 400')?.model).toBe('L400')
+    expect(wikiSearchName('mitsubishi', 'speace star')?.model).toBe('Space Star')
+    expect(wikiSearchName('mitsubishi', 'pajero wgn 3.2 did')?.model).toBe('Pajero')
+    expect(wikiSearchName('peugeot', 'expert traveller')?.model).toBe('Expert')
+    expect(wikiSearchName('peugeot 307 xs 2.0 e', '307 xs 2.0 e')?.model).toBe('307')
     expect(wikiSearchName('land rover', 'range rover')).toBeNull()
   })
 

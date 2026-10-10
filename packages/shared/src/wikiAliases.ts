@@ -78,7 +78,22 @@ function brandAlias(brand: string, model: string): WikiSearchName | null {
     if (model === 'mk cross') return named('Geely', 'MK Cross')
     if (/^(mk )?jl7152/.test(model)) return named('Geely', 'MK')
     if (/^ck-?2/.test(model)) return named('Geely', 'CK')
-    if (/^fe-?1/.test(model)) return named('Geely', 'LC')
+    if (/^fe-?1/.test(model) || /^lc-?1/.test(model)) return named('Geely', 'LC')
+    if (/^(fc )?mr-?7180/.test(model)) return named('Geely', 'FC')
+  }
+  if (brand === 'fiat' && /^(nuovo )?doblo/.test(model)) return named('Fiat', 'Doblo')
+  if (brand === 'kia' && model.startsWith('sorento')) return named('Kia', 'Sorento')
+  if (brand === 'mitsubishi') {
+    if (model === 'l 400') return named('Mitsubishi', 'L400')
+    if (model === 'speace star') return named('Mitsubishi', 'Space Star')
+    if (model === 'carizma') return named('Mitsubishi', 'Carisma')
+    if (model.startsWith('pajero')) return named('Mitsubishi', 'Pajero')
+  }
+  if (brand === 'peugeot') {
+    if (model.startsWith('expert')) return named('Peugeot', 'Expert')
+    // Trim words after the number: "307 xs 2.0 e".
+    const number = /^(\d{3})\s[a-z]{1,3}(\s|$)/.exec(model)?.[1]
+    if (number) return named('Peugeot', number)
   }
   if (brand === 'газ') {
     if (model.startsWith('2410')) return named('GAZ', '24', 'ГАЗ-24 Волга')

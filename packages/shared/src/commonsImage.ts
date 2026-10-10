@@ -12,7 +12,13 @@ const MIN_ASPECT = 1.2
 const DETAIL_SHOT =
   /interior|engine|dashboard|cockpit|steering|wheel|badge|logo|emblem|seat|trunk|boot|headlight|taillight|detail|speedometer|odometer|console/i
 
-const normalize = (value: string): string => value.toLowerCase().replace(/[^a-z0-9]/g, '')
+// Diacritics are folded first, or "Doblò" / "Citroën" would shrink to "dobl" / "citron" and miss "doblo" / "citroen".
+const normalize = (value: string): string =>
+  value
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '')
 
 /** Leading model tokens joined until ≥3 alphanumerics, so `S 01` → `s01` and `CR-V` → `crv`, but `Corolla E120` → `corolla`. */
 function modelKey(model: string): string {
