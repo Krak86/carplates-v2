@@ -222,6 +222,47 @@ body {
   }
 }
 
+/* Smooth GPU zoom in / out (transform only) that draws the eye to the mileage-calculations button. */
+@keyframes mot-zoom {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.035);
+  }
+}
+
+@utility animate-mot-zoom {
+  animation: mot-zoom 4.5s ease-in-out infinite;
+  will-change: transform;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+/* "This chart is interactive" hint: a short pulse, then a long rest (the delay is set per chart). */
+@keyframes mot-nudge {
+  0%,
+  14%,
+  100% {
+    transform: scale(1);
+  }
+  7% {
+    transform: scale(1.2);
+  }
+}
+
+@utility animate-mot-nudge {
+  animation: mot-nudge 6s ease-in-out infinite;
+  transform-origin: right center;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
 /* Tune freely while testing — no need to hunt through component classes. */
 :root {
   --watermark-opacity: 0.12;

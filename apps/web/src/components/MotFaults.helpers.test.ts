@@ -2,6 +2,9 @@ import { describe, it, expect } from 'vitest'
 
 import {
   bandLabel,
+  bandOfKm,
+  motCarTab,
+  parseMotCarTab,
   endsOf,
   formatShare,
   formatTests,
@@ -67,5 +70,26 @@ describe('labels', () => {
   it('collapses a one-year range', () => {
     expect(yearsLabel(2014, 2014)).toBe('2014')
     expect(yearsLabel(2012, 2016)).toBe('2012–2016')
+  })
+})
+
+describe('my-car share tab', () => {
+  const edges = [0, 25_000, 50_000, 75_000]
+
+  it('finds the band of an odometer value', () => {
+    expect(bandOfKm(edges, 0)).toBe(0)
+    expect(bandOfKm(edges, 49_999)).toBe(1)
+    expect(bandOfKm(edges, 500_000)).toBe(3)
+  })
+
+  it('round-trips an odometer value or a band', () => {
+    expect(parseMotCarTab(motCarTab({ km: 60_000, band: 2 }), 4, edges)).toEqual({ km: 60_000, band: 2 })
+    expect(parseMotCarTab(motCarTab({ km: null, band: 1 }), 4, edges)).toEqual({ km: null, band: 1 })
+  })
+
+  it('ignores a hand-edited tab', () => {
+    expect(parseMotCarTab('b9', 4, edges)).toBeNull()
+    expect(parseMotCarTab('km', 4, edges)).toBeNull()
+    expect(parseMotCarTab(null, 4, edges)).toBeNull()
   })
 })

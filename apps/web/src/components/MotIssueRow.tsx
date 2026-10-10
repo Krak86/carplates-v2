@@ -21,6 +21,8 @@ type Props = {
   children?: ReactNode
   /** Smaller type and no card look — used for the reasons inside a group. */
   nested?: boolean
+  /** Pulse the small chart (hover / tap hint) until the viewer has used a chart. */
+  nudge?: boolean
 }
 
 /**
@@ -36,7 +38,8 @@ export default function MotIssueRow({
   active,
   onActive,
   children,
-  nested = false
+  nested = false,
+  nudge = false
 }: Props): ReactNode {
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
@@ -91,6 +94,7 @@ export default function MotIssueRow({
       active={active}
       onActive={onActive}
       ariaLabel={t('mot.row.aria', { name: label })}
+      nudge={nudge}
     />
   )
 

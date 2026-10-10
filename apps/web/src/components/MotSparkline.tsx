@@ -1,7 +1,9 @@
+import { useState } from 'react'
 import type { ReactNode } from 'react'
 
 import { gapPath, slotOf } from '@/components/MotChart.helpers'
 import { niceMax, type MotMode } from '@/components/MotFaults.helpers'
+import { cn } from '@/lib/cn'
 
 type Series = readonly (number | null)[]
 
@@ -15,6 +17,8 @@ type Props = {
   active: number | null
   onActive: (band: number | null) => void
   ariaLabel: string
+  /** Gentle periodic pulse that tells the viewer the chart reacts to hover / tap (off once they have used one). */
+  nudge?: boolean
 }
 
 const BOX = { width: 168, height: 48, left: 4, right: 4, top: 6, bottom: 6 }
@@ -33,8 +37,11 @@ export default function MotSparkline({
   mode,
   active,
   onActive,
-  ariaLabel
+  ariaLabel,
+  nudge = false
 }: Props): ReactNode {
+  // Random start per chart so the pulses ripple down the list instead of beating in unison.
+  const [delay] = useState(() => Math.random() * 6)
   const showFail = mode !== 'watch'
   const showWatch = mode !== 'fail'
   const n = fail.length
@@ -55,7 +62,8 @@ export default function MotSparkline({
       viewBox={`0 0 ${BOX.width} ${BOX.height}`}
       role="img"
       aria-label={ariaLabel}
-      className="h-12 w-full max-w-[168px] shrink-0 touch-manipulation"
+      style={nudge ? { animationDelay: `${delay}s` } : undefined}
+      className={cn('h-12 w-full max-w-[168px] shrink-0 touch-manipulation', nudge && 'animate-mot-nudge')}
     >
       <line
         x1={BOX.left}

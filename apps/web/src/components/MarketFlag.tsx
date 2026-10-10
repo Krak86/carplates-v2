@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 
 type Props = {
-  /** Recall market code (`NL` = RDW / EU, `US` = NHTSA); anything else renders nothing. */
+  /** Market code (`NL` = RDW / EU, `US` = NHTSA, `GB` = UK MOT); anything else renders nothing. */
   market: string
   className?: string
 }
@@ -22,6 +22,18 @@ export default function MarketFlag({ market, className = 'h-3.5 w-5' }: Props): 
         <rect width="9" height="2" fill="#ae1c28" />
         <rect y="2" width="9" height="2" fill="#fff" />
         <rect y="4" width="9" height="2" fill="#21468b" />
+      </svg>
+    )
+  }
+
+  if (market === 'GB') {
+    return (
+      <svg viewBox="0 0 60 30" className={base} aria-hidden="true">
+        <rect width="60" height="30" fill="#012169" />
+        <path d="M0 0L60 30M60 0L0 30" stroke="#fff" strokeWidth="6" />
+        <path d="M0 0L60 30M60 0L0 30" stroke="#c8102e" strokeWidth="2.5" />
+        <path d="M30 0V30M0 15H60" stroke="#fff" strokeWidth="10" />
+        <path d="M30 0V30M0 15H60" stroke="#c8102e" strokeWidth="6" />
       </svg>
     )
   }

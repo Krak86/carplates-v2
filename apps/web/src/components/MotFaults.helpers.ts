@@ -86,6 +86,33 @@ export const MOT_TERMS = [
   'issueTests',
   'band',
   'average',
-  'sample'
+  'sample',
+  'table'
 ] as const
 export type MotTerm = (typeof MOT_TERMS)[number]
+
+/** Index of the mileage band holding `km`, for the band edges the API returned (lower edges, last band open-ended). */
+export function bandOfKm(edgesKm: readonly number[], km: number): number {
+  let band = 0
+  for (let i = 1; i < edgesKm.length; i++) if (km >= edgesKm[i]!) band = i
+  return band
+}
+
+/** Largest odometer value the "my car" form accepts (km). */
+export const MOT_MAX_KM = 999_999
+
+/** What a shared "my car" link carries: an odometer value (`km123000`) or a chosen band (`b3`). */
+export type MotCarTab = { km: number | null; band: number | null }
+
+export function motCarTab({ km, band }: MotCarTab): string {
+  return km != null ? `km${km}` : `b${band ?? 0}`
+}
+
+/** Reads `motCarTab`'s output back; anything else (a hand-edited link) is `null`, i.e. the modal stays closed. */
+export function parseMotCarTab(tab: string | null, bandCount: number, edgesKm: readonly number[]): MotCarTab | null {
+  const km = /^km(\d{1,6})$/.exec(tab ?? '')
+  if (km) return { km: Number(km[1]), band: bandOfKm(edgesKm, Number(km[1])) }
+  const band = /^b(\d{1,2})$/.exec(tab ?? '')
+  if (band && Number(band[1]) < bandCount) return { km: null, band: Number(band[1]) }
+  return null
+}
