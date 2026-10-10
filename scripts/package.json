@@ -22,6 +22,7 @@
     "export:kncap:csv": "tsx src/kncap.ts --export-csv seed-data/kncap-ratings.csv.gz",
     "ingest:iihs": "tsx src/iihs.ts",
     "ingest:iihs:csv": "tsx src/iihs.ts --from-csv seed-data/iihs-ratings.csv.gz",
+    "export:model-families:csv": "tsx src/model-families.ts",
     "export:iihs:csv": "tsx src/iihs.ts --export-csv seed-data/iihs-ratings.csv.gz",
     "ingest:infocar": "tsx src/infocar.ts",
     "ingest:infocar:csv": "tsx src/infocar.ts --from-csv seed-data/infocar-versions.csv.gz",
