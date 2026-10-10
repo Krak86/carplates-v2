@@ -238,6 +238,7 @@ const BRAND_SLUG_BY_NAME: Readonly<Record<string, string>> = {
   CHANA: 'chana',
   DENZA: 'denza',
   XIAOMI: 'xiaomi',
+  SOR: 'sor',
   SOUEAST: 'soueast',
   LANDWIND: 'landwind',
   HAFEI: 'hafei',
