@@ -1,6 +1,7 @@
 import { brandLogoUrl } from '@carplates/shared'
 import { CURRENCIES, valueCurve } from '@carplates/shared'
 import type {
+  CaRecallsResponse,
   CncapRatingsResponse,
   EuroNcapRatingsResponse,
   FuelEconomyResponse,
@@ -8,6 +9,10 @@ import type {
   IihsRatingsResponse,
   JncapRatingsResponse,
   KncapRatingsResponse,
+  MotResponse,
+  NhtsaComplaintsResponse,
+  NhtsaRecallsResponse,
+  RdwRecallsResponse,
   RdwResponse,
   Registration,
   ReviewsResponse,
@@ -28,6 +33,7 @@ import {
   valueInfoLines,
   valueWarnings
 } from '@/components/EstimatedValue.helpers'
+import { buildMotSections, buildRecallSections } from '@/lib/export-recalls-mot'
 import { orderedEditions } from '@/components/PressReviews.helpers'
 import { decileBand, isRareElsewhere } from '@/components/VdbChips.helpers'
 import {
@@ -164,6 +170,13 @@ export type ExportInput = {
   vdb: VdbResponse | null
   /** infocar / press / TopGear / e-drive catalog — the "Reviews" and "Videos" sections. */
   reviews: ReviewsResponse | null
+  /** Recall campaigns: EU (RDW), US (NHTSA) + owner complaints, Canada (no US twin) — the "Recalls" block. */
+  rdwRecalls: RdwRecallsResponse | null
+  nhtsaRecalls: NhtsaRecallsResponse | null
+  nhtsaComplaints: NhtsaComplaintsResponse | null
+  caRecalls: CaRecallsResponse | null
+  /** UK MOT fail / advisory rates by mileage — the "Common faults" section. */
+  mot: MotResponse | null
   /** NBU rates for the currency rows of the price section; null = euros only. */
   fx: FxResponse | null
   /** The VIN section's NHTSA localizer (labels / values in the UI language); absent = raw English. */
@@ -900,6 +913,8 @@ export function buildExportReport(input: ExportInput, t: Translate): ExportRepor
     buildVdbSection(input, t),
     buildRdwSection(input, t),
     ...buildPriceSections(input, t),
+    ...buildRecallSections(input, t),
+    ...buildMotSections(input.mot, t, input.lang),
     buildReviewsSection(input, t),
     buildWikiSection(input, t),
     buildPhotosSection(input, t),

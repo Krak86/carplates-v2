@@ -9,6 +9,7 @@ import { buildExportReport } from '@/lib/export-report'
 import type { ExportFormat, ExportInput, ExportVehicleInfo } from '@/lib/export-report'
 import { toCsv, toMarkdown, toPlainText } from '@/lib/export-formats'
 import {
+  caRecallsQuery,
   cncapRatingsQuery,
   euroNcapRatingsQuery,
   fuelEconomyQuery,
@@ -16,8 +17,12 @@ import {
   iihsRatingsQuery,
   jncapRatingsQuery,
   kncapRatingsQuery,
+  motQuery,
+  nhtsaComplaintsQuery,
+  nhtsaRecallsQuery,
   plateHistoryQuery,
   rdwQuery,
+  rdwRecallsQuery,
   reviewsQuery,
   safetyRatingsQuery,
   statsTopQuery,
@@ -91,7 +96,12 @@ export function useCopyAllInfoActions(params: CopyAllInfoParams): UseCopyAllInfo
       rdw,
       vdb,
       reviews,
-      fx
+      fx,
+      rdwRecalls,
+      nhtsaRecalls,
+      nhtsaComplaints,
+      caRecalls,
+      mot
     ] = await Promise.all([
       plate ? safe(queryClient.ensureQueryData(plateHistoryQuery(plate))) : Promise.resolve(null),
       params.vinDecodeResults == null && vin ? safe(queryClient.ensureQueryData(vinQuery(vin))) : Promise.resolve(null),
@@ -134,7 +144,25 @@ export function useCopyAllInfoActions(params: CopyAllInfoParams): UseCopyAllInfo
       vehicle.brand
         ? safe(queryClient.ensureQueryData(reviewsQuery(make, model, vehicle.year)))
         : Promise.resolve(null),
-      safe(queryClient.ensureQueryData({ ...fxQuery(), ...FAIL_FAST_OFFLINE }))
+      safe(queryClient.ensureQueryData({ ...fxQuery(), ...FAIL_FAST_OFFLINE })),
+      vehicle.brand && vehicle.model
+        ? safe(queryClient.ensureQueryData(rdwRecallsQuery(make, model)))
+        : Promise.resolve(null),
+      hasRatingsQuery
+        ? safe(queryClient.ensureQueryData({ ...nhtsaRecallsQuery(make, model, year), ...FAIL_FAST_OFFLINE }))
+        : Promise.resolve(null),
+      hasRatingsQuery
+        ? safe(queryClient.ensureQueryData({ ...nhtsaComplaintsQuery(make, model, year), ...FAIL_FAST_OFFLINE }))
+        : Promise.resolve(null),
+      hasRatingsQuery ? safe(queryClient.ensureQueryData(caRecallsQuery(make, model, year))) : Promise.resolve(null),
+      hasRatingsQuery
+        ? safe(
+            queryClient.ensureQueryData({
+              ...motQuery(make, model, year, params.current?.kind),
+              ...FAIL_FAST_OFFLINE
+            })
+          )
+        : Promise.resolve(null)
     ])
 
     return {
@@ -161,6 +189,11 @@ export function useCopyAllInfoActions(params: CopyAllInfoParams): UseCopyAllInfo
       vdb,
       reviews,
       fx,
+      rdwRecalls,
+      nhtsaRecalls,
+      nhtsaComplaints,
+      caRecalls,
+      mot,
       lang: i18n.language
     }
   }

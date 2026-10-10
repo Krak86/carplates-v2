@@ -63,6 +63,11 @@ function baseInput(overrides: Partial<ExportInput> = {}): ExportInput {
     vdb: null,
     reviews: null,
     fx: null,
+    rdwRecalls: null,
+    nhtsaRecalls: null,
+    nhtsaComplaints: null,
+    caRecalls: null,
+    mot: null,
     lang: 'en',
     ...overrides
   }
@@ -333,5 +338,87 @@ describe('buildLocalRecordsReport', () => {
       ['АА1234АА', 'My car', new Date(1700000000000).toLocaleString()],
       ['JT123456789012345', '—', new Date(1700000001000).toLocaleString()]
     ])
+  })
+})
+
+describe('recalls and common faults', () => {
+  it('adds a table per recall source and the complaint summary', () => {
+    const report = buildExportReport(
+      baseInput({
+        nhtsaRecalls: {
+          make: 'TOYOTA',
+          model: 'CAMRY',
+          year: 2020,
+          matchedModel: 'CAMRY',
+          total: 1,
+          recalls: [
+            {
+              code: '20V123',
+              publishedAt: '2020-03-01',
+              producer: 'Toyota',
+              component: 'AIR BAGS:FRONTAL',
+              summary: 'Inflator may rupture',
+              consequence: 'Injury',
+              remedy: 'Replace inflator',
+              parkIt: false,
+              parkOutside: false,
+              overTheAirUpdate: false
+            }
+          ]
+        },
+        nhtsaComplaints: {
+          make: 'TOYOTA',
+          model: 'CAMRY',
+          year: 2020,
+          matchedModel: null,
+          total: 7,
+          crashes: 1,
+          fires: 0,
+          injuries: 0,
+          deaths: 0,
+          components: [{ name: 'ENGINE', count: 3 }],
+          latestFiled: '2021-01-05'
+        }
+      }),
+      t
+    )
+    const nhtsa = report.sections.find(s => s.id === 'recallsNhtsa')
+    if (!nhtsa || nhtsa.type !== 'table') throw new Error('expected NHTSA table')
+    expect(nhtsa.rows[0]?.[6]).toBe('https://www.nhtsa.gov/recalls?nhtsaId=20V123')
+    expect(report.sections.some(s => s.id === 'complaints')).toBe(true)
+    expect(report.sections.some(s => s.id === 'recallsRdw' || s.id === 'recallsCa')).toBe(false)
+  })
+
+  it('adds Common faults sections when the MOT match exists', () => {
+    const report = buildExportReport(
+      baseInput({
+        mot: {
+          brand: 'TOYOTA',
+          model: 'CAMRY',
+          year: 2020,
+          match: {
+            makeName: 'TOYOTA',
+            modelName: 'CAMRY',
+            kind: 'car',
+            how: 'exact',
+            crossMake: false,
+            testYears: [2021, 2023],
+            edgesKm: [0, 25000],
+            tests: 5000,
+            window: { from: 2019, to: 2021, widened: false },
+            bands: [
+              { tests: 3000, failRate: 0.1, watchRate: 0.3, baselineFailRate: 0.2 },
+              { tests: 2000, failRate: 0.2, watchRate: 0.4, baselineFailRate: 0.3 }
+            ],
+            groups: [{ code: 'brakes', fail: [0.05, 0.1], watch: [0.1, 0.2], failTests: 10, watchTests: 20 }],
+            reasons: []
+          }
+        }
+      }),
+      t
+    )
+    const ids = report.sections.map(s => s.id)
+    expect(ids).toEqual(expect.arrayContaining(['mot', 'motBands', 'motGroups']))
+    expect(ids).not.toContain('motReasons')
   })
 })
