@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
@@ -43,13 +43,20 @@ const shareAt = (values: readonly (number | null)[], band: number): number => va
  * mileage. Shareable: the link carries the odometer value or the band. Portal for the same reason as Model360Modal (the
  * result Card's 3D tilt transform). Still model-level UK statistics — never a verdict on this car.
  */
-export default function MotCarModal({ name, year, match, initial, onClose }: Props): ReactNode {
+export default function MotCarModal({ name, year, match, initial, onClose: onClosed }: Props): ReactNode {
   const { t, i18n } = useTranslation()
   const [kmText, setKmText] = useState(initial.km != null ? String(initial.km) : '')
   const [band, setBand] = useState(initial.band ?? 0)
+  // Closing plays the exit animation first; the parent unmounts us once it is over.
+  const [closing, setClosing] = useState(false)
   const km = kmText === '' ? null : Math.min(Number(kmText), MOT_MAX_KM)
   const b = match.bands[band]
   const lang = i18n.language
+
+  const handleClose = (): void => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) onClosed()
+    else setClosing(true)
+  }
 
   const handleKmChange = (value: string): void => {
     const digits = value.replace(/\D/g, '').slice(0, 6)
@@ -62,6 +69,13 @@ export default function MotCarModal({ name, year, match, initial, onClose }: Pro
     // A chosen band replaces an odometer value that no longer falls in it.
     if (km != null && bandOfKm(match.edgesKm, km) !== i) setKmText('')
   }
+
+  // Safety net if the animationend event never fires (e.g. a background tab).
+  useEffect(() => {
+    if (!closing) return
+    const timer = setTimeout(onClosed, 400)
+    return () => clearTimeout(timer)
+  }, [closing, onClosed])
 
   const groups = [...match.groups]
     .map(g => ({ g, fail: shareAt(g.fail, band), watch: shareAt(g.watch, band) }))
@@ -97,8 +111,19 @@ export default function MotCarModal({ name, year, match, initial, onClose }: Pro
   }
 
   return createPortal(
-    <div className="fixed inset-0 z-30 flex items-center justify-center bg-black/50 p-4" role="dialog" aria-modal>
-      <div className="max-h-full w-full max-w-2xl overflow-y-auto rounded-xl bg-[var(--color-surface)] p-4">
+    <div
+      data-closing={closing || undefined}
+      className="fixed inset-0 z-30 flex animate-modal-backdrop items-center justify-center bg-black/50 p-4"
+      role="dialog"
+      aria-modal
+    >
+      <div
+        data-closing={closing || undefined}
+        onAnimationEnd={e => {
+          if (closing && e.target === e.currentTarget) onClosed()
+        }}
+        className="h-full w-full max-w-2xl animate-modal-panel overflow-y-auto rounded-xl bg-[var(--color-surface)] p-4"
+      >
         <div className="mb-3 flex items-center justify-between gap-3">
           <div className="min-w-0">
             <div className="truncate font-semibold">{t('mot.car.title', { name })}</div>
@@ -114,7 +139,7 @@ export default function MotCarModal({ name, year, match, initial, onClose }: Pro
             />
             <button
               type="button"
-              onClick={onClose}
+              onClick={handleClose}
               aria-label={t('mot.car.close')}
               className="text-[var(--color-muted)] hover:text-[var(--color-fg)]"
             >
@@ -159,78 +184,80 @@ export default function MotCarModal({ name, year, match, initial, onClose }: Pro
           ))}
         </div>
 
-        <div className="mt-3 space-y-1 rounded-lg bg-[var(--color-bg)]/40 p-3 text-sm">
-          <p className="font-medium">
-            {t('mot.car.band', { band: bandLabel(match.edgesKm, band), unit: t('mot.axis.kmShort') })}
-            {km != null && (
-              <span className="font-normal text-[var(--color-muted)]">
-                {' '}
-                · {t('mot.car.yours', { km: formatTests(km) })}
-              </span>
-            )}
-          </p>
-          {b?.failRate == null ? (
-            <p className="text-[var(--color-muted)]">{t('mot.readout.notEnough')}</p>
-          ) : (
-            <>
-              <p>
-                {t('mot.car.summary', {
-                  name,
-                  tests: formatTests(b.tests),
-                  fail: formatShare(b.failRate),
-                  watch: formatShare(b.watchRate)
-                })}
-              </p>
-              <p className="text-[var(--color-muted)]">
-                {b.baselineFailRate != null && `${t('mot.average')} ${formatShare(b.baselineFailRate)}`}
-                {b.dangerousRate != null && ` · ${t('mot.dangerous')} ${formatShare(b.dangerousRate)}`}
-                <span className="ml-1 inline-block align-middle">
-                  <MotHelp term="share" />
+        <div key={band} className="animate-fade-in">
+          <div className="mt-3 space-y-1 rounded-lg bg-[var(--color-bg)]/40 p-3 text-sm">
+            <p className="font-medium">
+              {t('mot.car.band', { band: bandLabel(match.edgesKm, band), unit: t('mot.axis.kmShort') })}
+              {km != null && (
+                <span className="font-normal text-[var(--color-muted)]">
+                  {' '}
+                  · {t('mot.car.yours', { km: formatTests(km) })}
                 </span>
-              </p>
+              )}
+            </p>
+            {b?.failRate == null ? (
+              <p className="text-[var(--color-muted)]">{t('mot.readout.notEnough')}</p>
+            ) : (
+              <>
+                <p>
+                  {t('mot.car.summary', {
+                    name,
+                    tests: formatTests(b.tests),
+                    fail: formatShare(b.failRate),
+                    watch: formatShare(b.watchRate)
+                  })}
+                </p>
+                <p className="text-[var(--color-muted)]">
+                  {b.baselineFailRate != null && `${t('mot.average')} ${formatShare(b.baselineFailRate)}`}
+                  {b.dangerousRate != null && ` · ${t('mot.dangerous')} ${formatShare(b.dangerousRate)}`}
+                  <span className="ml-1 inline-block align-middle">
+                    <MotHelp term="share" />
+                  </span>
+                </p>
+              </>
+            )}
+          </div>
+
+          <h3 className="mt-3 text-base font-medium">{t('mot.car.groups')}</h3>
+          {groups.length === 0 ? (
+            <p className="text-sm text-[var(--color-muted)]">{t('mot.row.noData')}</p>
+          ) : (
+            <ul className="mt-1 divide-y divide-[var(--color-border)]">
+              {groups.map(({ g, fail, watch }, i) => (
+                <li key={g.code} className="animate-row-in py-1.5" style={{ '--row-i': i } as React.CSSProperties}>
+                  {issueLine(g, t(groupKey(g.code)))}
+                  <span className="mt-1 block space-y-0.5">
+                    {bar(fail, 'var(--color-mot-fail)')}
+                    {bar(watch, 'var(--color-mot-watch)')}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {reasons.length > 0 && (
+            <>
+              <h3 className="mt-3 text-base font-medium">{t('mot.car.reasons')}</h3>
+              <ul className="mt-1 divide-y divide-[var(--color-border)]">
+                {reasons.map(({ r }, i) => {
+                  const translated = reasonLabel(r.code, lang)
+                  return (
+                    <li key={r.code} className="animate-row-in py-1.5" style={{ '--row-i': i } as React.CSSProperties}>
+                      {issueLine(r, translated ?? `${r.item}: ${r.failText || r.watchText}`)}
+                      {translated && (
+                        <span lang="en" className="block text-xs text-[var(--color-muted)]">
+                          {`${r.item}: ${r.failText || r.watchText}`}
+                        </span>
+                      )}
+                    </li>
+                  )
+                })}
+              </ul>
             </>
           )}
+
+          <p className="mt-3 text-xs text-[var(--color-muted)]">{t('mot.car.note', { name })}</p>
         </div>
-
-        <h3 className="mt-3 text-base font-medium">{t('mot.car.groups')}</h3>
-        {groups.length === 0 ? (
-          <p className="text-sm text-[var(--color-muted)]">{t('mot.row.noData')}</p>
-        ) : (
-          <ul className="mt-1 divide-y divide-[var(--color-border)]">
-            {groups.map(({ g, fail, watch }) => (
-              <li key={g.code} className="py-1.5">
-                {issueLine(g, t(groupKey(g.code)))}
-                <span className="mt-1 block space-y-0.5">
-                  {bar(fail, 'var(--color-mot-fail)')}
-                  {bar(watch, 'var(--color-mot-watch)')}
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
-
-        {reasons.length > 0 && (
-          <>
-            <h3 className="mt-3 text-base font-medium">{t('mot.car.reasons')}</h3>
-            <ul className="mt-1 divide-y divide-[var(--color-border)]">
-              {reasons.map(({ r }) => {
-                const translated = reasonLabel(r.code, lang)
-                return (
-                  <li key={r.code} className="py-1.5">
-                    {issueLine(r, translated ?? `${r.item}: ${r.failText || r.watchText}`)}
-                    {translated && (
-                      <span lang="en" className="block text-xs text-[var(--color-muted)]">
-                        {`${r.item}: ${r.failText || r.watchText}`}
-                      </span>
-                    )}
-                  </li>
-                )
-              })}
-            </ul>
-          </>
-        )}
-
-        <p className="mt-3 text-xs text-[var(--color-muted)]">{t('mot.car.note', { name })}</p>
       </div>
     </div>,
     document.body

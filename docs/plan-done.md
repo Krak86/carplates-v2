@@ -3130,3 +3130,19 @@ Electric/hybrid/gas/… breakdown on `/fuel`: table of classes (cars, % of fleet
 Third market group ("Canada (Transport Canada)") in the Recalls block, holding only the Canadian safety campaigns with no US (NHTSA) twin: 1,595 campaigns / 10,762 model-year links of 7,648 since 2010 (79.1 % have a twin).
 Why cut down: overlap research the same day showed ~97 % of Canadian campaigns repeat NHTSA; the rest are Canada-specific rules and models the US does not sell (Qashqai, X-Trail, Sprinter CDI names).
 Full write-up, twin rule, numbers and files: `DATASETS_PLAN.md` "Stage H — done"; conventions: `docs/features-reference.md` "Canada recalls without a US twin".
+
+### Wikimedia hero-image cache — alias passes and coverage run log (moved from PLAN.md 2026-10-11)
+
+**2026-10-09 — alias passes done (✅):** `packages/shared/src/wikiAliases.ts` (`wikiSearchName`) maps registry factory indexes / engine-code
+names to searchable names (VAZ 21104 → VAZ-2110, Niva, Priora, Kalina, ZAZ Sens/Slavuta/Tavria, GAZ, UAZ, Geely MK, Mercedes
+E-Class/ML/Sprinter, BMW "116 i" → 1 Series, trailing engine sizes stripped); rows keep the registry key, only the search uses the alias.
+`pnpm ingest:wiki-images -- --aliased` ran 3 passes (447 + 752 + 919 models, 0 failures left). The coverage script had a whitespace
+mismatch (registry `DAEWOO  LANOS`) and showed a false "33% not processed"; fixed. **Real coverage: 62.8% → 98.0% of cars** (13.10M;
+266k cars / 2.0% still `not_found`, mostly tiny trim-code models like "307 xs 2.0 e"). No wider pre-warm is needed. Soviet/UA photo sites
+(autoussr.ru, zaz.drive.place, sovietcarmodels.com, 24tv) were **not** used: copyrighted. Write-up: `docs/plan-done.md`.
+**2026-10-10 follow-up (✅):** live fallback now uses `wikiSearchName`; ~40 new alias rules; `--aliased` stopped early (≈1,800/2,212 models); **coverage 98.0% → 99.0%** (126k cars still not_found). Details: `docs/plan-done.md`.
+**2026-10-10 second session (✅):** `--aliased` finished, `--retry-failed` cleared, tail rules added (Doblo, Sorento, Mitsubishi, Peugeot trims, Geely LC/FC), diacritics fixed in title matching; **coverage 99.1%** (114.7k cars not_found), CSV re-exported. Details: `docs/plan-done.md`.
+
+### Modal motion + MOT "My car's mileage" modal full height ✅ BUILT (2026-10-11)
+
+`MotCarModal` panel is always full viewport height (`h-full`, content scrolls inside) so switching range chips no longer resizes it. Open / close animate: `animate-modal-backdrop` + `animate-modal-panel` (`global.css`, reduced-motion = none); closing sets `data-closing` and unmounts on the panel's `animationend` (400 ms timeout fallback; immediate under reduced motion). Content under the chips is keyed by band (`animate-fade-in`) and its group / reason rows stagger in with `animate-row-in`. `Model360Modal` does not use these yet. Conventions: `docs/features-reference.md` "UK MOT".

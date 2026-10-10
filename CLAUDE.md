@@ -32,7 +32,7 @@ pnpm ingest -- --year 2026 --limit 100000   # real data slice;  ingest:full = ev
 pnpm ingest:all     # ingest:full + all CSV seeds, then derived rollups;  ingest:ratings:csv = committed seeds only (seconds)
 ```
 
-UK MOT ("Common faults") is the odd one out: `ingest:mot -- --dir <folder with the DVSA ZIPs>` streams ~6 GB of ZIPs (manual download, `docs/commands-reference.md`); `ingest:mot:csv` loads the committed seed.
+UK MOT is the odd one out (manual ~6 GB ZIP download): `ingest:mot -- --dir <folder>`, or `ingest:mot:csv` for the committed seed.
 Each source has `ingest:<x>`, `ingest:<x>:csv` (committed seed) and `export:<x>:csv` (re-dump after a real re-ingest); no-CSV sources
 (news, social, winner360) are re-run on demand. Names and flags: `docs/commands-reference.md`.
 
@@ -64,7 +64,7 @@ PostHog/Sentry inert unless telemetry env is on (`.env.example` in each app; rea
 - **Ingest column mapping is header-name-driven, not positional** (`scripts/src/transform.ts`); the source layout changes yearly.
 - **DB writes**: Drizzle in `apps/api`; ingest batches `INSERT … ON CONFLICT DO NOTHING`; `backfill.ts` uses raw SQL. Schema change = a
   new `packages/db/migrations/NNNN_*.sql` (applied in order, once each).
-- **Never erase a real-data-seeded DB without asking.** `pnpm db:seed` TRUNCATEs `registry.registrations` (happened once, 2026-09-23).
+- **Never erase a real-data-seeded DB without asking.** `pnpm db:seed` TRUNCATEs `registry.registrations`.
   Before `db:seed` or any `TRUNCATE`/`DROP`/bulk `DELETE` on `registry.registrations` or `registry.ingested_resources`, run
   `SELECT count(*) FROM registry.registrations` — thousands = synthetic, millions = real; if real, **ask the user** first.
 - **Offline / PWA**: the service worker exists only in production builds. Editing `schemas.ts` discards users' saved offline data;

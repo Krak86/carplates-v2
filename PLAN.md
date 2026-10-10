@@ -341,11 +341,7 @@ above once scoped, or dropped if research says no.
 
 ### Actual — ready or in progress
 
-- ✅ Local search history in IndexedDB, grouped/collapsible by month/year,
-  per-record delete + clear-all — done, see Phase 1.5.
-- ✅ Add/remove favorites in IndexedDB — done, see Phase 1.5.
-- ✅ Find plate by camera/photo (Plate Recognizer Snapshot API) — done, see
-  "Plate image recognition" under Phase 3.
+- ✅ History, favorites, camera/photo search, registry stats (table + map), brand breakdown, kind icon + logo — done, see Phase 1.5 / "Plate image recognition" in `docs/plan-done.md`.
 - ⏳ Own ALPR model + AR overlay — step 1 (self-hosted OCR service,
   preferred over the metered cloud API above) done 2026-09-27; steps 2-4
   (client-side live detection, AR overlay, polish) not started — see
@@ -358,12 +354,6 @@ above once scoped, or dropped if research says no.
 - ⏳ RIA "similar cars" proxy (free token) — Phase 2, blocked on getting a
   `developers.ria.com` API key; otherwise unchanged from that section's design.
 - ⛔ Platesmania — **skipped**, see Phase 3: no free token, scraping ruled out.
-- ✅ Registry statistics page, step A (table) and step B (map) — both done,
-  see Phase 1.5.
-- ✅ Manufacturer/brand breakdown + year filter on the stats page — done, see
-  Phase 1.5.
-- ✅ Vehicle-kind icon (animated, colored by registry color) + brand logo on
-  the result card — done, see Phase 1.5.
 - ✅ **VIN decode overview + plate-card split** — done 2026-10-02 (tabs, VIN anatomy, equipment map, engine/origin
   cards, grouped details; plate card now has separate _Registration history_ and _VIN decode_ sections) — see
   `docs/plan-done.md`. Open follow-ups:
@@ -472,15 +462,7 @@ Pre-warm finished over every model (steps 1-7 done 2026-10-05/06; table 112,398 
 `GET /api/wiki/image` (stored row → live fallback → per-kind placeholder) and the Wikipedia text loads only when its section
 is opened. Design, schema, runbook, run log and the endpoint write-up are in `docs/plan-done.md` ("Wikimedia hero-image cache
 in Postgres + pre-warm").
-**2026-10-09 — alias passes done (✅):** `packages/shared/src/wikiAliases.ts` (`wikiSearchName`) maps registry factory indexes / engine-code
-names to searchable names (VAZ 21104 → VAZ-2110, Niva, Priora, Kalina, ZAZ Sens/Slavuta/Tavria, GAZ, UAZ, Geely MK, Mercedes
-E-Class/ML/Sprinter, BMW "116 i" → 1 Series, trailing engine sizes stripped); rows keep the registry key, only the search uses the alias.
-`pnpm ingest:wiki-images -- --aliased` ran 3 passes (447 + 752 + 919 models, 0 failures left). The coverage script had a whitespace
-mismatch (registry `DAEWOO  LANOS`) and showed a false "33% not processed"; fixed. **Real coverage: 62.8% → 98.0% of cars** (13.10M;
-266k cars / 2.0% still `not_found`, mostly tiny trim-code models like "307 xs 2.0 e"). No wider pre-warm is needed. Soviet/UA photo sites
-(autoussr.ru, zaz.drive.place, sovietcarmodels.com, 24tv) were **not** used: copyrighted. Write-up: `docs/plan-done.md`.
-**2026-10-10 follow-up (✅):** live fallback now uses `wikiSearchName`; ~40 new alias rules; `--aliased` stopped early (≈1,800/2,212 models); **coverage 98.0% → 99.0%** (126k cars still not_found). Details: `docs/plan-done.md`.
-**2026-10-10 second session (✅):** `--aliased` finished, `--retry-failed` cleared, tail rules added (Doblo, Sorento, Mitsubishi, Peugeot trims, Geely LC/FC), diacritics fixed in title matching; **coverage 99.1%** (114.7k cars not_found), CSV re-exported. Details: `docs/plan-done.md`.
+**Alias passes + coverage 62.8% → 99.1% (2026-10-09 … 10):** done — run log in `docs/plan-done.md` ("Wikimedia hero-image cache … alias passes").
 **Left (all optional):** (1) ~~resume `--aliased`, `--retry-failed`, export~~ done; (2) spot-check matches visually on real plates (Niva, Priora, Sens, Gazelle, Geely MK, Mercedes 200/230 → E-Class, UAZ 469 — needs plates from the user); (3) remaining `not_found` tail: Geely JL7162 / FE-2, Honda M-NV, СКС RDS-02РП, Fiat Grande Punto / Doblo Panorama, Kia Optima, Renault Taliant, ZAZ T13010 / TF69 (verify Chance), trim words ("307 xs 2.0 e", "pajero wgn 3.2 did") — each model < 300 cars; (4) check the offline `wiki` cap (200 entities) is enough now that every result fetches the photo. Ideas not done:
 search by normalized name for odd spellings ("118 i" → "118i"); non-Latin article titles (zh/ja/ko) are mostly rejected by
 the "title mentions the model" guard; a Wikidata `P18` query could replace the lead-image stage.
