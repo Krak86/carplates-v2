@@ -696,7 +696,7 @@ needs its licence/permission recorded and attribution on About (VehiclesDB done)
 ### Open-data round 2 — recalls, complaints, specs, MOT faults, EV data — **licences verified 2026-10-07; RDW specs built 2026-10-08, rest not started**
 
 **Built:** RDW specs (the "Specs" block, stages C/C2/C3 + regroup) — `docs/plan-done.md` "RDW specs (EU / NL)". RDW recalls (stage D) and C4
-(estimated value) are built (2026-10-09); stage M (model alias unification, M1–M3) is built (2026-10-10; M4 stats grouping waits for "go M4" — `docs/plan-done.md` "Model alias unification"); stage E (Open EV Data, "Electric" block) is built too (2026-10-09; the upstream data is frozen at 2020); stage F (NHTSA recalls + owner complaints, live API + cache, merged into the Recalls block) is built too (2026-10-10; `DATASETS_PLAN.md` "Stage F — done"). Details, licences, URLs, caveats and the skip list:
+(estimated value) are built (2026-10-09); stage M (model alias unification, M1–M3) is built (2026-10-10; M4 stats grouping built too — `docs/plan-done.md` "Model alias unification"); stage E (Open EV Data, "Electric" block) is built too (2026-10-09; the upstream data is frozen at 2020); stage F (NHTSA recalls + owner complaints, live API + cache, merged into the Recalls block) is built too (2026-10-10; `DATASETS_PLAN.md` "Stage F — done"). Details, licences, URLs, caveats and the skip list:
 `DATASETS_PLAN.md` ("Round 2"). Buildable (all free, own tables, each a
 removable card block, credit on About): **RDW** registered vehicles (CC0; "Specs") + RDW recalls (CC0), **NHTSA** recalls +
 complaints (public domain, live API like `api/safety`), **UK MOT** (OGL v3; "Common faults", newest file 2023), **Transport

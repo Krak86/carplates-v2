@@ -187,3 +187,5 @@ SW caches `index.html`). Plate/VIN pages are `noindex`; `?lang=` selects the lan
 `DІ`/`ЕD` plates (`plateSeries`) are online-service series with no region by design. `registry.plate_regions` (stats rollups) mirrors both
 tables — change them together, in a new migration (0045 holds all 108 statutory pairs + code 31); `regions.statute.test.ts` asserts the
 tables equal the statute, so edit it with them. A pair is the region at issue, not the car's location.
+
+- **Top-models boards read `stats_model_grouped`, not `stats_by_model`:** ZAZ / Daewoo / Chevrolet spellings are folded by `modelFamily` into one row. Rebuild with `pnpm db:refresh-model-family-stats` (after `db:refresh-stats`; `db:refresh-derived` does it). Raw `stats_by_model` still feeds the search model suggestions.

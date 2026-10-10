@@ -108,6 +108,7 @@
     "db:refresh-safety-stats": "pnpm --filter @carplates/scripts refresh-safety-stats",
     "db:refresh-vdb-stats": "pnpm --filter @carplates/scripts refresh-vdb-stats",
     "db:refresh-weight-stats": "pnpm --filter @carplates/scripts refresh-weight-stats",
+    "db:refresh-model-family-stats": "pnpm --filter @carplates/scripts refresh-model-family-stats",
     "db:refresh-derived": "pnpm --filter @carplates/scripts refresh-derived"
   },
   "devDependencies": {

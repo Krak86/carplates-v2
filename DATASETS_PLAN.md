@@ -723,7 +723,7 @@ little to a result card (same finding as Eurostat), so value comes from **model-
 - **Priority:** stage J is optional; its realistic yield is KBA + DataVic (clean licences, popularity / survival lines) and MLIT recalls (if the PDL note
   is fine). Everything else depends on the terms checklist above. **Estimate:** 0.5 session for the terms checklist; 1 session per source after.
 
-**Stage M — model alias unification (prerequisite for stage F and J; owner chose "asap, new session", 2026-10-10; M1–M3 built 2026-10-10 (write-up: `docs/plan-done.md` "Model alias unification"); M4 not started until "go M4").**
+**Stage M — model alias unification (prerequisite for stage F and J; owner chose "asap, new session", 2026-10-10; M1–M3 built 2026-10-10 (write-up: `docs/plan-done.md` "Model alias unification"); M4 built 2026-10-10 (`stats_model_grouped`, migration 0057)).**
 Why: three alias layers exist today — `vdbMatch.ts` (`MODEL_ALIASES`, `CROSS_MAKE_ALIASES`, `makeKey`/`modelKey`; VehiclesDB, RDW specs, recalls),
 `wikiAliases.ts` (`wikiSearchName`; photo search only, used by `wiki.service.ts` and `scripts/src/wiki-images.ts`) and `modelFamily.ts` (ZAZ / Daewoo /
 Chevrolet Lanos families; used by nothing but `export:model-families:csv`). A rule added to one does not reach the others (verified gaps in the
@@ -743,7 +743,7 @@ Stage J "Wiki / model normalization state" list). Every new model-keyed source w
 - **Out of scope:** Korean / Japanese domestic-name aliases (only when that data is built), any new data source, UI changes.
 - **Definition of done:** `pnpm format`, `pnpm lint`, `pnpm type-check`, `pnpm test` green; `pnpm --filter @carplates/shared build` run (API / web consume `dist/`); docs updated
   (`docs/features-reference.md` alias convention, `docs/plan-done.md` write-up, one ✅ line in `PLAN.md`); then a commit message and stop.
-- **Estimate:** M1 + M2 + M3 = 1 session; M4 = +0.5 (mostly the wait for the refresh).
+- **Estimate:** M1 + M2 + M3 = 1 session; M4 = +0.5.
 
 Not planned (decided): VehiclesDB per-country deciles, derived body-type label, vPIC offline dump, Eurostat. (Wikidata moved into stage I; other countries into stage J.)
 

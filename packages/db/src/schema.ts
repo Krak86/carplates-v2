@@ -1176,3 +1176,18 @@ export const openEv = registry.table(
 )
 export type OpenEvRow = typeof openEv.$inferSelect
 export type OpenEvInsert = typeof openEv.$inferInsert
+
+/**
+ * `stats_by_model` with ZAZ / Daewoo / Chevrolet spellings folded into one family row — backs the /stats top-models
+ * leaderboard. Rebuilt by `scripts/src/model-family-stats.ts`; see migrations/0057_stats_model_grouped.sql.
+ */
+export const statsModelGrouped = registry.table(
+  'stats_model_grouped',
+  {
+    brand: text('brand').notNull(),
+    model: text('model').notNull(),
+    ...statsMetrics
+  },
+  t => [primaryKey({ columns: [t.brand, t.model] })]
+)
+export type StatsModelGroupedInsert = typeof statsModelGrouped.$inferInsert

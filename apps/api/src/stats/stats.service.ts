@@ -15,7 +15,7 @@ import {
   statsByColor,
   statsByFuel,
   statsByKind,
-  statsByModel,
+  statsModelGrouped,
   statsByOrigin,
   statsByRegion,
   statsByRegionYear,
@@ -105,7 +105,7 @@ export class StatsService {
         .orderBy(desc(statsByColor.distinctPlates))
         .limit(TOP_N),
       db.select().from(statsByRegion).orderBy(desc(statsByRegion.distinctPlates)).limit(TOP_N),
-      db.select().from(statsByModel).orderBy(desc(statsByModel.distinctPlates)).limit(TOP_N),
+      db.select().from(statsModelGrouped).orderBy(desc(statsModelGrouped.distinctPlates)).limit(TOP_N),
       this.fuelStats.modelLeaderboard('ASC'),
       this.fuelStats.modelLeaderboard('DESC'),
       this.safetyStats.modelLeaderboard('DESC'),
@@ -204,9 +204,9 @@ export class StatsService {
       db.select().from(statsByBrand),
       db.select().from(statsByBrandYear),
       db.select().from(statsByOrigin),
-      // Top 10 only — stats_by_model has ~79k mostly-noisy pairs, never sent in full (see its
+      // Top 10 only — stats_model_grouped has ~75k mostly-noisy pairs, never sent in full (see its
       // migration). 10, not 5, so the web "top 5, show 10" toggle (TopStatsPanel) has data to expand into.
-      db.select().from(statsByModel).orderBy(desc(statsByModel.distinctPlates)).limit(10)
+      db.select().from(statsModelGrouped).orderBy(desc(statsModelGrouped.distinctPlates)).limit(10)
     ])
     const summary = summaryRows[0]
 

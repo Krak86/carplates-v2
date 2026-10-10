@@ -4,11 +4,12 @@ import { join } from 'node:path'
 const SCRIPTS_DIR = join(import.meta.dirname, '..')
 
 /**
- * Rollups computed from `current_registration`, in no required order (each reads the registry, none reads another):
+ * Rollups computed from `current_registration` or `stats_by_model`, in no required order (none reads another derived one):
  * the /fuel, /safety and /stats "Markets" pages. They go stale on every registry ingest, so ingests rebuild them.
  * A new rollup of this kind belongs in this list.
  */
 export const DERIVED_REFRESH_SCRIPTS = [
+  'src/model-family-stats.ts',
   'src/fuel-stats.ts',
   'src/safety-stats.ts',
   'src/vdb-stats.ts',
