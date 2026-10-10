@@ -24,6 +24,8 @@ import {
   getFx,
   getRdw,
   getOpenEv,
+  getNhtsaComplaints,
+  getNhtsaRecalls,
   getRdwRecalls,
   getVdb,
   getVdbStats,
@@ -290,6 +292,24 @@ export function rdwRecallsQuery(brand: string, model: string) {
   return queryOptions({
     queryKey: ['rdw', 'recalls', brand, model],
     queryFn: () => getRdwRecalls(brand, model),
+    staleTime: Infinity
+  })
+}
+
+// NHTSA (US) recall campaigns for a model-year — live API behind the server's 7-day cache; kept in the offline 'safety' group.
+export function nhtsaRecallsQuery(make: string, model: string, year: number) {
+  return queryOptions({
+    queryKey: ['safety', 'nhtsa-recalls', make, model, year],
+    queryFn: () => getNhtsaRecalls(make, model, year),
+    staleTime: Infinity
+  })
+}
+
+// NHTSA (US) owner-complaint summary for a model-year — live API behind the server's 30-day cache; offline 'safety' group.
+export function nhtsaComplaintsQuery(make: string, model: string, year: number) {
+  return queryOptions({
+    queryKey: ['safety', 'nhtsa-complaints', make, model, year],
+    queryFn: () => getNhtsaComplaints(make, model, year),
     staleTime: Infinity
   })
 }

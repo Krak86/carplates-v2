@@ -194,6 +194,16 @@ export {
   type RdwRecallsResponse
 } from './rdwRecalls.js'
 export {
+  NHTSA_COMPLAINT_COMPONENTS,
+  NHTSA_RECALLS_LIMIT,
+  nhtsaComplaintsResponseSchema,
+  nhtsaRecallSchema,
+  nhtsaRecallsResponseSchema,
+  type NhtsaComplaintsResponse,
+  type NhtsaRecall,
+  type NhtsaRecallsResponse
+} from './nhtsaRecalls.js'
+export {
   estimateValue,
   floorStartYears,
   OLD_CAR_FLOOR_SHARE,

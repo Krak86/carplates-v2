@@ -14,6 +14,7 @@ import { FuelModule } from './fuel/fuel.module.js'
 import { FxModule } from './fx/fx.module.js'
 import { CardModule } from './card/card.module.js'
 import { EvModule } from './ev/ev.module.js'
+import { NhtsaModule } from './nhtsa/nhtsa.module.js'
 import { RdwModule } from './rdw/rdw.module.js'
 import { VdbModule } from './vdb/vdb.module.js'
 import { HealthController } from './health/health.controller.js'
@@ -57,6 +58,7 @@ import { WikiModule } from './wiki/wiki.module.js'
     StatsModule,
     PhotosModule,
     SafetyModule,
+    NhtsaModule,
     FuelModule,
     FxModule,
     EvModule,

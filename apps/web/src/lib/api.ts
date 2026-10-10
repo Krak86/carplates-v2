@@ -15,6 +15,8 @@ import {
   euroNcapRatingsResponseSchema,
   fuelEconomyResponseSchema,
   fxResponseSchema,
+  nhtsaComplaintsResponseSchema,
+  nhtsaRecallsResponseSchema,
   openEvResponseSchema,
   rdwRecallsResponseSchema,
   rdwResponseSchema,
@@ -66,6 +68,8 @@ import type {
   EuroNcapRatingsResponse,
   FuelEconomyResponse,
   FxResponse,
+  NhtsaComplaintsResponse,
+  NhtsaRecallsResponse,
   OpenEvResponse,
   RdwRecallsResponse,
   RdwResponse,
@@ -269,6 +273,16 @@ export async function getRdw(brand: string, model: string, year: number, kind?: 
 export async function getRdwRecalls(brand: string, model: string): Promise<RdwRecallsResponse> {
   const params = new URLSearchParams({ brand, model })
   return rdwRecallsResponseSchema.parse(await getJson(`/api/rdw/recalls?${params.toString()}`))
+}
+
+export async function getNhtsaRecalls(make: string, model: string, year: number): Promise<NhtsaRecallsResponse> {
+  const params = new URLSearchParams({ make, model, year: String(year) })
+  return nhtsaRecallsResponseSchema.parse(await getJson(`/api/nhtsa/recalls?${params.toString()}`))
+}
+
+export async function getNhtsaComplaints(make: string, model: string, year: number): Promise<NhtsaComplaintsResponse> {
+  const params = new URLSearchParams({ make, model, year: String(year) })
+  return nhtsaComplaintsResponseSchema.parse(await getJson(`/api/nhtsa/complaints?${params.toString()}`))
 }
 
 export async function getOpenEv(brand: string, model: string): Promise<OpenEvResponse> {

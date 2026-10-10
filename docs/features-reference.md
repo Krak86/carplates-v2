@@ -63,6 +63,13 @@ Model-level only: a campaign covers a make/type, never a plate or VIN, so wordin
 
 UI details: the first `RECALLS_PREVIEW` (3) campaigns show, then "Show N more"; each row has a market tag (`market`, default `NL`); every field has a "?" (`recalls.about.*`); category and hazard are translated from RDW's fixed wording via `categoryKey` / `hazardKey` (an unknown wording stays Dutch, `lang="nl"`) while defect / consequences / remedy stay Dutch until stage D2 (planned in `DATASETS_PLAN.md`: `rdw_recall_texts` with an `engine` column, "AI translation" label, original-text switch).
 
+#### NHTSA recalls + complaints (stage F)
+
+Live, **no table**: `apps/api/src/nhtsa/` calls `api.nhtsa.gov` (`recallsByVehicle`, `complaintsByVehicle`) behind an in-memory TTL cache (recalls 7 d, complaints 30 d; errors are 502 and not cached). Contract
+`packages/shared/src/nhtsaRecalls.ts` (own file). Per **model year** — the web queries need `year`. The model-name retry (Mazda "6" → "Mazda6", Mercedes "E 200" → "E-CLASS", first token) is the one shared
+`nhtsaModelCandidates` (`safety/nhtsa-models.ts`); extend it there, not per service. NHTSA answers a non-match with HTTP 400 + empty `results` — that is "no match", not an error. Dates: recalls `dd/mm/yyyy`,
+complaints `mm/dd/yyyy`. Complaints are returned as counts only (never narratives). UI: `RdwRecalls` shows two collapsed-by-default `VinToggleSection` sub-sections (📂 + flag + count) — EU (RDW) and US (NHTSA); the US one holds `NhtsaRecallList` = footnote, `NhtsaComplaints` box, then the campaign rows (English text `lang="en"`). Market flags are inline SVG (`MarketFlag.tsx`; Windows does not draw emoji flags) — add a flag there for a new market. Queries use key head `safety` (offline group). Wording stays model-year-level and market-labelled (`recalls.market.US`).
+
 ### Estimated value (stage C4)
 
 A copy button beside the chip copies the range in the **shown** currency only (`formatMoneyCopy`: `€ 10 600–14 400`, plain spaces, no "~"); the NBU rates are fetched as soon as the estimate shows (not only on panel open) so ₴/$ can be copied.

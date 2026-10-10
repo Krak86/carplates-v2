@@ -6,6 +6,8 @@ import { useSearchParams } from 'react-router'
 
 import InfoPopover from '@/components/InfoPopover'
 import InfoText from '@/components/InfoText'
+import MarketFlag from '@/components/MarketFlag'
+import NhtsaRecallList from '@/components/NhtsaRecallList'
 import RdwRecallField from '@/components/RdwRecallField'
 import {
   categoryKey,
@@ -17,8 +19,9 @@ import {
 } from '@/components/RdwRecalls.helpers'
 import SectionHeader from '@/components/SectionHeader'
 import ShareButton from '@/components/ShareButton'
+import VinToggleSection from '@/components/vin/VinToggleSection'
 import { cn } from '@/lib/cn'
-import { rdwQuery, rdwRecallsQuery } from '@/lib/queries'
+import { nhtsaComplaintsQuery, nhtsaRecallsQuery, rdwQuery, rdwRecallsQuery } from '@/lib/queries'
 import { scrollElementIntoView } from '@/lib/share-section'
 
 type Props = {
@@ -30,8 +33,9 @@ type Props = {
 }
 
 /**
- * "Recalls" block from RDW open data (CC0): recall campaigns the Dutch authority lists for this make/model. Model-level
- * and EU market — it says nothing about whether this particular car is affected. Collapsed by default (open from a
+ * "Recalls" block: recall campaigns the Dutch authority RDW (open data, CC0) lists for this make/model (EU), then the US
+ * campaigns and an owner-complaint summary NHTSA holds for this model-year (public domain). Model-level and
+ * market-labelled — it says nothing about whether this particular car is affected. Collapsed by default (open from a
  * `?section=recalls` share link); renders nothing while loading, on error, or without a match.
  */
 export default function RdwRecalls({ brand, model, year, kind }: Props): ReactNode {
@@ -51,6 +55,14 @@ export default function RdwRecalls({ brand, model, year, kind }: Props): ReactNo
     enabled: !!(brand && model && year)
   })
   const match = data?.match
+  // US (NHTSA) campaigns are per model-year, so they need the year; a failed or empty answer just leaves the section out.
+  const usEnabled = !!(brand && model && year) && open
+  const usRecalls = useQuery({ ...nhtsaRecallsQuery(brand ?? '', model ?? '', year ?? 0), enabled: usEnabled })
+  const usComplaints = useQuery({ ...nhtsaComplaintsQuery(brand ?? '', model ?? '', year ?? 0), enabled: usEnabled })
+  const us = usRecalls.data && usRecalls.data.total > 0 ? usRecalls.data : null
+  const complaints = usComplaints.data && usComplaints.data.total > 0 ? usComplaints.data : null
+  const hasAny = !!(match || us || complaints)
+  const usPending = usEnabled && (usRecalls.isLoading || usComplaints.isLoading)
 
   useEffect(() => {
     if (isShared && sectionRef.current) scrollElementIntoView(sectionRef.current)
@@ -63,14 +75,15 @@ export default function RdwRecalls({ brand, model, year, kind }: Props): ReactNo
   const locale = i18n.language === 'ua' ? 'uk' : i18n.language
   const name = match ? `${match.makeName} ${match.modelName}` : ''
   const openShare = formatOpenShare(specs?.match?.specs.openRecallShare)
-  const info = match
+  const info = hasAny
     ? [
-        t('recalls.info.lead', { name }),
+        match && t('recalls.info.lead', { name }),
         t('recalls.info.model'),
-        match.how === 'prefix' && t('recalls.info.loose'),
-        match.crossMake && t('recalls.info.crossMake', { name }),
-        t('recalls.info.dutch'),
-        t('recalls.info.credit')
+        match?.how === 'prefix' && t('recalls.info.loose'),
+        match?.crossMake && t('recalls.info.crossMake', { name }),
+        match && t('recalls.info.dutch'),
+        match && t('recalls.info.credit'),
+        (us || complaints) && t('nhtsa.info.credit')
       ]
         .filter(Boolean)
         .join('\n')
@@ -83,13 +96,17 @@ export default function RdwRecalls({ brand, model, year, kind }: Props): ReactNo
         title={
           <>
             {t('recalls.title')}{' '}
-            {match && <span className="text-sm font-normal text-[var(--color-muted)]">({match.total})</span>}
+            {hasAny && (
+              <span className="text-sm font-normal text-[var(--color-muted)]">
+                ({(match?.total ?? 0) + (us?.total ?? 0)})
+              </span>
+            )}
           </>
         }
         info={
-          match && (
+          hasAny && (
             <InfoPopover label={t('vin.info.about', { field: t('recalls.title') })} title={t('recalls.title')}>
-              <InfoText text={info} highlight={[name, 'RDW']} />
+              <InfoText text={info} highlight={[name, 'RDW', 'NHTSA']} />
             </InfoPopover>
           )
         }
@@ -110,28 +127,36 @@ export default function RdwRecalls({ brand, model, year, kind }: Props): ReactNo
         <div className="overflow-hidden">
           {recalls.isLoading && <p className="mt-2 text-base text-[var(--color-muted)]">{t('result.loading')}</p>}
           {recalls.isError && <p className="mt-2 text-base text-[var(--color-muted)]">{t('result.error')}</p>}
-          {recalls.isSuccess && !match && (
+          {recalls.isSuccess && !hasAny && !usPending && (
             <p className="mt-2 text-base text-[var(--color-muted)]">{t('section.empty')}</p>
           )}
 
+          {hasAny && (
+            <div className="mt-2 space-y-1 rounded-lg bg-[var(--color-surface)]/20 p-3 text-sm">
+              <p className="font-medium">{t('recalls.what.title')}</p>
+              <p>{t('recalls.what.body')}</p>
+              <p className="text-[var(--color-muted)]">{t('recalls.what.ukraine')}</p>
+            </div>
+          )}
+
           {match && (
-            <>
-              <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1">
-                <span
-                  title={t('recalls.marketHint')}
-                  className="inline-block rounded-full border border-[var(--color-border)] px-2 py-0.5 text-xs text-[var(--color-muted)]"
-                >
-                  {t('recalls.market')}
-                </span>
-              </div>
-
-              <div className="mt-2 space-y-1 rounded-lg bg-[var(--color-surface)]/20 p-3 text-sm">
-                <p className="font-medium">{t('recalls.what.title')}</p>
-                <p>{t('recalls.what.body')}</p>
-                <p className="text-[var(--color-muted)]">{t('recalls.what.ukraine')}</p>
-              </div>
-
-              <p className="mt-2 text-xs text-[var(--color-muted)]">
+            <VinToggleSection
+              icon="📂"
+              showLabel={t('vin.group.show')}
+              hideLabel={t('vin.group.hide')}
+              title={
+                <>
+                  <MarketFlag market="NL" /> {t('recalls.market')}{' '}
+                  <span className="text-sm font-normal text-[var(--color-muted)]">({match.total})</span>
+                </>
+              }
+              info={
+                <InfoPopover label={t('vin.info.about', { field: t('recalls.market') })} title={t('recalls.market')}>
+                  <InfoText text={t('recalls.marketHint')} highlight={['RDW']} />
+                </InfoPopover>
+              }
+            >
+              <p className="text-xs text-[var(--color-muted)]">
                 {t('recalls.footnote', { name, count: match.total })}
                 {openShare && ` ${t('recalls.openShare', { share: openShare, year: specs?.match?.specs.year })}`}
               </p>
@@ -151,7 +176,8 @@ export default function RdwRecalls({ brand, model, year, kind }: Props): ReactNo
                     <li key={recall.code} className="py-2">
                       <details>
                         <summary className="cursor-pointer text-base">
-                          <span className="mr-2 inline-block rounded-full border border-[var(--color-border)] px-2 py-0.5 align-middle text-xs text-[var(--color-muted)]">
+                          <span className="mr-2 inline-flex items-center gap-1 rounded-full border border-[var(--color-border)] px-2 py-0.5 align-middle text-xs text-[var(--color-muted)]">
+                            <MarketFlag market={recall.market ?? 'NL'} className="h-3 w-4" />
                             {t(`recalls.market.${recall.market ?? 'NL'}`, { defaultValue: recall.market ?? 'NL' })}
                           </span>
                           {tr?.defect && !originals.includes(recall.code) ? (
@@ -273,7 +299,28 @@ export default function RdwRecalls({ brand, model, year, kind }: Props): ReactNo
                   {t('recalls.truncated', { shown: match.recalls.length, total: match.total })}
                 </p>
               )}
-            </>
+            </VinToggleSection>
+          )}
+
+          {(us || complaints) && (
+            <VinToggleSection
+              icon="📂"
+              showLabel={t('vin.group.show')}
+              hideLabel={t('vin.group.hide')}
+              title={
+                <>
+                  <MarketFlag market="US" /> {t('nhtsa.market')}{' '}
+                  {us && <span className="text-sm font-normal text-[var(--color-muted)]">({us.total})</span>}
+                </>
+              }
+              info={
+                <InfoPopover label={t('vin.info.about', { field: t('nhtsa.market') })} title={t('nhtsa.market')}>
+                  <InfoText text={t('nhtsa.marketHint')} highlight={['NHTSA']} />
+                </InfoPopover>
+              }
+            >
+              <NhtsaRecallList data={us} complaints={complaints} locale={locale} />
+            </VinToggleSection>
           )}
         </div>
       </div>

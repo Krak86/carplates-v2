@@ -3073,6 +3073,12 @@ and brand logos"); this entry records what shipped and why.
 - **Estimated value:** the "Charts and explanation" folder content has `p-3` on all sides (wrapper in `EstimatedValuePanel`, not in `EstimatedValueDetails`, which the chip popover also renders and which is already padded).
 - **`SegmentExplainer`** (plate and VIN segment chips + hint): root has `mt-3` above the chips.
 
+### NHTSA recalls + complaints (stage F of DATASETS_PLAN.md) ✅ BUILT (2026-10-10, uncommitted when written)
+
+Live NHTSA API behind a 7-day (recalls) / 30-day (complaints) in-memory cache, merged into the Recalls block as a collapsed "US (NHTSA) data" sub-section (footnote, complaints summary, campaigns) beside a collapsed "EU (NL) data" one, with SVG market flags. No migration, ingest, seed or schedule row.
+Full decisions, API quirks (HTTP 400 for no match, `dd/mm` vs `mm/dd` dates) and spot checks: `DATASETS_PLAN.md` "Stage F — done"; conventions: `docs/features-reference.md` "NHTSA recalls + complaints".
+Files: `apps/api/src/nhtsa/*`, `apps/api/src/safety/nhtsa-models.ts`, `packages/shared/src/nhtsaRecalls.ts`, `apps/web/src/components/NhtsaRecallList.tsx` / `NhtsaComplaints.tsx` / `RdwRecalls.tsx`.
+
 ### Model alias unification (stage M1–M3 of DATASETS_PLAN.md) ✅ BUILT (2026-10-10, uncommitted when written)
 
 - **M1 — one source.** `modelFamily.ts` now holds the ZAZ / Daewoo / Lanos / Sens knowledge: `modelFamily`, `zazFactoryFamily(text, leading?)` and
