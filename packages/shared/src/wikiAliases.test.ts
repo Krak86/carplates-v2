@@ -29,6 +29,10 @@ describe('wikiSearchName', () => {
     expect(wikiSearchName('mercedes-benz', 'b 250e')?.model).toBe('B-Class')
     expect(wikiSearchName('bmw', '116 i')?.model).toBe('1 Series')
     expect(wikiSearchName('bmw', 'x5')).toBeNull()
+    expect(wikiSearchName('bmw', 'r 1200gs')).toMatchObject({ model: 'R1200GS', leadQuery: 'BMW R1200GS' })
+    expect(wikiSearchName('bmw', 'r 1200 gs')?.model).toBe('R1200GS')
+    expect(wikiSearchName('bmw', 'f 700gs')?.leadQuery).toBe('BMW F series parallel-twin')
+    expect(wikiSearchName('bmw', 'f 800r')?.model).toBe('F series')
   })
 
   it('maps GAZ / UAZ / Geely / Mercedes vans and strips engine sizes', () => {

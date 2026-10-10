@@ -161,6 +161,12 @@ function brandAlias(brand: string, model: string): WikiSearchName | null {
     return letter ? named('Mercedes-Benz', `${letter.toUpperCase()}-Class`) : null
   }
   if (brand === 'bmw') {
+    // Motorcycles: the registry types "R 1200GS" / "R 1200 GS"; Wikipedia and Commons spell it "R1200GS".
+    const moto = /^([rfgks])\s?(\d{3,4})\s?([a-z]{0,3})$/.exec(model)
+    // The F 700/800 twins share one article, "BMW F series parallel-twin" (no per-model page for most of them).
+    if (moto?.[1] === 'f' && (moto[2] === '700' || moto[2] === '800'))
+      return named('BMW', 'F series', 'BMW F series parallel-twin')
+    if (moto) return named('BMW', `${moto[1]!.toUpperCase()}${moto[2]}${moto[3]!.toUpperCase()}`)
     const series = BMW_SERIES.exec(model.replace(/е/g, 'e'))?.[1]
     return series ? named('BMW', `${series} Series`) : null
   }

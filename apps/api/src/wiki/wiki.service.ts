@@ -79,12 +79,16 @@ export class WikiService {
 
     // The UI-language edition first, then the other two (ua → uk, ru, en) — a rare model often has an article in one only.
     const domains = wikiDomainChain(lang)
+    // Motorcycle indexes ("R 1200GS") are searched under the article's spelling ("BMW R1200GS").
+    const motoAlias = /^bmw\b/i.test(brand) ? wikiSearchName(brand.toLowerCase(), model.toLowerCase()) : null
+    const textQuery = motoAlias?.leadQuery ?? query
+    const textModel = motoAlias?.model ?? model
     let page: WikipediaPage | null = null
     let articleDomain = domain
     try {
       for (const d of domains) {
-        const hit = await this.fetchPage(d, query)
-        if (hit && titleMentionsModel(hit.title, model)) {
+        const hit = await this.fetchPage(d, textQuery)
+        if (hit && titleMentionsModel(hit.title, textModel)) {
           page = hit
           articleDomain = d
           break
