@@ -1970,6 +1970,8 @@
   "ca.sys.visual": "Visibility",
   "ca.sys.wheels": "Wheels",
   "generation.info.title": "Generation",
+  "generation.chip": "Generation {{name}}",
+  "section.about.basic": "The car's registration record from Ukraine's open state vehicle register (data.gov.ua, Ministry of Internal Affairs): body, engine, colour, fuel, weights, owner type, registration date and department.\nPersonal data is not published — only the vehicle's own attributes\nThe register is updated periodically, so very recent changes may be missing",
   "generation.info.lead": "{{name}}: generation {{generation}}, built {{span}} (by the car’s model year).",
   "generation.info.boundary": "The model year falls on the year two generations overlap, so this is a best guess.",
   "generation.info.previous": "Previous generation: {{generation}}, {{span}}.",

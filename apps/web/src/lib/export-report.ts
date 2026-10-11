@@ -1,6 +1,7 @@
 import { brandLogoUrl } from '@carplates/shared'
-import { CURRENCIES, valueCurve } from '@carplates/shared'
+import { CURRENCIES, generationSpan, valueCurve } from '@carplates/shared'
 import type {
+  Generation,
   CaRecallsResponse,
   CncapRatingsResponse,
   EuroNcapRatingsResponse,
@@ -24,6 +25,7 @@ import type {
 } from '@carplates/shared'
 
 import { formatRange } from '@/components/CO2Badge.helpers'
+import { generationLabel } from '@/components/GenerationChip.helpers'
 import {
   formatEur,
   formatMoney,
@@ -177,6 +179,8 @@ export type ExportInput = {
   caRecalls: CaRecallsResponse | null
   /** UK MOT fail / advisory rates by mileage — the "Common faults" section. */
   mot: MotResponse | null
+  /** The model's generation for this model year (Wikidata / Wikipedia), when one fits. */
+  generation?: Generation | null
   /** NBU rates for the currency rows of the price section; null = euros only. */
   fx: FxResponse | null
   /** The VIN section's NHTSA localizer (labels / values in the UI language); absent = raw English. */
@@ -192,6 +196,11 @@ function pushRow(rows: Row[], label: string, value: string | number | null | und
   rows.push({ label, value: String(value) })
 }
 
+/** "J200 · 2007–2021" — the code (or ordinal label) with its production span. */
+function generationRowValue(g: Generation | null | undefined, t: Translate): string | null {
+  return g ? `${generationLabel(g, t)} · ${generationSpan(g)}` : null
+}
+
 function buildVehicleSection(input: ExportInput, t: Translate): ExportKeyValueSection | null {
   const rows: Row[] = []
   const c = input.current
@@ -202,6 +211,7 @@ function buildVehicleSection(input: ExportInput, t: Translate): ExportKeyValueSe
   if (c) {
     pushRow(rows, t('field.brandModel'), [c.brand, c.model].filter(Boolean).join(' ') || null)
     pushRow(rows, t('field.year'), c.makeYear)
+    pushRow(rows, t('generation.info.title'), generationRowValue(input.generation, t))
     pushRow(rows, t('field.body'), c.body)
     if (c.capacity != null) pushRow(rows, t('field.capacity'), c.capacity)
     if (c.capacity == null || c.powerKwt != null) pushRow(rows, t('field.power'), c.powerKwt)
@@ -223,6 +233,7 @@ function buildVehicleSection(input: ExportInput, t: Translate): ExportKeyValueSe
   } else {
     pushRow(rows, t('field.brandModel'), [input.vehicle.brand, input.vehicle.model].filter(Boolean).join(' ') || null)
     pushRow(rows, t('field.year'), input.vehicle.year)
+    pushRow(rows, t('generation.info.title'), generationRowValue(input.generation, t))
     pushRow(rows, t('field.vin'), input.vin)
   }
 

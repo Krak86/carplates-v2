@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 
 import InfoPopover from '@/components/InfoPopover'
-import { generationLabel } from '@/components/GenerationChip.helpers'
+import { generationChipText, generationLabel } from '@/components/GenerationChip.helpers'
 import { generationQuery } from '@/lib/queries'
 
 type Props = {
@@ -57,7 +57,7 @@ export default function GenerationChip({ brand, model, year }: Props): ReactNode
       anchor={
         <span className={CHIP}>
           <span aria-hidden>🧬</span>
-          {name} · {generationSpan(current)}
+          {generationChipText(current, t)}
         </span>
       }
     >

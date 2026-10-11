@@ -80,6 +80,14 @@ export default function CarWikiInfo({ brand, model, year }: Props): ReactNode {
       >
         <div className="overflow-hidden">
           <div className="mt-3">
+            {wiki.isPending && wiki.isFetching && (
+              <div role="status" aria-label={t('result.loading')} className="animate-pulse space-y-2">
+                <div className="h-3.5 w-1/3 rounded bg-border" />
+                <div className="h-4 w-full rounded bg-border" />
+                <div className="h-4 w-11/12 rounded bg-border" />
+                <div className="h-4 w-4/5 rounded bg-border" />
+              </div>
+            )}
             {wiki.isError && <p className="text-base text-muted">{t('wiki.unavailable')}</p>}
             {data && !data.found && <p className="text-base text-muted">{t('wiki.none')}</p>}
 

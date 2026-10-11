@@ -275,9 +275,9 @@ export default function ResultCard({ data }: Props): ReactNode {
             <div className="mt-1 flex min-h-6 flex-wrap items-center gap-1.5">
               {chipsPending && <span aria-hidden className="h-6 w-24 animate-pulse rounded-full bg-border" />}
               <LastOperationChip operCode={c.operCode} operName={c.operName} dReg={c.dReg} />
+              <GenerationChip brand={c.brand} model={c.model} year={c.makeYear} />
               <TopStatBadges brand={c.brand} model={c.model} color={c.color} region={data.region} kind={c.kind} />
               <VdbChips brand={c.brand} model={c.model} kind={c.kind} />
-              <GenerationChip brand={c.brand} model={c.model} year={c.makeYear} />
               <Model3dButton brand={c.brand} model={c.model} />
               <Model360Button brand={c.brand} model={c.model} />
             </div>
@@ -321,6 +321,7 @@ export default function ResultCard({ data }: Props): ReactNode {
                 {t('result.basicLabel')} <SectionCount count={basicCount} />
               </>
             }
+            info={<SectionInfo section="basic" title={t('result.basicLabel')} />}
             actions={<ShareButton section="basic" label={t('share.button', { section: t('result.basicLabel') })} />}
             open={showBasic}
             onToggle={() => setShowBasic(v => !v)}

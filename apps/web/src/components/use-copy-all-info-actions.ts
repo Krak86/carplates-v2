@@ -14,6 +14,7 @@ import {
   euroNcapRatingsQuery,
   fuelEconomyQuery,
   fxQuery,
+  generationQuery,
   iihsRatingsQuery,
   jncapRatingsQuery,
   kncapRatingsQuery,
@@ -101,7 +102,8 @@ export function useCopyAllInfoActions(params: CopyAllInfoParams): UseCopyAllInfo
       nhtsaRecalls,
       nhtsaComplaints,
       caRecalls,
-      mot
+      mot,
+      generation
     ] = await Promise.all([
       plate ? safe(queryClient.ensureQueryData(plateHistoryQuery(plate))) : Promise.resolve(null),
       params.vinDecodeResults == null && vin ? safe(queryClient.ensureQueryData(vinQuery(vin))) : Promise.resolve(null),
@@ -162,7 +164,8 @@ export function useCopyAllInfoActions(params: CopyAllInfoParams): UseCopyAllInfo
               ...FAIL_FAST_OFFLINE
             })
           )
-        : Promise.resolve(null)
+        : Promise.resolve(null),
+      hasRatingsQuery ? safe(queryClient.ensureQueryData(generationQuery(make, model, year))) : Promise.resolve(null)
     ])
 
     return {
@@ -194,6 +197,7 @@ export function useCopyAllInfoActions(params: CopyAllInfoParams): UseCopyAllInfo
       nhtsaComplaints,
       caRecalls,
       mot,
+      generation: generation?.match?.current ?? null,
       lang: i18n.language
     }
   }
