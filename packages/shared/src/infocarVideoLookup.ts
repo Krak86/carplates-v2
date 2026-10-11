@@ -10,7 +10,8 @@ import type { InfocarRow } from './infocarLookup.js'
  * Year: a video carries infocar's generation id (the `_id7347` of its page, the same id as the catalog version page
  * `test_rav4_id7347.html`), so with the catalog rows its generation's year range is known — a 2017 RAV4 then gets the
  * 2015–2018 generation's videos, not the 2026 ones. A video whose generation isn't in the catalog falls back to the
- * year its title names (dropped when that is far from the car's year; kept when it names none). Best first: videos of
+ * year its title names: when that year falls in a catalog generation the car must be in it too, otherwise it is dropped
+ * when far (±3) from the car's year; kept when it names none (ranked by the generation on sale at its publish date). Best first: videos of
  * the car's own generation, then the rest, each newest first. Without a car year nothing is filtered.
  */
 export type InfocarVideoRow = {
@@ -35,6 +36,24 @@ export const MAX_VIDEOS = 6
 const TITLE_YEAR_TOLERANCE = 3
 
 type YearRange = { from: number; to: number }
+
+/** Year ranges of every catalog version of the brand's model (or its variants). */
+function candidateVersions(
+  catalog: InfocarRow[],
+  brandSlug: string,
+  candidate: string,
+  currentYear: number
+): YearRange[] {
+  return catalog
+    .filter(
+      row =>
+        row.brandSlug === brandSlug &&
+        (row.modelSlug === candidate || row.modelSlug.startsWith(`${candidate}-`)) &&
+        row.versionName !== null &&
+        row.yearFrom !== null
+    )
+    .map(row => ({ from: row.yearFrom!, to: row.yearTo ?? currentYear }))
+}
 
 /** Generation id (`..._id7347.html`) -> its year range, from the catalog's version rows. */
 function generationRanges(catalog: InfocarRow[], currentYear: number): Map<number, YearRange> {
@@ -61,22 +80,31 @@ export function videoLookup(
   const videoSlugs = [...new Set(brandRows.map(r => r.modelSlug!))]
   const ranges = generationRanges(catalog, currentYear)
 
-  // Tier 0 = the video's generation covers the car's year, 1 = generation unknown but the title doesn't contradict
-  // the year, null = drop.
-  const tier = (r: InfocarVideoRow): 0 | 1 | null => {
+  // Tier 0 = the video's generation (tagged, or the one its title year falls in) covers the car's year, 1 = generation
+  // unknown but the title doesn't contradict the year, null = drop.
+  const tier = (r: InfocarVideoRow, versions: YearRange[]): 0 | 1 | null => {
     if (year == null) return 1
     const range = r.generationId === null ? undefined : ranges.get(r.generationId)
     if (range) return range.from <= year && year <= range.to ? 0 : null
-    return r.year === null || Math.abs(r.year - year) <= TITLE_YEAR_TOLERANCE ? 1 : null
+    // Title year inside a known generation: the car must be in that generation too (ranges overlap at the edges).
+    const own = r.year === null ? [] : versions.filter(v => v.from <= r.year! && r.year! <= v.to)
+    if (own.length) return own.some(v => v.from <= year && year <= v.to) ? 0 : null
+    if (r.year !== null) return Math.abs(r.year - year) <= TITLE_YEAR_TOLERANCE ? 1 : null
+    // No year at all: a review is usually of the generation on sale when it was published. Only a ranking hint — a
+    // 2021 video can be about a 2012 car — so it never drops the video.
+    const published = Number(r.publishedAt?.slice(0, 4))
+    const onSale = published ? versions.filter(v => v.from <= published && published <= v.to) : []
+    return onSale.some(v => v.from <= year && year <= v.to) ? 0 : 1
   }
 
   // The first candidate that has any video wins (candidates run most specific first).
   for (const candidate of modelSlugCandidates(slug, model, videoSlugs)) {
     const hits = brandRows.filter(r => r.modelSlug === candidate || r.modelSlug!.startsWith(`${candidate}-`))
     if (!hits.length) continue
+    const versions = candidateVersions(catalog, slug, candidate, currentYear)
     return hits
       .flatMap(r => {
-        const t = tier(r)
+        const t = tier(r, versions)
         return t === null ? [] : [{ r, t }]
       })
       .sort((a, b) => a.t - b.t || (b.r.publishedAt ?? '').localeCompare(a.r.publishedAt ?? ''))

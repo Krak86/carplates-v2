@@ -66,4 +66,21 @@ describe('videoLookup', () => {
     expect(videoLookup(rows, catalog, 'МУССТАНГ', 'X', 2019)).toEqual([])
     expect(videoLookup(rows, catalog, 'TOYOTA', '', 2019)).toEqual([])
   })
+
+  it('maps a title year to its catalog generation, not a flat ±3 window', () => {
+    const t = [video({ youtubeId: 't2016', year: 2016 }), video({ youtubeId: 't2021', year: 2021 })]
+    // 2019 car: 2016 is inside 2015-2018 (not 2018-2022 ∋ 2019) -> dropped; 2021 is in 2018-2022 -> kept
+    expect(ids(videoLookup(t, catalog, 'TOYOTA', 'RAV4', 2019))).toEqual(['t2021'])
+    expect(ids(videoLookup(t, catalog, 'TOYOTA', 'RAV4', 2016))).toEqual(['t2016'])
+  })
+
+  it('ranks a year-less video by the generation on sale when it was published, without dropping others', () => {
+    const t = [
+      video({ youtubeId: 'pub2024', publishedAt: '2024-01-01' }),
+      video({ youtubeId: 'pub2019', publishedAt: '2019-06-01' }),
+      video({ youtubeId: 'pub2016', publishedAt: '2016-06-01' })
+    ]
+    // 2020 car (generation 2018-2022): the 2019 video first, the others kept after it, newest first
+    expect(ids(videoLookup(t, catalog, 'TOYOTA', 'RAV4', 2020))).toEqual(['pub2019', 'pub2024', 'pub2016'])
+  })
 })

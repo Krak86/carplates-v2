@@ -178,7 +178,7 @@ const VideosSchema = z.object({
     z.object({
       id: z.string(),
       snippet: z.object({ title: z.string(), channelTitle: z.string(), publishedAt: z.string() }),
-      contentDetails: z.object({ duration: z.string() }),
+      contentDetails: z.object({ duration: z.string().optional() }),
       status: z.object({ embeddable: z.boolean() }),
       statistics: z.object({ viewCount: z.string().optional() })
     })
@@ -265,7 +265,7 @@ async function searchModel(yt: YouTube, t: Target): Promise<Outcome> {
     if (fresh.length) {
       for (const v of await yt.details(fresh)) {
         const title = v.snippet.title
-        const durationS = parseIsoDuration(v.contentDetails.duration)
+        const durationS = parseIsoDuration(v.contentDetails.duration ?? '')
         const why = rejection({ title, durationS, embeddable: v.status.embeddable }, aliases)
         if (why) dropped[why]++
         else {
