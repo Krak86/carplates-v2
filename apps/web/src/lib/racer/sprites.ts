@@ -595,7 +595,7 @@ export function makeAtlas(theme: Theme, body: CarBody, color: string, plate: str
     const livery = vehicleSprite(model, null, null)
     if (livery) cars.push(livery)
   }
-  const heavies = TRAFFIC_HEAVY.map(model => vehicleSprite(model, null, null, 0, true)).filter(s => !!s)
+  const heavies = TRAFFIC_HEAVY.map(model => vehicleSprite(model, pick(colors), null, 0, true)).filter(s => !!s)
   if (heavies.length > 0) cars.push(...heavies)
   else
     for (const accent of [pick(colors), pick(colors)])

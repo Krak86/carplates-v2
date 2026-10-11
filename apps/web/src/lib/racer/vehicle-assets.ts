@@ -32,17 +32,17 @@ export const BODY_MODEL: Readonly<Record<CarBody, string>> = {
   ambulance: 'ambulance',
   firetruck: 'firetruck',
   garbage: 'garbage-truck',
-  bus: 'bus-green',
+  bus: 'bus-city',
   moto: 'moto'
 }
 
 /** Models that keep their own livery in traffic (never recoloured) and the slow, wide ones. */
 export const TRAFFIC_LIVERY: readonly string[] = ['taxi', 'police', 'ambulance']
-export const TRAFFIC_HEAVY: readonly string[] = ['bus-green', 'delivery', 'garbage-truck', 'truck-flat', 'firetruck']
+export const TRAFFIC_HEAVY: readonly string[] = ['bus-city', 'delivery', 'garbage-truck', 'truck-flat', 'firetruck']
 
 /** Models rendered by renderCustom (scripts/racer-render/render.html), not the Kenney colormap path. */
 const CUSTOM_RENDERED: readonly string[] = [
-  'bus-green',
+  'bus-city',
   'moto',
   'hatch-mag80',
   'sport-juff',
@@ -143,6 +143,12 @@ function brandLogo(brand: string | null): HTMLImageElement | null {
   const url = brandLogoUrl(brand)
   return (url && LOGOS.get(url)) || null
 }
+
+/** Badge diameter as a share of the plate width, and how far above the plate (in diameters) its centre sits. */
+type LogoLayout = { size: number; lift: number }
+const DEFAULT_LOGO_LAYOUT: LogoLayout = { size: 0.55, lift: 1.1 }
+/** The bus has a tall, flat tail panel: a bigger badge sits mid-panel, clear of the bumper. */
+const LOGO_LAYOUT: Readonly<Record<string, LogoLayout>> = { 'bus-city': { size: 0.75, lift: 0.97 } }
 
 /** A round chrome badge with the brand logo, centred at (cx, cy), like the emblem on a real tailgate. */
 function paintLogo(ctx: CanvasRenderingContext2D, logo: HTMLImageElement, cx: number, cy: number, d: number): void {
@@ -278,9 +284,10 @@ export function vehicleSprite(
 
   const logo = player ? brandLogo(player.brand) : null
   if (rect && logo) {
-    // on the boot lid, centred above the plate
-    const d = rect[2] * 0.55
-    paintLogo(ctx, logo, rect[0] + rect[2] / 2, rect[1] - d * 1.1, d)
+    // on the boot lid, centred above the plate; sized from the straight view so steering never shrinks the badge
+    const { size, lift } = LOGO_LAYOUT[model] ?? DEFAULT_LOGO_LAYOUT
+    const d = (plateRect(model) ?? rect)[2] * size
+    paintLogo(ctx, logo, rect[0] + rect[2] / 2, rect[1] - d * lift, d)
   }
 
   return {
