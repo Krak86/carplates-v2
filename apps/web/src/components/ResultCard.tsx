@@ -569,7 +569,12 @@ export default function ResultCard({ data }: Props): ReactNode {
           />
         </LazySection>
         <LazySection sections={['engines']}>
-          <WikiSpecs brand={c.brand} model={c.model} year={c.makeYear} />
+          <WikiSpecs
+            brand={c.brand}
+            model={c.model}
+            year={c.makeYear}
+            own={{ fuel: c.fuel, displacementCc: c.capacity, powerKw: c.powerKwt, massKg: c.ownWeight }}
+          />
         </LazySection>
         <LazySection sections={['value']} forceMount={valueOpenSignal > 0}>
           <EstimatedValueSection

@@ -1,10 +1,9 @@
 import type { ReactNode } from 'react'
-import { generationSpan } from '@carplates/shared'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 
 import InfoPopover from '@/components/InfoPopover'
-import { generationChipText, generationLabel } from '@/components/GenerationChip.helpers'
+import { generationChipText, generationLabel, generationSpanText } from '@/components/GenerationChip.helpers'
 import { generationQuery } from '@/lib/queries'
 
 type Props = {
@@ -35,16 +34,19 @@ export default function GenerationChip({ brand, model, year }: Props): ReactNode
     t('generation.info.lead', {
       name: `${match.makeName} ${match.modelName}`,
       generation: name,
-      span: generationSpan(current)
+      span: generationSpanText(current, t)
     }),
     match.boundary && t('generation.info.boundary'),
     match.previous &&
       t('generation.info.previous', {
         generation: generationLabel(match.previous, t),
-        span: generationSpan(match.previous)
+        span: generationSpanText(match.previous, t)
       }),
     match.next &&
-      t('generation.info.next', { generation: generationLabel(match.next, t), span: generationSpan(match.next) }),
+      t('generation.info.next', {
+        generation: generationLabel(match.next, t),
+        span: generationSpanText(match.next, t)
+      }),
     current.bodyStyles && t('generation.info.body', { body: current.bodyStyles }),
     current.platform && t('generation.info.platform', { platform: current.platform }),
     t('generation.info.credit')

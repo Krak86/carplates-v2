@@ -3,6 +3,11 @@ import { generationSpan } from '@carplates/shared'
 
 type Translate = (key: string, options?: Record<string, unknown>) => string
 
+/** "2007–2021"; an open span reads "2023–present" instead of a bare dash. */
+export function generationSpanText(g: Pick<Generation, 'yearFrom' | 'yearTo'>, t: Translate): string {
+  return g.yearTo === null ? `${g.yearFrom}–${t('generation.present')}` : generationSpan(g)
+}
+
 /** The code when the source names one (`XV40`), else the ordinal label ("Second generation") translated. */
 export function generationLabel(g: Pick<Generation, 'code' | 'label'>, t: Translate): string {
   if (g.code) return g.code
@@ -16,5 +21,5 @@ export function generationChipText(
   t: Translate
 ): string {
   const name = generationLabel(g, t)
-  return `${g.code ? t('generation.chip', { name }) : name} · ${generationSpan(g)}`
+  return `${g.code ? t('generation.chip', { name }) : name} · ${generationSpanText(g, t)}`
 }

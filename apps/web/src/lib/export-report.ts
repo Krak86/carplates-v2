@@ -1,5 +1,4 @@
-import { brandLogoUrl } from '@carplates/shared'
-import { CURRENCIES, generationSpan, valueCurve } from '@carplates/shared'
+import { brandLogoUrl, CURRENCIES, valueCurve } from '@carplates/shared'
 import type {
   Generation,
   CaRecallsResponse,
@@ -25,7 +24,7 @@ import type {
 } from '@carplates/shared'
 
 import { formatRange } from '@/components/CO2Badge.helpers'
-import { generationLabel } from '@/components/GenerationChip.helpers'
+import { generationLabel, generationSpanText } from '@/components/GenerationChip.helpers'
 import {
   formatEur,
   formatMoney,
@@ -198,7 +197,7 @@ function pushRow(rows: Row[], label: string, value: string | number | null | und
 
 /** "J200 · 2007–2021" — the code (or ordinal label) with its production span. */
 function generationRowValue(g: Generation | null | undefined, t: Translate): string | null {
-  return g ? `${generationLabel(g, t)} · ${generationSpan(g)}` : null
+  return g ? `${generationLabel(g, t)} · ${generationSpanText(g, t)}` : null
 }
 
 function buildVehicleSection(input: ExportInput, t: Translate): ExportKeyValueSection | null {

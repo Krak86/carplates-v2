@@ -1,20 +1,32 @@
 import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
-import { generationSpan } from '@carplates/shared'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router'
 
+import { generationSpanText } from '@/components/GenerationChip.helpers'
 import InfoPopover from '@/components/InfoPopover'
 import InfoText from '@/components/InfoText'
 import SectionCount from '@/components/SectionCount'
 import SectionHeader from '@/components/SectionHeader'
 import ShareButton from '@/components/ShareButton'
 import VinToggleSection from '@/components/vin/VinToggleSection'
+import { driveRows } from '@/components/WikiDrive.helpers'
 import WikiEngineCard from '@/components/WikiEngineCard'
 import WikiSourceLine from '@/components/WikiSourceLine'
 import WikiSpecRow from '@/components/WikiSpecRow'
-import { DIMENSION_KEYS, DIMENSION_LABELS, formatDimension, hasDimensions } from '@/components/WikiSpecs.helpers'
+import {
+  carMass,
+  DIMENSION_KEYS,
+  DIMENSION_LABELS,
+  engineMatchesCar,
+  engineVsCar,
+  formatDimension,
+  generationYearOf,
+  hasDimensions,
+  sortEnginesByFit,
+  type OwnCar
+} from '@/components/WikiSpecs.helpers'
 import { cn } from '@/lib/cn'
 import { wikiSpecsQuery } from '@/lib/queries'
 import { scrollElementIntoView } from '@/lib/share-section'
@@ -23,15 +35,17 @@ type Props = {
   brand: string | null
   model: string | null
   year: number | null
+  /** Registry figures of this car: the matching engine is highlighted and the others show how they differ. */
+  own?: OwnCar
 }
 
 /**
  * "Generation specs" block from Wikipedia (CC BY-SA, facts only): the engines offered in the generation of this model
  * year, its drive layout and gearbox, and — only where the Dutch register has no row for the model — dimensions, kerb
  * mass and tank volume. Catalogue values for the generation, not for this car; each block names its Wikipedia edition.
- * Collapsed by default (open from `?section=engines`); renders nothing while loading, on error, or without a match.
+ * The engine matching the car's registry figures is highlighted and listed first. Collapsed by default (open from `?section=engines`); renders nothing while loading, on error, or without a match.
  */
-export default function WikiSpecs({ brand, model, year }: Props): ReactNode {
+export default function WikiSpecs({ brand, model, year, own }: Props): ReactNode {
   const { t, i18n } = useTranslation()
   const [searchParams] = useSearchParams()
   const isShared = searchParams.get('section') === 'engines'
@@ -52,20 +66,24 @@ export default function WikiSpecs({ brand, model, year }: Props): ReactNode {
   const locale = i18n.language === 'ua' ? 'uk' : i18n.language
   const name = `${match.makeName} ${match.modelName}`
   const generation = match.generationCode || match.generationLabel || ''
-  const span = generationSpan({ yearFrom: match.yearFrom, yearTo: match.yearTo ?? null })
-  const engines = match.engines ?? []
+  const span = generationSpanText({ yearFrom: match.yearFrom, yearTo: match.yearTo ?? null }, t)
+  const engines = sortEnginesByFit(match.engines ?? [], own)
+  const hasMatch = engines.some(e => engineMatchesCar(e, own))
+  const yearOf = generationYearOf(year, match.yearFrom, match.yearTo)
   const dims = match.dimensions
   const dimensionRows = dims
-    ? DIMENSION_KEYS.map(key => ({ key, value: formatDimension(key, dims, t, locale) })).filter(r => !!r.value)
+    ? DIMENSION_KEYS.map(key => {
+        const value = formatDimension(key, dims, t, locale)
+        const mass = key === 'kerbKg' ? carMass(own, t, locale) : null
+        return { key, value: value && mass ? `${value} (${t('wikispec.thisCar', { value: mass })})` : value }
+      }).filter(r => !!r.value)
     : []
-  const driveRows = [
-    match.layout && { key: 'layout', value: match.layout },
-    match.transmission && { key: 'transmission', value: match.transmission }
-  ].filter(Boolean) as { key: string; value: string }[]
+  const driveItems = driveRows(match.layout, match.transmission, t)
 
   const info = [
     t('wikispec.info.lead', { name, generation, span }),
     t('wikispec.info.catalogue'),
+    own && t('wikispec.info.match'),
     match.crossMake && t('rdw.info.crossMake', { name }),
     dims && hasDimensions(dims) && t('wikispec.info.gap'),
     t('wikispec.info.credit')
@@ -104,6 +122,15 @@ export default function WikiSpecs({ brand, model, year }: Props): ReactNode {
         <div className="overflow-hidden">
           <p className="mt-2 text-xs text-[var(--color-muted)]">{t('wikispec.footnote', { name, generation, span })}</p>
 
+          {yearOf && (
+            <p className="mt-1 text-xs text-[var(--color-muted)]">
+              {yearOf.total
+                ? t('wikispec.carYear', { year, n: yearOf.n, total: yearOf.total })
+                : t('wikispec.carYearOpen', { year, n: yearOf.n })}
+              {own && engines.length > 0 && ` ${t(hasMatch ? 'wikispec.carMatch' : 'wikispec.carNoMatch')}`}
+            </p>
+          )}
+
           {engines.length > 0 && (
             <VinToggleSection
               nested
@@ -123,6 +150,8 @@ export default function WikiSpecs({ brand, model, year }: Props): ReactNode {
                   <WikiEngineCard
                     key={`${e.raw}-${e.displacementCc}-${e.powerKw}-${e.chassisCodes?.join()}`}
                     engine={e}
+                    matches={engineMatchesCar(e, own)}
+                    vsCar={engineVsCar(e, own, t)}
                   />
                 ))}
               </div>
@@ -130,7 +159,7 @@ export default function WikiSpecs({ brand, model, year }: Props): ReactNode {
             </VinToggleSection>
           )}
 
-          {driveRows.length > 0 && (
+          {driveItems.length > 0 && (
             <VinToggleSection
               nested
               icon="📂"
@@ -138,19 +167,14 @@ export default function WikiSpecs({ brand, model, year }: Props): ReactNode {
               hideLabel={t('vin.group.hide')}
               title={
                 <>
-                  {t('wikispec.drive')} <SectionCount count={driveRows.length} />
+                  {t('wikispec.drive')} <SectionCount count={driveItems.length} />
                 </>
               }
             >
               <p className="text-xs text-[var(--color-muted)]">{t('wikispec.hint.drive')}</p>
               <div className="divide-y divide-[var(--color-border)]">
-                {driveRows.map(r => (
-                  <WikiSpecRow
-                    key={r.key}
-                    label={t(`wikispec.${r.key}`)}
-                    value={r.value}
-                    about={t(`wikispec.about.${r.key}`)}
-                  />
+                {driveItems.map(r => (
+                  <WikiSpecRow key={r.key} label={t(r.labelKey)} value={r.value} about={t(r.aboutKey)} />
                 ))}
               </div>
               <WikiSourceLine source={match.driveSource} />

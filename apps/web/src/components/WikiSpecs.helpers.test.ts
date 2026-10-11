@@ -1,9 +1,13 @@
 import { describe, it, expect } from 'vitest'
 
 import {
+  engineMatchesCar,
+  engineVsCar,
   formatDimension,
   formatEngine,
   formatEnginePower,
+  generationYearOf,
+  sortEnginesByFit,
   splitWikiCodes,
   wikiSourceLabel
 } from '@/components/WikiSpecs.helpers'
@@ -66,5 +70,64 @@ describe('splitWikiCodes', () => {
     expect(splitWikiCodes(['T24A-FTS', 'TJA250'])).toEqual({ engine: ['T24A-FTS'], chassis: ['TJA250'] })
     expect(splitWikiCodes(['2TR-FE', 'FK1', 'L13Z4'])).toEqual({ engine: ['2TR-FE', 'L13Z4'], chassis: ['FK1'] })
     expect(splitWikiCodes(null)).toEqual({ engine: [], chassis: [] })
+  })
+})
+
+describe('engineMatchesCar', () => {
+  const petrol16 = { displacementCc: 1598, powerKw: 77, fuel: 'petrol' }
+  const car = { fuel: 'БЕНЗИН', displacementCc: 1597, powerKw: 77 }
+
+  it('matches on fuel, displacement and power', () => {
+    expect(engineMatchesCar(petrol16, car)).toBe(true)
+    expect(engineMatchesCar({ ...petrol16, powerKw: 66, powerKwMax: 80 }, car)).toBe(true)
+  })
+
+  it('rejects another fuel, size or power', () => {
+    expect(engineMatchesCar({ ...petrol16, fuel: 'diesel' }, car)).toBe(false)
+    expect(engineMatchesCar({ ...petrol16, displacementCc: 1998 }, car)).toBe(false)
+    expect(engineMatchesCar({ ...petrol16, powerKw: 110 }, car)).toBe(false)
+  })
+
+  it('never matches on fuel alone or without registry data', () => {
+    expect(engineMatchesCar({ fuel: 'petrol' }, car)).toBe(false)
+    expect(engineMatchesCar(petrol16, undefined)).toBe(false)
+    expect(engineMatchesCar(petrol16, { fuel: 'БЕНЗИН' })).toBe(false)
+  })
+
+  it('lets a hybrid engine fit a petrol or electric registration', () => {
+    expect(engineMatchesCar({ ...petrol16, fuel: 'hybrid' }, { ...car, fuel: 'ЕЛЕКТРО АБО БЕНЗИН' })).toBe(true)
+  })
+})
+
+describe('engineVsCar', () => {
+  const car = { displacementCc: 1600, powerKw: 77 }
+
+  it('shows signed litre and kW differences', () => {
+    expect(engineVsCar({ displacementCc: 2000, powerKw: 110 }, car, t)).toBe('+0.4 L · +33 kW')
+    expect(engineVsCar({ displacementCc: 1400, powerKw: 59 }, car, t)).toBe('−0.2 L · −18 kW')
+  })
+
+  it('is null when nothing is comparable or nothing differs', () => {
+    expect(engineVsCar({ fuel: 'petrol' }, car, t)).toBeNull()
+    expect(engineVsCar({ displacementCc: 1600, powerKw: 77 }, car, t)).toBeNull()
+    expect(engineVsCar({ displacementCc: 2000 }, undefined, t)).toBeNull()
+  })
+})
+
+describe('sortEnginesByFit', () => {
+  it('puts the matching engine first and keeps the rest in order', () => {
+    const a = { displacementCc: 1400, powerKw: 59, fuel: 'petrol' }
+    const b = { displacementCc: 1600, powerKw: 77, fuel: 'petrol' }
+    const c = { displacementCc: 2000, powerKw: 110, fuel: 'petrol' }
+    expect(sortEnginesByFit([a, b, c], { fuel: 'БЕНЗИН', displacementCc: 1600, powerKw: 77 })).toEqual([b, a, c])
+  })
+})
+
+describe('generationYearOf', () => {
+  it('counts the year inside the generation', () => {
+    expect(generationYearOf(2008, 2006, 2011)).toEqual({ n: 3, total: 6 })
+    expect(generationYearOf(2020, 2018, null)).toEqual({ n: 3, total: null })
+    expect(generationYearOf(2015, 2018, null)).toBeNull()
+    expect(generationYearOf(null, 2018, null)).toBeNull()
   })
 })
