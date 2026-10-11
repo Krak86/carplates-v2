@@ -10,6 +10,7 @@ import { formatStars } from '@/components/SafetyRatings.helpers'
 import YouTubeModal from '@/components/YouTubeModal'
 import { cn } from '@/lib/cn'
 import { jncapRatingsQuery } from '@/lib/queries'
+import SectionSkeleton from '@/components/ui/SectionSkeleton'
 
 type Props = {
   brand: string | null
@@ -180,7 +181,7 @@ export default function JncapRatings({ brand, model, year, active }: Props): Rea
   return (
     <div>
       <p className="mb-2 text-xs text-[var(--color-muted)]">{t('safety.coverageJncap')}</p>
-      {result.isPending && <p className="text-base text-[var(--color-muted)]">{t('result.loading')}</p>}
+      {result.isPending && <SectionSkeleton />}
       {result.isError && <p className="text-base text-[var(--color-muted)]">{t('safety.unavailable')}</p>}
       {result.isSuccess && ratings.length === 0 && (
         <p className="text-base text-[var(--color-muted)]">{t('safety.jncapNone')}</p>

@@ -10,6 +10,7 @@ import ShareButton from '@/components/ShareButton'
 import { cn } from '@/lib/cn'
 import { vehiclePhotosQuery } from '@/lib/queries'
 import { scrollElementIntoView } from '@/lib/share-section'
+import SectionSkeleton from '@/components/ui/SectionSkeleton'
 
 type Props = {
   brand: string | null
@@ -62,7 +63,7 @@ export default function VehiclePhotos({ brand, model, year }: Props): ReactNode 
       >
         <div className="overflow-hidden">
           <div className="mt-3">
-            {photos.isPending && <p className="text-base text-[var(--color-muted)]">{t('result.loading')}</p>}
+            {photos.isPending && <SectionSkeleton />}
             {photos.isError && <p className="text-base text-[var(--color-muted)]">{t('photos.unavailable')}</p>}
             {photos.isSuccess && images.length === 0 && (
               <p className="text-base text-[var(--color-muted)]">{t('photos.none')}</p>

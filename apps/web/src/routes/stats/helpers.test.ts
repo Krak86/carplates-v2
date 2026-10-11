@@ -255,6 +255,7 @@ describe('rankingBadges', () => {
       { brand: 'TOYOTA', model: 'PRIUS', n: 5000, avgScore: 90, sources: 2 }
     ],
     leastSafeModels: [],
+    specBoards: {},
     weightBoards: {
       passenger: { heaviest: [{ brand: 'LADA', model: '2105', n: 3000, weightKg: 2500 }], lightest: [] },
       truck: { heaviest: [{ brand: 'КАМАЗ', model: '55111', n: 900, weightKg: 9250 }], lightest: [] }

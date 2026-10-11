@@ -27,6 +27,8 @@ import {
   statsFieldResponseSchema,
   statsResponseSchema,
   statsTopResponseSchema,
+  SPEC_METRICS,
+  SPEC_METRIC_COLUMN,
   WEIGHT_GROUPS
 } from '@carplates/shared'
 import type {
@@ -34,6 +36,7 @@ import type {
   StatsFieldDimension,
   StatsFieldResponse,
   StatsResponse,
+  SpecBoard,
   StatsTopResponse,
   WeightBoard,
   WeightKindGroup
@@ -48,6 +51,8 @@ const TOP_N = 10
 /** A model needs this many registered vehicles to enter the weight boards: passenger cars match the fuel model boards' floor, the rarer kinds a lower one. */
 const MIN_PASSENGER_WEIGHT_MODEL = 1500
 const MIN_OTHER_WEIGHT_MODEL = 200
+/** Same floor for the spec boards (passenger cars only). */
+const MIN_SPEC_MODEL = 500
 
 @Injectable()
 export class StatsService {
@@ -90,7 +95,8 @@ export class StatsService {
       dirtiestModels,
       safestModels,
       leastSafeModels,
-      weightBoards
+      weightBoards,
+      specBoards
     ] = await Promise.all([
       db
         .select()
@@ -110,7 +116,8 @@ export class StatsService {
       this.fuelStats.modelLeaderboard('DESC'),
       this.safetyStats.modelLeaderboard('DESC'),
       this.safetyStats.modelLeaderboard('ASC'),
-      this.weightBoards()
+      this.weightBoards(),
+      this.specBoards()
     ])
     return statsTopResponseSchema.parse({
       byBrand: byBrand.map(row => ({ ...row, value: row.brand })),
@@ -121,7 +128,8 @@ export class StatsService {
       dirtiestModels,
       safestModels,
       leastSafeModels,
-      weightBoards
+      weightBoards,
+      specBoards
     })
   }
 
@@ -158,6 +166,37 @@ export class StatsService {
     return Object.fromEntries(
       WEIGHT_GROUPS.map(g => [g, board(g === 'all' ? ranked : ranked.filter(r => r.kindGroup === g))])
     )
+  }
+
+  /** Highest and lowest passenger-car models per spec metric from the small `stats_spec` rollup (power, displacement, height, length, fuel tank). */
+  private async specBoards(): Promise<Record<string, SpecBoard>> {
+    const { rows } = await this.dbService.db.execute<{
+      metric: string
+      brand: string
+      model: string
+      n: number
+      minVal: number
+      maxVal: number
+    }>(
+      sql`SELECT metric, brand, model, n, min_val::float8 AS "minVal", max_val::float8 AS "maxVal"
+          FROM registry.stats_spec WHERE n >= ${MIN_SPEC_MODEL}`
+    )
+    const boards: Record<string, SpecBoard> = {}
+    for (const metric of SPEC_METRICS) {
+      const list = rows.filter(r => r.metric === SPEC_METRIC_COLUMN[metric].key)
+      if (list.length === 0) continue
+      boards[metric] = {
+        highest: [...list]
+          .sort((a, b) => b.maxVal - a.maxVal || b.n - a.n)
+          .slice(0, TOP_N)
+          .map(r => ({ brand: r.brand, model: r.model, n: r.n, value: r.maxVal })),
+        lowest: [...list]
+          .sort((a, b) => a.minVal - b.minVal || b.n - a.n)
+          .slice(0, TOP_N)
+          .map(r => ({ brand: r.brand, model: r.model, n: r.n, value: r.minVal }))
+      }
+    }
+    return boards
   }
 
   /** One free-text dimension's full rollup (a few dozen rows) — the ResultCard "?" popover data. */

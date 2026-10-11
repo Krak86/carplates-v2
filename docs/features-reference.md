@@ -120,6 +120,14 @@ Files: migrations 0051-0053 (`registry.stats_weight`), `scripts/src/weight-stats
 
 Per (kind_group, source, brand, model): n, min_kg, max_kg. Registry weights are sanity-checked against `total_weight` and a per-kind minimum mass (300 kg cars/trucks, 50 kg two-wheelers/trailers); a model's edges are its 1st/99th percentile. Passenger cars that RDW recognises (`matchRdwModel`) use RDW's year-median unladen mass instead. `/api/stats/top` returns `weightBoards` per group (top 10 heaviest + lightest, per-group vehicle floor; defaults to `{}` so offline-cached answers still parse). UI: group tabs on `/stats` ("all" default), cards on the home page (a lazy `Home*Section`), and 🏋️ / 🪶 chips on the result card and in the export, ranked within the vehicle's own group. Weights show in kg, with tonnes in brackets from 1000 kg.
 
+## Spec rankings
+
+Files: migration 0063 (`registry.stats_spec`), `scripts/src/spec-stats.ts` (`pnpm db:refresh-spec-stats`, also in `db:refresh-derived`), `packages/shared/src/specMetrics.ts` (`SPEC_METRICS`), web `routes/stats/SpecModels*.tsx`.
+
+Passenger cars only; per (metric, brand, model): n, min, max. Power / displacement = 5th / 95th percentile of the registry column (typos reach a few percent; pure-electric capacity is a placeholder and skipped). Height / length = matched RDW year-medians, else the model's Wikipedia generations; fuel tank = Wikipedia only (thin: ~5 ranked models until `ingest:wikispecs` covers more). Matching = `matchRdwModel`. `/api/stats/top` returns `specBoards` per metric (top 10 highest + lowest, floor 500 vehicles; defaults to `{}`). UI: metric tabs on `/stats` under the weight panel. Registry-filed vans (Crafter, Transit) rank as cars.
+
+**Loading state of lazy sections:** a section that fetches after it expands shows `<SectionSkeleton />` (`components/ui/SectionSkeleton.tsx`), never a bare "Loading…" line. Sections that hide on a miss (Specs, Engines, Wiki) show nothing until matched.
+
 ## Community posts (Stack Exchange, Lemmy, Bluesky)
 
 Files: `lib/community.ts` (keyless browser-side searches, Zod-validated), `lib/bluesky.ts`, `SocialGroup` + `CommunityPostCard`, `CommunityWidget`, `useSideCommunity`.

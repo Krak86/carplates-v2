@@ -13,6 +13,7 @@ import { cn } from '@/lib/cn'
 import { newsLangFilter } from '@/lib/news'
 import { newsQuery } from '@/lib/queries'
 import { scrollElementIntoView } from '@/lib/share-section'
+import SectionSkeleton from '@/components/ui/SectionSkeleton'
 
 type Props = {
   brand: string | null
@@ -72,7 +73,7 @@ export default function NewsSection({ brand, model, year }: Props): ReactNode {
       >
         <div className="overflow-hidden">
           <div className="mt-3 space-y-3">
-            {news.isLoading && <p className="text-base text-[var(--color-muted)]">{t('result.loading')}</p>}
+            {news.isLoading && <SectionSkeleton />}
             {news.isError && <p className="text-base text-[var(--color-muted)]">{t('result.error')}</p>}
             {news.isSuccess && items.length === 0 && (
               <p className="text-base text-[var(--color-muted)]">{t('section.empty')}</p>

@@ -86,6 +86,8 @@ export {
   type RdwRecallTextInsert,
   statsFuel,
   statsWeight,
+  statsSpec,
+  type StatsSpecInsert,
   type StatsWeightInsert,
   type StatsModelGroupedInsert,
   statsVdb,

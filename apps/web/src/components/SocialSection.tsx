@@ -14,6 +14,7 @@ import VinToggleSection from '@/components/vin/VinToggleSection'
 import { blueskyQuery } from '@/lib/bluesky'
 import { lemmyQuery, stackExchangeQuery } from '@/lib/community'
 import { scrollElementIntoView } from '@/lib/share-section'
+import SectionSkeleton from '@/components/ui/SectionSkeleton'
 
 type Props = {
   brand: string | null
@@ -69,7 +70,7 @@ export default function SocialSection({ brand, model, year }: Props): ReactNode 
       defaultOpen={isShared}
       onOpenChange={setOpen}
     >
-      {isLoading && <p className="text-base text-[var(--color-muted)]">{t('result.loading')}</p>}
+      {isLoading && <SectionSkeleton />}
       {isSettled && !hasPosts && <p className="text-base text-[var(--color-muted)]">{t('section.empty')}</p>}
 
       {bluesky.length > 0 && (

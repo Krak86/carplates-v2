@@ -842,6 +842,22 @@ export const weightBoardSchema = z.object({
 })
 export type WeightBoard = z.infer<typeof weightBoardSchema>
 
+/** A model on a spec board: its edge value (unit by metric, see `SPEC_METRIC_COLUMN`) and `n` registered Ukrainian vehicles of it. */
+export const specStatsModelSchema = z.object({
+  brand: z.string(),
+  model: z.string(),
+  n: z.number().int(),
+  value: z.number()
+})
+export type SpecStatsModel = z.infer<typeof specStatsModelSchema>
+
+/** One tab of the spec panel: the ten highest and ten lowest passenger-car models of a metric. */
+export const specBoardSchema = z.object({
+  highest: z.array(specStatsModelSchema),
+  lowest: z.array(specStatsModelSchema)
+})
+export type SpecBoard = z.infer<typeof specBoardSchema>
+
 /**
  * GET /api/stats/top — everything the ResultCard ranking chips need in one small payload: the four registry
  * leaderboards (top 10 each, ranked by distinctPlates) plus the fuel/CO2 and crash-test model leaderboards
@@ -860,7 +876,9 @@ export const statsTopResponseSchema = statsResponseSchema
     safestModels: z.array(safetyStatsModelSchema),
     leastSafeModels: z.array(safetyStatsModelSchema),
     // Per weight group (see `WEIGHT_GROUPS`); the default keeps a pre-weight cached answer (offline PWA cache) parsing.
-    weightBoards: z.record(z.string(), weightBoardSchema).default({})
+    weightBoards: z.record(z.string(), weightBoardSchema).default({}),
+    // Per spec metric (see `SPEC_METRICS`); defaults to {} for the same reason.
+    specBoards: z.record(z.string(), specBoardSchema).default({})
   })
 export type StatsTopResponse = z.infer<typeof statsTopResponseSchema>
 

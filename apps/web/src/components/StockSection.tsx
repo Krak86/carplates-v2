@@ -12,6 +12,7 @@ import VinToggleSection from '@/components/vin/VinToggleSection'
 import { displayBrand } from '@/lib/display-brand'
 import { NEW_CARS_AD_COUNT, pickDistinctAds, STOCK_ROW_MAX, USED_CARS_AD_COUNT } from '@/lib/new-cars'
 import { scrollElementIntoView } from '@/lib/share-section'
+import SectionSkeleton from '@/components/ui/SectionSkeleton'
 
 type Props = {
   brand: string | null
@@ -66,7 +67,7 @@ export default function StockSection({ brand }: Props): ReactNode {
       defaultOpen={isShared}
       onOpenChange={setOpen}
     >
-      {open && photos.isPending && <p className="text-base text-muted">{t('result.loading')}</p>}
+      {open && photos.isPending && <SectionSkeleton />}
       {open && !photos.isPending && !hasCards && <p className="text-base text-muted">{t('section.empty')}</p>}
 
       <StockRow

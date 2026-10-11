@@ -1024,6 +1024,25 @@ export const statsWeight = registry.table(
 export type StatsWeightInsert = typeof statsWeight.$inferInsert
 
 /**
+ * Per passenger-car model and spec metric (power, displacement, height, length, fuel tank): Ukrainian vehicle count with the
+ * model's lowest / highest value. Backs the /stats spec boards. Rebuilt by scripts/src/spec-stats.ts; see migration 0063.
+ */
+export const statsSpec = registry.table(
+  'stats_spec',
+  {
+    metric: text('metric').notNull(),
+    source: text('source').notNull(),
+    brand: text('brand').notNull(),
+    model: text('model').notNull(),
+    n: integer('n').notNull(),
+    minVal: real('min_val').notNull(),
+    maxVal: real('max_val').notNull()
+  },
+  t => [primaryKey({ columns: [t.metric, t.brand, t.model] })]
+)
+export type StatsSpecInsert = typeof statsSpec.$inferInsert
+
+/**
  * Registry vehicles per vehicle class and matched VehiclesDB model (vdb_id null = that class's unmatched bucket) — backs
  * the /stats markets panel. Rebuilt by `scripts/src/vdb-stats.ts`; see migrations 0040 and 0046.
  */

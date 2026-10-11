@@ -18,6 +18,7 @@ import {
   nhtsaBodyBucket
 } from '@/components/SafetyRatings.helpers'
 import { safetyRatingsQuery } from '@/lib/queries'
+import SectionSkeleton from '@/components/ui/SectionSkeleton'
 
 type Props = {
   brand: string | null
@@ -243,7 +244,7 @@ export default function NhtsaRatings({ brand, model, year, body, active }: Props
         </div>
       )}
 
-      {result.isPending && <p className="text-base text-[var(--color-muted)]">{t('result.loading')}</p>}
+      {result.isPending && <SectionSkeleton />}
       {result.isError && <p className="text-base text-[var(--color-muted)]">{t('safety.unavailable')}</p>}
       {result.isSuccess && ratings.length === 0 && (
         <p className="text-base text-[var(--color-muted)]">{t('safety.none')}</p>

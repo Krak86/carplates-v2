@@ -13,7 +13,8 @@ export const DERIVED_REFRESH_SCRIPTS = [
   'src/fuel-stats.ts',
   'src/safety-stats.ts',
   'src/vdb-stats.ts',
-  'src/weight-stats.ts'
+  'src/weight-stats.ts',
+  'src/spec-stats.ts'
 ] as const
 
 /** Runs each derived-stats script in turn (own process each — they are CLIs); throws on the first failure. */

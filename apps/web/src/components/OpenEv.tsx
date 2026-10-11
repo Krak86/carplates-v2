@@ -15,6 +15,7 @@ import ShareButton from '@/components/ShareButton'
 import { cn } from '@/lib/cn'
 import { openEvQuery } from '@/lib/queries'
 import { scrollElementIntoView } from '@/lib/share-section'
+import SectionSkeleton from '@/components/ui/SectionSkeleton'
 
 type Props = {
   brand: string | null
@@ -94,7 +95,7 @@ export default function OpenEv({ brand, model, year, fuel }: Props): ReactNode {
         hideLabel={t('ev.hide')}
       />
 
-      {open && ev.isLoading && <p className="mt-2 text-base text-[var(--color-muted)]">{t('result.loading')}</p>}
+      {open && ev.isLoading && <SectionSkeleton />}
       {open && ev.isError && <p className="mt-2 text-base text-[var(--color-muted)]">{t('result.error')}</p>}
       {open && ev.isSuccess && !match && (
         <p className="mt-2 text-base text-[var(--color-muted)]">{t('section.empty')}</p>

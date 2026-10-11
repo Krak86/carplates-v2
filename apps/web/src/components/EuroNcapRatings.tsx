@@ -10,6 +10,7 @@ import { formatStars } from '@/components/SafetyRatings.helpers'
 import YouTubeModal from '@/components/YouTubeModal'
 import { cn } from '@/lib/cn'
 import { euroNcapRatingsQuery } from '@/lib/queries'
+import SectionSkeleton from '@/components/ui/SectionSkeleton'
 
 type Props = {
   brand: string | null
@@ -167,7 +168,7 @@ export default function EuroNcapRatings({ brand, model, year, active }: Props): 
   return (
     <div>
       <p className="mb-2 text-xs text-[var(--color-muted)]">{t('safety.coverageEuroncap')}</p>
-      {result.isPending && <p className="text-base text-[var(--color-muted)]">{t('result.loading')}</p>}
+      {result.isPending && <SectionSkeleton />}
       {result.isError && <p className="text-base text-[var(--color-muted)]">{t('safety.unavailable')}</p>}
       {result.isSuccess && ratings.length === 0 && (
         <p className="text-base text-[var(--color-muted)]">{t('safety.euroncapNone')}</p>

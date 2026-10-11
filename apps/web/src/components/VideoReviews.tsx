@@ -15,6 +15,7 @@ import { preferLanguage } from '@/components/VideoReviews.helpers'
 import { cn } from '@/lib/cn'
 import { reviewsQuery, socialQuery } from '@/lib/queries'
 import { scrollElementIntoView } from '@/lib/share-section'
+import SectionSkeleton from '@/components/ui/SectionSkeleton'
 
 type Props = {
   brand: string | null
@@ -81,9 +82,7 @@ export default function VideoReviews({ brand, model, year }: Props): ReactNode {
       >
         <div className="overflow-hidden">
           <div className="mt-3">
-            {(catalog.isPending || social.isPending) && (
-              <p className="text-base text-[var(--color-muted)]">{t('result.loading')}</p>
-            )}
+            {(catalog.isPending || social.isPending) && <SectionSkeleton />}
             {catalog.isError && <p className="text-base text-[var(--color-muted)]">{t('result.error')}</p>}
             {catalog.isSuccess && !social.isPending && !hasVideos && (
               <p className="text-base text-[var(--color-muted)]">{t('videos.none')}</p>

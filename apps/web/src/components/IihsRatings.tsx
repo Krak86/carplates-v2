@@ -8,6 +8,7 @@ import InfoPopover from '@/components/InfoPopover'
 import { filterByBodyStyle, groupIihsRatings, iihsBodyBucket } from '@/components/SafetyRatings.helpers'
 import type { IihsRatingGroup } from '@/components/SafetyRatings.helpers'
 import { iihsRatingsQuery } from '@/lib/queries'
+import SectionSkeleton from '@/components/ui/SectionSkeleton'
 
 type Props = {
   brand: string | null
@@ -145,7 +146,7 @@ export default function IihsRatings({ brand, model, year, body, active }: Props)
   return (
     <div>
       <p className="mb-2 text-xs text-[var(--color-muted)]">{t('safety.coverageIihs')}</p>
-      {result.isPending && <p className="text-base text-[var(--color-muted)]">{t('result.loading')}</p>}
+      {result.isPending && <SectionSkeleton />}
       {result.isError && <p className="text-base text-[var(--color-muted)]">{t('safety.unavailable')}</p>}
       {result.isSuccess && ratings.length === 0 && (
         <p className="text-base text-[var(--color-muted)]">{t('safety.iihsNone')}</p>

@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router'
 
 import CO2Badge from '@/components/CO2Badge'
+import SectionSkeleton from '@/components/ui/SectionSkeleton'
 import { similarVehiclesHref } from '@/components/CO2Badge.helpers'
 import SectionInfo from '@/components/SectionInfo'
 import SectionHeader from '@/components/SectionHeader'
@@ -78,8 +79,8 @@ export default function FuelEconomy({ brand, model, year, fuel, capacity, kind }
       >
         <div className="overflow-hidden">
           <div className="mt-2">
-            {result.isPending && open && <p className="text-sm text-[var(--color-muted)]">…</p>}
-            {noEstimate && rdw.isPending && <p className="text-sm text-[var(--color-muted)]">…</p>}
+            {result.isPending && open && <SectionSkeleton rows={2} />}
+            {noEstimate && rdw.isPending && <SectionSkeleton rows={2} />}
             {noEstimate && !rdw.isPending && !rdwCo2 && (
               <p className="text-sm text-[var(--color-muted)]">{t('co2.noData')}</p>
             )}

@@ -115,7 +115,8 @@ describe('buildExportReport', () => {
       dirtiestModels: [],
       safestModels: [{ brand: 'TOYOTA', model: 'CAMRY', n: 5000, avgScore: 90, sources: 2 }],
       leastSafeModels: [],
-      weightBoards: {}
+      weightBoards: {},
+      specBoards: {}
     }
     const report = buildExportReport(baseInput({ stats }), t)
     const rankings = report.sections.find(s => s.id === 'rankings')
@@ -140,7 +141,8 @@ describe('buildExportReport', () => {
       dirtiestModels: [],
       safestModels: [],
       leastSafeModels: [],
-      weightBoards: {}
+      weightBoards: {},
+      specBoards: {}
     }
     const report = buildExportReport(baseInput({ stats }), t)
     expect(report.sections.find(s => s.id === 'rankings')).toBeUndefined()

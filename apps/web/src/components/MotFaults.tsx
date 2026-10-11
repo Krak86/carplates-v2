@@ -33,6 +33,7 @@ import VinToggleSection from '@/components/vin/VinToggleSection'
 import { cn } from '@/lib/cn'
 import { motQuery } from '@/lib/queries'
 import { scrollElementIntoView } from '@/lib/share-section'
+import SectionSkeleton from '@/components/ui/SectionSkeleton'
 
 type Props = {
   brand: string | null
@@ -137,7 +138,7 @@ export default function MotFaults({ brand, model, year, kind }: Props): ReactNod
         )}
       >
         <div className="overflow-hidden">
-          {query.isLoading && <p className="mt-2 text-base text-[var(--color-muted)]">{t('result.loading')}</p>}
+          {query.isLoading && <SectionSkeleton />}
           {query.isError && <p className="mt-2 text-base text-[var(--color-muted)]">{t('result.error')}</p>}
           {query.isSuccess && !match && (
             <p className="mt-2 text-base text-[var(--color-muted)]">{t('section.empty')}</p>

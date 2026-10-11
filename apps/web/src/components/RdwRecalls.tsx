@@ -27,6 +27,7 @@ import VinToggleSection from '@/components/vin/VinToggleSection'
 import { cn } from '@/lib/cn'
 import { caRecallsQuery, nhtsaComplaintsQuery, nhtsaRecallsQuery, rdwQuery, rdwRecallsQuery } from '@/lib/queries'
 import { scrollElementIntoView } from '@/lib/share-section'
+import SectionSkeleton from '@/components/ui/SectionSkeleton'
 
 type Props = {
   brand: string | null
@@ -130,7 +131,7 @@ export default function RdwRecalls({ brand, model, year, kind }: Props): ReactNo
         )}
       >
         <div className="overflow-hidden">
-          {recalls.isLoading && <p className="mt-2 text-base text-[var(--color-muted)]">{t('result.loading')}</p>}
+          {recalls.isLoading && <SectionSkeleton />}
           {recalls.isError && <p className="mt-2 text-base text-[var(--color-muted)]">{t('result.error')}</p>}
           {recalls.isSuccess && !hasAny && !usPending && (
             <p className="mt-2 text-base text-[var(--color-muted)]">{t('section.empty')}</p>

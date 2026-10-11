@@ -49,6 +49,7 @@ export {
   type WeightGroup,
   type WeightKindGroup
 } from './weightGroups.js'
+export { SPEC_METRICS, SPEC_METRIC_COLUMN, DEFAULT_SPEC_METRIC, type SpecMetric } from './specMetrics.js'
 export { VEHICLE_KINDS, resolveVehicleKind, sourceValueForKind, type VehicleKind } from './vehicleKind.js'
 export {
   VEHICLE_COLORS,
@@ -358,6 +359,8 @@ export {
   fuelStatsModelSchema,
   weightStatsModelSchema,
   weightBoardSchema,
+  specBoardSchema,
+  specStatsModelSchema,
   fuelStatsResponseSchema,
   safetyStatsRowSchema,
   safetyStatsModelSchema,
@@ -424,6 +427,8 @@ export {
   type FuelStatsModel,
   type WeightStatsModel,
   type WeightBoard,
+  type SpecBoard,
+  type SpecStatsModel,
   type FuelStatsResponse,
   type SafetyStatsRow,
   type SafetyStatsModel,

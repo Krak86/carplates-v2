@@ -63,6 +63,7 @@ import { plateHistoryQuery, vinQuery } from '@/lib/queries'
 import { scrollElementIntoView } from '@/lib/share-section'
 import { formatVehicleLabel } from '@/lib/vehicle-label'
 import { useUiStore } from '@/store/ui-store'
+import SectionSkeleton from '@/components/ui/SectionSkeleton'
 
 // Everything below the fold loads on demand (near the viewport, or a `?section=` share link): see LazySection.
 const FavoriteButton = lazy(() => import('@/components/FavoriteButton'))
@@ -496,7 +497,7 @@ export default function ResultCard({ data }: Props): ReactNode {
             info={<SectionInfo section="vin" title={t('vin.title')} />}
             actions={<ShareButton section="vin" label={t('share.button', { section: t('vin.title') })} />}
           >
-            {vinDetail.isPending && <p className="text-base text-[var(--color-muted)]">{t('result.loading')}</p>}
+            {vinDetail.isPending && <SectionSkeleton />}
             {vinDetail.isError && <p className="text-base text-[var(--color-muted)]">{t('result.error')}</p>}
             {vinDetail.isSuccess && <VinDecodeTabs data={vinDetail.data} withBarcode />}
           </VinToggleSection>
@@ -529,7 +530,7 @@ export default function ResultCard({ data }: Props): ReactNode {
             <span aria-hidden>🕘</span>
             {t('result.historyTitle')}
           </div>
-          {plateHistory.isPending && <p className="text-base text-[var(--color-muted)]">{t('result.loading')}</p>}
+          {plateHistory.isPending && <SectionSkeleton />}
           {plateHistory.isError && <p className="text-base text-[var(--color-muted)]">{t('result.error')}</p>}
           {plateHistory.data && (
             <RegistrationTimeline
@@ -545,7 +546,7 @@ export default function ResultCard({ data }: Props): ReactNode {
                 <span aria-hidden>🆔</span>
                 {t('result.historyTitleVin')}
               </div>
-              {vinDetail.isPending && <p className="text-base text-[var(--color-muted)]">{t('result.loading')}</p>}
+              {vinDetail.isPending && <SectionSkeleton />}
               {vinDetail.isError && <p className="text-base text-[var(--color-muted)]">{t('result.error')}</p>}
               {vinDetail.data?.registry && (
                 <RegistrationTimeline
