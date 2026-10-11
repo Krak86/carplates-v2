@@ -16,6 +16,7 @@ import { CardModule } from './card/card.module.js'
 import { EvModule } from './ev/ev.module.js'
 import { MotModule } from './mot/mot.module.js'
 import { CaRecallsModule } from './ca-recalls/ca-recalls.module.js'
+import { GenerationsModule } from './generations/generations.module.js'
 import { NhtsaModule } from './nhtsa/nhtsa.module.js'
 import { RdwModule } from './rdw/rdw.module.js'
 import { VdbModule } from './vdb/vdb.module.js'
@@ -62,6 +63,7 @@ import { WikiModule } from './wiki/wiki.module.js'
     SafetyModule,
     NhtsaModule,
     CaRecallsModule,
+    GenerationsModule,
     FuelModule,
     FxModule,
     EvModule,

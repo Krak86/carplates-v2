@@ -38,6 +38,7 @@ const SOURCES: readonly Source[] = [
     url: 'https://github.com/OpenChargingCloud/open-ev-data',
     icon: '/icons/sources/github.webp'
   },
+  { key: 'wikidata', label: 'Wikidata / Wikipedia', url: 'https://www.wikidata.org', tile: 'bg-slate-600' },
   {
     key: 'belastingdienst',
     label: 'Belastingdienst',

@@ -915,6 +915,29 @@ export const caRecallModels = registry.table(
 )
 export type CaRecallModelInsert = typeof caRecallModels.$inferInsert
 
+/** One generation of a model (Wikidata CC0 + Wikipedia CC BY-SA facts); `yearTo` null = still in production. */
+export const modelGenerations = registry.table(
+  'model_generations',
+  {
+    makeKey: text('make_key').notNull(),
+    modelKey: text('model_key').notNull(),
+    make: text('make').notNull(),
+    model: text('model').notNull(),
+    yearFrom: smallint('year_from').notNull(),
+    yearTo: smallint('year_to'),
+    code: text('code').notNull().default(''),
+    label: text('label').notNull(),
+    bodyStyles: text('body_styles').notNull().default(''),
+    platform: text('platform').notNull().default(''),
+    wikiTitle: text('wiki_title').notNull().default(''),
+    wikidataId: text('wikidata_id').notNull().default(''),
+    source: text('source').notNull()
+  },
+  t => [primaryKey({ columns: [t.makeKey, t.modelKey, t.yearFrom] })]
+)
+export type ModelGenerationRow = typeof modelGenerations.$inferSelect
+export type ModelGenerationInsert = typeof modelGenerations.$inferInsert
+
 /**
  * Per-(brand, model, year, fuel, capacity bucket) passenger-car counts joined with the CO2 estimate the reference
  * data gives them — backs the /fuel statistics page. Rebuilt by `scripts/src/fuel-stats.ts`; see

@@ -26,6 +26,7 @@ import {
   getOpenEv,
   getMot,
   getCaRecalls,
+  getGenerations,
   getNhtsaComplaints,
   getNhtsaRecalls,
   getRdwRecalls,
@@ -305,6 +306,15 @@ export function caRecallsQuery(brand: string, model: string, year: number) {
   return queryOptions({
     queryKey: ['rdw', 'ca-recalls', brand, model, year],
     queryFn: () => getCaRecalls(brand, model, year),
+    staleTime: Infinity
+  })
+}
+
+// Car generation of a model-year (pnpm ingest:generations) — persisted reference data, cached offline in the rdw group.
+export function generationQuery(brand: string, model: string, year: number) {
+  return queryOptions({
+    queryKey: ['rdw', 'generations', brand, model, year],
+    queryFn: () => getGenerations(brand, model, year),
     staleTime: Infinity
   })
 }

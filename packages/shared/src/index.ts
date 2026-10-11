@@ -223,6 +223,14 @@ export {
   type CaTextSection
 } from './caRecalls.js'
 export {
+  generationSchema,
+  generationSpan,
+  generationsResponseSchema,
+  pickGeneration,
+  type Generation,
+  type GenerationsResponse
+} from './generations.js'
+export {
   NHTSA_COMPLAINT_COMPONENTS,
   NHTSA_RECALLS_LIMIT,
   nhtsaComplaintsResponseSchema,

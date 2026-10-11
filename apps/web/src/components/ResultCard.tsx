@@ -30,6 +30,7 @@ import { kgToTonnes } from '@/components/RdwSpecs.helpers'
 import ElectricLink from '@/components/ElectricLink'
 import { getBodyInfo, getFuelIcon } from '@/components/ResultCard.helpers'
 import PaidFeatureSections from '@/components/paid/PaidFeatureSections'
+import GenerationChip from '@/components/GenerationChip'
 import VdbChips from '@/components/VdbChips'
 import InfoPopover from '@/components/InfoPopover'
 import InfoText from '@/components/InfoText'
@@ -276,6 +277,7 @@ export default function ResultCard({ data }: Props): ReactNode {
               <LastOperationChip operCode={c.operCode} operName={c.operName} dReg={c.dReg} />
               <TopStatBadges brand={c.brand} model={c.model} color={c.color} region={data.region} kind={c.kind} />
               <VdbChips brand={c.brand} model={c.model} kind={c.kind} />
+              <GenerationChip brand={c.brand} model={c.model} year={c.makeYear} />
               <Model3dButton brand={c.brand} model={c.model} />
               <Model360Button brand={c.brand} model={c.model} />
             </div>

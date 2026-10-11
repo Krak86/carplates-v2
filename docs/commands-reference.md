@@ -128,6 +128,9 @@ pnpm ingest:mot -- --dir <folder with the DVSA ZIPs>   # UK MOT (DVSA anonymised
 pnpm ingest:mot:csv   # load the committed seed (seed-data/mot.csv.gz) — seconds, no ZIPs (part of ingest:ratings:csv)
 pnpm export:mot:csv   # re-dump the tables to that CSV — run after every real re-ingest
 pnpm ingest:ca-recalls   # Transport Canada recalls (OGL) with NO US twin -> registry.ca_recalls + ca_recall_models; downloads ~200 MB CSV + NHTSA flat file (cached in scripts/.data/ca-recalls/), ~10 s. --dry-run, --refresh. Block "Recalls" via GET /api/ca/recalls
+pnpm ingest:generations   # car generations (Wikidata + Wikipedia) for the top 300 registry models -> registry.model_generations; ~10 min, cached in scripts/.data/generations/. --limit N, --only "brand model", --dry-run (prints table + coverage), --refresh. Chip via GET /api/generations
+pnpm ingest:generations:csv   # load the committed seed (seed-data/model-generations.csv.gz) — part of ingest:ratings:csv
+pnpm export:generations:csv   # re-dump the table to that CSV — run after every real re-ingest
 pnpm ingest:ca-recalls:csv   # load the committed seed (seed-data/ca-recalls.csv.gz) — part of ingest:ratings:csv
 pnpm export:ca-recalls:csv   # re-dump both tables to that CSV — run after every real re-ingest
 pnpm ingest:rdw-recalls:translate   # local-model (NLLB, GPU) translation of recall texts -> rdw_recall_texts; resumable, --max-minutes N / --limit N --offset N / --make --model / --langs / --dump f.md. See DATASETS_PLAN "Stage D follow-up 2"

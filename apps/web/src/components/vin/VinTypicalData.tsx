@@ -4,6 +4,7 @@ import type { VinDecodeResponse } from '@carplates/shared'
 
 import FuelEconomy from '@/components/FuelEconomy'
 import RdwSpecs from '@/components/RdwSpecs'
+import GenerationChip from '@/components/GenerationChip'
 import VdbChips from '@/components/VdbChips'
 import { buildFallback, toFieldMap, typicalLookup } from '@/components/vin/helpers'
 
@@ -42,6 +43,7 @@ export default function VinTypicalData({ data }: Props): ReactNode {
         )}
         <div className="mt-1.5 flex flex-wrap gap-1.5 empty:hidden">
           <VdbChips brand={brand} model={model} kind={kind} />
+          <GenerationChip brand={brand} model={model} year={year} />
         </div>
       </div>
 
