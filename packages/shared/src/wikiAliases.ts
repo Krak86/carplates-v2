@@ -134,6 +134,9 @@ function brandAlias(brand: string, model: string): WikiSearchName | null {
   if (brand === 'renault' && model === 'megane scenic') return named('Renault', 'Scenic')
   if (brand === 'byd' && model === 'f-3') return named('BYD', 'F3')
   if (brand === 'smart' && model === 'cabrio') return named('Smart', 'Fortwo')
+  // The Taliant is the Turkish-market Logan III; its own Commons files are PNG only. The M-NV is filed as "Ciimo M-NV".
+  if (brand === 'renault' && model === 'taliant') return named('Dacia', 'Logan III')
+  if (brand === 'honda' && model === 'm-nv') return named('Honda', 'Ciimo M-NV')
   if (brand === 'infiniti') {
     const family = /^(fx|ex|qx|jx|g|m)\s?\d{2}$/.exec(model)?.[1]
     if (family) return named('Infiniti', family.toUpperCase())

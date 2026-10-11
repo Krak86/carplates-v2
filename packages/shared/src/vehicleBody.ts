@@ -116,15 +116,15 @@ const BODY_RULES: ReadonlyArray<readonly [BodyCategory, RegExp]> = [
 ]
 
 /**
- * The registry spelled the body with a licence-category suffix ("КАБРІОЛЕТ-B") up to 2020 registrations and without it from
- * 2021 — same vehicles, same fields. Display, stats grouping and search treat both as the plain name. The suffix is Latin
- * "B"; the Cyrillic "В" is accepted too.
+ * The registry spelled the body with a licence-category suffix ("КАБРІОЛЕТ-B", "МОТОЦИКЛ-A", "ФУРГОН-C", "АВТОБУС-D",
+ * "ПР-БОРТОВИЙ-E", "ТРИЦИКЛ-B1") up to 2020 registrations and without it from 2021 — same vehicles, same fields. Display,
+ * stats grouping and search treat both as the plain name. The suffix is Latin; the look-alike Cyrillic letters are accepted too.
  */
 export function normalizeBody(body: string): string
 export function normalizeBody(body: string | null | undefined): string | null
 export function normalizeBody(body: string | null | undefined): string | null {
   if (!body) return null
-  return body.trim().replace(/-[BВ]$/i, '')
+  return body.trim().replace(/-[A-EАВЕС]1?$/i, '')
 }
 
 type BodyStatsRow = { body: string | null; totalRows: number; distinctPlates: number; distinctVins: number }

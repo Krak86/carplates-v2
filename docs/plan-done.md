@@ -3114,6 +3114,10 @@ Files: `apps/api/src/nhtsa/*`, `apps/api/src/safety/nhtsa-models.ts`, `packages/
 
 `КАБРІОЛЕТ-B` (12,899 cars, registered 2013–2020) and `КАБРІОЛЕТ` (20,903, registered 2021–2026) are the same body type; 31 body names carry the suffix. `normalizeBody` + `mergeBodyStats` in `packages/shared/src/vehicleBody.ts` (tests in `vehicleBody.test.ts`), used by the result card, AR card, export, the field-info popover, `/api/stats`, `/api/stats/field/body`, body suggestions and the search filter. Read-time only: no migration, no `db:refresh-stats`. Browser-checked on АА6988ТХ (Smart Cabrio 2006): shows `КАБРІОЛЕТ`. Not checked: the advanced-search UI and the /stats page.
 
+**Follow-up (2026-10-12).** `normalizeBody` now strips every licence-category suffix (`-A`…`-E`, `-B1`, Latin or look-alike Cyrillic): `МОТОЦИКЛ-A`, `СІДЛОВИЙ ТЯГАЧ-E`, `АВТОБУС-D`, `ФУРГОН-C` merge with their plain names in `/api/stats`, the body field page and search. Stats/search UI pages not browser-checked. Photo gaps closed with aliases: Renault `taliant` → Dacia Logan III (its own Commons files are PNG only), Honda `m-nv` → "Ciimo M-NV" (the Commons name; 2021/2023 files). Stale `search`/`lead*` cache files for the old `honda-m-nv` key had to be deleted before the re-run. BYD `leopard 3` stays a Commons gap.
+
+**Matcher follow-up (2026-10-12).** `vdbMatch.ts`: Renault `taliant` → Dacia Logan (cross-make chip), `nuovo` stripped like `new`, engine figure after the nameplate ("A4 1.8", "6 2.5") retried as the base model, curated variant aliases (Grand Scenic, A4 Avant, A6 Allroad, CC Sport). `/api/vdb` also adds the names of catalog rows that list the matched row as an alias (Renault Symbol → "Dacia Logan"). About 25k more cars reach VehiclesDB / RDW / recalls. VW Multivan and Chinese models (Chery QQ, Geely CK, BYD …) left: no catalog row.
+
 ## UK MOT "Common faults" (stage G) ✅ DONE (2026-10-10)
 
 Strategy, profiling numbers, decisions, size report and the all-years forecast: `DATASETS_PLAN.md` ("Stage G"). Conventions for working on it: `docs/features-reference.md` ("UK MOT Common faults").

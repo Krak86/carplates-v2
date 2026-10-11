@@ -64,9 +64,15 @@ const CATALOG: Row[] = [
   row('Renault', 'Clio'),
   row('Dacia', 'Dokker', { kind: 'van' }),
   row('Dacia', 'Duster'),
+  row('Dacia', 'Logan'),
   row('Volkswagen', 'Transporter', { kind: 'van' }),
   row('Volkswagen', 'Transporter', { kind: 'car', globalDecile: 3 }),
-  row('Opel', 'Astra')
+  row('Opel', 'Astra'),
+  row('Renault', 'Scenic'),
+  row('Fiat', 'Doblo'),
+  row('Audi', 'A4'),
+  row('Audi', 'A6'),
+  row('Volkswagen', 'CC')
 ]
 
 function match(brand: string, model: string): { name: string; how: string } | null {
@@ -196,6 +202,20 @@ describe('cross-make aliases', () => {
     expect(across('RENAULT', 'DOKKER')).toBe('dacia/Dokker')
     expect(across('RENAULT', 'DOKKER DOKKER')).toBe('dacia/Dokker')
     expect(across('RENAULT', 'NEW DOKKER')).toBe('dacia/Dokker')
+  })
+
+  it('finds the Renault Taliant as the Dacia Logan', () => {
+    expect(across('RENAULT', 'TALIANT')).toBe('dacia/Logan')
+  })
+
+  it('reaches the base model through marketing prefixes, engine figures and variant words', () => {
+    expect(across('FIAT', 'NUOVO DOBLO')).toBe('fiat/Doblo')
+    expect(across('AUDI', 'A4 1.8')).toBe('audi/A4')
+    expect(across('AUDI', 'A4 AVANT')).toBe('audi/A4')
+    expect(across('AUDI', 'A6 ALLROAD')).toBe('audi/A6')
+    expect(across('RENAULT', 'GRAND SCENIC')).toBe('renault/Scenic')
+    expect(across('VOLKSWAGEN', 'CC SPORT')).toBe('volkswagen/CC')
+    expect(vdbCandidateKeys('mazda', '6 2.5').map(c => c.key)).toContain('mazda6')
   })
 
   it('lists the own make first and only curated extras', () => {

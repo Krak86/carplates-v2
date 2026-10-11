@@ -94,6 +94,15 @@ const MODEL_ALIASES: Readonly<Record<string, readonly (readonly [RegExp, string]
   gaz: [[/^31(02|05|10|29)/, 'volga']],
   // "PRADO" is the bare nameplate of the Land Cruiser Prado.
   toyota: [[/^prado/, 'landcruiserprado']],
+  // Body-variant words after the nameplate: the catalog files them under the base model.
+  renault: [[/^grandscenic/, 'scenic']],
+  audi: [
+    [/^a4avant/, 'a4'],
+    [/^a6allroad/, 'a6']
+  ],
+  volkswagen: [[/^ccsport/, 'cc']],
+  // The Renault Taliant is the Turkish-market Dacia Logan III (reached through `CROSS_MAKE_ALIASES`).
+  dacia: [[/^taliant/, 'logan']],
   // Registry spells the class as letter + engine figure (S 500); the catalog's S/V/R-Class keys are not in the
   // Euro NCAP table that `brandCandidateKey` serves.
   mercedesbenz: [
@@ -109,7 +118,7 @@ const MODEL_ALIASES: Readonly<Record<string, readonly (readonly [RegExp, string]
  * entry); Logan/Sandero/Duster have their own Renault catalog rows but RDW files them under Dacia, so the own make is tried first. Same rule as `MODEL_ALIASES`: only pairs verified in both the registry and the catalog.
  */
 const CROSS_MAKE_ALIASES: Readonly<Record<string, readonly (readonly [RegExp, string])[]>> = {
-  renault: [[/^(dokker|logan|sandero|duster)/, 'dacia']]
+  renault: [[/^(dokker|logan|sandero|duster|taliant)/, 'dacia']]
 }
 
 /** Catalog makes that file the ZAZ / Daewoo / Chevrolet Lanos lines (ZAZ Lanos, Daewoo Sens, Chevrolet Lanos …). */
@@ -127,9 +136,15 @@ function zazDaewooFamilyKeys(mk: string, model: string): string[] {
   return [name, `${found.brand === 'ZAZ' ? 'zaz' : 'daewoo'}${name}`]
 }
 
+/** "NEW SX4" / "NUOVO DOBLO" is the same nameplate as "SX4" / "DOBLO"; the marketing prefix only gets in the way. */
+const MARKETING_PREFIX_RE = /^(new|nuovo)\s+(?=\S)/i
+
+/** Registry engine figure after the nameplate ("A4 1.8", "6 2.5"). */
+const ENGINE_SIZE_RE = /\s+\d\.\d.*$/
+
 /** Make keys whose catalog rows can hold this registry model: its own make first, then any curated cross-make home. */
 export function vdbRelatedMakeKeys(mk: string, model: string): string[] {
-  const collapsed = collapseDoubledModel(model).replace(/^new\s+(?=\S)/i, '')
+  const collapsed = collapseDoubledModel(model).replace(MARKETING_PREFIX_RE, '')
   const key = modelKey(collapsed) ?? ''
   const extra = (CROSS_MAKE_ALIASES[mk] ?? []).filter(([pattern]) => pattern.test(key)).map(([, make]) => make)
   const family = zazDaewooFamilyKeys(mk, collapsed).length > 0 ? ZAZ_DAEWOO_CATALOG_MAKES : []
@@ -142,24 +157,29 @@ const SPACED_NAMEPLATE_RE = /^([a-z]{1,4})\s+\d/i
 /**
  * Further model keys to retry when the direct one misses, most specific first: the make-specific series/class
  * key (BMW 320D → 3series, Mazda 3 → mazda3, Mercedes E 200 → eclass — `brandCandidateKey`), then the bare
- * nameplate before an engine figure (Lexus RX 350 → rx).
+ * nameplate before an engine figure (Lexus RX 350 → rx; "A4 1.8" → a4, "6 2.5" → mazda6).
  */
 export function vdbCandidateKeys(mk: string, model: string): { key: string; how: VdbMatchHow }[] {
-  // "NEW SX4" is the same nameplate as "SX4"; the marketing prefix only gets in the way.
-  const collapsed = collapseDoubledModel(model).replace(/^new\s+(?=\S)/i, '')
+  const collapsed = collapseDoubledModel(model).replace(MARKETING_PREFIX_RE, '')
   const key = modelKey(collapsed)
   if (!key) return []
   const out: { key: string; how: VdbMatchHow }[] = [{ key, how: 'exact' }]
+  const push = (candidate: string | null | undefined, how: VdbMatchHow): void => {
+    if (candidate && !out.some(c => c.key === candidate)) out.push({ key: candidate, how })
+  }
   for (const [pattern, alias] of MODEL_ALIASES[mk] ?? []) {
-    if (pattern.test(key)) out.push({ key: alias, how: 'alias' })
+    if (pattern.test(key)) push(alias, 'alias')
   }
   const series = brandCandidateKey(mk, key)
-  if (series && series !== key) out.push({ key: series, how: 'series' })
+  if (series !== key) push(series, 'series')
   const letters = SPACED_NAMEPLATE_RE.exec(collapsed)?.[1]?.toLowerCase()
-  if (letters && letters !== key && letters !== series) out.push({ key: letters, how: 'prefix' })
-  for (const familyKey of zazDaewooFamilyKeys(mk, collapsed)) {
-    if (!out.some(c => c.key === familyKey)) out.push({ key: familyKey, how: 'alias' })
+  if (letters && letters !== key) push(letters, 'prefix')
+  const base = modelKey(collapsed.replace(ENGINE_SIZE_RE, ''))
+  if (base && base !== key) {
+    push(base, 'prefix')
+    push(brandCandidateKey(mk, base), 'series')
   }
+  for (const familyKey of zazDaewooFamilyKeys(mk, collapsed)) push(familyKey, 'alias')
   return out
 }
 

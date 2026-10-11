@@ -11,7 +11,7 @@ import {
   vdbVehicleClass
 } from '@carplates/shared'
 import type { VdbResponse } from '@carplates/shared'
-import { inArray } from 'drizzle-orm'
+import { inArray, sql } from 'drizzle-orm'
 
 import { DbService } from '../db/db.service.js'
 
@@ -37,6 +37,13 @@ export class VdbService {
     if (!found) return { brand, model, match: null }
 
     const { row, how } = found
+    // The catalog lists a rebadge on one side only (Dacia Logan → "Renault Symbol", the Symbol row has none): take
+    // the names of rows that list this one as an alias too.
+    const name = `${row.makeName} ${row.modelName}`
+    const listedBy = await this.dbService.db
+      .select({ makeName: vdbModels.makeName, modelName: vdbModels.modelName })
+      .from(vdbModels)
+      .where(sql`${vdbModels.aliases} @> ARRAY[${name}]::text[]`)
     return {
       brand,
       model,
@@ -50,7 +57,11 @@ export class VdbService {
         uaOnly: isUkraineOnly(row),
         crossMake: row.makeKey !== mk,
         aliases: [
-          ...new Set([...makeSynonymAliases(mk, row.modelName), ...displayAliases(row.aliases, row.modelName)])
+          ...new Set([
+            ...makeSynonymAliases(mk, row.modelName),
+            ...displayAliases(row.aliases, row.modelName),
+            ...listedBy.map(r => `${r.makeName} ${r.modelName}`)
+          ])
         ].filter(a => a.toLowerCase() !== `${row.makeName} ${row.modelName}`.toLowerCase())
       }
     }
