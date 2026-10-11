@@ -1,0 +1,956 @@
+{{Infobox PKW-Modell
+| Marke       = [[BMW (Automarke)|BMW]]
+| Modell      = F30, F31, F34, F35
+| Bild        = MA62 PFK (8157584799).jpg
+| Bild zeigt  = BMW 320d (2011–2015)
+| Bezeichnung = [[BMW 3er|3er]]
+| von         = 10/2011
+| bis         = 06/2019
+| Klasse      = [[Mittelklasse]]
+| Versionen   = [[Limousine]], [[Kombinationskraftwagen|Kombi]]
+| Motoren     = [[Ottomotor]]en:<br />1,5–3,0 Liter<br />(100–338 kW)<br />[[Hybridelektrokraftfahrzeug|Ottohybrid]]:<br />2,0–3,0 Liter (185–250 kW)<br />[[Dieselmotor]]en:<br />2,0–3,0 Liter<br />(85–230 kW)
+| Länge       = 4624–4753
+| Breite      = 1811–1877
+| Höhe        = 1416–1455
+| Radstand    = 2810–2920
+| Gewicht     = 1460–1725
+| Vorgänger   = [[BMW E90]]
+| Nachfolger  = [[BMW G20]]
+}}
+{{Infobox Crashtest PKW
+|delta-breite= 8
+|organisation1= Euro NCAP
+|jahr1= 2012
+|beleg1= <ref>{{Internetquelle |url=https://www.euroncap.com/de/results/bmw/3-series/10914 |titel=Offizielle Sicherheitsbewertung BMW 3 Series 2012 |werk=euroncap.com |abruf=2018-09-05}}</ref>
+|ergebnis1= 5 Sterne
+|organisation2= US-NCAP
+|jahr2= 2012
+|beleg2= <ref>{{Internetquelle |url=https://www.nhtsa.gov/vehicle/2012/BMW/328I/4%252520DR/RWD |titel=2012 BMW 328I 4 DR RWD – NHTSA |werk=nhtsa.gov |sprache=en |abruf=2018-09-05}}</ref>
+|ergebnis2= 5 Sterne
+}}
+<!--
+{| class="wikitable float-right" width="265"
+|-
+| Sterne im [[Euro NCAP|Euro-NCAP]]-[[Crashtest]]<ref name="crashtest">[http://de.euroncap.com/de/results/bmw/3_series/476.aspx BMW 3 Series – Euro NCAP]</ref>
+| [[Datei:Crashtest-Stern 5.svg|105px|]]
+|}-->
+Mit dem internen Kürzel '''F30''' bezeichnet [[BMW]] die sechste Generation der [[BMW 3er|3er-Reihe]]. Die viertürige Limousine wird der [[Mittelklasse]] zugeordnet. Das Fahrzeug wurde 2011 als Nachfolger der Baureihe [[BMW E90|E90]] eingeführt und bis 2019 gebaut. Auf der Basis des 3er wurde der [[BMW 3er Gran Turismo|Gran Turismo]] als [[Schrägheck]]limousine zum Kauf angeboten. Die anderen Bauformen der 3er-Reihe haben eigene Kürzel, z.&nbsp;B. ''F31'' für den Kombi („Touring“).
+
+
+== Modellgeschichte ==
+
+=== Allgemeines ===
+
+=== Wesentliche Unterschiede zum Vorgänger ===
+
+=== Produktionszeiträume ===
+
+=== Modellpflege ===
+
+== Design ==
+
+=== Abmessungen ===
+
+==== Kofferraum ====
+
+== Ausstattung ==
+
+=== Außenlackierungen ===
+
+=== Ausstattungslinien ===
+
+=== Multimedia ===
+
+=== Fahrassistenzsysteme ===
+
+== Technik ==
+
+=== Motorisierungen ===
+
+==== Ottomotoren ====
+
+==== Dieselmotoren ====
+
+=== Getriebe ===
+
+=== Umwelt ===
+
+=== Fahrzeugabstimmung ===
+
+=== Lenkung ===
+
+=== Fahrwerk ===
+
+=== Bremsen ===
+
+=== Sicherheit ===
+
+== Hybridmodell ''ActiveHybrid 3'' ==
+
+== Plug-In-Hybrid ''330e iPerformance'' ==
+
+== Gran Turismo (F34) ==
+
+== Langversion (F35) ==
+
+== Produktion und Absatz ==
+
+== Technische Daten ==
+
+=== Karosserieabmessungen ===
+{| class="wikitable" style="text-align:center"
+|-
+!colspan="6"| Abmessungen
+|-
+! Einheit
+! Limousine
+! Touring
+! Langversion
+! [[BMW F80|M3]]
+! M3 CS
+|-
+| '''[[Radstand]]'''
+|colspan="2"| 2810 mm
+| 2920 mm
+| 2810 mm
+| 2812 mm
+|-
+| '''Länge'''
+|colspan="2"| 4633 mm
+| 4753 mm
+|colspan="2"| 4671 mm
+|-
+| '''Breite (inkl. Außenspiegel)'''
+|colspan="3"| 2031 mm
+| 2037 mm
+|
+|-
+| '''Breite (ohne Außenspiegel)'''
+|colspan="3"| 1811 mm
+|colspan="2"| 1877 mm
+|-
+| '''[[Spurweite (Kraftfahrzeugtechnik)|Spurweite]] vorne'''
+|colspan="3"| 1543&nbsp;mm<br />1531 mm{{FN|(1)}}
+|colspan="2"| 1579 mm
+|-
+| '''Spurweite hinten'''
+|colspan="3"| 1583&nbsp;mm<br />1572 mm{{FN|(1)}}
+| 1603 mm
+| 1604 mm
+|-
+| '''Höhe'''
+|colspan="2"| 1416 mm{{FN|(2)}}<br />1429 mm{{FN|(3)}}<br />1434 mm{{FN|(3)}}{{FN|(5)}}
+| 1455 mm
+| 1424&nbsp;mm<br />1431 mm{{FN|(4)}}
+| 1424 mm
+|}
+
+=== Ottomotoren ===
+
+==== Limousine ====
+{| class="wikitable" style="text-align:center"
+|-
+! !! 316i || 320i EfficientDynamics Edition || 318i ||colspan="2"| 320i || 328i || 330i || 335i || 340i || [[BMW F80|M3]] || M3 Competition || M3 CS
+|-
+!style="text-align:left;"| Bauzeitraum
+|colspan="2"| 11/2012–05/2015 || 05/2015–10/2018 || 02/2012–10/2015 || 07/2015–10/2018 ||02/2012–07/2015 || 05/2015–10/2018 || 02/2012–07/2015 || 05/2015–10/2018 || 04/2014–05/2018 || 01/2016–05/2018 || 03/2018–05/2018
+|-
+!style="text-align:left"| Motor
+|colspan="12"| [[Ottomotor]]
+|-
+!style="text-align:left"| Motorbauart
+|colspan="2"| [[Reihenmotor|R4]]
+| R3
+|colspan="4"| R4
+|colspan="5"| R6
+|-
+!style="text-align:left"| [[Motoraufladung|Aufladung]]
+|colspan="9"| [[Turbolader#Twin-Scroll-Lader|Twin-Scroll-Abgasturbolader]]{{FN|TPT|gruppe=o}}
+|colspan="3"| [[Turbolader#Biturbo / Twin Turbo|zwei Abgasturbolader]]
+|-
+!style="text-align:left"| [[Gemischbildung|Gemischaufbereitung]]
+|colspan="12"| [[Direkteinspritzung]]
+|-
+!style="text-align:left"| [[Nockenwellenverstellung|variable Ventilsteuerung]]
+|colspan="12"| [[Valvetronic]]
+|-
+!style="text-align:left"| Motortyp
+|colspan="2"| [[BMW N13|N13B16]]
+| [[BMW B38|B38B15]]
+| [[BMW N20|N20B20]]
+| [[BMW B48|B48B20]]
+| N20B20
+| B48B20
+| [[BMW N55|N55B30]]
+| [[BMW B58|B58B30]]
+|colspan="3"| [[BMW S55|S55B30]]
+|-
+!style="text-align:left"| [[Hubraum]]
+|colspan="2"| 1598&nbsp;cm³
+| 1499&nbsp;cm³
+| 1997&nbsp;cm³
+| 1998&nbsp;cm³
+| 1997&nbsp;cm³
+| 1998&nbsp;cm³
+| 2979&nbsp;cm³
+| 2998&nbsp;cm³
+|colspan="3"| 2979&nbsp;cm³
+|-
+!style="text-align:left"| max. Leistung<br /> bei 1/min
+| 100&nbsp;kW (136&nbsp;PS)/<br />4400–6450
+| 125&nbsp;kW (170&nbsp;PS)/<br />4800–6450
+| 100&nbsp;kW (136&nbsp;PS)/<br />4400–6000
+| 135&nbsp;kW (184&nbsp;PS)/<br />5000
+| 135&nbsp;kW (184&nbsp;PS)/<br />5000–6500
+| 180&nbsp;kW (245&nbsp;PS)/<br />5000–6500
+| 185&nbsp;kW (252&nbsp;PS)/<br />5200–6500
+| 225&nbsp;kW (306&nbsp;PS)/<br />5800–6400{{FN|(1)|gruppe=o}}
+| 240&nbsp;kW (326&nbsp;PS)/<br />5500–6500
+| 317&nbsp;kW (431&nbsp;PS)/<br />5500–7300
+| 331&nbsp;kW (450&nbsp;PS)/<br />7000
+| 338&nbsp;kW (460&nbsp;PS)/<br />6250
+|-
+!style="text-align:left"| max. Drehmoment<br /> bei 1/min
+| 220&nbsp;Nm/<br />1350–4300/min
+| 250&nbsp;Nm/<br />1500–4500/min
+| 220&nbsp;Nm/<br />1250–4300/min
+| 270&nbsp;Nm/<br />1250–4500/min
+| 270&nbsp;Nm/<br />1350–4600/min
+| 350&nbsp;Nm/<br />1250–4800/min
+| 350&nbsp;Nm/<br />1450–4800/min
+| 400&nbsp;Nm/<br />1200–5000/min
+| 450&nbsp;Nm/<br />1380–5000/min
+|colspan="2"| 550&nbsp;Nm/<br />1850–5500/min
+| 600&nbsp;Nm/<br />4000–5380/min
+|-
+!style="text-align:left"| Getriebe, serienmäßig
+|colspan="11"| [[Fahrzeuggetriebe#Manuelle Betätigung|6-Gang-Schaltgetriebe]]
+| [[Doppelkupplungsgetriebe|7-Gang-Automatik&shy;getriebe (DKG)]]
+|-
+!style="text-align:left"| Getriebe, optional
+|colspan="9"| 8-Gang-[[Automatikgetriebe|Automatik&shy;getriebe]] / 8-Gang-Sport-Automatik&shy;getriebe
+|colspan="2"| 7-Gang-Automatik&shy;getriebe DKG
+| –
+|-
+!style="text-align:left"| Antrieb, serienmäßig
+|colspan="12"| [[Hinterradantrieb]]
+|-
+!style="text-align:left"| Antrieb, optional
+|colspan="3"| –
+|colspan="6"| [[Allradantrieb]] ([[xDrive]])
+|colspan="3"| –
+|-
+!style="text-align:left"| Beschleunigung,<br />0–100 km/h in s
+| 8,9 [9,1]
+| 7,6
+| 8,9 [9,1]
+| 7,3 [7,6]
+| 7,2 [7,3]
+| 5,9 [5,9]<br />(5,7 [5,8])
+| 5,9 [5,8]<br />([5,8])
+| 5,5 [5,2]<br />(5,3 [5,0])
+| 5,2 [5,1]<br />(5,0 [4,9])
+| 4,3 [4,1]
+| 4,2 [4,0]
+| 3,9
+|-
+!style="text-align:left"| Höchstgeschwindigkeit,<br />km/h
+| 210
+| 230
+| 210
+| 235 [233]
+| 235 [235]
+|colspan="4"| 250 [250]
+|colspan="2"| 250 [250]<br />280 [280]{{FN|(2)|gruppe=o}}
+| 280
+|-
+!style="text-align:left"| Kraftstoffverbrauch,<br />nach [[Wirtschaftskommission für Europa|ECE]]-Fahrzyklus,<br />kombiniert in l/100&nbsp;km{{FN|(3)|gruppe=o}}
+| 5,8–5,9 [5,8–5,9]
+| 5,3 [5,4]
+| 5,5–5,1 [5,4–5,0]
+| 6,1–6,3 [5,9–6,0]<br />(6,5–6,8 [6,4–6,8])
+| 5,5–5,9 [5,3–5,8]<br />(6,4–6,8 [5,7–6,1])
+| 6,4 [6,3]<br />(6,9 [6,7])
+| 6,1–6,5 [5,5–5,8]<br />([5,9–6,2])
+| 7,9 [7,2]<br />(8,2 [7,6])
+| 7,7–7,4 [6,8–6,5]<br />(7,9–7,7 [7,3–6,9])
+|colspan="2"| 9,1 [8,3]
+| 8,3
+|-
+!style="text-align:left"| Kohlendioxid-Emission,<br />kombiniert in g/km{{FN|(4)|gruppe=o}}
+| 134–137 [134–137]
+| 124 [127]
+| 129–119 [126–116]
+| 144–147 [138–141]<br />(152–159 [149–158])
+| 128–138 [124–134]<br />(149–159 [132–142])
+| 149 [147]<br />(162 [157])
+| 143–151 [129–136]<br />([138–144])
+| 186 [169]<br />(193 [178])
+| 179–172 [159–152]<br />(185–179 [169–162])
+|colspan="2"| 209 [194]
+| 194
+|-
+!style="text-align:left"| [[Abgasnorm]] nach<br />EU-Klassifikation
+|colspan="2"| Euro 5
+| Euro 6
+| Euro 5
+| Euro 6
+| Euro 5
+| Euro 6
+| Euro 5
+|colspan="4"| Euro 6
+|-
+!style="text-align:left"| [[Leergewicht]] in kg
+| 1460 [1480]
+| 1465 [1485]
+| 1475 [1500]
+| 1475 [1495]
+| 1505 [1525]
+| 1505 [1525]
+| 1540 [1570]
+| 1585 [1595]
+| 1605 [1615]
+| 1595 [1635]
+| 1610 [1635]
+| [1660]
+|-
+!style="text-align:left"| Tankinhalt in l
+|colspan="12"| 60
+|-
+!style="text-align:left"| Quelle
+| <ref name="Technische Daten 316i Lim 2012-11" />
+| <ref name="Technische Daten 320i ED Lim 2012-11" /><ref name="Technische Daten 320i ED Lim 2013-03" />
+| <ref name="Technische Daten alle 3er Limousine Touring 2015-05" />
+| <ref name="Technische Daten 320i Lim 2012-03" /><ref name="Technische Daten 320i xDrive Lim  Lim 2012-07" />
+| <ref name="Technische Daten alle 3er Limousine Touring 2015-05" />
+| <ref name="Technische Daten 328i 335i Lim 2011-11" />
+| <ref name="Technische Daten alle 3er Limousine Touring 2015-05" />
+| <ref name="Technische Daten 328i 335i Lim 2011-11" /><ref name="Technische Daten 335i Lim 2012-07" />
+| <ref name="Technische Daten alle 3er Limousine Touring 2015-05" />
+| <ref name="Technische Daten M3 Lim 2014-03" />
+|
+|
+|}
+
+==== Limousine mit langem Radstand ====
+
+==== Touring ====
+{| class="wikitable" style="text-align:center"
+|-
+! !! 316i || 318i ||colspan="2"| 320i || 328i || 330i || 335i || 340i
+|-
+!style="text-align:left;"| Bauzeitraum
+| 03/2013–07/2015 || 07/2015–06/2019 || 11/2012–06/2015 || 07/2015–06/2019 || 05/2012–06/2015 || 07/2015–06/2019 || 03/2013–07/2015 || 07/2015–06/2019
+|-
+!style="text-align:left"| Motor
+|colspan="8"| [[Ottomotor]]
+|-
+!style="text-align:left"| Motorbauart
+| [[Reihenmotor|R4]]
+| R3
+|colspan="4"| R4
+|colspan="2"| R6
+|-
+!style="text-align:left"| [[Motoraufladung|Aufladung]]
+|colspan="8"| [[Turbolader#Twin-Scroll-Lader|Twin-Scroll–Abgasturbolader]]{{FN|TPT|gruppe=t}}
+|-
+!style="text-align:left"| [[Gemischbildung|Gemischaufbereitung]]
+|colspan="8"| [[Direkteinspritzung]]
+|-
+!style="text-align:left"| [[Nockenwellenverstellung|variable Ventilsteuerung]]
+|colspan="8"| [[Valvetronic]]
+|-
+!style="text-align:left"| Motortyp
+| [[BMW N13|N13B16]]
+| [[BMW B38|B38B15]]
+| [[BMW N20|N20B20]]
+| [[BMW B48|B48B20]]
+| N20B20
+| B48B20
+| [[BMW N55|N55B30]]
+| [[BMW B58|B58B30]]
+|-
+!style="text-align:left"| [[Hubraum]]
+| 1598&nbsp;cm³
+| 1499&nbsp;cm³
+| 1997&nbsp;cm³
+| 1998&nbsp;cm³
+| 1997&nbsp;cm³
+| 1998&nbsp;cm³
+| 2979&nbsp;cm³
+| 2998&nbsp;cm³
+|-
+!style="text-align:left"| max. Leistung<br /> bei 1/min
+| 100&nbsp;kW (136&nbsp;PS)/<br />4400–6450
+| 100&nbsp;kW (136&nbsp;PS)/<br />4400–6000
+| 135&nbsp;kW (184&nbsp;PS)/<br />5000
+| 135&nbsp;kW (184&nbsp;PS)/<br />5000–6500
+| 180&nbsp;kW (245&nbsp;PS)/<br />5000–6500
+| 185&nbsp;kW (252&nbsp;PS)/<br />5200
+| 225&nbsp;kW (306&nbsp;PS)/<br />5800–6000
+| 240&nbsp;kW (326&nbsp;PS)/<br />5500–6500
+|-
+!style="text-align:left"| max. Drehmoment<br /> bei 1/min
+| 220&nbsp;Nm/<br />1350–4300
+| 220&nbsp;Nm/<br />1250–4300
+| 270&nbsp;Nm/<br />1250–4500
+| 290&nbsp;Nm/<br />1350–4250
+|colspan="2"| 350&nbsp;Nm/<br />1250–4800
+| 400&nbsp;Nm/<br />1200–5000
+| 450&nbsp;Nm/<br />1380–5000
+|-
+!style="text-align:left"| Getriebe, serienmäßig
+|colspan="8"| [[Fahrzeuggetriebe#Manuelle Betätigung|6-Gang-Schaltgetriebe]]
+|-
+!style="text-align:left"| Getriebe, optional
+|colspan="8"| 8-Gang-[[Automatikgetriebe|Automatik&shy;getriebe]] / 8-Gang-Sport-Automatik&shy;getriebe
+|-
+!style="text-align:left"| Antrieb, serienmäßig
+|colspan="8"| [[Hinterradantrieb]]
+|-
+!style="text-align:left"| Antrieb, optional
+|colspan="3"| –
+|colspan="5"| [[Allradantrieb]] ([[xDrive]])
+|-
+!style="text-align:left"| Beschleunigung,<br />0–100 km/h in s
+| 9,4 [9,3]
+| 9,2 [9,1]
+| 7,5 [7,5]
+| 7,5
+| 6,0 [6,0]
+| 6,0 [5,9] (6,0)
+| 5,5 [5,2]<br />(– [5,1])
+| [5,1] (5,0)
+|-
+!style="text-align:left"| Höchstgeschwindigkeit,<br />km/h
+| colspan="2" | 210
+| 233 [228]
+| 230
+| 250 [250]
+| 250 [250] (250)
+| 250 [250]
+| [250] (250)
+|-
+!style="text-align:left"| Kraftstoffverbrauch,<br />nach [[Wirtschaftskommission für Europa|ECE]]-Fahrzyklus,<br />kombiniert in l/100&nbsp;km{{FN|(2)|gruppe=t}}
+| 5,9–6,3 [5,9–6,3]
+| 5,4–5,9 [5,3–5,9]
+| 6,4–6,5 [6,1–6,2]
+| 5,9–6,3
+| 6,9 [6,5] (7,1)
+| 6,7–6,4 [6,1–5,8] (6,5–6,2)
+| 8,1 [7,6] (7,9)
+| [6,8–7,0] (7,2–7,6)
+|-
+!style="text-align:left"| Kohlendioxid-Emission,<br />kombiniert in g/km{{FN|(3)|gruppe=t}}
+| 138–143 [137–147]
+| 126–137 [124–134]
+| 149–152 [143–145]
+| 137–147
+| 159 [152] (166)
+| 157–149 [143–135] (152–144)
+| 189 [177] (184)
+| [158–164] (168–176)
+|-
+!style="text-align:left"| [[Abgasnorm]] nach<br />EU-Klassifikation
+|colspan="2"| Euro 6
+| Euro 5
+| Euro 6
+| Euro 5
+| Euro 6
+| Euro 5
+| Euro 6
+|-
+!style="text-align:left"| [[Leergewicht]] in kg
+| 1525 [1545]
+| 1525 [1565]
+| 1540 [1560]
+| 1585 [1595]
+| 1575 [1595]
+| 1615 [1640]
+| 1650 [1660]
+| [1690] (1755)
+|-
+!style="text-align:left"| Tankinhalt in l
+|colspan="8"| 60
+|-
+!style="text-align:left"| Quelle
+| <ref name="Technische Daten 316i Touring 2013" /><ref name="Technische Daten 316i Touring englisch 2013-03" />
+| <ref name="Technische Daten alle 3er Limousine Touring 2015-05" />
+| <ref name="Technische Daten 320i Touring 2012-11" />
+| <ref name="Technische Daten alle 3er Limousine Touring 2015-05" />
+| <ref name="Technische Daten 3er Touring 328i 2012-07" />
+| <ref name="Technische Daten 330i Touring Niederlande" /><ref name="Technische Daten alle 3er Limousine Touring 2015-05 englisch" />
+| <ref name="Technische Daten 335i Touring 2013" /><ref name="Technische Daten 335i xDrive Touring englisch 2013-03" />
+| <ref name="Technische Daten alle 3er Limousine Touring 2015-05" />
+|}
+
+=== Hybridmodell ===
+{| class="wikitable" style="text-align:center"
+|-
+! !! Active Hybrid 3 || 330e iPerformance
+|-
+!style="text-align:left"| Bauzeit
+| 11/2012–05/2015
+| 03/2016–06/2018
+|-
+!style="text-align:left"| Motor
+|colspan="2"| [[Ottomotor]] und [[Elektromotor]]
+|-
+!style="text-align:left"| Motorbauart
+| [[Reihenmotor|R6]]
+| R4
+|-
+!style="text-align:left"| [[Motoraufladung|Aufladung]]
+|colspan="2"| [[Turbolader|Abgasturbolader]]
+|-
+!style="text-align:left"| [[Gemischbildung|Gemischaufbereitung]]
+|colspan="2"| [[Direkteinspritzung]]
+|-
+!style="text-align:left"| [[Nockenwellenverstellung|variable Ventilsteuerung]]
+|colspan="2"| [[Valvetronic]]
+|-
+!style="text-align:left"| Motortyp
+| [[BMW N55|N55B30]]
+| [[BMW B48|B48B20A]]
+|-
+!style="text-align:left"| [[Hubraum]]
+| 2979&nbsp;cm³
+| 1998&nbsp;cm³
+|-
+!style="text-align:left"| Systemleistung<br />bei 1/min
+| 250&nbsp;kW (340&nbsp;PS)/<br />5800–6000
+| 185&nbsp;kW (252&nbsp;PS)/<br />5000–6500
+|-
+!style="text-align:left"| Verbrennungsmotor Leistung<br /> bei 1/min
+| 235&nbsp;kW (306&nbsp;PS)/<br />5800–6000
+| 135&nbsp;kW (184&nbsp;PS)/<br />5000–6500
+|-
+!style="text-align:left"| E-Motor, Leistung<br /> bei 1/min
+| 40&nbsp;kW (54&nbsp;PS)
+| 65&nbsp;kW (88&nbsp;PS)/<br />2500
+|-
+!style="text-align:left"| max. Systemdrehmoment<br /> bei 1/min
+| 450&nbsp;Nm/<br />1000–5000
+| 420&nbsp;Nm/<br />1450–3700
+|-
+!style="text-align:left"| Verbrennungsmotor Drehmoment<br /> bei 1/min
+| 400&nbsp;Nm/<br />1200–5000
+| 290&nbsp;Nm/<br />1350–4250
+|-
+!style="text-align:left"| E-Motor Drehmoment<br /> bei 1/min
+| 210&nbsp;Nm
+| 250&nbsp;Nm/<br />0–2500
+|-
+!style="text-align:left"| Getriebe, serienmäßig
+|colspan="2"| 8-Gang-[[Automatikgetriebe|Automatik&shy;getriebe]]
+|-
+!style="text-align:left"| Antrieb, serienmäßig
+|colspan="2"| [[Hinterradantrieb]]
+|-
+!style="text-align:left"| Antrieb, optional
+|colspan="2"| —
+|-
+!style="text-align:left"| Beschleunigung,<br />0–100&nbsp;km/h in s
+| 5,3
+| 6,1
+|-
+!style="text-align:left"| Höchstgeschwindigkeit,<br />km/h
+| 250{{FN|(1)|gruppe=h}}
+| 225{{FN|(1)|gruppe=h}};<br /> 120{{FN|(2)|gruppe=h}}
+|-
+!style="text-align:left"| Kraftstoffverbrauch,<br />nach [[Europäische Wirtschaftsgemeinschaft|EWG]]-Richtlinie,<br />kombiniert in l/100&nbsp;km
+| 5,9
+| 1,9–2,1
+|-
+!style="text-align:left"| Kohlendioxid-Emission,<br />kombiniert in g/km
+| 139
+| 44–49
+|-
+!style="text-align:left"| Reichweite elektrisch,<br />in km
+| 3-4
+| 37–40
+|-
+!style="text-align:left"| [[Abgasnorm]] nach<br />EU-Klassifikation
+| Euro 5
+| Euro 6
+|-
+!style="text-align:left"| Quelle
+| <ref name="Technische Daten ActiveHybrid3 Lim 2012-07" />
+| <ref name="Technische Daten 330e Lim 2015-09" />
+|}
+
+=== Dieselmotoren ===
+
+==== Limousine ====
+{| class="wikitable" style="text-align:center"
+|-
+! !!colspan="2"| 316d ||colspan="2"| 318d ||colspan="2"| 320d EfficientDynamics Edition || 320d<br />(328d USA)|| 320d ||colspan="2"| 325d || 330d || 335d
+|-
+!style="text-align:left;"| Bauzeitraum
+| 02/2012–03/2015 || 03/2015–10/2018 || 02/2012–06/2015 || 07/2015–10/2018 || 10/2011–07/2015 || 07/2015–10/2018 || 10/2011–06/2015 || 07/2015–10/2018 || 04/2013–06/2015 || 07/2015–02/2018 || 07/2012–10/2018 || 07/2013–10/2018
+|-
+!style="text-align:left"| Motor
+|colspan="12"| [[Dieselmotor]]
+|-
+!style="text-align:left"| Motorbauart
+|colspan="10"| [[Reihenmotor|R4]]
+|colspan="2"| R6
+|-
+!style="text-align:left"| [[Motoraufladung|Aufladung]]
+|colspan="8"| [[Turbolader|Abgas&shy;turbolader]] mit [[Variable Turbinengeometrie|verstellbaren Turbinenleitschaufeln]]  („Variable Turbinen&shy;geometrie“)
+|colspan="2"| Zweistufige Abgas&shy;turbolader&shy;aufladung mit verstellbaren Turbinenleitschaufeln
+| Abgas&shy;turbo&shy;lader mit verstellbaren Turbinenleitschaufeln
+| Zweistufige Abgasturbo&shy;lader&shy;aufladung mit verstellbaren Turbinenleitschaufeln
+|-
+!style="text-align:left"| [[Gemischbildung|Gemischaufbereitung]]
+|colspan="12"| [[Common-Rail-Direkteinspritzung]]
+|-
+!style="text-align:left"| Motortyp
+| [[BMW N47|N47D20]]
+| [[BMW B47|B47D20]]
+| N47D20
+| B47D20
+| N47D20
+| B47D20
+| N47D20
+| B47D20
+| N47D20
+| B47D20
+|colspan="2" | [[BMW N57|N57D30]]
+|-
+!style="text-align:left"| [[Hubraum]]
+|colspan="10"| 1995&nbsp;cm³
+|colspan="2"| 2993&nbsp;cm³
+|-
+!style="text-align:left"| max. Leistung<br />bei 1/min
+|colspan="2"| 85&nbsp;kW (116&nbsp;PS)/<br />4000
+| 105&nbsp;kW (143&nbsp;PS)/<br />4000
+| 110&nbsp;kW (150&nbsp;PS)/<br />4000
+|colspan="2"| 120&nbsp;kW (163&nbsp;PS)/<br />4000
+| 135&nbsp;kW (184&nbsp;PS)/<br />4000
+| 140&nbsp;kW (190&nbsp;PS)/<br />4000
+| 160&nbsp;kW (218&nbsp;PS)/<br />4400
+| 165&nbsp;kW (224&nbsp;PS)/<br />4400
+| 190&nbsp;kW (258&nbsp;PS)/<br />4000
+| 230&nbsp;kW (313&nbsp;PS)/<br />4400
+|-
+!style="text-align:left"| max. Drehmoment<br /> bei 1/min
+| 260&nbsp;Nm/<br />1750–2500
+| 270&nbsp;Nm/<br />1250–2750
+| 320&nbsp;Nm/<br />1750–2500
+| 320&nbsp;Nm/<br />1500–3000
+| 380&nbsp;Nm/<br />1750–2750
+| 400&nbsp;Nm/<br />1750–2250
+| 380&nbsp;Nm/<br />1750–2750
+| 400&nbsp;Nm/<br />1750–2500
+| 450&nbsp;Nm/<br />1500–2500
+| 450&nbsp;Nm/<br />1500–3000
+| 560&nbsp;Nm/<br />1500–3000{{FN|(1)|gruppe=dl}}
+| 630&nbsp;Nm/<br />1500–2500
+|-
+!style="text-align:left"| Getriebe, serienmäßig
+|colspan="10"| [[Fahrzeuggetriebe#Manuelle Betätigung|6-Gang-Schaltgetriebe]]
+|colspan="2"| 8-Gang-[[Automatikgetriebe|Automatik&shy;getriebe]]
+|-
+!style="text-align:left"| Getriebe, optional
+|colspan="10"| 8-Gang-Automatik&shy;getriebe
+|colspan="2"| –
+|-
+!style="text-align:left"| Antrieb, serienmäßig
+|colspan="11"| [[Hinterradantrieb]]
+| [[Allradantrieb]] ([[xDrive]])
+|-
+!style="text-align:left"| Antrieb, optional
+|colspan="2"| –
+|colspan="2"| Allradantrieb (xDrive){{FN|(2)|gruppe=dl}}
+|colspan="2"| –
+|colspan="2"| Allradantrieb (xDrive)
+| Allradantrieb (xDrive)
+| -
+| Allradantrieb (xDrive)
+| –
+|-
+!style="text-align:left"| Beschleunigung,<br />0–100 km/h in s
+| 10,9 [11,2]
+| 10,7 [10,6]
+| 9,0 [9,2]
+| 8,6 [8,4]
+| 8,0 [7,9]
+| 7,9 [7,8]
+| 7,5 [7,4]
+| 7,3 [7,2]
+| 6,8 [6,6]
+| 6,5 [6,1]
+| [5,6] ([5,3])
+| ([4,8])
+|-
+!style="text-align:left"| Höchstgeschwindigkeit,<br />km/h
+| 202 [202]
+| 205 [204]
+| 212 [212]
+| 215 [212]
+|colspan="2"| 230 [225]
+|colspan="2"| 235 [230]
+|colspan="2"| 245 [245]
+| [250] ([250])
+| ([250])
+|-
+!style="text-align:left"| Kraftstoffverbrauch,<br /> nach [[Wirtschaftskommission für Europa|ECE]]-Fahrzyklus,<br />kombiniert in l/100&nbsp;km{{FN|(3)}}
+| 4,3–4,5 [4,4]
+| 3,9–4,3 [4,0–4,3]
+| 4,4–4,5 [4,4–4,5]
+| 4,0–4,4 [4,0–4,4]
+| 4,1 [4,1]
+| 3,9–4,3 [3,8–4,1]
+| 4,5–4,6 [4,4–4,5]<br />(4,8–4,9 [4,7–4,8])
+| 4,0–4,4 [4,0–4,4]
+| 4,9–5,0 [4,6–4,8]
+| 4,6–4,9 [4,4–4,7]
+| [4,9]<br />([5,2])
+| ([5,4])
+|-
+!style="text-align:left"| [[Kohlendioxid]]-Emission,<br />kombiniert in g/km{{FN|(3)|gruppe=dl}}
+| 114–118 [116–117]
+| 102–113 [102–113]
+| 116–118 [117–118]
+| 106 [106]
+| 109 [109]
+| 102–113 [99–109]
+| 119–120 [117–118]<br />(127–128 [124–125])
+| 106 [106]
+| 129–132 [122–125]
+| 121 [116]
+| [129]<br />([137])
+| ([143])
+|-
+!style="text-align:left"| [[Abgasnorm]] nach<br />EU-Klassifikation
+| Euro 5
+| Euro 6
+| Euro 5
+| Euro 6
+| Euro 5{{FN|(4)|gruppe=dl}}
+| Euro 6
+| Euro 5
+| Euro 6
+| Euro 5
+| Euro 6
+|colspan="2"| Euro 5 / Euro 6
+|-
+!style="text-align:left"| [[Leergewicht]] in kg
+| 1485 [1505]
+| 1495 [1505]
+| 1485 [1505]
+| 1505 [1525]
+| 1490 [1500]
+|colspan="2"| 1495 [1505]
+| 1505 [1525]
+|colspan="2"| 1550 [1565]
+| [1615] (1685)
+| ([1705])
+|-
+!style="text-align:left"| Tankinhalt in l
+|colspan="11"| 57
+|
+|-
+!style="text-align:left"| Quelle
+| <ref name="Technische Daten 316d 318d Lim 2012-03" />
+| <ref name="Technische Daten 316d Lim 2015-03" /><ref name="Technische Daten alle 3er Limousine Touring 2015-05" />
+| <ref name="Technische Daten 316d 318d Lim 2012-03" /><ref name="Technische Daten 318d xDrive Lim 2013-07" />
+| <ref name="Technische Daten alle 3er Limousine Touring 2015-05" />
+| <ref name="Technische Daten 320d ED Lim 2011-11" />
+| <ref name="Technische Daten alle 3er Limousine Touring 2015-05" />
+| <ref name="Technische Daten 320d xDrive Lim 2012-07" /><ref name="Technische Daten 320d Lim 2013-03" />
+| <ref name="Technische Daten alle 3er Limousine Touring 2015-05" />
+| <ref name="Technische Daten 325d Lim 2013-03" />
+| <ref name="Technische Daten 325d Lim 2016-03" /><ref name="Technische Daten alle 3er Limousine Touring 2015-05" />
+| <ref name="Technische Daten 330d Lim 2012-07" /><ref name="Technische Daten 330d xDrive Lim 2013-03" />
+| <ref name="Technische Daten 335d xDrive Lim 2013-07" />
+|}
+
+==== Touring ====
+{| class="wikitable" style="text-align:center"
+|-
+!
+!colspan="2"| 316d ||colspan="2"| 318d ||colspan="2"| 320d Efficient Dynamics Edition ||colspan="2"| 320d ||colspan="2"| 325d || 330d || 335d
+|-
+!style="text-align:left;"| Bauzeitraum
+| 11/2012–03/2015
+| 03/2015–06/2019
+| 11/2012–07/2015
+| 07/2015–06/2019<ref name=":0">{{Internetquelle |url=https://www.press.bmwgroup.com/deutschland/pressDetail.html?title=die-neue-bmw-3er-limousine-der-neue-bmw-3er-touring&outputChannelId=7&id=T0214827DE&left_menu_item=node__4142 |titel=Die neue BMW 3er Limousine. Der neue BMW 3er Touring |werk=www.press.bmwgroup.com |abruf=2016-01-30}}</ref>
+| 04/2013–07/2015
+| 07/2015–06/2019<ref name=":0" />
+| 05/2012–07/2015
+| 07/2015–06/2019<ref name=":0" />
+| 04/2013–03/2016
+| 03/2016–02/2018<ref>{{Internetquelle |url=https://www.press.bmwgroup.com/deutschland/pressDetail.html?title=bmw-modellpflege-ma%25C3%259Fnahmen-zum-fr%25C3%25BChjahr-2016&outputChannelId=7&id=T0249811DE&left_menu_item=node__4143 |titel=BMW Modellpflege-Maßnahmen zum Frühjahr 2016 |werk=www.press.bmwgroup.com |abruf=2016-01-30}}</ref>
+| 05/2012–06/2019
+| 11/2013–06/2019
+|-
+!style="text-align:left"| Motor
+|colspan="12"| [[Dieselmotor]]
+|-
+!style="text-align:left"| Motorbauart
+|colspan="10"| [[Reihenmotor|R4]]
+|colspan="2"| R6
+|-
+!style="text-align:left"| [[Motoraufladung|Aufladung]]
+|colspan="8"| [[Turbolader|Abgas&shy;turbolader]] mit [[Variable-Turbinengeometrie-Lader|verstellbaren Turbinenleitschaufeln]]
+|colspan="2"| Zweistufige Abgas&shy;turbolader&shy;aufladung mit verstellbaren Turbinenleitschaufeln
+| Abgas&shy;turbolader mit verstellbaren Turbinenleitschaufeln
+| Zwei&shy;stufige Abgas&shy;turbolader&shy;aufladung mit verstellbaren Turbinenleitschaufeln
+|-
+!style="text-align:left"| [[Gemischbildung|Gemischaufbereitung]]
+|colspan="12"| [[Common-Rail-Direkteinspritzung]]
+|-
+!style="text-align:left"| Motortyp
+| [[BMW N47|N47D20]]
+| [[BMW B47|B47D20]]
+| N47D20
+| B47D20
+| N47D20
+| B47D20
+| N47D20
+| B47D20
+| N47D20
+| B47D20
+|colspan="2"| [[BMW N57|N57D30]]
+|-
+!style="text-align:left"| [[Hubraum]]
+|colspan="10"| 1995&nbsp;cm³
+|colspan="2"|  2993&nbsp;cm³
+|-
+!style="text-align:left"| max. Leistung<br /> bei 1/min
+|colspan="2"| 85 kW (116&nbsp;PS)/<br />4000
+| 105&nbsp;kW (143&nbsp;PS)/<br />4000
+| 110&nbsp;kW (150&nbsp;PS)/<br />4000
+|colspan="2"| 120&nbsp;kW (163&nbsp;PS)/<br />4000
+| 135&nbsp;kW (184&nbsp;PS)/<br />4000
+| 140&nbsp;kW (190&nbsp;PS)/<br />4000
+| 160&nbsp;kW (218&nbsp;PS)/<br />4400
+| 165&nbsp;kW (224&nbsp;PS)/<br />4400
+| 190&nbsp;kW (258&nbsp;PS)/<br />4000
+| 230&nbsp;kW (313&nbsp;PS)/<br />4400
+|-
+!style="text-align:left"| max. Drehmoment<br /> bei 1/min
+| 260 [[Newtonmeter|Nm]]/<br />1750–2500
+| 270&nbsp;Nm/<br />1250–2750
+| 320&nbsp;Nm/<br />1750–2500
+| 320&nbsp;Nm/<br />1500–3000
+| 380&nbsp;Nm/<br />1750–2750
+| 400&nbsp;Nm/<br />1750–2250
+| 380&nbsp;Nm/<br />1750–2750
+| 400&nbsp;Nm/<br />1750–2500
+| 450&nbsp;Nm/<br />1500–2500
+| 450&nbsp;Nm/<br />1500–3000
+| 560&nbsp;Nm/<br />1500–3000{{FN|(1)|gruppe=dt}}
+| 630&nbsp;Nm/<br />1500–2500
+|-
+!style="text-align:left"| Getriebe, serienmäßig
+|colspan="10"| [[Fahrzeuggetriebe#Manuelle Betätigung|6-Gang-Schaltgetriebe]]
+|colspan="2"| 8-Gang-[[Automatikgetriebe|Automatik&shy;getriebe]]
+|-
+!style="text-align:left"| Getriebe, optional
+|colspan="10"| 8-Gang-Automatik&shy;getriebe
+|colspan="2"| –
+|-
+!style="text-align:left"| Antrieb, serienmäßig
+|colspan="11"| [[Hinterradantrieb]]
+| [[Allradantrieb]] ([[xDrive]])
+|-
+!style="text-align:left"| Antrieb, optional
+|colspan="2"| –
+|colspan="2"| Allradantrieb (xDrive){{FN|(2)|gruppe=dt}}
+|colspan="2"| –
+|colspan="2"| Allradantrieb (xDrive){{FN|(3)|gruppe=dt}}
+|colspan="2"| –
+| Allradantrieb (xDrive)
+| –
+|-
+!style="text-align:left"| Beschleunigung,<br />0–100 km/h in s
+|colspan="2"| 11,2 [11,1]
+| 9,2 [9,2]
+| 8,9 [8,8] (9,2)
+| 8,3 [8,5]
+| 8,2 [8,1]
+| 7,7 [7,6] (7,8 [7,7])
+| 7,6 [7,4] (7,6 [7,6])
+| 6,9 [6,7]
+| 6,7 [6,3]
+| [5,6] ([5,4])
+| ([4,9])
+|-
+!style="text-align:left"| Höchstgeschwindigkeit,<br />km/h
+|colspan="2"| 200 [198]
+| 210 [210]
+| 210 (206)
+|colspan="2"| 222 [222]
+|colspan="2"| 230 [226] (228 [222])
+| 238 [238]
+| 240 [240]
+| [250] ([250])
+| ([250])
+|-
+!style="text-align:left"| Kraftstoffverbrauch,<br /> nach [[Wirtschaftskommission für Europa|ECE]]-Fahrzyklus,<br />kombiniert in l/100&nbsp;km{{FN|(4)|gruppe=dt}}
+| 4,7 [4,5]
+| 4,1–4,6 [4,1–4,6]
+| 4,7 [4,5]
+| 4,3–4,6 [4,1–4,5] (4,7–5,1)
+| 4,3 [4,3]
+| 4,1–4,5 [4,0–4,4]
+| 4,7 [4,6] (4,9 [4,9])
+| 4,3–4,7 [4,1–4,5] (4,7–5,0 [4,5–4,9])
+| 5,1–5,2 [4,8–4,9]
+| 4,9–5,2 [4,7–5,0]
+| [5,1] ([5,4])
+| ([5,6–5,7])
+|-
+!style="text-align:left"| Kohlendioxid-Emission,<br />kombiniert in g/km{{FN|(4)|gruppe=dt}}
+| 119–124
+| 109–120 [109–120]
+| 119–124
+| 112–122 [109–119] (123–133)
+| 112 [112]
+| 107–118 [104–116]
+| 124 [122] (129 [129])
+| 113–123 [109–119] (123–133 [119–129])
+| 134–137 [127–130]
+| 129–137 [123–131]
+| [135] ([142])
+| ([151])
+|-
+!style="text-align:left"| [[Abgasnorm]] nach<br />EU-Klassifikation
+|colspan="1"| Euro 5
+|colspan="1"| Euro 6
+|colspan="1"| Euro 5
+|colspan="1"| Euro 6
+| Euro 5{{FN|(5)|gruppe=dt}}
+| Euro 6
+|colspan="1"| Euro 5
+|colspan="1"| Euro 6
+|colspan="1"| Euro 5
+| Euro 6
+| Euro 5/6
+| Euro 6
+|-
+!style="text-align:left"| Tankinhalt in l
+|colspan="12"| 57
+|-
+!style="text-align:left"| Quelle
+| <ref name="Technische Daten 316d 318d Touring 2012-11" />
+| <ref name="Technische Daten 316d Touring 2015-03" /><ref name="Technische Daten alle 3er Limousine Touring 2015-05" />
+| <ref name="Technische Daten 316d 318d Touring 2012-11" /><ref name="Technische Daten 318d xDrive Touring 2013-07" />
+| <ref name="Technische Daten alle 3er Limousine Touring 2015-05" />
+| <ref name="Technische Daten 3er Touring 320d 330d 2012-07" />
+| <ref name="Technische Daten alle 3er Limousine Touring 2015-05" />
+| <ref name="Technische Daten 3er Touring 320d 330d 2012-07" />
+| <ref name="Technische Daten alle 3er Limousine Touring 2015-05" />
+| <ref name="Technische Daten 325d Touring 2016-03" />
+| <ref name="Technische Daten alle 3er Limousine Touring 2015-05" />
+| <ref name="Technische Daten 3er Touring 320d 330d 2012-07" /><ref name="Technische Daten 330d xdrive englisch" />
+| <ref name="Technische Daten 335d xDrive Touring 2013-11" /><ref name="Technische Daten alle 3er Limousine Touring 2015-05" />
+|}
+
+== Weblinks ==
+
+== Einzelnachweise ==

@@ -56,7 +56,7 @@ describe('parseEngine', () => {
       powerKw: 110,
       fuel: 'diesel'
     })
-    expect(parseEngine('3.5 L V6 268 hp')).toMatchObject({ cylinders: 6, powerKw: 197 })
+    expect(parseEngine('3.5 L V6 268 hp')).toMatchObject({ cylinders: 6, powerKw: 200 })
   })
 
   it('leaves unknown fields null and keeps the raw line', () => {

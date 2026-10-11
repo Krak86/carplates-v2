@@ -1,0 +1,156 @@
+{{Short description|Tenth generation of Honda Civic}}
+{{For|a complete overview of all Honda Civic models|Honda Civic}}
+{{Use British English|date=February 2025}}
+{{Infobox automobile
+| name = Honda Civic<br />Tenth generation
+| image = 2017 Honda Civic SR VTEC 1.0 Front.jpg
+| caption = 2017 Honda Civic hatchback (UK; pre-facelift)
+| manufacturer = [[Honda]]
+| production = 2016–2021
+| model_years = 2016–2021<br />2016–2020 (coupe)
+| assembly = {{ubl|
+  | Japan: [[Yorii, Saitama]]
+  | United States: [[Greensburg, Indiana]] ([[Honda Manufacturing of Indiana|HMIN]])
+  | Canada: [[Alliston, Ontario]] ([[Honda of Canada Manufacturing|HCM]])
+  | United Kingdom: [[Swindon]] ([[Honda UK Manufacturing|HUM]])
+  | Turkey: [[Gebze]] ([[Honda Türkiye]])
+  | China: [[Wuhan]] ([[Dongfeng Honda]])
+  | Thailand: [[Prachinburi]]
+  | Malaysia: [[Alor Gajah|Alor Gajah, Melaka]]
+  | India: [[Greater Noida]] ([[Honda Cars India|HCIL]]) (2019-2020)
+  | Brazil: [[Sumaré]]
+  | Pakistan: [[Lahore]] ([[Honda Atlas Cars|Honda Atlas]])
+}}
+| designer = Jarad Hall (sedan)<ref name="10th gen Civic Sedan PR">{{cite press release |date=16 September 2015 |title=Honda Debuts Dynamic New 10th Generation Civic Sedan for North America: The Most Ambitious Remake of Civic Ever |url=http://hondanews.com/channels/civic/releases/honda-debuts-dynamic-new-10th-generation-civic-sedan-for-north-america-the-most-ambitious-remake-of-civic-ever |location=Los Angeles |work=HondaNews.com |access-date=5 December 2016 |archive-url=https://web.archive.org/web/20190119232355/https://hondanews.com/channels/civic/releases/honda-debuts-dynamic-new-10th-generation-civic-sedan-for-north-america-the-most-ambitious-remake-of-civic-ever |archive-date=19 January 2019 |url-status=dead }}</ref><br />Guy Melville-Brown (coupe)<ref>{{cite web |url=https://www.adandp.media/articles/designing-the-2016-honda-civic-coupe |title=Designing the 2016 Honda Civic Coupe |last=Vasilash |first=Gary S. |date=4 April 2016 |work=Automotive Design & Production |publisher=Gardner Business Media |access-date=5 December 2016}}</ref><br />Toshinobu Minami (hatchback)<ref>{{Cite patent|title=Automobile, toy replica and/or other replicas|pubdate=2017-03-14|country=US|number=D781180|assign=[[Honda Motor Co. Ltd.]]|inventor1-last=Minami|inventor1-first=Toshinobu}}</ref>
+| platform = CCA<ref>{{Cite web |title=Honda gibt mit CR-V Startschuss für Millionenplattform |url=https://www.automobil-produktion.de/hersteller/wirtschaft/honda-baut-5-cr-v-generation-mit-cca-architektur-256.html |access-date=2022-03-30 |website=AUTOMOBIL PRODUKTION Online |language=de}}</ref><ref>{{Cite web |date=2014-07-29 |title=Carmakers bet on big global platforms to cut costs |url=https://www.autonews.com/article/20140804/OEM10/308049988/carmakers-bet-on-big-global-platforms-to-cut-costs |access-date=2022-03-30 |website=Automotive News |language=en}}</ref>
+| class = [[Compact car]] ([[C-segment|C]])
+| body_style = 2-door [[coupe]] (FC3/FC4, North America)<br />4-door [[sedan (automobile)|sedan]] (FC1/FC2/FC5/FC6)<br />5-door [[hatchback]] (FK4/FK7/[[Honda Civic Type R#FK8|FK8]])
+| layout = [[Front-engine, front-wheel-drive]]
+| related = [[Honda Insight#Third generation|Honda Insight (third generation)]]<br />[[Honda CR-V (fifth generation)]]
+| engine = {{ubl
+  | '''[[Petrol engine|Petrol]]:'''
+  | 1.0&nbsp;L ''[[Honda P engine#P10A2|P10A2]]'' [[Straight-three engine|I3]] [[Turbocharger|turbo]]
+  | 1.5&nbsp;L ''[[Honda L engine#L15B7|L15B7]]'' [[Straight-four engine|I4]] turbo
+  | 1.6&nbsp;L ''[[Honda R engine#R16B|R16B]]'' I4
+  | 1.8&nbsp;L ''[[Honda R engine#R18Z1|R18Z1]]'' I4
+  | 2.0&nbsp;L ''[[Honda K engine#K20C|K20C2]]'' I4
+  | 2.0&nbsp;L ''[[Honda K engine#K20C|K20C1]]'' I4 turbo (Type R)
+  | '''[[Diesel engine|Diesel]]:'''
+  | 1.6&nbsp;L [[Honda N engine#N16|''N16'' i-DTEC]] I4 [[Turbodiesel|turbo]]
+  }}
+| transmission = {{ubl
+                 | [[Continuously variable transmission|CVT]]
+                 | 6-speed [[manual transmission|manual]]
+                 | 9-speed [[ZF 9HP transmission|ZF ''9HP'']] automatic}} (diesel)
+| wheelbase = {{convert|2700|mm|in|1|abbr=on}}
+| length = {{ubl
+                 | {{convert|4492|mm|in|1|abbr=on}} (coupe)
+                 | {{convert|4519-4557|mm|in|1|abbr=on}} (hatchback)
+                 | {{convert|4630-4662|mm|in|1|abbr=on}} (sedan)
+                 }}
+| width = {{convert|1799|mm|in|1|abbr=on}}<br />{{convert|1877|mm|in|1|abbr=on}} (Type R)
+| height = {{ubl
+                 | {{convert|1395|mm|in|1|abbr=on}} (coupe)
+                 | {{convert|1429-1435|mm|in|1|abbr=on}} (hatchback)
+                 | {{convert|1416|mm|in|1|abbr=on}} (sedan)
+                 }}
+| weight = {{ubl
+                 | {{convert|1242|-|1310|kg|lb|0|abbr=on|disp=br()}} (coupe)
+                 | {{convert|1277|-|1362|kg|lb|0|abbr=on|disp=br()}} (hatchback)
+                 | {{convert|1244|-|1326|kg|lb|0|abbr=on|disp=br()}} (sedan)
+                 }}
+| predecessor = [[Honda Civic (ninth generation)]]
+| successor = [[Honda Civic (eleventh generation)]]<br />[[Honda Insight#Third generation|Honda Insight (third generation)]] (Japan, sedan)<br />[[Honda Prelude#BF1|Honda Prelude (sixth generation)]] (coupe)
+| model_code = FC/FK
+}}
+{{Honda Civic series}}
+The '''tenth-generation Honda Civic''' '''(FC/FK)''' is a [[compact car]] ([[C-segment]]) manufactured by [[Honda]] from 2015 until 2022, replacing the [[Honda Civic (ninth generation)|ninth-generation Civic]]. It was first released in November 2015 in the North American market, followed by its introduction in Europe and Asia-Pacific in 2016,<ref>{{Cite web|date=2016-09-16|title=This Is The European 2017 Honda Civic Hatchback|url=https://www.carscoops.com/2016/09/this-is-european-2017-honda-civic/|access-date=2021-07-02|website=Carscoops|language=en-US |last1=Halas |first1=John }}</ref> and in Japan in 2017.<ref name="Autoevolution">{{cite web|last=Radu|first=Mihnea|date=July 27, 2017|title=2017 Honda Civic Hatch and Sedan Launched in Japan|url=https://www.autoevolution.com/news/2017-honda-civic-hatch-and-sedan-launched-in-japan-119475.html|access-date=28 July 2017|website=Autoevolution.com}}</ref> This generation marked the unification of the [[Honda Civic|Civic]] range, as Honda ceased making a dedicated version for the European market—a strategy employed since the [[Honda Civic (sixth generation)|sixth-generation]]—in favour of a globally marketed model.<ref>{{Cite web|date=2016-09-07|title=Euro-Spec 2017 Honda Civic Hatch And Sedan, Jazz Spotlight To Premiere In Paris|url=https://www.carscoops.com/2016/09/euro-spec-2017-honda-civic-hatch-and/|access-date=2021-07-02|website=Carscoops|language=en-US |last1=Tsaousis |first1=Andreas }}</ref> As the result, three body styles were introduced with a near-identical design which are [[Sedan (automobile)|sedan]], [[hatchback]], and [[coupe]].
+
+A [[Honda Civic Type R#FK8|Type R version]] based on the hatchback model was released as a prototype model in September 2016, and has been sold from 2017 in several markets, including North America which received the Civic Type R model for the first time.<ref>{{Cite web|last=Resnick|first=Jim|date=2017-04-20|title=First-ever US Honda Civic Type R finally arrives with 306 horsepower|url=https://arstechnica.com/cars/2017/04/first-ever-us-honda-civic-type-r-finally-arrives-with-306-horsepower/|access-date=2021-07-02|website=Ars Technica|language=en-us}}</ref><ref>{{Cite web|last=Duff|first=Mike|date=2016-09-29|title=Honda Civic Type R Prototype: It's Almost Here!|url=https://www.caranddriver.com/news/a15099910/honda-civic-type-r-prototype-photos-and-info-news|access-date=2021-07-02|website=Car and Driver|language=en-US}}</ref>
+
+{{TOC limit|3}}
+
+
+== Overview ==
+
+== Body styles ==
+
+=== Hatchback ===
+
+=== Sedan ===
+
+=== Coupe ===
+
+== Performance models ==
+
+=== Si ===
+
+=== Type R ===
+
+== Facelift ==
+
+== Powertrain ==
+{| class="wikitable"
+|-
+! Engine !! Chassis code !! Horsepower !! Torque
+|-
+| 1.5 L [[Honda L engine#L15B7 VTC Turbo|L15B7]] I4 turbo petrol || FC1 (Sedan)<br />FC3 (Coupe)<br />FK4 (Hatchback) || {{cvt|174|hp|kW|0}} at 6,000 rpm (Standard)<br />{{cvt|205|hp|kW|0}} at 5,700 rpm (Si Sedan and Si Coupe) || {{Convert|162|lbft|Nm|abbr=on}} at 1,700-5,500 rpm (Standard)<br />{{Convert|192|lbft|Nm|abbr=on}} at 2,100-5,000 rpm (Si Sedan and Si Coupe)
+|-
+| 2.0 L [[Honda K engine#K20C|K20C2]] I4 petrol || FC2 (Sedan)<br />FC4 (Coupe) || {{cvt|158|hp|kW|0}} at 6,500 rpm || {{convert|138|lbft|Nm|abbr=on}} at 4,200 rpm
+|-
+|1.6 L [[Honda R engine#R16B|R16B]] I4 petrol
+|FC5 (Sedan)
+|{{cvt|125|hp|kW|0}} at 6,500 rpm
+|{{convert|112|lbft|Nm|abbr=on}} at 4,300 rpm
+|-
+| 1.8 L [[Honda R engine#R18Z1|R18Z1]] I4 petrol || FC6 (Sedan)<br />FK5 (Hatchback) || {{cvt|140|hp|kW|0}} at 6,500 rpm || {{convert|128|lbft|Nm|abbr=on}} at 4,300 rpm
+|-
+| 1.0 L [[Honda P engine#P10A2|P10A2]] I3 turbo petrol || FC7 (Sedan)<br />FC9 (Sedan)<br />FK6 (Hatchback)
+| {{cvt|128|hp|kW|0}} at 5,500 rpm || {{convert|147|lbft|Nm|abbr=on}} at 2,250 rpm
+|-
+| 1.6 L [[Honda N engine#N16|N16A1]] I4 turbo diesel || FC8 (Sedan)<br />FK9 (Hatchback) || {{cvt|118|hp|kW|0}} at 4,000 rpm || {{convert|221|lbft|Nm|abbr=on}} at 2,000 rpm
+|-
+| 1.5 L [[Honda L engine#L15C|L15BA / L15C]] I4 turbo petrol || FK7 (Hatchback) || {{cvt|180|hp|kW|0}} at 5,500 rpm (Manual)
+{{cvt|180|hp|kW|0}} at 6,000 rpm (CVT)
+| {{Convert|177|lbft|Nm|abbr=on}} at 1,900-5,000 rpm (Manual)<br />{{Convert|162|lbft|Nm|abbr=on}} at 1,700-5,500 rpm (CVT)
+|-
+| 2.0 L [[Honda K engine#K20C|K20C1]] I4 turbo petrol || FK8 (Type R Hatchback) || {{cvt|315|hp|kW|0}} at 6,500 rpm || {{convert|295|lbft|Nm|abbr=on}} at 2,500-4,500 rpm
+|}
+
+== Markets ==
+
+=== North America ===
+
+=== Japan ===
+
+=== Europe ===
+
+=== Australia ===
+
+=== China ===
+
+===Egypt===
+
+=== South America ===
+
+=== Southeast Asia ===
+
+==== Indonesia ====
+
+==== Malaysia ====
+
+==== Philippines ====
+
+==== Singapore ====
+
+==== Thailand ====
+
+=== India ===
+
+=== Pakistan ===
+
+== Safety ==
+
+== Awards ==
+
+== References ==

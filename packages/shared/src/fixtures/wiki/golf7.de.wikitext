@@ -1,0 +1,660 @@
+{{Infobox PKW-Modell
+| Marke      = [[Volkswagen]]
+| Modell     = Golf (Typ AU)
+| Bild       = VW Golf 1.4 TSI BlueMotion Technology CUP (VII) – Frontansicht, 15. Juni 2014, Düsseldorf.jpg
+| Bild zeigt = VW Golf VII
+| von        = 2012
+| bis        = 2021
+| Klasse     = [[Kompaktklasse]]
+| Versionen  = [[Kombilimousine]], [[Kombinationskraftwagen|Kombi]]
+| Motoren    = [[Ottomotor]]en:<br />1,0–2,0 Liter<br />(63–265 kW)<br />[[Dieselmotor]]en:<br />1,6–2,0 Liter<br />(66–135 kW)<br />[[Hybridantrieb|Otto-Hybrid]]:<br />1,4 Liter<br />(150 kW)<br />[[Elektromotor]]en:<br />85–100 kW
+| Länge      = 4255–4586
+| Breite     = 1799
+| Höhe       = 1442–1515
+| Radstand   = 2637
+| Gewicht    = 1205–1615
+| Vorgänger  = [[VW Golf VI]]
+| Nachfolger = [[VW Golf VIII]]<br />[[VW ID.3]]
+}}
+{{Infobox Crashtest PKW
+|delta-breite= 8
+|jahr1= 2012
+|beleg1= <ref>{{Internetquelle |url=https://www.euroncap.com/de/results/vw/golf/10955 |titel=Ergebnisse des VW Golf beim Euro-NCAP-Crashtest 2012 |werk=euroncap.com |abruf=2013-04-19}}</ref>
+|ergebnis1= 5 Sterne
+}}
+Der '''VW Golf VII''' (interne Typbezeichnung AU) ist die siebte [[Baureihe]] des [[VW Golf]]. Er kam in [[Deutschland]] im Herbst 2012 auf den Markt.<ref>{{Internetquelle |autor=[[Deutsche Presse-Agentur|dpa]] |url=http://www.handelsblatt.com/unternehmen/industrie/schwacher-automarkt-auch-fuer-vw-werden-die-zeiten-haerter/7179292.html |titel=Schwacher Automarkt: Auch für VW werden die Zeiten härter |werk=[[Handelsblatt]] online |datum=2012-09-25 |offline=1 |archiv-url=https://web.archive.org/web/20120928051532/http://www.handelsblatt.com/unternehmen/industrie/schwacher-automarkt-auch-fuer-vw-werden-die-zeiten-haerter/7179292.html |archiv-datum=2012-09-28 |abruf=2013-04-19}}</ref>
+
+Der Golf VII wurde zum europäischen ''[[Auto des Jahres (Europa)|Auto des Jahres]] 2013'' sowie zum ''[[Auto des Jahres|World Car of the Year]] (WCOTY)'' gewählt und erhielt ''[[Liste der Preisträger „Das Goldene Lenkrad“|Das Goldene Lenkrad]]'' in der Kategorie ''[[Kleinwagen|Klein-]] und [[Kompaktklasse|Kompaktwagen]]''.<ref>{{Internetquelle |url=http://www.axelspringer.de/presse/DAS-GOLDENE-LENKRAD-2013-Die-besten-Autos-des-Jahres-ausgezeichnet_19509901.html |titel=''Das Goldene Lenkrad'' 2013: Die besten Autos des Jahres ausgezeichnet |werk=axelspringer.de |hrsg=[[Axel Springer SE]] |datum=2013-11-12 |abruf=2013-11-18}}</ref>
+Außerdem gewann er die Wahl zum [[Auto des Jahres (Nordamerika)|''Auto des Jahres 2015'' in Nordamerika]].
+
+Im Oktober 2019 präsentierte Volkswagen das Nachfolgemodell [[VW Golf VIII|Golf VIII]]. In Nordamerika wird dieser nur noch als ''GTI'' und ''R'' angeboten. Die Produktion des Golf VII im mexikanischen [[Heroica Puebla de Zaragoza|Puebla]] lief im Januar 2021 aus; GTI und R werden seitdem aus Deutschland in die USA exportiert.<ref name="caranddr-357710">{{Internetquelle |autor=Daniel Golson |url=https://www.caranddriver.com/news/a27357710/volkswagen-golf-discontinued-usa/ |titel=The Volkswagen Golf Hatchback Might Be Killed In the U.S. |werk=caranddriver.com |datum=2019-05-03 |sprache=en |abruf=2020-10-19}}</ref><ref name="welt-202316412">{{Internetquelle |autor=Florian Gehm |url=https://www.welt.de/wirtschaft/article202316412/Volkswagen-Herstellung-des-Golf-8-kehrt-nach-Wolfsburg-zurueck.html |titel=Volkswagen: Herstellung des Golf 8 kehrt nach Wolfsburg zurück |werk=[[Die Welt#Online-Ausgabe|welt.de]] |datum=2019-10-22 |abruf=2020-10-19}}</ref><ref name="motor1-468647">{{Internetquelle |autor=Anthony Alaniz |url=https://www.motor1.com/news/468647/volkswagen-golf-ends-us-production/ |titel=That's It, Volkswagen Golf Officially Ends Production For US Market |werk=motor1.com |datum=2021-01-20 |sprache=en |abruf=2021-01-21}}</ref> Vom Golf VIII gibt es keine batterieelektrische Version mehr, dafür baut Volkswagen seit November 2019 den [[VW ID.3|ID.3]].<ref name="ecomento-909063">{{Internetquelle |url=https://ecomento.de/2019/09/06/vw-elektroauto-id-3-produktion-ab-november-im-werk-zwickau/ |titel=VW-Elektroauto ID.3 wird ab November produziert |werk=ecomento.de |datum=2019-09-06 |abruf=2021-01-29}}</ref>
+
+
+== Modellgeschichte ==
+
+=== Allgemeines ===
+
+=== Produktionsdaten ===
+
+== Ausstattung ==
+
+=== Ausstattungslinien ===
+
+=== Fahrerassistenzsysteme ===
+
+== Sondermodelle ==
+
+== Technische Daten ==
+
+=== Ottomotoren ===
+{| class="wikitable" style="text-align:center"
+|-
+! !!colspan="4" | 1.0 [[TSI (Motorentechnik)|TSI]] !!colspan="3"| 1.2 [[TSI (Motorentechnik)|TSI]] || 1.4 [[Erdgasfahrzeug|TGI]] !!colspan="2"| 1.4 TS<span style="color:red">I</span> !!colspan="2"| 1.4 T<span style="color:red">SI</span> ([[Zylinderabschaltung|ACT]]) !! 1.5 TGI !! 1.5 TSI (ACT) !! 1.5 T<span style="color:red">SI</span> (ACT) !! 1.8 TS<span style="color:red">I</span>{{FN|(2)}} !! 1.8 <span style="color:red">TSI</span>{{FN|(3)}}
+|-
+! style="text-align:left"| Bauzeitraum
+| 03/2017–12/2019 || 12/2016–08/2018 || 04/2015–12/2016 || 10/2018–05/2020 || 08/2012–03/2017 || 08/2012–04/2014 || 04/2014–03/2017 || 04/2013–05/2018 || 08/2012–04/2014 || 04/2014–03/2018 || 08/2012–04/2014 || 04/2014–06/2017 || 01/2019–05/2020 || 07/2017–05/2020 || 03/2017–05/2020 || 06/2014–2019 || 04/2015–05/2018
+|-
+! style="text-align:left"| Motorart
+|colspan="17"| [[Ottomotor]]
+|-
+! style="text-align:left"| Motortyp
+|colspan="15"| [[Reihenmotor]], [[Benzindirekteinspritzung]], [[Zahnriemen]]
+|colspan="2"| [[Reihenmotor]], [[Benzindirekteinspritzung]]
+|-
+! style="text-align:left"| Motorbaureihe
+|colspan="12"| [[VW EA211]]
+|colspan="3"| [[VW EA211 evo]]
+|colspan="2"| [[VW EA888]]
+|-
+! style="text-align:left"| [[Motorkennbuchstaben]]
+| CHZK || CHZC || CHZD || DKRF || CJZB || CJZA || CYVB || CPWA || CMBA, CPVA || CZCA || CHPA, (CPTA) || CZDA, (CZEA) || DHFA || DACA || DADA, DPCA || CXB || CJSB
+|-
+! style="text-align:left"| [[Motoraufladung]]
+|colspan="12"| [[Turbolader]]
+|colspan="2"| [[Variable-Turbinengeometrie-Lader|VTG-Turbolader]]
+|colspan="3"| [[Turbolader]]
+|-
+! style="text-align:left"| Zylinder/Ventile
+|colspan="4"| 3/12 ||colspan="13"| 4/16
+|-
+! style="text-align:left"| Hubraum
+|colspan="4"| 999&nbsp;cm³ ||colspan="3"| 1197&nbsp;cm³ ||colspan="5"| 1395&nbsp;cm³ ||colspan="3"| 1498&nbsp;cm³ ||colspan="2"| 1798&nbsp;cm³
+|-
+! style="text-align:left"| max. Leistung<br />bei min<sup>−1</sup>
+| 63&nbsp;kW (85&nbsp;PS)<br />/5000–5500
+|style="width:8em;"| 81&nbsp;kW (110&nbsp;PS)<br />/5000–5500
+|colspan="2" | 85&nbsp;kW (115&nbsp;PS)<br />/5000–5500
+| 63&nbsp;kW (85&nbsp;PS)<br />/4300–5300
+| 77&nbsp;kW (105&nbsp;PS)<br />/5000
+|style="width:7em;"| 81&nbsp;kW (110&nbsp;PS)<br />/4600–5600
+|style="width:7em;"| 81&nbsp;kW (110&nbsp;PS)<br />/4800–6000
+|style="width:7em;"| 90&nbsp;kW (122&nbsp;PS)<br />/5000
+|style="width:7em;"| 92&nbsp;kW (125&nbsp;PS)<br />/5000–6000
+|style="width:7em;"| 103&nbsp;kW (140&nbsp;PS)<br />/4500–6000
+|style="width:7em;"| 110&nbsp;kW (150&nbsp;PS)<br />/5000–6000
+|colspan="2"| 96&nbsp;kW (130&nbsp;PS)<br />/5000–6000
+|style="width:7em;"| 110&nbsp;kW (150&nbsp;PS)<br />/5000–6000
+| 126&nbsp;kW (172&nbsp;PS)<br />/4800–6200
+| 132&nbsp;kW (180&nbsp;PS)<br />/4500–6200
+|-
+! style="text-align:left"| max. Drehmoment<br />bei min<sup>−1</sup>
+| 175&nbsp;Nm<br />/2000–3000
+|colspan="3"| 200&nbsp;Nm<br />/2000–3500
+| 160&nbsp;Nm<br />/1400–3500
+| 175&nbsp;Nm<br />/1400–4100
+| 175&nbsp;Nm<br />/1400–4000
+| 200&nbsp;Nm<br />/1500–3500
+|colspan="2"| 200&nbsp;Nm<br />/1400–4000
+|colspan="2"| 250&nbsp;Nm<br />/1500–3500
+|colspan="2"| 200&nbsp;Nm<br />/1400–4000
+| 250&nbsp;Nm<br />/1500–3500
+| 270&nbsp;Nm<br />/1600–4200
+| 280&nbsp;Nm<br />/1350–4500
+|-
+! style="text-align:left"| Antriebsart, serienmäßig
+|colspan="16"| [[Frontantrieb|Vorderradantrieb]] || Allradantrieb ([[Syncro|4Motion]])
+|-
+! style="text-align:left"| Antriebsart, optional
+|colspan="17"| –
+|-
+! style="text-align:left"| Getriebeart, serienmäßig
+| 5-Gang-Schaltgetriebe ||colspan="3"| 6-Gang-Schaltgetriebe || 5-Gang-Schaltgetriebe ||colspan="10"| 6-Gang-Schaltgetriebe || 5-Gang-Schaltgetriebe || 6-Gang-DSG (DQ250)
+|-
+! style="text-align:left"| Getriebeart, optional
+| – ||colspan="3"| [[Doppelkupplungsgetriebe|7-Gang-DSG]] (DQ200) ||colspan="11"| [[Doppelkupplungsgetriebe|7-Gang-DSG (DQ200)]] || 6-Gang-[[Automatikgetriebe]] || –
+|-
+! style="text-align:left"| Leergewicht
+| 1206&nbsp;kg || 1216–1236&nbsp;kg || 1232&nbsp;kg || 1245&nbsp;kg || 1205&nbsp;kg || 1210–1229&nbsp;kg || 1210–1229&nbsp;kg ||1382–1395&nbsp;kg || 1225–1249&nbsp;kg || 1225–1249&nbsp;kg || 1268–1290&nbsp;kg || 1268–1290&nbsp;kg || 1350–1370 kg || 1280–1322&nbsp;kg || 1294–1317&nbsp;kg || 1342&nbsp;kg || 1540&nbsp;kg
+|-
+! style="text-align:left"| maximale Zuladung
+| 589&nbsp;kg || 412–579&nbsp;kg || 573&nbsp;kg || 515&nbsp;kg || 590&nbsp;kg || 576–585&nbsp;kg || 595–596&nbsp;kg || 540–543&nbsp;kg || 570–576&nbsp;kg || 576–580&nbsp;kg || 585–587&nbsp;kg || 585–587&nbsp;kg || 473–595 kg || 418–575 kg || 413–568&nbsp;kg || 491&nbsp;kg || 575&nbsp;kg
+|-
+! style="text-align:left"| Beschleunigung<br />0–100&nbsp;km/h
+| 11,9 s
+| 9,9 s
+| 9,7 s
+| 9,8 s
+| 11,9 s
+| 10,2 s
+| 9,2 s
+| 10,9 s
+| 9,3 s
+| 9,1 s
+| 8,4 s
+| 8,2 s
+| 9,6 s
+| 9,1 s
+| 8,3 s
+| 7,6 s
+| 7,8 s
+|-
+! style="text-align:left"| Höchstgeschwindigkeit
+| 180&nbsp;km/h
+| 196&nbsp;km/h
+| 204&nbsp;km/h
+| 198&nbsp;km/h
+| 179&nbsp;km/h
+| 192&nbsp;km/h
+| 195&nbsp;km/h
+| 194&nbsp;km/h
+| 203&nbsp;km/h
+| 204&nbsp;km/h
+| 212&nbsp;km/h
+| 216&nbsp;km/h
+| 206&nbsp;km/h
+| 210&nbsp;km/h
+| 216&nbsp;km/h
+| 209&nbsp;km/h
+| 217&nbsp;km/h
+|-
+! style="text-align:left"| Kraftstoffverbrauch<br />auf&nbsp;100&nbsp;km,&nbsp;kombiniert
+| 4,8–4,9 l Super
+| 4,7–4,9 l Super
+| 4,3 l Super
+| 4,8–5,4 l Super
+| 4,9 l Super
+| 4,8–4,9 l Super
+| 4,9 l Super
+| 3,4–3,5&nbsp;kg Erdgas (5,1–5,3 l Super)
+|colspan="2"| 5,0–5,2 l Super
+| 4,7–5,2 l Super
+| 5,0–5,2 l Super
+| 3,5–3,6&nbsp;kg Erdgas
+| 4,8 l Super
+| 4,9–5,0 l Super
+| 7,8 l Super Plus
+| 6,5–6,6 l Super
+|-
+! style="text-align:left"| [[CO2|CO<sub>2</sub>]]-Emission, kombiniert
+| 108–111&nbsp;g/km
+| 109–112&nbsp;g/km
+| 99&nbsp;g/km
+| 132&nbsp;g/km
+| 113&nbsp;g/km
+| 112–114&nbsp;g/km
+| 114&nbsp;g/km
+| 92–94&nbsp;g/km<br />(119–124&nbsp;g/km)
+|colspan="2"| 116–120&nbsp;g/km
+| 109–119&nbsp;g/km
+| 116–119&nbsp;g/km
+| 95–98&nbsp;g/km
+| 110&nbsp;g/km
+| 112–114&nbsp;g/km
+| k. A.
+| 153–155&nbsp;g/km
+|-
+! style="text-align:left"| Abgasnorm nach<br />EU-Klassifikation
+|colspan="3"| Euro 6 || Euro 6d-TEMP || Euro 5/6 
+| colspan="3" |Euro 6|| Euro 5 || Euro 6 || Euro 5{{FN|(1)}} ||colspan="4"| Euro 6 || – || Euro 6
+|-
+! style="text-align:left"| In Deutschland erhobene Kfz-Steuer pro Kalenderjahr
+| 46 Euro
+| 46–54 Euro
+| 36 Euro
+| 94 Euro
+| 60 Euro
+| 58–68 Euro
+| 58 Euro
+| 28–34 Euro
+| 70–86 Euro
+| 70–92 Euro
+| 56–80 Euro
+| 56–90 Euro
+| 64–74 Euro
+| 118 Euro
+| 72–142 Euro
+|}
+
+=== Ottomotoren über 147 kW (200 PS) ===
+{| class="wikitable" style="text-align:center;"
+|-
+! !!colspan="2"| GTI !!colspan="2"| GTI „Performance“ !! GTI „Clubsport“ !! GTI „Clubsport&nbsp;S“&nbsp;{{FN|(4)}} !! GTI TCR !!colspan="3"| [[Volkswagen R|R]] !! R360S {{FN|(6)}}
+|-
+! style="text-align:left"| Bauzeitraum
+| 03/2013–02/2017 || 02/2017–05/2018 || 03/2013–02/2017 || 02/2017–12/2019 || 01/2016–02/2017 || 09/2016–02/2017 || 01/2019–12/2019 || 11/2013–02/2017 || 12/2018–02/2020 || 02/2017–08/2018 || 09/2016–02/2017
+|-
+! style="text-align:left"| Motorart
+|colspan="11"| [[Ottomotor]]
+|-
+! style="text-align:left"| Motortyp
+|colspan="11"| [[Reihenmotor]], [[Benzindirekteinspritzung]]
+|-
+! style="text-align:left"| Motorbaureihe
+|colspan="11"| [[VW EA888|EA888]] 3. Generation
+|-
+! style="text-align:left"| Motorkennbuchstaben
+| CHHB ||colspan="2"| CHHA || DLBA, DKTB || CJXE || CJXG || DNUC || CJXC || DNUE || CJXG, DJHA || CJXC
+|-
+! style="text-align:left"| [[Motoraufladung]]
+|colspan="11"| [[Turbolader]]
+|-
+! style="text-align:left"| Zylinder/Ventile
+|colspan="11"| 4/16
+|-
+! style="text-align:left"| Hubraum
+|colspan="11"| 1984&nbsp;cm³
+|-
+! style="text-align:left"| max. Leistung<br />bei min<sup>−1</sup>
+|style="width:12em"| 162&nbsp;kW (220&nbsp;PS)<br />/4500–6200
+|style="width:12em" colspan="2"| 169&nbsp;kW (230&nbsp;PS)<br />/4700–6200
+|style="width:12em"| 180&nbsp;kW (245&nbsp;PS)<br />/5000–6200
+|style="width:12em"| 195&nbsp;kW (265&nbsp;PS){{FN|(5)}}<br />/5350–6600
+|style="width:12em"| 228&nbsp;kW (310&nbsp;PS)<br />/5800–6500
+|style="width:12em"| 213&nbsp;kW (290&nbsp;PS)<br />/5000–6800
+|style="width:12em" colspan="2"| 221&nbsp;kW (300&nbsp;PS)<br />/5500–6200
+|style="width:12em"| 228&nbsp;kW (310&nbsp;PS)<br />/5500–6500
+|style="width:12em"| 265&nbsp;kW (360&nbsp;PS)<br />/5500–6200
+|-
+! style="text-align:left"| max. Drehmoment<br />bei min<sup>−1</sup>
+| 350&nbsp;Nm<br />/1500–4400
+|colspan="2"| 350&nbsp;Nm<br />/1500–4600
+| 370&nbsp;Nm<br />/1600–4300
+| 350&nbsp;Nm{{FN|(5)}}<br />/1700–5300
+| 380&nbsp;Nm<br />/1850–5700
+| 380&nbsp;Nm<br />/1600–4300
+| 380&nbsp;Nm<br />/1800–5500
+| 400&nbsp;Nm<br />/2000–5200
+| 380 Nm 
+(Schaltgetriebe)
+400&nbsp;Nm
+
+(DSG)<br />/2000–5400
+| 460&nbsp;Nm<br />/1800–5500
+|-
+! style="text-align:left"| Antriebsart, serienmäßig
+|colspan="7"| [[Frontantrieb|Vorderradantrieb]] ||colspan="4"| Allradantrieb ([[Syncro|4Motion]])
+|-
+! style="text-align:left"| Antriebsart, optional
+|colspan="11"| –
+|-
+! style="text-align:left"| Getriebeart, serienmäßig
+|colspan="6"| 6-Gang-Schaltgetriebe
+| 7-Gang-DSG (DQ381)
+| 6-Gang-Schaltgetriebe
+| 7-Gang-DSG (DQ381)
+|colspan="2"| 6-Gang-Schaltgetriebe
+|-
+! style="text-align:left"| Getriebeart, optional
+|colspan="3"| 6-Gang-DSG (DQ250)
+| 7-Gang-DSG (DQ381)
+| 6-Gang-DSG (DQ250)
+|colspan="2"| –
+| 6-Gang-DSG (DQ250)
+| –
+| 7-Gang-DSG (DQ381)
+| 6-Gang-DSG (DQ250)
+|-
+! style="text-align:left"| Leergewicht
+| 1351–1370&nbsp;kg || 1364–1386&nbsp;kg || 1382–1402&nbsp;kg || 1387&nbsp;kg|| 1375–1395&nbsp;kg || 1360&nbsp;kg || 1430&nbsp;kg || 1476–1600&nbsp;kg || 1525&nbsp;kg || 1483–1505&nbsp;kg || keine Angaben
+|-
+! style="text-align:left"| maximale Zuladung
+| 544–545&nbsp;kg || 559–561&nbsp;kg || 543&nbsp;kg || 424–548&nbsp;kg || 429–550&nbsp;kg || 495&nbsp;kg || 416–545&nbsp;kg || 559&nbsp;kg || 485–520&nbsp;kg || 552–560&nbsp;kg || keine Angaben
+|-
+! style="text-align:left"| Beschleunigung<br />0–100&nbsp;km/h:
+| 6,5 s
+|colspan="2"| 6,4 s
+| 6,2 s
+| 6,3 s<ref>{{Internetquelle |url=http://www.auto-motor-und-sport.de/news/vw-golf-gti-clubsport-daten-preise-sitzprobe-8221278.html |titel=VW Golf GTI Clubsport |hrsg=auto-motor-und-sport |datum=2016-03-18 |abruf=2017-07-19}}</ref>
+| 5,8 s
+| 5,6 s
+| 4,9–5,1 s{{FN|(7)}}
+| 4,7–4,9 s
+| 4,6–5,1 s{{FN|(8)}}
+| 4,7 s
+|-
+! style="text-align:left"| Höchstgeschwindigkeit
+| 244–246&nbsp;km/h
+|colspan="2"| 248–250&nbsp;km/h
+|colspan="2"| 250&nbsp;km/h
+| 265&nbsp;km/h
+| 250&nbsp;km/h{{FN|(9)}}
+| 250&nbsp;km/h
+| 250&nbsp;km/h{{FN|(10)}}
+| 250&nbsp;km/h{{FN|(11)}}
+| 265&nbsp;km/h
+|-
+! style="text-align:left"| Kraftstoffverbrauch<br />auf&nbsp;100&nbsp;km,&nbsp;kombiniert
+| 6,0–6,4 l Super
+| 6,3–6,4 l Super
+| 6,0–6,4 l Super
+| 6,3–6,6 l Super
+| 6,9–7,0 l Super Plus
+| 7,4 l Super Plus
+| 6,7 l Super Plus
+| 6,9–7,1 l Super Plus
+| 7,0–7,1 l Super Plus
+| 7,0–7,9 l Super Plus
+| keine Angaben
+|-
+! style="text-align:left"| [[CO2|CO<sub>2</sub>]]-Emission, kombiniert
+| 139–148&nbsp;g/km
+| 145–148&nbsp;g/km
+| 139–149&nbsp;g/km
+| 167&nbsp;g/km
+| 158–162&nbsp;g/km
+| 172&nbsp;g/km
+| 151&nbsp;g/km
+| 159–165&nbsp;g/km
+| 158–191&nbsp;g/km
+| 160–180&nbsp;g/km
+| keine Angaben
+|-
+! style="text-align:left"| Abgasnorm nach<br />EU-Klassifikation
+|colspan="11"| Euro 6
+|-
+! style="text-align:left"| In Deutschland erhobene Kfz-Steuer pro Kalenderjahr
+|colspan="2"| 140–146 Euro
+| 144–146 Euro
+| 138–192 Euro
+|colspan="2"| 166–194 Euro
+| 198–202 Euro
+|colspan="2"| 180–236 Euro
+| 164–204 Euro
+|}
+
+=== Dieselmotoren ===
+{| class="wikitable" style="text-align:center"
+|-
+! !! 1.6 [[TDI-Motor|TDI]]{{FN|(12)}}
+! colspan="3"| 1.6 TD<span style="color:red">I</span>
+! colspan="2"| 2.0 TDI
+! 2.0 TDI (Alltrack)
+! GTD
+|-
+! style="text-align:left"| Bauzeitraum
+| 04/2013–05/2020
+| 08/2012–04/2014
+| 06/2013–04/2017
+| 04/2017–05/2020
+| 08/2012–04/2014
+| 04/2014–05/2020
+| 11/2014–02/2020
+| 03/2013–02/2019
+|-
+! style="text-align:left"| Motorart
+|colspan="8"| [[Dieselmotor]]
+|-
+! style="text-align:left"| Motortyp
+|colspan="8"| Reihenbauart, [[Common-Rail-Einspritzung]], [[Zahnriemen]]
+|-
+! style="text-align:left"| Motorbaureihe
+|colspan="8"| [[VW EA288]]
+|-
+! style="text-align:left"| Motorkennbuchstaben
+| CRKA, CLHB || CLHA || CRKB, CXXB || DDYA, DGTE || CRBC, CRLB, (CRBB{{FN|(12)}}) || CRMB, DCYA, DEJA, CRLB ||colspan="2"| CUNA, DGCA, DJGA
+|-
+! style="text-align:left"| [[Motoraufladung]]
+|colspan="8"| [[Turbolader]]
+|-
+! style="text-align:left"| Zylinder/Ventile
+|colspan="8"| 4/16
+|-
+! style="text-align:left"| Hubraum
+|colspan="4"| 1598&nbsp;cm³ ||colspan="4"| 1968&nbsp;cm³
+|-
+! style="text-align:left"| max. Leistung bei min<sup>−1</sup>
+|style="width:12em"| 66&nbsp;kW (90&nbsp;PS)<br />/2750–4800
+|style="width:12em"| 77&nbsp;kW (105&nbsp;PS)<br />/3000–4000
+|style="width:12em"| 81&nbsp;kW (110&nbsp;PS)<br />/3200–4000
+|style="width:12em"| 85&nbsp;kW (115&nbsp;PS)<br />/3250–4000
+|colspan="2" style="width:12em"| 110&nbsp;kW (150&nbsp;PS){{FN|(14)}}<br />/3500–4000
+|style="width:12em" colspan="2" | 135&nbsp;kW (184&nbsp;PS)<br />/3500–4000
+|-
+! style="text-align:left"| max. Drehmoment bei min<sup>−1</sup>
+| 230 Nm/1400–2700
+| 250 Nm/1500–2750
+| 250 Nm/1500–3000
+| 250 Nm/1500–3200
+| 320 Nm/1750–3000{{FN|(17)}}
+| 340 Nm/1750–3000
+|colspan="2"| 380 Nm/1750–3250
+|-
+! style="text-align:left"| Antriebsart, serienmäßig
+|colspan="6"| [[Frontantrieb|Vorderradantrieb]]
+| Allradantrieb
+| Vorderradantrieb
+|-
+! style="text-align:left"| Antriebsart, optional
+| –
+| [[Syncro|Allradantrieb]] (4Motion){{FN|(15)}}
+| Allradantrieb (4Motion) {{FN|(18)}}
+| –
+|colspan="2"| Allradantrieb (4Motion){{FN|(15)}}
+| –
+| –
+|-
+! style="text-align:left"| Getriebeart, serienmäßig
+| 5-Gang-Schaltgetriebe
+| 5-Gang-Schaltgetriebe/<br />6-Gang-Schaltgetriebe{{FN|(13)}}
+| 5-Gang-Schaltgetriebe/<br />6-Gang-Schaltgetriebe{{FN|(18)}}
+|colspan="1"| 5-Gang-Schaltgetriebe
+|colspan="4"| 6-Gang-Schaltgetriebe
+|-
+! style="text-align:left"| Getriebeart, optional
+| –
+|colspan="3"| [[Doppelkupplungsgetriebe|7-Gang-DSG]] (DQ200)
+|colspan="4"| 6-Gang-DSG (bis 12/2016) (DQ250)<br />7-Gang-DSG (ab 12/2016) (DQ381)
+|-
+! style="text-align:left"| Leergewicht
+| 1280&nbsp;kg || 1295–1410&nbsp;kg || 1265–1395&nbsp;kg<br />[1432&nbsp;kg] || 1301–1395&nbsp;kg|| colspan="2" | 1354–1449&nbsp;kg || 1584&nbsp;kg || 1377–1395&nbsp;kg
+|-
+! style="text-align:left"| maximale Zuladung
+| 575&nbsp;kg || 572–585&nbsp;kg || 409<ref>{{Internetquelle |url=https://www.autokosten.net/vw/golf-vii-variant/golf-variant-1-6-tdi-bluemotion/golf-vii-variant/technische-daten |titel=Technische Daten VW Golf Variant 1.6 TDI BlueMotion Datenblatt |abruf=2021-03-12}}</ref> –576&nbsp;kg || ||colspan="2"| 566–581&nbsp;kg ||colspan="2"| 548–560&nbsp;kg
+|-
+! style="text-align:left"| Beschleunigung, 0–100&nbsp;km/h
+| 11,9 s
+| 10,5–11,7 s
+| 10,5–11 s<br />[11,3 s]
+| 10,2 s<br />(10,5 s)
+|colspan="2"| 8,6 s
+| 7,8 s
+| 7,5 s
+|-
+! style="text-align:left"| Höchstgeschwindigkeit
+| 185&nbsp;km/h
+| 187–192&nbsp;km/h
+| 195–200&nbsp;km/h<br />[191&nbsp;km/h]
+| 198&nbsp;km/h<br />(198&nbsp;km/h)
+|colspan="2"| 216&nbsp;km/h<br />[211&nbsp;km/h]
+| 230&nbsp;km/h
+| 228–230&nbsp;km/h
+|-
+! style="text-align:left"| Kraftstoffverbrauch<br />auf&nbsp;100&nbsp;km,&nbsp;kombiniert
+| 3,8 l Diesel
+| 3,8–4,5 l Diesel
+| 3,2–3,9{{FN|(19)}} l Diesel<br />[4,5 l Diesel]
+| 4,1–4,2&nbsp;l<br />(3,9–4,0 l Diesel)
+|colspan="2"| 4,1–4,7 l Diesel
+| 4,5–4,9 l Diesel
+| 4,2–4,5 l Diesel
+|-
+! style="text-align:left"| [[CO2|CO<sub>2</sub>]]-Emission, kombiniert
+| 98&nbsp;g/km
+| 99–119&nbsp;g/km
+| 82–102&nbsp;g/km<br />[119&nbsp;g/km]
+| 106–109&nbsp;g/km<br />(102–105&nbsp;g/km)
+|colspan="2"| 106–122&nbsp;g/km
+| 129&nbsp;g/km
+| 119–126&nbsp;g/km
+|-
+! style="text-align:left"| Abgasnorm nach EU-Klassifikation
+|colspan="2"| Euro 5
+| Euro 5/Euro 6{{FN|(16)}}
+| Euro 6
+| Euro 5/Euro 6{{FN|(16)}}
+|colspan="3"| Euro 6
+|-
+! style="text-align:left"| In Deutschland erhobene Kfz-Steuer pro Kalenderjahr
+| 160 Euro
+| 160–200 Euro
+| 152–222 Euro
+| 166–250 Euro
+| 212–238 Euro
+| 244 Euro
+| 258 Euro
+| 218–289 Euro
+|}
+
+=== GTE ===
+{| class="wikitable" style="text-align:center"
+|-
+! !!style="width:12em"| GTE
+|-
+! style="text-align:left"| Bauzeitraum
+| 08/2014–03/2018<br />08/2019–05/2020
+|-
+! style="text-align:left"| Motorbaureihe
+| [[VW EA211]]
+|-
+! style="text-align:left"| Motorkennbuchstaben
+| CUK/CUKB
+|-
+! style="text-align:left"| Motorart
+| [[Hybridantrieb|Ottomotor + Elektromotor]]
+|-
+! style="text-align:left"| Zylinder/Ventile
+| 4/16
+|-
+! style="text-align:left"| Hubraum
+| 1395&nbsp;cm³
+|-
+! style="text-align:left"| max. Leistung (Verbrennungsmotor)
+| 110&nbsp;kW<br />(150&nbsp;PS) bei 5000–6000/min
+|-
+! style="text-align:left"|max. Drehmoment (Verbrennungsmotor)
+| 250 Nm bei 1500–3500/min
+|-
+! style="text-align:left"| max. Leistung (Elektromotor)
+| 75&nbsp;kW<br />(102&nbsp;PS)
+|-
+! style="text-align:left"| max. Drehmoment (Elektromotor)
+| 330 Nm
+|-
+! style="text-align:left"| max. Leistung (Systemleistung)
+| 150&nbsp;kW<br />(204&nbsp;PS)
+|-
+! style="text-align:left"| max. Drehmoment (Systemleistung)
+| 350 Nm
+|-
+! style="text-align:left"| Antriebsart
+| [[Vorderradantrieb]]
+|-
+! style="text-align:left"| Getriebeart, serienmäßig
+| 6-Gang-DSG (DQ400)
+|-
+! style="text-align:left"| Beschleunigung, 0–100&nbsp;km/h
+| 7,6 s
+|-
+! style="text-align:left"| Höchstgeschwindigkeit
+| 217&nbsp;km/h (kurzzeitig 222&nbsp;km/h mit „Boost“)<br /> elektrisch 130&nbsp;km/h
+|-
+! style="text-align:left"| Leergewicht
+| 1599 – 1615&nbsp;kg
+|-
+! style="text-align:left"| Kraftstoffverbrauch<br />auf&nbsp;100&nbsp;km,&nbsp;kombiniert
+| 1,6 – 1,8 l Super<br />WLTP: 1,9 – 2,1 l Super
+11,4 – 12 kWh<br />WLTP: 12,1 – 12,7 kWh
+|-
+! style="text-align:left"| Akkukapazität
+| 8,7 kWh (effektiv: 7,01 kWh)
+|-
+! style="text-align:left"| Elektrische Reichweite
+| bis zu 50&nbsp;km
+|-
+! style="text-align:left"| Ladezeiten: Ladedauer AC 2,3&nbsp;kW 100 % (Schuko)
+Ladedauer AC 3,6&nbsp;kW 100 %
+| 3 h 45 min
+2 h 15 min
+|-
+! style="text-align:left"| In Deutschland erhobene Kfz-Steuer pro Kalenderjahr
+| 28 Euro
+|}
+
+== e-Golf ==
+
+=== 2014er Modell ===
+
+=== 2017er Modell ===
+
+=== Technische Daten ===
+{| class="wikitable" style="text-align:center"
+! !!colspan="2"| e-Golf
+|-
+! style="text-align:left"| Bauzeitraum
+| 02/2014–02/2017
+| 02/2017–12/2020
+|-
+! style="text-align:left"| Motorbaureihe
+|colspan="2"| [[VW EAQ270]]<ref>{{Internetquelle |url=http://de.tw-motor.net/news/volkswagen-s-new-energy-platform-will-be-added-19330551.html |titel=Die neue Energieplattform von Volkswagen wird hinzugefügt, und der vierte Motor wird in Massenproduktion hergestellt. |abruf=2020-03-22}}</ref>
+|-
+! style="text-align:left"| Motorart
+|colspan="2"| Permanentmagneterregter Synchronelektromotor
+|-
+! style="text-align:left"| max. Leistung (Elektromotor)
+| 85&nbsp;kW (115&nbsp;PS)<br />/3000–12000/min
+| 100&nbsp;kW (136&nbsp;PS)<br />/3300–12000/min
+|-
+! style="text-align:left"| max. Drehmoment
+| 270 Nm/0–3000/min
+| 290 Nm/0–3300/min
+|-
+! style="text-align:left"| Getriebeart, serienmäßig
+|colspan="2"| 1-Gang-Stirnradgetriebe
+|-
+! style="text-align:left"| Beschleunigung, 0–100&nbsp;km/h
+| 10,4 s
+| 9,6 s
+|-
+! style="text-align:left"| Höchstgeschwindigkeit
+| 140&nbsp;km/h
+| 150&nbsp;km/h
+|-
+! style="text-align:left"| Leergewicht
+| 1585&nbsp;kg
+| 1615&nbsp;kg
+|-
+! style="text-align:left"| Stromverbrauch auf&nbsp;100&nbsp;km,&nbsp;kombiniert
+|colspan="2"| 12,7 kWh
+|-
+! style="text-align:left"| Reichweite
+| NEFZ: 190&nbsp;km<br /><br />EPA: 134&nbsp;km
+| NEFZ: 300&nbsp;km<ref name="PushEVs">{{Internetquelle |url=https://pushevs.com/electric-car-range-efficiency-nedc/ |titel=electric car range at pushevs.com |abruf=2019-05-22}}</ref><br />WLTP: 231&nbsp;km<ref>{{Internetquelle |url=https://www.volkswagen.de/de/models/e-golf.html/ |titel=e-golf at volkswagen.de |abruf=2019-05-22}}</ref><br />EPA: 201&nbsp;km<ref name="PushEVs" />
+|-
+! style="text-align:left"| Akkukapazität (brutto)
+| 24,2 kWh
+| 35,8 kWh
+|-
+! style="text-align:left"| Akkukapazität (netto) lt. Zulassungsbescheinigung
+| 21,1 kWh
+| 31,5 kWh
+|-
+! style="text-align:left"| Ladedauer AC 2,3&nbsp;kW 100 % (Schuko)<br />Ladedauer AC 3,6&nbsp;kW 100 % ([[IEC 62196 Typ 2|Typ 2]])<br />Ladedauer AC 7,2&nbsp;kW 100 % ([[IEC 62196 Typ 2|Typ 2]])<br />Ladedauer DC bis 80 % ([[Combined Charging System|CCS]])
+| 13&nbsp;h<br />8&nbsp;h<br />—<br />0,5&nbsp;h
+| 17&nbsp;h<br />10,5&nbsp;h<br />5,33&nbsp;h<br />0,75&nbsp;h
+|}
+
+=== Zulassungszahlen in Deutschland ===
+
+== Einzelnachweise ==
+
+== Weblinks ==

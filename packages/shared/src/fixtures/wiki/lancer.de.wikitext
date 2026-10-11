@@ -1,0 +1,418 @@
+{{Infobox PKW-Modell Generationen
+| Marke      = [[Mitsubishi Motors|Mitsubishi]]
+| Modell     = Lancer
+| von        = 1973
+| bis        = 2024
+| Klasse     = [[Kompaktklasse]]
+| Versionen  = [[Limousine]], [[Kombilimousine]], [[Kombinationskraftwagen|Kombi]], [[Coupé]]
+| Vorgänger  = 
+| Nachfolger = 
+}}
+Der '''Mitsubishi Lancer''' ist ein zwischen Anfang 1973 und Anfang 2024 produziertes Fahrzeug der [[Untere Mittelklasse|unteren Mittelklasse]] von [[Mitsubishi Motors Corporation|Mitsubishi]]. Er ist in einigen Fällen die [[Stufenheck]]-, [[Schrägheck]]- oder auch [[Kombinationskraftwagen|Kombivariante]] des [[Mitsubishi Colt]].
+
+Bekannt ist der Lancer unter anderem auch durch dessen Hochleistungs-Version namens „Evolution“ mit Vierradantrieb, der mehrere [[Rallye]]-Siege zu verzeichnen hatte. Von 2009 bis 2016 war mit dem „Mitsubishi Lancer Evolution X“ mit 217&nbsp;kW (295&nbsp;PS) Leistung die zehnte und letzte Auflage des Sportlers auf dem Markt.
+
+Im August 2017 wurde der Verkauf des Lancer in den meisten Ländern ersatzlos eingestellt. Lediglich in Taiwan und China erhielt die achte Generation mit dem '''Grand Lancer''' bzw. '''Lancer EX''' ein Nachfolgemodell.<ref>[https://www.autoblog.com/2017/01/06/mitsubishi-lancer-production-ends-august-2017/ Mitsubishi is killing the Lancer this summer] (englisch)</ref>
+
+
+== Allgemeines ==
+
+=== Karosserievarianten ===
+
+=== Modellgeschichte ===
+
+== Lancer (A70, 1973–1979) ==
+
+== Lancer (A171/A172/A174/A176, 1979–1983) ==
+
+== Lancer (C12V–C37V, 1983–1990) ==
+
+=== Motorenpalette für Europa ===
+{| class="wikitable" style="text-align:center;"
+|- style="background:#CCCCCC;"
+! Modell || Hubraum || Leistung || Max. Drehmoment || Getriebe || Bauzeit || Bemerkung
+|-
+|colspan="7" align="center" bgcolor=#C0C0C0| '''Ottomotoren'''
+|-
+| align="left" | 1200GL || 1183&nbsp;cm³ || 40&nbsp;kW (55&nbsp;PS) bei 5000&nbsp;min<sup>−1</sup> || 90&nbsp;Nm bei 3500&nbsp;min<sup>−1</sup> || rowspan="2" align="left" | 5-Gang || rowspan="3" | 11/1983–12/1988 || rowspan="3" align="left" | Limousine
+|-
+| align="left" | 1500GLX || rowspan="5" | 1458&nbsp;cm³ || rowspan="3" | 55&nbsp;kW (75&nbsp;PS) bei 5500&nbsp;min<sup>−1</sup> || rowspan="2" | 113&nbsp;Nm bei 4000&nbsp;min<sup>−1</sup>
+|-
+| align="left" | 1500GLX Öko Automatik || align="left" | 3-Stufen Öko Automatik
+|-
+| align="left" | 1500GL || 118&nbsp;Nm bei 3500&nbsp;min<sup>−1</sup> || rowspan="5" align="left" | 5-Gang || rowspan="3" |06/1985–12/1988|| align="left" | Kombi
+|-
+| align="left" | 1500GL Katalysator || 51&nbsp;kW (70&nbsp;PS) bei 5500&nbsp;min<sup>−1</sup> || 110&nbsp;Nm bei 3500&nbsp;min<sup>−1</sup> || align="left" | Kombi mit Katalysator, 16V
+|-
+| align="left" | 1500GLX || 55&nbsp;kW (75&nbsp;PS) bei 5500&nbsp;min<sup>−1</sup> || 118&nbsp;Nm bei 3500&nbsp;min<sup>−1</sup> || align="left" | Kombi
+|-
+| rowspan="2" align="left" | 1800  || rowspan="2" | 1755&nbsp;cm³ || 61&nbsp;kW (83&nbsp;PS) bei 5500&nbsp;min<sup>−1</sup> || 135&nbsp;Nm bei 3500&nbsp;min<sup>−1</sup> || rowspan="2" | 01/1987–12/1990 || align="left" | Kombi mit Allrad und Katalysator
+|-
+| 66&nbsp;kW (90&nbsp;PS) bei 5500&nbsp;min<sup>−1</sup> || 137&nbsp;Nm bei 3500&nbsp;min<sup>−1</sup> || align="left" | Kombi mit Allrad
+|-
+|colspan="7" align="center" bgcolor=#C0C0C0| '''Dieselmotoren'''
+|-
+| align="left" | 1800 D GL || 1779&nbsp;cm³ || 43&nbsp;kW (58&nbsp;PS) bei 4500&nbsp;min<sup>−1</sup> || 108&nbsp;Nm bei 2500&nbsp;min<sup>−1</sup> || align="left" | 5-Gang || 06/1985–09/1986 || align="left" | Limousine und Kombi
+|}
+
+=== Motoren für Japan ab 1983 (Lancer EX) ===
+{| class="wikitable"
+|+Ottomotoren
+!Hubraum
+!Leistung
+!Drehmoment
+|-
+|1,4 Liter
+|59 kW (80 PS) bei 5500/min
+|121 Nm bei 3500/min
+|-
+|1,6 Liter
+|63 kW (85 PS) bei 5500/min
+|135 Nm bei 3000/min
+|-
+|1,8 Liter
+|118 kW (160 PS) bei 5800/min
+|220 Nm bei 3500/min
+|}
+
+== Lancer (C6A/C7A, 1988–1996) ==
+
+=== Motoren für Europa ===
+{| class="wikitable"
+|+
+!Modell
+!Leistung
+!Max. Drehmoment
+!Bemerkung
+|-
+|1,3 Liter Vergasermotor Typ 4G13
+|55 kW (75 PS) bei 6000/min
+|102&nbsp;Nm bei 4000/min
+|
+|-
+|1,5 Liter Einspritzmotor 8 Ventile Typ 4G15
+|62 kW (84 PS) bei 6000/min
+|118&nbsp;Nm bei 4000/min
+|
+|-
+|1,5 Liter Einspritzmotor 12 Ventile Typ 4G15
+|66 kW (90 PS) bei 5500/min
+|126&nbsp;Nm bei 3000/min
+|
+|-
+|1,6 Liter Einspritzmotor 16 Ventile Typ 4G92
+|83 kW (113 PS) bei 6000/min
+|137&nbsp;Nm bei 5000/min
+|
+|-
+|1,8 Liter Einspritzmotor Typ 4G37
+|71 kW (97 PS) bei 5500/min
+|141&nbsp;Nm bei 4000/min
+|''nur Schrägheck mit Allradantrieb''
+|-
+|1,8 Liter Einspritzmotor Typ 4G67
+|100 kW (136 PS) bei 6500/min
+|162&nbsp;Nm bei 5000/min
+|''nur Schrägheck, Vorderradantrieb, vier Ventile pro Zylinder''
+|-
+|1,8 Liter Einspritzmotor Typ 4G93
+|103 kW (140 PS) bei 6500/min
+|167&nbsp;Nm bei 5500/min
+|''nur Schrägheck, Vorderradantrieb, vier Ventile pro Zylinder, ab 1992''
+|}
+{| class="wikitable"
+|+
+!Modell
+!Leistung
+!Max. Drehmoment
+|-
+|1,8 Liter Typ 4D65
+|44 kW (60 PS) bei 4.500/min
+|113&nbsp;Nm bei 3.000/min
+|}
+
+=== Motoren für Japan ===
+
+=== Fahrwerte laut Hersteller ===
+
+== Lancer (CB1A–CD8A, 1991–1996) ==
+
+=== Japan und USA ===
+
+=== Lizenzbauten ===
+
+=== Motoren für Europa ===
+{| class="wikitable"
+|+
+!Liter
+!Leistung
+!Max. Drehmoment
+!Ventile pro Zylinder
+|-
+|1,3 Liter
+|55 kW (75 PS) bei 6000/min
+|108&nbsp;Nm bei 3000/min
+| rowspan="2" |''3''
+|-
+|1,5 Liter
+|66 kW (90 PS) bei 6000/min
+|126&nbsp;Nm bei 3000/min
+|-
+| rowspan="2" |1,6 Liter
+|83 kW (113 PS) bei 6000/min
+|137&nbsp;Nm bei 5000/min
+| rowspan="3" |''4''
+|-
+|66 kW (90 PS) bei 5500/min
+|133&nbsp;Nm bei 4000/min
+|-
+|1,8 Liter
+|103 kW (140 PS) bei 6500/min
+|167&nbsp;Nm bei 5500/min
+|}
+
+=== Motoren für Japan ===
+
+== Lancer (CJ0, 1996–2003) ==
+
+=== Motorenpalette ===
+{| class="wikitable"
+|+
+!Liter
+!Hubraum
+!Leistung
+!Max. Drehmoment
+|-
+|1,3 Liter
+|1298&nbsp;cm³
+|55 kW (75 PS) bei 6000/min
+|108&nbsp;Nm bei 3000/min
+|-
+|1,6 Liter
+|1597&nbsp;cm³
+|66 kW (90 PS) bei 5500/min
+|
+|}
+
+== Lancer (CS0, 2000–2007) ==
+
+=== Motorenpalette ===
+{| class="wikitable" style="text-align:center;"
+|- style="background:#CCCCCC;"
+! Modell || Hubraum || Leistung || Max. Drehmoment || Getriebe
+|-
+| align="left" | 1.3 || 1299&nbsp;cm³ || 60&nbsp;kW (82&nbsp;PS)<br />bei 5000&nbsp;min<sup>−1</sup> || 120&nbsp;Nm bei 4000&nbsp;min<sup>−1</sup> || align="left" | mit Fünfgang-Schaltgetriebe
+|-
+| align="left" | 1.6 || 1584&nbsp;cm³ || 72&nbsp;kW (98&nbsp;PS)<br />bei 5000&nbsp;min<sup>−1</sup> || 150&nbsp;Nm bei 4000&nbsp;min<sup>−1</sup> || align="left" | mit Fünfgang-Schaltgetriebe oder [[Continuously variable transmission|4-Gang-Wandlerautomatik]]
+|-
+| align="left" | 2.0 || 1997&nbsp;cm³ || 99&nbsp;kW (135&nbsp;PS)<br />bei 5750&nbsp;min<sup>−1</sup> || 176&nbsp;Nm bei 4500&nbsp;min<sup>−1</sup> || align="left" | mit Fünfgang-Schaltgetriebe
+|}
+
+== Lancer (CY0, 2007–2017) ==
+
+=== Motorisierungen zur Markteinführung des Lancer (CY0) ===<!-- bessere Überschrift aber noch immer relativ unpräzise -->
+{| class="wikitable" style="text-align:center;"
+|- style="background:#CCCCCC;"
+! Modell || Hubraum || Leistung || Max. Drehmoment || Getriebe || Bauzeit
+|-
+! colspan="6"| Ottomotor
+|-
+! style="text-align:left;"| 1.5 MIVEC
+| 1499&nbsp;cm³ || 80&nbsp;kW (109&nbsp;PS) bei 6000&nbsp;min<sup>−1</sup> || 143&nbsp;Nm bei 4000&nbsp;min<sup>−1</sup> || style="text-align:left;"| mit Fünfgang-Schaltgetriebe || style="text-align:left;"| 06/2008–05/2010
+|-
+! rowspan="2" style="text-align:left;"| 1.8 MIVEC
+| rowspan="2" | 1798&nbsp;cm³ || 103&nbsp;kW (140&nbsp;PS) bei 6000&nbsp;min<sup>−1</sup> || 176&nbsp;Nm bei 4250&nbsp;min<sup>−1</sup> || rowspan="3" style="text-align:left;" | mit Fünfgang-Schaltgetriebe oder [[Continuously variable transmission|6-Stufen-CVT-Getriebe]]|| style="text-align:left;" | seit 06/2010 (seit 2012 nicht mehr in Deutschland erhältlich)
+|-
+| 105&nbsp;kW (143&nbsp;PS) bei 6000&nbsp;min<sup>−1</sup> || 178&nbsp;Nm bei 4250&nbsp;min<sup>−1</sup> || rowspan="2" style="text-align:left;" | 09/2007–05/2010
+|-
+! style="text-align:left;"| 2.0 MIVEC
+| rowspan="2" | 1998&nbsp;cm³ || 110&nbsp;kW (150&nbsp;PS) bei 6000&nbsp;min<sup>−1</sup> || 198&nbsp;Nm bei 4250&nbsp;min<sup>−1</sup>
+|-
+! style="text-align:left;"| 2.0 MIVEC Turbo Ralliart
+| 177&nbsp;kW (241&nbsp;PS) bei 6000&nbsp;min<sup>−1</sup> || 343&nbsp;Nm bei 2500–4750&nbsp;min<sup>−1</sup> || style="text-align:left;" | 6-Gang-[[Doppelkupplungsgetriebe]] (TC-SST) und permanentem Allradantrieb AWC || style="text-align:left;" | 10/2009–06/2011
+|-
+! colspan="6"| Dieselmotor
+|-
+! rowspan="2" style="text-align:left;"| 1.8 DI-D MIVEC ClearTec
+| rowspan="2" | 1798&nbsp;cm³ || 85&nbsp;kW (116&nbsp;PS) bei 4000&nbsp;min<sup>−1</sup> || 300&nbsp;Nm bei 2000–2500&nbsp;min<sup>−1</sup> || style="text-align:left;" | mit Fünfgang/Sechsgang-Schaltgetriebe || style="text-align:left;" | 06/2010–06/2013
+|-
+|110&nbsp;kW (150&nbsp;PS) bei 4000&nbsp;min<sup>−1</sup>
+|300&nbsp;Nm bei 2000&nbsp;min<sup>−1</sup>
+| rowspan="2" style="text-align:left;" |mit Sechsgang-Schaltgetriebe
+| style="text-align:left;" |06/2010–06/2013
+|-
+! style="text-align:left;"| [[TDI-Motor#TDI der zweiten Generation mit Pumpe-Düse-Technik|2.0 DI-D]]<br />Turbo
+| 1968&nbsp;cm³ || 103&nbsp;kW (140&nbsp;PS) bei 4000&nbsp;min<sup>−1</sup> || 310&nbsp;Nm bei 1750&nbsp;min<sup>−1</sup> || style="text-align:left;" | 06/2008–05/2010
+|}<!--
+
+=== Motorisierungen ab 2010 ===
+{| class="wikitable" style="text-align:center"
+|- class="hintergrundfarbe5"
+!
+! 1.6 [[Nockenwellenverstellung|MIVEC]] || 1.8 MIVEC || 2.0 MIVEC<br /><sub>(Australien und USA)</sub> || 2.0 MIVEC (Evolution)<br />(bis 2016) || 2.0 MIVEC Final<br />(bis 2016) || 2.0 MIVEC<br /><sub>(Großbritannien)</sub><br />(bis 2016) || 2.0 MIVEC<br /><sub>(Großbritannien)</sub><br />(bis 2016) || 2.4 MIVEC<br /><sub>(Australien und USA)</sub> || 1.8 DI-D<br />(bis 2015) 
+|-
+| style="background:#F5F5F5; text-align:left;" | '''Motor'''
+| colspan="8"| [[Ottomotor]]
+| [[Dieselmotor]]
+|-
+| style="background:#F5F5F5; text-align:left;" | '''Motortyp'''
+| colspan="9" |[[Vierzylinder]]-[[Reihenmotor]]
+|-
+| style="background:#F5F5F5; text-align:left;" | '''Motoraufladung'''
+| colspan="3"| –
+| colspan="4"| [[Turbolader|Abgasturbolader]]
+| –
+| Abgasturbolader
+|-
+| style="background:#F5F5F5; text-align:left;" | '''Gemischaufbereitung'''
+| colspan="8"| <!--vermutlich [[Saugrohreinspritzung]]-->
+| [[Common-Rail-Einspritzung]]
+|-
+| style="background:#F5F5F5; text-align:left;" | '''Hubraum'''
+| 1590&nbsp;cm³ || 1798&nbsp;cm³ || colspan="5" | 1998&nbsp;cm³ || 2360&nbsp;cm³ || 1798&nbsp;cm³
+|-
+| style="background:#F5F5F5; text-align:left;" | '''max. Leistung<br /> bei min<sup>−1</sup>'''
+| 86&nbsp;kW (117&nbsp;PS)/<br />6000 || 103&nbsp;kW (140&nbsp;PS)/<br />6000 || 110&nbsp;kW (150&nbsp;PS)/<br />6000 || 217&nbsp;kW (295&nbsp;PS)/<br />6500 || 226&nbsp;kW (307&nbsp;PS)/<br />6700 || 242&nbsp;kW (329&nbsp;PS)/<br />6500 || 264&nbsp;kW (359&nbsp;PS)/<br />6500 || 125&nbsp;kW (170&nbsp;PS)/<br />6000 || 85&nbsp;kW (116&nbsp;PS)/<br />3500 
+|-
+| style="background:#F5F5F5; text-align:left;" | '''max. Drehmoment<br />bei min<sup>−1</sup>'''
+| 154&nbsp;Nm/<br />4000 || 176&nbsp;Nm/<br />4200 || 197&nbsp;Nm/<br />4200 || 366&nbsp;Nm/<br />3500 || 414&nbsp;Nm/<br />4000 || 437&nbsp;Nm/<br />3500 || 492&nbsp;Nm/<br />3500 || 226&nbsp;Nm/<br />4200 || 300&nbsp;Nm/<br />1750–2250 
+|-
+| style="background:#F5F5F5; text-align:left;" | '''Getriebeart, serienmäßig'''
+| 5-Gang-Schalt&shy;getriebe || 6-Stu&shy;fen-CVT-Getriebe || colspan="6"| 5-Gang-Schalt&shy;getriebe || 6-Gang-Schaltgetriebe
+|-
+| style="background:#F5F5F5; text-align:left;" | '''Getriebeart, optional'''
+|colspan=2"| – || 6-Stu&shy;fen-CVT-Ge&shy;triebe || 6-Gang Doppel&shy;kupp&shy;lungs&shy;ge&shy;triebe mit Su&shy;per Sport Mo&shy;dus ||colspan="3"| – || 6-Stu&shy;fen-CVT-Ge&shy;triebe || colspan="2"| -
+|-
+| style="background:#F5F5F5; text-align:left;" | '''Leergewicht, inkl. 75&nbsp;kg Fahrergewicht'''
+| 1335–1375&nbsp;kg || 1450&nbsp;kg || – || 1635–1665&nbsp;kg || 1588&nbsp;kg || 1560&nbsp;kg || 1560&nbsp;kg || – || 1490&nbsp;kg 
+|-
+| style="background:#F5F5F5; text-align:left;" | '''maximale Zuladung'''
+| 415–425&nbsp;kg || 450&nbsp;kg || – || 375–405&nbsp;kg || 452&nbsp;kg || 480&nbsp;kg || 480&nbsp;kg || – ||450&nbsp;kg 
+|-
+| style="background:#F5F5F5; text-align:left;" | '''Beschleunigung, 0–100&nbsp;km/h'''
+| 10,7–11,1&nbsp;s || 11,9&nbsp;s || – || 5,4–5,6&nbsp;s || 5,7&nbsp;s || 4,4&nbsp;s || 4,1&nbsp;s || – || 10,2&nbsp;s 
+|-
+| style="background:#F5F5F5; text-align:left;" | '''Höchstgeschwindigkeit'''
+| 188–191&nbsp;km/h || 192&nbsp;km/h || – || 242&nbsp;km/h || 240&nbsp;km/h || 250&nbsp;km/h || 250&nbsp;km/h || – || 193&nbsp;km/h 
+|-
+| style="background:#F5F5F5; text-align:left;" | '''Kraftstoffverbrauch (Normverbrauch)<br />auf&nbsp;100&nbsp;km&nbsp;(kombiniert)'''
+| 5,5&nbsp;l Super || 6,6&nbsp;l Super || – || 10,5&nbsp;l Super Plus || 13,5&nbsp;l Super Plus || 11,1&nbsp;l Super Plus || 14,2&nbsp;l Super Plus || – || 4,8&nbsp;l Diesel 
+|-
+| style="background:#F5F5F5; text-align:left;" | '''CO<sub>2</sub>-Emission (kombiniert)'''
+| 128&nbsp;g/km || 153&nbsp;g/km || – || 243&nbsp;g/km || || 257&nbsp;g/km || 328&nbsp;g/km || – || 129&nbsp;g/km 
+|-
+| style="background:#F5F5F5; text-align:left;" | '''Abgasnorm nach EU-Klassifikation'''
+| colspan="2" | Euro 6|| – || colspan="4" | Euro 6 || – || Euro 5
+|}
+
+== Grand Lancer/Lancer EX (2017–2024) ==
+
+=== Technische Daten ===
+{| class="wikitable" style="font-size: 100%; text-align: center;"
+|- class="hintergrundfarbe5"
+|
+! Grand Lancer 1.8
+|-
+! style="text-align:left;"| Bauzeitraum
+| 02/2017–03/2024
+|-
+! style="text-align:left;" colspan="2"| <u>Motorkenndaten</u>
+|-
+! style="text-align:left;"| Motortyp
+| R4-[[Ottomotor]]
+|-
+! style="text-align:left;"| [[Hubraum]]
+| 1798 cm³
+|-
+! style="text-align:left;"| max. Leistung bei min<sup>−1</sup>
+| {{kW2PS|103}} / 6000
+|-
+! style="text-align:left;"| max. [[Drehmoment]] bei min<sup>−1</sup>
+| 176 Nm / 4200
+|-
+! style="text-align:left;" colspan="2"| <u>Kraftübertragung</u>
+|-
+! style="text-align:left;"| Antrieb
+| [[Vorderradantrieb]]
+|-
+! style="text-align:left;"| Getriebe
+| 6-Stufen-CVT-Getriebe
+|}
+
+=== Mitsubishi Aspire ===
+
+== {{Anker|Lancer Evolution}} Lancer Evolution (1992–2016) ==
+
+=== Geschichte ===
+
+=== Evolution X ===
+
+=== Konkurrenten ===
+
+=== Evolutionsstufen ===
+
+=== Technische Daten Mitsubishi Lancer Evo VI/IX/X ===
+{| class="wikitable"
+|- style="background:#E1E1E1"
+! width="14%"|Mitsubishi Lancer
+! width="14%"|Evo VI
+! width="14%"|Evo IX
+! width="14%"|Evo X
+! width="14%"|Evo X Final
+! width="14%"|Evo X 330
+! width="14%"|Evo X 360
+|- style="background:#EEEEEE"
+| Motor:&nbsp; || colspan="6" align="center" |4-Zylinder-Reihenmotor (Viertakt)
+|- style="background:#EEEEEE"
+| Motortyp:&nbsp; || align="center" |4G63 Turbo || align="center" |4G63 MIVEC || align="center" colspan="4" | 4B11T MIVEC
+|- style="background:#EEEEEE"
+| Hubraum:&nbsp; || colspan="2" align="center" |1997 cm³|| align="center" colspan="4" | 1998 cm³
+|- style="background:#EEEEEE"
+| Bohrung × Hub:&nbsp; || colspan="2" align="center" |85&nbsp;×&nbsp;88 mm|| align="center" colspan="4" |86&nbsp;×&nbsp;86 mm
+|- style="background:#EEEEEE"
+| Leistung bei 1/min:&nbsp; || colspan="2" align="center" |206 kW<br />(280 PS)<br />bei 6500 || align="center" |217 kW<br />(295 PS)<br />bei 6500 || align="center" |226 kW<br />(307 PS)<br />bei 6500 || align="center" |242 kW<br />(329 PS)<br />bei 6500 || align="center" | 264 kW<br />(359 PS)<br />bei 6500
+|- style="background:#EEEEEE"
+| Max. Drehmoment bei 1/min:&nbsp; || align="center" |380&nbsp;Nm bei 3000 || align="center" |355&nbsp;Nm bei 3500 || align="center" |366&nbsp;Nm bei 3500 || align="center" |414&nbsp;Nm bei 4000 || align="center" |437&nbsp;Nm bei 3500 || align="center" |492&nbsp;Nm bei 3500
+|- style="background:#EEEEEE"
+| Verdichtung:&nbsp; || colspan="2" align="center" | 8,8:1 || align="center" colspan="4" | 9,0:1
+|- style="background:#EEEEEE"
+| Gemischaufbereitung:&nbsp; || colspan="6" align="center" |Elektronische Einspritzung, Turbolader, Ladeluftkühler
+|- style="background:#EEEEEE"
+| Ventilsteuerung:&nbsp; || colspan="2" align="center" | Zwei obenliegende Nockenwellen, Antrieb über [[Zahnriemen]], 4 Ventile pro Zylinder || align="center" colspan="4" | Zwei obenliegende Nockenwellen, Antrieb über [[Steuerkette]], 4 Ventile pro Zylinder
+|- style="background:#EEEEEE"
+| Kühlung:&nbsp; || colspan="6" align="center" |[[Wasserkühlung]]
+|- style="background:#EEEEEE"
+| Getriebe:&nbsp; || align="center" | 5-Gang-Getriebe<br /> permanenter Allradantrieb ||align="center" | 5- oder 6-Gang-Getriebe<br /> permanenter Allradantrieb ||align="center" | manuelles 5-Gang-Getriebe oder 6-Gang-Doppelkupplungsgetriebe SST<br /> permanenter Allradantrieb ||align="center" colspan="3" | manuelles 5-Gang-Getriebe<br /> permanenter Allradantrieb
+|- style="background:#EEEEEE"
+| Radaufhängung vorn:&nbsp; || colspan="6" align="center" | Dreieckslenker, Federbeine, Schraubenfedern
+|- style="background:#EEEEEE"
+| Radaufhängung hinten:&nbsp; || align="center" | Raumlenkerachse, Schraubenfedern || colspan="6" align="center" | Längs- und Querlenker, Schraubenfedern
+|- style="background:#EEEEEE"
+| Lenkung:&nbsp; || colspan="6" align="center" | [[Zahnstange]]nlenkung, [[servo]]unterstützt
+|- style="background:#EEEEEE"
+| Karosserie:&nbsp; || colspan="2" align="center" | [[Stahlblech]], [[Karosserie#Selbsttragende Karosserie|selbsttragend]] || align="center" colspan="4" | [[Aluminium]] und Stahlblech, selbsttragend
+|- style="background:#EEEEEE"
+| Radstand:&nbsp; || align="center" | 2510 mm|| align="center" |2625 mm || align="center" colspan="4" |2650 mm
+|- style="background:#EEEEEE"
+| Abmessungen:&nbsp; || align="center" | 4350&nbsp;×&nbsp;1770&nbsp;×&nbsp;1420&nbsp;mm || align="center" | 4490&nbsp;×&nbsp;1770&nbsp;×&nbsp;1450&nbsp;mm || align="center" | 4505&nbsp;×&nbsp;1810&nbsp;×&nbsp;1480&nbsp;mm || align="center" | 4495&nbsp;×&nbsp;1810&nbsp;×&nbsp;1480&nbsp;mm ||align="center" colspan="2" | 4505&nbsp;×&nbsp;1810&nbsp;×&nbsp;1480 mm
+|- style="background:#EEEEEE"
+| Leergewicht (ohne Fahrer): || align="center" | 1240–1360 kg|| align="center" | 1465–1487&nbsp;kg || align="center" | 1560 (1590) kg || align="center" | 1588&nbsp;kg || align="center" colspan="2" | 1560 kg
+|- style="background:#EEEEEE"
+| Höchstgeschwindigkeit:&nbsp; || align="center" | ca. 250&nbsp;km/h || align="center" |250 km/h || align="center" |240 (242) km/h || align="center" |240 km/h || align="center" colspan="2" |250 km/h
+|- style="background:#EEEEEE"
+| 0–100 km/h:&nbsp; || align="center" | 4,9 s || align="center" | 5,7 s || align="center" | 5,4 (6,3) s || align="center" | 5,7 s || align="center" | 4,4 s || align="center" | 4,1 s
+|- style="background:#EEEEEE"
+| Verbrauch (Liter/100 Kilometer, EU- bzw. japanische Norm):&nbsp; || align="center" | ca. 8–16 S|| align="center" | 14,6 S || align="center" | Innerorts: 13,6 (13,9), Außerorts: 8,3 (8,5), Kombiniert: 10,2 (10,5) (Werte in Klammern bei SST-Getriebe) Super Plus bleifrei (mindestens ROZ 98) || align="center" | Innerorts: , Außerorts: , Kombiniert: 13,5 Super Plus bleifrei (mindestens ROZ 98) || align="center" | Innerorts: 15,0, Außerorts: 9,0, Kombiniert: 11,1 Super Plus bleifrei (mindestens ROZ 98) || align="center" | Innerorts: 21,9, Außerorts: 10,5, Kombiniert: 14,2 Super Plus bleifrei (mindestens ROZ 98)
+|- style="background:#EEEEEE"
+| Preis:&nbsp; || align="center" | – || align="center" | SFr 53.450–57.950 (02/07)<br /> entspricht ca. € 33.300–36.100 || align="center" | ab € 41.990 (Stand 2012 für den deutschen Markt) || align="center" | ab € 58.000 (Stand 2016 für den deutschen Markt) || align="center" | || align="center" |
+|}
+
+== Prototyp mit Elektromotoren ==
+
+== Der Lancer in anderen Ländern ==
+
+== Literatur ==
+
+== Weblinks ==
+
+== Einzelnachweise ==

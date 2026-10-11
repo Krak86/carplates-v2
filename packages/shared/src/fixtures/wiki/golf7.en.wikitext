@@ -1,0 +1,198 @@
+{{Use British English|date=August 2024}}
+{{Short description|Seventh generation of Golf compact car}}
+{{For|a complete overview of all Volkswagen Golf models|Volkswagen Golf}}
+{{Infobox automobile
+| name = Volkswagen Golf Mk7
+| image = 2013 Volkswagen Golf SE BlueMotion Technology 1.4 Front.jpg
+| manufacturer = [[Volkswagen]]
+| production = 2012–2020 (Europe)<br />2013–2020 (China)<br />2015–2020 (Brazil)<br />2014–2021 (Mexico)
+| model_years = 2015–2021 (North America)
+| assembly = {{ubl
+  | Germany: [[Wolfsburg]] ([[Wolfsburg Volkswagen Plant|Wolfsburg Plant]]); [[Zwickau]] ([[Volkswagen Zwickau-Mosel Plant|Zwickau-Mosel Plant]]); [[Dresden]] ([[Transparent Factory]]; e-Golf only)
+  | China: [[Changchun]]; [[Foshan]] ([[FAW-VW]]) 
+  | Mexico: [[Puebla (city)|Puebla]] ([[Volkswagen de México]])
+  | Brazil: [[São José dos Pinhais]] ([[Volkswagen do Brasil]])
+  | Indonesia: [[Jakarta]] ([[Indomobil Group|National Assemblers]])<ref>{{Cite web |last=Wicaksono |first=Krisna |date=2016-06-20 |title=VW Indonesia Setop Produksi Golf TSI |url=https://www.viva.co.id/otomotif/mobil/787449-vw-indonesia-setop-produksi-golf-tsi |trans-title=VW Indonesia ended Golf TSI production |access-date=2022-06-17 |website=www.viva.co.id |language=id}}</ref>
+}}
+| designer = {{ubl
+  | [[Klaus Zyciora|Klaus Bischoff]], [[Marc Lichte]], Andreas J. Mindt and Philipp Römers<ref>{{Cite patent |country=US |number=D690231 |title=Motor vehicle |pubdate=2013-09-24 |inventor1-last=Bischoff |inventor1-first=Klaus |inventor2-last=Lichte |inventor2-first=Marc |inventor3-last=Mindt |inventor3-first=Andreas J. |inventor4-last=Römers |inventor4-first=Philipp |assign1=[[Volkswagen AG]]}}</ref>
+  | Thomasz Bachorski (interior){{Citation needed|date=February 2021}}
+  | Manuela Joosten (trim){{Citation needed|date=February 2021}}
+  | Andreu Sola (lights){{Citation needed|date=February 2021}}
+}}
+| class = [[Compact car]]/[[C-segment|small family car]] ([[C-segment|C]])
+| body_style = {{ubl
+  | 3/5-door [[hatchback]]
+  | 5-door [[Station wagon|estate]]
+  }}
+| layout = [[Front-engine, front-wheel-drive]]<br />[[Front-engine, all-wheel-drive]]
+| platform = [[Volkswagen Group MQB]]
+| related = [[#Sportsvan|Volkswagen Golf Sportsvan]]<br />[[Audi A3#Mk3|Audi A3 Mk3]]<br />[[Audi TT#Mk3|Audi TT Mk3]]<br />[[SEAT León#Mk3|SEAT León Mk3]]<br />[[Škoda Octavia#Mk3|Škoda Octavia Mk3]]
+| engine = {{ubl
+  | '''[[Petrol engine|Petrol]]:'''
+  | 1.0 L ''[[Volkswagen EA211 engine|EA211]]'' [[Turbocharger|T]][[Gasoline direct injection|SI]] [[Straight-three engine|I3]]
+  | 1.2 L ''[[Volkswagen EA211 engine|EA211 TSI]]'' [[Straight-four engine|I4]]
+  | 1.4 L ''[[Volkswagen EA211 engine|EA211 TSI]]'' I4
+  | 1.5 L ''[[Volkswagen EA211 engine|EA211 TSI]]'' I4
+  | 1.6 L ''[[Volkswagen EA211 engine|EA211]]'' [[Multi-point injection|MSI]] I4
+  | 1.8 L ''[[List of Volkswagen Group petrol engines#1.8 R4 16v TSI/TFSI (EA888)|EA888 TSI]]'' I4
+  | 2.0 L ''[[List of Volkswagen Group petrol engines#2.0 R4 16v TSI/TFSI (EA888)|EA888 TSI]]'' I4
+  | '''[[Petrol engine|Petrol]] [[plug-in hybrid]]:'''
+  | 1.4 L ''[[Volkswagen EA211 engine|EA211 TSI]]'' I4 (GTE)
+  | '''[[Diesel engine|Diesel]]:'''
+  | 1.6 L ''[[List of Volkswagen Group diesel engines#1.6 R4 16v TDI CR 55-88kW (EA288)|EA288]]'' [[TDI (engine)|TDI]] I4 [[Common rail|CR]]
+  | 2.0 L ''[[List of Volkswagen Group diesel engines#2.0 R4 16v TDI CR 81-132kW |EA288 TDI]]'' I4 CR
+}}
+| motor = AC electric motor (e-Golf)
+| battery = 35.8 kWh (e-Golf), 8.7kWh (GTE)
+| transmission = {{ubl
+  | 5/6-speed [[Manual transmission|manual]]
+  | 6/8-speed [[automatic transmission|automatic]] ([[Tiptronic]])
+  | 6/7-speed [[Direct-shift gearbox|DSG]]
+}}
+| wheelbase = {{cvt|2631-2637|mm|in|1}}<br /> {{cvt|2619-2629|mm|in|1}} (facelift)
+| length = {{ubl
+  | {{convert|4255-4280|mm|in|1|abbr=on}} (hatchback)
+  | {{convert|4562-4679|mm|in|1|abbr=on}} (wagon)
+}}
+| width = {{convert|1791-1799|mm|in|1|abbr=on}}
+| height = {{convert|1435-1514|mm|in|1|abbr=on}}
+| weight = {{convert|1205|-|1500|kg|lb|abbr=on}}<ref>{{cite web |url=http://www.volkswagen.co.uk/new/golf-vii/which-model/engines/overview |title=Golf-vii engines & performance |publisher=Volkswagen UK |access-date=14 July 2015}}</ref><ref>{{cite web |url=http://www.volkswagen.co.uk/new/golf-gti-vii/which-model/engines/overview |title=Golf-gti-vii engines & performance |publisher=Volkswagen UK |access-date=14 July 2015}}</ref>
+| predecessor = [[Volkswagen Golf Mk6]]
+| successor = [[Volkswagen Golf Mk8]]<br />[[Volkswagen ID.3]] (for e-Golf)
+| sp = uk
+}}
+
+The '''Volkswagen Golf (Mk7)''' is a [[C-segment]] car manufactured by German automobile manufacturer [[Volkswagen]]. It is the seventh generation in the [[Volkswagen Golf|Golf]] series and the successor to the [[Volkswagen Golf Mk6|Golf Mk6]], and was introduced in [[Berlin]] on 4 September 2012, before a public launch at the [[2012 Paris Motor Show]],<ref>{{cite web |last=Kable |first=Greg |date=4 September 2012 |title=2013 Volkswagen Golf revealed |url=http://www.autocar.co.uk/car-news/2013-volkswagen-golf/2013-volkswagen-golf-revealed |access-date=4 September 2012 |work=[[Autocar (magazine)|Autocar]]}}</ref> with European sales beginning in November 2012 for the 2013 model year.<ref>{{cite web |language=de |url=http://www.auto-motor-und-sport.de/news/vw-golf-vii-markteinfuehrung-am-samstag-6054109.html |title=VW Golf VII: Markteinführung am Samstag |trans-title=VW Golf VII: Going on sale Saturday |website=Auto, Motor und Sport |date=7 November 2012 | access-date=14 July 2015 |archive-url=https://web.archive.org/web/20150715023847/http://www.auto-motor-und-sport.de/news/vw-golf-vii-markteinfuehrung-am-samstag-6054109.html |archive-date=15 July 2015}}</ref>
+
+Marketed in three-door and five-door [[hatchback]], [[van]], and [[station wagon|estate]] forms, the Golf Mk7 shares the [[Volkswagen Group MQB platform|MQB platform]] with the third generation [[Audi A3]], [[SEAT León]] and [[Škoda Octavia]].
+
+In November 2016, Volkswagen presented a [[Facelift (automotive)|facelift]] of the Golf Mk7.<ref>{{cite news |url=https://www.faz.net/1.4521530 |title=Weltpremiere in Wolfsburg: VW hat den Golf renoviert |first=Frankfurter Allgemeine Zeitung |last=GmbH |date=10 November 2016 |newspaper=FAZ.NET}}</ref> It was replaced in December 2019 by the [[Volkswagen Golf Mk8|Golf Mk8]], which is built on the [[Volkswagen Group MQB platform#MQB Evo (2019)|MQB Evo]] platform.<ref>{{Cite web |url=https://www.thedrive.com/news/30141/2020-volkswagen-golf-mk8-set-for-october-24-debut-in-wolfsburg-report |title=2020 Volkswagen Golf MK8 Set for October 24 Debut in Wolfsburg: Report |website=The Drive |last=Gilboy |first=James |date=3 October 2019}}</ref> Production of the e-Golf and the Golf Variant ended in mid-2020.<ref name="16.155 e-Golf">{{Cite web |url=https://www.glaesernemanufaktur.de/de/news-ergebnisseite/16.155-eGolf.html |title=VW Gläserne Manufaktur - 16.155 e-Golf: Gläserne Manufaktur 2019 mit Allzeit-Produktionsrekord |website=VW Gläserne Manufaktur |language=de |access-date=22 January 2020}}</ref><ref>{{Cite web |url=https://www.volkswagen-newsroom.com:443/de/pressemitteilungen/produktion-des-id3-im-werk-zwickau-startet-im-november-5322 |title=Produktion des ID.3 im Werk Zwickau startet im November |website=Volkswagen Newsroom |language=de |access-date=22 January 2020 }}{{Dead link|date=August 2025 |bot=InternetArchiveBot |fix-attempted=yes }}</ref>
+
+
+==Overview==
+
+=== New safety systems ===
+
+== Safety ==
+
+===ANCAP===
+
+===Euro NCAP===
+
+===Latin NCAP===
+
+===IIHS===
+
+== Estate (Golf Variant, Golf SportWagen, and Golf Alltrack)==
+
+==e-Golf==
+
+===Drivetrain and specifications===
+
+===Upgrades in 2017===
+
+==== Spektrum Program ====
+
+==Golf GTE==
+
+==Golf GTD==
+
+==Golf GTI==
+
+=== GTI Clubsport (2016) ===
+
+=== GTI Clubsport S (2016) ===
+
+=== GTI TCR (2019) ===
+
+==Golf R==
+
+=== Spektrum Program ===
+
+==Facelift==
+
+==Powertrain==
+{| class="wikitable" style="text-align:center; font-size:92%;"
+|-
+!colspan=8|Petrol engines
+|-
+! Model !! Displacement !! Power !! Torque !! Acceleration<br />0–100&nbsp;km/h (0-62&nbsp;mph) !! Top speed !! Transmission !! Notes
+|-
+|'''1.2 TSI BlueMotion'''||{{convert|1197|cc|cuin|0|abbr=on}} ||{{convert|85|PS|kW hp|0|abbr=on}} at 4,300–5,300 rpm||{{convert|160|Nm|lbft|0|abbr=on}} at 1,400–3,500 rpm||11.9 s||{{convert|179|km/h|mph|0|abbr=on}} ||5-speed manual ||
+|-
+|'''1.2 TSI BlueMotion'''||{{convert|1197|cc|cuin|0|abbr=on}} ||{{convert|105|PS|kW hp|0|abbr=on}} at 5,000 rpm||{{convert|175|Nm|lbft|0|abbr=on}} at 1,550–4,100 rpm||10.2 s||{{convert|192|km/h|mph|0|abbr=on}} ||6-speed manual<br />7-speed [[Direct Shift Gearbox|DSG]] ||
+|-
+|'''1.0 TSI BlueMotion'''||{{convert|999|cc|cuin|0|abbr=on}} ||{{convert|115|PS|kW hp|0|abbr=on}} at 5,000–5,500 rpm||{{convert|200|Nm|lbft|0|abbr=on}} at 2,000–3,500 rpm||9.7 s||{{convert|204|km/h|mph|0|abbr=on}} ||6-speed manual<br />7-speed [[Direct Shift Gearbox|DSG]] ||
+|-
+|'''1.4 TSI BlueMotion'''||{{convert|1390|cc|cuin|0|abbr=on}} ||{{convert|122|PS|kW hp|0|abbr=on}} at 5,000 rpm||{{convert|200|Nm|lbft|0|abbr=on}} at 1,400–4,000 rpm||9.3 s||{{convert|203|km/h|mph|0|abbr=on}}||6-speed manual<br />7-speed [[Direct Shift Gearbox|DSG]] ||
+|-
+|'''1.4 TSI BlueMotion'''||{{convert|1390|cc|cuin|0|abbr=on}} ||{{convert|125|PS|kW hp|0|abbr=on}} at 5,000–6,000 rpm||{{convert|200|Nm|lbft|0|abbr=on}} at 1,400–4,000 rpm||9.1 s||{{convert|204|km/h|mph|0|abbr=on}}||6-speed manual<br />7-speed [[Direct Shift Gearbox|DSG]] || from April 2014
+|-
+|'''1.4 TSI BlueMotion'''||{{convert|1395|cc|cuin|0|abbr=on}} ||{{convert|140|PS|kW hp|0|abbr=on}} at 4,500–6,000 rpm||{{convert|250|Nm|lbft|0|abbr=on}} at 1,500–3,500 rpm||8.4 s||{{convert|212|km/h|mph|0|abbr=on}}||6-speed manual<br />7-speed [[Direct Shift Gearbox|DSG]] ||
+|-
+|'''1.4 TSI BlueMotion'''||{{convert|1395|cc|cuin|0|abbr=on}} ||{{convert|150|PS|kW hp|0|abbr=on}} at 5,000–6,000 rpm||{{convert|250|Nm|lbft|0|abbr=on}} at 1,500–3,500 rpm||8.2 s||{{convert|216|km/h|mph|0|abbr=on}}||6-speed manual<br />7-speed [[Direct Shift Gearbox|DSG]]<br />8-speed automatic (USA) || from April 2014 (MY2018 in USA)
+|-
+|'''1.5 TSI EVO'''||{{convert|1498|cc|cuin|0|abbr=on}} ||{{convert|150|PS|kW hp|0|abbr=on}} at 5,000–6,000 rpm||{{convert|250|Nm|lbft|0|abbr=on}} at 1,500–3,500 rpm||8.1 s||{{convert|216|km/h|mph|0|abbr=on}}||6-speed manual<br />7-speed [[Direct Shift Gearbox|DSG]] ||
+|-
+|'''1.6'''||{{convert|1598|cc|cuin|0|abbr=on}} ||{{convert|110|PS|kW hp|0|abbr=on}} at 3050–4800 rpm||{{convert|164|Nm|lbft|0|abbr=on}} at 3400–4700 rpm||13.6 s||{{convert|190|km/h|mph|0|abbr=on}}||5-speed manual<br /> || Brazil, Chile, Colombia
+|-
+|'''1.8 TSI'''||{{convert|1798|cc|cuin|0|abbr=on}} ||{{convert|172|PS|kW hp|0|abbr=on}} at 4,800–6,200 rpm||{{convert|270|Nm|lbft|0|abbr=on}} at 1,600–4,200 rpm||7.6 s||{{convert|209|km/h|mph|0|abbr=on}}||5-speed manual<br />6-speed [[Triptronic|Tiptronic]]<br />6-speed [[Direct Shift Gearbox|DSG]] (AWD only) || North America
+|-
+|'''GTE'''||{{convert|1395|cc|cuin|0|abbr=on}} || GTE Hybrid mode—{{convert|205|PS|kW hp|0|abbr=on}} at 3,750–6,000 rpm <br /> Electric Motor—{{convert|100|PS|kW hp|0|abbr=on}} <br /> Petrol Motor—{{convert|150|PS|kW hp|0|abbr=on}} ||{{convert|350|Nm|lbft|0|abbr=on}} at 1,500–4,000 rpm||7.6 s || {{convert|222|km/h|mph|0|abbr=on}} || 6-speed [[Direct Shift Gearbox|DSG]]<br /> || EU
+|-
+|'''GTI (2013-2016)'''||{{convert|1984|cc|cuin|0|abbr=on}} ||{{convert|220|PS|kW hp|0|abbr=on}} at 4,500-6,200 rpm||{{convert|350|Nm|lbft|0|abbr=on}} at 1,500-4,400 rpm||6.3 s||{{convert|246|km/h|mph|0|abbr=on}}||6-speed manual<br />6-speed [[Direct Shift Gearbox|DSG]] ||
+|-
+|'''GTI Performance Package (2013-2016)'''||{{convert|1984|cc|cuin|0|abbr=on}} ||{{convert|230|PS|kW hp|0|abbr=on}} at 4,700-6,200 rpm||{{convert|350|Nm|lbft|0|abbr=on}} at 1,500-4,600 rpm||6.2 s||{{convert|250|km/h|mph|0|abbr=on}}||6-speed manual<br />7-speed [[Direct Shift Gearbox|DSG]] ||
+|-
+|'''GTI (2016-2020)'''||{{convert|1984|cc|cuin|0|abbr=on}} ||{{convert|230|PS|kW hp|0|abbr=on}} at 4,500-6,200 rpm||{{convert|350|Nm|lbft|0|abbr=on}} at 1,500-4,400 rpm||6.2 s||{{convert|246|km/h|mph|0|abbr=on}}||6-speed manual<br />6-speed [[Direct Shift Gearbox|DSG]] ||
+|-
+|'''GTI Performance Package (2016-2020)'''||{{convert|1984|cc|cuin|0|abbr=on}} ||{{convert|245|PS|kW hp|0|abbr=on}} at 4,700-6,200 rpm||{{convert|370|Nm|lbft|0|abbr=on}} at 1,500-4,600 rpm||6.0 s||{{convert|250|km/h|mph|0|abbr=on}}||6-speed manual<br />7-speed [[Direct Shift Gearbox|DSG]] ||
+|-
+|'''GTI Clubsport (2016)'''||{{convert|1984|cc|cuin|0|abbr=on}} ||{{convert|265|PS|kW hp|0|abbr=on}} at 5,350-6,600rpm||{{convert|370|Nm|lbft|0|abbr=on}} at 1,700-5,300rpm||5.9 s||{{convert|250|km/h|mph|0|abbr=on}}||6-speed manual<br />7-speed [[Direct Shift Gearbox|DSG]] ||
+|-
+|'''GTI Clubsport S'''||{{convert|1984|cc|cuin|0|abbr=on}} ||{{convert|310|PS|kW hp|0|abbr=on}} at 4,700-6,200 rpm||{{convert|385|Nm|lbft|0|abbr=on}} at 1,500-4,600 rpm||5.7 s||{{convert|250|km/h|mph|0|abbr=on}}||6-speed manual<br />7-speed [[Direct Shift Gearbox|DSG]] ||
+|-
+|'''GTI TCR (2019)'''||{{convert|1984|cc|cuin|0|abbr=on}} ||{{convert|290|PS|kW hp|0|abbr=on}} at 5,400-6,400 rpm||{{convert|380|Nm|lbft|0|abbr=on}} at 1,800-5,300 rpm||5.6 s||{{convert|250|km/h|mph|0|abbr=on}}||7-speed [[Direct Shift Gearbox|DSG]] ||
+|-
+|'''R (2014-2016)'''||{{convert|1984|cc|cuin|0|abbr=on}} ||{{convert|300|PS|kW hp|0|abbr=on}} at 5,500-6,200 rpm||{{convert|380|Nm|lbft|0|abbr=on}} at 1,800-5,500 rpm||4.9 s||{{convert|250|km/h|mph|0|abbr=on}}||6-speed manual<br />6-speed [[Direct Shift Gearbox|DSG]]||CJXC
+|-
+|'''R (2016-2018)'''||{{convert|1984|cc|cuin|0|abbr=on}} ||{{convert|310|PS|kW hp|0|abbr=on}} at 5,500-6,200 rpm||{{convert|380|Nm|lbft|0|abbr=on}} at 1,800-5,500 rpm||4.9 s||{{convert|250|km/h|mph|0|abbr=on}}||6-speed manual<br />7-speed [[Direct Shift Gearbox|DSG]]||DJHA
+|-
+|'''R (2018-2020)'''||{{convert|1984|cc|cuin|0|abbr=on}} ||{{convert|300|PS|kW hp|0|abbr=on}} at 5,500-6,200 rpm||{{convert|400|Nm|lbft|0|abbr=on}} at 1,800-5,500 rpm||4.9 s||{{convert|250|km/h|mph|0|abbr=on}}||6-speed manual<br />7-speed [[Direct Shift Gearbox|DSG]]||DNUE
+|-
+!colspan=8|Diesel engines
+|-
+! Model !! Displacement !! Power !! Torque !! Acceleration<br />0–100&nbsp;km/h (0-62&nbsp;mph) !! Top speed !! Transmission !! Notes
+|-
+|'''1.6 TDI BlueMotion (CLHB)'''||{{convert|1598|cc|cuin|0|abbr=on}} ||{{convert|90|PS|kW hp|0|abbr=on}} at 2750–4800 rpm||{{convert|230|Nm|lbft|0|abbr=on}} at 1400–2700 rpm||12.9 s||{{convert|185|km/h|mph|0|abbr=on}}||5-speed manual<br />7-speed [[Direct Shift Gearbox|DSG]] || Euro 5 / Euro 6 2015 on
+|-
+|'''1.6 TDI (CLHA)'''||{{convert|1598|cc|cuin|0|abbr=on}} ||{{convert|105|PS|kW hp|0|abbr=on}} at 3,000–4,000 rpm||{{convert|250|Nm|lbft|0|abbr=on}} at 1,500–2,750 rpm||10.7 s||{{convert|192|km/h|mph|0|abbr=on}}||5-speed manual<br />7-speed [[Direct Shift Gearbox|DSG]] || Euro 5 / Euro 6 2015 on
+|-
+|'''1.6 TDI BlueMotion (CRKB)'''||{{convert|1598|cc|cuin|0|abbr=on}} ||{{convert|110|PS|kW hp|0|abbr=on}} at 3,200–4,000 rpm||{{convert|250|Nm|lbft|0|abbr=on}} at 1,500–3000 rpm||10.5 s||{{convert|192|km/h|mph|0|abbr=on}}||6-speed manual || Euro 5 /Euro 6 2015 on
+|-
+|'''1.6 TDI (DDYA, DGTE)'''||{{convert|1598|cc|cuin|0|abbr=on}} ||{{convert|115|PS|kW hp|0|abbr=on}} at 3,000–4,000 rpm||{{convert|250|Nm|lbft|0|abbr=on}} at 1,500–3,200 rpm||10.2 s||{{convert|198|km/h|mph|0|abbr=on}}||5-speed manual<br />7-speed [[Direct Shift Gearbox|DSG]] || Euro 6d-TEMP 2017 on
+|-
+|'''2.0 TDI<ref>{{cite web |url=http://www.vw.co.za/en/models/new-golf/trimlevel_overview.s9_trimlevel_detail.suffix.html/new-golf~2F2-0-tdi-comfortline.html#/tab=fe720bd9f52787dfbe6c23ee27572adf |title=New Golf 2.0 TDI Comfortline |publisher=Volkswagen Group South Africa |access-date=17 November 2013 |url-status=dead |archive-url=https://web.archive.org/web/20140222143434/http://www.vw.co.za/en/models/new-golf/trimlevel_overview.s9_trimlevel_detail.suffix.html/new-golf~2F2-0-tdi-comfortline.html |archive-date=22 February 2014}}</ref>'''||{{convert|1968|cc|cuin|0|abbr=on}} ||{{convert|150|PS|kW hp|0|abbr=on}} at 4,400 rpm||{{convert|320|Nm|lbft|0|abbr=on}} at 1,750–3,000 rpm||8.6 s||{{convert|216|km/h|mph|0|abbr=on}}||6-speed manual<br />6-speed [[Direct Shift Gearbox|DSG]] ||
+|-
+|'''2.0 TDI BlueMotion (CKFC)'''||{{convert|1968|cc|cuin|0|abbr=on}} ||{{convert|150|PS|kW hp|0|abbr=on}} at 3,500–4,000 rpm||{{convert|340|Nm|lbft|0|abbr=on}} at 1,750–3,000 rpm||8.6 s|| {{convert|216|km/h|mph|0|abbr=on}}||6-speed manual<br />7-speed [[Direct Shift Gearbox|DSG]] ||
+|-
+|'''GTD (CUNA / CUPA/ DGCA)'''||{{convert|1968|cc|cuin|0|abbr=on}} ||{{convert|184|PS|kW hp|0|abbr=on}} at 3,500–4,000 rpm||{{convert|380|Nm|lbft|0|abbr=on}} at 1,750–3,250 rpm||7.5 s||{{convert|230|km/h|mph|0|abbr=on}}||6-speed manual<br />6-speed [[Direct Shift Gearbox|DSG]]<br />7-speed [[Direct Shift Gearbox|DSG]]  || Euro 6 
+|-
+!colspan=8|Electric motor
+|-
+! Model !! Displacement !! Power !! Torque !! Acceleration<br />0–100&nbsp;km/h (0-62&nbsp;mph) !! Top speed !! Transmission !! Notes
+|-
+|'''e-GOLF (EAGA)'''|| Electric Motor ||{{convert|136|PS|kW hp|0|abbr=on}}||{{convert|290|Nm|lbft|0|abbr=on}}||9.6 s||{{convert|150|km/h|mph|0|abbr=on}}||Single-speed automatic ||35.8 kWh battery
+|-
+|'''e-GOLF (EAGA)'''|| Electric Motor ||{{convert|115|PS|kW hp|0|abbr=on}}||{{convert|270|Nm|lbft|0|abbr=on}}||9.6 s||{{convert|140|km/h|mph|0|abbr=on}}||Single-speed automatic ||24.2 kWh battery
+|-
+|}
+
+==Awards==
+
+== <span class="anchor" id="Sportsvan"></span><span class="anchor" id="SportsVan"></span><span class="anchor" id="SV"></span>Golf Sportsvan/SV ==
+
+==References==
+
+==External links==

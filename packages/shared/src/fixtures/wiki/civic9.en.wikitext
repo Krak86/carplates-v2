@@ -1,0 +1,102 @@
+{{For|a complete overview of all Honda Civic models|Honda Civic}}
+{{Use dmy dates|date=June 2023}}{{Use British English|date=October 2024}}
+{{Short description|Ninth generation of Honda Civic}}
+{{Infobox automobile
+| name = Honda Civic (ninth generation)
+| image = [[File:2013 Honda Civic (FB2 MY13) VTi-L sedan (2018-10-01) 01.jpg|280px]]<br />[[File:2013 Honda Civic hatchback 1.6 i-DTEC ES (UK) front view.jpg|280px]]
+| manufacturer = [[Honda]]
+| production = 2011–2017
+| class = [[Compact car]] ([[C-segment|C]])
+| layout = [[Front-engine, front-wheel-drive]]
+| related = [[Acura ILX]]<br />[[Honda CR-V (fourth generation)]]<br />[[Honda Insight]]<br />[[Honda Jade (automobile)|Honda Jade]]
+| predecessor = [[Honda Civic (eighth generation)]]
+| successor = [[Honda Civic (tenth generation)]]
+}}
+{{Honda Civic series}}
+The '''ninth-generation Honda Civic''' is a range of [[compact car]]s ([[C-segment]]) manufactured by [[Honda]] between 2011 and 2016, replacing the [[Honda Civic (eighth generation)|eighth-generation Civic]]. It was launched in the North American market in April 2011, Europe in February 2012 and Asia-Pacific in early 2012. Four body styles were introduced throughout its production run, which are [[Sedan (automobile)|sedan]], [[coupe]], [[hatchback]] and a [[station wagon]] version marketed as the Civic Tourer. The latter two make up for the [[#FK|European-market Civic range]], which was produced in [[Swindon]], United Kingdom, and received a completely different design and smaller exterior size. The hatchback version forms a basis for a [[Honda Civic Type R#FK2|Civic Type R (FK2) model]], which was released later in 2015.
+
+Apart from the 750-unit limited run Civic Type R,<ref>{{cite web|title=Honda CEO on the future: 'competitive' next-gen CR-V, Accord; Civic Type R coming to Japan this autumn|date=7 July 2015|url=http://paultan.org/2015/07/07/honda-ceo-competitive-next-cr-v-accord-civic-type-r-japan-autumn/|access-date=7 July 2015|publisher=paultan.org}}</ref> versions of the ninth-generation Civic were not sold in Japan, creating a seven-year absence in the market until the release of the [[Honda Civic (tenth generation)|tenth-generation Civic]] in Japan in 2017.<ref>{{cite web|title=Honda to reintroduce Civic in Japan after six-year absence|url=https://asia.nikkei.com/Business/Honda-to-reintroduce-Civic-in-Japan-after-six-year-absence|access-date=2021-07-03|website=Nikkei Asia|language=en-GB}}</ref><ref name="civicrevival">{{cite news|date=25 February 2016|title=シビック 国内再投入…ホンダ、2018年までに|language=ja|trans-title=Honda announces Civic return to domestic market by 2018|newspaper=[[Yomiuri Shimbun]]|url=http://www.yomiuri.co.jp/life/atcars/news/20160225-OYT8T50070.html?cx_thumbnail=08&from=ytop_os_tmb|access-date=1 April 2016|archive-date=9 July 2018|archive-url=https://web.archive.org/web/20180709083236/https://www.yomiuri.co.jp/life/atcars/news/20160225-OYT8T50070.html?cx_thumbnail=08&from=ytop_os_tmb|url-status=dead}}</ref> However, the ninth-generation Civic sedan was temporarily produced in Japan for exports in early 2012 due to suspended production in the [[Phra Nakhon Si Ayutthaya Province|Ayutthaya]] plant as the result of [[2011 Thailand floods]].<ref>{{cite web |last=Razagui |first=Haitham |date=2011-11-25 |title=Thai floods force all-new Civic switch to Japan |url=https://www.goauto.com.au/news/honda/civic/thai-floods-force-all-new-civic-switch-to-japan/2011-11-25/18754.html |access-date=2021-07-03 |website=GoAuto |language=en}}</ref><ref>{{cite web |last=Stevens |first=Mike |date=2012-07-02 |title=2012 Honda Civic Sedan Series II Launched In Australia |url=https://www.drive.com.au/news/2012-honda-civic-sedan-series-ii-on-sale-in-australia/ |access-date=2021-07-03 |website=Drive |language=en-AU}}</ref>
+
+__TOC__
+{{clear}}
+
+
+== <span class="anchor" id="Coupe"></span><span class="anchor" id="Sedan"></span><span class="anchor" id="FB"></span><span class="anchor" id="FG"></span>Sedan/coupe (FB1–6, FG3–4; 2011) ==
+
+===North America===
+
+==== Sedan ====
+
+==== Coupe ====
+
+==== Si ====
+
+===Other markets===
+
+===Facelift===
+
+====North America====
+
+===== 2013 model year =====
+
+===== 2014 model year =====
+
+==== Other markets ====
+
+=== Hybrid ===
+
+==== Production ====
+
+===Safety===
+
+== <span class="anchor" id="Hatchback"></span><span class="anchor" id="FK"></span>Hatchback/Tourer (FK1–3; 2011) ==
+
+=== Development and production ===
+
+===2015 facelift===
+
+=== Civic Tourer ===
+
+===Civic Type R (FK2; 2015–2017)===
+
+=== Safety ===
+
+== Powertrain ==
+{| class="wikitable"
+|-
+! Engine !! Chassis code !! Horsepower !! Torque
+|-
+|1.3 L (marketed as 1.4L) <br /> [[Honda L engine#L13Z4|L13Z4]] I4 petrol ||FK1 (Hatchback) || {{cvt|100|hp|kW|0}} at 6,000 rpm ||{{convert|94|lbft|Nm|abbr=on}} at 4,800 rpm
+|-
+| 1.5 L [[Honda L engine#LEA2|LEA2]] I4 hybrid || FB4 (Hybrid Sedan) || {{cvt|110|hp|kW|0}} at 5,500 rpm || {{Convert|127|lbft|Nm|abbr=on}} at 1,000–3,500 rpm
+|-
+| 1.6 L [[Honda R engine#R16B|R16B1]] I4 petrol ||FB1 (Sedan, Asia) <br /> FB7 (Sedan, Europe) || {{cvt|125|hp|kW|0}} at 6,500 rpm ||{{convert|112|lbft|Nm|abbr=on}} at 4,300 rpm
+|-
+| 1.8 L [[Honda R engine#R18Z1|R18Z1]] I4 petrol || FB2 (Sedan)<br />FG3 (Coupe) || {{cvt|140|hp|kW|0}} at 6,500 rpm || {{convert|128|lbft|Nm|abbr=on}} at 4,300 rpm
+|-
+| 1.8 L [[Honda R engine#R18Z4|R18Z4]] I4 petrol || FB8 (Sedan)<br />FK2 (Hatchback and Tourer) || {{cvt|143|hp|kW|0}} at 6,500 rpm || {{convert|129|lbft|Nm|abbr=on}} at 4,300 rpm
+|-
+| 1.8 L [[Honda R engine#R18A9|R18A9]] I4 petrol || FB5 (Natural Gas Sedan) || {{cvt|110|hp|kW|0}} at 6,500 rpm || {{convert|106|lbft|Nm|abbr=on}} at 4,300 rpm
+|-
+| 2.0 L [[Honda R engine#R20Z1|R20Z1]] I4 petrol || FB3 (Sedan) || {{cvt|153|hp|kW|0}} at 6,500 rpm || {{convert|140|lbft|Nm|abbr=on}} at 4,300 rpm
+|-
+| 2.4 L [[Honda K engine#K24Z7|K24Z7]] I4 petrol || FB6 (Si Sedan)<br />FG4 (Si Coupe) || {{cvt|201|hp|kW|0}} at 7,000 rpm (pre-facelift)<br />{{cvt|205|hp|kW|0}} at 7,000 rpm (facelift) || {{convert|170|lbft|Nm|abbr=on}} at 4,400 rpm (pre-facelift)<br />{{convert|174|lbft|Nm|abbr=on}} at 4,400 rpm (facelift)
+|-
+| 1.6 L [[Honda N engine#N16A1|N16A1]] I4 turbo diesel || FK3 (Hatchback and Tourer) || {{cvt|118|hp|kW|0}} at 4,000 rpm || {{convert|221|lbft|Nm|abbr=on}} at 2,000 rpm
+|-
+| 2.2 L [[Honda N engine#N22B4|N22B4]] I4 turbo diesel || FK3 (Hatchback) || {{cvt|150|hp|kW|0}} at 4,000 rpm || {{convert|258|lbft|Nm|abbr=on}} at 2,000–2,750 rpm
+|-
+| 2.0 L [[Honda K engine#K20C|K20C1]] I4 turbo petrol || FK2 (Type R Hatchback) || {{cvt|306|hp|kW|0}} at 6,500 rpm || {{convert|295|lbft|Nm|abbr=on}} at 2,500–4,500 rpm
+|}
+
+==Motorsport==
+
+===WTCC===
+
+===BTCC===
+
+===American Touring Car Racing===
+
+==References==
+
+==External links==

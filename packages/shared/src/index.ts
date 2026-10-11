@@ -567,7 +567,12 @@ export {
   parseEngine,
   parseMeasure,
   parseWikiSpecs,
+  parseWikiTables,
+  powerKwOf,
+  tableSpecs,
   type Measure,
+  type TableSpecs,
   type WikiEngine,
-  type WikiSpecs
+  type WikiSpecs,
+  type WikiTable
 } from './wikiSpecs.js'

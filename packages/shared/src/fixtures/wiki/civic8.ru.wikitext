@@ -1,0 +1,185 @@
+{{о|всём семействе автомобилей | Honda Civic}}
+{{Автомобиль
+| название = Honda Civic
+| модель = Civic
+| фото = Honda Civic 1.8 i-VTEC VIII. Generation.JPG
+| подпись = 
+| производитель = [[Honda|Honda Motor]]
+| другое имя = 
+| годы производства = {{Годы автомобиля|2005|2011}}
+| заводы = {{Флаг|Япония}} [[Судзука (город)|Судзука]],<br>{{Флаг|США}} {{iw|Ист-Либерти (Огайо)|Ист-Либерти||East Liberty, Ohio}},<br>{{Флаг|США}} [[Гринсберг (Индиана)|Гринсберг]],<br>{{Флаг|Канада}} {{нп5|Аллистон|||Alliston}},<br>{{Флаг|Бразилия}} [[Сумаре (город)|Сумаре]],<br>{{Флаг|Великобритания}} [[Суиндон]],<br>{{Флаг|Турция}} [[Гебзе]],<br>{{Флаг|Таиланд}} [[Аюттхая]],<br>{{Флаг|Малайзия}} [[Малакка (город)|Малакка]],<br>{{Флаг|Индонезия}} [[Караванг]],<br>{{Флаг|Филиппины}} [[Санта-Роса (провинция Лагуна)|Санта-Роса]],<br>{{Флаг|Пакистан}} [[Лахор]],<br>{{Флаг|Китай}} [[Ухань]],<br>{{Флаг|Вьетнам}} [[Виньфук]],<br>{{Флаг|Индия}} [[:en:Greater Noida|Грэйтер-Ноида]]
+| платформа = 
+| класс = 
+| сегмент = C
+| тип кузова = {{Тип кузова|хетчбэк|5|5}},<br>{{Тип кузова|хетчбэк|3|5}},<br>{{Тип кузова|седан|4|5}},<br>{{Тип кузова|купе|2|5}}
+| компоновка = {{ПП-компоновка}}
+| двигатель = [[Бензиновый двигатель внутреннего сгорания|бензиновый]] или [[Турбонаддув|турбодизель]] (Европа)
+| кпп = [[Механическая коробка передач|механическая]], [[Автоматическая коробка передач|автоматическая]] или [[Роботизированная коробка переключения передач|роботизированная]] (Европа)
+| макс. скорость = 235 км/ч (Type R) 
+| похожие = [[Toyota Corolla]], [[Nissan Almera]], [[Škoda Octavia (1996)|Škoda Octavia]]
+| связанные = 
+| модификации        = 
+{{Модификация автомобиля
+ | название = Хетчбэк пятидверный
+ | изображение = [[Файл:Honda Civic Sport Milanored.JPG|290px|Honda Civic]]
+----
+[[Файл:Honda Civic Sport Milanored Heck.JPG|290px|Honda Civic]]
+ | другое имя = 
+ | тип кузова = {{Тип кузова|хетчбэк|5|5}} 
+ | колёсная база = 2635 мм
+ | длина = 4250—4256 мм
+ | ширина = 1760—1765 мм
+ | высота = 1460 мм
+ | колея передняя = 
+ | колея задняя = 
+ | клиренс = 
+ | масса = 1170—1450 кг
+ | полная масса = 
+ | грузоподъёмность = 
+ | расход топлива = 
+ | объём бака = 
+ | макс. скорость = 
+ | разгон = 
+ | коэффициент аэродинамического сопротивления =   
+}}
+{{Модификация автомобиля
+ | название = Хетчбэк трёхдверный
+ | изображение = [[Файл:Honda Civic (VIII) – Frontansicht, 13. Juni 2011, Wuppertal.jpg|290px|Honda Civic]]
+----
+[[Файл:Honda Civic (VIII) – Heckansicht, 13. Juni 2011, Wuppertal.jpg|290px|Honda Civic]]
+ | другое имя = 
+ | тип кузова = {{Тип кузова|хетчбэк|3|5}} 
+ | колёсная база = 2635 мм
+ | длина = 4275 мм
+ | ширина = 1785 мм
+ | высота = 1445—1460 мм
+ | колея передняя = 
+ | колея задняя = 
+ | клиренс = 
+ | масса = 1200—1450 кг
+ | полная масса = 
+ | грузоподъёмность = 
+ | расход топлива = 
+ | объём бака = 
+ | макс. скорость = 
+ | разгон = 
+ | коэффициент аэродинамического сопротивления =   
+}}
+{{Модификация автомобиля
+ | название = Седан
+ | изображение = [[Файл:'06-'08 Honda Civic Sedan Loaner.jpg|290px|Honda Civic]]
+----
+[[Файл:2007 Honda Civic DX, Rear Left, 04-05-2021.jpg|290px|Honda Civic]]
+ | другое имя = 
+ | тип кузова = {{Тип кузова|седан|4|5}} 
+ | колёсная база = 2700 мм
+ | длина = 4488—4545 мм
+ | ширина = 1750—1755 мм
+ | высота = 1430—1450 мм
+ | колея передняя = 
+ | колея задняя = 
+ | клиренс = 
+ | масса = 1190—1320 кг
+ | полная масса = 
+ | грузоподъёмность = 
+ | расход топлива = 
+ | объём бака = 
+ | макс. скорость = 
+ | разгон = 
+ | коэффициент аэродинамического сопротивления = 
+ | связанные = [[Acura CSX]]
+}}
+{{Модификация автомобиля
+ | название = Купе
+ | изображение = [[Файл:Honda Civic Coupé (25172863865).jpg|290px|Honda Civic Coupe]]
+----
+[[Файл:Honda Civic Coupé (24542170104).jpg|290px|Honda Civic Coupe]]
+ | другое имя = 
+ | тип кузова = {{Тип кузова|купе|2|5}} 
+ | колёсная база = 2650 мм
+ | длина = 4440 мм
+ | ширина = 1751 мм
+ | высота = 1396 мм
+ | колея передняя = 
+ | колея задняя = 
+ | клиренс = 
+ | масса = 1180—1255 кг
+ | полная масса = 
+ | грузоподъёмность = 
+ | расход топлива = 
+ | объём бака = 
+ | макс. скорость = 
+ | разгон = 
+ | коэффициент аэродинамического сопротивления =   
+}}
+}}
+
+'''Honda Civic''' ({{lang-ru|Хо́нда Сиви́к}}) — большое и разнообразное семейство легковых автомобилей, выпускаемых японской компанией [[Honda|Honda Motor]] с 1972 года.
+
+В восьмом поколении Civic, европейские трёх- и пятидверные хетчбэки и японо-американские четырёхдверный седан и двухдверное купе сильно отличались друг от друга. Помимо внешнего вида и оформления салона они имели разную компоновочную схему{{переход|Body}} и шасси{{переход|Chassis}}. Что их объединяло, так это новый двигатель Honda{{переход|Engine}}.
+
+
+== {{якорь|Body}} Кузов и оборудование ==
+
+== {{якорь|Engine}} Двигатели и трансмиссия ==
+{| class="standard collapsible collapsed" style="text-align:center"
+!colspan=6 |Двигатели<ref name="Fivedoors" /><ref name="Hatchback">{{cite web |url=https://hondanews.eu/eu/en/cars/media/pressreleases/34434/civic-type-r-and-type-s |title=CIVIC TYPE R AND TYPE S |subtitle= |lang=en |publisher=Honda Motor Europe |date=2007-01-29 |access-date=2022-01-26 |url-status= |archive-url=https://web.archive.org/web/20170516042756/http://hondanews.eu/eu/en/cars/media/pressreleases/34434/civic-type-r-and-type-s |archive-date=2017-05-16}}</ref><ref name="Spec Japan">{{cite web |url=https://www.honda.co.jp/factbook/auto/CIVIC/200509/26.html |title=主要諸元 |subtitle=Civic/Civic Hybrid |lang=ja |publisher=Honda Motor |date=2005-09-22|access-date=2022-01-24 |url-status= |archive-url=https://web.archive.org/web/20210413201113/https://www.honda.co.jp/factbook/auto/CIVIC/200509/26.html |archive-date=2021-04-13}}</ref><ref name="America">{{cite web |url=https://hondanews.com/en-US/honda-automobiles/releases/release-e9dd7ff209cc71cc83947a004c34c1b2-2006-honda-civic-coupe-and-civic-si-specifications |title=2006 Honda Civic Coupe and Civic Si Specifications |subtitle= |lang=en |publisher=American Honda Motor |date=2005-08-30 |access-date=2022-01-24 |url-status= |archive-url=https://web.archive.org/web/20220124085446/https://hondanews.com/en-US/honda-automobiles/releases/release-e9dd7ff209cc71cc83947a004c34c1b2-2006-honda-civic-coupe-and-civic-si-specifications |archive-date=2022-01-24}}</ref><ref>{{cite web |url=http://www.honda.co.ru/cars/civic_5d/technical-information |title=CIVIC 5D R-SERIES |subtitle=Технические данные |lang=ru |publisher=Honda Motor RUS |access-date=2022-02-03 |url-status=dead |archive-url=https://web.archive.org/web/20120215153922/http://www.honda.co.ru/cars/civic_5d/technical-information |archive-date=2012-02-15}}</ref><ref>{{cite web |url=http://www.honda.co.ru/cars/civic4d/technical-information/ |title=CIVIC 4D |subtitle=Технические данные |lang=ru |publisher=Honda Motor RUS |access-date=2022-02-03 |url-status=dead |archive-url=https://web.archive.org/web/20111123100943/http://www.honda.co.ru/cars/civic4d/ |archive-date=2011-11-23}}</ref>
+|-
+| ||рабочий<br>объём, см³ ||цилиндров/<br>клапанов ||мощность, л. с./<br>обороты, об/мин ||момент, Нм/<br>обороты, об/мин ||страна 
+|-
+| colspan=6 | Бензиновые
+|-
+| LD || 1339 ||4-цил./16-кл. [[SOHC]] || 83/5700 || 119/2800 ||Европа 
+|-
+| R16A || 1595 ||4-цил./16-кл. [[SOHC]] || 125/6500 || 152/4200 ||Сингапур, Египет, Турция, Россия 
+|-
+| R18A || 1799 ||4-цил./16-кл. [[SOHC]] || 140/6300 || 174/4300 ||Япония, Европа, Северная Америка 
+|-
+| colspan=6 | Дизель
+|-
+| N22 || 2204 ||4-цил./16-кл. [[DOHC]] || 140/4000 || 340/2000 ||Европа 
+|}
+
+== {{якорь|Chassis}} Ходовая часть ==
+
+== Civic Type R, Civic Si ==
+{| class="standard collapsible collapsed" style="text-align:center"
+!colspan=8 |Двигатели и трансмиссия<ref name="Hatchback" /><ref name="America" /><ref>{{cite web |url=http://www.honda.co.ru/cars/archive/civic-type-r/technical-information/ |title=CIVIC TYPE-R |subtitle=Технические данные |lang=ru |publisher=Honda Motor RUS |access-date=2022-02-03 |url-status=dead |archive-url=https://web.archive.org/web/20131023064815/http://www.honda.co.ru/cars/archive/civic-type-r/technical-information/ |archive-date=2013-10-23}}</ref><ref>{{cite web |url=https://www.honda.co.jp/factbook/auto/CIVIC_TYPE_R/200703/07.html |title=装備・諸元 |subtitle=Honda Civic Type R |lang=ja |publisher=Honda Motor |quote= |access-date=2022-01-28 |url-status= |archive-url=https://web.archive.org/web/20220124091700/https://www.honda.co.jp/factbook/auto/CIVIC_TYPE_R/200703/07.html |archive-date=2022-01-24}}</ref><ref>{{cite web |url=https://www.honda.co.jp/auto-archive/civic/type-r/2011/EURO/spec/ |title=Specifications |subtitle=Civic Type R Euro |lang=ja |publisher=Honda Motor |access-date=2022-02-03 |url-status= |archive-url=https://web.archive.org/web/20210703132029/https://www.honda.co.jp/auto-archive/civic/type-r/2011/EURO/spec/ |archive-date=2021-07-03}}</ref>
+|-
+| ||рабочий<br>объём, см³ ||цилиндров/<br>клапанов ||мощность, л. с./<br>обороты, об/мин ||момент, Нм/<br>обороты, об/мин ||коробка<br>передач || модель || страна
+|-
+| rowspan=3 | K20A || rowspan=3 | 1998 || rowspan=3 |4-цил./16-кл. [[DOHC]] || 197/7800 || 188/6200 || rowspan=3 |шестиступенчатая<br>механическая || Civic Si || Америка
+|-
+| 201/7800 || 193/5600 || rowspan=2 | Civic Type R || Европа
+|-
+| 225/8000 || 215/6100 || Япония
+|}
+
+== Civic Hybrid ==
+{| class="standard collapsible collapsed" style="text-align:center"
+!colspan=4 |Гибридный силовой привод<ref name="Spec Japan" /><ref>{{cite web |url=https://hondanews.eu/eu/en/cars/media/pressreleases/412/honda-announces-development-of-new-honda-hybrid-system |title=Honda Announces Development of New Honda Hybrid System |subtitle= |lang=en |publisher=Honda Motor Europe |date=2005-07-05 |access-date=2022-01-27 |url-status= |archive-url=https://web.archive.org/web/20220127045036/https://hondanews.eu/eu/en/cars/media/pressreleases/412/honda-announces-development-of-new-honda-hybrid-system |archive-date=2022-01-27}}</ref><ref>{{cite web |url=https://hondanews.com/en-US/honda-automobiles/releases/release-591334b5ff2cd7fdfabb17004c34c1b5-2006-honda-civic-sedan-and-civic-hybrid-specifications |title=2006 Honda Civic Sedan and Civic Hybrid Specifications |subtitle= |lang=en |publisher=American Honda Motor |date=2005-08-29 |access-date=2022-01-24 |url-status= |archive-url=https://web.archive.org/web/20220124055601/https://hondanews.com/en-US/honda-automobiles/releases/release-591334b5ff2cd7fdfabb17004c34c1b5-2006-honda-civic-sedan-and-civic-hybrid-specifications |archive-date=2022-01-24}}</ref>
+|-
+| colspan=5 | Двигатель внутреннего сгорания
+|-
+|рабочий<br>объём, см³ ||цилиндров/<br>клапанов ||мощность, л. с./<br>обороты, об/мин ||момент, Нм/<br>обороты, об/мин 
+|-
+| 1339 ||4-цил./8-кл. [[SOHC]] || 93/6000 || 118/4500
+|-
+| colspan=4 | Электромотор-генератор
+|-
+| тип || напряжение, В ||мощность, кВт/<br>обороты, об/мин ||момент, Н м/<br>обороты, об/мин 
+|-
+| [[Электродвигатель постоянного тока|постоянного<br>тока]]  || 158 || 15/2000 || 103/1160 
+|-
+| colspan=4 | Аккумуляторная батарея
+|-
+|  тип ||напряжение, В ||ёмкость, А ч ||
+|-
+|  [[Никель-металлогидридный аккумулятор|никель-<br>металлогидридная]] || 158 || 5,5 
+|}
+
+== Оценка ==
+
+== Примечания ==
+
+== Литература ==

@@ -975,13 +975,16 @@ wikidata_id, revid)` (keyed on the stage I generation row; `revid` makes the cre
     never show both for the same field). Figures from non-en editions are shown with an explicit "Wikipedia (RU)" style label. Licence posture unchanged (facts only, CC BY-SA credit + link).
     Worked example (Honda Civic 9th gen): infobox = layout only; the article's "Engines" table = 8 rows (1.3 L 100 hp … 2.4 L Si 201–205 hp, chassis codes FK1/FB1/FB7/FB2/FG3/FB8/FK2/FB4/FB5/FB3/FB6/FG4,
     cells use `{{cvt|100|hp|kW|0}}`, `<br>` lists, hybrid and natural-gas rows, mixed markets) — no dimensions or weight table in that article.
+  - **Steps 1–2 done (2026-10-11; nothing stored, owner go/no-go pending).** `wikiSpecs.ts` now has `parseWikiTables` / `tableSpecs` (row-per-engine and column-per-engine layouts, rowspan/colspan expanded,
+    localized headers en/ru/uk/de, header unit for bare power cells, group-title fuel, chassis codes + market note) merged by `parseWikiSpecs` (`series` + `code` = only tables under the heading naming the generation);
+    17 trimmed real articles in `packages/shared/src/fixtures/wiki/` + `wikiSpecs.tables.test.ts`; probe fetches full wikitext, compares infobox vs +tables, has `--extra` (VAZ, ZAZ, Daewoo, Chery, bikes, buses).
+    **Fill rates (engine = a list with power):** registry top models (33 gens) 3 % → 61 % en, 24 % → 70 % best of en/ru/uk/home; VAZ/Lada 0 → 22 % en, 89 → 100 % any; ZAZ/Daewoo 0 → 33 %, 50 → 100 %; Chery/Geely 0 → 0 %, 25 → 75 %;
+    motorcycles 0 → 43 %, 0 → 57 %; buses 25 → 25 %, 25 → 50 %. **Dimensions / mass / tank gain almost nothing from tables** (wheelbase +1 article overall) — the tables are an engine-list lever, dimensions still come from
+    infoboxes (best-of-chain 42–55 %, tank 25 %). Remaining engine misses: new generations not yet in the article (Tucson NX5), series articles with no engine tables in en (Lancer — de has them, so `de` belongs in the chain for every make).
   - **Steps (estimate 2–3 sessions, ~6–10 h):**
-    1. **Body-table parser (0.5–1 session)** in `packages/shared/src/wikiSpecs.ts`: find "Engines" / "Specifications" wikitables, read header + rows (`cvt`/`convert` cells, `<br>`, rowspan-free first; flag merged
-       cells as raw), map to `WikiEngine` (displacement, cylinders, power kW, fuel, chassis codes, market note) and to dimension fields; localized headers for ru / uk / de; tests on ~15 real articles (save
-       trimmed wikitext fixtures, not live fetches). Keep the rule "one unambiguous value or raw text".
-    2. **Probe re-run (0.5 session)** with `wiki-specs-probe.ts` extended to tables: fill rates per field / language, focused on models RDW lacks (VAZ, ZAZ, Daewoo, Chery, motorcycles, buses). Fix parser misses;
-       **this step decides if step 3+ is worth it — report the numbers to the owner before continuing.** Also fix the probe's series-article double counting (headings-source models: match the generation to a section).
-    3. **Table + ingest + seed (1 session):** migration `registry.model_spec_wiki` (key = stage I generation row; engines jsonb; dimension columns; `src_lang`, `src_title`, `wikidata_id`, `revid`),
+    1. ✅ **Body-table parser** (done 2026-10-11, see above).
+    2. ✅ **Probe re-run** (done 2026-10-11; numbers above; owner go/no-go on step 3 pending — if the owner says go, continue).
+    3. **Table + ingest + seed (1 session) — NEXT:** migration `registry.model_spec_wiki` (key = stage I generation row; engines jsonb; dimension columns; `src_lang`, `src_title`, `wikidata_id`, `revid`),
        `ingest:wikispecs` (+ `:csv`, `export:wikispecs:csv`; cache `scripts/.data/wikispecs/`, resumable, UA header, 1 request in flight, backoff on 429; top ~300 pairs from `model_generations`; ~1–2 h of API calls;
        dimension columns stay NULL where RDW has a row for that make/model), `HOME_WIKI_LANGS` table, small override CSV, `SCHEDULE.md` row (yearly), seed into `ingest:ratings:csv`.
     4. **API + UI (1 session):** `GET /api/wikispecs` (`apps/api/src/wikispecs/`, contract in its own `packages/shared/src/wikiSpecsApi.ts` file, fields `nullable().optional()`), matcher = the generation chip's matcher,
@@ -989,6 +992,13 @@ wikidata_id, revid)` (keyed on the stage I generation row; `revid` makes the cre
        `lib/offline-cache.ts` entry, share section id if it gets its own section. A miss hides the section.
     5. **Checks + docs (0.5 session):** `pnpm format`, lint, type-check, test, `pnpm --filter @carplates/shared build`; browser-check (light / dark / mobile / shared link) or say it was not done;
        write-up in `docs/plan-done.md`, one ✅ line in `PLAN.md`, conventions in `docs/features-reference.md`; commit message, stop.
+  - **Carry-over for steps 3–5 (from the probe, 2026-10-11):**
+    - Call `parseWikiSpecs(text, { lang, code: gen.code || gen.label, series: gen.source === 'headings' })`; `headings` generations share one series article and need `series`, so only tables under the matching heading count.
+    - Engine list = body tables first (infobox engine lines rarely carry power); dimensions / mass / tank = infobox (tables add ~nothing), only where RDW has no row. Store `powerKwMax`, `chassisCodes`, `note`, `years` in the engines jsonb.
+    - Chain per field: UI language → en → ru → uk → home edition, and **add `de` for every make** (Lancer's engine tables exist only in de); `ja` / `ko` fill only layout / transmission. Fetch **full wikitext** (no `rvsection=0`), langlinks from the en page.
+    - Known weak spots to leave as misses: brand-new generations without a table yet (Tucson NX5, Qashqai J12); hybrids whose power cell lists system + motor values (stored as min–max); the code column also holds engine codes (`XUD9`) in `chassisCodes`.
+    - Parser rule unchanged: one unambiguous value or raw text; hp = 0.7457 kW, PS / л. с. = 0.7355 kW. Fixtures live in `packages/shared/src/fixtures/wiki/`; add one for each parser fix found during the real ingest.
+    - The probe's `--extra` set (VAZ, ZAZ, Daewoo, Chery, bikes, buses) has no `model_generations` rows (stage I covers top models only): the ingest needs those makes added to stage I, or a small manual title CSV.
   - **Risks to watch:** mixed-market rows (Asia vs Europe chassis codes) — prefer the main-market row or keep all with a market note; ru main articles hold per-generation blocks, use only on a code match;
     vandalised / stale text (bounds + `revid` pin); registry model strings that do not match (depends on stage M aliases).
 

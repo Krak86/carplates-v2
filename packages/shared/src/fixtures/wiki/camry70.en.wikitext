@@ -1,0 +1,132 @@
+{{use dmy dates|date=October 2021}}
+{{Use British English|date=April 2022}}
+{{Short description|Eighth generation of Toyota Camry}}
+{{For|complete overview of all Camry models|Toyota Camry}}
+{{Infobox automobile
+| name = Toyota Camry (XV70)
+| image = 2018 Toyota Camry (ASV70R) Ascent sedan (2018-08-27) 01.jpg
+| caption = 2018 Toyota Camry Ascent (ASV70; pre-facelift, Australia)
+| manufacturer = [[Toyota]]
+| aka = Daihatsu Altis (Japan)<ref>{{cite news |url=https://autonetmagz.com/daihatsu-altis-kembaran-camry-menjadi-daihatsu-termewah/57402/ |title=Bukan Corolla, Daihatsu Altis Hadir Untuk Segmen Sedan Mewah | trans-title = Not a Corolla, the Daihatsu Altis joins the luxury sedan segment |first=Aswin |last=Guntara |work=Autonetmagz.com |location=Jakarta |language=id |date=11 July 2017 |access-date=21 July 2017}}</ref>
+| production = {{ubl
+  | June 2017 – December 2023 (Japan)<ref>{{cite news |url=http://www.caranddriver.com/news/a43417153/toyota-camry-japan-killed/?src=socialflowFBCAD |title=This is the Toyota Camry in Japan |first=Sebastian | last=Blanco |work=Automotive News |location=US |date=23 March 2023 |access-date=4 September 2023}}</ref>
+  | June 2017<ref name="start">{{cite news |url=http://www.autonews.com/article/20170628/OEM01/170629748/toyotas-kentucky-plant-launches-2018-camry |title=Toyota's Kentucky plant launches 2018 Camry |first=Laurence |last=Iliff |work=Automotive News |location=US |date=28 June 2017 |access-date=30 June 2017}}</ref> – April 2024 (US)
+  | December 2017 – October 2023 (China)
+  | April 2018 – March 2022 (Russia)<ref>{{Cite news |title=Toyota Ends Manufacturing Operations In Russia |url=https://www.motor1.com/news/612227/toyota-ends-manufacturing-operations-russia/ |first=Christopher |last=Smith |work=Motor1.com |date=2022-09-23 |access-date=2022-12-29}}</ref>
+  | October 2018 – October 2024 (Thailand)
+  | January 2019 – December 2024 (India)
+  }}
+| model_years = 2018–2024
+| assembly = {{ubl
+  | Japan: [[Toyota, Aichi]] (Tsutsumi plant)
+  | United States: [[Georgetown, Kentucky]] ([[Toyota Motor Manufacturing Kentucky|TMMK]])
+  | China: [[Nansha, Guangzhou]] ([[GAC Toyota]])
+  | Thailand: [[Chachoengsao]] ([[Toyota Motor Thailand|TMT]])
+  | India: [[Bidadi]] ([[Toyota Kirloskar Motor Private Limited|TKML]])
+  | Russia: [[Saint Petersburg]] ([[Toyota Motor Manufacturing Russia|TMMR]])
+  }}
+| designer = {{ubl
+  | Ian Cartabiano (Concept leader, Exterior SE/XSE, US-Specification: 2014, 2015)<ref>{{cite news |url=http://www.motortrend.com/news/2018-toyota-camry-design-analysis/ |title=2018 Toyota Camry Design Analysis: Camry Carrozzeria |first=Tom |last=Gale |work=Motor Trend |location=US |date=11 January 2017 |access-date=23 January 2017}}</ref>
+  | Shin Okahara (regular exterior: 2014)
+  | Ken Kubota (Project chief designer)
+  | Toshimitsu Araki (interior design: 2014)
+  | Chinatsu Kato (colours & trim: 2015–16)
+  }}
+| class = [[Mid-size car]]
+| body_style = 4-door [[Sedan (automobile)|sedan]]
+| layout = {{ubl
+  | [[Front-engine, front-wheel-drive layout|Front-engine, front-wheel-drive]]
+  | [[Front-engine, four-wheel-drive layout|Front-engine, four-wheel-drive]]
+  }}
+| platform = TNGA: [[Toyota TNGA-K platform|GA-K]]<ref name="usnews">{{cite news |url=https://cars.usnews.com/cars-trucks/2018-toyota-camry |work=U.S. News & World Report |location=United States |title=All-New 2018 Toyota Camry: What You Need to Know |date=24 January 2017 |access-date=1 April 2018 |last=Corcoran |first=T. Arthur}}</ref>
+| related = {{ubl
+  | [[Lexus ES (XZ10)]]
+  | [[Toyota Avalon (XX50)]]
+  }}
+| engine = {{ubl
+  | '''Petrol'''
+  | 2.0 L ''[[Toyota AR engine#6AR-FSE|6AR-FSE]]'' [[Straight-four engine|I4]]
+  | 2.0 L ''[[Toyota Dynamic Force engine#M20A-FKS|M20A-FKS]]'' I4
+  | 2.0 L ''[[Toyota Dynamic Force engine#M20C-FKS|M20C-FKS]]'' I4 (China)
+  | 2.0 L ''[[Toyota AR engine#6AR-FSE|6AR-FBS]]'' I4 
+  | 2.5 L ''[[Toyota AR engine#2AR-FE|2AR-FE]]'' I4
+  | 2.5 L ''[[Toyota Dynamic Force engine#A25A-FKS|A25A-FKS]]'' I4
+  | 2.5 L ''[[Toyota Dynamic Force engine#A25A-FKB|A25A-FKB]]'' I4
+  | 2.5 L ''[[Toyota Dynamic Force engine#A25C-FKS|A25C-FKS]]'' I4 (China)
+  | 3.5 L ''[[Toyota GR engine#2GR-FKS|2GR-FKS]]'' [[V6 engine|V6]]
+  | '''Petrol hybrid'''
+  | 2.5 L ''[[Toyota Dynamic Force engine#A25A-FXS|A25A-FXS]]'' I4<ref>{{cite press release 
+|url=http://newsroom.toyota.co.jp/en/detail/17680157 |title=Toyota Unveils Completely Redesigned Camry |publisher=Toyota |location=Japan |date=10 July 2017 |access-date=5 October 2017}}</ref><ref name="ConsumerReports">{{cite web |last1=Quincy |first1=Mike |title=All-New 2018 Toyota Camry Gains Styling Flair and Technology |url=http://www.consumerreports.org/sedans/2018-toyota-camry-sedan-preview/ |work=[[Consumer Reports]] |location=US |date=9 January 2017 |access-date=23 January 2017}}</ref>
+  | 2.5 L ''[[Toyota Dynamic Force engine#A25D-FXS|A25D-FXS]]'' I4 (China)
+  }}
+| motor = {{convert|88|kW|hp PS|abbr=on|0}} ''3NM'' [[Synchronous motor|permanent magnet synchronous]] (hybrid)
+| transmission = {{ubl
+  | 6-speed ''[[Toyota U transmission#U761E|U761E]]'' [[Automatic transmission|automatic]] (6AR-FSE, 6AR-FBS, 2AR-FE)
+  | 8-speed ''[[Toyota U transmission#UA80E|UA80E]]'' automatic (2GR-FKS)
+  | 8-speed ''[[Toyota U transmission#UB80E|UB80E]]'' automatic (A25A-FKS, A25A-FKB)
+  | ''[[Toyota K CVT transmission#K120|K120]]'' [[Continuously variable transmission|CVT]] with physical first gear
+  | [[Aisin Seiki]] ''T110'' [[Transmission (mechanics)#Electric variable|eCVT]] (hybrid)<ref name=ConsumerReports/>
+  }}
+| battery = {{ubl
+  | 6.5 [[Ampere hour|Ah]] (1.6 [[kW·h]]) 244.8V [[Nickel–metal hydride battery|NiMH]]
+  | 1.0 kW·h 259V [[Lithium-ion battery|Li-ion]] (Hybrid LE; North America)
+  }}
+| drivetrain = [[Hybrid vehicle drivetrain#Power-split or series-parallel hybrid|Power-split]] (hybrid)
+| wheelbase = {{convert|111.2|in|mm||abbr=on|order=flip}}
+| length = {{convert|192.1|-|193.3|in|mm||abbr=on|order=flip}}
+| width = {{convert|72.4|in|mm||abbr=on|order=flip}}
+| height = {{convert|56.88|in|mm||abbr=on|order=flip}}
+| weight = {{convert|3262|-|3659|lbs|kg||abbr=on|order=flip}}
+| predecessor = [[Toyota Camry (XV50)]]
+| successor = [[Toyota Camry (XV80)]]
+}}
+
+The '''Toyota Camry (XV70)''' is a [[mid-size car]] produced by [[Toyota]] from June 2017 to October 2024. Replacing the [[Toyota Camry (XV50)|XV50]] series, the XV70 represented the eighth generation of the [[Toyota Camry]] in all markets outside Japan,<ref name="Wheels">{{cite news |last1=Mathioudakis |first1=Byron |title=2017 Detroit Motor Show: 2018 Toyota Camry revealed |url=https://www.wheelsmag.com.au/news/events/1701/2017-detroit-motor-show-all-new-2018-toyota-camry-revealed |work=[[Wheels (magazine)|Wheels]] |location=Australia |date=10 January 2017 |access-date=23 January 2017}}</ref> which followed a different generational lineage. The XV70 Camry was introduced at the [[North American International Auto Show#2017|2017 North American International Auto Show]],<ref name=ConsumerReports/> it is built on the [[Toyota TNGA-K platform|GA-K]] platform.<ref name="usnews"/>
+
+
+== Markets ==
+
+== Trim levels ==
+
+== Camry Hybrid ==
+
+== Facelift ==
+
+== Engines ==
+{| class="wikitable"
+|-
+! Chassis
+! Model
+! Engine
+! Power
+! Torque
+! Transmission
+|-
+| rowspan = "11" | XV70 || rowspan = "2" | ASV71 (FWD) || 2.0&nbsp;L ''[[Toyota AR engine#6AR-FSE|6AR-FSE]]'' inline-four (petrol) || rowspan = "2" | {{convert|123|kW|hp PS|0|abbr=on}} || rowspan = "2" | {{convert|199|Nm|lbft|0|abbr=on}} || rowspan = "2" | 6-speed ''[[Toyota U transmission#U761E|U761E]]'' automatic
+|-
+| 2.0&nbsp;L ''[[Toyota AR engine#6AR-FBS|6AR-FBS]]'' inline-four (petrol)
+|-
+| MXVA71 (FWD) || 2.0&nbsp;L ''[[Toyota Dynamic Force engine#M20A-FKS|M20A-FKS]]'' inline-four (petrol) || {{convert|131|kW|hp PS|0|abbr=on}} || {{convert|210|Nm|lbft|0|abbr=on}} || [[continuously variable transmission|CVT]] ''[[Toyota K transmission#K120|K120]]'' automatic
+|-
+| ASV70 (FWD) || 2.5&nbsp;L ''[[Toyota AR engine#2AR-FE|2AR-FE]]'' inline-four (petrol) || {{convert|132|kW|hp PS|0|abbr=on}} || {{convert|233|Nm|lbft|0|abbr=on}} || 6-speed ''[[Toyota U transmission#U761E|U761E]]'' automatic
+|-
+|  rowspan = "3" | AXVA70 (FWD) || rowspan = "2" | 2.5&nbsp;L ''[[Toyota Dynamic Force engine#A25A-FKS|A25A-FKS]]'' inline-four (petrol) ||  {{convert|151.5|kW|hp PS|0|abbr=on}} || {{convert|249|Nm|lbft|0|abbr=on}} || rowspan = "4" |  8-speed ''[[Toyota U transmission#UB80E|UB80E]]'' automatic
+|-
+|  {{convert|153.5|kW|hp PS|0|abbr=on}} || {{convert|252|Nm|lbft|0|abbr=on}}
+|-
+|  2.5&nbsp;L ''[[Toyota Dynamic Force engine#A25A-FKB|A25A-FKB]]'' inline-four (petrol) || {{convert|154|kW|hp PS|0|abbr=on}} || {{convert|250|Nm|lbft|0|abbr=on}}
+|-
+| AXVA75 (AWD) || 2.5&nbsp;L ''[[Toyota Dynamic Force engine#A25A-FKS|A25A-FKS]]'' inline-four (petrol) ||  {{convert|151|kW|hp PS|0|abbr=on}} || {{convert|247|Nm|lbft|0|abbr=on}}
+|-
+| AXVH70 (FWD) || rowspan = "2" | 2.5&nbsp;L ''[[Toyota Dynamic Force engine#A25A-FXS|A25A-FXS]]'' I4 (petrol hybrid) + ''5NM'' Electric motor || rowspan = "2" | {{convert|131|kW|hp PS|0|abbr=on}} || rowspan = "2" |{{convert|221|Nm|lbft|0|abbr=on}} || rowspan = "2" | [[Transmission (mechanics)#Electric variable|eCVT]] ''T110'' automatic
+|-
+| AXVH75 (AWD)
+|-
+| GSV70 (FWD) || 3.5&nbsp;L ''[[Toyota GR engine|2GR-FKS]]'' V6 (petrol) || {{convert|224|kW|hp PS|0|abbr=on}} || {{convert|362|Nm|lbft|0|abbr=on}} || 8-speed ''[[Toyota U transmission#UA80E|UA80E]]'' automatic
+|}
+
+== Safety ==
+
+== References ==
+
+== External links ==

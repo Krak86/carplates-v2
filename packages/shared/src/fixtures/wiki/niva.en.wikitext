@@ -1,0 +1,253 @@
+{{short description|Russian 4×4 vehicle}}
+{{about|the vehicle currently known as the Lada Niva Legend|the Lada Niva Travel|Lada Niva Travel}}
+{{about-distinguish-text|the 4×4 vehicle formerly known as the Lada Niva|the compact car sold as both the [[Lada Riva|Lada Riva and Lada Nova]]|the musical group called [[Ladaniva]]}}
+{{More citations needed|date=January 2022}}
+{{Use dmy dates|date=April 2020}}
+{{Infobox automobile
+| name             = Lada Niva Legend
+| image            = 1987 Lada Niva 1600.jpg
+| caption          = 1987 Lada Niva
+| manufacturer     = [[AvtoVAZ]]
+| aka              = VAZ-2121 & VAZ-2131 "Niva" (Soviet Union/Russia; 1977–1993)<br />Lada Super 4×4 (Egypt)<br />Lada Bushman (Australia)<ref>Lada Australia advertisement for Lada Niva and Lada Bushman, Wheels (magazine), April 1997</ref><br />Lada Cossack (United Kingdom, Canada & New Zealand)<br />Lada Turist (New Zealand)<br />Lada Fora<br />Lada Hussar (United Kingdom)<br />Lada Job (Italy)<br />Lada Sport (Iceland)<br />Lada Niva<br />Lada Taiga (Germany, Austria & New Zealand)<br />Vlada 4×4 (Japan)
+| production       = 1977–present
+| assembly         = Russia: [[Tolyatti]] ([[VAZ]], [[VAZInterService|VIS]])<br />Azerbaijan: [[Hajigabul]] (Azermash)<br />Ecuador: [[Quito]] ([[Aymesa]])<br />Egypt: [[Cairo]] (Alamal Group)<br />Ethiopia: [[Addis Ababa]] (Holland Car)<br />Greece: [[Thebes, Greece|Thebes]] ([[Automeccanica]])<br />Jordan: [[Amman]] (LHJ)<br />Kazakhstan: [[Ust-Kamenogorsk]] ([[w:ru:Азия Авто|Azia Avto]])<ref>{{cite web |url=http://www.aziaavto.kz/hist_eng.htm |title=Ao"Азия Авто" |publisher=Aziaavto.kz |access-date=1 February 2011 |url-status=dead |archive-url=https://web.archive.org/web/20110116210058/http://www.aziaavto.kz/hist_eng.htm |archive-date=16 January 2011}}</ref><br />Romania: [[Bucharest]] (Dunarea)<br />Ukraine: [[Cherkasy]] ([[Bogdan group|Bogdan]])<br />Uruguay: [[Montevideo]] (Bognor)
+| predecessor      = 
+| successor        = [[Lada Niva Travel]]
+| class            = [[Off-road car]]<br />[[Compact SUV]]
+| body_style       = 3/5-door [[Compact SUV]]<br />2-door [[pickup truck]]<br />2-door [[chassis cab]]<br />3-door [[Panel truck|pickup truck-based van]]<br />3-door [[box van]]<br />2-door [[ambulance]]<br />2-door [[police SUV]]
+| layout           = [[Front-engine, four-wheel-drive layout|Front-engine, full-time four-wheel-drive]]
+| engine           = {{ubl
+ | '''[[Petrol engine|petrol]]:'''
+ | 1.6 L ''[[VAZ-2106|2106]]'' [[Straight-four engine|I4]]
+ | 1.7 L ''21213/4'' I4
+ | 1.8 L ''2131'' I4
+ | '''[[Diesel engine|diesel]]:'''
+ | 1.9&nbsp;L ''[[PSA XUD engine|XUD9A]]'' I4
+ | 1.9 L ''[[PSA XUD engine|XUD9SD]]'' [[Turbo-diesel|turbo]] I4
+}}
+| transmission     = 4-speed [[manual transmission|manual]] (1977–1993)<br />5-speed [[manual transmission|manual]] (1993–present)
+| front_suspension = [[independent suspension]] with coil springs
+| rear_suspension  = 5-link [[live axle]]
+| wheelbase        = {{convert|2200|mm|in|1|abbr=on}} ([[hatchback]])<br />{{convert|2700|mm|in|1|abbr=on}} ([[station wagon|wagon]])<br />{{convert|2700|mm|in|1|abbr=on}} ([[pickup truck|pickup]])
+| length           = {{convert|3740|mm|in|1|abbr=on}} (hatchback)<br />{{convert|4240|mm|in|1|abbr=on}} (wagon)<br />{{convert|4520|mm|in|1|abbr=on}} (pickup)
+| width            = {{convert|1680|mm|in|1|abbr=on}}
+| height           = {{convert|1640|mm|in|1|abbr=on}}
+| weight           = 1,150 kg (2121)<br />1,210 kg (21213/21214)<br />1,350 kg (2131)
+| related          = VIS-2346/2946
+}}
+
+The '''Lada Niva Legend''',<ref name=Ladapress>{{Cite web|title=LADA Niva Legend: the new name for the iconic model – Press-releases – News – Official website LADA|url=https://www.lada.ru/en/press-releases/118503.html|access-date=2021-01-17|website=LADA official website|archive-date=13 January 2021|archive-url=https://web.archive.org/web/20210113112447/https://www.lada.ru/en/press-releases/118503.html|url-status=live}}</ref> formerly called the '''Lada Niva''', '''VAZ-2121''', '''VAZ-2131''', and '''Lada 4×4''' ({{langx|ru|link=no|ВАЗ-2121, ВАЗ-2131, Лада Нива}}), is a series of [[four-wheel drive]], small (hatchback), and compact (wagon and pickup) [[Off-road vehicle|off-road cars]] designed and produced by [[AvtoVAZ]] since 1977. Initially aimed at the rural market, later models also targeted urban users. The three- and later five-door 4×4 hatchbacks were sold under the [[Lada]] marque in many markets,<ref>https://www.lada.ru/en/ {{Webarchive|url=https://web.archive.org/web/20210802222700/https://www.lada.ru/en/ |date=2 August 2021 }} Push cars icon and scroll down</ref> and have been in continuous production since 1977.
+
+In the 1990s, three- and five-door wagons on a {{convert|50|cm|in|0|abbr=on}} longer wheelbase and an extra-long wheelbase pick-up were added to the range.{{Clarify|reason=What does "range" mean here?|date=January 2022}} After the [[Land Rover series|original Land Rover]] and its successor, the [[Land Rover Defender]], were discontinued in 2016, the Niva became the longest-production-run off-road light vehicle still manufactured in its original form. By the end of 2020, an estimated 650,000 Lada Nivas had been sold globally.<ref name="Lada20-12">{{Cite web |title=AVTOVAZ has started production of the new LADA Niva Travel |type=Press Release |url=https://www.lada.ru/en/press-releases/118463.html |date=2020-12-21 |access-date=2021-01-17 |website=LADA official website |archive-date=21 January 2021 |archive-url=https://web.archive.org/web/20210121045737/https://www.lada.ru/en/press-releases/118463.html |url-status=live }}</ref>
+
+The Lada Niva is the world's first mass-produced off-road vehicle with a [[unibody]] construction (fully integrated body and frame).<ref>Six years ahead of the 1983 (for the 1984 model year) American [[Jeep Cherokee (XJ)]].</ref> It is the predecessor of current [[crossover SUV]]s, most of which are built similarly.
+
+In August 2020, Lada took over production of the 2003 [[Lada Niva II|Chevrolet Niva]] and rebranded it the "new" Lada Niva.<ref>{{cite web |url=http://info.avtovaz.ru/press-releases/117703.html |title=Niva возвращается в семью LADA! |trans-title=Niva returns to the Lada family |language=ru |access-date=16 August 2020 |archive-date=17 October 2020 |archive-url=https://web.archive.org/web/20201017140636/http://info.avtovaz.ru/press-releases/117703.html |url-status=live }}</ref> In December 2020, the new Niva was further rebranded as the '''Lada Niva Travel''', while the old model was renamed '''Lada Niva Legend''' in January 2021.<ref>{{Cite web |title=AVTOVAZ has started production of the new LADA Niva Travel – Press-releases – News – Official website LADA |url=https://www.lada.ru/en/press-releases/118463.html |access-date=2021-01-17 |website=LADA official website |archive-date=21 January 2021 |archive-url=https://web.archive.org/web/20210121045737/https://www.lada.ru/en/press-releases/118463.html |url-status=live }}</ref><ref name="Ladapress" />
+
+
+==Name==
+
+==History==
+
+===Prototypes and testing===
+
+===Design===
+
+===Later models===
+
+===Cossack and other importer special editions===
+
+===VAZ-2122 Reka===
+
+===LWB Nivas===
+
+===Nameplate changes===
+
+== Engines ==
+{| class="wikitable"
+! Model name
+! Engine code
+! Capacity
+! Years
+! Type
+! Power
+! Torque
+! Fuel consumption
+! Notes
+|-
+! colspan="9" | '''[[Petrol engine|Petrol]]'''
+|-
+| 21211
+| VAZ-21011
+| 1294 cm³
+| 1978–1987
+| Carburetor
+| 44 kW (60 hp)
+| —
+|
+|
+|-
+| 2121
+| VAZ-2121<ref>{{cite web | title=Lada Niva | date=3 July 2012 | url=https://flickr.com/photos/32109282@N00/7505106488 | access-date=16 July 2026 | archive-date=9 July 2025 | archive-url=https://web.archive.org/web/20250709213949/https://flickr.com/photos/32109282@N00/7505106488 | url-status=live }}</ref>
+| 1570 cm³
+| 1977–1994
+| Carburetor
+| 58.8 kW (80 hp)
+| 118 N⋅m
+|
+|
+|-
+| 21213
+| rowspan="7" | VAZ-21213
+| rowspan="7" | 1690 cm³
+| 1994–2010
+| Carburetor
+| 58 kW (79 hp)
+| —
+|
+|
+|-
+| 21214
+| 1994–2010
+| Multi-point fuel injection
+| 58.5 kW (80 hp)
+| —
+|
+|
+|-
+| 21218
+| 1995–present
+| Carburetor
+| 56.1 kW (76 hp)
+| —
+|
+| Long-wheelbase three-door
+|-
+| 212183
+| ?–present
+| Carburetor
+| 56.1 kW (76 hp)
+| —
+|
+| Landaulet
+|-
+| 21219
+| 1991–1994
+| Carburetor
+| 56.1 kW (76 hp)
+| —
+|
+|
+|-
+| 2129
+| 1994–present
+| Carburetor
+| 56.1 kW (76 hp)
+| —
+|
+| Long-wheelbase three-door
+|-
+| 2131
+| 1995–2001
+| Carburetor
+| 56.1 kW (76 hp)
+| —
+|
+| Five-door
+|-
+| 21214
+| VAZ-21214
+| 1690 cm³
+| 2010–present
+| Multi-point fuel injection
+| 61 kW (83 hp)
+| —
+|
+|
+|-
+| 2131
+| VAZ-2130
+| 1774 cm³
+| 2001–present
+| Fuel injection
+| 58.5 kW (80 hp)
+| —
+|
+|
+|-
+| 1.8
+|
+| 1774 cm³
+| July 2026 – present<ref>{{cite web | title=АвтоВАЗ сделал Lada Niva Legend экономичнее, динамичнее, комфортнее и безопаснее | url=https://motor.ru/news/avtovaz-sdelal-lada-niva-legend-ekonomichnee-dinamichnee-komfortnee-i-bezopasnee-15-07-2026.htm }}</ref>
+| Fuel injection
+| 67 kW (90 hp)
+| 153 N⋅m
+| 9.0 L/100 km
+|
+|-
+| Sport
+| VAZ-21127
+| 1596 cm³
+| 2024–present
+| Fuel injection
+| 90 kW (122 hp)
+| 151 N⋅m
+|
+|
+|-
+! colspan="9" | '''[[Diesel engine|Diesel]]'''
+|-
+| 21215
+| [[PSA XUD engine#XUD9|XUD9]]
+| 1905 cm³
+| 1995–1997
+| Indirect injection
+| 55 kW (75 hp)
+| —
+|
+|
+|}
+
+== Second generation ==
+
+===1998–2002===
+
+===2003–2019===
+
+===2020–present===
+
+==Safety by modern standards==
+
+==Uses==
+
+==Assembly outside Russia==
+
+== Concept cars ==
+
+=== Chevrolet Niva Concept (2014) ===
+
+===Lada 4x4 Vision Concept (2018)===
+
+===Lada T-134 (2025)===
+
+==Modifications==
+
+===Short/regular versions===
+
+==== Lada 4×4 Urban ====
+
+===Vehicles based on the Niva===
+
+==== VAZ-1922 Bronto "March-1" ====
+
+==== APAL-21541 "Stalker" ====
+
+===Long versions===
+
+==Notable owners==
+
+==Gallery==
+
+==References==
+
+==External links==
