@@ -45,6 +45,8 @@
   "result.historyHide": "Приховати історію",
   "result.basicLabel": "Основні дані",
   "result.basicShow": "Показати основні дані",
+  "result.chipsMore": "Показати більше",
+  "result.chipsLess": "Згорнути",
   "result.basicHide": "Приховати основні дані",
   "result.historyTitle": "Історія реєстрацій (за номером)",
   "result.historyTitleVin": "Історія реєстрацій (за VIN)",

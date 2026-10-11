@@ -52,7 +52,7 @@ export default function SectionHeader({
       )}
     >
       <span className="flex min-w-0 items-center gap-1.5 font-semibold">
-        <span aria-hidden className="shrink-0">
+        <span aria-hidden className="flex size-6 shrink-0 items-center justify-center">
           {icon}
         </span>
         {title}

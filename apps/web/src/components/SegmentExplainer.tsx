@@ -29,14 +29,23 @@ type Props = {
   label: string
   /** Put the hint on the chips' row, right-aligned, instead of above them. */
   hintInline?: boolean
+  /** Phones only: keep the explanation panel closed until a chip is tapped (more of the card fits on screen). */
+  collapseOnMobile?: boolean
 }
 
 /**
  * Colour-coded chips with a "what does this part mean" panel underneath — shared by the VIN and plate views.
  * Hover, focus or tap a chip to read about it; the first segment is selected initially.
  */
-export default function SegmentExplainer({ segments, hint, label, hintInline }: Props): ReactNode {
+export default function SegmentExplainer({ segments, hint, label, hintInline, collapseOnMobile }: Props): ReactNode {
   const [selected, setSelected] = useState(segments[0]?.id)
+  const [touched, setTouched] = useState(false)
+  const collapsed = !!collapseOnMobile && !touched
+
+  const handleSelect = (id: string): void => {
+    setSelected(id)
+    setTouched(true)
+  }
   const current = segments.find(s => s.id === selected) ?? segments[0]
   if (!current) return null
 
@@ -51,9 +60,9 @@ export default function SegmentExplainer({ segments, hint, label, hintInline }: 
               key={s.id}
               type="button"
               aria-pressed={current.id === s.id}
-              onMouseEnter={() => setSelected(s.id)}
-              onFocus={() => setSelected(s.id)}
-              onClick={() => setSelected(s.id)}
+              onMouseEnter={() => handleSelect(s.id)}
+              onFocus={() => handleSelect(s.id)}
+              onClick={() => handleSelect(s.id)}
               className={cn(
                 'rounded-md px-1.5 py-0.5 font-semibold tracking-wider ring-0 transition-[box-shadow,opacity,transform] duration-200 ease-out motion-reduce:transition-none',
                 SEGMENT_COLORS[s.color],
@@ -72,11 +81,21 @@ export default function SegmentExplainer({ segments, hint, label, hintInline }: 
         )}
       </div>
 
-      <div aria-live="polite" className="mt-2 rounded-md bg-[var(--color-border)]/30 px-3 py-2 text-sm">
-        <div key={current.id} className="animate-fade-in">
-          <span className="font-semibold">{current.title}</span>
-          <span className="text-[var(--color-muted)]"> · {current.positions}</span>
-          <p className="mt-0.5">{current.desc}</p>
+      <div
+        aria-live="polite"
+        className={cn(
+          'grid transition-[grid-template-rows] duration-300 ease-in-out',
+          collapsed ? 'grid-rows-[1fr] max-md:grid-rows-[0fr]' : 'grid-rows-[1fr]'
+        )}
+      >
+        <div className="overflow-hidden">
+          <div className="mt-2 rounded-md bg-[var(--color-border)]/30 px-3 py-2 text-sm">
+            <div key={current.id} className="animate-fade-in">
+              <span className="font-semibold">{current.title}</span>
+              <span className="text-[var(--color-muted)]"> · {current.positions}</span>
+              <p className="mt-0.5">{current.desc}</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -168,6 +168,15 @@ body {
     transition: border-color 150ms;
   }
 
+  /* Phones: tighter indent so nested lines don't eat the width. */
+  @media (max-width: 767px) {
+    [data-section-header][data-open] ~ *,
+    [data-thread] {
+      margin-left: 0.5rem;
+      padding-left: 0.375rem;
+    }
+  }
+
   [data-section-header][data-open] ~ *:hover,
   [data-thread]:hover {
     border-left-color: var(--color-primary);

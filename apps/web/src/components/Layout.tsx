@@ -147,7 +147,7 @@ export default function Layout({ children }: Props): ReactNode {
         {/* QuickLinks lives inside the sidebar's row: sticky is bounded by its container, so a footer
             outside it would push the sidebar up under the header at the bottom of the page. */}
         <div className="flex min-w-0 flex-1 flex-col">
-          <main className="page-vt min-w-0 flex-1 p-4 md:p-8">{children}</main>
+          <main className="page-vt min-w-0 flex-1 p-2 md:p-8">{children}</main>
 
           <QuickLinks />
         </div>

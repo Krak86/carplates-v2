@@ -22,7 +22,9 @@ import ColorSwatch from '@/components/ColorSwatch'
 import CopyAllInfoButton from '@/components/CopyAllInfoButton'
 import CopyButton from '@/components/CopyButton'
 import LastOperationChip from '@/components/LastOperationChip'
+import CollapsibleChips from '@/components/CollapsibleChips'
 import LazySection from '@/components/LazySection'
+import RegionLabel from '@/components/RegionLabel'
 import FieldInfoButton from '@/components/FieldInfoButton'
 import NoRegionBadge from '@/components/NoRegionBadge'
 import RegistrationTimeline from '@/components/RegistrationTimeline'
@@ -237,7 +239,7 @@ export default function ResultCard({ data }: Props): ReactNode {
                 vinRegistryActions={null}
               />
             </div>
-            <div className="text-base text-[var(--color-muted)]">
+            <div className="flex items-center text-base text-[var(--color-muted)]">
               <Link
                 viewTransition
                 to={`/${data.plate}`}
@@ -254,9 +256,7 @@ export default function ResultCard({ data }: Props): ReactNode {
                 feedback={plateCopy}
                 className="mx-1.5 align-middle"
               />
-              {data.region && (
-                <span className="rounded bg-[var(--color-surface)]/20 px-1.5 py-0.5">{regionLabel(data.region)}</span>
-              )}
+              {data.region && <RegionLabel>{regionLabel(data.region)}</RegionLabel>}
               {!data.region && (
                 <span className="rounded bg-[var(--color-surface)]/20 px-1.5 py-0.5">
                   <NoRegionBadge plate={data.plate} />
@@ -272,7 +272,7 @@ export default function ResultCard({ data }: Props): ReactNode {
               )}
             </div>
             {/* Reserves one chip-height up front so late-arriving chips never push the card down. */}
-            <div className="mt-1 flex min-h-6 flex-wrap items-center gap-1.5">
+            <CollapsibleChips className="mt-1">
               {chipsPending && <span aria-hidden className="h-6 w-24 animate-pulse rounded-full bg-border" />}
               <LastOperationChip operCode={c.operCode} operName={c.operName} dReg={c.dReg} />
               <GenerationChip brand={c.brand} model={c.model} year={c.makeYear} />
@@ -280,7 +280,7 @@ export default function ResultCard({ data }: Props): ReactNode {
               <VdbChips brand={c.brand} model={c.model} kind={c.kind} />
               <Model3dButton brand={c.brand} model={c.model} />
               <Model360Button brand={c.brand} model={c.model} />
-            </div>
+            </CollapsibleChips>
             <div className="mt-2 flex flex-wrap items-center gap-2 empty:hidden">
               <NewCarsLink brand={c.brand} />
               {brandDealerUrl && <BrandSiteChip url={brandDealerUrl} />}

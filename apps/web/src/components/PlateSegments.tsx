@@ -39,6 +39,7 @@ export default function PlateSegments({ plate, region }: Props): ReactNode {
     <SegmentExplainer
       hint={t('plate.seg.hint')}
       hintInline
+      collapseOnMobile
       label={t('plate.seg.label')}
       segments={segments.map(s => ({
         id: s.id,

@@ -13,7 +13,7 @@ export default function Card({ children, className, ref }: Props): ReactNode {
     <div
       ref={ref}
       className={cn(
-        'rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-sm',
+        'rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3 shadow-sm md:p-4',
         className
       )}
     >

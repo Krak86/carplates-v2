@@ -45,6 +45,8 @@
   "result.historyHide": "Hide history",
   "result.basicLabel": "Basic data",
   "result.basicShow": "Show basic data",
+  "result.chipsMore": "Show more",
+  "result.chipsLess": "Show less",
   "result.basicHide": "Hide basic data",
   "result.historyTitle": "Registration history (by plate)",
   "result.historyTitleVin": "Registration history (by VIN)",
