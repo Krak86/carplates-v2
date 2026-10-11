@@ -3,7 +3,15 @@ import { readFileSync } from 'node:fs'
 
 import { describe, it, expect } from 'vitest'
 
-import { parseEngine, parseWikiSpecs, parseWikiTables, powerKwOf, tableSpecs, type WikiEngine } from './wikiSpecs.js'
+import {
+  engineTemplates,
+  parseEngine,
+  parseWikiSpecs,
+  parseWikiTables,
+  powerKwOf,
+  tableSpecs,
+  type WikiEngine
+} from './wikiSpecs.js'
 
 /** Trimmed real wikitext (lead + headings + the spec tables only), saved from the live articles — never fetched in tests. */
 const fixture = (name: string): string =>
@@ -206,5 +214,30 @@ describe('series articles (one page, several generations)', () => {
     expect(jm.engines.length).toBeGreaterThan(0)
     expect(tl.engines.map(e => e.raw)).not.toEqual(jm.engines.map(e => e.raw))
     expect(tl.engines.length + jm.engines.length).toBeLessThan(parseWikiSpecs(text, { lang: 'en' }).engines.length)
+  })
+})
+
+describe('one infobox per generation with {{Двигатель}} engine templates (ru Mazda6)', () => {
+  const text = fixture('mazda6.ru')
+  const gen = (yearFrom: number) => parseWikiSpecs(text, { lang: 'ru', code: 'GG1', series: true, yearFrom })
+
+  it('picks the infobox whose production start matches the generation', () => {
+    expect(gen(2002).wheelbaseMm?.value).toBe(2675)
+    expect(gen(2007).wheelbaseMm).toBeNull()
+    expect(gen(2012).wheelbaseMm?.value).toBe(2830)
+  })
+
+  it('reads engines from the {{Двигатель}} templates (kW, hp, displacement)', () => {
+    const second = gen(2007).engines
+    expect(second.length).toBeGreaterThanOrEqual(2)
+    expect(second[0]).toMatchObject({ displacementCc: 1800, powerKw: 88, fuel: 'petrol' })
+    expect(second[1]).toMatchObject({ displacementCc: 2000, powerKw: 114 })
+  })
+
+  it('engineTemplates converts hp when the kW parameter is empty', () => {
+    const [e] = engineTemplates(
+      '{{Двигатель\n | наименование = 2,2 CD\n | объём = 2200\n | мощность =\n | мощность лс = 136\n | рекомендованное топливо = ДТ\n}}'
+    )
+    expect(e).toMatchObject({ displacementCc: 2200, powerKw: 100, fuel: 'diesel' })
   })
 })

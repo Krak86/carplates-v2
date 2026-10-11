@@ -2096,6 +2096,8 @@
   "wikispec.fuel.hybrid": "hybrid",
   "wikispec.fuel.lpg": "LPG",
   "wikispec.info.lead": "{{name}}, generation {{generation}} ({{span}}): the engines offered in this generation, its drive layout and gearbox.",
+  "wikispec.info.leadModel": "{{name}} ({{span}}): the engines offered over the model's life, its drive layout and gearbox.",
+  "wikispec.footnoteModel": "Catalogue values for the {{name}} ({{span}}), not for this car. They come from Wikipedia and may cover several markets and trims.",
   "wikispec.info.catalogue": "These are catalogue values for the whole generation, not measured on this car. Engines and trims differ by market, so your car may have none of them.",
   "wikispec.info.gap": "Dimensions, mass and tank volume are shown only because the Dutch register (Specs) has no figures for this model.",
   "wikispec.info.credit": "Source: Wikipedia (CC BY-SA); every block names the language edition it was read from.",

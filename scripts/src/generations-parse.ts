@@ -15,7 +15,7 @@ export type Generation = {
   platform: string
   wikiTitle: string
   wikidataId: string
-  source: 'wikidata' | 'prefix' | 'headings'
+  source: 'wikidata' | 'prefix' | 'headings' | 'single'
 }
 
 const MIN_YEAR = 1940
@@ -184,28 +184,89 @@ export type HeadingGeneration = { label: string; code: string; yearFrom: number;
  * Generations of a model that has no separate articles, from the main article's section headings:
  * `==First generation (Typ 1U; 1996)==`, `=== Third generation (J12; 2021) ===`, `== Second generation (2007–2013) ==`.
  */
-export function headingGenerations(wikitext: string): HeadingGeneration[] {
+export function headingGenerations(wikitext: string, seriesTitle = ''): HeadingGeneration[] {
   const out: HeadingGeneration[] = []
   for (const m of wikitext.matchAll(/^={2,4}\s*(.+?)\s*={2,4}\s*$/gm)) {
     const text = cleanWikitext(m[1]!)
-    const g =
-      /^((?:\w+)\s+generation)\s*(?:\(([^)]*)\))?/i.exec(text) ?? /^(Mk\.?\s?\d+)\s*(?:\(([^)]*)\))?/i.exec(text)
-    if (!g) continue
-    const label = g[1]!.replace(/\s+/g, ' ')
+    // `First generation X76 (FC/KC; 1997)`: a platform code may sit between the ordinal and the parenthesis.
+    const ordinalHead = /^((?:\w+)\s+generation)\s*([A-Za-z0-9/-]{2,10})?\s*(?:\(([^)]*)\))?/i.exec(text)
+    const markHead = ordinalHead ? null : /^(Mk\.?\s?\d+)\s*(?:\(([^)]*)\))?/i.exec(text)
+    if (!ordinalHead && !markHead) continue
+    const label = (ordinalHead?.[1] ?? markHead![1]!).replace(/\s+/g, ' ')
     if (/generation/i.test(label) && !(label.split(' ')[0]!.toLowerCase() in ORDINALS) && !/^\d/.test(label)) continue
-    const inner = g[2] ?? ''
+    // Upper-case only: `facelift (2000)` is a word, `XFK (…)` a code.
+    const rawCode = ordinalHead?.[2] ?? ''
+    if (rawCode && (rawCode !== rawCode.toUpperCase() || /^\d+$/.test(rawCode))) continue
+    const platformCode = rawCode
+    const inner = (ordinalHead ? ordinalHead[3] : markHead![2]) ?? ''
     const years = parseYearRange(inner)
     if (!years) continue
-    // The code is what is left of the parenthesis once the years are removed: `Typ 1U; 1996` → `Typ 1U`.
-    const code = inner
-      .split(/[;,]/)
-      .map(s => s.trim())
-      .filter(s => s && !/^(?:19|20)\d{2}\b/.test(s))
-      .join(' ')
+    // The code is what is left of the parenthesis once the years are removed: `Typ 1U; 1996` → `Typ 1U`. A code written
+    // before the parenthesis (`First generation X76 (FC/KC; 1997)`) wins: it names the generation, the rest its bodies.
+    const code =
+      platformCode ||
+      inner
+        .split(/[;,]/)
+        .map(s => s.trim())
+        .filter(s => s && !/^(?:19|20)\d{2}\b/.test(s))
+        .join(' ')
     const ordinal = ORDINALS[label.split(' ')[0]!.toLowerCase()] ?? Number(/\d+/.exec(label)?.[0] ?? 0)
     out.push({ label, code, yearFrom: years.from, ordinal })
   }
-  return dedupeByYear(out)
+  const numbered = dedupeByYear(out)
+  return numbered.length >= 2 ? numbered : (codedHeadings(wikitext, seriesTitle) ?? numbered)
+}
+
+/**
+ * Generations named by a code instead of an ordinal: `C4 (Typ 4A, 1994)`, `Vectra A (1988–1995)`, `Zafira A (1999)`. Many
+ * headings look alike (`S6 (2012–2018)`, `A6L (2005–2009)`), so only the longest run of consecutive codes of one shape counts:
+ * letters A, B, C… or one prefix with rising numbers (C4, C5, C6). The name before a letter must be words of the series title.
+ */
+function codedHeadings(wikitext: string, seriesTitle: string): HeadingGeneration[] | null {
+  const titleWords = new Set(seriesTitle.toLowerCase().split(/\s+/).filter(Boolean))
+  type Cand = { shape: string; rank: number; yearFrom: number; code: string }
+  const cands: Cand[] = []
+  for (const m of wikitext.matchAll(/^={2,4}\s*(.+?)\s*={2,4}\s*$/gm)) {
+    const text = cleanWikitext(m[1]!)
+    const h = /^((?:[A-Z][\w'-]*\s+){0,2}?)([A-Z]|[A-Z]{1,2}\d{1,3})(?:\/[^(]*?)?\s*\(([^)]*)\)/.exec(text)
+    if (!h) continue
+    const name = h[1]!.trim()
+    const token = h[2]!
+    if (
+      name &&
+      !name
+        .toLowerCase()
+        .split(/\s+/)
+        .every(w => titleWords.has(w))
+    )
+      continue
+    const years = parseYearRange(h[3]!)
+    if (!years) continue
+    const letter = token.length === 1
+    const prefix = letter ? '' : /^[A-Z]+/.exec(token)![0]
+    cands.push({
+      shape: letter ? `letter|${name}` : `num|${prefix}`,
+      rank: letter ? token.charCodeAt(0) - 64 : Number(/\d+/.exec(token)![0]),
+      yearFrom: years.from,
+      code: [name, token].filter(Boolean).join(' ')
+    })
+  }
+  let best: Cand[] = []
+  for (const shape of new Set(cands.map(c => c.shape))) {
+    const own = cands
+      .filter(c => c.shape === shape)
+      .sort((a, b) => a.rank - b.rank)
+      .filter((c, i, all) => i === 0 || c.rank !== all[i - 1]!.rank)
+    // Longest run of consecutive ranks with rising start years.
+    let run: Cand[] = []
+    for (const c of own) {
+      const last = run.at(-1)
+      run = last && c.rank === last.rank + 1 && c.yearFrom > last.yearFrom ? [...run, c] : [c]
+      if (run.length > best.length) best = run
+    }
+  }
+  if (best.length < 2) return null
+  return best.map(c => ({ label: c.code, code: c.code, yearFrom: c.yearFrom, ordinal: c.rank }))
 }
 
 /**
@@ -283,4 +344,43 @@ export function generationName(title: string, seriesTitle: string): { code: stri
   }
   const code = generationCode(title, seriesTitle)
   return code ? { code, label: code } : null
+}
+
+/** Years not covered between neighbours plus mid-list spans under two years (a clamped variant): lower = a cleaner chain. */
+export function chainDefects(list: Generation[]): number {
+  let defects = 0
+  list.forEach((g, i) => {
+    const next = list[i + 1]
+    if (next && g.yearTo !== null && next.yearFrom - g.yearTo > 1) defects++
+    if (next && g.yearTo !== null && g.yearTo - g.yearFrom < 2) defects++
+  })
+  return defects
+}
+
+/** More generations is better, each defect costs two: a long chain with a hole still beats a short clean one (Passat). */
+export const chainScore = (list: Generation[]): number => list.length - 2 * chainDefects(list)
+
+/** Generations of the other sources that start inside a hole of the chosen chain (Passat B7 2010–2014 between B6 and B8). */
+export function fillGaps(best: Generation[], others: Generation[]): Generation[] {
+  const extra = others.filter(o => {
+    if (best.some(b => b.yearFrom === o.yearFrom || (!!b.code && b.code === o.code))) return false
+    const before = [...best].reverse().find(b => b.yearFrom < o.yearFrom)
+    const after = best.find(b => b.yearFrom > o.yearFrom)
+    if (!before || before.yearTo === null) return false
+    // Inside a hole, or after a chain that ended before this generation started (Polo Mk6 after Mk5 2009–2017).
+    return after ? before.yearTo <= o.yearFrom && o.yearFrom < after.yearFrom : before.yearTo <= o.yearFrom
+  })
+  return extra.length === 0 ? best : finishGenerations([...best, ...extra])
+}
+
+/**
+ * The widest production span an article states, for a model with ONE generation: `1997–2002 (Daewoo) / 1997–2020 (licence-built)`
+ * → 1997–2020, because licence-built cars (ZAZ Lanos until 2017) sit in our registry. null end = still produced.
+ */
+export function productionSpan(wikitext: string): { from: number; to: number | null } | null {
+  const text = infoboxField(wikitext, 'production')
+  const years = [...text.matchAll(/(?<!\d)((?:19|20)\d{2})(?!\d)/g)].map(m => Number(m[1])).filter(validYear)
+  if (years.length === 0)
+    return infoboxYears(wikitext) && { from: infoboxYears(wikitext)!.from, to: infoboxYears(wikitext)!.to ?? null }
+  return { from: Math.min(...years), to: /present|current|ongoing|now/i.test(text) ? null : Math.max(...years) }
 }

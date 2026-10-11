@@ -17,7 +17,7 @@ const CHIP =
 
 /**
  * "Generation XV40 · 2006–2011" chip from Wikidata / Wikipedia facts, with the neighbouring generations in its popover.
- * Renders nothing while loading, on error, without a match, or when the year falls in no known span.
+ * Renders nothing while loading, on error, without a match, for a one-generation model, or when the year falls in no known span.
  */
 export default function GenerationChip({ brand, model, year }: Props): ReactNode {
   const { t } = useTranslation()
@@ -27,7 +27,8 @@ export default function GenerationChip({ brand, model, year }: Props): ReactNode
   })
   const match = data?.match
   const current = match?.current
-  if (!match || !current) return null
+  // A model with one row (VAZ-2109, Lanos) has no generations to tell apart: its row only anchors the spec sheet.
+  if (!match || !current || match.total < 2) return null
 
   const name = generationLabel(current, t)
   const lines = [

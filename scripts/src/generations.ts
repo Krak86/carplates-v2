@@ -25,12 +25,16 @@ import { stringify as stringifyCsv } from 'csv-stringify/sync'
 import { and, eq, sql } from 'drizzle-orm'
 
 import {
+  chainScore,
+  chainDefects,
+  fillGaps,
   finishGenerations,
   generationCode,
   generationName,
   headingGenerations,
   infoboxField,
   infoboxYears,
+  productionSpan,
   parseYearRange,
   ordinalLabel,
   trustedHeadings,
@@ -139,26 +143,69 @@ type RevisionResponse = {
   }
 }
 
+/** Other makes whose article covers the same model (Renault Logan = Dacia Logan); tried only when the registry make has none. */
+const SERIES_BRAND_ALTS: Record<string, string[]> = {
+  renault: ['Dacia'],
+  opel: ['Vauxhall'],
+  chevrolet: ['Daewoo'],
+  daewoo: ['Chevrolet']
+}
+
+type Series = { title: string; qid: string; wikitext: string; pinned?: boolean }
+
+const TITLE_PINS = new URL('./generations-titles.csv', import.meta.url)
+
+/** `generations-titles.csv`: the article title for registry names the search cannot find (VAZ-2109 lives in "Lada Samara"). */
+async function loadTitlePins(): Promise<Map<string, string>> {
+  const rows = parseCsv(await readFile(TITLE_PINS, 'utf8'), { columns: true, skip_empty_lines: true }) as Record<
+    string,
+    string
+  >[]
+  return new Map(rows.map(r => [norm(r.query!), r.title!]))
+}
+
+let titlePins: Map<string, string> | null = null
+
+/** Article candidates: the registry make's own hit first, then each alternative make's. */
+async function findSeriesCandidates(t: Target): Promise<Series[]> {
+  titlePins ??= await loadTitlePins()
+  const pinned = titlePins.get(norm(t.query))
+  if (pinned) {
+    const hit = await fetchSeries(pinned, '')
+    return hit ? [{ ...hit, pinned: true }] : []
+  }
+  const out: Series[] = []
+  for (const make of [t.make, ...(SERIES_BRAND_ALTS[norm(t.make)] ?? [])]) {
+    const hit = await findSeriesOfBrand(t, make)
+    if (hit && !out.some(o => o.title === hit.title)) out.push(hit)
+  }
+  return out
+}
+
 /** The series article for a target: the shortest search hit that contains the model and the brand, with no "(…)" suffix. */
-async function findSeries(t: Target): Promise<{ title: string; qid: string; wikitext: string } | null> {
+async function findSeriesOfBrand(t: Target, make: string): Promise<Series | null> {
   const found = await getJson<SearchResponse>(
     wikiUrl({
       action: 'query',
       generator: 'search',
-      gsrsearch: t.query,
+      gsrsearch: make === t.make ? t.query : `${make} ${t.model}`,
       gsrlimit: '6',
       gsrnamespace: '0',
       prop: 'pageprops',
       ppprop: 'wikibase_item'
     })
   )
-  const brand = norm(t.make)
+  const brand = norm(make)
   const model = norm(t.model)
   const hit = (found.query?.pages ?? [])
     .filter(p => !p.title.includes('(') && norm(p.title).includes(model) && norm(p.title).includes(brand))
     .sort((a, b) => a.title.length - b.title.length)[0]
   if (!hit) return null
+  return fetchSeries(hit.title, hit.pageprops?.wikibase_item ?? '')
+}
 
+/** The article (redirects followed) with its wikitext and Wikidata id. */
+async function fetchSeries(title: string, fallbackQid: string): Promise<Series | null> {
   const rev = await getJson<RevisionResponse>(
     wikiUrl({
       action: 'query',
@@ -166,13 +213,13 @@ async function findSeries(t: Target): Promise<{ title: string; qid: string; wiki
       rvprop: 'content',
       rvslots: 'main',
       redirects: '1',
-      titles: hit.title,
+      titles: title,
       ppprop: 'wikibase_item'
     })
   )
   const page = rev.query?.pages?.[0]
   const wikitext = page?.revisions?.[0]?.slots.main.content ?? ''
-  const qid = page?.pageprops?.wikibase_item ?? hit.pageprops?.wikibase_item ?? ''
+  const qid = page?.pageprops?.wikibase_item ?? fallbackQid
   return page && !page.missing ? { title: page.title, qid, wikitext } : null
 }
 
@@ -191,12 +238,16 @@ async function wikidataGenerations(qid: string): Promise<{ title: string; wikida
 
 /** Articles named "Series (code)" that Wikidata does not link as generations (BMW 3 Series (E36)). */
 async function prefixGenerations(seriesTitle: string): Promise<{ title: string; wikidataId: string }[]> {
-  const data = await getJson<{ query?: { prefixsearch?: { title: string }[] } }>(
-    wikiUrl({ action: 'query', list: 'prefixsearch', pssearch: `${seriesTitle} (`, pslimit: '40' })
-  )
-  return (data.query?.prefixsearch ?? [])
-    .filter(p => p.title.startsWith(`${seriesTitle} (`) && generationCode(p.title, seriesTitle) !== null)
-    .map(p => ({ title: p.title, wikidataId: '' }))
+  // "Series (E36)" and "Series Mk6": both spellings are generation articles.
+  const titles: string[] = []
+  for (const prefix of [`${seriesTitle} (`, `${seriesTitle} Mk`]) {
+    const data = await getJson<{ query?: { prefixsearch?: { title: string }[] } }>(
+      wikiUrl({ action: 'query', list: 'prefixsearch', pssearch: prefix, pslimit: '40' })
+    )
+    for (const p of data.query?.prefixsearch ?? [])
+      if (p.title.startsWith(prefix) && generationCode(p.title, seriesTitle) !== null) titles.push(p.title)
+  }
+  return titles.map(title => ({ title, wikidataId: '' }))
 }
 
 /** Lead section (infobox) of each article, 20 titles per request. */
@@ -250,39 +301,85 @@ async function fromArticles(
   return out
 }
 
-/** Generations of one target, or [] when Wikipedia has fewer than two with a start year (one row says nothing). */
+/**
+ * Generations of one target. A model with fewer than two generations with a start year gets no chain (the chip hides one row),
+ * but a model whose article gives production years (VAZ-2109, Daewoo Lanos) keeps ONE 'single' row so the spec sheet can
+ * attach to it. A single row is only the fallback: a later candidate article (Dacia Duster) with a real chain wins.
+ */
 async function resolve(t: Target): Promise<{ gens: Generation[]; target: Target }> {
-  const series = await findSeries(t)
-  if (!series) return { gens: [], target: t }
-
-  let gens = await fromArticles(series.title, await wikidataGenerations(series.qid), 'wikidata')
-  if (gens.length < 2) {
-    const viaPrefix = await fromArticles(series.title, await prefixGenerations(series.title), 'prefix')
-    if (viaPrefix.length > gens.length) gens = viaPrefix
+  let single: { gens: Generation[]; target: Target } | null = null
+  for (const series of await findSeriesCandidates(t)) {
+    const found = await resolveSeries(t, series)
+    if (found.gens.length > 0) return found
+    single ??= singleGeneration(t, series)
   }
-  if (gens.length < 2) {
-    const headings = trustedHeadings(headingGenerations(series.wikitext))
-    if (headings.length > gens.length) {
-      gens = headings.map(h => ({
-        code: h.code,
-        label: h.label,
-        yearFrom: h.yearFrom,
-        yearTo: null,
-        bodyStyles: '',
-        platform: '',
+  return single ?? { gens: [], target: t }
+}
+
+/** One row from the series article's own infobox years; null when it names none or the start is not a real year. */
+function singleGeneration(t: Target, series: Series): { gens: Generation[]; target: Target } | null {
+  // Only the model's own article ("Daewoo Lanos"), not a relative of it ("Renault Duster Oroch").
+  if (!series.pinned && !norm(series.title).endsWith(norm(t.model))) return null
+  const years = productionSpan(series.wikitext)
+  if (!years || years.from > new Date().getFullYear()) return null
+  return {
+    gens: [
+      {
+        code: '',
+        label: '',
+        yearFrom: years.from,
+        yearTo: years.to,
+        bodyStyles: infoboxField(series.wikitext, 'body_style').slice(0, 80),
+        platform: infoboxField(series.wikitext, 'platform').slice(0, 60),
         wikiTitle: series.title,
         wikidataId: series.qid,
-        source: 'headings'
-      }))
-    }
+        source: 'single'
+      }
+    ],
+    target: { ...t, ...displayName(t, series.title) }
   }
-  const finished = finishGenerations(gens)
+}
+
+const fromHeadings = (series: Series): Generation[] =>
+  trustedHeadings(headingGenerations(series.wikitext, series.title)).map(h => ({
+    code: h.code,
+    label: h.label,
+    yearFrom: h.yearFrom,
+    yearTo: null,
+    bodyStyles: '',
+    platform: '',
+    wikiTitle: series.title,
+    wikidataId: series.qid,
+    source: 'headings'
+  }))
+
+/** Articles announce the next generation ahead of time (Rogue "T34; 2027"): a start after this year is not on the road. */
+const onTheRoad = (gens: Generation[]): Generation[] =>
+  finishGenerations(gens.filter(g => g.yearFrom <= new Date().getFullYear()))
+
+async function resolveSeries(t: Target, series: Series): Promise<{ gens: Generation[]; target: Target }> {
+  // Wikidata first, then "Series (code)" titles and section headings. A chain with holes (Corolla E140 → E210, Passat without
+  // B7) loses to a source that closes them; on a tie the earlier source stays.
+  const candidates: Generation[][] = [
+    onTheRoad(await fromArticles(series.title, await wikidataGenerations(series.qid), 'wikidata'))
+  ]
+  // A chain that stops years ago for a model still in production lacks its newest generation (Polo without Mk6).
+  const stillProduced = parseYearRange(infoboxField(series.wikitext, 'production'))?.to === null
+  const staleTail = (c: Generation[]): boolean =>
+    stillProduced && (c.at(-1)?.yearTo ?? new Date().getFullYear()) < new Date().getFullYear() - 1
+  const clean = (): boolean => candidates.some(c => c.length >= 2 && chainDefects(c) === 0 && !staleTail(c))
+  if (!clean())
+    candidates.push(onTheRoad(await fromArticles(series.title, await prefixGenerations(series.title), 'prefix')))
+  if (!clean()) candidates.push(onTheRoad(fromHeadings(series)))
+  const ranked = candidates.filter(c => c.length >= 2).sort((x, y) => chainScore(y) - chainScore(x))
+  const best = ranked[0]
+  if (!best) return { gens: [], target: t }
+  const finished = fillGaps(best, ranked.slice(1).flat())
   // The last generation has no next start to end it: a model whose main article gives a production end (Laguna 1993–2015)
   // ends there; only a still-produced model stays open.
   const last = finished.at(-1)
   const seriesEnd = parseYearRange(infoboxField(series.wikitext, 'production'))?.to
   if (last && last.yearTo === null && seriesEnd && seriesEnd >= last.yearFrom) last.yearTo = seriesEnd
-  if (finished.length < 2) return { gens: [], target: t }
   return {
     gens: finished.map((g, i) => ({ ...g, label: g.label && !/^Q\d+$/.test(g.label) ? g.label : ordinalLabel(i + 1) })),
     target: { ...t, ...displayName(t, series.title) }

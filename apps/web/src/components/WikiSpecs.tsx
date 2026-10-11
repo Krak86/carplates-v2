@@ -81,7 +81,7 @@ export default function WikiSpecs({ brand, model, year, own }: Props): ReactNode
   const driveItems = driveRows(match.layout, match.transmission, t)
 
   const info = [
-    t('wikispec.info.lead', { name, generation, span }),
+    generation ? t('wikispec.info.lead', { name, generation, span }) : t('wikispec.info.leadModel', { name, span }),
     t('wikispec.info.catalogue'),
     own && t('wikispec.info.match'),
     match.crossMake && t('rdw.info.crossMake', { name }),
@@ -120,7 +120,11 @@ export default function WikiSpecs({ brand, model, year, own }: Props): ReactNode
         )}
       >
         <div className="overflow-hidden">
-          <p className="mt-2 text-xs text-[var(--color-muted)]">{t('wikispec.footnote', { name, generation, span })}</p>
+          <p className="mt-2 text-xs text-[var(--color-muted)]">
+            {generation
+              ? t('wikispec.footnote', { name, generation, span })
+              : t('wikispec.footnoteModel', { name, span })}
+          </p>
 
           {yearOf && (
             <p className="mt-1 text-xs text-[var(--color-muted)]">

@@ -240,7 +240,8 @@ const ALIASES = {
   fuel_capacity: ['fuel_capacity', 'объём бака', 'бак', 'tankinhalt', '燃料タンク容量'],
   layout: ['layout', 'привод', 'компонування', 'antrieb', 'koncepce', '구동방식', '駆動方式'],
   transmission: ['transmission', 'кпп', 'трансмісія', 'getriebe', '변속기', 'トランスミッション'],
-  engine: ['engine', 'двигатель', 'двигун', 'motoren', 'motor', 'エンジン', '엔진']
+  engine: ['engine', 'двигатель', 'двигун', 'motoren', 'motor', 'エンジン', '엔진'],
+  production: ['production', 'годы производства', 'роки виробництва', 'produktionszeit', 'bauzeit', '生産期間']
 } as const
 type Alias = keyof typeof ALIASES
 
@@ -313,6 +314,95 @@ function blockField(block: string, names: readonly string[]): string {
   return ''
 }
 
+/** The block of a multi-infobox article (one per generation) whose production start is within a year of `yearFrom`; the closest wins. */
+function blockByYear(blocks: Block[], yearFrom: number | undefined): Block | undefined {
+  if (!yearFrom || blocks.length < 2) return undefined
+  const spans = blocks.map(b => {
+    const years = [...blockField(b.text, ALIASES.production).matchAll(/(?<!\d)((?:19|20)\d{2})(?!\d)/g)].map(m =>
+      Number(m[1])
+    )
+    // The first range only ("2007–2013 / 2007–2013 (China)"); an open range is as wide as it gets.
+    return years[0] === undefined
+      ? null
+      : {
+          off: Math.abs(years[0] - yearFrom),
+          width: years[1] !== undefined && years[1] >= years[0] ? years[1] - years[0] : Infinity
+        }
+  })
+  // The closest start wins; of equally close ones the narrowest span, so a per-generation block beats the model-wide one.
+  let best = -1
+  spans.forEach((s, i) => {
+    if (!s || s.off > 1) return
+    const cur = spans[best]
+    if (!cur || s.off < cur.off || (s.off === cur.off && s.width < cur.width)) best = i
+  })
+  return blocks[best]
+}
+
+const ENGINE_TEMPLATE = /^\{\{\s*(?:двигатель|двигун)/i
+const PETROL_WORD = /(?<![\p{L}\d])(?:АИ|аи|бензин\p{L}*)/u
+const DIESEL_WORD = /(?<![\p{L}\d])(?:ДТ|дизел\p{L}*)/iu
+
+/** The text of the `{{…}}` template starting at `start` (braces balanced), or '' when it never closes. */
+function templateAt(raw: string, start: number): string {
+  let depth = 0
+  for (let j = start; j < raw.length - 1; j++) {
+    const two = raw.slice(j, j + 2)
+    if (two === '{{') {
+      depth++
+      j++
+    } else if (two === '}}') {
+      depth--
+      j++
+      if (depth === 0) return raw.slice(start, j + 1)
+    }
+  }
+  return ''
+}
+
+/** Value of the first of `names` as a `| name = value` line of one template, without comments. */
+function templateParam(body: string, names: string[]): string {
+  for (const name of names) {
+    const m = new RegExp(`^\\s*\\|\\s*${escapeRegExp(name)}\\s*=([^\\n]*)`, 'imu').exec(body)
+    const value = m?.[1]?.replace(/<!--[\s\S]*?-->/g, '').trim()
+    if (value) return value
+  }
+  return ''
+}
+
+/**
+ * Engines written as ru / uk `{{Двигатель | наименование = 2,0 L MZR l4 | объём = 2000 | мощность = 114 | мощность лс = 147 …}}`
+ * templates (the parameter `мощность` is kW). One engine per template; [] when the field holds none.
+ */
+export function engineTemplates(raw: string): WikiEngine[] {
+  const out: WikiEngine[] = []
+  for (let i = 0; i < raw.length - 1; i++) {
+    if (raw.slice(i, i + 2) !== '{{') continue
+    const body = templateAt(raw, i)
+    if (!body) break
+    i += body.length - 1
+    if (!ENGINE_TEMPLATE.test(body)) continue
+    const name = expandWikitext(templateParam(body, ['наименование', 'назва'])).join(' ')
+    const base = parseEngine(name)
+    const number = (names: string[]): number => Number(templateParam(body, names).replace(',', '.'))
+    const cc = number(['объём', "об'єм", 'об’єм'])
+    const kw = number(['мощность', 'потужність'])
+    const hp = number(['мощность лс', 'потужність кс'])
+    const fuelText = `${name} ${templateParam(body, ['рекомендованное топливо', 'рекомендоване паливо'])}`
+    const fuel = base.fuel ?? (DIESEL_WORD.test(fuelText) ? 'diesel' : PETROL_WORD.test(fuelText) ? 'petrol' : null)
+    const cylinders = number(['цилиндров', 'циліндрів']) || base.cylinders
+    out.push({
+      displacementCc:
+        cc >= 40 && cc <= 20000 ? Math.round(cc) : cc > 0 && cc < 20 ? Math.round(cc * 1000) : base.displacementCc,
+      cylinders: cylinders && cylinders <= 16 ? cylinders : null,
+      powerKw: kw >= 5 && kw <= 1500 ? Math.round(kw) : hp >= 5 && hp <= 2000 ? Math.round(hp * 0.7355) : base.powerKw,
+      fuel,
+      raw: name || body.slice(0, 80)
+    })
+  }
+  return out
+}
+
 const codeKey = (s: string): string => s.toLowerCase().replace(/[^\p{L}\d]+/gu, '')
 
 export type ParseOptions = {
@@ -325,6 +415,11 @@ export type ParseOptions = {
    * when a heading above them matches `code`, never as a whole.
    */
   series?: boolean
+  /**
+   * First production year of the generation: an article with one infobox per generation (ru `{{Автомобиль}}` under each "Поколение"
+   * heading) gives the block whose production start is within a year of it.
+   */
+  yearFrom?: number
   /** false = infobox only (the probe compares both); default true. */
   tables?: boolean
 }
@@ -368,7 +463,8 @@ export function parseWikiSpecs(wikitext: string, opts: ParseOptions = {}): WikiS
   const sub = code
     ? blocks.find(b => SUB_NAME.test(b.name) && codeKey(blockField(b.text, ALIASES.name)).includes(code))
     : undefined
-  const main = sub ?? blocks.find(b => !SUB_NAME.test(b.name))
+  const mains = blocks.filter(b => !SUB_NAME.test(b.name))
+  const main = sub ?? blockByYear(mains, opts.yearFrom) ?? mains[0]
   const allowBare = BARE_NUMBER_LANGS.has(opts.lang ?? 'en')
   const field = (a: Alias): string[] => (main ? expandWikitext(blockField(main.text, ALIASES[a])) : [])
   const rawOnly: WikiSpecs['rawOnly'] = {}
@@ -388,9 +484,10 @@ export function parseWikiSpecs(wikitext: string, opts: ParseOptions = {}): WikiS
     if (!fromTable && raw.length > 0) rawOnly[name] = raw.join(' / ').slice(0, 300)
     return fromTable
   }
-  const infoboxEngines = field('engine')
-    .map(parseEngine)
-    .filter(e => e.displacementCc !== null || e.powerKw !== null)
+  const templateEngines = main ? engineTemplates(blockField(main.text, ALIASES.engine)) : []
+  const infoboxEngines = (templateEngines.length > 0 ? templateEngines : field('engine').map(parseEngine)).filter(
+    e => e.displacementCc !== null || e.powerKw !== null
+  )
   // Table rows carry power, chassis codes and notes; infobox lines rarely do — tables win when they have a figure.
   const engines =
     tables.engines.some(e => e.powerKw !== null) || infoboxEngines.length === 0 ? tables.engines : infoboxEngines

@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+  chainDefects,
+  chainScore,
   cleanWikitext,
+  fillGaps,
   finishGenerations,
   generationCode,
   generationName,
@@ -9,6 +12,7 @@ import {
   infoboxField,
   infoboxYears,
   parseYearRange,
+  productionSpan,
   trustedHeadings,
   type Generation
 } from './generations-parse.js'
@@ -91,6 +95,99 @@ describe('headingGenerations', () => {
       { label: 'Third generation', code: 'J12', yearFrom: 2021, ordinal: 3 },
       { label: 'Second generation', code: '', yearFrom: 2007, ordinal: 2 }
     ])
+  })
+})
+
+describe('productionSpan', () => {
+  it('takes the widest stated span, so licence-built years count (Lanos until 2017+)', () => {
+    const lanos = `{{Infobox automobile\n| production = 1997–2002 (Daewoo)<br />1997–2020 (CKD and license-built models)\n| assembly = Ukraine (AvtoZAZ: 1998–2017)\n}}`
+    expect(productionSpan(lanos)).toEqual({ from: 1997, to: 2020 })
+  })
+
+  it('leaves the end open for a model still produced', () => {
+    expect(productionSpan('{{Infobox automobile\n| production = 2017–present\n}}')).toEqual({ from: 2017, to: null })
+  })
+
+  it('is null without any year', () => {
+    expect(productionSpan('{{Infobox automobile\n| name = x\n}}')).toBeNull()
+  })
+})
+
+describe('chain quality', () => {
+  const g = (code: string, from: number, to: number | null): Generation => ({ ...gen(from, to, code) })
+
+  it('counts holes and clamped mid-list spans', () => {
+    expect(chainDefects([g('a', 2000, 2005), g('b', 2005, 2010)])).toBe(0)
+    expect(chainDefects([g('a', 2000, 2005), g('b', 2008, 2012)])).toBe(1)
+    expect(chainDefects([g('a', 2008, 2009), g('b', 2009, null)])).toBe(1)
+    expect(chainScore([g('a', 2000, 2005), g('b', 2008, 2012), g('c', 2012, null)])).toBe(1)
+  })
+
+  it('fills a hole and a missing newest generation from other sources', () => {
+    const best = [g('B6', 2005, 2010), g('B8', 2014, 2021)]
+    const others = [g('B7', 2010, 2014), g('B6', 2005, 2010), g('B9', 2021, null)]
+    expect(fillGaps(best, others).map(x => [x.code, x.yearFrom, x.yearTo])).toEqual([
+      ['B6', 2005, 2010],
+      ['B7', 2010, 2014],
+      ['B8', 2014, 2021],
+      ['B9', 2021, null]
+    ])
+  })
+
+  it('leaves a clean chain alone and ignores a generation that overlaps one', () => {
+    const best = [g('a', 2000, 2005), g('b', 2005, 2010)]
+    expect(fillGaps(best, [g('x', 2003, 2007)])).toBe(best)
+  })
+})
+
+describe('headingGenerations: coded headings', () => {
+  it('reads a platform code between the ordinal and the parenthesis (Kangoo)', () => {
+    const wt = `== First generation X76 (FC/KC; 1997) ==\n== Second generation X61 (FW/KW; 2007) ==\n== Third generation XFK (FFK/KFK; 2020) ==`
+    expect(headingGenerations(wt, 'Renault Kangoo').map(g => [g.label, g.code, g.yearFrom])).toEqual([
+      ['First generation', 'X76', 1997],
+      ['Second generation', 'X61', 2007],
+      ['Third generation', 'XFK', 2020]
+    ])
+  })
+
+  it('reads the Audi A6 C-codes and ignores variants', () => {
+    const wt = [
+      '== C4 (Typ 4A, 1994) ==',
+      '=== C4 engines ===',
+      '== S6 ==',
+      '== C5 (Typ 4B, 1997) ==',
+      '== allroad quattro (1999–2005) ==',
+      '== C6 (Typ 4F, 2004) ==',
+      '== A6L (2005–2009) ==',
+      '== S6 (2012–2018) ==',
+      '== C7 (Typ 4G, 2011) ==',
+      '== C7 facelift (2015–2018) =='
+    ].join('\n')
+    expect(headingGenerations(wt, 'Audi A6').map(g => [g.code, g.yearFrom])).toEqual([
+      ['C4', 1994],
+      ['C5', 1997],
+      ['C6', 2004],
+      ['C7', 2011]
+    ])
+  })
+
+  it('reads letter generations named after the model (Vectra, Zafira) and skips other brands', () => {
+    const vectra = `== Vectra A (1988–1995) ==\n== Vectra B (1995–2002) ==\n== Vectra C (2002–2008) ==\n== Chevrolet Vectra D (2009–2012) ==`
+    expect(headingGenerations(vectra, 'Opel Vectra').map(g => [g.code, g.yearFrom])).toEqual([
+      ['Vectra A', 1988],
+      ['Vectra B', 1995],
+      ['Vectra C', 2002]
+    ])
+    const zafira = `== Zafira A (1999) ==\n== Zafira OPC ==\n== Zafira B (2005) ==\n== Zafira C/Zafira Tourer (2011) ==`
+    expect(headingGenerations(zafira, 'Opel Zafira').map(g => [g.code, g.yearFrom])).toEqual([
+      ['Zafira A', 1999],
+      ['Zafira B', 2005],
+      ['Zafira C', 2011]
+    ])
+  })
+
+  it('finds nothing in a single stray code heading', () => {
+    expect(headingGenerations('== S6 (2012–2018) ==', 'Audi A6')).toEqual([])
   })
 })
 
