@@ -3185,7 +3185,7 @@ Every /stats section now has a ❓ explanation (what the data means, where it co
 - **Sources named:** data.gov.ua registrations dataset (MVS service centres), the plate-prefix → region table, RDW open data, Wikipedia generation specs. Thresholds are worded "a few hundred vehicles" (weight and spec floors are 200 in `weight-stats.ts` / `spec-stats.ts`).
 - **Collapse-all:** `ScrollButtons` renders it only when the path is one segment outside `ROUTE_TITLE_KEYS` (the `/:query` plate / VIN route); "back to top" stays everywhere.
 - **/fuel and /safety:** same treatment. Keys `fuelSummary|fuelPowertrain|fuelChart|fuelModels|fuelDistribution` and `safetySummary|safetyChart|safetyModels|safetyDistribution` (titles `fuel|safety.chart.title`, `fuel|safety.models.title`); the model lists take an `info` prop, so the ❓ also shows on the home page boards. Floors worded from the code (brands 2000, models 1500 matched cars; sources EEA/EPA and Euro NCAP / JNCAP / C-NCAP / KNCAP / IIHS).
-- **Known gaps / follow-ups:** `STATIC_ROUTES` in `use-header-vehicle-label.ts` lacks `/fuel` and `/safety` (`ROUTE_TITLE_KEYS` is the complete list); `docs/features-reference.md` says the spec floor is 500, the code uses 200.
+- **Known gaps / follow-ups:** `STATIC_ROUTES` in `use-header-vehicle-label.ts` lacks `/fuel` and `/safety` (`ROUTE_TITLE_KEYS` is the complete list); the spec floor is 200 in `spec-stats.ts` (stored) and 500 in `stats.service.ts` (shown) — `docs/features-reference.md` now says both.
 
 ## Wikimedia photos for КРАЗ trucks (2026-10-11)
 

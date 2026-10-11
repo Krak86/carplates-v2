@@ -1,7 +1,5 @@
 # CLAUDE_RULES.md
 
-Auto-loaded via @import in CLAUDE.md (comment it out there to save tokens).
-
 ## Environment
 
 **No Python on this machine.** For bulk or scripted edits use the Edit tool (`replace_all` where it fits), or a Node/`tsx`
@@ -88,18 +86,11 @@ warns on violations; side-effect imports (`import './x'`) are position-exempt.
 
 **Styling — Tailwind v4 (CSS-first):**
 
-The theme lives in the `@theme` block at the top of
-[apps/web/src/styles/global.css](apps/web/src/styles/global.css). No
-`tailwind.config`. Light is the committed default; `[data-theme='dark']` tokens
-are wired but there's no UI toggle yet.
-
-- Use v4 directives: `@theme`, `@utility`, `@custom-variant`, `@plugin`, `@import 'tailwindcss'`, `@source`.
-- Removed in v4, never emit: `@tailwind base/components/utilities`, `@screen`, `theme()`, `safelist`. `!important` is a trailing bang (`@apply inline-block!`). Keyframes go top-level. Class names in `.md` files and CSS comments are not scanned.
+Theme: `@theme` block at the top of [apps/web/src/styles/global.css](apps/web/src/styles/global.css); no `tailwind.config`. Light is the
+default; `[data-theme='dark']` tokens exist, no UI toggle. Use v4 directives only (`@theme`, `@utility`, `@custom-variant`, `@plugin`,
+`@source`); never `@tailwind base/…`, `@screen`, `theme()`, `safelist`. `!important` is a trailing bang (`@apply inline-block!`).
 
 ## Performance Rules
-
-**Zustand selectors (CRITICAL):** never a zero-arg `useUiStore()`. 1 field →
-`useUiStore(s => s.field)`; 2+ → a shallow-compared selector.
 
 **Effects:**
 
