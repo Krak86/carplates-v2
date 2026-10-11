@@ -115,6 +115,41 @@ const BODY_RULES: ReadonlyArray<readonly [BodyCategory, RegExp]> = [
   ['radio', /РАДІОТЕХН/]
 ]
 
+/**
+ * The registry spelled the body with a licence-category suffix ("КАБРІОЛЕТ-B") up to 2020 registrations and without it from
+ * 2021 — same vehicles, same fields. Display, stats grouping and search treat both as the plain name. The suffix is Latin
+ * "B"; the Cyrillic "В" is accepted too.
+ */
+export function normalizeBody(body: string): string
+export function normalizeBody(body: string | null | undefined): string | null
+export function normalizeBody(body: string | null | undefined): string | null {
+  if (!body) return null
+  return body.trim().replace(/-[BВ]$/i, '')
+}
+
+type BodyStatsRow = { body: string | null; totalRows: number; distinctPlates: number; distinctVins: number }
+
+/** `stats_by_body` rows with the "-B" and plain spellings summed into one row (the plain name), biggest first. */
+export function mergeBodyStats<T extends BodyStatsRow>(rows: readonly T[]): T[] {
+  const merged = new Map<string | null, T>()
+  for (const row of rows) {
+    const key = normalizeBody(row.body)
+    const prev = merged.get(key)
+    merged.set(
+      key,
+      prev
+        ? {
+            ...prev,
+            totalRows: prev.totalRows + row.totalRows,
+            distinctPlates: prev.distinctPlates + row.distinctPlates,
+            distinctVins: prev.distinctVins + row.distinctVins
+          }
+        : { ...row, body: key }
+    )
+  }
+  return [...merged.values()].sort((a, b) => b.distinctPlates - a.distinctPlates)
+}
+
 /** Special-purpose category for a raw registry `body` value, or `null` for generic / unrecognised bodies. */
 export function resolveBodyCategory(body: string | null | undefined): BodyCategory | null {
   if (!body) return null

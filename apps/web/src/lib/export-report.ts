@@ -1,4 +1,4 @@
-import { brandLogoUrl, CURRENCIES, valueCurve } from '@carplates/shared'
+import { brandLogoUrl, CURRENCIES, normalizeBody, valueCurve } from '@carplates/shared'
 import type {
   Generation,
   CaRecallsResponse,
@@ -211,7 +211,7 @@ function buildVehicleSection(input: ExportInput, t: Translate): ExportKeyValueSe
     pushRow(rows, t('field.brandModel'), [c.brand, c.model].filter(Boolean).join(' ') || null)
     pushRow(rows, t('field.year'), c.makeYear)
     pushRow(rows, t('generation.info.title'), generationRowValue(input.generation, t))
-    pushRow(rows, t('field.body'), c.body)
+    pushRow(rows, t('field.body'), normalizeBody(c.body))
     if (c.capacity != null) pushRow(rows, t('field.capacity'), c.capacity)
     if (c.capacity == null || c.powerKwt != null) pushRow(rows, t('field.power'), c.powerKwt)
     pushRow(rows, t('field.color'), c.color)

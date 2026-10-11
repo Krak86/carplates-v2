@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
+import { normalizeBody } from '@carplates/shared'
 import type { StatsFieldDimension } from '@carplates/shared'
 
 import ColorSwatch from '@/components/ColorSwatch'
@@ -127,6 +128,8 @@ export default function FieldInfoButton({ dimension, current }: Props): ReactNod
     setHovering(false)
   }
 
+  // Stats rows carry the plain body name ("КАБРІОЛЕТ"), the card may hold the pre-2021 "-B" spelling.
+  const currentValue = dimension === 'body' ? normalizeBody(current) : current
   const isKnown = config.isKnown ?? ((): boolean => true)
   const allRows = stats.data ?? []
   const known = allRows
@@ -136,7 +139,7 @@ export default function FieldInfoButton({ dimension, current }: Props): ReactNod
       icon: config.getIcon?.(row.value),
       descriptionKey: config.getDescriptionKey?.(row.value),
       totalRows: row.totalRows,
-      isCurrent: row.value === current
+      isCurrent: row.value === currentValue
     }))
     .sort((a, b) => b.totalRows - a.totalRows)
   const unknownTotal = allRows.filter(row => !isKnown(row.value)).reduce((sum, row) => sum + row.totalRows, 0)

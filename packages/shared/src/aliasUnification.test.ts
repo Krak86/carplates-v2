@@ -63,6 +63,7 @@ describe('ZAZ / Daewoo alias source', () => {
     expect(wikiSearchName('citroen', 'c1sx')?.model).toBe('C1')
     expect(wikiSearchName('skoda', 'octavia a8')).toMatchObject({ brand: 'Skoda', model: 'Octavia' })
     expect(wikiSearchName('skoda', 'octavia a5')).toBeNull()
+    expect(wikiSearchName('smart', 'cabrio')?.model).toBe('Fortwo')
   })
 
   it('keeps the own make first and still hides a miss', () => {

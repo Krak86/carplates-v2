@@ -374,7 +374,7 @@ Renault Logan/Sandero/Duster -> Dacia added (own make is tried first, so Vehicle
 **Coverage of the current registry** (share of vehicles whose make/model matches): cars **80.9 %** (6.2 % via loose prefix), trucks/vans
 65.2 %, buses 32.6 %, motorcycles 18.1 %. The unmatched cars are structural — VAZ/Lada, ZAZ, Daewoo, Chery Amulet etc. were barely
 sold in NL, so RDW has no rows; do not chase them. No chip and no `/stats` panel was built (owner to decide: a "136 hp" chip is cheap;
-a `/stats` panel would mostly show the unmatched Soviet/Korean fleet). Follow-ups done the same day: small-sample warning + approximate counts, Emissions falls back to RDW CO2, tonnes/litres brackets, share link, per-row explainers. **Not browser-checked in the UI yet.**
+a `/stats` panel would mostly show the unmatched Soviet/Korean fleet). Follow-ups done the same day: small-sample warning + approximate counts, Emissions falls back to RDW CO2, tonnes/litres brackets, share link, per-row explainers. **Browser-checked 2026-10-11** (КА2209ТВ, VW Golf 2014, `?section=specs`: light 1280 px, dark ~500 px, all six groups expanded, no console errors, no horizontal overflow).
 
 **Stage C2 — done (2026-10-08): more RDW fields in the Specs block.** Built: migration 0048 (34 columns on `rdw_specs`: min / median /
 max of gross mass, wheelbase, seats, doors, braked and unbraked towing, length, width, height, top speed; plus `*_n` for the four
@@ -892,7 +892,7 @@ little to a result card (same finding as Eurostat), so value comes from **model-
   3. Engine-size stripping skips the brand rules: `mazda|6 2.5` searches "mazda 6", `mazda|6` searches "Mazda6" (both found; cosmetic).
   4. Largest remaining `not_found` rows: Geely `jl7162` (9.8k cars; only `jl7152` is aliased), Honda `m-nv` (4.3k), Chrysler `gr.voyager` (1.5k),
      Skoda `octavia a8` (1.0k), Renault `taliant`, BYD `leopard 3`, Citroen `c1sx` (typo of C1), Smart `cabrio`. Cheap rules, ~0.2 % of cars.
-- **Recommendation before stage J (or any new model-keyed source):** (a) make `modelFamily` / the wiki alias table feed the VehiclesDB / RDW matcher
+- **Recommendation before stage J — DONE by stage M (M1–M4, 2026-10-10) plus Smart `cabrio` (2026-10-11; Honda `m-nv`, Renault `taliant`, BYD `leopard 3` are real Commons gaps — see `docs/plan-done.md`; (b) and (c) stand):** (a) make `modelFamily` / the wiki alias table feed the VehiclesDB / RDW matcher
   (one alias source, one test file), and group `stats_by_model` by family; (b) add a Korean / Japanese **domestic-name alias list** only when KR / JP data is
   actually built; (c) keep matching misses hidden — a new source never shows a section on a fuzzy guess.
 - **Priority:** stage J is optional; its realistic yield is KBA + DataVic (clean licences, popularity / survival lines) and MLIT recalls (if the PDL note
@@ -1024,7 +1024,7 @@ cadence = how often to run it by hand, then by scheduler. Each bulk source follo
 | Open EV Data                              | yes, tiny                                                                  | data file untouched since 2020-07 | **yearly** (check the repo for a newer ev-data.json)                           | re-run `ingest:<x>:csv` seed is enough between pulls                                         |
 
 Result-card blocks: **Recalls** (RDW + NHTSA + CA, market-labelled), **Complaints** (NHTSA), **Common faults** (MOT),
-**Specs** (RDW), **Electric** (Open EV Data). Status: **Specs (RDW), Recalls (RDW) and Electric built**; the others **not started**.
+**Specs** (RDW), **Electric** (Open EV Data). Status: **all built** (Specs, Recalls RDW/NHTSA/CA, Complaints, Electric, Common faults).
 
 ## Decisions on the former open questions (2026-10-08, best-practice defaults; owner may override)
 

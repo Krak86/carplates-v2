@@ -6,6 +6,7 @@ import { Link, useSearchParams } from 'react-router'
 import {
   dealerUrl,
   fallbackVehicleColor,
+  normalizeBody,
   resolveVehicleColor,
   resolveVehicleKind,
   VEHICLE_COLOR_HEX
@@ -358,7 +359,7 @@ export default function ResultCard({ data }: Props): ReactNode {
                             {bodyInfo.icon}
                           </span>
                         )}
-                        {c.body}
+                        {normalizeBody(c.body)}
                         <FieldInfoButton dimension="body" current={c.body} />
                       </span>
                       {bodyInfo && <span className="text-right text-xs text-muted">{t(bodyInfo.descriptionKey)}</span>}

@@ -3106,6 +3106,14 @@ Files: `apps/api/src/nhtsa/*`, `apps/api/src/safety/nhtsa-models.ts`, `packages/
   (112,846 rows). **`pnpm wiki-images:coverage`: 99.3 % of cars have a photo (13,272,102 of 13,371,190; was 99.1 %), 88.2 % of groups (was 88.0 %).**
 - **M4 — stats grouping (2026-10-10).** Migration 0057 adds `registry.stats_model_grouped`: `stats_by_model` with every pair `modelFamily` knows folded into its family row (382 of 78,808 raw pairs → 78,448 rows), other pairs copied as-is. Rebuilt from `stats_by_model` alone (no registry scan, seconds, no 15-min refresh) by `scripts/src/model-family-stats.ts` (`pnpm db:refresh-model-family-stats`, part of `db:refresh-derived`; run after `db:refresh-stats`). `StatsService` top-models boards read it; `stats_by_model` stays raw for the search suggestions. Folded counts are sums, so a plate typed under two spellings counts twice. Result: **Daewoo Lanos is first (378,476 plates)**, ZAZ Sens sixth, Slavuta twelfth. Chevrolet Lanos stays its own row (`modelFamily` keeps the brand).
 
+- **M3 follow-up (2026-10-11).** Tried four more photo rules; only Smart `cabrio` → Fortwo worked (787 cars; kept and pinned in `aliasUnification.test.ts`). The other three are
+  genuine Commons gaps, so no rule was kept: Renault `taliant` (743 cars) has only PNG files (the pre-warm takes JPEG only); Honda `m-nv` (4,300) has one JPEG with no year in the
+  title (the plan needs a year); BYD `leopard 3` has no Commons file under any name. `wiki-images.csv.gz` re-exported (114,507 rows); coverage 99.3 % of cars / 88.2 % of groups, unchanged.
+
+## Body "-B" spelling merged ✅ DONE (2026-10-11)
+
+`КАБРІОЛЕТ-B` (12,899 cars, registered 2013–2020) and `КАБРІОЛЕТ` (20,903, registered 2021–2026) are the same body type; 31 body names carry the suffix. `normalizeBody` + `mergeBodyStats` in `packages/shared/src/vehicleBody.ts` (tests in `vehicleBody.test.ts`), used by the result card, AR card, export, the field-info popover, `/api/stats`, `/api/stats/field/body`, body suggestions and the search filter. Read-time only: no migration, no `db:refresh-stats`. Browser-checked on АА6988ТХ (Smart Cabrio 2006): shows `КАБРІОЛЕТ`. Not checked: the advanced-search UI and the /stats page.
+
 ## UK MOT "Common faults" (stage G) ✅ DONE (2026-10-10)
 
 Strategy, profiling numbers, decisions, size report and the all-years forecast: `DATASETS_PLAN.md` ("Stage G"). Conventions for working on it: `docs/features-reference.md` ("UK MOT Common faults").

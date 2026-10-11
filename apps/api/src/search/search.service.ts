@@ -1,6 +1,13 @@
 import { Inject, Injectable } from '@nestjs/common'
 import { currentRegistration, statsByBody, statsByBrand, statsByModel, statsByOper } from '@carplates/db'
-import { fuelKeyword, platePrefixesForRegion, sourceValueForKind, sourceValuesForColor } from '@carplates/shared'
+import {
+  fuelKeyword,
+  mergeBodyStats,
+  normalizeBody,
+  platePrefixesForRegion,
+  sourceValueForKind,
+  sourceValuesForColor
+} from '@carplates/shared'
 import type {
   BodySuggestionsResponse,
   BrandSuggestionsResponse,
@@ -65,16 +72,22 @@ export class SearchService {
     return { suggestions: rows.filter((r): r is { brand: string; distinctPlates: number } => r.brand != null) }
   }
 
-  /** Top-10 raw body values by distinctPlates matching `q` ("МІКРОАВТОБУС МЕДДОПОМОГА", "СЕДАН-B"...). */
+  /** Top-10 body values by distinctPlates matching `q`, "-B" and plain spellings merged ("МІКРОАВТОБУС МЕДДОПОМОГА", "СЕДАН"...). */
   async suggestBodies(q: string): Promise<BodySuggestionsResponse> {
     const rows = await this.dbService.db
       .select({ body: statsByBody.body, distinctPlates: statsByBody.distinctPlates })
       .from(statsByBody)
-      .where(and(isNotNull(statsByBody.body), q ? ilike(statsByBody.body, `%${q}%`) : undefined))
+      .where(and(isNotNull(statsByBody.body), q ? ilike(statsByBody.body, `%${normalizeBody(q)}%`) : undefined))
       .orderBy(desc(statsByBody.distinctPlates))
-      .limit(10)
+      .limit(20)
 
-    return { suggestions: rows.filter((r): r is { body: string; distinctPlates: number } => r.body != null) }
+    const merged = mergeBodyStats(rows.map(r => ({ ...r, totalRows: 0, distinctVins: 0 })))
+    return {
+      suggestions: merged
+        .filter((r): r is typeof r & { body: string } => r.body != null)
+        .slice(0, 10)
+        .map(r => ({ body: r.body, distinctPlates: r.distinctPlates }))
+    }
   }
 
   /** Every operation code with its most common name and current vehicle count (~190 rows from the stats_by_oper rollup). */
@@ -136,7 +149,7 @@ export class SearchService {
       filters.color ? inArray(currentRegistration.color, sourceValuesForColor(filters.color)) : undefined,
       filters.kind ? eq(currentRegistration.kind, sourceValueForKind(filters.kind)) : undefined,
       // Substring, served by ix_current_reg_body_trgm (migration 0042).
-      filters.body ? ilike(currentRegistration.body, `%${filters.body}%`) : undefined,
+      filters.body ? ilike(currentRegistration.body, `%${normalizeBody(filters.body)}%`) : undefined,
       // Exact code, served by ix_current_reg_oper_code (migration 0059).
       filters.oper != null ? eq(currentRegistration.operCode, filters.oper) : undefined,
       // Matches the ix_current_reg_plate_region expression index (packages/db migration 0015) --

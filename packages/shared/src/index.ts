@@ -31,6 +31,8 @@ export {
   bodySuggestionSchema,
   bodySuggestionsResponseSchema,
   BODY_CATEGORIES,
+  mergeBodyStats,
+  normalizeBody,
   resolveBodyCategory,
   type BodyCategory,
   type BodySuggestion,

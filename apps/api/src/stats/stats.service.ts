@@ -24,6 +24,7 @@ import {
 } from '@carplates/db'
 import {
   dataVersionResponseSchema,
+  mergeBodyStats,
   statsFieldResponseSchema,
   statsResponseSchema,
   statsTopResponseSchema,
@@ -204,7 +205,9 @@ export class StatsService {
     const db = this.dbService.db
     switch (dimension) {
       case 'body':
-        return statsFieldResponseSchema.parse((await db.select().from(statsByBody)).map(r => ({ ...r, value: r.body })))
+        return statsFieldResponseSchema.parse(
+          mergeBodyStats(await db.select().from(statsByBody)).map(r => ({ ...r, value: r.body }))
+        )
       case 'kind':
         return statsFieldResponseSchema.parse((await db.select().from(statsByKind)).map(r => ({ ...r, value: r.kind })))
       case 'color':
@@ -259,7 +262,7 @@ export class StatsService {
       byYear,
       byRegion,
       byRegionYear,
-      byBody: byBody.map(row => ({ ...row, value: row.body })),
+      byBody: mergeBodyStats(byBody).map(row => ({ ...row, value: row.body })),
       byKind: byKind.map(row => ({ ...row, value: row.kind })),
       byColor: byColor.map(row => ({ ...row, value: row.color })),
       byFuel: byFuel.map(row => ({ ...row, value: row.fuel })),

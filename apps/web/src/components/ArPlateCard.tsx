@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
+import { normalizeBody } from '@carplates/shared'
 
 import { plateQuery } from '@/lib/queries'
 import { useRegionLabel } from '@/lib/region-label'
@@ -47,7 +48,9 @@ export default function ArPlateCard({ plate, auto, onNavigate }: Props): ReactNo
               <p className="font-medium">
                 {formatVehicleLabel({ brand: car.brand, model: car.model, year: car.makeYear, color: car.color })}
               </p>
-              <p className="text-muted">{[car.fuel, car.body, regionLabel(data.region)].filter(Boolean).join(' · ')}</p>
+              <p className="text-muted">
+                {[car.fuel, normalizeBody(car.body), regionLabel(data.region)].filter(Boolean).join(' · ')}
+              </p>
             </>
           )}
           <Link

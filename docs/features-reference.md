@@ -234,6 +234,10 @@ tables equal the statute, so edit it with them. A pair is the region at issue, n
 
 - **Top-models boards read `stats_model_grouped`, not `stats_by_model`:** ZAZ / Daewoo / Chevrolet spellings are folded by `modelFamily` into one row. Rebuild with `pnpm db:refresh-model-family-stats` (after `db:refresh-stats`; `db:refresh-derived` does it). Raw `stats_by_model` still feeds the search model suggestions.
 
+## Body type spelling ("-B")
+
+The registry writes the body with a licence-category suffix (`КАБРІОЛЕТ-B`) for registrations dated up to 2020 and without it from 2021 — same vehicles, same kind / purpose / fuel (checked 2026-10-11 on cabriolets: no overlap, cut at 2021-01-01). `normalizeBody` (`vehicleBody.ts`) strips a trailing `-B` / `-В`; the card, AR card, export and the "?" popover use it, `mergeBodyStats` sums the two `stats_by_body` rows at read time (`/api/stats`, `/api/stats/field/body`, body suggestions), and the advanced-search body filter normalizes its input (it is a substring match, so plain `СЕДАН` already hits both). Stored data and the rollup are untouched — no migration, no refresh. `resolveBodyCategory` keyword rules ignore the suffix. Use `normalizeBody` for any new body display or grouping.
+
 ## Registration status (last operation)
 
 - **What it is:** a vehicle's status = its latest registry operation (`current_registration.oper_code`, e.g. 215 = ТИМЧАСОВИЙ ДЕРЖАВНИЙ ОБЛІК ТЗ ЗА ВІЙСЬКОВОСЛУЖБОВЦЕМ). `operStatus()` in `apps/web/src/lib/oper-info.ts` maps a code to one of 9 statuses (military / temporary / properUser / new / import / owner / modification / deregistered / other); it reuses `operCategory` and splits out 2xx.

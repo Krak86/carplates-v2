@@ -133,6 +133,7 @@ function brandAlias(brand: string, model: string): WikiSearchName | null {
   if (brand === 'chevrolet' && model === 'evanda') return named('Daewoo', 'Evanda')
   if (brand === 'renault' && model === 'megane scenic') return named('Renault', 'Scenic')
   if (brand === 'byd' && model === 'f-3') return named('BYD', 'F3')
+  if (brand === 'smart' && model === 'cabrio') return named('Smart', 'Fortwo')
   if (brand === 'infiniti') {
     const family = /^(fx|ex|qx|jx|g|m)\s?\d{2}$/.exec(model)?.[1]
     if (family) return named('Infiniti', family.toUpperCase())
