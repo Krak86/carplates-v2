@@ -560,3 +560,14 @@ export {
   type MotReason,
   type MotResponse
 } from './mot.js'
+
+export {
+  WIKI_SPEC_BOUNDS,
+  expandWikitext,
+  parseEngine,
+  parseMeasure,
+  parseWikiSpecs,
+  type Measure,
+  type WikiEngine,
+  type WikiSpecs
+} from './wikiSpecs.js'

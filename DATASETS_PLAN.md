@@ -356,7 +356,7 @@ at the end of a stage give a commit message and stop. Order = value / risk, clea
 | **H. Transport Canada recalls** — **done 2026-10-10** (cut down, see "Stage H — done" below)                                   | Only the Canadian safety campaigns with no US (NHTSA) twin (1,595 of 7,648 since 2010) as a third "Canada" group in the Recalls block; twin test at ingest; quarterly                                                                                                                                                                            | small        | D, F                              |
 | **Z. autoevolution specs**                                                                                                     | Only if they grant written permission and a data channel; then overlap check + "Specs" section (would sit beside or replace the RDW specs for models RDW lacks)                                                                                                                                                                                  | —            | their reply                       |
 | **I. Car generations (Wikipedia + Wikidata)** — **built 2026-10-11** (see "Stage I — built" below)                             | Generation per (brand, model, year): code, label, production years, body styles, platform; "Generation XV40 (2006–2011)" line on the card (details under "Stage I" below)                                                                                                                                                                        | medium-large | — (reuses the C pipeline pattern) |
-| **K. Wikipedia spec sheet** — proposal 2026-10-10, not started                                                                 | Engines, dimensions, mass, layout, transmission per generation from infoboxes + Wikidata; per-field language fallback (UI lang -> en -> ru -> ua -> make's home-language edition); fills what RDW lacks (VAZ/ZAZ/Daewoo, motorcycles, buses) (details under "Stage K" below)                                                                     | medium-large | I (generations), M (aliases)      |
+| **K. Wikipedia spec sheet** — proposal 2026-10-10; **step 1 (parser + probe) done 2026-10-11, table/ingest/UI not started**    | Engines, dimensions, mass, layout, transmission per generation from infoboxes + Wikidata; per-field language fallback (UI lang -> en -> ru -> ua -> make's home-language edition); fills what RDW lacks (VAZ/ZAZ/Daewoo, motorcycles, buses) (details under "Stage K" below)                                                                     | medium-large | I (generations), M (aliases)      |
 
 **Stage C — done (2026-10-08): RDW specs.** Source: opendata.rdw.nl (CC0). Power and CO2 are NOT in the main dataset
 `m9d7-ebf2` (which has displacement, mass, dimensions) but in the fuel/emissions dataset `8ys7-d773`, keyed by kenteken, as TEXT
@@ -958,6 +958,39 @@ wikidata_id, revid)` (keyed on the stage I generation row; `revid` makes the cre
   vandalised or stale infoboxes — bounds + `revid` pin; matching to the registry's messy model strings (depends on M).
 - **Estimate:** 1 session for the parser + probe on 15 models (read-only, like `wiki-generations-probe.ts`) and a hit-rate report;
   1 session for table + ingest + UI. Decide after the probe whether the multi-language fallback pays off (measure fields gained per language).
+- **Probe done (2026-10-11, step 1 of K; nothing stored).** Built: `packages/shared/src/wikiSpecs.ts` (+ test; `parseWikiSpecs(wikitext, { lang, code })` — template expansion
+  incl. `convert`/`cvt`, unit conversion, "one unambiguous number or null" rule, bounds, engine-line parser, localized template/param aliases for en / ru / uk / de / cs / ja / ko,
+  ru per-generation sub-block picked by code) and the read-only `scripts/src/wiki-specs-probe.ts` (`pnpm exec tsx src/wiki-specs-probe.ts [models…] [--per N] [--show]`, cache in
+  `scripts/.data/wikispecs-probe/`). Result on 15 models / 33 generation articles from `model_generations` (en alone → best of en / ru / uk / home edition): wheelbase 36 → 45 %, length 12 → 36 %,
+  width 36 → 42 %, height 18 → 36 %, weight 27 → 36 %, tank 0 → 12 %, transmission 48 → 76 %, engines 48 → 52 %, layout 100 % (trivial). **The fallback pays off, mostly for dimensions and
+  transmission; ru is the best second edition (31/33 articles exist, nested per-generation blocks), uk and de next, ja / ko only fill layout / transmission.**
+  - **Findings:** (1) many en generation infoboxes carry only `layout` (Civic 8/9th gen, Qashqai, Tucson, Sportage, Astra, Lancer) — the figures live in body tables, not the infobox; infobox-only K tops out near
+    these rates, so a body-table/`Specifications` section parser is the next lever. (2) en engine lines rarely carry power (`2.0 L B48 turbo I4`), and have header lines ("Petrol:") — headers are filtered;
+    power per engine needs the prose. (3) ru main model articles hold one `Модификация автомобиля` block per generation with wheelbase / length / width / height / mass / tank / engines — use **only when the block
+    matches the generation code**; the main block of a model article is not a generation value. (4) de `Infobox PKW-Modell` has bare numbers (`Länge = 4255–4586`, mm / kg) — accepted only for de / cs / ru / uk / ja / ko.
+    (5) Models whose generations come from section headings (`source = headings`: Qashqai, Tucson, Sportage, Astra, Lancer) share one series article, so the probe counted the same article several times — the real
+    ingest must match the generation to a sub-block/section, not reuse the series infobox. (6) 4 of 15 targets have no generations (Octavia, Megane, Mazda 6, Audi A6 — known gaps of stage I).
+  - **Decision (2026-10-11, owner): option B, scoped.** Parse body tables too (infobox alone leaves Civic 9th gen, Qashqai, Tucson, Sportage, Astra, Lancer with only the drive layout).
+    **Engines list (with power) for every matched model; dimensions / mass / tank only where RDW has no row** (RDW is measured and per model-year, Wikipedia is a per-generation catalogue value —
+    never show both for the same field). Figures from non-en editions are shown with an explicit "Wikipedia (RU)" style label. Licence posture unchanged (facts only, CC BY-SA credit + link).
+    Worked example (Honda Civic 9th gen): infobox = layout only; the article's "Engines" table = 8 rows (1.3 L 100 hp … 2.4 L Si 201–205 hp, chassis codes FK1/FB1/FB7/FB2/FG3/FB8/FK2/FB4/FB5/FB3/FB6/FG4,
+    cells use `{{cvt|100|hp|kW|0}}`, `<br>` lists, hybrid and natural-gas rows, mixed markets) — no dimensions or weight table in that article.
+  - **Steps (estimate 2–3 sessions, ~6–10 h):**
+    1. **Body-table parser (0.5–1 session)** in `packages/shared/src/wikiSpecs.ts`: find "Engines" / "Specifications" wikitables, read header + rows (`cvt`/`convert` cells, `<br>`, rowspan-free first; flag merged
+       cells as raw), map to `WikiEngine` (displacement, cylinders, power kW, fuel, chassis codes, market note) and to dimension fields; localized headers for ru / uk / de; tests on ~15 real articles (save
+       trimmed wikitext fixtures, not live fetches). Keep the rule "one unambiguous value or raw text".
+    2. **Probe re-run (0.5 session)** with `wiki-specs-probe.ts` extended to tables: fill rates per field / language, focused on models RDW lacks (VAZ, ZAZ, Daewoo, Chery, motorcycles, buses). Fix parser misses;
+       **this step decides if step 3+ is worth it — report the numbers to the owner before continuing.** Also fix the probe's series-article double counting (headings-source models: match the generation to a section).
+    3. **Table + ingest + seed (1 session):** migration `registry.model_spec_wiki` (key = stage I generation row; engines jsonb; dimension columns; `src_lang`, `src_title`, `wikidata_id`, `revid`),
+       `ingest:wikispecs` (+ `:csv`, `export:wikispecs:csv`; cache `scripts/.data/wikispecs/`, resumable, UA header, 1 request in flight, backoff on 429; top ~300 pairs from `model_generations`; ~1–2 h of API calls;
+       dimension columns stay NULL where RDW has a row for that make/model), `HOME_WIKI_LANGS` table, small override CSV, `SCHEDULE.md` row (yearly), seed into `ingest:ratings:csv`.
+    4. **API + UI (1 session):** `GET /api/wikispecs` (`apps/api/src/wikispecs/`, contract in its own `packages/shared/src/wikiSpecsApi.ts` file, fields `nullable().optional()`), matcher = the generation chip's matcher,
+       "Engines of this generation" list + gap-filling rows in the Specs block (`RdwSpecs.tsx`), source label, "catalogue values for the generation, not for this car" copy, ua/ru/en strings, About credit,
+       `lib/offline-cache.ts` entry, share section id if it gets its own section. A miss hides the section.
+    5. **Checks + docs (0.5 session):** `pnpm format`, lint, type-check, test, `pnpm --filter @carplates/shared build`; browser-check (light / dark / mobile / shared link) or say it was not done;
+       write-up in `docs/plan-done.md`, one ✅ line in `PLAN.md`, conventions in `docs/features-reference.md`; commit message, stop.
+  - **Risks to watch:** mixed-market rows (Asia vs Europe chassis codes) — prefer the main-market row or keep all with a market note; ru main articles hold per-generation blocks, use only on a code match;
+    vandalised / stale text (bounds + `revid` pin); registry model strings that do not match (depends on stage M aliases).
 
 Not planned (decided): VehiclesDB per-country deciles, derived body-type label, vPIC offline dump, Eurostat. (Wikidata moved into stage I; other countries into stage J.)
 
