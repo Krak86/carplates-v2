@@ -11,6 +11,7 @@ const SOURCES: readonly Source[] = [
   { key: 'nhtsa', label: 'NHTSA', url: 'https://www.nhtsa.gov', icon: '/icons/sources/nhtsa.webp' },
   { key: 'wikipedia', label: 'Wikipedia', url: 'https://www.wikipedia.org', mask: '/icons/wikipedia-w.svg' },
   { key: 'pixabay', label: 'Pixabay', url: 'https://pixabay.com', icon: '/icons/sources/pixabay.webp' },
+  // No logo: Euro NCAP's terms do not allow reuse of its mark.
   { key: 'euroncap', label: 'Euro NCAP', url: 'https://www.euroncap.com', tile: 'bg-yellow-400' },
   { key: 'jncap', label: 'JNCAP / NASVA', url: 'https://www.nasva.go.jp', icon: '/icons/sources/jncap.webp' },
   { key: 'cncap', label: 'C-NCAP / CATARC', url: 'https://www.c-ncap.org.cn', icon: '/icons/sources/cncap.webp' },
@@ -23,7 +24,7 @@ const SOURCES: readonly Source[] = [
     key: 'mot',
     label: 'DVSA MOT',
     url: 'https://www.data.gov.uk/dataset/anonymised_mot_test',
-    tile: 'bg-slate-700'
+    mask: '/icons/sources/dvsa.svg'
   },
   {
     key: 'ca',
@@ -38,7 +39,12 @@ const SOURCES: readonly Source[] = [
     url: 'https://github.com/OpenChargingCloud/open-ev-data',
     icon: '/icons/sources/github.webp'
   },
-  { key: 'wikidata', label: 'Wikidata / Wikipedia', url: 'https://www.wikidata.org', tile: 'bg-slate-600' },
+  {
+    key: 'wikidata',
+    label: 'Wikidata / Wikipedia',
+    url: 'https://www.wikidata.org',
+    icon: '/icons/sources/wikidata.svg'
+  },
   {
     key: 'belastingdienst',
     label: 'Belastingdienst',
@@ -108,6 +114,18 @@ const SOURCES: readonly Source[] = [
     mask: '/icons/sources/github.webp'
   },
   { key: 'kenney', label: 'Kenney', url: 'https://kenney.nl', icon: '/icons/sources/kenney.webp' },
+  {
+    key: 'googleTranslate',
+    label: 'Google Translate',
+    url: 'https://translate.google.com',
+    icon: '/logos/google-translate.svg'
+  },
+  {
+    key: 'opusMt',
+    label: 'Hugging Face / OPUS-MT',
+    url: 'https://huggingface.co/Helsinki-NLP',
+    icon: '/icons/sources/huggingface.svg'
+  },
   { key: 'youtube', label: 'YouTube', url: 'https://www.youtube.com', icon: '/icons/sources/youtube.webp' },
   {
     key: 'googleSignIn',

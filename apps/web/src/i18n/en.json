@@ -1052,7 +1052,7 @@
   "rdw.about.bodyTypes": "The most common body types of the Dutch vehicles of this model and year, as classified by the register (estate, hatchback, MPV …). A model name often covers more than one body, e.g. hatchback and estate.",
   "rdw.about.colours": "The most common colours of the Dutch vehicles of this model and year (first colour in the register). A guide to what was bought in the Netherlands, not to what exists in Ukraine.",
   "rdw.about.energyLabels": "The Dutch energy label (A best … G worst) the vehicle got at registration, from CO₂ and fuel use. Only assigned to cars with a fuel-based figure, so electric and older cars often have none; shown as shares of those that have one.",
-  "about.source.rdw": "RDW (Rijksdienst voor het Wegverkeer, the Netherlands Vehicle Authority) — EU-spec power, engine capacity, unladen mass and CO₂ per make, model and year, aggregated from the Dutch vehicle register (open data, CC0).",
+  "about.source.rdw": "RDW (Rijksdienst voor het Wegverkeer, the Netherlands Vehicle Authority) — EU-spec power, engine capacity, unladen mass and CO₂ per make, model and year, aggregated from the Dutch vehicle register, plus EU recall campaigns (open data, CC0).",
   "about.source.ev": "Open EV Data (OpenChargingCloud, MIT licence, © 2019 Niklas Hösl) — usable battery, consumption and AC / DC charging of electric and plug-in hybrid models, as of 2020.",
   "about.source.vehiclesdb": "Cross-market data (markets a model is sold in, popularity decile) — \"Vehicle data by VehiclesDB\", CC BY 4.0.",
   "about.source.infocar": "Test-drive and owner-review links, and car videos, matched to the model and year (links only, no content copied).",
@@ -2002,5 +2002,7 @@
   "generation.ordinal.eighth": "Eighth generation",
   "generation.ordinal.ninth": "Ninth generation",
   "generation.ordinal.tenth": "Tenth generation",
-  "about.source.wikidata": "Wikidata (CC0) and Wikipedia (CC BY-SA 4.0) — which generation of a model a car belongs to (code, production years, body styles, platform). Facts only; each generation links to its article."
+  "about.source.wikidata": "Wikidata (CC0) and Wikipedia (CC BY-SA 4.0) — which generation of a model a car belongs to (code, production years, body styles, platform). Facts only; each generation links to its article.",
+  "about.source.googleTranslate": "Opens translate.google.com on request to translate recall texts; the text is sent to Google only when you choose that option.",
+  "about.source.opusMt": "Helsinki-NLP OPUS-MT translation models (CC BY 4.0) from Hugging Face, run in your browser with transformers.js to translate recall texts on-device. Optional one-time download; nothing is sent anywhere."
 }
