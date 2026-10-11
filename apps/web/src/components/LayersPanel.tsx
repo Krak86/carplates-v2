@@ -2,7 +2,9 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { useSession } from '@/components/auth/use-session'
+import ShareLayoutButton from '@/components/ShareLayoutButton'
 import { useLiveMapView } from '@/hooks/useBackgroundMode'
+import { useLayoutUrlActions } from '@/hooks/useLayoutUrl'
 import { usePoorConnection } from '@/hooks/usePoorConnection'
 import { cn } from '@/lib/cn'
 import {
@@ -29,16 +31,19 @@ export default function LayersPanel(): ReactNode {
   const setMapView = useLiveBackgroundStore(s => s.setMapView)
   const view = useLiveMapView()
   const poor = usePoorConnection()
+  const { writeLayout } = useLayoutUrlActions()
 
   // The map is pinned to the page it was picked on (region capital, else all of Ukraine); picking it again re-pins it.
   const handleSelect = (m: BackgroundMode): void => {
     if (m === 'map') setMapView(view)
     setMode(m)
+    writeLayout(m, isStreamMode(m) ? streams[m] : undefined)
   }
 
   // For a signed-in user a picked video source becomes their saved stream for that layer (/settings, synced).
   const handleStreamChange = (m: StreamMode, id: string): void => {
     setStream(m, id)
+    writeLayout(m, id)
     if (user) saveStream(m, id)
   }
 
@@ -96,6 +101,8 @@ export default function LayersPanel(): ReactNode {
           </select>
         </label>
       )}
+
+      <ShareLayoutButton className="mt-2 flex w-full border-t border-[var(--color-border)] px-1 pt-2 text-left text-xs text-[var(--color-primary)] underline hover:no-underline" />
 
       {mode === 'map' && (
         <a

@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 
 import { useSession } from '@/components/auth/use-session'
+import { layoutFromLocation } from '@/hooks/useLayoutUrl'
 import { getSettings, putSettings } from '@/lib/api'
 import { effectiveBackground } from '@/lib/user-settings'
 import { STREAM_MODES } from '@/lib/live-background'
@@ -105,13 +106,18 @@ export function useUserSettingsActions(): void {
   const defaultMode = settings.defaultMode
   const setMode = useLiveBackgroundStore(s => s.setMode)
   useEffect(() => {
-    if (ready) setMode(defaultMode)
+    // A `?layout=` link wins over the saved default.
+    if (ready && !layoutFromLocation()) setMode(defaultMode)
   }, [ready, defaultMode, setMode])
 
   const streams = settings.streams
   const setStream = useLiveBackgroundStore(s => s.setStream)
   useEffect(() => {
     if (!ready) return
-    for (const mode of STREAM_MODES) setStream(mode, streams[mode])
+    const linked = layoutFromLocation()
+    for (const mode of STREAM_MODES) {
+      if (linked?.mode === mode && linked.stream) continue
+      setStream(mode, streams[mode])
+    }
   }, [ready, streams, setStream])
 }

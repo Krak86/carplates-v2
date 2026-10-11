@@ -18,6 +18,7 @@ const STATIC_ROUTES = new Set([
   'discuss',
   'advanced-search',
   'race',
+  'relax',
   'features',
   'admin',
   'settings'

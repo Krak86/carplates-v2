@@ -91,6 +91,11 @@ export const STATIC_PAGES: Record<string, Record<Lang, PageText>> = {
       description: 'A free racing game: take a sedan, hatchback, SUV or anything else for a spin.'
     }
   },
+  '/relax': {
+    ua: { title: 'Релакс · Cars UA', description: 'Живий фон: карта, Земля з космосу, трафік та місто.' },
+    ru: { title: 'Релакс · Cars UA', description: 'Живой фон: карта, Земля из космоса, трафик и город.' },
+    en: { title: 'Relax · Cars UA', description: 'A live backdrop: map, Earth from space, traffic and city.' }
+  },
   '/advanced-search': {
     ua: {
       title: 'Розширений пошук · Cars UA',

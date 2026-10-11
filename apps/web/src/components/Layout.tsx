@@ -16,6 +16,7 @@ import SyncBanner from '@/components/SyncBanner'
 import { useHeaderVehicleLabel } from '@/components/use-header-vehicle-label'
 import { useUserSettingsActions } from '@/components/use-user-settings-actions'
 import { useBackgroundMode } from '@/hooks/useBackgroundMode'
+import { useApplyLayoutFromUrl } from '@/hooks/useLayoutUrl'
 import { useScrolledOnRoute } from '@/hooks/useSideWidgetsVisible'
 import { cn } from '@/lib/cn'
 import { setTransitionDirection } from '@/lib/view-transition'
@@ -39,6 +40,7 @@ export default function Layout({ children }: Props): ReactNode {
   // The scroll buttons' chunk is only fetched once the user first scrolls.
   const hasScrolled = useScrolledOnRoute()
   useUserSettingsActions()
+  useApplyLayoutFromUrl()
   const { pathname } = useLocation()
   // Sidebar is lazy-loaded (not part of the LCP path) — stay unmounted until
   // the first open, then keep mounted so close gets a transition instead of a hard unmount.
