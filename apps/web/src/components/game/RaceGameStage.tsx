@@ -3,7 +3,9 @@ import type { MouseEvent, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import RaceGameSettings from '@/components/game/RaceGameSettings'
+import RaceTouchControls from '@/components/game/RaceTouchControls'
 import { useRaceGameActions } from '@/components/game/use-race-game-actions'
+import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { RACER_SIZE_KB, type CarBody, type RacerConfig } from '@/lib/racer/config'
 
 type Props = {
@@ -17,10 +19,18 @@ type Props = {
 export default function RaceGameStage({ config, onChange, onPickBody }: Props): ReactNode {
   const { t } = useTranslation()
   const [sound, setSound] = useState(false)
-  const { phase, hud, wasLoaded, handleStart, handleRestart, setCanvas } = useRaceGameActions(config, sound)
+  const { phase, hud, wasLoaded, handleStart, handleRestart, handleInput, setCanvas } = useRaceGameActions(
+    config,
+    sound
+  )
+  const isTouch = useMediaQuery('(pointer: coarse)')
+  const isPortrait = useMediaQuery('(orientation: portrait)')
 
   const [frame, setFrame] = useState<HTMLDivElement | null>(null)
-  const [fullscreen, setFullscreen] = useState(false)
+  const [nativeFullscreen, setFullscreen] = useState(false)
+  // iPhone Safari has no element full screen: the frame is stretched over the page instead
+  const [pseudoFullscreen, setPseudoFullscreen] = useState(false)
+  const fullscreen = nativeFullscreen || pseudoFullscreen
 
   useEffect(() => {
     const handleChange = (): void => setFullscreen(document.fullscreenElement === frame && !!frame)
@@ -35,8 +45,10 @@ export default function RaceGameStage({ config, onChange, onPickBody }: Props): 
 
   const handleToggleFullscreen = (e: MouseEvent<HTMLButtonElement>): void => {
     e.currentTarget.blur() // keys must keep steering the car
-    if (document.fullscreenElement) void document.exitFullscreen()
-    else void frame?.requestFullscreen().catch(() => undefined)
+    if (pseudoFullscreen) setPseudoFullscreen(false)
+    else if (document.fullscreenElement) void document.exitFullscreen()
+    else if (document.fullscreenEnabled) void frame?.requestFullscreen().catch(() => undefined)
+    else setPseudoFullscreen(true)
   }
 
   if (phase !== 'playing') {
@@ -46,7 +58,7 @@ export default function RaceGameStage({ config, onChange, onPickBody }: Props): 
           🏁
         </div>
         <p>{wasLoaded ? t('race.introReady') : t('race.intro', { size: RACER_SIZE_KB })}</p>
-        <p className="text-sm text-[var(--color-muted)]">{t('race.introNote')}</p>
+        <p className="text-sm text-[var(--color-muted)]">{t(isTouch ? 'race.introNoteTouch' : 'race.introNote')}</p>
         {phase === 'error' && <p className="text-sm text-red-500">{t('race.error')}</p>}
         <button
           type="button"
@@ -67,11 +79,39 @@ export default function RaceGameStage({ config, onChange, onPickBody }: Props): 
   return (
     <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_16rem]">
       <div>
-        <div ref={setFrame} className="relative overflow-hidden rounded-lg bg-black">
+        <div
+          ref={setFrame}
+          className={`relative overflow-hidden bg-black ${pseudoFullscreen ? 'fixed inset-0 z-50 h-dvh' : 'rounded-lg'} ${isTouch ? 'touch-none select-none' : ''}`}
+        >
           <canvas
             ref={setCanvas}
-            className={fullscreen ? 'block h-screen w-screen object-contain' : 'block aspect-[4/3] w-full'}
+            className={
+              pseudoFullscreen
+                ? 'block h-full w-full object-contain'
+                : fullscreen
+                  ? 'block h-screen w-screen object-contain'
+                  : 'block aspect-[4/3] w-full'
+            }
           />
+
+          {isTouch && <RaceTouchControls onInput={handleInput} />}
+
+          {pseudoFullscreen && (
+            <button
+              type="button"
+              onClick={() => setPseudoFullscreen(false)}
+              aria-label={t('race.touch.exitFullscreen')}
+              className="absolute top-3 left-1/2 size-9 -translate-x-1/2 rounded-full bg-black/50 text-white"
+            >
+              ✕
+            </button>
+          )}
+
+          {isTouch && isPortrait && (
+            <div className="pointer-events-none absolute inset-x-0 top-1/3 text-center text-sm text-white [text-shadow:0_1px_3px_#000]">
+              {t('race.touch.rotate')}
+            </div>
+          )}
 
           {hud && (
             <div className="pointer-events-none absolute inset-x-0 top-0 flex justify-between p-3 font-mono text-white [text-shadow:0_1px_3px_#000]">
@@ -96,7 +136,7 @@ export default function RaceGameStage({ config, onChange, onPickBody }: Props): 
         </div>
 
         <div className="mt-2 flex items-center justify-between gap-3 text-sm text-[var(--color-muted)]">
-          <span>{config.auto ? t('race.controlsAuto') : t('race.controls')}</span>
+          <span>{isTouch ? t('race.controlsTouch') : config.auto ? t('race.controlsAuto') : t('race.controls')}</span>
           <button
             type="button"
             onClick={handleToggleSound}
@@ -105,7 +145,7 @@ export default function RaceGameStage({ config, onChange, onPickBody }: Props): 
           >
             {sound ? t('race.soundOn') : t('race.soundOff')}
           </button>
-          {document.fullscreenEnabled && (
+          {(document.fullscreenEnabled || isTouch) && (
             <button
               type="button"
               onClick={handleToggleFullscreen}
@@ -124,7 +164,16 @@ export default function RaceGameStage({ config, onChange, onPickBody }: Props): 
         </div>
       </div>
 
-      <RaceGameSettings config={config} onChange={onChange} onPickBody={onPickBody} />
+      {isTouch ? (
+        <details className="rounded-lg border border-[var(--color-border)] p-3">
+          <summary className="cursor-pointer font-semibold">{t('race.touch.settings')}</summary>
+          <div className="mt-3">
+            <RaceGameSettings config={config} onChange={onChange} onPickBody={onPickBody} />
+          </div>
+        </details>
+      ) : (
+        <RaceGameSettings config={config} onChange={onChange} onPickBody={onPickBody} />
+      )}
     </div>
   )
 }

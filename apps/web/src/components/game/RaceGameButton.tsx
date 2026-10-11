@@ -25,6 +25,8 @@ type Props = {
   brand?: string | null
   /** "BRAND MODEL (year)" shown beside the modal title. */
   vehicleLabel?: string
+  /** Opens the modal each time it changes (the card's "test drive" chip). */
+  openSignal?: number
 }
 
 /**
@@ -32,7 +34,15 @@ type Props = {
  * a banner on wide screens (`xl`, where the side gutter has room), a compact 🎮 circle on `lg`, nothing below — the game
  * needs a keyboard. Online only: the game is a lazy chunk kept out of the PWA precache.
  */
-export default function RaceGameButton({ color, kind, bodyText, plate, brand, vehicleLabel }: Props): ReactNode {
+export default function RaceGameButton({
+  color,
+  kind,
+  bodyText,
+  plate,
+  brand,
+  vehicleLabel,
+  openSignal = 0
+}: Props): ReactNode {
   const { t } = useTranslation()
   const online = useOnlineStatus()
   const [searchParams] = useSearchParams()
@@ -40,6 +50,13 @@ export default function RaceGameButton({ color, kind, bodyText, plate, brand, ve
   const isShared = searchParams.get('section') === 'race'
   const [open, setOpen] = useState(() => isShared)
   const [sharedTab] = useState(() => (isShared ? searchParams.get('tab') : null))
+
+  // The "test drive" chip on the card bumps `openSignal`; derive the open state during render rather than in an effect.
+  const [seenSignal, setSeenSignal] = useState(openSignal)
+  if (openSignal !== seenSignal) {
+    setSeenSignal(openSignal)
+    setOpen(true)
+  }
 
   const [revealed, setRevealed] = useState(() => revealedThisSession)
 

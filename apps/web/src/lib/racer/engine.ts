@@ -37,8 +37,12 @@ export type Racer = {
   restart: () => void
   /** Sound is off until the viewer turns it on. */
   setSound: (on: boolean) => void
+  /** Drives the same controls as the keyboard (the on-screen buttons); omitted flags keep their state. */
+  setInput: (input: Partial<RacerInput>) => void
   destroy: () => void
 }
+
+export type RacerInput = { left: boolean; right: boolean; faster: boolean; slower: boolean }
 
 const BEST_KEY = 'carplates.racer.best'
 
@@ -845,6 +849,12 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
     },
     restart,
     setSound: sound.setEnabled,
+    setInput(input): void {
+      if (input.left !== undefined) keyLeft = input.left
+      if (input.right !== undefined) keyRight = input.right
+      if (input.faster !== undefined && input.faster !== keyFaster) handleFaster(input.faster, false)
+      if (input.slower !== undefined && input.slower !== keySlower) handleSlower(input.slower, false)
+    },
     destroy(): void {
       destroyed = true
       sound.destroy()

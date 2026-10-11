@@ -1,4 +1,4 @@
-# GAME_PLAN.md — test-drive racer: full screen + mobile (planned, not started)
+# GAME_PLAN.md — test-drive racer: full screen + mobile (A done, B built 2026-10-11 — needs real-device testing, C planned)
 
 Research notes from 2026-10-09. Nothing here is built. Current state of the game: `docs/features-reference.md` "Test-drive racer" and
 `docs/plan-done.md` "Test-drive racer game". Other racer follow-ups (music, art-pass leftovers): `PLAN.md` "Test-drive racer game".
@@ -19,6 +19,8 @@ testing is the biggest part (tilt cannot be tested in a desktop browser).
 - iPhone Safari has no element full screen (iPad does): use a pseudo-full-screen (`fixed inset-0`, `100dvh`) as the fallback.
 
 ## B. Mobile: virtual buttons and layout
+
+**Built (2026-10-11), untested on real phones:** `Racer.setInput` (engine), `RaceTouchControls`/`RaceTouchButton` (pointer capture, `(pointer: coarse)` only), portrait "rotate" hint, settings in a collapsed `<details>` on touch, iPhone pseudo-full-screen fallback (`fixed inset-0` + ✕), touch-specific intro/controls texts. Not done: landscape lock, default lower resolution on touch.
 
 - Input is four flags in the engine (`keyLeft/keyRight/keyFaster/keySlower`, `KEY_ACTIONS` in `engine.ts`). Expose
   `racer.setInput({ left, right, faster, slower })` so a touch layer drives the same physics.

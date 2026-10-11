@@ -18,6 +18,7 @@ import NewCarsLink from '@/components/NewCarsLink'
 import EstimatedValueChip from '@/components/EstimatedValueChip'
 import CardTiltToggle from '@/components/CardTiltToggle'
 import RaceGameButton from '@/components/game/RaceGameButton'
+import RaceTestDriveChip from '@/components/game/RaceTestDriveChip'
 import ColorSwatch from '@/components/ColorSwatch'
 import CopyAllInfoButton from '@/components/CopyAllInfoButton'
 import CopyButton from '@/components/CopyButton'
@@ -118,6 +119,7 @@ export default function ResultCard({ data }: Props): ReactNode {
   // The header chip's chevron and the Estimated value section share the currency; each chevron click bumps the signal.
   const [valueCurrency, setValueCurrency] = useState<Currency>('EUR')
   const [valueOpenSignal, setValueOpenSignal] = useState(0)
+  const [raceOpenSignal, setRaceOpenSignal] = useState(0)
   const basicRef = useRef<HTMLDivElement>(null)
   const historyRef = useRef<HTMLDivElement>(null)
   const vinRef = useRef<HTMLDivElement>(null)
@@ -192,6 +194,7 @@ export default function ResultCard({ data }: Props): ReactNode {
           of stacking it above, which otherwise pushes the card down for no reason. */}
       <CardTiltToggle className="absolute top-0 -left-14 hidden lg:inline-flex" />
       <RaceGameButton
+        openSignal={raceOpenSignal}
         color={VEHICLE_COLOR_HEX[vehicleColor]}
         kind={vehicleKind}
         bodyText={c.body}
@@ -280,6 +283,7 @@ export default function ResultCard({ data }: Props): ReactNode {
               <VdbChips brand={c.brand} model={c.model} kind={c.kind} />
               <Model3dButton brand={c.brand} model={c.model} />
               <Model360Button brand={c.brand} model={c.model} />
+              <RaceTestDriveChip onOpen={() => setRaceOpenSignal(n => n + 1)} />
             </CollapsibleChips>
             <div className="mt-2 flex flex-wrap items-center gap-2 empty:hidden">
               <NewCarsLink brand={c.brand} />

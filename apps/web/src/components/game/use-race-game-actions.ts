@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 
 import type { RacerConfig, RacerHud } from '@/lib/racer/config'
-import type { Racer } from '@/lib/racer/engine'
+import type { Racer, RacerInput } from '@/lib/racer/engine'
 
 const LOADED_KEY = 'carplates.racer.loaded'
 
@@ -76,5 +76,7 @@ export function useRaceGameActions(config: RacerConfig, sound: boolean) {
 
   const handleRestart = (): void => racerRef.current?.restart()
 
-  return { phase, hud, wasLoaded, handleStart, handleRestart, setCanvas }
+  const handleInput = (input: Partial<RacerInput>): void => racerRef.current?.setInput(input)
+
+  return { phase, hud, wasLoaded, handleStart, handleRestart, handleInput, setCanvas }
 }
