@@ -35,14 +35,21 @@ export function formatEngine(e: WikiEngineView, t: Translate): string {
   return parts.length > 0 ? parts.join(' · ') : (e.raw ?? '')
 }
 
+/** Engine families whose code has the chassis shape (1-4 letters, 1-3 digits). */
+const ENGINE_FAMILY =
+  /^(B(38|47|48|58)|TU\d|XUD?\d{1,2}|DV\d{1,2}|DW\d{1,2}|EP\d|HR\d{2}|EA\d{3}|VR\d|I\d|TD\d{2}|M\d{3})$/
+
 /**
  * Splits a row's codes into engine codes (`T24A-FTS`, `2TR-FE`, `L13Z4`) and chassis / model codes (`TJA250`, `FK1`). A chassis
- * code is 1-4 letters then 1-3 digits and no hyphen; this is a best guess, the source table does not label the two.
+ * code is 1-4 letters then 1-3 digits and no hyphen, unless it is a well-known engine family (`B48`, `TU5`, `EA888`); a bare
+ * number is a displacement the source table put in the code column and is dropped. A best guess, the source table does not
+ * label the two.
  */
 export function splitWikiCodes(codes: readonly string[] | null | undefined): { engine: string[]; chassis: string[] } {
   const out: { engine: string[]; chassis: string[] } = { engine: [], chassis: [] }
   for (const code of codes ?? []) {
-    out[/^[A-Z]{1,4}\d{1,3}$/.test(code) ? 'chassis' : 'engine'].push(code)
+    if (/^\d+$/.test(code)) continue
+    out[/^[A-Z]{1,4}\d{1,3}$/.test(code) && !ENGINE_FAMILY.test(code) ? 'chassis' : 'engine'].push(code)
   }
   return out
 }

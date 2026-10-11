@@ -8,11 +8,22 @@ import { PlateModule } from '../plate/plate.module.js'
 import { RdwModule } from '../rdw/rdw.module.js'
 import { VdbModule } from '../vdb/vdb.module.js'
 import { WikiModule } from '../wiki/wiki.module.js'
+import { WikispecsModule } from '../wikispecs/wikispecs.module.js'
 import { CardController } from './card.controller.js'
 import { CardService } from './card.service.js'
 
 @Module({
-  imports: [PlateModule, VdbModule, RdwModule, EvModule, Models3dModule, Models360Module, WikiModule, FxModule],
+  imports: [
+    PlateModule,
+    VdbModule,
+    RdwModule,
+    EvModule,
+    Models3dModule,
+    Models360Module,
+    WikiModule,
+    WikispecsModule,
+    FxModule
+  ],
   controllers: [CardController],
   providers: [CardService]
 })

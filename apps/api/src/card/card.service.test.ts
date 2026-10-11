@@ -10,6 +10,7 @@ import type { PlateService } from '../plate/plate.service.js'
 import type { RdwService } from '../rdw/rdw.service.js'
 import type { VdbService } from '../vdb/vdb.service.js'
 import type { WikiService } from '../wiki/wiki.service.js'
+import type { WikispecsService } from '../wikispecs/wikispecs.service.js'
 import { CardService } from './card.service.js'
 
 const fxRates = { date: '2026-10-09', eurUah: 48, usdUah: 41 }
@@ -24,6 +25,9 @@ function setup(current: Partial<Registration> | null) {
   const models3d = { lookup: vi.fn().mockResolvedValue({ models: [] }) }
   const models360 = { lookup: vi.fn().mockResolvedValue({ models: [], winner: [] }) }
   const wiki = { peekImage: vi.fn().mockResolvedValue({ image: null }) }
+  const wikispecs = {
+    wikispecs: vi.fn().mockResolvedValue({ brand: 'B', model: 'M', year: 2023, match: null })
+  }
   const fx = { peek: vi.fn().mockReturnValue(fxRates) }
   const service = new CardService(
     plates as unknown as PlateService,
@@ -33,9 +37,10 @@ function setup(current: Partial<Registration> | null) {
     models3d as unknown as Models3dService,
     models360 as unknown as Models360Service,
     wiki as unknown as WikiService,
+    wikispecs as unknown as WikispecsService,
     fx as unknown as FxService
   )
-  return { service, plates, vdb, rdw, ev, models3d, models360, wiki, fx }
+  return { service, plates, vdb, rdw, ev, models3d, models360, wiki, wikispecs, fx }
 }
 
 const petrol = {
@@ -56,8 +61,10 @@ describe('CardService', () => {
   })
 
   it('answers each part with the inputs the web would send', async () => {
-    const { service, vdb, rdw, models3d, wiki } = setup(petrol)
+    const { service, vdb, rdw, models3d, wiki, wikispecs } = setup(petrol)
     const out = await service.bundle('HC0500YC')
+
+    expect(wikispecs.wikispecs).toHaveBeenCalledWith('PORSCHE', 'TAYCAN', 2023)
 
     expect(vdb.lookup).toHaveBeenCalledWith('PORSCHE', 'TAYCAN', 'ЛЕГКОВИЙ')
     expect(rdw.lookup).toHaveBeenCalledWith('PORSCHE', 'TAYCAN', 2023, 'ЛЕГКОВИЙ')
@@ -82,6 +89,7 @@ describe('CardService', () => {
     const out = await run.service.bundle('p')
     expect(out.rdw).toBeNull()
     expect(run.rdw.lookup).not.toHaveBeenCalled()
+    expect(run.wikispecs.wikispecs).not.toHaveBeenCalled()
     expect(run.fx.peek).not.toHaveBeenCalled()
     expect(out.fx).toBeNull()
   })

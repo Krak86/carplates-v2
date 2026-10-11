@@ -8,6 +8,7 @@ import { WikispecsService } from './wikispecs.service.js'
 @Module({
   imports: [GenerationsModule],
   controllers: [WikispecsController],
-  providers: [WikispecsService]
+  providers: [WikispecsService],
+  exports: [WikispecsService]
 })
 export class WikispecsModule {}

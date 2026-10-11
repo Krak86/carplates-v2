@@ -91,6 +91,7 @@ export function seedCardBundle(
   if (brand && model) {
     seed(vdbQuery(brand, model, kind).queryKey, bundle.vdb)
     if (year) seed(rdwQuery(brand, model, year, kind).queryKey, bundle.rdw)
+    if (year) seed(wikiSpecsQuery(brand, model, year).queryKey, bundle.wikiSpecs)
     seed(openEvQuery(brand, model).queryKey, bundle.ev)
     seed(models3dQuery(brand, model).queryKey, bundle.models3d)
     seed(models360Query(brand, model).queryKey, bundle.models360)

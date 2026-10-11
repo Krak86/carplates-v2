@@ -10,6 +10,7 @@ import { PlateService } from '../plate/plate.service.js'
 import { RdwService } from '../rdw/rdw.service.js'
 import { VdbService } from '../vdb/vdb.service.js'
 import { WikiService } from '../wiki/wiki.service.js'
+import { WikispecsService } from '../wikispecs/wikispecs.service.js'
 
 /**
  * Everything the top of a result card needs beyond the plate row, from local data only (see `cardBundleResponseSchema`).
@@ -28,6 +29,7 @@ export class CardService {
     @Inject(Models3dService) private readonly models3d: Models3dService,
     @Inject(Models360Service) private readonly models360: Models360Service,
     @Inject(WikiService) private readonly wiki: WikiService,
+    @Inject(WikispecsService) private readonly wikispecs: WikispecsService,
     @Inject(FxService) private readonly fx: FxService
   ) {}
 
@@ -39,19 +41,20 @@ export class CardService {
     const hasModel = !!(brand && model)
     const isElectric = resolveFuelCategories(fuel).includes('electric')
 
-    const [vdb, rdw, ev, models3d, models360, wikiImage] = await Promise.all([
+    const [vdb, rdw, ev, models3d, models360, wikiImage, wikiSpecs] = await Promise.all([
       hasModel ? this.part('vdb', () => this.vdb.lookup(brand, model, kind ?? undefined)) : null,
       hasModel && year ? this.part('rdw', () => this.rdw.lookup(brand, model, year, kind ?? undefined)) : null,
       hasModel && isElectric ? this.part('ev', () => this.ev.lookup(brand, model)) : null,
       hasModel ? this.part('models3d', () => this.models3d.lookup(brand, model)) : null,
       hasModel ? this.part('models360', () => this.models360.lookup(brand, model)) : null,
-      brand || model ? this.part('wikiImage', () => this.wiki.peekImage(brand ?? '', model ?? '', year ?? null)) : null
+      brand || model ? this.part('wikiImage', () => this.wiki.peekImage(brand ?? '', model ?? '', year ?? null)) : null,
+      hasModel && year ? this.part('wikiSpecs', () => this.wikispecs.wikispecs(brand, model, year)) : null
     ])
 
     // The NBU rates only matter once there is an estimate to convert.
     const fx = rdw?.match?.valueEstimate ? this.fx.peek() : null
 
-    return { plate: current.plate ?? '', vdb, rdw, ev, models3d, models360, fx, wikiImage }
+    return { plate: current.plate ?? '', vdb, rdw, ev, models3d, models360, fx, wikiImage, wikiSpecs }
   }
 
   /** One failing part must not take the others down — the client falls back to that part's own endpoint. */

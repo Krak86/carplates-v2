@@ -11,7 +11,8 @@ import {
   rdwQuery,
   seedCardBundle,
   vdbQuery,
-  wikiImageQuery
+  wikiImageQuery,
+  wikiSpecsQuery
 } from '@/lib/queries'
 
 vi.mock('@/lib/api', async importOriginal => ({
@@ -28,7 +29,8 @@ const bundle: CardBundleResponse = {
   ev: { brand: 'PORSCHE', model: 'TAYCAN', match: null },
   models3d: { models: [] },
   fx: { date: '2026-10-09', eurUah: 48, usdUah: 41 },
-  wikiImage: { image: null }
+  wikiImage: { image: null },
+  wikiSpecs: { brand: 'PORSCHE', model: 'TAYCAN', year: 2023, match: null }
 }
 
 const plateResponse = { plate: 'HC0500YC', current: vehicle } as unknown as PlateLookupResponse
@@ -41,6 +43,7 @@ describe('seedCardBundle', () => {
     expect(client.getQueryData(vdbQuery('PORSCHE', 'TAYCAN', 'ЛЕГКОВИЙ').queryKey)).toEqual(bundle.vdb)
     expect(client.getQueryData(rdwQuery('PORSCHE', 'TAYCAN', 2023, 'ЛЕГКОВИЙ').queryKey)).toEqual(bundle.rdw)
     expect(client.getQueryData(openEvQuery('PORSCHE', 'TAYCAN').queryKey)).toEqual(bundle.ev)
+    expect(client.getQueryData(wikiSpecsQuery('PORSCHE', 'TAYCAN', 2023).queryKey)).toEqual(bundle.wikiSpecs)
     expect(client.getQueryData(models3dQuery('PORSCHE', 'TAYCAN').queryKey)).toEqual(bundle.models3d)
     expect(client.getQueryData(fxQuery().queryKey)).toEqual(bundle.fx)
     expect(client.getQueryData(wikiImageQuery('PORSCHE', 'TAYCAN', 2023).queryKey)).toEqual({ image: null })

@@ -71,6 +71,14 @@ describe('splitWikiCodes', () => {
     expect(splitWikiCodes(['2TR-FE', 'FK1', 'L13Z4'])).toEqual({ engine: ['2TR-FE', 'L13Z4'], chassis: ['FK1'] })
     expect(splitWikiCodes(null)).toEqual({ engine: [], chassis: [] })
   })
+
+  it('files known engine families as engines and drops bare displacements (real rows of the 2026-10 ingest)', () => {
+    expect(splitWikiCodes(['B48', 'TU5', 'XUD9', 'DV6', 'EA888', 'M274'])).toEqual({
+      engine: ['B48', 'TU5', 'XUD9', 'DV6', 'EA888', 'M274'],
+      chassis: []
+    })
+    expect(splitWikiCodes(['1798', 'XV40', 'ACV31'])).toEqual({ engine: [], chassis: ['XV40', 'ACV31'] })
+  })
 })
 
 describe('engineMatchesCar', () => {

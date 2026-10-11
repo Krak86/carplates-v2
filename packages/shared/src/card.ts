@@ -5,6 +5,7 @@ import { openEvResponseSchema } from './openEv.js'
 import { rdwResponseSchema } from './rdw.js'
 import { models360ResponseSchema, models3dResponseSchema, wikiImageResponseSchema } from './schemas.js'
 import { vdbResponseSchema } from './vdb.js'
+import { wikiSpecsResponseSchema } from './wikiSpecsApi.js'
 
 /**
  * GET /api/card/:plate — everything the top of a result card needs beyond the plate row itself, resolved server-side
@@ -21,6 +22,7 @@ export const cardBundleResponseSchema = z.object({
   models3d: models3dResponseSchema.nullable().optional(),
   models360: models360ResponseSchema.nullable().optional(),
   fx: fxResponseSchema.nullable().optional(),
-  wikiImage: wikiImageResponseSchema.nullable().optional()
+  wikiImage: wikiImageResponseSchema.nullable().optional(),
+  wikiSpecs: wikiSpecsResponseSchema.nullable().optional()
 })
 export type CardBundleResponse = z.infer<typeof cardBundleResponseSchema>
