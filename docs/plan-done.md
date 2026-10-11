@@ -3177,11 +3177,12 @@ Section "Generation specs" (📖, share id `engines`, collapsed by default) unde
 - **Checks:** type-check, 1041 tests pass. Real DB: 662 length, 521 height, 5 fuel-tank, ~1800 power, ~2100 displacement model rows.
 - **Known gaps / follow-ups:** fuel tank has only 5 ranked models (18 of 606 Wikipedia rows carry a tank) until `ingest:wikispecs` covers more; registry-filed vans (Crafter, Transit) rank as cars; spec boards are passenger-only (no group tabs, trucks / buses not ranked); not on the home page; no committed seed (rebuilt from existing tables).
 
-### /stats explanations + sources, collapse-all scoped ✅ BUILT (2026-10-11)
+### /stats, /fuel, /safety explanations + sources, collapse-all scoped ✅ BUILT (2026-10-11)
 
 Every /stats section now has a ❓ explanation (what the data means, where it comes from, what is and is not listed) ending in a "Sources" line; the floating collapse-all button shows on plate / VIN result pages only.
 
 - **Explanations:** `SectionInfo` (`section.about.<key>`) keys `statsSummary` (page header), `statsTopBrand|Model|Color|Region` (one per leaderboard card), `statsWeight` (group tab row), `statsSpec` (metric tab row), `statsTable` (next to the Table / Map toggle); titles `stats.weight.title`, `stats.spec.title`, `stats.table.title`. ua/ru/en. The VehiclesDB "Markets" panel already had `stats.vdb.info`.
 - **Sources named:** data.gov.ua registrations dataset (MVS service centres), the plate-prefix → region table, RDW open data, Wikipedia generation specs. Thresholds are worded "a few hundred vehicles" (weight and spec floors are 200 in `weight-stats.ts` / `spec-stats.ts`).
 - **Collapse-all:** `ScrollButtons` renders it only when the path is one segment outside `ROUTE_TITLE_KEYS` (the `/:query` plate / VIN route); "back to top" stays everywhere.
-- **Known gaps / follow-ups:** `STATIC_ROUTES` in `use-header-vehicle-label.ts` lacks `/fuel` and `/safety` (`ROUTE_TITLE_KEYS` is the complete list); /fuel and /safety panels have no explanations yet; `docs/features-reference.md` says the spec floor is 500, the code uses 200.
+- **/fuel and /safety:** same treatment. Keys `fuelSummary|fuelPowertrain|fuelChart|fuelModels|fuelDistribution` and `safetySummary|safetyChart|safetyModels|safetyDistribution` (titles `fuel|safety.chart.title`, `fuel|safety.models.title`); the model lists take an `info` prop, so the ❓ also shows on the home page boards. Floors worded from the code (brands 2000, models 1500 matched cars; sources EEA/EPA and Euro NCAP / JNCAP / C-NCAP / KNCAP / IIHS).
+- **Known gaps / follow-ups:** `STATIC_ROUTES` in `use-header-vehicle-label.ts` lacks `/fuel` and `/safety` (`ROUTE_TITLE_KEYS` is the complete list); `docs/features-reference.md` says the spec floor is 500, the code uses 200.

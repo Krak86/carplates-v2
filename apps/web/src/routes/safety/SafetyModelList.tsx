@@ -14,11 +14,13 @@ const DEFAULT_VISIBLE_N = 5
 
 type Props = {
   title: string
+  /** A ❓ explanation shown next to the title. */
+  info?: ReactNode
   models: SafetyStatsModel[]
 }
 
 /** A short ranked list of models (safest or least safe) — each links to an advanced search for that make and model. */
-export default function SafetyModelList({ title, models }: Props): ReactNode {
+export default function SafetyModelList({ title, info, models }: Props): ReactNode {
   const { t, i18n } = useTranslation()
   const numberFormat = new Intl.NumberFormat(toIntlLocale(i18n.language))
   const [expanded, setExpanded] = useState(false)
@@ -27,7 +29,10 @@ export default function SafetyModelList({ title, models }: Props): ReactNode {
 
   return (
     <section>
-      <h2 className="mb-2 text-base font-semibold">{title}</h2>
+      <h2 className="mb-2 flex items-center gap-1.5 text-base font-semibold">
+        {title}
+        {info}
+      </h2>
       <ol className="space-y-1 text-sm">
         {visible.map((m, i) => (
           <li key={`${m.brand}-${m.model}`} className="flex items-center gap-2">

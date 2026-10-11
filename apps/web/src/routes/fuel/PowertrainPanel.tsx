@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router'
 
+import SectionInfo from '@/components/SectionInfo'
 import Card from '@/components/ui/Card'
 import { powertrainStatsQuery } from '@/lib/queries'
 import { parseFuelClass, parsePowertrainView } from '@/routes/fuel/helpers'
@@ -55,7 +56,10 @@ export default function PowertrainPanel(): ReactNode {
 
   return (
     <Card className="mb-6">
-      <h2 className="mb-1 text-base font-semibold">{t('fuel.pt.title')}</h2>
+      <h2 className="mb-1 flex items-center gap-1.5 text-base font-semibold">
+        {t('fuel.pt.title')}
+        <SectionInfo section="fuelPowertrain" title={t('fuel.pt.title')} />
+      </h2>
       <p className="mb-3 text-xs text-[var(--color-muted)]">{t('fuel.pt.note')}</p>
 
       <PowertrainTable classes={data.classes} selected={current.fuelClass} onSelect={handleSelect} />

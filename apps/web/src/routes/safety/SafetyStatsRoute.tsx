@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router'
 
 import { CO2_BAND_COLOR } from '@/components/CO2Badge.helpers'
+import SectionInfo from '@/components/SectionInfo'
 import Card from '@/components/ui/Card'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 import { cn } from '@/lib/cn'
@@ -69,9 +70,13 @@ export default function SafetyStatsRoute(): ReactNode {
 
   return (
     <div className="mx-auto w-full max-w-6xl">
-      <h1 className="mb-4 inline-block rounded-lg bg-[var(--color-bg)]/85 px-3 py-1.5 text-2xl font-bold backdrop-blur-sm">
-        {t('safety.title')}
-      </h1>
+      <div className="mb-4 flex items-center gap-3">
+        <h1 className="inline-block rounded-lg bg-[var(--color-bg)]/85 px-3 py-1.5 text-2xl font-bold backdrop-blur-sm">
+          {t('safety.title')}
+        </h1>
+
+        <SectionInfo section="safetySummary" title={t('safety.title')} />
+      </div>
 
       {!online && (
         <p className="mb-4 rounded-md border border-amber-500/40 bg-amber-500/15 px-3 py-2 text-sm font-medium text-amber-800 dark:text-amber-300">
@@ -107,22 +112,26 @@ export default function SafetyStatsRoute(): ReactNode {
             </Card>
           </div>
 
-          <div className="mb-3 inline-flex gap-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-1">
-            {SAFETY_TABS.map(value => (
-              <button
-                key={value}
-                type="button"
-                onClick={() => handleTabChange(value)}
-                className={cn(
-                  'rounded-md border px-3 py-1 text-sm transition-colors duration-200',
-                  value === tab
-                    ? 'border-transparent bg-[var(--color-bg)] font-medium text-[var(--color-fg)] shadow-sm'
-                    : 'border-[var(--color-border)]/50 bg-[var(--color-bg)]/50 text-[var(--color-muted)] hover:border-[var(--color-border)] hover:bg-[var(--color-bg)] hover:text-[var(--color-fg)]'
-                )}
-              >
-                {t(`safety.tab.${value}`)}
-              </button>
-            ))}
+          <div className="mb-3 flex items-center gap-2">
+            <div className="inline-flex gap-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-1">
+              {SAFETY_TABS.map(value => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => handleTabChange(value)}
+                  className={cn(
+                    'rounded-md border px-3 py-1 text-sm transition-colors duration-200',
+                    value === tab
+                      ? 'border-transparent bg-[var(--color-bg)] font-medium text-[var(--color-fg)] shadow-sm'
+                      : 'border-[var(--color-border)]/50 bg-[var(--color-bg)]/50 text-[var(--color-muted)] hover:border-[var(--color-border)] hover:bg-[var(--color-bg)] hover:text-[var(--color-fg)]'
+                  )}
+                >
+                  {t(`safety.tab.${value}`)}
+                </button>
+              ))}
+            </div>
+
+            <SectionInfo section="safetyChart" title={t('safety.chart.title')} />
           </div>
 
           <Card className="mb-6">
@@ -135,7 +144,10 @@ export default function SafetyStatsRoute(): ReactNode {
           <SafetyModelsPanel stats={data} />
 
           <Card>
-            <h2 className="mb-3 text-base font-semibold">{t('safety.distribution')}</h2>
+            <h2 className="mb-3 flex items-center gap-1.5 text-base font-semibold">
+              {t('safety.distribution')}
+              <SectionInfo section="safetyDistribution" title={t('safety.distribution')} />
+            </h2>
             <div className="flex h-32 items-end gap-0.5" role="img" aria-label={t('safety.distribution')}>
               {data.distribution.map(b => (
                 <div

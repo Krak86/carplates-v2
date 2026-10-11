@@ -126,7 +126,7 @@ Files: migration 0063 (`registry.stats_spec`), `scripts/src/spec-stats.ts` (`pnp
 
 Passenger cars only; per (metric, brand, model): n, min, max. Power / displacement = 5th / 95th percentile of the registry column (typos reach a few percent; pure-electric capacity is a placeholder and skipped). Height / length = matched RDW year-medians, else the model's Wikipedia generations; fuel tank = Wikipedia only (thin: ~5 ranked models until `ingest:wikispecs` covers more). Matching = `matchRdwModel`. `/api/stats/top` returns `specBoards` per metric (top 10 highest + lowest, floor 500 vehicles; defaults to `{}`). UI: metric tabs on `/stats` under the weight panel. Registry-filed vans (Crafter, Transit) rank as cars.
 
-**Explanations on /stats:** each section carries a `SectionInfo` ❓ (`section.about.stats*` in ua/ru/en: summary, four top boards, weight, spec, table/map) listing meaning, sources and exclusions — add one for any new /stats section. The collapse-all floating button (`ScrollButtons`) is plate / VIN pages only.
+**Explanations on /stats, /fuel, /safety:** each section carries a `SectionInfo` ❓ (`section.about.stats*` / `fuel*` / `safety*` in ua/ru/en: summary, boards, chart tabs, model rankings, distribution) listing meaning, sources and exclusions — add one for any new section on these pages. The collapse-all floating button (`ScrollButtons`) is plate / VIN pages only.
 
 **Loading state of lazy sections:** a section that fetches after it expands shows `<SectionSkeleton />` (`components/ui/SectionSkeleton.tsx`), never a bare "Loading…" line. Sections that hide on a miss (Specs, Engines, Wiki) show nothing until matched.
 
