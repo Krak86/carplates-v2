@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 
+import GoogleTranslateLink from '@/components/GoogleTranslateLink'
 import InfoPopover from '@/components/InfoPopover'
 import { generationChipText, generationLabel, generationSpanText } from '@/components/GenerationChip.helpers'
 import { generationQuery } from '@/lib/queries'
@@ -48,7 +49,14 @@ export default function GenerationChip({ brand, model, year }: Props): ReactNode
         generation: generationLabel(match.next, t),
         span: generationSpanText(match.next, t)
       }),
-    current.bodyStyles && t('generation.info.body', { body: current.bodyStyles }),
+    current.bodyStyles && (
+      <>
+        {t('generation.info.body', { body: current.bodyStyles })}
+        <span className="mt-0.5 block text-xs">
+          <GoogleTranslateLink text={current.bodyStyles} from="en" />
+        </span>
+      </>
+    ),
     current.platform && t('generation.info.platform', { platform: current.platform }),
     t('generation.info.credit')
   ].filter(Boolean)
@@ -65,8 +73,8 @@ export default function GenerationChip({ brand, model, year }: Props): ReactNode
       }
     >
       <ul className="list-disc space-y-1 pl-4">
-        {lines.map(line => (
-          <li key={String(line)}>{line}</li>
+        {lines.map((line, i) => (
+          <li key={i}>{line}</li>
         ))}
       </ul>
     </InfoPopover>

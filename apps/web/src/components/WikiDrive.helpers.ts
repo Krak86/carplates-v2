@@ -15,6 +15,8 @@ export type DriveRow = {
   labelKey: string
   aboutKey: string
   value: string
+  /** The value is the article's own words (nothing could be read from it): the source language may need translating. */
+  raw?: boolean
 }
 
 const POSITION_PATTERNS: Record<EnginePosition, RegExp> = {
@@ -188,7 +190,13 @@ export function driveRows(
     })
   }
   if (positions.length === 0 && wheels.length === 0 && layout && !isJunk(layout)) {
-    rows.push({ key: 'layout', labelKey: 'wikispec.layout', aboutKey: 'wikispec.about.layout', value: layout })
+    rows.push({
+      key: 'layout',
+      labelKey: 'wikispec.layout',
+      aboutKey: 'wikispec.about.layout',
+      value: layout,
+      raw: true
+    })
   }
 
   const boxes = parseGearboxes(transmission)
@@ -210,7 +218,8 @@ export function driveRows(
       key: 'transmission',
       labelKey: 'wikispec.transmission',
       aboutKey: 'wikispec.about.transmission',
-      value: transmission
+      value: transmission,
+      raw: true
     })
   }
   return rows

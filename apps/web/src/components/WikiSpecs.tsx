@@ -156,6 +156,7 @@ export default function WikiSpecs({ brand, model, year, own }: Props): ReactNode
                     engine={e}
                     matches={engineMatchesCar(e, own)}
                     vsCar={engineVsCar(e, own, t)}
+                    sourceLang={match.enginesSource?.lang}
                   />
                 ))}
               </div>
@@ -178,7 +179,13 @@ export default function WikiSpecs({ brand, model, year, own }: Props): ReactNode
               <p className="text-xs text-[var(--color-muted)]">{t('wikispec.hint.drive')}</p>
               <div className="divide-y divide-[var(--color-border)]">
                 {driveItems.map(r => (
-                  <WikiSpecRow key={r.key} label={t(r.labelKey)} value={r.value} about={t(r.aboutKey)} />
+                  <WikiSpecRow
+                    key={r.key}
+                    label={t(r.labelKey)}
+                    value={r.value}
+                    about={t(r.aboutKey)}
+                    sourceLang={r.raw ? match.driveSource?.lang : undefined}
+                  />
                 ))}
               </div>
               <WikiSourceLine source={match.driveSource} />

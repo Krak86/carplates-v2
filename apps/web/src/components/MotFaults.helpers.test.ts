@@ -5,6 +5,8 @@ import {
   bandOfKm,
   motCarTab,
   parseMotCarTab,
+  reasonText,
+  untranslatedReasons,
   endsOf,
   formatShare,
   formatTests,
@@ -91,5 +93,25 @@ describe('my-car share tab', () => {
     expect(parseMotCarTab('b9', 4, edges)).toBeNull()
     expect(parseMotCarTab('km', 4, edges)).toBeNull()
     expect(parseMotCarTab(null, 4, edges)).toBeNull()
+  })
+})
+
+describe('untranslated MOT reasons', () => {
+  const known = {
+    code: 'exhaust/emissions-not-tested/not-tested',
+    item: 'Exhaust',
+    failText: 'Emissions not tested',
+    watchText: ''
+  }
+  const unknown = { code: 'x/y/z', item: 'Horn', failText: 'Horn inoperative', watchText: 'Horn weak' }
+
+  it('keeps only the reasons without a static translation, in DVSA English, one per line', () => {
+    expect(untranslatedReasons([known, unknown], 'ua', 'both')).toBe('Horn: Horn inoperative')
+    expect(untranslatedReasons([known], 'ua', 'both')).toBe('')
+  })
+
+  it('reads the advisory text in watch mode', () => {
+    expect(reasonText(unknown, 'watch')).toBe('Horn: Horn weak')
+    expect(reasonText(unknown, 'fail')).toBe('Horn: Horn inoperative')
   })
 })

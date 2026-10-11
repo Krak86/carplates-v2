@@ -3211,3 +3211,7 @@ Measured on the real registry (top 1,500 model groups = 15.4M cars): generation 
 - **Run:** `ingest:generations -- --limit 600` then `ingest:wikispecs` (both resumable; Wikipedia cache in `scripts/.data/`), seeds re-exported (`model-generations.csv.gz` 20 KB, `wikispecs.csv.gz` 204 KB).
 - **Checks:** format, lint (0 errors), type-check, 1,055 tests, shared rebuilt. API-checked (A6 2008 → C6 + 20 engines; Logan 2010 → L90/U90/F90; Sens → 1 row, 9 engines, no chip; Polo 2019 → Mk6; Mazda 6 2010 → GH1/GH2). **Not browser-checked** (the chip hide and the model-level strings are untested in the UI).
 - **Not done:** model-name leaks that the matcher already folds (Octavia a5/a7/Tour — verify on real plates before adding aliases), Passat B7 (no separate article), Opel Vivaro, Peugeot Partner / Expert, Ford Fusion (separate Europe/Americas articles), Chery/Geely, widening past 600 targets.
+
+### On-device "Translate" for all untranslated source text ✅ BUILT (2026-10-11)
+
+Owner decision: the stage D2 full translation run is skipped; the real-time "Translate" button (already on recall fields) is the pattern for every untranslated key/value. Added: `WikiSpecRow sourceLang` (engine note / raw text, raw drive rows), `DriveRow.raw`, `untranslatedReasons` / `reasonText` (UK MOT reasons without a static label, one link per group and in the car modal), and a link under the generation chip's body styles. Convention written in `docs/features-reference.md`. Checks: web type-check, 274 web tests (+2). **Not browser-checked.**

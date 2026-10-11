@@ -1,4 +1,6 @@
-import { MOT_GROUP_CODES, type MotGroupCode } from '@carplates/shared'
+import { MOT_GROUP_CODES, type MotGroupCode, type MotReason } from '@carplates/shared'
+
+import { reasonLabel } from '@/components/MotReasons'
 
 /** What the charts draw: tests that failed, tests that carried an advisory ("watch for"), or both. */
 export const MOT_MODES = ['both', 'fail', 'watch'] as const
@@ -115,4 +117,19 @@ export function parseMotCarTab(tab: string | null, bandCount: number, edgesKm: r
   const band = /^b(\d{1,2})$/.exec(tab ?? '')
   if (band && Number(band[1]) < bandCount) return { km: null, band: Number(band[1]) }
   return null
+}
+
+type ReasonTexts = Pick<MotReason, 'code' | 'item' | 'failText' | 'watchText'>
+
+/** DVSA's English wording of one reason: "Brake pads: worn or less than 1.5 mm" (the advisory text in watch mode). */
+export function reasonText(r: ReasonTexts, mode: MotMode): string {
+  return `${r.item}: ${mode === 'watch' && r.watchText ? r.watchText : r.failText || r.watchText}`
+}
+
+/** The English wording of the reasons that have no static translation in `lang`, one per line; '' when all are translated. */
+export function untranslatedReasons(reasons: readonly ReasonTexts[], lang: string, mode: MotMode): string {
+  return reasons
+    .filter(r => !reasonLabel(r.code, lang))
+    .map(r => reasonText(r, mode))
+    .join('\n')
 }

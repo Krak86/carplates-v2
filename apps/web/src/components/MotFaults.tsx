@@ -19,10 +19,13 @@ import {
   formatTests,
   groupKey,
   parseMotCarTab,
+  reasonText,
+  untranslatedReasons,
   yearsLabel,
   type MotCarTab,
   type MotMode
 } from '@/components/MotFaults.helpers'
+import GoogleTranslateLink from '@/components/GoogleTranslateLink'
 import MotHelp from '@/components/MotHelp'
 import MotIssueRow from '@/components/MotIssueRow'
 import { reasonLabel } from '@/components/MotReasons'
@@ -382,24 +385,31 @@ export default function MotFaults({ brand, model, year, kind }: Props): ReactNod
                         nudge={!touched}
                       >
                         {reasons.length > 0 ? (
-                          reasons.map(r => {
-                            const translated = reasonLabel(r.code, lang)
-                            const original = `${r.item}: ${mode === 'watch' && r.watchText ? r.watchText : r.failText || r.watchText}`
-                            return (
-                              <MotIssueRow
-                                key={r.code}
-                                nested
-                                label={translated ?? original}
-                                original={translated ? original : undefined}
-                                issue={r}
-                                edgesKm={match.edgesKm}
-                                mode={mode}
-                                active={active}
-                                onActive={handleActive}
-                                nudge={!touched}
-                              />
-                            )
-                          })
+                          <>
+                            {reasons.map(r => {
+                              const translated = reasonLabel(r.code, lang)
+                              const original = reasonText(r, mode)
+                              return (
+                                <MotIssueRow
+                                  key={r.code}
+                                  nested
+                                  label={translated ?? original}
+                                  original={translated ? original : undefined}
+                                  issue={r}
+                                  edgesKm={match.edgesKm}
+                                  mode={mode}
+                                  active={active}
+                                  onActive={handleActive}
+                                  nudge={!touched}
+                                />
+                              )
+                            })}
+                            {untranslatedReasons(reasons, lang, mode) && (
+                              <li className="py-1 pl-3 text-xs">
+                                <GoogleTranslateLink text={untranslatedReasons(reasons, lang, mode)} from="en" />
+                              </li>
+                            )}
+                          </>
                         ) : (
                           <li className="py-2 pl-3 text-sm text-[var(--color-muted)]">{t('mot.reasons.none')}</li>
                         )}

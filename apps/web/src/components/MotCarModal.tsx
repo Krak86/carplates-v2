@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import type { MotIssue, MotResponse } from '@carplates/shared'
 
+import GoogleTranslateLink from '@/components/GoogleTranslateLink'
 import MotHelp from '@/components/MotHelp'
 import {
   MOT_MAX_KM,
@@ -13,6 +14,7 @@ import {
   formatTests,
   groupKey,
   motCarTab,
+  untranslatedReasons,
   type MotCarTab
 } from '@/components/MotFaults.helpers'
 import { reasonLabel } from '@/components/MotReasons'
@@ -253,6 +255,22 @@ export default function MotCarModal({ name, year, match, initial, onClose: onClo
                   )
                 })}
               </ul>
+              {untranslatedReasons(
+                reasons.map(x => x.r),
+                lang,
+                'both'
+              ) && (
+                <p className="mt-1 text-xs">
+                  <GoogleTranslateLink
+                    text={untranslatedReasons(
+                      reasons.map(x => x.r),
+                      lang,
+                      'both'
+                    )}
+                    from="en"
+                  />
+                </p>
+              )}
             </>
           )}
 
