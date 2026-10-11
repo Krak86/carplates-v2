@@ -17,6 +17,7 @@ export type WikiSearchName = {
 }
 
 const VAZ_BRANDS = new Set(['ваз', 'lada', 'богдан', 'bogdan', 'vaz'])
+const KRAZ_BRANDS = new Set(['краз', 'kraz'])
 const ZAZ_BRANDS = new Set(['заз', 'заз-daewoo', 'zaz'])
 
 const vaz = (number: string): WikiSearchName => ({ brand: 'VAZ', model: number, leadQuery: `ВАЗ-${number}` })
@@ -91,6 +92,13 @@ function brandAlias(brand: string, model: string): WikiSearchName | null {
     // Trim words after the number: "307 xs 2.0 e".
     const number = /^(\d{3})\s[a-z]{1,3}(\s|$)/.exec(model)?.[1]
     if (number) return named('Peugeot', number)
+  }
+  if (KRAZ_BRANDS.has(brand)) {
+    // "63221", "6322-021" are trims of the KrAZ-6322; other indexes ("65055", "255б") have an article of their own.
+    const digits = /^(\d{3,5})/.exec(model)?.[1]
+    if (!digits) return null
+    const number = digits.startsWith('6322') ? '6322' : digits
+    return named('KrAZ', number, `KrAZ-${number}`)
   }
   if (brand === 'газ') {
     if (model.startsWith('2410')) return named('GAZ', '24', 'ГАЗ-24 Волга')

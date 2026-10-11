@@ -8,7 +8,8 @@
  *   pnpm ingest:wiki-images -- --brand kia        # one brand (repeatable)
  *   pnpm ingest:wiki-images -- --aliased          # only models with a wikiSearchName alias (VAZ 21104 → VAZ-2110 …), any size,
  *                                                 # redone even when stored not_found
- *   pnpm ingest:wiki-images -- --limit 50         # first N models, for a trial / a time-boxed session
+ *   pnpm ingest:wiki-images -- --all-kinds --brand краз --min-cars 1   # trucks etc. too (default: passenger cars only)
+ *   pnpm ingest:wiki-images -- --limit 50        # first N models, for a trial / a time-boxed session
  *   pnpm ingest:wiki-images -- --dry-run          # fetch + resolve + count, write nothing to the DB
  *   pnpm ingest:wiki-images -- --refresh          # redo models even if stored (ignores the on-disk response cache too)
  *   pnpm ingest:wiki-images -- --rps 2            # requests per second (default 1, max 2)
@@ -98,6 +99,7 @@ type Args = {
   retryNotFound: boolean
   aliased: boolean
   all: boolean
+  allKinds: boolean
   exportCsv?: string
   fromCsv?: string
 }
@@ -112,7 +114,8 @@ function parseArgs(argv: string[]): Args {
     retryFailed: false,
     retryNotFound: false,
     aliased: false,
-    all: false
+    all: false,
+    allKinds: false
   }
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i]
@@ -126,6 +129,7 @@ function parseArgs(argv: string[]): Args {
     else if (arg === '--retry-not-found') a.retryNotFound = true
     else if (arg === '--aliased') a.aliased = true
     else if (arg === '--all') a.all = true
+    else if (arg === '--all-kinds') a.allKinds = true
     else if (arg === '--export-csv') a.exportCsv = argv[++i]
     else if (arg === '--from-csv') a.fromCsv = argv[++i]
   }
@@ -182,12 +186,12 @@ type ModelGroup = { brand: string; model: string; total: number; years: Map<numb
 const groupId = (brand: string, model: string): string => `${brand}\u0000${model}`
 
 /** Passenger-car brand/model/year groups of the current registry, merged under the normalized `wikiImageKey`. */
-async function loadGroups(db: Db): Promise<ModelGroup[]> {
+async function loadGroups(db: Db, allKinds: boolean): Promise<ModelGroup[]> {
   const maxYear = new Date().getFullYear() + 1
   const { rows } = await db.execute<{ brand: string; model: string; year: number; n: number }>(sql`
     SELECT lower(btrim(brand)) AS brand, lower(btrim(model)) AS model, make_year AS year, count(*)::int AS n
     FROM registry.current_registration
-    WHERE kind ILIKE '%легков%' AND btrim(coalesce(brand, '')) <> '' AND btrim(coalesce(model, '')) <> ''
+    WHERE (${allKinds} OR kind ILIKE '%легков%') AND btrim(coalesce(brand, '')) <> '' AND btrim(coalesce(model, '')) <> ''
       AND make_year BETWEEN ${MIN_YEAR} AND ${maxYear}
     GROUP BY 1, 2, 3
   `)
@@ -612,8 +616,8 @@ async function main(): Promise<void> {
   const { db, close } = createDb()
   try {
     log('loading registry groups …')
-    let groups = await loadGroups(db)
-    log(`${groups.length} models with passenger cars in the registry`)
+    let groups = await loadGroups(db, args.allKinds)
+    log(`${groups.length} models with ${args.allKinds ? 'vehicles' : 'passenger cars'} in the registry`)
 
     const stored = await db
       .select()
@@ -625,7 +629,8 @@ async function main(): Promise<void> {
     let waitingForRetry = 0
 
     groups = groups.filter(g => {
-      if (args.brands.length && !args.brands.includes(g.brand)) return false
+      // The registry often repeats the model in the brand ("краз 63221"), so `--brand краз` takes those too.
+      if (args.brands.length && !args.brands.some(b => g.brand === b || g.brand.startsWith(`${b} `))) return false
       const row = prev.get(groupId(g.brand, g.model))
       if (args.retryFailed) {
         const due = row?.status === 'failed' && (args.all || !row.nextRetryAt || row.nextRetryAt.getTime() <= now)

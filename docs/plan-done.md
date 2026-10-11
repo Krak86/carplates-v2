@@ -3186,3 +3186,14 @@ Every /stats section now has a ❓ explanation (what the data means, where it co
 - **Collapse-all:** `ScrollButtons` renders it only when the path is one segment outside `ROUTE_TITLE_KEYS` (the `/:query` plate / VIN route); "back to top" stays everywhere.
 - **/fuel and /safety:** same treatment. Keys `fuelSummary|fuelPowertrain|fuelChart|fuelModels|fuelDistribution` and `safetySummary|safetyChart|safetyModels|safetyDistribution` (titles `fuel|safety.chart.title`, `fuel|safety.models.title`); the model lists take an `info` prop, so the ❓ also shows on the home page boards. Floors worded from the code (brands 2000, models 1500 matched cars; sources EEA/EPA and Euro NCAP / JNCAP / C-NCAP / KNCAP / IIHS).
 - **Known gaps / follow-ups:** `STATIC_ROUTES` in `use-header-vehicle-label.ts` lacks `/fuel` and `/safety` (`ROUTE_TITLE_KEYS` is the complete list); `docs/features-reference.md` says the spec floor is 500, the code uses 200.
+
+## Wikimedia photos for КРАЗ trucks (2026-10-11)
+
+The pre-warm skipped trucks (`kind ILIKE '%легков%'`) and `63221` had no alias to the `KrAZ-6322` article, so КРАЗ plates (e.g. `04ВЕ9280`, КРАЗ 63221, 2012) showed no photo.
+
+- **`ingest:wiki-images --all-kinds`** drops the passenger-car filter in `loadGroups`; default behaviour unchanged.
+- **`wikiSearchName`**: brands `краз` / `kraz` → `KrAZ-<number>` (`6322xx` → `6322`); test in `wikiAliases.test.ts`. `krasz` deliberately excluded (trailer codes).
+- **`leadLanguages`**: `краз` added to the `ru` list (en → ru → uk).
+- **`--brand` filter** now also matches `"<brand> <model>"` brands — the first run missed `краз 63221` (stored `not_found` by an earlier live lookup) until this was fixed and `--retry-not-found` was run.
+- **Run:** `pnpm ingest:wiki-images -- --all-kinds --min-cars 1 --brand краз --brand kraz --rps 2` (+ `--retry-not-found`): 64 of 118 groups with a photo, 0 failed; `краз 63221` 11/19 years. The API's in-memory image cache holds earlier `null` answers until restart.
+- **Not done:** re-export of `wiki-images.csv.gz`; other truck brands (МАЗ, КамАЗ, ЗІЛ).

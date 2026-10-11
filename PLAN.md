@@ -463,6 +463,7 @@ Pre-warm finished over every model (steps 1-7 done 2026-10-05/06; table 112,398 
 is opened. Design, schema, runbook, run log and the endpoint write-up are in `docs/plan-done.md` ("Wikimedia hero-image cache
 in Postgres + pre-warm").
 **Alias passes + coverage 62.8% → 99.1% (2026-10-09 … 10):** done — run log in `docs/plan-done.md` ("Wikimedia hero-image cache … alias passes").
+**КРАЗ trucks (2026-10-11):** ✅ `--all-kinds` + KrAZ alias + `ru` lead edition — 64 of 118 КРАЗ groups have a photo (`docs/plan-done.md`). Other truck brands (МАЗ, КамАЗ, ЗІЛ …) not done; `export:wiki-images:csv` not yet re-run.
 **Left (all optional):** (1) ~~resume `--aliased`, `--retry-failed`, export~~ done; (2) spot-check matches visually on real plates (Niva, Priora, Sens, Gazelle, Geely MK, Mercedes 200/230 → E-Class, UAZ 469 — needs plates from the user); (3) remaining `not_found` tail: Geely JL7162 / FE-2, Honda M-NV, СКС RDS-02РП, Fiat Grande Punto / Doblo Panorama, Kia Optima, Renault Taliant, ZAZ T13010 / TF69 (verify Chance), trim words ("307 xs 2.0 e", "pajero wgn 3.2 did") — each model < 300 cars; (4) check the offline `wiki` cap (200 entities) is enough now that every result fetches the photo. Ideas not done:
 search by normalized name for odd spellings ("118 i" → "118i"); non-Latin article titles (zh/ja/ko) are mostly rejected by
 the "title mentions the model" guard; a Wikidata `P18` query could replace the lead-image stage.

@@ -253,7 +253,7 @@ function apiUrl(base: string, params: Record<string, string>): URL {
 const brandLanguages = (brands: string[], langs: string[]): Array<[string, string[]]> => brands.map(b => [b, langs])
 
 const LEAD_LANGUAGES_BY_BRAND: Record<string, string[]> = Object.fromEntries([
-  ...brandLanguages(['ваз', 'уаз', 'заз', 'газ', 'москвич', 'лаз', 'богдан', 'маз', 'камаз', 'луаз'], ['ru']),
+  ...brandLanguages(['ваз', 'уаз', 'заз', 'газ', 'москвич', 'лаз', 'богдан', 'маз', 'камаз', 'луаз', 'краз'], ['ru']),
   ...brandLanguages(['fiat', 'lancia', 'alfa romeo', 'maserati', 'ferrari', 'lamborghini', 'iveco'], ['it']),
   ...brandLanguages(
     ['geely', 'chery', 'byd', 'great wall', 'jac', 'faw', 'dongfeng', 'lifan', 'changan', 'haval', 'baic'],

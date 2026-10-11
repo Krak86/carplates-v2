@@ -17,6 +17,12 @@ describe('wikiSearchName', () => {
     expect(wikiSearchName('ваз', '111830')?.model).toBe('Kalina')
   })
 
+  it('maps KrAZ indexes to their article', () => {
+    expect(wikiSearchName('краз', '63221')).toEqual({ brand: 'KrAZ', model: '6322', leadQuery: 'KrAZ-6322' })
+    expect(wikiSearchName('краз', '65055')).toEqual({ brand: 'KrAZ', model: '65055', leadQuery: 'KrAZ-65055' })
+    expect(wikiSearchName('краз', 'самоскид')).toBeNull()
+  })
+
   it('maps ZAZ indexes', () => {
     expect(wikiSearchName('заз-daewoo', 't13110')?.model).toBe('Sens')
     expect(wikiSearchName('заз', '110307-42')?.model).toBe('Slavuta')
