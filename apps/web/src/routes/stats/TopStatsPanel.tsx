@@ -5,6 +5,7 @@ import type { StatsTopResponse } from '@carplates/shared'
 
 import BrandLogo from '@/components/BrandLogo'
 import ColorSwatch from '@/components/ColorSwatch'
+import SectionInfo from '@/components/SectionInfo'
 import Card from '@/components/ui/Card'
 import { cn } from '@/lib/cn'
 import { toIntlLocale } from '@/lib/intl'
@@ -34,11 +35,14 @@ const HIGHLIGHT_DURATION_MS = 2500
 
 function Leaderboard({
   titleKey,
+  infoSection,
   icon,
   entries,
   showColorSwatch
 }: {
   titleKey: string
+  /** `section.about.<infoSection>` explanation shown behind the ❓ next to the title. */
+  infoSection: string
   icon: string
   entries: LeaderboardEntry[]
   /** Each entry's `label` is itself a color value — show its swatch circle before the text. */
@@ -70,6 +74,7 @@ function Leaderboard({
     <Card>
       <div className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-[var(--color-muted)] uppercase">
         <span aria-hidden>{icon}</span> {t(titleKey, { count: visible.length })}
+        <SectionInfo section={infoSection} title={t(titleKey, { count: visible.length })} />
       </div>
       {entries.length === 0 ? (
         <p className="text-sm text-[var(--color-muted)]">{t('stats.noRows')}</p>
@@ -148,10 +153,16 @@ export default function TopStatsPanel({ stats, highlightModel }: Props): ReactNo
 
   return (
     <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-      <Leaderboard titleKey="stats.top.brand" icon="🏭" entries={brandEntries} />
-      <Leaderboard titleKey="stats.top.model" icon="🚗" entries={modelEntries} />
-      <Leaderboard titleKey="stats.top.color" icon="🎨" entries={colorEntries} showColorSwatch />
-      <Leaderboard titleKey="stats.top.region" icon="🗺️" entries={regionEntries} />
+      <Leaderboard titleKey="stats.top.brand" infoSection="statsTopBrand" icon="🏭" entries={brandEntries} />
+      <Leaderboard titleKey="stats.top.model" infoSection="statsTopModel" icon="🚗" entries={modelEntries} />
+      <Leaderboard
+        titleKey="stats.top.color"
+        infoSection="statsTopColor"
+        icon="🎨"
+        entries={colorEntries}
+        showColorSwatch
+      />
+      <Leaderboard titleKey="stats.top.region" infoSection="statsTopRegion" icon="🗺️" entries={regionEntries} />
     </div>
   )
 }

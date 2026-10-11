@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { DEFAULT_SPEC_METRIC, SPEC_METRICS, type SpecMetric } from '@carplates/shared'
 import { useTranslation } from 'react-i18next'
 
+import SectionInfo from '@/components/SectionInfo'
 import Card from '@/components/ui/Card'
 import { cn } from '@/lib/cn'
 import { statsTopQuery } from '@/lib/queries'
@@ -30,7 +31,7 @@ export default function SpecModelsPanel(): ReactNode {
 
   return (
     <div className="mb-6">
-      <div role="group" aria-label={t('stats.spec.metric')} className="mb-3 flex flex-wrap gap-1.5">
+      <div role="group" aria-label={t('stats.spec.metric')} className="mb-3 flex flex-wrap items-center gap-1.5">
         {metrics.map(m => (
           <button
             key={m}
@@ -45,6 +46,8 @@ export default function SpecModelsPanel(): ReactNode {
             {t(`stats.spec.metric.${m}`)}
           </button>
         ))}
+
+        <SectionInfo section="statsSpec" title={t('stats.spec.title')} />
       </div>
 
       {board && (

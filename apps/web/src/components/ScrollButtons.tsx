@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useLocation } from 'react-router'
 
+import { ROUTE_TITLE_KEYS } from '@/hooks/useDocumentTitle'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { useScrolledNow } from '@/hooks/useSideWidgetsVisible'
 import { cn } from '@/lib/cn'
@@ -44,6 +46,10 @@ export default function ScrollButtons(): ReactNode {
   const { t } = useTranslation()
   const isWide = useMediaQuery(WIDE_QUERY)
   const scrolled = useScrolledNow()
+  // Only a plate / VIN result page (a single segment that is not a static route) has collapsible sections.
+  const { pathname } = useLocation()
+  const isResultRoute =
+    pathname !== '/' && pathname.split('/').filter(Boolean).length === 1 && !(pathname in ROUTE_TITLE_KEYS)
   const [pos, setPos] = useState<Position>(measure)
 
   useEffect(() => {
@@ -79,28 +85,30 @@ export default function ScrollButtons(): ReactNode {
         scrolled ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
       )}
     >
-      <button
-        type="button"
-        aria-label={t('scroll.collapseAll')}
-        title={t('scroll.collapseAll')}
-        tabIndex={scrolled ? undefined : -1}
-        onClick={collapseAllSections}
-        className={BUTTON_CLASS}
-      >
-        <svg
-          aria-hidden
-          viewBox="0 0 24 24"
-          className="size-6"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
+      {isResultRoute && (
+        <button
+          type="button"
+          aria-label={t('scroll.collapseAll')}
+          title={t('scroll.collapseAll')}
+          tabIndex={scrolled ? undefined : -1}
+          onClick={collapseAllSections}
+          className={BUTTON_CLASS}
         >
-          <path d="M20 4l-6 6M14 4v6h6" />
-          <path d="M4 20l6-6M10 20v-6H4" />
-        </svg>
-      </button>
+          <svg
+            aria-hidden
+            viewBox="0 0 24 24"
+            className="size-6"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M20 4l-6 6M14 4v6h6" />
+            <path d="M4 20l6-6M10 20v-6H4" />
+          </svg>
+        </button>
+      )}
 
       <button
         type="button"

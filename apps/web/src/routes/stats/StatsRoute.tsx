@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router'
 
 import LoadErrorBoundary from '@/components/LoadErrorBoundary'
+import SectionInfo from '@/components/SectionInfo'
 import Card from '@/components/ui/Card'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 import { cn } from '@/lib/cn'
@@ -106,6 +107,8 @@ export default function StatsRoute(): ReactNode {
           {t('stats.title')}
         </h1>
 
+        <SectionInfo section="statsSummary" title={t('stats.title')} />
+
         {stats.isSuccess && range && (
           <p className="inline-block rounded bg-[var(--color-bg)]/85 px-2 py-1 text-sm text-[var(--color-muted)] backdrop-blur-sm">
             {t('stats.yearRange', {
@@ -155,22 +158,26 @@ export default function StatsRoute(): ReactNode {
 
           <VdbStatsPanel />
 
-          <div className="mb-4 inline-flex gap-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-1">
-            {STATS_VIEWS.map(v => (
-              <button
-                key={v}
-                type="button"
-                onClick={() => handleViewChange(v)}
-                className={cn(
-                  'rounded-md border px-3 py-1 text-sm transition-colors duration-200',
-                  v === view
-                    ? 'border-transparent bg-[var(--color-bg)] font-medium text-[var(--color-fg)] shadow-sm'
-                    : 'border-[var(--color-border)]/50 bg-[var(--color-bg)]/50 text-[var(--color-muted)] hover:border-[var(--color-border)] hover:bg-[var(--color-bg)] hover:text-[var(--color-fg)]'
-                )}
-              >
-                {t(`stats.view.${v}`)}
-              </button>
-            ))}
+          <div className="mb-4 flex items-center gap-2">
+            <div className="inline-flex gap-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-1">
+              {STATS_VIEWS.map(v => (
+                <button
+                  key={v}
+                  type="button"
+                  onClick={() => handleViewChange(v)}
+                  className={cn(
+                    'rounded-md border px-3 py-1 text-sm transition-colors duration-200',
+                    v === view
+                      ? 'border-transparent bg-[var(--color-bg)] font-medium text-[var(--color-fg)] shadow-sm'
+                      : 'border-[var(--color-border)]/50 bg-[var(--color-bg)]/50 text-[var(--color-muted)] hover:border-[var(--color-border)] hover:bg-[var(--color-bg)] hover:text-[var(--color-fg)]'
+                  )}
+                >
+                  {t(`stats.view.${v}`)}
+                </button>
+              ))}
+            </div>
+
+            <SectionInfo section="statsTable" title={t('stats.table.title')} />
           </div>
 
           <div className="mb-4 flex flex-wrap items-center justify-between gap-2">

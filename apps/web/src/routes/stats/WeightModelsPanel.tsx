@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { DEFAULT_WEIGHT_GROUP, WEIGHT_GROUPS, type WeightGroup } from '@carplates/shared'
 import { useTranslation } from 'react-i18next'
 
+import SectionInfo from '@/components/SectionInfo'
 import { cn } from '@/lib/cn'
 import { statsTopQuery } from '@/lib/queries'
 import WeightModelsCards from '@/routes/stats/WeightModelsCards'
@@ -26,7 +27,7 @@ export default function WeightModelsPanel(): ReactNode {
 
   return (
     <div className="mb-6">
-      <div role="group" aria-label={t('stats.weight.group')} className="mb-3 flex flex-wrap gap-1.5">
+      <div role="group" aria-label={t('stats.weight.group')} className="mb-3 flex flex-wrap items-center gap-1.5">
         {groups.map(g => (
           <button
             key={g}
@@ -41,6 +42,8 @@ export default function WeightModelsPanel(): ReactNode {
             {t(`stats.weight.group.${g}`)}
           </button>
         ))}
+
+        <SectionInfo section="statsWeight" title={t('stats.weight.title')} />
       </div>
 
       {board && <WeightModelsCards key={group} board={board} showGroup={group === 'all'} />}
