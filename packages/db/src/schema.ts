@@ -938,6 +938,47 @@ export const modelGenerations = registry.table(
 export type ModelGenerationRow = typeof modelGenerations.$inferSelect
 export type ModelGenerationInsert = typeof modelGenerations.$inferInsert
 
+/** Wikipedia spec catalogue of one generation (same key as `modelGenerations`); dimensions are NULL where RDW has the model. */
+export type WikiEngineJson = {
+  displacementCc: number | null
+  cylinders: number | null
+  powerKw: number | null
+  fuel: 'petrol' | 'diesel' | 'electric' | 'hybrid' | 'lpg' | null
+  raw: string
+  powerKwMax?: number | null
+  chassisCodes?: string[]
+  note?: string
+  years?: string
+}
+export const modelSpecWiki = registry.table(
+  'model_spec_wiki',
+  {
+    makeKey: text('make_key').notNull(),
+    modelKey: text('model_key').notNull(),
+    yearFrom: smallint('year_from').notNull(),
+    wheelbaseMm: integer('wheelbase_mm'),
+    lengthMm: integer('length_mm'),
+    widthMm: integer('width_mm'),
+    heightMm: integer('height_mm'),
+    kerbKg: integer('kerb_kg'),
+    fuelTankL: real('fuel_tank_l'),
+    layout: text('layout').notNull().default(''),
+    transmission: text('transmission').notNull().default(''),
+    engines: jsonb('engines').$type<WikiEngineJson[]>().notNull().default([]),
+    srcLang: text('src_lang').notNull().default(''),
+    srcTitle: text('src_title').notNull().default(''),
+    revid: bigint('revid', { mode: 'number' }),
+    enginesLang: text('engines_lang').notNull().default(''),
+    enginesTitle: text('engines_title').notNull().default(''),
+    driveLang: text('drive_lang').notNull().default(''),
+    driveTitle: text('drive_title').notNull().default(''),
+    wikidataId: text('wikidata_id').notNull().default('')
+  },
+  t => [primaryKey({ columns: [t.makeKey, t.modelKey, t.yearFrom] })]
+)
+export type ModelSpecWikiRow = typeof modelSpecWiki.$inferSelect
+export type ModelSpecWikiInsert = typeof modelSpecWiki.$inferInsert
+
 /**
  * Per-(brand, model, year, fuel, capacity bucket) passenger-car counts joined with the CO2 estimate the reference
  * data gives them — backs the /fuel statistics page. Rebuilt by `scripts/src/fuel-stats.ts`; see

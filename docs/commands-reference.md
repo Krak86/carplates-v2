@@ -131,6 +131,9 @@ pnpm ingest:ca-recalls   # Transport Canada recalls (OGL) with NO US twin -> reg
 pnpm ingest:generations   # car generations (Wikidata + Wikipedia) for the top 300 registry models -> registry.model_generations; ~10 min, cached in scripts/.data/generations/. --limit N, --only "brand model", --dry-run (prints table + coverage), --refresh. Chip via GET /api/generations
 pnpm ingest:generations:csv   # load the committed seed (seed-data/model-generations.csv.gz) — part of ingest:ratings:csv
 pnpm export:generations:csv   # re-dump the table to that CSV — run after every real re-ingest
+pnpm ingest:wikispecs   # Wikipedia spec catalogue (stage K: dimensions, drive, engines with power) for every row of model_generations -> registry.model_spec_wiki; en -> ru -> uk -> de -> home edition per block, dimensions NULL where RDW has the model; ~1 h cold, cached in scripts/.data/wikispecs/ (resumable). --limit N models, --only "make_key model_key", --dry-run (coverage table), --refresh. Title pins: scripts/src/wikispecs-overrides.csv
+pnpm ingest:wikispecs:csv   # load the committed seed (seed-data/wikispecs.csv.gz) — part of ingest:ratings:csv
+pnpm export:wikispecs:csv   # re-dump the table to that CSV — run after every real re-ingest
 pnpm ingest:ca-recalls:csv   # load the committed seed (seed-data/ca-recalls.csv.gz) — part of ingest:ratings:csv
 pnpm export:ca-recalls:csv   # re-dump both tables to that CSV — run after every real re-ingest
 pnpm ingest:rdw-recalls:translate   # local-model (NLLB, GPU) translation of recall texts -> rdw_recall_texts; resumable, --max-minutes N / --limit N --offset N / --make --model / --langs / --dump f.md. See DATASETS_PLAN "Stage D follow-up 2"
