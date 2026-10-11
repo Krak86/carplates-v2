@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { MouseEvent, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -19,9 +19,24 @@ export default function RaceGameStage({ config, onChange, onPickBody }: Props): 
   const [sound, setSound] = useState(false)
   const { phase, hud, wasLoaded, handleStart, handleRestart, setCanvas } = useRaceGameActions(config, sound)
 
+  const [frame, setFrame] = useState<HTMLDivElement | null>(null)
+  const [fullscreen, setFullscreen] = useState(false)
+
+  useEffect(() => {
+    const handleChange = (): void => setFullscreen(document.fullscreenElement === frame && !!frame)
+    document.addEventListener('fullscreenchange', handleChange)
+    return () => document.removeEventListener('fullscreenchange', handleChange)
+  }, [frame])
+
   const handleToggleSound = (e: MouseEvent<HTMLButtonElement>): void => {
     setSound(on => !on)
     e.currentTarget.blur() // keys must keep steering the car
+  }
+
+  const handleToggleFullscreen = (e: MouseEvent<HTMLButtonElement>): void => {
+    e.currentTarget.blur() // keys must keep steering the car
+    if (document.fullscreenElement) void document.exitFullscreen()
+    else void frame?.requestFullscreen().catch(() => undefined)
   }
 
   if (phase !== 'playing') {
@@ -52,8 +67,11 @@ export default function RaceGameStage({ config, onChange, onPickBody }: Props): 
   return (
     <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_16rem]">
       <div>
-        <div className="relative overflow-hidden rounded-lg bg-black">
-          <canvas ref={setCanvas} className="block aspect-[4/3] w-full" />
+        <div ref={setFrame} className="relative overflow-hidden rounded-lg bg-black">
+          <canvas
+            ref={setCanvas}
+            className={fullscreen ? 'block h-screen w-screen object-contain' : 'block aspect-[4/3] w-full'}
+          />
 
           {hud && (
             <div className="pointer-events-none absolute inset-x-0 top-0 flex justify-between p-3 font-mono text-white [text-shadow:0_1px_3px_#000]">
@@ -87,6 +105,15 @@ export default function RaceGameStage({ config, onChange, onPickBody }: Props): 
           >
             {sound ? t('race.soundOn') : t('race.soundOff')}
           </button>
+          {document.fullscreenEnabled && (
+            <button
+              type="button"
+              onClick={handleToggleFullscreen}
+              className="shrink-0 cursor-pointer rounded-full border border-[var(--color-border)] px-3 py-0.5 hover:border-[var(--color-primary)]"
+            >
+              {t('race.fullscreen')}
+            </button>
+          )}
           <button
             type="button"
             onClick={handleRestart}
