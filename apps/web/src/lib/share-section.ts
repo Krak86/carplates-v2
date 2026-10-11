@@ -5,6 +5,7 @@ export const SHARE_SECTIONS = [
   'basic',
   'history',
   'specs',
+  'engines',
   'recalls',
   'faults',
   'electric',

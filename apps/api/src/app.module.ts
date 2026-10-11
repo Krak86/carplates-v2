@@ -37,6 +37,7 @@ import { StatsModule } from './stats/stats.module.js'
 import { UsageModule } from './usage/usage.module.js'
 import { VinModule } from './vin/vin.module.js'
 import { WikiModule } from './wiki/wiki.module.js'
+import { WikispecsModule } from './wikispecs/wikispecs.module.js'
 
 @Module({
   imports: [
@@ -64,6 +65,7 @@ import { WikiModule } from './wiki/wiki.module.js'
     NhtsaModule,
     CaRecallsModule,
     GenerationsModule,
+    WikispecsModule,
     FuelModule,
     FxModule,
     EvModule,

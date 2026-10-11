@@ -576,3 +576,15 @@ export {
   type WikiSpecs,
   type WikiTable
 } from './wikiSpecs.js'
+export {
+  wikiDimensionsSchema,
+  wikiEngineSchema,
+  wikiSourceSchema,
+  wikiSourceUrl,
+  wikiSpecsResponseSchema,
+  type WikiDimensions,
+  type WikiEngineView,
+  type WikiSource,
+  type WikiSpecsMatch,
+  type WikiSpecsResponse
+} from './wikiSpecsApi.js'

@@ -27,6 +27,7 @@ import {
   getMot,
   getCaRecalls,
   getGenerations,
+  getWikiSpecs,
   getNhtsaComplaints,
   getNhtsaRecalls,
   getRdwRecalls,
@@ -315,6 +316,15 @@ export function generationQuery(brand: string, model: string, year: number) {
   return queryOptions({
     queryKey: ['rdw', 'generations', brand, model, year],
     queryFn: () => getGenerations(brand, model, year),
+    staleTime: Infinity
+  })
+}
+
+// Wikipedia catalogue figures (engines, layout, gap dimensions) of the generation — persisted reference data, offline in the rdw group.
+export function wikiSpecsQuery(brand: string, model: string, year: number) {
+  return queryOptions({
+    queryKey: ['rdw', 'wikispecs', brand, model, year],
+    queryFn: () => getWikiSpecs(brand, model, year),
     staleTime: Infinity
   })
 }

@@ -81,6 +81,7 @@ const RdwSpecs = lazy(() => import('@/components/RdwSpecs'))
 const RdwRecalls = lazy(() => import('@/components/RdwRecalls'))
 const MotFaults = lazy(() => import('@/components/MotFaults'))
 const OpenEv = lazy(() => import('@/components/OpenEv'))
+const WikiSpecs = lazy(() => import('@/components/WikiSpecs'))
 const SafetyRatings = lazy(() => import('@/components/SafetyRatings'))
 
 type Props = {
@@ -566,6 +567,9 @@ export default function ResultCard({ data }: Props): ReactNode {
             fuel={c.fuel}
             own={{ powerKw: c.powerKwt, displacementCc: c.capacity, massKg: c.ownWeight, grossMassKg: c.totalWeight }}
           />
+        </LazySection>
+        <LazySection sections={['engines']}>
+          <WikiSpecs brand={c.brand} model={c.model} year={c.makeYear} />
         </LazySection>
         <LazySection sections={['value']} forceMount={valueOpenSignal > 0}>
           <EstimatedValueSection

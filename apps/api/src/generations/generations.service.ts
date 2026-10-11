@@ -6,6 +6,14 @@ import { and, asc, eq, inArray, sql } from 'drizzle-orm'
 
 import { DbService } from '../db/db.service.js'
 
+export type LocatedGenerations = {
+  /** The matched catalogue model: its keys address other `model_*` tables. */
+  row: { makeKey: string; modelKey: string; make: string; model: string }
+  how: 'exact' | 'alias' | 'series' | 'prefix'
+  list: Generation[]
+  crossMake: boolean
+}
+
 @Injectable()
 export class GenerationsService {
   constructor(@Inject(DbService) private readonly dbService: DbService) {}
@@ -16,8 +24,34 @@ export class GenerationsService {
    */
   async generations(brand: string, model: string, year?: number): Promise<GenerationsResponse> {
     const none: GenerationsResponse = { brand, model, year: year ?? null, match: null }
+    const located = await this.locate(brand, model)
+    if (!located) return none
+    const { row, how, list, crossMake } = located
+
+    const current = year ? pickGeneration(list, year) : null
+    const at = current ? list.indexOf(current) : -1
+    return {
+      brand,
+      model,
+      year: year ?? null,
+      match: {
+        makeName: row.make,
+        modelName: row.model,
+        how,
+        crossMake,
+        current,
+        previous: at > 0 ? list[at - 1]! : null,
+        next: at >= 0 ? (list[at + 1] ?? null) : null,
+        boundary: !!current && !!year && year === current.yearFrom && at > 0 && list[at - 1]!.yearTo === year,
+        total: list.length
+      }
+    }
+  }
+
+  /** The catalogue model a registry make/model matches (the shared VehiclesDB matcher) with all its generations, oldest first. */
+  async locate(brand: string, model: string): Promise<LocatedGenerations | null> {
     const mk = makeKey(brand)
-    if (!mk) return none
+    if (!mk) return null
 
     const { db } = this.dbService
     const models = (
@@ -34,7 +68,7 @@ export class GenerationsService {
     ).map(r => ({ ...r, kind: 'any', aliases: [] }))
 
     const found = matchVdbModelAcrossMakes(models, mk, model, ['any'])
-    if (!found) return none
+    if (!found) return null
 
     const { row, how } = found
     const rows = await db
@@ -51,24 +85,6 @@ export class GenerationsService {
       platform: r.platform,
       wikiTitle: r.wikiTitle
     }))
-
-    const current = year ? pickGeneration(list, year) : null
-    const at = current ? list.indexOf(current) : -1
-    return {
-      brand,
-      model,
-      year: year ?? null,
-      match: {
-        makeName: row.make,
-        modelName: row.model,
-        how,
-        crossMake: row.makeKey !== mk,
-        current,
-        previous: at > 0 ? list[at - 1]! : null,
-        next: at >= 0 ? (list[at + 1] ?? null) : null,
-        boundary: !!current && !!year && year === current.yearFrom && at > 0 && list[at - 1]!.yearTo === year,
-        total: list.length
-      }
-    }
+    return { row, how, list, crossMake: row.makeKey !== mk }
   }
 }

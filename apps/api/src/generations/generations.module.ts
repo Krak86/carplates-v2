@@ -5,6 +5,7 @@ import { GenerationsService } from './generations.service.js'
 
 @Module({
   controllers: [GenerationsController],
-  providers: [GenerationsService]
+  providers: [GenerationsService],
+  exports: [GenerationsService]
 })
 export class GenerationsModule {}
