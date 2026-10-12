@@ -187,7 +187,10 @@ const WORD_CYL: Record<string, number> = { two: 2, three: 3, four: 4, five: 5, s
 
 /** Power in kW: kW as is, PS / CV / ch / л. с. × 0.7355 (metric), hp / bhp × 0.7457 (mechanical) — a unit-less number is never taken. */
 export function powerKwOf(text: string): number | null {
-  const kw = /(\d{2,4}(?:\.\d{1,2})?)\s*(?:kW|кВт)(?![\p{L}\d])/iu.exec(text)
+  // "135 + 10 кВт" (mild hybrid boost): the engine's own figure is the first.
+  const kw =
+    /(\d{2,4})\s*\+\s*\d{1,3}\s*(?:kW|кВт)(?![\p{L}\d])/iu.exec(text) ??
+    /(\d{2,4}(?:\.\d{1,2})?)\s*(?:kW|кВт)(?![\p{L}\d])/iu.exec(text)
   const metric = /(\d{2,4}(?:\.\d{1,2})?)\s*(?:PS|CV|ch|л\.\s?с\.?|к\.\s?с\.?)(?![\p{L}\d])/iu.exec(text)
   const mech = /(\d{2,4}(?:\.\d{1,2})?)\s*(?:bhp|hp)(?![\p{L}\d])/iu.exec(text)
   let powerKw: number | null = null
@@ -197,12 +200,15 @@ export function powerKwOf(text: string): number | null {
   return powerKw !== null && (powerKw < 5 || powerKw > 1500) ? null : powerKw
 }
 
+/** An explicit cubic-centimetre figure ("1595 cm³", "1497 см3"). */
+const CC_RE = /(\d{3,5}(?:\.\d)?)\s*(?:cc|cm³|cm3|см³|см3)/i
+
 /** One engine line: `1.6 L I4 (petrol) 110 PS`, `2,2 л 5S-FE I4 (136 л. с.)`. Each field null when not found. */
 export function parseEngine(line: string): WikiEngine {
   const text = line.replace(/(\d),(\d{3})(?!\d)/g, '$1$2').replace(/(\d),(\d)(?!\d)/g, '$1.$2')
   let displacementCc: number | null = null
   const litres = /(?<![\d.])(\d{1,2}(?:\.\d{1,2})?)\s*(?:l|litres?|liters?|литр\p{L}*|л)(?![\p{L}\d])/iu.exec(text)
-  const cc = /(\d{3,5}(?:\.\d)?)\s*(?:cc|cm³|cm3|см³)/i.exec(text)
+  const cc = CC_RE.exec(text)
   // An explicit cc figure beats a litre one: a bike's spec table lists "248 cc … SAE 10W40/1.9 L" (the oil capacity).
   if (cc) displacementCc = Math.round(Number(cc[1]))
   else if (litres) displacementCc = Math.round(Number(litres[1]) * 1000)
@@ -556,9 +562,16 @@ export function parseWikiSpecs(wikitext: string, opts: ParseOptions = {}): WikiS
     infoboxCc.length > 0 &&
     tables.engines.every(e => e.displacementCc !== null) &&
     !tables.engines.some(e => infoboxCc.some(cc => Math.abs(cc - e.displacementCc!) <= cc * 0.03))
+  // An infobox that only gives ranges ("200–930 kW", "1,0–1,6 л (33–78 кВт)") or no displacement/code is outlisted by a longer table.
+  const RANGE = /\d\s*[–—-]\s*\d+(?:[.,]\d+)?\s*(?:kW|кВт|PS|л\.?\s?с|[lл](?![\p{L}]))/iu
+  const infoboxVague =
+    infoboxEngines.every(e => RANGE.test(e.raw) || (e.displacementCc === null && (e.engineCodes?.length ?? 0) === 0)) &&
+    tables.engines.length > infoboxEngines.length
   const engines =
     infoboxEngines.length === 0 ||
-    (tables.engines.some(e => e.powerKw !== null) && (tableNamesEngine || !infoboxHasPower) && !tableContradicts)
+    (tables.engines.some(e => e.powerKw !== null) &&
+      (tableNamesEngine || !infoboxHasPower || infoboxVague) &&
+      !tableContradicts)
       ? tables.engines
       : infoboxEngines
   return {
@@ -903,6 +916,10 @@ function engineOf(p: EngineParts): WikiEngine | null {
     .join(' ')
   const parsed = parseEngine(text)
   let displacementCc = parsed.displacementCc
+  // German / Russian power cells carry the capacity too ("1595 cm³ 95 kW"); it beats a litre figure of the engine cell (a consumption).
+  const plain = (s: string): string => s.replace(/(\d),(\d{3})(?!\d)/g, '$1$2')
+  const powerCc = CC_RE.exec(plain(p.power.join(' ')))
+  if (powerCc && !CC_RE.test(plain(text))) displacementCc = Math.round(Number(powerCc[1]))
   if (displacementCc === null) {
     for (const d of p.displacement) displacementCc ??= bareDisplacement(d.lines.join(' '), d.header)
     // A leading "1.3" / "1,6" of an engine cell is litres ("1,3 (70 л. с.)").

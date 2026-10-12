@@ -256,3 +256,30 @@ describe('parseWikiSpecs: per-model power line of a shared bike infobox (BMW F s
     expect(parseWikiSpecs(wikitext, { lang: 'en' }).engines[0]?.powerKw).toBe(63)
   })
 })
+
+describe('parseEngine / powerKwOf: Russian cc unit and mild-hybrid boost', () => {
+  it('reads `1497 см3` over the litre figure of a consumption', () => {
+    const e = parseEngine('C 200 R4 6,2-6,6 л Super 142-151 г/км 1497 см3 135 + 10 кВт (184 + 14 л. с.)')
+    expect(e).toMatchObject({ displacementCc: 1497, powerKw: 135 })
+  })
+})
+
+describe('parseWikiSpecs: a range-only infobox loses to a longer variant table', () => {
+  const wikitext = `{{Infobox Pkw-Modell
+| Motoren = Elektromotor: 200–930 kW
+}}
+{| class="wikitable"
+! Version !! Motor !! Leistung
+|-
+| 001 RWD || Synchronmotor || 200 kW (272 PS)
+|-
+| 001 AWD || Synchronmotor || 310 kW (421 PS)
+|-
+| 001 FR || Synchronmotor || 580 kW (789 PS)
+|}`
+
+  it('takes the table variants', () => {
+    const engines = parseWikiSpecs(wikitext, { lang: 'de' }).engines
+    expect(engines.map(e => e.powerKw)).toEqual([200, 310, 580])
+  })
+})
