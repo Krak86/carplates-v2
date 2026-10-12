@@ -595,7 +595,7 @@ export default function ResultCard({ data }: Props): ReactNode {
           <RdwRecalls brand={c.brand} model={c.model} year={c.makeYear} kind={c.kind} />
         </LazySection>
         <LazySection sections={['faults']}>
-          <MotFaults brand={c.brand} model={c.model} year={c.makeYear} kind={c.kind} />
+          <MotFaults brand={c.brand} model={c.model} year={c.makeYear} kind={c.kind} fuel={c.fuel} />
         </LazySection>
         <LazySection sections={['electric']}>
           <OpenEv brand={c.brand} model={c.model} year={c.makeYear} fuel={c.fuel} />

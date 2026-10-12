@@ -80,6 +80,7 @@ import type {
   WikiSpecsResponse,
   NhtsaComplaintsResponse,
   NhtsaRecallsResponse,
+  MotFuelHint,
   MotResponse,
   OpenEvResponse,
   RdwRecallsResponse,
@@ -319,9 +320,16 @@ export async function getOpenEv(brand: string, model: string): Promise<OpenEvRes
   return openEvResponseSchema.parse(await getJson(`/api/ev?${params.toString()}`))
 }
 
-export async function getMot(brand: string, model: string, year: number, kind?: string | null): Promise<MotResponse> {
+export async function getMot(
+  brand: string,
+  model: string,
+  year: number,
+  kind?: string | null,
+  fuel?: MotFuelHint
+): Promise<MotResponse> {
   const params = new URLSearchParams({ brand, model, year: String(year) })
   if (kind) params.set('kind', kind)
+  if (fuel) params.set('fuel', fuel)
   return motResponseSchema.parse(await getJson(`/api/mot?${params.toString()}`))
 }
 

@@ -3,6 +3,7 @@ import type { QueryClient, QueryKey } from '@tanstack/react-query'
 import { normalizePlate } from '@carplates/shared'
 import type {
   CardBundleResponse,
+  MotFuelHint,
   PlateLookupResponse,
   StatsFieldDimension,
   StockRange,
@@ -358,10 +359,10 @@ export function openEvQuery(brand: string, model: string) {
 }
 
 // UK MOT fail / advisory rates by mileage for a model (pnpm ingest:mot) — online-only, loaded when the "Common faults" section opens.
-export function motQuery(brand: string, model: string, year: number, kind?: string | null) {
+export function motQuery(brand: string, model: string, year: number, kind?: string | null, fuel?: MotFuelHint) {
   return queryOptions({
-    queryKey: ['mot', brand, model, year, kind ?? null],
-    queryFn: () => getMot(brand, model, year, kind),
+    queryKey: ['mot', brand, model, year, kind ?? null, fuel ?? null],
+    queryFn: () => getMot(brand, model, year, kind, fuel),
     staleTime: Infinity
   })
 }

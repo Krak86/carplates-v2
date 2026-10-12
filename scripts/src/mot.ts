@@ -23,9 +23,10 @@ import { join, resolve } from 'node:path'
 import { parseArgs } from 'node:util'
 
 import { createDb } from '@carplates/db'
-import { MOT_GROUP_CODES } from '@carplates/shared'
+import { MOT_GROUP_CODES, MOT_MIN_KEY_TESTS } from '@carplates/shared'
 
 import { type MotFiles, MotAggregator, cachedCensus, foldCensus } from './mot-aggregate.js'
+import { MotFold } from './mot-fold.js'
 import { csvPartCount } from './mot-zip.js'
 import { buildReasonIndex, loadMotLookup } from './mot-lookup.js'
 import { type MotData, exportMot, importMot, mergeMot, saveMot } from './mot-store.js'
@@ -92,21 +93,31 @@ async function aggregate(dir: string, only: number[] | null, refreshCensus: bool
   log(`lookup: ${lookup.size} rfr ids → ${reasons.reasons.length} reason codes`)
 
   // census over all years decides which make/models are stored
-  const census: Awaited<ReturnType<typeof cachedCensus>> = {}
-  for (const f of files) {
-    const c = foldCensus(await cachedCensus(f, CACHE_DIR, refreshCensus))
-    for (const [id, rec] of Object.entries(c)) {
-      const into = (census[id] ??= { make: rec.make, model: rec.model, tests: 0, spellings: {} })
-      if (rec.tests > into.tests / 2) {
-        into.make = rec.make
-        into.model = rec.model
+  const raw: Awaited<ReturnType<typeof cachedCensus>>[] = []
+  for (const f of files) raw.push(await cachedCensus(f, CACHE_DIR, refreshCensus))
+  const sumCensus = (folder: MotFold): Awaited<ReturnType<typeof cachedCensus>> => {
+    const census: Awaited<ReturnType<typeof cachedCensus>> = {}
+    for (const c of raw.map(r => foldCensus(r, folder))) {
+      for (const [id, rec] of Object.entries(c)) {
+        const into = (census[id] ??= { make: rec.make, model: rec.model, tests: 0, spellings: {} })
+        if (rec.tests > into.tests / 2) {
+          into.make = rec.make
+          into.model = rec.model
+        }
+        into.tests += rec.tests
       }
-      into.tests += rec.tests
     }
-    log(`census ${f.year}: ${Object.keys(c).length} keys`)
+    return census
   }
+  // Electric trims split off their base only when the `ev` key is big enough to be stored; the rest stay in the base.
+  const probe = new MotFold()
+  const summed = sumCensus(probe)
+  const evAllowed = new Set([...probe.evSplits].filter(id => (summed[id]?.tests ?? 0) >= MOT_MIN_KEY_TESTS))
+  log(`ev split: ${evAllowed.size} of ${probe.evSplits.size} ev keys kept`)
+  const folder = new MotFold(undefined, undefined, evAllowed)
+  const census = sumCensus(folder)
 
-  const agg = new MotAggregator(census, reasons)
+  const agg = new MotAggregator(census, reasons, MOT_MIN_KEY_TESTS, folder)
   log(`tracking ${agg.trackedCount} make/models (issue counters ${(agg.issueBytes / 1e6).toFixed(0)} MB)`)
   for (const f of files) await agg.addYear(f, log)
   return { ...agg.finish(), years: files.map(f => f.year) }

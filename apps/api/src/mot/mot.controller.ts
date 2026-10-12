@@ -1,7 +1,7 @@
 import { Controller, Get, Inject, Query } from '@nestjs/common'
 import { ApiOkResponse, ApiQuery, ApiTags } from '@nestjs/swagger'
 import { createZodDto } from 'nestjs-zod'
-import { motResponseSchema } from '@carplates/shared'
+import { MOT_FUEL_HINTS, motResponseSchema } from '@carplates/shared'
 import { z } from 'zod'
 
 import { zodParam } from '../common/zod-param.pipe.js'
@@ -14,7 +14,8 @@ const querySchema = z.object({
   brand: z.string().trim().min(1),
   model: z.string().trim().min(1),
   year: z.coerce.number().int().min(1900).max(2100).optional(),
-  kind: z.string().trim().optional()
+  kind: z.string().trim().optional(),
+  fuel: z.enum(MOT_FUEL_HINTS).optional()
 })
 
 @ApiTags('mot')
@@ -28,8 +29,9 @@ export class MotController {
   @ApiQuery({ name: 'model', required: true })
   @ApiQuery({ name: 'year', required: false })
   @ApiQuery({ name: 'kind', required: false })
+  @ApiQuery({ name: 'fuel', required: false, enum: MOT_FUEL_HINTS })
   @ApiOkResponse({ type: MotResponseDto })
   lookup(@Query(zodParam(querySchema)) query: z.infer<typeof querySchema>): Promise<MotResponseDto> {
-    return this.motService.lookup(query.brand, query.model, query.year ?? null, query.kind)
+    return this.motService.lookup(query.brand, query.model, query.year ?? null, query.kind, query.fuel)
   }
 }

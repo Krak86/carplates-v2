@@ -11,6 +11,9 @@ const real = new Set([
   'car|landrover|rangeroversport',
   'car|bmw|x5',
   'car|hyundai|ioniq',
+  'car|kia|niro',
+  'car|renault|zoe',
+  'car|mini|coopers',
   'car|viva|viva',
   'car|vauxhall|viva',
   'car|vauxhall|vivaro'
@@ -57,6 +60,32 @@ describe('MotFold', () => {
   })
 })
 
+describe('MotFold EV split', () => {
+  it('counts an electric trim under the base + ev, wherever the EV word sits', () => {
+    expect(fold.fold('car', 'kia', 'niro4ev', 'NIRO 4 + EV')).toBe('niroev')
+    expect(fold.fold('car', 'kia', 'niro2ev', 'NIRO 2 EV')).toBe('niroev')
+    expect(fold.fold('car', 'mini', 'coopersselectriclevel2', 'COOPER S ELECTRIC LEVEL 2')).toBe('coopersev')
+  })
+
+  it('leaves hybrids, other E words and the base alone', () => {
+    expect(fold.fold('car', 'kia', 'niro2phevsa', 'NIRO 2 PHEV SA')).toBe('niro')
+    expect(fold.fold('car', 'kia', 'niro3hevsa', 'NIRO 3 HEV SA')).toBe('niro')
+    expect(fold.fold('car', 'kia', 'niroetech', 'NIRO E-TECH')).toBe('niro')
+    expect(fold.fold('car', 'kia', 'niro', 'NIRO')).toBe('niro')
+  })
+
+  it('does not split a model that is electric throughout, nor a kept-separate one', () => {
+    expect(fold.fold('car', 'renault', 'zoeiconicev50', 'ZOE ICONIC EV 50')).toBe('zoe')
+    expect(fold.fold('car', 'hyundai', 'ioniq5premiumev', 'IONIQ 5 PREMIUM EV')).toBe('ioniq5')
+  })
+
+  it('folds a gated-out ev key back into the base', () => {
+    const gated = new MotFold(real, new Set(), new Set())
+    expect(gated.fold('car', 'kia', 'niro2ev', 'NIRO 2 EV')).toBe('niro')
+    expect(gated.evSplits.has('car|kia|niroev')).toBe(true)
+  })
+})
+
 describe('KeyCache', () => {
   it('keys a row under its folded model', () => {
     expect(new KeyCache(fold).get('car', 'FORD', 'KUGA ST-LINE')).toEqual({ mk: 'ford', mo: 'kuga' })
@@ -90,5 +119,6 @@ describe('baseModelName', () => {
     expect(baseModelName('IONIQ 5 PREMIUM EV', 'ioniq5')).toBe('IONIQ 5')
     expect(baseModelName('KUGA', 'kuga')).toBe('KUGA')
     expect(baseModelName('X5 M', 'x5m')).toBe('X5 M')
+    expect(baseModelName('NIRO 4 + EV', 'niroev')).toBe('NIRO EV')
   })
 })

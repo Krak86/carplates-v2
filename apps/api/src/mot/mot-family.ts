@@ -22,6 +22,13 @@ export function motFamilyOf<T extends MotFamilyKey>(models: readonly T[], row: T
   return family.length > 0 ? family : [row]
 }
 
+/** The `...ev` key of a model (ingest counts its electric trims there), same make and kind; null when none is stored. */
+export function evKeyOf<T extends MotFamilyKey>(models: readonly T[], row: T): T | null {
+  return (
+    models.find(m => m.kind === row.kind && m.makeKey === row.makeKey && m.modelKey === row.modelKey + 'ev') ?? null
+  )
+}
+
 /** Leading whole words shared by every name ("EV6 GT-LINE", "EV6 AIR" -> "EV6"); the first name when nothing is shared. */
 export function commonModelName(names: readonly string[]): string {
   const split = names.map(n => n.split(/\s+/))

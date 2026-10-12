@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { type MotFamilyKey, commonModelName, mergeIssueRows, motFamilyOf } from './mot-family.js'
+import { type MotFamilyKey, commonModelName, evKeyOf, mergeIssueRows, motFamilyOf } from './mot-family.js'
 
 const k = (modelKey: string, model: string, tests = 100, makeKey = 'kia', kind = 'car'): MotFamilyKey => ({
   kind,
@@ -8,6 +8,22 @@ const k = (modelKey: string, model: string, tests = 100, makeKey = 'kia', kind =
   modelKey,
   model,
   tests
+})
+
+describe('evKeyOf', () => {
+  const models = [k('niro', 'NIRO'), k('niroev', 'NIRO EV', 5000), k('soul', 'SOUL'), k('niroev', 'X', 1, 'mg')]
+
+  it('finds the ev key of the same make and kind', () => {
+    expect(evKeyOf(models, models[0]!)).toBe(models[1])
+  })
+
+  it('is null when the model has no ev key', () => {
+    expect(evKeyOf(models, models[2]!)).toBeNull()
+  })
+
+  it('does not cross make or kind', () => {
+    expect(evKeyOf([models[0]!, k('niroev', 'NIRO EV', 5000, 'kia', 'van')], models[0]!)).toBeNull()
+  })
 })
 
 describe('motFamilyOf', () => {

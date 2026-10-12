@@ -18,6 +18,7 @@ import {
   formatShare,
   formatTests,
   groupKey,
+  motFuelHint,
   parseMotCarTab,
   reasonText,
   untranslatedReasons,
@@ -44,6 +45,8 @@ type Props = {
   year: number | null
   /** Registry kind text: cars, vans and motorcycles map to different MOT test classes. */
   kind?: string | null
+  /** Registry fuel text: an electric car gets the model's electric trims (no exhaust faults) when the data has them. */
+  fuel?: string | null
 }
 
 const SOURCE_URL = 'https://www.data.gov.uk/dataset/anonymised_mot_test'
@@ -54,7 +57,7 @@ const SOURCE_URL = 'https://www.data.gov.uk/dataset/anonymised_mot_test'
  * this particular car. Collapsed by default (opens from a `?section=faults` share link); fetches only when opened;
  * "no match" shows the usual empty line.
  */
-export default function MotFaults({ brand, model, year, kind }: Props): ReactNode {
+export default function MotFaults({ brand, model, year, kind, fuel }: Props): ReactNode {
   const { t, i18n } = useTranslation()
   const [searchParams] = useSearchParams()
   const isShared = searchParams.get('section') === 'faults'
@@ -70,7 +73,7 @@ export default function MotFaults({ brand, model, year, kind }: Props): ReactNod
   const [car, setCar] = useState<MotCarTab | null | undefined>(undefined)
   const sectionRef = useRef<HTMLDivElement>(null)
   const query = useQuery({
-    ...motQuery(brand ?? '', model ?? '', year ?? 0, kind),
+    ...motQuery(brand ?? '', model ?? '', year ?? 0, kind, motFuelHint(fuel)),
     enabled: !!(brand && model && year)
   })
   const match = query.data?.match

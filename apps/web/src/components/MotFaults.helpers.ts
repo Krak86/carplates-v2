@@ -1,4 +1,10 @@
-import { MOT_GROUP_CODES, type MotGroupCode, type MotReason } from '@carplates/shared'
+import {
+  MOT_GROUP_CODES,
+  type MotFuelHint,
+  type MotGroupCode,
+  type MotReason,
+  registryFuelClass
+} from '@carplates/shared'
 
 import { reasonLabel } from '@/components/MotReasons'
 
@@ -6,6 +12,13 @@ import { reasonLabel } from '@/components/MotReasons'
 export const MOT_MODES = ['both', 'fail', 'watch'] as const
 export type MotMode = (typeof MOT_MODES)[number]
 export const DEFAULT_MOT_MODE: MotMode = 'both'
+
+/** Fuel hint for `/api/mot`: only a known registry fuel is sent (a hybrid has an exhaust, so it is "other"). */
+export function motFuelHint(fuel: string | null | undefined): MotFuelHint | undefined {
+  const cls = registryFuelClass(fuel)
+  if (cls === 'unknown') return undefined
+  return cls === 'electric' ? 'electric' : 'other'
+}
 
 /** Groups shown as rows before "show all". */
 export const MOT_GROUPS_PREVIEW = 6

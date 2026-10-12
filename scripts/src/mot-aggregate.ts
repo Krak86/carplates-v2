@@ -322,7 +322,7 @@ export class MotAggregator {
   /** dense reason slot → index into `reasonIndex.reasons`. */
   private readonly dense: number[] = []
   private readonly table = new TestTable(26)
-  private readonly keyCache = new KeyCache()
+  private readonly keyCache: KeyCache
   /** [tracked][yearSlot][band][tests, fails, advisories] */
   private readonly cells: Int32Array
   /** [tracked][band][tests-with-dangerous-fail, G*2 groups, R*2 reasons] */
@@ -333,7 +333,13 @@ export class MotAggregator {
   readonly diag: Record<string, number> = {}
   private readonly reasonIndex: MotReasonIndex
 
-  constructor(census: Census, reasonIndex: MotReasonIndex, minKeyTests = MOT_MIN_KEY_TESTS) {
+  constructor(
+    census: Census,
+    reasonIndex: MotReasonIndex,
+    minKeyTests = MOT_MIN_KEY_TESTS,
+    folder: MotFold = new MotFold()
+  ) {
+    this.keyCache = new KeyCache(folder)
     this.reasonIndex = reasonIndex
     this.denseOf = new Int32Array(reasonIndex.reasons.length).fill(-1)
     this.tracked = new Map()

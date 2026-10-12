@@ -15,6 +15,13 @@ export const MOT_MIN_BAND_TESTS = 200
 /** A make/model needs this many normal tests (all years pooled) to be stored at all. */
 export const MOT_MIN_KEY_TESTS = 200
 
+/** Registry fuel hint of `/api/mot`: an electric car prefers the model's `...ev` trim key (no exhaust, other brake/tyre wear). */
+export const MOT_FUEL_HINTS = ['electric', 'other'] as const
+export type MotFuelHint = (typeof MOT_FUEL_HINTS)[number]
+
+/** An `ev` key needs this many tests to be preferred over the base model. */
+export const MOT_MIN_EV_KEY_TESTS = 1000
+
 /** DVSA reports miles; every stored and shown figure is kilometres. */
 export const MILES_TO_KM = 1.609344
 

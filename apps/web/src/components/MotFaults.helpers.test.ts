@@ -4,6 +4,7 @@ import {
   bandLabel,
   bandOfKm,
   motCarTab,
+  motFuelHint,
   parseMotCarTab,
   reasonText,
   untranslatedReasons,
@@ -18,6 +19,15 @@ import {
 } from './MotFaults.helpers'
 
 const EDGES = [0, 25_000, 50_000, 100_000]
+
+describe('motFuelHint', () => {
+  it('sends electric, other, and nothing when the fuel is unknown', () => {
+    expect(motFuelHint('ЕЛЕКТРО')).toBe('electric')
+    expect(motFuelHint('БЕНЗИН')).toBe('other')
+    expect(motFuelHint('ЕЛЕКТРО АБО БЕНЗИН')).toBe('other')
+    expect(motFuelHint(null)).toBeUndefined()
+  })
+})
 
 describe('bandLabel', () => {
   it('writes thousand-km ranges and an open last band', () => {

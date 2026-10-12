@@ -6,17 +6,26 @@ import {
   MOT_BAND_EDGES_KM,
   MOT_GROUP_CODES,
   MOT_MIN_BAND_TESTS,
+  MOT_MIN_EV_KEY_TESTS,
   makeKey,
   matchVdbModelAcrossMakes,
   vdbCandidateKeys,
   vdbRelatedMakeKeys,
   vdbVehicleClass
 } from '@carplates/shared'
-import type { MotGroupCode, MotIssue, MotKind, MotReason, MotResponse, VdbVehicleClass } from '@carplates/shared'
+import type {
+  MotFuelHint,
+  MotGroupCode,
+  MotIssue,
+  MotKind,
+  MotReason,
+  MotResponse,
+  VdbVehicleClass
+} from '@carplates/shared'
 import { and, eq, inArray } from 'drizzle-orm'
 
 import { DbService } from '../db/db.service.js'
-import { commonModelName, mergeIssueRows, motFamilyOf } from './mot-family.js'
+import { commonModelName, evKeyOf, mergeIssueRows, motFamilyOf } from './mot-family.js'
 
 /** MOT kinds a registry vehicle class may match, most preferred first (the registry files vans as cars or as trucks). */
 const KINDS_BY_CLASS: Readonly<Partial<Record<VdbVehicleClass, readonly MotKind[]>>> = {
@@ -50,7 +59,13 @@ export class MotService {
    * UK MOT statistics for the model (`pnpm ingest:mot`): model-level, never about this car. Matching is the shared
    * VehiclesDB matcher over the stored make/models; a miss gives `match: null` and the section hides.
    */
-  async lookup(brand: string, model: string, year: number | null, registryKind?: string): Promise<MotResponse> {
+  async lookup(
+    brand: string,
+    model: string,
+    year: number | null,
+    registryKind?: string,
+    fuel?: MotFuelHint
+  ): Promise<MotResponse> {
     const none: MotResponse = { brand, model, year: year ?? 0, match: null }
     const mk = makeKey(brand)
     if (!mk) return none
@@ -84,6 +99,9 @@ export class MotService {
     if (!found) return none
 
     const { how } = found
+    // An electric registry car prefers the model's `...ev` key (ingest splits electric trims off their base), if big enough.
+    const ev = fuel === 'electric' && how !== 'prefix' ? evKeyOf(models, found.row) : null
+    if (ev && ev.tests >= MOT_MIN_EV_KEY_TESTS) found.row = { ...found.row, ...ev }
     const kind = found.row.kind as MotKind
     // A prefix match means no key is exactly this model: DVSA's 2024+ files split it by trim ("EV6 GT-LINE", "EV6 AIR"),
     // so pool the whole trim family instead of showing one trim as if it were the model.
