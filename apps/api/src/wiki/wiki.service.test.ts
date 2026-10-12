@@ -113,6 +113,17 @@ beforeEach(() => {
   vi.stubGlobal('fetch', vi.fn())
 })
 
+describe('WikiService image origin', () => {
+  it('says live for a fresh Wikimedia fetch, db once it is stored, and live again on refresh', async () => {
+    routeFetch()
+    const { service } = makeService()
+
+    expect((await service.lookupImage('Toyota', 'Camry')).from).toBe('live')
+    expect((await service.lookupImage('Toyota', 'Camry')).from).toBe('db')
+    expect((await service.lookupImage('Toyota', 'Camry', { refresh: true })).from).toBe('live')
+  })
+})
+
 describe('WikiService', () => {
   it('resolves the article text, the English lead image and its attribution, and stores the photo', async () => {
     routeFetch()

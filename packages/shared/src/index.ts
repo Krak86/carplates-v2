@@ -450,6 +450,7 @@ export {
   type WikiImageAttribution,
   type WikiImage,
   type WikiInfo,
+  type WikiImageFrom,
   type WikiImageResponse,
   type ReviewsResponse,
   type Model3d,

@@ -26,6 +26,7 @@ import type {
   CommonsPages,
   WikiImage,
   WikiImageKey,
+  WikiImageFrom,
   WikiImageResponse,
   WikiImageOutcome,
   WikiInfo,
@@ -40,10 +41,17 @@ export const WIKI_IMAGE_SOURCES = ['commons', 'wiki'] as const
 export type WikiImageSource = (typeof WIKI_IMAGE_SOURCES)[number]
 
 /** `yearOnly`: a photo of that model year (or, with `yearBack`, the nearest of that many earlier years) or nothing — never the stored model row / article lead image. */
-type LookupOptions = { year?: number; source?: WikiImageSource; yearOnly?: boolean; yearBack?: number }
+type LookupOptions = {
+  year?: number
+  source?: WikiImageSource
+  yearOnly?: boolean
+  yearBack?: number
+  /** On-demand update: ignore stored/hot answers and ask Commons/Wikipedia now (the new photo replaces the stored one). */
+  refresh?: boolean
+}
 
 /** `settled: false` = the answer came from a failed request, so it must not be memoized as "no photo". */
-type Resolved = { image: WikiImage | null; settled: boolean }
+type Resolved = { image: WikiImage | null; settled: boolean; from?: WikiImageFrom }
 
 const CACHE_MAX = 300
 const UPSTREAM_TIMEOUT_MS = 10_000
@@ -74,7 +82,7 @@ export class WikiService {
     // Year only matters to the year-aware strategy; keep it out of the key otherwise so `wiki` entries still share.
     const year = source === 'commons' && brand && model ? (options.year ?? null) : null
     const cacheKey = `${domain}:${source}:${year ?? ''}:${query.toLowerCase()}`
-    const cached = this.cache.get(cacheKey)
+    const cached = options.refresh ? undefined : this.cache.get(cacheKey)
     if (cached) return cached
 
     // The UI-language edition first, then the other two (ua → uk, ru, en) — a rare model often has an article in one only.
@@ -99,7 +107,9 @@ export class WikiService {
     }
 
     // The photo is decoration: whatever happens resolving it, the article text is still returned.
-    const resolved = page ? await this.resolveImage(brand, model, query, year, source) : { image: null, settled: true }
+    const resolved = page
+      ? await this.resolveImage(brand, model, query, year, source, !!options.refresh)
+      : { image: null, settled: true }
 
     const text = page ? shapeWikiExtract(page.extract ?? '') : null
     const result = page
@@ -135,14 +145,20 @@ export class WikiService {
     const yearOnly = !!options.yearOnly && !!year && source === 'commons'
     const yearBack = yearOnly ? (options.yearBack ?? 0) : 0
     const cacheKey = `${source}:${yearOnly ? `y${yearBack || ''}` : ''}${year ?? ''}:${query.toLowerCase()}`
-    const cached = this.imageCache.get(cacheKey)
+    const refresh = !!options.refresh
+    const cached = refresh ? undefined : this.imageCache.get(cacheKey)
     if (cached) return cached
 
     const resolved = yearOnly
-      ? await this.resolveYearOnlyLadder(brand, model, year!, yearBack)
-      : await this.resolveImage(brand, model, query, year, source)
-    const result = { image: resolved.image }
-    if (resolved.settled) this.rememberImage(cacheKey, result)
+      ? await this.resolveYearOnlyLadder(brand, model, year!, yearBack, refresh)
+      : await this.resolveImage(brand, model, query, year, source, refresh)
+    const result: WikiImageResponse = { image: resolved.image, from: resolved.image ? resolved.from : undefined }
+    // A photo fetched now is stored by the time the next request asks, so the memoized copy reports the table.
+    if (resolved.settled)
+      this.rememberImage(cacheKey, {
+        ...result,
+        from: result.from === 'live' && source === 'commons' ? 'db' : result.from
+      })
     return result
   }
 
@@ -161,9 +177,9 @@ export class WikiService {
     if (cached) return cached
 
     const yearRow = askedYear ? await this.readRow(wikiImageKey(brand, model, askedYear)) : null
-    if (yearRow?.status === 'ok') return { image: wikiImageFromRow(yearRow) }
+    if (yearRow?.status === 'ok') return { image: wikiImageFromRow(yearRow), from: 'db' }
     const modelRow = await this.readRow(wikiImageKey(brand, model))
-    if (modelRow?.status === 'ok') return { image: wikiImageFromRow(modelRow) }
+    if (modelRow?.status === 'ok') return { image: wikiImageFromRow(modelRow), from: 'db' }
     return null
   }
 
@@ -174,10 +190,16 @@ export class WikiService {
   }
 
   /** `year`, then each earlier year down to `year - back`: the first photo wins; each year is its own stored row. */
-  private async resolveYearOnlyLadder(brand: string, model: string, year: number, back: number): Promise<Resolved> {
+  private async resolveYearOnlyLadder(
+    brand: string,
+    model: string,
+    year: number,
+    back: number,
+    refresh: boolean
+  ): Promise<Resolved> {
     let settled = true
     for (let y = year; y >= year - back; y--) {
-      const found = await this.resolveYearOnlyImage(brand, model, y)
+      const found = await this.resolveYearOnlyImage(brand, model, y, refresh)
       if (found.image) return found
       settled = settled && found.settled
     }
@@ -185,47 +207,54 @@ export class WikiService {
   }
 
   /** Stored `(brand, model, year)` row, else one live Commons year search (whose answer is stored, "none" included). */
-  private async resolveYearOnlyImage(brand: string, model: string, year: number): Promise<Resolved> {
+  private async resolveYearOnlyImage(brand: string, model: string, year: number, refresh: boolean): Promise<Resolved> {
     // Own key space: a strict (model-year-only) answer must neither be poisoned by, nor overwrite, the hero photo's looser year row.
     const key = wikiImageKey(`showcase ${brand}`, model, year)
     const row = await this.readRow(key)
-    if (row?.status === 'ok') return { image: wikiImageFromRow(row), settled: true }
-    if (row && wikiImageRowIsFinal(row)) return { image: null, settled: true }
+    if (!refresh) {
+      if (row?.status === 'ok') return { image: wikiImageFromRow(row), settled: true, from: 'db' }
+      if (row && wikiImageRowIsFinal(row)) return { image: null, settled: true }
+    }
     return this.liveYearImage(brand, model, year, key, row, true)
   }
 
   /**
    * Photo order: stored `(brand, model, year)` row → stored `(brand, model)` row → live fetch (which stores its answer).
    * `source=wiki` is the A/B knob for the lead image alone, so it bypasses the table.
+   * `refresh` skips the stored rows and re-fetches. `from` tells the client which of the two produced the photo.
    */
   private async resolveImage(
     brand: string,
     model: string,
     query: string,
     year: number | null,
-    source: WikiImageSource
+    source: WikiImageSource,
+    refresh: boolean
   ): Promise<Resolved> {
     if (source === 'wiki')
-      return this.fetchLeadImage(brand, query, model).catch(() => ({ image: null, settled: false }))
+      return this.fetchLeadImage(brand, query, model)
+        .then(found => ({ ...found, from: 'live' as const }))
+        .catch(() => ({ image: null, settled: false }))
 
     const yearKey = year ? wikiImageKey(brand, model, year) : null
     const modelKey = wikiImageKey(brand, model)
 
     const yearRow = yearKey ? await this.readRow(yearKey) : null
-    if (yearRow?.status === 'ok') return { image: wikiImageFromRow(yearRow), settled: true }
-
     const modelRow = await this.readRow(modelKey)
-    if (modelRow?.status === 'ok') return { image: wikiImageFromRow(modelRow), settled: true }
-    if (modelRow && wikiImageRowIsFinal(modelRow)) return { image: null, settled: true }
+    if (!refresh) {
+      if (yearRow?.status === 'ok') return { image: wikiImageFromRow(yearRow), settled: true, from: 'db' }
+      if (modelRow?.status === 'ok') return { image: wikiImageFromRow(modelRow), settled: true, from: 'db' }
+      if (modelRow && wikiImageRowIsFinal(modelRow)) return { image: null, settled: true }
+    }
 
     let settled = true
-    if (yearKey && year && (!yearRow || !wikiImageRowIsFinal(yearRow))) {
+    if (yearKey && year && (refresh || !yearRow || !wikiImageRowIsFinal(yearRow))) {
       const found = await this.liveYearImage(brand, model, year, yearKey, yearRow)
       if (found.image) return found
       settled = found.settled
     }
     const lead = await this.liveLeadImage(brand, query, model, modelKey, modelRow)
-    return { image: lead.image, settled: settled && lead.settled }
+    return { image: lead.image, settled: settled && lead.settled, from: lead.from }
   }
 
   private async liveYearImage(
@@ -243,7 +272,7 @@ export class WikiService {
         image ? { kind: 'ok', image, origin: 'commons_year', title: null } : { kind: 'not_found' },
         previous
       )
-      return { image, settled: true }
+      return { image, settled: true, from: 'live' }
     } catch (err) {
       await this.persist(key, this.failure(err), previous)
       return { image: null, settled: false }
@@ -264,7 +293,7 @@ export class WikiService {
         image ? { kind: 'ok', image, origin: 'lead', title: null } : { kind: 'not_found' },
         previous
       )
-      return { image, settled: true }
+      return { image, settled: true, from: 'live' }
     } catch (err) {
       await this.persist(key, this.failure(err), previous)
       return { image: null, settled: false }
@@ -350,6 +379,8 @@ export class WikiService {
   }
 
   private async persist(key: WikiImageKey, outcome: WikiImageOutcome, previous: WikiImageRow | null): Promise<void> {
+    // A refresh that finds nothing (or fails) must not wipe the photo we already have.
+    if (previous?.status === 'ok' && outcome.kind !== 'ok') return
     const failures = previous?.status === 'failed' ? previous.attempts : 0
     try {
       await this.store.save(wikiImageRowValues(key, outcome, failures))

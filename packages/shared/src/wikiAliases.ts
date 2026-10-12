@@ -54,7 +54,10 @@ const MERCEDES_CLASS = /^([abces])\s?\d{2,3}[a-z]{0,3}(?:\s|$)/
 const BMW_SERIES = /^([1-8])\d{2}\s?[a-z]{0,3}$/
 
 /** The searchable name for a registry brand/model (both already lower-cased), or null when the model is searchable as is. */
-export function wikiSearchName(registryBrand: string, model: string): WikiSearchName | null {
+export function wikiSearchName(registryBrandRaw: string, modelRaw: string): WikiSearchName | null {
+  // The API receives the registry's upper-case text; the rules below are written in lower case.
+  const registryBrand = registryBrandRaw.toLowerCase()
+  const model = modelRaw.toLowerCase()
   // Many registry rows carry the model inside `brand` too ("ваз 21063", "заз-daewoo t13110", "mercedes-benz e 200").
   const brand = registryBrand.split(' ')[0] ?? registryBrand
   const alias = brandAlias(brand, model)
@@ -112,6 +115,8 @@ function brandAlias(brand: string, model: string): WikiSearchName | null {
     if (/^(3151|469)/.test(model)) return named('UAZ', '469', 'УАЗ-469')
     if (model.startsWith('3163')) return named('UAZ', 'Patriot', 'УАЗ Патріот')
   }
+  // "220301", "2203-01", "2203802" are trims of the RAF-2203 (22031 / 22038 have articles of their own).
+  if ((brand === 'раф' || brand === 'raf') && /^2203(-|\d{2}|$)/.test(model)) return named('RAF', '2203', 'РАФ-2203')
   if (brand === 'иж') {
     if (model.startsWith('2125')) return named('IZh', '2125', 'ИЖ-2125 Комби')
     if (model.startsWith('2717')) return named('IZh', '2717', 'ИЖ-2717')

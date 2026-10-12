@@ -501,7 +501,13 @@ export type WikiInfo = z.infer<typeof wikiInfoResponseSchema>
 
 /** GET /api/wiki/image?brand=&model=&year= — the hero photo alone: stored `wiki_image` row first, live Commons/Wikipedia
  *  lookup only when nothing is stored. No article text, so the first paint never waits on a live Wikipedia request. */
-export const wikiImageResponseSchema = z.object({ image: wikiImageSchema.nullable() })
+export const wikiImageFromSchema = z.enum(['db', 'live'])
+export type WikiImageFrom = z.infer<typeof wikiImageFromSchema>
+/** `from`: where this answer's photo came from — our stored row (`db`) or a Wikimedia request made just now (`live`). */
+export const wikiImageResponseSchema = z.object({
+  image: wikiImageSchema.nullable(),
+  from: wikiImageFromSchema.nullable().optional()
+})
 export type WikiImageResponse = z.infer<typeof wikiImageResponseSchema>
 
 /** GET /api/reviews?brand=&model=&year= — links into infocar.ua's persisted catalog (`pnpm ingest:infocar`), per tree:

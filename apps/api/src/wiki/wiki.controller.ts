@@ -16,7 +16,8 @@ const querySchema = z.object({
   year: z.coerce.number().int().min(1900).max(2100).optional(),
   source: z.enum(WIKI_IMAGE_SOURCES).optional(),
   yearOnly: z.enum(['true']).optional(),
-  yearBack: z.coerce.number().int().min(0).max(MAX_YEAR_BACK).optional()
+  yearBack: z.coerce.number().int().min(0).max(MAX_YEAR_BACK).optional(),
+  refresh: z.enum(['true']).optional()
 })
 
 const imageQuerySchema = querySchema.omit({ lang: true })
@@ -38,13 +39,19 @@ export class WikiController {
     required: false,
     description: 'With yearOnly: also try up to this many earlier years (max 5), nearest first'
   })
+  @ApiQuery({
+    name: 'refresh',
+    required: false,
+    description: "'true': re-fetch from Wikimedia and update the stored photo"
+  })
   @ApiOkResponse({ type: WikiImageDto })
   lookupImage(@Query(zodParam(imageQuerySchema)) query: z.infer<typeof imageQuerySchema>): Promise<WikiImageDto> {
     return this.wikiService.lookupImage(query.brand ?? '', query.model ?? '', {
       year: query.year,
       source: query.source,
       yearOnly: query.yearOnly === 'true',
-      yearBack: query.yearBack
+      yearBack: query.yearBack,
+      refresh: query.refresh === 'true'
     })
   }
 
@@ -54,11 +61,13 @@ export class WikiController {
   @ApiQuery({ name: 'lang', required: false })
   @ApiQuery({ name: 'year', required: false, description: 'Model year — picks a matching-generation photo' })
   @ApiQuery({ name: 'source', required: false, enum: WIKI_IMAGE_SOURCES })
+  @ApiQuery({ name: 'refresh', required: false, description: "'true': re-fetch the photo from Wikimedia" })
   @ApiOkResponse({ type: WikiInfoDto })
   lookup(@Query(zodParam(infoQuerySchema)) query: z.infer<typeof infoQuerySchema>): Promise<WikiInfoDto> {
     return this.wikiService.lookup(query.brand ?? '', query.model ?? '', query.lang, {
       year: query.year,
-      source: query.source
+      source: query.source,
+      refresh: query.refresh === 'true'
     })
   }
 }

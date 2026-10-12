@@ -829,6 +829,8 @@
   "wiki.readMore": "Читати далі…",
   "wiki.readLess": "Згорнути",
   "wiki.otherLang": "Статті вашою мовою немає. Є в іншій мові:",
+  "wiki.imageRefresh": "Оновити фото",
+  "wiki.imageRefreshing": "Оновлення…",
   "wiki.imageCredit": "Фото: {{credit}}",
   "wiki.noImage": "Фото відсутнє",
   "wiki.imageCreditBg": "Фото на фоні: {{credit}}",

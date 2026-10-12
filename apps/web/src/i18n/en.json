@@ -367,6 +367,8 @@
   "wiki.readMore": "Read more…",
   "wiki.readLess": "Show less",
   "wiki.otherLang": "No article in your language. Available in another one:",
+  "wiki.imageRefresh": "Update photo",
+  "wiki.imageRefreshing": "Updating…",
   "wiki.imageCredit": "Photo: {{credit}}",
   "wiki.noImage": "No photo available",
   "wiki.imageCreditBg": "Background photo: {{credit}}",

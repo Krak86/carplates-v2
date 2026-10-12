@@ -218,9 +218,11 @@ export async function getWikiImage(
   model: string,
   year: number | null,
   yearOnly = false,
-  yearBack = 0
+  yearBack = 0,
+  refresh = false
 ): Promise<WikiImageResponse> {
   const params = new URLSearchParams()
+  if (refresh) params.set('refresh', 'true')
   if (yearOnly) params.set('yearOnly', 'true')
   if (yearOnly && yearBack) params.set('yearBack', String(yearBack))
   if (brand) params.set('brand', brand)

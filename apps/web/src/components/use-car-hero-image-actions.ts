@@ -1,8 +1,9 @@
 import { useEffect } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { UseQueryResult } from '@tanstack/react-query'
 import type { WikiImageResponse } from '@carplates/shared'
 
+import { getWikiImage } from '@/lib/api'
 import { wikiImageQuery } from '@/lib/queries'
 import { useBackgroundStore } from '@/store/background-store'
 
@@ -24,9 +25,24 @@ type Params = {
  * the ambient background in place of the rotation; the override is cleared on unmount so leaving
  * this result reverts to the rotation automatically.
  */
-export function useCarHeroImageActions({ brand, model, year, key }: Params): UseQueryResult<WikiImageResponse> {
+export function useCarHeroImageActions({
+  brand,
+  model,
+  year,
+  key
+}: Params): UseQueryResult<WikiImageResponse> & { refresh: () => void; isRefreshing: boolean } {
   const hasQuery = Boolean(brand || model)
-  const heroImage = useQuery({ ...wikiImageQuery(brand ?? '', model ?? '', year), enabled: hasQuery })
+  const options = wikiImageQuery(brand ?? '', model ?? '', year)
+  const heroImage = useQuery({ ...options, enabled: hasQuery })
+  const queryClient = useQueryClient()
+  // On-demand update: the server re-fetches from Wikimedia and replaces its stored photo.
+  const refreshMutation = useMutation({
+    mutationFn: () => getWikiImage(brand ?? '', model ?? '', year, false, 0, true),
+    onSuccess: data => {
+      // Keep the current photo when the refresh found nothing.
+      if (data.image) queryClient.setQueryData(options.queryKey, data)
+    }
+  })
   const setHeroOverride = useBackgroundStore(s => s.setHeroOverride)
   const clearHeroOverride = useBackgroundStore(s => s.clearHeroOverride)
   const image = heroImage.data?.image
@@ -37,5 +53,5 @@ export function useCarHeroImageActions({ brand, model, year, key }: Params): Use
     return (): void => clearHeroOverride(key)
   }, [key, image, setHeroOverride, clearHeroOverride])
 
-  return heroImage
+  return { ...heroImage, refresh: () => refreshMutation.mutate(), isRefreshing: refreshMutation.isPending }
 }

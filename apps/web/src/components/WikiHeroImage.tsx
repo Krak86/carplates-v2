@@ -62,6 +62,21 @@ export default function WikiHeroImage({ brand, model, year, rawKind, vehicleKey 
           className={`h-full w-full rounded-lg object-cover transition-opacity duration-200 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
         />
       )}
+      {image && heroImage.data?.from && (
+        <div className="absolute top-2 left-2 rounded bg-black/60 px-1.5 py-0.5 text-[10px] text-white/80">
+          {heroImage.data.from === 'live' ? 'Wiki live' : 'DB'}
+        </div>
+      )}
+
+      <button
+        type="button"
+        onClick={heroImage.refresh}
+        disabled={heroImage.isRefreshing}
+        className="absolute bottom-2 left-2 rounded bg-black/60 px-1.5 py-0.5 text-[10px] text-white/80 hover:text-white disabled:opacity-60"
+      >
+        {t(heroImage.isRefreshing ? 'wiki.imageRefreshing' : 'wiki.imageRefresh')}
+      </button>
+
       {isLoaded && creditParts.length > 0 && (
         <div className="absolute right-2 bottom-2 rounded bg-black/60 px-1.5 py-0.5 text-[10px] text-white/80">
           {t('wiki.imageCredit', { credit: creditParts.join(', ') })}
