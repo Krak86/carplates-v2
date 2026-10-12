@@ -12,6 +12,7 @@ import {
   motBandOf
 } from '@carplates/shared'
 
+import { MotFold, baseModelName } from './mot-fold.js'
 import { type MotReasonIndex } from './mot-lookup.js'
 import { columnIndex, forEachCsvLine, openZipCsv } from './mot-zip.js'
 
@@ -53,16 +54,18 @@ export type KeyInfo = { kind: MotKind; makeKey: string; modelKey: string; make: 
 /** Identifier of a make/model in a census / tracked map. */
 export const keyId = (kind: MotKind, mk: string, mo: string): string => `${kind}|${mk}|${mo}`
 
-/** Memoised (make, model) text → keys: 35M rows share ~70k distinct spellings, so the regexes run once per spelling. */
-class KeyCache {
+/** Memoised (kind, make, model) text → keys: 35M rows share ~70k distinct spellings, so the regexes run once per spelling. */
+export class KeyCache {
   private readonly cache = new Map<string, { mk: string; mo: string } | null>()
-  get(make: string, model: string): { mk: string; mo: string } | null {
-    const raw = `${make}\u0001${model}`
+  constructor(private readonly folder: MotFold = new MotFold()) {}
+  /** Trim keys come back folded into their base model (see `MotFold`). */
+  get(kind: MotKind, make: string, model: string): { mk: string; mo: string } | null {
+    const raw = `${kind}${make}${model}`
     let hit = this.cache.get(raw)
     if (hit === undefined) {
       const mk = makeKey(make)
       const mo = modelKey(model)
-      hit = mk && mo ? { mk, mo } : null
+      hit = mk && mo ? { mk, mo: this.folder.fold(kind, mk, mo, model) } : null
       this.cache.set(raw, hit)
     }
     return hit
@@ -122,7 +125,7 @@ export async function censusYear(file: MotFiles): Promise<Census> {
       if (r.length < c.width) return
       const kind = KIND_BY_CLASS[r[c.cls]!]
       if (!kind || r[c.type] !== 'NT' || !COMPLETED.has(r[c.result]!)) return
-      const k = keys.get(r[c.make]!.trim().toUpperCase(), r[c.model]!.trim().toUpperCase())
+      const k = keys.get(kind, r[c.make]!.trim().toUpperCase(), r[c.model]!.trim().toUpperCase())
       if (!k) return
       const id = keyId(kind, k.mk, k.mo)
       const rec = (out[id] ??= { make: '', model: '', tests: 0, spellings: {} })
@@ -142,6 +145,26 @@ export async function censusYear(file: MotFiles): Promise<Census> {
         .sort((a, b) => b[1] - a[1])
         .slice(0, 3)
     )
+  }
+  return out
+}
+
+/**
+ * A census built before trim folding (the cached files) re-keyed the way `KeyCache` keys rows: trims counted under their
+ * base model, which keeps the most common spelling. Idempotent on an already folded census.
+ */
+export function foldCensus(census: Census, folder: MotFold = new MotFold()): Census {
+  const out: Census = {}
+  for (const [id, rec] of Object.entries(census)) {
+    const [kind, mk, mo] = id.split('|') as [MotKind, string, string]
+    const to = folder.fold(kind, mk, mo, rec.model)
+    const into = (out[keyId(kind, mk, to)] ??= { make: rec.make, model: rec.model, tests: 0, spellings: {} })
+    if (rec.tests > into.tests) {
+      into.make = rec.make
+      into.model = rec.model
+    }
+    into.tests += rec.tests
+    for (const [sp, n] of Object.entries(rec.spellings)) into.spellings[sp] = (into.spellings[sp] ?? 0) + n
   }
   return out
 }
@@ -319,7 +342,14 @@ export class MotAggregator {
       if (rec.tests < minKeyTests) continue
       const [kind, mk, mo] = id.split('|') as [MotKind, string, string]
       this.tracked.set(id, this.trackedKeys.length)
-      this.trackedKeys.push({ kind, makeKey: mk, modelKey: mo, make: rec.make, model: rec.model, tests: rec.tests })
+      this.trackedKeys.push({
+        kind,
+        makeKey: mk,
+        modelKey: mo,
+        make: rec.make,
+        model: baseModelName(rec.model, mo),
+        tests: rec.tests
+      })
     }
     if (this.trackedKeys.length >= MAX_TRACKED)
       throw new Error(`${this.trackedKeys.length} tracked keys do not fit 13 bits`)
@@ -386,7 +416,7 @@ export class MotAggregator {
           Math.max(0, (firstUse > 1900 ? firstUse : file.year) - MOT_FIRST_MODEL_YEAR)
         )
 
-        const k = this.keyCache.get(r[c.make]!.trim().toUpperCase(), r[c.model]!.trim().toUpperCase())
+        const k = this.keyCache.get(kind, r[c.make]!.trim().toUpperCase(), r[c.model]!.trim().toUpperCase())
         const t = k ? (this.tracked.get(keyId(kind, k.mk, k.mo)) ?? UNTRACKED) : UNTRACKED
         const bi = (KIND_INDEX[kind] * MOT_MAX_BANDS + band) * (4 + G * 2)
         this.baseline[bi]!++

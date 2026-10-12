@@ -15,8 +15,7 @@ function toRating(row: IihsRatingRow): IihsRating {
     vehicleClass: row.vehicleClass,
     modelYear: row.modelYear,
     award: row.award,
-    tests: row.tests,
-    imageUrl: row.imageUrl
+    tests: row.tests
   }
 }
 

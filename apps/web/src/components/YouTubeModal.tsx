@@ -48,6 +48,18 @@ export default function YouTubeModal({ youtubeId, description, title, onClose }:
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           allowFullScreen
         />
+
+        <p className="mt-2 text-xs text-[var(--color-muted)]">
+          {t('safety.videoFallback')}:{' '}
+          <a
+            href={`https://www.youtube.com/watch?v=${youtubeId}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[var(--color-primary)] underline"
+          >
+            {t('safety.videoOpenOnYoutube')} ↗
+          </a>
+        </p>
       </div>
     </div>,
     document.body

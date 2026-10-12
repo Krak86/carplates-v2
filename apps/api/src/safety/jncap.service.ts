@@ -22,7 +22,6 @@ function toRating(row: JncapRatingRow): JncapRating {
     emergencyCallType: row.emergencyCallType,
     emergencyCallPct: row.emergencyCallPct,
     testScores: row.testScores,
-    imageUrl: row.imageUrl,
     youtubeId: row.youtubeId,
     reportPdfUrl: row.reportPdfUrl
   }

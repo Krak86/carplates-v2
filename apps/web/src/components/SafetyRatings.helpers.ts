@@ -126,7 +126,6 @@ export type IihsRatingGroup = {
   vehicleClass: string | null
   award: string | null
   tests: IihsRating['tests']
-  imageUrl: string | null
   yearFrom: number
   yearTo: number
   /** True if any row folded into this group is in the caller's applicable-assessment set. */
@@ -156,7 +155,6 @@ export function groupIihsRatings(ratings: readonly IihsRating[], applicableIds: 
     if (continuesLast && last) {
       last.assessmentIds.push(r.assessmentId)
       last.primaryAssessmentId = r.assessmentId
-      last.imageUrl = r.imageUrl ?? last.imageUrl
       last.yearTo = r.modelYear
       last.applicable = last.applicable || isApplicable
     } else {
@@ -167,7 +165,6 @@ export function groupIihsRatings(ratings: readonly IihsRating[], applicableIds: 
         vehicleClass: r.vehicleClass,
         award: r.award,
         tests: r.tests,
-        imageUrl: r.imageUrl,
         yearFrom: r.modelYear,
         yearTo: r.modelYear,
         applicable: isApplicable

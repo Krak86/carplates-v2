@@ -25,7 +25,7 @@ import { parseArgs } from 'node:util'
 import { createDb } from '@carplates/db'
 import { MOT_GROUP_CODES } from '@carplates/shared'
 
-import { type MotFiles, MotAggregator, cachedCensus } from './mot-aggregate.js'
+import { type MotFiles, MotAggregator, cachedCensus, foldCensus } from './mot-aggregate.js'
 import { csvPartCount } from './mot-zip.js'
 import { buildReasonIndex, loadMotLookup } from './mot-lookup.js'
 import { type MotData, exportMot, importMot, mergeMot, saveMot } from './mot-store.js'
@@ -94,7 +94,7 @@ async function aggregate(dir: string, only: number[] | null, refreshCensus: bool
   // census over all years decides which make/models are stored
   const census: Awaited<ReturnType<typeof cachedCensus>> = {}
   for (const f of files) {
-    const c = await cachedCensus(f, CACHE_DIR, refreshCensus)
+    const c = foldCensus(await cachedCensus(f, CACHE_DIR, refreshCensus))
     for (const [id, rec] of Object.entries(c)) {
       const into = (census[id] ??= { make: rec.make, model: rec.model, tests: 0, spellings: {} })
       if (rec.tests > into.tests / 2) {

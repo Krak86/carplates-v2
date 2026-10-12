@@ -65,9 +65,8 @@ Euro NCAP"). robots.txt: `Allow: /`, `Disallow: /admin`, `/api/`, `/preview/`, `
   shows the brand logo; the `frontImageUrl` / `images` fields stay in the schema, DB and CSV, unused. The crash-test video stays as
   the YouTube no-cookie embed (play on click) plus an "Open on YouTube" link. The source credit on About stays (text link + logo);
   the logo is the only grey item (press page bars logos in commercial contexts) — owner decided to keep it for now.
-- **Action before any public deploy (remaining):** (1) show stars + percentages + a link to the source page only; (2) stop displaying Euro NCAP
-  images/videos/logos (or get written permission); (3) credit "Euro NCAP" on About; (4) optionally ask permission. Until then treat the
-  section as **hidden-before-deploy** like any unresolved licence (rule in "Round 2"). Local dev use is unaffected.
+- **Action before any public deploy — done 2026-10-12 (permission email skipped by owner):** the card shows stars, percentages, pillar bars and links only; Euro NCAP images are no longer served (`frontImageUrl` / `images` removed from `euroNcapRatingSchema` and the API; the scraper still keeps the URLs in `euroncap_ratings`); the logo is the brand logo, About has a text tile + "not affiliated" line; videos are Euro NCAP's own uploads (431 distinct ids checked via oEmbed 2026-10-12: 428 on the "Euro NCAP" channel, 3 gone) in a click-to-play youtube-nocookie modal with an "Open on YouTube" fallback. Remaining risk is the scraped text/scores themselves and the removal of any video (player shows "unavailable").
+- **Same treatment for JNCAP / KNCAP / IIHS (2026-10-12):** their terms were never recorded, so their programme photos (`imageUrl`) are no longer served, shown or exported (brand logo instead; columns kept in the tables). JNCAP's 87 video ids were checked via oEmbed: all on NASVA's official channel. NHTSA = public-domain government photos; C-NCAP shows no images.
 
 ## VehiclesDB (release 2026.10.0, built 2026-10-03)
 
@@ -787,6 +786,8 @@ Files to download (all `https://edh-dvsa-data-gov-uk-files-prod.s3.eu-west-1.ama
 
 Put everything in **one folder** (the ZIPs unextracted). Not needed: the older-layout `MOT+testing+data+results+(2024).zip` / `MOT+Testing+data+failure+item+(2024).zip` (2.2 GB; the 0.68 GB item file looks failures-only, and there is no 2025 equivalent).
 First steps once the path is given: list ZIP entries, profile row counts / classes / test types / mileage units / whether advisories (`rfr_type_code` A) are present, report, then decide the pooled window (2023–2025 vs 2022–2025; 2021 is the km-in-miles risk year) with the owner.
+
+**G2 follow-up B (2026-10-12, ✅):** trim keys are folded into their base model at ingest (`scripts/src/mot-fold.ts`); all five years rebuilt, 4,437 tracked models. See `docs/plan-done.md` "UK MOT follow-up B".
 
 **Stage G3 — MOT pre-2018 (2005–2017), parked (2026-10-12).** Not planned; see the "not worth it" reasoning and the forecast under "Stage G2 research" and "Forecast" above. Revisit only if the registry shows many unmatched old models that an old UK file would fix.
 

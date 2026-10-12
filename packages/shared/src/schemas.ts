@@ -159,23 +159,14 @@ export const safetyRatingsResponseSchema = z.object({
 })
 export type SafetyRatingsResponse = z.infer<typeof safetyRatingsResponseSchema>
 
-const EURONCAP_IMAGE_URL_RE = /^https:\/\/data-cdn\.euroncap\.com\/media\/assessment-media\/[\w-]+\/[\w.-]+\.webp$/
 const YOUTUBE_ID_RE = /^[\w-]{11}$/
-
-/** One Euro NCAP crash-test carousel image — always hotlinked from Euro NCAP's own CDN, never rehosted. */
-export const euroNcapImageSchema = z.object({
-  url: z.string().regex(EURONCAP_IMAGE_URL_RE),
-  /** Test code parsed from the filename, e.g. "MPDB", "FW", "O2O1" — null when it can't be parsed. */
-  test: z.string().nullable()
-})
-export type EuroNcapImage = z.infer<typeof euroNcapImageSchema>
 
 /**
  * One Euro NCAP assessment (one tested variant/generation) — scraped from euroncap.com and
  * persisted, unlike NHTSA which is fetched live. No API exists, so `stars`/percentages are
- * only as fresh as the last `pnpm ingest:euroncap` run. Media stays as source URLs/ids: crash
- * images are hotlinked from Euro NCAP's CDN and videos play via YouTube's own embed — nothing
- * is downloaded or rehosted (their media is copyrighted; only the factual scores are ours to store).
+ * only as fresh as the last `pnpm ingest:euroncap` run. Only the factual scores, links and
+ * YouTube ids are served: Euro NCAP images are never sent to the client (their media is copyrighted; the scraper keeps
+ * the image URLs in the table but the API does not expose them), and videos play via YouTube's own embed.
  */
 export const euroNcapRatingSchema = z.object({
   assessmentId: z.string(),
@@ -193,9 +184,6 @@ export const euroNcapRatingSchema = z.object({
   safetyAssistPct: z.number().int().min(0).max(100).nullable(),
   /** True for a "Safety Pack"/optional-equipment variant of the same generation. */
   safetyPack: z.boolean(),
-  /** The frontal ("_0_") carousel shot, used as the row thumbnail when present. */
-  frontImageUrl: z.string().regex(EURONCAP_IMAGE_URL_RE).nullable(),
-  images: z.array(euroNcapImageSchema),
   youtubeIds: z.array(z.string().regex(YOUTUBE_ID_RE)),
   reportPdfUrl: z.string().nullable()
 })
@@ -247,7 +235,6 @@ export const jncapRatingSchema = z.object({
   emergencyCallType: z.string().nullable(),
   emergencyCallPct: z.number().int().min(0).max(100).nullable(),
   testScores: z.array(jncapTestScoreSchema),
-  imageUrl: z.string().nullable(),
   youtubeId: z.string().regex(YOUTUBE_ID_RE).nullable(),
   reportPdfUrl: z.string().nullable()
 })
@@ -355,8 +342,7 @@ export const kncapRatingSchema = z.object({
   pedestrianPct: z.number().nullable(),
   pedestrianStar: z.number().int().nullable(),
   accidentPct: z.number().nullable(),
-  accidentStar: z.number().int().nullable(),
-  imageUrl: z.string().nullable()
+  accidentStar: z.number().int().nullable()
 })
 export type KncapRating = z.infer<typeof kncapRatingSchema>
 
@@ -401,8 +387,7 @@ export const iihsRatingSchema = z.object({
   modelYear: z.number().int(),
   /** "TSP" / "TSP+" (Top Safety Pick / Top Safety Pick+), or null. */
   award: z.string().nullable(),
-  tests: z.array(iihsTestSchema),
-  imageUrl: z.string().nullable()
+  tests: z.array(iihsTestSchema)
 })
 export type IihsRating = z.infer<typeof iihsRatingSchema>
 

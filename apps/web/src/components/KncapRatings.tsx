@@ -64,19 +64,9 @@ function RatingCard({ rating, brand, compact }: RatingCardProps): ReactNode {
 
   return (
     <div className="flex gap-3 border-t border-[var(--color-border)] py-2 first:border-t-0">
-      {rating.imageUrl ? (
-        <img
-          src={rating.imageUrl}
-          alt=""
-          loading="lazy"
-          referrerPolicy="no-referrer"
-          className="h-16 w-16 shrink-0 rounded object-cover"
-        />
-      ) : (
-        <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded bg-[var(--color-border)]/40 p-3">
-          <BrandLogo brand={brand} className="h-full w-full object-contain" />
-        </div>
-      )}
+      <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded bg-[var(--color-border)]/40 p-3">
+        <BrandLogo brand={brand} className="h-full w-full object-contain" />
+      </div>
 
       <div className="min-w-0 flex-1 text-sm">
         <div className="truncate font-medium">{label}</div>

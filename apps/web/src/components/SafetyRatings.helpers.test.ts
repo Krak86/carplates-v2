@@ -108,7 +108,6 @@ describe('groupIihsRatings', () => {
       modelYear: 2020,
       award: null,
       tests: [{ key: 'headlights', label: 'Headlights', rating: 'Good', qualifier: null }],
-      imageUrl: null,
       ...overrides
     }
   }

@@ -19,8 +19,7 @@ function toRating(row: KncapRatingRow): KncapRating {
     pedestrianPct: row.pedestrianPct,
     pedestrianStar: row.pedestrianStar,
     accidentPct: row.accidentPct,
-    accidentStar: row.accidentStar,
-    imageUrl: row.imageUrl
+    accidentStar: row.accidentStar
   }
 }
 

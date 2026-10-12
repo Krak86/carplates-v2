@@ -16,8 +16,6 @@ function rating(overrides: Partial<EuroNcapRating>): EuroNcapRating {
     vulnerableRoadUsersPct: null,
     safetyAssistPct: null,
     safetyPack: false,
-    frontImageUrl: null,
-    images: [],
     youtubeIds: [],
     reportPdfUrl: null,
     ...overrides

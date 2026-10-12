@@ -182,8 +182,6 @@ describe('buildExportReport', () => {
           vulnerableRoadUsersPct: 70,
           safetyAssistPct: 80,
           safetyPack: false,
-          frontImageUrl: 'https://data-cdn.euroncap.com/media/assessment-media/a1/front_0_.webp',
-          images: [{ url: 'https://data-cdn.euroncap.com/media/assessment-media/a1/side_1_.webp', test: 'side' }],
           youtubeIds: ['abcdefghijk'],
           reportPdfUrl: 'https://euroncap.com/a1.pdf'
         }

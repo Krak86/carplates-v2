@@ -18,7 +18,6 @@ function rating(overrides: Partial<JncapRating>): JncapRating {
     emergencyCallType: null,
     emergencyCallPct: null,
     testScores: [],
-    imageUrl: null,
     youtubeId: null,
     reportPdfUrl: null,
     ...overrides

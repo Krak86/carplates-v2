@@ -11,7 +11,6 @@ function rating(overrides: Partial<IihsRating>): IihsRating {
     modelYear: 2020,
     award: null,
     tests: [],
-    imageUrl: null,
     ...overrides
   }
 }

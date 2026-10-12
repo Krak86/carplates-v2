@@ -860,11 +860,8 @@ function collectMedia(
     )
   })
   input.jncap?.ratings.forEach(r => {
-    addImage(t('safety.tabJncap'), r.imageUrl)
     if (r.youtubeId) addVideo(t('safety.tabJncap'), `https://youtu.be/${r.youtubeId}`)
   })
-  input.kncap?.ratings.forEach(r => addImage(t('safety.tabKncap'), r.imageUrl))
-  input.iihs?.ratings.forEach(r => addImage(t('safety.tabIihs'), r.imageUrl))
   input.reviews?.videos.forEach(v => addVideo(`${t('videos.title')} — ${v.title}`, v.url))
   if (input.wiki?.image) addImage(t('wiki.title'), input.wiki.image.url)
   input.photos.forEach((p, i) => addImage(t('export.photoN', { n: i + 1 }), p.webformatURL))

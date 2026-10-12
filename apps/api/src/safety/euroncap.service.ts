@@ -23,8 +23,6 @@ function toRating(row: EuroncapRatingRow): EuroNcapRating {
     vulnerableRoadUsersPct: row.vulnerableRoadUsersPct,
     safetyAssistPct: row.safetyAssistPct,
     safetyPack: row.safetyPack,
-    frontImageUrl: row.frontImageUrl,
-    images: row.images,
     youtubeIds: row.youtubeIds,
     reportPdfUrl: row.reportPdfUrl
   }
