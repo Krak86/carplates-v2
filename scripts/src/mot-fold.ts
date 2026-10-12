@@ -21,8 +21,24 @@ export const MOT_KEEP_SEPARATE: readonly string[] = [
   'van|toyota|proacecity',
   'car|citroen|c5aircross',
   'car|citroen|c5x',
-  'car|mitsubishi|eclipsecross'
+  'car|mitsubishi|eclipsecross',
+  'car|suzuki|sx4scross',
+  'car|vauxhall|grandlandx',
+  'car|vauxhall|crosslandx',
+  'car|ds|ds3crossback',
+  'car|volkswagen|tiguanallspace',
+  'car|ford|tourneocourier'
 ]
+
+/** Abbreviated spellings of a leading model name, expanded before the prefix lookup ("DISCOVERY SPT RDYN" is Discovery Sport). */
+const MODEL_ABBREVIATIONS: readonly (readonly [RegExp, string])[] = [
+  [/^DISCOVERY SPT\b/, 'DISCOVERY SPORT'],
+  [/^RANGE ROVER SPT\b/, 'RANGE ROVER SPORT'],
+  [/^TIGUAN ASPACE\b/, 'TIGUAN ALLSPACE']
+]
+
+const expandAbbreviations = (model: string): string =>
+  MODEL_ABBREVIATIONS.reduce((m, [from, to]) => m.replace(from, to), model.trim())
 
 /**
  * Models that are electric throughout: their "EV" trims are not a split ("ZOE ICONIC RAPID CHARGE EV 50" vs "ZOE"),
@@ -73,8 +89,10 @@ export class MotFold {
   fold(kind: MotKind, mk: string, mo: string, rawModel: string): string {
     const own = `${kind}|${mk}|`
     if (this.real.has(own + mo) || this.keep.has(own + mo)) return mo
-    const words = rawModel.trim().split(/\s+/)
-    for (let n = words.length - 1; n >= 1; n--) {
+    const expanded = expandAbbreviations(rawModel)
+    const words = expanded.split(/\s+/)
+    // An expanded name may itself be the whole model ("DISCOVERY SPT"); otherwise the full text is the key being folded.
+    for (let n = expanded === rawModel.trim() ? words.length - 1 : words.length; n >= 1; n--) {
       const prefix = modelKey(words.slice(0, n).join(' '))
       // A kept-separate model's own trims fold into it, not past it ("IONIQ 5 PREMIUM" -> ioniq5).
       if (prefix && (this.real.has(own + prefix) || this.keep.has(own + prefix)))
@@ -86,11 +104,11 @@ export class MotFold {
 
 /** Display name of a (folded) key: the leading words of the raw model whose key is `mo` ("IONIQ 5 PREMIUM EV" -> "IONIQ 5"). */
 export function baseModelName(model: string, mo: string): string {
-  const words = model.trim().split(/\s+/)
+  const words = expandAbbreviations(model).split(/\s+/)
   for (let n = 1; n <= words.length; n++) {
     const name = words.slice(0, n).join(' ')
     if (modelKey(name) === mo) return name
     if (modelKey(name) + EV_KEY_SUFFIX === mo) return `${name} EV`
   }
-  return model
+  return expandAbbreviations(model)
 }

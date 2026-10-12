@@ -791,6 +791,8 @@ First steps once the path is given: list ZIP entries, profile row counts / class
 
 **G2 follow-up C (2026-10-12, ✅):** electric trims ("NIRO 4 + EV", "ZS TROPHY EV", "COOPER S ELECTRIC") are counted under a separate `<base>ev` key at ingest (`MotFold.split`, gated on the census, `MOT_EV_ONLY` excludes Zoe/Leaf); `GET /api/mot?fuel=electric|other` lets an electric registry car use it (>= 1,000 tests, else the base). Niro 193,258 + Niro EV 79,901 = 273,159. Write-up: `docs/plan-done.md` "UK MOT follow-up C".
 
+**G2 follow-up D (2026-10-12, ✅):** keep-list audit: six more post-2021 models extending an older name are kept separate (SX4 S-Cross, Grandland X, Crossland X, DS 3 Crossback, Tiguan Allspace, Tourneo Courier) and abbreviated spellings (Discovery SPT, Range Rover SPT, Tiguan ASPACE) are expanded before folding; all five years rebuilt, 4,459 tracked models. Write-up: `docs/plan-done.md` "UK MOT follow-up D".
+
 **Stage G3 — MOT pre-2018 (2005–2017), parked (2026-10-12).** Not planned; see the "not worth it" reasoning and the forecast under "Stage G2 research" and "Forecast" above. Revisit only if the registry shows many unmatched old models that an old UK file would fix.
 
 **Stage G2 research (2026-10-12; nothing downloaded or built).** Question: add more years, expose the data further, is it worth it?

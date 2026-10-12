@@ -16,9 +16,18 @@ const real = new Set([
   'car|mini|coopers',
   'car|viva|viva',
   'car|vauxhall|viva',
-  'car|vauxhall|vivaro'
+  'car|vauxhall|vivaro',
+  'car|vauxhall|grandland',
+  'car|suzuki|sx4',
+  'car|landrover|discovery',
+  'car|landrover|discoverysport',
+  'car|landrover|rangerover',
+  'car|volkswagen|tiguan'
 ])
-const fold = new MotFold(real, new Set(['car|hyundai|ioniq5']))
+const fold = new MotFold(
+  real,
+  new Set(['car|hyundai|ioniq5', 'car|vauxhall|grandlandx', 'car|suzuki|sx4scross', 'car|volkswagen|tiguanallspace'])
+)
 
 describe('MotFold', () => {
   it('folds a trim into its base model', () => {
@@ -48,6 +57,24 @@ describe('MotFold', () => {
     expect(fold.fold('car', 'hyundai', 'ioniq5', 'IONIQ 5')).toBe('ioniq5')
     expect(fold.fold('car', 'hyundai', 'ioniq5premiumev', 'IONIQ 5 PREMIUM EV')).toBe('ioniq5')
     expect(fold.fold('car', 'hyundai', 'ioniqseconnecthev', 'IONIQ SE CONNECT HEV')).toBe('ioniq')
+  })
+
+  it('keeps a renamed or successor model apart from the older name it extends', () => {
+    expect(fold.fold('car', 'vauxhall', 'grandlandxsrinavturbo', 'GRANDLAND X SRI NAV TURBO')).toBe('grandlandx')
+    expect(fold.fold('car', 'vauxhall', 'grandlandsrinavturbo', 'GRANDLAND SRI NAV TURBO')).toBe('grandland')
+    expect(fold.fold('car', 'suzuki', 'sx4scrossmotionbjetmhev', 'SX4 S-CROSS MOTION B-JET MHEV')).toBe('sx4scross')
+    expect(fold.fold('car', 'suzuki', 'sx4szt', 'SX4 SZ-T')).toBe('sx4')
+    expect(fold.fold('car', 'volkswagen', 'tiguanallspaceseltdi', 'TIGUAN ALLSPACE SEL TDI')).toBe('tiguanallspace')
+  })
+
+  it('expands abbreviated model names before folding', () => {
+    expect(fold.fold('car', 'landrover', 'discoverysptrdynshsedauto', 'DISCOVERY SPT RDYN HSE D AUTO')).toBe(
+      'discoverysport'
+    )
+    expect(fold.fold('car', 'landrover', 'discoveryspt', 'DISCOVERY SPT')).toBe('discoverysport')
+    expect(fold.fold('car', 'landrover', 'rangeroversptautobio', 'RANGE ROVER SPT AUTOBIO')).toBe('rangeroversport')
+    expect(fold.fold('car', 'landrover', 'discoveryhsesd6auto', 'DISCOVERY HSE SD6 AUTO')).toBe('discovery')
+    expect(fold.fold('car', 'volkswagen', 'tiguanaspaceeleganc', 'TIGUAN ASPACE ELEGANCE')).toBe('tiguanallspace')
   })
 
   it('does not cross kind or make', () => {
@@ -120,5 +147,6 @@ describe('baseModelName', () => {
     expect(baseModelName('KUGA', 'kuga')).toBe('KUGA')
     expect(baseModelName('X5 M', 'x5m')).toBe('X5 M')
     expect(baseModelName('NIRO 4 + EV', 'niroev')).toBe('NIRO EV')
+    expect(baseModelName('DISCOVERY SPT RDYN S D A', 'discoverysport')).toBe('DISCOVERY SPORT')
   })
 })
