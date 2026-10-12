@@ -530,7 +530,9 @@ export function parseWikiSpecs(wikitext: string, opts: ParseOptions = {}): WikiS
       })
   }
   // Table rows carry power, chassis codes and notes; infobox lines rarely do — tables win when they have a figure,
-  // unless they name no engine at all (a per-variant power table has neither displacement nor engine code).
+  // unless they name no engine at all (a per-variant power table has neither displacement nor engine code) while the
+  // infobox already states a power; an infobox without any power loses to the table's figures.
+  const infoboxHasPower = infoboxEngines.some(e => e.powerKw !== null)
   const tableNamesEngine = tables.engines.some(e => e.displacementCc !== null || (e.engineCodes?.length ?? 0) > 0)
   // A table sharing no displacement with the infobox lists other vehicles (a competitor comparison): the infobox wins.
   const infoboxCc = infoboxEngines.flatMap(e => (e.displacementCc === null ? [] : [e.displacementCc]))
@@ -540,7 +542,7 @@ export function parseWikiSpecs(wikitext: string, opts: ParseOptions = {}): WikiS
     !tables.engines.some(e => infoboxCc.some(cc => Math.abs(cc - e.displacementCc!) <= cc * 0.03))
   const engines =
     infoboxEngines.length === 0 ||
-    (tables.engines.some(e => e.powerKw !== null) && tableNamesEngine && !tableContradicts)
+    (tables.engines.some(e => e.powerKw !== null) && (tableNamesEngine || !infoboxHasPower) && !tableContradicts)
       ? tables.engines
       : infoboxEngines
   return {

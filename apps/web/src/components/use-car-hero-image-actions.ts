@@ -25,12 +25,11 @@ type Params = {
  * the ambient background in place of the rotation; the override is cleared on unmount so leaving
  * this result reverts to the rotation automatically.
  */
-export function useCarHeroImageActions({
-  brand,
-  model,
-  year,
-  key
-}: Params): UseQueryResult<WikiImageResponse> & { refresh: () => void; isRefreshing: boolean } {
+export function useCarHeroImageActions({ brand, model, year, key }: Params): {
+  query: UseQueryResult<WikiImageResponse>
+  refresh: () => void
+  isRefreshing: boolean
+} {
   const hasQuery = Boolean(brand || model)
   const options = wikiImageQuery(brand ?? '', model ?? '', year)
   const heroImage = useQuery({ ...options, enabled: hasQuery })
@@ -53,5 +52,5 @@ export function useCarHeroImageActions({
     return (): void => clearHeroOverride(key)
   }, [key, image, setHeroOverride, clearHeroOverride])
 
-  return { ...heroImage, refresh: () => refreshMutation.mutate(), isRefreshing: refreshMutation.isPending }
+  return { query: heroImage, refresh: () => refreshMutation.mutate(), isRefreshing: refreshMutation.isPending }
 }

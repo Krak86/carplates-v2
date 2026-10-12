@@ -23,7 +23,7 @@ type Props = {
  */
 export default function WikiHeroImage({ brand, model, year, rawKind, vehicleKey }: Props): ReactNode {
   const { t } = useTranslation()
-  const heroImage = useCarHeroImageActions({ brand, model, year, key: vehicleKey })
+  const { query: heroImage, refresh, isRefreshing } = useCarHeroImageActions({ brand, model, year, key: vehicleKey })
   const image = heroImage.isSuccess ? heroImage.data.image : null
   const creditParts = [image?.attribution?.author, image?.attribution?.license].filter(Boolean)
 
@@ -70,11 +70,11 @@ export default function WikiHeroImage({ brand, model, year, rawKind, vehicleKey 
 
       <button
         type="button"
-        onClick={heroImage.refresh}
-        disabled={heroImage.isRefreshing}
+        onClick={refresh}
+        disabled={isRefreshing}
         className="absolute bottom-2 left-2 rounded bg-black/60 px-1.5 py-0.5 text-[10px] text-white/80 hover:text-white disabled:opacity-60"
       >
-        {t(heroImage.isRefreshing ? 'wiki.imageRefreshing' : 'wiki.imageRefresh')}
+        {t(isRefreshing ? 'wiki.imageRefreshing' : 'wiki.imageRefresh')}
       </button>
 
       {isLoaded && creditParts.length > 0 && (
