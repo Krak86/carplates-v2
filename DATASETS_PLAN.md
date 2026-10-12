@@ -1113,6 +1113,24 @@ wikidata_id, revid)` (keyed on the stage I generation row; `revid` makes the cre
     - **Unknowns (unchecked):** whether the section fields fit bikes (seat height, dry weight, final drive vs wheelbase / kerb mass; `{{Infobox motorcycle}}` mapping), and whether `GenerationsService.locate()` assumes cars.
     - **If done anyway:** scoped pass only — ~15 pinned titles in `generations-titles.csv`, `ingest:generations`, `ingest:wikispecs`, re-export both seeds (`model-generations.csv.gz`, `wikispecs.csv.gz`), check the motorcycle infobox mapping,
       browser-check one bike and one bus. Ask the owner before running on the real-data DB. Estimate 0.5–1 session. Full pass (long tail): not worth it.
+    - **Status update (2026-10-12): the parser half is already built; what is left is a verify-then-scope job named "Stage K-M" (K for Motorcycles & buses).** Found in the code, not yet documented: `wikiSpecs.ts` accepts
+      `Infobox motorcycle` / `Infobox UK Bus` / `Infobox truck`, has a motorcycle power-field rule and a model-year-column table layout (`yearFrom`); fixtures `mt07.en.wikitext`, `lionscoach.en.wikitext`; commits `6bf87d6`
+      (generations + wiki specs for ~35 motorcycle and bus models), `35a0065` (UK Bus infobox, Bajaj Dominar pin, decimal-cc engines), `2e162a5` (transposed model-year tables, Suzuki SV650). So the "unknowns" above are
+      partly answered by those commits; steps below confirm the rest. **Nothing below runs on the real-data DB without the owner's go.**
+    - **Steps (estimate 1 session, ~3–5 h; steps 1–2 are read-only):**
+      1. **K-M1 Audit (read-only, ~0.5 h).** Read the three commits' diffs and `docs/plan-done.md` for what they stored; count stored rows by `vehicle_kind` in `model_generations` / `model_spec_wiki` (SELECT only);
+         list which of Honda, Yamaha, Suzuki, Kawasaki, BMW, Bajaj, Jawa and Mercedes / Neoplan / MAN / Iveco buses already have rows. Output: a gap list (brand, model, missing piece).
+      2. **K-M2 Field-fit check (read-only, ~1 h).** (a) Does `GenerationsService.locate()` / `wikispecs` matcher assume cars (kind filter, year logic, make aliases)? (b) Which bike-only fields does `{{Infobox motorcycle}}` carry that our
+         columns lack (seat height, dry weight, final drive, frame, brakes, tyres, fuel capacity) versus the car columns (wheelbase, kerb mass); (c) same for bus (length, seats, floor type). Decide per field: map to an existing column,
+         add a column (migration), or skip. Output: a mapping table written into this section.
+      3. **K-M3 Parser fixtures (~1 h).** One trimmed real article per gap found (Honda CB / Yamaha / Kawasaki Ninja / BMW R-series, Neoplan / MAN bus) in `packages/shared/src/fixtures/wiki/` + tests in `wikiSpecs.test.ts`; fix the
+         parser only for what the fixtures expose. `pnpm --filter @carplates/shared build`.
+      4. **K-M4 Pins + ingest (~0.5–1 h, needs owner go for the DB).** Add the missing pinned titles to `generations-titles.csv` (~15), run `ingest:generations` and `ingest:wikispecs` for those pairs only, re-export
+         `model-generations.csv.gz` and `wikispecs.csv.gz`. Run `SELECT count(*)` guards first per CLAUDE.md; these tables are re-ingestable, but ask anyway.
+      5. **K-M5 UI fit (~0.5–1 h, only if K-M2 found gaps).** Bike / bus rows in `WikiSpecs.tsx` (labels + ua/ru/en strings, ❓ explainers), hide car-only rows (wheelbase) for bikes; contracts stay `nullable().optional()`.
+      6. **K-M6 Checks + docs (~0.5 h).** `pnpm format`, lint, type-check, test; browser-check one bike and one bus (light / dark / 485 px / `?section=engines`); write-up in `docs/plan-done.md`, ✅ line in `PLAN.md`,
+         conventions in `docs/features-reference.md`; commit message, stop.
+    - **Stop rules:** if K-M1 shows the ~35 models already cover the scoped brands, finish at K-M2 with a note and skip 3–5. Photos are separate (`wiki_image`, `wikiAliases.ts`) and out of scope.
 
 Not planned (decided): VehiclesDB per-country deciles, derived body-type label, vPIC offline dump, Eurostat. (Wikidata moved into stage I; other countries into stage J.)
 
