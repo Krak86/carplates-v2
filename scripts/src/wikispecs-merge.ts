@@ -62,8 +62,6 @@ const RAW_MAX = 160
 const dimCount = (s: WikiSpecs): number =>
   [s.wheelbaseMm, s.lengthMm, s.widthMm, s.heightMm, s.kerbKg, s.fuelTankL].filter(m => m !== null).length
 
-const hasPower = (s: WikiSpecs): boolean => s.engines.some(e => e.powerKw !== null)
-
 /** First edition of the chain with the highest count (an earlier edition wins a tie). */
 function best(editions: Edition[], score: (s: WikiSpecs) => number): Edition | undefined {
   let pick: Edition | undefined
@@ -105,7 +103,9 @@ export function mergeEditions(
 ): ModelSpecWikiInsert | null {
   const dims = rdwHasModel ? undefined : best(editions, dimCount)
   // An engine list is only worth showing with power; a list without it is a fallback when no edition has any.
-  const engines = best(editions, s => (hasPower(s) ? s.engines.length : 0)) ?? best(editions, s => s.engines.length)
+  // Counted by entries with power: a cell split into "1,4 л" + "(55 кВт)" fragments must not outscore whole engines.
+  const engines =
+    best(editions, s => s.engines.filter(e => e.powerKw !== null).length) ?? best(editions, s => s.engines.length)
   const drive = best(editions, s => (s.layout ? 1 : 0) + (s.transmission ? 1 : 0))
   if (!dims && !engines && !drive) return null
 

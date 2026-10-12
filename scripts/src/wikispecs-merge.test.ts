@@ -93,6 +93,14 @@ describe('mergeEditions', () => {
         ?.enginesLang
     ).toBe('uk')
   })
+
+  it('ranks engine lists by entries with power, so split fragments do not beat whole engines', () => {
+    const fragment = { ...ENGINE, powerKw: null }
+    const split = [fragment, ENGINE, fragment, ENGINE]
+    expect(
+      mergeEditions(KEY, [ed('uk', { engines: [ENGINE, ENGINE] }), ed('de', { engines: split })], false)?.enginesLang
+    ).toBe('uk')
+  })
 })
 
 describe('editionTargets', () => {
