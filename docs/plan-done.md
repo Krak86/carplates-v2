@@ -3291,3 +3291,18 @@ Audited every key `MotFold` folds (2024-25 censuses, groups >= 250 tests/yr, fir
 ### Stage K leftover — motorcycles and buses (2026-10-12)
 
 Scoped pass: 35 pinned Wikipedia titles (Honda, Yamaha, Suzuki, Kawasaki, BMW, Bajaj bikes; Iveco Daily, MAN, Mercedes T2/Citaro buses), `MODEL_ALIASES` for bare Sprinter / T2 / Citaro / LT / Daily codes, `wikiSpecs.ts` reads `wet_weight` and the bike `power` field. Coverage: 7.7 % of motorcycle and 56.9 % of bus registrations resolve to a generation row. Details and the unmatched list: `DATASETS_PLAN.md` "Step 4 done".
+
+### Stage K-M4 — Kawasaki / BMW motorcycle pins ingested (2026-10-12)
+
+The 17 pins of commit `bb9bd40` (`generations-titles.csv`) were ingested on the real DB with owner approval limited to `registry.model_generations` and `registry.model_spec_wiki` (`registrations` / `ingested_resources` untouched).
+
+|                     | before | after                                          |
+| ------------------- | ------ | ---------------------------------------------- |
+| `model_generations` | 1,155  | 1,172 (+17: Kawasaki 10, BMW 7; all `single`)  |
+| `model_spec_wiki`   | 1,147  | 1,165 (+18: Kawasaki 10, BMW 7, Bogdan A092 1) |
+
+- **How:** the default `--limit 300` never reaches bikes (90–680 cars each vs ~7,970 at rank 300), so each pin ran as `ingest:generations --only "<query>"` (replaces only that make/model key). `ingest:wikispecs` then ran in full (cache in `scripts/.data/`, no `--refresh`).
+- **Wikispecs side effect:** the full run rewrote 98 existing non-bike rows (mostly `engines`: parser changes since the last ingest plus live-article drift). Reverted: the seed is HEAD + the 18 new rows, loaded with `--from-csv` and re-exported; diff = 18 additions, 0 changed, 0 removed. Re-run the whole table later as its own reviewed step (Audi A5 regresses to a Russian summary line; Audi 80 and Chevrolet Aveo 2023 improve).
+- **Checks:** Versys 650 = 649 cc / 50 kW (OK). **Versys 1000 is not 1,043 cc / 87 kW**: 9 engines from another table (the closest, "R4 1043 88 kW"). Browser: Kawasaki Versys 650 (`ВІ1923АВ`) and BMW F800GS (`АА4938АХ`) cards, `?section=engines`, light and dark, render correctly.
+- **Pins that are poor data:** BMW K1600GT 2011–2011; F700GS and F800GS both 2008–2013 (shared "F series parallel-twin" article); card model name for F-series is the article title.
+- **Registry spellings without a pin** (cars): Ninja 400R 236, Ninja 250R 123, Ninja 650 102, K1600GTL 198 + 116, R 1200RT 311 + 146, S 1000 R 235, S 1000XR 198, R 1300GS 156, F 750GS 132, F 850GS 125, R 1250 RT 122, R 1200R 105, R 18 97. `--only` does not report unmatched spellings, so this list comes from a registry query, not the ingest.
