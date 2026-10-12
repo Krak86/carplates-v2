@@ -901,6 +901,8 @@ in-memory store resets on restart and isn't shared across instances), body-email
 
 ### Deploy-time security checklist (do when setting up the VPS)
 
+Code-level audit findings and the full pre-deploy gate: [docs/security-checklist.md](docs/security-checklist.md) (2026-10-13).
+
 - [ ] Set `TRUST_PROXY=true` **only** once Caddy/Cloudflare is in front and the API port is not publicly reachable; otherwise
       `X-Forwarded-For` is spoofable and the per-IP limits are bypassable (or all users share the proxy's IP).
 - [ ] Firewall: expose only 80/443 (+ UDP 443 for HTTP/3); API, Postgres and Redis ports closed to the internet; SSH key-only, fail2ban.
