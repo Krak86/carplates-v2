@@ -1,6 +1,6 @@
 # GAME_PLAN.md — test-drive racer: full screen + mobile (A done, B built 2026-10-11 — needs real-device testing, C planned)
 
-Research notes from 2026-10-09. Nothing here is built. Current state of the game: `docs/features-reference.md` "Test-drive racer" and
+Research notes from 2026-10-09; A and B are built (see the notes below), C is not. Current state of the game: `docs/features-reference.md` "Test-drive racer" and
 `docs/plan-done.md` "Test-drive racer game". Other racer follow-ups (music, art-pass leftovers): `PLAN.md` "Test-drive racer game".
 
 Order: **A (full screen) → B (virtual buttons + mobile layout) → C (optional tilt)**. A and B ≈ 1-2 days, C ≈ half a day; real-device
