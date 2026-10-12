@@ -558,11 +558,11 @@ Dry-run on 2 models (Lanos, Lancer): 8 kept each, 101 units each.
 ("YouTube fallback for models with no infocar video — design, trial and build notes"):**
 
 1. ✅ _done 2026-10-11_ — **Finish the runs:** ≥ 5,000 tier finished 2026-10-07 (Day 3), ≥ 1,000 tier finished 2026-10-11 (Day 7). `--min-cars 500` is deferred (≈ 9+ days for few, older-model videos).
-2. **Generation/year matching** — _partly done 2026-10-11:_ a title year that falls inside a catalog generation now requires the car to be in that generation too (`videoLookup`, replaces the flat ±3 window); still open: generation _words_ (`MK1`, `B8`) and year-less titles (74% of rows). Original scope: parse a year or generation word (`MK1`, `Mk2`, `B`, `3`, `X`) from the title and map it to a generation
+2. **Generation/year matching** — _partly done 2026-10-11:_ a title year that falls inside a catalog generation now requires the car to be in that generation too (`videoLookup`, replaces the flat ±3 window); _generation words done 2026-10-12:_ a single standalone Wikipedia generation code in the title (`MK1`, `Mk 2`, `B8`; codes with a letter and a digit only, ambiguous titles ignored) pins the span (`titleGenerationSpan`, `ReviewsService` passes `GenerationsService.locate().list` for the fallback); still open: year-less titles without a code (≈ 74% of rows), which only get the publish-date ranking hint. Original scope: parse a year or generation word (`MK1`, `Mk2`, `B`, `3`, `X`) from the title and map it to a generation
    year range via the infocar version catalog (as `videoLookup` does for infocar videos), else store the title year.
 3. ✅ _done 2026-10-07_ — **`videoLookup` integration + UI label** — `youtube_videos` as a second source after the infocar ones (dedupe by `youtube_id`, infocar
    first, `MAX_VIDEOS` still caps the section), labelled as YouTube search results rather than infocar picks.
-4. **Verify** (the "Done when" below) and measure again: share of the top-400 pairs with ≥1 video (was 74.1% of registrations), share of
+4. ✅ _done 2026-10-12_ — **Verify** (the "Done when" below) and measure again (via `/api/reviews`, dev API, DB with the Day 7 CSV: top-400 (brand, model) pairs **96.8%** with ≥1 video, 98.7% of their registrations (was 74.1%); top-400 (brand, model, year) triples **88.5%** with ≥1 video, 89.3% of their registrations; Lanos, Touran, Fusion, Lancer and Doblo each return 5–6 videos; RAV4 2017 returns the infocar video). Original wording: share of the top-400 pairs with ≥1 video (was 74.1% of registrations), share of
    lookups with a year-matched video.
 
 _Done when:_ the no-video models in the Step 2a list (Lanos, Touran, Fusion, Lancer, Doblo, Laguna, Omega, ВАЗ 2107…)

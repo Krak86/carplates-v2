@@ -32,6 +32,34 @@ export type InfocarVideoRow = {
 
 export const MAX_VIDEOS = 6
 
+/** A Wikipedia generation (`Mk5`, `B8`, `XV40`) whose code a title may name. */
+export type VideoGeneration = { code: string; yearFrom: number; yearTo: number | null }
+
+const WORD_CHAR = '[\\p{L}\\p{N}]'
+
+/**
+ * Production span of the one generation whose code the title names (`MK1`, `Mk 5`, `B8`), else null. Only codes with a letter
+ * and a digit count (a bare `3` or `X` would hit any title), a code must stand alone as a word, and two different
+ * generations in one title ("MK1 vs MK2") are ambiguous.
+ */
+export function titleGenerationSpan(
+  title: string,
+  generations: readonly VideoGeneration[],
+  currentYear: number
+): YearRange | null {
+  const hits = generations.filter(g => {
+    const code = g.code.trim()
+    if (!/\p{L}/u.test(code) || !/\d/.test(code)) return false
+    const body = code
+      .split(/[\s-]+/)
+      .map(part => part.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+      .join('[\\s-]?')
+    return new RegExp(`(?<!${WORD_CHAR})${body}(?!${WORD_CHAR})`, 'iu').test(title)
+  })
+  if (hits.length !== 1) return null
+  return { from: hits[0]!.yearFrom, to: hits[0]!.yearTo ?? currentYear }
+}
+
 /** How far a title's year may be from the car's year (generation unknown) before the video is dropped. */
 const TITLE_YEAR_TOLERANCE = 3
 
@@ -72,7 +100,8 @@ export function videoLookup(
   brand: string | null | undefined,
   model: string | null | undefined,
   year: number | null | undefined,
-  currentYear: number = new Date().getFullYear()
+  currentYear: number = new Date().getFullYear(),
+  generations: readonly VideoGeneration[] = []
 ): InfocarVideoRow[] {
   const slug = infocarBrandSlug(brand)
   if (!slug || !model?.trim()) return []
@@ -86,8 +115,10 @@ export function videoLookup(
     if (year == null) return 1
     const range = r.generationId === null ? undefined : ranges.get(r.generationId)
     if (range) return range.from <= year && year <= range.to ? 0 : null
-    // Title year inside a known generation: the car must be in that generation too (ranges overlap at the edges).
-    const own = r.year === null ? [] : versions.filter(v => v.from <= r.year! && r.year! <= v.to)
+    // A generation word in the title (`MK1`, `B8`) pins the span; else a title year inside a known generation: the car must
+    // be in that generation too (ranges overlap at the edges).
+    const word = titleGenerationSpan(r.title, generations, currentYear)
+    const own = word ? [word] : r.year === null ? [] : versions.filter(v => v.from <= r.year! && r.year! <= v.to)
     if (own.length) return own.some(v => v.from <= year && year <= v.to) ? 0 : null
     if (r.year !== null) return Math.abs(r.year - year) <= TITLE_YEAR_TOLERANCE ? 1 : null
     // No year at all: a review is usually of the generation on sale when it was published. Only a ranking hint — a

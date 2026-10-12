@@ -22,6 +22,7 @@ import type { InfocarRow, InfocarVideoRow, ReviewsResponse } from '@carplates/sh
 import { eq } from 'drizzle-orm'
 
 import { DbService } from '../db/db.service.js'
+import { GenerationsService } from '../generations/generations.service.js'
 
 const LANGS = ['ua', 'ru', 'en'] as const
 type Lang = (typeof LANGS)[number]
@@ -30,7 +31,10 @@ type Query = { brand: string; model?: string; year?: number }
 
 @Injectable()
 export class ReviewsService {
-  constructor(@Inject(DbService) private readonly dbService: DbService) {}
+  constructor(
+    @Inject(DbService) private readonly dbService: DbService,
+    @Inject(GenerationsService) private readonly generationsService: GenerationsService
+  ) {}
 
   /**
    * Matching lives in `@carplates/shared` (`infocarLookup`, `videoLookup`, `ownerPostLookup`) — persisted catalogs
@@ -86,6 +90,8 @@ export class ReviewsService {
         const lang = LANGS.find(l => l === r.lang)
         if (lang) langById.set(r.youtubeId, lang)
       }
+      // Generation words in titles (`MK1`, `B8`) resolve against the model's Wikipedia generations.
+      const located = query.model ? await this.generationsService.locate(query.brand, query.model) : null
       videoHits = videoLookup(
         ytRows.map((r): InfocarVideoRow => ({
           youtubeId: r.youtubeId,
@@ -102,7 +108,9 @@ export class ReviewsService {
         catalog,
         query.brand,
         query.model,
-        query.year
+        query.year,
+        undefined,
+        located?.list ?? []
       )
     }
     const videos = videoHits.map(v => ({

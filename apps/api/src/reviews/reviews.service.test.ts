@@ -10,6 +10,7 @@ import type {
 } from '@carplates/db'
 
 import type { DbService } from '../db/db.service.js'
+import type { GenerationsService } from '../generations/generations.service.js'
 
 import { ReviewsService } from './reviews.service.js'
 
@@ -60,7 +61,10 @@ function serviceWith(
       })
     })
   }
-  return new ReviewsService({ db } as unknown as DbService)
+  return new ReviewsService(
+    { db } as unknown as DbService,
+    { locate: () => Promise.resolve(null) } as unknown as GenerationsService
+  )
 }
 
 const video: CarVideoRow = {
@@ -143,7 +147,7 @@ describe('ReviewsService.lookup', () => {
   })
 
   it('returns nothing for a brand without a known slug, without touching the DB', async () => {
-    const service = new ReviewsService({} as unknown as DbService)
+    const service = new ReviewsService({} as unknown as DbService, {} as unknown as GenerationsService)
     expect(await service.lookup({ brand: 'МУССТАНГ', model: 'X', year: 2019 })).toEqual({
       testDrive: null,
       reviews: null,

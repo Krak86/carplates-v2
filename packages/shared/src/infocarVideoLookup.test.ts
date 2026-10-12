@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import type { InfocarRow } from './infocarLookup.js'
-import { videoLookup } from './infocarVideoLookup.js'
+import { titleGenerationSpan, videoLookup } from './infocarVideoLookup.js'
 import type { InfocarVideoRow } from './infocarVideoLookup.js'
 
 const video = (overrides: Partial<InfocarVideoRow>): InfocarVideoRow => ({
@@ -82,5 +82,31 @@ describe('videoLookup', () => {
     ]
     // 2020 car (generation 2018-2022): the 2019 video first, the others kept after it, newest first
     expect(ids(videoLookup(t, catalog, 'TOYOTA', 'RAV4', 2020))).toEqual(['pub2019', 'pub2024', 'pub2016'])
+  })
+})
+
+describe('generation words in titles', () => {
+  const gens = [
+    { code: 'Mk1', yearFrom: 2000, yearTo: 2005 },
+    { code: 'Mk 2', yearFrom: 2006, yearTo: 2012 },
+    { code: 'XV40', yearFrom: 2013, yearTo: null },
+    { code: 'Third generation', yearFrom: 2020, yearTo: null }
+  ]
+
+  it('finds a single code as a standalone word, with optional space/hyphen', () => {
+    expect(titleGenerationSpan('RAV4 MK1 review', gens, 2026)).toEqual({ from: 2000, to: 2005 })
+    expect(titleGenerationSpan('Test mk-2 drive', gens, 2026)).toEqual({ from: 2006, to: 2012 })
+    expect(titleGenerationSpan('XV40 review', gens, 2026)).toEqual({ from: 2013, to: 2026 })
+  })
+
+  it('ignores partial words, ambiguous titles and codes without a digit', () => {
+    expect(titleGenerationSpan('AMK1 review', gens, 2026)).toBeNull()
+    expect(titleGenerationSpan('MK1 vs MK2', gens, 2026)).toBeNull()
+    expect(titleGenerationSpan('Third generation test', gens, 2026)).toBeNull()
+  })
+
+  it('drops a video whose generation word contradicts the car year', () => {
+    const t = [video({ youtubeId: 'a', title: 'Mk1 test' }), video({ youtubeId: 'b', title: 'Mk2 test' })]
+    expect(ids(videoLookup(t, [], 'TOYOTA', 'RAV4', 2008, 2026, gens))).toEqual(['b'])
   })
 })
