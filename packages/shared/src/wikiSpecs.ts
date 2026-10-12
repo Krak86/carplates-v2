@@ -201,7 +201,7 @@ export function powerKwOf(text: string): number | null {
 export function parseEngine(line: string): WikiEngine {
   const text = line.replace(/(\d),(\d{3})(?!\d)/g, '$1$2').replace(/(\d),(\d)(?!\d)/g, '$1.$2')
   let displacementCc: number | null = null
-  const litres = /(?<![\d.])(\d(?:\.\d{1,2})?)\s*(?:l|litres?|liters?|литр\p{L}*|л)(?![\p{L}\d])/iu.exec(text)
+  const litres = /(?<![\d.])(\d{1,2}(?:\.\d{1,2})?)\s*(?:l|litres?|liters?|литр\p{L}*|л)(?![\p{L}\d])/iu.exec(text)
   const cc = /(\d{3,5}(?:\.\d)?)\s*(?:cc|cm³|см³)/i.exec(text)
   if (litres) displacementCc = Math.round(Number(litres[1]) * 1000)
   else if (cc) displacementCc = Math.round(Number(cc[1]))
@@ -242,7 +242,7 @@ const ALIASES = {
   width: ['width', 'ширина', 'breite', 'šířka', '전폭', '全幅'],
   height: ['height', 'высота', 'висота', 'höhe', 'výška', '전고', '全高'],
   weight: ['weight', 'wet_weight', 'масса', 'вага', 'gewicht', 'hmotnost', '전비중량', '車両重量'],
-  power: ['power'],
+  power: ['power', 'powerout'],
   fuel_capacity: ['fuel_capacity', 'объём бака', 'бак', 'tankinhalt', '燃料タンク容量'],
   layout: ['layout', 'привод', 'компонування', 'antrieb', 'koncepce', '구동방식', '駆動方式'],
   transmission: ['transmission', 'кпп', 'трансмісія', 'getriebe', '변속기', 'トランスミッション'],

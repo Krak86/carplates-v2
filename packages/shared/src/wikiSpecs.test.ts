@@ -136,6 +136,12 @@ describe("parseWikiSpecs: `Infobox UK Bus` (MAN Lion's Coach / City)", () => {
     expect(specs.heightMm?.value).toBe(3870)
   })
 
+  it('reads the engine power from `powerout`', () => {
+    const engines = read('lionscoach').engines
+    expect(engines).toHaveLength(1)
+    expect(engines[0]).toMatchObject({ displacementCc: 12400, powerKw: 316, fuel: 'diesel' })
+  })
+
   it('keeps the whole range of lengths of the city bus', () => {
     const specs = read('lionscity')
     expect(specs.lengthMm).toMatchObject({ min: 8130, max: 20450 })
