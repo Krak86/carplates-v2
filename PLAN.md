@@ -1020,6 +1020,19 @@ card-on-file subscriptions; revisit with real quotes.
   tokens, 1 h TTL), change password, session list/revoke, login throttle 5/15 min per email + 20/15 min per IP (see
   rate-limit section). Needs a transactional email provider (Resend/Postmark/Brevo free tiers; Brevo or SES if cost
   matters), SPF/DKIM on the domain, and email templates (ua/ru/en). Prefer Better Auth over hand-rolling this part.
+  **Not built yet** (checked 2026-10-12: only Google sign-in exists; `GOOGLE_CLIENT_ID` is the sole auth env var). Consider a
+  passwordless **email magic link / one-time code** first (no password storage, same mail provider, single-use hashed
+  token, 15 min TTL, same throttles) and add the password on top only if wanted.
+- **Telegram login** (planned; best fit for the UA audience, free, no review): Login Widget → `POST /api/auth/telegram`
+  verifies the payload (HMAC-SHA256 keyed with SHA256(bot token) over the sorted `data-check-string`, `auth_date` ≤ 1 day
+  old). Keys: bot token (from @BotFather, **secret**, env `TELEGRAM_BOT_TOKEN`) + bot username (`TELEGRAM_BOT_USERNAME`,
+  public), domain set via `/setdomain` (needs https, so test through a tunnel). Telegram gives **no email** → identity
+  `(telegram, <numeric id>)` only; `users.email` is nullable or a placeholder, so decide this before the migration, and
+  offer "add email" on `/profile` to enable linking/recovery. Also needs `auth_identities` linking by provider subject
+  (never by unverified email).
+- **Other providers (researched 2026-10-12, not planned yet):** GitHub (client id + secret, code flow), Microsoft
+  (client id, OIDC), Facebook/Meta (app id + secret, needs privacy URL + data-deletion URL + Live app), Apple (Services
+  ID + Team ID + Key ID + `.p8`, $99/yr, secret JWT rotates ≤ 6 months — skip unless a store app ships).
 - **Account deletion with grace period** + data export (JSON); admin-side: list/search users, revoke sessions, disable
   account, per-user feature allow-list for the paid-pilot.
 - **Admin Statistics** — ✅ built (2026-10-07, `app.usage_events`, migration 0038, PostHog HogQL proxy). Open: retention
