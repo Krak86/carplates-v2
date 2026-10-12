@@ -284,3 +284,29 @@ describe('code column header', () => {
     expect(first?.engineCodes).toBeUndefined()
   })
 })
+
+describe('code cleanup', () => {
+  const engines = (file: string, lang: string): WikiEngine[] => parseWikiSpecs(fixture(file), { lang }).engines
+
+  it('drops the trailing hyphen of a full Japanese model code cut at 9 characters', () => {
+    const codes = engines('prado90.en', 'en').flatMap(e => [...(e.chassisCodes ?? []), ...(e.engineCodes ?? [])])
+    expect(codes).toContain('E-VZJ95W')
+    expect(codes).toContain('KD-KZJ95W')
+    expect(codes.some(c => c.endsWith('-'))).toBe(false)
+  })
+
+  it('drops gearbox words from an ambiguous "Code" column', () => {
+    const wikitext = `== Engines ==
+{| class="wikitable"
+! Engine !! Displacement !! Power !! Code
+|-
+| 1.6 petrol || 1600 cc || 110 PS || 5-speed
+|-
+| 1.8 petrol || 1800 cc || 120 PS || 3-phase / FK1
+|}`
+    const list = parseWikiSpecs(wikitext, { lang: 'en' }).engines
+    const codes = list.flatMap(e => e.chassisCodes ?? [])
+    expect(codes).not.toContain('5-speed')
+    expect(codes).not.toContain('3-phase')
+  })
+})

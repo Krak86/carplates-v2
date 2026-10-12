@@ -569,6 +569,7 @@ export {
 } from './mot.js'
 
 export {
+  GEARBOX_WORD,
   WIKI_SPEC_BOUNDS,
   expandWikitext,
   parseEngine,

@@ -81,6 +81,13 @@ describe('splitWikiCodes', () => {
     })
     expect(splitWikiCodes(['1798', 'XV40', 'ACV31'])).toEqual({ engine: [], chassis: ['XV40', 'ACV31'] })
   })
+
+  it('drops gearbox words that old rows still carry', () => {
+    expect(splitWikiCodes(['3-phase', '4-speed', '5-speed', '6-speed', 'XV40'])).toEqual({
+      engine: [],
+      chassis: ['XV40']
+    })
+  })
 })
 
 describe('wikiRowCodes', () => {

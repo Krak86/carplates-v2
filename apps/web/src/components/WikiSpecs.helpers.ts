@@ -1,4 +1,5 @@
 import {
+  GEARBOX_WORD,
   resolveFuelCategories,
   type VehicleFuel,
   type WikiDimensions,
@@ -48,7 +49,7 @@ const ENGINE_FAMILY =
 export function splitWikiCodes(codes: readonly string[] | null | undefined): { engine: string[]; chassis: string[] } {
   const out: { engine: string[]; chassis: string[] } = { engine: [], chassis: [] }
   for (const code of codes ?? []) {
-    if (/^\d+$/.test(code)) continue
+    if (/^\d+$/.test(code) || GEARBOX_WORD.test(code)) continue
     out[/^[A-Z]{1,4}\d{1,3}$/.test(code) && !ENGINE_FAMILY.test(code) ? 'chassis' : 'engine'].push(code)
   }
   return out

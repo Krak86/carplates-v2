@@ -1,0 +1,12 @@
+== Second generation (J90; 1996) ==
+Representative Japanese-market specifications at launch were as follows.
+
+{| class="wikitable"
+! Grade !! Model code !! Engine !! Displacement !! Maximum output !! Kerb weight
+|-
+| 5-door TZ || E-VZJ95W-GKPGK || 5VZ-FE V6 DOHC || {{cvt|3378|cc|L|1|order=flip}} || {{cvt|185|PS|kW PS hp|0|order=out}} at 4,800 rpm || {{cvt|1890|kg|lb|0}}
+|-
+| 5-door TZ || KD-KZJ95W-GKMGK || 1KZ-TE I4 turbo || {{cvt|2982|cc|L|1|order=flip}} || {{cvt|140|PS|kW PS hp|0|order=out}} at 3,600 rpm || {{cvt|1960|kg|lb|0}}
+|-
+| 3-door RZ || E-VZJ90W-GJMGK || 5VZ-FE V6 DOHC || {{cvt|3378|cc|L|1|order=flip}} || {{cvt|185|PS|kW PS hp|0|order=out}} at 4,800 rpm || {{cvt|1740|kg|lb|0}}
+|}

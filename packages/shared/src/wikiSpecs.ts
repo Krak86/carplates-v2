@@ -744,6 +744,9 @@ function cellPower(lines: string[]): { kw: number | null; max: number | null } {
   return { kw: lo, max: hi }
 }
 
+/** Gearbox / phase words (`5-speed`, `3-phase`) a loose "Code" column carries; not codes of any kind. */
+export const GEARBOX_WORD = /^\d-(?:speed|phase)$/i
+
 /** Codes such as `FK1`, `FB7` out of "FK1 (Hatchback) / FB7 (Sedan, Europe)"; the parenthesised words are the note. */
 function chassisOf(lines: string[], engine = false): { codes: string[]; note: string } {
   const notes: string[] = []
@@ -754,8 +757,16 @@ function chassisOf(lines: string[], engine = false): { codes: string[]; note: st
     // already said what the cell is.
     const spaced = engine ? /^\s*([A-Z]{1,3} \d{2,4}[A-Z0-9-]*)(?![\w-])/.exec(part) : null
     const m = spaced ?? /^\s*([A-Z0-9][A-Za-z0-9-]{1,9})\b\s*(?:\(([^)]*)\))?/.exec(part)
-    if (m && !/^\d+$/.test(m[1]!) && (/\d/.test(m[1]!) || (engine && /^[A-Z]{3,}$/.test(m[1]!)))) {
-      codes.push(m[1]!)
+    // A full Japanese model code ("E-VZJ95W-GKPGK") is cut at 10 characters and may end on its hyphen.
+    const code = m?.[1]?.replace(/-+$/, '')
+    if (
+      m &&
+      code &&
+      !/^\d+$/.test(code) &&
+      !GEARBOX_WORD.test(code) &&
+      (/\d/.test(code) || (engine && /^[A-Z]{3,}$/.test(code)))
+    ) {
+      codes.push(code)
       if (m[2]) notes.push(m[2])
     }
   }
