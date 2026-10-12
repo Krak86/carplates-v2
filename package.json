@@ -104,6 +104,7 @@
     "ingest:generations:csv": "pnpm --filter @carplates/scripts ingest:generations:csv",
     "ingest:wikispecs": "pnpm --filter @carplates/scripts ingest:wikispecs",
     "ingest:wikispecs:csv": "pnpm --filter @carplates/scripts ingest:wikispecs:csv",
+    "ingest:wikispecs:curated": "pnpm --filter @carplates/scripts ingest:wikispecs:curated",
     "export:wikispecs:csv": "pnpm --filter @carplates/scripts export:wikispecs:csv",
     "export:generations:csv": "pnpm --filter @carplates/scripts export:generations:csv",
     "ingest:ca-recalls": "pnpm --filter @carplates/scripts ingest:ca-recalls",

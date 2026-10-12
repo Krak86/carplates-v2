@@ -8,10 +8,23 @@ import { z } from 'zod'
 export const wikiSourceSchema = z.object({
   /** Wikipedia edition (`en`, `ru`, `de` …). */
   lang: z.string(),
-  /** Article title in that edition. */
-  title: z.string()
+  /** Article title in that edition; for a curated source the cited site's display name. */
+  title: z.string(),
+  /** Curated rows (`lang` = `CURATED_LANG`): the cited manufacturer page and the ISO date it was read. Never Wikipedia. */
+  url: z.string().nullable().optional(),
+  accessed: z.string().nullable().optional()
 })
 export type WikiSource = z.infer<typeof wikiSourceSchema>
+
+/** `lang` marker of a hand-curated source (manufacturer page + registry data), as opposed to a Wikipedia edition. */
+export const CURATED_LANG = 'curated'
+
+/** Year a curated row starts at: the manufacturer page gives no production years, so it spans every model year. */
+export const CURATED_YEAR_FROM = 1900
+
+export function isCuratedSource(source: Pick<WikiSource, 'lang'> | null | undefined): boolean {
+  return source?.lang === CURATED_LANG
+}
 
 export const wikiEngineSchema = z.object({
   displacementCc: z.number().nullable().optional(),
@@ -71,6 +84,7 @@ export type WikiSpecsMatch = NonNullable<WikiSpecsResponse['match']>
 
 /** Wikipedia article URL for a source (`ua` is the app's code for the `uk` edition). */
 export function wikiSourceUrl(source: WikiSource): string {
+  if (isCuratedSource(source) && source.url) return source.url
   const lang = source.lang === 'ua' ? 'uk' : source.lang
   return `https://${lang}.wikipedia.org/wiki/${encodeURIComponent(source.title.replace(/ /g, '_'))}`
 }

@@ -4,6 +4,7 @@ import {
   type VehicleFuel,
   type WikiDimensions,
   type WikiEngineView,
+  isCuratedSource,
   type WikiSource
 } from '@carplates/shared'
 
@@ -11,8 +12,9 @@ import { ccToLitres, cmToMetres, kgToTonnes, kwToHp } from '@/components/RdwSpec
 
 type Translate = (key: string, options?: Record<string, unknown>) => string
 
-/** "Wikipedia (RU)"; the Ukrainian edition's subdomain is `uk`, shown as the app's `UA`. */
-export function wikiSourceLabel(source: Pick<WikiSource, 'lang'>): string {
+/** "Wikipedia (RU)"; the Ukrainian edition's subdomain is `uk`, shown as the app's `UA`. A curated source is the cited site's own name. */
+export function wikiSourceLabel(source: Pick<WikiSource, 'lang' | 'title'>): string {
+  if (isCuratedSource(source) && source.title) return source.title
   const lang = source.lang === 'uk' ? 'ua' : source.lang
   return `Wikipedia (${lang.toUpperCase()})`
 }

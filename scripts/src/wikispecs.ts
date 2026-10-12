@@ -4,11 +4,13 @@
  * wikitext of its article in en, then the same article in ru / uk / de / the make's home edition (langlinks from the en page),
  * parsed with `parseWikiSpecs` (infobox + body tables) and merged block by block (`wikispecs-merge.ts`). Dimensions are left
  * NULL for makes/models RDW has. Responses are cached in `scripts/.data/wikispecs/` (resumable; `--refresh` fetches again);
- * `wikispecs-overrides.csv` pins an article title for one generation and language.
+ * `wikispecs-overrides.csv` pins an article title for one generation and language. `wikispecs-curated.csv` holds hand-curated
+ * rows (manufacturer page, one citation each) for models no article covers; `--curated` upserts them into both tables.
  *
  *   pnpm ingest:wikispecs                                  # all generations, replaces the rows of each processed model
  *   pnpm ingest:wikispecs -- --limit 20 --dry-run          # first 20 models, print a coverage table, write nothing
  *   pnpm ingest:wikispecs -- --only "honda civic"          # one model (make key + model key words, as in the table)
+ *   pnpm ingest:wikispecs:curated                          # upsert wikispecs-curated.csv (generation row + spec row)
  *   pnpm ingest:wikispecs -- --export-csv ./x.csv.gz       # dump the table
  *   pnpm ingest:wikispecs -- --from-csv ./x.csv.gz         # load a dump, no network
  */
@@ -18,25 +20,35 @@ import { dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { gunzipSync, gzipSync } from 'node:zlib'
 
-import { createDb, modelSpecWiki } from '@carplates/db'
+import { createDb, modelGenerations, modelSpecWiki } from '@carplates/db'
 import type { Db, ModelSpecWikiInsert, WikiEngineJson } from '@carplates/db'
 import { parseWikiSpecs, splitWikiTitle } from '@carplates/shared'
 import { parse as parseCsv } from 'csv-parse/sync'
 import { stringify as stringifyCsv } from 'csv-stringify/sync'
 import { and, eq, sql } from 'drizzle-orm'
 
+import { parseCurated } from './wikispecs-curated-parse.js'
 import { editionTargets, mergeEditions, wikiLangChain, type Edition } from './wikispecs-merge.js'
 
 const USER_AGENT = 'carsua.app-ingest/1.0 (https://carsua.app; rukrak86@gmail.com)'
 const CACHE_DIR = new URL('../.data/wikispecs/', import.meta.url)
 const OVERRIDES = new URL('./wikispecs-overrides.csv', import.meta.url)
+const CURATED = new URL('./wikispecs-curated.csv', import.meta.url)
 const DELAY_MS = 250 // one request in flight, ~4 per second
 const BATCH = 500
 
-type Args = { limit: number; only?: string; dryRun: boolean; refresh: boolean; exportCsv?: string; fromCsv?: string }
+type Args = {
+  limit: number
+  only?: string
+  dryRun: boolean
+  refresh: boolean
+  exportCsv?: string
+  fromCsv?: string
+  curated: boolean
+}
 
 function parseArgs(argv: string[]): Args {
-  const a: Args = { limit: Infinity, dryRun: false, refresh: false }
+  const a: Args = { limit: Infinity, dryRun: false, refresh: false, curated: false }
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i]
     if (arg === '--limit') a.limit = Number(argv[++i])
@@ -45,6 +57,7 @@ function parseArgs(argv: string[]): Args {
     else if (arg === '--refresh') a.refresh = true
     else if (arg === '--export-csv') a.exportCsv = argv[++i]
     else if (arg === '--from-csv') a.fromCsv = argv[++i]
+    else if (arg === '--curated') a.curated = true
   }
   return a
 }
@@ -142,7 +155,7 @@ async function loadOverrides(): Promise<Map<string, Override[]>> {
 async function loadGenerations(db: Db): Promise<Generation[]> {
   const { rows } = (await db.execute(
     sql`SELECT make_key, model_key, make, model, year_from, code, label, wiki_title, wikidata_id, source
-        FROM registry.model_generations ORDER BY make_key, model_key, year_from`
+        FROM registry.model_generations WHERE source <> 'curated' ORDER BY make_key, model_key, year_from`
   )) as unknown as { rows: Record<string, string | number>[] }
   return rows.map(r => ({
     makeKey: String(r.make_key),
@@ -279,7 +292,10 @@ const CSV_COLUMNS = [
   'engines_title',
   'drive_lang',
   'drive_title',
-  'wikidata_id'
+  'wikidata_id',
+  'source_label',
+  'source_url',
+  'source_accessed'
 ] as const
 
 async function exportToCsv(db: Db, path: string): Promise<void> {
@@ -308,7 +324,10 @@ async function exportToCsv(db: Db, path: string): Promise<void> {
       engines_title: r.enginesTitle,
       drive_lang: r.driveLang,
       drive_title: r.driveTitle,
-      wikidata_id: r.wikidataId
+      wikidata_id: r.wikidataId,
+      source_label: r.sourceLabel,
+      source_url: r.sourceUrl,
+      source_accessed: r.sourceAccessed
     })),
     { header: true, columns: [...CSV_COLUMNS] }
   )
@@ -346,7 +365,10 @@ async function importFromCsv(db: Db, path: string): Promise<void> {
     enginesTitle: r.engines_title ?? '',
     driveLang: r.drive_lang ?? '',
     driveTitle: r.drive_title ?? '',
-    wikidataId: r.wikidata_id ?? ''
+    wikidataId: r.wikidata_id ?? '',
+    sourceLabel: r.source_label ?? '',
+    sourceUrl: r.source_url ?? '',
+    sourceAccessed: r.source_accessed ?? ''
   }))
   // A seed is the whole table: replace it.
   await db.transaction(async tx => {
@@ -361,6 +383,30 @@ async function importFromCsv(db: Db, path: string): Promise<void> {
   log(`loaded ${rows.length} row(s) from ${path}`)
 }
 
+/** Upserts the curated CSV: one `model_generations` row (source 'curated') + one `model_spec_wiki` row per model. */
+async function applyCurated(db: Db, dryRun: boolean): Promise<void> {
+  const records = parseCsv(await readFile(CURATED, 'utf8'), { columns: true, skip_empty_lines: true }) as Record<
+    string,
+    string
+  >[]
+  const { rows, dropped } = parseCurated(records)
+  for (const d of dropped) log(`! dropped ${d.key}: ${d.reason}`)
+  if (dryRun) return log(`dry-run: ${rows.length} curated row(s) valid, nothing written`)
+  await db.transaction(async tx => {
+    for (const { spec, ...gen } of rows) {
+      await tx
+        .delete(modelGenerations)
+        .where(and(eq(modelGenerations.makeKey, gen.makeKey), eq(modelGenerations.modelKey, gen.modelKey)))
+      await tx
+        .delete(modelSpecWiki)
+        .where(and(eq(modelSpecWiki.makeKey, gen.makeKey), eq(modelSpecWiki.modelKey, gen.modelKey)))
+      await tx.insert(modelGenerations).values(gen)
+      await tx.insert(modelSpecWiki).values(spec)
+    }
+  })
+  log(`curated: upserted ${rows.length} row(s), dropped ${dropped.length}`)
+}
+
 async function main(): Promise<void> {
   const args = parseArgs(process.argv.slice(2))
   refresh = args.refresh
@@ -368,6 +414,7 @@ async function main(): Promise<void> {
   try {
     if (args.exportCsv) await exportToCsv(db, args.exportCsv)
     else if (args.fromCsv) await importFromCsv(db, args.fromCsv)
+    else if (args.curated) await applyCurated(db, args.dryRun)
     else await run(db, args)
   } finally {
     await close()

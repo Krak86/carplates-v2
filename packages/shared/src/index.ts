@@ -591,6 +591,9 @@ export {
   type WikiTable
 } from './wikiSpecs.js'
 export {
+  CURATED_LANG,
+  CURATED_YEAR_FROM,
+  isCuratedSource,
   wikiDimensionsSchema,
   wikiEngineSchema,
   wikiSourceSchema,

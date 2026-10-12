@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
+import { isCuratedSource } from '@carplates/shared'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router'
@@ -69,7 +70,8 @@ export default function WikiSpecs({ brand, model, year, own }: Props): ReactNode
   const span = generationSpanText({ yearFrom: match.yearFrom, yearTo: match.yearTo ?? null }, t)
   const engines = sortEnginesByFit(match.engines ?? [], own)
   const hasMatch = engines.some(e => engineMatchesCar(e, own))
-  const yearOf = generationYearOf(year, match.yearFrom, match.yearTo)
+  const curated = isCuratedSource(match.enginesSource ?? match.dimensionsSource ?? match.driveSource)
+  const yearOf = curated ? null : generationYearOf(year, match.yearFrom, match.yearTo)
   const dims = match.dimensions
   const dimensionRows = dims
     ? DIMENSION_KEYS.map(key => {
@@ -81,12 +83,16 @@ export default function WikiSpecs({ brand, model, year, own }: Props): ReactNode
   const driveItems = driveRows(match.layout, match.transmission, t)
 
   const info = [
-    generation ? t('wikispec.info.lead', { name, generation, span }) : t('wikispec.info.leadModel', { name, span }),
+    curated
+      ? t('wikispec.info.leadCurated', { name })
+      : generation
+        ? t('wikispec.info.lead', { name, generation, span })
+        : t('wikispec.info.leadModel', { name, span }),
     t('wikispec.info.catalogue'),
     own && t('wikispec.info.match'),
     match.crossMake && t('rdw.info.crossMake', { name }),
     dims && hasDimensions(dims) && t('wikispec.info.gap'),
-    t('wikispec.info.credit')
+    t(curated ? 'wikispec.info.creditCurated' : 'wikispec.info.credit')
   ]
     .filter(Boolean)
     .join('\n')
@@ -102,7 +108,7 @@ export default function WikiSpecs({ brand, model, year, own }: Props): ReactNode
         }
         info={
           <InfoPopover label={t('vin.info.about', { field: t('wikispec.title') })} title={t('wikispec.title')}>
-            <InfoText text={info} highlight={[name, 'Wikipedia']} />
+            <InfoText text={info} highlight={[name, curated ? 'source' : 'Wikipedia']} />
           </InfoPopover>
         }
         actions={<ShareButton section="engines" label={t('share.button', { section: t('wikispec.title') })} />}
@@ -121,9 +127,11 @@ export default function WikiSpecs({ brand, model, year, own }: Props): ReactNode
       >
         <div className="overflow-hidden">
           <p className="mt-2 text-xs text-[var(--color-muted)]">
-            {generation
-              ? t('wikispec.footnote', { name, generation, span })
-              : t('wikispec.footnoteModel', { name, span })}
+            {curated
+              ? t('wikispec.footnoteCurated', { name })
+              : generation
+                ? t('wikispec.footnote', { name, generation, span })
+                : t('wikispec.footnoteModel', { name, span })}
           </p>
 
           {yearOf && (

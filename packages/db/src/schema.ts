@@ -973,7 +973,11 @@ export const modelSpecWiki = registry.table(
     enginesTitle: text('engines_title').notNull().default(''),
     driveLang: text('drive_lang').notNull().default(''),
     driveTitle: text('drive_title').notNull().default(''),
-    wikidataId: text('wikidata_id').notNull().default('')
+    wikidataId: text('wikidata_id').notNull().default(''),
+    /** Curated rows only (`*_lang = 'curated'`, migration 0065): the one cited manufacturer page. '' = a Wikipedia row. */
+    sourceLabel: text('source_label').notNull().default(''),
+    sourceUrl: text('source_url').notNull().default(''),
+    sourceAccessed: text('source_accessed').notNull().default('')
   },
   t => [primaryKey({ columns: [t.makeKey, t.modelKey, t.yearFrom] })]
 )

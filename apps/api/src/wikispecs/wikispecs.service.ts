@@ -1,14 +1,24 @@
 import { Inject, Injectable } from '@nestjs/common'
 import { modelSpecWiki } from '@carplates/db'
-import { pickGeneration } from '@carplates/shared'
+import type { ModelSpecWikiRow } from '@carplates/db'
+import { CURATED_LANG, pickGeneration } from '@carplates/shared'
 import type { WikiSource, WikiSpecsResponse } from '@carplates/shared'
 import { and, eq } from 'drizzle-orm'
 
 import { DbService } from '../db/db.service.js'
 import { GenerationsService } from '../generations/generations.service.js'
 
-/** A block's source, or null when the ingest stored no edition for it. */
-function source(lang: string, title: string): WikiSource | null {
+/** A block's source, or null when the ingest stored no edition for it. A curated block carries the row's one citation. */
+function source(
+  lang: string,
+  title: string,
+  cite: Pick<ModelSpecWikiRow, 'sourceLabel' | 'sourceUrl' | 'sourceAccessed'>
+): WikiSource | null {
+  if (lang === CURATED_LANG) {
+    return cite.sourceUrl
+      ? { lang, title: cite.sourceLabel, url: cite.sourceUrl, accessed: cite.sourceAccessed || null }
+      : null
+  }
   return lang && title ? { lang, title } : null
 }
 
@@ -69,12 +79,12 @@ export class WikispecsService {
         yearFrom: generation.yearFrom,
         yearTo: generation.yearTo,
         dimensions: hasDimensions ? dimensions : null,
-        dimensionsSource: hasDimensions ? source(r.srcLang, r.srcTitle) : null,
+        dimensionsSource: hasDimensions ? source(r.srcLang, r.srcTitle, r) : null,
         engines: r.engines,
-        enginesSource: source(r.enginesLang, r.enginesTitle),
+        enginesSource: source(r.enginesLang, r.enginesTitle, r),
         layout: r.layout,
         transmission: r.transmission,
-        driveSource: source(r.driveLang, r.driveTitle)
+        driveSource: source(r.driveLang, r.driveTitle, r)
       }
     }
   }

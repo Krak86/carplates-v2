@@ -28,8 +28,11 @@ const t = (key: string, options?: Record<string, unknown>): string => UNITS[key]
 
 describe('wikiSourceLabel', () => {
   it('upper-cases the edition and maps uk to UA', () => {
-    expect(wikiSourceLabel({ lang: 'ru' })).toBe('Wikipedia (RU)')
-    expect(wikiSourceLabel({ lang: 'uk' })).toBe('Wikipedia (UA)')
+    expect(wikiSourceLabel({ lang: 'ru', title: 'x' })).toBe('Wikipedia (RU)')
+    expect(wikiSourceLabel({ lang: 'uk', title: 'x' })).toBe('Wikipedia (UA)')
+  })
+  it('names the cited site for a curated source, never Wikipedia', () => {
+    expect(wikiSourceLabel({ lang: 'curated', title: 'Bajaj Auto' })).toBe('Bajaj Auto')
   })
 })
 

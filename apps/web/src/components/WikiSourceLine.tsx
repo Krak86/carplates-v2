@@ -8,7 +8,7 @@ type Props = {
   source: WikiSource | null | undefined
 }
 
-/** "Source: Wikipedia (RU)" link to the article one block's figures were read from; nothing without a source. */
+/** "Source: Wikipedia (RU)" link to the article one block's figures were read from; a curated row names its manufacturer page and access date instead. Nothing without a source. */
 export default function WikiSourceLine({ source }: Props): ReactNode {
   const { t } = useTranslation()
   if (!source) return null
@@ -24,6 +24,7 @@ export default function WikiSourceLine({ source }: Props): ReactNode {
       >
         {wikiSourceLabel(source)}
       </a>
+      {source.accessed && ` · ${t('wikispec.accessed', { date: source.accessed })}`}
     </p>
   )
 }
