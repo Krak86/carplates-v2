@@ -5,7 +5,9 @@
  * project only) — scenery is drawn in ./sprites.ts, cars come from ./vehicle-assets.ts (Kenney renders).
  */
 import {
+  HORN_HZ,
   QUALITY_SIZE,
+  SIRENS,
   THEMES,
   TOP_SPEED_KMH,
   TRAFFIC_COUNT,
@@ -39,10 +41,12 @@ export type Racer = {
   setSound: (on: boolean) => void
   /** Drives the same controls as the keyboard (the on-screen buttons); omitted flags keep their state. */
   setInput: (input: Partial<RacerInput>) => void
+  /** The current vehicle's siren (emergency bodies only; a no-op for the rest). Independent of the sound toggle. */
+  setSiren: (on: boolean) => void
   destroy: () => void
 }
 
-export type RacerInput = { left: boolean; right: boolean; faster: boolean; slower: boolean }
+export type RacerInput = { left: boolean; right: boolean; faster: boolean; slower: boolean; horn: boolean }
 
 const BEST_KEY = 'carplates.racer.best'
 
@@ -196,6 +200,7 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
   let keyRight = false
   let keyFaster = false
   let keySlower = false
+  let keyHorn = false
   let cruise = DEFAULT_CRUISE_KMH // auto mode: the chosen cruise speed, km/h
   let braking = false // brake lights on
 
@@ -774,7 +779,14 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
     ArrowUp: handleFaster,
     KeyW: handleFaster,
     ArrowDown: handleSlower,
-    KeyS: handleSlower
+    KeyS: handleSlower,
+    KeyH: d => handleHorn(d)
+  }
+
+  function handleHorn(down: boolean): void {
+    if (down === keyHorn) return
+    keyHorn = down
+    sound.setHorn(down, HORN_HZ[cfg.body])
   }
 
   function handleKey(e: KeyboardEvent): void {
@@ -786,6 +798,7 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
 
   function handleBlur(): void {
     keyLeft = keyRight = keyFaster = keySlower = false
+    handleHorn(false)
   }
 
   function restart(): void {
@@ -849,7 +862,11 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
     },
     restart,
     setSound: sound.setEnabled,
+    setSiren(on): void {
+      sound.setSiren(on, SIRENS[cfg.body])
+    },
     setInput(input): void {
+      if (input.horn !== undefined) handleHorn(input.horn)
       if (input.left !== undefined) keyLeft = input.left
       if (input.right !== undefined) keyRight = input.right
       if (input.faster !== undefined && input.faster !== keyFaster) handleFaster(input.faster, false)

@@ -21,7 +21,7 @@ type Engine = typeof import('@/lib/racer/engine')
  * only exists while playing; the racer is created when both the chunk and the canvas are there, applies setting
  * changes live, and is destroyed (RAF + key listeners) when the modal closes.
  */
-export function useRaceGameActions(config: RacerConfig, sound: boolean) {
+export function useRaceGameActions(config: RacerConfig, sound: boolean, siren: boolean) {
   // Once the chunk has been fetched on this device it is in the HTTP cache — the size warning would be noise.
   const [wasLoaded] = useState(readLoaded)
   const [phase, setPhase] = useState<Phase>('intro')
@@ -31,6 +31,7 @@ export function useRaceGameActions(config: RacerConfig, sound: boolean) {
   const racerRef = useRef<Racer | null>(null)
   const configRef = useRef(config)
   const soundRef = useRef(sound)
+  const sirenRef = useRef(siren)
 
   useEffect(() => {
     configRef.current = config
@@ -43,9 +44,15 @@ export function useRaceGameActions(config: RacerConfig, sound: boolean) {
   }, [sound])
 
   useEffect(() => {
+    sirenRef.current = siren
+    racerRef.current?.setSiren(siren)
+  }, [siren])
+
+  useEffect(() => {
     if (!engine || !canvas) return
     const racer = engine.createRacer(canvas, configRef.current, setHud)
     racer.setSound(soundRef.current)
+    racer.setSiren(sirenRef.current)
     racerRef.current = racer
     return () => {
       racer.destroy()

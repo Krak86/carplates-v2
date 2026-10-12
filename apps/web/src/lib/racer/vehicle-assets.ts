@@ -19,6 +19,9 @@ type Sprite = { img: HTMLCanvasElement; w: number; h: number; heavy?: boolean; b
 /** Logical sprite units per pixel: sets the on-road size of a model (the sedan lands at the old 80 units). */
 const LOGICAL_PER_PX = 0.26
 
+/** On-road size multiplier for models whose render is bigger than their category suits (the fire engine hid the traffic behind it). */
+const SIZE_SCALE: Readonly<Record<string, number>> = { firetruck: 0.75 }
+
 /** Body type → rendered model (Kenney Car Kit, plus the CC-BY Sketchfab models — see docs/plan-done.md "Racer art pass"). */
 export const BODY_MODEL: Readonly<Record<CarBody, string>> = {
   sedan: 'sedan-toyama',
@@ -49,7 +52,11 @@ const CUSTOM_RENDERED: readonly string[] = [
   'sedan-toyama',
   'van-gmc',
   'suv-hummer',
-  'pickup-silv'
+  'pickup-silv',
+  'taxi',
+  'police',
+  'ambulance',
+  'firetruck'
 ]
 
 const URLS = import.meta.glob<string>('./assets/*.webp', { eager: true, query: '?url', import: 'default' })
@@ -292,8 +299,8 @@ export function vehicleSprite(
 
   return {
     img: out,
-    w: base.width * LOGICAL_PER_PX,
-    h: base.height * LOGICAL_PER_PX,
+    w: base.width * LOGICAL_PER_PX * (SIZE_SCALE[model] ?? 1),
+    h: base.height * LOGICAL_PER_PX * (SIZE_SCALE[model] ?? 1),
     heavy,
     brake: player ? brakeOverlay(key, base) : undefined
   }

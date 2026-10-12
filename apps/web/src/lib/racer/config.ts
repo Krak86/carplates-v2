@@ -82,6 +82,34 @@ export const TOP_SPEED_KMH: Readonly<Record<CarBody, number>> = {
   garbage: 70,
   bus: 80
 }
+
+/** A synthesised siren: the pitch swings around `centre` by ±`depth` Hz, `rate` times a second (sine = wail, square = hi-lo). */
+export type SirenTone = { centre: number; depth: number; rate: number; shape: 'sine' | 'square' }
+
+/** Emergency vehicles only: a body is "siren-capable" when it has an entry here. */
+export const SIRENS: Readonly<Partial<Record<CarBody, SirenTone>>> = {
+  police: { centre: 1000, depth: 450, rate: 0.7, shape: 'sine' },
+  ambulance: { centre: 865, depth: 95, rate: 1, shape: 'square' },
+  firetruck: { centre: 650, depth: 280, rate: 0.35, shape: 'sine' }
+}
+
+/** Horn pitch (Hz of the lower of its two notes) per category: bikes squeak, trucks and buses bellow. */
+export const HORN_HZ: Readonly<Record<CarBody, number>> = {
+  sedan: 420,
+  hatch: 460,
+  suv: 380,
+  sport: 440,
+  pickup: 360,
+  van: 350,
+  moto: 620,
+  taxi: 400,
+  police: 400,
+  ambulance: 340,
+  firetruck: 220,
+  garbage: 200,
+  bus: 240
+}
+
 /** Manual (gas pedal) is the default; auto-forward is opt-in: the car keeps rolling, ←/→ steer, ↑/↓ step the cruise speed. */
 export const DEFAULT_AUTO = false
 export const DEFAULT_LANES: Lanes = 3

@@ -3,10 +3,11 @@ import type { MouseEvent, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import RaceGameSettings from '@/components/game/RaceGameSettings'
+import RaceHornButton from '@/components/game/RaceHornButton'
 import RaceTouchControls from '@/components/game/RaceTouchControls'
 import { useRaceGameActions } from '@/components/game/use-race-game-actions'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
-import { RACER_SIZE_KB, type CarBody, type RacerConfig } from '@/lib/racer/config'
+import { RACER_SIZE_KB, SIRENS, type CarBody, type RacerConfig } from '@/lib/racer/config'
 
 type Props = {
   config: RacerConfig
@@ -19,9 +20,14 @@ type Props = {
 export default function RaceGameStage({ config, onChange, onPickBody }: Props): ReactNode {
   const { t } = useTranslation()
   const [sound, setSound] = useState(false)
+  // the body whose siren is on: switching to another car silences it, and it stays off if the viewer comes back
+  const [sirenBody, setSirenBody] = useState<CarBody | null>(null)
+  const hasSiren = !!SIRENS[config.body]
+  const siren = sirenBody === config.body
   const { phase, hud, wasLoaded, handleStart, handleRestart, handleInput, setCanvas } = useRaceGameActions(
     config,
-    sound
+    sound,
+    siren
   )
   const isTouch = useMediaQuery('(pointer: coarse)')
   const isPortrait = useMediaQuery('(orientation: portrait)')
@@ -42,6 +48,22 @@ export default function RaceGameStage({ config, onChange, onPickBody }: Props): 
     setSound(on => !on)
     e.currentTarget.blur() // keys must keep steering the car
   }
+
+  const handleToggleSiren = (e?: MouseEvent<HTMLButtonElement>): void => {
+    setSirenBody(siren ? null : config.body)
+    e?.currentTarget.blur()
+  }
+
+  // E toggles the siren (H is the horn, handled by the engine)
+  useEffect(() => {
+    if (!hasSiren) return
+    const handleKey = (e: KeyboardEvent): void => {
+      if (e.code !== 'KeyE' || e.repeat || e.ctrlKey || e.metaKey || e.altKey) return
+      setSirenBody(body => (body === config.body ? null : config.body))
+    }
+    window.addEventListener('keydown', handleKey)
+    return () => window.removeEventListener('keydown', handleKey)
+  }, [hasSiren, config.body])
 
   const handleToggleFullscreen = (e: MouseEvent<HTMLButtonElement>): void => {
     e.currentTarget.blur() // keys must keep steering the car
@@ -94,7 +116,12 @@ export default function RaceGameStage({ config, onChange, onPickBody }: Props): 
             }
           />
 
-          {isTouch && <RaceTouchControls onInput={handleInput} />}
+          {isTouch && (
+            <RaceTouchControls
+              onInput={handleInput}
+              siren={hasSiren ? { on: siren, onToggle: handleToggleSiren } : undefined}
+            />
+          )}
 
           {pseudoFullscreen && (
             <button
@@ -137,6 +164,17 @@ export default function RaceGameStage({ config, onChange, onPickBody }: Props): 
 
         <div className="mt-2 flex items-center justify-between gap-3 text-sm text-[var(--color-muted)]">
           <span>{isTouch ? t('race.controlsTouch') : config.auto ? t('race.controlsAuto') : t('race.controls')}</span>
+          {hasSiren && (
+            <button
+              type="button"
+              onClick={handleToggleSiren}
+              aria-pressed={siren}
+              className="shrink-0 cursor-pointer rounded-full border border-[var(--color-border)] px-3 py-0.5 hover:border-[var(--color-primary)]"
+            >
+              {siren ? t('race.sirenOn') : t('race.sirenOff')}
+            </button>
+          )}
+          <RaceHornButton onHold={down => handleInput({ horn: down })} />
           <button
             type="button"
             onClick={handleToggleSound}
