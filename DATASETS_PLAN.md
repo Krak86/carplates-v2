@@ -751,6 +751,8 @@ What the pre-2018 layout needs (a separate parser path, **not loaded without the
 - `location_id` is wrong before 2022 (not used).
 
 **Stage G2 — MOT 2024 + 2025 (decided 2026-10-12; step 1 = 2025 ✅ and step 2 = 2024 ✅, both DONE 2026-10-12 and merged into the DB — stage complete).** Scope = add the 2024 and 2025 years only; **pre-2018 is split out as Stage G3 (parked, below)**.
+
+**Follow-up A (2026-10-12) — 2021–23 counting verified, gap closed.** Dry-ran 2022 and 2023 in window mode (`RECENT_TESTS`) and in exact mode (new `--exact` flag on `ingest:mot` forces `MotFiles.scattered` for single-file years): per-year totals (tests 34,203,099 / 34,640,366; fails; advisories; dangerous), all 13 group fail/advisory counts and every model×band row (16,345 / 20,614) are **identical (0.000 %)**, and the window run never raised `revisitedBeyondWindow` / `interleavedTests`. The old 32.8M `revisitedBeyondWindow` therefore did not come from 2022 or 2023 (2021, multi-part, is exact). No UI rate moves; no rebuild needed.
 **Start rule: nothing is built until the owner has downloaded the files below and gives the agent the folder path.** At the start of G2 the agent re-prints this list, then waits for the path.
 
 Files to download (all `https://edh-dvsa-data-gov-uk-files-prod.s3.eu-west-1.amazonaws.com/<name>`, OGL v3; ≈ 18.3 GB of ZIPs; the host ignores range requests, so use a normal browser/`curl -O` download, resume is not available):

@@ -4,6 +4,7 @@
  *
  *   pnpm ingest:mot -- --dir C:/Users/me/Downloads/UK_MOT      # aggregate every year found + load the tables
  *   pnpm ingest:mot -- --dir … --years 2022,2023               # only these years
+ *   pnpm ingest:mot -- --dir … --exact                         # exact per-test counting for every year (default: only multi-part item ZIPs)
  *   pnpm ingest:mot -- --dir … --dry-run                       # aggregate, print sizes, write nothing to the DB
  *   pnpm ingest:mot -- --dir … --reuse-aggregate               # skip the ZIP pass: load the last cached aggregate
  *   pnpm ingest:mot -- --dir … --refresh-census                # redo the per-year make/model census (cached otherwise)
@@ -43,13 +44,14 @@ const { values } = parseArgs({
     'refresh-census': { type: 'boolean', default: false },
     'reuse-aggregate': { type: 'boolean', default: false },
     merge: { type: 'boolean', default: false },
+    exact: { type: 'boolean', default: false },
     'from-csv': { type: 'string' },
     'export-csv': { type: 'string' }
   }
 })
 
 /** Year files present in the folder (both the result and the item ZIP must exist). */
-function findFiles(dir: string, only: number[] | null): MotFiles[] {
+function findFiles(dir: string, only: number[] | null, exact = false): MotFiles[] {
   const names = new Set(readdirSync(dir))
   const files: MotFiles[] = []
   for (const name of names) {
@@ -64,7 +66,12 @@ function findFiles(dir: string, only: number[] | null): MotFiles[] {
       continue
     }
     const itemPath = join(dir, item)
-    files.push({ year, result: join(dir, name), item: itemPath, scattered: csvPartCount(itemPath, 'test_item') > 1 })
+    files.push({
+      year,
+      result: join(dir, name),
+      item: itemPath,
+      scattered: exact || csvPartCount(itemPath, 'test_item') > 1
+    })
   }
   return files.sort((a, b) => a.year - b.year)
 }
@@ -72,8 +79,8 @@ function findFiles(dir: string, only: number[] | null): MotFiles[] {
 /** Years before this use the pre-May-2018 layout / straddle the EU directive (decision 0 in DATASETS_PLAN.md). */
 const MIN_SUPPORTED_YEAR = 2019
 
-async function aggregate(dir: string, only: number[] | null, refreshCensus: boolean): Promise<MotData> {
-  const all = findFiles(dir, only)
+async function aggregate(dir: string, only: number[] | null, refreshCensus: boolean, exact: boolean): Promise<MotData> {
+  const all = findFiles(dir, only, exact)
   const files = all.filter(f => f.year >= MIN_SUPPORTED_YEAR)
   for (const f of all.filter(f => f.year < MIN_SUPPORTED_YEAR))
     log(`skip ${f.year}: before ${MIN_SUPPORTED_YEAR} (old layout)`)
@@ -142,7 +149,7 @@ async function main(): Promise<void> {
     log(`reusing ${aggPath}`)
   } else {
     const only = values.years ? values.years.split(',').map(Number) : null
-    rows = await aggregate(dir, only, values['refresh-census']!)
+    rows = await aggregate(dir, only, values['refresh-census']!, values.exact!)
     await mkdir(CACHE_DIR, { recursive: true })
     await writeFile(aggPath, JSON.stringify(rows))
     log(`aggregate cached in ${aggPath}`)
