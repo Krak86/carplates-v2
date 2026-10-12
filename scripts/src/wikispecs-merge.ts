@@ -92,8 +92,11 @@ const engineJson = (e: WikiSpecs['engines'][number]): WikiEngineJson => ({
 
 const whole = (m: WikiSpecs['lengthMm']): number | null => (m ? Math.round(m.value) : null)
 
-/** `make|model|yearFrom` whose infobox "weight" is a gross figure (Volvo B7R: 18,000 kg for a ~12 m coach), not kerb weight. */
-const GROSS_WEIGHT_KEYS: ReadonlySet<string> = new Set(['volvo|b7r|1997'])
+/**
+ * `make|model|yearFrom` whose infobox "weight" is a gross figure, not kerb weight
+ * (Volvo B7R: 18,000 kg for a ~12 m coach; BAZ-2215: 3,980 kg, the registry's gross for the van).
+ */
+const GROSS_WEIGHT_KEYS: ReadonlySet<string> = new Set(['volvo|b7r|1997', 'baz|2215|2003'])
 
 /**
  * One row from the editions of a generation (in chain order), or null when no edition has anything.

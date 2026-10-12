@@ -75,6 +75,12 @@ describe('mergeEditions', () => {
     expect(row).toMatchObject({ lengthMm: 11500, kerbKg: null })
   })
 
+  it('drops the BAZ-2215 gross weight (3,980 kg) but keeps the other dimensions', () => {
+    const baz = { makeKey: 'baz', modelKey: '2215', yearFrom: 2003, wikidataId: 'Q3' }
+    const row = mergeEditions(baz, [ed('en', { lengthMm: measure(5680), kerbKg: measure(3980) })], false)
+    expect(row).toMatchObject({ lengthMm: 5680, kerbKg: null })
+  })
+
   it('returns null when no edition has anything', () => {
     expect(mergeEditions(KEY, [ed('en', {}), ed('ru', {})], false)).toBeNull()
     expect(mergeEditions(KEY, [ed('en', { lengthMm: measure(4300) })], true)).toBeNull()
