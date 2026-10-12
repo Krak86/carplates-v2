@@ -1,6 +1,6 @@
 # DATASETS_PLAN.md
 
-> **State on 2026-10-12.** Built: A, B, C–C4, D, E, F, G, H (cut down), I, K, M. Open: **J** (other countries, research only), **Z** (autoevolution, waits for the public app), the Euro NCAP wording action before any public deploy. Stage K follow-ups and the stage M alias leftovers are finished (`docs/plan-done.md` "Stage K follow-ups"). Still optional: generation rows for bikes and buses, browser-check of the card-bundle seeding. The "Resume here" text below is from 2026-10-09 and older than this line.
+> **State on 2026-10-12.** Built: A, B, C–C4, D, E, F, G, H (cut down), I, K, M. Open: **J** (other countries, research only), **Z** (autoevolution, waits for the public app), the Euro NCAP wording action before any public deploy. Stage K follow-ups and the stage M alias leftovers are finished (`docs/plan-done.md` "Stage K follow-ups"). Browser-checked 2026-10-12 (СЕ9990СВ `?section=engines`, dark: the section renders from `/api/card`, no separate `/api/wikispecs` request). Optional leftover: generation rows for bikes and buses — measured, low yield (~28 % of motorcycle rows, ~15–20 % of bus rows at best), full pass not recommended; see "Leftover: generation rows for motorcycles and buses" under Stage K. The "Resume here" text below is from 2026-10-09 and older than this line.
 >
 > **Resume here (2026-10-09).** Stages A (+A2 plate-region fix, +A3 alias chips), **B** (motorcycle/truck/bus matching), **C** (RDW specs, C2, C3) **C4** (estimated value) **D** (RDW recalls) and **E** (Open EV Data) are DONE;
 > stages M1–M3 and **F** (NHTSA recalls + complaints) are built; see "Staged plan" near the end. **Rule: do not start a stage until the owner says "go stage X".**
@@ -1072,6 +1072,19 @@ wikidata_id, revid)` (keyed on the stage I generation row; `revid` makes the cre
     - ~~The probe's `--extra` set has no `model_generations` rows~~ — stale: `generations-titles.csv` pins VAZ / Lada / ZAZ / Daewoo / Chery / Geely / BYD, and the seed has rows for them (checked 2026-10-12). Bikes and buses still have none.
   - **Risks to watch:** mixed-market rows (Asia vs Europe chassis codes) — prefer the main-market row or keep all with a market note; ru main articles hold per-generation blocks, use only on a code match;
     vandalised / stale text (bounds + `revid` pin); registry model strings that do not match (depends on stage M aliases).
+  - **Leftover: generation rows for motorcycles and buses — measured 2026-10-12 (read-only on the real DB, nothing stored); recommendation: do not build the full pass.**
+    - **Motorcycles** (713,435 rows, 9,099 brand+model pairs): top 50 pairs = 26 % of rows, top 300 = 55 %, the long tail is 45 %. ~55 % of rows are clone / Ukrainian-market brands with code models
+      (`MT125-8`, `LF175-2E`) that have no Wikipedia article: Musstang 9.3 %, Spark 7.5 %, Lifan 7.1 %, Viper 6.7 %, Geon 5.6 %, Forte 4.5 %, Shineray 3.6 %, Kovi 2.9 %, Loncin 2.8 %, Tekken 1.6 %. Only Honda (9.0 %),
+      Yamaha (6.4 %), Suzuki (4.3 %), Kawasaki (3.0 %), Bajaj (3.7 %), BMW (2.2 %) (+ Jawa) are likely to have articles = **~28 % of rows at best**. `model_generations` has no motorcycle rows (its Honda 34 / Suzuki 15 /
+      Yamaha 2 rows are car models). Registry `brand` is noisy (`"БАЗ  А079.14"` = brand + model in one field), so matching needs the same alias work as stage M.
+    - **Buses** (434,468 rows, 5,422 pairs): Mercedes-Benz 27.4 % (mostly Sprinter vans registered as buses), БАЗ 11.7 %, БОГДАН 9.3 %, РУТА 7.3 %, Volkswagen 5.3 % (LT / Crafter), ПАЗ 4.8 %, ГАЗ 3.4 %, Neoplan 2.4 %, Ataman 2.4 %, MAN 2.3 %,
+      I-VAN 2.2 %, Iveco 2.0 %. Realistic = Mercedes / VW vans (car-style rows likely exist already) + Neoplan / MAN / Iveco ≈ **15–20 % of rows**; the Ukrainian makes (Bogdan, BAZ, Ruta, PAZ, Ataman) have little on Wikipedia.
+    - **UI effect if built (scoped pass: Honda, Yamaha, Suzuki, Kawasaki, BMW, Bajaj, Jawa + Mercedes / Neoplan / MAN buses):** a generation chip and the "Generation specs" section (engine cards, layout / transmission, dimensions only
+      where RDW has no row) for ~28 % of motorcycle and ~15–20 % of bus rows. **Photos are unchanged** — they come from the separate `wiki_image` pipeline (`wikiAliases.ts`), which already works for any vehicle kind; code-model clones
+      likely get no photo, and that would be its own task (aliases or a brand-level fallback image). Today a bike / bus page without a generation row simply hides the chip and the section; RDW "Specs" still shows where it has a row (~18 % bikes, ~33 % buses).
+    - **Unknowns (unchecked):** whether the section fields fit bikes (seat height, dry weight, final drive vs wheelbase / kerb mass; `{{Infobox motorcycle}}` mapping), and whether `GenerationsService.locate()` assumes cars.
+    - **If done anyway:** scoped pass only — ~15 pinned titles in `generations-titles.csv`, `ingest:generations`, `ingest:wikispecs`, re-export both seeds (`model-generations.csv.gz`, `wikispecs.csv.gz`), check the motorcycle infobox mapping,
+      browser-check one bike and one bus. Ask the owner before running on the real-data DB. Estimate 0.5–1 session. Full pass (long tail): not worth it.
 
 Not planned (decided): VehiclesDB per-country deciles, derived body-type label, vPIC offline dump, Eurostat. (Wikidata moved into stage I; other countries into stage J.)
 
