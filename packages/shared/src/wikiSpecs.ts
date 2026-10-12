@@ -1096,8 +1096,12 @@ export function tableSpecs(table: WikiTable, yearFrom?: number): TableSpecs {
   const columns: EngineParts[] = Array.from({ length: width }, emptyParts)
   const namedRows = labelled.some(r => r.kind === 'engineCode' || r.kind === 'chassisCode')
   for (const c of columns) c.named = namedRows
+  // Several rated-power rows by standard (GOST / DIN / SAE, "Lada 2101"): the DIN net rating is the one to take.
+  const powerRows = labelled.filter(r => r.kind === 'power')
+  const dinOnly = powerRows.length > 1 && powerRows.some(r => /\bDIN\b/.test(r.label))
   for (const { kind, label, values } of labelled) {
     if (!kind) continue
+    if (kind === 'power' && dinOnly && !/\bDIN\b/.test(label)) continue
     if (isDimKind(kind)) {
       for (const v of values) addDim(out.dims, kind, v)
       continue

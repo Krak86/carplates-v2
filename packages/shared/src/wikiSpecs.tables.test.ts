@@ -360,3 +360,29 @@ describe('code cleanup', () => {
     expect(codes).not.toContain('3-phase')
   })
 })
+
+describe('rated power by standard (column per engine)', () => {
+  it('takes the DIN row when GOST / DIN / SAE rows coexist (Lada 2101)', () => {
+    const wikitext = `== Engines ==
+{| class="wikitable"
+! Engine !! VAZ-2101 !! VAZ-21011
+|-
+! Displacement
+| 1198 cm3 || 1294 cm3
+|-
+! Rated power (GOST–14846)
+| 46 kW at 5600 min-1 || 51 kW at 5600 min-1
+|-
+! Rated power (DIN 70020)
+| 44 kW at 5600 min-1 || 48 kW at 5600 min-1
+|-
+! Rated power (SAE J1349)
+| 48 kW at 5600 min-1 ||
+|}`
+    const list = parseWikiSpecs(wikitext, { lang: 'en' }).engines
+    expect(list.map(e => [e.powerKw, e.powerKwMax ?? null])).toEqual([
+      [44, null],
+      [48, null]
+    ])
+  })
+})
