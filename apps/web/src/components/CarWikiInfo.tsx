@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useSearchParams } from 'react-router'
 import { wikiDomain } from '@carplates/shared'
 
+import GoogleTranslateLink from '@/components/GoogleTranslateLink'
 import SectionInfo from '@/components/SectionInfo'
 import SectionHeader from '@/components/SectionHeader'
 import ShareButton from '@/components/ShareButton'
@@ -114,7 +115,11 @@ export default function CarWikiInfo({ brand, model, year }: Props): ReactNode {
                     </button>
                   </div>
                 )}
-                {data.extract && textVisible && <p className="text-base whitespace-pre-line">{data.extract}</p>}
+                {data.extract && textVisible && (
+                  <p lang={data.articleLang ?? undefined} className="text-base whitespace-pre-line">
+                    {data.extract}
+                  </p>
+                )}
 
                 {data.more && textVisible && (
                   <>
@@ -153,6 +158,18 @@ export default function CarWikiInfo({ brand, model, year }: Props): ReactNode {
                       </span>
                     </button>
                   </>
+                )}
+
+                {isFallback && textVisible && data.articleLang && (
+                  <p className="mt-2 text-xs">
+                    <GoogleTranslateLink
+                      text={[data.extract, data.more]
+                        .filter(Boolean)
+                        .join('\n\n')
+                        .replace(/^(?:##|==+)\s*(.+?)\s*(?:==+)?$/gm, '$1')}
+                      from={data.articleLang}
+                    />
+                  </p>
                 )}
 
                 <div className="mt-1 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-sm text-muted">

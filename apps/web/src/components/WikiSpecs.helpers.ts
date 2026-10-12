@@ -19,6 +19,12 @@ export function wikiSourceLabel(source: Pick<WikiSource, 'lang' | 'title'>): str
   return `Wikipedia (${lang.toUpperCase()})`
 }
 
+/** Language of a source's own wording, for the Translate link: a curated source quotes the manufacturer's English page. */
+export function sourceTextLang(source: Pick<WikiSource, 'lang'> | null | undefined): string | undefined {
+  if (!source) return undefined
+  return isCuratedSource(source) ? 'en' : source.lang
+}
+
 /** "74 kW (101 hp)", or "74–92 kW (101–125 hp)" for a range; null without a power figure. */
 export function formatEnginePower(e: Pick<WikiEngineView, 'powerKw' | 'powerKwMax'>, t: Translate): string | null {
   if (e.powerKw == null) return null

@@ -26,6 +26,7 @@ import {
   generationYearOf,
   hasDimensions,
   sortEnginesByFit,
+  sourceTextLang,
   type OwnCar
 } from '@/components/WikiSpecs.helpers'
 import { cn } from '@/lib/cn'
@@ -164,7 +165,7 @@ export default function WikiSpecs({ brand, model, year, own }: Props): ReactNode
                     engine={e}
                     matches={engineMatchesCar(e, own)}
                     vsCar={engineVsCar(e, own, t)}
-                    sourceLang={match.enginesSource?.lang}
+                    sourceLang={sourceTextLang(match.enginesSource)}
                   />
                 ))}
               </div>
@@ -192,7 +193,7 @@ export default function WikiSpecs({ brand, model, year, own }: Props): ReactNode
                     label={t(r.labelKey)}
                     value={r.value}
                     about={t(r.aboutKey)}
-                    sourceLang={r.raw ? match.driveSource?.lang : undefined}
+                    sourceLang={r.raw ? sourceTextLang(match.driveSource) : undefined}
                   />
                 ))}
               </div>

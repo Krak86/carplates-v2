@@ -158,18 +158,18 @@ async function translateWithOpus(text: string, from: string, to: string, onProgr
 
 const chromeReady = new Map<string, Promise<boolean>>()
 
-/** True when the built-in browser translator can translate `from` → `to` right now (installed, nothing to download). Cached. */
-export function isChromeReady(from: string, to: string): Promise<boolean> {
+/** True when the built-in browser translator can translate `from` → `to` on a click: installed, or a language pack it downloads first (the click is the reader's choice). Cached. */
+export function canChromeTranslate(from: string, to: string): Promise<boolean> {
   const key = `${from}>${to}`
   let cached = chromeReady.get(key)
   if (!cached) {
-    cached = chromeOption(from, to).then(o => o.status === 'ready')
+    cached = chromeOption(from, to).then(o => o.status !== 'unavailable')
     chromeReady.set(key, cached)
   }
   return cached
 }
 
-/** Forget the cached answers of `isChromeReady` (after a language pack was downloaded). */
+/** Forget the cached answers of `canChromeTranslate` (after a language pack was downloaded). */
 export const resetChromeReady = (): void => chromeReady.clear()
 
 /** What this browser can do for `from` → `to`, without downloading anything. Order = preference. */

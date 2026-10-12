@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 
 import GoogleTranslateAnchor from '@/components/GoogleTranslateAnchor'
 import { needsTranslation } from '@/lib/google-translate'
-import { isChromeReady, translateLocally } from '@/lib/local-translate'
+import { canChromeTranslate, translateLocally } from '@/lib/local-translate'
 
 // The dialog (and, behind it, the on-device translation engines) loads only when a reader opens it.
 const TranslateDialog = lazy(() => import('@/components/TranslateDialog'))
@@ -28,13 +28,14 @@ export default function GoogleTranslateLink({ text, from }: Props): ReactNode {
   const [busy, setBusy] = useState(false)
   const [inPlace, setInPlace] = useState<string | null>(null)
   const [failed, setFailed] = useState(false)
+  const [percent, setPercent] = useState<number | null>(null)
   const lang = i18n.language
 
   // Re-asked when the dialog closes: the reader may just have installed the language pack there.
   useEffect(() => {
     if (open) return
     let cancelled = false
-    void isChromeReady(from, lang).then(ok => {
+    void canChromeTranslate(from, lang).then(ok => {
       if (!cancelled) setReady(ok)
     })
     return (): void => {
@@ -58,11 +59,12 @@ export default function GoogleTranslateLink({ text, from }: Props): ReactNode {
     setBusy(true)
     setFailed(false)
     try {
-      setInPlace(await translateLocally('chrome', text, from, lang, () => undefined))
+      setInPlace(await translateLocally('chrome', text, from, lang, setPercent))
     } catch {
       setFailed(true)
     } finally {
       setBusy(false)
+      setPercent(null)
     }
   }
 
@@ -76,7 +78,13 @@ export default function GoogleTranslateLink({ text, from }: Props): ReactNode {
             onClick={e => void handleInPlace(e)}
             className="underline hover:no-underline disabled:opacity-50"
           >
-            {busy ? t('translate.working') : inPlace ? t('translate.hideHere') : t('translate.here')}
+            {busy
+              ? percent == null
+                ? t('translate.working')
+                : `${t('translate.working')} ${percent}%`
+              : inPlace
+                ? t('translate.hideHere')
+                : t('translate.here')}
           </button>
         )}
         <button type="button" onClick={handleOpen} className="underline hover:no-underline">

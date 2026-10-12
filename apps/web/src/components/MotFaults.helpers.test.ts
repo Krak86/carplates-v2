@@ -120,6 +120,11 @@ describe('untranslated MOT reasons', () => {
     expect(untranslatedReasons([known], 'ua', 'both')).toBe('')
   })
 
+  it('ends each reason with ";" and a line break so the translation keeps one reason per line', () => {
+    const other = { code: 'x/y/w', item: 'Wiper', failText: 'Wiper missing', watchText: '' }
+    expect(untranslatedReasons([unknown, other], 'ua', 'both')).toBe('Horn: Horn inoperative;\nWiper: Wiper missing')
+  })
+
   it('reads the advisory text in watch mode', () => {
     expect(reasonText(unknown, 'watch')).toBe('Horn: Horn weak')
     expect(reasonText(unknown, 'fail')).toBe('Horn: Horn inoperative')

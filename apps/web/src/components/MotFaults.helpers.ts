@@ -144,5 +144,5 @@ export function untranslatedReasons(reasons: readonly ReasonTexts[], lang: strin
   return reasons
     .filter(r => !reasonLabel(r.code, lang))
     .map(r => reasonText(r, mode))
-    .join('\n')
+    .join(';\n')
 }
