@@ -1,0 +1,160 @@
+{{Infobox PKW-Modell
+| Marke      = [[Honda]]
+| Modell     = Civic
+| Bild       = Honda Civic front 20080303.jpg
+| Bild zeigt = Honda Civic Dreitürer
+| von        = 1983
+| bis        = 1987
+| Klasse     = [[Kompaktklasse]]
+| Klasse1    = [[Van (Automobil)|Van]]
+| Versionen  = [[Kombilimousine]], [[Limousine]], [[Kombinationskraftwagen|Kombi]], [[Kombicoupé]]
+| Motoren    = [[Ottomotor]]en:<br />1,2–1,5 Liter<br />(40–74 kW)
+| Länge      = 3810
+| Breite     = 1635
+| Höhe       = 1340
+| Radstand   = 2380
+| Gewicht    = ca. 855
+| Vorgänger  = [[Honda Civic 2. Generation|Civic 2. Generation]]
+| Nachfolger = [[Honda Civic 4. Generation|Civic 4. Generation]]
+}}
+Die '''dritte Generation des [[Honda Civic]]''' wurde von September 1983 bis September 1987 gefertigt. Es gab ihn in vier Karosserievarianten: als Coupé [[Honda CRX|CR-X]], dreitüriges Steilheck (Hatchback), viertüriges Stufenheck und Van ''Shuttle'' (einem Vorläufer der heutigen Minivans). Bei der Gestaltung wurde bei dieser Modellreihe das Designbüro von [[Pininfarina]] beteiligt.
+
+== Ausstattung ==
+Die dritte Generation ist ohne klassischen Kombi, da diese Rolle vom kleinen Van [[Honda Shuttle|Shuttle]] übernommen wird. Der Shuttle hatte serienmäßig Frontantrieb und war auch mit Allradantrieb erhältlich. Durch einen Druckknopf am Armaturenbrett konnte dieser zugeschaltet werden. Im Jahr 1987 wurde das Allradantriebssystem des ''Shuttle'' geändert. Es bekam eine automatische Viskokupplung, die bei unterschiedlicher Drehzahl der Achsen automatisch Drehmoment an die Hinterräder weiterleitet.
+
+== Motoren ==
+Den Civic bot Honda zunächst mit 1,3&nbsp;Liter 52&nbsp;kW (71&nbsp;PS) und dem 1,5&nbsp;Liter GL oder S mit 62&nbsp;kW (85&nbsp;PS) an. Diese wurden 1984 mit dem 1,2&nbsp;Liter 40&nbsp;kW (54&nbsp;PS) ergänzt. Das Spitzenmodell seiner Zeit war der 1,5 Liter GT mit 74&nbsp;kW (101&nbsp;PS). Ab dem Modelljahr 1986 wurde diese Version auf Wunsch mit einem geregelten Katalysator ausgestattet, worauf in dem damaligen Prospekt mit einem einfachen Nebensatz im Kleingedruckten „für den umweltbewußten Fahrer“ hingewiesen wurde. Die Ausführung mit Katalysator leistete 90&nbsp;PS.
+
+Die stärkste Motorisierung dieser Baureihe war ausschließlich auf dem japanischen Markt erhältlich. Dort wurden ab dem Modelljahr 1985 sowohl der Dreitürer als auch die viertürige Limousine als Civic Si mit einem 1,6-Liter-Motor mit zwei nebenliegenden Nockenwellen (DOHC), digitaler Saugrohreinspritzung und Katalysator angeboten. Dieser leiste 96 kW (132 PS) und war nahezu baugleich mit dem Motor, der hier in Europa ausschließlich im Honda CRX erhältlich war.
+
+=== Modellübersicht ===
+{| class="wikitable"
+|-
+!Modellcode
+!Typ
+![[Hubraum]]
+![[Watt (Einheit)|kW]] ([[Pferdestärke|PS]])
+!Motorcode
+!Besonderheit
+!Bauzeit
+|- style="background:#dddddd;"
+|AL
+|Dreitürer
+|1,2 l (1.2)
+|align="center" |40 (54)
+|ZA2
+|
+|01/1984–09/1987
+|- style="background:#eeeeee;"
+|rowspan="3"|AH
+|Dreitürer (1.5S)
+|rowspan="3"|1,5 l
+|align="center" |63 (86)
+|EW1
+|serienmäßige Servolenkung
+|09/1983–09/1987
+|- style="background:#eeeeee;"
+|Dreitürer (1.5GT)
+|align="center" |74 (101)
+| rowspan="2" |EW2
+|[[Saugrohreinspritzung]] mit [[PGM-FI|PGM-Fi]]{{FN|1}}
+|01/1985–09/1987
+|- style="background:#eeeeee;"
+|Dreitürer (1.5iGT)
+|align="center" |66 (90)
+|PGM-Fi mit G-Kat
+|01/1986–09/1987
+|- style="background:#dddddd;"
+|AF
+|Zweitürer (CRX)
+|1,5 l (1.5i)
+|align="center" |74 (101)
+|EW3
+|
+| rowspan="2" |09/1983–09/1987
+|- style="background:#eeeeee;"
+|rowspan="2"|AG
+|rowspan="2"|Dreitürer
+|1,3 l (1.3Deluxe)
+|align="center" |52 (71)
+|EV1
+|
+|- style="background:#eeeeee;"
+|1,3
+|align="center"|55 (75)
+|EV2
+|ohne Kat / mit Hondamatic H3
+|
+|- style="background:#dddddd;"
+|rowspan="2"|AK
+|Viertürer
+|rowspan="2"|1,5 l
+|rowspan="2" align="center"|66 (90)
+|rowspan="2"|EW1
+|
+|01/1986–09/1987
+|- style="background:#dddddd;"
+|Fünftürer
+|
+|
+|- style="background:#eeeeee;"
+|AM
+|Viertürer
+|1,2 l (1.2)
+|align="center" |40 (54)
+|ZA1
+|
+|09/1983–09/1987
+|- style="background:#dddddd;"
+|rowspan="2"|AN
+| rowspan="4" |Shuttle
+| rowspan="4" |1,5 l
+|align="center" rowspan="2"|63 (86)
+|rowspan="2"|EW2
+|[[RT4WD]]
+|
+|- style="background:#dddddd;"
+|Civic Shuttle
+|01/1985–12/1987
+|- style="background:#eeeeee;"
+|rowspan="2"|AR
+|align="center" rowspan="2"|66 (90)
+|rowspan="2"|EW
+|[[RT4WD]]
+|
+|- style="background:#eeeeee;"
+|Civic Shuttle
+|10/1983–12/1987
+|- style="background:#dddddd;"
+|AS
+|Zweitürer (CRX)
+|1,6 l (1.6-16)
+|align="center" |92 (125)
+|ZC1
+|
+|09/1983–09/1987
+|}
+{{FNZ|1|[[PGM-FI|Programmed Fuel Injection]]}}
+
+<gallery>
+Datei:Honda Civic rear 20080303.jpg|Heck des Civic Dreitürer
+Datei:3rd Gen Civic Sedan.jpg|Honda Civic Viertürer (US-Ausführung)
+Datei:1985 Honda Civic Shuttle.jpg|alt=Ansicht links vorne eines 1985 Honda Civic Shuttle|Honda Civic Shuttle (1985)
+</gallery>
+
+== Auszeichnungen ==
+Bereits zu seinem Debüt im Jahr 1983 wurden sowohl der dreitürige Honda Civic, als auch der Honda Ballade (eine Variation der viertürigen Limousine) zum Car of the Year Japan 1983/1984<ref>{{Internetquelle |url=https://www.jcoty.org/record/coty1983/ |titel=第4回 1983 – 1984 日本カー･オブ･ザ･イヤー |sprache=ja |abruf=2026-07-24}}</ref> gewählt. Des Weiteren wurde der dreitürige Civic im Jahr 1984 als erstes Serienfahrzeug mit dem im selben Jahr ins Leben gerufenen Car Design Award Torino – Piemonte (später nur noch Car Design Award),<ref>{{Internetquelle |url=https://cardesignaward.org/en/history/ |titel=History |werk=Car Design Award |sprache=en-US |abruf=2026-07-24}}</ref> sowie dem Good Design Grand Award,<ref>{{Internetquelle |url=https://www.g-mark.org/en/gallery/GOOD%20DESIGN%20AWARD |titel=GOOD DESIGN AWARD |sprache=en |abruf=2026-07-24}}</ref> dem bedeutendsten japanischen Preis für Industriedesign, ausgezeichnet. Es war das erste Mal, dass ein PKW mit diesem Preis ausgezeichnet wurde.
+
+== Weblinks ==
+{{Commonscat|Honda Civic (1983)|Honda Civic (3. Generation)}}
+
+== Einzelnachweise ==
+<references />
+
+{{Navigationsleiste Honda-Automodelle}}
+
+[[Kategorie:Honda-Automobil|Civic03]]
+[[Kategorie:Limousine]]
+[[Kategorie:Kombilimousine]]
+[[Kategorie:Kombi]]
+[[Kategorie:Kombicoupé]]

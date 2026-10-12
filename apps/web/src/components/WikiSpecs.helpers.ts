@@ -42,8 +42,8 @@ const ENGINE_FAMILY =
 /**
  * Splits a row's codes into engine codes (`T24A-FTS`, `2TR-FE`, `L13Z4`) and chassis / model codes (`TJA250`, `FK1`). A chassis
  * code is 1-4 letters then 1-3 digits and no hyphen, unless it is a well-known engine family (`B48`, `TU5`, `EA888`); a bare
- * number is a displacement the source table put in the code column and is dropped. A best guess, the source table does not
- * label the two.
+ * number is a displacement the source table put in the code column and is dropped. A best guess for rows whose header did not
+ * name the column (old rows, ambiguous "Code" headers); `wikiRowCodes` prefers the stored split.
  */
 export function splitWikiCodes(codes: readonly string[] | null | undefined): { engine: string[]; chassis: string[] } {
   const out: { engine: string[]; chassis: string[] } = { engine: [], chassis: [] }
@@ -52,6 +52,15 @@ export function splitWikiCodes(codes: readonly string[] | null | undefined): { e
     out[/^[A-Z]{1,4}\d{1,3}$/.test(code) && !ENGINE_FAMILY.test(code) ? 'chassis' : 'engine'].push(code)
   }
   return out
+}
+
+/** The stored engine / chassis split when the source header named the column (`engineCodes` present), else the shape guess. */
+export function wikiRowCodes(e: Pick<WikiEngineView, 'chassisCodes' | 'engineCodes'>): {
+  engine: string[]
+  chassis: string[]
+} {
+  if (e.engineCodes == null) return splitWikiCodes(e.chassisCodes)
+  return { engine: e.engineCodes, chassis: e.chassisCodes ?? [] }
 }
 
 /** What the registry says about this car, for comparing it with the generation's catalogue figures. */
@@ -155,7 +164,7 @@ export type EngineRowKey = (typeof ENGINE_ROW_KEYS)[number]
 
 /** The key / value rows of one engine; a row without a value is dropped, and `raw` shows only when no number was read. */
 export function engineRows(e: WikiEngineView, t: Translate): { key: EngineRowKey; value: string }[] {
-  const codes = splitWikiCodes(e.chassisCodes)
+  const codes = wikiRowCodes(e)
   const hasNumbers = e.powerKw != null || !!e.displacementCc
   const values: Record<EngineRowKey, string | null> = {
     power: formatEnginePower(e, t),

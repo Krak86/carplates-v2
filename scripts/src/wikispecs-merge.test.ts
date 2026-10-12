@@ -74,6 +74,17 @@ describe('mergeEditions', () => {
     expect(mergeEditions(KEY, [ed('en', { lengthMm: measure(4300) })], true)).toBeNull()
   })
 
+  it('passes engineCodes through, an empty list included (the "header named the column" marker)', () => {
+    const named = { ...ENGINE, chassisCodes: ['FK1'], engineCodes: [] }
+    const ambiguous = { ...ENGINE, chassisCodes: ['K9K'] }
+    const row = mergeEditions(KEY, [ed('en', { engines: [{ ...named, engineCodes: ['B48'] }] })], false)
+    expect(row?.engines?.[0]).toMatchObject({ chassisCodes: ['FK1'], engineCodes: ['B48'] })
+    expect(mergeEditions(KEY, [ed('en', { engines: [named] })], false)?.engines?.[0]?.engineCodes).toEqual([])
+    expect(mergeEditions(KEY, [ed('en', { engines: [ambiguous] })], false)?.engines?.[0]).not.toHaveProperty(
+      'engineCodes'
+    )
+  })
+
   it('falls back to a power-less engine list only when no edition has power', () => {
     const noPower = { ...ENGINE, powerKw: null }
     expect(mergeEditions(KEY, [ed('en', { engines: [noPower] })], false)?.enginesLang).toBe('en')

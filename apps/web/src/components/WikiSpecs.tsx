@@ -152,7 +152,7 @@ export default function WikiSpecs({ brand, model, year, own }: Props): ReactNode
               <div className="divide-y divide-[var(--color-border)]">
                 {engines.map(e => (
                   <WikiEngineCard
-                    key={`${e.raw}-${e.displacementCc}-${e.powerKw}-${e.chassisCodes?.join()}`}
+                    key={`${e.raw}-${e.displacementCc}-${e.powerKw}-${e.chassisCodes?.join()}-${e.engineCodes?.join()}`}
                     engine={e}
                     matches={engineMatchesCar(e, own)}
                     vsCar={engineVsCar(e, own, t)}

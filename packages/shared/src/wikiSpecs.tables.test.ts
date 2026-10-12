@@ -134,7 +134,7 @@ describe('real articles', () => {
     { file: 'camry70.ru', lang: 'ru', engines: 4, first: { displacementCc: 1800, powerKw: 92 } },
     { file: 'civic8.ru', lang: 'ru', engines: 9, first: { displacementCc: 1339, powerKw: 61, fuel: 'petrol' } },
     { file: 'focus3.ru', lang: 'ru', engines: 11, first: { displacementCc: 1400, powerKw: 55, fuel: 'petrol' } },
-    { file: 'golf7.de', lang: 'de', engines: 33, first: { displacementCc: 999, powerKw: 63, fuel: 'petrol' } },
+    { file: 'golf7.de', lang: 'de', engines: 38, first: { displacementCc: 999, powerKw: 63, fuel: 'petrol' } },
     {
       file: 'golf7.en',
       lang: 'en',
@@ -239,5 +239,48 @@ describe('one infobox per generation with {{Двигатель}} engine template
       '{{Двигатель\n | наименование = 2,2 CD\n | объём = 2200\n | мощность =\n | мощность лс = 136\n | рекомендованное топливо = ДТ\n}}'
     )
     expect(e).toMatchObject({ displacementCc: 2200, powerKw: 100, fuel: 'diesel' })
+  })
+})
+
+describe('code column header', () => {
+  const engines = (file: string, lang: string): WikiEngine[] => parseWikiSpecs(fixture(file), { lang }).engines
+
+  it('en "Engine code" fills engineCodes and leaves chassisCodes empty', () => {
+    const [first] = engines('niva.en', 'en')
+    expect(first).toMatchObject({ engineCodes: ['VAZ-21011'], chassisCodes: [] })
+  })
+
+  it('en "Chassis code" fills chassisCodes with an empty engineCodes marker', () => {
+    const [first] = engines('civic10.en', 'en')
+    expect(first).toMatchObject({ chassisCodes: ['FC1', 'FC3', 'FK4'], engineCodes: [] })
+  })
+
+  it('uk "Код двигуна" is the engine code', () => {
+    expect(engines('bmw7e32.uk', 'uk')[0]).toMatchObject({ engineCodes: ['M30'], chassisCodes: [] })
+  })
+
+  it('ru "Код двигателя" is the engine code, also written with a space ("OM 607")', () => {
+    const list = engines('citan.ru', 'ru')
+    expect(list.map(e => e.engineCodes)).toEqual([['M 200'], ['OM 607'], ['OM 607'], ['OM 607']])
+  })
+
+  it('ru "Код двигателя" keeps every code of a multi-code cell', () => {
+    expect(engines('golf4.ru', 'ru')[0]?.engineCodes).toEqual(['AHW', 'AXP', 'AKQ', 'APE', 'AUA', 'BCA'])
+  })
+
+  it('de "Motorcode" is the engine code', () => {
+    expect(engines('civic3.de', 'de')[0]).toMatchObject({ engineCodes: ['ZA2'], chassisCodes: [] })
+  })
+
+  it('de "Motorbaureihe" / "Motorkennbuchstaben" are engine codes, all-caps ones without a digit included', () => {
+    const list = engines('golf7.de', 'de')
+    expect(list[4]).toMatchObject({ engineCodes: ['CJZB'], chassisCodes: [] })
+    expect(list.find(e => e.engineCodes?.includes('EA888'))?.engineCodes).toContain('CHHB')
+  })
+
+  it('an ambiguous "Code" header keeps the list in chassisCodes and leaves engineCodes unset', () => {
+    const [first] = engines('lodgy.en', 'en')
+    expect(first?.chassisCodes).toEqual(['H5Ft'])
+    expect(first?.engineCodes).toBeUndefined()
   })
 })

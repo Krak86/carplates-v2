@@ -947,6 +947,7 @@ export type WikiEngineJson = {
   raw: string
   powerKwMax?: number | null
   chassisCodes?: string[]
+  engineCodes?: string[]
   note?: string
   years?: string
 }

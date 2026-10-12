@@ -23,6 +23,8 @@ export const wikiEngineSchema = z.object({
   /** The row's own text when the numbers could not be read unambiguously. */
   raw: z.string().nullable().optional(),
   chassisCodes: z.array(z.string()).nullable().optional(),
+  /** Present (maybe empty) when the source header named the code column: then both code lists are exact, no shape guess. */
+  engineCodes: z.array(z.string()).nullable().optional(),
   note: z.string().nullable().optional(),
   years: z.string().nullable().optional()
 })

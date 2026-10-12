@@ -1,6 +1,6 @@
 # DATASETS_PLAN.md
 
-> **State on 2026-10-12.** Built: A, B, C–C4, D, E, F, G, H (cut down), I, K, M. Open: **J** (other countries, research only), **Z** (autoevolution, waits for the public app), the Euro NCAP wording action before any public deploy. Stage K follow-ups and the stage M alias leftovers are finished (`docs/plan-done.md` "Stage K follow-ups"). Still optional: store engine vs chassis codes separately in the parser (needs an `ingest:wikispecs` re-run, ~1 h), generation rows for bikes and buses, browser-check of the card-bundle seeding. The "Resume here" text below is from 2026-10-09 and older than this line.
+> **State on 2026-10-12.** Built: A, B, C–C4, D, E, F, G, H (cut down), I, K, M. Open: **J** (other countries, research only), **Z** (autoevolution, waits for the public app), the Euro NCAP wording action before any public deploy. Stage K follow-ups and the stage M alias leftovers are finished (`docs/plan-done.md` "Stage K follow-ups"). Still optional: generation rows for bikes and buses, browser-check of the card-bundle seeding. The "Resume here" text below is from 2026-10-09 and older than this line.
 >
 > **Resume here (2026-10-09).** Stages A (+A2 plate-region fix, +A3 alias chips), **B** (motorcycle/truck/bus matching), **C** (RDW specs, C2, C3) **C4** (estimated value) **D** (RDW recalls) and **E** (Open EV Data) are DONE;
 > stages M1–M3 and **F** (NHTSA recalls + complaints) are built; see "Staged plan" near the end. **Rule: do not start a stage until the owner says "go stage X".**

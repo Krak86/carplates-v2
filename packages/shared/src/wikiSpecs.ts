@@ -50,8 +50,13 @@ export type WikiEngine = {
   raw: string
   /** Body-table rows only: the top of a power range ("201 hp pre-facelift / 205 hp facelift"), null when single. */
   powerKwMax?: number | null
-  /** Body-table rows only: codes of the row's code column (chassis "FK1 (Hatchback)" → ['FK1'], or an engine code) and their market note. */
+  /**
+   * Body-table rows only: chassis / model codes ("FK1 (Hatchback)" → ['FK1']). When the code column's header is ambiguous
+   * ("Code", "Type/code") `engineCodes` is absent and this holds the whole column; the reader guesses by shape.
+   */
   chassisCodes?: string[]
+  /** Body-table rows only: engine codes (`2TR-FE`, `B48`). Present (maybe empty) only when the table's header named its code column. */
+  engineCodes?: string[]
   note?: string
   years?: string
 }
@@ -434,7 +439,7 @@ const TABLE_DIM: Record<keyof WikiSpecs['rawOnly'], keyof TableSpecs['dims']> = 
 }
 
 const engineKey = (e: WikiEngine): string =>
-  [e.displacementCc, e.powerKw, e.powerKwMax, e.fuel, e.chassisCodes?.join('+')].join('|')
+  [e.displacementCc, e.powerKw, e.powerKwMax, e.fuel, e.chassisCodes?.join('+'), e.engineCodes?.join('+')].join('|')
 
 /** Engines and dimensions of the article's body tables that belong to the generation (see `ParseOptions.series`). */
 function articleTables(wikitext: string, opts: ParseOptions): TableSpecs {
@@ -687,11 +692,20 @@ export function parseWikiTables(wikitext: string): WikiTable[] {
   return tables
 }
 
-type ColumnKind = 'engine' | 'displacement' | 'cylinders' | 'power' | 'fuel' | 'code' | 'years' | DimKind
+type ColumnKind =
+  'engine' | 'displacement' | 'cylinders' | 'power' | 'fuel' | 'engineCode' | 'chassisCode' | 'code' | 'years' | DimKind
 
-/** Header / row-label patterns (en, ru, uk, de); first match wins, so "Engine code" is `code`, not `engine`. */
+/**
+ * Header / row-label patterns (en, ru, uk, de); first match wins, so "Engine code" is `engineCode`, not `engine`. The code
+ * column splits by what its header names: engine codes, chassis / model codes, else the ambiguous `code` ("Code", "Type/code").
+ */
 const COLUMN_KINDS: [ColumnKind, RegExp][] = [
-  ['code', /chassis|engine code|\bcode\b|кузов|шасси|код двиг|код мотор|baureihe|modellcode/i],
+  [
+    'engineCode',
+    /engine (?:code|id)|engine family|motor\W*(?:baureihe|code|kenn)|motor\W*\*?\s*\(code\)|kód motoru|код (?:двиг|мотор)|(?:двигун|двигатель)\s*\(код\)|маркировка двигателя|буквенный код/i
+  ],
+  ['chassisCode', /chassis|кузов|шасси|baureihe|model\s?code|body code/i],
+  ['code', /\bcode\b/i],
   ['displacement', /displacement|capacity|volume|объ[её]м|об'єм|hubraum|swept/i],
   ['cylinders', /cylinders|цилиндр|циліндр|zylinder/i],
   ['power', /power|output|horsepower|\bhp\b|\bps\b|\bkw\b|мощност|потужн|leistung/i],
@@ -731,13 +745,16 @@ function cellPower(lines: string[]): { kw: number | null; max: number | null } {
 }
 
 /** Codes such as `FK1`, `FB7` out of "FK1 (Hatchback) / FB7 (Sedan, Europe)"; the parenthesised words are the note. */
-function chassisOf(lines: string[]): { codes: string[]; note: string } {
+function chassisOf(lines: string[], engine = false): { codes: string[]; note: string } {
   const notes: string[] = []
   const codes: string[] = []
   // Split on commas outside parentheses only: "FB7 (Sedan, Europe)" is one entry.
   for (const part of lines.join(' / ').split(/\s*[/;]\s*|,(?![^(]*\))/)) {
-    const m = /^\s*([A-Z0-9][A-Za-z0-9-]{1,9})\b\s*(?:\(([^)]*)\))?/.exec(part)
-    if (m && /\d/.test(m[1]!)) {
+    // An engine-code column also writes "OM 607" with a space and all-caps codes without a digit ("CJZA"); its header
+    // already said what the cell is.
+    const spaced = engine ? /^\s*([A-Z]{1,3} \d{2,4}[A-Z0-9-]*)(?![\w-])/.exec(part) : null
+    const m = spaced ?? /^\s*([A-Z0-9][A-Za-z0-9-]{1,9})\b\s*(?:\(([^)]*)\))?/.exec(part)
+    if (m && !/^\d+$/.test(m[1]!) && (/\d/.test(m[1]!) || (engine && /^[A-Z]{3,}$/.test(m[1]!)))) {
       codes.push(m[1]!)
       if (m[2]) notes.push(m[2])
     }
@@ -782,8 +799,12 @@ type EngineParts = {
   cylinders: string[]
   power: string[]
   fuel: string[]
+  engineCode: string[]
+  chassisCode: string[]
   code: string[]
   years: string[]
+  /** The table's header named its code column(s): `engineCodes` is then reliable, even when empty. */
+  named: boolean
 }
 
 const emptyParts = (): EngineParts => ({
@@ -792,8 +813,11 @@ const emptyParts = (): EngineParts => ({
   cylinders: [],
   power: [],
   fuel: [],
+  engineCode: [],
+  chassisCode: [],
   code: [],
-  years: []
+  years: [],
+  named: false
 })
 
 function engineOf(p: EngineParts): WikiEngine | null {
@@ -818,7 +842,8 @@ function engineOf(p: EngineParts): WikiEngine | null {
   const power = cellPower(p.power)
   const powerKw = power.kw ?? parsed.powerKw
   if (displacementCc === null && powerKw === null) return null
-  const { codes, note } = chassisOf(p.code)
+  const { codes, note } = chassisOf([...p.chassisCode, ...p.code])
+  const engineCodes = chassisOf(p.engineCode, true).codes
   let fuel = parsed.fuel
   // "Natural Gas Sedan" in the chassis column: a CNG variant of a petrol engine.
   if ((fuel === null || fuel === 'petrol') && /natural gas|\bcng\b|\blpg\b|метан|пропан|erdgas/i.test(note))
@@ -831,6 +856,7 @@ function engineOf(p: EngineParts): WikiEngine | null {
     raw: `${text} ${p.power.join(' ')}`.replace(/\s+/g, ' ').trim().slice(0, 300),
     powerKwMax: power.max,
     chassisCodes: codes,
+    ...(p.named ? { engineCodes } : {}),
     note,
     years: p.years.join(' ').slice(0, 60)
   }
@@ -855,6 +881,7 @@ export function tableSpecs(table: WikiTable): TableSpecs {
   const kinds = table.header.map(columnKind)
   // ≥2 distinct recognised columns = a row per engine; a lone label in the corner ("Двигатель | 1,3 | 1,5") = a column per engine.
   const byRow = new Set(kinds.filter(k => k !== null)).size >= 2
+  const named = kinds.some(k => k === 'engineCode' || k === 'chassisCode')
 
   if (byRow) {
     let groupFuel: WikiEngine['fuel'] = null
@@ -867,6 +894,7 @@ export function tableSpecs(table: WikiTable): TableSpecs {
         continue
       }
       const parts = emptyParts()
+      parts.named = named
       row.forEach((cell, i) => {
         const kind = kinds[i]
         if (!kind || cell.length === 0) return
@@ -891,6 +919,8 @@ export function tableSpecs(table: WikiTable): TableSpecs {
   if (labelled.filter(r => r.kind !== null).length < 2) return out
   const width = Math.max(0, ...labelled.map(r => r.values.length))
   const columns: EngineParts[] = Array.from({ length: width }, emptyParts)
+  const namedRows = labelled.some(r => r.kind === 'engineCode' || r.kind === 'chassisCode')
+  for (const c of columns) c.named = namedRows
   for (const { kind, label, values } of labelled) {
     if (!kind) continue
     if (isDimKind(kind)) {

@@ -70,6 +70,8 @@ const engineJson = (e: WikiSpecs['engines'][number]): WikiEngineJson => ({
   raw: e.raw.slice(0, RAW_MAX),
   ...(e.powerKwMax != null ? { powerKwMax: e.powerKwMax } : {}),
   ...(e.chassisCodes?.length ? { chassisCodes: e.chassisCodes } : {}),
+  // Kept even when empty: its presence says the header named the column, so the reader skips the shape guess.
+  ...(e.engineCodes ? { engineCodes: e.engineCodes } : {}),
   ...(e.note ? { note: e.note } : {}),
   ...(e.years ? { years: e.years } : {})
 })

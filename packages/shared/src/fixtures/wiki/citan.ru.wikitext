@@ -1,0 +1,117 @@
+{{Автомобиль
+| название = Mercedes-Benz Citan
+| фото = Mercedes-Benz W420 1X7A0299.jpg
+| производитель = {{флаг|Германия}} [[Mercedes-Benz]]
+| годы производства = {{Годы автомобиля|2012|}}
+| предшественник = [[Mercedes-Benz Vaneo]]
+| преемник = 
+| класс = [[Light Commercial Vehicle]]
+| сегмент = M
+| тип кузова = {{тип кузова|компактвэн|3|7}} <br> {{тип кузова|фургон|2|2}}
+| компоновка = {{ПП-компоновка}}
+| колёсная формула = {{Колёсная формула|cat|4|2}}
+| заводы = {{флаг|Франция}} [[Мобёж]]
+| платформа = 
+| двигатель = Бензиновый: 114 л.с. <br> Дизельные: 75-110 л.с.
+| кпп = 5-ст МКПП <br> 6-ст [[МКПП]]<br>6-ст АКПП
+| колёсная база = L1: 2313 мм<br> L2: 2697 мм<br> L3: 3081 мм
+| длина = L1: 3940 мм <br> L2: 4320 мм <br> L3: 4710 мм
+| ширина = 1829
+| высота = 1809–1839 мм
+| клиренс = 
+| передняя колея = 
+| задняя колея = 
+| масса = 1295–1465 кг
+| объём бака = 
+| связанные = [[Renault Kangoo]]<br>[[Mercedes-Benz Т-класс]]
+| похожие = [[Peugeot Partner]]<br>[[Opel Combo]]<br>[[Citroën Berlingo]]<br>[[Volkswagen Caddy]]
+| дизайнер = 
+}}
+'''Mercedes-Benz Citan''' (код кузова '''W415/W420''') — совместный компактный [[Фургон (автомобиль)|фургон]] компании [[Mercedes-Benz]] и альянса [[Renault Nissan (альянс)|Renault Nissan]], разработанный на основе [[Renault Kangoo]] и представленный в 2012 году для замены [[Mercedes-Benz Vaneo]].
+
+== История ==
+[[Файл:Mercedes-Benz Citan Van on IAA 2012 right side.jpg|left|thumb|Mercedes-Benz Citan на выставке 2012 года]]
+В феврале 2012 года появились первые изображения разрабатываемого минивэна от компании Mercedes-Benz и альянса [[Renault Nissan (альянс)|Renault Nissan]]. Серийная модель была представлена на выставке «''IAA Commercial Vehicle Show''» в [[Ганновер]]е в сентябре 2012 года. Сборку автомобилей наладили на ''MCA'', дочернем предприятии фирмы [[Renault]], в северном [[Франция|французском]] городе [[Мобёж]].
+
+Разнообразие кузовов Mercedes-Benz Citan является решением разработчиков, позволяющим модели выйти на рынки как пассажирских, так и лёгких коммерческих транспортных средств. Для компании Mercedes-Benz это первый автомобиль после [[Mercedes-Benz Vito]] 1995 года, запущенный на коммерческий рынок.
+
+Продажи в Европе стартовали в конце 2012 года<ref>{{cite web |url= https://www.drive.ru/news/mercedes/4f8d390c09b602eb51000035.html |title= Mercedes-Benz › Немцы превратили Renault Kangoo в Mercedes Citan |author= Анастасия Королькова |date= 2012-04-17 |publisher= Drive.ru |access-date= 2016-12-20 |url-status= dead |archive-date= 2016-12-24 |archive-url= https://web.archive.org/web/20161224234525/https://www.drive.ru/news/mercedes/4f8d390c09b602eb51000035.html }}</ref>.
+
+2016 год стал самым успешным для Mercedes-Benz Citan за всю историю его существования — объёмы продаж модели выросли на 18%<ref>{{cite web |url= http://svopi.ru/automedia/145446 |title= Объемы продаж коммерческих авто Mercedes-Benz Vans побили рекорды 2015 года‍ |author= Алексей Ефедоров |date= 2016-12-23 |publisher= Информационное агентство "Свопи" |access-date= 2016-12-24 |url-status= dead |archive-date= 2016-12-25 |archive-url= https://web.archive.org/web/20161225080642/http://svopi.ru/automedia/145446 }}</ref><ref>{{cite web |url= http://www.automotiveworld.com/news-releases/mercedes-benz-vans-surpasses-last-years-sales-record-already-november/ |title= Mercedes-Benz Vans surpasses last year’s sales record already in November |date= 2016-12-21 |publisher= Automative World |lang= en |access-date= 2016-12-24 |url-status= dead |archive-date= 2016-12-22 |archive-url= https://web.archive.org/web/20161222172634/http://www.automotiveworld.com/news-releases/mercedes-benz-vans-surpasses-last-years-sales-record-already-november/ }}</ref>.
+
+== Описание ==
+Серийная модель Citan доступна с несколькими дизельными и бензиновыми двигателями мощностью от 75 до 114 л.с., а также с пакетом [[BlueEFFICIENCY]].
+
+Автомобиль предлагается в различных конфигурациях, включая фургон, грузопассажирский фургон и '''Mixto''' — пассажирский вариант. Также имеется ещё один пассажирский вариант — ''Citan Kombi''. Кроме количества посадочных мест, автомобили различаются ещё и по размеру и грузоподъёмности.
+
+Mercedes-Benz Citan выпускается с тремя вариантами колёсной базы: компактная (3.94 м, тип кузова — ''Panel Van''), длинная (4.32 м, тип кузова — ''Dualiner'') и очень длинная (4.71 м, тип кузова — ''Traveliner''). Это, в свою очередь, позволяет обеспечить большой грузовой объём: 2,4 м<sup>3</sup>, 3,1 м<sup>3</sup> и 3,8 м<sup>3</sup> соответственно. По габаритам автомобиль можно сравнить с [[Citroën Nemo|Citroën]] Berlingo, [[Fiat Fiorino|Fiat Doblo]] и [[Peugeot Bipper|Peugeot]] Partner. Citan (с длинной и очень длинной колёсной базой) стандартно поставляется с раздвижной дверью на правой стороне. Дополнительно присутствует раздвижная дверь с левой стороны.
+
+Версия ''Combi'', также известная как пассажирский Citan, способна с комфортом разместить 5 взрослых человек. В базовую комплектацию автомобиля входят: третий тормозной фонарь, насос гидроусилителя руля, система облегчения трогания с места на подъёме, пыльцевой фильтр, ABS, EBV, ASR, BAS, ограничители силы натяжения ремней безопасности на многоместном заднем сиденье, ремни безопасности с регулировкой по высоте, система центральной блокировки замков и асферические зеркала.
+
+=== Шасси ===
+Подвеска спереди — пружинная независимая, типа [[Макферсон (подвеска)|Макферсон]], сзади — полузависимая, работающая на кручение поперечная балка. Коробка передач 5 или 6-ступенчатая, механическая. С 2016 года на заказ для бензинового мотора доступна 6-ступенчатая роботизированная коробка передач ''EDC6''<ref>{{cite web |url= https://www.drive.ru/news/mercedes/renault/573d7444ec05c4f35e0000c5.html |title= Моделям Renault Kangoo и Mercedes Citan достались «роботы» |author= Анастасия Королькова |date= 2016-05-19 |publisher= Drive.ru |access-date= 2016-12-24   |url-status= dead }}</ref><ref>{{cite web |url= https://autoreview.ru/news/renault-kangoo-i-mercedes-citan-obzavelis-robotizirovannymi-korobkami |title= Renault Kangoo и Mercedes Citan обзавелись роботизированными коробками |author= Игорь Владимирский |date= 2016-05-18 |publisher= [[Авторевю]] |access-date= 2016-12-24 |url-status= dead |archive-date= 2016-12-25 |archive-url= https://web.archive.org/web/20161225081939/https://autoreview.ru/news/renault-kangoo-i-mercedes-citan-obzavelis-robotizirovannymi-korobkami }}</ref>. Привод на передние колёса. Рулевое управление реечное с электронным усилителем. Тормоза — дисковые.
+
+=== Двигатели ===
+{| class="wikitable" 
+! Модель ||Код двигателя||Рабочий объём||Мощность||Годы выпуска
+|-
+|align="center" colspan=5|''Бензиновые''
+|-
+|112 BlueEFFICIENCY ||M 200||1192 см<sup>3</sup>||114 л.с. (84 кВт)||с 06/2013
+|-
+| align="center" colspan=5|''Дизельные''
+|-
+|108 CDI ||OM 607||1461 см<sup>3</sup>||75 л.с. (55 кВт)||с 09/2012
+|-
+|108 CDI BlueEFFICIENCY ||OM 607||1461 см<sup>3</sup>||75 л.с. (55 кВт)||с 09/2012
+|-
+|109 CDI ||OM 607||1461 см<sup>3</sup>||90 л.с. (66 кВт)||с 09/2012
+|-
+|109 CDI BlueEFFICIENCY ||OM 607||1461 см<sup>3</sup>||90 л.с. (66 кВт)||с 09/2012
+|-
+|111 CDI ||OM 607||1461 см<sup>3</sup>||110 л.с. (81 кВт)||с 06/2013
+|-
+|111 CDI BlueEFFICIENCY ||OM 607||1461 см<sup>3</sup>||110 л.с. (81 кВт)||с 06/2013
+|}
+
+=== Безопасность ===
+[[Файл:Mercedes-Benz Citan 109 CDI BlueEFFICIENCY (W 415) – Innenraum, 13. April 2013, Düsseldorf.jpg|thumb|right|Интерьер автомобиля]]
+Mercedes-Benz Citan прошёл тест [[Euro NCAP]] в 2013 году:
+{{Рейтинг EuroNCAP
+ |модель = Mercedes-Benz CITAN Kombi, 109 Blue Efficiency 'High' grade, LHD
+ |год = 2013
+ |ссылка = http://www.euroncap.com/results/mercedes_benz/citan_kombi/515.aspx
+ |совместим с жизнью = да
+ |общий рейтинг = 3
+ |процент пассажир = 74
+ |процент ребёнок = 69
+ |процент пешеход = 56
+ |процент активная безопасность = 33
+ |версия теста = 2013
+}}
+
+Получив неудовлетворительные оценки, компания запросила перепроверку безопасности автомобиля:
+{{Рейтинг EuroNCAP
+ |модель = Mercedes-Benz CITAN Kombi, 109 Blue Efficiency 'High' grade
+ |год = 2013
+ |ссылка = http://www.euroncap.com/results/mercedes_benz/citan/542.aspx
+ |совместим с жизнью = да
+ |общий рейтинг = 4
+ |процент пассажир = 79
+ |процент ребёнок = 81
+ |процент пешеход = 56
+ |процент активная безопасность = 70
+ |версия теста = 2013
+}}
+
+== Примечания ==
+{{примечания}}
+
+== Литература ==
+* {{статья |автор=  |заглавие= Mercedes-Benz Citan: выкаблучивайтесь |издание= [[За рулём]] |год= 2013 |месяц= 12 |число= 24 |ссылка= http://www.zr.ru/content/articles/603471-mercedes-benz-citan-vykabluchivajtes/   }}
+* {{статья |автор=  |заглавие= Mercedes-Benz Citan: устрица под шнапсом |издание= [[За рулём]] |год= 2014 |число= 8 |месяц= 3 |ссылка= http://www.zr.ru/content/articles/620136-mercedes-benz-citan-ustrica-pod-shnapsom/   }}
+
+{{Автомобили Mercedes-Benz}}
+{{Грузовые автомобили Mercedes-Benz}}
+
+[[Категория:Автомобили Mercedes-Benz|Citan]]

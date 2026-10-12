@@ -1,0 +1,119 @@
+{{Short description|Compact multi-purpose vehicle (MPV)}}
+{{Infobox automobile
+| name = Dacia Lodgy
+| image = Dacia Lodgy, Schaffen Diest Fly-Drive 2013.JPG
+| caption = 2013 Dacia Lodgy (pre-facelift)
+| manufacturer = [[Automobile Dacia|Dacia]] ([[Renault]])
+| aka = Renault Lodgy ([[Commonwealth of Independent States|CIS]] countries, Ukraine, India)
+| production = 2012–2024 (Morocco)<br />2015–2020 (India)
+| model_years = 
+| designer = Renault Design Central Europe
+| assembly = {{ubl |Morocco: [[Tangier]] |India: [[Chennai]] ([[Renault India Private Limited|Renault India]])}}
+| predecessor = [[Dacia Logan MCV|Dacia Logan MCV (Mk1)]]
+| successor = [[Dacia Jogger]]
+| class = [[Compact MPV]] ([[M-segment|M]])
+| body_style = 5-door [[Minivan|MPV]]
+| layout = [[Front-engine, front-wheel-drive layout|Front-engine, front-wheel-drive]]
+| platform = [[Nissan B platform|Dacia M0 platform]]
+| engine = {{ubl
+  | '''[[Petrol engine|petrol]]:'''
+  | 1.2 L ''[[Nissan HR engine#H5Ft|H5Ft]]'' [[Turbocharger|turbo]] [[Straight-four engine|I4]]
+  | 1.3 L ''[[Nissan HR engine#H5Ht|H5Ht]]'' [[Turbocharger|turbo]] [[Straight-four engine|I4]]<ref>{{cite web |url=https://www.autoweek.nl/autonieuws/artikel/dacia-lodgy-en-dokker-nu-ook-met-nieuwe-1-3-benzinemotoren/ |title=Dacia Lodgy én Dokker nu ook met nieuwe 1.3 TCe |trans-title=Dacia Lodgy and Dokker now also with new 1.3 TCe |last=Krijgsman |first=Lars |work=Autoweek.nl |date=7 February 2019 |access-date=19 September 2025 |language=nl}}</ref>
+  | 1.6 L ''[[Renault K-Type engine#K7M|K7M]]'' I4
+  | '''[[Diesel engine|diesel]]:'''
+  | 1.5 L ''[[Renault K-Type engine#K9K dCi|K9K]]'' [[Turbo-diesel|turbo]] [[Common rail|dCi]] I4
+  }}
+| transmission = 5-speed [[Manual transmission|manual]]<br />6-speed manual
+| wheelbase = {{convert|2810|mm|in|1|abbr=on}}
+| length = {{convert|4498|mm|in|1|abbr=on}}
+| width = {{convert|1751|mm|in|1|abbr=on}}
+| height = {{convert|1680|mm|in|1|abbr=on}}
+| weight = {{convert|1165|-|1337|kg|lb|0|abbr=on}}
+| related = [[Dacia Dokker]]
+}}
+
+The '''Dacia Lodgy''' is a [[compact MPV]] produced by the [[France|French]] manufacturer [[Renault]] and its [[Romania]]n subsidiary [[Automobile Dacia|Dacia]] from 2012 to 2024. It was officially unveiled jointly by both brands at the [[Geneva Motor Show#2012|2012 Geneva Motor Show]].<ref>{{cite web|last=Pulman|first=Ben|title=Dacia Lodgy MPV (2012) first official pictures|url=http://www.carmagazine.co.uk/News/Search-Results/First-Official-Pictures/Dacia-Lodgy-MPV-2012-first-official-pictures/|publisher=Car Magazine|access-date=6 January 2012|date=5 January 2012}}</ref> The car was available only in [[Right- and left-hand traffic|LHD]] from launch, with [[front-wheel drive]] and a choice of five and seven seater models.
+
+The Lodgy was manufactured at a Renault factory in [[Tangier]], [[Morocco]].<ref>{{cite web|title=Tangier plant: setting new standards|url=http://www.renault.com/en/capeco2/laisser-moins-de-traces/pages/usine-tanger-site-industriel-pilote.aspx|publisher=Renault|access-date=13 February 2012}}</ref><ref name=":0">{{Cite news |title=Usine de Tanger |url=https://www.renaultgroup.com/groupe/implantations/usine-tanger/ |archive-url=https://web.archive.org/web/20260120162256/https://www.renaultgroup.com/groupe/implantations/usine-tanger/ |archive-date=2026-01-20 |access-date=2026-01-23 |work=Renault Group |language=fr-FR}}</ref> Although sales in Europe ended in February 2022, production continued in Morocco until 2024 for the domestic market.<ref>{{Cite web|url=https://autolatest.ro/stiri/dacia-inca-produce-modelul-lodgy-ambiance-2024-cu-7-locuri-si-motor-diesel-1-5-dci-de-85-cp/|title=Dacia inca produce modelul Lodgy Ambiance 2024 cu 7 locuri si motor diesel 1.5 dCi de 85 CP - AUTOLATEST|date=January 14, 2024}}</ref><ref>{{Cite web | title=Dacia lance la production de la Jogger au Maroc et ouvre les précommandes | url=https://www.moteur.ma/fr/guide-achat/actualite/dacia-lance-la-production-de-la-jogger-au-maroc-et-ouvre-les-precommandes-1050.html | archive-url=https://web.archive.org/web/20250115133946/https://www.moteur.ma/fr/guide-achat/actualite/dacia-lance-la-production-de-la-jogger-au-maroc-et-ouvre-les-precommandes-1050.html | access-date=2026-08-07 | archive-date=2025-01-15}}</ref>
+
+==Overview==
+[[File:Dieppe, Seine-Maritime - France (9327009984).jpg|left|thumb|Rear view (pre-facelift)]]
+[[File:Dacia Lodgy Stepway.jpg|alt=|left|thumb|Lodgy Stepway (pre-facelift)]]
+[[File:GIMS_2019,_Le_Grand-Saconnex_(GIMS0724).jpg|left|thumb|Lodgy Stepway (facelift)]]
+The Lodgy shares the [[Nissan B platform|Dacia M0 platform]] with the contemporary [[Dacia Logan]], [[Dacia Sandero]] and [[Renault Symbol]]. It is powered by a choice of [[Inline-four engine|four cylinder]] engines: a 1.5 L diesel (in two variants) and two petrol engines, a 1.6 L [[Naturally aspirated engine|aspirated]] and a 1.2 L [[Turbocharger#Automotive turbochargers, diesel and gasoline|turbocharged]] Energy TCe 115.<ref>{{cite web|title=Technical Data|url=http://www.dacia.ro/modele-si-preturi/lodgy/date-tehnice.html|publisher=Automobile Dacia|access-date=6 March 2012|date=6 March 2012|language=ro}}</ref>
+
+Lodgy is the first Dacia model to offer a [[speed limiter]], on the Laureate level, and a navigation system with a seven-inch touchscreen display, as an option. Bluetooth and USB connectivity, previously introduced on the [[Dacia Duster]], are also available.<ref>{{cite web|title=Dacia Lodgy, lansată la Geneva |url=http://www.rfi.ro/articol/stiri/economie/dacia-lodgy-lansata-geneva |publisher=RFI România |access-date=6 March 2012 |date=6 March 2012 |language=ro }}{{dead link|date=December 2016 |bot=InternetArchiveBot |fix-attempted=yes }}</ref>
+
+The Lodgy received three stars in [[Euro NCAP]]'s crash test rating, considered to be the lowest result for a car in 2012.<ref>{{cite web|title=Dacia Lodgy safety test rated worst of 2012 |url=http://www.carsafetyrules.com/dacia-lodgy-safety-test-rated-worst-of-2012/ |publisher=Car Safety Rules|access-date=28 November 2012|date=29 November 2012}}</ref> In the test, the rear passenger floor panel and tunnel were completely separated, and the transmission tunnel was deformed between the front seats.<ref>{{cite web|title=Dacia budgets on safety|url=http://www.euroncap.com/Content-Web-Article/42264995-5e6e-4d2b-abf6-6c2032783494/dacia-budgets-on-safety.aspx|publisher=Euro NCAP|access-date=30 November 2012|date=28 November 2012}}</ref>
+
+The Lodgy was facelifted in 2017, which included subtle updates.
+
+The Lodgy was discontinued in Europe in early 2022 following the introduction of the [[Dacia Jogger]]. The assembly of the vehicle continued until 2024 in Morocco for the domestic market.<ref name=":0" />
+
+===India===
+Renault India launched its MPV Lodgy on 9 April 2015, at a base price Rs 8.19 lac. The Lodgy is offered in seven variants, namely: Lodgy std 85PS, Lodgy RxE 85PS, Lodgy RxL 85PS, Lodgy RxZ 85PS, Lodgy RxL 110PS, Lodgy RxZ 110PS 8 seater and Lodgy RxZ 110PS seven seater.
+
+Its major exterior features includes twin slated grille, swept back headlamps, fog lamps, chrome highlights, contemporary taillight cluster, while major interior highlights are spacious cabin, large windows, seven and eight seater option, newly designed dashboard, touch screen infotainment system, comfortable seats and multi function steering wheel with cruise control toggles.<ref name="Renault Lodgy Launched">{{cite web|url=http://www.cardekho.com/india-car-news/renault-launches-lodgy-in-india-priced-from-rs-819-lac-15657.htm| title=Renault Lodgy Launched in India| author=CarDekho Team | publisher=CarDekho.com | access-date=13 April 2015}}</ref>
+It was discontinued in India in 2020.
+{{clear}}
+
+==Engines==
+{| class="wikitable" style="text-align:center; font-size:90%;"
+|-  style="text-align:center; background:#dcdcdc; vertical-align:middle;"
+! Code !! Capacity !! Type !! Power !! Torque !! Top speed !! Acceleration 0–100&nbsp;km/h<br />(0-62&nbsp;mph) !! Combined consumption !! [[Emission standard|CO<sub>2</sub> emissions]]
+|-
+| [[Nissan HR engine#H5Ft|H5Ft&nbsp;402]] || 1,198 cc || [[DOHC]] 16v [[Turbocharger|Turbo]] || {{cvt|115|PS|kW hp|0}} at 4500&nbsp;rpm || {{cvt|190|Nm|lbft|0}} at 1500&nbsp;rpm ||{{Convert|179|km/h|mi/h|0|abbr=on}} || 10.6 s || {{convert|6|L/100 km|abbr=on}} || 140 [[gram|g]]/km
+|-
+| H5H 470 || 1,333 cc || [[DOHC]] 16v [[Turbocharger|Turbo]] || {{cvt|130|PS|kW hp|0}} at 5000&nbsp;rpm || {{cvt|240|Nm|lbft|0}} at 1600&nbsp;rpm ||{{Convert|193|km/h|mi/h|0|abbr=on}}  || 9.3 s || {{convert|6.1|L/100 km|abbr=on}} || 142 [[gram|g]]/km
+|-
+| [[Renault K-Type engine#K7M|K7M&nbsp;812]] || 1,598 cc || SOHC 8v || {{cvt|85|PS|kW hp|0}} at 5000&nbsp;rpm || {{cvt|134|Nm|lbft|0}} at 3000&nbsp;rpm || {{Convert|160|km/h|mi/h|0|abbr=on}} || 14.5 s || {{convert|7.1|L/100 km|abbr=on}} || 165 g/km
+|-
+| [[Renault K-Type engine#K9K dCi|K9K&nbsp;612]] || 1,461 cc || [[SOHC]] 8v Turbo [[Diesel engine|Diesel]] || {{cvt|90|PS|kW hp|0}} at 3750&nbsp;rpm || {{cvt|200|Nm|lbft|0}} at 1750&nbsp;rpm ||{{Convert|169|km/h|mi/h|0|abbr=on}} || 12.4 s || {{convert|4.2|L/100 km|abbr=on}} || 109 g/km
+|-
+| K9K 846 || 1,461 cc || SOHC 8v Turbo Diesel || {{cvt|110|PS|kW hp|0}} at 4000&nbsp;rpm || {{cvt|240|Nm|lbft|0}} at 1750&nbsp;rpm ||{{Convert|175|km/h|mi/h|0|abbr=on}} || 11.6 s || {{convert|4.4|L/100 km|abbr=on}} || 116 g/km
+|}
+
+==Lodgy Glace==
+[[File:Dacia Lodgy glace.jpg|right|thumb|Lodgy Glace]]
+In November 2011, Dacia announced that it would take part in the [[Andros Trophy]], revealing the new Lodgy for the first time, in an [[ice racing]] version called Lodgy Glace. Unlike the production version, the Lodgy Glace featured a rear [[mid-engine, four-wheel-drive layout]] and was powered by a 3.0 litre [[V6 engine|V6]] engine, which produced {{convert|355|bhp|kW PS|0|abbr=on}} and {{convert|265|lbft|Nm|0|abbr=on}} of torque.
+
+Two models were raced by father and son [[Alain Prost]] and [[Nicolas Prost]], and the third by [[Evens Stievenart]].<ref>{{cite web|title=Dacia Lodgy ice racer shown|url=http://www.autocar.co.uk/News/NewsArticle/AllCars/260066/|publisher=Autocar|access-date=6 January 2012|date=14 November 2011}}</ref> The team eventually won the competition, with Alain Prost as the first placed driver, gaining four victories and six other podium finishes.
+
+The seven rounds took place in [[Val Thorens]], [[Andorra]], [[Alpe d'Huez]], [[Isola 2000]], [[Lans-en-Vercors]], [[Saint-Dié-des-Vosges]] and [[Super Besse]].<ref>{{cite web|title=Rapports de courses - Trophée Andros|url=http://www.dacia.fr/univers-dacia/evenements/trophee-andros/rapports-de-courses/|publisher=Dacia France|access-date=14 August 2013|archive-url=https://web.archive.org/web/20130206053158/http://www.dacia.fr/univers-dacia/evenements/trophee-andros/rapports-de-courses/|archive-date=6 February 2013|url-status=dead}}</ref> It was the first MPV model to win the competition,<ref>{{cite web|title=Prost și Dacia Lodgy "Glace" încununați de succes la Trofeul Andros!|url=http://www.daciagroup.com/presa/comunicate-de-presa/2012/prost-si-dacia-lodgy-glace-incununati-de-succes-la-trofeul-andros|publisher=Dacia|access-date=14 August 2013|date=30 January 2012}}</ref> and the second model from Dacia to compete in the Andros Trophy, after the [[Dacia Duster|Duster]] took part in the seasons of 2010 and 2011.<ref>{{cite web|title=Dacia Lodgy "Glace": o masina deosebita si un sezon deosebit la Trofeul Andros|url=http://www.daciagroup.com/presa/comunicate-de-presa/2011/dacia-lodgy-glace-o-masina-deosebita-si-un-sezon-deosebit-la-trofeul|publisher=Dacia|access-date=13 August 2013|date=14 November 2011}}</ref>
+
+== Safety ==
+The Renault Lodgy for India with no airbags and no [[Anti-lock braking system|ABS]] received 0 stars for adult occupants and 2 stars for toddlers from [[Global NCAP]] 1.0 in 2018 (similar to [[Latin NCAP]] 2013).<ref>[https://static1.squarespace.com/static/5fb4ea8933ae6c208c3dac41/t/605dea98fb4e832a5be7b166/1616767641365/Renault-Lodgy.pdf Renault-Lodgy. No airbags] Global NCAP</ref>
+{{Global NCAP
+|year=2018
+|region=India
+|description=Renault Lodgy – No Airbags
+|reference_code=Renault-Lodgy.pdf
+|adult_stars=0
+|adult_points=0.00
+|child_stars=2
+|child_points=15.67
+}}
+
+==References==
+{{Reflist}}
+
+==External links==
+{{Commons category|Dacia Lodgy}}
+*[http://www.renault.com/en/vehicules/dacia/pages/lodgy.aspx Official Dacia Lodgy website]
+*[http://www.fuelarc.com/cars/renault/lodgy-stepway-7-seater/ Renault Lodgy Stepway]
+*[https://www.carmanualsonline.info/dacia-lodgy-2012-1-g-owners-manual Owner's Manual]
+
+{{Dacia}}
+{{Automobile Dacia}}
+
+{{DEFAULTSORT:Dacia Lodgy}}
+[[Category:Dacia vehicles|Lodgy]]
+[[Category:Cars of Romania]]
+[[Category:Front-wheel-drive vehicles]]
+[[Category:Compact MPVs]]
+[[Category:Global NCAP small MPVs]]
+[[Category:2010s cars]]
+[[Category:Cars introduced in 2012]]
+[[Category:Cars discontinued in 2022]]
+[[Category:Cars of India]]
+[[Category:Cars of Morocco]]

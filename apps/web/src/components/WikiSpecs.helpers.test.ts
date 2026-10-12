@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest'
 
 import {
   engineMatchesCar,
+  engineRows,
   engineVsCar,
   formatDimension,
   formatEngine,
@@ -9,6 +10,7 @@ import {
   generationYearOf,
   sortEnginesByFit,
   splitWikiCodes,
+  wikiRowCodes,
   wikiSourceLabel
 } from '@/components/WikiSpecs.helpers'
 
@@ -78,6 +80,35 @@ describe('splitWikiCodes', () => {
       chassis: []
     })
     expect(splitWikiCodes(['1798', 'XV40', 'ACV31'])).toEqual({ engine: [], chassis: ['XV40', 'ACV31'] })
+  })
+})
+
+describe('wikiRowCodes', () => {
+  it('trusts the stored split, even where the shape guess would misfile', () => {
+    expect(wikiRowCodes({ engineCodes: ['GSE20'], chassisCodes: ['ALE20'] })).toEqual({
+      engine: ['GSE20'],
+      chassis: ['ALE20']
+    })
+    expect(wikiRowCodes({ engineCodes: [], chassisCodes: ['B48'] })).toEqual({ engine: [], chassis: ['B48'] })
+    expect(wikiRowCodes({ engineCodes: ['CJZA'] })).toEqual({ engine: ['CJZA'], chassis: [] })
+  })
+
+  it('falls back to the shape guess for old rows without engineCodes', () => {
+    expect(wikiRowCodes({ chassisCodes: ['2TR-FE', 'FK1'] })).toEqual({ engine: ['2TR-FE'], chassis: ['FK1'] })
+    expect(wikiRowCodes({ chassisCodes: ['2TR-FE', 'FK1'], engineCodes: null })).toEqual({
+      engine: ['2TR-FE'],
+      chassis: ['FK1']
+    })
+    expect(wikiRowCodes({})).toEqual({ engine: [], chassis: [] })
+  })
+})
+
+describe('engineRows codes', () => {
+  const t = (key: string): string => key
+  it('shows the stored codes under their own rows', () => {
+    const rows = engineRows({ raw: '', powerKw: 100, engineCodes: ['GSE20'], chassisCodes: ['ALE20'] }, t)
+    expect(rows.find(r => r.key === 'engineCode')?.value).toBe('GSE20')
+    expect(rows.find(r => r.key === 'chassisCode')?.value).toBe('ALE20')
   })
 })
 
