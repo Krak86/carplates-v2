@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs'
 import { describe, it, expect } from 'vitest'
 
 import {
+  cellPower,
   engineTemplates,
   parseEngine,
   parseWikiSpecs,
@@ -24,6 +25,15 @@ describe('powerKwOf', () => {
     expect(powerKwOf('100 hp')).toBe(75)
     expect(powerKwOf('86 л. с.')).toBe(63)
     expect(powerKwOf('5500 rpm')).toBeNull()
+  })
+})
+
+describe('cellPower', () => {
+  it('keeps a real range but drops the hybrid motor line', () => {
+    expect(cellPower(['201 hp', '205 hp'])).toEqual({ kw: 150, max: null })
+    expect(cellPower(['110 kW', '150 kW'])).toEqual({ kw: 110, max: 150 })
+    expect(cellPower(['195 kW (265 PS)', '8 kW (11 PS)'])).toEqual({ kw: 195, max: null })
+    expect(cellPower(['250 kW', '235 kW', '40 kW'])).toEqual({ kw: 235, max: 250 })
   })
 })
 

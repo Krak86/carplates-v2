@@ -813,10 +813,16 @@ type DimKind = 'wheelbase' | 'length' | 'width' | 'height' | 'weight' | 'tank'
 const isDimKind = (k: ColumnKind | null): k is DimKind =>
   k === 'wheelbase' || k === 'length' || k === 'width' || k === 'height' || k === 'weight' || k === 'tank'
 
-/** Power of a cell: one value when its lines agree (kW and PS of the same engine), else the min–max across lines. */
-function cellPower(lines: string[]): { kw: number | null; max: number | null } {
-  const vals = lines.map(powerKwOf).filter((v): v is number => v !== null)
-  if (vals.length === 0) return { kw: null, max: null }
+/**
+ * Power of a cell: one value when its lines agree (kW and PS of the same engine), else the min–max across lines. A line
+ * under a quarter of the strongest one is the electric motor / 48 V booster of a hybrid ("195 kW … 8 kW (11 PS)"), not a
+ * second engine rating, so it is left out.
+ */
+export function cellPower(lines: string[]): { kw: number | null; max: number | null } {
+  const all = lines.map(powerKwOf).filter((v): v is number => v !== null)
+  if (all.length === 0) return { kw: null, max: null }
+  const top = Math.max(...all)
+  const vals = all.filter(v => v >= top * 0.25)
   const lo = Math.min(...vals)
   const hi = Math.max(...vals)
   if (hi - lo <= hi * 0.03) return { kw: vals[0]!, max: null }
