@@ -7,11 +7,13 @@
  *   pnpm ingest:mot -- --dir … --dry-run                       # aggregate, print sizes, write nothing to the DB
  *   pnpm ingest:mot -- --dir … --reuse-aggregate               # skip the ZIP pass: load the last cached aggregate
  *   pnpm ingest:mot -- --dir … --refresh-census                # redo the per-year make/model census (cached otherwise)
+ *   pnpm ingest:mot -- --dir … --years 2025 --merge           # ADD these years onto the tables (refuses a year already pooled)
  *   pnpm ingest:mot -- --from-csv seed-data/mot.csv.gz        # load the committed seed, no ZIPs needed
  *   pnpm ingest:mot -- --export-csv seed-data/mot.csv.gz       # dump the tables after a real ingest
  *
- * Download (not done by the script): https://data.dft.gov.uk/anonymised-mot-test/test_data/dft_test_result_<Y>.zip,
- * …/dft_test_item_<Y>.zip and https://data.dft.gov.uk/anonymised-mot-test/lookup.zip — put them in one folder.
+ * Download (not done by the script): the yearly result + item ZIPs and the lookup — see DATASETS_PLAN.md (2024+: `dft_test_*_extracts_<Y>.zip`
+ * + `dft_item_detail_extract.csv` + `dft_item_group_extract.csv`; up to 2023: `dft_test_*_<Y>.zip` + `lookup.zip`) — in one folder.
+ * ZIPs over 4 GB need 7-Zip on the machine (Info-ZIP unzip and Windows tar cannot read Zip64 here).
  */
 import { existsSync, readdirSync } from 'node:fs'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
@@ -25,7 +27,7 @@ import { MOT_GROUP_CODES } from '@carplates/shared'
 import { type MotFiles, MotAggregator, cachedCensus } from './mot-aggregate.js'
 import { csvPartCount } from './mot-zip.js'
 import { buildReasonIndex, loadMotLookup } from './mot-lookup.js'
-import { type MotData, exportMot, importMot, saveMot } from './mot-store.js'
+import { type MotData, exportMot, importMot, mergeMot, saveMot } from './mot-store.js'
 
 const log = (...m: unknown[]): void => {
   console.log(...m)
@@ -40,6 +42,7 @@ const { values } = parseArgs({
     'dry-run': { type: 'boolean', default: false },
     'refresh-census': { type: 'boolean', default: false },
     'reuse-aggregate': { type: 'boolean', default: false },
+    merge: { type: 'boolean', default: false },
     'from-csv': { type: 'string' },
     'export-csv': { type: 'string' }
   }
@@ -50,13 +53,14 @@ function findFiles(dir: string, only: number[] | null): MotFiles[] {
   const names = new Set(readdirSync(dir))
   const files: MotFiles[] = []
   for (const name of names) {
-    const m = /^dft_test_result_(\d{4})\.zip$/.exec(name)
+    // 2021-23: `dft_test_result_<Y>.zip`; 2024+: `dft_test_result_extracts_<Y>.zip` (twelve monthly CSVs, Zip64)
+    const m = /^dft_test_result_(?:extracts_)?(\d{4})\.zip$/.exec(name)
     if (!m) continue
     const year = Number(m[1])
-    const item = `dft_test_item_${year}.zip`
+    const item = [`dft_test_item_${year}.zip`, `dft_test_item_extracts_${year}.zip`].find(n => names.has(n))
     if (only && !only.includes(year)) continue
-    if (!names.has(item)) {
-      log(`skip ${year}: ${item} is missing`)
+    if (!item) {
+      log(`skip ${year}: the item ZIP is missing`)
       continue
     }
     const itemPath = join(dir, item)
@@ -148,8 +152,13 @@ async function main(): Promise<void> {
 
   const { db, close } = createDb()
   try {
-    await saveMot(db, rows)
-    log('tables replaced')
+    if (values.merge) {
+      const merged = await mergeMot(db, rows)
+      log(`merged: tables now pool ${merged.years.join(', ')}`)
+    } else {
+      await saveMot(db, rows)
+      log('tables replaced')
+    }
   } finally {
     await close()
   }

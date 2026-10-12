@@ -750,7 +750,7 @@ What the pre-2018 layout needs (a separate parser path, **not loaded without the
 - **Layout:** every pre-2022 pair so far is multi-part and quoted/comma-delimited (2021 is; older ones unverified): the reader (`mot-zip.ts`) already handles that, the scattered-rows bookkeeping switches on by itself (`MotFiles.scattered`) and needs the extra ~1 GB.
 - `location_id` is wrong before 2022 (not used).
 
-**Stage G2 — MOT 2024 + 2025 (decided 2026-10-12; not started).** Scope = add the 2024 and 2025 years only; **pre-2018 is split out as Stage G3 (parked, below)**.
+**Stage G2 — MOT 2024 + 2025 (decided 2026-10-12; step 1 = 2025 ✅ DONE 2026-10-12 and merged into the DB, step 2 = 2024 next).** Scope = add the 2024 and 2025 years only; **pre-2018 is split out as Stage G3 (parked, below)**.
 **Start rule: nothing is built until the owner has downloaded the files below and gives the agent the folder path.** At the start of G2 the agent re-prints this list, then waits for the path.
 
 Files to download (all `https://edh-dvsa-data-gov-uk-files-prod.s3.eu-west-1.amazonaws.com/<name>`, OGL v3; ≈ 18.3 GB of ZIPs; the host ignores range requests, so use a normal browser/`curl -O` download, resume is not available):
@@ -768,6 +768,18 @@ Files to download (all `https://edh-dvsa-data-gov-uk-files-prod.s3.eu-west-1.ama
 | `dft_mdr_fuel_type_extract.csv`                               | 261 B   |
 | `dft_mdr_rfr_location_extract.csv`                            | 2.9 KB  |
 | `mot-testing-data-user-guide-v5.1.odt` (optional)             | 74 KB   |
+
+**Download in steps (decided 2026-10-12; DVSA publishes one result ZIP + one item ZIP per year, so year is the finest split, half-years are not possible).** Keep every file in **one folder**, ZIPs unextracted; each year's result + item ZIPs are only usable as a pair.
+
+- **Step 0 — lookups (~4 MB):** the six small CSVs + optional `.odt`. Download first (a wrong URL fails fast).
+- **Step 1 — 2025 (~9.2 GB):** `dft_test_result_extracts_2025.zip` + `dft_test_item_extracts_2025.zip`. Newest year, most useful if we stop here.
+- **Step 2 — 2024 (~9.1 GB):** `dft_test_result_extracts_2024.zip` + `dft_test_item_extracts_2024.zip`.
+
+**Step 1 result (2026-10-12, folder `C:\Users\rkor\Downloads\UK_MOT`):** 2025 = 42.7M tests (40.2M class 4, 1.37M class 7, 1.08M class 1/2), 35.6M normal tests, 92.5M item rows (61.7M advisories A), twelve monthly CSVs per ZIP, **Zip64 -> 7-Zip needed**, item rows of one test scattered > 65k rows apart (exact counting mode), `\"` quote escape, 44 short rows skipped. Aggregate: 4,916 tracked models, 35.2M indexed tests, ~3m40s; car fail rate 22.4 % (22.8 % for 2021–23). **Merged onto the DB** (`--reuse-aggregate --merge`): `mot_meta.years` = 2021, 2022, 2023, 2025; 6,260 tracked models; seed `seed-data/mot.csv.gz` re-exported. Pre-merge backup: `scripts/.data/mot/backup-2021-2023.csv.gz` (local). Decision taken: **do not drop 2021–23 — keep adding years with `--merge`** (pooled window 2021–25; the 2021 km-in-miles risk stays as accepted before).
+
+**Step 2 (2024), what the next session does:** the ZIPs `dft_test_{result,item}_extracts_2024.zip` are already in the folder. (1) `pnpm ingest:mot -- --dir C:/Users/rkor/Downloads/UK_MOT --years 2024 --dry-run` (~4 min; profile the printed sizes/diagnostics, compare the car fail rate with 2025 / 2021–23), (2) back the tables up first: from `scripts/`, `node --import tsx src/mot.ts --export-csv .data/mot/backup-before-2024.csv.gz`, (3) `pnpm ingest:mot -- --dir … --years 2024 --reuse-aggregate --merge` (refuses if 2024 is already pooled), (4) `pnpm export:mot:csv`, check `git diff --stat`, (5) browser-check the "Common faults" section of a car, (6) docs: tick this stage in `PLAN.md`, write-up in `docs/plan-done.md`, then give a commit message. Stop for a commit message, do not commit.
+
+**Session flow:** "go stage G2 step1" → owner gives the folder path holding step 0 + step 1 files → agent lists ZIP entries, profiles 2025 (row counts, classes, test types, mileage units, advisories `rfr_type_code` A), reports, builds/tests the ingest on 2025 alone, and stops with a commit message. "go stage G2 step2" → same for 2024 once its ZIPs are in the folder, then decide the pooled window (2023–2025 vs 2022–2025; 2021 is the km-in-miles risk year), reload, docs (`SCHEDULE.md`, `docs/features-reference.md`, `PLAN.md` ✅, `docs/plan-done.md`).
 
 Put everything in **one folder** (the ZIPs unextracted). Not needed: the older-layout `MOT+testing+data+results+(2024).zip` / `MOT+Testing+data+failure+item+(2024).zip` (2.2 GB; the 0.68 GB item file looks failures-only, and there is no 2025 equivalent).
 First steps once the path is given: list ZIP entries, profile row counts / classes / test types / mileage units / whether advisories (`rfr_type_code` A) are present, report, then decide the pooled window (2023–2025 vs 2022–2025; 2021 is the km-in-miles risk year) with the owner.

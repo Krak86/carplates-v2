@@ -1,4 +1,6 @@
+import { existsSync, createReadStream } from 'node:fs'
 import { join } from 'node:path'
+import { type Readable } from 'node:stream'
 
 import { type MotGroupCode } from '@carplates/shared'
 
@@ -40,16 +42,28 @@ export type MotReasonInfo = {
 
 type Node = { parent: string; name: string }
 
+/** The two lookup tables: inside `lookup.zip` (up to 2023) or as the loose `dft_item_*_extract.csv` files (2024+ downloads). */
+function lookupSources(dir: string): { group: () => Readable; detail: () => Readable } {
+  const zip = join(dir, 'lookup.zip')
+  if (existsSync(zip))
+    return { group: () => openZipCsv(zip, 'item_group'), detail: () => openZipCsv(zip, 'item_detail') }
+  const group = join(dir, 'dft_item_group_extract.csv')
+  const detail = join(dir, 'dft_item_detail_extract.csv')
+  if (!existsSync(group) || !existsSync(detail))
+    throw new Error(`${dir}: needs lookup.zip or dft_item_group_extract.csv + dft_item_detail_extract.csv`)
+  return { group: () => createReadStream(group), detail: () => createReadStream(detail) }
+}
+
 /**
- * `rfr_id` → group + wording from `lookup.zip`. The same `rfr_id` carries the same top-level group in every vehicle class
+ * `rfr_id` → group + wording from the lookup tables (see `lookupSources`). The same `rfr_id` carries the same top-level group in every vehicle class
  * (checked on the 2023 lookup: 5,768 ids in 2+ classes, 0 differ), so the class is not needed to resolve a reason.
  */
 export async function loadMotLookup(dir: string): Promise<Map<number, MotReasonInfo>> {
-  const zip = join(dir, 'lookup.zip')
+  const src = lookupSources(dir)
   const nodes = new Map<string, Node>()
   let ix: Record<string, number> = {}
   await forEachCsvLine(
-    openZipCsv(zip, 'item_group'),
+    src.group(),
     h => {
       ix = Object.fromEntries(h.map((c, i) => [c, i]))
     },
@@ -76,7 +90,7 @@ export async function loadMotLookup(dir: string): Promise<Map<number, MotReasonI
 
   const out = new Map<number, MotReasonInfo>()
   await forEachCsvLine(
-    openZipCsv(zip, 'item_detail'),
+    src.detail(),
     h => {
       ix = Object.fromEntries(h.map((c, i) => [c, i]))
     },

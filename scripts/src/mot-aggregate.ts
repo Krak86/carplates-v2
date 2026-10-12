@@ -78,6 +78,8 @@ type Cols = {
   make: number
   model: number
   firstUse: number
+  /** Columns a well-formed row has; a shorter one is a mis-split line. */
+  width: number
 }
 
 const resultCols = (h: string[]): Cols => {
@@ -99,7 +101,8 @@ const resultCols = (h: string[]): Cols => {
     mileage: ix.test_mileage!,
     make: ix.make!,
     model: ix.model!,
-    firstUse: ix.first_use_date!
+    firstUse: ix.first_use_date!,
+    width: h.length
   }
 }
 
@@ -116,6 +119,7 @@ export async function censusYear(file: MotFiles): Promise<Census> {
       c = resultCols(h)
     },
     r => {
+      if (r.length < c.width) return
       const kind = KIND_BY_CLASS[r[c.cls]!]
       if (!kind || r[c.type] !== 'NT' || !COMPLETED.has(r[c.result]!)) return
       const k = keys.get(r[c.make]!.trim().toUpperCase(), r[c.model]!.trim().toUpperCase())
@@ -163,16 +167,20 @@ class PairSet {
   private readonly a: Uint32Array
   private readonly b: Uint32Array
   private readonly mask: number
+  private readonly limit: number
+  private count = 0
   constructor(bits: number) {
     this.a = new Uint32Array(1 << bits)
     this.b = new Uint32Array(1 << bits)
     this.mask = (1 << bits) - 1
+    this.limit = Math.floor((1 << bits) * 0.85)
   }
   /** True when the pair was new. `code` must be >= 1 (0 marks an empty slot). */
   add(test: number, code: number): boolean {
     let i = (Math.imul(test ^ Math.imul(code, 0x85ebca6b), 0x9e3779b1) >>> 0) & this.mask
     for (;;) {
       if (this.b[i] === 0) {
+        if (++this.count > this.limit) throw new Error('PairSet is over 85 % full: raise its bits')
         this.a[i] = test
         this.b[i] = code
         return true
@@ -351,6 +359,10 @@ export class MotAggregator {
         c = resultCols(h)
       },
       r => {
+        if (r.length < c.width) {
+          this.bump('shortRow')
+          return
+        }
         const kind = KIND_BY_CLASS[r[c.cls]!]
         if (!kind || r[c.type] !== 'NT') return
         const res = r[c.result]!
@@ -434,20 +446,23 @@ export class MotAggregator {
         if (id !== lastTest) {
           flush()
           lastTest = id
-          const known = recent.get(id)
-          if (known) {
-            seen = known
-            this.bump('interleavedTests')
-          } else {
-            seen = newSeen()
-            recent.set(id, seen)
-            if (recent.size > RECENT_TESTS) recent.delete(recent.keys().next().value!)
+          // Exact mode keeps everything per test id in the table / pair set, so no window of recent tests is needed.
+          const known = exact ? undefined : recent.get(id)
+          if (!exact) {
+            if (known) {
+              seen = known
+              this.bump('interleavedTests')
+            } else {
+              seen = newSeen()
+              recent.set(id, seen)
+              if (recent.size > RECENT_TESTS) recent.delete(recent.keys().next().value!)
+            }
           }
           slot = this.table.slot(id)
           if (slot < 0) this.bump('itemTestMissing')
           else {
             payload = this.table.get(slot)
-            if (payload & F_VISITED && !known) this.bump('revisitedBeyondWindow')
+            if (payload & F_VISITED && !known && !exact) this.bump('revisitedBeyondWindow')
             payload |= F_VISITED
           }
         }

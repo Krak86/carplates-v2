@@ -25,6 +25,17 @@ describe('splitQuoted', () => {
   it('keeps a doubled quote as one quote', () => {
     expect(splitQuoted('"a ""b"" c",2')).toEqual(['a "b" c', '2'])
   })
+
+  it('reads a backslash-escaped quote (2024+ files) without losing the following fields', () => {
+    expect(splitQuoted('4,TQ,LAND ROVER,"SERIES 2 88\\"",GREY,PE')).toEqual([
+      '4',
+      'TQ',
+      'LAND ROVER',
+      'SERIES 2 88"',
+      'GREY',
+      'PE'
+    ])
+  })
 })
 
 describe('forEachCsvLine', () => {

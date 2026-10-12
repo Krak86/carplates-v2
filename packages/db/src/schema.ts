@@ -1396,5 +1396,7 @@ export const motMeta = registry.table('mot_meta', {
   id: smallint('id').primaryKey().default(1),
   yearFrom: smallint('year_from').notNull(),
   yearTo: smallint('year_to').notNull(),
+  /** Every pooled test year; null only on a row from before migration 0064 that never got backfilled. */
+  years: smallint('years').array(),
   loadedAt: timestamp('loaded_at', { withTimezone: true }).notNull().defaultNow()
 })
