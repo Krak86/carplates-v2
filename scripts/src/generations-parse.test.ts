@@ -10,6 +10,7 @@ import {
   generationName,
   headingGenerations,
   infoboxField,
+  parseTitlePins,
   infoboxYears,
   parseYearRange,
   productionSpan,
@@ -239,5 +240,33 @@ describe('finishGenerations variants', () => {
   it('drops a variant article nested inside another generation', () => {
     const list = finishGenerations([gen(2013, 2018, 'F15'), gen(2014, 2018, 'F85'), gen(2018, null, 'G05')])
     expect(list.map(g => g.code)).toEqual(['F15', 'G05'])
+  })
+})
+
+describe('parseTitlePins', () => {
+  const norm = (s: string): string => s.toLowerCase().replace(/[^a-z0-9]+/g, '')
+
+  it('defaults lang to en and reads a lang column', () => {
+    const pins = parseTitlePins('query,title,lang\nVAZ 2101,VAZ-2101\nNeoplan n 116,Neoplan Cityliner,de\n', norm)
+    expect(pins.get('vaz2101')).toEqual({ lang: 'en', title: 'VAZ-2101' })
+    expect(pins.get('neoplann116')).toEqual({ lang: 'de', title: 'Neoplan Cityliner' })
+  })
+
+  it('still reads the two-column form', () => {
+    expect(parseTitlePins('query,title\nZil 130,ZIL-130\n', norm).get('zil130')).toEqual({
+      lang: 'en',
+      title: 'ZIL-130'
+    })
+  })
+})
+
+describe('productionSpan in other editions', () => {
+  it('reads the de infobox field', () => {
+    expect(
+      productionSpan('{{Infobox Bus\n | Marke = Setra\n | Produktionszeitraum = 1991–2002\n | Achsen = 2\n}}')
+    ).toEqual({
+      from: 1991,
+      to: 2002
+    })
   })
 })

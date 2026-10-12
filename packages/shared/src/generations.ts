@@ -15,7 +15,7 @@ export const generationSchema = z.object({
   yearTo: z.number().int().nullable(),
   bodyStyles: z.string(),
   platform: z.string(),
-  /** English Wikipedia article (or the series article for heading-derived rows). */
+  /** English Wikipedia article (or the series article for heading-derived rows); `de:Title` when another edition is the source. */
   wikiTitle: z.string()
 })
 export type Generation = z.infer<typeof generationSchema>
@@ -45,6 +45,18 @@ export const generationsResponseSchema = z.object({
     .nullable()
 })
 export type GenerationsResponse = z.infer<typeof generationsResponseSchema>
+
+/** A stored `wiki_title`: `Toyota Camry (XV40)` (en) or `de:Neoplan Cityliner` (a pinned article of another edition). */
+export function splitWikiTitle(stored: string): { lang: string; title: string } {
+  const m = /^([a-z]{2,3}):(.+)$/.exec(stored)
+  return m ? { lang: m[1]!, title: m[2]! } : { lang: 'en', title: stored }
+}
+
+/** Article URL of a stored `wiki_title` (`ua` is the app's code for the `uk` edition). */
+export function wikiTitleUrl(stored: string): string {
+  const { lang, title } = splitWikiTitle(stored)
+  return `https://${lang === 'ua' ? 'uk' : lang}.wikipedia.org/wiki/${encodeURIComponent(title.replace(/ /g, '_'))}`
+}
 
 /** The generation whose production span contains `year`; the newest of two when a shared boundary year matches both. */
 export function pickGeneration<T extends Pick<Generation, 'yearFrom' | 'yearTo'>>(

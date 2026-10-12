@@ -3,6 +3,8 @@
  * article titles) → generation rows. No network, no DB. Facts only (years, codes, body styles) — Wikipedia text is CC BY-SA.
  */
 
+import { parse as parseCsv } from 'csv-parse/sync'
+
 export type Generation = {
   /** Short code: `XV40`, `Mk5`, `Typ 1U`, or `''` when the source names none. */
   code: string
@@ -68,7 +70,7 @@ export function infoboxBlock(wikitext: string): string {
 /** The `{{Infobox automobile}}` field `name` of the wikitext, cleaned; `''` when absent. */
 export function infoboxField(page: string, name: string): string {
   const wikitext = infoboxBlock(page)
-  const start = wikitext.search(new RegExp(`\\n\\s*\\|\\s*${name}\\s*=`, 'i'))
+  const start = wikitext.search(new RegExp(`\\n\\s*\\|\\s*(?:${name})\\s*=`, 'i'))
   if (start < 0) return ''
   const rest = wikitext.slice(start + 1)
   const eq = rest.indexOf('=')
@@ -373,12 +375,29 @@ export function fillGaps(best: Generation[], others: Generation[]): Generation[]
   return extra.length === 0 ? best : finishGenerations([...best, ...extra])
 }
 
+/** `production` and its names in the other editions' infoboxes (de Infobox Bus; ru/uk card templates). */
+const PRODUCTION_FIELD =
+  'production|Produktionszeitraum|Годы производства|годы выпуска|Роки виробництва|роки виробництва'
+
+export type TitlePin = { lang: string; title: string }
+
+/** `generations-titles.csv` (`query,title[,lang]`): the article to read for a registry name; `lang` defaults to en. */
+export function parseTitlePins(csv: string, normalize: (query: string) => string): Map<string, TitlePin> {
+  const out = new Map<string, TitlePin>()
+  for (const r of parseCsv(csv, { columns: true, skip_empty_lines: true, relax_column_count: true }) as Record<
+    string,
+    string
+  >[])
+    out.set(normalize(r.query!), { lang: r.lang?.trim() || 'en', title: r.title! })
+  return out
+}
+
 /**
  * The widest production span an article states, for a model with ONE generation: `1997–2002 (Daewoo) / 1997–2020 (licence-built)`
  * → 1997–2020, because licence-built cars (ZAZ Lanos until 2017) sit in our registry. null end = still produced.
  */
 export function productionSpan(wikitext: string): { from: number; to: number | null } | null {
-  const text = infoboxField(wikitext, 'production')
+  const text = infoboxField(wikitext, PRODUCTION_FIELD)
   const years = [...text.matchAll(/(?<!\d)((?:19|20)\d{2})(?!\d)/g)].map(m => Number(m[1])).filter(validYear)
   if (years.length === 0)
     return infoboxYears(wikitext) && { from: infoboxYears(wikitext)!.from, to: infoboxYears(wikitext)!.to ?? null }

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { generationSpan, pickGeneration } from './generations.js'
+import { generationSpan, pickGeneration, splitWikiTitle, wikiTitleUrl } from './generations.js'
 
 const list = [
   { yearFrom: 1996, yearTo: 2001 },
@@ -34,5 +34,22 @@ describe('generationSpan', () => {
     expect(generationSpan({ yearFrom: 2006, yearTo: 2011 })).toBe('2006–2011')
     expect(generationSpan({ yearFrom: 2006, yearTo: 2006 })).toBe('2006')
     expect(generationSpan({ yearFrom: 2020, yearTo: null })).toBe('2020–')
+  })
+})
+
+describe('splitWikiTitle / wikiTitleUrl', () => {
+  it('reads a plain title as en', () => {
+    expect(splitWikiTitle('Toyota Camry (XV40)')).toEqual({ lang: 'en', title: 'Toyota Camry (XV40)' })
+    expect(wikiTitleUrl('Honda CBR600RR')).toBe('https://en.wikipedia.org/wiki/Honda_CBR600RR')
+  })
+
+  it('reads a `lang:` prefix as that edition', () => {
+    expect(splitWikiTitle('de:Neoplan Cityliner')).toEqual({ lang: 'de', title: 'Neoplan Cityliner' })
+    expect(wikiTitleUrl('de:Neoplan Cityliner')).toBe('https://de.wikipedia.org/wiki/Neoplan_Cityliner')
+    expect(wikiTitleUrl('ua:Ява-350')).toContain('https://uk.wikipedia.org/wiki/')
+  })
+
+  it('keeps colons inside an en title', () => {
+    expect(splitWikiTitle('Fiat 500: Nuova')).toEqual({ lang: 'en', title: 'Fiat 500: Nuova' })
   })
 })

@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import type { WikiSpecs } from '@carplates/shared'
 
-import { mergeEditions, wikiLangChain, type Edition } from './wikispecs-merge.js'
+import { editionTargets, mergeEditions, wikiLangChain, type Edition } from './wikispecs-merge.js'
 
 const measure = (value: number) => ({ value, min: value, max: value })
 const empty = (): WikiSpecs => ({
@@ -92,5 +92,34 @@ describe('mergeEditions', () => {
       mergeEditions(KEY, [ed('en', { engines: [noPower, noPower] }), ed('uk', { engines: [ENGINE] })], false)
         ?.enginesLang
     ).toBe('uk')
+  })
+})
+
+describe('editionTargets', () => {
+  const links = [
+    { lang: 'ru', title: 'ru-link' },
+    { lang: 'de', title: 'de-link' }
+  ]
+  const chain = ['en', 'ru', 'uk', 'de']
+
+  it('en primary: the others come from the langlinks, a pin wins', () => {
+    const out = editionTargets('en', links, chain, l => (l === 'ru' ? 'ru-pin' : undefined))
+    expect(out).toEqual([
+      { lang: 'en', title: undefined },
+      { lang: 'ru', title: 'ru-pin' },
+      { lang: 'uk', title: undefined },
+      { lang: 'de', title: 'de-link' }
+    ])
+  })
+
+  it('de primary: de keeps its own page, en and the rest come from the de langlinks', () => {
+    const out = editionTargets('de', [{ lang: 'en', title: 'en-link' }], chain, () => undefined)
+    expect(out.find(t => t.lang === 'de')).toEqual({ lang: 'de', title: undefined })
+    expect(out.find(t => t.lang === 'en')).toEqual({ lang: 'en', title: 'en-link' })
+    expect(out.map(t => t.lang)).toEqual(chain)
+  })
+
+  it('a primary edition outside the chain is still read', () => {
+    expect(editionTargets('pl', [], chain, () => undefined).map(t => t.lang)).toEqual([...chain, 'pl'])
   })
 })

@@ -38,6 +38,22 @@ export const wikiLangChain = (makeKey: string): string[] => [
   ...new Set([...BASE_WIKI_LANGS, ...(HOME_WIKI_LANGS[makeKey] ?? [])])
 ]
 
+/**
+ * Which edition to read for each language of the chain. The primary edition (en, or the `lang:` of the pinned title) is
+ * always read first and keeps its own page; the others come from a pin, else from the primary page's langlinks.
+ */
+export function editionTargets(
+  primaryLang: string,
+  langlinks: readonly { lang: string; title: string }[],
+  chain: readonly string[],
+  pin: (lang: string) => string | undefined
+): { lang: string; title: string | undefined }[] {
+  return [...new Set([...chain, primaryLang])].map(lang => ({
+    lang,
+    title: lang === primaryLang ? undefined : (pin(lang) ?? langlinks.find(l => l.lang === lang)?.title)
+  }))
+}
+
 export type Edition = { lang: string; title: string; revid: number | null; specs: WikiSpecs }
 
 const MAX_ENGINES = 40

@@ -20,12 +20,12 @@ import { gunzipSync, gzipSync } from 'node:zlib'
 
 import { createDb, modelSpecWiki } from '@carplates/db'
 import type { Db, ModelSpecWikiInsert, WikiEngineJson } from '@carplates/db'
-import { parseWikiSpecs } from '@carplates/shared'
+import { parseWikiSpecs, splitWikiTitle } from '@carplates/shared'
 import { parse as parseCsv } from 'csv-parse/sync'
 import { stringify as stringifyCsv } from 'csv-stringify/sync'
 import { and, eq, sql } from 'drizzle-orm'
 
-import { mergeEditions, wikiLangChain, type Edition } from './wikispecs-merge.js'
+import { editionTargets, mergeEditions, wikiLangChain, type Edition } from './wikispecs-merge.js'
 
 const USER_AGENT = 'carsua.app-ingest/1.0 (https://carsua.app; rukrak86@gmail.com)'
 const CACHE_DIR = new URL('../.data/wikispecs/', import.meta.url)
@@ -169,14 +169,15 @@ async function loadRdwModels(db: Db): Promise<Set<string>> {
 async function editionsOf(g: Generation, overrides: Map<string, Override[]>): Promise<Edition[]> {
   const pinned = overrides.get(`${g.makeKey}|${g.modelKey}|${g.yearFrom}`) ?? []
   const pin = (lang: string): string | undefined => pinned.find(o => o.lang === lang)?.title
-  const en = await fetchPage('en', pin('en') ?? g.wikiTitle, true)
-  if (!en) return []
+  // A `de:Title` wiki_title makes that edition the primary one: its langlinks supply the others.
+  const { lang: primaryLang, title: primaryTitle } = splitWikiTitle(g.wikiTitle)
+  const primary = await fetchPage(primaryLang, pin(primaryLang) ?? primaryTitle, true)
+  if (!primary) return []
   // `headings` generations share one series article: tables only count under the heading that names the generation.
   const opts = { code: g.code || g.label, series: g.source === 'headings', yearFrom: g.yearFrom }
   const out: Edition[] = []
-  for (const lang of wikiLangChain(g.makeKey)) {
-    const title = pin(lang) ?? en.langlinks?.find(l => l.lang === lang)?.title
-    const page = lang === 'en' ? en : title ? await fetchPage(lang, title, false).catch(() => null) : null
+  for (const { lang, title } of editionTargets(primaryLang, primary.langlinks ?? [], wikiLangChain(g.makeKey), pin)) {
+    const page = lang === primaryLang ? primary : title ? await fetchPage(lang, title, false).catch(() => null) : null
     const rev = page?.revisions?.[0]
     if (!page || !rev) continue
     out.push({

@@ -25,6 +25,8 @@ import { stringify as stringifyCsv } from 'csv-stringify/sync'
 import { and, eq, sql } from 'drizzle-orm'
 
 import {
+  parseTitlePins,
+  type TitlePin,
   chainScore,
   chainDefects,
   fillGaps,
@@ -43,7 +45,6 @@ import {
 
 const USER_AGENT = 'carsua.app-ingest/1.0 (https://carsua.app; rukrak86@gmail.com)'
 const CACHE_DIR = new URL('../.data/generations/', import.meta.url)
-const WIKI_API = 'https://en.wikipedia.org/w/api.php'
 const DELAY_MS = 250
 const DEFAULT_LIMIT = 300
 
@@ -95,8 +96,8 @@ async function getJson<T>(url: string): Promise<T> {
   throw new Error(`gave up after retries: ${url}`)
 }
 
-const wikiUrl = (params: Record<string, string>): string =>
-  `${WIKI_API}?${new URLSearchParams({ format: 'json', formatversion: '2', ...params }).toString()}`
+const wikiUrl = (params: Record<string, string>, lang = 'en'): string =>
+  `https://${lang}.wikipedia.org/w/api.php?${new URLSearchParams({ format: 'json', formatversion: '2', ...params }).toString()}`
 
 type Target = { make: string; model: string; query: string; cars: number }
 
@@ -151,27 +152,26 @@ const SERIES_BRAND_ALTS: Record<string, string[]> = {
   daewoo: ['Chevrolet']
 }
 
-type Series = { title: string; qid: string; wikitext: string; pinned?: boolean }
+type Series = { title: string; qid: string; wikitext: string; lang: string; pinned?: boolean }
+
+/** What `model_generations.wiki_title` stores: the plain title for en, `de:Title` for a pinned article of another edition. */
+const storedTitle = (lang: string, title: string): string => (lang === 'en' ? title : `${lang}:${title}`)
 
 const TITLE_PINS = new URL('./generations-titles.csv', import.meta.url)
 
 /** `generations-titles.csv`: the article title for registry names the search cannot find (VAZ-2109 lives in "Lada Samara"). */
-async function loadTitlePins(): Promise<Map<string, string>> {
-  const rows = parseCsv(await readFile(TITLE_PINS, 'utf8'), { columns: true, skip_empty_lines: true }) as Record<
-    string,
-    string
-  >[]
-  return new Map(rows.map(r => [norm(r.query!), r.title!]))
+async function loadTitlePins(): Promise<Map<string, TitlePin>> {
+  return parseTitlePins(await readFile(TITLE_PINS, 'utf8'), norm)
 }
 
-let titlePins: Map<string, string> | null = null
+let titlePins: Map<string, TitlePin> | null = null
 
 /** Article candidates: the registry make's own hit first, then each alternative make's. */
 async function findSeriesCandidates(t: Target): Promise<Series[]> {
   titlePins ??= await loadTitlePins()
   const pinned = titlePins.get(norm(t.query))
   if (pinned) {
-    const hit = await fetchSeries(pinned, '')
+    const hit = await fetchSeries(pinned.title, '', pinned.lang)
     return hit ? [{ ...hit, pinned: true }] : []
   }
   const out: Series[] = []
@@ -201,26 +201,29 @@ async function findSeriesOfBrand(t: Target, make: string): Promise<Series | null
     .filter(p => !p.title.includes('(') && norm(p.title).includes(model) && norm(p.title).includes(brand))
     .sort((a, b) => a.title.length - b.title.length)[0]
   if (!hit) return null
-  return fetchSeries(hit.title, hit.pageprops?.wikibase_item ?? '')
+  return fetchSeries(hit.title, hit.pageprops?.wikibase_item ?? '', 'en')
 }
 
 /** The article (redirects followed) with its wikitext and Wikidata id. */
-async function fetchSeries(title: string, fallbackQid: string): Promise<Series | null> {
+async function fetchSeries(title: string, fallbackQid: string, lang: string): Promise<Series | null> {
   const rev = await getJson<RevisionResponse>(
-    wikiUrl({
-      action: 'query',
-      prop: 'revisions|pageprops',
-      rvprop: 'content',
-      rvslots: 'main',
-      redirects: '1',
-      titles: title,
-      ppprop: 'wikibase_item'
-    })
+    wikiUrl(
+      {
+        action: 'query',
+        prop: 'revisions|pageprops',
+        rvprop: 'content',
+        rvslots: 'main',
+        redirects: '1',
+        titles: title,
+        ppprop: 'wikibase_item'
+      },
+      lang
+    )
   )
   const page = rev.query?.pages?.[0]
   const wikitext = page?.revisions?.[0]?.slots.main.content ?? ''
   const qid = page?.pageprops?.wikibase_item ?? fallbackQid
-  return page && !page.missing ? { title: page.title, qid, wikitext } : null
+  return page && !page.missing ? { title: page.title, qid, wikitext, lang } : null
 }
 
 type SparqlResponse = { results: { bindings: { g: { value: string }; title: { value: string } }[] } }
@@ -331,7 +334,7 @@ function singleGeneration(t: Target, series: Series): { gens: Generation[]; targ
         yearTo: years.to,
         bodyStyles: infoboxField(series.wikitext, 'body_style').slice(0, 80),
         platform: infoboxField(series.wikitext, 'platform').slice(0, 60),
-        wikiTitle: series.title,
+        wikiTitle: storedTitle(series.lang, series.title),
         wikidataId: series.qid,
         source: 'single'
       }
@@ -348,7 +351,7 @@ const fromHeadings = (series: Series): Generation[] =>
     yearTo: null,
     bodyStyles: '',
     platform: '',
-    wikiTitle: series.title,
+    wikiTitle: storedTitle(series.lang, series.title),
     wikidataId: series.qid,
     source: 'headings'
   }))
@@ -360,15 +363,17 @@ const onTheRoad = (gens: Generation[]): Generation[] =>
 async function resolveSeries(t: Target, series: Series): Promise<{ gens: Generation[]; target: Target }> {
   // Wikidata first, then "Series (code)" titles and section headings. A chain with holes (Corolla E140 → E210, Passat without
   // B7) loses to a source that closes them; on a tie the earlier source stays.
+  // Wikidata chains and "Series (code)" titles are English articles: a pinned article of another edition only has its headings.
+  const english = series.lang === 'en'
   const candidates: Generation[][] = [
-    onTheRoad(await fromArticles(series.title, await wikidataGenerations(series.qid), 'wikidata'))
+    english ? onTheRoad(await fromArticles(series.title, await wikidataGenerations(series.qid), 'wikidata')) : []
   ]
   // A chain that stops years ago for a model still in production lacks its newest generation (Polo without Mk6).
   const stillProduced = parseYearRange(infoboxField(series.wikitext, 'production'))?.to === null
   const staleTail = (c: Generation[]): boolean =>
     stillProduced && (c.at(-1)?.yearTo ?? new Date().getFullYear()) < new Date().getFullYear() - 1
   const clean = (): boolean => candidates.some(c => c.length >= 2 && chainDefects(c) === 0 && !staleTail(c))
-  if (!clean())
+  if (english && !clean())
     candidates.push(onTheRoad(await fromArticles(series.title, await prefixGenerations(series.title), 'prefix')))
   if (!clean()) candidates.push(onTheRoad(fromHeadings(series)))
   const ranked = candidates.filter(c => c.length >= 2).sort((x, y) => chainScore(y) - chainScore(x))

@@ -230,6 +230,8 @@ export {
   generationSpan,
   generationsResponseSchema,
   pickGeneration,
+  splitWikiTitle,
+  wikiTitleUrl,
   type Generation,
   type GenerationsResponse
 } from './generations.js'
