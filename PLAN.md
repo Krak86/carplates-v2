@@ -681,7 +681,7 @@ needs its licence/permission recorded and attribution on About (VehiclesDB done)
 (estimated value) are built (2026-10-09); stage M (model alias unification, M1–M3) is built (2026-10-10; M4 stats grouping built too — `docs/plan-done.md` "Model alias unification"); stage E (Open EV Data, "Electric" block) is built too (2026-10-09; the upstream data is frozen at 2020); stage F (NHTSA recalls + owner complaints, live API + cache, merged into the Recalls block) is built too (2026-10-10; `DATASETS_PLAN.md` "Stage F — done"); ✅ stage G (UK MOT "Common faults": fail / advisory rates by mileage from DVSA 2021–2023, lazy section `faults`, 64 MB of tables, 3.2 MB seed) is built (2026-10-10; `docs/plan-done.md` "UK MOT Common faults"). Details, licences, URLs, caveats and the skip list:
 `DATASETS_PLAN.md` ("Round 2"). Buildable (all free, own tables, each a
 removable card block, credit on About): **RDW** registered vehicles (CC0; "Specs") + RDW recalls (CC0), **NHTSA** recalls +
-complaints (public domain, live API like `api/safety`), **UK MOT** (OGL v3; "Common faults", years 2021–23 + 2025 loaded, 2024 next — Stage G2 in `DATASETS_PLAN.md`), **Transport
+complaints (public domain, live API like `api/safety`), **UK MOT** (OGL v3; "Common faults", years 2021–25 loaded ✅ — Stage G2 in `DATASETS_PLAN.md`), **Transport
 Canada** recalls (OGL-Canada, low priority), **Open EV Data** (MIT; "Electric" block). Order: RDW -> NHTSA -> EV -> Canada -> MOT. **Refresh cadences** (RDW specs 6 mo, RDW recalls monthly, NHTSA live + cache
 7/30 d, MOT yearly, Canada quarterly, EV quarterly) are in `DATASETS_PLAN.md`; **each source's ingest, seed, refresh command and
 `SCHEDULE.md` entry are implemented only when its card block is built** — nothing ahead of the feature.
@@ -743,7 +743,7 @@ recalls, NCAP stars) come from public sources we already use. Everything below i
 
 **Group 3 — more open sources (already in DATASETS_PLAN, order unchanged)**
 
-- NHTSA recalls + complaints (stage F, owner call pending), UK MOT "common faults" (OGL, 2021–23 + 2025 loaded), Transport Canada recalls
+- NHTSA recalls + complaints (stage F, owner call pending), UK MOT "common faults" (OGL, 2021–25 loaded), Transport Canada recalls
   (low), RDW recall refresh. Maybe: other national open registers (Norway, Sweden, Estonia, Latvia) as an RDW cross-check for models
   RDW lacks; **each needs a licence read before use**.
 

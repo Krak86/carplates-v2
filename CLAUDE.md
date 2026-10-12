@@ -14,9 +14,8 @@ touching those areas** · `docs/commands-reference.md` every `ingest:*` / `expor
 
 ## Commands
 
-`pnpm dev` (web :5173 + api :3000) · `preview:prod` (PORT=3100 if dev runs) · `build|lint|type-check|test|format` · `db:up|down|reset|
-migrate|seed|refresh-stats|refresh-derived` · `ingest`, `ingest:all`, `ingest:<x>[:csv]`, `export:<x>:csv` (see commands-reference).
-Setup: `pnpm install && pnpm db:up && pnpm db:migrate && pnpm db:seed && pnpm dev`. UK MOT is manual (`ingest:mot -- --dir`).
+`pnpm dev` (web :5173 + api :3000), `build|lint|type-check|test|format`, `db:*`, `ingest:*`, `export:*` — full list in `README.md` /
+`docs/commands-reference.md`. Setup: `pnpm install && pnpm db:up && pnpm db:migrate && pnpm db:seed && pnpm dev`.
 
 ## Layout
 

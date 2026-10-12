@@ -8,6 +8,7 @@ import {
   MOT_MIN_BAND_TESTS,
   makeKey,
   matchVdbModelAcrossMakes,
+  vdbCandidateKeys,
   vdbRelatedMakeKeys,
   vdbVehicleClass
 } from '@carplates/shared'
@@ -15,6 +16,7 @@ import type { MotGroupCode, MotIssue, MotKind, MotReason, MotResponse, VdbVehicl
 import { and, eq, inArray } from 'drizzle-orm'
 
 import { DbService } from '../db/db.service.js'
+import { commonModelName, mergeIssueRows, motFamilyOf } from './mot-family.js'
 
 /** MOT kinds a registry vehicle class may match, most preferred first (the registry files vans as cars or as trucks). */
 const KINDS_BY_CLASS: Readonly<Partial<Record<VdbVehicleClass, readonly MotKind[]>>> = {
@@ -81,21 +83,34 @@ export class MotService {
     const found = candidates.sort((a, b) => b.row.tests - a.row.tests)[0]
     if (!found) return none
 
-    const { row, how } = found
-    const kind = row.kind as MotKind
-    const [stats, issues, baseline, meta] = await Promise.all([
+    const { how } = found
+    const kind = found.row.kind as MotKind
+    // A prefix match means no key is exactly this model: DVSA's 2024+ files split it by trim ("EV6 GT-LINE", "EV6 AIR"),
+    // so pool the whole trim family instead of showing one trim as if it were the model.
+    const direct = (vdbCandidateKeys(found.row.makeKey, model)[0] ?? vdbCandidateKeys(mk, model)[0])?.key ?? ''
+    const family = how === 'prefix' ? motFamilyOf(models, found.row, direct) : [found.row]
+    const row = {
+      ...found.row,
+      tests: family.reduce((a, m) => a + m.tests, 0),
+      model: family.length > 1 ? commonModelName(family.map(m => m.model)) : found.row.model
+    }
+    const modelKeys = family.map(m => m.modelKey)
+    const [stats, issueRows, baseline, meta] = await Promise.all([
       db
         .select()
         .from(motStats)
-        .where(and(eq(motStats.kind, kind), eq(motStats.makeKey, row.makeKey), eq(motStats.modelKey, row.modelKey))),
+        .where(and(eq(motStats.kind, kind), eq(motStats.makeKey, row.makeKey), inArray(motStats.modelKey, modelKeys))),
       db
         .select()
         .from(motIssues)
-        .where(and(eq(motIssues.kind, kind), eq(motIssues.makeKey, row.makeKey), eq(motIssues.modelKey, row.modelKey))),
+        .where(
+          and(eq(motIssues.kind, kind), eq(motIssues.makeKey, row.makeKey), inArray(motIssues.modelKey, modelKeys))
+        ),
       db.select().from(motBaseline).where(eq(motBaseline.kind, kind)),
       db.select().from(motMeta).limit(1)
     ])
     const years = meta[0]
+    const issues = mergeIssueRows(issueRows)
     if (!years || stats.length === 0) return none
 
     const bandCount = MOT_BAND_EDGES_KM[kind].length
