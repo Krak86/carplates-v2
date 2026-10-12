@@ -1,6 +1,6 @@
 # DATASETS_PLAN.md
 
-> **State on 2026-10-12.** Built: A, B, C–C4, D, E, F, G, H (cut down), I, K, M. Open: **J** (other countries, research only), **Z** (autoevolution, waits for the public app), the Euro NCAP wording action before any public deploy. Stage K follow-ups and the stage M alias leftovers are finished (`docs/plan-done.md` "Stage K follow-ups"). Browser-checked 2026-10-12 (СЕ9990СВ `?section=engines`, dark: the section renders from `/api/card`, no separate `/api/wikispecs` request). Optional leftover: generation rows for bikes and buses — measured, low yield (~28 % of motorcycle rows, ~15–20 % of bus rows at best), full pass not recommended; see "Leftover: generation rows for motorcycles and buses" under Stage K. The "Resume here" text below is from 2026-10-09 and older than this line.
+> **State on 2026-10-12.** Built: A, B, C–C4, D, E, F, G, H (cut down), I, K, M. Open: **J** (other countries, research only), **Z** (autoevolution, waits for the public app), the Euro NCAP wording action before any public deploy. Stage K-M1 to K-M7 (bike/bus pins, parser fixes, curated manufacturer rows) are done (generations 1,213, wikispecs 1,206); the rest of the articleless tail (Ruta, Chinese bikes, Neoplan/Setra/MAN/Van Hool/ЛАЗ) has no usable source and stays empty by policy. Parked: G3 (MOT pre-2018). Skipped: D2 (full recall translation, replaced by the on-device Translate button). Stage K follow-ups and the stage M alias leftovers are finished (`docs/plan-done.md` "Stage K follow-ups"). Browser-checked 2026-10-12 (СЕ9990СВ `?section=engines`, dark: the section renders from `/api/card`, no separate `/api/wikispecs` request). Optional leftover: generation rows for bikes and buses — measured, low yield (~28 % of motorcycle rows, ~15–20 % of bus rows at best), full pass not recommended; see "Leftover: generation rows for motorcycles and buses" under Stage K. The "Resume here" text below is from 2026-10-09 and older than this line.
 >
 > **Resume here (2026-10-09).** Stages A (+A2 plate-region fix, +A3 alias chips), **B** (motorcycle/truck/bus matching), **C** (RDW specs, C2, C3) **C4** (estimated value) **D** (RDW recalls) and **E** (Open EV Data) are DONE;
 > stages M1–M3 and **F** (NHTSA recalls + complaints) are built; see "Staged plan" near the end. **Rule: do not start a stage until the owner says "go stage X".**
@@ -349,12 +349,12 @@ Idea: extend the local DB with Soviet/UA cars (VAZ, GAZ, ZAZ, Moskvich, IZH, UAZ
   Run `pnpm ingest:generations:csv` + `ingest:wikispecs:csv` on a fresh DB to pick up the re-keyed seeds.
 - **Plan if the gap is real**: first measure it (read-only SQL: registry rows of those makes with no `vdb_models` / `rdw_specs`
   match). Then a small separate, removable seed table sourced from **Wikidata (CC0) / Wikipedia (CC BY-SA)** — years, engine,
-  mass — with autoussr.ru as cross-check only; credit on About. Fits the existing deferred Wikidata stage I. Not started.
+  mass — with autoussr.ru as cross-check only; credit on About. Stage I is built (2026-10-11); the ru-article pins of K-M7 step 3 covered МАЗ-5551 and Иж-2715/2717, the rest of this tail has no usable article. Remaining gap: no data source.
 
 ### Deferred
 
 - **Wikidata (CC0 _(memory)_)** — generations, production years, successor links, Commons image links; maybe extend the wiki
-  section. Now proposed as stage I (last stage, see below); not started.
+  section. Built as stage I (2026-10-11).
 - **NHTSA vPIC offline dump** — only if the live-API dependency becomes a problem.
 
 ### Staged plan (decided 2026-10-08; owner approves each stage before it starts)
@@ -487,7 +487,7 @@ COROLLA` is filed as "TOYOTA COROLLA" in recent years (5,795 in 2021), so a regi
 **Stage E — done (2026-10-09): Open EV Data "Electric" block.** Source: `data/ev-data.json` on the `master` branch of OpenChargingCloud/open-ev-data (MIT, © 2019 Niklas Hösl).
 **Finding: the file is frozen — `meta.updated_at` and its last commit are 2020-07-30, 118 variants, 2011-2020 models only (no Model Y, ID.4, Ioniq 5 …).** The repo itself still gets commits, the data does not. Built: migration 0056 `registry.open_ev` (one row per variant: powertrain bev/phev, release year, usable kWh, kWh/100 km, AC kW + phases + ports, DC kW + ports; charging curves and per-point power are not kept), `scripts/src/open-ev.ts` + `open-ev-parse.ts` (Zod, `--dry-run`, `--export-csv`, `--from-csv`), seed `seed-data/open-ev.csv.gz` (5 KB, in `ingest:ratings:csv`), `GET /api/ev?brand&model` (`apps/api/src/ev/`, the VehiclesDB matcher over `open_ev` keys, cross-make aliases included), contract `packages/shared/src/openEv.ts` (own file), web block `OpenEv.tsx` (🔌, `LazySection`, share `?section=electric`, query key `['rdw','ev',…]` so it rides the rdw offline group), ua/ru/en strings, About credit. **Decisions:** the block shows only when the registry fuel resolves to `electric` (so a petrol Kona gets none; hybrids with electricity count); it lists every variant of the model, oldest first, and marks the one closest to the car's year; the vPIC "battery-electric" trigger from the original plan was not built (the registry fuel is enough). **Coverage:** ~32 % of registry vehicles with electric fuel (514k) match the file on an exact make+model key (166k; the real matcher is looser). **Not browser-checked in the UI.**
 
-**Stage C3 / C4 / later RDW datasets — planned (discussed 2026-10-08; nothing started, owner says "go stage X").**
+**Stage C3 / C4 / later RDW datasets — discussion record (2026-10-08). C3 and C4 are DONE (see "Stage C3 — done" / "Stage C4 — done"); the "Worth checking" and backlog items below are not scheduled.**
 RDW publishes 68 datasets; the vehicle ones worth syncing (checked against the live catalogue, ids in brackets). All are CC0 for the
 vehicle and recall data; **check the licence on the dataset page before adding any TGK or APK dataset.**
 
@@ -1181,7 +1181,7 @@ wikidata_id, revid)` (keyed on the stage I generation row; `revid` makes the cre
       - **K-M7 step 2 (2026-10-12).** Wikispecs parser: footnote rows spanning the table dropped, system-total power (`zusammen` / `Gesamt` / `combined`), registration-limited `Dauerleistung` row ignored, `Displacement, engine code` header. Lada 2101 takes the DIN row (44/48 kW). Null-power rows (308) are source gaps (prose / other generation). Seeds re-exported.
       - **K-M7 step 5, phase 1 (2026-10-12).** Hand-curated rows for the articleless tail: manufacturer pages only (one URL + access date per row, shown as "source", not Wikipedia), `scripts/src/wikispecs-curated.csv` → `pnpm ingest:wikispecs:curated`; first 3 rows Bajaj Boxer BM 150 / 150 X / 125X. Generations 1,212, wikispecs 1,205.
       - **K-M7 step 5, phase 2 (2026-10-12, closes step 5).** Official pages exist only for Bajaj Boxer BM 100 ES (+1 row); Geon, Viper, Forte, Shineray, Ruta, Musstang, Lifan, Loncin, Spark and buses have none, so they stay empty by policy. Generations 1,213, wikispecs 1,206.
-      - **Open → Stage K-M7 (PLAN.md):** more bike/bus pins, quality leftovers, articleless tail (Ruta, Chinese bikes), in-app verification.
+      - **Stage K-M7 (PLAN.md) is closed (2026-10-12):** pins, parser fixes, curated manufacturer rows and in-app verification done; the rest of the articleless tail stays empty by policy (no official sources).
       - **K-M6 step 1 (2026-10-12, read-only).** Bus registrations on a key with generations: 8.2 % (top gaps: БАЗ А079/Etalon, Bogdan, Ruta, Mercedes trim keys → Sprinter fold, VW LT, ПАЗ); bikes 6.8 %; wikispecs 14.7 % of engines w/o `powerKw`, 165 `powerKwMax` outliers (BMW PHEV). Tables: `docs/plan-done.md` "K-M6 step 1".
       - **Decision: continue to K-M2, but only the read-only field-fit check** — it needs no DB and settles the three open column questions. **Stop before K-M3/K-M4** unless the owner wants Kawasaki/BMW/Honda breadth: the remaining named gaps are mostly "no article" or "prose only", so new fixtures would add little, and the brands with real headroom are pins-only work (Kawasaki, BMW F-series), not parser work.
 
