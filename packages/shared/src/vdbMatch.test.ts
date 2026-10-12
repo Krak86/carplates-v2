@@ -247,7 +247,11 @@ describe('cross-make aliases', () => {
       ['zaz', 'slavuta'],
       ['zaz', 'tavria'],
       ['gaz', 'gazelle'],
-      ['uaz', '452']
+      ['uaz', '452'],
+      ['gaz', '3307'],
+      ['paz', '3205'],
+      ['bogdan', 'a092'],
+      ['baz', 'a079']
     ].map(([mk, name]) => row(mk!, name!))
     const gen = (brand: string, model: string): string | null => {
       const found = matchVdbModelAcrossMakes(gens, makeKey(brand)!, model)
@@ -264,6 +268,10 @@ describe('cross-make aliases', () => {
     expect(gen('ЗАЗ', '110206')).toBe('zaz/tavria')
     expect(gen('ГАЗ', '33021')).toBe('gaz/gazelle')
     expect(gen('УАЗ', '3303')).toBe('uaz/452')
+    expect(gen('ГАЗ', '3309')).toBe('gaz/3307')
+    expect(gen('ПАЗ', '32054')).toBe('paz/3205')
+    expect(gen('БОГДАН', 'А-09202')).toBe('bogdan/a092')
+    expect(gen('БАЗ', 'А079.14')).toBe('baz/a079')
   })
 
   it('reaches the base model through marketing prefixes, engine figures and variant words', () => {

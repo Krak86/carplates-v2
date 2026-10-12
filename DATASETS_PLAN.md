@@ -338,7 +338,10 @@ Idea: extend the local DB with Soviet/UA cars (VAZ, GAZ, ZAZ, Moskvich, IZH, UAZ
   217x→priora, 1117–1119→kalina, 2121/2131→niva; zaz 1102→tavria, 1103→slavuta, 1105→dana; gaz 3302/2705/3221→gazelle, 2217/2752→sobol; uaz 3303/3741/3962/2206→452).
   Share of cars with a generation row: Lada **97.6 %**, ZAZ **91.9 %**, UAZ 72 %, GAZ 66.6 % (rest = trucks, Forza, Largus, Bogdan buses, SAZ — no rows).
   Same day: pins + `--only` ingest of **ZAZ Forza** (→ "Chery Fulwin 2", 2009–2019, ~12.8k cars) and **Lada Largus** (2012–now), both with full wiki specs; seeds re-exported.
-  Still open: trucks (GAZ 33xx/53xx, KAMAZ, ZIL) and buses have no pins; ZAZ Chance (TF69x) has no English article of its own (en "ZAZ Chance" is missing) — left unmatched.
+  **Step 3 done (2026-10-12): trucks and buses.** Ten pins in `generations-titles.csv` (GAZ-53, GAZ-66, GAZ-3307, ZIL-130, ZIL-131, PAZ-3205, Bogdan A092 → "Ataman A092", Bogdan A091, BAZ A079, Ural-375),
+  all with generation + wiki specs (except BAZ A079: no spec tables; engines/power missing on PAZ-3205 and Ural-375 layout). Aliases in `MODEL_ALIASES`: gaz 3307/3309 → `3307`, paz 3205x → `3205`,
+  bogdan 092x/091x → `a092`/`a091`, baz 079x → `a079` (the registry key drops the Cyrillic "А"). Seeds re-exported. No en article exists for KAMAZ-5320/5511/53212, ZIL-431410 or ZIL-ММЗ 554 — left unmatched.
+  Still open: KAMAZ (no articles), MAZ 5551, GAZ 5312, Bogdan A-09212 / A-092 trim; ZAZ Chance (TF69x) has no English article of its own (en "ZAZ Chance" is missing) — left unmatched.
   Run `pnpm ingest:generations:csv` + `ingest:wikispecs:csv` on a fresh DB to pick up the re-keyed seeds.
 - **Plan if the gap is real**: first measure it (read-only SQL: registry rows of those makes with no `vdb_models` / `rdw_specs`
   match). Then a small separate, removable seed table sourced from **Wikidata (CC0) / Wikipedia (CC BY-SA)** — years, engine,

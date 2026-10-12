@@ -97,8 +97,19 @@ const MODEL_ALIASES: Readonly<Record<string, readonly (readonly [RegExp, string]
     [/^24(02|10)/, '24'],
     // Gazelle: 3302/33021/33023 (flatbed, van), 2705 (van), 3221/32213 (minibus); Sobol: 2217, 2752.
     [/^(3302|2705|3221)/, 'gazelle'],
-    [/^(2217|2752)/, 'sobol']
+    [/^(2217|2752)/, 'sobol'],
+    // GAZ-3309 is the diesel-engined 3307 (same cab and chassis family; the article is "GAZ-3307").
+    [/^330[79]/, '3307']
   ],
+  // The registry drops the Cyrillic "А" of Bogdan / BAZ indexes (А-09202 → 09202, А079.14 → 07914). The Bogdan A092 is the
+  // Ataman A092 bus; A091 and the BAZ А079 (Etalon) have articles under the Latin letter.
+  bogdan: [
+    [/^092/, 'a092'],
+    [/^091/, 'a091']
+  ],
+  baz: [[/^079/, 'a079']],
+  // PAZ-32054 / 32051 / 32053 are modifications of the PAZ-3205 bus.
+  paz: [[/^3205/, '3205']],
   // VAZ type-approval numbers are model + modification digit: 2110x (21101, 21104 …) is the 2110 sedan, 2111x the 2111
   // estate, 2112x the 2112 hatch; 2113–2115x are the Samara-2 line the catalog files under "Samara". A sixth digit
   // (211540, 211010) is a suffix on the same code. Priora: the catalog holds only the 2172 hatch, 2170/2171 share its nameplate.
