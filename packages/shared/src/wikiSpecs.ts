@@ -666,6 +666,15 @@ function expandSpans(rawRows: RawCell[][]): { cells: Cell[]; header: boolean[]; 
   const grid: { cells: Cell[]; header: boolean[]; merged: boolean }[] = []
   for (const row of rawRows) {
     if (row.length === 0) continue
+    // A lone body cell spanning the table that states a power ("(3) … front motor 165 kW") is a footnote; repeated into every
+    // column it would be read as a value of each one. (A span without a figure is a group title: "Petrol", kept for the fuel.)
+    // (A footnote with a nested `{|` table in it parses as several cells, so only the first one is looked at.)
+    if (
+      !row[0]!.header &&
+      spanOf(row[0]!.attrs, 'colspan') >= 5 &&
+      powerKwOf(expandWikitext(row[0]!.body).join(' ')) !== null
+    )
+      continue
     const cells: Cell[] = []
     const header: boolean[] = []
     let merged = false
@@ -804,6 +813,10 @@ function columnKind(label: string): ColumnKind | null {
   const text = label.replace(/\s+/g, ' ').trim()
   // Charging power ("Ladeleistung", "Charging power") is not the engine's.
   if (/charg|lade|заряд/i.test(text)) return null
+  // "Dauerleistung laut Zulassung" is the registration-limited continuous rating (Tesla: "DE: 66 kW"), not the catalogue power.
+  if (/dauerleistung|laut (?:zulassung|anmeldung)/i.test(text)) return null
+  // "Displacement, engine code" holds "1329 cc I4 (1NR-FE)": the engine text (parseEngine reads the capacity), not a bare code.
+  if (/displacement|hubraum|объ[её]м|об'єм/i.test(text) && /engine (?:code|id)/i.test(text)) return 'engine'
   // "Power<br>Torque" is still the power column; a pure torque column is nothing.
   if (/torque|крутящ|крутн|drehmoment/i.test(text) && !/power|мощност|потужн|leistung/i.test(text)) return null
   return COLUMN_KINDS.find(([, re]) => re.test(text))?.[0] ?? null
@@ -813,12 +826,23 @@ type DimKind = 'wheelbase' | 'length' | 'width' | 'height' | 'weight' | 'tank'
 const isDimKind = (k: ColumnKind | null): k is DimKind =>
   k === 'wheelbase' || k === 'length' || k === 'width' || k === 'height' || k === 'weight' || k === 'tank'
 
+const TOTAL_WORD = /zusammen|gesamt|combined|system (?:power|output)|суммарн|совокупн|сумарн|разом/i
+
 /**
  * Power of a cell: one value when its lines agree (kW and PS of the same engine), else the min–max across lines. A line
  * under a quarter of the strongest one is the electric motor / 48 V booster of a hybrid ("195 kW … 8 kW (11 PS)"), not a
  * second engine rating, so it is left out.
  */
 export function cellPower(lines: string[]): { kw: number | null; max: number | null } {
+  // Multi-motor cells ("205 kW vorn / 380 kW hinten / zusammen: / 585 kW") name the system total: it is the figure, the
+  // per-axle lines are parts of it. The label may stand alone on the line before the number.
+  const labelled = lines.findIndex(
+    (l, i) => TOTAL_WORD.test(l) && (powerKwOf(l) !== null || powerKwOf(lines[i + 1] ?? '') !== null)
+  )
+  if (labelled >= 0) {
+    const total = powerKwOf(lines[labelled]!) ?? powerKwOf(lines[labelled + 1]!)
+    if (total !== null) return { kw: total, max: null }
+  }
   const all = lines.map(powerKwOf).filter((v): v is number => v !== null)
   if (all.length === 0) return { kw: null, max: null }
   const top = Math.max(...all)

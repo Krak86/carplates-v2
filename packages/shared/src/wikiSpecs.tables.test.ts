@@ -35,6 +35,46 @@ describe('cellPower', () => {
     expect(cellPower(['195 kW (265 PS)', '8 kW (11 PS)'])).toEqual({ kw: 195, max: null })
     expect(cellPower(['250 kW', '235 kW', '40 kW'])).toEqual({ kw: 235, max: 250 })
   })
+
+  it('takes the system total of a multi-motor cell (Tesla Model S)', () => {
+    expect(cellPower(['205 kW vorn', '380 kW hinten', 'zusammen:', '585 kW / 795 PS'])).toEqual({ kw: 585, max: null })
+    expect(cellPower(['314 kW front', '2 × 309 kW rear', 'Combined: 750 kW'])).toEqual({ kw: 750, max: null })
+    // A label with no figure on its line or the next changes nothing.
+    expect(cellPower(['110 kW', '150 kW', 'Gesamt'])).toEqual({ kw: 110, max: 150 })
+  })
+})
+
+describe('parseWikiTables: footnote rows', () => {
+  it('drops a lone cell spanning the table instead of repeating it into every column', () => {
+    const [t] = parseWikiTables(
+      '{|\n! Model !! A !! B !! C !! D !! E\n|-\n! Power\n| 100 kW\n| 120 kW\n| 140 kW\n| 150 kW\n| 160 kW\n|-\n| colspan="6" | (3) front motor 165 kW\n|}'
+    )
+    expect(t?.rows).toHaveLength(1)
+  })
+})
+
+describe('tableSpecs: registration-limited power row (Tesla Model S, de)', () => {
+  it('ignores "Dauerleistung laut Zulassung"', () => {
+    const [t] = parseWikiTables(
+      '{|\n! Modell !! 60 !! 85\n|-\n! Max. Leistung\n| 225 kW\n| 270 kW\n|-\n! Dauerleistung<br />laut Zulassung\n| DE: 69 kW\n| DE: 69 kW\n|}'
+    )
+    expect(tableSpecs(t!).engines.map(e => [e.powerKw, e.powerKwMax])).toEqual([
+      [225, null],
+      [270, null]
+    ])
+  })
+})
+
+describe('tableSpecs: "Displacement, engine code" column', () => {
+  it('reads the capacity out of the combined column', () => {
+    const [t] = parseWikiTables(
+      '{|\n! Grade !! Model code !! Displacement, engine code !! Power, Torque\n|-\n| 1.3X || NRE160 || {{cvt|1329|cc|L|1}} I4 (1NR-FE) || {{cvt|95|PS|kW|0}} at 6000 rpm\n|}'
+    )
+    const [e] = tableSpecs(t!).engines
+    expect(e?.displacementCc).toBe(1329)
+    expect(e?.powerKw).toBe(70)
+    expect(e?.chassisCodes).toEqual(['NRE160'])
+  })
 })
 
 describe('parseEngine litres', () => {
