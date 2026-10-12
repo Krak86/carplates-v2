@@ -7,7 +7,7 @@ import RaceHornButton from '@/components/game/RaceHornButton'
 import RaceTouchControls from '@/components/game/RaceTouchControls'
 import { useRaceGameActions } from '@/components/game/use-race-game-actions'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
-import { RACER_SIZE_KB, SIRENS, type CarBody, type RacerConfig } from '@/lib/racer/config'
+import { BUMP_LESSONS, BUMP_WARNING, RACER_SIZE_KB, SIRENS, type CarBody, type RacerConfig } from '@/lib/racer/config'
 
 type Props = {
   config: RacerConfig
@@ -15,6 +15,8 @@ type Props = {
   /** When set, picking a car type calls this instead of only switching the sprite (the plate-less route dresses it up). */
   onPickBody?: (body: CarBody) => void
 }
+
+const MOUSE_IDLE_MS = 2000
 
 /** The intro screen, then canvas + HUD + settings: everything of the game except the frame around it. */
 export default function RaceGameStage({ config, onChange, onPickBody }: Props): ReactNode {
@@ -37,12 +39,19 @@ export default function RaceGameStage({ config, onChange, onPickBody }: Props): 
   // iPhone Safari has no element full screen: the frame is stretched over the page instead
   const [pseudoFullscreen, setPseudoFullscreen] = useState(false)
   const fullscreen = nativeFullscreen || pseudoFullscreen
+  const [mouseIdle, setMouseIdle] = useState(false)
+  const [mouseTick, setMouseTick] = useState(0)
 
   useEffect(() => {
     const handleChange = (): void => setFullscreen(document.fullscreenElement === frame && !!frame)
     document.addEventListener('fullscreenchange', handleChange)
     return () => document.removeEventListener('fullscreenchange', handleChange)
   }, [frame])
+
+  const handleMouseMove = (): void => {
+    setMouseIdle(false)
+    setMouseTick(n => n + 1)
+  }
 
   const handleToggleSound = (e: MouseEvent<HTMLButtonElement>): void => {
     setSound(on => !on)
@@ -65,13 +74,36 @@ export default function RaceGameStage({ config, onChange, onPickBody }: Props): 
     return () => window.removeEventListener('keydown', handleKey)
   }, [hasSiren, config.body])
 
-  const handleToggleFullscreen = (e: MouseEvent<HTMLButtonElement>): void => {
-    e.currentTarget.blur() // keys must keep steering the car
+  const toggleFullscreen = (): void => {
     if (pseudoFullscreen) setPseudoFullscreen(false)
     else if (document.fullscreenElement) void document.exitFullscreen()
     else if (document.fullscreenEnabled) void frame?.requestFullscreen().catch(() => undefined)
     else setPseudoFullscreen(true)
   }
+
+  const handleToggleFullscreen = (e: MouseEvent<HTMLButtonElement>): void => {
+    e.currentTarget.blur() // keys must keep steering the car
+    toggleFullscreen()
+  }
+
+  // F toggles full screen, M the sound (the engine ignores both)
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent): void => {
+      if ((e.code !== 'KeyF' && e.code !== 'KeyM') || e.repeat || e.ctrlKey || e.metaKey || e.altKey) return
+      if (e.target instanceof HTMLElement && e.target.closest('input, textarea, select')) return
+      if (e.code === 'KeyF') toggleFullscreen()
+      else setSound(on => !on)
+    }
+    window.addEventListener('keydown', handleKey)
+    return () => window.removeEventListener('keydown', handleKey)
+  })
+
+  // the pointer hides over the game after a moment of stillness and returns on movement
+  useEffect(() => {
+    if (phase !== 'playing') return
+    const timer = setTimeout(() => setMouseIdle(true), MOUSE_IDLE_MS)
+    return () => clearTimeout(timer)
+  }, [phase, mouseIdle, mouseTick])
 
   if (phase !== 'playing') {
     return (
@@ -103,7 +135,8 @@ export default function RaceGameStage({ config, onChange, onPickBody }: Props): 
       <div>
         <div
           ref={setFrame}
-          className={`relative overflow-hidden bg-black ${pseudoFullscreen ? 'fixed inset-0 z-50 h-dvh' : 'rounded-lg'} ${isTouch ? 'touch-none select-none' : ''}`}
+          onMouseMove={handleMouseMove}
+          className={`relative overflow-hidden bg-black ${mouseIdle ? 'cursor-none' : ''} ${pseudoFullscreen ? 'fixed inset-0 z-50 h-dvh' : 'rounded-lg'} ${isTouch ? 'touch-none select-none' : ''}`}
         >
           <canvas
             ref={setCanvas}
@@ -154,10 +187,29 @@ export default function RaceGameStage({ config, onChange, onPickBody }: Props): 
                   <div className="text-xs opacity-80">{t('race.hud.level')}</div>
                 </div>
               )}
-              <div className="text-right">
-                <div className="text-3xl leading-none font-bold tabular-nums">{hud.km.toFixed(2)}</div>
-                <div className="text-xs opacity-80">{t('race.hud.km')}</div>
+              <div className="flex gap-5 text-right">
+                <div>
+                  <div
+                    className={`text-3xl leading-none font-bold tabular-nums ${hud.bumps >= BUMP_WARNING ? 'text-red-400' : ''}`}
+                  >
+                    {hud.bumps}
+                  </div>
+                  <div className="text-xs opacity-80">{t('race.hud.bumps')}</div>
+                </div>
+                <div>
+                  <div className="text-3xl leading-none font-bold tabular-nums">{hud.km.toFixed(2)}</div>
+                  <div className="text-xs opacity-80">{t('race.hud.km')}</div>
+                </div>
               </div>
+            </div>
+          )}
+
+          {hud && hud.bumps >= BUMP_WARNING && (
+            <div
+              role="status"
+              className="pointer-events-none absolute inset-x-0 bottom-3 mx-auto w-fit max-w-[90%] rounded-lg bg-red-600/85 px-3 py-1.5 text-center text-sm font-semibold text-white"
+            >
+              {hud.bumps >= BUMP_LESSONS ? t('race.bumpsLessons') : t('race.bumpsCrashTest')}
             </div>
           )}
         </div>

@@ -71,6 +71,8 @@ const CRUISE_KMH = [0, 20, 40, 60, 80, 100, 120] as const
 const DEFAULT_CRUISE_KMH = 40
 /** Brake lights stay on while the car is this much (game units, 100 = 1 km/h) over its cruise speed. */
 const BRAKE_MARGIN = 300
+/** A hit within this many seconds of the previous contact is the same bump. */
+const BUMP_COOLDOWN = 0.7
 const SKY_SPEED = 0.001
 const HILL_SPEED = 0.002
 const TREE_SPEED = 0.003
@@ -190,6 +192,8 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
   let position = 0
   let speed = 0
   let driven = 0 // km, never reset: the HUD's session odometer
+  let bumps = 0 // collisions with traffic or roadside objects, never reset (session counter like `driven`)
+  let bumpCooldown = 0 // seconds of contact-free driving left before the next hit counts as a new bump
   let currentLapTime = 0
   let lastLapTime: number | null = null
   let bestLap: number | null = readBest()
@@ -221,6 +225,7 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
     onHud({
       speed: 5 * Math.round(speed / 500),
       km: driven,
+      bumps,
       lap: formatTime(currentLapTime),
       last: lastLapTime == null ? null : formatTime(lastLapTime),
       best: bestLap == null ? null : formatTime(bestLap),
@@ -277,7 +282,17 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
     }
   }
 
+  /** Counts a hit once per contact: staying pressed against the obstacle keeps the cooldown running. */
+  function registerBump(): void {
+    if (bumpCooldown <= 0) {
+      bumps++
+      emitHud(true)
+    }
+    bumpCooldown = BUMP_COOLDOWN
+  }
+
   function update(dt: number): void {
+    bumpCooldown -= dt
     const playerSegment = findSegment(position + PLAYER_Z)
     const playerW = atlas.player.straight.w * SPRITE_SCALE
     const speedPercent = speed / MAX_SPEED
@@ -315,6 +330,7 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
         if (overlap(playerX, playerW, sprite.offset + (spriteW / 2) * (sprite.offset > 0 ? 1 : -1), spriteW)) {
           speed = MAX_SPEED / 5
           sound.crash()
+          registerBump()
           position = increase(playerSegment.p1.world.z, -PLAYER_Z, trackLength) // stop in front of the sprite
           break
         }
@@ -326,6 +342,7 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
       if (speed > car.speed && overlap(playerX, playerW, car.offset, carW, 0.8)) {
         speed = car.speed * (car.speed / speed)
         sound.crash()
+        registerBump()
         position = increase(car.z, -PLAYER_Z, trackLength)
         break
       }

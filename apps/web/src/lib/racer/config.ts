@@ -143,11 +143,18 @@ export type RacerConfig = {
   auto: boolean
 }
 
+/** Bumps at which the HUD starts joking that this is a crash test and not the viewer's car. */
+export const BUMP_WARNING = 5
+/** Bumps at which the joke turns into "take driving lessons". */
+export const BUMP_LESSONS = 15
+
 export type RacerHud = {
   /** km/h */
   speed: number
   /** Kilometres driven since the engine started (this opening of the game only; a restart keeps counting). */
   km: number
+  /** Collisions with cars, trees, signs… since the engine started (a restart keeps counting). */
+  bumps: number
   lap: string
   last: string | null
   best: string | null
