@@ -1,0 +1,377 @@
+{{Short description|Middle-weight motorcycle}}
+{{More citations needed|date=February 2009}}
+{{Infobox Motorcycle
+|name             = Suzuki SV650
+|image            = Suzuki SV650.jpg 
+|caption= 2006 Suzuki SV650S
+|aka              = 
+|manufacturer     = [[Suzuki]]
+|parent_company   = 
+|production       = 1999–2012<br/>2016–present
+|assembly         = [[Hamamatsu]], [[Japan]]
+|model_year       = 
+|predecessor      = 
+|successor        = 
+|class            = [[Types of motorcycle#Standard|Standard]] (SV650) <br /> [[sport bike|Sports]] (SV650S)<ref name="mcn"/>
+|engine           = 
+|top_speed        = 
+|power            = 
+|torque           = 
+|transmission     = 
+|suspension       = 
+|brakes           = 
+|tires            = 
+|rake_trail       = 
+|wheelbase        = 
+|length           = 
+|width            = 
+|height           = 
+|seat_height      = 
+|dry_weight       = 
+|wet_weight       = 
+|fuel_capacity    = 
+|oil_capacity     = 
+|fuel_consumption = 
+|turning_radius   = 
+|climbing_ability = 
+|related          = 
+}}
+
+The '''Suzuki SV650''' and its variants are street motorcycles manufactured since 1999 by [[Suzuki]]. In 2009, Suzuki replaced the standard SV650 with the [[Suzuki SFV650 Gladius|SFV650 Gladius]]. In 2016, the Gladius name was discontinued and the 2017 model was reverted to SV650.
+
+Other twin cylinder motorcycles in the class include the [[Yamaha MT-07|Yamaha MT07]] / [[Yamaha XSR700]] and [[Kawasaki Z series|Kawasaki Z650]] / [[Kawasaki Ninja|Kawasaki Ninja 650]].  The SV650 is more affordable than the likes of the [[Ducati Monster]], [[Ducati Scrambler (2015)|Ducati Scrambler]], and [[KTM 790 Duke]], but has similar performance.<ref>{{cite web |url=http://www.bikeme.tv/index.php/2017-suzuki-sv650-lam-sweet-neat/ |author=Ben Akhurst |title=2017 Suzuki SV650 LAM – SWEET & NEAT |work=BIKE ME! |date=2016-06-14 |access-date=2016-07-24}}</ref><ref>{{cite web |url=http://www.revzilla.com/common-tread/is-the-600-cc-race-replica-doomed |author=Mark Gardiner |title=Is the 600 cc race replica doomed to extinction? |work=[[RevZilla.com|RevZilla]] |date=2016-06-30 |access-date=2016-07-24}}</ref>
+
+==Specifications==
+{| class="wikitable" style="text-align:center; font-size: 90%;"
+! Model year
+! 1999–2002
+! 2003
+! 2004–2006
+! 2007
+! 2008–2014
+! 2017–present
+|-
+!Suzuki Year Codes
+|'''X ('99), Y ('00), K1, K2'''
+|'''K3'''
+|'''K4, K5, K6'''
+|'''K7'''
+|'''K8, K9, L0, L1, L2, L3, L4'''
+|
+|-
+!Suzuki Models
+|SV650 (naked)
+SV650S (half-fairing)
+|SV650 (naked)
+SV650S (half-fairing)
+|SV650 (naked)
+SV650S (half-fairing)
+|SV650 (naked)
+SV650A (ABS)
+
+SV650S (half-fairing)
+
+SV650SA (half-fair'd+ABS)
+|SV650 (naked)
+SV650A (ABS)
+
+SV650SF (full-fairing)
+
+SV650SA (full-fair'd+ABS)
+
+|SV650
+SV650 ABS
+
+SV650X
+
+|-
+! colspan="7" | Engine
+|-
+!Engine Type
+| colspan="3" |{{Convert|645|cc|abbr=on}} [[Radiator (engine cooling)|liquid-cooled]] [[4-stroke]] [[Multivalve|8-valve]] [[DOHC]] 90° [[V-twin]]<br />TSCC (Twin Swirl Combustion Chamber)
+| colspan="3" |Added twin spark plugs per cylinder 
+and O2 sensor for improved emissions
+|-
+! Bore x stroke
+| colspan="6" | {{convert|81.0|x|62.6|mm|abbr=on}}
+|-
+! Compression
+| colspan="5" | 11.5:1
+|11.2:1
+|-
+! Power
+| {{Convert|64.2|hp|abbr=on}} @ 9000&nbsp;rpm<ref name="cw99">{{Citation |title= Suzuki SV650 (evaluation) |magazine=[[Cycle World]] |publisher=[[Hachette Filipacchi Media U.S.]] |issn=0011-4286 |location=Newport Beach, California |date= May 1999 |volume= 38 |issue= 5 |pages= 76&ndash;83}}</ref>
+| colspan="4" | {{Convert|73.4|hp|abbr=on}} @ 8800&nbsp;rpm (rear wheel)<ref name="Tuttle2004">{{Citation |url= http://www.ridermagazine.com/output.cfm?id=775099 |access-date= 2011-02-04 |title= 2004 Honda 599 vs 2004 Suzuki SV650 vs 2004 Yamaha FZ6 |last= Tuttle Jr |first= Mark |magazine= Rider |year= 2004|archive-url=https://web.archive.org/web/20101127155804/http://ridermagazine.com/output.cfm?id=775099|archive-date=2010-11-27 }}</ref>
+| {{Convert|74.9|hp|abbr=on}} @ 8500 rpm (claimed)<ref name=claimed>{{cite web |url=https://bikes.suzuki.co.uk/bikes/street/sv650//|title=New V-Twin SV650| publisher=[[Suzuki]]|access-date=March 28, 2017|date=2017 }}</ref><br/>{{Convert|69.3|hp|abbr=on}} @ 8530 rpm (rear wheel)<ref name=three>{{Citation |title=THREE OF A KIND |last= Adams |first= Bradley |magazine=[[Cycle World]] |pages= 42–48 |date=May 2017 }}</ref>
+|-
+! Torque
+| {{Convert|42.3|lbfft|abbr=on}} @ 7200&nbsp;rpm<ref name="cw99" />
+| colspan="4" | {{Convert|47.2|lbfft|abbr=on}} @ 7000&nbsp;rpm (rear wheel)<ref name="Tuttle2004" />
+| {{Convert|47|lbft|abbr=on}}@ 8100 rpm (claimed)<ref name=claimed/><br/>{{Convert|44.2|lbft|abbr=on}}@ 8000 rpm (rear wheel)<ref name=three/>
+|-
+! Fuel system
+| Mikuni BDSR39 x2
+| colspan="5" | Fuel injection
+|-
+! Ignition
+| colspan="6" | [[Capacitor discharge ignition|Digital transistorized]]
+|-
+! colspan="7" | Chassis
+|-
+! Frame
+| Aluminium alloy oval tube trellis
+| colspan="4" | Pressure cast aluminium alloy diamond truss
+| Steel trellis frame
+|-
+! Front suspension
+| Kayaba 41&nbsp;mm telescopic fork, {{Convert|132|mm|abbr=on}} wheel travel.<br />Non-adjustable (1999–2001).<br />Adjustable pre-load (2002).
+| colspan="4" | 41&nbsp;mm damping rod fork, {{Convert|130|mm|abbr=on}} travel.<br />Adjustable pre-load.
+| 41&nbsp;mm telescopic fork, {{Convert|125|mm|abbr=on}} travel
+|-
+! Rake
+| colspan="5" | 25°
+|
+|-
+! Trail
+| {{Convert|100|mm|abbr=on}}
+| colspan="4" | {{Convert|102|mm|abbr=on}} (naked), 100mm (3.9 in) (S, SF, SA)
+|
+|-
+! Rear suspension
+| Kayaba single shock, adjustable pre-load
+127&nbsp;mm (5.0&nbsp;in) wheel travel
+
+337&nbsp;mm length. 9.1&nbsp;kg/mm (510&nbsp;lb/in) spring rate
+| colspan="4" | KYB (formally Kayaba) single shock, adjustable pre-load
+330&nbsp;mm bolt-to-bolt length. 7.7&nbsp;kg/mm (430&nbsp;lb/in) spring rate
+|Link type single shock, 7-step adjustable pre-load, {{Convert|130|mm|abbr=on}} travel
+|-
+! Front brakes
+| colspan="6" | Dual 290&nbsp;mm floating discs
+|-
+! Rear brakes
+| colspan="6" | Single 240&nbsp;mm disc
+|-
+! ABS
+| colspan="3" {{n/a}}
+| colspan="3" | Optional
+|-
+! Front tire
+| colspan="5" | 120/60-ZR17 MC (55W), tubeless
+|120/70ZR17M/C (58W), tubeless
+|-
+! Rear tire
+| colspan="6" | 160/60-ZR17 MC (69W), tubeless
+|-
+! colspan="6" | Dimensions
+!
+|-
+! Length
+| 2045&nbsp;mm (80.5&nbsp;in)
+| 2125&nbsp;mm (83.7&nbsp;in)<br />2130&nbsp;mm (83.9&nbsp;in) (S)
+| 2080&nbsp;mm (81.9&nbsp;in)<br />2085&nbsp;mm (82.1&nbsp;in) (S)
+| 2080&nbsp;mm (81.9&nbsp;in)<br />2085&nbsp;mm (82.1&nbsp;in) (S)
+2120&nbsp;mm (83.5&nbsp;in) (A, SA)
+|2080&nbsp;mm (81.9&nbsp;in)<br />2085&nbsp;mm (82.1&nbsp;in) (SF)
+2120&nbsp;mm (83.5&nbsp;in) (A, SA)
+|2140&nbsp;mm (84.2&nbsp;in.)
+|-
+! Width
+| 740&nbsp;mm (29.5&nbsp;in)
+| 745&nbsp;mm (29.3&nbsp;in)<br />730&nbsp;mm (28.7&nbsp;in) (S)
+| 745&nbsp;mm (29.3&nbsp;in)<br />730&nbsp;mm (28.7&nbsp;in) (S)
+| 745&nbsp;mm (29.3&nbsp;in) (naked, A)<br />730&nbsp;mm (28.7&nbsp;in) (S, SA)
+|745&nbsp;mm (29.3&nbsp;in) (naked, A)<br />730&nbsp;mm (28.7&nbsp;in) (SF, SA)
+|760&nbsp;mm (29.9&nbsp;in.)
+|-
+! Height
+| 1130&nbsp;mm (44.5&nbsp;in)
+| 1085&nbsp;mm (42.7&nbsp;in)<br />1175&nbsp;mm (46.3&nbsp;in) (S)
+| 1085&nbsp;mm (42.7&nbsp;in)<br />1170&nbsp;mm (46.1&nbsp;in) (S)
+| 1085&nbsp;mm (42.7&nbsp;in) (naked, A)<br />1170&nbsp;mm (46.1&nbsp;in) (S, SA)
+|1085&nbsp;mm (42.7&nbsp;in) (naked, A)<br />1170&nbsp;mm (46.1&nbsp;in) (SF, SA)
+|
+|-
+! Wheelbase
+| 1420&nbsp;mm (55.9&nbsp;in)
+| 1440&nbsp;mm (56.7&nbsp;in)<br />1430&nbsp;mm (56.3&nbsp;in) (S)
+| 1440&nbsp;mm (56.7"&nbsp;in)<br />1430&nbsp;mm (56.3&nbsp;in) (S)
+| 1440&nbsp;mm (56.7&nbsp;in)<br />1430&nbsp;mm (56.1&nbsp;in) (S)<br />1470&nbsp;mm (57.9&nbsp;in) (A, SA)
+|1440&nbsp;mm (56.7&nbsp;in)<br />1430&nbsp;mm (56.3&nbsp;in) (S, SA)<br />1470&nbsp;mm (57.9&nbsp;in) (SF)
+|1445&nbsp;mm (56.9&nbsp;in.)
+|-
+! Seat height
+| 805&nbsp;mm (31.7&nbsp;in)
+| colspan="3" | 800&nbsp;mm (31.5&nbsp;in)
+|
+|785&nbsp;mm (30.9in.)
+|-
+! Ground clearance
+| {{Convert|140|mm|abbr=on}}
+| 155&nbsp;mm (6.1&nbsp;in) (S)
+| 150&nbsp;mm (5.9&nbsp;in)<br />155&nbsp;mm (6.1&nbsp;in) (S)
+| 150&nbsp;mm (5.9&nbsp;in)<br />155&nbsp;mm (6.1&nbsp;in) (S, SA, SF)
+|150&nbsp;mm (5.9&nbsp;in)<br />155&nbsp;mm (6.1&nbsp;in) (SA, SF)
+|135&nbsp;mm (5.3&nbsp;in.)
+|-
+!Dry weight
+|165&nbsp;kg (364 lbs){{Verify source|date=September 2015}}<ref name="ServiceManual">{{Cite book|title = Suzuki Service Manual}}</ref> 169&nbsp;kg (372 lbs) (S){{Verify source|date=September 2015}}<ref name="ServiceManual" />
+|167&nbsp;kg (368 lbs){{Verify source|date=September 2015}}<ref name="ServiceManual" /> 171&nbsp;kg (376 lbs) (S){{Verify source|date=September 2015}}<ref name="ServiceManual" />
+|165&nbsp;kg (363 lbs){{Verify source|date=September 2015}}<ref name="ServiceManual" /> 169&nbsp;kg (372 lbs) (S){{Verify source|date=September 2015}}<ref name="ServiceManual" />
+|168&nbsp;kg (370 lbs){{Verify source|date=September 2015}}<ref name="ServiceManual" /> 171&nbsp;kg (376 lbs) (A){{Verify source|date=September 2015}}<ref name="ServiceManual" />
+
+172&nbsp;kg (379 lbs) (S){{Verify source|date=September 2015}}<ref name="ServiceManual" />
+
+175&nbsp;kg (385 lbs) (SA){{Verify source|date=September 2015}}<ref name="ServiceManual" />
+|168&nbsp;kg (370 lbs){{Verify source|date=September 2015}}<ref name="ServiceManual" /> 171&nbsp;kg (376 lbs) (A){{Verify source|date=September 2015}}<ref name="ServiceManual" />
+
+[not confirmed] (SF)
+
+[not confirmed] (SA)
+|
+|-
+! Wet weight
+| {{Convert|189|kg|abbr=on}}<ref name=cw99/>
+| colspan = "3" | {{Convert|198|kg|abbr=on}}<ref name=Tuttle2004/>
+|
+|195&nbsp;kg (429.9&nbsp;lbs.)
+197&nbsp;kg (434.3&nbsp;lbs.) (ABS)
+|-
+! Fuel capacity
+| {{convert|16|L|abbr=on}}{{convert|15|L|abbr=on}} (California)
+| colspan="4" | {{convert|17|L|abbr=on}}<br />{{convert|16|L|abbr=on}} (California)
+|3.8 US gal (14.5 L) / 3.6 US gal (13.8 L) CA model
+|-
+! Oil capacity
+| colspan="5" | Without filter change: 2.3 L (2.4 US qt), With filter change: 2.7 L (2.9 US qt), Overhaul: 3.1 L (3.3 US qt)<ref name="ServiceManual" />
+|
+|-
+!Engine coolant capacity
+|1.6 L (1.7 US qt)<ref name="ServiceManual" />
+| colspan="4" |1.7 L (1.8 US qt)<ref name="ServiceManual" />
+|
+|-
+! colspan="7" | Drive-train
+|-
+! Primary reduction
+| colspan="5" | 34/71 (2.088)
+|
+|-
+! 1st gear
+| colspan="5" | 32/13 (2.461)
+|
+|-
+! 2nd gear
+| colspan="5" | 32/18 (1.777)
+|
+|-
+! 3rd gear
+| colspan="5" | 29/21 (1.380)
+|
+|-
+! 4th gear
+| colspan="5" | 27/24 (1.125)
+|
+|-
+! 5th gear
+| colspan="5" | 25/26 (0.961)
+|
+|-
+! 6th gear
+| colspan="5" | 23/27 (0.851)
+|
+|-
+! Final reduction
+| colspan="5" | 45/15 (3.000)  46/15 on later models
+|
+|-
+! Final drive
+| colspan="5" | #525 O-ring chain. 520 on later models
+|
+|-
+! colspan="6" | Valve-train
+!
+|-
+! Valve angle
+| colspan="3" | 14° intake, 16° exhaust  
+| colspan="2" |
+|
+|-
+! Intake valves
+| colspan="3" | 31&nbsp;mm
+| colspan="2" |
+|
+|-
+! Intake valve stem
+| colspan="3" | 4.5&nbsp;mm 
+| colspan="2" |
+|
+|-
+! Intake valve lift
+| 8.1&nbsp;mm
+| colspan="2" | 8.7&nbsp;mm
+| colspan="2" |
+|
+|-
+! Exhaust valves
+| colspan="3" | 25.5&nbsp;mm
+| colspan="2" |
+|
+|-
+! Exhaust valve stem
+| colspan="3" | 4.5&nbsp;mm 
+| colspan="2" |
+|
+|-
+! Exhaust valve lift
+| 6.1&nbsp;mm
+| colspan="2" | 7.3&nbsp;mm
+| colspan="2" |
+|
+|-
+! colspan="7" | Performance
+|-
+! {{Convert|1/4|mi}}
+| 11.85 @ {{convert|110.17|mph|km/h|abbr=on}}<ref name="cw99" />
+| colspan="3" | 
+|
+|
+|-
+! {{Convert|0|-|60|mph|abbr=on}}
+| 3.20 sec<ref name="cw99" />
+| colspan="3" | 
+|
+|
+|-
+! {{Convert|0|-|100|mph|abbr=on}}
+| 8.76 sec<ref name="cw99" />
+| colspan="3" |
+|
+|
+|-
+! Roll on, {{Convert|60|-|80|mph|abbr=on}}
+|
+| colspan="3" |
+|
+|
+|-
+! Braking distance<br />from {{Convert|60|mph|abbr=on}}
+| {{Convert|36.08|m|abbr=on}}<ref name="cw99" />
+| colspan="3" |
+|
+|
+|-
+! Fuel economy
+| {{Convert|46|mpgus|abbr=on}}<ref name="cw99" />
+| colspan="3" | 
+|
+|
+|-
+! Model year
+! 1999–2002
+! 2003
+! 2004–2006
+! 2007
+!2008-2009
+! 2017–2023
+|}

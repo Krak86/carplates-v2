@@ -142,6 +142,51 @@ describe("parseWikiSpecs: `Infobox UK Bus` (MAN Lion's Coach / City)", () => {
   })
 })
 
+describe('parseWikiSpecs: transposed model-year table (Suzuki SV650)', () => {
+  const read = (yearFrom: number | undefined): ReturnType<typeof parseWikiSpecs> =>
+    parseWikiSpecs(readFileSync(new URL('./fixtures/wiki/sv650.en.wikitext', import.meta.url), 'utf8'), {
+      lang: 'en',
+      yearFrom
+    })
+
+  it('takes the 1999–2002 column: its own power and the base-model dimensions', () => {
+    const s = read(1999)
+    expect(s.engines).toHaveLength(1)
+    expect(s.engines[0]).toMatchObject({ displacementCc: 645, powerKw: 48 })
+    expect(s.lengthMm?.value).toBe(2045)
+    expect(s.kerbKg?.value).toBe(189)
+  })
+
+  it('applies a colspan cell to the single-year column and keeps the first variant line', () => {
+    const s = read(2003)
+    expect(s.engines[0]).toMatchObject({ displacementCc: 645, powerKw: 55 })
+    expect(s.lengthMm?.value).toBe(2125)
+    expect(s.kerbKg?.value).toBe(198)
+    expect(s.fuelTankL?.value).toBe(17)
+  })
+
+  it('never borrows a neighbour for an empty cell (2017–present)', () => {
+    const s = read(2017)
+    expect(s.engines[0]?.displacementCc).toBeNull()
+    expect(s.engines[0]?.powerKw).toBe(56)
+    expect(s.lengthMm?.value).toBe(2140)
+    expect(s.heightMm).toBeNull()
+    expect(s.kerbKg?.value).toBe(195)
+  })
+
+  it('is picked by year even in a series article whose headings name no generation', () => {
+    const text = readFileSync(new URL('./fixtures/wiki/sv650.en.wikitext', import.meta.url), 'utf8')
+    const s = parseWikiSpecs(text, { lang: 'en', series: true, code: 'SV650', yearFrom: 2003 })
+    expect(s.engines[0]?.powerKw).toBe(55)
+  })
+
+  it('stores nothing without a year or for a year outside every column', () => {
+    expect(read(undefined).engines).toEqual([])
+    expect(read(1990).engines).toEqual([])
+    expect(read(1990).lengthMm).toBeNull()
+  })
+})
+
 describe('parseEngine: motorcycle displacement', () => {
   it('reads a decimal cc figure', () => {
     expect(parseEngine('373.3 cc (2016-2025) single-cylinder, liquid-cooled').displacementCc).toBe(373)

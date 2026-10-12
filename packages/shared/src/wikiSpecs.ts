@@ -187,11 +187,11 @@ const WORD_CYL: Record<string, number> = { two: 2, three: 3, four: 4, five: 5, s
 
 /** Power in kW: kW as is, PS / CV / ch / л. с. × 0.7355 (metric), hp / bhp × 0.7457 (mechanical) — a unit-less number is never taken. */
 export function powerKwOf(text: string): number | null {
-  const kw = /(\d{2,4})\s*(?:kW|кВт)(?![\p{L}\d])/iu.exec(text)
-  const metric = /(\d{2,4})\s*(?:PS|CV|ch|л\.\s?с\.?|к\.\s?с\.?)(?![\p{L}\d])/iu.exec(text)
-  const mech = /(\d{2,4})\s*(?:bhp|hp)(?![\p{L}\d])/iu.exec(text)
+  const kw = /(\d{2,4}(?:\.\d{1,2})?)\s*(?:kW|кВт)(?![\p{L}\d])/iu.exec(text)
+  const metric = /(\d{2,4}(?:\.\d{1,2})?)\s*(?:PS|CV|ch|л\.\s?с\.?|к\.\s?с\.?)(?![\p{L}\d])/iu.exec(text)
+  const mech = /(\d{2,4}(?:\.\d{1,2})?)\s*(?:bhp|hp)(?![\p{L}\d])/iu.exec(text)
   let powerKw: number | null = null
-  if (kw) powerKw = Number(kw[1])
+  if (kw) powerKw = Math.round(Number(kw[1]))
   else if (metric) powerKw = Math.round(Number(metric[1]) * 0.7355)
   else if (mech) powerKw = Math.round(Number(mech[1]) * 0.7457)
   return powerKw !== null && (powerKw < 5 || powerKw > 1500) ? null : powerKw
@@ -444,10 +444,16 @@ const engineKey = (e: WikiEngine): string =>
 
 /** Engines and dimensions of the article's body tables that belong to the generation (see `ParseOptions.series`). */
 function articleTables(wikitext: string, opts: ParseOptions): TableSpecs {
-  const all = parseWikiTables(wikitext).map(t => ({ headings: t.headings, specs: tableSpecs(t) }))
+  const all = parseWikiTables(wikitext).map(t => ({
+    headings: t.headings,
+    byYear: !!modelYearColumns(t),
+    specs: tableSpecs(t, opts.yearFrom)
+  }))
   const code = opts.code ? codeKey(opts.code) : ''
   const matched = code ? all.filter(t => t.headings.some(h => codeKey(h).includes(code))) : []
-  const used = matched.length > 0 ? matched : opts.series ? [] : all
+  const base = matched.length > 0 ? matched : opts.series ? [] : all
+  // A model-year table picks its column by `yearFrom`, so a series article needs no heading to select it.
+  const used = [...new Set([...base, ...all.filter(t => t.byYear)])]
   const out: TableSpecs = { engines: [], dims: {} }
   const seen = new Set<string>()
   for (const { specs } of used) {
@@ -713,6 +719,7 @@ const COLUMN_KINDS: [ColumnKind, RegExp][] = [
   ],
   ['chassisCode', /chassis|кузов|шасси|baureihe|model\s?code|body code/i],
   ['code', /\bcode\b/i],
+  ['tank', /fuel (?:tank|capacity)/i],
   ['displacement', /displacement|capacity|volume|объ[её]м|об'єм|hubraum|swept/i],
   ['cylinders', /cylinders|цилиндр|циліндр|zylinder/i],
   ['power', /power|output|horsepower|\bhp\b|\bps\b|\bkw\b|мощност|потужн|leistung/i],
@@ -890,12 +897,63 @@ function addDim(out: TableSpecs['dims'], kind: DimKind, lines: string[]): void {
   if (lines.length > 0) (out[kind] ??= []).push(...lines)
 }
 
+/** `1999–2002` / `2003` / `2017–present` → [from, to]; null for anything else. */
+function yearSpan(label: string): [number, number] | null {
+  const m = /^\s*(\d{4})\s*(?:[–—-]\s*(\d{4}|present|now)?\s*)?$/i.exec(label)
+  if (!m) return null
+  const from = Number(m[1])
+  const open = !m[2] ? /[–—-]/.test(m[0]) : !/^\d/.test(m[2])
+  return [from, open ? Infinity : Number(m[2] ?? from)]
+}
+
+/** The year range of each column of a model-year table (`Model year | 1999–2002 | 2003 …`); null for any other table. */
+export function modelYearColumns(table: WikiTable): ([number, number] | null)[] | null {
+  const spans = table.header.slice(1).map(yearSpan)
+  return columnKind(table.header[0] ?? '') === 'years' && spans.filter(Boolean).length >= 2 ? spans : null
+}
+
 /**
- * Engines and dimensions out of one table. Two layouts: a row per engine / variant (columns classified by the header), and a
- * column per engine with the parameter names down the first column (`Wheelbase | 2700 | 2700` — de / ru technical data).
+ * Model-year table (`Model year | 1999–2002 | 2003 …`, a row per attribute): only the column whose range holds `yearFrom` counts,
+ * its first line per cell (the base model before the "S / A" variants). Colspan merges were expanded already; a missing or
+ * empty cell is no value.
  */
-export function tableSpecs(table: WikiTable): TableSpecs {
+function modelYearSpecs(
+  table: WikiTable,
+  spans: ([number, number] | null)[],
+  yearFrom: number | undefined
+): TableSpecs {
   const out: TableSpecs = { engines: [], dims: {} }
+  const col = spans.findIndex(s => !!s && yearFrom !== undefined && yearFrom >= s[0] && yearFrom <= s[1])
+  if (col < 0) return out
+  const parts = emptyParts()
+  for (const row of table.rows) {
+    // A section title ("Engine", "Dimensions") fills the row with one text.
+    if (new Set(row.map(c => c.join(' ')).filter(Boolean)).size < 2) continue
+    const label = row[0]!.join(' ')
+    const kind = columnKind(label)
+    const value = row[col + 1]?.slice(0, 1) ?? []
+    if (!kind || value.length === 0) continue
+    if (isDimKind(kind)) {
+      if (!(kind === 'weight' && /dry/i.test(label))) addDim(out.dims, kind, value)
+    } else if (kind === 'power' || kind === 'cylinders' || kind === 'fuel') parts[kind].push(...value)
+    else if (kind === 'engine' && /engine/i.test(label)) parts.engine.push(...value)
+    else if (kind === 'displacement' && /displacement/i.test(label))
+      parts.displacement.push({ lines: value, header: label })
+  }
+  const e = engineOf(parts)
+  if (e) out.engines.push(e)
+  return out
+}
+
+/**
+ * Engines and dimensions out of one table. Three layouts: a row per engine / variant (columns classified by the header), a
+ * column per engine with the parameter names down the first column (`Wheelbase | 2700 | 2700` — de / ru technical data), and
+ * a column per model-year range (`Model year | 1999–2002 | 2003`, motorcycles; needs `yearFrom`).
+ */
+export function tableSpecs(table: WikiTable, yearFrom?: number): TableSpecs {
+  const out: TableSpecs = { engines: [], dims: {} }
+  const spans = modelYearColumns(table)
+  if (spans) return modelYearSpecs(table, spans, yearFrom)
   const kinds = table.header.map(columnKind)
   // ≥2 distinct recognised columns = a row per engine; a lone label in the corner ("Двигатель | 1,3 | 1,5") = a column per engine.
   const byRow = new Set(kinds.filter(k => k !== null)).size >= 2
