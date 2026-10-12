@@ -584,7 +584,14 @@ export function makePlayerSprites(body: CarBody, color: string, plate: string, b
   }
 }
 
-export function makeAtlas(theme: Theme, body: CarBody, color: string, plate: string, brand: string | null): Atlas {
+export function makeAtlas(
+  theme: Theme,
+  body: CarBody,
+  color: string,
+  plate: string,
+  brand: string | null,
+  region: string
+): Atlas {
   const text = plate || 'AA0000AA'
   const colors = Object.values(VEHICLE_COLOR_HEX)
   const trafficBodies: readonly CarBody[] = ['sedan', 'hatch', 'suv', 'sport', 'pickup', 'van']
@@ -612,9 +619,9 @@ export function makeAtlas(theme: Theme, body: CarBody, color: string, plate: str
   const styles: BoardStyle[] = [
     { bg: BOARD_COLORS[0]?.[0] ?? '#1f4fa3', fg: '#ffffff', text: 'carsua.app' },
     { bg: '#f6f6f2', fg: '#111111', text, plate: true },
-    { bg: BOARD_COLORS[1]?.[0] ?? '#ffd500', fg: '#0057b8', text: '🇺🇦 UA' },
+    { bg: BOARD_COLORS[1]?.[0] ?? '#ffd500', fg: '#0057b8', text: region },
     { bg: BOARD_COLORS[2]?.[0] ?? '#111827', fg: '#4cc9f0', text: '🏁 RACE' },
-    { bg: BOARD_COLORS[3]?.[0] ?? '#c2410c', fg: '#ffffff', text: 'carsua.app' }
+    { bg: BOARD_COLORS[3]?.[0] ?? '#c2410c', fg: '#ffffff', text: region }
   ]
 
   return {

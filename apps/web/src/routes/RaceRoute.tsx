@@ -11,6 +11,7 @@ import {
   randomBackdrop,
   randomLanes,
   randomQuality,
+  randomRegion,
   randomScenery,
   randomTraffic,
   type CarBody,
@@ -36,6 +37,7 @@ function randomStart(): Start {
       traffic: randomTraffic(),
       quality: randomQuality(),
       plate: GENERIC_PLATE,
+      region: randomRegion(),
       brand: presetBrand(preset),
       auto: DEFAULT_AUTO
     }

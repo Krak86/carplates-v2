@@ -161,6 +161,7 @@ function sameConfig(a: RacerConfig, b: RacerConfig): boolean {
     a.traffic === b.traffic &&
     a.quality === b.quality &&
     a.plate === b.plate &&
+    a.region === b.region &&
     a.brand === b.brand &&
     a.auto === b.auto
   )
@@ -176,7 +177,7 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
 
   let cfg = initial
   let theme: Theme = THEMES[cfg.scenery]
-  let atlas: Atlas = makeAtlas(theme, cfg.body, cfg.color, cfg.plate, cfg.brand)
+  let atlas: Atlas = makeAtlas(theme, cfg.body, cfg.color, cfg.plate, cfg.brand, cfg.region)
   let backdrop: Backdrop = makeBackdrop(theme, cfg.scenery, cfg.backdrop)
   let width = 1024
   let height = 768
@@ -752,7 +753,7 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
 
   function rebuildLook(): void {
     theme = THEMES[cfg.scenery]
-    atlas = makeAtlas(theme, cfg.body, cfg.color, cfg.plate, cfg.brand)
+    atlas = makeAtlas(theme, cfg.body, cfg.color, cfg.plate, cfg.brand, cfg.region)
     backdrop = makeBackdrop(theme, cfg.scenery, cfg.backdrop)
   }
 
@@ -847,7 +848,11 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
       const resized = next.quality !== cfg.quality
       const backdropChanged = next.backdrop !== cfg.backdrop
       const sameWorld =
-        !resized && next.scenery === cfg.scenery && next.lanes === cfg.lanes && next.traffic === cfg.traffic
+        !resized &&
+        next.scenery === cfg.scenery &&
+        next.lanes === cfg.lanes &&
+        next.traffic === cfg.traffic &&
+        next.region === cfg.region // the region sits on the billboards, which live in the road
       const brandChanged = next.brand !== cfg.brand
       cfg = next
       cruise = Math.min(cruise, Math.round(topSpeed() / 100)) // a slower vehicle caps the cruise speed

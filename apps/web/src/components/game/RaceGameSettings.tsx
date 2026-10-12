@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { VEHICLE_COLOR_HEX } from '@carplates/shared'
+import { REGION_NAMES, VEHICLE_COLOR_HEX } from '@carplates/shared'
 
 import RaceGameChip from '@/components/game/RaceGameChip'
 import RaceGameGroup from '@/components/game/RaceGameGroup'
@@ -13,6 +13,7 @@ import {
   SCENERIES,
   TRAFFIC_LEVELS,
   randomBackdrop,
+  randomRegion,
   type CarBody,
   type RacerConfig,
   type SceneryId
@@ -105,6 +106,25 @@ export default function RaceGameSettings({ config, onChange, onPickBody }: Props
         ))}
         <RaceGameChip active={false} onClick={() => onChange({ backdrop: randomBackdrop() })}>
           <span aria-hidden>🎲</span> {t('race.backdrop.random')}
+        </RaceGameChip>
+      </RaceGameGroup>
+
+      <RaceGameGroup label={t('race.region')}>
+        <select
+          aria-label={t('race.region')}
+          value={config.region}
+          onChange={e => onChange({ region: e.target.value })}
+          className="min-w-0 flex-1 cursor-pointer rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-2 py-1"
+        >
+          {!REGION_NAMES.includes(config.region) && <option value={config.region}>{config.region}</option>}
+          {REGION_NAMES.map(name => (
+            <option key={name} value={name}>
+              {name}
+            </option>
+          ))}
+        </select>
+        <RaceGameChip active={false} onClick={() => onChange({ region: randomRegion() })}>
+          <span aria-hidden>🎲</span> {t('race.region.random')}
         </RaceGameChip>
       </RaceGameGroup>
 

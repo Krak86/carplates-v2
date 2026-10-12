@@ -17,6 +17,7 @@ import {
   randomQuality,
   randomScenery,
   randomTraffic,
+  startRegion,
   type RacerConfig
 } from '@/lib/racer/config'
 
@@ -60,6 +61,7 @@ export default function RaceGameModal({
     traffic: randomTraffic(),
     quality: randomQuality(),
     plate,
+    region: startRegion(plate),
     brand: brand ?? null,
     auto: DEFAULT_AUTO,
     ...decodeRaceConfig(shared)

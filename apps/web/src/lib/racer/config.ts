@@ -1,4 +1,4 @@
-import { type VehicleKind } from '@carplates/shared'
+import { REGION_NAMES, regionName, type VehicleKind } from '@carplates/shared'
 
 export const CAR_BODIES = [
   'sedan',
@@ -49,6 +49,16 @@ export function randomTraffic(): TrafficLevel {
 
 export function randomQuality(): Quality {
   return pickRandom(QUALITIES, DEFAULT_QUALITY)
+}
+
+/** A random region name (Ukrainian, as in the registry) for the roadside billboards. */
+export function randomRegion(): string {
+  return pickRandom(REGION_NAMES, 'м. Київ')
+}
+
+/** The starting region: the plate's own when its prefix is known, otherwise a random one. */
+export function startRegion(plate: string): string {
+  return regionName(plate) ?? randomRegion()
 }
 
 export const LANE_OPTIONS = [2, 3, 4] as const
@@ -137,6 +147,8 @@ export type RacerConfig = {
   quality: Quality
   /** Printed on the player's number plate and on one of the roadside billboards. */
   plate: string
+  /** Region name (Ukrainian) shown on the roadside billboards; follows the plate's region when it is known. */
+  region: string
   /** Brand of the looked-up car (any registry spelling); its logo is stuck on the back of the player's car. */
   brand: string | null
   /** Auto-forward mode: no gas pedal, the car cruises at a speed level that ↑ raises one step at a time. */
@@ -292,9 +304,9 @@ export function encodeRaceConfig(c: RacerConfig): string {
 }
 
 /** Reads a share-link token back; every part is validated, anything unknown is dropped (it is external input). */
-export function decodeRaceConfig(token: string | null): Partial<Omit<RacerConfig, 'plate' | 'brand'>> {
+export function decodeRaceConfig(token: string | null): Partial<Omit<RacerConfig, 'plate' | 'region' | 'brand'>> {
   const [body, scenery, lanes, traffic, quality, color, backdrop, mode] = (token ?? '').split('-')
-  const out: Partial<Omit<RacerConfig, 'plate' | 'brand'>> = {}
+  const out: Partial<Omit<RacerConfig, 'plate' | 'region' | 'brand'>> = {}
   if (mode === 'a' || mode === 'm') out.auto = mode === 'a'
   const body_ = CAR_BODIES.find(v => v === body)
   if (body_) out.body = body_
