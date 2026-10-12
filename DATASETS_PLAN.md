@@ -1131,6 +1131,39 @@ wikidata_id, revid)` (keyed on the stage I generation row; `revid` makes the cre
       6. **K-M6 Checks + docs (~0.5 h).** `pnpm format`, lint, type-check, test; browser-check one bike and one bus (light / dark / 485 px / `?section=engines`); write-up in `docs/plan-done.md`, ✅ line in `PLAN.md`,
          conventions in `docs/features-reference.md`; commit message, stop.
     - **Stop rules:** if K-M1 shows the ~35 models already cover the scoped brands, finish at K-M2 with a note and skip 3–5. Photos are separate (`wiki_image`, `wikiAliases.ts`) and out of scope.
+    - **K-M1 result (2026-10-12).** The commit diffs were not read (`git show` was denied); the write-ups in `docs/plan-done.md` stand in for them. Neither `model_generations` nor `model_spec_wiki` has a vehicle-kind column, so counts are by `make`. **Confirmed by SELECT on `registry.model_generations`** (make, model, source, rows; 57 rows for Honda/Yamaha/Suzuki/Kawasaki/BMW/Bajaj/Jawa/MAN/Iveco/Neoplan/Setra; the Mercedes and `model_spec_wiki` queries were not run):
+      - **Bikes with a row:** Bajaj Avenger (3, headings), Dominar (1), Pulsar (1); BMW R1200GS, R1250GS, S1000RR (1 each); Honda 500 twins, CB400 Super Four, CB600F (2), CBR1000RR, CBR600F, CBR600RR, Dio, Gold Wing, NC700, Shadow, VFR800 (1 each); Kawasaki Ninja 400 (1); Suzuki Burgman, GSR600, GSX-R600, GSX-R750, Intruder (1 each), SV650 (3, headings); Yamaha DragStar 650, FZ6, Jog, MT-07, MT-09, YBR125, YZF-R1, YZF-R6 (1 each).
+      - **Buses / vans with a row:** Iveco Daily (3, headings), Stralis (1); MAN Lion's City (1), Lion's Coach (3, headings), NL202 (1).
+      - **No rows at all:** Jawa, Neoplan, Setra, every Kawasaki except Ninja 400.
+      - **Corrections to the write-ups:** Honda Dio and Yamaha Jog have a `single` row although neither is in `generations-titles.csv` (Dio was listed as unmatched, Jog was never mentioned), so they came from the matcher's own resolution; check they point at the right article. Suzuki Intruder and MAN Lion's City have a generation row but, per the Step 5 write-up, no spec row. The Bajaj model is stored as lowercase `dominar` (the pin title is "Dominar 400"), unlike the other models.
+      - **Still unchecked:** `model_spec_wiki` row counts per make (so "generation row, no engines" cases are not listed), and the Mercedes rows (T2, Citaro, Sprinter).
+      - **Honda** — pinned: CB500 twins, CB600F/Hornet, CBR600F/600RR/1000RR, VFR800, Gold Wing, CB400SF, NC700, Shadow (one `single` row each). Gaps: Steed (only inside the Shadow article), Dio (one article, many editions), XR150L (family page only).
+      - **Yamaha** — pinned: DragStar, YBR125, MT-07/09, YZF-R1/R6, FZ6. MT-07 re-ingested, but the en infobox typo gives 656 cc. Gap: Majesty (article covers only the YP400).
+      - **Suzuki** — pinned: Burgman/Skywave, GSX-R600/750, GSR600, SV650 (3 rows after 6c, engine + power), Intruder (0 rows, prose only, skipped for good). Gap: Address (the only article is Access 125).
+      - **Kawasaki** — only Ninja 400 has a row (confirmed). Gap: every other model (Z, ER-6, Versys, ZX-6R/10R, KLE), the thinnest brand relative to its ~3 % share of bike rows.
+      - **BMW** — pinned: R1200GS, S1000RR, R1250GS. Gaps: F-series (F650/700/800GS), R-series boxers, K-series.
+      - **Bajaj** — pinned: Pulsar, Avenger, Dominar 400. Gap: Boxer BM150 (redirects to CT 100, skipped for good).
+      - **Jawa** — none. Gap: Jawa 350 (Type 634/638), planned as 6b (ru/uk pin plus a card template in `INFOBOX_NAME`); the `lang` pin path exists.
+      - **Buses** — pinned: Mercedes T2/Citaro (plus Sprinter aliases), Iveco Daily, MAN NL202, Lion's Coach (3 rows, transmission only), Lion's City (0 rows, skipped for good); Sprinter, Crafter, LT and Stralis already had rows. Gaps: **Neoplan** (N116/N316) and **Setra** (S 215/315): the de articles have no infobox or only per-model pages with de `Infobox Bus`, which `INFOBOX_NAME` lacks. Step 4 measured 56.9 % of bus registrations resolving.
+      - **Cross-cutting gaps:** bike `seat_height`, `dry_weight`, `final_drive` have no column (not stored); bus length/seats/floor type were not checked; motorcycle coverage is 7.7 % of rows (41,043 of 533,394), against the ~28 % ceiling in the scoping above. The browser check done in Step 5 covered only the MT-07 and Iveco 35C13.
+      - **K-M2 result (2026-10-12, read-only; code and the `mt07` / `lionscoach` fixtures only, no DB).**
+        - **(a) Matcher is kind-agnostic.** `GenerationsService.locate()` (`generations.service.ts:52`) maps every row to `kind: 'any'` and calls `matchVdbModelAcrossMakes(…, ['any'])`; year logic is `pickGeneration` on `yearFrom`/`yearTo` only. No car assumption. Open risk: `vdbRelatedMakeKeys` / make aliases were written for cars; a bike under a noisy registry brand ("БАЗ  А079.14") is a matcher-alias question, not a bike one.
+        - **(b) Bike infobox fields** (`mt07.en`: name, manufacturer, production, class, engine, power, transmission, wheelbase, length, width, seat_height, wet_weight, fuel_capacity):
+
+          | Field | Stored as | Decision |
+          | --- | --- | --- |
+          | wheelbase / length / width | `wheelbaseMm` / `lengthMm` / `widthMm` | map (works) |
+          | height | `heightMm` | map; most bike infoboxes omit it (NULL, shown only where RDW has no row) |
+          | wet_weight | `kerbKg` (alias on `weight`) | map (works); label "kerb mass" is right for a wet bike |
+          | fuel_capacity | `fuelTankL` | map (works) |
+          | power | merged into the lone engine | map (works) |
+          | seat_height | none | skip (not in registry/RDW, low value) — or one `seatHeightMm` column if wanted |
+          | dry_weight / final_drive / frame / brakes / tyres | none | skip; no UI row to hang them on |
+          | layout | `layout` text (`drive` on cars) | bikes have no `layout`; field stays empty, row is hidden |
+        - **(c) Bus infobox** (`lionscoach.en`: production, floortype, doors, engine, capacity, powerout, transmission, wheelbase, length, width, height, weight): dimensions, `weight` → `kerbKg` and `transmission` map already. **Gap 1:** `powerout` is not in `ALIASES.power` (only `power`), so a bus engine given as "D2676 LOH" with power in `powerout` gets no kW — add `powerout` to `power`. **Gap 2:** `capacity` (passengers) and `floortype` / `doors` have no column — skip (RDW has seats). The bus `capacity` must not be read as displacement; only the table regex uses that word, so check once on a fixture.
+        - **(d) UI (`WikiSpecs.tsx` / `.helpers.ts`)** has no vehicle-kind branch: `DIMENSION_KEYS` always lists wheelbase, length, width, height, kerb mass and tank, each skipped when null, so bikes need no hiding logic; `driveRows(layout, transmission)` hides an empty layout. K-M5 is therefore needed only if a label reads wrong for bikes ("Wheelbase" is fine; "Kerb mass" is the RDW wording for a bike's wet mass).
+        - **Mapping outcome:** one parser change (`powerout` alias) and no migration. No new column is required.
+      - **Decision: continue to K-M2, but only the read-only field-fit check** — it needs no DB and settles the three open column questions. **Stop before K-M3/K-M4** unless the owner wants Kawasaki/BMW/Honda breadth: the remaining named gaps are mostly "no article" or "prose only", so new fixtures would add little, and the brands with real headroom are pins-only work (Kawasaki, BMW F-series), not parser work.
 
 Not planned (decided): VehiclesDB per-country deciles, derived body-type label, vPIC offline dump, Eurostat. (Wikidata moved into stage I; other countries into stage J.)
 
