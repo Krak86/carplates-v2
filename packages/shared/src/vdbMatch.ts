@@ -147,12 +147,23 @@ const MODEL_ALIASES: Readonly<Record<string, readonly (readonly [RegExp, string]
     [/^a4avant/, 'a4'],
     [/^a6allroad/, 'a6']
   ],
-  volkswagen: [[/^ccsport/, 'cc']],
+  volkswagen: [
+    [/^ccsport/, 'cc'],
+    // LT 28 / 35 / 46 are the weight classes of the LT.
+    [/^lt\d/, 'lt']
+  ],
+  // Daily codes are weight class + power (35C13, 35S13, 35.10, 50C15) or the "Turbo Daily" name.
+  iveco: [[/^(turbodaily|\d{2}[cs]?\d{2}$)/, 'daily']],
   // The Renault Taliant is the Turkish-market Dacia Logan III (reached through `CROSS_MAKE_ALIASES`).
   dacia: [[/^taliant/, 'logan']],
   // Registry spells the class as letter + engine figure (S 500); the catalog's S/V/R-Class keys are not in the
   // Euro NCAP table that `brandCandidateKey` serves.
+  // Bus-registered vans: bare Sprinter codes (313 CDI, 312 D, 316; a Cyrillic variant suffix is dropped, 312Д-П18 → 31218; the ranges skip the cars: 250 D, 300 D, 500),
+  // the T2 (609 D, 814) and the Citaro (O 530). Ranges avoid the cars (200 D–250 D, 300 D, 500, 600). Pre-1995 T1 codes (208 D–410 D) fall outside the Sprinter's years, so the chip hides.
   mercedesbenz: [
+    [/^(2(0[89]|1\d)|[345](0[1-9]|1\d))(cdi|d)?(\d\d)?$/, 'sprinter'],
+    [/^(60\d|61\d|70\d|81\d)d?$/, 't2'],
+    [/^o530/, 'citaro'],
     [/^s\d/, 'sclass'],
     [/^v\d/, 'vclass'],
     [/^r\d/, 'rclass']

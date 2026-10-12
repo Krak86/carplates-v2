@@ -204,7 +204,7 @@ export function parseEngine(line: string): WikiEngine {
   const litres = /(?<![\d.])(\d(?:\.\d{1,2})?)\s*(?:l|litres?|liters?|литр\p{L}*|л)(?![\p{L}\d])/iu.exec(text)
   const cc = /(\d{3,5})\s*(?:cc|cm³|см³)/i.exec(text)
   if (litres) displacementCc = Math.round(Number(litres[1]) * 1000)
-  else if (cc) displacementCc = Number(cc[1])
+  else if (cc) displacementCc = Math.round(Number(cc[1]))
   if (displacementCc !== null && (displacementCc < 40 || displacementCc > 20000)) displacementCc = null
 
   let cylinders: number | null = null
@@ -241,7 +241,8 @@ const ALIASES = {
   length: ['length', 'длина', 'довжина', 'länge', 'délka', '전장', '全長'],
   width: ['width', 'ширина', 'breite', 'šířka', '전폭', '全幅'],
   height: ['height', 'высота', 'висота', 'höhe', 'výška', '전고', '全高'],
-  weight: ['weight', 'масса', 'вага', 'gewicht', 'hmotnost', '전비중량', '車両重量'],
+  weight: ['weight', 'wet_weight', 'масса', 'вага', 'gewicht', 'hmotnost', '전비중량', '車両重量'],
+  power: ['power'],
   fuel_capacity: ['fuel_capacity', 'объём бака', 'бак', 'tankinhalt', '燃料タンク容量'],
   layout: ['layout', 'привод', 'компонування', 'antrieb', 'koncepce', '구동방식', '駆動方式'],
   transmission: ['transmission', 'кпп', 'трансмісія', 'getriebe', '변속기', 'トランスミッション'],
@@ -493,6 +494,12 @@ export function parseWikiSpecs(wikitext: string, opts: ParseOptions = {}): WikiS
   const infoboxEngines = (templateEngines.length > 0 ? templateEngines : field('engine').map(parseEngine)).filter(
     e => e.displacementCc !== null || e.powerKw !== null
   )
+  // Motorcycle infoboxes keep the power in its own field ("55 kW @ 9,000 rpm"): a lone engine without a figure takes the first one.
+  const bikeKw =
+    infoboxEngines.length === 1 && infoboxEngines[0]!.powerKw === null
+      ? (field('power').map(powerKwOf).find(Boolean) ?? null)
+      : null
+  if (bikeKw) infoboxEngines[0] = { ...infoboxEngines[0]!, powerKw: bikeKw }
   // Table rows carry power, chassis codes and notes; infobox lines rarely do — tables win when they have a figure.
   const engines =
     tables.engines.some(e => e.powerKw !== null) || infoboxEngines.length === 0 ? tables.engines : infoboxEngines

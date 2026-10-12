@@ -274,6 +274,30 @@ describe('cross-make aliases', () => {
     expect(gen('БАЗ', 'А079.14')).toBe('baz/a079')
   })
 
+  it('reaches the bus generation rows through bare van codes, and leaves cars alone', () => {
+    const gens = [
+      ['mercedesbenz', 'sprinter'],
+      ['mercedesbenz', 't2'],
+      ['mercedesbenz', 'citaro'],
+      ['volkswagen', 'lt'],
+      ['iveco', 'daily']
+    ].map(([mk, name]) => row(mk!, name!))
+    const gen = (brand: string, model: string): string | null => {
+      const found = matchVdbModelAcrossMakes(gens, makeKey(brand)!, model)
+      return found ? `${found.row.makeKey}/${found.row.name}` : null
+    }
+    expect(gen('MERCEDES-BENZ', '313 CDI')).toBe('mercedesbenz/sprinter')
+    expect(gen('MERCEDES-BENZ', '312 D')).toBe('mercedesbenz/sprinter')
+    expect(gen('MERCEDES-BENZ', '316')).toBe('mercedesbenz/sprinter')
+    expect(gen('MERCEDES-BENZ', '609 D')).toBe('mercedesbenz/t2')
+    expect(gen('MERCEDES-BENZ', 'O 530')).toBe('mercedesbenz/citaro')
+    expect(gen('MERCEDES-BENZ', '300 D')).toBeNull()
+    expect(gen('MERCEDES-BENZ', '250 D')).toBeNull()
+    expect(gen('VOLKSWAGEN', 'LT 35 D')).toBe('volkswagen/lt')
+    expect(gen('IVECO', '35C13')).toBe('iveco/daily')
+    expect(gen('IVECO', 'TURBO DAILY')).toBe('iveco/daily')
+  })
+
   it('reaches the base model through marketing prefixes, engine figures and variant words', () => {
     expect(across('FIAT', 'NUOVO DOBLO')).toBe('fiat/Doblo')
     expect(across('AUDI', 'A4 1.8')).toBe('audi/A4')

@@ -1,0 +1,20 @@
+{{short description|Japanese motorcycle made beginning 2014}}
+{{Infobox motorcycle
+| name = Yamaha MT-07
+| manufacturer = [[Yamaha Motor Company]]
+| production = 2014–present
+| class = [[Naked bike]]
+| engine = {{convert|689|cc|abbr=on}} [[Radiator (engine cooling)|liquid-cooled]] [[4-stroke]] [[DOHC]] [[Straight-twin engine|270° parallel-twin]]
+| power = {{unbulleted list
+  | {{convert|55|kW|hp PS|abbr=on|1}} @ 9,000&nbsp;rpm<ref name="telegraph"/>
+  | {{convert|49.85|kW|hp PS|abbr=on|1}} @ 9,200&nbsp;rpm (rear wheel)
+  }}
+| transmission = 6-speed [[Non-synchronous transmission|constant mesh]]
+| wheelbase = {{convert|1400|mm|1|abbr=on}}
+| length = {{convert|2085|mm|1|abbr=on}}
+| width = {{convert|745|mm|1|abbr=on}}
+| seat_height = {{convert|805|mm|1|abbr=on}}
+| wet_weight = {{convert|179|kg|abbr=on}}
+| fuel_capacity = {{convert|14|L|1|abbr=on}}
+}}
+The '''Yamaha MT-07''' is a motorcycle.

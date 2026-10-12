@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs'
+
 import { describe, it, expect } from 'vitest'
 
 import { expandWikitext, parseEngine, parseMeasure, parseWikiSpecs } from './wikiSpecs.js'
@@ -100,5 +102,24 @@ lead text`
 
   it('returns empty specs for a page without an infobox', () => {
     expect(parseWikiSpecs('just text').engines).toEqual([])
+  })
+})
+
+describe('parseWikiSpecs: motorcycle infobox', () => {
+  const specs = parseWikiSpecs(readFileSync(new URL('./fixtures/wiki/mt07.en.wikitext', import.meta.url), 'utf8'), {
+    lang: 'en'
+  })
+
+  it('reads dimensions, tank and the wet weight as the kerb mass', () => {
+    expect(specs.wheelbaseMm?.value).toBe(1400)
+    expect(specs.lengthMm?.value).toBe(2085)
+    expect(specs.kerbKg?.value).toBe(179)
+    expect(specs.fuelTankL?.value).toBe(14)
+    expect(specs.transmission).toContain('6-speed')
+  })
+
+  it('takes the power of the separate `power` field for a lone engine', () => {
+    expect(specs.engines).toHaveLength(1)
+    expect(specs.engines[0]).toMatchObject({ displacementCc: 689, powerKw: 55 })
   })
 })
