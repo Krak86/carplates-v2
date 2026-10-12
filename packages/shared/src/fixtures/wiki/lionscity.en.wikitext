@@ -1,0 +1,33 @@
+{{Infobox automobile
+| name         = MAN Lion's City
+| image        = SL MAN Lion's City NL253 Hybrid 4842, T-Centralen, 2019 (01).jpg
+| caption      = Lion's City Hybrid in service in [[Sweden]]
+| type         = 
+| manufacturer = [[MAN Truck & Bus]]
+| aka          = 
+| production   = 1996–present
+| model_years  = 
+| assembly     = {{unbulleted list|Germany: [[Augsburg]]/[[Nobitz]] (Göppel Bus), [[Plauen]]/[[Pilsting]] ([[Neoplan]]/[[Viseon Bus]]), [[Salzgitter]]|Poland: [[Starachowice]]/[[Sady, Poznań County|Sady]] ([[FSC Star|MAN Bus]])|South Africa: [[Olifantsfontein]]|Turkey: [[Ankara]] ([[MANAŞ]])
+|Malaysia: [[Johor]] ([[Gemilang Coachworks]])|Philippines: [[Carmona, Cavite|Carmona]] ([[Almazora Motors Corporation|Almazora]])}}
+| designer     = 
+| class        = [[Bus manufacturing|Integral bus]]
+| body_style   = {{unbulleted list|[[Midibus]]|[[Single-decker bus]]|[[Articulated bus]]|[[Double-decker bus]]}}
+| layout       = 
+| platform     = 
+| doors        = 1, 2, 3, 4 or 5
+| floortype    = {{unbulleted list|[[Low-floor bus|Low floor]]|[[Low-entry bus|Low entry]]}}
+| chassis      = 
+| related      = {{unbulleted list|MAN Lion's Classic|[[Neoplan Centroliner]]}}
+| engine       = 
+| powerout     = {{convert|220–360|hp|kW|abbr=on}}
+| transmission = 
+| propulsion   = 
+| wheelbase    = 
+| length       = {{convert|8.13 – 20.45|m}}
+| width        = {{convert|2.38 – 2.55|m}}
+| height       = {{convert|2.99 – 4.37|m}}
+| weight       = 
+| predecessor  = {{unbulleted list|MAN EL&nbsp;xx2 (A12)|MAN ND&nbsp;xx2 (A14)|[[MAN NG272(2)|MAN NG&nbsp;xx2]] (A11)|[[MAN NL262|MAN NL&nbsp;xx2]] (A10/A15/A27)|MAN NM&nbsp;xx2 (469)}}
+| successor    = 
+| sp           = uk
+}}

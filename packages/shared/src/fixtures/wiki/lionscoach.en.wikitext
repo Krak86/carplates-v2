@@ -1,0 +1,31 @@
+{{Infobox UK Bus
+| name = MAN Lion's Coach
+| image = File:MAN Lion’s Coach of Bomatur in Helsinki (1).jpg
+| caption = Lion's Coach 3rd generation 
+| manufacturer = [[MAN Truck & Bus]] / [[MANAŞ]]
+| aka = MAN Fortuna
+| production = 1996–present
+| assembly = Turkey: [[Ankara]] ([[MANAŞ]])
+| predecessor = {{unbulleted list|[[MAN SR 292]]|[[MAN SR 362]]}}
+| successor = 
+| class = [[Coach (bus)|Coach]]
+| doors = 2 doors
+| floortype = High Deck
+| engine = MAN D2676LOH 12.4 liter common rail 6-cylinder [[diesel engine]] (Euro VI), vertically installed
+| capacity = 43 – 61 seats
+| powerout = {{plainlist|
+* '''2-axle models''': 316kW or 346kW
+* '''3-axle models''': 346kW or 375kW}}
+| transmission = MAN TipMatic, automated 12-speed [[manual gearbox]] with EasyStart or 6-speed [[automatic gearbox]]
+| wheelbase = 
+| length = {{plainlist|
+* '''Lion’s Coach''': 12,101 mm
+* '''Lion’s Coach C (2 axles)''': 13,091 mm
+* '''Lion’s Coach C (3 axles)''': 13,361 mm
+* '''Lion’s Coach L''': 13,901 mm}}
+| width = 2,550 mm
+| height = 3,870 mm
+| weight = 19,700 kg – 25,530 kg
+| related = [[Neoplan Tourliner]]
+| designer = Stephan Schönherr
+}}

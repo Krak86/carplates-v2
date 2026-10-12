@@ -123,3 +123,27 @@ describe('parseWikiSpecs: motorcycle infobox', () => {
     expect(specs.engines[0]).toMatchObject({ displacementCc: 689, powerKw: 55 })
   })
 })
+
+describe("parseWikiSpecs: `Infobox UK Bus` (MAN Lion's Coach / City)", () => {
+  const read = (name: string): ReturnType<typeof parseWikiSpecs> =>
+    parseWikiSpecs(readFileSync(new URL(`./fixtures/wiki/${name}.en.wikitext`, import.meta.url), 'utf8'), {
+      lang: 'en'
+    })
+
+  it('reads the single-vehicle infobox of the coach', () => {
+    const specs = read('lionscoach')
+    expect(specs.widthMm?.value).toBe(2550)
+    expect(specs.heightMm?.value).toBe(3870)
+  })
+
+  it('keeps the whole range of lengths of the city bus', () => {
+    const specs = read('lionscity')
+    expect(specs.lengthMm).toMatchObject({ min: 8130, max: 20450 })
+  })
+})
+
+describe('parseEngine: motorcycle displacement', () => {
+  it('reads a decimal cc figure', () => {
+    expect(parseEngine('373.3 cc (2016-2025) single-cylinder, liquid-cooled').displacementCc).toBe(373)
+  })
+})

@@ -202,7 +202,7 @@ export function parseEngine(line: string): WikiEngine {
   const text = line.replace(/(\d),(\d{3})(?!\d)/g, '$1$2').replace(/(\d),(\d)(?!\d)/g, '$1.$2')
   let displacementCc: number | null = null
   const litres = /(?<![\d.])(\d(?:\.\d{1,2})?)\s*(?:l|litres?|liters?|литр\p{L}*|л)(?![\p{L}\d])/iu.exec(text)
-  const cc = /(\d{3,5})\s*(?:cc|cm³|см³)/i.exec(text)
+  const cc = /(\d{3,5}(?:\.\d)?)\s*(?:cc|cm³|см³)/i.exec(text)
   if (litres) displacementCc = Math.round(Number(litres[1]) * 1000)
   else if (cc) displacementCc = Math.round(Number(cc[1]))
   if (displacementCc !== null && (displacementCc < 40 || displacementCc > 20000)) displacementCc = null
@@ -222,7 +222,7 @@ export function parseEngine(line: string): WikiEngine {
 
 /** Infobox template names: en, ru (+ the per-generation sub-template), uk, de, ja, ko, cs. */
 const INFOBOX_NAME =
-  /^(?:infobox[ _]automobile|infobox[ _]motorcycle|infobox[ _]bus|infobox[ _]truck|infobox[ _]vehicle|автомобиль|модификация автомобиля|картка:автомобіль|модифікація автомобіля|infobox[ _]pkw-modell(?:[ _]generationen)?|infobox[ _]自動車基本情報|자동차 정보|infobox - automobil)$/i
+  /^(?:infobox[ _]automobile|infobox[ _]motorcycle|infobox[ _](?:uk[ _])?bus|infobox[ _]truck|infobox[ _]vehicle|автомобиль|модификация автомобиля|картка:автомобіль|модифікація автомобіля|infobox[ _]pkw-modell(?:[ _]generationen)?|infobox[ _]自動車基本情報|자동차 정보|infobox - automobil)$/i
 const SUB_NAME = /^(?:модификация автомобиля|модифікація автомобіля)$/i
 
 /** Parameter names per field: English first, then the same facts under the other editions' names. */
