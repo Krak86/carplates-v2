@@ -112,6 +112,14 @@ describe('productionSpan', () => {
   it('is null without any year', () => {
     expect(productionSpan('{{Infobox automobile\n| name = x\n}}')).toBeNull()
   })
+
+  it('expands a short end year and narrows a multi-model field to the model (BMW F series)', () => {
+    const f =
+      '{{Infobox motorcycle\n| production = F800GS (2008–19)<br/>F800GSA (2013–19)<br/>F700GS (2012–19)<br/>F650GS (2008–12)\n}}'
+    expect(productionSpan(f, 'F 700 GS')).toEqual({ from: 2012, to: 2019 })
+    expect(productionSpan(f, 'F 800 GS')).toEqual({ from: 2008, to: 2019 })
+    expect(productionSpan(f)).toEqual({ from: 2008, to: 2019 })
+  })
 })
 
 describe('chain quality', () => {

@@ -323,7 +323,7 @@ async function resolve(t: Target): Promise<{ gens: Generation[]; target: Target 
 function singleGeneration(t: Target, series: Series): { gens: Generation[]; target: Target } | null {
   // Only the model's own article ("Daewoo Lanos"), not a relative of it ("Renault Duster Oroch").
   if (!series.pinned && !norm(series.title).endsWith(norm(t.model))) return null
-  const years = productionSpan(series.wikitext)
+  const years = productionSpan(series.wikitext, t.model)
   if (!years || years.from > new Date().getFullYear()) return null
   return {
     gens: [

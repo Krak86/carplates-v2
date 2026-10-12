@@ -395,11 +395,25 @@ export function parseTitlePins(csv: string, normalize: (query: string) => string
 /**
  * The widest production span an article states, for a model with ONE generation: `1997–2002 (Daewoo) / 1997–2020 (licence-built)`
  * → 1997–2020, because licence-built cars (ZAZ Lanos until 2017) sit in our registry. null end = still produced.
+ * A short end (`2008–19`) is expanded. A field that lists several models (`F800GS (2008–19)<br/>F700GS (2012–19)`) is narrowed
+ * to the entries naming `model` (folded to [a-z0-9]) when any does.
  */
-export function productionSpan(wikitext: string): { from: number; to: number | null } | null {
-  const text = infoboxField(wikitext, PRODUCTION_FIELD)
-  const years = [...text.matchAll(/(?<!\d)((?:19|20)\d{2})(?!\d)/g)].map(m => Number(m[1])).filter(validYear)
-  if (years.length === 0)
+export function productionSpan(wikitext: string, model = ''): { from: number; to: number | null } | null {
+  const fold = (s: string): string => s.toLowerCase().replace(/[^a-z0-9]+/g, '')
+  const field = infoboxField(wikitext, PRODUCTION_FIELD)
+  const entries = field.split(/,\s+|;\s*|\n/)
+  const named = model ? entries.filter(e => fold(e).includes(fold(model))) : []
+  const text = named.length > 0 ? named.join('\n') : field
+  const years = [...text.matchAll(/(?<!\d)((?:19|20)\d{2})(?:\s*[–—-]\s*((?:19|20)?\d{2})(?!\d))?(?!\d)/g)].flatMap(
+    m => {
+      const from = Number(m[1])
+      const end =
+        m[2] === undefined ? [] : [m[2].length === 2 ? Math.floor(from / 100) * 100 + Number(m[2]) : Number(m[2])]
+      return [from, ...end]
+    }
+  )
+  const valid = years.filter(validYear)
+  if (valid.length === 0)
     return infoboxYears(wikitext) && { from: infoboxYears(wikitext)!.from, to: infoboxYears(wikitext)!.to ?? null }
-  return { from: Math.min(...years), to: /present|current|ongoing|now/i.test(text) ? null : Math.max(...years) }
+  return { from: Math.min(...valid), to: /present|current|ongoing|now/i.test(text) ? null : Math.max(...valid) }
 }

@@ -203,8 +203,9 @@ export function parseEngine(line: string): WikiEngine {
   let displacementCc: number | null = null
   const litres = /(?<![\d.])(\d{1,2}(?:\.\d{1,2})?)\s*(?:l|litres?|liters?|литр\p{L}*|л)(?![\p{L}\d])/iu.exec(text)
   const cc = /(\d{3,5}(?:\.\d)?)\s*(?:cc|cm³|cm3|см³)/i.exec(text)
-  if (litres) displacementCc = Math.round(Number(litres[1]) * 1000)
-  else if (cc) displacementCc = Math.round(Number(cc[1]))
+  // An explicit cc figure beats a litre one: a bike's spec table lists "248 cc … SAE 10W40/1.9 L" (the oil capacity).
+  if (cc) displacementCc = Math.round(Number(cc[1]))
+  else if (litres) displacementCc = Math.round(Number(litres[1]) * 1000)
   if (displacementCc !== null && (displacementCc < 40 || displacementCc > 20000)) displacementCc = null
 
   let cylinders: number | null = null
@@ -222,7 +223,7 @@ export function parseEngine(line: string): WikiEngine {
 
 /** Infobox template names: en, ru (+ the per-generation sub-template), uk, de, ja, ko, cs. */
 const INFOBOX_NAME =
-  /^(?:infobox[ _]automobile|infobox[ _]motorcycle|infobox[ _](?:uk[ _])?bus|infobox[ _]truck|infobox[ _]vehicle|автомобиль|модификация автомобиля|картка:автомобіль|модифікація автомобіля|infobox[ _]pkw-modell(?:[ _]generationen)?|infobox[ _]自動車基本情報|자동차 정보|infobox - automobil)$/i
+  /^(?:infobox[ _]automobile|infobox[ _]motorcycle|infobox[ _]motorrad|infobox[ _](?:uk[ _])?bus|infobox[ _]truck|infobox[ _]vehicle|автомобиль|модификация автомобиля|картка:автомобіль|модифікація автомобіля|infobox[ _]pkw-modell(?:[ _]generationen)?|infobox[ _]自動車基本情報|자동차 정보|infobox - automobil)$/i
 const SUB_NAME = /^(?:модификация автомобиля|модифікація автомобіля)$/i
 
 /** Parameter names per field: English first, then the same facts under the other editions' names. */
@@ -243,6 +244,8 @@ const ALIASES = {
   height: ['height', 'высота', 'висота', 'höhe', 'výška', '전고', '全高'],
   weight: ['weight', 'wet_weight', 'масса', 'вага', 'gewicht', 'hmotnost', '전비중량', '車両重量'],
   power: ['power', 'powerout'],
+  de_displacement: ['hubraum'],
+  de_power: ['leistung'],
   fuel_capacity: ['fuel_capacity', 'объём бака', 'бак', 'tankinhalt', '燃料タンク容量'],
   layout: ['layout', 'привод', 'компонування', 'antrieb', 'koncepce', '구동방식', '駆動方式'],
   transmission: ['transmission', 'кпп', 'трансмісія', 'getriebe', '변속기', 'トランスミッション'],
@@ -506,11 +509,38 @@ export function parseWikiSpecs(wikitext: string, opts: ParseOptions = {}): WikiS
       ? (field('power').map(powerKwOf).find(Boolean) ?? null)
       : null
   if (bikeKw) infoboxEngines[0] = { ...infoboxEngines[0]!, powerKw: bikeKw }
+  // German motorcycle infoboxes keep `Hubraum` (cm³) and `Leistung` ("88/120 bei 9000": kW/PS) apart from the engine text.
+  if (infoboxEngines.length === 0) {
+    const cc = Number(
+      field('de_displacement')
+        .join(' ')
+        .replace(/\s/g, '')
+        .replace(',', '.')
+        .match(/^\d+(?:\.\d)?/)?.[0]
+    )
+    const power = field('de_power').join(' ')
+    const kw = /^(\d{2,4})\s*\/\s*\d{2,4}(?!\d)/.exec(power)?.[1]
+    if (cc >= 40 && cc <= 20000)
+      infoboxEngines.push({
+        displacementCc: Math.round(cc),
+        cylinders: null,
+        powerKw: kw ? Number(kw) : powerKwOf(power),
+        fuel: null,
+        raw: `${cc} cm³ ${power}`.trim()
+      })
+  }
   // Table rows carry power, chassis codes and notes; infobox lines rarely do — tables win when they have a figure,
   // unless they name no engine at all (a per-variant power table has neither displacement nor engine code).
   const tableNamesEngine = tables.engines.some(e => e.displacementCc !== null || (e.engineCodes?.length ?? 0) > 0)
+  // A table sharing no displacement with the infobox lists other vehicles (a competitor comparison): the infobox wins.
+  const infoboxCc = infoboxEngines.flatMap(e => (e.displacementCc === null ? [] : [e.displacementCc]))
+  const tableContradicts =
+    infoboxCc.length > 0 &&
+    tables.engines.every(e => e.displacementCc !== null) &&
+    !tables.engines.some(e => infoboxCc.some(cc => Math.abs(cc - e.displacementCc!) <= cc * 0.03))
   const engines =
-    infoboxEngines.length === 0 || (tables.engines.some(e => e.powerKw !== null) && tableNamesEngine)
+    infoboxEngines.length === 0 ||
+    (tables.engines.some(e => e.powerKw !== null) && tableNamesEngine && !tableContradicts)
       ? tables.engines
       : infoboxEngines
   return {

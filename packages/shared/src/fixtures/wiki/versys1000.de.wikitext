@@ -1,0 +1,228 @@
+{{Infobox Motorrad
+| Marke           = Kawasaki
+| Modell          = Versys 1000
+| Bild            = Kawasaki Versys1000 Pearl Stardust White right-front 2011 Tokyo Motor Show.jpg
+| Bildtext        = Modelljahr 2012
+| Hersteller      = [[Kawasaki Heavy Industries]]
+| Bezeichnung     = Versys 1000 (S/SE)<br />V. 1000 (S/SE) Tourer<br />V. 1000 (S/SE) Grand Tourer 
+| Produktion von  = 2012
+| Produktion bis  = 
+| Klasse          = [[Motorrad]]
+| Bauart          = [[Reisemotorrad]]
+| Motor           = Flüssigkeitsgekühlter [[Reihenmotor]] mit vier Zylindern
+| Hubraum         = 1043
+| Leistung        = 88/120 bei 9000 min<sup>−1</sup>
+| Drehmoment      = 102 bei 7500 min<sup>−1</sup>
+| Geschwindigkeit = 226
+| Gänge           = 6-Gang
+| Antrieb         = [[O-Ring-Kette]]
+| Bremsen         = vorn Ø&nbsp;300&nbsp;mm Doppelscheibenbremse<br />hinten Ø&nbsp;250&nbsp;mm Scheibenbremse
+| Radstand        = 1520
+| Maße            = 2240 × 895 × 1400
+| Sitzhöhe        = 84,0
+| Leergewicht     = 250 (fahrfertig)
+| Vorgängermodell = 
+| Nachfolgemodell = 
+}}
+
+Die '''Kawasaki Versys 1000''' (oder '''KLE 1000 Versys''') ist ein [[Motorrad]] des japanischen Fahrzeugherstellers [[Kawasaki Heavy Industries|Kawasaki]]. Das [[Reisemotorrad]] wurde am 8. November 2011 auf der internationalen Motorradmesse [[EICMA]] in [[Mailand]] der Presse vorgestellt und wird in [[Japan]] hergestellt. Die Verkaufsbezeichnung ''Versys'' [{{IPA|ˈvɜ:sɪs}}] ist ein [[Silbenwort]] des englischen Begriffs ''versatile system'' (vielseitiges System).
+
+== Technik ==
+=== Antrieb ===
+Der flüssigkeitsgekühlte [[Vierzylindermotor]] mit 1043&nbsp;cm³ Hubraum stammt konstruktiv von der [[Kawasaki Z 1000|Z&nbsp;1000]] ab, hat aber 1,34&nbsp;kg mehr Schwungmasse, um den Gleichförmigkeitsgrad im unteren und mittleren Drehzahlbereich zu verbessern, einen neuen Zylinderkopf und geänderte Steuerzeiten. Der [[Reihenmotor]] erzeugt eine [[Nennleistung]] von 88,2&nbsp;kW (120&nbsp;PS) und ein maximales Drehmoment von 102&nbsp;Nm bei einer Drehzahl von 7500&nbsp;min<sup>−1</sup>. Die vier Ventile je [[Zylinderkopf]] werden von zwei obenliegenden, kettengetriebenen [[Nockenwelle]]n über [[Tassenstößel]] angesteuert. Eine Ausgleichswelle reduziert Vibrationen. Die vier Zylinder haben eine [[Zylinderbohrung|Bohrung]] von 77&nbsp;mm Durchmesser, die Kolben einen [[Kolbenhub|Hub]] von 56&nbsp;mm bei einem [[Verdichtungsverhältnis]] von 10,3:1.
+
+Das Motorrad beschleunigt in 3,5 Sekunden von 0 auf 100&nbsp;km/h und erreicht eine Höchstgeschwindigkeit von 226&nbsp;km/h. Es verbraucht durchschnittlich 5,2&nbsp;Liter Kraftstoff auf 100&nbsp;km und hat eine theoretische Reichweite von 404&nbsp;km.<ref>{{Internetquelle |autor=Andreas Bildl |url=http://www.motorradonline.de/vergleichstests/ducati-multistrada-1200-kawasaki-versys-1000-und-triumph-tiger-1050-im-test-technische-daten/403348?seite=3 |titel=Ducati Multistrada 1200, Kawasaki Versys 1000 und Triumph Tiger 1050 |werk=[[Motorrad (Zeitschrift)|Motorrad]], Ausgabe 5/2012 |datum=2012-02-16 |abruf=2013-04-22 |offline=1 }}</ref> Eine dreistufige Traktionskontrolle (eng. ''Kawasaki Traction Control, KTRC'') ohne Schräglagensensorik regelt den Vortrieb.
+
+=== Fahrwerk ===
+Das Fahrwerk baut auf einem Doppelrohrrahmen aus Aluminium auf. Um den Cockpitträger ist eine Halbschalenverkleidung montiert. Eine Zweiarmschwinge mit angelenktem Federbein und mit 150&nbsp;mm Federweg führt das Hinterrad, eine Upside-Down-[[Teleskopgabel]] das Vorderrad. Die Kraftumwandlung erfolgt durch ein klauengeschaltetes Sechsganggetriebe, die Krafttrennung durch eine mechanisch betätigte Mehrscheiben-Ölbadkupplung und der [[Sekundärantrieb]] über eine [[O-Ring-Kette]]. Die Kupplung wird hydraulisch betätigt. Die maximale Zuladung beträgt 212&nbsp;kg, die [[Zulässige Gesamtmasse]] 459&nbsp;kg.
+
+=== Bremsanlage ===
+Am Vorderrad verzögern zwei schwimmend gelagerten Scheibenbremsen mit 300&nbsp;mm Durchmesser und Vierkolben-Festsätteln, hinten eine Scheibenbremse mit 250&nbsp;mm Durchmesser und Einkolben-Schwimmsattel. Ein [[Antiblockiersystem]] von Bosch unterstützt die Bremsanlage.
+
+=== Kraftstoffversorgung ===
+Das [[Gemischbildung|Gemisch]] wird von einer elektronischen Kraftstoffeinspritzung erzeugt. Der Hersteller empfiehlt die Verwendung von bleifreiem [[Motorenbenzin]] mit einer Klopffestigkeit von mindestens 95&nbsp;Oktan. Der Kraftstofftank hat ein Volumen von 21&nbsp;Liter.
+
+=== Elektrisches System ===
+Die [[Starterbatterie]] hat eine Kapazität von 8&nbsp;[[Amperestunde|Ah]] und versorgt den elektrischen [[Anlasser]]. Die Lichtmaschine erzeugt eine elektrische Leistung von 336&nbsp;[[Watt (Einheit)|Watt]]. Die Multifunktions-Instrumenteneinheit hat einen analogen Drehzahlmesser und eine [[Flüssigkristallanzeige]] (LCD) mit Tachometer, Kraftstoffanzeige, Kraftstoffverbrauchsanzeige und Uhr.
+[[Datei:Frontview Kawasaki Versys-1000-SE mid-year 2019.jpg|mini|1000 Versys nach Modellpflege]]
+
+=== Abgasanlage ===
+Die Abgase werden durch einen geregelten [[Fahrzeugkatalysator|Katalysator]] mit [[Sekundärluftsystem]] gereinigt und erfüllen die [[Abgasnorm|Schadstoffklasse EURO3]]. Der Vorschalldämpfer befindet sich unter dem Motor. Die vier [[Abgaskrümmer]] münden am Heck auf der rechten Fahrzeugseite in einen Endschalldämpfer aus Edelstahl.
+
+=== Modellentwicklung ===
+Wie bei dem kleineren Modell, der [[Kawasaki KLE 650 Versys|Versys 650]], hat Kawasaki zum Modelljahr 2015 einige Modifikationen an der Versys 1000 durchgeführt.<ref name="motorrad_2015-02" /> Die Frontverkleidung wurde gegen eine breitere mit nebeneinander liegenden Scheinwerfern getauscht. Kühlerverkleidung und Blinkerposition wurden ebenso wie die Instrumentierung überarbeitet. Der Hauptständer ist jetzt serienmäßig verbaut. Durch Änderungen am  Auspuffendtopf stieg die Leistung um 1,4&nbsp;kW auf nunmehr 88,2&nbsp;kW. Das Drehmoment wird jetzt bei 7.500/min erreicht (vorher 7.700/min). Das Gewicht stieg durch die Modifikationen von 239 auf 250&nbsp;kg.
+
+== Marktpositionierung ==
+Als einer der letzten großen Zweiradhersteller brachte Kawasaki eine Reiseenduro mit mehr als 1000&nbsp;cm³ Hubraum auf den Markt. Die Versys 1000 hat mit 1043&nbsp;cm³ einen geringeren Hubraum als die Kontrahenten mit ihren rund 1200&nbsp;cm³ und ist das einzige Motorrad der Klasse mit Reihenvierzylindermotor. Mit ihrer 17-Zoll-Bereifung ist sie hauptsächlich für den Betrieb auf asphaltierten Straßen vorgesehen. Das Konzept ähnelt stark dem der [[Triumph Tiger 1050]].
+
+{| class="wikitable sortable"
+! Hersteller !! Name !! Motor !! Hubraum !! kW !! PS !! Nm
+|-
+| [[Pierer Mobility|KTM]]
+| [[KTM 1190 Adventure|1190 Adventure]]
+| V2
+| align="right" | 1195
+| align="right" | 110
+| 150
+| 125
+|-
+| [[Ducati]]
+| [[Ducati Multistrada 1200|Multistrada 1200]]
+| V2
+| align="right" | 1198
+| align="right" | 110
+| 150
+| 119
+|-
+| [[Triumph Motorcycles|Triumph]]
+| [[Triumph Tiger Explorer|Tiger Explorer]]
+| R3
+| align="right" | 1215
+| align="right" | 101
+| 137
+| 121
+|-
+| [[Honda]]
+| [[Honda VFR1200X Crosstourer|VFR&nbsp;1200&nbsp;X Crosstourer]]
+| V4
+| align="right" | 1237
+| align="right" | 95
+| 129
+| 126
+|-
+| [[Aprilia]]
+| [[Aprilia ETV 1200 Caponord|ETV&nbsp;1200 Caponord]]
+| V2
+| align="right" | 1197
+| align="right" | 94
+| 128
+| 116
+|-
+| [[Benelli (Motorradhersteller)|Benelli]]
+| [[Benelli TreK 1130|TreK 1130]]
+| R3
+| align="right" | 1131
+| align="right" | 92
+| 125
+| 112
+|-
+| [[BMW-Motorrad|BMW]]
+| [[BMW R 1200 GS K50|R 1200 GS (K50)]]
+| B2
+| align="right" | 1170
+| align="right" | 92
+| 125
+| 125
+|-
+| [[Kawasaki Heavy Industries|Kawasaki]]
+| Versys 1000
+| R4
+| align="right" | 1043
+| align="right" | 88
+| 120
+| 102
+|-
+| [[Yamaha Motor|Yamaha]]
+| [[Yamaha XT1200Z Super Ténéré|XT&nbsp;1200&nbsp;Z Super Ténéré]]
+| R2
+| align="right" | 1199
+| align="right" | 81
+| 110
+| 114
+|-
+| [[Moto Guzzi]]
+| [[Moto Guzzi Stelvio|Stelvio 1200]]
+| V2
+| align="right" | 1151
+| align="right" | 77
+| 105
+| 113
+|-
+| [[Suzuki]]
+| [[Suzuki V-Strom 1000 ABS|V-Strom 1000 ABS]]
+| V2
+| align="right" | 1037
+| align="right" | 74
+| 100
+| 103
+|}
+
+== Kritiken ==
+{{Zitat
+ |Text=Fernreisende werden die Laufruhe zu schätzen wissen, das breite Drehzahlband sowieso. Und ein passendes Aggregat hatte man ja praktisch im Regal liegen - das formidable [[Kawasaki Z 1000|Z-1000]]-Triebwerk. Das freilich musste erst einmal auf seinen neuen Einsatzzweck hin getrimmt werden. Es steckt in einem neu konstruierten Fahrwerk, dessen lange Federwege von jeweils 150 Millimetern aber nicht für den Offroad-Einsatz, sondern vorrangig für das komfortable Bewältigen aller Arten asphaltierter Pfade vorgesehen sind. […] Dank Drehmomentkur wirkt das Versys-Aggregat zumindest in den unteren Gängen spritzig, büßt durch die lange Übersetzung der oberen Gänge jedoch deutlich an Antrittsstärke ein. Das Ansprech- und Lastwechselverhalten braucht noch etwas Feinschliff. Kupplung und Gangwechsel gehen leicht, dazu besitzt die Versys wie alle Kawas einen Getriebe-Mechanismus, der dafür sorgt, dass man im Stand vom ersten Gang nur bis in den Leerlauf schalten kann.
+ |Autor=Andreas Bildl
+ |Quelle=[[Motorrad (Zeitschrift)|Motorrad]]
+ |ref=<ref name="Bildl" />}}
+
+{{Zitat
+ |Text=Wer in den Alpen wildert, wird auf den typischen Schlechtwegstrecken zurückstecken müssen. Der 17-Zöller an der Front rumpelt regelrecht durch Schlaglöcher, während das den 19-Zöller der GS kaum beeindruckt. Budget-Angebot hin oder her – die Kawa bleibt ein hochgelegter Vierzylinder.
+ |Autor=Jörg Lohse, Peter Mayer, Thomas Schmieder
+ |Quelle=[[Motorrad (Zeitschrift)|Motorrad BMW Spezial]]
+ |ref=<ref name="Lohse" />}}
+
+{{Zitat
+ |Text=Mit genau 1043 ccm bleibt die Kawasaki Versys 1000 unter der klassenüblich gerundeten 1200. Trotzdem lässt der formidabel abgestimmte Reihenvierzylindermotor weder Durchzug noch Leistung vermissen. Auch das Fahrwerk geht in Ordnung, ist mit 150-Millimeter-Federweg und Straßenrädern jedoch kaum Enduro.
+ |Autor=Maik Schwarz
+ |Quelle=MO–Das Motorradmagazin
+ |ref=<ref name="Schwarz" />}}
+
+== Weblinks ==
+{{Commonscat}}
+* [http://www.kawasaki.de/ Offizielle deutsche Homepage]
+* [https://www.kawasaki.de/de/search?textsearch=versys%201000 Versys 1000 Modelljahre ab 2012]
+* [http://www.kawasaki.ch/ Offizielle schweizerische Homepage]
+* [http://www.kawasaki.at/ Offizielle österreichische Homepage]
+* [http://www.kawasaki.de/Versys1000/Specifications ''Technische Daten''] auf: ''kawasaki.de''
+
+== Einzelnachweise ==
+<references>
+<ref name="Bildl">{{Internetquelle
+ |autor=Andreas Bildl
+ |url=http://www.motorradonline.de/einzeltests/kawasaki-versys-1000-der-vierzylinder-tourer/402227
+ |titel=Der Vierzylinder-Tourer von Kawasaki
+ |werk=[[Motorrad (Zeitschrift)|Motorrad]], Ausgabe 04/2012
+ |datum=2012-02-02
+ |abruf=2013-04-20
+ |archiv-url=https://web.archive.org/web/20130505013942/http://www.motorradonline.de/einzeltests/kawasaki-versys-1000-der-vierzylinder-tourer/402227
+ |archiv-datum=2013-05-05
+ |offline=1
+ |archiv-bot=2022-03-08 15:35:13 InternetArchiveBot
+ }}</ref>
+<ref name="Lohse">
+{{Literatur
+ |Autor=Jörg Lohse, Peter Mayer, Thomas Schmieder
+ |Titel=Die Meute hetzt den Wolf
+ |Sammelwerk=[[Motorrad (Zeitschrift)|Motorrad BMW Spezial]]
+ |Nummer=2
+ |Datum=2012
+ |Seiten=24}}
+</ref>
+<ref name="Schwarz">
+{{Literatur
+ |Autor=Maik Schwarz
+ |Titel=Vorbild GS
+ |Sammelwerk=MO – Das Motorradmagazin
+ |Nummer=5
+ |Datum=2013
+ |ISSN=0723-2616
+ |Seiten=27}}
+</ref>
+<ref name="motorrad_2015-02">{{Internetquelle
+ |autor=Andreas Bildl
+ |url=http://www.motorradonline.de/vergleichstest/kawasaki-versys-1000-alt-gegen-neu-im-test/640992
+ |titel=Alt gegen neu
+ |werk=[[Motorrad (Zeitschrift)|Motorrad]], Ausgabe 02/2015
+ |datum=2015-02-19
+ |abruf=2016-05-23
+ |archiv-url=https://web.archive.org/web/20160523202434/http://www.motorradonline.de/vergleichstest/kawasaki-versys-1000-alt-gegen-neu-im-test/640992
+ |archiv-datum=2016-05-23
+ |offline=1
+ }}</ref>
+</references>
+
+{{Navigationsleiste Kawasaki-Motorräder}}
+
+{{SORTIERUNG:Kawasaki KLE 1000 Versys}}
+[[Kategorie:Kawasaki-Kraftrad|KLE 1000 Versys]]
+[[Kategorie:Reiseenduro]]
+[[Kategorie:Motorradmodell]]

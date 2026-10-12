@@ -197,6 +197,15 @@ describe('parseEngine: motorcycle displacement', () => {
   it('reads a decimal cc figure', () => {
     expect(parseEngine('373.3 cc (2016-2025) single-cylinder, liquid-cooled').displacementCc).toBe(373)
   })
+
+  it('takes the cc figure over the oil capacity in litres of a spec-table block', () => {
+    expect(parseEngine('Inline-twin, DOHC 248 cc SE-SG Class SAE 10W40-20W50/1.9 L 27.9 kW @ 12500 rpm')).toMatchObject(
+      {
+        displacementCc: 248,
+        powerKw: 28
+      }
+    )
+  })
 })
 
 describe('parseWikiSpecs: Kawasaki Versys (cm<sup>3</sup> and a power-only table)', () => {
@@ -215,5 +224,21 @@ describe('parseWikiSpecs: Kawasaki Versys (cm<sup>3</sup> and a power-only table
     const engines = read('versys650').engines
     expect(engines).toHaveLength(1)
     expect(engines[0]).toMatchObject({ displacementCc: 649, powerKw: 50 })
+  })
+})
+
+describe('parseWikiSpecs: German motorcycle infobox beside a competitor table', () => {
+  const wikitext = readFileSync(new URL('./fixtures/wiki/versys1000.de.wikitext', import.meta.url), 'utf8')
+
+  it('reads `Hubraum` and `Leistung` (kW/PS) of `Infobox Motorrad`', () => {
+    const engines = parseWikiSpecs(wikitext, { lang: 'de', tables: false }).engines
+    expect(engines).toHaveLength(1)
+    expect(engines[0]).toMatchObject({ displacementCc: 1043, powerKw: 88 })
+  })
+
+  it('does not take the rival bikes of the comparison table for the model engines', () => {
+    const engines = parseWikiSpecs(wikitext, { lang: 'de' }).engines
+    expect(engines).toHaveLength(1)
+    expect(engines[0]).toMatchObject({ displacementCc: 1043, powerKw: 88 })
   })
 })
