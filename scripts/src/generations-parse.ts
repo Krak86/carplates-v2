@@ -400,7 +400,7 @@ export function parseTitlePins(csv: string, normalize: (query: string) => string
  */
 export function productionSpan(wikitext: string, model = ''): { from: number; to: number | null } | null {
   const fold = (s: string): string => s.toLowerCase().replace(/[^a-z0-9]+/g, '')
-  const field = infoboxField(wikitext, PRODUCTION_FIELD)
+  const field = infoboxField(wikitext, PRODUCTION_FIELD) || deProductionRange(wikitext)
   const entries = field.split(/,\s+|;\s*|\n/)
   const named = model ? entries.filter(e => fold(e).includes(fold(model))) : []
   const text = named.length > 0 ? named.join('\n') : field
@@ -420,6 +420,13 @@ export function productionSpan(wikitext: string, model = ''): { from: number; to
   const loneStart =
     new Set(valid).size === 1 && !/[–—-]\s*(?:19|20)?\d{2}/.test(text) && MOTORCYCLE_INFOBOX.test(wikitext)
   return { from, to: loneStart || /present|current|ongoing|now/i.test(text) ? null : Math.max(...valid) }
+}
+
+/** `Infobox Motorrad` keeps the span in two fields (`Produktion von = 2018`, `Produktion bis = 2024`); a missing end reads as open. */
+function deProductionRange(wikitext: string): string {
+  const from = infoboxField(wikitext, 'Produktion von')
+  const to = infoboxField(wikitext, 'Produktion bis')
+  return from && to ? `${from}–${to}` : from
 }
 
 const MOTORCYCLE_INFOBOX = /\{\{\s*Infobox[ _](?:motorcycle|Motorrad)/i

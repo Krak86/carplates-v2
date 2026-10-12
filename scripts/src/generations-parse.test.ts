@@ -282,4 +282,20 @@ describe('productionSpan in other editions', () => {
       to: 2002
     })
   })
+
+  it('reads the de Motorrad Produktion von / bis pair', () => {
+    const page = [
+      '{{Infobox Motorrad',
+      '| Modell = R 1250 RT',
+      '| Produktion von = 2018',
+      '| Produktion bis = 2024',
+      '}}'
+    ]
+    expect(productionSpan(page.join('\n'))).toEqual({ from: 2018, to: 2024 })
+  })
+
+  it('treats a de Motorrad without Produktion bis as still produced', () => {
+    const page = ['{{Infobox Motorrad', '| Produktion von = 2019', '| Hubraum = 1254', '}}']
+    expect(productionSpan(page.join('\n'))).toEqual({ from: 2019, to: null })
+  })
 })
