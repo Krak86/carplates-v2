@@ -19,6 +19,7 @@ const BRAND_SLUG_BY_NAME: Readonly<Record<string, string>> = {
   VOLKSWAGEN: 'volkswagen',
   RENAULT: 'renault',
   ВАЗ: 'lada',
+  VAZ: 'lada',
   LADA: 'lada',
   'MERCEDES-BENZ': 'mercedes-benz',
   'MERCEDES BENZ': 'mercedes-benz',

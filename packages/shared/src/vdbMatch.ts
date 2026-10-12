@@ -91,7 +91,43 @@ export function collapseDoubledModel(model: string): string {
  */
 const MODEL_ALIASES: Readonly<Record<string, readonly (readonly [RegExp, string])[]>> = {
   // GAZ-3102/31029/3110/31105 are all the Volga; the catalog has one "Volga" entry.
-  gaz: [[/^31(02|05|10|29)/, 'volga']],
+  gaz: [
+    [/^31(02|05|10|29)/, 'volga'],
+    // GAZ-24-10 / 24-02 are the Volga 24 sedan/estate (the catalog has "24" and "2401" only).
+    [/^24(02|10)/, '24'],
+    // Gazelle: 3302/33021/33023 (flatbed, van), 2705 (van), 3221/32213 (minibus); Sobol: 2217, 2752.
+    [/^(3302|2705|3221)/, 'gazelle'],
+    [/^(2217|2752)/, 'sobol']
+  ],
+  // VAZ type-approval numbers are model + modification digit: 2110x (21101, 21104 …) is the 2110 sedan, 2111x the 2111
+  // estate, 2112x the 2112 hatch; 2113–2115x are the Samara-2 line the catalog files under "Samara". A sixth digit
+  // (211540, 211010) is a suffix on the same code. Priora: the catalog holds only the 2172 hatch, 2170/2171 share its nameplate.
+  lada: [
+    [/^2110/, '110'],
+    [/^2111/, '111'],
+    [/^2112/, '112'],
+    [/^211[345]/, 'samara'],
+    [/^217[01]/, '2172'],
+    // The generation catalogue (Wikipedia) names these lines, not the codes: Priora 2170–2172, Kalina 1117–1119, Niva 2121/2131.
+    [/^2113/, '2114'],
+    [/^2102/, '2101'],
+    [/^217[012]/, 'priora'],
+    [/^111[789]/, 'kalina'],
+    [/^21(21|31)/, 'niva']
+  ],
+  // UAZ-3151x (31512 …) is the renamed 469; the 452 "Bukhanka" family (3303 flatbed, 3741 van, 3962 ambulance, 2206 bus).
+  uaz: [
+    [/^3151/, '469'],
+    [/^(3303|3741|3962|2206)/, '452']
+  ],
+  // ZAZ-1102 is the Tavria, 1103 the Slavuta, 1105 the Dana (Tavria pickup).
+  zaz: [
+    [/^1102/, 'tavria'],
+    [/^1103/, 'slavuta'],
+    [/^1105/, 'dana']
+  ],
+  // The ZAZ Vida is the Chevrolet Aveo T250 (reached through `CROSS_MAKE_ALIASES`).
+  chevrolet: [[/^vida/, 'aveo']],
   // "PRADO" is the bare nameplate of the Land Cruiser Prado.
   toyota: [[/^prado/, 'landcruiserprado']],
   // Body-variant words after the nameplate: the catalog files them under the base model.
@@ -118,7 +154,10 @@ const MODEL_ALIASES: Readonly<Record<string, readonly (readonly [RegExp, string]
  * entry); Logan/Sandero/Duster have their own Renault catalog rows but RDW files them under Dacia, so the own make is tried first. Same rule as `MODEL_ALIASES`: only pairs verified in both the registry and the catalog.
  */
 const CROSS_MAKE_ALIASES: Readonly<Record<string, readonly (readonly [RegExp, string])[]>> = {
-  renault: [[/^(dokker|logan|sandero|duster|taliant)/, 'dacia']]
+  renault: [[/^(dokker|logan|sandero|duster|taliant)/, 'dacia']],
+  // Bogdan assembled the VAZ 2110 / 2111 / 2112 / 2115 / Priora under its own badge.
+  bogdan: [[/^(211[0-5]|217[01])/, 'lada']],
+  zaz: [[/^vida/, 'chevrolet']]
 }
 
 /** Catalog makes that file the ZAZ / Daewoo / Chevrolet Lanos lines (ZAZ Lanos, Daewoo Sens, Chevrolet Lanos …). */

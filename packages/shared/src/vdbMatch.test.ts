@@ -59,7 +59,15 @@ const CATALOG: Row[] = [
   row('Lada', '2108'),
   row('Lada', '2121', { countries: ['ua', 'nl'] }),
   row('Lada', '2107', { aliases: ['Semyorka'], countries: ['ua'] }),
+  row('Lada', '110'),
+  row('Lada', '111'),
+  row('Lada', '112'),
+  row('Lada', 'Samara'),
+  row('Lada', '2172'),
+  row('UAZ', '469'),
+  row('Chevrolet', 'Aveo'),
   row('GAZ', 'Volga'),
+  row('GAZ', '24'),
   row('Renault', 'Megane'),
   row('Renault', 'Clio'),
   row('Dacia', 'Dokker', { kind: 'van' }),
@@ -181,7 +189,9 @@ describe('matchVdbModel — prefix', () => {
 
 describe('matchVdbModel — misses stay misses', () => {
   it('returns null for models the catalog lacks (hide the data, never guess)', () => {
-    expect(match('ВАЗ', '21104')).toBeNull()
+    expect(match('ВАЗ', '2123')).toBeNull()
+    expect(match('ЗАЗ', '110307')).toBeNull()
+    expect(match('ГАЗ', '3302')).toBeNull()
     expect(match('RENAULT', 'DOKKER')).toBeNull()
     expect(match('TOYOTA', 'VENZA')).toBeNull()
     expect(match('FORD', '')).toBeNull()
@@ -206,6 +216,54 @@ describe('cross-make aliases', () => {
 
   it('finds the Renault Taliant as the Dacia Logan', () => {
     expect(across('RENAULT', 'TALIANT')).toBe('dacia/Logan')
+  })
+
+  it('maps VAZ type-approval codes to the 2110 / 2111 / 2112 / Samara / Priora catalog rows', () => {
+    expect(across('ВАЗ', '21104')).toBe('lada/110')
+    expect(across('ВАЗ', '211010')).toBe('lada/110')
+    expect(across('ВАЗ', '21114')).toBe('lada/111')
+    expect(across('ВАЗ', '21124')).toBe('lada/112')
+    expect(across('ВАЗ', '211540')).toBe('lada/Samara')
+    expect(across('ВАЗ', '21144')).toBe('lada/Samara')
+    expect(across('ВАЗ', '217030')).toBe('lada/2172')
+    expect(across('ВАЗ', '21099')).toBeNull()
+  })
+
+  it('finds the Bogdan-badged VAZ, the ZAZ Vida, the UAZ-31512 and the GAZ-2410', () => {
+    expect(across('БОГДАН', '211010')).toBe('lada/110')
+    expect(across('ЗАЗ', 'VIDA')).toBe('chevrolet/Aveo')
+    expect(across('УАЗ', '31512')).toBe('uaz/469')
+    expect(across('ГАЗ', '2410')).toBe('gaz/24')
+  })
+
+  it('reaches the generation catalogue rows (stored under the registry make key lada)', () => {
+    const gens = [
+      ['lada', '2101'],
+      ['lada', '2110'],
+      ['lada', '2114'],
+      ['lada', '2115'],
+      ['lada', 'priora'],
+      ['lada', 'kalina'],
+      ['zaz', 'slavuta'],
+      ['zaz', 'tavria'],
+      ['gaz', 'gazelle'],
+      ['uaz', '452']
+    ].map(([mk, name]) => row(mk!, name!))
+    const gen = (brand: string, model: string): string | null => {
+      const found = matchVdbModelAcrossMakes(gens, makeKey(brand)!, model)
+      return found ? `${found.row.makeKey}/${found.row.name}` : null
+    }
+    expect(makeKey('VAZ')).toBe('lada')
+    expect(gen('ВАЗ', '21104')).toBe('lada/2110')
+    expect(gen('ВАЗ', '211340')).toBe('lada/2114')
+    expect(gen('ВАЗ', '21150')).toBe('lada/2115')
+    expect(gen('ВАЗ', '2102')).toBe('lada/2101')
+    expect(gen('ВАЗ', '217030')).toBe('lada/priora')
+    expect(gen('ВАЗ', '11183')).toBe('lada/kalina')
+    expect(gen('ЗАЗ', '110307')).toBe('zaz/slavuta')
+    expect(gen('ЗАЗ', '110206')).toBe('zaz/tavria')
+    expect(gen('ГАЗ', '33021')).toBe('gaz/gazelle')
+    expect(gen('УАЗ', '3303')).toBe('uaz/452')
   })
 
   it('reaches the base model through marketing prefixes, engine figures and variant words', () => {

@@ -132,8 +132,7 @@ prefix 13.8%, series 4.4%, alias 0.6%; no make 8.3% (trailers/trucks: Schmitz, K
 7.6%. `stats_vdb` coverage: **92.6% of passenger cars**. The plan's earlier "Cyrillic ВАЗ/ЗАЗ make gap" was wrong:
 `brandSlug` already maps them; the gap is at the MODEL level (below).
 
-**Known gaps (data limits, not bugs):** VehiclesDB has no Lada 2110/2111/2112/2114/2115/Priora(2170)/Kalina entries (the
-biggest unmatched ВАЗ groups: 21104, 217030, 21150, 21114), no ZAZ Vida/Tavria/Slavuta, Geely CK, Chery QQ, Gazelle (GAZ
+**Known gaps (data limits, not bugs):** VehiclesDB files Lada 2110/2111/2112 as `110`/`111`/`112` and 2113–2115 under `Samara` (reached by aliases since 2026-10-12, see "Step 1 done"); it has no Priora 2170/2171 or Kalina sedan entry, no ZAZ Vida/Tavria/Slavuta, Geely CK, Chery QQ, Gazelle (GAZ
 3302), DAF "FT XF …" truck codes. Renault Dokker exists only as Dacia Dokker — solved in stage A by the curated
 `CROSS_MAKE_ALIASES` (`vdbRelatedMakeKeys` / `matchVdbModelAcrossMakes`; Renault Lodgy has no catalog row anywhere). VW Multivan is left unmatched on purpose (Transporter family,
 ambiguous). `modelKey` strips Cyrillic, so a Cyrillic catalog alias (e.g. "Жигули") can never match.
@@ -328,6 +327,20 @@ Idea: extend the local DB with Soviet/UA cars (VAZ, GAZ, ZAZ, Moskvich, IZH, UAZ
 - **zaz.drive.place / drive.place** — 403 to automated fetch (bot protection). Its privacy policy names **Automdb.com**: an ad-funded
   car-encyclopedia family on a shared template. No reuse licence; do not scrape or bypass the block. Skip.
 - **zaz.ua** (manufacturer, not fetched) and the **24tv.ua** article (editorial, not a dataset): nothing to ingest.
+- **Step 1 done (2026-10-12): code aliases.** Measured first: ВАЗ 72 % / ЗАЗ 33 % / ГАЗ 21 % / КАМАЗ 0 % of cars matched VehiclesDB (RDW 20 / 18 / 0 / 0 %).
+  The misses were factory modification codes, not missing makes. `MODEL_ALIASES` / `CROSS_MAKE_ALIASES` (`vdbMatch.ts`) now map `lada` 2110x→`110`,
+  2111x→`111`, 2112x→`112`, 2113–2115x→`samara`, 2170/2171x→`2172` (Priora; the catalog holds the hatch only), `bogdan` 211x/217x→`lada`, `uaz` 3151x→`469`,
+  `gaz` 2402/2410→`24`, `zaz` Vida→`chevrolet` Aveo (T250 rebadge). `stats_vdb` passenger-car coverage 92.6 % → **95.9 %** (`pnpm db:refresh-vdb-stats`).
+  **Still no catalog row (needs step 2):** ZAZ 110307/1102/1105 (Slavuta, Tavria, Pickup) and Chance TF69x, GAZ 3302/33021/2705 (Gazelle) and the 33xx/53xx trucks,
+  UAZ 3303, ZIL, KAMAZ, Bogdan buses, Lada 1118 (Kalina sedan).
+- **Step 2 done (2026-10-12) — no new table needed.** The Soviet/UA rows already existed in `model_generations` / `model_spec_wiki` (stage I/K, pinned in
+  `generations-titles.csv`) but were **unreachable**: the 13 ВАЗ rows were stored under make key `vaz` while the registry's `ВАЗ` / `Lada` key is `lada`. Fixed by `VAZ → lada` in
+  `brandSlug`, re-keying both tables in place and re-exporting `model-generations.csv.gz` / `wikispecs.csv.gz`; generation-line aliases added in `MODEL_ALIASES` (lada 2113x→2114, 2102→2101,
+  217x→priora, 1117–1119→kalina, 2121/2131→niva; zaz 1102→tavria, 1103→slavuta, 1105→dana; gaz 3302/2705/3221→gazelle, 2217/2752→sobol; uaz 3303/3741/3962/2206→452).
+  Share of cars with a generation row: Lada **97.6 %**, ZAZ **91.9 %**, UAZ 72 %, GAZ 66.6 % (rest = trucks, Forza, Largus, Bogdan buses, SAZ — no rows).
+  Same day: pins + `--only` ingest of **ZAZ Forza** (→ "Chery Fulwin 2", 2009–2019, ~12.8k cars) and **Lada Largus** (2012–now), both with full wiki specs; seeds re-exported.
+  Still open: trucks (GAZ 33xx/53xx, KAMAZ, ZIL) and buses have no pins; ZAZ Chance (TF69x) has no English article of its own (en "ZAZ Chance" is missing) — left unmatched.
+  Run `pnpm ingest:generations:csv` + `ingest:wikispecs:csv` on a fresh DB to pick up the re-keyed seeds.
 - **Plan if the gap is real**: first measure it (read-only SQL: registry rows of those makes with no `vdb_models` / `rdw_specs`
   match). Then a small separate, removable seed table sourced from **Wikidata (CC0) / Wikipedia (CC BY-SA)** — years, engine,
   mass — with autoussr.ru as cross-check only; credit on About. Fits the existing deferred Wikidata stage I. Not started.
