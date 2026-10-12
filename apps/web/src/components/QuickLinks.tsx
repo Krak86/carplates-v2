@@ -14,6 +14,11 @@ const ROWS = [
   ]
 ] as const
 
+const LEGAL_LINKS = [
+  { to: '/privacy', key: 'legal.privacy.heading' },
+  { to: '/terms', key: 'legal.terms.heading' }
+] as const
+
 /** Shortcut links shown at the bottom of every page. */
 export default function QuickLinks(): ReactNode {
   const { t } = useTranslation()
@@ -37,6 +42,14 @@ export default function QuickLinks(): ReactNode {
           ))}
         </div>
       ))}
+
+      <div className="flex flex-wrap justify-center gap-3 text-xs text-[var(--color-muted)]">
+        {LEGAL_LINKS.map(link => (
+          <Link key={link.to} viewTransition to={link.to} className="underline hover:text-[var(--color-fg)]">
+            {t(link.key)}
+          </Link>
+        ))}
+      </div>
     </nav>
   )
 }

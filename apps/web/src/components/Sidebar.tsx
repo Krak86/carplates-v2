@@ -132,6 +132,15 @@ export default function Sidebar(): ReactNode {
       </button>
 
       <OfflineDataSettings />
+
+      <div className="mt-4 flex gap-3 px-3 text-xs text-[var(--color-muted)]">
+        <NavLink to="/privacy" className="underline hover:text-[var(--color-fg)]" onClick={handleClose}>
+          {t('legal.privacy.heading')}
+        </NavLink>
+        <NavLink to="/terms" className="underline hover:text-[var(--color-fg)]" onClick={handleClose}>
+          {t('legal.terms.heading')}
+        </NavLink>
+      </div>
     </nav>
   )
 }

@@ -1,5 +1,7 @@
+import { useEffect, useRef } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Link, useLocation } from 'react-router'
 
 import Card from '@/components/ui/Card'
 
@@ -175,6 +177,13 @@ function SourceAvatar({ source }: { source: Source }): ReactNode {
 export default function AboutRoute(): ReactNode {
   const { t } = useTranslation()
   const year = new Date().getFullYear()
+  const { hash } = useLocation()
+  const sourcesRef = useRef<HTMLDivElement>(null)
+
+  // `/about#sources` (linked from privacy/terms): the router doesn't scroll to hashes itself.
+  useEffect(() => {
+    if (hash === '#sources') sourcesRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [hash])
 
   return (
     <article className="mx-auto max-w-content space-y-4">
@@ -214,10 +223,19 @@ export default function AboutRoute(): ReactNode {
           <p className="mt-2">{t('about.licensePermission')}</p>
           <p className="mt-2">{t('about.licenseNotice')}</p>
           <p className="mt-2 text-xs text-[var(--color-muted)]">{t('about.licenseWarranty')}</p>
+          <p className="mt-2">
+            <Link to="/privacy" className="text-[var(--color-primary)] underline">
+              {t('legal.privacy.heading')}
+            </Link>
+            {' · '}
+            <Link to="/terms" className="text-[var(--color-primary)] underline">
+              {t('legal.terms.heading')}
+            </Link>
+          </p>
         </div>
       </Card>
 
-      <Card className="space-y-3 text-sm text-[var(--color-fg)]">
+      <Card ref={sourcesRef} className="scroll-mt-20 space-y-3 text-sm text-[var(--color-fg)]">
         <h2 className="font-semibold">{t('about.sourcesHeading')}</h2>
         <ul className="space-y-3">
           {SOURCES.map(source => (

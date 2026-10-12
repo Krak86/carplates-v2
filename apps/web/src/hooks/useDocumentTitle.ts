@@ -8,6 +8,8 @@ const HTML_LANG: Record<Lang, string> = { ua: 'uk', ru: 'ru', en: 'en' }
 /** Static route → the `nav.*` i18n key naming it. Search/deep-link routes set their own title. */
 export const ROUTE_TITLE_KEYS: Record<string, string> = {
   '/about': 'nav.about',
+  '/privacy': 'legal.privacy.heading',
+  '/terms': 'legal.terms.heading',
   '/history': 'nav.history',
   '/favorites': 'nav.favorites',
   '/stats': 'nav.stats',

@@ -43,6 +43,16 @@ export const STATIC_PAGES: Record<string, Record<Lang, PageText>> = {
     ru: { title: 'О сервисе · Cars UA', description: 'Откуда данные, как работает поиск и что такое Cars UA.' },
     en: { title: 'About · Cars UA', description: 'Where the data comes from, how search works, and what Cars UA is.' }
   },
+  '/privacy': {
+    ua: { title: 'Політика конфіденційності · Cars UA', description: 'Які дані ми зберігаємо і чого не збираємо.' },
+    ru: { title: 'Политика конфиденциальности · Cars UA', description: 'Какие данные мы храним и чего не собираем.' },
+    en: { title: 'Privacy policy · Cars UA', description: 'What data we keep and what we do not collect.' }
+  },
+  '/terms': {
+    ua: { title: 'Умови користування · Cars UA', description: 'Правила користування сервісом Cars UA.' },
+    ru: { title: 'Условия использования · Cars UA', description: 'Правила использования сервиса Cars UA.' },
+    en: { title: 'Terms of use · Cars UA', description: 'The rules for using Cars UA.' }
+  },
   '/history': {
     ua: { title: 'Історія пошуку · Cars UA', description: 'Ваші останні пошуки за номером і VIN.' },
     ru: { title: 'История поиска · Cars UA', description: 'Ваши последние поиски по номеру и VIN.' },
