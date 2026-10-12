@@ -294,6 +294,16 @@ describe('productionSpan in other editions', () => {
     expect(productionSpan(page.join('\n'))).toEqual({ from: 2018, to: 2024 })
   })
 
+  it('reads the ru {{Годы автомобиля}} template, an empty end year meaning still produced (МАЗ-5337)', () => {
+    const open = '{{Автомобиль\n| название = МАЗ-5337\n| годы производства = {{Годы автомобиля|1987|}}\n}}'
+    expect(productionSpan(open)).toEqual({ from: 1987, to: null })
+    // The field ends at the next Cyrillic `| предшественник =` line, so a later "MAZ-5337" mention is not the narrowed entry.
+    const full = `${open.replace('\n}}', '')}\n| предшественник = [[МАЗ-5335]]\n| викисклад = MAZ-5337\n}}`
+    expect(productionSpan(full, '5337')).toEqual({ from: 1987, to: null })
+    const closed = '{{Автомобиль\n| годы производства = {{Годы автомобиля|1985|2019}}\n}}'
+    expect(productionSpan(closed)).toEqual({ from: 1985, to: 2019 })
+  })
+
   it('treats a de Motorrad without Produktion bis as still produced', () => {
     const page = ['{{Infobox Motorrad', '| Produktion von = 2019', '| Hubraum = 1254', '}}']
     expect(productionSpan(page.join('\n'))).toEqual({ from: 2019, to: null })

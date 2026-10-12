@@ -35,6 +35,9 @@ export function cleanWikitext(raw: string): string {
     s = s.replace(/\{\{([^{}]*)\}\}/g, (_m, body: string) => {
       const [name = '', ...args] = body.split('|')
       if (/^\s*(cite|citation|efn|sfn|refn)/i.test(name)) return ''
+      // ru `{{Годы автомобиля|1987|}}`: an empty end year means still produced; `|1985|2019` is a range.
+      if (/^\s*Годы автомобиля\s*$/i.test(name) && /^\s*(?:19|20)\d{2}\s*$/.test(args[0] ?? '') && args.length >= 2)
+        return `${args[0]!.trim()}–${args[1]!.trim() || 'present'}`
       // `{{circa|1996}}` and friends: keep the arguments that are not `name=value`.
       return args.filter(a => !/^\s*[a-z_ ]+=/i.test(a)).join(' ')
     })
@@ -89,7 +92,7 @@ export function infoboxField(page: string, name: string): string {
       }
       depth--
       i++
-    } else if (rest[i] === '\n' && depth === 0 && /^\n\s*\|\s*[a-z_0-9 ]+=/i.test(rest.slice(i, i + 60))) {
+    } else if (rest[i] === '\n' && depth === 0 && /^\n\s*\|\s*[\p{L}_0-9 ]+=/iu.test(rest.slice(i, i + 60))) {
       end = i
       break
     }
