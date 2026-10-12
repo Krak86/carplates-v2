@@ -3214,6 +3214,15 @@ The pre-warm skipped trucks (`kind ILIKE '%легков%'`) and `63221` had no a
 - **Run:** `pnpm ingest:wiki-images -- --all-kinds --min-cars 1 --brand краз --brand kraz --rps 2` (+ `--retry-not-found`): 64 of 118 groups with a photo, 0 failed; `краз 63221` 11/19 years. The API's in-memory image cache holds earlier `null` answers until restart.
 - **Not done:** re-export of `wiki-images.csv.gz`; other truck brands (МАЗ, КамАЗ, ЗІЛ).
 
+## Wiki photo origin label, on-demand refresh, RAF-2203 alias (2026-10-12)
+
+`01АР8763` (РАФ 220301, 1992) showed no photo: `220301` is a trim of the RAF-2203 article and an earlier live lookup had stored `not_found`. A first attempt to switch live lookups off (`WIKI_IMAGE_LIVE`) was dropped in favour of showing where a photo comes from.
+
+- **Origin:** `wikiImageResponseSchema` gains optional `from: 'db' | 'live'`; `WikiService` tracks it through `Resolved` (`peekImage` → `db`). Hero label "DB" / "Wiki live" top-left.
+- **Refresh:** `?refresh=true` on `/api/wiki/image` and `/api/wiki`; "Update photo" button bottom-left (ua/ru/en `wiki.imageRefresh*`). A miss never overwrites an `ok` row.
+- **`wikiSearchName`:** РАФ/RAF `2203`, `2203-xx`, `2203xxx` → `RAF-2203` ("РАФ-2203"); inputs are now lower-cased inside (upper-case registry brands never matched the lower-case rules, e.g. ГАЗ / УАЗ).
+- **Stale rows:** models that now match an alias but were stored `not_found` stay so until "Update photo" or `ingest:wiki-images --retry-not-found`. No test yet for the RAF alias itself.
+
 ### Stages I / K coverage round ✅ BUILT (2026-10-11)
 
 Measured on the real registry (top 1,500 model groups = 15.4M cars): generation rows covered 53 %, engines 50 %. After this round the top 600 targets give **376 models / 1,098 generation rows covering 86.5 % of their cars** (was 152 / 614 / 60.7 % for the top 300), and **1,093 spec rows, engines on 94 % of generations (was 66 %), with power 72 %**.

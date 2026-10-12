@@ -19,7 +19,7 @@ Ukrainian vehicle lookup by **plate number** or **VIN**. Rebuild of
   UK editorial reviews (score out of 10 + blurb, English; `registry.topgear_reviews`) and a DRIVE2 search link — links
   only, nothing copied. infocar videos play from YouTube on demand, followed by the latest uploads of the make's (and its parent group's) official YouTube channel (`pnpm ingest:social`, `registry.social_posts`; titles, thumbnails and links only); community 3D models ([Sketchfab](https://sketchfab.com))
   open in a "3D view" modal, and [CarShow360](https://carshow360.net) 360° exterior/interior galleries (every generation/trim of the make/model, links only) in a "360° view" modal
-- Result-card hero photo: served from our stored Wikimedia cache first (`/api/wiki/image`, year-aware Commons search; live Commons/Wikipedia lead image only as a fallback, then a per-kind placeholder); the Wikipedia article text loads only when its section is opened
+- Result-card hero photo: served from our stored Wikimedia cache first (`/api/wiki/image`, year-aware Commons search; live Commons/Wikipedia lead image only as a fallback, then a per-kind placeholder); a "DB" / "Wiki live" label shows the source and an "Update photo" button re-fetches it (`?refresh=true`); the Wikipedia article text loads only when its section is opened
 - Background layers on every page (button in the header, online only, session-only): car photos (default), a Google Maps
   view (the plate's region capital on a result page, else Ukraine), or a live YouTube stream — NASA ISS "Earth from space",
   street/traffic cams or a city view (low quality on purpose, selectable; disabled on data-saver/≤3G). Advanced search shows an OpenStreetMap view of the chosen region

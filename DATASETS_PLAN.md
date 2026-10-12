@@ -653,7 +653,7 @@ no US group), types, lint and tests green.
 
 - Per year two ZIPs, pipe-delimited: `dft_test_result_<Y>.zip` → `test_result.csv` (2023: 42.2M rows, 3.7 GB unzipped) and `dft_test_item_<Y>.zip` → `test_item.csv` (89.3M rows, 2.0 GB);
   plus `lookup.zip` and the user guide `mot-testing-data-user-guide-v5.1.odt`. URLs: `https://data.dft.gov.uk/anonymised-mot-test/test_data/dft_test_result_<Y>.zip`,
-  `…/dft_test_item_<Y>.zip`, `https://data.dft.gov.uk/anonymised-mot-test/lookup.zip`. Newest year = **2023** (no 2024/25 as of 2026-10-10); range 2005–2023, **schema changed May 2018** (use ≥ 2018 files only).
+  `…/dft_test_item_<Y>.zip`, `https://data.dft.gov.uk/anonymised-mot-test/lookup.zip`. Newest year then = **2023** (**2024 and 2025 exist** — found 2026-10-12, see "Stage G2"); range 2005–2023, **schema changed May 2018** (use ≥ 2018 files only).
 - `test_result` columns: `test_id|vehicle_id|test_date|test_class_id|test_type|test_result|test_mileage|postcode_area|make|model|colour|fuel_type|cylinder_capacity|first_use_date`.
   Class 4 = cars (39.8M), 7 = vans (1.26M), 2 = motorcycles (0.81M), 1 = small motorcycles (0.24M). `test_type` NT = normal test (35.0M), RT = re-test (7.2M; **drop**, it double-counts).
   `test_result` P / F / PRS (pass after rectification at the station) / ABA / ABR / ABRVE / R. **Mileage is in miles** (convert to km). 2023 fail rate (NT, decided) ≈ 22.6 %.
@@ -736,6 +736,60 @@ What the pre-2018 layout needs (a separate parser path, **not loaded without the
 - **Mileage:** the km-in-miles mix-up (user guide: "prior to 2022 … sometimes holds kilometres") applies to every year before 2022 — the per-age median check must be repeated, and the plausibility filter may need to be stricter.
 - **Layout:** every pre-2022 pair so far is multi-part and quoted/comma-delimited (2021 is; older ones unverified): the reader (`mot-zip.ts`) already handles that, the scattered-rows bookkeeping switches on by itself (`MotFiles.scattered`) and needs the extra ~1 GB.
 - `location_id` is wrong before 2022 (not used).
+
+**Stage G2 — MOT 2024 + 2025 (decided 2026-10-12; not started).** Scope = add the 2024 and 2025 years only; **pre-2018 is split out as Stage G3 (parked, below)**.
+**Start rule: nothing is built until the owner has downloaded the files below and gives the agent the folder path.** At the start of G2 the agent re-prints this list, then waits for the path.
+
+Files to download (all `https://edh-dvsa-data-gov-uk-files-prod.s3.eu-west-1.amazonaws.com/<name>`, OGL v3; ≈ 18.3 GB of ZIPs; the host ignores range requests, so use a normal browser/`curl -O` download, resume is not available):
+
+| file                                                          | size    |
+| ------------------------------------------------------------- | ------- |
+| `dft_test_result_extracts_2024.zip`                           | 4.80 GB |
+| `dft_test_item_extracts_2024.zip`                             | 4.33 GB |
+| `dft_test_result_extracts_2025.zip`                           | 4.84 GB |
+| `dft_test_item_extracts_2025.zip`                             | 4.36 GB |
+| `dft_item_detail_extract.csv` (lookup, replaces `lookup.zip`) | 3.6 MB  |
+| `dft_item_group_extract.csv`                                  | 143 KB  |
+| `dft_mdr_test_outcome_extract.csv`                            | 132 B   |
+| `dft_mdr_test_type_extract.csv`                               | 146 B   |
+| `dft_mdr_fuel_type_extract.csv`                               | 261 B   |
+| `dft_mdr_rfr_location_extract.csv`                            | 2.9 KB  |
+| `mot-testing-data-user-guide-v5.1.odt` (optional)             | 74 KB   |
+
+Put everything in **one folder** (the ZIPs unextracted). Not needed: the older-layout `MOT+testing+data+results+(2024).zip` / `MOT+Testing+data+failure+item+(2024).zip` (2.2 GB; the 0.68 GB item file looks failures-only, and there is no 2025 equivalent).
+First steps once the path is given: list ZIP entries, profile row counts / classes / test types / mileage units / whether advisories (`rfr_type_code` A) are present, report, then decide the pooled window (2023–2025 vs 2022–2025; 2021 is the km-in-miles risk year) with the owner.
+
+**Stage G3 — MOT pre-2018 (2005–2017), parked (2026-10-12).** Not planned; see the "not worth it" reasoning and the forecast under "Stage G2 research" and "Forecast" above. Revisit only if the registry shows many unmatched old models that an old UK file would fix.
+
+**Stage G2 research (2026-10-12; nothing downloaded or built).** Question: add more years, expose the data further, is it worth it?
+
+- **The 2026-10-10 note "newest file is 2023" is out of date.** DVSA moved the dataset to `open.data.dvsa.gov.uk/mot-anonymised/` (OGL v3, page "last updated 22 June 2026"; files on
+  `https://edh-dvsa-data-gov-uk-files-prod.s3.eu-west-1.amazonaws.com/`). New years, sizes from HEAD requests:
+
+  | file                                                                                            | added       | zipped size                                                                |
+  | ----------------------------------------------------------------------------------------------- | ----------- | -------------------------------------------------------------------------- |
+  | `MOT+testing+data+results+(2024).zip`                                                           | 7 Mar 2025  | 1.53 GB                                                                    |
+  | `MOT+Testing+data+failure+item+(2024).zip`                                                      | 7 Mar 2025  | **0.68 GB** (2023 was 2.0 GB unzipped; unclear if advisories are still in) |
+  | `dft_test_result_extracts_2024.zip` / `_2025.zip`                                               | 22 Jun 2026 | 4.80 GB / 4.84 GB                                                          |
+  | `dft_test_item_extracts_2024.zip` / `_2025.zip`                                                 | 22 Jun 2026 | 4.33 GB / 4.36 GB                                                          |
+  | lookups as `dft_item_detail_extract.csv`, `dft_item_group_extract.csv`, `dft_mdr_*_extract.csv` | 22 Jun 2026 | small, same columns as `lookup.zip`                                        |
+
+  The "extracts" ZIPs hold **monthly CSVs** (`dft_test_result_extracts_2025/dft_test_result_extract_202501.csv`) with the same `test_result` header as before — a third layout for `mot-zip.ts`
+  (12 part files, like 2021). They are ~3× the bytes of the 2023 files per year, cause unknown (more test types? wider rows? no compression?) — **profile before deciding**. 2025 is a full year; no 2026 file yet.
+  The DVSA host ignores HTTP range requests, so entry lists need a full download.
+
+- **Value of adding 2024 + 2025:** same schema family, so no new parser logic beyond the monthly layout; the pooled window moves 2021–23 → 2022–25 or 2023–25 (drop 2021: it is the km-in-miles risk year).
+  Gains: ~+30 % more tests per band, fresher fault patterns, models newly out of warranty. Rows barely grow (key = model year). Cost: ~9 GB download per extracts year, ~4 min/year of ingest if the row count is as before.
+  **Recommendation: do it** (it is the yearly refresh already in SCHEDULE.md). Check first that the item extracts still carry advisories (`rfr_type_code` A) — "Watch for" depends on them.
+- **Value of pre-2018 years (2005–2017): low, recommend not loading.** The forecast above still stands (~+31 GB, ×2 table, separate parser, no Dangerous category, km/miles risk, 2018 straddles the directive).
+  What it buys: models that left UK roads before 2021 (a handful of old Vauxhall/Ford/VW/Peugeot variants the old UA fleet has). Old UA cars already match through 2021–25 tests of the same models at 200k+ km.
+  Measure before any decision: count registry vehicles whose model key is unmatched today but would match with a pre-2021 MOT key — impossible without the data, so approximate with the UK model list from the 2005 file only (one year, ~1.5 GB).
+- **"Expose it as well":** it is already exposed — `GET /api/mot` and the lazy `faults` section. Options beyond that, all allowed by OGL with the statement we already show:
+  (1) publish the aggregate seed (`scripts/seed-data/mot.csv.gz`, 3.2 MB) as a download / open-data page; (2) a `/stats` or `/models/<make>/<model>` page "most common faults by mileage" (SEO-friendly, needs a route);
+  (3) a "reliability by model" ranking (fail rate at 100–150k km) — **risky**: UK RHD/salt-road cars, the plan's rule says never a score for this car; label as UK stats only; (4) feed the Value block (mileage-vs-age expectation).
+  Worth: (2) and (4) are cheap reuse of existing tables; (1) is optional; (3) only with the owner's explicit OK.
+- **Is it worth it overall?** Today ~76 % of registry cars match and get a section; the extra years change coverage by about a point and make numbers fresher. Biggest remaining coverage misses are structural (Soviet/Korean/Chinese-market models, heavy trucks), which no MOT year fixes. So: refresh with 2024–25 is worth it when convenient; pre-2018 is not; new exposure routes are optional product work.
+- **Open facts to verify before building:** item-extract content (advisories? minors?), row counts per year, class coverage, whether `test_mileage` units are miles in 2024/2025, schema drift vs `test_result` header, and how many of the 4.8 GB are re-tests.
 
 **Decisions (owner, 2026-10-10):**
 
