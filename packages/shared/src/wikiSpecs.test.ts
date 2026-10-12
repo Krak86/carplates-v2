@@ -242,3 +242,17 @@ describe('parseWikiSpecs: German motorcycle infobox beside a competitor table', 
     expect(engines[0]).toMatchObject({ displacementCc: 1043, powerKw: 88 })
   })
 })
+
+describe('parseWikiSpecs: per-model power line of a shared bike infobox (BMW F series)', () => {
+  const wikitext = `{{Infobox motorcycle
+| name = BMW F800GS, F700GS
+| engine = {{Convert|798|cc|abbr=on}}, parallel-twin
+| power = {{Convert|85|hp|abbr=on|disp=flip}} @ 7,500&nbsp;rpm (F800)<br/>{{Convert|75|hp|abbr=on|disp=flip}} @ 7,300&nbsp;rpm (F700)
+}}`
+
+  it('takes the line tagged with the model, the first one without a model', () => {
+    expect(parseWikiSpecs(wikitext, { lang: 'en', model: 'f700gs' }).engines[0]?.powerKw).toBe(56)
+    expect(parseWikiSpecs(wikitext, { lang: 'en', model: 'f800gs' }).engines[0]?.powerKw).toBe(63)
+    expect(parseWikiSpecs(wikitext, { lang: 'en' }).engines[0]?.powerKw).toBe(63)
+  })
+})

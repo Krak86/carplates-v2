@@ -414,6 +414,20 @@ export function engineTemplates(raw: string): WikiEngine[] {
 
 const codeKey = (s: string): string => s.toLowerCase().replace(/[^\p{L}\d]+/gu, '')
 
+/** Power of the line tagged with the model (`75 hp @ 7,300 rpm (F700)` for `f700gs`): the tag must start the folded model. */
+function modelPowerKw(lines: string[], model = ''): number | null {
+  const fold = (s: string): string => s.toLowerCase().replace(/[^a-z0-9]+/g, '')
+  if (!model) return null
+  for (const line of lines) {
+    const tagged = [...line.matchAll(/\(([^()]{3,12})\)/g)].some(
+      m => fold(m[1]!).length >= 3 && model.startsWith(fold(m[1]!))
+    )
+    const kw = tagged ? powerKwOf(line) : null
+    if (kw) return kw
+  }
+  return null
+}
+
 export type ParseOptions = {
   /** Wikipedia edition of the text ('en', 'ru' …): decides whether bare numbers are accepted as mm / kg / litres. */
   lang?: string
@@ -429,6 +443,8 @@ export type ParseOptions = {
    * heading) gives the block whose production start is within a year of it.
    */
   yearFrom?: number
+  /** Folded model key (`f700gs`): picks its own line from a per-model infobox `power` field (`75 hp (F700)`). */
+  model?: string
   /** false = infobox only (the probe compares both); default true. */
   tables?: boolean
 }
@@ -506,7 +522,7 @@ export function parseWikiSpecs(wikitext: string, opts: ParseOptions = {}): WikiS
   // Motorcycle infoboxes keep the power in its own field ("55 kW @ 9,000 rpm"): a lone engine without a figure takes the first one.
   const bikeKw =
     infoboxEngines.length === 1 && infoboxEngines[0]!.powerKw === null
-      ? (field('power').map(powerKwOf).find(Boolean) ?? null)
+      ? (modelPowerKw(field('power'), opts.model) ?? field('power').map(powerKwOf).find(Boolean) ?? null)
       : null
   if (bikeKw) infoboxEngines[0] = { ...infoboxEngines[0]!, powerKw: bikeKw }
   // German motorcycle infoboxes keep `Hubraum` (cm³) and `Leistung` ("88/120 bei 9000": kW/PS) apart from the engine text.

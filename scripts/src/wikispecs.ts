@@ -174,7 +174,7 @@ async function editionsOf(g: Generation, overrides: Map<string, Override[]>): Pr
   const primary = await fetchPage(primaryLang, pin(primaryLang) ?? primaryTitle, true)
   if (!primary) return []
   // `headings` generations share one series article: tables only count under the heading that names the generation.
-  const opts = { code: g.code || g.label, series: g.source === 'headings', yearFrom: g.yearFrom }
+  const opts = { code: g.code || g.label, series: g.source === 'headings', yearFrom: g.yearFrom, model: g.modelKey }
   const out: Edition[] = []
   for (const { lang, title } of editionTargets(primaryLang, primary.langlinks ?? [], wikiLangChain(g.makeKey), pin)) {
     const page = lang === primaryLang ? primary : title ? await fetchPage(lang, title, false).catch(() => null) : null
