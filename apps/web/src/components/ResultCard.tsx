@@ -26,6 +26,7 @@ import CopyButton from '@/components/CopyButton'
 import LastOperationChip from '@/components/LastOperationChip'
 import CollapsibleChips from '@/components/CollapsibleChips'
 import LazySection from '@/components/LazySection'
+import ReportIssueLink from '@/components/ReportIssueLink'
 import RegionLabel from '@/components/RegionLabel'
 import FieldInfoButton from '@/components/FieldInfoButton'
 import NoRegionBadge from '@/components/NoRegionBadge'
@@ -638,6 +639,8 @@ export default function ResultCard({ data }: Props): ReactNode {
           <StockSection brand={c.brand} />
         </LazySection>
         <PaidFeatureSections hasPlate={!!data.plate} hasVin={hasVin} />
+
+        <ReportIssueLink about={data.plate ?? c.vin ?? undefined} className="mt-4" />
       </Card>
     </div>
   )

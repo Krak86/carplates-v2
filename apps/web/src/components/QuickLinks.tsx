@@ -16,7 +16,8 @@ const ROWS = [
 
 const LEGAL_LINKS = [
   { to: '/privacy', key: 'legal.privacy.heading' },
-  { to: '/terms', key: 'legal.terms.heading' }
+  { to: '/terms', key: 'legal.terms.heading' },
+  { to: '/discuss', key: 'report.footer' }
 ] as const
 
 /** Shortcut links shown at the bottom of every page. */

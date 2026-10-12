@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useLocation } from 'react-router'
+import { Link, useLocation } from 'react-router'
 
 import { ROUTE_TITLE_KEYS } from '@/hooks/useDocumentTitle'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
@@ -26,7 +26,7 @@ function measure(): Position {
   const rect = card.getBoundingClientRect()
   const left = rect.right + GAP_PX
   if (left + BUTTON_SIZE_PX + GAP_PX > window.innerWidth) return fallback
-  // Two buttons + the gap between them must stay above the card's bottom.
+  // The stack's bottom edge must stay above the card's bottom.
   return { left, bottom: Math.max(GAP_PX, window.innerHeight - rect.bottom + GAP_PX) }
 }
 
@@ -40,7 +40,7 @@ function collapseAllSections(): void {
 
 /**
  * Floating round buttons (desktop / tablet) shown once the page is scrolled: "back to top" (smooth) with a
- * "collapse all open sections" button stacked above it. Lazy-loaded by `Layout` on the first scroll.
+ * "collapse all open sections" button and a "feedback" (/discuss) button stacked above it. Lazy-loaded by `Layout` on the first scroll.
  */
 export default function ScrollButtons(): ReactNode {
   const { t } = useTranslation()
@@ -50,6 +50,8 @@ export default function ScrollButtons(): ReactNode {
   const { pathname } = useLocation()
   const isResultRoute =
     pathname !== '/' && pathname.split('/').filter(Boolean).length === 1 && !(pathname in ROUTE_TITLE_KEYS)
+  // On a result page the report carries the plate / VIN (see ReportIssueLink).
+  const feedbackTo = isResultRoute ? `/discuss?about=${pathname.slice(1)}` : '/discuss'
   const [pos, setPos] = useState<Position>(measure)
 
   useEffect(() => {
@@ -85,6 +87,21 @@ export default function ScrollButtons(): ReactNode {
         scrolled ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
       )}
     >
+      {pathname !== '/discuss' && (
+        <Link
+          viewTransition
+          to={feedbackTo}
+          aria-label={t('report.footer')}
+          title={t('report.footer')}
+          tabIndex={scrolled ? undefined : -1}
+          className={BUTTON_CLASS}
+        >
+          <span aria-hidden className="text-xl leading-none">
+            💬
+          </span>
+        </Link>
+      )}
+
       {isResultRoute && (
         <button
           type="button"
