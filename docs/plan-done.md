@@ -3377,3 +3377,156 @@ Not pinned (reason): Honda Steed / XR 150 / Yamaha Majesty 250 (no en/de article
 **K-M7 step 5, phase 1 (curated seed plumbing, 2026-10-12).** Policy (agreed): sources = manufacturer pages (facts only, nothing copied) + our own registry data, no scraped third-party catalogues; one citation per row (URL + access date) shown as "source", never as Wikipedia; a row with fewer than 3 sourced figures is dropped; an unsourced figure stays empty. Built: migration `0065_model_spec_curated.sql` (`source_label` / `source_url` / `source_accessed` on `model_spec_wiki`; the language/title columns cannot hold URL + date); `scripts/src/wikispecs-curated.csv` + `wikispecs-curated-parse.ts` (validation, PS→kW, drop rules, tests); `pnpm ingest:wikispecs:curated` (`--dry-run` supported) upserts one `model_generations` row (`source='curated'`, `year_from` 1900, open end) + one spec row per model; `ingest:wikispecs` skips curated models so a refresh cannot wipe them; both seed exporters/importers carry the new columns. Contract: `wikiSourceSchema` gains `url` / `accessed` (`.nullable().optional()`), `CURATED_LANG` / `CURATED_YEAR_FROM` / `isCuratedSource` in `wikiSpecsApi.ts`. UI: `WikiSourceLine` shows "Source: Bajaj Auto · accessed 2026-10-12" linking the manufacturer page; `WikiSpecs` uses curated footnote / info strings (ua/ru/en, "not Wikipedia"), hides the span and "year N of M". Rows: Bajaj Boxer BM 150, BM 150 X, BM 125X (bajajauto.com regional pages; registry-name ↔ Bajaj-name mapping is an assumption). Counts: generations 1,212, wikispecs 1,205; old seed rows unchanged. Sourcing finding: Ruta, Musstang, Lifan, Loncin, Spark have no official spec pages (only ads / third-party databases, excluded by policy), so many of the ~30 targets will be dropped; Geon, Viper, Forte, Shineray still to try.
 
 **K-M7 step 5, phase 2 (2026-10-12, closes step 5).** Sourcing sweep of the top registry bikes: Geon (Dakar GNS 300, Scrambler 250, X-Road 250), Viper (V150A, ZS150-J, V250L), Forte (FT125-K9A), Shineray (XY250GY-6C, XY200-4 Intruder; shineraymoto.com lists category pages only, no spec figures and no XY250GY-6C) have no official spec pages reachable (only dealer / marketplace / third-party databases, excluded by policy), so no rows; buses (Ruta, Neoplan, Setra, MAN, Van Hool, ЛАЗ) not pursued for the same reason. Added one row: Bajaj Boxer BM 100 ES (bajajauto.com/en-ng/bikes/boxer-100es-spoke; registry "BOXER BM 100ES" ↔ Bajaj "Boxer 100ES" is an assumption; fuel left empty because the page does not state it). Other Bajaj registry models skipped: Avenger / Dominar / Pulsar already have Wikipedia rows. Counts: generations 1,213, wikispecs 1,206 (+1 each); seed diff shows one added line per file, none removed. Browser check (СВ1206АВ Boxer BM 100ES, АЕ5032АС Boxer BM 150 X): "Source: Bajaj Auto · accessed 2026-10-12" linking the manufacturer page, footnote "manufacturer catalogue values … not Wikipedia data", no year-span / year-of-N line, generation chip hidden. Remaining articleless tail stays empty by policy.
+
+## Own ALPR real-photo pass — findings and fixes (moved from PLAN.md, 2026-10-12)
+
+**Real-photo pass (2026-09-30 / 10-01) — 88 own Ukrainian photos** (kept in a
+gitignored `services/alpr/eval/images/`; `services/alpr/eval.mjs` runs them
+through the container and writes `eval/results.json`, scoring recall once an
+`eval/labels.csv` (`file,plate|plate`) exists — **no labels yet, so no recall
+figure**). Findings and fixes:
+
+- **EXIF orientation was ignored** (the biggest miss): phone portrait shots are
+  stored sideways with an EXIF flag, so plates reached the detector rotated 90°.
+  `app.py` now applies `ImageOps.exif_transpose`. Every previously-empty phone
+  photo then read correctly. (The web flow hid this: the canvas downscale drops
+  EXIF; a direct upload did not.)
+- **Truncated reads.** The detector box is tight/cut on angled plates
+  ("BC15"): `app.py` now OCRs a padded crop and retries with wider padding when
+  the read isn't 8 chars. A box touching an _inner tile edge_ is a plate cut by
+  a seam ("388CX" beat "BE8388CX" in the merge) — such boxes are skipped and
+  full-length reads win the duplicate merge.
+- **Candidate filter.** `isUaPlate` (`packages/shared/src/plate.ts`) keeps only
+  complete plates in shapes verified against the registry (16.7M rows):
+  `LLDDDDLL` ~91% — besides the 12 Cyrillic look-alike letters it uses Latin
+  Y/Z/J/F/D/G/… (~6% of rows; all electric-car series, e.g. `ВС1554ZА`) — and
+  the legacy `DDLLDDDD` ~8% (region digits first; registry dates from 2013, so
+  re-registered old plates). Signs ("HOTEL"), foreign plates and partial reads
+  no longer appear as boxes or in "Also found". `repairOcrPlate` is now
+  shape-aware, repairing by slot (0/O, 1/I, 8/B, 2/Z, 5/S).
+  Known cost: the legacy shape lets an occasional junk read through (`98II1166`
+  on a small object) — require a higher score for it if it gets annoying.
+  Not matched on purpose: 6 digits, 4 letters + 4 digits, diplomatic, …
+- **Photo EXIF in the UI.** `lib/photo-meta.ts` reads capture date + GPS from
+  the original file (`exifr`, before the downscale); `PhotoMetaInfo` shows them
+  (GPS links to OpenStreetMap), warns when the photo is ≥1 year old (plate may
+  now be on another car) and when it predates 2013 (registry data starts
+  2013-01-02 — e.g. `АТ9998АХ` is read right but legitimately absent). None of
+  the 88 photos carries GPS (stripped/disabled), so that line is untested on
+  real data. Zoom dialog: 🏷 button / `B` hides the plate labels.
+- **Two-row / stacked car plates — fixed 2026-10-01.** The registry has ~119k
+  4-letter + 4-digit plates (`KA EO` over `3881`, stored `KAEO3881`); the
+  whole-plate OCR reads them in an unstable order. `app.py` `_read_stacked`: a box
+  with width/height < 2.4 is split into two overlapping rows, each OCR'd (each must
+  read exactly 4 chars), joined top+bottom; otherwise the normal read.
+  `LLLLDDDD` added to `PLATE_SHAPES`/`isUaPlate`/`repairOcrPlate`. Verified on
+  `ua_kaeo3881.jpg`, `images.jpg`, the EV and Passat stacked plates.
+  **Tried and rejected:** reordering LLDDDDLL→LLLLDDDD from box aspect alone —
+  angled single-row plates also have aspect 1.3-2.4 and it scrambled ~25 correct reads.
+- **Motorcycle (3-row) plates — partly fixed 2026-10-01.** Row-by-row OCR does not
+  work (this OCR model returns nothing for a lone short row like `AI`), so
+  they go through the whole-plate read, which keeps their order but misreads
+  small soft plates (`ua_ai1920ja.jpg`: `AL1930JA`, truth `AI1920JA`). Fix in
+  `_read_plate`: when no plain read reaches 0.97 (0.9 was too low: the web's q0.85 JPEG re-encode turned the plain read into `AL1930JA` at 0.94 and the retry never ran), retry on a tight crop upscaled 2x
+  and sharpened → `AI1920JA` 0.98. Padding hurt that plate (wider crops read
+  `AI1930JA`/`AU1533JA`). Cost: ~+13% latency (414→469 ms/photo avg). The
+  sharpened retry also changed 8 other reads among the 88 photos; on the one checked
+  by eye (`20241103_135726.jpg`) it was better (`BC3847EI`), but with no
+  `labels.csv` there is still no recall number.
+- **Legacy-shape junk — fixed 2026-10-01.** `recognize.mapper.ts` drops a
+  digits-first (`DDLLDDDD`) read scoring < 0.7 (`LEGACY_MIN_SCORE`).
+
+## infocar video crawl and YouTube fallback — run log and no-video model list (moved from PLAN.md, 2026-10-12)
+
+**Step 2a — infocar video crawl: done 2026-10-04; models with no video → YouTube fallback (ingest built 2026-10-05; daily runs + lookup/UI open).** Full crawl:
+153 brands, 3,739 videos (`registry.car_videos`, committed as `scripts/seed-data/infocar-videos.csv.gz`, loaded by
+`ingest:ratings:csv`). `youtube_id` is the real YouTube id scraped from infocar's `/video/` pages (infocar embeds
+YouTube), not an infocar-internal id; thumbnails are infocar-hosted. 83% have a model slug + generation id, but only 42%
+of all videos have a generation present in the version catalog (the year filter needs it; 41% fall back to the title
+year, 15% have neither). Measured `videoLookup` over the 400 most-registered (brand, model) pairs: 245 have ≥1 video
+(74.1% of those registrations); on the top 60, 52 have one, only 41 once the car's year is applied. **No-video models,
+by registrations (the to-do list for alternative sources):**
+
+- Ukrainian/Soviet-built, largely outside infocar's coverage: Daewoo Lanos (~230k incl. ЗАЗ/ZAZ-Daewoo spellings), Sens,
+  Nexia; ВАЗ 2101/2103/2105-2109/21043/21063/21093/21099/2121/21101/21104/211540/217030/21150/21213; ЗАЗ 110307/1102/
+  110557; ГАЗ 3110/3302; Chevrolet Niva.
+- Western passenger cars: VW Touran (63k), Ford Fusion (59k), Mitsubishi Lancer (86k), Fiat Doblo (77k), Renault Laguna
+  (28k), Opel Omega (38k), Volvo V50, Chery Amulet (34k), Dodge Journey, Hyundai Getz (30k) / ix35, Nissan Note /
+  Primera / Tiida, Ford C-Max, Opel Meriva / Movano, Peugeot 307 / 207 / Expert, Fiat Scudo / Ducato, Mercedes Vito,
+  Chevrolet Nubira, VW Bora / LT 35, Audi 100 / 80, Mazda CX-7 / 626 / 5, Mitsubishi Colt.
+- Commercial/odd registry entries (MAN TGX, DAF XF, Krone SD, ПГ/ПА trailers, Honda Dio, Geely MR-7151A, Musstang):
+  skip — not worth video matching.
+- Also: old-year gaps (model has videos but none for a 2007–2008 car): Toyota Camry, Hyundai Tucson / Santa Fe /
+  Accent, Mazda 3, Nissan Qashqai, Mitsubishi Outlander, VW Caddy, Opel Zafira. Intended (no wrong-generation videos).
+- Re-derive/extend the list with the registry query + `videoLookup` (top N pairs, 0 results) — the 400-pair run is
+  what the numbers above come from; the registry spells many models twice ("LANOS LANOS"), collapse them first.
+
+**YouTube fallback — trial done 2026-10-04; full build + crawl is the next session's job.** Search YouTube for gap
+models only, as an **offline batch** that stores results next to `car_videos` (new `source` column or a sibling table;
+links + facts only, same lookup path) — never live per request. Per (brand, model, generation), not per year.
+
+**Build status (2026-10-05): ingest built (steps 3, 4, 6-tooling, 7); real run: ≥5,000 tier done, ≥1,000 tier done (day 7, see below); lookup integration done 2026-10-07 (`ReviewsService.lookup` falls back to `youtube_videos` through `videoLookup` when infocar has no video for the model; the Videos section needed no UI change, only the source footnote); the response video now carries `source` (infocar|youtube) + `lang`, the Videos section shows a "found by a YouTube search" note for fallback videos and lists the UI language first (`preferLanguage`, client-side — the API still caps at 6 newest, language-blind).**
+**Run log:** `pnpm ingest:youtube-videos -- --min-cars 5000`, once per Pacific day (after ~10:00 Kyiv). Day 1 (2026-10-05): 67
+models, 443 videos, 9,090 units, 0 errors; obscure ВАЗ trim codes fell through to 3 queries (303 units each), so fewer than the
+~89 models/day estimate. Afterwards ВАЗ trim codes were folded into the base model (`baseModel`: 21063 → 2106, 210994 → 21099,
+217030 → 2170; day-1 rows re-keyed, their run rows dropped), so the ≥5,000 tier is now 131 models with ~85 left (≈ 1 more
+day). Day 2 (2026-10-06): 65 models with videos, 4 none (ЗАЗ 1102xx/1103xx), 0 errors, 459 videos, 8,988 units; daily budget
+reached with 16 models left in the tier. Day 3 (2026-10-07): **≥5,000 tier finished** — 16 models with videos, 0 none, 0 errors, 112 videos,
+2,222 units; the remaining budget went to `--min-cars 1000`: 44 models with videos, 5 none (ЗАЗ TF698K, Mercedes 200, Fiat NUOVO DOBLO,
+Daewoo T13110, ЗАЗ 110307-40), 0 errors, 308 videos, 6,764 units (8,986 total); 194 of 243 models left in that tier (≈ 2 more days;
+next in line: Mercedes-Benz ML 320 down to 3,033 cars). Day 4 (2026-10-08): `--min-cars 1000`: 50 models with videos, 5 none (Daewoo FSO LANOS TF69Y, ЗАЗ TF69YO, ЗАЗ 110377-40, …), 0 errors, 302 videos, 8,984 units; daily budget reached, 151 of 206 models left in that tier (≈ 1.5 more days; next in line: ≤ 2,254 cars). CSV re-exported (1,574 videos). Day 5 (2026-10-09, run after the 10:00 Kyiv reset; a first attempt at 09:10 found the quota still spent and did nothing): `--min-cars 1000`: 39 models with videos, 8 none (АЗЛК 2141201, заз-Daewoo T13010, Chrysler GR.VOYAGER, …), 0 errors, 221 videos, 9,080 units; daily budget reached, 104 of 151 models left in that tier (≈ 2–3 more days; next in line: ≤ 1,662 cars). CSV re-exported (1,792 videos). Day 6 (2026-10-10, run at 11:06 Kyiv): `--min-cars 1000`: 54 models searched (48 with videos, 6 none — БОГДАН 211120, Audi 80 1.8 S, ЗАЗ 110270, Mercedes-Benz 208 D, …), 0 errors, 279 videos, 8,986 units; daily budget reached, 50 of 104 models left in that tier (≈ 1 more day at ~54 models/day; next in line: ≤ 1,267 cars). CSV re-exported (2,063 videos). Day 7 (2026-10-11, run at 10:44 Kyiv): `--min-cars 1000`: 49 models searched (43 with videos, 6 none — Geely FE-2, Geely JL7152, ЗАЗ 110377, ЗАЗ 110216, Mitsubishi GALANT 2.0 I, ЗАЗ 110380-40), 1 error (Dacia SUPER NOVA: a `videos.list` item had no `contentDetails.duration`, probably a live/upcoming video; fixed by making it optional, a missing duration now counts as 0 and the item is filtered as "short"), 258 videos, 8,379 units. Re-run the same day: Dacia SUPER NOVA 3 videos, 303 units (8,682 total). **≥1,000 tier finished**; CSV re-exported (2,320 videos). **First partial CSV seed committed 2026-10-06** (`a0b278a`: 881 rows over 110 models in the DB and the CSV; the per-day
+sums above are 902 — the difference was not investigated). **Next:** nothing required — the YouTube fallback is complete and committed; generation/year matching is parked (Remaining item 2) and `--min-cars 500` stays deferred (newer models have fewer videos, 101-303 units per model, ≈ 9+ days). Commit `scripts/seed-data/youtube-videos.csv.gz`.
+Migration `0031_youtube_videos.sql` (`registry.youtube_videos` + `youtube_model_runs` resume/quota ledger),
+`scripts/src/youtube-videos.ts` (+ `youtube-videos-filter.ts`, tested), CSV export/import wired into `ingest:ratings:csv`.
+The target list is derived (`--list`): 5,142 passenger-car gap models; tiers by registered cars at ~101 units/model, ~89
+models/day: ≥10,000 cars = 99 models ≈ 1.1 d · ≥5,000 = 164 ≈ 1.8 d · ≥2,000 = 299 ≈ 3.4 d · ≥1,000 = 435 ≈ 4.9 d ·
+≥100 = 1,334 ≈ 15 d. So "1.5-2 days" buys the ≥5,000 tier (3.17M of the 4.15M gap cars); run `--min-cars 5000` first.
+Known gaps: the same model under two brand spellings is searched twice (Daewoo/ЗАЗ LANOS); Cyrillic aliases exist only for
+the curated table in `youtube-videos-filter.ts` (others need the Latin model name in the title); no generation matching yet.
+Dry-run on 2 models (Lanos, Lancer): 8 kept each, 101 units each.
+
+## Stage K-M leftovers log (moved from PLAN.md, 2026-10-12)
+
+- ✅ Stage K leftover: generation chip + specs for ~35 motorcycle / bus models (2026-10-12; bikes 7.7 %, buses 56.9 % of registrations; `docs/plan-done.md` "Stage K leftover — motorcycles and buses").
+- ✅ Stage K Step 5 (2026-10-12, partly): `Infobox UK Bus` parsed (MAN Lion's Coach), Dominar pinned, bike + bus cards browser-checked. Open: SV650 transposed table, per-language title pins (Neoplan/Setra de, Jawa ru) — `DATASETS_PLAN.md` "Step 5 done".
+- ✅ Stage K Step 6c (2026-10-12): transposed model-year spec tables parsed (Suzuki SV650 1999/2003/2017 now store engines); `docs/plan-done.md` "Step 6c".
+- ✅ Stage K Step 6a (2026-10-12): per-language title pins — optional `lang` column in `generations-titles.csv`, `de:` prefix in `wiki_title`, `editionTargets` (primary edition); no Neoplan/Setra row gained data (de articles are prose-only or missing). Open: 6b Jawa 350 (ru `Ява-350`), 6c SV650 table (`docs/plan-done.md` "Stage K leftover, Step 6a").
+- ✅ Stage K-M4 (2026-10-12): 17 Kawasaki / BMW bike pins ingested (generations 1,155 → 1,172, wikispecs 1,147 → 1,165; seeds re-exported, additions only). Open: Versys 1000 stores the wrong engines, K1600GT 2011–2011, 13 unpinned registry spellings, 98 drifted wikispecs rows not taken — `docs/plan-done.md` "Stage K-M4".
+- ✅ **Stage K-M6 — motorcycle & bus tail (done 2026-10-12; write-ups in `docs/plan-done.md` "K-M6 step 1–4"; step 1 coverage figures were exact-key only, re-measured through the matcher in step 3).** Original plan kept below for reference. DB scope: only `registry.model_generations` + `registry.model_spec_wiki` (re-ingestable; `SELECT count(*)` guard first; never `registrations` / `ingested_resources`). Counts before: generations 1,185, wikispecs 1,179. Each step ends with `pnpm format`, a write-up in `docs/plan-done.md`, a one-line ✅ here, a `DATASETS_PLAN.md` line and a suggested commit message.
+  1. **Measure (read-only, no code).** (a) Bus coverage: top ~40 bus brand/models by count in `registry.registrations` (vehicle kind = bus) vs rows in `model_generations` / `model_spec_wiki`; list gaps by registrations. (b) Models whose pin query finds no `en` article (candidates for step 2). (c) Power-quality scan: wikispecs rows whose engines have `powerKwMax` far from `powerKw`, kW/cc outside plausible bounds, or `powerKw` null for >50 % of entries. Output: three short tables in `docs/plan-done.md`; the bus gaps and de-only list decide the scope of steps 2–3.
+  2. **de-only articles (R 1250 RT).** `generations.ts` already carries `Series.lang` (Stage K Step 6a), so the `lang=de` pin returning 0 generations is most likely the generation parser finding no rows in a de article (de `Infobox Motorrad` / table layout), not an en-only ingest. Debug with the cached page: parse it in a scratch script, find why no generation is emitted, fix in `generations-parse.ts` (+ test), then pin R 1250 RT and every other de-only model from step 1b. Ask before widening beyond bikes/buses.
+  3. **Bus gaps.** Pin the biggest uncovered bus models from step 1a in `scripts/src/generations-titles.csv` (per-language `lang` where needed); `ingest:generations --only "<query>"` then `ingest:wikispecs --only "<makekey modelkey>"`; review drift against the seed (diff by `make_key|model_key|year_from`), re-export both seeds. Buses without a Wikipedia article stay unpinned (note them, no invented data).
+  4. **Quality sweep.** From step 1c: fix the parser rules that explain most implausible rows (e.g. Lada 2101 `44 kW` with `powerKwMax 48` from a "46 kW at 5600" line; Corolla 2012 now without displacement), or add bounds in `parseEngine`; full cached `ingest:wikispecs`, row-by-row diff vs the seed, ask before overwriting rows whose output got worse.
+  5. **Close-out.** Docs, `features-reference.md` if a convention changed, counts, commit message.
+- ✅ **Stage K-M7 — K-M6 tail (done 2026-10-12; steps 1–5 below, step 3 resolved as option B + step 5 curated rows).** Start a session with "Stage K-M7 step N". Same DB scope as K-M6 (only `registry.model_generations` + `registry.model_spec_wiki`; `SELECT count(*)` guard first; never `registrations` / `ingested_resources`). Counts before: generations 1,199, wikispecs 1,193. Measure coverage **through the matcher** (`matchVdbModelAcrossMakes` over `model_generations` keys), never by exact key. Each step ends with `pnpm format`, a write-up in `docs/plan-done.md`, a one-line ✅ here, a `DATASETS_PLAN.md` line and a suggested commit message.
+  1. **More pins (cheap).** Registry bikes/buses still unmatched but with a likely en/de article: Honda XR 150 / Steed / PC 36 / CBF 600 SA, Yamaha Majesty 250 / RJ 07 / YZF 600R, Suzuki Address 125, Harley-Davidson XL 883N, BMW F 900 R (no article found in K-M6 — try de/it), KTM 390 Adventure (own generation row: article is the 390 series, would claim 2013), Mercedes O303 / O350 / Tourismo, Volvo B7 / B12, MAN A21, ПАЗ 4234. Check each article's production field and redirect target before pinning (a redirect to a wider series = wrong years); `ingest:generations --only` then `ingest:wikispecs --only "<makekey modelkey>"`, review drift, re-export both seeds.
+  2. **Quality leftovers.** Tesla Model S front-motor values (165 kW); toyota|corolla|2012 engines with power but no displacement; K1600GT `2011–2011` (lone year); Lada 2101 `44` vs `powerKwMax 48` (article's net/gross — decide keep or take the first); the 255 rows mostly null on power (source gaps: Toyota 54, Nissan 32, Ford 21, Renault 17, Lexus 15 — try another edition or a body-table rule where the article has the figure).
+  3. **Articleless tail (decision, no code unless approved).** Ruta (31.6k buses), Chinese/Ukrainian-market bikes (Musstang, Lifan, Bajaj, Jawa, Spark, Viper, Geon, Forte, Shineray, Loncin …; ~90 % of the bikes still unmatched), Neoplan / Setra / MAN / Van Hool / ЛАЗ / МАЗ. Wikipedia has nothing; a different source (RDW/NHTSA bike data, manufacturer pages) needs its own licence/ToS review. Write the options and ask before building.
+  4. **Verify in the app.** `pnpm dev`, open a plate/VIN page of a newly covered bus (Ataman A092, BAZ 2215) and bike (KTM 390 Duke, Yamaha MT-03, R 1250 RT): chip and Generation specs render, no wrong year; run full `pnpm test`.
+  5. **Close-out.** Docs, counts, commit message.
+- ✅ Stage K-M7 step 1 (2026-10-12): 6 pins (F 900 R de, O303, Volvo B7R / B12 / B12B, YZF600R); buses 61.7 %, bikes 10.1 %; generations 1,205 / wikispecs 1,198; B7R gross weight dropped via `GROSS_WEIGHT_KEYS` (`docs/plan-done.md` "K-M7 step 1").
+- ✅ Stage K-M7 step 2 (2026-10-12): wikispecs parser fixes — full-width footnote rows dropped (Tesla 165 kW), system-total power for multi-motor / plug-in cells, `Dauerleistung laut Zulassung` ignored, `Displacement, engine code` column; Lada 2101 takes the DIN net rating (44/48 kW, no max); both seeds re-exported (`docs/plan-done.md` "K-M7 step 2").
+- ✅ Stage K-M7 step 3 (2026-10-12): option B only — 3 ru pins (МАЗ-5551, Иж-2717, Иж-2715; ≈ 6.4k cars), the rest of the articleless tail has no usable Wikipedia article; generations 1,208 / wikispecs 1,201 (`docs/plan-done.md` "K-M7 step 3"). Next: step 4.
+- ✅ Stage K-M7 step 4 (2026-10-12): verified in the app/API; BAZ-2215 gross weight (3,980 kg) no longer shown as kerb weight (`GROSS_WEIGHT_KEYS`), seed re-exported; tests/lint/type-check green (`docs/plan-done.md` "K-M7 step 4"). Next: step 5 (close-out).
+- ✅ K-M7 open decision 1 (2026-10-12): МАЗ-5337 parser fix — `{{Годы автомобиля|1987|}}` reads as open-ended, ru field boundary accepts Cyrillic names, pin `Maz 5337`; generations 1,209 / wikispecs 1,202 (`docs/plan-done.md` "K-M7 open decision 1").
+- ✅ **K-M7 step 5 (done; planned, option E — ~3–5 h; start only after the policy is agreed):** hand-curated seed for the articleless tail (~30 rows: Ruta 20/25/22, Musstang MT125, Spark SP125, Lifan LF150/LF175, Viper, Geon …; est. +5–8 pts bikes, ~+7 pts buses). A new manually sourced data source, so: (a) **policy (agreed 2026-10-12):** sources = manufacturer pages (facts only, nothing copied verbatim) + our own registry data, no scraped third-party catalogues; one citation per row (URL + access date) shown as "source" in the UI, never as Wikipedia data; a row with fewer than 3 sourced figures is dropped; (b) **plumbing** (~1–1.5 h): committed curated CSV, a `source` marker so the rows are not shown as Wikipedia data, loader + exporter, migration only if existing columns do not fit; (c) **UI attribution** (~45–60 min): citation + "not Wikipedia" label, tests; (d) **sourcing** (~1.5–2.5 h): ~30 rows, can be split — plumbing + 3–5 well-sourced rows first (~2 h), the rest in batches; (e) docs, `pnpm format`, full test/lint/type-check, seed re-export (~30 min). Then close-out. Options C (RDW/NHTSA bike data: no Chinese brands, new ingest, licence review) and D (manufacturer pages / scraped catalogues: licence/ToS risk) were not recommended.
+- ✅ K-M7 step 5, phase 1 (2026-10-12): curated-seed plumbing (migration 0065, `wikispecs-curated.csv`, `ingest:wikispecs:curated`, "source" attribution in the UI) + 3 Bajaj Boxer rows; generations 1,212 / wikispecs 1,205 (`docs/plan-done.md` "K-M7 step 5, phase 1"). ✅ Phase 2 (2026-10-12): sweep found official pages only for Bajaj Boxer BM 100 ES (+1 row; Geon/Viper/Forte/Shineray/Ruta/Musstang/Lifan/Loncin/Spark/buses have none); browser-verified; generations 1,213 / wikispecs 1,206. **Step 5 closed** (`docs/plan-done.md` "K-M7 step 5, phase 2").
+- ✅ Stage K-M6 steps 3–4 (2026-10-12): coverage re-measured through the matcher (buses 57.8 %, bikes 10.2 %); 13 bus/bike pins, Mercedes alias widened, hybrid motor line dropped in `cellPower`; generations 1,199 / wikispecs 1,193 (`docs/plan-done.md` "K-M6 step 3" / "step 4").
+- ✅ Stage K-M6 step 2 (2026-10-12): `productionSpan` reads de `Produktion von/bis`; R 1250 RT pinned (de), generations 1,186 / wikispecs 1,180 (`docs/plan-done.md` "K-M6 step 2").
+- ✅ Stage K-M6 step 1 (2026-10-12, measure only): bus coverage 8.2 %, bike coverage 6.8 %, 64/300 default targets without generations, 165 power-max outliers (mostly BMW PHEV) (`docs/plan-done.md` "K-M6 step 1").
+- ✅ Stage K-M5 follow-up 5 (2026-10-12): engine edition ranked by entries with power; the two held rows resolved, seed = parser output (`docs/plan-done.md`).
+- ✅ Stage K-M5 (2026-10-12): Versys 1000 engines fixed (German `Infobox Motorrad` + competitor-table guard), F700GS/F800GS years, cc beats litres, 11 more bike pins (generations 1,184, wikispecs 1,177). Follow-up: a lone start year in an `Infobox motorcycle` is open-ended (K1600GT/GTL, NC750XD 2012–now; cars keep one-year spans), generations 1,185. Open: R 1250 RT unpinned. Follow-up 4: the 13 held wikispecs rows are fixed in the parser (seed re-exported; solenza 2003 and navara 2014 kept at HEAD) — `docs/plan-done.md` "Stage K-M5".
+
+## Sitemap, bot protection and legal notes ✅ BUILT (2026-10-12)
+
+- **Sitemap/robots:** `SeoController` serves `/sitemap.xml` (all `STATIC_PAGES` except `/history`, `/favorites`) and a generated
+  `/robots.txt` (`Disallow: /api/`, `/og/`, `Sitemap:` line) from `PUBLIC_SITE_URL`. `/fuel`, `/safety`, `/features` gained
+  `STATIC_PAGES` entries (they were `noindex` before). The static `apps/web/public/robots.txt` is now shadowed in production and can be deleted.
+- **Rate limiting:** global per-IP throttler on `/api/*` only (30/1 s, 150/60 s, 1500/1 h — looser than the PLAN's 10/1 s because a page
+  load fires a burst of lazy-section queries and mobile carriers share IPs); `/api/plate/*` 100/60 s, `/api/vin/*` 30/60 s;
+  `/api/auth/me` skipped. Static assets, `/og`, `/healthz` and the SPA catch-all are not counted (`skipIf`). Tests: `throttle.test.ts`.
+- **Hardening:** `TRUST_PROXY` env → Fastify `trustProxy`; `requestTimeout` 60 s; `nosniff` / `referrer-policy` / `x-frame-options`
+  `onSend` hook. CSP and HSTS deliberately left to the proxy (embed allowlist) — see PLAN.md "Deploy-time security checklist".
+- **Not done:** per-user tracker, Redis throttler store, Turnstile, Cloudflare — deploy-time items.
+- **Legal research** (cookies/consent, "All rights reserved" vs MIT, ads/paid-content risks per data source) saved in
+  `docs/legal-and-monetization.md`. Key finding: PostHog defaults to cookie + localStorage persistence — decide before enabling telemetry in prod.

@@ -153,6 +153,10 @@ One more optional add-on lives in the web app: `VITE_GOOGLE_MAPS_EMBED_KEY` in
 from a keyless Google Maps embed to the official Embed API. Vite reads it at
 build/dev start, so restart `pnpm dev` after changing it.
 
+Production-only API settings: `PUBLIC_SITE_URL` (real origin — used by link previews, `/sitemap.xml` and `/robots.txt`) and
+`TRUST_PROXY=true` (only behind Caddy/Cloudflare, so per-IP rate limits see the client IP). Deploy checklist: `PLAN.md` "Deploy-time
+security checklist".
+
 ## Offline / PWA
 
 The app is an installable PWA (`vite-plugin-pwa`). The service worker is only

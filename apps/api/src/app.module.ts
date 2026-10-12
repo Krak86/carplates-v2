@@ -1,10 +1,12 @@
 import { Module } from '@nestjs/common'
-import { APP_FILTER, APP_PIPE } from '@nestjs/core'
+import { APP_FILTER, APP_GUARD, APP_PIPE } from '@nestjs/core'
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler'
 import { SentryModule } from '@sentry/nestjs/setup'
 import { ZodValidationPipe } from 'nestjs-zod'
 
 import { AuthModule } from './auth/auth.module.js'
 import { AllExceptionsFilter } from './common/all-exceptions.filter.js'
+import { GLOBAL_THROTTLE } from './common/throttle.js'
 import { DbModule } from './db/db.module.js'
 import { MissedModule } from './missed/missed.module.js'
 import { FeaturesModule } from './features/features.module.js'
@@ -42,6 +44,7 @@ import { WikispecsModule } from './wikispecs/wikispecs.module.js'
 @Module({
   imports: [
     SentryModule.forRoot(),
+    ThrottlerModule.forRoot(GLOBAL_THROTTLE),
     DbModule,
     MissedModule,
     AuthModule,
@@ -78,6 +81,7 @@ import { WikispecsModule } from './wikispecs/wikispecs.module.js'
   ],
   controllers: [HealthController],
   providers: [
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
     { provide: APP_PIPE, useClass: ZodValidationPipe },
     { provide: APP_FILTER, useClass: AllExceptionsFilter }
   ]

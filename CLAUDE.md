@@ -6,11 +6,11 @@
 open-data portal (`data.gov.ua`) in Postgres; VIN decoding proxies NHTSA. **Phase 1: local dev stack only** (no CI, no VPS). The v1 app
 is the sibling `../carplates/` (do not modify; reference for ports).
 
-Docs map (**grep headings, never read whole** — several are 100–300 KB): `PLAN.md` active/planned · `docs/plan-done.md` finished
-write-ups · `README.md` features, setup, script list · `docs/features-reference.md` conventions per feature (VehiclesDB, RDW, value,
-rankings, posts, racer, Accounts, VIN page, offline/PWA, link previews, plate regions, generations) — **read the matching section before
-touching those areas** · `docs/commands-reference.md` every `ingest:*` / `export:*` / ALPR command · `DATASETS_PLAN.md`,
-`GAME_PLAN.md`, `FEATURES_PLAN.md`, `SCHEDULE.md`, `docs/vps-http2-http3.md`.
+Docs map (**grep headings, never read whole** — several are 100–350 KB): `PLAN.md` active/planned · `docs/plan-done.md` finished
+write-ups · `README.md` setup, env, scripts · `docs/features-reference.md` per-feature conventions (VehiclesDB, RDW, value, rankings,
+posts, racer, Accounts, VIN page, offline/PWA, link previews, sitemap/rate limits, plate regions, generations) — **read the matching
+section before touching those areas** · `docs/commands-reference.md` `ingest:*` / `export:*` / ALPR · `docs/legal-and-monetization.md`
+cookies/licence/ads · also `DATASETS_PLAN.md`, `GAME_PLAN.md`, `FEATURES_PLAN.md`, `SCHEDULE.md`, `docs/vps-http2-http3.md`.
 
 ## Commands
 
@@ -47,6 +47,8 @@ ESLint 10, Vite 8, Tailwind v4 (`@theme` in `src/styles/global.css`), i18next ua
 - **Below-the-fold sections are `LazySection`s**; a new shareable one must list its id in `sections`. Shared pure helpers of lazy
   chunks go in `vite.config.ts` `HELPER_GROUPS`.
 - Accounts: separate `app` schema, not re-ingestable; `account.ts`, not `schemas.ts`; admins by SQL only; online-only UI.
+- **New public route** → add a `STATIC_PAGES` entry (ua/ru/en) in `apps/api/src/spa/spa-text.ts`, else it is `noindex` and not in the
+  sitemap. `/api/*` is globally rate-limited (`common/throttle.ts`); add a `@Throttle` for any enumerable lookup.
 - Tests: Vitest, colocated `*.test.ts(x)`.
 
 ## Workflow

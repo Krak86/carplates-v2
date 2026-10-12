@@ -77,6 +77,39 @@ export const STATIC_PAGES: Record<string, Record<Lang, PageText>> = {
       description: "Most common makes, colors, fuels and regions in Ukraine's vehicle registry."
     }
   },
+  '/fuel': {
+    ua: {
+      title: 'Пальне та викиди · Cars UA',
+      description: 'Витрата пального та викиди CO₂ за марками й моделями за реєстром України.'
+    },
+    ru: {
+      title: 'Топливо и выбросы · Cars UA',
+      description: 'Расход топлива и выбросы CO₂ по маркам и моделям по реестру Украины.'
+    },
+    en: {
+      title: 'Fuel & emissions · Cars UA',
+      description: "Fuel economy and CO₂ emissions by make and model, from Ukraine's vehicle registry."
+    }
+  },
+  '/safety': {
+    ua: {
+      title: 'Безпека в ДТП · Cars UA',
+      description: 'Результати краш-тестів Euro NCAP, IIHS, NHTSA та інших за марками й моделями.'
+    },
+    ru: {
+      title: 'Безопасность в ДТП · Cars UA',
+      description: 'Результаты краш-тестов Euro NCAP, IIHS, NHTSA и других по маркам и моделям.'
+    },
+    en: {
+      title: 'Crash safety · Cars UA',
+      description: 'Euro NCAP, IIHS, NHTSA and other crash-test results by make and model.'
+    }
+  },
+  '/features': {
+    ua: { title: 'Функції · Cars UA', description: 'Що ми створюємо для користувачів з обліковим записом.' },
+    ru: { title: 'Функции · Cars UA', description: 'Что мы создаём для пользователей с учётной записью.' },
+    en: { title: 'Features · Cars UA', description: 'What we are building for signed-in users.' }
+  },
   '/news': {
     ua: { title: 'Автоновини · Cars UA', description: 'Свіжі автоновини з українських та світових видань.' },
     ru: { title: 'Автоновости · Cars UA', description: 'Свежие автоновости из украинских и мировых изданий.' },

@@ -53,6 +53,10 @@ const envSchema = z.object({
   /** Sentry organization slug — only used to build the dashboard link on the admin Statistics tab. */
   SENTRY_ORG_SLUG: z.string().optional(),
 
+  /** Set when running behind a reverse proxy (Caddy/Cloudflare) so per-IP rate limits see the client IP from
+   *  X-Forwarded-For, not the proxy's. Leave off when the API is exposed directly — the header would be spoofable. */
+  TRUST_PROXY: boolish,
+
   /** Swagger UI at /api/docs — off in production unless explicitly enabled. */
   ENABLE_SWAGGER: boolish,
 

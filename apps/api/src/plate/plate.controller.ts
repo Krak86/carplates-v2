@@ -1,7 +1,9 @@
 import { Controller, Get, Inject, Param } from '@nestjs/common'
 import { ApiOkResponse, ApiParam, ApiTags } from '@nestjs/swagger'
+import { Throttle } from '@nestjs/throttler'
 import { z } from 'zod'
 
+import { PLATE_LOOKUP_THROTTLE } from '../common/throttle.js'
 import { zodParam } from '../common/zod-param.pipe.js'
 import { PlateHistoryDto, PlateLookupDto } from './plate.dto.js'
 import { PlateService } from './plate.service.js'
@@ -14,6 +16,7 @@ export class PlateController {
   constructor(@Inject(PlateService) private readonly plateService: PlateService) {}
 
   @Get(':plate')
+  @Throttle(PLATE_LOOKUP_THROTTLE)
   @ApiParam({ name: 'plate', example: 'ВЕ7116АА', description: 'Latin or Cyrillic; normalized server-side' })
   @ApiOkResponse({ type: PlateLookupDto })
   lookup(@Param('plate', PlateParam) plate: string): Promise<PlateLookupDto> {
@@ -21,6 +24,7 @@ export class PlateController {
   }
 
   @Get(':plate/history')
+  @Throttle(PLATE_LOOKUP_THROTTLE)
   @ApiParam({ name: 'plate', example: 'ВЕ7116АА' })
   @ApiOkResponse({ type: PlateHistoryDto })
   history(@Param('plate', PlateParam) plate: string): Promise<PlateHistoryDto> {

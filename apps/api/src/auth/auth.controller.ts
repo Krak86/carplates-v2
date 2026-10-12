@@ -12,7 +12,7 @@ import {
   UseInterceptors
 } from '@nestjs/common'
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger'
-import { Throttle, ThrottlerGuard } from '@nestjs/throttler'
+import { SkipThrottle, Throttle, ThrottlerGuard } from '@nestjs/throttler'
 import { googleSignInRequestSchema } from '@carplates/shared'
 import type { GoogleSignInRequest, SessionUser } from '@carplates/shared'
 import type { FastifyRequest } from 'fastify'
@@ -40,6 +40,7 @@ export class AuthController {
 
   /** The current user, or `user: null` when anonymous / the session expired. */
   @Get('me')
+  @SkipThrottle({ short: true, medium: true, long: true })
   @Header('Cache-Control', 'no-store')
   @ApiOkResponse({ type: SessionDto })
   async me(@SessionToken() token: string | null): Promise<SessionDto> {
