@@ -415,5 +415,11 @@ export function productionSpan(wikitext: string, model = ''): { from: number; to
   const valid = years.filter(validYear)
   if (valid.length === 0)
     return infoboxYears(wikitext) && { from: infoboxYears(wikitext)!.from, to: infoboxYears(wikitext)!.to ?? null }
-  return { from: Math.min(...valid), to: /present|current|ongoing|now/i.test(text) ? null : Math.max(...valid) }
+  const from = Math.min(...valid)
+  // A lone start year (`March 2011`) in a motorcycle infobox means still produced; for cars it is a one-year span.
+  const loneStart =
+    new Set(valid).size === 1 && !/[–—-]\s*(?:19|20)?\d{2}/.test(text) && MOTORCYCLE_INFOBOX.test(wikitext)
+  return { from, to: loneStart || /present|current|ongoing|now/i.test(text) ? null : Math.max(...valid) }
 }
+
+const MOTORCYCLE_INFOBOX = /\{\{\s*Infobox[ _](?:motorcycle|Motorrad)/i

@@ -120,6 +120,11 @@ describe('productionSpan', () => {
     expect(productionSpan(f, 'F 800 GS')).toEqual({ from: 2008, to: 2019 })
     expect(productionSpan(f)).toEqual({ from: 2008, to: 2019 })
   })
+
+  it('treats a lone start year as open-ended for motorcycles only', () => {
+    expect(productionSpan('{{Infobox motorcycle\n| production = March 2011\n}}')).toEqual({ from: 2011, to: null })
+    expect(productionSpan('{{Infobox automobile\n| production = March 2003\n}}')).toEqual({ from: 2003, to: 2003 })
+  })
 })
 
 describe('chain quality', () => {
