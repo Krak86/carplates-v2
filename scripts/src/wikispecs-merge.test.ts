@@ -69,6 +69,12 @@ describe('mergeEditions', () => {
     })
   })
 
+  it('drops a known gross-as-kerb weight (Volvo B7R) but keeps the other dimensions', () => {
+    const b7r = { makeKey: 'volvo', modelKey: 'b7r', yearFrom: 1997, wikidataId: 'Q2' }
+    const row = mergeEditions(b7r, [ed('en', { lengthMm: measure(11500), kerbKg: measure(18000) })], false)
+    expect(row).toMatchObject({ lengthMm: 11500, kerbKg: null })
+  })
+
   it('returns null when no edition has anything', () => {
     expect(mergeEditions(KEY, [ed('en', {}), ed('ru', {})], false)).toBeNull()
     expect(mergeEditions(KEY, [ed('en', { lengthMm: measure(4300) })], true)).toBeNull()

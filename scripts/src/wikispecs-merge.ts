@@ -92,6 +92,9 @@ const engineJson = (e: WikiSpecs['engines'][number]): WikiEngineJson => ({
 
 const whole = (m: WikiSpecs['lengthMm']): number | null => (m ? Math.round(m.value) : null)
 
+/** `make|model|yearFrom` whose infobox "weight" is a gross figure (Volvo B7R: 18,000 kg for a ~12 m coach), not kerb weight. */
+const GROSS_WEIGHT_KEYS: ReadonlySet<string> = new Set(['volvo|b7r|1997'])
+
 /**
  * One row from the editions of a generation (in chain order), or null when no edition has anything.
  * `rdwHasModel` = RDW has measured rows for the make/model: the dimension block is dropped (never show both).
@@ -116,7 +119,7 @@ export function mergeEditions(
     lengthMm: d ? whole(d.lengthMm) : null,
     widthMm: d ? whole(d.widthMm) : null,
     heightMm: d ? whole(d.heightMm) : null,
-    kerbKg: d ? whole(d.kerbKg) : null,
+    kerbKg: d && !GROSS_WEIGHT_KEYS.has(`${key.makeKey}|${key.modelKey}|${key.yearFrom}`) ? whole(d.kerbKg) : null,
     fuelTankL: d?.fuelTankL ? Math.round(d.fuelTankL.value * 10) / 10 : null,
     layout: drive?.specs.layout ?? '',
     transmission: drive?.specs.transmission ?? '',
