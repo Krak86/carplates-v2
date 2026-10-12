@@ -1,0 +1,19 @@
+{{Infobox motorcycle
+| name         = Kawasaki Versys 1000
+| image        = Kawasaki Versys 1000 - Akrapovič.jpg
+| manufacturer = [[Kawasaki Heavy Industries Motorcycle & Engine|Kawasaki]]
+| production   = 2012-present
+| class        = [[Sport touring motorcycle|Sport-touring]]
+| engine       = {{ubl|Liquid-cooled|4-stroke|[[Inline-four engine|inline-four]]|1,043&nbsp;cm<sup>3</sup>}}
+| bore_stroke  = 77.0&nbsp;mm × 56.0&nbsp;mm
+| compression  = 10.3:1
+| power        = {{convert|86.8|kW|hp|0|abbr=on}} @ 9,000&nbsp;rpm
+| torque       = {{convert|102|Nm|lbft|0|abbr=on}} @ 7,700&nbsp;rpm
+| transmission = 6-speed [[manual transmission|manual]]; chain final drive
+| frame        = Twin-tube aluminium/steel (market/refresh dependent)
+| wheelbase    = {{convert|1520|mm|in|1|abbr=on}}
+| length       = {{convert|2240|mm|abbr=on}}
+| width        = {{convert|845|mm|abbr=on}}
+| height       = {{convert|1400|mm|abbr=on}}
+| wet_weight   = {{convert|239|kg|abbr=on}} (claimed)
+}}

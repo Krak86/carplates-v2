@@ -202,7 +202,7 @@ export function parseEngine(line: string): WikiEngine {
   const text = line.replace(/(\d),(\d{3})(?!\d)/g, '$1$2').replace(/(\d),(\d)(?!\d)/g, '$1.$2')
   let displacementCc: number | null = null
   const litres = /(?<![\d.])(\d{1,2}(?:\.\d{1,2})?)\s*(?:l|litres?|liters?|литр\p{L}*|л)(?![\p{L}\d])/iu.exec(text)
-  const cc = /(\d{3,5}(?:\.\d)?)\s*(?:cc|cm³|см³)/i.exec(text)
+  const cc = /(\d{3,5}(?:\.\d)?)\s*(?:cc|cm³|cm3|см³)/i.exec(text)
   if (litres) displacementCc = Math.round(Number(litres[1]) * 1000)
   else if (cc) displacementCc = Math.round(Number(cc[1]))
   if (displacementCc !== null && (displacementCc < 40 || displacementCc > 20000)) displacementCc = null
@@ -506,9 +506,13 @@ export function parseWikiSpecs(wikitext: string, opts: ParseOptions = {}): WikiS
       ? (field('power').map(powerKwOf).find(Boolean) ?? null)
       : null
   if (bikeKw) infoboxEngines[0] = { ...infoboxEngines[0]!, powerKw: bikeKw }
-  // Table rows carry power, chassis codes and notes; infobox lines rarely do — tables win when they have a figure.
+  // Table rows carry power, chassis codes and notes; infobox lines rarely do — tables win when they have a figure,
+  // unless they name no engine at all (a per-variant power table has neither displacement nor engine code).
+  const tableNamesEngine = tables.engines.some(e => e.displacementCc !== null || (e.engineCodes?.length ?? 0) > 0)
   const engines =
-    tables.engines.some(e => e.powerKw !== null) || infoboxEngines.length === 0 ? tables.engines : infoboxEngines
+    infoboxEngines.length === 0 || (tables.engines.some(e => e.powerKw !== null) && tableNamesEngine)
+      ? tables.engines
+      : infoboxEngines
   return {
     wheelbaseMm: measure('wheelbase', 'length', WIKI_SPEC_BOUNDS.wheelbaseMm),
     lengthMm: measure('length', 'length', WIKI_SPEC_BOUNDS.lengthMm),

@@ -198,3 +198,22 @@ describe('parseEngine: motorcycle displacement', () => {
     expect(parseEngine('373.3 cc (2016-2025) single-cylinder, liquid-cooled').displacementCc).toBe(373)
   })
 })
+
+describe('parseWikiSpecs: Kawasaki Versys (cm<sup>3</sup> and a power-only table)', () => {
+  const read = (name: string): ReturnType<typeof parseWikiSpecs> =>
+    parseWikiSpecs(readFileSync(new URL(`./fixtures/wiki/${name}.en.wikitext`, import.meta.url), 'utf8'), {
+      lang: 'en'
+    })
+
+  it('reads `1,043 cm<sup>3</sup>` inside a `ubl` engine field, with the power from `power`', () => {
+    const engines = read('versys1000').engines
+    expect(engines).toHaveLength(1)
+    expect(engines[0]).toMatchObject({ displacementCc: 1043, powerKw: 87 })
+  })
+
+  it('keeps the infobox displacement when the body table only lists power per variant', () => {
+    const engines = read('versys650').engines
+    expect(engines).toHaveLength(1)
+    expect(engines[0]).toMatchObject({ displacementCc: 649, powerKw: 50 })
+  })
+})

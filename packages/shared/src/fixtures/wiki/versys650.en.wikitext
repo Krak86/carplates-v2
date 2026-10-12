@@ -1,0 +1,49 @@
+{{outdated|date=August 2016}}
+{{Infobox Motorcycle
+| name = Kawasaki Versys 650
+| image = Kawasaki Versys 650 2025.jpg
+| caption = 2025 Kawasaki Versys 650
+| manufacturer = [[Kawasaki Motors]]
+| parent_company = [[Kawasaki Heavy Industries]]
+| production = 2007–Current
+| assembly = [[Rayong]], [[Thailand]]<br>[[Manaus]], [[Brazil]]
+| predecessor = [[Kawasaki KLE500]]
+| class = [[Types of motorcycles#Standard|Standard]] or [[Sport touring motorcycle|sport touring]] crossover
+| frame = Steel [[Motorcycle frame|diamond]]
+| engine = {{convert|649|cc|cuin|1|abbr=on}} [[Radiator (engine cooling)|liquid-cooled]] [[4-stroke]] [[Multivalve|8-valve]] [[DOHC]] [[Straight-twin engine|parallel-twin]]
+| power = {{convert|67|hp|kW|0|abbr=on}} @ 8,400&nbsp;rpm<ref name=mcc>{{cite web | url = https://www.motorcycle.com/manufacturer/kawasaki/2008-kawasaki-versys-road-test-71476.html | publisher= Motorcycle.com | title= 2008 Kawasaki Versys Road Test | first= Pete | last= Brissette | date= 8 January 2008 | accessdate= 1 July 2011}}</ref>
+| torque = {{convert|42|lbft|abbr=on}}<ref name=mcc/>
+| bore_stroke = {{convert|83|x|60|mm|abbr=on}}
+| compression = 10.6:1
+| transmission = 6-speed constant mesh
+| suspension = Front: {{convert|41|mm|in|1|abbr=on}} [[Motorcycle fork#Telescopic|telescopic fork]] with adjustable rebound and preload, {{convert|150|mm|abbr=on}} travel<br />Rear: Single offset laydown shock with adjustable rebound and spring preload, {{convert|145|mm|abbr=on}} travel
+| brakes = Front: Dual-piston [[Brake caliper|caliper]] with dual {{convert|300|mm|in|1|abbr=on}} discs<br />Rear: Dual-piston caliper with single {{convert|220|mm|in|1|abbr=on}} disc
+| tires = Front: 120/70-17<br />Rear: 160/60-17
+| rake_trail = 25 degrees, {{convert|108|mm|abbr=on}}
+| wheelbase = {{convert|1415|mm|abbr=on}}<ref name=kc>{{cite web |archiveurl= https://web.archive.org/web/20120330043626/http://www.kawasaki.ca/model/SUPERSPORT/1442/Versys-650 |archivedate=March 30, 2012 | url = http://www.kawasaki.ca/model/SUPERSPORT/1442/Versys-650 | publisher= Kawasaki.ca | title= 2012 Kawasaki Versys 650 Specifications | first=G. | last=White | date= 8 December 2011 | accessdate=8 December 2011}}</ref>
+| length = {{convert|2125|mm|abbr=on}}<ref name=kc/>
+| width = {{convert|840|mm|abbr=on}}<ref name=kc/>
+| height = {{convert|1330|mm|abbr=on}}<ref name=kc/>
+| seat_height = {{convert|845|mm|abbr=on}}<ref name=kc/>
+| wet_weight = {{convert|206|kg|abbr=on}}<ref name=mcc/>
+| fuel_capacity = {{convert|19|L|abbr=on}}<ref name=kc/>
+| fuel_consumption = {{convert|4.5|L/100 km|abbr=on}}<ref name=kc/>
+| related = [[Kawasaki Versys]]<br/>[[Kawasaki Ninja 650R]]
+| sp = uk
+}}
+
+== Local variants ==
+{| class="wikitable"
+!Model
+!KLE650 (KLE650FHF)
+!KLE650L (KLE650FHFW)
+|-
+|Power
+|51 kW @ 8,500 rpm
+|41.3 kW @ 8,000 rpm
+|-
+|Torque
+|64 N.m @ 7,000
+|55 n.m @ 5,500 rpm
+|}
+In addition to the above differences, Australia marketed Versys 650 and 650L are sold with a fuel capacity of 21 L and have a kerb mass of 216 kg (wet) for both the 650L and 650.
