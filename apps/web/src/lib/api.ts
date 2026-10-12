@@ -114,6 +114,8 @@ import type {
   StatsResponse,
   StatsTopResponse,
   VehicleColor,
+  SearchSortDir,
+  SearchSortKey,
   VehicleFuel,
   VehicleKind,
   VehiclePhotosResponse,
@@ -413,6 +415,8 @@ export type VehicleSearchFilters = {
   body?: string
   region?: string
   oper?: number
+  sort?: SearchSortKey
+  dir?: SearchSortDir
   page: number
   pageSize: number
 }
@@ -429,6 +433,8 @@ export async function searchVehicles(filters: VehicleSearchFilters): Promise<Sea
   if (filters.body) params.set('body', filters.body)
   if (filters.region) params.set('region', filters.region)
   if (filters.oper != null) params.set('oper', String(filters.oper))
+  if (filters.sort) params.set('sort', filters.sort)
+  if (filters.dir) params.set('dir', filters.dir)
   params.set('page', String(filters.page))
   params.set('pageSize', String(filters.pageSize))
   return searchResponseSchema.parse(await getJson(`/api/search?${params.toString()}`))

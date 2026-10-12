@@ -11,6 +11,25 @@ export const MIN_BRAND_LENGTH = 2
 export const MIN_MODEL_LENGTH = 1
 export const MIN_INDEXABLE_LENGTH = 3
 
+/** Sort keys of the advanced search, in the order of the form inputs (region/oper are derived from the plate / latest operation). */
+export const SEARCH_SORT_KEYS = [
+  'brand',
+  'model',
+  'makeYear',
+  'fuel',
+  'color',
+  'kind',
+  'body',
+  'region',
+  'oper',
+  'plate'
+] as const
+export type SearchSortKey = (typeof SEARCH_SORT_KEYS)[number]
+export const SEARCH_SORT_DIRS = ['asc', 'desc'] as const
+export type SearchSortDir = (typeof SEARCH_SORT_DIRS)[number]
+export const DEFAULT_SEARCH_SORT: SearchSortKey = 'brand'
+export const DEFAULT_SEARCH_DIR: SearchSortDir = 'asc'
+
 export type TextFilterError = 'brandTooShort' | 'needsIndexable'
 
 /** `null` when the (trimmed) make/model pair is searchable; otherwise which rule it breaks. */

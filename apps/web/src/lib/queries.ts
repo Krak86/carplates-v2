@@ -461,6 +461,8 @@ export function vehicleSearchQuery(filters: VehicleSearchFilters) {
       filters.body,
       filters.region,
       filters.oper,
+      filters.sort,
+      filters.dir,
       filters.page,
       filters.pageSize
     ],

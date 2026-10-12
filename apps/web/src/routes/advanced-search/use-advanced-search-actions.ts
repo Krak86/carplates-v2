@@ -3,8 +3,12 @@ import { useQuery } from '@tanstack/react-query'
 import type { UseQueryResult } from '@tanstack/react-query'
 import { useSearchParams } from 'react-router'
 import {
+  DEFAULT_SEARCH_DIR,
+  DEFAULT_SEARCH_SORT,
   MIN_INDEXABLE_LENGTH,
   REGION_NAMES,
+  SEARCH_SORT_DIRS,
+  SEARCH_SORT_KEYS,
   textFilterError,
   VEHICLE_COLORS,
   VEHICLE_FUELS,
@@ -17,6 +21,8 @@ import type {
   TextFilterError,
   ModelSuggestion,
   SearchResponse,
+  SearchSortDir,
+  SearchSortKey,
   VehicleColor,
   VehicleFuel,
   VehicleKind
@@ -105,6 +111,9 @@ type UseAdvancedSearchActions = {
   bodyTooShort: boolean
   page: number
   setPage: (page: number) => void
+  sort: SearchSortKey
+  dir: SearchSortDir
+  setSort: (sort: SearchSortKey, dir: SearchSortDir) => void
   pageSize: number
   /** The committed (URL) filters have something to search for. */
   hasAnyFilter: boolean
@@ -129,6 +138,9 @@ export function useAdvancedSearchActions(): UseAdvancedSearchActions {
   const [searchParams, setSearchParams] = useSearchParams()
   const applied = filtersFromParams(searchParams)
   const page = Math.max(1, Number(searchParams.get('page')) || 1)
+  // Sorting is applied straight to the URL (not drafted): it re-orders the committed result set.
+  const sort = parseEnumParam(SEARCH_SORT_KEYS, searchParams.get('sort')) || DEFAULT_SEARCH_SORT
+  const dir = parseEnumParam(SEARCH_SORT_DIRS, searchParams.get('dir')) || DEFAULT_SEARCH_DIR
   const [draft, setDraft] = useState<AdvancedSearchFilters>(() => filtersFromParams(searchParams))
 
   const debouncedBrand = useDebouncedValue(draft.brand.trim())
@@ -203,6 +215,8 @@ export function useAdvancedSearchActions(): UseAdvancedSearchActions {
       body: applied.body.trim() || undefined,
       region: applied.region || undefined,
       oper: applied.oper ? Number(applied.oper) : undefined,
+      sort,
+      dir,
       page,
       pageSize: PAGE_SIZE
     }),
@@ -224,7 +238,24 @@ export function useAdvancedSearchActions(): UseAdvancedSearchActions {
     for (const [key, value] of Object.entries(draft)) {
       if (value) next.set(key, value.trim())
     }
+    if (sort !== DEFAULT_SEARCH_SORT) next.set('sort', sort)
+    if (dir !== DEFAULT_SEARCH_DIR) next.set('dir', dir)
     setSearchParams(next, { replace: true })
+  }
+
+  function setSort(nextSort: SearchSortKey, nextDir: SearchSortDir): void {
+    setSearchParams(
+      prev => {
+        const params = new URLSearchParams(prev)
+        if (nextSort !== DEFAULT_SEARCH_SORT) params.set('sort', nextSort)
+        else params.delete('sort')
+        if (nextDir !== DEFAULT_SEARCH_DIR) params.set('dir', nextDir)
+        else params.delete('dir')
+        params.delete('page')
+        return params
+      },
+      { replace: true }
+    )
   }
 
   function setPage(nextPage: number): void {
@@ -254,6 +285,9 @@ export function useAdvancedSearchActions(): UseAdvancedSearchActions {
     bodyTooShort,
     page,
     setPage,
+    sort,
+    dir,
+    setSort,
     pageSize: PAGE_SIZE,
     hasAnyFilter,
     yearFromInvalid,

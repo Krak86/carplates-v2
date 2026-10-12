@@ -6,6 +6,7 @@ import {
   MIN_INDEXABLE_LENGTH,
   REGION_NAMES,
   regionName,
+  SEARCH_SORT_KEYS,
   VEHICLE_COLORS,
   VEHICLE_FUELS,
   VEHICLE_KINDS
@@ -72,6 +73,9 @@ export default function AdvancedSearchRoute(): ReactNode {
     bodyTooShort,
     page,
     setPage,
+    sort,
+    dir,
+    setSort,
     pageSize,
     hasAnyFilter,
     yearFromInvalid,
@@ -329,11 +333,37 @@ export default function AdvancedSearchRoute(): ReactNode {
 
       {hasAnyFilter && results.isSuccess && (
         <>
-          <p className="mb-2 inline-block rounded-lg bg-[var(--color-bg)]/85 px-3 py-1.5 text-sm text-[var(--color-muted)] backdrop-blur-sm">
-            {results.data.totalIsExact
-              ? t('advancedSearch.resultsCount', { count: results.data.total })
-              : t('advancedSearch.resultsCountAtLeast', { count: results.data.total })}
-          </p>
+          <div className="mb-2 flex flex-wrap items-center gap-2">
+            <p className="inline-block rounded-lg bg-[var(--color-bg)]/85 px-3 py-1.5 text-sm text-[var(--color-muted)] backdrop-blur-sm">
+              {results.data.totalIsExact
+                ? t('advancedSearch.resultsCount', { count: results.data.total })
+                : t('advancedSearch.resultsCountAtLeast', { count: results.data.total })}
+            </p>
+
+            <label className="inline-flex items-center gap-2 rounded-lg bg-[var(--color-bg)]/85 px-3 py-1 text-sm whitespace-nowrap text-[var(--color-muted)] backdrop-blur-sm">
+              {t('advancedSearch.sortBy')}
+              <select
+                value={sort}
+                onChange={e => setSort(e.target.value as typeof sort, dir)}
+                className={cn(inputClass, 'w-auto py-1')}
+              >
+                {SEARCH_SORT_KEYS.map(k => (
+                  <option key={k} value={k}>
+                    {t(`advancedSearch.sort.${k}`)}
+                  </option>
+                ))}
+              </select>
+              <button
+                type="button"
+                onClick={() => setSort(sort, dir === 'asc' ? 'desc' : 'asc')}
+                title={t(dir === 'asc' ? 'advancedSearch.sortAsc' : 'advancedSearch.sortDesc')}
+                aria-label={t(dir === 'asc' ? 'advancedSearch.sortAsc' : 'advancedSearch.sortDesc')}
+                className="rounded-lg border border-[var(--color-border)] px-2 py-1 hover:bg-[var(--color-surface)]"
+              >
+                {dir === 'asc' ? '↑' : '↓'}
+              </button>
+            </label>
+          </div>
 
           {results.data.results.length === 0 ? (
             <p className="inline-block rounded-lg bg-[var(--color-bg)]/85 px-3 py-1.5 text-[var(--color-muted)] backdrop-blur-sm">

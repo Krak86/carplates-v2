@@ -1,10 +1,14 @@
 import { Controller, Get, Inject, Query } from '@nestjs/common'
 import { ApiOkResponse, ApiQuery, ApiTags } from '@nestjs/swagger'
 import {
+  DEFAULT_SEARCH_DIR,
+  DEFAULT_SEARCH_SORT,
   MIN_BRAND_LENGTH,
   MIN_INDEXABLE_LENGTH,
   MIN_MODEL_LENGTH,
   REGION_NAMES,
+  SEARCH_SORT_DIRS,
+  SEARCH_SORT_KEYS,
   textFilterError,
   VEHICLE_COLORS,
   VEHICLE_FUELS,
@@ -60,6 +64,8 @@ const searchQuerySchema = z
       .min(1)
       .optional()
       .refine(v => v === undefined || REGION_NAMES.includes(v), { message: 'unknown region' }),
+    sort: z.enum(SEARCH_SORT_KEYS).default(DEFAULT_SEARCH_SORT),
+    dir: z.enum(SEARCH_SORT_DIRS).default(DEFAULT_SEARCH_DIR),
     page: z.coerce.number().int().min(1).default(1),
     pageSize: z.coerce.number().int().min(1).max(50).default(20)
   })
@@ -117,6 +123,8 @@ export class SearchController {
   @ApiQuery({ name: 'body', required: false })
   @ApiQuery({ name: 'region', required: false, enum: REGION_NAMES })
   @ApiQuery({ name: 'oper', required: false })
+  @ApiQuery({ name: 'sort', required: false, enum: SEARCH_SORT_KEYS })
+  @ApiQuery({ name: 'dir', required: false, enum: SEARCH_SORT_DIRS })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'pageSize', required: false })
   @ApiOkResponse({ type: SearchResponseDto })

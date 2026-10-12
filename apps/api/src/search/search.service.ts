@@ -5,6 +5,7 @@ import {
   mergeBodyStats,
   normalizeBody,
   platePrefixesForRegion,
+  regionName,
   sourceValueForKind,
   sourceValuesForColor
 } from '@carplates/shared'
@@ -14,6 +15,8 @@ import type {
   ModelSuggestionsResponse,
   OperSuggestionsResponse,
   SearchResponse,
+  SearchSortDir,
+  SearchSortKey,
   VehicleColor,
   VehicleFuel,
   VehicleKind
@@ -34,6 +37,8 @@ export type SearchFilters = {
   region?: string
   /** Latest operation code (current status), e.g. 215 = temporary state registration for a serviceman. */
   oper?: number
+  sort: SearchSortKey
+  dir: SearchSortDir
   page: number
   pageSize: number
 }
@@ -51,6 +56,24 @@ export type SearchFilters = {
  * the caller whether the fetched count is the real total or just "at least this many".
  */
 const SEARCH_COUNT_CAP = 10_000
+
+type SortableRow = {
+  plate: string
+  brand: string | null
+  model: string | null
+  makeYear: number | null
+  color: string | null
+  fuel: string | null
+  kind: string | null
+  body: string | null
+  operName: string | null
+}
+
+function sortValue(row: SortableRow, key: SearchSortKey): string | number | null {
+  if (key === 'region') return regionName(row.plate) ?? null
+  if (key === 'oper') return row.operName
+  return row[key]
+}
 
 @Injectable()
 export class SearchService {
@@ -169,18 +192,36 @@ export class SearchService {
         makeYear: currentRegistration.makeYear,
         color: currentRegistration.color,
         fuel: currentRegistration.fuel,
-        dReg: currentRegistration.dReg
+        dReg: currentRegistration.dReg,
+        // Sort-only columns, stripped from the response below.
+        kind: currentRegistration.kind,
+        body: currentRegistration.body,
+        operName: currentRegistration.operName
       })
       .from(currentRegistration)
       .where(where)
       .limit(SEARCH_COUNT_CAP)
 
-    matches.sort((a, b) => a.plate.localeCompare(b.plate))
+    // Nulls last in both directions; plate is the tiebreaker so paging stays stable.
+    const sign = filters.dir === 'desc' ? -1 : 1
+    matches.sort((a, b) => {
+      const av = sortValue(a, filters.sort)
+      const bv = sortValue(b, filters.sort)
+      if (av == null && bv != null) return 1
+      if (av != null && bv == null) return -1
+      if (av != null && bv != null && av !== bv) {
+        const cmp = typeof av === 'number' && typeof bv === 'number' ? av - bv : String(av).localeCompare(String(bv))
+        if (cmp !== 0) return cmp * sign
+      }
+      return a.plate.localeCompare(b.plate)
+    })
 
     const offset = (filters.page - 1) * filters.pageSize
     const total = matches.length
     return {
-      results: matches.slice(offset, offset + filters.pageSize),
+      results: matches
+        .slice(offset, offset + filters.pageSize)
+        .map(({ kind: _k, body: _b, operName: _o, ...row }) => row),
       total,
       totalIsExact: total < SEARCH_COUNT_CAP,
       page: filters.page,

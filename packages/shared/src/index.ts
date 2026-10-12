@@ -21,10 +21,16 @@ export {
   type PlateSeries
 } from './regions.js'
 export {
+  DEFAULT_SEARCH_DIR,
+  DEFAULT_SEARCH_SORT,
   MIN_BRAND_LENGTH,
   MIN_INDEXABLE_LENGTH,
   MIN_MODEL_LENGTH,
+  SEARCH_SORT_DIRS,
+  SEARCH_SORT_KEYS,
   textFilterError,
+  type SearchSortDir,
+  type SearchSortKey,
   type TextFilterError
 } from './searchFilters.js'
 export {
