@@ -3530,3 +3530,25 @@ Dry-run on 2 models (Lanos, Lancer): 8 kept each, 101 units each.
 - **Not done:** per-user tracker, Redis throttler store, Turnstile, Cloudflare — deploy-time items.
 - **Legal research** (cookies/consent, "All rights reserved" vs MIT, ads/paid-content risks per data source) saved in
   `docs/legal-and-monetization.md`. Key finding: PostHog defaults to cookie + localStorage persistence — decide before enabling telemetry in prod.
+
+## Wiki photo aliases for trucks + legacy VIN chip ✅ BUILT (2026-10-13)
+
+- **Trigger:** ВХ0449ІС (ГАЗ 5203, 1969) and ВС8907ТР (MAN TGS 28.320) had no hero photo although Wikipedia has the articles
+  (ГАЗ-52, MAN TGS). Cause: the registry stores factory indexes / weight codes that Commons and Wikipedia do not know, and the
+  default pre-warm skips non-passenger kinds.
+- **Aliases** (`packages/shared/src/wikiAliases.ts`, tests in `wikiAliases.test.ts`): ГАЗ 51/52/53/66/69/21/24/3307/3110, the 3302
+  family (33021, 330202, 3302-14 …) → Gazelle; ЗИЛ 130/131/157/4331/4334 (4333xx → 4331); ПАЗ 3203–3206 → 3205, 672; УАЗ 3741/3303/452д
+  → 452; MAN TGX/TGS/TGA/TGL/TGM → family article, `l 2000` / 6–10 t codes → L2000, `f 2000` / 19–35 t codes → F2000; Mercedes
+  `4xx/6xx/8xx d|cdi` → Vario, `310` / `312d-п18` → T1. Lead query is Cyrillic for Soviet models (the uk edition holds the article; the
+  en edition often returns the plant instead and is rejected by the title guard). Not aliased: ЗИЛ-164 / 5301 (no article), KrAZ 250 /
+  65101 (search returns the generic KrAZ article, rejected by the guard — needs a different query). MAN numeric codes 8.xxx → L2000 and
+  19/26/… → F2000 are an inference from weight classes, not verified; 14.xxx / 18.xxx left unmapped.
+- **Re-scrape** (`pnpm ingest:wiki-images --aliased --all-kinds --min-cars 1 --brand X --rps 1`, one brand at a time; stale
+  `not_found` rows were deleted first, unnecessary — `--aliased` retries non-`ok` rows itself): ГАЗ 198 photos / 201 none, ЗИЛ 208 / 159,
+  ПАЗ 53 / 5, УАЗ 48 / 48, Mercedes-Benz 226 / 533 (whole brand is scanned), MAN 927 / 326. `--retry-failed` needs `--all-kinds` for trucks.
+  Seed CSV re-exported: 124,316 rows after the first batch, 131,243 after MAN (2,567 KB).
+- **Legacy VIN chip:** a registry `vin` that is not a 17-char ISO 3779 VIN (pre-1981 / Soviet chassis numbers like `382590`) is shown
+  as plain text with an "old-style number" chip and tooltip (`result.vinLegacy*`, ua/ru/en) in `ResultCard.tsx`; it is not a link, and
+  the VIN decode section, NHTSA request and VIN registry history query are skipped for it. Not checked: Copy-all-info / report export
+  still pass the short value as `vin`; whether `/api/vin/…` rejects non-17-char input.
+- **Workflow rule:** after any change to `registry.wiki_image`, re-run `pnpm export:wiki-images:csv` (added to `CLAUDE.md`).
