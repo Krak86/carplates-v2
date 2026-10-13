@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import type { Registration } from '@carplates/shared'
 
+import CopyButton from '@/components/CopyButton'
 import InfoPopover from '@/components/InfoPopover'
 import { cn } from '@/lib/cn'
 import { depMapsUrl } from '@/lib/maps'
@@ -106,6 +107,20 @@ export default function RegistrationTimeline({ actions, currentPlate, currentVeh
               {isDifferentVehicle && vehicleLabel && (
                 <div className="mt-0.5 text-sm font-medium">
                   {vehicleLabel} {action.makeYear ? `(${action.makeYear})` : ''}
+                </div>
+              )}
+
+              {isDifferentVehicle && action.vin && (
+                <div className="mt-0.5 flex items-center gap-1.5 text-sm">
+                  <Link
+                    viewTransition
+                    to={`/${action.vin}`}
+                    className="font-mono text-[var(--color-primary)] underline"
+                  >
+                    {action.vin}
+                  </Link>
+                  <span className="text-[var(--color-muted)]">({t('field.vin')})</span>
+                  <CopyButton text={action.vin} label={t('field.vin')} />
                 </div>
               )}
 
