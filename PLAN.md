@@ -889,6 +889,28 @@ Cheapest sensible path: a 2 vCPU / 8 GB box with a 160 GB disk (or a small root 
 `PGDATA` and backups, which can be grown later without migrating). Resize CPU/RAM later from observed load — not an architectural
 commitment. Keep backups on a separate volume/off-box so they don't compete with PGDATA for space.
 
+**Provider shortlist (checked 2026-10-13, prices ex-VAT/promo, verify at purchase):**
+
+- **Contabo Cloud VPS 6** (6 vCPU / 12 GB / 200 GB SSD _or_ 100 GB NVMe, ~€7.20/mo for the first 24 months, list €9) — current
+  pick. Choose the NVMe variant if backups go off-box, otherwise 200 GB SSD (or buy extra storage). Pick the EU (Germany)
+  datacenter. Renewal price after 24 months is higher; shared/noisy disk, so **off-box backups are mandatory**, not Contabo's
+  snapshots alone.
+- Hetzner (4 vCPU / 8 GB + attached volume, ~€12–20/mo, NVMe) — the more reliable fallback.
+- Ukrainian host kVPS90 (4 vCPU / 8 GB / 90 GB SSD, ~1618 UAH/mo yearly) — only if UAH payment / UA hosting is required; ~5×
+  the price and capped at 100 GB disk.
+
+**Static IP + DNS (required):** the VPS must have a **static public IPv4** (and IPv6 if offered) — all providers above give one by
+default; do not use a NAT/shared or ephemeral address. `carsua.app` is registered at **Squarespace**, so in Squarespace Domains →
+DNS settings point the domain at the VPS:
+
+- `A` record: `@` → VPS IPv4 (and `AAAA` `@` → IPv6 if used);
+- `CNAME` (or `A`) for `www` → `carsua.app` / the same IP;
+- keep Squarespace's default MX/TXT records if email is used; drop any Squarespace-site `A`/`CNAME` records that would conflict.
+- Set a low TTL (300 s) before cutover, raise it after it's stable. Caddy then obtains the Let's Encrypt cert automatically once DNS
+  resolves to the box (ports 80/443 TCP + 443 UDP open for HTTP/3); also set the provider's **reverse DNS (PTR)** to `carsua.app`.
+- Alternative: move DNS to Cloudflare (change nameservers at Squarespace) for CDN/edge caching and DDoS cover — the "short-TTL edge
+  cache" item below depends on this; decide before launch.
+
 - ✅ Load-performance pass done 2026-10-09 (lazy sections, per-language i18n, chunk groups — `docs/plan-done.md` "Load-performance pass").
   **Remaining load-performance actions (value order; context in "Load-performance pass"):**
   1. [ ] Measure for real — Lighthouse + DevTools trace on the VPS behind Caddy (Fast 4G, 4× CPU); LCP/CLS before vs after were never measured.
