@@ -43,7 +43,7 @@ export default function Sidebar(): ReactNode {
     )
 
   return (
-    <nav className="flex h-full w-64 flex-col gap-1 border-r border-[var(--color-border)] bg-[var(--color-bg)]/50 p-3 backdrop-blur-md">
+    <nav className="flex h-full w-full flex-col gap-1 border-r border-[var(--color-border)] bg-[var(--color-bg)]/50 p-3 backdrop-blur-md">
       {/* Mobile only: the header hides these below md. The row is the popovers' positioning context. */}
       <div className="relative mb-1 flex gap-2 md:hidden">
         <LayersButton inSidebar />

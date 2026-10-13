@@ -132,13 +132,13 @@ export default function Layout({ children }: Props): ReactNode {
             />
             <div
               className={cn(
-                'fixed inset-y-0 top-14 left-0 z-20 w-64 overflow-x-hidden overflow-y-auto transition-transform duration-300 ease-in-out',
+                'fixed inset-y-0 top-14 left-0 z-20 w-72 max-w-[85vw] overflow-x-hidden overflow-y-auto transition-transform duration-300 ease-in-out',
                 open ? 'translate-x-0' : '-translate-x-full'
               )}
             >
               <LoadErrorBoundary compact>
-                <div className="w-64">
-                  <Suspense fallback={<div className="w-64 border-r border-[var(--color-border)]" />}>
+                <div className="w-full">
+                  <Suspense fallback={<div className="w-full border-r border-[var(--color-border)]" />}>
                     <Sidebar />
                   </Suspense>
                 </div>

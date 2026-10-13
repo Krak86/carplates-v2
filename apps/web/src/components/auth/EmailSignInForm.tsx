@@ -34,7 +34,7 @@ export default function EmailSignInForm(): ReactNode {
 
   if (flow.challenge) {
     return (
-      <form onSubmit={flow.handleCodeSubmit} className="mt-3 w-64">
+      <form onSubmit={flow.handleCodeSubmit} className="mt-3 w-64 max-w-full">
         <p className="mb-2 text-sm">{t('auth.email.sent', { email: flow.email })}</p>
         <label className="sr-only" htmlFor="email-code">
           {t('auth.email.codeLabel')}
@@ -79,7 +79,7 @@ export default function EmailSignInForm(): ReactNode {
   }
 
   return (
-    <form onSubmit={flow.handleSendSubmit} className="mt-3 w-64">
+    <form onSubmit={flow.handleSendSubmit} className="mt-3 w-64 max-w-full">
       <div className="mb-3 flex items-center gap-2 text-xs text-[var(--color-muted)]">
         <span className="h-px flex-1 bg-[var(--color-border)]" />
         {t('auth.email.or')}
