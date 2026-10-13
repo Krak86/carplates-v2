@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "tunnel": "tsx src/tunnel.ts",
     "seed": "tsx src/seed.ts",
     "refresh-stats": "tsx src/refresh-stats.ts",
     "ingest": "tsx src/ingest.ts",

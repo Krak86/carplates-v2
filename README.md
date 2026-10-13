@@ -168,6 +168,18 @@ built web app through the API, not with `pnpm dev` — `pnpm preview:prod` build
 IndexedDB (200 plates / 200 VINs, 30 days; favorites never expire) and are
 marked out of date via `GET /api/stats/version` after a re-ingest.
 
+## Testing through a Cloudflare tunnel
+
+`pnpm tunnel` does it all: `db:up` + `db:migrate`, `pnpm build`, a `cloudflared` quick tunnel, the API serving the built SPA with
+`PUBLIC_SITE_URL` set to the tunnel URL (and `TRUST_PROXY=true`), smoke checks through the public URL, then prints the manual steps
+for _that_ URL. Needs [`cloudflared`](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/)
+(`winget install --id Cloudflare.cloudflared`) and a free port 3000 (stop `pnpm dev`). Flags: `--skip-build`, `--no-db`, `--port`,
+`--hostname dev.example.com` (named tunnel with a stable URL; needs `CLOUDFLARE_TUNNEL_TOKEN`).
+
+Manual afterwards (a quick-tunnel URL changes every run): add the URL to the Google OAuth client's **Authorized JavaScript origins**
+(Cloud Console → Credentials), BotFather `/setdomain` → the tunnel host (one domain per bot — restore the real one after), and the
+host to the Turnstile widget's hostnames.
+
 ## Workspace
 
 | Package           |                                                                                                                                                                                                                                                                                                                                                                                                                             |
