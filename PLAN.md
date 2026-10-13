@@ -609,6 +609,7 @@ Canada** recalls (OGL-Canada, low priority), **Open EV Data** (MIT; "Electric" b
 Recalls are model-level and market-labelled, never "your car has a recall"; this revisits the 2026-09-24 park in "Phase 3+ —
 recalls" above (open owner call: NHTSA recalls or RDW/EU only). **Skipped:** Eurostat (country totals only), ANCAP / Latin NCAP /
 ASEAN NCAP (no licence/permission), Kaggle sets, DVSA recalls API. Wikidata deferred. data.gov.ua is a separate session.
+**Stage J (other countries' open data: KBA, DataVic, MLIT, Korea) — ⏸ skipped for now (owner, 2026-10-13);** short licence re-check and findings in `DATASETS_PLAN.md` "Stage J".
 
 ### Car dimensions (automobiledimension.com) — **waiting for the owner's permission (asked 2026-10-07)**
 
