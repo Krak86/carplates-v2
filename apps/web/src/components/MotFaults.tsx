@@ -110,7 +110,8 @@ export default function MotFaults({ brand, model, year, kind, fuel }: Props): Re
       ]
         .filter(Boolean)
         .join('\n')
-    : ''
+    : // No data yet (collapsed, loading or no UK match): the "?" still explains what the section is.
+      [t('mot.what.body'), t('mot.what.uk')].join('\n')
 
   return (
     <div ref={sectionRef} className="mt-3 border-t border-[var(--color-border)] pt-3">
@@ -122,11 +123,9 @@ export default function MotFaults({ brand, model, year, kind, fuel }: Props): Re
           </>
         }
         info={
-          match && (
-            <InfoPopover label={t('vin.info.about', { field: t('mot.title') })} title={t('mot.title')}>
-              <InfoText text={info} highlight={[name, 'MOT', 'DVSA']} />
-            </InfoPopover>
-          )
+          <InfoPopover label={t('vin.info.about', { field: t('mot.title') })} title={t('mot.title')}>
+            <InfoText text={info} highlight={[name, 'MOT', 'DVSA'].filter(Boolean)} />
+          </InfoPopover>
         }
         actions={<ShareButton section="faults" label={t('share.button', { section: t('mot.title') })} />}
         open={open}

@@ -98,7 +98,8 @@ export default function RdwRecalls({ brand, model, year, kind }: Props): ReactNo
       ]
         .filter(Boolean)
         .join('\n')
-    : ''
+    : // Data loads only once the section is opened: until then the "?" explains what a recall campaign is.
+      [t('recalls.what.body'), t('recalls.what.ukraine')].join('\n')
 
   return (
     <div ref={sectionRef} className="mt-3 border-t border-[var(--color-border)] pt-3">
@@ -110,11 +111,9 @@ export default function RdwRecalls({ brand, model, year, kind }: Props): ReactNo
           </>
         }
         info={
-          hasAny && (
-            <InfoPopover label={t('vin.info.about', { field: t('recalls.title') })} title={t('recalls.title')}>
-              <InfoText text={info} highlight={[name, 'RDW', 'NHTSA', 'Transport Canada']} />
-            </InfoPopover>
-          )
+          <InfoPopover label={t('vin.info.about', { field: t('recalls.title') })} title={t('recalls.title')}>
+            <InfoText text={info} highlight={[name, 'RDW', 'NHTSA', 'Transport Canada'].filter(Boolean)} />
+          </InfoPopover>
         }
         actions={<ShareButton section="recalls" label={t('share.button', { section: t('recalls.title') })} />}
         open={open}

@@ -70,7 +70,8 @@ export default function OpenEv({ brand, model, year, fuel }: Props): ReactNode {
       ]
         .filter(Boolean)
         .join('\n')
-    : ''
+    : // No data yet (collapsed, loading or no match): the "?" still explains what the section is.
+      [t('ev.info.model'), t('ev.info.old'), t('ev.info.credit')].join('\n')
 
   return (
     <div ref={sectionRef} className="mt-3 border-t border-[var(--color-border)] pt-3">
@@ -82,11 +83,9 @@ export default function OpenEv({ brand, model, year, fuel }: Props): ReactNode {
           </>
         }
         info={
-          match && (
-            <InfoPopover label={t('vin.info.about', { field: t('ev.title') })} title={t('ev.title')}>
-              <InfoText text={info} highlight={[name, 'Open EV Data']} />
-            </InfoPopover>
-          )
+          <InfoPopover label={t('vin.info.about', { field: t('ev.title') })} title={t('ev.title')}>
+            <InfoText text={info} highlight={[name, 'Open EV Data'].filter(Boolean)} />
+          </InfoPopover>
         }
         actions={<ShareButton section="electric" label={t('share.button', { section: t('ev.title') })} />}
         open={open}
