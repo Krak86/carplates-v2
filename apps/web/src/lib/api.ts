@@ -67,6 +67,7 @@ import type {
   SettingsUpdateRequest,
   SyncRequest,
   SyncResponse,
+  TelegramSignInRequest,
   BodySuggestionsResponse,
   OperSuggestionsResponse,
   BrandSuggestionsResponse,
@@ -549,6 +550,11 @@ export async function getSession(): Promise<SessionResponse> {
 /** Exchanges the Google Identity Services credential (an ID token) for our own session cookie. */
 export async function signInWithGoogle(credential: string): Promise<SessionResponse> {
   return sessionResponseSchema.parse(await sendJson('POST', '/api/auth/google', { credential }))
+}
+
+/** Exchanges the Telegram Login Widget's signed user object for our own session cookie. */
+export async function signInWithTelegram(payload: TelegramSignInRequest): Promise<SessionResponse> {
+  return sessionResponseSchema.parse(await sendJson('POST', '/api/auth/telegram', payload))
 }
 
 export async function signOut(): Promise<SessionResponse> {

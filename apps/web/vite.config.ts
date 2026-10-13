@@ -93,6 +93,7 @@ export default defineConfig({
           // Sign-in and the paid-feature / admin pages need the API: Google's script, the session cookie and every
           // account call are online-only, so none of their lazy chunks are worth precaching.
           'assets/GoogleSignInButton-*.js',
+          'assets/TelegramSignInButton-*.js',
           'assets/AccountMenu-*.js',
           'assets/FeaturesRoute-*.js',
           'assets/SettingsRoute-*.js',

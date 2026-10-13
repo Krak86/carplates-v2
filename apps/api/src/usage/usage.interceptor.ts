@@ -15,7 +15,8 @@ const ROUTE_KINDS: Record<string, UsageKind> = {
   'POST /api/recognize/plate/local': 'photo_search',
   'POST /api/recognize/plate/cloud': 'photo_search',
   'POST /api/recognize/vin': 'photo_search',
-  'POST /api/auth/google': 'login'
+  'POST /api/auth/google': 'login',
+  'POST /api/auth/telegram': 'login'
 }
 
 /** `uk-UA,ru;q=0.8` → `ua`; only the three UI languages are kept apart, anything else is `other`. */

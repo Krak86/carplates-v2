@@ -202,6 +202,12 @@ lookups and sign-ins into `app.usage_events` (kind, UI language, found, has-cook
 `POSTHOG_PERSONAL_API_KEY` + `POSTHOG_PROJECT_ID`, optional `POSTHOG_API_HOST`, `SENTRY_ORG_SLUG` for the link). Add a new counted
 route in `ROUTE_KINDS` + `USAGE_KINDS` (`account.ts`) + the `admin.stats.kind.*` i18n keys.
 
+**Telegram login** (`auth/telegram-login.ts`, `POST /api/auth/telegram`, web `TelegramSignInButton` + `lib/telegram-login.ts`):
+Login Widget payload verified by HMAC (key = SHA256(bot token)), `auth_date` ≤ 24 h. Identity `('telegram', <numeric id>)` only —
+**`app.users.email` is nullable** (migration 0066), so `SessionUser.email` can be `null`; never assume it in UI/SQL. Telegram users are
+never merged into a Google account (no verified email to match on). Env: `TELEGRAM_BOT_TOKEN` (secret) + `TELEGRAM_BOT_USERNAME`;
+BotFather `/setdomain` needs https (use a tunnel locally). Both absent → `auth/config.telegramBotUsername` is `null`, button hidden.
+
 `GOOGLE_CLIENT_ID` is documented in `apps/api/.env.example`. `/features` is the feature opt-in route (no "paid" wording on the site;
 toggles hidden while `AVAILABLE_PAID_FEATURES` is empty); FEATURES_PLAN.md wants the same URL for the guide — see PLAN.md Phase 5.
 

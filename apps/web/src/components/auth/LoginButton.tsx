@@ -7,6 +7,7 @@ import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 
 // Google's script is only fetched once this popover opens (see lib/google-identity.ts).
 const GoogleSignInButton = lazy(() => import('@/components/auth/GoogleSignInButton'))
+const TelegramSignInButton = lazy(() => import('@/components/auth/TelegramSignInButton'))
 const AccountMenu = lazy(() => import('@/components/auth/AccountMenu'))
 
 /** Header trigger right of the layers button: a person icon when anonymous, the avatar / initial once signed in. Hidden offline. */
@@ -46,14 +47,14 @@ export default function LoginButton(): ReactNode {
         type="button"
         aria-label={label}
         aria-expanded={open}
-        title={user?.email ?? label}
+        title={user?.email ?? user?.name ?? label}
         onClick={() => setOpen(o => !o)}
         className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] shadow hover:bg-[var(--color-surface)]"
       >
         {user?.avatarUrl ? (
           <img src={user.avatarUrl} alt="" referrerPolicy="no-referrer" className="h-full w-full object-cover" />
         ) : user ? (
-          <span className="font-semibold">{(user.name ?? user.email).charAt(0).toUpperCase()}</span>
+          <span className="font-semibold">{(user.name ?? user.email ?? '?').charAt(0).toUpperCase()}</span>
         ) : (
           <svg
             aria-hidden
@@ -79,6 +80,7 @@ export default function LoginButton(): ReactNode {
             ) : (
               <div className="w-max max-w-[calc(100vw-2rem)] rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] p-3 shadow-lg">
                 <GoogleSignInButton />
+                <TelegramSignInButton />
               </div>
             )}
           </Suspense>

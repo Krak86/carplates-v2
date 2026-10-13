@@ -135,6 +135,8 @@ const SOURCES: readonly Source[] = [
     url: 'https://developers.google.com/identity',
     icon: '/icons/sources/googlesignin.webp'
   },
+  // No logo file yet: a plain tile in Telegram's blue until the brand guidelines are checked.
+  { key: 'telegram', label: 'Telegram Login', url: 'https://core.telegram.org/widgets/login', tile: 'bg-sky-500' },
   { key: 'posthog', label: 'PostHog', url: 'https://posthog.com', icon: '/icons/sources/posthog.webp' },
   { key: 'sentry', label: 'Sentry', url: 'https://sentry.io', icon: '/icons/sources/sentry.webp' }
 ]

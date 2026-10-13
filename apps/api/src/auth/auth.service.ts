@@ -2,7 +2,7 @@ import { Inject, Injectable, Logger, ServiceUnavailableException, UnauthorizedEx
 import { authIdentities, sessions, users } from '@carplates/db'
 import type { UserRow } from '@carplates/db'
 import { USER_ROLES } from '@carplates/shared'
-import type { SessionUser } from '@carplates/shared'
+import type { SessionUser, TelegramSignInRequest } from '@carplates/shared'
 import { and, eq, gt, lt, sql } from 'drizzle-orm'
 
 import { DbService } from '../db/db.service.js'
@@ -11,6 +11,8 @@ import { loadEnv } from '../env.js'
 import { GoogleIdTokenVerifier, InvalidIdTokenError } from './google-id-token.js'
 import type { GoogleIdentity } from './google-id-token.js'
 import { hashSessionToken, newSessionToken } from './session-cookie.js'
+import { InvalidTelegramLoginError, verifyTelegramLogin } from './telegram-login.js'
+import type { TelegramIdentity } from './telegram-login.js'
 
 const DAY_MS = 24 * 60 * 60 * 1000
 
@@ -39,6 +41,14 @@ export class AuthService {
     return this.env.GOOGLE_CLIENT_ID ?? null
   }
 
+  get telegramBotUsername(): string | null {
+    return this.telegramBotToken ? (this.env.TELEGRAM_BOT_USERNAME ?? null) : null
+  }
+
+  private get telegramBotToken(): string | null {
+    return this.env.TELEGRAM_BOT_TOKEN && this.env.TELEGRAM_BOT_USERNAME ? this.env.TELEGRAM_BOT_TOKEN : null
+  }
+
   get sessionTtlMs(): number {
     return this.env.SESSION_TTL_DAYS * DAY_MS
   }
@@ -56,6 +66,24 @@ export class AuthService {
       throw err
     }
     const user = await this.upsertGoogleUser(identity)
+    const token = await this.createSession(user.id, userAgent)
+    return { user: toSessionUser(user), token }
+  }
+
+  async signInWithTelegram(payload: TelegramSignInRequest, userAgent: string | undefined): Promise<SignInResult> {
+    const botToken = this.telegramBotToken
+    if (!botToken) throw new ServiceUnavailableException('Telegram sign-in is not configured')
+    let identity: TelegramIdentity
+    try {
+      identity = verifyTelegramLogin(payload, botToken)
+    } catch (err) {
+      if (err instanceof InvalidTelegramLoginError) {
+        this.logger.warn(err.message)
+        throw new UnauthorizedException('Invalid Telegram login')
+      }
+      throw err
+    }
+    const user = await this.upsertTelegramUser(identity)
     const token = await this.createSession(user.id, userAgent)
     return { user: toSessionUser(user), token }
   }
@@ -116,6 +144,28 @@ export class AuthService {
         .insert(authIdentities)
         .values({ provider: 'google', subject: identity.subject, userId: user.id, email: identity.email })
         .onConflictDoNothing()
+      return user
+    })
+  }
+
+  /** Linked strictly by Telegram id — there is no email to match on, so a Telegram login never merges into a Google account. */
+  private async upsertTelegramUser(identity: TelegramIdentity): Promise<UserRow> {
+    return this.dbService.db.transaction(async tx => {
+      const profile = { name: identity.name, avatarUrl: identity.picture, lastLoginAt: new Date() }
+      const [linked] = await tx
+        .select({ userId: authIdentities.userId })
+        .from(authIdentities)
+        .where(and(eq(authIdentities.provider, 'telegram'), eq(authIdentities.subject, identity.subject)))
+        .limit(1)
+
+      if (linked) {
+        const [user] = await tx.update(users).set(profile).where(eq(users.id, linked.userId)).returning()
+        if (user) return user
+      }
+
+      const [user] = await tx.insert(users).values(profile).returning()
+      if (!user) throw new Error('User insert returned no row')
+      await tx.insert(authIdentities).values({ provider: 'telegram', subject: identity.subject, userId: user.id })
       return user
     })
   }

@@ -13,8 +13,8 @@ import {
 } from '@nestjs/common'
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger'
 import { SkipThrottle, Throttle, ThrottlerGuard } from '@nestjs/throttler'
-import { googleSignInRequestSchema } from '@carplates/shared'
-import type { GoogleSignInRequest, SessionUser } from '@carplates/shared'
+import { googleSignInRequestSchema, telegramSignInRequestSchema } from '@carplates/shared'
+import type { GoogleSignInRequest, SessionUser, TelegramSignInRequest } from '@carplates/shared'
 import type { FastifyRequest } from 'fastify'
 
 import { zodParam } from '../common/zod-param.pipe.js'
@@ -35,7 +35,10 @@ export class AuthController {
   @Header('Cache-Control', 'public, max-age=300')
   @ApiOkResponse({ type: AuthConfigDto })
   config(): AuthConfigDto {
-    return { googleClientId: this.authService.googleClientId }
+    return {
+      googleClientId: this.authService.googleClientId,
+      telegramBotUsername: this.authService.telegramBotUsername
+    }
   }
 
   /** The current user, or `user: null` when anonymous / the session expired. */
@@ -58,6 +61,20 @@ export class AuthController {
     @Req() req: FastifyRequest
   ): Promise<WithSessionCookie<SessionDto>> {
     const { user, token } = await this.authService.signInWithGoogle(body.credential, req.headers['user-agent'])
+    return new WithSessionCookie({ user }, token)
+  }
+
+  /** Exchanges a signed Telegram Login Widget payload for our own session cookie. */
+  @Post('telegram')
+  @HttpCode(200)
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { ttl: 15 * 60_000, limit: 20 } })
+  @ApiOkResponse({ type: SessionDto })
+  async telegram(
+    @Body(zodParam(telegramSignInRequestSchema)) body: TelegramSignInRequest,
+    @Req() req: FastifyRequest
+  ): Promise<WithSessionCookie<SessionDto>> {
+    const { user, token } = await this.authService.signInWithTelegram(body, req.headers['user-agent'])
     return new WithSessionCookie({ user }, token)
   }
 

@@ -37,7 +37,7 @@ export default function AdminUsersTab(): ReactNode {
               {users.data.users.map(u => (
                 <tr key={u.id}>
                   <td className="p-3">
-                    <div className="font-medium">{u.email}</div>
+                    <div className="font-medium">{u.email ?? u.name ?? u.id}</div>
                     <div className="text-xs text-[var(--color-muted)]">
                       {u.name ?? '—'} · {u.role}
                     </div>

@@ -1194,7 +1194,8 @@ export const app = pgSchema('app')
 
 export const users = app.table('users', {
   id: uuid('id').primaryKey().defaultRandom(),
-  email: text('email').notNull(),
+  /** Null for Telegram-only accounts (the widget gives no email). */
+  email: text('email'),
   name: text('name'),
   avatarUrl: text('avatar_url'),
   role: text('role').notNull().default('user'),

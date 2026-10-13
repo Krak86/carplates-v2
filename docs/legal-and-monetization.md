@@ -6,7 +6,11 @@ launching ads or paid features. The project-specific findings are the useful par
 ## Cookie / consent
 
 - Today the app sets **no advertising or tracking cookies**. Own state (history, favorites, language, theme, offline data) is
-  `localStorage`; the Google-login session cookie is strictly necessary. Both are exempt from consent in the EU.
+  `localStorage`; the login session cookie (`carsua_sid`, Google or Telegram) is strictly necessary. Both are exempt from consent in the EU.
+- **Login providers = personal data**: Google → email, name, avatar URL; Telegram → numeric id, name, avatar URL (no email/phone).
+  Both are listed in the privacy policy (`legal.privacy.account.*`) and on `/about` sources. Telegram's widget loads
+  `telegram.org/js/telegram-widget.js` only when the sign-in popover opens (third-party request → mention in the policy, keep it lazy).
+  Adding a provider = update that policy paragraph (ua/ru/en) + an About source entry.
 - Ukraine has no cookie-consent law in force (check: the GDPR-style personal-data bill's status). But `ru`/`en` UI languages attract
   EU/UK visitors, so ePrivacy/GDPR may apply to them.
 - **PostHog** (`apps/web/src/lib/telemetry.ts`) does not set `persistence`, so it defaults to cookie + localStorage. Before enabling

@@ -1,12 +1,13 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import type { SessionResponse } from '@carplates/shared'
+import type { SessionResponse, TelegramSignInRequest } from '@carplates/shared'
 
-import { deleteAccount, signInWithGoogle, signOut } from '@/lib/api'
+import { deleteAccount, signInWithGoogle, signInWithTelegram, signOut } from '@/lib/api'
 import { disableGoogleAutoSelect } from '@/lib/google-identity'
 import { adminUsersQuery, featuresQuery, sessionQuery } from '@/lib/queries'
 
 type UseAuthActions = {
   signIn: ReturnType<typeof useMutation<SessionResponse, Error, string>>
+  signInTelegram: ReturnType<typeof useMutation<SessionResponse, Error, TelegramSignInRequest>>
   signOut: ReturnType<typeof useMutation<SessionResponse, Error, void>>
   deleteAccount: ReturnType<typeof useMutation<SessionResponse, Error, void>>
 }
@@ -22,6 +23,8 @@ export function useAuthActions(): UseAuthActions {
   }
 
   const signIn = useMutation({ mutationFn: signInWithGoogle, onSuccess: setSession })
+
+  const signInTelegram = useMutation({ mutationFn: signInWithTelegram, onSuccess: setSession })
 
   const signOutMutation = useMutation({
     mutationFn: signOut,
@@ -39,5 +42,5 @@ export function useAuthActions(): UseAuthActions {
     }
   })
 
-  return { signIn, signOut: signOutMutation, deleteAccount: deleteAccountMutation }
+  return { signIn, signInTelegram, signOut: signOutMutation, deleteAccount: deleteAccountMutation }
 }

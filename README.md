@@ -133,11 +133,12 @@ Everything above (plate/VIN search) works with zero external keys. These
 features are optional add-ons, each gated on its own key in `apps/api/.env` —
 absent, the app runs fine and that one feature just answers "unavailable":
 
-| Feature                          | Env var                        | Get a free key at                                                             |
-| -------------------------------- | ------------------------------ | ----------------------------------------------------------------------------- |
-| Find a plate by photo/camera     | `PLATE_RECOGNIZER_CLOUD_TOKEN` | [platerecognizer.com](https://platerecognizer.com)                            |
-| "What it might look like" photos | `PIXABAY_API_KEY`              | [pixabay.com/api/docs](https://pixabay.com/api/docs/)                         |
-| Sign in with Google              | `GOOGLE_CLIENT_ID`             | [console.cloud.google.com](https://console.cloud.google.com/apis/credentials) |
+| Feature                          | Env var                                        | Get a free key at                                                               |
+| -------------------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------- |
+| Find a plate by photo/camera     | `PLATE_RECOGNIZER_CLOUD_TOKEN`                 | [platerecognizer.com](https://platerecognizer.com)                              |
+| "What it might look like" photos | `PIXABAY_API_KEY`                              | [pixabay.com/api/docs](https://pixabay.com/api/docs/)                           |
+| Sign in with Google              | `GOOGLE_CLIENT_ID`                             | [console.cloud.google.com](https://console.cloud.google.com/apis/credentials)   |
+| Sign in with Telegram            | `TELEGRAM_BOT_TOKEN` + `TELEGRAM_BOT_USERNAME` | [@BotFather](https://t.me/BotFather) (`/newbot`, then `/setdomain`, https only) |
 
 Add whichever you want to `apps/api/.env` (see `apps/api/.env.example`), then
 restart `pnpm dev` — both are read once at process start, so editing `.env`

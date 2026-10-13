@@ -33,15 +33,15 @@ thousands of near-duplicates. That is exactly what Google's doorway / scaled-con
 
 **3. Partial canonicalisers already exist and should be reused, not reinvented:**
 
-| Helper | Location | What it does |
-|---|---|---|
-| `brandSlug` / `makeKey` | `brandLogo.ts`, `vehicleKey.ts` | Brand to a Latin key |
-| `brandCandidateKey` | `vehicleKey.ts:68` | BMW 320D to 3series, Mercedes E 200 to eclass, Mazda 3 to mazda3 |
-| `modelFamily` | `modelFamily.ts` | Folds ZAZ / Daewoo / Chevrolet Lanos |
-| `wikiSearchName` | `wikiAliases.ts` | ВАЗ / ГАЗ / КРАЗ / MAN factory codes to the model name |
-| `vdbCandidateKeys` / `matchVdbModel` | `vdbMatch.ts` | Matching against 14k VehiclesDB models |
-| Trim-prefix folding | `scripts/src/mot-fold.ts` | Longest whole-word prefix that is a real model (`SPRINTER 316 CDI` to `sprinter`) |
-| `model_generations` | DB table | 480 models / 1,213 generations, which gives a natural middle layer |
+| Helper                               | Location                        | What it does                                                                      |
+| ------------------------------------ | ------------------------------- | --------------------------------------------------------------------------------- |
+| `brandSlug` / `makeKey`              | `brandLogo.ts`, `vehicleKey.ts` | Brand to a Latin key                                                              |
+| `brandCandidateKey`                  | `vehicleKey.ts:68`              | BMW 320D to 3series, Mercedes E 200 to eclass, Mazda 3 to mazda3                  |
+| `modelFamily`                        | `modelFamily.ts`                | Folds ZAZ / Daewoo / Chevrolet Lanos                                              |
+| `wikiSearchName`                     | `wikiAliases.ts`                | ВАЗ / ГАЗ / КРАЗ / MAN factory codes to the model name                            |
+| `vdbCandidateKeys` / `matchVdbModel` | `vdbMatch.ts`                   | Matching against 14k VehiclesDB models                                            |
+| Trim-prefix folding                  | `scripts/src/mot-fold.ts`       | Longest whole-word prefix that is a real model (`SPRINTER 316 CDI` to `sprinter`) |
+| `model_generations`                  | DB table                        | 480 models / 1,213 generations, which gives a natural middle layer                |
 
 **4. Speed: yes, precompute, but use a TS-built table, not a SQL matview.** A live `GROUP BY` over 16.7M rows takes
 seconds. The canonical mapping logic lives in TS (`@carplates/shared`), so it cannot sit inside a matview definition. The
@@ -70,6 +70,7 @@ Slugs are Latin kebab-case: `vaz`, `zaz`, `mercedes-benz`, `3-series`, `lanos`, 
 ## Plan
 
 ### Step 1: Canonical model mapping (the taxonomy)
+
 - New shared module `packages/shared/src/catalogKey.ts` with `catalogSlugs(brand, model) → { make, model, how } | null`.
   It composes, in order: `brandSlug`, the `wikiSearchName` factory-code rules, `modelFamily`, `brandCandidateKey`
   (BMW/Mercedes series), then MOT-style whole-word prefix folding against a known model list (VehiclesDB `make_key/model_key`
@@ -77,19 +78,21 @@ Slugs are Latin kebab-case: `vaz`, `zaz`, `mercedes-benz`, `3-series`, `lanos`, 
 - Migration `NNNN_catalog.sql`:
   - `registry.catalog_alias (brand, model) → make_slug, model_slug, how`, built from `stats_by_model` (78k rows, cheap).
   - `registry.catalog_model (make_slug, model_slug, make_name, model_name, n, year_min, year_max, top_raw_brand,
-    top_raw_model, kind_group, indexable)`.
+top_raw_model, kind_group, indexable)`.
   - `registry.catalog_make`.
 - Script `scripts/src/catalog-build.ts` (`pnpm db:refresh-catalog`), added to `db:refresh-derived`.
 - Manual overrides in a committed `scripts/src/catalog-overrides.csv`, same idea as `generations-titles.csv`.
 
 ### Step 2: Rollup per make/model/year
+
 - `registry.catalog_year_stats (make_slug, model_slug, make_year, n, fuel_mix jsonb, body_mix, color_top, region_top,
-  capacity_p50, power_p50, imported_share, first_reg_by_year jsonb, owners_p50)`.
+capacity_p50, power_p50, imported_share, first_reg_by_year jsonb, owners_p50)`.
 - It is filled by one SQL pass that joins `current_registration` to `catalog_alias`, run from the same script. The API only
   ever reads by primary key.
 - `indexable` = at least `CATALOG_MIN_CARS` (start at 200) for a year page, or at least 1,000 for a model page.
 
 ### Step 3: API
+
 - `apps/api/src/catalog/` with these endpoints:
   - `GET /api/catalog/makes`
   - `GET /api/catalog/:make` (models)
@@ -99,6 +102,7 @@ Slugs are Latin kebab-case: `vaz`, `zaz`, `mercedes-benz`, `3-series`, `lanos`, 
   is applied since these are enumerable lookups.
 
 ### Step 4: Web
+
 - Routes `/cars`, `/cars/:make`, `/cars/:make/:model` and `/cars/:make/:model/:year`, declared in `App.tsx` before `/:query`.
 - New `components/catalog/ModelYearCard.tsx`:
   - Header with logo, name, year, `GenerationChip`, `VdbChips` and `EstimatedValueChip`.
@@ -112,6 +116,7 @@ Slugs are Latin kebab-case: `vaz`, `zaz`, `mercedes-benz`, `3-series`, `lanos`, 
   - Model page → year chips and sibling models.
 
 ### Step 5: SEO plumbing
+
 - `spa.controller.ts` `metaFor`: add a `/cars/...` branch. It writes a per-page title and description (counts, years) in
   ua/ru/en, a canonical URL, and `noindex` when `!indexable`.
 - Add JSON-LD `Car`/`ProductModel` and hreflang alternates for `?lang=`.
@@ -119,10 +124,12 @@ Slugs are Latin kebab-case: `vaz`, `zaz`, `mercedes-benz`, `3-series`, `lanos`, 
 - `STATIC_PAGES` gets `/cars` only. The dynamic pages get their text from the catalog table.
 
 ### Step 6: Docs
+
 - `features-reference.md` gets a "Model catalog" section.
 - Write-up in `plan-done.md`; seed CSV via `export:catalog:csv` for the overrides output, if needed.
 
 ## Rollout order
+
 1. Steps 1-2, then check the folding quality with SQL. For example, the top 300 models should look like a real model list
    and not trims.
 2. API and web for model-year pages.
@@ -130,6 +137,7 @@ Slugs are Latin kebab-case: `vaz`, `zaz`, `mercedes-benz`, `3-series`, `lanos`, 
 4. Sitemap: submit gradually and watch Search Console indexing before raising the page count.
 
 ## Verification
+
 - `pnpm test` covers `catalogKey.test.ts`, with BMW, Mercedes, Sprinter, ВАЗ / ЗАЗ / Lanos, Cee'd and Mazda cases.
 - `pnpm db:refresh-catalog`, then `SELECT` the top models per make and spot-check for leftover trims.
 - `pnpm dev`, then open `/cars/bmw/x5/2015`. Sections load, there are no plate fields, and the network shows only catalog

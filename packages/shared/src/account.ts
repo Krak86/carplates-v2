@@ -15,7 +15,8 @@ export type UserRole = (typeof USER_ROLES)[number]
 
 export const sessionUserSchema = z.object({
   id: z.string(),
-  email: z.string(),
+  /** Null for Telegram-only accounts. */
+  email: z.string().nullable(),
   name: z.string().nullable(),
   avatarUrl: z.string().nullable(),
   role: z.enum(USER_ROLES),
@@ -27,13 +28,22 @@ export type SessionUser = z.infer<typeof sessionUserSchema>
 export const sessionResponseSchema = z.object({ user: sessionUserSchema.nullable() })
 export type SessionResponse = z.infer<typeof sessionResponseSchema>
 
-/** `googleClientId: null` = the API has no GOOGLE_CLIENT_ID, sign-in is unavailable. */
-export const authConfigResponseSchema = z.object({ googleClientId: z.string().nullable() })
+/** `googleClientId` / `telegramBotUsername: null` = the API lacks that provider's env, so its sign-in is unavailable. */
+export const authConfigResponseSchema = z.object({
+  googleClientId: z.string().nullable(),
+  telegramBotUsername: z.string().nullable()
+})
 export type AuthConfigResponse = z.infer<typeof authConfigResponseSchema>
 
 /** The ID token (JWT) Google Identity Services hands the page after the user picks an account. */
 export const googleSignInRequestSchema = z.object({ credential: z.string().min(20).max(4096) })
 export type GoogleSignInRequest = z.infer<typeof googleSignInRequestSchema>
+
+/** The Telegram Login Widget's signed user object, verbatim (every field is part of the signature). */
+export const telegramSignInRequestSchema = z
+  .record(z.string().max(64), z.union([z.string().max(1024), z.number()]))
+  .refine(r => Object.keys(r).length <= 12, 'too many fields')
+export type TelegramSignInRequest = z.infer<typeof telegramSignInRequestSchema>
 
 export const featureStateSchema = z.object({
   feature: z.enum(PAID_FEATURES),

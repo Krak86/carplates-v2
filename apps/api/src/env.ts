@@ -41,6 +41,11 @@ const envSchema = z.object({
   /** OAuth 2.0 Web client id from Google Cloud Console (Credentials). Absent → sign-in is unavailable
    *  (`GET /api/auth/config` answers `googleClientId: null`, `POST /api/auth/google` 503). Not a secret. */
   GOOGLE_CLIENT_ID: z.string().optional(),
+  /** Telegram Login Widget: bot token from @BotFather (**secret**, verifies the signature) + the bot's public username
+   *  (no `@`). Both needed, else Telegram sign-in is unavailable (`telegramBotUsername: null`, `POST /api/auth/telegram` 503).
+   *  The site domain must be set with BotFather `/setdomain` (https only — test through a tunnel). */
+  TELEGRAM_BOT_TOKEN: z.string().optional(),
+  TELEGRAM_BOT_USERNAME: z.string().optional(),
   /** Session cookie lifetime; each request in the second half of it extends the session again (sliding). */
   SESSION_TTL_DAYS: z.coerce.number().int().positive().default(30),
 

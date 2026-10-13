@@ -2894,6 +2894,20 @@ Phase 5's first slice; the open stages (pricing, backlog, profile page) stay in 
   user + session (401/403/400 paths, save, admin list, delete). A real Google sign-in has worked end to end (the owner's account exists with a login timestamp, later promoted to admin by SQL).
 - **Not done on purpose:** billing, real RIA/Platesmania/auction calls, cloud sync, email login, cookie-consent surface (the session cookie is strictly necessary).
 
+### Accounts — Telegram sign-in ✅ BUILT (2026-10-13)
+
+Second provider next to Google; same session machinery (`carsua_sid`, sliding `SESSION_TTL_DAYS`).
+
+- **Flow:** Telegram Login Widget (script injected only when the sign-in popover opens, `lib/telegram-login.ts`, global callback `carplatesTelegramAuth`) → signed user object → `POST /api/auth/telegram` (20 / 15 min, counted as `login`) →
+  `verifyTelegramLogin` (`apps/api/src/auth/telegram-login.ts`): HMAC-SHA256 keyed with SHA256(bot token) over the sorted `key=value` check string (all fields incl. unknown ones), `timingSafeEqual`, `auth_date` ≤ 24 h old / ≤ 60 s in the future.
+- **Identity:** `auth_identities ('telegram', <numeric id>)`, stable across renames. **No email, no phone** → migration `0066_users_email_nullable.sql` drops `NOT NULL` on `app.users.email` (unique index keeps NULLs distinct); `SessionUser.email` is `string | null`, UI falls back to name.
+  Telegram users are never merged into Google accounts (nothing verified to match on) — linking is the open "add email" item in PLAN.md.
+- **Config:** `TELEGRAM_BOT_TOKEN` (secret) + `TELEGRAM_BOT_USERNAME`; both needed, else `auth/config.telegramBotUsername` is `null` and the button is hidden / the route answers 503. BotFather `/setdomain` needs https →
+  local test through a tunnel (`cloudflared tunnel --url http://localhost:5173`; the free domain changes on every restart, so re-run `/setdomain`). `localhost` gives "Bot domain invalid".
+- **Web:** `TelegramSignInButton` (lazy, `globIgnores`d from the PWA precache) under the Google button in `LoginButton`; `useAuthActions().signInTelegram`.
+- **Legal/About:** privacy paragraph `legal.privacy.account.p` and the `about.source.telegram` entry (ua/ru/en) updated; `docs/legal-and-monetization.md` notes provider data.
+- **Tests:** `telegram-login.test.ts` (valid, extra signed fields, wrong token, tampered field, expired/future, malformed).
+
 ### Accounts, stage A+ — sync, settings, labels, admin statistics ✅ BUILT (2026-10-07)
 
 Five commits on top of stage A; open items stay in PLAN.md "Phase 5 → Stage C".

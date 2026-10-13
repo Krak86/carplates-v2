@@ -24,14 +24,14 @@ export default function AccountMenu({ user, onNavigate }: Props): ReactNode {
     <div className="w-64 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] p-2 shadow-lg">
       <div className="px-3 py-2">
         <div className="flex items-center gap-2">
-          <span className="truncate font-medium">{user.name ?? user.email}</span>
+          <span className="truncate font-medium">{user.name ?? user.email ?? t('auth.menu')}</span>
           {user.role === 'admin' && (
             <span className="shrink-0 rounded-full bg-primary/15 px-2 py-0.5 text-xs text-[var(--color-primary)]">
               {t('auth.admin')}
             </span>
           )}
         </div>
-        {user.name && <div className="truncate text-xs text-[var(--color-muted)]">{user.email}</div>}
+        {user.name && user.email && <div className="truncate text-xs text-[var(--color-muted)]">{user.email}</div>}
       </div>
 
       <div className="my-1 border-t border-[var(--color-border)]" />
@@ -69,7 +69,7 @@ export default function AccountMenu({ user, onNavigate }: Props): ReactNode {
 
       {confirmingDelete && (
         <DeleteAccountDialog
-          email={user.email}
+          email={user.email ?? user.name ?? ''}
           pending={deleteAccount.isPending}
           failed={deleteAccount.isError}
           onConfirm={() => deleteAccount.mutate(undefined, { onSuccess: onNavigate })}
