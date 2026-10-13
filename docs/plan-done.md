@@ -3610,3 +3610,5 @@ Smaller items shipped the same day as email sign-in and the truck aliases (above
 - **Telegram login** (`e2d6a2b`) and **sign-in guide** (`58efa3f`, `docs/logins.md`); **security audit + pre-deploy checklist** (`2c9efea`, `docs/security-checklist.md`).
 - **Seed CSVs** (`94f71f8`): news items, social posts and recall translations are exported/loaded like the other scraped tables (`export:news:csv`, `export:social:csv`).
 - **AUTO.RIA link fix** (`c92a721`): Cee'd no longer 404s; "In stock" also links RST/OLX searches. **Catalog pages** `/cars/:make/:model/:year` planned in `docs/catalog-plan.md`.
+
+2026-10-14: the 8 auction link-out sites (Bidfax, Bid.cars, Poctra, Copart, IAA, Stat.vin, OPENLANE, Encar) added to About sources as logo-less tiles. Their terms pages were mostly unreachable (403/404); the reachable ones (Stat.vin, Encar) say nothing about logo reuse, so no logos until permission or brand guidelines are found. Stat.vin states it is not affiliated with Copart/IAAI.

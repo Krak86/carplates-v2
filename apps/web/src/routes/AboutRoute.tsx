@@ -54,6 +54,15 @@ const SOURCES: readonly Source[] = [
     icon: '/icons/sources/belastingdienst.webp'
   },
   { key: 'infocar', label: 'infocar.ua', url: 'https://www.infocar.ua', icon: '/icons/infocar.png' },
+  // Auction link-outs (AuctionCheck): no logos — commercial marks, no licence found in their terms; plain tiles only.
+  { key: 'bidfax', label: 'Bidfax', url: 'https://bidfax.info', tile: 'bg-slate-500' },
+  { key: 'bidcars', label: 'Bid.cars', url: 'https://bid.cars', tile: 'bg-slate-500' },
+  { key: 'poctra', label: 'Poctra', url: 'https://poctra.com', tile: 'bg-slate-500' },
+  { key: 'copart', label: 'Copart', url: 'https://www.copart.com', tile: 'bg-slate-500' },
+  { key: 'iaai', label: 'IAA', url: 'https://www.iaai.com', tile: 'bg-slate-500' },
+  { key: 'statvin', label: 'Stat.vin', url: 'https://stat.vin', tile: 'bg-slate-500' },
+  { key: 'openlane', label: 'OPENLANE Europe', url: 'https://www.openlane.eu', tile: 'bg-slate-500' },
+  { key: 'encar', label: 'Encar', url: 'https://www.encar.com', tile: 'bg-slate-500' },
   { key: 'hondaUa', label: 'honda.ua', url: 'https://www.honda.ua', icon: '/icons/sources/honda.webp' },
   { key: 'itc', label: 'ITC.ua', url: 'https://itc.ua/ua/tag/test-drayv-ua/', icon: '/icons/itc.webp' },
   { key: 'mezha', label: 'Mezha', url: 'https://mezha.ua/tag/test-drayv/', icon: '/icons/mezha.webp' },
@@ -135,8 +144,12 @@ const SOURCES: readonly Source[] = [
     url: 'https://developers.google.com/identity',
     icon: '/icons/sources/googlesignin.webp'
   },
-  // No logo file yet: a plain tile in Telegram's blue until the brand guidelines are checked.
-  { key: 'telegram', label: 'Telegram Login', url: 'https://core.telegram.org/widgets/login', tile: 'bg-sky-500' },
+  {
+    key: 'telegram',
+    label: 'Telegram Login',
+    url: 'https://core.telegram.org/widgets/login',
+    icon: '/icons/sources/telegram.webp'
+  },
   { key: 'posthog', label: 'PostHog', url: 'https://posthog.com', icon: '/icons/sources/posthog.webp' },
   { key: 'sentry', label: 'Sentry', url: 'https://sentry.io', icon: '/icons/sources/sentry.webp' }
 ]
