@@ -67,11 +67,11 @@ pnpm ingest:topgear:csv   # load the committed TopGear CSV (71 KB gz) — second
 pnpm export:topgear:csv   # re-dump the table to that CSV — run after every real re-crawl
 pnpm ingest:news      # poll the RSS feeds listed in scripts/news-sources.json (edit that file to add/disable feeds; `onlyCategories`/`excludeUrls` filter
                        # whole-site feeds by category / link regex) -> registry.news_items, tagged brand/model/year from the headline, robots.txt-checked; idempotent,
-                       # run on demand or from a scheduler (every ~6 h; no CSV seed); --source id, --dry-run, --list. See PLAN.md "Step 2d"
+                       # run on demand or from a scheduler (every ~6 h); --source id, --dry-run, --list. See PLAN.md "Step 2d"
 pnpm ingest:social    # brand + parent-group YouTube channel uploads from each channel's public RSS feed (no key, no quota, 54 channels = 50 makes + 4 groups, 1 req/s ≈ 1 min)
                        # -> registry.social_posts; channels are SOCIAL_CHANNELS in packages/shared/src/socialChannels.ts (shown in the "Videos" section of result cards, under the infocar model videos
                        # "Official channel" strip; GET /api/social?brand=; prints each feed's real channel title next to the configured name — a mismatch = wrong id);
-                       # --channel audi|group:gm, --dry-run, --list. No CSV seed; run daily like ingest:news
+                       # --channel audi|group:gm, --dry-run, --list. Run daily like ingest:news
 pnpm ingest:press     # itc.ua + mezha.ua "test drive" tag listings (Ukrainian listing paged until empty; each article's hreflang
                        # editions fetched too: itc uk+ru, mezha uk+en; ~310 articles, ~10 min cold, 1 req/s, robots-aware, HTML cached
                        # in scripts/.data/press/) -> registry.press_reviews (link + title + blurb per language; brand found in the
@@ -138,6 +138,11 @@ pnpm ingest:wikispecs:csv   # load the committed seed (seed-data/wikispecs.csv.g
 pnpm export:wikispecs:csv   # re-dump the table to that CSV — run after every real re-ingest
 pnpm ingest:ca-recalls:csv   # load the committed seed (seed-data/ca-recalls.csv.gz) — part of ingest:ratings:csv
 pnpm export:ca-recalls:csv   # re-dump both tables to that CSV — run after every real re-ingest
+pnpm ingest:news:csv  /  export:news:csv  # seed-data/news-items.csv.gz — feeds only hold the latest N items, so the accumulated history is worth keeping (part of ingest:ratings:csv)
+pnpm ingest:social:csv  /  export:social:csv  # seed-data/social-posts.csv.gz — same, for the channel feeds (part of ingest:ratings:csv)
+pnpm ingest:recall-texts:csv  /  export:recall-texts:csv  # seed-data/recall-texts.csv.gz — the NLLB translations of recall texts (GPU-hours to redo); load AFTER the recalls CSVs, last step of ingest:ratings:csv
+                       # Not seeded on purpose: missed_lookups (user telemetry), stats_* (db:refresh-derived), registrations (ingest:full), app.* (accounts)
+pnpm ingest:winner360:csv  /  export:winner360:csv  # seed-data/winner360.csv.gz — snapshot of the dealer stock for offline setup; a live ingest:winner360 replaces it (part of ingest:ratings:csv)
 pnpm ingest:rdw-recalls:translate   # local-model (NLLB, GPU) translation of recall texts -> rdw_recall_texts; resumable, --max-minutes N / --limit N --offset N / --make --model / --langs / --dump f.md. See DATASETS_PLAN "Stage D follow-up 2"
 pnpm db:refresh-vdb-stats   # rebuild registry.stats_vdb (the /stats "Markets" panel) from the registry + vdb_models
 pnpm db:refresh-derived     # rebuild ALL rollups computed from current_registration: fuel-stats + safety-stats + vdb-stats

@@ -4,15 +4,20 @@
  *
  *   pnpm ingest:winner360             # ONE request to the dealer's public JSON endpoint -> rows (replaces the whole set)
  *   pnpm ingest:winner360 -- --dry-run    # fetch + parse + print a summary, write nothing
+ *   pnpm ingest:winner360 -- --export-csv ./x.csv[.gz]   # dump the table (`pnpm export:winner360:csv`)
+ *   pnpm ingest:winner360 -- --from-csv ./x.csv[.gz]     # load a dump, no fetching (`pnpm ingest:winner360:csv`)
  *
  * The stock page builds its cards from `api.php?query=vehicles_group/any/…` (all ~185 cards, ~200 KB); a card with a
  * non-empty `photo_360` gets the "Фото 360" button, which opens `/360.php?photo_recid=<photo_recid>`. It is live
  * inventory, so each run replaces the table: panoramas that left the stock are deleted. No CSV seed — one request is
- * cheaper than shipping a file. robots.txt (checked 2026-10-08) only disallows `/check-vin` and some named bots.
+ * cheaper than shipping a file — the seed is only a snapshot so a fresh setup has data offline; run a live ingest to refresh it
+ * (a live run deletes panoramas no longer in stock). robots.txt (checked 2026-10-08) only disallows `/check-vin` and some named bots.
  */
 import { createDb, winner360 } from '@carplates/db'
+import type { Winner360Insert } from '@carplates/db'
 import { notInArray, sql } from 'drizzle-orm'
 
+import { readCsv, writeCsv } from './csv-io.js'
 import { parseCards } from './winner360-parse.js'
 
 const ENDPOINT = 'https://stock.winner.ua/api.php?query=vehicles_group/any/any/any/any/any/any/any'
@@ -24,8 +29,80 @@ const log = (...m: unknown[]): void => {
   console.log(...m)
 }
 
+const CSV_COLUMNS = [
+  'photo_recid',
+  'brand_slug',
+  'model_slug',
+  'brand',
+  'model',
+  'year',
+  'version',
+  'fuel',
+  'photo_url',
+  'fetched_at'
+] as const
+
+async function csvMode(exportPath?: string, fromPath?: string): Promise<void> {
+  const { db, close } = createDb()
+  try {
+    if (exportPath) {
+      const rows = await db.select().from(winner360).orderBy(winner360.photoRecid)
+      const size = await writeCsv(
+        exportPath,
+        CSV_COLUMNS,
+        rows.map(r => ({
+          photo_recid: r.photoRecid,
+          brand_slug: r.brandSlug,
+          model_slug: r.modelSlug,
+          brand: r.brand,
+          model: r.model,
+          year: r.year ?? '',
+          version: r.version ?? '',
+          fuel: r.fuel ?? '',
+          photo_url: r.photoUrl,
+          fetched_at: r.fetchedAt.toISOString()
+        }))
+      )
+      log(`exported ${rows.length} panorama(s) to ${exportPath} (${(size / 1024).toFixed(0)} KB)`)
+    } else if (fromPath) {
+      const csv = await readCsv(fromPath)
+      if (!csv) {
+        log(`no seed CSV at ${fromPath} yet — skipped (run export:winner360:csv)`)
+        return
+      }
+      const rows = csv.records.map((r): Winner360Insert => ({
+        photoRecid: Number(r.photo_recid),
+        brandSlug: r.brand_slug!,
+        modelSlug: r.model_slug!,
+        brand: r.brand!,
+        model: r.model!,
+        year: r.year ? Number(r.year) : null,
+        version: r.version || null,
+        fuel: r.fuel || null,
+        photoUrl: r.photo_url!,
+        fetchedAt: new Date(r.fetched_at!)
+      }))
+      for (let i = 0; i < rows.length; i += BATCH)
+        await db
+          .insert(winner360)
+          .values(rows.slice(i, i + BATCH))
+          .onConflictDoNothing()
+      log(`imported ${rows.length} panorama(s) from ${csv.path}`)
+    }
+  } finally {
+    await close()
+  }
+}
+
 async function main(): Promise<void> {
-  const dryRun = process.argv.includes('--dry-run')
+  const argv = process.argv.slice(2)
+  if (argv.includes('--export-csv') || argv.includes('--from-csv')) {
+    const valueOf = (flag: string): string | undefined =>
+      argv.includes(flag) ? argv[argv.indexOf(flag) + 1] : undefined
+    await csvMode(valueOf('--export-csv'), valueOf('--from-csv'))
+    return
+  }
+  const dryRun = argv.includes('--dry-run')
   const res = await fetch(ENDPOINT, {
     headers: { 'user-agent': USER_AGENT, accept: 'application/json' },
     signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS)
