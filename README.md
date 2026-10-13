@@ -209,6 +209,8 @@ MIT
 
 ### Email sign-in locally
 
+All sign-in methods (email, Google, Telegram), linking, sudo mode and admin promotion: [docs/logins.md](docs/logins.md).
+
 Email sign-in works out of the box: with the default `MAIL_TRANSPORT=log` the code and magic link are printed in the API log.
 To see real HTML mails run `docker compose -f infra/docker-compose.yml up -d mailpit`, set `MAIL_TRANSPORT=smtp` and open
 <http://localhost:8025>. Template previews (dev only): <http://localhost:3000/api/dev/emails>. For the magic link to open the
