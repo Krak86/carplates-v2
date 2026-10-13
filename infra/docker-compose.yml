@@ -11,7 +11,7 @@ services:
       POSTGRES_PASSWORD: carplates
       POSTGRES_DB: carplates
     ports:
-      - '5432:5432'
+      - '127.0.0.1:5432:5432'
     volumes:
       # postgres:18+ expects the mount at /var/lib/postgresql (data goes in a
       # version subdirectory), NOT /var/lib/postgresql/data.

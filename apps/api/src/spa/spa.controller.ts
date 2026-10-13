@@ -1,6 +1,6 @@
 import { createReadStream } from 'node:fs'
 import { readFile, stat } from 'node:fs/promises'
-import { join, normalize, resolve } from 'node:path'
+import { join, normalize, resolve, sep } from 'node:path'
 
 import { Controller, Get, Inject, NotFoundException, Req, Res } from '@nestjs/common'
 import { ApiExcludeController } from '@nestjs/swagger'
@@ -30,6 +30,15 @@ const MIME: Record<string, string> = {
 const mimeOf = (path: string): string => {
   const dot = path.lastIndexOf('.')
   return (dot >= 0 && MIME[path.slice(dot)]) || 'application/octet-stream'
+}
+
+/** A malformed %-escape is a miss (falls through to the SPA), not a 500. */
+const safeDecode = (s: string): string => {
+  try {
+    return decodeURIComponent(s)
+  } catch {
+    return ''
+  }
 }
 
 // Must revalidate every load, or a stale service worker / manifest pins users to an old build.
@@ -65,12 +74,12 @@ export class SpaController {
   @Get('*')
   async serve(@Req() req: FastifyRequest, @Res() reply: FastifyReply): Promise<void> {
     const pathname = (req.url.split('?')[0] ?? '/') || '/'
-    const rel = decodeURIComponent(pathname.replace(/^\/+/, ''))
+    const rel = safeDecode(pathname.replace(/^\/+/, ''))
 
     // real file under the dist dir → serve it
     if (this.distDir && rel && !rel.includes('..')) {
       const filePath = normalize(join(this.distDir, rel))
-      if (filePath.startsWith(this.distDir)) {
+      if (filePath.startsWith(this.distDir + sep)) {
         try {
           if ((await stat(filePath)).isFile()) {
             reply.type(mimeOf(filePath)).header('cache-control', cacheControlOf(rel)).send(createReadStream(filePath))

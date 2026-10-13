@@ -23,3 +23,11 @@ peerDependencyRules:
 # Supply-chain age gate. Off during initial scaffolding to avoid churn; revisit
 # (e.g. 10080 = 7 days) once the dependency set is stable.
 minimumReleaseAge: 0
+
+# Security: patched floors for transitive deps (pnpm audit --prod); @nestjs/platform-fastify pins an older fastify.
+overrides:
+  fastify: '>=5.12.5'
+  brace-expansion@<5.0.12: '>=5.0.12'
+  js-yaml@<5.4.1: '>=5.4.1'
+  dompurify@<3.4.16: '>=3.4.16'
+  fast-uri: '>=4.1.5'
