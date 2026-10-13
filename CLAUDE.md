@@ -4,18 +4,16 @@
 
 `carsua.app` v2 — Ukrainian vehicle lookup by plate number or VIN. pnpm monorepo replacing the 2019 GitHub-Pages SPA. Data: state
 open-data portal (`data.gov.ua`) in Postgres; VIN decoding proxies NHTSA. **Phase 1: local dev stack only** (no CI, no VPS). The v1 app
-is the sibling `../carplates/` (do not modify; reference for ports).
+is the sibling `../carplates/` (do not modify).
 
-Docs map (**grep headings, never read whole** — several are 100–350 KB): `PLAN.md` active/planned · `docs/plan-done.md` finished
-write-ups · `README.md` setup, env, scripts · `docs/features-reference.md` per-feature conventions (VehiclesDB, RDW, value, rankings,
-posts, racer, Accounts, VIN page, offline/PWA, link previews, sitemap/rate limits, plate regions, generations) — **read the matching
-section before touching those areas** · `docs/commands-reference.md` `ingest:*` / `export:*` / ALPR · `docs/legal-and-monetization.md`
-cookies/licence/ads · also `docs/catalog-plan.md` (model catalog pages, planned), `DATASETS_PLAN.md`, `GAME_PLAN.md`, `FEATURES_PLAN.md`, `SCHEDULE.md`, `docs/vps-http2-http3.md`.
+Docs map (**grep headings, never read whole** — several are 100–400 KB): `PLAN.md` active/planned (incl. version pins) ·
+`docs/plan-done.md` finished write-ups · `README.md` setup, env, scripts · `docs/features-reference.md` per-feature conventions
+(**read the matching section before touching VehiclesDB, RDW, value, rankings, posts, racer, Accounts, VIN page, offline/PWA, link
+previews, sitemap/rate limits, plate regions, generations, stock news**) · `docs/commands-reference.md` `ingest:*` / `export:*` / ALPR ·
+`docs/legal-and-monetization.md` · `docs/logins.md` · `docs/security-checklist.md`. Rarely needed: `docs/catalog-plan.md`,
+`DATASETS_PLAN.md`, `GAME_PLAN.md`, `FEATURES_PLAN.md`, `SCHEDULE.md`, `docs/vps-http2-http3.md`.
 
-## Commands
-
-`pnpm dev` (web :5173 + api :3000), `build|lint|type-check|test|format`, `db:*`, `ingest:*`, `export:*` — full list in `README.md` /
-`docs/commands-reference.md`. Setup: `pnpm install && pnpm db:up && pnpm db:migrate && pnpm db:seed && pnpm dev`.
+Setup: `pnpm install && pnpm db:up && pnpm db:migrate && pnpm db:seed && pnpm dev` (web :5173, api :3000). Other scripts: README.
 
 ## Layout
 
@@ -24,8 +22,8 @@ logic**) · `packages/db` (Drizzle schema `registry`, SQL migrator) · `apps/api
 per-plate `<meta>`) · `apps/web` (Vite + React 19 + React Router, `@/` → `src/`) · `scripts/` (ingest/export CLIs via `tsx`,
 `seed-data/` = committed gzipped CSVs) · `infra/` · `services/alpr/`.
 
-Pins (reasons in PLAN.md "Version pins"): pnpm 12, Node 24, TypeScript 5.9 (not 7), NestJS 11 (not 12), Drizzle 0.45.2, Vitest 4,
-ESLint 10, Vite 8, Tailwind v4 (`@theme` in `src/styles/global.css`), i18next ua/ru/en, `nestjs-zod`. Real `.env*` are gitignored.
+Pins: pnpm 12, Node 24, TypeScript 5.9 (not 7), NestJS 11 (not 12), Drizzle 0.45.2, Vitest 4, ESLint 10, Vite 8, Tailwind v4
+(`@theme` in `src/styles/global.css`), i18next ua/ru/en, `nestjs-zod`. Real `.env*` are gitignored.
 
 ## Conventions
 
@@ -55,9 +53,8 @@ ESLint 10, Vite 8, Tailwind v4 (`@theme` in `src/styles/global.css`), i18next ua
 
 - After each big update give a suggested commit message (subject + bullet per change, covering everything uncommitted: check
   `git status` / `git diff --stat`; split if logical). Never run `git commit` / `git push` unless asked.
-- **Seed CSVs mirror scraped tables.** After any change to `registry.wiki_image` (pre-warm, alias edits in `wikiAliases.ts` + re-scrape, row
-  deletes), re-run `pnpm export:wiki-images:csv` so `scripts/seed-data/wiki-images.csv.gz` matches. The same holds for every other
-  `export:*:csv` dataset: a new setup loads the CSV instead of re-scraping.
+- **Seed CSVs mirror scraped tables.** After changing `registry.wiki_image` (pre-warm, `wikiAliases.ts` + re-scrape, row deletes) re-run
+  `pnpm export:wiki-images:csv`; same for every other `export:*:csv` dataset (a new setup loads the CSV instead of re-scraping).
 - Run `pnpm format` first (`scripts/src/fixtures` is in `.prettierignore` — never reformat it).
 - Keep docs current: finished work → write-up in `docs/plan-done.md`, one-line ✅ in `PLAN.md`, conventions in `docs/features-reference.md`.
 

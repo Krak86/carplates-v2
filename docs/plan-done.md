@@ -3584,3 +3584,29 @@ in code (ua/ru/en); no backup email — Google, Telegram and email are each othe
   code, cross-site 403, set-email, `REAUTH_REQUIRED`, re-auth, new-device mail, revoke-others, delete → restore by sign-in, purge after the grace
   period; browser run of sign-in, re-auth dialog + automatic retry, email change.
 - **Deferred**: `notifyNewSignIn` opt-out setting, bounce/complaint webhook handling, passkeys/TOTP, a Redis-backed throttle (DB counts suffice for now).
+
+## Stock news, mobile sidebar, info popups, tunnel, /install ✅ BUILT (2026-10-13)
+
+Smaller items shipped the same day as email sign-in and the truck aliases (above).
+
+- **Yahoo Finance news widget** (`55a1fcb`): `GET /api/stocks/news?brand=` (`apps/api/src/stocks/`) merges Yahoo's search endpoint (images,
+  publishers) with the per-ticker RSS feed, matched by ticker (share-class aware, so `GOOG`/`GOOGL` do not mix), deduped, cached 15 min;
+  `stockNewsResponseSchema` (optional `publisher` / `imageUrl`) and `yahooFinanceNewsUrl` in `@carplates/shared`. Web: `StockNewsWidget` under
+  the mechanics Q&A in the right column (3 → 10 headlines, "Show more ↓/↑", "More ↗" to Yahoo) with a shared `StockNewsCard`; a
+  "💹 <Company> news" group in the Social section, counted in its total. Same unofficial-Yahoo caveat as the share-price widget (PLAN.md).
+  The new-cars widget "in stock" link now uses ↗ (external).
+- **Pixabay photos removed from saved/copied reports** (`export-report.ts`, `export.photoN` key dropped); the on-page "What it might look like" section stays.
+- **Mobile sidebar** (`ffceeff`, `e9f9f09`, `b51c3c6`): below `md` the Layers and Profile buttons move from the header into the drawer (`inSidebar`
+  prop; popovers span the drawer width); drawer is `w-72` capped at 85vw; sign-in form inputs are `w-64 max-w-full`; `LoginButton` takes `onNavigate`
+  so the drawer closes after a profile-menu item. "Full report" removed from "Under consideration" features.
+- **`FieldInfoButton` popup** (`d6a3216`): the panel is portalled to `body` with fixed, viewport-clamped coordinates (it used to overflow the left
+  edge on phones), width/height capped to the viewport, opens upward when there is more room, closes on outside scroll/resize but not on scroll inside it.
+  `RdwRecalls`, `MotFaults` and `OpenEv` always render the header "?" (even before data or without a match) with the "what is this" text (`fb659d9`).
+- **Test-drive racer** (`565fff6`): responsive controls and fullscreen layout on phones.
+- **Account nav** (`a55630f`): `AccountNav` (profile / settings / features / admin) on the four account routes; admin "Dashboards" tab linking to Resend and Cloudflare/Turnstile.
+- **`/install` page** (`61b6bc5`): PWA guide + install button, sidebar link, footer quick link, `STATIC_PAGES` entry (conventions in `docs/features-reference.md`).
+- **`pnpm tunnel`** (`de87fde`, `scripts/src/tunnel.ts`): db up/migrate → build → `cloudflared` quick (or named) tunnel → API with `PUBLIC_SITE_URL` = tunnel URL →
+  smoke checks → prints the manual steps (Google origin, Telegram `/setdomain`, Turnstile). Needed because Telegram login requires https. README "Testing through a Cloudflare tunnel".
+- **Telegram login** (`e2d6a2b`) and **sign-in guide** (`58efa3f`, `docs/logins.md`); **security audit + pre-deploy checklist** (`2c9efea`, `docs/security-checklist.md`).
+- **Seed CSVs** (`94f71f8`): news items, social posts and recall translations are exported/loaded like the other scraped tables (`export:news:csv`, `export:social:csv`).
+- **AUTO.RIA link fix** (`c92a721`): Cee'd no longer 404s; "In stock" also links RST/OLX searches. **Catalog pages** `/cars/:make/:model/:year` planned in `docs/catalog-plan.md`.

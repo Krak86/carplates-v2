@@ -36,7 +36,8 @@ Ukrainian vehicle lookup by **plate number** or **VIN**. Rebuild of
 - Skeleton placeholders while the stats pages and homepage stats load; the About page lists every data source with its icon
 - Cross-market and EU data (separate, removable blocks): [VehiclesDB](https://github.com/vehiclesdb/vehiclesdb) chips (CC BY 4.0; where the model is also sold, popularity, "also known as") and a collapsible **Specs** block from [RDW](https://opendata.rdw.nl) (CC0, "EU (NL) data": power, mass, dimensions, consumption, NL list price, fuel/colour mix as min/median/max), also shown on the VIN page as "typical for this model"; VIN decode fields are translated to UA/RU with the English original beside them
 - Light/dark theme, AR plate scan (shareable `?section=ar` link), click the plate/VIN to copy it, plate and VIN photo search (VIN: on-device barcode, else self-hosted OCR; found VINs are outlined on the photo and listed as chips), VIN decode with an offline VIN-prefix fallback for cars NHTSA does not know (labelled "≈" fields), link previews for shared plate/VIN URLs
-- Installable PWA with offline mode: recent results, history and favorites stay available without a connection
+- Installable PWA with offline mode: recent results, history and favorites stay available without a connection; `/install` explains it
+- Company news (Yahoo Finance) next to the share price, and passwordless email / Google / Telegram sign-in with a `/profile` page
 
 pnpm monorepo · Node 24 · React 19 + Vite 8 · NestJS 11 + Fastify · Drizzle + Postgres 18.
 
