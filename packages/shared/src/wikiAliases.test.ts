@@ -70,6 +70,17 @@ describe('wikiSearchName', () => {
     expect(wikiSearchName('mercedes-benz', '310')?.model).toBe('T1')
   })
 
+  it('maps MAN truck codes to their family article', () => {
+    expect(wikiSearchName('man', 'tgs 28.320')).toEqual({ brand: 'MAN', model: 'TGS', leadQuery: 'MAN TGS' })
+    expect(wikiSearchName('man tgs 18.400', 'tgs 18.400')?.model).toBe('TGS')
+    expect(wikiSearchName('man', 'tgx 18.440 bls')?.model).toBe('TGX')
+    expect(wikiSearchName('man', 'tgl 8.180')?.model).toBe('TGL')
+    expect(wikiSearchName('man', 'l 2000')?.model).toBe('L2000')
+    expect(wikiSearchName('man', '8.163')?.model).toBe('L2000')
+    expect(wikiSearchName('man', '19.403')?.model).toBe('F2000')
+    expect(wikiSearchName('man', 'tge 3.140')?.model).toBe('tge')
+  })
+
   it('drops a model repeated in the brand, and maps the not_found tail', () => {
     expect(wikiSearchName('seat leon', 'leon')).toMatchObject({ brand: 'seat', model: 'leon' })
     expect(wikiSearchName('daewoo sens t1311', 'sens t1311')?.model).toBe('Sens')

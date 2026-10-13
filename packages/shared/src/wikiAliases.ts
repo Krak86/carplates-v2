@@ -103,6 +103,14 @@ function brandAlias(brand: string, model: string): WikiSearchName | null {
     const number = digits.startsWith('6322') ? '6322' : digits
     return named('KrAZ', number, `KrAZ-${number}`)
   }
+  if (brand === 'man') {
+    // "tgx 18.440", "tgs 28.320", "tgl 8.180 bls": the number is the weight/power code, the family is the article.
+    const tg = /^(tgx|tgs|tga|tgl|tgm)(?:\s|$)/.exec(model)?.[1]
+    if (tg) return named('MAN', tg.toUpperCase(), `MAN ${tg.toUpperCase()}`)
+    // Pre-TG ranges: "l 2000" / "8.163" (light, 6–10 t) and "f 2000" / "19.403" (heavy, 19–35 t).
+    if (/^l\s?2000/.test(model) || /^(6|8|9|10)\.\d{3}$/.test(model)) return named('MAN', 'L2000', 'MAN L2000')
+    if (/^f\s?2000/.test(model) || /^(19|26|32|33|35)\.\d{3}$/.test(model)) return named('MAN', 'F2000', 'MAN F2000')
+  }
   if (brand === 'газ') {
     if (model.startsWith('2410')) return named('GAZ', '24', 'ГАЗ-24 Волга')
     // Gazelle: 2705 / 3221 vans and the 3302 family (33021, 330202, 3302-14, 330232-414 …).
