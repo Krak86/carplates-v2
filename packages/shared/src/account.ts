@@ -20,7 +20,9 @@ export const sessionUserSchema = z.object({
   name: z.string().nullable(),
   avatarUrl: z.string().nullable(),
   role: z.enum(USER_ROLES),
-  createdAt: z.string()
+  createdAt: z.string(),
+  /** Set once the user asked to delete the account; signing in during the grace period restores it. */
+  deletionScheduledAt: z.string().nullable().optional()
 })
 export type SessionUser = z.infer<typeof sessionUserSchema>
 
@@ -31,9 +33,90 @@ export type SessionResponse = z.infer<typeof sessionResponseSchema>
 /** `googleClientId` / `telegramBotUsername: null` = the API lacks that provider's env, so its sign-in is unavailable. */
 export const authConfigResponseSchema = z.object({
   googleClientId: z.string().nullable(),
-  telegramBotUsername: z.string().nullable()
+  telegramBotUsername: z.string().nullable(),
+  /** Email code sign-in is always on; the flag lets a deployment without a mail transport hide it. */
+  emailEnabled: z.boolean().optional(),
+  /** Public Cloudflare Turnstile site key; null/absent = no challenge is required. */
+  turnstileSiteKey: z.string().nullable().optional(),
+  /** Days a deleted account can still be restored by signing in. */
+  deletionGraceDays: z.number().optional()
 })
 export type AuthConfigResponse = z.infer<typeof authConfigResponseSchema>
+
+export const EMAIL_CODE_LENGTH = 6
+export const EMAIL_CHALLENGE_TTL_MINUTES = 15
+/** Seconds the client must wait before asking for another code for the same address. */
+export const EMAIL_RESEND_SECONDS = 60
+export const UI_LANGS = ['ua', 'ru', 'en'] as const
+export type UiLang = (typeof UI_LANGS)[number]
+
+/** Lower-cased and trimmed, so one mailbox is one account. */
+export const emailAddressSchema = z.string().trim().toLowerCase().max(254).pipe(z.email())
+
+export const emailStartRequestSchema = z.object({
+  email: emailAddressSchema,
+  lang: z.enum(UI_LANGS).default('ua'),
+  turnstileToken: z.string().max(4096).optional()
+})
+export type EmailStartRequest = z.infer<typeof emailStartRequestSchema>
+
+/** Same body whether or not the address has an account (no enumeration). */
+export const emailStartResponseSchema = z.object({
+  challengeId: z.string(),
+  expiresAt: z.string(),
+  resendAfterSeconds: z.number()
+})
+export type EmailStartResponse = z.infer<typeof emailStartResponseSchema>
+
+export const emailVerifyRequestSchema = z.object({
+  challengeId: z.string().uuid(),
+  code: z.string().regex(new RegExp(`^\\d{${EMAIL_CODE_LENGTH}}$`))
+})
+export type EmailVerifyRequest = z.infer<typeof emailVerifyRequestSchema>
+
+export const emailLinkVerifyRequestSchema = z.object({ token: z.string().min(20).max(200) })
+export type EmailLinkVerifyRequest = z.infer<typeof emailLinkVerifyRequestSchema>
+
+/** Message of the 403 a sensitive endpoint answers when the session's last sign-in is older than SUDO_WINDOW_MINUTES. */
+export const REAUTH_REQUIRED = 'REAUTH_REQUIRED'
+export const SUDO_WINDOW_MINUTES = 10
+/** Message of the 409 when a verified email already belongs to another account. */
+export const EMAIL_IN_USE = 'EMAIL_IN_USE'
+
+export const LINKABLE_PROVIDERS = ['google', 'telegram'] as const
+export type LinkableProvider = (typeof LINKABLE_PROVIDERS)[number]
+
+/** How the signed-in user can currently get back into the account (email = the address on the account, if any). */
+export const signInMethodsResponseSchema = z.object({
+  email: z.string().nullable(),
+  google: z.object({ email: z.string().nullable(), linkedAt: z.string() }).nullable(),
+  telegram: z.object({ linkedAt: z.string() }).nullable()
+})
+export type SignInMethodsResponse = z.infer<typeof signInMethodsResponseSchema>
+
+export const sessionInfoSchema = z.object({
+  id: z.string(),
+  /** e.g. "Chrome on Windows". */
+  device: z.string(),
+  method: z.string().nullable(),
+  createdAt: z.string(),
+  lastSeenAt: z.string(),
+  current: z.boolean()
+})
+export type SessionInfo = z.infer<typeof sessionInfoSchema>
+
+export const sessionsResponseSchema = z.object({ sessions: z.array(sessionInfoSchema) })
+export type SessionsResponse = z.infer<typeof sessionsResponseSchema>
+
+/** Re-authentication finished: the session counts as freshly signed in for SUDO_WINDOW_MINUTES. */
+export const reauthResponseSchema = z.object({ authAt: z.string() })
+export type ReauthResponse = z.infer<typeof reauthResponseSchema>
+
+export const setEmailStartRequestSchema = z.object({ email: emailAddressSchema, lang: z.enum(UI_LANGS).default('ua') })
+export type SetEmailStartRequest = z.infer<typeof setEmailStartRequestSchema>
+
+export const reauthEmailStartRequestSchema = z.object({ lang: z.enum(UI_LANGS).default('ua') })
+export type ReauthEmailStartRequest = z.infer<typeof reauthEmailStartRequestSchema>
 
 /** The ID token (JWT) Google Identity Services hands the page after the user picks an account. */
 export const googleSignInRequestSchema = z.object({ credential: z.string().min(20).max(4096) })

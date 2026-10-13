@@ -22,5 +22,14 @@ services:
       timeout: 5s
       retries: 10
 
+  # Catches outgoing mail locally: SMTP on 1025, inbox UI on http://localhost:8025.
+  # Use with MAIL_TRANSPORT=smtp (SMTP_URL defaults to smtp://localhost:1025).
+  mailpit:
+    image: axllent/mailpit:v1.21
+    restart: unless-stopped
+    ports:
+      - '127.0.0.1:1025:1025'
+      - '127.0.0.1:8025:8025'
+
 volumes:
   pgdata:

@@ -133,12 +133,14 @@ Everything above (plate/VIN search) works with zero external keys. These
 features are optional add-ons, each gated on its own key in `apps/api/.env` —
 absent, the app runs fine and that one feature just answers "unavailable":
 
-| Feature                          | Env var                                        | Get a free key at                                                               |
-| -------------------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------- |
-| Find a plate by photo/camera     | `PLATE_RECOGNIZER_CLOUD_TOKEN`                 | [platerecognizer.com](https://platerecognizer.com)                              |
-| "What it might look like" photos | `PIXABAY_API_KEY`                              | [pixabay.com/api/docs](https://pixabay.com/api/docs/)                           |
-| Sign in with Google              | `GOOGLE_CLIENT_ID`                             | [console.cloud.google.com](https://console.cloud.google.com/apis/credentials)   |
-| Sign in with Telegram            | `TELEGRAM_BOT_TOKEN` + `TELEGRAM_BOT_USERNAME` | [@BotFather](https://t.me/BotFather) (`/newbot`, then `/setdomain`, https only) |
+| Feature                          | Env var                                                                         | Get a free key at                                                                             |
+| -------------------------------- | ------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| Find a plate by photo/camera     | `PLATE_RECOGNIZER_CLOUD_TOKEN`                                                  | [platerecognizer.com](https://platerecognizer.com)                                            |
+| "What it might look like" photos | `PIXABAY_API_KEY`                                                               | [pixabay.com/api/docs](https://pixabay.com/api/docs/)                                         |
+| Sign in with Google              | `GOOGLE_CLIENT_ID`                                                              | [console.cloud.google.com](https://console.cloud.google.com/apis/credentials)                 |
+| Sign in with Telegram            | `TELEGRAM_BOT_TOKEN` + `TELEGRAM_BOT_USERNAME`                                  | [@BotFather](https://t.me/BotFather) (`/newbot`, then `/setdomain`, https only)               |
+| Email sign-in (code + link)      | `MAIL_TRANSPORT` (+ `RESEND_API_KEY` or `SMTP_URL`), `MAIL_FROM`, `AUTH_SECRET` | [resend.com](https://resend.com) (3k mails/month free) · Brevo, Postmark, SES via SMTP        |
+| Bot check on "send code"         | `TURNSTILE_SITE_KEY` + `TURNSTILE_SECRET_KEY`                                   | [dash.cloudflare.com → Turnstile](https://dash.cloudflare.com/?to=/:account/turnstile) (free) |
 
 Add whichever you want to `apps/api/.env` (see `apps/api/.env.example`), then
 restart `pnpm dev` — both are read once at process start, so editing `.env`
@@ -204,3 +206,11 @@ See [CLAUDE.md](CLAUDE.md) for conventions and [PLAN.md](PLAN.md) for the roadma
 ## License
 
 MIT
+
+### Email sign-in locally
+
+Email sign-in works out of the box: with the default `MAIL_TRANSPORT=log` the code and magic link are printed in the API log.
+To see real HTML mails run `docker compose -f infra/docker-compose.yml up -d mailpit`, set `MAIL_TRANSPORT=smtp` and open
+<http://localhost:8025>. Template previews (dev only): <http://localhost:3000/api/dev/emails>. For the magic link to open the
+Vite app set `PUBLIC_SITE_URL=http://localhost:5173`. Production refuses to boot without `AUTH_SECRET` (≥ 32 chars), a real
+`PUBLIC_SITE_URL` and `MAIL_TRANSPORT=smtp|resend`; send from a subdomain (`mail.carsua.app`) with SPF + DKIM from the provider and a DMARC record.

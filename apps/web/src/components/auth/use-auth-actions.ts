@@ -1,13 +1,31 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import type { SessionResponse, TelegramSignInRequest } from '@carplates/shared'
+import type {
+  EmailLinkVerifyRequest,
+  EmailStartRequest,
+  EmailStartResponse,
+  EmailVerifyRequest,
+  SessionResponse,
+  TelegramSignInRequest
+} from '@carplates/shared'
 
-import { deleteAccount, signInWithGoogle, signInWithTelegram, signOut } from '@/lib/api'
+import {
+  deleteAccount,
+  signInWithGoogle,
+  signInWithTelegram,
+  signOut,
+  startEmailSignIn,
+  verifyEmailCode,
+  verifyEmailLink
+} from '@/lib/api'
 import { disableGoogleAutoSelect } from '@/lib/google-identity'
 import { adminUsersQuery, featuresQuery, sessionQuery } from '@/lib/queries'
 
 type UseAuthActions = {
   signIn: ReturnType<typeof useMutation<SessionResponse, Error, string>>
   signInTelegram: ReturnType<typeof useMutation<SessionResponse, Error, TelegramSignInRequest>>
+  emailStart: ReturnType<typeof useMutation<EmailStartResponse, Error, EmailStartRequest>>
+  emailVerify: ReturnType<typeof useMutation<SessionResponse, Error, EmailVerifyRequest>>
+  emailVerifyLink: ReturnType<typeof useMutation<SessionResponse, Error, EmailLinkVerifyRequest>>
   signOut: ReturnType<typeof useMutation<SessionResponse, Error, void>>
   deleteAccount: ReturnType<typeof useMutation<SessionResponse, Error, void>>
 }
@@ -26,6 +44,10 @@ export function useAuthActions(): UseAuthActions {
 
   const signInTelegram = useMutation({ mutationFn: signInWithTelegram, onSuccess: setSession })
 
+  const emailStart = useMutation({ mutationFn: startEmailSignIn })
+  const emailVerify = useMutation({ mutationFn: verifyEmailCode, onSuccess: setSession })
+  const emailVerifyLink = useMutation({ mutationFn: verifyEmailLink, onSuccess: setSession })
+
   const signOutMutation = useMutation({
     mutationFn: signOut,
     onSuccess: data => {
@@ -42,5 +64,13 @@ export function useAuthActions(): UseAuthActions {
     }
   })
 
-  return { signIn, signInTelegram, signOut: signOutMutation, deleteAccount: deleteAccountMutation }
+  return {
+    signIn,
+    signInTelegram,
+    emailStart,
+    emailVerify,
+    emailVerifyLink,
+    signOut: signOutMutation,
+    deleteAccount: deleteAccountMutation
+  }
 }

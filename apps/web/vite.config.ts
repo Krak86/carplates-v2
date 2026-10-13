@@ -94,9 +94,12 @@ export default defineConfig({
           // account call are online-only, so none of their lazy chunks are worth precaching.
           'assets/GoogleSignInButton-*.js',
           'assets/TelegramSignInButton-*.js',
+          'assets/EmailSignInForm-*.js',
+          'assets/EmailLinkRoute-*.js',
           'assets/AccountMenu-*.js',
           'assets/FeaturesRoute-*.js',
           'assets/SettingsRoute-*.js',
+          'assets/ProfileRoute-*.js',
           'assets/AdminRoute-*.js',
           // The "test your car" racer is desktop-only and fetched on demand after an explicit confirmation.
           'assets/RaceGameModal-*.js',

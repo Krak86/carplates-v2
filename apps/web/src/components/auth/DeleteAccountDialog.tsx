@@ -6,6 +6,8 @@ import { useTranslation } from 'react-i18next'
 type Props = {
   /** The account's email, repeated back so it is unmistakable which account goes. */
   email: string
+  /** Days the account can still be restored by signing in again. */
+  graceDays: number
   pending: boolean
   failed: boolean
   onConfirm: () => void
@@ -13,7 +15,14 @@ type Props = {
 }
 
 /** Permanent-deletion confirmation. Cancel is focused by default; Escape / backdrop cancel (never while deleting). */
-export default function DeleteAccountDialog({ email, pending, failed, onConfirm, onClose }: Props): ReactNode {
+export default function DeleteAccountDialog({
+  email,
+  graceDays,
+  pending,
+  failed,
+  onConfirm,
+  onClose
+}: Props): ReactNode {
   const { t } = useTranslation()
   const cancelRef = useRef<HTMLButtonElement>(null)
 
@@ -50,7 +59,7 @@ export default function DeleteAccountDialog({ email, pending, failed, onConfirm,
         <p className="mb-3 truncate text-sm text-[var(--color-muted)]">{email}</p>
 
         <div id="delete-account-body" className="space-y-2 text-sm">
-          <p className="font-medium">{t('account.delete.permanent')}</p>
+          <p className="font-medium">{t('account.delete.permanent', { days: graceDays })}</p>
           <ul className="list-disc space-y-1 pl-5 text-[var(--color-muted)]">
             <li>{t('account.delete.itemProfile')}</li>
             <li>{t('account.delete.itemFeatures')}</li>

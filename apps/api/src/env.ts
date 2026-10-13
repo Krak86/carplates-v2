@@ -46,6 +46,19 @@ const envSchema = z.object({
    *  The site domain must be set with BotFather `/setdomain` (https only — test through a tunnel). */
   TELEGRAM_BOT_TOKEN: z.string().optional(),
   TELEGRAM_BOT_USERNAME: z.string().optional(),
+  /** Server secret (≥ 32 chars) keying the HMAC of email sign-in codes. Required in production; dev falls back to a fixed value. */
+  AUTH_SECRET: z.string().min(32).optional(),
+  /** Transactional mail transport: `log` (dev default, prints to the API log), `smtp` (Mailpit / any provider) or `resend`. */
+  MAIL_TRANSPORT: z.enum(['log', 'smtp', 'resend']).default('log'),
+  RESEND_API_KEY: z.string().optional(),
+  SMTP_URL: z.string().default('smtp://localhost:1025'),
+  MAIL_FROM: z.string().default('carsua.app <no-reply@localhost>'),
+  MAIL_REPLY_TO: z.string().optional(),
+  /** Cloudflare Turnstile on "send code". Site key is public; absent secret → the check is skipped (dev). */
+  TURNSTILE_SITE_KEY: z.string().optional(),
+  TURNSTILE_SECRET_KEY: z.string().optional(),
+  /** Days a deleted account can still be restored by signing in before it is purged. */
+  ACCOUNT_DELETION_GRACE_DAYS: z.coerce.number().int().min(1).max(90).default(14),
   /** Session cookie lifetime; each request in the second half of it extends the session again (sliding). */
   SESSION_TTL_DAYS: z.coerce.number().int().positive().default(30),
 
@@ -83,9 +96,26 @@ export function loadEnv(source: NodeJS.ProcessEnv = process.env): Env {
     const issues = parsed.error.issues.map(i => `  ${i.path.join('.')}: ${i.message}`).join('\n')
     throw new Error(`Invalid environment:\n${issues}`)
   }
+  assertProductionEnv(parsed.data)
   cached = parsed.data
   return cached
 }
+
+/** Refuses to boot a misconfigured production: dev CORS reflects any origin, and email codes need a real HMAC key. */
+function assertProductionEnv(env: Env): void {
+  if (env.NODE_ENV !== 'production') return
+  const problems: string[] = []
+  if (!env.AUTH_SECRET) problems.push('AUTH_SECRET is required')
+  if (/localhost|127\.0\.0\.1/.test(env.PUBLIC_SITE_URL))
+    problems.push('PUBLIC_SITE_URL must be the public https origin')
+  if (env.MAIL_TRANSPORT === 'log') problems.push('MAIL_TRANSPORT must be smtp or resend')
+  if (env.MAIL_TRANSPORT === 'resend' && !env.RESEND_API_KEY) problems.push('RESEND_API_KEY is required for resend')
+  if (problems.length) throw new Error(`Invalid production environment:\n${problems.map(p => `  ${p}`).join('\n')}`)
+}
+
+/** Dev/test fallback so email sign-in works without configuration; never reachable in production (asserted above). */
+export const authSecret = (env: Env): string => env.AUTH_SECRET ?? 'dev-only-auth-secret-not-for-production!!'
+export const turnstileEnabled = (env: Env): boolean => Boolean(env.TURNSTILE_SECRET_KEY && env.TURNSTILE_SITE_KEY)
 
 export const telemetryEnabled = (env: Env): boolean => env.ENABLE_TELEMETRY && Boolean(env.SENTRY_DSN)
 export const swaggerEnabled = (env: Env): boolean => env.ENABLE_SWAGGER || env.NODE_ENV !== 'production'

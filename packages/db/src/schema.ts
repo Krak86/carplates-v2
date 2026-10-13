@@ -1200,7 +1200,11 @@ export const users = app.table('users', {
   avatarUrl: text('avatar_url'),
   role: text('role').notNull().default('user'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  lastLoginAt: timestamp('last_login_at', { withTimezone: true })
+  lastLoginAt: timestamp('last_login_at', { withTimezone: true }),
+  /** Language for emails, refreshed on every sign-in. */
+  lang: text('lang'),
+  /** Set by "delete account": sessions are revoked at once, the row is purged after the grace period unless restored. */
+  deletionScheduledAt: timestamp('deletion_scheduled_at', { withTimezone: true })
 })
 export type UserRow = typeof users.$inferSelect
 
@@ -1221,8 +1225,47 @@ export const sessions = app.table('sessions', {
   userId: uuid('user_id').notNull(),
   userAgent: text('user_agent'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull()
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  /** Public handle for "revoke this device" — the token hash never leaves the server. */
+  id: uuid('id').notNull().defaultRandom(),
+  /** Last (re-)authentication; sensitive actions need it < 10 min old (sudo mode). */
+  authAt: timestamp('auth_at', { withTimezone: true }).notNull().defaultNow(),
+  lastSeenAt: timestamp('last_seen_at', { withTimezone: true }).notNull().defaultNow(),
+  method: text('method'),
+  deviceHash: text('device_hash')
 })
+
+/** Short-lived email sign-in / verification challenges (code + magic link). Hashes only; see migration 0067. */
+export const emailChallenges = app.table(
+  'email_challenges',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    email: text('email').notNull(),
+    purpose: text('purpose').notNull(),
+    userId: uuid('user_id'),
+    codeHash: text('code_hash').notNull(),
+    linkHash: text('link_hash').notNull().unique(),
+    attempts: integer('attempts').notNull().default(0),
+    lang: text('lang').notNull().default('ua'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    consumedAt: timestamp('consumed_at', { withTimezone: true })
+  },
+  t => [index('ix_email_challenges_email_created').on(t.email, t.createdAt)]
+)
+
+export type EmailChallengeRow = typeof emailChallenges.$inferSelect
+
+export const knownDevices = app.table(
+  'known_devices',
+  {
+    userId: uuid('user_id').notNull(),
+    deviceHash: text('device_hash').notNull(),
+    firstSeenAt: timestamp('first_seen_at', { withTimezone: true }).notNull().defaultNow(),
+    lastSeenAt: timestamp('last_seen_at', { withTimezone: true }).notNull().defaultNow()
+  },
+  t => [primaryKey({ columns: [t.userId, t.deviceHash] })]
+)
 
 export const userFeatures = app.table(
   'user_features',

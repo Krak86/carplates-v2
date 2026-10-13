@@ -1022,7 +1022,10 @@ card-on-file subscriptions; revisit with real quotes.
   here, never in the dropdown. Deletion today = the confirmation dialog (`DeleteAccountDialog`); on `/profile` add a
   re-auth step (password if the account has one, else a fresh Google sign-in) and a **14–30-day grace period**
   (soft-delete flag, sessions revoked at once, "undo" link by email, hard-delete by a scheduled job).
-- **Email + password:** `credentials` table (argon2id), email confirmation, forgot/reset password (single-use hashed
+- ✅ **Email sign-in (passwordless code + link), `/profile`, sudo mode, devices, new-device mail, deletion grace built (2026-10-13)** — conventions in
+  `docs/features-reference.md` "Accounts", write-up in `docs/plan-done.md`. Still open: notification opt-out for the new-device mail, filter/notify
+  settings on /profile, optional password on top (below), passkeys.
+- **Email + password (not planned any more — passwordless chosen):** `credentials` table (argon2id), email confirmation, forgot/reset password (single-use hashed
   tokens, 1 h TTL), change password, session list/revoke, login throttle 5/15 min per email + 20/15 min per IP (see
   rate-limit section). Needs a transactional email provider (Resend/Postmark/Brevo free tiers; Brevo or SES if cost
   matters), SPF/DKIM on the domain, and email templates (ua/ru/en). Prefer Better Auth over hand-rolling this part.

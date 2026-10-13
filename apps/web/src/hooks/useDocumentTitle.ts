@@ -22,6 +22,7 @@ export const ROUTE_TITLE_KEYS: Record<string, string> = {
   '/relax': 'nav.relax',
   '/features': 'nav.features',
   '/settings': 'nav.settings',
+  '/profile': 'auth.profile',
   '/admin': 'nav.admin'
 }
 

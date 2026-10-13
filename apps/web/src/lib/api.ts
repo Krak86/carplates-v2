@@ -3,6 +3,11 @@ import {
   adminStatsResponseSchema,
   adminUsersResponseSchema,
   authConfigResponseSchema,
+  REAUTH_REQUIRED,
+  emailStartResponseSchema,
+  reauthResponseSchema,
+  sessionsResponseSchema,
+  signInMethodsResponseSchema,
   featuresResponseSchema,
   sessionResponseSchema,
   settingsResponseSchema,
@@ -68,6 +73,16 @@ import type {
   SyncRequest,
   SyncResponse,
   TelegramSignInRequest,
+  EmailLinkVerifyRequest,
+  EmailStartRequest,
+  EmailStartResponse,
+  EmailVerifyRequest,
+  LinkableProvider,
+  ReauthEmailStartRequest,
+  ReauthResponse,
+  SessionsResponse,
+  SetEmailStartRequest,
+  SignInMethodsResponse,
   BodySuggestionsResponse,
   OperSuggestionsResponse,
   BrandSuggestionsResponse,
@@ -555,6 +570,72 @@ export async function signInWithGoogle(credential: string): Promise<SessionRespo
 /** Exchanges the Telegram Login Widget's signed user object for our own session cookie. */
 export async function signInWithTelegram(payload: TelegramSignInRequest): Promise<SessionResponse> {
   return sessionResponseSchema.parse(await sendJson('POST', '/api/auth/telegram', payload))
+}
+
+/** Step 1 of email sign-in: mails a code + magic link. The answer is the same whether or not the address has an account. */
+export async function startEmailSignIn(request: EmailStartRequest): Promise<EmailStartResponse> {
+  return emailStartResponseSchema.parse(await sendJson('POST', '/api/auth/email/start', request))
+}
+
+export async function verifyEmailCode(request: EmailVerifyRequest): Promise<SessionResponse> {
+  return sessionResponseSchema.parse(await sendJson('POST', '/api/auth/email/verify', request))
+}
+
+export async function verifyEmailLink(request: EmailLinkVerifyRequest): Promise<SessionResponse> {
+  return sessionResponseSchema.parse(await sendJson('POST', '/api/auth/email/verify-link', request))
+}
+
+/** Thrown (as the 403 message) by sensitive endpoints when the session's last sign-in is too old. */
+export function isReauthRequired(error: unknown): boolean {
+  return error instanceof ApiError && error.status === 403 && error.message === REAUTH_REQUIRED
+}
+
+export async function getSignInMethods(): Promise<SignInMethodsResponse> {
+  return signInMethodsResponseSchema.parse(await sendJson('GET', '/api/auth/methods'))
+}
+
+export async function getSessions(): Promise<SessionsResponse> {
+  return sessionsResponseSchema.parse(await sendJson('GET', '/api/auth/sessions'))
+}
+
+export async function revokeSession(id: string): Promise<void> {
+  await sendJson('DELETE', `/api/auth/sessions/${encodeURIComponent(id)}`)
+}
+
+export async function revokeOtherSessions(): Promise<void> {
+  await sendJson('POST', '/api/auth/sessions/revoke-others')
+}
+
+export async function startReauthEmail(request: ReauthEmailStartRequest): Promise<EmailStartResponse> {
+  return emailStartResponseSchema.parse(await sendJson('POST', '/api/auth/reauth/email/start', request))
+}
+
+export async function verifyReauthEmail(request: EmailVerifyRequest): Promise<ReauthResponse> {
+  return reauthResponseSchema.parse(await sendJson('POST', '/api/auth/reauth/email/verify', request))
+}
+
+export async function reauthWithGoogle(credential: string): Promise<ReauthResponse> {
+  return reauthResponseSchema.parse(await sendJson('POST', '/api/auth/reauth/google', { credential }))
+}
+
+export async function reauthWithTelegram(payload: TelegramSignInRequest): Promise<ReauthResponse> {
+  return reauthResponseSchema.parse(await sendJson('POST', '/api/auth/reauth/telegram', payload))
+}
+
+export async function startSetEmail(request: SetEmailStartRequest): Promise<EmailStartResponse> {
+  return emailStartResponseSchema.parse(await sendJson('POST', '/api/auth/set-email/start', request))
+}
+
+export async function verifySetEmail(request: EmailVerifyRequest): Promise<SessionResponse> {
+  return sessionResponseSchema.parse(await sendJson('POST', '/api/auth/set-email/verify', request))
+}
+
+export async function linkProvider(provider: LinkableProvider, body: unknown): Promise<void> {
+  await sendJson('POST', `/api/auth/link/${provider}`, body)
+}
+
+export async function unlinkProvider(provider: LinkableProvider): Promise<void> {
+  await sendJson('DELETE', `/api/auth/methods/${provider}`)
 }
 
 export async function signOut(): Promise<SessionResponse> {

@@ -3566,3 +3566,21 @@ Dry-run on 2 models (Lanos, Lancer): 8 kept each, 101 units each.
   the VIN decode section, NHTSA request and VIN registry history query are skipped for it. Not checked: Copy-all-info / report export
   still pass the short value as `vin`; whether `/api/vin/…` rejects non-17-char input.
 - **Workflow rule:** after any change to `registry.wiki_image`, re-run `pnpm export:wiki-images:csv` (added to `CLAUDE.md`).
+
+## Email sign-in, /profile, sudo mode ✅ BUILT (2026-10-13)
+
+Decisions: passwordless (6-digit code + magic link in one mail, 15 min, single use) instead of passwords; Resend as the default provider
+behind a provider-agnostic `MailService` (`log` / `smtp` / `resend`; Mailpit in `infra/docker-compose.yml` for local mail); React Email templates
+in code (ua/ru/en); no backup email — Google, Telegram and email are each other's recovery paths.
+
+- **DB** (migration 0067): `app.email_challenges`, `app.known_devices`; `app.sessions` gains `id`, `auth_at`, `last_seen_at`, `method`, `device_hash`;
+  `app.users` gains `lang`, `deletion_scheduled_at`.
+- **API**: `OriginGuard` (CSRF), `EmailChallengeService`, `TurnstileService`, `MailModule` (+ dev preview controller), `AccountSecurityService/Controller`
+  (methods, sessions list/revoke, re-auth by email/Google/Telegram, set email, link/unlink, sudo-protected delete), `AccountPurgeService`.
+  Production env assertions (`AUTH_SECRET`, real `PUBLIC_SITE_URL`, a real mail transport).
+- **Web**: `EmailSignInForm` in the login popover, `/auth/email` link page, `/profile` (identity, sign-in methods, devices, danger zone) with
+  `ReauthGate`; account deletion moved out of the dropdown.
+- **Verified**: unit tests (crypto, device parsing, origin guard, every template × language, safeNextPath); live API run of sign-in, wrong/replayed
+  code, cross-site 403, set-email, `REAUTH_REQUIRED`, re-auth, new-device mail, revoke-others, delete → restore by sign-in, purge after the grace
+  period; browser run of sign-in, re-auth dialog + automatic retry, email change.
+- **Deferred**: `notifyNewSignIn` opt-out setting, bounce/complaint webhook handling, passkeys/TOTP, a Redis-backed throttle (DB counts suffice for now).

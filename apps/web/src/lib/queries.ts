@@ -15,6 +15,8 @@ import {
   getAdminStats,
   getAdminUsers,
   getAuthConfig,
+  getSessions,
+  getSignInMethods,
   getCardBundle,
   getFeatures,
   getSession,
@@ -548,6 +550,14 @@ export function authConfigQuery() {
 
 export function sessionQuery() {
   return queryOptions({ queryKey: ['auth', 'session'], queryFn: getSession, staleTime: 5 * 60_000, retry: false })
+}
+
+export function signInMethodsQuery() {
+  return queryOptions({ queryKey: ['auth', 'methods'], queryFn: getSignInMethods, staleTime: 60_000 })
+}
+
+export function sessionsListQuery() {
+  return queryOptions({ queryKey: ['auth', 'sessions'], queryFn: getSessions, staleTime: 30_000 })
 }
 
 export function featuresQuery() {

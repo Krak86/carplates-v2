@@ -208,6 +208,23 @@ Login Widget payload verified by HMAC (key = SHA256(bot token)), `auth_date` ≤
 never merged into a Google account (no verified email to match on). Env: `TELEGRAM_BOT_TOKEN` (secret) + `TELEGRAM_BOT_USERNAME`;
 BotFather `/setdomain` needs https (use a tunnel locally). Both absent → `auth/config.telegramBotUsername` is `null`, button hidden.
 
+**Email sign-in + /profile** (`auth/email-challenge*.ts`, `account-security.*`, `mail/`; web `EmailSignInForm`, `routes/auth`, `routes/profile`;
+migration 0067): passwordless — `POST /api/auth/email/start` always answers 202 (no account enumeration), the mail holds a 6-digit code **and** a
+magic link (`/auth/email#t=<token>`, fragment so it never reaches logs/Referer; the page POSTs only after a click so mail scanners can't consume
+it). Challenges live in `app.email_challenges`: code stored as HMAC(`AUTH_SECRET`, id:code), link as SHA-256, 15 min, single use, 5 attempts,
+≤ 3 sends / 15 min and ≤ 10 / day per address (counted in the DB, all purposes together). Set-email / re-auth mails are code-only (no link).
+**Invariant: every `users.email` is verified** (Google `email_verified` or a code). Email sign-in attaches to the user with that email (this is
+how it merges with a Google account); a Telegram user adds an email on /profile — if another account owns it the 409 `EMAIL_IN_USE` only appears
+_after_ the code proves the mailbox. No password, no backup email: linked methods (email · Google · Telegram) are the recovery paths; unlinking the
+last one is refused. **Sudo mode**: `SudoGuard` needs `sessions.auth_at` < 10 min (a sign-in counts), else 403 `REAUTH_REQUIRED`; the web
+`ReauthGate` / `useRunSudo(mutation, vars)` opens the dialog and retries. Sudo routes: set-email, link/unlink, `DELETE /api/auth/me`.
+Deleting only _schedules_ (`users.deletion_scheduled_at`, all sessions end, notice mail); any sign-in clears it, `AccountPurgeService` hard-deletes
+after `ACCOUNT_DELETION_GRACE_DAYS` (14). A sign-in from a browser without a known `carsua_did` cookie (`app.known_devices`) on an account that
+already had a device mails a "new sign-in" notice. Mail: `MAIL_TRANSPORT` = `log` | `smtp` | `resend` (`mail/mail.service.ts`), React Email
+templates in `mail/templates.tsx` with copy in `mail/mail-text.ts` (ua/ru/en; sRGB hex only), preview at `/api/dev/emails` (dev). New mail kind =
+add it to `CODE_MAIL_KINDS`/`NOTICE_MAIL_KINDS` + text; `render.test.ts` covers every kind × language. A global `OriginGuard` rejects cross-site
+writes (`Sec-Fetch-Site` / `Origin`). Turnstile (`TURNSTILE_*`) guards "send code" and is skipped without a secret.
+
 `GOOGLE_CLIENT_ID` is documented in `apps/api/.env.example`. `/features` is the feature opt-in route (no "paid" wording on the site;
 toggles hidden while `AVAILABLE_PAID_FEATURES` is empty); FEATURES_PLAN.md wants the same URL for the guide — see PLAN.md Phase 5.
 

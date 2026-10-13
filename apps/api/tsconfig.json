@@ -9,7 +9,9 @@
     "emitDecoratorMetadata": true,
     // decorator metadata needs runtime value imports of injected types
     "verbatimModuleSyntax": false,
-    "strictPropertyInitialization": false
+    "strictPropertyInitialization": false,
+    // email templates (React Email) are .tsx
+    "jsx": "react-jsx"
   },
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts", "src/**/*.tsx"]
 }

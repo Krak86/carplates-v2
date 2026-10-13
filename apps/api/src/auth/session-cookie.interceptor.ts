@@ -7,13 +7,15 @@ import type { Observable } from 'rxjs'
 import { loadEnv } from '../env.js'
 
 import { AuthService } from './auth.service.js'
-import { sessionCookie } from './session-cookie.js'
+import { deviceCookie, sessionCookie } from './session-cookie.js'
 
 /** A controller result that also sets (`token`) or clears (`null`) the session cookie. */
 export class WithSessionCookie<T> {
   constructor(
     readonly body: T,
-    readonly token: string | null
+    readonly token: string | null,
+    /** Set on sign-in so the browser keeps the same device id (new-device notices). */
+    readonly deviceId?: string
   ) {}
 }
 
@@ -33,7 +35,9 @@ export class SessionCookieInterceptor implements NestInterceptor {
         if (!(value instanceof WithSessionCookie)) return value
         const reply = context.switchToHttp().getResponse<FastifyReply>()
         const maxAgeS = Math.floor(this.authService.sessionTtlMs / 1000)
-        void reply.header('set-cookie', sessionCookie(value.token, maxAgeS, this.secure))
+        const cookies = [sessionCookie(value.token, maxAgeS, this.secure)]
+        if (value.deviceId) cookies.push(deviceCookie(value.deviceId, this.secure))
+        void reply.header('set-cookie', cookies)
         void reply.header('cache-control', 'no-store')
         return value.body as unknown
       })

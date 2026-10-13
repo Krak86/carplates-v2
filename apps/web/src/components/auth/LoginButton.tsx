@@ -8,6 +8,7 @@ import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 // Google's script is only fetched once this popover opens (see lib/google-identity.ts).
 const GoogleSignInButton = lazy(() => import('@/components/auth/GoogleSignInButton'))
 const TelegramSignInButton = lazy(() => import('@/components/auth/TelegramSignInButton'))
+const EmailSignInForm = lazy(() => import('@/components/auth/EmailSignInForm'))
 const AccountMenu = lazy(() => import('@/components/auth/AccountMenu'))
 
 /** Header trigger right of the layers button: a person icon when anonymous, the avatar / initial once signed in. Hidden offline. */
@@ -81,6 +82,7 @@ export default function LoginButton(): ReactNode {
               <div className="w-max max-w-[calc(100vw-2rem)] rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] p-3 shadow-lg">
                 <GoogleSignInButton />
                 <TelegramSignInButton />
+                <EmailSignInForm />
               </div>
             )}
           </Suspense>
