@@ -293,6 +293,7 @@ export default function ResultCard({ data }: Props): ReactNode {
                 operName={c.operName}
                 dReg={c.dReg}
                 onOpenAuctions={hasVin ? () => setAuctionOpenSignal(n => n + 1) : undefined}
+                everImported={data.everImported}
               />
               <GenerationChip brand={c.brand} model={c.model} year={c.makeYear} />
               <TopStatBadges brand={c.brand} model={c.model} color={c.color} region={data.region} kind={c.kind} />
@@ -668,10 +669,13 @@ export default function ResultCard({ data }: Props): ReactNode {
             <AuctionCheck
               vin={c.vin}
               openSignal={auctionOpenSignal}
-              imported={hasImportOperation([
-                { operCode: c.operCode, operName: c.operName },
-                ...(vinDetail.data?.registry?.actions ?? plateHistory.data?.actions ?? [])
-              ])}
+              imported={
+                !!data.everImported ||
+                hasImportOperation([
+                  { operCode: c.operCode, operName: c.operName },
+                  ...(vinDetail.data?.registry?.actions ?? plateHistory.data?.actions ?? [])
+                ])
+              }
             />
           </LazySection>
         )}

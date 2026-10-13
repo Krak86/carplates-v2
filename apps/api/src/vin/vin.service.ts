@@ -2,7 +2,7 @@ import { BadGatewayException, BadRequestException, Inject, Injectable, NotFoundE
 import { registrations } from '@carplates/db'
 import { isVin } from '@carplates/shared'
 import type { VinDecodeResponse, VinRegistry } from '@carplates/shared'
-import { desc, eq } from 'drizzle-orm'
+import { and, desc, eq, inArray, isNull } from 'drizzle-orm'
 
 import { DbService } from '../db/db.service.js'
 import { loadEnv } from '../env.js'
@@ -63,13 +63,36 @@ export class VinService {
 
   /** Our own registry rows for this VIN, e.g. a plateless 2026 action (ГСЦ МВС order №67/ОД). */
   private async lookupRegistry(vin: string): Promise<VinRegistry | undefined> {
-    const rows = await this.dbService.db
+    const db = this.dbService.db
+    const vinRows = await db
       .select()
       .from(registrations)
       .where(eq(registrations.vin, vin))
       .orderBy(desc(registrations.dReg), desc(registrations.id))
 
-    if (rows.length === 0) return undefined
+    if (vinRows.length === 0) return undefined
+
+    // Older rows (e.g. a customs import) often carry no VIN, only the plate the car wore then. Pull in the VIN-less
+    // rows of every plate this VIN wore, when brand and model match, so a plate reassigned to another car stays out.
+    // A VIN-less row adds no new plate, so one hop reaches everything there is.
+    const plates = [...new Set(vinRows.map(r => r.plate).filter((p): p is string => !!p))]
+    const brand = vinRows.find(r => r.brand)?.brand
+    const model = vinRows.find(r => r.model)?.model
+    const plateRows =
+      plates.length && brand && model
+        ? await db
+            .select()
+            .from(registrations)
+            .where(
+              and(
+                inArray(registrations.plate, plates),
+                isNull(registrations.vin),
+                eq(registrations.brand, brand),
+                eq(registrations.model, model)
+              )
+            )
+        : []
+    const rows = [...vinRows, ...plateRows].sort((a, b) => (b.dReg ?? '').localeCompare(a.dReg ?? '') || b.id - a.id)
 
     const latest = rows[0]
     return {

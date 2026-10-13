@@ -1,5 +1,3 @@
-import { operCategory } from '@/lib/oper-info'
-
 export const AUCTION_REGION_ICON = { us: '🇺🇸', eu: '🇪🇺', kr: '🇰🇷' } as const
 type AuctionRegion = keyof typeof AUCTION_REGION_ICON
 
@@ -69,10 +67,4 @@ export function auctionOpenUrl(site: AuctionSite, vin: string, lang: string): st
   return site.searchUrl ? site.searchUrl(vin) : site.home(lang)
 }
 
-/** "РЕЄСТРАЦІЯ ТЗ ПРИВЕЗЕНОГО З-ЗА КОРДОНУ ПО ПОСВІДЧЕННЮ МИТНИЦІ" and kin — same keywords as the origin stats view. */
-const IMPORT_NAME = /ПРИВЕЗЕН|ВВЕЗЕН/i
-
-/** True when any registration operation says the car was brought in from abroad (used) — worth an auction check. */
-export function hasImportOperation(actions: readonly { operCode: number | null; operName?: string | null }[]): boolean {
-  return actions.some(a => operCategory(a.operCode) === 'import' || IMPORT_NAME.test(a.operName ?? ''))
-}
+export { hasImportOperation } from '@carplates/shared'

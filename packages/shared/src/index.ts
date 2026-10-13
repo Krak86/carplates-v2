@@ -181,6 +181,7 @@ export {
   type Winner360LookupRow
 } from './model360Lookup.js'
 export { countOwners } from './owners.js'
+export { hasImportOperation, IMPORT_OPER_CODES, isImportOperation } from './import-history.js'
 export {
   vdbMatchSchema,
   vdbResponseSchema,

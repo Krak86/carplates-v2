@@ -1,8 +1,8 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common'
 import { currentRegistration, registrations } from '@carplates/db'
-import { countOwners, normalizePlate, regionName } from '@carplates/shared'
+import { countOwners, hasImportOperation, normalizePlate, regionName } from '@carplates/shared'
 import type { PlateHistoryResponse, PlateLookupResponse, Registration } from '@carplates/shared'
-import { and, desc, eq, isNull, or, type SQL } from 'drizzle-orm'
+import { and, desc, eq, inArray, isNotNull, isNull, or, type SQL } from 'drizzle-orm'
 
 import { DbService } from '../db/db.service.js'
 import { MissedService } from '../missed/missed.service.js'
@@ -42,22 +42,51 @@ export class PlateService {
       .from(registrations)
       .where(this.identityFilter(plate, current.vin))
 
-    // Owners follow the vehicle, not the plate: with a VIN, count its whole history — it
-    // includes earlier registrations under other plates (the same set the VIN page shows).
-    const ownerActions = current.vin
-      ? await db
-          .select({ operCode: registrations.operCode, operName: registrations.operName })
-          .from(registrations)
-          .where(or(eq(registrations.vin, current.vin), eq(registrations.plate, plate)))
-      : actions
+    // Owners and the import flag follow the vehicle, not the plate: with a VIN, use its whole history.
+    const vehicleActions = current.vin ? await this.vehicleActions(current) : actions
 
     return {
       plate,
       region: regionName(plate) ?? null,
       current: toRegistrationDto(current),
       historyCount: actions.length || 1,
-      ownersCount: countOwners(ownerActions) || 1
+      ownersCount: countOwners(vehicleActions) || 1,
+      everImported: hasImportOperation(vehicleActions)
     }
+  }
+
+  /**
+   * Same set as the VIN page's registration history: the VIN's own rows plus the VIN-less rows of every plate it wore
+   * (older rows, e.g. a customs import, carry no VIN) when brand and model match. Rows that merely share a plate with
+   * another car are left out, so a reassigned plate neither adds owners nor an import.
+   */
+  private async vehicleActions(current: {
+    vin: string | null
+    brand: string | null
+    model: string | null
+  }): Promise<{ operCode: number | null; operName: string | null }[]> {
+    const db = this.dbService.db
+    const vinRows = await db
+      .select({ operCode: registrations.operCode, operName: registrations.operName })
+      .from(registrations)
+      .where(eq(registrations.vin, current.vin!))
+    if (!current.brand || !current.model) return vinRows
+    const wornPlates = db
+      .select({ plate: registrations.plate })
+      .from(registrations)
+      .where(and(eq(registrations.vin, current.vin!), isNotNull(registrations.plate)))
+    const plateRows = await db
+      .select({ operCode: registrations.operCode, operName: registrations.operName })
+      .from(registrations)
+      .where(
+        and(
+          inArray(registrations.plate, wornPlates),
+          isNull(registrations.vin),
+          eq(registrations.brand, current.brand),
+          eq(registrations.model, current.model)
+        )
+      )
+    return [...vinRows, ...plateRows]
   }
 
   /** The plate's current registration alone (one query), null when unknown — no history, no owner count, never recorded as missed. */

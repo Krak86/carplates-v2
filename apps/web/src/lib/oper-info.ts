@@ -1,3 +1,5 @@
+import { IMPORT_OPER_CODES } from '@carplates/shared'
+
 /** Operation codes with a dedicated explainer (`oper.code.<code>` in i18n); the rest fall back to their range's group. */
 const KNOWN_OPER_CODES: ReadonlySet<number> = new Set([
   13, 17, 18, 20, 30, 40, 48, 49, 50, 69, 70, 71, 72, 80, 99, 100, 101, 105, 110, 140, 172, 210, 212, 213, 215, 218,
@@ -22,7 +24,6 @@ export const OPER_CATEGORIES = ['new', 'import', 'owner', 'modification', 'dereg
 export type OperCategory = (typeof OPER_CATEGORIES)[number]
 
 const NEW_CODES: ReadonlySet<number> = new Set([17, 20, 30, 69, 72, 99, 105])
-const IMPORT_CODES: ReadonlySet<number> = new Set([70, 71, 100, 172, 221])
 const OWNER_CODES: ReadonlySet<number> = new Set([40, 48, 49, 50, 80, 101, 110, 140, 218, 363])
 const MODIFICATION_CODES: ReadonlySet<number> = new Set([390, 400, 402, 403, 404, 405, 408])
 
@@ -34,7 +35,7 @@ const MODIFICATION_CODES: ReadonlySet<number> = new Set([390, 400, 402, 403, 404
 export function operCategory(code: number | null | undefined): OperCategory {
   if (code == null) return 'noise'
   if (NEW_CODES.has(code)) return 'new'
-  if (IMPORT_CODES.has(code)) return 'import'
+  if (IMPORT_OPER_CODES.has(code)) return 'import'
   if (OWNER_CODES.has(code) || (code >= 307 && code <= 339)) return 'owner'
   if (MODIFICATION_CODES.has(code)) return 'modification'
   // 293 only ends a temporary registration; 5xx are real exits from the register

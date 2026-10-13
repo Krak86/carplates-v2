@@ -82,6 +82,8 @@
   "auctions.hide": "Hide auction check",
   "auctions.importedChip": "Imported — possible auction car",
   "auctions.chipTitle": "Imported car: check the auction history",
+  "auctions.earlierChip": "Was imported",
+  "auctions.earlierChipTitle": "The car's history (under another plate or earlier) includes an import from abroad: check the auction history",
   "auctions.extraTitle": "More resources",
   "auctions.extraIntro": "Last-resort places: no VIN archive of auction cars here, but useful to look at lots, dealers or the car's origin.",
   "auctions.intro": "Was this VIN ever sold at a car auction as a damaged lot? Public archives keep photos, damage and sale prices for years.",
