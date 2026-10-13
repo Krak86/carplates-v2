@@ -1,12 +1,18 @@
 import { Injectable, Logger } from '@nestjs/common'
-import { stockCompanyFor, yahooFinanceUrl } from '@carplates/shared'
-import type { StockRange, StockResponse } from '@carplates/shared'
+import { stockCompanyFor, yahooFinanceNewsUrl, yahooFinanceUrl } from '@carplates/shared'
+import type { StockNewsResponse, StockRange, StockResponse } from '@carplates/shared'
 import { z } from 'zod'
 
 const CHART_URL = 'https://query1.finance.yahoo.com/v8/finance/chart'
 const UPSTREAM_TIMEOUT_MS = 10_000
 const CACHE_TTL_MS = 5 * 60 * 1000
 const CACHE_MAX = 200
+const NEWS_RSS_URL = 'https://feeds.finance.yahoo.com/rss/2.0/headline'
+const NEWS_CACHE_TTL_MS = 15 * 60 * 1000
+const NEWS_SUMMARY_MAX = 280
+const NEWS_MAX = 20
+const NEWS_SEARCH_URL = 'https://query1.finance.yahoo.com/v1/finance/search'
+const NEWS_HEADERS = { 'User-Agent': 'Mozilla/5.0 (compatible; carsua.app)', Accept: 'application/json, text/xml' }
 const INTERVAL: Record<StockRange, string> = { '1d': '5m', '1mo': '1d', '1y': '1d' }
 
 const chartSchema = z.object({
@@ -29,10 +35,13 @@ const chartSchema = z.object({
 
 const EMPTY: StockResponse = { company: null, currency: null, price: null, baseline: null, points: [] }
 
+const EMPTY_NEWS: StockNewsResponse = { company: null, moreUrl: null, items: [] }
+
 @Injectable()
 export class StocksService {
   private readonly logger = new Logger(StocksService.name)
   private readonly cache = new Map<string, { at: number; value: StockResponse }>()
+  private readonly newsCache = new Map<string, { at: number; value: StockNewsResponse }>()
 
   async lookup(brand: string, range: StockRange): Promise<StockResponse> {
     const company = stockCompanyFor(brand)
@@ -85,4 +94,133 @@ export class StocksService {
       points
     }
   }
+
+  private async fetchSearchNews(name: string, symbol: string): Promise<StockNewsResponse['items']> {
+    // Yahoo tags news with the primary line ("VOW.DE") while the chart symbol may be a share class ("VOW3.DE").
+    const tickers = new Set([symbol, symbol.replace(/^([A-Z]+)\d+(?=\.)/, '$1')])
+    // A legal suffix ("Volkswagen Group") makes the word search match nothing.
+    const q = name.replace(/\s+(group|ag|se|sa|nv|plc|inc\.?|corp(oration)?|co\.?|ltd)$/i, '')
+    const params = new URLSearchParams({ q, newsCount: '25', quotesCount: '0', listsCount: '0' })
+    const res = await fetch(`${NEWS_SEARCH_URL}?${params}`, {
+      headers: NEWS_HEADERS,
+      signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS)
+    })
+    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    return searchSchema
+      .parse(await res.json())
+      .news.filter(n => n.link.startsWith('https://') && n.relatedTickers?.some(t => tickers.has(t)))
+      .map(n => {
+        // Smallest thumbnail that is still sharp in a 240px panel.
+        const sizes = (n.thumbnail?.resolutions ?? []).filter(r => r.url.startsWith('https://'))
+        const image = sizes.filter(r => r.width >= 400).sort((a, b) => a.width - b.width)[0] ?? sizes[0]
+        return {
+          id: n.uuid,
+          title: n.title,
+          url: n.link,
+          publishedAt: new Date(n.providerPublishTime * 1000).toISOString(),
+          summary: '',
+          publisher: n.publisher ?? null,
+          imageUrl: image?.url ?? null
+        }
+      })
+  }
+
+  private async fetchRssNews(symbol: string): Promise<StockNewsResponse['items']> {
+    const res = await fetch(`${NEWS_RSS_URL}?${new URLSearchParams({ s: symbol, region: 'US', lang: 'en-US' })}`, {
+      headers: NEWS_HEADERS,
+      signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS)
+    })
+    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    return parseNewsRss(await res.text())
+  }
+
+  async news(brand: string): Promise<StockNewsResponse> {
+    const company = stockCompanyFor(brand)
+    if (!company) return EMPTY_NEWS
+
+    const hit = this.newsCache.get(company.symbol)
+    if (hit && Date.now() - hit.at < NEWS_CACHE_TTL_MS) return hit.value
+
+    try {
+      // The search feed carries images + publishers but is keyed by words, the RSS feed by ticker: use both, deduped.
+      const [rich, rss] = await Promise.all([
+        this.fetchSearchNews(company.name, company.symbol).catch(() => []),
+        this.fetchRssNews(company.symbol).catch(() => [])
+      ])
+      const seen = new Set<string>()
+      const items = [...rich, ...rss]
+        .filter(i => !seen.has(i.id) && !!seen.add(i.id))
+        .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt))
+        .slice(0, NEWS_MAX)
+      if (!items.length && hit) return hit.value
+
+      const value: StockNewsResponse = {
+        company: { id: company.id, name: company.name, symbol: company.symbol, url: yahooFinanceUrl(company.symbol) },
+        moreUrl: yahooFinanceNewsUrl(company.symbol),
+        items
+      }
+      if (this.newsCache.size >= CACHE_MAX) this.newsCache.delete(this.newsCache.keys().next().value!)
+      this.newsCache.set(company.symbol, { at: Date.now(), value })
+      return value
+    } catch (err) {
+      this.logger.warn(`Stock news fetch failed for ${company.symbol}: ${err instanceof Error ? err.message : err}`)
+      return hit?.value ?? EMPTY_NEWS
+    }
+  }
+}
+
+const searchSchema = z.object({
+  news: z
+    .array(
+      z.object({
+        uuid: z.string(),
+        title: z.string(),
+        publisher: z.string().optional(),
+        link: z.string(),
+        providerPublishTime: z.number(),
+        relatedTickers: z.array(z.string()).optional(),
+        thumbnail: z
+          .object({ resolutions: z.array(z.object({ url: z.string(), width: z.number() })).optional() })
+          .optional()
+      })
+    )
+    .default([])
+})
+
+const decodeXml = (s: string): string =>
+  s
+    .replace(/^<!\[CDATA\[([\s\S]*?)\]\]>$/, '$1')
+    .replace(/&#x([0-9a-f]+);/gi, (_, h: string) => String.fromCodePoint(parseInt(h, 16)))
+    .replace(/&#(\d+);/g, (_, d: string) => String.fromCodePoint(Number(d)))
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&amp;/g, '&')
+    .trim()
+
+const tagText = (block: string, tag: string): string => {
+  const m = new RegExp(`<${tag}[^>]*>([\\s\\S]*?)</${tag}>`).exec(block)
+  return m ? decodeXml(m[1]!) : ''
+}
+
+/** Items of a Yahoo Finance headline feed; entries without a title, an https link or a valid date are dropped. */
+export function parseNewsRss(xml: string): StockNewsResponse['items'] {
+  return [...xml.matchAll(/<item>([\s\S]*?)<\/item>/g)].flatMap(([, block]) => {
+    const title = tagText(block!, 'title')
+    const url = tagText(block!, 'link')
+    const published = new Date(tagText(block!, 'pubDate'))
+    if (!title || !url.startsWith('https://') || Number.isNaN(published.getTime())) return []
+    return [
+      {
+        id: tagText(block!, 'guid') || url,
+        title,
+        url,
+        publishedAt: published.toISOString(),
+        summary: tagText(block!, 'description').slice(0, NEWS_SUMMARY_MAX),
+        publisher: null,
+        imageUrl: null
+      }
+    ]
+  })
 }

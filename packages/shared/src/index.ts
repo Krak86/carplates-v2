@@ -152,6 +152,7 @@ export {
   STOCK_RANGES,
   stockCompanyFor,
   yahooFinanceUrl,
+  yahooFinanceNewsUrl,
   type StockCompany,
   type StockRange
 } from './stockCompanies.js'
@@ -478,7 +479,9 @@ export {
   socialPostSchema,
   socialResponseSchema,
   stockResponseSchema,
+  stockNewsResponseSchema,
   type StockResponse,
+  type StockNewsResponse,
   type NewsItem,
   type NewsPageResponse,
   type NewsResponse,

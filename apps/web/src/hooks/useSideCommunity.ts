@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
+import type { StockNewsResponse } from '@carplates/shared'
 
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { blueskyQuery } from '@/lib/bluesky'
 import { type CommunityPost, lemmyQuery, stackExchangeQuery } from '@/lib/community'
 import { newsLangFilter } from '@/lib/news'
-import { newsQuery } from '@/lib/queries'
+import { newsQuery, stockNewsQuery } from '@/lib/queries'
 
 /** Room for the card (700px) plus two 240px columns on each side. Narrower desktops get the first column only. */
 export const SECOND_COLUMN_QUERY = '(min-width: 1760px)'
@@ -22,9 +23,19 @@ type Result = {
   /** Lemmy / Q&A beside the first-column widget, after the delay and only on very wide screens. */
   leftSecond: CommunitySlot | null
   rightSecond: CommunitySlot | null
+  /** Yahoo Finance headlines, stacked below the Q&A widget in whichever right column it sits (or alone there). */
+  stockNewsFirst: StockNewsResponse | null
+  stockNewsSecond: StockNewsResponse | null
 }
 
-const EMPTY: Result = { leftFirst: null, rightFirst: null, leftSecond: null, rightSecond: null }
+const EMPTY: Result = {
+  leftFirst: null,
+  rightFirst: null,
+  leftSecond: null,
+  rightSecond: null,
+  stockNewsFirst: null,
+  stockNewsSecond: null
+}
 
 /**
  * Placement of the Lemmy and Mechanics-Q&A side widgets. Left column: Bluesky, then Lemmy beside it — or in its place
@@ -53,6 +64,7 @@ export function useSideCommunity(
   const news = useQuery({ ...newsQuery(brand, model, year, newsLangFilter(i18n.language)), enabled })
   const lemmy = useQuery({ ...lemmyQuery(brand ?? '', model), enabled })
   const qa = useQuery({ ...stackExchangeQuery(brand ?? '', model), enabled })
+  const stockNews = useQuery({ ...stockNewsQuery(brand ?? ''), enabled })
 
   if (!enabled) return EMPTY
 
@@ -66,10 +78,14 @@ export function useSideCommunity(
     ? { posts: qa.data.posts, moreUrl: qa.data.searchUrl }
     : null
 
+  const stockNewsSlot = stockNews.data?.items.length ? stockNews.data : null
+
   return {
     leftFirst: blueskySettled && !hasBluesky ? lemmySlot : null,
     rightFirst: !news.isPending && !hasNews ? qaSlot : null,
     leftSecond: blueskySettled && hasBluesky && isWide && delayed ? lemmySlot : null,
-    rightSecond: !news.isPending && hasNews && isWide && delayed ? qaSlot : null
+    rightSecond: !news.isPending && hasNews && isWide && delayed ? qaSlot : null,
+    stockNewsFirst: !news.isPending && !hasNews ? stockNewsSlot : null,
+    stockNewsSecond: !news.isPending && hasNews && isWide && delayed ? stockNewsSlot : null
   }
 }

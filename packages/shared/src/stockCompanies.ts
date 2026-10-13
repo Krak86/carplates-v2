@@ -76,3 +76,5 @@ export const DEFAULT_STOCK_RANGE: StockRange = '1d'
 
 export const yahooFinanceUrl = (symbol: string): string =>
   `https://finance.yahoo.com/quote/${encodeURIComponent(symbol)}`
+
+export const yahooFinanceNewsUrl = (symbol: string): string => `${yahooFinanceUrl(symbol)}/news/`

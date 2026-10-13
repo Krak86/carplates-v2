@@ -52,6 +52,7 @@ const EMPTY_WEIGHT_BOARD: WeightBoard = { heaviest: [], lightest: [] }
 const NewsWidget = lazy(() => import('@/components/NewsWidget'))
 const BlueskyWidget = lazy(() => import('@/components/BlueskyWidget'))
 const CommunityWidget = lazy(() => import('@/components/CommunityWidget'))
+const StockNewsWidget = lazy(() => import('@/components/StockNewsWidget'))
 const NewCarsWidget = lazy(() => import('@/components/NewCarsWidget'))
 const StockWidget = lazy(() => import('@/components/StockWidget'))
 
@@ -377,6 +378,14 @@ export default function SearchRoute(): ReactNode {
               </LoadErrorBoundary>
             )}
 
+            {community.stockNewsFirst && (
+              <LoadErrorBoundary compact>
+                <Suspense fallback={null}>
+                  <StockNewsWidget news={community.stockNewsFirst} side="right" />
+                </Suspense>
+              </LoadErrorBoundary>
+            )}
+
             <LoadErrorBoundary compact>
               <Suspense fallback={null}>
                 <NewCarsWidget key={wikiHeroVehicle.brand} brand={wikiHeroVehicle.brand} />
@@ -386,13 +395,28 @@ export default function SearchRoute(): ReactNode {
         )}
 
         {/* Second right column, beside the first (very wide screens, ~1s after it): mechanics Q&A. */}
-        {community.rightSecond && (
+        {(community.rightSecond || community.stockNewsSecond) && (
           <div className="pointer-events-none fixed top-20 right-67 z-10 flex max-h-[calc(100vh-6rem)] w-60 flex-col gap-3 overflow-x-hidden overflow-y-auto">
-            <LoadErrorBoundary compact>
-              <Suspense fallback={null}>
-                <CommunityWidget icon="🔧" title={t('social.stackexchange')} side="right" {...community.rightSecond} />
-              </Suspense>
-            </LoadErrorBoundary>
+            {community.rightSecond && (
+              <LoadErrorBoundary compact>
+                <Suspense fallback={null}>
+                  <CommunityWidget
+                    icon="🔧"
+                    title={t('social.stackexchange')}
+                    side="right"
+                    {...community.rightSecond}
+                  />
+                </Suspense>
+              </LoadErrorBoundary>
+            )}
+
+            {community.stockNewsSecond && (
+              <LoadErrorBoundary compact>
+                <Suspense fallback={null}>
+                  <StockNewsWidget news={community.stockNewsSecond} side="right" />
+                </Suspense>
+              </LoadErrorBoundary>
+            )}
           </div>
         )}
 

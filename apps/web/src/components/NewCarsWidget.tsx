@@ -128,7 +128,7 @@ export default function NewCarsWidget({ brand }: Props): ReactNode {
         rel="noopener noreferrer nofollow"
         className="rounded-md px-2 py-1.5 text-center text-sm font-medium text-primary hover:bg-surface"
       >
-        {t('newCarsWidget.inStock', { brand: upperBrand(brand), year })} <span aria-hidden>→</span>
+        {t('newCarsWidget.inStock', { brand: upperBrand(brand), year })} <span aria-hidden>↗</span>
       </a>
     </aside>
   )

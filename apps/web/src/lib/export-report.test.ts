@@ -51,7 +51,6 @@ function baseInput(overrides: Partial<ExportInput> = {}): ExportInput {
     vinHistoryActions: null,
     wiki: null,
     fuel: null,
-    photos: [],
     euroncap: null,
     nhtsa: null,
     jncap: null,

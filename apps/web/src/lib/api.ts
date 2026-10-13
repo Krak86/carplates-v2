@@ -49,6 +49,7 @@ import {
   newsPageResponseSchema,
   socialResponseSchema,
   stockResponseSchema,
+  stockNewsResponseSchema,
   reviewsResponseSchema,
   safetyRatingsResponseSchema,
   searchResponseSchema,
@@ -109,6 +110,7 @@ import type {
   NewsPageResponse,
   NewsResponse,
   SocialResponse,
+  StockNewsResponse,
   StockRange,
   StockResponse,
   ReviewsResponse,
@@ -535,6 +537,11 @@ export async function getSocial(brand: string): Promise<SocialResponse> {
 /** Price series of the listed company behind a car's brand (live, proxied); `company: null` when the brand has no listing. */
 export async function getStock(brand: string, range: StockRange): Promise<StockResponse> {
   return stockResponseSchema.parse(await getJson(`/api/stocks?brand=${encodeURIComponent(brand)}&range=${range}`))
+}
+
+/** Yahoo Finance headlines of the listed company behind a car's brand (live, proxied); empty when the brand has no listing. */
+export async function getStockNews(brand: string): Promise<StockNewsResponse> {
+  return stockNewsResponseSchema.parse(await getJson(`/api/stocks/news?brand=${encodeURIComponent(brand)}`))
 }
 
 /** One page of the /news archive, optionally narrowed to some source ids. */

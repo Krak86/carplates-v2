@@ -28,7 +28,6 @@ import {
   safetyRatingsQuery,
   statsTopQuery,
   vdbQuery,
-  vehiclePhotosQuery,
   vinQuery,
   wikiInfoQuery
 } from '@/lib/queries'
@@ -64,7 +63,7 @@ const FAIL_FAST_OFFLINE = { networkMode: 'always', retry: false } as const
 
 /**
  * Gathers every section the "Copy all info" button offers — fetching whatever isn't already
- * cached (all six NCAP sources, wiki, stock photos, plate/VIN history) regardless of which
+ * cached (all six NCAP sources, wiki, plate/VIN history) regardless of which
  * sections the viewer actually has expanded on screen — then renders the requested format.
  */
 export function useCopyAllInfoActions(params: CopyAllInfoParams): UseCopyAllInfoActions {
@@ -91,7 +90,6 @@ export function useCopyAllInfoActions(params: CopyAllInfoParams): UseCopyAllInfo
       kncap,
       iihs,
       wiki,
-      photos,
       stats,
       fuel,
       rdw,
@@ -119,9 +117,6 @@ export function useCopyAllInfoActions(params: CopyAllInfoParams): UseCopyAllInfo
       hasRatingsQuery ? safe(queryClient.ensureQueryData(iihsRatingsQuery(make, model, year))) : Promise.resolve(null),
       hasWikiQuery
         ? safe(queryClient.ensureQueryData(wikiInfoQuery(make, model, i18n.language, vehicle.year)))
-        : Promise.resolve(null),
-      hasWikiQuery
-        ? safe(queryClient.ensureQueryData(vehiclePhotosQuery(make, model, vehicle.year)))
         : Promise.resolve(null),
       safe(queryClient.ensureQueryData({ ...statsTopQuery(), ...FAIL_FAST_OFFLINE })),
       hasRatingsQuery
@@ -180,7 +175,6 @@ export function useCopyAllInfoActions(params: CopyAllInfoParams): UseCopyAllInfo
       vinHistoryActions: params.vinRegistryActions ?? vinDetail?.registry?.actions ?? null,
       wiki,
       fuel,
-      photos: photos?.images ?? [],
       euroncap,
       nhtsa,
       jncap,

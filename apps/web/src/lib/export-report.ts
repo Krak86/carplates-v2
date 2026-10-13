@@ -19,7 +19,6 @@ import type {
   SafetyRatingsResponse,
   StatsTopResponse,
   VdbResponse,
-  VehiclePhoto,
   WikiInfo
 } from '@carplates/shared'
 
@@ -156,7 +155,6 @@ export type ExportInput = {
   wiki: WikiInfo | null
   /** Fuel/CO2 estimate for similar vehicles — the same data the ResultCard's "Emissions" section shows. */
   fuel: FuelEconomyResponse | null
-  photos: VehiclePhoto[]
   euroncap: EuroNcapRatingsResponse | null
   nhtsa: SafetyRatingsResponse | null
   jncap: JncapRatingsResponse | null
@@ -567,16 +565,6 @@ function buildWikiSection(input: ExportInput, t: Translate): ExportKeyValueSecti
   return { type: 'kv', id: 'wiki', title: t('wiki.title'), rows }
 }
 
-function buildPhotosSection(input: ExportInput, t: Translate): ExportLinksSection | null {
-  if (input.photos.length === 0) return null
-  return {
-    type: 'links',
-    id: 'photos',
-    title: t('photos.title'),
-    links: input.photos.map((p, i) => ({ label: t('export.photoN', { n: i + 1 }), url: p.webformatURL }))
-  }
-}
-
 // --- Crash-test safety: coverage + per-source "what do these numbers mean" text, mirroring the
 // ❓ popovers in SafetyRatings.tsx / *Ratings.tsx (see those files' RatingsInfo/CoverageInfo). ---
 
@@ -864,7 +852,6 @@ function collectMedia(
   })
   input.reviews?.videos.forEach(v => addVideo(`${t('videos.title')} — ${v.title}`, v.url))
   if (input.wiki?.image) addImage(t('wiki.title'), input.wiki.image.url)
-  input.photos.forEach((p, i) => addImage(t('export.photoN', { n: i + 1 }), p.webformatURL))
 
   const images_ = [...images.entries()].map(([url, label]) => ({ label, url }))
   const videos_ = [...videos.entries()].map(([url, label]) => ({ label, url }))
@@ -924,7 +911,6 @@ export function buildExportReport(input: ExportInput, t: Translate): ExportRepor
     ...buildMotSections(input.mot, t, input.lang),
     buildReviewsSection(input, t),
     buildWikiSection(input, t),
-    buildPhotosSection(input, t),
     media.images,
     media.videos
   ]

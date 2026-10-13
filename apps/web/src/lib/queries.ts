@@ -42,6 +42,7 @@ import {
   getNewsPage,
   getSocial,
   getStock,
+  getStockNews,
   getReviews,
   getSafetyStats,
   getIihsRatings,
@@ -524,6 +525,14 @@ export function stockQuery(brand: string, range: StockRange) {
     queryKey: ['stock', brand, range],
     queryFn: () => getStock(brand, range),
     staleTime: 5 * 60 * 1000
+  })
+}
+
+export function stockNewsQuery(brand: string) {
+  return queryOptions({
+    queryKey: ['stock-news', brand],
+    queryFn: () => getStockNews(brand),
+    staleTime: 15 * 60 * 1000
   })
 }
 

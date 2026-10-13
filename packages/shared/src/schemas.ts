@@ -933,3 +933,22 @@ export const stockResponseSchema = z.object({
   points: z.array(z.tuple([z.number(), z.number()]))
 })
 export type StockResponse = z.infer<typeof stockResponseSchema>
+
+/** Yahoo Finance headlines for the listed company behind a car's brand (live, via the API's RSS proxy). */
+export const stockNewsResponseSchema = z.object({
+  company: z.object({ id: z.string(), name: z.string(), symbol: z.string(), url: z.string() }).nullable(),
+  /** The company's own news page on Yahoo Finance ("more"). */
+  moreUrl: z.string().nullable(),
+  items: z.array(
+    z.object({
+      id: z.string(),
+      title: z.string(),
+      url: z.string(),
+      publishedAt: z.string(),
+      summary: z.string(),
+      publisher: z.string().nullable().optional(),
+      imageUrl: z.string().nullable().optional()
+    })
+  )
+})
+export type StockNewsResponse = z.infer<typeof stockNewsResponseSchema>
