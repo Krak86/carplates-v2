@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next'
 import { NavLink } from 'react-router'
 
 import { useSession } from '@/components/auth/use-session'
+import LoginButton from '@/components/auth/LoginButton'
+import LayersButton from '@/components/LayersButton'
 import OfflineDataSettings from '@/components/OfflineDataSettings'
 import Spinner from '@/components/ui/Spinner'
 import { LANGS } from '@/i18n'
@@ -42,6 +44,11 @@ export default function Sidebar(): ReactNode {
 
   return (
     <nav className="flex h-full w-64 flex-col gap-1 border-r border-[var(--color-border)] bg-[var(--color-bg)]/50 p-3 backdrop-blur-md">
+      {/* Mobile only: the header hides these below md. The row is the popovers' positioning context. */}
+      <div className="relative mb-1 flex gap-2 md:hidden">
+        <LayersButton inSidebar />
+        <LoginButton inSidebar />
+      </div>
       <NavLink viewTransition to="/" className={linkClass} onClick={handleClose} end>
         <span aria-hidden>🔍</span> {t('nav.search')}
       </NavLink>

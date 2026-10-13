@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 
 import { useSession } from '@/components/auth/use-session'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
+import { cn } from '@/lib/cn'
 
 // Google's script is only fetched once this popover opens (see lib/google-identity.ts).
 const GoogleSignInButton = lazy(() => import('@/components/auth/GoogleSignInButton'))
@@ -11,8 +12,13 @@ const TelegramSignInButton = lazy(() => import('@/components/auth/TelegramSignIn
 const EmailSignInForm = lazy(() => import('@/components/auth/EmailSignInForm'))
 const AccountMenu = lazy(() => import('@/components/auth/AccountMenu'))
 
+type Props = {
+  /** Mobile drawer variant: the popover spans the sidebar row (positioned by the row) instead of hanging off the button. */
+  inSidebar?: boolean
+}
+
 /** Header trigger right of the layers button: a person icon when anonymous, the avatar / initial once signed in. Hidden offline. */
-export default function LoginButton(): ReactNode {
+export default function LoginButton({ inSidebar = false }: Props): ReactNode {
   const { t } = useTranslation()
   const online = useOnlineStatus()
   const { user } = useSession()
@@ -43,7 +49,7 @@ export default function LoginButton(): ReactNode {
   const label = user ? t('auth.menu') : t('auth.signIn')
 
   return (
-    <div ref={rootRef} className="relative shrink-0">
+    <div ref={rootRef} className={cn('shrink-0', inSidebar ? 'static' : 'relative max-md:hidden')}>
       <button
         type="button"
         aria-label={label}
@@ -74,7 +80,7 @@ export default function LoginButton(): ReactNode {
       </button>
 
       {open && (
-        <div className="absolute top-full right-0 pt-2">
+        <div className={cn('absolute top-full pt-2', inSidebar ? 'inset-x-0 z-10 [&>div]:w-full' : 'right-0')}>
           <Suspense fallback={null}>
             {user ? (
               <AccountMenu user={user} onNavigate={() => setOpen(false)} />
