@@ -55,6 +55,9 @@ ESLint 10, Vite 8, Tailwind v4 (`@theme` in `src/styles/global.css`), i18next ua
 
 - After each big update give a suggested commit message (subject + bullet per change, covering everything uncommitted: check
   `git status` / `git diff --stat`; split if logical). Never run `git commit` / `git push` unless asked.
+- **Seed CSVs mirror scraped tables.** After any change to `registry.wiki_image` (pre-warm, alias edits in `wikiAliases.ts` + re-scrape, row
+  deletes), re-run `pnpm export:wiki-images:csv` so `scripts/seed-data/wiki-images.csv.gz` matches. The same holds for every other
+  `export:*:csv` dataset: a new setup loads the CSV instead of re-scraping.
 - Run `pnpm format` first (`scripts/src/fixtures` is in `.prettierignore` — never reformat it).
 - Keep docs current: finished work → write-up in `docs/plan-done.md`, one-line ✅ in `PLAN.md`, conventions in `docs/features-reference.md`.
 
