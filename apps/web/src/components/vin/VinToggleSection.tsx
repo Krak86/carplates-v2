@@ -14,6 +14,8 @@ type Props = {
   showLabel: string
   hideLabel: string
   defaultOpen?: boolean
+  /** Each change opens the section (0 = never asked) — for a control elsewhere on the card. */
+  openSignal?: number
   /** Fires with the new state on every toggle — for callers that fetch lazily on first open. */
   onOpenChange?: (open: boolean) => void
   /** Extra header controls (e.g. a share button), rendered only while expanded. */
@@ -34,6 +36,7 @@ export default function VinToggleSection({
   showLabel,
   hideLabel,
   defaultOpen = false,
+  openSignal = 0,
   onOpenChange,
   actions,
   bordered = true,
@@ -41,7 +44,14 @@ export default function VinToggleSection({
   ref,
   children
 }: Props): ReactNode {
-  const [open, setOpen] = useState(defaultOpen)
+  const [open, setOpen] = useState(defaultOpen || openSignal > 0)
+  const [seenSignal, setSeenSignal] = useState(openSignal)
+
+  if (openSignal !== seenSignal) {
+    setSeenSignal(openSignal)
+    setOpen(true)
+    onOpenChange?.(true)
+  }
 
   return (
     <div

@@ -62,6 +62,7 @@ import { cn } from '@/lib/cn'
 import { koatuuRegion } from '@/lib/koatuu'
 import { useRegionLabel } from '@/lib/region-label'
 import { depMapsUrl } from '@/lib/maps'
+import { hasImportOperation } from '@/lib/auction-sites'
 import { plateHistoryQuery, vinQuery } from '@/lib/queries'
 import { scrollElementIntoView } from '@/lib/share-section'
 import { formatVehicleLabel } from '@/lib/vehicle-label'
@@ -71,6 +72,7 @@ import SectionSkeleton from '@/components/ui/SectionSkeleton'
 // Everything below the fold loads on demand (near the viewport, or a `?section=` share link): see LazySection.
 const FavoriteButton = lazy(() => import('@/components/FavoriteButton'))
 const VehicleKindIcon = lazy(() => import('@/components/VehicleKindIcon'))
+const AuctionCheck = lazy(() => import('@/components/AuctionCheck'))
 const StockSection = lazy(() => import('@/components/StockSection'))
 const SocialSection = lazy(() => import('@/components/SocialSection'))
 const NewsSection = lazy(() => import('@/components/NewsSection'))
@@ -125,6 +127,8 @@ export default function ResultCard({ data }: Props): ReactNode {
   const [valueCurrency, setValueCurrency] = useState<Currency>('EUR')
   const [valueOpenSignal, setValueOpenSignal] = useState(0)
   const [raceOpenSignal, setRaceOpenSignal] = useState(0)
+  // The "imported" status chip opens the Auction history section (mounting it first if it is still lazy).
+  const [auctionOpenSignal, setAuctionOpenSignal] = useState(0)
   const basicRef = useRef<HTMLDivElement>(null)
   const historyRef = useRef<HTMLDivElement>(null)
   const vinRef = useRef<HTMLDivElement>(null)
@@ -284,7 +288,12 @@ export default function ResultCard({ data }: Props): ReactNode {
             {/* Reserves one chip-height up front so late-arriving chips never push the card down. */}
             <CollapsibleChips className="mt-1">
               {chipsPending && <span aria-hidden className="h-6 w-24 animate-pulse rounded-full bg-border" />}
-              <LastOperationChip operCode={c.operCode} operName={c.operName} dReg={c.dReg} />
+              <LastOperationChip
+                operCode={c.operCode}
+                operName={c.operName}
+                dReg={c.dReg}
+                onOpenAuctions={hasVin ? () => setAuctionOpenSignal(n => n + 1) : undefined}
+              />
               <GenerationChip brand={c.brand} model={c.model} year={c.makeYear} />
               <TopStatBadges brand={c.brand} model={c.model} color={c.color} region={data.region} kind={c.kind} />
               <VdbChips brand={c.brand} model={c.model} kind={c.kind} />
@@ -654,6 +663,18 @@ export default function ResultCard({ data }: Props): ReactNode {
         <LazySection sections={['stock']}>
           <StockSection brand={c.brand} model={c.model} year={c.makeYear} />
         </LazySection>
+        {hasVin && c.vin && (
+          <LazySection sections={['auctions']} forceMount={auctionOpenSignal > 0}>
+            <AuctionCheck
+              vin={c.vin}
+              openSignal={auctionOpenSignal}
+              imported={hasImportOperation([
+                { operCode: c.operCode, operName: c.operName },
+                ...(vinDetail.data?.registry?.actions ?? plateHistory.data?.actions ?? [])
+              ])}
+            />
+          </LazySection>
+        )}
         <PaidFeatureSections hasPlate={!!data.plate} hasVin={hasVin} />
 
         <ReportIssueLink about={data.plate ?? c.vin ?? undefined} className="mt-4" />

@@ -1,3 +1,4 @@
+import { lazy } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
@@ -26,8 +27,12 @@ import VinBarcode from '@/components/vin/VinBarcode'
 import VinRegistryHistory from '@/components/vin/VinRegistryHistory'
 import VinDecodeTabs from '@/components/vin/VinDecodeTabs'
 import VinTypicalData from '@/components/vin/VinTypicalData'
+import LazySection from '@/components/LazySection'
 import { useCardMotion } from '@/hooks/useCardMotion'
+import { hasImportOperation } from '@/lib/auction-sites'
 import { useUiStore } from '@/store/ui-store'
+
+const AuctionCheck = lazy(() => import('@/components/AuctionCheck'))
 
 type Props = {
   data: VinDecodeResponse
@@ -123,6 +128,10 @@ export default function VinResult({ data }: Props): ReactNode {
             </>
           }
         />
+
+        <LazySection sections={['auctions']}>
+          <AuctionCheck vin={data.vin} imported={hasImportOperation(registry?.actions ?? [])} />
+        </LazySection>
       </Card>
     </div>
   )

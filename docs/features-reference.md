@@ -239,6 +239,8 @@ reuses the plate-card components (VehiclesDB chips, RDW Specs, Emissions) throug
 fuel/type/displacement to registry-style inputs; it is labelled "≈ typical, not decoded". Crash ratings and wiki info go through the
 `overviewExtras` slot so only the Overview tab shows them; so does `VinTypicalData` (VehiclesDB chips + RDW specs + emissions) — VIN page only, the plate card has its own sections for those. The "Copy all info" export (`export-report.ts`) also gathers RDW specs, VehiclesDB and the reviews catalog.
 
+**Auction history** (`?section=auctions`, `AuctionCheck.tsx`, sites in `lib/auction-sites.ts`): lazy section on the plate card (valid VIN only) and the VIN page. `tier: 'main'` archives bind a search to the visitor's session, so they open `AuctionVinModal` (copy VIN, paste on the site); none has a VIN-in-URL search; Bidfax/Bid.cars open the language-matching home (`bidfax.info` ua, `en.bidfax.info` en/ru, `bid.cars/{ua,ru,en}`). `tier: 'extra'` sites (Copart — active lots only, opens pre-filled; IAAI, Stat.vin, OPENLANE, Encar) have no VIN archive and sit in a "More resources" list. The "imported — possible auction car" chip comes from `hasImportOperation` (import op codes **or** `ПРИВЕЗЕН/ВВЕЗЕН` in `operName`) over whatever history is loaded; the card's "imported" last-operation chip opens/scrolls this section via `openSignal` instead of linking to Advanced search. The URL patterns could not be verified from tooling (sites block bots) — recheck in a browser when touching them. Link-out only; the facts are static copy, no statistics.
+
 ## Offline / PWA details
 
 Rules in CLAUDE.md are the short form. Full detail: the service worker only exists in production builds. Changing a Zod schema in

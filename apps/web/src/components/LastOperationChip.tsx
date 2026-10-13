@@ -11,6 +11,8 @@ type Props = {
   operName: string | null
   /** ISO date of the last operation. */
   dReg: string | null
+  /** Given for a car with a valid VIN: an "imported" status then opens the Auction history section instead of searching. */
+  onOpenAuctions?: () => void
 }
 
 /** Statuses that are timeline categories reuse that explanation; the rest have their own `oper.statusInfo.*`. */
@@ -28,13 +30,21 @@ const CATEGORY_INFO: Partial<Record<OperStatus, string>> = {
  * history, with a ❓ explaining the operation. Built from the plate payload itself — no extra request, so it renders
  * with the card. The label links to Advanced search filtered to the same status.
  */
-export default function LastOperationChip({ operCode, operName, dReg }: Props): ReactNode {
+export default function LastOperationChip({ operCode, operName, dReg, onOpenAuctions }: Props): ReactNode {
   const { t } = useTranslation()
   if (operCode == null) return null
 
   const status = operStatus(operCode)
   const year = dReg?.slice(0, 4)
   const categoryInfo = CATEGORY_INFO[status]
+  const opensAuctions = status === 'import' && !!onOpenAuctions
+  const label = (
+    <>
+      <span aria-hidden>{OPER_STATUS_ICON[status]}</span>
+      {t(`oper.status.${status}`)}
+      {year && <span className="text-[var(--color-muted)]">· {year}</span>}
+    </>
+  )
 
   return (
     <span
@@ -42,16 +52,26 @@ export default function LastOperationChip({ operCode, operName, dReg }: Props): 
         'inline-flex animate-chip-in items-center gap-1 rounded-full border chip-tone py-0.5 pr-1 pl-2 text-xs text-[var(--color-fg)] transition-colors chip-registry'
       )}
     >
-      <Link
-        viewTransition
-        to={`/advanced-search?oper=${operCode}`}
-        title={t('oper.statusFindSame')}
-        className="inline-flex items-center gap-1 transition-colors hover:text-[var(--color-primary)]"
-      >
-        <span aria-hidden>{OPER_STATUS_ICON[status]}</span>
-        {t(`oper.status.${status}`)}
-        {year && <span className="text-[var(--color-muted)]">· {year}</span>}
-      </Link>
+      {opensAuctions ? (
+        <button
+          type="button"
+          onClick={onOpenAuctions}
+          title={t('auctions.chipTitle')}
+          className="inline-flex items-center gap-1 transition-colors hover:text-[var(--color-primary)]"
+        >
+          {label}
+          <span aria-hidden>↓</span>
+        </button>
+      ) : (
+        <Link
+          viewTransition
+          to={`/advanced-search?oper=${operCode}`}
+          title={t('oper.statusFindSame')}
+          className="inline-flex items-center gap-1 transition-colors hover:text-[var(--color-primary)]"
+        >
+          {label}
+        </Link>
+      )}
 
       <InfoPopover label={t('oper.infoLabel')} title={t('oper.statusLast')}>
         <p className="m-0 font-medium">
