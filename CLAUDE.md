@@ -10,7 +10,7 @@ Docs map (**grep headings, never read whole** — several are 100–350 KB): `PL
 write-ups · `README.md` setup, env, scripts · `docs/features-reference.md` per-feature conventions (VehiclesDB, RDW, value, rankings,
 posts, racer, Accounts, VIN page, offline/PWA, link previews, sitemap/rate limits, plate regions, generations) — **read the matching
 section before touching those areas** · `docs/commands-reference.md` `ingest:*` / `export:*` / ALPR · `docs/legal-and-monetization.md`
-cookies/licence/ads · also `DATASETS_PLAN.md`, `GAME_PLAN.md`, `FEATURES_PLAN.md`, `SCHEDULE.md`, `docs/vps-http2-http3.md`.
+cookies/licence/ads · also `docs/catalog-plan.md` (model catalog pages, planned), `DATASETS_PLAN.md`, `GAME_PLAN.md`, `FEATURES_PLAN.md`, `SCHEDULE.md`, `docs/vps-http2-http3.md`.
 
 ## Commands
 
