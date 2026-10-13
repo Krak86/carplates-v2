@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { normalizeBody } from '@carplates/shared'
@@ -27,6 +28,12 @@ const HOVER_CLOSE_DELAY_MS = 1000
 // pops every one of them open in passing. Keyboard focus opens immediately (below) —
 // a Tab landing on the button is a deliberate visit, not a passing sweep.
 const HOVER_OPEN_DELAY_MS = 400
+
+const PANEL_WIDTH = 544 // w-136
+const PANEL_MAX_HEIGHT = 256 // max-h-64
+const VIEWPORT_MARGIN = 16
+
+type Placement = { left: number; width: number; top?: number; bottom?: number; maxHeight: number }
 
 type DimensionConfig = {
   // `fuel` and `body` have a per-value icon (keyword-matched, ResultCard.helpers.ts); only
@@ -67,6 +74,8 @@ export default function FieldInfoButton({ dimension, current }: Props): ReactNod
   const [pinned, setPinned] = useState(false)
   const visible = hovering || pinned
   const containerRef = useRef<HTMLSpanElement>(null)
+  const panelRef = useRef<HTMLDivElement>(null)
+  const [placement, setPlacement] = useState<Placement | null>(null)
   const closeTimeoutRef = useRef<number | null>(null)
   const openTimeoutRef = useRef<number | null>(null)
   const stats = useQuery({ ...statsFieldQuery(dimension), enabled: visible })
@@ -106,7 +115,9 @@ export default function FieldInfoButton({ dimension, current }: Props): ReactNod
   useEffect(() => {
     if (!pinned) return
     function handlePointerDown(e: PointerEvent): void {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) setPinned(false)
+      const target = e.target as Node
+      if (containerRef.current?.contains(target) || panelRef.current?.contains(target)) return
+      setPinned(false)
     }
     function handleKeyDown(e: KeyboardEvent): void {
       if (e.key === 'Escape') {
@@ -127,6 +138,44 @@ export default function FieldInfoButton({ dimension, current }: Props): ReactNod
     setPinned(false)
     setHovering(false)
   }
+
+  // The panel is portaled to <body> with `fixed` coordinates clamped to the viewport: absolute
+  // inside the button's container, a right-aligned 34rem panel overflowed the left screen edge
+  // on phones (and any clipping ancestor, e.g. the sidebar, cut it) with no way to scroll to it.
+  useLayoutEffect(() => {
+    if (!visible || !containerRef.current) {
+      setPlacement(null)
+      return
+    }
+    const rect = containerRef.current.getBoundingClientRect()
+    const width = Math.min(PANEL_WIDTH, window.innerWidth - VIEWPORT_MARGIN * 2)
+    const left = Math.max(VIEWPORT_MARGIN, Math.min(rect.right - width, window.innerWidth - width - VIEWPORT_MARGIN))
+    const spaceBelow = window.innerHeight - rect.bottom - VIEWPORT_MARGIN
+    const spaceAbove = rect.top - VIEWPORT_MARGIN
+    const openAbove = spaceBelow < PANEL_MAX_HEIGHT && spaceAbove > spaceBelow
+    setPlacement({
+      left,
+      width,
+      maxHeight: Math.min(PANEL_MAX_HEIGHT, openAbove ? spaceAbove : spaceBelow),
+      ...(openAbove ? { bottom: window.innerHeight - rect.top } : { top: rect.bottom })
+    })
+  }, [visible])
+
+  // Fixed coordinates come from a one-time measurement, so scrolling elsewhere closes the panel.
+  useEffect(() => {
+    if (!visible) return
+    function handleScroll(e: Event): void {
+      if (panelRef.current && e.target instanceof Node && panelRef.current.contains(e.target)) return
+      handleClose()
+    }
+    window.addEventListener('scroll', handleScroll, true)
+    window.addEventListener('resize', handleClose)
+    return (): void => {
+      window.removeEventListener('scroll', handleScroll, true)
+      window.removeEventListener('resize', handleClose)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- handleClose is stable enough for this listener's lifetime
+  }, [visible])
 
   // Stats rows carry the plain body name ("КАБРІОЛЕТ"), the card may hold the pre-2021 "-B" spelling.
   const currentValue = dimension === 'body' ? normalizeBody(current) : current
@@ -158,89 +207,107 @@ export default function FieldInfoButton({ dimension, current }: Props): ReactNod
       : known
 
   return (
-    <span
-      ref={containerRef}
-      className="relative inline-flex"
-      onMouseEnter={() => {
-        cancelScheduledClose()
-        scheduleOpen()
-      }}
-      onMouseLeave={() => {
-        cancelScheduledOpen()
-        scheduleClose()
-      }}
-      onFocus={() => {
-        cancelScheduledClose()
-        cancelScheduledOpen()
-        setHovering(true)
-      }}
-      onBlur={() => {
-        cancelScheduledOpen()
-        setHovering(false)
-      }}
-    >
-      <button
-        type="button"
-        aria-label={t('field.info', { field: fieldLabel })}
-        aria-expanded={visible}
-        onClick={() => setPinned(v => !v)}
-        className="text-[var(--color-muted)] hover:text-[var(--color-primary)]"
+    <>
+      <span
+        ref={containerRef}
+        className="relative inline-flex"
+        onMouseEnter={() => {
+          cancelScheduledClose()
+          scheduleOpen()
+        }}
+        onMouseLeave={() => {
+          cancelScheduledOpen()
+          scheduleClose()
+        }}
+        onFocus={() => {
+          cancelScheduledClose()
+          cancelScheduledOpen()
+          setHovering(true)
+        }}
+        onBlur={() => {
+          cancelScheduledOpen()
+          setHovering(false)
+        }}
       >
-        ❓
-      </button>
+        <button
+          type="button"
+          aria-label={t('field.info', { field: fieldLabel })}
+          aria-expanded={visible}
+          onClick={() => setPinned(v => !v)}
+          className="text-[var(--color-muted)] hover:text-[var(--color-primary)]"
+        >
+          ❓
+        </button>
+      </span>
 
-      {/* The pt-1 gap (rather than a top margin on the panel below) keeps the hoverable
+      {/* The py-1 gap (rather than a margin on the panel below) keeps the hoverable
           area contiguous with the button — a margin would leave a dead strip the pointer
           has to cross, which drops the hover state before it ever reaches the panel. */}
-      {visible && (
-        <div className="absolute top-full right-0 z-10 pt-1">
+      {visible &&
+        placement &&
+        createPortal(
           <div
-            role="tooltip"
-            className="max-h-64 w-136 max-w-[calc(100vw-2rem)] overflow-y-auto rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] p-2 text-sm shadow-lg"
+            ref={panelRef}
+            style={{ left: placement.left, top: placement.top, bottom: placement.bottom, width: placement.width }}
+            className="fixed z-50 py-1"
+            onMouseEnter={() => {
+              cancelScheduledClose()
+              scheduleOpen()
+            }}
+            onMouseLeave={() => {
+              cancelScheduledOpen()
+              scheduleClose()
+            }}
           >
-            <div className="mb-1 flex items-center justify-between gap-2 px-1.5">
-              <span className="font-semibold">{t('field.infoTitle', { field: fieldLabel })}</span>
-              <button
-                type="button"
-                aria-label={t('field.infoClose')}
-                onClick={handleClose}
-                className="text-[var(--color-muted)] hover:text-[var(--color-fg)]"
-              >
-                ✕
-              </button>
-            </div>
-            {stats.isPending && stats.fetchStatus === 'paused' && (
-              <p className="px-1.5 text-[var(--color-muted)]">{t('offline.needsConnection')}</p>
-            )}
-            {stats.isPending && stats.fetchStatus !== 'paused' && (
-              <p className="px-1.5 text-[var(--color-muted)]">{t('result.loading')}</p>
-            )}
-            {stats.isError && <p className="px-1.5 text-[var(--color-muted)]">{t('result.error')}</p>}
-            <ul className="flex flex-col gap-0.5">
-              {rows.map(row => (
-                <li
-                  key={row.value ?? ''}
-                  className={cn(
-                    'flex items-center justify-between gap-2 rounded px-1.5 py-1 whitespace-nowrap',
-                    row.isCurrent && 'bg-[var(--color-primary)]/15 font-medium'
-                  )}
+            <div
+              role="tooltip"
+              style={{ maxHeight: placement.maxHeight }}
+              className="overflow-y-auto rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] p-2 text-sm shadow-lg"
+            >
+              <div className="mb-1 flex items-center justify-between gap-2 px-1.5">
+                <span className="font-semibold">{t('field.infoTitle', { field: fieldLabel })}</span>
+                <button
+                  type="button"
+                  aria-label={t('field.infoClose')}
+                  onClick={handleClose}
+                  className="text-[var(--color-muted)] hover:text-[var(--color-fg)]"
                 >
-                  <span className="flex items-center gap-1.5">
-                    {dimension === 'color' && <ColorSwatch value={row.value} />}
-                    {row.icon && (
-                      <span aria-hidden title={row.descriptionKey && t(row.descriptionKey)}>
-                        {row.icon}
-                      </span>
+                  ✕
+                </button>
+              </div>
+              {stats.isPending && stats.fetchStatus === 'paused' && (
+                <p className="px-1.5 text-[var(--color-muted)]">{t('offline.needsConnection')}</p>
+              )}
+              {stats.isPending && stats.fetchStatus !== 'paused' && (
+                <p className="px-1.5 text-[var(--color-muted)]">{t('result.loading')}</p>
+              )}
+              {stats.isError && <p className="px-1.5 text-[var(--color-muted)]">{t('result.error')}</p>}
+              <ul className="flex flex-col gap-0.5">
+                {rows.map(row => (
+                  <li
+                    key={row.value ?? ''}
+                    className={cn(
+                      'flex items-center justify-between gap-2 rounded px-1.5 py-1 whitespace-nowrap',
+                      row.isCurrent && 'bg-[var(--color-primary)]/15 font-medium'
                     )}
-                    {row.value || t('field.unknown')}
-                  </span>
-                  <span className="text-[var(--color-muted)]">{row.totalRows.toLocaleString()}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      )}
-    </span>
+                  >
+                    <span className="flex items-center gap-1.5">
+                      {dimension === 'color' && <ColorSwatch value={row.value} />}
+                      {row.icon && (
+                        <span aria-hidden title={row.descriptionKey && t(row.descriptionKey)}>
+                          {row.icon}
+                        </span>
+                      )}
+                      {row.value || t('field.unknown')}
+                    </span>
+                    <span className="text-[var(--color-muted)]">{row.totalRows.toLocaleString()}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>,
+          document.body
+        )}
+    </>
   )
 }
