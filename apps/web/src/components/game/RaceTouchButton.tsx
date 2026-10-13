@@ -24,7 +24,7 @@ export default function RaceTouchButton({ label, onHold }: Props): ReactNode {
       onPointerCancel={handleRelease}
       onLostPointerCapture={handleRelease}
       onContextMenu={e => e.preventDefault()}
-      className="flex size-16 touch-none items-center justify-center rounded-full border border-white/40 bg-black/40 text-3xl text-white select-none active:bg-white/40 sm:size-20"
+      className="flex size-[clamp(2.75rem,13cqw,5rem)] touch-none items-center justify-center rounded-full border border-white/40 bg-black/40 text-[clamp(1.5rem,6cqw,1.875rem)] text-white select-none active:bg-white/40"
     >
       {label}
     </button>

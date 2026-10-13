@@ -79,7 +79,7 @@ export default function RaceGameModal({
 
   return createPortal(
     <div className="fixed inset-0 z-30 flex items-center justify-center bg-black/60 p-4" role="dialog" aria-modal>
-      <div className="max-h-full w-full max-w-6xl overflow-y-auto rounded-xl bg-[var(--color-surface)] p-4">
+      <div className="max-h-full w-full max-w-6xl overflow-x-hidden overflow-y-auto rounded-xl bg-[var(--color-surface)] p-4">
         <div className="mb-3 flex items-center justify-between gap-3">
           <div className="flex items-center gap-1.5 font-semibold">
             <span aria-hidden className="leading-none">

@@ -132,7 +132,7 @@ export default function RaceGameStage({ config, onChange, onPickBody }: Props): 
 
   return (
     <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_16rem]">
-      <div>
+      <div className="min-w-0">
         <div
           ref={setFrame}
           onMouseMove={handleMouseMove}
@@ -153,13 +153,14 @@ export default function RaceGameStage({ config, onChange, onPickBody }: Props): 
             <RaceTouchControls
               onInput={handleInput}
               siren={hasSiren ? { on: siren, onToggle: handleToggleSiren } : undefined}
+              fullscreen={fullscreen}
             />
           )}
 
-          {pseudoFullscreen && (
+          {fullscreen && (isTouch || pseudoFullscreen) && (
             <button
               type="button"
-              onClick={() => setPseudoFullscreen(false)}
+              onClick={toggleFullscreen}
               aria-label={t('race.touch.exitFullscreen')}
               className="absolute top-3 left-1/2 size-9 -translate-x-1/2 rounded-full bg-black/50 text-white"
             >
@@ -214,8 +215,8 @@ export default function RaceGameStage({ config, onChange, onPickBody }: Props): 
           )}
         </div>
 
-        <div className="mt-2 flex items-center justify-between gap-3 text-sm text-[var(--color-muted)]">
-          <span>{isTouch ? t('race.controlsTouch') : config.auto ? t('race.controlsAuto') : t('race.controls')}</span>
+        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-[var(--color-muted)]">
+          <span className="min-w-0 basis-full sm:basis-auto">{isTouch ? t('race.controlsTouch') : config.auto ? t('race.controlsAuto') : t('race.controls')}</span>
           {hasSiren && (
             <button
               type="button"
