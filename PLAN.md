@@ -869,25 +869,25 @@ The recurring-job plan (cadences, locking, run log, alerting, build steps) is dr
 
 ### VPS sizing (starting point)
 
-`registry` schema is 13.9 GB (24.7M rows in `registrations`) as of 2026-09,
-growing by roughly the ~110 MB/year the backup policy below already assumes
-for archived source ZIPs — the DB grows at a similar rate (one monthly ingest
-of deltas, not a re-ingest of the full history). Containers to fit: Postgres,
-`api`, `web` (served by `api`), Redis, Caddy, and a monthly `ingest-cron` job
-that runs occasionally and holds an exclusive lock on `registrations` for
+The database is **23 GB** as of 2026-10-13 (`registrations` 14 GB / 24.7M rows + the `current_registration` matview
+8.9 GB; everything else < 0.5 GB), growing by roughly the ~110 MB/year the backup policy below already assumes for archived source
+ZIPs (one monthly ingest of deltas, not a re-ingest of the full history). Containers to fit: Postgres, `api`, `web` (served by
+`api`), Redis, Caddy, and a monthly `ingest-cron` job that runs occasionally and holds an exclusive lock on `registrations` for
 minutes.
 
-| Resource | Spec       | Why                                                                                                                                                                                                               |
-| -------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| CPU      | 4 vCPU     | Normal traffic is light indexed lookups; `ingest-cron` is I/O-bound not CPU-bound, but spare cores keep it from starving API traffic during its run                                                               |
-| RAM      | 8 GB       | Only `current_registration` (the hot-path matview) needs to stay resident, not the full 14GB — 8GB covers Postgres `shared_buffers` + OS page cache + Redis + Node without swapping during ingest's index rebuild |
-| Disk     | 80 GB NVMe | 14GB DB + WAL + 2-3 `pg_dump -Fc` backups + archived source ZIPs (~1.2GB, +110MB/year) + Docker images/logs, with years of headroom                                                                               |
-| Network  | default    | Indexed point-lookups; bandwidth isn't the bottleneck                                                                                                                                                             |
+**Traffic is expected to be low** at launch and possibly long-term (indexed point lookups, CDN/edge-cacheable), so **disk is the
+binding constraint, not CPU/RAM**. Size the disk for the DB, not for users.
 
-Roughly a Hetzner CPX32 / DigitalOcean 4vCPU-8GB class box. A 2 vCPU / 4GB /
-40GB box would also run fine day-to-day and only feel tight during the
-monthly ingest — not an architectural commitment, resize later based on
-PostHog-observed load.
+| Resource | Start (low traffic) | Comfortable | Why                                                                                                                                                                                                                         |
+| -------- | ------------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| CPU      | 2 vCPU              | 4 vCPU      | Lookups are light; `ingest-cron` is I/O-bound. Go to 4 only if PostHog/metrics show API latency during ingest                                                                                                               |
+| RAM      | 8 GB                | 8–16 GB     | Hot path is `current_registration` + indexes (~9 GB on disk); a small working set stays cached with 8 GB. 4 GB works but cold lookups hit disk and the ingest index rebuild is slow                                         |
+| Disk     | 160 GB NVMe         | 160–200 GB  | 23 GB DB + ~9 GB temp during matview refresh/index rebuild + WAL during ingest + 2–3 `pg_dump -Fc` backups (~5–8 GB each) + source ZIPs (~1.2 GB) + images/logs ≈ 60–70 GB peak. 80 GB is too tight; **40 GB does not fit** |
+| Network  | default             | default     | Point lookups; bandwidth isn't the bottleneck                                                                                                                                                                               |
+
+Cheapest sensible path: a 2 vCPU / 8 GB box with a 160 GB disk (or a small root disk + an attached block volume for
+`PGDATA` and backups, which can be grown later without migrating). Resize CPU/RAM later from observed load — not an architectural
+commitment. Keep backups on a separate volume/off-box so they don't compete with PGDATA for space.
 
 - ✅ Load-performance pass done 2026-10-09 (lazy sections, per-language i18n, chunk groups — `docs/plan-done.md` "Load-performance pass").
   **Remaining load-performance actions (value order; context in "Load-performance pass"):**
