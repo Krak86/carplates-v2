@@ -30,8 +30,6 @@ type Props = {
   actions: Registration[]
   /** The plate already shown on this page — its own rows render as plain text, not a link to itself. */
   currentPlate?: string
-  /** The vehicle already shown on this page — a row for a different vehicle (plate reassigned to another car) gets its own brand/model/year line. */
-  currentVehicle?: { brand: string | null; model: string | null }
 }
 
 /**
@@ -40,7 +38,7 @@ type Props = {
  * top — but the connecting arrows point up, since that's the direction the dates actually run in
  * (each step is newer than the one below it).
  */
-export default function RegistrationTimeline({ actions, currentPlate, currentVehicle }: Props): ReactNode {
+export default function RegistrationTimeline({ actions, currentPlate }: Props): ReactNode {
   const { t, i18n } = useTranslation()
 
   return (
@@ -49,8 +47,15 @@ export default function RegistrationTimeline({ actions, currentPlate, currentVeh
         const isLast = index === actions.length - 1
         // Foreign/transit prefixes and plateless (2026+) rows have no oblast match — say so rather than going blank.
         const region = plateRegionLabel(action.plate, t, i18n.language)
-        const isDifferentVehicle =
-          !!currentVehicle && (action.brand !== currentVehicle.brand || action.model !== currentVehicle.model)
+        // Brand / model / year / VIN show on the newest row and again wherever any of them changes going back in time
+        // (plate reassigned to another car, or a row that published no VIN).
+        const newer = actions[index - 1]
+        const showVehicle =
+          !newer ||
+          newer.brand !== action.brand ||
+          newer.model !== action.model ||
+          newer.makeYear !== action.makeYear ||
+          newer.vin !== action.vin
         const category = operCategory(action.operCode)
         const vehicleLabel = [action.brand, action.model].filter(Boolean).join(' ')
 
@@ -89,9 +94,12 @@ export default function RegistrationTimeline({ actions, currentPlate, currentVeh
                   ) : action.plate === currentPlate ? (
                     action.plate
                   ) : (
-                    <Link viewTransition to={`/${action.plate}`} className="text-[var(--color-primary)] underline">
-                      {action.plate}
-                    </Link>
+                    <>
+                      <Link viewTransition to={`/${action.plate}`} className="text-[var(--color-primary)] underline">
+                        {action.plate}
+                      </Link>
+                      <CopyButton text={action.plate} label={t('field.plate')} />
+                    </>
                   )}
                   {action.plateInferred && (
                     <span
@@ -104,13 +112,13 @@ export default function RegistrationTimeline({ actions, currentPlate, currentVeh
                 </span>
               </div>
 
-              {isDifferentVehicle && vehicleLabel && (
+              {showVehicle && vehicleLabel && (
                 <div className="mt-0.5 text-sm font-medium">
                   {vehicleLabel} {action.makeYear ? `(${action.makeYear})` : ''}
                 </div>
               )}
 
-              {isDifferentVehicle && action.vin && (
+              {showVehicle && action.vin && (
                 <div className="mt-0.5 flex items-center gap-1.5 text-sm">
                   <Link
                     viewTransition

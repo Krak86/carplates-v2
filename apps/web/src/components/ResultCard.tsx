@@ -152,7 +152,6 @@ export default function ResultCard({ data }: Props): ReactNode {
   // wore. Neither subsumes the other, so both run and render as separate sections.
   const plateHistory = useQuery({ ...plateHistoryQuery(data.plate), enabled: showMore })
   const vinDetail = useQuery({ ...vinQuery(c.vin ?? ''), enabled: (showMore || showVin) && hasVin })
-  const currentVehicle = { brand: c.brand, model: c.model }
 
   // A pure EV has no engine capacity — power_kwt (2026+ only) is its only engine
   // figure, so it takes the capacity row's place instead of being hidden.
@@ -560,13 +559,7 @@ export default function ResultCard({ data }: Props): ReactNode {
           </div>
           {plateHistory.isPending && <SectionSkeleton />}
           {plateHistory.isError && <p className="text-base text-[var(--color-muted)]">{t('result.error')}</p>}
-          {plateHistory.data && (
-            <RegistrationTimeline
-              actions={plateHistory.data.actions}
-              currentPlate={data.plate}
-              currentVehicle={currentVehicle}
-            />
-          )}
+          {plateHistory.data && <RegistrationTimeline actions={plateHistory.data.actions} currentPlate={data.plate} />}
 
           {hasVin && (vinDetail.isPending || vinDetail.isError || vinDetail.data?.registry) && (
             <div className="mt-4 border-t border-[var(--color-border)] pt-3">
@@ -577,11 +570,7 @@ export default function ResultCard({ data }: Props): ReactNode {
               {vinDetail.isPending && <SectionSkeleton />}
               {vinDetail.isError && <p className="text-base text-[var(--color-muted)]">{t('result.error')}</p>}
               {vinDetail.data?.registry && (
-                <RegistrationTimeline
-                  actions={vinDetail.data.registry.actions}
-                  currentPlate={data.plate}
-                  currentVehicle={currentVehicle}
-                />
+                <RegistrationTimeline actions={vinDetail.data.registry.actions} currentPlate={data.plate} />
               )}
             </div>
           )}
