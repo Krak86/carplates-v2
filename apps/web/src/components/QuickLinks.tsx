@@ -15,6 +15,7 @@ const ROWS = [
 ] as const
 
 const LEGAL_LINKS = [
+  { to: '/install', key: 'install.heading' },
   { to: '/privacy', key: 'legal.privacy.heading' },
   { to: '/terms', key: 'legal.terms.heading' },
   { to: '/discuss', key: 'report.footer' }

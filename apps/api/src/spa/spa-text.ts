@@ -43,6 +43,23 @@ export const STATIC_PAGES: Record<string, Record<Lang, PageText>> = {
     ru: { title: 'О сервисе · Cars UA', description: 'Откуда данные, как работает поиск и что такое Cars UA.' },
     en: { title: 'About · Cars UA', description: 'Where the data comes from, how search works, and what Cars UA is.' }
   },
+  '/install': {
+    ua: {
+      title: 'Встановлення застосунку · Cars UA',
+      description:
+        'Як встановити Cars UA на телефон чи комп’ютер, що працює офлайн, як оновити або видалити застосунок.'
+    },
+    ru: {
+      title: 'Установка приложения · Cars UA',
+      description:
+        'Как установить Cars UA на телефон или компьютер, что работает офлайн, как обновить или удалить приложение.'
+    },
+    en: {
+      title: 'Install the app · Cars UA',
+      description:
+        'How to install Cars UA on your phone or computer, what works offline, and how to update or remove it.'
+    }
+  },
   '/privacy': {
     ua: { title: 'Політика конфіденційності · Cars UA', description: 'Які дані ми зберігаємо і чого не збираємо.' },
     ru: { title: 'Политика конфиденциальности · Cars UA', description: 'Какие данные мы храним и чего не собираем.' },

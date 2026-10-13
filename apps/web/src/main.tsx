@@ -5,6 +5,7 @@ import { BrowserRouter } from 'react-router'
 
 import App from '@/App'
 import { i18nReady } from '@/i18n'
+import '@/lib/install-prompt'
 import { OFFLINE_MAX_AGE_MS, offlineGroup } from '@/lib/offline-cache'
 import { queryPersister, reportOfflineUsage, syncDataVersion } from '@/lib/offline-storage'
 import { queryClient } from '@/lib/query'

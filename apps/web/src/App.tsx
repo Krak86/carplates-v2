@@ -11,6 +11,7 @@ import SearchRoute from '@/routes/SearchRoute'
 
 const AboutRoute = lazy(() => import('@/routes/AboutRoute'))
 const LegalRoute = lazy(() => import('@/routes/LegalRoute'))
+const InstallRoute = lazy(() => import('@/routes/install/InstallRoute'))
 const HistoryRoute = lazy(() => import('@/routes/history/HistoryRoute'))
 const FavoritesRoute = lazy(() => import('@/routes/favorites/FavoritesRoute'))
 const StatsRoute = lazy(() => import('@/routes/stats/StatsRoute'))
@@ -40,6 +41,7 @@ export default function App(): ReactNode {
           <Routes>
             <Route path="/" element={<SearchRoute />} />
             <Route path="/about" element={<AboutRoute />} />
+            <Route path="/install" element={<InstallRoute />} />
             <Route path="/privacy" element={<LegalRoute doc="privacy" />} />
             <Route path="/terms" element={<LegalRoute doc="terms" />} />
             <Route path="/history" element={<HistoryRoute />} />

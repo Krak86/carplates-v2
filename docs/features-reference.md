@@ -249,6 +249,8 @@ that should work offline goes into the persisted-cache rules in `lib/offline-cac
 (`/api/stats`) stay out. Runtime caches are prefixed `carplates-rt-`. SPA cache headers: hashed assets immutable, `index.html` / `sw.js` /
 manifest `no-cache` (`spa.controller.ts`). `@vite-pwa/assets-generator` must stay on v2 (sharp).
 
+**`/install` page** (`routes/install/`): static explainer (what a PWA is, what the app does offline, limits, cache cautions, update/remove steps, best practice) + a live install button. `beforeinstallprompt` fires once and early, so `lib/install-prompt.ts` is imported from `main.tsx` and holds the event; the hook reads it via `useSyncExternalStore`. iOS has no such event (hint text instead). Copy is flat keys `install.<section>.h` / `install.<section>.<n>`; when you add a bullet, bump `items` in `routes/install/helpers.ts` and add the key in ua/ru/en. Update the copy whenever the offline scope (`globIgnores`, `OFFLINE_LIMITS`) changes.
+
 ## Link previews
 
 Meta tags + `/og/*.png` are produced by the **API** (`apps/api/src/spa/`) on first load/deep link — Vite (`:5173`) never shows them. To

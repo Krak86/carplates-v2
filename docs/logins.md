@@ -4,11 +4,11 @@ carsua.app has **no passwords and no built-in/default accounts**. Searching plat
 favorites/history sync, settings and opt-in features. There are three sign-in methods, all ending in the same httpOnly
 `carsua_sid` session cookie (only its SHA-256 is stored in `app.sessions`, TTL `SESSION_TTL_DAYS`, default 30).
 
-| Method   | Endpoint(s)                                           | Env (`apps/api/.env`)                              | Works locally without setup?    |
-| -------- | ----------------------------------------------------- | -------------------------------------------------- | ------------------------------- |
+| Method   | Endpoint(s)                                               | Env (`apps/api/.env`)                                                       | Works locally without setup?      |
+| -------- | --------------------------------------------------------- | --------------------------------------------------------------------------- | --------------------------------- |
 | Email    | `POST /api/auth/email/start`, `…/verify`, `…/verify-link` | `MAIL_TRANSPORT`, `MAIL_FROM`, `AUTH_SECRET`, `SMTP_URL` / `RESEND_API_KEY` | **Yes** — code printed in API log |
-| Google   | `POST /api/auth/google`                               | `GOOGLE_CLIENT_ID`                                 | No — needs an OAuth client      |
-| Telegram | `POST /api/auth/telegram`                             | `TELEGRAM_BOT_TOKEN`, `TELEGRAM_BOT_USERNAME`      | No — needs https tunnel         |
+| Google   | `POST /api/auth/google`                                   | `GOOGLE_CLIENT_ID`                                                          | No — needs an OAuth client        |
+| Telegram | `POST /api/auth/telegram`                                 | `TELEGRAM_BOT_TOKEN`, `TELEGRAM_BOT_USERNAME`                               | No — needs https tunnel           |
 
 A method without its env vars is simply hidden/“not configured”; `GET /api/auth/config` tells the web app which are on.
 

@@ -216,7 +216,9 @@ export default function RaceGameStage({ config, onChange, onPickBody }: Props): 
         </div>
 
         <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-[var(--color-muted)]">
-          <span className="min-w-0 basis-full sm:basis-auto">{isTouch ? t('race.controlsTouch') : config.auto ? t('race.controlsAuto') : t('race.controls')}</span>
+          <span className="min-w-0 basis-full sm:basis-auto">
+            {isTouch ? t('race.controlsTouch') : config.auto ? t('race.controlsAuto') : t('race.controls')}
+          </span>
           {hasSiren && (
             <button
               type="button"
