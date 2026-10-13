@@ -105,13 +105,27 @@ function brandAlias(brand: string, model: string): WikiSearchName | null {
   }
   if (brand === 'газ') {
     if (model.startsWith('2410')) return named('GAZ', '24', 'ГАЗ-24 Волга')
-    if (model.startsWith('2705') || model.startsWith('3221')) return named('GAZ', 'Gazelle', 'ГАЗель')
+    // Gazelle: 2705 / 3221 vans and the 3302 family (33021, 330202, 3302-14, 330232-414 …).
+    if (/^(2705|3221|3302)/.test(model)) return named('GAZ', 'Gazelle', 'ГАЗель')
     if (model.startsWith('2752') || model.startsWith('2217')) return named('GAZ', 'Sobol', 'ГАЗ Соболь')
     if (model.startsWith('31105')) return named('GAZ', '31105', 'ГАЗ-31105 Волга')
+    if (/^(3110|31029|3102)/.test(model)) return named('GAZ', '3110', 'ГАЗ-3110 Волга')
+    // Soviet-era models carry the bare article number plus a variant suffix: 5203 (GAZ-52), 5312 (GAZ-53), 6611 (GAZ-66).
+    const soviet = /^(51|52|53|66|69|21|24|3307)(?:\D|\d{2}|$)/.exec(model)?.[1]
+    if (soviet) return named('GAZ', soviet, `ГАЗ-${soviet}`)
+  }
+  if (brand === 'зил' || brand === 'зіл') {
+    const zil = /^(130|131|157|4331|4334)/.exec(model)?.[1]
+    if (zil) return named('ZIL', zil, `ЗИЛ-${zil}`)
+    if (/^4333/.test(model)) return named('ZIL', '4331', 'ЗИЛ-4331')
+  }
+  // PAZ-3205 and its 32053 / 32054 / 3206 variants; the older PAZ-672 has an article of its own.
+  if (brand === 'паз') {
+    if (/^320[3-6]/.test(model)) return named('PAZ', '3205', 'ПАЗ-3205')
+    if (model.startsWith('672')) return named('PAZ', '672', 'ПАЗ-672')
   }
   if (brand === 'уаз') {
-    if (model.startsWith('3909') || model.startsWith('3962') || model.startsWith('2206'))
-      return named('UAZ', '452', 'УАЗ-452')
+    if (/^(3909|3962|2206|3741|3303|452)/.test(model)) return named('UAZ', '452', 'УАЗ-452')
     if (/^(3151|469)/.test(model)) return named('UAZ', '469', 'УАЗ-469')
     if (model.startsWith('3163')) return named('UAZ', 'Patriot', 'УАЗ Патріот')
   }
@@ -170,7 +184,9 @@ function brandAlias(brand: string, model: string): WikiSearchName | null {
     if (/^g\s?\d{2,3}/.test(m)) return named('Mercedes-Benz', 'G-Class')
     if (/^3\d{2}\s?cdi/.test(m)) return named('Mercedes-Benz', 'Sprinter')
     if (/^(vito )?1\d{2}\s?(cdi|d)$/.test(m)) return named('Mercedes-Benz', 'Vito')
-    if (/^[23](08|10|11|12|14)\s?d$/.test(m)) return named('Mercedes-Benz', 'T1')
+    if (/^[23](08|10|11|12|14)\s?d(-.*)?$/.test(m) || /^3(08|10|11|12|14)$/.test(m)) return named('Mercedes-Benz', 'T1')
+    // Medium vans 4xx / 6xx / 8xx ("412 d", "416 cdi", "609 d", "614 d"): the T2 / Vario family.
+    if (/^[468]\d{2}\s?(d|cdi)$/.test(m)) return named('Mercedes-Benz', 'Vario')
     if (/^190(\s?[de])?$/.test(m)) return named('Mercedes-Benz', '190')
     // Pre-1995 numeric names (200, 230 e, 250 d): the W123/W124 era, which Commons files under the E-Class.
     if (/^2[0-9]{2}(\s?[de])?$/.test(m) || m === '320') return named('Mercedes-Benz', 'E-Class')

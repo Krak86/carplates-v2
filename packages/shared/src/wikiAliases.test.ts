@@ -51,6 +51,25 @@ describe('wikiSearchName', () => {
     expect(wikiSearchName('fiat', 'nuovo doblo 1.3')?.model).toBe('Doblo')
   })
 
+  it('maps Soviet-era trucks and vans to their articles', () => {
+    expect(wikiSearchName('газ', '5203')).toEqual({ brand: 'GAZ', model: '52', leadQuery: 'ГАЗ-52' })
+    expect(wikiSearchName('газ 69', '69')?.leadQuery).toBe('ГАЗ-69')
+    expect(wikiSearchName('газ', '5312')?.model).toBe('53')
+    expect(wikiSearchName('газ', '6611')?.model).toBe('66')
+    expect(wikiSearchName('газ', '33021')?.model).toBe('Gazelle')
+    expect(wikiSearchName('газ', '330232-414')?.model).toBe('Gazelle')
+    expect(wikiSearchName('газ', '31029')?.model).toBe('3110')
+    expect(wikiSearchName('зил', '433362')?.leadQuery).toBe('ЗИЛ-4331')
+    expect(wikiSearchName('зил', '130')?.leadQuery).toBe('ЗИЛ-130')
+    expect(wikiSearchName('паз', '32054')?.leadQuery).toBe('ПАЗ-3205')
+    expect(wikiSearchName('уаз', '3741')?.model).toBe('452')
+    expect(wikiSearchName('уаз', '452д')?.model).toBe('452')
+    expect(wikiSearchName('mercedes-benz', '412 d')?.model).toBe('Vario')
+    expect(wikiSearchName('mercedes-benz', '609 d')?.model).toBe('Vario')
+    expect(wikiSearchName('mercedes-benz', '312d-п18')?.model).toBe('T1')
+    expect(wikiSearchName('mercedes-benz', '310')?.model).toBe('T1')
+  })
+
   it('drops a model repeated in the brand, and maps the not_found tail', () => {
     expect(wikiSearchName('seat leon', 'leon')).toMatchObject({ brand: 'seat', model: 'leon' })
     expect(wikiSearchName('daewoo sens t1311', 'sens t1311')?.model).toBe('Sens')
