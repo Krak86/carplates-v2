@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router'
 import { newCarsUrl, usedCarsUrl } from '@carplates/shared'
 
+import { MARKET_SITES } from '@/components/EstimatedValue.helpers'
 import SectionInfo from '@/components/SectionInfo'
 import ShareButton from '@/components/ShareButton'
 import StockRow from '@/components/StockRow'
@@ -16,6 +17,9 @@ import SectionSkeleton from '@/components/ui/SectionSkeleton'
 
 type Props = {
   brand: string | null
+  model?: string | null
+  /** Make year of the looked-up car (for the classifieds links). */
+  year?: number | null
 }
 
 /**
@@ -25,7 +29,7 @@ type Props = {
  * 1–2 model years linking to its used-cars page. Each row has up to 3 cards; every photo and every ad line is distinct
  * across both rows, and a row shrinks to the photos found (hidden with none). Link-out only — nothing is copied from the importer's site.
  */
-export default function StockSection({ brand }: Props): ReactNode {
+export default function StockSection({ brand, model, year }: Props): ReactNode {
   const { t } = useTranslation()
   const [searchParams] = useSearchParams()
   const isShared = searchParams.get('section') === 'stock'
@@ -48,10 +52,12 @@ export default function StockSection({ brand }: Props): ReactNode {
     if (isShared && sectionRef.current) scrollElementIntoView(sectionRef.current)
   }, [isShared])
 
-  if (!brand || (!newTarget && !usedUrl)) return null
+  const hasImporter = !!newTarget || !!usedUrl
+  const market = model && year ? { model, year } : null
+  if (!brand || (!hasImporter && !market)) return null
 
   const name = displayBrand(brand)
-  const year = new Date().getFullYear()
+  const adYear = new Date().getFullYear()
   const title = t('newCarsSection.title', { brand: name })
   const handleImageError = (imageUrl: string): void => setFailedUrls(urls => [...urls, imageUrl])
 
@@ -68,7 +74,9 @@ export default function StockSection({ brand }: Props): ReactNode {
       onOpenChange={setOpen}
     >
       {open && photos.isPending && <SectionSkeleton />}
-      {open && !photos.isPending && !hasCards && <p className="text-base text-muted">{t('section.empty')}</p>}
+      {open && hasImporter && !photos.isPending && !hasCards && (
+        <p className="text-base text-muted">{t('section.empty')}</p>
+      )}
 
       <StockRow
         label={t('newCarsSection.rowNew')}
@@ -78,7 +86,7 @@ export default function StockSection({ brand }: Props): ReactNode {
         adKeyPrefix="newCarsWidget.ad"
         ads={newAds}
         brandName={name}
-        year={year}
+        year={adYear}
         onImageError={handleImageError}
       />
 
@@ -91,12 +99,31 @@ export default function StockSection({ brand }: Props): ReactNode {
           adKeyPrefix="newCarsSection.used"
           ads={usedAds}
           brandName={name}
-          year={year}
+          year={adYear}
           onImageError={handleImageError}
         />
       )}
 
       {hasCards && <p className="text-sm text-muted">{t('newCarsSection.disclaimer')}</p>}
+
+      {market && (
+        <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+          <span className="text-muted">
+            {t('newCarsSection.market', { car: `${name} ${market.model} ${market.year}` })}
+          </span>
+          {MARKET_SITES.map(site => (
+            <a
+              key={site.id}
+              href={site.url(brand, market.model, market.year)}
+              target="_blank"
+              rel="noopener noreferrer nofollow"
+              className="text-primary underline"
+            >
+              {site.name} ↗<span className="sr-only"> — {t('newCarsWidget.opensNewTab')}</span>
+            </a>
+          ))}
+        </div>
+      )}
     </VinToggleSection>
   )
 }

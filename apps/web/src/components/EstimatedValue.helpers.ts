@@ -112,16 +112,42 @@ export function valueWarnings(
   return warnings
 }
 
+/** Slugs the sites spell differently from our sources (RDW writes "CEE D", the registry "CEE'D"; the sites use "ceed"). */
+const MARKET_SLUG_ALIASES: Record<string, string> = { 'cee-d': 'ceed' }
+
+/** URL slug of a make / model: apostrophes vanish ("Cee'd" → "ceed", as on the sites), other runs become one hyphen. */
+function marketSlug(s: string): string {
+  const slug = s
+    .trim()
+    .toLowerCase()
+    .replace(/['’`]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+  return MARKET_SLUG_ALIASES[slug] ?? slug
+}
+
 /** AUTO.RIA's own listing page for a make / model / year (a plain link — no data is read from RIA). */
 export function riaSearchUrl(make: string, model: string, year: number): string {
-  const slug = (s: string): string =>
-    s
-      .trim()
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '')
-  return `https://auto.ria.com/uk/car/${slug(make)}/${slug(model)}/year/${year}/`
+  return `https://auto.ria.com/uk/car/${marketSlug(make)}/${marketSlug(model)}/year/${year}/`
 }
+
+/** RST's listing page for a make / model / year (a plain link). */
+export function rstSearchUrl(make: string, model: string, year: number): string {
+  return `https://rst.ua/ukr/oldcars/${marketSlug(make)}/${marketSlug(model)}/${year}/`
+}
+
+/** OLX.ua cars of a make / model built in exactly that year (a plain link). */
+export function olxSearchUrl(make: string, model: string, year: number): string {
+  const slugs = `${marketSlug(make)}/${marketSlug(model)}`
+  return `https://www.olx.ua/uk/transport/legkovye-avtomobili/${slugs}/?search%5Bfilter_float_motor_year%3Afrom%5D=${year}&search%5Bfilter_float_motor_year%3Ato%5D=${year}`
+}
+
+/** Ukrainian classifieds we link out to (text links only — their logos are trademarks we have no licence for). */
+export const MARKET_SITES = [
+  { id: 'ria', name: 'AUTO.RIA', url: riaSearchUrl },
+  { id: 'rst', name: 'RST', url: rstSearchUrl },
+  { id: 'olx', name: 'OLX', url: olxSearchUrl }
+] as const
 
 export type ChartPoint = { x: number; y: number }
 

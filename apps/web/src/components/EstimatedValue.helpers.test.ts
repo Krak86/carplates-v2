@@ -8,7 +8,9 @@ import {
   formatMoneyCopy,
   formatMoneyRange,
   plotSeries,
+  olxSearchUrl,
   riaSearchUrl,
+  rstSearchUrl,
   ukrPrice,
   valueWarnings
 } from '@/components/EstimatedValue.helpers'
@@ -51,6 +53,20 @@ describe('riaSearchUrl', () => {
       'https://auto.ria.com/uk/car/mercedes-benz/e-class/year/2016/'
     )
     expect(riaSearchUrl(' Tesla ', 'Model 3', 2021)).toBe('https://auto.ria.com/uk/car/tesla/model-3/year/2021/')
+  })
+
+  it("drops apostrophes instead of hyphenating them (Cee'd is /ceed/ on the sites)", () => {
+    expect(riaSearchUrl('KIA', "CEE'D", 2012)).toBe('https://auto.ria.com/uk/car/kia/ceed/year/2012/')
+    expect(riaSearchUrl('KIA', 'CEE D', 2012)).toBe('https://auto.ria.com/uk/car/kia/ceed/year/2012/')
+  })
+})
+
+describe('rstSearchUrl / olxSearchUrl', () => {
+  it('builds the RST and OLX listing links', () => {
+    expect(rstSearchUrl('KIA', "CEE'D", 2012)).toBe('https://rst.ua/ukr/oldcars/kia/ceed/2012/')
+    expect(olxSearchUrl('KIA', "CEE'D", 2012)).toBe(
+      'https://www.olx.ua/uk/transport/legkovye-avtomobili/kia/ceed/?search%5Bfilter_float_motor_year%3Afrom%5D=2012&search%5Bfilter_float_motor_year%3Ato%5D=2012'
+    )
   })
 })
 
