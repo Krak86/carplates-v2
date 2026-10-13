@@ -6,6 +6,7 @@ import { Link, useSearchParams } from 'react-router'
 import {
   dealerUrl,
   fallbackVehicleColor,
+  isVin,
   normalizeBody,
   resolveVehicleColor,
   resolveVehicleKind,
@@ -132,7 +133,9 @@ export default function ResultCard({ data }: Props): ReactNode {
   const tiltEnabled = useUiStore(s => s.cardTiltEnabled)
   const glowRef = useCardMotion<HTMLDivElement>(tiltEnabled)
   const c = data.current
-  const hasVin = c.vin != null
+  // Pre-1981 / Soviet vehicles carry a short chassis number in the VIN field: show it, but nothing can decode it.
+  const isLegacyVin = c.vin != null && !isVin(c.vin)
+  const hasVin = c.vin != null && !isLegacyVin
   const vehicleKind = resolveVehicleKind(c.kind)
   const bodyInfo = getBodyInfo(c.body)
   const vehicleColor = resolveVehicleColor(c.color) ?? fallbackVehicleColor(data.plate)
@@ -461,7 +464,20 @@ export default function ResultCard({ data }: Props): ReactNode {
                 label={t('field.vin')}
                 info="vin"
                 value={
-                  c.vin ? (
+                  isLegacyVin ? (
+                    <span className="inline-flex flex-wrap items-center gap-1">
+                      <span>{c.vin}</span>
+
+                      <span
+                        title={t('result.vinLegacyHint')}
+                        className="rounded-full border border-[var(--color-border)] px-2 py-0.5 text-xs text-[var(--color-muted)]"
+                      >
+                        {t('result.vinLegacy')}
+                      </span>
+
+                      <CopyButton text={c.vin ?? ''} label={t('field.vin')} feedback={vinCopy} />
+                    </span>
+                  ) : c.vin ? (
                     <span className="inline-flex items-center gap-1">
                       <Link
                         viewTransition
