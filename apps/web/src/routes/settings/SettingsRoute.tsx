@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Navigate, useSearchParams } from 'react-router'
 
+import AccountNav from '@/components/auth/AccountNav'
 import { useSession } from '@/components/auth/use-session'
 import Card from '@/components/ui/Card'
 import Spinner from '@/components/ui/Spinner'
@@ -32,6 +33,8 @@ export default function SettingsRoute(): ReactNode {
 
   return (
     <div className="mx-auto w-full max-w-content">
+      <AccountNav />
+
       <Card className="mb-4">
         <h1 className="text-2xl font-bold">{t('settings.title')}</h1>
         <div role="tablist" className="mt-3 flex gap-2">

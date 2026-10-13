@@ -2,13 +2,15 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Navigate, useSearchParams } from 'react-router'
 
+import AccountNav from '@/components/auth/AccountNav'
 import { useSession } from '@/components/auth/use-session'
 import Spinner from '@/components/ui/Spinner'
 import { cn } from '@/lib/cn'
+import AdminLinksTab from '@/routes/admin/AdminLinksTab'
 import AdminStatsTab from '@/routes/admin/AdminStatsTab'
 import AdminUsersTab from '@/routes/admin/AdminUsersTab'
 
-const ADMIN_TABS = ['users', 'stats'] as const
+const ADMIN_TABS = ['users', 'stats', 'links'] as const
 type AdminTab = (typeof ADMIN_TABS)[number]
 const DEFAULT_TAB: AdminTab = 'users'
 
@@ -28,6 +30,8 @@ export default function AdminRoute(): ReactNode {
 
   return (
     <div className="mx-auto w-full max-w-content">
+      <AccountNav />
+
       <h1 className="mb-3 text-2xl font-bold">{t('admin.title')}</h1>
 
       <div role="tablist" className="mb-4 flex gap-2">
@@ -52,6 +56,7 @@ export default function AdminRoute(): ReactNode {
 
       {tab === 'users' && <AdminUsersTab />}
       {tab === 'stats' && <AdminStatsTab />}
+      {tab === 'links' && <AdminLinksTab />}
     </div>
   )
 }

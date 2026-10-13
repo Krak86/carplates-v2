@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { Navigate } from 'react-router'
 import type { PaidFeature } from '@carplates/shared'
 
+import AccountNav from '@/components/auth/AccountNav'
 import { useSession } from '@/components/auth/use-session'
 import Card from '@/components/ui/Card'
 import Spinner from '@/components/ui/Spinner'
@@ -59,6 +60,8 @@ export default function FeaturesRoute(): ReactNode {
 
   return (
     <div className="mx-auto w-full max-w-content">
+      <AccountNav />
+
       {/* Opaque-ish panel: the page sits over a user-chosen photo/live background, so bare text isn't always legible. */}
       <Card className="mb-4">
         <h1 className="mb-2 text-2xl font-bold">{t('features.title')}</h1>
@@ -115,6 +118,7 @@ export default function FeaturesRoute(): ReactNode {
             {t(titleKey)}
           </h2>
           <Card className="divide-y divide-[var(--color-border)] p-0">
+            {ids.length === 0 && <p className="p-4 text-[var(--color-muted)]">{t('features.comingSoonEmpty')}</p>}
             {ids.map(id => (
               <div key={id} className="flex items-center gap-3 p-4 text-[var(--color-muted)]">
                 <span aria-hidden>{FUTURE_FEATURE_ICON[id]}</span>

@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Navigate, useLocation } from 'react-router'
 
+import AccountNav from '@/components/auth/AccountNav'
 import { useSession } from '@/components/auth/use-session'
 import Card from '@/components/ui/Card'
 import Spinner from '@/components/ui/Spinner'
@@ -27,6 +28,8 @@ export default function ProfileRoute(): ReactNode {
 
   return (
     <div className="mx-auto w-full max-w-content">
+      <AccountNav />
+
       <Card className="mb-4">
         <h1 className="text-2xl font-bold">{t('profile.title')}</h1>
       </Card>
