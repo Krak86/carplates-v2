@@ -324,6 +324,21 @@ above once scoped, or dropped if research says no.
 - 📋 **Wanted (stolen) vehicles** — planned 2026-10-01, researched, not started.
   See "Wanted vehicles ingest" below.
 
+- 📋 **Window sticker** (Monroney-style spec label, PDF/print) — idea 2026-10-13, researched, not started.
+  - **Templates:** no free official one to reuse. The US Monroney label is mandated by the Automobile Information
+    Disclosure Act (1958) and the EPA fuel-economy label by 40 CFR 600 — specs only, no licensed artwork; the EU has
+    the CO₂/fuel label (Directive 1999/94/EC) at the point of sale; Ukraine mandates nothing. So we design our own
+    A4/Letter layout (not an "official" label — say so in a footer) and render it with the existing `export-pdf.ts`
+    pipeline (lazy, online-only chunk) as a new `ExportFormat`, or a print-styled `/sticker` view.
+  - **What we can fill (already in the app):** brand/model/year/generation + hero image & logo, body, colour, fuel,
+    engine capacity/power, weight, region and registration history (registry); NHTSA VIN decode (trim, engine,
+    transmission, drive, GVWR, plant, safety equipment); RDW specs (EU); VehiclesDB chips; CO₂ score + EPA/EEA fuel
+    economy; NHTSA / Euro NCAP / JNCAP ratings; recalls + MOT; value estimate; QR code to the result page.
+  - **What we cannot:** original MSRP, option packages and prices (the real Monroney comes from the manufacturer per
+    VIN, not NHTSA's free decode) — so it is a "spec label", not a reproduction; no data → omit the block.
+  - **Next:** reuse the `ExportReport` sections from `export-report.ts` (single data gatherer) and add a layout that
+    maps them to fixed label blocks; decide Letter vs A4 and the three languages.
+
 - 📋 **Link-preview follow-ups** (2026-10-01): (a) e-Ukraine typeface (thedigital.gov.ua/fonts, Dropbox
   download) for the OG cards — blocked on confirming its license (page only says CC BY 4.0 for "content") and
   glyph coverage (ї є ґ) + TTF/OTF files; the site itself stays on the system font stack; (b) test a real

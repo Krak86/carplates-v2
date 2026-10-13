@@ -47,7 +47,7 @@ export default function Sidebar(): ReactNode {
       {/* Mobile only: the header hides these below md. The row is the popovers' positioning context. */}
       <div className="relative mb-1 flex gap-2 md:hidden">
         <LayersButton inSidebar />
-        <LoginButton inSidebar />
+        <LoginButton inSidebar onNavigate={handleClose} />
       </div>
       <NavLink viewTransition to="/" className={linkClass} onClick={handleClose} end>
         <span aria-hidden>🔍</span> {t('nav.search')}

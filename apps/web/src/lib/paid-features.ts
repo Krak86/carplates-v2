@@ -24,7 +24,6 @@ export const CONSIDERING_FEATURES = [
   'platesmania',
   'auction_history',
   'plate_alerts',
-  'full_report',
   'auction_photos'
 ] as const
 
@@ -33,7 +32,6 @@ export type FutureFeature = (typeof COMING_SOON_FEATURES)[number] | (typeof CONS
 export const FUTURE_FEATURE_ICON: Record<FutureFeature, string> = {
   ria_ads: PAID_FEATURE_ICON.ria_ads,
   plate_alerts: '🔔',
-  full_report: '📄',
   auction_photos: '🖼️',
   ria_avg_price: PAID_FEATURE_ICON.ria_avg_price,
   platesmania: PAID_FEATURE_ICON.platesmania,

@@ -15,10 +15,12 @@ const AccountMenu = lazy(() => import('@/components/auth/AccountMenu'))
 type Props = {
   /** Mobile drawer variant: the popover spans the sidebar row (positioned by the row) instead of hanging off the button. */
   inSidebar?: boolean
+  /** Called after a menu item is chosen (the mobile drawer closes itself, like the desktop popover does). */
+  onNavigate?: () => void
 }
 
 /** Header trigger right of the layers button: a person icon when anonymous, the avatar / initial once signed in. Hidden offline. */
-export default function LoginButton({ inSidebar = false }: Props): ReactNode {
+export default function LoginButton({ inSidebar = false, onNavigate }: Props): ReactNode {
   const { t } = useTranslation()
   const online = useOnlineStatus()
   const { user } = useSession()
@@ -45,6 +47,11 @@ export default function LoginButton({ inSidebar = false }: Props): ReactNode {
   }, [open])
 
   if (!online) return null
+
+  const handleNavigate = (): void => {
+    setOpen(false)
+    onNavigate?.()
+  }
 
   const label = user ? t('auth.menu') : t('auth.signIn')
 
@@ -83,7 +90,7 @@ export default function LoginButton({ inSidebar = false }: Props): ReactNode {
         <div className={cn('absolute top-full pt-2', inSidebar ? 'inset-x-0 z-10 [&>div]:w-full' : 'right-0')}>
           <Suspense fallback={null}>
             {user ? (
-              <AccountMenu user={user} onNavigate={() => setOpen(false)} />
+              <AccountMenu user={user} onNavigate={handleNavigate} />
             ) : (
               <div className="w-max max-w-[calc(100vw-2rem)] rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] p-3 shadow-lg">
                 <GoogleSignInButton />
