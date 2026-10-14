@@ -1,4 +1,4 @@
-import type { WikiSource } from '@carplates/shared'
+import type { RdwResponse, WikiSource, WikiSpecsResponse } from '@carplates/shared'
 import { useQuery } from '@tanstack/react-query'
 
 import type { Dims } from '@/components/size/fit'
@@ -57,9 +57,20 @@ export function useVehicleSize({ brand, model, year, kind, body, vinFields }: Ve
   const enabled = !!(brand && model && year)
   const { data: rdwData } = useQuery({ ...rdwQuery(brand ?? '', model ?? '', year ?? 0, kind), enabled })
   const { data: wikiData } = useQuery({ ...wikiSpecsQuery(brand ?? '', model ?? '', year ?? 0), enabled })
-  const rdw = rdwData?.match ?? null
-  const wiki = wikiData?.match ?? null
 
+  return computeVehicleSize({ rdw: rdwData?.match ?? null, wiki: wikiData?.match ?? null, kind, body, vinFields })
+}
+
+export type ComputeSizeInput = {
+  rdw: RdwResponse['match'] | null
+  wiki: WikiSpecsResponse['match'] | null
+  kind?: string | null
+  body?: string | null
+  vinFields?: ReadonlyMap<string, string> | null
+}
+
+/** The pure part of `useVehicleSize`, shared with the export report (which holds the same query results). */
+export function computeVehicleSize({ rdw, wiki, kind, body, vinFields }: ComputeSizeInput): VehicleSize | null {
   const shape = sizeShape({
     kind,
     body,

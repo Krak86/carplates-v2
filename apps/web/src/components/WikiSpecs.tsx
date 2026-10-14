@@ -39,6 +39,8 @@ type Props = {
   year: number | null
   /** Registry figures of this car: the matching engine is highlighted and the others show how they differ. */
   own?: OwnCar
+  /** Each change opens the section and scrolls to it (0 = never asked) — a link in the Specs block. */
+  openSignal?: number
 }
 
 /**
@@ -47,11 +49,12 @@ type Props = {
  * mass and tank volume. Catalogue values for the generation, not for this car; each block names its Wikipedia edition.
  * The engine matching the car's registry figures is highlighted and listed first. Collapsed by default (open from `?section=engines`); renders nothing while loading, on error, or without a match.
  */
-export default function WikiSpecs({ brand, model, year, own }: Props): ReactNode {
+export default function WikiSpecs({ brand, model, year, own, openSignal = 0 }: Props): ReactNode {
   const { t, i18n } = useTranslation()
   const [searchParams] = useSearchParams()
   const isShared = searchParams.get('section') === 'engines'
-  const [open, setOpen] = useState(() => isShared)
+  const [open, setOpen] = useState(() => isShared || openSignal > 0)
+  const [seenSignal, setSeenSignal] = useState(openSignal)
   const sectionRef = useRef<HTMLDivElement>(null)
   const { data } = useQuery({
     ...wikiSpecsQuery(brand ?? '', model ?? '', year ?? 0),
@@ -59,9 +62,14 @@ export default function WikiSpecs({ brand, model, year, own }: Props): ReactNode
   })
   const match = data?.match
 
+  if (openSignal !== seenSignal) {
+    setSeenSignal(openSignal)
+    setOpen(true)
+  }
+
   useEffect(() => {
-    if (isShared && match && sectionRef.current) scrollElementIntoView(sectionRef.current)
-  }, [isShared, match])
+    if ((isShared || openSignal > 0) && match && sectionRef.current) scrollElementIntoView(sectionRef.current)
+  }, [isShared, openSignal, match])
 
   if (!match) return null
 

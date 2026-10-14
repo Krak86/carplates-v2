@@ -23,17 +23,20 @@ type Props = {
   capacity?: number | null
   /** Registry kind text — picks which Dutch-register kinds the RDW fallback may match. */
   kind?: string | null
+  /** Each change opens the section and scrolls to it (0 = never asked) — a link in the Specs block. */
+  openSignal?: number
 }
 
 /**
  * Collapsed "Show emissions" section (same toggle as the safety ratings): the estimate is only fetched once it
  * is opened, and the section is hidden entirely for a car with no make/model/year to match on.
  */
-export default function FuelEconomy({ brand, model, year, fuel, capacity, kind }: Props): ReactNode {
+export default function FuelEconomy({ brand, model, year, fuel, capacity, kind, openSignal = 0 }: Props): ReactNode {
   const { t } = useTranslation()
   const [searchParams] = useSearchParams()
   const isSharedEmissions = searchParams.get('section') === 'emissions'
-  const [open, setOpen] = useState(() => isSharedEmissions)
+  const [open, setOpen] = useState(() => isSharedEmissions || openSignal > 0)
+  const [seenSignal, setSeenSignal] = useState(openSignal)
   const sectionRef = useRef<HTMLDivElement>(null)
   const hasQuery = !!(brand && model && year)
   const result = useQuery({
@@ -50,9 +53,15 @@ export default function FuelEconomy({ brand, model, year, fuel, capacity, kind }
   const rdwMatch = rdw.data?.match
   const rdwCo2 = rdwMatch?.specs.co2GKm ?? null
 
+  if (openSignal !== seenSignal) {
+    setSeenSignal(openSignal)
+    setOpen(true)
+  }
+
   useEffect(() => {
-    if (isSharedEmissions && hasQuery && sectionRef.current) scrollElementIntoView(sectionRef.current)
-  }, [isSharedEmissions, hasQuery])
+    if ((isSharedEmissions || openSignal > 0) && hasQuery && sectionRef.current)
+      scrollElementIntoView(sectionRef.current)
+  }, [isSharedEmissions, openSignal, hasQuery])
 
   if (!hasQuery) return null
   const estimate = result.data?.estimate

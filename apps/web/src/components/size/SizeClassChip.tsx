@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import ChipChevronButton from '@/components/ChipChevronButton'
 import InfoPopover from '@/components/InfoPopover'
 import InfoText from '@/components/InfoText'
 import { useVehicleSize, type VehicleSizeInput } from '@/components/size/use-vehicle-size'
@@ -51,25 +52,7 @@ export default function SizeClassChip({ onOpenSection, ...input }: Props): React
         <InfoText text={t('size.chip.info', { class: label, length: `${approx}${mmToMetres(length.value)}` })} />
       </InfoPopover>
 
-      <button
-        type="button"
-        aria-label={t('size.chip.expand')}
-        onClick={onOpenSection}
-        onPointerEnter={() => void loadSection()}
-        onFocus={() => void loadSection()}
-        className="inline-flex size-5 items-center justify-center rounded-full bg-[var(--color-surface)]/30 text-[var(--color-primary)] hover:bg-[var(--color-primary)]/20"
-      >
-        <svg viewBox="0 0 12 12" aria-hidden className="size-3">
-          <path
-            d="M2 4.5 6 8.5 10 4.5"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={1.8}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </button>
+      <ChipChevronButton label={t('size.chip.expand')} onClick={onOpenSection} onWarm={() => void loadSection()} />
     </span>
   )
 }

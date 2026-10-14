@@ -11,6 +11,7 @@ import InfoText from '@/components/InfoText'
 import {
   appliesToFuel,
   approxCount,
+  GROUP_JUMP,
   describeRange,
   altFigure,
   formatPercent,
@@ -18,6 +19,7 @@ import {
   SPEC_GROUPS,
   SPEC_ROWS,
   visibleShares,
+  type JumpSection,
   type OwnFigures,
   type SpecRange,
   type SpecRowDef
@@ -27,6 +29,7 @@ import RdwShareRow from '@/components/RdwShareRow'
 import SectionCount from '@/components/SectionCount'
 import SectionHeader from '@/components/SectionHeader'
 import ShareButton from '@/components/ShareButton'
+import SpecGroupJump from '@/components/SpecGroupJump'
 import VinToggleSection from '@/components/vin/VinToggleSection'
 import { cn } from '@/lib/cn'
 import { rdwQuery } from '@/lib/queries'
@@ -42,6 +45,8 @@ type Props = {
   fuel?: string | null
   /** What the registry says about this exact car — shown under the typical figure for comparison. */
   own?: OwnFigures
+  /** Opens another section of the card (and scrolls to it) from a group's link. */
+  onJump?: (section: JumpSection) => void
 }
 
 type SpecRowProps = {
@@ -95,7 +100,7 @@ function SpecRow({ def, range, own, locale }: SpecRowProps): ReactNode {
  * the same make/model/year as registered in the Netherlands. EU-spec, so labelled as such. Collapsed by default (open
  * from a `?section=specs` share link); renders nothing while loading, on error, or without a match — a miss hides it.
  */
-export default function RdwSpecs({ brand, model, year, kind, fuel, own }: Props): ReactNode {
+export default function RdwSpecs({ brand, model, year, kind, fuel, own, onJump }: Props): ReactNode {
   const { t, i18n } = useTranslation()
   const [searchParams] = useSearchParams()
   const isShared = searchParams.get('section') === 'specs'
@@ -236,6 +241,7 @@ export default function RdwSpecs({ brand, model, year, kind, fuel, own }: Props)
                 </>
               }
             >
+              {onJump && GROUP_JUMP[group.key] && <SpecGroupJump section={GROUP_JUMP[group.key]!} onJump={onJump} />}
               <div className="divide-y divide-[var(--color-border)]">{group.rows}</div>
             </VinToggleSection>
           ))}

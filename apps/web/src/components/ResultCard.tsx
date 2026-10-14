@@ -32,7 +32,7 @@ import RegionLabel from '@/components/RegionLabel'
 import FieldInfoButton from '@/components/FieldInfoButton'
 import NoRegionBadge from '@/components/NoRegionBadge'
 import RegistrationTimeline from '@/components/RegistrationTimeline'
-import { kgToTonnes } from '@/components/RdwSpecs.helpers'
+import { kgToTonnes, type JumpSection } from '@/components/RdwSpecs.helpers'
 import ElectricLink from '@/components/ElectricLink'
 import { getBodyInfo, getFuelIcon } from '@/components/ResultCard.helpers'
 import PaidFeatureSections from '@/components/paid/PaidFeatureSections'
@@ -133,6 +133,18 @@ export default function ResultCard({ data }: Props): ReactNode {
   const [sizeOpenSignal, setSizeOpenSignal] = useState(0)
   // The "imported" status chip opens the Auction history section (mounting it first if it is still lazy).
   const [auctionOpenSignal, setAuctionOpenSignal] = useState(0)
+  // Links inside the Specs block open the section that goes deeper.
+  const [emissionsOpenSignal, setEmissionsOpenSignal] = useState(0)
+  const [enginesOpenSignal, setEnginesOpenSignal] = useState(0)
+  const jumpToSection = (section: JumpSection): void => {
+    const bump = {
+      size: setSizeOpenSignal,
+      value: setValueOpenSignal,
+      emissions: setEmissionsOpenSignal,
+      engines: setEnginesOpenSignal
+    }
+    bump[section](n => n + 1)
+  }
   const basicRef = useRef<HTMLDivElement>(null)
   const historyRef = useRef<HTMLDivElement>(null)
   const vinRef = useRef<HTMLDivElement>(null)
@@ -597,14 +609,16 @@ export default function ResultCard({ data }: Props): ReactNode {
             kind={c.kind}
             fuel={c.fuel}
             own={{ powerKw: c.powerKwt, displacementCc: c.capacity, massKg: c.ownWeight, grossMassKg: c.totalWeight }}
+            onJump={jumpToSection}
           />
         </LazySection>
-        <LazySection sections={['engines']}>
+        <LazySection sections={['engines']} forceMount={enginesOpenSignal > 0}>
           <WikiSpecs
             brand={c.brand}
             model={c.model}
             year={c.makeYear}
             own={{ fuel: c.fuel, displacementCc: c.capacity, powerKw: c.powerKwt, massKg: c.ownWeight }}
+            openSignal={enginesOpenSignal}
           />
         </LazySection>
         <LazySection sections={['size']} forceMount={sizeOpenSignal > 0}>
@@ -640,7 +654,7 @@ export default function ResultCard({ data }: Props): ReactNode {
         <LazySection sections={['electric']}>
           <OpenEv brand={c.brand} model={c.model} year={c.makeYear} fuel={c.fuel} />
         </LazySection>
-        <LazySection sections={['emissions']}>
+        <LazySection sections={['emissions']} forceMount={emissionsOpenSignal > 0}>
           <FuelEconomy
             brand={c.brand}
             model={c.model}
@@ -648,6 +662,7 @@ export default function ResultCard({ data }: Props): ReactNode {
             fuel={c.fuel}
             capacity={c.capacity}
             kind={c.kind}
+            openSignal={emissionsOpenSignal}
           />
         </LazySection>
         <LazySection sections={['ratings']}>

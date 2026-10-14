@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { ReactNode } from 'react'
 import type { WikiSource } from '@carplates/shared'
 import { useTranslation } from 'react-i18next'
@@ -33,17 +34,26 @@ type RowProps = {
   children: ReactNode
   tag?: ReactNode
   note?: ReactNode
+  /** Pointer / focus / touch on the row: the matching dimension of the drawing lights up. */
+  onActiveChange?: (active: boolean) => void
 }
 
 const ROW_CLASS =
   '-mx-4 flex justify-between gap-4 px-4 py-1.5 text-base transition-colors hover:bg-[var(--color-border)]/40'
 
 /** Same look as the Specs rows: a muted label chip with a ❓ on the left, the value (and its source) on the right. */
-function Row({ label, aboutKey, children, tag, note }: RowProps): ReactNode {
+function Row({ label, aboutKey, children, tag, note, onActiveChange }: RowProps): ReactNode {
   const { t } = useTranslation()
 
   return (
-    <div className={ROW_CLASS}>
+    <div
+      className={ROW_CLASS}
+      onPointerEnter={() => onActiveChange?.(true)}
+      onPointerLeave={() => onActiveChange?.(false)}
+      onPointerDown={() => onActiveChange?.(true)}
+      onFocus={() => onActiveChange?.(true)}
+      onBlur={() => onActiveChange?.(false)}
+    >
       <span className="flex items-center gap-1.5 rounded bg-[var(--color-surface)]/20 px-1 py-0.5 text-[var(--color-muted)]">
         {label}
         <InfoPopover label={t('vin.info.about', { field: label })} title={label}>
@@ -76,11 +86,9 @@ function SourceTag({ figure, wiki }: TagProps): ReactNode {
       )}
     >
       {label}
-      {isEstimate && (
-        <InfoPopover label={t('vin.info.about', { field: label })} title={label}>
-          <InfoText text={t('size.about.estimate')} />
-        </InfoPopover>
-      )}
+      <InfoPopover label={t('vin.info.about', { field: label })} title={label}>
+        <InfoText text={t(isEstimate ? 'size.about.estimate' : `size.about.source.${figure.source}`)} />
+      </InfoPopover>
     </span>
   )
 }
@@ -93,12 +101,23 @@ export default function SizeSchemaTab({ name, shape, figures, cls, wiki }: Props
   const { t, i18n } = useTranslation()
   const metre = t('rdw.unitM')
   const unit = t('wikispec.unitMm')
+  const [active, setActive] = useState<SizeField | null>(null)
 
   return (
     <div>
       <p className="mt-2 text-sm text-[var(--color-muted)]">{t('size.tab.schema.intro')}</p>
 
-      <VehicleSizeSchema shape={shape} figures={figures} name={name} />
+      <VehicleSizeSchema shape={shape} figures={figures} name={name} active={active} onActiveChange={setActive} />
+
+      <p aria-live="polite" className="mt-1 min-h-10 text-xs text-[var(--color-muted)]">
+        {active ? (
+          <>
+            <strong className="text-[var(--color-fg)]">{t(`size.field.${active}`)}.</strong> {t(`size.about.${active}`)}
+          </>
+        ) : (
+          t('size.schema.hover')
+        )}
+      </p>
 
       <div className="mt-2 divide-y divide-[var(--color-border)]">
         {SIZE_FIELDS.map((field: SizeField) => {
@@ -112,6 +131,7 @@ export default function SizeSchemaTab({ name, shape, figures, cls, wiki }: Props
               key={field}
               label={t(`size.field.${field}`)}
               aboutKey={field}
+              onActiveChange={on => setActive(on ? field : null)}
               tag={<SourceTag figure={figure} wiki={wiki} />}
               note={
                 hasSpread && (

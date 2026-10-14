@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 
+import ChipChevronButton from '@/components/ChipChevronButton'
 import InfoPopover from '@/components/InfoPopover'
 import { cn } from '@/lib/cn'
 import { OPER_STATUS_ICON, type OperStatus, operInfoKey, operStatus } from '@/lib/oper-info'
@@ -43,23 +44,11 @@ export default function LastOperationChip({
   const status = operCode == null ? null : operStatus(operCode)
   const earlierChip = everImported && status !== 'import' && (
     <span className="inline-flex animate-chip-in items-center gap-1 rounded-full border chip-tone py-0.5 pr-1 pl-2 text-xs text-[var(--color-fg)] transition-colors chip-registry">
-      {onOpenAuctions ? (
-        <button
-          type="button"
-          onClick={onOpenAuctions}
-          title={t('auctions.earlierChipTitle')}
-          className="inline-flex items-center gap-1 transition-colors hover:text-[var(--color-primary)]"
-        >
-          <span aria-hidden>{OPER_STATUS_ICON.import}</span>
-          {t('auctions.earlierChip')}
-          <span aria-hidden>↓</span>
-        </button>
-      ) : (
-        <span title={t('auctions.earlierChipTitle')} className="inline-flex items-center gap-1">
-          <span aria-hidden>{OPER_STATUS_ICON.import}</span>
-          {t('auctions.earlierChip')}
-        </span>
-      )}
+      <span title={t('auctions.earlierChipTitle')} className="inline-flex items-center gap-1">
+        <span aria-hidden>{OPER_STATUS_ICON.import}</span>
+        {t('auctions.earlierChip')}
+      </span>
+      {onOpenAuctions && <ChipChevronButton label={t('auctions.earlierChipTitle')} onClick={onOpenAuctions} />}
     </span>
   )
   if (operCode == null || status == null) return earlierChip || null
@@ -82,15 +71,12 @@ export default function LastOperationChip({
         )}
       >
         {opensAuctions ? (
-          <button
-            type="button"
-            onClick={onOpenAuctions}
-            title={t('auctions.chipTitle')}
-            className="inline-flex items-center gap-1 transition-colors hover:text-[var(--color-primary)]"
-          >
-            {label}
-            <span aria-hidden>↓</span>
-          </button>
+          <>
+            <span title={t('auctions.chipTitle')} className="inline-flex items-center gap-1">
+              {label}
+            </span>
+            <ChipChevronButton label={t('auctions.chipTitle')} onClick={onOpenAuctions} />
+          </>
         ) : (
           <Link
             viewTransition

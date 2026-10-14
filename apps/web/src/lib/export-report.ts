@@ -14,6 +14,7 @@ import type {
   NhtsaRecallsResponse,
   RdwRecallsResponse,
   RdwResponse,
+  WikiSpecsResponse,
   Registration,
   ReviewsResponse,
   SafetyRatingsResponse,
@@ -33,6 +34,7 @@ import {
   valueInfoLines,
   valueWarnings
 } from '@/components/EstimatedValue.helpers'
+import { buildGenerationSection, buildSizeSection } from '@/lib/export-size'
 import { buildMotSections, buildRecallSections } from '@/lib/export-recalls-mot'
 import { orderedEditions } from '@/components/PressReviews.helpers'
 import { decileBand, isRareElsewhere } from '@/components/VdbChips.helpers'
@@ -165,6 +167,8 @@ export type ExportInput = {
   stats: StatsTopResponse | null
   /** Dutch-register specs (RDW) for the make/model/year — the "Specs" section. */
   rdw: RdwResponse | null
+  /** Wikipedia catalogue figures of the generation — the "Generation specs" section, also a source of the size figures. */
+  wikiSpecs?: WikiSpecsResponse | null
   /** VehiclesDB cross-market facts — the chips beside the title. */
   vdb: VdbResponse | null
   /** infocar / press / TopGear / e-drive catalog — the "Reviews" and "Videos" sections. */
@@ -906,6 +910,8 @@ export function buildExportReport(input: ExportInput, t: Translate): ExportRepor
     iihsTable(input.iihs, input.vehicle.body, t),
     buildVdbSection(input, t),
     buildRdwSection(input, t),
+    buildGenerationSection(input, t),
+    buildSizeSection(input, t),
     ...buildPriceSections(input, t),
     ...buildRecallSections(input, t),
     ...buildMotSections(input.mot, t, input.lang),

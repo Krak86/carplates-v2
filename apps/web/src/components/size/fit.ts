@@ -66,7 +66,7 @@ export const PARKING_REFS: readonly ParkingRef[] = [
 export const LEGAL_LINKS: readonly NormLink[] = [
   {
     id: 'ua-dbn',
-    url: 'https://ips.ligazakon.net/document/DBN00063',
+    url: 'https://e-construction.gov.ua/laws_detail/2845786368808847244?doc_type=2',
     market: 'UA',
     clause: 'п. 5.2'
   },

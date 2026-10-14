@@ -6,6 +6,7 @@ import InfoText from '@/components/InfoText'
 import MarketFlag from '@/components/MarketFlag'
 import { fitInBay, linkById, PARKING_REFS, type Dims } from '@/components/size/fit'
 import SizeCarTop from '@/components/size/SizeCarTop'
+import SizeRoadSign from '@/components/size/SizeRoadSign'
 import SizeExternalLink from '@/components/size/SizeExternalLink'
 import SizeVerdictChip from '@/components/size/SizeVerdictChip'
 import { mmToMetres, type SizeShape } from '@/components/size/VehicleSize.helpers'
@@ -51,8 +52,21 @@ export default function SizeParkingTab({ dims, shape, estimated }: Props): React
                 {name}
                 <InfoPopover label={t('vin.info.about', { field: name })} title={name}>
                   <InfoText text={t(`size.bay.about.${ref.id}`)} />
+                  {link?.id === 'ua-dbn' && (
+                    <>
+                      <p className="mt-1.5">{t(`size.link.${link.id}.what`)}</p>
+                      <p className="mt-1.5">
+                        <SizeExternalLink href={link.url}>{t('size.link.ua-dbn.official')}</SizeExternalLink>
+                      </p>
+                    </>
+                  )}
                 </InfoPopover>
               </p>
+              {ref.id === 'ua' && (
+                <p className="mt-1">
+                  <SizeRoadSign />
+                </p>
+              )}
               <p className="text-xs text-[var(--color-muted)]">
                 {mmToMetres(ref.lengthMm)} × {mmToMetres(ref.widthMm)} {t('rdw.unitM')}
               </p>

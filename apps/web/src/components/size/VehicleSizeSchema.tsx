@@ -2,13 +2,17 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { FRONT_OVERHANG_SHARE, GLASS_PATHS, SIDE_PATHS, TOP_LAYOUT, WHEEL_MM } from '@/components/size/silhouettes'
-import type { SizeFigures, SizeShape } from '@/components/size/VehicleSize.helpers'
+import type { SizeField, SizeFigures, SizeShape } from '@/components/size/VehicleSize.helpers'
 import { estimatePrefix, formatMm } from '@/components/size/VehicleSize.helpers'
 
 type Props = {
   shape: SizeShape
   figures: SizeFigures
   name: string
+  /** The dimension the reader points at: it is drawn bold, the others fade. */
+  active?: SizeField | null
+  /** Pointing at a dimension in the drawing itself (hover / tap); null when the pointer leaves. */
+  onActiveChange?: (field: SizeField | null) => void
 }
 
 /** Wheelbase share of the length when no figure is known (nothing to draw an arrow for then). */
@@ -26,10 +30,27 @@ type DimProps = {
   /** Label sits beside a vertical arrow (rotated) or above a horizontal one. */
   vertical?: boolean
   dashed?: boolean
+  field: SizeField
+  active: SizeField | null
+  onActiveChange?: (field: SizeField | null) => void
 }
 
 /** A dimension arrow: a line with end ticks and a centred label. All coordinates are millimetres of the drawing. */
-function Dim({ x1, y1, x2, y2, label, fontSize, vertical = false, dashed = false }: DimProps): ReactNode {
+function Dim({
+  x1,
+  y1,
+  x2,
+  y2,
+  label,
+  fontSize,
+  vertical = false,
+  dashed = false,
+  field,
+  active,
+  onActiveChange
+}: DimProps): ReactNode {
+  const isActive = active === field
+  const isFaded = active != null && !isActive
   const tick = fontSize * 0.45
   const mx = (x1 + x2) / 2
   const my = (y1 + y2) / 2
@@ -50,7 +71,19 @@ function Dim({ x1, y1, x2, y2, label, fontSize, vertical = false, dashed = false
   )
 
   return (
-    <g stroke="var(--color-muted)" strokeWidth={1.2} fill="var(--color-fg)" vectorEffect="non-scaling-stroke">
+    <g
+      stroke={isActive ? 'var(--color-primary)' : 'var(--color-muted)'}
+      strokeWidth={isActive ? 2.4 : 1.2}
+      fill={isActive ? 'var(--color-primary)' : 'var(--color-fg)'}
+      opacity={isFaded ? 0.2 : 1}
+      fontWeight={isActive ? 700 : undefined}
+      className="cursor-pointer transition-opacity"
+      onPointerEnter={() => onActiveChange?.(field)}
+      onPointerLeave={() => onActiveChange?.(null)}
+      onPointerDown={() => onActiveChange?.(field)}
+      vectorEffect="non-scaling-stroke"
+    >
+      <line x1={x1} y1={y1} x2={x2} y2={y2} stroke="transparent" strokeWidth={fontSize * 2.4} />
       <line
         x1={x1}
         y1={y1}
@@ -91,7 +124,7 @@ function Wheel({ cx, cy, r }: WheelProps): ReactNode {
  * stretched to the length x height (side) and length x width (top), the wheels sit at the real wheelbase, and every
  * dimension carries an arrow. A figure that is our forecast is prefixed with "≈" and its arrow is dashed.
  */
-export default function VehicleSizeSchema({ shape, figures, name }: Props): ReactNode {
+export default function VehicleSizeSchema({ shape, figures, name, active = null, onActiveChange }: Props): ReactNode {
   const { t, i18n } = useTranslation()
   const length = figures.lengthMm?.value ?? null
   const width = figures.widthMm?.value ?? null
@@ -172,6 +205,9 @@ export default function VehicleSizeSchema({ shape, figures, name }: Props): Reac
             label={text('heightMm', height)}
             fontSize={fs}
             dashed={isDashed('heightMm')}
+            field="heightMm"
+            active={active}
+            onActiveChange={onActiveChange}
           />
           {figures.wheelbaseMm && (
             <Dim
@@ -182,6 +218,9 @@ export default function VehicleSizeSchema({ shape, figures, name }: Props): Reac
               label={text('wheelbaseMm', wheelbase)}
               fontSize={fs}
               dashed={isDashed('wheelbaseMm')}
+              field="wheelbaseMm"
+              active={active}
+              onActiveChange={onActiveChange}
             />
           )}
           <Dim
@@ -192,6 +231,9 @@ export default function VehicleSizeSchema({ shape, figures, name }: Props): Reac
             label={text('lengthMm', length)}
             fontSize={fs}
             dashed={isDashed('lengthMm')}
+            field="lengthMm"
+            active={active}
+            onActiveChange={onActiveChange}
           />
           {figures.wheelbaseMm && (
             <g stroke="var(--color-muted)" strokeWidth={1} strokeDasharray={`${fs * 0.2} ${fs * 0.25}`} fill="none">
@@ -262,6 +304,9 @@ export default function VehicleSizeSchema({ shape, figures, name }: Props): Reac
             label={text('widthMm', width)}
             fontSize={fs}
             dashed={isDashed('widthMm')}
+            field="widthMm"
+            active={active}
+            onActiveChange={onActiveChange}
           />
         </g>
       </svg>

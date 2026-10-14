@@ -283,3 +283,15 @@ export function approxCount(n: number, locale: string): string {
   const step = digits > 0 ? 10 ** digits : 1
   return `~${(Math.round(n / step) * step).toLocaleString(locale)}`
 }
+
+/** Sections a Specs group links to (the link's text is `rdw.jump.<section>.label` / `.what`). */
+export const JUMP_SECTIONS = ['size', 'value', 'emissions', 'engines'] as const
+export type JumpSection = (typeof JUMP_SECTIONS)[number]
+
+/** Which section each Specs group continues in; groups without one have no link. */
+export const GROUP_JUMP: Readonly<Partial<Record<SpecGroup, JumpSection>>> = {
+  engine: 'engines',
+  body: 'size',
+  price: 'value',
+  economy: 'emissions'
+}

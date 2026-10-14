@@ -29,7 +29,8 @@ import {
   statsTopQuery,
   vdbQuery,
   vinQuery,
-  wikiInfoQuery
+  wikiInfoQuery,
+  wikiSpecsQuery
 } from '@/lib/queries'
 import { copyToClipboard } from '@/lib/share-section'
 
@@ -101,7 +102,8 @@ export function useCopyAllInfoActions(params: CopyAllInfoParams): UseCopyAllInfo
       nhtsaComplaints,
       caRecalls,
       mot,
-      generation
+      generation,
+      wikiSpecs
     ] = await Promise.all([
       plate ? safe(queryClient.ensureQueryData(plateHistoryQuery(plate))) : Promise.resolve(null),
       params.vinDecodeResults == null && vin ? safe(queryClient.ensureQueryData(vinQuery(vin))) : Promise.resolve(null),
@@ -160,7 +162,8 @@ export function useCopyAllInfoActions(params: CopyAllInfoParams): UseCopyAllInfo
             })
           )
         : Promise.resolve(null),
-      hasRatingsQuery ? safe(queryClient.ensureQueryData(generationQuery(make, model, year))) : Promise.resolve(null)
+      hasRatingsQuery ? safe(queryClient.ensureQueryData(generationQuery(make, model, year))) : Promise.resolve(null),
+      hasRatingsQuery ? safe(queryClient.ensureQueryData(wikiSpecsQuery(make, model, year))) : Promise.resolve(null)
     ])
 
     return {
@@ -183,6 +186,7 @@ export function useCopyAllInfoActions(params: CopyAllInfoParams): UseCopyAllInfo
       iihs,
       stats,
       rdw,
+      wikiSpecs,
       vdb,
       reviews,
       fx,
