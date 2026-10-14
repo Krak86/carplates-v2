@@ -1,3 +1,4 @@
+import { lazy } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { VinDecodeResponse } from '@carplates/shared'
@@ -6,7 +7,10 @@ import FuelEconomy from '@/components/FuelEconomy'
 import RdwSpecs from '@/components/RdwSpecs'
 import GenerationChip from '@/components/GenerationChip'
 import VdbChips from '@/components/VdbChips'
+import LazySection from '@/components/LazySection'
 import { buildFallback, toFieldMap, typicalLookup } from '@/components/vin/helpers'
+
+const VehicleSizeSection = lazy(() => import('@/components/size/VehicleSizeSection'))
 
 type Props = {
   data: VinDecodeResponse
@@ -48,6 +52,9 @@ export default function VinTypicalData({ data }: Props): ReactNode {
       </div>
 
       <RdwSpecs brand={brand} model={model} year={year} kind={kind} fuel={fuel} />
+      <LazySection sections={['size']}>
+        <VehicleSizeSection brand={brand} model={model} year={year} kind={kind} vinFields={fields} />
+      </LazySection>
       <FuelEconomy brand={brand} model={model} year={year} fuel={fuel} capacity={capacity} kind={kind} />
     </div>
   )

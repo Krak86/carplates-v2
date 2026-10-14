@@ -30,6 +30,7 @@ const VENDOR_GROUPS: Array<[string, RegExp]> = [
 const HELPER_GROUPS: Array<[string, RegExp]> = [
   ['helpers-ratings', /\/src\/components\/SafetyRatings\.(helpers|brands)\.ts$/],
   ['helpers-specs', /\/src\/components\/(RdwSpecs\.helpers|CO2Badge\.helpers|VdbChips\.helpers)\.ts$/],
+  ['helpers-size', /\/src\/components\/size\/(VehicleSize\.helpers|fit)\.ts$/],
   ['helpers-value', /\/src\/components\/EstimatedValue\.helpers\.ts$/],
   ['helpers-media', /\/src\/components\/(VideoReviews|ReviewLinks|PressReviews)\.helpers\.ts$/]
 ]

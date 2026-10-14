@@ -37,6 +37,7 @@ import ElectricLink from '@/components/ElectricLink'
 import { getBodyInfo, getFuelIcon } from '@/components/ResultCard.helpers'
 import PaidFeatureSections from '@/components/paid/PaidFeatureSections'
 import GenerationChip from '@/components/GenerationChip'
+import SizeClassChip from '@/components/size/SizeClassChip'
 import VdbChips from '@/components/VdbChips'
 import InfoPopover from '@/components/InfoPopover'
 import InfoText from '@/components/InfoText'
@@ -89,6 +90,7 @@ const MotFaults = lazy(() => import('@/components/MotFaults'))
 const OpenEv = lazy(() => import('@/components/OpenEv'))
 const WikiSpecs = lazy(() => import('@/components/WikiSpecs'))
 const SafetyRatings = lazy(() => import('@/components/SafetyRatings'))
+const VehicleSizeSection = lazy(() => import('@/components/size/VehicleSizeSection'))
 
 type Props = {
   data: PlateLookupResponse
@@ -127,6 +129,8 @@ export default function ResultCard({ data }: Props): ReactNode {
   const [valueCurrency, setValueCurrency] = useState<Currency>('EUR')
   const [valueOpenSignal, setValueOpenSignal] = useState(0)
   const [raceOpenSignal, setRaceOpenSignal] = useState(0)
+  // The size-class chip's chevron opens the Size & parking section the same way.
+  const [sizeOpenSignal, setSizeOpenSignal] = useState(0)
   // The "imported" status chip opens the Auction history section (mounting it first if it is still lazy).
   const [auctionOpenSignal, setAuctionOpenSignal] = useState(0)
   const basicRef = useRef<HTMLDivElement>(null)
@@ -296,6 +300,14 @@ export default function ResultCard({ data }: Props): ReactNode {
                 everImported={data.everImported}
               />
               <GenerationChip brand={c.brand} model={c.model} year={c.makeYear} />
+              <SizeClassChip
+                brand={c.brand}
+                model={c.model}
+                year={c.makeYear}
+                kind={c.kind}
+                body={c.body}
+                onOpenSection={() => setSizeOpenSignal(n => n + 1)}
+              />
               <TopStatBadges brand={c.brand} model={c.model} color={c.color} region={data.region} kind={c.kind} />
               <VdbChips brand={c.brand} model={c.model} kind={c.kind} />
               <Model3dButton brand={c.brand} model={c.model} />
@@ -593,6 +605,17 @@ export default function ResultCard({ data }: Props): ReactNode {
             model={c.model}
             year={c.makeYear}
             own={{ fuel: c.fuel, displacementCc: c.capacity, powerKw: c.powerKwt, massKg: c.ownWeight }}
+          />
+        </LazySection>
+        <LazySection sections={['size']} forceMount={sizeOpenSignal > 0}>
+          <VehicleSizeSection
+            brand={c.brand}
+            model={c.model}
+            year={c.makeYear}
+            kind={c.kind}
+            body={c.body}
+            vin={hasVin ? c.vin : null}
+            openSignal={sizeOpenSignal}
           />
         </LazySection>
         <LazySection sections={['value']} forceMount={valueOpenSignal > 0}>

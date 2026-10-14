@@ -301,6 +301,9 @@ above once scoped, or dropped if research says no.
 - ⏳ RIA "similar cars" proxy (free token) — Phase 2, blocked on getting a
   `developers.ria.com` API key; otherwise unchanged from that section's design.
 - ⛔ Platesmania — **skipped**, see Phase 3: no free token, scraping ruled out.
+- ✅ **Size & parking section + size-class chip** — done 2026-10-14 (`?section=size&tab=schema|parking|garage|norms`; RDW +
+  Wikipedia + VIN merged, gaps forecast, scaled side/top drawing, ДБН / German / US bays, ПДР limits) — see
+  `docs/plan-done.md`. Open: ⏳ ДБН Додаток Є class table (only the clause 5.2 / 4.6 figures are verified).
 - ✅ **VIN decode overview + plate-card split** — done 2026-10-02 (tabs, VIN anatomy, equipment map, engine/origin
   cards, grouped details; plate card now has separate _Registration history_ and _VIN decode_ sections) — see
   `docs/plan-done.md`. Open follow-ups:
