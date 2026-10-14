@@ -6,7 +6,9 @@ import type { VinRegistry } from '@carplates/shared'
 
 import RegistrationTimeline from '@/components/RegistrationTimeline'
 import SectionCount from '@/components/SectionCount'
+import SectionInfo from '@/components/SectionInfo'
 import ShareButton from '@/components/ShareButton'
+import VinSince2021Note from '@/components/vin/VinSince2021Note'
 import VinToggleSection from '@/components/vin/VinToggleSection'
 import { scrollElementIntoView } from '@/lib/share-section'
 
@@ -38,9 +40,12 @@ export default function VinRegistryHistory({ registry }: Props): ReactNode {
           {t('vin.registryTitle')} <SectionCount count={registry.actions.length} />
         </>
       }
+      info={<SectionInfo section="history" title={t('vin.registryTitle')} />}
       actions={<ShareButton section="history" label={t('share.button', { section: t('vin.registryTitle') })} />}
     >
       <RegistrationTimeline actions={registry.actions} />
+
+      <VinSince2021Note />
     </VinToggleSection>
   )
 }

@@ -57,6 +57,7 @@ import Model360Button from '@/components/Model360Button'
 import VerificationLinks from '@/components/VerificationLinks'
 import VinDecodeTabs from '@/components/vin/VinDecodeTabs'
 import { groupFields } from '@/components/vin/helpers'
+import VinSince2021Note from '@/components/vin/VinSince2021Note'
 import VinToggleSection from '@/components/vin/VinToggleSection'
 import { useCardMotion } from '@/hooks/useCardMotion'
 import { cn } from '@/lib/cn'
@@ -597,8 +598,11 @@ export default function ResultCard({ data }: Props): ReactNode {
               {vinDetail.data?.registry && (
                 <RegistrationTimeline actions={vinDetail.data.registry.actions} currentPlate={data.plate} />
               )}
+              {vinDetail.data?.registry && <VinSince2021Note />}
             </div>
           )}
+
+          {!c.vin && plateHistory.data && <VinSince2021Note variant="noVin" />}
         </VinToggleSection>
 
         <LazySection sections={['specs']}>
