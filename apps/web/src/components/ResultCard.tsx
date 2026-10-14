@@ -235,14 +235,15 @@ export default function ResultCard({ data }: Props): ReactNode {
           />
         </Suspense>
 
-        <div className="mb-1 flex items-stretch gap-3 pr-10 lg:pr-8">
+        <div className="mb-1 flex items-stretch gap-3 pr-12 lg:pr-8">
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 text-xl font-semibold">
               <BrandLogo brand={c.brand} />
-              <span>
+              <span className="min-w-0 break-words">
                 {[c.brand, c.model].filter(Boolean).join(' ')} {c.makeYear ? `(${c.makeYear})` : ''}
               </span>
               <CopyAllInfoButton
+                className="shrink-0"
                 vehicle={{ brand: c.brand, model: c.model, year: c.makeYear, body: c.body }}
                 plate={data.plate}
                 region={regionLabel(data.region)}

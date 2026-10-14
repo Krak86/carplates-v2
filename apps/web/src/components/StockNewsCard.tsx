@@ -46,7 +46,9 @@ export default function StockNewsCard({ item, withSummary = false }: Props): Rea
         />
       )}
 
-      <p className="line-clamp-4 text-sm font-medium break-words text-fg group-hover:text-primary">{item.title}</p>
+      <p className="line-clamp-4 text-sm font-medium break-words text-fg group-hover:text-primary">
+        {item.title} <span aria-hidden>↗</span>
+      </p>
 
       {withSummary && !!item.summary && <p className="line-clamp-3 text-xs break-words text-muted">{item.summary}</p>}
 

@@ -89,14 +89,14 @@ export default function AuctionCheck({ vin, imported = false, openSignal = 0 }: 
       ref={sectionRef}
       icon="🔨"
       title={
-        <>
+        <span className="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-1">
           {title}
           {imported && (
-            <span className="ml-1 rounded-full border border-[var(--color-border)] px-2 py-0.5 text-xs font-normal">
+            <span className="rounded-full border border-[var(--color-border)] px-2 py-0.5 text-xs font-normal max-sm:w-fit max-sm:basis-full">
               🌍 {t('auctions.importedChip')}
             </span>
           )}
-        </>
+        </span>
       }
       info={<SectionInfo section="auctions" title={title} />}
       actions={<ShareButton section="auctions" label={t('share.button', { section: title })} />}

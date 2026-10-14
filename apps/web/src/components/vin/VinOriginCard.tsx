@@ -52,7 +52,7 @@ export default function VinOriginCard({ fields, fallback }: Props): ReactNode {
           rel="noopener noreferrer"
           className="shrink-0 text-sm text-[var(--color-primary)] hover:underline"
         >
-          📍 {t('vin.origin.map')}
+          📍 {t('vin.origin.map')} <span aria-hidden>↗</span>
         </a>
       )}
     </div>

@@ -57,7 +57,7 @@ export default function VideoStrip({ videos }: Props): ReactNode {
               title={video.title}
               className="mt-1 line-clamp-2 text-sm text-[var(--color-primary)] underline hover:no-underline"
             >
-              {video.title}
+              {video.title} <span aria-hidden>↗</span>
             </a>
           </li>
         ))}

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import type { ReactNode } from 'react'
+import type { MouseEvent, PointerEvent, ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router'
@@ -11,6 +11,8 @@ import { cn } from '@/lib/cn'
 import { vehiclePhotosQuery } from '@/lib/queries'
 import { scrollElementIntoView } from '@/lib/share-section'
 import SectionSkeleton from '@/components/ui/SectionSkeleton'
+
+const SWIPE_MIN_PX = 40
 
 type Props = {
   brand: string | null
@@ -30,6 +32,7 @@ export default function VehiclePhotos({ brand, model, year }: Props): ReactNode 
   const [open, setOpen] = useState(() => isSharedPhotos)
   const [index, setIndex] = useState(0)
   const sectionRef = useRef<HTMLDivElement>(null)
+  const swipeRef = useRef<{ x: number; swiped: boolean } | null>(null)
   const hasQuery = Boolean(brand || model)
   const photos = useQuery({ ...vehiclePhotosQuery(brand ?? '', model ?? '', year), enabled: open && hasQuery })
   const images = photos.data?.images ?? []
@@ -38,6 +41,26 @@ export default function VehiclePhotos({ brand, model, year }: Props): ReactNode 
   useEffect(() => {
     if (isSharedPhotos && sectionRef.current) scrollElementIntoView(sectionRef.current)
   }, [isSharedPhotos])
+
+  const step = (delta: number): void => setIndex(i => (i + delta + images.length) % images.length)
+
+  const handleSwipeStart = (e: PointerEvent<HTMLDivElement>): void => {
+    swipeRef.current = { x: e.clientX, swiped: false }
+  }
+
+  const handleSwipeEnd = (e: PointerEvent<HTMLDivElement>): void => {
+    const start = swipeRef.current
+    if (!start || images.length < 2) return
+    const dx = e.clientX - start.x
+    if (Math.abs(dx) < SWIPE_MIN_PX) return
+    start.swiped = true
+    step(dx < 0 ? 1 : -1)
+  }
+
+  // A swipe ends on the photo's link — don't follow it.
+  const handleLinkClick = (e: MouseEvent<HTMLAnchorElement>): void => {
+    if (swipeRef.current?.swiped) e.preventDefault()
+  }
 
   if (!hasQuery) return null
 
@@ -71,8 +94,18 @@ export default function VehiclePhotos({ brand, model, year }: Props): ReactNode 
 
             {current && (
               <div>
-                <div className="relative overflow-hidden rounded-md border border-[var(--color-border)]">
-                  <a href={current.pageURL} target="_blank" rel="noopener noreferrer">
+                <div
+                  onPointerDown={handleSwipeStart}
+                  onPointerUp={handleSwipeEnd}
+                  className="relative touch-pan-y overflow-hidden rounded-md border border-[var(--color-border)]"
+                >
+                  <a
+                    href={current.pageURL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    draggable={false}
+                    onClick={handleLinkClick}
+                  >
                     <img
                       src={current.webformatURL}
                       alt={t('photos.alt', { query: photos.data?.query ?? '' })}
@@ -85,7 +118,7 @@ export default function VehiclePhotos({ brand, model, year }: Props): ReactNode 
                       <button
                         type="button"
                         aria-label={t('photos.prev')}
-                        onClick={() => setIndex(i => (i - 1 + images.length) % images.length)}
+                        onClick={() => step(-1)}
                         className="absolute top-1/2 left-2 -translate-y-1/2 rounded-full bg-black/40 px-2 py-1 text-white hover:bg-black/60"
                       >
                         ‹
@@ -93,7 +126,7 @@ export default function VehiclePhotos({ brand, model, year }: Props): ReactNode 
                       <button
                         type="button"
                         aria-label={t('photos.next')}
-                        onClick={() => setIndex(i => (i + 1) % images.length)}
+                        onClick={() => step(1)}
                         className="absolute top-1/2 right-2 -translate-y-1/2 rounded-full bg-black/40 px-2 py-1 text-white hover:bg-black/60"
                       >
                         ›

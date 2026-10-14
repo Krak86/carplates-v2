@@ -39,7 +39,8 @@ function zoomAt(view: View, factor: number, px: number, py: number): View {
 export default function PhotoZoomDialog({ url, candidates, active, onClose }: Props): ReactNode {
   const { t } = useTranslation()
   const viewportRef = useRef<HTMLDivElement>(null)
-  const dragRef = useRef<{ x: number; y: number } | null>(null)
+  const pointersRef = useRef(new Map<number, { x: number; y: number }>())
+  const pinchRef = useRef<number | null>(null)
   const [view, setView] = useState<View>(FIT)
   const [showBoxes, setShowBoxes] = useState(true)
 
@@ -66,21 +67,47 @@ export default function PhotoZoomDialog({ url, candidates, active, onClose }: Pr
   const handleZoomButton = (factor: number): void => setView(v => zoomAt(v, factor, 0, 0))
 
   const handlePointerDown = (e: PointerEvent<HTMLDivElement>): void => {
-    dragRef.current = { x: e.clientX, y: e.clientY }
+    pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY })
+    pinchRef.current = null
     e.currentTarget.setPointerCapture(e.pointerId)
   }
 
   const handlePointerMove = (e: PointerEvent<HTMLDivElement>): void => {
-    const last = dragRef.current
+    const pointers = pointersRef.current
+    const last = pointers.get(e.pointerId)
     if (!last) return
-    const dx = e.clientX - last.x
-    const dy = e.clientY - last.y
-    dragRef.current = { x: e.clientX, y: e.clientY }
+    const next = { x: e.clientX, y: e.clientY }
+
+    if (pointers.size >= 2) {
+      // Two fingers: pinch-zoom around their midpoint, and pan with the midpoint.
+      const other = [...pointers].find(([id]) => id !== e.pointerId)?.[1]
+      pointers.set(e.pointerId, next)
+      if (!other) return
+      const dist = Math.hypot(next.x - other.x, next.y - other.y)
+      const prev = pinchRef.current
+      pinchRef.current = dist
+      if (prev === null || prev === 0) return
+      const rect = e.currentTarget.getBoundingClientRect()
+      const px = (next.x + other.x) / 2 - rect.left - rect.width / 2
+      const py = (next.y + other.y) / 2 - rect.top - rect.height / 2
+      const dx = (next.x - last.x) / 2
+      const dy = (next.y - last.y) / 2
+      setView(v => {
+        const z = zoomAt(v, dist / prev, px, py)
+        return z === FIT ? z : { ...z, x: z.x + dx, y: z.y + dy }
+      })
+      return
+    }
+
+    pointers.set(e.pointerId, next)
+    const dx = next.x - last.x
+    const dy = next.y - last.y
     setView(v => (v.scale === MIN_SCALE ? v : { ...v, x: v.x + dx, y: v.y + dy }))
   }
 
-  const handlePointerUp = (): void => {
-    dragRef.current = null
+  const handlePointerUp = (e: PointerEvent<HTMLDivElement>): void => {
+    pointersRef.current.delete(e.pointerId)
+    pinchRef.current = null
   }
 
   const handleDoubleClick = (e: MouseEvent<HTMLDivElement>): void => {

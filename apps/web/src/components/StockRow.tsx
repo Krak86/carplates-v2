@@ -70,7 +70,7 @@ export default function StockRow({
 
                 <div className="space-y-1 p-2.5">
                   <p className="line-clamp-3 min-h-12 text-sm font-medium text-fg group-hover:text-primary">
-                    {t(`${adKeyPrefix}${ads[i] ?? 1}`, { brand: brandName, year })}
+                    {t(`${adKeyPrefix}${ads[i] ?? 1}`, { brand: brandName, year })} <span aria-hidden>↗</span>
                   </p>
 
                   <p className="truncate text-xs text-muted">

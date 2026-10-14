@@ -18,7 +18,7 @@ export default function FavoriteButton({ kind, value, label, className }: Props)
   const { isFavorite, isPending, toggle } = useFavoriteToggle(kind, value, label)
 
   return (
-    <span className={cn('z-10 flex items-center gap-2', className)}>
+    <span className={cn('z-10 flex flex-col-reverse items-center gap-1 sm:flex-row sm:gap-2', className)}>
       <FavoriteLabelsButton kind={kind} value={value} />
 
       <button

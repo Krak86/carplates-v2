@@ -89,7 +89,7 @@ export default function NewsCard({
             compact ? 'text-sm' : 'text-base'
           )}
         >
-          {newsTitle(item, t)}
+          {newsTitle(item, t)} <span aria-hidden>↗</span>
         </p>
 
         <p className="truncate text-xs text-[var(--color-muted)]">

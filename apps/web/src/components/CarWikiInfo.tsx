@@ -180,7 +180,7 @@ export default function CarWikiInfo({ brand, model, year }: Props): ReactNode {
                       rel="noopener noreferrer"
                       className="text-[var(--color-primary)] underline"
                     >
-                      {t('wiki.source')}
+                      {t('wiki.source')} <span aria-hidden>↗</span>
                     </a>
                   )}
                 </div>

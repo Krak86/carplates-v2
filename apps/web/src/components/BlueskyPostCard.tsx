@@ -45,7 +45,7 @@ export default function BlueskyPostCard({ post, decorative = false }: Props): Re
       </div>
 
       <p className="line-clamp-5 text-sm break-words text-[var(--color-fg)] group-hover:text-[var(--color-primary)]">
-        {post.text}
+        {post.text} <span aria-hidden>↗</span>
       </p>
 
       {post.images.length > 0 && (

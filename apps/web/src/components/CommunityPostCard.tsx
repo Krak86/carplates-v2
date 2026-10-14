@@ -24,7 +24,7 @@ export default function CommunityPostCard({ post }: Props): ReactNode {
       className="group block space-y-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)]/60 p-2.5 transition-colors hover:bg-[var(--color-surface)]"
     >
       <p className="line-clamp-4 text-sm font-medium break-words text-[var(--color-fg)] group-hover:text-[var(--color-primary)]">
-        {post.title}
+        {post.title} <span aria-hidden>↗</span>
       </p>
 
       {post.thumb && (

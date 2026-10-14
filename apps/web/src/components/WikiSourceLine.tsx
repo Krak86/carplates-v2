@@ -22,7 +22,7 @@ export default function WikiSourceLine({ source }: Props): ReactNode {
         rel="noreferrer noopener"
         className="text-[var(--color-primary)] underline hover:no-underline"
       >
-        {wikiSourceLabel(source)}
+        {wikiSourceLabel(source)} <span aria-hidden>↗</span>
       </a>
       {source.accessed && ` · ${t('wikispec.accessed', { date: source.accessed })}`}
     </p>
