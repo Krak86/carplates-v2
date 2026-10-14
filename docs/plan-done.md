@@ -3628,3 +3628,11 @@ Files: `apps/web/src/components/size/` — `VehicleSize.helpers.ts` (merge, shap
 - UA parking place: ДБН В.2.3-15:2007 blurb + official e-construction.gov.ua link; ПДР sign 5.38 drawn as SVG in `SizeRoadSign.tsx` (swap in an official scan later).
 - Specs groups link (`SpecGroupJump`, `GROUP_JUMP`) to Generation specs / Size & parking / Estimated value / Emissions: each section takes an `openSignal` bumped from `ResultCard`.
 - "Save as" report now has Generation specs and Size & parking (`lib/export-size.ts`; `computeVehicleSize` is the pure core of `useVehicleSize`).
+
+## Chip explainers, weight tab URLs, mobile polish, VIN-since-2021 note (2026-10-14)
+
+- **Header chips:** `VdbChips`, `GenerationChip`, `TopStatBadges`, `Model3dButton`, `Model360Button` and `SizeClassChip` share one pattern — chip + "?" `InfoPopover` explainer (and `ChipChevronButton` where the chip opens a section). Size is shown in metres only (no mm/ft toggle).
+- **Weight tab URLs:** the `/stats` heaviest / lightest panel keeps its group in `?weight=<group>` (`WeightModelsPanel`); arriving on a `?weight=` deep link (result-card ranking chip) scrolls the panel into view once the boards load.
+- **Mobile polish:** `PhotoZoomDialog` pinch-zooms (two pointers: zoom around the midpoint + pan, `touch-none`); `VehiclePhotos` swipes between photos (`SWIPE_MIN_PX` 40, a swipe ending on the photo link does not follow it); external links carry a ↗ marker; header layout tightened.
+- **"VIN data starts in 2021" note** (`vin/VinSince2021Note.tsx`, `vin.since2021.*`): the open registry only publishes VINs from 2021, so older plates/owners are not linked by VIN. Shown under the registry history on the VIN page (`VinRegistryHistory`) and on the plate card — full text under the VIN history, short `noVin` variant when the plate itself has no VIN.
+- Ukrainian wording: «застосунок» (not «додаток») for the app.

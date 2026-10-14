@@ -6,14 +6,11 @@
 open-data portal (`data.gov.ua`) in Postgres; VIN decoding proxies NHTSA. **Phase 1: local dev stack only** (no CI, no VPS). The v1 app
 is the sibling `../carplates/` (do not modify).
 
-Docs map (**grep headings, never read whole** — several are 100–400 KB): `PLAN.md` active/planned (incl. version pins) ·
-`docs/plan-done.md` finished write-ups · `README.md` setup, env, scripts · `docs/features-reference.md` per-feature conventions
-(**read the matching section before touching VehiclesDB, RDW, value, rankings, posts, racer, Accounts, VIN page, offline/PWA, link
-previews, sitemap/rate limits, plate regions, generations, stock news**) · `docs/commands-reference.md` `ingest:*` / `export:*` / ALPR ·
-`docs/legal-and-monetization.md` · `docs/logins.md` · `docs/security-checklist.md`. Rarely needed: `docs/catalog-plan.md`,
-`DATASETS_PLAN.md`, `GAME_PLAN.md`, `FEATURES_PLAN.md`, `SCHEDULE.md`, `docs/vps-http2-http3.md`.
-
-Setup: `pnpm install && pnpm db:up && pnpm db:migrate && pnpm db:seed && pnpm dev` (web :5173, api :3000). Other scripts: README.
+Docs (**grep headings, never read whole** — several are 100–400 KB): `PLAN.md` active/planned + version pins · `docs/plan-done.md`
+finished write-ups · `README.md` setup/env/scripts · `docs/features-reference.md` per-feature conventions (**read the matching section
+before touching VehiclesDB, RDW, value, rankings, posts, racer, Accounts, VIN page, size, offline/PWA, link previews, sitemap/rate limits,
+plate regions, generations, stock news**) · `docs/commands-reference.md` `ingest:*`/`export:*`/ALPR · `docs/{legal-and-monetization,logins,security-checklist}.md`.
+Others (`catalog-plan`, `DATASETS_PLAN`, `GAME_PLAN`, `FEATURES_PLAN`, `SCHEDULE`, `vps-http2-http3`) only on request.
 
 ## Layout
 
@@ -22,8 +19,7 @@ logic**) · `packages/db` (Drizzle schema `registry`, SQL migrator) · `apps/api
 per-plate `<meta>`) · `apps/web` (Vite + React 19 + React Router, `@/` → `src/`) · `scripts/` (ingest/export CLIs via `tsx`,
 `seed-data/` = committed gzipped CSVs) · `infra/` · `services/alpr/`.
 
-Pins: pnpm 12, Node 24, TypeScript 5.9 (not 7), NestJS 11 (not 12), Drizzle 0.45.2, Vitest 4, ESLint 10, Vite 8, Tailwind v4
-(`@theme` in `src/styles/global.css`), i18next ua/ru/en, `nestjs-zod`. Real `.env*` are gitignored.
+Pins (details in PLAN.md): pnpm 12, Node 24, TypeScript 5.9 (not 7), NestJS 11 (not 12), Drizzle 0.45.2, Tailwind v4, i18next ua/ru/en.
 
 ## Conventions
 
