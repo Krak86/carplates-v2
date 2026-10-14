@@ -7,7 +7,6 @@ import InfoPopover from '@/components/InfoPopover'
 import InfoText from '@/components/InfoText'
 import VehicleSizeSchema from '@/components/size/VehicleSizeSchema'
 import {
-  formatMm,
   mmToMetres,
   SIZE_FIELDS,
   sourceLabel,
@@ -98,9 +97,8 @@ function SourceTag({ figure, wiki }: TagProps): ReactNode {
  * gave one, and the shape and class the drawing and the header chip are based on.
  */
 export default function SizeSchemaTab({ name, shape, figures, cls, wiki }: Props): ReactNode {
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
   const metre = t('rdw.unitM')
-  const unit = t('wikispec.unitMm')
   const [active, setActive] = useState<SizeField | null>(null)
 
   return (
@@ -137,18 +135,15 @@ export default function SizeSchemaTab({ name, shape, figures, cls, wiki }: Props
                 hasSpread && (
                   <span className="text-xs text-[var(--color-muted)]">
                     {t('size.range', {
-                      range: `${formatMm(spread.min, i18n.language)}–${formatMm(spread.max, i18n.language)}`,
-                      unit
+                      range: `${mmToMetres(spread.min)}–${mmToMetres(spread.max)}`,
+                      unit: metre
                     })}
                   </span>
                 )
               }
             >
               {figure.source === 'estimate' && '≈ '}
-              {formatMm(figure.value, i18n.language)} {unit}
-              <span className="ml-1 font-normal text-[var(--color-muted)]">
-                ({mmToMetres(figure.value)} {metre})
-              </span>
+              {mmToMetres(figure.value)} {metre}
             </Row>
           )
         })}

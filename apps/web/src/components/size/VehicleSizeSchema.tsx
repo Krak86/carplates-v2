@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 
 import { FRONT_OVERHANG_SHARE, GLASS_PATHS, SIDE_PATHS, TOP_LAYOUT, WHEEL_MM } from '@/components/size/silhouettes'
 import type { SizeField, SizeFigures, SizeShape } from '@/components/size/VehicleSize.helpers'
-import { estimatePrefix, formatMm } from '@/components/size/VehicleSize.helpers'
+import { estimatePrefix, mmToMetres } from '@/components/size/VehicleSize.helpers'
 
 type Props = {
   shape: SizeShape
@@ -125,7 +125,7 @@ function Wheel({ cx, cy, r }: WheelProps): ReactNode {
  * dimension carries an arrow. A figure that is our forecast is prefixed with "≈" and its arrow is dashed.
  */
 export default function VehicleSizeSchema({ shape, figures, name, active = null, onActiveChange }: Props): ReactNode {
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
   const length = figures.lengthMm?.value ?? null
   const width = figures.widthMm?.value ?? null
   const height = figures.heightMm?.value ?? null
@@ -150,7 +150,7 @@ export default function VehicleSizeSchema({ shape, figures, name, active = null,
   const viewH = topY + width + length * 0.1 - viewY
 
   const text = (field: keyof SizeFigures, value: number): string =>
-    `${estimatePrefix(figures[field]?.source ?? 'rdw')}${formatMm(value, i18n.language)} ${t('wikispec.unitMm')}`
+    `${estimatePrefix(figures[field]?.source ?? 'rdw')}${mmToMetres(value)} ${t('rdw.unitM')}`
   const isDashed = (field: keyof SizeFigures): boolean => figures[field]?.source === 'estimate'
 
   const alt = t('size.schema.alt', {

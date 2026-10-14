@@ -40,24 +40,21 @@ export default function Model360Button({ brand, model }: Props): ReactNode {
 
   return (
     <div className="contents">
-      <InfoPopover
-        label={t('model360.open', { n: count })}
-        title={t('model360.open', { n: count })}
-        anchor={
-          <button
-            type="button"
-            onClick={() => setOpen(true)}
-            disabled={!online}
-            title={online ? undefined : t('offline.needsConnection')}
-            className="inline-flex animate-chip-in cursor-pointer items-center gap-1 rounded-full border chip-tone px-2 py-0.5 text-xs text-[var(--color-fg)] transition-colors chip-view hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-[var(--color-border)] disabled:hover:text-[var(--color-fg)]"
-          >
-            <span aria-hidden>🔄</span>
-            {t('model360.open', { n: count })}
-          </button>
-        }
-      >
-        {t('chip.tip.view360')}
-      </InfoPopover>
+      <span className="inline-flex animate-chip-in items-center gap-1 rounded-full border chip-tone py-0.5 pr-1 pl-2 text-xs text-[var(--color-fg)] transition-colors chip-view hover:border-[var(--color-primary)]">
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          disabled={!online}
+          title={online ? undefined : t('offline.needsConnection')}
+          className="inline-flex cursor-pointer items-center gap-1 hover:text-[var(--color-primary)] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:text-[var(--color-fg)]"
+        >
+          <span aria-hidden>🔄</span>
+          {t('model360.open', { n: count })}
+        </button>
+        <InfoPopover label={t('model360.open', { n: count })} title={t('model360.open', { n: count })}>
+          {t('chip.tip.view360')}
+        </InfoPopover>
+      </span>
 
       {open && online && (
         <Suspense fallback={null}>

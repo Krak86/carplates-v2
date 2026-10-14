@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { DEFAULT_WEIGHT_GROUP, WEIGHT_GROUPS, type WeightGroup } from '@carplates/shared'
 import { useTranslation } from 'react-i18next'
+import { useSearchParams } from 'react-router'
 
 import SectionInfo from '@/components/SectionInfo'
 import { cn } from '@/lib/cn'
@@ -16,9 +17,30 @@ import WeightModelsCards from '@/routes/stats/WeightModelsCards'
  */
 export default function WeightModelsPanel(): ReactNode {
   const { t } = useTranslation()
-  const [group, setGroup] = useState<WeightGroup>(DEFAULT_WEIGHT_GROUP)
+  // The tab lives in the URL (?weight=passenger) so every group has its own shareable link, like the stats dimension tabs.
+  const [searchParams, setSearchParams] = useSearchParams()
+  const param = searchParams.get('weight')
+  const group: WeightGroup = WEIGHT_GROUPS.find(g => g === param) ?? DEFAULT_WEIGHT_GROUP
+
+  const handleGroupChange = (next: WeightGroup): void => {
+    setSearchParams(
+      prev => {
+        const params = new URLSearchParams(prev)
+        params.set('weight', next)
+        return params
+      },
+      { preventScrollReset: true }
+    )
+  }
   const { data } = useQuery(statsTopQuery())
   const boards = data?.weightBoards
+  const rootRef = useRef<HTMLDivElement>(null)
+  const hasBoards = !!boards && Object.keys(boards).length > 0
+  // Arriving on a ?weight= deep link (a result-card chip): bring the panel into view once it has rendered.
+  const [deepLinked] = useState(() => searchParams.has('weight'))
+  useEffect(() => {
+    if (deepLinked && hasBoards) rootRef.current?.scrollIntoView({ block: 'start' })
+  }, [deepLinked, hasBoards])
   if (!boards || Object.keys(boards).length === 0) return null
 
   // A group with no ranked model (e.g. "other") has no tab to open.
@@ -26,14 +48,14 @@ export default function WeightModelsPanel(): ReactNode {
   const board = boards[group]
 
   return (
-    <div className="mb-6">
+    <div ref={rootRef} className="mb-6 scroll-mt-4">
       <div role="group" aria-label={t('stats.weight.group')} className="mb-3 flex flex-wrap items-center gap-1.5">
         {groups.map(g => (
           <button
             key={g}
             type="button"
             aria-pressed={g === group}
-            onClick={() => setGroup(g)}
+            onClick={() => handleGroupChange(g)}
             className={cn(
               'rounded-full border px-2.5 py-0.5 text-xs',
               g === group ? 'border-primary bg-primary text-white' : 'border-border text-fg'

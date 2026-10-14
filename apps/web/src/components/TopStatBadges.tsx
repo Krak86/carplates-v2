@@ -47,23 +47,23 @@ export default function TopStatBadges({ brand, model, color, region, kind }: Pro
     // `contents`: the chips flow in the parent's wrapping row, alongside sibling chips (e.g. the 3D view).
     <div className="contents">
       {badges.map(badge => (
-        <InfoPopover
+        <span
           key={badge.key}
-          label={t(badge.textKey, { rank: badge.rank })}
-          title={t(badge.textKey, { rank: badge.rank })}
-          anchor={
-            <Link
-              viewTransition
-              to={badge.to}
-              className={`${TONE[badge.key] ?? DEFAULT_TONE} inline-flex animate-chip-in items-center gap-1 rounded-full border chip-tone px-2 py-0.5 text-xs text-[var(--color-fg)] transition-colors hover:text-[var(--color-primary)]`}
-            >
-              <span aria-hidden>{badge.icon}</span>
-              {t(badge.textKey, { rank: badge.rank })}
-            </Link>
-          }
+          className={`${TONE[badge.key] ?? DEFAULT_TONE} inline-flex animate-chip-in items-center gap-1 rounded-full border chip-tone py-0.5 pr-1 pl-2 text-xs text-[var(--color-fg)] transition-colors`}
         >
-          {t(`chip.tip.${badge.key}`)}
-        </InfoPopover>
+          <Link
+            viewTransition
+            to={badge.to}
+            className="inline-flex items-center gap-1 transition-colors hover:text-[var(--color-primary)]"
+          >
+            <span aria-hidden>{badge.icon}</span>
+            {t(badge.textKey, { rank: badge.rank })}
+          </Link>
+
+          <InfoPopover label={t(badge.textKey, { rank: badge.rank })} title={t(badge.textKey, { rank: badge.rank })}>
+            {t(`chip.tip.${badge.key}`)}
+          </InfoPopover>
+        </span>
       ))}
     </div>
   )

@@ -13,7 +13,7 @@ type Props = Omit<VehicleSizeInput, 'vinFields'> & {
 }
 
 const CHIP =
-  'chip-market chip-tone inline-flex animate-chip-in items-center gap-1 rounded-full border px-2 py-0.5 text-xs text-[var(--color-fg)]'
+  'chip-market chip-tone inline-flex animate-chip-in items-center gap-1 rounded-full border py-0.5 pr-1 pl-2 text-xs text-[var(--color-fg)]'
 
 // Hovering / focusing the chevron warms the section's chunk, so the scroll lands on a ready section.
 const loadSection = (): Promise<typeof import('@/components/size/VehicleSizeSection')> =>
@@ -37,20 +37,15 @@ export default function SizeClassChip({ onOpenSection, ...input }: Props): React
 
   return (
     <span className="inline-flex items-center gap-0.5">
-      <InfoPopover
-        label={title}
-        title={title}
-        anchor={
-          <span className={CHIP}>
-            <span aria-hidden>📏</span>
-            {label}
-            {cls.sub != null && ` · ${t(`rdw.size.${cls.sub}`)}`} · {approx}
-            {mmToMetres(length.value)} {t('rdw.unitM')}
-          </span>
-        }
-      >
-        <InfoText text={t('size.chip.info', { class: label, length: `${approx}${mmToMetres(length.value)}` })} />
-      </InfoPopover>
+      <span className={CHIP}>
+        <span aria-hidden>📏</span>
+        {label}
+        {cls.sub != null && ` · ${t(`rdw.size.${cls.sub}`)}`} · {approx}
+        {mmToMetres(length.value)} {t('rdw.unitM')}
+        <InfoPopover label={title} title={title}>
+          <InfoText text={t('size.chip.info', { class: label, length: `${approx}${mmToMetres(length.value)}` })} />
+        </InfoPopover>
+      </span>
 
       <ChipChevronButton label={t('size.chip.expand')} onClick={onOpenSection} onWarm={() => void loadSection()} />
     </span>

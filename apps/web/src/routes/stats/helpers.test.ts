@@ -272,7 +272,7 @@ describe('rankingBadges', () => {
 
   it('adds a weight chip linking to /stats, ranked within the vehicle group', () => {
     const lada = { brand: 'LADA', model: '2105', color: null, region: null, kind: 'ЛЕГКОВИЙ' }
-    expect(rankingBadges(top, lada).map(b => [b.key, b.to])).toEqual([['heaviest', '/stats']])
+    expect(rankingBadges(top, lada).map(b => [b.key, b.to])).toEqual([['heaviest', '/stats?weight=passenger']])
   })
 
   it('ranks a truck on the truck board only', () => {

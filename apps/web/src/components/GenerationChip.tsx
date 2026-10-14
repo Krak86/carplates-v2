@@ -14,7 +14,7 @@ type Props = {
 }
 
 const CHIP =
-  'chip-market chip-tone inline-flex animate-chip-in items-center gap-1 rounded-full border px-2 py-0.5 text-xs text-[var(--color-fg)]'
+  'chip-market chip-tone inline-flex animate-chip-in items-center gap-1 rounded-full border py-0.5 pr-1 pl-2 text-xs text-[var(--color-fg)]'
 
 /**
  * "Generation XV40 · 2006–2011" chip from Wikidata / Wikipedia facts, with the neighbouring generations in its popover.
@@ -62,21 +62,16 @@ export default function GenerationChip({ brand, model, year }: Props): ReactNode
   ].filter(Boolean)
 
   return (
-    <InfoPopover
-      label={t('generation.info.title')}
-      title={t('generation.info.title')}
-      anchor={
-        <span className={CHIP}>
-          <span aria-hidden>🧬</span>
-          {generationChipText(current, t)}
-        </span>
-      }
-    >
-      <ul className="list-disc space-y-1 pl-4">
-        {lines.map((line, i) => (
-          <li key={i}>{line}</li>
-        ))}
-      </ul>
-    </InfoPopover>
+    <span className={CHIP}>
+      <span aria-hidden>🧬</span>
+      {generationChipText(current, t)}
+      <InfoPopover label={t('generation.info.title')} title={t('generation.info.title')}>
+        <ul className="list-disc space-y-1 pl-4">
+          {lines.map((line, i) => (
+            <li key={i}>{line}</li>
+          ))}
+        </ul>
+      </InfoPopover>
+    </span>
   )
 }

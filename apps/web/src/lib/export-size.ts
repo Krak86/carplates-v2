@@ -1,6 +1,6 @@
 import { computeVehicleSize } from '@/components/size/use-vehicle-size'
 import { fitInBay, GARAGE_REFS, linkById, PARKING_REFS } from '@/components/size/fit'
-import { formatMm, leadParts, mmToMetres, SIZE_FIELDS, sourceLabel } from '@/components/size/VehicleSize.helpers'
+import { leadParts, mmToMetres, SIZE_FIELDS, sourceLabel } from '@/components/size/VehicleSize.helpers'
 import { toFieldMap } from '@/components/vin/helpers'
 import { wikiSourceUrl } from '@carplates/shared'
 import {
@@ -65,8 +65,6 @@ export function buildSizeSection(input: ExportInput, t: Translate): ExportKeyVal
   })
   if (!size) return null
 
-  const locale = input.lang === 'ua' ? 'uk' : input.lang
-  const unit = t('wikispec.unitMm')
   const rows: Row[] = []
   for (const field of SIZE_FIELDS) {
     const figure = size.figures[field]
@@ -74,7 +72,7 @@ export function buildSizeSection(input: ExportInput, t: Translate): ExportKeyVal
     const approx = figure.source === 'estimate' ? '≈ ' : ''
     rows.push({
       label: t(`size.field.${field}`),
-      value: `${approx}${formatMm(figure.value, locale)} ${unit} (${mmToMetres(figure.value)} ${t('rdw.unitM')}) · ${sourceLabel(figure.source, size.sources.wiki, t)}`
+      value: `${approx}${mmToMetres(figure.value)} ${t('rdw.unitM')} · ${sourceLabel(figure.source, size.sources.wiki, t)}`
     })
   }
   rows.push({ label: t('size.shape.label'), value: t(`size.shape.${size.shape}`) })

@@ -273,14 +273,14 @@ export function rankingBadges(
       icon: '🏋️',
       rank: rankOfModel(weightBoard?.heaviest ?? [], brand, model),
       textKey: 'result.topHeaviest',
-      to: '/stats'
+      to: statsLink({ weight: group ?? '' })
     },
     {
       key: 'lightest',
       icon: '🪶',
       rank: rankOfModel(weightBoard?.lightest ?? [], brand, model),
       textKey: 'result.topLightest',
-      to: '/stats'
+      to: statsLink({ weight: group ?? '' })
     }
   ].filter((b): b is RankingBadge => b.rank !== null)
 }
