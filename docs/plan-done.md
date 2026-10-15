@@ -3646,3 +3646,57 @@ Files: `apps/web/src/components/size/` — `VehicleSize.helpers.ts` (merge, shap
 ## Releases page (2026-10-15)
 
 - `/releases` ("What's new"): day-by-day change log back to the first commit (2026-09-09) with group filter; sidebar link, `STATIC_PAGES` SEO entry, link from the PWA update bar. Conventions: `docs/features-reference.md` "Releases page".
+
+## Cross-links, update-bar button, About features (2026-10-15)
+
+- **Cross-links** (`6df9280`, `5bed8de`): `JumpTarget` (`RdwSpecs.helpers.ts`) covers a section, `history`, `vin` or `specs-<group>`; `ResultCard.jumpToSection` handles them and is shared as `CardJumpContext` (`card-jump.ts`). Basic-section rows get a chip-style `RowJump` arrow (only when the target section exists), `SpecsJumpLink` / `SpecGroupJump` link Specs groups to the sections that expand on them. `ResultCard.tsx` was split up along the way. Conventions: `docs/features-reference.md` top section.
+- **"Update & see what's new"** (`58c92a3`): the PWA update bar sets the URL to `/releases` before the normal update, so the reload lands the new shell on the change log (`use-pwa-actions.ts`).
+- **About page** (`c1951da`): a features list (ua/ru/en) plus two new source tiles (МТСБУ `mtsbu.webp`, stolen.in.ua `stolenin.svg`); the new entries were also added to `releases.ts`.
+- **Static routes read as plates** (`51f4cde`): `use-header-vehicle-label.ts` now ignores `ROUTE_TITLE_KEYS` paths (`/releases`, `/install`, …).
+
+## Wanted vehicles ingest — original design (planned 2026-10-01, built 2026-10-15; moved from PLAN.md)
+
+Source: data.gov.ua dataset `ac1a3a9d-512b-446b-9b0c-1383d38ce474` (National
+Police, CC-BY, "more than once daily"). Resource `CarsWanted.json`
+(`2d69d196-02f1-49b9-97fa-0fb69077e05f`), ~36 MB, one JSON array replaced in
+place. Fields (all required): `id`, `brand`, `model`, `cartype`, `color`,
+`vehiclenumber`, `bodynumber`, `chassisnumber`, `enginenumber`,
+`illegalseizuredate`, `organunit`, `insertdate`. No status / found-date field.
+Record count unverified (~80-100k estimated) — check on first download.
+
+**Key finding:** the file is a full snapshot of the _current_ list, so a found
+car most likely just disappears from the next file. CKAN revision history is
+patchy (see registry data). We must keep our own history → tombstones, never
+hard-delete.
+
+Design:
+
+- Table `registry.wanted_vehicles`: `source_id` PK, normalized `plate`, `vin`
+  (from `bodynumber`/`chassisnumber`, validated), brand/model/color/cartype/
+  organunit, `seized_at`, `inserted_at`, `raw jsonb`, `first_seen_at`,
+  `last_seen_at` (or a `sync_run_id` to avoid rewriting every row daily),
+  `resolved_at` (null while listed). Indexes: plate, vin, resolved_at.
+  Separate table joined at query time — not a column on the registry.
+- `scripts/src/wanted.ts` (same style as `ingest.ts`): `package_show` → compare
+  resource `last_modified` with the stored value, exit if unchanged → stream
+  download + stream-parse (`stream-json`, not whole-file `JSON.parse`) with Zod
+  per row → staging table → one set-based upsert → mark rows missing from the
+  run `resolved_at = now()`.
+- **Safety guard:** abort without resolving anything if the file fails to parse
+  or has < ~80% of the previous row count (truncated download must not mass-
+  "recover" cars).
+- Match by plate, and by VIN for plateless cars (2026 plate removal). Police
+  free-text fields are likely messy — normalize with `normalizePlate`, validate
+  VIN, measure the match rate on real data first.
+- Schedule: daily is enough; the `last_modified` check makes a 2-6 h cadence
+  nearly free. Add to `ingest:all`.
+- UI: label as "listed as wanted as of <date>", not a flat claim (stale for
+  hours, found cars may linger).
+
+Load estimate (unmeasured): ~36 MB download (~5-8 MB gzipped) per changed run,
+tens of MB RAM when streamed, seconds to low tens of seconds of DB work for
+~100k narrow rows, sub-ms indexed lookups. No meaningful VPS impact.
+
+First steps when picked up: download the real file locally, confirm count and
+plate/VIN quality, then migration + Zod schema in `packages/shared` + `wanted.ts`
+with a fixture test.

@@ -8,9 +8,9 @@ is the sibling `../carplates/` (do not modify).
 
 Docs (**grep headings, never read whole** — several are 100–400 KB): `PLAN.md` active/planned + version pins · `docs/plan-done.md`
 finished write-ups · `README.md` setup/env/scripts · `docs/features-reference.md` per-feature conventions (**read the matching section
-before touching VehiclesDB, RDW, value, rankings, posts, racer, Accounts, VIN page, size, offline/PWA, link previews, sitemap/rate limits,
-plate regions, generations, stock news**) · `docs/commands-reference.md` `ingest:*`/`export:*`/ALPR · `docs/{legal-and-monetization,logins,security-checklist}.md`.
-Others (`catalog-plan`, `DATASETS_PLAN`, `GAME_PLAN`, `FEATURES_PLAN`, `SCHEDULE`, `vps-http2-http3`) only on request.
+before touching a feature**: VehiclesDB, RDW, value, rankings, posts, racer, Accounts, VIN page, size, wanted, releases, offline/PWA, link
+previews, sitemap/rate limits, plate regions, generations, stock news) · `docs/commands-reference.md` `ingest:*`/`export:*`/ALPR ·
+`docs/{legal-and-monetization,logins,security-checklist}.md`. Other docs in `docs/` and the root `*_PLAN.md`/`SCHEDULE.md` only on request.
 
 ## Layout
 
@@ -19,7 +19,7 @@ logic**) · `packages/db` (Drizzle schema `registry`, SQL migrator) · `apps/api
 per-plate `<meta>`) · `apps/web` (Vite + React 19 + React Router, `@/` → `src/`) · `scripts/` (ingest/export CLIs via `tsx`,
 `seed-data/` = committed gzipped CSVs) · `infra/` · `services/alpr/`.
 
-Pins (details in PLAN.md): pnpm 12, Node 24, TypeScript 5.9 (not 7), NestJS 11 (not 12), Drizzle 0.45.2, Tailwind v4, i18next ua/ru/en.
+Pins (why: PLAN.md): pnpm 12, Node 24, TypeScript 5.9 (not 7), NestJS 11 (not 12), Drizzle 0.45.2, Tailwind v4.
 
 ## Conventions
 
@@ -43,7 +43,6 @@ Pins (details in PLAN.md): pnpm 12, Node 24, TypeScript 5.9 (not 7), NestJS 11 (
 - Accounts: separate `app` schema, not re-ingestable; `account.ts`, not `schemas.ts`; admins by SQL only; online-only UI.
 - **New public route** → add it to `ROUTE_TITLE_KEYS` (`useDocumentTitle.ts`; also stops the header/scroll buttons reading it as a plate) and a `STATIC_PAGES` entry (ua/ru/en) in `apps/api/src/spa/spa-text.ts`, else it is `noindex` and not in the
   sitemap. `/api/*` is globally rate-limited (`common/throttle.ts`); add a `@Throttle` for any enumerable lookup.
-- Tests: Vitest, colocated `*.test.ts(x)`.
 
 ## Workflow
 
@@ -51,7 +50,7 @@ Pins (details in PLAN.md): pnpm 12, Node 24, TypeScript 5.9 (not 7), NestJS 11 (
   `git status` / `git diff --stat`; split if logical). Never run `git commit` / `git push` unless asked.
 - **Seed CSVs mirror scraped tables.** After changing `registry.wiki_image` (pre-warm, `wikiAliases.ts` + re-scrape, row deletes) re-run
   `pnpm export:wiki-images:csv`; same for every other `export:*:csv` dataset (a new setup loads the CSV instead of re-scraping).
-- Run `pnpm format` first (`scripts/src/fixtures` is in `.prettierignore` — never reformat it).
-- Keep docs current: finished work → write-up in `docs/plan-done.md`, one-line ✅ in `PLAN.md`, conventions in `docs/features-reference.md`.
+- Run `pnpm format` first (never reformat `scripts/src/fixtures`). Tests: Vitest, colocated `*.test.ts(x)`.
+- Keep docs current: write-up → `docs/plan-done.md`, one-line ✅ → `PLAN.md`, conventions → `docs/features-reference.md`, user-facing entry → `releases.ts`.
 
 @CLAUDE_RULES.md

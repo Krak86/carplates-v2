@@ -1,8 +1,6 @@
 # CLAUDE_RULES.md
 
-Lint (`pnpm lint`) and Prettier (`.prettierrc`) already enforce formatting, import order, `consistent-type-imports`, no-raw-console,
-no-bare-`useStore`, no `forwardRef`, no `../` in `apps/web`, no phantom deps, Drizzle `.update/.delete` needs `.where`, TanStack
-Query rules — run them instead of memorising. Below: what lint does **not** catch.
+Lint (`pnpm lint`) and Prettier already enforce formatting, imports, console, `useStore`, `forwardRef`, `../` in `apps/web`, Drizzle `.where`, TanStack Query rules. Below: what they do **not** catch.
 
 ## Environment
 
@@ -27,9 +25,7 @@ one-off — never `python`/`python3`. Don't announce this each time; just do it.
 - State: Zustand (`useUiStore`, ~3 fields, always a selector) = shared UI state; TanStack Query = all server state, `queryOptions()`
   co-locating key + fn; `useState` = local only.
 - `@types/*` majors must match the runtime package's major.
-- Tailwind v4, CSS-first: tokens in the `@theme` block of `apps/web/src/styles/global.css`, no `tailwind.config`; only v4 directives
-  (`@theme`, `@utility`, `@custom-variant`, `@plugin`, `@source`), never `@tailwind base`, `@screen`, `theme()`, `safelist`;
-  `!important` is a trailing bang (`@apply inline-block!`). Light default, `[data-theme='dark']` tokens, no toggle.
+- Tailwind v4, CSS-first: tokens in the `@theme` block of `apps/web/src/styles/global.css`, no `tailwind.config`, no v3 directives (`@tailwind base`, `@screen`, `theme()`, `safelist`); `!important` is a trailing bang. Light default, `[data-theme='dark']` tokens, no toggle.
 
 ## Performance (React Compiler)
 

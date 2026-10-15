@@ -329,11 +329,11 @@ above once scoped, or dropped if research says no.
 - ✅ **Stock news widget + Social chip, mobile sidebar buttons, viewport-safe info popups, `/install` page, `pnpm tunnel`** (2026-10-13, `ffceeff` … `55a1fcb`) — built, see `docs/plan-done.md` ("Stock news, mobile sidebar…"). **Open:** news rides the same unofficial Yahoo endpoints as the share price (drop the widget if they break).
 - ✅ **Skeleton placeholders** for stats pages and homepage stats (2026-10-06, `de0a53c`) and the **About page sources + icons** (`9b974fd`) — built, see `docs/plan-done.md`.
 - ✅ **Weight rankings, Stack Exchange + Lemmy community posts, richer "Copy all info" export, WebP brand logos** (2026-10-09, `3f7a596` … `bb9f055`) — built, see `docs/plan-done.md` and `docs/features-reference.md`. **Open:** Stack Exchange / Lemmy are unauthenticated public APIs (rate limits unmeasured — judge on real traffic, drop the widget column if they throttle); weight edges for models with few vehicles are percentile-based, so tiny samples are noisy (per-group floor only); Lighthouse/LCP not yet measured after the perf pass (Phase 4).
-- 📋 **"What's new" bell + feature guide** — planned 2026-10-06, not started: [FEATURES_PLAN.md](FEATURES_PLAN.md) (changelog bell, `/features` guide with Playwright screenshots, ua/ru/en). **Conflicts with the
+- 📋 **Feature guide** (`/features`-style tour with Playwright screenshots, ua/ru/en) — planned 2026-10-06, not started: [FEATURES_PLAN.md](FEATURES_PLAN.md). The "What's new" part shipped as the `/releases` page (2026-10-15, no bell). **Conflicts with the
   paid-features route** — see Phase 5 "Stage A".
 
-- 📋 **Wanted (stolen) vehicles** — planned 2026-10-01, researched, not started.
-  See "Wanted vehicles ingest" below.
+- ✅ **Wanted (stolen) vehicles** — built 2026-10-15 (`5bed8de`), see above and `docs/plan-done.md` (original design archived there).
+- ✅ **Cross-links between result-card sections, About features list** (2026-10-15, `6df9280`, `c1951da`) — see `docs/plan-done.md`.
 
 - 📋 **Window sticker** (Monroney-style spec label, PDF/print) — idea 2026-10-13, researched, not started.
   - **Templates:** no free official one to reuse. The US Monroney label is mandated by the Automobile Information
@@ -380,53 +380,6 @@ Built: a desktop-only promo banner beside the result card (xl+; a 🎮 circle on
 - [ ] Touch/mobile controls — deliberately out of scope (desktop only, keyboard).
 - [ ] Track variety / a second track, ghost of the best lap, a local top-N lap table.
 - [ ] Count game opens in `app.usage_events` (new kind in `ROUTE_KINDS` + `USAGE_KINDS` + the `admin.stats.kind.*` i18n keys) to see whether the banner earns its space.
-
-### Wanted vehicles ingest — planned (2026-10-01), not started
-
-Source: data.gov.ua dataset `ac1a3a9d-512b-446b-9b0c-1383d38ce474` (National
-Police, CC-BY, "more than once daily"). Resource `CarsWanted.json`
-(`2d69d196-02f1-49b9-97fa-0fb69077e05f`), ~36 MB, one JSON array replaced in
-place. Fields (all required): `id`, `brand`, `model`, `cartype`, `color`,
-`vehiclenumber`, `bodynumber`, `chassisnumber`, `enginenumber`,
-`illegalseizuredate`, `organunit`, `insertdate`. No status / found-date field.
-Record count unverified (~80-100k estimated) — check on first download.
-
-**Key finding:** the file is a full snapshot of the _current_ list, so a found
-car most likely just disappears from the next file. CKAN revision history is
-patchy (see registry data). We must keep our own history → tombstones, never
-hard-delete.
-
-Design:
-
-- Table `registry.wanted_vehicles`: `source_id` PK, normalized `plate`, `vin`
-  (from `bodynumber`/`chassisnumber`, validated), brand/model/color/cartype/
-  organunit, `seized_at`, `inserted_at`, `raw jsonb`, `first_seen_at`,
-  `last_seen_at` (or a `sync_run_id` to avoid rewriting every row daily),
-  `resolved_at` (null while listed). Indexes: plate, vin, resolved_at.
-  Separate table joined at query time — not a column on the registry.
-- `scripts/src/wanted.ts` (same style as `ingest.ts`): `package_show` → compare
-  resource `last_modified` with the stored value, exit if unchanged → stream
-  download + stream-parse (`stream-json`, not whole-file `JSON.parse`) with Zod
-  per row → staging table → one set-based upsert → mark rows missing from the
-  run `resolved_at = now()`.
-- **Safety guard:** abort without resolving anything if the file fails to parse
-  or has < ~80% of the previous row count (truncated download must not mass-
-  "recover" cars).
-- Match by plate, and by VIN for plateless cars (2026 plate removal). Police
-  free-text fields are likely messy — normalize with `normalizePlate`, validate
-  VIN, measure the match rate on real data first.
-- Schedule: daily is enough; the `last_modified` check makes a 2-6 h cadence
-  nearly free. Add to `ingest:all`.
-- UI: label as "listed as wanted as of <date>", not a flat claim (stale for
-  hours, found cars may linger).
-
-Load estimate (unmeasured): ~36 MB download (~5-8 MB gzipped) per changed run,
-tens of MB RAM when streamed, seconds to low tens of seconds of DB work for
-~100k narrow rows, sub-ms indexed lookups. No meaningful VPS impact.
-
-First steps when picked up: download the real file locally, confirm count and
-plate/VIN quality, then migration + Zod schema in `packages/shared` + `wanted.ts`
-with a fixture test.
 
 ### Wikimedia hero-image cache in Postgres + pre-warm — ✅ built and fully pre-warmed (2026-10-06); small tail left
 
