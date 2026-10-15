@@ -503,6 +503,14 @@ export default function ResultCard({ data }: Props): ReactNode {
                         <ColorSwatch value={c.color} />
                         {c.color}
                         <FieldInfoButton dimension="color" current={c.color} />
+                        <Link
+                          to={`/stats?${new URLSearchParams({ dim: 'color', highlight: c.color })}`}
+                          title={t('nav.stats')}
+                          aria-label={t('nav.stats')}
+                          className="rounded px-1 hover:bg-border/60"
+                        >
+                          <span aria-hidden>→</span>
+                        </Link>
                       </span>
                     )
                   }
