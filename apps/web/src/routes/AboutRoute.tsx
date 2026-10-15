@@ -53,6 +53,19 @@ const SOURCES: readonly Source[] = [
     url: 'https://www.belastingdienst.nl/wps/wcm/connect/nl/bpm/content/bpm-afschrijving-koerslijst-taxatierapport-forfaitaire-tabel',
     icon: '/icons/sources/belastingdienst.webp'
   },
+  {
+    key: 'nationalPolice',
+    label: 'National Police of Ukraine',
+    url: 'https://data.gov.ua/dataset/2cd12755-834b-4c43-9026-fe356ce93af5',
+    tile: 'bg-blue-700'
+  },
+  { key: 'stolenIn', label: 'stolen.in.ua', url: 'https://stolen.in.ua', icon: '/icons/sources/stolenin.svg' },
+  { key: 'bdr', label: 'MVS (bdr.mvs.gov.ua)', url: 'https://bdr.mvs.gov.ua', icon: '/icons/bdr.svg' },
+  { key: 'mtsbu', label: 'MTSBU', url: 'https://policy.mtsbu.ua', icon: '/icons/sources/mtsbu.webp' },
+  { key: 'shtrafua', label: 'ShtrafUA', url: 'https://shtrafua.com', icon: '/icons/shtrafua.png' },
+  { key: 'drive2', label: 'DRIVE2', url: 'https://www.drive2.ru', icon: '/icons/drive2.png' },
+  { key: 'osm', label: 'OpenStreetMap', url: 'https://www.openstreetmap.org', tile: 'bg-green-700' },
+  { key: 'autoria', label: 'Auto.RIA / OLX', url: 'https://auto.ria.com', tile: 'bg-slate-500' },
   { key: 'infocar', label: 'infocar.ua', url: 'https://www.infocar.ua', icon: '/icons/infocar.png' },
   // Auction link-outs (AuctionCheck): no logos — commercial marks, no licence found in their terms; plain tiles only.
   { key: 'bidfax', label: 'Bidfax', url: 'https://bidfax.info', tile: 'bg-slate-500' },
@@ -188,6 +201,28 @@ function SourceAvatar({ source }: { source: Source }): ReactNode {
   )
 }
 
+const FEATURES = [
+  'lookup',
+  'wanted',
+  'vin',
+  'recognition',
+  'advanced',
+  'specs',
+  'safety',
+  'fuel',
+  'value',
+  'auctions',
+  'reviews',
+  'media',
+  'verify',
+  'stats',
+  'news',
+  'race',
+  'account',
+  'copy',
+  'pwa'
+] as const
+
 // Lazy-loaded (see App.tsx).
 export default function AboutRoute(): ReactNode {
   const { t } = useTranslation()
@@ -248,6 +283,15 @@ export default function AboutRoute(): ReactNode {
             </Link>
           </p>
         </div>
+      </Card>
+
+      <Card className="space-y-3 text-sm text-[var(--color-fg)]">
+        <h2 className="font-semibold">{t('about.featuresHeading')}</h2>
+        <ul className="list-disc space-y-1.5 pl-5">
+          {FEATURES.map(key => (
+            <li key={key}>{t(`about.feature.${key}`)}</li>
+          ))}
+        </ul>
       </Card>
 
       <Card ref={sourcesRef} className="scroll-mt-20 space-y-3 text-sm text-[var(--color-fg)]">

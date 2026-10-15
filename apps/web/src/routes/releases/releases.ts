@@ -11,6 +11,12 @@ export const RELEASES: readonly ReleaseDay[] = [
     date: '2026-10-15',
     items: [
       item(
+        'improved',
+        '«Про застосунок»: короткий список усіх можливостей і нові джерела (Нацполіція, МВС, МТСБУ, DRIVE2 тощо)',
+        '«О приложении»: краткий список всех возможностей и новые источники (Нацполиция, МВД, МТСБУ, DRIVE2 и др.)',
+        'About: brief list of all features and new sources (National Police, MVS, MTSBU, DRIVE2, etc.)'
+      ),
+      item(
         'new',
         'Перевірка розшуку (викрадення) за номером і VIN',
         'Проверка розыска (угона) по номеру и VIN',
