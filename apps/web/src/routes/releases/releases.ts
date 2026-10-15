@@ -12,6 +12,24 @@ export const RELEASES: readonly ReleaseDay[] = [
     items: [
       item(
         'new',
+        'Посилання на Нові Офіційні Тести ПДР (pdr.infotech.gov.ua) у секції «Перевірка» та у вікні тест-драйву',
+        'Ссылка на Новые официальные тесты ПДД (pdr.infotech.gov.ua) в секции «Проверка» и в окне тест-драйва',
+        'Link to the new official traffic-rules tests (pdr.infotech.gov.ua) in the Verification section and the test-drive window'
+      ),
+      item(
+        'new',
+        'Фільтр за призначенням у розширеному пошуку, пояснення призначення й власника на картці; колір веде до статистики /stats',
+        'Фильтр по назначению в расширенном поиске, пояснения назначения и владельца на карточке; цвет ведёт к статистике /stats',
+        'Purpose filter in advanced search, purpose and owner explainers on the card; the colour row links to /stats'
+      ),
+      item(
+        'new',
+        'Гарнітура e-Ukraine як додатковий шрифт у меню',
+        'Гарнитура e-Ukraine как дополнительный шрифт в меню',
+        'e-Ukraine typeface as an optional font in the menu'
+      ),
+      item(
+        'new',
         'Динаміка: к.с. на тонну, орієнтовний розгін 0–100, максимальна швидкість поруч із гепардом і лімітами України, потужність у конях',
         'Динамика: л. с. на тонну, ориентировочный разгон 0–100, максимальная скорость рядом с гепардом и лимитами Украины, мощность в лошадях',
         'Performance: hp per tonne, estimated 0–100, top speed next to a cheetah and the Ukrainian limits, power in horses'
