@@ -164,7 +164,23 @@ const SOURCES: readonly Source[] = [
     icon: '/icons/sources/telegram.webp'
   },
   { key: 'posthog', label: 'PostHog', url: 'https://posthog.com', icon: '/icons/sources/posthog.webp' },
-  { key: 'sentry', label: 'Sentry', url: 'https://sentry.io', icon: '/icons/sources/sentry.webp' }
+  { key: 'sentry', label: 'Sentry', url: 'https://sentry.io', icon: '/icons/sources/sentry.webp' },
+  // No logos below: no licence found for the marks; plain tiles only.
+  {
+    key: 'turnstile',
+    label: 'Cloudflare Turnstile',
+    url: 'https://www.cloudflare.com/application-services/products/turnstile/',
+    tile: 'bg-orange-600'
+  },
+  { key: 'resend', label: 'Resend', url: 'https://resend.com', tile: 'bg-slate-500' },
+  {
+    key: 'notoSans',
+    label: 'Noto Sans',
+    url: 'https://fonts.google.com/noto/specimen/Noto+Sans',
+    tile: 'bg-slate-500'
+  },
+  // No logo: the typeface page does not grant reuse of the Diia / Ministry marks.
+  { key: 'eUkraine', label: 'e-Ukraine typeface', url: 'https://thedigital.gov.ua/fonts', tile: 'bg-blue-700' }
 ]
 
 function SourceAvatar({ source }: { source: Source }): ReactNode {
