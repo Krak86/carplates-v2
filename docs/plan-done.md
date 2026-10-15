@@ -3711,3 +3711,33 @@ zstd/gzip, HSTS, CSP Report-Only, maintenance flag + `handle_errors` page/JSON),
 workflows + CI + Dependabot, `MaintenanceError`/`MaintenanceBanner`. `spa.controller.ts` re-reads `index.html` by mtime so a web deploy needs no api restart.
 Found while testing: stock Caddy has no `br` (docs said it did); `pg_dump --schema` is ignored with `-t` (the first backup script would have omitted all `app`
 tables); `RelaxRoute.tsx` was unformatted and would have failed the CI `format:check` gate.
+
+### Pre-public secrets audit, production DB-credential guard, first Dependabot round ✅ DONE (2026-10-15)
+
+**Secrets audit (repo about to go public).** Checked tracked files and file names across history; no real secrets found. Only `apps/{api,web}/.env.example`
+are tracked (`.gitignore`: `.env`, `.env.*`, `!.env.example`); no `.env`/`.pem`/`.key` ever appeared in history. Token-pattern grep (Telegram bot token, AWS,
+GitHub, OpenAI-style, Google API key, Slack, private-key blocks) found nothing. Every secret is read from env and declared optional in `apps/api/src/env.ts`
+(`TELEGRAM_BOT_TOKEN`, `AUTH_SECRET`, `RESEND_API_KEY`, `TURNSTILE_SECRET_KEY`, `PLATE_RECOGNIZER_CLOUD_TOKEN`, `PIXABAY_API_KEY`,
+`POSTHOG_PERSONAL_API_KEY`); `deploy-api.yml` takes them from GitHub Actions secrets and fails if one is missing. The Telegram bot **username**, Google client
+id, Turnstile site key and domain are public by design and live in Actions _variables_. Left in the repo knowingly: the local-only dev DB credentials
+(`carplates:carplates@localhost`, docker port bound to `127.0.0.1`), the maintainer's email in `package.json` and the ingest User-Agent strings
+(`wikispecs.ts`, `wiki-specs-probe.ts`, `generations.ts`), and Cloudflare's published IP ranges in `infra/Caddyfile`.
+**Not verified:** the contents of the two `.env.example` files (read denied in that session) and every past commit's contents — run
+`gitleaks detect --log-opts="--all"` before flipping the repo public. `scripts/seed-data/*.csv.gz` is open-data scrapes (check for personal data, not secrets).
+
+**Production DB-credential guard.** `DATABASE_URL` had a dev default, so a production deploy missing the variable would silently use `carplates:carplates@`.
+`assertProductionEnv` (`env.ts`) now rejects a missing or default-credential URL (`DEV_DB_CREDENTIALS` constant, also used for the dev default). Production
+gets the real password from the `POSTGRES_PASSWORD` secret via `deploy-api.yml`. Not covered: `packages/db` `LOCAL_DATABASE_URL` (ingest scripts/migrator
+fallback). Running the API locally with `NODE_ENV=production` now needs a non-default DB password.
+
+**First Dependabot round (12 PRs, applied by hand as one commit).** Applied: vitest 4 → 5 (5.0.5), `@sentry/nestjs` 10 → 11.7 (`instrument.ts` uses only
+`dsn`/`environment`/`release`/`tracesSampleRate`/`beforeSend`; runtime event delivery untested), domhandler 5 → 6, the 27-update minor/patch group
+(drizzle-orm 0.45.4, react-router 8.4, vite 8.3, eslint 10.12, typescript-eslint 8.71, zod 4.6.6, tsx 4.23, …) and five Actions majors (checkout 7,
+setup-node 7, docker login 4 / setup-buildx 4 / build-push 7; the Docker ones only run in `deploy-*.yml`, so first proof is the next deploy). Verified:
+`pnpm build`, `pnpm lint` (0 errors), `pnpm test` (162 files, 1261 tests).
+Not applied, with reasons: **node 24 → 25** (engines `>=24 <25`, 25 is not LTS), **python 3.12 → 3.14** (ALPR wheels unverified), **`@tanstack/react-table`
+8 → 9** (rewrite; only consumer is `routes/stats/StatsTable.tsx`, CI failed). `dependabot.yml` now ignores node major and python major/minor.
+**jsdom is held at `~30.0.1`:** with vitest 5.0.5, jsdom 30.1.x makes `expect(Promise.reject(new Error('404'))).rejects.toThrow('404')` fail in the web
+project (`expected [Function] to throw error including '404' but got ''`); found via `queries.card.test.ts`, bisected by pinning jsdom. See the pin table in PLAN.md.
+Gotcha: a worktree under the deep scratchpad path fails `pnpm` (task-state path too long) and `git worktree remove` can't delete its `node_modules` — use a
+short path (`C:\tmp\…`) and `fs.rmSync` with a `\\?\` prefix for cleanup.

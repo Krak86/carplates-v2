@@ -19,7 +19,7 @@ logic**) · `packages/db` (Drizzle schema `registry`, SQL migrator) · `apps/api
 per-plate `<meta>`) · `apps/web` (Vite + React 19 + React Router, `@/` → `src/`) · `scripts/` (ingest/export CLIs via `tsx`,
 `seed-data/` = committed gzipped CSVs) · `infra/` · `services/alpr/`.
 
-Pins (why: PLAN.md): pnpm 12, Node 24, TypeScript 5.9 (not 7), NestJS 11 (not 12), Drizzle 0.45.2, Tailwind v4.
+Pins (why: PLAN.md): pnpm 12, Node 24, TypeScript 5.9 (not 7), NestJS 11 (not 12), Drizzle 0.45.x (not 1.0 RC), jsdom ~30.0 (30.1 breaks `.rejects.toThrow`), Tailwind v4.
 
 ## Conventions
 
