@@ -1,12 +1,18 @@
 import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import {
+  columnFilteringFeature,
   createColumnHelper,
+  createFilteredRowModel,
+  createSortedRowModel,
+  filterFn_includesString,
   flexRender,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getSortedRowModel,
-  useReactTable
+  globalFilteringFeature,
+  rowSortingFeature,
+  sortFn_alphanumeric,
+  sortFn_basic,
+  tableFeatures,
+  useTable
 } from '@tanstack/react-table'
 import type { SortingState } from '@tanstack/react-table'
 import { useVirtualizer } from '@tanstack/react-virtual'
@@ -37,7 +43,17 @@ type Props = {
   showColorSwatch?: boolean
 }
 
-const columnHelper = createColumnHelper<StatsRow>()
+const features = tableFeatures({
+  columnFilteringFeature,
+  globalFilteringFeature,
+  rowSortingFeature,
+  filteredRowModel: createFilteredRowModel(),
+  sortedRowModel: createSortedRowModel(),
+  filterFns: { includesString: filterFn_includesString },
+  sortFns: { alphanumeric: sortFn_alphanumeric, basic: sortFn_basic }
+})
+
+const columnHelper = createColumnHelper<typeof features, StatsRow>()
 
 export default function StatsTable({
   rows,
@@ -58,7 +74,7 @@ export default function StatsTable({
 
   const numberFormat = new Intl.NumberFormat(toIntlLocale(i18n.language))
 
-  const columns = [
+  const columns = columnHelper.columns([
     columnHelper.accessor('label', {
       header: labelHeader,
       cell: c =>
@@ -86,10 +102,12 @@ export default function StatsTable({
       header: t('stats.column.distinctVins'),
       cell: c => numberFormat.format(c.getValue())
     })
-  ]
+  ])
 
-  const table = useReactTable({
+  const table = useTable({
+    features,
     data: rows,
+    globalFilterFn: 'includesString',
     columns,
     // A composite id (label survives sorting; +year disambiguates the 2D rollups, where
     // label alone repeats across years) so the highlight-on-arrival effect below can find
@@ -97,10 +115,7 @@ export default function StatsTable({
     getRowId: row => `${row.label}::${row.year ?? ''}`,
     state: { sorting, globalFilter },
     onSortingChange: setSorting,
-    onGlobalFilterChange: setGlobalFilter,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel()
+    onGlobalFilterChange: setGlobalFilter
   })
 
   const tableRows = table.getRowModel().rows
@@ -181,7 +196,7 @@ export default function StatsTable({
                     row.id === highlightedRowId && 'bg-[var(--color-primary)]/20'
                   )}
                 >
-                  {row.getVisibleCells().map(cell => (
+                  {row.getAllCells().map(cell => (
                     <td key={cell.id} className="px-3 py-2">
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </td>
