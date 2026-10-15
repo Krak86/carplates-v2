@@ -29,6 +29,7 @@ import {
   getOpenEv,
   getMot,
   getCaRecalls,
+  getWanted,
   getGenerations,
   getWikiSpecs,
   getNhtsaComplaints,
@@ -583,4 +584,13 @@ export function adminStatsQuery() {
 
 export function adminAnalyticsQuery() {
   return queryOptions({ queryKey: ['admin', 'analytics'], queryFn: getAdminAnalytics, staleTime: 5 * 60_000 })
+}
+
+// "Wanted for unlawful taking" check (pnpm ingest:wanted) — live data: online-only, never in the offline cache (no persisted group).
+export function wantedQuery(plate: string | null, vin: string | null) {
+  return queryOptions({
+    queryKey: ['wanted', plate, vin],
+    queryFn: () => getWanted(plate, vin),
+    staleTime: 5 * 60_000
+  })
 }

@@ -33,6 +33,7 @@ import { hasImportOperation } from '@/lib/auction-sites'
 import { useUiStore } from '@/store/ui-store'
 
 const AuctionCheck = lazy(() => import('@/components/AuctionCheck'))
+const WantedCheck = lazy(() => import('@/components/WantedCheck'))
 
 type Props = {
   data: VinDecodeResponse
@@ -128,6 +129,10 @@ export default function VinResult({ data }: Props): ReactNode {
             </>
           }
         />
+
+        <LazySection sections={['wanted']}>
+          <WantedCheck plate={null} vin={data.vin} />
+        </LazySection>
 
         <LazySection sections={['auctions']}>
           <AuctionCheck vin={data.vin} imported={hasImportOperation(registry?.actions ?? [])} />

@@ -915,6 +915,45 @@ export const caRecallModels = registry.table(
 )
 export type CaRecallModelInsert = typeof caRecallModels.$inferInsert
 
+/**
+ * A vehicle wanted for unlawful taking (National Police open data, CC BY). The feed lists only current records, so a row that
+ * leaves it keeps its history: `resolvedAt` set = no longer wanted (found or cancelled). `plate` is normalized, `vin` is
+ * the 17-char body/chassis number when the record has one.
+ */
+export const wantedVehicles = registry.table(
+  'wanted_vehicles',
+  {
+    sourceId: text('source_id').primaryKey(),
+    plate: text('plate'),
+    vin: text('vin'),
+    vinAlt: text('vin_alt'),
+    brand: text('brand'),
+    model: text('model'),
+    vehicleType: text('vehicle_type'),
+    color: text('color'),
+    seizedAt: date('seized_at'),
+    registeredAt: date('registered_at'),
+    organUnit: text('organ_unit'),
+    firstSeenAt: timestamp('first_seen_at', { withTimezone: true }).notNull().defaultNow(),
+    lastSeenAt: timestamp('last_seen_at', { withTimezone: true }).notNull().defaultNow(),
+    resolvedAt: timestamp('resolved_at', { withTimezone: true })
+  },
+  t => [
+    index('ix_wanted_vehicles_plate')
+      .on(t.plate)
+      .where(sql`${t.plate} is not null`),
+    index('ix_wanted_vehicles_vin')
+      .on(t.vin)
+      .where(sql`${t.vin} is not null`),
+    index('ix_wanted_vehicles_vin_alt')
+      .on(t.vinAlt)
+      .where(sql`${t.vinAlt} is not null`),
+    index('ix_wanted_vehicles_last_seen').on(t.lastSeenAt)
+  ]
+)
+export type WantedVehicleRow = typeof wantedVehicles.$inferSelect
+export type WantedVehicleInsert = typeof wantedVehicles.$inferInsert
+
 /** One generation of a model (Wikidata CC0 + Wikipedia CC BY-SA facts); `yearTo` null = still in production. */
 export const modelGenerations = registry.table(
   'model_generations',

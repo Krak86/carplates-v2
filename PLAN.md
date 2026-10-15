@@ -85,6 +85,10 @@ using an API isn't a viable substitute (ToS risk, fragile against markup
 changes, no stable auth story). Revisit only if a free/affordable token
 becomes available.
 
+### Wanted / stolen vehicle check ✅ DONE (2026-10-15)
+
+Police open data (data.gov.ua) -> `registry.wanted_vehicles` + `/api/wanted` + `WantedCheck` section; write-up in `docs/plan-done.md`. Scheduled daily in `SCHEDULE.md` (VPS job still to set up).
+
 ### Plate image recognition (camera/upload) ✅ DONE (2026-09-22) — archived
 
 Write-up moved to `docs/plan-done.md` ("Plate image recognition … Plate Recognizer cloud"). On-premise SDK ruled out (same per-lookup licensing).

@@ -22,6 +22,7 @@ import {
   fuelEconomyResponseSchema,
   fxResponseSchema,
   caRecallsResponseSchema,
+  wantedResponseSchema,
   generationsResponseSchema,
   wikiSpecsResponseSchema,
   nhtsaComplaintsResponseSchema,
@@ -93,6 +94,7 @@ import type {
   FuelEconomyResponse,
   FxResponse,
   CaRecallsResponse,
+  WantedResponse,
   GenerationsResponse,
   WikiSpecsResponse,
   NhtsaComplaintsResponse,
@@ -685,4 +687,12 @@ export async function getSettings(): Promise<SettingsResponse> {
 /** Saves the settings document if it is newer than the server's; returns whichever document is now current. */
 export async function putSettings(request: SettingsUpdateRequest): Promise<SettingsResponse> {
   return settingsResponseSchema.parse(await sendJson('PUT', '/api/settings', request))
+}
+
+/** National Police "wanted for unlawful taking" list: the plate and/or VIN, current and earlier records. */
+export async function getWanted(plate: string | null, vin: string | null): Promise<WantedResponse> {
+  const params = new URLSearchParams()
+  if (plate) params.set('plate', plate)
+  if (vin) params.set('vin', vin)
+  return wantedResponseSchema.parse(await getJson(`/api/wanted?${params.toString()}`))
 }

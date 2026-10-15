@@ -648,3 +648,6 @@ export {
   type WikiSpecsMatch,
   type WikiSpecsResponse
 } from './wikiSpecsApi.js'
+
+export { wantedRecordSchema, wantedResponseSchema, stolenInUaUrl } from './wanted.js'
+export type { WantedRecord, WantedResponse } from './wanted.js'

@@ -130,6 +130,7 @@ pnpm ingest:mot --dir <folder with the DVSA ZIPs>   # UK MOT (DVSA anonymised re
 pnpm ingest:mot:csv   # load the committed seed (seed-data/mot.csv.gz) — seconds, no ZIPs (part of ingest:ratings:csv)
 pnpm export:mot:csv   # re-dump the tables to that CSV — run after every real re-ingest
 pnpm ingest:ca-recalls   # Transport Canada recalls (OGL) with NO US twin -> registry.ca_recalls + ca_recall_models; downloads ~200 MB CSV + NHTSA flat file (cached in scripts/.data/ca-recalls/), ~10 s. --dry-run, --refresh. Block "Recalls" via GET /api/ca/recalls
+pnpm ingest:wanted   # National Police wanted-vehicles feed (data.gov.ua, CC BY, ~36 MB) -> registry.wanted_vehicles; upserts, marks records that left the feed as resolved (= history), so run it daily. --dry-run, --file <json>. Block "Wanted" via GET /api/wanted
 pnpm ingest:generations   # car generations (Wikidata + Wikipedia) for the top 300 registry models -> registry.model_generations; ~10 min, cached in scripts/.data/generations/. --limit N, --only "brand model", --dry-run (prints table + coverage), --refresh. Chip via GET /api/generations
 pnpm ingest:generations:csv   # load the committed seed (seed-data/model-generations.csv.gz) — part of ingest:ratings:csv
 pnpm export:generations:csv   # re-dump the table to that CSV — run after every real re-ingest

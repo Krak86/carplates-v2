@@ -65,6 +65,7 @@ import Card from '@/components/ui/Card'
 import Model3dButton from '@/components/Model3dButton'
 import Model360Button from '@/components/Model360Button'
 import VerificationLinks from '@/components/VerificationLinks'
+import WantedChip from '@/components/WantedChip'
 import VinDecodeTabs from '@/components/vin/VinDecodeTabs'
 import { groupFields } from '@/components/vin/helpers'
 import VinSince2021Note from '@/components/vin/VinSince2021Note'
@@ -85,6 +86,7 @@ import SectionSkeleton from '@/components/ui/SectionSkeleton'
 const FavoriteButton = lazy(() => import('@/components/FavoriteButton'))
 const VehicleKindIcon = lazy(() => import('@/components/VehicleKindIcon'))
 const AuctionCheck = lazy(() => import('@/components/AuctionCheck'))
+const WantedCheck = lazy(() => import('@/components/WantedCheck'))
 const StockSection = lazy(() => import('@/components/StockSection'))
 const SocialSection = lazy(() => import('@/components/SocialSection'))
 const NewsSection = lazy(() => import('@/components/NewsSection'))
@@ -144,6 +146,7 @@ export default function ResultCard({ data }: Props): ReactNode {
   const [sizeOpenSignal, setSizeOpenSignal] = useState(0)
   // The "imported" status chip opens the Auction history section (mounting it first if it is still lazy).
   const [auctionOpenSignal, setAuctionOpenSignal] = useState(0)
+  const [wantedOpenSignal, setWantedOpenSignal] = useState(0)
   // Links inside the Specs block open the section that goes deeper.
   const [emissionsOpenSignal, setEmissionsOpenSignal] = useState(0)
   const [enginesOpenSignal, setEnginesOpenSignal] = useState(0)
@@ -348,6 +351,11 @@ export default function ResultCard({ data }: Props): ReactNode {
               {/* Reserves one chip-height up front so late-arriving chips never push the card down. */}
               <CollapsibleChips className="mt-1">
                 {chipsPending && <span aria-hidden className="h-6 w-24 animate-pulse rounded-full bg-border" />}
+                <WantedChip
+                  plate={data.plate}
+                  vin={hasVin ? c.vin : null}
+                  onOpen={() => setWantedOpenSignal(n => n + 1)}
+                />
                 <LastOperationChip
                   operCode={c.operCode}
                   operName={c.operName}
@@ -401,6 +409,12 @@ export default function ResultCard({ data }: Props): ReactNode {
           <PlateSegments plate={data.plate} region={data.region} />
 
           <VerificationLinks />
+
+          {(data.plate || hasVin) && (
+            <LazySection sections={['wanted']} forceMount={wantedOpenSignal > 0}>
+              <WantedCheck plate={data.plate} vin={hasVin ? c.vin : null} openSignal={wantedOpenSignal} />
+            </LazySection>
+          )}
 
           <div ref={basicRef} className="mt-3 border-t border-[var(--color-border)] pt-3">
             <SectionHeader

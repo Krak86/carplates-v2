@@ -3636,3 +3636,9 @@ Files: `apps/web/src/components/size/` — `VehicleSize.helpers.ts` (merge, shap
 - **Mobile polish:** `PhotoZoomDialog` pinch-zooms (two pointers: zoom around the midpoint + pan, `touch-none`); `VehiclePhotos` swipes between photos (`SWIPE_MIN_PX` 40, a swipe ending on the photo link does not follow it); external links carry a ↗ marker; header layout tightened.
 - **"VIN data starts in 2021" note** (`vin/VinSince2021Note.tsx`, `vin.since2021.*`): the open registry only publishes VINs from 2021, so older plates/owners are not linked by VIN. Shown under the registry history on the VIN page (`VinRegistryHistory`) and on the plate card — full text under the VIN history, short `noVin` variant when the plate itself has no VIN.
 - Ukrainian wording: «застосунок» (not «додаток») for the app.
+
+## Wanted / stolen vehicle check (2026-10-15)
+
+- **Source:** National Police open dataset "Інформація про транспортні засоби, що перебувають у розшуку у зв'язку з їх незаконним заволодінням (включаючи ідентифікаційні номери…)" on data.gov.ua (`2cd12755-834b-4c43-9026-fe356ce93af5`, CC BY, refreshed several times a day, ~79 k records, ~36 MB JSON, plate + body/chassis numbers). It is also what stolen.in.ua shows (that site has no public API). The older MVS dataset (`9b0e87e0-…`) is frozen by a Cabinet resolution — do not use it.
+- **Built:** migrations 0068/0069 (`registry.wanted_vehicles`), `pnpm ingest:wanted` (`scripts/src/wanted.ts` + `wanted-parse.ts`), `GET /api/wanted?plate=&vin=` (`apps/api/src/wanted/`), contract `packages/shared/src/wanted.ts`, section `WantedCheck` (plate card under Verification, VIN page above Auctions, `?section=wanted`).
+- Conventions: `docs/features-reference.md` "Wanted vehicles".
