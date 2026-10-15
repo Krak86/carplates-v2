@@ -5,10 +5,13 @@ const boolish = z
   .optional()
   .transform(v => v === 'true' || v === '1')
 
+const DEV_DB_CREDENTIALS = 'carplates:carplates@'
+
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   PORT: z.coerce.number().int().positive().default(3000),
-  DATABASE_URL: z.string().default('postgres://carplates:carplates@localhost:5432/carplates'),
+  /** Dev default only; production refuses to boot with it (see `assertProductionEnv`). */
+  DATABASE_URL: z.string().default(`postgres://${DEV_DB_CREDENTIALS}localhost:5432/carplates`),
 
   /** Absolute or relative path to the built web app; unset in dev (Vite serves it). */
   WEB_DIST_DIR: z.string().optional(),
@@ -106,6 +109,8 @@ function assertProductionEnv(env: Env): void {
   if (env.NODE_ENV !== 'production') return
   const problems: string[] = []
   if (!env.AUTH_SECRET) problems.push('AUTH_SECRET is required')
+  if (env.DATABASE_URL.includes(DEV_DB_CREDENTIALS))
+    problems.push('DATABASE_URL is required and must not use the dev credentials')
   if (/localhost|127\.0\.0\.1/.test(env.PUBLIC_SITE_URL))
     problems.push('PUBLIC_SITE_URL must be the public https origin')
   if (env.MAIL_TRANSPORT === 'log') problems.push('MAIL_TRANSPORT must be smtp or resend')
