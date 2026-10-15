@@ -115,20 +115,20 @@
     "@carplates/shared": "workspace:*",
     "@huggingface/transformers": "4.3.1",
     "cheerio": "^1.2.0",
-    "csv-parse": "^7.0.2",
-    "csv-stringify": "^6.8.3",
-    "drizzle-orm": "0.45.2",
+    "csv-parse": "^7.0.3",
+    "csv-stringify": "^6.9.0",
+    "drizzle-orm": "0.45.4",
     "iconv-lite": "^0.7.3",
     "unzipper": "^0.12.5",
-    "zod": "^4.6.0"
+    "zod": "^4.6.6"
   },
   "devDependencies": {
     "@types/node": "^24.7.0",
     "@types/unzipper": "^0.10.11",
-    "domhandler": "^5.0.3",
+    "domhandler": "^6.0.1",
     "sharp": "^0.35.5",
-    "tsx": "^4.20.6",
+    "tsx": "^4.23.15",
     "typescript": "~5.9.3",
-    "vitest": "^4.1.11"
+    "vitest": "^5.0.4"
   }
 }
