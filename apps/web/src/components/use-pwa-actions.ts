@@ -7,6 +7,7 @@ type UsePwaActions = {
   needRefresh: boolean
   offlineReady: boolean
   handleUpdate: () => void
+  handleUpdateAndView: () => void
   handleDismiss: () => void
 }
 
@@ -37,6 +38,11 @@ export function usePwaActions(): UsePwaActions {
     needRefresh,
     offlineReady,
     handleUpdate: () => void updateServiceWorker(true),
+    // The update reloads the page on the current URL, so point it at /releases first: the reloaded (new) shell lands there.
+    handleUpdateAndView: (): void => {
+      window.history.pushState(null, '', '/releases')
+      void updateServiceWorker(true)
+    },
     handleDismiss: (): void => {
       setNeedRefresh(false)
       setOfflineReady(false)

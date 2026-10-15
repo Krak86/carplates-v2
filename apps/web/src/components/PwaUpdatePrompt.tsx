@@ -1,32 +1,20 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router'
 
 import { usePwaActions } from '@/components/use-pwa-actions'
 
 export default function PwaUpdatePrompt(): ReactNode {
   const { t } = useTranslation()
-  const { needRefresh, offlineReady, handleUpdate, handleDismiss } = usePwaActions()
+  const { needRefresh, offlineReady, handleUpdate, handleUpdateAndView, handleDismiss } = usePwaActions()
 
   if (!needRefresh && !offlineReady) return null
 
   return (
     <div
       role="status"
-      className="fixed right-4 bottom-4 left-4 z-50 mx-auto flex max-w-md items-center gap-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)]/95 px-4 py-3 text-sm shadow-lg backdrop-blur-md"
+      className="fixed right-4 bottom-4 left-4 z-50 mx-auto flex max-w-md flex-wrap items-center gap-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)]/95 px-4 py-3 text-sm shadow-lg backdrop-blur-md"
     >
-      <span className="flex-1">
-        {needRefresh ? t('pwa.updateAvailable') : t('pwa.offlineReady')}
-
-        {needRefresh && (
-          <>
-            {' '}
-            <Link to="/releases" className="underline">
-              {t('pwa.whatsNew')}
-            </Link>
-          </>
-        )}
-      </span>
+      <span className="flex-1">{needRefresh ? t('pwa.updateAvailable') : t('pwa.offlineReady')}</span>
 
       {needRefresh && (
         <button
@@ -45,6 +33,16 @@ export default function PwaUpdatePrompt(): ReactNode {
       >
         {needRefresh ? t('pwa.later') : t('pwa.close')}
       </button>
+
+      {needRefresh && (
+        <div className="basis-full">
+          <button type="button" onClick={handleUpdateAndView} className="font-medium underline">
+            {t('pwa.whatsNew')}
+          </button>
+
+          <p className="mt-1 text-xs text-[var(--color-muted)]">{t('pwa.whatsNewHint')}</p>
+        </div>
+      )}
     </div>
   )
 }

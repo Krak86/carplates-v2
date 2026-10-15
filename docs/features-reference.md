@@ -349,4 +349,4 @@ Files: migrations 0068 + 0069, `scripts/src/wanted.ts` (+ `wanted-parse.ts`), `a
 ## Releases page (`/releases`, 2026-10-15)
 
 - Public "What's new" log, one `ReleaseDay` per working day in `apps/web/src/routes/releases/releases.ts` (items tagged `new | improved | data | fix`, text in ua/ru/en). **After each big update add the day's entry (or extend today's).** Data is bundled in the lazy route chunk, not in `/api`.
-- The PWA update bar links to it (`pwa.whatsNew`). A waiting service worker keeps serving the **old** shell until the user presses "Update", so that link shows the old entries; the new day appears after the update.
+- The PWA update bar has "Update & see what's new": it sets the URL to `/releases` (`history.pushState`) and then runs the normal update, whose reload lands the new shell there. A hint under it says the changelog shows the latest entries only after the update (the waiting service worker keeps serving the old shell until then).
