@@ -41,7 +41,7 @@ Pins (details in PLAN.md): pnpm 12, Node 24, TypeScript 5.9 (not 7), NestJS 11 (
 - **Below-the-fold sections are `LazySection`s**; a new shareable one must list its id in `sections`. Shared pure helpers of lazy
   chunks go in `vite.config.ts` `HELPER_GROUPS`.
 - Accounts: separate `app` schema, not re-ingestable; `account.ts`, not `schemas.ts`; admins by SQL only; online-only UI.
-- **New public route** → add a `STATIC_PAGES` entry (ua/ru/en) in `apps/api/src/spa/spa-text.ts`, else it is `noindex` and not in the
+- **New public route** → add it to `ROUTE_TITLE_KEYS` (`useDocumentTitle.ts`; also stops the header/scroll buttons reading it as a plate) and a `STATIC_PAGES` entry (ua/ru/en) in `apps/api/src/spa/spa-text.ts`, else it is `noindex` and not in the
   sitemap. `/api/*` is globally rate-limited (`common/throttle.ts`); add a `@Throttle` for any enumerable lookup.
 - Tests: Vitest, colocated `*.test.ts(x)`.
 

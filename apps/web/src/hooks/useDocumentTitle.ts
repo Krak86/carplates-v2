@@ -21,6 +21,7 @@ export const ROUTE_TITLE_KEYS: Record<string, string> = {
   '/advanced-search': 'nav.advancedSearch',
   '/race': 'nav.race',
   '/relax': 'nav.relax',
+  '/releases': 'nav.releases',
   '/features': 'nav.features',
   '/settings': 'nav.settings',
   '/profile': 'auth.profile',

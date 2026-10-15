@@ -88,6 +88,9 @@ export default function Sidebar(): ReactNode {
       <NavLink viewTransition to="/install" className={linkClass} onClick={handleClose}>
         <span aria-hidden>📲</span> {t('nav.install')}
       </NavLink>
+      <NavLink viewTransition to="/releases" className={linkClass} onClick={handleClose}>
+        <span aria-hidden>🆕</span> {t('nav.releases')}
+      </NavLink>
       {user && (
         <NavLink viewTransition to="/features" className={accountLinkClass} onClick={handleClose}>
           <span aria-hidden>💎</span> {t('nav.features')}

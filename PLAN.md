@@ -85,6 +85,8 @@ using an API isn't a viable substitute (ToS risk, fragile against markup
 changes, no stable auth story). Revisit only if a free/affordable token
 becomes available.
 
+### Releases page (`/releases`) ✅ DONE (2026-10-15) — see `docs/plan-done.md`
+
 ### Wanted / stolen vehicle check ✅ DONE (2026-10-15)
 
 Police open data (data.gov.ua) -> `registry.wanted_vehicles` + `/api/wanted` + `WantedCheck` section; write-up in `docs/plan-done.md`. Scheduled daily in `SCHEDULE.md` (VPS job still to set up).

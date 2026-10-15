@@ -3642,3 +3642,7 @@ Files: `apps/web/src/components/size/` — `VehicleSize.helpers.ts` (merge, shap
 - **Source:** National Police open dataset "Інформація про транспортні засоби, що перебувають у розшуку у зв'язку з їх незаконним заволодінням (включаючи ідентифікаційні номери…)" on data.gov.ua (`2cd12755-834b-4c43-9026-fe356ce93af5`, CC BY, refreshed several times a day, ~79 k records, ~36 MB JSON, plate + body/chassis numbers). It is also what stolen.in.ua shows (that site has no public API). The older MVS dataset (`9b0e87e0-…`) is frozen by a Cabinet resolution — do not use it.
 - **Built:** migrations 0068/0069 (`registry.wanted_vehicles`), `pnpm ingest:wanted` (`scripts/src/wanted.ts` + `wanted-parse.ts`), `GET /api/wanted?plate=&vin=` (`apps/api/src/wanted/`), contract `packages/shared/src/wanted.ts`, section `WantedCheck` (plate card under Verification, VIN page above Auctions, `?section=wanted`).
 - Conventions: `docs/features-reference.md` "Wanted vehicles".
+
+## Releases page (2026-10-15)
+
+- `/releases` ("What's new"): day-by-day change log back to the first commit (2026-09-09) with group filter; sidebar link, `STATIC_PAGES` SEO entry, link from the PWA update bar. Conventions: `docs/features-reference.md` "Releases page".

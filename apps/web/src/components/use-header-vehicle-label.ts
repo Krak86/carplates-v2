@@ -3,26 +3,8 @@ import { useLocation } from 'react-router'
 import { classifyQuery } from '@carplates/shared'
 
 import { extractVehicleInfo } from '@/components/VinResult.helpers'
+import { ROUTE_TITLE_KEYS } from '@/hooks/useDocumentTitle'
 import { plateQuery, vinQuery } from '@/lib/queries'
-
-// The other single-segment routes App.tsx matches before falling through to SearchRoute's
-// `/:query` — keep this in sync whenever a new top-level route is added there, or its segment
-// gets misread as a plate/VIN candidate here (homoglyph-repaired into a bogus lookup, e.g.
-// "advanced-search" -> a Cyrillic-lookalike "plate" -> a wasted 404 /api/plate/... request).
-const STATIC_ROUTES = new Set([
-  'about',
-  'history',
-  'favorites',
-  'stats',
-  'news',
-  'discuss',
-  'advanced-search',
-  'race',
-  'relax',
-  'features',
-  'admin',
-  'settings'
-])
 
 const withYear = (car: string, year: number | null): string => (car ? `${car}${year ? ` (${year})` : ''}` : '')
 
@@ -36,8 +18,7 @@ export type HeaderVehicleLabel = { text: string; brand: string | null }
 export function useHeaderVehicleLabel(): HeaderVehicleLabel | null {
   const { pathname } = useLocation()
   const segments = pathname.split('/').filter(Boolean)
-  const raw =
-    segments.length === 1 && !STATIC_ROUTES.has(segments[0] as string) ? decodeURIComponent(segments[0] as string) : ''
+  const raw = segments.length === 1 && !(pathname in ROUTE_TITLE_KEYS) ? decodeURIComponent(segments[0] as string) : ''
   const kind = raw ? classifyQuery(raw) : null
 
   const plate = useQuery({ ...plateQuery(raw), enabled: kind === 'plate' })

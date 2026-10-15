@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Link } from 'react-router'
 
 import { usePwaActions } from '@/components/use-pwa-actions'
 
@@ -14,7 +15,18 @@ export default function PwaUpdatePrompt(): ReactNode {
       role="status"
       className="fixed right-4 bottom-4 left-4 z-50 mx-auto flex max-w-md items-center gap-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)]/95 px-4 py-3 text-sm shadow-lg backdrop-blur-md"
     >
-      <span className="flex-1">{needRefresh ? t('pwa.updateAvailable') : t('pwa.offlineReady')}</span>
+      <span className="flex-1">
+        {needRefresh ? t('pwa.updateAvailable') : t('pwa.offlineReady')}
+
+        {needRefresh && (
+          <>
+            {' '}
+            <Link to="/releases" className="underline">
+              {t('pwa.whatsNew')}
+            </Link>
+          </>
+        )}
+      </span>
 
       {needRefresh && (
         <button

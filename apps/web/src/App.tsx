@@ -20,6 +20,7 @@ const SafetyStatsRoute = lazy(() => import('@/routes/safety/SafetyStatsRoute'))
 const NewsRoute = lazy(() => import('@/routes/news/NewsRoute'))
 const DiscussRoute = lazy(() => import('@/routes/DiscussRoute'))
 const RelaxRoute = lazy(() => import('@/routes/RelaxRoute'))
+const ReleasesRoute = lazy(() => import('@/routes/releases/ReleasesRoute'))
 const FeaturesRoute = lazy(() => import('@/routes/features/FeaturesRoute'))
 const SettingsRoute = lazy(() => import('@/routes/settings/SettingsRoute'))
 const EmailLinkRoute = lazy(() => import('@/routes/auth/EmailLinkRoute'))
@@ -54,6 +55,7 @@ export default function App(): ReactNode {
             <Route path="/advanced-search" element={<AdvancedSearchRoute />} />
             <Route path="/race" element={<RaceRoute />} />
             <Route path="/relax" element={<RelaxRoute />} />
+            <Route path="/releases" element={<ReleasesRoute />} />
             <Route path="/features" element={<FeaturesRoute />} />
             <Route path="/settings" element={<SettingsRoute />} />
             <Route path="/auth/email" element={<EmailLinkRoute />} />

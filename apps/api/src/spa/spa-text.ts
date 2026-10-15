@@ -122,6 +122,17 @@ export const STATIC_PAGES: Record<string, Record<Lang, PageText>> = {
       description: 'Euro NCAP, IIHS, NHTSA and other crash-test results by make and model.'
     }
   },
+  '/releases': {
+    ua: { title: 'Що нового · Cars UA', description: 'Історія змін Cars UA за днями: можливості, покращення, дані.' },
+    ru: {
+      title: 'Что нового · Cars UA',
+      description: 'История изменений Cars UA по дням: возможности, улучшения, данные.'
+    },
+    en: {
+      title: 'What’s new · Cars UA',
+      description: 'A day-by-day log of Cars UA changes: features, improvements, data.'
+    }
+  },
   '/features': {
     ua: { title: 'Функції · Cars UA', description: 'Що ми створюємо для користувачів з обліковим записом.' },
     ru: { title: 'Функции · Cars UA', description: 'Что мы создаём для пользователей с учётной записью.' },

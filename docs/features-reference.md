@@ -345,3 +345,8 @@ Files: migrations 0068 + 0069, `scripts/src/wanted.ts` (+ `wanted-parse.ts`), `a
 - **Not part of the seed CSVs** (live data; a fresh setup runs `pnpm ingest:wanted` once, ~15 s).
 - **Matching:** `plate` is `normalizePlate`d; `vin` / `vin_alt` = the VIN-shaped (17-char) body and chassis numbers (a record can carry both a local `Y6L…` body number and the maker's `KNE…` VIN) — a lookup matches either. Records without a plate (≈ 11 %) are found by VIN only. `matchedBy` says which key hit.
 - `GET /api/wanted` has the plate-lookup `@Throttle`; at least one of `plate` / `vin` is required. The section opens itself and shows a red chip when something is found; a clean result is worded "not on the list", never "clean" (not an official certificate). Link-outs: `stolen.in.ua/v/<Latin plate>` and the dataset page.
+
+## Releases page (`/releases`, 2026-10-15)
+
+- Public "What's new" log, one `ReleaseDay` per working day in `apps/web/src/routes/releases/releases.ts` (items tagged `new | improved | data | fix`, text in ua/ru/en). **After each big update add the day's entry (or extend today's).** Data is bundled in the lazy route chunk, not in `/api`.
+- The PWA update bar links to it (`pwa.whatsNew`). A waiting service worker keeps serving the **old** shell until the user presses "Update", so that link shows the old entries; the new day appears after the update.
