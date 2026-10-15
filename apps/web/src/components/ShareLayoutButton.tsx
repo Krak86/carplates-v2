@@ -10,16 +10,18 @@ import { useLiveBackgroundStore } from '@/store/live-background-store'
 
 type Props = {
   className?: string
+  /** Show on photos too (the /relax page itself, where the button is the only content). */
+  showOnPhotos?: boolean
 }
 
-/** Shares the active background as a `/relax?layout=…` link (native share sheet, else clipboard). Hidden on photos. */
-export default function ShareLayoutButton({ className }: Props): ReactNode {
+/** Shares the active background as a `/relax?layout=…` link (native share sheet, else clipboard). Hidden on photos unless `showOnPhotos`. */
+export default function ShareLayoutButton({ className, showOnPhotos }: Props): ReactNode {
   const { t } = useTranslation()
   const mode = useLiveBackgroundStore(s => s.mode)
   const streams = useLiveBackgroundStore(s => s.streams)
   const [copied, setCopied] = useState(false)
 
-  if (mode === 'images') return null
+  if (mode === 'images' && !showOnPhotos) return null
 
   const handleShare = async (): Promise<void> => {
     const url = buildLayoutShareUrl(mode, isStreamMode(mode) ? streams[mode] : undefined)
