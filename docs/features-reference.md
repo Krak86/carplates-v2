@@ -276,6 +276,10 @@ SW caches `index.html`). Plate/VIN pages are `noindex`; `?lang=` selects the lan
   over any static file. The sitemap = every key of `STATIC_PAGES` (`spa-text.ts`) except the per-device `/history`, `/favorites`
   (`sitemap.ts` `EXCLUDED`). **A new public route must get a `STATIC_PAGES` entry (ua/ru/en)** — without it the page is `noindex` and
   absent from the sitemap. Settings/admin/plate/VIN pages stay out on purpose.
+- **Languages:** every sitemap page is listed once per language (`/about`, `/about?lang=ru`, `?lang=en`; default `ua` = bare path), each
+  `<url>` with the full `xhtml:link` hreflang set + `x-default`. The page `<head>` mirrors it (`alternates: true` in `renderMetaTags`):
+  self-canonical per language + `<link rel="alternate" hreflang>`. Helpers `langUrl`/`alternateLinks` in `meta.ts`. Plate/VIN pages stay
+  `noindex` with a bare canonical.
 - Rate limits: one global `ThrottlerGuard` (`AppModule`, `common/throttle.ts`) counts **only `/api/*`** per IP (short/medium/long).
   Heavy or enumerable routes add `@Throttle(...)` constants from the same file (plate, VIN); never skip a route without a reason
   (`/api/auth/me` is the only skip). recognize/auth/og keep their own tighter module-level guards. Behind a proxy set `TRUST_PROXY`.

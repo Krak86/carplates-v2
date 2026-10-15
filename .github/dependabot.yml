@@ -10,6 +10,12 @@ updates:
   - package-ecosystem: docker
     directories: ['/apps/api', '/services/alpr']
     schedule: { interval: weekly }
+    ignore:
+      # Node is pinned to 24 LTS (package.json engines, .nvmrc); Python stays on the version the ALPR wheels support.
+      - dependency-name: node
+        update-types: [version-update:semver-major]
+      - dependency-name: python
+        update-types: [version-update:semver-major, version-update:semver-minor]
   - package-ecosystem: github-actions
     directory: /
     schedule: { interval: weekly }
