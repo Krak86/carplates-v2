@@ -10,7 +10,7 @@ about production. Measure production-like with `pnpm preview:prod` (below).
 
 ```caddyfile
 carsua.app {
-	encode zstd br gzip
+	encode zstd gzip
 	# rate_limit blocks: see PLAN.md "Rate-limit policy"
 	reverse_proxy api:3000
 }
@@ -32,7 +32,8 @@ caddy:
   volumes: ['./Caddyfile:/etc/caddy/Caddyfile:ro', 'caddy_data:/data', 'caddy_config:/config']
 ```
 
-`encode` needs `br`/`zstd`: they ship with stock Caddy 2.
+Stock Caddy 2 ships **zstd and gzip only** — `encode br` fails to load ("module not registered: http.encoders.br", verified 2026-10-15).
+Brotli to browsers comes from Cloudflare, which re-compresses. The real config is `infra/Caddyfile`; deploy flow in [deploy.md](deploy.md).
 
 ## nginx (alternative)
 

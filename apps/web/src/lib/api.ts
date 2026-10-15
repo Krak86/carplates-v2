@@ -144,6 +144,7 @@ import type {
   WikiInfo
 } from '@carplates/shared'
 import type { Feature, FeatureCollection, Geometry } from 'geojson'
+import { z } from 'zod'
 
 const BASE = import.meta.env.VITE_API_BASE ?? ''
 
@@ -161,8 +162,25 @@ export class ApiError extends Error {
   }
 }
 
+/** The reverse proxy's answer while the API is restarting or in planned maintenance (infra/Caddyfile `handle_errors`). */
+const maintenanceBodySchema = z.object({
+  status: z.literal('maintenance'),
+  retryAfter: z.number().positive().optional()
+})
+
+export class MaintenanceError extends ApiError {
+  constructor(readonly retryAfterSeconds: number | undefined) {
+    super(503, 'maintenance')
+    this.name = 'MaintenanceError'
+  }
+}
+
 async function unwrap(res: Response): Promise<unknown> {
   const body: unknown = await res.json().catch(() => null)
+  if (res.status === 503) {
+    const maintenance = maintenanceBodySchema.safeParse(body)
+    if (maintenance.success) throw new MaintenanceError(maintenance.data.retryAfter)
+  }
   if (!res.ok) {
     const message =
       body && typeof body === 'object' && 'message' in body

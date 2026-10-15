@@ -1,0 +1,15 @@
+**/node_modules
+**/dist
+**/.env
+**/.env.*
+!**/.env.example
+.git
+.github
+.vscode
+scripts/.data
+scripts/seed-data
+services
+docs
+infra
+*.md
+*.zip

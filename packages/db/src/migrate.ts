@@ -7,6 +7,7 @@
  *
  * `drizzle-kit generate` / `studio` still work for inspection.
  */
+import { realpathSync } from 'node:fs'
 import { readdir, readFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -52,7 +53,8 @@ export async function runMigrations(url = resolveDatabaseUrl()): Promise<string[
   }
 }
 
-const isEntrypoint = process.argv[1] === fileURLToPath(import.meta.url)
+// realpath: when run from node_modules (the Docker image) argv[1] is the pnpm symlink, import.meta.url the target.
+const isEntrypoint = !!process.argv[1] && realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url))
 if (isEntrypoint) {
   runMigrations()
     .then(applied => {

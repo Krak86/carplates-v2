@@ -1,0 +1,76 @@
+name: Deploy Web
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/web/**'
+      - 'packages/shared/**'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - '.github/workflows/deploy-web.yml'
+      - '.github/actions/**'
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-web
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    uses: ./.github/workflows/ci.yml
+
+  deploy:
+    needs: ci
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile --filter @carplates/web...
+      - run: pnpm --filter @carplates/shared build
+
+      - name: Build web
+        # Everything VITE_* is public once bundled, so these are variables, not secrets.
+        env:
+          VITE_GIT_SHA: ${{ github.sha }}
+          VITE_API_BASE: ${{ vars.VITE_API_BASE }}
+          VITE_DISQUS_SHORT_NAME: ${{ vars.VITE_DISQUS_SHORT_NAME }}
+          VITE_ENABLE_TELEMETRY: ${{ vars.VITE_ENABLE_TELEMETRY }}
+          VITE_POSTHOG_KEY: ${{ vars.VITE_POSTHOG_KEY }}
+          VITE_POSTHOG_HOST: ${{ vars.VITE_POSTHOG_HOST }}
+          VITE_SENTRY_DSN: ${{ vars.VITE_SENTRY_DSN }}
+          VITE_GOOGLE_MAPS_EMBED_KEY: ${{ vars.VITE_GOOGLE_MAPS_EMBED_KEY }}
+        run: pnpm --filter @carplates/web build
+
+      - uses: ./.github/actions/ssh-setup
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          user: ${{ vars.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          known-hosts: ${{ secrets.VPS_KNOWN_HOSTS }}
+
+      - name: Upload release and switch
+        run: |
+          rsync -az --delete apps/web/dist/ "vps:/opt/carsua/web/releases/$GITHUB_SHA/"
+          ssh vps bash -s -- "$GITHUB_SHA" < infra/vps/deploy-web.sh
+
+      - name: Purge Cloudflare cache for the entry files
+        env:
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          CF_ZONE_ID: ${{ secrets.CF_ZONE_ID }}
+          URL: ${{ vars.PUBLIC_SITE_URL }}
+        run: |
+          if [ -z "$CF_API_TOKEN" ] || [ -z "$CF_ZONE_ID" ]; then echo "Cloudflare secrets not set; skipping purge"; exit 0; fi
+          files=$(printf '"%s/","%s/index.html","%s/sw.js","%s/registerSW.js","%s/manifest.webmanifest"' "$URL" "$URL" "$URL" "$URL" "$URL")
+          curl -fsS -X POST "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/purge_cache" \
+            -H "Authorization: Bearer $CF_API_TOKEN" -H "Content-Type: application/json" \
+            --data "{\"files\":[$files]}"

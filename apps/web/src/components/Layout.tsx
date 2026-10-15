@@ -9,6 +9,7 @@ import LoginButton from '@/components/auth/LoginButton'
 import BrandLogo from '@/components/BrandLogo'
 import LayersButton from '@/components/LayersButton'
 import LoadErrorBoundary from '@/components/LoadErrorBoundary'
+import MaintenanceBanner from '@/components/MaintenanceBanner'
 import OfflineBanner from '@/components/OfflineBanner'
 import PwaUpdatePrompt from '@/components/PwaUpdatePrompt'
 import QuickLinks from '@/components/QuickLinks'
@@ -117,6 +118,7 @@ export default function Layout({ children }: Props): ReactNode {
       </header>
 
       <OfflineBanner />
+      <MaintenanceBanner />
       <SyncBanner />
 
       <div className="flex flex-1">

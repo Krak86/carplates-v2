@@ -1,0 +1,70 @@
+{
+	# Real client IP: Cloudflare sends it in CF-Connecting-IP. Trust that header only from Cloudflare's ranges
+	# (https://www.cloudflare.com/ips/ — re-check occasionally).
+	servers {
+		trusted_proxies static 173.245.48.0/20 103.21.244.0/22 103.22.200.0/22 103.31.4.0/22 141.101.64.0/18 108.162.192.0/18 190.93.240.0/20 188.114.96.0/20 197.234.240.0/22 198.41.128.0/17 162.158.0.0/15 104.16.0.0/13 104.24.0.0/14 172.64.0.0/13 131.0.72.0/22 2400:cb00::/32 2606:4700::/32 2803:f800::/32 2405:b500::/32 2405:8100::/32 2a06:98c0::/29 2c0f:f248::/32
+		client_ip_headers CF-Connecting-IP
+	}
+}
+
+www.carsua.app {
+	tls /certs/origin.pem /certs/origin.key
+	redir https://carsua.app{uri} permanent
+}
+
+carsua.app {
+	tls /certs/origin.pem /certs/origin.key
+	# Stock Caddy has no Brotli encoder; Cloudflare re-compresses to Brotli for browsers.
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		Permissions-Policy "camera=(self), geolocation=(self), microphone=()"
+		# Report-Only first; enforce after a week of clean browser consoles (docs/security-checklist.md finding 2).
+		Content-Security-Policy-Report-Only "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; form-action 'self'; img-src 'self' data: blob: https:; media-src 'self' https:; font-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' https://accounts.google.com https://telegram.org https://challenges.cloudflare.com https://eu-assets.i.posthog.com https://*.disqus.com https://*.disquscdn.com; connect-src 'self' https://eu.i.posthog.com https://eu-assets.i.posthog.com https://*.sentry.io https://accounts.google.com; frame-src https://accounts.google.com https://oauth.telegram.org https://challenges.cloudflare.com https://www.youtube-nocookie.com https://www.youtube.com https://sketchfab.com https://www.google.com https://disqus.com"
+	}
+
+	# Planned maintenance: `touch /opt/carsua/compose/flags/MAINTENANCE`. /healthz stays reachable for the deploy script.
+	@maint {
+		file {
+			root /
+			try_files /flags/MAINTENANCE
+		}
+		not path /healthz
+	}
+	handle @maint {
+		error 503
+	}
+
+	handle {
+		reverse_proxy api-blue:3000 api-green:3000 {
+			lb_policy first
+			lb_try_duration 15s
+			lb_try_interval 250ms
+			health_uri /healthz
+			health_interval 2s
+			health_timeout 2s
+			# Cloudflare appends to XFF and the client can pre-set it; only the verified IP goes upstream.
+			header_up X-Forwarded-For {client_ip}
+		}
+	}
+
+	# API unreachable (deploy gap, crash, maintenance flag): pages get a self-refreshing notice, /api gets JSON
+	# that the web app turns into a "server is updating" banner.
+	handle_errors 502 503 504 {
+		header Retry-After 30
+		header Cache-Control "no-store"
+		@api path /api/* /healthz
+		handle @api {
+			header Content-Type application/json
+			respond `{"status":"maintenance","retryAfter":30}` 503
+		}
+		handle {
+			rewrite * /maintenance.html
+			file_server {
+				root /srv
+				status 503
+			}
+		}
+	}
+}

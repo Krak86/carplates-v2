@@ -61,6 +61,7 @@ export class SpaController {
   private readonly env = loadEnv()
   private readonly distDir = this.env.WEB_DIST_DIR ? resolve(this.env.WEB_DIST_DIR) : null
   private indexHtmlCache: string | null = null
+  private indexStamp = ''
   // Bounded: one entry per known route × language, plus one shared '*' entry per language.
   private readonly staticMetaCache = new Map<string, string>()
 
@@ -107,9 +108,14 @@ export class SpaController {
     reply.type('text/html; charset=utf-8').header('cache-control', 'no-cache').send(injectMeta(html, meta))
   }
 
+  /** Re-read when the file changes: a web deploy repoints `WEB_DIST_DIR` (a symlink) without restarting the API. */
   private async loadIndex(): Promise<string> {
-    if (this.indexHtmlCache) return this.indexHtmlCache
-    this.indexHtmlCache = await readFile(join(this.distDir as string, 'index.html'), 'utf8')
+    const file = join(this.distDir as string, 'index.html')
+    const { mtimeMs, size } = await stat(file)
+    const stamp = `${mtimeMs}:${size}`
+    if (this.indexHtmlCache && this.indexStamp === stamp) return this.indexHtmlCache
+    this.indexHtmlCache = await readFile(file, 'utf8')
+    this.indexStamp = stamp
     return this.indexHtmlCache
   }
 

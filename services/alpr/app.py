@@ -224,9 +224,20 @@ def healthz() -> dict[str, str]:
     return {"status": "ok"}
 
 
+# The API already caps uploads at 4 MB; this is the same guard one hop later, with headroom.
+MAX_UPLOAD_BYTES = 6 * 1024 * 1024
+
+
+async def _read_capped(image: UploadFile) -> bytes:
+    raw = await image.read(MAX_UPLOAD_BYTES + 1)
+    if len(raw) > MAX_UPLOAD_BYTES:
+        raise HTTPException(status_code=413, detail="Image too large")
+    return raw
+
+
 @app.post("/recognize")
 async def recognize(image: UploadFile = File(...)) -> dict[str, list[dict[str, Any]]]:
-    raw = await image.read()
+    raw = await _read_capped(image)
     if not raw:
         raise HTTPException(status_code=400, detail="Uploaded image is empty")
 
@@ -298,7 +309,7 @@ def _ocr_lines(frame: np.ndarray, **kwargs: Any) -> list[dict[str, Any]]:
 
 @app.post("/recognize/vin")
 async def recognize_vin(image: UploadFile = File(...)) -> dict[str, list[dict[str, Any]]]:
-    raw = await image.read()
+    raw = await _read_capped(image)
     if not raw:
         raise HTTPException(status_code=400, detail="Uploaded image is empty")
 

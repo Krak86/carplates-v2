@@ -3700,3 +3700,14 @@ tens of MB RAM when streamed, seconds to low tens of seconds of DB work for
 First steps when picked up: download the real file locally, confirm count and
 plate/VIN quality, then migration + Zod schema in `packages/shared` + `wanted.ts`
 with a fixture test.
+
+## Deploy tooling (2026-10-15)
+
+Written the repo side of PLAN.md Phase 4 (not yet run on a VPS — see [deploy.md](deploy.md) "Status"). `apps/api/Dockerfile` (pnpm deploy, non-root,
+HEALTHCHECK; migrator ships as `node_modules/@carplates/db/dist/migrate.js` — its entrypoint check now compares realpaths, it silently did nothing under
+pnpm's symlinks), ALPR hardened (non-root, `read_only` + tmpfs, `cap_drop`, 6 MB upload cap, HEALTHCHECK), `infra/docker-compose.prod.yml` (caddy,
+api-blue/green, alpr, postgres 18.6 tuned), `infra/Caddyfile` (Cloudflare origin cert + trusted proxies, `X-Forwarded-For` forced to the verified client IP,
+zstd/gzip, HSTS, CSP Report-Only, maintenance flag + `handle_errors` page/JSON), `infra/vps/{bootstrap,deploy-api,deploy-web,backup}.sh`, three
+workflows + CI + Dependabot, `MaintenanceError`/`MaintenanceBanner`. `spa.controller.ts` re-reads `index.html` by mtime so a web deploy needs no api restart.
+Found while testing: stock Caddy has no `br` (docs said it did); `pg_dump --schema` is ignored with `-t` (the first backup script would have omitted all `app`
+tables); `RelaxRoute.tsx` was unformatted and would have failed the CI `format:check` gate.

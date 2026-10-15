@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>carsua.app — updating</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #f6f7f9;
+        --fg: #14181f;
+        --muted: #5b6574;
+        --accent: #2563eb;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #0f131a;
+          --fg: #e8ecf3;
+          --muted: #9aa5b6;
+          --accent: #6ea0ff;
+        }
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100dvh;
+        display: grid;
+        place-items: center;
+        padding: 1rem 16px;
+        background: var(--bg);
+        color: var(--fg);
+        font:
+          16px/1.5 system-ui,
+          -apple-system,
+          'Segoe UI',
+          Roboto,
+          sans-serif;
+      }
+      main {
+        max-width: 28rem;
+        text-align: center;
+      }
+      .plate {
+        display: inline-block;
+        margin-bottom: 1.5rem;
+        padding: 0.35rem 1.1rem;
+        border: 3px solid currentColor;
+        border-radius: 8px;
+        font:
+          700 1.6rem/1.2 ui-monospace,
+          'SF Mono',
+          Menlo,
+          Consolas,
+          monospace;
+        letter-spacing: 0.12em;
+      }
+      h1 {
+        margin: 0 0 0.5rem;
+        font-size: 1.5rem;
+      }
+      p {
+        margin: 0.25rem 0;
+        color: var(--muted);
+      }
+      .bar {
+        height: 4px;
+        margin: 1.75rem auto 0;
+        width: 8rem;
+        border-radius: 2px;
+        background: color-mix(in srgb, var(--accent) 22%, transparent);
+        overflow: hidden;
+      }
+      .bar::after {
+        content: '';
+        display: block;
+        height: 100%;
+        width: 40%;
+        background: var(--accent);
+        border-radius: 2px;
+        animation: slide 1.4s ease-in-out infinite;
+      }
+      @keyframes slide {
+        from {
+          transform: translateX(-100%);
+        }
+        to {
+          transform: translateX(250%);
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .bar::after {
+          animation: none;
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="plate" aria-hidden="true">CARSUA</div>
+      <h1 id="title">carsua.app is updating</h1>
+      <p id="text">We'll be back in a minute. This page reloads itself.</p>
+      <div class="bar" role="progressbar" aria-label="Updating"></div>
+    </main>
+    <script>
+      var T = {
+        ua: ['carsua.app оновлюється', 'Скоро повернемось. Сторінка оновиться сама.'],
+        ru: ['carsua.app обновляется', 'Скоро вернёмся. Страница обновится сама.'],
+        en: ['carsua.app is updating', "We'll be back in a minute. This page reloads itself."]
+      }
+      var lang = (navigator.language || 'en').slice(0, 2).toLowerCase()
+      lang = lang === 'uk' ? 'ua' : T[lang] ? lang : 'en'
+      document.documentElement.lang = lang === 'ua' ? 'uk' : lang
+      document.title = T[lang][0]
+      document.getElementById('title').textContent = T[lang][0]
+      document.getElementById('text').textContent = T[lang][1]
+
+      // Poll the API health; reload as soon as the app is back.
+      setInterval(function () {
+        fetch('/healthz', { cache: 'no-store' }).then(
+          function (r) {
+            if (r.ok) location.reload()
+          },
+          function () {}
+        )
+      }, 10000)
+    </script>
+  </body>
+</html>

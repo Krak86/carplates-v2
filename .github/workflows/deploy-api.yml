@@ -1,0 +1,169 @@
+name: Deploy API
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/api/**'
+      - 'packages/shared/**'
+      - 'packages/db/**'
+      - 'infra/**'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - '.github/workflows/deploy-api.yml'
+      - '.github/actions/**'
+  workflow_dispatch:
+    inputs:
+      sync_only:
+        description: 'First setup: copy compose files + secrets and start only Postgres (restore the DB dump, then run again without this)'
+        type: boolean
+        default: false
+
+concurrency:
+  group: deploy-api
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    uses: ./.github/workflows/ci.yml
+
+  build:
+    needs: ci
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      owner: ${{ steps.meta.outputs.owner }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: meta
+        run: echo "owner=${GITHUB_REPOSITORY_OWNER,,}" >> "$GITHUB_OUTPUT"
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/api/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ steps.meta.outputs.owner }}/carsua-api:${{ github.sha }}
+            ghcr.io/${{ steps.meta.outputs.owner }}/carsua-api:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    environment: production # restricted to main; add required reviewers there if you want a click-to-deploy gate
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/ssh-setup
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          user: ${{ vars.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          known-hosts: ${{ secrets.VPS_KNOWN_HOSTS }}
+
+      - name: Sync compose files
+        # --inplace: Caddy bind-mounts single files, and a rename would leave the container on the old inode.
+        run: |
+          rsync -az --inplace infra/docker-compose.prod.yml infra/Caddyfile infra/maintenance.html infra/vps/backup.sh vps:/opt/carsua/compose/
+
+      - name: Write env files and origin certificate
+        env:
+          GH_OWNER: ${{ needs.build.outputs.owner }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
+          PUBLIC_SITE_URL: ${{ vars.PUBLIC_SITE_URL }}
+          MAIL_TRANSPORT: ${{ vars.MAIL_TRANSPORT }}
+          MAIL_FROM: ${{ vars.MAIL_FROM }}
+          MAIL_REPLY_TO: ${{ vars.MAIL_REPLY_TO }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          SMTP_URL: ${{ secrets.SMTP_URL }}
+          GOOGLE_CLIENT_ID: ${{ vars.GOOGLE_CLIENT_ID }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_BOT_USERNAME: ${{ vars.TELEGRAM_BOT_USERNAME }}
+          TURNSTILE_SITE_KEY: ${{ vars.TURNSTILE_SITE_KEY }}
+          TURNSTILE_SECRET_KEY: ${{ secrets.TURNSTILE_SECRET_KEY }}
+          PLATE_RECOGNIZER_CLOUD_TOKEN: ${{ secrets.PLATE_RECOGNIZER_CLOUD_TOKEN }}
+          PLATE_RECOGNIZER_CLOUD_ENABLED: ${{ vars.PLATE_RECOGNIZER_CLOUD_ENABLED }}
+          PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
+          POSTHOG_PERSONAL_API_KEY: ${{ secrets.POSTHOG_PERSONAL_API_KEY }}
+          POSTHOG_PROJECT_ID: ${{ vars.POSTHOG_PROJECT_ID }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          SENTRY_ORG_SLUG: ${{ vars.SENTRY_ORG_SLUG }}
+          ENABLE_TELEMETRY: ${{ vars.ENABLE_TELEMETRY }}
+          CF_ORIGIN_CERT: ${{ secrets.CF_ORIGIN_CERT }}
+          CF_ORIGIN_KEY: ${{ secrets.CF_ORIGIN_KEY }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          BACKUP_BUCKET: ${{ vars.BACKUP_BUCKET }}
+          HC_PING_BACKUP: ${{ secrets.HC_PING_BACKUP }}
+        run: |
+          : "${POSTGRES_PASSWORD:?POSTGRES_PASSWORD secret is missing}"
+          : "${AUTH_SECRET:?AUTH_SECRET secret is missing}"
+
+          # Only non-empty values are written, so an unset optional feature stays "not configured" in env.ts.
+          emit() { for n in "$@"; do v="${!n:-}"; [ -n "$v" ] && printf '%s=%s\n' "$n" "$v"; done; return 0; }
+
+          {
+            printf 'DATABASE_URL=postgres://carplates:%s@postgres:5432/carplates\n' "$POSTGRES_PASSWORD"
+            printf 'GIT_SHA=%s\n' "$GITHUB_SHA"
+            emit AUTH_SECRET PUBLIC_SITE_URL MAIL_TRANSPORT MAIL_FROM MAIL_REPLY_TO RESEND_API_KEY SMTP_URL \
+              GOOGLE_CLIENT_ID TELEGRAM_BOT_TOKEN TELEGRAM_BOT_USERNAME TURNSTILE_SITE_KEY TURNSTILE_SECRET_KEY \
+              PLATE_RECOGNIZER_CLOUD_TOKEN PLATE_RECOGNIZER_CLOUD_ENABLED PIXABAY_API_KEY \
+              POSTHOG_PERSONAL_API_KEY POSTHOG_PROJECT_ID SENTRY_DSN SENTRY_ORG_SLUG ENABLE_TELEMETRY
+          } > api.env
+          printf 'POSTGRES_USER=carplates\nPOSTGRES_PASSWORD=%s\nPOSTGRES_DB=carplates\n' "$POSTGRES_PASSWORD" > postgres.env
+          printf 'GH_OWNER=%s\n' "$GH_OWNER" > owner.env
+
+          # umask 077 so the files are never group/world-readable, even briefly.
+          ssh vps 'umask 077; cat > /opt/carsua/env/api.env.new && mv /opt/carsua/env/api.env.new /opt/carsua/env/api.env' < api.env
+          ssh vps 'umask 077; cat > /opt/carsua/env/postgres.env.new && mv /opt/carsua/env/postgres.env.new /opt/carsua/env/postgres.env' < postgres.env
+          # GH_OWNER lives in compose/.env next to the colour tags; replace just that line.
+          ssh vps 'cd /opt/carsua/compose && touch .env && { grep -v "^GH_OWNER=" .env || true; cat; } > .env.tmp && mv .env.tmp .env' < owner.env
+          if [ -n "$CF_ORIGIN_CERT" ] && [ -n "$CF_ORIGIN_KEY" ]; then
+            printf '%s\n' "$CF_ORIGIN_CERT" | ssh vps 'umask 077; cat > /opt/carsua/env/certs/origin.pem'
+            printf '%s\n' "$CF_ORIGIN_KEY" | ssh vps 'umask 077; cat > /opt/carsua/env/certs/origin.key'
+          fi
+          if [ -n "$R2_ACCESS_KEY_ID" ] && [ -n "$BACKUP_BUCKET" ]; then
+            {
+              printf 'RCLONE_CONFIG_R2_TYPE=s3\nRCLONE_CONFIG_R2_PROVIDER=Cloudflare\n'
+              printf 'RCLONE_CONFIG_R2_ACCESS_KEY_ID=%s\nRCLONE_CONFIG_R2_SECRET_ACCESS_KEY=%s\nRCLONE_CONFIG_R2_ENDPOINT=%s\n' \
+                "$R2_ACCESS_KEY_ID" "$R2_SECRET_ACCESS_KEY" "$R2_ENDPOINT"
+              emit BACKUP_BUCKET HC_PING_BACKUP
+            } > backup.env
+            ssh vps 'umask 077; cat > /opt/carsua/env/backup.env' < backup.env
+          fi
+          rm -f api.env postgres.env owner.env backup.env
+
+      - name: Start Postgres only (sync_only)
+        if: ${{ inputs.sync_only }}
+        run: ssh vps 'cd /opt/carsua/compose && COMPOSE_FILE=docker-compose.prod.yml docker compose up -d postgres'
+
+      - name: Blue/green switch
+        if: ${{ !inputs.sync_only }}
+        run: ssh vps bash -s -- "$GITHUB_SHA" < infra/vps/deploy-api.sh
+
+      - name: Public health check
+        if: ${{ !inputs.sync_only }}
+        env:
+          URL: ${{ vars.PUBLIC_SITE_URL }}
+        run: |
+          for _ in $(seq 1 12); do
+            curl -fsS --max-time 10 "$URL/healthz" && exit 0
+            sleep 5
+          done
+          echo "public /healthz still failing" >&2
+          exit 1

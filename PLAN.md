@@ -878,7 +878,7 @@ DNS settings point the domain at the VPS:
   **Remaining load-performance actions (value order; context in "Load-performance pass"):**
   1. [ ] Measure for real — Lighthouse + DevTools trace on the VPS behind Caddy (Fast 4G, 4× CPU); LCP/CLS before vs after were never measured.
   2. [ ] Preload the active language chunk (it is fetched only after the entry script runs: one extra round trip) — inline script in `index.html` + a build-time hook for the hashed filename.
-  3. [ ] Brotli at the proxy (Caddy `encode zstd br gzip`) — the API does not compress; local numbers overstate transfer.
+  3. [ ] Brotli: stock Caddy has no `br` encoder (zstd + gzip at the origin, Cloudflare serves Brotli) — the API does not compress; local numbers overstate transfer.
   4. [ ] Short-TTL edge cache for read-only `/api/*` lookups (stats, vdb, rdw, wiki) — see `docs/vps-http2-http3.md`.
   5. [ ] Make `FuelEconomy` / `RdwSpecs` lazy for real: move the helpers they share with `CO2Badge` and the VIN code into the grouped helper chunks in `vite.config.ts`.
   6. [ ] Hero/LCP: confirm the largest image is the hero and add a preload hint; check fonts.
@@ -886,7 +886,9 @@ DNS settings point the domain at the VPS:
 - HTTP/2 + HTTP/3 + Brotli + caching setup: [docs/vps-http2-http3.md](docs/vps-http2-http3.md) (open UDP 443!)
 - Prod `docker-compose`: Caddy (auto-TLS + **coarse per-IP rate limit**, see
   below) · Redis (RIA + VIN cache, throttler store) · api · web · ingest-cron
-- GHCR image build + SSH deploy workflow (GitHub Actions, free for public repos)
+- ✅ Deploy tooling written 2026-10-15 (api/alpr Dockerfiles, `infra/docker-compose.prod.yml` + Caddyfile + maintenance page, blue/green api deploy,
+  web symlink releases, 3 path-filtered GitHub workflows, bootstrap + backup scripts, web maintenance banner) — **not yet run on a real VPS**.
+  Runbook, secrets list and what is still open: [docs/deploy.md](docs/deploy.md). Still to build: `ingest-cron` image + `run-job.ts` (SCHEDULE.md), Redis throttler store.
 - Monthly CKAN ingest cron on the VPS (`ingest.ts`, self-checks `ingested_resources`)
 - ✅ OG image endpoint — done 2026-10-01 (plate **and** VIN, `resvg-js` + bundled Noto Sans, never
   Puppeteer; see `docs/plan-done.md` "Link previews"). Still for deploy: set `PUBLIC_SITE_URL` to the real

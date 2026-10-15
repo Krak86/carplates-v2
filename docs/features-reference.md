@@ -350,3 +350,16 @@ Files: migrations 0068 + 0069, `scripts/src/wanted.ts` (+ `wanted-parse.ts`), `a
 
 - Public "What's new" log, one `ReleaseDay` per working day in `apps/web/src/routes/releases/releases.ts` (items tagged `new | improved | data | fix`, text in ua/ru/en). **After each big update add the day's entry (or extend today's).** Data is bundled in the lazy route chunk, not in `/api`.
 - The PWA update bar has "Update & see what's new": it sets the URL to `/releases` (`history.pushState`) and then runs the normal update, whose reload lands the new shell there. A hint under it says the changelog shows the latest entries only after the update (the waiting service worker keeps serving the old shell until then).
+
+## Deploy & maintenance (2026-10-15)
+
+Runbook, secrets, folder layout: [deploy.md](deploy.md). Conventions:
+
+- **Three path-filtered workflows on `main`** (`deploy-web|api|alpr.yml`); never add `web`/`api` branches. New runtime env var = add it to `env.ts`, to the
+  `env:` block + `emit` list in `deploy-api.yml`, and to the secrets/variables table in `deploy.md` (web: a `VITE_*` var in `deploy-web.yml`).
+- **Migrations must be backward compatible** (blue/green: the old api runs on the new schema for seconds) — add first, drop in a later release.
+- **Web releases are folders + a `current` symlink**; the api serves `WEB_DIST_DIR=/web/current` and re-reads `index.html` by mtime. Never bake the
+  web into the api image.
+- **Never add `ports:` to postgres/alpr** (Docker-published ports bypass ufw); only Caddy publishes. Stock Caddy has no `br` encoder.
+- **Proxy maintenance answer** = `503 {"status":"maintenance","retryAfter":N}` → `MaintenanceError` (`lib/api.ts`) → patient retry + `MaintenanceBanner`
+  (`lib/maintenance.ts`). Any new fetch helper must go through `unwrap` to get this for free.

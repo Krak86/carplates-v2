@@ -1579,6 +1579,7 @@
   "offline.usage": "Used on this device: {{size}}",
   "offline.clear": "Clear cached images",
   "offline.confirmClear": "Delete cached images (car photos, logos, backgrounds) from this device? Saved results are kept — remove them from History or Favorites.",
+  "maintenance.banner": "The server is updating — results will appear in a few seconds.",
   "pwa.updateAvailable": "A new version is available.",
   "pwa.update": "Update",
   "pwa.later": "Later",

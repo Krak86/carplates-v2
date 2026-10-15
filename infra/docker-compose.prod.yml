@@ -1,0 +1,93 @@
+# Production stack. Lives on the VPS as /opt/carsua/compose/docker-compose.prod.yml (CI copies it on every api deploy;
+# paths below are relative to that folder). Only Caddy publishes ports; everything else is on the internal network.
+# Blue/green api: the deploy starts the idle colour with the new image, waits for /healthz, then stops the old one.
+# Colour tags come from /opt/carsua/compose/.env (written by the deploy): API_TAG_BLUE, API_TAG_GREEN, ALPR_TAG, GH_OWNER.
+name: carsua
+
+x-logging: &logging
+  driver: json-file
+  options: { max-size: '10m', max-file: '5' }
+
+x-api: &api
+  restart: unless-stopped
+  env_file: ../env/api.env
+  environment:
+    NODE_ENV: production
+    TRUST_PROXY: 'true'
+    WEB_DIST_DIR: /web/current
+    ALPR_LOCAL_URL: http://alpr:8088
+  volumes:
+    - ../web:/web:ro
+  depends_on:
+    postgres: { condition: service_healthy }
+  mem_limit: 1g
+  cap_drop: [ALL]
+  security_opt: ['no-new-privileges:true']
+  logging: *logging
+
+services:
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports: ['80:80', '443:443', '443:443/udp']
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./maintenance.html:/srv/maintenance.html:ro
+      - ./flags:/flags:ro # `touch flags/MAINTENANCE` = planned maintenance page
+      - ../env/certs:/certs:ro # Cloudflare origin certificate: origin.pem + origin.key
+      - caddy_data:/data
+      - caddy_config:/config
+    logging: *logging
+
+  api-blue:
+    <<: *api
+    image: ghcr.io/${GH_OWNER}/carsua-api:${API_TAG_BLUE:-latest}
+
+  api-green:
+    <<: *api
+    image: ghcr.io/${GH_OWNER}/carsua-api:${API_TAG_GREEN:-latest}
+
+  alpr:
+    image: ghcr.io/${GH_OWNER}/carsua-alpr:${ALPR_TAG:-latest}
+    restart: unless-stopped
+    user: '10001:10001'
+    read_only: true
+    tmpfs: ['/tmp']
+    cap_drop: [ALL]
+    security_opt: ['no-new-privileges:true']
+    mem_limit: 1536m
+    cpus: 1.5
+    logging: *logging
+
+  postgres:
+    image: postgres:18.6
+    restart: unless-stopped
+    env_file: ../env/postgres.env # POSTGRES_USER / POSTGRES_PASSWORD / POSTGRES_DB
+    # Sized for the 8 GB box: hot set is current_registration + indexes (~9 GB), so most of it lives in the OS cache.
+    command:
+      - postgres
+      - -c
+      - shared_buffers=2GB
+      - -c
+      - effective_cache_size=5GB
+      - -c
+      - maintenance_work_mem=1GB
+      - -c
+      - work_mem=16MB
+      - -c
+      - max_wal_size=8GB
+      - -c
+      - random_page_cost=1.1
+    shm_size: 1g
+    volumes:
+      - ../pgdata:/var/lib/postgresql # postgres:18+ mounts here, not /var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    logging: *logging
+
+volumes:
+  caddy_data:
+  caddy_config:

@@ -11,9 +11,10 @@ const INDEX =
 
 describe('SpaController meta injection', () => {
   let app: NestFastifyApplication
+  let dist: string
 
   beforeAll(async () => {
-    const dist = mkdtempSync(join(tmpdir(), 'spa-dist-'))
+    dist = mkdtempSync(join(tmpdir(), 'spa-dist-'))
     writeFileSync(join(dist, 'index.html'), INDEX)
     vi.stubEnv('WEB_DIST_DIR', dist)
     vi.stubEnv('PUBLIC_SITE_URL', 'https://carsua.app')
@@ -81,5 +82,10 @@ describe('SpaController meta injection', () => {
     const html = await get('/ZZ0000ZZ')
     expect(html).toContain('og:title')
     expect(html).toContain('noindex')
+  })
+
+  it('picks up a replaced index.html without a restart (web deploy swaps the dist symlink)', async () => {
+    writeFileSync(join(dist, 'index.html'), INDEX.replace('<div id="root">', '<div id="root" data-build="new">'))
+    expect(await get('/about')).toContain('data-build="new"')
   })
 })

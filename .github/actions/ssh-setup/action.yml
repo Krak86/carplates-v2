@@ -1,0 +1,29 @@
+name: ssh-setup
+description: Configure `ssh vps` / `rsync vps:` for the production VPS (pinned host key, dedicated CI key).
+inputs:
+  host: { description: VPS hostname or IP, required: true }
+  user: { description: SSH user, required: true }
+  key: { description: CI private key, required: true }
+  known-hosts: { description: Pinned host key line(s) from `ssh-keyscan <ip>`, required: true }
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      env:
+        HOST: ${{ inputs.host }}
+        USER_NAME: ${{ inputs.user }}
+        KEY: ${{ inputs.key }}
+        KNOWN_HOSTS: ${{ inputs.known-hosts }}
+      run: |
+        install -d -m 700 ~/.ssh
+        printf '%s\n' "$KEY" > ~/.ssh/id_ci && chmod 600 ~/.ssh/id_ci
+        printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+        cat > ~/.ssh/config <<EOF
+        Host vps
+          HostName $HOST
+          User $USER_NAME
+          IdentityFile ~/.ssh/id_ci
+          IdentitiesOnly yes
+          StrictHostKeyChecking yes
+          ServerAliveInterval 30
+        EOF
