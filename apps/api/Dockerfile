@@ -1,6 +1,6 @@
 # API image. Build context = repo root:  docker build -f apps/api/Dockerfile .
 # Serves /api, per-plate <meta> and the SPA from WEB_DIST_DIR (bind-mounted by compose, not baked in).
-FROM node:24-slim AS build
+FROM node:25-slim AS build
 ENV PNPM_HOME=/pnpm PATH=/pnpm:$PATH
 RUN corepack enable
 WORKDIR /repo
@@ -21,7 +21,7 @@ RUN pnpm --filter @carplates/shared --filter @carplates/db build && pnpm --filte
 RUN pnpm --filter @carplates/api deploy --prod --legacy /out \
   && cp -r apps/api/dist /out/dist
 
-FROM node:24-slim
+FROM node:25-slim
 ENV NODE_ENV=production PORT=3000
 WORKDIR /app
 COPY --from=build --chown=node:node /out ./
