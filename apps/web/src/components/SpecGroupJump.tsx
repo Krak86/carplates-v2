@@ -1,15 +1,17 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import type { JumpSection } from '@/components/RdwSpecs.helpers'
+import type { JumpTarget } from '@/components/RdwSpecs.helpers'
 
 type Props = {
-  section: JumpSection
-  onJump: (section: JumpSection) => void
+  section: JumpTarget
+  onJump: (section: JumpTarget) => void
+  /** Which way the target lies on the card; ↓ for a section further down. */
+  arrow?: '↓' | '↑'
 }
 
 /** "↓ Size & parking" under a Specs group heading: opens the section that goes deeper and scrolls to it, with a line saying what is there. */
-export default function SpecGroupJump({ section, onJump }: Props): ReactNode {
+export default function SpecGroupJump({ section, onJump, arrow = '↓' }: Props): ReactNode {
   const { t } = useTranslation()
 
   return (
@@ -19,7 +21,7 @@ export default function SpecGroupJump({ section, onJump }: Props): ReactNode {
         onClick={() => onJump(section)}
         className="text-[var(--color-primary)] underline hover:no-underline"
       >
-        <span aria-hidden>↓</span> {t(`rdw.jump.${section}.label`)}
+        <span aria-hidden>{arrow}</span> {t(`rdw.jump.${section}.label`)}
       </button>
       {' — '}
       {t(`rdw.jump.${section}.what`)}

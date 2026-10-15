@@ -10,6 +10,7 @@ import InfoPopover from '@/components/InfoPopover'
 import InfoText from '@/components/InfoText'
 import SectionHeader from '@/components/SectionHeader'
 import ShareButton from '@/components/ShareButton'
+import SpecsJumpLink from '@/components/SpecsJumpLink'
 import UkrPriceBreakdown from '@/components/UkrPriceBreakdown'
 import { useEstimatedValue, type ValueInput } from '@/components/use-estimated-value'
 import ValuePriceByFuel from '@/components/ValuePriceByFuel'
@@ -87,6 +88,15 @@ export default function EstimatedValueSection({
       >
         <div className="overflow-hidden">
           <div className="mt-2 space-y-2">
+            <SpecsJumpLink
+              group="price"
+              brand={input.brand}
+              model={input.model}
+              year={input.year}
+              kind={input.kind}
+              fuel={input.fuel}
+            />
+
             <EstimatedValuePill value={value} />
 
             <UkrPriceBreakdown

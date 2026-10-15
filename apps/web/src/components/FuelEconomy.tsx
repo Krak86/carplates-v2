@@ -11,6 +11,7 @@ import { similarVehiclesHref } from '@/components/CO2Badge.helpers'
 import SectionInfo from '@/components/SectionInfo'
 import SectionHeader from '@/components/SectionHeader'
 import ShareButton from '@/components/ShareButton'
+import SpecsJumpLink from '@/components/SpecsJumpLink'
 import { cn } from '@/lib/cn'
 import { fuelEconomyQuery, rdwQuery } from '@/lib/queries'
 import { scrollElementIntoView } from '@/lib/share-section'
@@ -88,6 +89,8 @@ export default function FuelEconomy({ brand, model, year, fuel, capacity, kind, 
       >
         <div className="overflow-hidden">
           <div className="mt-2">
+            <SpecsJumpLink group="economy" brand={brand} model={model} year={year} kind={kind} fuel={fuel} />
+
             {result.isPending && open && <SectionSkeleton rows={2} />}
             {noEstimate && rdw.isPending && <SectionSkeleton rows={2} />}
             {noEstimate && !rdw.isPending && !rdwCo2 && (

@@ -21,6 +21,11 @@ the computed keys, so after changing `makeKey`/`modelKey`/`brandSlug` re-run `in
 Files: `packages/shared/src/rdw.ts` (contract, own file) + `rdwMatch.ts`, `apps/api/src/rdw/`, web `components/RdwSpecs.tsx` +
 `.helpers.ts`, `scripts/src/rdw.ts` + `rdw-parse.ts`; migrations 0047 `registry.rdw_specs` + 0048 (stage C2 columns).
 
+Cross-links: `JumpTarget` (`RdwSpecs.helpers.ts`) = section | `history` | `vin` | `specs-<group>`; `ResultCard.jumpToSection` handles all of
+them and is provided as `CardJumpContext` (`card-jump.ts`). Basic-section rows get a `RowJump` "📐↓" button (shown only when the target
+has data: `hasSpecGroup`, size class); Value / Generation specs / Size / Emissions open with a `SpecsJumpLink` "↑" back to their Specs
+group. `RdwSpecs` takes `openSignal` + `openGroup`; `VinToggleSection.openSignal` no longer fires `onOpenChange`.
+
 CC0 data from RDW (Dutch vehicle authority): power, engine capacity, unladen and gross mass, combined CO2, top speed, towing limits, seats, doors, wheelbase and length/width/height as min / median / max per
 (kind, make, model, first-registration year) — the "Specs" result-card block, labelled "EU (NL) data" (EU-spec, may differ from a
 Ukrainian build). RDW's SODA server does the work: `ingest:rdw` posts one grouped, server-side-joined query per make (main

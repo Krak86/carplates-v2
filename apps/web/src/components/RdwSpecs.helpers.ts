@@ -288,6 +288,15 @@ export function approxCount(n: number, locale: string): string {
 export const JUMP_SECTIONS = ['size', 'value', 'emissions', 'engines'] as const
 export type JumpSection = (typeof JUMP_SECTIONS)[number]
 
+/** Everything a cross-link on the card can scroll to: a section, a Specs group (`specs-<group>`), history or the VIN decode. */
+export type JumpTarget = JumpSection | 'history' | 'vin' | `specs-${SpecGroup}`
+
+/** Whether the Specs block shows at least one row of `group` for this car (so a link to it never leads nowhere). */
+export function hasSpecGroup(specs: RdwSpecs, group: SpecGroup, fuel: string | null | undefined): boolean {
+  if (group === 'fleet') return SHARE_ROWS.some(def => visibleShares(def.pick(specs), def.limit).length > 0)
+  return SPEC_ROWS.some(def => def.group === group && appliesToFuel(def.powertrain, fuel) && !!def.pick(specs))
+}
+
 /** Which section each Specs group continues in; groups without one have no link. */
 export const GROUP_JUMP: Readonly<Partial<Record<SpecGroup, JumpSection>>> = {
   engine: 'engines',

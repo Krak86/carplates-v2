@@ -11,6 +11,7 @@ import InfoText from '@/components/InfoText'
 import SectionCount from '@/components/SectionCount'
 import SectionHeader from '@/components/SectionHeader'
 import ShareButton from '@/components/ShareButton'
+import SpecsJumpLink from '@/components/SpecsJumpLink'
 import VinToggleSection from '@/components/vin/VinToggleSection'
 import { driveRows } from '@/components/WikiDrive.helpers'
 import WikiEngineCard from '@/components/WikiEngineCard'
@@ -39,6 +40,8 @@ type Props = {
   year: number | null
   /** Registry figures of this car: the matching engine is highlighted and the others show how they differ. */
   own?: OwnCar
+  /** Registry kind text — keeps the link back to the Specs block on the same cached lookup. */
+  kind?: string | null
   /** Each change opens the section and scrolls to it (0 = never asked) — a link in the Specs block. */
   openSignal?: number
 }
@@ -49,7 +52,7 @@ type Props = {
  * mass and tank volume. Catalogue values for the generation, not for this car; each block names its Wikipedia edition.
  * The engine matching the car's registry figures is highlighted and listed first. Collapsed by default (open from `?section=engines`); renders nothing while loading, on error, or without a match.
  */
-export default function WikiSpecs({ brand, model, year, own, openSignal = 0 }: Props): ReactNode {
+export default function WikiSpecs({ brand, model, year, own, kind, openSignal = 0 }: Props): ReactNode {
   const { t, i18n } = useTranslation()
   const [searchParams] = useSearchParams()
   const isShared = searchParams.get('section') === 'engines'
@@ -135,6 +138,10 @@ export default function WikiSpecs({ brand, model, year, own, openSignal = 0 }: P
         )}
       >
         <div className="overflow-hidden">
+          <div className="mt-2 empty:hidden">
+            <SpecsJumpLink group="engine" brand={brand} model={model} year={year} kind={kind} fuel={own?.fuel} />
+          </div>
+
           <p className="mt-2 text-xs text-[var(--color-muted)]">
             {curated
               ? t('wikispec.footnoteCurated', { name })

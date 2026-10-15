@@ -2521,5 +2521,21 @@
   "rdw.jump.emissions.label": "Emissions",
   "rdw.jump.emissions.what": "CO₂ and fuel use of similar cars from the EPA and EU data, with charts",
   "rdw.jump.engines.label": "Generation specs",
-  "rdw.jump.engines.what": "every engine offered in this generation, with the one matching your car highlighted, plus drive and gearbox"
+  "rdw.jump.engines.what": "every engine offered in this generation, with the one matching your car highlighted, plus drive and gearbox",
+  "rdw.jump.history.label": "Registration history",
+  "rdw.jump.history.what": "every registration, re-registration and plate change of this car",
+  "rdw.jump.vin.label": "VIN decode",
+  "rdw.jump.vin.what": "what the VIN reveals: maker, plant, engine, body and equipment",
+  "rdw.jump.specs-engine.label": "Specs: Engine and performance",
+  "rdw.jump.specs-engine.what": "typical power, displacement and performance of this model in the Dutch register",
+  "rdw.jump.specs-mass.label": "Specs: Mass and towing",
+  "rdw.jump.specs-mass.what": "typical kerb mass, gross mass and towing limits of this model",
+  "rdw.jump.specs-body.label": "Specs: Body and dimensions",
+  "rdw.jump.specs-body.what": "typical length, width, height and wheelbase of this model",
+  "rdw.jump.specs-price.label": "Specs: New price (NL)",
+  "rdw.jump.specs-price.what": "the typical new price of this model in the Netherlands",
+  "rdw.jump.specs-economy.label": "Specs: Consumption and emissions",
+  "rdw.jump.specs-economy.what": "typical fuel use and CO₂ of this model in the Dutch register",
+  "rdw.jump.specs-fleet.label": "Specs: Dutch fleet of this model",
+  "rdw.jump.specs-fleet.what": "how the Dutch fleet of this model splits by fuel, body, colour and energy label"
 }

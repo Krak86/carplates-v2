@@ -19,8 +19,9 @@ import {
   SPEC_GROUPS,
   SPEC_ROWS,
   visibleShares,
-  type JumpSection,
+  type JumpTarget,
   type OwnFigures,
+  type SpecGroup,
   type SpecRange,
   type SpecRowDef
 } from '@/components/RdwSpecs.helpers'
@@ -46,7 +47,10 @@ type Props = {
   /** What the registry says about this exact car — shown under the typical figure for comparison. */
   own?: OwnFigures
   /** Opens another section of the card (and scrolls to it) from a group's link. */
-  onJump?: (section: JumpSection) => void
+  onJump?: (section: JumpTarget) => void
+  /** Each change opens the block and `openGroup` inside it, then scrolls there (0 = never asked) — a link elsewhere on the card. */
+  openSignal?: number
+  openGroup?: SpecGroup | null
 }
 
 type SpecRowProps = {
@@ -100,11 +104,31 @@ function SpecRow({ def, range, own, locale }: SpecRowProps): ReactNode {
  * the same make/model/year as registered in the Netherlands. EU-spec, so labelled as such. Collapsed by default (open
  * from a `?section=specs` share link); renders nothing while loading, on error, or without a match — a miss hides it.
  */
-export default function RdwSpecs({ brand, model, year, kind, fuel, own, onJump }: Props): ReactNode {
+export default function RdwSpecs({
+  brand,
+  model,
+  year,
+  kind,
+  fuel,
+  own,
+  onJump,
+  openSignal = 0,
+  openGroup = null
+}: Props): ReactNode {
   const { t, i18n } = useTranslation()
   const [searchParams] = useSearchParams()
   const isShared = searchParams.get('section') === 'specs'
-  const [open, setOpen] = useState(() => isShared)
+  const [open, setOpen] = useState(() => isShared || openSignal > 0)
+  const [seenSignal, setSeenSignal] = useState(openSignal)
+  // One signal per group, so asking for a new group never re-opens one the reader closed (derived during render).
+  const [groupSignals, setGroupSignals] = useState<Partial<Record<SpecGroup, number>>>(() =>
+    openGroup ? { [openGroup]: openSignal } : {}
+  )
+  if (openSignal !== seenSignal) {
+    setSeenSignal(openSignal)
+    setOpen(true)
+    if (openGroup) setGroupSignals(prev => ({ ...prev, [openGroup]: openSignal }))
+  }
   const sectionRef = useRef<HTMLDivElement>(null)
   const { data } = useQuery({
     ...rdwQuery(brand ?? '', model ?? '', year ?? 0, kind),
@@ -115,6 +139,13 @@ export default function RdwSpecs({ brand, model, year, kind, fuel, own, onJump }
   useEffect(() => {
     if (isShared && match && sectionRef.current) scrollElementIntoView(sectionRef.current)
   }, [isShared, match])
+
+  // A link elsewhere on the card: scroll to the asked group once the block has rendered.
+  useEffect(() => {
+    if (openSignal === 0 || !match || !sectionRef.current) return
+    const group = openGroup && sectionRef.current.querySelector<HTMLElement>(`[data-spec-group="${openGroup}"]`)
+    scrollElementIntoView(group || sectionRef.current)
+  }, [openSignal, openGroup, match])
 
   if (!match) return null
 
@@ -228,22 +259,24 @@ export default function RdwSpecs({ brand, model, year, kind, fuel, own, onJump }
           )}
 
           {groups.map(group => (
-            <VinToggleSection
-              key={group.key}
-              nested
-              icon="📂"
-              defaultOpen={group.key === 'engine'}
-              showLabel={t('vin.group.show')}
-              hideLabel={t('vin.group.hide')}
-              title={
-                <>
-                  {t(`rdw.group.${group.key}`)} <SectionCount count={group.rows.length} />
-                </>
-              }
-            >
-              {onJump && GROUP_JUMP[group.key] && <SpecGroupJump section={GROUP_JUMP[group.key]!} onJump={onJump} />}
-              <div className="divide-y divide-[var(--color-border)]">{group.rows}</div>
-            </VinToggleSection>
+            <div key={group.key} data-spec-group={group.key}>
+              <VinToggleSection
+                nested
+                icon="📂"
+                defaultOpen={group.key === 'engine'}
+                openSignal={groupSignals[group.key] ?? 0}
+                showLabel={t('vin.group.show')}
+                hideLabel={t('vin.group.hide')}
+                title={
+                  <>
+                    {t(`rdw.group.${group.key}`)} <SectionCount count={group.rows.length} />
+                  </>
+                }
+              >
+                {onJump && GROUP_JUMP[group.key] && <SpecGroupJump section={GROUP_JUMP[group.key]!} onJump={onJump} />}
+                <div className="divide-y divide-[var(--color-border)]">{group.rows}</div>
+              </VinToggleSection>
+            </div>
           ))}
         </div>
       </div>

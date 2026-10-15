@@ -7,6 +7,7 @@ import { useSearchParams } from 'react-router'
 import SectionHeader from '@/components/SectionHeader'
 import SectionInfo from '@/components/SectionInfo'
 import ShareButton from '@/components/ShareButton'
+import SpecsJumpLink from '@/components/SpecsJumpLink'
 import { leadParts, parseSizeTab, SIZE_TABS, type SizeTab } from '@/components/size/VehicleSize.helpers'
 import { useVehicleSize, type VehicleSizeInput } from '@/components/size/use-vehicle-size'
 import SectionSkeleton from '@/components/ui/SectionSkeleton'
@@ -95,6 +96,10 @@ export default function VehicleSizeSection({ vin, vinFields, openSignal = 0, ...
       >
         <div className="overflow-hidden">
           <p className="mt-2 text-xs text-[var(--color-muted)]">{t('size.lead', { sources: lead })}</p>
+
+          <div className="mt-2 empty:hidden">
+            <SpecsJumpLink group="body" brand={input.brand} model={input.model} year={input.year} kind={input.kind} />
+          </div>
 
           {typicalOnly && (
             <p className="mt-2 rounded-md border border-dashed border-[var(--color-border)] px-2.5 py-1.5 text-sm">

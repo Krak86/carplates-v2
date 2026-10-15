@@ -14,7 +14,7 @@ type Props = {
   showLabel: string
   hideLabel: string
   defaultOpen?: boolean
-  /** Each change opens the section (0 = never asked) — for a control elsewhere on the card. */
+  /** Each change opens the section (0 = never asked) — for a control elsewhere on the card, which tells its own state; no `onOpenChange`. */
   openSignal?: number
   /** Fires with the new state on every toggle — for callers that fetch lazily on first open. */
   onOpenChange?: (open: boolean) => void
@@ -50,7 +50,6 @@ export default function VinToggleSection({
   if (openSignal !== seenSignal) {
     setSeenSignal(openSignal)
     setOpen(true)
-    onOpenChange?.(true)
   }
 
   return (
