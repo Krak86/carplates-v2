@@ -52,6 +52,7 @@ import {
   getSafetyRatings,
   getStats,
   getStatsField,
+  getStatsDistribution,
   getStatsTop,
   getUkraineGeography,
   getModels3d,
@@ -169,6 +170,11 @@ export function statsQuery() {
 // instead of the full ~14 MB statsQuery(). Same monthly-ingest cadence, so same never-refetch policy.
 export function statsTopQuery() {
   return queryOptions({ queryKey: ['stats', 'top'], queryFn: getStatsTop, staleTime: Infinity })
+}
+
+// Fleet histograms behind the Performance panel's percentile bars (~60 buckets, changes only on a spec-stats rebuild).
+export function statsDistributionQuery() {
+  return queryOptions({ queryKey: ['stats', 'distribution'], queryFn: getStatsDistribution, staleTime: Infinity })
 }
 
 // One dimension's breakdown for a ResultCard "?" popover — a few dozen rows.
@@ -462,6 +468,7 @@ export function vehicleSearchQuery(filters: VehicleSearchFilters) {
       filters.fuel,
       filters.color,
       filters.kind,
+      filters.purpose,
       filters.body,
       filters.region,
       filters.oper,

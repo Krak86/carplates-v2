@@ -39,3 +39,6 @@ services/alpr/eval/
 
 # full-size logo originals (not shipped; built into public/logos by build:logo-images)
 apps/web/assets-src/kind/logos/
+
+# e-Ukraine typeface preview — license unconfirmed (PLAN.md), do not commit
+# apps/web/public/fonts/e-ukraine/

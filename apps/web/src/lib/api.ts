@@ -57,6 +57,7 @@ import {
   statsFieldResponseSchema,
   statsResponseSchema,
   statsTopResponseSchema,
+  distributionResponseSchema,
   vehiclePhotosResponseSchema,
   vinDecodeResponseSchema,
   wikiImageResponseSchema,
@@ -133,11 +134,13 @@ import type {
   StatsFieldResponse,
   StatsResponse,
   StatsTopResponse,
+  DistributionResponse,
   VehicleColor,
   SearchSortDir,
   SearchSortKey,
   VehicleFuel,
   VehicleKind,
+  VehiclePurpose,
   VehiclePhotosResponse,
   VinDecodeResponse,
   WikiImageResponse,
@@ -228,6 +231,10 @@ export async function decodeVin(vin: string): Promise<VinDecodeResponse> {
 
 export async function getStats(): Promise<StatsResponse> {
   return statsResponseSchema.parse(await getJson('/api/stats'))
+}
+
+export async function getStatsDistribution(): Promise<DistributionResponse> {
+  return distributionResponseSchema.parse(await getJson('/api/stats/distribution'))
 }
 
 export async function getStatsTop(): Promise<StatsTopResponse> {
@@ -450,6 +457,7 @@ export type VehicleSearchFilters = {
   fuel?: VehicleFuel
   color?: VehicleColor
   kind?: VehicleKind
+  purpose?: VehiclePurpose
   body?: string
   region?: string
   oper?: number
@@ -468,6 +476,7 @@ export async function searchVehicles(filters: VehicleSearchFilters): Promise<Sea
   if (filters.fuel) params.set('fuel', filters.fuel)
   if (filters.color) params.set('color', filters.color)
   if (filters.kind) params.set('kind', filters.kind)
+  if (filters.purpose) params.set('purpose', filters.purpose)
   if (filters.body) params.set('body', filters.body)
   if (filters.region) params.set('region', filters.region)
   if (filters.oper != null) params.set('oper', String(filters.oper))

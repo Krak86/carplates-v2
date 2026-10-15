@@ -9,7 +9,8 @@ import {
   SEARCH_SORT_KEYS,
   VEHICLE_COLORS,
   VEHICLE_FUELS,
-  VEHICLE_KINDS
+  VEHICLE_KINDS,
+  VEHICLE_PURPOSES
 } from '@carplates/shared'
 import type { SearchResultRow } from '@carplates/shared'
 
@@ -231,6 +232,25 @@ export default function AdvancedSearchRoute(): ReactNode {
                   </option>
                 ))}
               </select>
+            </label>
+
+            <label className="flex flex-col gap-1 text-sm">
+              {t('advancedSearch.purpose')}
+              <select
+                value={filters.purpose}
+                onChange={e => updateFilter('purpose', e.target.value as typeof filters.purpose)}
+                className={inputClass}
+              >
+                <option value="">{t('advancedSearch.anyPurpose')}</option>
+                {VEHICLE_PURPOSES.map(p => (
+                  <option key={p} value={p}>
+                    {t(`vehiclePurpose.${p}`)}
+                  </option>
+                ))}
+              </select>
+              {!!filters.purpose && (
+                <span className="text-xs text-[var(--color-muted)]">{t(`vehiclePurposeDesc.${filters.purpose}`)}</span>
+              )}
             </label>
 
             <label className="flex flex-col gap-1 text-sm">

@@ -22,6 +22,8 @@ export default function Sidebar(): ReactNode {
   const langLoading = useUiStore(s => s.langLoading)
   const theme = useUiStore(s => s.theme)
   const toggleTheme = useUiStore(s => s.toggleTheme)
+  const font = useUiStore(s => s.font)
+  const toggleFont = useUiStore(s => s.toggleFont)
   const setDrawerOpen = useUiStore(s => s.setDrawerOpen)
 
   const { user, isAdmin } = useSession()
@@ -142,6 +144,16 @@ export default function Sidebar(): ReactNode {
       >
         <span aria-hidden>{theme === 'dark' ? '🌙' : '☀️'}</span>{' '}
         {theme === 'dark' ? t('nav.themeDark') : t('nav.themeLight')}
+      </button>
+
+      <div className="mt-4 px-3 text-xs tracking-wide text-[var(--color-muted)] uppercase">{t('nav.font')}</div>
+      <button
+        type="button"
+        aria-pressed={font === 'e-ukraine'}
+        onClick={toggleFont}
+        className="rounded-lg bg-[var(--color-surface)]/60 px-3 py-1.5 text-left text-sm transition-colors duration-200 hover:bg-[var(--color-surface)]"
+      >
+        {font === 'e-ukraine' ? t('nav.fontEUkraine') : t('nav.fontSystem')}
       </button>
 
       <OfflineDataSettings />

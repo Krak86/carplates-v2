@@ -63,6 +63,8 @@ const SOURCES: readonly Source[] = [
   { key: 'bdr', label: 'MVS (bdr.mvs.gov.ua)', url: 'https://bdr.mvs.gov.ua', icon: '/icons/bdr.svg' },
   { key: 'mtsbu', label: 'MTSBU', url: 'https://policy.mtsbu.ua', icon: '/icons/sources/mtsbu.webp' },
   { key: 'shtrafua', label: 'ShtrafUA', url: 'https://shtrafua.com', icon: '/icons/shtrafua.png' },
+  // No logo: the site grants no reuse of its mark.
+  { key: 'pdr', label: 'pdr.infotech.gov.ua', url: 'https://pdr.infotech.gov.ua', tile: 'bg-blue-700' },
   { key: 'drive2', label: 'DRIVE2', url: 'https://www.drive2.ru', icon: '/icons/drive2.png' },
   { key: 'osm', label: 'OpenStreetMap', url: 'https://www.openstreetmap.org', tile: 'bg-green-700' },
   { key: 'autoria', label: 'Auto.RIA / OLX', url: 'https://auto.ria.com', tile: 'bg-slate-500' },
@@ -164,7 +166,23 @@ const SOURCES: readonly Source[] = [
     icon: '/icons/sources/telegram.webp'
   },
   { key: 'posthog', label: 'PostHog', url: 'https://posthog.com', icon: '/icons/sources/posthog.webp' },
-  { key: 'sentry', label: 'Sentry', url: 'https://sentry.io', icon: '/icons/sources/sentry.webp' }
+  { key: 'sentry', label: 'Sentry', url: 'https://sentry.io', icon: '/icons/sources/sentry.webp' },
+  // No logos below: no licence found for the marks; plain tiles only.
+  {
+    key: 'turnstile',
+    label: 'Cloudflare Turnstile',
+    url: 'https://www.cloudflare.com/application-services/products/turnstile/',
+    tile: 'bg-orange-600'
+  },
+  { key: 'resend', label: 'Resend', url: 'https://resend.com', tile: 'bg-slate-500' },
+  {
+    key: 'notoSans',
+    label: 'Noto Sans',
+    url: 'https://fonts.google.com/noto/specimen/Noto+Sans',
+    tile: 'bg-slate-500'
+  },
+  // No logo: the typeface page does not grant reuse of the Diia / Ministry marks.
+  { key: 'eUkraine', label: 'e-Ukraine typeface', url: 'https://thedigital.gov.ua/fonts', tile: 'bg-blue-700' }
 ]
 
 function SourceAvatar({ source }: { source: Source }): ReactNode {
@@ -208,6 +226,7 @@ const FEATURES = [
   'recognition',
   'advanced',
   'specs',
+  'performance',
   'safety',
   'fuel',
   'value',

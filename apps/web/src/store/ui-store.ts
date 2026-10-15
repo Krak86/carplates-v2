@@ -55,15 +55,40 @@ function persistTheme(theme: Theme): void {
 const startTheme = initialTheme()
 applyTheme(startTheme)
 
+// Preview: the e-Ukraine typeface (license pending, see PLAN.md) vs the system stack; styled via `[data-font]` in global.css.
+const FONTS = ['system', 'e-ukraine'] as const
+type Font = (typeof FONTS)[number]
+
+const FONT_STORAGE_KEY = 'carplates.font'
+
+function initialFont(): Font {
+  try {
+    const saved = localStorage.getItem(FONT_STORAGE_KEY)
+    if (FONTS.some(f => f === saved)) return saved as Font
+  } catch {
+    /* private mode / disabled storage */
+  }
+  return 'system'
+}
+
+function applyFont(font: Font): void {
+  document.documentElement.dataset.font = font
+}
+
+const startFont = initialFont()
+applyFont(startFont)
+
 interface UiState {
   lang: Lang
   /** The language being fetched after a switch (null when idle) — the UI shows a spinner and keeps the old one until it lands. */
   langLoading: Lang | null
   theme: Theme
+  font: Font
   drawerOpen: boolean
   cardTiltEnabled: boolean
   setLang: (lang: Lang) => Promise<void>
   toggleTheme: () => void
+  toggleFont: () => void
   setDrawerOpen: (open: boolean) => void
   toggleCardTilt: () => void
 }
@@ -72,6 +97,7 @@ export const useUiStore = create<UiState>((set, get) => ({
   lang: initialLang(),
   langLoading: null,
   theme: startTheme,
+  font: startFont,
   drawerOpen: false,
   cardTiltEnabled: initialCardTiltEnabled(),
   setLang: async lang => {
@@ -107,6 +133,17 @@ export const useUiStore = create<UiState>((set, get) => ({
       applyTheme(theme)
       persistTheme(theme)
       return { theme }
+    }),
+  toggleFont: (): void =>
+    set(s => {
+      const font = s.font === 'system' ? 'e-ukraine' : 'system'
+      applyFont(font)
+      try {
+        localStorage.setItem(FONT_STORAGE_KEY, font)
+      } catch {
+        /* private mode / disabled storage */
+      }
+      return { font }
     }),
   setDrawerOpen: (drawerOpen): void => set({ drawerOpen }),
   toggleCardTilt: (): void =>

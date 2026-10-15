@@ -1087,6 +1087,21 @@ export const statsSpec = registry.table(
 export type StatsSpecInsert = typeof statsSpec.$inferInsert
 
 /**
+ * Fleet histograms per metric (power_kw, hp_per_tonne, displacement_cc) of passenger cars: `bucket` = lower edge in the
+ * metric's unit, `n` = cars. Backs the card's percentile bars. Rebuilt by scripts/src/spec-stats.ts; see migration 0070.
+ */
+export const statsDistribution = registry.table(
+  'stats_distribution',
+  {
+    metric: text('metric').notNull(),
+    bucket: integer('bucket').notNull(),
+    n: integer('n').notNull()
+  },
+  t => [primaryKey({ columns: [t.metric, t.bucket] })]
+)
+export type StatsDistributionInsert = typeof statsDistribution.$inferInsert
+
+/**
  * Registry vehicles per vehicle class and matched VehiclesDB model (vdb_id null = that class's unmatched bucket) — backs
  * the /stats markets panel. Rebuilt by `scripts/src/vdb-stats.ts`; see migrations 0040 and 0046.
  */

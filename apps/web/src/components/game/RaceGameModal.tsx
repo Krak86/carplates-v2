@@ -124,6 +124,17 @@ export default function RaceGameModal({
           </a>{' '}
           · Jake Gordon · MIT
         </p>
+
+        <p className="mt-1 text-xs text-[var(--color-muted)]">
+          <a
+            href="https://pdr.infotech.gov.ua/"
+            target="_blank"
+            rel="noopener noreferrer nofollow"
+            className="underline"
+          >
+            {t('race.pdr')} ↗
+          </a>
+        </p>
       </div>
     </div>,
     document.body

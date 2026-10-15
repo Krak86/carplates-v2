@@ -11,9 +11,10 @@ import { cn } from '@/lib/cn'
 import { scrollElementIntoView } from '@/lib/share-section'
 
 type VerificationSite = {
-  id: 'bdr' | 'mtsbu' | 'shtrafua'
+  id: 'bdr' | 'mtsbu' | 'shtrafua' | 'pdr'
   url: string
-  icon: string
+  /** Absent when we are not cleared to show the logo — an emoji tile is drawn instead. */
+  icon?: string
   /** The logo has white lettering — it needs a dark backdrop to be readable on the light card. */
   darkBg?: boolean
   /** Wide wordmark vs. square emblem. */
@@ -23,7 +24,9 @@ type VerificationSite = {
 const VERIFICATION_SITES: VerificationSite[] = [
   { id: 'bdr', url: 'https://bdr.mvs.gov.ua/', icon: '/icons/bdr.svg', iconClass: 'size-8' },
   { id: 'mtsbu', url: 'https://policy.mtsbu.ua/', icon: '/icons/mtsbu.svg', darkBg: true, iconClass: 'h-5 w-auto' },
-  { id: 'shtrafua', url: 'https://shtrafua.com', icon: '/icons/shtrafua.png', iconClass: 'h-5 w-auto' }
+  { id: 'shtrafua', url: 'https://shtrafua.com', icon: '/icons/shtrafua.png', iconClass: 'h-5 w-auto' },
+  // No logo: the official-tests site grants no reuse of its mark.
+  { id: 'pdr', url: 'https://pdr.infotech.gov.ua/', iconClass: 'text-xl' }
 ]
 
 /**
@@ -83,7 +86,13 @@ export default function VerificationLinks(): ReactNode {
                         site.darkBg ? 'bg-[#1d2b3a]' : 'bg-white/70'
                       )}
                     >
-                      <img src={site.icon} alt="" className={cn('max-w-full object-contain', site.iconClass)} />
+                      {site.icon ? (
+                        <img src={site.icon} alt="" className={cn('max-w-full object-contain', site.iconClass)} />
+                      ) : (
+                        <span aria-hidden className={cn('leading-none', site.iconClass)}>
+                          📝
+                        </span>
+                      )}
                     </span>
                     <span className="min-w-0">
                       <span className="block underline">{t(`verification.${site.id}.title`)}</span>
