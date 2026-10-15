@@ -1,7 +1,7 @@
 # Self-hosted ALPR (own model, no token, no per-lookup billing) — see PLAN.md's
 # "Own ALPR model" section. CPU-only ONNX Runtime, sized for the Phase 4 VPS
 # (no GPU there — see PLAN.md's VPS sizing table).
-FROM python:3.12-slim
+FROM python:3.14-slim
 
 WORKDIR /app
 
