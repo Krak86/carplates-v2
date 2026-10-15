@@ -1,7 +1,7 @@
 import { Controller, Get, Inject, Param } from '@nestjs/common'
 import { ApiOkResponse, ApiParam, ApiTags } from '@nestjs/swagger'
 import { STATS_FIELD_DIMENSIONS, statsFieldDimensionSchema } from '@carplates/shared'
-import type { StatsFieldDimension, StatsFieldResponse } from '@carplates/shared'
+import type { DistributionResponse, StatsFieldDimension, StatsFieldResponse } from '@carplates/shared'
 
 import { zodParam } from '../common/zod-param.pipe.js'
 import { DataVersionResponseDto, StatsResponseDto, StatsTopResponseDto } from './stats.dto.js'
@@ -22,6 +22,14 @@ export class StatsController {
   @ApiOkResponse({ type: StatsTopResponseDto })
   top(): Promise<StatsTopResponseDto> {
     return this.statsService.top()
+  }
+
+  @Get('distribution')
+  @ApiOkResponse({
+    description: 'Fleet histograms { width, buckets: [[edge, cars]] } for power, hp/tonne and engine size'
+  })
+  distribution(): Promise<DistributionResponse> {
+    return this.statsService.distribution()
   }
 
   @Get('field/:dimension')

@@ -153,7 +153,7 @@ pnpm db:refresh-derived     # rebuild ALL rollups computed from current_registra
                             # ingest:vehiclesdb alone do NOT — run this after them
 pnpm db:refresh-weight-stats # rebuild registry.stats_weight (heaviest/lightest models per vehicle group; migrations 0051-0053) from the registry
                              # + rdw_specs (scripts/src/weight-stats.ts); part of db:refresh-derived. Run after a registry or RDW ingest
-pnpm db:refresh-spec-stats   # rebuild registry.stats_spec (highest/lowest power, engine, height, length, fuel tank; migration 0063); part of db:refresh-derived
+pnpm db:refresh-spec-stats   # rebuild registry.stats_spec (highest/lowest power, engine, height, length, fuel tank; migration 0063) and registry.stats_distribution (fleet histograms of power, hp/tonne, engine size for the card percentile bars; migration 0070); part of db:refresh-derived
 pnpm --filter scripts build:logo-images   # gitignored apps/web/assets-src/kind/logos/*.png -> public/logos/*.webp (max 700 px, q75); WebP only
 pnpm db:refresh-fuel-stats   # rebuild registry.stats_fuel (the /fuel page rollup) from the registry + fuel_economy;
                              # run after any registry ingest or ingest:fuel (ingest:all does it last)

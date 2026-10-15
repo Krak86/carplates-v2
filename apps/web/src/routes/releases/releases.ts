@@ -11,6 +11,24 @@ export const RELEASES: readonly ReleaseDay[] = [
     date: '2026-10-15',
     items: [
       item(
+        'new',
+        'Динаміка: к.с. на тонну, орієнтовний розгін 0–100, максимальна швидкість поруч із гепардом і лімітами України, потужність у конях',
+        'Динамика: л. с. на тонну, ориентировочный разгон 0–100, максимальная скорость рядом с гепардом и лимитами Украины, мощность в лошадях',
+        'Performance: hp per tonne, estimated 0–100, top speed next to a cheetah and the Ukrainian limits, power in horses'
+      ),
+      item(
+        'new',
+        'Місце авто серед легковиків України за потужністю, к.с. на тонну та об’ємом; орієнтовний акциз при ввезенні; схема мас GVM/TBM/GTM/ATM/GCM',
+        'Место авто среди легковых Украины по мощности, л. с. на тонну и объёму; ориентировочный акциз при ввозе; схема масс GVM/TBM/GTM/ATM/GCM',
+        'Where a car ranks among Ukrainian passenger cars by power, hp per tonne and engine size; import excise estimate; GVM/TBM/GTM/ATM/GCM mass schema'
+      ),
+      item(
+        'new',
+        'Маса та буксирування: корисне навантаження з повзунками людей і багажу, чи підійде причіп/караван, потрібна категорія прав',
+        'Масса и буксировка: полезная нагрузка с ползунками людей и багажа, подойдёт ли прицеп/караван, нужная категория прав',
+        'Mass and towing: payload with people and luggage sliders, which trailer or caravan fits, the licence category needed'
+      ),
+      item(
         'fix',
         'Кнопка «Поділитися» тепер завжди видима на сторінці /relax, зокрема на фоні «Фото»',
         'Кнопка «Поделиться» теперь всегда видна на странице /relax, в том числе на фоне «Фото»',

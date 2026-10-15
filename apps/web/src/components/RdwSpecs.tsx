@@ -25,8 +25,11 @@ import {
   type SpecRange,
   type SpecRowDef
 } from '@/components/RdwSpecs.helpers'
+import RdwImportExcise from '@/components/RdwImportExcise'
+import RdwPerformance from '@/components/RdwPerformance'
 import RdwScaleBar from '@/components/RdwScaleBar'
 import RdwShareRow from '@/components/RdwShareRow'
+import RdwTowing from '@/components/RdwTowing'
 import SectionCount from '@/components/SectionCount'
 import SectionHeader from '@/components/SectionHeader'
 import ShareButton from '@/components/ShareButton'
@@ -275,6 +278,31 @@ export default function RdwSpecs({
               >
                 {onJump && GROUP_JUMP[group.key] && <SpecGroupJump section={GROUP_JUMP[group.key]!} onJump={onJump} />}
                 <div className="divide-y divide-[var(--color-border)]">{group.rows}</div>
+                {group.key === 'engine' && (
+                  <RdwPerformance
+                    specs={specs}
+                    own={own}
+                    fuel={fuel}
+                    passenger={!!kind?.toUpperCase().startsWith('ЛЕГКОВ')}
+                    locale={locale}
+                  />
+                )}
+                {group.key === 'engine' && !!kind?.toUpperCase().startsWith('ЛЕГКОВ') && (
+                  <RdwImportExcise
+                    fuel={fuel}
+                    cc={own?.displacementCc ?? specs.displacementCc?.median ?? null}
+                    year={year}
+                    locale={locale}
+                  />
+                )}
+                {group.key === 'mass' && (
+                  <RdwTowing
+                    specs={specs}
+                    own={own}
+                    truck={!!kind?.toUpperCase().startsWith('ВАНТАЖ')}
+                    locale={locale}
+                  />
+                )}
               </VinToggleSection>
             </div>
           ))}

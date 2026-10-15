@@ -10,9 +10,10 @@
  * where RDW has none, to its Wikipedia generations (`ingest:wikispecs`); the model's edges are the lowest / highest value
  * over its years or generations. Re-run after a registry, RDW or wikispecs ingest; `db:refresh-derived` does it.
  */
-import { createDb, statsSpec } from '@carplates/db'
-import type { StatsSpecInsert } from '@carplates/db'
+import { createDb, statsDistribution, statsSpec } from '@carplates/db'
+import type { StatsDistributionInsert, StatsSpecInsert } from '@carplates/db'
 import {
+  DISTRIBUTION_BUCKET_WIDTH,
   makeKey,
   matchRdwModel,
   RDW_MIN_DISPLAY_N,
@@ -29,6 +30,10 @@ const PASSENGER_KIND = 'ЛЕГКОВИЙ'
 /** Real passenger-car ranges; values outside are typos (a 3 kW or 9 999 cc "car"). */
 const POWER_KW_RANGE = [15, 900] as const
 const DISPLACEMENT_CC_RANGE = [500, 9000] as const
+/** Sane own mass (kg) for the power-to-weight histogram; the column carries typos. */
+const OWN_WEIGHT_RANGE = [600, 4000] as const
+/** Metric horsepower per kW (same constant as the web's `kwToHp`). */
+const HP_PER_KW = 1.35962
 
 /** Model edges are the 5th / 95th percentile: power and capacity typos reach a few percent of a model (a 835 kW Kyron at the 99th). */
 const EDGE_LO = 0.05
@@ -250,10 +255,42 @@ async function main(): Promise<void> {
     }
     const values = [...out.values()]
 
+    // Fleet histograms for the card's percentile bars: one SQL pass per metric over the sane-range passenger cars.
+    const histogram = (
+      metric: string,
+      width: number,
+      expr: ReturnType<typeof sql>,
+      where: ReturnType<typeof sql>
+    ): ReturnType<typeof sql> =>
+      sql`SELECT ${metric}::text AS metric, (floor((${expr})::float8 / ${width}::int) * ${width}::int)::int AS bucket, count(*)::int AS n
+          FROM registry.current_registration
+          WHERE kind = ${PASSENGER_KIND} AND ${where}
+          GROUP BY 2`
+    const { rows: distribution } = await db.execute<StatsDistributionInsert>(sql`
+      ${histogram('power_kw', DISTRIBUTION_BUCKET_WIDTH.power_kw, sql`power_kwt`, sql`power_kwt BETWEEN ${POWER_KW_RANGE[0]} AND ${POWER_KW_RANGE[1]}`)}
+      UNION ALL
+      ${histogram(
+        'hp_per_tonne',
+        DISTRIBUTION_BUCKET_WIDTH.hp_per_tonne,
+        sql`power_kwt * ${HP_PER_KW}::float8 / own_weight * 1000`,
+        sql`power_kwt BETWEEN ${POWER_KW_RANGE[0]} AND ${POWER_KW_RANGE[1]} AND own_weight BETWEEN ${OWN_WEIGHT_RANGE[0]} AND ${OWN_WEIGHT_RANGE[1]}`
+      )}
+      UNION ALL
+      ${histogram(
+        'displacement_cc',
+        DISTRIBUTION_BUCKET_WIDTH.displacement_cc,
+        sql`capacity`,
+        sql`fuel IS DISTINCT FROM ${ELECTRIC_FUEL} AND capacity BETWEEN ${DISPLACEMENT_CC_RANGE[0]} AND ${DISPLACEMENT_CC_RANGE[1]}`
+      )}
+    `)
+
     await db.transaction(async tx => {
       await tx.execute(sql`TRUNCATE registry.stats_spec`)
       for (let i = 0; i < values.length; i += BATCH) await tx.insert(statsSpec).values(values.slice(i, i + BATCH))
+      await tx.execute(sql`TRUNCATE registry.stats_distribution`)
+      if (distribution.length > 0) await tx.insert(statsDistribution).values(distribution)
     })
+    log(`wrote ${distribution.length} distribution bucket(s)`)
     const byMetric = new Map<string, number>()
     for (const v of values) byMetric.set(v.metric, (byMetric.get(v.metric) ?? 0) + 1)
     log(`wrote ${values.length} spec row(s):`, Object.fromEntries(byMetric))

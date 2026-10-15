@@ -20,10 +20,13 @@ import {
   statsByRegion,
   statsByRegionYear,
   statsByYear,
+  statsDistribution,
   statsSummary
 } from '@carplates/db'
 import {
+  DISTRIBUTION_BUCKET_WIDTH,
   dataVersionResponseSchema,
+  distributionResponseSchema,
   mergeBodyStats,
   statsFieldResponseSchema,
   statsResponseSchema,
@@ -34,6 +37,9 @@ import {
 } from '@carplates/shared'
 import type {
   DataVersionResponse,
+  DistributionMetric,
+  DistributionResponse,
+  Histogram,
   StatsFieldDimension,
   StatsFieldResponse,
   StatsResponse,
@@ -82,6 +88,20 @@ export class StatsService {
       })
       .join('|')
     return dataVersionResponseSchema.parse({ dataVersion: createHash('sha1').update(raw).digest('hex').slice(0, 16) })
+  }
+
+  /** Fleet histograms (power, hp/tonne, engine size) of passenger cars; the client turns one into a percentile. */
+  async distribution(): Promise<DistributionResponse> {
+    const rows = await this.dbService.db.select().from(statsDistribution).orderBy(statsDistribution.bucket)
+    const histogram = (metric: DistributionMetric): Histogram => ({
+      width: DISTRIBUTION_BUCKET_WIDTH[metric],
+      buckets: rows.filter(r => r.metric === metric).map(r => [r.bucket, r.n] as [number, number])
+    })
+    return distributionResponseSchema.parse({
+      power_kw: histogram('power_kw'),
+      hp_per_tonne: histogram('hp_per_tonne'),
+      displacement_cc: histogram('displacement_cc')
+    })
   }
 
   /** The ranking-chip leaderboards only: registry top 10s (null values excluded — same rule as the web's `topLabels`) + fuel/crash model boards. */

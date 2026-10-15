@@ -57,6 +57,7 @@ import {
   statsFieldResponseSchema,
   statsResponseSchema,
   statsTopResponseSchema,
+  distributionResponseSchema,
   vehiclePhotosResponseSchema,
   vinDecodeResponseSchema,
   wikiImageResponseSchema,
@@ -133,6 +134,7 @@ import type {
   StatsFieldResponse,
   StatsResponse,
   StatsTopResponse,
+  DistributionResponse,
   VehicleColor,
   SearchSortDir,
   SearchSortKey,
@@ -229,6 +231,10 @@ export async function decodeVin(vin: string): Promise<VinDecodeResponse> {
 
 export async function getStats(): Promise<StatsResponse> {
   return statsResponseSchema.parse(await getJson('/api/stats'))
+}
+
+export async function getStatsDistribution(): Promise<DistributionResponse> {
+  return distributionResponseSchema.parse(await getJson('/api/stats/distribution'))
 }
 
 export async function getStatsTop(): Promise<StatsTopResponse> {
