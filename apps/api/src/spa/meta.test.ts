@@ -25,6 +25,14 @@ describe('renderMetaTags', () => {
     expect(renderMetaTags(base)).not.toContain('robots')
     expect(renderMetaTags({ ...base, noindex: true })).toContain('noindex')
   })
+
+  it('self-canonicalises each language and lists hreflang alternates when asked', () => {
+    const html = renderMetaTags({ ...base, path: '/about', lang: 'ru', alternates: true })
+    expect(html).toContain('rel="canonical" href="https://carsua.app/about?lang=ru"')
+    expect(html).toContain('hreflang="en" href="https://carsua.app/about?lang=en"')
+    expect(html).toContain('hreflang="x-default" href="https://carsua.app/about"')
+    expect(renderMetaTags(base)).not.toContain('hreflang')
+  })
 })
 
 describe('injectMeta', () => {

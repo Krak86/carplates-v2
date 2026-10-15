@@ -9,6 +9,7 @@ import type { FastifyReply, FastifyRequest } from 'fastify'
 import { loadEnv } from '../env.js'
 import { injectMeta, renderMetaTags } from './meta.js'
 import { PreviewService } from './preview.service.js'
+import { sitemapPaths } from './sitemap.js'
 import { DEFAULT_LANG, STATIC_PAGES, resolveLang, type Lang } from './spa-text.js'
 
 const MIME: Record<string, string> = {
@@ -158,7 +159,8 @@ export class SpaController {
         ...page,
         image: `${siteUrl}/og/default.png${langQuery}`,
         // Unknown paths (typos, not-found plates) shouldn't be indexed under the home page's tags.
-        noindex: !known
+        noindex: !known,
+        alternates: known && sitemapPaths().includes(path)
       })
       this.staticMetaCache.set(cacheKey, block)
     }
