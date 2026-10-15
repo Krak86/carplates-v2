@@ -40,7 +40,7 @@ jobs:
     outputs:
       owner: ${{ steps.meta.outputs.owner }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - id: meta
         run: echo "owner=${GITHUB_REPOSITORY_OWNER,,}" >> "$GITHUB_OUTPUT"
       - uses: docker/setup-buildx-action@v3
@@ -66,7 +66,7 @@ jobs:
     timeout-minutes: 20
     environment: production # restricted to main; add required reviewers there if you want a click-to-deploy gate
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/ssh-setup
         with:
           host: ${{ secrets.VPS_HOST }}
