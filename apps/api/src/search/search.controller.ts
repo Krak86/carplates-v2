@@ -12,7 +12,8 @@ import {
   textFilterError,
   VEHICLE_COLORS,
   VEHICLE_FUELS,
-  VEHICLE_KINDS
+  VEHICLE_KINDS,
+  VEHICLE_PURPOSES
 } from '@carplates/shared'
 import { z } from 'zod'
 
@@ -56,6 +57,7 @@ const searchQuerySchema = z
     fuel: z.enum(VEHICLE_FUELS).optional(),
     color: z.enum(VEHICLE_COLORS).optional(),
     kind: z.enum(VEHICLE_KINDS).optional(),
+    purpose: z.enum(VEHICLE_PURPOSES).optional(),
     body: z.string().trim().min(MIN_INDEXABLE_LENGTH).optional(),
     oper: z.coerce.number().int().min(0).max(9999).optional(),
     region: z
@@ -120,6 +122,7 @@ export class SearchController {
   @ApiQuery({ name: 'fuel', required: false, enum: VEHICLE_FUELS })
   @ApiQuery({ name: 'color', required: false, enum: VEHICLE_COLORS })
   @ApiQuery({ name: 'kind', required: false, enum: VEHICLE_KINDS })
+  @ApiQuery({ name: 'purpose', required: false, enum: VEHICLE_PURPOSES })
   @ApiQuery({ name: 'body', required: false })
   @ApiQuery({ name: 'region', required: false, enum: REGION_NAMES })
   @ApiQuery({ name: 'oper', required: false })

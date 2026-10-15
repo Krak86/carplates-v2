@@ -30,6 +30,8 @@ import LazySection from '@/components/LazySection'
 import ReportIssueLink from '@/components/ReportIssueLink'
 import RegionLabel from '@/components/RegionLabel'
 import FieldInfoButton from '@/components/FieldInfoButton'
+import OwnerInfo from '@/components/OwnerInfo'
+import PurposeInfo from '@/components/PurposeInfo'
 import NoRegionBadge from '@/components/NoRegionBadge'
 import RegistrationTimeline from '@/components/RegistrationTimeline'
 import { CardJumpContext } from '@/components/card-jump'
@@ -110,7 +112,18 @@ type Props = {
 }
 
 // `info` is a `field.about.<info>` i18n key — adds a ❓ with a plain-language explanation of the field.
-function Row({ label, value, info }: { label: string; value: ReactNode; info?: string }): ReactNode {
+// `infoExtra` is rendered under that explanation inside the same popover.
+function Row({
+  label,
+  value,
+  info,
+  infoExtra
+}: {
+  label: string
+  value: ReactNode
+  info?: string
+  infoExtra?: ReactNode
+}): ReactNode {
   const { t } = useTranslation()
   if (value == null || value === '') return null
   return (
@@ -120,6 +133,7 @@ function Row({ label, value, info }: { label: string; value: ReactNode; info?: s
         {info && (
           <InfoPopover label={t('vin.info.about', { field: label })} title={label}>
             <InfoText text={t(`field.about.${info}`)} />
+            {infoExtra}
           </InfoPopover>
         )}
       </span>
@@ -533,11 +547,17 @@ export default function ResultCard({ data }: Props): ReactNode {
                     )
                   }
                 />
-                <Row label={t('field.purpose')} value={c.purpose} info="purpose" />
+                <Row
+                  label={t('field.purpose')}
+                  value={c.purpose}
+                  info="purpose"
+                  infoExtra={<PurposeInfo current={c.purpose} />}
+                />
                 {hasCapacity && <Row label={t('field.power')} value={c.powerKwt} info="power" />}
                 <Row
                   label={t('field.owner')}
                   info="owner"
+                  infoExtra={<OwnerInfo person={c.person} />}
                   value={c.person === 'P' ? t('field.ownerPrivate') : t('field.ownerCompany')}
                 />
                 <Row

@@ -12,7 +12,8 @@ import {
   textFilterError,
   VEHICLE_COLORS,
   VEHICLE_FUELS,
-  VEHICLE_KINDS
+  VEHICLE_KINDS,
+  VEHICLE_PURPOSES
 } from '@carplates/shared'
 import type {
   BodySuggestion,
@@ -25,7 +26,8 @@ import type {
   SearchSortKey,
   VehicleColor,
   VehicleFuel,
-  VehicleKind
+  VehicleKind,
+  VehiclePurpose
 } from '@carplates/shared'
 
 import {
@@ -56,6 +58,7 @@ export type AdvancedSearchFilters = {
   fuel: VehicleFuel | ''
   color: VehicleColor | ''
   kind: VehicleKind | ''
+  purpose: VehiclePurpose | ''
   body: string
   region: string
   /** Latest operation code as a string ("" = any). */
@@ -77,6 +80,7 @@ function filtersFromParams(params: URLSearchParams): AdvancedSearchFilters {
     fuel: parseEnumParam(VEHICLE_FUELS, params.get('fuel')),
     color: parseEnumParam(VEHICLE_COLORS, params.get('color')),
     kind: parseEnumParam(VEHICLE_KINDS, params.get('kind')),
+    purpose: parseEnumParam(VEHICLE_PURPOSES, params.get('purpose')),
     body: params.get('body') ?? '',
     region: parseEnumParam(REGION_NAMES, params.get('region')),
     oper: OPER_RE.test(params.get('oper') ?? '') ? (params.get('oper') ?? '') : ''
@@ -160,6 +164,7 @@ export function useAdvancedSearchActions(): UseAdvancedSearchActions {
     draft.fuel ||
     draft.color ||
     draft.kind ||
+    draft.purpose ||
     draft.body ||
     draft.region ||
     draft.oper
@@ -198,6 +203,7 @@ export function useAdvancedSearchActions(): UseAdvancedSearchActions {
       applied.fuel ||
       applied.color ||
       applied.kind ||
+      applied.purpose ||
       applied.body ||
       applied.region ||
       applied.oper
@@ -212,6 +218,7 @@ export function useAdvancedSearchActions(): UseAdvancedSearchActions {
       fuel: applied.fuel || undefined,
       color: applied.color || undefined,
       kind: applied.kind || undefined,
+      purpose: applied.purpose || undefined,
       body: applied.body.trim() || undefined,
       region: applied.region || undefined,
       oper: applied.oper ? Number(applied.oper) : undefined,

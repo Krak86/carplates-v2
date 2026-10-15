@@ -7,6 +7,7 @@ import {
   platePrefixesForRegion,
   regionName,
   sourceValueForKind,
+  sourceValueForPurpose,
   sourceValuesForColor
 } from '@carplates/shared'
 import type {
@@ -19,7 +20,8 @@ import type {
   SearchSortKey,
   VehicleColor,
   VehicleFuel,
-  VehicleKind
+  VehicleKind,
+  VehiclePurpose
 } from '@carplates/shared'
 import { and, desc, eq, gte, ilike, inArray, isNotNull, lte, sql, type SQL } from 'drizzle-orm'
 
@@ -33,6 +35,7 @@ export type SearchFilters = {
   fuel?: VehicleFuel
   color?: VehicleColor
   kind?: VehicleKind
+  purpose?: VehiclePurpose
   body?: string
   region?: string
   /** Latest operation code (current status), e.g. 215 = temporary state registration for a serviceman. */
@@ -171,6 +174,8 @@ export class SearchService {
       filters.fuel ? ilike(currentRegistration.fuel, `%${fuelKeyword(filters.fuel)}%`) : undefined,
       filters.color ? inArray(currentRegistration.color, sourceValuesForColor(filters.color)) : undefined,
       filters.kind ? eq(currentRegistration.kind, sourceValueForKind(filters.kind)) : undefined,
+      // 3 exact values, unindexed: cheap alone (the 10k cap stops the scan early for "general"), best combined with another filter.
+      filters.purpose ? eq(currentRegistration.purpose, sourceValueForPurpose(filters.purpose)) : undefined,
       // Substring, served by ix_current_reg_body_trgm (migration 0042).
       filters.body ? ilike(currentRegistration.body, `%${normalizeBody(filters.body)}%`) : undefined,
       // Exact code, served by ix_current_reg_oper_code (migration 0059).
