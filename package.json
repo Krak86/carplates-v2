@@ -82,6 +82,8 @@
     "ingest:youtube-videos:csv": "pnpm --filter @carplates/scripts ingest:youtube-videos:csv",
     "export:youtube-videos:csv": "pnpm --filter @carplates/scripts export:youtube-videos:csv",
     "ingest:wiki-images": "pnpm --filter @carplates/scripts ingest:wiki-images",
+    "ingest:wanted-history:csv": "pnpm --filter @carplates/scripts ingest:wanted-history:csv",
+    "export:wanted-history:csv": "pnpm --filter @carplates/scripts export:wanted-history:csv",
     "ingest:wiki-images:csv": "pnpm --filter @carplates/scripts ingest:wiki-images:csv",
     "export:wiki-images:csv": "pnpm --filter @carplates/scripts export:wiki-images:csv",
     "wiki-images:coverage": "pnpm --filter @carplates/scripts wiki-images:coverage",

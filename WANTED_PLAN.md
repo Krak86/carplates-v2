@@ -39,13 +39,19 @@ range; `--no-details` = month cards only). Re-running a range is safe: fetched i
    with `--from/--to/--no-details`, parsers + HTML-fixture tests (§3), `source = 'feed'` guard in `wanted.ts`. Run
    `pnpm ingest:wanted` (fills `region`) and `pnpm ingest:wanted-history --from 2020-08 --to 2020-08` as a smoke test
    (Aug 2020: 388 cards, 287 found; spot-check `AP1577BP` → removed 2026-04-30).
-2. **Backfill 2020–2021** — `--from 2020-08 --to 2021-12` (≈ 1 h).
+2. ✅ **Backfill 2020–2021 (2026-10-16, uncommitted data run)** — `--from 2020-08 --to 2021-12` (≈ 1 h, exit 0). Result: 17 months,
+   2839 detail pages, 3193 exact + 1984 placeholder rows written. Month cards vs headers: 2020 1749 / 1289 found (hdr 1840 / 1353,
+   95 %), 2021 3047 / 2142 found (hdr 3156 / 2222, 96-97 %). In the DB (by `seized_at` year, after the one-row-per-plate/date/unit
+   dedupe and with feed rows merged): 2020 1601 stolen / 1214 found / 387 wanted; 2021 2808 / 2052 / 756. Null `region`: 3.75 %
+   (2020), 1.96 % (2021); these are exactly the 115 placeholder rows (no unit known, null by design); scraped exact rows 0 null. Spot-checks OK: `AC0785AB` (VIPER, Волинська, removed 2026-04-30), `CA9143BE` (Черкаська, removed 2021-02-08), `54636AA` (Київська). CSV export added (`export:wanted-history:csv`) and run after this step.
 3. **Backfill 2022 H1** — `--from 2022-01 --to 2022-06` (≈ 3 h; war months dominate).
 4. **Backfill 2022 H2** — `--from 2022-07 --to 2022-12` (≈ 2.5 h).
 5. **Backfill 2023–2024** — `--from 2023-01 --to 2024-12` (≈ 1.2 h).
 6. **Backfill 2025–2026** — `--from 2025-01` (to the current month, ≈ 25 min). From here on, a no-arg run refreshes only the
    last 2 months (daily, after `ingest:wanted`).
-   After each backfill step: per-year `SELECT` of stolen / found vs the table above, null `region` share, a few card spot-checks.
+   After each backfill step: per-year `SELECT` of stolen / found vs the table above, null `region` share, a few card spot-checks, then
+   `pnpm export:wanted-history:csv` (cumulative snapshot -> `scripts/seed-data/wanted-history*.csv.gz`; a new setup loads it with
+   `pnpm ingest:wanted-history:csv` instead of re-scraping) and commit the refreshed files with the step.
 7. **Card history** — `wanted.service.ts`: scraped records in lookups, "history since Aug 2020", stolen.in.ua attribution (§3 end).
 8. **Stats API** — `GET /api/wanted/stats` + shared Zod contract (§4), service test.
 9. **`/wanted` route** — page, sortable tables, map, year chart, recent lists (§5), route title + `STATIC_PAGES`.
