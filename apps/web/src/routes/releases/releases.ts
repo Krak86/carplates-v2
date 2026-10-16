@@ -21,6 +21,12 @@ export const RELEASES: readonly ReleaseDay[] = [
         'Довідник /read/fleet: що їздить Україною — найпопулярніші кольори, паливо та роки реєстрації авто',
         'Справочник /read/fleet: что ездит по Украине — самые популярные цвета, топливо и годы регистрации авто',
         'New /read/fleet guide: what Ukraine drives — the most common colours, fuels and registration years'
+      ),
+      item(
+        'new',
+        'Довідник /read/plates: будова номерного знака, усі коди регіонів (чинні й старі цифрові), перевірка вашого номера та номери без регіону (Дія, Кабінет водія)',
+        'Справочник /read/plates: устройство номерного знака, все коды регионов (действующие и старые цифровые), проверка вашего номера и номера без региона (Дія, Кабинет водителя)',
+        'New /read/plates guide: plate anatomy, every region code (current and legacy digit codes), a check for your own plate and plates without a region (Diia, Driver’s Cabinet)'
       )
     ]
   },

@@ -194,6 +194,23 @@ export const STATIC_PAGES: Record<string, Record<Lang, PageText>> = {
       description: 'The most common colours, fuels and registration years of cars in Ukraine, from the open registry.'
     }
   },
+  '/read/plates': {
+    ua: {
+      title: 'Номерні знаки України: коди регіонів і формати · Cars UA',
+      description:
+        'З чого складається номер, які літери означають який регіон, старі й нові формати та номери без регіону.'
+    },
+    ru: {
+      title: 'Номерные знаки Украины: коды регионов и форматы · Cars UA',
+      description:
+        'Из чего состоит номер, какие буквы означают какой регион, старые и новые форматы и номера без региона.'
+    },
+    en: {
+      title: 'Ukrainian number plates: region codes and formats · Cars UA',
+      description:
+        'What a plate is made of, which letters mean which region, the old and new formats, and plates with no region.'
+    }
+  },
   '/features': {
     ua: { title: 'Функції · Cars UA', description: 'Що ми створюємо для користувачів з обліковим записом.' },
     ru: { title: 'Функции · Cars UA', description: 'Что мы создаём для пользователей с учётной записью.' },
