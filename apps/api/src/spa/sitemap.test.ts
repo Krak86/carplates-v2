@@ -16,7 +16,8 @@ describe('sitemap', () => {
       '/read/fleet',
       '/read/plates',
       '/read/generations',
-      '/read/vin'
+      '/read/vin',
+      '/read/recalls'
     ])
       expect(paths).toContain(p)
     expect(paths).not.toContain('/history')

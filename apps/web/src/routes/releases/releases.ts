@@ -12,6 +12,12 @@ export const RELEASES: readonly ReleaseDay[] = [
     items: [
       item(
         'new',
+        'Довідник /read/recalls: чим відкликання відрізняється від типової несправності, кампанії ЄС, США й Канади та частка відмов за пробігом у британському техогляді — на прикладі популярних моделей',
+        'Справочник /read/recalls: чем отзыв отличается от типичной неисправности, кампании ЕС, США и Канады и доля отказов по пробегу в британском техосмотре — на примере популярных моделей',
+        'New /read/recalls guide: how a recall differs from a common fault, EU, US and Canadian campaigns and the fail rate by mileage in UK inspections — shown on popular models'
+      ),
+      item(
+        'new',
         'Довідник /read/vin: з чого складається VIN, розбір будь-якого введеного VIN (виробник, країна, модельний рік, контрольна цифра), таблиця кодів року та де знайти VIN',
         'Справочник /read/vin: из чего состоит VIN, разбор любого введённого VIN (производитель, страна, модельный год, контрольная цифра), таблица кодов года и где найти VIN',
         'New /read/vin guide: what a VIN is made of, a breakdown of any VIN you type (maker, country, model year, check digit), the year-code table and where to find the VIN'

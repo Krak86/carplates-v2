@@ -33,6 +33,7 @@ const SafetyRoute = lazy(() => import('@/routes/read/safety/SafetyRoute'))
 const FuelRoute = lazy(() => import('@/routes/read/fuel/FuelRoute'))
 const VinRoute = lazy(() => import('@/routes/read/vin/VinRoute'))
 const ExtremesRoute = lazy(() => import('@/routes/read/extremes/ExtremesRoute'))
+const RecallsRoute = lazy(() => import('@/routes/read/recalls/RecallsRoute'))
 const FeaturesRoute = lazy(() => import('@/routes/features/FeaturesRoute'))
 const SettingsRoute = lazy(() => import('@/routes/settings/SettingsRoute'))
 const EmailLinkRoute = lazy(() => import('@/routes/auth/EmailLinkRoute'))
@@ -80,6 +81,7 @@ export default function App(): ReactNode {
             <Route path="/read/fuel" element={<FuelRoute />} />
             <Route path="/read/vin" element={<VinRoute />} />
             <Route path="/read/extremes" element={<ExtremesRoute />} />
+            <Route path="/read/recalls" element={<RecallsRoute />} />
             <Route path="/features" element={<FeaturesRoute />} />
             <Route path="/settings" element={<SettingsRoute />} />
             <Route path="/auth/email" element={<EmailLinkRoute />} />

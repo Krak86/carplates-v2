@@ -358,6 +358,8 @@ Links: every URL is built by `readHref` (`read/links.ts`): the plate card's body
 
 **`/read/extremes`** (record holders; `read/extremes/`) has no API, rollup or migration: it embeds the `/stats` `WeightModelsPanel` (group tab in `?weight=`, scrolls to itself on a deep link) and `SpecModelsPanel` (metric tab is local state) over `statsTopQuery()`, so a board change shows up in both places. Notes in `content.ts` mirror the `section.about.statsWeight` / `statsSpec` texts (percentile edges, RDW/Wikipedia sources, the few-hundred-cars floor) — change them together.
 
+**`/read/recalls`** (recalls and common faults; `read/recalls/`) has no API of its own: one picked example (`EXAMPLES`, local state) feeds `rdwRecallsQuery` / `nhtsaRecallsQuery` / `caRecallsQuery` and `motQuery(…, 'car')`. The MOT notes in `content.ts` mirror the `mot.what.*` / `mot.info.*` wording (UK data, OGL v3, model-level) — change them together. A model with no match shows a dash or the empty line, not an error.
+
 ## Stock news and info popups
 
 - **Stock news** (`GET /api/stocks/news?brand=`, `apps/api/src/stocks/`): Yahoo search (images, publishers) merged with the per-ticker RSS, matched by ticker (share-class aware — `GOOG` ≠ `GOOGL`), deduped, 15 min cache. Contract `stockNewsResponseSchema` (`publisher` / `imageUrl` optional) lives in `packages/shared/src/schemas.ts`; unofficial endpoint, same caveat as the share-price widget — never build anything that needs it. Web: `StockNewsWidget` (right column, 3 → 10 headlines) and the "💹 <Company> news" group in `SocialSection` (counted in the section total); both use `StockNewsCard`.

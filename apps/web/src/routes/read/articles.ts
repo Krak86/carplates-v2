@@ -7,6 +7,7 @@ import {
   GENERATIONS_PATH,
   IMPORTS_PATH,
   PLATES_PATH,
+  RECALLS_PATH,
   SAFETY_PATH,
   SIZES_PATH,
   VIN_PATH
@@ -79,6 +80,12 @@ export const EXTREMES_LEAD: L10n = {
   en: 'Which model is the heaviest and which the lightest, which is the most powerful and the biggest? The registry’s record holders by weight, power, engine size, dimensions and fuel tank, and how to read the lists.'
 }
 
+export const RECALLS_LEAD: L10n = {
+  ua: 'Що таке відкликання, чим воно відрізняється від типової несправності і що ламається в моделі з пробігом? Кампанії ЄС, США й Канади та британські дані техогляду — на прикладі популярних моделей.',
+  ru: 'Что такое отзыв, чем он отличается от типичной неисправности и что ломается в модели с пробегом? Кампании ЕС, США и Канады и британские данные техосмотра — на примере популярных моделей.',
+  en: 'What is a recall, how does it differ from a common fault, and what wears out on a model as the miles add up? EU, US and Canadian campaigns and UK inspection data, shown on popular models.'
+}
+
 /** The published explainers, in hub order. A new article = a route in App.tsx + `STATIC_PAGES` (spa-text.ts) + an entry here. */
 export const ARTICLES: readonly ArticleMeta[] = [
   { path: BODY_TYPES_PATH, icon: '🚙', titleKey: 'nav.readBodyTypes', lead: BODY_TYPES_LEAD },
@@ -91,7 +98,8 @@ export const ARTICLES: readonly ArticleMeta[] = [
   { path: IMPORTS_PATH, icon: '🚢', titleKey: 'nav.readImports', lead: IMPORTS_LEAD },
   { path: SAFETY_PATH, icon: '🛡️', titleKey: 'nav.readSafety', lead: SAFETY_LEAD },
   { path: FUEL_PATH, icon: '⛽', titleKey: 'nav.readFuel', lead: FUEL_LEAD },
-  { path: EXTREMES_PATH, icon: '🏆', titleKey: 'nav.readExtremes', lead: EXTREMES_LEAD }
+  { path: EXTREMES_PATH, icon: '🏆', titleKey: 'nav.readExtremes', lead: EXTREMES_LEAD },
+  { path: RECALLS_PATH, icon: '🔧', titleKey: 'nav.readRecalls', lead: RECALLS_LEAD }
 ]
 
 /** Themes planned next, listed in the hub so readers see where it is going. */

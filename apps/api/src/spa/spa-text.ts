@@ -313,6 +313,23 @@ export const STATIC_PAGES: Record<string, Record<Lang, PageText>> = {
         'The Ukrainian registry’s record holders: which model is the heaviest and the lightest, the most powerful, with the biggest engine, the tallest or longest body and the largest fuel tank, and how to read these rankings.'
     }
   },
+  '/read/recalls': {
+    ua: {
+      title: 'Відкликання авто і типові несправності моделей · Cars UA',
+      description:
+        'Що таке відкликання, чим воно відрізняється від типової несправності, скільки кампаній мають популярні моделі в ЄС, США й Канаді і що найчастіше ламається з пробігом за даними техогляду.'
+    },
+    ru: {
+      title: 'Отзывы авто и типичные неисправности моделей · Cars UA',
+      description:
+        'Что такое отзыв, чем он отличается от типичной неисправности, сколько кампаний у популярных моделей в ЕС, США и Канаде и что чаще всего ломается с пробегом по данным техосмотра.'
+    },
+    en: {
+      title: 'Car recalls and common faults by model · Cars UA',
+      description:
+        'What a recall is, how it differs from a common fault, how many campaigns popular models have in the EU, US and Canada, and what most often fails as mileage grows according to inspection data.'
+    }
+  },
   '/read/vin': {
     ua: {
       title: 'VIN-код: що означають 17 символів, рік випуску і де його знайти · Cars UA',
