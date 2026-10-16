@@ -158,7 +158,15 @@ export default function RdwTowing({ specs, own, truck = false, locale }: Props):
         </div>
       )}
 
-      <RdwMassSchema gross={gross} braked={braked} truck={truck} locale={locale} />
+      <RdwMassSchema
+        gross={gross}
+        braked={braked}
+        unbraked={unbraked}
+        kerb={kerb}
+        trailerKg={trailerKg}
+        truck={truck}
+        locale={locale}
+      />
 
       <details className="mt-2 text-xs">
         <summary className="cursor-pointer text-[var(--color-primary)]">⚖️ {t('rdw.tow.rules.title')}</summary>

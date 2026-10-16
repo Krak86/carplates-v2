@@ -29,7 +29,7 @@ export default function RdwImportExcise({ fuel, cc, year, locale }: Props): Reac
   if (!engine || !cc || !year) return null
 
   return (
-    <details className="my-2 text-sm">
+    <details open className="my-2 text-sm">
       <summary className="cursor-pointer text-[var(--color-primary)]">💶 {t('rdw.excise.title')}</summary>
 
       <label className="mt-2 flex items-center gap-2">
