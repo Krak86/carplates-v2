@@ -16,7 +16,12 @@ import HomeStatsSkeleton from '@/routes/stats/HomeStatsSkeleton'
  * metric tab row. Read from the same small `statsTopQuery()` payload as the weight boards; renders nothing before the
  * rollup is built (`db:refresh-spec-stats`), a skeleton while it loads.
  */
-export default function SpecModelsPanel(): ReactNode {
+type Props = {
+  /** One card per row at every width (for narrow containers, e.g. inside an article card). */
+  stacked?: boolean
+}
+
+export default function SpecModelsPanel({ stacked = false }: Props): ReactNode {
   const { t } = useTranslation()
   const [metric, setMetric] = useState<SpecMetric>(DEFAULT_SPEC_METRIC)
   const { data, isPending, fetchStatus } = useQuery(statsTopQuery())
@@ -51,7 +56,7 @@ export default function SpecModelsPanel(): ReactNode {
       </div>
 
       {board && (
-        <div key={metric} className="grid gap-3 md:grid-cols-2">
+        <div key={metric} className={cn('grid gap-3', !stacked && 'md:grid-cols-2')}>
           <Card>
             <SpecModelList title={t(`stats.spec.highest.${metric}`)} metric={metric} models={board.highest} />
           </Card>

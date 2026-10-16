@@ -1,6 +1,7 @@
 import {
   BODY_TYPES_PATH,
   ELECTRIC_PATH,
+  EXTREMES_PATH,
   FLEET_PATH,
   FUEL_PATH,
   GENERATIONS_PATH,
@@ -72,6 +73,12 @@ export const VIN_LEAD: L10n = {
   en: 'What do the 17 characters of a VIN mean, how do you read the maker, country and model year off it, and where is it on the car? Break down any VIN right on the page.'
 }
 
+export const EXTREMES_LEAD: L10n = {
+  ua: 'Яка модель найважча, а яка найлегша, хто найпотужніший і найбільший? Рекордсмени реєстру за вагою, потужністю, об’ємом двигуна, розмірами й баком — і як читати ці списки.',
+  ru: 'Какая модель самая тяжёлая, а какая самая лёгкая, кто самый мощный и самый большой? Рекордсмены реестра по весу, мощности, объёму двигателя, размерам и баку — и как читать эти списки.',
+  en: 'Which model is the heaviest and which the lightest, which is the most powerful and the biggest? The registry’s record holders by weight, power, engine size, dimensions and fuel tank, and how to read the lists.'
+}
+
 /** The published explainers, in hub order. A new article = a route in App.tsx + `STATIC_PAGES` (spa-text.ts) + an entry here. */
 export const ARTICLES: readonly ArticleMeta[] = [
   { path: BODY_TYPES_PATH, icon: '🚙', titleKey: 'nav.readBodyTypes', lead: BODY_TYPES_LEAD },
@@ -83,7 +90,8 @@ export const ARTICLES: readonly ArticleMeta[] = [
   { path: ELECTRIC_PATH, icon: '🔌', titleKey: 'nav.readElectric', lead: ELECTRIC_LEAD },
   { path: IMPORTS_PATH, icon: '🚢', titleKey: 'nav.readImports', lead: IMPORTS_LEAD },
   { path: SAFETY_PATH, icon: '🛡️', titleKey: 'nav.readSafety', lead: SAFETY_LEAD },
-  { path: FUEL_PATH, icon: '⛽', titleKey: 'nav.readFuel', lead: FUEL_LEAD }
+  { path: FUEL_PATH, icon: '⛽', titleKey: 'nav.readFuel', lead: FUEL_LEAD },
+  { path: EXTREMES_PATH, icon: '🏆', titleKey: 'nav.readExtremes', lead: EXTREMES_LEAD }
 ]
 
 /** Themes planned next, listed in the hub so readers see where it is going. */

@@ -63,6 +63,12 @@ export const RELEASES: readonly ReleaseDay[] = [
         'Довідник /read/fuel: паливо й викиди CO₂ — на чому їздить парк, розподіл викидів, зміна за роками випуску, найчистіші та найвитратніші моделі і як ми оцінюємо викиди',
         'Справочник /read/fuel: топливо и выбросы CO₂ — на чём ездит парк, распределение выбросов, изменение по годам выпуска, самые чистые и самые затратные модели и как мы оцениваем выбросы',
         'New /read/fuel guide: fuel and CO₂ — what the fleet runs on, the spread of emissions, change by model year, the cleanest and most CO₂-heavy models and how we estimate emissions'
+      ),
+      item(
+        'new',
+        'Довідник /read/extremes: найважчі й найлегші моделі за групами транспорту, найпотужніші, з найбільшим двигуном, найвищі, найдовші та з найбільшим баком — і як читати ці рейтинги',
+        'Справочник /read/extremes: самые тяжёлые и лёгкие модели по группам транспорта, самые мощные, с самым большим двигателем, самые высокие, длинные и с самым большим баком — и как читать эти рейтинги',
+        'New /read/extremes guide: the heaviest and lightest models by vehicle group, the most powerful, biggest-engined, tallest, longest and largest-tanked — and how to read these rankings'
       )
     ]
   },

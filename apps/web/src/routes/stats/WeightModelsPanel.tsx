@@ -15,7 +15,12 @@ import WeightModelsCards from '@/routes/stats/WeightModelsCards'
  * bus, motorcycle (incl. moped, quad, tricycles), trailer (incl. semi-trailer) and other. Read from the same small
  * `statsTopQuery()` payload as the result-card ranking chips; renders nothing until it loads or before the rollup is built.
  */
-export default function WeightModelsPanel(): ReactNode {
+type Props = {
+  /** One card per row (see `WeightModelsCards`). */
+  stacked?: boolean
+}
+
+export default function WeightModelsPanel({ stacked = false }: Props): ReactNode {
   const { t } = useTranslation()
   // The tab lives in the URL (?weight=passenger) so every group has its own shareable link, like the stats dimension tabs.
   const [searchParams, setSearchParams] = useSearchParams()
@@ -68,7 +73,7 @@ export default function WeightModelsPanel(): ReactNode {
         <SectionInfo section="statsWeight" title={t('stats.weight.title')} />
       </div>
 
-      {board && <WeightModelsCards key={group} board={board} showGroup={group === 'all'} />}
+      {board && <WeightModelsCards key={group} board={board} showGroup={group === 'all'} stacked={stacked} />}
     </div>
   )
 }

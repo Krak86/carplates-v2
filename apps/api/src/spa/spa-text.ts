@@ -296,6 +296,23 @@ export const STATIC_PAGES: Record<string, Record<Lang, PageText>> = {
         'Petrol, diesel, gas, hybrid or electric: what Ukraine runs on, how much CO₂ the average car emits, how it changes with the model year, which models are the cleanest and the most CO₂-heavy, and how we estimate emissions.'
     }
   },
+  '/read/extremes': {
+    ua: {
+      title: 'Найважчі, найлегші й найпотужніші моделі авто в Україні · Cars UA',
+      description:
+        'Рекордсмени українського реєстру: яка модель найважча і найлегша, хто найпотужніший, має найбільший двигун, найвищий чи найдовший кузов і найбільший бак — та як читати ці рейтинги.'
+    },
+    ru: {
+      title: 'Самые тяжёлые, лёгкие и мощные модели авто в Украине · Cars UA',
+      description:
+        'Рекордсмены украинского реестра: какая модель самая тяжёлая и лёгкая, кто самый мощный, с самым большим двигателем, самым высоким или длинным кузовом и самым большим баком — и как читать эти рейтинги.'
+    },
+    en: {
+      title: 'Heaviest, lightest and most powerful car models in Ukraine · Cars UA',
+      description:
+        'The Ukrainian registry’s record holders: which model is the heaviest and the lightest, the most powerful, with the biggest engine, the tallest or longest body and the largest fuel tank, and how to read these rankings.'
+    }
+  },
   '/read/vin': {
     ua: {
       title: 'VIN-код: що означають 17 символів, рік випуску і де його знайти · Cars UA',
