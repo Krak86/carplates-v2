@@ -228,6 +228,23 @@ export const STATIC_PAGES: Record<string, Record<Lang, PageText>> = {
         'Length, width and wheelbase of every generation of popular models — how much the Golf and the Octavia grew over the decades.'
     }
   },
+  '/read/electric': {
+    ua: {
+      title: 'Електромобілі в Україні: роки, регіони, моделі, зарядка · Cars UA',
+      description:
+        'Скільки в Україні електромобілів і гібридів, з яких років, де їх найбільше, які моделі лідирують і чим відрізняються роз’єми зарядки.'
+    },
+    ru: {
+      title: 'Электромобили в Украине: годы, регионы, модели, зарядка · Cars UA',
+      description:
+        'Сколько в Украине электромобилей и гибридов, каких лет, где их больше всего, какие модели лидируют и чем отличаются разъёмы зарядки.'
+    },
+    en: {
+      title: 'Electric cars in Ukraine: years, regions, models, charging · Cars UA',
+      description:
+        'How many electric cars and hybrids Ukraine has, which years they are from, where they are, which models lead and how the charging plugs differ.'
+    }
+  },
   '/features': {
     ua: { title: 'Функції · Cars UA', description: 'Що ми створюємо для користувачів з обліковим записом.' },
     ru: { title: 'Функции · Cars UA', description: 'Что мы создаём для пользователей с учётной записью.' },

@@ -1,4 +1,11 @@
-import { BODY_TYPES_PATH, FLEET_PATH, GENERATIONS_PATH, PLATES_PATH, SIZES_PATH } from '@/routes/read/links'
+import {
+  BODY_TYPES_PATH,
+  ELECTRIC_PATH,
+  FLEET_PATH,
+  GENERATIONS_PATH,
+  PLATES_PATH,
+  SIZES_PATH
+} from '@/routes/read/links'
 import type { ArticleMeta, L10n, UpcomingTopic } from '@/routes/read/types'
 
 export const BODY_TYPES_LEAD: L10n = {
@@ -31,13 +38,20 @@ export const GENERATIONS_LEAD: L10n = {
   en: 'How much did the Octavia, Golf or Camry grow over the decades? Length, width and wheelbase of every generation, on real models from the registry.'
 }
 
+export const ELECTRIC_LEAD: L10n = {
+  ua: 'Скільки в Україні електромобілів і гібридів, з яких років вони, де їх найбільше і які моделі найпопулярніші? Ще — чим відрізняються роз’єми зарядки.',
+  ru: 'Сколько в Украине электромобилей и гибридов, каких они лет, где их больше всего и какие модели самые популярные? А ещё — чем отличаются разъёмы зарядки.',
+  en: 'How many electric cars and hybrids does Ukraine have, which years are they from, where are they, and which models lead? Plus how the charging plugs differ.'
+}
+
 /** The published explainers, in hub order. A new article = a route in App.tsx + `STATIC_PAGES` (spa-text.ts) + an entry here. */
 export const ARTICLES: readonly ArticleMeta[] = [
   { path: BODY_TYPES_PATH, icon: '🚙', titleKey: 'nav.readBodyTypes', lead: BODY_TYPES_LEAD },
   { path: SIZES_PATH, icon: '📏', titleKey: 'nav.readSizes', lead: SIZES_LEAD },
   { path: FLEET_PATH, icon: '🎨', titleKey: 'nav.readFleet', lead: FLEET_LEAD },
   { path: PLATES_PATH, icon: '🔢', titleKey: 'nav.readPlates', lead: PLATES_LEAD },
-  { path: GENERATIONS_PATH, icon: '🧬', titleKey: 'nav.readGenerations', lead: GENERATIONS_LEAD }
+  { path: GENERATIONS_PATH, icon: '🧬', titleKey: 'nav.readGenerations', lead: GENERATIONS_LEAD },
+  { path: ELECTRIC_PATH, icon: '🔌', titleKey: 'nav.readElectric', lead: ELECTRIC_LEAD }
 ]
 
 /** Themes planned next, listed in the hub so readers see where it is going. */

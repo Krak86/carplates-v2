@@ -21,6 +21,7 @@ import {
   statsByRegionYear,
   statsByYear,
   statsDistribution,
+  statsEv,
   statsSizeModels,
   statsSummary
 } from '@carplates/db'
@@ -28,6 +29,7 @@ import {
   DISTRIBUTION_BUCKET_WIDTH,
   dataVersionResponseSchema,
   distributionResponseSchema,
+  evStatsResponseSchema,
   mergeBodyStats,
   sizeModelsResponseSchema,
   statsFieldResponseSchema,
@@ -41,6 +43,7 @@ import type {
   DataVersionResponse,
   DistributionMetric,
   DistributionResponse,
+  EvStatsResponse,
   Histogram,
   SizeModelsResponse,
   StatsFieldDimension,
@@ -63,6 +66,8 @@ const MIN_PASSENGER_WEIGHT_MODEL = 1500
 const MIN_OTHER_WEIGHT_MODEL = 200
 /** Same floor for the spec boards (passenger cars only). */
 const MIN_SPEC_MODEL = 500
+/** Pure-electric models listed in the EV article. */
+const EV_TOP_MODELS = 15
 
 @Injectable()
 export class StatsService {
@@ -104,6 +109,48 @@ export class StatsService {
       power_kw: histogram('power_kw'),
       hp_per_tonne: histogram('hp_per_tonne'),
       displacement_cc: histogram('displacement_cc')
+    })
+  }
+
+  /** Electrified passenger cars by model year, region and model (a rollup rebuilt by `db:refresh-ev-stats`); 'all' rows are the whole fleet. */
+  async ev(): Promise<EvStatsResponse> {
+    const rows = await this.dbService.db.select().from(statsEv)
+    const split = (): { bev: number; hybrid: number } => ({ bev: 0, hybrid: 0 })
+    const total = split()
+    let fleet = 0
+    const years = new Map<number, { bev: number; hybrid: number; fleet: number }>()
+    const regions = new Map<string, { bev: number; hybrid: number; fleet: number }>()
+    const models = new Map<string, { brand: string; model: string; n: number; firstYear: number }>()
+    for (const r of rows) {
+      const year = years.get(r.makeYear) ?? { ...split(), fleet: 0 }
+      const region = r.region ? (regions.get(r.region) ?? { ...split(), fleet: 0 }) : null
+      if (r.powertrain === 'all') {
+        fleet += r.n
+        year.fleet += r.n
+        if (region) region.fleet += r.n
+      } else if (r.powertrain === 'bev' || r.powertrain === 'hybrid') {
+        total[r.powertrain] += r.n
+        year[r.powertrain] += r.n
+        if (region) region[r.powertrain] += r.n
+        if (r.powertrain === 'bev') {
+          const key = `${r.brand}|${r.model}`
+          const m = models.get(key) ?? { brand: r.brand, model: r.model, n: 0, firstYear: r.makeYear }
+          m.n += r.n
+          m.firstYear = Math.min(m.firstYear, r.makeYear)
+          models.set(key, m)
+        }
+      }
+      years.set(r.makeYear, year)
+      if (region && r.region) regions.set(r.region, region)
+    }
+    return evStatsResponseSchema.parse({
+      total,
+      fleet,
+      byYear: [...years.entries()].map(([year, v]) => ({ year, ...v })).sort((a, b) => a.year - b.year),
+      byRegion: [...regions.entries()]
+        .map(([region, v]) => ({ region, ...v }))
+        .sort((a, b) => b.bev + b.hybrid - (a.bev + a.hybrid)),
+      topModels: [...models.values()].sort((a, b) => b.n - a.n).slice(0, EV_TOP_MODELS)
     })
   }
 

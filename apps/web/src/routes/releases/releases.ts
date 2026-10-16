@@ -33,6 +33,12 @@ export const RELEASES: readonly ReleaseDay[] = [
         'Довідник /read/generations: як Octavia, Golf, Camry та інші моделі росли за поколіннями — довжина, ширина й колісна база кожного покоління',
         'Справочник /read/generations: как Octavia, Golf, Camry и другие модели росли по поколениям — длина, ширина и колёсная база каждого поколения',
         'New /read/generations guide: how the Octavia, Golf, Camry and other models grew across generations — length, width and wheelbase of every generation'
+      ),
+      item(
+        'new',
+        'Довідник /read/electric: електромобілі в Україні — за роком випуску, регіонами та моделями, плюс гід по роз’ємах зарядки (Type 2, CCS, CHAdeMO, GB/T)',
+        'Справочник /read/electric: электромобили в Украине — по году выпуска, регионам и моделям, плюс гид по разъёмам зарядки (Type 2, CCS, CHAdeMO, GB/T)',
+        'New /read/electric guide: electric cars in Ukraine by model year, region and model, plus a charging-plug guide (Type 2, CCS, CHAdeMO, GB/T)'
       )
     ]
   },

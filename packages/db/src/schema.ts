@@ -1524,3 +1524,21 @@ export const motMeta = registry.table('mot_meta', {
   years: smallint('years').array(),
   loadedAt: timestamp('loaded_at', { withTimezone: true }).notNull().defaultNow()
 })
+
+/**
+ * Electrified passenger cars per powertrain ('bev' | 'hybrid'), model year, plate region ('' = none) and model. Backs the
+ * /read/electric article. Rebuilt by scripts/src/ev-stats.ts; see migration 0072.
+ */
+export const statsEv = registry.table(
+  'stats_ev',
+  {
+    powertrain: text('powertrain').notNull(),
+    makeYear: integer('make_year').notNull(),
+    region: text('region').notNull().default(''),
+    brand: text('brand').notNull(),
+    model: text('model').notNull(),
+    n: integer('n').notNull()
+  },
+  t => [primaryKey({ columns: [t.powertrain, t.makeYear, t.region, t.brand, t.model] })]
+)
+export type StatsEvInsert = typeof statsEv.$inferInsert

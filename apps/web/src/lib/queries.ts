@@ -53,6 +53,7 @@ import {
   getSafetyRatings,
   getStats,
   getStatsField,
+  getEvStats,
   getSizeModels,
   getStatsDistribution,
   getStatsTop,
@@ -182,6 +183,10 @@ export function statsDistributionQuery() {
 // Per-model body + dimensions behind the /read articles and size explorer (~3.7k rows, a rollup rebuilt with the spec stats).
 export function sizeModelsQuery() {
   return queryOptions({ queryKey: ['stats', 'size-models'], queryFn: getSizeModels, staleTime: Infinity })
+}
+
+export function evStatsQuery() {
+  return queryOptions({ queryKey: ['stats', 'ev'], queryFn: getEvStats, staleTime: Infinity })
 }
 
 // One dimension's breakdown for a ResultCard "?" popover — a few dozen rows.

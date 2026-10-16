@@ -3,6 +3,7 @@ import { ApiOkResponse, ApiParam, ApiTags } from '@nestjs/swagger'
 import { STATS_FIELD_DIMENSIONS, statsFieldDimensionSchema } from '@carplates/shared'
 import type {
   DistributionResponse,
+  EvStatsResponse,
   SizeModelsResponse,
   StatsFieldDimension,
   StatsFieldResponse
@@ -44,6 +45,15 @@ export class StatsController {
   })
   sizeModels(): Promise<SizeModelsResponse> {
     return this.statsService.sizeModels()
+  }
+
+  @Get('ev')
+  @ApiOkResponse({
+    description:
+      'Electrified passenger cars { total, fleet, byYear, byRegion, topModels }: electric-only vs hybrid with electricity'
+  })
+  ev(): Promise<EvStatsResponse> {
+    return this.statsService.ev()
   }
 
   @Get('field/:dimension')

@@ -59,6 +59,7 @@ import {
   statsResponseSchema,
   statsTopResponseSchema,
   distributionResponseSchema,
+  evStatsResponseSchema,
   sizeModelsResponseSchema,
   vehiclePhotosResponseSchema,
   vinDecodeResponseSchema,
@@ -138,6 +139,7 @@ import type {
   StatsResponse,
   StatsTopResponse,
   DistributionResponse,
+  EvStatsResponse,
   SizeModelsResponse,
   VehicleColor,
   SearchSortDir,
@@ -243,6 +245,10 @@ export async function getStatsDistribution(): Promise<DistributionResponse> {
 
 export async function getSizeModels(): Promise<SizeModelsResponse> {
   return sizeModelsResponseSchema.parse(await getJson('/api/stats/size-models'))
+}
+
+export async function getEvStats(): Promise<EvStatsResponse> {
+  return evStatsResponseSchema.parse(await getJson('/api/stats/ev'))
 }
 
 export async function getStatsTop(): Promise<StatsTopResponse> {
