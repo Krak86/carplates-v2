@@ -3781,3 +3781,7 @@ A hub of explainers built on the registry: **`/read`** (cards + a "coming next" 
 ### Card → guide cross-links (2026-10-16)
 
 Each plate-card / VIN-page section now ends with a `ReadGuideLink` (pill, guide emoji, right arrow) to the /read guide on the same topic: no content is duplicated, only linked. Placement table and rules: `docs/features-reference.md` "Read guides". Guide icon / title key / hue moved into `GUIDE_META` so card chunks do not pull the long `articles.ts` leads.
+
+### Guides as blog posts, mass schema relations (2026-10-16)
+
+`/read` articles now read like blog posts: `ArticleBanner` (oklch cover from the guide's `hue`), a `published` ISO date per `ARTICLES` entry and a copy-link button (`read.share`) in `ArticleHeader`; the hub cards reuse the banner. `RdwMassSchema` relates the chosen car to GVM / TBM / GTM / ATM / GCM (`rdw.schema.your.*`: empty + payload, ~7 % tow-ball, ATM = GTM + TBM, GCM = GVM + GTM) for the trailer picked above or the heaviest braked trailer; excise and mass sections open by default. Dev hygiene: `scripts` declares `pg` so pnpm resolves one `drizzle-orm` copy (two copies broke `scripts` type-check). About lists the guides in its feature card.
