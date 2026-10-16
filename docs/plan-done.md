@@ -3752,6 +3752,8 @@ Follow-up details: `GET /api/stats/distribution` (`stats_distribution`, buckets 
 
 ## Read guides (`/read`, 2026-10-16)
 
+**Third article `/read/fleet` (2026-10-16):** colours, fuel and registration years on the existing field rollups — `year` added to `STATS_FIELD_DIMENSIONS` (+ `StatsService.field`), no migration. Route, `ROUTE_TITLE_KEYS`, `STATIC_PAGES`, `ARTICLES` entry (the matching "coming next" item removed), `nav.readFleet` / `read.fleet.*` keys in ua/ru/en.
+
 A hub of explainers built on the registry: **`/read`** (cards + a "coming next" list), **`/read/body-types`** and **`/read/sizes`**. Split by question, not by data source: _what shape is it_ vs _how big is it_; a third page on fleet statistics (colours, fuel, age) is next and only reuses `/api/stats*`.
 
 - **Body types:** one card per shape (sedan, hatch, wagon, coupe, SUV, MPV, van, pickup) with the Size section's silhouettes, a definition, "how to spot", and 2–3 real models with size, fleet count and an on-demand "Show real plates". "SUV or crossover?" compares ladder-frame and unibody (a stated explanation — frame type is not in our data), and the body-field share bars link to `/stats?dim=body`.

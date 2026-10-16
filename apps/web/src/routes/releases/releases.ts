@@ -15,6 +15,12 @@ export const RELEASES: readonly ReleaseDay[] = [
         'Довідник /read: типи кузова і розміри авто простими словами — з реальними моделями з реєстру, номерами та пошуком за розміром; на картці авто є посилання на відповідні пояснення',
         'Справочник /read: типы кузова и размеры авто простыми словами — с реальными моделями из реестра, номерами и поиском по размеру; на карточке авто есть ссылки на соответствующие объяснения',
         'New /read guides: body types and car sizes explained with real models from the registry, real plates and a size explorer; the plate card links to the matching explanations'
+      ),
+      item(
+        'new',
+        'Довідник /read/fleet: що їздить Україною — найпопулярніші кольори, паливо та роки реєстрації авто',
+        'Справочник /read/fleet: что ездит по Украине — самые популярные цвета, топливо и годы регистрации авто',
+        'New /read/fleet guide: what Ukraine drives — the most common colours, fuels and registration years'
       )
     ]
   },

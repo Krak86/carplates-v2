@@ -24,6 +24,7 @@ const ReleasesRoute = lazy(() => import('@/routes/releases/ReleasesRoute'))
 const ReadHubRoute = lazy(() => import('@/routes/read/ReadHubRoute'))
 const BodyTypesRoute = lazy(() => import('@/routes/read/body-types/BodyTypesRoute'))
 const SizesRoute = lazy(() => import('@/routes/read/sizes/SizesRoute'))
+const FleetRoute = lazy(() => import('@/routes/read/fleet/FleetRoute'))
 const FeaturesRoute = lazy(() => import('@/routes/features/FeaturesRoute'))
 const SettingsRoute = lazy(() => import('@/routes/settings/SettingsRoute'))
 const EmailLinkRoute = lazy(() => import('@/routes/auth/EmailLinkRoute'))
@@ -62,6 +63,7 @@ export default function App(): ReactNode {
             <Route path="/read" element={<ReadHubRoute />} />
             <Route path="/read/body-types" element={<BodyTypesRoute />} />
             <Route path="/read/sizes" element={<SizesRoute />} />
+            <Route path="/read/fleet" element={<FleetRoute />} />
             <Route path="/features" element={<FeaturesRoute />} />
             <Route path="/settings" element={<SettingsRoute />} />
             <Route path="/auth/email" element={<EmailLinkRoute />} />

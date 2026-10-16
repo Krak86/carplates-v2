@@ -1045,7 +1045,7 @@ card-on-file subscriptions; revisit with real quotes.
   `(telegram, <numeric id>)` only; `users.email` is nullable or a placeholder, so decide this before the migration, and
   offer "add email" on `/profile` to enable linking/recovery. Also needs `auth_identities` linking by provider subject
   (never by unverified email).
-- ✅ **Read guides `/read` (2026-10-16):** hub + "Body types" and "Sizes" articles with live examples, size explorer and plate-card links (`stats_size_models`, migration 0071) — conventions in `docs/features-reference.md` "Read guides"; write-up in `docs/plan-done.md`. Next articles planned: what Ukraine drives (colours/fuel/age), plate regions, generations growth.
+- ✅ **Read guides `/read` (2026-10-16):** hub + "Body types" and "Sizes" articles with live examples, size explorer and plate-card links (`stats_size_models`, migration 0071) — conventions in `docs/features-reference.md` "Read guides"; write-up in `docs/plan-done.md`. ✅ `/read/fleet` (colours/fuel/registration years). Next articles planned: plate regions, generations growth.
 - ✅ **About sources (2026-10-14):** 8 auction link-out sites added as logo-less tiles (no logo licence found), Telegram Login logo added — see `docs/plan-done.md`.
 - **Other providers (researched 2026-10-12, not planned yet):** GitHub (client id + secret, code flow), Microsoft
   (client id, OIDC), Facebook/Meta (app id + secret, needs privacy URL + data-deletion URL + Live app), Apple (Services

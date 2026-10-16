@@ -1,4 +1,4 @@
-import { BODY_TYPES_PATH, SIZES_PATH } from '@/routes/read/links'
+import { BODY_TYPES_PATH, FLEET_PATH, SIZES_PATH } from '@/routes/read/links'
 import type { ArticleMeta, L10n, UpcomingTopic } from '@/routes/read/types'
 
 export const BODY_TYPES_LEAD: L10n = {
@@ -13,22 +13,21 @@ export const SIZES_LEAD: L10n = {
   en: 'What do the A, B, C, D, J and M classes mean? How big is a “compact”, and will it fit your parking space? Classes by length, shown on real cars from the registry.'
 }
 
+export const FLEET_LEAD: L10n = {
+  ua: 'Який колір найпопулярніший, на чому їздимо і чи старіє автопарк? Кольори, паливо та роки реєстрації — на даних усього реєстру.',
+  ru: 'Какой цвет самый популярный, на чём ездим и стареет ли автопарк? Цвета, топливо и годы регистрации — на данных всего реестра.',
+  en: 'Which colour is the most common, what do we run on, and is the fleet getting older? Colours, fuels and registration years across the whole registry.'
+}
+
 /** The published explainers, in hub order. A new article = a route in App.tsx + `STATIC_PAGES` (spa-text.ts) + an entry here. */
 export const ARTICLES: readonly ArticleMeta[] = [
   { path: BODY_TYPES_PATH, icon: '🚙', titleKey: 'nav.readBodyTypes', lead: BODY_TYPES_LEAD },
-  { path: SIZES_PATH, icon: '📏', titleKey: 'nav.readSizes', lead: SIZES_LEAD }
+  { path: SIZES_PATH, icon: '📏', titleKey: 'nav.readSizes', lead: SIZES_LEAD },
+  { path: FLEET_PATH, icon: '🎨', titleKey: 'nav.readFleet', lead: FLEET_LEAD }
 ]
 
 /** Themes planned next, listed in the hub so readers see where it is going. */
 export const UPCOMING: readonly UpcomingTopic[] = [
-  {
-    icon: '🎨',
-    title: {
-      ua: 'Що їздить Україною: кольори, паливо, вік автопарку',
-      ru: 'Что ездит по Украине: цвета, топливо, возраст автопарка',
-      en: 'What Ukraine drives: colours, fuel, fleet age'
-    }
-  },
   {
     icon: '🔢',
     title: {

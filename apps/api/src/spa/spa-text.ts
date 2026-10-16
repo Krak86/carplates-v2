@@ -180,6 +180,20 @@ export const STATIC_PAGES: Record<string, Record<Lang, PageText>> = {
       description: 'The A, B, C, D, J and M classes by length, whether a car fits a parking space, and a size explorer.'
     }
   },
+  '/read/fleet': {
+    ua: {
+      title: 'Що їздить Україною: кольори, паливо, вік · Cars UA',
+      description: 'Найпопулярніші кольори, паливо та роки реєстрації авто в Україні — на даних відкритого реєстру.'
+    },
+    ru: {
+      title: 'Что ездит по Украине: цвета, топливо, возраст · Cars UA',
+      description: 'Самые популярные цвета, топливо и годы регистрации авто в Украине — на данных открытого реестра.'
+    },
+    en: {
+      title: 'What Ukraine drives: colours, fuel, fleet age · Cars UA',
+      description: 'The most common colours, fuels and registration years of cars in Ukraine, from the open registry.'
+    }
+  },
   '/features': {
     ua: { title: 'Функції · Cars UA', description: 'Що ми створюємо для користувачів з обліковим записом.' },
     ru: { title: 'Функции · Cars UA', description: 'Что мы создаём для пользователей с учётной записью.' },

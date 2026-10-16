@@ -3,6 +3,7 @@ import type { SizeClass, SizeShape } from '@/components/size/VehicleSize.helpers
 export const READ_PATH = '/read'
 export const BODY_TYPES_PATH = '/read/body-types'
 export const SIZES_PATH = '/read/sizes'
+export const FLEET_PATH = '/read/fleet'
 
 /** Shapes the body-types article has a card for (the plate card links only these). */
 export const BODY_GUIDE_SHAPES = ['sedan', 'hatch', 'wagon', 'coupe', 'suv', 'mpv', 'van', 'pickup'] as const

@@ -9,7 +9,7 @@ describe('sitemap', () => {
       expect(paths).toContain(p)
     }
     expect(paths).toContain('/advanced-search')
-    for (const p of ['/read', '/read/body-types', '/read/sizes']) expect(paths).toContain(p)
+    for (const p of ['/read', '/read/body-types', '/read/sizes', '/read/fleet']) expect(paths).toContain(p)
     expect(paths).not.toContain('/history')
     expect(paths).not.toContain('/favorites')
   })

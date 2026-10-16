@@ -245,6 +245,10 @@ export class StatsService {
         )
       case 'fuel':
         return statsFieldResponseSchema.parse((await db.select().from(statsByFuel)).map(r => ({ ...r, value: r.fuel })))
+      case 'year':
+        return statsFieldResponseSchema.parse(
+          (await db.select().from(statsByYear)).map(r => ({ ...r, value: r.year === null ? null : String(r.year) }))
+        )
     }
   }
 

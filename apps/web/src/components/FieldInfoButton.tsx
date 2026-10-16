@@ -11,7 +11,7 @@ import { FUEL_ICON_FALLBACK, getBodyInfo, getFuelIcon, isKnownFuel } from '@/com
 import { cn } from '@/lib/cn'
 import { statsFieldQuery } from '@/lib/queries'
 
-export type FieldInfoDimension = StatsFieldDimension
+export type FieldInfoDimension = Exclude<StatsFieldDimension, 'year'>
 
 type Props = {
   dimension: FieldInfoDimension
