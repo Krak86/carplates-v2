@@ -59,7 +59,11 @@ range; `--no-details` = month cards only). Re-running a range is safe: fetched i
    08 1148 / 672, 09 1225 / 736, 10 1133 / 663, 11 968 / 575, 12 910 / 552 = 7408 / 4567 (88 % / 91 % of the headers, same dedupe
    gap as H1). Null `region` 16 rows (0.2 %), all placeholders; exact rows 0 null. Spot-checks OK: `КА9771НХ` (Київ, removed
    2023-05-11), `АХ4102МВ` (Харківська), `АР1927ЕО` (Запорізька). CSV export re-run (18 111 rows, 18 459 ids, 29 pages, ≈ 0.9 MB).
-5. **Backfill 2023–2024** — `--from 2023-01 --to 2024-12` (≈ 1.2 h).
+5. ✅ **Backfill 2023–2024 (2026-10-16, uncommitted data run)** — `--from 2023-01 --to 2024-12`, exit 0, no retries. Month cards vs
+   headers: 2023 4522 cards / 2842 found (hdr 4577 / 2881, 99 %), 2024 2288 cards / 1461 found (hdr 2324 / 1486, 98-99 %). In the DB
+   by `seized_at` year (stolen / found / wanted): 2023 4028 / 2581 / 1447, 2024 1925 / 1350 / 575 (feed rows merged; same dedupe gap as
+   2022). Null `region` 0.89 % (2023), 0.78 % (2024). Spot-checks OK: `АН9583СТ` (Донецька, removed 2025-09-26), `ТО6400АН`
+   (Донецька, removed 2026-04-30). CSV export re-run (21 388 rows, 21 946 ids, 53 pages, ≈ 1.1 MB).
 6. **Backfill 2025–2026** — `--from 2025-01` (to the current month, ≈ 25 min). From here on, a no-arg run refreshes only the
    last 2 months (daily, after `ingest:wanted`).
    After each backfill step: per-year `SELECT` of stolen / found vs the table above, null `region` share, a few card spot-checks, then

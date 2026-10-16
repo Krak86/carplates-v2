@@ -62,11 +62,12 @@ export class OgController {
   }
 
   private svgFor(preview: Awaited<ReturnType<PreviewService['describe']>>, lang: Lang): string {
+    const siteIconPng = readLogo(join(this.assetsDir, 'brand-icon.png'))
     if (!preview) {
       const [title, subtitle] = TAGLINE[lang]
-      return buildCardSvg({ plate: null, title, subtitle, color: 'blue' })
+      return buildCardSvg({ plate: null, title, subtitle, color: 'blue', siteIconPng })
     }
     const logoPng = preview.brandSlug ? readLogo(join(this.assetsDir, 'logos', `${preview.brandSlug}.png`)) : null
-    return buildCardSvg({ ...preview.card, logoPng })
+    return buildCardSvg({ ...preview.card, logoPng, siteIconPng })
   }
 }
