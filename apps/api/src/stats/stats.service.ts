@@ -22,6 +22,7 @@ import {
   statsByYear,
   statsDistribution,
   statsEv,
+  statsImports,
   statsSizeModels,
   statsSummary
 } from '@carplates/db'
@@ -30,6 +31,7 @@ import {
   dataVersionResponseSchema,
   distributionResponseSchema,
   evStatsResponseSchema,
+  importsStatsResponseSchema,
   mergeBodyStats,
   sizeModelsResponseSchema,
   statsFieldResponseSchema,
@@ -45,6 +47,7 @@ import type {
   DistributionResponse,
   EvStatsResponse,
   Histogram,
+  ImportsStatsResponse,
   SizeModelsResponse,
   StatsFieldDimension,
   StatsFieldResponse,
@@ -68,6 +71,9 @@ const MIN_OTHER_WEIGHT_MODEL = 200
 const MIN_SPEC_MODEL = 500
 /** Pure-electric models listed in the EV article. */
 const EV_TOP_MODELS = 15
+/** Imported models and VIN build countries listed in the imports article. */
+const IMPORT_TOP_MODELS = 15
+const IMPORT_TOP_COUNTRIES = 15
 
 @Injectable()
 export class StatsService {
@@ -151,6 +157,37 @@ export class StatsService {
         .map(([region, v]) => ({ region, ...v }))
         .sort((a, b) => b.bev + b.hybrid - (a.bev + a.hybrid)),
       topModels: [...models.values()].sort((a, b) => b.n - a.n).slice(0, EV_TOP_MODELS)
+    })
+  }
+
+  /** Used imports vs dealer sales by year, import countries (VIN) and models (a rollup rebuilt by `db:refresh-imports-stats`). */
+  async imports(): Promise<ImportsStatsResponse> {
+    const rows = await this.dbService.db.select().from(statsImports)
+    const total = { import: 0, dealer: 0 }
+    const years = new Map<number, { import: number; dealer: number }>()
+    const countries = new Map<string, number>()
+    const models = new Map<string, { brand: string; model: string; n: number }>()
+    for (const r of rows) {
+      if (r.origin !== 'import' && r.origin !== 'dealer') continue
+      total[r.origin] += r.n
+      const year = years.get(r.regYear) ?? { import: 0, dealer: 0 }
+      year[r.origin] += r.n
+      years.set(r.regYear, year)
+      if (r.origin !== 'import') continue
+      countries.set(r.country, (countries.get(r.country) ?? 0) + r.n)
+      const key = `${r.brand}|${r.model}`
+      const m = models.get(key) ?? { brand: r.brand, model: r.model, n: 0 }
+      m.n += r.n
+      models.set(key, m)
+    }
+    return importsStatsResponseSchema.parse({
+      total,
+      byYear: [...years.entries()].map(([year, v]) => ({ year, ...v })).sort((a, b) => a.year - b.year),
+      byCountry: [...countries.entries()]
+        .map(([country, n]) => ({ country, n }))
+        .sort((a, b) => b.n - a.n)
+        .slice(0, IMPORT_TOP_COUNTRIES),
+      topModels: [...models.values()].sort((a, b) => b.n - a.n).slice(0, IMPORT_TOP_MODELS)
     })
   }
 

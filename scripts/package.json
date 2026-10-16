@@ -104,6 +104,7 @@
     "refresh-weight-stats": "tsx src/weight-stats.ts",
     "refresh-spec-stats": "tsx src/spec-stats.ts",
     "refresh-ev-stats": "tsx src/ev-stats.ts",
+    "refresh-imports-stats": "tsx src/imports-stats.ts",
     "refresh-model-family-stats": "tsx src/model-family-stats.ts",
     "refresh-derived": "tsx src/refresh-derived.ts",
     "build:kind-images": "tsx src/build-kind-images.ts",

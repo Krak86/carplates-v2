@@ -4,6 +4,7 @@ import { STATS_FIELD_DIMENSIONS, statsFieldDimensionSchema } from '@carplates/sh
 import type {
   DistributionResponse,
   EvStatsResponse,
+  ImportsStatsResponse,
   SizeModelsResponse,
   StatsFieldDimension,
   StatsFieldResponse
@@ -54,6 +55,15 @@ export class StatsController {
   })
   ev(): Promise<EvStatsResponse> {
     return this.statsService.ev()
+  }
+
+  @Get('imports')
+  @ApiOkResponse({
+    description:
+      'Used imports vs dealer sales { total, byYear, byCountry, topModels } by registration operation; country = the VIN build country'
+  })
+  imports(): Promise<ImportsStatsResponse> {
+    return this.statsService.imports()
   }
 
   @Get('field/:dimension')

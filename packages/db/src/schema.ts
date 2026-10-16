@@ -1542,3 +1542,21 @@ export const statsEv = registry.table(
   t => [primaryKey({ columns: [t.powertrain, t.makeYear, t.region, t.brand, t.model] })]
 )
 export type StatsEvInsert = typeof statsEv.$inferInsert
+
+/**
+ * Passenger cars per origin ('import' | 'dealer'), year of that operation, VIN build country ('' = unknown) and model. Backs
+ * the /read/imports article. Rebuilt by scripts/src/imports-stats.ts; see migration 0073.
+ */
+export const statsImports = registry.table(
+  'stats_imports',
+  {
+    origin: text('origin').notNull(),
+    regYear: integer('reg_year').notNull(),
+    country: text('country').notNull().default(''),
+    brand: text('brand').notNull(),
+    model: text('model').notNull(),
+    n: integer('n').notNull()
+  },
+  t => [primaryKey({ columns: [t.origin, t.regYear, t.country, t.brand, t.model] })]
+)
+export type StatsImportsInsert = typeof statsImports.$inferInsert

@@ -54,6 +54,7 @@ import {
   getStats,
   getStatsField,
   getEvStats,
+  getImportsStats,
   getSizeModels,
   getStatsDistribution,
   getStatsTop,
@@ -187,6 +188,10 @@ export function sizeModelsQuery() {
 
 export function evStatsQuery() {
   return queryOptions({ queryKey: ['stats', 'ev'], queryFn: getEvStats, staleTime: Infinity })
+}
+
+export function importsStatsQuery() {
+  return queryOptions({ queryKey: ['stats', 'imports'], queryFn: getImportsStats, staleTime: Infinity })
 }
 
 // One dimension's breakdown for a ResultCard "?" popover — a few dozen rows.

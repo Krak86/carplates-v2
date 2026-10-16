@@ -245,6 +245,23 @@ export const STATIC_PAGES: Record<string, Record<Lang, PageText>> = {
         'How many electric cars and hybrids Ukraine has, which years they are from, where they are, which models lead and how the charging plugs differ.'
     }
   },
+  '/read/imports': {
+    ua: {
+      title: 'Авто з-за кордону: ввезені та куплені через дилера, країна за VIN · Cars UA',
+      description:
+        'Скільки авто ввезено з-за кордону й скільки куплено через дилера, які моделі ввозять найчастіше, що VIN каже про країну виробництва і що перевірити перед купівлею.'
+    },
+    ru: {
+      title: 'Авто из-за границы: ввезённые и купленные через дилера, страна по VIN · Cars UA',
+      description:
+        'Сколько авто ввезено из-за границы и сколько куплено через дилера, какие модели ввозят чаще всего, что VIN говорит о стране сборки и что проверить перед покупкой.'
+    },
+    en: {
+      title: 'Cars from abroad: imports vs dealer-bought, country by VIN · Cars UA',
+      description:
+        'How many cars were brought in from abroad and how many bought through a dealer, which models are imported most, what the VIN says about the country of build and what to check before buying.'
+    }
+  },
   '/features': {
     ua: { title: 'Функції · Cars UA', description: 'Що ми створюємо для користувачів з обліковим записом.' },
     ru: { title: 'Функции · Cars UA', description: 'Что мы создаём для пользователей с учётной записью.' },

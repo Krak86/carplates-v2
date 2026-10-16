@@ -39,6 +39,12 @@ export const RELEASES: readonly ReleaseDay[] = [
         'Довідник /read/electric: електромобілі в Україні — за роком випуску, регіонами та моделями, плюс гід по роз’ємах зарядки (Type 2, CCS, CHAdeMO, GB/T)',
         'Справочник /read/electric: электромобили в Украине — по году выпуска, регионам и моделям, плюс гид по разъёмам зарядки (Type 2, CCS, CHAdeMO, GB/T)',
         'New /read/electric guide: electric cars in Ukraine by model year, region and model, plus a charging-plug guide (Type 2, CCS, CHAdeMO, GB/T)'
+      ),
+      item(
+        'new',
+        'Довідник /read/imports: авто з-за кордону — ввезені та куплені через дилера за роками, найчастіші моделі, країна збирання за VIN і що перевірити перед купівлею',
+        'Справочник /read/imports: авто из-за границы — ввезённые и купленные через дилера по годам, самые частые модели, страна сборки по VIN и что проверить перед покупкой',
+        'New /read/imports guide: cars from abroad — imported vs dealer-bought by year, the most imported models, country of build by VIN and what to check before buying'
       )
     ]
   },

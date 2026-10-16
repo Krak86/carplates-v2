@@ -7,6 +7,7 @@ export const FLEET_PATH = '/read/fleet'
 export const PLATES_PATH = '/read/plates'
 export const GENERATIONS_PATH = '/read/generations'
 export const ELECTRIC_PATH = '/read/electric'
+export const IMPORTS_PATH = '/read/imports'
 
 /** Shapes the body-types article has a card for (the plate card links only these). */
 export const BODY_GUIDE_SHAPES = ['sedan', 'hatch', 'wagon', 'coupe', 'suv', 'mpv', 'van', 'pickup'] as const

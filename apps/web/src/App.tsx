@@ -28,6 +28,7 @@ const FleetRoute = lazy(() => import('@/routes/read/fleet/FleetRoute'))
 const PlatesRoute = lazy(() => import('@/routes/read/plates/PlatesRoute'))
 const GenerationsRoute = lazy(() => import('@/routes/read/generations/GenerationsRoute'))
 const ElectricRoute = lazy(() => import('@/routes/read/electric/ElectricRoute'))
+const ImportsRoute = lazy(() => import('@/routes/read/imports/ImportsRoute'))
 const FeaturesRoute = lazy(() => import('@/routes/features/FeaturesRoute'))
 const SettingsRoute = lazy(() => import('@/routes/settings/SettingsRoute'))
 const EmailLinkRoute = lazy(() => import('@/routes/auth/EmailLinkRoute'))
@@ -70,6 +71,7 @@ export default function App(): ReactNode {
             <Route path="/read/plates" element={<PlatesRoute />} />
             <Route path="/read/generations" element={<GenerationsRoute />} />
             <Route path="/read/electric" element={<ElectricRoute />} />
+            <Route path="/read/imports" element={<ImportsRoute />} />
             <Route path="/features" element={<FeaturesRoute />} />
             <Route path="/settings" element={<SettingsRoute />} />
             <Route path="/auth/email" element={<EmailLinkRoute />} />

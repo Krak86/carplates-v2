@@ -3,6 +3,7 @@ import {
   ELECTRIC_PATH,
   FLEET_PATH,
   GENERATIONS_PATH,
+  IMPORTS_PATH,
   PLATES_PATH,
   SIZES_PATH
 } from '@/routes/read/links'
@@ -44,6 +45,12 @@ export const ELECTRIC_LEAD: L10n = {
   en: 'How many electric cars and hybrids does Ukraine have, which years are they from, where are they, and which models lead? Plus how the charging plugs differ.'
 }
 
+export const IMPORTS_LEAD: L10n = {
+  ua: 'Скільки авто ввезено з-за кордону, а скільки куплено через дилера, які моделі ввозять найчастіше і що VIN каже про країну виробництва? Ще — що перевірити перед купівлею.',
+  ru: 'Сколько авто ввезено из-за границы, а сколько куплено через дилера, какие модели ввозят чаще всего и что VIN говорит о стране сборки? А ещё — что проверить перед покупкой.',
+  en: 'How many cars were brought in from abroad and how many bought through a dealer, which models are imported most, and what does the VIN say about the country of build? Plus what to check before buying.'
+}
+
 /** The published explainers, in hub order. A new article = a route in App.tsx + `STATIC_PAGES` (spa-text.ts) + an entry here. */
 export const ARTICLES: readonly ArticleMeta[] = [
   { path: BODY_TYPES_PATH, icon: '🚙', titleKey: 'nav.readBodyTypes', lead: BODY_TYPES_LEAD },
@@ -51,7 +58,8 @@ export const ARTICLES: readonly ArticleMeta[] = [
   { path: FLEET_PATH, icon: '🎨', titleKey: 'nav.readFleet', lead: FLEET_LEAD },
   { path: PLATES_PATH, icon: '🔢', titleKey: 'nav.readPlates', lead: PLATES_LEAD },
   { path: GENERATIONS_PATH, icon: '🧬', titleKey: 'nav.readGenerations', lead: GENERATIONS_LEAD },
-  { path: ELECTRIC_PATH, icon: '🔌', titleKey: 'nav.readElectric', lead: ELECTRIC_LEAD }
+  { path: ELECTRIC_PATH, icon: '🔌', titleKey: 'nav.readElectric', lead: ELECTRIC_LEAD },
+  { path: IMPORTS_PATH, icon: '🚢', titleKey: 'nav.readImports', lead: IMPORTS_LEAD }
 ]
 
 /** Themes planned next, listed in the hub so readers see where it is going. */
