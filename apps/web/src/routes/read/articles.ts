@@ -2,6 +2,7 @@ import {
   BODY_TYPES_PATH,
   ELECTRIC_PATH,
   FLEET_PATH,
+  FUEL_PATH,
   GENERATIONS_PATH,
   IMPORTS_PATH,
   PLATES_PATH,
@@ -58,6 +59,12 @@ export const SAFETY_LEAD: L10n = {
   en: 'Which cars on our roads have crash-test ratings, how do they change with the model year, and which models are the best and the weakest? Plus what those ratings do not tell you.'
 }
 
+export const FUEL_LEAD: L10n = {
+  ua: 'На чому їздить Україна, скільки CO₂ викидає середнє авто, чи чистішає парк із роками і які моделі найекономніші та найвитратніші? Ще — як ми оцінюємо викиди.',
+  ru: 'На чём ездит Украина, сколько CO₂ выбрасывает среднее авто, чистеет ли парк с годами и какие модели самые экономичные и самые затратные? А ещё — как мы оцениваем выбросы.',
+  en: 'What does Ukraine run on, how much CO₂ does the average car emit, is the fleet getting cleaner with the years, and which models are the cleanest and the most CO₂-heavy? Plus how we estimate emissions.'
+}
+
 /** The published explainers, in hub order. A new article = a route in App.tsx + `STATIC_PAGES` (spa-text.ts) + an entry here. */
 export const ARTICLES: readonly ArticleMeta[] = [
   { path: BODY_TYPES_PATH, icon: '🚙', titleKey: 'nav.readBodyTypes', lead: BODY_TYPES_LEAD },
@@ -67,7 +74,8 @@ export const ARTICLES: readonly ArticleMeta[] = [
   { path: GENERATIONS_PATH, icon: '🧬', titleKey: 'nav.readGenerations', lead: GENERATIONS_LEAD },
   { path: ELECTRIC_PATH, icon: '🔌', titleKey: 'nav.readElectric', lead: ELECTRIC_LEAD },
   { path: IMPORTS_PATH, icon: '🚢', titleKey: 'nav.readImports', lead: IMPORTS_LEAD },
-  { path: SAFETY_PATH, icon: '🛡️', titleKey: 'nav.readSafety', lead: SAFETY_LEAD }
+  { path: SAFETY_PATH, icon: '🛡️', titleKey: 'nav.readSafety', lead: SAFETY_LEAD },
+  { path: FUEL_PATH, icon: '⛽', titleKey: 'nav.readFuel', lead: FUEL_LEAD }
 ]
 
 /** Themes planned next, listed in the hub so readers see where it is going. */

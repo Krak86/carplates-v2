@@ -279,6 +279,23 @@ export const STATIC_PAGES: Record<string, Record<Lang, PageText>> = {
         'Which cars in Ukraine have Euro NCAP, IIHS, JNCAP, C-NCAP and KNCAP ratings, how they change with the model year, which models are the best and the weakest, and what the ratings do not tell you.'
     }
   },
+  '/read/fuel': {
+    ua: {
+      title: 'Паливо й викиди CO₂: на чому їздить Україна, чисті та витратні моделі · Cars UA',
+      description:
+        'Бензин, дизель, газ, гібрид чи електро: на чому їздить Україна, скільки CO₂ викидає середнє авто, як це змінюється за роками випуску, які моделі найчистіші та найвитратніші і як ми оцінюємо викиди.'
+    },
+    ru: {
+      title: 'Топливо и выбросы CO₂: на чём ездит Украина, чистые и затратные модели · Cars UA',
+      description:
+        'Бензин, дизель, газ, гибрид или электро: на чём ездит Украина, сколько CO₂ выбрасывает среднее авто, как это меняется по годам выпуска, какие модели самые чистые и самые затратные и как мы оцениваем выбросы.'
+    },
+    en: {
+      title: 'Fuel and CO₂ emissions: what Ukraine runs on, cleanest and thirstiest models · Cars UA',
+      description:
+        'Petrol, diesel, gas, hybrid or electric: what Ukraine runs on, how much CO₂ the average car emits, how it changes with the model year, which models are the cleanest and the most CO₂-heavy, and how we estimate emissions.'
+    }
+  },
   '/features': {
     ua: { title: 'Функції · Cars UA', description: 'Що ми створюємо для користувачів з обліковим записом.' },
     ru: { title: 'Функции · Cars UA', description: 'Что мы создаём для пользователей с учётной записью.' },

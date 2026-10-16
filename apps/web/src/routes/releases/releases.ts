@@ -51,6 +51,12 @@ export const RELEASES: readonly ReleaseDay[] = [
         'Довідник /read/safety: краш-тести — п’ять програм (Euro NCAP, IIHS, JNCAP, C-NCAP, KNCAP), оцінки автопарку, зміна за роками випуску, найкращі й найслабші моделі та межі цих оцінок',
         'Справочник /read/safety: краш-тесты — пять программ (Euro NCAP, IIHS, JNCAP, C-NCAP, KNCAP), оценки автопарка, изменение по годам выпуска, лучшие и слабейшие модели и пределы этих оценок',
         'New /read/safety guide: crash tests — the five programmes (Euro NCAP, IIHS, JNCAP, C-NCAP, KNCAP), the fleet’s ratings, change by model year, the best and weakest models and the limits of these ratings'
+      ),
+      item(
+        'new',
+        'Довідник /read/fuel: паливо й викиди CO₂ — на чому їздить парк, розподіл викидів, зміна за роками випуску, найчистіші та найвитратніші моделі і як ми оцінюємо викиди',
+        'Справочник /read/fuel: топливо и выбросы CO₂ — на чём ездит парк, распределение выбросов, изменение по годам выпуска, самые чистые и самые затратные модели и как мы оцениваем выбросы',
+        'New /read/fuel guide: fuel and CO₂ — what the fleet runs on, the spread of emissions, change by model year, the cleanest and most CO₂-heavy models and how we estimate emissions'
       )
     ]
   },
