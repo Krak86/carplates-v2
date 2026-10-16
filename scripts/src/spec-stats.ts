@@ -1,6 +1,7 @@
 /**
  * Rebuilds `registry.stats_spec` — the /stats highest / lowest passenger-car boards for power, engine displacement,
- * height, length and fuel tank — from `current_registration`, `rdw_specs` and `model_spec_wiki`.
+ * height, length and fuel tank — from `current_registration`, `rdw_specs` and `model_spec_wiki`. The same run also
+ * rebuilds `registry.stats_size_models` (dominant body + median dimensions per model, for the /read size explorer).
  *
  *   pnpm db:refresh-spec-stats
  *
@@ -10,12 +11,13 @@
  * where RDW has none, to its Wikipedia generations (`ingest:wikispecs`); the model's edges are the lowest / highest value
  * over its years or generations. Re-run after a registry, RDW or wikispecs ingest; `db:refresh-derived` does it.
  */
-import { createDb, statsDistribution, statsSpec } from '@carplates/db'
-import type { StatsDistributionInsert, StatsSpecInsert } from '@carplates/db'
+import { createDb, statsDistribution, statsSizeModels, statsSpec } from '@carplates/db'
+import type { StatsDistributionInsert, StatsSizeModelInsert, StatsSpecInsert } from '@carplates/db'
 import {
   DISTRIBUTION_BUCKET_WIDTH,
   makeKey,
   matchRdwModel,
+  normalizeBody,
   RDW_MIN_DISPLAY_N,
   SPEC_METRIC_COLUMN,
   vdbRelatedMakeKeys,
@@ -71,6 +73,49 @@ type WikiRow = {
   tankLo: number | null
   tankHi: number | null
 }
+
+/** A model needs this many registry passenger cars to appear in the size explorer. */
+const SIZE_MIN_VEHICLES = 50
+
+type SizeFigures = {
+  lengthMm: number | null
+  widthMm: number | null
+  heightMm: number | null
+  wheelbaseMm: number | null
+}
+type SizeRdwRow = SizeFigures & {
+  makeKey: string
+  modelKey: string
+  make: string
+  model: string
+  rdwBody: string | null
+}
+type SizeWikiRow = SizeFigures & { makeKey: string; modelKey: string }
+type SizeRef = RdwReferenceRow & SizeFigures & { source: 'rdw' | 'wiki'; rdwBody: string | null }
+type SizeRegistryRow = { brand: string; model: string; n: number; body: string | null }
+
+const hasSize = (f: SizeFigures): boolean => f.lengthMm != null || f.widthMm != null || f.heightMm != null
+
+/** Size references by make key: RDW first, Wikipedia for models RDW has no dimensions for. */
+function sizeIndex(rdw: readonly SizeRdwRow[], wiki: readonly SizeWikiRow[]): Map<string, SizeRef[]> {
+  const byMake = new Map<string, SizeRef[]>()
+  const seen = new Set<string>()
+  const add = (e: SizeRef): void => {
+    seen.add(`${e.makeKey}|${e.modelKey}`)
+    byMake.set(e.makeKey, [...(byMake.get(e.makeKey) ?? []), e])
+  }
+  for (const r of rdw) {
+    if (!hasSize(r)) continue
+    add({ ...r, kind: 'car', aliases: [], source: 'rdw' })
+  }
+  for (const r of wiki) {
+    if (seen.has(`${r.makeKey}|${r.modelKey}`) || !hasSize(r)) continue
+    add({ ...r, kind: 'car', aliases: [], make: r.makeKey, model: r.modelKey, source: 'wiki', rdwBody: null })
+  }
+  return byMake
+}
+
+const roundMm = (v: number | null): number | null => (v == null ? null : Math.round(v))
 
 const log = (...m: unknown[]): void => {
   console.log(...m)
@@ -255,6 +300,75 @@ async function main(): Promise<void> {
     }
     const values = [...out.values()]
 
+    // Size explorer rollup: dominant normalized body + median catalogue dimensions per model (cm -> mm for RDW).
+    // Well-sampled years first; a model RDW only has thin samples for (most Toyotas) still gets its figures.
+    const { rows: sizeRdw } = await db.execute<SizeRdwRow>(sql`
+      WITH body_tally AS (
+        SELECT make_key, model_key, e->>0 AS key, sum((e->>1)::int) AS c
+        FROM registry.rdw_specs, jsonb_array_elements(body_types) e
+        WHERE kind = 'car' AND body_types IS NOT NULL
+        GROUP BY 1, 2, 3
+      ), top_body AS (
+        SELECT DISTINCT ON (make_key, model_key) make_key, model_key, key
+        FROM body_tally ORDER BY make_key, model_key, c DESC
+      )
+      SELECT s.make_key AS "makeKey", s.model_key AS "modelKey", max(s.make) AS make, max(s.model) AS model,
+             max(tb.key) AS "rdwBody",
+             (coalesce(percentile_cont(0.5) WITHIN GROUP (ORDER BY length_cm_median) FILTER (WHERE length_cm_n >= ${RDW_MIN_DISPLAY_N} AND length_cm_median > 0),
+                       percentile_cont(0.5) WITHIN GROUP (ORDER BY length_cm_median) FILTER (WHERE length_cm_median > 0)) * 10)::float8 AS "lengthMm",
+             (coalesce(percentile_cont(0.5) WITHIN GROUP (ORDER BY width_cm_median) FILTER (WHERE width_cm_n >= ${RDW_MIN_DISPLAY_N} AND width_cm_median > 0),
+                       percentile_cont(0.5) WITHIN GROUP (ORDER BY width_cm_median) FILTER (WHERE width_cm_median > 0)) * 10)::float8 AS "widthMm",
+             (coalesce(percentile_cont(0.5) WITHIN GROUP (ORDER BY height_cm_median) FILTER (WHERE height_cm_n >= ${RDW_MIN_DISPLAY_N} AND height_cm_median > 0),
+                       percentile_cont(0.5) WITHIN GROUP (ORDER BY height_cm_median) FILTER (WHERE height_cm_median > 0)) * 10)::float8 AS "heightMm",
+             (percentile_cont(0.5) WITHIN GROUP (ORDER BY wheelbase_cm_median) FILTER (WHERE wheelbase_cm_median > 0) * 10)::float8 AS "wheelbaseMm"
+      FROM registry.rdw_specs s
+      LEFT JOIN top_body tb ON tb.make_key = s.make_key AND tb.model_key = s.model_key
+      WHERE s.kind = 'car'
+      GROUP BY s.make_key, s.model_key
+    `)
+    const { rows: sizeWiki } = await db.execute<SizeWikiRow>(sql`
+      SELECT make_key AS "makeKey", model_key AS "modelKey",
+             (percentile_cont(0.5) WITHIN GROUP (ORDER BY length_mm) FILTER (WHERE length_mm > 0))::float8 AS "lengthMm",
+             (percentile_cont(0.5) WITHIN GROUP (ORDER BY width_mm) FILTER (WHERE width_mm > 0))::float8 AS "widthMm",
+             (percentile_cont(0.5) WITHIN GROUP (ORDER BY height_mm) FILTER (WHERE height_mm > 0))::float8 AS "heightMm",
+             (percentile_cont(0.5) WITHIN GROUP (ORDER BY wheelbase_mm) FILTER (WHERE wheelbase_mm > 0))::float8 AS "wheelbaseMm"
+      FROM registry.model_spec_wiki
+      GROUP BY make_key, model_key
+    `)
+    const sizeRefs = sizeIndex(sizeRdw, sizeWiki)
+    const { rows: sizeRegistry } = await db.execute<SizeRegistryRow>(sql`
+      SELECT brand, model, count(*)::int AS n, mode() WITHIN GROUP (ORDER BY body) AS body
+      FROM (
+        SELECT body, model,
+               btrim(CASE WHEN tidy LIKE '% ' || model THEN left(tidy, length(tidy) - length(model) - 1) ELSE tidy END) AS brand
+        FROM (
+          SELECT body, model, btrim(regexp_replace(brand, '[[:space:]]+', ' ', 'g')) AS tidy
+          FROM registry.current_registration
+          WHERE brand IS NOT NULL AND model IS NOT NULL AND kind = ${PASSENGER_KIND}
+        ) cleaned
+      ) t
+      WHERE brand <> ''
+      GROUP BY brand, model
+      HAVING count(*) >= ${SIZE_MIN_VEHICLES}
+    `)
+    const sizeModels: StatsSizeModelInsert[] = sizeRegistry.map(r => {
+      const mk = makeKey(r.brand)
+      const candidates = mk ? vdbRelatedMakeKeys(mk, r.model).flatMap(k => sizeRefs.get(k) ?? []) : []
+      const ref = mk ? (matchRdwModel(candidates, mk, r.model, 'car')?.row ?? null) : null
+      return {
+        brand: r.brand,
+        model: r.model,
+        n: r.n,
+        body: normalizeBody(r.body),
+        rdwBody: ref?.rdwBody ?? null,
+        lengthMm: roundMm(ref?.lengthMm ?? null),
+        widthMm: roundMm(ref?.widthMm ?? null),
+        heightMm: roundMm(ref?.heightMm ?? null),
+        wheelbaseMm: roundMm(ref?.wheelbaseMm ?? null),
+        source: ref?.source ?? null
+      }
+    })
+
     // Fleet histograms for the card's percentile bars: one SQL pass per metric over the sane-range passenger cars.
     const histogram = (
       metric: string,
@@ -289,8 +403,12 @@ async function main(): Promise<void> {
       for (let i = 0; i < values.length; i += BATCH) await tx.insert(statsSpec).values(values.slice(i, i + BATCH))
       await tx.execute(sql`TRUNCATE registry.stats_distribution`)
       if (distribution.length > 0) await tx.insert(statsDistribution).values(distribution)
+      await tx.execute(sql`TRUNCATE registry.stats_size_models`)
+      for (let i = 0; i < sizeModels.length; i += BATCH)
+        await tx.insert(statsSizeModels).values(sizeModels.slice(i, i + BATCH))
     })
     log(`wrote ${distribution.length} distribution bucket(s)`)
+    log(`wrote ${sizeModels.length} size model(s), ${sizeModels.filter(m => m.lengthMm != null).length} with a length`)
     const byMetric = new Map<string, number>()
     for (const v of values) byMetric.set(v.metric, (byMetric.get(v.metric) ?? 0) + 1)
     log(`wrote ${values.length} spec row(s):`, Object.fromEntries(byMetric))

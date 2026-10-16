@@ -66,6 +66,7 @@ export {
   type DistributionResponse,
   type Histogram
 } from './distribution.js'
+export { sizeModelSchema, sizeModelsResponseSchema, type SizeModel, type SizeModelsResponse } from './sizeModels.js'
 export { SPEC_METRICS, SPEC_METRIC_COLUMN, DEFAULT_SPEC_METRIC, type SpecMetric } from './specMetrics.js'
 export { VEHICLE_KINDS, resolveVehicleKind, sourceValueForKind, type VehicleKind } from './vehicleKind.js'
 export { VEHICLE_PURPOSES, sourceValueForPurpose, type VehiclePurpose } from './vehiclePurpose.js'

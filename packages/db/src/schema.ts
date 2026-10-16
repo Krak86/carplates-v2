@@ -1087,6 +1087,28 @@ export const statsSpec = registry.table(
 export type StatsSpecInsert = typeof statsSpec.$inferInsert
 
 /**
+ * One row per Ukrainian passenger model: dominant registry body + catalogue dimensions (mm). Backs the /read/body-types and
+ * /read/sizes articles and the size explorer. Rebuilt by scripts/src/spec-stats.ts; see migration 0071.
+ */
+export const statsSizeModels = registry.table(
+  'stats_size_models',
+  {
+    brand: text('brand').notNull(),
+    model: text('model').notNull(),
+    n: integer('n').notNull(),
+    body: text('body'),
+    rdwBody: text('rdw_body'),
+    lengthMm: integer('length_mm'),
+    widthMm: integer('width_mm'),
+    heightMm: integer('height_mm'),
+    wheelbaseMm: integer('wheelbase_mm'),
+    source: text('source')
+  },
+  t => [primaryKey({ columns: [t.brand, t.model] })]
+)
+export type StatsSizeModelInsert = typeof statsSizeModels.$inferInsert
+
+/**
  * Fleet histograms per metric (power_kw, hp_per_tonne, displacement_cc) of passenger cars: `bucket` = lower edge in the
  * metric's unit, `n` = cars. Backs the card's percentile bars. Rebuilt by scripts/src/spec-stats.ts; see migration 0070.
  */

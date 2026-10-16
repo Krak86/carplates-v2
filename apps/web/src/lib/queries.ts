@@ -52,6 +52,7 @@ import {
   getSafetyRatings,
   getStats,
   getStatsField,
+  getSizeModels,
   getStatsDistribution,
   getStatsTop,
   getUkraineGeography,
@@ -175,6 +176,11 @@ export function statsTopQuery() {
 // Fleet histograms behind the Performance panel's percentile bars (~60 buckets, changes only on a spec-stats rebuild).
 export function statsDistributionQuery() {
   return queryOptions({ queryKey: ['stats', 'distribution'], queryFn: getStatsDistribution, staleTime: Infinity })
+}
+
+// Per-model body + dimensions behind the /read articles and size explorer (~3.7k rows, a rollup rebuilt with the spec stats).
+export function sizeModelsQuery() {
+  return queryOptions({ queryKey: ['stats', 'size-models'], queryFn: getSizeModels, staleTime: Infinity })
 }
 
 // One dimension's breakdown for a ResultCard "?" popover — a few dozen rows.

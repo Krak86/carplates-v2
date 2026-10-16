@@ -21,6 +21,7 @@ import {
   statsByRegionYear,
   statsByYear,
   statsDistribution,
+  statsSizeModels,
   statsSummary
 } from '@carplates/db'
 import {
@@ -28,6 +29,7 @@ import {
   dataVersionResponseSchema,
   distributionResponseSchema,
   mergeBodyStats,
+  sizeModelsResponseSchema,
   statsFieldResponseSchema,
   statsResponseSchema,
   statsTopResponseSchema,
@@ -40,6 +42,7 @@ import type {
   DistributionMetric,
   DistributionResponse,
   Histogram,
+  SizeModelsResponse,
   StatsFieldDimension,
   StatsFieldResponse,
   StatsResponse,
@@ -102,6 +105,12 @@ export class StatsService {
       hp_per_tonne: histogram('hp_per_tonne'),
       displacement_cc: histogram('displacement_cc')
     })
+  }
+
+  /** Per-model body + dimensions behind the /read explainers and the size explorer (a rollup rebuilt by `db:refresh-spec-stats`). */
+  async sizeModels(): Promise<SizeModelsResponse> {
+    const rows = await this.dbService.db.select().from(statsSizeModels).orderBy(desc(statsSizeModels.n))
+    return sizeModelsResponseSchema.parse({ models: rows })
   }
 
   /** The ranking-chip leaderboards only: registry top 10s (null values excluded — same rule as the web's `topLabels`) + fuel/crash model boards. */

@@ -133,6 +133,53 @@ export const STATIC_PAGES: Record<string, Record<Lang, PageText>> = {
       description: 'A day-by-day log of Cars UA changes: features, improvements, data.'
     }
   },
+  '/read': {
+    ua: {
+      title: 'Довідник · Cars UA',
+      description:
+        'Авто простими словами на даних українського реєстру: типи кузова, розміри й класи, реальні приклади.'
+    },
+    ru: {
+      title: 'Справочник · Cars UA',
+      description:
+        'Авто простыми словами на данных украинского реестра: типы кузова, размеры и классы, реальные примеры.'
+    },
+    en: {
+      title: 'Guides · Cars UA',
+      description: 'Cars explained on Ukrainian registry data: body types, sizes and classes, real examples.'
+    }
+  },
+  '/read/body-types': {
+    ua: {
+      title: 'Типи кузова авто · Cars UA',
+      description:
+        'Седан, хетчбек, універсал, SUV чи кросовер: чим вони відрізняються, з реальними прикладами з українського реєстру.'
+    },
+    ru: {
+      title: 'Типы кузова авто · Cars UA',
+      description:
+        'Седан, хэтчбек, универсал, SUV или кроссовер: чем они отличаются, с реальными примерами из украинского реестра.'
+    },
+    en: {
+      title: 'Car body types · Cars UA',
+      description:
+        'Sedan, hatchback, estate, SUV or crossover: how they differ, with real examples from the Ukrainian registry.'
+    }
+  },
+  '/read/sizes': {
+    ua: {
+      title: 'Розміри та класи авто · Cars UA',
+      description: 'Класи A, B, C, D, J, M за довжиною, чи влізе авто в паркомісце, пошук моделей за розміром.'
+    },
+    ru: {
+      title: 'Размеры и классы авто · Cars UA',
+      description: 'Классы A, B, C, D, J, M по длине, влезет ли авто на парковочное место, поиск моделей по размеру.'
+    },
+    en: {
+      title: 'Car sizes and classes · Cars UA',
+      description: 'The A, B, C, D, J and M classes by length, whether a car fits a parking space, and a size explorer.'
+    }
+  },
   '/features': {
     ua: { title: 'Функції · Cars UA', description: 'Що ми створюємо для користувачів з обліковим записом.' },
     ru: { title: 'Функции · Cars UA', description: 'Что мы создаём для пользователей с учётной записью.' },

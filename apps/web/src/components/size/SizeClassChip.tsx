@@ -1,11 +1,14 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Link } from 'react-router'
 
 import ChipChevronButton from '@/components/ChipChevronButton'
 import InfoPopover from '@/components/InfoPopover'
 import InfoText from '@/components/InfoText'
 import { useVehicleSize, type VehicleSizeInput } from '@/components/size/use-vehicle-size'
 import { mmToMetres } from '@/components/size/VehicleSize.helpers'
+import { upperBrand } from '@/lib/display-brand'
+import { readHref } from '@/routes/read/links'
 
 type Props = Omit<VehicleSizeInput, 'vinFields'> & {
   /** The chevron: mount the Size & parking section, open it and scroll to it. */
@@ -44,6 +47,18 @@ export default function SizeClassChip({ onOpenSection, ...input }: Props): React
         {mmToMetres(length.value)} {t('rdw.unitM')}
         <InfoPopover label={title} title={title}>
           <InfoText text={t('size.chip.info', { class: label, length: `${approx}${mmToMetres(length.value)}` })} />
+          <Link
+            to={readHref.sizes({
+              shape: size.shape,
+              cls: cls.cls,
+              brand: input.brand && upperBrand(input.brand),
+              model: input.model
+            })}
+            viewTransition
+            className="mt-2 inline-block text-primary"
+          >
+            {t('read.card.sizeLink')} →
+          </Link>
         </InfoPopover>
       </span>
 

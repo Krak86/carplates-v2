@@ -81,6 +81,7 @@ import { hasImportOperation } from '@/lib/auction-sites'
 import { plateHistoryQuery, rdwQuery, vinQuery } from '@/lib/queries'
 import { scrollElementIntoView } from '@/lib/share-section'
 import { formatVehicleLabel } from '@/lib/vehicle-label'
+import { bodyGuideShape, readHref } from '@/routes/read/links'
 import { useUiStore } from '@/store/ui-store'
 import SectionSkeleton from '@/components/ui/SectionSkeleton'
 
@@ -211,8 +212,10 @@ export default function ResultCard({ data }: Props): ReactNode {
   })
   const rdwSpecs = rdwData?.match?.specs
   const hasSpecs = (group: SpecGroup): boolean => !!rdwSpecs && hasSpecGroup(rdwSpecs, group, c.fuel)
-  const hasSize = !!useVehicleSize({ brand: c.brand, model: c.model, year: c.makeYear, kind: c.kind, body: c.body })
-    ?.cls
+  const size = useVehicleSize({ brand: c.brand, model: c.model, year: c.makeYear, kind: c.kind, body: c.body })
+  const hasSize = !!size?.cls
+  // The body row links to the guide's card for this shape, only when a source actually named the body style.
+  const guideShape = size?.shapeKnown ? bodyGuideShape(size.shape) : null
   // Pre-1981 / Soviet vehicles carry a short chassis number in the VIN field: show it, but nothing can decode it.
   const isLegacyVin = c.vin != null && !isVin(c.vin)
   const hasVin = c.vin != null && !isLegacyVin
@@ -471,6 +474,17 @@ export default function ResultCard({ data }: Props): ReactNode {
                           )}
                           {normalizeBody(c.body)}
                           <FieldInfoButton dimension="body" current={c.body} />
+                          {guideShape && (
+                            <Link
+                              to={readHref.bodyTypes(guideShape)}
+                              viewTransition
+                              title={t('read.card.bodyLink', { shape: t(`size.shape.${guideShape}`) })}
+                              aria-label={t('read.card.bodyLink', { shape: t(`size.shape.${guideShape}`) })}
+                              className="inline-flex size-6 items-center justify-center rounded-full hover:bg-(--color-bg)"
+                            >
+                              <span aria-hidden>📖</span>
+                            </Link>
+                          )}
                           {hasSpecs('body') && <RowJump target="specs-body" />}
                         </span>
                         {bodyInfo && (

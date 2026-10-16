@@ -8,6 +8,17 @@ const item = (group: ReleaseGroup, ua: string, ru: string, en: string): ReleaseI
  */
 export const RELEASES: readonly ReleaseDay[] = [
   {
+    date: '2026-10-16',
+    items: [
+      item(
+        'new',
+        'Довідник /read: типи кузова і розміри авто простими словами — з реальними моделями з реєстру, номерами та пошуком за розміром; на картці авто є посилання на відповідні пояснення',
+        'Справочник /read: типы кузова и размеры авто простыми словами — с реальными моделями из реестра, номерами и поиском по размеру; на карточке авто есть ссылки на соответствующие объяснения',
+        'New /read guides: body types and car sizes explained with real models from the registry, real plates and a size explorer; the plate card links to the matching explanations'
+      )
+    ]
+  },
+  {
     date: '2026-10-15',
     items: [
       item(
