@@ -16,6 +16,56 @@ export type WantedFeedRow = {
   organunit?: string | null
 }
 
+/**
+ * Police unit → region (`REGION_NAMES`). The unit names its own oblast LAST (`… ГУНП В КИЇВСЬКІЙ ОБЛАСТІ`), while a district earlier in
+ * the name can echo another one (`КИЇВСЬКЕ … ГУНП В ОДЕСЬКІЙ ОБЛ.`, `ДНІПРОВСЬКЕ … В М. КИЄВІ`) — so the rightmost match wins.
+ */
+const REGION_RULES: readonly (readonly [string, RegExp])[] = [
+  ['Вінницька область', /ВІННИЦ/g],
+  ['Волинська область', /ВОЛИНСЬК|ВОЛИНІ/g],
+  ['Дніпропетровська область', /ДНІПРОПЕТР/g],
+  ['Донецька область', /ДОНЕЦЬК|ДОНЕЧЧ/g],
+  ['Житомирська область', /ЖИТОМИР/g],
+  ['Закарпатська область', /ЗАКАРПАТ/g],
+  ['Запорізька область', /ЗАПОРІЗЬК[А-ЯІЇ]{1,2}\s+ОБЛ/g],
+  ['Івано-Франківська область', /ІВАНО-ФРАНК/g],
+  ['Київська область', /КИЇВСЬК[А-ЯІЇ]{1,2}\s+ОБЛ/g],
+  ['Київ', /М\.?\s*КИЄВ|Г\.?\s*КИЕВ/g],
+  ['Кіровоградська область', /КІРОВОГРАД|КРОПИВНИЦЬК[А-ЯІЇ]{1,2}\s+ОБЛ/g],
+  ['Луганська область', /ЛУГАНСЬК|ЛУГАНЩ/g],
+  ['Львівська область', /ЛЬВІВСЬК[А-ЯІЇ]{1,2}\s+ОБЛ/g],
+  ['Миколаївська область', /МИКОЛАЇВСЬК[А-ЯІЇ]{1,2}\s+ОБЛ/g],
+  ['Одеська область', /ОДЕСЬК[А-ЯІЇ]{1,2}\s+ОБЛ/g],
+  ['Полтавська область', /ПОЛТАВСЬК[А-ЯІЇ]{1,2}\s+ОБЛ/g],
+  ['Рівненська область', /РІВНЕНС/g],
+  ['Сумська область', /СУМСЬК[А-ЯІЇ]{1,2}\s+ОБЛ/g],
+  ['Тернопільська область', /ТЕРНОП/g],
+  ['Харківська область', /ХАРК[ІИ]В[ЬС]*К[А-ЯІЇ]{1,2}\s+ОБЛ/g],
+  ['Херсонська область', /ХЕРСОНСЬК[А-ЯІЇ]{1,2}\s+ОБЛ/g],
+  ['Хмельницька область', /ХМЕЛЬНИЦ/g],
+  ['Черкаська область', /ЧЕРКАС/g],
+  ['Чернігівська область', /ЧЕРНІГІВ/g],
+  ['Чернівецька область', /ЧЕРНІВЕЦ/g],
+  ['АР Крим', /КРИМ|КРЫМ/g],
+  ['Севастополь', /СЕВАСТ/g]
+]
+
+export function organUnitRegion(unit: string | null | undefined): string | null {
+  const u = unit?.toUpperCase()
+  if (!u) return null
+  let best: string | null = null
+  let bestAt = -1
+  for (const [region, re] of REGION_RULES) {
+    for (const m of u.matchAll(re)) {
+      if (m.index > bestAt) {
+        bestAt = m.index
+        best = region
+      }
+    }
+  }
+  return best
+}
+
 const text = (v: string | null | undefined): string | null => {
   const t = v?.trim()
   return t ? t : null
@@ -42,6 +92,7 @@ export function toWantedInsert(row: WantedFeedRow): Omit<WantedVehicleInsert, 'l
   if (!sourceId) return null
   const plate = text(row.vehiclenumber)
   const [vin = null, vinAlt = null] = feedVins(row)
+  const organUnit = text(row.organunit)
   return {
     sourceId,
     plate: plate ? normalizePlate(plate) : null,
@@ -53,6 +104,7 @@ export function toWantedInsert(row: WantedFeedRow): Omit<WantedVehicleInsert, 'l
     color: text(row.color),
     seizedAt: feedDate(row.illegalseizuredate),
     registeredAt: feedDate(row.insertdate),
-    organUnit: text(row.organunit)
+    organUnit,
+    region: organUnitRegion(organUnit)
   }
 }

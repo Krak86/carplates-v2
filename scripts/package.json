@@ -87,6 +87,7 @@
     "export:generations:csv": "tsx src/generations.ts --export-csv seed-data/model-generations.csv.gz",
     "ingest:ca-recalls": "tsx src/ca-recalls.ts",
     "ingest:wanted": "tsx src/wanted.ts",
+    "ingest:wanted-history": "tsx src/wanted-history.ts",
     "ingest:ca-recalls:csv": "tsx src/ca-recalls.ts --from-csv seed-data/ca-recalls.csv.gz",
     "export:ca-recalls:csv": "tsx src/ca-recalls.ts --export-csv seed-data/ca-recalls.csv.gz",
     "ingest:rdw-recalls": "tsx src/rdw-recalls.ts",

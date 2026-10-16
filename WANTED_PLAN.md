@@ -35,7 +35,7 @@ work, so it is split into halves.
 The scraper takes a month range: `pnpm ingest:wanted-history --from 2020-08 --to 2021-12` (months **and** details for that
 range; `--no-details` = month cards only). Re-running a range is safe: fetched ids are remembered in `wanted_scrape_ids`.
 
-1. **Foundation** (code, no long run) — migration 0074 (§1), `organUnitRegion` + `region` in the feed ingest (§2), the scraper
+1. ✅ **Foundation (2026-10-16, uncommitted)** (code, no long run) — migration 0074 (§1), `organUnitRegion` + `region` in the feed ingest (§2), the scraper
    with `--from/--to/--no-details`, parsers + HTML-fixture tests (§3), `source = 'feed'` guard in `wanted.ts`. Run
    `pnpm ingest:wanted` (fills `region`) and `pnpm ingest:wanted-history --from 2020-08 --to 2020-08` as a smoke test
    (Aug 2020: 388 cards, 287 found; spot-check `AP1577BP` → removed 2026-04-30).
@@ -62,6 +62,8 @@ Steps 2–6 are only data runs (no code), so they can run while 7–10 are built
 | 3       | 7–8   | Card history + stats API                                            |
 | 4       | 9     | `/wanted` page                                                      |
 | 5       | 10    | Links, home teaser, docs, releases                                  |
+
+Session 1 result: Aug 2020 smoke test = 388 cards / 287 found (header 401 / 297), 250 detail pages, `AP1577BP` has the 2026-04-30 removal; region null share 0.12 %. Resume at session 2 (step 2).
 
 Mark a step ✅ here when it is done (with the commit), so the next session knows where to resume.
 
