@@ -5,6 +5,7 @@ import {
   GENERATIONS_PATH,
   IMPORTS_PATH,
   PLATES_PATH,
+  SAFETY_PATH,
   SIZES_PATH
 } from '@/routes/read/links'
 import type { ArticleMeta, L10n, UpcomingTopic } from '@/routes/read/types'
@@ -51,6 +52,12 @@ export const IMPORTS_LEAD: L10n = {
   en: 'How many cars were brought in from abroad and how many bought through a dealer, which models are imported most, and what does the VIN say about the country of build? Plus what to check before buying.'
 }
 
+export const SAFETY_LEAD: L10n = {
+  ua: 'Які авто на наших дорогах мають оцінки краш-тестів, як вони змінюються з роками випуску і які моделі найкращі та найслабші? Ще — що ці оцінки не кажуть.',
+  ru: 'Какие авто на наших дорогах имеют оценки краш-тестов, как они меняются по годам выпуска и какие модели лучшие и слабейшие? А ещё — о чём эти оценки не говорят.',
+  en: 'Which cars on our roads have crash-test ratings, how do they change with the model year, and which models are the best and the weakest? Plus what those ratings do not tell you.'
+}
+
 /** The published explainers, in hub order. A new article = a route in App.tsx + `STATIC_PAGES` (spa-text.ts) + an entry here. */
 export const ARTICLES: readonly ArticleMeta[] = [
   { path: BODY_TYPES_PATH, icon: '🚙', titleKey: 'nav.readBodyTypes', lead: BODY_TYPES_LEAD },
@@ -59,7 +66,8 @@ export const ARTICLES: readonly ArticleMeta[] = [
   { path: PLATES_PATH, icon: '🔢', titleKey: 'nav.readPlates', lead: PLATES_LEAD },
   { path: GENERATIONS_PATH, icon: '🧬', titleKey: 'nav.readGenerations', lead: GENERATIONS_LEAD },
   { path: ELECTRIC_PATH, icon: '🔌', titleKey: 'nav.readElectric', lead: ELECTRIC_LEAD },
-  { path: IMPORTS_PATH, icon: '🚢', titleKey: 'nav.readImports', lead: IMPORTS_LEAD }
+  { path: IMPORTS_PATH, icon: '🚢', titleKey: 'nav.readImports', lead: IMPORTS_LEAD },
+  { path: SAFETY_PATH, icon: '🛡️', titleKey: 'nav.readSafety', lead: SAFETY_LEAD }
 ]
 
 /** Themes planned next, listed in the hub so readers see where it is going. */

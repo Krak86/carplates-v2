@@ -262,6 +262,23 @@ export const STATIC_PAGES: Record<string, Record<Lang, PageText>> = {
         'How many cars were brought in from abroad and how many bought through a dealer, which models are imported most, what the VIN says about the country of build and what to check before buying.'
     }
   },
+  '/read/safety': {
+    ua: {
+      title: 'Краш-тести: оцінки безпеки авто в Україні за роками й моделями · Cars UA',
+      description:
+        'Які авто в Україні мають оцінки Euro NCAP, IIHS, JNCAP, C-NCAP і KNCAP, як вони змінюються за роками випуску, які моделі найкращі та найслабші і чого ці оцінки не кажуть.'
+    },
+    ru: {
+      title: 'Краш-тесты: оценки безопасности авто в Украине по годам и моделям · Cars UA',
+      description:
+        'Какие авто в Украине имеют оценки Euro NCAP, IIHS, JNCAP, C-NCAP и KNCAP, как они меняются по годам выпуска, какие модели лучшие и слабейшие и о чём эти оценки не говорят.'
+    },
+    en: {
+      title: 'Crash tests: car safety ratings in Ukraine by year and model · Cars UA',
+      description:
+        'Which cars in Ukraine have Euro NCAP, IIHS, JNCAP, C-NCAP and KNCAP ratings, how they change with the model year, which models are the best and the weakest, and what the ratings do not tell you.'
+    }
+  },
   '/features': {
     ua: { title: 'Функції · Cars UA', description: 'Що ми створюємо для користувачів з обліковим записом.' },
     ru: { title: 'Функции · Cars UA', description: 'Что мы создаём для пользователей с учётной записью.' },

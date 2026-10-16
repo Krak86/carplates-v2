@@ -45,6 +45,12 @@ export const RELEASES: readonly ReleaseDay[] = [
         'Довідник /read/imports: авто з-за кордону — ввезені та куплені через дилера за роками, найчастіші моделі, країна збирання за VIN і що перевірити перед купівлею',
         'Справочник /read/imports: авто из-за границы — ввезённые и купленные через дилера по годам, самые частые модели, страна сборки по VIN и что проверить перед покупкой',
         'New /read/imports guide: cars from abroad — imported vs dealer-bought by year, the most imported models, country of build by VIN and what to check before buying'
+      ),
+      item(
+        'new',
+        'Довідник /read/safety: краш-тести — п’ять програм (Euro NCAP, IIHS, JNCAP, C-NCAP, KNCAP), оцінки автопарку, зміна за роками випуску, найкращі й найслабші моделі та межі цих оцінок',
+        'Справочник /read/safety: краш-тесты — пять программ (Euro NCAP, IIHS, JNCAP, C-NCAP, KNCAP), оценки автопарка, изменение по годам выпуска, лучшие и слабейшие модели и пределы этих оценок',
+        'New /read/safety guide: crash tests — the five programmes (Euro NCAP, IIHS, JNCAP, C-NCAP, KNCAP), the fleet’s ratings, change by model year, the best and weakest models and the limits of these ratings'
       )
     ]
   },
