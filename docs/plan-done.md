@@ -3777,3 +3777,7 @@ A hub of explainers built on the registry: **`/read`** (cards + a "coming next" 
 **Eleventh article `/read/extremes` (2026-10-16):** record holders — heaviest/lightest models by vehicle group (`WeightModelsPanel`, `?weight=`) and highest/lowest passenger cars by power, engine size, height, length and fuel tank (`SpecModelsPanel`), plus a "how to read" section. No new API, rollup or migration: both panels read `statsTopQuery()`.
 
 **Twelfth article `/read/recalls` (2026-10-16):** recalls vs common faults — a static "recall is not a worn part" explainer, a model picker (five curated models, `recalls/content.ts` `EXAMPLES`) driving two live blocks over the existing per-model endpoints: campaign counts per market (`rdwRecallsQuery`, `nhtsaRecallsQuery`, `caRecallsQuery`) and UK MOT fail rate by mileage vs the UK average plus the top fault groups (`motQuery`, folded in `recalls/helpers.ts`). No new API, rollup or migration. Wording stays model-level and market-labelled, never "your car has a recall".
+
+### Card → guide cross-links (2026-10-16)
+
+Each plate-card / VIN-page section now ends with a `ReadGuideLink` (pill, guide emoji, right arrow) to the /read guide on the same topic: no content is duplicated, only linked. Placement table and rules: `docs/features-reference.md` "Read guides". Guide icon / title key / hue moved into `GUIDE_META` so card chunks do not pull the long `articles.ts` leads.

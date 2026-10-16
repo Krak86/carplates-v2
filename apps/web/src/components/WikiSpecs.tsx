@@ -33,6 +33,8 @@ import {
 import { cn } from '@/lib/cn'
 import { wikiSpecsQuery } from '@/lib/queries'
 import { scrollElementIntoView } from '@/lib/share-section'
+import ReadGuideLink from '@/components/ReadGuideLink'
+import { GENERATIONS_PATH } from '@/routes/read/links'
 
 type Props = {
   brand: string | null
@@ -242,6 +244,7 @@ export default function WikiSpecs({ brand, model, year, own, kind, openSignal = 
               <WikiSourceLine source={match.dimensionsSource} />
             </VinToggleSection>
           )}
+          <ReadGuideLink guide={GENERATIONS_PATH} />
         </div>
       </div>
     </div>

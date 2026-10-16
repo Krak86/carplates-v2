@@ -3476,6 +3476,7 @@
   "read.explorer.more": "Показать ещё",
   "read.card.bodyLink": "Что такое «{{shape}}»?",
   "read.card.sizeLink": "Авто такого размера и класса",
+  "read.card.guide": "Справочник: {{title}}",
   "nav.readVin": "VIN-код простыми словами",
   "read.sec.vinAnatomy": "Устройство VIN",
   "read.sec.vinYears": "Коды года",

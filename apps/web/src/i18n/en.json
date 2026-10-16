@@ -2996,6 +2996,7 @@
   "read.explorer.more": "Show more",
   "read.card.bodyLink": "What is a “{{shape}}”?",
   "read.card.sizeLink": "Cars of this size and class",
+  "read.card.guide": "Guide: {{title}}",
   "nav.readVin": "VIN explained",
   "read.sec.vinAnatomy": "VIN anatomy",
   "read.sec.vinYears": "Year codes",

@@ -14,6 +14,38 @@ export const VIN_PATH = '/read/vin'
 export const EXTREMES_PATH = '/read/extremes'
 export const RECALLS_PATH = '/read/recalls'
 
+export const GUIDE_PATHS = [
+  BODY_TYPES_PATH,
+  SIZES_PATH,
+  FLEET_PATH,
+  PLATES_PATH,
+  VIN_PATH,
+  GENERATIONS_PATH,
+  ELECTRIC_PATH,
+  IMPORTS_PATH,
+  SAFETY_PATH,
+  FUEL_PATH,
+  EXTREMES_PATH,
+  RECALLS_PATH
+] as const
+export type GuidePath = (typeof GUIDE_PATHS)[number]
+
+/** Icon, `nav.*` title key and banner hue of each guide: light enough for the card chunks (the long leads stay in articles.ts). */
+export const GUIDE_META: Record<GuidePath, { icon: string; titleKey: string; hue: number }> = {
+  [BODY_TYPES_PATH]: { icon: '🚙', titleKey: 'nav.readBodyTypes', hue: 250 },
+  [SIZES_PATH]: { icon: '📏', titleKey: 'nav.readSizes', hue: 200 },
+  [FLEET_PATH]: { icon: '🎨', titleKey: 'nav.readFleet', hue: 330 },
+  [PLATES_PATH]: { icon: '🔢', titleKey: 'nav.readPlates', hue: 60 },
+  [VIN_PATH]: { icon: '🪪', titleKey: 'nav.readVin', hue: 285 },
+  [GENERATIONS_PATH]: { icon: '🧬', titleKey: 'nav.readGenerations', hue: 150 },
+  [ELECTRIC_PATH]: { icon: '🔌', titleKey: 'nav.readElectric', hue: 175 },
+  [IMPORTS_PATH]: { icon: '🚢', titleKey: 'nav.readImports', hue: 230 },
+  [SAFETY_PATH]: { icon: '🛡️', titleKey: 'nav.readSafety', hue: 25 },
+  [FUEL_PATH]: { icon: '⛽', titleKey: 'nav.readFuel', hue: 100 },
+  [EXTREMES_PATH]: { icon: '🏆', titleKey: 'nav.readExtremes', hue: 80 },
+  [RECALLS_PATH]: { icon: '🔧', titleKey: 'nav.readRecalls', hue: 45 }
+}
+
 /** Shapes the body-types article has a card for (the plate card links only these). */
 export const BODY_GUIDE_SHAPES = ['sedan', 'hatch', 'wagon', 'coupe', 'suv', 'mpv', 'van', 'pickup'] as const
 export type BodyGuideShape = (typeof BODY_GUIDE_SHAPES)[number]

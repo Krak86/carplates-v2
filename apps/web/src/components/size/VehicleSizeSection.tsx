@@ -13,8 +13,11 @@ import { useVehicleSize, type VehicleSizeInput } from '@/components/size/use-veh
 import SectionSkeleton from '@/components/ui/SectionSkeleton'
 import { toFieldMap } from '@/components/vin/helpers'
 import { cn } from '@/lib/cn'
+import { upperBrand } from '@/lib/display-brand'
 import { vinQuery } from '@/lib/queries'
 import { scrollElementIntoView } from '@/lib/share-section'
+import ReadGuideLink from '@/components/ReadGuideLink'
+import { readHref, SIZES_PATH } from '@/routes/read/links'
 
 // Each tab is its own chunk, fetched the first time it opens; the silhouette paths ride along with the schema tab only.
 const SizeSchemaTab = lazy(() => import('@/components/size/SizeSchemaTab'))
@@ -144,6 +147,15 @@ export default function VehicleSizeSection({ vin, vinFields, openSignal = 0, ...
               {activeTab === 'norms' && <SizeNormsTab dims={dims} cls={cls} />}
             </Suspense>
           )}
+          <ReadGuideLink
+            guide={SIZES_PATH}
+            href={readHref.sizes({
+              shape,
+              cls: cls?.cls,
+              brand: input.brand && upperBrand(input.brand),
+              model: input.model
+            })}
+          />
         </div>
       </div>
     </div>

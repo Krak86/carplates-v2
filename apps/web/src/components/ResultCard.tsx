@@ -81,7 +81,8 @@ import { hasImportOperation } from '@/lib/auction-sites'
 import { plateHistoryQuery, rdwQuery, vinQuery } from '@/lib/queries'
 import { scrollElementIntoView } from '@/lib/share-section'
 import { formatVehicleLabel } from '@/lib/vehicle-label'
-import { bodyGuideShape, readHref } from '@/routes/read/links'
+import { bodyGuideShape, FLEET_PATH, readHref } from '@/routes/read/links'
+import ReadGuideLink from '@/components/ReadGuideLink'
 import { useUiStore } from '@/store/ui-store'
 import SectionSkeleton from '@/components/ui/SectionSkeleton'
 
@@ -664,6 +665,8 @@ export default function ResultCard({ data }: Props): ReactNode {
                   }
                 />
               </div>
+
+              <ReadGuideLink guide={FLEET_PATH} />
             </div>
           </div>
 

@@ -7,6 +7,8 @@ import VinDecodeFields from '@/components/VinDecodeFields'
 import VinBarcode from '@/components/vin/VinBarcode'
 import VinOverview from '@/components/vin/VinOverview'
 import { cn } from '@/lib/cn'
+import ReadGuideLink from '@/components/ReadGuideLink'
+import { VIN_PATH } from '@/routes/read/links'
 
 type Props = {
   data: VinDecodeResponse
@@ -52,6 +54,7 @@ export default function VinDecodeTabs({ data, withBarcode, overviewExtras }: Pro
 
       {view === 'overview' ? <VinOverview data={data} /> : <VinDecodeFields results={data.results} />}
       <p className="mt-3 text-sm text-[var(--color-muted)]">{t('vin.source')}</p>
+      <ReadGuideLink guide={VIN_PATH} />
 
       {view === 'overview' && overviewExtras}
     </div>

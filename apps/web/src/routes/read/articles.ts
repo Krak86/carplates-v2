@@ -5,6 +5,7 @@ import {
   FLEET_PATH,
   FUEL_PATH,
   GENERATIONS_PATH,
+  GUIDE_META,
   IMPORTS_PATH,
   PLATES_PATH,
   RECALLS_PATH,
@@ -88,41 +89,20 @@ export const RECALLS_LEAD: L10n = {
 
 const PUBLISHED = '2026-10-16'
 
-/** The published explainers, in hub order. A new article = a route in App.tsx + `STATIC_PAGES` (spa-text.ts) + an entry here. */
+/** The published explainers, in hub order. A new article = a route in App.tsx + `STATIC_PAGES` (spa-text.ts) + `GUIDE_META` (links.ts) + an entry here. */
 export const ARTICLES: readonly ArticleMeta[] = [
-  {
-    path: BODY_TYPES_PATH,
-    icon: '🚙',
-    titleKey: 'nav.readBodyTypes',
-    lead: BODY_TYPES_LEAD,
-    published: PUBLISHED,
-    hue: 250
-  },
-  { path: SIZES_PATH, icon: '📏', titleKey: 'nav.readSizes', lead: SIZES_LEAD, published: PUBLISHED, hue: 200 },
-  { path: FLEET_PATH, icon: '🎨', titleKey: 'nav.readFleet', lead: FLEET_LEAD, published: PUBLISHED, hue: 330 },
-  { path: PLATES_PATH, icon: '🔢', titleKey: 'nav.readPlates', lead: PLATES_LEAD, published: PUBLISHED, hue: 60 },
-  { path: VIN_PATH, icon: '🪪', titleKey: 'nav.readVin', lead: VIN_LEAD, published: PUBLISHED, hue: 285 },
-  {
-    path: GENERATIONS_PATH,
-    icon: '🧬',
-    titleKey: 'nav.readGenerations',
-    lead: GENERATIONS_LEAD,
-    published: PUBLISHED,
-    hue: 150
-  },
-  {
-    path: ELECTRIC_PATH,
-    icon: '🔌',
-    titleKey: 'nav.readElectric',
-    lead: ELECTRIC_LEAD,
-    published: PUBLISHED,
-    hue: 175
-  },
-  { path: IMPORTS_PATH, icon: '🚢', titleKey: 'nav.readImports', lead: IMPORTS_LEAD, published: PUBLISHED, hue: 230 },
-  { path: SAFETY_PATH, icon: '🛡️', titleKey: 'nav.readSafety', lead: SAFETY_LEAD, published: PUBLISHED, hue: 25 },
-  { path: FUEL_PATH, icon: '⛽', titleKey: 'nav.readFuel', lead: FUEL_LEAD, published: PUBLISHED, hue: 100 },
-  { path: EXTREMES_PATH, icon: '🏆', titleKey: 'nav.readExtremes', lead: EXTREMES_LEAD, published: PUBLISHED, hue: 80 },
-  { path: RECALLS_PATH, icon: '🔧', titleKey: 'nav.readRecalls', lead: RECALLS_LEAD, published: PUBLISHED, hue: 45 }
+  { path: BODY_TYPES_PATH, ...GUIDE_META[BODY_TYPES_PATH], lead: BODY_TYPES_LEAD, published: PUBLISHED },
+  { path: SIZES_PATH, ...GUIDE_META[SIZES_PATH], lead: SIZES_LEAD, published: PUBLISHED },
+  { path: FLEET_PATH, ...GUIDE_META[FLEET_PATH], lead: FLEET_LEAD, published: PUBLISHED },
+  { path: PLATES_PATH, ...GUIDE_META[PLATES_PATH], lead: PLATES_LEAD, published: PUBLISHED },
+  { path: VIN_PATH, ...GUIDE_META[VIN_PATH], lead: VIN_LEAD, published: PUBLISHED },
+  { path: GENERATIONS_PATH, ...GUIDE_META[GENERATIONS_PATH], lead: GENERATIONS_LEAD, published: PUBLISHED },
+  { path: ELECTRIC_PATH, ...GUIDE_META[ELECTRIC_PATH], lead: ELECTRIC_LEAD, published: PUBLISHED },
+  { path: IMPORTS_PATH, ...GUIDE_META[IMPORTS_PATH], lead: IMPORTS_LEAD, published: PUBLISHED },
+  { path: SAFETY_PATH, ...GUIDE_META[SAFETY_PATH], lead: SAFETY_LEAD, published: PUBLISHED },
+  { path: FUEL_PATH, ...GUIDE_META[FUEL_PATH], lead: FUEL_LEAD, published: PUBLISHED },
+  { path: EXTREMES_PATH, ...GUIDE_META[EXTREMES_PATH], lead: EXTREMES_LEAD, published: PUBLISHED },
+  { path: RECALLS_PATH, ...GUIDE_META[RECALLS_PATH], lead: RECALLS_LEAD, published: PUBLISHED }
 ]
 
 /** Themes planned next, listed in the hub so readers see where it is going. */

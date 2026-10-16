@@ -7,6 +7,8 @@ import type { PlateSegmentId } from '@/components/PlateSegments.helpers'
 import SegmentExplainer from '@/components/SegmentExplainer'
 import { useRegionLabel } from '@/lib/region-label'
 import type { SegmentColor } from '@/components/SegmentExplainer'
+import ReadGuideLink from '@/components/ReadGuideLink'
+import { PLATES_PATH } from '@/routes/read/links'
 
 type Props = {
   plate: string
@@ -36,19 +38,22 @@ export default function PlateSegments({ plate, region }: Props): ReactNode {
   }
 
   return (
-    <SegmentExplainer
-      hint={t('plate.seg.hint')}
-      hintInline
-      collapseOnMobile
-      label={t('plate.seg.label')}
-      segments={segments.map(s => ({
-        id: s.id,
-        text: s.text,
-        color: SEGMENT_COLOR[s.id],
-        title: t(`plate.seg.${s.id}.title`),
-        positions: t('vin.seg.positions', { range: s.positions }),
-        desc: t(`plate.seg.${s.id}.desc`, params)
-      }))}
-    />
+    <>
+      <SegmentExplainer
+        hint={t('plate.seg.hint')}
+        hintInline
+        collapseOnMobile
+        label={t('plate.seg.label')}
+        segments={segments.map(s => ({
+          id: s.id,
+          text: s.text,
+          color: SEGMENT_COLOR[s.id],
+          title: t(`plate.seg.${s.id}.title`),
+          positions: t('vin.seg.positions', { range: s.positions }),
+          desc: t(`plate.seg.${s.id}.desc`, params)
+        }))}
+      />
+      <ReadGuideLink guide={PLATES_PATH} />
+    </>
   )
 }
