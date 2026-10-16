@@ -15,6 +15,8 @@ import SpecsJumpLink from '@/components/SpecsJumpLink'
 import { cn } from '@/lib/cn'
 import { fuelEconomyQuery, rdwQuery } from '@/lib/queries'
 import { scrollElementIntoView } from '@/lib/share-section'
+import ReadGuideLink from '@/components/ReadGuideLink'
+import { FUEL_PATH } from '@/routes/read/links'
 
 type Props = {
   brand: string | null
@@ -125,6 +127,7 @@ export default function FuelEconomy({ brand, model, year, fuel, capacity, kind, 
                 carYear={year}
               />
             )}
+            <ReadGuideLink guide={FUEL_PATH} />
           </div>
         </div>
       </div>

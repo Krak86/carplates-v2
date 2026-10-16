@@ -38,6 +38,8 @@ import { cn } from '@/lib/cn'
 import { motQuery } from '@/lib/queries'
 import { scrollElementIntoView } from '@/lib/share-section'
 import SectionSkeleton from '@/components/ui/SectionSkeleton'
+import ReadGuideLink from '@/components/ReadGuideLink'
+import { RECALLS_PATH } from '@/routes/read/links'
 
 type Props = {
   brand: string | null
@@ -458,6 +460,8 @@ export default function MotFaults({ brand, model, year, kind, fuel }: Props): Re
                   data.gov.uk
                 </a>
               </p>
+
+              <ReadGuideLink guide={RECALLS_PATH} />
             </>
           )}
         </div>

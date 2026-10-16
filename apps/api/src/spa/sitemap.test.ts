@@ -9,6 +9,17 @@ describe('sitemap', () => {
       expect(paths).toContain(p)
     }
     expect(paths).toContain('/advanced-search')
+    for (const p of [
+      '/read',
+      '/read/body-types',
+      '/read/sizes',
+      '/read/fleet',
+      '/read/plates',
+      '/read/generations',
+      '/read/vin',
+      '/read/recalls'
+    ])
+      expect(paths).toContain(p)
     expect(paths).not.toContain('/history')
     expect(paths).not.toContain('/favorites')
   })
@@ -17,6 +28,7 @@ describe('sitemap', () => {
     const xml = renderSitemap('https://carsua.app')
     expect(xml).toContain('<loc>https://carsua.app</loc>')
     expect(xml).toContain('<loc>https://carsua.app/about</loc>')
+    expect(xml).toContain('<loc>https://carsua.app/read/body-types</loc>')
   })
 
   it('lists every language of a page with hreflang alternates', () => {

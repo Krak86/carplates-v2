@@ -78,13 +78,13 @@ export function rankOfModel(
  * an exact figure would need a dedicated rollup grouped by a normalized fuel expression.
  */
 function fuelRows(stats: StatsResponse): StatsRow[] {
-  const known = stats.byFuel.filter(r => isKnownFuel(r.value)).map(r => ({ ...r, label: r.value ?? '—', year: null }))
+  const known = stats.byFuel.filter(r => isKnownFuel(r.value)).map(r => ({ ...r, label: r.value ?? '-', year: null }))
   const unknown = stats.byFuel.filter(r => !isKnownFuel(r.value))
   if (unknown.length === 0) return known
   return [
     ...known,
     {
-      label: '—',
+      label: '-',
       year: null,
       totalRows: unknown.reduce((sum, r) => sum + r.totalRows, 0),
       distinctPlates: unknown.reduce((sum, r) => sum + r.distinctPlates, 0),
@@ -97,25 +97,25 @@ function fuelRows(stats: StatsResponse): StatsRow[] {
 export function dimensionRows(stats: StatsResponse, dim: StatsDimension): StatsRow[] {
   switch (dim) {
     case 'year':
-      return stats.byYear.map(r => ({ ...r, label: r.year === null ? '—' : String(r.year), year: r.year }))
+      return stats.byYear.map(r => ({ ...r, label: r.year === null ? '-' : String(r.year), year: r.year }))
     case 'region':
       return stats.byRegion.map(r => ({ ...r, label: r.region, year: null }))
     case 'regionYear':
       return stats.byRegionYear.map(r => ({ ...r, label: r.region, year: r.year }))
     case 'body':
-      return stats.byBody.map(r => ({ ...r, label: r.value ?? '—', year: null }))
+      return stats.byBody.map(r => ({ ...r, label: r.value ?? '-', year: null }))
     case 'kind':
-      return stats.byKind.map(r => ({ ...r, label: r.value ?? '—', year: null }))
+      return stats.byKind.map(r => ({ ...r, label: r.value ?? '-', year: null }))
     case 'color':
-      return stats.byColor.map(r => ({ ...r, label: r.value ?? '—', year: null }))
+      return stats.byColor.map(r => ({ ...r, label: r.value ?? '-', year: null }))
     case 'fuel':
       return fuelRows(stats)
     case 'brand':
-      return stats.byBrand.map(r => ({ ...r, label: r.value ?? '—', year: null }))
+      return stats.byBrand.map(r => ({ ...r, label: r.value ?? '-', year: null }))
     case 'brandYear':
-      return stats.byBrandYear.map(r => ({ ...r, label: r.brand ?? '—', year: r.year }))
+      return stats.byBrandYear.map(r => ({ ...r, label: r.brand ?? '-', year: r.year }))
     case 'origin':
-      return stats.byOrigin.map(r => ({ ...r, label: r.value ?? '—', year: null }))
+      return stats.byOrigin.map(r => ({ ...r, label: r.value ?? '-', year: null }))
   }
 }
 

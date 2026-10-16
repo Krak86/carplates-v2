@@ -19,6 +19,8 @@ import SectionHeader from '@/components/SectionHeader'
 import ShareButton from '@/components/ShareButton'
 import { cn } from '@/lib/cn'
 import { scrollElementIntoView } from '@/lib/share-section'
+import ReadGuideLink from '@/components/ReadGuideLink'
+import { SAFETY_PATH } from '@/routes/read/links'
 
 type Props = {
   brand: string | null
@@ -235,6 +237,7 @@ export default function SafetyRatings({ brand, model, year, body }: Props): Reac
               {source === 'kncap' && <KncapRatings brand={brand} model={model} year={year} active={open} />}
               {source === 'iihs' && <IihsRatings brand={brand} model={model} year={year} body={body} active={open} />}
             </div>
+            <ReadGuideLink guide={SAFETY_PATH} />
           </div>
         </div>
       </div>

@@ -6,7 +6,7 @@ const STAR_EMPTY = '☆'
 /** NHTSA ratings are usually "1".."5", but sometimes "Not Rated" — render whichever applies. */
 export function formatStars(rating: string | null): string {
   const n = rating != null ? Number(rating) : NaN
-  if (!Number.isInteger(n) || n < 1 || n > 5) return rating ?? '—'
+  if (!Number.isInteger(n) || n < 1 || n > 5) return rating ?? '-'
   return STAR_FILLED.repeat(n) + STAR_EMPTY.repeat(5 - n)
 }
 
@@ -40,7 +40,7 @@ export function averageStarRating(ratings: readonly (string | null)[]): number |
 
 /** Rounded stars for the glyphs, exact decimal alongside for precision an integer star count would lose. */
 export function formatAverageStars(average: number | null): string {
-  if (average == null) return '—'
+  if (average == null) return '-'
   return `${formatStars(String(Math.round(average)))} (${average.toFixed(1)})`
 }
 

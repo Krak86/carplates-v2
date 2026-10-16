@@ -35,6 +35,8 @@ import {
   valueWarnings
 } from '@/components/EstimatedValue.helpers'
 import { buildGenerationSection, buildSizeSection } from '@/lib/export-size'
+import { buildNewsSections, buildSourcesSection } from '@/lib/export-news'
+import type { ExportNewsInput } from '@/lib/export-news'
 import { buildMotSections, buildRecallSections } from '@/lib/export-recalls-mot'
 import { orderedEditions } from '@/components/PressReviews.helpers'
 import { decileBand, isRareElsewhere } from '@/components/VdbChips.helpers'
@@ -144,7 +146,7 @@ export type ExportReport = {
 
 export type ExportVehicleInfo = { brand: string | null; model: string | null; year: number | null; body: string | null }
 
-export type ExportInput = {
+export type ExportInput = ExportNewsInput & {
   vehicle: ExportVehicleInfo
   plate: string | null
   region: string | null
@@ -218,7 +220,7 @@ function buildVehicleSection(input: ExportInput, t: Translate): ExportKeyValueSe
     if (c.capacity == null || c.powerKwt != null) pushRow(rows, t('field.power'), c.powerKwt)
     pushRow(rows, t('field.color'), c.color)
     pushRow(rows, t('field.fuel'), c.fuel)
-    pushRow(rows, t('field.weight'), c.ownWeight != null ? `${c.ownWeight} / ${c.totalWeight ?? '—'}` : null)
+    pushRow(rows, t('field.weight'), c.ownWeight != null ? `${c.ownWeight} / ${c.totalWeight ?? '-'}` : null)
     pushRow(rows, t('field.kind'), c.kind)
     pushRow(rows, t('field.purpose'), c.purpose)
     pushRow(
@@ -287,13 +289,13 @@ function buildVinDecodeSection(input: ExportInput, t: Translate): ExportKeyValue
 function historyRow(action: Registration, t: Translate, lang: string): string[] {
   const region = plateRegionLabel(action.plate, t, lang)
   return [
-    action.dReg ?? '—',
-    action.plate ?? '—',
+    action.dReg ?? '-',
+    action.plate ?? '-',
     region,
-    action.dep ?? '—',
-    [action.brand, action.model].filter(Boolean).join(' ') || '—',
-    action.makeYear != null ? String(action.makeYear) : '—',
-    action.operName ?? '—'
+    action.dep ?? '-',
+    [action.brand, action.model].filter(Boolean).join(' ') || '-',
+    action.makeYear != null ? String(action.makeYear) : '-',
+    action.operName ?? '-'
   ]
 }
 
@@ -526,24 +528,24 @@ function buildReviewsSection(input: ExportInput, t: Translate): ExportTableSecti
   for (const [label, match] of infocar) {
     if (!match) continue
     const hasStats = match.level !== 'brand' && match.reviewCount !== null && match.avgRating !== null
-    const stats = hasStats ? t('reviews.stats', { count: match.reviewCount, rating: match.avgRating?.toFixed(1) }) : '—'
+    const stats = hasStats ? t('reviews.stats', { count: match.reviewCount, rating: match.avgRating?.toFixed(1) }) : '-'
     const years = yearFilterLabel(match.yearUrl)
     if (match.yearUrl && years) {
-      rows.push(['infocar.ua', `${label} — ${t('reviews.forYears', { years })}`, stats, match.yearUrl])
+      rows.push(['infocar.ua', `${label} - ${t('reviews.forYears', { years })}`, stats, match.yearUrl])
     }
     for (const link of infocarLinks(match)) {
-      rows.push(['infocar.ua', `${label} — ${link.title ?? match.modelName ?? ''}`.trim(), stats, link.url])
+      rows.push(['infocar.ua', `${label} - ${link.title ?? match.modelName ?? ''}`.trim(), stats, link.url])
     }
   }
 
   for (const review of data.press) {
     const [main] = orderedEditions(review, input.lang)
     const entry = main ? review.langs[main] : undefined
-    if (entry) rows.push([review.source === 'itc' ? 'ITC.ua' : 'Mezha', entry.title, '—', entry.url])
+    if (entry) rows.push([review.source === 'itc' ? 'ITC.ua' : 'Mezha', entry.title, '-', entry.url])
   }
-  for (const post of data.ownerPosts) rows.push(['e-drive.com.ua', post.title, '—', post.url])
+  for (const post of data.ownerPosts) rows.push(['e-drive.com.ua', post.title, '-', post.url])
   for (const review of data.topgear) {
-    const rating = review.rating !== null ? `${review.rating}/${review.bestRating ?? 10}` : '—'
+    const rating = review.rating !== null ? `${review.rating}/${review.bestRating ?? 10}` : '-'
     rows.push(['TopGear', review.title, rating, review.url])
   }
 
@@ -561,7 +563,7 @@ function buildWikiSection(input: ExportInput, t: Translate): ExportKeyValueSecti
   const wiki = input.wiki
   if (!wiki?.found) return null
   const rows: Row[] = []
-  pushRow(rows, t('export.wikiTitle'), [wiki.title, wiki.description].filter(Boolean).join(' — '))
+  pushRow(rows, t('export.wikiTitle'), [wiki.title, wiki.description].filter(Boolean).join(' - '))
   // Intro only: the "Read more" body is long and overlaps the other sections.
   pushRow(rows, t('export.wikiSummary'), wiki.extract)
   pushRow(rows, t('export.wikiPage'), wiki.pageUrl)
@@ -611,17 +613,17 @@ function euroncapTable(data: EuroNcapRatingsResponse | null, t: Translate): Expo
   ]
   const rows = data.ratings.map(r => [
     r.assessmentId === data.applicableAssessmentId ? t('export.yes') : '',
-    r.testedVariant ?? '—',
-    r.ratingYear != null ? String(r.ratingYear) : '—',
-    r.stars != null ? String(r.stars) : '—',
-    r.adultOccupantPct != null ? `${r.adultOccupantPct}%` : '—',
-    r.childOccupantPct != null ? `${r.childOccupantPct}%` : '—',
-    r.vulnerableRoadUsersPct != null ? `${r.vulnerableRoadUsersPct}%` : '—',
-    r.safetyAssistPct != null ? `${r.safetyAssistPct}%` : '—',
+    r.testedVariant ?? '-',
+    r.ratingYear != null ? String(r.ratingYear) : '-',
+    r.stars != null ? String(r.stars) : '-',
+    r.adultOccupantPct != null ? `${r.adultOccupantPct}%` : '-',
+    r.childOccupantPct != null ? `${r.childOccupantPct}%` : '-',
+    r.vulnerableRoadUsersPct != null ? `${r.vulnerableRoadUsersPct}%` : '-',
+    r.safetyAssistPct != null ? `${r.safetyAssistPct}%` : '-',
     r.safetyPack ? t('export.yes') : '',
     r.url,
-    r.reportPdfUrl ?? '—',
-    r.youtubeIds.map(id => `https://youtu.be/${id}`).join('; ') || '—'
+    r.reportPdfUrl ?? '-',
+    r.youtubeIds.map(id => `https://youtu.be/${id}`).join('; ') || '-'
   ])
   const note = joinNotes(t, [
     'safety.euroncapRatingsInfoStars',
@@ -655,21 +657,21 @@ function nhtsaTable(data: SafetyRatingsResponse | null, body: string | null, t: 
   ]
   const rows = ratings.map(r => [
     r.description,
-    r.overallRating ?? '—',
-    r.overallFrontCrashRating ?? '—',
-    r.overallSideCrashRating ?? '—',
-    r.rolloverRating ?? '—',
-    r.sidePoleCrashRating ?? '—',
-    formatPercent(r.rolloverPossibility) ?? '—',
-    r.electronicStabilityControl ?? '—',
-    r.forwardCollisionWarning ?? '—',
-    r.laneDepartureWarning ?? '—',
-    r.complaintsCount != null ? String(r.complaintsCount) : '—',
-    r.recallsCount != null ? String(r.recallsCount) : '—',
+    r.overallRating ?? '-',
+    r.overallFrontCrashRating ?? '-',
+    r.overallSideCrashRating ?? '-',
+    r.rolloverRating ?? '-',
+    r.sidePoleCrashRating ?? '-',
+    formatPercent(r.rolloverPossibility) ?? '-',
+    r.electronicStabilityControl ?? '-',
+    r.forwardCollisionWarning ?? '-',
+    r.laneDepartureWarning ?? '-',
+    r.complaintsCount != null ? String(r.complaintsCount) : '-',
+    r.recallsCount != null ? String(r.recallsCount) : '-',
     [r.frontCrashVideo, r.sideCrashVideo, r.sidePoleVideo]
       .filter((v): v is string => v != null)
       .map(v => safetyVideoUrl(v))
-      .join('; ') || '—'
+      .join('; ') || '-'
   ])
   const note = joinNotes(t, [
     'safety.ratingsInfoStars',
@@ -703,16 +705,16 @@ function jncapTable(data: JncapRatingsResponse | null, t: Translate): ExportTabl
   ]
   const rows = data.ratings.map(r => [
     r.assessmentId === data.applicableAssessmentId ? t('export.yes') : '',
-    r.ratingYear != null ? String(r.ratingYear) : '—',
-    r.stars != null ? String(r.stars) : '—',
-    r.overallPct != null ? `${r.overallPct}%` : '—',
-    [r.preventiveRank, r.preventivePct != null ? `${r.preventivePct}%` : null].filter(Boolean).join(' / ') || '—',
-    [r.collisionRank, r.collisionPct != null ? `${r.collisionPct}%` : null].filter(Boolean).join(' / ') || '—',
+    r.ratingYear != null ? String(r.ratingYear) : '-',
+    r.stars != null ? String(r.stars) : '-',
+    r.overallPct != null ? `${r.overallPct}%` : '-',
+    [r.preventiveRank, r.preventivePct != null ? `${r.preventivePct}%` : null].filter(Boolean).join(' / ') || '-',
+    [r.collisionRank, r.collisionPct != null ? `${r.collisionPct}%` : null].filter(Boolean).join(' / ') || '-',
     [r.emergencyCallType, r.emergencyCallPct != null ? `${r.emergencyCallPct}%` : null].filter(Boolean).join(' / ') ||
-      '—',
+      '-',
     r.url,
-    r.reportPdfUrl ?? '—',
-    r.youtubeId ? `https://youtu.be/${r.youtubeId}` : '—'
+    r.reportPdfUrl ?? '-',
+    r.youtubeId ? `https://youtu.be/${r.youtubeId}` : '-'
   ])
   const note = joinNotes(t, [
     'safety.jncapRatingsInfoStars',
@@ -736,15 +738,15 @@ function cncapTable(data: CncapRatingsResponse | null, t: Translate): ExportTabl
     t('safety.cncapOriginalName')
   ]
   const fmt = (v: number | null, unit: CncapRatingsResponse['ratings'][number]['scoreUnit']): string =>
-    v == null ? '—' : unit === 'pct' ? `${v}%` : `${v} ${t('safety.cncapPoints')}`
+    v == null ? '-' : unit === 'pct' ? `${v}%` : `${v} ${t('safety.cncapPoints')}`
   const rows = data.ratings.map(r => [
     r.assessmentId === data.applicableAssessmentId ? t('export.yes') : '',
-    r.ratingYear != null ? String(r.ratingYear) : '—',
+    r.ratingYear != null ? String(r.ratingYear) : '-',
     fmt(r.overallScore, r.scoreUnit),
     fmt(r.occupantScore, r.scoreUnit),
     fmt(r.vruScore, r.scoreUnit),
     fmt(r.activeSafetyScore, r.scoreUnit),
-    r.vehicleClass ? t(`safety.cncapClass.${r.vehicleClass}`) : '—',
+    r.vehicleClass ? t(`safety.cncapClass.${r.vehicleClass}`) : '-',
     r.nameZh
   ])
   const note = joinNotes(t, [
@@ -770,12 +772,12 @@ function kncapTable(data: KncapRatingsResponse | null, t: Translate): ExportTabl
     t('safety.kncapOriginalName')
   ]
   const cat = (star: number | null, pct: number | null): string =>
-    [star != null ? `${star}★` : null, pct != null ? `${pct}%` : null].filter(Boolean).join(' / ') || '—'
+    [star != null ? `${star}★` : null, pct != null ? `${pct}%` : null].filter(Boolean).join(' / ') || '-'
   const rows = data.ratings.map(r => [
     r.assessmentId === data.applicableAssessmentId ? t('export.yes') : '',
-    r.ratingYear != null ? String(r.ratingYear) : '—',
-    r.overallClass != null ? t('safety.kncapClass', { n: r.overallClass }) : '—',
-    r.overallScore != null ? `${r.overallScore}%` : '—',
+    r.ratingYear != null ? String(r.ratingYear) : '-',
+    r.overallClass != null ? t('safety.kncapClass', { n: r.overallClass }) : '-',
+    r.overallScore != null ? `${r.overallScore}%` : '-',
     cat(r.crashStar, r.crashPct),
     cat(r.pedestrianStar, r.pedestrianPct),
     cat(r.accidentStar, r.accidentPct),
@@ -815,11 +817,11 @@ function iihsTable(data: IihsRatingsResponse | null, body: string | null, t: Tra
     g.applicable ? t('export.yes') : '',
     g.variantType,
     g.yearFrom === g.yearTo ? String(g.yearFrom) : `${g.yearFrom}–${g.yearTo}`,
-    g.award ?? '—',
+    g.award ?? '-',
     g.tests
       .filter(test => test.rating != null)
       .map(test => `${test.label}: ${test.rating}${test.qualifier ? ` (${test.qualifier})` : ''}`)
-      .join('; ') || '—',
+      .join('; ') || '-',
     iihsDetailUrl(g.primaryAssessmentId)
   ])
   const note = joinNotes(t, ['safety.iihsRatingsInfoScale', 'safety.iihsRatingsInfoFcp', 'safety.iihsRatingsInfoAward'])
@@ -841,20 +843,20 @@ function collectMedia(
 
   input.euroncap?.ratings.forEach(r => {
     const label = r.testedVariant ?? t('safety.tabEuroNcap')
-    r.youtubeIds.forEach(id => addVideo(`${t('safety.tabEuroNcap')} — ${label}`, `https://youtu.be/${id}`))
+    r.youtubeIds.forEach(id => addVideo(`${t('safety.tabEuroNcap')} - ${label}`, `https://youtu.be/${id}`))
   })
   input.nhtsa?.ratings.forEach(r => {
-    addImage(`${t('safety.tabNhtsa')} — ${r.description} (${t('safety.front')})`, r.frontCrashPicture)
-    addImage(`${t('safety.tabNhtsa')} — ${r.description} (${t('safety.side')})`, r.sideCrashPicture)
-    addImage(`${t('safety.tabNhtsa')} — ${r.description} (${t('safety.sidePole')})`, r.sidePolePicture)
+    addImage(`${t('safety.tabNhtsa')} - ${r.description} (${t('safety.front')})`, r.frontCrashPicture)
+    addImage(`${t('safety.tabNhtsa')} - ${r.description} (${t('safety.side')})`, r.sideCrashPicture)
+    addImage(`${t('safety.tabNhtsa')} - ${r.description} (${t('safety.sidePole')})`, r.sidePolePicture)
     ;[r.frontCrashVideo, r.sideCrashVideo, r.sidePoleVideo].forEach(
-      v => v != null && addVideo(`${t('safety.tabNhtsa')} — ${r.description}`, safetyVideoUrl(v))
+      v => v != null && addVideo(`${t('safety.tabNhtsa')} - ${r.description}`, safetyVideoUrl(v))
     )
   })
   input.jncap?.ratings.forEach(r => {
     if (r.youtubeId) addVideo(t('safety.tabJncap'), `https://youtu.be/${r.youtubeId}`)
   })
-  input.reviews?.videos.forEach(v => addVideo(`${t('videos.title')} — ${v.title}`, v.url))
+  input.reviews?.videos.forEach(v => addVideo(`${t('videos.title')} - ${v.title}`, v.url))
   if (input.wiki?.image) addImage(t('wiki.title'), input.wiki.image.url)
 
   const images_ = [...images.entries()].map(([url, label]) => ({ label, url }))
@@ -872,7 +874,7 @@ export type ExportLocalRecord = { value: string; label: string | null; date: num
  *  (see LocalRecordsExportButton), not a per-vehicle deep dive like buildExportReport above. */
 export function buildLocalRecordsReport(title: string, entries: ExportLocalRecord[], t: Translate): ExportReport {
   const columns = [t('export.value'), t('export.label'), t('export.date')]
-  const rows = entries.map(e => [e.value, e.label ?? '—', new Date(e.date).toLocaleString()])
+  const rows = entries.map(e => [e.value, e.label ?? '-', new Date(e.date).toLocaleString()])
   return {
     title,
     subtitle: t('export.recordCount', { count: entries.length }),
@@ -917,8 +919,10 @@ export function buildExportReport(input: ExportInput, t: Translate): ExportRepor
     ...buildMotSections(input.mot, t, input.lang),
     buildReviewsSection(input, t),
     buildWikiSection(input, t),
+    ...buildNewsSections(input, t, input.lang),
     media.images,
-    media.videos
+    media.videos,
+    buildSourcesSection(input, t)
   ]
 
   return {

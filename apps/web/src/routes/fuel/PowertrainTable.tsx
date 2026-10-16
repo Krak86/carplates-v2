@@ -63,13 +63,13 @@ export default function PowertrainTable({ classes, selected, onSelect }: Props):
               <td className="px-2 text-right tabular-nums">{numberFormat.format(c.models)}</td>
               <td className="px-2 text-right tabular-nums">{numberFormat.format(c.brands)}</td>
               <td className="max-w-[12rem] truncate px-2">
-                {c.topModel ? `${c.topModel.brand} ${c.topModel.model}` : '—'}
+                {c.topModel ? `${c.topModel.brand} ${c.topModel.model}` : '-'}
               </td>
               <td
                 className="px-2 text-right tabular-nums"
                 style={c.avgCo2 != null ? { color: CO2_BAND_COLOR[bandForCo2(c.avgCo2)] } : undefined}
               >
-                {c.avgCo2 != null ? Math.round(c.avgCo2) : '—'}
+                {c.avgCo2 != null ? Math.round(c.avgCo2) : '-'}
               </td>
             </tr>
           ))}

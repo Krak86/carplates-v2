@@ -1087,6 +1087,28 @@ export const statsSpec = registry.table(
 export type StatsSpecInsert = typeof statsSpec.$inferInsert
 
 /**
+ * One row per Ukrainian passenger model: dominant registry body + catalogue dimensions (mm). Backs the /read/body-types and
+ * /read/sizes articles and the size explorer. Rebuilt by scripts/src/spec-stats.ts; see migration 0071.
+ */
+export const statsSizeModels = registry.table(
+  'stats_size_models',
+  {
+    brand: text('brand').notNull(),
+    model: text('model').notNull(),
+    n: integer('n').notNull(),
+    body: text('body'),
+    rdwBody: text('rdw_body'),
+    lengthMm: integer('length_mm'),
+    widthMm: integer('width_mm'),
+    heightMm: integer('height_mm'),
+    wheelbaseMm: integer('wheelbase_mm'),
+    source: text('source')
+  },
+  t => [primaryKey({ columns: [t.brand, t.model] })]
+)
+export type StatsSizeModelInsert = typeof statsSizeModels.$inferInsert
+
+/**
  * Fleet histograms per metric (power_kw, hp_per_tonne, displacement_cc) of passenger cars: `bucket` = lower edge in the
  * metric's unit, `n` = cars. Backs the card's percentile bars. Rebuilt by scripts/src/spec-stats.ts; see migration 0070.
  */
@@ -1502,3 +1524,39 @@ export const motMeta = registry.table('mot_meta', {
   years: smallint('years').array(),
   loadedAt: timestamp('loaded_at', { withTimezone: true }).notNull().defaultNow()
 })
+
+/**
+ * Electrified passenger cars per powertrain ('bev' | 'hybrid'), model year, plate region ('' = none) and model. Backs the
+ * /read/electric article. Rebuilt by scripts/src/ev-stats.ts; see migration 0072.
+ */
+export const statsEv = registry.table(
+  'stats_ev',
+  {
+    powertrain: text('powertrain').notNull(),
+    makeYear: integer('make_year').notNull(),
+    region: text('region').notNull().default(''),
+    brand: text('brand').notNull(),
+    model: text('model').notNull(),
+    n: integer('n').notNull()
+  },
+  t => [primaryKey({ columns: [t.powertrain, t.makeYear, t.region, t.brand, t.model] })]
+)
+export type StatsEvInsert = typeof statsEv.$inferInsert
+
+/**
+ * Passenger cars per origin ('import' | 'dealer'), year of that operation, VIN build country ('' = unknown) and model. Backs
+ * the /read/imports article. Rebuilt by scripts/src/imports-stats.ts; see migration 0073.
+ */
+export const statsImports = registry.table(
+  'stats_imports',
+  {
+    origin: text('origin').notNull(),
+    regYear: integer('reg_year').notNull(),
+    country: text('country').notNull().default(''),
+    brand: text('brand').notNull(),
+    model: text('model').notNull(),
+    n: integer('n').notNull()
+  },
+  t => [primaryKey({ columns: [t.origin, t.regYear, t.country, t.brand, t.model] })]
+)
+export type StatsImportsInsert = typeof statsImports.$inferInsert

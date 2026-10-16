@@ -22,6 +22,19 @@ export const ROUTE_TITLE_KEYS: Record<string, string> = {
   '/race': 'nav.race',
   '/relax': 'nav.relax',
   '/releases': 'nav.releases',
+  '/read': 'nav.read',
+  '/read/body-types': 'nav.readBodyTypes',
+  '/read/sizes': 'nav.readSizes',
+  '/read/fleet': 'nav.readFleet',
+  '/read/plates': 'nav.readPlates',
+  '/read/generations': 'nav.readGenerations',
+  '/read/electric': 'nav.readElectric',
+  '/read/imports': 'nav.readImports',
+  '/read/safety': 'nav.readSafety',
+  '/read/fuel': 'nav.readFuel',
+  '/read/vin': 'nav.readVin',
+  '/read/extremes': 'nav.readExtremes',
+  '/read/recalls': 'nav.readRecalls',
   '/features': 'nav.features',
   '/settings': 'nav.settings',
   '/profile': 'auth.profile',
@@ -44,6 +57,6 @@ export function useDocumentTitle(page: string | null | undefined): void {
 
   useEffect(() => {
     if (page === undefined) return
-    document.title = page ? `${page} · ${appName}` : `${appName} — ${tagline}`
+    document.title = page ? `${page} · ${appName}` : `${appName} - ${tagline}`
   }, [page, appName, tagline])
 }

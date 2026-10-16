@@ -12,7 +12,7 @@ type TileProps = { label: string; value: number | null }
 function Tile({ label, value }: TileProps): ReactNode {
   return (
     <Card>
-      <div className="text-2xl font-bold tabular-nums">{value === null ? '—' : value.toLocaleString()}</div>
+      <div className="text-2xl font-bold tabular-nums">{value === null ? '-' : value.toLocaleString()}</div>
       <div className="text-sm text-[var(--color-muted)]">{label}</div>
     </Card>
   )
@@ -92,7 +92,7 @@ export default function AdminStatsTab(): ReactNode {
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <h2 className="mb-2 font-semibold">{t('admin.stats.languages')}</h2>
-          {languages.length === 0 && <p className="text-sm text-[var(--color-muted)]">—</p>}
+          {languages.length === 0 && <p className="text-sm text-[var(--color-muted)]">-</p>}
           {languages.map(l => (
             <div key={l.lang} className="flex justify-between text-sm tabular-nums">
               <span>{l.lang}</span>

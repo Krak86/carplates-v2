@@ -35,7 +35,7 @@ export default function VdbChips({ brand, model, kind }: Props): ReactNode {
   const nameOf = (code: string): string => countryName(code.toUpperCase(), lang)
   const names = (codes: readonly string[]): string => codes.map(nameOf).join(', ')
   // One "ES — Spain" bullet per covered register: the short code the flags stand for, with the full name.
-  const legend = COVERED_MARKETS.map(c => `${c.toUpperCase()} — ${nameOf(c)}`)
+  const legend = COVERED_MARKETS.map(c => `${c.toUpperCase()} - ${nameOf(c)}`)
   // Answers persisted in IndexedDB before crossMake/aliases existed lack them (the cache is not re-parsed with Zod).
   const aliases = match.aliases ?? []
   // Other names of the same car: the catalog's make+model when it files it under another make, then its aliases.

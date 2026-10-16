@@ -1,7 +1,14 @@
 import { Controller, Get, Inject, Param } from '@nestjs/common'
 import { ApiOkResponse, ApiParam, ApiTags } from '@nestjs/swagger'
 import { STATS_FIELD_DIMENSIONS, statsFieldDimensionSchema } from '@carplates/shared'
-import type { DistributionResponse, StatsFieldDimension, StatsFieldResponse } from '@carplates/shared'
+import type {
+  DistributionResponse,
+  EvStatsResponse,
+  ImportsStatsResponse,
+  SizeModelsResponse,
+  StatsFieldDimension,
+  StatsFieldResponse
+} from '@carplates/shared'
 
 import { zodParam } from '../common/zod-param.pipe.js'
 import { DataVersionResponseDto, StatsResponseDto, StatsTopResponseDto } from './stats.dto.js'
@@ -30,6 +37,33 @@ export class StatsController {
   })
   distribution(): Promise<DistributionResponse> {
     return this.statsService.distribution()
+  }
+
+  @Get('size-models')
+  @ApiOkResponse({
+    description:
+      'Passenger models { brand, model, n, body, rdwBody, lengthMm, widthMm, heightMm, wheelbaseMm }, biggest first'
+  })
+  sizeModels(): Promise<SizeModelsResponse> {
+    return this.statsService.sizeModels()
+  }
+
+  @Get('ev')
+  @ApiOkResponse({
+    description:
+      'Electrified passenger cars { total, fleet, byYear, byRegion, topModels }: electric-only vs hybrid with electricity'
+  })
+  ev(): Promise<EvStatsResponse> {
+    return this.statsService.ev()
+  }
+
+  @Get('imports')
+  @ApiOkResponse({
+    description:
+      'Used imports vs dealer sales { total, byYear, byCountry, topModels } by registration operation; country = the VIN build country'
+  })
+  imports(): Promise<ImportsStatsResponse> {
+    return this.statsService.imports()
   }
 
   @Get('field/:dimension')

@@ -133,6 +133,8 @@
     "db:refresh-vdb-stats": "pnpm --filter @carplates/scripts refresh-vdb-stats",
     "db:refresh-weight-stats": "pnpm --filter @carplates/scripts refresh-weight-stats",
     "db:refresh-spec-stats": "pnpm --filter @carplates/scripts refresh-spec-stats",
+    "db:refresh-ev-stats": "pnpm --filter @carplates/scripts refresh-ev-stats",
+    "db:refresh-imports-stats": "pnpm --filter @carplates/scripts refresh-imports-stats",
     "db:refresh-model-family-stats": "pnpm --filter @carplates/scripts refresh-model-family-stats",
     "db:refresh-derived": "pnpm --filter @carplates/scripts refresh-derived"
   },

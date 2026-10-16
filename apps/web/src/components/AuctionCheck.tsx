@@ -10,6 +10,8 @@ import VinToggleSection from '@/components/vin/VinToggleSection'
 import { AUCTION_REGION_ICON, AUCTION_SITES, auctionOpenUrl, auctionSitesByTier } from '@/lib/auction-sites'
 import type { AuctionSiteId } from '@/lib/auction-sites'
 import { copyToClipboard, scrollElementIntoView } from '@/lib/share-section'
+import ReadGuideLink from '@/components/ReadGuideLink'
+import { IMPORTS_PATH } from '@/routes/read/links'
 
 type Props = {
   vin: string
@@ -123,6 +125,8 @@ export default function AuctionCheck({ vin, imported = false, openSignal = 0 }: 
           ))}
         </ul>
       </div>
+
+      <ReadGuideLink guide={IMPORTS_PATH} />
 
       {modalSite && (
         <AuctionVinModal

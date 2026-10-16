@@ -23,6 +23,7 @@ import {
   fxResponseSchema,
   caRecallsResponseSchema,
   wantedResponseSchema,
+  generationGrowthResponseSchema,
   generationsResponseSchema,
   wikiSpecsResponseSchema,
   nhtsaComplaintsResponseSchema,
@@ -58,6 +59,9 @@ import {
   statsResponseSchema,
   statsTopResponseSchema,
   distributionResponseSchema,
+  evStatsResponseSchema,
+  importsStatsResponseSchema,
+  sizeModelsResponseSchema,
   vehiclePhotosResponseSchema,
   vinDecodeResponseSchema,
   wikiImageResponseSchema,
@@ -96,6 +100,7 @@ import type {
   FxResponse,
   CaRecallsResponse,
   WantedResponse,
+  GenerationGrowthResponse,
   GenerationsResponse,
   WikiSpecsResponse,
   NhtsaComplaintsResponse,
@@ -135,6 +140,9 @@ import type {
   StatsResponse,
   StatsTopResponse,
   DistributionResponse,
+  EvStatsResponse,
+  ImportsStatsResponse,
+  SizeModelsResponse,
   VehicleColor,
   SearchSortDir,
   SearchSortKey,
@@ -235,6 +243,18 @@ export async function getStats(): Promise<StatsResponse> {
 
 export async function getStatsDistribution(): Promise<DistributionResponse> {
   return distributionResponseSchema.parse(await getJson('/api/stats/distribution'))
+}
+
+export async function getSizeModels(): Promise<SizeModelsResponse> {
+  return sizeModelsResponseSchema.parse(await getJson('/api/stats/size-models'))
+}
+
+export async function getEvStats(): Promise<EvStatsResponse> {
+  return evStatsResponseSchema.parse(await getJson('/api/stats/ev'))
+}
+
+export async function getImportsStats(): Promise<ImportsStatsResponse> {
+  return importsStatsResponseSchema.parse(await getJson('/api/stats/imports'))
 }
 
 export async function getStatsTop(): Promise<StatsTopResponse> {
@@ -345,6 +365,11 @@ export async function getCaRecalls(brand: string, model: string, year: number): 
 export async function getGenerations(brand: string, model: string, year: number): Promise<GenerationsResponse> {
   const params = new URLSearchParams({ brand, model, year: String(year) })
   return generationsResponseSchema.parse(await getJson(`/api/generations?${params.toString()}`))
+}
+
+export async function getGenerationGrowth(brand: string, model: string): Promise<GenerationGrowthResponse> {
+  const params = new URLSearchParams({ brand, model })
+  return generationGrowthResponseSchema.parse(await getJson(`/api/generations/growth?${params.toString()}`))
 }
 
 export async function getWikiSpecs(brand: string, model: string, year: number): Promise<WikiSpecsResponse> {

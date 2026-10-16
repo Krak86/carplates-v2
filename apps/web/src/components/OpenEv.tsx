@@ -16,6 +16,8 @@ import { cn } from '@/lib/cn'
 import { openEvQuery } from '@/lib/queries'
 import { scrollElementIntoView } from '@/lib/share-section'
 import SectionSkeleton from '@/components/ui/SectionSkeleton'
+import ReadGuideLink from '@/components/ReadGuideLink'
+import { ELECTRIC_PATH } from '@/routes/read/links'
 
 type Props = {
   brand: string | null
@@ -163,6 +165,8 @@ export default function OpenEv({ brand, model, year, fuel }: Props): ReactNode {
               </li>
             ))}
           </ul>
+
+          <ReadGuideLink guide={ELECTRIC_PATH} />
         </div>
       )}
     </div>

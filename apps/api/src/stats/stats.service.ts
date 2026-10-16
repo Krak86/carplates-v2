@@ -21,13 +21,19 @@ import {
   statsByRegionYear,
   statsByYear,
   statsDistribution,
+  statsEv,
+  statsImports,
+  statsSizeModels,
   statsSummary
 } from '@carplates/db'
 import {
   DISTRIBUTION_BUCKET_WIDTH,
   dataVersionResponseSchema,
   distributionResponseSchema,
+  evStatsResponseSchema,
+  importsStatsResponseSchema,
   mergeBodyStats,
+  sizeModelsResponseSchema,
   statsFieldResponseSchema,
   statsResponseSchema,
   statsTopResponseSchema,
@@ -39,7 +45,10 @@ import type {
   DataVersionResponse,
   DistributionMetric,
   DistributionResponse,
+  EvStatsResponse,
   Histogram,
+  ImportsStatsResponse,
+  SizeModelsResponse,
   StatsFieldDimension,
   StatsFieldResponse,
   StatsResponse,
@@ -60,6 +69,11 @@ const MIN_PASSENGER_WEIGHT_MODEL = 1500
 const MIN_OTHER_WEIGHT_MODEL = 200
 /** Same floor for the spec boards (passenger cars only). */
 const MIN_SPEC_MODEL = 500
+/** Pure-electric models listed in the EV article. */
+const EV_TOP_MODELS = 15
+/** Imported models and VIN build countries listed in the imports article. */
+const IMPORT_TOP_MODELS = 15
+const IMPORT_TOP_COUNTRIES = 15
 
 @Injectable()
 export class StatsService {
@@ -102,6 +116,85 @@ export class StatsService {
       hp_per_tonne: histogram('hp_per_tonne'),
       displacement_cc: histogram('displacement_cc')
     })
+  }
+
+  /** Electrified passenger cars by model year, region and model (a rollup rebuilt by `db:refresh-ev-stats`); 'all' rows are the whole fleet. */
+  async ev(): Promise<EvStatsResponse> {
+    const rows = await this.dbService.db.select().from(statsEv)
+    const split = (): { bev: number; hybrid: number } => ({ bev: 0, hybrid: 0 })
+    const total = split()
+    let fleet = 0
+    const years = new Map<number, { bev: number; hybrid: number; fleet: number }>()
+    const regions = new Map<string, { bev: number; hybrid: number; fleet: number }>()
+    const models = new Map<string, { brand: string; model: string; n: number; firstYear: number }>()
+    for (const r of rows) {
+      const year = years.get(r.makeYear) ?? { ...split(), fleet: 0 }
+      const region = r.region ? (regions.get(r.region) ?? { ...split(), fleet: 0 }) : null
+      if (r.powertrain === 'all') {
+        fleet += r.n
+        year.fleet += r.n
+        if (region) region.fleet += r.n
+      } else if (r.powertrain === 'bev' || r.powertrain === 'hybrid') {
+        total[r.powertrain] += r.n
+        year[r.powertrain] += r.n
+        if (region) region[r.powertrain] += r.n
+        if (r.powertrain === 'bev') {
+          const key = `${r.brand}|${r.model}`
+          const m = models.get(key) ?? { brand: r.brand, model: r.model, n: 0, firstYear: r.makeYear }
+          m.n += r.n
+          m.firstYear = Math.min(m.firstYear, r.makeYear)
+          models.set(key, m)
+        }
+      }
+      years.set(r.makeYear, year)
+      if (region && r.region) regions.set(r.region, region)
+    }
+    return evStatsResponseSchema.parse({
+      total,
+      fleet,
+      byYear: [...years.entries()].map(([year, v]) => ({ year, ...v })).sort((a, b) => a.year - b.year),
+      byRegion: [...regions.entries()]
+        .map(([region, v]) => ({ region, ...v }))
+        .sort((a, b) => b.bev + b.hybrid - (a.bev + a.hybrid)),
+      topModels: [...models.values()].sort((a, b) => b.n - a.n).slice(0, EV_TOP_MODELS)
+    })
+  }
+
+  /** Used imports vs dealer sales by year, import countries (VIN) and models (a rollup rebuilt by `db:refresh-imports-stats`). */
+  async imports(): Promise<ImportsStatsResponse> {
+    const rows = await this.dbService.db.select().from(statsImports)
+    const total = { import: 0, dealer: 0 }
+    const years = new Map<number, { import: number; dealer: number }>()
+    const countries = new Map<string, number>()
+    const models = new Map<string, { brand: string; model: string; n: number }>()
+    for (const r of rows) {
+      if (r.origin !== 'import' && r.origin !== 'dealer') continue
+      total[r.origin] += r.n
+      const year = years.get(r.regYear) ?? { import: 0, dealer: 0 }
+      year[r.origin] += r.n
+      years.set(r.regYear, year)
+      if (r.origin !== 'import') continue
+      countries.set(r.country, (countries.get(r.country) ?? 0) + r.n)
+      const key = `${r.brand}|${r.model}`
+      const m = models.get(key) ?? { brand: r.brand, model: r.model, n: 0 }
+      m.n += r.n
+      models.set(key, m)
+    }
+    return importsStatsResponseSchema.parse({
+      total,
+      byYear: [...years.entries()].map(([year, v]) => ({ year, ...v })).sort((a, b) => a.year - b.year),
+      byCountry: [...countries.entries()]
+        .map(([country, n]) => ({ country, n }))
+        .sort((a, b) => b.n - a.n)
+        .slice(0, IMPORT_TOP_COUNTRIES),
+      topModels: [...models.values()].sort((a, b) => b.n - a.n).slice(0, IMPORT_TOP_MODELS)
+    })
+  }
+
+  /** Per-model body + dimensions behind the /read explainers and the size explorer (a rollup rebuilt by `db:refresh-spec-stats`). */
+  async sizeModels(): Promise<SizeModelsResponse> {
+    const rows = await this.dbService.db.select().from(statsSizeModels).orderBy(desc(statsSizeModels.n))
+    return sizeModelsResponseSchema.parse({ models: rows })
   }
 
   /** The ranking-chip leaderboards only: registry top 10s (null values excluded — same rule as the web's `topLabels`) + fuel/crash model boards. */
@@ -236,6 +329,10 @@ export class StatsService {
         )
       case 'fuel':
         return statsFieldResponseSchema.parse((await db.select().from(statsByFuel)).map(r => ({ ...r, value: r.fuel })))
+      case 'year':
+        return statsFieldResponseSchema.parse(
+          (await db.select().from(statsByYear)).map(r => ({ ...r, value: r.year === null ? null : String(r.year) }))
+        )
     }
   }
 

@@ -41,7 +41,7 @@ export default function SafetyBarList({ rows, formatLabel }: Props): ReactNode {
           </span>
 
           <span className="text-right whitespace-nowrap tabular-nums">
-            {row.avgScore != null ? Math.round(row.avgScore) : '—'}{' '}
+            {row.avgScore != null ? Math.round(row.avgScore) : '-'}{' '}
             <span className="text-xs text-[var(--color-muted)]">
               {t('fuel.cars', { count: numberFormat.format(row.n) })} · {Math.round(coveragePercent(row))}%
             </span>

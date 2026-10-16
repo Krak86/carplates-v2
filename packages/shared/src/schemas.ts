@@ -667,7 +667,7 @@ export const statsResponseSchema = z.object({
 })
 export type StatsResponse = z.infer<typeof statsResponseSchema>
 
-export const STATS_FIELD_DIMENSIONS = ['body', 'kind', 'color', 'fuel'] as const
+export const STATS_FIELD_DIMENSIONS = ['body', 'kind', 'color', 'fuel', 'year'] as const
 export type StatsFieldDimension = (typeof STATS_FIELD_DIMENSIONS)[number]
 export const statsFieldDimensionSchema = z.enum(STATS_FIELD_DIMENSIONS)
 

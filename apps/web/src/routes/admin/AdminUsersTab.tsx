@@ -8,7 +8,7 @@ import { PAID_FEATURE_ICON } from '@/lib/paid-features'
 import { adminUsersQuery } from '@/lib/queries'
 
 const formatDate = (iso: string | null, locale: string): string =>
-  iso ? new Date(iso).toLocaleString(locale, { dateStyle: 'medium', timeStyle: 'short' }) : '—'
+  iso ? new Date(iso).toLocaleString(locale, { dateStyle: 'medium', timeStyle: 'short' }) : '-'
 
 export default function AdminUsersTab(): ReactNode {
   const { t, i18n } = useTranslation()
@@ -39,7 +39,7 @@ export default function AdminUsersTab(): ReactNode {
                   <td className="p-3">
                     <div className="font-medium">{u.email ?? u.name ?? u.id}</div>
                     <div className="text-xs text-[var(--color-muted)]">
-                      {u.name ?? '—'} · {u.role}
+                      {u.name ?? '-'} · {u.role}
                     </div>
                   </td>
                   <td className="p-3">

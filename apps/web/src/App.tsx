@@ -21,6 +21,19 @@ const NewsRoute = lazy(() => import('@/routes/news/NewsRoute'))
 const DiscussRoute = lazy(() => import('@/routes/DiscussRoute'))
 const RelaxRoute = lazy(() => import('@/routes/RelaxRoute'))
 const ReleasesRoute = lazy(() => import('@/routes/releases/ReleasesRoute'))
+const ReadHubRoute = lazy(() => import('@/routes/read/ReadHubRoute'))
+const BodyTypesRoute = lazy(() => import('@/routes/read/body-types/BodyTypesRoute'))
+const SizesRoute = lazy(() => import('@/routes/read/sizes/SizesRoute'))
+const FleetRoute = lazy(() => import('@/routes/read/fleet/FleetRoute'))
+const PlatesRoute = lazy(() => import('@/routes/read/plates/PlatesRoute'))
+const GenerationsRoute = lazy(() => import('@/routes/read/generations/GenerationsRoute'))
+const ElectricRoute = lazy(() => import('@/routes/read/electric/ElectricRoute'))
+const ImportsRoute = lazy(() => import('@/routes/read/imports/ImportsRoute'))
+const SafetyRoute = lazy(() => import('@/routes/read/safety/SafetyRoute'))
+const FuelRoute = lazy(() => import('@/routes/read/fuel/FuelRoute'))
+const VinRoute = lazy(() => import('@/routes/read/vin/VinRoute'))
+const ExtremesRoute = lazy(() => import('@/routes/read/extremes/ExtremesRoute'))
+const RecallsRoute = lazy(() => import('@/routes/read/recalls/RecallsRoute'))
 const FeaturesRoute = lazy(() => import('@/routes/features/FeaturesRoute'))
 const SettingsRoute = lazy(() => import('@/routes/settings/SettingsRoute'))
 const EmailLinkRoute = lazy(() => import('@/routes/auth/EmailLinkRoute'))
@@ -56,6 +69,19 @@ export default function App(): ReactNode {
             <Route path="/race" element={<RaceRoute />} />
             <Route path="/relax" element={<RelaxRoute />} />
             <Route path="/releases" element={<ReleasesRoute />} />
+            <Route path="/read" element={<ReadHubRoute />} />
+            <Route path="/read/body-types" element={<BodyTypesRoute />} />
+            <Route path="/read/sizes" element={<SizesRoute />} />
+            <Route path="/read/fleet" element={<FleetRoute />} />
+            <Route path="/read/plates" element={<PlatesRoute />} />
+            <Route path="/read/generations" element={<GenerationsRoute />} />
+            <Route path="/read/electric" element={<ElectricRoute />} />
+            <Route path="/read/imports" element={<ImportsRoute />} />
+            <Route path="/read/safety" element={<SafetyRoute />} />
+            <Route path="/read/fuel" element={<FuelRoute />} />
+            <Route path="/read/vin" element={<VinRoute />} />
+            <Route path="/read/extremes" element={<ExtremesRoute />} />
+            <Route path="/read/recalls" element={<RecallsRoute />} />
             <Route path="/features" element={<FeaturesRoute />} />
             <Route path="/settings" element={<SettingsRoute />} />
             <Route path="/auth/email" element={<EmailLinkRoute />} />

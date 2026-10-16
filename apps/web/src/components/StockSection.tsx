@@ -119,7 +119,7 @@ export default function StockSection({ brand, model, year }: Props): ReactNode {
               rel="noopener noreferrer nofollow"
               className="text-primary underline"
             >
-              {site.name} ↗<span className="sr-only"> — {t('newCarsWidget.opensNewTab')}</span>
+              {site.name} ↗<span className="sr-only"> - {t('newCarsWidget.opensNewTab')}</span>
             </a>
           ))}
         </div>

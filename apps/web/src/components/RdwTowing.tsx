@@ -150,15 +150,23 @@ export default function RdwTowing({ specs, own, truck = false, locale }: Props):
 
           <p className="mt-1 text-xs text-[var(--color-muted)]">
             {t('rdw.tow.limits', {
-              braked: braked ? fmt(braked) : '—',
-              unbraked: unbraked ? fmt(unbraked) : '—'
+              braked: braked ? fmt(braked) : '-',
+              unbraked: unbraked ? fmt(unbraked) : '-'
             })}
             {kerb && ` ${t('rdw.tow.caravanTip', { kg: fmt(caravanAdvice(kerb)) })}`}
           </p>
         </div>
       )}
 
-      <RdwMassSchema gross={gross} braked={braked} truck={truck} locale={locale} />
+      <RdwMassSchema
+        gross={gross}
+        braked={braked}
+        unbraked={unbraked}
+        kerb={kerb}
+        trailerKg={trailerKg}
+        truck={truck}
+        locale={locale}
+      />
 
       <details className="mt-2 text-xs">
         <summary className="cursor-pointer text-[var(--color-primary)]">⚖️ {t('rdw.tow.rules.title')}</summary>

@@ -32,7 +32,7 @@ export default function NewCarsLink({ brand }: Props): ReactNode {
       {t('result.newCars', { brand: displayBrand(brand), year: new Date().getFullYear() })}
       <span aria-hidden>↗</span>
       <span className="sr-only">
-        {title} — {t('field.opensNewTab')}
+        {title} - {t('field.opensNewTab')}
       </span>
     </a>
   )

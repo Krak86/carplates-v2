@@ -54,7 +54,7 @@ export default function StockNewsCard({ item, withSummary = false }: Props): Rea
 
       <p className="truncate text-xs text-muted">
         {item.publisher || hostOf(item.url)} · {date}
-        <span className="sr-only"> — {t('news.opensNewTab')}</span>
+        <span className="sr-only"> - {t('news.opensNewTab')}</span>
       </p>
     </a>
   )

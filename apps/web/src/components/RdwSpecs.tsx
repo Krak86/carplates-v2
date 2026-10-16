@@ -38,6 +38,8 @@ import VinToggleSection from '@/components/vin/VinToggleSection'
 import { cn } from '@/lib/cn'
 import { rdwQuery } from '@/lib/queries'
 import { scrollElementIntoView } from '@/lib/share-section'
+import ReadGuideLink from '@/components/ReadGuideLink'
+import { EXTREMES_PATH } from '@/routes/read/links'
 
 type Props = {
   brand: string | null
@@ -306,6 +308,7 @@ export default function RdwSpecs({
               </VinToggleSection>
             </div>
           ))}
+          <ReadGuideLink guide={EXTREMES_PATH} />
         </div>
       </div>
     </div>

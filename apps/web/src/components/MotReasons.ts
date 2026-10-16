@@ -72,7 +72,7 @@ const LABELS: Readonly<Record<string, readonly [string, string, string]>> = {
   'brakes/service-brake-performance/excessively-binding': ['Brakes binding', 'Гальма заїдають', 'Тормоза заедают'],
   'tyres/condition/has-a-cut-in-excess-of-the-requirements-deep-enough-to-reach-the-ply-or-cords': [
     'Tyre cut reaching the cords',
-    'Порізана шина — до корду',
+    'Порізана шина - до корду',
     'Порез шины до корда'
   ],
   'other/non-component-advisories/child-seat-fitted-not-allowing-full-inspection-of-adult-belt': [

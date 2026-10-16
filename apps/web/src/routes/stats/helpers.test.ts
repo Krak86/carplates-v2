@@ -59,7 +59,7 @@ describe('dimensionRows', () => {
   it('labels the year rollup by year, with a dash for the undated bucket', () => {
     expect(dimensionRows(stats, 'year')).toEqual([
       { year: 2025, totalRows: 40, distinctPlates: 35, distinctVins: 30, label: '2025' },
-      { year: null, totalRows: 5, distinctPlates: 5, distinctVins: 4, label: '—' }
+      { year: null, totalRows: 5, distinctPlates: 5, distinctVins: 4, label: '-' }
     ])
   })
 
@@ -85,7 +85,7 @@ describe('dimensionRows', () => {
 
   it('falls back to a dash for an unset dimension value (body/kind/color/fuel)', () => {
     expect(dimensionRows(stats, 'body')).toEqual([
-      { value: null, totalRows: 2, distinctPlates: 2, distinctVins: 1, label: '—', year: null }
+      { value: null, totalRows: 2, distinctPlates: 2, distinctVins: 1, label: '-', year: null }
     ])
     expect(dimensionRows(stats, 'kind')[0]?.label).toBe('Легковий')
     expect(dimensionRows(stats, 'color')[0]?.label).toBe('Білий')
@@ -115,14 +115,14 @@ describe('dimensionRows', () => {
         label: 'Ввезено з-за кордону, дилер',
         year: null
       },
-      { value: null, totalRows: 10, distinctPlates: 10, distinctVins: 8, label: '—', year: null }
+      { value: null, totalRows: 10, distinctPlates: 10, distinctVins: 8, label: '-', year: null }
     ])
   })
 
   it('merges the unknown/absent fuel values into one dash row', () => {
     expect(dimensionRows(stats, 'fuel')).toEqual([
       { value: 'БЕНЗИН', totalRows: 6, distinctPlates: 6, distinctVins: 5, label: 'БЕНЗИН', year: null },
-      { label: '—', year: null, totalRows: 3, distinctPlates: 3, distinctVins: 3 }
+      { label: '-', year: null, totalRows: 3, distinctPlates: 3, distinctVins: 3 }
     ])
   })
 })
@@ -194,7 +194,7 @@ describe('topBrands / topColors / topRegions / topModels', () => {
     expect(topBrands(stats, 1)).toEqual(['TOYOTA'])
   })
 
-  it('defaults to the top 10 — the API/panel "show 10" ceiling, not just the panel default 5-row display', () => {
+  it('defaults to the top 10 - the API/panel "show 10" ceiling, not just the panel default 5-row display', () => {
     expect(MAX_TOP_N).toBe(10)
   })
 })

@@ -127,7 +127,7 @@ export function splitVin(vin: string): VinSegment[] | null {
 }
 
 // 30-year cycle: A=2010 … Y=2030, then 1=2031 … 9=2039. I, O, Q, U, Z, 0 are never used.
-const YEAR_CODES = 'ABCDEFGHJKLMNPRSTVWXY123456789'
+export const YEAR_CODES = 'ABCDEFGHJKLMNPRSTVWXY123456789'
 
 /** Both model years a position-10 character can mean (the VIN doesn't say which 30-year cycle). */
 export function decodeYearChar(char: string): number[] {

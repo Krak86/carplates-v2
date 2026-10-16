@@ -6,7 +6,7 @@ type Props = {
   highlight?: readonly string[]
 }
 
-const ITEM_SEPARATOR = ' — '
+const ITEM_SEPARATOR = ' - '
 const NAME_CLASS = 'font-semibold underline decoration-[var(--color-primary)] decoration-2 underline-offset-2'
 
 const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')

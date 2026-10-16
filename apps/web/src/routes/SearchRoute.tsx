@@ -192,7 +192,7 @@ export default function SearchRoute(): ReactNode {
     titleCar = formatVehicleLabel({ ...extractVehicleInfo(vin.data), color: null })
   }
   const shownValue = (kind === 'plate' && plate.data?.plate) || (kind === 'vin' && vin.data?.vin) || raw
-  useDocumentTitle(shownValue ? [shownValue, titleCar].filter(Boolean).join(' — ') : null)
+  useDocumentTitle(shownValue ? [shownValue, titleCar].filter(Boolean).join(' - ') : null)
 
   const notFound = active.error instanceof ApiError && active.error.status === 404
   // Centered only on a pristine page — any input, photo, or recognition error pins the search to the top.

@@ -103,6 +103,8 @@
     "refresh-vdb-stats": "tsx src/vdb-stats.ts",
     "refresh-weight-stats": "tsx src/weight-stats.ts",
     "refresh-spec-stats": "tsx src/spec-stats.ts",
+    "refresh-ev-stats": "tsx src/ev-stats.ts",
+    "refresh-imports-stats": "tsx src/imports-stats.ts",
     "refresh-model-family-stats": "tsx src/model-family-stats.ts",
     "refresh-derived": "tsx src/refresh-derived.ts",
     "build:kind-images": "tsx src/build-kind-images.ts",
@@ -119,6 +121,7 @@
     "csv-stringify": "^6.9.0",
     "drizzle-orm": "0.45.4",
     "iconv-lite": "^0.7.3",
+    "pg": "^8.23.1",
     "unzipper": "^0.12.5",
     "zod": "^4.6.6"
   },

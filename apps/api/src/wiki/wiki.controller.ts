@@ -31,7 +31,7 @@ export class WikiController {
   @Get('image')
   @ApiQuery({ name: 'brand', required: false })
   @ApiQuery({ name: 'model', required: false })
-  @ApiQuery({ name: 'year', required: false, description: 'Model year — picks a matching-generation photo' })
+  @ApiQuery({ name: 'year', required: false, description: 'Model year - picks a matching-generation photo' })
   @ApiQuery({ name: 'source', required: false, enum: WIKI_IMAGE_SOURCES })
   @ApiQuery({ name: 'yearOnly', required: false, description: "'true': only a photo of exactly that model year" })
   @ApiQuery({
@@ -59,7 +59,7 @@ export class WikiController {
   @ApiQuery({ name: 'brand', required: false })
   @ApiQuery({ name: 'model', required: false })
   @ApiQuery({ name: 'lang', required: false })
-  @ApiQuery({ name: 'year', required: false, description: 'Model year — picks a matching-generation photo' })
+  @ApiQuery({ name: 'year', required: false, description: 'Model year - picks a matching-generation photo' })
   @ApiQuery({ name: 'source', required: false, enum: WIKI_IMAGE_SOURCES })
   @ApiQuery({ name: 'refresh', required: false, description: "'true': re-fetch the photo from Wikimedia" })
   @ApiOkResponse({ type: WikiInfoDto })

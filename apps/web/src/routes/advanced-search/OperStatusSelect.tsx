@@ -30,7 +30,7 @@ export default function OperStatusSelect({ value, onChange, operations, classNam
           <optgroup key={status} label={`${OPER_STATUS_ICON[status]} ${t(`oper.status.${status}`)}`}>
             {group.map(o => (
               <option key={o.code} value={o.code}>
-                {o.code} · {o.name ?? '—'} ({number.format(o.distinctPlates)})
+                {o.code} · {o.name ?? '-'} ({number.format(o.distinctPlates)})
               </option>
             ))}
           </optgroup>

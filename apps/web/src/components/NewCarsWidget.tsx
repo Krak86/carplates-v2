@@ -111,7 +111,7 @@ export default function NewCarsWidget({ brand }: Props): ReactNode {
 
           <p className="truncate text-xs text-muted">
             {hostOf(siteUrl)} <span aria-hidden>↗</span>
-            <span className="sr-only"> — {t('newCarsWidget.opensNewTab')}</span>
+            <span className="sr-only"> - {t('newCarsWidget.opensNewTab')}</span>
           </p>
 
           {credit && (

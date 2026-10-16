@@ -96,7 +96,7 @@ export default function CarWikiInfo({ brand, model, year }: Props): ReactNode {
               <div>
                 {data.description && (
                   <p className="mb-1 text-sm text-muted">
-                    {[data.title, data.description].filter(Boolean).join(' — ')}
+                    {[data.title, data.description].filter(Boolean).join(' - ')}
                   </p>
                 )}
                 {isFallback && (

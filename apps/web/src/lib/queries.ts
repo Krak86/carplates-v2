@@ -30,6 +30,7 @@ import {
   getMot,
   getCaRecalls,
   getWanted,
+  getGenerationGrowth,
   getGenerations,
   getWikiSpecs,
   getNhtsaComplaints,
@@ -52,6 +53,9 @@ import {
   getSafetyRatings,
   getStats,
   getStatsField,
+  getEvStats,
+  getImportsStats,
+  getSizeModels,
   getStatsDistribution,
   getStatsTop,
   getUkraineGeography,
@@ -175,6 +179,19 @@ export function statsTopQuery() {
 // Fleet histograms behind the Performance panel's percentile bars (~60 buckets, changes only on a spec-stats rebuild).
 export function statsDistributionQuery() {
   return queryOptions({ queryKey: ['stats', 'distribution'], queryFn: getStatsDistribution, staleTime: Infinity })
+}
+
+// Per-model body + dimensions behind the /read articles and size explorer (~3.7k rows, a rollup rebuilt with the spec stats).
+export function sizeModelsQuery() {
+  return queryOptions({ queryKey: ['stats', 'size-models'], queryFn: getSizeModels, staleTime: Infinity })
+}
+
+export function evStatsQuery() {
+  return queryOptions({ queryKey: ['stats', 'ev'], queryFn: getEvStats, staleTime: Infinity })
+}
+
+export function importsStatsQuery() {
+  return queryOptions({ queryKey: ['stats', 'imports'], queryFn: getImportsStats, staleTime: Infinity })
 }
 
 // One dimension's breakdown for a ResultCard "?" popover — a few dozen rows.
@@ -328,6 +345,15 @@ export function generationQuery(brand: string, model: string, year: number) {
   return queryOptions({
     queryKey: ['rdw', 'generations', brand, model, year],
     queryFn: () => getGenerations(brand, model, year),
+    staleTime: Infinity
+  })
+}
+
+// Every generation of a model with its typical size, for /read/generations — online-only (not in the rdw offline group).
+export function generationGrowthQuery(brand: string, model: string) {
+  return queryOptions({
+    queryKey: ['generations', 'growth', brand, model],
+    queryFn: () => getGenerationGrowth(brand, model),
     staleTime: Infinity
   })
 }

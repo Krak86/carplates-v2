@@ -8,6 +8,101 @@ const item = (group: ReleaseGroup, ua: string, ru: string, en: string): ReleaseI
  */
 export const RELEASES: readonly ReleaseDay[] = [
   {
+    date: '2026-10-16',
+    items: [
+      item(
+        'improved',
+        '«Копіювати всю інформацію» тепер містить новини, соціальні обговорення (Bluesky, Stack Exchange, Lemmy), фінансові новини компанії та список джерел даних',
+        '«Копировать всю информацию» теперь включает новости, социальные обсуждения (Bluesky, Stack Exchange, Lemmy), финансовые новости компании и список источников данных',
+        '“Copy all info” now includes news, social threads (Bluesky, Stack Exchange, Lemmy), the company’s finance news and a list of the data sources used'
+      ),
+      item(
+        'improved',
+        'Схема мас на картці авто співвідносить обране авто з GVM, TBM, GTM, ATM і GCM; секції акцизу та мас відкриті за замовчуванням',
+        'Схема масс на карточке авто соотносит выбранное авто с GVM, TBM, GTM, ATM и GCM; секции акциза и масс открыты по умолчанию',
+        'The mass schema on the car card now relates the chosen car to GVM, TBM, GTM, ATM and GCM; the excise and mass sections are open by default'
+      ),
+      item(
+        'improved',
+        'Статті /read оформлені як блог: обкладинка, дата та кнопка копіювання посилання; у «Про проєкт» з’явився пункт про довідники',
+        'Статьи /read оформлены как блог: обложка, дата и кнопка копирования ссылки; в «О проекте» появился пункт о справочниках',
+        'The /read guides look like blog posts: cover banner, date and copy-link button; About now lists the guides'
+      ),
+      item(
+        'improved',
+        'Секції картки авто та сторінки VIN тепер мають кнопку «Довідник» зі стрілкою - перехід до відповідного пояснення в /read (колір, VIN, розміри, паливо, безпека, відкликання та інше)',
+        'Секции карточки авто и страницы VIN теперь имеют кнопку «Справочник» со стрелкой - переход к соответствующему объяснению в /read (цвет, VIN, размеры, топливо, безопасность, отзывы и другое)',
+        'Car card and VIN page sections now end with a “Guide” button with an arrow - a link to the matching explainer in /read (colour, VIN, size, fuel, safety, recalls and more)'
+      ),
+      item(
+        'new',
+        'Довідник /read/recalls: чим відкликання відрізняється від типової несправності, кампанії ЄС, США й Канади та частка відмов за пробігом у британському техогляді - на прикладі популярних моделей',
+        'Справочник /read/recalls: чем отзыв отличается от типичной неисправности, кампании ЕС, США и Канады и доля отказов по пробегу в британском техосмотре - на примере популярных моделей',
+        'New /read/recalls guide: how a recall differs from a common fault, EU, US and Canadian campaigns and the fail rate by mileage in UK inspections - shown on popular models'
+      ),
+      item(
+        'new',
+        'Довідник /read/vin: з чого складається VIN, розбір будь-якого введеного VIN (виробник, країна, модельний рік, контрольна цифра), таблиця кодів року та де знайти VIN',
+        'Справочник /read/vin: из чего состоит VIN, разбор любого введённого VIN (производитель, страна, модельный год, контрольная цифра), таблица кодов года и где найти VIN',
+        'New /read/vin guide: what a VIN is made of, a breakdown of any VIN you type (maker, country, model year, check digit), the year-code table and where to find the VIN'
+      ),
+      item(
+        'new',
+        'Довідник /read: типи кузова і розміри авто простими словами - з реальними моделями з реєстру, номерами та пошуком за розміром; на картці авто є посилання на відповідні пояснення',
+        'Справочник /read: типы кузова и размеры авто простыми словами - с реальными моделями из реестра, номерами и поиском по размеру; на карточке авто есть ссылки на соответствующие объяснения',
+        'New /read guides: body types and car sizes explained with real models from the registry, real plates and a size explorer; the plate card links to the matching explanations'
+      ),
+      item(
+        'new',
+        'Довідник /read/fleet: що їздить Україною - найпопулярніші кольори, паливо та роки реєстрації авто',
+        'Справочник /read/fleet: что ездит по Украине - самые популярные цвета, топливо и годы регистрации авто',
+        'New /read/fleet guide: what Ukraine drives - the most common colours, fuels and registration years'
+      ),
+      item(
+        'new',
+        'Довідник /read/plates: будова номерного знака, усі коди регіонів (чинні й старі цифрові), перевірка вашого номера та номери без регіону (Дія, Кабінет водія)',
+        'Справочник /read/plates: устройство номерного знака, все коды регионов (действующие и старые цифровые), проверка вашего номера и номера без региона (Дія, Кабинет водителя)',
+        'New /read/plates guide: plate anatomy, every region code (current and legacy digit codes), a check for your own plate and plates without a region (Diia, Driver’s Cabinet)'
+      ),
+      item(
+        'new',
+        'Довідник /read/generations: як Octavia, Golf, Camry та інші моделі росли за поколіннями - довжина, ширина й колісна база кожного покоління',
+        'Справочник /read/generations: как Octavia, Golf, Camry и другие модели росли по поколениям - длина, ширина и колёсная база каждого поколения',
+        'New /read/generations guide: how the Octavia, Golf, Camry and other models grew across generations - length, width and wheelbase of every generation'
+      ),
+      item(
+        'new',
+        'Довідник /read/electric: електромобілі в Україні - за роком випуску, регіонами та моделями, плюс гід по роз’ємах зарядки (Type 2, CCS, CHAdeMO, GB/T)',
+        'Справочник /read/electric: электромобили в Украине - по году выпуска, регионам и моделям, плюс гид по разъёмам зарядки (Type 2, CCS, CHAdeMO, GB/T)',
+        'New /read/electric guide: electric cars in Ukraine by model year, region and model, plus a charging-plug guide (Type 2, CCS, CHAdeMO, GB/T)'
+      ),
+      item(
+        'new',
+        'Довідник /read/imports: авто з-за кордону - ввезені та куплені через дилера за роками, найчастіші моделі, країна збирання за VIN і що перевірити перед купівлею',
+        'Справочник /read/imports: авто из-за границы - ввезённые и купленные через дилера по годам, самые частые модели, страна сборки по VIN и что проверить перед покупкой',
+        'New /read/imports guide: cars from abroad - imported vs dealer-bought by year, the most imported models, country of build by VIN and what to check before buying'
+      ),
+      item(
+        'new',
+        'Довідник /read/safety: краш-тести - п’ять програм (Euro NCAP, IIHS, JNCAP, C-NCAP, KNCAP), оцінки автопарку, зміна за роками випуску, найкращі й найслабші моделі та межі цих оцінок',
+        'Справочник /read/safety: краш-тесты - пять программ (Euro NCAP, IIHS, JNCAP, C-NCAP, KNCAP), оценки автопарка, изменение по годам выпуска, лучшие и слабейшие модели и пределы этих оценок',
+        'New /read/safety guide: crash tests - the five programmes (Euro NCAP, IIHS, JNCAP, C-NCAP, KNCAP), the fleet’s ratings, change by model year, the best and weakest models and the limits of these ratings'
+      ),
+      item(
+        'new',
+        'Довідник /read/fuel: паливо й викиди CO₂ - на чому їздить парк, розподіл викидів, зміна за роками випуску, найчистіші та найвитратніші моделі і як ми оцінюємо викиди',
+        'Справочник /read/fuel: топливо и выбросы CO₂ - на чём ездит парк, распределение выбросов, изменение по годам выпуска, самые чистые и самые затратные модели и как мы оцениваем выбросы',
+        'New /read/fuel guide: fuel and CO₂ - what the fleet runs on, the spread of emissions, change by model year, the cleanest and most CO₂-heavy models and how we estimate emissions'
+      ),
+      item(
+        'new',
+        'Довідник /read/extremes: найважчі й найлегші моделі за групами транспорту, найпотужніші, з найбільшим двигуном, найвищі, найдовші та з найбільшим баком - і як читати ці рейтинги',
+        'Справочник /read/extremes: самые тяжёлые и лёгкие модели по группам транспорта, самые мощные, с самым большим двигателем, самые высокие, длинные и с самым большим баком - и как читать эти рейтинги',
+        'New /read/extremes guide: the heaviest and lightest models by vehicle group, the most powerful, biggest-engined, tallest, longest and largest-tanked - and how to read these rankings'
+      )
+    ]
+  },
+  {
     date: '2026-10-15',
     items: [
       item(
@@ -288,8 +383,8 @@ export const RELEASES: readonly ReleaseDay[] = [
       ),
       item(
         'improved',
-        'Секції завантажуються при розгортанні, окремі чанки мов, WebP-логотипи — швидше відкриття',
-        'Секции загружаются при раскрытии, отдельные чанки языков, WebP-логотипы — быстрее открытие',
+        'Секції завантажуються при розгортанні, окремі чанки мов, WebP-логотипи - швидше відкриття',
+        'Секции загружаются при раскрытии, отдельные чанки языков, WebP-логотипы - быстрее открытие',
         'Sections load on expand, per-language chunks and WebP logos for faster loads'
       ),
       item(
@@ -618,8 +713,8 @@ export const RELEASES: readonly ReleaseDay[] = [
     items: [
       item(
         'new',
-        'Краш-тести C-NCAP, KNCAP та IIHS (разом із Euro NCAP, JNCAP, NHTSA — шість джерел)',
-        'Краш-тесты C-NCAP, KNCAP и IIHS (вместе с Euro NCAP, JNCAP, NHTSA — шесть источников)',
+        'Краш-тести C-NCAP, KNCAP та IIHS (разом із Euro NCAP, JNCAP, NHTSA - шість джерел)',
+        'Краш-тесты C-NCAP, KNCAP и IIHS (вместе с Euro NCAP, JNCAP, NHTSA - шесть источников)',
         'C-NCAP, KNCAP and IIHS crash tests (six rating sources in total)'
       ),
       item(
@@ -699,8 +794,8 @@ export const RELEASES: readonly ReleaseDay[] = [
       ),
       item(
         'improved',
-        'Ширші картки результатів; мова за замовчуванням — українська',
-        'Более широкие карточки результатов; язык по умолчанию — украинский',
+        'Ширші картки результатів; мова за замовчуванням - українська',
+        'Более широкие карточки результатов; язык по умолчанию - украинский',
         'Wider result cards; Ukrainian is the default language'
       )
     ]
@@ -751,8 +846,8 @@ export const RELEASES: readonly ReleaseDay[] = [
       ),
       item(
         'data',
-        'Макет реєстру 2026 року: номер може бути порожнім, ключ — VIN',
-        'Макет реестра 2026 года: номер может быть пустым, ключ — VIN',
+        'Макет реєстру 2026 року: номер може бути порожнім, ключ - VIN',
+        'Макет реестра 2026 года: номер может быть пустым, ключ - VIN',
         '2026 registry layout: nullable plate, rows keyed on VIN'
       )
     ]

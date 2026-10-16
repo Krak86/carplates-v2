@@ -28,6 +28,8 @@ import { cn } from '@/lib/cn'
 import { caRecallsQuery, nhtsaComplaintsQuery, nhtsaRecallsQuery, rdwQuery, rdwRecallsQuery } from '@/lib/queries'
 import { scrollElementIntoView } from '@/lib/share-section'
 import SectionSkeleton from '@/components/ui/SectionSkeleton'
+import ReadGuideLink from '@/components/ReadGuideLink'
+import { RECALLS_PATH } from '@/routes/read/links'
 
 type Props = {
   brand: string | null
@@ -360,6 +362,7 @@ export default function RdwRecalls({ brand, model, year, kind }: Props): ReactNo
               <CaRecallList data={ca} year={year} locale={locale} />
             </VinToggleSection>
           )}
+          <ReadGuideLink guide={RECALLS_PATH} />
         </div>
       </div>
     </div>
