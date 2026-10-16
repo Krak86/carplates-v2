@@ -23,6 +23,7 @@ import {
   fxResponseSchema,
   caRecallsResponseSchema,
   wantedResponseSchema,
+  generationGrowthResponseSchema,
   generationsResponseSchema,
   wikiSpecsResponseSchema,
   nhtsaComplaintsResponseSchema,
@@ -97,6 +98,7 @@ import type {
   FxResponse,
   CaRecallsResponse,
   WantedResponse,
+  GenerationGrowthResponse,
   GenerationsResponse,
   WikiSpecsResponse,
   NhtsaComplaintsResponse,
@@ -351,6 +353,11 @@ export async function getCaRecalls(brand: string, model: string, year: number): 
 export async function getGenerations(brand: string, model: string, year: number): Promise<GenerationsResponse> {
   const params = new URLSearchParams({ brand, model, year: String(year) })
   return generationsResponseSchema.parse(await getJson(`/api/generations?${params.toString()}`))
+}
+
+export async function getGenerationGrowth(brand: string, model: string): Promise<GenerationGrowthResponse> {
+  const params = new URLSearchParams({ brand, model })
+  return generationGrowthResponseSchema.parse(await getJson(`/api/generations/growth?${params.toString()}`))
 }
 
 export async function getWikiSpecs(brand: string, model: string, year: number): Promise<WikiSpecsResponse> {

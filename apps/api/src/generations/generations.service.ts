@@ -1,10 +1,12 @@
 import { Inject, Injectable } from '@nestjs/common'
-import { modelGenerations } from '@carplates/db'
+import { modelGenerations, modelSpecWiki, rdwSpecs } from '@carplates/db'
 import { makeKey, matchVdbModelAcrossMakes, pickGeneration, vdbRelatedMakeKeys } from '@carplates/shared'
-import type { Generation, GenerationsResponse } from '@carplates/shared'
+import type { Generation, GenerationGrowthResponse, GenerationsResponse } from '@carplates/shared'
 import { and, asc, eq, inArray, sql } from 'drizzle-orm'
 
 import { DbService } from '../db/db.service.js'
+
+import { generationGrowth } from './growth.js'
 
 export type LocatedGenerations = {
   /** The matched catalogue model: its keys address other `model_*` tables. */
@@ -45,6 +47,42 @@ export class GenerationsService {
         boundary: !!current && !!year && year === current.yearFrom && at > 0 && list[at - 1]!.yearTo === year,
         total: list.length
       }
+    }
+  }
+
+  /** Every generation of the model with its typical size (RDW year-medians per span, Wikipedia where RDW has none). */
+  async growth(brand: string, model: string): Promise<GenerationGrowthResponse> {
+    const located = await this.locate(brand, model)
+    if (!located) return { brand, model, match: null }
+    const { row, list } = located
+    const { db } = this.dbService
+
+    const [rdwYears, wiki] = await Promise.all([
+      db
+        .select({
+          modelYear: rdwSpecs.modelYear,
+          lengthCm: rdwSpecs.lengthCmMedian,
+          lengthN: rdwSpecs.lengthCmN,
+          widthCm: rdwSpecs.widthCmMedian,
+          widthN: rdwSpecs.widthCmN,
+          wheelbaseCm: rdwSpecs.wheelbaseCmMedian
+        })
+        .from(rdwSpecs)
+        .where(and(eq(rdwSpecs.kind, 'car'), eq(rdwSpecs.makeKey, row.makeKey), eq(rdwSpecs.modelKey, row.modelKey))),
+      db
+        .select({
+          yearFrom: modelSpecWiki.yearFrom,
+          lengthMm: modelSpecWiki.lengthMm,
+          widthMm: modelSpecWiki.widthMm,
+          wheelbaseMm: modelSpecWiki.wheelbaseMm
+        })
+        .from(modelSpecWiki)
+        .where(and(eq(modelSpecWiki.makeKey, row.makeKey), eq(modelSpecWiki.modelKey, row.modelKey)))
+    ])
+    return {
+      brand,
+      model,
+      match: { makeName: row.make, modelName: row.model, generations: generationGrowth(list, rdwYears, wiki) }
     }
   }
 

@@ -211,6 +211,23 @@ export const STATIC_PAGES: Record<string, Record<Lang, PageText>> = {
         'What a plate is made of, which letters mean which region, the old and new formats, and plates with no region.'
     }
   },
+  '/read/generations': {
+    ua: {
+      title: 'Як авто росли за поколіннями: Octavia, Golf, Camry · Cars UA',
+      description:
+        'Довжина, ширина й колісна база кожного покоління популярних моделей — наскільки «Гольф» і «Октавія» виросли за десятиліття.'
+    },
+    ru: {
+      title: 'Как авто росли по поколениям: Octavia, Golf, Camry · Cars UA',
+      description:
+        'Длина, ширина и колёсная база каждого поколения популярных моделей — насколько «Гольф» и «Октавия» выросли за десятилетия.'
+    },
+    en: {
+      title: 'How cars grew across generations: Octavia, Golf, Camry · Cars UA',
+      description:
+        'Length, width and wheelbase of every generation of popular models — how much the Golf and the Octavia grew over the decades.'
+    }
+  },
   '/features': {
     ua: { title: 'Функції · Cars UA', description: 'Що ми створюємо для користувачів з обліковим записом.' },
     ru: { title: 'Функции · Cars UA', description: 'Что мы создаём для пользователей с учётной записью.' },

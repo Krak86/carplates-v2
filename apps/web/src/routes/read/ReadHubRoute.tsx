@@ -31,16 +31,18 @@ export default function ReadHubRoute(): ReactNode {
         ))}
       </div>
 
-      <Card>
-        <h2 className="mb-2 text-lg font-semibold">{t('read.hub.soon')}</h2>
-        <ul className="space-y-1.5 text-muted">
-          {UPCOMING.map(topic => (
-            <li key={topic.title.en}>
-              <span aria-hidden>{topic.icon}</span> {pick(topic.title, i18n.language)}
-            </li>
-          ))}
-        </ul>
-      </Card>
+      {UPCOMING.length > 0 && (
+        <Card>
+          <h2 className="mb-2 text-lg font-semibold">{t('read.hub.soon')}</h2>
+          <ul className="space-y-1.5 text-muted">
+            {UPCOMING.map(topic => (
+              <li key={topic.title.en}>
+                <span aria-hidden>{topic.icon}</span> {pick(topic.title, i18n.language)}
+              </li>
+            ))}
+          </ul>
+        </Card>
+      )}
     </div>
   )
 }

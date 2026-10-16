@@ -26,6 +26,7 @@ const BodyTypesRoute = lazy(() => import('@/routes/read/body-types/BodyTypesRout
 const SizesRoute = lazy(() => import('@/routes/read/sizes/SizesRoute'))
 const FleetRoute = lazy(() => import('@/routes/read/fleet/FleetRoute'))
 const PlatesRoute = lazy(() => import('@/routes/read/plates/PlatesRoute'))
+const GenerationsRoute = lazy(() => import('@/routes/read/generations/GenerationsRoute'))
 const FeaturesRoute = lazy(() => import('@/routes/features/FeaturesRoute'))
 const SettingsRoute = lazy(() => import('@/routes/settings/SettingsRoute'))
 const EmailLinkRoute = lazy(() => import('@/routes/auth/EmailLinkRoute'))
@@ -66,6 +67,7 @@ export default function App(): ReactNode {
             <Route path="/read/sizes" element={<SizesRoute />} />
             <Route path="/read/fleet" element={<FleetRoute />} />
             <Route path="/read/plates" element={<PlatesRoute />} />
+            <Route path="/read/generations" element={<GenerationsRoute />} />
             <Route path="/features" element={<FeaturesRoute />} />
             <Route path="/settings" element={<SettingsRoute />} />
             <Route path="/auth/email" element={<EmailLinkRoute />} />

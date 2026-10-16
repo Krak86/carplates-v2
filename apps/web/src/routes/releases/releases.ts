@@ -27,6 +27,12 @@ export const RELEASES: readonly ReleaseDay[] = [
         'Довідник /read/plates: будова номерного знака, усі коди регіонів (чинні й старі цифрові), перевірка вашого номера та номери без регіону (Дія, Кабінет водія)',
         'Справочник /read/plates: устройство номерного знака, все коды регионов (действующие и старые цифровые), проверка вашего номера и номера без региона (Дія, Кабинет водителя)',
         'New /read/plates guide: plate anatomy, every region code (current and legacy digit codes), a check for your own plate and plates without a region (Diia, Driver’s Cabinet)'
+      ),
+      item(
+        'new',
+        'Довідник /read/generations: як Octavia, Golf, Camry та інші моделі росли за поколіннями — довжина, ширина й колісна база кожного покоління',
+        'Справочник /read/generations: как Octavia, Golf, Camry и другие модели росли по поколениям — длина, ширина и колёсная база каждого поколения',
+        'New /read/generations guide: how the Octavia, Golf, Camry and other models grew across generations — length, width and wheelbase of every generation'
       )
     ]
   },

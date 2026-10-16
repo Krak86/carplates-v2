@@ -245,6 +245,12 @@ export {
   type CaTextSection
 } from './caRecalls.js'
 export {
+  generationGrowthItemSchema,
+  generationGrowthResponseSchema,
+  type GenerationGrowthItem,
+  type GenerationGrowthResponse
+} from './generationGrowth.js'
+export {
   generationSchema,
   generationSpan,
   generationsResponseSchema,

@@ -30,6 +30,7 @@ import {
   getMot,
   getCaRecalls,
   getWanted,
+  getGenerationGrowth,
   getGenerations,
   getWikiSpecs,
   getNhtsaComplaints,
@@ -334,6 +335,15 @@ export function generationQuery(brand: string, model: string, year: number) {
   return queryOptions({
     queryKey: ['rdw', 'generations', brand, model, year],
     queryFn: () => getGenerations(brand, model, year),
+    staleTime: Infinity
+  })
+}
+
+// Every generation of a model with its typical size, for /read/generations — online-only (not in the rdw offline group).
+export function generationGrowthQuery(brand: string, model: string) {
+  return queryOptions({
+    queryKey: ['generations', 'growth', brand, model],
+    queryFn: () => getGenerationGrowth(brand, model),
     staleTime: Infinity
   })
 }
