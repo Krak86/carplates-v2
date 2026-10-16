@@ -12,6 +12,12 @@ export const RELEASES: readonly ReleaseDay[] = [
     items: [
       item(
         'improved',
+        '«Копіювати всю інформацію» тепер містить новини, соціальні обговорення (Bluesky, Stack Exchange, Lemmy), фінансові новини компанії та список джерел даних',
+        '«Копировать всю информацию» теперь включает новости, социальные обсуждения (Bluesky, Stack Exchange, Lemmy), финансовые новости компании и список источников данных',
+        '“Copy all info” now includes news, social threads (Bluesky, Stack Exchange, Lemmy), the company’s finance news and a list of the data sources used'
+      ),
+      item(
+        'improved',
         'Схема мас на картці авто співвідносить обране авто з GVM, TBM, GTM, ATM і GCM; секції акцизу та мас відкриті за замовчуванням',
         'Схема масс на карточке авто соотносит выбранное авто с GVM, TBM, GTM, ATM и GCM; секции акциза и масс открыты по умолчанию',
         'The mass schema on the car card now relates the chosen car to GVM, TBM, GTM, ATM and GCM; the excise and mass sections are open by default'

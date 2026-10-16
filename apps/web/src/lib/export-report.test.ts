@@ -421,3 +421,81 @@ describe('recalls and common faults', () => {
     expect(ids).not.toContain('motReasons')
   })
 })
+
+describe('buildExportReport news and sources', () => {
+  const news = {
+    items: [
+      {
+        url: 'https://carscoops.com/a',
+        source: 'carscoops-news',
+        title: 'Make only',
+        summary: null,
+        imageUrl: null,
+        publishedAt: '2026-10-01T10:00:00Z',
+        lang: 'en',
+        match: 'brand' as const
+      },
+      {
+        url: 'https://infocar.ua/b',
+        source: 'infocar-news',
+        title: 'Model\n match',
+        summary: null,
+        imageUrl: null,
+        publishedAt: '2026-10-02T10:00:00Z',
+        lang: 'uk',
+        match: 'model' as const
+      }
+    ]
+  }
+
+  it('adds no news, social or sources sections when nothing was fetched', () => {
+    const ids = buildExportReport(baseInput({ current: null }), t).sections.map(s => s.id)
+    expect(ids).not.toContain('news')
+    expect(ids).not.toContain('sources')
+  })
+
+  it('lists model news first, with a readable outlet and the link', () => {
+    const report = buildExportReport(baseInput({ news }), t)
+    const table = report.sections.find((s): s is ExportTableSection => s.id === 'news')
+    expect(table?.rows.map(r => [r[0], r[1], r[3]])).toEqual([
+      ['Model match', 'infocar.ua', 'https://infocar.ua/b'],
+      ['Make only', 'Carscoops', 'https://carscoops.com/a']
+    ])
+  })
+
+  it('exports social threads and finance news and names only the sources that contributed', () => {
+    const community = {
+      searchUrl: 'https://x',
+      posts: [
+        {
+          id: '1',
+          url: 'https://l/1',
+          title: 'Thread',
+          source: 'c/cars',
+          createdAt: '2026-10-03T00:00:00Z',
+          score: 1,
+          replies: 2,
+          thumb: null
+        }
+      ]
+    }
+    const report = buildExportReport(
+      baseInput({
+        news,
+        lemmy: community,
+        stockNews: {
+          company: { id: 'toyota', name: 'Toyota', symbol: '7203.T', url: 'https://y' },
+          moreUrl: null,
+          items: [{ id: '1', title: 'Shares', url: 'https://y/1', publishedAt: '2026-10-04T00:00:00Z', summary: '' }]
+        }
+      }),
+      t
+    )
+    const ids = report.sections.map(s => s.id)
+    expect(ids).toEqual(expect.arrayContaining(['news', 'lemmy', 'stock-news', 'sources']))
+    const sources = report.sections.find(s => s.id === 'sources')
+    const labels = sources?.type === 'links' ? sources.links.map(l => l.label) : []
+    expect(labels).toEqual(expect.arrayContaining(['data.gov.ua', 'infocar.ua', 'Carscoops', 'Lemmy', 'Yahoo Finance']))
+    expect(labels).not.toContain('Bluesky')
+  })
+})

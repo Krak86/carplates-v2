@@ -35,6 +35,8 @@ import {
   valueWarnings
 } from '@/components/EstimatedValue.helpers'
 import { buildGenerationSection, buildSizeSection } from '@/lib/export-size'
+import { buildNewsSections, buildSourcesSection } from '@/lib/export-news'
+import type { ExportNewsInput } from '@/lib/export-news'
 import { buildMotSections, buildRecallSections } from '@/lib/export-recalls-mot'
 import { orderedEditions } from '@/components/PressReviews.helpers'
 import { decileBand, isRareElsewhere } from '@/components/VdbChips.helpers'
@@ -144,7 +146,7 @@ export type ExportReport = {
 
 export type ExportVehicleInfo = { brand: string | null; model: string | null; year: number | null; body: string | null }
 
-export type ExportInput = {
+export type ExportInput = ExportNewsInput & {
   vehicle: ExportVehicleInfo
   plate: string | null
   region: string | null
@@ -917,8 +919,10 @@ export function buildExportReport(input: ExportInput, t: Translate): ExportRepor
     ...buildMotSections(input.mot, t, input.lang),
     buildReviewsSection(input, t),
     buildWikiSection(input, t),
+    ...buildNewsSections(input, t, input.lang),
     media.images,
-    media.videos
+    media.videos,
+    buildSourcesSection(input, t)
   ]
 
   return {

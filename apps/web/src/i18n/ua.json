@@ -1976,6 +1976,7 @@
   "export.tests": "Тести",
   "export.allImages": "Усі зображення",
   "export.allVideos": "Усі відео",
+  "export.sources": "Джерела даних",
   "export.untitled": "Транспортний засіб",
   "export.generatedAt": "Сформовано: {{date}}",
   "export.value": "Номер / VIN",

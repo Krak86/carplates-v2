@@ -5,6 +5,9 @@ import type { Registration } from '@carplates/shared'
 
 import { useVinText } from '@/components/vin/use-vin-text'
 import { downloadBlob, downloadText, vehicleFileStem } from '@/lib/download'
+import { blueskyQuery } from '@/lib/bluesky'
+import { lemmyQuery, stackExchangeQuery } from '@/lib/community'
+import { newsLangFilter } from '@/lib/news'
 import { buildExportReport } from '@/lib/export-report'
 import type { ExportFormat, ExportInput, ExportVehicleInfo } from '@/lib/export-report'
 import { toCsv, toMarkdown, toPlainText } from '@/lib/export-formats'
@@ -19,6 +22,7 @@ import {
   jncapRatingsQuery,
   kncapRatingsQuery,
   motQuery,
+  newsQuery,
   nhtsaComplaintsQuery,
   nhtsaRecallsQuery,
   plateHistoryQuery,
@@ -27,6 +31,7 @@ import {
   reviewsQuery,
   safetyRatingsQuery,
   statsTopQuery,
+  stockNewsQuery,
   vdbQuery,
   vinQuery,
   wikiInfoQuery,
@@ -103,7 +108,12 @@ export function useCopyAllInfoActions(params: CopyAllInfoParams): UseCopyAllInfo
       caRecalls,
       mot,
       generation,
-      wikiSpecs
+      wikiSpecs,
+      news,
+      bluesky,
+      stackExchange,
+      lemmy,
+      stockNews
     ] = await Promise.all([
       plate ? safe(queryClient.ensureQueryData(plateHistoryQuery(plate))) : Promise.resolve(null),
       params.vinDecodeResults == null && vin ? safe(queryClient.ensureQueryData(vinQuery(vin))) : Promise.resolve(null),
@@ -163,7 +173,24 @@ export function useCopyAllInfoActions(params: CopyAllInfoParams): UseCopyAllInfo
           )
         : Promise.resolve(null),
       hasRatingsQuery ? safe(queryClient.ensureQueryData(generationQuery(make, model, year))) : Promise.resolve(null),
-      hasRatingsQuery ? safe(queryClient.ensureQueryData(wikiSpecsQuery(make, model, year))) : Promise.resolve(null)
+      hasRatingsQuery ? safe(queryClient.ensureQueryData(wikiSpecsQuery(make, model, year))) : Promise.resolve(null),
+      vehicle.brand
+        ? safe(queryClient.ensureQueryData(newsQuery(make, vehicle.model, vehicle.year, newsLangFilter(i18n.language))))
+        : Promise.resolve(null),
+      vehicle.brand
+        ? safe(
+            queryClient.ensureQueryData({ ...blueskyQuery(make, vehicle.model, vehicle.year), ...FAIL_FAST_OFFLINE })
+          )
+        : Promise.resolve(null),
+      vehicle.brand
+        ? safe(queryClient.ensureQueryData({ ...stackExchangeQuery(make, vehicle.model), ...FAIL_FAST_OFFLINE }))
+        : Promise.resolve(null),
+      vehicle.brand
+        ? safe(queryClient.ensureQueryData({ ...lemmyQuery(make, vehicle.model), ...FAIL_FAST_OFFLINE }))
+        : Promise.resolve(null),
+      vehicle.brand
+        ? safe(queryClient.ensureQueryData({ ...stockNewsQuery(make), ...FAIL_FAST_OFFLINE }))
+        : Promise.resolve(null)
     ])
 
     return {
@@ -196,6 +223,11 @@ export function useCopyAllInfoActions(params: CopyAllInfoParams): UseCopyAllInfo
       caRecalls,
       mot,
       generation: generation?.match?.current ?? null,
+      news,
+      bluesky,
+      stackExchange,
+      lemmy,
+      stockNews,
       lang: i18n.language
     }
   }

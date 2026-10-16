@@ -1502,6 +1502,7 @@
   "export.tests": "Tests",
   "export.allImages": "All images",
   "export.allVideos": "All videos",
+  "export.sources": "Data sources",
   "export.untitled": "Vehicle",
   "export.generatedAt": "Generated: {{date}}",
   "export.value": "Plate / VIN",
