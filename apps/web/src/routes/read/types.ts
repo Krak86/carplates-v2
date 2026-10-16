@@ -11,6 +11,10 @@ export type ArticleMeta = {
   /** `nav.*` key naming the article. */
   titleKey: string
   lead: L10n
+  /** ISO date (YYYY-MM-DD) the guide went live. */
+  published: string
+  /** oklch hue of the banner. */
+  hue: number
 }
 
 export type UpcomingTopic = { icon: string; title: L10n }

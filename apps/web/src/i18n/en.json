@@ -2738,6 +2738,8 @@
   "read.hub.open": "Read",
   "read.hub.soon": "Coming next",
   "read.back": "All guides",
+  "read.share": "Copy link to this guide",
+  "read.published": "Published",
   "read.showPlates": "Show real plates",
   "read.hidePlates": "Hide plates",
   "read.plates.loading": "Looking up plates…",

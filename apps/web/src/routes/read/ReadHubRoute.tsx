@@ -2,9 +2,12 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 
+import ArticleBanner from '@/routes/read/ArticleBanner'
+
 import Card from '@/components/ui/Card'
 import { ARTICLES, UPCOMING } from '@/routes/read/articles'
 import { pick } from '@/routes/read/helpers'
+import { toIntlLocale } from '@/lib/intl'
 
 // Lazy-loaded (see App.tsx). Public, no sign-in.
 export default function ReadHubRoute(): ReactNode {
@@ -17,15 +20,23 @@ export default function ReadHubRoute(): ReactNode {
         <p className="text-muted">{t('read.hub.intro')}</p>
       </Card>
 
-      <div className="grid gap-3 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-2">
         {ARTICLES.map(article => (
           <Link key={article.path} to={article.path} viewTransition className="group block">
-            <Card className="h-full transition-colors group-hover:border-primary">
-              <h2 className="mb-1 text-lg font-semibold">
-                <span aria-hidden>{article.icon}</span> {t(article.titleKey)}
-              </h2>
-              <p className="text-sm text-muted">{pick(article.lead, i18n.language)}</p>
-              <span className="mt-2 inline-block text-sm text-primary">{t('read.hub.open')} →</span>
+            <Card className="h-full overflow-hidden !p-0 transition-colors group-hover:border-primary">
+              <ArticleBanner article={article} className="h-36" />
+
+              <div className="p-3 md:p-4">
+                <time dateTime={article.published} className="text-xs text-muted">
+                  {new Date(article.published).toLocaleDateString(toIntlLocale(i18n.language), {
+                    dateStyle: 'long'
+                  })}
+                </time>
+
+                <h2 className="mb-1 text-lg font-semibold">{t(article.titleKey)}</h2>
+                <p className="text-sm text-muted">{pick(article.lead, i18n.language)}</p>
+                <span className="mt-2 inline-block text-sm text-primary">{t('read.hub.open')} →</span>
+              </div>
             </Card>
           </Link>
         ))}

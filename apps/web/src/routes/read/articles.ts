@@ -86,20 +86,43 @@ export const RECALLS_LEAD: L10n = {
   en: 'What is a recall, how does it differ from a common fault, and what wears out on a model as the miles add up? EU, US and Canadian campaigns and UK inspection data, shown on popular models.'
 }
 
+const PUBLISHED = '2026-10-16'
+
 /** The published explainers, in hub order. A new article = a route in App.tsx + `STATIC_PAGES` (spa-text.ts) + an entry here. */
 export const ARTICLES: readonly ArticleMeta[] = [
-  { path: BODY_TYPES_PATH, icon: '🚙', titleKey: 'nav.readBodyTypes', lead: BODY_TYPES_LEAD },
-  { path: SIZES_PATH, icon: '📏', titleKey: 'nav.readSizes', lead: SIZES_LEAD },
-  { path: FLEET_PATH, icon: '🎨', titleKey: 'nav.readFleet', lead: FLEET_LEAD },
-  { path: PLATES_PATH, icon: '🔢', titleKey: 'nav.readPlates', lead: PLATES_LEAD },
-  { path: VIN_PATH, icon: '🪪', titleKey: 'nav.readVin', lead: VIN_LEAD },
-  { path: GENERATIONS_PATH, icon: '🧬', titleKey: 'nav.readGenerations', lead: GENERATIONS_LEAD },
-  { path: ELECTRIC_PATH, icon: '🔌', titleKey: 'nav.readElectric', lead: ELECTRIC_LEAD },
-  { path: IMPORTS_PATH, icon: '🚢', titleKey: 'nav.readImports', lead: IMPORTS_LEAD },
-  { path: SAFETY_PATH, icon: '🛡️', titleKey: 'nav.readSafety', lead: SAFETY_LEAD },
-  { path: FUEL_PATH, icon: '⛽', titleKey: 'nav.readFuel', lead: FUEL_LEAD },
-  { path: EXTREMES_PATH, icon: '🏆', titleKey: 'nav.readExtremes', lead: EXTREMES_LEAD },
-  { path: RECALLS_PATH, icon: '🔧', titleKey: 'nav.readRecalls', lead: RECALLS_LEAD }
+  {
+    path: BODY_TYPES_PATH,
+    icon: '🚙',
+    titleKey: 'nav.readBodyTypes',
+    lead: BODY_TYPES_LEAD,
+    published: PUBLISHED,
+    hue: 250
+  },
+  { path: SIZES_PATH, icon: '📏', titleKey: 'nav.readSizes', lead: SIZES_LEAD, published: PUBLISHED, hue: 200 },
+  { path: FLEET_PATH, icon: '🎨', titleKey: 'nav.readFleet', lead: FLEET_LEAD, published: PUBLISHED, hue: 330 },
+  { path: PLATES_PATH, icon: '🔢', titleKey: 'nav.readPlates', lead: PLATES_LEAD, published: PUBLISHED, hue: 60 },
+  { path: VIN_PATH, icon: '🪪', titleKey: 'nav.readVin', lead: VIN_LEAD, published: PUBLISHED, hue: 285 },
+  {
+    path: GENERATIONS_PATH,
+    icon: '🧬',
+    titleKey: 'nav.readGenerations',
+    lead: GENERATIONS_LEAD,
+    published: PUBLISHED,
+    hue: 150
+  },
+  {
+    path: ELECTRIC_PATH,
+    icon: '🔌',
+    titleKey: 'nav.readElectric',
+    lead: ELECTRIC_LEAD,
+    published: PUBLISHED,
+    hue: 175
+  },
+  { path: IMPORTS_PATH, icon: '🚢', titleKey: 'nav.readImports', lead: IMPORTS_LEAD, published: PUBLISHED, hue: 230 },
+  { path: SAFETY_PATH, icon: '🛡️', titleKey: 'nav.readSafety', lead: SAFETY_LEAD, published: PUBLISHED, hue: 25 },
+  { path: FUEL_PATH, icon: '⛽', titleKey: 'nav.readFuel', lead: FUEL_LEAD, published: PUBLISHED, hue: 100 },
+  { path: EXTREMES_PATH, icon: '🏆', titleKey: 'nav.readExtremes', lead: EXTREMES_LEAD, published: PUBLISHED, hue: 80 },
+  { path: RECALLS_PATH, icon: '🔧', titleKey: 'nav.readRecalls', lead: RECALLS_LEAD, published: PUBLISHED, hue: 45 }
 ]
 
 /** Themes planned next, listed in the hub so readers see where it is going. */
