@@ -38,7 +38,7 @@ export default function FuelBarList({ rows, formatLabel }: Props): ReactNode {
           </span>
 
           <span className="text-right whitespace-nowrap tabular-nums">
-            {row.avgCo2 != null ? Math.round(row.avgCo2) : '—'}{' '}
+            {row.avgCo2 != null ? Math.round(row.avgCo2) : '-'}{' '}
             <span className="text-xs text-[var(--color-muted)]">
               {t('fuel.cars', { count: numberFormat.format(row.n) })} · {Math.round(coveragePercent(row))}%
             </span>

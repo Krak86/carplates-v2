@@ -123,12 +123,12 @@ export default function GrowthCard({ brand, model, note, profile }: Props): Reac
                       <span className="w-12 shrink-0 text-right tabular-nums">{mmToMetres(g.lengthMm)}</span>
                     </div>
                   ) : (
-                    <span className="text-muted">—</span>
+                    <span className="text-muted">-</span>
                   )}
                 </td>
 
-                <td className="py-1.5 pr-2 text-right tabular-nums">{g.widthMm ? mmToMetres(g.widthMm) : '—'}</td>
-                <td className="py-1.5 text-right tabular-nums">{g.wheelbaseMm ? mmToMetres(g.wheelbaseMm) : '—'}</td>
+                <td className="py-1.5 pr-2 text-right tabular-nums">{g.widthMm ? mmToMetres(g.widthMm) : '-'}</td>
+                <td className="py-1.5 text-right tabular-nums">{g.wheelbaseMm ? mmToMetres(g.wheelbaseMm) : '-'}</td>
               </tr>
             ))}
           </tbody>

@@ -21,17 +21,17 @@ export const WHY_REASONS: ReadonlyArray<{ title: L10n; text: L10n }> = [
   {
     title: { ua: 'Зсув класу', ru: 'Сдвиг класса', en: 'Class creep' },
     text: {
-      ua: 'Щойно модель виростає, під нею з’являється менша — і стара ніша заповнюється новачком.',
-      ru: 'Как только модель вырастает, под ней появляется меньшая — и старая ниша заполняется новичком.',
+      ua: 'Щойно модель виростає, під нею з’являється менша - і стара ніша заповнюється новачком.',
+      ru: 'Как только модель вырастает, под ней появляется меньшая - и старая ниша заполняется новичком.',
       en: 'Once a model grows, a smaller one is slotted underneath it to refill the old niche.'
     }
   },
   {
     title: { ua: 'Спільні платформи', ru: 'Общие платформы', en: 'Shared platforms' },
     text: {
-      ua: 'Одна платформа обслуговує кілька моделей, тому розміри міняються сходинками — між поколіннями, а не всередині одного.',
-      ru: 'Одна платформа обслуживает несколько моделей, поэтому размеры меняются ступенями — между поколениями, а не внутри одного.',
-      en: 'One platform serves several models, so sizes change in steps — between generations, not inside one.'
+      ua: 'Одна платформа обслуговує кілька моделей, тому розміри міняються сходинками - між поколіннями, а не всередині одного.',
+      ru: 'Одна платформа обслуживает несколько моделей, поэтому размеры меняются ступенями - между поколениями, а не внутри одного.',
+      en: 'One platform serves several models, so sizes change in steps - between generations, not inside one.'
     }
   }
 ]
@@ -42,8 +42,8 @@ export const GROWTH_MODELS: ReadonlyArray<{ brand: string; model: string; note: 
     brand: 'SKODA',
     model: 'OCTAVIA',
     note: {
-      ua: 'Одна з найпоширеніших моделей в Україні — і майже зразкова історія «з компакта в середній клас».',
-      ru: 'Одна из самых распространённых моделей в Украине — и почти образцовая история «из компакта в средний класс».',
+      ua: 'Одна з найпоширеніших моделей в Україні - і майже зразкова історія «з компакта в середній клас».',
+      ru: 'Одна из самых распространённых моделей в Украине - и почти образцовая история «из компакта в средний класс».',
       en: 'One of the most common models in Ukraine, and nearly a textbook “compact to mid-size” story.'
     }
   },
@@ -69,8 +69,8 @@ export const GROWTH_MODELS: ReadonlyArray<{ brand: string; model: string; note: 
     brand: 'TOYOTA',
     model: 'CAMRY',
     note: {
-      ua: 'Колісна база відома майже для всіх поколінь, а довжина — лише там, де вистачає даних RDW.',
-      ru: 'Колёсная база известна почти для всех поколений, а длина — только там, где хватает данных RDW.',
+      ua: 'Колісна база відома майже для всіх поколінь, а довжина - лише там, де вистачає даних RDW.',
+      ru: 'Колёсная база известна почти для всех поколений, а длина - только там, где хватает данных RDW.',
       en: 'Wheelbase is known for nearly every generation; length only where RDW has enough data.'
     }
   },
@@ -87,8 +87,8 @@ export const GROWTH_MODELS: ReadonlyArray<{ brand: string; model: string; note: 
     brand: 'FORD',
     model: 'FOCUS',
     note: {
-      ua: 'Другий Focus одразу став помітно більшим за перший — класичний стрибок між поколіннями.',
-      ru: 'Второй Focus сразу стал заметно больше первого — классический скачок между поколениями.',
+      ua: 'Другий Focus одразу став помітно більшим за перший - класичний стрибок між поколіннями.',
+      ru: 'Второй Focus сразу стал заметно больше первого - классический скачок между поколениями.',
       en: 'The second Focus was clearly bigger than the first: a classic jump between generations.'
     }
   },
@@ -96,17 +96,17 @@ export const GROWTH_MODELS: ReadonlyArray<{ brand: string; model: string; note: 
     brand: 'HYUNDAI',
     model: 'TUCSON',
     note: {
-      ua: 'Кросовери ростуть повільніше за хетчбеки, але стабільно — і шириною, і колісною базою.',
-      ru: 'Кроссоверы растут медленнее хэтчбеков, но стабильно — и шириной, и колёсной базой.',
-      en: 'Crossovers grow more slowly than hatchbacks, but steadily — in width and wheelbase alike.'
+      ua: 'Кросовери ростуть повільніше за хетчбеки, але стабільно - і шириною, і колісною базою.',
+      ru: 'Кроссоверы растут медленнее хэтчбеков, но стабильно - и шириной, и колёсной базой.',
+      en: 'Crossovers grow more slowly than hatchbacks, but steadily - in width and wheelbase alike.'
     }
   },
   {
     brand: 'AUDI',
     model: 'A4',
     note: {
-      ua: 'Найбільша сходинка — між B7 і B8: колісна база за одне покоління зросла приблизно на 15 см.',
-      ru: 'Самая большая ступенька — между B7 и B8: колёсная база за одно поколение выросла примерно на 15 см.',
+      ua: 'Найбільша сходинка - між B7 і B8: колісна база за одне покоління зросла приблизно на 15 см.',
+      ru: 'Самая большая ступенька - между B7 и B8: колёсная база за одно поколение выросла примерно на 15 см.',
       en: 'The big step is B7 to B8: the wheelbase gained about 15 cm in a single generation.'
     }
   }
@@ -114,8 +114,8 @@ export const GROWTH_MODELS: ReadonlyArray<{ brand: string; model: string; note: 
 
 export const METHOD_POINTS: readonly L10n[] = [
   {
-    ua: 'Розмір покоління — це медіана за модельними роками, що потрапляють у його роки виробництва, за типовими даними RDW (Нідерланди). Де в RDW немає даних, беремо каталожні значення з Вікіпедії.',
-    ru: 'Размер поколения — это медиана по модельным годам, попадающим в его годы производства, по типовым данным RDW (Нидерланды). Где в RDW нет данных, берём каталожные значения из Википедии.',
+    ua: 'Розмір покоління - це медіана за модельними роками, що потрапляють у його роки виробництва, за типовими даними RDW (Нідерланди). Де в RDW немає даних, беремо каталожні значення з Вікіпедії.',
+    ru: 'Размер поколения - это медиана по модельным годам, попадающим в его годы производства, по типовым данным RDW (Нидерланды). Где в RDW нет данных, берём каталожные значения из Википедии.',
     en: 'A generation’s size is the median over the model years inside its production span, from RDW (Netherlands) type data. Where RDW has none, catalogue values from Wikipedia fill in.'
   },
   {

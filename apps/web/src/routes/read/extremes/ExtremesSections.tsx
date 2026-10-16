@@ -65,7 +65,7 @@ export function ReadSection(): ReactNode {
         {READING.map(item => (
           <li key={item.key} className="text-muted">
             <strong className="text-(--color-text)">{t(`read.extremes.read.${item.key}`)}</strong>
-            {' — '}
+            {' - '}
             {pick(item.text, i18n.language)}
           </li>
         ))}

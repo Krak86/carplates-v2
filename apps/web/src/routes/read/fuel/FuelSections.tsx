@@ -118,7 +118,7 @@ export function FleetSection(): ReactNode {
                 className="text-2xl font-bold tabular-nums"
                 style={data.fleetAvgCo2 != null ? { color: CO2_BAND_COLOR[bandForCo2(data.fleetAvgCo2)] } : undefined}
               >
-                {data.fleetAvgCo2 != null ? Math.round(data.fleetAvgCo2) : '—'}
+                {data.fleetAvgCo2 != null ? Math.round(data.fleetAvgCo2) : '-'}
                 <span className="text-sm font-normal text-muted"> {t('co2.unitGKm')}</span>
               </dd>
             </div>
@@ -295,7 +295,7 @@ export function MethodSection(): ReactNode {
         {METHOD.map(item => (
           <li key={item.key} className="text-muted">
             <strong className="text-(--color-text)">{t(`read.fuel.method.${item.key}`)}</strong>
-            {' — '}
+            {' - '}
             {pick(item.text, i18n.language)}
           </li>
         ))}

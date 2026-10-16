@@ -31,7 +31,7 @@ export default function PlateSegments({ plate, region }: Props): ReactNode {
   if (!segments) return null
 
   const params = {
-    region: regionLabel(region) ?? '—',
+    region: regionLabel(region) ?? '-',
     service: t(`plate.seg.service.${plateSeries(normalizePlate(plate)) ?? 'diia'}`)
   }
 

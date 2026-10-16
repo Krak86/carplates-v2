@@ -94,7 +94,7 @@ export default function NewsCard({
 
         <p className="truncate text-xs text-[var(--color-muted)]">
           {hostOf(item.url)} · {date}
-          <span className="sr-only"> — {t('news.opensNewTab')}</span>
+          <span className="sr-only"> - {t('news.opensNewTab')}</span>
         </p>
       </div>
     </a>

@@ -129,7 +129,7 @@ export function RecallsSection({ example }: ExampleProps): ReactNode {
                 <span aria-hidden>{row.flag}</span>
                 <span className="text-muted">{t(`read.recalls.market.${row.key}`)}</span>
                 <strong className="ml-auto tabular-nums">
-                  {row.total == null ? '—' : formatCount(row.total, lang)}
+                  {row.total == null ? '-' : formatCount(row.total, lang)}
                 </strong>
               </li>
             ))}
@@ -230,7 +230,7 @@ export function ReadSection(): ReactNode {
         {READING.map(item => (
           <li key={item.key} className="text-muted">
             <strong className="text-(--color-text)">{t(`read.recalls.read.${item.key}`)}</strong>
-            {' — '}
+            {' - '}
             {pick(item.text, i18n.language)}
           </li>
         ))}

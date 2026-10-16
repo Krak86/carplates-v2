@@ -99,7 +99,7 @@ export default function SafetyStatsRoute(): ReactNode {
                   data.fleetAvgScore != null ? { color: CO2_BAND_COLOR[bandForScore(data.fleetAvgScore)] } : undefined
                 }
               >
-                {data.fleetAvgScore != null ? Math.round(data.fleetAvgScore) : '—'} {t('safety.scoreUnit')}
+                {data.fleetAvgScore != null ? Math.round(data.fleetAvgScore) : '-'} {t('safety.scoreUnit')}
               </div>
             </Card>
             <Card>

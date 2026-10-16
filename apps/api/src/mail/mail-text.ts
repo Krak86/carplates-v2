@@ -30,17 +30,17 @@ export type MailChrome = { footer: string; codeLabel: string; linkFallback: stri
 
 export const CHROME_TEXT: Record<Lang, MailChrome> = {
   ua: {
-    footer: 'carsua.app — пошук авто за номером і VIN. Це автоматичний лист, відповідати на нього не потрібно.',
+    footer: 'carsua.app - пошук авто за номером і VIN. Це автоматичний лист, відповідати на нього не потрібно.',
     codeLabel: 'Ваш код',
     linkFallback: 'Якщо кнопка не працює, скопіюйте це посилання в браузер:'
   },
   ru: {
-    footer: 'carsua.app — поиск авто по номеру и VIN. Это автоматическое письмо, отвечать на него не нужно.',
+    footer: 'carsua.app - поиск авто по номеру и VIN. Это автоматическое письмо, отвечать на него не нужно.',
     codeLabel: 'Ваш код',
     linkFallback: 'Если кнопка не работает, скопируйте эту ссылку в браузер:'
   },
   en: {
-    footer: 'carsua.app — vehicle lookup by plate and VIN. This is an automated message; no reply is needed.',
+    footer: 'carsua.app - vehicle lookup by plate and VIN. This is an automated message; no reply is needed.',
     codeLabel: 'Your code',
     linkFallback: 'If the button does not work, copy this link into your browser:'
   }
@@ -48,21 +48,21 @@ export const CHROME_TEXT: Record<Lang, MailChrome> = {
 
 const SIGN_IN_TEXT: Record<Lang, CodeMailText> = {
   ua: {
-    subject: code => `${code} — код для входу на carsua.app`,
+    subject: code => `${code} - код для входу на carsua.app`,
     heading: 'Вхід на carsua.app',
     intro: 'Введіть цей код на сайті або натисніть кнопку, щоб увійти.',
     button: 'Увійти',
     expires: m => `Дійсний ${m} хвилин і спрацює лише один раз.`,
-    ignore: 'Якщо ви не запитували вхід, просто проігноруйте цей лист — акаунт у безпеці.',
+    ignore: 'Якщо ви не запитували вхід, просто проігноруйте цей лист - акаунт у безпеці.',
     requestedFrom: d => `Запит надійшов з: ${d}.`
   },
   ru: {
-    subject: code => `${code} — код для входа на carsua.app`,
+    subject: code => `${code} - код для входа на carsua.app`,
     heading: 'Вход на carsua.app',
     intro: 'Введите этот код на сайте или нажмите кнопку, чтобы войти.',
     button: 'Войти',
     expires: m => `Действителен ${m} минут и сработает только один раз.`,
-    ignore: 'Если вы не запрашивали вход, просто проигнорируйте это письмо — аккаунт в безопасности.',
+    ignore: 'Если вы не запрашивали вход, просто проигнорируйте это письмо - аккаунт в безопасности.',
     requestedFrom: d => `Запрос пришёл с: ${d}.`
   },
   en: {
@@ -71,7 +71,7 @@ const SIGN_IN_TEXT: Record<Lang, CodeMailText> = {
     intro: 'Enter this code on the site, or press the button, to sign in.',
     button: 'Sign in',
     expires: m => `Valid for ${m} minutes and works only once.`,
-    ignore: 'If you did not request this, just ignore this email — your account is safe.',
+    ignore: 'If you did not request this, just ignore this email - your account is safe.',
     requestedFrom: d => `Requested from: ${d}.`
   }
 }
@@ -79,14 +79,14 @@ const SIGN_IN_TEXT: Record<Lang, CodeMailText> = {
 const SET_EMAIL_TEXT: Record<Lang, CodeMailText> = {
   ua: {
     ...SIGN_IN_TEXT.ua,
-    subject: code => `${code} — підтвердження пошти на carsua.app`,
+    subject: code => `${code} - підтвердження пошти на carsua.app`,
     heading: 'Підтвердіть електронну пошту',
     intro: 'Введіть цей код на сторінці профілю, щоб прив’язати цю пошту до акаунта.',
     button: 'Підтвердити'
   },
   ru: {
     ...SIGN_IN_TEXT.ru,
-    subject: code => `${code} — подтверждение почты на carsua.app`,
+    subject: code => `${code} - подтверждение почты на carsua.app`,
     heading: 'Подтвердите электронную почту',
     intro: 'Введите этот код на странице профиля, чтобы привязать эту почту к аккаунту.',
     button: 'Подтвердить'
@@ -103,14 +103,14 @@ const SET_EMAIL_TEXT: Record<Lang, CodeMailText> = {
 const REAUTH_TEXT: Record<Lang, CodeMailText> = {
   ua: {
     ...SIGN_IN_TEXT.ua,
-    subject: code => `${code} — підтвердження дії на carsua.app`,
+    subject: code => `${code} - підтвердження дії на carsua.app`,
     heading: 'Підтвердіть, що це ви',
     intro: 'Для захищеної дії в профілі потрібне повторне підтвердження. Введіть цей код.',
     button: 'Підтвердити'
   },
   ru: {
     ...SIGN_IN_TEXT.ru,
-    subject: code => `${code} — подтверждение действия на carsua.app`,
+    subject: code => `${code} - подтверждение действия на carsua.app`,
     heading: 'Подтвердите, что это вы',
     intro: 'Для защищённого действия в профиле нужно повторное подтверждение. Введите этот код.',
     button: 'Подтвердить'
@@ -137,14 +137,14 @@ export const NOTICE_TEXT: Record<NoticeMailKind, Record<Lang, NoticeMailText>> =
       heading: 'Пошту акаунта змінено',
       body: 'Електронну пошту вашого акаунта змінено на {email}. Ця адреса більше не використовується для входу.',
       button: null,
-      ignore: 'Якщо це були не ви — увійдіть через Google або Telegram і завершіть усі сеанси в профілі.'
+      ignore: 'Якщо це були не ви - увійдіть через Google або Telegram і завершіть усі сеанси в профілі.'
     },
     ru: {
       subject: 'Почта аккаунта carsua.app изменена',
       heading: 'Почта аккаунта изменена',
       body: 'Электронная почта вашего аккаунта изменена на {email}. Этот адрес больше не используется для входа.',
       button: null,
-      ignore: 'Если это были не вы — войдите через Google или Telegram и завершите все сеансы в профиле.'
+      ignore: 'Если это были не вы - войдите через Google или Telegram и завершите все сеансы в профиле.'
     },
     en: {
       subject: 'Your carsua.app account email was changed',
@@ -159,21 +159,21 @@ export const NOTICE_TEXT: Record<NoticeMailKind, Record<Lang, NoticeMailText>> =
       subject: 'Новий вхід в акаунт carsua.app',
       heading: 'Новий вхід в акаунт',
       body: 'Ми помітили вхід з нового пристрою: {device}, {time}.',
-      button: 'Це не я — завершити всі сеанси',
+      button: 'Це не я - завершити всі сеанси',
       ignore: 'Якщо це були ви, нічого робити не потрібно.'
     },
     ru: {
       subject: 'Новый вход в аккаунт carsua.app',
       heading: 'Новый вход в аккаунт',
       body: 'Мы заметили вход с нового устройства: {device}, {time}.',
-      button: 'Это не я — завершить все сеансы',
+      button: 'Это не я - завершить все сеансы',
       ignore: 'Если это были вы, ничего делать не нужно.'
     },
     en: {
       subject: 'New sign-in to your carsua.app account',
       heading: 'New sign-in to your account',
       body: 'We noticed a sign-in from a new device: {device}, {time}.',
-      button: 'Not me — end all sessions',
+      button: 'Not me - end all sessions',
       ignore: 'If this was you, no action is needed.'
     }
   },
@@ -183,14 +183,14 @@ export const NOTICE_TEXT: Record<NoticeMailKind, Record<Lang, NoticeMailText>> =
       heading: 'Акаунт буде видалено',
       body: 'Ваш акаунт і всі дані буде остаточно видалено через {days} дн. Щоб скасувати видалення, просто увійдіть у акаунт до цього строку.',
       button: 'Відновити акаунт',
-      ignore: 'Якщо ви хочете видалити акаунт — нічого робити не потрібно.'
+      ignore: 'Якщо ви хочете видалити акаунт - нічого робити не потрібно.'
     },
     ru: {
       subject: 'Удаление аккаунта carsua.app запланировано',
       heading: 'Аккаунт будет удалён',
       body: 'Ваш аккаунт и все данные будут окончательно удалены через {days} дн. Чтобы отменить удаление, просто войдите в аккаунт до этого срока.',
       button: 'Восстановить аккаунт',
-      ignore: 'Если вы хотите удалить аккаунт — ничего делать не нужно.'
+      ignore: 'Если вы хотите удалить аккаунт - ничего делать не нужно.'
     },
     en: {
       subject: 'Your carsua.app account is scheduled for deletion',

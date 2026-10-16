@@ -391,7 +391,7 @@ function makeServiceWith(store: FakeStore): WikiService {
 }
 
 describe('WikiService.lookupImage', () => {
-  it('serves a stored photo with no Wikimedia call at all — no article text either', async () => {
+  it('serves a stored photo with no Wikimedia call at all - no article text either', async () => {
     routeFetch()
     const { service, store } = makeService()
     await store.save({

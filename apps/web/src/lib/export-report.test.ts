@@ -335,7 +335,7 @@ describe('buildLocalRecordsReport', () => {
     if (!section || section.type !== 'table') throw new Error('expected table section')
     expect(section.rows).toEqual([
       ['АА1234АА', 'My car', new Date(1700000000000).toLocaleString()],
-      ['JT123456789012345', '—', new Date(1700000001000).toLocaleString()]
+      ['JT123456789012345', '-', new Date(1700000001000).toLocaleString()]
     ])
   })
 })

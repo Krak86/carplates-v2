@@ -66,7 +66,7 @@ export class PreviewService {
       ...vehiclePageText(lang, { value: res.plate, car, year, extra: [c.fuel, res.region] }, 'plate'),
       card: {
         plate: res.plate,
-        title: [car ?? '—', year].filter(Boolean).join(' · '),
+        title: [car ?? '-', year].filter(Boolean).join(' · '),
         subtitle: [res.region, cap(c.fuel), color].filter(Boolean).join(' · '),
         color: resolveVehicleColor(c.color) ?? fallbackVehicleColor(res.plate)
       },

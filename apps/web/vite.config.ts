@@ -62,7 +62,7 @@ export default defineConfig({
         }
       },
       manifest: {
-        name: 'Cars UA — пошук авто за номером та VIN',
+        name: 'Cars UA - пошук авто за номером та VIN',
         short_name: 'Cars UA',
         description: 'Пошук даних про транспортний засіб за номерним знаком або VIN-кодом.',
         lang: 'uk',

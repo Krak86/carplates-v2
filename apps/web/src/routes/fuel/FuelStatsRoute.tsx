@@ -96,7 +96,7 @@ export default function FuelStatsRoute(): ReactNode {
                 className="text-xl font-semibold"
                 style={data.fleetAvgCo2 != null ? { color: CO2_BAND_COLOR[bandForCo2(data.fleetAvgCo2)] } : undefined}
               >
-                {data.fleetAvgCo2 != null ? Math.round(data.fleetAvgCo2) : '—'} {t('co2.unitGKm')}
+                {data.fleetAvgCo2 != null ? Math.round(data.fleetAvgCo2) : '-'} {t('co2.unitGKm')}
               </div>
             </Card>
             <Card>

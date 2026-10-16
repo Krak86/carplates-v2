@@ -333,7 +333,7 @@ export default function AboutRoute(): ReactNode {
                 ) : (
                   <span className="font-medium">{source.label}</span>
                 )}
-                <span className="text-[var(--color-muted)]"> — {t(`about.source.${source.key}`)}</span>
+                <span className="text-[var(--color-muted)]"> - {t(`about.source.${source.key}`)}</span>
               </div>
             </li>
           ))}

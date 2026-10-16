@@ -25,16 +25,16 @@ export const TAGLINE: Record<Lang, [string, string]> = {
 export const STATIC_PAGES: Record<string, Record<Lang, PageText>> = {
   '/': {
     ua: {
-      title: 'Cars UA — номери та VIN',
+      title: 'Cars UA - номери та VIN',
       description: 'Пошук даних про транспортний засіб за номерним знаком або VIN-кодом. Відкриті дані реєстру України.'
     },
     ru: {
-      title: 'Cars UA — номера и VIN',
+      title: 'Cars UA - номера и VIN',
       description:
         'Поиск данных о транспортном средстве по номерному знаку или VIN-коду. Открытые данные реестра Украины.'
     },
     en: {
-      title: 'Cars UA — plates & VIN',
+      title: 'Cars UA - plates & VIN',
       description: "Look up a vehicle by Ukrainian plate number or VIN. Built on the state's open vehicle registry."
     }
   },
@@ -183,11 +183,11 @@ export const STATIC_PAGES: Record<string, Record<Lang, PageText>> = {
   '/read/fleet': {
     ua: {
       title: 'Що їздить Україною: кольори, паливо, вік · Cars UA',
-      description: 'Найпопулярніші кольори, паливо та роки реєстрації авто в Україні — на даних відкритого реєстру.'
+      description: 'Найпопулярніші кольори, паливо та роки реєстрації авто в Україні - на даних відкритого реєстру.'
     },
     ru: {
       title: 'Что ездит по Украине: цвета, топливо, возраст · Cars UA',
-      description: 'Самые популярные цвета, топливо и годы регистрации авто в Украине — на данных открытого реестра.'
+      description: 'Самые популярные цвета, топливо и годы регистрации авто в Украине - на данных открытого реестра.'
     },
     en: {
       title: 'What Ukraine drives: colours, fuel, fleet age · Cars UA',
@@ -215,17 +215,17 @@ export const STATIC_PAGES: Record<string, Record<Lang, PageText>> = {
     ua: {
       title: 'Як авто росли за поколіннями: Octavia, Golf, Camry · Cars UA',
       description:
-        'Довжина, ширина й колісна база кожного покоління популярних моделей — наскільки «Гольф» і «Октавія» виросли за десятиліття.'
+        'Довжина, ширина й колісна база кожного покоління популярних моделей - наскільки «Гольф» і «Октавія» виросли за десятиліття.'
     },
     ru: {
       title: 'Как авто росли по поколениям: Octavia, Golf, Camry · Cars UA',
       description:
-        'Длина, ширина и колёсная база каждого поколения популярных моделей — насколько «Гольф» и «Октавия» выросли за десятилетия.'
+        'Длина, ширина и колёсная база каждого поколения популярных моделей - насколько «Гольф» и «Октавия» выросли за десятилетия.'
     },
     en: {
       title: 'How cars grew across generations: Octavia, Golf, Camry · Cars UA',
       description:
-        'Length, width and wheelbase of every generation of popular models — how much the Golf and the Octavia grew over the decades.'
+        'Length, width and wheelbase of every generation of popular models - how much the Golf and the Octavia grew over the decades.'
     }
   },
   '/read/electric': {
@@ -300,12 +300,12 @@ export const STATIC_PAGES: Record<string, Record<Lang, PageText>> = {
     ua: {
       title: 'Найважчі, найлегші й найпотужніші моделі авто в Україні · Cars UA',
       description:
-        'Рекордсмени українського реєстру: яка модель найважча і найлегша, хто найпотужніший, має найбільший двигун, найвищий чи найдовший кузов і найбільший бак — та як читати ці рейтинги.'
+        'Рекордсмени українського реєстру: яка модель найважча і найлегша, хто найпотужніший, має найбільший двигун, найвищий чи найдовший кузов і найбільший бак - та як читати ці рейтинги.'
     },
     ru: {
       title: 'Самые тяжёлые, лёгкие и мощные модели авто в Украине · Cars UA',
       description:
-        'Рекордсмены украинского реестра: какая модель самая тяжёлая и лёгкая, кто самый мощный, с самым большим двигателем, самым высоким или длинным кузовом и самым большим баком — и как читать эти рейтинги.'
+        'Рекордсмены украинского реестра: какая модель самая тяжёлая и лёгкая, кто самый мощный, с самым большим двигателем, самым высоким или длинным кузовом и самым большим баком - и как читать эти рейтинги.'
     },
     en: {
       title: 'Heaviest, lightest and most powerful car models in Ukraine · Cars UA',
@@ -430,7 +430,7 @@ export function vehiclePageText(lang: Lang, f: Facts, kind: 'plate' | 'vin'): Pa
   const facts = [f.car, f.year, ...f.extra].filter(Boolean).join(', ')
   const note = kind === 'vin' ? `${REGISTRY_NOTE[lang]} NHTSA vPIC.` : REGISTRY_NOTE[lang]
   return {
-    title: `${f.value} — ${f.car ?? UNKNOWN_VEHICLE[lang]}${year} · ${SITE_NAME}`,
+    title: `${f.value} - ${f.car ?? UNKNOWN_VEHICLE[lang]}${year} · ${SITE_NAME}`,
     description: `${kind === 'vin' ? 'VIN ' : ''}${f.value}${facts ? `: ${facts}` : ''}. ${note}`
   }
 }

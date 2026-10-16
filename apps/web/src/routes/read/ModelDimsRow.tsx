@@ -20,7 +20,7 @@ export default function ModelDimsRow({ profile, highlighted = false, withActions
   const { t, i18n } = useTranslation()
   const { model, cls } = profile
   const { lengthMm, widthMm, heightMm } = model
-  const dims = [lengthMm, widthMm, heightMm].map(mm => (mm ? mmToMetres(mm) : '—')).join(' × ')
+  const dims = [lengthMm, widthMm, heightMm].map(mm => (mm ? mmToMetres(mm) : '-')).join(' × ')
   const searchParams = new URLSearchParams({ brand: model.brand, model: model.model })
 
   return (

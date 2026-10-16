@@ -88,7 +88,7 @@ export default function StatsTable({
         )
     }),
     ...(showYearColumn
-      ? [columnHelper.accessor('year', { header: t('stats.column.year'), cell: c => c.getValue() ?? '—' })]
+      ? [columnHelper.accessor('year', { header: t('stats.column.year'), cell: c => c.getValue() ?? '-' })]
       : []),
     columnHelper.accessor('totalRows', {
       header: t('stats.column.totalRows'),

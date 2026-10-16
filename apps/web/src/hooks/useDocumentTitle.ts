@@ -57,6 +57,6 @@ export function useDocumentTitle(page: string | null | undefined): void {
 
   useEffect(() => {
     if (page === undefined) return
-    document.title = page ? `${page} · ${appName}` : `${appName} — ${tagline}`
+    document.title = page ? `${page} · ${appName}` : `${appName} - ${tagline}`
   }, [page, appName, tagline])
 }

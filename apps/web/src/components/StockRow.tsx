@@ -75,7 +75,7 @@ export default function StockRow({
 
                   <p className="truncate text-xs text-muted">
                     {hostOf(url)} <span aria-hidden>↗</span>
-                    <span className="sr-only"> — {t('newCarsWidget.opensNewTab')}</span>
+                    <span className="sr-only"> - {t('newCarsWidget.opensNewTab')}</span>
                   </p>
 
                   {credit && (

@@ -24,12 +24,12 @@ const SUB_KEYS = [0, 1, 2, 3] as const
 
 /** "< 3.80 m", "3.80–4.20 m", "≥ 5.10 m". */
 function rangeText(range: LengthRange | null, unit: string): string {
-  if (!range) return '—'
+  if (!range) return '-'
   const { fromMm, toMm } = range
   if (fromMm == null && toMm != null) return `< ${mmToMetres(toMm)} ${unit}`
   if (fromMm != null && toMm == null) return `≥ ${mmToMetres(fromMm)} ${unit}`
   if (fromMm != null && toMm != null) return `${mmToMetres(fromMm)}–${mmToMetres(toMm)} ${unit}`
-  return '—'
+  return '-'
 }
 
 /** Sub-size word ranges of the SUV / MPV classes (small … large), from the same cut-offs the plate card uses. */
@@ -45,7 +45,7 @@ export default function SegmentsTable({ profiles }: Props): ReactNode {
 
   const topModels = (cls: SizeClass): ReactNode => {
     const top = topOfSegment(profiles, cls, TOP_PER_SEGMENT)
-    if (top.length === 0) return '—'
+    if (top.length === 0) return '-'
     return top.map(p => (
       <span key={`${p.model.brand}|${p.model.model}`} className="block">
         {displayName(p.model)} <span className="text-muted">({formatCount(p.model.n, i18n.language)})</span>

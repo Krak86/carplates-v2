@@ -23,7 +23,7 @@ export default function SpecGroupJump({ section, onJump, arrow = '↓' }: Props)
       >
         <span aria-hidden>{arrow}</span> {t(`rdw.jump.${section}.label`)}
       </button>
-      {' — '}
+      {' - '}
       {t(`rdw.jump.${section}.what`)}
     </p>
   )

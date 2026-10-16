@@ -15,8 +15,8 @@ type ShapeCopy = {
 export const SHAPE_COPY: Readonly<Record<ExplainedShape, ShapeCopy>> = {
   sedan: {
     what: {
-      ua: 'Три «об’єми»: капот, салон і окремий багажник з власною кришкою. Багажник відокремлений від салону — тихіше й жорсткіший кузов.',
-      ru: 'Три «объёма»: капот, салон и отдельный багажник со своей крышкой. Багажник отделён от салона — тише и жёстче кузов.',
+      ua: 'Три «об’єми»: капот, салон і окремий багажник з власною кришкою. Багажник відокремлений від салону - тихіше й жорсткіший кузов.',
+      ru: 'Три «объёма»: капот, салон и отдельный багажник со своей крышкой. Багажник отделён от салона - тише и жёстче кузов.',
       en: 'Three “boxes”: hood, cabin and a separate boot with its own lid. The boot is walled off from the cabin, so it is quieter and the body stiffer.'
     },
     spot: {
@@ -32,9 +32,9 @@ export const SHAPE_COPY: Readonly<Record<ExplainedShape, ShapeCopy>> = {
   },
   hatch: {
     what: {
-      ua: 'Два «об’єми»: салон і багажник в одному просторі, а задні двері (з склом) піднімаються разом. Компактний і практичний — городній автомобіль № 1.',
-      ru: 'Два «объёма»: салон и багажник в одном пространстве, а задняя дверь (со стеклом) поднимается целиком. Компактный и практичный — городской автомобиль № 1.',
-      en: 'Two “boxes”: cabin and luggage space share one volume and the rear door, glass and all, lifts as one. Compact and practical — the city-car default.'
+      ua: 'Два «об’єми»: салон і багажник в одному просторі, а задні двері (з склом) піднімаються разом. Компактний і практичний - городній автомобіль № 1.',
+      ru: 'Два «объёма»: салон и багажник в одном пространстве, а задняя дверь (со стеклом) поднимается целиком. Компактный и практичный - городской автомобиль № 1.',
+      en: 'Two “boxes”: cabin and luggage space share one volume and the rear door, glass and all, lifts as one. Compact and practical - the city-car default.'
     },
     spot: {
       ua: 'Багажник відкривається разом із заднім склом. Кормова частина коротка.',
@@ -49,8 +49,8 @@ export const SHAPE_COPY: Readonly<Record<ExplainedShape, ShapeCopy>> = {
   },
   wagon: {
     what: {
-      ua: 'Седан або хетчбек, подовжений за задньою віссю: довгий дах і вертикальна задня кришка. Найбільший багажник у кузові розміром із легковик. У реєстрі — «УНІВЕРСАЛ».',
-      ru: 'Седан или хэтчбек, удлинённый за задней осью: длинная крыша и вертикальная задняя дверь. Самый большой багажник в кузове размером с легковой. В реестре — «УНІВЕРСАЛ».',
+      ua: 'Седан або хетчбек, подовжений за задньою віссю: довгий дах і вертикальна задня кришка. Найбільший багажник у кузові розміром із легковик. У реєстрі - «УНІВЕРСАЛ».',
+      ru: 'Седан или хэтчбек, удлинённый за задней осью: длинная крыша и вертикальная задняя дверь. Самый большой багажник в кузове размером с легковой. В реестре - «УНІВЕРСАЛ».',
       en: 'A sedan or hatch stretched behind the rear axle: long roof, upright tailgate, the biggest boot you get in a car-sized body. The registry calls it “УНІВЕРСАЛ”.'
     },
     spot: {
@@ -66,8 +66,8 @@ export const SHAPE_COPY: Readonly<Record<ExplainedShape, ShapeCopy>> = {
   },
   coupe: {
     what: {
-      ua: 'Дві двері, низький схил даху, спортивні пропорції. Кабріолет — те саме авто зі складним дахом.',
-      ru: 'Две двери, низкая линия крыши, спортивные пропорции. Кабриолет — то же авто со складной крышей.',
+      ua: 'Дві двері, низький схил даху, спортивні пропорції. Кабріолет - те саме авто зі складним дахом.',
+      ru: 'Две двери, низкая линия крыши, спортивные пропорции. Кабриолет - то же авто со складной крышей.',
       en: 'Two doors, a low sloping roof, sporty proportions. A convertible is the same car with a folding roof.'
     },
     spot: {
@@ -83,9 +83,9 @@ export const SHAPE_COPY: Readonly<Record<ExplainedShape, ShapeCopy>> = {
   },
   suv: {
     what: {
-      ua: 'Високий кузов із великим кліренсом (понад 17 см) і прямою посадкою, нерідко повнопривідний. Бувають справжні рамні позашляховики та кросовери на платформі легковика — див. нижче.',
-      ru: 'Высокий кузов с большим клиренсом (более 17 см) и прямой посадкой, нередко полноприводный. Бывают настоящие рамные внедорожники и кроссоверы на платформе легковушки — см. ниже.',
-      en: 'A tall body with generous ground clearance (over about 17 cm) and an upright seat, often all-wheel drive. There are true ladder-frame SUVs and crossovers built on a car platform — see below.'
+      ua: 'Високий кузов із великим кліренсом (понад 17 см) і прямою посадкою, нерідко повнопривідний. Бувають справжні рамні позашляховики та кросовери на платформі легковика - див. нижче.',
+      ru: 'Высокий кузов с большим клиренсом (более 17 см) и прямой посадкой, нередко полноприводный. Бывают настоящие рамные внедорожники и кроссоверы на платформе легковушки - см. ниже.',
+      en: 'A tall body with generous ground clearance (over about 17 cm) and an upright seat, often all-wheel drive. There are true ladder-frame SUVs and crossovers built on a car platform - see below.'
     },
     spot: {
       ua: 'Висота зазвичай від 1,6 м; колісні арки та бампери піднято.',
@@ -122,8 +122,8 @@ export const SHAPE_COPY: Readonly<Record<ExplainedShape, ShapeCopy>> = {
       en: 'A box on wheels for cargo or up to nine passengers: tall, long, usually with sliding side doors.'
     },
     spot: {
-      ua: 'Висота 1,9 м і більше. Колісна база — від 3 м.',
-      ru: 'Высота 1,9 м и больше. Колёсная база — от 3 м.',
+      ua: 'Висота 1,9 м і більше. Колісна база - від 3 м.',
+      ru: 'Высота 1,9 м и больше. Колёсная база - от 3 м.',
       en: 'About 1.9 m or taller, with a wheelbase from roughly 3 m.'
     },
     examples: [
@@ -153,8 +153,8 @@ export const SHAPE_COPY: Readonly<Record<ExplainedShape, ShapeCopy>> = {
 type SuvSide = { title: L10n; points: readonly L10n[]; examples: ReadonlyArray<{ brand: string; model: string }> }
 
 export const SUV_INTRO: L10n = {
-  ua: 'У реєстрі і RAV4, і Land Cruiser Prado — «УНІВЕРСАЛ»: різниці між ними в даних немає. Тому розрізняємо за конструкцією.',
-  ru: 'В реестре и RAV4, и Land Cruiser Prado — «УНІВЕРСАЛ»: разницы между ними в данных нет. Поэтому различаем по конструкции.',
+  ua: 'У реєстрі і RAV4, і Land Cruiser Prado - «УНІВЕРСАЛ»: різниці між ними в даних немає. Тому розрізняємо за конструкцією.',
+  ru: 'В реестре и RAV4, и Land Cruiser Prado - «УНІВЕРСАЛ»: разницы между ними в данных нет. Поэтому различаем по конструкции.',
   en: 'The registry files both the RAV4 and the Land Cruiser Prado as “УНІВЕРСАЛ”, so the data cannot tell them apart. The difference is in how they are built.'
 }
 
@@ -163,8 +163,8 @@ export const SUV_SIDES: { frame: SuvSide; crossover: SuvSide } = {
     title: { ua: 'Рамний SUV', ru: 'Рамный SUV', en: 'Ladder-frame SUV' },
     points: [
       {
-        ua: 'Кузов стоїть на окремій потужній рамі — як у вантажівки.',
-        ru: 'Кузов стоит на отдельной мощной раме — как у грузовика.',
+        ua: 'Кузов стоїть на окремій потужній рамі - як у вантажівки.',
+        ru: 'Кузов стоит на отдельной мощной раме - как у грузовика.',
         en: 'The body sits on a separate heavy frame, like a truck.'
       },
       {
@@ -211,13 +211,13 @@ export const SUV_SIDES: { frame: SuvSide; crossover: SuvSide } = {
 }
 
 export const SUV_NOTE: L10n = {
-  ua: 'Ми не зберігаємо тип несучої конструкції (рама чи моноблок) — це пояснення, а не дані з реєстру. Розміри нижче — з довідників.',
-  ru: 'Мы не храним тип несущей конструкции (рама или моноблок) — это объяснение, а не данные реестра. Размеры ниже — из справочников.',
-  en: 'We do not store the construction type (frame or unibody) — this is an explanation, not registry data. The sizes shown come from reference catalogues.'
+  ua: 'Ми не зберігаємо тип несучої конструкції (рама чи моноблок) - це пояснення, а не дані з реєстру. Розміри нижче - з довідників.',
+  ru: 'Мы не храним тип несущей конструкции (рама или моноблок) - это объяснение, а не данные реестра. Размеры ниже - из справочников.',
+  en: 'We do not store the construction type (frame or unibody) - this is an explanation, not registry data. The sizes shown come from reference catalogues.'
 }
 
 export const QUIRK: L10n = {
-  ua: 'Поле «кузов» у реєстрі — вільний текст, який вносять під час реєстрації. Тому Octavia може бути «ЛІФТБЕК» чи «УНІВЕРСАЛ», а кросовери здебільшого — «УНІВЕРСАЛ». Тип моделі тут визначено за більшістю авто в реєстрі та даними RDW (Нідерланди), тож це «типовий» кузов, не точний для кожного авто.',
-  ru: 'Поле «кузов» в реестре — свободный текст, который вносят при регистрации. Поэтому Octavia может быть «ЛІФТБЕК» или «УНІВЕРСАЛ», а кроссоверы чаще всего — «УНІВЕРСАЛ». Тип модели здесь определён по большинству авто в реестре и данным RDW (Нидерланды), так что это «типичный» кузов, не точный для каждой машины.',
-  en: 'The registry’s “body” field is free text typed in at registration, so an Octavia may be “ЛІФТБЕК” or “УНІВЕРСАЛ” and crossovers are mostly “УНІВЕРСАЛ”. A model’s type here comes from most of its cars in the registry plus RDW (Netherlands) data — the usual body, not exact for every car.'
+  ua: 'Поле «кузов» у реєстрі - вільний текст, який вносять під час реєстрації. Тому Octavia може бути «ЛІФТБЕК» чи «УНІВЕРСАЛ», а кросовери здебільшого - «УНІВЕРСАЛ». Тип моделі тут визначено за більшістю авто в реєстрі та даними RDW (Нідерланди), тож це «типовий» кузов, не точний для кожного авто.',
+  ru: 'Поле «кузов» в реестре - свободный текст, который вносят при регистрации. Поэтому Octavia может быть «ЛІФТБЕК» или «УНІВЕРСАЛ», а кроссоверы чаще всего - «УНІВЕРСАЛ». Тип модели здесь определён по большинству авто в реестре и данным RDW (Нидерланды), так что это «типичный» кузов, не точный для каждой машины.',
+  en: 'The registry’s “body” field is free text typed in at registration, so an Octavia may be “ЛІФТБЕК” or “УНІВЕРСАЛ” and crossovers are mostly “УНІВЕРСАЛ”. A model’s type here comes from most of its cars in the registry plus RDW (Netherlands) data - the usual body, not exact for every car.'
 }

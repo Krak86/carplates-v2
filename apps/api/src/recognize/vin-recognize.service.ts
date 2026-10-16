@@ -30,7 +30,7 @@ export class VinRecognizeService {
     }
     if (image.buffer.byteLength === 0) throw new BadRequestException('Uploaded image is empty')
     if (!ACCEPTED_MIME.has(image.mimetype)) {
-      throw new BadRequestException(`Unsupported image format "${image.mimetype}" — upload a JPEG, PNG or WebP photo`)
+      throw new BadRequestException(`Unsupported image format "${image.mimetype}" - upload a JPEG, PNG or WebP photo`)
     }
 
     const form = new FormData()

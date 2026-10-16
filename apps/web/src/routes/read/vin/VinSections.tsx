@@ -32,9 +32,9 @@ export function AnatomySection(): ReactNode {
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>): void => setInput(event.target.value)
 
   const params = {
-    manufacturer: reading?.make ?? '—',
-    country: reading?.country ? `${isoFlag(reading.country)} ${countryName(reading.country, i18n.language)}` : '—',
-    year: reading?.year ? String(reading.year) : '—'
+    manufacturer: reading?.make ?? '-',
+    country: reading?.country ? `${isoFlag(reading.country)} ${countryName(reading.country, i18n.language)}` : '-',
+    year: reading?.year ? String(reading.year) : '-'
   }
   const checkNote = reading ? t(reading.checkOk ? 'read.vin.checkOk' : 'read.vin.checkFail') : ''
   const describe = (id: VinSegmentId): string => {

@@ -104,7 +104,7 @@ export function RegionsSection(): ReactNode {
                   </Link>
                 </td>
                 <td className="py-1.5 pr-3 font-mono">{row.pairs.join(' ')}</td>
-                <td className="py-1.5 font-mono">{row.legacy.join(' ') || '—'}</td>
+                <td className="py-1.5 font-mono">{row.legacy.join(' ') || '-'}</td>
               </tr>
             ))}
           </tbody>

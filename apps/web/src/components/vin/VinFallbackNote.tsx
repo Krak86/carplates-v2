@@ -22,7 +22,7 @@ export default function VinFallbackNote({ fallback }: Props): ReactNode {
       <ul className="mt-1 list-disc space-y-0.5 pl-5 text-[var(--color-muted)]">
         {sources.map(s => (
           <li key={s}>
-            <b className="font-medium text-[var(--color-fg)]">≈ {t(`vin.derived.${s}.label`)}</b> —{' '}
+            <b className="font-medium text-[var(--color-fg)]">≈ {t(`vin.derived.${s}.label`)}</b> -{' '}
             {t(`vin.derived.${s}.hint`)}
           </li>
         ))}

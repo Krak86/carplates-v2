@@ -62,7 +62,7 @@ export function ProgrammesSection(): ReactNode {
               <strong className="text-(--color-text)">{t(`safety.source.${p.source}`)}</strong>
               {' · '}
               {pick(p.scale, i18n.language)}
-              {' — '}
+              {' - '}
               {pick(p.text, i18n.language)}
               {row && row.matched > 0 && (
                 <span className="block text-sm">
@@ -114,7 +114,7 @@ export function FleetSection(): ReactNode {
                   data.fleetAvgScore != null ? { color: CO2_BAND_COLOR[bandForScore(data.fleetAvgScore)] } : undefined
                 }
               >
-                {data.fleetAvgScore != null ? Math.round(data.fleetAvgScore) : '—'}
+                {data.fleetAvgScore != null ? Math.round(data.fleetAvgScore) : '-'}
               </dd>
             </div>
           </dl>
@@ -294,7 +294,7 @@ export function LimitsSection(): ReactNode {
         {LIMITS.map(limit => (
           <li key={limit.key} className="text-muted">
             <strong className="text-(--color-text)">{t(`read.safety.limit.${limit.key}`)}</strong>
-            {' — '}
+            {' - '}
             {pick(limit.text, i18n.language)}
           </li>
         ))}

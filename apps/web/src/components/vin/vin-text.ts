@@ -25,7 +25,7 @@ const VALUE_ALIASES: Readonly<Record<string, string>> = {
 
 const SEPARATORS: readonly (readonly [string, string])[] = [
   [', ', ', '],
-  [' - ', ' — '],
+  [' - ', ' - '],
   [' and ', ' + ']
 ]
 

@@ -549,7 +549,7 @@ export default function ResultCard({ data }: Props): ReactNode {
                   value={
                     c.ownWeight && (
                       <span className="inline-flex items-center gap-1.5">
-                        {`${c.ownWeight} / ${c.totalWeight ?? '—'} ${t('field.unitKg')} (~${kgToTonnes(c.ownWeight)}${c.totalWeight ? ` / ${kgToTonnes(c.totalWeight)}` : ''} ${t('field.unitT')})`}
+                        {`${c.ownWeight} / ${c.totalWeight ?? '-'} ${t('field.unitKg')} (~${kgToTonnes(c.ownWeight)}${c.totalWeight ? ` / ${kgToTonnes(c.totalWeight)}` : ''} ${t('field.unitT')})`}
                         {hasSpecs('mass') && <RowJump target="specs-mass" />}
                       </span>
                     )

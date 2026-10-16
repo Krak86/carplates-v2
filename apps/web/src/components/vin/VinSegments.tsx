@@ -48,11 +48,11 @@ export default function VinSegments({ vin, fields, fallback }: Props): ReactNode
     derived ? `${text} (≈ ${t('vin.derived.wmi.label')})` : text
   const maker = fields.get('Manufacturer Name') ?? fields.get('Make') ?? fallback.make?.value
   const params: Record<string, string> = {
-    make: fields.get('Make') ?? fallback.make?.value ?? '—',
-    manufacturer: maker ? approx(maker, !fields.get('Manufacturer Name') && !fields.get('Make')) : '—',
-    country: country ? approx(`${flag ? `${flag} ` : ''}${country}`, !nhtsaCountry) : '—',
-    city: fields.get('Plant City') ?? '—',
-    year: year ? String(year) : '—',
+    make: fields.get('Make') ?? fallback.make?.value ?? '-',
+    manufacturer: maker ? approx(maker, !fields.get('Manufacturer Name') && !fields.get('Make')) : '-',
+    country: country ? approx(`${flag ? `${flag} ` : ''}${country}`, !nhtsaCountry) : '-',
+    city: fields.get('Plant City') ?? '-',
+    year: year ? String(year) : '-',
     descriptor: fields.get('Vehicle Descriptor') ?? textOf('vds')
   }
   const vdsKey = fields.get('Vehicle Descriptor') ? 'vin.seg.vds.desc' : 'vin.seg.vds.descRaw'

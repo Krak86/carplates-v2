@@ -221,7 +221,7 @@ export function ChecksSection(): ReactNode {
         {CHECKS.map(check => (
           <li key={check.key} className="text-muted">
             <strong className="text-(--color-text)">{t(`read.imports.check.${check.key}`)}</strong>
-            {' — '}
+            {' - '}
             {pick(check.text, i18n.language)}
           </li>
         ))}

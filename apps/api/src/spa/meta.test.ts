@@ -63,7 +63,7 @@ describe('spa-text', () => {
       { value: 'AA1234BB', car: 'Toyota Camry', year: '2015', extra: ['Petrol'] },
       'plate'
     )
-    expect(t.title).toBe('AA1234BB — Toyota Camry 2015 · Cars UA')
+    expect(t.title).toBe('AA1234BB - Toyota Camry 2015 · Cars UA')
     expect(t.description).toContain('Toyota Camry, 2015, Petrol')
   })
 })

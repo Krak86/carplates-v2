@@ -7,7 +7,7 @@ describe('InfoText highlight', () => {
   it('underlines highlighted names in the lead and in bullets, escaping regex characters', () => {
     const html = renderToStaticMarkup(
       <InfoText
-        text={'Matched to Toyota Land Cruiser Prado.\nAlso known as: Rabbit.\nID.3 — a name'}
+        text={'Matched to Toyota Land Cruiser Prado.\nAlso known as: Rabbit.\nID.3 - a name'}
         highlight={['Toyota Land Cruiser Prado', 'Rabbit', 'ID.3']}
       />
     )

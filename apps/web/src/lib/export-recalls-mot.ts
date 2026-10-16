@@ -16,7 +16,7 @@ import type { ExportKeyValueSection, ExportSection, ExportTableSection, Translat
 /** Reasons printed in the Common faults export (the full list has ~2,000 codes); ranked by their peak fail rate. */
 const MOT_REASONS_LIMIT = 30
 
-const DASH = '—'
+const DASH = '-'
 
 function localeOf(lang: string): string {
   return lang === 'ua' ? 'uk' : lang

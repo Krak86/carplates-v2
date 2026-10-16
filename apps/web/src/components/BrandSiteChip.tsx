@@ -31,7 +31,7 @@ export default function BrandSiteChip({ url }: Props): ReactNode {
       {host}
       <span aria-hidden>↗</span>
       <span className="sr-only">
-        {t('result.officialSite')} — {t('field.opensNewTab')}
+        {t('result.officialSite')} - {t('field.opensNewTab')}
       </span>
     </a>
   )

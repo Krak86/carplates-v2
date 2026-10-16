@@ -55,11 +55,11 @@ export default function LocalRecordRow({
           viewTransition
           onClick={handleOpen}
           to={`/${value}`}
-          title={label ? `${value} — ${label}` : value}
+          title={label ? `${value} - ${label}` : value}
           className="block truncate text-[var(--color-primary)] underline"
         >
           {value}
-          {label ? ` — ${label}` : ''}
+          {label ? ` - ${label}` : ''}
         </Link>
 
         {labels.length > 0 && (

@@ -121,7 +121,7 @@ export async function toPdfBlob(report: ExportReport): Promise<Blob> {
       if (section.type === 'chart') writeImage(renderChartPng(section), CHART_WIDTH_PT)
       if (section.note) writeLines(section.note, FONT_SIZE_BODY, false)
       for (const row of section.rows) {
-        const line = section.columns.map((col, i) => `${col}: ${row[i] ?? '—'}`).join(' · ')
+        const line = section.columns.map((col, i) => `${col}: ${row[i] ?? '-'}`).join(' · ')
         writeLines(line, FONT_SIZE_BODY, false)
       }
     } else {
