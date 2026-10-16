@@ -7,7 +7,8 @@ import {
   IMPORTS_PATH,
   PLATES_PATH,
   SAFETY_PATH,
-  SIZES_PATH
+  SIZES_PATH,
+  VIN_PATH
 } from '@/routes/read/links'
 import type { ArticleMeta, L10n, UpcomingTopic } from '@/routes/read/types'
 
@@ -65,12 +66,19 @@ export const FUEL_LEAD: L10n = {
   en: 'What does Ukraine run on, how much CO₂ does the average car emit, is the fleet getting cleaner with the years, and which models are the cleanest and the most CO₂-heavy? Plus how we estimate emissions.'
 }
 
+export const VIN_LEAD: L10n = {
+  ua: 'Що означають 17 символів VIN, як за ним дізнатися виробника, країну й модельний рік і де його знайти на авто? Розбір будь-якого VIN — прямо на сторінці.',
+  ru: 'Что означают 17 символов VIN, как по нему узнать производителя, страну и модельный год и где его найти на авто? Разбор любого VIN — прямо на странице.',
+  en: 'What do the 17 characters of a VIN mean, how do you read the maker, country and model year off it, and where is it on the car? Break down any VIN right on the page.'
+}
+
 /** The published explainers, in hub order. A new article = a route in App.tsx + `STATIC_PAGES` (spa-text.ts) + an entry here. */
 export const ARTICLES: readonly ArticleMeta[] = [
   { path: BODY_TYPES_PATH, icon: '🚙', titleKey: 'nav.readBodyTypes', lead: BODY_TYPES_LEAD },
   { path: SIZES_PATH, icon: '📏', titleKey: 'nav.readSizes', lead: SIZES_LEAD },
   { path: FLEET_PATH, icon: '🎨', titleKey: 'nav.readFleet', lead: FLEET_LEAD },
   { path: PLATES_PATH, icon: '🔢', titleKey: 'nav.readPlates', lead: PLATES_LEAD },
+  { path: VIN_PATH, icon: '🪪', titleKey: 'nav.readVin', lead: VIN_LEAD },
   { path: GENERATIONS_PATH, icon: '🧬', titleKey: 'nav.readGenerations', lead: GENERATIONS_LEAD },
   { path: ELECTRIC_PATH, icon: '🔌', titleKey: 'nav.readElectric', lead: ELECTRIC_LEAD },
   { path: IMPORTS_PATH, icon: '🚢', titleKey: 'nav.readImports', lead: IMPORTS_LEAD },

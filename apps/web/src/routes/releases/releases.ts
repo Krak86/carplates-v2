@@ -12,6 +12,12 @@ export const RELEASES: readonly ReleaseDay[] = [
     items: [
       item(
         'new',
+        'Довідник /read/vin: з чого складається VIN, розбір будь-якого введеного VIN (виробник, країна, модельний рік, контрольна цифра), таблиця кодів року та де знайти VIN',
+        'Справочник /read/vin: из чего состоит VIN, разбор любого введённого VIN (производитель, страна, модельный год, контрольная цифра), таблица кодов года и где найти VIN',
+        'New /read/vin guide: what a VIN is made of, a breakdown of any VIN you type (maker, country, model year, check digit), the year-code table and where to find the VIN'
+      ),
+      item(
+        'new',
         'Довідник /read: типи кузова і розміри авто простими словами — з реальними моделями з реєстру, номерами та пошуком за розміром; на картці авто є посилання на відповідні пояснення',
         'Справочник /read: типы кузова и размеры авто простыми словами — с реальными моделями из реестра, номерами и поиском по размеру; на карточке авто есть ссылки на соответствующие объяснения',
         'New /read guides: body types and car sizes explained with real models from the registry, real plates and a size explorer; the plate card links to the matching explanations'

@@ -8,6 +8,7 @@ import PlateSegments from '@/components/PlateSegments'
 import UaPlateBadge from '@/components/UaPlateBadge'
 import Card from '@/components/ui/Card'
 import { useRegionLabel } from '@/lib/region-label'
+import { VIN_PATH } from '@/routes/read/links'
 import { lookupPrefix, regionRows } from '@/routes/read/plates/helpers'
 
 const CURRENT_EXAMPLE = 'КА1234ВС'
@@ -134,7 +135,12 @@ export function FormatsSection(): ReactNode {
         <li>{t('read.plates.formatDiia')}</li>
         <li>{t('read.plates.formatCabinet')}</li>
         <li>{t('read.plates.formatChoice')}</li>
-        <li>{t('read.plates.formatNoPlate')}</li>
+        <li>
+          {t('read.plates.formatNoPlate')}{' '}
+          <Link to={VIN_PATH} className="text-primary">
+            {t('nav.readVin')} →
+          </Link>
+        </li>
       </ul>
     </Card>
   )

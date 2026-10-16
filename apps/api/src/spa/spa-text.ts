@@ -296,6 +296,23 @@ export const STATIC_PAGES: Record<string, Record<Lang, PageText>> = {
         'Petrol, diesel, gas, hybrid or electric: what Ukraine runs on, how much CO₂ the average car emits, how it changes with the model year, which models are the cleanest and the most CO₂-heavy, and how we estimate emissions.'
     }
   },
+  '/read/vin': {
+    ua: {
+      title: 'VIN-код: що означають 17 символів, рік випуску і де його знайти · Cars UA',
+      description:
+        'З чого складається VIN, як за ним дізнатися виробника, країну й модельний рік, що таке контрольна цифра, де знайти VIN на авто і чому в реєстрі його може не бути.'
+    },
+    ru: {
+      title: 'VIN-код: что значат 17 символов, год выпуска и где его найти · Cars UA',
+      description:
+        'Из чего состоит VIN, как по нему узнать производителя, страну и модельный год, что такое контрольная цифра, где найти VIN на авто и почему в реестре его может не быть.'
+    },
+    en: {
+      title: 'VIN explained: what the 17 characters mean, the model year and where to find it · Cars UA',
+      description:
+        'What a VIN is made of, how to read the maker, country and model year off it, what the check digit is, where to find the VIN on a car and why the registry may not have it.'
+    }
+  },
   '/features': {
     ua: { title: 'Функції · Cars UA', description: 'Що ми створюємо для користувачів з обліковим записом.' },
     ru: { title: 'Функции · Cars UA', description: 'Что мы создаём для пользователей с учётной записью.' },
