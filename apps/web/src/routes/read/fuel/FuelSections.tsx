@@ -270,7 +270,7 @@ export function ModelsSection(): ReactNode {
       isError={isError}
     >
       {data && (
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-6">
           <ModelList title={t('read.fuel.cleanest')} models={data.cleanestModels} />
           <ModelList title={t('read.fuel.dirtiest')} models={data.dirtiestModels} />
         </div>
