@@ -14,13 +14,13 @@ export default function ReadHubRoute(): ReactNode {
   const { t, i18n } = useTranslation()
 
   return (
-    <div className="mx-auto w-full max-w-content space-y-4">
+    <div className="mx-auto w-full max-w-6xl space-y-4">
       <Card>
         <h1 className="mb-2 text-2xl font-bold">{t('read.hub.title')}</h1>
         <p className="text-muted">{t('read.hub.intro')}</p>
       </Card>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {ARTICLES.map(article => (
           <Link key={article.path} to={article.path} viewTransition className="group block">
             <Card className="h-full overflow-hidden !p-0 transition-colors group-hover:border-primary">
