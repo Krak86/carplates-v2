@@ -3,11 +3,11 @@ import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 
 import ArticleBanner from '@/routes/read/ArticleBanner'
+import ArticleTags from '@/routes/read/ArticleTags'
 
 import Card from '@/components/ui/Card'
 import { ARTICLES, UPCOMING } from '@/routes/read/articles'
 import { pick } from '@/routes/read/helpers'
-import { toIntlLocale } from '@/lib/intl'
 
 // Lazy-loaded (see App.tsx). Public, no sign-in.
 export default function ReadHubRoute(): ReactNode {
@@ -27,11 +27,7 @@ export default function ReadHubRoute(): ReactNode {
               <ArticleBanner article={article} className="h-36" />
 
               <div className="p-3 md:p-4">
-                <time dateTime={article.published} className="text-xs text-muted">
-                  {new Date(article.published).toLocaleDateString(toIntlLocale(i18n.language), {
-                    dateStyle: 'long'
-                  })}
-                </time>
+                <ArticleTags article={article} className="mb-1.5" />
 
                 <h2 className="mb-1 text-lg font-semibold">{t(article.titleKey)}</h2>
                 <p className="text-sm text-muted">{pick(article.lead, i18n.language)}</p>

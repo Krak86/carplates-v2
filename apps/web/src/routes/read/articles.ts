@@ -87,22 +87,85 @@ export const RECALLS_LEAD: L10n = {
   en: 'What is a recall, how does it differ from a common fault, and what wears out on a model as the miles add up? EU, US and Canadian campaigns and UK inspection data, shown on popular models.'
 }
 
-const PUBLISHED = '2026-10-16'
+export const BODY_TYPES_TAGS: L10n[] = [
+  { ua: 'Кузови', ru: 'Кузова', en: 'Bodies' },
+  { ua: 'Приклади з реєстру', ru: 'Примеры из реестра', en: 'Registry examples' }
+]
+
+export const SIZES_TAGS: L10n[] = [
+  { ua: 'Розміри', ru: 'Размеры', en: 'Sizes' },
+  { ua: 'Класи авто', ru: 'Классы авто', en: 'Classes' }
+]
+
+export const FLEET_TAGS: L10n[] = [
+  { ua: 'Автопарк', ru: 'Автопарк', en: 'Fleet' },
+  { ua: 'Кольори', ru: 'Цвета', en: 'Colours' },
+  { ua: 'Паливо', ru: 'Топливо', en: 'Fuel' }
+]
+
+export const PLATES_TAGS: L10n[] = [
+  { ua: 'Номери', ru: 'Номера', en: 'Plates' },
+  { ua: 'Регіони', ru: 'Регионы', en: 'Regions' }
+]
+
+export const VIN_TAGS: L10n[] = [
+  { ua: 'VIN', ru: 'VIN', en: 'VIN' },
+  { ua: 'Розшифровка', ru: 'Расшифровка', en: 'Decoding' }
+]
+
+export const GENERATIONS_TAGS: L10n[] = [
+  { ua: 'Покоління', ru: 'Поколения', en: 'Generations' },
+  { ua: 'Розміри', ru: 'Размеры', en: 'Sizes' }
+]
+
+export const ELECTRIC_TAGS: L10n[] = [
+  { ua: 'Електромобілі', ru: 'Электромобили', en: 'EVs' },
+  { ua: 'Гібриди', ru: 'Гибриды', en: 'Hybrids' },
+  { ua: 'Зарядка', ru: 'Зарядка', en: 'Charging' }
+]
+
+export const IMPORTS_TAGS: L10n[] = [
+  { ua: 'Імпорт', ru: 'Импорт', en: 'Imports' },
+  { ua: 'VIN', ru: 'VIN', en: 'VIN' },
+  { ua: 'Купівля', ru: 'Покупка', en: 'Buying' }
+]
+
+export const SAFETY_TAGS: L10n[] = [
+  { ua: 'Безпека', ru: 'Безопасность', en: 'Safety' },
+  { ua: 'Краш-тести', ru: 'Краш-тесты', en: 'Crash tests' }
+]
+
+export const FUEL_TAGS: L10n[] = [
+  { ua: 'Паливо', ru: 'Топливо', en: 'Fuel' },
+  { ua: 'CO₂', ru: 'CO₂', en: 'CO₂' },
+  { ua: 'Викиди', ru: 'Выбросы', en: 'Emissions' }
+]
+
+export const EXTREMES_TAGS: L10n[] = [
+  { ua: 'Рекорди', ru: 'Рекорды', en: 'Records' },
+  { ua: 'Потужність', ru: 'Мощность', en: 'Power' },
+  { ua: 'Вага', ru: 'Вес', en: 'Weight' }
+]
+
+export const RECALLS_TAGS: L10n[] = [
+  { ua: 'Відкликання', ru: 'Отзывы', en: 'Recalls' },
+  { ua: 'Несправності', ru: 'Неисправности', en: 'Faults' }
+]
 
 /** The published explainers, in hub order. A new article = a route in App.tsx + `STATIC_PAGES` (spa-text.ts) + `GUIDE_META` (links.ts) + an entry here. */
 export const ARTICLES: readonly ArticleMeta[] = [
-  { path: BODY_TYPES_PATH, ...GUIDE_META[BODY_TYPES_PATH], lead: BODY_TYPES_LEAD, published: PUBLISHED },
-  { path: SIZES_PATH, ...GUIDE_META[SIZES_PATH], lead: SIZES_LEAD, published: PUBLISHED },
-  { path: FLEET_PATH, ...GUIDE_META[FLEET_PATH], lead: FLEET_LEAD, published: PUBLISHED },
-  { path: PLATES_PATH, ...GUIDE_META[PLATES_PATH], lead: PLATES_LEAD, published: PUBLISHED },
-  { path: VIN_PATH, ...GUIDE_META[VIN_PATH], lead: VIN_LEAD, published: PUBLISHED },
-  { path: GENERATIONS_PATH, ...GUIDE_META[GENERATIONS_PATH], lead: GENERATIONS_LEAD, published: PUBLISHED },
-  { path: ELECTRIC_PATH, ...GUIDE_META[ELECTRIC_PATH], lead: ELECTRIC_LEAD, published: PUBLISHED },
-  { path: IMPORTS_PATH, ...GUIDE_META[IMPORTS_PATH], lead: IMPORTS_LEAD, published: PUBLISHED },
-  { path: SAFETY_PATH, ...GUIDE_META[SAFETY_PATH], lead: SAFETY_LEAD, published: PUBLISHED },
-  { path: FUEL_PATH, ...GUIDE_META[FUEL_PATH], lead: FUEL_LEAD, published: PUBLISHED },
-  { path: EXTREMES_PATH, ...GUIDE_META[EXTREMES_PATH], lead: EXTREMES_LEAD, published: PUBLISHED },
-  { path: RECALLS_PATH, ...GUIDE_META[RECALLS_PATH], lead: RECALLS_LEAD, published: PUBLISHED }
+  { path: BODY_TYPES_PATH, ...GUIDE_META[BODY_TYPES_PATH], lead: BODY_TYPES_LEAD, tags: BODY_TYPES_TAGS },
+  { path: SIZES_PATH, ...GUIDE_META[SIZES_PATH], lead: SIZES_LEAD, tags: SIZES_TAGS },
+  { path: FLEET_PATH, ...GUIDE_META[FLEET_PATH], lead: FLEET_LEAD, tags: FLEET_TAGS },
+  { path: PLATES_PATH, ...GUIDE_META[PLATES_PATH], lead: PLATES_LEAD, tags: PLATES_TAGS },
+  { path: VIN_PATH, ...GUIDE_META[VIN_PATH], lead: VIN_LEAD, tags: VIN_TAGS },
+  { path: GENERATIONS_PATH, ...GUIDE_META[GENERATIONS_PATH], lead: GENERATIONS_LEAD, tags: GENERATIONS_TAGS },
+  { path: ELECTRIC_PATH, ...GUIDE_META[ELECTRIC_PATH], lead: ELECTRIC_LEAD, tags: ELECTRIC_TAGS },
+  { path: IMPORTS_PATH, ...GUIDE_META[IMPORTS_PATH], lead: IMPORTS_LEAD, tags: IMPORTS_TAGS },
+  { path: SAFETY_PATH, ...GUIDE_META[SAFETY_PATH], lead: SAFETY_LEAD, tags: SAFETY_TAGS },
+  { path: FUEL_PATH, ...GUIDE_META[FUEL_PATH], lead: FUEL_LEAD, tags: FUEL_TAGS },
+  { path: EXTREMES_PATH, ...GUIDE_META[EXTREMES_PATH], lead: EXTREMES_LEAD, tags: EXTREMES_TAGS },
+  { path: RECALLS_PATH, ...GUIDE_META[RECALLS_PATH], lead: RECALLS_LEAD, tags: RECALLS_TAGS }
 ]
 
 /** Themes planned next, listed in the hub so readers see where it is going. */
