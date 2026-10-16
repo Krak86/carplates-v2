@@ -52,7 +52,13 @@ range; `--no-details` = month cards only). Re-running a range is safe: fetched i
    one-row-per-plate/date/unit dedupe collapses repeated records; the gap is wider than in 2020-21 and not yet analysed). Null `region` 0.54 % (112 rows, of which
    placeholders 74). Spot-checks OK: `BM0462AK` (Сумська, removed 2023-06-30), `AP1687EH` (Запорізька), `AX1611BI` (Черкаська). CSV
    export re-run (14 043 rows, 14 479 ids, 23 pages, ≈ 0.9 MB).
-4. **Backfill 2022 H2** — `--from 2022-07 --to 2022-12` (≈ 2.5 h).
+4. ✅ **Backfill 2022 H2 (2026-10-16, uncommitted data run)** — `--from 2022-07 --to 2022-12` (≈ 2.5 h, exit 0, no retries needed).
+   3980 detail pages, 4982 exact records, 1014 placeholders. Month cards vs headers: 8299 cards / 4967 found (hdr 8391 / 5037, 99 %).
+   Per month (cards / found, hdr): jul 2407 / 1485 (2478 / 1538), aug 1221 / 709 (1221 / 709), sep 1381 / 812 (1388 / 817), oct 1264 / 743
+   (1272 / 750), nov 1038 / 619 (1041 / 622), dec 988 / 599 (991 / 601). In the DB by `seized_at` month (stolen / found): 07 2024 / 1369,
+   08 1148 / 672, 09 1225 / 736, 10 1133 / 663, 11 968 / 575, 12 910 / 552 = 7408 / 4567 (88 % / 91 % of the headers, same dedupe
+   gap as H1). Null `region` 16 rows (0.2 %), all placeholders; exact rows 0 null. Spot-checks OK: `КА9771НХ` (Київ, removed
+   2023-05-11), `АХ4102МВ` (Харківська), `АР1927ЕО` (Запорізька). CSV export re-run (18 111 rows, 18 459 ids, 29 pages, ≈ 0.9 MB).
 5. **Backfill 2023–2024** — `--from 2023-01 --to 2024-12` (≈ 1.2 h).
 6. **Backfill 2025–2026** — `--from 2025-01` (to the current month, ≈ 25 min). From here on, a no-arg run refreshes only the
    last 2 months (daily, after `ingest:wanted`).
