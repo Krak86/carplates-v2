@@ -44,7 +44,14 @@ range; `--no-details` = month cards only). Re-running a range is safe: fetched i
    95 %), 2021 3047 / 2142 found (hdr 3156 / 2222, 96-97 %). In the DB (by `seized_at` year, after the one-row-per-plate/date/unit
    dedupe and with feed rows merged): 2020 1601 stolen / 1214 found / 387 wanted; 2021 2808 / 2052 / 756. Null `region`: 3.75 %
    (2020), 1.96 % (2021); these are exactly the 115 placeholder rows (no unit known, null by design); scraped exact rows 0 null. Spot-checks OK: `AC0785AB` (VIPER, Волинська, removed 2026-04-30), `CA9143BE` (Черкаська, removed 2021-02-08), `54636AA` (Київська). CSV export added (`export:wanted-history:csv`) and run after this step.
-3. **Backfill 2022 H1** — `--from 2022-01 --to 2022-06` (≈ 3 h; war months dominate).
+3. ✅ **Backfill 2022 H1 (2026-10-16, uncommitted data run)** — `--from 2022-01 --to 2022-06` (≈ 3 h; war months dominate). First run died
+   in Mar on an HTTP 502 burst (3 retries / 15 s were too few); `RETRIES` raised to 6 (≈ 75 s), re-run resumed from `wanted_scrape_ids`
+   and exited 0 (7303 detail pages, 9615 exact records, 1268 placeholders in the resumed run). Month cards vs headers, Jan–Jun:
+   24 965 stolen / 14 961 found (hdr 25 141 / 15 069, 99 %). In the DB by `seized_at` month (stolen / found): 01 185 / 139,
+   02 4451 / 3135, 03 6107 / 4068, 04 3612 / 2233, 05 4031 / 2517, 06 2461 / 1472 = 20 847 / 13 564 (83 % / 90 % of the headers: the
+   one-row-per-plate/date/unit dedupe collapses repeated records; the gap is wider than in 2020-21 and not yet analysed). Null `region` 0.54 % (112 rows, of which
+   placeholders 74). Spot-checks OK: `BM0462AK` (Сумська, removed 2023-06-30), `AP1687EH` (Запорізька), `AX1611BI` (Черкаська). CSV
+   export re-run (14 043 rows, 14 479 ids, 23 pages, ≈ 0.9 MB).
 4. **Backfill 2022 H2** — `--from 2022-07 --to 2022-12` (≈ 2.5 h).
 5. **Backfill 2023–2024** — `--from 2023-01 --to 2024-12` (≈ 1.2 h).
 6. **Backfill 2025–2026** — `--from 2025-01` (to the current month, ≈ 25 min). From here on, a no-arg run refreshes only the

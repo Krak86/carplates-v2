@@ -33,7 +33,7 @@ const USER_AGENT = 'carsua.app-ingest/1.0 (+https://carsua.app)'
 const SOURCE = 'stolen.in.ua'
 const FIRST_MONTH = '2020-08'
 const DELAY_MS = 1000
-const RETRIES = 3
+const RETRIES = 6 // backoff 5+10+15+20+25 s: rides out a short stolen.in.ua 502 burst
 
 type Args = { from?: string; to?: string; details: boolean; dryRun: boolean }
 
