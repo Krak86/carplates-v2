@@ -234,6 +234,7 @@ const FEATURES = [
   'reviews',
   'media',
   'verify',
+  'guides',
   'stats',
   'news',
   'race',

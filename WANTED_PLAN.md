@@ -1,6 +1,7 @@
 # Wanted vehicles: `/wanted` stats page + stolen.in.ua history backfill
 
 ## Context
+
 `registry.wanted_vehicles` (≈79k rows, migrations 0068/0069, `pnpm ingest:wanted`) is only used for the per-plate/VIN check on the
 result card. The police feed lists **current** records only, so "found" history exists only since our first ingest. The user wants
 (1) a public stats page on wanted cars (top brands/models/regions/types/colours, recently stolen, recently found, totals by year,
@@ -14,16 +15,16 @@ police unit (`organ_unit`), and "removed from wanted" date (→ `resolved_at`). 
 
 ## Size of the backfill (stolen.in.ua month headers, counted 2026-10-16)
 
-| Theft year | Stolen | Found | Still wanted | Detail fetches (≤ found) | ≈ time at 1 req/s |
-| ---------- | -----: | ----: | -----------: | -----------------------: | ----------------: |
-| 2020 (Aug–Dec) | 1 840 | 1 353 | 487 | ≤ 1 353 | 25 min |
-| 2021 | 3 156 | 2 222 | 934 | ≤ 2 222 | 40 min |
-| 2022 | 33 532 | 20 106 | 13 426 | ≤ 20 106 | 5.5 h |
-| 2023 | 4 577 | 2 881 | 1 696 | ≤ 2 881 | 50 min |
-| 2024 | 2 324 | 1 486 | 838 | ≤ 1 486 | 25 min |
-| 2025 | 1 326 | 898 | 428 | ≤ 898 | 15 min |
-| 2026 (to Oct) | 915 | 425 | 490 | ≤ 425 | 7 min |
-| **Total** | **47 670** | **29 371** | **18 299** | **≤ 29 371** | **≈ 8 h** |
+| Theft year     |     Stolen |      Found | Still wanted | Detail fetches (≤ found) | ≈ time at 1 req/s |
+| -------------- | ---------: | ---------: | -----------: | -----------------------: | ----------------: |
+| 2020 (Aug–Dec) |      1 840 |      1 353 |          487 |                  ≤ 1 353 |            25 min |
+| 2021           |      3 156 |      2 222 |          934 |                  ≤ 2 222 |            40 min |
+| 2022           |     33 532 |     20 106 |       13 426 |                 ≤ 20 106 |             5.5 h |
+| 2023           |      4 577 |      2 881 |        1 696 |                  ≤ 2 881 |            50 min |
+| 2024           |      2 324 |      1 486 |          838 |                  ≤ 1 486 |            25 min |
+| 2025           |      1 326 |        898 |          428 |                    ≤ 898 |            15 min |
+| 2026 (to Oct)  |        915 |        425 |          490 |                    ≤ 425 |             7 min |
+| **Total**      | **47 670** | **29 371** |   **18 299** |             **≤ 29 371** |         **≈ 8 h** |
 
 Only found cards need a detail page (still-wanted ones are already in our feed); fewer in practice, since one page covers every
 record of a plate/VIN and placeholder ids (`XXXXXXXX`, `0000`, `*`) are skipped. 2022 (the full-scale invasion) is 2/3 of the
@@ -54,13 +55,13 @@ Steps 2–6 are only data runs (no code), so they can run while 7–10 are built
 
 ### Sessions (start each with "implement session N of WANTED_PLAN.md")
 
-| Session | Steps | Scope |
-| ------- | ----- | ----- |
-| 1 | 1 | Foundation: migration, region, scraper + tests, Aug 2020 smoke test |
-| 2 | 2–6 | Backfill data runs (≈ 8 h, background / can span days) |
-| 3 | 7–8 | Card history + stats API |
-| 4 | 9 | `/wanted` page |
-| 5 | 10 | Links, home teaser, docs, releases |
+| Session | Steps | Scope                                                               |
+| ------- | ----- | ------------------------------------------------------------------- |
+| 1       | 1     | Foundation: migration, region, scraper + tests, Aug 2020 smoke test |
+| 2       | 2–6   | Backfill data runs (≈ 8 h, background / can span days)              |
+| 3       | 7–8   | Card history + stats API                                            |
+| 4       | 9     | `/wanted` page                                                      |
+| 5       | 10    | Links, home teaser, docs, releases                                  |
 
 Mark a step ✅ here when it is done (with the commit), so the next session knows where to resume.
 
@@ -88,18 +89,21 @@ Mark a step ✅ here when it is done (with the commit), so the next session know
 - Fetch the two fixtures for tests from the live site in session 1 (`aug-20` month page, `/v/AP1577BP`); trim them to a few cards.
 
 ## 1. Schema — `packages/db/migrations/0074_wanted_history.sql` (+ Drizzle `wantedVehicles` in `packages/db/src/schema.ts`)
+
 - `source text NOT NULL DEFAULT 'feed'` (`'feed' | 'stolen.in.ua'`), `resolved_exact boolean NOT NULL DEFAULT true`, `region text` (derived from `organ_unit`), indexes on
   `seized_at`, `resolved_at`, `region`. Backward compatible (blue/green).
 - New table `registry.wanted_scrape_pages (month text PK, fetched_at, cards int)` and `registry.wanted_scrape_ids (ident text PK,
-  status text, fetched_at)` for resume.
+status text, fetched_at)` for resume.
 
 ## 2. Region from police unit — `scripts/src/wanted-parse.ts`
+
 - `organUnitRegion(unit)`: match oblast stems (`ЗАПОРІЗЬК` → `Запорізька область`, `КИЄВ`/`М. КИЄВІ` → `Київ`, `КРИМ` …)
   onto `REGION_NAMES` from `@carplates/shared` (`packages/shared/src/regions.ts`). Unit-tested in `wanted-parse.test.ts` with
   real samples (pull 50 distinct `organ_unit` values first). `toWantedInsert` fills `region`; a normal `pnpm ingest:wanted`
   run backfills all feed rows (upsert `set` gains `region`).
 
 ## 3. Backfill — `scripts/src/wanted-history.ts` + `wanted-history-parse.ts` (+ test with saved HTML fixture), `pnpm ingest:wanted-history`
+
 - **Phase A, months** (`/history/<mon>-<yy>`, Aug 2020 → current, list from the `<select>`): parse cards (`<a href="/v/ID">`,
   `bg-emerald-950` = found, `bg-rose-950` = wanted, type icon alt, brand/`<small>` model, day). `--from/--to YYYY-MM` limit the
   months; with no range only the last 2 months are re-fetched. Store found cards **not already in our table** (match ident = plate/vin/vin_alt + `seized_at`) as
@@ -116,6 +120,7 @@ Mark a step ✅ here when it is done (with the commit), so the next session know
   card shows scraped records (they match by plate/VIN automatically). Attribution "history: stolen.in.ua" on the page + card.
 
 ## 4. API — `apps/api/src/wanted/`
+
 - `GET /api/wanted/stats` (`WantedService.stats()`, in-memory cache 10 min, invalidated by `max(last_seen_at)`): summary
   (wanted now, found total, found since tracking, with plate / VIN, median days to found, history since), `byYear`
   (seized year → stolen, found), `byRegion`, `byBrand`, `byModel`, `byType`, `byColor` (each `{label, stolen, found, wanted}`,
@@ -124,6 +129,7 @@ Mark a step ✅ here when it is done (with the commit), so the next session know
   shared. Default global throttle is enough (not an enumerable lookup).
 
 ## 5. Web — `apps/web/src/routes/wanted/`
+
 - `WantedStatsRoute.tsx` (lazy, `/wanted` in `App.tsx`), `wantedStatsQuery` in `lib/queries.ts` (no offline group, live data),
   fetcher in `lib/api.ts`, helpers/types in `helpers.ts`/`types.ts`.
 - Sections: summary cards (as `StatsRoute` L134-151) · **by year** grouped bars stolen vs found (pattern of
@@ -137,10 +143,12 @@ Mark a step ✅ here when it is done (with the commit), so the next session know
   (ua/ru/en) in `apps/api/src/spa/spa-text.ts`.
 
 ## 6. Docs
+
 `docs/features-reference.md` "Wanted vehicles" (source column, region, scrape, resume), `docs/commands-reference.md`
 (`ingest:wanted-history`), `PLAN.md` ✅, `docs/plan-done.md`, `releases.ts` entry.
 
 ## Verification
+
 - `pnpm --filter @carplates/shared build`; `pnpm db:migrate`; `pnpm ingest:wanted` (regions filled: `SELECT region, count(*) …`,
   null share < 5 %).
 - `pnpm ingest:wanted-history --no-details` → month counts match stolen.in.ua headers (e.g. Aug 2020: 401 stolen / 297 found);

@@ -162,7 +162,9 @@ export default function RdwMassSchema({
     gcm:
       gross && gtm !== null
         ? `${t('rdw.schema.your.gcm', { gvm: fmt(gross), gtm: fmt(gtm) })}${
-            chosen && atm ? ` ${t('rdw.tow.licence', { category: t(`rdw.tow.category.${licenceFor(gross, atm)}`) })}` : ''
+            chosen && atm
+              ? ` ${t('rdw.tow.licence', { category: t(`rdw.tow.category.${licenceFor(gross, atm)}`) })}`
+              : ''
           }`
         : undefined
   }
@@ -276,9 +278,7 @@ export default function RdwMassSchema({
       {variant === 'car' && atm && (
         <div className="mt-2 rounded-lg bg-[var(--color-surface)]/20 p-2">
           <p className="text-xs font-medium">
-            {chosen
-              ? t('rdw.schema.your.chosen', { kg: fmt(atm) })
-              : t('rdw.schema.your.maxBraked', { kg: fmt(atm) })}
+            {chosen ? t('rdw.schema.your.chosen', { kg: fmt(atm) }) : t('rdw.schema.your.maxBraked', { kg: fmt(atm) })}
           </p>
 
           <ul className="mt-1 space-y-0.5">

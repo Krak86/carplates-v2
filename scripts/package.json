@@ -121,6 +121,7 @@
     "csv-stringify": "^6.9.0",
     "drizzle-orm": "0.45.4",
     "iconv-lite": "^0.7.3",
+    "pg": "^8.23.1",
     "unzipper": "^0.12.5",
     "zod": "^4.6.6"
   },

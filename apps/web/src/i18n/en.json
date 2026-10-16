@@ -854,6 +854,7 @@
   "about.feature.reviews": "Reviews and test drives, videos, owner posts and social threads (Bluesky, Stack Exchange, Lemmy)",
   "about.feature.media": "Photos, 3D models (Sketchfab), 360° galleries and Wikipedia articles",
   "about.feature.verify": "Verification: fines, MTSBU insurance check, official traffic-rules tests, official services; MVS service-centre and nearby-services maps",
+  "about.feature.guides": "Guides on /read: plates and regions, VIN, body types and sizes, generations, fleet, imports, electric cars, fuel and CO₂, crash tests, recalls and model records - with live registry data",
   "about.feature.stats": "Registry statistics on /stats: region map, rankings and markets; heaviest and lightest models",
   "about.feature.news": "Car news from RSS feeds, a searchable /news archive and share-price widgets",
   "about.feature.race": "A free test-drive racing game in the browser and relaxing live backgrounds",

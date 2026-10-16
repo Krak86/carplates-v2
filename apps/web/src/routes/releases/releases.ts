@@ -12,6 +12,18 @@ export const RELEASES: readonly ReleaseDay[] = [
     items: [
       item(
         'improved',
+        'Схема мас на картці авто співвідносить обране авто з GVM, TBM, GTM, ATM і GCM; секції акцизу та мас відкриті за замовчуванням',
+        'Схема масс на карточке авто соотносит выбранное авто с GVM, TBM, GTM, ATM и GCM; секции акциза и масс открыты по умолчанию',
+        'The mass schema on the car card now relates the chosen car to GVM, TBM, GTM, ATM and GCM; the excise and mass sections are open by default'
+      ),
+      item(
+        'improved',
+        'Статті /read оформлені як блог: обкладинка, дата та кнопка копіювання посилання; у «Про проєкт» з’явився пункт про довідники',
+        'Статьи /read оформлены как блог: обложка, дата и кнопка копирования ссылки; в «О проекте» появился пункт о справочниках',
+        'The /read guides look like blog posts: cover banner, date and copy-link button; About now lists the guides'
+      ),
+      item(
+        'improved',
         'Секції картки авто та сторінки VIN тепер мають кнопку «Довідник» зі стрілкою - перехід до відповідного пояснення в /read (колір, VIN, розміри, паливо, безпека, відкликання та інше)',
         'Секции карточки авто и страницы VIN теперь имеют кнопку «Справочник» со стрелкой - переход к соответствующему объяснению в /read (цвет, VIN, размеры, топливо, безопасность, отзывы и другое)',
         'Car card and VIN page sections now end with a “Guide” button with an arrow - a link to the matching explainer in /read (colour, VIN, size, fuel, safety, recalls and more)'
