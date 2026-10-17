@@ -73,7 +73,7 @@ range; `--no-details` = month cards only). Re-running a range is safe: fetched i
    After each backfill step: per-year `SELECT` of stolen / found vs the table above, null `region` share, a few card spot-checks, then
    `pnpm export:wanted-history:csv` (cumulative snapshot -> `scripts/seed-data/wanted-history*.csv.gz`; a new setup loads it with
    `pnpm ingest:wanted-history:csv` instead of re-scraping) and commit the refreshed files with the step.
-7. **Card history** — `wanted.service.ts`: scraped records in lookups, "history since Aug 2020", stolen.in.ua attribution (§3 end).
+7. ✅ **Card history (2026-10-17, uncommitted)** — `wanted.service.ts`: scraped records in lookups, "history since Aug 2020", stolen.in.ua attribution (§3 end). Done: records carry `source` + `removedExact` (inexact removal shows "exact date unknown"), `trackedSince` = earliest scraped theft date >= 2020-08-01 + `historySource`; checked on `АР1577ВР` (feed + removed 2026-04-30 record).
 8. **Stats API** — `GET /api/wanted/stats` + shared Zod contract (§4), service test.
 9. **`/wanted` route** — page, sortable tables, map, year chart, recent lists (§5), route title + `STATIC_PAGES`.
 10. **Links + docs** — `WantedCheck` link, `/stats` link, home teaser (§5), docs + `releases.ts` (§6).

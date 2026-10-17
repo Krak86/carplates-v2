@@ -79,7 +79,10 @@ function WantedRecordCard({ record }: { record: WantedRecord }): ReactNode {
             )
           }
         />
-        <Row label={t('wanted.removedAt')} value={date(record.removedAt)} />
+        <Row
+          label={t('wanted.removedAt')}
+          value={record.removedExact === false ? t('wanted.removedUnknown') : date(record.removedAt)}
+        />
       </dl>
 
       {!isWanted && <p className="mt-1.5 text-[var(--color-muted)]">{t('wanted.removedNote')}</p>}
@@ -155,7 +158,9 @@ export default function WantedCheck({ plate, vin, openSignal = 0 }: Props): Reac
             ? t('wanted.checkedAt', { date: new Date(data.checkedAt).toLocaleString(locale) })
             : t('wanted.neverLoaded')}
           {data.trackedSince &&
-            ` ${t('wanted.trackedSince', { date: new Date(data.trackedSince).toLocaleDateString(locale) })}`}
+            ` ${t(data.historySource ? 'wanted.historySince' : 'wanted.trackedSince', {
+              date: new Date(data.trackedSince).toLocaleDateString(locale)
+            })}`}
         </p>
       )}
 

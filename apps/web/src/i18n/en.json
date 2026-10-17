@@ -309,6 +309,8 @@
   "wanted.checkedAt": "Police list last refreshed in our database: {{date}}.",
   "wanted.neverLoaded": "The wanted list has not been loaded on this server yet.",
   "wanted.trackedSince": "We have tracked removed records since {{date}}.",
+  "wanted.historySince": "History of removed records since {{date}} (source: stolen.in.ua).",
+  "wanted.removedUnknown": "Left the list (exact date unknown)",
   "wanted.note": "This is National Police open data (CC BY), not an official certificate: no record does not prove the car is clean. Before buying, check the car at an MVS service centre or with the police.",
   "wanted.link.stolen": "- the same data, page for this plate",
   "wanted.link.dataset": "- the National Police open dataset",

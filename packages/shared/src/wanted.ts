@@ -22,7 +22,11 @@ export const wantedRecordSchema = z.object({
   registeredAt: z.string().nullable(),
   organUnit: z.string().nullable(),
   /** ISO timestamp of the first of our runs that no longer saw the record; null while wanted. */
-  removedAt: z.string().nullable()
+  removedAt: z.string().nullable(),
+  /** `stolen.in.ua` for records from the scraped history (since Aug 2020); absent / `feed` = our own feed snapshots. */
+  source: z.enum(['feed', 'stolen.in.ua']).nullable().optional(),
+  /** False when only the month of the removal is known (`removedAt` is the scrape time, not the real date). */
+  removedExact: z.boolean().nullable().optional()
 })
 export type WantedRecord = z.infer<typeof wantedRecordSchema>
 
@@ -34,7 +38,9 @@ export const wantedResponseSchema = z.object({
   /** ISO timestamp of the last ingest that completed; null if the list was never loaded. */
   checkedAt: z.string().nullable(),
   /** Earliest first-seen timestamp we hold — removals before it were not tracked. */
-  trackedSince: z.string().nullable()
+  trackedSince: z.string().nullable(),
+  /** Set when `trackedSince` comes from the scraped stolen.in.ua history (attribution on the card). */
+  historySource: z.literal('stolen.in.ua').nullable().optional()
 })
 export type WantedResponse = z.infer<typeof wantedResponseSchema>
 
