@@ -23,6 +23,7 @@ import {
   fxResponseSchema,
   caRecallsResponseSchema,
   wantedResponseSchema,
+  wantedStatsResponseSchema,
   generationGrowthResponseSchema,
   generationsResponseSchema,
   wikiSpecsResponseSchema,
@@ -100,6 +101,7 @@ import type {
   FxResponse,
   CaRecallsResponse,
   WantedResponse,
+  WantedStatsResponse,
   GenerationGrowthResponse,
   GenerationsResponse,
   WikiSpecsResponse,
@@ -747,4 +749,9 @@ export async function getWanted(plate: string | null, vin: string | null): Promi
   if (plate) params.set('plate', plate)
   if (vin) params.set('vin', vin)
   return wantedResponseSchema.parse(await getJson(`/api/wanted?${params.toString()}`))
+}
+
+/** Aggregates for the /wanted page: totals, by year / region / brand / model / type / colour, recent lists. */
+export async function getWantedStats(): Promise<WantedStatsResponse> {
+  return wantedStatsResponseSchema.parse(await getJson('/api/wanted/stats'))
 }

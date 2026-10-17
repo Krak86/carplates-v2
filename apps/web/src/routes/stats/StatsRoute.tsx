@@ -222,7 +222,9 @@ export default function StatsRoute(): ReactNode {
             {view === 'map' ? (
               <LoadErrorBoundary compact>
                 <Suspense fallback={<StatsMapSkeleton />}>
-                  <StatsMap rows={dimensionRows(stats.data, 'region')} metric={metric} />
+                  <StatsMap
+                    rows={dimensionRows(stats.data, 'region').map(r => ({ label: r.label, value: r[metric] }))}
+                  />
                 </Suspense>
               </LoadErrorBoundary>
             ) : (

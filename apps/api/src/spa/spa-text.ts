@@ -94,6 +94,20 @@ export const STATIC_PAGES: Record<string, Record<Lang, PageText>> = {
       description: "Most common makes, colors, fuels and regions in Ukraine's vehicle registry."
     }
   },
+  '/wanted': {
+    ua: {
+      title: 'Розшук авто: статистика · Cars UA',
+      description: 'Скільки авто в розшуку в Україні, скільки знайдено, за регіонами, марками, кольорами та роками.'
+    },
+    ru: {
+      title: 'Розыск авто: статистика · Cars UA',
+      description: 'Сколько авто в розыске в Украине, сколько найдено, по регионам, маркам, цветам и годам.'
+    },
+    en: {
+      title: 'Wanted vehicles: statistics · Cars UA',
+      description: 'How many vehicles are wanted in Ukraine and how many were found, by region, make, colour and year.'
+    }
+  },
   '/fuel': {
     ua: {
       title: 'Пальне та викиди · Cars UA',

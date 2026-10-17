@@ -75,7 +75,7 @@ range; `--no-details` = month cards only). Re-running a range is safe: fetched i
    `pnpm ingest:wanted-history:csv` instead of re-scraping) and commit the refreshed files with the step.
 7. ✅ **Card history (2026-10-17, 64a643b)** — `wanted.service.ts`: scraped records in lookups, "history since Aug 2020", stolen.in.ua attribution (§3 end). Done: records carry `source` + `removedExact` (inexact removal shows "exact date unknown"), `trackedSince` = earliest scraped theft date >= 2020-08-01 + `historySource`; checked on `АР1577ВР` (feed + removed 2026-04-30 record).
 8. ✅ **Stats API (2026-10-17, 111436f)** — `GET /api/wanted/stats` + `wantedStatsResponseSchema` (§4), service test. Verified live: 75 196 wanted now, 26 714 found, median 1348 days to found, 100-row top lists, 50 recent each, ≈ 0.2 s (cached). `byYear` includes pre-2020 thefts (feed rows from 1928); the page should trim or group them.
-9. **`/wanted` route** — page, sortable tables, map, year chart, recent lists (§5), route title + `STATIC_PAGES`.
+9. ✅ **`/wanted` route (2026-10-17, uncommitted)** — `routes/wanted/` (route, sortable table, year chart with pre-2020 grouped into one "≤ 2019" bar, recent lists), `StatsMap` now takes `{label, value}[]`, `wantedStatsQuery`, i18n `wanted.stats.*`, `ROUTE_TITLE_KEYS` + `STATIC_PAGES`. Verified in the browser (ua/ru): sort asc/desc, region map, plate links. Left for step 10: links, home teaser, docs, `releases.ts`.
 10. **Links + docs** — `WantedCheck` link, `/stats` link, home teaser (§5), docs + `releases.ts` (§6).
 
 Steps 2–6 are only data runs (no code), so they can run while 7–10 are built; the page just shows more history as they finish.

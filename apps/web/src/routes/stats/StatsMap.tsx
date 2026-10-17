@@ -14,20 +14,20 @@ import { REGION_NAME_BY_SHAPE_ISO } from '@/routes/stats/region-geography'
 import StatsMapSkeleton from '@/routes/stats/StatsMapSkeleton'
 import { useUiStore } from '@/store/ui-store'
 
-import type { StatsMetric, StatsRow } from './types'
-
 const MAP_WIDTH = 800
 const MAP_HEIGHT = 520
 const LEGEND_STEPS = 8
 
+export type MapRow = { label: string; value: number }
+
 type Props = {
-  rows: StatsRow[]
-  metric: StatsMetric
+  /** `label` = the Ukrainian `REGIONS` name. */
+  rows: MapRow[]
 }
 
 type Hover = { name: string; value: number | null; x: number; y: number }
 
-export default function StatsMap({ rows, metric }: Props): ReactNode {
+export default function StatsMap({ rows }: Props): ReactNode {
   const { t, i18n } = useTranslation()
   const theme = useUiStore(s => s.theme)
   const geography = useQuery(ukraineGeographyQuery())
@@ -35,8 +35,8 @@ export default function StatsMap({ rows, metric }: Props): ReactNode {
 
   const numberFormat = new Intl.NumberFormat(toIntlLocale(i18n.language))
 
-  const valueByRegion = new Map(rows.map(r => [r.label, r[metric]]))
-  const values = rows.map(r => r[metric])
+  const valueByRegion = new Map(rows.map(r => [r.label, r.value]))
+  const values = rows.map(r => r.value)
   const min = values.length ? Math.min(...values) : 0
   const max = values.length ? Math.max(...values) : 0
 
