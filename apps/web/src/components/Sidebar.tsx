@@ -75,6 +75,9 @@ export default function Sidebar(): ReactNode {
       <NavLink viewTransition to="/safety" className={linkClass} onClick={handleClose}>
         <span aria-hidden>🛡️</span> {t('nav.safety')}
       </NavLink>
+      <NavLink viewTransition to="/wanted" className={linkClass} onClick={handleClose}>
+        <span aria-hidden>🚨</span> {t('nav.wanted')}
+      </NavLink>
       <NavLink viewTransition to="/news" className={linkClass} onClick={handleClose}>
         <span aria-hidden>📰</span> {t('nav.news')}
       </NavLink>
