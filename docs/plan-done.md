@@ -3054,7 +3054,7 @@ Trigger: the dev server showed ~22 MB / 337 requests before the first result. Th
   keeps the current language). Tests `await i18nReady`.
 - **Chunking** (`vite.config.ts`): `vendor-react|query|i18n` for cache stability, `helpers-ratings|specs|value|media` for pure helpers
   shared by lazy chunks. Components are never grouped (would pull a group into the first load).
-- **Tooling/docs:** `pnpm preview:prod` (+ `apps/api/preview.env`) builds and serves the SPA from Nest; `docs/vps-http2-http3.md`
+- **Tooling/docs:** `pnpm preview:prod` (+ `apps/api/preview.env`) builds and serves the SPA from Nest; `docs/deploy.md`
   (Caddy/nginx/Cloudflare h2/h3, Brotli, UDP 443).
 - **Verified in Chrome** on the production build: no console errors; `?section=news` opens and scrolls to News. Not measured: Lighthouse,
   LCP/CLS before vs after.

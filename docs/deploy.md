@@ -5,7 +5,35 @@ boots, migrates; ALPR image runs hardened (non-root, read-only, no caps); Caddyf
 switch with zero non-200s, outage page/JSON, maintenance flag); `deploy-web.sh` against a Linux container; workflows pass `actionlint`.
 Not testable here: real SSH deploys, Cloudflare, R2, `pg_restore` of the real DB, HTTP/3 through Cloudflare.
 
-Why/what (sizing, provider, security checklist, rate limits): [PLAN.md "Phase 4"](../PLAN.md). Caddy/h2/h3 notes: [vps-http2-http3.md](vps-http2-http3.md).
+This file is the single VPS reference: sizing/provider/DNS, architecture, runbook, secrets, backups, and the HTTP/2-3 + compression notes (last
+section). Task checklists and the rate-limit policy stay in [PLAN.md "Phase 4"](../PLAN.md); the pre-deploy security gate is
+[security-checklist.md](security-checklist.md); recurring jobs are [SCHEDULE.md](../SCHEDULE.md).
+
+## Sizing and provider (checked 2026-10-13, prices ex-VAT/promo, verify at purchase)
+
+The database is **23 GB** as of 2026-10-13 (`registrations` 14 GB / 24.7M rows + the `current_registration` matview 8.9 GB; everything else
+< 0.5 GB), growing ~110 MB/year (monthly delta ingest, not a full re-ingest). Containers: Postgres, `api` (also serves the web), Caddy, `alpr`,
+and later a monthly `ingest-cron` that holds an exclusive lock on `registrations` for minutes. **Traffic is expected to be low** (indexed point
+lookups, edge-cacheable), so **disk is the binding constraint, not CPU/RAM**.
+
+| Resource | Start (low traffic) | Comfortable | Why                                                                                                                                                                                                                         |
+| -------- | ------------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| CPU      | 2 vCPU              | 4 vCPU      | Lookups are light; `ingest-cron` is I/O-bound. Go to 4 only if metrics show API latency during ingest                                                                                                                       |
+| RAM      | 8 GB                | 8–16 GB     | Hot path is `current_registration` + indexes (~9 GB on disk); a small working set stays cached with 8 GB. 4 GB works but cold lookups hit disk and the ingest index rebuild is slow                                         |
+| Disk     | 160 GB NVMe         | 160–200 GB  | 23 GB DB + ~9 GB temp during matview refresh/index rebuild + WAL during ingest + 2–3 `pg_dump -Fc` backups (~5–8 GB each) + source ZIPs (~1.2 GB) + images/logs ≈ 60–70 GB peak. 80 GB is too tight; **40 GB does not fit** |
+| Network  | default             | default     | Point lookups; bandwidth isn't the bottleneck                                                                                                                                                                               |
+
+Resize CPU/RAM later from observed load. Keep backups off-box (or on a separate volume) so they don't compete with PGDATA for space.
+
+- **Contabo Cloud VPS 6** (6 vCPU / 12 GB / 200 GB SSD _or_ 100 GB NVMe, ~€7.20/mo for the first 24 months, list €9) — current pick. EU
+  (Germany). Renewal price is higher after 24 months; shared/noisy disk, so **off-box backups are mandatory**, not Contabo snapshots alone.
+- Hetzner (4 vCPU / 8 GB + attached volume, ~€12–20/mo, NVMe) — the more reliable fallback.
+- Ukrainian host kVPS90 (4 vCPU / 8 GB / 90 GB SSD, ~1618 UAH/mo yearly) — only if UAH payment / UA hosting is required; ~5× the price, 100 GB cap.
+
+**Static IP + DNS (required):** a **static public IPv4** (and IPv6 if offered); never a NAT/shared/ephemeral address. `carsua.app` is registered at
+**Squarespace** but DNS moves to **Cloudflare** (nameservers changed at Squarespace; steps in "Where to get what"): `A @ → IPv4`, `AAAA @ → IPv6`,
+`CNAME www → carsua.app`, keep MX/TXT, drop old Squarespace-site `A`/`CNAME`. Use a low TTL (300 s) before cutover, raise it after. Set the
+provider's **reverse DNS (PTR)** to `carsua.app`. Without Cloudflare, Caddy would get its Let's Encrypt cert once DNS resolves to the box.
 
 ## How it fits together
 
@@ -133,3 +161,39 @@ snapshots are an extra, not the backup. `pg_dump` caveat (verified): `--schema` 
 - CSP is Report-Only; enforce after a clean week. Cloudflare IP ranges in the Caddyfile: re-check against cloudflare.com/ips occasionally.
 - Caddy edge `rate_limit` needs a custom build — left to Cloudflare's rule + the Nest throttler.
 - Pin GitHub Actions by commit SHA once stable (Dependabot already tracks them).
+
+## HTTP/2, HTTP/3, compression, caching
+
+The Nest/Fastify API speaks plain HTTP/1.1 and does **no compression**; it sets `Cache-Control` itself (`apps/api/src/spa/spa.controller.ts`:
+hashed `/assets/*` long-cache; `index.html` / `sw.js` / `registerSW.js` / `manifest.webmanifest` `no-cache`). TLS, h2, h3, compression and edge
+rate limiting belong to the proxy. The real config is `infra/Caddyfile` + `infra/docker-compose.prod.yml`. Local dev (Vite `:5173`) is HTTP/1.1
+and unbundled, so it says nothing about production.
+
+**Caddy (in use)**
+
+- Enables **h2 and h3 by default** and advertises h3 via `Alt-Svc` (browsers use h2 on the first visit, h3 afterwards).
+- Compose must publish **`80`, `443` and `443/udp`**; the firewall must allow TCP 80, TCP 443 **and UDP 443**. Without UDP, h3 silently falls back to h2.
+- Stock Caddy 2 ships **zstd and gzip only** — `encode br` fails to load ("module not registered: http.encoders.br", verified 2026-10-15).
+  Brotli to browsers comes from Cloudflare, which re-compresses.
+- Do not add a second `Cache-Control` for `/assets/*` in Caddy — the app already sends the right one. Put a Caddy/CDN cache in front of `/og/*`.
+
+**nginx (alternative, not used)** — `listen 443 ssl;` + `listen 443 quic reuseport;`, `http2 on; http3 on;`,
+`add_header Alt-Svc 'h3=":443"; ma=86400' always;`, `gzip on` (brotli needs the `ngx_brotli` module), `proxy_pass http://127.0.0.1:3000`.
+
+**Cloudflare in front** — h2/h3 + Brotli on by default; hashed `/assets/*` cached at the edge; SSL mode Full (strict). The client IP arrives in
+`CF-Connecting-IP` (Fastify `trustProxy` + throttler tracker; only trust Cloudflare's IP ranges). A short-TTL edge cache for read-only `/api/*`
+lookups (stats, vdb, rdw, wiki) is a PLAN.md Phase 4 item.
+
+**Verify**
+
+```bash
+curl -sI --http2 https://carsua.app | head -1        # HTTP/2 200
+curl -sI --http3 https://carsua.app | head -1        # HTTP/3 200 (needs a curl built with HTTP/3)
+curl -sI -H 'accept-encoding: br' https://carsua.app/assets/<hashed>.js | grep -i 'content-encoding\|cache-control'
+```
+
+Or DevTools → Network → right-click the header row → enable **Protocol** (`h2` / `h3`).
+
+**Production-like check on your machine** — `pnpm preview:prod` = `pnpm build` + the API with `apps/api/preview.env` (`WEB_DIST_DIR=../web/dist`),
+so Nest serves the built SPA on `:3000` (stop `pnpm dev`'s API first or pass `PORT=3100`). Still HTTP/1.1 and **uncompressed** — judge transfer by
+gzip/brotli sizes. The PWA service worker is active there: use DevTools → Application → "Update on reload" / clear storage when comparing runs.

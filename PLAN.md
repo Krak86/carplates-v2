@@ -836,60 +836,18 @@ Group 1 dimension callouts + garage-fit -> Group 3 (existing order). Owner says 
 
 The recurring-job plan (cadences, locking, run log, alerting, build steps) is drafted in [SCHEDULE.md](SCHEDULE.md) — build it as part of this phase.
 
-### VPS sizing (starting point)
-
-The database is **23 GB** as of 2026-10-13 (`registrations` 14 GB / 24.7M rows + the `current_registration` matview
-8.9 GB; everything else < 0.5 GB), growing by roughly the ~110 MB/year the backup policy below already assumes for archived source
-ZIPs (one monthly ingest of deltas, not a re-ingest of the full history). Containers to fit: Postgres, `api`, `web` (served by
-`api`), Redis, Caddy, and a monthly `ingest-cron` job that runs occasionally and holds an exclusive lock on `registrations` for
-minutes.
-
-**Traffic is expected to be low** at launch and possibly long-term (indexed point lookups, CDN/edge-cacheable), so **disk is the
-binding constraint, not CPU/RAM**. Size the disk for the DB, not for users.
-
-| Resource | Start (low traffic) | Comfortable | Why                                                                                                                                                                                                                         |
-| -------- | ------------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| CPU      | 2 vCPU              | 4 vCPU      | Lookups are light; `ingest-cron` is I/O-bound. Go to 4 only if PostHog/metrics show API latency during ingest                                                                                                               |
-| RAM      | 8 GB                | 8–16 GB     | Hot path is `current_registration` + indexes (~9 GB on disk); a small working set stays cached with 8 GB. 4 GB works but cold lookups hit disk and the ingest index rebuild is slow                                         |
-| Disk     | 160 GB NVMe         | 160–200 GB  | 23 GB DB + ~9 GB temp during matview refresh/index rebuild + WAL during ingest + 2–3 `pg_dump -Fc` backups (~5–8 GB each) + source ZIPs (~1.2 GB) + images/logs ≈ 60–70 GB peak. 80 GB is too tight; **40 GB does not fit** |
-| Network  | default             | default     | Point lookups; bandwidth isn't the bottleneck                                                                                                                                                                               |
-
-Cheapest sensible path: a 2 vCPU / 8 GB box with a 160 GB disk (or a small root disk + an attached block volume for
-`PGDATA` and backups, which can be grown later without migrating). Resize CPU/RAM later from observed load — not an architectural
-commitment. Keep backups on a separate volume/off-box so they don't compete with PGDATA for space.
-
-**Provider shortlist (checked 2026-10-13, prices ex-VAT/promo, verify at purchase):**
-
-- **Contabo Cloud VPS 6** (6 vCPU / 12 GB / 200 GB SSD _or_ 100 GB NVMe, ~€7.20/mo for the first 24 months, list €9) — current
-  pick. Choose the NVMe variant if backups go off-box, otherwise 200 GB SSD (or buy extra storage). Pick the EU (Germany)
-  datacenter. Renewal price after 24 months is higher; shared/noisy disk, so **off-box backups are mandatory**, not Contabo's
-  snapshots alone.
-- Hetzner (4 vCPU / 8 GB + attached volume, ~€12–20/mo, NVMe) — the more reliable fallback.
-- Ukrainian host kVPS90 (4 vCPU / 8 GB / 90 GB SSD, ~1618 UAH/mo yearly) — only if UAH payment / UA hosting is required; ~5×
-  the price and capped at 100 GB disk.
-
-**Static IP + DNS (required):** the VPS must have a **static public IPv4** (and IPv6 if offered) — all providers above give one by
-default; do not use a NAT/shared or ephemeral address. `carsua.app` is registered at **Squarespace**, so in Squarespace Domains →
-DNS settings point the domain at the VPS:
-
-- `A` record: `@` → VPS IPv4 (and `AAAA` `@` → IPv6 if used);
-- `CNAME` (or `A`) for `www` → `carsua.app` / the same IP;
-- keep Squarespace's default MX/TXT records if email is used; drop any Squarespace-site `A`/`CNAME` records that would conflict.
-- Set a low TTL (300 s) before cutover, raise it after it's stable. Caddy then obtains the Let's Encrypt cert automatically once DNS
-  resolves to the box (ports 80/443 TCP + 443 UDP open for HTTP/3); also set the provider's **reverse DNS (PTR)** to `carsua.app`.
-- Alternative: move DNS to Cloudflare (change nameservers at Squarespace) for CDN/edge caching and DDoS cover — the "short-TTL edge
-  cache" item below depends on this; decide before launch.
+VPS sizing, provider shortlist (Contabo Cloud VPS 6), static IP and DNS: [docs/deploy.md](docs/deploy.md) "Sizing and provider".
 
 - ✅ Load-performance pass done 2026-10-09 (lazy sections, per-language i18n, chunk groups — `docs/plan-done.md` "Load-performance pass").
   **Remaining load-performance actions (value order; context in "Load-performance pass"):**
   1. [ ] Measure for real — Lighthouse + DevTools trace on the VPS behind Caddy (Fast 4G, 4× CPU); LCP/CLS before vs after were never measured.
   2. [ ] Preload the active language chunk (it is fetched only after the entry script runs: one extra round trip) — inline script in `index.html` + a build-time hook for the hashed filename.
   3. [ ] Brotli: stock Caddy has no `br` encoder (zstd + gzip at the origin, Cloudflare serves Brotli) — the API does not compress; local numbers overstate transfer.
-  4. [ ] Short-TTL edge cache for read-only `/api/*` lookups (stats, vdb, rdw, wiki) — see `docs/vps-http2-http3.md`.
+  4. [ ] Short-TTL edge cache for read-only `/api/*` lookups (stats, vdb, rdw, wiki) — see `docs/deploy.md`.
   5. [ ] Make `FuelEconomy` / `RdwSpecs` lazy for real: move the helpers they share with `CO2Badge` and the VIN code into the grouped helper chunks in `vite.config.ts`.
   6. [ ] Hero/LCP: confirm the largest image is the hero and add a preload hint; check fonts.
   7. [ ] Delay PostHog extras (recorder, surveys, dead-clicks, web-vitals scripts) until idle / first interaction (telemetry is off locally).
-- HTTP/2 + HTTP/3 + Brotli + caching setup: [docs/vps-http2-http3.md](docs/vps-http2-http3.md) (open UDP 443!)
+- HTTP/2 + HTTP/3 + Brotli + caching setup: [docs/deploy.md](docs/deploy.md) (open UDP 443!)
 - Prod `docker-compose`: Caddy (auto-TLS + **coarse per-IP rate limit**, see
   below) · Redis (RIA + VIN cache, throttler store) · api · web · ingest-cron
 - ✅ Deploy tooling written 2026-10-15 (api/alpr Dockerfiles, `infra/docker-compose.prod.yml` + Caddyfile + maintenance page, blue/green api deploy,
