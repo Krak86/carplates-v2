@@ -1957,6 +1957,7 @@
   "stats.map.attribution": "Межі регіонів: geoBoundaries.org (дані OpenStreetMap), ODbL 1.0",
   "share.button": "Поділитися: {{section}}",
   "share.copied": "Посилання скопійовано!",
+  "share.page": "Поділитися сторінкою",
   "export.button": "Скопіювати всю інформацію",
   "export.copyClipboard": "Скопіювати в буфер обміну",
   "export.downloadTxt": "Завантажити як .txt",

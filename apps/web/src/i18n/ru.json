@@ -1957,6 +1957,7 @@
   "stats.map.attribution": "Границы регионов: geoBoundaries.org (данные OpenStreetMap), ODbL 1.0",
   "share.button": "Поделиться: {{section}}",
   "share.copied": "Ссылка скопирована!",
+  "share.page": "Поделиться страницей",
   "export.button": "Скопировать всю информацию",
   "export.copyClipboard": "Скопировать в буфер обмена",
   "export.downloadTxt": "Скачать как .txt",
