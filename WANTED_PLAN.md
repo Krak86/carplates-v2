@@ -86,13 +86,33 @@ Steps 2–6 are only data runs (no code), so they can run while 7–10 are built
 | ------- | ----- | ------------------------------------------------------------------- |
 | 1       | 1     | Foundation: migration, region, scraper + tests, Aug 2020 smoke test |
 | 2       | 2–6   | Backfill data runs (≈ 8 h, background / can span days)              |
-| 3       | 7–8   | Card history + stats API                                            |
+| 3       | 7–8   | Card history + stats API (done)                                     |
 | 4       | 9     | `/wanted` page                                                      |
 | 5       | 10    | Links, home teaser, docs, releases                                  |
 
 Session 1 result: Aug 2020 smoke test = 388 cards / 287 found (header 401 / 297), 250 detail pages, `AP1577BP` has the 2026-04-30 removal; region null share 0.12 %. Resume at session 2 (step 2).
 
 Mark a step ✅ here when it is done (with the commit), so the next session knows where to resume.
+
+### Handoff for step 9 (written after step 8, 2026-10-17)
+
+Start the new session with "implement session 4 of WANTED_PLAN.md". Everything the page needs exists; nothing else to prepare.
+
+- **API (live, verified)**: `GET /api/wanted/stats`, contract `wantedStatsResponseSchema` / `WantedStatsRow` / `WantedStatsVehicle` in
+  `@carplates/shared` (`packages/shared/src/wanted.ts`, already built). Shape: `summary { wantedNow, foundTotal, foundSinceTracking,
+withPlate, withVin, medianDaysToFound|null, historySince|null }`, `byYear` (ascending, `label` = year string),
+  `byRegion|byBrand|byModel|byType|byColor` (`{label, stolen, found, wanted}`, top 100, stolen desc), `recentStolen` / `recentFound`
+  (50 each: brand, model, vehicleType, color, plate, seizedAt `YYYY-MM-DD`, resolvedAt ISO|null, region|null), `checkedAt`.
+- **Data quirks to handle in the UI**: `byYear` runs from 1928 (feed thefts before Aug 2020 are mostly still wanted, found ≈ 0): group
+  everything before 2020 into one "≤ 2019" bar or show 2020+ only, and note that found counts before Aug 2020 are not tracked. Labels
+  are Ukrainian (brand `ВАЗ`, colour `БІЛИЙ`, type `Легковий автотранспорт`, region `Донецька область`); a vehicle's `region` can be null.
+  The map needs region labels mapped to `StatsMap`'s names (`localizeRegion`, `REGION_NAME_BY_SHAPE_ISO` in
+  `routes/stats/region-geography`). Real numbers (2026-10-17): 75 196 wanted, 26 714 found, median 1348 days.
+- **Existing files to follow**: `apps/web/src/routes/stats/{StatsRoute,StatsTable,StatsMap}.tsx` (+ `StatsTable.test.tsx`;
+  `HomeNewsSection.tsx` also lives in `routes/stats/`, for the step-10 teaser), `routes/read/imports/ImportsSections.tsx`
+  (`YearsSection`), `lib/api.ts` (wanted fetcher ~L744), `lib/queries.ts` (`wantedQuery` ~L623, live data, no offline group),
+  `components/WantedCheck.tsx` (step 10).
+- Read `docs/features-reference.md` "Wanted vehicles" plus the "New public route" rule in CLAUDE.md before coding.
 
 ## stolen.in.ua reference (verified 2026-10-16)
 
