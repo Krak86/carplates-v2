@@ -43,7 +43,7 @@ export const ROUTE_TITLE_KEYS: Record<string, string> = {
 }
 
 /**
- * Sets `document.title` (`"<page> · Cars UA"`, or the app name + tagline when `page` is null)
+ * Sets `document.title` (`"Cars UA - <page>"`, or the app name + tagline when `page` is null)
  * and keeps `<html lang>` in step with the UI language. Re-runs on language change.
  * `undefined` leaves the title to whichever page owns it (the search route, under `/:query`).
  */
@@ -58,6 +58,6 @@ export function useDocumentTitle(page: string | null | undefined): void {
 
   useEffect(() => {
     if (page === undefined) return
-    document.title = page ? `${page} · ${appName}` : `${appName} - ${tagline}`
+    document.title = page ? `${appName} - ${page}` :`${appName} - ${tagline}`
   }, [page, appName, tagline])
 }
