@@ -64,8 +64,12 @@ range; `--no-details` = month cards only). Re-running a range is safe: fetched i
    by `seized_at` year (stolen / found / wanted): 2023 4028 / 2581 / 1447, 2024 1925 / 1350 / 575 (feed rows merged; same dedupe gap as
    2022). Null `region` 0.89 % (2023), 0.78 % (2024). Spot-checks OK: `АН9583СТ` (Донецька, removed 2025-09-26), `ТО6400АН`
    (Донецька, removed 2026-04-30). CSV export re-run (21 388 rows, 21 946 ids, 53 pages, ≈ 1.1 MB).
-6. **Backfill 2025–2026** — `--from 2025-01` (to the current month, ≈ 25 min). From here on, a no-arg run refreshes only the
-   last 2 months (daily, after `ingest:wanted`).
+6. ✅ **Backfill 2025–2026 (2026-10-17, uncommitted data run)** — `--from 2025-01 --to 2026-10`, exit 0, no retries. 1122 detail pages,
+   1286 exact records, 676 placeholders. Month cards vs headers: 22 months within 0-5 cards of the header (e.g. 2025 total 1494 cards
+   vs hdr ~1500; Oct 2026 21 / 4 = hdr). In the DB by `seized_at` year (stolen / found / wanted): 2025 1229 / 827 / 402, 2026 871 /
+   405 / 466 (hdr 1326 / 898, 915 / 425; same dedupe gap as earlier). Null `region` 2.03 % (2025), 0.57 % (2026). CSV export re-run
+   (22 556 rows, 23 068 ids, 75 pages, ≈ 1.2 MB). `AP1577BP` spot-check not repeated (plate lookup by Latin text returned no row;
+   likely stored with Cyrillic letters). From here on, a no-arg run refreshes only the last 2 months (daily, after `ingest:wanted`).
    After each backfill step: per-year `SELECT` of stolen / found vs the table above, null `region` share, a few card spot-checks, then
    `pnpm export:wanted-history:csv` (cumulative snapshot -> `scripts/seed-data/wanted-history*.csv.gz`; a new setup loads it with
    `pnpm ingest:wanted-history:csv` instead of re-scraping) and commit the refreshed files with the step.
