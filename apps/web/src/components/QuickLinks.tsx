@@ -10,8 +10,7 @@ const ROWS = [
   [
     { to: '/stats', icon: '📊', key: 'stats.viewLink' },
     { to: '/fuel', icon: '⛽', key: 'fuel.viewLink' },
-    { to: '/safety', icon: '🛡️', key: 'safety.viewLink' },
-    { to: '/wanted', icon: '🚨', key: 'wanted.stats.viewLink' }
+    { to: '/safety', icon: '🛡️', key: 'safety.viewLink' }
   ]
 ] as const
 

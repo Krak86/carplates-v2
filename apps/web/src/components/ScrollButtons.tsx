@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useLocation } from 'react-router'
 
+import { NO_SHARE_PATHS, usePageShareActions } from '@/components/use-page-share-actions'
 import { ROUTE_TITLE_KEYS } from '@/hooks/useDocumentTitle'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { useScrolledNow } from '@/hooks/useSideWidgetsVisible'
@@ -52,6 +53,9 @@ export default function ScrollButtons(): ReactNode {
     pathname !== '/' && pathname.split('/').filter(Boolean).length === 1 && !(pathname in ROUTE_TITLE_KEYS)
   // On a result page the report carries the plate / VIN (see ReportIssueLink).
   const feedbackTo = isResultRoute ? `/discuss?about=${pathname.slice(1)}` : '/discuss'
+  const isShareable =
+    pathname !== '/' && !NO_SHARE_PATHS.has(pathname) && (isResultRoute || pathname in ROUTE_TITLE_KEYS)
+  const { copied, share } = usePageShareActions()
   const [pos, setPos] = useState<Position>(measure)
 
   useEffect(() => {
@@ -87,6 +91,40 @@ export default function ScrollButtons(): ReactNode {
         scrolled ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
       )}
     >
+      {isShareable && (
+        <button
+          type="button"
+          aria-label={t('share.page')}
+          title={t('share.page')}
+          tabIndex={scrolled ? undefined : -1}
+          onClick={() => void share()}
+          className={BUTTON_CLASS}
+        >
+          {copied ? (
+            <span aria-hidden className="text-xl leading-none">
+              ✅
+            </span>
+          ) : (
+            <svg
+              aria-hidden
+              viewBox="0 0 24 24"
+              className="size-6"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M12 3v12M8 7l4-4 4 4" />
+              <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7" />
+            </svg>
+          )}
+          <span className="sr-only" aria-live="polite">
+            {copied ? t('share.copied') : ''}
+          </span>
+        </button>
+      )}
+
       {pathname !== '/discuss' && (
         <Link
           viewTransition
