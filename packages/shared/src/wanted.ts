@@ -44,5 +44,54 @@ export const wantedResponseSchema = z.object({
 })
 export type WantedResponse = z.infer<typeof wantedResponseSchema>
 
+/** One row of a `/api/wanted/stats` breakdown: `stolen` = every record, `found` = removed from the list, `wanted` = still on it. */
+export const wantedStatsRowSchema = z.object({
+  label: z.string(),
+  stolen: z.number(),
+  found: z.number(),
+  wanted: z.number()
+})
+export type WantedStatsRow = z.infer<typeof wantedStatsRowSchema>
+
+export const wantedStatsVehicleSchema = z.object({
+  brand: z.string().nullable(),
+  model: z.string().nullable(),
+  vehicleType: z.string().nullable(),
+  color: z.string().nullable(),
+  plate: z.string().nullable(),
+  seizedAt: z.string().nullable(),
+  resolvedAt: z.string().nullable(),
+  region: z.string().nullable()
+})
+export type WantedStatsVehicle = z.infer<typeof wantedStatsVehicleSchema>
+
+/** Aggregates for the `/wanted` page. Own contract: new fields must be `.nullable().optional()`. */
+export const wantedStatsResponseSchema = z.object({
+  summary: z.object({
+    wantedNow: z.number(),
+    foundTotal: z.number(),
+    /** Found records whose removal our own feed snapshots saw (exact date). */
+    foundSinceTracking: z.number(),
+    withPlate: z.number(),
+    withVin: z.number(),
+    /** Median days from theft to removal over exact removal dates only. */
+    medianDaysToFound: z.number().nullable(),
+    /** ISO date of the earliest scraped theft (stolen.in.ua history). */
+    historySince: z.string().nullable()
+  }),
+  /** Theft year, ascending (label = year). */
+  byYear: z.array(wantedStatsRowSchema),
+  byRegion: z.array(wantedStatsRowSchema),
+  byBrand: z.array(wantedStatsRowSchema),
+  byModel: z.array(wantedStatsRowSchema),
+  byType: z.array(wantedStatsRowSchema),
+  byColor: z.array(wantedStatsRowSchema),
+  recentStolen: z.array(wantedStatsVehicleSchema),
+  recentFound: z.array(wantedStatsVehicleSchema),
+  /** Newest `last_seen_at` of the feed: when the data was last refreshed. */
+  checkedAt: z.string().nullable()
+})
+export type WantedStatsResponse = z.infer<typeof wantedStatsResponseSchema>
+
 /** stolen.in.ua per-plate page (Latin plate) — the link-out for a manual check. */
 export const stolenInUaUrl = (plateLatin: string): string => `https://stolen.in.ua/v/${encodeURIComponent(plateLatin)}`

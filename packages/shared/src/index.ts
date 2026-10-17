@@ -668,5 +668,12 @@ export {
   type WikiSpecsResponse
 } from './wikiSpecsApi.js'
 
-export { wantedRecordSchema, wantedResponseSchema, stolenInUaUrl } from './wanted.js'
-export type { WantedRecord, WantedResponse } from './wanted.js'
+export {
+  wantedRecordSchema,
+  wantedResponseSchema,
+  wantedStatsResponseSchema,
+  wantedStatsRowSchema,
+  wantedStatsVehicleSchema,
+  stolenInUaUrl
+} from './wanted.js'
+export type { WantedRecord, WantedResponse, WantedStatsResponse, WantedStatsRow, WantedStatsVehicle } from './wanted.js'
