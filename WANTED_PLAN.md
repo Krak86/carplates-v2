@@ -75,7 +75,7 @@ range; `--no-details` = month cards only). Re-running a range is safe: fetched i
    `pnpm ingest:wanted-history:csv` instead of re-scraping) and commit the refreshed files with the step.
 7. ✅ **Card history (2026-10-17, 64a643b)** — `wanted.service.ts`: scraped records in lookups, "history since Aug 2020", stolen.in.ua attribution (§3 end). Done: records carry `source` + `removedExact` (inexact removal shows "exact date unknown"), `trackedSince` = earliest scraped theft date >= 2020-08-01 + `historySource`; checked on `АР1577ВР` (feed + removed 2026-04-30 record).
 8. ✅ **Stats API (2026-10-17, 111436f)** — `GET /api/wanted/stats` + `wantedStatsResponseSchema` (§4), service test. Verified live: 75 196 wanted now, 26 714 found, median 1348 days to found, 100-row top lists, 50 recent each, ≈ 0.2 s (cached). `byYear` includes pre-2020 thefts (feed rows from 1928); the page should trim or group them.
-9. ✅ **`/wanted` route (2026-10-17, uncommitted)** — `routes/wanted/` (route, sortable table, year chart with pre-2020 grouped into one "≤ 2019" bar, recent lists), `StatsMap` now takes `{label, value}[]`, `wantedStatsQuery`, i18n `wanted.stats.*`, `ROUTE_TITLE_KEYS` + `STATIC_PAGES`. Verified in the browser (ua/ru): sort asc/desc, region map, plate links. Left for step 10: links, home teaser, docs, `releases.ts`.
+9. ✅ **`/wanted` route (2026-10-17, 5b47efb)** — `routes/wanted/` (route, sortable table, year chart with pre-2020 grouped into one "≤ 2019" bar, recent lists), `StatsMap` now takes `{label, value}[]`, `wantedStatsQuery`, i18n `wanted.stats.*`, `ROUTE_TITLE_KEYS` + `STATIC_PAGES`. Verified in the browser (ua/ru): sort asc/desc, region map, plate links. Left for step 10: links, home teaser, docs, `releases.ts`.
 10. **Links + docs** — `WantedCheck` link, `/stats` link, home teaser (§5), docs + `releases.ts` (§6).
 
 Steps 2–6 are only data runs (no code), so they can run while 7–10 are built; the page just shows more history as they finish.
@@ -113,6 +113,18 @@ withPlate, withVin, medianDaysToFound|null, historySince|null }`, `byYear` (asce
   (`YearsSection`), `lib/api.ts` (wanted fetcher ~L744), `lib/queries.ts` (`wantedQuery` ~L623, live data, no offline group),
   `components/WantedCheck.tsx` (step 10).
 - Read `docs/features-reference.md` "Wanted vehicles" plus the "New public route" rule in CLAUDE.md before coding.
+
+### Handoff for step 10 (written after step 9, 2026-10-17)
+
+Start the new session with "implement session 5 of WANTED_PLAN.md". Step 9 is committed (5b47efb).
+
+- **Done in step 9**: `apps/web/src/routes/wanted/` (route, table, chart, `WantedRecentList`, `helpers.ts`), `wantedStatsQuery`, i18n `wanted.stats.*` (ua/ru/en; `wanted.stats.title` is the page name, usable as link text), route + title + `STATIC_PAGES`.
+- **To do**:
+  1. `components/WantedCheck.tsx`: link "Wanted vehicles stats" to `/wanted`.
+  2. `routes/stats/StatsRoute.tsx`: link to `/wanted` (also consider `components/QuickLinks.tsx`).
+  3. Home teaser `routes/stats/HomeWantedSection.tsx`: 5 `recentStolen` from `wantedStatsQuery()` plus a link. Mount it in `routes/SearchRoute.tsx` inside a `LazySection` next to `<HomeNewsSection />` (~L360). Same pattern as `HomeNewsSection`: return null when no data, `LoadErrorBoundary compact`, `section-vt`. Reuse `routes/wanted/WantedRecentList.tsx` with the list sliced to 5.
+  4. Docs: `docs/commands-reference.md` (`ingest:wanted-history`, `export:wanted-history:csv`), one-line ✅ in `PLAN.md`, write-up in `docs/plan-done.md`, entry in `src/routes/releases/releases.ts` (see `types.ts`; no em dash in UI text). `features-reference.md` "Wanted vehicles" already has the /wanted notes.
+- **Verify**: `pnpm format`, `pnpm lint`, `pnpm test`, then the home teaser and links in the browser.
 
 ## stolen.in.ua reference (verified 2026-10-16)
 
