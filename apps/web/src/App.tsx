@@ -8,6 +8,7 @@ import LoadErrorBoundary from '@/components/LoadErrorBoundary'
 import Spinner from '@/components/ui/Spinner'
 import { ROUTE_TITLE_KEYS, useDocumentTitle } from '@/hooks/useDocumentTitle'
 import PageShareButton from '@/components/PageShareButton'
+import { NO_SHARE_PATHS } from '@/components/use-page-share-actions'
 import SearchRoute from '@/routes/SearchRoute'
 
 const AboutRoute = lazy(() => import('@/routes/AboutRoute'))
@@ -43,9 +44,6 @@ const ProfileRoute = lazy(() => import('@/routes/profile/ProfileRoute'))
 const AdminRoute = lazy(() => import('@/routes/admin/AdminRoute'))
 const AdvancedSearchRoute = lazy(() => import('@/routes/advanced-search/AdvancedSearchRoute'))
 const RaceRoute = lazy(() => import('@/routes/RaceRoute'))
-
-/** Personal / admin pages: a shared link would only show the recipient their own (or a login) view. */
-const NO_SHARE_PATHS = new Set(['/history', '/favorites', '/settings', '/profile', '/admin'])
 
 export default function App(): ReactNode {
   const { pathname } = useLocation()
@@ -97,7 +95,11 @@ export default function App(): ReactNode {
             <Route path="*" element={<SearchRoute />} />
           </Routes>
         </Suspense>
-        {titleKey && !NO_SHARE_PATHS.has(pathname) && <PageShareButton title={t(titleKey)} />}
+        {titleKey && !NO_SHARE_PATHS.has(pathname) && (
+          <div className="mt-6 flex justify-center">
+            <PageShareButton title={t(titleKey)} />
+          </div>
+        )}
       </LoadErrorBoundary>
     </Layout>
   )

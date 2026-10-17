@@ -1,57 +1,37 @@
-import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { copyToClipboard } from '@/lib/share-section'
-import i18n from '@/i18n'
+import { usePageShareActions } from '@/components/use-page-share-actions'
 
 type Props = {
   title: string
 }
 
-/** Shares the current page's link (native share sheet, else clipboard). The link carries the sharer's language. */
+/** Chip that shares the current page's link (native share sheet, else clipboard). The link carries the sharer's language. */
 export default function PageShareButton({ title }: Props): ReactNode {
   const { t } = useTranslation()
-  const [copied, setCopied] = useState(false)
-
-  const handleShare = async (): Promise<void> => {
-    const url = `${window.location.origin}${window.location.pathname}?lang=${i18n.language}`
-    if (typeof navigator.share === 'function') {
-      try {
-        await navigator.share({ title, url })
-        return
-      } catch (e) {
-        if (e instanceof DOMException && e.name === 'AbortError') return
-      }
-    }
-    if (await copyToClipboard(url)) {
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    }
-  }
+  const { copied, share } = usePageShareActions(title)
 
   return (
-    <div className="mt-6 flex justify-center">
-      <button
-        type="button"
-        onClick={() => void handleShare()}
-        className="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-surface)]/20 px-4 py-2 text-sm text-[var(--color-primary)]"
+    <button
+      type="button"
+      onClick={() => void share()}
+      className="inline-flex items-center gap-1 rounded-full border border-[var(--color-border)] bg-[var(--color-surface)]/20 px-2 py-0.5 text-xs text-[var(--color-fg)] transition-colors hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
+    >
+      <svg
+        aria-hidden
+        viewBox="0 0 24 24"
+        className="h-3.5 w-3.5 shrink-0"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       >
-        <svg
-          aria-hidden
-          viewBox="0 0 24 24"
-          className="h-4 w-4 shrink-0"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M12 3v12M8 7l4-4 4 4" />
-          <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7" />
-        </svg>
-        {copied ? t('share.copied') : t('share.page')}
-      </button>
-    </div>
+        <path d="M12 3v12M8 7l4-4 4 4" />
+        <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7" />
+      </svg>
+      <span aria-live="polite">{copied ? t('share.copied') : t('share.page')}</span>
+    </button>
   )
 }

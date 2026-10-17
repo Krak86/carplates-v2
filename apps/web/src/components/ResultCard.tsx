@@ -16,6 +16,7 @@ import type { Currency, PlateLookupResponse } from '@carplates/shared'
 
 import BrandLogo from '@/components/BrandLogo'
 import BrandSiteChip from '@/components/BrandSiteChip'
+import PageShareButton from '@/components/PageShareButton'
 import NewCarsLink from '@/components/NewCarsLink'
 import EstimatedValueChip from '@/components/EstimatedValueChip'
 import CardTiltToggle from '@/components/CardTiltToggle'
@@ -399,6 +400,7 @@ export default function ResultCard({ data }: Props): ReactNode {
               <div className="mt-2 flex flex-wrap items-center gap-2 empty:hidden">
                 <NewCarsLink brand={c.brand} />
                 {brandDealerUrl && <BrandSiteChip url={brandDealerUrl} />}
+                <PageShareButton title={data.plate ?? c.vin} />
               </div>
             </div>
             <Suspense fallback={<div aria-hidden className="aspect-square max-h-20 shrink-0 max-md:hidden" />}>
