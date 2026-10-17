@@ -21,6 +21,12 @@ export const RELEASES: readonly ReleaseDay[] = [
         'Секція «Розшук» на картці авто тепер показує знайдені раніше записи з історії stolen.in.ua та посилається на статистику',
         'Секция «Розыск» на карточке авто теперь показывает найденные ранее записи из истории stolen.in.ua и ссылается на статистику',
         'The Wanted section on the car card now shows earlier found records from the stolen.in.ua history and links to the statistics'
+      ),
+      item(
+        'improved',
+        '«Про проєкт»: опис розшуку доповнено статистикою /wanted, а stolen.in.ua - історією знайдених авто; у бічному меню з’явилося посилання на /wanted',
+        '«О проекте»: описание розыска дополнено статистикой /wanted, а stolen.in.ua - историей найденных авто; в боковом меню появилась ссылка на /wanted',
+        'About: the wanted description now mentions the /wanted statistics and stolen.in.ua the found-vehicle history; the sidebar links to /wanted'
       )
     ]
   },
