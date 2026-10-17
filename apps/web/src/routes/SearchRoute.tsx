@@ -42,6 +42,7 @@ import HomeFuelSection from '@/routes/stats/HomeFuelSection'
 import HomeNewsSection from '@/routes/stats/HomeNewsSection'
 import HomeSafetySection from '@/routes/stats/HomeSafetySection'
 import HomeStatsSkeleton from '@/routes/stats/HomeStatsSkeleton'
+import HomeWantedSection from '@/routes/stats/HomeWantedSection'
 
 const VinResult = lazy(() => import('@/components/VinResult'))
 const TopStatsPanel = lazy(() => import('@/routes/stats/TopStatsPanel'))
@@ -358,6 +359,12 @@ export default function SearchRoute(): ReactNode {
         <Presence show={showHomeStats}>
           <LazySection fallback={null}>
             <HomeNewsSection />
+          </LazySection>
+        </Presence>
+
+        <Presence show={showHomeStats}>
+          <LazySection fallback={null}>
+            <HomeWantedSection />
           </LazySection>
         </Presence>
 

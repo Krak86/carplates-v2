@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useSearchParams } from 'react-router'
+import { Link, useSearchParams } from 'react-router'
 import { useQuery } from '@tanstack/react-query'
 import { denormalizePlate, stolenInUaUrl } from '@carplates/shared'
 import type { WantedRecord } from '@carplates/shared'
@@ -182,6 +182,11 @@ export default function WantedCheck({ plate, vin, openSignal = 0 }: Props): Reac
           </a>{' '}
           <span className="text-[var(--color-muted)]">{t('wanted.link.dataset')}</span>
           <span className="sr-only">{t('field.opensNewTab')}</span>
+        </li>
+        <li>
+          <Link viewTransition to="/wanted" className={LINK_CLASS}>
+            {t('wanted.stats.viewLink')} →
+          </Link>
         </li>
       </ul>
     </VinToggleSection>

@@ -324,6 +324,7 @@
   "wanted.stats.recentFound": "Recently found",
   "wanted.stats.noPlate": "no plate",
   "wanted.stats.source": "Source: National Police open data (CC BY) and the stolen.in.ua history since Aug 2020. \"Found\" means removed from the wanted list.",
+  "wanted.stats.viewLink": "Wanted vehicles statistics",
   "wanted.removedAt": "Left the list",
   "wanted.removedNote": "The record is no longer in the National Police list: the vehicle was found or the search was cancelled - the source does not say which.",
   "wanted.clear": "The plate and VIN are not on the list of vehicles wanted for unlawful taking.",

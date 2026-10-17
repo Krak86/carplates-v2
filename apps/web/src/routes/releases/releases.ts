@@ -8,6 +8,23 @@ const item = (group: ReleaseGroup, ua: string, ru: string, en: string): ReleaseI
  */
 export const RELEASES: readonly ReleaseDay[] = [
   {
+    date: '2026-10-17',
+    items: [
+      item(
+        'new',
+        'Сторінка /wanted: статистика авто в розшуку за роками, областями, марками, моделями, типами та кольорами, з історією знайдених авто з серпня 2020, мапою та списками нещодавно викрадених і знайдених; короткий блок на головній',
+        'Страница /wanted: статистика разыскиваемых авто по годам, областям, маркам, моделям, типам и цветам, с историей найденных авто с августа 2020, картой и списками недавно угнанных и найденных; краткий блок на главной',
+        'New /wanted page: statistics of vehicles wanted for theft by year, region, make, model, type and colour, with the history of found cars since Aug 2020, a map and lists of recently stolen and found vehicles; a short teaser on the home page'
+      ),
+      item(
+        'improved',
+        'Секція «Розшук» на картці авто тепер показує знайдені раніше записи з історії stolen.in.ua та посилається на статистику',
+        'Секция «Розыск» на карточке авто теперь показывает найденные ранее записи из истории stolen.in.ua и ссылается на статистику',
+        'The Wanted section on the car card now shows earlier found records from the stolen.in.ua history and links to the statistics'
+      )
+    ]
+  },
+  {
     date: '2026-10-16',
     items: [
       item(
