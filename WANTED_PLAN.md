@@ -35,16 +35,16 @@ work, so it is split into halves.
 The scraper takes a month range: `pnpm ingest:wanted-history --from 2020-08 --to 2021-12` (months **and** details for that
 range; `--no-details` = month cards only). Re-running a range is safe: fetched ids are remembered in `wanted_scrape_ids`.
 
-1. ✅ **Foundation (2026-10-16, uncommitted)** (code, no long run) — migration 0074 (§1), `organUnitRegion` + `region` in the feed ingest (§2), the scraper
+1. ✅ **Foundation (2026-10-16, 5f421fb)** (code, no long run) — migration 0074 (§1), `organUnitRegion` + `region` in the feed ingest (§2), the scraper
    with `--from/--to/--no-details`, parsers + HTML-fixture tests (§3), `source = 'feed'` guard in `wanted.ts`. Run
    `pnpm ingest:wanted` (fills `region`) and `pnpm ingest:wanted-history --from 2020-08 --to 2020-08` as a smoke test
    (Aug 2020: 388 cards, 287 found; spot-check `AP1577BP` → removed 2026-04-30).
-2. ✅ **Backfill 2020–2021 (2026-10-16, uncommitted data run)** — `--from 2020-08 --to 2021-12` (≈ 1 h, exit 0). Result: 17 months,
+2. ✅ **Backfill 2020–2021 (2026-10-16, e3e0998)** — `--from 2020-08 --to 2021-12` (≈ 1 h, exit 0). Result: 17 months,
    2839 detail pages, 3193 exact + 1984 placeholder rows written. Month cards vs headers: 2020 1749 / 1289 found (hdr 1840 / 1353,
    95 %), 2021 3047 / 2142 found (hdr 3156 / 2222, 96-97 %). In the DB (by `seized_at` year, after the one-row-per-plate/date/unit
    dedupe and with feed rows merged): 2020 1601 stolen / 1214 found / 387 wanted; 2021 2808 / 2052 / 756. Null `region`: 3.75 %
    (2020), 1.96 % (2021); these are exactly the 115 placeholder rows (no unit known, null by design); scraped exact rows 0 null. Spot-checks OK: `AC0785AB` (VIPER, Волинська, removed 2026-04-30), `CA9143BE` (Черкаська, removed 2021-02-08), `54636AA` (Київська). CSV export added (`export:wanted-history:csv`) and run after this step.
-3. ✅ **Backfill 2022 H1 (2026-10-16, uncommitted data run)** — `--from 2022-01 --to 2022-06` (≈ 3 h; war months dominate). First run died
+3. ✅ **Backfill 2022 H1 (2026-10-16, 3f12087)** — `--from 2022-01 --to 2022-06` (≈ 3 h; war months dominate). First run died
    in Mar on an HTTP 502 burst (3 retries / 15 s were too few); `RETRIES` raised to 6 (≈ 75 s), re-run resumed from `wanted_scrape_ids`
    and exited 0 (7303 detail pages, 9615 exact records, 1268 placeholders in the resumed run). Month cards vs headers, Jan–Jun:
    24 965 stolen / 14 961 found (hdr 25 141 / 15 069, 99 %). In the DB by `seized_at` month (stolen / found): 01 185 / 139,
@@ -52,19 +52,19 @@ range; `--no-details` = month cards only). Re-running a range is safe: fetched i
    one-row-per-plate/date/unit dedupe collapses repeated records; the gap is wider than in 2020-21 and not yet analysed). Null `region` 0.54 % (112 rows, of which
    placeholders 74). Spot-checks OK: `BM0462AK` (Сумська, removed 2023-06-30), `AP1687EH` (Запорізька), `AX1611BI` (Черкаська). CSV
    export re-run (14 043 rows, 14 479 ids, 23 pages, ≈ 0.9 MB).
-4. ✅ **Backfill 2022 H2 (2026-10-16, uncommitted data run)** — `--from 2022-07 --to 2022-12` (≈ 2.5 h, exit 0, no retries needed).
+4. ✅ **Backfill 2022 H2 (2026-10-16, 6b73293)** — `--from 2022-07 --to 2022-12` (≈ 2.5 h, exit 0, no retries needed).
    3980 detail pages, 4982 exact records, 1014 placeholders. Month cards vs headers: 8299 cards / 4967 found (hdr 8391 / 5037, 99 %).
    Per month (cards / found, hdr): jul 2407 / 1485 (2478 / 1538), aug 1221 / 709 (1221 / 709), sep 1381 / 812 (1388 / 817), oct 1264 / 743
    (1272 / 750), nov 1038 / 619 (1041 / 622), dec 988 / 599 (991 / 601). In the DB by `seized_at` month (stolen / found): 07 2024 / 1369,
    08 1148 / 672, 09 1225 / 736, 10 1133 / 663, 11 968 / 575, 12 910 / 552 = 7408 / 4567 (88 % / 91 % of the headers, same dedupe
    gap as H1). Null `region` 16 rows (0.2 %), all placeholders; exact rows 0 null. Spot-checks OK: `КА9771НХ` (Київ, removed
    2023-05-11), `АХ4102МВ` (Харківська), `АР1927ЕО` (Запорізька). CSV export re-run (18 111 rows, 18 459 ids, 29 pages, ≈ 0.9 MB).
-5. ✅ **Backfill 2023–2024 (2026-10-16, uncommitted data run)** — `--from 2023-01 --to 2024-12`, exit 0, no retries. Month cards vs
+5. ✅ **Backfill 2023–2024 (2026-10-16, committed with 83a4927)** — `--from 2023-01 --to 2024-12`, exit 0, no retries. Month cards vs
    headers: 2023 4522 cards / 2842 found (hdr 4577 / 2881, 99 %), 2024 2288 cards / 1461 found (hdr 2324 / 1486, 98-99 %). In the DB
    by `seized_at` year (stolen / found / wanted): 2023 4028 / 2581 / 1447, 2024 1925 / 1350 / 575 (feed rows merged; same dedupe gap as
    2022). Null `region` 0.89 % (2023), 0.78 % (2024). Spot-checks OK: `АН9583СТ` (Донецька, removed 2025-09-26), `ТО6400АН`
    (Донецька, removed 2026-04-30). CSV export re-run (21 388 rows, 21 946 ids, 53 pages, ≈ 1.1 MB).
-6. ✅ **Backfill 2025–2026 (2026-10-17, uncommitted data run)** — `--from 2025-01 --to 2026-10`, exit 0, no retries. 1122 detail pages,
+6. ✅ **Backfill 2025–2026 (2026-10-17, cfca5f1)** — `--from 2025-01 --to 2026-10`, exit 0, no retries. 1122 detail pages,
    1286 exact records, 676 placeholders. Month cards vs headers: 22 months within 0-5 cards of the header (e.g. 2025 total 1494 cards
    vs hdr ~1500; Oct 2026 21 / 4 = hdr). In the DB by `seized_at` year (stolen / found / wanted): 2025 1229 / 827 / 402, 2026 871 /
    405 / 466 (hdr 1326 / 898, 915 / 425; same dedupe gap as earlier). Null `region` 2.03 % (2025), 0.57 % (2026). CSV export re-run
@@ -73,8 +73,8 @@ range; `--no-details` = month cards only). Re-running a range is safe: fetched i
    After each backfill step: per-year `SELECT` of stolen / found vs the table above, null `region` share, a few card spot-checks, then
    `pnpm export:wanted-history:csv` (cumulative snapshot -> `scripts/seed-data/wanted-history*.csv.gz`; a new setup loads it with
    `pnpm ingest:wanted-history:csv` instead of re-scraping) and commit the refreshed files with the step.
-7. ✅ **Card history (2026-10-17, uncommitted)** — `wanted.service.ts`: scraped records in lookups, "history since Aug 2020", stolen.in.ua attribution (§3 end). Done: records carry `source` + `removedExact` (inexact removal shows "exact date unknown"), `trackedSince` = earliest scraped theft date >= 2020-08-01 + `historySource`; checked on `АР1577ВР` (feed + removed 2026-04-30 record).
-8. **Stats API** — `GET /api/wanted/stats` + shared Zod contract (§4), service test.
+7. ✅ **Card history (2026-10-17, 64a643b)** — `wanted.service.ts`: scraped records in lookups, "history since Aug 2020", stolen.in.ua attribution (§3 end). Done: records carry `source` + `removedExact` (inexact removal shows "exact date unknown"), `trackedSince` = earliest scraped theft date >= 2020-08-01 + `historySource`; checked on `АР1577ВР` (feed + removed 2026-04-30 record).
+8. ✅ **Stats API (2026-10-17, 111436f)** — `GET /api/wanted/stats` + `wantedStatsResponseSchema` (§4), service test. Verified live: 75 196 wanted now, 26 714 found, median 1348 days to found, 100-row top lists, 50 recent each, ≈ 0.2 s (cached). `byYear` includes pre-2020 thefts (feed rows from 1928); the page should trim or group them.
 9. **`/wanted` route** — page, sortable tables, map, year chart, recent lists (§5), route title + `STATIC_PAGES`.
 10. **Links + docs** — `WantedCheck` link, `/stats` link, home teaser (§5), docs + `releases.ts` (§6).
 
