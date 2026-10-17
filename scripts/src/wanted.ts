@@ -12,7 +12,7 @@ import { readFile } from 'node:fs/promises'
 
 import { createDb, wantedVehicles } from '@carplates/db'
 import type { Db } from '@carplates/db'
-import { and, isNull, lt, sql } from 'drizzle-orm'
+import { and, eq, isNull, lt, sql } from 'drizzle-orm'
 
 import { toWantedInsert } from './wanted-parse.js'
 import type { WantedFeedRow } from './wanted-parse.js'
@@ -79,6 +79,7 @@ async function save(db: Db, rows: Row[]): Promise<void> {
           seizedAt: sql`excluded.seized_at`,
           registeredAt: sql`excluded.registered_at`,
           organUnit: sql`excluded.organ_unit`,
+          region: sql`excluded.region`,
           lastSeenAt: runStart,
           resolvedAt: null
         }
@@ -88,7 +89,9 @@ async function save(db: Db, rows: Row[]): Promise<void> {
   const resolved = await db
     .update(wantedVehicles)
     .set({ resolvedAt: runStart })
-    .where(and(isNull(wantedVehicles.resolvedAt), lt(wantedVehicles.lastSeenAt, runStart)))
+    .where(
+      and(eq(wantedVehicles.source, 'feed'), isNull(wantedVehicles.resolvedAt), lt(wantedVehicles.lastSeenAt, runStart))
+    )
     .returning({ sourceId: wantedVehicles.sourceId })
   log(`upserted ${rows.length} record(s); ${resolved.length} left the feed and were marked resolved`)
 }

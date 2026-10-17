@@ -91,6 +91,10 @@ becomes available.
 
 Police open data (data.gov.ua) -> `registry.wanted_vehicles` + `/api/wanted` + `WantedCheck` section; write-up in `docs/plan-done.md`. Scheduled daily in `SCHEDULE.md` (VPS job still to set up).
 
+### Wanted vehicles history, stats and `/wanted` page ✅ DONE (2026-10-17)
+
+stolen.in.ua backfill (Aug 2020+), card history, `GET /api/wanted/stats`, `/wanted` page, home teaser; write-up in `docs/plan-done.md`, steps in `WANTED_PLAN.md`.
+
 ### Plate image recognition (camera/upload) ✅ DONE (2026-09-22) — archived
 
 Write-up moved to `docs/plan-done.md` ("Plate image recognition … Plate Recognizer cloud"). On-premise SDK ruled out (same per-lookup licensing).

@@ -936,9 +936,22 @@ export const wantedVehicles = registry.table(
     organUnit: text('organ_unit'),
     firstSeenAt: timestamp('first_seen_at', { withTimezone: true }).notNull().defaultNow(),
     lastSeenAt: timestamp('last_seen_at', { withTimezone: true }).notNull().defaultNow(),
-    resolvedAt: timestamp('resolved_at', { withTimezone: true })
+    resolvedAt: timestamp('resolved_at', { withTimezone: true }),
+    /** `feed` (police CarsWanted.json) or `stolen.in.ua` (scraped history of found cars). */
+    source: text('source').notNull().default('feed'),
+    /** False for a month-card placeholder whose real removal date is unknown (`resolvedAt` = scrape time). */
+    resolvedExact: boolean('resolved_exact').notNull().default(true),
+    /** Region derived from `organUnit`. */
+    region: text('region')
   },
   t => [
+    index('ix_wanted_vehicles_seized_at').on(t.seizedAt),
+    index('ix_wanted_vehicles_resolved_at')
+      .on(t.resolvedAt)
+      .where(sql`${t.resolvedAt} is not null`),
+    index('ix_wanted_vehicles_region')
+      .on(t.region)
+      .where(sql`${t.region} is not null`),
     index('ix_wanted_vehicles_plate')
       .on(t.plate)
       .where(sql`${t.plate} is not null`),
@@ -953,6 +966,20 @@ export const wantedVehicles = registry.table(
 )
 export type WantedVehicleRow = typeof wantedVehicles.$inferSelect
 export type WantedVehicleInsert = typeof wantedVehicles.$inferInsert
+
+/** stolen.in.ua scrape resume state: one row per fetched month page (`aug-20`). */
+export const wantedScrapePages = registry.table('wanted_scrape_pages', {
+  month: text('month').primaryKey(),
+  fetchedAt: timestamp('fetched_at', { withTimezone: true }).notNull().defaultNow(),
+  cards: integer('cards').notNull()
+})
+
+/** ... and one row per fetched detail page (`/v/<ident>`). */
+export const wantedScrapeIds = registry.table('wanted_scrape_ids', {
+  ident: text('ident').primaryKey(),
+  status: text('status').notNull(),
+  fetchedAt: timestamp('fetched_at', { withTimezone: true }).notNull().defaultNow()
+})
 
 /** One generation of a model (Wikidata CC0 + Wikipedia CC BY-SA facts); `yearTo` null = still in production. */
 export const modelGenerations = registry.table(

@@ -7,6 +7,7 @@ import Layout from '@/components/Layout'
 import LoadErrorBoundary from '@/components/LoadErrorBoundary'
 import Spinner from '@/components/ui/Spinner'
 import { ROUTE_TITLE_KEYS, useDocumentTitle } from '@/hooks/useDocumentTitle'
+import PageShareButton from '@/components/PageShareButton'
 import SearchRoute from '@/routes/SearchRoute'
 
 const AboutRoute = lazy(() => import('@/routes/AboutRoute'))
@@ -15,6 +16,7 @@ const InstallRoute = lazy(() => import('@/routes/install/InstallRoute'))
 const HistoryRoute = lazy(() => import('@/routes/history/HistoryRoute'))
 const FavoritesRoute = lazy(() => import('@/routes/favorites/FavoritesRoute'))
 const StatsRoute = lazy(() => import('@/routes/stats/StatsRoute'))
+const WantedStatsRoute = lazy(() => import('@/routes/wanted/WantedStatsRoute'))
 const FuelStatsRoute = lazy(() => import('@/routes/fuel/FuelStatsRoute'))
 const SafetyStatsRoute = lazy(() => import('@/routes/safety/SafetyStatsRoute'))
 const NewsRoute = lazy(() => import('@/routes/news/NewsRoute'))
@@ -42,6 +44,9 @@ const AdminRoute = lazy(() => import('@/routes/admin/AdminRoute'))
 const AdvancedSearchRoute = lazy(() => import('@/routes/advanced-search/AdvancedSearchRoute'))
 const RaceRoute = lazy(() => import('@/routes/RaceRoute'))
 
+/** Personal / admin pages: a shared link would only show the recipient their own (or a login) view. */
+const NO_SHARE_PATHS = new Set(['/history', '/favorites', '/settings', '/profile', '/admin'])
+
 export default function App(): ReactNode {
   const { pathname } = useLocation()
   const { t } = useTranslation()
@@ -61,6 +66,7 @@ export default function App(): ReactNode {
             <Route path="/history" element={<HistoryRoute />} />
             <Route path="/favorites" element={<FavoritesRoute />} />
             <Route path="/stats" element={<StatsRoute />} />
+            <Route path="/wanted" element={<WantedStatsRoute />} />
             <Route path="/fuel" element={<FuelStatsRoute />} />
             <Route path="/safety" element={<SafetyStatsRoute />} />
             <Route path="/news" element={<NewsRoute />} />
@@ -91,6 +97,7 @@ export default function App(): ReactNode {
             <Route path="*" element={<SearchRoute />} />
           </Routes>
         </Suspense>
+        {titleKey && !NO_SHARE_PATHS.has(pathname) && <PageShareButton title={t(titleKey)} />}
       </LoadErrorBoundary>
     </Layout>
   )

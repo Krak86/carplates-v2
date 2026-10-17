@@ -30,6 +30,7 @@ import {
   getMot,
   getCaRecalls,
   getWanted,
+  getWantedStats,
   getGenerationGrowth,
   getGenerations,
   getWikiSpecs,
@@ -626,4 +627,9 @@ export function wantedQuery(plate: string | null, vin: string | null) {
     queryFn: () => getWanted(plate, vin),
     staleTime: 5 * 60_000
   })
+}
+
+// /wanted page aggregates — live data like wantedQuery (no offline group); the API caches 10 min.
+export function wantedStatsQuery() {
+  return queryOptions({ queryKey: ['wanted', 'stats'], queryFn: getWantedStats, staleTime: 5 * 60_000 })
 }

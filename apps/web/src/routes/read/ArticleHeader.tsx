@@ -4,8 +4,8 @@ import { Link, useLocation } from 'react-router'
 
 import { useCopyFeedback } from '@/components/use-copy-feedback'
 import Card from '@/components/ui/Card'
-import { toIntlLocale } from '@/lib/intl'
 import ArticleBanner from '@/routes/read/ArticleBanner'
+import ArticleTags from '@/routes/read/ArticleTags'
 import { ARTICLES } from '@/routes/read/articles'
 import { READ_PATH } from '@/routes/read/links'
 
@@ -17,9 +17,9 @@ type Props = {
   jumps: ReadonlyArray<{ id: string; label: string }>
 }
 
-/** Banner, title, date, share link, lead and jump chips shared by every /read article. */
+/** Banner, title, tags, share link, lead and jump chips shared by every /read article. */
 export default function ArticleHeader({ title, lead, backLabel, jumps }: Props): ReactNode {
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
   const { pathname } = useLocation()
   const { copied, copy } = useCopyFeedback()
   const article = ARTICLES.find(a => a.path === pathname)
@@ -38,14 +38,7 @@ export default function ArticleHeader({ title, lead, backLabel, jumps }: Props):
         <h1 className="mb-1 text-2xl font-bold">{title}</h1>
 
         <div className="mb-3 flex flex-wrap items-center gap-3 text-sm text-muted">
-          {article && (
-            <time dateTime={article.published}>
-              {t('read.published')}{' '}
-              {new Date(article.published).toLocaleDateString(toIntlLocale(i18n.language), {
-                dateStyle: 'long'
-              })}
-            </time>
-          )}
+          {article && <ArticleTags article={article} />}
 
           <button
             type="button"

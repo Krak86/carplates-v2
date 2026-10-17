@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useSearchParams } from 'react-router'
+import { Link, useSearchParams } from 'react-router'
 import { useQuery } from '@tanstack/react-query'
 import { denormalizePlate, stolenInUaUrl } from '@carplates/shared'
 import type { WantedRecord } from '@carplates/shared'
@@ -79,7 +79,10 @@ function WantedRecordCard({ record }: { record: WantedRecord }): ReactNode {
             )
           }
         />
-        <Row label={t('wanted.removedAt')} value={date(record.removedAt)} />
+        <Row
+          label={t('wanted.removedAt')}
+          value={record.removedExact === false ? t('wanted.removedUnknown') : date(record.removedAt)}
+        />
       </dl>
 
       {!isWanted && <p className="mt-1.5 text-[var(--color-muted)]">{t('wanted.removedNote')}</p>}
@@ -155,7 +158,9 @@ export default function WantedCheck({ plate, vin, openSignal = 0 }: Props): Reac
             ? t('wanted.checkedAt', { date: new Date(data.checkedAt).toLocaleString(locale) })
             : t('wanted.neverLoaded')}
           {data.trackedSince &&
-            ` ${t('wanted.trackedSince', { date: new Date(data.trackedSince).toLocaleDateString(locale) })}`}
+            ` ${t(data.historySource ? 'wanted.historySince' : 'wanted.trackedSince', {
+              date: new Date(data.trackedSince).toLocaleDateString(locale)
+            })}`}
         </p>
       )}
 
@@ -177,6 +182,11 @@ export default function WantedCheck({ plate, vin, openSignal = 0 }: Props): Reac
           </a>{' '}
           <span className="text-[var(--color-muted)]">{t('wanted.link.dataset')}</span>
           <span className="sr-only">{t('field.opensNewTab')}</span>
+        </li>
+        <li>
+          <Link viewTransition to="/wanted" className={LINK_CLASS}>
+            {t('wanted.stats.viewLink')} →
+          </Link>
         </li>
       </ul>
     </VinToggleSection>

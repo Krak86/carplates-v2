@@ -3750,6 +3750,13 @@ The "Ukrainian rules and limits" `<details>` box in `RdwTowing` carries only fig
 
 Follow-up details: `GET /api/stats/distribution` (`stats_distribution`, buckets 5 kW / 10 hp·t⁻¹ / 100 cc over sane-range passenger cars, rebuilt by `db:refresh-spec-stats`) → `percentileOf` (shared `distribution.ts`) → `RdwFleetRank`. `RdwImportExcise`: Tax Code 215.3.5-1 base rates (petrol 50/100 € up to/over 3,000 cc, diesel 75/150 € up to/over 3,500 cc) × litres × age factor 1–15; the statute text was confirmed from law 2611-VIII, but the current wording and how the current year is counted were NOT (the Tax Code text is not fetchable), hence the age slider and the "ask customs" note; electric/hybrid/gas-only rules are not modelled. `RdwMassSchema` = original artwork (do not copy third-party diagrams).
 
+### Small polish, 2026-10-16/17
+
+- **Brand logo (`83a4927`):** new `public/logo.png` + `brand-icon.png` replace `favicon.svg`; used for the favicon, PWA icons (`vite.config.ts`), the header (`Layout.tsx`) and the link-preview card (`og-card.ts`, `og.controller.ts`).
+- **News cards without an image** get a placeholder tile (`NewsCard.tsx`); **favorites rows** are compact on mobile (`LocalRecordRow.tsx`).
+- **Copy all info** also exports news, social threads, finance news and the data-source list (`lib/export-news.ts`).
+- **About** lists the wanted statistics and the stolen.in.ua history; the sidebar links to `/wanted` (`7a372fd`).
+
 ## Read guides (`/read`, 2026-10-16)
 
 **Third article `/read/fleet` (2026-10-16):** colours, fuel and registration years on the existing field rollups — `year` added to `STATS_FIELD_DIMENSIONS` (+ `StatsService.field`), no migration. Route, `ROUTE_TITLE_KEYS`, `STATIC_PAGES`, `ARTICLES` entry (the matching "coming next" item removed), `nav.readFleet` / `read.fleet.*` keys in ua/ru/en.
@@ -3785,3 +3792,7 @@ Each plate-card / VIN-page section now ends with a `ReadGuideLink` (pill, guide 
 ### Guides as blog posts, mass schema relations (2026-10-16)
 
 `/read` articles now read like blog posts: `ArticleBanner` (oklch cover from the guide's `hue`), a `published` ISO date per `ARTICLES` entry and a copy-link button (`read.share`) in `ArticleHeader`; the hub cards reuse the banner. `RdwMassSchema` relates the chosen car to GVM / TBM / GTM / ATM / GCM (`rdw.schema.your.*`: empty + payload, ~7 % tow-ball, ATM = GTM + TBM, GCM = GVM + GTM) for the trailer picked above or the heaviest braked trailer; excise and mass sections open by default. Dev hygiene: `scripts` declares `pg` so pnpm resolves one `drizzle-orm` copy (two copies broke `scripts` type-check). About lists the guides in its feature card.
+
+### Wanted vehicles: history, stats, `/wanted` (2026-10-17)
+
+The feed only shows who is wanted now, so found cars were backfilled from stolen.in.ua (Aug 2020 onward, `pnpm ingest:wanted-history`, resumable, seed CSVs via `ingest:wanted-history:csv` / `export:wanted-history:csv`). Migration 0074 adds `source`, `resolved_exact` and `region` (derived from the police unit); the card shows scraped records and "history since Aug 2020". `GET /api/wanted/stats` feeds the `/wanted` page (summary cards, by year / region / make / model / type / colour tables, region map, recently stolen / found lists) and a home teaser (`HomeWantedSection`: 5 newest stolen, link to the page). Links to `/wanted` from `WantedCheck`, `/stats` and `QuickLinks`. Conventions: `docs/features-reference.md` "Wanted vehicles"; step log: `WANTED_PLAN.md`.

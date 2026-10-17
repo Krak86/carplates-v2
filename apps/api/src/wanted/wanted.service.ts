@@ -11,7 +11,8 @@ export class WantedService {
 
   /**
    * Every record (current and removed) whose plate or VIN equals the given one. `checkedAt` / `trackedSince` describe our own
-   * snapshots of the feed (`pnpm ingest:wanted`): a vehicle that left the feed before the first run is not in the history.
+   * snapshots of the feed (`pnpm ingest:wanted`): a vehicle that left the feed before the first run is only in the history if the stolen.in.ua backfill
+   * (`pnpm ingest:wanted-history`) found it; then `trackedSince` is the earliest scraped theft date.
    */
   async lookup(plate: string | null, vin: string | null): Promise<WantedResponse> {
     const { db } = this.dbService
@@ -34,7 +35,10 @@ export class WantedService {
       db
         .select({
           checkedAt: sql<Date | null>`max(${wantedVehicles.lastSeenAt})`,
-          trackedSince: sql<Date | null>`min(${wantedVehicles.firstSeenAt})`
+          trackedSince: sql<Date | null>`min(${wantedVehicles.firstSeenAt})`,
+          historySince: sql<
+            string | null
+          >`min(${wantedVehicles.seizedAt}) filter (where ${wantedVehicles.source} = 'stolen.in.ua' and ${wantedVehicles.seizedAt} >= '2020-08-01')`
         })
         .from(wantedVehicles)
     ])
@@ -55,14 +59,22 @@ export class WantedService {
       seizedAt: r.seizedAt,
       registeredAt: r.registeredAt,
       organUnit: r.organUnit,
-      removedAt: r.resolvedAt?.toISOString() ?? null
+      removedAt: r.resolvedAt?.toISOString() ?? null,
+      source: r.source === 'stolen.in.ua' ? 'stolen.in.ua' : 'feed',
+      removedExact: r.resolvedExact
     }))
+    const historySince = meta?.historySince ?? null
 
     return {
       wanted: records.some(r => r.status === 'wanted'),
       records,
       checkedAt: meta?.checkedAt ? new Date(meta.checkedAt).toISOString() : null,
-      trackedSince: meta?.trackedSince ? new Date(meta.trackedSince).toISOString() : null
+      trackedSince: historySince
+        ? new Date(historySince).toISOString()
+        : meta?.trackedSince
+          ? new Date(meta.trackedSince).toISOString()
+          : null,
+      historySource: historySince ? 'stolen.in.ua' : null
     }
   }
 }

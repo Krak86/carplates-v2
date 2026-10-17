@@ -19,6 +19,8 @@ export type CardInput = {
   color: VehicleColor
   /** Brand logo PNG, drawn bottom-right when present. */
   logoPng?: Buffer | null
+  /** Site icon PNG for the top-left badge; falls back to the drawn glyph. */
+  siteIconPng?: Buffer | null
 }
 
 const esc = (s: string): string =>
@@ -32,9 +34,13 @@ const panel = (x: number, y: number, w: number, h: number): string =>
 
 const FAVICON_GLYPH = `<g fill="none" stroke="#fff" stroke-width="44" stroke-linecap="round" stroke-linejoin="round"><path d="M110 168V290a64 64 0 0 0 128 0V168"/><path d="M282 354L342 168L402 354M301 296H383"/></g>`
 
-const header = (): string => `
+const header = (siteIconPng?: Buffer | null): string => `
 ${panel(50, 40, 330, 100)}
-<g transform="translate(70 55) scale(0.145)"><rect width="512" height="512" rx="96" fill="${BRAND_BLUE}"/>${FAVICON_GLYPH}</g>
+${
+  siteIconPng
+    ? `<image x="70" y="55" width="72" height="72" href="data:image/png;base64,${siteIconPng.toString('base64')}"/>`
+    : `<g transform="translate(70 55) scale(0.145)"><rect width="512" height="512" rx="96" fill="${BRAND_BLUE}"/>${FAVICON_GLYPH}</g>`
+}
 <text x="165" y="107" font-family="${FONT_FAMILY}" font-size="42" font-weight="700" fill="#fff">Cars UA</text>`
 
 function background(color: VehicleColor): string {
@@ -48,7 +54,7 @@ function background(color: VehicleColor): string {
 export function buildCardSvg(input: CardInput): string {
   const open = `<svg xmlns="http://www.w3.org/2000/svg" width="${OG_WIDTH}" height="${OG_HEIGHT}">`
   if (input.plate === null) {
-    return `${open}${background('blue')}${header()}
+    return `${open}${background('blue')}${header(input.siteIconPng)}
 ${panel(50, 250, 1100, 300)}
 <text x="90" y="360" font-family="${FONT_FAMILY}" font-size="72" font-weight="700" fill="#fff">${esc(clip(input.title, 34))}</text>
 <text x="90" y="440" font-family="${FONT_FAMILY}" font-size="72" font-weight="700" fill="#fff">${esc(clip(input.subtitle, 34))}</text>
@@ -60,7 +66,7 @@ ${panel(50, 250, 1100, 300)}
   const logo = input.logoPng
     ? `<image x="930" y="415" width="100" height="100" href="data:image/png;base64,${input.logoPng.toString('base64')}"/>`
     : ''
-  return `${open}${background(input.color)}${header()}
+  return `${open}${background(input.color)}${header(input.siteIconPng)}
 <rect x="150" y="190" width="900" height="170" rx="22" fill="#fff" stroke="#111" stroke-width="8"/>
 <rect x="150" y="190" width="90" height="170" rx="22" fill="${BRAND_BLUE}"/>
 <text x="645" y="${190 + 85 + Math.round(plateSize * 0.36)}" text-anchor="middle" font-family="${FONT_FAMILY}" font-size="${plateSize}" font-weight="700" fill="#111" letter-spacing="4">${esc(input.plate)}</text>

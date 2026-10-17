@@ -64,7 +64,7 @@ export default function FavoritesRoute(): ReactNode {
       )}
 
       {visible.length > 0 && (
-        <Card className="divide-y divide-[var(--color-border)] p-2!">
+        <Card className="divide-y divide-[var(--color-border)] p-0! sm:p-2!">
           {visible.map(entry => (
             <LocalRecordRow
               key={entry.id}

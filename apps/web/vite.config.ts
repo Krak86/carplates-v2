@@ -51,9 +51,9 @@ export default defineConfig({
     VitePWA({
       registerType: 'prompt',
       injectRegister: false,
-      // Icons, favicon.ico and apple-touch-icon are generated from public/favicon.svg — replace that file to rebrand.
+      // Icons, favicon.ico and apple-touch-icon are generated from public/logo.png — replace that file to rebrand.
       pwaAssets: {
-        image: 'public/favicon.svg',
+        image: 'public/logo.png',
         htmlPreset: '2023',
         preset: {
           ...minimal2023Preset,

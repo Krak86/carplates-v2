@@ -28,6 +28,9 @@ const hostOf = (url: string): string => {
   }
 }
 
+/** Stable oklch hue per source, so each outlet's placeholder tile has its own tint. */
+const hostHue = (host: string): number => [...host].reduce((sum, ch) => (sum * 31 + ch.charCodeAt(0)) % 360, 7)
+
 /** One headline: a link out to the source with its image (hotlinked, hidden if it fails), title and `source · date`. Nothing else is copied. */
 export default function NewsCard({
   item,
@@ -39,6 +42,8 @@ export default function NewsCard({
   const { t, i18n } = useTranslation()
   const [imageFailed, setImageFailed] = useState(false)
   const showImage = !!item.imageUrl && !imageFailed
+  const hasBrandLogo = !!fallbackBrand && !!brandLogoUrl(fallbackBrand)
+  const host = hostOf(item.url)
   const date = new Date(item.publishedAt).toLocaleDateString(toIntlLocale(i18n.language), {
     day: 'numeric',
     month: 'short'
@@ -57,7 +62,7 @@ export default function NewsCard({
         compact ? 'w-full' : 'w-72 shrink-0'
       )}
     >
-      {!showImage && !!fallbackBrand && !!brandLogoUrl(fallbackBrand) && (
+      {!showImage && hasBrandLogo && (
         <div
           className={cn(
             'flex items-center justify-center bg-white/90 p-3 dark:bg-white/10',
@@ -65,6 +70,24 @@ export default function NewsCard({
           )}
         >
           <BrandLogo brand={fallbackBrand} className="h-full max-h-14 w-full max-w-20 object-contain" />
+        </div>
+      )}
+
+      {!showImage && !hasBrandLogo && (
+        <div
+          aria-hidden
+          style={{
+            background: `linear-gradient(135deg, oklch(0.4 0.06 ${hostHue(host)} / 0.55), oklch(0.28 0.03 ${hostHue(host)} / 0.55))`
+          }}
+          className={cn(
+            'flex flex-col items-center justify-center gap-1 border-border text-muted',
+            horizontal
+              ? 'w-28 shrink-0 self-stretch border-r sm:w-36'
+              : cn('w-full border-b', compact ? 'h-24' : 'h-32')
+          )}
+        >
+          <span className="rounded-lg border border-white/20 px-2.5 py-1.5 text-2xl shadow-inner">📰</span>
+          <span className="max-w-full truncate px-2 text-[10px] tracking-wide uppercase">{host}</span>
         </div>
       )}
 
@@ -93,7 +116,7 @@ export default function NewsCard({
         </p>
 
         <p className="truncate text-xs text-[var(--color-muted)]">
-          {hostOf(item.url)} · {date}
+          {host} · {date}
           <span className="sr-only"> - {t('news.opensNewTab')}</span>
         </p>
       </div>

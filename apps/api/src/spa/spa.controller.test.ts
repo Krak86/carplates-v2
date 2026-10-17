@@ -28,7 +28,7 @@ describe('SpaController meta injection', () => {
           ? {
               kind: 'plate',
               value: 'AA1234BB',
-              title: 'AA1234BB - Toyota Camry 2015 · Cars UA',
+              title: 'Cars UA - AA1234BB - Toyota Camry 2015',
               description: 'AA1234BB: Toyota Camry',
               card: {},
               brandSlug: null
@@ -57,7 +57,7 @@ describe('SpaController meta injection', () => {
 
   it('injects per-vehicle tags with noindex on a known plate', async () => {
     const html = await get('/AA1234BB?lang=ua')
-    expect(html).toContain('<title>AA1234BB - Toyota Camry 2015 · Cars UA</title>')
+    expect(html).toContain('<title>Cars UA - AA1234BB - Toyota Camry 2015</title>')
     expect(html).toContain('og:image" content="https://carsua.app/og/AA1234BB.png"')
     expect(html).toContain('noindex')
     expect(html).not.toContain('>old<')

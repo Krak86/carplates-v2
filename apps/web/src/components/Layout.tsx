@@ -104,7 +104,8 @@ export default function Layout({ children }: Props): ReactNode {
         >
           ☰
         </button>
-        <Link viewTransition to="/" className="shrink-0 text-lg font-semibold">
+        <Link viewTransition to="/" className="flex shrink-0 items-center gap-2 text-lg font-semibold">
+          <img src="/brand-icon.png" alt="" width={28} height={28} className="size-7 rounded-md" />
           {t('app.title')}
         </Link>
         {vehicleLabel && (

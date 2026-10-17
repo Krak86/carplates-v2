@@ -2,7 +2,7 @@ import { Suspense, lazy, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { useSearchParams } from 'react-router'
+import { Link, useSearchParams } from 'react-router'
 
 import LoadErrorBoundary from '@/components/LoadErrorBoundary'
 import SectionInfo from '@/components/SectionInfo'
@@ -108,6 +108,14 @@ export default function StatsRoute(): ReactNode {
         </h1>
 
         <SectionInfo section="statsSummary" title={t('stats.title')} />
+
+        <Link
+          viewTransition
+          to="/wanted"
+          className="inline-block rounded bg-[var(--color-bg)]/85 px-2 py-1 text-sm text-[var(--color-primary)] underline backdrop-blur-sm"
+        >
+          🚨 {t('wanted.stats.viewLink')}
+        </Link>
 
         {stats.isSuccess && range && (
           <p className="inline-block rounded bg-[var(--color-bg)]/85 px-2 py-1 text-sm text-[var(--color-muted)] backdrop-blur-sm">
@@ -222,7 +230,9 @@ export default function StatsRoute(): ReactNode {
             {view === 'map' ? (
               <LoadErrorBoundary compact>
                 <Suspense fallback={<StatsMapSkeleton />}>
-                  <StatsMap rows={dimensionRows(stats.data, 'region')} metric={metric} />
+                  <StatsMap
+                    rows={dimensionRows(stats.data, 'region').map(r => ({ label: r.label, value: r[metric] }))}
+                  />
                 </Suspense>
               </LoadErrorBoundary>
             ) : (

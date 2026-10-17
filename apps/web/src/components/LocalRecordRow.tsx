@@ -45,11 +45,11 @@ export default function LocalRecordRow({
     markTransitionSource(e.currentTarget.parentElement, 'vehicle-card')
   }
 
+  const logo = <BrandLogo brand={brandFromLabel(label)} size="sm" />
+
   return (
-    <div className="flex items-center justify-between gap-3 px-4 py-2 text-sm">
-      <span className="flex w-6 shrink-0 justify-center">
-        <BrandLogo brand={brandFromLabel(label)} size="sm" />
-      </span>
+    <div className="flex items-center justify-between gap-3 px-1 py-2 text-sm sm:px-4">
+      <span className="hidden w-6 shrink-0 justify-center sm:flex">{logo}</span>
       <div className="min-w-0 flex-1">
         <Link
           viewTransition
@@ -62,8 +62,10 @@ export default function LocalRecordRow({
           {label ? ` - ${label}` : ''}
         </Link>
 
+        {/* Mobile: the brand logo sits beside the label chips instead of in its own column. */}
         {labels.length > 0 && (
-          <div className="mt-1 flex flex-wrap gap-1">
+          <div className="mt-1 flex flex-wrap items-center gap-1">
+            <span className="flex shrink-0 sm:hidden">{logo}</span>
             {labels.map(l => (
               <LabelChip key={l.id} label={l} />
             ))}
@@ -86,7 +88,7 @@ export default function LocalRecordRow({
           {t('offline.savedBadge')}
         </span>
       )}
-      {actions}
+      {actions && <span className="hidden sm:contents">{actions}</span>}
       <span className="shrink-0 text-[var(--color-muted)]">
         {new Date(date).toLocaleDateString(toIntlLocale(i18n.language))}
       </span>

@@ -1,4 +1,5 @@
 import { createZodDto } from 'nestjs-zod'
-import { wantedResponseSchema } from '@carplates/shared'
+import { wantedResponseSchema, wantedStatsResponseSchema } from '@carplates/shared'
 
 export class WantedResponseDto extends createZodDto(wantedResponseSchema) {}
+export class WantedStatsResponseDto extends createZodDto(wantedStatsResponseSchema) {}

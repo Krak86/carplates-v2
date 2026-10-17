@@ -89,6 +89,8 @@ export {
   type WantedVehicleRow,
   type WantedVehicleInsert,
   wantedVehicles,
+  wantedScrapePages,
+  wantedScrapeIds,
   type RdwRecallTextInsert,
   statsFuel,
   statsWeight,

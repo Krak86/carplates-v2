@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { feedDate, feedVins, toWantedInsert } from './wanted-parse.js'
+import { feedDate, feedVins, organUnitRegion, toWantedInsert } from './wanted-parse.js'
 
 describe('wanted feed parsing', () => {
   it('collects the VIN-shaped body and chassis numbers', () => {
@@ -28,5 +28,23 @@ describe('wanted feed parsing', () => {
     expect(feedDate('2022-08-05T15:00:00Z')).toBe('2022-08-05')
     expect(feedDate('0200-03-04T08:00:00Z')).toBeNull()
     expect(feedDate(null)).toBeNull()
+  })
+
+  it('derives the region from the police unit (the oblast named last wins)', () => {
+    const cases: [string, string][] = [
+      ['ДАРНИЦЬКЕ УПРАВЛІННЯ ПОЛІЦІЇ ГУНП В М. КИЄВІ', 'Київ'],
+      [
+        'ВІДДІЛ ПОЛІЦІЇ №2 (М.ІРПІНЬ) БУЧАНСЬКОГО РАЙОННОГО УПРАВЛІННЯ ПОЛІЦІЇ ГУНП В КИЇВСЬКІЙ ОБЛ.',
+        'Київська область'
+      ],
+      ['КОМУНАРСЬКЕ ВІДДІЛЕННЯ ПОЛІЦІЇ ДНІПРОВСЬКОГО ВІДДІЛУ ГУНП В ЗАПОРІЗЬКІЙ ОБЛАСТІ', 'Запорізька область'],
+      ['КИЇВСЬКЕ ВІДДІЛЕННЯ ПОЛІЦІЇ ГУНП В ОДЕСЬКІЙ ОБЛАСТІ', 'Одеська область'],
+      ['ОМ 1 Г.ЯЛТЫ АР КРЫМ', 'АР Крим'],
+      ['БАЛАКЛАВСЬКИЙ РВ СЕВАСТПОЛЬСЬКОГО МУ', 'Севастополь'],
+      ['УСБУ В ХАРКІВЬКІЙ ОБЛАСТІ', 'Харківська область']
+    ]
+    for (const [unit, region] of cases) expect(organUnitRegion(unit)).toBe(region)
+    expect(organUnitRegion('НАЦІОНАЛЬНА ПОЛІЦІЯ УКРАЇНИ')).toBeNull()
+    expect(organUnitRegion(null)).toBeNull()
   })
 })

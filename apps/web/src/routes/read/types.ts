@@ -11,8 +11,8 @@ export type ArticleMeta = {
   /** `nav.*` key naming the article. */
   titleKey: string
   lead: L10n
-  /** ISO date (YYYY-MM-DD) the guide went live. */
-  published: string
+  /** Short topic labels shown under the title and on the hub card. */
+  tags: L10n[]
   /** oklch hue of the banner. */
   hue: number
 }
