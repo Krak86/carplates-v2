@@ -76,8 +76,7 @@ range; `--no-details` = month cards only). Re-running a range is safe: fetched i
 7. ✅ **Card history (2026-10-17, 64a643b)** — `wanted.service.ts`: scraped records in lookups, "history since Aug 2020", stolen.in.ua attribution (§3 end). Done: records carry `source` + `removedExact` (inexact removal shows "exact date unknown"), `trackedSince` = earliest scraped theft date >= 2020-08-01 + `historySource`; checked on `АР1577ВР` (feed + removed 2026-04-30 record).
 8. ✅ **Stats API (2026-10-17, 111436f)** — `GET /api/wanted/stats` + `wantedStatsResponseSchema` (§4), service test. Verified live: 75 196 wanted now, 26 714 found, median 1348 days to found, 100-row top lists, 50 recent each, ≈ 0.2 s (cached). `byYear` includes pre-2020 thefts (feed rows from 1928); the page should trim or group them.
 9. ✅ **`/wanted` route (2026-10-17, 5b47efb)** — `routes/wanted/` (route, sortable table, year chart with pre-2020 grouped into one "≤ 2019" bar, recent lists), `StatsMap` now takes `{label, value}[]`, `wantedStatsQuery`, i18n `wanted.stats.*`, `ROUTE_TITLE_KEYS` + `STATIC_PAGES`. Verified in the browser (ua/ru): sort asc/desc, region map, plate links. Left for step 10: links, home teaser, docs, `releases.ts`.
-10. ✅ **Links, home teaser, docs (2026-10-17, commit hash: fill in after commit)** - `/wanted` links in `WantedCheck`, `/stats`, `QuickLinks`; `HomeWantedSection` (5 newest stolen) in a `LazySection` after the news; i18n `wanted.stats.viewLink`; commands-reference, `PLAN.md`, `plan-done.md`, `releases.ts`. Verified in the browser (ru, home teaser + QuickLinks).
-11. **Links + docs** — `WantedCheck` link, `/stats` link, home teaser (§5), docs + `releases.ts` (§6).
+10. ✅ **Links, home teaser, docs (2026-10-17, c824946, sidebar link 7a372fd)** - `/wanted` links in `WantedCheck`, `/stats`, `QuickLinks`; `HomeWantedSection` (5 newest stolen) in a `LazySection` after the news; i18n `wanted.stats.viewLink`; commands-reference, `PLAN.md`, `plan-done.md`, `releases.ts`. Verified in the browser (ru, home teaser + QuickLinks).
 
 Steps 2–6 are only data runs (no code), so they can run while 7–10 are built; the page just shows more history as they finish.
 
@@ -89,43 +88,11 @@ Steps 2–6 are only data runs (no code), so they can run while 7–10 are built
 | 2       | 2–6   | Backfill data runs (≈ 8 h, background / can span days)              |
 | 3       | 7–8   | Card history + stats API (done)                                     |
 | 4       | 9     | `/wanted` page                                                      |
-| 5       | 10    | Links, home teaser, docs, releases                                  |
+| 5       | 10    | Links, home teaser, docs, releases (done, all steps complete)       |
 
-Session 1 result: Aug 2020 smoke test = 388 cards / 287 found (header 401 / 297), 250 detail pages, `AP1577BP` has the 2026-04-30 removal; region null share 0.12 %. Resume at session 2 (step 2).
+Session 1 result: Aug 2020 smoke test = 388 cards / 287 found (header 401 / 297), 250 detail pages, `AP1577BP` has the 2026-04-30 removal; region null share 0.12 %. (All steps done 2026-10-17.)
 
 Mark a step ✅ here when it is done (with the commit), so the next session knows where to resume.
-
-### Handoff for step 9 (written after step 8, 2026-10-17)
-
-Start the new session with "implement session 4 of WANTED_PLAN.md". Everything the page needs exists; nothing else to prepare.
-
-- **API (live, verified)**: `GET /api/wanted/stats`, contract `wantedStatsResponseSchema` / `WantedStatsRow` / `WantedStatsVehicle` in
-  `@carplates/shared` (`packages/shared/src/wanted.ts`, already built). Shape: `summary { wantedNow, foundTotal, foundSinceTracking,
-withPlate, withVin, medianDaysToFound|null, historySince|null }`, `byYear` (ascending, `label` = year string),
-  `byRegion|byBrand|byModel|byType|byColor` (`{label, stolen, found, wanted}`, top 100, stolen desc), `recentStolen` / `recentFound`
-  (50 each: brand, model, vehicleType, color, plate, seizedAt `YYYY-MM-DD`, resolvedAt ISO|null, region|null), `checkedAt`.
-- **Data quirks to handle in the UI**: `byYear` runs from 1928 (feed thefts before Aug 2020 are mostly still wanted, found ≈ 0): group
-  everything before 2020 into one "≤ 2019" bar or show 2020+ only, and note that found counts before Aug 2020 are not tracked. Labels
-  are Ukrainian (brand `ВАЗ`, colour `БІЛИЙ`, type `Легковий автотранспорт`, region `Донецька область`); a vehicle's `region` can be null.
-  The map needs region labels mapped to `StatsMap`'s names (`localizeRegion`, `REGION_NAME_BY_SHAPE_ISO` in
-  `routes/stats/region-geography`). Real numbers (2026-10-17): 75 196 wanted, 26 714 found, median 1348 days.
-- **Existing files to follow**: `apps/web/src/routes/stats/{StatsRoute,StatsTable,StatsMap}.tsx` (+ `StatsTable.test.tsx`;
-  `HomeNewsSection.tsx` also lives in `routes/stats/`, for the step-10 teaser), `routes/read/imports/ImportsSections.tsx`
-  (`YearsSection`), `lib/api.ts` (wanted fetcher ~L744), `lib/queries.ts` (`wantedQuery` ~L623, live data, no offline group),
-  `components/WantedCheck.tsx` (step 10).
-- Read `docs/features-reference.md` "Wanted vehicles" plus the "New public route" rule in CLAUDE.md before coding.
-
-### Handoff for step 10 (written after step 9, 2026-10-17)
-
-Start the new session with "implement session 5 of WANTED_PLAN.md". Step 9 is committed (5b47efb).
-
-- **Done in step 9**: `apps/web/src/routes/wanted/` (route, table, chart, `WantedRecentList`, `helpers.ts`), `wantedStatsQuery`, i18n `wanted.stats.*` (ua/ru/en; `wanted.stats.title` is the page name, usable as link text), route + title + `STATIC_PAGES`.
-- **To do**:
-  1. `components/WantedCheck.tsx`: link "Wanted vehicles stats" to `/wanted`.
-  2. `routes/stats/StatsRoute.tsx`: link to `/wanted` (also consider `components/QuickLinks.tsx`).
-  3. Home teaser `routes/stats/HomeWantedSection.tsx`: 5 `recentStolen` from `wantedStatsQuery()` plus a link. Mount it in `routes/SearchRoute.tsx` inside a `LazySection` next to `<HomeNewsSection />` (~L360). Same pattern as `HomeNewsSection`: return null when no data, `LoadErrorBoundary compact`, `section-vt`. Reuse `routes/wanted/WantedRecentList.tsx` with the list sliced to 5.
-  4. Docs: `docs/commands-reference.md` (`ingest:wanted-history`, `export:wanted-history:csv`), one-line ✅ in `PLAN.md`, write-up in `docs/plan-done.md`, entry in `src/routes/releases/releases.ts` (see `types.ts`; no em dash in UI text). `features-reference.md` "Wanted vehicles" already has the /wanted notes.
-- **Verify**: `pnpm format`, `pnpm lint`, `pnpm test`, then the home teaser and links in the browser.
 
 ## stolen.in.ua reference (verified 2026-10-16)
 
