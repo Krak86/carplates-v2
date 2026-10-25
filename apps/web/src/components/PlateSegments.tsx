@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { normalizePlate, plateSeries } from '@carplates/shared'
 
+import RegionFlag from '@/components/RegionFlag'
 import { splitPlate } from '@/components/PlateSegments.helpers'
 import type { PlateSegmentId } from '@/components/PlateSegments.helpers'
 import SegmentExplainer from '@/components/SegmentExplainer'
@@ -50,7 +51,8 @@ export default function PlateSegments({ plate, region }: Props): ReactNode {
           color: SEGMENT_COLOR[s.id],
           title: t(`plate.seg.${s.id}.title`),
           positions: t('vin.seg.positions', { range: s.positions }),
-          desc: t(`plate.seg.${s.id}.desc`, params)
+          desc: t(`plate.seg.${s.id}.desc`, params),
+          icon: s.id === 'region' ? <RegionFlag region={region} /> : undefined
         }))}
       />
       <ReadGuideLink guide={PLATES_PATH} />

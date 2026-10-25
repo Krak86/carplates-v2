@@ -29,6 +29,7 @@ import LastOperationChip from '@/components/LastOperationChip'
 import CollapsibleChips from '@/components/CollapsibleChips'
 import LazySection from '@/components/LazySection'
 import ReportIssueLink from '@/components/ReportIssueLink'
+import RegionFlagInfo from '@/components/RegionFlagInfo'
 import RegionLabel from '@/components/RegionLabel'
 import FieldInfoButton from '@/components/FieldInfoButton'
 import OwnerInfo from '@/components/OwnerInfo'
@@ -352,7 +353,14 @@ export default function ResultCard({ data }: Props): ReactNode {
                   feedback={plateCopy}
                   className="mx-1.5 align-middle"
                 />
-                {data.region && <RegionLabel>{regionLabel(data.region)}</RegionLabel>}
+                {data.region && (
+                  <>
+                    <RegionLabel region={data.region}>{regionLabel(data.region)}</RegionLabel>
+                    <span className="ml-1.5 inline-flex">
+                      <RegionFlagInfo region={data.region} label={regionLabel(data.region)} />
+                    </span>
+                  </>
+                )}
                 {!data.region && (
                   <span className="rounded bg-[var(--color-surface)]/20 px-1.5 py-0.5">
                     <NoRegionBadge plate={data.plate} />

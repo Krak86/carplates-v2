@@ -20,6 +20,7 @@ import {
   type Theme
 } from './config'
 import { preloadBackdrop } from './backdrop-assets'
+import { preloadRegionFlag, regionFlagImage } from './flag-assets'
 import { createSound } from './sound'
 import { preloadBrandLogo } from './vehicle-assets'
 import {
@@ -33,7 +34,7 @@ import {
   type Sprite
 } from './sprites'
 
-export { preloadBackdrop, preloadBrandLogo }
+export { preloadBackdrop, preloadBrandLogo, preloadRegionFlag }
 
 export type Racer = {
   /** Applies new settings live (car, scenery, lanes, traffic, resolution) without resetting the lap. */
@@ -191,7 +192,15 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
 
   let cfg = initial
   let theme: Theme = THEMES[cfg.scenery]
-  let atlas: Atlas = makeAtlas(theme, cfg.body, cfg.color, cfg.plate, cfg.brand, cfg.region)
+  let atlas: Atlas = makeAtlas(
+    theme,
+    cfg.body,
+    cfg.color,
+    cfg.plate,
+    cfg.brand,
+    cfg.region,
+    regionFlagImage(cfg.region)
+  )
   let backdrop: Backdrop = makeBackdrop(theme, cfg.scenery, cfg.backdrop)
   let width = 1024
   let height = 768
@@ -833,7 +842,7 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
 
   function rebuildLook(): void {
     theme = THEMES[cfg.scenery]
-    atlas = makeAtlas(theme, cfg.body, cfg.color, cfg.plate, cfg.brand, cfg.region)
+    atlas = makeAtlas(theme, cfg.body, cfg.color, cfg.plate, cfg.brand, cfg.region, regionFlagImage(cfg.region))
     backdrop = makeBackdrop(theme, cfg.scenery, cfg.backdrop)
   }
 
@@ -936,6 +945,7 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
       if (sameConfig(cfg, next)) return
       const resized = next.quality !== cfg.quality
       const backdropChanged = next.backdrop !== cfg.backdrop
+      const regionChanged = next.region !== cfg.region
       const sameWorld =
         !resized &&
         next.scenery === cfg.scenery &&
@@ -951,6 +961,17 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
         void preloadBrandLogo(wanted).then(() => {
           if (!destroyed && cfg.brand === wanted)
             atlas.player = makePlayerSprites(cfg.body, cfg.color, cfg.plate, wanted)
+        })
+      }
+      if (regionChanged) {
+        // the flag is fetched on demand; the boards show the name alone until it arrives
+        const wanted = next.region
+        void preloadRegionFlag(wanted).then(() => {
+          if (!destroyed && cfg.region === wanted && regionFlagImage(wanted)) {
+            // the boards are baked into the road: rebuild it (same geometry) so they show the flag
+            rebuildLook()
+            resetRoad()
+          }
         })
       }
       if (backdropChanged) {

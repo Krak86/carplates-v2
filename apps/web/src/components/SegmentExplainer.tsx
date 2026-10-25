@@ -21,6 +21,8 @@ export type ExplainedSegment = {
   title: string
   positions: string
   desc: string
+  /** Decorative image shown before the title (e.g. the region flag). */
+  icon?: ReactNode
 }
 
 type Props = {
@@ -91,6 +93,7 @@ export default function SegmentExplainer({ segments, hint, label, hintInline, co
         <div className="overflow-hidden">
           <div className="mt-2 rounded-md bg-[var(--color-border)]/30 px-3 py-2 text-sm">
             <div key={current.id} className="animate-fade-in">
+              {current.icon && <>{current.icon} </>}
               <span className="font-semibold">{current.title}</span>
               <span className="text-[var(--color-muted)]"> · {current.positions}</span>
               <p className="mt-0.5">{current.desc}</p>

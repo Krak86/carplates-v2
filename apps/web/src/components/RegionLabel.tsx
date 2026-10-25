@@ -1,17 +1,20 @@
 import { useState } from 'react'
 import type { ReactNode } from 'react'
 
+import RegionFlag from '@/components/RegionFlag'
 import { cn } from '@/lib/cn'
 
 type Props = {
   children: ReactNode
+  /** Region name as in the registry: its flag is shown before the label. */
+  region?: string | null
 }
 
 /**
  * Region next to the plate. On phones it stays on one line, cut with "…" when it doesn't fit; a tap
  * reveals the full name (wrapping onto more lines). From `md` up it is plain text.
  */
-export default function RegionLabel({ children }: Props): ReactNode {
+export default function RegionLabel({ children, region }: Props): ReactNode {
   const [expanded, setExpanded] = useState(false)
 
   return (
@@ -24,6 +27,11 @@ export default function RegionLabel({ children }: Props): ReactNode {
         expanded ? 'animate-fade-in' : 'max-md:truncate'
       )}
     >
+      {region && (
+        <>
+          <RegionFlag region={region} />{' '}
+        </>
+      )}
       {children}
     </button>
   )

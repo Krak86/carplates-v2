@@ -75,7 +75,7 @@ export default defineConfig({
       workbox: {
         // No `webmanifest` here: the plugin precaches it itself, and a second entry with another revision
         // makes Workbox throw on startup, leaving a service worker that caches and serves nothing.
-        globPatterns: ['**/*.{js,css,html,svg,ico,png,geojson}'],
+        globPatterns: ['**/*.{js,css,html,svg,ico,png,geojson}', 'assets/flag-*.webp'], // region flags (~40 KB) for the offline result card
         // Logos (~2 MB) are runtime-cached below; PDF fonts and export-* chunks (PDF/DOCX export) stay online-only.
         // So does the AR scan (needs the API to read plates): its detector worker, wasm runtime and ONNX model.
         // And the News / Bluesky / Stock side widgets: live third-party data, only mounted online after the first scroll.

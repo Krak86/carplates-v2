@@ -413,7 +413,7 @@ function paintPost(ctx: Ctx): void {
   for (let y = 10; y < 100; y += 30) ctx.fillRect(8, y, 24, 14)
 }
 
-type BoardStyle = { bg: string; fg: string; text: string; plate?: boolean }
+type BoardStyle = { bg: string; fg: string; text: string; plate?: boolean; flag?: HTMLImageElement | null }
 
 function paintBillboard(ctx: Ctx, style: BoardStyle): void {
   box(ctx, 40, 100, 14, 70, 2, '#4a3a2a')
@@ -430,6 +430,15 @@ function paintBillboard(ctx: Ctx, style: BoardStyle): void {
     ctx.fillStyle = style.fg
     ctx.font = 'bold 46px monospace'
     ctx.fillText(style.text, 185, 58, 215)
+  } else if (style.flag) {
+    // the region's flag on the left, its name on the rest of the board
+    ctx.drawImage(style.flag, 16, 26, 84, 56)
+    ctx.strokeStyle = 'rgb(0 0 0 / 0.35)'
+    ctx.lineWidth = 2
+    ctx.strokeRect(16, 26, 84, 56)
+    ctx.fillStyle = style.fg
+    ctx.font = 'bold 36px sans-serif'
+    ctx.fillText(style.text, 202, 58, 180)
   } else {
     ctx.fillStyle = style.fg
     ctx.font = 'bold 44px sans-serif'
@@ -590,9 +599,9 @@ export function makeAtlas(
   color: string,
   plate: string,
   brand: string | null,
-  region: string
+  region: string,
+  flag: HTMLImageElement | null
 ): Atlas {
-  const text = plate || 'AA0000AA'
   const colors = Object.values(VEHICLE_COLOR_HEX)
   const trafficBodies: readonly CarBody[] = ['sedan', 'hatch', 'suv', 'sport', 'pickup', 'van']
 
@@ -616,14 +625,6 @@ export function makeAtlas(
   const plants = [pine, oak, poplar, bush, boulder]
   if (theme.flowers) plants.push(makeSprite(200, 150, 1.5, paintSunflowers))
 
-  const styles: BoardStyle[] = [
-    { bg: BOARD_COLORS[0]?.[0] ?? '#1f4fa3', fg: '#ffffff', text: 'carsua.app' },
-    { bg: '#f6f6f2', fg: '#111111', text, plate: true },
-    { bg: BOARD_COLORS[1]?.[0] ?? '#ffd500', fg: '#0057b8', text: region },
-    { bg: BOARD_COLORS[2]?.[0] ?? '#111827', fg: '#4cc9f0', text: '🏁 RACE' },
-    { bg: BOARD_COLORS[3]?.[0] ?? '#c2410c', fg: '#ffffff', text: region }
-  ]
-
   return {
     player: makePlayerSprites(body, color, plate, brand),
     cars,
@@ -632,6 +633,20 @@ export function makeAtlas(
     pine,
     oak,
     post: makeSprite(40, 110, 2, paintPost),
-    billboards: styles.map(style => makeSprite(300, 170, 1.2, ctx => paintBillboard(ctx, style)))
+    billboards: makeBillboards(plate, region, flag)
   }
+}
+
+/** The roadside boards: site name, the player's plate, the region (with its flag when loaded), a race flag, the region again. */
+function makeBillboards(plate: string, region: string, flag: HTMLImageElement | null): Sprite[] {
+  const text = plate || 'AA0000AA'
+  const styles: BoardStyle[] = [
+    { bg: BOARD_COLORS[0]?.[0] ?? '#1f4fa3', fg: '#ffffff', text: 'carsua.app' },
+    { bg: '#f6f6f2', fg: '#111111', text, plate: true },
+    { bg: BOARD_COLORS[1]?.[0] ?? '#ffd500', fg: '#0057b8', text: region, flag },
+    { bg: BOARD_COLORS[2]?.[0] ?? '#111827', fg: '#4cc9f0', text: '🏁 RACE' },
+    { bg: BOARD_COLORS[3]?.[0] ?? '#c2410c', fg: '#ffffff', text: region, flag }
+  ]
+
+  return styles.map(style => makeSprite(300, 170, 1.2, ctx => paintBillboard(ctx, style)))
 }

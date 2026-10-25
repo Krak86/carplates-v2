@@ -26,3 +26,7 @@ Vinnytsia, Volyn (Lutsk), Zhytomyr, Zaporizhzhia, Crimea, Sevastopol and Donetsk
 | cherkasy | SergKh78 | CC BY-SA 4.0 | [Національний дендрологічний парк Софіївка DSC 4715.jpg](https://commons.wikimedia.org/wiki/File:%D0%9D%D0%B0%D1%86%D1%96%D0%BE%D0%BD%D0%B0%D0%BB%D1%8C%D0%BD%D0%B8%D0%B9_%D0%B4%D0%B5%D0%BD%D0%B4%D1%80%D0%BE%D0%BB%D0%BE%D0%B3%D1%96%D1%87%D0%BD%D0%B8%D0%B9_%D0%BF%D0%B0%D1%80%D0%BA_%D0%A1%D0%BE%D1%84%D1%96%D1%97%D0%B2%D0%BA%D0%B0_DSC_4715.jpg) |
 | chernihiv | Valerii Sorokin | CC BY-SA 3.0 | [Троїцький монастир.jpg](https://commons.wikimedia.org/wiki/File:%D0%A2%D1%80%D0%BE%D1%97%D1%86%D1%8C%D0%BA%D0%B8%D0%B9_%D0%BC%D0%BE%D0%BD%D0%B0%D1%81%D1%82%D0%B8%D1%80.jpg) |
 | chernivtsi | Сергій Криниця (Haidamac) | CC BY-SA 3.0 | [Cernauti Residentia 03.jpg](https://commons.wikimedia.org/wiki/File:Cernauti_Residentia_03.jpg) |
+
+## Region flags
+
+`apps/web/src/assets/flags/flag-<id>.webp` (120x80) are rasterised from the Wikimedia Commons SVGs of the oblast flags (`Flag of <Region> Oblast.svg`, Crimea, Sevastopol, Kyiv city `Flag of Kyiv Kurovskyi.svg`), all marked **Public domain** on Commons (checked 2026-10-25 through the MediaWiki API); no attribution is required. Crimea's 2:1 flag is stretched to 3:2.

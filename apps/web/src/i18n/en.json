@@ -2235,6 +2235,7 @@
   "race.finished.title": "Test drive finished",
   "race.finished.text": "You have driven {{km}} km - that is where the virtual test drive ends. To go further, contact a real seller: call, arrange a meeting and get behind the wheel of the real car.",
   "race.finished.restart": "One more virtual drive",
+  "region.flag.label": "Region flag",
   "race.page.heading": "Test drive",
   "race.page.intro": "No plate needed: you get a random famous car. Pick a car type to get an example of it, then change the colour, scenery and traffic. The kilometre counter covers this visit only.",
   "race.page.randomCar": "Random car",

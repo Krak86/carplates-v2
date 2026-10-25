@@ -1,4 +1,5 @@
 import { REGION_NAMES, regionName, type VehicleKind } from '@carplates/shared'
+import { REGION_IDS } from '@/lib/region-ids'
 
 export const CAR_BODIES = [
   'sedan',
@@ -56,35 +57,7 @@ export const BACKDROPS = [...GENERIC_BACKDROPS, ...REGION_BACKDROP_IDS] as const
 export type BackdropId = (typeof BACKDROPS)[number]
 
 /** Region-specific backdrops (key = region name as in the registry); a plate from one of them starts on its own backdrop. */
-const REGION_BACKDROPS: Readonly<Record<string, BackdropId>> = {
-  'Вінницька область': 'vinnytsia',
-  'Волинська область': 'volyn',
-  'Житомирська область': 'zhytomyr',
-  'Запорізька область': 'zaporizhzhia',
-  'АР Крим': 'crimea',
-  Севастополь: 'sevastopol',
-  'Донецька область': 'donetsk',
-  Київ: 'kyiv',
-  'Київська область': 'kyivska',
-  'Дніпропетровська область': 'dnipro',
-  'Закарпатська область': 'zakarpattia',
-  'Івано-Франківська область': 'ivanofrankivsk',
-  'Кіровоградська область': 'kirovohrad',
-  'Луганська область': 'luhansk',
-  'Львівська область': 'lviv',
-  'Миколаївська область': 'mykolaiv',
-  'Одеська область': 'odesa',
-  'Полтавська область': 'poltava',
-  'Рівненська область': 'rivne',
-  'Сумська область': 'sumy',
-  'Тернопільська область': 'ternopil',
-  'Харківська область': 'kharkiv',
-  'Херсонська область': 'kherson',
-  'Хмельницька область': 'khmelnytskyi',
-  'Черкаська область': 'cherkasy',
-  'Чернігівська область': 'chernihiv',
-  'Чернівецька область': 'chernivtsi'
-}
+const REGION_BACKDROPS: Readonly<Record<string, BackdropId>> = REGION_IDS
 
 function pickRandom<T>(options: readonly T[], fallback: T): T {
   return options[Math.floor(Math.random() * options.length)] ?? fallback

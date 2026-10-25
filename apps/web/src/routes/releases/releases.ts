@@ -21,6 +21,24 @@ export const RELEASES: readonly ReleaseDay[] = [
         'У секції «Перевірка» нові посилання: протокол техогляду (ОТК) за номером і чинність посвідчення водія',
         'В секции «Проверка» новые ссылки: протокол техосмотра (ОТК) по номеру и действительность водительского удостоверения',
         'Verification section has new links: technical inspection protocol (OTK) by plate and driving licence validity'
+      ),
+      item(
+        'new',
+        'Прапори областей: на картці номера біля регіону, у поясненні номера та на рекламних щитах у тест-драйві',
+        'Флаги областей: на карточке номера рядом с регионом, в пояснении номера и на рекламных щитах в тест-драйве',
+        'Region flags: on the plate card next to the region, in the plate explanation and on the test-drive billboards'
+      ),
+      item(
+        'new',
+        'Тест-драйв завершується після 10 км: щоб їхати далі, звертайтеся до справжнього продавця',
+        'Тест-драйв завершается после 10 км: чтобы ехать дальше, обращайтесь к настоящему продавцу',
+        'The test drive ends after 10 km: to go further, contact a real seller'
+      ),
+      item(
+        'improved',
+        'У тест-драйві вибір фону області змінює й область на рекламних щитах; новий фон для Миколаївської області',
+        'В тест-драйве выбор фона области меняет и область на рекламных щитах; новый фон для Николаевской области',
+        'In the test drive, picking a region backdrop also sets the billboard region; new Mykolaiv backdrop'
       )
     ]
   },
