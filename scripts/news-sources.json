@@ -93,10 +93,10 @@
   {
     "id": "carscoops-reviews",
     "name": "Carscoops",
-    "url": "https://www.carscoops.com/tag/reviews/feed/",
+    "url": "https://www.carscoops.com/category/reviews/feed/",
     "lang": "en",
     "enabled": true,
-    "note": "18 items, ~800 KB; low frequency (newest was 4 days old) — reviews"
+    "note": "2 items (~5 KB), low frequency; the old /tag/reviews/feed/ now 301s to an HTML page — reviews"
   },
   {
     "id": "autoevolution",
