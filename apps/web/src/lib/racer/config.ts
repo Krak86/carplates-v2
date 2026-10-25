@@ -159,6 +159,13 @@ export type RacerConfig = {
 export const BUMP_WARNING = 5
 /** Bumps at which the joke turns into "take driving lessons". */
 export const BUMP_LESSONS = 15
+/** Bumps at which the car is a wreck: it stops and the drive can only be started over. */
+export const BUMP_WRECK = 20
+/** The car smokes one level more per this many bumps (0 = clean, up to `MAX_SMOKE_LEVEL`). */
+export const BUMPS_PER_SMOKE = 5
+export const MAX_SMOKE_LEVEL = 3
+
+export const smokeLevel = (bumps: number): number => Math.min(MAX_SMOKE_LEVEL, Math.floor(bumps / BUMPS_PER_SMOKE))
 
 export type RacerHud = {
   /** km/h */
@@ -167,6 +174,8 @@ export type RacerHud = {
   km: number
   /** Collisions with cars, trees, signs… since the engine started (a restart keeps counting). */
   bumps: number
+  /** `BUMP_WRECK` bumps reached: the car is stopped until the drive is started over. */
+  wrecked: boolean
   lap: string
   last: string | null
   best: string | null

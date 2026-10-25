@@ -7,7 +7,15 @@ import RaceHornButton from '@/components/game/RaceHornButton'
 import RaceTouchControls from '@/components/game/RaceTouchControls'
 import { useRaceGameActions } from '@/components/game/use-race-game-actions'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
-import { BUMP_LESSONS, BUMP_WARNING, RACER_SIZE_KB, SIRENS, type CarBody, type RacerConfig } from '@/lib/racer/config'
+import {
+  BUMP_LESSONS,
+  BUMP_WARNING,
+  BUMP_WRECK,
+  RACER_SIZE_KB,
+  SIRENS,
+  type CarBody,
+  type RacerConfig
+} from '@/lib/racer/config'
 
 type Props = {
   config: RacerConfig
@@ -205,7 +213,27 @@ export default function RaceGameStage({ config, onChange, onPickBody }: Props): 
             </div>
           )}
 
-          {hud && hud.bumps >= BUMP_WARNING && (
+          {hud?.wrecked && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/60 p-4">
+              <div role="alertdialog" className="max-w-sm rounded-xl bg-white p-5 text-center text-black shadow-xl">
+                <div className="text-5xl" aria-hidden>
+                  💥🚗🔥
+                </div>
+                <h3 className="mt-2 text-lg font-bold">{t('race.wrecked.title')}</h3>
+                <p className="mt-1 text-sm">{t('race.wrecked.text', { count: BUMP_WRECK })}</p>
+                <button
+                  type="button"
+                  autoFocus
+                  onClick={handleRestart}
+                  className="mt-4 cursor-pointer rounded-full bg-[var(--color-primary)] px-5 py-2 font-semibold text-white"
+                >
+                  {t('race.wrecked.restart')}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {hud && !hud.wrecked && hud.bumps >= BUMP_WARNING && (
             <div
               role="status"
               className="pointer-events-none absolute inset-x-0 bottom-3 mx-auto w-fit max-w-[90%] rounded-lg bg-red-600/85 px-3 py-1.5 text-center text-sm font-semibold text-white"
