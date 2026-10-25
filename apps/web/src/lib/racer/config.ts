@@ -20,9 +20,71 @@ export type CarBody = (typeof CAR_BODIES)[number]
 export const SCENERIES = ['day', 'sunset', 'night', 'winter'] as const
 export type SceneryId = (typeof SCENERIES)[number]
 
-/** Photo backdrops behind the road (files in ./backdrops). */
-export const BACKDROPS = ['carpathians', 'spruce', 'forest', 'grove'] as const
+/** Photo backdrops behind the road (files in ./backdrops). The generic ones are the random pool. */
+export const GENERIC_BACKDROPS = ['carpathians', 'spruce', 'forest', 'grove'] as const
+/** Region-specific photo backdrops, shown in their own settings section. */
+export const REGION_BACKDROP_IDS = [
+  'vinnytsia',
+  'volyn',
+  'zhytomyr',
+  'zaporizhzhia',
+  'crimea',
+  'sevastopol',
+  'donetsk',
+  'kyiv',
+  'kyivska',
+  'dnipro',
+  'zakarpattia',
+  'ivanofrankivsk',
+  'kirovohrad',
+  'luhansk',
+  'lviv',
+  'mykolaiv',
+  'odesa',
+  'poltava',
+  'rivne',
+  'sumy',
+  'ternopil',
+  'kharkiv',
+  'kherson',
+  'khmelnytskyi',
+  'cherkasy',
+  'chernihiv',
+  'chernivtsi'
+] as const
+export const BACKDROPS = [...GENERIC_BACKDROPS, ...REGION_BACKDROP_IDS] as const
 export type BackdropId = (typeof BACKDROPS)[number]
+
+/** Region-specific backdrops (key = region name as in the registry); a plate from one of them starts on its own backdrop. */
+const REGION_BACKDROPS: Readonly<Record<string, BackdropId>> = {
+  'Вінницька область': 'vinnytsia',
+  'Волинська область': 'volyn',
+  'Житомирська область': 'zhytomyr',
+  'Запорізька область': 'zaporizhzhia',
+  'АР Крим': 'crimea',
+  Севастополь: 'sevastopol',
+  'Донецька область': 'donetsk',
+  Київ: 'kyiv',
+  'Київська область': 'kyivska',
+  'Дніпропетровська область': 'dnipro',
+  'Закарпатська область': 'zakarpattia',
+  'Івано-Франківська область': 'ivanofrankivsk',
+  'Кіровоградська область': 'kirovohrad',
+  'Луганська область': 'luhansk',
+  'Львівська область': 'lviv',
+  'Миколаївська область': 'mykolaiv',
+  'Одеська область': 'odesa',
+  'Полтавська область': 'poltava',
+  'Рівненська область': 'rivne',
+  'Сумська область': 'sumy',
+  'Тернопільська область': 'ternopil',
+  'Харківська область': 'kharkiv',
+  'Херсонська область': 'kherson',
+  'Хмельницька область': 'khmelnytskyi',
+  'Черкаська область': 'cherkasy',
+  'Чернігівська область': 'chernihiv',
+  'Чернівецька область': 'chernivtsi'
+}
 
 function pickRandom<T>(options: readonly T[], fallback: T): T {
   return options[Math.floor(Math.random() * options.length)] ?? fallback
@@ -30,7 +92,7 @@ function pickRandom<T>(options: readonly T[], fallback: T): T {
 
 /** A random backdrop — the starting choice; the player can pick another in the settings. */
 export function randomBackdrop(): BackdropId {
-  return pickRandom(BACKDROPS, DEFAULT_BACKDROP)
+  return pickRandom(GENERIC_BACKDROPS, DEFAULT_BACKDROP)
 }
 
 /** Random starting scenery (day / sunset / night / winter); the player can switch it live in the settings. */
@@ -49,6 +111,16 @@ export function randomTraffic(): TrafficLevel {
 
 export function randomQuality(): Quality {
   return pickRandom(QUALITIES, DEFAULT_QUALITY)
+}
+
+/** The backdrop that belongs to a region, if it has one. */
+export function regionBackdrop(region: string): BackdropId | undefined {
+  return REGION_BACKDROPS[region]
+}
+
+/** The starting backdrop: the region's own when it has one, otherwise a random one. */
+export function startBackdrop(region: string): BackdropId {
+  return regionBackdrop(region) ?? randomBackdrop()
 }
 
 /** A random region name (Ukrainian, as in the registry) for the roadside billboards. */

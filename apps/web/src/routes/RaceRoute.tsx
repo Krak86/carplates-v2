@@ -8,12 +8,12 @@ import Card from '@/components/ui/Card'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 import {
   DEFAULT_AUTO,
-  randomBackdrop,
   randomLanes,
   randomQuality,
   randomRegion,
   randomScenery,
   randomTraffic,
+  startBackdrop,
   type CarBody,
   type RacerConfig
 } from '@/lib/racer/config'
@@ -26,18 +26,19 @@ type Start = { config: RacerConfig; label: string }
 
 function randomStart(): Start {
   const { body, preset } = randomCar()
+  const region = randomRegion()
   return {
     label: preset.label,
     config: {
       color: preset.color,
       body,
       scenery: randomScenery(),
-      backdrop: randomBackdrop(),
+      backdrop: startBackdrop(region),
       lanes: randomLanes(),
       traffic: randomTraffic(),
       quality: randomQuality(),
       plate: GENERIC_PLATE,
-      region: randomRegion(),
+      region,
       brand: presetBrand(preset),
       auto: DEFAULT_AUTO
     }

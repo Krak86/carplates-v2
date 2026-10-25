@@ -12,11 +12,11 @@ import {
   bodyForKind,
   decodeRaceConfig,
   encodeRaceConfig,
-  randomBackdrop,
   randomLanes,
   randomQuality,
   randomScenery,
   randomTraffic,
+  startBackdrop,
   startRegion,
   type RacerConfig
 } from '@/lib/racer/config'
@@ -56,7 +56,7 @@ export default function RaceGameModal({
     color,
     body: bodyForKind(kind, bodyText),
     scenery: randomScenery(),
-    backdrop: randomBackdrop(),
+    backdrop: startBackdrop(startRegion(plate)),
     lanes: randomLanes(),
     traffic: randomTraffic(),
     quality: randomQuality(),
