@@ -118,6 +118,11 @@ export function regionBackdrop(region: string): BackdropId | undefined {
   return REGION_BACKDROPS[region]
 }
 
+/** The region a region backdrop belongs to (the reverse of `regionBackdrop`); undefined for the generic backdrops. */
+export function backdropRegion(backdrop: BackdropId): string | undefined {
+  return Object.keys(REGION_BACKDROPS).find(region => REGION_BACKDROPS[region] === backdrop)
+}
+
 /** The starting backdrop: the region's own when it has one, otherwise a random one. */
 export function startBackdrop(region: string): BackdropId {
   return regionBackdrop(region) ?? randomBackdrop()
@@ -231,6 +236,8 @@ export type RacerConfig = {
 export const BUMP_WARNING = 5
 /** Bumps at which the joke turns into "take driving lessons". */
 export const BUMP_LESSONS = 15
+/** Kilometres after which the test drive ends and the viewer is sent to a real seller. */
+export const TEST_DRIVE_KM = 10
 /** Bumps at which the car is a wreck: it stops and the drive can only be started over. */
 export const BUMP_WRECK = 20
 /** The car smokes one level more per this many bumps (0 = clean, up to `MAX_SMOKE_LEVEL`). */
@@ -248,6 +255,8 @@ export type RacerHud = {
   bumps: number
   /** `BUMP_WRECK` bumps reached: the car is stopped until the drive is started over. */
   wrecked: boolean
+  /** `TEST_DRIVE_KM` driven: the car is stopped and the drive can only be started over. */
+  finished: boolean
   lap: string
   last: string | null
   best: string | null

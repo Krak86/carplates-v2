@@ -6,6 +6,7 @@
  */
 import {
   BUMP_WRECK,
+  TEST_DRIVE_KM,
   HORN_HZ,
   QUALITY_SIZE,
   SIRENS,
@@ -209,6 +210,7 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
   let bumps = 0 // collisions with traffic or roadside objects, never reset (session counter like `driven`)
   let bumpCooldown = 0 // seconds of contact-free driving left before the next hit counts as a new bump
   let wrecked = false // BUMP_WRECK bumps: the car is stopped and input ignored until restart() clears it
+  let finished = false // TEST_DRIVE_KM driven: same stop as a wreck, until restart() starts a new drive
   let puffs: Puff[] = []
   let puffDebt = 0 // fractional puffs carried between updates
   let carAnchor = { x: 0, y: 0, w: 0, h: 0 } // where the player's car was last drawn (canvas px), the smoke's source
@@ -245,6 +247,7 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
       km: driven,
       bumps,
       wrecked,
+      finished,
       lap: formatTime(currentLapTime),
       last: lastLapTime == null ? null : formatTime(lastLapTime),
       best: bestLap == null ? null : formatTime(bestLap),
@@ -303,7 +306,7 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
 
   /** Counts a hit once per contact: staying pressed against the obstacle keeps the cooldown running. */
   function registerBump(): void {
-    if (wrecked) return
+    if (wrecked || finished) return
     if (bumpCooldown <= 0) {
       bumps++
       if (bumps >= BUMP_WRECK) wrecked = true
@@ -363,7 +366,7 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
 
     position = increase(position, dt * speed, trackLength)
 
-    if (!wrecked) {
+    if (!wrecked && !finished) {
       if (keyLeft) playerX -= dx
       else if (keyRight) playerX += dx
     }
@@ -371,7 +374,7 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
     playerX -= dx * speedPercent * playerSegment.curve * CENTRIFUGAL
 
     const accel = ACCEL * (0.5 + 0.5 * (topSpeed() / MAX_SPEED)) * dt
-    if (wrecked) {
+    if (wrecked || finished) {
       // the car coasts to a halt and stays there; the wheel and pedals no longer answer
       speed += BREAKING * 0.5 * dt
       braking = false
@@ -417,6 +420,10 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
     playerX = limit(playerX, -3, 3)
     speed = limit(speed, 0, topSpeed())
     driven += ((speed / 100) * dt) / 3600 // the HUD shows speed / 100 as km/h
+    if (driven >= TEST_DRIVE_KM && !finished) {
+      finished = true
+      emitHud(true)
+    }
 
     const travelled = (position - startPosition) / SEGMENT_LENGTH
     skyOffset = increase(skyOffset, SKY_SPEED * playerSegment.curve * travelled, 1)
@@ -638,7 +645,7 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
               interpolate(playerSegment.p1.camera.y, playerSegment.p2.camera.y, playerPercent) *
               height) /
               2,
-          speed * (keyLeft && !wrecked ? -1 : keyRight && !wrecked ? 1 : 0)
+          speed * (keyLeft && !wrecked && !finished ? -1 : keyRight && !wrecked && !finished ? 1 : 0)
         )
       }
     }
@@ -893,9 +900,10 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
   }
 
   function restart(): void {
-    if (wrecked) {
-      // a wreck means a brand-new test drive: the counters start from zero too
+    if (wrecked || finished) {
+      // a wreck or a finished drive means a brand-new test drive: the counters start from zero too
       wrecked = false
+      finished = false
       bumps = 0
       driven = 0
     }

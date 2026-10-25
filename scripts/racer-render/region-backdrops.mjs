@@ -88,6 +88,11 @@ const PHOTOS = {
     sky: { x0: 0, x1: 0.5, y0: 0 },
     ridge: { cx: 0.5, y0: 0.2, y1: 0.6, k: 2, h: 220, key: true, keyRows: 0.35 }
   },
+  mykolaiv: {
+    file: 'Mykolaiv.jpg',
+    sky: { x0: 0.15, x1: 0.65, y0: 0 },
+    ridge: { cx: 0.5, y0: 0.3, y1: 0.76, k: 2, h: 250, key: true, keyRows: 1 }
+  },
   volyn: {
     file: 'волинь.webp',
     sky: { gradient: ['#7fa6d4', '#cfe0ee'] },

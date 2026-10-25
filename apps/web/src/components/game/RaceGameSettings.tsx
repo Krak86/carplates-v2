@@ -16,10 +16,12 @@ import {
   TRAFFIC_LEVELS,
   randomBackdrop,
   randomRegion,
+  backdropRegion,
   regionBackdrop,
   type CarBody,
   type RacerConfig,
-  type SceneryId
+  type SceneryId,
+  type BackdropId
 } from '@/lib/racer/config'
 
 type Props = {
@@ -58,6 +60,12 @@ export default function RaceGameSettings({ config, onChange, onPickBody }: Props
     : REGION_BACKDROP_IDS.slice(0, REGION_BACKDROPS_COLLAPSED)
 
   /** A region with its own photo backdrop switches to it; any other keeps the current backdrop. */
+  /** A region backdrop also moves the billboards to its region; a generic one keeps the current region. */
+  const handleBackdrop = (backdrop: BackdropId): void => {
+    const region = backdropRegion(backdrop)
+    onChange(region ? { backdrop, region } : { backdrop })
+  }
+
   const handleRegion = (region: string): void => {
     const backdrop = regionBackdrop(region)
     onChange(backdrop ? { region, backdrop } : { region })
@@ -116,7 +124,7 @@ export default function RaceGameSettings({ config, onChange, onPickBody }: Props
 
       <RaceGameGroup label={t('race.backdrop')}>
         {GENERIC_BACKDROPS.map(backdrop => (
-          <RaceGameChip key={backdrop} active={config.backdrop === backdrop} onClick={() => onChange({ backdrop })}>
+          <RaceGameChip key={backdrop} active={config.backdrop === backdrop} onClick={() => handleBackdrop(backdrop)}>
             {t(`race.backdrop.${backdrop}`)}
           </RaceGameChip>
         ))}
@@ -127,7 +135,7 @@ export default function RaceGameSettings({ config, onChange, onPickBody }: Props
 
       <RaceGameGroup label={t('race.backdrop.regions')}>
         {regionBackdrops.map(backdrop => (
-          <RaceGameChip key={backdrop} active={config.backdrop === backdrop} onClick={() => onChange({ backdrop })}>
+          <RaceGameChip key={backdrop} active={config.backdrop === backdrop} onClick={() => handleBackdrop(backdrop)}>
             {t(`race.backdrop.${backdrop}`)}
           </RaceGameChip>
         ))}

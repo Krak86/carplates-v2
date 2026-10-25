@@ -12,6 +12,7 @@ import {
   BUMP_WARNING,
   BUMP_WRECK,
   RACER_SIZE_KB,
+  TEST_DRIVE_KM,
   SIRENS,
   type CarBody,
   type RacerConfig
@@ -233,7 +234,27 @@ export default function RaceGameStage({ config, onChange, onPickBody }: Props): 
             </div>
           )}
 
-          {hud && !hud.wrecked && hud.bumps >= BUMP_WARNING && (
+          {hud?.finished && !hud.wrecked && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/60 p-4">
+              <div role="alertdialog" className="max-w-sm rounded-xl bg-white p-5 text-center text-black shadow-xl">
+                <div className="text-5xl" aria-hidden>
+                  🏁🤝
+                </div>
+                <h3 className="mt-2 text-lg font-bold">{t('race.finished.title')}</h3>
+                <p className="mt-1 text-sm">{t('race.finished.text', { km: TEST_DRIVE_KM })}</p>
+                <button
+                  type="button"
+                  autoFocus
+                  onClick={handleRestart}
+                  className="mt-4 cursor-pointer rounded-full bg-[var(--color-primary)] px-5 py-2 font-semibold text-white"
+                >
+                  {t('race.finished.restart')}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {hud && !hud.wrecked && !hud.finished && hud.bumps >= BUMP_WARNING && (
             <div
               role="status"
               className="pointer-events-none absolute inset-x-0 bottom-3 mx-auto w-fit max-w-[90%] rounded-lg bg-red-600/85 px-3 py-1.5 text-center text-sm font-semibold text-white"
