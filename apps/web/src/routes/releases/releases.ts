@@ -15,6 +15,12 @@ export const RELEASES: readonly ReleaseDay[] = [
         'Якщо номера чи VIN немає в реєстрі (наприклад, авто до 2013 року), під повідомленням з’явилося посилання на перевірку AUTO.RIA',
         'Если номера или VIN нет в реестре (например, авто до 2013 года), под сообщением появилась ссылка на проверку AUTO.RIA',
         'When a plate or VIN is not in the registry (e.g. a pre-2013 car), a link to the AUTO.RIA check now appears under the message'
+      ),
+      item(
+        'new',
+        'У секції «Перевірка» нові посилання: протокол техогляду (ОТК) за номером і чинність посвідчення водія',
+        'В секции «Проверка» новые ссылки: протокол техосмотра (ОТК) по номеру и действительность водительского удостоверения',
+        'Verification section has new links: technical inspection protocol (OTK) by plate and driving licence validity'
       )
     ]
   },
