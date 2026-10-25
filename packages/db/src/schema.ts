@@ -1587,3 +1587,73 @@ export const statsImports = registry.table(
   t => [primaryKey({ columns: [t.origin, t.regYear, t.country, t.brand, t.model] })]
 )
 export type StatsImportsInsert = typeof statsImports.$inferInsert
+
+/** Brand home country by period (Wikidata); modern ISO code, mapped to the legacy state by year in the app. See migrations/0075_origin.sql. */
+export const brandOriginPeriod = registry.table(
+  'brand_origin_period',
+  {
+    brandSlug: text('brand_slug').notNull(),
+    fromYear: smallint('from_year').notNull().default(0),
+    toYear: smallint('to_year'),
+    countryCode: text('country_code').notNull(),
+    foundedYear: smallint('founded_year'),
+    hqCity: text('hq_city'),
+    source: text('source').notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
+  },
+  t => [primaryKey({ columns: [t.brandSlug, t.fromYear] })]
+)
+export type BrandOriginPeriodRow = typeof brandOriginPeriod.$inferSelect
+export type BrandOriginPeriodInsert = typeof brandOriginPeriod.$inferInsert
+
+/** Brand ownership history (Wikidata). Gaps mean "unknown". */
+export const brandOwnership = registry.table(
+  'brand_ownership',
+  {
+    brandSlug: text('brand_slug').notNull(),
+    ownerName: text('owner_name').notNull(),
+    ownerCountry: text('owner_country'),
+    fromYear: smallint('from_year').notNull().default(0),
+    toYear: smallint('to_year'),
+    source: text('source').notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
+  },
+  t => [primaryKey({ columns: [t.brandSlug, t.ownerName, t.fromYear] })]
+)
+export type BrandOwnershipRow = typeof brandOwnership.$inferSelect
+export type BrandOwnershipInsert = typeof brandOwnership.$inferInsert
+
+/** Hand-curated plants per model (release 2). `city` '' = unknown. */
+export const modelPlant = registry.table(
+  'model_plant',
+  {
+    brandSlug: text('brand_slug').notNull(),
+    modelSlug: text('model_slug').notNull(),
+    countryCode: text('country_code').notNull(),
+    city: text('city').notNull().default(''),
+    fromYear: smallint('from_year').notNull().default(0),
+    toYear: smallint('to_year'),
+    sourceUrl: text('source_url').notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
+  },
+  t => [primaryKey({ columns: [t.brandSlug, t.modelSlug, t.countryCode, t.city, t.fromYear] })]
+)
+export type ModelPlantRow = typeof modelPlant.$inferSelect
+export type ModelPlantInsert = typeof modelPlant.$inferInsert
+
+/** VIN world-manufacturer-identifier list (NHTSA). */
+export const wmiPrefix = registry.table(
+  'wmi_prefix',
+  {
+    wmi: text('wmi').notNull(),
+    fromYear: smallint('from_year').notNull().default(0),
+    toYear: smallint('to_year'),
+    maker: text('maker'),
+    countryCode: text('country_code'),
+    region: text('region'),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
+  },
+  t => [primaryKey({ columns: [t.wmi, t.fromYear] })]
+)
+export type WmiPrefixRow = typeof wmiPrefix.$inferSelect
+export type WmiPrefixInsert = typeof wmiPrefix.$inferInsert

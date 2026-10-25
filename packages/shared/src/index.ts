@@ -9,6 +9,18 @@ export {
 } from './plate.js'
 export { modelFamily, type ModelFamily } from './modelFamily.js'
 export { hasKnownWmi, lookupWmi, type WmiMatch } from './wmi.js'
+export {
+  LEGACY_COUNTRIES,
+  brandOriginPeriodSchema,
+  brandOwnershipSchema,
+  countryAtYear,
+  isLegacyCountry,
+  modelPlantSchema,
+  type BrandOriginPeriod,
+  type BrandOwnership,
+  type LegacyCountry,
+  type ModelPlant
+} from './origin.js'
 export { extractVins, vinCheckDigitOk, type OcrLine, type VinRead } from './vin-read.js'
 export {
   LEGACY_REGIONS,
