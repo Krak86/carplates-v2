@@ -8,6 +8,17 @@ const item = (group: ReleaseGroup, ua: string, ru: string, en: string): ReleaseI
  */
 export const RELEASES: readonly ReleaseDay[] = [
   {
+    date: '2026-10-25',
+    items: [
+      item(
+        'new',
+        'Якщо номера чи VIN немає в реєстрі (наприклад, авто до 2013 року), під повідомленням з’явилося посилання на перевірку AUTO.RIA',
+        'Если номера или VIN нет в реестре (например, авто до 2013 года), под сообщением появилась ссылка на проверку AUTO.RIA',
+        'When a plate or VIN is not in the registry (e.g. a pre-2013 car), a link to the AUTO.RIA check now appears under the message'
+      )
+    ]
+  },
+  {
     date: '2026-10-17',
     items: [
       item(

@@ -382,6 +382,14 @@ Files: migrations 0068 + 0069, `scripts/src/wanted.ts` (+ `wanted-parse.ts`), `a
 - **Matching:** `plate` is `normalizePlate`d; `vin` / `vin_alt` = the VIN-shaped (17-char) body and chassis numbers (a record can carry both a local `Y6L…` body number and the maker's `KNE…` VIN) — a lookup matches either. Records without a plate (≈ 11 %) are found by VIN only. `matchedBy` says which key hit.
 - `GET /api/wanted` has the plate-lookup `@Throttle`; at least one of `plate` / `vin` is required. The section opens itself and shows a red chip when something is found; a clean result is worded "not on the list", never "clean" (not an official certificate). Link-outs: `stolen.in.ua/v/<Latin plate>` and the dataset page.
 
+## AUTO.RIA link-out for not-found plates / VINs (2026-10-25)
+
+Files: `apps/web/src/components/RiaCheckLink.tsx` (used by `NotFoundInfo` and the VIN not-found branch of `SearchRoute`), `RIA_CHECK_URL` in `packages/shared/src/riaCheck.ts`.
+
+- **The web only shows a plain link** to `auto.ria.com/uk/check-car/` (the open data starts Jan 2013; RIA's check knows some older plates). No RIA data is fetched or displayed: its robots.txt and terms forbid it, see `docs/legal-and-monetization.md` ("AUTO.RIA: link-out only").
+- **Dormant code:** `apps/api/src/ria/` (`GET /api/ria-check/:plate`, TTL cache, 4 calls / 90 s budget under RIA's 5 / 90 s cap) and the `riaCheckResponseSchema` contract stay behind `RIA_CHECK_ENABLED` (off, wired in `deploy-api.yml` + `deploy.md`). Nothing in the web calls it. Enable only with RIA's written consent, and then add a client query + card again.
+- No offline group, no new route (so no `ROUTE_TITLE_KEYS` / `STATIC_PAGES` entry).
+
 ## Releases page (`/releases`, 2026-10-15)
 
 - Public "What's new" log, one `ReleaseDay` per working day in `apps/web/src/routes/releases/releases.ts` (items tagged `new | improved | data | fix`, text in ua/ru/en). **After each big update add the day's entry (or extend today's).** Data is bundled in the lazy route chunk, not in `/api`.

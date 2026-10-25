@@ -87,6 +87,8 @@ becomes available.
 
 ### Releases page (`/releases`) ✅ DONE (2026-10-15) — see `docs/plan-done.md`
 
+### AUTO.RIA link-out for plates/VINs not in the registry ✅ DONE (2026-10-25) — link only; RIA data use is restricted, see `docs/legal-and-monetization.md`
+
 ### Wanted / stolen vehicle check ✅ DONE (2026-10-15)
 
 Police open data (data.gov.ua) -> `registry.wanted_vehicles` + `/api/wanted` + `WantedCheck` section; write-up in `docs/plan-done.md`. Scheduled daily in `SCHEDULE.md` (VPS job still to set up).

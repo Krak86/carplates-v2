@@ -37,6 +37,13 @@ launching ads or paid features. The project-specific findings are the useful par
 - **Scraped / third-party sources** are the main risk: infocar, TopGear, carshow360/winner360, Honda videos, IIHS, Euro NCAP,
   JNCAP, edrive, car-dimensions site (permission still pending, see PLAN.md). Don't put ads or a paywall next to reproduced text or
   images from these; prefer link-out or licensed use. Audit one by one.
+- **AUTO.RIA (`auto.ria.com`): link-out only, never read its data (checked 2026-10-25).** Its free check
+  (`/cars-verifyings/api/vin-verifyings/<plate>`, no auth) does answer for pre-2013 plates, but: `robots.txt` has
+  `Disallow: */api/*`; the terms (`oferta.ria.com/auto`) forbid scraping/copying the database (cl. 1.16), forbid publishing,
+  redistributing or commercially using API-obtained data, and list blocking, technical countermeasures and lawsuits as
+  consequences (cl. 1.6.8). The not-found card therefore only links to `auto.ria.com/uk/check-car/` (`RiaCheckLink`). The
+  server-side fetcher (`apps/api/src/ria/`, `RIA_CHECK_ENABLED`) stays **off and unused by the web**; turn it on only with RIA's
+  written consent (contact `verified_cars@auto.ria.com`). Same rule for any other RIA endpoint.
 - Fine to monetize with attribution: Wikipedia/Commons (CC BY-SA, share-alike), NHTSA (public domain), RDW (CC0), Open EV Data (MIT).
 - Images (wiki-images, photos): per-image licence check first.
 - Ad networks reject scraped / thin content. Safest monetization surface: content you own — plate/VIN lookup, computed value

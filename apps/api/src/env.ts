@@ -32,6 +32,11 @@ const envSchema = z.object({
   /** Own-model ALPR container (services/alpr, `pnpm alpr:up`). Absent → the local recognize route answers 503. */
   ALPR_LOCAL_URL: z.string().optional(),
 
+  /** AUTO.RIA's free "check a car" answer, the fallback for plates our registry lacks (pre-2013). Unofficial, undocumented
+   *  endpoint capped at 5 calls / 90 s per IP, so it is opt-in: off unless explicitly enabled. */
+  RIA_CHECK_ENABLED: boolish,
+  RIA_CHECK_BASE_URL: z.string().default('https://auto.ria.com'),
+
   PIXABAY_BASE_URL: z.string().default('https://pixabay.com/api/'),
   /** Absent → the photos route answers 503. */
   PIXABAY_API_KEY: z.string().optional(),
