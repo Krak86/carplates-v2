@@ -1,6 +1,6 @@
 # ORIGIN_PLAN.md - vehicle origin chip + "Where it comes from" section
 
-**Status:** Steps 0-2, 4 and 5 done (Step 3 deferred). To continue in a new session: "start Step 6". Tick the boxes below as steps finish.
+**Status:** Steps 0-2, 4 and 5 done (Step 3 deferred). To continue in a new session: "start Step A (data cleanup)", then follow "Implementation order" below. Tick the boxes below as steps finish.
 Read CLAUDE.md and CLAUDE_RULES.md first; they govern every step (ESM `.js` imports, explicit `@Inject`, Zod at boundaries, tests colocated,
 `pnpm format` first, never `git commit` unless asked, suggest a commit message after each big update).
 
@@ -52,6 +52,33 @@ Show where a vehicle comes from, only when the data is known (never guessed):
 Existing code to reuse: `VinOriginCard`, `countryIso()`/`countryFlag()` in `apps/web/src/components/vin/helpers.ts`,
 `packages/shared/src/wmi.ts`, `apps/web/src/components/RegistrationTimeline.tsx`, `lib/offline-cache.ts`, the "imported" chip -> Auction history
 `openSignal` pattern.
+
+## Implementation order (remaining, first release)
+
+Step numbers stay as written below; this is the order to build them in. Each step adds its own ua/ru/en keys; Step 10 is the final sweep.
+
+1. **Step A - Data cleanup (~30 min, below).** Fix the Step 2 data before any UI shows it.
+2. **Step 6** - Flags and country names (chip and section both need them).
+3. **Step 8a** - Extract the shared `Timeline` from `RegistrationTimeline`; its existing tests must still pass. Separate commit, regression risk.
+4. **Step 8b** - `OriginSection` (steps, mismatch banner, explainer, source + "as of"). Built before the chip so `?section=origin` and `openSignal` have a target.
+5. **Step 7** - Chip (needs flags and a section to open).
+6. **Step 10** - i18n, accessibility, polish, browser check.
+7. **Step 11** - Docs, release, final checks.
+
+Release 2 (deferred): Step 3, Step 9.
+
+### [ ] Step A - Data cleanup (30 min)
+
+Fix the Step 2 data problems found while testing the Step 5 API (see "Step 5 notes"). Edit `scripts/src/brand-origin-overrides.ts` (`OWNERSHIP_OVERRIDES` replaces Wikidata ownership for a slug and is empty today; `ORIGIN_OVERRIDES` for the HQ city) and/or the ownership filter in `mergeBrand` (`brand-origin-parse.ts`); add a parse test for any filter change. Each override needs a Wikipedia source.
+
+- Skoda: drop junk "Volkswagen Group 0-2000", "Skoda Works 1925-" and "Volkswagen Finance Luxemburg 2014-"; expected: Volkswagen Group from 1991.
+- Nissan: drop the "Renault-Nissan-Mitsubishi Alliance" owner (an alliance is not an owner); keep Renault only if dated/accurate (Renault holds a stake since 1999).
+- Lada: `hq_city` "Russia" -> "Tolyatti".
+- Volvo: add Ford 1999-2010 and Geely from 2010 (Wikidata gap) via `OWNERSHIP_OVERRIDES`.
+- Then scan the top ~30 brands by registry count with `pnpm ingest:brand-origin --show <slugs>` for the same patterns (undated or duplicate owners, finance arms, alliances, a country name as HQ city) and fix what is clearly wrong.
+- Re-run `pnpm ingest:brand-origin` (offline, uses the cache; writes the real DB, only the two origin tables), then `pnpm export:brand-origin:csv`. Do not touch `registry.registrations`.
+- Verify: `GET /api/origin?brand=SKODA&year=2018` and `brand=VOLVO` show clean ownership.
+- **Done when:** the top brands show sensible ownership and HQ, the seed CSVs are re-exported, tests pass.
 
 ## Steps
 
@@ -140,7 +167,7 @@ Done 2026-10-26. `apps/api/src/origin/` (`origin.controller/service/module/dto.t
 - Tests: brand only, brand + owner, brand + plant, nothing.
 - **Done when:** correct on a Skoda (CZ/DE), a Toyota (JP) and an old VAZ (USSR).
 
-### [ ] Step 8 - Timeline component and section (2.5 h)
+### [ ] Step 8 - Timeline component and section (2.5 h) - build as 8a (Timeline extract) then 8b (OriginSection)
 
 - Extract the dot-and-line markup from `RegistrationTimeline.tsx` into a shared `Timeline`; `RegistrationTimeline` keeps its behavior
   (newest first, arrows up) and its tests must still pass. The origin section is chronological, arrows down.
