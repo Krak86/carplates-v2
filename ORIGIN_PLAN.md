@@ -164,7 +164,9 @@ Notes: `components/Flag.tsx` (`code`, optional `label`; decorative without it) r
 - Replace `countryFlag()` usage in the VIN card. Legacy names in ua/ru/en i18n keys; others via `Intl.DisplayNames`.
 - **Done when:** the VIN page shows the same flags as before; legacy flags render.
 
-### [ ] Step 7 - Chip (1 h)
+### [x] Step 7 - Chip (1 h) - DONE 2026-10-26
+
+Notes: `components/OriginChip.tsx` (brand flag, owner flag only when `ownerCountry` is known and differs from the brand's, plant flag; popover legend + disclaimer; chevron bumps `openSignal`). Pure `buildOriginChip` in `OriginSection.helpers.ts` (tests: brand only, +owner, owner hidden cases, +plant, nothing). Mounted in `ResultCard` (after GenerationChip) and `VinResult` (row under the barcode); both `LazySection`s got `forceMount` + `openSignal`. Shares the query key with the section. Keys `origin.chip.*` in ua/ru/en. **Owner flag will rarely show: `owner_country` is null for most ownership rows (Wikidata owner country is not fetched).** Not browser-checked (Step 10); the Skoda/Toyota/VAZ check is still to do there.
 
 - `OriginChip.tsx` (default export, `Props` type, hook for data, derive during render). On the VIN page and plate card next to existing chips.
 - Tooltip per flag; click opens the origin section via `openSignal`.

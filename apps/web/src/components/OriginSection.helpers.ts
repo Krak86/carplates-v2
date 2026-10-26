@@ -135,6 +135,39 @@ export function buildOriginView(
   return view
 }
 
+export type OriginChipData = {
+  brand: { country: string; ukrainianSsr: boolean } | null
+  /** Current owner, only when its country is known and differs from the brand's. */
+  owner: { name: string; country: string } | null
+  plant: { country: string; city: string | null } | null
+}
+
+/** The flags of the header chip: brand home, owner when it is from elsewhere, assembly plant. Null when nothing is known. */
+export function buildOriginChip(
+  data: OriginResponse | undefined,
+  year: number | null | undefined
+): OriginChipData | null {
+  const view = buildOriginView(data, year, null)
+  const brandStep = view.steps.find(step => step.kind === 'brand')
+  const assemblyStep = view.steps.find(step => step.kind === 'assembly')
+  const brand =
+    brandStep?.kind === 'brand' ? { country: brandStep.country, ukrainianSsr: brandStep.ukrainianSsr } : null
+  const plant = assemblyStep?.kind === 'assembly' ? { country: assemblyStep.country, city: assemblyStep.city } : null
+
+  const modernBrandCode = pickByYear(data?.brand?.periods ?? [], year)?.countryCode
+  const picked = pickByYear(data?.brand?.ownership ?? [], year)
+  // pickByYear falls back to the nearest earlier row: an owner that had already left before the car's year is not its owner.
+  const currentOwner =
+    picked && (year == null || picked.toYear == null || picked.toYear === 0 || year <= picked.toYear) ? picked : null
+  const owner =
+    currentOwner?.ownerCountry && currentOwner.ownerCountry !== modernBrandCode
+      ? { name: currentOwner.ownerName, country: countryAtYear(currentOwner.ownerCountry, year) }
+      : null
+
+  if (!brand && !owner && !plant) return null
+  return { brand, owner, plant }
+}
+
 /** Short readable name of a source URL: "Wikidata", else the host. */
 export function sourceLabel(url: string): string {
   try {

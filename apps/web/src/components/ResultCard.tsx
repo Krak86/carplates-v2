@@ -71,6 +71,7 @@ import Model360Button from '@/components/Model360Button'
 import VerificationLinks from '@/components/VerificationLinks'
 import WantedChip from '@/components/WantedChip'
 import VinDecodeTabs from '@/components/vin/VinDecodeTabs'
+import OriginChip from '@/components/OriginChip'
 import { ukraineFromActions } from '@/components/OriginSection.helpers'
 import { countryIso, groupFields, toFieldMap } from '@/components/vin/helpers'
 import VinSince2021Note from '@/components/vin/VinSince2021Note'
@@ -167,6 +168,8 @@ export default function ResultCard({ data }: Props): ReactNode {
   // The "imported" status chip opens the Auction history section (mounting it first if it is still lazy).
   const [auctionOpenSignal, setAuctionOpenSignal] = useState(0)
   const [wantedOpenSignal, setWantedOpenSignal] = useState(0)
+  // The origin (flags) chip opens the "Where it comes from" section the same way.
+  const [originOpenSignal, setOriginOpenSignal] = useState(0)
   // Links inside the Specs block open the section that goes deeper.
   const [emissionsOpenSignal, setEmissionsOpenSignal] = useState(0)
   const [enginesOpenSignal, setEnginesOpenSignal] = useState(0)
@@ -394,6 +397,15 @@ export default function ResultCard({ data }: Props): ReactNode {
                   everImported={data.everImported}
                 />
                 <GenerationChip brand={c.brand} model={c.model} year={c.makeYear} />
+                <OriginChip
+                  brand={c.brand}
+                  model={c.model}
+                  year={c.makeYear}
+                  vin={hasVin ? c.vin : null}
+                  plantCountry={countryIso(vinFields?.get('Plant Country'))}
+                  plantCity={vinFields?.get('Plant City')}
+                  onOpenSection={() => setOriginOpenSignal(n => n + 1)}
+                />
                 <SizeClassChip
                   brand={c.brand}
                   model={c.model}
@@ -853,8 +865,9 @@ export default function ResultCard({ data }: Props): ReactNode {
             <StockSection brand={c.brand} model={c.model} year={c.makeYear} />
           </LazySection>
           {c.brand && (
-            <LazySection sections={['origin']}>
+            <LazySection sections={['origin']} forceMount={originOpenSignal > 0}>
               <OriginSection
+                openSignal={originOpenSignal}
                 brand={c.brand}
                 model={c.model}
                 year={c.makeYear}

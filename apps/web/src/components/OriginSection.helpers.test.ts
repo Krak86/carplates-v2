@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { OriginResponse } from '@carplates/shared'
 
-import { buildOriginView } from '@/components/OriginSection.helpers'
+import { buildOriginChip, buildOriginView } from '@/components/OriginSection.helpers'
 
 const SKODA: OriginResponse = {
   brand: {
@@ -74,6 +74,51 @@ describe('buildOriginView', () => {
     )
 
     expect(view).toMatchObject({ makerMismatch: 'Ford', northAmericaVin: true, assemblyDiffers: false })
+  })
+
+  describe('buildOriginChip', () => {
+    it('brand only', () => {
+      const data: OriginResponse = { brand: { slug: 'toyota', periods: [SKODA.brand!.periods[0]!], ownership: [] } }
+
+      expect(buildOriginChip(data, 2018)).toEqual({
+        brand: { country: 'CZ', ukrainianSsr: false },
+        owner: null,
+        plant: null
+      })
+    })
+
+    it('brand + owner from another country', () => {
+      const data: OriginResponse = {
+        brand: {
+          ...SKODA.brand!,
+          ownership: [{ ownerName: 'Volkswagen Group', ownerCountry: 'DE', fromYear: 1991, toYear: null, source: 'wd' }]
+        }
+      }
+
+      expect(buildOriginChip(data, 2018)?.owner).toEqual({ name: 'Volkswagen Group', country: 'DE' })
+    })
+
+    it('hides an owner from the brand country, of unknown country or gone before the car year', () => {
+      const owned = (ownerCountry: string | null, toYear: number | null): OriginResponse => ({
+        brand: { ...SKODA.brand!, ownership: [{ ownerName: 'X', ownerCountry, fromYear: 1991, toYear, source: 'wd' }] }
+      })
+
+      expect(buildOriginChip(owned('CZ', null), 2018)?.owner).toBeNull()
+      expect(buildOriginChip(owned(null, null), 2018)?.owner).toBeNull()
+      expect(buildOriginChip(owned('DE', 2000), 2018)?.owner).toBeNull()
+    })
+
+    it('brand + plant, with the former state by year', () => {
+      expect(buildOriginChip(SKODA, 1985)).toMatchObject({
+        brand: { country: 'CSHH' },
+        plant: { country: 'CSHH', city: null }
+      })
+    })
+
+    it('nothing known', () => {
+      expect(buildOriginChip(undefined, 2018)).toBeNull()
+      expect(buildOriginChip({}, 2018)).toBeNull()
+    })
   })
 
   it('lists model plants under the assembly step', () => {

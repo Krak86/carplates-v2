@@ -1,4 +1,4 @@
-import { lazy } from 'react'
+import { lazy, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
@@ -28,6 +28,7 @@ import VinRegistryHistory from '@/components/vin/VinRegistryHistory'
 import VinDecodeTabs from '@/components/vin/VinDecodeTabs'
 import VinTypicalData from '@/components/vin/VinTypicalData'
 import LazySection from '@/components/LazySection'
+import OriginChip from '@/components/OriginChip'
 import { useCardMotion } from '@/hooks/useCardMotion'
 import { ukraineFromActions } from '@/components/OriginSection.helpers'
 import { countryIso, toFieldMap } from '@/components/vin/helpers'
@@ -50,6 +51,8 @@ export default function VinResult({ data }: Props): ReactNode {
   const vehicleColor = resolveVehicleColor(registry?.actions[0]?.color) ?? fallbackVehicleColor(data.vin)
   const plate = registry?.plate ?? null
   const region = plate ? (regionName(plate) ?? null) : null
+  // The origin chip opens the "Where it comes from" section (mounting it first if it is still lazy).
+  const [originOpenSignal, setOriginOpenSignal] = useState(0)
   const tiltEnabled = useUiStore(s => s.cardTiltEnabled)
   const glowRef = useCardMotion<HTMLDivElement>(tiltEnabled)
   useCarHeroImageActions({ brand: vehicle.brand, model: vehicle.model, year: vehicle.year, key: data.vin })
@@ -102,6 +105,18 @@ export default function VinResult({ data }: Props): ReactNode {
         </div>
         <VinBarcode vin={data.vin} />
 
+        <div className="mb-3 flex flex-wrap items-center gap-1.5 empty:hidden">
+          <OriginChip
+            brand={vehicle.brand}
+            model={vehicle.model}
+            year={vehicle.year}
+            vin={data.vin}
+            plantCountry={countryIso(fields.get('Plant Country'))}
+            plantCity={fields.get('Plant City')}
+            onOpenSection={() => setOriginOpenSignal(n => n + 1)}
+          />
+        </div>
+
         {registry && (
           <div className="mb-4">
             <div className="flex justify-between gap-4 py-1.5 text-base">
@@ -138,8 +153,9 @@ export default function VinResult({ data }: Props): ReactNode {
           <WantedCheck plate={null} vin={data.vin} />
         </LazySection>
 
-        <LazySection sections={['origin']}>
+        <LazySection sections={['origin']} forceMount={originOpenSignal > 0}>
           <OriginSection
+            openSignal={originOpenSignal}
             brand={vehicle.brand}
             model={vehicle.model}
             year={vehicle.year}
