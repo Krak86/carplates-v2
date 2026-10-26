@@ -89,8 +89,9 @@ def _sharpened(crop: np.ndarray) -> np.ndarray:
 # (BO read as BU at 0.88 vs 0.12) or a letter where a digit belongs. A UA plate has a known shape
 # and its letters come from a small set, so re-pick each slot within its class. Same shapes as
 # PLATE_SHAPES in packages/shared (plate.ts). Letters = the 12 Cyrillic look-alikes plus the Latin
-# ones that really occur in the registry (a 2% sample: Y 7.7k, J 6k, F 4.9k, D 2.3k, G 1.6k,
-# Z 1.2k); L/U/N/R/Q/V/S are under 100 each, so a read of one of those is a misread.
+# ones that really occur in the registry (all 24.2M 8-char plates, 2026-10-26: Y 389k, J 303k, F 240k,
+# D 133k, G 80k, Z 62k); L/U/N/S/R/V/Q are 0.5k-10.5k each (L is 0.04% of plates), so a read of one of
+# those is a misread. Re-measured on the full table: the earlier 2% sample picked the same set.
 PLATE_LETTERS = "ABCEHIKMOPTXYJFDGZ"
 PLATE_SHAPES = ["LLDDDDLL", "LLLLDDDD", "DDLLDDDD"]
 MIN_SHAPE_FIT = 6  # slots (of 8) that must already fit a shape, else the read is left as it is
@@ -164,17 +165,24 @@ def _read_plate(tile: np.ndarray, box: Any) -> tuple[tuple[str, float], list[tup
 # plate): the readers differ by crop, and the more confident one is not always the right one. Besides
 # the best read, return up to MAX_ALTERNATIVES other full-length reads that differ from it by exactly
 # one character and are at least ALT_MIN_SCORE sure; they share the plate's box, so the UI can show
-# them as one group.
+# them as one group. A primary at or above ALT_CONFIDENT_SCORE is sure enough that an alternative
+# more than ALT_CONFIDENT_GAP behind it is only noise (AH4018AC at 0.987 beside AH4078AC at 0.943);
+# a near-tie (BT1572BK 0.986 / BT1372BK 0.985) is real ambiguity and stays.
 ALT_MIN_SCORE = 0.55
+ALT_CONFIDENT_SCORE = 0.97
+ALT_CONFIDENT_GAP = 0.03
 MAX_ALTERNATIVES = 2
 
 
-def _alternatives(best: str, reads: list[tuple[str, float]]) -> list[tuple[str, float]]:
+def _alternatives(best: str, best_score: float, reads: list[tuple[str, float]]) -> list[tuple[str, float]]:
+    confident = best_score >= ALT_CONFIDENT_SCORE
     top: dict[str, float] = {}
     for text, score in reads:
         compact = _compact(text)
         differs = sum(a != b for a, b in zip(compact, best))
         if len(compact) == PLATE_LENGTH and differs == 1 and score >= ALT_MIN_SCORE:
+            if confident and best_score - score > ALT_CONFIDENT_GAP:
+                continue
             top[compact] = max(score, top.get(compact, 0.0))
     return sorted(top.items(), key=lambda item: item[1], reverse=True)[:MAX_ALTERNATIVES]
 
@@ -366,7 +374,7 @@ def _predict_tiled(frame: np.ndarray) -> list[dict[str, Any]]:
         # score and opens the top one, so an alternative must never take the primary's place.
         results.extend(
             {"plate": alt, "score": min(alt_score, score - 0.001), "box": _box(box)}
-            for alt, alt_score in _alternatives(_compact(plate), same_plate)
+            for alt, alt_score in _alternatives(_compact(plate), score, same_plate)
         )
     return results
 
@@ -380,16 +388,18 @@ def healthz() -> dict[str, str]:
 MAX_UPLOAD_BYTES = 6 * 1024 * 1024
 
 
-async def _read_capped(image: UploadFile) -> bytes:
-    raw = await image.read(MAX_UPLOAD_BYTES + 1)
+def _read_capped(image: UploadFile) -> bytes:
+    raw = image.file.read(MAX_UPLOAD_BYTES + 1)
     if len(raw) > MAX_UPLOAD_BYTES:
         raise HTTPException(status_code=413, detail="Image too large")
     return raw
 
 
+# Plain `def` (not `async def`) on purpose: the inference is CPU-bound, so FastAPI runs the handler in its
+# threadpool and a slow photo no longer queues every other upload behind it on the event loop.
 @app.post("/recognize")
-async def recognize(image: UploadFile = File(...)) -> dict[str, list[dict[str, Any]]]:
-    raw = await _read_capped(image)
+def recognize(image: UploadFile = File(...)) -> dict[str, list[dict[str, Any]]]:
+    raw = _read_capped(image)
     if not raw:
         raise HTTPException(status_code=400, detail="Uploaded image is empty")
 
@@ -460,8 +470,8 @@ def _ocr_lines(frame: np.ndarray, **kwargs: Any) -> list[dict[str, Any]]:
 
 
 @app.post("/recognize/vin")
-async def recognize_vin(image: UploadFile = File(...)) -> dict[str, list[dict[str, Any]]]:
-    raw = await _read_capped(image)
+def recognize_vin(image: UploadFile = File(...)) -> dict[str, list[dict[str, Any]]]:
+    raw = _read_capped(image)
     if not raw:
         raise HTTPException(status_code=400, detail="Uploaded image is empty")
 

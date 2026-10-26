@@ -148,21 +148,16 @@ not a parallel feature, hence the step order below.
 
 **Own ALPR — open actions (as of 2026-10-26, continue here):**
 
-- ⏳ **Ground truth for the eval.** `services/alpr/eval/labels.csv` is still missing, so every eval so far only shows "unchanged", never recall. Add the
+- ⏳ **Ground truth for the eval (partly done: `labels.csv` has 3 plates, recall 3/3; `BX5213BO` and `BC3064XC` have no photo, the other 85 photos are unlabelled).** Evals now report recall for the labelled files only. Add the
   known plates (the `eval/images/` photos are gitignored): `BX5213BO` (white-rack Mercedes 1940), `BC3064XC` (red truck), `AH4018AC` and `AB1918AB`
   (mopeds), `AI1920JA` (`ua_ai1920ja.jpg`), then label the rest and report recall/accuracy from `eval.mjs`.
-- ⏳ **Web upload resize changes reads.** The app downscales before sending (`shrinkImage`): the 4-plate parking photo reads `BC9779IX` from the original
-  file but `OC9779IX` through the app. Run the eval through `shrinkImage` (or compare sizes/quality) and pick settings that keep the reads.
-- ⏳ **Alternatives noise and threshold.** `ALT_MIN_SCORE` 0.55 / max 2 gave extra reads on ~15 of 88 photos, some next to an already-correct 0.98 read
-  (`AH4078AC` beside `AH4018AC`). Tune with labels; consider showing alternatives only when the primary is < ~0.97 or when the gap is small.
-- ⏳ **Registry check of alternatives.** The 3/5 ambiguity (`BX5213BO` vs `BX5215BO`, both OCR-plausible) cannot be settled by OCR; `BX5215BO` is a real
-  Peugeot. Idea: look each candidate up and rank/mark those that exist, or flag "alternative exists in the registry".
-- ⏳ **Concurrency.** The `/recognize` handler is `async def` but CPU-bound, so one upload blocks the others (and the API times out at 10 s,
-  `local-recognize.service.ts`). Run it in a threadpool (`def` handler) or add workers; until then never run an eval while using the app.
+- ✅ **Web upload resize (2026-10-26).** `shrinkImage` cap 3200 -> 4608 px: the 3200 cap cost 4 confident reads on 4000 px phone photos (incl. `BC9779IX`); `eval.mjs --shrink` mirrors it. Details: `docs/plan-done.md` ("Web upload resize").
+- ✅ **Alternatives noise (2026-10-26).** A primary >= 0.97 now suppresses alternatives more than 0.03 behind it (`ALT_CONFIDENT_SCORE` / `ALT_CONFIDENT_GAP`); near-ties stay. 6 of the alternatives on 90 photos dropped, none added, `ALT_MIN_SCORE` 0.55 unchanged: `docs/plan-done.md` ("Alternatives noise"). Re-tune once more photos are labelled.
+- ✅ **Registry check of alternatives (2026-10-26).** `RegistryRankService` (`apps/api/src/recognize/registry-rank*.ts`): when a plate's best read is not in `registry.registrations` but an alternative is, the alternative takes its place (scores swapped inside the box group). No contract change, so no visible "exists" flag; add one only if wanted (it means editing `schemas.ts`, which resets offline data). Not yet exercised end to end against the real registry.
+- ✅ **Concurrency (2026-10-26).** `/recognize` and `/recognize/vin` are plain `def` (FastAPI threadpool): 3 simultaneous uploads of the slowest photo finish in ~6.3 s wall instead of 3/6/9.4 s serial, reads identical. Uploads still compete for the same CPU (no 3x); more workers only if that becomes a real problem. Detail: `docs/plan-done.md` ("Concurrency").
 - ⏳ **UI polish still to check:** light theme and desktop, the zoom dialog (`PhotoZoomDialog`) with groups, a11y of the chain/number badges, and the moped
   and truck photos end to end in the browser (only the car and the parking photos were checked).
-- ⏳ **Letter set.** `PLATE_LETTERS` in `app.py` is measured from a 2% registry sample (L/U/N/R/Q/V/S excluded, <100 each). Re-measure on the full table and
-  consider moving the set into `packages/shared` so the API's `repairOcrPlate` and the service agree.
+- ✅ **Letter set (2026-10-26).** Re-measured on the full registry (24.7M rows): same 18 letters (12 Cyrillic + Y J F D G Z, 60k-389k each); L/U/N/S/R/V/Q are 0.5k-10.5k. Kept as is in `app.py` only. Known gap: TS side (`isUaPlate`) accepts any Latin letter and `repairOcrPlate` maps `5`->`S` (rare letter); the own ALPR never sends it. Sharing the set needs a file copied into the ALPR build context; not done.
 - ❓ **Cloud route.** `/api/recognize/plate/cloud` + `PLATE_RECOGNIZER_*` env still exist (off unless flag + token; the web app never calls it). Decision
   pending: delete it entirely (also `deploy-api.yml`, deploy.md) or keep as a manual cross-check.
 - ❓ **Unexplained label.** A screenshot showed `AA4018AC` for the `AH4018AC` moped; the local service never returned it (it returned `AH4078AC`). Source unknown

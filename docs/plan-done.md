@@ -3461,6 +3461,31 @@ Three user photos failed: a three-row moped plate (`AB 1918 AB`, steeply tilted,
 
 Eval (88 photos, no labels): top read unchanged on 87; the one change is a junk read the API repairs to the same plate. `BX5213BO` is not the primary for its photo (the OCR genuinely sees 3/5 as ambiguous at ~235 px); it is offered as the alternative.
 
+## Own ALPR: web upload resize (2026-10-26)
+
+`eval.mjs --shrink` re-encodes each photo like `shrinkImage` (sharp: orient, fit in `SHRINK_MAX` px, JPEG `SHRINK_Q` stepping down by 15 to <= 2.5 MB), writes `results.shrink.json` and lists reads that differ from `results.json` plus the count of confident (>= 0.9) original reads lost. Measured on 90 photos:
+
+| max side, quality | confident reads lost |
+| --- | --- |
+| 3200, 85 (old web default) | 5 |
+| 3200, 95 | 4 |
+| 4608, 85 | 1 |
+| none, 85 | 1 |
+
+The pixel cap, not the JPEG quality, costs the reads: 4000-4128 px phone photos lose `BC9779IX` (parking) and others. The single remaining loss is the wrong alternative `AI1930JA`. `MAX_DIMENSION` in `apps/web/src/lib/image.ts` is now 4608 (the 2.5 MB byte target and the API's 4 MB multipart limit are unchanged). sharp's encoder is not Chrome's, so confirm in the browser. Eval ground truth so far: `labels.csv` with `AB1918AB`, `AH4018AC`, `AI1920JA` = recall 3/3, 4 extra reads (`AH4078AC`, `3UK6`, `AI1930JA`, `AL1920JA`); total time 59 s, slowest photo 2.6 s.
+
+## Own ALPR: alternatives noise (2026-10-26)
+
+`_alternatives` in `services/alpr/app.py` took every one-character variant scoring >= 0.55, so a correct 0.987 read (`AH4018AC`) came with `AH4078AC` (0.943), and `AI1920JA` with `AI1930JA` / `AL1920JA`. Now, when the primary scores >= `ALT_CONFIDENT_SCORE` (0.97), an alternative more than `ALT_CONFIDENT_GAP` (0.03) behind it is dropped. A first version that dropped all alternatives behind a confident primary also removed `BT1372BK` (0.985 beside `BT1572BK` 0.986 on `20230221_105943.jpg`), a real near-tie, hence the gap. Eval (90 photos): 6 alternatives dropped, 0 added, no top read changed, recall 3/3 with extra reads 4 -> 1; total 59.4 s (was 59.2 s), slowest photo 2.9 s. Only 3 plates are labelled, so the 0.97/0.03 values are untuned; which of `BT1572BK` / `BT1372BK` is right is unknown.
+
+## Own ALPR: registry check of alternatives (2026-10-26)
+
+OCR cannot settle an ambiguous glyph (`BX5213BO` vs `BX5215BO`), the registry can. `LocalRecognizeService` now passes the mapped candidates through `RegistryRankService.rank` (`apps/api/src/recognize/registry-rank.service.ts`, pure logic in `registry-rank.ts`): only reads that share a box with another read are looked up (`selectDistinct plate … where plate in (…)` on `registry.registrations`); if a plate's best read is not registered and an alternative is, they swap scores inside the group, so the top candidate (the one the web opens) is the registered one. Both or neither registered: OCR order stays. A failing lookup logs a warning and keeps the OCR order. No schema change (a visible flag would need `schemas.ts`). Tests: `registry-rank.test.ts`; existing recognize tests pass a pass-through rank service. Not run against the real registry yet.
+
+## Own ALPR: concurrency (2026-10-26)
+
+`/recognize` and `/recognize/vin` were `async def` around CPU-bound inference, so one upload held the event loop and the rest queued: 3 simultaneous uploads of `20151209_132029.jpg` took 3.0 / 6.1 / 9.4 s (the API times out at 10 s). They are now plain `def` (FastAPI's threadpool; `_read_capped` reads `image.file` synchronously). Same test after: 6.5 / 5.7 / 6.5 s wall, identical reads, `/healthz` stays at ~10-30 ms. Sequential eval over 90 photos: every read and score identical, total 53.2 s (was 59.4 s), slowest 2.4 s. The gain is limited because the requests share one CPU and ONNX's own threads; multiple uvicorn workers were not tried (each would load the models again). Thread safety of the shared models is only evidenced by the identical reads under three parallel uploads.
+
 ## infocar video crawl and YouTube fallback — run log and no-video model list (moved from PLAN.md, 2026-10-12)
 
 **Step 2a — infocar video crawl: done 2026-10-04; models with no video → YouTube fallback (ingest built 2026-10-05; daily runs + lookup/UI open).** Full crawl:

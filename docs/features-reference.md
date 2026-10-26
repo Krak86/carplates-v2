@@ -292,6 +292,7 @@ SW caches `index.html`). Plate/VIN pages are `noindex`; `?lang=` selects the lan
 The ALPR returns, per plate in the photo, its best read plus up to 2 alternative reads (one character different, scored below the
 primary) **sharing the same `box`**. No schema field marks the group: `components/plate-groups.ts` (`groupCandidates`) groups candidates
 by identical box, so `schemas.ts` stays untouched (editing it discards saved offline data). A box-less read is its own group.
+The API re-ranks a group by the registry (`RegistryRankService`): an alternative that exists replaces a best read that does not, by swapping their scores.
 
 - Group color = `labelColorVar` (the HDR `--label-N` palette) shared by the chips (`PlateCandidates`) and the outline in the photo
   (`PhotoPlateBoxes`); the number badge shows only when there are several plates, the chain icon only joins alternatives.

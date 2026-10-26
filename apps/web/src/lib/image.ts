@@ -1,4 +1,4 @@
-export const MAX_DIMENSION = 3200
+export const MAX_DIMENSION = 4608
 const TARGET_BYTES = 2_500_000
 const MIN_QUALITY = 0.4
 const QUALITY_STEP = 0.15
@@ -10,7 +10,7 @@ function canvasToBlob(canvas: HTMLCanvasElement, quality: number): Promise<Blob>
 }
 
 /**
- * Downscales + re-encodes to ~900 KB JPEG before upload. Falls back to the
+ * Downscales (max side 4608 px: a 3200 cap cost reads on 4000 px phone photos) + re-encodes to a JPEG of at most ~2.5 MB before upload. Falls back to the
  * original file if the browser can't decode it (e.g. an exotic format) — the
  * server's mimetype allowlist then gives a clear error instead.
  */
