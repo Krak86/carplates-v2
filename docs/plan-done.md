@@ -3486,6 +3486,10 @@ OCR cannot settle an ambiguous glyph (`BX5213BO` vs `BX5215BO`), the registry ca
 
 `/recognize` and `/recognize/vin` were `async def` around CPU-bound inference, so one upload held the event loop and the rest queued: 3 simultaneous uploads of `20151209_132029.jpg` took 3.0 / 6.1 / 9.4 s (the API times out at 10 s). They are now plain `def` (FastAPI's threadpool; `_read_capped` reads `image.file` synchronously). Same test after: 6.5 / 5.7 / 6.5 s wall, identical reads, `/healthz` stays at ~10-30 ms. Sequential eval over 90 photos: every read and score identical, total 53.2 s (was 59.4 s), slowest 2.4 s. The gain is limited because the requests share one CPU and ONNX's own threads; multiple uvicorn workers were not tried (each would load the models again). Thread safety of the shared models is only evidenced by the identical reads under three parallel uploads.
 
+## Own ALPR: letter set re-measured (2026-10-26)
+
+`PLATE_LETTERS` in `services/alpr/app.py` was measured on a 2% sample. Re-measured over all 24.2M 8-character plates in `registry.registrations` (24.7M rows, read-only): the 12 Cyrillic look-alikes dominate (А 20.9M … Р 3.6M); Latin Y 389k, J 303k, F 240k, D 133k, G 80k, Z 62k; L 10.5k, U 5.6k, N 3.8k, S 2.1k, R 1.6k, V 1.5k, Q 0.5k (L is 0.04% of plates). Same 18-letter set, unchanged. Not done: sharing the set with TypeScript. `isUaPlate` accepts any Latin letter and `repairOcrPlate` maps `5`->`S`; the own ALPR constrains letter slots itself, so it never sends that case, and the ALPR build context (`services/alpr`) cannot import `packages/shared` without a copied file.
+
 ## infocar video crawl and YouTube fallback — run log and no-video model list (moved from PLAN.md, 2026-10-12)
 
 **Step 2a — infocar video crawl: done 2026-10-04; models with no video → YouTube fallback (ingest built 2026-10-05; daily runs + lookup/UI open).** Full crawl:

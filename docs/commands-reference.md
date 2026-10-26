@@ -181,7 +181,8 @@ pnpm ingest:all        # db:migrate, then ingest:full + ingest:ratings:csv concu
 pnpm alpr:build     # build the self-hosted ALPR (own-model plate recognition) Docker image
 pnpm alpr:up        # run it on :8088 (sets ALPR_LOCAL_URL=http://localhost:8088 in apps/api/.env to use it)
 pnpm alpr:down      # stop it
-node services/alpr/eval.mjs   # run services/alpr/eval/images/* through the running container → eval/results.json
+node services/alpr/eval.mjs   # run services/alpr/eval/images/* through the running container → eval/results.json (+ recall if eval/labels.csv)
+node services/alpr/eval.mjs --shrink   # same, but photos re-encoded like the web's shrinkImage → results.shrink.json + reads that differ (SHRINK_MAX / SHRINK_Q override); don't run while the app is in use
                               # (gitignored photos; rebuild with alpr:build after editing services/alpr/app.py)
 ```
 
