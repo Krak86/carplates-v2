@@ -1,6 +1,6 @@
 # ORIGIN_PLAN.md - vehicle origin chip + "Where it comes from" section
 
-**Status:** Steps 0-1 done. To continue in a new session: "start Step 2 of ORIGIN_PLAN.md" (see "Step 1 notes" at the bottom). Tick the boxes below as steps finish.
+**Status:** Steps 0-1 done. Step 2 is done except the NHTSA WMI import (blocked by NHTSA throttling, see "Step 2 notes" at the bottom). To continue in a new session: "finish the WMI part of Step 2 in ORIGIN_PLAN.md", or "start Step 3/4/5". Tick the boxes below as steps finish.
 Read CLAUDE.md and CLAUDE_RULES.md first; they govern every step (ESM `.js` imports, explicit `@Inject`, Zod at boundaries, tests colocated,
 `pnpm format` first, never `git commit` unless asked, suggest a commit message after each big update).
 
@@ -78,7 +78,7 @@ Existing code to reuse: `VinOriginCard`, `countryIso()`/`countryFlag()` in `apps
 - `pnpm --filter @carplates/shared build` after editing.
 - **Done when:** migration applies cleanly, helper tests pass.
 
-### [ ] Step 2 - Ingest from Wikidata and NHTSA (2 h)
+### [~] Step 2 - Ingest from Wikidata and NHTSA (2 h) - Wikidata part DONE, WMI import PENDING
 
 - `scripts/src/ingest-brand-origin.ts`: Wikidata SPARQL for country (with dates), founded, HQ, owner, ownership dates. Header-name-driven
   mapping, `INSERT ... ON CONFLICT DO NOTHING`, cache raw responses, descriptive User-Agent, respect rate limits.
@@ -220,3 +220,42 @@ Done 2026-10-25.
 - `packages/shared/src/wmi.ts` exports `lookupWmi(vin)` -> `{ make, country }` and `hasKnownWmi`; keep it as the fallback in Step 2.
 - Nothing exists yet for Step 2 onward (no ingest script, seed CSV or API). Before Step 2 skim `docs/commands-reference.md` and an existing
   scraper (e.g. `scripts/src/wiki-images.ts`) for cache dir, User-Agent and rate-limit style, and read the VehiclesDB section.
+
+## Step 2 notes
+
+Done 2026-10-26 (Wikidata part). WMI part pending.
+
+**Wikidata (done, written to the local real DB):** `pnpm ingest:brand-origin` (`--report` = no write, `--show skoda,volvo` = print rows, `--refresh`,
+`--top N`). Files: `scripts/src/ingest-brand-origin.ts`, `brand-origin-parse.ts` (+ test), `brand-origin-overrides.ts`. Result: 163 brands with
+origin, 150 ownership rows, **97.8 % of registry vehicles** (by distinct plates) have origin data. Still unmatched: 46 slugs, mostly small
+trailer/moto brands (`musstang`, `viper`, `lev`, `ams`, `geon`, `forte`, `saz`, `ruta`, `lider`, `dnipro` ...); the 4044 names with no slug at all
+(765k vehicles) are trailer/body-builder spellings, not brands - not Step 2's job.
+
+How it works / lessons (do not re-learn these):
+
+- Candidates = Wikidata items with direct `P31` in the maker classes (`Q786820` automobile manufacturer, `Q10429667` car brand, `Q108460239` truck,
+  `Q4380190` bus, `Q15081030` motorcycle manufacturer). `P279*` and `Q4830453` ("business") time out / return everything. Labels en/uk/ru + en altLabels.
+- Matching = label slugified like `brandSlug()` (exact), else with a company suffix dropped ("Skoda Auto" -> skoda, "loose"). Scalars prefer exact
+  items; spellings that do not match go in `WIKIDATA_ALIASES` (Qid per slug); gaps and legacy periods in `ORIGIN_OVERRIDES` (replace Wikidata).
+- **Facts via SPARQL (batches of 25), ownership via the entity API** (`wbgetentities`, claims P127 + P749 with P580/P582 qualifiers, owner labels
+  in a second call). Owners in SPARQL time out on big brands. Do NOT add `maxlag` to the entity API (the query-service lag makes it reject all calls).
+  Entity JSON values vary per property: parse loosely, read `id`/`time` defensively.
+- Ownership filter in `mergeBrand`: an undated plain "owned by" is dropped (shareholders such as Nippon Life -> Toyota); kept = parent organization
+  or dated owner. Result: Skoda shows Volkswagen Group with dates; **Volvo shows only Geely (no Ford 1999-2010: Wikidata gap)**; Toyota/Lada have none.
+  Ownership is therefore "known history", the UI must treat missing as unknown (already a plan rule). Owner country is not fetched (`null`).
+- Raw responses cached in `scripts/.data/brand-origin/` (gitignored); re-runs are offline. Re-run writes by delete-then-insert per slug.
+- Overrides added from knowledge, each with a Wikipedia source: zaz/luaz (SU until 1991 then UA), azlk, ural, nefaz, bogdan, odaz, daewoo, daf, krone,
+  kogel, schwarzmuller, wielton, haval, loncin. `foundedYear` null where unsure.
+- `@carplates/db` index now exports the four origin tables (`brandOriginPeriod`, `brandOwnership`, `modelPlant`, `wmiPrefix`) + row/insert types;
+  `pnpm --filter @carplates/db build` is needed after schema/index edits.
+
+**WMI (written, NOT yet run for real):** `pnpm ingest:wmi` (`--dry-run`, `--refresh`). Files: `scripts/src/ingest-wmi.ts`, `wmi-parse.ts` (+ test, 5 pass).
+vPIC has no bulk WMI endpoint: it pages `GetAllManufacturers` (232 pages, all cached), keeps road-vehicle makers (2654) and calls
+`GetWMIsForManufacturer/{id}` for each, cached in `scripts/.data/wmi/`. **NHTSA started answering 403 after ~1440 of the 2654 calls** (throttled IP);
+the script now stops on 403/429 (no retry storm), uses concurrency 2 + 300 ms pause, and writes nothing when stopped.
+
+- TODO (next session): wait (an hour or more), run `pnpm ingest:wmi --dry-run` (resumes from the cache), check the report (WMIs without a country,
+  unrecognised country names -> add to `COUNTRY_ALIASES` in `wmi-parse.ts`), then `pnpm ingest:wmi` for real. Verify WVW (VW, DE), TMB (Skoda, CZ),
+  JTD (Toyota, JP), XTA (Lada, RU) in `registry.wmi_prefix`. `packages/shared/src/wmi.ts` stays the fallback until the API (Step 5) uses the table.
+- Step 4 (seed exports) must cover `brand_origin_period`, `brand_ownership` and `wmi_prefix`; there is no `--export-csv`/`--from-csv` in either
+  script yet (add them in Step 4, same shape as `open-ev.ts`).

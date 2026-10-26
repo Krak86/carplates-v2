@@ -35,7 +35,7 @@ export default function NotFoundInfo({ value }: Props): ReactNode {
         {isPlate ? t('result.notFound.hintPlate') : t('result.notFound.hintFormat')}
       </p>
 
-      {isPlate && <RiaCheckLink kind="plate" />}
+      {isPlate && <RiaCheckLink kind="plate" value={plate} />}
     </div>
   )
 }

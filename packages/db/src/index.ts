@@ -161,7 +161,19 @@ export {
   type YoutubeVideoRow,
   type YoutubeVideoInsert,
   type YoutubeModelRunRow,
-  type YoutubeModelRunInsert
+  type YoutubeModelRunInsert,
+  brandOriginPeriod,
+  brandOwnership,
+  modelPlant,
+  wmiPrefix,
+  type BrandOriginPeriodRow,
+  type BrandOriginPeriodInsert,
+  type BrandOwnershipRow,
+  type BrandOwnershipInsert,
+  type ModelPlantRow,
+  type ModelPlantInsert,
+  type WmiPrefixRow,
+  type WmiPrefixInsert
 } from './schema.js'
 export {
   createDb,

@@ -309,7 +309,7 @@ export default function SearchRoute(): ReactNode {
                 {notFound ? t('result.noResults', { value: raw }) : t('result.error')}
               </p>
 
-              {notFound && kind === 'vin' && <RiaCheckLink kind="vin" />}
+              {notFound && kind === 'vin' && <RiaCheckLink kind="vin" value={raw.replace(/\s+/g, '').toUpperCase()} />}
             </div>
           )}
         </Presence>

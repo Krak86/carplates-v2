@@ -72,6 +72,8 @@
     "export:fuel:csv": "tsx src/fuel-economy.ts --export-csv seed-data/fuel-economy.csv.gz",
     "ingest:rdw": "tsx src/rdw.ts",
     "ingest:rdw:csv": "tsx src/rdw.ts --from-csv seed-data/rdw-specs.csv.gz",
+    "ingest:brand-origin": "tsx src/ingest-brand-origin.ts",
+    "ingest:wmi": "tsx src/ingest-wmi.ts",
     "ingest:open-ev": "tsx src/open-ev.ts",
     "ingest:open-ev:csv": "tsx src/open-ev.ts --from-csv seed-data/open-ev.csv.gz",
     "export:open-ev:csv": "tsx src/open-ev.ts --export-csv seed-data/open-ev.csv.gz",

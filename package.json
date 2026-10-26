@@ -105,6 +105,8 @@
     "ingest:rdw": "pnpm --filter @carplates/scripts ingest:rdw",
     "ingest:rdw:csv": "pnpm --filter @carplates/scripts ingest:rdw:csv",
     "export:rdw:csv": "pnpm --filter @carplates/scripts export:rdw:csv",
+    "ingest:brand-origin": "pnpm --filter @carplates/scripts ingest:brand-origin",
+    "ingest:wmi": "pnpm --filter @carplates/scripts ingest:wmi",
     "ingest:open-ev": "pnpm --filter @carplates/scripts ingest:open-ev",
     "ingest:open-ev:csv": "pnpm --filter @carplates/scripts ingest:open-ev:csv",
     "ingest:mot": "pnpm --filter @carplates/scripts ingest:mot",
