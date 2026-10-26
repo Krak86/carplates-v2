@@ -409,3 +409,16 @@ Runbook, secrets, folder layout: [deploy.md](deploy.md). Conventions:
 - **Never add `ports:` to postgres/alpr** (Docker-published ports bypass ufw); only Caddy publishes. Stock Caddy has no `br` encoder.
 - **Proxy maintenance answer** = `503 {"status":"maintenance","retryAfter":N}` → `MaintenanceError` (`lib/api.ts`) → patient retry + `MaintenanceBanner`
   (`lib/maintenance.ts`). Any new fetch helper must go through `unwrap` to get this for free.
+
+## Vehicle origin ("Where it comes from", 2026-10-26)
+
+Files: migration 0075, `packages/shared/src/origin.ts` (own file, no offline-cache bust), `apps/api/src/origin/` (+ pure `origin-hints.ts`), `scripts/src/ingest-brand-origin.ts` / `ingest-wmi.ts` (+ `brand-origin-overrides.ts`), `apps/web/src/components/Origin{Chip,Section,StepBody,Country,SourceLink}.tsx` + `OriginSection.helpers.ts`, `Flag.tsx`, `LegacyFlag.tsx`, `Timeline.tsx` (shared with `RegistrationTimeline`). Plan and decisions: `ORIGIN_PLAN.md`.
+
+- **Never guessed:** every step shows only when the data is known; the section renders nothing when no origin fact is known (a Ukraine step alone does not count). Hints (North-America VIN, assembly differs from brand country, brand-vs-WMI maker mismatch) are neutral and quiet by default.
+- **Data:** brand country / founded / HQ / ownership from Wikidata (`brand_origin_period`, `brand_ownership`, keyed on `brandSlug()`), WMI from NHTSA vPIC (`wmi_prefix`, fallback `lookupWmi` in `wmi.ts` for TMB / JTD / XTA). Gaps and legacy periods go in `ORIGIN_OVERRIDES` / `OWNERSHIP_OVERRIDES` / `HQ_CITY_OVERRIDES` (each with a Wikipedia source). `model_plant` exists but is empty (curated plants are release 2). Seed CSVs: `brand-origin`, `brand-ownership`, `wmi`; re-run `export:*:csv` after a real re-ingest.
+- **Legacy countries by year:** periods hold the modern ISO code; `countryAtYear(code, year)` gives `SU`, `CSHH`, `DD`, `DE-FRG`, `YU`, `CSXX`. ZAZ / LuAZ store `SU` and the UI adds "Ukrainian SSR". Names: `Intl.DisplayNames` for current countries, `country.<code>` i18n keys for former ones.
+- **Flags:** `Flag` renders `public/country-flags/<iso>.svg` (flag-icons, MIT; add a flag = copy the SVG + add it to `FLAG_CODES` in `vin/helpers.ts`); former states are inline SVG in `LegacyFlag`. No emoji flags (none exist for old states, Windows draws letters).
+- **API:** `GET /api/origin?brand=&model=&year=&vin=&plantCountry=&plantCity=` (only `brand` required; `ORIGIN_THROTTLE` 60/min). NHTSA's plant stays client-side: the web passes the decoded Plant Country as ISO and the city; without them the plant is the VIN-prefix country. Query key `['origin', ...]`, offline group `origin`.
+- **UI:** `OriginChip` (flags: brand, owner when from elsewhere, plant; popover legend; chevron bumps `openSignal`) sits under the barcode on the VIN card and after `GenerationChip` on the plate card. `OriginSection` is a `LazySection` (`?section=origin`, share id `origin`, helpers in `helpers-origin`). NHTSA plant cities are title-cased (`plantCity`).
+- **Import wording:** the registry says only "from abroad" with no country, so the Ukraine step shows "imported" / "registered", never a source country.
+- **A VIN with no brand** (no registry match and no NHTSA Make) shows no chip or section; there is no WMI-only brand fallback.

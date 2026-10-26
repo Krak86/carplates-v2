@@ -8,6 +8,23 @@ const item = (group: ReleaseGroup, ua: string, ru: string, en: string): ReleaseI
  */
 export const RELEASES: readonly ReleaseDay[] = [
   {
+    date: '2026-10-26',
+    items: [
+      item(
+        'new',
+        'Звідки авто: прапорці біля VIN і номера (країна марки, власника, збирання) та секція з часовою лінією — марка, власники, завод, Україна',
+        'Откуда авто: флажки рядом с VIN и номером (страна марки, владельца, сборки) и секция с временной линией — марка, владельцы, завод, Украина',
+        'Where it comes from: flags next to the VIN and plate (brand, owner, assembly country) and a timeline section - brand, owners, plant, Ukraine'
+      ),
+      item(
+        'new',
+        'Для старих авто показуємо колишні країни: СРСР, Чехословаччина, НДР, ФРН, Югославія',
+        'Для старых авто показываем прежние страны: СССР, Чехословакия, ГДР, ФРГ, Югославия',
+        'Older cars show the country of their time: USSR, Czechoslovakia, East and West Germany, Yugoslavia'
+      )
+    ]
+  },
+  {
     date: '2026-10-25',
     items: [
       item(

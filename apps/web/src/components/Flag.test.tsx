@@ -9,7 +9,7 @@ import { LEGACY_COUNTRIES } from '@carplates/shared'
 import Flag from '@/components/Flag'
 import { countryLabel, FLAG_CODES, flagSlug } from '@/components/vin/helpers'
 
-const FLAG_DIR = resolve(process.cwd(), 'public/country-flags')
+const FLAG_DIR = resolve(__dirname, '../../public/country-flags')
 
 describe('flagSlug', () => {
   it('lowercases current countries and gives West Germany the German flag', () => {
