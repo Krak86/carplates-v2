@@ -71,7 +71,8 @@ import Model360Button from '@/components/Model360Button'
 import VerificationLinks from '@/components/VerificationLinks'
 import WantedChip from '@/components/WantedChip'
 import VinDecodeTabs from '@/components/vin/VinDecodeTabs'
-import { groupFields } from '@/components/vin/helpers'
+import { ukraineFromActions } from '@/components/OriginSection.helpers'
+import { countryIso, groupFields, toFieldMap } from '@/components/vin/helpers'
 import VinSince2021Note from '@/components/vin/VinSince2021Note'
 import VinToggleSection from '@/components/vin/VinToggleSection'
 import { useCardMotion } from '@/hooks/useCardMotion'
@@ -91,6 +92,7 @@ import SectionSkeleton from '@/components/ui/SectionSkeleton'
 // Everything below the fold loads on demand (near the viewport, or a `?section=` share link): see LazySection.
 const FavoriteButton = lazy(() => import('@/components/FavoriteButton'))
 const VehicleKindIcon = lazy(() => import('@/components/VehicleKindIcon'))
+const OriginSection = lazy(() => import('@/components/OriginSection'))
 const AuctionCheck = lazy(() => import('@/components/AuctionCheck'))
 const WantedCheck = lazy(() => import('@/components/WantedCheck'))
 const StockSection = lazy(() => import('@/components/StockSection'))
@@ -260,6 +262,7 @@ export default function ResultCard({ data }: Props): ReactNode {
       c.regAddrKoatuu,
       c.vin
     ].filter(Boolean).length + 2
+  const vinFields = vinDetail.data ? toFieldMap(vinDetail.data.results) : null
   const vinFieldCount = vinDetail.data
     ? groupFields(vinDetail.data.results).reduce((sum, g) => sum + g.rows.length, 0)
     : undefined
@@ -849,6 +852,22 @@ export default function ResultCard({ data }: Props): ReactNode {
           <LazySection sections={['stock']}>
             <StockSection brand={c.brand} model={c.model} year={c.makeYear} />
           </LazySection>
+          {c.brand && (
+            <LazySection sections={['origin']}>
+              <OriginSection
+                brand={c.brand}
+                model={c.model}
+                year={c.makeYear}
+                vin={hasVin ? c.vin : null}
+                plantCountry={countryIso(vinFields?.get('Plant Country'))}
+                plantCity={vinFields?.get('Plant City')}
+                ukraine={ukraineFromActions(
+                  vinDetail.data?.registry?.actions ?? plateHistory.data?.actions ?? [],
+                  !!data.everImported
+                )}
+              />
+            </LazySection>
+          )}
           {hasVin && c.vin && (
             <LazySection sections={['auctions']} forceMount={auctionOpenSignal > 0}>
               <AuctionCheck

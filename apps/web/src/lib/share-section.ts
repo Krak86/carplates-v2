@@ -27,6 +27,7 @@ export const SHARE_SECTIONS = [
   'social',
   'stock',
   'auctions',
+  'origin',
   'wanted'
 ] as const
 export type ShareSection = (typeof SHARE_SECTIONS)[number]

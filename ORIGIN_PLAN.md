@@ -171,7 +171,9 @@ Notes: `components/Flag.tsx` (`code`, optional `label`; decorative without it) r
 - Tests: brand only, brand + owner, brand + plant, nothing.
 - **Done when:** correct on a Skoda (CZ/DE), a Toyota (JP) and an old VAZ (USSR).
 
-### [ ] Step 8 - Timeline component and section (2.5 h) - build as 8a (Timeline extract) then 8b (OriginSection)
+### [x] Step 8 - Timeline component and section (2.5 h) - DONE 2026-10-26 (8a Timeline extract, 8b OriginSection)
+
+Notes 8b: `components/OriginSection.tsx` (+ `OriginStepBody`, `OriginCountry`, `OriginSourceLink`, pure `OriginSection.helpers.ts` with `buildOriginView`/`ukraineFromActions`, group `helpers-origin`). Share id `origin` added; mounted in `VinResult` and `ResultCard` as a `LazySection`; renders nothing when no origin fact is known (a Ukraine step alone does not count). `openSignal` is wired in the component but no caller bumps it yet (Step 7). Contract gained `brand.asOf` (latest ingest date): sources are per-fact links, the "as of" date is one line for the brand data. Not browser-checked and no render test yet (Step 10). `section.about.origin` / API link-preview text for `?section=origin` not added.
 
 - Extract the dot-and-line markup from `RegistrationTimeline.tsx` into a shared `Timeline`; `RegistrationTimeline` keeps its behavior
   (newest first, arrows up) and its tests must still pass. The origin section is chronological, arrows down.

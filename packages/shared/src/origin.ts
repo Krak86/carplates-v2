@@ -95,7 +95,9 @@ export const originResponseSchema = z.object({
     .object({
       slug: z.string(),
       periods: z.array(brandOriginPeriodSchema),
-      ownership: z.array(brandOwnershipSchema)
+      ownership: z.array(brandOwnershipSchema),
+      /** YYYY-MM-DD the brand rows were last ingested (Wikidata snapshot date). */
+      asOf: z.string().nullable().optional()
     })
     .nullable()
     .optional(),

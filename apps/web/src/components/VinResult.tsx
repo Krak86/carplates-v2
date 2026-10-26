@@ -29,10 +29,13 @@ import VinDecodeTabs from '@/components/vin/VinDecodeTabs'
 import VinTypicalData from '@/components/vin/VinTypicalData'
 import LazySection from '@/components/LazySection'
 import { useCardMotion } from '@/hooks/useCardMotion'
+import { ukraineFromActions } from '@/components/OriginSection.helpers'
+import { countryIso, toFieldMap } from '@/components/vin/helpers'
 import { hasImportOperation } from '@/lib/auction-sites'
 import { useUiStore } from '@/store/ui-store'
 
 const AuctionCheck = lazy(() => import('@/components/AuctionCheck'))
+const OriginSection = lazy(() => import('@/components/OriginSection'))
 const WantedCheck = lazy(() => import('@/components/WantedCheck'))
 
 type Props = {
@@ -43,6 +46,7 @@ export default function VinResult({ data }: Props): ReactNode {
   const { t } = useTranslation()
   const registry = data.registry
   const vehicle = extractVehicleInfo(data)
+  const fields = toFieldMap(data.results)
   const vehicleColor = resolveVehicleColor(registry?.actions[0]?.color) ?? fallbackVehicleColor(data.vin)
   const plate = registry?.plate ?? null
   const region = plate ? (regionName(plate) ?? null) : null
@@ -132,6 +136,18 @@ export default function VinResult({ data }: Props): ReactNode {
 
         <LazySection sections={['wanted']}>
           <WantedCheck plate={null} vin={data.vin} />
+        </LazySection>
+
+        <LazySection sections={['origin']}>
+          <OriginSection
+            brand={vehicle.brand}
+            model={vehicle.model}
+            year={vehicle.year}
+            vin={data.vin}
+            plantCountry={countryIso(fields.get('Plant Country'))}
+            plantCity={fields.get('Plant City')}
+            ukraine={ukraineFromActions(registry?.actions ?? [])}
+          />
         </LazySection>
 
         <LazySection sections={['auctions']}>

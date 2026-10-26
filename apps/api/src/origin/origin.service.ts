@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common'
 import { brandOriginPeriod, brandOwnership, modelPlant, wmiPrefix } from '@carplates/db'
 import { brandSlug, isVin, lookupWmi, modelKey, vinRegion } from '@carplates/shared'
 import type { BrandOriginPeriod, BrandOwnership, ModelPlant, OriginResponse } from '@carplates/shared'
-import { and, asc, eq } from 'drizzle-orm'
+import { and, asc, eq, max } from 'drizzle-orm'
 
 import { DbService } from '../db/db.service.js'
 
@@ -43,7 +43,8 @@ export class OriginService {
     const plantCountry = query.plantCountry ?? wmi?.countryCode ?? null
 
     return {
-      brand: slug && (periods.length || ownership.length) ? { slug, periods, ownership } : null,
+      brand:
+        slug && (periods.length || ownership.length) ? { slug, periods, ownership, asOf: await this.asOf(slug) } : null,
       plant: plantCountry
         ? { countryCode: plantCountry, city: query.plantCity ?? null, source: query.plantCountry ? 'nhtsa' : 'wmi' }
         : null,
@@ -59,6 +60,15 @@ export class OriginService {
         plantCountry
       })
     }
+  }
+
+  /** Latest ingest date of the brand rows. */
+  private async asOf(slug: string): Promise<string | null> {
+    const [row] = await this.dbService.db
+      .select({ at: max(brandOriginPeriod.updatedAt) })
+      .from(brandOriginPeriod)
+      .where(eq(brandOriginPeriod.brandSlug, slug))
+    return row?.at ? new Date(row.at).toISOString().slice(0, 10) : null
   }
 
   private async periods(slug: string): Promise<BrandOriginPeriod[]> {
