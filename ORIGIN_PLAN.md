@@ -1,6 +1,6 @@
 # ORIGIN_PLAN.md - vehicle origin chip + "Where it comes from" section
 
-**Status:** Steps 0-2, 4 and 5 done (Step 3 deferred). To continue in a new session: "start Step A (data cleanup)", then follow "Implementation order" below. Tick the boxes below as steps finish.
+**Status:** First release done (Steps 0-2, 4-8, 10, 11, A). Step 3 and Step 9 are deferred to release 2. Tick the boxes below as steps finish.
 Read CLAUDE.md and CLAUDE_RULES.md first; they govern every step (ESM `.js` imports, explicit `@Inject`, Zod at boundaries, tests colocated,
 `pnpm format` first, never `git commit` unless asked, suggest a commit message after each big update).
 
@@ -198,7 +198,7 @@ Notes: ua/ru/en key sets for `origin.*` / `country.*` are identical (checked by 
 - Dark theme, mobile width, keyboard navigation for chip and expander, screen-reader labels on flags.
 - Check in the browser (chrome-devtools): console clean, Lighthouse pass on the VIN page shows no regression.
 
-### [ ] Step 11 - Docs, release, final checks (1 h)
+### [x] Step 11 - Docs, release, final checks (1 h) - DONE 2026-10-26
 
 - Write-up -> `docs/plan-done.md`, one-line ✅ -> `PLAN.md`, conventions -> `docs/features-reference.md` (new "Origin" section),
   user-facing entry -> `releases.ts`, commands -> `docs/commands-reference.md`.

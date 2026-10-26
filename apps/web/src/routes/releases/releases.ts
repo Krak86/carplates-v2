@@ -21,6 +21,24 @@ export const RELEASES: readonly ReleaseDay[] = [
         'Для старих авто показуємо колишні країни: СРСР, Чехословаччина, НДР, ФРН, Югославія',
         'Для старых авто показываем прежние страны: СССР, Чехословакия, ГДР, ФРГ, Югославия',
         'Older cars show the country of their time: USSR, Czechoslovakia, East and West Germany, Yugoslavia'
+      ),
+      item(
+        'improved',
+        'Перед переходом на перевірку AUTO.RIA номер або VIN копіюється - залишається лише вставити його на сайті',
+        'Перед переходом на проверку AUTO.RIA номер или VIN копируется - остаётся только вставить его на сайте',
+        'Before opening the AUTO.RIA check the plate or VIN is copied - just paste it on the site'
+      ),
+      item(
+        'data',
+        'Країни, штаб-квартири та власники марок із Wikidata, виробники VIN (WMI) з NHTSA; прибрано помилкових власників у популярних марок',
+        'Страны, штаб-квартиры и владельцы марок из Wikidata, производители VIN (WMI) из NHTSA; убраны ошибочные владельцы у популярных марок',
+        'Brand countries, headquarters and owners from Wikidata, VIN manufacturers (WMI) from NHTSA; wrong owners of popular brands cleaned up'
+      ),
+      item(
+        'fix',
+        'Міста заводів з NHTSA пишуться як «Georgetown», а не «GEORGETOWN»',
+        'Города заводов из NHTSA пишутся как «Georgetown», а не «GEORGETOWN»',
+        'NHTSA plant cities read “Georgetown”, not “GEORGETOWN”'
       )
     ]
   },
@@ -56,6 +74,42 @@ export const RELEASES: readonly ReleaseDay[] = [
         'У тест-драйві вибір фону області змінює й область на рекламних щитах; новий фон для Миколаївської області',
         'В тест-драйве выбор фона области меняет и область на рекламных щитах; новый фон для Николаевской области',
         'In the test drive, picking a region backdrop also sets the billboard region; new Mykolaiv backdrop'
+      ),
+      item(
+        'new',
+        'У тест-драйві фото-фони для кожної області: номер стартує на фоні своєї області, а в налаштуваннях є розділ «Фони областей»',
+        'В тест-драйве фото-фоны для каждой области: номер стартует на фоне своей области, а в настройках есть раздел «Фоны областей»',
+        'The test drive has a photo backdrop for every region: a plate starts on its own region, and the settings have a “Region backdrops” section'
+      ),
+      item(
+        'new',
+        'У тест-драйві зіткнення спричиняють дим (білий, сірий, чорний), а після 20 зіткнень авто розбивається',
+        'В тест-драйве столкновения вызывают дым (белый, серый, чёрный), а после 20 столкновений авто разбивается',
+        'In the test drive bumps cause smoke (white, grey, black) and the car is wrecked after 20 bumps'
+      ),
+      item(
+        'new',
+        'Біля області на картці номера є «?» - великий прапор області; прапори також у виборі області в тест-драйві',
+        'Рядом с областью на карточке номера есть «?» - большой флаг области; флаги также в выборе области в тест-драйве',
+        'A “?” beside the region on the plate card shows a large region flag; flags also appear in the test-drive region picker'
+      ),
+      item(
+        'improved',
+        'У «Перевірці» біля кожного рядка є «?» з розшифровкою скорочень (БДР, ПДР, ОСЦПВ, МТСБУ, ОТК, ТСЦ МВС)',
+        'В «Проверке» у каждой строки есть «?» с расшифровкой сокращений (БДР, ПДР, ОСЦПВ, МТСБУ, ОТК, ТСЦ МВД)',
+        'Each Verification row has a “?” spelling out the abbreviations (BDR, PDR, OSCPV, MTSBU, OTK, TSC MVS)'
+      ),
+      item(
+        'improved',
+        'У підказках чипів рейтингу першим рядком - значення й кількість авто (марка, модель, колір, область)',
+        'В подсказках чипов рейтинга первой строкой - значение и количество авто (марка, модель, цвет, область)',
+        'Ranking chip tooltips lead with the ranked value and its vehicle count (make, model, colour, region)'
+      ),
+      item(
+        'fix',
+        'Оновлено джерело оглядів Carscoops у стрічці новин',
+        'Обновлён источник обзоров Carscoops в ленте новостей',
+        'Repointed the Carscoops reviews feed in the news ticker'
       )
     ]
   },
