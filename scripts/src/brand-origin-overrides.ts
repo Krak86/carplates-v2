@@ -8,6 +8,7 @@
  *   is; `countryAtYear` maps modern codes to the legacy state of the year, so only a state that must read differently (Ukrainian SSR
  *   cars show the USSR flag but we want the period boundary explicit) needs a legacy code here.
  * - `OWNERSHIP_OVERRIDES`: ownership rows REPLACING Wikidata's for the slug (only where Wikidata is known wrong or empty).
+ * - `HQ_CITY_OVERRIDES`: just the HQ city of the Wikidata origin row.
  *
  * Every entry has a `source` (a URL), shown to the user as the fact's source.
  */
@@ -219,4 +220,68 @@ export const ORIGIN_OVERRIDES: Readonly<Record<string, readonly OriginOverride[]
   ]
 }
 
-export const OWNERSHIP_OVERRIDES: Readonly<Record<string, readonly Omit<BrandOwnershipRowOut, 'brandSlug'>[]>> = {}
+/**
+ * `HQ_CITY_OVERRIDES`: replaces only the `hqCity` of the Wikidata origin row (Wikidata gives a country, a building or a ward).
+ * `null` = unknown, shown as nothing. The city's source is the Wikipedia article in the comment.
+ */
+export const HQ_CITY_OVERRIDES: Readonly<Record<string, string | null>> = {
+  lada: 'Tolyatti', // https://en.wikipedia.org/wiki/Lada
+  citroen: 'Paris', // https://en.wikipedia.org/wiki/Citro%C3%ABn (Wikidata: "PSA Poissy Plant")
+  mini: null, // https://en.wikipedia.org/wiki/Mini_(marque) lists no HQ (Wikidata: "Germany")
+  chrysler: 'Auburn Hills', // https://en.wikipedia.org/wiki/Chrysler
+  dodge: 'Auburn Hills', // https://en.wikipedia.org/wiki/Dodge
+  mazda: 'Fuchū', // https://en.wikipedia.org/wiki/Mazda
+  honda: 'Tokyo', // https://en.wikipedia.org/wiki/Honda (Minato, Tokyo)
+  scania: 'Södertälje' // https://en.wikipedia.org/wiki/Scania_AB
+}
+
+type OwnershipOverride = Omit<BrandOwnershipRowOut, 'brandSlug'>
+
+const own = (ownerName: string, fromYear: number, toYear: number | null, source: string): OwnershipOverride => ({
+  ownerName,
+  ownerCountry: null,
+  fromYear,
+  toYear,
+  source
+})
+
+const SKODA = 'https://en.wikipedia.org/wiki/%C5%A0koda_Auto'
+const VOLVO = 'https://en.wikipedia.org/wiki/Volvo_Cars'
+const NISSAN = 'https://en.wikipedia.org/wiki/Nissan'
+const LADA = 'https://en.wikipedia.org/wiki/Lada'
+const OPEL = 'https://en.wikipedia.org/wiki/Opel'
+const FIAT = 'https://en.wikipedia.org/wiki/Fiat_Automobiles'
+const LAND_ROVER = 'https://en.wikipedia.org/wiki/Land_Rover'
+const CITROEN = 'https://en.wikipedia.org/wiki/Citro%C3%ABn'
+
+export const OWNERSHIP_OVERRIDES: Readonly<Record<string, readonly OwnershipOverride[]>> = {
+  skoda: [own('Volkswagen Group', 1991, null, SKODA)],
+  // Renault took 36.8 % in 1999 and holds 15 % voting rights since 2023; the Alliance is not an owner.
+  nissan: [own('Renault', 1999, null, NISSAN)],
+  lada: [own('Renault', 2016, 2022, LADA), own('NAMI', 2022, null, LADA)],
+  volvo: [own('Ford', 1999, 2010, VOLVO), own('Geely', 2010, null, VOLVO)],
+  opel: [
+    own('General Motors', 1929, 2017, OPEL),
+    own('PSA Group', 2017, 2021, OPEL),
+    own('Stellantis', 2021, null, OPEL)
+  ],
+  fiat: [
+    own('Fiat Group', 1899, 2014, FIAT),
+    own('Fiat Chrysler Automobiles', 2014, 2021, FIAT),
+    own('Stellantis', 2021, null, FIAT)
+  ],
+  'land-rover': [
+    own('British Leyland', 1978, 1986, LAND_ROVER),
+    own('Rover Group', 1986, 1994, LAND_ROVER),
+    own('BMW', 1994, 2000, LAND_ROVER),
+    own('Ford', 2000, 2008, LAND_ROVER),
+    own('Tata Motors', 2008, 2012, LAND_ROVER),
+    own('Jaguar Land Rover', 2013, null, LAND_ROVER)
+  ],
+  // Wikidata gave Stellantis from "always"; PSA bought Citroën in 1976 (Peugeot SA, later PSA) and Stellantis owns it since 2021.
+  citroen: [own('PSA Group', 1976, 2021, CITROEN), own('Stellantis', 2021, null, CITROEN)],
+  peugeot: [own('PSA Group', 1976, 2021, CITROEN), own('Stellantis', 2021, null, CITROEN)],
+  // Honda is listed on the Tokyo / New York exchanges with no parent; Wikidata's only row is the shareholder Tokio Marine
+  // (https://en.wikipedia.org/wiki/Honda).
+  honda: []
+}

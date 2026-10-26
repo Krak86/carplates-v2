@@ -27,7 +27,7 @@ import type { Db } from '@carplates/db'
 import { brandSlug } from '@carplates/shared'
 import { inArray, sql } from 'drizzle-orm'
 
-import { ORIGIN_OVERRIDES, OWNERSHIP_OVERRIDES, WIKIDATA_ALIASES } from './brand-origin-overrides.js'
+import { HQ_CITY_OVERRIDES, ORIGIN_OVERRIDES, OWNERSHIP_OVERRIDES, WIKIDATA_ALIASES } from './brand-origin-overrides.js'
 import {
   BRAND_CLASSES,
   entitiesSchema,
@@ -318,6 +318,9 @@ async function main(): Promise<void> {
     for (const [slug, periods] of Object.entries(ORIGIN_OVERRIDES)) {
       for (let i = origin.length - 1; i >= 0; i--) if (origin[i]!.brandSlug === slug) origin.splice(i, 1)
       origin.push(...periods.map(p => ({ ...p, brandSlug: slug })))
+    }
+    for (const [slug, hqCity] of Object.entries(HQ_CITY_OVERRIDES)) {
+      for (const r of origin) if (r.brandSlug === slug) r.hqCity = hqCity
     }
     for (const [slug, rows] of Object.entries(OWNERSHIP_OVERRIDES)) {
       for (let i = owners.length - 1; i >= 0; i--) if (owners[i]!.brandSlug === slug) owners.splice(i, 1)

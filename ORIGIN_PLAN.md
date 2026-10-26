@@ -67,7 +67,9 @@ Step numbers stay as written below; this is the order to build them in. Each ste
 
 Release 2 (deferred): Step 3, Step 9.
 
-### [ ] Step A - Data cleanup (30 min)
+### [x] Step A - Data cleanup (30 min) - DONE 2026-10-26
+
+Notes: `mergeBrand` now drops alliances / finance arms (`NOT_AN_OWNER`), rows that end with no known start, and the brand's own company (`labelToLooseSlug(owner) === slug`: Ford Motor Company -> ford); folds "Stellantis Europe / North America" into "Stellantis"; merges overlapping or touching periods of one owner (`mergeOverlapping`). Parse test added. `OWNERSHIP_OVERRIDES` (Wikipedia source each): skoda, nissan, lada, volvo, opel, fiat, land-rover, citroen, peugeot, honda (empty: Tokio Marine was a shareholder). New `HQ_CITY_OVERRIDES` (hqCity only): lada Tolyatti, citroen Paris, mini null, chrysler/dodge Auburn Hills, mazda Fuchū, honda Tokyo, scania Södertälje. DB re-ingested (118 ownership rows), seed CSVs re-exported (CSV says 119: one stale row in the DB, harmless). Still imperfect, left: Chrysler history 2007-2014, Volkswagen shows Porsche SE as undated parent, Mercedes-Benz Group label is anachronistic for pre-2022.
 
 Fix the Step 2 data problems found while testing the Step 5 API (see "Step 5 notes"). Edit `scripts/src/brand-origin-overrides.ts` (`OWNERSHIP_OVERRIDES` replaces Wikidata ownership for a slug and is empty today; `ORIGIN_OVERRIDES` for the HQ city) and/or the ownership filter in `mergeBrand` (`brand-origin-parse.ts`); add a parse test for any filter change. Each override needs a Wikipedia source.
 

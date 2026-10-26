@@ -75,6 +75,36 @@ describe('foldItemRows + mergeBrand', () => {
     expect(mergeBrand('x', [], ['Q2'], foldItemRows(rows)).origin?.countryCode).toBe('DE')
   })
 
+  it('drops alliances, finance arms, undated ended rows and the brand itself; merges overlapping periods', () => {
+    const owner = (name: string, from?: string, to?: string): SparqlRow => ({
+      item: uri('Q1'),
+      cc: { value: 'CZ' },
+      owner: { value: name },
+      ownerKind: { value: 'parent' },
+      ...(from ? { ownerFrom: { value: from } } : {}),
+      ...(to ? { ownerTo: { value: to } } : {})
+    })
+    const merged = mergeBrand(
+      'skoda',
+      ['Q1'],
+      [],
+      foldItemRows([
+        owner('Volkswagen Group', undefined, '2000-01-01T00:00:00Z'),
+        owner('Volkswagen Group', '1991-01-01T00:00:00Z'),
+        owner('Volkswagen Group', '2000-01-01T00:00:00Z', '2007-01-01T00:00:00Z'),
+        owner('Volkswagen Finance Luxemburg', '2014-01-01T00:00:00Z'),
+        owner('Renault–Nissan–Mitsubishi Alliance'),
+        owner('Skoda Auto'),
+        owner('Stellantis Europe', '2021-01-01T00:00:00Z'),
+        owner('Stellantis', '2021-06-01T00:00:00Z')
+      ])
+    )
+    expect(merged.owners.map(o => [o.ownerName, o.fromYear, o.toYear])).toEqual([
+      ['Volkswagen Group', 1991, null],
+      ['Stellantis', 2021, null]
+    ])
+  })
+
   it('returns no origin when nothing is known', () => {
     expect(mergeBrand('x', ['Q404'], [], foldItemRows(rows)).origin).toBeNull()
   })

@@ -195,8 +195,17 @@ export function mergeBrand(
   const owners: BrandOwnershipRowOut[] = []
   for (const f of ordered) {
     for (const o of f.owners) {
+      const ownerName = canonicalOwnerName(o.ownerName)
+      // An alliance is not an owner, a finance arm is not a parent, a row that ends without a known start is junk,
+      // and the brand's own company ("Ford Motor Company" -> ford) says nothing about ownership.
+      if (
+        NOT_AN_OWNER.test(ownerName) ||
+        (o.fromYear === 0 && o.toYear !== null) ||
+        labelToLooseSlug(ownerName) === slug
+      )
+        continue
       // Same owner and start year from two items: keep one, prefer the one that knows the end.
-      const dup = owners.find(x => x.ownerName === o.ownerName && x.fromYear === o.fromYear)
+      const dup = owners.find(x => x.ownerName === ownerName && x.fromYear === o.fromYear)
       if (dup) {
         dup.toYear ??= o.toYear
         dup.ownerCountry ??= o.ownerCountry
@@ -206,7 +215,7 @@ export function mergeBrand(
       if (!o.parent && o.fromYear === 0) continue
       owners.push({
         brandSlug: slug,
-        ownerName: o.ownerName,
+        ownerName,
         ownerCountry: o.ownerCountry,
         fromYear: o.fromYear,
         toYear: o.toYear,
@@ -214,8 +223,30 @@ export function mergeBrand(
       })
     }
   }
-  owners.sort((a, b) => a.fromYear - b.fromYear || a.ownerName.localeCompare(b.ownerName))
-  return { origin, owners }
+  return { origin, owners: mergeOverlapping(owners) }
+}
+
+const NOT_AN_OWNER = /\balliance\b|\bfinance\b|\bfinancial\b|\bleasing\b|\bbank\b/i
+
+/** Regional arms of one group count as the group ("Stellantis Europe" -> "Stellantis"). */
+function canonicalOwnerName(name: string): string {
+  return name.replace(/^(Stellantis) (Europe|North America)$/, '$1')
+}
+
+/** Rows of one owner whose periods overlap or touch become one (Volkswagen 1991- and 2000-2007 -> 1991-), sorted by start. */
+function mergeOverlapping(rows: readonly BrandOwnershipRowOut[]): BrandOwnershipRowOut[] {
+  const out: BrandOwnershipRowOut[] = []
+  const byStart = [...rows].sort((a, b) => a.fromYear - b.fromYear || a.ownerName.localeCompare(b.ownerName))
+  for (const row of byStart) {
+    const prev = out.find(x => x.ownerName === row.ownerName && (x.toYear === null || row.fromYear <= x.toYear))
+    if (!prev) {
+      out.push({ ...row })
+      continue
+    }
+    prev.toYear = prev.toYear === null || row.toYear === null ? null : Math.max(prev.toYear, row.toYear)
+    prev.ownerCountry ??= row.ownerCountry
+  }
+  return out
 }
 
 const snakSchema = z.object({ datavalue: z.object({ value: z.unknown() }).optional() })
