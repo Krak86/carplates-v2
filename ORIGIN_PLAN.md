@@ -1,6 +1,6 @@
 # ORIGIN_PLAN.md - vehicle origin chip + "Where it comes from" section
 
-**Status:** Steps 0-2 and 4 done (Step 3 deferred). To continue in a new session: "start Step 5". Tick the boxes below as steps finish.
+**Status:** Steps 0-2, 4 and 5 done (Step 3 deferred). To continue in a new session: "start Step 6". Tick the boxes below as steps finish.
 Read CLAUDE.md and CLAUDE_RULES.md first; they govern every step (ESM `.js` imports, explicit `@Inject`, Zod at boundaries, tests colocated,
 `pnpm format` first, never `git commit` unless asked, suggest a commit message after each big update).
 
@@ -105,7 +105,7 @@ Notes: `--export-csv` / `--from-csv` added to `ingest-brand-origin.ts` and `inge
 `ingest:wmi:csv` are in `ingest:ratings:csv`. Round trip verified on the local DB (counts equal). **Re-run both `export:*:csv` after any real
 re-ingest.** Step 3 adds `model_plant` to this (its own CSV).
 
-### [ ] Step 5 - API (1.5 h)
+### [x] Step 5 - API (1.5 h) - DONE 2026-10-26
 
 - `apps/api/src/origin/` (controller, service, Zod input schema). `GET /api/origin?brand=&model=&year=&vin=`. No logic in the controller,
   never `@Res()`, explicit `@Inject(...)` on every constructor dependency (`tsx watch` has no `design:paramtypes`).
@@ -114,6 +114,18 @@ re-ingest.** Step 3 adds `model_plant` to this (its own CSV).
 - `@Throttle` (brand list is enumerable). Tests for every hint rule incl. negatives (no VIN, pre-1981 VIN, unknown WMI).
 - Add the query to `lib/offline-cache.ts`.
 - **Done when:** tests pass and the endpoint returns sane output for ten real plates/VINs, incl. a Soviet-era car and a Japanese import.
+
+## Step 5 notes
+
+Done 2026-10-26. `apps/api/src/origin/` (`origin.controller/service/module/dto.ts`, pure rules in `origin-hints.ts`, test `origin-hints.test.ts`, 16 pass). Contract `originResponseSchema` in `packages/shared/src/origin.ts` (+ `vinRegion`, moved from `scripts/src/wmi-parse.ts`, which re-exports it). Web: `getOrigin` (`lib/api.ts`), `originQuery` (`lib/queries.ts`, key `['origin', ...]`), new offline group `origin: 400` in `lib/offline-cache.ts`. `ORIGIN_THROTTLE` 60/min.
+
+- `GET /api/origin?brand=&model=&year=&vin=&plantCountry=&plantCity=`. Only `brand` is required. **NHTSA plant stays client-side**: the web passes the decoded Plant Country as ISO (`countryIso()`) and city; without them the plant is the VIN prefix country (`source: 'wmi'`). The API never calls NHTSA.
+- Response parts are all optional (missing = unknown): `brand {slug, periods, ownership}` (raw rows, periods hold the **modern** code: the client applies `countryAtYear(code, year)`), `plant`, `wmi {wmi, maker, countryCode, region}`, `modelPlants` (empty until Step 3; keyed on `modelKey(model)`), `hints`.
+- WMI order: `registry.wmi_prefix`, then `lookupWmi` (TMB, JTD, XTA live only there), then first-character country block. Non-17-char / pre-1981 VINs yield no WMI, plant or hints.
+- Hints (neutral, quiet by default): `northAmericaVin` (first char 1-5), `makerMismatch` (only when the WMI maker resolves via `brandSlug` to a _different_ brand that is not an owner or rebadge sibling; unknown maker strings never warn), `assemblyDiffers` (brand country vs plant country, both through `countryAtYear`).
+- Checked live on the real DB: Skoda (TMB, 1985/2018), Toyota (JP, NHTSA plant), Nissan, Mercedes, Volvo, VW with a US VIN (NA hint + assembly differs), Lada (XTA), ZAZ 1985 (SU period) and unknown brand (empty).
+- **Data issues seen (Step 2 data, not the API; fix before Step 8 renders them):** Skoda ownership has a junk row "Volkswagen Group 0-2000" plus "Skoda Works 1925-" and "Volkswagen Finance Luxemburg 2014-"; Nissan lists the Alliance as an owner; Lada `hq_city` = "Russia"; Volvo still lacks Ford. Plan: tidy in `brand-origin-overrides.ts` / the ownership filter, then re-run `export:brand-origin:csv`.
+- Not done: no `/api/origin` entry in the sitemap or `docs/features-reference.md` yet (Step 11 writes the Origin section).
 
 ### [ ] Step 6 - Flags and country names (1 h)
 

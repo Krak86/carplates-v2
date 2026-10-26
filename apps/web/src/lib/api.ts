@@ -33,6 +33,7 @@ import {
   openEvResponseSchema,
   rdwRecallsResponseSchema,
   rdwResponseSchema,
+  originResponseSchema,
   vdbResponseSchema,
   vdbStatsResponseSchema,
   fuelStatsResponseSchema,
@@ -112,6 +113,7 @@ import type {
   OpenEvResponse,
   RdwRecallsResponse,
   RdwResponse,
+  OriginResponse,
   VdbResponse,
   VdbStatsResponse,
   VdbVehicleClass,
@@ -346,6 +348,26 @@ export async function getVdb(brand: string, model: string, kind?: string | null)
   const params = new URLSearchParams({ brand, model })
   if (kind) params.set('kind', kind)
   return vdbResponseSchema.parse(await getJson(`/api/vdb?${params.toString()}`))
+}
+
+export type OriginParams = {
+  brand: string
+  model?: string | null
+  year?: number | null
+  vin?: string | null
+  /** ISO 3166-1 alpha-2 of the NHTSA plant country. */
+  plantCountry?: string | null
+  plantCity?: string | null
+}
+
+export async function getOrigin(p: OriginParams): Promise<OriginResponse> {
+  const params = new URLSearchParams({ brand: p.brand })
+  if (p.model) params.set('model', p.model)
+  if (p.year) params.set('year', String(p.year))
+  if (p.vin) params.set('vin', p.vin)
+  if (p.plantCountry) params.set('plantCountry', p.plantCountry)
+  if (p.plantCity) params.set('plantCity', p.plantCity)
+  return originResponseSchema.parse(await getJson(`/api/origin?${params.toString()}`))
 }
 
 export async function getRdw(brand: string, model: string, year: number, kind?: string | null): Promise<RdwResponse> {

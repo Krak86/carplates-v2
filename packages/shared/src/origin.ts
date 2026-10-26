@@ -70,3 +70,65 @@ export const modelPlantSchema = z.object({
   sourceUrl: z.string()
 })
 export type ModelPlant = z.infer<typeof modelPlantSchema>
+
+export const VIN_REGIONS = ['africa', 'asia', 'europe', 'north-america', 'oceania', 'south-america'] as const
+export type VinRegion = (typeof VIN_REGIONS)[number]
+
+/** First VIN character -> world region (ISO 3779). */
+export function vinRegion(wmi: string): VinRegion | null {
+  const c = wmi[0]
+  if (!c) return null
+  if (c >= 'A' && c <= 'H') return 'africa'
+  if (c >= 'J' && c <= 'R') return 'asia'
+  if (c >= 'S' && c <= 'Z') return 'europe'
+  if (c >= '1' && c <= '5') return 'north-america'
+  if (c === '6' || c === '7') return 'oceania'
+  if (c === '8' || c === '9') return 'south-america'
+  return null
+}
+
+export const ORIGIN_PLANT_SOURCES = ['nhtsa', 'wmi'] as const
+
+/** GET /api/origin. Every part is optional: a missing one means unknown, never "none". New fields stay nullable().optional(). */
+export const originResponseSchema = z.object({
+  brand: z
+    .object({
+      slug: z.string(),
+      periods: z.array(brandOriginPeriodSchema),
+      ownership: z.array(brandOwnershipSchema)
+    })
+    .nullable()
+    .optional(),
+  /** Where this exact VIN was built: NHTSA plant fields when the caller passed them, else the VIN prefix (country only). */
+  plant: z
+    .object({
+      countryCode: countrySchema,
+      city: z.string().nullable().optional(),
+      source: z.enum(ORIGIN_PLANT_SOURCES)
+    })
+    .nullable()
+    .optional(),
+  /** The VIN prefix (WMI) record. maker is null when only the country block is known. */
+  wmi: z
+    .object({
+      wmi: z.string(),
+      maker: z.string().nullable().optional(),
+      countryCode: countrySchema.nullable().optional(),
+      region: z.enum(VIN_REGIONS).nullable().optional()
+    })
+    .nullable()
+    .optional(),
+  /** Filled by the hand-curated model plants (release 2); empty until then. */
+  modelPlants: z.array(modelPlantSchema).optional(),
+  hints: z
+    .object({
+      /** VIN built for North America (first character 1-5): the car may be US/Canada-spec. A hint, not a fact. */
+      northAmericaVin: z.boolean(),
+      /** The VIN prefix names a different maker than the registry brand. */
+      makerMismatch: z.object({ wmiMaker: z.string() }).nullable().optional(),
+      /** Brand home country (as of the year) differs from the plant country. Neutral: plenty of brands build abroad. */
+      assemblyDiffers: z.object({ brandCountry: countrySchema, plantCountry: countrySchema }).nullable().optional()
+    })
+    .optional()
+})
+export type OriginResponse = z.infer<typeof originResponseSchema>

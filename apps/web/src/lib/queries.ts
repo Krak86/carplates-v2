@@ -37,6 +37,7 @@ import {
   getNhtsaComplaints,
   getNhtsaRecalls,
   getRdwRecalls,
+  getOrigin,
   getVdb,
   getVdbStats,
   getFuelStats,
@@ -73,7 +74,7 @@ import {
   suggestBrands,
   suggestModels
 } from '@/lib/api'
-import type { FuelEconomyParams, VehicleSearchFilters } from '@/lib/api'
+import type { FuelEconomyParams, OriginParams, VehicleSearchFilters } from '@/lib/api'
 import { isFavorited, listFavorites } from '@/lib/favorites-db'
 import type { FavoriteKind } from '@/lib/favorites-db'
 import { listVisits } from '@/lib/history-db'
@@ -310,6 +311,22 @@ export function vdbQuery(brand: string, model: string, kind?: string | null) {
   return queryOptions({
     queryKey: ['vdb', brand, model, kind ?? null],
     queryFn: () => getVdb(brand, model, kind),
+    staleTime: Infinity
+  })
+}
+
+// Brand origin (Wikidata + NHTSA WMI, pnpm ingest:brand-origin) — persisted reference data, cached offline like vdb.
+export function originQuery(params: OriginParams) {
+  return queryOptions({
+    queryKey: [
+      'origin',
+      params.brand,
+      params.model ?? null,
+      params.year ?? null,
+      params.vin ?? null,
+      params.plantCountry ?? null
+    ],
+    queryFn: () => getOrigin(params),
     staleTime: Infinity
   })
 }

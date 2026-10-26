@@ -41,6 +41,7 @@ import { SearchModule } from './search/search.module.js'
 import { SpaModule } from './spa/spa.module.js'
 import { StatsModule } from './stats/stats.module.js'
 import { UsageModule } from './usage/usage.module.js'
+import { OriginModule } from './origin/origin.module.js'
 import { VinModule } from './vin/vin.module.js'
 import { WikiModule } from './wiki/wiki.module.js'
 import { WikispecsModule } from './wikispecs/wikispecs.module.js'
@@ -59,6 +60,7 @@ import { WikispecsModule } from './wikispecs/wikispecs.module.js'
     UsageModule,
     PlateModule,
     CardModule,
+    OriginModule,
     VinModule,
     RecognizeModule,
     NewsModule,

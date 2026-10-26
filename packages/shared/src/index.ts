@@ -11,15 +11,21 @@ export { modelFamily, type ModelFamily } from './modelFamily.js'
 export { hasKnownWmi, lookupWmi, type WmiMatch } from './wmi.js'
 export {
   LEGACY_COUNTRIES,
+  ORIGIN_PLANT_SOURCES,
+  VIN_REGIONS,
   brandOriginPeriodSchema,
   brandOwnershipSchema,
   countryAtYear,
   isLegacyCountry,
   modelPlantSchema,
+  originResponseSchema,
+  vinRegion,
   type BrandOriginPeriod,
   type BrandOwnership,
   type LegacyCountry,
-  type ModelPlant
+  type ModelPlant,
+  type OriginResponse,
+  type VinRegion
 } from './origin.js'
 export { extractVins, vinCheckDigitOk, type OcrLine, type VinRead } from './vin-read.js'
 export {

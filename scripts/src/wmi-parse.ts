@@ -1,4 +1,5 @@
 /** Pure helpers of `ingest:wmi`: NHTSA vPIC manufacturer / WMI rows into `registry.wmi_prefix` rows. */
+import { vinRegion, type VinRegion } from '@carplates/shared'
 import { z } from 'zod'
 
 export const manufacturersPageSchema = z.object({
@@ -66,20 +67,7 @@ export function countryNameToCode(name: string | null | undefined): string | nul
   return COUNTRY_ALIASES[key] ?? reverseCountryNames().get(key) ?? null
 }
 
-export type VinRegion = 'africa' | 'asia' | 'europe' | 'north-america' | 'oceania' | 'south-america'
-
-/** First VIN character -> world region (ISO 3779). */
-export function vinRegion(wmi: string): VinRegion | null {
-  const c = wmi[0]
-  if (!c) return null
-  if (c >= 'A' && c <= 'H') return 'africa'
-  if (c >= 'J' && c <= 'R') return 'asia'
-  if (c >= 'S' && c <= 'Z') return 'europe'
-  if (c >= '1' && c <= '5') return 'north-america'
-  if (c === '6' || c === '7') return 'oceania'
-  if (c === '8' || c === '9') return 'south-america'
-  return null
-}
+export { vinRegion, type VinRegion } from '@carplates/shared'
 
 export type WmiRow = {
   wmi: string
