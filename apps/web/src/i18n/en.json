@@ -1389,6 +1389,8 @@
   "recognize.unavailable": "Photo search isn't available right now.",
   "recognize.error": "Photo search failed. Please try again.",
   "recognize.alsoFound": "Also found:",
+  "recognize.sameCarReads": "Possible reads of this plate:",
+  "recognize.plateN": "Plate {{n}} in the photo",
   "recognize.tooLarge": "That photo is too large to upload - try a smaller one.",
   "recognize.photoTips": "Photo tips: JPEG, PNG or WebP; large photos are scaled to {{max}} px on the long side. Best results with a sharp, well-lit plate - tiny, blurred, dark or steeply angled plates may be missed.",
   "recognize.photoTipsVin": "Photo tips: JPEG, PNG or WebP; large photos are scaled to {{max}} px on the long side. Best results with a sharp, well-lit, glare-free VIN label, sticker or barcode - blurred, dark, reflective or angled shots may be misread.",

@@ -144,6 +144,8 @@ not a parallel feature, hence the step order below.
 
 **Real-photo pass (2026-09-30 / 10-01, 88 own Ukrainian photos) ✅** — EXIF orientation, truncated reads, candidate filter, stacked/motorcycle plates, legacy-shape junk: findings in `docs/plan-done.md` ("Own ALPR real-photo pass"). `eval/labels.csv` is still missing, so there is no recall figure.
 
+**Moped plates, constrained decoding, alternative reads (2026-10-26) ✅** — row-wise reader for three-row moped plates, slot-class decoding with the registry's real letter set, one-character alternatives returned per plate and shown as numbered/colored chip groups; also a latency regression found and fixed (worst photo 98 s -> 1.3 s): `docs/plan-done.md` ("Own ALPR: moped plates, constrained decoding, alternative reads").
+
 - **Idea, not built:** use the photo date to show who held the plate _on that
   date_ (the registry keeps full history), and flag a read that only matches an
   older owner as a likely misread.

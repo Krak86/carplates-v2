@@ -3450,6 +3450,17 @@ figure**). Findings and fixes:
 - **Legacy-shape junk — fixed 2026-10-01.** `recognize.mapper.ts` drops a
   digits-first (`DDLLDDDD`) read scoring < 0.7 (`LEGACY_MIN_SCORE`).
 
+## Own ALPR: moped plates, constrained decoding, alternative reads (2026-10-26)
+
+Three user photos failed: a three-row moped plate (`AB 1918 AB`, steeply tilted, read as junk), `AH 4018 AC` (read `AH4078AC`), and a car plate `BX 5213 BO` (read `BX5215BU`). Fixes, all in `services/alpr/app.py` unless noted:
+
+- **Row-wise reader (`_read_rows`).** For near-square / tall boxes (width/height < 1.6) the general text OCR (RapidOCR, the VIN route's reader) reads each row on its own: crop scaled to a 400 px long side, the `UA` flag line dropped, rows sorted top to bottom, accepted only as `LLDDDDLL`. A box taller than wide also tries steep rotations (±30…85°). It runs **once per merged plate**, after the tiles are deduplicated. It replaces the plate OCR's read only when that read is weak (not 8 characters, or below 0.9) or the row read is more confident; the same text keeps the plate OCR's score.
+- **Constrained decoding (`_plate_ocr`).** The OCR's per-slot probabilities are re-picked within the slot's class once the shape (`LLDDDDLL`, `LLLLDDDD`, `DDLLDDDD`) is known: letters from `ABCEHIKMOPTXYJFDGZ`, digits from digits. The letter set is measured, not assumed: a 2% sample of `registry.registrations` has Y 7.7k, J 6k, F 4.9k, D 2.3k, G 1.6k, Z 1.2k and L/U/N/R/Q/V/S under 100 each. A first version with only the 12 Cyrillic look-alikes turned `AA2762YA` into `AA2762XA`. Fixes `BX5215BU` -> `BX5215BO` (the model had `U` 0.88 vs `O` 0.12).
+- **Alternative reads (`_alternatives`).** When variants disagree on one character (3/5 on a blurry plate), up to 2 other full-length reads that differ by exactly one character and score >= 0.55 are returned on the same box. They are clamped just below the primary's score, because the API sorts by score and opens the top one. The web groups equal boxes (`components/plate-groups.ts`): chips joined by a chain icon, numbered and colored per plate, matching the outline in the photo.
+- **Latency regression found on the way.** The first row reader ran per tile and enlarged crops 3x with 9 rotations: one 800 px false detection cost ~8.5 s x 7 tiles, the worst eval photo took 98 s and the API's 10 s upstream timeout showed "photo search failed". After the fix: median 0.64 s, max 2.6 s, 60 s for all 88 photos (baseline ~50 s). **Always time the eval (`results.json` has `ms`) after touching the pipeline**, and never run an eval while using the app: the service handles one image at a time.
+
+Eval (88 photos, no labels): top read unchanged on 87; the one change is a junk read the API repairs to the same plate. `BX5213BO` is not the primary for its photo (the OCR genuinely sees 3/5 as ambiguous at ~235 px); it is offered as the alternative.
+
 ## infocar video crawl and YouTube fallback — run log and no-video model list (moved from PLAN.md, 2026-10-12)
 
 **Step 2a — infocar video crawl: done 2026-10-04; models with no video → YouTube fallback (ingest built 2026-10-05; daily runs + lookup/UI open).** Full crawl:

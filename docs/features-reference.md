@@ -287,6 +287,18 @@ SW caches `index.html`). Plate/VIN pages are `noindex`; `?lang=` selects the lan
   (`/api/auth/me` is the only skip). recognize/auth/og keep their own tighter module-level guards. Behind a proxy set `TRUST_PROXY`.
 - Legal/cookie/monetization findings: `docs/legal-and-monetization.md`.
 
+## Photo search: plate groups (2026-10-26)
+
+The ALPR returns, per plate in the photo, its best read plus up to 2 alternative reads (one character different, scored below the
+primary) **sharing the same `box`**. No schema field marks the group: `components/plate-groups.ts` (`groupCandidates`) groups candidates
+by identical box, so `schemas.ts` stays untouched (editing it discards saved offline data). A box-less read is its own group.
+
+- Group color = `labelColorVar` (the HDR `--label-N` palette) shared by the chips (`PlateCandidates`) and the outline in the photo
+  (`PhotoPlateBoxes`); the number badge shows only when there are several plates, the chain icon only joins alternatives.
+- One plate with alternatives is labelled `recognize.sameCarReads`; several plates `recognize.alsoFound`.
+- The service latency budget is the API's 10 s `UPSTREAM_TIMEOUT_MS` (`local-recognize.service.ts`): after any change to
+  `services/alpr/app.py` time `eval.mjs` (`results.json` has `ms`; baseline ~0.6 s/photo) and do not use the app during an eval.
+
 ## Plate regions
 
 `regionName` (`packages/shared/src/regions.ts`) = letter prefix (`REGIONS`) or, for digits-first legacy plates, `LEGACY_REGIONS`.
