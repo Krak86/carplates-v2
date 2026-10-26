@@ -156,7 +156,9 @@ Done 2026-10-26. `apps/api/src/origin/` (`origin.controller/service/module/dto.t
 - **Data issues seen (Step 2 data, not the API; fix before Step 8 renders them):** Skoda ownership has a junk row "Volkswagen Group 0-2000" plus "Skoda Works 1925-" and "Volkswagen Finance Luxemburg 2014-"; Nissan lists the Alliance as an owner; Lada `hq_city` = "Russia"; Volvo still lacks Ford. Plan: tidy in `brand-origin-overrides.ts` / the ownership filter, then re-run `export:brand-origin:csv`.
 - Not done: no `/api/origin` entry in the sitemap or `docs/features-reference.md` yet (Step 11 writes the Origin section).
 
-### [ ] Step 6 - Flags and country names (1 h)
+### [x] Step 6 - Flags and country names (1 h) - DONE 2026-10-26
+
+Notes: `components/Flag.tsx` (`code`, optional `label`; decorative without it) renders an `<img>` from `public/country-flags/<iso>.svg` (92 flags copied from flag-icons 7.5.0, MIT, LICENSE.txt alongside; not a dependency; list in `FLAG_CODES` in `vin/helpers.ts`, a test checks every file exists; add a flag = copy the SVG + add the slug). Former states are drawn inline by `components/LegacyFlag.tsx` (SU, CSHH, DD, YU, CSXX; simplified, **not yet eyeballed in a browser - check in Step 10**); `DE-FRG` uses `de.svg`. `flagSlug(code)` and `countryLabel(code, lang, t)` (Intl for current, `country.<code>` i18n key for former) are in `vin/helpers.ts`. Flags are excluded from the precache and runtime-cached (`carplates-rt-country-flags`, CacheFirst). `VinOriginCard` uses `Flag` (emoji `🌍` when no flag); `VinSegments` tooltip text and `VdbChips`/stats still use emoji `isoFlag`/`countryFlag` (text-only spots, left on purpose). "Ukrainian SSR" label is not added yet (Step 8 needs it).
 
 - One `Flag` component, SVG for every country incl. legacy; lazy-loaded, accessible name (`aria-hidden` when decorative next to the name).
 - Replace `countryFlag()` usage in the VIN card. Legacy names in ua/ru/en i18n keys; others via `Intl.DisplayNames`.

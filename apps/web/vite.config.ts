@@ -81,6 +81,7 @@ export default defineConfig({
         // And the News / Bluesky / Stock side widgets: live third-party data, only mounted online after the first scroll.
         globIgnores: [
           'logos/**',
+          'country-flags/**',
           'fonts/**',
           'models/**',
           'assets/export-*.js',
@@ -120,6 +121,16 @@ export default defineConfig({
             options: {
               cacheName: 'carplates-rt-logos',
               expiration: { maxEntries: 100, maxAgeSeconds: 90 * DAY_S },
+              cacheableResponse: { statuses: [200] }
+            }
+          },
+          {
+            // Country SVG flags (~0.8 MB for all, a few KB each) — only the ones actually seen get cached.
+            urlPattern: ({ url, sameOrigin }): boolean => sameOrigin && url.pathname.startsWith('/country-flags/'),
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'carplates-rt-country-flags',
+              expiration: { maxEntries: 100, maxAgeSeconds: 365 * DAY_S },
               cacheableResponse: { statuses: [200] }
             }
           },
