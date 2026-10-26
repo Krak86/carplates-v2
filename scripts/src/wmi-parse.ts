@@ -21,11 +21,11 @@ export const wmiListSchema = z.object({
   Results: z.array(z.object({ WMI: z.string().nullable().optional() }))
 })
 
-/** Primary vehicle types worth a lookup: what can appear on a Ukrainian-registered road vehicle (trailers, LSVs, off-road skipped). */
+/** Vehicle types worth a lookup (primary or not: VOLKSWAGEN AG, WVW, has no primary type): what can appear on a Ukrainian-registered road vehicle (trailers, LSVs, off-road skipped). */
 const WANTED_TYPES = /^(Passenger Car|Multipurpose Passenger Vehicle|Truck|Bus|Motorcycle|Incomplete Vehicle)/
 
 export const isWantedManufacturer = (m: NhtsaManufacturer): boolean =>
-  (m.VehicleTypes ?? []).some(t => t.IsPrimary && WANTED_TYPES.test(t.Name))
+  (m.VehicleTypes ?? []).some(t => WANTED_TYPES.test(t.Name))
 
 /** NHTSA spellings that `Intl.DisplayNames` names differently. */
 const COUNTRY_ALIASES: Readonly<Record<string, string>> = {

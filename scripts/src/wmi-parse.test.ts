@@ -31,11 +31,11 @@ describe('vinRegion', () => {
 })
 
 describe('isWantedManufacturer', () => {
-  it('keeps road vehicles, drops trailers', () => {
+  it('keeps road vehicles (primary or not), drops trailers', () => {
     const base = { Mfr_ID: 1 }
     expect(isWantedManufacturer({ ...base, VehicleTypes: [{ IsPrimary: true, Name: 'Passenger Car' }] })).toBe(true)
     expect(isWantedManufacturer({ ...base, VehicleTypes: [{ IsPrimary: true, Name: 'Trailer' }] })).toBe(false)
-    expect(isWantedManufacturer({ ...base, VehicleTypes: [{ IsPrimary: false, Name: 'Truck' }] })).toBe(false)
+    expect(isWantedManufacturer({ ...base, VehicleTypes: [{ IsPrimary: false, Name: 'Truck' }] })).toBe(true)
   })
 })
 

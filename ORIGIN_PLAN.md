@@ -1,6 +1,6 @@
 # ORIGIN_PLAN.md - vehicle origin chip + "Where it comes from" section
 
-**Status:** Steps 0-1 done. Step 2 is done except the NHTSA WMI import (blocked by NHTSA throttling, see "Step 2 notes" at the bottom). To continue in a new session: "finish the WMI part of Step 2 in ORIGIN_PLAN.md", or "start Step 3/4/5". Tick the boxes below as steps finish.
+**Status:** Steps 0-2 done. To continue in a new session: "start Step 3/4/5". Tick the boxes below as steps finish.
 Read CLAUDE.md and CLAUDE_RULES.md first; they govern every step (ESM `.js` imports, explicit `@Inject`, Zod at boundaries, tests colocated,
 `pnpm format` first, never `git commit` unless asked, suggest a commit message after each big update).
 
@@ -78,7 +78,7 @@ Existing code to reuse: `VinOriginCard`, `countryIso()`/`countryFlag()` in `apps
 - `pnpm --filter @carplates/shared build` after editing.
 - **Done when:** migration applies cleanly, helper tests pass.
 
-### [~] Step 2 - Ingest from Wikidata and NHTSA (2 h) - Wikidata part DONE, WMI import PENDING
+### [x] Step 2 - Ingest from Wikidata and NHTSA (2 h) - DONE
 
 - `scripts/src/ingest-brand-origin.ts`: Wikidata SPARQL for country (with dates), founded, HQ, owner, ownership dates. Header-name-driven
   mapping, `INSERT ... ON CONFLICT DO NOTHING`, cache raw responses, descriptive User-Agent, respect rate limits.
@@ -259,3 +259,5 @@ the script now stops on 403/429 (no retry storm), uses concurrency 2 + 300 ms pa
   JTD (Toyota, JP), XTA (Lada, RU) in `registry.wmi_prefix`. `packages/shared/src/wmi.ts` stays the fallback until the API (Step 5) uses the table.
 - Step 4 (seed exports) must cover `brand_origin_period`, `brand_ownership` and `wmi_prefix`; there is no `--export-csv`/`--from-csv` in either
   script yet (add them in Step 4, same shape as `open-ev.ts`).
+
+**WMI import done 2026-10-26:** needed a VPN (NHTSA blocks an IP after a few hundred calls; cache resumes). Filter relaxed to any road-vehicle type (not only primary: VW AG has none). `registry.wmi_prefix` = 1152 WMIs, all with a country; WVW = Volkswagen DE. **vPIC does not list TMB (Skoda), JTD (Toyota), XTA (Lada)** (it covers mostly US-market WMIs), so the API (Step 5) must fall back to `packages/shared/src/wmi.ts` for them; do not drop that file.
