@@ -14,6 +14,8 @@
  *   pnpm ingest:brand-origin --refresh      # ignore the cache
  *   pnpm ingest:brand-origin --top 80       # unmatched rows to print (default 60)
  *   pnpm ingest:brand-origin --show skoda,volvo   # print the rows built for these slugs
+ *   pnpm ingest:brand-origin --export-csv seed-data/brand-origin.csv.gz   # dump both tables (+ brand-ownership.csv.gz beside it)
+ *   pnpm ingest:brand-origin --from-csv seed-data/brand-origin.csv.gz     # load that dump (replaces both tables), no Wikidata calls
  */
 import { createHash } from 'node:crypto'
 import { existsSync } from 'node:fs'
@@ -38,6 +40,7 @@ import {
   sparqlResponseSchema
 } from './brand-origin-parse.js'
 import type { BrandOriginRow, Entities, BrandOwnershipRowOut, SparqlRow, WikidataItem } from './brand-origin-parse.js'
+import { exportBrandOrigin, importBrandOrigin } from './origin-csv.js'
 
 const ENDPOINT = 'https://query.wikidata.org/sparql'
 const USER_AGENT = 'carsua.app-ingest/1.0 (+https://carsua.app; rukrak86@gmail.com)'
@@ -47,7 +50,15 @@ const PAUSE_MS = 1500
 const RETRIES = 2
 const QUERY_TIMEOUT_MS = 90_000
 
-type Args = { report: boolean; dryRun: boolean; refresh: boolean; top: number; show: string[] }
+type Args = {
+  report: boolean
+  dryRun: boolean
+  refresh: boolean
+  top: number
+  show: string[]
+  exportCsv?: string
+  fromCsv?: string
+}
 
 function parseArgs(argv: string[]): Args {
   const a: Args = { report: false, dryRun: false, refresh: false, top: 60, show: [] }
@@ -58,6 +69,8 @@ function parseArgs(argv: string[]): Args {
     else if (arg === '--refresh') a.refresh = true
     else if (arg === '--show') a.show = (argv[++i] ?? '').split(',').filter(Boolean)
     else if (arg === '--top') a.top = Number(argv[++i]) || a.top
+    else if (arg === '--export-csv') a.exportCsv = argv[++i]
+    else if (arg === '--from-csv') a.fromCsv = argv[++i]
   }
   return a
 }
@@ -260,6 +273,9 @@ async function main(): Promise<void> {
   const args = parseArgs(process.argv.slice(2))
   const { db, close } = createDb()
   try {
+    if (args.exportCsv) return await exportBrandOrigin(db, args.exportCsv)
+    if (args.fromCsv) return await importBrandOrigin(db, args.fromCsv)
+
     const { bySlug, unmapped } = await registryBrands(db)
     const total = [...bySlug.values()].reduce((a, n) => a + n, 0)
     const slugs = new Set(bySlug.keys())

@@ -7,6 +7,8 @@
  *   pnpm ingest:wmi                 # query (cached), upsert
  *   pnpm ingest:wmi --dry-run       # query + report, write nothing
  *   pnpm ingest:wmi --refresh       # ignore the cache
+ *   pnpm ingest:wmi --export-csv ./x.csv.gz   # dump the current table
+ *   pnpm ingest:wmi --from-csv ./x.csv.gz     # load a dump (replaces the table), no NHTSA calls
  */
 import { existsSync } from 'node:fs'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
@@ -15,6 +17,7 @@ import { join } from 'node:path'
 import { createDb, wmiPrefix } from '@carplates/db'
 import { sql } from 'drizzle-orm'
 
+import { exportWmi, importWmi } from './origin-csv.js'
 import {
   buildWmiRows,
   countryNameToCode,
@@ -92,6 +95,18 @@ async function main(): Promise<void> {
   const argv = process.argv.slice(2)
   const dryRun = argv.includes('--dry-run')
   const refresh = argv.includes('--refresh')
+  const exportCsv = argv.includes('--export-csv') ? argv[argv.indexOf('--export-csv') + 1] : undefined
+  const fromCsv = argv.includes('--from-csv') ? argv[argv.indexOf('--from-csv') + 1] : undefined
+  if (exportCsv || fromCsv) {
+    const { db, close } = createDb()
+    try {
+      if (exportCsv) await exportWmi(db, exportCsv)
+      else if (fromCsv) await importWmi(db, fromCsv)
+    } finally {
+      await close()
+    }
+    return
+  }
 
   const manufacturers = (await listManufacturers(refresh)).filter(isWantedManufacturer)
   log(`${manufacturers.length} road-vehicle manufacturer(s)`)

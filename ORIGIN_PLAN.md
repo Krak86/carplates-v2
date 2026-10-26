@@ -1,6 +1,6 @@
 # ORIGIN_PLAN.md - vehicle origin chip + "Where it comes from" section
 
-**Status:** Steps 0-2 done. To continue in a new session: "start Step 3/4/5". Tick the boxes below as steps finish.
+**Status:** Steps 0-2 and 4 done (Step 3 deferred). To continue in a new session: "start Step 5". Tick the boxes below as steps finish.
 Read CLAUDE.md and CLAUDE_RULES.md first; they govern every step (ESM `.js` imports, explicit `@Inject`, Zod at boundaries, tests colocated,
 `pnpm format` first, never `git commit` unless asked, suggest a commit message after each big update).
 
@@ -93,11 +93,17 @@ Existing code to reuse: `VinOriginCard`, `countryIso()`/`countryFlag()` in `apps
 - CSV of the top 30-50 models by registry count: countries, cities, years, a Wikipedia source link per row. Own ingest script.
 - Validation test: every row has a source URL, a valid country, a sane year range.
 
-### [ ] Step 4 - Seed exports (30 min)
+### [x] Step 4 - Seed exports (30 min) - DONE 2026-10-26
 
 - `export:brand-origin:csv`, `export:wmi:csv` (and `export:model-plants:csv` with Step 3) -> gzipped CSVs in `scripts/seed-data/`.
 - Document the commands in `docs/commands-reference.md`. A new setup loads the CSV instead of re-scraping.
 - **Done when:** a fresh setup loads all tables from the CSVs.
+
+Notes: `--export-csv` / `--from-csv` added to `ingest-brand-origin.ts` and `ingest-wmi.ts`; shared code in `scripts/src/origin-csv.ts` (uses
+`csv-io.ts`). Seeds: `brand-origin.csv.gz` (165 periods) + `brand-ownership.csv.gz` (150 rows; the path is derived from the origin path) and
+`wmi.csv.gz` (1152). A load TRUNCATEs and replaces only these tables; a missing seed is skipped with a message. `ingest:brand-origin:csv` and
+`ingest:wmi:csv` are in `ingest:ratings:csv`. Round trip verified on the local DB (counts equal). **Re-run both `export:*:csv` after any real
+re-ingest.** Step 3 adds `model_plant` to this (its own CSV).
 
 ### [ ] Step 5 - API (1.5 h)
 

@@ -137,6 +137,12 @@ pnpm export:wanted-history:csv   # re-dump the scraped rows + resume tables to t
 pnpm ingest:generations   # car generations (Wikidata + Wikipedia) for the top 300 registry models -> registry.model_generations; ~10 min, cached in scripts/.data/generations/. --limit N, --only "brand model", --dry-run (prints table + coverage), --refresh. Chip via GET /api/generations
 pnpm ingest:generations:csv   # load the committed seed (seed-data/model-generations.csv.gz) — part of ingest:ratings:csv
 pnpm export:generations:csv   # re-dump the table to that CSV — run after every real re-ingest
+pnpm ingest:brand-origin   # vehicle origin (ORIGIN_PLAN.md): Wikidata (CC0) brand country / founded / HQ / ownership -> registry.brand_origin_period + brand_ownership, keyed on brandSlug(); cached in scripts/.data/brand-origin/. --report (no write), --dry-run, --refresh, --top N, --show skoda,volvo. Overrides: scripts/src/brand-origin-overrides.ts
+pnpm ingest:brand-origin:csv   # load the committed seed (seed-data/brand-origin.csv.gz + brand-ownership.csv.gz; replaces both tables) — part of ingest:ratings:csv
+pnpm export:brand-origin:csv   # re-dump both tables to those CSVs — run after every real re-ingest
+pnpm ingest:wmi   # VIN world-manufacturer identifiers (NHTSA vPIC) -> registry.wmi_prefix; ~2.7k calls cached in scripts/.data/wmi/ (resumable; NHTSA 403s a throttled IP after a few hundred calls, use a VPN or wait). --dry-run, --refresh. vPIC lacks many non-US WMIs (TMB, JTD, XTA): the API falls back to packages/shared/src/wmi.ts
+pnpm ingest:wmi:csv   # load the committed seed (seed-data/wmi.csv.gz; replaces the table) — part of ingest:ratings:csv
+pnpm export:wmi:csv   # re-dump the table to that CSV — run after every real re-ingest
 pnpm ingest:wikispecs   # Wikipedia spec catalogue (stage K: dimensions, drive, engines with power) for every row of model_generations -> registry.model_spec_wiki; en -> ru -> uk -> de -> home edition per block, dimensions NULL where RDW has the model; ~1 h cold, cached in scripts/.data/wikispecs/ (resumable). --limit N models, --only "make_key model_key", --dry-run (coverage table), --refresh. Title pins: scripts/src/wikispecs-overrides.csv
 pnpm ingest:wikispecs:csv   # load the committed seed (seed-data/wikispecs.csv.gz) — part of ingest:ratings:csv
 pnpm export:wikispecs:csv   # re-dump the table to that CSV — run after every real re-ingest
