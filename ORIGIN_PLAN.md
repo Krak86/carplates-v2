@@ -190,7 +190,9 @@ Notes 8b: `components/OriginSection.tsx` (+ `OriginStepBody`, `OriginCountry`, `
   Online-only, so not in `lib/offline-cache.ts`. Use the `dataviz` skill. Build only after the unmatched-brand report is clean.
 - **Done when:** numbers match a direct SQL check on a sample of brands.
 
-### [ ] Step 10 - i18n, accessibility, polish (1.5 h)
+### [x] Step 10 - i18n, accessibility, polish (1.5 h) - DONE 2026-10-26
+
+Notes: ua/ru/en key sets for `origin.*` / `country.*` are identical (checked by diff). Browser-checked on a Toyota VIN (4T1BF1FK5CU123456, mobile width, en + ua): chip (JP + US flags, legend popover, disclaimer), section (timeline, hints, "as of"), flags have localized alt text, no origin console errors. Fixed: NHTSA plant cities arrive in capitals, now title-cased by `plantCity` (+ test). **Not verified:** legacy SVG flags (USSR, CSHH, DD, YU; needs a real Soviet-era plate), light theme, Lighthouse, a VIN with no NHTSA/registry make (brand is null, so no chip/section; WMI-only brand fallback not built). No `section.about.origin` (the section has its own explainer) and no API link-preview text for `?section=origin`.
 
 - ua/ru/en strings for every label, tooltip and the explainer. No em dash in UI text.
 - Dark theme, mobile width, keyboard navigation for chip and expander, screen-reader labels on flags.

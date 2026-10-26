@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { OriginResponse } from '@carplates/shared'
 
-import { buildOriginChip, buildOriginView } from '@/components/OriginSection.helpers'
+import { buildOriginChip, buildOriginView, plantCity } from '@/components/OriginSection.helpers'
 
 const SKODA: OriginResponse = {
   brand: {
@@ -132,5 +132,14 @@ describe('buildOriginView', () => {
       city: 'Puebla',
       alsoBuiltIn: [{ country: 'DE', city: 'Wolfsburg', from: 2010, to: null }]
     })
+  })
+})
+
+describe('plantCity', () => {
+  it('title-cases NHTSA capitals, keeps mixed case, drops empty', () => {
+    expect(plantCity('GEORGETOWN')).toBe('Georgetown')
+    expect(plantCity('MLADÁ BOLESLAV')).toBe('Mladá Boleslav')
+    expect(plantCity('Kvasiny')).toBe('Kvasiny')
+    expect(plantCity('')).toBeNull()
   })
 })

@@ -72,6 +72,13 @@ const UKRAINIAN_SSR_BRANDS = ['zaz', 'luaz']
 
 const nonZero = (year: number | null | undefined): number | null => (year ? year : null)
 
+/** NHTSA writes plant cities in capitals ("GEORGETOWN"); mixed-case names from the curated data are left as they are. */
+export function plantCity(city: string | null | undefined): string | null {
+  if (!city) return null
+  if (city !== city.toUpperCase()) return city
+  return city.toLowerCase().replace(/(^|[\s-])\p{L}/gu, m => m.toUpperCase())
+}
+
 /**
  * The chronological steps of a vehicle's origin, each present only when known. Countries are resolved for the car's
  * model year (a 1985 Skoda is Czechoslovak); an unknown year keeps the modern country.
@@ -115,7 +122,7 @@ export function buildOriginView(
     view.steps.push({
       kind: 'assembly',
       country: countryAtYear(data.plant.countryCode, year),
-      city: data.plant.city || null,
+      city: plantCity(data.plant.city),
       via: data.plant.source,
       alsoBuiltIn: (data.modelPlants ?? []).map(p => ({
         country: countryAtYear(p.countryCode, year ?? p.fromYear),
