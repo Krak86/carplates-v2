@@ -208,6 +208,18 @@ Notes: ua/ru/en key sets for `origin.*` / `country.*` are identical (checked by 
 - `pnpm format`, `pnpm lint`, full tests, production build (check the lazy chunk). Re-run every `export:*:csv` touched.
 - Suggested commit message(s); do not run `git commit`.
 
+## Open follow-ups (after all steps)
+
+Not blocking, collected 2026-10-26:
+
+- **Browser checks missing:** legacy SVG flags (USSR, CSHH, DD, YU; needs a real Soviet-era plate), light theme, Lighthouse on the VIN page, the /stats origin panel (mobile width, dark and light).
+- **No WMI-only brand fallback:** a VIN with no registry and no NHTSA make shows no chip or section.
+- **No API link-preview text** for `?section=origin` (and no `section.about.origin`; the section has its own explainer).
+- **Model plants CSV** was written from memory with a Wikipedia source per row, not re-read row by row: spot-check it.
+- **Ownership data:** Chrysler 2007-2014 history is off; Volkswagen shows Porsche SE as an undated parent; "Mercedes-Benz Group" is anachronistic before 2022.
+- **Owner flag rarely shows:** `owner_country` is null for most ownership rows (Wikidata owner country is not fetched).
+- **Stats panel:** the assembly country is known for ~48 % of cars (older cars have no standard VIN); the 0.3 % of unmatched brands count as unknown.
+
 ## Suggested commit split
 
 1. Schema, contract, country-by-year helper (Step 1)
@@ -215,7 +227,7 @@ Notes: ua/ru/en key sets for `origin.*` / `country.*` are identical (checked by 
 3. API (Step 5)
 4. Flags, chip, section (Steps 6-8)
 5. i18n, docs, release notes (Steps 10-11)
-6. Release 2: model plants + stats (Steps 3, 9)
+6. Release 2: model plants + stats (Steps 3, 9) - done
 
 ## Effort
 

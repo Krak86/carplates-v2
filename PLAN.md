@@ -339,6 +339,7 @@ above once scoped, or dropped if research says no.
   paid-features route** — see Phase 5 "Stage A".
 
 - ✅ **Wanted (stolen) vehicles** — built 2026-10-15 (`5bed8de`), see above and `docs/plan-done.md` (original design archived there).
+- ✅ **Vehicle origin** (flags chip, `?section=origin` timeline, model plants, `/stats` "Where cars come from"; 2026-10-25/26) — built, see `docs/plan-done.md`, `docs/features-reference.md` and [ORIGIN_PLAN.md](ORIGIN_PLAN.md) (open follow-ups listed there).
 - ✅ **Cross-links between result-card sections, About features list** (2026-10-15, `6df9280`, `c1951da`) — see `docs/plan-done.md`.
 - ✅ **Pre-public secrets audit, production DB-credential guard, first Dependabot round** (2026-10-15) — see `docs/plan-done.md`. **Open:** run
   gitleaks over the full history before flipping the repo public; `@tanstack/react-table` 9 migration (v8 held).

@@ -12,6 +12,18 @@ export const RELEASES: readonly ReleaseDay[] = [
     items: [
       item(
         'new',
+        'У секції «Звідки авто» для популярних моделей показано, де ще їх збирають (країна, місто, роки)',
+        'В секции «Откуда авто» для популярных моделей показано, где ещё их собирают (страна, город, годы)',
+        'The origin section now lists where else popular models were built (country, city, years)'
+      ),
+      item(
+        'data',
+        'Заводи збирання моделей зібрані вручну з Вікіпедії - з посиланням на статтю для кожного запису',
+        'Заводы сборки моделей собраны вручную из Википедии - со ссылкой на статью для каждой записи',
+        'Model assembly plants are hand-curated from Wikipedia, with an article link for every entry'
+      ),
+      item(
+        'new',
         'Статистика: «Звідки авто» - легкові авто за країною бренду та за країною збирання (за VIN), з колишніми країнами за модельним роком',
         'Статистика: «Откуда авто» - легковые авто по стране бренда и по стране сборки (по VIN), с прежними странами по модельному году',
         'Stats: "Where cars come from" - passenger cars by brand home country and by assembly country (from the VIN), with the country of their time by model year'
