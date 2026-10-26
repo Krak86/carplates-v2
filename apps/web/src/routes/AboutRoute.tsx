@@ -67,7 +67,12 @@ const SOURCES: readonly Source[] = [
   // No logo: the site grants no reuse of its mark.
   { key: 'pdr', label: 'pdr.infotech.gov.ua', url: 'https://pdr.infotech.gov.ua', tile: 'bg-blue-700' },
   { key: 'drive2', label: 'DRIVE2', url: 'https://www.drive2.ru', icon: '/icons/drive2.png' },
-  { key: 'flagIcons', label: 'flag-icons', url: 'https://github.com/lipis/flag-icons', icon: '/icons/sources/github.webp' },
+  {
+    key: 'flagIcons',
+    label: 'flag-icons',
+    url: 'https://github.com/lipis/flag-icons',
+    icon: '/icons/sources/github.webp'
+  },
   { key: 'osm', label: 'OpenStreetMap', url: 'https://www.openstreetmap.org', tile: 'bg-green-700' },
   { key: 'autoria', label: 'Auto.RIA / OLX', url: 'https://auto.ria.com', tile: 'bg-slate-500' },
   { key: 'infocar', label: 'infocar.ua', url: 'https://www.infocar.ua', icon: '/icons/infocar.png' },

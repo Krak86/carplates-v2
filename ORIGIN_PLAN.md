@@ -1,6 +1,6 @@
 # ORIGIN_PLAN.md - vehicle origin chip + "Where it comes from" section
 
-**Status:** First release done (Steps 0-2, 4-8, 10, 11, A). Step 3 and Step 9 are deferred to release 2. Tick the boxes below as steps finish.
+**Status:** First release done (Steps 0-2, 4-8, 10, 11, A). Step 3 done (release 2, 2026-10-26); Step 9 is still deferred to release 2. Tick the boxes below as steps finish.
 Read CLAUDE.md and CLAUDE_RULES.md first; they govern every step (ESM `.js` imports, explicit `@Inject`, Zod at boundaries, tests colocated,
 `pnpm format` first, never `git commit` unless asked, suggest a commit message after each big update).
 
@@ -117,7 +117,9 @@ Fix the Step 2 data problems found while testing the Step 5 API (see "Step 5 not
 - Manual overrides file for legacy-country gaps (ZAZ, LuAZ, Moskvich, ...), documented in the script.
 - **Done when:** the report shows the top brands matched; overrides documented.
 
-### [ ] Step 3 - Hand-curated model plants - DEFERRED to release 2 (1.5-2 h)
+### [x] Step 3 - Hand-curated model plants (release 2, 1.5-2 h) - DONE 2026-10-26
+
+Notes: `scripts/seed-data/model-plants.csv` (plain, hand-edited, the source of truth; columns `brand_slug, models, country_code, city, from_year, to_year, source_url`; `models` = registry spellings joined by `|`, each becomes a `modelKey` slug; `from_year` 0 = start unknown, empty `to_year` = still built there; modern ISO country, the client applies `countryAtYear`). `pnpm ingest:model-plants` (`--dry-run`) validates (`model-plants-parse.ts`: Wikipedia source URL on every row, ISO country, sane years, duplicate spellings collapsed) and replaces `registry.model_plant`; it is in `ingest:ratings:csv`. 188 rows / 204 model plants / 85 model keys, ~45 models (VW, Skoda, Toyota, Ford, Renault/Dacia, Opel, Audi, BMW, Hyundai/Kia, Nissan, Mazda, Honda, Tesla, Daewoo/Chevrolet/ZAZ ...). **Written from memory with the Wikipedia model article as the cited source, not re-read row by row: spot-check before trusting; many start years are 0 on purpose.** Web: "also built in" now lists only plants open in the car year, not the car's own plant (same country, and same city when both known), and shows the years (`yearRange`). No `export:model-plants:csv`: the CSV itself is the seed.
 
 - CSV of the top 30-50 models by registry count: countries, cities, years, a Wikipedia source link per row. Own ingest script.
 - Validation test: every row has a source URL, a valid country, a sane year range.

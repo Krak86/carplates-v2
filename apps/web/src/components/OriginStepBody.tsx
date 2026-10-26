@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 
 import OriginCountry from '@/components/OriginCountry'
 import type { OriginStep } from '@/components/OriginSection.helpers'
-import { ownerRange } from '@/components/OriginSection.helpers'
+import { ownerRange, yearRange } from '@/components/OriginSection.helpers'
 import OriginSourceLink from '@/components/OriginSourceLink'
 
 type Props = {
@@ -86,6 +86,11 @@ export default function OriginStepBody({ step }: Props): ReactNode {
                 <li key={`${alt.country}-${alt.city}-${alt.from}`} className="flex flex-wrap items-center gap-x-2">
                   <OriginCountry code={alt.country} />
                   {alt.city && <span>{alt.city}</span>}
+
+                  {yearRange(alt.from, alt.to) && (
+                    <span className="text-sm text-[var(--color-muted)]">{yearRange(alt.from, alt.to)}</span>
+                  )}
+
                   <OriginSourceLink url={alt.source} />
                 </li>
               ))}

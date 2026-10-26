@@ -142,6 +142,7 @@ pnpm ingest:brand-origin:csv   # load the committed seed (seed-data/brand-origin
 pnpm export:brand-origin:csv   # re-dump both tables to those CSVs — run after every real re-ingest
 pnpm ingest:wmi   # VIN world-manufacturer identifiers (NHTSA vPIC) -> registry.wmi_prefix; ~2.7k calls cached in scripts/.data/wmi/ (resumable; NHTSA 403s a throttled IP after a few hundred calls, use a VPN or wait). --dry-run, --refresh. vPIC lacks many non-US WMIs (TMB, JTD, XTA): the API falls back to packages/shared/src/wmi.ts
 pnpm ingest:wmi:csv   # load the committed seed (seed-data/wmi.csv.gz; replaces the table) — part of ingest:ratings:csv
+pnpm ingest:model-plants   # hand-curated model plants (scripts/seed-data/model-plants.csv, a Wikipedia source per row) -> registry.model_plant; validates, replaces the table, --dry-run. Edit the CSV by hand; part of ingest:ratings:csv. No export command (the CSV is the seed)
 pnpm export:wmi:csv   # re-dump the table to that CSV — run after every real re-ingest
 pnpm ingest:wikispecs   # Wikipedia spec catalogue (stage K: dimensions, drive, engines with power) for every row of model_generations -> registry.model_spec_wiki; en -> ru -> uk -> de -> home edition per block, dimensions NULL where RDW has the model; ~1 h cold, cached in scripts/.data/wikispecs/ (resumable). --limit N models, --only "make_key model_key", --dry-run (coverage table), --refresh. Title pins: scripts/src/wikispecs-overrides.csv
 pnpm ingest:wikispecs:csv   # load the committed seed (seed-data/wikispecs.csv.gz) — part of ingest:ratings:csv

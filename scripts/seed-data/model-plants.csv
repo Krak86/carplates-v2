@@ -1,0 +1,189 @@
+brand_slug,models,country_code,city,from_year,to_year,source_url
+volkswagen,PASSAT,DE,Emden,1973,2022,https://en.wikipedia.org/wiki/Volkswagen_Passat
+volkswagen,PASSAT,US,Chattanooga,2011,2022,https://en.wikipedia.org/wiki/Volkswagen_Passat_(NMS)
+volkswagen,PASSAT,CN,Shanghai,2001,,https://en.wikipedia.org/wiki/Volkswagen_Passat
+volkswagen,PASSAT,SK,Bratislava,2023,,https://en.wikipedia.org/wiki/Volkswagen_Passat_(B9)
+volkswagen,GOLF,DE,Wolfsburg,1974,,https://en.wikipedia.org/wiki/Volkswagen_Golf
+volkswagen,GOLF,ZA,Uitenhage,1978,2009,https://en.wikipedia.org/wiki/Volkswagen_Golf_Mk1
+volkswagen,JETTA,DE,Wolfsburg,1979,,https://en.wikipedia.org/wiki/Volkswagen_Jetta
+volkswagen,JETTA,MX,Puebla,0,,https://en.wikipedia.org/wiki/Volkswagen_Jetta
+volkswagen,JETTA,CN,Changchun,1991,,https://en.wikipedia.org/wiki/Volkswagen_Jetta
+volkswagen,TIGUAN,DE,Wolfsburg,2007,,https://en.wikipedia.org/wiki/Volkswagen_Tiguan
+volkswagen,TIGUAN,MX,Puebla,2017,,https://en.wikipedia.org/wiki/Volkswagen_Tiguan
+volkswagen,TIGUAN,CN,Shanghai,2010,,https://en.wikipedia.org/wiki/Volkswagen_Tiguan
+volkswagen,TOUAREG,SK,Bratislava,2002,,https://en.wikipedia.org/wiki/Volkswagen_Touareg
+volkswagen,POLO,DE,Wolfsburg,1975,,https://en.wikipedia.org/wiki/Volkswagen_Polo
+volkswagen,POLO,ES,Pamplona,1994,,https://en.wikipedia.org/wiki/Volkswagen_Polo
+volkswagen,POLO,ZA,Uitenhage,1996,,https://en.wikipedia.org/wiki/Volkswagen_Polo
+volkswagen,POLO,IN,Pune,2010,,https://en.wikipedia.org/wiki/Volkswagen_Polo
+volkswagen,TRANSPORTER,DE,Hannover,1956,,https://en.wikipedia.org/wiki/Volkswagen_Transporter
+volkswagen,CADDY,PL,Poznań,2004,,https://en.wikipedia.org/wiki/Volkswagen_Caddy
+skoda,OCTAVIA|OCTAVIA A5|OCTAVIA TOUR|OCTAVIA A7,CZ,Mladá Boleslav,1996,,https://en.wikipedia.org/wiki/%C5%A0koda_Octavia
+skoda,OCTAVIA|OCTAVIA A5|OCTAVIA TOUR|OCTAVIA A7,UA,Solomonovo,0,,https://en.wikipedia.org/wiki/%C5%A0koda_Octavia
+skoda,OCTAVIA|OCTAVIA A5|OCTAVIA TOUR|OCTAVIA A7,IN,Aurangabad,2001,,https://en.wikipedia.org/wiki/%C5%A0koda_Octavia
+skoda,OCTAVIA|OCTAVIA A5|OCTAVIA TOUR|OCTAVIA A7,CN,Shanghai,2007,,https://en.wikipedia.org/wiki/%C5%A0koda_Octavia
+skoda,FABIA,CZ,Mladá Boleslav,1999,,https://en.wikipedia.org/wiki/%C5%A0koda_Fabia
+skoda,FABIA,UA,Solomonovo,0,,https://en.wikipedia.org/wiki/%C5%A0koda_Fabia
+skoda,SUPERB,CZ,Kvasiny,2001,,https://en.wikipedia.org/wiki/%C5%A0koda_Superb
+skoda,SUPERB,UA,Solomonovo,0,,https://en.wikipedia.org/wiki/%C5%A0koda_Superb
+skoda,KODIAQ,CZ,Kvasiny,2016,,https://en.wikipedia.org/wiki/%C5%A0koda_Kodiaq
+toyota,CAMRY,JP,Tsutsumi,1982,,https://en.wikipedia.org/wiki/Toyota_Camry
+toyota,CAMRY,US,Georgetown,1988,,https://en.wikipedia.org/wiki/Toyota_Camry
+toyota,CAMRY,AU,Altona,1987,2017,https://en.wikipedia.org/wiki/Toyota_Camry
+toyota,CAMRY,RU,Saint Petersburg,2007,2022,https://en.wikipedia.org/wiki/Toyota_Camry
+toyota,CAMRY,CN,Guangzhou,2006,,https://en.wikipedia.org/wiki/Toyota_Camry
+toyota,COROLLA,JP,Takaoka,0,,https://en.wikipedia.org/wiki/Toyota_Corolla
+toyota,COROLLA,GB,Burnaston,1992,2021,https://en.wikipedia.org/wiki/Toyota_Corolla
+toyota,COROLLA,CA,Cambridge,1988,,https://en.wikipedia.org/wiki/Toyota_Corolla
+toyota,COROLLA,TR,Sakarya,1994,,https://en.wikipedia.org/wiki/Toyota_Corolla
+toyota,COROLLA,US,Fremont,1988,2010,https://en.wikipedia.org/wiki/Toyota_Corolla
+toyota,RAV4|RAV-4|RAV-4 HYBRID,JP,,1994,,https://en.wikipedia.org/wiki/Toyota_RAV4
+toyota,RAV4|RAV-4|RAV-4 HYBRID,CA,Woodstock,2008,,https://en.wikipedia.org/wiki/Toyota_RAV4
+toyota,RAV4|RAV-4|RAV-4 HYBRID,US,Georgetown,2019,,https://en.wikipedia.org/wiki/Toyota_RAV4
+ford,FOCUS,DE,Saarlouis,1998,2025,https://en.wikipedia.org/wiki/Ford_Focus_(first_generation)
+ford,FOCUS,US,Wayne,2000,2018,https://en.wikipedia.org/wiki/Ford_Focus_(North_America)
+ford,FOCUS,RU,Vsevolozhsk,2002,2019,https://en.wikipedia.org/wiki/Ford_Focus_(first_generation)
+ford,FUSION,MX,Hermosillo,2005,2020,https://en.wikipedia.org/wiki/Ford_Fusion_(Americas)
+ford,FUSION,DE,Cologne,2002,2012,https://en.wikipedia.org/wiki/Ford_Fusion_(Europe)
+ford,MONDEO,BE,Genk,1993,2014,https://en.wikipedia.org/wiki/Ford_Mondeo
+ford,MONDEO,ES,Valencia,2014,2022,https://en.wikipedia.org/wiki/Ford_Mondeo
+ford,KUGA,DE,Saarlouis,2008,2012,https://en.wikipedia.org/wiki/Ford_Kuga
+ford,KUGA,ES,Valencia,2012,,https://en.wikipedia.org/wiki/Ford_Kuga
+ford,FIESTA,DE,Cologne,1976,2023,https://en.wikipedia.org/wiki/Ford_Fiesta
+ford,FIESTA,ES,Valencia,1976,2002,https://en.wikipedia.org/wiki/Ford_Fiesta
+ford,TRANSIT,GB,Southampton,1972,2013,https://en.wikipedia.org/wiki/Ford_Transit
+ford,TRANSIT,TR,Gölcük,2001,,https://en.wikipedia.org/wiki/Ford_Transit
+ford,TRANSIT,US,Kansas City,2014,,https://en.wikipedia.org/wiki/Ford_Transit
+renault,MEGANE,FR,Douai,1995,,https://en.wikipedia.org/wiki/Renault_M%C3%A9gane
+renault,MEGANE,ES,Palencia,0,,https://en.wikipedia.org/wiki/Renault_M%C3%A9gane
+renault,MEGANE,TR,Bursa,0,,https://en.wikipedia.org/wiki/Renault_M%C3%A9gane
+renault,MEGANE SCENIC|SCENIC,FR,Douai,1996,,https://en.wikipedia.org/wiki/Renault_Sc%C3%A9nic
+renault,KANGOO,FR,Maubeuge,1997,,https://en.wikipedia.org/wiki/Renault_Kangoo
+renault,KANGOO,BR,Curitiba,0,,https://en.wikipedia.org/wiki/Renault_Kangoo
+renault,LOGAN,RO,Pitești,2004,,https://en.wikipedia.org/wiki/Dacia_Logan
+renault,LOGAN,RU,Moscow,2005,2022,https://en.wikipedia.org/wiki/Dacia_Logan
+renault,LOGAN,MA,Casablanca,0,,https://en.wikipedia.org/wiki/Dacia_Logan
+dacia,LOGAN,RO,Pitești,2004,,https://en.wikipedia.org/wiki/Dacia_Logan
+renault,DUSTER,RO,Pitești,2010,,https://en.wikipedia.org/wiki/Dacia_Duster
+renault,DUSTER,RU,Moscow,0,2022,https://en.wikipedia.org/wiki/Dacia_Duster
+renault,DUSTER,BR,São José dos Pinhais,0,,https://en.wikipedia.org/wiki/Dacia_Duster
+dacia,DUSTER,RO,Pitești,2010,,https://en.wikipedia.org/wiki/Dacia_Duster
+dacia,SANDERO,RO,Pitești,2007,,https://en.wikipedia.org/wiki/Dacia_Sandero
+renault,SANDERO,RO,Pitești,2007,,https://en.wikipedia.org/wiki/Dacia_Sandero
+renault,SANDERO,BR,Curitiba,2007,,https://en.wikipedia.org/wiki/Dacia_Sandero
+renault,SANDERO,RU,Moscow,0,2022,https://en.wikipedia.org/wiki/Dacia_Sandero
+renault,TRAFIC,FR,Sandouville,2001,,https://en.wikipedia.org/wiki/Renault_Trafic
+renault,TRAFIC,GB,Luton,2001,2014,https://en.wikipedia.org/wiki/Renault_Trafic
+opel,VIVARO,GB,Luton,2001,,https://en.wikipedia.org/wiki/Opel_Vivaro
+opel,VIVARO,FR,Sandouville,2001,,https://en.wikipedia.org/wiki/Opel_Vivaro
+opel,ASTRA,DE,Rüsselsheim,2015,,https://en.wikipedia.org/wiki/Opel_Astra
+opel,ASTRA,GB,Ellesmere Port,1991,,https://en.wikipedia.org/wiki/Opel_Astra
+opel,ASTRA,PL,Gliwice,2004,,https://en.wikipedia.org/wiki/Opel_Astra
+opel,ASTRA,BE,Antwerp,1991,2010,https://en.wikipedia.org/wiki/Opel_Astra
+opel,VECTRA,DE,Rüsselsheim,1988,2008,https://en.wikipedia.org/wiki/Opel_Vectra
+opel,ZAFIRA,DE,Bochum,1999,2014,https://en.wikipedia.org/wiki/Opel_Zafira
+opel,ZAFIRA,DE,Rüsselsheim,2011,2019,https://en.wikipedia.org/wiki/Opel_Zafira
+opel,COMBO,ES,Zaragoza,2001,2011,https://en.wikipedia.org/wiki/Opel_Combo
+opel,COMBO,TR,Bursa,2011,2018,https://en.wikipedia.org/wiki/Opel_Combo
+opel,COMBO,ES,Vigo,2018,,https://en.wikipedia.org/wiki/Opel_Combo
+fiat,DOBLO,TR,Bursa,2000,,https://en.wikipedia.org/wiki/Fiat_Dobl%C3%B2
+fiat,DOBLO,BR,Betim,2001,,https://en.wikipedia.org/wiki/Fiat_Dobl%C3%B2
+fiat,SCUDO,IT,Val di Sangro,1995,2006,https://en.wikipedia.org/wiki/Fiat_Scudo
+fiat,SCUDO,FR,Valenciennes,2007,2016,https://en.wikipedia.org/wiki/Fiat_Scudo
+audi,A6,DE,Neckarsulm,1994,,https://en.wikipedia.org/wiki/Audi_A6
+audi,A6,CN,Changchun,0,,https://en.wikipedia.org/wiki/Audi_A6
+audi,A6,IN,Aurangabad,0,,https://en.wikipedia.org/wiki/Audi_A6
+audi,A4,DE,Ingolstadt,1994,,https://en.wikipedia.org/wiki/Audi_A4
+audi,A4,CN,Changchun,2009,,https://en.wikipedia.org/wiki/Audi_A4
+audi,Q7,SK,Bratislava,2005,,https://en.wikipedia.org/wiki/Audi_Q7
+audi,Q7,IN,Aurangabad,0,,https://en.wikipedia.org/wiki/Audi_Q7
+audi,Q5,DE,Ingolstadt,2008,2016,https://en.wikipedia.org/wiki/Audi_Q5
+audi,Q5,MX,San José Chiapa,2016,,https://en.wikipedia.org/wiki/Audi_Q5
+audi,Q5,CN,Changchun,2010,,https://en.wikipedia.org/wiki/Audi_Q5
+bmw,X5,US,Spartanburg,1999,,https://en.wikipedia.org/wiki/BMW_X5
+bmw,X5,RU,Kaliningrad,0,,https://en.wikipedia.org/wiki/BMW_X5
+bmw,X3,AT,Graz,2003,2010,https://en.wikipedia.org/wiki/BMW_X3
+bmw,X3,US,Spartanburg,2010,,https://en.wikipedia.org/wiki/BMW_X3
+bmw,X3,ZA,Rosslyn,2018,,https://en.wikipedia.org/wiki/BMW_X3
+hyundai,TUCSON,KR,Ulsan,2004,,https://en.wikipedia.org/wiki/Hyundai_Tucson
+hyundai,TUCSON,CZ,Nošovice,0,,https://en.wikipedia.org/wiki/Hyundai_Tucson
+hyundai,SANTA FE,KR,Ulsan,2000,,https://en.wikipedia.org/wiki/Hyundai_Santa_Fe
+hyundai,SANTA FE,US,Montgomery,0,,https://en.wikipedia.org/wiki/Hyundai_Santa_Fe
+hyundai,SANTA FE,RU,Taganrog,2001,2012,https://en.wikipedia.org/wiki/Hyundai_Santa_Fe
+hyundai,SONATA,US,Montgomery,2005,,https://en.wikipedia.org/wiki/Hyundai_Sonata
+hyundai,SONATA,RU,Taganrog,2001,2012,https://en.wikipedia.org/wiki/Hyundai_Sonata
+hyundai,ACCENT,KR,Ulsan,1994,,https://en.wikipedia.org/wiki/Hyundai_Accent
+hyundai,ACCENT,TR,Izmit,1997,,https://en.wikipedia.org/wiki/Hyundai_Accent
+hyundai,ACCENT,RU,Taganrog,2001,2012,https://en.wikipedia.org/wiki/Hyundai_Accent
+hyundai,ELANTRA,KR,Ulsan,1990,,https://en.wikipedia.org/wiki/Hyundai_Elantra
+hyundai,ELANTRA,US,Montgomery,2010,,https://en.wikipedia.org/wiki/Hyundai_Elantra
+kia,SPORTAGE,KR,Gwangju,1993,,https://en.wikipedia.org/wiki/Kia_Sportage
+kia,SPORTAGE,SK,Žilina,2006,,https://en.wikipedia.org/wiki/Kia_Sportage
+kia,SORENTO,KR,Hwaseong,0,,https://en.wikipedia.org/wiki/Kia_Sorento
+kia,SORENTO,US,West Point,2009,,https://en.wikipedia.org/wiki/Kia_Sorento
+kia,CEE'D|CEED,SK,Žilina,2006,,https://en.wikipedia.org/wiki/Kia_Ceed
+mitsubishi,OUTLANDER,JP,,2001,,https://en.wikipedia.org/wiki/Mitsubishi_Outlander
+mitsubishi,OUTLANDER,RU,Kaluga,2012,2022,https://en.wikipedia.org/wiki/Mitsubishi_Outlander
+nissan,QASHQAI,GB,Sunderland,2006,,https://en.wikipedia.org/wiki/Nissan_Qashqai
+nissan,QASHQAI,RU,Saint Petersburg,2015,2022,https://en.wikipedia.org/wiki/Nissan_Qashqai
+nissan,ROGUE,JP,Kyushu,2008,2013,https://en.wikipedia.org/wiki/Nissan_Rogue
+nissan,ROGUE,US,Smyrna,0,,https://en.wikipedia.org/wiki/Nissan_Rogue
+nissan,LEAF,JP,Oppama,2010,,https://en.wikipedia.org/wiki/Nissan_Leaf
+nissan,LEAF,US,Smyrna,2013,,https://en.wikipedia.org/wiki/Nissan_Leaf
+nissan,LEAF,GB,Sunderland,2013,,https://en.wikipedia.org/wiki/Nissan_Leaf
+nissan,JUKE,GB,Sunderland,2010,2019,https://en.wikipedia.org/wiki/Nissan_Juke
+nissan,NOTE,JP,Oppama,2004,,https://en.wikipedia.org/wiki/Nissan_Note
+nissan,NOTE,GB,Sunderland,2006,2017,https://en.wikipedia.org/wiki/Nissan_Note
+mazda,6,JP,Hofu,2002,,https://en.wikipedia.org/wiki/Mazda6
+mazda,6,US,Flat Rock,2002,2007,https://en.wikipedia.org/wiki/Mazda6
+mazda,6,CN,Changchun,2002,,https://en.wikipedia.org/wiki/Mazda6
+mazda,6,RU,Vladivostok,2012,2022,https://en.wikipedia.org/wiki/Mazda6
+mazda,3,JP,,2003,,https://en.wikipedia.org/wiki/Mazda3
+mazda,3,MX,Salamanca,2014,,https://en.wikipedia.org/wiki/Mazda3
+mazda,3,CN,Changchun,0,,https://en.wikipedia.org/wiki/Mazda3
+mazda,CX-5,JP,Hiroshima,2012,,https://en.wikipedia.org/wiki/Mazda_CX-5
+mazda,CX-5,RU,Vladivostok,0,2022,https://en.wikipedia.org/wiki/Mazda_CX-5
+honda,ACCORD,JP,Sayama,1976,,https://en.wikipedia.org/wiki/Honda_Accord
+honda,ACCORD,US,Marysville,1982,,https://en.wikipedia.org/wiki/Honda_Accord
+honda,CR-V,JP,,1995,,https://en.wikipedia.org/wiki/Honda_CR-V
+honda,CR-V,GB,Swindon,0,2021,https://en.wikipedia.org/wiki/Honda_CR-V
+honda,CR-V,US,East Liberty,2002,,https://en.wikipedia.org/wiki/Honda_CR-V
+honda,CR-V,CA,Alliston,2007,,https://en.wikipedia.org/wiki/Honda_CR-V
+honda,CIVIC,JP,Suzuka,1972,,https://en.wikipedia.org/wiki/Honda_Civic
+honda,CIVIC,GB,Swindon,2001,2021,https://en.wikipedia.org/wiki/Honda_Civic
+honda,CIVIC,TR,Gebze,0,2021,https://en.wikipedia.org/wiki/Honda_Civic
+honda,CIVIC,CA,Alliston,1998,,https://en.wikipedia.org/wiki/Honda_Civic
+subaru,OUTBACK,JP,Gunma,1994,,https://en.wikipedia.org/wiki/Subaru_Outback
+subaru,OUTBACK,US,Lafayette,0,,https://en.wikipedia.org/wiki/Subaru_Outback
+tesla,MODEL 3,US,Fremont,2017,,https://en.wikipedia.org/wiki/Tesla_Model_3
+tesla,MODEL 3,CN,Shanghai,2019,,https://en.wikipedia.org/wiki/Tesla_Model_3
+tesla,MODEL Y,US,Fremont,2020,,https://en.wikipedia.org/wiki/Tesla_Model_Y
+tesla,MODEL Y,US,Austin,2022,,https://en.wikipedia.org/wiki/Tesla_Model_Y
+tesla,MODEL Y,CN,Shanghai,2021,,https://en.wikipedia.org/wiki/Tesla_Model_Y
+tesla,MODEL Y,DE,Grünheide,2022,,https://en.wikipedia.org/wiki/Tesla_Model_Y
+porsche,CAYENNE,DE,Leipzig,2002,,https://en.wikipedia.org/wiki/Porsche_Cayenne
+porsche,CAYENNE,SK,Bratislava,0,,https://en.wikipedia.org/wiki/Porsche_Cayenne
+dodge,JOURNEY,MX,Toluca,2008,2020,https://en.wikipedia.org/wiki/Dodge_Journey
+lexus,RX 350|RX350,JP,Miyata,1998,,https://en.wikipedia.org/wiki/Lexus_RX
+lexus,RX 350|RX350,CA,Cambridge,2003,,https://en.wikipedia.org/wiki/Lexus_RX
+suzuki,GRAND VITARA,JP,,2005,2015,https://en.wikipedia.org/wiki/Suzuki_Grand_Vitara
+suzuki,GRAND VITARA,CA,Ingersoll,0,2011,https://en.wikipedia.org/wiki/Suzuki_Grand_Vitara
+daewoo,LANOS,KR,Bupyeong,1997,2002,https://en.wikipedia.org/wiki/Daewoo_Lanos
+daewoo,LANOS,PL,Warsaw,1998,2002,https://en.wikipedia.org/wiki/Daewoo_Lanos
+daewoo,LANOS,UA,Zaporizhzhia,1998,,https://en.wikipedia.org/wiki/Daewoo_Lanos
+zaz,LANOS,UA,Zaporizhzhia,1998,2017,https://en.wikipedia.org/wiki/ZAZ_Lanos
+daewoo,MATIZ,KR,Changwon,1998,,https://en.wikipedia.org/wiki/Daewoo_Matiz
+daewoo,MATIZ,UZ,Asaka,0,,https://en.wikipedia.org/wiki/Daewoo_Matiz
+daewoo,NEXIA,UZ,Asaka,1996,,https://en.wikipedia.org/wiki/Daewoo_Nexia
+daewoo,NEXIA,KR,Bupyeong,1994,1997,https://en.wikipedia.org/wiki/Daewoo_Nexia
+chevrolet,AVEO,KR,Gunsan,0,,https://en.wikipedia.org/wiki/Chevrolet_Aveo
+chevrolet,AVEO,UA,Zaporizhzhia,2005,,https://en.wikipedia.org/wiki/Chevrolet_Aveo
+chevrolet,AVEO,UZ,Asaka,0,,https://en.wikipedia.org/wiki/Chevrolet_Aveo
+chevrolet,AVEO,MX,Ramos Arizpe,2004,,https://en.wikipedia.org/wiki/Chevrolet_Aveo
+chevrolet,LACETTI,KR,Bupyeong,2002,,https://en.wikipedia.org/wiki/Chevrolet_Lacetti
+chevrolet,LACETTI,UA,Zaporizhzhia,2004,,https://en.wikipedia.org/wiki/Chevrolet_Lacetti
+chevrolet,CRUZE,KR,Bupyeong,2008,,https://en.wikipedia.org/wiki/Chevrolet_Cruze
+chevrolet,CRUZE,US,Lordstown,2010,2019,https://en.wikipedia.org/wiki/Chevrolet_Cruze
+chevrolet,NIVA,RU,Tolyatti,2002,,https://en.wikipedia.org/wiki/Chevrolet_Niva
+chery,AMULET,CN,Wuhu,2003,,https://en.wikipedia.org/wiki/Chery_Amulet
+chery,AMULET,UA,Zaporizhzhia,0,,https://en.wikipedia.org/wiki/Chery_Amulet

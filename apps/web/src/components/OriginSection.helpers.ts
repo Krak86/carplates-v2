@@ -124,13 +124,7 @@ export function buildOriginView(
       country: countryAtYear(data.plant.countryCode, year),
       city: plantCity(data.plant.city),
       via: data.plant.source,
-      alsoBuiltIn: (data.modelPlants ?? []).map(p => ({
-        country: countryAtYear(p.countryCode, year ?? p.fromYear),
-        city: p.city || null,
-        from: nonZero(p.fromYear),
-        to: nonZero(p.toYear),
-        source: p.sourceUrl
-      }))
+      alsoBuiltIn: alsoBuiltIn(data, year)
     })
   }
 
@@ -140,6 +134,40 @@ export function buildOriginView(
   }
 
   return view
+}
+
+/** "2008+" (still built), "2005-2012", "-2022" (start unknown); null when both are unknown. */
+export function yearRange(from: number | null, to: number | null): string | null {
+  if (from && to) return `${from}-${to}`
+  if (from) return `${from}+`
+  return to ? `-${to}` : null
+}
+
+/** 'Mladá Boleslav' and 'MLADA BOLESLAV' (NHTSA) are the same city. */
+const cityKey = (city: string | null | undefined): string =>
+  (city ?? '').normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().trim()
+
+/**
+ * Curated plants of this model (Step 3) other than the car's own: in production in the car's year, and not the plant
+ * already shown (same country and, when the city is known, same city).
+ */
+function alsoBuiltIn(data: OriginResponse, year: number | null | undefined): OriginPlantAlt[] {
+  const own = data.plant
+  return (data.modelPlants ?? [])
+    .filter(p => year == null || (p.fromYear <= year && (p.toYear == null || year <= p.toYear)))
+    .filter(
+      p =>
+        !own ||
+        p.countryCode !== own.countryCode ||
+        (!!cityKey(own.city) && !!cityKey(p.city) && cityKey(p.city) !== cityKey(own.city))
+    )
+    .map(p => ({
+      country: countryAtYear(p.countryCode, year ?? p.fromYear),
+      city: p.city || null,
+      from: nonZero(p.fromYear),
+      to: nonZero(p.toYear),
+      source: p.sourceUrl
+    }))
 }
 
 export type OriginChipData = {

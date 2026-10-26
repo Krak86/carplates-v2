@@ -74,6 +74,7 @@
     "ingest:rdw:csv": "tsx src/rdw.ts --from-csv seed-data/rdw-specs.csv.gz",
     "ingest:brand-origin": "tsx src/ingest-brand-origin.ts",
     "ingest:wmi": "tsx src/ingest-wmi.ts",
+    "ingest:model-plants": "tsx src/ingest-model-plants.ts",
     "ingest:brand-origin:csv": "tsx src/ingest-brand-origin.ts --from-csv seed-data/brand-origin.csv.gz",
     "export:brand-origin:csv": "tsx src/ingest-brand-origin.ts --export-csv seed-data/brand-origin.csv.gz",
     "ingest:wmi:csv": "tsx src/ingest-wmi.ts --from-csv seed-data/wmi.csv.gz",

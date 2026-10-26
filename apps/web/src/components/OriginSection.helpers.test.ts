@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { OriginResponse } from '@carplates/shared'
 
-import { buildOriginChip, buildOriginView, plantCity } from '@/components/OriginSection.helpers'
+import { buildOriginChip, buildOriginView, plantCity, yearRange } from '@/components/OriginSection.helpers'
 
 const SKODA: OriginResponse = {
   brand: {
@@ -132,6 +132,41 @@ describe('buildOriginView', () => {
       city: 'Puebla',
       alsoBuiltIn: [{ country: 'DE', city: 'Wolfsburg', from: 2010, to: null }]
     })
+  })
+})
+
+describe('model plants (also built in)', () => {
+  const plants: OriginResponse['modelPlants'] = [
+    { countryCode: 'CZ', city: 'Mladá Boleslav', fromYear: 1996, toYear: null, sourceUrl: 'u' },
+    { countryCode: 'CZ', city: 'Kvasiny', fromYear: 2001, toYear: null, sourceUrl: 'u' },
+    { countryCode: 'IN', city: 'Aurangabad', fromYear: 2001, toYear: null, sourceUrl: 'u' },
+    { countryCode: 'CN', city: 'Shanghai', fromYear: 2007, toYear: 2012, sourceUrl: 'u' }
+  ]
+  const alt = (data: OriginResponse, year: number | null): string[] => {
+    const step = buildOriginView(data, year, null).steps.find(s => s.kind === 'assembly')
+    return step?.kind === 'assembly' ? step.alsoBuiltIn.map(a => `${a.country}/${a.city}`) : []
+  }
+
+  it('drops plants not yet open or already closed in the car year', () => {
+    const data = { plant: { countryCode: 'CZ', source: 'wmi' as const }, modelPlants: plants }
+    expect(alt(data, 2000)).toEqual([])
+    expect(alt(data, 2010)).toEqual(['IN/Aurangabad', 'CN/Shanghai'])
+    expect(alt(data, 2015)).toEqual(['IN/Aurangabad'])
+    expect(alt(data, null)).toEqual(['IN/Aurangabad', 'CN/Shanghai'])
+  })
+
+  it("drops the car's own plant, matching the NHTSA capitals and diacritics", () => {
+    const own = { countryCode: 'CZ', source: 'nhtsa' as const, city: 'MLADA BOLESLAV' }
+    expect(alt({ plant: own, modelPlants: plants }, 2010)).toEqual(['CZ/Kvasiny', 'IN/Aurangabad', 'CN/Shanghai'])
+  })
+})
+
+describe('yearRange', () => {
+  it('formats open, closed and unknown ranges', () => {
+    expect(yearRange(2005, 2012)).toBe('2005-2012')
+    expect(yearRange(2008, null)).toBe('2008+')
+    expect(yearRange(null, 2022)).toBe('-2022')
+    expect(yearRange(null, null)).toBeNull()
   })
 })
 
