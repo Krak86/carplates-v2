@@ -3096,6 +3096,7 @@
   "wikispec.about.gearbox.single": "Одне фіксоване передавальне число, як в електромобілях: передачі не перемикаються.",
   "about.source.googleTranslate": "На запит відкриває translate.google.com для перекладу текстів відкликань; текст надсилається до Google лише якщо ви оберете цей варіант.",
   "about.source.opusMt": "Моделі перекладу Helsinki-NLP OPUS-MT (CC BY 4.0) з Hugging Face, працюють у вашому браузері через transformers.js для перекладу текстів відкликань на пристрої. Необов’язкове одноразове завантаження; нічого нікуди не надсилається.",
+  "about.source.fastAlpr": "Відкриті моделі пошуку та зчитування номерів (fast-alpr і open-image-models, MIT; RapidOCR, Apache 2.0) для пошуку за фото.",
   "size.title": "Габарити та паркування",
   "size.show": "Показати габарити",
   "size.hide": "Сховати габарити",

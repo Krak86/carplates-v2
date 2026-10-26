@@ -2616,6 +2616,7 @@
   "wikispec.about.gearbox.single": "One fixed ratio, as in electric cars: no gear changes at all.",
   "about.source.googleTranslate": "Opens translate.google.com on request to translate recall texts; the text is sent to Google only when you choose that option.",
   "about.source.opusMt": "Helsinki-NLP OPUS-MT translation models (CC BY 4.0) from Hugging Face, run in your browser with transformers.js to translate recall texts on-device. Optional one-time download; nothing is sent anywhere.",
+  "about.source.fastAlpr": "Open-source plate detection and reading models (fast-alpr and open-image-models, MIT; RapidOCR, Apache 2.0) behind search by photo.",
   "size.title": "Size & parking",
   "size.show": "Show size",
   "size.hide": "Hide size",

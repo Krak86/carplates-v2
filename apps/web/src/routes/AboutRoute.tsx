@@ -159,6 +159,12 @@ const SOURCES: readonly Source[] = [
     url: 'https://huggingface.co/Helsinki-NLP',
     icon: '/icons/sources/huggingface.svg'
   },
+  {
+    key: 'fastAlpr',
+    label: 'fast-alpr / RapidOCR',
+    url: 'https://github.com/ankandrew/fast-alpr',
+    icon: '/icons/sources/github.webp'
+  },
   { key: 'youtube', label: 'YouTube', url: 'https://www.youtube.com', icon: '/icons/sources/youtube.webp' },
   {
     key: 'googleSignIn',

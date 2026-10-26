@@ -30,6 +30,12 @@ export const RELEASES: readonly ReleaseDay[] = [
       ),
       item(
         'data',
+        'На сторінці «Про проєкт» у джерелах додано відкриті моделі розпізнавання номерів (fast-alpr, RapidOCR)',
+        'На странице «О проекте» в источниках добавлены открытые модели распознавания номеров (fast-alpr, RapidOCR)',
+        'The About page now credits the open plate-recognition models (fast-alpr, RapidOCR) among its sources'
+      ),
+      item(
+        'data',
         'Заводи збирання моделей зібрані вручну з Вікіпедії - з посиланням на статтю для кожного запису',
         'Заводы сборки моделей собраны вручную из Википедии - со ссылкой на статью для каждой записи',
         'Model assembly plants are hand-curated from Wikipedia, with an article link for every entry'

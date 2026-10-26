@@ -2,9 +2,8 @@
 
 ## What this is
 
-`carsua.app` v2 — Ukrainian vehicle lookup by plate number or VIN. pnpm monorepo replacing the 2019 GitHub-Pages SPA. Data: state
-open-data portal (`data.gov.ua`) in Postgres; VIN decoding proxies NHTSA. **Phase 1: local dev stack only** (no CI, no VPS). The v1 app
-is the sibling `../carplates/` (do not modify).
+`carsua.app` v2 — Ukrainian vehicle lookup by plate or VIN. pnpm monorepo; data from `data.gov.ua` in Postgres, VIN decoding via NHTSA.
+The v1 app is the sibling `../carplates/` (do not modify).
 
 Docs (**grep headings, never read whole** — several are 100–400 KB): `PLAN.md` active/planned + version pins · `docs/plan-done.md`
 finished write-ups · `README.md` setup/env/scripts · `docs/features-reference.md` per-feature conventions (**grep `^## ` and read the matching
