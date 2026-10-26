@@ -19,9 +19,11 @@ export {
   isLegacyCountry,
   modelPlantSchema,
   originResponseSchema,
+  pickByYear,
   vinRegion,
   type BrandOriginPeriod,
   type BrandOwnership,
+  type Dated,
   type LegacyCountry,
   type ModelPlant,
   type OriginResponse,
@@ -87,6 +89,7 @@ export {
 export { sizeModelSchema, sizeModelsResponseSchema, type SizeModel, type SizeModelsResponse } from './sizeModels.js'
 export { evSplitSchema, evStatsResponseSchema, type EvSplit, type EvStatsResponse } from './evStats.js'
 export { importsStatsResponseSchema, type ImportsStatsResponse } from './importsStats.js'
+export { originStatsResponseSchema, type OriginStatsResponse } from './originStats.js'
 export { SPEC_METRICS, SPEC_METRIC_COLUMN, DEFAULT_SPEC_METRIC, type SpecMetric } from './specMetrics.js'
 export { VEHICLE_KINDS, resolveVehicleKind, sourceValueForKind, type VehicleKind } from './vehicleKind.js'
 export { VEHICLE_PURPOSES, sourceValueForPurpose, type VehiclePurpose } from './vehiclePurpose.js'

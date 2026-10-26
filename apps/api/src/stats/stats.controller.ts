@@ -5,6 +5,7 @@ import type {
   DistributionResponse,
   EvStatsResponse,
   ImportsStatsResponse,
+  OriginStatsResponse,
   SizeModelsResponse,
   StatsFieldDimension,
   StatsFieldResponse
@@ -64,6 +65,15 @@ export class StatsController {
   })
   imports(): Promise<ImportsStatsResponse> {
     return this.statsService.imports()
+  }
+
+  @Get('origin')
+  @ApiOkResponse({
+    description:
+      'Passenger cars { total, byBrand, byPlant } by brand home country and VIN assembly country (ISO or a former state by model year; empty country = unknown)'
+  })
+  origin(): Promise<OriginStatsResponse> {
+    return this.statsService.origin()
   }
 
   @Get('field/:dimension')

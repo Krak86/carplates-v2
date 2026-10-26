@@ -1588,6 +1588,19 @@ export const statsImports = registry.table(
 )
 export type StatsImportsInsert = typeof statsImports.$inferInsert
 
+/** Passenger cars by model year, brand home country and VIN assembly country (a rollup rebuilt by `db:refresh-origin-stats`). See migrations/0076_stats_origin.sql. */
+export const statsOrigin = registry.table(
+  'stats_origin',
+  {
+    makeYear: integer('make_year').notNull(),
+    brandCountry: text('brand_country').notNull().default(''),
+    plantCountry: text('plant_country').notNull().default(''),
+    n: integer('n').notNull()
+  },
+  t => [primaryKey({ columns: [t.makeYear, t.brandCountry, t.plantCountry] })]
+)
+export type StatsOriginInsert = typeof statsOrigin.$inferInsert
+
 /** Brand home country by period (Wikidata); modern ISO code, mapped to the legacy state by year in the app. See migrations/0075_origin.sql. */
 export const brandOriginPeriod = registry.table(
   'brand_origin_period',

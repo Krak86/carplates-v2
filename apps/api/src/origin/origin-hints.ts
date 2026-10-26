@@ -1,5 +1,7 @@
-import { brandSlug, countryAtYear } from '@carplates/shared'
+import { brandSlug, countryAtYear, pickByYear } from '@carplates/shared'
 import type { BrandOriginPeriod, OriginResponse } from '@carplates/shared'
+
+export { pickByYear }
 
 type Hints = NonNullable<OriginResponse['hints']>
 
@@ -9,22 +11,6 @@ const RELATED_SLUGS: readonly (readonly string[])[] = [
   ['opel', 'vauxhall'],
   ['ssangyong', 'kg-mobility']
 ]
-
-type Dated = { fromYear: number; toYear?: number | null }
-
-/**
- * The row in force in `year`; with no year, the most recent one. A year before the first row falls back to the
- * first (a brand's earliest known period still describes it), after the last to the last.
- */
-export function pickByYear<T extends Dated>(rows: readonly T[], year: number | null | undefined): T | null {
-  if (rows.length === 0) return null
-  const sorted = [...rows].sort((a, b) => a.fromYear - b.fromYear)
-  if (year == null) return sorted[sorted.length - 1] ?? null
-  const hit = sorted.find(r => r.fromYear <= year && (r.toYear == null || year <= r.toYear))
-  if (hit) return hit
-  const started = sorted.filter(r => r.fromYear <= year)
-  return started[started.length - 1] ?? sorted[0] ?? null
-}
 
 /** Slug of the maker a WMI names ("Volkswagen (Brazil)", "Hyundai Motor Company"), or null when it cannot be told. */
 function makerSlug(maker: string): string | null {

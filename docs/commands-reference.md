@@ -161,6 +161,7 @@ pnpm db:refresh-derived     # rebuild ALL rollups computed from current_registra
                             # after the registry refresh unless given --skip-derived; ingest:full refreshes once at its end;
                             # ingest:all skips it in ingest:full and runs it after the CSV loads. ingest:ratings:csv /
                             # ingest:vehiclesdb alone do NOT — run this after them
+pnpm db:refresh-origin-stats # rebuild registry.stats_origin (passenger cars by model year, brand home country and VIN assembly country; migration 0076) for the /stats "Where cars come from" panel; part of db:refresh-derived. Re-run after ingest:brand-origin / ingest:wmi too
 pnpm db:refresh-weight-stats # rebuild registry.stats_weight (heaviest/lightest models per vehicle group; migrations 0051-0053) from the registry
                              # + rdw_specs (scripts/src/weight-stats.ts); part of db:refresh-derived. Run after a registry or RDW ingest
 pnpm db:refresh-spec-stats   # rebuild registry.stats_spec (highest/lowest power, engine, height, length, fuel tank; migration 0063) and registry.stats_distribution (fleet histograms of power, hp/tonne, engine size for the card percentile bars; migration 0070); part of db:refresh-derived

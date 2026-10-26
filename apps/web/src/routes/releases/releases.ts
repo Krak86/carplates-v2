@@ -12,6 +12,12 @@ export const RELEASES: readonly ReleaseDay[] = [
     items: [
       item(
         'new',
+        'Статистика: «Звідки авто» - легкові авто за країною бренду та за країною збирання (за VIN), з колишніми країнами за модельним роком',
+        'Статистика: «Откуда авто» - легковые авто по стране бренда и по стране сборки (по VIN), с прежними странами по модельному году',
+        'Stats: "Where cars come from" - passenger cars by brand home country and by assembly country (from the VIN), with the country of their time by model year'
+      ),
+      item(
+        'new',
         'Звідки авто: прапорці біля VIN і номера (країна марки, власника, збирання) та секція з часовою лінією — марка, власники, завод, Україна',
         'Откуда авто: флажки рядом с VIN и номером (страна марки, владельца, сборки) и секция с временной линией — марка, владельцы, завод, Украина',
         'Where it comes from: flags next to the VIN and plate (brand, owner, assembly country) and a timeline section - brand, owners, plant, Ukraine'

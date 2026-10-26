@@ -1,6 +1,6 @@
 # ORIGIN_PLAN.md - vehicle origin chip + "Where it comes from" section
 
-**Status:** First release done (Steps 0-2, 4-8, 10, 11, A). Step 3 done (release 2, 2026-10-26); Step 9 is still deferred to release 2. Tick the boxes below as steps finish.
+**Status:** All steps done (first release Steps 0-2, 4-8, 10, 11, A; release 2 Steps 3 and 9). Tick the boxes below as steps finish.
 Read CLAUDE.md and CLAUDE_RULES.md first; they govern every step (ESM `.js` imports, explicit `@Inject`, Zod at boundaries, tests colocated,
 `pnpm format` first, never `git commit` unless asked, suggest a commit message after each big update).
 
@@ -34,8 +34,7 @@ Show where a vehicle comes from, only when the data is known (never guessed):
 - Pre-1981 VINs are not standardized: old cars get origin from brand/model periods only; the assembly step is often empty. Acceptable.
 - Derived hints (US-spec likelihood from plant country, brand-vs-WMI mismatch) are labelled as hints, in neutral wording.
 - **Not doing:** editorial call-outs for specific assembly countries (RU/BY/CN). Plain facts + flags only.
-- **Deferred to a second release:** Step 3 (hand-curated model plants / "also built in") and Step 9 (stats breakdown). They are in the plan
-  but not in the first release; the first-release data model and API already leave room for them.
+- **Second release (done 2026-10-26):** Step 3 (hand-curated model plants / "also built in") and Step 9 (stats breakdown).
 - UI text: no em dash, use "-" (comments may keep "-"). New tint colors: oklch/P3 with an sRGB fallback.
 
 ## Data sources
@@ -186,7 +185,9 @@ Notes 8b: `components/OriginSection.tsx` (+ `OriginStepBody`, `OriginCountry`, `
   no synchronous `setState` in effects.
 - **Done when:** renders for the three sample cars, empty states look right, `?section=origin` opens and scrolls.
 
-### [ ] Step 9 - Stats breakdown - DEFERRED to release 2 (1.5 h)
+### [x] Step 9 - Stats breakdown (release 2, 1.5 h) - DONE 2026-10-26
+
+Notes: rollup `registry.stats_origin` (migration 0076: make_year, brand_country, plant_country, n; former states stored under their own code, '' = unknown) rebuilt by `scripts/src/origin-stats.ts` (`pnpm db:refresh-origin-stats`, in `DERIVED_REFRESH_SCRIPTS`). Passenger cars from `current_registration`; brand country = `brand_origin_period` row in force in the model year (`pickByYear`, moved to `@carplates/shared`) through `countryAtYear`; plant country = `wmi_prefix` then `lookupWmi` of a standard 17-character VIN from 1981 on. `GET /api/stats/origin` (`StatsService.origin`, pure `foldOriginStats`, contract `packages/shared/src/originStats.ts`, `originStatsQuery`, online-only) feeds `routes/stats/OriginStatsPanel.tsx` (two ranked bar lists, top 8 + "other countries" + "unknown", `section.about.statsOrigin`), mounted under the spec panel on `/stats`. Real DB: 13,371,190 passenger cars; brand country known for 99.7 %, plant country for 48 % (the rest has no standard VIN, mostly older cars). **Checked against direct SQL:** the total and Skoda from 1993 on (687,964, all CZ) match exactly. Not browser-checked (light theme, mobile width); the unmatched-brand tail (0.3 %) shows as "unknown".
 
 - Stats-page charts: cars in Ukraine by brand origin country and by assembly country (same period rules; Soviet-built counts as USSR).
   Online-only, so not in `lib/offline-cache.ts`. Use the `dataviz` skill. Build only after the unmatched-brand report is clean.
