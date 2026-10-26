@@ -146,6 +146,28 @@ not a parallel feature, hence the step order below.
 
 **Moped plates, constrained decoding, alternative reads (2026-10-26) ✅** — row-wise reader for three-row moped plates, slot-class decoding with the registry's real letter set, one-character alternatives returned per plate and shown as numbered/colored chip groups; also a latency regression found and fixed (worst photo 98 s -> 1.3 s): `docs/plan-done.md` ("Own ALPR: moped plates, constrained decoding, alternative reads").
 
+**Own ALPR — open actions (as of 2026-10-26, continue here):**
+
+- ⏳ **Ground truth for the eval.** `services/alpr/eval/labels.csv` is still missing, so every eval so far only shows "unchanged", never recall. Add the
+  known plates (the `eval/images/` photos are gitignored): `BX5213BO` (white-rack Mercedes 1940), `BC3064XC` (red truck), `AH4018AC` and `AB1918AB`
+  (mopeds), `AI1920JA` (`ua_ai1920ja.jpg`), then label the rest and report recall/accuracy from `eval.mjs`.
+- ⏳ **Web upload resize changes reads.** The app downscales before sending (`shrinkImage`): the 4-plate parking photo reads `BC9779IX` from the original
+  file but `OC9779IX` through the app. Run the eval through `shrinkImage` (or compare sizes/quality) and pick settings that keep the reads.
+- ⏳ **Alternatives noise and threshold.** `ALT_MIN_SCORE` 0.55 / max 2 gave extra reads on ~15 of 88 photos, some next to an already-correct 0.98 read
+  (`AH4078AC` beside `AH4018AC`). Tune with labels; consider showing alternatives only when the primary is < ~0.97 or when the gap is small.
+- ⏳ **Registry check of alternatives.** The 3/5 ambiguity (`BX5213BO` vs `BX5215BO`, both OCR-plausible) cannot be settled by OCR; `BX5215BO` is a real
+  Peugeot. Idea: look each candidate up and rank/mark those that exist, or flag "alternative exists in the registry".
+- ⏳ **Concurrency.** The `/recognize` handler is `async def` but CPU-bound, so one upload blocks the others (and the API times out at 10 s,
+  `local-recognize.service.ts`). Run it in a threadpool (`def` handler) or add workers; until then never run an eval while using the app.
+- ⏳ **UI polish still to check:** light theme and desktop, the zoom dialog (`PhotoZoomDialog`) with groups, a11y of the chain/number badges, and the moped
+  and truck photos end to end in the browser (only the car and the parking photos were checked).
+- ⏳ **Letter set.** `PLATE_LETTERS` in `app.py` is measured from a 2% registry sample (L/U/N/R/Q/V/S excluded, <100 each). Re-measure on the full table and
+  consider moving the set into `packages/shared` so the API's `repairOcrPlate` and the service agree.
+- ❓ **Cloud route.** `/api/recognize/plate/cloud` + `PLATE_RECOGNIZER_*` env still exist (off unless flag + token; the web app never calls it). Decision
+  pending: delete it entirely (also `deploy-api.yml`, deploy.md) or keep as a manual cross-check.
+- ❓ **Unexplained label.** A screenshot showed `AA4018AC` for the `AH4018AC` moped; the local service never returned it (it returned `AH4078AC`). Source unknown
+  (older build or another tool), nothing to fix unless it reappears.
+
 - **Idea, not built:** use the photo date to show who held the plate _on that
   date_ (the registry keeps full history), and flag a read that only matches an
   older owner as a likely misread.
