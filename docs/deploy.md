@@ -170,6 +170,31 @@ snapshots are an extra, not the backup. `pg_dump` caveat (verified): `--schema` 
 
 ## Still open
 
+### Next steps after the first deploy (2026-10-27, in this order)
+
+1. **R2 backups (most important).** Until they work, the only copies of the real data are the dev PC and the VPS; keep `C:\tmp\carsua.dump` (1.28 GB, local) and
+   `/opt/carsua/backups/carsua.dump` (VPS) as the interim restore point and delete them only after step 1 is verified. Steps: R2 → enable → bucket `carsua-backups`
+   → API token (Object Read & Write on that bucket) → secrets `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_ENDPOINT`, variable `BACKUP_BUCKET`; healthchecks.io check
+   `backup` → secret `HC_PING_BACKUP` (all in "Where to get what"). Re-run `deploy-api` (it writes `/opt/carsua/env/backup.env` only when the R2 values exist), then
+   `ssh deploy@<ip> bash /opt/carsua/compose/backup.sh nightly` once by hand, confirm the object in R2, and restore it into a scratch container.
+2. **SSH hardening was never verified.** `bootstrap.sh` writes `sshd_config.d/99-carsua.conf`, but sshd takes the first value it finds, so a provider file
+   (e.g. `50-cloud-init.conf` with `PasswordAuthentication yes`) would win. `deploy` has no sudo password, so `sudo sshd -T` fails; check with
+   `grep -ri passwordauthentication /etc/ssh/sshd_config.d/ /etc/ssh/sshd_config` and by trying `ssh -o PubkeyAuthentication=no deploy@<ip>` (must be refused).
+   If a provider file wins, fix `bootstrap.sh` (name the drop-in `00-carsua.conf`) and re-apply.
+3. **UptimeRobot** (free, 5 min) on `https://carsua.app/healthz`; one healthchecks.io check per future cron job.
+4. **Cloudflare settings not yet confirmed:** Always Use HTTPS, HTTP/3, Bot Fight Mode, the WAF rate-limit rule on `/api/plate*` + `/api/vin*`. DNSSEC was turned
+   off at Squarespace for the nameserver move; optionally re-enable it in Cloudflare and add the DS record at Squarespace.
+5. **Pre-deploy security gate:** [security-checklist.md §7](security-checklist.md).
+6. **Browser smoke test (partly done: home, plate page, link-preview card):** Google login (authorised origin `https://carsua.app`), Telegram login (`/setdomain carsua.app`;
+   check `TELEGRAM_BOT_USERNAME` is the production bot), a real email through Resend (`MAIL_FROM` is `carsua <noreply@carsua.app>`), VIN lookup, camera recognize
+   (ALPR), Maps key restricted to the `carsua.app` referrer, Disqus.
+7. **Secrets hygiene.** Dev values were visible in screenshots/chat during the first deploy: rotate `POSTHOG_PERSONAL_API_KEY` and any other key you consider exposed.
+   The production `AUTH_SECRET` and `POSTGRES_PASSWORD` are separate from the dev ones. Optional secrets still unset: `SENTRY_DSN` (only `VITE_SENTRY_DSN` is set, so
+   server errors are not tracked), `PLATE_RECOGNIZER_CLOUD_TOKEN`, `TURNSTILE_*`.
+8. Housekeeping: 6 open Dependabot PRs; a Contabo snapshot once the site is stable; a Telegram `@WebpageBot` / X card-validator refresh of the old text-less preview.
+
+### Longer term
+
 - `ingest-cron` image + `run-job.ts` + crontab (SCHEDULE.md) — not built; monthly ingest and `ingest:wanted` must be run by hand on the VPS until then
   (`wanted` loses history on skipped days). There is no `ingest` image yet, so `backup.sh full/archive` are manual too.
 - Redis throttler store (not used by the app yet, so Redis is not in the compose file); until then limits are per-process and reset on restart,

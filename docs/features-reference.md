@@ -270,6 +270,9 @@ manifest `no-cache` (`spa.controller.ts`). `@vite-pwa/assets-generator` must sta
 Meta tags + `/og/*.png` are produced by the **API** (`apps/api/src/spa/`) on first load/deep link — Vite (`:5173`) never shows them. To
 test: `pnpm build`, set `WEB_DIST_DIR=../web/dist` in `apps/api/.env`, restart the API, open `localhost:3000/<plate>` (Incognito, the
 SW caches `index.html`). Plate/VIN pages are `noindex`; `?lang=` selects the language.
+The card fonts (`fonts/NotoSans-*.ttf` in `WEB_DIST_DIR`) are looked up on the first render, not at boot (on a first deploy the api can start before the web
+build exists); a card rendered without fonts is not cached. Cloudflare caches `/og/*.png` for 24 h, so `deploy-api` purges the `/og/` prefix after each
+deploy; Telegram and X keep their own preview cache.
 
 ## Sitemap, robots and rate limits
 
