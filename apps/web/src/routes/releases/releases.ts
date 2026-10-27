@@ -8,6 +8,35 @@ const item = (group: ReleaseGroup, ua: string, ru: string, en: string): ReleaseI
  */
 export const RELEASES: readonly ReleaseDay[] = [
   {
+    date: '2026-10-27',
+    items: [
+      item(
+        'new',
+        'Новини: показано, коли їх востаннє оновлено, - на сторінці /news та в розділі новин картки авто; на /wanted - дату оновлення списку поліції',
+        'Новости: показано, когда они обновлялись в последний раз, - на странице /news и в разделе новостей карточки авто; на /wanted - дата обновления списка полиции',
+        'News: shows when it was last updated - on /news and in the result card News section; /wanted shows the police list refresh date'
+      ),
+      item(
+        'improved',
+        'Бічні віджети новин показують новини всіма мовами, а не лише мовою інтерфейсу',
+        'Боковые виджеты новостей показывают новости на всех языках, а не только на языке интерфейса',
+        'The side news widgets show news in all languages, not only the interface language'
+      ),
+      item(
+        'improved',
+        'Посилання для поширення зберігають обраний шрифт',
+        'Ссылки для отправки сохраняют выбранный шрифт',
+        'Share links carry the chosen font'
+      ),
+      item(
+        'fix',
+        'Картки для соцмереж (/og/) більше не бувають без тексту: шрифти підбираються на льоту',
+        'Карточки для соцсетей (/og/) больше не бывают без текста: шрифты подбираются на лету',
+        'Link-preview cards (/og/) no longer come out without text: fonts are resolved on demand'
+      )
+    ]
+  },
+  {
     date: '2026-10-26',
     items: [
       item(
