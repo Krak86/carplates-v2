@@ -4,7 +4,7 @@
 #   backup.sh full      after each monthly ingest (manual until ingest-cron exists) — whole DB, keeps the newest 2
 #   backup.sh archive   mirrors /opt/carsua/archive (data.gov.ua source ZIPs) to the bucket
 # Everything else in the DB is rebuildable from the source ZIPs or the committed seed CSVs (PLAN.md "Backup policy").
-# Config: /opt/carsua/env/backup.env  →  RCLONE_CONFIG_R2_{TYPE,PROVIDER,ACCESS_KEY_ID,SECRET_ACCESS_KEY,ENDPOINT}, BACKUP_BUCKET,
+# Config: /opt/carsua/env/backup.env  →  RCLONE_CONFIG_R2_{TYPE,PROVIDER,NO_CHECK_BUCKET,ACCESS_KEY_ID,SECRET_ACCESS_KEY,ENDPOINT}, BACKUP_BUCKET,
 #         optional HC_PING_BACKUP (healthchecks.io ping URL).
 set -euo pipefail
 
