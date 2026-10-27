@@ -7,7 +7,7 @@ Nothing here is built yet — no scheduler exists in the repo. Drafted 2026-10-0
 
 1. **Poll often, work rarely.** A cheap "did anything change?" check on a short cadence; heavy work only on change.
    `scripts/src/ingest.ts` already compares CKAN `last_modified` with `registry.ingested_resources`, so a daily
-   trigger costs one API call on most days. This covers "monthly, but daily until the new month appears" with no special case.
+   trigger costs one API call on most runs. This covers "monthly, but polled until the new month appears" with no special case.
 2. **Scheduler lives outside the API process.** A separate `ingest-cron` container (or host cron / supercronic)
    running one-shot `pnpm …` commands. Not `@nestjs/schedule`: it double-fires with 2+ API instances and competes
    with request traffic for memory during a large ingest.
@@ -28,7 +28,7 @@ Nothing here is built yet — no scheduler exists in the repo. Drafted 2026-10-0
 | ---------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | RSS news                           | `pnpm ingest:news`                                                                  | Daily (PLAN.md suggests every ~6 h)                                                             | Idempotent; shorter interval is nearly free.                                                                                                                                                                                                                          |
 | Brand YouTube channels             | `pnpm ingest:social`                                                                | Daily (same slot as the news ingest)                                                            | 54 public RSS feeds (50 makes + 4 groups) at 1 req/s (~1 min). Idempotent; a dead feed is reported, never fails the run.                                                                                                                                              |
-| Plates (data.gov.ua)               | `pnpm ingest:full` -> backfill -> stats                                             | **Daily**, ~03:00 Kyiv                                                                          | Real work ~monthly (new month published). Holds an exclusive lock on `registrations` for minutes — run at night.                                                                                                                                                      |
+| Plates (data.gov.ua)               | `pnpm ingest:full` -> backfill -> stats                                             | **Twice a week** (Tue + Fri), ~03:00 Kyiv                                                       | Real work ~monthly (new month published); other runs no-op. Holds an exclusive lock on `registrations` for minutes — run at night. Healthchecks: period 7 d, grace 1 d.                                                                                               |
 | Wanted-cars list (National Police) | `pnpm ingest:wanted`                                                                | **Daily**, same slot as the news ingest (feed changes several times a day; every 2-6 h is fine) | Upserts ~79 k rows (~36 MB JSON, ~15 s); rows missing from the feed get `resolved_at` — that is the history shown on the card, so **skipped days lose history**. Refuses a feed under 20 000 rows. Not in the seed CSVs.                                              |
 | Safety ratings                     | `ingest:euroncap`, `jncap`, `cncap`, `kncap`, `iihs`                                | Half-yearly                                                                                     | Add a January run for IIHS awards. Quarterly is fine (cheap).                                                                                                                                                                                                         |
 | VehiclesDB (markets/popularity)    | `ingest:vehiclesdb -- --refresh` -> `export:vehiclesdb:csv` -> `db:refresh-derived` | Half-yearly (new release)                                                                       | Chips update at once; the /stats Markets panel needs the refresh. Commit the re-exported seed after review.                                                                                                                                                           |
@@ -48,7 +48,8 @@ Nothing here is built yet — no scheduler exists in the repo. Drafted 2026-10-0
 
 ## Open decisions
 
-- Plate check stays daily forever (recommended): ~29 no-op runs a month, also catches mid-month corrections.
+- Plate check runs twice a week (decided 2026-10-27, was daily): a new month lands at most ~4 days late, a failed run is retried in 3-4 days,
+  and mid-month corrections are still caught. A no-op run costs one CKAN call, so daily would also be fine if the lag ever matters.
 - Slow half-yearly jobs: one sequential "refresh" job, or staggered across the month (recommended: stagger, one heavy job at a time).
 
 ## Build steps (when picked up)
