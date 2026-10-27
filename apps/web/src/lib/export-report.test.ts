@@ -542,11 +542,36 @@ describe('buildExportReport news and sources', () => {
     expect(origin?.type === 'kv' && origin.rows.map(r => r.label)).toEqual(
       expect.arrayContaining(['origin.step.brand', 'origin.step.assembly'])
     )
+    expect(origin?.type === 'kv' && origin.layout).toBe('timeline')
+    // Alternatives, hints and the source hang under a step instead of being steps themselves.
+    expect(origin?.type === 'kv' && origin.rows.filter(r => r.note).map(r => r.label)).toEqual(
+      expect.arrayContaining(['export.source'])
+    )
+    expect(origin?.type === 'kv' && origin.rows.filter(r => !r.note).map(r => r.label)).not.toContain('export.source')
     const wanted = report.sections.find(s => s.id === 'wanted')
     expect(wanted?.type === 'kv' && wanted.rows[0]).toEqual({ label: 'export.wantedStatus', value: 'wanted.chip.was' })
+    expect(wanted?.type === 'kv' && wanted.tone).toBe('neutral')
+    expect(report.summary?.[0]).toEqual({ text: 'wanted.chip.was', tone: 'neutral' })
     const sources = report.sections.find(s => s.id === 'sources')
     const labels = sources?.type === 'links' ? sources.links.map(l => l.label) : []
     expect(labels).toEqual(expect.arrayContaining(['stolen.in.ua', 'Wikipedia / Wikidata', 'NHTSA']))
+  })
+
+  it('tones the wanted verdict: wanted = alert, clear = ok', () => {
+    const checkedAt = '2026-10-27T00:00:00Z'
+    const base = { records: [], checkedAt, trackedSince: checkedAt, historySource: 'stolen.in.ua' as const }
+    const toneOf = (wanted: boolean): string | undefined => {
+      const report = buildExportReport(baseInput({ wanted: { ...base, wanted } }), t)
+      const section = report.sections.find(s => s.id === 'wanted')
+      return section?.type === 'kv' ? section.tone : undefined
+    }
+    expect(toneOf(true)).toBe('alert')
+    expect(toneOf(false)).toBe('ok')
+  })
+
+  it('builds the cover strip from the verdict, region, year and fuel', () => {
+    const report = buildExportReport(baseInput({ current: registration({ fuel: 'БЕНЗИН' }) }), t)
+    expect(report.summary?.map(s => s.text)).toEqual(['Київська область', '2020', 'БЕНЗИН'])
   })
 
   it('leaves Origin and Wanted out when there is no such data', () => {

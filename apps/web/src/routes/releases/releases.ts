@@ -12,6 +12,12 @@ export const RELEASES: readonly ReleaseDay[] = [
     items: [
       item(
         'improved',
+        'PDF і Word з «Копіювати всю інформацію» стали гарнішими: кольорова плашка розшуку, шлях походження кроками, таблиці з заголовком і зеброю та смуга-підсумок на початку',
+        'PDF и Word из «Копировать всю информацию» стали аккуратнее: цветная плашка розыска, путь происхождения шагами, таблицы с заголовком и зеброй и полоса-итог в начале',
+        'The PDF and Word from "Copy all info" look better: a coloured wanted banner, the origin as steps, tables with a shaded header and zebra rows, and a summary strip on the cover'
+      ),
+      item(
+        'improved',
         '«Копіювати всю інформацію» тепер містить «Звідки авто» та перевірку розшуку (з історією записів) і відповідні джерела',
         '«Копировать всю информацию» теперь включает «Откуда авто» и проверку розыска (с историей записей) и соответствующие источники',
         '"Copy all info" now includes "Where it comes from" and the wanted check (with record history), plus their sources'

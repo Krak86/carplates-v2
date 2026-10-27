@@ -36,7 +36,7 @@ import {
 } from '@/components/EstimatedValue.helpers'
 import { buildGenerationSection, buildSizeSection } from '@/lib/export-size'
 import { buildNewsSections, buildSourcesSection } from '@/lib/export-news'
-import { buildOriginSection, buildWantedSection } from '@/lib/export-verify'
+import { buildOriginSection, buildWantedSection, WANTED_TONE, wantedVerdict } from '@/lib/export-verify'
 import type { ExportVerifyInput } from '@/lib/export-verify'
 import type { ExportNewsInput } from '@/lib/export-news'
 import { buildMotSections, buildRecallSections } from '@/lib/export-recalls-mot'
@@ -84,11 +84,25 @@ export const EXPORT_FORMAT_LABEL_KEYS: Readonly<Record<ExportFormat, string>> = 
   pdf: 'export.downloadPdf'
 }
 
+/** How loudly a verdict is drawn: Word / PDF colour it, the text formats print `EXPORT_TONE_MARKER`. */
+export const EXPORT_TONES = ['alert', 'ok', 'neutral'] as const
+export type ExportTone = (typeof EXPORT_TONES)[number]
+
+export const EXPORT_TONE_MARKER: Readonly<Record<ExportTone, string>> = { alert: '[!]', ok: '[OK]', neutral: '[i]' }
+
 export type ExportKeyValueSection = {
   type: 'kv'
   id: string
   title: string
-  rows: { label: string; value: string }[]
+  /**
+   * Word / PDF draw the first row as a coloured verdict banner; txt / md / csv prefix its value with a text marker.
+   * Rows are labelled `label: value` everywhere, so a verdict row still reads fine without the colour.
+   */
+  tone?: ExportTone
+  /** `timeline`: Word / PDF draw the rows as numbered steps joined by a line; the text formats print plain rows. */
+  layout?: 'timeline'
+  /** `note`: a timeline detail (alternatives, warnings, source) drawn small under the step above, not a step of its own. */
+  rows: { label: string; value: string; note?: boolean }[]
 }
 
 export type ExportTableSection = {
@@ -143,6 +157,8 @@ export type ExportReport = {
   /** Wikipedia lead image, shown right under the title block when the wiki lookup found one. */
   heroImage: { url: string; alt: string } | null
   generatedAtLabel: string
+  /** The cover's one-line strip (verdict, region, year, fuel); absent for reports without a vehicle. */
+  summary?: { text: string; tone?: ExportTone }[]
   sections: ExportSection[]
 }
 
@@ -937,6 +953,18 @@ export function buildExportReport(input: ExportInput, t: Translate): ExportRepor
     heroImage:
       input.wiki?.found && input.wiki.image ? { url: input.wiki.image.url, alt: input.wiki.title ?? title } : null,
     generatedAtLabel: t('export.generatedAt', { date: new Date().toLocaleString() }),
+    summary: buildSummary(input, t),
     sections: sections.filter((s): s is ExportSection => s != null)
   }
+}
+
+/** Cover strip: the wanted verdict first (it is the one that matters), then region, year and fuel. */
+function buildSummary(input: ExportInput, t: Translate): { text: string; tone?: ExportTone }[] {
+  const verdict = input.wanted ? wantedVerdict(input.wanted) : null
+  const items: { text: string; tone?: ExportTone }[] = []
+  if (verdict) items.push({ text: t(`wanted.chip.${verdict}`), tone: WANTED_TONE[verdict] })
+  for (const text of [input.region, input.vehicle.year, input.current?.fuel]) {
+    if (text) items.push({ text: String(text) })
+  }
+  return items
 }

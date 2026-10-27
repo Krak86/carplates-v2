@@ -2,7 +2,7 @@ import type { OriginResponse, WantedRecord, WantedResponse } from '@carplates/sh
 
 import { buildOriginView, ukraineFromActions, yearRange } from '@/components/OriginSection.helpers'
 import { countryLabel } from '@/components/vin/helpers'
-import type { ExportInput, ExportKeyValueSection, Translate } from '@/lib/export-report'
+import type { ExportInput, ExportKeyValueSection, ExportTone, Translate } from '@/lib/export-report'
 
 /** Live "is it on the police list" answer and the brand/plant origin - the two card sections added after the first export. */
 export type ExportVerifyInput = {
@@ -10,9 +10,17 @@ export type ExportVerifyInput = {
   wanted?: WantedResponse | null
 }
 
-type Row = { label: string; value: string }
+type Row = { label: string; value: string; note?: boolean }
 
 const DASH = '-'
+
+type WantedVerdict = 'wanted' | 'was' | 'clear'
+
+export const WANTED_TONE: Readonly<Record<WantedVerdict, ExportTone>> = { wanted: 'alert', was: 'neutral', clear: 'ok' }
+
+export function wantedVerdict(data: WantedResponse): WantedVerdict {
+  return data.wanted ? 'wanted' : data.records.length > 0 ? 'was' : 'clear'
+}
 
 function localeOf(lang: string): string {
   return lang === 'ua' ? 'uk' : lang
@@ -30,8 +38,8 @@ function ownerYears(from: number | null, to: number | null, t: Translate): strin
   return to ? t('origin.owner.until', { to }) : ''
 }
 
-function push(rows: Row[], label: string, value: string | null | undefined): void {
-  if (value) rows.push({ label, value })
+function push(rows: Row[], label: string, value: string | null | undefined, note = false): void {
+  if (value) rows.push(note ? { label, value, note } : { label, value })
 }
 
 /** Mirrors OriginSection: the same steps, hints and countries (former states by year), as label/value rows. */
@@ -74,7 +82,8 @@ export function buildOriginSection(input: ExportInput, t: Translate): ExportKeyV
         t('origin.assembly.also'),
         step.alsoBuiltIn
           .map(alt => [country(alt.country), alt.city, yearRange(alt.from, alt.to)].filter(Boolean).join(' '))
-          .join('; ')
+          .join('; '),
+        true
       )
     } else {
       push(
@@ -91,12 +100,12 @@ export function buildOriginSection(input: ExportInput, t: Translate): ExportKeyV
   }
 
   if (view.makerMismatch) {
-    push(rows, DASH, t('origin.warn.mismatch', { maker: view.makerMismatch, brand: input.vehicle.brand ?? '' }))
+    push(rows, DASH, t('origin.warn.mismatch', { maker: view.makerMismatch, brand: input.vehicle.brand ?? '' }), true)
   }
-  if (view.northAmericaVin) push(rows, DASH, t('origin.hint.northAmerica'))
-  push(rows, t('export.source'), t('export.originSource'))
+  if (view.northAmericaVin) push(rows, DASH, t('origin.hint.northAmerica'), true)
+  push(rows, t('export.source'), t('export.originSource'), true)
 
-  return { type: 'kv', id: 'origin', title: t('origin.title'), rows }
+  return { type: 'kv', id: 'origin', title: t('origin.title'), layout: 'timeline', rows }
 }
 
 function recordValue(record: WantedRecord, t: Translate, lang: string): string {
@@ -122,7 +131,7 @@ export function buildWantedSection(input: ExportInput, t: Translate): ExportKeyV
   const data = input.wanted
   if (!data) return null
 
-  const verdict = data.wanted ? 'wanted' : data.records.length > 0 ? 'was' : 'clear'
+  const verdict = wantedVerdict(data)
   const rows: Row[] = []
   push(rows, t('export.wantedStatus'), t(`wanted.chip.${verdict}`))
 
@@ -134,5 +143,5 @@ export function buildWantedSection(input: ExportInput, t: Translate): ExportKeyV
   push(rows, t('export.wantedChecked'), dateOf(data.checkedAt, input.lang))
   push(rows, t('export.source'), t('export.wantedSource'))
 
-  return { type: 'kv', id: 'wanted', title: t('wanted.title'), rows }
+  return { type: 'kv', id: 'wanted', title: t('wanted.title'), tone: WANTED_TONE[verdict], rows }
 }

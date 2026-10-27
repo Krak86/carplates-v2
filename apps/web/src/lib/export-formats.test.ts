@@ -44,6 +44,42 @@ describe('toPlainText', () => {
   })
 })
 
+const toned: ExportReport = {
+  ...report,
+  summary: [{ text: 'Wanted', tone: 'alert' }, { text: 'Kyiv' }],
+  sections: [
+    {
+      type: 'kv',
+      id: 'wanted',
+      title: 'Wanted check',
+      tone: 'alert',
+      rows: [
+        { label: 'Status', value: 'Wanted' },
+        { label: 'Checked', value: '2026-10-27' }
+      ]
+    }
+  ]
+}
+
+describe('tone and cover strip', () => {
+  it('prefixes only the verdict row with a text marker in txt, md and csv', () => {
+    expect(toPlainText(toned)).toContain('Status: [!] Wanted')
+    expect(toPlainText(toned)).toContain('Checked: 2026-10-27')
+    expect(toMarkdown(toned)).toContain('| Status | [!] Wanted |')
+    expect(toCsv(toned)).toContain('Status,[!] Wanted')
+  })
+
+  it('prints the cover strip as one line under the subtitle', () => {
+    expect(toPlainText(toned)).toContain('[!] Wanted · Kyiv')
+    expect(toMarkdown(toned)).toContain('**[!] Wanted · Kyiv**')
+    expect(toCsv(toned)).toContain('[!] Wanted · Kyiv')
+  })
+
+  it('leaves a section without a tone untouched', () => {
+    expect(toPlainText(report)).toContain('VIN: JT123456789012345')
+  })
+})
+
 describe('toMarkdown', () => {
   it('renders kv/table sections as markdown tables and links as a list', () => {
     const md = toMarkdown(report)
