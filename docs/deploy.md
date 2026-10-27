@@ -3,7 +3,7 @@
 Status (2026-10-27): **first real deploy done** on a Contabo Cloud VPS 6 behind Cloudflare (Full strict + origin certificate): bootstrap, `deploy-api`,
 `deploy-alpr`, `deploy-web`, a verified `pg_restore` of the real DB (row counts equal local) and a live `https://carsua.app` (healthz, sitemap,
 robots, plate API all 200; HTTP/3 advertised). The runbook below is corrected from that run; the problems found are in `docs/plan-done.md`
-"First VPS deploy". **Not yet done:** R2 backups + a restore test, UptimeRobot, the security gate (§7), `ingest-cron`.
+"First VPS deploy". R2 backups work (nightly + full verified 2026-10-27). **Not yet done:** UptimeRobot, the security gate (§7), `ingest-cron`.
 Deploy scripts run via `ssh vps bash -s < script`, so bash reads the script from stdin: every `docker` call in them that could attach stdin needs
 `</dev/null`, or it swallows the rest of the script and bash exits 0 early (this made `deploy-api` report success without starting the api).
 
@@ -168,19 +168,51 @@ pulls without a login. Settings → Actions → "Require approval for all outsid
 R2 free tier = 10 GB (no egress fees). ZIPs + one full dump may exceed it — if so, keep one full dump or rely on ZIPs + re-ingest. Contabo
 snapshots are an extra, not the backup. `pg_dump` caveat (verified): `--schema` is ignored once `-t` is used, so the script lists `-t 'app.*'`.
 
+## Restore from R2
+
+Setup on the VPS (a new server first needs First-time setup steps 1-3: Docker, `deploy-api` with `sync_only`, empty Postgres, `backup.env`):
+`cd /opt/carsua/compose && export COMPOSE_FILE=docker-compose.prod.yml; set -a; . /opt/carsua/env/backup.env; set +a`.
+Dumps carry no roles; the server role keeps the `POSTGRES_PASSWORD` secret.
+
+**A. Lost or corrupted app data (VPS alive): nightly tables only.** Stop the api (or use maintenance mode) first.
+
+```bash
+f=$(rclone lsf R2:carsua-backups/nightly | sort | tail -1)   # any of the last 14 days
+rclone copyto "R2:carsua-backups/nightly/$f" /opt/carsua/backups/restore.dump
+docker compose cp /opt/carsua/backups/restore.dump postgres:/tmp/restore.dump
+docker compose exec -T postgres pg_restore --clean --if-exists --no-owner -U carplates -d carplates /tmp/restore.dump
+```
+
+`--clean --if-exists` drops and recreates only those tables; changes since the last 03:30 run are lost. **Not yet tested on a populated DB**
+(only restored into an empty scratch container): try it once in a scratch container before relying on it.
+
+**B. Total loss (new empty server): full first, then nightly on top.**
+
+1. `rclone copyto "R2:carsua-backups/full/$(rclone lsf R2:carsua-backups/full | sort | tail -1)" /opt/carsua/backups/full.dump`, then
+   `docker compose cp` it into the container and run, detached:
+   `nohup docker compose exec -T postgres pg_restore -j 4 --no-owner -U carplates -d carplates --verbose /tmp/full.dump > /opt/carsua/backups/restore.log 2>&1 &`.
+   Over an hour (indexes + `current_registration` refresh ~45 min). Done when no `pg_restore` and no `REFRESH MATERIALIZED VIEW` is active.
+2. `VACUUM (ANALYZE)`, then apply the newest nightly as in A.
+3. `deploy-api` normally, then `deploy-web`; check `/healthz`, a plate, a login.
+
+Registry data lost with the full dumps: re-ingest from `archive/` ZIPs (`backup.sh archive`) or data.gov.ua (`ingest:*`).
+
 ## Still open
 
 ### Next steps after the first deploy (2026-10-27, in this order)
 
-1. **R2 backups (most important).** Until they work, the only copies of the real data are the dev PC and the VPS; keep `C:\tmp\carsua.dump` (1.28 GB, local) and
-   `/opt/carsua/backups/carsua.dump` (VPS) as the interim restore point and delete them only after step 1 is verified. Steps: R2 → enable → bucket `carsua-backups`
-   → API token (Object Read & Write on that bucket) → secrets `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_ENDPOINT`, variable `BACKUP_BUCKET`; healthchecks.io check
-   `backup` → secret `HC_PING_BACKUP` (all in "Where to get what"). Re-run `deploy-api` (it writes `/opt/carsua/env/backup.env` only when the R2 values exist), then
-   `ssh deploy@<ip> bash /opt/carsua/compose/backup.sh nightly` once by hand, confirm the object in R2, and restore it into a scratch container.
-2. **SSH hardening was never verified.** `bootstrap.sh` writes `sshd_config.d/99-carsua.conf`, but sshd takes the first value it finds, so a provider file
-   (e.g. `50-cloud-init.conf` with `PasswordAuthentication yes`) would win. `deploy` has no sudo password, so `sudo sshd -T` fails; check with
-   `grep -ri passwordauthentication /etc/ssh/sshd_config.d/ /etc/ssh/sshd_config` and by trying `ssh -o PubkeyAuthentication=no deploy@<ip>` (must be refused).
-   If a provider file wins, fix `bootstrap.sh` (name the drop-in `00-carsua.conf`) and re-apply.
+1. ✅ **R2 backups (done 2026-10-27).** `backup.sh nightly` and `backup.sh full` uploaded to `carsua-backups`; the nightly dump was restored into a scratch
+   `postgres:18.6` container (create schemas `app` + `registry` first; 9 app tables, 6 registry tables) and the 1.28 GB full dump passed `pg_restore --list`
+   (68 `TABLE DATA`). Gotcha: an object-scoped R2 token cannot check/create buckets, so rclone needs `RCLONE_CONFIG_R2_NO_CHECK_BUCKET=true` (set in `backup.env`
+   by `deploy-api`), else uploads fail with 403 AccessDenied. A `501 NotImplemented` on attempt 1 followed by success on attempt 2 is normal. A full dump takes
+   ~10 min; run it under `nohup`. Still to do: confirm the 03:30 cron run + healthchecks.io check, `backup.sh archive` (source ZIPs), and delete the old local
+   `C:\tmp\carsua.dump` once comfortable.
+2. ✅ **SSH hardening (fixed + verified 2026-10-27).** The check found the problem: sshd takes the first value it reads, `50-cloud-init.conf` (unreadable by
+   `deploy`) beat `99-carsua.conf`, and password login was on. Renamed the drop-in to `00-carsua.conf` (`bootstrap.sh` now writes that name) and reloaded sshd;
+   `ssh -o PubkeyAuthentication=no -o PreferredAuthentications=password deploy@<ip>` is now refused with no password prompt. Re-run that test after any sshd change.
+   `deploy` has no sudo (no password, no sudoers entry; only the `docker` group), so root edits go through the Contabo VNC console as root, or a privileged
+   container: `docker run --rm --privileged --pid=host alpine nsenter -t 1 -m -u -n -i sh -c '/usr/sbin/sshd -t && systemctl reload ssh'` (the `docker` group is
+   effectively root).
 3. **UptimeRobot** (free, 5 min) on `https://carsua.app/healthz`; one healthchecks.io check per future cron job.
 4. **Cloudflare settings not yet confirmed:** Always Use HTTPS, HTTP/3, Bot Fight Mode, the WAF rate-limit rule on `/api/plate*` + `/api/vin*`. DNSSEC was turned
    off at Squarespace for the nameserver move; optionally re-enable it in Cloudflare and add the DS record at Squarespace.
