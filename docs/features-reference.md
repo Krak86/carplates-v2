@@ -144,7 +144,7 @@ Passenger cars only; per (metric, brand, model): n, min, max. Power / displaceme
 
 Files: `lib/community.ts` (keyless browser-side searches, Zod-validated), `lib/bluesky.ts`, `SocialGroup` + `CommunityPostCard`, `CommunityWidget`, `useSideCommunity`.
 
-The Social section lists Bluesky, Mechanics Q&A (Stack Exchange "Motor Vehicle Maintenance & Repair") and Lemmy, each with a "More" link to the source's own search. The search term is "make model" — **without the year** (it empties the results). Side widgets (desktop, appear on scroll, latch via `useScrolledOnRoute`): left column = Bluesky, then Lemmy beside it (or in its place if no Bluesky); right = news, then Q&A beside it (or in its place); the second column needs >= 1760 px and shows ~1 s after the first. All widget chunks are excluded from the PWA precache (live third-party data).
+The Social section lists Bluesky, Mechanics Q&A (Stack Exchange "Motor Vehicle Maintenance & Repair") and Lemmy, each with a "More" link to the source's own search. The search term is "make model" — **without the year** (it empties the results). Side widgets (desktop, appear on scroll, latch via `useScrolledOnRoute`): left column = Bluesky, then Lemmy beside it (or in its place if no Bluesky); right = news, then Q&A beside it (or in its place); the second column needs >= 1760 px and shows ~1 s after the first. The side news query is **not** language-filtered (all of ua/ru/en show in every UI language; the News section and /news page still filter for `ua`). All widget chunks are excluded from the PWA precache (live third-party data).
 
 ## Export, wiki text and brand logos
 
