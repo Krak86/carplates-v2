@@ -852,6 +852,22 @@ Group 1 dimension callouts + garage-fit -> Group 3 (existing order). Owner says 
     Revisit only if a free/affordable all-makes pricing API turns up, or
     a specific brand's distributor ships a real public feed (not a PDF).
 
+### Export polish: prettier PDF / Word (planned 2026-10-27, not started)
+
+"Copy all info" (`lib/export-*`) renders every section as plain kv rows or tables (`export-pdf.ts` = hand-drawn jsPDF, no autotable by
+design; `export-docx.ts` = plain `docx` tables). Goal: a nicer PDF / Word without a heavy new dependency. Order of value:
+
+1. **Verdict banner** for the wanted check: optional `tone: 'alert' | 'ok' | 'neutral'` on `ExportKeyValueSection` (`export-report.ts`), set by
+   `buildWantedSection` (`export-verify.ts`: wanted = alert, was = neutral, clear = ok); PDF/Word draw a coloured box, md/txt/csv a text marker.
+2. **Origin as a stepped timeline** (brand -> owners -> assembly -> Ukraine) instead of 4 kv rows.
+3. **Table polish for every section:** shaded header row, zebra rows, fixed label-column width in kv tables, no row split across pages.
+4. **Cover block:** logo, hero photo, title, plate/VIN and a one-line summary strip (verdict, region, year, fuel).
+5. Skipped unless asked: country flags in origin rows (needs SVG rasterising), extra chart types, a PDF layout library.
+
+How to test in a new session: export a plate with a wanted history and a decoded VIN as PDF, Word and md (`ExportMenuButton`), open the
+files and check the banner, the timeline, page breaks and Cyrillic text; add `tone` cases to `export-report.test.ts`. Section types are
+`kv | table | links | text | chart`; every renderer (`export-formats.ts` txt/md/csv, `export-pdf.ts`, `export-docx.ts`, `export-image.ts`) must handle a new field.
+
 ## Phase 4 — VPS / production
 
 The recurring-job plan (cadences, locking, run log, alerting, build steps) is drafted in [SCHEDULE.md](SCHEDULE.md) — build it as part of this phase.
