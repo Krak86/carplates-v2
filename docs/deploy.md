@@ -197,6 +197,8 @@ snapshots are an extra, not the backup. `pg_dump` caveat (verified): `--schema` 
 
 - `ingest-cron` image + `run-job.ts` + crontab (SCHEDULE.md) — not built; monthly ingest and `ingest:wanted` must be run by hand on the VPS until then
   (`wanted` loses history on skipped days). There is no `ingest` image yet, so `backup.sh full/archive` are manual too.
+  **First crontab entries (cheap, idempotent, build these first):** the RSS jobs `pnpm ingest:news` (every ~6 h; news ticker is empty/stale without it) and
+  `pnpm ingest:social` (daily, brand YouTube RSS), then `ingest:wanted` (daily) and the plate `ingest:full` (daily ~03:00 Kyiv). One healthchecks.io check each.
 - Redis throttler store (not used by the app yet, so Redis is not in the compose file); until then limits are per-process and reset on restart,
   and blue/green briefly runs two api processes.
 - CSP is Report-Only; enforce after a clean week. Cloudflare IP ranges in the Caddyfile: re-check against cloudflare.com/ips occasionally.
