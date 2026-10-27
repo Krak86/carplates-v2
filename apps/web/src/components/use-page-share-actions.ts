@@ -2,6 +2,7 @@ import { useState } from 'react'
 
 import i18n from '@/i18n'
 import { copyToClipboard } from '@/lib/share-section'
+import { setFontParam } from '@/store/ui-store'
 
 /** Personal / admin pages: a shared link would only show the recipient their own (or a login) view. */
 export const NO_SHARE_PATHS = new Set(['/history', '/favorites', '/settings', '/profile', '/admin'])
@@ -16,7 +17,9 @@ export function usePageShareActions(title?: string): UsePageShareActions {
   const [copied, setCopied] = useState(false)
 
   const share = async (): Promise<void> => {
-    const url = `${window.location.origin}${window.location.pathname}?lang=${i18n.language}`
+    const params = new URLSearchParams({ lang: i18n.language })
+    setFontParam(params)
+    const url = `${window.location.origin}${window.location.pathname}?${params.toString()}`
     if (typeof navigator.share === 'function') {
       try {
         await navigator.share({ title: title ?? document.title, url })

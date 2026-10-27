@@ -49,8 +49,8 @@ import {
   plateLookupResponseSchema,
   plateRecognizeResponseSchema,
   vinRecognizeResponseSchema,
-  newsResponseSchema,
-  newsPageResponseSchema,
+  newsFeedResponseSchema,
+  newsFeedPageResponseSchema,
   socialResponseSchema,
   stockResponseSchema,
   stockNewsResponseSchema,
@@ -120,8 +120,8 @@ import type {
   VdbVehicleClass,
   Models3dResponse,
   Models360Response,
-  NewsPageResponse,
-  NewsResponse,
+  NewsFeedPageResponse,
+  NewsFeedResponse,
   SocialResponse,
   StockNewsResponse,
   StockRange,
@@ -604,13 +604,13 @@ export async function getNews(
   model?: string | null,
   year?: number | null,
   lang?: 'uk'
-): Promise<NewsResponse> {
+): Promise<NewsFeedResponse> {
   const params = new URLSearchParams()
   if (brand) params.set('brand', brand)
   if (brand && model) params.set('model', model)
   if (brand && year != null) params.set('year', String(year))
   if (lang) params.set('lang', lang)
-  return newsResponseSchema.parse(await getJson(`/api/news?${params.toString()}`))
+  return newsFeedResponseSchema.parse(await getJson(`/api/news?${params.toString()}`))
 }
 
 /** Brand / parent-group YouTube channel uploads (persisted by pnpm ingest:social) for a car's brand; empty when the brand has no channel. */
@@ -636,13 +636,13 @@ export async function getNewsPage(opts: {
   q: string
   order: 'asc' | 'desc'
   lang?: 'uk'
-}): Promise<NewsPageResponse> {
+}): Promise<NewsFeedPageResponse> {
   const { page, pageSize, sources, q, order, lang } = opts
   const params = new URLSearchParams({ page: String(page), pageSize: String(pageSize), order })
   if (q) params.set('q', q)
   if (sources.length) params.set('source', sources.join(','))
   if (lang) params.set('lang', lang)
-  return newsPageResponseSchema.parse(await getJson(`/api/news/list?${params.toString()}`))
+  return newsFeedPageResponseSchema.parse(await getJson(`/api/news/list?${params.toString()}`))
 }
 
 export async function getAuthConfig(): Promise<AuthConfigResponse> {

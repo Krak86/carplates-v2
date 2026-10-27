@@ -8,7 +8,6 @@ import NewsGroups from '@/components/NewsGroups'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { SIDE_WIDGETS_DESKTOP_QUERY } from '@/hooks/useSideWidgetsVisible'
 import { cn } from '@/lib/cn'
-import { newsLangFilter } from '@/lib/news'
 import { newsQuery } from '@/lib/queries'
 
 /** The side panel is a teaser; the rest is behind the "more news" link. */
@@ -26,12 +25,13 @@ type Props = {
  * with news, the panel fades in from the right once the user starts scrolling.
  */
 export default function NewsWidget({ brand, model, year }: Props): ReactNode {
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
   const isDesktop = useMediaQuery(SIDE_WIDGETS_DESKTOP_QUERY)
   const { pathname } = useLocation()
   // Dismissal is per route: storing the path it was closed on makes it lapse on the next navigation.
   const [dismissedPath, setDismissedPath] = useState<string | null>(null)
-  const news = useQuery({ ...newsQuery(brand, model, year, newsLangFilter(i18n.language)), enabled: isDesktop })
+  // No UI-language filter: the side panel shows news in every language (ua, ru, en).
+  const news = useQuery({ ...newsQuery(brand, model, year), enabled: isDesktop })
 
   const all = news.data?.items ?? []
   if (!isDesktop || !all.length || dismissedPath === pathname) return null

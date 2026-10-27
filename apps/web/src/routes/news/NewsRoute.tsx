@@ -7,6 +7,7 @@ import { useSearchParams } from 'react-router'
 import NewsCard from '@/components/NewsCard'
 import Spinner from '@/components/ui/Spinner'
 import { cn } from '@/lib/cn'
+import { toIntlLocale } from '@/lib/intl'
 import { NEWS_PAGE_SIZE, NEWS_SEARCH_MIN_CHARS, NEWS_SOURCE_GROUPS, newsLangFilter, sourceIdsOf } from '@/lib/news'
 import { newsPageQuery } from '@/lib/queries'
 
@@ -94,6 +95,12 @@ export default function NewsRoute(): ReactNode {
       <h1 className="text-2xl font-bold">
         <span aria-hidden>📰</span> {t('news.heading')}
       </h1>
+
+      {news.data?.updatedAt && (
+        <p className="text-sm text-[var(--color-muted)]">
+          {t('news.updatedAt', { date: new Date(news.data.updatedAt).toLocaleString(toIntlLocale(i18n.language)) })}
+        </p>
+      )}
 
       <div className="space-y-2">
         <div className="flex items-start gap-2">

@@ -5,6 +5,7 @@ import i18n from '@/i18n'
 import { useLiveMapView } from '@/hooks/useBackgroundMode'
 import { BACKGROUND_MODES, LIVE_STREAMS, isStreamMode, type BackgroundMode } from '@/lib/live-background'
 import { useLiveBackgroundStore } from '@/store/live-background-store'
+import { setFontParam } from '@/store/ui-store'
 
 export const LAYOUT_PARAM = 'layout'
 export const STREAM_PARAM = 'stream'
@@ -69,5 +70,6 @@ function applyLayoutParams(p: URLSearchParams, mode: BackgroundMode, streamId?: 
 export function buildLayoutShareUrl(mode: BackgroundMode, streamId?: string): string {
   const p = applyLayoutParams(new URLSearchParams(), mode, streamId)
   p.set('lang', i18n.language)
+  setFontParam(p)
   return `${window.location.origin}/relax?${p.toString()}`
 }

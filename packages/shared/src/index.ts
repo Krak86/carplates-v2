@@ -691,6 +691,9 @@ export {
   type WikiSpecsResponse
 } from './wikiSpecsApi.js'
 
+export { newsFeedResponseSchema, newsFeedPageResponseSchema } from './news.js'
+export type { NewsFeedResponse, NewsFeedPageResponse } from './news.js'
+
 export {
   wantedRecordSchema,
   wantedResponseSchema,

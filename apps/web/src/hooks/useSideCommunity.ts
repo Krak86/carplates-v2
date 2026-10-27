@@ -1,12 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { useTranslation } from 'react-i18next'
 import type { StockNewsResponse } from '@carplates/shared'
 
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { blueskyQuery } from '@/lib/bluesky'
 import { type CommunityPost, lemmyQuery, stackExchangeQuery } from '@/lib/community'
-import { newsLangFilter } from '@/lib/news'
 import { newsQuery, stockNewsQuery } from '@/lib/queries'
 
 /** Room for the card (700px) plus two 240px columns on each side. Narrower desktops get the first column only. */
@@ -49,7 +47,6 @@ export function useSideCommunity(
   year: number | null,
   withBluesky: boolean
 ): Result {
-  const { i18n } = useTranslation()
   const isWide = useMediaQuery(SECOND_COLUMN_QUERY)
   const [delayed, setDelayed] = useState(false)
   const enabled = active && !!brand
@@ -61,7 +58,8 @@ export function useSideCommunity(
   }, [enabled])
 
   const bluesky = useQuery({ ...blueskyQuery(brand ?? '', model, year), enabled: enabled && withBluesky })
-  const news = useQuery({ ...newsQuery(brand, model, year, newsLangFilter(i18n.language)), enabled })
+  // Side widgets show news in every language (no UI-language filter) - the same query NewsWidget uses.
+  const news = useQuery({ ...newsQuery(brand, model, year), enabled })
   const lemmy = useQuery({ ...lemmyQuery(brand ?? '', model), enabled })
   const qa = useQuery({ ...stackExchangeQuery(brand ?? '', model), enabled })
   const stockNews = useQuery({ ...stockNewsQuery(brand ?? ''), enabled })
