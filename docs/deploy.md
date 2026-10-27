@@ -77,8 +77,10 @@ pgdata/    Postgres data (the ~23 GB DB)        backups/  staging for dumps befo
 
 ## Where to get what
 
-**Contabo** — order _Cloud VPS 6_, EU (Germany), image **Ubuntu 24.04**, paste your SSH public key (`ssh-keygen -t ed25519 -C carsua-admin`, then
-`~/.ssh/id_ed25519.pub`). Contabo emails "Your login data" with the **IPv4/IPv6** and root; the same is in my.contabo.com → _Your services_ →
+**Contabo** — order _Cloud VPS 6_, EU (Germany), image **Ubuntu 24.04**, "No Data Protection" (backups go to R2). The order form only asks for a root
+password (generate one; it is used once, for `scp`/`ssh` of `bootstrap.sh`, and the script then disables password login). Create the keys locally
+(`ssh-keygen -t ed25519 -C carsua-admin`, and a passphrase-less `-C carsua-ci -f ~/.ssh/carsua-ci`); their `.pub` lines go into the bootstrap
+command. In PowerShell/cmd quote the remote command with double quotes outside and single quotes around the keys. Contabo emails "Your login data" with the **IPv4/IPv6** and root; the same is in my.contabo.com → _Your services_ →
 _VPS_. There also: _Reverse DNS management_ (set PTR to `carsua.app`), _Snapshots_ (take one before risky changes — not a backup).
 
 **Cloudflare** (free) — dash.cloudflare.com → _Add a domain_ `carsua.app` (Free). Check the imported records (keep MX/TXT, drop old Squarespace site
@@ -125,17 +127,29 @@ pulls without a login. Settings → Actions → "Require approval for all outsid
    locks SSH (key-only, no root), ufw (22/80/443 tcp, 443 udp), fail2ban, Docker, 4 GB swap, `/opt/carsua`, nightly backup cron. **Open a second terminal
    and `ssh deploy@<ip>` before closing the root session.**
 2. **Cloudflare + GitHub** — as above (DNS can propagate while you continue).
-3. **Images + files** — run `deploy-alpr`, then `deploy-api` with **`sync_only` ticked**: it builds the api image, copies compose/Caddyfile, writes
-   the env files and cert, and starts **only Postgres** (empty). It does _not_ migrate or start the api.
+3. **Images + files** — run `deploy-api` with **`sync_only` ticked** first: it builds the api image, copies compose/Caddyfile, writes
+   the env files and cert, and starts **only Postgres** (empty). It does _not_ migrate or start the api. Then run `deploy-alpr` (its deploy step
+   needs the compose file that `deploy-api` delivers; run first it fails with `COMPOSE_FILE ... no such file`). Set both `carsua-*` packages to
+   Public before `deploy-alpr`. Merge to `main` with `[skip ci]`, otherwise the push starts `deploy-api` without `sync_only` on an empty DB.
 4. **Copy the whole local database** (all schemas and tables; not an ingest):
    - Locally: `SELECT count(*) FROM registry.registrations` — expect ~24.7M (real data).
-   - `docker exec carplates-v2-postgres-1 pg_dump -Fc -Z 6 -U carplates carplates > carsua.dump` — smaller than the 23 GB on disk because the dump
-     holds rows only; **indexes and the `current_registration` matview (8.9 GB) are rebuilt on restore**. The real size is whatever the file is.
-   - `rsync -P --partial carsua.dump deploy@<ip>:/opt/carsua/backups/` (resumable).
-   - On the VPS (`cd /opt/carsua/compose`, `export COMPOSE_FILE=docker-compose.prod.yml`):
-     `docker compose exec -T postgres pg_restore -j 4 --no-owner -U carplates -d carplates < /opt/carsua/backups/carsua.dump`, then
-     `docker compose exec postgres psql -U carplates -c "ALTER ROLE carplates PASSWORD '<POSTGRES_PASSWORD>'"` (the restored role keeps the _local_
-     password; the api uses the secret) and `VACUUM ANALYZE`. Budget 30–90 min. Compare `count(*)` of the big tables with local.
+   - Dump inside the container, then copy it out (**never `> carsua.dump` in PowerShell: it re-encodes the binary and corrupts it**; in Git Bash
+     write the container path as `//tmp/carsua.dump` or it is rewritten to a Windows path):
+     `docker exec carplates-v2-postgres-1 pg_dump -Fc -Z 6 -U carplates -f //tmp/carsua.dump carplates`, then
+     `docker cp carplates-v2-postgres-1://tmp/carsua.dump C:/tmp/carsua.dump` (may create `carsua.dumpcarsua.dump`: rename it). Verified 2026-10-27:
+     **1.28 GB** for 24.7M rows (14.3 GB tables incl. indexes + 8.9 GB matview on disk; the dump holds compressed rows only, and **indexes and the
+     matviews are rebuilt on restore**, which is why the restore is slow, not the data load).
+   - `scp C:\tmp\carsua.dump deploy@<ip>:/opt/carsua/backups/` (1.28 GB took 43 s; check the byte size on the VPS matches).
+   - On the VPS (`cd /opt/carsua/compose`, `export COMPOSE_FILE=docker-compose.prod.yml`; **re-export in every new SSH session**, otherwise
+     `docker compose` fails with "no configuration file provided" and any `|| echo finished` fallback lies). `pg_restore -j` cannot read stdin and
+     `/opt/carsua/backups` is not mounted in the container, so copy the file in and detach the job so a dropped SSH session does not kill it:
+     `docker compose cp /opt/carsua/backups/carsua.dump postgres:/tmp/carsua.dump`, then
+     `nohup docker compose exec -T postgres pg_restore -j 4 --no-owner -U carplates -d carplates --verbose /tmp/carsua.dump > /opt/carsua/backups/restore.log 2>&1 &`.
+     Done when no `pg_restore` process is left **and** no `REFRESH MATERIALIZED VIEW` is active (`pg_stat_activity`); the last step is the
+     `current_registration` refresh (~45+ min on the Contabo disk). No `ALTER ROLE` needed: `pg_dump` carries no roles, so the server role keeps the
+     `POSTGRES_PASSWORD` secret. Then `docker compose exec postgres psql -U carplates -d carplates -c "VACUUM (ANALYZE)"`, remove
+     `/tmp/carsua.dump` in the container, and compare `count(*)` of `registrations`, `current_registration` and `app.users` with local. Measured
+     2026-10-27: 24721694 / 16723888 / 2 on both sides; restore log had 0 errors; VPS DB is 21 GB vs 23 GB local (no bloat).
    - Faster/no-rebuild alternative: stop local Postgres and copy the `pgdata` volume (~23 GB, same 18.6 image) into `/opt/carsua/pgdata`.
 5. **Run `deploy-api` normally** (migrator is a no-op on the restored DB), then `deploy-web`. Check `https://carsua.app/healthz`, a plate, a VIN, camera recognize.
 6. **Backups** — `ssh deploy@<ip> bash /opt/carsua/compose/backup.sh nightly` once by hand; confirm the object in R2; do a restore test into a scratch container.
