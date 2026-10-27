@@ -12,7 +12,7 @@ import { alprLocalEnabled, loadEnv } from '../env.js'
 import type { UploadedImage, VinReaderResponse } from './recognize.types.js'
 
 const ACCEPTED_MIME = new Set(['image/jpeg', 'image/png', 'image/webp'])
-const UPSTREAM_TIMEOUT_MS = 15_000
+const UPSTREAM_TIMEOUT_MS = 40_000
 const MAX_CANDIDATES = 5
 
 /**

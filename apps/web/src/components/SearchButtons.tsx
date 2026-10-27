@@ -18,7 +18,7 @@ export default function SearchButtons({ isRecognizing, online, onPickPhoto, onPi
     <>
       <PhotoSearchButton isPending={isRecognizing} disabled={!online} onPick={onPickPhoto} />
       <CameraSearchButton isPending={isRecognizing} disabled={!online} onCapture={onPickPhoto} />
-      <ArSearchButton disabled={!online} />
+      <ArSearchButton isPending={isRecognizing} disabled={!online} />
       <VinSearchButton isPending={isRecognizing} disabled={!online} onPick={onPickVinPhoto} />
     </>
   )

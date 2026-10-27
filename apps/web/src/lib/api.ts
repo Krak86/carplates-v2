@@ -557,25 +557,27 @@ export async function getUkraineGeography(): Promise<UkraineGeography> {
  * exists but nothing in the web app calls it. See PLAN.md's "Own ALPR model"
  * section.
  */
-export async function recognizePlate(file: File): Promise<PlateRecognizeResponse> {
+export async function recognizePlate(file: File, signal?: AbortSignal): Promise<PlateRecognizeResponse> {
   const form = new FormData()
   form.append('image', file)
 
   const res = await fetch(`${BASE}/api/recognize/plate/local`, {
     method: 'POST',
     body: form,
+    signal,
     headers: { accept: 'application/json' }
   })
   return plateRecognizeResponseSchema.parse(await unwrap(res))
 }
 
-export async function recognizeVin(file: File): Promise<VinRecognizeResponse> {
+export async function recognizeVin(file: File, signal?: AbortSignal): Promise<VinRecognizeResponse> {
   const form = new FormData()
   form.append('image', file)
 
   const res = await fetch(`${BASE}/api/recognize/vin`, {
     method: 'POST',
     body: form,
+    signal,
     headers: { accept: 'application/json' }
   })
   return vinRecognizeResponseSchema.parse(await unwrap(res))

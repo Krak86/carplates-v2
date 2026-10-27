@@ -252,7 +252,13 @@ export default function SearchRoute(): ReactNode {
 
         <Presence show={!!photo}>
           {photo && (
-            <PhotoThumbnail url={photo.url} candidates={photo.candidates} active={raw || null} onClose={dismissPhoto} />
+            <PhotoThumbnail
+              url={photo.url}
+              candidates={photo.candidates}
+              active={raw || null}
+              pending={isRecognizing}
+              onClose={dismissPhoto}
+            />
           )}
         </Presence>
         <Presence show={!!photo?.meta && photo.mode === 'plate'}>

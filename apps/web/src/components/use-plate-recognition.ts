@@ -45,10 +45,10 @@ type Job = { file: File; mode: 'plate' | 'vin' }
 type Reads = { values: string[]; candidates: PlateCandidate[] }
 
 /** A VIN barcode is read on-device when the browser can; otherwise the photo goes to the server OCR. */
-async function readVin(file: File): Promise<Reads> {
+async function readVin(file: File, signal: AbortSignal): Promise<Reads> {
   const barcode = await readVinBarcode(file)
   if (barcode) return { values: [barcode], candidates: [] }
-  const res = await recognizeVin(await shrinkImage(file))
+  const res = await recognizeVin(await shrinkImage(file), signal)
   // VIN reads reuse the plate-candidate shape (key = the VIN), so the photo outlines and the "also found" chips just work.
   const candidates: PlateCandidate[] = res.candidates.map(c => ({
     plate: c.vin,
@@ -59,8 +59,8 @@ async function readVin(file: File): Promise<Reads> {
   return { values: candidates.map(c => c.plate), candidates }
 }
 
-async function readPlate(file: File): Promise<Reads> {
-  const res = await recognizePlate(await shrinkImage(file))
+async function readPlate(file: File, signal: AbortSignal): Promise<Reads> {
+  const res = await recognizePlate(await shrinkImage(file), signal)
   return { values: res.candidates.map(c => c.plate), candidates: res.candidates }
 }
 
@@ -88,9 +88,14 @@ export function usePlateRecognition({ currentValue, linkedValue }: UsePlateRecog
   const [photo, setPhoto] = useState<PhotoThumbnail | null>(null)
   const photoRef = useRef(photo)
   photoRef.current = photo
+  const abortRef = useRef<AbortController | null>(null)
 
   const { mutate, reset, isPending, error, variables } = useMutation({
-    mutationFn: async ({ file, mode }: Job) => (mode === 'vin' ? readVin(file) : readPlate(file)),
+    mutationFn: async ({ file, mode }: Job) => {
+      abortRef.current = new AbortController()
+      const { signal } = abortRef.current
+      return mode === 'vin' ? readVin(file, signal) : readPlate(file, signal)
+    },
     onSuccess: data => {
       const top = data.values[0]
       if (!top) return
@@ -130,6 +135,8 @@ export function usePlateRecognition({ currentValue, linkedValue }: UsePlateRecog
   }
 
   const dismissPhoto = (): void => {
+    // Also drops a request still in flight, so a slow recognition can be skipped without reloading.
+    abortRef.current?.abort()
     // Stay on the current route; the URL is revoked after the fade-out so the image doesn't vanish mid-animation.
     const url = photoRef.current?.url
     if (url) setTimeout(() => URL.revokeObjectURL(url), DISMISS_REVOKE_MS)
