@@ -56,7 +56,7 @@ services:
     cap_drop: [ALL]
     security_opt: ['no-new-privileges:true']
     mem_limit: 1536m
-    cpus: 1.5
+    cpus: 3 # of 6 (Cloud VPS 6); ONNX Runtime sizes its thread pool from the host cores, so a low quota throttles it
     logging: *logging
 
   postgres:
