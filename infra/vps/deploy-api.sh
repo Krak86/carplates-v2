@@ -22,8 +22,10 @@ docker compose pull "api-$NEW"
 # Stateful services first (no-ops when already up). `up -d` never recreates them unless their definition changed.
 docker compose up -d postgres alpr caddy
 
+# The workflow pipes this script into `bash -s`, so bash reads it from stdin: any command that also reads stdin eats the rest
+# of the script and bash exits 0 early. Hence </dev/null on every docker call that could attach stdin.
 echo "migrating…"
-docker compose run --rm --no-deps -T "api-$NEW" node node_modules/@carplates/db/dist/migrate.js
+docker compose run --rm --no-deps -T "api-$NEW" node node_modules/@carplates/db/dist/migrate.js </dev/null
 
 docker compose up -d --no-deps "api-$NEW"
 cid="$(docker compose ps -q "api-$NEW")"
@@ -44,7 +46,7 @@ sleep 6
 [ "$OLD" = none ] || docker compose stop "api-$OLD"
 
 # Pick up Caddyfile / maintenance.html changes (the files were rsynced with --inplace so the bind mounts see them).
-docker compose exec -T caddy caddy reload --config /etc/caddy/Caddyfile >/dev/null
+docker compose exec -T caddy caddy reload --config /etc/caddy/Caddyfile >/dev/null </dev/null
 
 docker image prune -f >/dev/null
 echo "api-$NEW is live ($TAG)"
