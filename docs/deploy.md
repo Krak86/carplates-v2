@@ -222,7 +222,7 @@ Registry data lost with the full dumps: re-ingest from `archive/` ZIPs (`backup.
    (ALPR), Maps key restricted to the `carsua.app` referrer, Disqus.
 7. **Secrets hygiene.** Dev values were visible in screenshots/chat during the first deploy: rotate `POSTHOG_PERSONAL_API_KEY` and any other key you consider exposed.
    The production `AUTH_SECRET` and `POSTGRES_PASSWORD` are separate from the dev ones. Optional secrets still unset: `SENTRY_DSN` (only `VITE_SENTRY_DSN` is set, so
-   server errors are not tracked), `PLATE_RECOGNIZER_CLOUD_TOKEN`, `TURNSTILE_*`.
+   server errors are not tracked), `PLATE_RECOGNIZER_CLOUD_TOKEN`. `TURNSTILE_*` is set (2026-10-27).
 8. Housekeeping: 6 open Dependabot PRs; a Contabo snapshot once the site is stable; a Telegram `@WebpageBot` / X card-validator refresh of the old text-less preview.
 
 ### Longer term

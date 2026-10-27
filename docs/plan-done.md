@@ -3506,7 +3506,13 @@ Verified from outside: `/healthz` `{"status":"ok","db":"up"}` in ~0.2 s, `/`, `/
 
 **Measured:** dump 1.28 GB for 24.7M rows (tables 14.3 GB incl. indexes + 8.9 GB matview on disk; indexes and matviews are rebuilt on restore), upload 43 s, restore with `-j 4` about an hour, the last step (`REFRESH MATERIALIZED VIEW registry.current_registration`) alone over 42 min. VPS DB 21 GB vs 23 GB local. `registrations` 24721694, `current_registration` 16723888, `app.users` 2 on both sides; restore log had 0 errors; the migrator reported "up to date" on the restored DB.
 
-**Open (ordered list with the concrete steps: `docs/deploy.md` "Still open"):** R2 backups and a restore test, SSH hardening check, UptimeRobot on `/healthz`, Cloudflare settings and security checklist §7, browser smoke test (login, mail, VIN, camera), secrets rotation, `ingest-cron` (monthly delta ingest and `ingest:wanted` are manual on the VPS until then), CSP is Report-Only, Lighthouse on the VPS.
+**Follow-up the same day (R2 backups, SSH, Turnstile):**
+
+- R2 backups: bucket `carsua-backups` + object-scoped Account API token. The first upload failed with 403 AccessDenied: rclone checks/creates the bucket before uploading and a bucket-scoped token may not. Fix `RCLONE_CONFIG_R2_NO_CHECK_BUCKET=true`, written to `backup.env` by `deploy-api`. A `501 NotImplemented` on attempt 1 then success on attempt 2 is normal. Verified: nightly dump (8.6 MB) restored into a scratch `postgres:18.6` (create schemas `app` + `registry` first; 9 + 6 tables), full dump (1.28 GB, ~10 min to create) passes `pg_restore --list` (68 `TABLE DATA`). Restore runbook added to `docs/deploy.md` "Restore from R2" (nightly-over-full path not yet tested on a populated DB).
+- SSH: password login was still on. sshd keeps the first value it reads and the provider's `50-cloud-init.conf` loaded before `99-carsua.conf`. Renamed to `00-carsua.conf` (`bootstrap.sh` writes that name), reloaded; `ssh -o PubkeyAuthentication=no -o PreferredAuthentications=password` is now refused. `deploy` has no sudo, so the root edit went through the `docker` group (privileged container + `nsenter`).
+- Turnstile widget created and `TURNSTILE_SITE_KEY` / `TURNSTILE_SECRET_KEY` set.
+
+**Open (ordered list with the concrete steps: `docs/deploy.md` "Still open"):** confirm the 03:30 nightly cron + healthcheck, `backup.sh archive`, UptimeRobot on `/healthz`, Cloudflare settings and security checklist §7, browser smoke test (login, mail, VIN, camera), secrets rotation, `ingest-cron` (monthly delta ingest and `ingest:wanted` are manual on the VPS until then), CSP is Report-Only, Lighthouse on the VPS.
 
 ## Own ALPR: letter set re-measured (2026-10-26)
 
