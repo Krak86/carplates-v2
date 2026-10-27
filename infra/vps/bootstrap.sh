@@ -32,7 +32,9 @@ chown deploy:deploy /home/deploy/.ssh/authorized_keys
 chmod 600 /home/deploy/.ssh/authorized_keys
 
 # --- SSH hardening ---
-cat > /etc/ssh/sshd_config.d/99-carsua.conf <<'EOF'
+# 00- so it is read first: sshd keeps the first value, and a provider file (50-cloud-init.conf: PasswordAuthentication yes) would win over 99-.
+rm -f /etc/ssh/sshd_config.d/99-carsua.conf
+cat > /etc/ssh/sshd_config.d/00-carsua.conf <<'EOF'
 PermitRootLogin no
 PasswordAuthentication no
 KbdInteractiveAuthentication no

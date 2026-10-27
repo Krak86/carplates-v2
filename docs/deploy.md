@@ -207,10 +207,12 @@ Registry data lost with the full dumps: re-ingest from `archive/` ZIPs (`backup.
    by `deploy-api`), else uploads fail with 403 AccessDenied. A `501 NotImplemented` on attempt 1 followed by success on attempt 2 is normal. A full dump takes
    ~10 min; run it under `nohup`. Still to do: confirm the 03:30 cron run + healthchecks.io check, `backup.sh archive` (source ZIPs), and delete the old local
    `C:\tmp\carsua.dump` once comfortable.
-2. **SSH hardening was never verified.** `bootstrap.sh` writes `sshd_config.d/99-carsua.conf`, but sshd takes the first value it finds, so a provider file
-   (e.g. `50-cloud-init.conf` with `PasswordAuthentication yes`) would win. `deploy` has no sudo password, so `sudo sshd -T` fails; check with
-   `grep -ri passwordauthentication /etc/ssh/sshd_config.d/ /etc/ssh/sshd_config` and by trying `ssh -o PubkeyAuthentication=no deploy@<ip>` (must be refused).
-   If a provider file wins, fix `bootstrap.sh` (name the drop-in `00-carsua.conf`) and re-apply.
+2. ✅ **SSH hardening (fixed + verified 2026-10-27).** The check found the problem: sshd takes the first value it reads, `50-cloud-init.conf` (unreadable by
+   `deploy`) beat `99-carsua.conf`, and password login was on. Renamed the drop-in to `00-carsua.conf` (`bootstrap.sh` now writes that name) and reloaded sshd;
+   `ssh -o PubkeyAuthentication=no -o PreferredAuthentications=password deploy@<ip>` is now refused with no password prompt. Re-run that test after any sshd change.
+   `deploy` has no sudo (no password, no sudoers entry; only the `docker` group), so root edits go through the Contabo VNC console as root, or a privileged
+   container: `docker run --rm --privileged --pid=host alpine nsenter -t 1 -m -u -n -i sh -c '/usr/sbin/sshd -t && systemctl reload ssh'` (the `docker` group is
+   effectively root).
 3. **UptimeRobot** (free, 5 min) on `https://carsua.app/healthz`; one healthchecks.io check per future cron job.
 4. **Cloudflare settings not yet confirmed:** Always Use HTTPS, HTTP/3, Bot Fight Mode, the WAF rate-limit rule on `/api/plate*` + `/api/vin*`. DNSSEC was turned
    off at Squarespace for the nameserver move; optionally re-enable it in Cloudflare and add the DS record at Squarespace.
