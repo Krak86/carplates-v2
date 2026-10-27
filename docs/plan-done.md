@@ -3465,12 +3465,12 @@ Eval (88 photos, no labels): top read unchanged on 87; the one change is a junk 
 
 `eval.mjs --shrink` re-encodes each photo like `shrinkImage` (sharp: orient, fit in `SHRINK_MAX` px, JPEG `SHRINK_Q` stepping down by 15 to <= 2.5 MB), writes `results.shrink.json` and lists reads that differ from `results.json` plus the count of confident (>= 0.9) original reads lost. Measured on 90 photos:
 
-| max side, quality | confident reads lost |
-| --- | --- |
-| 3200, 85 (old web default) | 5 |
-| 3200, 95 | 4 |
-| 4608, 85 | 1 |
-| none, 85 | 1 |
+| max side, quality          | confident reads lost |
+| -------------------------- | -------------------- |
+| 3200, 85 (old web default) | 5                    |
+| 3200, 95                   | 4                    |
+| 4608, 85                   | 1                    |
+| none, 85                   | 1                    |
 
 The pixel cap, not the JPEG quality, costs the reads: 4000-4128 px phone photos lose `BC9779IX` (parking) and others. The single remaining loss is the wrong alternative `AI1930JA`. `MAX_DIMENSION` in `apps/web/src/lib/image.ts` is now 4608 (the 2.5 MB byte target and the API's 4 MB multipart limit are unchanged). sharp's encoder is not Chrome's, so confirm in the browser. Eval ground truth so far: `labels.csv` with `AB1918AB`, `AH4018AC`, `AI1920JA` = recall 3/3, 4 extra reads (`AH4078AC`, `3UK6`, `AI1930JA`, `AL1920JA`); total time 59 s, slowest photo 2.6 s.
 
