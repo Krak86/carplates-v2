@@ -418,6 +418,8 @@ Files: `apps/web/src/components/RiaCheckLink.tsx` (used by `NotFoundInfo` and th
 ## Releases page (`/releases`, 2026-10-15)
 
 - Public "What's new" log, one `ReleaseDay` per working day in `apps/web/src/routes/releases/releases.ts` (items tagged `new | improved | data | fix`, text in ua/ru/en). **After each big update add the day's entry (or extend today's).** Data is bundled in the lazy route chunk, not in `/api`.
+- **Header bell** (`NewsBell.tsx` + lazy `NewsBellPanel.tsx`): dot while `LATEST_RELEASE_DATE` (`releases/latest.ts`) is newer than the `carplates.releasesSeen` localStorage date (`lib/releases-seen.ts`); opening the bell or visiting `/releases` marks seen; first visit starts caught up. Per-browser by design (public site, no table). **When adding a new release day also bump `LATEST_RELEASE_DATE`** (a test fails otherwise).
+- **Lazy header popups** (bell, layers panel) render a same-footprint skeleton (`NewsBellSkeleton`, `LayersPanelSkeleton`) as the `Suspense` fallback; the bell loads on click only, the layers panel also prefetches on hover. The sidebar chunk is warmed 1.5 s after load (mobile main nav) - keep it.
 - The PWA update bar has "Update & see what's new": it sets the URL to `/releases` (`history.pushState`) and then runs the normal update, whose reload lands the new shell there. A hint under it says the changelog shows the latest entries only after the update (the waiting service worker keeps serving the old shell until then).
 
 ## Deploy & maintenance (2026-10-15)

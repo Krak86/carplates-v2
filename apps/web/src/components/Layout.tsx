@@ -10,6 +10,7 @@ import BrandLogo from '@/components/BrandLogo'
 import LayersButton from '@/components/LayersButton'
 import LoadErrorBoundary from '@/components/LoadErrorBoundary'
 import MaintenanceBanner from '@/components/MaintenanceBanner'
+import NewsBell from '@/components/NewsBell'
 import OfflineBanner from '@/components/OfflineBanner'
 import PwaUpdatePrompt from '@/components/PwaUpdatePrompt'
 import QuickLinks from '@/components/QuickLinks'
@@ -115,6 +116,7 @@ export default function Layout({ children }: Props): ReactNode {
           </span>
         )}
         <LayersButton />
+        <NewsBell />
         <LoginButton />
       </header>
 

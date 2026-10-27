@@ -2,6 +2,7 @@ import { Suspense, lazy, useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import LayersPanelSkeleton from '@/components/LayersPanelSkeleton'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 import { cn } from '@/lib/cn'
 
@@ -69,7 +70,7 @@ export default function LayersButton({ inSidebar = false }: Props): ReactNode {
 
       {open && (
         <div className={cn('absolute top-full pt-2', inSidebar ? 'inset-x-0 z-10 [&>div]:w-full' : 'right-0')}>
-          <Suspense fallback={null}>
+          <Suspense fallback={<LayersPanelSkeleton />}>
             <LayersPanel />
           </Suspense>
         </div>

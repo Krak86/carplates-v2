@@ -251,6 +251,7 @@ const FEATURES = [
   'guides',
   'stats',
   'news',
+  'whatsnew',
   'race',
   'account',
   'copy',

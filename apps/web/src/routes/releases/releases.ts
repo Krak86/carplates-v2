@@ -12,9 +12,21 @@ export const RELEASES: readonly ReleaseDay[] = [
     items: [
       item(
         'new',
+        'Дзвінок у шапці: крапка, коли є нові оновлення, і список останніх змін зі посиланням на «Що нового»',
+        'Колокольчик в шапке: точка, когда есть новые обновления, и список последних изменений со ссылкой на «Что нового»',
+        'A bell in the header: a dot when there are new updates, with a dropdown of the latest changes linking to What’s new'
+      ),
+      item(
+        'new',
         'Новини: показано, коли їх востаннє оновлено, - на сторінці /news та в розділі новин картки авто; на /wanted - дату оновлення списку поліції',
         'Новости: показано, когда они обновлялись в последний раз, - на странице /news и в разделе новостей карточки авто; на /wanted - дата обновления списка полиции',
         'News: shows when it was last updated - on /news and in the result card News section; /wanted shows the police list refresh date'
+      ),
+      item(
+        'improved',
+        'Панель шарів фону та дзвінок оновлень показують скелетон, поки завантажуються',
+        'Панель слоёв фона и колокольчик обновлений показывают скелетон, пока загружаются',
+        'The background-layers panel and the updates bell show a skeleton while they load'
       ),
       item(
         'improved',
