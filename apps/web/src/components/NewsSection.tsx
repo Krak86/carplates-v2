@@ -10,6 +10,7 @@ import SectionCount from '@/components/SectionCount'
 import SectionInfo from '@/components/SectionInfo'
 import ShareButton from '@/components/ShareButton'
 import { cn } from '@/lib/cn'
+import { toIntlLocale } from '@/lib/intl'
 import { newsLangFilter } from '@/lib/news'
 import { newsQuery } from '@/lib/queries'
 import { scrollElementIntoView } from '@/lib/share-section'
@@ -83,7 +84,11 @@ export default function NewsSection({ brand, model, year }: Props): ReactNode {
               <>
                 <NewsGroups items={items} brand={brand} horizontal decorative={!open} />
 
-                <p className="text-sm text-[var(--color-muted)]">{t('news.disclaimer')}</p>
+                <p className="text-sm text-[var(--color-muted)]">
+                  {t('news.disclaimer')}
+                  {news.data?.updatedAt &&
+                    ` ${t('news.updatedAt', { date: new Date(news.data.updatedAt).toLocaleString(toIntlLocale(i18n.language)) })}`}
+                </p>
               </>
             )}
           </div>

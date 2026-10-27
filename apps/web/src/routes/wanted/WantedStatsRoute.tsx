@@ -92,6 +92,14 @@ export default function WantedStatsRoute(): ReactNode {
             {t('wanted.stats.historySince', { date: summary.historySince.slice(0, 10) })}
           </p>
         )}
+
+        {data && (
+          <p className="inline-block rounded bg-[var(--color-bg)]/85 px-2 py-1 text-sm text-[var(--color-muted)] backdrop-blur-sm">
+            {data.checkedAt
+              ? t('wanted.checkedAt', { date: new Date(data.checkedAt).toLocaleString(toIntlLocale(i18n.language)) })
+              : t('wanted.neverLoaded')}
+          </p>
+        )}
       </div>
 
       {!online && (

@@ -675,6 +675,7 @@
   "news.latest": "Latest auto news",
   "news.opensNewTab": "opens the article on the source site",
   "news.disclaimer": "Headlines link to the original sites, matched by make and model from the title.",
+  "news.updatedAt": "News last updated: {{date}}",
   "news.show": "Show news",
   "news.hide": "Hide news",
   "news.newModel": "New model: {{title}}",
