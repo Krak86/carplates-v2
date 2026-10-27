@@ -444,3 +444,10 @@ Files: migration 0075, `packages/shared/src/origin.ts` (own file, no offline-cac
 - **Import wording:** the registry says only "from abroad" with no country, so the Ukraine step shows "imported" / "registered", never a source country.
 - **Stats panel (`/stats`, `OriginStatsPanel`):** passenger cars by brand home country and by VIN assembly country, from the rollup `stats_origin` (migration 0076, `pnpm db:refresh-origin-stats`, part of `db:refresh-derived`; re-run after `ingest:brand-origin` / `ingest:wmi`). Same period rules as the VIN page (`pickByYear` + `countryAtYear` by model year; Soviet-built = USSR). Unknown brand or non-standard VIN counts under "unknown", never guessed. `GET /api/stats/origin`, online-only.
 - **A VIN with no brand** (no registry match and no NHTSA Make) shows no chip or section; there is no WMI-only brand fallback.
+
+## Claude Code mod: Token Weather (2026-10-27)
+
+- **Dev tooling, not an app feature.** `.claude/mods/token-weather/` is a self-contained Claude Code plugin (context-window forecast band above the prompt); the app never imports it. Excluded from ESLint (`.claude/mods/**`), outside the pnpm workspace. Shows in the terminal CLI and the VS Code panel.
+- **Enable (once per machine):** Manage plugins -> Marketplaces -> add the folder path `<repo>\.claude\mods\token-weather` (marketplace `local-mods`), then Plugins -> install `token-weather@local-mods`. Settings-file entries (`extraKnownMarketplaces` / `enabledPlugins`) did not register it. It loads from the folder in place, so edits apply on the next session.
+- **Copy to another project:** copy the folder, then repeat the enable step. Options (`enabled`, `showSparkline`, `showStartupNotice`) are in the plugin's settings.
+- **Authoring rule:** the engine rejects the whole module if `$` is passed to a function that is not declared at the top level of `register.tsx` (helpers taking `$` must be top-level). Failures show as `token-weather: ... module did not load` in `claude --debug`; the log path is printed at startup.

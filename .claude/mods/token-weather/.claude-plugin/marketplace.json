@@ -1,0 +1,5 @@
+{
+  "name": "local-mods",
+  "owner": { "name": "Ruslan Korkin" },
+  "plugins": [{ "name": "token-weather", "source": "./" }]
+}

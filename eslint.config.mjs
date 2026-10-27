@@ -26,6 +26,7 @@ export default tseslint.config(
       '**/coverage/**',
       '**/.vite/**',
       'eslint-rules/**',
+      '.claude/mods/**',
       'services/alpr/eval.mjs',
       'services/alpr/eval/**',
       'infra/db/migrations/**'
