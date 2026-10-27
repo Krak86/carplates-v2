@@ -1,9 +1,11 @@
 # Deploying to the VPS
 
-Status (2026-10-15): everything below is **written and locally tested, but never run on a real VPS**. Tested locally: api image builds,
-boots, migrates; ALPR image runs hardened (non-root, read-only, no caps); Caddyfile + compose run as a stack (h2, zstd, headers, blue/green
-switch with zero non-200s, outage page/JSON, maintenance flag); `deploy-web.sh` against a Linux container; workflows pass `actionlint`.
-Not testable here: real SSH deploys, Cloudflare, R2, `pg_restore` of the real DB, HTTP/3 through Cloudflare.
+Status (2026-10-27): **first real deploy done** on a Contabo Cloud VPS 6 behind Cloudflare (Full strict + origin certificate): bootstrap, `deploy-api`,
+`deploy-alpr`, `deploy-web`, a verified `pg_restore` of the real DB (row counts equal local) and a live `https://carsua.app` (healthz, sitemap,
+robots, plate API all 200; HTTP/3 advertised). The runbook below is corrected from that run; the problems found are in `docs/plan-done.md`
+"First VPS deploy". **Not yet done:** R2 backups + a restore test, UptimeRobot, the security gate (§7), `ingest-cron`.
+Deploy scripts run via `ssh vps bash -s < script`, so bash reads the script from stdin: every `docker` call in them that could attach stdin needs
+`</dev/null`, or it swallows the rest of the script and bash exits 0 early (this made `deploy-api` report success without starting the api).
 
 This file is the single VPS reference: sizing/provider/DNS, architecture, runbook, secrets, backups, and the HTTP/2-3 + compression notes (last
 section). Task checklists and the rate-limit policy stay in [PLAN.md "Phase 4"](../PLAN.md); the pre-deploy security gate is

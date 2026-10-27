@@ -871,7 +871,7 @@ VPS sizing, provider shortlist (Contabo Cloud VPS 6), static IP and DNS: [docs/d
 - Prod `docker-compose`: Caddy (auto-TLS + **coarse per-IP rate limit**, see
   below) · Redis (RIA + VIN cache, throttler store) · api · web · ingest-cron
 - ✅ Deploy tooling written 2026-10-15 (api/alpr Dockerfiles, `infra/docker-compose.prod.yml` + Caddyfile + maintenance page, blue/green api deploy,
-  web symlink releases, 3 path-filtered GitHub workflows, bootstrap + backup scripts, web maintenance banner) — **not yet run on a real VPS**.
+  web symlink releases, 3 path-filtered GitHub workflows, bootstrap + backup scripts, web maintenance banner) — ✅ **first real VPS deploy done 2026-10-27** (`docs/plan-done.md` "First VPS deploy"); R2 backups, UptimeRobot and the security gate are still open.
   Runbook, secrets list and what is still open: [docs/deploy.md](docs/deploy.md). Still to build: `ingest-cron` image + `run-job.ts` (SCHEDULE.md), Redis throttler store.
 - Monthly CKAN ingest cron on the VPS (`ingest.ts`, self-checks `ingested_resources`)
 - ✅ OG image endpoint — done 2026-10-01 (plate **and** VIN, `resvg-js` + bundled Noto Sans, never
