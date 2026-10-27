@@ -15,7 +15,8 @@ import { RegistryRankService } from './registry-rank.service.js'
 import type { PlateReaderResponse, UploadedImage } from './recognize.types.js'
 
 const ACCEPTED_MIME = new Set(['image/jpeg', 'image/png', 'image/webp'])
-const UPSTREAM_TIMEOUT_MS = 10_000
+// Tiled multi-crop inference on the VPS's 1.5 CPUs can take well over 10 s; stays under the 60 s requestTimeout in main.ts.
+const UPSTREAM_TIMEOUT_MS = 40_000
 
 /**
  * Own-model ALPR (services/alpr, `pnpm alpr:up`) — self-hosted, no token, no

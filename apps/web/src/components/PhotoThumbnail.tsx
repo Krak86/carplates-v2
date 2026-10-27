@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { PlateCandidate } from '@carplates/shared'
@@ -10,12 +10,26 @@ type Props = {
   url: string
   candidates: PlateCandidate[]
   active: string | null
+  /** True while the recognition request is in flight; a skip button appears if it drags on. */
+  pending?: boolean
   onClose: () => void
 }
 
-export default function PhotoThumbnail({ url, candidates, active, onClose }: Props): ReactNode {
+const SKIP_AFTER_MS = 8000
+
+export default function PhotoThumbnail({ url, candidates, active, pending = false, onClose }: Props): ReactNode {
   const { t } = useTranslation()
   const [zoomed, setZoomed] = useState(false)
+  const [slow, setSlow] = useState(false)
+
+  useEffect(() => {
+    if (!pending) return
+    const timer = setTimeout(() => setSlow(true), SKIP_AFTER_MS)
+    return (): void => {
+      clearTimeout(timer)
+      setSlow(false)
+    }
+  }, [pending])
 
   return (
     <div className="relative w-full max-w-content">
@@ -41,6 +55,16 @@ export default function PhotoThumbnail({ url, candidates, active, onClose }: Pro
       >
         ✕
       </button>
+
+      {pending && slow && (
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute bottom-2 left-2 rounded-full bg-black/70 px-3 py-1 text-xs font-medium text-white hover:bg-black/90"
+        >
+          {t('photo.skip')}
+        </button>
+      )}
 
       {zoomed && <PhotoZoomDialog url={url} candidates={candidates} active={active} onClose={() => setZoomed(false)} />}
     </div>

@@ -9,10 +9,11 @@ import { SEARCH_BUTTON_CLASS, SEARCH_BUTTON_ICON_CLASS } from '@/components/sear
 const ArCameraDialog = lazy(() => import('@/components/ArCameraDialog'))
 
 type Props = {
+  isPending?: boolean
   disabled?: boolean
 }
 
-export default function ArSearchButton({ disabled = false }: Props): ReactNode {
+export default function ArSearchButton({ isPending = false, disabled = false }: Props): ReactNode {
   const { t } = useTranslation()
   // The open state lives in the URL (`?section=ar`), so the scanner is a shareable link and survives a reload.
   const [searchParams, setSearchParams] = useSearchParams()
@@ -47,7 +48,7 @@ export default function ArSearchButton({ disabled = false }: Props): ReactNode {
       <button
         type="button"
         onClick={handleOpen}
-        disabled={disabled}
+        disabled={isPending || disabled}
         title={disabled ? t('offline.needsConnection') : undefined}
         className={SEARCH_BUTTON_CLASS}
       >
