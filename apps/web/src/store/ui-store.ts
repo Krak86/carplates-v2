@@ -61,7 +61,28 @@ type Font = (typeof FONTS)[number]
 
 const FONT_STORAGE_KEY = 'carplates.font'
 
+export const FONT_PARAM = 'font'
+const DEFAULT_FONT: Font = 'system'
+
+/** `?font=` on a shared link wins for that visit; like `?lang=` it is not persisted (see `toggleFont`). */
+function fontFromUrl(): Font | null {
+  try {
+    const fromUrl = new URLSearchParams(window.location.search).get(FONT_PARAM)
+    return FONTS.find(f => f === fromUrl) ?? null
+  } catch {
+    return null
+  }
+}
+
+/** Adds the sharer's font to a share link's params, only when it isn't the default. */
+export function setFontParam(params: URLSearchParams): void {
+  const { font } = useUiStore.getState()
+  if (font !== DEFAULT_FONT) params.set(FONT_PARAM, font)
+}
+
 function initialFont(): Font {
+  const fromUrl = fontFromUrl()
+  if (fromUrl) return fromUrl
   try {
     const saved = localStorage.getItem(FONT_STORAGE_KEY)
     if (FONTS.some(f => f === saved)) return saved as Font
@@ -142,6 +163,13 @@ export const useUiStore = create<UiState>((set, get) => ({
         localStorage.setItem(FONT_STORAGE_KEY, font)
       } catch {
         /* private mode / disabled storage */
+      }
+      // An explicit choice replaces a shared link's ?font=, so a reload doesn't snap back to it.
+      const url = new URL(window.location.href)
+      if (url.searchParams.has(FONT_PARAM)) {
+        if (font === DEFAULT_FONT) url.searchParams.delete(FONT_PARAM)
+        else url.searchParams.set(FONT_PARAM, font)
+        window.history.replaceState(window.history.state, '', url)
       }
       return { font }
     }),

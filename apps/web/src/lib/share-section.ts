@@ -1,4 +1,5 @@
 import i18n from '@/i18n'
+import { setFontParam } from '@/store/ui-store'
 
 export const SHARE_SECTIONS = [
   'verification',
@@ -38,6 +39,7 @@ export function buildShareUrl(section: ShareSection, tab?: string): string {
   params.set('section', section)
   if (tab) params.set('tab', tab)
   params.set('lang', i18n.language)
+  setFontParam(params)
   return `${window.location.origin}${window.location.pathname}?${params.toString()}`
 }
 
