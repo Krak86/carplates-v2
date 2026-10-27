@@ -31,9 +31,7 @@ const CACHE_FALLBACK = 'public, max-age=300'
 export class OgController {
   private readonly env = loadEnv()
   private readonly assetsDir = this.env.WEB_DIST_DIR ? resolve(this.env.WEB_DIST_DIR) : DEV_PUBLIC_DIR
-  private readonly fontFiles = ['NotoSans-Regular.ttf', 'NotoSans-Bold.ttf']
-    .map(f => join(this.assetsDir, 'fonts', f))
-    .filter(existsSync)
+  private fontFilesFound: string[] = []
   private readonly pngCache = new Lru<Buffer>(PNG_CACHE_MAX)
 
   constructor(@Inject(PreviewService) private readonly previews: PreviewService) {}
@@ -50,15 +48,27 @@ export class OgController {
     const preview = isDefault ? null : await this.previews.describe(key, lang)
 
     const cacheKey = `${lang}:${preview ? preview.value : 'default'}`
+    const fontFiles = this.fontFiles()
     let png = this.pngCache.get(cacheKey)
     if (!png) {
-      png = renderPng(this.svgFor(preview, lang), this.fontFiles)
-      this.pngCache.set(cacheKey, png)
+      png = renderPng(this.svgFor(preview, lang), fontFiles)
+      // A card rendered without fonts has no text: never keep it in memory or let the edge cache it for a day.
+      if (fontFiles.length > 0) this.pngCache.set(cacheKey, png)
     }
     reply
       .type('image/png')
-      .header('cache-control', preview || isDefault ? CACHE_OK : CACHE_FALLBACK)
+      .header('cache-control', (preview || isDefault) && fontFiles.length > 0 ? CACHE_OK : CACHE_FALLBACK)
       .send(png)
+  }
+
+  /** Looked up on demand, not at boot: on a first deploy the api can start before the web build (`fonts/`) exists. */
+  private fontFiles(): string[] {
+    if (this.fontFilesFound.length === 0) {
+      this.fontFilesFound = ['NotoSans-Regular.ttf', 'NotoSans-Bold.ttf']
+        .map(f => join(this.assetsDir, 'fonts', f))
+        .filter(existsSync)
+    }
+    return this.fontFilesFound
   }
 
   private svgFor(preview: Awaited<ReturnType<PreviewService['describe']>>, lang: Lang): string {

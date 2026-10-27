@@ -3486,6 +3486,27 @@ OCR cannot settle an ambiguous glyph (`BX5213BO` vs `BX5215BO`), the registry ca
 
 `/recognize` and `/recognize/vin` were `async def` around CPU-bound inference, so one upload held the event loop and the rest queued: 3 simultaneous uploads of `20151209_132029.jpg` took 3.0 / 6.1 / 9.4 s (the API times out at 10 s). They are now plain `def` (FastAPI's threadpool; `_read_capped` reads `image.file` synchronously). Same test after: 6.5 / 5.7 / 6.5 s wall, identical reads, `/healthz` stays at ~10-30 ms. Sequential eval over 90 photos: every read and score identical, total 53.2 s (was 59.4 s), slowest 2.4 s. The gain is limited because the requests share one CPU and ONNX's own threads; multiple uvicorn workers were not tried (each would load the models again). Thread safety of the shared models is only evidenced by the identical reads under three parallel uploads.
 
+## First VPS deploy (2026-10-27)
+
+Contabo Cloud VPS 6 (EU, Ubuntu 24.04, no Contabo backup add-on), DNS on Cloudflare (Full strict, origin certificate, HTTP/3, DNSSEC turned off at
+Squarespace before the nameserver change; Cloudflare was active within minutes), Resend domain verified through its Cloudflare auto-configure. Order that worked:
+`bootstrap.sh` as root, GitHub Environment `production` (secrets + variables), `deploy-api` with `sync_only`, `deploy-alpr`, DB copy, `deploy-api`, `deploy-web`.
+Verified from outside: `/healthz` `{"status":"ok","db":"up"}` in ~0.2 s, `/`, `/sitemap.xml`, `/robots.txt`, `/api/plate/*` all 200, `alt-svc: h3`.
+
+**Problems found, all fixed in `docs/deploy.md`:**
+
+- `deploy-alpr` before `deploy-api` fails: its deploy step needs `docker-compose.prod.yml`, which only `deploy-api` delivers. Order is `deploy-api` (`sync_only`) first. Both `carsua-*` packages must be Public before the VPS can pull.
+- Merging to `main` starts the path-filtered deploys at once, and `deploy-api` without `sync_only` would migrate the empty DB before the restore. Merge with `[skip ci]` until the data is in.
+- The `ci` job gates `deploy-api`: `prettier --check` failed on `docs/plan-done.md` and `pnpm audit --prod --audit-level=high` on `undici` 7.29.1 (via `scripts > cheerio`). Fixed with an `overrides` floor (`undici@>=7.18.0 <7.30.1: ^7.30.1`) in `pnpm-workspace.yaml`.
+- Windows dump: `pg_dump … > file` in PowerShell re-encodes the binary. Dump inside the container (`-f`), then `docker cp`. In Git Bash the container path needs `//tmp/…` (else rewritten to a Windows path); `docker cp` produced `carsua.dumpcarsua.dump`.
+- The documented `pg_restore -j 4 … < dump` cannot work (parallel restore does not read stdin) and the backups folder is not mounted in the container: copy the dump in with `docker compose cp`, run detached with `nohup`. `ALTER ROLE` is not needed (`pg_dump` carries no roles).
+- A "finished" check built on `docker compose exec … || echo finished` printed "finished" while `COMPOSE_FILE` was unset in a new SSH session and the restore was still building indexes. Done = no `pg_restore` process **and** no active `REFRESH MATERIALIZED VIEW`.
+- `deploy-api.sh` ran as `bash -s` from stdin; `docker compose run -T … migrate.js` consumed the rest of the script, so the step passed with no api container (Caddy: `lookup api-blue … server misbehaving`, public health check timed out). Fixed with `</dev/null` on the migrate run and the caddy reload.
+
+**Measured:** dump 1.28 GB for 24.7M rows (tables 14.3 GB incl. indexes + 8.9 GB matview on disk; indexes and matviews are rebuilt on restore), upload 43 s, restore with `-j 4` about an hour, the last step (`REFRESH MATERIALIZED VIEW registry.current_registration`) alone over 42 min. VPS DB 21 GB vs 23 GB local. `registrations` 24721694, `current_registration` 16723888, `app.users` 2 on both sides; restore log had 0 errors; the migrator reported "up to date" on the restored DB.
+
+**Open:** backups to R2 and a restore test, UptimeRobot on `/healthz`, security checklist §7, `ingest-cron` (monthly delta ingest and `ingest:wanted` are manual on the VPS until then), CSP is Report-Only, Lighthouse on the VPS.
+
 ## Own ALPR: letter set re-measured (2026-10-26)
 
 `PLATE_LETTERS` in `services/alpr/app.py` was measured on a 2% sample. Re-measured over all 24.2M 8-character plates in `registry.registrations` (24.7M rows, read-only): the 12 Cyrillic look-alikes dominate (А 20.9M … Р 3.6M); Latin Y 389k, J 303k, F 240k, D 133k, G 80k, Z 62k; L 10.5k, U 5.6k, N 3.8k, S 2.1k, R 1.6k, V 1.5k, Q 0.5k (L is 0.04% of plates). Same 18-letter set, unchanged. Not done: sharing the set with TypeScript. `isUaPlate` accepts any Latin letter and `repairOcrPlate` maps `5`->`S`; the own ALPR constrains letter slots itself, so it never sends that case, and the ALPR build context (`services/alpr`) cannot import `packages/shared` without a copied file.
