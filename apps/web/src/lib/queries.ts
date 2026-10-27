@@ -37,6 +37,7 @@ import {
   getNhtsaComplaints,
   getNhtsaRecalls,
   getRdwRecalls,
+  getOrigin,
   getVdb,
   getVdbStats,
   getFuelStats,
@@ -56,6 +57,7 @@ import {
   getStatsField,
   getEvStats,
   getImportsStats,
+  getOriginStats,
   getSizeModels,
   getStatsDistribution,
   getStatsTop,
@@ -73,7 +75,7 @@ import {
   suggestBrands,
   suggestModels
 } from '@/lib/api'
-import type { FuelEconomyParams, VehicleSearchFilters } from '@/lib/api'
+import type { FuelEconomyParams, OriginParams, VehicleSearchFilters } from '@/lib/api'
 import { isFavorited, listFavorites } from '@/lib/favorites-db'
 import type { FavoriteKind } from '@/lib/favorites-db'
 import { listVisits } from '@/lib/history-db'
@@ -195,6 +197,10 @@ export function importsStatsQuery() {
   return queryOptions({ queryKey: ['stats', 'imports'], queryFn: getImportsStats, staleTime: Infinity })
 }
 
+export function originStatsQuery() {
+  return queryOptions({ queryKey: ['stats', 'origin'], queryFn: getOriginStats, staleTime: Infinity })
+}
+
 // One dimension's breakdown for a ResultCard "?" popover — a few dozen rows.
 export function statsFieldQuery(dimension: StatsFieldDimension) {
   return queryOptions({
@@ -310,6 +316,22 @@ export function vdbQuery(brand: string, model: string, kind?: string | null) {
   return queryOptions({
     queryKey: ['vdb', brand, model, kind ?? null],
     queryFn: () => getVdb(brand, model, kind),
+    staleTime: Infinity
+  })
+}
+
+// Brand origin (Wikidata + NHTSA WMI, pnpm ingest:brand-origin) — persisted reference data, cached offline like vdb.
+export function originQuery(params: OriginParams) {
+  return queryOptions({
+    queryKey: [
+      'origin',
+      params.brand,
+      params.model ?? null,
+      params.year ?? null,
+      params.vin ?? null,
+      params.plantCountry ?? null
+    ],
+    queryFn: () => getOrigin(params),
     staleTime: Infinity
   })
 }

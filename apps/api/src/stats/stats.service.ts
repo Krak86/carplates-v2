@@ -17,6 +17,7 @@ import {
   statsByKind,
   statsModelGrouped,
   statsByOrigin,
+  statsOrigin,
   statsByRegion,
   statsByRegionYear,
   statsByYear,
@@ -33,6 +34,7 @@ import {
   evStatsResponseSchema,
   importsStatsResponseSchema,
   mergeBodyStats,
+  originStatsResponseSchema,
   sizeModelsResponseSchema,
   statsFieldResponseSchema,
   statsResponseSchema,
@@ -48,6 +50,7 @@ import type {
   EvStatsResponse,
   Histogram,
   ImportsStatsResponse,
+  OriginStatsResponse,
   SizeModelsResponse,
   StatsFieldDimension,
   StatsFieldResponse,
@@ -61,6 +64,7 @@ import type {
 import { DbService } from '../db/db.service.js'
 import { FuelStatsService } from '../fuel/fuel-stats.service.js'
 import { SafetyStatsService } from '../safety/safety-stats.service.js'
+import { foldOriginStats } from './stats-origin.js'
 
 // Leaderboard depth — must match MAX_TOP_N in apps/web/src/routes/stats/helpers.ts.
 const TOP_N = 10
@@ -189,6 +193,12 @@ export class StatsService {
         .slice(0, IMPORT_TOP_COUNTRIES),
       topModels: [...models.values()].sort((a, b) => b.n - a.n).slice(0, IMPORT_TOP_MODELS)
     })
+  }
+
+  /** Passenger cars by brand home country and VIN assembly country (a rollup rebuilt by `db:refresh-origin-stats`). */
+  async origin(): Promise<OriginStatsResponse> {
+    const rows = await this.dbService.db.select().from(statsOrigin)
+    return originStatsResponseSchema.parse(foldOriginStats(rows))
   }
 
   /** Per-model body + dimensions behind the /read explainers and the size explorer (a rollup rebuilt by `db:refresh-spec-stats`). */

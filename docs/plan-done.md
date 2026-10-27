@@ -3450,6 +3450,46 @@ figure**). Findings and fixes:
 - **Legacy-shape junk — fixed 2026-10-01.** `recognize.mapper.ts` drops a
   digits-first (`DDLLDDDD`) read scoring < 0.7 (`LEGACY_MIN_SCORE`).
 
+## Own ALPR: moped plates, constrained decoding, alternative reads (2026-10-26)
+
+Three user photos failed: a three-row moped plate (`AB 1918 AB`, steeply tilted, read as junk), `AH 4018 AC` (read `AH4078AC`), and a car plate `BX 5213 BO` (read `BX5215BU`). Fixes, all in `services/alpr/app.py` unless noted:
+
+- **Row-wise reader (`_read_rows`).** For near-square / tall boxes (width/height < 1.6) the general text OCR (RapidOCR, the VIN route's reader) reads each row on its own: crop scaled to a 400 px long side, the `UA` flag line dropped, rows sorted top to bottom, accepted only as `LLDDDDLL`. A box taller than wide also tries steep rotations (±30…85°). It runs **once per merged plate**, after the tiles are deduplicated. It replaces the plate OCR's read only when that read is weak (not 8 characters, or below 0.9) or the row read is more confident; the same text keeps the plate OCR's score.
+- **Constrained decoding (`_plate_ocr`).** The OCR's per-slot probabilities are re-picked within the slot's class once the shape (`LLDDDDLL`, `LLLLDDDD`, `DDLLDDDD`) is known: letters from `ABCEHIKMOPTXYJFDGZ`, digits from digits. The letter set is measured, not assumed: a 2% sample of `registry.registrations` has Y 7.7k, J 6k, F 4.9k, D 2.3k, G 1.6k, Z 1.2k and L/U/N/R/Q/V/S under 100 each. A first version with only the 12 Cyrillic look-alikes turned `AA2762YA` into `AA2762XA`. Fixes `BX5215BU` -> `BX5215BO` (the model had `U` 0.88 vs `O` 0.12).
+- **Alternative reads (`_alternatives`).** When variants disagree on one character (3/5 on a blurry plate), up to 2 other full-length reads that differ by exactly one character and score >= 0.55 are returned on the same box. They are clamped just below the primary's score, because the API sorts by score and opens the top one. The web groups equal boxes (`components/plate-groups.ts`): chips joined by a chain icon, numbered and colored per plate, matching the outline in the photo.
+- **Latency regression found on the way.** The first row reader ran per tile and enlarged crops 3x with 9 rotations: one 800 px false detection cost ~8.5 s x 7 tiles, the worst eval photo took 98 s and the API's 10 s upstream timeout showed "photo search failed". After the fix: median 0.64 s, max 2.6 s, 60 s for all 88 photos (baseline ~50 s). **Always time the eval (`results.json` has `ms`) after touching the pipeline**, and never run an eval while using the app: the service handles one image at a time.
+
+Eval (88 photos, no labels): top read unchanged on 87; the one change is a junk read the API repairs to the same plate. `BX5213BO` is not the primary for its photo (the OCR genuinely sees 3/5 as ambiguous at ~235 px); it is offered as the alternative.
+
+## Own ALPR: web upload resize (2026-10-26)
+
+`eval.mjs --shrink` re-encodes each photo like `shrinkImage` (sharp: orient, fit in `SHRINK_MAX` px, JPEG `SHRINK_Q` stepping down by 15 to <= 2.5 MB), writes `results.shrink.json` and lists reads that differ from `results.json` plus the count of confident (>= 0.9) original reads lost. Measured on 90 photos:
+
+| max side, quality | confident reads lost |
+| --- | --- |
+| 3200, 85 (old web default) | 5 |
+| 3200, 95 | 4 |
+| 4608, 85 | 1 |
+| none, 85 | 1 |
+
+The pixel cap, not the JPEG quality, costs the reads: 4000-4128 px phone photos lose `BC9779IX` (parking) and others. The single remaining loss is the wrong alternative `AI1930JA`. `MAX_DIMENSION` in `apps/web/src/lib/image.ts` is now 4608 (the 2.5 MB byte target and the API's 4 MB multipart limit are unchanged). sharp's encoder is not Chrome's, so confirm in the browser. Eval ground truth so far: `labels.csv` with `AB1918AB`, `AH4018AC`, `AI1920JA` = recall 3/3, 4 extra reads (`AH4078AC`, `3UK6`, `AI1930JA`, `AL1920JA`); total time 59 s, slowest photo 2.6 s.
+
+## Own ALPR: alternatives noise (2026-10-26)
+
+`_alternatives` in `services/alpr/app.py` took every one-character variant scoring >= 0.55, so a correct 0.987 read (`AH4018AC`) came with `AH4078AC` (0.943), and `AI1920JA` with `AI1930JA` / `AL1920JA`. Now, when the primary scores >= `ALT_CONFIDENT_SCORE` (0.97), an alternative more than `ALT_CONFIDENT_GAP` (0.03) behind it is dropped. A first version that dropped all alternatives behind a confident primary also removed `BT1372BK` (0.985 beside `BT1572BK` 0.986 on `20230221_105943.jpg`), a real near-tie, hence the gap. Eval (90 photos): 6 alternatives dropped, 0 added, no top read changed, recall 3/3 with extra reads 4 -> 1; total 59.4 s (was 59.2 s), slowest photo 2.9 s. Only 3 plates are labelled, so the 0.97/0.03 values are untuned; which of `BT1572BK` / `BT1372BK` is right is unknown.
+
+## Own ALPR: registry check of alternatives (2026-10-26)
+
+OCR cannot settle an ambiguous glyph (`BX5213BO` vs `BX5215BO`), the registry can. `LocalRecognizeService` now passes the mapped candidates through `RegistryRankService.rank` (`apps/api/src/recognize/registry-rank.service.ts`, pure logic in `registry-rank.ts`): only reads that share a box with another read are looked up (`selectDistinct plate … where plate in (…)` on `registry.registrations`); if a plate's best read is not registered and an alternative is, they swap scores inside the group, so the top candidate (the one the web opens) is the registered one. Both or neither registered: OCR order stays. A failing lookup logs a warning and keeps the OCR order. No schema change (a visible flag would need `schemas.ts`). Tests: `registry-rank.test.ts`; existing recognize tests pass a pass-through rank service. Not run against the real registry yet.
+
+## Own ALPR: concurrency (2026-10-26)
+
+`/recognize` and `/recognize/vin` were `async def` around CPU-bound inference, so one upload held the event loop and the rest queued: 3 simultaneous uploads of `20151209_132029.jpg` took 3.0 / 6.1 / 9.4 s (the API times out at 10 s). They are now plain `def` (FastAPI's threadpool; `_read_capped` reads `image.file` synchronously). Same test after: 6.5 / 5.7 / 6.5 s wall, identical reads, `/healthz` stays at ~10-30 ms. Sequential eval over 90 photos: every read and score identical, total 53.2 s (was 59.4 s), slowest 2.4 s. The gain is limited because the requests share one CPU and ONNX's own threads; multiple uvicorn workers were not tried (each would load the models again). Thread safety of the shared models is only evidenced by the identical reads under three parallel uploads.
+
+## Own ALPR: letter set re-measured (2026-10-26)
+
+`PLATE_LETTERS` in `services/alpr/app.py` was measured on a 2% sample. Re-measured over all 24.2M 8-character plates in `registry.registrations` (24.7M rows, read-only): the 12 Cyrillic look-alikes dominate (А 20.9M … Р 3.6M); Latin Y 389k, J 303k, F 240k, D 133k, G 80k, Z 62k; L 10.5k, U 5.6k, N 3.8k, S 2.1k, R 1.6k, V 1.5k, Q 0.5k (L is 0.04% of plates). Same 18-letter set, unchanged. Not done: sharing the set with TypeScript. `isUaPlate` accepts any Latin letter and `repairOcrPlate` maps `5`->`S`; the own ALPR constrains letter slots itself, so it never sends that case, and the ALPR build context (`services/alpr`) cannot import `packages/shared` without a copied file.
+
 ## infocar video crawl and YouTube fallback — run log and no-video model list (moved from PLAN.md, 2026-10-12)
 
 **Step 2a — infocar video crawl: done 2026-10-04; models with no video → YouTube fallback (ingest built 2026-10-05; daily runs + lookup/UI open).** Full crawl:
@@ -3796,3 +3836,13 @@ Each plate-card / VIN-page section now ends with a `ReadGuideLink` (pill, guide 
 ### Wanted vehicles: history, stats, `/wanted` (2026-10-17)
 
 The feed only shows who is wanted now, so found cars were backfilled from stolen.in.ua (Aug 2020 onward, `pnpm ingest:wanted-history`, resumable, seed CSVs via `ingest:wanted-history:csv` / `export:wanted-history:csv`). Migration 0074 adds `source`, `resolved_exact` and `region` (derived from the police unit); the card shows scraped records and "history since Aug 2020". `GET /api/wanted/stats` feeds the `/wanted` page (summary cards, by year / region / make / model / type / colour tables, region map, recently stolen / found lists) and a home teaser (`HomeWantedSection`: 5 newest stolen, link to the page). Links to `/wanted` from `WantedCheck`, `/stats` and `QuickLinks`. Conventions: `docs/features-reference.md` "Wanted vehicles"; step log: `WANTED_PLAN.md`.
+
+### Vehicle origin chip + "Where it comes from" section (2026-10-26)
+
+Shows where a car comes from, only when known: flags chip (brand country, owner when different, assembly plant) on the VIN and plate cards, and a `?section=origin` timeline (brand origin, ownership with years, assembly, Ukraine) with a brand-vs-VIN-prefix warning, a collapsed explainer, per-fact sources and an "as of" date. Built in steps 0-8 and 10-11 of `ORIGIN_PLAN.md`: migration 0075, Wikidata + NHTSA WMI ingests with overrides and seed CSVs (163 brands, 97.8 % of registry vehicles matched; 1152 WMIs), `GET /api/origin`, SVG flags incl. former states (USSR, Czechoslovakia, GDR, FRG, Yugoslavia, Serbia and Montenegro) chosen by model year, shared `Timeline`. Conventions: `docs/features-reference.md` "Vehicle origin". Release 2 added curated model plants (Step 3, 2026-10-26: `model-plants.csv`, `ingest:model-plants`, "also built in" filtered by year); the stats breakdown (Step 9) is still deferred. Open: legacy flags and light theme not eyeballed, no WMI-only brand fallback.
+
+**Stats breakdown (Step 9, 2026-10-26):** `/stats` panel "Where cars come from" - passenger cars by brand home country and by VIN assembly country, former states by model year. Rollup `registry.stats_origin` (migration 0076, `scripts/src/origin-stats.ts`, `db:refresh-origin-stats`, in `db:refresh-derived`), `GET /api/stats/origin`, `OriginStatsPanel`. Real DB: 13.37 M cars, brand country known for 99.7 %, plant country for 48 %; total and Skoda-from-1993 verified equal to direct SQL. `pickByYear` moved to `@carplates/shared`.
+
+### Racer, flags, verification and RIA polish (2026-10-25 / 26)
+
+Racer: smoke at 5 / 10 / 15 bumps and a wreck at 20, a 10 km test-drive end ("contact a real seller"), a photo backdrop for every region (`scripts/racer-render/region-backdrops.mjs`, credits in `docs/racer-backdrop-credits.md`), a backdrop chip that also sets the billboard region, and `RaceRegionSelect` with flags. Large region flag preview ("?" beside the region chip). Verification: OTK protocol and driving-licence links (opendata.hsc.gov.ua) and a "?" glossary on every row; ranking-chip tooltips lead with the vehicle count. AUTO.RIA link-out copies the plate / VIN first (shared auction modal). Carscoops reviews feed repointed. About: new features card entries (origin, OTK / licence, 10 km test drive), new sources (MVS HSC open data, flag-icons) and widened NHTSA / Wikidata / Wikimedia texts. Conventions: `docs/features-reference.md` "Test-drive racer", "Verification links and chip tooltips", "AUTO.RIA link-out".

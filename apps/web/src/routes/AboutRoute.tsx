@@ -59,6 +59,7 @@ const SOURCES: readonly Source[] = [
     url: 'https://data.gov.ua/dataset/2cd12755-834b-4c43-9026-fe356ce93af5',
     tile: 'bg-blue-700'
   },
+  { key: 'hsc', label: 'MVS HSC open data', url: 'https://opendata.hsc.gov.ua', tile: 'bg-blue-700' },
   { key: 'stolenIn', label: 'stolen.in.ua', url: 'https://stolen.in.ua', icon: '/icons/sources/stolenin.svg' },
   { key: 'bdr', label: 'MVS (bdr.mvs.gov.ua)', url: 'https://bdr.mvs.gov.ua', icon: '/icons/bdr.svg' },
   { key: 'mtsbu', label: 'MTSBU', url: 'https://policy.mtsbu.ua', icon: '/icons/sources/mtsbu.webp' },
@@ -66,6 +67,12 @@ const SOURCES: readonly Source[] = [
   // No logo: the site grants no reuse of its mark.
   { key: 'pdr', label: 'pdr.infotech.gov.ua', url: 'https://pdr.infotech.gov.ua', tile: 'bg-blue-700' },
   { key: 'drive2', label: 'DRIVE2', url: 'https://www.drive2.ru', icon: '/icons/drive2.png' },
+  {
+    key: 'flagIcons',
+    label: 'flag-icons',
+    url: 'https://github.com/lipis/flag-icons',
+    icon: '/icons/sources/github.webp'
+  },
   { key: 'osm', label: 'OpenStreetMap', url: 'https://www.openstreetmap.org', tile: 'bg-green-700' },
   { key: 'autoria', label: 'Auto.RIA / OLX', url: 'https://auto.ria.com', tile: 'bg-slate-500' },
   { key: 'infocar', label: 'infocar.ua', url: 'https://www.infocar.ua', icon: '/icons/infocar.png' },
@@ -152,6 +159,12 @@ const SOURCES: readonly Source[] = [
     url: 'https://huggingface.co/Helsinki-NLP',
     icon: '/icons/sources/huggingface.svg'
   },
+  {
+    key: 'fastAlpr',
+    label: 'fast-alpr / RapidOCR',
+    url: 'https://github.com/ankandrew/fast-alpr',
+    icon: '/icons/sources/github.webp'
+  },
   { key: 'youtube', label: 'YouTube', url: 'https://www.youtube.com', icon: '/icons/sources/youtube.webp' },
   {
     key: 'googleSignIn',
@@ -223,6 +236,7 @@ const FEATURES = [
   'lookup',
   'wanted',
   'vin',
+  'origin',
   'recognition',
   'advanced',
   'specs',

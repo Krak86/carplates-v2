@@ -10,13 +10,27 @@ type Props = {
   siteName: string
   url: string
   onClose: () => void
+  /** Overrides for non-VIN reuse (e.g. a plate): the copy label and the three texts. */
+  copyLabel?: string
+  title?: string
+  step1?: string
+  step2?: string
 }
 
 /**
  * Shown for auction sites that cannot take a VIN in the URL: the VIN to copy, a hint to paste it into the site's own
  * search box, and the link. Portaled — the result Card's 3D tilt transform would otherwise contain `position: fixed`.
  */
-export default function AuctionVinModal({ vin, siteName, url, onClose }: Props): ReactNode {
+export default function AuctionVinModal({
+  vin,
+  siteName,
+  url,
+  onClose,
+  copyLabel = 'VIN',
+  title,
+  step1,
+  step2
+}: Props): ReactNode {
   const { t } = useTranslation()
   const feedback = useCopyFeedback()
 
@@ -30,7 +44,7 @@ export default function AuctionVinModal({ vin, siteName, url, onClose }: Props):
     >
       <div className="w-full max-w-md rounded-xl bg-[var(--color-surface)] p-4" onClick={e => e.stopPropagation()}>
         <div className="mb-3 flex items-center justify-between gap-3">
-          <div className="font-semibold">{t('auctions.modal.title', { site: siteName })}</div>
+          <div className="font-semibold">{title ?? t('auctions.modal.title', { site: siteName })}</div>
           <button
             type="button"
             onClick={onClose}
@@ -41,13 +55,15 @@ export default function AuctionVinModal({ vin, siteName, url, onClose }: Props):
           </button>
         </div>
 
-        <p className="mb-2 text-sm text-[var(--color-muted)]">{t('auctions.modal.step1')}</p>
+        <p className="mb-2 text-sm text-[var(--color-muted)]">{step1 ?? t('auctions.modal.step1')}</p>
         <div className="mb-3 flex items-center justify-between gap-3 rounded-lg border border-[var(--color-border)] px-3 py-2">
           <code className="font-mono text-base break-all select-all">{vin}</code>
-          <CopyButton text={vin} label="VIN" feedback={feedback} />
+          <CopyButton text={vin} label={copyLabel} feedback={feedback} />
         </div>
 
-        <p className="mb-3 text-sm text-[var(--color-muted)]">{t('auctions.modal.step2', { site: siteName })}</p>
+        <p className="mb-3 text-sm text-[var(--color-muted)]">
+          {step2 ?? t('auctions.modal.step2', { site: siteName })}
+        </p>
 
         <a
           href={url}

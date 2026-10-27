@@ -5,6 +5,7 @@ import type { Registration } from '@carplates/shared'
 
 import CopyButton from '@/components/CopyButton'
 import InfoPopover from '@/components/InfoPopover'
+import Timeline from '@/components/Timeline'
 import { cn } from '@/lib/cn'
 import { depMapsUrl } from '@/lib/maps'
 import { type OperCategory, operCategory, operInfoKey } from '@/lib/oper-info'
@@ -42,9 +43,9 @@ export default function RegistrationTimeline({ actions, currentPlate }: Props): 
   const { t, i18n } = useTranslation()
 
   return (
-    <ol className="m-0 list-none p-0">
-      {actions.map((action, index) => {
-        const isLast = index === actions.length - 1
+    <Timeline
+      arrows="up"
+      items={actions.map((action, index) => {
         // Foreign/transit prefixes and plateless (2026+) rows have no oblast match — say so rather than going blank.
         const region = plateRegionLabel(action.plate, t, i18n.language)
         // Brand / model / year / VIN show on the newest row and again wherever any of them changes going back in time
@@ -59,31 +60,10 @@ export default function RegistrationTimeline({ actions, currentPlate }: Props): 
         const category = operCategory(action.operCode)
         const vehicleLabel = [action.brand, action.model].filter(Boolean).join(' ')
 
-        return (
-          <li
-            key={`${action.dReg}-${action.operCode}`}
-            className="-mx-4 flex gap-3 rounded-lg px-4 transition-colors hover:bg-[var(--color-border)]/40"
-          >
-            <div className="flex flex-col items-center">
-              <span
-                aria-hidden
-                className={cn(
-                  'mt-1 h-3 w-3 shrink-0 rounded-full border-2',
-                  index === 0
-                    ? 'border-[var(--color-primary)] bg-[var(--color-primary)]'
-                    : 'border-[var(--color-border)] bg-[var(--color-surface)]'
-                )}
-              />
-              {!isLast && (
-                <span aria-hidden className="relative w-px flex-1 bg-[var(--color-border)]">
-                  <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 leading-none text-[var(--color-muted)]">
-                    ▴
-                  </span>
-                </span>
-              )}
-            </div>
-
-            <div className={cn('min-w-0 flex-1 text-base', !isLast && 'pb-4')}>
+        return {
+          key: `${action.dReg}-${action.operCode}`,
+          content: (
+            <>
               <div className="flex items-center justify-between gap-4">
                 <span className="rounded bg-[var(--color-surface)]/20 px-1 py-0.5 font-medium">
                   {action.dReg ?? '-'}
@@ -178,10 +158,10 @@ export default function RegistrationTimeline({ actions, currentPlate }: Props): 
                   )}
                 </div>
               )}
-            </div>
-          </li>
-        )
+            </>
+          )
+        }
       })}
-    </ol>
+    />
   )
 }

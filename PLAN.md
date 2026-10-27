@@ -87,6 +87,8 @@ becomes available.
 
 ### Releases page (`/releases`) ✅ DONE (2026-10-15) — see `docs/plan-done.md`
 
+### AUTO.RIA link-out for plates/VINs not in the registry ✅ DONE (2026-10-25) — link only; RIA data use is restricted, see `docs/legal-and-monetization.md`
+
 ### Wanted / stolen vehicle check ✅ DONE (2026-10-15)
 
 Police open data (data.gov.ua) -> `registry.wanted_vehicles` + `/api/wanted` + `WantedCheck` section; write-up in `docs/plan-done.md`. Scheduled daily in `SCHEDULE.md` (VPS job still to set up).
@@ -140,7 +142,24 @@ not a parallel feature, hence the step order below.
 **Models, step 1 and the tiled-detection / photo-viewer work are done** — moved to `docs/plan-done.md`
 ("Own ALPR model — models, step 1 …"). Open work continues below ("Real-photo pass", hard-image TODO, steps 2-4).
 
-**Real-photo pass (2026-09-30 / 10-01, 88 own Ukrainian photos) ✅** — EXIF orientation, truncated reads, candidate filter, stacked/motorcycle plates, legacy-shape junk: findings in `docs/plan-done.md` ("Own ALPR real-photo pass"). `eval/labels.csv` is still missing, so there is no recall figure.
+**Real-photo pass (2026-09-30 / 10-01, 88 own Ukrainian photos) ✅** — EXIF orientation, truncated reads, candidate filter, stacked/motorcycle plates, legacy-shape junk: findings in `docs/plan-done.md` ("Own ALPR real-photo pass"). `eval/labels.csv` was added later (2026-10-26, 3 plates).
+
+**Moped plates, constrained decoding, alternative reads (2026-10-26) ✅** — row-wise reader for three-row moped plates, slot-class decoding with the registry's real letter set, one-character alternatives returned per plate and shown as numbered/colored chip groups; also a latency regression found and fixed (worst photo 98 s -> 1.3 s): `docs/plan-done.md` ("Own ALPR: moped plates, constrained decoding, alternative reads").
+
+**Own ALPR — open actions (as of 2026-10-26, continue here):**
+
+- ⏳ **Ground truth for the eval — partly done.** `services/alpr/eval/labels.csv` (gitignored) has 3 plates, recall 3/3 (`forte_ft__645663814hd.webp` `AB1918AB`, `imz-ural_m-67-36__605381145hd.webp` `AH4018AC`, `ua_ai1920ja.jpg` `AI1920JA`). **Still to do:** the photos for `BX5213BO` (white-rack Mercedes 1940) and `BC3064XC` (red truck) are not in `eval/images/` (not found; copy them in and add the rows), and the other 85 photos are unlabelled, so recall is still measured on 3 files only. The `ALT_CONFIDENT_*` and `ALT_MIN_SCORE` values stay untuned until more are labelled.
+- ✅ **Web upload resize (2026-10-26).** `shrinkImage` cap 3200 -> 4608 px: the 3200 cap cost 4 confident reads on 4000 px phone photos (incl. `BC9779IX`); `eval.mjs --shrink` mirrors it. Details: `docs/plan-done.md` ("Web upload resize").
+- ✅ **Alternatives noise (2026-10-26).** A primary >= 0.97 now suppresses alternatives more than 0.03 behind it (`ALT_CONFIDENT_SCORE` / `ALT_CONFIDENT_GAP`); near-ties stay. 6 of the alternatives on 90 photos dropped, none added, `ALT_MIN_SCORE` 0.55 unchanged: `docs/plan-done.md` ("Alternatives noise"). Re-tune once more photos are labelled.
+- ✅ **Registry check of alternatives (2026-10-26).** `RegistryRankService` (`apps/api/src/recognize/registry-rank*.ts`): when a plate's best read is not in `registry.registrations` but an alternative is, the alternative takes its place (scores swapped inside the box group). No contract change, so no visible "exists" flag; add one only if wanted (it means editing `schemas.ts`, which resets offline data). Not yet exercised end to end against the real registry.
+- ✅ **Concurrency (2026-10-26).** `/recognize` and `/recognize/vin` are plain `def` (FastAPI threadpool): 3 simultaneous uploads of the slowest photo finish in ~6.3 s wall instead of 3/6/9.4 s serial, reads identical. Uploads still compete for the same CPU (no 3x); more workers only if that becomes a real problem. Detail: `docs/plan-done.md` ("Concurrency").
+- ⏳ **UI polish still to check:** light theme and desktop, the zoom dialog (`PhotoZoomDialog`) with groups, a11y of the chain/number badges, and the moped
+  and truck photos end to end in the browser (only the car and the parking photos were checked). Not started; also confirm the new 4608 px shrink and the registry re-rank in the real app (the re-rank has only unit tests, not run against the registry).
+- ✅ **Letter set (2026-10-26).** Re-measured on the full registry (24.7M rows): same 18 letters (12 Cyrillic + Y J F D G Z, 60k-389k each); L/U/N/S/R/V/Q are 0.5k-10.5k. Kept as is in `app.py` only. Known gap: TS side (`isUaPlate`) accepts any Latin letter and `repairOcrPlate` maps `5`->`S` (rare letter); the own ALPR never sends it. Sharing the set needs a file copied into the ALPR build context; not done.
+- ❓ **Cloud route.** `/api/recognize/plate/cloud` + `PLATE_RECOGNIZER_*` env still exist (off unless flag + token; the web app never calls it). Decision
+  pending: delete it entirely (also `deploy-api.yml`, deploy.md) or keep as a manual cross-check.
+- ❓ **Unexplained label.** A screenshot showed `AA4018AC` for the `AH4018AC` moped; the local service never returned it (it returned `AH4078AC`). Source unknown
+  (older build or another tool), nothing to fix unless it reappears.
 
 - **Idea, not built:** use the photo date to show who held the plate _on that
   date_ (the registry keeps full history), and flag a read that only matches an
@@ -337,6 +356,7 @@ above once scoped, or dropped if research says no.
   paid-features route** — see Phase 5 "Stage A".
 
 - ✅ **Wanted (stolen) vehicles** — built 2026-10-15 (`5bed8de`), see above and `docs/plan-done.md` (original design archived there).
+- ✅ **Vehicle origin** (flags chip, `?section=origin` timeline, model plants, `/stats` "Where cars come from"; 2026-10-25/26) — built, see `docs/plan-done.md`, `docs/features-reference.md` and [ORIGIN_PLAN.md](ORIGIN_PLAN.md) (open follow-ups listed there).
 - ✅ **Cross-links between result-card sections, About features list** (2026-10-15, `6df9280`, `c1951da`) — see `docs/plan-done.md`.
 - ✅ **Pre-public secrets audit, production DB-credential guard, first Dependabot round** (2026-10-15) — see `docs/plan-done.md`. **Open:** run
   gitleaks over the full history before flipping the repo public; `@tanstack/react-table` 9 migration (v8 held).
@@ -1009,6 +1029,8 @@ card-on-file subscriptions; revisit with real quotes.
   (never by unverified email).
 - ✅ **Read guides `/read` (2026-10-16):** hub + "Body types" and "Sizes" articles with live examples, size explorer and plate-card links (`stats_size_models`, migration 0071) — conventions in `docs/features-reference.md` "Read guides"; write-up in `docs/plan-done.md`. ✅ `/read/fleet` (colours/fuel/registration years). ✅ `/read/plates` (anatomy, region codes, region-less series). ✅ `/read/generations` (size growth per generation from RDW year-medians, no migration). ✅ `/read/electric` (EVs by model year/region/model + plug guide; `stats_ev`, migration 0072). ✅ `/read/imports` (imports vs dealer by year, models, VIN build country; `stats_imports`, migration 0073). ✅ `/read/safety` (crash tests, reads `/api/safety/stats`). ✅ `/read/fuel` (fuel mix, CO₂ by band/year/model, reads `/api/fuel/stats`). ✅ `/read/vin` (VIN anatomy, type-a-VIN breakdown, year codes, where to find it; static). ✅ `/read/extremes` (heaviest/lightest + power/size records; reuses the `/stats` panels, no new API). Twelfth: `/read/recalls` (recalls vs common faults; model picker over the existing RDW/NHTSA/CA/MOT endpoints, no new API). ✅ Blog-style guide covers/date/copy-link, card → guide links, mass-schema GVM/TBM/GTM/ATM/GCM relations.
 - ✅ **Card → guide cross-links (2026-10-16):** `ReadGuideLink` pill with a right arrow at the foot of each card / VIN section, pointing to its /read guide; `GUIDE_META` in `read/links.ts` — see `docs/features-reference.md` "Read guides".
+- ✅ **Vehicle origin (2026-10-26):** flags chip + `?section=origin` timeline (brand country, ownership, assembly, Ukraine) from Wikidata + NHTSA WMI, legacy countries by year; curated model plants and stats breakdown deferred — see `docs/plan-done.md`.
+- ✅ **Racer / flags / verification polish (2026-10-25):** region backdrops, smoke + wreck, 10 km end, flag preview, OTK + licence links, glossary, RIA copy-first modal; About sources MVS HSC + flag-icons — see `docs/plan-done.md`.
 - ✅ **About sources (2026-10-14):** 8 auction link-out sites added as logo-less tiles (no logo licence found), Telegram Login logo added — see `docs/plan-done.md`.
 - **Other providers (researched 2026-10-12, not planned yet):** GitHub (client id + secret, code flow), Microsoft
   (client id, OIDC), Facebook/Meta (app id + secret, needs privacy URL + data-deletion URL + Live app), Apple (Services

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { isUaPlate, normalizePlate, regionName } from '@carplates/shared'
 
 import NoRegionBadge from '@/components/NoRegionBadge'
+import RiaCheckLink from '@/components/RiaCheckLink'
 import { useRegionLabel } from '@/lib/region-label'
 
 type Props = {
@@ -33,6 +34,8 @@ export default function NotFoundInfo({ value }: Props): ReactNode {
       <p className="mt-2 text-sm text-[var(--color-muted)]">
         {isPlate ? t('result.notFound.hintPlate') : t('result.notFound.hintFormat')}
       </p>
+
+      {isPlate && <RiaCheckLink kind="plate" value={plate} />}
     </div>
   )
 }

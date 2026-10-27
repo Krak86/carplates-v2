@@ -1,4 +1,5 @@
 import { REGION_NAMES, regionName, type VehicleKind } from '@carplates/shared'
+import { REGION_IDS } from '@/lib/region-ids'
 
 export const CAR_BODIES = [
   'sedan',
@@ -20,9 +21,43 @@ export type CarBody = (typeof CAR_BODIES)[number]
 export const SCENERIES = ['day', 'sunset', 'night', 'winter'] as const
 export type SceneryId = (typeof SCENERIES)[number]
 
-/** Photo backdrops behind the road (files in ./backdrops). */
-export const BACKDROPS = ['carpathians', 'spruce', 'forest', 'grove'] as const
+/** Photo backdrops behind the road (files in ./backdrops). The generic ones are the random pool. */
+export const GENERIC_BACKDROPS = ['carpathians', 'spruce', 'forest', 'grove'] as const
+/** Region-specific photo backdrops, shown in their own settings section. */
+export const REGION_BACKDROP_IDS = [
+  'vinnytsia',
+  'volyn',
+  'zhytomyr',
+  'zaporizhzhia',
+  'crimea',
+  'sevastopol',
+  'donetsk',
+  'kyiv',
+  'kyivska',
+  'dnipro',
+  'zakarpattia',
+  'ivanofrankivsk',
+  'kirovohrad',
+  'luhansk',
+  'lviv',
+  'mykolaiv',
+  'odesa',
+  'poltava',
+  'rivne',
+  'sumy',
+  'ternopil',
+  'kharkiv',
+  'kherson',
+  'khmelnytskyi',
+  'cherkasy',
+  'chernihiv',
+  'chernivtsi'
+] as const
+export const BACKDROPS = [...GENERIC_BACKDROPS, ...REGION_BACKDROP_IDS] as const
 export type BackdropId = (typeof BACKDROPS)[number]
+
+/** Region-specific backdrops (key = region name as in the registry); a plate from one of them starts on its own backdrop. */
+const REGION_BACKDROPS: Readonly<Record<string, BackdropId>> = REGION_IDS
 
 function pickRandom<T>(options: readonly T[], fallback: T): T {
   return options[Math.floor(Math.random() * options.length)] ?? fallback
@@ -30,7 +65,7 @@ function pickRandom<T>(options: readonly T[], fallback: T): T {
 
 /** A random backdrop — the starting choice; the player can pick another in the settings. */
 export function randomBackdrop(): BackdropId {
-  return pickRandom(BACKDROPS, DEFAULT_BACKDROP)
+  return pickRandom(GENERIC_BACKDROPS, DEFAULT_BACKDROP)
 }
 
 /** Random starting scenery (day / sunset / night / winter); the player can switch it live in the settings. */
@@ -49,6 +84,21 @@ export function randomTraffic(): TrafficLevel {
 
 export function randomQuality(): Quality {
   return pickRandom(QUALITIES, DEFAULT_QUALITY)
+}
+
+/** The backdrop that belongs to a region, if it has one. */
+export function regionBackdrop(region: string): BackdropId | undefined {
+  return REGION_BACKDROPS[region]
+}
+
+/** The region a region backdrop belongs to (the reverse of `regionBackdrop`); undefined for the generic backdrops. */
+export function backdropRegion(backdrop: BackdropId): string | undefined {
+  return Object.keys(REGION_BACKDROPS).find(region => REGION_BACKDROPS[region] === backdrop)
+}
+
+/** The starting backdrop: the region's own when it has one, otherwise a random one. */
+export function startBackdrop(region: string): BackdropId {
+  return regionBackdrop(region) ?? randomBackdrop()
 }
 
 /** A random region name (Ukrainian, as in the registry) for the roadside billboards. */
@@ -159,6 +209,15 @@ export type RacerConfig = {
 export const BUMP_WARNING = 5
 /** Bumps at which the joke turns into "take driving lessons". */
 export const BUMP_LESSONS = 15
+/** Kilometres after which the test drive ends and the viewer is sent to a real seller. */
+export const TEST_DRIVE_KM = 10
+/** Bumps at which the car is a wreck: it stops and the drive can only be started over. */
+export const BUMP_WRECK = 20
+/** The car smokes one level more per this many bumps (0 = clean, up to `MAX_SMOKE_LEVEL`). */
+export const BUMPS_PER_SMOKE = 5
+export const MAX_SMOKE_LEVEL = 3
+
+export const smokeLevel = (bumps: number): number => Math.min(MAX_SMOKE_LEVEL, Math.floor(bumps / BUMPS_PER_SMOKE))
 
 export type RacerHud = {
   /** km/h */
@@ -167,6 +226,10 @@ export type RacerHud = {
   km: number
   /** Collisions with cars, trees, signs… since the engine started (a restart keeps counting). */
   bumps: number
+  /** `BUMP_WRECK` bumps reached: the car is stopped until the drive is started over. */
+  wrecked: boolean
+  /** `TEST_DRIVE_KM` driven: the car is stopped and the drive can only be started over. */
+  finished: boolean
   lap: string
   last: string | null
   best: string | null

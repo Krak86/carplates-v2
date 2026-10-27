@@ -1,8 +1,9 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import Flag from '@/components/Flag'
 import VinDerivedChip from '@/components/vin/VinDerivedChip'
-import { countryFlag, countryName, isoFlag } from '@/components/vin/helpers'
+import { countryIso, countryName, flagSlug } from '@/components/vin/helpers'
 import type { FieldMap, VinFallback } from '@/components/vin/helpers'
 
 type Props = {
@@ -22,12 +23,12 @@ export default function VinOriginCard({ fields, fallback }: Props): ReactNode {
   const country = nhtsaCountry ?? (derivedCountry ? countryName(derivedCountry.value, i18n.language) : undefined)
   const place = [city, country].filter(Boolean).join(', ')
   const mapUrl = place ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place)}` : null
-  const flag = derivedCountry ? isoFlag(derivedCountry.value) : countryFlag(nhtsaCountry)
+  const flagCode = derivedCountry ? derivedCountry.value : countryIso(nhtsaCountry)
 
   return (
     <div className="flex items-center gap-3">
-      <span aria-hidden className="text-4xl leading-none">
-        {flag ?? '🌍'}
+      <span aria-hidden className="inline-flex w-12 shrink-0 justify-center text-4xl leading-none">
+        {flagCode && flagSlug(flagCode) ? <Flag code={flagCode} className="h-8 w-12" /> : '🌍'}
       </span>
 
       <div className="min-w-0 flex-1">

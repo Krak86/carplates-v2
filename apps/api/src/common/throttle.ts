@@ -21,3 +21,5 @@ export const GLOBAL_THROTTLE: ThrottlerModuleOptions = {
 /** Tighter per-route caps for the endpoints a registry scraper would enumerate (overrides `medium`). */
 export const PLATE_LOOKUP_THROTTLE = { medium: { limit: 100, ttl: 60_000 } }
 export const VIN_DECODE_THROTTLE = { medium: { limit: 30, ttl: 60_000 } }
+/** Brand origin: the brand list is enumerable, though each answer is small. */
+export const ORIGIN_THROTTLE = { medium: { limit: 60, ttl: 60_000 } }

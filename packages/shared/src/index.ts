@@ -9,6 +9,26 @@ export {
 } from './plate.js'
 export { modelFamily, type ModelFamily } from './modelFamily.js'
 export { hasKnownWmi, lookupWmi, type WmiMatch } from './wmi.js'
+export {
+  LEGACY_COUNTRIES,
+  ORIGIN_PLANT_SOURCES,
+  VIN_REGIONS,
+  brandOriginPeriodSchema,
+  brandOwnershipSchema,
+  countryAtYear,
+  isLegacyCountry,
+  modelPlantSchema,
+  originResponseSchema,
+  pickByYear,
+  vinRegion,
+  type BrandOriginPeriod,
+  type BrandOwnership,
+  type Dated,
+  type LegacyCountry,
+  type ModelPlant,
+  type OriginResponse,
+  type VinRegion
+} from './origin.js'
 export { extractVins, vinCheckDigitOk, type OcrLine, type VinRead } from './vin-read.js'
 export {
   LEGACY_REGIONS,
@@ -69,6 +89,7 @@ export {
 export { sizeModelSchema, sizeModelsResponseSchema, type SizeModel, type SizeModelsResponse } from './sizeModels.js'
 export { evSplitSchema, evStatsResponseSchema, type EvSplit, type EvStatsResponse } from './evStats.js'
 export { importsStatsResponseSchema, type ImportsStatsResponse } from './importsStats.js'
+export { originStatsResponseSchema, type OriginStatsResponse } from './originStats.js'
 export { SPEC_METRICS, SPEC_METRIC_COLUMN, DEFAULT_SPEC_METRIC, type SpecMetric } from './specMetrics.js'
 export { VEHICLE_KINDS, resolveVehicleKind, sourceValueForKind, type VehicleKind } from './vehicleKind.js'
 export { VEHICLE_PURPOSES, sourceValueForPurpose, type VehiclePurpose } from './vehiclePurpose.js'
@@ -287,6 +308,8 @@ export { customsAgeK, customsFuel, customsTax, UKR_DUTY_RATE, UKR_VAT_RATE } fro
 export type { CustomsFuel, CustomsTax } from './ukrCustoms.js'
 export { convertEur, CURRENCIES, fxResponseSchema } from './fx.js'
 export type { Currency, FxResponse } from './fx.js'
+export { RIA_CHECK_URL, riaCheckResponseSchema } from './riaCheck.js'
+export type { RiaCheckResponse } from './riaCheck.js'
 export { cardBundleResponseSchema, type CardBundleResponse } from './card.js'
 export {
   RDW_MIN_N,

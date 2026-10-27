@@ -15,11 +15,14 @@ changes to consume either backend.
 import io
 import logging
 import re
+from types import SimpleNamespace
 from typing import Any
 
 import cv2
 import numpy as np
 from fast_alpr import ALPR
+from fast_plate_ocr.core.process import preprocess_image
+from fast_plate_ocr.inference.plate_recognizer import _load_image_from_source
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from PIL import Image, ImageOps
 from rapidocr_onnxruntime import RapidOCR
@@ -82,11 +85,61 @@ def _sharpened(crop: np.ndarray) -> np.ndarray:
     return cv2.filter2D(big, -1, SHARPEN_KERNEL)
 
 
-def _read_plate(tile: np.ndarray, box: Any) -> tuple[str, float] | None:
+# The OCR picks the likeliest of 36 characters per slot, so it can emit a letter no UA plate uses
+# (BO read as BU at 0.88 vs 0.12) or a letter where a digit belongs. A UA plate has a known shape
+# and its letters come from a small set, so re-pick each slot within its class. Same shapes as
+# PLATE_SHAPES in packages/shared (plate.ts). Letters = the 12 Cyrillic look-alikes plus the Latin
+# ones that really occur in the registry (all 24.2M 8-char plates, 2026-10-26: Y 389k, J 303k, F 240k,
+# D 133k, G 80k, Z 62k); L/U/N/S/R/V/Q are 0.5k-10.5k each (L is 0.04% of plates), so a read of one of
+# those is a misread. Re-measured on the full table: the earlier 2% sample picked the same set.
+PLATE_LETTERS = "ABCEHIKMOPTXYJFDGZ"
+PLATE_SHAPES = ["LLDDDDLL", "LLLLDDDD", "DDLLDDDD"]
+MIN_SHAPE_FIT = 6  # slots (of 8) that must already fit a shape, else the read is left as it is
+
+
+def _plate_ocr(crop: np.ndarray) -> tuple[str, float] | None:
+    model = alpr.ocr.ocr_model
+    cfg = model.config
+    # Same preprocessing as fast-alpr's DefaultOCR.predict, but keeping the per-slot probabilities.
+    color = cv2.COLOR_BGR2RGB if cfg.image_color_mode == "rgb" else cv2.COLOR_BGR2GRAY
+    batch = preprocess_image(_load_image_from_source(cv2.cvtColor(crop, color), cfg))
+    probs = model.model.run([model.plate_output_name], {"input": batch})[0].reshape(
+        cfg.max_plate_slots, len(cfg.alphabet)
+    )
+    alphabet = cfg.alphabet
+    picked = probs.argmax(axis=1)
+    text = "".join(alphabet[i] for i in picked).rstrip(cfg.pad_char)
+    if not text:
+        return None
+    scores = [float(probs[slot, i]) for slot, i in enumerate(picked[: len(text)])]
+    if len(text) == PLATE_LENGTH:
+        letters = [i for i, c in enumerate(alphabet) if c in PLATE_LETTERS]
+        digits = [i for i, c in enumerate(alphabet) if c.isdigit()]
+
+        def fit(shape: str) -> int:
+            return sum((c.isalpha() if kind == "L" else c.isdigit()) for c, kind in zip(text, shape))
+
+        shape = max(PLATE_SHAPES, key=fit)  # a tie keeps the earlier (more common) shape
+        if fit(shape) >= MIN_SHAPE_FIT:
+            fixed = ""
+            for slot, kind in enumerate(shape):
+                allowed = letters if kind == "L" else digits
+                best = max(allowed, key=lambda i: probs[slot, i])
+                fixed += alphabet[best]
+                if best != picked[slot]:
+                    # An overridden character's confidence is its share among the allowed ones.
+                    scores[slot] = float(probs[slot, best] / probs[slot, allowed].sum())
+            text = fixed
+    return text, min(scores)
+
+
+def _read_plate(tile: np.ndarray, box: Any) -> tuple[tuple[str, float], list[tuple[str, float]]] | None:
+    """The best read of the plate in `box`, plus every read tried (the alternatives come from those)."""
     height, width = tile.shape[:2]
     bw, bh = box.x2 - box.x1, box.y2 - box.y1
     best: tuple[str, float] | None = None
     best_full = False
+    reads: list[tuple[str, float]] = []
     # Plain crops first. Sharpened ones only run when no plain read is confident:
     # on a confident plate they could only reorder a multi-row plate's characters.
     for sharpen, pads in ((False, PAD_VARIANTS), (True, SHARPEN_PAD_VARIANTS)):
@@ -96,16 +149,42 @@ def _read_plate(tile: np.ndarray, box: Any) -> tuple[str, float] | None:
             crop = tile[y1:y2, x1:x2]
             if crop.size == 0:
                 continue
-            ocr = alpr.ocr.predict(_sharpened(crop) if sharpen else crop)
-            if ocr is None or not ocr.text:
+            candidate = _plate_ocr(_sharpened(crop) if sharpen else crop)
+            if candidate is None:
                 continue
-            candidate = (ocr.text, _confidence(ocr.confidence))
-            full = len(_compact(ocr.text)) == PLATE_LENGTH
+            reads.append(candidate)
+            full = len(_compact(candidate[0])) == PLATE_LENGTH
             if best is None or (full and not best_full) or (full == best_full and candidate[1] > best[1]):
                 best, best_full = candidate, full
             if best_full and best is not None and best[1] >= GOOD_ENOUGH:
-                return best
-    return best
+                return best, reads
+    return (best, reads) if best is not None else None
+
+
+# The same plate can read two ways when one glyph is ambiguous at this size (3/5 on a blurry
+# plate): the readers differ by crop, and the more confident one is not always the right one. Besides
+# the best read, return up to MAX_ALTERNATIVES other full-length reads that differ from it by exactly
+# one character and are at least ALT_MIN_SCORE sure; they share the plate's box, so the UI can show
+# them as one group. A primary at or above ALT_CONFIDENT_SCORE is sure enough that an alternative
+# more than ALT_CONFIDENT_GAP behind it is only noise (AH4018AC at 0.987 beside AH4078AC at 0.943);
+# a near-tie (BT1572BK 0.986 / BT1372BK 0.985) is real ambiguity and stays.
+ALT_MIN_SCORE = 0.55
+ALT_CONFIDENT_SCORE = 0.97
+ALT_CONFIDENT_GAP = 0.03
+MAX_ALTERNATIVES = 2
+
+
+def _alternatives(best: str, best_score: float, reads: list[tuple[str, float]]) -> list[tuple[str, float]]:
+    confident = best_score >= ALT_CONFIDENT_SCORE
+    top: dict[str, float] = {}
+    for text, score in reads:
+        compact = _compact(text)
+        differs = sum(a != b for a, b in zip(compact, best))
+        if len(compact) == PLATE_LENGTH and differs == 1 and score >= ALT_MIN_SCORE:
+            if confident and best_score - score > ALT_CONFIDENT_GAP:
+                continue
+            top[compact] = max(score, top.get(compact, 0.0))
+    return sorted(top.items(), key=lambda item: item[1], reverse=True)[:MAX_ALTERNATIVES]
 
 
 # Stacked car plates (4 letters over 4 digits, e.g. KA EO / 3881) have a near-square
@@ -138,6 +217,64 @@ def _read_stacked(tile: np.ndarray, box: Any) -> tuple[str, float] | None:
         text += part
         score = min(score, _confidence(ocr.confidence))
     return text, score
+
+
+# Three-row moped plates (AB / 1918 / AB) photographed at a steep angle: the plate OCR reads one
+# line, so they come out as garbage (or blank) however the crop is padded. The general text
+# OCR (RapidOCR, same one as the VIN route) finds each row on its own, and survives a wide range
+# of tilts, so for near-square / tall boxes read it on a few rotations of the crop and accept a
+# read only if it has the moped layout (2 letters, 4 digits, 2 letters), rows joined top to
+# bottom. A confident row read beats the plate OCR's; otherwise it only fills in for a weak one.
+ROWS_MAX_ASPECT = 1.6  # box width / height below this is a candidate for three rows (a moped plate is ~1.3)
+ROWS_ANGLES = [0, -70, 70, -50, 50, -85, 85, -30, 30]  # level first: most plates need no rotation
+ROWS_TILTED_ASPECT = 1.0  # a box taller than wide may hold a steeply rotated plate: only then try the other angles
+ROWS_TARGET_SIDE = 400  # px: the crop is scaled to this long side (a cost cap: a 800 px false box cost 8 s at 3x)
+ROWS_MAX_SCALE = 4
+ROWS_PAD = 0.1
+ROWS_GOOD_ENOUGH = 0.9
+ROWS_ACCEPT_BELOW = 0.9  # a normal full-length read at least this confident is kept
+MOPED_PLATE = re.compile(r"^[A-Z]{2}\d{4}[A-Z]{2}$")
+
+
+def _rotated(crop: np.ndarray, angle: int) -> np.ndarray:
+    height, width = crop.shape[:2]
+    side = int(max(height, width) * 1.1)
+    matrix = cv2.getRotationMatrix2D((width / 2, height / 2), angle, 1.0)
+    matrix[0, 2] += (side - width) / 2
+    matrix[1, 2] += (side - height) / 2
+    return cv2.warpAffine(crop, matrix, (side, side), borderValue=(255, 255, 255))
+
+
+def _read_rows(tile: np.ndarray, box: Any) -> tuple[str, float] | None:
+    height, width = tile.shape[:2]
+    bw, bh = box.x2 - box.x1, box.y2 - box.y1
+    if bh <= 0 or bw / bh >= ROWS_MAX_ASPECT:
+        return None
+    crop = tile[
+        max(0, int(box.y1 - bh * ROWS_PAD)) : min(height, int(box.y2 + bh * ROWS_PAD)),
+        max(0, int(box.x1 - bw * ROWS_PAD)) : min(width, int(box.x2 + bw * ROWS_PAD)),
+    ]
+    if crop.size == 0:
+        return None
+    scale = min(ROWS_MAX_SCALE, ROWS_TARGET_SIDE / max(crop.shape[:2]))
+    crop = cv2.resize(crop, None, fx=scale, fy=scale, interpolation=cv2.INTER_CUBIC if scale > 1 else cv2.INTER_AREA)
+    best: tuple[str, float] | None = None
+    for angle in ROWS_ANGLES if bw / bh < ROWS_TILTED_ASPECT else ROWS_ANGLES[:1]:
+        lines, _ = text_ocr(_rotated(crop, angle))
+        if not lines:
+            continue
+        # The "UA" flag strip is read as a row of its own.
+        lines = [line for line in lines if _compact(line[1]) != "UA"]
+        lines = sorted(lines, key=lambda line: sum(point[1] for point in line[0]))
+        text = "".join(_compact(line[1]) for line in lines)
+        if not MOPED_PLATE.match(text):
+            continue
+        score = min(float(line[2]) for line in lines)
+        if best is None or score > best[1]:
+            best = (text, score)
+        if score >= ROWS_GOOD_ENOUGH:
+            break
+    return best
 
 
 EDGE_MARGIN = 3  # px
@@ -186,8 +323,8 @@ def _overlap(a: tuple[float, float, float, float], b: tuple[float, float, float,
 
 def _predict_tiled(frame: np.ndarray) -> list[dict[str, Any]]:
     height, width = frame.shape[:2]
-    # (box in full-frame coords, detection confidence, plate, score)
-    found: list[tuple[tuple[float, float, float, float], float, str, float]] = []
+    # (box in full-frame coords, detection confidence, plate, score, every read tried for it)
+    found: list[tuple[tuple[float, float, float, float], float, str, float, list[tuple[str, float]]]] = []
 
     for x0, y0, x1, y1 in _tiles(width, height):
         tile = frame[y0:y1, x0:x1]
@@ -197,16 +334,19 @@ def _predict_tiled(frame: np.ndarray) -> list[dict[str, Any]]:
             # neighbouring tile (or the full frame) sees it whole.
             if _touches_inner_edge(box, (x0, y0, x1, y1), width, height):
                 continue
-            read = _read_stacked(tile, box) or _read_plate(tile, box)
+            read = _read_stacked(tile, box)
+            reads = [read] if read is not None else []
+            if read is None and (plate_read := _read_plate(tile, box)) is not None:
+                read, reads = plate_read
             if read is None:
                 continue
             full_box = (box.x1 + x0, box.y1 + y0, box.x2 + x0, box.y2 + y0)
-            found.append((full_box, float(detection.confidence), read[0], read[1]))
+            found.append((full_box, float(detection.confidence), read[0], read[1], reads))
 
     # The same plate is seen by several tiles: keep a full-length read over a
     # truncated one, then the most confident detection.
     found.sort(key=lambda f: (len(_compact(f[2])) == PLATE_LENGTH, f[1]), reverse=True)
-    kept: list[tuple[tuple[float, float, float, float], float, str, float]] = []
+    kept: list[tuple[tuple[float, float, float, float], float, str, float, list[tuple[str, float]]]] = []
     for candidate in found:
         if all(_overlap(candidate[0], k[0]) < DUPLICATE_OVERLAP for k in kept):
             kept.append(candidate)
@@ -216,7 +356,27 @@ def _predict_tiled(frame: np.ndarray) -> list[dict[str, Any]]:
         x2, y2 = min(float(width), b[2]), min(float(height), b[3])
         return {"x": x1 / width, "y": y1 / height, "w": (x2 - x1) / width, "h": (y2 - y1) / height}
 
-    return [{"plate": plate, "score": score, "box": _box(box)} for box, _, plate, score in kept]
+    results: list[dict[str, Any]] = []
+    for box, _, plate, score, _ in kept:
+        same_plate = [r for f in found if _overlap(f[0], box) >= DUPLICATE_OVERLAP for r in f[4]]
+        # The row-wise text OCR is the more accurate reader for a moped layout (the plate OCR
+        # misreads one glyph, e.g. AH4018AC -> AH4078AC), so a confident row read wins. It is the
+        # slow reader, so it runs once per plate here, not once per tile that saw it.
+        rows = _read_rows(frame, SimpleNamespace(x1=box[0], y1=box[1], x2=box[2], y2=box[3]))
+        if rows is not None:
+            same_plate.append(rows)
+            weak = len(_compact(plate)) != PLATE_LENGTH or score < ROWS_ACCEPT_BELOW
+            # Same text from both readers: keep the plate OCR's score so it doesn't drift.
+            if _compact(plate) != rows[0] and (weak or rows[1] > score):
+                plate, score = rows
+        results.append({"plate": plate, "score": score, "box": _box(box)})
+        # An alternative ranks just below its plate's own read, whatever it scored: the API sorts by
+        # score and opens the top one, so an alternative must never take the primary's place.
+        results.extend(
+            {"plate": alt, "score": min(alt_score, score - 0.001), "box": _box(box)}
+            for alt, alt_score in _alternatives(_compact(plate), score, same_plate)
+        )
+    return results
 
 
 @app.get("/healthz")
@@ -228,16 +388,18 @@ def healthz() -> dict[str, str]:
 MAX_UPLOAD_BYTES = 6 * 1024 * 1024
 
 
-async def _read_capped(image: UploadFile) -> bytes:
-    raw = await image.read(MAX_UPLOAD_BYTES + 1)
+def _read_capped(image: UploadFile) -> bytes:
+    raw = image.file.read(MAX_UPLOAD_BYTES + 1)
     if len(raw) > MAX_UPLOAD_BYTES:
         raise HTTPException(status_code=413, detail="Image too large")
     return raw
 
 
+# Plain `def` (not `async def`) on purpose: the inference is CPU-bound, so FastAPI runs the handler in its
+# threadpool and a slow photo no longer queues every other upload behind it on the event loop.
 @app.post("/recognize")
-async def recognize(image: UploadFile = File(...)) -> dict[str, list[dict[str, Any]]]:
-    raw = await _read_capped(image)
+def recognize(image: UploadFile = File(...)) -> dict[str, list[dict[str, Any]]]:
+    raw = _read_capped(image)
     if not raw:
         raise HTTPException(status_code=400, detail="Uploaded image is empty")
 
@@ -308,8 +470,8 @@ def _ocr_lines(frame: np.ndarray, **kwargs: Any) -> list[dict[str, Any]]:
 
 
 @app.post("/recognize/vin")
-async def recognize_vin(image: UploadFile = File(...)) -> dict[str, list[dict[str, Any]]]:
-    raw = await _read_capped(image)
+def recognize_vin(image: UploadFile = File(...)) -> dict[str, list[dict[str, Any]]]:
+    raw = _read_capped(image)
     if not raw:
         raise HTTPException(status_code=400, detail="Uploaded image is empty")
 

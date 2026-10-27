@@ -29,6 +29,7 @@ import LastOperationChip from '@/components/LastOperationChip'
 import CollapsibleChips from '@/components/CollapsibleChips'
 import LazySection from '@/components/LazySection'
 import ReportIssueLink from '@/components/ReportIssueLink'
+import RegionFlagInfo from '@/components/RegionFlagInfo'
 import RegionLabel from '@/components/RegionLabel'
 import FieldInfoButton from '@/components/FieldInfoButton'
 import OwnerInfo from '@/components/OwnerInfo'
@@ -70,7 +71,9 @@ import Model360Button from '@/components/Model360Button'
 import VerificationLinks from '@/components/VerificationLinks'
 import WantedChip from '@/components/WantedChip'
 import VinDecodeTabs from '@/components/vin/VinDecodeTabs'
-import { groupFields } from '@/components/vin/helpers'
+import OriginChip from '@/components/OriginChip'
+import { ukraineFromActions } from '@/components/OriginSection.helpers'
+import { countryIso, groupFields, toFieldMap } from '@/components/vin/helpers'
 import VinSince2021Note from '@/components/vin/VinSince2021Note'
 import VinToggleSection from '@/components/vin/VinToggleSection'
 import { useCardMotion } from '@/hooks/useCardMotion'
@@ -90,6 +93,7 @@ import SectionSkeleton from '@/components/ui/SectionSkeleton'
 // Everything below the fold loads on demand (near the viewport, or a `?section=` share link): see LazySection.
 const FavoriteButton = lazy(() => import('@/components/FavoriteButton'))
 const VehicleKindIcon = lazy(() => import('@/components/VehicleKindIcon'))
+const OriginSection = lazy(() => import('@/components/OriginSection'))
 const AuctionCheck = lazy(() => import('@/components/AuctionCheck'))
 const WantedCheck = lazy(() => import('@/components/WantedCheck'))
 const StockSection = lazy(() => import('@/components/StockSection'))
@@ -164,6 +168,8 @@ export default function ResultCard({ data }: Props): ReactNode {
   // The "imported" status chip opens the Auction history section (mounting it first if it is still lazy).
   const [auctionOpenSignal, setAuctionOpenSignal] = useState(0)
   const [wantedOpenSignal, setWantedOpenSignal] = useState(0)
+  // The origin (flags) chip opens the "Where it comes from" section the same way.
+  const [originOpenSignal, setOriginOpenSignal] = useState(0)
   // Links inside the Specs block open the section that goes deeper.
   const [emissionsOpenSignal, setEmissionsOpenSignal] = useState(0)
   const [enginesOpenSignal, setEnginesOpenSignal] = useState(0)
@@ -259,6 +265,7 @@ export default function ResultCard({ data }: Props): ReactNode {
       c.regAddrKoatuu,
       c.vin
     ].filter(Boolean).length + 2
+  const vinFields = vinDetail.data ? toFieldMap(vinDetail.data.results) : null
   const vinFieldCount = vinDetail.data
     ? groupFields(vinDetail.data.results).reduce((sum, g) => sum + g.rows.length, 0)
     : undefined
@@ -352,7 +359,14 @@ export default function ResultCard({ data }: Props): ReactNode {
                   feedback={plateCopy}
                   className="mx-1.5 align-middle"
                 />
-                {data.region && <RegionLabel>{regionLabel(data.region)}</RegionLabel>}
+                {data.region && (
+                  <>
+                    <RegionLabel region={data.region}>{regionLabel(data.region)}</RegionLabel>
+                    <span className="ml-1.5 inline-flex">
+                      <RegionFlagInfo region={data.region} label={regionLabel(data.region)} />
+                    </span>
+                  </>
+                )}
                 {!data.region && (
                   <span className="rounded bg-[var(--color-surface)]/20 px-1.5 py-0.5">
                     <NoRegionBadge plate={data.plate} />
@@ -383,6 +397,15 @@ export default function ResultCard({ data }: Props): ReactNode {
                   everImported={data.everImported}
                 />
                 <GenerationChip brand={c.brand} model={c.model} year={c.makeYear} />
+                <OriginChip
+                  brand={c.brand}
+                  model={c.model}
+                  year={c.makeYear}
+                  vin={hasVin ? c.vin : null}
+                  plantCountry={countryIso(vinFields?.get('Plant Country'))}
+                  plantCity={vinFields?.get('Plant City')}
+                  onOpenSection={() => setOriginOpenSignal(n => n + 1)}
+                />
                 <SizeClassChip
                   brand={c.brand}
                   model={c.model}
@@ -841,6 +864,23 @@ export default function ResultCard({ data }: Props): ReactNode {
           <LazySection sections={['stock']}>
             <StockSection brand={c.brand} model={c.model} year={c.makeYear} />
           </LazySection>
+          {c.brand && (
+            <LazySection sections={['origin']} forceMount={originOpenSignal > 0}>
+              <OriginSection
+                openSignal={originOpenSignal}
+                brand={c.brand}
+                model={c.model}
+                year={c.makeYear}
+                vin={hasVin ? c.vin : null}
+                plantCountry={countryIso(vinFields?.get('Plant Country'))}
+                plantCity={vinFields?.get('Plant City')}
+                ukraine={ukraineFromActions(
+                  vinDetail.data?.registry?.actions ?? plateHistory.data?.actions ?? [],
+                  !!data.everImported
+                )}
+              />
+            </LazySection>
+          )}
           {hasVin && c.vin && (
             <LazySection sections={['auctions']} forceMount={auctionOpenSignal > 0}>
               <AuctionCheck

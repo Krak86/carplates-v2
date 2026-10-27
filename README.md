@@ -200,7 +200,7 @@ See [CLAUDE.md](CLAUDE.md) for conventions and [PLAN.md](PLAN.md) for the roadma
 ## Scripts
 
 `pnpm dev · preview:prod · build · lint · type-check · test · format` ·
-`pnpm db:up · db:down · db:reset · db:migrate · db:seed · db:refresh-stats · db:refresh-weight-stats · db:refresh-spec-stats · ingest · ingest:full` ·
+`pnpm db:up · db:down · db:reset · db:migrate · db:seed · db:refresh-stats · db:refresh-weight-stats · db:refresh-spec-stats · db:refresh-origin-stats · ingest · ingest:full` ·
 `pnpm ingest:euroncap · ingest:euroncap:csv · export:euroncap:csv` ·
 `pnpm ingest:jncap · ingest:jncap:csv · export:jncap:csv` ·
 `pnpm ingest:cncap · ingest:cncap:csv · export:cncap:csv` ·

@@ -8,6 +8,148 @@ const item = (group: ReleaseGroup, ua: string, ru: string, en: string): ReleaseI
  */
 export const RELEASES: readonly ReleaseDay[] = [
   {
+    date: '2026-10-26',
+    items: [
+      item(
+        'improved',
+        'Пошук за фото: якщо символ на номері важко розібрати, показано кілька можливих варіантів цього номера, пов’язаних ланцюжком; кожен номер на фото має свій колір і цифру',
+        'Поиск по фото: если символ на номере трудно разобрать, показано несколько возможных вариантов этого номера, связанных цепочкой; у каждого номера на фото свой цвет и цифра',
+        'Photo search: when a character on a plate is hard to read, several possible readings of that plate are shown chained together; each plate in the photo has its own color and number'
+      ),
+      item(
+        'fix',
+        'Пошук за фото: розпізнавання триряндних номерів мопедів і мотоциклів та точніші літери й цифри (літера U більше не підставляється замість O)',
+        'Поиск по фото: распознавание трёхрядных номеров мопедов и мотоциклов и более точные буквы и цифры (буква U больше не подставляется вместо O)',
+        'Photo search: reads three-row moped and motorcycle plates, with more accurate letters and digits (a U is no longer picked where an O belongs)'
+      ),
+      item(
+        'new',
+        'У секції «Звідки авто» для популярних моделей показано, де ще їх збирають (країна, місто, роки)',
+        'В секции «Откуда авто» для популярных моделей показано, где ещё их собирают (страна, город, годы)',
+        'The origin section now lists where else popular models were built (country, city, years)'
+      ),
+      item(
+        'data',
+        'На сторінці «Про проєкт» у джерелах додано відкриті моделі розпізнавання номерів (fast-alpr, RapidOCR)',
+        'На странице «О проекте» в источниках добавлены открытые модели распознавания номеров (fast-alpr, RapidOCR)',
+        'The About page now credits the open plate-recognition models (fast-alpr, RapidOCR) among its sources'
+      ),
+      item(
+        'data',
+        'Заводи збирання моделей зібрані вручну з Вікіпедії - з посиланням на статтю для кожного запису',
+        'Заводы сборки моделей собраны вручную из Википедии - со ссылкой на статью для каждой записи',
+        'Model assembly plants are hand-curated from Wikipedia, with an article link for every entry'
+      ),
+      item(
+        'new',
+        'Статистика: «Звідки авто» - легкові авто за країною бренду та за країною збирання (за VIN), з колишніми країнами за модельним роком',
+        'Статистика: «Откуда авто» - легковые авто по стране бренда и по стране сборки (по VIN), с прежними странами по модельному году',
+        'Stats: "Where cars come from" - passenger cars by brand home country and by assembly country (from the VIN), with the country of their time by model year'
+      ),
+      item(
+        'new',
+        'Звідки авто: прапорці біля VIN і номера (країна марки, власника, збирання) та секція з часовою лінією — марка, власники, завод, Україна',
+        'Откуда авто: флажки рядом с VIN и номером (страна марки, владельца, сборки) и секция с временной линией — марка, владельцы, завод, Украина',
+        'Where it comes from: flags next to the VIN and plate (brand, owner, assembly country) and a timeline section - brand, owners, plant, Ukraine'
+      ),
+      item(
+        'new',
+        'Для старих авто показуємо колишні країни: СРСР, Чехословаччина, НДР, ФРН, Югославія',
+        'Для старых авто показываем прежние страны: СССР, Чехословакия, ГДР, ФРГ, Югославия',
+        'Older cars show the country of their time: USSR, Czechoslovakia, East and West Germany, Yugoslavia'
+      ),
+      item(
+        'improved',
+        'Перед переходом на перевірку AUTO.RIA номер або VIN копіюється - залишається лише вставити його на сайті',
+        'Перед переходом на проверку AUTO.RIA номер или VIN копируется - остаётся только вставить его на сайте',
+        'Before opening the AUTO.RIA check the plate or VIN is copied - just paste it on the site'
+      ),
+      item(
+        'data',
+        'Країни, штаб-квартири та власники марок із Wikidata, виробники VIN (WMI) з NHTSA; прибрано помилкових власників у популярних марок',
+        'Страны, штаб-квартиры и владельцы марок из Wikidata, производители VIN (WMI) из NHTSA; убраны ошибочные владельцы у популярных марок',
+        'Brand countries, headquarters and owners from Wikidata, VIN manufacturers (WMI) from NHTSA; wrong owners of popular brands cleaned up'
+      ),
+      item(
+        'fix',
+        'Міста заводів з NHTSA пишуться як «Georgetown», а не «GEORGETOWN»',
+        'Города заводов из NHTSA пишутся как «Georgetown», а не «GEORGETOWN»',
+        'NHTSA plant cities read “Georgetown”, not “GEORGETOWN”'
+      )
+    ]
+  },
+  {
+    date: '2026-10-25',
+    items: [
+      item(
+        'new',
+        'Якщо номера чи VIN немає в реєстрі (наприклад, авто до 2013 року), під повідомленням з’явилося посилання на перевірку AUTO.RIA',
+        'Если номера или VIN нет в реестре (например, авто до 2013 года), под сообщением появилась ссылка на проверку AUTO.RIA',
+        'When a plate or VIN is not in the registry (e.g. a pre-2013 car), a link to the AUTO.RIA check now appears under the message'
+      ),
+      item(
+        'new',
+        'У секції «Перевірка» нові посилання: протокол техогляду (ОТК) за номером і чинність посвідчення водія',
+        'В секции «Проверка» новые ссылки: протокол техосмотра (ОТК) по номеру и действительность водительского удостоверения',
+        'Verification section has new links: technical inspection protocol (OTK) by plate and driving licence validity'
+      ),
+      item(
+        'new',
+        'Прапори областей: на картці номера біля регіону, у поясненні номера та на рекламних щитах у тест-драйві',
+        'Флаги областей: на карточке номера рядом с регионом, в пояснении номера и на рекламных щитах в тест-драйве',
+        'Region flags: on the plate card next to the region, in the plate explanation and on the test-drive billboards'
+      ),
+      item(
+        'new',
+        'Тест-драйв завершується після 10 км: щоб їхати далі, звертайтеся до справжнього продавця',
+        'Тест-драйв завершается после 10 км: чтобы ехать дальше, обращайтесь к настоящему продавцу',
+        'The test drive ends after 10 km: to go further, contact a real seller'
+      ),
+      item(
+        'improved',
+        'У тест-драйві вибір фону області змінює й область на рекламних щитах; новий фон для Миколаївської області',
+        'В тест-драйве выбор фона области меняет и область на рекламных щитах; новый фон для Николаевской области',
+        'In the test drive, picking a region backdrop also sets the billboard region; new Mykolaiv backdrop'
+      ),
+      item(
+        'new',
+        'У тест-драйві фото-фони для кожної області: номер стартує на фоні своєї області, а в налаштуваннях є розділ «Фони областей»',
+        'В тест-драйве фото-фоны для каждой области: номер стартует на фоне своей области, а в настройках есть раздел «Фоны областей»',
+        'The test drive has a photo backdrop for every region: a plate starts on its own region, and the settings have a “Region backdrops” section'
+      ),
+      item(
+        'new',
+        'У тест-драйві зіткнення спричиняють дим (білий, сірий, чорний), а після 20 зіткнень авто розбивається',
+        'В тест-драйве столкновения вызывают дым (белый, серый, чёрный), а после 20 столкновений авто разбивается',
+        'In the test drive bumps cause smoke (white, grey, black) and the car is wrecked after 20 bumps'
+      ),
+      item(
+        'new',
+        'Біля області на картці номера є «?» - великий прапор області; прапори також у виборі області в тест-драйві',
+        'Рядом с областью на карточке номера есть «?» - большой флаг области; флаги также в выборе области в тест-драйве',
+        'A “?” beside the region on the plate card shows a large region flag; flags also appear in the test-drive region picker'
+      ),
+      item(
+        'improved',
+        'У «Перевірці» біля кожного рядка є «?» з розшифровкою скорочень (БДР, ПДР, ОСЦПВ, МТСБУ, ОТК, ТСЦ МВС)',
+        'В «Проверке» у каждой строки есть «?» с расшифровкой сокращений (БДР, ПДР, ОСЦПВ, МТСБУ, ОТК, ТСЦ МВД)',
+        'Each Verification row has a “?” spelling out the abbreviations (BDR, PDR, OSCPV, MTSBU, OTK, TSC MVS)'
+      ),
+      item(
+        'improved',
+        'У підказках чипів рейтингу першим рядком - значення й кількість авто (марка, модель, колір, область)',
+        'В подсказках чипов рейтинга первой строкой - значение и количество авто (марка, модель, цвет, область)',
+        'Ranking chip tooltips lead with the ranked value and its vehicle count (make, model, colour, region)'
+      ),
+      item(
+        'fix',
+        'Оновлено джерело оглядів Carscoops у стрічці новин',
+        'Обновлён источник обзоров Carscoops в ленте новостей',
+        'Repointed the Carscoops reviews feed in the news ticker'
+      )
+    ]
+  },
+  {
     date: '2026-10-17',
     items: [
       item(

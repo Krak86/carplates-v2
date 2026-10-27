@@ -32,6 +32,7 @@ const HELPER_GROUPS: Array<[string, RegExp]> = [
   ['helpers-specs', /\/src\/components\/(RdwSpecs\.helpers|CO2Badge\.helpers|VdbChips\.helpers)\.ts$/],
   ['helpers-size', /\/src\/components\/size\/(VehicleSize\.helpers|fit)\.ts$/],
   ['helpers-value', /\/src\/components\/EstimatedValue\.helpers\.ts$/],
+  ['helpers-origin', /\/src\/components\/OriginSection\.helpers\.ts$/],
   ['helpers-media', /\/src\/components\/(VideoReviews|ReviewLinks|PressReviews)\.helpers\.ts$/]
 ]
 const CODE_GROUPS = [...VENDOR_GROUPS, ...HELPER_GROUPS]
@@ -75,12 +76,13 @@ export default defineConfig({
       workbox: {
         // No `webmanifest` here: the plugin precaches it itself, and a second entry with another revision
         // makes Workbox throw on startup, leaving a service worker that caches and serves nothing.
-        globPatterns: ['**/*.{js,css,html,svg,ico,png,geojson}'],
+        globPatterns: ['**/*.{js,css,html,svg,ico,png,geojson}', 'assets/flag-*.webp'], // region flags (~40 KB) for the offline result card
         // Logos (~2 MB) are runtime-cached below; PDF fonts and export-* chunks (PDF/DOCX export) stay online-only.
         // So does the AR scan (needs the API to read plates): its detector worker, wasm runtime and ONNX model.
         // And the News / Bluesky / Stock side widgets: live third-party data, only mounted online after the first scroll.
         globIgnores: [
           'logos/**',
+          'country-flags/**',
           'fonts/**',
           'models/**',
           'assets/export-*.js',
@@ -120,6 +122,16 @@ export default defineConfig({
             options: {
               cacheName: 'carplates-rt-logos',
               expiration: { maxEntries: 100, maxAgeSeconds: 90 * DAY_S },
+              cacheableResponse: { statuses: [200] }
+            }
+          },
+          {
+            // Country SVG flags (~0.8 MB for all, a few KB each) — only the ones actually seen get cached.
+            urlPattern: ({ url, sameOrigin }): boolean => sameOrigin && url.pathname.startsWith('/country-flags/'),
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'carplates-rt-country-flags',
+              expiration: { maxEntries: 100, maxAgeSeconds: 365 * DAY_S },
               cacheableResponse: { statuses: [200] }
             }
           },

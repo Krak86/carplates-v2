@@ -18,6 +18,7 @@ import StatsTable from '@/routes/stats/StatsTable'
 import TopStatsPanel from '@/routes/stats/TopStatsPanel'
 import VdbStatsPanel from '@/routes/stats/VdbStatsPanel'
 import WeightModelsPanel from '@/routes/stats/WeightModelsPanel'
+import OriginStatsPanel from '@/routes/stats/OriginStatsPanel'
 import SpecModelsPanel from '@/routes/stats/SpecModelsPanel'
 import {
   DEFAULT_STATS_DIMENSION,
@@ -163,6 +164,8 @@ export default function StatsRoute(): ReactNode {
           <WeightModelsPanel />
 
           <SpecModelsPanel />
+
+          <OriginStatsPanel />
 
           <VdbStatsPanel />
 

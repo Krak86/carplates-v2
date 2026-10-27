@@ -1,7 +1,11 @@
 import { BadGatewayException, BadRequestException, NotFoundException } from '@nestjs/common'
+import type { PlateCandidate } from '@carplates/shared'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { LocalRecognizeService } from './local-recognize.service.js'
+import type { RegistryRankService } from './registry-rank.service.js'
+
+const passThroughRank = { rank: async (c: PlateCandidate[]) => c } as unknown as RegistryRankService
 
 vi.stubEnv('ALPR_LOCAL_URL', 'http://localhost:8088')
 
@@ -20,7 +24,7 @@ describe('LocalRecognizeService', () => {
     const fetchMock = vi.mocked(fetch)
     fetchMock.mockResolvedValue(jsonResponse({ results: [{ plate: 'BH01791C', score: 0.92 }] }))
 
-    const service = new LocalRecognizeService()
+    const service = new LocalRecognizeService(passThroughRank)
     const result = await service.recognize(image)
 
     expect(result).toEqual({ candidates: [{ plate: 'ВН0179ІС', raw: 'BH01791C', score: 0.92 }] })
@@ -32,30 +36,30 @@ describe('LocalRecognizeService', () => {
 
   it('throws NotFoundException when the container returns no results', async () => {
     vi.mocked(fetch).mockResolvedValue(jsonResponse({ results: [] }))
-    const service = new LocalRecognizeService()
+    const service = new LocalRecognizeService(passThroughRank)
     await expect(service.recognize(image)).rejects.toBeInstanceOf(NotFoundException)
   })
 
   it('throws BadGatewayException on a non-ok upstream response', async () => {
     vi.mocked(fetch).mockResolvedValue(jsonResponse({}, 500))
-    const service = new LocalRecognizeService()
+    const service = new LocalRecognizeService(passThroughRank)
     await expect(service.recognize(image)).rejects.toBeInstanceOf(BadGatewayException)
   })
 
   it('throws BadGatewayException when the fetch itself rejects (container not running)', async () => {
     vi.mocked(fetch).mockRejectedValue(new Error('connect ECONNREFUSED'))
-    const service = new LocalRecognizeService()
+    const service = new LocalRecognizeService(passThroughRank)
     await expect(service.recognize(image)).rejects.toBeInstanceOf(BadGatewayException)
   })
 
   it('rejects an unsupported mimetype before calling upstream', async () => {
-    const service = new LocalRecognizeService()
+    const service = new LocalRecognizeService(passThroughRank)
     await expect(service.recognize({ ...image, mimetype: 'image/heic' })).rejects.toBeInstanceOf(BadRequestException)
     expect(fetch).not.toHaveBeenCalled()
   })
 
   it('rejects an empty buffer before calling upstream', async () => {
-    const service = new LocalRecognizeService()
+    const service = new LocalRecognizeService(passThroughRank)
     await expect(service.recognize({ ...image, buffer: Buffer.alloc(0) })).rejects.toBeInstanceOf(BadRequestException)
     expect(fetch).not.toHaveBeenCalled()
   })

@@ -137,6 +137,13 @@ pnpm export:wanted-history:csv   # re-dump the scraped rows + resume tables to t
 pnpm ingest:generations   # car generations (Wikidata + Wikipedia) for the top 300 registry models -> registry.model_generations; ~10 min, cached in scripts/.data/generations/. --limit N, --only "brand model", --dry-run (prints table + coverage), --refresh. Chip via GET /api/generations
 pnpm ingest:generations:csv   # load the committed seed (seed-data/model-generations.csv.gz) — part of ingest:ratings:csv
 pnpm export:generations:csv   # re-dump the table to that CSV — run after every real re-ingest
+pnpm ingest:brand-origin   # vehicle origin (ORIGIN_PLAN.md): Wikidata (CC0) brand country / founded / HQ / ownership -> registry.brand_origin_period + brand_ownership, keyed on brandSlug(); cached in scripts/.data/brand-origin/. --report (no write), --dry-run, --refresh, --top N, --show skoda,volvo. Overrides: scripts/src/brand-origin-overrides.ts
+pnpm ingest:brand-origin:csv   # load the committed seed (seed-data/brand-origin.csv.gz + brand-ownership.csv.gz; replaces both tables) — part of ingest:ratings:csv
+pnpm export:brand-origin:csv   # re-dump both tables to those CSVs — run after every real re-ingest
+pnpm ingest:wmi   # VIN world-manufacturer identifiers (NHTSA vPIC) -> registry.wmi_prefix; ~2.7k calls cached in scripts/.data/wmi/ (resumable; NHTSA 403s a throttled IP after a few hundred calls, use a VPN or wait). --dry-run, --refresh. vPIC lacks many non-US WMIs (TMB, JTD, XTA): the API falls back to packages/shared/src/wmi.ts
+pnpm ingest:wmi:csv   # load the committed seed (seed-data/wmi.csv.gz; replaces the table) — part of ingest:ratings:csv
+pnpm ingest:model-plants   # hand-curated model plants (scripts/seed-data/model-plants.csv, a Wikipedia source per row) -> registry.model_plant; validates, replaces the table, --dry-run. Edit the CSV by hand; part of ingest:ratings:csv. No export command (the CSV is the seed)
+pnpm export:wmi:csv   # re-dump the table to that CSV — run after every real re-ingest
 pnpm ingest:wikispecs   # Wikipedia spec catalogue (stage K: dimensions, drive, engines with power) for every row of model_generations -> registry.model_spec_wiki; en -> ru -> uk -> de -> home edition per block, dimensions NULL where RDW has the model; ~1 h cold, cached in scripts/.data/wikispecs/ (resumable). --limit N models, --only "make_key model_key", --dry-run (coverage table), --refresh. Title pins: scripts/src/wikispecs-overrides.csv
 pnpm ingest:wikispecs:csv   # load the committed seed (seed-data/wikispecs.csv.gz) — part of ingest:ratings:csv
 pnpm export:wikispecs:csv   # re-dump the table to that CSV — run after every real re-ingest
@@ -154,6 +161,7 @@ pnpm db:refresh-derived     # rebuild ALL rollups computed from current_registra
                             # after the registry refresh unless given --skip-derived; ingest:full refreshes once at its end;
                             # ingest:all skips it in ingest:full and runs it after the CSV loads. ingest:ratings:csv /
                             # ingest:vehiclesdb alone do NOT — run this after them
+pnpm db:refresh-origin-stats # rebuild registry.stats_origin (passenger cars by model year, brand home country and VIN assembly country; migration 0076) for the /stats "Where cars come from" panel; part of db:refresh-derived. Re-run after ingest:brand-origin / ingest:wmi too
 pnpm db:refresh-weight-stats # rebuild registry.stats_weight (heaviest/lightest models per vehicle group; migrations 0051-0053) from the registry
                              # + rdw_specs (scripts/src/weight-stats.ts); part of db:refresh-derived. Run after a registry or RDW ingest
 pnpm db:refresh-spec-stats   # rebuild registry.stats_spec (highest/lowest power, engine, height, length, fuel tank; migration 0063) and registry.stats_distribution (fleet histograms of power, hp/tonne, engine size for the card percentile bars; migration 0070); part of db:refresh-derived
@@ -173,7 +181,8 @@ pnpm ingest:all        # db:migrate, then ingest:full + ingest:ratings:csv concu
 pnpm alpr:build     # build the self-hosted ALPR (own-model plate recognition) Docker image
 pnpm alpr:up        # run it on :8088 (sets ALPR_LOCAL_URL=http://localhost:8088 in apps/api/.env to use it)
 pnpm alpr:down      # stop it
-node services/alpr/eval.mjs   # run services/alpr/eval/images/* through the running container → eval/results.json
+node services/alpr/eval.mjs   # run services/alpr/eval/images/* through the running container → eval/results.json (+ recall if eval/labels.csv)
+node services/alpr/eval.mjs --shrink   # same, but photos re-encoded like the web's shrinkImage → results.shrink.json + reads that differ (SHRINK_MAX / SHRINK_Q override); don't run while the app is in use
                               # (gitignored photos; rebuild with alpr:build after editing services/alpr/app.py)
 ```
 

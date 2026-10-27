@@ -2,6 +2,7 @@ import {
   BadGatewayException,
   BadRequestException,
   HttpException,
+  Inject,
   Injectable,
   NotFoundException,
   ServiceUnavailableException
@@ -10,6 +11,7 @@ import type { PlateRecognizeResponse } from '@carplates/shared'
 
 import { alprLocalEnabled, loadEnv } from '../env.js'
 import { mapPlateReaderResults } from './recognize.mapper.js'
+import { RegistryRankService } from './registry-rank.service.js'
 import type { PlateReaderResponse, UploadedImage } from './recognize.types.js'
 
 const ACCEPTED_MIME = new Set(['image/jpeg', 'image/png', 'image/webp'])
@@ -23,6 +25,8 @@ const UPSTREAM_TIMEOUT_MS = 10_000
 @Injectable()
 export class LocalRecognizeService {
   private readonly env = loadEnv()
+
+  constructor(@Inject(RegistryRankService) private readonly registryRank: RegistryRankService) {}
 
   async recognize(image: UploadedImage): Promise<PlateRecognizeResponse> {
     if (!alprLocalEnabled(this.env)) {
@@ -53,6 +57,6 @@ export class LocalRecognizeService {
 
     const candidates = mapPlateReaderResults(payload.results ?? [])
     if (candidates.length === 0) throw new NotFoundException('No plate found in the image')
-    return { candidates }
+    return { candidates: await this.registryRank.rank(candidates) }
   }
 }

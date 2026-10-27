@@ -1,4 +1,4 @@
-import { lookupWmi, type VinDecodeResponse } from '@carplates/shared'
+import { isLegacyCountry, lookupWmi, type VinDecodeResponse } from '@carplates/shared'
 
 import { VIN_GROUPS } from '@/components/vin/types'
 import type {
@@ -211,6 +211,112 @@ export function isoFlag(code: string): string {
 /** Localized country name for an ISO code; `lang` is the app language (`ua` is the BCP-47 `uk`). */
 export function countryName(iso: string, lang: string): string {
   return new Intl.DisplayNames([lang === 'ua' ? 'uk' : lang], { type: 'region' }).of(iso) ?? iso
+}
+
+/** SVG flags copied from flag-icons into `public/country-flags/` (MIT, see LICENSE.txt there); other countries show no flag. */
+export const FLAG_CODES = [
+  'ae',
+  'al',
+  'am',
+  'ar',
+  'at',
+  'au',
+  'az',
+  'ba',
+  'be',
+  'bg',
+  'br',
+  'by',
+  'ca',
+  'ch',
+  'cl',
+  'cn',
+  'co',
+  'cu',
+  'cy',
+  'cz',
+  'de',
+  'dk',
+  'dz',
+  'ee',
+  'eg',
+  'es',
+  'et',
+  'fi',
+  'fr',
+  'gb',
+  'ge',
+  'gr',
+  'hk',
+  'hr',
+  'hu',
+  'id',
+  'ie',
+  'il',
+  'in',
+  'ir',
+  'is',
+  'it',
+  'jp',
+  'kg',
+  'kp',
+  'kr',
+  'kz',
+  'li',
+  'lt',
+  'lu',
+  'lv',
+  'ma',
+  'mc',
+  'md',
+  'me',
+  'mk',
+  'mt',
+  'mx',
+  'my',
+  'ng',
+  'nl',
+  'no',
+  'nz',
+  'pe',
+  'ph',
+  'pk',
+  'pl',
+  'pt',
+  'py',
+  'ro',
+  'rs',
+  'ru',
+  'sa',
+  'se',
+  'sg',
+  'si',
+  'sk',
+  'sm',
+  'th',
+  'tj',
+  'tm',
+  'tn',
+  'tr',
+  'tw',
+  'ua',
+  'us',
+  'uy',
+  'uz',
+  've',
+  'vn',
+  'za'
+] as const
+
+/** The `country-flags/<slug>.svg` file for a country code; West Germany flies the German flag. Null for legacy states (drawn inline) or no flag file. */
+export function flagSlug(code: string): string | null {
+  const slug = code === 'DE-FRG' ? 'de' : code.toLowerCase()
+  return (FLAG_CODES as readonly string[]).includes(slug) ? slug : null
+}
+
+/** Current countries by `Intl.DisplayNames`, former states (`SU`, `CSHH`, ...) by their own `country.<code>` key. */
+export function countryLabel(code: string, lang: string, t: (key: string) => string): string {
+  return isLegacyCountry(code) ? t(`country.${code}`) : countryName(code, lang)
 }
 
 // ---- Fallback for gaps in the NHTSA decode ------------------------------------------------------

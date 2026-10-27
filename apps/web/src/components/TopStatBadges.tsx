@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 
 import InfoPopover from '@/components/InfoPopover'
+import { toIntlLocale } from '@/lib/intl'
 import { statsTopQuery } from '@/lib/queries'
 import { rankingBadges } from '@/routes/stats/helpers'
 
@@ -36,7 +37,7 @@ const DEFAULT_TONE = 'chip-stats'
  * Each chip deep-links to the exact place on the stats / fuel / safety page that shows it.
  */
 export default function TopStatBadges({ brand, model, color, region, kind }: Props): ReactNode {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const stats = useQuery(statsTopQuery())
   if (!stats.data) return null
 
@@ -61,6 +62,12 @@ export default function TopStatBadges({ brand, model, color, region, kind }: Pro
           </Link>
 
           <InfoPopover label={t(badge.textKey, { rank: badge.rank })} title={t(badge.textKey, { rank: badge.rank })}>
+            {badge.name && badge.count !== undefined && (
+              <p className="mb-1 font-semibold">
+                {t('chip.tip.count', { name: badge.name, n: badge.count.toLocaleString(toIntlLocale(i18n.language)) })}
+              </p>
+            )}
+
             {t(`chip.tip.${badge.key}`)}
           </InfoPopover>
         </span>

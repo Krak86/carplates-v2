@@ -2,15 +2,13 @@
 
 ## What this is
 
-`carsua.app` v2 — Ukrainian vehicle lookup by plate number or VIN. pnpm monorepo replacing the 2019 GitHub-Pages SPA. Data: state
-open-data portal (`data.gov.ua`) in Postgres; VIN decoding proxies NHTSA. **Phase 1: local dev stack only** (no CI, no VPS). The v1 app
-is the sibling `../carplates/` (do not modify).
+`carsua.app` v2 — Ukrainian vehicle lookup by plate or VIN. pnpm monorepo; data from `data.gov.ua` in Postgres, VIN decoding via NHTSA.
+The v1 app is the sibling `../carplates/` (do not modify).
 
 Docs (**grep headings, never read whole** — several are 100–400 KB): `PLAN.md` active/planned + version pins · `docs/plan-done.md`
-finished write-ups · `README.md` setup/env/scripts · `docs/features-reference.md` per-feature conventions (**read the matching section
-before touching a feature**: VehiclesDB, RDW, value, rankings, posts, racer, Accounts, VIN page, size, wanted, releases, offline/PWA, link
-previews, sitemap/rate limits, plate regions, generations, stock news) · `docs/commands-reference.md` `ingest:*`/`export:*`/ALPR ·
-`docs/{legal-and-monetization,logins,security-checklist}.md`. Other docs in `docs/` and the root `*_PLAN.md`/`SCHEDULE.md` only on request.
+finished write-ups · `README.md` setup/env/scripts · `docs/features-reference.md` per-feature conventions (**grep `^## ` and read the matching
+section before touching a feature**) · `docs/commands-reference.md` `ingest:*`/`export:*`/ALPR · `docs/{legal-and-monetization,logins,security-checklist}.md`.
+Other docs in `docs/` and the root `*_PLAN.md`/`SCHEDULE.md` only on request.
 
 ## Layout
 
@@ -52,6 +50,7 @@ Pins (why: PLAN.md): pnpm 12, Node 24, TypeScript 5.9 (not 7), NestJS 11 (not 12
 - **Seed CSVs mirror scraped tables.** After changing `registry.wiki_image` (pre-warm, `wikiAliases.ts` + re-scrape, row deletes) re-run
   `pnpm export:wiki-images:csv`; same for every other `export:*:csv` dataset (a new setup loads the CSV instead of re-scraping).
 - Run `pnpm format` first (never reformat `scripts/src/fixtures`). Tests: Vitest, colocated `*.test.ts(x)`.
-- Keep docs current: write-up → `docs/plan-done.md`, one-line ✅ → `PLAN.md`, conventions → `docs/features-reference.md`, user-facing entry → `releases.ts`.
+- Keep docs current: write-up → `docs/plan-done.md`, one-line ✅ → `PLAN.md`, conventions → `docs/features-reference.md`, user-facing entry → `releases.ts`;
+  a new feature or data source also goes on the About page (`about.feature.*` / `SOURCES` + `about.source.*`, ua/ru/en).
 
 @CLAUDE_RULES.md

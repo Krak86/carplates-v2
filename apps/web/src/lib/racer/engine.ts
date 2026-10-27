@@ -5,18 +5,22 @@
  * project only) — scenery is drawn in ./sprites.ts, cars come from ./vehicle-assets.ts (Kenney renders).
  */
 import {
+  BUMP_WRECK,
+  TEST_DRIVE_KM,
   HORN_HZ,
   QUALITY_SIZE,
   SIRENS,
   THEMES,
   TOP_SPEED_KMH,
   TRAFFIC_COUNT,
+  smokeLevel,
   type RacerConfig,
   type RacerHud,
   type RoadColor,
   type Theme
 } from './config'
 import { preloadBackdrop } from './backdrop-assets'
+import { preloadRegionFlag, regionFlagImage } from './flag-assets'
 import { createSound } from './sound'
 import { preloadBrandLogo } from './vehicle-assets'
 import {
@@ -30,12 +34,12 @@ import {
   type Sprite
 } from './sprites'
 
-export { preloadBackdrop, preloadBrandLogo }
+export { preloadBackdrop, preloadBrandLogo, preloadRegionFlag }
 
 export type Racer = {
   /** Applies new settings live (car, scenery, lanes, traffic, resolution) without resetting the lap. */
   setConfig: (next: RacerConfig) => void
-  /** Back to the start line, lap timer cleared. */
+  /** Back to the start line, lap timer cleared. After a wreck it also zeroes the bump and km counters. */
   restart: () => void
   /** Sound is off until the viewer turns it on. */
   setSound: (on: boolean) => void
@@ -104,6 +108,17 @@ type Segment = {
   clip: number
 }
 type Car = { offset: number; z: number; sprite: Sprite; speed: number; percent: number }
+/** A smoke puff in canvas pixels; `age` runs 0 → 1 over its life. */
+type Puff = { x: number; y: number; vx: number; vy: number; r: number; age: number; life: number }
+
+/** Per smoke level (1-3): puffs per second, puff colour (rgb) and peak opacity. A wreck keeps the last level. */
+const SMOKE = [
+  { rate: 0, rgb: '0,0,0', alpha: 0 },
+  { rate: 8, rgb: '225,225,225', alpha: 0.35 },
+  { rate: 18, rgb: '110,110,110', alpha: 0.5 },
+  { rate: 34, rgb: '25,25,25', alpha: 0.7 }
+] as const
+const MAX_PUFFS = 120
 
 const limit = (v: number, min: number, max: number): number => Math.max(min, Math.min(v, max))
 const interpolate = (a: number, b: number, p: number): number => a + (b - a) * p
@@ -177,7 +192,15 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
 
   let cfg = initial
   let theme: Theme = THEMES[cfg.scenery]
-  let atlas: Atlas = makeAtlas(theme, cfg.body, cfg.color, cfg.plate, cfg.brand, cfg.region)
+  let atlas: Atlas = makeAtlas(
+    theme,
+    cfg.body,
+    cfg.color,
+    cfg.plate,
+    cfg.brand,
+    cfg.region,
+    regionFlagImage(cfg.region)
+  )
   let backdrop: Backdrop = makeBackdrop(theme, cfg.scenery, cfg.backdrop)
   let width = 1024
   let height = 768
@@ -195,6 +218,11 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
   let driven = 0 // km, never reset: the HUD's session odometer
   let bumps = 0 // collisions with traffic or roadside objects, never reset (session counter like `driven`)
   let bumpCooldown = 0 // seconds of contact-free driving left before the next hit counts as a new bump
+  let wrecked = false // BUMP_WRECK bumps: the car is stopped and input ignored until restart() clears it
+  let finished = false // TEST_DRIVE_KM driven: same stop as a wreck, until restart() starts a new drive
+  let puffs: Puff[] = []
+  let puffDebt = 0 // fractional puffs carried between updates
+  let carAnchor = { x: 0, y: 0, w: 0, h: 0 } // where the player's car was last drawn (canvas px), the smoke's source
   let currentLapTime = 0
   let lastLapTime: number | null = null
   let bestLap: number | null = readBest()
@@ -227,6 +255,8 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
       speed: 5 * Math.round(speed / 500),
       km: driven,
       bumps,
+      wrecked,
+      finished,
       lap: formatTime(currentLapTime),
       last: lastLapTime == null ? null : formatTime(lastLapTime),
       best: bestLap == null ? null : formatTime(bestLap),
@@ -285,15 +315,56 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
 
   /** Counts a hit once per contact: staying pressed against the obstacle keeps the cooldown running. */
   function registerBump(): void {
+    if (wrecked || finished) return
     if (bumpCooldown <= 0) {
       bumps++
+      if (bumps >= BUMP_WRECK) wrecked = true
       emitHud(true)
     }
     bumpCooldown = BUMP_COOLDOWN
   }
 
+  /** Spawns puffs at the car by the current smoke level and ages the existing ones. */
+  function updateSmoke(dt: number): void {
+    const level = smokeLevel(bumps)
+    const { rate } = SMOKE[level] as (typeof SMOKE)[number]
+    puffDebt += rate * dt
+    while (puffDebt >= 1 && puffs.length < MAX_PUFFS && carAnchor.w > 0) {
+      puffDebt -= 1
+      puffs.push({
+        x: carAnchor.x + (Math.random() - 0.5) * carAnchor.w * 0.4,
+        y: carAnchor.y - carAnchor.h * 0.55,
+        vx: (Math.random() - 0.5) * 20 * resolution,
+        vy: -(40 + Math.random() * 40) * resolution,
+        r: carAnchor.w * (0.07 + Math.random() * 0.05),
+        age: 0,
+        life: 0.9 + Math.random() * 0.6
+      })
+    }
+    if (rate === 0) puffDebt = 0
+    for (const p of puffs) {
+      p.age += dt / p.life
+      p.x += p.vx * dt
+      p.y += p.vy * dt
+      p.r += carAnchor.w * 0.12 * dt
+    }
+    puffs = puffs.filter(p => p.age < 1)
+  }
+
+  function drawSmoke(): void {
+    const level = Math.max(1, smokeLevel(bumps))
+    const { rgb, alpha } = SMOKE[level] as (typeof SMOKE)[number]
+    for (const p of puffs) {
+      ctx.fillStyle = `rgba(${rgb},${(alpha * (1 - p.age)).toFixed(3)})`
+      ctx.beginPath()
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2)
+      ctx.fill()
+    }
+  }
+
   function update(dt: number): void {
     bumpCooldown -= dt
+    updateSmoke(dt)
     const playerSegment = findSegment(position + PLAYER_Z)
     const playerW = atlas.player.straight.w * SPRITE_SCALE
     const speedPercent = speed / MAX_SPEED
@@ -304,13 +375,19 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
 
     position = increase(position, dt * speed, trackLength)
 
-    if (keyLeft) playerX -= dx
-    else if (keyRight) playerX += dx
+    if (!wrecked && !finished) {
+      if (keyLeft) playerX -= dx
+      else if (keyRight) playerX += dx
+    }
 
     playerX -= dx * speedPercent * playerSegment.curve * CENTRIFUGAL
 
     const accel = ACCEL * (0.5 + 0.5 * (topSpeed() / MAX_SPEED)) * dt
-    if (cfg.auto) {
+    if (wrecked || finished) {
+      // the car coasts to a halt and stays there; the wheel and pedals no longer answer
+      speed += BREAKING * 0.5 * dt
+      braking = false
+    } else if (cfg.auto) {
       // the car rolls on by itself and settles at the chosen cruise speed; ↓ / ↑ presses change that speed
       const target = Math.min(cruise * 100, topSpeed())
       if (speed < target) speed += accel
@@ -352,6 +429,10 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
     playerX = limit(playerX, -3, 3)
     speed = limit(speed, 0, topSpeed())
     driven += ((speed / 100) * dt) / 3600 // the HUD shows speed / 100 as km/h
+    if (driven >= TEST_DRIVE_KM && !finished) {
+      finished = true
+      emitHud(true)
+    }
 
     const travelled = (position - startPosition) / SEGMENT_LENGTH
     skyOffset = increase(skyOffset, SKY_SPEED * playerSegment.curve * travelled, 1)
@@ -486,6 +567,12 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
     const bounce = 1.5 * Math.random() * (speed / MAX_SPEED) * resolution * randomChoice([-1, 1])
     const sprite = steer < 0 ? atlas.player.left : steer > 0 ? atlas.player.right : atlas.player.straight
     drawSprite(sprite, scale, destX, destY + bounce, -0.5, -1)
+    carAnchor = {
+      x: destX,
+      y: destY + bounce,
+      w: sprite.w * scale * (width / 2) * (SPRITE_SCALE * ROAD_WIDTH),
+      h: sprite.h * scale * (width / 2) * (SPRITE_SCALE * ROAD_WIDTH)
+    }
     // brake lights glow while ↓ is held
     if (braking && sprite.brake) drawSprite({ ...sprite, img: sprite.brake }, scale, destX, destY + bounce, -0.5, -1)
   }
@@ -567,10 +654,12 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
               interpolate(playerSegment.p1.camera.y, playerSegment.p2.camera.y, playerPercent) *
               height) /
               2,
-          speed * (keyLeft ? -1 : keyRight ? 1 : 0)
+          speed * (keyLeft && !wrecked && !finished ? -1 : keyRight && !wrecked && !finished ? 1 : 0)
         )
       }
     }
+
+    drawSmoke()
   }
 
   function project(p: Point, cameraX: number, cameraY: number, cameraZ: number): void {
@@ -753,7 +842,7 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
 
   function rebuildLook(): void {
     theme = THEMES[cfg.scenery]
-    atlas = makeAtlas(theme, cfg.body, cfg.color, cfg.plate, cfg.brand, cfg.region)
+    atlas = makeAtlas(theme, cfg.body, cfg.color, cfg.plate, cfg.brand, cfg.region, regionFlagImage(cfg.region))
     backdrop = makeBackdrop(theme, cfg.scenery, cfg.backdrop)
   }
 
@@ -820,6 +909,15 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
   }
 
   function restart(): void {
+    if (wrecked || finished) {
+      // a wreck or a finished drive means a brand-new test drive: the counters start from zero too
+      wrecked = false
+      finished = false
+      bumps = 0
+      driven = 0
+    }
+    puffs = []
+    puffDebt = 0
     position = 0
     speed = 0
     cruise = DEFAULT_CRUISE_KMH
@@ -847,6 +945,7 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
       if (sameConfig(cfg, next)) return
       const resized = next.quality !== cfg.quality
       const backdropChanged = next.backdrop !== cfg.backdrop
+      const regionChanged = next.region !== cfg.region
       const sameWorld =
         !resized &&
         next.scenery === cfg.scenery &&
@@ -862,6 +961,17 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
         void preloadBrandLogo(wanted).then(() => {
           if (!destroyed && cfg.brand === wanted)
             atlas.player = makePlayerSprites(cfg.body, cfg.color, cfg.plate, wanted)
+        })
+      }
+      if (regionChanged) {
+        // the flag is fetched on demand; the boards show the name alone until it arrives
+        const wanted = next.region
+        void preloadRegionFlag(wanted).then(() => {
+          if (!destroyed && cfg.region === wanted && regionFlagImage(wanted)) {
+            // the boards are baked into the road: rebuild it (same geometry) so they show the flag
+            rebuildLook()
+            resetRoad()
+          }
         })
       }
       if (backdropChanged) {

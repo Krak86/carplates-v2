@@ -20,6 +20,7 @@ import { CardModule } from './card/card.module.js'
 import { EvModule } from './ev/ev.module.js'
 import { MotModule } from './mot/mot.module.js'
 import { CaRecallsModule } from './ca-recalls/ca-recalls.module.js'
+import { RiaModule } from './ria/ria.module.js'
 import { WantedModule } from './wanted/wanted.module.js'
 import { GenerationsModule } from './generations/generations.module.js'
 import { NhtsaModule } from './nhtsa/nhtsa.module.js'
@@ -40,6 +41,7 @@ import { SearchModule } from './search/search.module.js'
 import { SpaModule } from './spa/spa.module.js'
 import { StatsModule } from './stats/stats.module.js'
 import { UsageModule } from './usage/usage.module.js'
+import { OriginModule } from './origin/origin.module.js'
 import { VinModule } from './vin/vin.module.js'
 import { WikiModule } from './wiki/wiki.module.js'
 import { WikispecsModule } from './wikispecs/wikispecs.module.js'
@@ -58,6 +60,7 @@ import { WikispecsModule } from './wikispecs/wikispecs.module.js'
     UsageModule,
     PlateModule,
     CardModule,
+    OriginModule,
     VinModule,
     RecognizeModule,
     NewsModule,
@@ -72,6 +75,7 @@ import { WikispecsModule } from './wikispecs/wikispecs.module.js'
     NhtsaModule,
     CaRecallsModule,
     WantedModule,
+    RiaModule,
     GenerationsModule,
     WikispecsModule,
     FuelModule,

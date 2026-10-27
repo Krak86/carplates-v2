@@ -15,6 +15,7 @@ import {
 import LazySection from '@/components/LazySection'
 import LoadErrorBoundary from '@/components/LoadErrorBoundary'
 import NotFoundInfo from '@/components/NotFoundInfo'
+import RiaCheckLink from '@/components/RiaCheckLink'
 import PhotoMetaInfo from '@/components/PhotoMetaInfo'
 import PhotoWarnings from '@/components/PhotoWarnings'
 import PhotoThumbnail from '@/components/PhotoThumbnail'
@@ -303,9 +304,13 @@ export default function SearchRoute(): ReactNode {
           {notFound && kind === 'plate' ? (
             <NotFoundInfo value={raw} />
           ) : (
-            <p className="rounded bg-[var(--color-surface)]/20 px-1.5 py-0.5 text-[var(--color-muted)]">
-              {notFound ? t('result.noResults', { value: raw }) : t('result.error')}
-            </p>
+            <div className="flex flex-col items-center">
+              <p className="rounded bg-[var(--color-surface)]/20 px-1.5 py-0.5 text-[var(--color-muted)]">
+                {notFound ? t('result.noResults', { value: raw }) : t('result.error')}
+              </p>
+
+              {notFound && kind === 'vin' && <RiaCheckLink kind="vin" value={raw.replace(/\s+/g, '').toUpperCase()} />}
+            </div>
           )}
         </Presence>
 

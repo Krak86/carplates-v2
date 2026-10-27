@@ -112,7 +112,7 @@ pulls without a login. Settings → Actions → "Require approval for all outsid
 | Variables (public once deployed)                                                                                                                                                      |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `VPS_USER` (= `deploy`), `PUBLIC_SITE_URL` (`https://carsua.app`), `MAIL_TRANSPORT`, `MAIL_FROM`, `MAIL_REPLY_TO`, `GOOGLE_CLIENT_ID`, `TELEGRAM_BOT_USERNAME`, `TURNSTILE_SITE_KEY`  |
-| `PLATE_RECOGNIZER_CLOUD_ENABLED`, `POSTHOG_PROJECT_ID`, `SENTRY_ORG_SLUG`, `ENABLE_TELEMETRY`, `BACKUP_BUCKET`                                                                        |
+| `PLATE_RECOGNIZER_CLOUD_ENABLED`, `RIA_CHECK_ENABLED` (AUTO.RIA plate fallback, off by default), `POSTHOG_PROJECT_ID`, `SENTRY_ORG_SLUG`, `ENABLE_TELEMETRY`, `BACKUP_BUCKET`         |
 | Web build: `VITE_API_BASE` (leave empty), `VITE_DISQUS_SHORT_NAME`, `VITE_ENABLE_TELEMETRY`, `VITE_POSTHOG_KEY`, `VITE_POSTHOG_HOST`, `VITE_SENTRY_DSN`, `VITE_GOOGLE_MAPS_EMBED_KEY` |
 
 `VITE_*` values are bundled into public JS — restrict `VITE_GOOGLE_MAPS_EMBED_KEY` to the `carsua.app` referrer in Google Cloud. Also set

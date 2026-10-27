@@ -189,7 +189,24 @@ export function choroplethColor(t: number, theme: 'light' | 'dark'): string {
   return `rgb(${lerp(r1, r2, localT)}, ${lerp(g1, g2, localT)}, ${lerp(b1, b2, localT)})`
 }
 
-export type RankingBadge = { key: string; icon: string; rank: number; textKey: string; to: string }
+export type RankingBadge = {
+  key: string
+  icon: string
+  rank: number
+  textKey: string
+  to: string
+  /** The ranked value and its registered-vehicle count (distinctPlates) — registry boards only, for the chip's tooltip. */
+  name?: string
+  count?: number
+}
+
+/** distinctPlates of the by-dimension row labelled `value` (the figure its rank is based on), or undefined. */
+function countOfValue(
+  rows: { value: string | null; distinctPlates: number }[],
+  value: string | null
+): number | undefined {
+  return rows.find(r => r.value === value)?.distinctPlates
+}
 
 /** `highlight`/`highlightModel` are read once by StatsRoute on arrival (see its state comment) to scroll to and flash this exact row. */
 function statsLink(params: Record<string, string>): string {
@@ -215,7 +232,9 @@ export function rankingBadges(
       icon: '🏭',
       rank: rankOf(topBrands(stats), brand),
       textKey: 'result.topBrand',
-      to: statsLink({ dim: 'brand', highlight: brand ?? '' })
+      to: statsLink({ dim: 'brand', highlight: brand ?? '' }),
+      name: brand ?? undefined,
+      count: countOfValue(stats.byBrand, brand)
     },
     {
       key: 'model',
@@ -224,21 +243,27 @@ export function rankingBadges(
       textKey: 'result.topModel',
       // No interactive "model" dimension tab exists (see stats_by_model's migration) — this
       // lands on the always-visible top-models panel instead.
-      to: statsLink({ highlightModel: `${brand ?? ''}::${model ?? ''}` })
+      to: statsLink({ highlightModel: `${brand ?? ''}::${model ?? ''}` }),
+      name: brand && model ? `${brand} ${model}` : undefined,
+      count: stats.topModels.find(r => r.brand === brand && r.model === model)?.distinctPlates
     },
     {
       key: 'color',
       icon: '🎨',
       rank: rankOf(topColors(stats), color),
       textKey: 'result.topColor',
-      to: statsLink({ dim: 'color', highlight: color ?? '' })
+      to: statsLink({ dim: 'color', highlight: color ?? '' }),
+      name: color ?? undefined,
+      count: countOfValue(stats.byColor, color)
     },
     {
       key: 'region',
       icon: '🗺️',
       rank: rankOf(topRegions(stats), region),
       textKey: 'result.topRegion',
-      to: statsLink({ dim: 'region', highlight: region ?? '' })
+      to: statsLink({ dim: 'region', highlight: region ?? '' }),
+      name: region ?? undefined,
+      count: stats.byRegion.find(r => r.region === region)?.distinctPlates
     },
     {
       key: 'cleanest',

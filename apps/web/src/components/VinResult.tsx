@@ -1,4 +1,4 @@
-import { lazy } from 'react'
+import { lazy, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
@@ -28,11 +28,15 @@ import VinRegistryHistory from '@/components/vin/VinRegistryHistory'
 import VinDecodeTabs from '@/components/vin/VinDecodeTabs'
 import VinTypicalData from '@/components/vin/VinTypicalData'
 import LazySection from '@/components/LazySection'
+import OriginChip from '@/components/OriginChip'
 import { useCardMotion } from '@/hooks/useCardMotion'
+import { ukraineFromActions } from '@/components/OriginSection.helpers'
+import { countryIso, toFieldMap } from '@/components/vin/helpers'
 import { hasImportOperation } from '@/lib/auction-sites'
 import { useUiStore } from '@/store/ui-store'
 
 const AuctionCheck = lazy(() => import('@/components/AuctionCheck'))
+const OriginSection = lazy(() => import('@/components/OriginSection'))
 const WantedCheck = lazy(() => import('@/components/WantedCheck'))
 
 type Props = {
@@ -43,9 +47,12 @@ export default function VinResult({ data }: Props): ReactNode {
   const { t } = useTranslation()
   const registry = data.registry
   const vehicle = extractVehicleInfo(data)
+  const fields = toFieldMap(data.results)
   const vehicleColor = resolveVehicleColor(registry?.actions[0]?.color) ?? fallbackVehicleColor(data.vin)
   const plate = registry?.plate ?? null
   const region = plate ? (regionName(plate) ?? null) : null
+  // The origin chip opens the "Where it comes from" section (mounting it first if it is still lazy).
+  const [originOpenSignal, setOriginOpenSignal] = useState(0)
   const tiltEnabled = useUiStore(s => s.cardTiltEnabled)
   const glowRef = useCardMotion<HTMLDivElement>(tiltEnabled)
   useCarHeroImageActions({ brand: vehicle.brand, model: vehicle.model, year: vehicle.year, key: data.vin })
@@ -98,6 +105,18 @@ export default function VinResult({ data }: Props): ReactNode {
         </div>
         <VinBarcode vin={data.vin} />
 
+        <div className="mb-3 flex flex-wrap items-center gap-1.5 empty:hidden">
+          <OriginChip
+            brand={vehicle.brand}
+            model={vehicle.model}
+            year={vehicle.year}
+            vin={data.vin}
+            plantCountry={countryIso(fields.get('Plant Country'))}
+            plantCity={fields.get('Plant City')}
+            onOpenSection={() => setOriginOpenSignal(n => n + 1)}
+          />
+        </div>
+
         {registry && (
           <div className="mb-4">
             <div className="flex justify-between gap-4 py-1.5 text-base">
@@ -132,6 +151,19 @@ export default function VinResult({ data }: Props): ReactNode {
 
         <LazySection sections={['wanted']}>
           <WantedCheck plate={null} vin={data.vin} />
+        </LazySection>
+
+        <LazySection sections={['origin']} forceMount={originOpenSignal > 0}>
+          <OriginSection
+            openSignal={originOpenSignal}
+            brand={vehicle.brand}
+            model={vehicle.model}
+            year={vehicle.year}
+            vin={data.vin}
+            plantCountry={countryIso(fields.get('Plant Country'))}
+            plantCity={fields.get('Plant City')}
+            ukraine={ukraineFromActions(registry?.actions ?? [])}
+          />
         </LazySection>
 
         <LazySection sections={['auctions']}>

@@ -180,6 +180,8 @@ now: sprites ~365 KB + one ~100 KB backdrop + the engine).
 
 **Standalone route `/race`** (`routes/RaceRoute.tsx`, sidebar 🎮, also in `ROUTE_TITLE_KEYS`, `STATIC_ROUTES`/`APP_PAGES` and the API's `spa-text.ts`): no plate or VIN — a random famous car of a random category (`lib/racer/presets.ts`: hardcoded make/model/year + paint per `CarBody`, `randomPreset`/`randomCar`), everything else random. The car-type chips pick a random example of that type (`onPickBody` on `RaceGameSettings`); a hand-picked colour clears the label; "🎲 Random car" re-rolls. The plate reads "CARS UA". No share link. `RaceGameStage.tsx` (intro, canvas, HUD, settings) is shared by the route and `RaceGameModal`. The HUD also shows a **km odometer** (`RacerHud.km`, engine `driven`: HUD speed / 100 = km/h integrated over time; counts this opening only, a restart keeps it). **Touch**: on `(pointer: coarse)` the stage overlays `RaceTouchControls` (← → left, ↓ ↑ right) driving `racer.setInput` — the same flags as the keyboard; settings collapse into a `<details>`; iPhone (no element full screen) uses a pseudo-full-screen. Next: `GAME_PLAN.md` (real-device pass, tilt).
 
+**Region flags** (`lib/region-ids.ts` = region name → id, shared by the racer backdrops and the flags; `lib/region-flags.ts`, `components/RegionFlag.tsx`, files `assets/flags/flag-<id>.webp`, credits in `docs/racer-backdrop-credits.md`): decorative (`alt=""`, the name always sits beside the flag), shown in `RegionLabel`, the plate-segment explainer and the racer billboards (`racer/flag-assets.ts`; a late-loading flag rebuilds the road once). `no-inline` + `globPatterns` `assets/flag-*.webp` keep them out of the JS and in the PWA precache. A new region = id in `region-ids.ts` + a flag file. **The test drive ends at `TEST_DRIVE_KM` (10 km)** with a "contact a real seller" overlay (engine `finished`, like a wreck; restart zeroes the counters). **Smoke and wreck:** puffs turn white/grey/black at 5/10/15 bumps and the car is wrecked at 20 (stops, ignores input, overlay with a start-over button). **Region backdrops** (27 sky + ridge webp layers per region, built by `scripts/racer-render/region-backdrops.mjs` from plain photos; credits in `docs/racer-backdrop-credits.md`): a plate starts on its region's backdrop, `/race` uses its random region's, the region select and 🎲 switch to it, and picking a region backdrop chip sets the billboard region (`backdropRegion()` in `config.ts`; generic backdrops leave it). The billboard region select is `RaceRegionSelect` (flags in options, keyboard-safe while driving). The "?" beside the region chip opens a large flag (`RegionFlagInfo`, `assets/flags-lg/`, loaded on demand, not precached).
+
 ## Accounts
 
 Files: `apps/api/src/auth/`, `features/`; web `components/auth/`, `routes/features|admin/`.
@@ -285,6 +287,19 @@ SW caches `index.html`). Plate/VIN pages are `noindex`; `?lang=` selects the lan
   (`/api/auth/me` is the only skip). recognize/auth/og keep their own tighter module-level guards. Behind a proxy set `TRUST_PROXY`.
 - Legal/cookie/monetization findings: `docs/legal-and-monetization.md`.
 
+## Photo search: plate groups (2026-10-26)
+
+The ALPR returns, per plate in the photo, its best read plus up to 2 alternative reads (one character different, scored below the
+primary) **sharing the same `box`**. No schema field marks the group: `components/plate-groups.ts` (`groupCandidates`) groups candidates
+by identical box, so `schemas.ts` stays untouched (editing it discards saved offline data). A box-less read is its own group.
+The API re-ranks a group by the registry (`RegistryRankService`): an alternative that exists replaces a best read that does not, by swapping their scores.
+
+- Group color = `labelColorVar` (the HDR `--label-N` palette) shared by the chips (`PlateCandidates`) and the outline in the photo
+  (`PhotoPlateBoxes`); the number badge shows only when there are several plates, the chain icon only joins alternatives.
+- One plate with alternatives is labelled `recognize.sameCarReads`; several plates `recognize.alsoFound`.
+- The service latency budget is the API's 10 s `UPSTREAM_TIMEOUT_MS` (`local-recognize.service.ts`): after any change to
+  `services/alpr/app.py` time `eval.mjs` (`results.json` has `ms`; baseline ~0.6 s/photo) and do not use the app during an eval.
+
 ## Plate regions
 
 `regionName` (`packages/shared/src/regions.ts`) = letter prefix (`REGIONS`) or, for digits-first legacy plates, `LEGACY_REGIONS`.
@@ -382,6 +397,21 @@ Files: migrations 0068 + 0069, `scripts/src/wanted.ts` (+ `wanted-parse.ts`), `a
 - **Matching:** `plate` is `normalizePlate`d; `vin` / `vin_alt` = the VIN-shaped (17-char) body and chassis numbers (a record can carry both a local `Y6L…` body number and the maker's `KNE…` VIN) — a lookup matches either. Records without a plate (≈ 11 %) are found by VIN only. `matchedBy` says which key hit.
 - `GET /api/wanted` has the plate-lookup `@Throttle`; at least one of `plate` / `vin` is required. The section opens itself and shows a red chip when something is found; a clean result is worded "not on the list", never "clean" (not an official certificate). Link-outs: `stolen.in.ua/v/<Latin plate>` and the dataset page.
 
+## AUTO.RIA link-out for not-found plates / VINs (2026-10-25)
+
+Files: `apps/web/src/components/RiaCheckLink.tsx` (used by `NotFoundInfo` and the VIN not-found branch of `SearchRoute`), `RIA_CHECK_URL` in `packages/shared/src/riaCheck.ts`.
+
+- **The web only shows a plain link** to `auto.ria.com/uk/check-car/` (the open data starts Jan 2013; RIA's check knows some older plates). No RIA data is fetched or displayed: its robots.txt and terms forbid it, see `docs/legal-and-monetization.md` ("AUTO.RIA: link-out only").
+- **Dormant code:** `apps/api/src/ria/` (`GET /api/ria-check/:plate`, TTL cache, 4 calls / 90 s budget under RIA's 5 / 90 s cap) and the `riaCheckResponseSchema` contract stay behind `RIA_CHECK_ENABLED` (off, wired in `deploy-api.yml` + `deploy.md`). Nothing in the web calls it. Enable only with RIA's written consent, and then add a client query + card again.
+- No offline group, no new route (so no `ROUTE_TITLE_KEYS` / `STATIC_PAGES` entry).
+
+- **Copy before leaving (2026-10-26):** `RiaCheckLink` opens the auction-style modal (`AuctionVinModal` with `copyLabel` / `title` / `step1` / `step2` overrides, `result.ria.*`): the normalized plate / VIN to copy, then the site.
+
+## Verification links and chip tooltips (2026-10-25)
+
+- **Verification section:** OTK protocol (by plate) and driving-licence check link out to `opendata.hsc.gov.ua` (links only, per-site emoji tile; `verification.{otk,license}.*`). Every row has a "?" popover spelling out its abbreviations (`verification.*.about`: БДР, ПДР, ОСЦПВ, МТСБУ, ОТК, ТСЦ МВС, МВС). A new row = its `title` / `desc` / `about` strings in ua/ru/en.
+- **Ranking chips:** the tooltip leads with the ranked value and its vehicle count (`chip.tip.count`), taken from the existing `/api/stats/top` payload (no new request).
+
 ## Releases page (`/releases`, 2026-10-15)
 
 - Public "What's new" log, one `ReleaseDay` per working day in `apps/web/src/routes/releases/releases.ts` (items tagged `new | improved | data | fix`, text in ua/ru/en). **After each big update add the day's entry (or extend today's).** Data is bundled in the lazy route chunk, not in `/api`.
@@ -399,3 +429,25 @@ Runbook, secrets, folder layout: [deploy.md](deploy.md). Conventions:
 - **Never add `ports:` to postgres/alpr** (Docker-published ports bypass ufw); only Caddy publishes. Stock Caddy has no `br` encoder.
 - **Proxy maintenance answer** = `503 {"status":"maintenance","retryAfter":N}` → `MaintenanceError` (`lib/api.ts`) → patient retry + `MaintenanceBanner`
   (`lib/maintenance.ts`). Any new fetch helper must go through `unwrap` to get this for free.
+
+## Vehicle origin ("Where it comes from", 2026-10-26)
+
+Files: migration 0075, `packages/shared/src/origin.ts` (own file, no offline-cache bust), `apps/api/src/origin/` (+ pure `origin-hints.ts`), `scripts/src/ingest-brand-origin.ts` / `ingest-wmi.ts` (+ `brand-origin-overrides.ts`), `apps/web/src/components/Origin{Chip,Section,StepBody,Country,SourceLink}.tsx` + `OriginSection.helpers.ts`, `Flag.tsx`, `LegacyFlag.tsx`, `Timeline.tsx` (shared with `RegistrationTimeline`). Plan and decisions: `ORIGIN_PLAN.md`.
+
+- **Never guessed:** every step shows only when the data is known; the section renders nothing when no origin fact is known (a Ukraine step alone does not count). Hints (North-America VIN, assembly differs from brand country, brand-vs-WMI maker mismatch) are neutral and quiet by default.
+- **Data:** brand country / founded / HQ / ownership from Wikidata (`brand_origin_period`, `brand_ownership`, keyed on `brandSlug()`), WMI from NHTSA vPIC (`wmi_prefix`, fallback `lookupWmi` in `wmi.ts` for TMB / JTD / XTA). Gaps and legacy periods go in `ORIGIN_OVERRIDES` / `OWNERSHIP_OVERRIDES` / `HQ_CITY_OVERRIDES` (each with a Wikipedia source). `model_plant` exists but is empty (curated plants are release 2). Seed CSVs: `brand-origin`, `brand-ownership`, `wmi`; re-run `export:*:csv` after a real re-ingest.
+- **Legacy countries by year:** periods hold the modern ISO code; `countryAtYear(code, year)` gives `SU`, `CSHH`, `DD`, `DE-FRG`, `YU`, `CSXX`. ZAZ / LuAZ store `SU` and the UI adds "Ukrainian SSR". Names: `Intl.DisplayNames` for current countries, `country.<code>` i18n keys for former ones.
+- **Flags:** `Flag` renders `public/country-flags/<iso>.svg` (flag-icons, MIT; add a flag = copy the SVG + add it to `FLAG_CODES` in `vin/helpers.ts`); former states are inline SVG in `LegacyFlag`. No emoji flags (none exist for old states, Windows draws letters).
+- **API:** `GET /api/origin?brand=&model=&year=&vin=&plantCountry=&plantCity=` (only `brand` required; `ORIGIN_THROTTLE` 60/min). NHTSA's plant stays client-side: the web passes the decoded Plant Country as ISO and the city; without them the plant is the VIN-prefix country. Query key `['origin', ...]`, offline group `origin`.
+- **UI:** `OriginChip` (flags: brand, owner when from elsewhere, plant; popover legend; chevron bumps `openSignal`) sits under the barcode on the VIN card and after `GenerationChip` on the plate card. `OriginSection` is a `LazySection` (`?section=origin`, share id `origin`, helpers in `helpers-origin`). NHTSA plant cities are title-cased (`plantCity`).
+- **Model plants ("also built in"):** hand-curated `scripts/seed-data/model-plants.csv` -> `model_plant` (`pnpm ingest:model-plants`; edit the CSV, never the table). Keyed on `brandSlug` + `modelKey(registry model)`, so list every registry spelling in `models` (`A|B`). The web shows only plants open in the car year and not the car's own plant. Every row needs a Wikipedia URL (parser rejects others); `from_year` 0 = unknown.
+- **Import wording:** the registry says only "from abroad" with no country, so the Ukraine step shows "imported" / "registered", never a source country.
+- **Stats panel (`/stats`, `OriginStatsPanel`):** passenger cars by brand home country and by VIN assembly country, from the rollup `stats_origin` (migration 0076, `pnpm db:refresh-origin-stats`, part of `db:refresh-derived`; re-run after `ingest:brand-origin` / `ingest:wmi`). Same period rules as the VIN page (`pickByYear` + `countryAtYear` by model year; Soviet-built = USSR). Unknown brand or non-standard VIN counts under "unknown", never guessed. `GET /api/stats/origin`, online-only.
+- **A VIN with no brand** (no registry match and no NHTSA Make) shows no chip or section; there is no WMI-only brand fallback.
+
+## Claude Code mod: Token Weather (2026-10-27)
+
+- **Dev tooling, not an app feature.** `.claude/mods/token-weather/` is a self-contained Claude Code plugin (context-window forecast band above the prompt); the app never imports it. Excluded from ESLint (`.claude/mods/**`), outside the pnpm workspace. Shows in the terminal CLI and the VS Code panel.
+- **Enable (once per machine):** Manage plugins -> Marketplaces -> add the folder path `<repo>\.claude\mods\token-weather` (marketplace `local-mods`), then Plugins -> install `token-weather@local-mods`. Settings-file entries (`extraKnownMarketplaces` / `enabledPlugins`) did not register it. It loads from the folder in place, so edits apply on the next session.
+- **Copy to another project:** copy the folder, then repeat the enable step. Options (`enabled`, `showSparkline`, `showStartupNotice`) are in the plugin's settings.
+- **Authoring rule:** the engine rejects the whole module if `$` is passed to a function that is not declared at the top level of `register.tsx` (helpers taking `$` must be top-level). Failures show as `token-weather: ... module did not load` in `claude --debug`; the log path is printed at startup.

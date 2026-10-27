@@ -3,6 +3,8 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router'
 
+import InfoPopover from '@/components/InfoPopover'
+import InfoText from '@/components/InfoText'
 import SectionCount from '@/components/SectionCount'
 import SectionHeader from '@/components/SectionHeader'
 import SectionInfo from '@/components/SectionInfo'
@@ -11,10 +13,12 @@ import { cn } from '@/lib/cn'
 import { scrollElementIntoView } from '@/lib/share-section'
 
 type VerificationSite = {
-  id: 'bdr' | 'mtsbu' | 'shtrafua' | 'pdr'
+  id: 'bdr' | 'mtsbu' | 'otk' | 'license' | 'shtrafua' | 'pdr'
   url: string
   /** Absent when we are not cleared to show the logo — an emoji tile is drawn instead. */
   icon?: string
+  /** The emoji tile drawn when there is no logo. */
+  emoji?: string
   /** The logo has white lettering — it needs a dark backdrop to be readable on the light card. */
   darkBg?: boolean
   /** Wide wordmark vs. square emblem. */
@@ -24,9 +28,11 @@ type VerificationSite = {
 const VERIFICATION_SITES: VerificationSite[] = [
   { id: 'bdr', url: 'https://bdr.mvs.gov.ua/', icon: '/icons/bdr.svg', iconClass: 'size-8' },
   { id: 'mtsbu', url: 'https://policy.mtsbu.ua/', icon: '/icons/mtsbu.svg', darkBg: true, iconClass: 'h-5 w-auto' },
+  // No logos for the HSC open-data checks or the official-tests site: none grants reuse of its mark.
+  { id: 'otk', url: 'https://opendata.hsc.gov.ua/search-otk/veh/', emoji: '🔧', iconClass: 'text-xl' },
+  { id: 'license', url: 'https://opendata.hsc.gov.ua/check-driver-license/', emoji: '🪪', iconClass: 'text-xl' },
   { id: 'shtrafua', url: 'https://shtrafua.com', icon: '/icons/shtrafua.png', iconClass: 'h-5 w-auto' },
-  // No logo: the official-tests site grants no reuse of its mark.
-  { id: 'pdr', url: 'https://pdr.infotech.gov.ua/', iconClass: 'text-xl' }
+  { id: 'pdr', url: 'https://pdr.infotech.gov.ua/', emoji: '📝', iconClass: 'text-xl' }
 ]
 
 /**
@@ -72,12 +78,12 @@ export default function VerificationLinks(): ReactNode {
         <div className="overflow-hidden">
           <ul className="mt-3 space-y-1.5">
             {VERIFICATION_SITES.map(site => (
-              <li key={site.id}>
+              <li key={site.id} className="flex items-start gap-1 sm:items-center">
                 <a
                   href={site.url}
                   target="_blank"
                   rel="noopener noreferrer nofollow"
-                  className="flex items-start justify-between gap-3 rounded-md px-2 py-1.5 text-base text-[var(--color-primary)] transition-colors hover:bg-[var(--color-border)]/40 sm:items-center"
+                  className="flex min-w-0 flex-1 items-start justify-between gap-3 rounded-md px-2 py-1.5 text-base text-[var(--color-primary)] transition-colors hover:bg-[var(--color-border)]/40 sm:items-center"
                 >
                   <span className="flex min-w-0 flex-col items-start gap-2 sm:flex-row sm:items-center sm:gap-3">
                     <span
@@ -90,7 +96,7 @@ export default function VerificationLinks(): ReactNode {
                         <img src={site.icon} alt="" className={cn('max-w-full object-contain', site.iconClass)} />
                       ) : (
                         <span aria-hidden className={cn('leading-none', site.iconClass)}>
-                          📝
+                          {site.emoji}
                         </span>
                       )}
                     </span>
@@ -104,6 +110,16 @@ export default function VerificationLinks(): ReactNode {
                   <span aria-hidden>↗</span>
                   <span className="sr-only">{t('field.opensNewTab')}</span>
                 </a>
+
+                {/* Outside the link: a button cannot nest in an anchor. Spells out the abbreviations used in this row. */}
+                <span className="mt-2 shrink-0 sm:mt-0">
+                  <InfoPopover
+                    label={t('vin.info.about', { field: t(`verification.${site.id}.title`) })}
+                    title={t(`verification.${site.id}.title`)}
+                  >
+                    <InfoText text={t(`verification.${site.id}.about`)} />
+                  </InfoPopover>
+                </span>
               </li>
             ))}
           </ul>
