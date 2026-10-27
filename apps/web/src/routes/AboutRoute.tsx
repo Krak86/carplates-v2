@@ -181,6 +181,7 @@ const SOURCES: readonly Source[] = [
   { key: 'posthog', label: 'PostHog', url: 'https://posthog.com', icon: '/icons/sources/posthog.webp' },
   { key: 'sentry', label: 'Sentry', url: 'https://sentry.io', icon: '/icons/sources/sentry.webp' },
   // No logos below: no licence found for the marks; plain tiles only.
+  { key: 'cloudflare', label: 'Cloudflare', url: 'https://www.cloudflare.com', tile: 'bg-orange-600' },
   {
     key: 'turnstile',
     label: 'Cloudflare Turnstile',
@@ -251,9 +252,12 @@ const FEATURES = [
   'guides',
   'stats',
   'news',
+  'whatsnew',
   'race',
   'account',
   'copy',
+  'discuss',
+  'share',
   'pwa'
 ] as const
 

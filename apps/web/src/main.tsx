@@ -2,6 +2,7 @@ import { StrictMode } from 'react'
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router'
+import { z } from 'zod'
 
 import App from '@/App'
 import { i18nReady } from '@/i18n'
@@ -11,6 +12,9 @@ import { queryPersister, reportOfflineUsage, syncDataVersion } from '@/lib/offli
 import { queryClient } from '@/lib/query'
 import { initTelemetry } from '@/lib/telemetry'
 import '@/styles/global.css'
+
+// Zod's JIT probes `new Function` on every schema; a CSP without 'unsafe-eval' would flag each probe.
+z.config({ jitless: true })
 
 const telemetryReady = initTelemetry()
 

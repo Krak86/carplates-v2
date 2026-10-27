@@ -11,10 +11,46 @@ export const RELEASES: readonly ReleaseDay[] = [
     date: '2026-10-27',
     items: [
       item(
+        'fix',
+        'Пошук за фото: повільне розпізнавання більше не завершується помилкою, його можна пропустити',
+        'Поиск по фото: медленное распознавание больше не завершается ошибкой, его можно пропустить',
+        'Photo search: slow recognition no longer fails, and you can skip it'
+      ),
+      item(
+        'data',
+        'На сторінці «Про проєкт» додано Cloudflare (CDN і кеш) у джерелах, а також обговорення та посилання з картками-превʼю у можливостях',
+        'На странице «О проекте» добавлены Cloudflare (CDN и кеш) в источники, а также обсуждение и ссылки с карточками-превью в возможности',
+        'The About page now lists Cloudflare (CDN and cache) among its sources, plus discussion and link-preview sharing among the features'
+      ),
+      item(
+        'improved',
+        'PDF і Word з «Копіювати всю інформацію» стали гарнішими: кольорова плашка розшуку, шлях походження кроками, таблиці з заголовком і зеброю та смуга-підсумок на початку',
+        'PDF и Word из «Копировать всю информацию» стали аккуратнее: цветная плашка розыска, путь происхождения шагами, таблицы с заголовком и зеброй и полоса-итог в начале',
+        'The PDF and Word from "Copy all info" look better: a coloured wanted banner, the origin as steps, tables with a shaded header and zebra rows, and a summary strip on the cover'
+      ),
+      item(
+        'improved',
+        '«Копіювати всю інформацію» тепер містить «Звідки авто» та перевірку розшуку (з історією записів) і відповідні джерела',
+        '«Копировать всю информацию» теперь включает «Откуда авто» и проверку розыска (с историей записей) и соответствующие источники',
+        '"Copy all info" now includes "Where it comes from" and the wanted check (with record history), plus their sources'
+      ),
+      item(
+        'new',
+        'Дзвінок у шапці: крапка, коли є нові оновлення, і список останніх змін зі посиланням на «Що нового»',
+        'Колокольчик в шапке: точка, когда есть новые обновления, и список последних изменений со ссылкой на «Что нового»',
+        'A bell in the header: a dot when there are new updates, with a dropdown of the latest changes linking to What’s new'
+      ),
+      item(
         'new',
         'Новини: показано, коли їх востаннє оновлено, - на сторінці /news та в розділі новин картки авто; на /wanted - дату оновлення списку поліції',
         'Новости: показано, когда они обновлялись в последний раз, - на странице /news и в разделе новостей карточки авто; на /wanted - дата обновления списка полиции',
         'News: shows when it was last updated - on /news and in the result card News section; /wanted shows the police list refresh date'
+      ),
+      item(
+        'improved',
+        'Панель шарів фону та дзвінок оновлень показують скелетон, поки завантажуються',
+        'Панель слоёв фона и колокольчик обновлений показывают скелетон, пока загружаются',
+        'The background-layers panel and the updates bell show a skeleton while they load'
       ),
       item(
         'improved',

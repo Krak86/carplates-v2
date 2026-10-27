@@ -852,6 +852,9 @@ Group 1 dimension callouts + garage-fit -> Group 3 (existing order). Owner says 
     Revisit only if a free/affordable all-makes pricing API turns up, or
     a specific brand's distributor ships a real public feed (not a PDF).
 
+- ✅ Export polish: prettier PDF / Word done 2026-10-27 (verdict banner, origin timeline, table polish, cover strip; `docs/plan-done.md` "Export polish"). Skipped on purpose: country flags in origin rows, extra chart types, a PDF layout library.
+- ✅ About page refresh (Cloudflare source, discuss + share features) and photo-search timeout fix done 2026-10-27 (`docs/plan-done.md` "About page refresh").
+
 ## Phase 4 — VPS / production
 
 The recurring-job plan (cadences, locking, run log, alerting, build steps) is drafted in [SCHEDULE.md](SCHEDULE.md) — build it as part of this phase.
@@ -872,8 +875,8 @@ VPS sizing, provider shortlist (Contabo Cloud VPS 6), static IP and DNS: [docs/d
   below) · Redis (RIA + VIN cache, throttler store) · api · web · ingest-cron
 - ✅ Deploy tooling written 2026-10-15 (api/alpr Dockerfiles, `infra/docker-compose.prod.yml` + Caddyfile + maintenance page, blue/green api deploy,
   web symlink releases, 3 path-filtered GitHub workflows, bootstrap + backup scripts, web maintenance banner) — ✅ **first real VPS deploy done 2026-10-27** (`docs/plan-done.md` "First VPS deploy"); next steps (R2 backups first, SSH hardening check, UptimeRobot, security gate, smoke test, secrets rotation): [docs/deploy.md](docs/deploy.md) "Still open".
-  Runbook, secrets list and what is still open: [docs/deploy.md](docs/deploy.md). Still to build: `ingest-cron` image + `run-job.ts` (SCHEDULE.md), Redis throttler store.
-- Monthly CKAN ingest cron on the VPS (`ingest.ts`, self-checks `ingested_resources`)
+  Runbook, secrets list and what is still open: [docs/deploy.md](docs/deploy.md). Still to build: `ingest-cron` image + `run-job.ts` (SCHEDULE.md; first entries are the RSS jobs `ingest:news` every ~6 h and `ingest:social` daily), Redis throttler store.
+- CKAN plate ingest cron on the VPS, twice a week (`ingest.ts`, self-checks `ingested_resources`; cadence in SCHEDULE.md)
 - ✅ OG image endpoint — done 2026-10-01 (plate **and** VIN, `resvg-js` + bundled Noto Sans, never
   Puppeteer; see `docs/plan-done.md` "Link previews"). Still for deploy: set `PUBLIC_SITE_URL` to the real
   domain, make sure `fonts/` + `logos/` ship in `WEB_DIST_DIR`, and put a CDN/Caddy cache in front of `/og/`
@@ -1027,6 +1030,7 @@ card-on-file subscriptions; revisit with real quotes.
   `(telegram, <numeric id>)` only; `users.email` is nullable or a placeholder, so decide this before the migration, and
   offer "add email" on `/profile` to enable linking/recovery. Also needs `auth_identities` linking by provider subject
   (never by unverified email).
+- ✅ **Header What's-new bell + lazy-panel skeletons (2026-10-27):** unread dot from a localStorage seen-date, latest-5 dropdown linking to `/releases`; skeletons for the bell and layers panels — see `docs/plan-done.md`.
 - ✅ **Read guides `/read` (2026-10-16):** hub + "Body types" and "Sizes" articles with live examples, size explorer and plate-card links (`stats_size_models`, migration 0071) — conventions in `docs/features-reference.md` "Read guides"; write-up in `docs/plan-done.md`. ✅ `/read/fleet` (colours/fuel/registration years). ✅ `/read/plates` (anatomy, region codes, region-less series). ✅ `/read/generations` (size growth per generation from RDW year-medians, no migration). ✅ `/read/electric` (EVs by model year/region/model + plug guide; `stats_ev`, migration 0072). ✅ `/read/imports` (imports vs dealer by year, models, VIN build country; `stats_imports`, migration 0073). ✅ `/read/safety` (crash tests, reads `/api/safety/stats`). ✅ `/read/fuel` (fuel mix, CO₂ by band/year/model, reads `/api/fuel/stats`). ✅ `/read/vin` (VIN anatomy, type-a-VIN breakdown, year codes, where to find it; static). ✅ `/read/extremes` (heaviest/lightest + power/size records; reuses the `/stats` panels, no new API). Twelfth: `/read/recalls` (recalls vs common faults; model picker over the existing RDW/NHTSA/CA/MOT endpoints, no new API). ✅ Blog-style guide covers/date/copy-link, card → guide links, mass-schema GVM/TBM/GTM/ATM/GCM relations.
 - ✅ **Card → guide cross-links (2026-10-16):** `ReadGuideLink` pill with a right arrow at the foot of each card / VIN section, pointing to its /read guide; `GUIDE_META` in `read/links.ts` — see `docs/features-reference.md` "Read guides".
 - ✅ **Vehicle origin (2026-10-26):** flags chip + `?section=origin` timeline (brand country, ownership, assembly, Ukraine) from Wikidata + NHTSA WMI, legacy countries by year; curated model plants and stats breakdown deferred — see `docs/plan-done.md`.

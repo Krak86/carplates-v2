@@ -40,7 +40,7 @@ Ukrainian vehicle lookup by **plate number** or **VIN**. Rebuild of
 - Company news (Yahoo Finance) next to the share price, and passwordless email / Google / Telegram sign-in with a `/profile` page
 - **Size & parking** section and a size-class chip (`?section=size&tab=schema|parking|garage|norms`): dimensions merged from RDW / Wikipedia / VIN, a to-scale drawing, parking-place and garage fit checks against the Ukrainian norms (ДБН, ПДР)
 - **Wanted (stolen) check** by plate or VIN from the National Police open data (`pnpm ingest:wanted`, `registry.wanted_vehicles`, `GET /api/wanted`); a red chip shows only when something is listed. Live data, not part of the seed CSVs
-- **What's new** page (`/releases`): day-by-day change log in ua/ru/en, linked from the sidebar and the PWA update bar ("Update & see what's new")
+- **What's new** page (`/releases`): day-by-day change log in ua/ru/en, linked from the sidebar and the PWA update bar ("Update & see what's new"); a header bell shows a dot for unseen updates and a dropdown of the latest ones
 - Result-card sections link to each other (row "jump" arrows, Specs group links, "?" explainers on header chips); the About page lists the features and every data source
 
 pnpm monorepo · Node 24 · React 19 + Vite 8 · NestJS 11 + Fastify · Drizzle + Postgres 18.

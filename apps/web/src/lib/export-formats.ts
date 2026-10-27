@@ -1,9 +1,23 @@
-import type { ExportReport, ExportSection } from '@/lib/export-report'
+import { EXPORT_TONE_MARKER } from '@/lib/export-report'
+import type { ExportKeyValueSection, ExportReport, ExportSection } from '@/lib/export-report'
+
+/** The rows of a kv section, the verdict row (first, when the section has a tone) prefixed with its text marker. */
+function kvRows(section: ExportKeyValueSection): ExportKeyValueSection['rows'] {
+  const { tone } = section
+  if (!tone) return section.rows
+  return section.rows.map((row, i) => (i === 0 ? { ...row, value: `${EXPORT_TONE_MARKER[tone]} ${row.value}` } : row))
+}
+
+/** The cover strip as one line ("[!] Wanted · Kyiv · 2020"), or null when the report has none. */
+function summaryLine(report: ExportReport): string | null {
+  const items = report.summary?.map(s => (s.tone ? `${EXPORT_TONE_MARKER[s.tone]} ${s.text}` : s.text)) ?? []
+  return items.length > 0 ? items.join(' · ') : null
+}
 
 function sectionToTextLines(section: ExportSection): string[] {
   const lines: string[] = [`## ${section.title}`]
   if (section.type === 'kv') {
-    for (const row of section.rows) lines.push(`${row.label}: ${row.value}`)
+    for (const row of kvRows(section)) lines.push(`${row.label}: ${row.value}`)
   } else if (section.type === 'text') {
     lines.push(...section.paragraphs)
   } else if (section.type === 'table' || section.type === 'chart') {
@@ -19,6 +33,8 @@ function sectionToTextLines(section: ExportSection): string[] {
 /** Plain text — used for both the clipboard copy and the .txt download. */
 export function toPlainText(report: ExportReport): string {
   const lines = [report.title, report.subtitle, report.generatedAtLabel, '']
+  const summary = summaryLine(report)
+  if (summary) lines.splice(2, 0, summary)
   if (report.heroImage) lines.splice(1, 0, report.heroImage.url)
   for (const section of report.sections) lines.push(...sectionToTextLines(section), '')
   return lines.join('\n').trim() + '\n'
@@ -32,7 +48,7 @@ function sectionToMarkdown(section: ExportSection): string[] {
   const lines: string[] = [`## ${section.title}`, '']
   if (section.type === 'kv') {
     lines.push('| Field | Value |', '| --- | --- |')
-    for (const row of section.rows) lines.push(`| ${escapeMd(row.label)} | ${escapeMd(row.value)} |`)
+    for (const row of kvRows(section)) lines.push(`| ${escapeMd(row.label)} | ${escapeMd(row.value)} |`)
   } else if (section.type === 'text') {
     for (const p of section.paragraphs) lines.push(p, '')
   } else if (section.type === 'table' || section.type === 'chart') {
@@ -51,7 +67,10 @@ export function toMarkdown(report: ExportReport): string {
   if (report.logo) lines.push(`![${report.logo.alt}](${report.logo.url})`, '')
   lines.push(`# ${report.title}`, '')
   if (report.heroImage) lines.push(`![${report.heroImage.alt}](${report.heroImage.url})`, '')
-  lines.push(`*${report.subtitle}*`, '', `*${report.generatedAtLabel}*`, '')
+  lines.push(`*${report.subtitle}*`, '')
+  const summary = summaryLine(report)
+  if (summary) lines.push(`**${summary}**`, '')
+  lines.push(`*${report.generatedAtLabel}*`, '')
   for (const section of report.sections) lines.push(...sectionToMarkdown(section), '')
   return lines.join('\n').trim() + '\n'
 }
@@ -70,7 +89,7 @@ function sectionToCsvBlock(section: ExportSection): string[] {
   const lines: string[] = [csvLine([`# ${section.title}`])]
   if (section.type === 'kv') {
     lines.push(csvLine(['Field', 'Value']))
-    for (const row of section.rows) lines.push(csvLine([row.label, row.value]))
+    for (const row of kvRows(section)) lines.push(csvLine([row.label, row.value]))
   } else if (section.type === 'text') {
     for (const p of section.paragraphs) lines.push(csvLine([p]))
   } else if (section.type === 'table' || section.type === 'chart') {
@@ -97,6 +116,8 @@ function sectionToCsvBlock(section: ExportSection): string[] {
  */
 export function toCsv(report: ExportReport): string {
   const lines = [csvLine([report.title]), csvLine([report.subtitle]), csvLine([report.generatedAtLabel]), '']
+  const summary = summaryLine(report)
+  if (summary) lines.splice(2, 0, csvLine([summary]))
   if (report.heroImage) lines.splice(1, 0, csvLine([report.heroImage.url]))
   for (const section of report.sections) lines.push(...sectionToCsvBlock(section), '')
   return '﻿' + lines.join('\r\n').trim() + '\r\n'
