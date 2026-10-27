@@ -36,6 +36,8 @@ import {
 } from '@/components/EstimatedValue.helpers'
 import { buildGenerationSection, buildSizeSection } from '@/lib/export-size'
 import { buildNewsSections, buildSourcesSection } from '@/lib/export-news'
+import { buildOriginSection, buildWantedSection } from '@/lib/export-verify'
+import type { ExportVerifyInput } from '@/lib/export-verify'
 import type { ExportNewsInput } from '@/lib/export-news'
 import { buildMotSections, buildRecallSections } from '@/lib/export-recalls-mot'
 import { orderedEditions } from '@/components/PressReviews.helpers'
@@ -146,51 +148,52 @@ export type ExportReport = {
 
 export type ExportVehicleInfo = { brand: string | null; model: string | null; year: number | null; body: string | null }
 
-export type ExportInput = ExportNewsInput & {
-  vehicle: ExportVehicleInfo
-  plate: string | null
-  region: string | null
-  /** The vehicle's latest known registration row, when we have one (null for a VIN with no registry match). */
-  current: Registration | null
-  vin: string | null
-  vinDecodeResults: { variable: string; value: string }[] | null
-  plateHistoryActions: Registration[] | null
-  vinHistoryActions: Registration[] | null
-  wiki: WikiInfo | null
-  /** Fuel/CO2 estimate for similar vehicles — the same data the ResultCard's "Emissions" section shows. */
-  fuel: FuelEconomyResponse | null
-  euroncap: EuroNcapRatingsResponse | null
-  nhtsa: SafetyRatingsResponse | null
-  jncap: JncapRatingsResponse | null
-  cncap: CncapRatingsResponse | null
-  kncap: KncapRatingsResponse | null
-  iihs: IihsRatingsResponse | null
-  /** Same rollup TopStatBadges reads on the result card — backs the "Rankings" section below. */
-  stats: StatsTopResponse | null
-  /** Dutch-register specs (RDW) for the make/model/year — the "Specs" section. */
-  rdw: RdwResponse | null
-  /** Wikipedia catalogue figures of the generation — the "Generation specs" section, also a source of the size figures. */
-  wikiSpecs?: WikiSpecsResponse | null
-  /** VehiclesDB cross-market facts — the chips beside the title. */
-  vdb: VdbResponse | null
-  /** infocar / press / TopGear / e-drive catalog — the "Reviews" and "Videos" sections. */
-  reviews: ReviewsResponse | null
-  /** Recall campaigns: EU (RDW), US (NHTSA) + owner complaints, Canada (no US twin) — the "Recalls" block. */
-  rdwRecalls: RdwRecallsResponse | null
-  nhtsaRecalls: NhtsaRecallsResponse | null
-  nhtsaComplaints: NhtsaComplaintsResponse | null
-  caRecalls: CaRecallsResponse | null
-  /** UK MOT fail / advisory rates by mileage — the "Common faults" section. */
-  mot: MotResponse | null
-  /** The model's generation for this model year (Wikidata / Wikipedia), when one fits. */
-  generation?: Generation | null
-  /** NBU rates for the currency rows of the price section; null = euros only. */
-  fx: FxResponse | null
-  /** The VIN section's NHTSA localizer (labels / values in the UI language); absent = raw English. */
-  vinText?: { label: (variable: string) => Bilingual; value: (variable: string, raw: string) => Bilingual }
-  /** UI language code (ua / ru / en): localizes country names, number grouping and press editions. */
-  lang: string
-}
+export type ExportInput = ExportNewsInput &
+  ExportVerifyInput & {
+    vehicle: ExportVehicleInfo
+    plate: string | null
+    region: string | null
+    /** The vehicle's latest known registration row, when we have one (null for a VIN with no registry match). */
+    current: Registration | null
+    vin: string | null
+    vinDecodeResults: { variable: string; value: string }[] | null
+    plateHistoryActions: Registration[] | null
+    vinHistoryActions: Registration[] | null
+    wiki: WikiInfo | null
+    /** Fuel/CO2 estimate for similar vehicles — the same data the ResultCard's "Emissions" section shows. */
+    fuel: FuelEconomyResponse | null
+    euroncap: EuroNcapRatingsResponse | null
+    nhtsa: SafetyRatingsResponse | null
+    jncap: JncapRatingsResponse | null
+    cncap: CncapRatingsResponse | null
+    kncap: KncapRatingsResponse | null
+    iihs: IihsRatingsResponse | null
+    /** Same rollup TopStatBadges reads on the result card — backs the "Rankings" section below. */
+    stats: StatsTopResponse | null
+    /** Dutch-register specs (RDW) for the make/model/year — the "Specs" section. */
+    rdw: RdwResponse | null
+    /** Wikipedia catalogue figures of the generation — the "Generation specs" section, also a source of the size figures. */
+    wikiSpecs?: WikiSpecsResponse | null
+    /** VehiclesDB cross-market facts — the chips beside the title. */
+    vdb: VdbResponse | null
+    /** infocar / press / TopGear / e-drive catalog — the "Reviews" and "Videos" sections. */
+    reviews: ReviewsResponse | null
+    /** Recall campaigns: EU (RDW), US (NHTSA) + owner complaints, Canada (no US twin) — the "Recalls" block. */
+    rdwRecalls: RdwRecallsResponse | null
+    nhtsaRecalls: NhtsaRecallsResponse | null
+    nhtsaComplaints: NhtsaComplaintsResponse | null
+    caRecalls: CaRecallsResponse | null
+    /** UK MOT fail / advisory rates by mileage — the "Common faults" section. */
+    mot: MotResponse | null
+    /** The model's generation for this model year (Wikidata / Wikipedia), when one fits. */
+    generation?: Generation | null
+    /** NBU rates for the currency rows of the price section; null = euros only. */
+    fx: FxResponse | null
+    /** The VIN section's NHTSA localizer (labels / values in the UI language); absent = raw English. */
+    vinText?: { label: (variable: string) => Bilingual; value: (variable: string, raw: string) => Bilingual }
+    /** UI language code (ua / ru / en): localizes country names, number grouping and press editions. */
+    lang: string
+  }
 
 type Row = { label: string; value: string }
 
@@ -911,6 +914,8 @@ export function buildExportReport(input: ExportInput, t: Translate): ExportRepor
     kncapTable(input.kncap, t),
     iihsTable(input.iihs, input.vehicle.body, t),
     buildVdbSection(input, t),
+    buildOriginSection(input, t),
+    buildWantedSection(input, t),
     buildRdwSection(input, t),
     buildGenerationSection(input, t),
     buildSizeSection(input, t),

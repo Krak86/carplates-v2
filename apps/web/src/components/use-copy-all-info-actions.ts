@@ -23,6 +23,7 @@ import {
   kncapRatingsQuery,
   motQuery,
   newsQuery,
+  originQuery,
   nhtsaComplaintsQuery,
   nhtsaRecallsQuery,
   plateHistoryQuery,
@@ -33,10 +34,12 @@ import {
   statsTopQuery,
   stockNewsQuery,
   vdbQuery,
+  wantedQuery,
   vinQuery,
   wikiInfoQuery,
   wikiSpecsQuery
 } from '@/lib/queries'
+import { countryIso } from '@/components/vin/helpers'
 import { copyToClipboard } from '@/lib/share-section'
 
 export type CopyAllInfoParams = {
@@ -113,7 +116,8 @@ export function useCopyAllInfoActions(params: CopyAllInfoParams): UseCopyAllInfo
       bluesky,
       stackExchange,
       lemmy,
-      stockNews
+      stockNews,
+      wanted
     ] = await Promise.all([
       plate ? safe(queryClient.ensureQueryData(plateHistoryQuery(plate))) : Promise.resolve(null),
       params.vinDecodeResults == null && vin ? safe(queryClient.ensureQueryData(vinQuery(vin))) : Promise.resolve(null),
@@ -190,8 +194,29 @@ export function useCopyAllInfoActions(params: CopyAllInfoParams): UseCopyAllInfo
         : Promise.resolve(null),
       vehicle.brand
         ? safe(queryClient.ensureQueryData({ ...stockNewsQuery(make), ...FAIL_FAST_OFFLINE }))
+        : Promise.resolve(null),
+      plate || vin
+        ? safe(queryClient.ensureQueryData({ ...wantedQuery(plate, vin), ...FAIL_FAST_OFFLINE }))
         : Promise.resolve(null)
     ])
+
+    // Needs the decoded VIN (NHTSA plant), so it runs after the batch above.
+    const vinResults = params.vinDecodeResults ?? vinDetail?.results ?? null
+    const plantField = (name: string): string | undefined => vinResults?.find(r => r.variable === name)?.value
+    const origin = vehicle.brand
+      ? await safe(
+          queryClient.ensureQueryData(
+            originQuery({
+              brand: make,
+              model: vehicle.model,
+              year: vehicle.year,
+              vin,
+              plantCountry: countryIso(plantField('Plant Country')),
+              plantCity: plantField('Plant City')
+            })
+          )
+        )
+      : null
 
     return {
       vehicle,
@@ -228,6 +253,8 @@ export function useCopyAllInfoActions(params: CopyAllInfoParams): UseCopyAllInfo
       stackExchange,
       lemmy,
       stockNews,
+      origin,
+      wanted,
       lang: i18n.language
     }
   }

@@ -122,7 +122,12 @@ const SOURCE = {
   bluesky: { label: 'Bluesky', url: 'https://bsky.app' },
   stackExchange: { label: 'Stack Exchange', url: 'https://mechanics.stackexchange.com' },
   lemmy: { label: 'Lemmy', url: 'https://lemmy.world' },
-  yahoo: { label: 'Yahoo Finance', url: 'https://finance.yahoo.com' }
+  yahoo: { label: 'Yahoo Finance', url: 'https://finance.yahoo.com' },
+  police: {
+    label: 'National Police of Ukraine (data.gov.ua)',
+    url: 'https://data.gov.ua/dataset/2cd12755-834b-4c43-9026-fe356ce93af5'
+  },
+  stolenIn: { label: 'stolen.in.ua', url: 'https://stolen.in.ua' }
 } as const satisfies Record<string, SourceEntry>
 
 const NEWS_OUTLET_URL: Readonly<Record<string, string>> = {
@@ -146,7 +151,15 @@ export function buildSourcesSection(input: ExportInput & ExportNewsInput, t: Tra
   }
 
   add(SOURCE.registry, input.current || input.plateHistoryActions || input.vinHistoryActions)
-  add(SOURCE.nhtsa, input.vinDecodeResults || input.nhtsa || input.nhtsaRecalls || input.nhtsaComplaints)
+  add(
+    SOURCE.nhtsa,
+    input.vinDecodeResults ||
+      input.nhtsa ||
+      input.nhtsaRecalls ||
+      input.nhtsaComplaints ||
+      input.origin?.plant ||
+      input.origin?.wmi
+  )
   add(SOURCE.euroncap, input.euroncap)
   add(SOURCE.jncap, input.jncap)
   add(SOURCE.cncap, input.cncap)
@@ -156,9 +169,11 @@ export function buildSourcesSection(input: ExportInput & ExportNewsInput, t: Tra
   add(SOURCE.rdw, input.rdw || input.rdwRecalls)
   add(SOURCE.canada, input.caRecalls)
   add(SOURCE.mot, input.mot)
-  add(SOURCE.wiki, input.wiki || input.wikiSpecs || input.generation)
+  add(SOURCE.wiki, input.wiki || input.wikiSpecs || input.generation || input.origin?.brand)
   add(SOURCE.vdb, input.vdb)
   add(SOURCE.nbu, input.fx)
+  add(SOURCE.police, input.wanted)
+  add(SOURCE.stolenIn, input.wanted?.historySource)
 
   const outletKeys = new Set(
     (input.news?.items ?? []).map(
