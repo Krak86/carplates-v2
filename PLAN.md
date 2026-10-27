@@ -853,6 +853,7 @@ Group 1 dimension callouts + garage-fit -> Group 3 (existing order). Owner says 
     a specific brand's distributor ships a real public feed (not a PDF).
 
 - ✅ Export polish: prettier PDF / Word done 2026-10-27 (verdict banner, origin timeline, table polish, cover strip; `docs/plan-done.md` "Export polish"). Skipped on purpose: country flags in origin rows, extra chart types, a PDF layout library.
+- ✅ About page refresh (Cloudflare source, discuss + share features) and photo-search timeout fix done 2026-10-27 (`docs/plan-done.md` "About page refresh").
 
 ## Phase 4 — VPS / production
 

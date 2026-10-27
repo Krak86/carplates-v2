@@ -3878,3 +3878,7 @@ Header bell (`NewsBell.tsx`, next to the layers button, hidden offline): a dot w
 ## Export polish: prettier PDF / Word (2026-10-27)
 
 Four steps of the plan, in order: (1) verdict banner (`tone` on `ExportKeyValueSection`; wanted = alert, was = neutral, clear = ok); (2) origin as a numbered timeline (`layout: 'timeline'`, alternatives / hints / source are `note` rows under their step); (3) table polish in PDF and Word (shaded header, zebra, fixed kv label column of 30%, whole rows, header repeated after a page break; no new dependency); (4) cover strip (`summary`: verdict, region, year, fuel). Text formats get `[!]`/`[OK]`/`[i]` markers and a one-line strip. Checked with a rendered ua sample (wanted history, origin, a 70-row table) as PDF / docx / md / csv: Cyrillic, banner, timeline and page breaks fine in the PDF; the docx XML has `cantSplit`, `tblHeader`, shading, fixed layout and the banner edge (not opened in Word itself). Tests: `export-report.test.ts`, `export-formats.test.ts`. Still skipped: country flags (SVG rasterising), more chart types, a PDF layout library.
+
+## About page refresh and photo-search timeout (2026-10-27)
+
+About: Cloudflare added to `SOURCES` (`about.source.cloudflare`, CDN and cache, plain tile - no logo licence) and two features to `FEATURES` (`discuss`, `share`), ua/ru/en. Photo search: slow recognition no longer errors out and can be skipped (`ArSearchButton.tsx`, `local-recognize.service.ts`); the alpr container got 3 CPUs on the 6-core VPS. Releases entries added for both.
