@@ -56,7 +56,7 @@ export default function SpecModelsPanel({ stacked = false }: Props): ReactNode {
       </div>
 
       {board && (
-        <div key={metric} className={cn('grid gap-3', !stacked && 'md:grid-cols-2')}>
+        <div key={metric} className={cn('grid grid-cols-1 gap-3', !stacked && 'md:grid-cols-2')}>
           <Card>
             <SpecModelList title={t(`stats.spec.highest.${metric}`)} metric={metric} models={board.highest} />
           </Card>

@@ -16,7 +16,7 @@ export default function FuelModelsPanel({ stats }: Props): ReactNode {
   const info = <SectionInfo section="fuelModels" title={t('fuel.models.title')} />
 
   return (
-    <div className="mb-6 grid gap-3 md:grid-cols-2">
+    <div className="mb-6 grid grid-cols-1 gap-3 md:grid-cols-2">
       <Card>
         <FuelModelList title={t('fuel.cleanest')} info={info} models={stats.cleanestModels} />
       </Card>

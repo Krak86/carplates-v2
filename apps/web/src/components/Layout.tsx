@@ -86,7 +86,7 @@ export default function Layout({ children }: Props): ReactNode {
   }, [])
 
   return (
-    <div className="flex min-h-full flex-col">
+    <div className="flex min-h-full flex-col pb-[env(safe-area-inset-bottom)]">
       <BackgroundPhotos />
       {backgroundMode !== 'images' && (
         <Suspense fallback={null}>
@@ -166,6 +166,12 @@ export default function Layout({ children }: Props): ReactNode {
         </Suspense>
       )}
       <PwaUpdatePrompt />
+
+      {/* Edge-to-edge (viewport-fit=cover): the system nav bar turns transparent, so blur what scrolls under it. */}
+      <div
+        aria-hidden
+        className="pointer-events-none fixed inset-x-0 bottom-0 z-30 h-[env(safe-area-inset-bottom)] bg-[var(--color-bg)]/50 backdrop-blur-md"
+      />
     </div>
   )
 }

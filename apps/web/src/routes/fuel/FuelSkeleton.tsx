@@ -37,7 +37,7 @@ export default function FuelSkeleton(): ReactNode {
         ))}
       </Card>
 
-      <div className="mb-6 grid gap-3 md:grid-cols-2">
+      <div className="mb-6 grid grid-cols-1 gap-3 md:grid-cols-2">
         {Array.from({ length: 2 }, (_, i) => (
           <Card key={i}>
             <Skeleton className="mb-3 h-5 w-40" />
