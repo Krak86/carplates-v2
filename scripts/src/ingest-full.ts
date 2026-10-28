@@ -61,7 +61,10 @@ async function ensureArchive2026(): Promise<boolean> {
 const SKIP_DERIVED = '--skip-derived'
 
 async function main(): Promise<void> {
-  runIngest([SKIP_DERIVED])
+  // `--archive <dir>`: keep a copy of every downloaded CKAN ZIP (scheduled runs point it at the backed-up archive folder).
+  const archiveIdx = process.argv.indexOf('--archive')
+  const archiveDir = archiveIdx >= 0 ? process.argv[archiveIdx + 1] : undefined
+  runIngest([SKIP_DERIVED, ...(archiveDir ? ['--archive', archiveDir] : [])])
   if (await ensureArchive2026()) runIngest(['--file', ARCHIVE_2026, SKIP_DERIVED])
   runIngest(['--backfill-plates', SKIP_DERIVED])
   if (!process.argv.includes(SKIP_DERIVED)) refreshDerived()

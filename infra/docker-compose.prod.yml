@@ -59,6 +59,21 @@ services:
     cpus: 3 # of 6 (Cloud VPS 6); ONNX Runtime sizes its thread pool from the host cores, so a low quota throttles it
     logging: *logging
 
+  # Scheduled ingest jobs: never started by `up`; the deploy user's crontab runs `docker compose run --rm ingest …` via infra/vps/run-ingest.sh.
+  ingest:
+    image: ghcr.io/${GH_OWNER}/carsua-ingest:${INGEST_TAG:-latest}
+    profiles: [jobs]
+    env_file: ../env/ingest.env # DATABASE_URL, HC_PING_<JOB>, optional API keys
+    volumes:
+      - ../archive:/archive # data.gov.ua source ZIPs, mirrored to R2 by backup.sh archive
+      - ../ingest-data:/repo/scripts/.data # CKAN download cache
+    depends_on:
+      postgres: { condition: service_healthy }
+    mem_limit: 2g
+    cap_drop: [ALL]
+    security_opt: ['no-new-privileges:true']
+    logging: *logging
+
   postgres:
     image: postgres:18.6
     restart: unless-stopped

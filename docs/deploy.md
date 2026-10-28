@@ -240,7 +240,9 @@ Registry data lost with the full dumps: re-ingest from `archive/` ZIPs (`backup.
 7. **Secrets hygiene.** Dev values were visible in screenshots/chat during the first deploy: rotate `POSTHOG_PERSONAL_API_KEY` and any other key you consider exposed.
    The production `AUTH_SECRET` and `POSTGRES_PASSWORD` are separate from the dev ones. Optional secrets still unset: `SENTRY_DSN` (only `VITE_SENTRY_DSN` is set, so
    server errors are not tracked), `PLATE_RECOGNIZER_CLOUD_TOKEN`. `TURNSTILE_*` is set (2026-10-27).
-8. **Ingest cron (the biggest functional gap).** `ingest-cron` image + `run-job.ts` + crontab (SCHEDULE.md) are not built, so monthly ingest and `ingest:wanted`
+8. **Ingest cron (code written 2026-10-28, not yet enabled).** Needs: merge to `main` (runs `deploy-ingest.yml`; the `deploy-api` run applies migration 0077 first, so
+   merge/deploy the api before the first cron tick), healthchecks.io checks + GitHub secrets `HC_PING_NEWS|SOCIAL|WANTED|PLATES` (periods: news/social/wanted 1 d,
+   plates 7 d + 1 d grace), then a manual dry run of each job. Details in SCHEDULE.md. The old text follows: monthly ingest and `ingest:wanted`
    run by hand on the VPS (`wanted` loses history on every skipped day; the news ticker is empty/stale). There is no `ingest` image yet, so `backup.sh full/archive`
    are manual too, and `archive` stays a no-op until the first VPS ingest. Build order (cheap, idempotent first): `pnpm ingest:news` (every ~6 h), `pnpm ingest:social`
    (daily, brand YouTube RSS), `ingest:wanted` (daily), then the plate `ingest:full` (Tue + Fri ~03:00 Kyiv). One healthchecks.io check per job; run

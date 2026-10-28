@@ -1,0 +1,105 @@
+name: Deploy ingest
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/**'
+      - 'packages/shared/**'
+      - 'packages/db/**'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - 'infra/vps/run-ingest.sh'
+      - 'infra/vps/ingest.cron'
+      - '.github/workflows/deploy-ingest.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-ingest
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    uses: ./.github/workflows/ci.yml
+
+  build:
+    needs: ci
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      owner: ${{ steps.meta.outputs.owner }}
+    steps:
+      - uses: actions/checkout@v7
+      - id: meta
+        run: echo "owner=${GITHUB_REPOSITORY_OWNER,,}" >> "$GITHUB_OUTPUT"
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: scripts/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ steps.meta.outputs.owner }}/carsua-ingest:${{ github.sha }}
+            ghcr.io/${{ steps.meta.outputs.owner }}/carsua-ingest:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    environment: production
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/ssh-setup
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          user: ${{ vars.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          known-hosts: ${{ secrets.VPS_KNOWN_HOSTS }}
+
+      - name: Sync compose file and job scripts
+        run: rsync -az --inplace infra/docker-compose.prod.yml infra/vps/run-ingest.sh infra/vps/ingest.cron vps:/opt/carsua/compose/
+
+      - name: Write ingest env
+        env:
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          HC_PING_NEWS: ${{ secrets.HC_PING_NEWS }}
+          HC_PING_SOCIAL: ${{ secrets.HC_PING_SOCIAL }}
+          HC_PING_WANTED: ${{ secrets.HC_PING_WANTED }}
+          HC_PING_PLATES: ${{ secrets.HC_PING_PLATES }}
+        run: |
+          : "${POSTGRES_PASSWORD:?POSTGRES_PASSWORD secret is missing}"
+          emit() { for n in "$@"; do v="${!n:-}"; [ -n "$v" ] && printf '%s=%s\n' "$n" "$v"; done; return 0; }
+          {
+            printf 'DATABASE_URL=postgres://carplates:%s@postgres:5432/carplates\n' "$POSTGRES_PASSWORD"
+            emit HC_PING_NEWS HC_PING_SOCIAL HC_PING_WANTED HC_PING_PLATES
+          } > ingest.env
+          ssh vps 'umask 077; cat > /opt/carsua/env/ingest.env.new && mv /opt/carsua/env/ingest.env.new /opt/carsua/env/ingest.env' < ingest.env
+          rm -f ingest.env
+
+      - name: Pull the image and install the crontab
+        run: |
+          ssh vps bash -s -- "$GITHUB_SHA" <<'EOF'
+          set -euo pipefail
+          cd /opt/carsua/compose
+          export COMPOSE_FILE=docker-compose.prod.yml
+          touch .env
+          { grep -v '^INGEST_TAG=' .env || true; echo "INGEST_TAG=$1"; } > .env.tmp && mv .env.tmp .env
+          install -d /opt/carsua/archive /opt/carsua/ingest-data
+          docker compose pull ingest
+          crontab ingest.cron
+          docker image prune -f >/dev/null
+          echo "ingest image $1 ready; crontab installed"
+          EOF

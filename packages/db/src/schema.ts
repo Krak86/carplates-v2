@@ -1182,6 +1182,21 @@ export const ingestedResources = registry.table('ingested_resources', {
 })
 export type IngestedResourceRow = typeof ingestedResources.$inferSelect
 
+/** Run log of the scheduled ingest jobs (`scripts/src/run-job.ts`); see migrations/0077_job_runs.sql. */
+export const jobRuns = registry.table(
+  'job_runs',
+  {
+    id: bigserial('id', { mode: 'number' }).primaryKey(),
+    job: text('job').notNull(),
+    startedAt: timestamp('started_at', { withTimezone: true }).notNull().defaultNow(),
+    finishedAt: timestamp('finished_at', { withTimezone: true }),
+    status: text('status').notNull().default('running'),
+    exitCode: integer('exit_code'),
+    error: text('error')
+  },
+  t => [index('ix_job_runs_job_started').on(t.job, t.startedAt.desc())]
+)
+
 /**
  * Per-(brand, model, make year) passenger-car counts joined with the combined crash score of the NCAP-style ratings
  * that apply to them — backs the /safety statistics page. Rebuilt by `scripts/src/safety-stats.ts`; see

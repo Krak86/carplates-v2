@@ -1,7 +1,11 @@
 # SCHEDULE.md
 
 Plan for the recurring ingest/refresh jobs. **Do this after the VPS deploy (PLAN.md Phase 4).**
-Nothing here is built yet — no scheduler exists in the repo. Drafted 2026-10-06.
+Drafted 2026-10-06. **Built 2026-10-28 for `news`, `social`, `wanted`, `plates`** (the rest of the table is still manual): host cron (the `deploy` user's
+crontab, `infra/vps/ingest.cron`) -> `infra/vps/run-ingest.sh <job>` -> `docker compose run --rm ingest` (image `scripts/Dockerfile`, deployed by
+`deploy-ingest.yml`) -> `scripts/src/run-job.ts` (advisory lock, timeout, `registry.job_runs` row, healthchecks ping). A job's command and timeout
+live in `scripts/src/jobs.ts`; add a job there + a crontab line + an `HC_PING_<JOB>` secret. Not yet run on the VPS: dry-run each job by hand first
+(`bash /opt/carsua/compose/run-ingest.sh news`), then check `SELECT * FROM registry.job_runs`.
 
 ## Principles
 
