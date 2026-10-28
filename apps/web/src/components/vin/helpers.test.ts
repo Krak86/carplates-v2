@@ -10,6 +10,7 @@ import {
   gvwrClass,
   parseAirbagLocations,
   parseDriveType,
+  parseSteeringSide,
   resolveYear,
   splitVin,
   toFieldMap,
@@ -64,6 +65,15 @@ describe('parseDriveType', () => {
     expect(parseDriveType('FWD/Front-Wheel Drive')).toBe('fwd')
     expect(parseDriveType('RWD/Rear-Wheel Drive')).toBe('rwd')
     expect(parseDriveType('weird')).toBeNull()
+  })
+})
+
+describe('parseSteeringSide', () => {
+  it('maps NHTSA steering location strings', () => {
+    expect(parseSteeringSide('Left-Hand Drive (LHD)')).toBe('lhd')
+    expect(parseSteeringSide('Right-Hand Drive (RHD)')).toBe('rhd')
+    expect(parseSteeringSide('Not Applicable')).toBeNull()
+    expect(parseSteeringSide(undefined)).toBeNull()
   })
 })
 

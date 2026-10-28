@@ -203,6 +203,7 @@
   "chip.tip.heaviest": "Ranked by EU unladen mass among models of the same vehicle group (cars with cars, trucks with trucks). Click to see the weight rankings.",
   "chip.tip.lightest": "Ranked by EU unladen mass among models of the same vehicle group (cars with cars, trucks with trucks). Click to see the weight rankings.",
   "chip.tip.view3d": "Interactive 3D models of this car from Sketchfab. Click to open the viewer.",
+  "chip.tip.steering.rhd": "Right-hand drive: the steering wheel is on the right (from the decoded VIN).",
   "chip.tip.view360": "360° spin photos of this car. Click to open the viewer.",
   "field.brandModel": "Make / model",
   "field.year": "Model year",

@@ -72,6 +72,7 @@ import VerificationLinks from '@/components/VerificationLinks'
 import WantedChip from '@/components/WantedChip'
 import VinDecodeTabs from '@/components/vin/VinDecodeTabs'
 import OriginChip from '@/components/OriginChip'
+import SteeringChip from '@/components/SteeringChip'
 import { ukraineFromActions } from '@/components/OriginSection.helpers'
 import { countryIso, groupFields, toFieldMap } from '@/components/vin/helpers'
 import VinSince2021Note from '@/components/vin/VinSince2021Note'
@@ -407,6 +408,7 @@ export default function ResultCard({ data }: Props): ReactNode {
                   plantCity={vinFields?.get('Plant City')}
                   onOpenSection={() => setOriginOpenSignal(n => n + 1)}
                 />
+                <SteeringChip steering={vinFields?.get('Steering Location')} />
                 <SizeClassChip
                   brand={c.brand}
                   model={c.model}
