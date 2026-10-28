@@ -19,7 +19,7 @@ export default function WeightModelsCards({ board, showGroup, stacked = false }:
   const { t } = useTranslation()
 
   return (
-    <div className={cn('grid gap-3', !stacked && 'md:grid-cols-2')}>
+    <div className={cn('grid grid-cols-1 gap-3', !stacked && 'md:grid-cols-2')}>
       <Card>
         <WeightModelList title={t('stats.weight.heaviest')} models={board.heaviest} showGroup={showGroup} />
       </Card>

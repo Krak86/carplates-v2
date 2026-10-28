@@ -131,7 +131,7 @@ function VdbStatsBody({ data }: { data: VdbStatsResponse }): ReactNode {
         </ul>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <ModelList titleKey="stats.vdb.rare" icon="💎" rows={data.rareElsewhere} />
         <ModelList titleKey="stats.vdb.uaOnly" icon="🇺🇦" rows={data.uaOnlyModels} />
       </div>

@@ -119,43 +119,45 @@ export default function PowertrainDetail({ data, rareMinCars, view, onViewChange
         ) : rows.length === 0 ? (
           <p className="text-sm text-[var(--color-muted)]">{t('fuel.pt.empty')}</p>
         ) : (
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-[var(--color-border)] text-xs text-[var(--color-muted)] uppercase">
-                <th className="w-8 py-1 text-right font-medium">#</th>
-                <th className="px-2 text-left font-medium" />
-                <th className="px-2 text-right font-medium">{t('fuel.pt.col.cars')}</th>
-                <th className="px-2 text-right font-medium">{t('fuel.pt.classShare')}</th>
-                <th className="px-2 text-right font-medium">{ownHeader}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {visible.map((r, i) => (
-                <tr
-                  key={r.key}
-                  className="animate-row-in border-b border-[var(--color-border)]/40"
-                  style={{ '--row-i': i % COLLAPSED_ROWS } as CSSProperties}
-                >
-                  <td className="py-1 text-right text-[var(--color-muted)] tabular-nums">{i + 1}</td>
-                  <td className="px-2">
-                    <span className="flex items-center gap-2">
-                      <BrandLogo brand={r.brand} size="sm" placeholder />
-                      <Link
-                        viewTransition
-                        to={`/advanced-search?${searchQuery(r, shown.data.fuelClass)}`}
-                        className="min-w-0 truncate text-[var(--color-primary)]"
-                      >
-                        {r.model ? `${r.brand} ${r.model}` : r.brand}
-                      </Link>
-                    </span>
-                  </td>
-                  <td className="px-2 text-right tabular-nums">{numberFormat.format(r.n)}</td>
-                  <td className="px-2 text-right tabular-nums">{formatPercent(r.classShare)}</td>
-                  <td className="px-2 text-right tabular-nums">{formatPercent(r.ownShare)}</td>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[28rem] text-sm">
+              <thead>
+                <tr className="border-b border-[var(--color-border)] text-xs text-[var(--color-muted)] uppercase">
+                  <th className="w-8 py-1 text-right font-medium">#</th>
+                  <th className="px-2 text-left font-medium" />
+                  <th className="px-2 text-right font-medium">{t('fuel.pt.col.cars')}</th>
+                  <th className="px-2 text-right font-medium">{t('fuel.pt.classShare')}</th>
+                  <th className="px-2 text-right font-medium">{ownHeader}</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {visible.map((r, i) => (
+                  <tr
+                    key={r.key}
+                    className="animate-row-in border-b border-[var(--color-border)]/40"
+                    style={{ '--row-i': i % COLLAPSED_ROWS } as CSSProperties}
+                  >
+                    <td className="py-1 text-right text-[var(--color-muted)] tabular-nums">{i + 1}</td>
+                    <td className="px-2">
+                      <span className="flex items-center gap-2">
+                        <BrandLogo brand={r.brand} size="sm" placeholder />
+                        <Link
+                          viewTransition
+                          to={`/advanced-search?${searchQuery(r, shown.data.fuelClass)}`}
+                          className="min-w-0 truncate text-[var(--color-primary)]"
+                        >
+                          {r.model ? `${r.brand} ${r.model}` : r.brand}
+                        </Link>
+                      </span>
+                    </td>
+                    <td className="px-2 text-right tabular-nums">{numberFormat.format(r.n)}</td>
+                    <td className="px-2 text-right tabular-nums">{formatPercent(r.classShare)}</td>
+                    <td className="px-2 text-right tabular-nums">{formatPercent(r.ownShare)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
 
         {shown.view !== 'years' && canExpand && (
