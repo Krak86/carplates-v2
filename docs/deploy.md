@@ -3,7 +3,7 @@
 Status (2026-10-27): **first real deploy done** on a Contabo Cloud VPS 6 behind Cloudflare (Full strict + origin certificate): bootstrap, `deploy-api`,
 `deploy-alpr`, `deploy-web`, a verified `pg_restore` of the real DB (row counts equal local) and a live `https://carsua.app` (healthz, sitemap,
 robots, plate API all 200; HTTP/3 advertised). The runbook below is corrected from that run; the problems found are in `docs/plan-done.md`
-"First VPS deploy". R2 backups work (nightly + full verified 2026-10-27). **Not yet done:** UptimeRobot, the security gate (§7), `ingest-cron`.
+"First VPS deploy". R2 backups work (nightly + full verified 2026-10-27). UptimeRobot on `/healthz` is up (2026-10-28). **Not yet done:** the security gate (§7), `ingest-cron`.
 Deploy scripts run via `ssh vps bash -s < script`, so bash reads the script from stdin: every `docker` call in them that could attach stdin needs
 `</dev/null`, or it swallows the rest of the script and bash exits 0 early (this made `deploy-api` report success without starting the api).
 
@@ -155,7 +155,7 @@ pulls without a login. Settings → Actions → "Require approval for all outsid
    - Faster/no-rebuild alternative: stop local Postgres and copy the `pgdata` volume (~23 GB, same 18.6 image) into `/opt/carsua/pgdata`.
 5. **Run `deploy-api` normally** (migrator is a no-op on the restored DB), then `deploy-web`. Check `https://carsua.app/healthz`, a plate, a VIN, camera recognize.
 6. **Backups** — `ssh deploy@<ip> bash /opt/carsua/compose/backup.sh nightly` once by hand; confirm the object in R2; do a restore test into a scratch container.
-7. Pre-deploy gate: [security-checklist.md §7](security-checklist.md); UptimeRobot; submit `sitemap.xml`.
+7. Pre-deploy gate: [security-checklist.md §7](security-checklist.md); submit `sitemap.xml`.
 
 ## Backups (free, only what cannot be rebuilt)
 
@@ -215,7 +215,7 @@ Registry data lost with the full dumps: re-ingest from `archive/` ZIPs (`backup.
    `deploy` has no sudo (no password, no sudoers entry; only the `docker` group), so root edits go through the Contabo VNC console as root, or a privileged
    container: `docker run --rm --privileged --pid=host alpine nsenter -t 1 -m -u -n -i sh -c '/usr/sbin/sshd -t && systemctl reload ssh'` (the `docker` group is
    effectively root).
-3. **UptimeRobot** (free, 5 min) on `https://carsua.app/healthz`; one healthchecks.io check per future cron job.
+3. ✅ **UptimeRobot (done 2026-10-28):** free plan, HTTP monitors every 5 min on `https://carsua.app/healthz` and the home page, email alerts. One healthchecks.io check per future cron job.
 4. **Cloudflare settings not yet confirmed:** Always Use HTTPS, HTTP/3, Bot Fight Mode, the WAF rate-limit rule on `/api/plate*` + `/api/vin*`. DNSSEC was turned
    off at Squarespace for the nameserver move; optionally re-enable it in Cloudflare and add the DS record at Squarespace.
 5. **Pre-deploy security gate:** [security-checklist.md §7](security-checklist.md).
