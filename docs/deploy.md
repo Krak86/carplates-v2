@@ -277,8 +277,10 @@ and unbundled, so it says nothing about production.
 `add_header Alt-Svc 'h3=":443"; ma=86400' always;`, `gzip on` (brotli needs the `ngx_brotli` module), `proxy_pass http://127.0.0.1:3000`.
 
 **Cloudflare in front** — h2/h3 + Brotli on by default; hashed `/assets/*` cached at the edge; SSL mode Full (strict). The client IP arrives in
-`CF-Connecting-IP` (Fastify `trustProxy` + throttler tracker; only trust Cloudflare's IP ranges). A short-TTL edge cache for read-only `/api/*`
-lookups (stats, vdb, rdw, wiki) is a PLAN.md Phase 4 item.
+`CF-Connecting-IP` (Fastify `trustProxy` + throttler tracker; only trust Cloudflare's IP ranges). The global rollups (`/api/stats/*` except `version`, `/api/fuel/stats`,
+`/api/fuel/powertrains`, `/api/safety/stats`, `/api/wanted/stats`) send `Cache-Control: public, max-age=300`, but Cloudflare does not cache
+JSON by default: add a Cache Rule (matching those paths → "Eligible for cache", Edge TTL "Use cache-control header if present") to make it
+effective at the edge. vdb / rdw / wiki lookups are still uncached (PLAN.md Phase 4).
 
 **Pitfall: Browser Cache TTL.** Cloudflare → Caching → Configuration → **Browser Cache TTL must be "Respect Existing Headers"**. At its 4-hour
 default it rewrites the app's `no-cache` on `sw.js` / `index.html` / `registerSW.js` to `max-age=14400`, so browsers keep the old service

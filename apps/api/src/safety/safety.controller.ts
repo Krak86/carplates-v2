@@ -1,10 +1,11 @@
 import { createReadStream } from 'node:fs'
 
-import { Controller, Get, Inject, Query, Res } from '@nestjs/common'
+import { Controller, Get, Header, Inject, Query, Res } from '@nestjs/common'
 import { ApiExcludeEndpoint, ApiOkResponse, ApiQuery, ApiTags } from '@nestjs/swagger'
 import type { FastifyReply } from 'fastify'
 import { z } from 'zod'
 
+import { ROLLUP_CACHE } from '../common/cache.js'
 import { zodParam } from '../common/zod-param.pipe.js'
 import { CncapRatingsDto } from './cncap.dto.js'
 import { CncapService } from './cncap.service.js'
@@ -107,6 +108,7 @@ export class SafetyController {
 
   // Rollup for the /safety page, rebuilt by `pnpm db:refresh-safety-stats` — see safety-stats.service.ts.
   @Get('stats')
+  @Header('Cache-Control', ROLLUP_CACHE)
   @ApiOkResponse({ type: SafetyStatsDto })
   stats(): Promise<SafetyStatsDto> {
     return this.safetyStatsService.get()

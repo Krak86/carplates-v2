@@ -889,10 +889,10 @@ VPS sizing, provider shortlist (Contabo Cloud VPS 6), static IP and DNS: [docs/d
   1. [x] Measured 2026-10-28 on carsua.app (Fast 4G, 4× CPU): LCP 1174 ms, **CLS 0.79** (`Presence` animating open after load; fixed in code, re-measure after deploy) — `docs/plan-done.md` "Load-performance pass". [ ] Lighthouse run still open.
   2. [ ] Preload the active language chunk (it is fetched only after the entry script runs: one extra round trip) — inline script in `index.html` + a build-time hook for the hashed filename.
   3. [ ] Brotli: stock Caddy has no `br` encoder (zstd + gzip at the origin, Cloudflare serves Brotli) — the API does not compress; local numbers overstate transfer.
-  4. [ ] Short-TTL edge cache for read-only `/api/*` lookups (stats, vdb, rdw, wiki) — see `docs/deploy.md`.
+  4. [x] Short-TTL cache for the global rollups (`/api/stats/*` except `version`, `/api/fuel/stats|powertrains`, `/api/safety/stats`, `/api/wanted/stats`): `Cache-Control: public, max-age=300` (`common/cache.ts`, 2026-10-28). [ ] Still open: a Cloudflare Cache Rule ("Eligible for cache", respect origin TTL, path `/api/stats*` etc.; Cloudflare does not cache JSON by default) and vdb / rdw / wiki lookups.
   5. [ ] Make `FuelEconomy` / `RdwSpecs` lazy for real: move the helpers they share with `CO2Badge` and the VIN code into the grouped helper chunks in `vite.config.ts`.
   6. [ ] Hero/LCP: confirm the largest image is the hero and add a preload hint; check fonts.
-  7. [ ] Delay PostHog extras (recorder, surveys, dead-clicks, web-vitals scripts) until idle / first interaction (telemetry is off locally).
+  7. [x] PostHog (and the recorder / surveys / dead-clicks / web-vitals scripts it loads) now starts on first interaction or browser idle (max 4 s); early `capture()` calls are queued (`lib/telemetry.ts`, 2026-10-28). Sentry still starts at once. Re-measure after deploy.
 - HTTP/2 + HTTP/3 + Brotli + caching setup: [docs/deploy.md](docs/deploy.md) (open UDP 443!)
 - Prod `docker-compose`: Caddy (auto-TLS + **coarse per-IP rate limit**, see
   below) · Redis (RIA + VIN cache, throttler store) · api · web · ingest-cron
