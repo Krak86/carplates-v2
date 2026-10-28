@@ -486,6 +486,7 @@
   "vin.derived.yearCode.hint": "read from the 10th VIN character, which encodes the model year. The code repeats every 30 years, so the most recent plausible year is shown.",
   "vin.assists.title": "Safety & driver aids",
   "vin.assists.show": "Show driver aids",
+  "vin.phone.hint": "Phone projection support depends on the model and head unit. Check on the official pages:",
   "vin.assists.hide": "Hide driver aids",
   "section.about.assists": "The driver-assist and safety systems the VIN decoder lists for this car.\nStandard - fitted on this trim\nOptional - offered on this trim, may not be on this exact car\nSAE level - how much the car can steer and brake for you, from 0 (nothing) to 5 (everything); a driver-assist rating, not a promise of self-driving",
   "vin.assists.explainer.title": "What is this, and why can it be empty?",

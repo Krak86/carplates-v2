@@ -10,6 +10,7 @@ import { hasAssists } from '@/components/vin/helpers'
 import type { FieldMap } from '@/components/vin/helpers'
 import VinAssists from '@/components/vin/VinAssists'
 import VinEuBaseline from '@/components/vin/VinEuBaseline'
+import VinSmartphoneLinks from '@/components/vin/VinSmartphoneLinks'
 import VinToggleSection from '@/components/vin/VinToggleSection'
 import { scrollElementIntoView } from '@/lib/share-section'
 
@@ -74,6 +75,8 @@ export default function DriverAssistSection({ fields, euYear }: Props): ReactNod
             <VinEuBaseline year={euYear} />
           </div>
         )}
+
+        <VinSmartphoneLinks />
       </div>
     </VinToggleSection>
   )
