@@ -10,6 +10,7 @@ import Spinner from '@/components/ui/Spinner'
 import DangerZoneSection from '@/routes/profile/DangerZoneSection'
 import DevicesSection from '@/routes/profile/DevicesSection'
 import IdentitySection from '@/routes/profile/IdentitySection'
+import NotificationsSection from '@/routes/profile/NotificationsSection'
 import ReauthGate from '@/routes/profile/ReauthGate'
 import SignInMethodsSection from '@/routes/profile/SignInMethodsSection'
 
@@ -37,6 +38,7 @@ export default function ProfileRoute(): ReactNode {
       <ReauthGate>
         <IdentitySection user={user} />
         <SignInMethodsSection />
+        <NotificationsSection user={user} />
         <DevicesSection />
         <DangerZoneSection user={user} />
       </ReauthGate>

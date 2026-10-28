@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { RELEASES } from '@carplates/shared/releases'
 
 import Card from '@/components/ui/Card'
 import type { Lang } from '@/i18n'
 import { cn } from '@/lib/cn'
-import { RELEASES } from '@/routes/releases/releases'
 import { RELEASE_GROUPS, RELEASE_GROUP_ICON } from '@/routes/releases/types'
 import type { ReleaseGroup } from '@/routes/releases/types'
 

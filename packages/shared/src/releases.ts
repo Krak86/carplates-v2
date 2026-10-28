@@ -1,4 +1,12 @@
-import type { ReleaseDay, ReleaseGroup, ReleaseItem } from '@/routes/releases/types'
+export const RELEASE_GROUPS = ['new', 'improved', 'data', 'fix'] as const
+export type ReleaseGroup = (typeof RELEASE_GROUPS)[number]
+
+export const RELEASE_LANGS = ['ua', 'ru', 'en'] as const
+export type ReleaseLang = (typeof RELEASE_LANGS)[number]
+
+export type ReleaseItem = { group: ReleaseGroup } & Record<ReleaseLang, string>
+
+export type ReleaseDay = { date: string; items: readonly ReleaseItem[] }
 
 const item = (group: ReleaseGroup, ua: string, ru: string, en: string): ReleaseItem => ({ group, ua, ru, en })
 
@@ -7,6 +15,83 @@ const item = (group: ReleaseGroup, ua: string, ru: string, en: string): ReleaseI
  * Written from the git history; the page sorts by date, so order here is not significant.
  */
 export const RELEASES: readonly ReleaseDay[] = [
+  {
+    date: '2026-10-28',
+    items: [
+      item(
+        'new',
+        'Кермо праворуч: позначка RHD на картці VIN, коли декодований VIN це показує',
+        'Руль справа: метка RHD на карточке VIN, когда расшифрованный VIN это показывает',
+        'Right-hand drive: an RHD chip on the VIN card when the decoded VIN says so'
+      ),
+      item(
+        'new',
+        'Гра-гонки: керування нахилом телефона на сенсорних екранах і робота офлайн після першого завантаження',
+        'Игра-гонки: управление наклоном телефона на сенсорных экранах и работа офлайн после первой загрузки',
+        'Race game: optional tilt steering on touch devices, and it works offline after the first load'
+      ),
+      item(
+        'improved',
+        'Переклад на місці працює навіть без вбудованого перекладача браузера: невеликі моделі OPUS кешуються в браузері',
+        'Перевод на месте работает даже без встроенного переводчика браузера: небольшие модели OPUS кэшируются в браузере',
+        'Translate in place now works without the built-in browser translator: small OPUS models are cached in your browser'
+      ),
+      item(
+        'new',
+        'Щомісячні новини на пошту: за бажанням (вмикається в профілі) - раз на місяць короткий список нових можливостей, лише коли вони були; відписка в один клік',
+        'Ежемесячные новости на почту: по желанию (включается в профиле) - раз в месяц короткий список новых возможностей, только когда они были; отписка в один клик',
+        'Monthly news by email: optional (switched on in your profile) - once a month a short list of new features, only when there were some; one-click unsubscribe'
+      ),
+      item(
+        'new',
+        'Базова ціна США з VIN (NHTSA): перевірка поруч із ціною ЄС, а для авто без ціни ЄС - власна оцінка з розмитненням',
+        'Базовая цена США по VIN (NHTSA): проверка рядом с ценой ЕС, а для авто без цены ЕС - собственная оценка с растаможкой',
+        'US base price from the VIN (NHTSA): a cross-check next to the EU price, and its own estimate with customs for cars without an EU price'
+      ),
+      item(
+        'improved',
+        'Новини Yahoo Finance перенесено з «Соцмереж» до «Новин»: дві підписані групи, разом не більше 5 новин',
+        'Новости Yahoo Finance перенесены из «Соцсетей» в «Новости»: две подписанные группы, всего не больше 5 новостей',
+        'Yahoo Finance headlines moved from Social to News: two labelled groups, at most 5 headlines in total'
+      ),
+      item(
+        'new',
+        'Бічне меню: тема «Авто» (за системою), колір акценту та розмір тексту',
+        'Боковое меню: тема «Авто» (как в системе), цвет акцента и размер текста',
+        'Sidebar: an "Auto" theme (follows the system), an accent color and a text size'
+      ),
+      item(
+        'new',
+        'Кнопка «Поділитися» також внизу сторінки результату за номером або VIN',
+        'Кнопка «Поделиться» также внизу страницы результата по номеру или VIN',
+        'A Share button also at the bottom of a plate or VIN result page'
+      ),
+      item(
+        'improved',
+        'Посилання для поширення містять номер латиницею замість закодованої кирилиці',
+        'Ссылки для отправки содержат номер латиницей вместо закодированной кириллицы',
+        'Share links carry the plate in Latin letters instead of percent-encoded Cyrillic'
+      ),
+      item(
+        'improved',
+        'PDF і Word з «Копіювати всю інформацію» мають зміст і окрему сторінку для кожного розділу',
+        'PDF и Word из «Копировать всю информацию» имеют оглавление и отдельную страницу для каждого раздела',
+        'The PDF and Word from "Copy all info" have a contents page and a page per section'
+      ),
+      item(
+        'data',
+        'На сторінці «Про проєкт» додано Disqus у джерелах і вигляд застосунку у можливостях',
+        'На странице «О проекте» добавлены Disqus в источники и внешний вид приложения в возможности',
+        'The About page now lists Disqus among its sources and app appearance among the features'
+      ),
+      item(
+        'improved',
+        'Встановлений застосунок більше не блимає синім під час запуску',
+        'Установленное приложение больше не мигает синим при запуске',
+        'The installed app no longer flashes blue on launch'
+      )
+    ]
+  },
   {
     date: '2026-10-27',
     items: [

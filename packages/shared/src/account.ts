@@ -22,7 +22,9 @@ export const sessionUserSchema = z.object({
   role: z.enum(USER_ROLES),
   createdAt: z.string(),
   /** Set once the user asked to delete the account; signing in during the grace period restores it. */
-  deletionScheduledAt: z.string().nullable().optional()
+  deletionScheduledAt: z.string().nullable().optional(),
+  /** Opted in to the monthly "what's new" mail (off until the user switches it on). */
+  marketingOptIn: z.boolean().optional()
 })
 export type SessionUser = z.infer<typeof sessionUserSchema>
 
@@ -42,6 +44,29 @@ export const authConfigResponseSchema = z.object({
   deletionGraceDays: z.number().optional()
 })
 export type AuthConfigResponse = z.infer<typeof authConfigResponseSchema>
+
+export const marketingPreferenceRequestSchema = z.object({ optIn: z.boolean() })
+export type MarketingPreferenceRequest = z.infer<typeof marketingPreferenceRequestSchema>
+
+/** Body of the unsubscribe page's button: the signed token from the mail link. */
+export const unsubscribeRequestSchema = z.object({ token: z.string().min(1).max(300) })
+export type UnsubscribeRequest = z.infer<typeof unsubscribeRequestSchema>
+
+/** Admin view of the next monthly digest (`GET /api/admin/digest`). */
+export const adminDigestStatusSchema = z.object({
+  /** `YYYY-MM` of the month the next digest covers. */
+  period: z.string(),
+  /** False when that month shipped no new feature: nothing would be sent. */
+  hasContent: z.boolean(),
+  features: z.number(),
+  optedIn: z.number(),
+  alreadySent: z.number(),
+  /** `DIGEST_ENABLED` on the API. */
+  enabled: z.boolean()
+})
+export type AdminDigestStatus = z.infer<typeof adminDigestStatusSchema>
+
+export const adminDigestTestResponseSchema = z.object({ sentTo: z.string().nullable() })
 
 export const EMAIL_CODE_LENGTH = 6
 export const EMAIL_CHALLENGE_TTL_MINUTES = 15
@@ -177,6 +202,37 @@ export const adminStatsResponseSchema = z.object({
   featureOptIns: z.array(z.object({ feature: z.enum(PAID_FEATURES), users: z.number() }))
 })
 export type AdminStatsResponse = z.infer<typeof adminStatsResponseSchema>
+
+/** One sample of the host the API runs on. `at` is epoch ms. */
+export const serverSampleSchema = z.object({
+  at: z.number(),
+  /** Whole-host CPU busy share since the previous sample, 0-100. */
+  cpuPercent: z.number(),
+  memUsedBytes: z.number(),
+  /** The API process (RSS). */
+  processRssBytes: z.number(),
+  load1: z.number()
+})
+export type ServerSample = z.infer<typeof serverSampleSchema>
+
+export const adminServerResponseSchema = z.object({
+  cpuCores: z.number(),
+  cpuModel: z.string(),
+  memTotalBytes: z.number(),
+  diskTotalBytes: z.number().nullable(),
+  diskUsedBytes: z.number().nullable(),
+  uptimeSeconds: z.number(),
+  processUptimeSeconds: z.number(),
+  load: z.tuple([z.number(), z.number(), z.number()]),
+  nodeVersion: z.string(),
+  platform: z.string(),
+  users: z.number(),
+  dbSizeBytes: z.number().nullable(),
+  dbConnections: z.number().nullable(),
+  /** Oldest first; kept in memory, so it restarts empty with the API. */
+  samples: z.array(serverSampleSchema)
+})
+export type AdminServerResponse = z.infer<typeof adminServerResponseSchema>
 
 /** PostHog numbers pulled server-side (HogQL). `configured: false` = no POSTHOG_PERSONAL_API_KEY / project id. */
 export const adminAnalyticsResponseSchema = z.object({

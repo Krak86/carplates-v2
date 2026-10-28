@@ -29,6 +29,7 @@ import VinDecodeTabs from '@/components/vin/VinDecodeTabs'
 import VinTypicalData from '@/components/vin/VinTypicalData'
 import LazySection from '@/components/LazySection'
 import OriginChip from '@/components/OriginChip'
+import SteeringChip from '@/components/SteeringChip'
 import { useCardMotion } from '@/hooks/useCardMotion'
 import { ukraineFromActions } from '@/components/OriginSection.helpers'
 import { countryIso, toFieldMap } from '@/components/vin/helpers'
@@ -115,6 +116,7 @@ export default function VinResult({ data }: Props): ReactNode {
             plantCity={fields.get('Plant City')}
             onOpenSection={() => setOriginOpenSignal(n => n + 1)}
           />
+          <SteeringChip steering={fields.get('Steering Location')} />
         </div>
 
         {registry && (

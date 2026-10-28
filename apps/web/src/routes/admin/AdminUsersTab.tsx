@@ -6,6 +6,7 @@ import Card from '@/components/ui/Card'
 import Spinner from '@/components/ui/Spinner'
 import { PAID_FEATURE_ICON } from '@/lib/paid-features'
 import { adminUsersQuery } from '@/lib/queries'
+import AdminDigestCard from '@/routes/admin/AdminDigestCard'
 
 const formatDate = (iso: string | null, locale: string): string =>
   iso ? new Date(iso).toLocaleString(locale, { dateStyle: 'medium', timeStyle: 'short' }) : '-'
@@ -16,6 +17,8 @@ export default function AdminUsersTab(): ReactNode {
 
   return (
     <>
+      <AdminDigestCard />
+
       {users.isPending && <Spinner />}
       {users.isError && <p className="text-red-600">{t('result.error')}</p>}
       {users.isSuccess && users.data.users.length === 0 && (

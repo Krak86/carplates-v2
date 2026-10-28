@@ -3,10 +3,13 @@ import { useTranslation } from 'react-i18next'
 
 import InfoPopover from '@/components/InfoPopover'
 import InfoText from '@/components/InfoText'
+import UsPriceJump from '@/components/UsPriceJump'
 import { useCopyFeedback } from '@/components/use-copy-feedback'
 import { FIELD_INFO } from '@/components/vin/field-info'
 import { useVinText } from '@/components/vin/use-vin-text'
 import type { FieldRow } from '@/components/vin/types'
+
+const BASE_PRICE_VARIABLE = 'Base Price ($)'
 
 type Props = {
   row: FieldRow
@@ -35,7 +38,7 @@ export default function VinFieldRow({ row }: Props): ReactNode {
         )}
       </dt>
 
-      <dd className="ml-auto max-w-full min-w-0 text-right font-medium">
+      <dd className="ml-auto flex max-w-full min-w-0 items-center justify-end gap-1.5 text-right font-medium">
         <button
           type="button"
           title={t('copy.button', { label: label.text })}
@@ -45,6 +48,7 @@ export default function VinFieldRow({ row }: Props): ReactNode {
           {copied ? `✅ ${t('copy.copied')}` : value.text}
           {!copied && value.en && <span className="block text-xs font-normal opacity-70">{value.en}</span>}
         </button>
+        {row.variable === BASE_PRICE_VARIABLE && <UsPriceJump />}
       </dd>
     </div>
   )

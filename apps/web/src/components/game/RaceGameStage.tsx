@@ -6,6 +6,7 @@ import RaceGameSettings from '@/components/game/RaceGameSettings'
 import RaceHornButton from '@/components/game/RaceHornButton'
 import RaceTouchControls from '@/components/game/RaceTouchControls'
 import { useRaceGameActions } from '@/components/game/use-race-game-actions'
+import { requestTiltPermission, useRaceTilt } from '@/components/game/use-race-tilt'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import {
   BUMP_LESSONS,
@@ -41,6 +42,10 @@ export default function RaceGameStage({ config, onChange, onPickBody }: Props): 
     siren
   )
   const isTouch = useMediaQuery('(pointer: coarse)')
+  // steering by tilting the phone: opt-in each visit, never remembered
+  const [tilt, setTilt] = useState(false)
+  useRaceTilt(tilt && isTouch, handleInput)
+  const handleToggleTilt = async (): Promise<void> => setTilt(!tilt && (await requestTiltPermission()))
   const isPortrait = useMediaQuery('(orientation: portrait)')
 
   const [frame, setFrame] = useState<HTMLDivElement | null>(null)
@@ -310,11 +315,21 @@ export default function RaceGameStage({ config, onChange, onPickBody }: Props): 
         <details className="rounded-lg border border-[var(--color-border)] p-3">
           <summary className="cursor-pointer font-semibold">{t('race.touch.settings')}</summary>
           <div className="mt-3">
-            <RaceGameSettings config={config} onChange={onChange} onPickBody={onPickBody} />
+            <RaceGameSettings
+              config={config}
+              onChange={onChange}
+              onPickBody={onPickBody}
+              tilt={isTouch ? { on: tilt, onToggle: handleToggleTilt } : undefined}
+            />
           </div>
         </details>
       ) : (
-        <RaceGameSettings config={config} onChange={onChange} onPickBody={onPickBody} />
+        <RaceGameSettings
+          config={config}
+          onChange={onChange}
+          onPickBody={onPickBody}
+          tilt={isTouch ? { on: tilt, onToggle: handleToggleTilt } : undefined}
+        />
       )}
     </div>
   )

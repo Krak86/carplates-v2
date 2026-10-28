@@ -1322,7 +1322,10 @@ export const users = app.table('users', {
   /** Language for emails, refreshed on every sign-in. */
   lang: text('lang'),
   /** Set by "delete account": sessions are revoked at once, the row is purged after the grace period unless restored. */
-  deletionScheduledAt: timestamp('deletion_scheduled_at', { withTimezone: true })
+  deletionScheduledAt: timestamp('deletion_scheduled_at', { withTimezone: true }),
+  /** Explicit opt-in to the monthly "what's new" mail (default off); toggled on /profile or by the unsubscribe link. */
+  marketingOptIn: boolean('marketing_opt_in').notNull().default(false),
+  marketingOptInAt: timestamp('marketing_opt_in_at', { withTimezone: true })
 })
 export type UserRow = typeof users.$inferSelect
 
@@ -1383,6 +1386,17 @@ export const knownDevices = app.table(
     lastSeenAt: timestamp('last_seen_at', { withTimezone: true }).notNull().defaultNow()
   },
   t => [primaryKey({ columns: [t.userId, t.deviceHash] })]
+)
+
+/** Claim rows of the monthly digest: one per (covered month, user). See migration 0078. */
+export const digestSends = app.table(
+  'digest_sends',
+  {
+    period: text('period').notNull(),
+    userId: uuid('user_id').notNull(),
+    sentAt: timestamp('sent_at', { withTimezone: true }).notNull().defaultNow()
+  },
+  t => [primaryKey({ columns: [t.period, t.userId] })]
 )
 
 export const userFeatures = app.table(

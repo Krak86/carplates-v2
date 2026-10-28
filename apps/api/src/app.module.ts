@@ -9,6 +9,7 @@ import { AllExceptionsFilter } from './common/all-exceptions.filter.js'
 import { OriginGuard } from './common/origin.guard.js'
 import { GLOBAL_THROTTLE } from './common/throttle.js'
 import { DbModule } from './db/db.module.js'
+import { DigestModule } from './digest/digest.module.js'
 import { MailModule } from './mail/mail.module.js'
 import { MissedModule } from './missed/missed.module.js'
 import { FeaturesModule } from './features/features.module.js'
@@ -54,6 +55,7 @@ import { WikispecsModule } from './wikispecs/wikispecs.module.js'
     MissedModule,
     MailModule,
     AuthModule,
+    DigestModule,
     FeaturesModule,
     SyncModule,
     SettingsModule,

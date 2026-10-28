@@ -71,7 +71,8 @@ export default defineConfig({
         scope: '/',
         display: 'standalone',
         background_color: '#ffffff',
-        theme_color: BRAND_COLOR
+        // Neutral so the splash and task switcher don't flash blue; the runtime <meta theme-color> follows the theme.
+        theme_color: '#ffffff'
       },
       workbox: {
         // No `webmanifest` here: the plugin precaches it itself, and a second entry with another revision
@@ -104,7 +105,7 @@ export default defineConfig({
           'assets/SettingsRoute-*.js',
           'assets/ProfileRoute-*.js',
           'assets/AdminRoute-*.js',
-          // The "test your car" racer is desktop-only and fetched on demand after an explicit confirmation.
+          // The "test your car" racer is fetched on demand after an explicit confirmation, then runtime-cached (below).
           'assets/RaceGameModal-*.js',
           'assets/engine-*.js'
         ],
@@ -146,12 +147,24 @@ export default defineConfig({
             }
           },
           {
+            // The racer's code (kept out of the precache) is cached once it has been opened, so the game then works offline.
+            urlPattern: ({ url, sameOrigin }): boolean =>
+              sameOrigin && /^\/assets\/(RaceGameModal|engine)-[^/]+\.js$/.test(url.pathname),
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'carplates-rt-race-code',
+              expiration: { maxEntries: 6, maxAgeSeconds: 365 * DAY_S },
+              cacheableResponse: { statuses: [200] }
+            }
+          },
+          {
+            // Also the racer's car sprites (~80) and region backdrops (~60): only the ones actually used get cached.
             urlPattern: ({ url, sameOrigin }): boolean =>
               sameOrigin && url.pathname.startsWith('/assets/') && /\.(webp|avif|jpe?g)$/.test(url.pathname),
             handler: 'CacheFirst',
             options: {
               cacheName: 'carplates-rt-backgrounds',
-              expiration: { maxEntries: 20, maxAgeSeconds: 365 * DAY_S },
+              expiration: { maxEntries: 200, maxAgeSeconds: 365 * DAY_S },
               cacheableResponse: { statuses: [200] }
             }
           },

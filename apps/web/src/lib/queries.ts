@@ -12,7 +12,9 @@ import type {
 
 import {
   getAdminAnalytics,
+  getAdminServer,
   getAdminStats,
+  getAdminDigest,
   getAdminUsers,
   getAuthConfig,
   getSessions,
@@ -630,12 +632,25 @@ export function featuresQuery() {
   return queryOptions({ queryKey: ['account', 'features'], queryFn: getFeatures, staleTime: 5 * 60_000 })
 }
 
+export function adminDigestQuery() {
+  return queryOptions({ queryKey: ['admin', 'digest'], queryFn: getAdminDigest })
+}
+
 export function adminUsersQuery() {
   return queryOptions({ queryKey: ['admin', 'users'], queryFn: getAdminUsers })
 }
 
 export function adminStatsQuery() {
   return queryOptions({ queryKey: ['admin', 'stats'], queryFn: getAdminStats, staleTime: 60_000 })
+}
+
+export function adminServerQuery() {
+  return queryOptions({
+    queryKey: ['admin', 'server'],
+    queryFn: getAdminServer,
+    staleTime: 15_000,
+    refetchInterval: 30_000
+  })
 }
 
 export function adminAnalyticsQuery() {

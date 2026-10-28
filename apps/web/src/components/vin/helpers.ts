@@ -451,6 +451,13 @@ export function parseDriveType(value: string | undefined): DriveType | null {
   return null
 }
 
+export function parseSteeringSide(value: string | undefined): 'lhd' | 'rhd' | null {
+  if (!value) return null
+  if (/left/i.test(value) || /\blhd\b/i.test(value)) return 'lhd'
+  if (/right/i.test(value) || /\brhd\b/i.test(value)) return 'rhd'
+  return null
+}
+
 export function parseTpms(value: string | undefined): 'direct' | 'indirect' | null {
   if (!value) return null
   if (/indirect/i.test(value)) return 'indirect'

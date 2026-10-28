@@ -10,9 +10,28 @@ import Spinner from '@/components/ui/Spinner'
 import { LANGS } from '@/i18n'
 import type { Lang } from '@/i18n'
 import { cn } from '@/lib/cn'
-import { useUiStore } from '@/store/ui-store'
+import { ACCENTS, TEXT_SIZES, THEME_MODES, useUiStore } from '@/store/ui-store'
+import type { Accent, TextSize, ThemeMode } from '@/store/ui-store'
 
 const LANG_LABEL: Record<Lang, string> = { ua: 'Українська', ru: 'Русский', en: 'English' }
+
+const THEME_MODE_KEY: Record<ThemeMode, 'nav.themeAuto' | 'nav.themeLight' | 'nav.themeDark'> = {
+  auto: 'nav.themeAuto',
+  light: 'nav.themeLight',
+  dark: 'nav.themeDark'
+}
+
+// Swatches show the light-theme accent (the same hues as the `[data-accent]` tokens in global.css).
+const ACCENT_SWATCH: Record<Accent, string> = {
+  blue: 'hsl(222 89% 55%)',
+  green: 'hsl(150 70% 30%)',
+  orange: 'hsl(24 90% 40%)',
+  red: 'hsl(2 75% 48%)',
+  violet: 'hsl(268 70% 50%)',
+  neutral: 'hsl(220 15% 25%)'
+}
+
+const TEXT_SIZE_CLASS: Record<TextSize, string> = { sm: 'text-xs', md: 'text-sm', lg: 'text-lg' }
 
 // Lazy-loaded (see App.tsx) — not part of the LCP path.
 export default function Sidebar(): ReactNode {
@@ -20,8 +39,12 @@ export default function Sidebar(): ReactNode {
   const lang = useUiStore(s => s.lang)
   const setLang = useUiStore(s => s.setLang)
   const langLoading = useUiStore(s => s.langLoading)
-  const theme = useUiStore(s => s.theme)
-  const toggleTheme = useUiStore(s => s.toggleTheme)
+  const themeMode = useUiStore(s => s.themeMode)
+  const setThemeMode = useUiStore(s => s.setThemeMode)
+  const accent = useUiStore(s => s.accent)
+  const setAccent = useUiStore(s => s.setAccent)
+  const textSize = useUiStore(s => s.textSize)
+  const setTextSize = useUiStore(s => s.setTextSize)
   const font = useUiStore(s => s.font)
   const toggleFont = useUiStore(s => s.toggleFont)
   const setDrawerOpen = useUiStore(s => s.setDrawerOpen)
@@ -139,18 +162,64 @@ export default function Sidebar(): ReactNode {
       ))}
 
       <div className="mt-4 px-3 text-xs tracking-wide text-[var(--color-muted)] uppercase">{t('nav.theme')}</div>
-      <button
-        type="button"
-        aria-pressed={theme === 'dark'}
-        onClick={() => {
-          toggleTheme()
-          handleClose()
-        }}
-        className="rounded-lg bg-[var(--color-surface)]/60 px-3 py-1.5 text-left text-sm transition-colors duration-200 hover:bg-[var(--color-surface)]"
-      >
-        <span aria-hidden>{theme === 'dark' ? '🌙' : '☀️'}</span>{' '}
-        {theme === 'dark' ? t('nav.themeDark') : t('nav.themeLight')}
-      </button>
+      <div role="group" aria-label={t('nav.theme')} className="flex gap-1">
+        {THEME_MODES.map(mode => (
+          <button
+            key={mode}
+            type="button"
+            aria-pressed={mode === themeMode}
+            onClick={() => setThemeMode(mode)}
+            className={cn(
+              'flex-1 rounded-lg px-2 py-1.5 text-sm transition-colors duration-200',
+              mode === themeMode
+                ? 'bg-[var(--color-surface)] font-medium text-[var(--color-primary)]'
+                : 'bg-[var(--color-surface)]/60 text-[var(--color-muted)] hover:bg-[var(--color-surface)] hover:text-[var(--color-fg)]'
+            )}
+          >
+            {t(THEME_MODE_KEY[mode])}
+          </button>
+        ))}
+      </div>
+
+      <div className="mt-4 px-3 text-xs tracking-wide text-[var(--color-muted)] uppercase">{t('nav.accent')}</div>
+      <div role="group" aria-label={t('nav.accent')} className="flex gap-2 px-3 py-1">
+        {ACCENTS.map(a => (
+          <button
+            key={a}
+            type="button"
+            aria-pressed={a === accent}
+            aria-label={t(`nav.accent.${a}`)}
+            title={t(`nav.accent.${a}`)}
+            onClick={() => setAccent(a)}
+            style={{ background: ACCENT_SWATCH[a] }}
+            className={cn(
+              'size-7 rounded-full border-2 transition-shadow duration-200',
+              a === accent ? 'border-[var(--color-fg)] shadow-md' : 'border-[var(--color-border)]'
+            )}
+          />
+        ))}
+      </div>
+
+      <div className="mt-4 px-3 text-xs tracking-wide text-[var(--color-muted)] uppercase">{t('nav.textSize')}</div>
+      <div role="group" aria-label={t('nav.textSize')} className="flex gap-1">
+        {TEXT_SIZES.map(size => (
+          <button
+            key={size}
+            type="button"
+            aria-pressed={size === textSize}
+            onClick={() => setTextSize(size)}
+            className={cn(
+              'flex-1 rounded-lg px-2 py-1.5 transition-colors duration-200',
+              TEXT_SIZE_CLASS[size],
+              size === textSize
+                ? 'bg-[var(--color-surface)] font-medium text-[var(--color-primary)]'
+                : 'bg-[var(--color-surface)]/60 text-[var(--color-muted)] hover:bg-[var(--color-surface)] hover:text-[var(--color-fg)]'
+            )}
+          >
+            A
+          </button>
+        ))}
+      </div>
 
       <div className="mt-4 px-3 text-xs tracking-wide text-[var(--color-muted)] uppercase">{t('nav.font')}</div>
       <button

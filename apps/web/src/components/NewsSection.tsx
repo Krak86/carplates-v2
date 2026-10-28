@@ -4,7 +4,9 @@ import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router'
 
+import NewsGroupLabel from '@/components/NewsGroupLabel'
 import NewsGroups from '@/components/NewsGroups'
+import StockNewsCard from '@/components/StockNewsCard'
 import SectionHeader from '@/components/SectionHeader'
 import SectionCount from '@/components/SectionCount'
 import SectionInfo from '@/components/SectionInfo'
@@ -12,9 +14,13 @@ import ShareButton from '@/components/ShareButton'
 import { cn } from '@/lib/cn'
 import { toIntlLocale } from '@/lib/intl'
 import { newsLangFilter } from '@/lib/news'
-import { newsQuery } from '@/lib/queries'
+import { newsQuery, stockNewsQuery } from '@/lib/queries'
 import { scrollElementIntoView } from '@/lib/share-section'
 import SectionSkeleton from '@/components/ui/SectionSkeleton'
+
+/** Total headlines in the section, split between the car news and the Yahoo Finance group. */
+const NEWS_LIMIT = 5
+const FINANCE_MIN = 2
 
 type Props = {
   brand: string | null
@@ -39,7 +45,16 @@ export default function NewsSection({ brand, model, year }: Props): ReactNode {
     ...newsQuery(brand ?? '', model, year, newsLangFilter(i18n.language)),
     enabled: !!brand
   })
-  const items = news.data?.items ?? []
+  const financeNews = useQuery({ ...stockNewsQuery(brand ?? ''), enabled: !!brand })
+  const finance = financeNews.data?.items ?? []
+  const carItems = news.data?.items ?? []
+  // Yahoo gets at least its share of the cap; whatever the car news leaves unused goes to Yahoo too.
+  const financeCount = Math.min(finance.length, Math.max(FINANCE_MIN, NEWS_LIMIT - carItems.length))
+  const items = carItems.slice(0, NEWS_LIMIT - financeCount)
+  const financeShown = finance.slice(0, financeCount)
+  const total = items.length + financeShown.length
+  const isLoading = news.isLoading || financeNews.isLoading
+  const isSettled = (news.isSuccess || news.isError) && (financeNews.isSuccess || financeNews.isError)
 
   useEffect(() => {
     if (isShared && sectionRef.current) scrollElementIntoView(sectionRef.current)
@@ -53,7 +68,7 @@ export default function NewsSection({ brand, model, year }: Props): ReactNode {
         icon="📰"
         title={
           <>
-            {t('news.title')} <SectionCount count={items.length} />
+            {t('news.title')} <SectionCount count={total} />
           </>
         }
         info={<SectionInfo section="news" title={t('news.title')} />}
@@ -74,15 +89,40 @@ export default function NewsSection({ brand, model, year }: Props): ReactNode {
       >
         <div className="overflow-hidden">
           <div className="mt-3 space-y-3">
-            {news.isLoading && <SectionSkeleton />}
-            {news.isError && <p className="text-base text-[var(--color-muted)]">{t('result.error')}</p>}
-            {news.isSuccess && items.length === 0 && (
+            {isLoading && <SectionSkeleton />}
+            {news.isError && financeNews.isError && (
+              <p className="text-base text-[var(--color-muted)]">{t('result.error')}</p>
+            )}
+            {isSettled && total === 0 && !news.isError && (
               <p className="text-base text-[var(--color-muted)]">{t('section.empty')}</p>
             )}
 
-            {items.length > 0 && (
+            {total > 0 && (
               <>
-                <NewsGroups items={items} brand={brand} horizontal decorative={!open} />
+                {items.length > 0 && (
+                  <div className="space-y-2">
+                    <NewsGroupLabel icon="📰" title={t('news.group.car')} />
+                    <NewsGroups items={items} brand={brand} horizontal decorative={!open} />
+                  </div>
+                )}
+
+                {financeShown.length > 0 && (
+                  <div className="space-y-2">
+                    <NewsGroupLabel
+                      icon="💹"
+                      title={t('stockNews.title', { name: financeNews.data?.company?.name ?? '' })}
+                      moreUrl={financeNews.data?.moreUrl ?? undefined}
+                    />
+
+                    <ul className="space-y-2">
+                      {financeShown.map(item => (
+                        <li key={item.id}>
+                          <StockNewsCard item={item} horizontal />
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
 
                 <p className="text-sm text-[var(--color-muted)]">
                   {t('news.disclaimer')}

@@ -72,6 +72,7 @@ import VerificationLinks from '@/components/VerificationLinks'
 import WantedChip from '@/components/WantedChip'
 import VinDecodeTabs from '@/components/vin/VinDecodeTabs'
 import OriginChip from '@/components/OriginChip'
+import SteeringChip from '@/components/SteeringChip'
 import { ukraineFromActions } from '@/components/OriginSection.helpers'
 import { countryIso, groupFields, toFieldMap } from '@/components/vin/helpers'
 import VinSince2021Note from '@/components/vin/VinSince2021Note'
@@ -106,6 +107,7 @@ const VideoReviews = lazy(() => import('@/components/VideoReviews'))
 const ReviewLinks = lazy(() => import('@/components/ReviewLinks'))
 const FuelEconomy = lazy(() => import('@/components/FuelEconomy'))
 const EstimatedValueSection = lazy(() => import('@/components/EstimatedValueSection'))
+const UsBasePriceFromVin = lazy(() => import('@/components/UsBasePriceFromVin'))
 const RdwSpecs = lazy(() => import('@/components/RdwSpecs'))
 const RdwRecalls = lazy(() => import('@/components/RdwRecalls'))
 const MotFaults = lazy(() => import('@/components/MotFaults'))
@@ -406,6 +408,7 @@ export default function ResultCard({ data }: Props): ReactNode {
                   plantCity={vinFields?.get('Plant City')}
                   onOpenSection={() => setOriginOpenSignal(n => n + 1)}
                 />
+                <SteeringChip steering={vinFields?.get('Steering Location')} />
                 <SizeClassChip
                   brand={c.brand}
                   model={c.model}
@@ -812,11 +815,28 @@ export default function ResultCard({ data }: Props): ReactNode {
               kind={c.kind}
               fuel={c.fuel}
               capacity={c.capacity}
+              vin={hasVin ? c.vin : null}
               currency={valueCurrency}
               onCurrencyChange={setValueCurrency}
               openSignal={valueOpenSignal}
             />
           </LazySection>
+          {hasVin && (
+            <LazySection sections={['value']} forceMount={valueOpenSignal > 0}>
+              <UsBasePriceFromVin
+                scope="noEu"
+                vin={c.vin!}
+                brand={c.brand}
+                model={c.model}
+                year={c.makeYear}
+                kind={c.kind}
+                fuel={c.fuel}
+                capacity={c.capacity}
+                currency={valueCurrency}
+                onCurrencyChange={setValueCurrency}
+              />
+            </LazySection>
+          )}
           <LazySection sections={['recalls']}>
             <RdwRecalls brand={c.brand} model={c.model} year={c.makeYear} kind={c.kind} />
           </LazySection>

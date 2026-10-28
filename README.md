@@ -229,6 +229,7 @@ MIT
 All sign-in methods (email, Google, Telegram), linking, sudo mode and admin promotion: [docs/logins.md](docs/logins.md).
 
 Email sign-in works out of the box: with the default `MAIL_TRANSPORT=log` the code and magic link are printed in the API log.
+The optional monthly "what's new" mail (opt-in on `/profile`) is off unless `DIGEST_ENABLED=true`; preview it at `/api/dev/emails/digest` and send yourself a test from the admin Users tab. `MAIL_FROM_NEWS` sets a separate sender.
 To see real HTML mails run `docker compose -f infra/docker-compose.yml up -d mailpit`, set `MAIL_TRANSPORT=smtp` and open
 <http://localhost:8025>. Template previews (dev only): <http://localhost:3000/api/dev/emails>. For the magic link to open the
 Vite app set `PUBLIC_SITE_URL=http://localhost:5173`. Production refuses to boot without `AUTH_SECRET` (≥ 32 chars), a real

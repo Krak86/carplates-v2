@@ -11,6 +11,7 @@ import InfoText from '@/components/InfoText'
 import SectionHeader from '@/components/SectionHeader'
 import ShareButton from '@/components/ShareButton'
 import SpecsJumpLink from '@/components/SpecsJumpLink'
+import UsBasePriceFromVin from '@/components/UsBasePriceFromVin'
 import UkrPriceBreakdown from '@/components/UkrPriceBreakdown'
 import { useEstimatedValue, type ValueInput } from '@/components/use-estimated-value'
 import ValuePriceByFuel from '@/components/ValuePriceByFuel'
@@ -19,6 +20,8 @@ import { cn } from '@/lib/cn'
 import { scrollElementIntoView } from '@/lib/share-section'
 
 type Props = ValueInput & {
+  /** Valid VIN of the car: its NHTSA US base price is shown as a cross-check inside the section. */
+  vin?: string | null
   currency: Currency
   onCurrencyChange: (currency: Currency) => void
   /** Bumped by the card-header chevron: each change opens the section and scrolls to it (0 = never asked). */
@@ -35,6 +38,7 @@ export default function EstimatedValueSection({
   currency: wanted,
   onCurrencyChange,
   openSignal,
+  vin,
   ...input
 }: Props): ReactNode {
   const { t } = useTranslation()
@@ -118,6 +122,21 @@ export default function EstimatedValueSection({
                 currency={currency}
                 fx={fx}
                 locale={locale}
+              />
+            )}
+
+            {vin && (
+              <UsBasePriceFromVin
+                scope="withEu"
+                vin={vin}
+                brand={input.brand}
+                model={input.model}
+                year={input.year}
+                kind={input.kind}
+                fuel={input.fuel}
+                capacity={input.capacity}
+                currency={wanted}
+                onCurrencyChange={onCurrencyChange}
               />
             )}
 

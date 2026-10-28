@@ -39,6 +39,7 @@ export const ROUTE_TITLE_KEYS: Record<string, string> = {
   '/features': 'nav.features',
   '/settings': 'nav.settings',
   '/profile': 'auth.profile',
+  '/unsubscribe': 'digest.unsubscribe.title',
   '/admin': 'nav.admin'
 }
 

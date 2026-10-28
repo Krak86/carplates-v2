@@ -1,13 +1,15 @@
 import { Controller, Get, Header, Inject, UseGuards } from '@nestjs/common'
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger'
 import { createZodDto } from 'nestjs-zod'
-import { adminAnalyticsResponseSchema, adminStatsResponseSchema } from '@carplates/shared'
+import { adminAnalyticsResponseSchema, adminServerResponseSchema, adminStatsResponseSchema } from '@carplates/shared'
 
 import { AdminGuard } from '../auth/session.guard.js'
 
 import { PosthogService } from './posthog.service.js'
+import { ServerStatsService } from './server-stats.service.js'
 import { UsageService } from './usage.service.js'
 
+class AdminServerDto extends createZodDto(adminServerResponseSchema) {}
 class AdminStatsDto extends createZodDto(adminStatsResponseSchema) {}
 class AdminAnalyticsDto extends createZodDto(adminAnalyticsResponseSchema) {}
 
@@ -17,7 +19,8 @@ class AdminAnalyticsDto extends createZodDto(adminAnalyticsResponseSchema) {}
 export class UsageAdminController {
   constructor(
     @Inject(UsageService) private readonly usage: UsageService,
-    @Inject(PosthogService) private readonly posthog: PosthogService
+    @Inject(PosthogService) private readonly posthog: PosthogService,
+    @Inject(ServerStatsService) private readonly serverStats: ServerStatsService
   ) {}
 
   @Get('stats')
@@ -32,5 +35,12 @@ export class UsageAdminController {
   @ApiOkResponse({ type: AdminAnalyticsDto })
   analytics(): Promise<AdminAnalyticsDto> {
     return this.posthog.summary()
+  }
+
+  @Get('server')
+  @Header('Cache-Control', 'no-store')
+  @ApiOkResponse({ type: AdminServerDto })
+  server(): Promise<AdminServerDto> {
+    return this.serverStats.snapshot()
   }
 }

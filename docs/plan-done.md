@@ -3891,3 +3891,15 @@ Four steps of the plan, in order: (1) verdict banner (`tone` on `ExportKeyValueS
 ## About page refresh and photo-search timeout (2026-10-27)
 
 About: Cloudflare added to `SOURCES` (`about.source.cloudflare`, CDN and cache, plain tile - no logo licence) and two features to `FEATURES` (`discuss`, `share`), ua/ru/en. Photo search: slow recognition no longer errors out and can be skipped (`ArSearchButton.tsx`, `local-recognize.service.ts`); the alpr container got 3 CPUs on the 6-core VPS. Releases entries added for both.
+
+## Monthly "what's new" digest (2026-10-28)
+
+Opt-in mail, sent on the 1st for the previous month. Consent is explicit (`app.users.marketing_opt_in`, default false, switch on `/profile` → Notifications; nothing is turned on at sign-in, because a feature digest is marketing mail and the sender reputation is shared with the sign-in codes). Migration 0078 adds the two `marketing_opt_in*` columns and `app.digest_sends` (period, user_id).
+
+Content comes from the release log, which therefore moved from `apps/web/src/routes/releases/releases.ts` to `packages/shared/src/releases.ts` (subpath export `@carplates/shared/releases`, not the barrel, so the 70 KB log stays out of the main chunk). `apps/api/src/digest/digest-content.ts`: `previousPeriod` (Kyiv calendar month before now), `isSendWindow` (1st from 09:00 Kyiv, plus 2 days of catch-up), `buildDigest` (every `new` item of that month in full, the other groups as counts; `null` = no new feature = nothing is sent). `DigestService` ticks every 30 min while `DIGEST_ENABLED=true`, claims each (month, user) in `app.digest_sends` before sending (second instance / restart safe; a failed send releases its claim and is retried on the next tick), 600 ms between sends (Resend 2 req/s). Mail: `DigestEmail` template + `DIGEST_TEXT` (ua/ru/en), `List-Unsubscribe` + `List-Unsubscribe-Post: List-Unsubscribe=One-Click` headers, optional separate sender `MAIL_FROM_NEWS`.
+
+Unsubscribe: signed token `<userId>.<HMAC(AUTH_SECRET)>` (no expiry; it can only switch the digest off). Mail link → `/unsubscribe#t=…` (POST only after a click, like the magic link); mailbox button → `POST /api/digest/unsubscribe/one-click?t=…` (Nest's Fastify adapter already parses the form body, the endpoint only reads `?t=`; `OriginGuard` lets header-less server requests through). Admin: Users tab card (`GET /api/admin/digest`: period, new-feature count, subscribers, already sent; `POST /api/admin/digest/test` mails the admin their own copy). Dev preview: `/api/dev/emails/digest?lang=ua`.
+
+## Week digest 2026-10-25 → 2026-10-28 (docs sync)
+
+Docs, release log and About page re-checked against the week's commits. Release log (`packages/shared/src/releases.ts`, 2026-10-28) gained RHD chip, race tilt steering + offline cache and OPUS in-place translate; the About race and VIN feature lines mention them (ua/ru/en). All week's data sources were already on About (Disqus, OPUS-MT, Yahoo Finance, Cloudflare/Turnstile, NHTSA MSRP). `CLAUDE.md` + `CLAUDE_RULES.md` are ~7.7 KB combined, so nothing was trimmed; details stay in `docs/features-reference.md`.

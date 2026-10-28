@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 
 import GoogleTranslateAnchor from '@/components/GoogleTranslateAnchor'
 import { needsTranslation } from '@/lib/google-translate'
-import { canChromeTranslate, translateLocally } from '@/lib/local-translate'
+import { inPlaceEngine, translateLocally, type TranslatorId } from '@/lib/local-translate'
 
 // The dialog (and, behind it, the on-device translation engines) loads only when a reader opens it.
 const TranslateDialog = lazy(() => import('@/components/TranslateDialog'))
@@ -18,13 +18,13 @@ type Props = {
 
 /**
  * Next to untranslated text: a button opening the translate dialog (on-device translation) and, always, the external
- * Google Translate link. Once the browser's built-in translator is installed, a "Translate here" button translates in
- * place and shows the result in a tinted block underneath. Renders nothing when the text is already in the UI language.
+ * Google Translate link. Once an on-device engine is installed (the browser's built-in translator, or the OPUS models
+ * downloaded earlier from the dialog), a "Translate here" button translates in place and shows the result in a tinted block underneath. Renders nothing when the text is already in the UI language.
  */
 export default function GoogleTranslateLink({ text, from }: Props): ReactNode {
   const { t, i18n } = useTranslation()
   const [open, setOpen] = useState(false)
-  const [ready, setReady] = useState(false)
+  const [engine, setEngine] = useState<TranslatorId | null>(null)
   const [busy, setBusy] = useState(false)
   const [inPlace, setInPlace] = useState<string | null>(null)
   const [failed, setFailed] = useState(false)
@@ -35,8 +35,8 @@ export default function GoogleTranslateLink({ text, from }: Props): ReactNode {
   useEffect(() => {
     if (open) return
     let cancelled = false
-    void canChromeTranslate(from, lang).then(ok => {
-      if (!cancelled) setReady(ok)
+    void inPlaceEngine(from, lang).then(found => {
+      if (!cancelled) setEngine(found)
     })
     return (): void => {
       cancelled = true
@@ -56,10 +56,11 @@ export default function GoogleTranslateLink({ text, from }: Props): ReactNode {
       setInPlace(null)
       return
     }
+    if (!engine) return
     setBusy(true)
     setFailed(false)
     try {
-      setInPlace(await translateLocally('chrome', text, from, lang, setPercent))
+      setInPlace(await translateLocally(engine, text, from, lang, setPercent))
     } catch {
       setFailed(true)
     } finally {
@@ -71,7 +72,7 @@ export default function GoogleTranslateLink({ text, from }: Props): ReactNode {
   return (
     <>
       <span className="inline-flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[var(--color-muted)]">
-        {ready && (
+        {!!engine && (
           <button
             type="button"
             disabled={busy}

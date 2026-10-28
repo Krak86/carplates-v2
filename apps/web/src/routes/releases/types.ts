@@ -1,7 +1,8 @@
-import type { Lang } from '@/i18n'
+import { RELEASE_GROUPS } from '@carplates/shared/releases'
+import type { ReleaseDay, ReleaseGroup, ReleaseItem } from '@carplates/shared/releases'
 
-export const RELEASE_GROUPS = ['new', 'improved', 'data', 'fix'] as const
-export type ReleaseGroup = (typeof RELEASE_GROUPS)[number]
+export { RELEASE_GROUPS }
+export type { ReleaseDay, ReleaseGroup, ReleaseItem }
 
 export const RELEASE_GROUP_ICON: Record<ReleaseGroup, string> = {
   new: '✨',
@@ -9,7 +10,3 @@ export const RELEASE_GROUP_ICON: Record<ReleaseGroup, string> = {
   data: '🗂️',
   fix: '🐞'
 }
-
-export type ReleaseItem = { group: ReleaseGroup } & Record<Lang, string>
-
-export type ReleaseDay = { date: string; items: readonly ReleaseItem[] }

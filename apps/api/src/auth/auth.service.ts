@@ -39,7 +39,8 @@ export function toSessionUser(row: UserRow): SessionUser {
     avatarUrl: row.avatarUrl,
     role: USER_ROLES.find(r => r === row.role) ?? 'user',
     createdAt: row.createdAt.toISOString(),
-    deletionScheduledAt: row.deletionScheduledAt?.toISOString() ?? null
+    deletionScheduledAt: row.deletionScheduledAt?.toISOString() ?? null,
+    marketingOptIn: row.marketingOptIn
   }
 }
 

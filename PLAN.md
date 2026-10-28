@@ -690,6 +690,28 @@ Group 1 dimension callouts + garage-fit -> Group 3 (existing order). Owner says 
 
 ### To discuss / research
 
+- [ ] **Driver assist + CarPlay / Android Auto** — researched 2026-10-28, not started. Owner says "go" per step.
+      **Legal (verified 2026-10-28): do NOT scrape Apple's CarPlay list or Google's Android Auto page.** Apple site terms ban
+      "page-scrape / robot / spider" and copying (robots.txt is open, the ToS still applies); Google terms ban scraping content
+      "that doesn't belong to you"; EU database right covers the compilation even though single facts are free. No open dataset
+      and no Wikidata property exists. Allowed: link-out, or a hand-written table from manufacturer pages (same rules as
+      `wikispecs-curated.csv`: facts only, one citation per row, nothing copied). Not legal advice; ask a lawyer before any scrape. - [ ] **Step 1 — NHTSA vPIC ADAS chips (do first, no new source).** The VIN decode already gives `vinFields`
+      (`Map<name, value>`, see `SteeringChip` in `ResultCard.tsx` / `VinResult.tsx`). First check what a real decode returns:
+      call `GetVehicleVariableList` and decode ~10 VINs (US 2018+, EU, Tesla, pre-2015) to see which ADAS variables are
+      filled (expected: Adaptive Cruise Control, Lane Departure Warning, Lane Keeping, Lane Centering, Forward Collision
+      Warning, Automatic Emergency Braking, Blind Spot Warning, SAE automation level). Then a `DriverAssistChip`/section in
+      `components/vin/` with `helpers.ts` parsing (values are "Standard" / "Optional" / "Not Applicable" / empty), hidden when
+      nothing is filled, "standard vs optional" wording and a footnote that it is the US-market spec. If the data comes via
+      the API instead, the contract goes in its own file with `.nullable().optional()`. i18n ua/ru/en, About source line,
+      `releases.ts` entry. Never say "has autopilot": only SAE level + listed systems. - [ ] **Step 2 — EU baseline by first-registration date (GSR2).** For EU/RDW cars, derive "mandatory since" systems (AEB,
+      lane keeping, intelligent speed assistance, driver drowsiness) from the first-registration date: new types from
+      2022-07, all new cars from 2024-07. Label it a legal baseline, not the car's equipment. Verify the exact dates from the
+      EU regulation (2019/2144) text before coding. - [ ] **Step 3 (optional) — Tesla.** Only if the decode names Tesla: "Autopilot hardware" chip, no FSD claim (software
+      subscription, no public source). - [ ] **Step 4 (optional) — CarPlay / Android Auto.** Link-out "Check CarPlay / Android Auto support" to Apple's and
+      Google's own pages (like the AUTO.RIA link-out). A curated CSV of the top ~50 models only if the owner wants it, built
+      by hand from manufacturer pages, with a citation per row. - **Worth it?** Step 1 yes (cheap, accurate per VIN). Step 2 yes (cheap, honest). Steps 3-4 only if time. Full
+      scraped database: no.
+
 - [ ] **Model catalog pages `/cars/:make/:model/:year`** — researched 2026-10-13, not started. Plate-free model pages
       (registry stats + the existing model-level sections) as indexable SEO slugs; needs a canonical make/model taxonomy
       (registry models are trim-level) and TS-built rollup tables, not a matview. Full write-up: [docs/catalog-plan.md](docs/catalog-plan.md).
@@ -1034,6 +1056,8 @@ card-on-file subscriptions; revisit with real quotes.
 - ✅ **Read guides `/read` (2026-10-16):** hub + "Body types" and "Sizes" articles with live examples, size explorer and plate-card links (`stats_size_models`, migration 0071) — conventions in `docs/features-reference.md` "Read guides"; write-up in `docs/plan-done.md`. ✅ `/read/fleet` (colours/fuel/registration years). ✅ `/read/plates` (anatomy, region codes, region-less series). ✅ `/read/generations` (size growth per generation from RDW year-medians, no migration). ✅ `/read/electric` (EVs by model year/region/model + plug guide; `stats_ev`, migration 0072). ✅ `/read/imports` (imports vs dealer by year, models, VIN build country; `stats_imports`, migration 0073). ✅ `/read/safety` (crash tests, reads `/api/safety/stats`). ✅ `/read/fuel` (fuel mix, CO₂ by band/year/model, reads `/api/fuel/stats`). ✅ `/read/vin` (VIN anatomy, type-a-VIN breakdown, year codes, where to find it; static). ✅ `/read/extremes` (heaviest/lightest + power/size records; reuses the `/stats` panels, no new API). Twelfth: `/read/recalls` (recalls vs common faults; model picker over the existing RDW/NHTSA/CA/MOT endpoints, no new API). ✅ Blog-style guide covers/date/copy-link, card → guide links, mass-schema GVM/TBM/GTM/ATM/GCM relations.
 - ✅ **Card → guide cross-links (2026-10-16):** `ReadGuideLink` pill with a right arrow at the foot of each card / VIN section, pointing to its /read guide; `GUIDE_META` in `read/links.ts` — see `docs/features-reference.md` "Read guides".
 - ✅ **Vehicle origin (2026-10-26):** flags chip + `?section=origin` timeline (brand country, ownership, assembly, Ukraine) from Wikidata + NHTSA WMI, legacy countries by year; curated model plants and stats breakdown deferred — see `docs/plan-done.md`.
+- ✅ **Docs/About sync (2026-10-28):** release log + About features for RHD chip, race tilt/offline, OPUS translate; see `docs/plan-done.md`.
+- ✅ **Monthly digest mail (2026-10-28):** opt-in on /profile, sent on the 1st for the previous month from the release log (only if it had a `new` item), one-click unsubscribe, admin test send; migration 0078, `DIGEST_ENABLED` — see `docs/plan-done.md`.
 - ✅ **Racer / flags / verification polish (2026-10-25):** region backdrops, smoke + wreck, 10 km end, flag preview, OTK + licence links, glossary, RIA copy-first modal; About sources MVS HSC + flag-icons — see `docs/plan-done.md`.
 - ✅ **About sources (2026-10-14):** 8 auction link-out sites added as logo-less tiles (no logo licence found), Telegram Login logo added — see `docs/plan-done.md`.
 - **Other providers (researched 2026-10-12, not planned yet):** GitHub (client id + secret, code flow), Microsoft

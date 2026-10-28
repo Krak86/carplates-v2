@@ -3,11 +3,11 @@ import { ApiExcludeController } from '@nestjs/swagger'
 
 import { resolveLang } from '../spa/spa-text.js'
 
-import { CODE_MAIL_KINDS, NOTICE_MAIL_KINDS } from './mail-text.js'
+import { CODE_MAIL_KINDS, DIGEST_MAIL_KIND, NOTICE_MAIL_KINDS } from './mail-text.js'
 import type { MailKind } from './mail-text.js'
 import { renderSample } from './render.js'
 
-const ALL_KINDS: readonly string[] = [...CODE_MAIL_KINDS, ...NOTICE_MAIL_KINDS]
+const ALL_KINDS: readonly string[] = [...CODE_MAIL_KINDS, ...NOTICE_MAIL_KINDS, DIGEST_MAIL_KIND]
 
 /** Dev-only (registered when NODE_ENV != production): `/api/dev/emails/signIn?lang=ua`, `…/signIn.txt` for plain text. */
 @ApiExcludeController()
@@ -36,6 +36,6 @@ export class MailPreviewController {
 
   private async render(template: string, lang: string | undefined): ReturnType<typeof renderSample> {
     if (!ALL_KINDS.includes(template)) throw new NotFoundException('Unknown template')
-    return renderSample(template as MailKind, resolveLang(lang))
+    return renderSample(template as MailKind | typeof DIGEST_MAIL_KIND, resolveLang(lang))
   }
 }
