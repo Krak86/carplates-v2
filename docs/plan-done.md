@@ -3917,3 +3917,33 @@ Step 1 of "Driver assist + CarPlay / Android Auto". The VIN page already had `Vi
 ## EU legal baseline (GSR2) in the driver-aids section (2026-10-28)
 
 Step 2 of "Driver assist + CarPlay / Android Auto". Dates checked against Regulation (EU) 2019/2144 (original text, Annex II notes B and Art. 16): for passenger cars (M1) AEB for light vehicles, emergency lane keeping, intelligent speed assistance and driver drowsiness/attention warning are refused type-approval for new TYPES from 2022-07-06 and may not be registered in any NEW car from 2024-07-07. (Advanced driver distraction warning and pedestrian/cyclist AEB are one stage later, 2024-07-07 / 2026-07-07; not shown yet.) `vin/gsr2.ts` (`gsr2Status`, `gsr2Baseline`) compares the whole model year with the two dates: <2022 none (hidden), 2022-2023 `newTypes`, 2024 `transition` (depends on the month), 2025+ `all`. Only a year is known (the model year stands in for the first-registration date), so the text says so. `VinEuBaseline` renders it inside `DriverAssistSection` (new prop `euYear`, set only when the RDW register knows the model, i.e. an EU-market car); the section now shows if either the NHTSA assists or the baseline exist. Wording: legal baseline, not the car's equipment, only valid if first registered in the EU. Keys `vin.eu.*` (ua/ru/en). The Annex II table text extracted flat, so the M1 column was inferred from the row order; recheck against EUR-Lex when adding more rows. Steps 3-4 stay optional in PLAN.md. Verified in the UI on a 2023 Porsche Taycan (НС0500YС): the dashed "new models only" chips render under the US-spec NHTSA chips; the two blocks can read as contradictory (see the open polish note in PLAN.md).
+
+## Ingest cron (2026-10-28)
+
+✅ **Built and run on the VPS.** Host cron (the `deploy` user's crontab, `infra/vps/ingest.cron`) starts `infra/vps/run-ingest.sh <job>`, which runs
+`docker compose run --rm ingest tsx src/run-job.ts <job>` (image `scripts/Dockerfile` = pnpm install + shared/db build + `tsx`; compose service `ingest`,
+profile `jobs`, binds `/opt/carsua/archive` and `/opt/carsua/ingest-data` (= `scripts/.data`)). `run-job.ts` takes a per-job advisory lock (skips if held),
+logs a `registry.job_runs` row (migration 0077; `abandoned` for rows a killed run left `running`), enforces the timeout on the whole process group and pings
+`HC_PING_<JOB>` (`/start`, ok, `/fail`; unset = no ping). What runs and its timeout: `scripts/src/jobs.ts` (`news`, `social`, `wanted` daily; `plates` = `ingest-full.ts --archive /archive`
+Tue + Fri, 12 h limit). Deployed by `deploy-ingest.yml` (builds the image, writes `ingest.env`, syncs the scripts, installs the crontab). Schedule, operating notes: SCHEDULE.md.
+
+**Found on the first run (all fixed or documented):**
+
+- A restored DB had `ingested_resources` rows only for 2025/2026, so the first `plates` run re-read 2013-2024 (mostly 0 inserted, ~11k missing rows filled), then
+  reloaded 2026 (910k plateless duplicates by design), the snapshot, the backfill (931k plates, 931k duplicates removed) and the refreshes: ~8 h with one restart.
+- **No-op runs were not no-ops.** `ingest.ts` refreshed `current_registration` + all stats after every invocation, even when every resource was skipped, and
+  `ingest-full` re-ran the snapshot and the backfill (indexes dropped, exclusive lock, ~25 min) every time; three stats refreshes cost ~1.5 h. Now: refresh only
+  when rows were inserted, `--skip-refresh` for the intermediate steps (one refresh, after the backfill), and a `scripts/.data/backfill-pending` marker
+  (`ingest-state.ts`) written by any load that inserts rows and cleared by `--backfill-plates`; `ingest-full` skips snapshot/backfill/refreshes without it.
+  A file, not a row: `ingested_resources.ingested_at` feeds the public data-version marker.
+- Stopping the container mid-`REFRESH MATERIALIZED VIEW` leaves the refresh running in Postgres; the backfill's `DROP INDEX` would queue behind it and block
+  every plate lookup. Terminate it with `pg_terminate_backend` first.
+- Cron times are the VPS's local time (CET), not UTC.
+- ~404k rows have no plate after the run (2026 registrations since the removal with no earlier plated record, ~1% of 2021-2025 published without one); all have a VIN.
+- `backup.sh archive` printed a first-attempt `501 NotImplemented` from R2 and succeeded on the retry (16 objects, 1.1 GiB); `full` ~10 min for 1.3 GB.
+
+**Automation added the same day:** after a `plates` run that loaded a resource, `run-ingest.sh` runs `backup.sh archive` + `full`; `infra/vps/ingest-status.sh`
+(copied to the VPS by the deploy) shows the running container, last log lines, `job_runs`, pending marker and what Postgres is doing.
+
+**Still open:** healthchecks.io checks + `HC_PING_NEWS|SOCIAL|WANTED|PLATES` secrets (then re-run `deploy-ingest`); confirm the first Tue/Fri no-op run; the other
+SCHEDULE.md sources (ratings, VehiclesDB, RDW, recalls, ...) stay manual.

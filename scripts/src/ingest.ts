@@ -9,6 +9,11 @@
  *   pnpm ingest --archive ./backups     # keep a copy of every downloaded ZIP
  *   pnpm ingest --backfill-plates       # reconstruct plate for 2026+ rows (see backfill.ts)
  *   pnpm ingest --year 2026 --after 2026-05-01   # skip rows already covered by an archived snapshot
+ *   pnpm ingest --skip-refresh          # load only; no current_registration / stats / derived refresh (ingest:full does it once)
+ *   pnpm ingest --backfill-plates --if-pending   # backfill only when an earlier load left the pending marker (ingest-state.ts)
+ *
+ * The refreshes run only when rows were inserted (a no-op run is one CKAN call). Any load that inserts rows leaves the
+ * "backfill pending" marker; --backfill-plates clears it.
  *
  * Source layout changes every few years — different columns, different order,
  * different date formats, and as of the 2026-09-01 resource no plate column at
@@ -43,6 +48,7 @@ import { createDb, ingestedResources, refreshCurrentRegistration, refreshStats, 
 import type { Db, RegistrationInsert } from '@carplates/db'
 import { backfillPlates } from './backfill.js'
 import { refreshDerived } from './derived-refresh.js'
+import { clearBackfillPending, isBackfillPending, markBackfillPending } from './ingest-state.js'
 import { buildLayout, looksLikeHeader, mapRecord } from './transform.js'
 import type { Layout } from './transform.js'
 
@@ -64,12 +70,23 @@ interface Args {
   backfillPlates: boolean
   /** Leave the fuel/safety/markets rollups alone — a caller (ingest:full, ingest:all) refreshes them once at the end. */
   skipDerived: boolean
+  /** Load only: no current_registration / stats / derived refresh (a caller does it once at the end). */
+  skipRefresh: boolean
+  /** With --backfill-plates: do nothing unless an earlier load left the pending marker. */
+  ifPending: boolean
   /** Skip mapped rows with `d_reg` before this ISO date — already covered by an archived snapshot. */
   after?: string
 }
 
 function parseArgs(argv: string[]): Args {
-  const a: Args = { dryRun: false, encoding: 'utf8', backfillPlates: false, skipDerived: false }
+  const a: Args = {
+    dryRun: false,
+    encoding: 'utf8',
+    backfillPlates: false,
+    skipDerived: false,
+    skipRefresh: false,
+    ifPending: false
+  }
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i]
     if (arg === '--year') a.year = Number(argv[++i])
@@ -79,6 +96,8 @@ function parseArgs(argv: string[]): Args {
     else if (arg === '--archive') a.archive = argv[++i]
     else if (arg === '--backfill-plates') a.backfillPlates = true
     else if (arg === '--skip-derived') a.skipDerived = true
+    else if (arg === '--skip-refresh') a.skipRefresh = true
+    else if (arg === '--if-pending') a.ifPending = true
     else if (arg === '--after') {
       const v = argv[++i]
       if (!v || !/^\d{4}-\d{2}-\d{2}$/.test(v))
@@ -318,19 +337,29 @@ async function resolveZipCsvEntries(zipPath: string, label: string): Promise<Zip
   return fileEntries
 }
 
+/** current_registration + stats rollups + derived rollups: only after a load that changed the registry. */
+async function refreshAfterLoad(db: Db, args: Args): Promise<void> {
+  log('refreshing current_registration view …')
+  await refreshCurrentRegistration(db)
+  log('refreshing stats rollups …')
+  await refreshStats(db)
+  log('done: current_registration + stats rollups refreshed')
+  if (!args.skipDerived) refreshDerived()
+}
+
 async function main(): Promise<void> {
   const args = parseArgs(process.argv.slice(2))
   const { db, close } = createDb()
   try {
     if (args.backfillPlates) {
+      if (args.ifPending && !isBackfillPending()) {
+        log('backfill: nothing pending, skipping')
+        return
+      }
       const result = await backfillPlates(db)
       log(`backfill: ${result.exactMatched} exact, ${result.vinFallback} vin-fallback, ${result.deduped} deduped`)
-      log('refreshing current_registration view …')
-      await refreshCurrentRegistration(db)
-      log('refreshing stats rollups …')
-      await refreshStats(db)
-      log('done: current_registration + stats rollups refreshed')
-      if (!args.skipDerived) refreshDerived()
+      await clearBackfillPending()
+      if (!args.skipRefresh) await refreshAfterLoad(db, args)
       return
     }
 
@@ -352,12 +381,10 @@ async function main(): Promise<void> {
       }
       if (!args.dryRun) {
         await recordIngestedResource(db, id, basename(args.file), null, null, inserted)
-        log('refreshing current_registration view …')
-        await refreshCurrentRegistration(db)
-        log('refreshing stats rollups …')
-        await refreshStats(db)
-        log('done: current_registration + stats rollups refreshed')
-        if (!args.skipDerived) refreshDerived()
+        if (inserted > 0) {
+          await markBackfillPending()
+          if (!args.skipRefresh) await refreshAfterLoad(db, args)
+        }
       }
       log(`done: ${args.dryRun ? '[dry-run] would insert' : 'inserted'} ${inserted} rows from ${args.file}`)
       return
@@ -371,15 +398,13 @@ async function main(): Promise<void> {
       return
     }
     log(`found ${resources.length} matching resource(s): ${resources.map(r => r.name).join(', ')}`)
-    for (const r of resources) await processResource(db, r, args)
-    if (!args.dryRun) {
-      log('refreshing current_registration view …')
-      await refreshCurrentRegistration(db)
-      log('refreshing stats rollups …')
-      await refreshStats(db)
-      log('done: current_registration + stats rollups refreshed')
-      if (!args.skipDerived) refreshDerived()
+    let total = 0
+    for (const r of resources) total += await processResource(db, r, args)
+    if (!args.dryRun && total > 0) {
+      await markBackfillPending()
+      if (!args.skipRefresh) await refreshAfterLoad(db, args)
     }
+    if (total === 0) log('nothing new to load')
     log('done: ingest complete')
   } finally {
     await close()

@@ -3,7 +3,7 @@
 Status (2026-10-27): **first real deploy done** on a Contabo Cloud VPS 6 behind Cloudflare (Full strict + origin certificate): bootstrap, `deploy-api`,
 `deploy-alpr`, `deploy-web`, a verified `pg_restore` of the real DB (row counts equal local) and a live `https://carsua.app` (healthz, sitemap,
 robots, plate API all 200; HTTP/3 advertised). The runbook below is corrected from that run; the problems found are in `docs/plan-done.md`
-"First VPS deploy". R2 backups work (nightly + full verified 2026-10-27). UptimeRobot on `/healthz` is up (2026-10-28). **Not yet done:** the rest of the security gate (§7, partly checked 2026-10-28), `ingest-cron`.
+"First VPS deploy". R2 backups work (nightly + full verified 2026-10-27). UptimeRobot on `/healthz` is up (2026-10-28). `ingest` cron live since 2026-10-28 (step 8). **Not yet done:** the rest of the security gate (§7, partly checked 2026-10-28), the healthchecks.io checks for the ingest jobs.
 Deploy scripts run via `ssh vps bash -s < script`, so bash reads the script from stdin: every `docker` call in them that could attach stdin needs
 `</dev/null`, or it swallows the rest of the script and bash exits 0 early (this made `deploy-api` report success without starting the api).
 
@@ -240,13 +240,14 @@ Registry data lost with the full dumps: re-ingest from `archive/` ZIPs (`backup.
 7. **Secrets hygiene.** Dev values were visible in screenshots/chat during the first deploy: rotate `POSTHOG_PERSONAL_API_KEY` and any other key you consider exposed.
    The production `AUTH_SECRET` and `POSTGRES_PASSWORD` are separate from the dev ones. Optional secrets still unset: `SENTRY_DSN` (only `VITE_SENTRY_DSN` is set, so
    server errors are not tracked), `PLATE_RECOGNIZER_CLOUD_TOKEN`. `TURNSTILE_*` is set (2026-10-27).
-8. **Ingest cron (code written 2026-10-28, not yet enabled).** Needs: merge to `main` (runs `deploy-ingest.yml`; the `deploy-api` run applies migration 0077 first, so
-   merge/deploy the api before the first cron tick), healthchecks.io checks + GitHub secrets `HC_PING_NEWS|SOCIAL|WANTED|PLATES` (periods: news/social/wanted 1 d,
-   plates 7 d + 1 d grace), then a manual dry run of each job. Details in SCHEDULE.md. The old text follows: monthly ingest and `ingest:wanted`
-   run by hand on the VPS (`wanted` loses history on every skipped day; the news ticker is empty/stale). There is no `ingest` image yet, so `backup.sh full/archive`
-   are manual too, and `archive` stays a no-op until the first VPS ingest. Build order (cheap, idempotent first): `pnpm ingest:news` (every ~6 h), `pnpm ingest:social`
-   (daily, brand YouTube RSS), `ingest:wanted` (daily), then the plate `ingest:full` (Tue + Fri ~03:00 Kyiv). One healthchecks.io check per job; run
-   `backup.sh archive` + `full` after the first monthly ingest.
+8. **Ingest cron (live 2026-10-28).** `deploy-ingest.yml` (path-filtered: `scripts/**`, shared, db, `infra/vps/*ingest*`) builds `scripts/Dockerfile`, pulls it on the VPS,
+   writes `/opt/carsua/env/ingest.env` (`DATABASE_URL`, `HC_PING_*`), syncs `run-ingest.sh` / `ingest-status.sh` / the compose file and installs
+   `infra/vps/ingest.cron` as the `deploy` user's crontab (replaces it; it was empty). Jobs: `news`, `social`, `wanted` daily, `plates` Tue + Fri
+   (crontab times are the VPS's local time, CET). Details, the first-load procedure and gotchas: SCHEDULE.md. Check: `crontab -l`,
+   `~/ingest-status.sh`, `SELECT * FROM registry.job_runs ORDER BY id DESC`. Still open: create one healthchecks.io check per job (news/social/wanted 1 d,
+   plates 7 d + 1 d grace), add the GitHub secrets `HC_PING_NEWS|SOCIAL|WANTED|PLATES` to the `production` environment, re-run `deploy-ingest`.
+   A `plates` run that loaded something runs `backup.sh archive` + `full` by itself. The first manual load (2026-10-28) is written up in
+   `docs/plan-done.md` "Ingest cron".
 9. Housekeeping: 6 open Dependabot PRs; a Contabo snapshot once the site is stable; a Telegram `@WebpageBot` / X card-validator refresh of the old text-less preview.
 
 ### Longer term

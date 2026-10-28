@@ -898,8 +898,8 @@ VPS sizing, provider shortlist (Contabo Cloud VPS 6), static IP and DNS: [docs/d
   below) · Redis (RIA + VIN cache, throttler store) · api · web · ingest-cron
 - ✅ Deploy tooling written 2026-10-15 (api/alpr Dockerfiles, `infra/docker-compose.prod.yml` + Caddyfile + maintenance page, blue/green api deploy,
   web symlink releases, 3 path-filtered GitHub workflows, bootstrap + backup scripts, web maintenance banner) — ✅ **first real VPS deploy done 2026-10-27** (`docs/plan-done.md` "First VPS deploy"); ✅ R2 backups (nightly + full, restore-tested), SSH hardening and Turnstile done the same day; ✅ UptimeRobot on `/healthz` and ✅ Cloudflare settings + WAF rate-limit rule (2026-10-28); next steps (security gate, smoke test, secrets rotation): [docs/deploy.md](docs/deploy.md) "Still open".
-  Runbook, secrets list and what is still open: [docs/deploy.md](docs/deploy.md). Still to build: `ingest-cron` image + `run-job.ts` (SCHEDULE.md; first entries are the RSS jobs `ingest:news` every ~6 h and `ingest:social` daily), Redis throttler store.
-- CKAN plate ingest cron on the VPS, twice a week (`ingest.ts`, self-checks `ingested_resources`; cadence in SCHEDULE.md)
+  Runbook, secrets list and what is still open: [docs/deploy.md](docs/deploy.md). ✅ Ingest cron live 2026-10-28 (`docs/plan-done.md` "Ingest cron"); still open: healthchecks.io checks + `HC_PING_*` secrets, Redis throttler store.
+- ✅ CKAN plate ingest cron on the VPS, Tue + Fri (done 2026-10-28; no-op unless CKAN has something new, then backfill + stats + backups; SCHEDULE.md)
 - ✅ OG image endpoint — done 2026-10-01 (plate **and** VIN, `resvg-js` + bundled Noto Sans, never
   Puppeteer; see `docs/plan-done.md` "Link previews"). Still for deploy: set `PUBLIC_SITE_URL` to the real
   domain, make sure `fonts/` + `logos/` ship in `WEB_DIST_DIR`, and put a CDN/Caddy cache in front of `/og/`

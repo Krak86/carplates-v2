@@ -155,6 +155,8 @@ pnpm ingest:recall-texts:csv  /  export:recall-texts:csv  # seed-data/recall-tex
                        # Not seeded on purpose: missed_lookups (user telemetry), stats_* (db:refresh-derived), registrations (ingest:full), app.* (accounts)
 pnpm ingest:winner360:csv  /  export:winner360:csv  # seed-data/winner360.csv.gz — snapshot of the dealer stock for offline setup; a live ingest:winner360 replaces it (part of ingest:ratings:csv)
 pnpm ingest:rdw-recalls:translate   # local-model (NLLB, GPU) translation of recall texts -> rdw_recall_texts; resumable, --max-minutes N / --limit N --offset N / --make --model / --langs / --dump f.md. See DATASETS_PLAN "Stage D follow-up 2"
+pnpm ingest --skip-refresh | --backfill-plates --if-pending   # load only (no current_registration/stats/derived refresh) | backfill only while a load left scripts/.data/backfill-pending.
+                            # ingest/ingest:full refresh only when rows were inserted ("nothing new to load" otherwise); the VPS jobs are scripts/src/jobs.ts + SCHEDULE.md
 pnpm db:refresh-vdb-stats   # rebuild registry.stats_vdb (the /stats "Markets" panel) from the registry + vdb_models
 pnpm db:refresh-derived     # rebuild ALL rollups computed from current_registration: fuel-stats + safety-stats + vdb-stats
                             # (scripts/src/derived-refresh.ts — add new rollups of that kind there). `ingest` runs it itself
