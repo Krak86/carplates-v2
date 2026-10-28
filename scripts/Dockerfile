@@ -12,7 +12,10 @@ COPY packages/shared/package.json packages/shared/
 COPY packages/db/package.json packages/db/
 COPY scripts/package.json scripts/
 # Full install, not --prod: tsx runs the TypeScript sources directly.
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile --filter @carplates/scripts...
+# onnxruntime-node (via @huggingface/transformers) ships win32/darwin binaries; the VPS containerd fails to lchown
+# win32/x64/dxcompiler.dll when extracting the layer. Delete them in the same RUN so they never land in a layer.
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile --filter @carplates/scripts... \
+  && find node_modules/.pnpm -type d -path '*/onnxruntime-node/bin/napi-v6/*' \( -name win32 -o -name darwin \) -prune -exec rm -rf {} +
 
 COPY tsconfig.base.json ./
 COPY packages/shared packages/shared
