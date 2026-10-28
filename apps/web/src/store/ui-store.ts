@@ -223,28 +223,32 @@ export const useUiStore = create<UiState>((set, get) => ({
     set({ accent })
   },
   setTextSize: (textSize): void => {
-    applyTextSize(textSize)
     persistSaved(TEXT_SIZE_STORAGE_KEY, textSize)
-    set({ textSize })
+    // Reflowing text morphs through a view transition, like a language switch.
+    runLangTransition(() => {
+      flushSync(() => {
+        applyTextSize(textSize)
+        set({ textSize })
+      })
+    })
   },
-  toggleFont: (): void =>
-    set(s => {
-      const font = s.font === 'system' ? 'e-ukraine' : 'system'
-      applyFont(font)
-      try {
-        localStorage.setItem(FONT_STORAGE_KEY, font)
-      } catch {
-        /* private mode / disabled storage */
-      }
-      // An explicit choice replaces a shared link's ?font=, so a reload doesn't snap back to it.
-      const url = new URL(window.location.href)
-      if (url.searchParams.has(FONT_PARAM)) {
-        if (font === DEFAULT_FONT) url.searchParams.delete(FONT_PARAM)
-        else url.searchParams.set(FONT_PARAM, font)
-        window.history.replaceState(window.history.state, '', url)
-      }
-      return { font }
-    }),
+  toggleFont: (): void => {
+    const font = get().font === 'system' ? 'e-ukraine' : 'system'
+    runLangTransition(() => {
+      flushSync(() => {
+        applyFont(font)
+        set({ font })
+      })
+    })
+    persistSaved(FONT_STORAGE_KEY, font)
+    // An explicit choice replaces a shared link's ?font=, so a reload doesn't snap back to it.
+    const url = new URL(window.location.href)
+    if (url.searchParams.has(FONT_PARAM)) {
+      if (font === DEFAULT_FONT) url.searchParams.delete(FONT_PARAM)
+      else url.searchParams.set(FONT_PARAM, font)
+      window.history.replaceState(window.history.state, '', url)
+    }
+  },
   setDrawerOpen: (drawerOpen): void => set({ drawerOpen }),
   toggleCardTilt: (): void =>
     set(s => {

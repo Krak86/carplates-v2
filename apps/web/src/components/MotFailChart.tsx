@@ -14,8 +14,11 @@ type Props = {
   onActive: (band: number | null) => void
 }
 
-const BOX = { width: 360, height: 190, left: 34, right: 8, top: 12, bottom: 34 }
+const BOX = { width: 360, height: 202, left: 34, right: 8, top: 12, bottom: 46 }
 const BAR_MAX_WIDTH = 24
+/** Above this many bands the "100–150" labels no longer fit side by side, so every other one drops to a second row. */
+const STAGGER_FROM_BANDS = 6
+const LABEL_ROW_GAP = 11
 const MARKER_RADIUS = 4
 
 /**
@@ -117,7 +120,7 @@ export default function MotFailChart({ bands, edgesKm, mode, active, onActive }:
 
             <text
               x={slot.center}
-              y={plotBottom + 14}
+              y={plotBottom + 14 + (n > STAGGER_FROM_BANDS && i % 2 === 1 ? LABEL_ROW_GAP : 0)}
               textAnchor="middle"
               fontSize={9.5}
               fill={isActive ? 'var(--color-fg)' : 'var(--color-muted)'}
