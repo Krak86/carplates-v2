@@ -270,15 +270,21 @@ and unbundled, so it says nothing about production.
 - Enables **h2 and h3 by default** and advertises h3 via `Alt-Svc` (browsers use h2 on the first visit, h3 afterwards).
 - Compose must publish **`80`, `443` and `443/udp`**; the firewall must allow TCP 80, TCP 443 **and UDP 443**. Without UDP, h3 silently falls back to h2.
 - Stock Caddy 2 ships **zstd and gzip only** — `encode br` fails to load ("module not registered: http.encoders.br", verified 2026-10-15).
-  Brotli to browsers comes from Cloudflare, which re-compresses.
+  Brotli to browsers comes from Cloudflare, but only when the origin response is **uncompressed**: it passes an already gzip/zstd response
+  through (seen 2026-10-28: `content-encoding: gzip` with `accept-encoding: br`). The Caddyfile therefore compresses only requests without
+  `CF-Connecting-IP` (`@direct`); after deploying it, check `curl -sI -H 'accept-encoding: br' https://carsua.app/assets/<file>.js` shows
+  `content-encoding: br` (purge the Cloudflare cache first: the gzip copy is cached for a year). Cloudflare → Speed → Optimization →
+  Content Optimization → Brotli must be on.
 - Do not add a second `Cache-Control` for `/assets/*` in Caddy — the app already sends the right one. Put a Caddy/CDN cache in front of `/og/*`.
 
 **nginx (alternative, not used)** — `listen 443 ssl;` + `listen 443 quic reuseport;`, `http2 on; http3 on;`,
 `add_header Alt-Svc 'h3=":443"; ma=86400' always;`, `gzip on` (brotli needs the `ngx_brotli` module), `proxy_pass http://127.0.0.1:3000`.
 
 **Cloudflare in front** — h2/h3 + Brotli on by default; hashed `/assets/*` cached at the edge; SSL mode Full (strict). The client IP arrives in
-`CF-Connecting-IP` (Fastify `trustProxy` + throttler tracker; only trust Cloudflare's IP ranges). A short-TTL edge cache for read-only `/api/*`
-lookups (stats, vdb, rdw, wiki) is a PLAN.md Phase 4 item.
+`CF-Connecting-IP` (Fastify `trustProxy` + throttler tracker; only trust Cloudflare's IP ranges). The global rollups (`/api/stats/*` except `version`, `/api/fuel/stats`,
+`/api/fuel/powertrains`, `/api/safety/stats`, `/api/wanted/stats`) send `Cache-Control: public, max-age=300`, but Cloudflare does not cache
+JSON by default: add a Cache Rule (matching those paths → "Eligible for cache", Edge TTL "Use cache-control header if present") to make it
+effective at the edge. vdb / rdw / wiki lookups are still uncached (PLAN.md Phase 4).
 
 **Pitfall: Browser Cache TTL.** Cloudflare → Caching → Configuration → **Browser Cache TTL must be "Respect Existing Headers"**. At its 4-hour
 default it rewrites the app's `no-cache` on `sw.js` / `index.html` / `registerSW.js` to `max-age=14400`, so browsers keep the old service

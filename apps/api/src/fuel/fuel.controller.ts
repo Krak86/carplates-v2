@@ -1,7 +1,8 @@
-import { Controller, Get, Inject, Query } from '@nestjs/common'
+import { Controller, Get, Header, Inject, Query } from '@nestjs/common'
 import { ApiOkResponse, ApiQuery, ApiTags } from '@nestjs/swagger'
 import { z } from 'zod'
 
+import { ROLLUP_CACHE } from '../common/cache.js'
 import { zodParam } from '../common/zod-param.pipe.js'
 
 import { FuelEconomyDto, FuelStatsDto, PowertrainStatsDto } from './fuel.dto.js'
@@ -40,6 +41,7 @@ export class FuelController {
 
   // Rollup for the /fuel page, rebuilt by `pnpm db:refresh-fuel-stats` — see fuel-stats.service.ts.
   @Get('stats')
+  @Header('Cache-Control', ROLLUP_CACHE)
   @ApiOkResponse({ type: FuelStatsDto })
   stats(): Promise<FuelStatsDto> {
     return this.fuelStatsService.get()
@@ -47,6 +49,7 @@ export class FuelController {
 
   // Fuel-class breakdown (counts, shares, top/rare models and brands) from the same rollup table.
   @Get('powertrains')
+  @Header('Cache-Control', ROLLUP_CACHE)
   @ApiOkResponse({ type: PowertrainStatsDto })
   powertrains(): Promise<PowertrainStatsDto> {
     return this.powertrainStatsService.get()

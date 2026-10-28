@@ -1,9 +1,10 @@
-import { Controller, Get, Inject, Query } from '@nestjs/common'
+import { Controller, Get, Header, Inject, Query } from '@nestjs/common'
 import { ApiOkResponse, ApiQuery, ApiTags } from '@nestjs/swagger'
 import { Throttle } from '@nestjs/throttler'
 import { isVin, normalizePlate } from '@carplates/shared'
 import { z } from 'zod'
 
+import { ROLLUP_CACHE } from '../common/cache.js'
 import { PLATE_LOOKUP_THROTTLE } from '../common/throttle.js'
 import { zodParam } from '../common/zod-param.pipe.js'
 
@@ -32,6 +33,7 @@ export class WantedController {
 
   /** Aggregates over the whole wanted list and scraped history, for the `/wanted` page. */
   @Get('stats')
+  @Header('Cache-Control', ROLLUP_CACHE)
   @ApiOkResponse({ type: WantedStatsResponseDto })
   stats(): Promise<WantedStatsResponseDto> {
     return this.statsService.stats()
