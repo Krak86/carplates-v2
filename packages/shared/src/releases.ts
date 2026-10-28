@@ -20,9 +20,9 @@ export const RELEASES: readonly ReleaseDay[] = [
     items: [
       item(
         'new',
-        'Безпека авто з ЄС: які системи (екстрене гальмування, утримання в смузі, помічник швидкості, контроль сонливості) були обов’язковими за законом ЄС для року випуску - це правовий мінімум, а не комплектація конкретного авто',
-        'Безопасность авто из ЕС: какие системы (экстренное торможение, удержание в полосе, помощник скорости, контроль сонливости) были обязательны по закону ЕС для года выпуска - это правовой минимум, а не комплектация конкретного авто',
-        'Safety of EU-market cars: which systems (emergency braking, lane keeping, speed assistance, drowsiness warning) EU law required for the model year - a legal baseline, not the equipment of this particular car'
+        'Безпека авто з ЄС: які системи (екстрене гальмування, утримання в смузі, помічник швидкості, контроль сонливості, відволікання водія, гальмування для пішоходів і велосипедистів) були обов’язковими за законом ЄС для року випуску - це правовий мінімум, а не комплектація конкретного авто',
+        'Безопасность авто из ЕС: какие системы (экстренное торможение, удержание в полосе, помощник скорости, контроль сонливости, отвлечения водителя, торможение для пешеходов и велосипедистов) были обязательны по закону ЕС для года выпуска - это правовой минимум, а не комплектация конкретного авто',
+        'Safety of EU-market cars: which systems (emergency braking, lane keeping, speed assistance, drowsiness and distraction warning, pedestrian and cyclist braking) EU law required for the model year - a legal baseline, not the equipment of this particular car'
       ),
       item(
         'new',

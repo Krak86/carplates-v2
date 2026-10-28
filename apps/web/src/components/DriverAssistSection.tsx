@@ -69,7 +69,11 @@ export default function DriverAssistSection({ fields, euYear }: Props): ReactNod
       <div className="space-y-4">
         {fields && hasDecoded && <VinAssists fields={fields} />}
 
-        {hasBaseline && <VinEuBaseline year={euYear} />}
+        {hasBaseline && (
+          <div className={hasDecoded ? 'border-t border-[var(--color-border)] pt-4' : undefined}>
+            <VinEuBaseline year={euYear} />
+          </div>
+        )}
       </div>
     </VinToggleSection>
   )

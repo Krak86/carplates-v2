@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { gsr2Baseline } from '@/components/vin/gsr2'
+import { gsr2Baseline, gsr2Stages } from '@/components/vin/gsr2'
 import { cn } from '@/lib/cn'
 
 type Props = {
@@ -11,34 +11,59 @@ type Props = {
 
 /** "Mandatory since" chips from EU Regulation 2019/2144 for the car's year. A legal baseline, never the car's equipment. */
 export default function VinEuBaseline({ year }: Props): ReactNode {
-  const { t } = useTranslation()
-  const items = gsr2Baseline(year)
-  const status = items[0]?.status
-  if (!status) return null
+  const { t, i18n } = useTranslation()
+  const stages = gsr2Stages(gsr2Baseline(year))
+  if (stages.length === 0) return null
+
+  const formatDate = (iso: string): string =>
+    new Date(iso).toLocaleDateString(i18n.language === 'ua' ? 'uk' : i18n.language, {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+      timeZone: 'UTC'
+    })
 
   return (
     <div className="space-y-2">
       <h4 className="m-0 text-sm font-semibold">{t('vin.eu.title', { year })}</h4>
 
-      <p className="m-0 text-sm">{t(`vin.eu.status.${status}`)}</p>
-
-      <ul className="flex flex-wrap gap-1.5">
-        {items.map(s => (
-          <li
-            key={s.key}
-            className={cn(
-              'rounded-full px-2.5 py-0.5 text-sm',
-              s.status === 'all'
-                ? 'bg-sky-500/15 text-sky-800 dark:text-sky-300'
-                : 'border border-dashed border-[var(--color-muted)] text-[var(--color-muted)]'
-            )}
-          >
-            {s.status === 'all' ? '§' : '○'} {t(`vin.eu.${s.key}`)}
-          </li>
-        ))}
-      </ul>
-
       <p className="m-0 text-xs text-[var(--color-muted)]">{t('vin.eu.note')}</p>
+
+      {stages.map(items => {
+        const first = items[0]
+        if (!first) return null
+
+        return (
+          <div key={first.typesFrom} className="space-y-2">
+            <p className="m-0 text-sm">
+              {t(
+                `vin.eu.status.${first.status === 'newTypes' && Date.parse(first.allFrom) <= Date.now() ? 'newTypesPast' : first.status}`,
+                {
+                  year,
+                  types: formatDate(first.typesFrom),
+                  all: formatDate(first.allFrom)
+                }
+              )}
+            </p>
+
+            <ul className="flex flex-wrap gap-1.5">
+              {items.map(s => (
+                <li
+                  key={s.key}
+                  className={cn(
+                    'rounded-full px-2.5 py-0.5 text-sm',
+                    s.status === 'all'
+                      ? 'bg-sky-500/15 text-sky-800 dark:text-sky-300'
+                      : 'border border-dashed border-[var(--color-muted)] text-[var(--color-muted)]'
+                  )}
+                >
+                  {s.status === 'all' ? '§' : '○'} {t(`vin.eu.${s.key}`)}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )
+      })}
     </div>
   )
 }

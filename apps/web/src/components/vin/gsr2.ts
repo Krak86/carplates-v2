@@ -7,7 +7,9 @@ export const GSR2_SYSTEMS = [
   { key: 'aeb', typesFrom: '2022-07-06', allFrom: '2024-07-07' },
   { key: 'elks', typesFrom: '2022-07-06', allFrom: '2024-07-07' },
   { key: 'isa', typesFrom: '2022-07-06', allFrom: '2024-07-07' },
-  { key: 'ddaw', typesFrom: '2022-07-06', allFrom: '2024-07-07' }
+  { key: 'ddaw', typesFrom: '2022-07-06', allFrom: '2024-07-07' },
+  { key: 'addw', typesFrom: '2024-07-07', allFrom: '2026-07-07' },
+  { key: 'aebpc', typesFrom: '2024-07-07', allFrom: '2026-07-07' }
 ] as const
 
 export type Gsr2Key = (typeof GSR2_SYSTEMS)[number]['key']
@@ -31,11 +33,25 @@ export function gsr2Status(year: number, rule: { typesFrom: string; allFrom: str
   return 'newTypes'
 }
 
+export type Gsr2Item = {
+  key: Gsr2Key
+  status: Exclude<Gsr2Status, 'none'>
+  typesFrom: string
+  allFrom: string
+}
+
 /** The systems with a non-'none' status for `year`; empty for cars from before the regulation. */
-export function gsr2Baseline(year: number | null): { key: Gsr2Key; status: Exclude<Gsr2Status, 'none'> }[] {
+export function gsr2Baseline(year: number | null): Gsr2Item[] {
   if (year === null) return []
   return GSR2_SYSTEMS.flatMap(s => {
     const status = gsr2Status(year, s)
-    return status === 'none' ? [] : [{ key: s.key, status }]
+    return status === 'none' ? [] : [{ key: s.key, status, typesFrom: s.typesFrom, allFrom: s.allFrom }]
   })
+}
+
+/** The items split by rule dates (stages), oldest stage first, so each stage gets its own explanation. */
+export function gsr2Stages(items: Gsr2Item[]): Gsr2Item[][] {
+  const stages = new Map<string, Gsr2Item[]>()
+  for (const item of items) stages.set(item.typesFrom, [...(stages.get(item.typesFrom) ?? []), item])
+  return [...stages.values()]
 }
