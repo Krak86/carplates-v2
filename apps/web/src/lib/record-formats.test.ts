@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { toCsv, toMarkdown, toPlainText } from '@/lib/export-formats'
+import { toCsv, toMarkdown, toPlainText } from '@/lib/record-formats'
 import type { ExportReport } from '@/lib/export-report'
 
 const report: ExportReport = {

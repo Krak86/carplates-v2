@@ -14,6 +14,8 @@ const BRAND_COLOR = '#1d4ed8'
 
 // PDF/DOCX export is online-only: these libs (~1.5 MB) get `export-*` chunk names so the precache can skip them.
 // Only list packages nothing else imports — a shared one would drag its export chunk into the main bundle.
+// Never name a source module `export-*.ts` either: Rollup names its chunk after the file, the precache then skips it,
+// and if the main app imports it the whole app is blank offline (was `lib/export-formats.ts`).
 const EXPORT_LIB =
   /[\\/]node_modules[\\/](jspdf|docx|html2canvas|canvg|dompurify|jszip|fflate|fast-png|iobuffer|pako|core-js|@babel[\\/]runtime|raf|rgbcolor|stackblur-canvas|svg-pathdata|performance-now)[\\/]/
 
