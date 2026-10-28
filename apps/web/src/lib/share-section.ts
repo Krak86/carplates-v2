@@ -1,3 +1,5 @@
+import { denormalizePlate, isUaPlate } from '@carplates/shared'
+
 import i18n from '@/i18n'
 import { setFontParam } from '@/store/ui-store'
 
@@ -33,6 +35,23 @@ export const SHARE_SECTIONS = [
 ] as const
 export type ShareSection = (typeof SHARE_SECTIONS)[number]
 
+/**
+ * Current origin + path for a shared link. A Cyrillic plate path would be pasted as an unreadable
+ * `%D0%92…` string, so it is written in its Latin look-alikes (the API normalizes both to the same key).
+ */
+export function shareBaseUrl(): string {
+  const { origin, pathname } = window.location
+  const segment = pathname.slice(1)
+  if (segment.includes('/')) return `${origin}${pathname}`
+  let decoded: string
+  try {
+    decoded = decodeURIComponent(segment)
+  } catch {
+    return `${origin}${pathname}`
+  }
+  return isUaPlate(decoded) ? `${origin}/${denormalizePlate(decoded)}` : `${origin}${pathname}`
+}
+
 /** The shared link carries the sharer's language so its link preview (and the opened app) match it. */
 export function buildShareUrl(section: ShareSection, tab?: string): string {
   const params = new URLSearchParams()
@@ -40,7 +59,7 @@ export function buildShareUrl(section: ShareSection, tab?: string): string {
   if (tab) params.set('tab', tab)
   params.set('lang', i18n.language)
   setFontParam(params)
-  return `${window.location.origin}${window.location.pathname}?${params.toString()}`
+  return `${shareBaseUrl()}?${params.toString()}`
 }
 
 export async function copyToClipboard(text: string): Promise<boolean> {
