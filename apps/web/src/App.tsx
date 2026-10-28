@@ -64,7 +64,15 @@ export default function App(): ReactNode {
   return (
     <Layout>
       <LoadErrorBoundary resetKey={pathname}>
-        <Suspense fallback={<Spinner />}>
+        {/* Viewport-tall: a bare spinner leaves QuickLinks inside the first screen, and it is pushed out
+            (CLS 0.22 on /fuel) when the route chunk renders. */}
+        <Suspense
+          fallback={
+            <div className="min-h-svh">
+              <Spinner />
+            </div>
+          }
+        >
           <Routes>
             <Route path="/" element={<SearchRoute />} />
             <Route path="/about" element={<AboutRoute />} />

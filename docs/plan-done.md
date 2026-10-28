@@ -3075,6 +3075,20 @@ Trigger: the dev server showed ~22 MB / 337 requests before the first result. Th
   build (first re-run showed CLS 0.38 from `index-Bg8bPWRj.js`). Unregister the SW and delete `caches` (or use a fresh profile) and check
   `document.scripts` against the `index-*.js` in a no-store fetch of `/` before tracing.
 
+- **Contrast fix verified 2026-10-29** (Deploy Web #25, build `index-B1rOudh2.js` confirmed against a no-store fetch of `/` after clearing the SW
+  and `caches`): Lighthouse mobile **a11y 100** (was 96, `color-contrast` passes), best-practices 96, SEO 100, agentic browsing 50. Remaining
+  fails: `inspector-issues`, `llms-txt`, `ai-catalog.json` schema (both files still absent, awaiting a decision). The audit covers the home page
+  only; light theme and the yellow/orange/green bands are not rendered there, so they are unverified in a browser.
+  ✅ Then checked on `/fuel` (CO₂ value text in lists and tables; same build `index-B1rOudh2.js`, SW + `caches` cleared): **dark and light
+  both a11y 100**, `color-contrast` passes; red, orange, yellow and green bands were all rendered. New findings there: **CLS 0.22**
+  (the home page is 0.01; cause not investigated) and `td-has-header` (the "% of group / % of the model" table has no `<th scope>` on its row
+  cells), both open in PLAN.md.
+  **Fix (2026-10-29, not yet deployed):** a PerformanceObserver showed one shift of 0.22 whose sources were `QuickLinks` (`NAV` + its
+  `div.mt-6`) moving from y 663 to off-screen: while the lazy route chunk loads, the `Suspense` fallback is a 16 px spinner, so the footer
+  sits inside the first screen and jumps below the fold when the page (skeleton, then content) renders. `App.tsx` now wraps the fallback in
+  `min-h-svh`; the same applies to every lazy route. `td-has-header`: `PowertrainDetail` row names are `<th scope="row">` and the empty
+  second header carries an sr-only view name (`fuel.pt.view.*`). Verify after deploy.
+
 ### Estimated value, weight rankings, community widgets and export ✅ BUILT (2026-10-09, `86cc500` … `bb9f055`)
 
 Write-ups of the conventions are in `docs/features-reference.md` ("Estimated value", "Weight rankings", "Community posts", "Export, wiki text
