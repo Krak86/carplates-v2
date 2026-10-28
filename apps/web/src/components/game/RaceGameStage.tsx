@@ -45,7 +45,6 @@ export default function RaceGameStage({ config, onChange, onPickBody }: Props): 
   // steering by tilting the phone: opt-in each visit, never remembered
   const [tilt, setTilt] = useState(false)
   useRaceTilt(tilt && isTouch, handleInput)
-  const handleToggleTilt = async (): Promise<void> => setTilt(!tilt && (await requestTiltPermission()))
   const isPortrait = useMediaQuery('(orientation: portrait)')
 
   const [frame, setFrame] = useState<HTMLDivElement | null>(null)
@@ -57,7 +56,11 @@ export default function RaceGameStage({ config, onChange, onPickBody }: Props): 
   const [mouseTick, setMouseTick] = useState(0)
 
   useEffect(() => {
-    const handleChange = (): void => setFullscreen(document.fullscreenElement === frame && !!frame)
+    const handleChange = (): void => {
+      const on = document.fullscreenElement === frame && !!frame
+      setFullscreen(on)
+      if (!on) setTilt(false) // tilt steering lives only in full screen
+    }
     document.addEventListener('fullscreenchange', handleChange)
     return () => document.removeEventListener('fullscreenchange', handleChange)
   }, [frame])
@@ -89,9 +92,33 @@ export default function RaceGameStage({ config, onChange, onPickBody }: Props): 
   }, [hasSiren, config.body])
 
   const toggleFullscreen = (): void => {
-    if (pseudoFullscreen) setPseudoFullscreen(false)
-    else if (document.fullscreenElement) void document.exitFullscreen()
+    if (pseudoFullscreen) {
+      setPseudoFullscreen(false)
+      setTilt(false)
+    } else if (document.fullscreenElement) void document.exitFullscreen()
     else if (document.fullscreenEnabled) void frame?.requestFullscreen().catch(() => undefined)
+    else setPseudoFullscreen(true)
+  }
+
+  // tilt = landscape full screen + steering; leaving full screen switches it off again
+  const handleToggleTilt = async (): Promise<void> => {
+    if (tilt) {
+      setTilt(false)
+      return
+    }
+    const wasFullscreen = fullscreen
+    const entering = wasFullscreen ? Promise.resolve() : enterFullscreen()
+    const granted = await requestTiltPermission()
+    await entering
+    if (!granted && !wasFullscreen) {
+      setPseudoFullscreen(false)
+      if (document.fullscreenElement) void document.exitFullscreen()
+    }
+    setTilt(granted)
+  }
+
+  const enterFullscreen = async (): Promise<void> => {
+    if (document.fullscreenEnabled) await frame?.requestFullscreen().catch(() => undefined)
     else setPseudoFullscreen(true)
   }
 
@@ -301,6 +328,16 @@ export default function RaceGameStage({ config, onChange, onPickBody }: Props): 
               {t('race.fullscreen')}
             </button>
           )}
+          {isTouch && (
+            <button
+              type="button"
+              onClick={handleToggleTilt}
+              aria-pressed={tilt}
+              className="shrink-0 cursor-pointer rounded-full border border-[var(--color-border)] px-3 py-0.5 hover:border-[var(--color-primary)]"
+            >
+              <span aria-hidden>📱</span> {tilt ? t('race.tilt.on') : t('race.tilt.off')}
+            </button>
+          )}
           <button
             type="button"
             onClick={handleRestart}
@@ -319,17 +356,11 @@ export default function RaceGameStage({ config, onChange, onPickBody }: Props): 
               config={config}
               onChange={onChange}
               onPickBody={onPickBody}
-              tilt={isTouch ? { on: tilt, onToggle: handleToggleTilt } : undefined}
             />
           </div>
         </details>
       ) : (
-        <RaceGameSettings
-          config={config}
-          onChange={onChange}
-          onPickBody={onPickBody}
-          tilt={isTouch ? { on: tilt, onToggle: handleToggleTilt } : undefined}
-        />
+        <RaceGameSettings config={config} onChange={onChange} onPickBody={onPickBody} />
       )}
     </div>
   )

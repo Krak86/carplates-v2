@@ -31,8 +31,6 @@ type Props = {
   onChange: (patch: Partial<RacerConfig>) => void
   /** Replaces the plain "switch the car type" click (the plate-less route also applies a famous example's paint). */
   onPickBody?: (body: CarBody) => void
-  /** Touch devices only: steering by tilting the phone (left/right only). */
-  tilt?: { on: boolean; onToggle: () => void }
 }
 
 const BODY_EMOJI: Readonly<Record<CarBody, string>> = {
@@ -56,7 +54,7 @@ const REGION_BACKDROPS_COLLAPSED = 3
 
 const SCENERY_EMOJI: Readonly<Record<SceneryId, string>> = { day: '☀️', sunset: '🌇', night: '🌙', winter: '❄️' }
 
-export default function RaceGameSettings({ config, onChange, onPickBody, tilt }: Props): ReactNode {
+export default function RaceGameSettings({ config, onChange, onPickBody }: Props): ReactNode {
   const { t } = useTranslation()
   const [showAllRegions, setShowAllRegions] = useState(false)
   const regionBackdrops = showAllRegions
@@ -85,14 +83,6 @@ export default function RaceGameSettings({ config, onChange, onPickBody, tilt }:
           {t('race.drive.manual')}
         </RaceGameChip>
       </RaceGameGroup>
-
-      {tilt && (
-        <RaceGameGroup label={t('race.tilt')}>
-          <RaceGameChip active={tilt.on} onClick={tilt.onToggle}>
-            <span aria-hidden>📱</span> {tilt.on ? t('race.tilt.on') : t('race.tilt.off')}
-          </RaceGameChip>
-        </RaceGameGroup>
-      )}
 
       <RaceGameGroup label={t('race.color')}>
         {Object.values(VEHICLE_COLOR_HEX).map(hex => (
