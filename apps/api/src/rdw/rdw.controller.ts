@@ -1,7 +1,8 @@
-import { Controller, Get, Inject, Query } from '@nestjs/common'
+import { Controller, Get, Inject, Query, UseInterceptors } from '@nestjs/common'
 import { ApiOkResponse, ApiQuery, ApiTags } from '@nestjs/swagger'
 import { z } from 'zod'
 
+import { LOOKUP_CACHE, lookupCacheInterceptor, RECALLS_CACHE } from '../common/cache.js'
 import { zodParam } from '../common/zod-param.pipe.js'
 
 import { RdwRecallsResponseDto, RdwResponseDto } from './rdw.dto.js'
@@ -26,6 +27,7 @@ export class RdwController {
   constructor(@Inject(RdwService) private readonly rdwService: RdwService) {}
 
   @Get()
+  @UseInterceptors(lookupCacheInterceptor(LOOKUP_CACHE))
   @ApiQuery({ name: 'brand', required: true })
   @ApiQuery({ name: 'model', required: true })
   @ApiQuery({ name: 'year', required: true })
@@ -37,6 +39,7 @@ export class RdwController {
 
   /** Model-level recall campaigns from RDW (EU market) — never a statement about a particular car. */
   @Get('recalls')
+  @UseInterceptors(lookupCacheInterceptor(RECALLS_CACHE))
   @ApiQuery({ name: 'brand', required: true })
   @ApiQuery({ name: 'model', required: true })
   @ApiOkResponse({ type: RdwRecallsResponseDto })
