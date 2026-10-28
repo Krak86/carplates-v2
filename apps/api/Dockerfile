@@ -18,8 +18,10 @@ COPY packages/shared packages/shared
 COPY packages/db packages/db
 COPY apps/api apps/api
 RUN pnpm --filter @carplates/shared --filter @carplates/db build && pnpm --filter @carplates/api build
-RUN pnpm --filter @carplates/api deploy --prod --legacy /out \
-  && cp -r apps/api/dist /out/dist
+# Plain `cp -r` (not -a) turns pnpm's hardlinks into real files: hardlinked layer entries made containerd fail to extract the image.
+RUN pnpm --filter @carplates/api deploy --prod --legacy /deployed \
+  && cp -r apps/api/dist /deployed/dist \
+  && cp -r /deployed /out && rm -rf /deployed
 
 FROM node:24-slim
 ENV NODE_ENV=production PORT=3000
