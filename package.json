@@ -151,9 +151,9 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@tanstack/eslint-plugin-query": "^5.104.2",
+    "@tanstack/eslint-plugin-query": "^5.104.5",
     "concurrently": "^10.0.6",
-    "eslint": "^10.12.0",
+    "eslint": "^10.13.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-import-resolver-typescript": "^4.4.5",
     "eslint-plugin-drizzle": "^0.2.3",
@@ -163,7 +163,7 @@
     "prettier": "^3.9.10",
     "prettier-plugin-tailwindcss": "^0.8.1",
     "typescript": "~5.9.3",
-    "typescript-eslint": "^8.71.1",
+    "typescript-eslint": "^8.72.0",
     "vitest": "^5.0.4"
   }
 }
