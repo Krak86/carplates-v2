@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { downloadBlob, downloadText, toFileStem } from '@/lib/download'
 import { buildLocalRecordsReport } from '@/lib/export-report'
 import type { ExportFormat, ExportLocalRecord } from '@/lib/export-report'
-import { toCsv, toMarkdown, toPlainText } from '@/lib/export-formats'
+import { toCsv, toMarkdown, toPlainText } from '@/lib/record-formats'
 import { copyToClipboard } from '@/lib/share-section'
 
 type UseLocalRecordsExportActions = {

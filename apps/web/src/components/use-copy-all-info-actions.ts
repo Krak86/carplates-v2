@@ -10,7 +10,7 @@ import { lemmyQuery, stackExchangeQuery } from '@/lib/community'
 import { newsLangFilter } from '@/lib/news'
 import { buildExportReport } from '@/lib/export-report'
 import type { ExportFormat, ExportInput, ExportVehicleInfo } from '@/lib/export-report'
-import { toCsv, toMarkdown, toPlainText } from '@/lib/export-formats'
+import { toCsv, toMarkdown, toPlainText } from '@/lib/record-formats'
 import {
   caRecallsQuery,
   cncapRatingsQuery,
