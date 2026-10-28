@@ -96,7 +96,7 @@ async function translateWithChrome(text: string, from: string, to: string, onPro
       )
     }
   })
-  resetChromeReady() // the pack is installed now: "translate here" buttons may appear
+  resetInPlaceEngines() // the pack is installed now: "translate here" buttons may appear
   try {
     onProgress(null)
     return await translator.translate(text)
@@ -143,6 +143,7 @@ async function translateWithOpus(text: string, from: string, to: string, onProgr
       }
     })
     markCached(pair)
+    resetInPlaceEngines() // the models are cached now: "translate here" buttons may appear
     onProgress(null)
     const next: string[] = []
     for (const sentence of current) {
@@ -156,21 +157,29 @@ async function translateWithOpus(text: string, from: string, to: string, onProgr
 
 // ---- Public API ----------------------------------------------------------------------------------------------------
 
-const chromeReady = new Map<string, Promise<boolean>>()
+const inPlaceEngines = new Map<string, Promise<TranslatorId | null>>()
 
-/** True when the built-in browser translator can translate `from` → `to` on a click: installed, or a language pack it downloads first (the click is the reader's choice). Cached. */
-export function canChromeTranslate(from: string, to: string): Promise<boolean> {
+/**
+ * The engine a "Translate here" click can use for `from` → `to` without a big download: one that is installed, else the
+ * built-in browser translator (a language pack it downloads first is the reader's choice), else null. OPUS counts only
+ * once its models are cached (it was downloaded from the dialog before). Cached.
+ */
+export function inPlaceEngine(from: string, to: string): Promise<TranslatorId | null> {
   const key = `${from}>${to}`
-  let cached = chromeReady.get(key)
+  let cached = inPlaceEngines.get(key)
   if (!cached) {
-    cached = chromeOption(from, to).then(o => o.status !== 'unavailable')
-    chromeReady.set(key, cached)
+    cached = chromeOption(from, to).then(chrome => {
+      if (chrome.status === 'ready') return 'chrome'
+      if (opusOption(from, to).status === 'ready') return 'opus'
+      return chrome.status === 'unavailable' ? null : 'chrome'
+    })
+    inPlaceEngines.set(key, cached)
   }
   return cached
 }
 
-/** Forget the cached answers of `canChromeTranslate` (after a language pack was downloaded). */
-export const resetChromeReady = (): void => chromeReady.clear()
+/** Forget the cached answers of `inPlaceEngine` (after a language pack or model was downloaded). */
+export const resetInPlaceEngines = (): void => inPlaceEngines.clear()
 
 /** What this browser can do for `from` → `to`, without downloading anything. Order = preference. */
 export async function detectOptions(from: string, to: string): Promise<LocalOption[]> {

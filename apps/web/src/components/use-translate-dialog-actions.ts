@@ -6,8 +6,9 @@ type Running = { id: TranslatorId; percent: number | null }
 
 /**
  * State of the translate dialog: asks the browser what it can do on-device for `from` → `to` (nothing is downloaded by
- * that), then runs the engine the reader picked — the pick is the consent to any download. When the built-in browser
- * translator is already installed it runs at once (nothing to download, like opening Google Translate).
+ * that), then runs the engine the reader picked — the pick is the consent to any download. When an engine is already
+ * installed (built-in browser translator, or OPUS models cached by an earlier download) it runs at once (nothing to
+ * download, like opening Google Translate).
  */
 export function useTranslateDialogActions(text: string, from: string, to: string) {
   const [options, setOptions] = useState<LocalOption[] | null>(null)
@@ -45,10 +46,10 @@ export function useTranslateDialogActions(text: string, from: string, to: string
   )
 
   useEffect(() => {
-    const first = options?.[0]
-    if (autoRan.current || first?.id !== 'chrome' || first.status !== 'ready') return
+    const ready = options?.find(o => o.status === 'ready')
+    if (autoRan.current || !ready) return
     autoRan.current = true
-    void handleTranslate('chrome')
+    void handleTranslate(ready.id)
   }, [options, handleTranslate])
 
   return { options, running, result, failed, handleTranslate }
