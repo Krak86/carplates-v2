@@ -225,8 +225,15 @@ Registry data lost with the full dumps: re-ingest from `archive/` ZIPs (`backup.
 5. **Pre-deploy security gate** ([security-checklist.md §7](security-checklist.md)), partly done 2026-10-28. Passed against the live site: `pnpm audit --prod` has
    no high/critical (nodemailer ^10.2.1 and `fast-uri >=4.2.3` bumped; the one left is a low `deepmerge` with no patch, accepted), HSTS/nosniff/Referrer/Permissions
    headers, `/api/docs` is not Swagger, `/api/admin/*` anonymous → 401, cross-site POST → 403, rate limits → 429 on `/api/plate/*` and `/api/auth/google`.
-   Still open: enforce CSP (now Report-Only in `infra/Caddyfile`), `nmap -Pn -p 22,80,443,5432,8088 <vps-ip>` from another network, cookie flags + sign-out +
-   account-deletion check in the browser, `trivy image` + `gitleaks` on full history, ZAP baseline, restore test on a populated DB.
+   Also passed: `gitleaks` on all 558 commits (clean); `trivy fs` on the lockfile + `infra/` (0 HIGH/CRITICAL); `nmap` of the VPS (only 22/80/443 reachable, 5432/6379/8088
+   filtered; an open port 53 seen from the dev PC was the local network intercepting DNS, not the VPS: `ss` shows only loopback listeners and no container publishes 53);
+   session cookie flags (`carsua_sid` HttpOnly + Secure + SameSite=Lax) and sign-out deleting the `app.sessions` row (count 5 → 4 → 5); email sign-in via Resend.
+   ZAP baseline (passive, public pages): 0 FAIL, 9 WARN, all accepted: CSP not enforced (Report-Only, below), COEP/COOP missing (would break the YouTube/Disqus/Sketchfab
+   embeds and the Google sign-in popup), `?lang=` reflection is whitelisted by `resolveLang`, the rest is cache/comment noise. `trivy image` (api/alpr, HIGH+CRITICAL): ~55 Debian OS
+   findings per image with no fix available (re-scan after base-image bumps), plus 7 HIGH in the npm bundled with `node:24-slim`, now removed in `apps/api/Dockerfile`.
+   Gotcha: Cloudflare Bot Fight Mode challenges GitHub runner IPs (403), so the post-deploy public `/healthz` check in `deploy-api.yml` is advisory only.
+   Still open: enforce CSP (Report-Only in `infra/Caddyfile`, after ~1 week of clean reports), account-deletion test with a throwaway account, restore test on a populated DB,
+   re-run `trivy image` after the next base-image update.
 6. **Browser smoke test (partly done: home, plate page, link-preview card):** Google login (authorised origin `https://carsua.app`), Telegram login (`/setdomain carsua.app`;
    check `TELEGRAM_BOT_USERNAME` is the production bot), a real email through Resend (`MAIL_FROM` is `carsua <noreply@carsua.app>`), VIN lookup, camera recognize
    (ALPR), Maps key restricted to the `carsua.app` referrer, Disqus.
