@@ -3,7 +3,7 @@
 Status (2026-10-27): **first real deploy done** on a Contabo Cloud VPS 6 behind Cloudflare (Full strict + origin certificate): bootstrap, `deploy-api`,
 `deploy-alpr`, `deploy-web`, a verified `pg_restore` of the real DB (row counts equal local) and a live `https://carsua.app` (healthz, sitemap,
 robots, plate API all 200; HTTP/3 advertised). The runbook below is corrected from that run; the problems found are in `docs/plan-done.md`
-"First VPS deploy". R2 backups work (nightly + full verified 2026-10-27). UptimeRobot on `/healthz` is up (2026-10-28). **Not yet done:** the security gate (§7), `ingest-cron`.
+"First VPS deploy". R2 backups work (nightly + full verified 2026-10-27). UptimeRobot on `/healthz` is up (2026-10-28). **Not yet done:** the rest of the security gate (§7, partly checked 2026-10-28), `ingest-cron`.
 Deploy scripts run via `ssh vps bash -s < script`, so bash reads the script from stdin: every `docker` call in them that could attach stdin needs
 `</dev/null`, or it swallows the rest of the script and bash exits 0 early (this made `deploy-api` report success without starting the api).
 
@@ -222,7 +222,11 @@ Registry data lost with the full dumps: re-ingest from `archive/` ZIPs (`backup.
    / 10 s, Block 10 s (verified: ~30 × 200 then 429). HSTS is sent by Caddy (`max-age=31536000`), so Cloudflare's HSTS toggle stays off (a second source would
    duplicate or override it). Not done: "Under Attack" is a manual toggle for incidents. DNSSEC was turned off at Squarespace for the nameserver move; optionally
    re-enable it in Cloudflare and add the DS record at Squarespace.
-5. **Pre-deploy security gate:** [security-checklist.md §7](security-checklist.md).
+5. **Pre-deploy security gate** ([security-checklist.md §7](security-checklist.md)), partly done 2026-10-28. Passed against the live site: `pnpm audit --prod` has
+   no high/critical (nodemailer ^10.2.1 and `fast-uri >=4.2.3` bumped; the one left is a low `deepmerge` with no patch, accepted), HSTS/nosniff/Referrer/Permissions
+   headers, `/api/docs` is not Swagger, `/api/admin/*` anonymous → 401, cross-site POST → 403, rate limits → 429 on `/api/plate/*` and `/api/auth/google`.
+   Still open: enforce CSP (now Report-Only in `infra/Caddyfile`), `nmap -Pn -p 22,80,443,5432,8088 <vps-ip>` from another network, cookie flags + sign-out +
+   account-deletion check in the browser, `trivy image` + `gitleaks` on full history, ZAP baseline, restore test on a populated DB.
 6. **Browser smoke test (partly done: home, plate page, link-preview card):** Google login (authorised origin `https://carsua.app`), Telegram login (`/setdomain carsua.app`;
    check `TELEGRAM_BOT_USERNAME` is the production bot), a real email through Resend (`MAIL_FROM` is `carsua <noreply@carsua.app>`), VIN lookup, camera recognize
    (ALPR), Maps key restricted to the `carsua.app` referrer, Disqus.
