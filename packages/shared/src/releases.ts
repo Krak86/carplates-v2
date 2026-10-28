@@ -20,6 +20,24 @@ export const RELEASES: readonly ReleaseDay[] = [
     items: [
       item(
         'new',
+        'Кермо праворуч: позначка RHD на картці VIN, коли декодований VIN це показує',
+        'Руль справа: метка RHD на карточке VIN, когда расшифрованный VIN это показывает',
+        'Right-hand drive: an RHD chip on the VIN card when the decoded VIN says so'
+      ),
+      item(
+        'new',
+        'Гра-гонки: керування нахилом телефона на сенсорних екранах і робота офлайн після першого завантаження',
+        'Игра-гонки: управление наклоном телефона на сенсорных экранах и работа офлайн после первой загрузки',
+        'Race game: optional tilt steering on touch devices, and it works offline after the first load'
+      ),
+      item(
+        'improved',
+        'Переклад на місці працює навіть без вбудованого перекладача браузера: невеликі моделі OPUS кешуються в браузері',
+        'Перевод на месте работает даже без встроенного переводчика браузера: небольшие модели OPUS кэшируются в браузере',
+        'Translate in place now works without the built-in browser translator: small OPUS models are cached in your browser'
+      ),
+      item(
+        'new',
         'Щомісячні новини на пошту: за бажанням (вмикається в профілі) - раз на місяць короткий список нових можливостей, лише коли вони були; відписка в один клік',
         'Ежемесячные новости на почту: по желанию (включается в профиле) - раз в месяц короткий список новых возможностей, только когда они были; отписка в один клик',
         'Monthly news by email: optional (switched on in your profile) - once a month a short list of new features, only when there were some; one-click unsubscribe'
