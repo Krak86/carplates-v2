@@ -20,7 +20,6 @@ import PhotoMetaInfo from '@/components/PhotoMetaInfo'
 import PhotoWarnings from '@/components/PhotoWarnings'
 import PhotoThumbnail from '@/components/PhotoThumbnail'
 import PlateCandidates from '@/components/PlateCandidates'
-import ResultCard from '@/components/ResultCard'
 import SearchField from '@/components/SearchField'
 import Presence from '@/components/ui/Presence'
 import Spinner from '@/components/ui/Spinner'
@@ -45,6 +44,7 @@ import HomeSafetySection from '@/routes/stats/HomeSafetySection'
 import HomeStatsSkeleton from '@/routes/stats/HomeStatsSkeleton'
 import HomeWantedSection from '@/routes/stats/HomeWantedSection'
 
+const ResultCard = lazy(() => import('@/components/ResultCard'))
 const VinResult = lazy(() => import('@/components/VinResult'))
 const TopStatsPanel = lazy(() => import('@/routes/stats/TopStatsPanel'))
 const WeightModelsCards = lazy(() => import('@/routes/stats/WeightModelsCards'))
@@ -287,7 +287,11 @@ export default function SearchRoute(): ReactNode {
           {photo && <PlateCandidates candidates={photo.candidates} active={raw || null} onSelect={selectCandidate} />}
         </Presence>
 
-        {!recognizeErrorKey && kind === 'plate' && plate.data && <ResultCard data={plate.data} />}
+        {!recognizeErrorKey && kind === 'plate' && plate.data && (
+          <Suspense fallback={null}>
+            <ResultCard data={plate.data} />
+          </Suspense>
+        )}
         {!recognizeErrorKey && kind === 'vin' && vin.data && (
           <Suspense fallback={null}>
             <VinResult data={vin.data} />
