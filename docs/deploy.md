@@ -205,8 +205,10 @@ Registry data lost with the full dumps: re-ingest from `archive/` ZIPs (`backup.
    `postgres:18.6` container (create schemas `app` + `registry` first; 9 app tables, 6 registry tables) and the 1.28 GB full dump passed `pg_restore --list`
    (68 `TABLE DATA`). Gotcha: an object-scoped R2 token cannot check/create buckets, so rclone needs `RCLONE_CONFIG_R2_NO_CHECK_BUCKET=true` (set in `backup.env`
    by `deploy-api`), else uploads fail with 403 AccessDenied. A `501 NotImplemented` on attempt 1 followed by success on attempt 2 is normal. A full dump takes
-   ~10 min; run it under `nohup`. Still to do: confirm the 03:30 cron run + healthchecks.io check, `backup.sh archive` (source ZIPs), and delete the old local
-   `C:\tmp\carsua.dump` once comfortable.
+   ~10 min; run it under `nohup`. Nightly cron confirmed 2026-10-28 (`/etc/cron.d/carsua-backup`, 03:30 server time; dump in R2; healthchecks.io Started + OK).
+   Manual `rclone` on the VPS needs `set -a; . /opt/carsua/env/backup.env; set +a` first (no rclone.conf). Never open the ping URL in a browser (counts as a ping).
+   `backup.sh archive` works but is a no-op until the first VPS ingest fills `/opt/carsua/archive`; run it and `backup.sh full` after that ingest. Still to do:
+   restore test on a populated DB, and delete the old local `C:\tmp\carsua.dump` once comfortable.
 2. ✅ **SSH hardening (fixed + verified 2026-10-27).** The check found the problem: sshd takes the first value it reads, `50-cloud-init.conf` (unreadable by
    `deploy`) beat `99-carsua.conf`, and password login was on. Renamed the drop-in to `00-carsua.conf` (`bootstrap.sh` now writes that name) and reloaded sshd;
    `ssh -o PubkeyAuthentication=no -o PreferredAuthentications=password deploy@<ip>` is now refused with no password prompt. Re-run that test after any sshd change.
@@ -223,14 +225,15 @@ Registry data lost with the full dumps: re-ingest from `archive/` ZIPs (`backup.
 7. **Secrets hygiene.** Dev values were visible in screenshots/chat during the first deploy: rotate `POSTHOG_PERSONAL_API_KEY` and any other key you consider exposed.
    The production `AUTH_SECRET` and `POSTGRES_PASSWORD` are separate from the dev ones. Optional secrets still unset: `SENTRY_DSN` (only `VITE_SENTRY_DSN` is set, so
    server errors are not tracked), `PLATE_RECOGNIZER_CLOUD_TOKEN`. `TURNSTILE_*` is set (2026-10-27).
-8. Housekeeping: 6 open Dependabot PRs; a Contabo snapshot once the site is stable; a Telegram `@WebpageBot` / X card-validator refresh of the old text-less preview.
+8. **Ingest cron (the biggest functional gap).** `ingest-cron` image + `run-job.ts` + crontab (SCHEDULE.md) are not built, so monthly ingest and `ingest:wanted`
+   run by hand on the VPS (`wanted` loses history on every skipped day; the news ticker is empty/stale). There is no `ingest` image yet, so `backup.sh full/archive`
+   are manual too, and `archive` stays a no-op until the first VPS ingest. Build order (cheap, idempotent first): `pnpm ingest:news` (every ~6 h), `pnpm ingest:social`
+   (daily, brand YouTube RSS), `ingest:wanted` (daily), then the plate `ingest:full` (Tue + Fri ~03:00 Kyiv). One healthchecks.io check per job; run
+   `backup.sh archive` + `full` after the first monthly ingest.
+9. Housekeeping: 6 open Dependabot PRs; a Contabo snapshot once the site is stable; a Telegram `@WebpageBot` / X card-validator refresh of the old text-less preview.
 
 ### Longer term
 
-- `ingest-cron` image + `run-job.ts` + crontab (SCHEDULE.md) — not built; monthly ingest and `ingest:wanted` must be run by hand on the VPS until then
-  (`wanted` loses history on skipped days). There is no `ingest` image yet, so `backup.sh full/archive` are manual too.
-  **First crontab entries (cheap, idempotent, build these first):** the RSS jobs `pnpm ingest:news` (every ~6 h; news ticker is empty/stale without it) and
-  `pnpm ingest:social` (daily, brand YouTube RSS), then `ingest:wanted` (daily) and the plate `ingest:full` (Tue + Fri ~03:00 Kyiv). One healthchecks.io check each.
 - Redis throttler store (not used by the app yet, so Redis is not in the compose file); until then limits are per-process and reset on restart,
   and blue/green briefly runs two api processes.
 - CSP is Report-Only; enforce after a clean week. Cloudflare IP ranges in the Caddyfile: re-check against cloudflare.com/ips occasionally.
