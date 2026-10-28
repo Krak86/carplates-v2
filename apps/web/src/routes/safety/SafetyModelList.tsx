@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 
 import BrandLogo from '@/components/BrandLogo'
-import { CO2_BAND_COLOR } from '@/components/CO2Badge.helpers'
+import { CO2_BAND_TEXT_COLOR } from '@/components/CO2Badge.helpers'
 import { toIntlLocale } from '@/lib/intl'
 import { bandForScore } from '@/routes/safety/helpers'
 
@@ -47,7 +47,7 @@ export default function SafetyModelList({ title, info, models }: Props): ReactNo
             </Link>
             <span
               className="font-medium whitespace-nowrap tabular-nums"
-              style={{ color: CO2_BAND_COLOR[bandForScore(m.avgScore)] }}
+              style={{ color: CO2_BAND_TEXT_COLOR[bandForScore(m.avgScore)] }}
             >
               {Math.round(m.avgScore)}
               <span className="text-xs font-normal text-[var(--color-muted)]">

@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router'
 
-import { CO2_BAND_COLOR } from '@/components/CO2Badge.helpers'
+import { CO2_BAND_COLOR, CO2_BAND_TEXT_COLOR } from '@/components/CO2Badge.helpers'
 import SectionInfo from '@/components/SectionInfo'
 import Card from '@/components/ui/Card'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
@@ -94,7 +94,9 @@ export default function FuelStatsRoute(): ReactNode {
               <div className="text-xs text-[var(--color-muted)] uppercase">{t('fuel.summary.fleetAvg')}</div>
               <div
                 className="text-xl font-semibold"
-                style={data.fleetAvgCo2 != null ? { color: CO2_BAND_COLOR[bandForCo2(data.fleetAvgCo2)] } : undefined}
+                style={
+                  data.fleetAvgCo2 != null ? { color: CO2_BAND_TEXT_COLOR[bandForCo2(data.fleetAvgCo2)] } : undefined
+                }
               >
                 {data.fleetAvgCo2 != null ? Math.round(data.fleetAvgCo2) : '-'} {t('co2.unitGKm')}
               </div>

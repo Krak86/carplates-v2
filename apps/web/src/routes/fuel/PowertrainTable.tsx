@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import type { PowertrainClass } from '@carplates/shared'
 import { useTranslation } from 'react-i18next'
 
-import { CO2_BAND_COLOR } from '@/components/CO2Badge.helpers'
+import { CO2_BAND_TEXT_COLOR } from '@/components/CO2Badge.helpers'
 import { cn } from '@/lib/cn'
 import { toIntlLocale } from '@/lib/intl'
 import { bandForCo2, formatPercent } from '@/routes/fuel/helpers'
@@ -67,7 +67,7 @@ export default function PowertrainTable({ classes, selected, onSelect }: Props):
               </td>
               <td
                 className="px-2 text-right tabular-nums"
-                style={c.avgCo2 != null ? { color: CO2_BAND_COLOR[bandForCo2(c.avgCo2)] } : undefined}
+                style={c.avgCo2 != null ? { color: CO2_BAND_TEXT_COLOR[bandForCo2(c.avgCo2)] } : undefined}
               >
                 {c.avgCo2 != null ? Math.round(c.avgCo2) : '-'}
               </td>

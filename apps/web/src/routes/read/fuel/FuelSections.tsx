@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 
 import BrandLogo from '@/components/BrandLogo'
-import { CO2_BAND_COLOR } from '@/components/CO2Badge.helpers'
+import { CO2_BAND_COLOR, CO2_BAND_TEXT_COLOR } from '@/components/CO2Badge.helpers'
 import Card from '@/components/ui/Card'
 import Skeleton from '@/components/ui/Skeleton'
 import { fuelStatsQuery } from '@/lib/queries'
@@ -116,7 +116,9 @@ export function FleetSection(): ReactNode {
               <dt className="text-sm text-muted">{t('read.fuel.average')}</dt>
               <dd
                 className="text-2xl font-bold tabular-nums"
-                style={data.fleetAvgCo2 != null ? { color: CO2_BAND_COLOR[bandForCo2(data.fleetAvgCo2)] } : undefined}
+                style={
+                  data.fleetAvgCo2 != null ? { color: CO2_BAND_TEXT_COLOR[bandForCo2(data.fleetAvgCo2)] } : undefined
+                }
               >
                 {data.fleetAvgCo2 != null ? Math.round(data.fleetAvgCo2) : '-'}
                 <span className="text-sm font-normal text-muted"> {t('co2.unitGKm')}</span>
@@ -240,7 +242,7 @@ function ModelList({ title, models }: { title: string; models: readonly FuelStat
 
             <span
               className="font-medium whitespace-nowrap tabular-nums"
-              style={{ color: CO2_BAND_COLOR[bandForCo2(m.avgCo2)] }}
+              style={{ color: CO2_BAND_TEXT_COLOR[bandForCo2(m.avgCo2)] }}
             >
               {Math.round(m.avgCo2)}
               <span className="text-xs font-normal text-muted"> {t('co2.unitGKm')}</span>
