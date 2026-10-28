@@ -17,7 +17,7 @@ carsua.app {
 	# Stock Caddy has no Brotli encoder. Cloudflare passes an already-compressed origin response through unchanged (verified
 	# 2026-10-28: browsers got gzip), but compresses an uncompressed one itself - to Brotli when the browser accepts it.
 	# So requests that came through Cloudflare are sent plain; only direct hits (no CF-Connecting-IP) are compressed here.
-	@direct not header Cf-Connecting-Ip
+	@direct not header Cf-Connecting-Ip *
 	encode @direct zstd gzip
 
 	header {
