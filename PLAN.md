@@ -690,6 +690,33 @@ Group 1 dimension callouts + garage-fit -> Group 3 (existing order). Owner says 
 
 ### To discuss / research
 
+- [ ] **Driver assist + CarPlay / Android Auto** — researched 2026-10-28, not started. Owner says "go" per step.
+      **Legal (verified 2026-10-28): do NOT scrape Apple's CarPlay list or Google's Android Auto page.** Apple site terms ban
+      "page-scrape / robot / spider" and copying (robots.txt is open, the ToS still applies); Google terms ban scraping content
+      "that doesn't belong to you"; EU database right covers the compilation even though single facts are free. No open dataset
+      and no Wikidata property exists. Allowed: link-out, or a hand-written table from manufacturer pages (same rules as
+      `wikispecs-curated.csv`: facts only, one citation per row, nothing copied). Not legal advice; ask a lawyer before any scrape.
+      - [ ] **Step 1 — NHTSA vPIC ADAS chips (do first, no new source).** The VIN decode already gives `vinFields`
+            (`Map<name, value>`, see `SteeringChip` in `ResultCard.tsx` / `VinResult.tsx`). First check what a real decode returns:
+            call `GetVehicleVariableList` and decode ~10 VINs (US 2018+, EU, Tesla, pre-2015) to see which ADAS variables are
+            filled (expected: Adaptive Cruise Control, Lane Departure Warning, Lane Keeping, Lane Centering, Forward Collision
+            Warning, Automatic Emergency Braking, Blind Spot Warning, SAE automation level). Then a `DriverAssistChip`/section in
+            `components/vin/` with `helpers.ts` parsing (values are "Standard" / "Optional" / "Not Applicable" / empty), hidden when
+            nothing is filled, "standard vs optional" wording and a footnote that it is the US-market spec. If the data comes via
+            the API instead, the contract goes in its own file with `.nullable().optional()`. i18n ua/ru/en, About source line,
+            `releases.ts` entry. Never say "has autopilot": only SAE level + listed systems.
+      - [ ] **Step 2 — EU baseline by first-registration date (GSR2).** For EU/RDW cars, derive "mandatory since" systems (AEB,
+            lane keeping, intelligent speed assistance, driver drowsiness) from the first-registration date: new types from
+            2022-07, all new cars from 2024-07. Label it a legal baseline, not the car's equipment. Verify the exact dates from the
+            EU regulation (2019/2144) text before coding.
+      - [ ] **Step 3 (optional) — Tesla.** Only if the decode names Tesla: "Autopilot hardware" chip, no FSD claim (software
+            subscription, no public source).
+      - [ ] **Step 4 (optional) — CarPlay / Android Auto.** Link-out "Check CarPlay / Android Auto support" to Apple's and
+            Google's own pages (like the AUTO.RIA link-out). A curated CSV of the top ~50 models only if the owner wants it, built
+            by hand from manufacturer pages, with a citation per row.
+      - **Worth it?** Step 1 yes (cheap, accurate per VIN). Step 2 yes (cheap, honest). Steps 3-4 only if time. Full
+        scraped database: no.
+
 - [ ] **Model catalog pages `/cars/:make/:model/:year`** — researched 2026-10-13, not started. Plate-free model pages
       (registry stats + the existing model-level sections) as indexable SEO slugs; needs a canonical make/model taxonomy
       (registry models are trim-level) and TS-built rollup tables, not a matview. Full write-up: [docs/catalog-plan.md](docs/catalog-plan.md).
