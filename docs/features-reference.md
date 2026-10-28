@@ -174,7 +174,7 @@ allowed**) tinted through a body mask (the body only needs to be its own materia
 files in `lib/racer/assets/`, built by `scripts/racer-render/` with no Blender); the photo backdrops (the owner's own photos) are lazy
 per id (`backdrop-assets.ts`, `lib/racer/backdrops/`); trees, signs and sound stay procedural. Steering sprites are mirrored per model
 family — see docs/plan-done.md "Racer art pass". The engine is a dynamic-imported chunk (import it only with `import type` elsewhere)
-and `RaceGameModal`/`engine` chunks are `globIgnores`d from the PWA precache. Settings are shareable via `?section=race&tab=…`
+and `RaceGameModal`/`engine` chunks are `globIgnores`d from the PWA precache; once opened they are runtime-cached (`carplates-rt-race-code`, sprites/backdrops in `carplates-rt-backgrounds`), so the game then works offline (only what was used, e.g. the backdrops of the regions driven). Settings are shareable via `?section=race&tab=…`
 (`encodeRaceConfig`/`decodeRaceConfig`, validated); without a share link scenery, backdrop, lanes, traffic and resolution start
 random on every opening (`randomScenery`/`randomBackdrop`/`randomLanes`/`randomTraffic`/`randomQuality` in `config.ts`). The HUD
 shows speed, a bump counter (hits on cars/trees/signs, one per contact via a 0.7 s cooldown; a "crash test" warning at `BUMP_WARNING`, a "driving lessons" one at `BUMP_LESSONS`) and the km odometer (the lap readout is hidden; lap timing still runs in the engine). Update `RACER_SIZE_KB` after big changes (470
