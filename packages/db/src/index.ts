@@ -18,6 +18,7 @@ export {
   statsModelGrouped,
   statsByOrigin,
   ingestedResources,
+  jobRuns,
   euroncapRatings,
   jncapRatings,
   cncapRatings,

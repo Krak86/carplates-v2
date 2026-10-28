@@ -1,0 +1,13 @@
+# Scheduled ingest jobs (SCHEDULE.md). Installed as the deploy user's crontab by the ingest deploy (`crontab ingest.cron`); server time.
+# Each job logs to registry.job_runs and pings its healthchecks.io check (HC_PING_<JOB> in /opt/carsua/env/ingest.env).
+# run-job.ts skips a run while the previous one is still going, so overlaps are harmless.
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+# RSS news, brand YouTube feeds and the wanted-cars list daily (a skipped day loses wanted history).
+10 4 * * *   bash /opt/carsua/compose/run-ingest.sh news >> /opt/carsua/backups/ingest.log 2>&1
+25 4 * * *   bash /opt/carsua/compose/run-ingest.sh social >> /opt/carsua/backups/ingest.log 2>&1
+40 4 * * *   bash /opt/carsua/compose/run-ingest.sh wanted >> /opt/carsua/backups/ingest.log 2>&1
+
+# data.gov.ua plates: Tue + Fri, after the 03:30 backup. A no-op run is one CKAN call; the monthly load holds a lock on registrations.
+15 5 * * 2,5 bash /opt/carsua/compose/run-ingest.sh plates >> /opt/carsua/backups/ingest.log 2>&1

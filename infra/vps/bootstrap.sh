@@ -66,7 +66,7 @@ sysctl -w vm.swappiness=10 >/dev/null
 echo 'vm.swappiness=10' > /etc/sysctl.d/99-carsua.conf
 
 # --- app tree (see PLAN.md "Deploy" / docs/deploy.md for what each folder is) ---
-install -d -o deploy -g deploy /opt/carsua /opt/carsua/{compose,env,web,backups,archive}
+install -d -o deploy -g deploy /opt/carsua /opt/carsua/{compose,env,web,backups,archive,ingest-data}
 install -d -o deploy -g deploy -m 700 /opt/carsua/env/certs
 install -d -o deploy -g deploy /opt/carsua/compose/flags /opt/carsua/web/releases
 # nightly off-box backup (script + credentials are delivered by the api deploy; until then the job just fails harmlessly)
@@ -74,6 +74,7 @@ cat > /etc/cron.d/carsua-backup <<'EOF'
 30 3 * * * deploy bash /opt/carsua/compose/backup.sh nightly >> /opt/carsua/backups/backup.log 2>&1
 EOF
 chmod 644 /etc/cron.d/carsua-backup
+# scheduled ingest jobs: the ingest deploy installs infra/vps/ingest.cron as the deploy user's crontab (no root needed)
 # pgdata is owned by the postgres container's uid (set on first start); leave it root-owned.
 install -d /opt/carsua/pgdata
 
