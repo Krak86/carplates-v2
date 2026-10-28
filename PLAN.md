@@ -691,7 +691,7 @@ Group 1 dimension callouts + garage-fit -> Group 3 (existing order). Owner says 
 
 ### To discuss / research
 
-- [ ] **Driver assist + CarPlay / Android Auto** — researched 2026-10-28, not started. Owner says "go" per step.
+- [ ] **Driver assist + CarPlay / Android Auto** — researched 2026-10-28, not started. Owner says "go" per step. **Step 1 ✅ 2026-10-28** (ASSISTS extended, SAE level, US-spec footnote, shareable plate-card section with explainer; see features-reference "VIN page" > Driver assists). **Step 2 ✅ 2026-10-28** (EU GSR2 baseline by model year, `vin/gsr2.ts`; seen working on Porsche Taycan 2023 НС0500YС). Steps 3-4 optional, ask the owner first. Open polish (owner not yet decided): the NHTSA chips (US spec, ✓) and the EU baseline chips (dashed) can look contradictory on one card (e.g. a US-decoded Taycan) - add a separator line ("above: decoded equipment; below: what EU law required") and/or hide baseline chips whose system already shows ✓. Polish ✅ (divider + note on top). ADDW and pedestrian/cyclist AEB rows ✅ (second GSR2 stage). VIN page baseline ✅ (`VinTypicalEuBaseline`, inside "Typical model data", only when the NL register knows the model). Step 4 link-out ✅ (`VinSmartphoneLinks`; curated CSV not built).
       **Legal (verified 2026-10-28): do NOT scrape Apple's CarPlay list or Google's Android Auto page.** Apple site terms ban
       "page-scrape / robot / spider" and copying (robots.txt is open, the ToS still applies); Google terms ban scraping content
       "that doesn't belong to you"; EU database right covers the compilation even though single facts are free. No open dataset
@@ -704,11 +704,11 @@ Group 1 dimension callouts + garage-fit -> Group 3 (existing order). Owner says 
       `components/vin/` with `helpers.ts` parsing (values are "Standard" / "Optional" / "Not Applicable" / empty), hidden when
       nothing is filled, "standard vs optional" wording and a footnote that it is the US-market spec. If the data comes via
       the API instead, the contract goes in its own file with `.nullable().optional()`. i18n ua/ru/en, About source line,
-      `releases.ts` entry. Never say "has autopilot": only SAE level + listed systems. - [ ] **Step 2 — EU baseline by first-registration date (GSR2).** For EU/RDW cars, derive "mandatory since" systems (AEB,
+      `releases.ts` entry. Never say "has autopilot": only SAE level + listed systems. - [x] **Step 2 (done 2026-10-28) — EU baseline by first-registration date (GSR2).** For EU/RDW cars, derive "mandatory since" systems (AEB,
       lane keeping, intelligent speed assistance, driver drowsiness) from the first-registration date: new types from
       2022-07, all new cars from 2024-07. Label it a legal baseline, not the car's equipment. Verify the exact dates from the
-      EU regulation (2019/2144) text before coding. - [ ] **Step 3 (optional) — Tesla.** Only if the decode names Tesla: "Autopilot hardware" chip, no FSD claim (software
-      subscription, no public source). - [ ] **Step 4 (optional) — CarPlay / Android Auto.** Link-out "Check CarPlay / Android Auto support" to Apple's and
+      EU regulation (2019/2144) text before coding. - [x] **Step 3 (optional) — Tesla (done 2026-10-28, `teslaHardware`).** Only if the decode names Tesla: "Autopilot hardware" chip, no FSD claim (software
+      subscription, no public source). - [x] **Step 4 (done 2026-10-28, `VinSmartphoneLinks`) — CarPlay / Android Auto.** Link-out "Check CarPlay / Android Auto support" to Apple's and
       Google's own pages (like the AUTO.RIA link-out). A curated CSV of the top ~50 models only if the owner wants it, built
       by hand from manufacturer pages, with a citation per row. - **Worth it?** Step 1 yes (cheap, accurate per VIN). Step 2 yes (cheap, honest). Steps 3-4 only if time. Full
       scraped database: no.
@@ -898,8 +898,8 @@ VPS sizing, provider shortlist (Contabo Cloud VPS 6), static IP and DNS: [docs/d
   below) · Redis (RIA + VIN cache, throttler store) · api · web · ingest-cron
 - ✅ Deploy tooling written 2026-10-15 (api/alpr Dockerfiles, `infra/docker-compose.prod.yml` + Caddyfile + maintenance page, blue/green api deploy,
   web symlink releases, 3 path-filtered GitHub workflows, bootstrap + backup scripts, web maintenance banner) — ✅ **first real VPS deploy done 2026-10-27** (`docs/plan-done.md` "First VPS deploy"); ✅ R2 backups (nightly + full, restore-tested), SSH hardening and Turnstile done the same day; ✅ UptimeRobot on `/healthz` and ✅ Cloudflare settings + WAF rate-limit rule (2026-10-28); next steps (security gate, smoke test, secrets rotation): [docs/deploy.md](docs/deploy.md) "Still open".
-  Runbook, secrets list and what is still open: [docs/deploy.md](docs/deploy.md). Still to build: `ingest-cron` image + `run-job.ts` (SCHEDULE.md; first entries are the RSS jobs `ingest:news` every ~6 h and `ingest:social` daily), Redis throttler store.
-- CKAN plate ingest cron on the VPS, twice a week (`ingest.ts`, self-checks `ingested_resources`; cadence in SCHEDULE.md)
+  Runbook, secrets list and what is still open: [docs/deploy.md](docs/deploy.md). ✅ Ingest cron live 2026-10-28 (`docs/plan-done.md` "Ingest cron"); still open: healthchecks.io checks + `HC_PING_*` secrets, Redis throttler store.
+- ✅ CKAN plate ingest cron on the VPS, Tue + Fri (done 2026-10-28; no-op unless CKAN has something new, then backfill + stats + backups; SCHEDULE.md)
 - ✅ OG image endpoint — done 2026-10-01 (plate **and** VIN, `resvg-js` + bundled Noto Sans, never
   Puppeteer; see `docs/plan-done.md` "Link previews"). Still for deploy: set `PUBLIC_SITE_URL` to the real
   domain, make sure `fonts/` + `logos/` ship in `WEB_DIST_DIR`, and put a CDN/Caddy cache in front of `/og/`

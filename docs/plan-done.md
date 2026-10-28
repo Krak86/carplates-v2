@@ -3511,7 +3511,7 @@ Verified from outside: `/healthz` `{"status":"ok","db":"up"}` in ~0.2 s, `/`, `/
 - R2 backups: bucket `carsua-backups` + object-scoped Account API token. The first upload failed with 403 AccessDenied: rclone checks/creates the bucket before uploading and a bucket-scoped token may not. Fix `RCLONE_CONFIG_R2_NO_CHECK_BUCKET=true`, written to `backup.env` by `deploy-api`. A `501 NotImplemented` on attempt 1 then success on attempt 2 is normal. Verified: nightly dump (8.6 MB) restored into a scratch `postgres:18.6` (create schemas `app` + `registry` first; 9 + 6 tables), full dump (1.28 GB, ~10 min to create) passes `pg_restore --list` (68 `TABLE DATA`). Restore runbook added to `docs/deploy.md` "Restore from R2" (nightly-over-full path not yet tested on a populated DB).
 - SSH: password login was still on. sshd keeps the first value it reads and the provider's `50-cloud-init.conf` loaded before `99-carsua.conf`. Renamed to `00-carsua.conf` (`bootstrap.sh` writes that name), reloaded; `ssh -o PubkeyAuthentication=no -o PreferredAuthentications=password` is now refused. `deploy` has no sudo, so the root edit went through the `docker` group (privileged container + `nsenter`).
 - Turnstile widget created and `TURNSTILE_SITE_KEY` / `TURNSTILE_SECRET_KEY` set.
-- Nightly cron confirmed 2026-10-28: `/etc/cron.d/carsua-backup` (not the user crontab; installed by `bootstrap.sh`) ran at 03:30 server time (02:30 UTC), `nightly-20261028T023002Z.dump` is in R2 and the healthchecks.io `backup` check logged Started + OK. `backup.sh archive` runs clean but is a no-op until the first VPS ingest fills `/opt/carsua/archive`. On the VPS, rclone has no config file: load `/opt/carsua/env/backup.env` (`set -a; . …; set +a`) before any manual `rclone` call. Opening the ping URL in a browser counts as a ping, so don't.
+- Nightly cron confirmed 2026-10-28: `/etc/cron.d/carsua-backup` (not the user crontab; installed by `bootstrap.sh`) ran at 03:30 server time (02:30 UTC), `nightly-20261028T023002Z.dump` is in R2 and the healthchecks.io `backup` check logged Started + OK. `backup.sh archive` runs clean but was a no-op until the first VPS ingest filled `/opt/carsua/archive`. Restore path A tested on a populated scratch container (restore, delete `app.users` + `app.sessions`, `--clean --if-exists` restore: no errors, 2 users / 5 sessions back). On the VPS, rclone has no config file: load `/opt/carsua/env/backup.env` (`set -a; . …; set +a`) before any manual `rclone` call. Opening the ping URL in a browser counts as a ping, so don't.
 
 Cloudflare settings confirmed 2026-10-28 (Always Use HTTPS, Min TLS 1.2, HTTP/3, Browser Cache TTL, Bot Fight Mode, WAF rate-limit rule `api-lookup-limit` 30 req / 10 s per IP on `/api/plate*` + `/api/vin*`, tested: ~30 × 200 then 429); HSTS comes from Caddy, not Cloudflare.
 
@@ -3909,3 +3909,45 @@ Docs, release log and About page re-checked against the week's commits. Release 
 ### Addendum (2026-10-28, later)
 
 About page: the feature list (between the description card and the Sources card) gained `about.feature.translate` and the value/race lines now mention the US base price and the road mini-map; `about.source.nhtsa` mentions MSRP (ua/ru/en). Release log 2026-10-28 got a matching `data` item. Not in the release log on purpose: the admin Server tab (admin-only) and the host-cron ingest jobs (infra). `CLAUDE_RULES.md` still said "no toggle" for the theme; the sidebar Appearance setting (auto/light/dark) replaced that, line fixed.
+
+## Driver assists from the VIN decode (2026-10-28)
+
+Step 1 of "Driver assist + CarPlay / Android Auto". The VIN page already had `VinAssists`; it was extended with Crash Imminent Braking, Rear AEB, Lane Centering, Blind Spot Intervention, Adaptive Driving Beam, Parking Assist and the SAE automation level (`saeLevelRange`), plus a "US-market spec" footnote, and the same block now appears on the plate card as its own collapsed, shareable 🛟 section (`DriverAssistSection`, `?section=assists`, after Size & parking) with a ❓ popover and a "what is this / why empty" explainer. Sample decodes: US 2018+ (Tesla, Honda, Ford) fill the fields, EU/older VINs return none, SAE level was empty in all samples. Steps 2-4 (EU GSR2 baseline, Tesla, CarPlay link-out) remain in PLAN.md.
+
+## EU legal baseline (GSR2) in the driver-aids section (2026-10-28)
+
+Step 2 of "Driver assist + CarPlay / Android Auto". Dates checked against Regulation (EU) 2019/2144 (original text, Annex II notes B and Art. 16): for passenger cars (M1) AEB for light vehicles, emergency lane keeping, intelligent speed assistance and driver drowsiness/attention warning are refused type-approval for new TYPES from 2022-07-06 and may not be registered in any NEW car from 2024-07-07. (Advanced driver distraction warning and pedestrian/cyclist AEB are one stage later, 2024-07-07 / 2026-07-07; added 2026-10-28 as a second stage in `gsr2.ts`, dates cross-checked against several secondary sources, EUR-Lex itself could not be fetched.) `vin/gsr2.ts` (`gsr2Status`, `gsr2Baseline`) compares the whole model year with the two dates: <2022 none (hidden), 2022-2023 `newTypes`, 2024 `transition` (depends on the month), 2025+ `all`. Only a year is known (the model year stands in for the first-registration date), so the text says so. `VinEuBaseline` renders it inside `DriverAssistSection` (new prop `euYear`, set only when the RDW register knows the model, i.e. an EU-market car); the section now shows if either the NHTSA assists or the baseline exist. Wording: legal baseline, not the car's equipment, only valid if first registered in the EU. Keys `vin.eu.*` (ua/ru/en). The Annex II table text extracted flat, so the M1 column was inferred from the row order; recheck against EUR-Lex when adding more rows. Steps 3-4 stay optional in PLAN.md. Verified in the UI on a 2023 Porsche Taycan (НС0500YС): the dashed "new models only" chips render under the US-spec NHTSA chips; the two blocks can read as contradictory (see the open polish note in PLAN.md).
+
+## Ingest cron (2026-10-28)
+
+✅ **Built and run on the VPS.** Host cron (the `deploy` user's crontab, `infra/vps/ingest.cron`) starts `infra/vps/run-ingest.sh <job>`, which runs
+`docker compose run --rm ingest tsx src/run-job.ts <job>` (image `scripts/Dockerfile` = pnpm install + shared/db build + `tsx`; compose service `ingest`,
+profile `jobs`, binds `/opt/carsua/archive` and `/opt/carsua/ingest-data` (= `scripts/.data`)). `run-job.ts` takes a per-job advisory lock (skips if held),
+logs a `registry.job_runs` row (migration 0077; `abandoned` for rows a killed run left `running`), enforces the timeout on the whole process group and pings
+`HC_PING_<JOB>` (`/start`, ok, `/fail`; unset = no ping). What runs and its timeout: `scripts/src/jobs.ts` (`news`, `social`, `wanted` daily; `plates` = `ingest-full.ts --archive /archive`
+Tue + Fri, 12 h limit). Deployed by `deploy-ingest.yml` (builds the image, writes `ingest.env`, syncs the scripts, installs the crontab). Schedule, operating notes: SCHEDULE.md.
+
+**Found on the first run (all fixed or documented):**
+
+- A restored DB had `ingested_resources` rows only for 2025/2026, so the first `plates` run re-read 2013-2024 (mostly 0 inserted, ~11k missing rows filled), then
+  reloaded 2026 (910k plateless duplicates by design), the snapshot, the backfill (931k plates, 931k duplicates removed) and the refreshes: ~8 h with one restart.
+- **No-op runs were not no-ops.** `ingest.ts` refreshed `current_registration` + all stats after every invocation, even when every resource was skipped, and
+  `ingest-full` re-ran the snapshot and the backfill (indexes dropped, exclusive lock, ~25 min) every time; three stats refreshes cost ~1.5 h. Now: refresh only
+  when rows were inserted, `--skip-refresh` for the intermediate steps (one refresh, after the backfill), and a `scripts/.data/backfill-pending` marker
+  (`ingest-state.ts`) written by any load that inserts rows and cleared by `--backfill-plates`; `ingest-full` skips snapshot/backfill/refreshes without it.
+  A file, not a row: `ingested_resources.ingested_at` feeds the public data-version marker.
+- Stopping the container mid-`REFRESH MATERIALIZED VIEW` leaves the refresh running in Postgres; the backfill's `DROP INDEX` would queue behind it and block
+  every plate lookup. Terminate it with `pg_terminate_backend` first.
+- Cron times are the VPS's local time (CET), not UTC.
+- ~404k rows have no plate after the run (2026 registrations since the removal with no earlier plated record, ~1% of 2021-2025 published without one); all have a VIN.
+- `backup.sh archive` printed a first-attempt `501 NotImplemented` from R2 and succeeded on the retry (16 objects, 1.1 GiB); `full` ~10 min for 1.3 GB.
+
+**Automation added the same day:** after a `plates` run that loaded a resource, `run-ingest.sh` runs `backup.sh archive` + `full`; `infra/vps/ingest-status.sh`
+(copied to the VPS by the deploy) shows the running container, last log lines, `job_runs`, pending marker and what Postgres is doing.
+
+**Still open:** healthchecks.io checks + `HC_PING_NEWS|SOCIAL|WANTED|PLATES` secrets (then re-run `deploy-ingest`); confirm the first Tue/Fri no-op run; the other
+SCHEDULE.md sources (ratings, VehiclesDB, RDW, recalls, ...) stay manual.
+
+## Tesla hardware, EU baseline on the VIN page, CarPlay link-out (2026-10-28)
+
+Steps 3-4 of "Driver assist + CarPlay / Android Auto", plus the second GSR2 stage. `teslaHardware()` (`vin/helpers.ts`) estimates the Autopilot hardware generation from the model year, Tesla only, no FSD claim; it counts as an assist so the section shows. `gsr2.ts` has one status line per stage (new types 2024-07-07 ADDW and pedestrian/cyclist AEB, all new cars 2026-07-07), past tense once passed. `VinTypicalEuBaseline` shows the EU baseline in "Typical model data" when RDW knows the model. `VinSmartphoneLinks` is a link-out to Apple's and Google's own pages (their lists are not scraped: terms forbid it); shown under the assists block on the plate card and the VIN Overview tab. About page: sources `carplay` and `eurlex`, longer `about.feature.vin`.

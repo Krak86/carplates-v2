@@ -12,6 +12,7 @@ import VinMotorcycleSchematic from '@/components/vin/VinMotorcycleSchematic'
 import VinOriginCard from '@/components/vin/VinOriginCard'
 import VinSegments from '@/components/vin/VinSegments'
 import VinSection from '@/components/vin/VinSection'
+import VinSmartphoneLinks from '@/components/vin/VinSmartphoneLinks'
 import VinStatusBanner from '@/components/vin/VinStatusBanner'
 import {
   buildFallback,
@@ -69,8 +70,12 @@ export default function VinOverview({ data }: Props): ReactNode {
       )}
 
       {hasAssists(fields) && (
-        <VinSection icon="🛡️" title={t('vin.assists.title')}>
+        <VinSection icon="🛟" title={t('vin.assists.title')}>
           <VinAssists fields={fields} />
+
+          <div className="mt-3">
+            <VinSmartphoneLinks />
+          </div>
         </VinSection>
       )}
 

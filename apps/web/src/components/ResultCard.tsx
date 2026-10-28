@@ -72,6 +72,7 @@ import VerificationLinks from '@/components/VerificationLinks'
 import WantedChip from '@/components/WantedChip'
 import VinDecodeTabs from '@/components/vin/VinDecodeTabs'
 import OriginChip from '@/components/OriginChip'
+import DriverAssistSection from '@/components/DriverAssistSection'
 import SteeringChip from '@/components/SteeringChip'
 import { ukraineFromActions } from '@/components/OriginSection.helpers'
 import { countryIso, groupFields, toFieldMap } from '@/components/vin/helpers'
@@ -806,6 +807,9 @@ export default function ResultCard({ data }: Props): ReactNode {
               vin={hasVin ? c.vin : null}
               openSignal={sizeOpenSignal}
             />
+          </LazySection>
+          <LazySection sections={['assists']}>
+            <DriverAssistSection fields={vinFields} euYear={rdwSpecs ? c.makeYear : null} />
           </LazySection>
           <LazySection sections={['value']} forceMount={valueOpenSignal > 0}>
             <EstimatedValueSection

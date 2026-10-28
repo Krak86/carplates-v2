@@ -10,6 +10,7 @@ on:
       - 'pnpm-lock.yaml'
       - 'pnpm-workspace.yaml'
       - 'infra/vps/run-ingest.sh'
+      - 'infra/vps/ingest-status.sh'
       - 'infra/vps/ingest.cron'
       - '.github/workflows/deploy-ingest.yml'
   workflow_dispatch:
@@ -70,7 +71,7 @@ jobs:
           known-hosts: ${{ secrets.VPS_KNOWN_HOSTS }}
 
       - name: Sync compose file and job scripts
-        run: rsync -az --inplace infra/docker-compose.prod.yml infra/vps/run-ingest.sh infra/vps/ingest.cron vps:/opt/carsua/compose/
+        run: rsync -az --inplace infra/docker-compose.prod.yml infra/vps/run-ingest.sh infra/vps/ingest-status.sh infra/vps/ingest.cron vps:/opt/carsua/compose/
 
       - name: Write ingest env
         env:

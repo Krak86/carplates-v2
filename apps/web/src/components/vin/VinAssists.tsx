@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { ASSISTS, assistLevel } from '@/components/vin/helpers'
+import { ASSISTS, assistLevel, saeLevelRange, teslaHardware } from '@/components/vin/helpers'
 import type { FieldMap } from '@/components/vin/helpers'
 import { cn } from '@/lib/cn'
 
@@ -16,24 +16,40 @@ export default function VinAssists({ fields }: Props): ReactNode {
     const level = assistLevel(fields.get(a.variable))
     return level ? [{ ...a, level }] : []
   })
-  if (present.length === 0) return null
+  const sae = saeLevelRange(fields)
+  const tesla = teslaHardware(fields)
+  if (present.length === 0 && !sae && !tesla) return null
 
   return (
-    <ul className="flex flex-wrap gap-1.5">
-      {present.map(a => (
-        <li
-          key={a.key}
-          title={t(`vin.level.${a.level}`)}
-          className={cn(
-            'rounded-full px-2.5 py-0.5 text-sm',
-            a.level === 'standard'
-              ? 'bg-emerald-500/15 text-emerald-800 dark:text-emerald-300'
-              : 'border border-dashed border-[var(--color-muted)] text-[var(--color-muted)]'
-          )}
-        >
-          {a.level === 'standard' ? '✓' : '○'} {t(`vin.assist.${a.key}`)}
-        </li>
-      ))}
-    </ul>
+    <div className="space-y-2">
+      {sae && (
+        <p className="text-sm">
+          {t('vin.assist.sae', { level: sae.from === sae.to ? `${sae.to}` : `${sae.from}-${sae.to}` })}
+        </p>
+      )}
+
+      {tesla && <p className="text-sm">{t(`vin.tesla.${tesla}`)}</p>}
+
+      {present.length > 0 && (
+        <ul className="flex flex-wrap gap-1.5">
+          {present.map(a => (
+            <li
+              key={a.key}
+              title={t(`vin.level.${a.level}`)}
+              className={cn(
+                'rounded-full px-2.5 py-0.5 text-sm',
+                a.level === 'standard'
+                  ? 'bg-emerald-500/15 text-emerald-800 dark:text-emerald-300'
+                  : 'border border-dashed border-[var(--color-muted)] text-[var(--color-muted)]'
+              )}
+            >
+              {a.level === 'standard' ? '✓' : '○'} {t(`vin.assist.${a.key}`)}
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <p className="text-xs text-[var(--color-muted)]">{t('vin.assists.note')}</p>
+    </div>
   )
 }

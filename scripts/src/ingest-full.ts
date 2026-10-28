@@ -8,6 +8,10 @@
  *   pnpm ingest --file .data/archive/reestrTZ2026_pre-redaction_2026-05-01.zip
  *   pnpm ingest --backfill-plates
  *
+ * Only the first runs unconditionally. The snapshot, the backfill and the (single) refresh of current_registration + stats
+ * + derived rollups run only while a load has left `scripts/.data/backfill-pending` (ingest-state.ts), so a scheduled run
+ * with nothing new on CKAN ends after one API call. The steps here pass `--skip-refresh`; the backfill step refreshes once.
+ *
  * The middle step downloads its source fresh each time rather than shipping
  * the ZIP in the repo: the live reestrTZ2026 CKAN resource lost its plate
  * column sometime before the ГСЦ МВС order's 2026-06-29 effective date and
@@ -26,6 +30,7 @@ import { Readable } from 'node:stream'
 import { pipeline } from 'node:stream/promises'
 
 import { refreshDerived } from './derived-refresh.js'
+import { isBackfillPending } from './ingest-state.js'
 
 const SCRIPTS_DIR = join(import.meta.dirname, '..')
 const ARCHIVE_2026 = join(SCRIPTS_DIR, '.data', 'archive', 'reestrTZ2026_pre-redaction_2026-05-01.zip')
@@ -59,13 +64,21 @@ async function ensureArchive2026(): Promise<boolean> {
 
 /** Each child ingest would otherwise rebuild the derived rollups itself; this command does it once, at the very end. */
 const SKIP_DERIVED = '--skip-derived'
+/** The loads skip current_registration + stats too: the backfill step refreshes them once, after the plates are reconciled. */
+const SKIP_REFRESH = '--skip-refresh'
 
 async function main(): Promise<void> {
   // `--archive <dir>`: keep a copy of every downloaded CKAN ZIP (scheduled runs point it at the backed-up archive folder).
   const archiveIdx = process.argv.indexOf('--archive')
   const archiveDir = archiveIdx >= 0 ? process.argv[archiveIdx + 1] : undefined
-  runIngest([SKIP_DERIVED, ...(archiveDir ? ['--archive', archiveDir] : [])])
-  if (await ensureArchive2026()) runIngest(['--file', ARCHIVE_2026, SKIP_DERIVED])
+  runIngest([SKIP_REFRESH, SKIP_DERIVED, ...(archiveDir ? ['--archive', archiveDir] : [])])
+  // Any load that inserts rows leaves the pending marker (ingest-state.ts), and a run killed before its backfill leaves it too.
+  // Without it nothing changed: the snapshot, the backfill (it holds a lock on registrations) and the refreshes would be wasted.
+  if (!isBackfillPending()) {
+    console.log('nothing new to load; skipping snapshot, backfill and refreshes')
+    return
+  }
+  if (await ensureArchive2026()) runIngest(['--file', ARCHIVE_2026, SKIP_REFRESH, SKIP_DERIVED])
   runIngest(['--backfill-plates', SKIP_DERIVED])
   if (!process.argv.includes(SKIP_DERIVED)) refreshDerived()
 }

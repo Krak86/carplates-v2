@@ -20,6 +20,30 @@ export const RELEASES: readonly ReleaseDay[] = [
     items: [
       item(
         'new',
+        'Безпека авто з ЄС: які системи (екстрене гальмування, утримання в смузі, помічник швидкості, контроль сонливості, відволікання водія, гальмування для пішоходів і велосипедистів) були обов’язковими за законом ЄС для року випуску - це правовий мінімум, а не комплектація конкретного авто',
+        'Безопасность авто из ЕС: какие системы (экстренное торможение, удержание в полосе, помощник скорости, контроль сонливости, отвлечения водителя, торможение для пешеходов и велосипедистов) были обязательны по закону ЕС для года выпуска - это правовой минимум, а не комплектация конкретного авто',
+        'Safety of EU-market cars: which systems (emergency braking, lane keeping, speed assistance, drowsiness and distraction warning, pedestrian and cyclist braking) EU law required for the model year - a legal baseline, not the equipment of this particular car'
+      ),
+      item(
+        'new',
+        'Допомога водієві з VIN: адаптивний круїз, утримання в смузі, аварійне гальмування, сліпі зони, рівень автоматизації SAE і покоління апаратної частини Tesla Autopilot - тепер і на картці номера (комплектація для ринку США)',
+        'Помощь водителю по VIN: адаптивный круиз, удержание в полосе, аварийное торможение, слепые зоны, уровень автоматизации SAE и поколение аппаратной части Tesla Autopilot - теперь и на карточке номера (комплектация для рынка США)',
+        'Driver assists from the VIN: adaptive cruise, lane keeping, emergency braking, blind spots, the SAE automation level and the Tesla Autopilot hardware generation - now on the plate card too (US-market spec)'
+      ),
+      item(
+        'new',
+        'Підтримка CarPlay / Android Auto: на картці номера та VIN - посилання на офіційні сторінки Apple і Google, а в «Типових даних моделі» - правовий мінімум безпеки ЄС',
+        'Поддержка CarPlay / Android Auto: на карточке номера и VIN - ссылки на официальные страницы Apple и Google, а в «Типовых данных модели» - правовой минимум безопасности ЕС',
+        'CarPlay / Android Auto support: links to the official Apple and Google pages on the plate and VIN cards, and the EU legal safety baseline in "Typical model data"'
+      ),
+      item(
+        'data',
+        'Сторінка «Про проєкт»: нові джерела - Apple CarPlay / Android Auto і EUR-Lex (Регламент ЄС 2019/2144), оновлено опис VIN-можливостей',
+        'Страница «О проекте»: новые источники - Apple CarPlay / Android Auto и EUR-Lex (Регламент ЕС 2019/2144), обновлено описание возможностей VIN',
+        'About page: new sources - Apple CarPlay / Android Auto and EUR-Lex (Regulation (EU) 2019/2144), and a fuller VIN feature line'
+      ),
+      item(
+        'new',
         'Гра-гонки: карта дороги (вигляд зверху) з деревами, знаками та іншими авто; вмикається кнопкою «Карта»',
         'Игра-гонки: карта дороги (вид сверху) с деревьями, знаками и другими авто; включается кнопкой «Карта»',
         'Race game: a top-down road map showing the trees, signs and other cars; toggled with the Map button'

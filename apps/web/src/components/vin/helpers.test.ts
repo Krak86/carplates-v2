@@ -11,6 +11,10 @@ import {
   parseAirbagLocations,
   parseDriveType,
   parseSteeringSide,
+  hasAssists,
+  teslaHardware,
+  parseSaeLevel,
+  saeLevelRange,
   resolveYear,
   splitVin,
   toFieldMap,
@@ -167,5 +171,51 @@ describe('misc', () => {
   it('reads the GVWR class', () => {
     expect(gvwrClass('Class 1C: 4,001 - 5,000 lb (1,814 - 2,268 kg)')).toBe(1)
     expect(gvwrClass('n/a')).toBeNull()
+  })
+})
+
+describe('SAE level and assists', () => {
+  it('parses the level digit', () => {
+    expect(parseSaeLevel('Level 2 - Partial Automation')).toBe(2)
+    expect(parseSaeLevel('3')).toBe(3)
+    expect(parseSaeLevel('Not Applicable')).toBeNull()
+    expect(parseSaeLevel(undefined)).toBeNull()
+  })
+
+  it('builds an ordered range from either end', () => {
+    expect(saeLevelRange(toFieldMap([{ variable: 'SAE Automation Level From', value: '2' }] as never))).toEqual({
+      from: 2,
+      to: 2
+    })
+    expect(
+      saeLevelRange(
+        toFieldMap([
+          { variable: 'SAE Automation Level From', value: '3' },
+          { variable: 'SAE Automation Level To', value: '1' }
+        ] as never)
+      )
+    ).toEqual({ from: 1, to: 3 })
+    expect(saeLevelRange(toFieldMap([]))).toBeNull()
+  })
+
+  it('counts new assist variables and the SAE level as assists', () => {
+    expect(hasAssists(toFieldMap([{ variable: 'Lane Centering Assistance', value: 'Standard' }] as never))).toBe(true)
+    expect(hasAssists(toFieldMap([{ variable: 'SAE Automation Level From', value: '2' }] as never))).toBe(true)
+    expect(hasAssists(toFieldMap([{ variable: 'Parking Assist', value: 'Not Applicable' }] as never))).toBe(false)
+  })
+
+  it('estimates Tesla Autopilot hardware from the model year, only for Tesla', () => {
+    const tesla = (make: string, year: string) =>
+      toFieldMap([
+        { variable: 'Make', value: make },
+        { variable: 'Model Year', value: year }
+      ] as never)
+    expect(teslaHardware(tesla('TESLA', '2015'))).toBe('hw1')
+    expect(teslaHardware(tesla('TESLA', '2017'))).toBe('hw2')
+    expect(teslaHardware(tesla('TESLA', '2021'))).toBe('hw23')
+    expect(teslaHardware(tesla('TESLA', '2024'))).toBe('hw34')
+    expect(teslaHardware(tesla('TESLA', '2012'))).toBeNull()
+    expect(teslaHardware(tesla('FORD', '2021'))).toBeNull()
+    expect(hasAssists(tesla('TESLA', '2021'))).toBe(true)
   })
 })

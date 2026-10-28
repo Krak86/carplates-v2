@@ -565,8 +565,14 @@ export const ASSISTS = [
   { key: 'acc', variable: 'Adaptive Cruise Control (ACC)' },
   { key: 'ldw', variable: 'Lane Departure Warning (LDW)' },
   { key: 'lka', variable: 'Lane Keeping Assistance (LKA)' },
+  { key: 'cib', variable: 'Crash Imminent Braking (CIB)' },
+  { key: 'rearAeb', variable: 'Rear Automatic Emergency Braking' },
+  { key: 'lca', variable: 'Lane Centering Assistance' },
   { key: 'bsw', variable: 'Blind Spot Warning (BSW)' },
+  { key: 'bsi', variable: 'Blind Spot Intervention (BSI)' },
   { key: 'rcta', variable: 'Rear Cross Traffic Alert' },
+  { key: 'adb', variable: 'Adaptive Driving Beam (ADB)' },
+  { key: 'parking', variable: 'Parking Assist' },
   { key: 'camera', variable: 'Backup Camera' },
   { key: 'keyless', variable: 'Keyless Ignition' },
   { key: 'drl', variable: 'Daytime Running Light (DRL)' }
@@ -583,8 +589,44 @@ export function assistLevel(value: string | undefined): AssistLevel | null {
   return null
 }
 
+/** NHTSA "SAE Automation Level From/To" ("Level 2 - Partial Automation", "2", …) → 0-5; null when empty or unparsable. */
+export function parseSaeLevel(value: string | undefined): number | null {
+  const m = value?.match(/\b([0-5])\b/)
+  return m ? Number(m[1]) : null
+}
+
+/** The SAE range the decode reports, `from <= to`; null when neither end is filled. */
+export function saeLevelRange(fields: FieldMap): { from: number; to: number } | null {
+  const from = parseSaeLevel(fields.get('SAE Automation Level From'))
+  const to = parseSaeLevel(fields.get('SAE Automation Level To'))
+  if (from === null && to === null) return null
+  const lo = from ?? to ?? 0
+  const hi = to ?? from ?? 0
+  return { from: Math.min(lo, hi), to: Math.max(lo, hi) }
+}
+
+export type TeslaHardware = 'hw1' | 'hw2' | 'hw23' | 'hw34'
+
+/**
+ * Tesla "Autopilot hardware" generation, estimated from the model year only (the VIN does not encode it; the switch-overs fell
+ * mid-year). Says nothing about software: FSD / paid Autopilot features have no public per-VIN source. Null for other makes.
+ */
+export function teslaHardware(fields: FieldMap): TeslaHardware | null {
+  if (!/^tesla\b/i.test(fields.get('Make') ?? '')) return null
+  const year = Number(fields.get('Model Year'))
+  if (!Number.isFinite(year) || year < 2014) return null
+  if (year <= 2016) return 'hw1'
+  if (year <= 2018) return 'hw2'
+  if (year <= 2022) return 'hw23'
+  return 'hw34'
+}
+
 export function hasAssists(fields: FieldMap): boolean {
-  return ASSISTS.some(a => assistLevel(fields.get(a.variable)) !== null)
+  return (
+    saeLevelRange(fields) !== null ||
+    teslaHardware(fields) !== null ||
+    ASSISTS.some(a => assistLevel(fields.get(a.variable)) !== null)
+  )
 }
 
 export type VehicleShape = 'car' | 'motorcycle'

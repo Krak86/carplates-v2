@@ -11,6 +11,7 @@ import { usBasePriceUsd } from '@/components/us-value.helpers'
 import VdbChips from '@/components/VdbChips'
 import LazySection from '@/components/LazySection'
 import { buildFallback, toFieldMap, typicalLookup } from '@/components/vin/helpers'
+import VinTypicalEuBaseline from '@/components/vin/VinTypicalEuBaseline'
 
 const VehicleSizeSection = lazy(() => import('@/components/size/VehicleSizeSection'))
 
@@ -70,6 +71,7 @@ export default function VinTypicalData({ data }: Props): ReactNode {
         <VehicleSizeSection brand={brand} model={model} year={year} kind={kind} vinFields={fields} />
       </LazySection>
       <FuelEconomy brand={brand} model={model} year={year} fuel={fuel} capacity={capacity} kind={kind} />
+      <VinTypicalEuBaseline brand={brand} model={model} year={year} kind={kind} />
     </div>
   )
 }
