@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router'
 
-import { CO2_BAND_COLOR } from '@/components/CO2Badge.helpers'
+import { CO2_BAND_COLOR, CO2_BAND_TEXT_COLOR } from '@/components/CO2Badge.helpers'
 import SectionInfo from '@/components/SectionInfo'
 import Card from '@/components/ui/Card'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
@@ -96,7 +96,9 @@ export default function SafetyStatsRoute(): ReactNode {
               <div
                 className="text-xl font-semibold"
                 style={
-                  data.fleetAvgScore != null ? { color: CO2_BAND_COLOR[bandForScore(data.fleetAvgScore)] } : undefined
+                  data.fleetAvgScore != null
+                    ? { color: CO2_BAND_TEXT_COLOR[bandForScore(data.fleetAvgScore)] }
+                    : undefined
                 }
               >
                 {data.fleetAvgScore != null ? Math.round(data.fleetAvgScore) : '-'} {t('safety.scoreUnit')}

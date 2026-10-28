@@ -8,6 +8,14 @@ export const CO2_BAND_COLOR: Readonly<Record<Co2Band, string>> = {
   red: 'hsl(0 78% 52%)'
 }
 
+/** Band colors for text: the fill mixed with the theme foreground, so it clears 4.5:1 on both themes (the plain fill is ~3.6:1 on dark). */
+export const CO2_BAND_TEXT_COLOR: Readonly<Record<Co2Band, string>> = {
+  green: `color-mix(in srgb, ${CO2_BAND_COLOR.green} 65%, var(--color-fg))`,
+  yellow: `color-mix(in srgb, ${CO2_BAND_COLOR.yellow} 65%, var(--color-fg))`,
+  orange: `color-mix(in srgb, ${CO2_BAND_COLOR.orange} 65%, var(--color-fg))`,
+  red: `color-mix(in srgb, ${CO2_BAND_COLOR.red} 65%, var(--color-fg))`
+}
+
 /** "164" for a single value, "164–175" for a range; null when there's no value at all. */
 export function formatRange(min: number | null, max: number | null, digits = 0): string | null {
   if (min == null || max == null) return null

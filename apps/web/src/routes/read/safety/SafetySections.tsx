@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 
 import BrandLogo from '@/components/BrandLogo'
-import { CO2_BAND_COLOR } from '@/components/CO2Badge.helpers'
+import { CO2_BAND_COLOR, CO2_BAND_TEXT_COLOR } from '@/components/CO2Badge.helpers'
 import Card from '@/components/ui/Card'
 import Skeleton from '@/components/ui/Skeleton'
 import { toIntlLocale } from '@/lib/intl'
@@ -111,7 +111,9 @@ export function FleetSection(): ReactNode {
               <dd
                 className="text-2xl font-bold tabular-nums"
                 style={
-                  data.fleetAvgScore != null ? { color: CO2_BAND_COLOR[bandForScore(data.fleetAvgScore)] } : undefined
+                  data.fleetAvgScore != null
+                    ? { color: CO2_BAND_TEXT_COLOR[bandForScore(data.fleetAvgScore)] }
+                    : undefined
                 }
               >
                 {data.fleetAvgScore != null ? Math.round(data.fleetAvgScore) : '-'}
@@ -236,7 +238,7 @@ function ModelList({ title, models }: { title: string; models: readonly SafetySt
 
             <span
               className="font-medium whitespace-nowrap tabular-nums"
-              style={{ color: CO2_BAND_COLOR[bandForScore(m.avgScore)] }}
+              style={{ color: CO2_BAND_TEXT_COLOR[bandForScore(m.avgScore)] }}
             >
               {Math.round(m.avgScore)}
               <span className="text-xs font-normal text-muted">

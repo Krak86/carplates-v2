@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 
 import BrandLogo from '@/components/BrandLogo'
-import { CO2_BAND_COLOR } from '@/components/CO2Badge.helpers'
+import { CO2_BAND_TEXT_COLOR } from '@/components/CO2Badge.helpers'
 import { toIntlLocale } from '@/lib/intl'
 import { bandForCo2 } from '@/routes/fuel/helpers'
 
@@ -47,7 +47,7 @@ export default function FuelModelList({ title, info, models }: Props): ReactNode
             </Link>
             <span
               className="font-medium whitespace-nowrap tabular-nums"
-              style={{ color: CO2_BAND_COLOR[bandForCo2(m.avgCo2)] }}
+              style={{ color: CO2_BAND_TEXT_COLOR[bandForCo2(m.avgCo2)] }}
             >
               {Math.round(m.avgCo2)} {t('co2.unitGKm')}
             </span>
