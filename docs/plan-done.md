@@ -3075,6 +3075,11 @@ Trigger: the dev server showed ~22 MB / 337 requests before the first result. Th
   build (first re-run showed CLS 0.38 from `index-Bg8bPWRj.js`). Unregister the SW and delete `caches` (or use a fresh profile) and check
   `document.scripts` against the `index-*.js` in a no-store fetch of `/` before tracing.
 
+- **Contrast fix verified 2026-10-29** (Deploy Web #25, build `index-B1rOudh2.js` confirmed against a no-store fetch of `/` after clearing the SW
+  and `caches`): Lighthouse mobile **a11y 100** (was 96, `color-contrast` passes), best-practices 96, SEO 100, agentic browsing 50. Remaining
+  fails: `inspector-issues`, `llms-txt`, `ai-catalog.json` schema (both files still absent, awaiting a decision). The audit covers the home page
+  only; light theme and the yellow/orange/green bands are not rendered there, so they are unverified in a browser.
+
 ### Estimated value, weight rankings, community widgets and export ✅ BUILT (2026-10-09, `86cc500` … `bb9f055`)
 
 Write-ups of the conventions are in `docs/features-reference.md` ("Estimated value", "Weight rankings", "Community posts", "Export, wiki text
