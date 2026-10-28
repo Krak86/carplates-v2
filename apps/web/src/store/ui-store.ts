@@ -28,13 +28,22 @@ function persistCardTiltEnabled(enabled: boolean): void {
 const THEME_STORAGE_KEY = 'carplates.theme'
 const THEME_COLORS: Record<Theme, string> = { light: '#ffffff', dark: '#0f141f' }
 
-function initialTheme(): Theme {
+/** `auto` follows the OS and is stored as "no saved value". */
+export const THEME_MODES = ['auto', 'light', 'dark'] as const
+export type ThemeMode = (typeof THEME_MODES)[number]
+
+function initialThemeMode(): ThemeMode {
   try {
     const saved = localStorage.getItem(THEME_STORAGE_KEY)
     if (saved === 'light' || saved === 'dark') return saved
   } catch {
     /* private mode / disabled storage */
   }
+  return 'auto'
+}
+
+function resolveTheme(mode: ThemeMode): Theme {
+  if (mode !== 'auto') return mode
   return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
 }
 
@@ -44,16 +53,61 @@ function applyTheme(theme: Theme): void {
   document.querySelector('meta[name="theme-color"]')?.setAttribute('content', THEME_COLORS[theme])
 }
 
-function persistTheme(theme: Theme): void {
+function persistThemeMode(mode: ThemeMode): void {
   try {
-    localStorage.setItem(THEME_STORAGE_KEY, theme)
+    if (mode === 'auto') localStorage.removeItem(THEME_STORAGE_KEY)
+    else localStorage.setItem(THEME_STORAGE_KEY, mode)
   } catch {
     /* private mode / disabled storage */
   }
 }
 
-const startTheme = initialTheme()
+const startThemeMode = initialThemeMode()
+const startTheme = resolveTheme(startThemeMode)
 applyTheme(startTheme)
+
+// Accent color and text size: `[data-accent]` / `[data-text-size]` on <html>, styled in global.css (default = attribute absent).
+export const ACCENTS = ['blue', 'green', 'orange', 'red', 'violet', 'neutral'] as const
+export type Accent = (typeof ACCENTS)[number]
+export const TEXT_SIZES = ['sm', 'md', 'lg'] as const
+export type TextSize = (typeof TEXT_SIZES)[number]
+
+const ACCENT_STORAGE_KEY = 'carplates.accent'
+const TEXT_SIZE_STORAGE_KEY = 'carplates.textSize'
+const DEFAULT_ACCENT: Accent = 'blue'
+const DEFAULT_TEXT_SIZE: TextSize = 'md'
+
+function readSaved<T extends string>(key: string, allowed: readonly T[], fallback: T): T {
+  try {
+    const saved = localStorage.getItem(key)
+    return allowed.find(v => v === saved) ?? fallback
+  } catch {
+    return fallback
+  }
+}
+
+function persistSaved(key: string, value: string): void {
+  try {
+    localStorage.setItem(key, value)
+  } catch {
+    /* private mode / disabled storage */
+  }
+}
+
+function applyAccent(accent: Accent): void {
+  if (accent === DEFAULT_ACCENT) delete document.documentElement.dataset.accent
+  else document.documentElement.dataset.accent = accent
+}
+
+function applyTextSize(size: TextSize): void {
+  if (size === DEFAULT_TEXT_SIZE) delete document.documentElement.dataset.textSize
+  else document.documentElement.dataset.textSize = size
+}
+
+const startAccent = readSaved(ACCENT_STORAGE_KEY, ACCENTS, DEFAULT_ACCENT)
+const startTextSize = readSaved(TEXT_SIZE_STORAGE_KEY, TEXT_SIZES, DEFAULT_TEXT_SIZE)
+applyAccent(startAccent)
+applyTextSize(startTextSize)
 
 // Preview: the e-Ukraine typeface (license pending, see PLAN.md) vs the system stack; styled via `[data-font]` in global.css.
 const FONTS = ['system', 'e-ukraine'] as const
@@ -103,12 +157,18 @@ interface UiState {
   lang: Lang
   /** The language being fetched after a switch (null when idle) — the UI shows a spinner and keeps the old one until it lands. */
   langLoading: Lang | null
+  /** The resolved theme; `themeMode` is the user's choice (`auto` = follow the OS). */
   theme: Theme
+  themeMode: ThemeMode
+  accent: Accent
+  textSize: TextSize
   font: Font
   drawerOpen: boolean
   cardTiltEnabled: boolean
   setLang: (lang: Lang) => Promise<void>
-  toggleTheme: () => void
+  setThemeMode: (mode: ThemeMode) => void
+  setAccent: (accent: Accent) => void
+  setTextSize: (size: TextSize) => void
   toggleFont: () => void
   setDrawerOpen: (open: boolean) => void
   toggleCardTilt: () => void
@@ -118,6 +178,9 @@ export const useUiStore = create<UiState>((set, get) => ({
   lang: initialLang(),
   langLoading: null,
   theme: startTheme,
+  themeMode: startThemeMode,
+  accent: startAccent,
+  textSize: startTextSize,
   font: startFont,
   drawerOpen: false,
   cardTiltEnabled: initialCardTiltEnabled(),
@@ -148,13 +211,22 @@ export const useUiStore = create<UiState>((set, get) => ({
       })
     })
   },
-  toggleTheme: (): void =>
-    set(s => {
-      const theme = s.theme === 'light' ? 'dark' : 'light'
-      applyTheme(theme)
-      persistTheme(theme)
-      return { theme }
-    }),
+  setThemeMode: (themeMode): void => {
+    const theme = resolveTheme(themeMode)
+    applyTheme(theme)
+    persistThemeMode(themeMode)
+    set({ themeMode, theme })
+  },
+  setAccent: (accent): void => {
+    applyAccent(accent)
+    persistSaved(ACCENT_STORAGE_KEY, accent)
+    set({ accent })
+  },
+  setTextSize: (textSize): void => {
+    applyTextSize(textSize)
+    persistSaved(TEXT_SIZE_STORAGE_KEY, textSize)
+    set({ textSize })
+  },
   toggleFont: (): void =>
     set(s => {
       const font = s.font === 'system' ? 'e-ukraine' : 'system'
@@ -181,3 +253,16 @@ export const useUiStore = create<UiState>((set, get) => ({
       return { cardTiltEnabled }
     })
 }))
+
+// In `auto` mode the theme tracks the OS live (e.g. the phone's day/night schedule).
+try {
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+    const { themeMode } = useUiStore.getState()
+    if (themeMode !== 'auto') return
+    const theme = resolveTheme('auto')
+    applyTheme(theme)
+    useUiStore.setState({ theme })
+  })
+} catch {
+  /* no matchMedia (tests) */
+}

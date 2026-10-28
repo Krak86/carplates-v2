@@ -71,7 +71,8 @@ export default defineConfig({
         scope: '/',
         display: 'standalone',
         background_color: '#ffffff',
-        theme_color: BRAND_COLOR
+        // Neutral so the splash and task switcher don't flash blue; the runtime <meta theme-color> follows the theme.
+        theme_color: '#ffffff'
       },
       workbox: {
         // No `webmanifest` here: the plugin precaches it itself, and a second entry with another revision

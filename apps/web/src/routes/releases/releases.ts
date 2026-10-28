@@ -8,6 +8,23 @@ const item = (group: ReleaseGroup, ua: string, ru: string, en: string): ReleaseI
  */
 export const RELEASES: readonly ReleaseDay[] = [
   {
+    date: '2026-10-28',
+    items: [
+      item(
+        'new',
+        'Бічне меню: тема «Авто» (за системою), колір акценту та розмір тексту',
+        'Боковое меню: тема «Авто» (как в системе), цвет акцента и размер текста',
+        'Sidebar: an "Auto" theme (follows the system), an accent color and a text size'
+      ),
+      item(
+        'improved',
+        'Встановлений застосунок більше не блимає синім під час запуску',
+        'Установленное приложение больше не мигает синим при запуске',
+        'The installed app no longer flashes blue on launch'
+      )
+    ]
+  },
+  {
     date: '2026-10-27',
     items: [
       item(
