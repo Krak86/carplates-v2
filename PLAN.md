@@ -691,7 +691,7 @@ Group 1 dimension callouts + garage-fit -> Group 3 (existing order). Owner says 
 
 ### To discuss / research
 
-- [ ] **Driver assist + CarPlay / Android Auto** — researched 2026-10-28, not started. Owner says "go" per step.
+- [ ] **Driver assist + CarPlay / Android Auto** — researched 2026-10-28, not started. Owner says "go" per step. **Step 1 ✅ 2026-10-28** (ASSISTS extended, SAE level, US-spec footnote, shareable plate-card section with explainer; see features-reference "VIN page" > Driver assists). Steps 2-4 open; next is Step 2 (verify GSR2 dates in Regulation 2019/2144 first).
       **Legal (verified 2026-10-28): do NOT scrape Apple's CarPlay list or Google's Android Auto page.** Apple site terms ban
       "page-scrape / robot / spider" and copying (robots.txt is open, the ToS still applies); Google terms ban scraping content
       "that doesn't belong to you"; EU database right covers the compilation even though single facts are free. No open dataset

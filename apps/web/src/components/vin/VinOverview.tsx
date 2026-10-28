@@ -69,7 +69,7 @@ export default function VinOverview({ data }: Props): ReactNode {
       )}
 
       {hasAssists(fields) && (
-        <VinSection icon="🛡️" title={t('vin.assists.title')}>
+        <VinSection icon="🛟" title={t('vin.assists.title')}>
           <VinAssists fields={fields} />
         </VinSection>
       )}

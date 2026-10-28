@@ -20,6 +20,12 @@ export const RELEASES: readonly ReleaseDay[] = [
     items: [
       item(
         'new',
+        'Допомога водієві з VIN: адаптивний круїз, утримання в смузі, аварійне гальмування, сліпі зони та рівень автоматизації SAE - тепер і на картці номера (комплектація для ринку США)',
+        'Помощь водителю по VIN: адаптивный круиз, удержание в полосе, аварийное торможение, слепые зоны и уровень автоматизации SAE - теперь и на карточке номера (комплектация для рынка США)',
+        'Driver assists from the VIN: adaptive cruise, lane keeping, emergency braking, blind spots and the SAE automation level - now on the plate card too (US-market spec)'
+      ),
+      item(
+        'new',
         'Гра-гонки: карта дороги (вигляд зверху) з деревами, знаками та іншими авто; вмикається кнопкою «Карта»',
         'Игра-гонки: карта дороги (вид сверху) с деревьями, знаками и другими авто; включается кнопкой «Карта»',
         'Race game: a top-down road map showing the trees, signs and other cars; toggled with the Map button'

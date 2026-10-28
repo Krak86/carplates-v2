@@ -3909,3 +3909,7 @@ Docs, release log and About page re-checked against the week's commits. Release 
 ### Addendum (2026-10-28, later)
 
 About page: the feature list (between the description card and the Sources card) gained `about.feature.translate` and the value/race lines now mention the US base price and the road mini-map; `about.source.nhtsa` mentions MSRP (ua/ru/en). Release log 2026-10-28 got a matching `data` item. Not in the release log on purpose: the admin Server tab (admin-only) and the host-cron ingest jobs (infra). `CLAUDE_RULES.md` still said "no toggle" for the theme; the sidebar Appearance setting (auto/light/dark) replaced that, line fixed.
+
+## Driver assists from the VIN decode (2026-10-28)
+
+Step 1 of "Driver assist + CarPlay / Android Auto". The VIN page already had `VinAssists`; it was extended with Crash Imminent Braking, Rear AEB, Lane Centering, Blind Spot Intervention, Adaptive Driving Beam, Parking Assist and the SAE automation level (`saeLevelRange`), plus a "US-market spec" footnote, and the same block now appears on the plate card as its own collapsed, shareable 🛟 section (`DriverAssistSection`, `?section=assists`, after Size & parking) with a ❓ popover and a "what is this / why empty" explainer. Sample decodes: US 2018+ (Tesla, Honda, Ford) fill the fields, EU/older VINs return none, SAE level was empty in all samples. Steps 2-4 (EU GSR2 baseline, Tesla, CarPlay link-out) remain in PLAN.md.
