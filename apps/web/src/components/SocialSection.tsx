@@ -10,11 +10,9 @@ import SectionCount from '@/components/SectionCount'
 import SectionInfo from '@/components/SectionInfo'
 import ShareButton from '@/components/ShareButton'
 import SocialGroup from '@/components/SocialGroup'
-import StockNewsCard from '@/components/StockNewsCard'
 import VinToggleSection from '@/components/vin/VinToggleSection'
 import { blueskyQuery } from '@/lib/bluesky'
 import { lemmyQuery, stackExchangeQuery } from '@/lib/community'
-import { stockNewsQuery } from '@/lib/queries'
 import { scrollElementIntoView } from '@/lib/share-section'
 import SectionSkeleton from '@/components/ui/SectionSkeleton'
 
@@ -42,15 +40,13 @@ export default function SocialSection({ brand, model, year }: Props): ReactNode 
   const blueskyPosts = useQuery({ ...blueskyQuery(brand ?? '', model, year), enabled })
   const stackPosts = useQuery({ ...stackExchangeQuery(brand ?? '', model), enabled })
   const lemmyPosts = useQuery({ ...lemmyQuery(brand ?? '', model), enabled })
-  const financeNews = useQuery({ ...stockNewsQuery(brand ?? ''), enabled })
   const bluesky = blueskyPosts.data?.posts ?? []
   const stack = stackPosts.data?.posts ?? []
   const lemmy = lemmyPosts.data?.posts ?? []
-  const finance = financeNews.data?.items ?? []
-  const total = bluesky.length + stack.length + lemmy.length + finance.length
+  const total = bluesky.length + stack.length + lemmy.length
   const hasPosts = total > 0
 
-  const queries = [blueskyPosts, stackPosts, lemmyPosts, financeNews]
+  const queries = [blueskyPosts, stackPosts, lemmyPosts]
   const isLoading = queries.some(q => q.isLoading)
   const isSettled = open && !isLoading && queries.every(q => q.isSuccess || q.isError)
 
@@ -104,20 +100,6 @@ export default function SocialSection({ brand, model, year }: Props): ReactNode 
           {lemmy.map(post => (
             <li key={post.id} className="w-64 shrink-0">
               <CommunityPostCard post={post} />
-            </li>
-          ))}
-        </SocialGroup>
-      )}
-
-      {finance.length > 0 && (
-        <SocialGroup
-          icon="💹"
-          title={t('stockNews.title', { name: financeNews.data?.company?.name ?? '' })}
-          moreUrl={financeNews.data?.moreUrl ?? undefined}
-        >
-          {finance.map(item => (
-            <li key={item.id} className="w-64 shrink-0">
-              <StockNewsCard item={item} withSummary />
             </li>
           ))}
         </SocialGroup>

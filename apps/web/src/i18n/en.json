@@ -689,6 +689,7 @@
   "news.updatedAt": "News last updated: {{date}}",
   "news.show": "Show news",
   "news.hide": "Hide news",
+  "news.group.car": "Car news",
   "news.newModel": "New model: {{title}}",
   "news.heading": "Auto news",
   "news.viewLink": "More auto news",

@@ -11,6 +11,12 @@ export const RELEASES: readonly ReleaseDay[] = [
     date: '2026-10-28',
     items: [
       item(
+        'improved',
+        'Новини Yahoo Finance перенесено з «Соцмереж» до «Новин»: дві підписані групи, разом не більше 5 новин',
+        'Новости Yahoo Finance перенесены из «Соцсетей» в «Новости»: две подписанные группы, всего не больше 5 новостей',
+        'Yahoo Finance headlines moved from Social to News: two labelled groups, at most 5 headlines in total'
+      ),
+      item(
         'new',
         'Бічне меню: тема «Авто» (за системою), колір акценту та розмір тексту',
         'Боковое меню: тема «Авто» (как в системе), цвет акцента и размер текста',

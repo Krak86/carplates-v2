@@ -1151,6 +1151,7 @@
   "news.updatedAt": "Новости обновлены: {{date}}",
   "news.show": "Показать новости",
   "news.hide": "Скрыть новости",
+  "news.group.car": "Новости об авто",
   "news.newModel": "Новая модель: {{title}}",
   "news.heading": "Автоновости",
   "news.viewLink": "Больше автоновостей",
