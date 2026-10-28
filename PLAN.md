@@ -874,7 +874,7 @@ VPS sizing, provider shortlist (Contabo Cloud VPS 6), static IP and DNS: [docs/d
 - Prod `docker-compose`: Caddy (auto-TLS + **coarse per-IP rate limit**, see
   below) · Redis (RIA + VIN cache, throttler store) · api · web · ingest-cron
 - ✅ Deploy tooling written 2026-10-15 (api/alpr Dockerfiles, `infra/docker-compose.prod.yml` + Caddyfile + maintenance page, blue/green api deploy,
-  web symlink releases, 3 path-filtered GitHub workflows, bootstrap + backup scripts, web maintenance banner) — ✅ **first real VPS deploy done 2026-10-27** (`docs/plan-done.md` "First VPS deploy"); ✅ R2 backups (nightly + full, restore-tested), SSH hardening and Turnstile done the same day; ✅ UptimeRobot on `/healthz` (2026-10-28); next steps (Cloudflare settings, security gate, smoke test, secrets rotation): [docs/deploy.md](docs/deploy.md) "Still open".
+  web symlink releases, 3 path-filtered GitHub workflows, bootstrap + backup scripts, web maintenance banner) — ✅ **first real VPS deploy done 2026-10-27** (`docs/plan-done.md` "First VPS deploy"); ✅ R2 backups (nightly + full, restore-tested), SSH hardening and Turnstile done the same day; ✅ UptimeRobot on `/healthz` and ✅ Cloudflare settings + WAF rate-limit rule (2026-10-28); next steps (security gate, smoke test, secrets rotation): [docs/deploy.md](docs/deploy.md) "Still open".
   Runbook, secrets list and what is still open: [docs/deploy.md](docs/deploy.md). Still to build: `ingest-cron` image + `run-job.ts` (SCHEDULE.md; first entries are the RSS jobs `ingest:news` every ~6 h and `ingest:social` daily), Redis throttler store.
 - CKAN plate ingest cron on the VPS, twice a week (`ingest.ts`, self-checks `ingested_resources`; cadence in SCHEDULE.md)
 - ✅ OG image endpoint — done 2026-10-01 (plate **and** VIN, `resvg-js` + bundled Noto Sans, never
@@ -902,8 +902,8 @@ Code-level audit findings and the full pre-deploy gate: [docs/security-checklist
       `X-Forwarded-For` is spoofable and the per-IP limits are bypassable (or all users share the proxy's IP).
 - [ ] Firewall: expose only 80/443 (+ UDP 443 for HTTP/3); API, Postgres and Redis ports closed to the internet; SSH key-only (✅ verified 2026-10-27), fail2ban.
 - [ ] Caddy edge limits from "Rate-limit policy" below (all paths 120/60s; `/api/*` 60/60s + 1000/1h; `/og/*` 300/60s).
-- [ ] Cloudflare (free tier) in front: Bot Fight Mode, WAF rate-limit rule on `/api/plate*` and `/api/vin*`, "Under Attack" toggle
-      ready. Then trust only Cloudflare's IP ranges / `CF-Connecting-IP`.
+- [x] Cloudflare (free tier) in front: ✅ Bot Fight Mode, WAF rate-limit rule on `/api/plate*` and `/api/vin*` (30/10 s per IP), HTTP/3, Always Use HTTPS (2026-10-28,
+      `docs/deploy.md` step 4). "Under Attack" stays a manual incident toggle. Trust only Cloudflare's IP ranges / `CF-Connecting-IP` (Caddyfile; re-check the ranges occasionally).
 - [x] Cloudflare Turnstile on sign-in "send code" — keys set in production (2026-10-27). [ ] Still open: feedback/discuss submit and (optionally) camera recognize — never on plain search.
 - [ ] Headers at Caddy: `Strict-Transport-Security`, a Content-Security-Policy (allow YouTube, Sketchfab, Google Maps, PostHog,
       Sentry, Google Identity; start in `Report-Only`), `Permissions-Policy` (camera/geolocation for self only).

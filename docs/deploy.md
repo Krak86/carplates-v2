@@ -216,8 +216,12 @@ Registry data lost with the full dumps: re-ingest from `archive/` ZIPs (`backup.
    container: `docker run --rm --privileged --pid=host alpine nsenter -t 1 -m -u -n -i sh -c '/usr/sbin/sshd -t && systemctl reload ssh'` (the `docker` group is
    effectively root).
 3. ✅ **UptimeRobot (done 2026-10-28):** free plan, HTTP monitors every 5 min on `https://carsua.app/healthz` and the home page, email alerts. One healthchecks.io check per future cron job.
-4. **Cloudflare settings not yet confirmed:** Always Use HTTPS, HTTP/3, Bot Fight Mode, the WAF rate-limit rule on `/api/plate*` + `/api/vin*`. DNSSEC was turned
-   off at Squarespace for the nameserver move; optionally re-enable it in Cloudflare and add the DS record at Squarespace.
+4. ✅ **Cloudflare settings (done 2026-10-28):** Full (strict), Always Use HTTPS, Min TLS 1.2, Automatic HTTPS Rewrites, HTTP/2 + HTTP/3 (Speed → Settings →
+   Protocol; not on the Network page), Browser Cache TTL "Respect Existing Headers", Rocket Loader off, Bot Fight Mode, and one WAF rate-limit rule `api-lookup-limit`
+   (Security → Security rules → zone level, not the Enterprise account WAF): `starts_with(uri.path, "/api/plate") or starts_with(…, "/api/vin")`, per IP, 30 requests
+   / 10 s, Block 10 s (verified: ~30 × 200 then 429). HSTS is sent by Caddy (`max-age=31536000`), so Cloudflare's HSTS toggle stays off (a second source would
+   duplicate or override it). Not done: "Under Attack" is a manual toggle for incidents. DNSSEC was turned off at Squarespace for the nameserver move; optionally
+   re-enable it in Cloudflare and add the DS record at Squarespace.
 5. **Pre-deploy security gate:** [security-checklist.md §7](security-checklist.md).
 6. **Browser smoke test (partly done: home, plate page, link-preview card):** Google login (authorised origin `https://carsua.app`), Telegram login (`/setdomain carsua.app`;
    check `TELEGRAM_BOT_USERNAME` is the production bot), a real email through Resend (`MAIL_FROM` is `carsua <noreply@carsua.app>`), VIN lookup, camera recognize

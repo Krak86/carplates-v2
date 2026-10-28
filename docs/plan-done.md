@@ -3513,7 +3513,9 @@ Verified from outside: `/healthz` `{"status":"ok","db":"up"}` in ~0.2 s, `/`, `/
 - Turnstile widget created and `TURNSTILE_SITE_KEY` / `TURNSTILE_SECRET_KEY` set.
 - Nightly cron confirmed 2026-10-28: `/etc/cron.d/carsua-backup` (not the user crontab; installed by `bootstrap.sh`) ran at 03:30 server time (02:30 UTC), `nightly-20261028T023002Z.dump` is in R2 and the healthchecks.io `backup` check logged Started + OK. `backup.sh archive` runs clean but is a no-op until the first VPS ingest fills `/opt/carsua/archive`. On the VPS, rclone has no config file: load `/opt/carsua/env/backup.env` (`set -a; . …; set +a`) before any manual `rclone` call. Opening the ping URL in a browser counts as a ping, so don't.
 
-**Open (ordered list with the concrete steps: `docs/deploy.md` "Still open"):** populated-DB restore test, `backup.sh archive` + `full` after the first VPS ingest, Cloudflare settings and security checklist §7, browser smoke test (login, mail, VIN, camera), secrets rotation, `ingest-cron` (monthly delta ingest and `ingest:wanted` are manual on the VPS until then), CSP is Report-Only, Lighthouse on the VPS.
+Cloudflare settings confirmed 2026-10-28 (Always Use HTTPS, Min TLS 1.2, HTTP/3, Browser Cache TTL, Bot Fight Mode, WAF rate-limit rule `api-lookup-limit` 30 req / 10 s per IP on `/api/plate*` + `/api/vin*`, tested: ~30 × 200 then 429); HSTS comes from Caddy, not Cloudflare.
+
+**Open (ordered list with the concrete steps: `docs/deploy.md` "Still open"):** populated-DB restore test, `backup.sh archive` + `full` after the first VPS ingest, security checklist §7, browser smoke test (login, mail, VIN, camera), secrets rotation, `ingest-cron` (monthly delta ingest and `ingest:wanted` are manual on the VPS until then), CSP is Report-Only, Lighthouse on the VPS.
 
 ## Own ALPR: letter set re-measured (2026-10-26)
 
