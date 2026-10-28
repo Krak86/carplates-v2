@@ -157,17 +157,18 @@ jobs:
         if: ${{ !inputs.sync_only }}
         run: ssh vps bash -s -- "$GITHUB_SHA" < infra/vps/deploy-api.sh
 
+      # Advisory only: Cloudflare Bot Fight Mode serves GitHub runner IPs a Managed Challenge (403), and the blue/green
+      # step above already health-checked the new container on the origin. UptimeRobot watches the public /healthz.
       - name: Public health check
         if: ${{ !inputs.sync_only }}
         env:
           URL: ${{ vars.PUBLIC_SITE_URL }}
         run: |
-          for _ in $(seq 1 12); do
+          for _ in $(seq 1 3); do
             curl -fsS --max-time 10 "$URL/healthz" && exit 0
             sleep 5
           done
-          echo "public /healthz still failing" >&2
-          exit 1
+          echo "::warning::public /healthz not reachable from the runner (Cloudflare Bot Fight Mode challenges CI IPs); origin check already passed"
 
       # The api renders the /og/*.png link-preview cards and Cloudflare caches them for 24 h, so a new api build
       # (fonts, layout, data) would otherwise keep serving the old cards. Best-effort: the deploy itself already succeeded.
