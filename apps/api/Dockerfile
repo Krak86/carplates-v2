@@ -23,6 +23,8 @@ RUN pnpm --filter @carplates/api deploy --prod --legacy /out \
 
 FROM node:24-slim
 ENV NODE_ENV=production PORT=3000
+# npm/npx/corepack are not used at runtime (CMD and HEALTHCHECK are plain node); their bundled deps only add trivy findings.
+RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack
 WORKDIR /app
 COPY --from=build --chown=node:node /out ./
 USER node
