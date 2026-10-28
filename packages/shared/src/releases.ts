@@ -91,6 +91,12 @@ export const RELEASES: readonly ReleaseDay[] = [
         'The About page now lists Disqus among its sources and app appearance among the features'
       ),
       item(
+        'data',
+        'Сторінка «Про проєкт»: повний перелік можливостей між описом і джерелами, додано переклад на місці, базову ціну США та карту дороги',
+        'Страница «О проекте»: полный перечень возможностей между описанием и источниками, добавлены перевод на месте, базовая цена США и карта дороги',
+        'About page: the full feature list sits between the description and the sources, now with in-place translation, the US base price and the road map'
+      ),
+      item(
         'improved',
         'Встановлений застосунок більше не блимає синім під час запуску',
         'Установленное приложение больше не мигает синим при запуске',
