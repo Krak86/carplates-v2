@@ -2,6 +2,8 @@ import {
   adminAnalyticsResponseSchema,
   adminServerResponseSchema,
   adminStatsResponseSchema,
+  adminDigestStatusSchema,
+  adminDigestTestResponseSchema,
   adminUsersResponseSchema,
   authConfigResponseSchema,
   REAUTH_REQUIRED,
@@ -75,6 +77,7 @@ import type {
   AdminAnalyticsResponse,
   AdminServerResponse,
   AdminStatsResponse,
+  AdminDigestStatus,
   AdminUsersResponse,
   AuthConfigResponse,
   FeaturesResponse,
@@ -747,6 +750,24 @@ export async function getFeatures(): Promise<FeaturesResponse> {
 
 export async function saveFeatures(request: FeaturesUpdateRequest): Promise<FeaturesResponse> {
   return featuresResponseSchema.parse(await sendJson('PUT', '/api/features', request))
+}
+
+/** Switches the monthly "what's new" mail on or off for the signed-in user; answers with the refreshed session. */
+export async function setMarketingOptIn(optIn: boolean): Promise<SessionResponse> {
+  return sessionResponseSchema.parse(await sendJson('PUT', '/api/digest/subscription', { optIn }))
+}
+
+/** The unsubscribe page's button; `token` is the signed value from the mail link. */
+export async function unsubscribeDigest(token: string): Promise<void> {
+  await sendJson('POST', '/api/digest/unsubscribe', { token })
+}
+
+export async function getAdminDigest(): Promise<AdminDigestStatus> {
+  return adminDigestStatusSchema.parse(await sendJson('GET', '/api/admin/digest'))
+}
+
+export async function sendAdminDigestTest(): Promise<{ sentTo: string | null }> {
+  return adminDigestTestResponseSchema.parse(await sendJson('POST', '/api/admin/digest/test'))
 }
 
 export async function getAdminUsers(): Promise<AdminUsersResponse> {

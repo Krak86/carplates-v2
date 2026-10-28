@@ -43,6 +43,7 @@ export {
   authIdentities,
   emailChallenges,
   knownDevices,
+  digestSends,
   type EmailChallengeRow,
   sessions,
   userFeatures,

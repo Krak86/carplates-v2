@@ -419,9 +419,17 @@ Files: `apps/web/src/components/RiaCheckLink.tsx` (used by `NotFoundInfo` and th
 - **Verification section:** OTK protocol (by plate) and driving-licence check link out to `opendata.hsc.gov.ua` (links only, per-site emoji tile; `verification.{otk,license}.*`). Every row has a "?" popover spelling out its abbreviations (`verification.*.about`: БДР, ПДР, ОСЦПВ, МТСБУ, ОТК, ТСЦ МВС, МВС). A new row = its `title` / `desc` / `about` strings in ua/ru/en.
 - **Ranking chips:** the tooltip leads with the ranked value and its vehicle count (`chip.tip.count`), taken from the existing `/api/stats/top` payload (no new request).
 
+## Monthly digest mail (2026-10-28)
+
+- Code: `apps/api/src/digest/` (`digest-content.ts` pure period + content, `digest.service.ts` scheduler/claims, controllers), mail `DigestEmail` / `DIGEST_TEXT`; web `routes/profile/NotificationsSection.tsx`, `routes/auth/UnsubscribeRoute.tsx`, `routes/admin/AdminDigestCard.tsx`.
+- **Opt-in only** (`users.marketing_opt_in` default false); never switch it on at sign-in. Telegram-only users (no email) are skipped. Unsubscribing keeps `marketing_opt_in_at` as the consent record.
+- **The release log is the digest source** and lives in `packages/shared/src/releases.ts` (import `@carplates/shared/releases`, never the barrel). Only `new` items are listed; `improved|data|fix` are counts. A month without a `new` item sends nothing, so tag items honestly.
+- Sent on the 1st (Kyiv) for the previous month, 3-day catch-up window; `app.digest_sends` is the idempotency claim. Off unless `DIGEST_ENABLED=true` (never enable on dev/stage copies of production data). `MAIL_FROM_NEWS` = optional separate sender (own subdomain + SPF/DKIM/DMARC).
+- Every digest carries `List-Unsubscribe` + one-click POST (`/api/digest/unsubscribe/one-click?t=`) and a footer link to `/unsubscribe#t=`. Token = `unsubscribe-token.ts`.
+
 ## Releases page (`/releases`, 2026-10-15)
 
-- Public "What's new" log, one `ReleaseDay` per working day in `apps/web/src/routes/releases/releases.ts` (items tagged `new | improved | data | fix`, text in ua/ru/en). **After each big update add the day's entry (or extend today's).** Data is bundled in the lazy route chunk, not in `/api`.
+- Public "What's new" log, one `ReleaseDay` per working day in `packages/shared/src/releases.ts` (import `@carplates/shared/releases`; items tagged `new | improved | data | fix`, text in ua/ru/en). **After each big update add the day's entry (or extend today's).** Data is bundled in a lazy web chunk, never the main one; the API reads the same file for the [monthly digest](#monthly-digest-mail-2026-10-28).
 - **Header bell** (`NewsBell.tsx` + lazy `NewsBellPanel.tsx`): dot while `LATEST_RELEASE_DATE` (`releases/latest.ts`) is newer than the `carplates.releasesSeen` localStorage date (`lib/releases-seen.ts`); opening the bell or visiting `/releases` marks seen; first visit starts caught up. Per-browser by design (public site, no table). **When adding a new release day also bump `LATEST_RELEASE_DATE`** (a test fails otherwise).
 - **Lazy header popups** (bell, layers panel) render a same-footprint skeleton (`NewsBellSkeleton`, `LayersPanelSkeleton`) as the `Suspense` fallback; the bell loads on click only, the layers panel also prefetches on hover. The sidebar chunk is warmed 1.5 s after load (mobile main nav) - keep it.
 - The PWA update bar has "Update & see what's new": it sets the URL to `/releases` (`history.pushState`) and then runs the normal update, whose reload lands the new shell there. A hint under it says the changelog shows the latest entries only after the update (the waiting service worker keeps serving the old shell until then).

@@ -49,7 +49,7 @@ Pins (why: PLAN.md): pnpm 12, Node 24, TypeScript 5.9 (not 7), NestJS 11 (not 12
 - **Seed CSVs mirror scraped tables.** After changing `registry.wiki_image` (pre-warm, `wikiAliases.ts` + re-scrape, row deletes) re-run
   `pnpm export:wiki-images:csv`; same for every other `export:*:csv` dataset (a new setup loads the CSV instead of re-scraping).
 - Run `pnpm format` first (never reformat `scripts/src/fixtures`). Tests: Vitest, colocated `*.test.ts(x)`.
-- Keep docs current: write-up → `docs/plan-done.md`, one-line ✅ → `PLAN.md`, conventions → `docs/features-reference.md`, user-facing entry → `releases.ts` (new day ⇒ also bump `releases/latest.ts`, a test checks);
+- Keep docs current: write-up → `docs/plan-done.md`, one-line ✅ → `PLAN.md`, conventions → `docs/features-reference.md`, user-facing entry → `packages/shared/src/releases.ts` (also the monthly digest source: only `new` items are mailed; new day ⇒ also bump `releases/latest.ts`, a test checks);
   a new feature or data source also goes on the About page (`about.feature.*` / `SOURCES` + `about.source.*`, ua/ru/en).
 
 @CLAUDE_RULES.md

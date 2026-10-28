@@ -1,4 +1,12 @@
-import type { ReleaseDay, ReleaseGroup, ReleaseItem } from '@/routes/releases/types'
+export const RELEASE_GROUPS = ['new', 'improved', 'data', 'fix'] as const
+export type ReleaseGroup = (typeof RELEASE_GROUPS)[number]
+
+export const RELEASE_LANGS = ['ua', 'ru', 'en'] as const
+export type ReleaseLang = (typeof RELEASE_LANGS)[number]
+
+export type ReleaseItem = { group: ReleaseGroup } & Record<ReleaseLang, string>
+
+export type ReleaseDay = { date: string; items: readonly ReleaseItem[] }
 
 const item = (group: ReleaseGroup, ua: string, ru: string, en: string): ReleaseItem => ({ group, ua, ru, en })
 
@@ -10,6 +18,12 @@ export const RELEASES: readonly ReleaseDay[] = [
   {
     date: '2026-10-28',
     items: [
+      item(
+        'new',
+        'Щомісячні новини на пошту: за бажанням (вмикається в профілі) - раз на місяць короткий список нових можливостей, лише коли вони були; відписка в один клік',
+        'Ежемесячные новости на почту: по желанию (включается в профиле) - раз в месяц короткий список новых возможностей, только когда они были; отписка в один клик',
+        'Monthly news by email: optional (switched on in your profile) - once a month a short list of new features, only when there were some; one-click unsubscribe'
+      ),
       item(
         'new',
         'Базова ціна США з VIN (NHTSA): перевірка поруч із ціною ЄС, а для авто без ціни ЄС - власна оцінка з розмитненням',

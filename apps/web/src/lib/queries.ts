@@ -14,6 +14,7 @@ import {
   getAdminAnalytics,
   getAdminServer,
   getAdminStats,
+  getAdminDigest,
   getAdminUsers,
   getAuthConfig,
   getSessions,
@@ -629,6 +630,10 @@ export function sessionsListQuery() {
 
 export function featuresQuery() {
   return queryOptions({ queryKey: ['account', 'features'], queryFn: getFeatures, staleTime: 5 * 60_000 })
+}
+
+export function adminDigestQuery() {
+  return queryOptions({ queryKey: ['admin', 'digest'], queryFn: getAdminDigest })
 }
 
 export function adminUsersQuery() {

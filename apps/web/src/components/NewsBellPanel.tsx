@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 
 import type { Lang } from '@/i18n'
-import { RELEASES } from '@/routes/releases/releases'
+import { RELEASES } from '@carplates/shared/releases'
 import { RELEASE_GROUP_ICON } from '@/routes/releases/types'
 
 const DATE_LOCALE: Record<Lang, string> = { ua: 'uk-UA', ru: 'ru-RU', en: 'en-GB' }

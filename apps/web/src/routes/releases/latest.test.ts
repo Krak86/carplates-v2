@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
+import { RELEASES } from '@carplates/shared/releases'
 
 import { LATEST_RELEASE_DATE } from '@/routes/releases/latest'
-import { RELEASES } from '@/routes/releases/releases'
 
 describe('LATEST_RELEASE_DATE', () => {
   it('matches the newest day in RELEASES', () => {

@@ -7,6 +7,7 @@ import {
   reauthWithTelegram,
   revokeOtherSessions,
   revokeSession,
+  setMarketingOptIn,
   startReauthEmail,
   startSetEmail,
   unlinkProvider,
@@ -40,6 +41,10 @@ export function useProfileActions() {
       onSuccess: refresh
     }),
     unlink: useMutation({ mutationFn: unlinkProvider, onSuccess: refresh }),
+    setMarketing: useMutation({
+      mutationFn: setMarketingOptIn,
+      onSuccess: data => queryClient.setQueryData(sessionQuery().queryKey, data)
+    }),
     revoke: useMutation({ mutationFn: revokeSession, onSuccess: refresh }),
     revokeOthers: useMutation({ mutationFn: revokeOtherSessions, onSuccess: refresh }),
     reauthEmailStart: useMutation({ mutationFn: startReauthEmail }),

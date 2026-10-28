@@ -3,6 +3,8 @@ import type { Lang } from '../spa/spa-text.js'
 /** Email kinds. Code emails carry a 6-digit code + magic link; notice emails are informational with an optional button. */
 export const CODE_MAIL_KINDS = ['signIn', 'setEmail', 'reauth'] as const
 export const NOTICE_MAIL_KINDS = ['emailChanged', 'newSignIn', 'deletionScheduled'] as const
+/** The monthly "what's new" mail; not a sign-in / security kind, so it has its own text table (`DIGEST_TEXT`). */
+export const DIGEST_MAIL_KIND = 'digest'
 export type CodeMailKind = (typeof CODE_MAIL_KINDS)[number]
 export type NoticeMailKind = (typeof NOTICE_MAIL_KINDS)[number]
 export type MailKind = CodeMailKind | NoticeMailKind
@@ -199,6 +201,74 @@ export const NOTICE_TEXT: Record<NoticeMailKind, Record<Lang, NoticeMailText>> =
       button: 'Restore account',
       ignore: 'If you want the account deleted, no action is needed.'
     }
+  }
+}
+
+export type DigestMailText = {
+  subject: (month: string) => string
+  heading: (month: string) => string
+  intro: string
+  /** Counts of the items that are only summarised; zero counts are left out and an all-zero month yields `null`. */
+  more: (counts: { improved: number; data: number; fix: number }) => string | null
+  button: string
+  reason: string
+  unsubscribe: string
+}
+
+const joinParts = (prefix: string, parts: string[]): string | null =>
+  parts.length ? `${prefix} ${parts.join(', ')}.` : null
+
+export const DIGEST_TEXT: Record<Lang, DigestMailText> = {
+  ua: {
+    subject: month => `Що нового на carsua.app: ${month}`,
+    heading: month => `Що нового: ${month}`,
+    intro: 'Нові можливості, які зʼявилися на carsua.app минулого місяця:',
+    more: c =>
+      joinParts(
+        'Також за місяць -',
+        [
+          c.improved ? `покращень: ${String(c.improved)}` : '',
+          c.data ? `оновлень даних: ${String(c.data)}` : '',
+          c.fix ? `виправлень: ${String(c.fix)}` : ''
+        ].filter(Boolean)
+      ),
+    button: 'Усі зміни',
+    reason: 'Ви отримали цей лист, бо ввімкнули щомісячні новини у профілі.',
+    unsubscribe: 'Відписатися'
+  },
+  ru: {
+    subject: month => `Что нового на carsua.app: ${month}`,
+    heading: month => `Что нового: ${month}`,
+    intro: 'Новые возможности, появившиеся на carsua.app в прошлом месяце:',
+    more: c =>
+      joinParts(
+        'Также за месяц -',
+        [
+          c.improved ? `улучшений: ${String(c.improved)}` : '',
+          c.data ? `обновлений данных: ${String(c.data)}` : '',
+          c.fix ? `исправлений: ${String(c.fix)}` : ''
+        ].filter(Boolean)
+      ),
+    button: 'Все изменения',
+    reason: 'Вы получили это письмо, потому что включили ежемесячные новости в профиле.',
+    unsubscribe: 'Отписаться'
+  },
+  en: {
+    subject: month => `What's new on carsua.app: ${month}`,
+    heading: month => `What's new: ${month}`,
+    intro: 'The new features that arrived on carsua.app last month:',
+    more: c =>
+      joinParts(
+        'Also this month -',
+        [
+          c.improved ? `improvements: ${String(c.improved)}` : '',
+          c.data ? `data updates: ${String(c.data)}` : '',
+          c.fix ? `fixes: ${String(c.fix)}` : ''
+        ].filter(Boolean)
+      ),
+    button: 'See all changes',
+    reason: 'You are receiving this because you turned on monthly news in your profile.',
+    unsubscribe: 'Unsubscribe'
   }
 }
 

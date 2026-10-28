@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 
 import type { Lang } from '../spa/spa-text.js'
 
-import { CHROME_TEXT, CODE_TEXT, NOTICE_TEXT, fill } from './mail-text.js'
+import { CHROME_TEXT, CODE_TEXT, DIGEST_TEXT, NOTICE_TEXT, fill } from './mail-text.js'
 import type { CodeMailKind, NoticeMailKind } from './mail-text.js'
 
 // Email clients only reliably support sRGB hex — no oklch / P3 / CSS variables here.
@@ -49,6 +49,7 @@ const styles = {
     fontWeight: 700,
     textDecoration: 'none'
   },
+  item: { fontSize: 15, lineHeight: '22px', color: COLOR.text, margin: '0 0 10px', paddingLeft: 4 },
   muted: { fontSize: 13, lineHeight: '19px', color: COLOR.muted, margin: '0 0 8px' },
   link: { fontSize: 12, color: COLOR.accent, wordBreak: 'break-all' as const },
   hr: { borderColor: COLOR.border, margin: '20px 0 12px' }
@@ -111,6 +112,51 @@ export function CodeEmail({ kind, lang, code, link, minutes, device }: CodeEmail
           </Link>
         </>
       ) : null}
+    </Layout>
+  )
+}
+
+export type DigestEmailProps = {
+  lang: Lang
+  /** Localized month, e.g. "October 2026". */
+  month: string
+  /** The month's new features, already in `lang`. */
+  features: string[]
+  counts: { improved: number; data: number; fix: number }
+  releasesUrl: string
+  unsubscribeUrl: string
+}
+
+export function DigestEmail({
+  lang,
+  month,
+  features,
+  counts,
+  releasesUrl,
+  unsubscribeUrl
+}: DigestEmailProps): ReactNode {
+  const text = DIGEST_TEXT[lang]
+  const more = text.more(counts)
+  return (
+    <Layout lang={lang} preview={text.heading(month)}>
+      <Text style={styles.heading}>{text.heading(month)}</Text>
+      <Text style={styles.text}>{text.intro}</Text>
+      {features.map(feature => (
+        <Text key={feature} style={styles.item}>
+          {'• '}
+          {feature}
+        </Text>
+      ))}
+      {more ? <Text style={styles.muted}>{more}</Text> : null}
+      <Section style={{ margin: '12px 0 16px' }}>
+        <Button href={releasesUrl} style={styles.button}>
+          {text.button}
+        </Button>
+      </Section>
+      <Text style={styles.muted}>{text.reason}</Text>
+      <Link href={unsubscribeUrl} style={styles.link}>
+        {text.unsubscribe}
+      </Link>
     </Layout>
   )
 }

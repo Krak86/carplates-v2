@@ -7,7 +7,16 @@ import { loadEnv } from '../env.js'
 import { renderNoticeMail } from './render.js'
 import type { NoticeEmailProps } from './templates.js'
 
-export type OutgoingMail = { to: string; subject: string; html: string; text: string }
+export type OutgoingMail = {
+  to: string
+  subject: string
+  html: string
+  text: string
+  /** Overrides `MAIL_FROM` (the digest sends from its own address). */
+  from?: string
+  /** Extra headers, e.g. `List-Unsubscribe`. */
+  headers?: Record<string, string>
+}
 
 const RESEND_URL = 'https://api.resend.com/emails'
 const SEND_TIMEOUT_MS = 10_000
@@ -44,11 +53,12 @@ export class MailService {
       method: 'POST',
       headers: { Authorization: `Bearer ${this.env.RESEND_API_KEY ?? ''}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        from: this.env.MAIL_FROM,
+        from: mail.from ?? this.env.MAIL_FROM,
         to: [mail.to],
         subject: mail.subject,
         html: mail.html,
         text: mail.text,
+        ...(mail.headers ? { headers: mail.headers } : {}),
         ...(this.env.MAIL_REPLY_TO ? { reply_to: this.env.MAIL_REPLY_TO } : {})
       }),
       signal: AbortSignal.timeout(SEND_TIMEOUT_MS)
@@ -62,11 +72,12 @@ export class MailService {
   private async sendSmtp(mail: OutgoingMail): Promise<void> {
     this.smtp ??= createTransport(this.env.SMTP_URL)
     await this.smtp.sendMail({
-      from: this.env.MAIL_FROM,
+      from: mail.from ?? this.env.MAIL_FROM,
       to: mail.to,
       subject: mail.subject,
       html: mail.html,
       text: mail.text,
+      headers: mail.headers,
       replyTo: this.env.MAIL_REPLY_TO
     })
   }

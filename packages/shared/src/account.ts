@@ -22,7 +22,9 @@ export const sessionUserSchema = z.object({
   role: z.enum(USER_ROLES),
   createdAt: z.string(),
   /** Set once the user asked to delete the account; signing in during the grace period restores it. */
-  deletionScheduledAt: z.string().nullable().optional()
+  deletionScheduledAt: z.string().nullable().optional(),
+  /** Opted in to the monthly "what's new" mail (off until the user switches it on). */
+  marketingOptIn: z.boolean().optional()
 })
 export type SessionUser = z.infer<typeof sessionUserSchema>
 
@@ -42,6 +44,29 @@ export const authConfigResponseSchema = z.object({
   deletionGraceDays: z.number().optional()
 })
 export type AuthConfigResponse = z.infer<typeof authConfigResponseSchema>
+
+export const marketingPreferenceRequestSchema = z.object({ optIn: z.boolean() })
+export type MarketingPreferenceRequest = z.infer<typeof marketingPreferenceRequestSchema>
+
+/** Body of the unsubscribe page's button: the signed token from the mail link. */
+export const unsubscribeRequestSchema = z.object({ token: z.string().min(1).max(300) })
+export type UnsubscribeRequest = z.infer<typeof unsubscribeRequestSchema>
+
+/** Admin view of the next monthly digest (`GET /api/admin/digest`). */
+export const adminDigestStatusSchema = z.object({
+  /** `YYYY-MM` of the month the next digest covers. */
+  period: z.string(),
+  /** False when that month shipped no new feature: nothing would be sent. */
+  hasContent: z.boolean(),
+  features: z.number(),
+  optedIn: z.number(),
+  alreadySent: z.number(),
+  /** `DIGEST_ENABLED` on the API. */
+  enabled: z.boolean()
+})
+export type AdminDigestStatus = z.infer<typeof adminDigestStatusSchema>
+
+export const adminDigestTestResponseSchema = z.object({ sentTo: z.string().nullable() })
 
 export const EMAIL_CODE_LENGTH = 6
 export const EMAIL_CHALLENGE_TTL_MINUTES = 15

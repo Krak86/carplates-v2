@@ -53,6 +53,10 @@ email** (`app.users.email` is nullable) and are never auto-merged with a Google/
 - A sign-in from an unknown device (`carsua_did` cookie) on an account that already had one sends a “new sign-in” notice mail.
 - Cross-site writes are rejected by a global `OriginGuard`.
 
+## Monthly news mail (opt-in)
+
+Not a login method, but the only non-transactional mail. Off for every account until the user ticks **Notifications → Monthly news by email** on `/profile` (`PUT /api/digest/subscription`); sign-in never turns it on, and Telegram-only accounts (no email) are skipped. Sent on the 1st for the previous month, only if it shipped a new feature, when `DIGEST_ENABLED=true`. Unsubscribe: footer link `/unsubscribe#t=<token>`, the mailbox one-click button (`POST /api/digest/unsubscribe/one-click?t=`), or the same switch on `/profile`. Details: `docs/features-reference.md` → Monthly digest mail.
+
 ## Admin access
 
 There is no admin login and no API to grant roles. Sign in with any method first, then promote by SQL:
@@ -67,5 +71,5 @@ Then open `/admin` (stats, analytics, dashboard links).
 ## Code map
 
 `apps/api/src/auth/` (`auth.controller.ts`, `account-security.controller.ts`, `email-challenge.service.ts`, `telegram-login.ts`,
-`google-id-token.ts`, `session.guard.ts`) · `apps/api/src/mail/` · web `components/auth/`, `routes/auth`, `routes/profile`.
+`google-id-token.ts`, `session.guard.ts`) · `apps/api/src/mail/` · `apps/api/src/digest/` · web `components/auth/`, `routes/auth`, `routes/profile`.
 Deeper conventions: `docs/features-reference.md` → “Accounts”.

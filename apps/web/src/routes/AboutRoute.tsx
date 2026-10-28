@@ -260,6 +260,7 @@ const FEATURES = [
   'discuss',
   'share',
   'appearance',
+  'digest',
   'pwa'
 ] as const
 
