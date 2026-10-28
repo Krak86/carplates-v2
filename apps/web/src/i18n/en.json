@@ -2397,6 +2397,8 @@
   "race.sirenOn": "🚨 Siren: on",
   "race.sirenOff": "🚨 Siren: off",
   "race.fullscreen": "⛶ Full screen",
+  "race.map": "🗺 Map",
+  "race.mapLabel": "Road map: a top-down view, the road bends exactly as in the game",
   "value.ua.expand": "Show the EU value and the customs breakdown",
   "value.show": "Show estimate",
   "value.hide": "Hide estimate",

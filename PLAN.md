@@ -396,6 +396,7 @@ above once scoped, or dropped if research says no.
 Built: a desktop-only promo banner beside the result card (xl+; a 🎮 circle on lg; eases in 3 s after the card shows) opens a pseudo-3D racer in a modal. Write-up, file map and gotchas: `docs/plan-done.md` "Test-drive racer game".
 
 - ✅ (2026-10-09) Standalone **`/race`** route (no plate; random famous car + hardcoded presets per body type in `lib/racer/presets.ts`; HUD km odometer for the session) — see `docs/features-reference.md` "Test-drive racer".
+- ✅ (2026-10-28) **Mini-map** of the generated road (rotating top-down radar, curves/trees/traffic from the engine) — `docs/features-reference.md` "Test-drive racer". [ ] Ideas left: real OSM scenery along the map (forest/village sprites from real data), hills strip, a destination/route mode.
 - ✅ (2026-10-11) **Full screen + mobile virtual buttons** — built, needs real-device testing (`docs/plan-done.md` "Test-drive racer game"). [ ] Still open: tilt steering, landscape lock, lower default resolution on touch — `GAME_PLAN.md`.
 - [ ] Optional **music**: the original's track is licensed to that project only (Lucky Lion Studios) — not reusable. A CC0/CC-BY loop would be a separate lazy download (~1-3 MB) behind the sound toggle, with a credit line in the modal.
 - ✅ Credits (javascript-racer, Kenney, and the CC BY 4.0 Sketchfab authors: animanyarty, MaG80, JUFF, mk2design, snafuj, Houdini1561, Han66st, cgart.com) are in `about.source.racer`.

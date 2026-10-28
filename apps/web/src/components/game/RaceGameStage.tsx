@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 
 import RaceGameSettings from '@/components/game/RaceGameSettings'
 import RaceHornButton from '@/components/game/RaceHornButton'
+import RaceMiniMap from '@/components/game/RaceMiniMap'
 import RaceTouchControls from '@/components/game/RaceTouchControls'
 import { useRaceGameActions } from '@/components/game/use-race-game-actions'
 import { requestTiltPermission, useRaceTilt } from '@/components/game/use-race-tilt'
@@ -36,11 +37,12 @@ export default function RaceGameStage({ config, onChange, onPickBody }: Props): 
   const [sirenBody, setSirenBody] = useState<CarBody | null>(null)
   const hasSiren = !!SIRENS[config.body]
   const siren = sirenBody === config.body
-  const { phase, hud, wasLoaded, handleStart, handleRestart, handleInput, setCanvas } = useRaceGameActions(
+  const { phase, hud, wasLoaded, handleStart, handleRestart, handleInput, getMap, setCanvas } = useRaceGameActions(
     config,
     sound,
     siren
   )
+  const [showMap, setShowMap] = useState(true)
   const isTouch = useMediaQuery('(pointer: coarse)')
   // steering by tilting the phone: opt-in each visit, never remembered
   const [tilt, setTilt] = useState(false)
@@ -72,6 +74,11 @@ export default function RaceGameStage({ config, onChange, onPickBody }: Props): 
 
   const handleToggleSound = (e: MouseEvent<HTMLButtonElement>): void => {
     setSound(on => !on)
+    e.currentTarget.blur() // keys must keep steering the car
+  }
+
+  const handleToggleMap = (e: MouseEvent<HTMLButtonElement>): void => {
+    setShowMap(on => !on)
     e.currentTarget.blur() // keys must keep steering the car
   }
 
@@ -215,6 +222,17 @@ export default function RaceGameStage({ config, onChange, onPickBody }: Props): 
             </div>
           )}
 
+          {showMap && (isTouch || fullscreen) && (
+            <RaceMiniMap
+              getMap={getMap}
+              scenery={config.scenery}
+              color={config.color}
+              size={240}
+              label={t('race.mapLabel')}
+              className="pointer-events-none absolute top-20 right-3 size-28 rounded-full border-2 border-white/70 opacity-90 shadow-lg"
+            />
+          )}
+
           {hud && (
             <div className="pointer-events-none absolute inset-x-0 top-0 flex justify-between p-3 font-mono text-white [text-shadow:0_1px_3px_#000]">
               <div>
@@ -340,6 +358,14 @@ export default function RaceGameStage({ config, onChange, onPickBody }: Props): 
           )}
           <button
             type="button"
+            onClick={handleToggleMap}
+            aria-pressed={showMap}
+            className="shrink-0 cursor-pointer rounded-full border border-[var(--color-border)] px-3 py-0.5 hover:border-[var(--color-primary)]"
+          >
+            {t('race.map')}
+          </button>
+          <button
+            type="button"
             onClick={handleRestart}
             className="shrink-0 cursor-pointer rounded-full border border-[var(--color-border)] px-3 py-0.5 hover:border-[var(--color-primary)]"
           >
@@ -352,15 +378,24 @@ export default function RaceGameStage({ config, onChange, onPickBody }: Props): 
         <details className="rounded-lg border border-[var(--color-border)] p-3">
           <summary className="cursor-pointer font-semibold">{t('race.touch.settings')}</summary>
           <div className="mt-3">
-            <RaceGameSettings
-              config={config}
-              onChange={onChange}
-              onPickBody={onPickBody}
-            />
+            <RaceGameSettings config={config} onChange={onChange} onPickBody={onPickBody} />
           </div>
         </details>
       ) : (
-        <RaceGameSettings config={config} onChange={onChange} onPickBody={onPickBody} />
+        <div className="flex min-w-0 flex-col gap-4">
+          {showMap && !fullscreen && (
+            <RaceMiniMap
+              getMap={getMap}
+              scenery={config.scenery}
+              color={config.color}
+              size={400}
+              label={t('race.mapLabel')}
+              className="aspect-square w-full rounded-lg border border-[var(--color-border)]"
+            />
+          )}
+
+          <RaceGameSettings config={config} onChange={onChange} onPickBody={onPickBody} />
+        </div>
       )}
     </div>
   )

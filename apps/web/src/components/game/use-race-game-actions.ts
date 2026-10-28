@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 
 import type { RacerConfig, RacerHud } from '@/lib/racer/config'
 import type { Racer, RacerInput } from '@/lib/racer/engine'
+import type { MapView } from '@/lib/racer/minimap'
 
 const LOADED_KEY = 'carplates.racer.loaded'
 
@@ -86,5 +87,7 @@ export function useRaceGameActions(config: RacerConfig, sound: boolean, siren: b
 
   const handleInput = (input: Partial<RacerInput>): void => racerRef.current?.setInput(input)
 
-  return { phase, hud, wasLoaded, handleStart, handleRestart, handleInput, setCanvas }
+  const getMap = (): MapView | null => racerRef.current?.getMap() ?? null
+
+  return { phase, hud, wasLoaded, handleStart, handleRestart, handleInput, getMap, setCanvas }
 }

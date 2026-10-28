@@ -20,6 +20,12 @@ export const RELEASES: readonly ReleaseDay[] = [
     items: [
       item(
         'new',
+        'Гра-гонки: карта дороги (вигляд зверху) з деревами, знаками та іншими авто; вмикається кнопкою «Карта»',
+        'Игра-гонки: карта дороги (вид сверху) с деревьями, знаками и другими авто; включается кнопкой «Карта»',
+        'Race game: a top-down road map showing the trees, signs and other cars; toggled with the Map button'
+      ),
+      item(
+        'new',
         'Кермо праворуч: позначка RHD на картці VIN, коли декодований VIN це показує',
         'Руль справа: метка RHD на карточке VIN, когда расшифрованный VIN это показывает',
         'Right-hand drive: an RHD chip on the VIN card when the decoded VIN says so'
