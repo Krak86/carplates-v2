@@ -20,6 +20,12 @@ export const RELEASES: readonly ReleaseDay[] = [
     items: [
       item(
         'new',
+        'Безпека авто з ЄС: які системи (екстрене гальмування, утримання в смузі, помічник швидкості, контроль сонливості) були обов’язковими за законом ЄС для року випуску - це правовий мінімум, а не комплектація конкретного авто',
+        'Безопасность авто из ЕС: какие системы (экстренное торможение, удержание в полосе, помощник скорости, контроль сонливости) были обязательны по закону ЕС для года выпуска - это правовой минимум, а не комплектация конкретного авто',
+        'Safety of EU-market cars: which systems (emergency braking, lane keeping, speed assistance, drowsiness warning) EU law required for the model year - a legal baseline, not the equipment of this particular car'
+      ),
+      item(
+        'new',
         'Допомога водієві з VIN: адаптивний круїз, утримання в смузі, аварійне гальмування, сліпі зони та рівень автоматизації SAE - тепер і на картці номера (комплектація для ринку США)',
         'Помощь водителю по VIN: адаптивный круиз, удержание в полосе, аварийное торможение, слепые зоны и уровень автоматизации SAE - теперь и на карточке номера (комплектация для рынка США)',
         'Driver assists from the VIN: adaptive cruise, lane keeping, emergency braking, blind spots and the SAE automation level - now on the plate card too (US-market spec)'

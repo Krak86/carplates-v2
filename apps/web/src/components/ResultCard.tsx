@@ -809,7 +809,7 @@ export default function ResultCard({ data }: Props): ReactNode {
             />
           </LazySection>
           <LazySection sections={['assists']}>
-            <DriverAssistSection fields={vinFields} />
+            <DriverAssistSection fields={vinFields} euYear={rdwSpecs ? c.makeYear : null} />
           </LazySection>
           <LazySection sections={['value']} forceMount={valueOpenSignal > 0}>
             <EstimatedValueSection

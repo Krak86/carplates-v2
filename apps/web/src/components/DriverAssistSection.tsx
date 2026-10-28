@@ -5,33 +5,39 @@ import { useSearchParams } from 'react-router'
 
 import SectionInfo from '@/components/SectionInfo'
 import ShareButton from '@/components/ShareButton'
+import { gsr2Baseline } from '@/components/vin/gsr2'
 import { hasAssists } from '@/components/vin/helpers'
 import type { FieldMap } from '@/components/vin/helpers'
 import VinAssists from '@/components/vin/VinAssists'
+import VinEuBaseline from '@/components/vin/VinEuBaseline'
 import VinToggleSection from '@/components/vin/VinToggleSection'
 import { scrollElementIntoView } from '@/lib/share-section'
 
 type Props = {
   /** Decoded NHTSA fields; null while the VIN decode is missing or loading. */
   fields: FieldMap | null
+  /** Model year when the RDW register knows this model (an EU-market car), else null: enables the legal baseline. */
+  euYear: number | null
 }
 
 /**
- * Collapsed "Safety & driver aids" section on the plate card (shareable via `?section=assists`). Renders nothing when the
- * decode lists no assist, so EU / pre-2015 VINs show no empty block.
+ * Collapsed "Safety & driver aids" section on the plate card (shareable via `?section=assists`). Shows the decoded
+ * assists and, for EU-market models, the GSR2 legal baseline; renders nothing when both are empty.
  */
-export default function DriverAssistSection({ fields }: Props): ReactNode {
+export default function DriverAssistSection({ fields, euYear }: Props): ReactNode {
   const { t } = useTranslation()
   const [searchParams] = useSearchParams()
   const isShared = searchParams.get('section') === 'assists'
   const sectionRef = useRef<HTMLDivElement>(null)
-  const ready = !!fields && hasAssists(fields)
+  const hasDecoded = !!fields && hasAssists(fields)
+  const hasBaseline = gsr2Baseline(euYear).length > 0
+  const ready = hasDecoded || hasBaseline
 
   useEffect(() => {
     if (isShared && ready && sectionRef.current) scrollElementIntoView(sectionRef.current)
   }, [isShared, ready])
 
-  if (!fields || !ready) return null
+  if (!ready) return null
 
   const title = t('vin.assists.title')
 
@@ -60,7 +66,11 @@ export default function DriverAssistSection({ fields }: Props): ReactNode {
         </div>
       </details>
 
-      <VinAssists fields={fields} />
+      <div className="space-y-4">
+        {fields && hasDecoded && <VinAssists fields={fields} />}
+
+        {hasBaseline && <VinEuBaseline year={euYear} />}
+      </div>
     </VinToggleSection>
   )
 }

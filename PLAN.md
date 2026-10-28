@@ -691,7 +691,7 @@ Group 1 dimension callouts + garage-fit -> Group 3 (existing order). Owner says 
 
 ### To discuss / research
 
-- [ ] **Driver assist + CarPlay / Android Auto** — researched 2026-10-28, not started. Owner says "go" per step. **Step 1 ✅ 2026-10-28** (ASSISTS extended, SAE level, US-spec footnote, shareable plate-card section with explainer; see features-reference "VIN page" > Driver assists). Steps 2-4 open; next is Step 2 (verify GSR2 dates in Regulation 2019/2144 first).
+- [ ] **Driver assist + CarPlay / Android Auto** — researched 2026-10-28, not started. Owner says "go" per step. **Step 1 ✅ 2026-10-28** (ASSISTS extended, SAE level, US-spec footnote, shareable plate-card section with explainer; see features-reference "VIN page" > Driver assists). **Step 2 ✅ 2026-10-28** (EU GSR2 baseline by model year, `vin/gsr2.ts`; seen working on Porsche Taycan 2023 НС0500YС). Steps 3-4 optional, ask the owner first. Open polish (owner not yet decided): the NHTSA chips (US spec, ✓) and the EU baseline chips (dashed) can look contradictory on one card (e.g. a US-decoded Taycan) - add a separator line ("above: decoded equipment; below: what EU law required") and/or hide baseline chips whose system already shows ✓. Possible later rows: ADDW and pedestrian/cyclist AEB (2024-07-07 / 2026-07-07); VIN page has no baseline yet.
       **Legal (verified 2026-10-28): do NOT scrape Apple's CarPlay list or Google's Android Auto page.** Apple site terms ban
       "page-scrape / robot / spider" and copying (robots.txt is open, the ToS still applies); Google terms ban scraping content
       "that doesn't belong to you"; EU database right covers the compilation even though single facts are free. No open dataset
