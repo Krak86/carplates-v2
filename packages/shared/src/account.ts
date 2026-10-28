@@ -178,6 +178,37 @@ export const adminStatsResponseSchema = z.object({
 })
 export type AdminStatsResponse = z.infer<typeof adminStatsResponseSchema>
 
+/** One sample of the host the API runs on. `at` is epoch ms. */
+export const serverSampleSchema = z.object({
+  at: z.number(),
+  /** Whole-host CPU busy share since the previous sample, 0-100. */
+  cpuPercent: z.number(),
+  memUsedBytes: z.number(),
+  /** The API process (RSS). */
+  processRssBytes: z.number(),
+  load1: z.number()
+})
+export type ServerSample = z.infer<typeof serverSampleSchema>
+
+export const adminServerResponseSchema = z.object({
+  cpuCores: z.number(),
+  cpuModel: z.string(),
+  memTotalBytes: z.number(),
+  diskTotalBytes: z.number().nullable(),
+  diskUsedBytes: z.number().nullable(),
+  uptimeSeconds: z.number(),
+  processUptimeSeconds: z.number(),
+  load: z.tuple([z.number(), z.number(), z.number()]),
+  nodeVersion: z.string(),
+  platform: z.string(),
+  users: z.number(),
+  dbSizeBytes: z.number().nullable(),
+  dbConnections: z.number().nullable(),
+  /** Oldest first; kept in memory, so it restarts empty with the API. */
+  samples: z.array(serverSampleSchema)
+})
+export type AdminServerResponse = z.infer<typeof adminServerResponseSchema>
+
 /** PostHog numbers pulled server-side (HogQL). `configured: false` = no POSTHOG_PERSONAL_API_KEY / project id. */
 export const adminAnalyticsResponseSchema = z.object({
   configured: z.boolean(),

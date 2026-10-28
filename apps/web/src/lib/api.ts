@@ -1,5 +1,6 @@
 import {
   adminAnalyticsResponseSchema,
+  adminServerResponseSchema,
   adminStatsResponseSchema,
   adminUsersResponseSchema,
   authConfigResponseSchema,
@@ -72,6 +73,7 @@ import {
 } from '@carplates/shared'
 import type {
   AdminAnalyticsResponse,
+  AdminServerResponse,
   AdminStatsResponse,
   AdminUsersResponse,
   AuthConfigResponse,
@@ -757,6 +759,10 @@ export async function getAdminStats(): Promise<AdminStatsResponse> {
 
 export async function getAdminAnalytics(): Promise<AdminAnalyticsResponse> {
   return adminAnalyticsResponseSchema.parse(await sendJson('GET', '/api/admin/analytics'))
+}
+
+export async function getAdminServer(): Promise<AdminServerResponse> {
+  return adminServerResponseSchema.parse(await sendJson('GET', '/api/admin/server'))
 }
 
 /** Pushes this device's favorites/history (tombstones included) and returns the merged server state. */
