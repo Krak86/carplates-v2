@@ -3079,6 +3079,10 @@ Trigger: the dev server showed ~22 MB / 337 requests before the first result. Th
   and `caches`): Lighthouse mobile **a11y 100** (was 96, `color-contrast` passes), best-practices 96, SEO 100, agentic browsing 50. Remaining
   fails: `inspector-issues`, `llms-txt`, `ai-catalog.json` schema (both files still absent, awaiting a decision). The audit covers the home page
   only; light theme and the yellow/orange/green bands are not rendered there, so they are unverified in a browser.
+  ✅ Then checked on `/fuel` (CO₂ value text in lists and tables; same build `index-B1rOudh2.js`, SW + `caches` cleared): **dark and light
+  both a11y 100**, `color-contrast` passes; red, orange, yellow and green bands were all rendered. New findings there: **CLS 0.22**
+  (the home page is 0.01; cause not investigated) and `td-has-header` (the "% of group / % of the model" table has no `<th scope>` on its row
+  cells), both open in PLAN.md.
 
 ### Estimated value, weight rankings, community widgets and export ✅ BUILT (2026-10-09, `86cc500` … `bb9f055`)
 
