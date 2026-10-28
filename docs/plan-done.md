@@ -3059,6 +3059,12 @@ Trigger: the dev server showed ~22 MB / 337 requests before the first result. Th
 - **Verified in Chrome** on the production build: no console errors; `?section=news` opens and scrolls to News. Not measured: Lighthouse,
   LCP/CLS before vs after.
 - **Left:** the full prioritised list (measure for real, language preload, Brotli, edge cache, eager chunks, hero preload, PostHog delay) is tracked in PLAN.md Phase 4.
+- **Measured on production 2026-10-28** (https://carsua.app/, DevTools MCP trace, mobile 412×823, Fast 4G, 4× CPU, cache off): LCP **1174 ms**
+  (text badge, TTFB 2 ms, 99.8 % render delay), critical path 247 ms, no preconnects, ~155 requests, PostHog 377 ms main thread
+  (recorder, dead-clicks, web-vitals, surveys loaded eagerly). **CLS 0.79** (bad): `Presence` mounted collapsed (`entered=false`) and
+  animated `grid-template-rows`/`margin-top` open after load (shifts 0.42 + 0.30), plus the bottom `NAV` 0.07. Fix: `Presence` starts
+  expanded when `show` is already true on first render. Seen: JS/API answered with gzip through Cloudflare (no Brotli seen), `/api/*`
+  `cf-cache-status: DYNAMIC`, `index-*.js` preload map lists every route, language chunk starts after the entry graph.
 
 ### Estimated value, weight rankings, community widgets and export ✅ BUILT (2026-10-09, `86cc500` … `bb9f055`)
 

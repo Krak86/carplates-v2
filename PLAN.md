@@ -886,7 +886,7 @@ VPS sizing, provider shortlist (Contabo Cloud VPS 6), static IP and DNS: [docs/d
 
 - ✅ Load-performance pass done 2026-10-09 (lazy sections, per-language i18n, chunk groups — `docs/plan-done.md` "Load-performance pass").
   **Remaining load-performance actions (value order; context in "Load-performance pass"):**
-  1. [ ] Measure for real — Lighthouse + DevTools trace on the VPS behind Caddy (Fast 4G, 4× CPU); LCP/CLS before vs after were never measured.
+  1. [x] Measured 2026-10-28 on carsua.app (Fast 4G, 4× CPU): LCP 1174 ms, **CLS 0.79** (`Presence` animating open after load; fixed in code, re-measure after deploy) — `docs/plan-done.md` "Load-performance pass". [ ] Lighthouse run still open.
   2. [ ] Preload the active language chunk (it is fetched only after the entry script runs: one extra round trip) — inline script in `index.html` + a build-time hook for the hashed filename.
   3. [ ] Brotli: stock Caddy has no `br` encoder (zstd + gzip at the origin, Cloudflare serves Brotli) — the API does not compress; local numbers overstate transfer.
   4. [ ] Short-TTL edge cache for read-only `/api/*` lookups (stats, vdb, rdw, wiki) — see `docs/deploy.md`.

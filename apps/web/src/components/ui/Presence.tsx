@@ -14,7 +14,8 @@ type Props = {
 export default function Presence({ show, children }: Props): ReactNode {
   const [lastChildren, setLastChildren] = useState(children)
   const [mounted, setMounted] = useState(show)
-  const [entered, setEntered] = useState(false)
+  // Already shown on first render: start expanded, otherwise it animates open after load and shifts the layout (CLS).
+  const [entered, setEntered] = useState(show)
 
   if (show && lastChildren !== children) setLastChildren(children)
 
