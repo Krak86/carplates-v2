@@ -3,7 +3,7 @@
 Status (2026-10-27): **first real deploy done** on a Contabo Cloud VPS 6 behind Cloudflare (Full strict + origin certificate): bootstrap, `deploy-api`,
 `deploy-alpr`, `deploy-web`, a verified `pg_restore` of the real DB (row counts equal local) and a live `https://carsua.app` (healthz, sitemap,
 robots, plate API all 200; HTTP/3 advertised). The runbook below is corrected from that run; the problems found are in `docs/plan-done.md`
-"First VPS deploy". R2 backups work (nightly + full verified 2026-10-27). **Not yet done:** UptimeRobot, the security gate (§7), `ingest-cron`.
+"First VPS deploy". R2 backups work (nightly + full verified 2026-10-27). UptimeRobot on `/healthz` is up (2026-10-28). **Not yet done:** the rest of the security gate (§7, partly checked 2026-10-28), `ingest-cron`.
 Deploy scripts run via `ssh vps bash -s < script`, so bash reads the script from stdin: every `docker` call in them that could attach stdin needs
 `</dev/null`, or it swallows the rest of the script and bash exits 0 early (this made `deploy-api` report success without starting the api).
 
@@ -155,7 +155,7 @@ pulls without a login. Settings → Actions → "Require approval for all outsid
    - Faster/no-rebuild alternative: stop local Postgres and copy the `pgdata` volume (~23 GB, same 18.6 image) into `/opt/carsua/pgdata`.
 5. **Run `deploy-api` normally** (migrator is a no-op on the restored DB), then `deploy-web`. Check `https://carsua.app/healthz`, a plate, a VIN, camera recognize.
 6. **Backups** — `ssh deploy@<ip> bash /opt/carsua/compose/backup.sh nightly` once by hand; confirm the object in R2; do a restore test into a scratch container.
-7. Pre-deploy gate: [security-checklist.md §7](security-checklist.md); UptimeRobot; submit `sitemap.xml`.
+7. Pre-deploy gate: [security-checklist.md §7](security-checklist.md); submit `sitemap.xml`.
 
 ## Backups (free, only what cannot be rebuilt)
 
@@ -205,32 +205,43 @@ Registry data lost with the full dumps: re-ingest from `archive/` ZIPs (`backup.
    `postgres:18.6` container (create schemas `app` + `registry` first; 9 app tables, 6 registry tables) and the 1.28 GB full dump passed `pg_restore --list`
    (68 `TABLE DATA`). Gotcha: an object-scoped R2 token cannot check/create buckets, so rclone needs `RCLONE_CONFIG_R2_NO_CHECK_BUCKET=true` (set in `backup.env`
    by `deploy-api`), else uploads fail with 403 AccessDenied. A `501 NotImplemented` on attempt 1 followed by success on attempt 2 is normal. A full dump takes
-   ~10 min; run it under `nohup`. Still to do: confirm the 03:30 cron run + healthchecks.io check, `backup.sh archive` (source ZIPs), and delete the old local
-   `C:\tmp\carsua.dump` once comfortable.
+   ~10 min; run it under `nohup`. Nightly cron confirmed 2026-10-28 (`/etc/cron.d/carsua-backup`, 03:30 server time; dump in R2; healthchecks.io Started + OK).
+   Manual `rclone` on the VPS needs `set -a; . /opt/carsua/env/backup.env; set +a` first (no rclone.conf). Never open the ping URL in a browser (counts as a ping).
+   `backup.sh archive` works but is a no-op until the first VPS ingest fills `/opt/carsua/archive`; run it and `backup.sh full` after that ingest. Still to do:
+   restore test on a populated DB, and delete the old local `C:\tmp\carsua.dump` once comfortable.
 2. ✅ **SSH hardening (fixed + verified 2026-10-27).** The check found the problem: sshd takes the first value it reads, `50-cloud-init.conf` (unreadable by
    `deploy`) beat `99-carsua.conf`, and password login was on. Renamed the drop-in to `00-carsua.conf` (`bootstrap.sh` now writes that name) and reloaded sshd;
    `ssh -o PubkeyAuthentication=no -o PreferredAuthentications=password deploy@<ip>` is now refused with no password prompt. Re-run that test after any sshd change.
    `deploy` has no sudo (no password, no sudoers entry; only the `docker` group), so root edits go through the Contabo VNC console as root, or a privileged
    container: `docker run --rm --privileged --pid=host alpine nsenter -t 1 -m -u -n -i sh -c '/usr/sbin/sshd -t && systemctl reload ssh'` (the `docker` group is
    effectively root).
-3. **UptimeRobot** (free, 5 min) on `https://carsua.app/healthz`; one healthchecks.io check per future cron job.
-4. **Cloudflare settings not yet confirmed:** Always Use HTTPS, HTTP/3, Bot Fight Mode, the WAF rate-limit rule on `/api/plate*` + `/api/vin*`. DNSSEC was turned
-   off at Squarespace for the nameserver move; optionally re-enable it in Cloudflare and add the DS record at Squarespace.
-5. **Pre-deploy security gate:** [security-checklist.md §7](security-checklist.md).
+3. ✅ **UptimeRobot (done 2026-10-28):** free plan, HTTP monitors every 5 min on `https://carsua.app/healthz` and the home page, email alerts. One healthchecks.io check per future cron job.
+4. ✅ **Cloudflare settings (done 2026-10-28):** Full (strict), Always Use HTTPS, Min TLS 1.2, Automatic HTTPS Rewrites, HTTP/2 + HTTP/3 (Speed → Settings →
+   Protocol; not on the Network page), Browser Cache TTL "Respect Existing Headers", Rocket Loader off, Bot Fight Mode, and one WAF rate-limit rule `api-lookup-limit`
+   (Security → Security rules → zone level, not the Enterprise account WAF): `starts_with(uri.path, "/api/plate") or starts_with(…, "/api/vin")`, per IP, 30 requests
+   / 10 s, Block 10 s (verified: ~30 × 200 then 429). HSTS is sent by Caddy (`max-age=31536000`), so Cloudflare's HSTS toggle stays off (a second source would
+   duplicate or override it). Not done: "Under Attack" is a manual toggle for incidents. DNSSEC was turned off at Squarespace for the nameserver move; optionally
+   re-enable it in Cloudflare and add the DS record at Squarespace.
+5. **Pre-deploy security gate** ([security-checklist.md §7](security-checklist.md)), partly done 2026-10-28. Passed against the live site: `pnpm audit --prod` has
+   no high/critical (nodemailer ^10.2.1 and `fast-uri >=4.2.3` bumped; the one left is a low `deepmerge` with no patch, accepted), HSTS/nosniff/Referrer/Permissions
+   headers, `/api/docs` is not Swagger, `/api/admin/*` anonymous → 401, cross-site POST → 403, rate limits → 429 on `/api/plate/*` and `/api/auth/google`.
+   Still open: enforce CSP (now Report-Only in `infra/Caddyfile`), `nmap -Pn -p 22,80,443,5432,8088 <vps-ip>` from another network, cookie flags + sign-out +
+   account-deletion check in the browser, `trivy image` + `gitleaks` on full history, ZAP baseline, restore test on a populated DB.
 6. **Browser smoke test (partly done: home, plate page, link-preview card):** Google login (authorised origin `https://carsua.app`), Telegram login (`/setdomain carsua.app`;
    check `TELEGRAM_BOT_USERNAME` is the production bot), a real email through Resend (`MAIL_FROM` is `carsua <noreply@carsua.app>`), VIN lookup, camera recognize
    (ALPR), Maps key restricted to the `carsua.app` referrer, Disqus.
 7. **Secrets hygiene.** Dev values were visible in screenshots/chat during the first deploy: rotate `POSTHOG_PERSONAL_API_KEY` and any other key you consider exposed.
    The production `AUTH_SECRET` and `POSTGRES_PASSWORD` are separate from the dev ones. Optional secrets still unset: `SENTRY_DSN` (only `VITE_SENTRY_DSN` is set, so
-   server errors are not tracked), `PLATE_RECOGNIZER_CLOUD_TOKEN`, `TURNSTILE_*`.
-8. Housekeeping: 6 open Dependabot PRs; a Contabo snapshot once the site is stable; a Telegram `@WebpageBot` / X card-validator refresh of the old text-less preview.
+   server errors are not tracked), `PLATE_RECOGNIZER_CLOUD_TOKEN`. `TURNSTILE_*` is set (2026-10-27).
+8. **Ingest cron (the biggest functional gap).** `ingest-cron` image + `run-job.ts` + crontab (SCHEDULE.md) are not built, so monthly ingest and `ingest:wanted`
+   run by hand on the VPS (`wanted` loses history on every skipped day; the news ticker is empty/stale). There is no `ingest` image yet, so `backup.sh full/archive`
+   are manual too, and `archive` stays a no-op until the first VPS ingest. Build order (cheap, idempotent first): `pnpm ingest:news` (every ~6 h), `pnpm ingest:social`
+   (daily, brand YouTube RSS), `ingest:wanted` (daily), then the plate `ingest:full` (Tue + Fri ~03:00 Kyiv). One healthchecks.io check per job; run
+   `backup.sh archive` + `full` after the first monthly ingest.
+9. Housekeeping: 6 open Dependabot PRs; a Contabo snapshot once the site is stable; a Telegram `@WebpageBot` / X card-validator refresh of the old text-less preview.
 
 ### Longer term
 
-- `ingest-cron` image + `run-job.ts` + crontab (SCHEDULE.md) — not built; monthly ingest and `ingest:wanted` must be run by hand on the VPS until then
-  (`wanted` loses history on skipped days). There is no `ingest` image yet, so `backup.sh full/archive` are manual too.
-  **First crontab entries (cheap, idempotent, build these first):** the RSS jobs `pnpm ingest:news` (every ~6 h; news ticker is empty/stale without it) and
-  `pnpm ingest:social` (daily, brand YouTube RSS), then `ingest:wanted` (daily) and the plate `ingest:full` (Tue + Fri ~03:00 Kyiv). One healthchecks.io check each.
 - Redis throttler store (not used by the app yet, so Redis is not in the compose file); until then limits are per-process and reset on restart,
   and blue/green briefly runs two api processes.
 - CSP is Report-Only; enforce after a clean week. Cloudflare IP ranges in the Caddyfile: re-check against cloudflare.com/ips occasionally.

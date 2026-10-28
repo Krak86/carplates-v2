@@ -3506,7 +3506,16 @@ Verified from outside: `/healthz` `{"status":"ok","db":"up"}` in ~0.2 s, `/`, `/
 
 **Measured:** dump 1.28 GB for 24.7M rows (tables 14.3 GB incl. indexes + 8.9 GB matview on disk; indexes and matviews are rebuilt on restore), upload 43 s, restore with `-j 4` about an hour, the last step (`REFRESH MATERIALIZED VIEW registry.current_registration`) alone over 42 min. VPS DB 21 GB vs 23 GB local. `registrations` 24721694, `current_registration` 16723888, `app.users` 2 on both sides; restore log had 0 errors; the migrator reported "up to date" on the restored DB.
 
-**Open (ordered list with the concrete steps: `docs/deploy.md` "Still open"):** R2 backups and a restore test, SSH hardening check, UptimeRobot on `/healthz`, Cloudflare settings and security checklist §7, browser smoke test (login, mail, VIN, camera), secrets rotation, `ingest-cron` (monthly delta ingest and `ingest:wanted` are manual on the VPS until then), CSP is Report-Only, Lighthouse on the VPS.
+**Follow-up the same day (R2 backups, SSH, Turnstile):**
+
+- R2 backups: bucket `carsua-backups` + object-scoped Account API token. The first upload failed with 403 AccessDenied: rclone checks/creates the bucket before uploading and a bucket-scoped token may not. Fix `RCLONE_CONFIG_R2_NO_CHECK_BUCKET=true`, written to `backup.env` by `deploy-api`. A `501 NotImplemented` on attempt 1 then success on attempt 2 is normal. Verified: nightly dump (8.6 MB) restored into a scratch `postgres:18.6` (create schemas `app` + `registry` first; 9 + 6 tables), full dump (1.28 GB, ~10 min to create) passes `pg_restore --list` (68 `TABLE DATA`). Restore runbook added to `docs/deploy.md` "Restore from R2" (nightly-over-full path not yet tested on a populated DB).
+- SSH: password login was still on. sshd keeps the first value it reads and the provider's `50-cloud-init.conf` loaded before `99-carsua.conf`. Renamed to `00-carsua.conf` (`bootstrap.sh` writes that name), reloaded; `ssh -o PubkeyAuthentication=no -o PreferredAuthentications=password` is now refused. `deploy` has no sudo, so the root edit went through the `docker` group (privileged container + `nsenter`).
+- Turnstile widget created and `TURNSTILE_SITE_KEY` / `TURNSTILE_SECRET_KEY` set.
+- Nightly cron confirmed 2026-10-28: `/etc/cron.d/carsua-backup` (not the user crontab; installed by `bootstrap.sh`) ran at 03:30 server time (02:30 UTC), `nightly-20261028T023002Z.dump` is in R2 and the healthchecks.io `backup` check logged Started + OK. `backup.sh archive` runs clean but is a no-op until the first VPS ingest fills `/opt/carsua/archive`. On the VPS, rclone has no config file: load `/opt/carsua/env/backup.env` (`set -a; . …; set +a`) before any manual `rclone` call. Opening the ping URL in a browser counts as a ping, so don't.
+
+Cloudflare settings confirmed 2026-10-28 (Always Use HTTPS, Min TLS 1.2, HTTP/3, Browser Cache TTL, Bot Fight Mode, WAF rate-limit rule `api-lookup-limit` 30 req / 10 s per IP on `/api/plate*` + `/api/vin*`, tested: ~30 × 200 then 429); HSTS comes from Caddy, not Cloudflare.
+
+**Open (ordered list with the concrete steps: `docs/deploy.md` "Still open"):** populated-DB restore test, `backup.sh archive` + `full` after the first VPS ingest, security checklist §7, browser smoke test (login, mail, VIN, camera), secrets rotation, `ingest-cron` (monthly delta ingest and `ingest:wanted` are manual on the VPS until then), CSP is Report-Only, Lighthouse on the VPS.
 
 ## Own ALPR: letter set re-measured (2026-10-26)
 
