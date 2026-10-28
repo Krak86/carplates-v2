@@ -53,7 +53,12 @@ export function useRaceTilt(enabled: boolean, onInput: (input: Partial<RacerInpu
     }
     // the picture must not spin while the phone is tilted: Android locks it in full screen, iOS has no lock (ignored)
     const orientation = screen.orientation as ScreenOrientation & { lock?: (o: string) => Promise<void> }
-    void orientation?.lock?.('landscape').catch(() => undefined)
+    // tablets (shortest side >= 600 css px) are held in whichever landscape they are in: a forced 'landscape' is often
+    // ignored there or flips the picture, so lock the current one when it already is landscape
+    const isTablet = Math.min(screen.width, screen.height) >= 600
+    const current = orientation?.type
+    const target = isTablet && current?.startsWith('landscape') ? current : 'landscape'
+    void orientation?.lock?.(target).catch(() => orientation?.lock?.('landscape').catch(() => undefined))
     window.addEventListener('deviceorientation', handleOrientation)
     return () => {
       window.removeEventListener('deviceorientation', handleOrientation)
