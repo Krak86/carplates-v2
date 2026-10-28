@@ -49,7 +49,12 @@ function noteText(row: Row): string {
   return row.label === '-' ? row.value : `${row.label}: ${row.value}`
 }
 
-function sectionToDocx(section: ExportSection, docx: Docx): (Paragraph | Table)[] {
+/** Bookmark name the contents entry of section `index` links to. */
+function sectionAnchor(index: number): string {
+  return `section${index}`
+}
+
+function sectionToDocx(section: ExportSection, docx: Docx, index: number, newPage: boolean): (Paragraph | Table)[] {
   const {
     Paragraph,
     TextRun,
@@ -62,12 +67,14 @@ function sectionToDocx(section: ExportSection, docx: Docx): (Paragraph | Table)[
     TableLayoutType,
     BorderStyle,
     ExternalHyperlink,
-    ImageRun
+    ImageRun,
+    Bookmark
   } = docx
   const heading = new Paragraph({
-    text: section.title,
+    children: [new Bookmark({ id: sectionAnchor(index), children: [new TextRun(section.title)] })],
     heading: HeadingLevel.HEADING_2,
     keepNext: true,
+    pageBreakBefore: newPage,
     border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: RULE, space: 2 } }
   })
   const none = { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' }
@@ -277,12 +284,19 @@ function sectionToDocx(section: ExportSection, docx: Docx): (Paragraph | Table)[
 
 export async function toDocxBlob(report: ExportReport): Promise<Blob> {
   const docx = await loadDocx()
-  const { Document, Paragraph, TextRun, HeadingLevel, ImageRun, Packer, ShadingType } = docx
+  const { Document, Paragraph, TextRun, HeadingLevel, ImageRun, Packer, ShadingType, InternalHyperlink } = docx
 
-  const imageParagraph = async (image: ExportReport['logo'], maxWidth: number): Promise<Paragraph | null> => {
+  const hasToc = !!report.contentsLabel && report.sections.length > 1
+
+  const imageParagraph = async (
+    image: ExportReport['logo'],
+    maxWidth: number,
+    pageBreakBefore = false
+  ): Promise<Paragraph | null> => {
     const png = image ? await fetchImageAsPng(image.url, maxWidth) : null
     if (!image || !png) return null
     return new Paragraph({
+      pageBreakBefore,
       children: [
         new ImageRun({
           type: 'png',
@@ -296,7 +310,7 @@ export async function toDocxBlob(report: ExportReport): Promise<Blob> {
 
   const [logo, hero] = await Promise.all([
     imageParagraph(report.logo, LOGO_MAX_WIDTH_PX),
-    imageParagraph(report.heroImage, HERO_MAX_WIDTH_PX)
+    imageParagraph(report.heroImage, HERO_MAX_WIDTH_PX, hasToc) // with a contents page the hero opens page 2
   ])
 
   // The cover strip: one shaded run per item (verdict first), separated by plain spaces.
@@ -320,9 +334,33 @@ export async function toDocxBlob(report: ExportReport): Promise<Blob> {
     new Paragraph({ children: [new TextRun({ text: report.subtitle, color: MUTED })] })
   )
   if (strip.length > 0) children.push(new Paragraph({ children: strip, spacing: { before: 120, after: 120 } }))
-  if (hero) children.push(hero)
+  if (hero && !hasToc) children.push(hero)
   children.push(new Paragraph({ children: [new TextRun({ text: report.generatedAtLabel, size: 16, color: MUTED })] }))
-  for (const section of report.sections) children.push(...sectionToDocx(section, docx))
+  if (report.description) children.push(new Paragraph({ text: report.description, spacing: { before: 160 } }))
+
+  if (hasToc) {
+    // Clickable contents: each entry jumps to its section heading's bookmark.
+    children.push(
+      new Paragraph({ text: report.contentsLabel!, heading: HeadingLevel.HEADING_2, spacing: { before: 360 } }),
+      ...report.sections.map(
+        (section, i) =>
+          new Paragraph({
+            spacing: { after: 80 },
+            children: [
+              new TextRun({ text: `${i + 1}. `, color: MUTED }),
+              new InternalHyperlink({
+                anchor: sectionAnchor(i),
+                children: [new TextRun({ text: section.title, style: 'Hyperlink' })]
+              })
+            ]
+          })
+      )
+    )
+    if (hero) children.push(hero)
+  }
+
+  // Every section starts on its own page; without a contents page the first shares the cover (or follows the hero).
+  report.sections.forEach((section, i) => children.push(...sectionToDocx(section, docx, i, i > 0 || (hasToc && !hero))))
 
   const doc = new Document({ sections: [{ children }] })
   return Packer.toBlob(doc)

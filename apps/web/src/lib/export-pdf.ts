@@ -337,11 +337,31 @@ export async function toPdfBlob(report: ExportReport): Promise<Blob> {
   writeLines(report.subtitle, FONT_SIZE_BODY, false, MUTED)
   y += 4
   if (report.summary && report.summary.length > 0) writeSummaryStrip(report.summary)
-  writeImage(hero, HERO_MAX_WIDTH_PT)
+  // With a contents page the hero moves to the first section's page, so page 1 is title + description + contents.
+  const hasToc = !!report.contentsLabel && report.sections.length > 1
+  if (!hasToc) writeImage(hero, HERO_MAX_WIDTH_PT)
   writeLines(report.generatedAtLabel, FONT_SIZE_SMALL, false, MUTED)
   y += LINE_HEIGHT / 2
+  if (report.description) {
+    y += 4
+    writeLines(report.description, FONT_SIZE_BODY, false)
+  }
+  let tocY = y
+  const sectionPages: number[] = []
+  if (hasToc) {
+    y += LINE_HEIGHT
+    writeHeading(report.contentsLabel!)
+    tocY = y
+  }
 
-  function writeSection(section: ExportSection): void {
+  function writeSection(section: ExportSection, index: number): void {
+    // The first section shares the cover page unless there is a contents page.
+    if (index > 0 || hasToc) {
+      doc.addPage()
+      y = PAGE_MARGIN
+    }
+    sectionPages.push(doc.getNumberOfPages())
+    if (index === 0 && hasToc) writeImage(hero, HERO_MAX_WIDTH_PT)
     writeHeading(section.title)
 
     if (section.type === 'kv') {
@@ -358,7 +378,30 @@ export async function toPdfBlob(report: ExportReport): Promise<Blob> {
     y += LINE_HEIGHT / 2
   }
 
-  for (const section of report.sections) writeSection(section)
+  report.sections.forEach((section, i) => writeSection(section, i))
+
+  if (hasToc) {
+    // Page numbers are only known now, so the entries are drawn back on page 1; each one links to its section page.
+    doc.setPage(1)
+    const lineHeight = Math.min(18, (pageHeight - PAGE_MARGIN - tocY) / report.sections.length)
+    const fontSize = lineHeight < 14 ? FONT_SIZE_SMALL : FONT_SIZE_BODY + 1
+    doc.setFontSize(fontSize)
+    doc.setFont(FONT_NAME, 'normal')
+    report.sections.forEach((section, i) => {
+      const page = sectionPages[i]!
+      const baseline = tocY + i * lineHeight + fontSize
+      const pageLabel = String(page)
+      const number = `${i + 1}.`
+      const title = doc.splitTextToSize(section.title, maxWidth - 60)[0] as string
+      doc.setTextColor(...MUTED)
+      doc.text(number, PAGE_MARGIN, baseline)
+      doc.setTextColor(...ACCENT)
+      doc.text(title, PAGE_MARGIN + 24, baseline)
+      doc.setTextColor(...MUTED)
+      doc.text(pageLabel, PAGE_MARGIN + maxWidth, baseline, { align: 'right' })
+      doc.link(PAGE_MARGIN, baseline - fontSize, maxWidth, lineHeight, { pageNumber: page })
+    })
+  }
 
   return doc.output('blob')
 }

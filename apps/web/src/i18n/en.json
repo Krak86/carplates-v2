@@ -1611,6 +1611,8 @@
   "export.sources": "Data sources",
   "export.untitled": "Vehicle",
   "export.generatedAt": "Generated: {{date}}",
+  "export.description": "A combined vehicle report: registry data, registration history, crash tests, specs, estimated value, recalls, reviews and sources. Each section starts on a new page.",
+  "export.contents": "Contents",
   "export.value": "Plate / VIN",
   "export.label": "Label",
   "export.date": "Date",

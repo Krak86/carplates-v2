@@ -157,6 +157,9 @@ export type ExportReport = {
   /** Wikipedia lead image, shown right under the title block when the wiki lookup found one. */
   heroImage: { url: string; alt: string } | null
   generatedAtLabel: string
+  /** Short "what is this document" text and the table-of-contents heading; Word / PDF draw a contents page only when `contentsLabel` is set. */
+  description?: string
+  contentsLabel?: string
   /** The cover's one-line strip (verdict, region, year, fuel); absent for reports without a vehicle. */
   summary?: { text: string; tone?: ExportTone }[]
   sections: ExportSection[]
@@ -953,6 +956,8 @@ export function buildExportReport(input: ExportInput, t: Translate): ExportRepor
     heroImage:
       input.wiki?.found && input.wiki.image ? { url: input.wiki.image.url, alt: input.wiki.title ?? title } : null,
     generatedAtLabel: t('export.generatedAt', { date: new Date().toLocaleString() }),
+    description: t('export.description'),
+    contentsLabel: t('export.contents'),
     summary: buildSummary(input, t),
     sections: sections.filter((s): s is ExportSection => s != null)
   }
