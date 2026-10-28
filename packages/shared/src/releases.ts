@@ -20,6 +20,12 @@ export const RELEASES: readonly ReleaseDay[] = [
     items: [
       item(
         'new',
+        'Гра-гонки: карта дороги (вигляд зверху) з деревами, знаками та іншими авто; вмикається кнопкою «Карта»',
+        'Игра-гонки: карта дороги (вид сверху) с деревьями, знаками и другими авто; включается кнопкой «Карта»',
+        'Race game: a top-down road map showing the trees, signs and other cars; toggled with the Map button'
+      ),
+      item(
+        'new',
         'Кермо праворуч: позначка RHD на картці VIN, коли декодований VIN це показує',
         'Руль справа: метка RHD на карточке VIN, когда расшифрованный VIN это показывает',
         'Right-hand drive: an RHD chip on the VIN card when the decoded VIN says so'
@@ -83,6 +89,12 @@ export const RELEASES: readonly ReleaseDay[] = [
         'На сторінці «Про проєкт» додано Disqus у джерелах і вигляд застосунку у можливостях',
         'На странице «О проекте» добавлены Disqus в источники и внешний вид приложения в возможности',
         'The About page now lists Disqus among its sources and app appearance among the features'
+      ),
+      item(
+        'data',
+        'Сторінка «Про проєкт»: повний перелік можливостей між описом і джерелами, додано переклад на місці, базову ціну США та карту дороги',
+        'Страница «О проекте»: полный перечень возможностей между описанием и источниками, добавлены перевод на месте, базовая цена США и карта дороги',
+        'About page: the full feature list sits between the description and the sources, now with in-place translation, the US base price and the road map'
       ),
       item(
         'improved',

@@ -261,6 +261,7 @@ const FEATURES = [
   'share',
   'appearance',
   'digest',
+  'translate',
   'pwa'
 ] as const
 

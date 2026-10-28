@@ -51,9 +51,13 @@ export function useRaceTilt(enabled: boolean, onInput: (input: Partial<RacerInpu
       right = nextRight
       onInputRef.current({ left, right })
     }
+    // the picture must not spin while the phone is tilted: Android locks it in full screen, iOS has no lock (ignored)
+    const orientation = screen.orientation as ScreenOrientation & { lock?: (o: string) => Promise<void> }
+    void orientation?.lock?.('landscape').catch(() => undefined)
     window.addEventListener('deviceorientation', handleOrientation)
     return () => {
       window.removeEventListener('deviceorientation', handleOrientation)
+      orientation?.unlock?.()
       onInputRef.current({ left: false, right: false })
     }
   }, [enabled])

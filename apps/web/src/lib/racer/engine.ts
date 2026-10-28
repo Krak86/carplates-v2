@@ -21,6 +21,7 @@ import {
 } from './config'
 import { preloadBackdrop } from './backdrop-assets'
 import { preloadRegionFlag, regionFlagImage } from './flag-assets'
+import type { MapKind, MapObject, MapView } from './minimap'
 import { createSound } from './sound'
 import { preloadBrandLogo } from './vehicle-assets'
 import {
@@ -47,6 +48,8 @@ export type Racer = {
   setInput: (input: Partial<RacerInput>) => void
   /** The current vehicle's siren (emergency bodies only; a no-op for the rest). Independent of the sound toggle. */
   setSiren: (on: boolean) => void
+  /** Read-only view of the road for the mini-map (see ./minimap.ts); stays valid across road rebuilds. */
+  getMap: () => MapView
   destroy: () => void
 }
 
@@ -208,6 +211,7 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
 
   let segments: Segment[] = []
   let cars: Car[] = []
+  let mapObjects: MapObject[][] = [] // per segment, what the mini-map draws beside the road (built with the sprites)
   let trackLength = 0
   let skyOffset = 0
   let hillOffset = 0
@@ -770,6 +774,18 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
     }
   }
 
+  function mapKind(source: Sprite): MapKind {
+    if (source === atlas.oak) return 'oak'
+    if (source === atlas.pine) return 'pine'
+    if (source === atlas.poplar) return 'poplar'
+    if (source === atlas.post) return 'post'
+    return atlas.billboards.includes(source) ? 'sign' : 'plant'
+  }
+
+  function resetMapObjects(): void {
+    mapObjects = segments.map(segment => segment.sprites.map(s => ({ kind: mapKind(s.source), offset: s.offset })))
+  }
+
   function resetCars(): void {
     cars = []
     for (let n = 0; n < TRAFFIC_COUNT[cfg.traffic]; n++) {
@@ -811,6 +827,7 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
     trackLength = segments.length * SEGMENT_LENGTH
 
     resetSprites()
+    resetMapObjects()
     resetCars()
 
     seg(findSegment(PLAYER_Z).index + 2).color = START
@@ -933,6 +950,19 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
   let last = performance.now()
   let acc = 0
 
+  const mapView: MapView = {
+    track: {
+      get count() {
+        return segments.length
+      },
+      halfWidth: ROAD_WIDTH / SEGMENT_LENGTH,
+      curve: i => seg(i).curve,
+      objects: i => mapObjects[i] ?? [],
+      cars: i => seg(i).cars
+    },
+    state: () => ({ s: (position + PLAYER_Z) / SEGMENT_LENGTH, playerX })
+  }
+
   applyCanvasSize()
   restart()
   window.addEventListener('keydown', handleKey)
@@ -1004,6 +1034,7 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
       if (input.faster !== undefined && input.faster !== keyFaster) handleFaster(input.faster, false)
       if (input.slower !== undefined && input.slower !== keySlower) handleSlower(input.slower, false)
     },
+    getMap: () => mapView,
     destroy(): void {
       destroyed = true
       sound.destroy()
