@@ -3065,6 +3065,15 @@ Trigger: the dev server showed ~22 MB / 337 requests before the first result. Th
   animated `grid-template-rows`/`margin-top` open after load (shifts 0.42 + 0.30), plus the bottom `NAV` 0.07. Fix: `Presence` starts
   expanded when `show` is already true on first render. Seen: JS/API answered with gzip through Cloudflare (no Brotli seen), `/api/*`
   `cf-cache-status: DYNAMIC`, `index-*.js` preload map lists every route, language chunk starts after the entry graph.
+- **Re-measured after the deploy 2026-10-29** (same setup; Caddy fix `@direct not header Cf-Connecting-Ip *` first, the earlier deploy failed on
+  the matcher): **CLS 0.01** (was 0.79), LCP 1362 ms (was 1174; still a text badge, TTFB 2 ms, 99 % render delay, so the change is run-to-run
+  noise, not a regression from the hints), requests **103** (was ~155), PostHog **225 ms** main thread (was 377), critical path 467 ms
+  (`manifest.webmanifest` now the longest link), Lighthouse mobile: a11y 96, best-practices 96, SEO 100. Brotli verified (`content-encoding: br`,
+  `cf-cache-status: HIT` on `/assets/*.js`). `/api/fuel/stats` still `cf-cache-status: DYNAMIC` (Cache Rule not created yet).
+  Lighthouse fails: `color-contrast` (CO₂ value `#e42525` on `#191e29`, 3.64:1), `inspector-issues`, `llms-txt`, `ai-catalog.json` schema.
+  **Measuring pitfall:** the service worker precaches the previous build, so right after a deploy a trace (even with cache off) runs the OLD
+  build (first re-run showed CLS 0.38 from `index-Bg8bPWRj.js`). Unregister the SW and delete `caches` (or use a fresh profile) and check
+  `document.scripts` against the `index-*.js` in a no-store fetch of `/` before tracing.
 
 ### Estimated value, weight rankings, community widgets and export ✅ BUILT (2026-10-09, `86cc500` … `bb9f055`)
 

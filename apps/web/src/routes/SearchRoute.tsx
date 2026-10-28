@@ -44,7 +44,8 @@ import HomeSafetySection from '@/routes/stats/HomeSafetySection'
 import HomeStatsSkeleton from '@/routes/stats/HomeStatsSkeleton'
 import HomeWantedSection from '@/routes/stats/HomeWantedSection'
 
-const ResultCard = lazy(() => import('@/components/ResultCard'))
+const loadResultCard = (): Promise<typeof import('@/components/ResultCard')> => import('@/components/ResultCard')
+const ResultCard = lazy(loadResultCard)
 const VinResult = lazy(() => import('@/components/VinResult'))
 const TopStatsPanel = lazy(() => import('@/routes/stats/TopStatsPanel'))
 const WeightModelsCards = lazy(() => import('@/routes/stats/WeightModelsCards'))
@@ -67,6 +68,19 @@ export default function SearchRoute(): ReactNode {
   // Not precached by the service worker (live data), so offline they are never mounted.
   const sideWidgets = useSideWidgetsVisible() && online
   const isHome = useLocation().pathname === '/'
+
+  // The first plate search is the common next step from the home page: fetch the card chunk while the browser is idle
+  // so the result doesn't wait for an extra round trip. The module cache makes the later lazy() import free.
+  useEffect(() => {
+    if (!isHome) return
+    if (typeof window.requestIdleCallback !== 'function') {
+      const timer = setTimeout(() => void loadResultCard(), 2000)
+      return (): void => clearTimeout(timer)
+    }
+    const id = window.requestIdleCallback(() => void loadResultCard(), { timeout: 4000 })
+    return (): void => window.cancelIdleCallback(id)
+  }, [isHome])
+
   const raw = params.query ? decodeURIComponent(params.query) : ''
   const kind = raw ? classifyQuery(raw) : null
   const isSharedSection = searchParams.has('section')
