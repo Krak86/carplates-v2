@@ -5,6 +5,7 @@ import type { FavoriteLabel } from '@carplates/shared'
 
 import BrandLogo from '@/components/BrandLogo'
 import LabelChip from '@/components/LabelChip'
+import { cn } from '@/lib/cn'
 import { toIntlLocale } from '@/lib/intl'
 import { brandFromLabel } from '@/lib/vehicle-label'
 import { markTransitionSource } from '@/lib/view-transition'
@@ -47,31 +48,8 @@ export default function LocalRecordRow({
 
   const logo = <BrandLogo brand={brandFromLabel(label)} size="sm" />
 
-  return (
-    <div className="flex items-center justify-between gap-3 px-1 py-2 text-sm sm:px-4">
-      <span className="hidden w-6 shrink-0 justify-center sm:flex">{logo}</span>
-      <div className="min-w-0 flex-1">
-        <Link
-          viewTransition
-          onClick={handleOpen}
-          to={`/${value}`}
-          title={label ? `${value} - ${label}` : value}
-          className="block truncate text-[var(--color-primary)] underline"
-        >
-          {value}
-          {label ? ` - ${label}` : ''}
-        </Link>
-
-        {/* Mobile: the brand logo sits beside the label chips instead of in its own column. */}
-        {labels.length > 0 && (
-          <div className="mt-1 flex flex-wrap items-center gap-1">
-            <span className="flex shrink-0 sm:hidden">{logo}</span>
-            {labels.map(l => (
-              <LabelChip key={l.id} label={l} />
-            ))}
-          </div>
-        )}
-      </div>
+  const badges = (
+    <>
       {notFound && (
         <span
           title={t('history.notFoundHint')}
@@ -88,10 +66,44 @@ export default function LocalRecordRow({
           {t('offline.savedBadge')}
         </span>
       )}
+    </>
+  )
+  const dateText = (
+    <span className="shrink-0 text-[var(--color-muted)]">
+      {new Date(date).toLocaleDateString(toIntlLocale(i18n.language))}
+    </span>
+  )
+
+  return (
+    <div className="flex items-center justify-between gap-3 px-3 py-2 text-sm sm:px-4">
+      <span className="hidden w-6 shrink-0 justify-center sm:flex">{logo}</span>
+      <div className="min-w-0 flex-1">
+        <Link
+          viewTransition
+          onClick={handleOpen}
+          to={`/${value}`}
+          title={label ? `${value} - ${label}` : value}
+          className="block truncate text-[var(--color-primary)] underline"
+        >
+          {value}
+          {label ? ` - ${label}` : ''}
+        </Link>
+
+        {/* Mobile: a second row holds the brand logo, label chips, badges and date, so the title gets the full width. */}
+        <div className={cn('mt-1 flex flex-wrap items-center gap-1', labels.length === 0 && 'sm:hidden')}>
+          <span className="flex shrink-0 sm:hidden">{logo}</span>
+          {labels.map(l => (
+            <LabelChip key={l.id} label={l} />
+          ))}
+          <span className="ml-auto flex items-center gap-2 sm:hidden">
+            {badges}
+            {dateText}
+          </span>
+        </div>
+      </div>
+      <span className="hidden sm:contents">{badges}</span>
       {actions && <span className="hidden sm:contents">{actions}</span>}
-      <span className="shrink-0 text-[var(--color-muted)]">
-        {new Date(date).toLocaleDateString(toIntlLocale(i18n.language))}
-      </span>
+      <span className="hidden sm:inline">{dateText}</span>
       <button
         type="button"
         aria-label={deleteLabel}
