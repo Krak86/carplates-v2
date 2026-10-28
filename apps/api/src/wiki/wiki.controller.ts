@@ -1,7 +1,8 @@
-import { Controller, Get, Inject, Query } from '@nestjs/common'
+import { Controller, Get, Inject, Query, UseInterceptors } from '@nestjs/common'
 import { ApiOkResponse, ApiQuery, ApiTags } from '@nestjs/swagger'
 import { z } from 'zod'
 
+import { LOOKUP_CACHE, lookupCacheInterceptor } from '../common/cache.js'
 import { zodParam } from '../common/zod-param.pipe.js'
 import { WikiImageDto, WikiInfoDto } from './wiki.dto.js'
 import { WIKI_IMAGE_SOURCES, WikiService } from './wiki.service.js'
@@ -29,6 +30,7 @@ export class WikiController {
   constructor(@Inject(WikiService) private readonly wikiService: WikiService) {}
 
   @Get('image')
+  @UseInterceptors(lookupCacheInterceptor(LOOKUP_CACHE))
   @ApiQuery({ name: 'brand', required: false })
   @ApiQuery({ name: 'model', required: false })
   @ApiQuery({ name: 'year', required: false, description: 'Model year - picks a matching-generation photo' })
@@ -56,6 +58,7 @@ export class WikiController {
   }
 
   @Get()
+  @UseInterceptors(lookupCacheInterceptor(LOOKUP_CACHE))
   @ApiQuery({ name: 'brand', required: false })
   @ApiQuery({ name: 'model', required: false })
   @ApiQuery({ name: 'lang', required: false })

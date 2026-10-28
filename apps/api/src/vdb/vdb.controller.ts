@@ -1,8 +1,9 @@
-import { Controller, Get, Inject, Query } from '@nestjs/common'
+import { Controller, Get, Header, Inject, Query, UseInterceptors } from '@nestjs/common'
 import { ApiOkResponse, ApiQuery, ApiTags } from '@nestjs/swagger'
 import { VDB_VEHICLE_CLASSES } from '@carplates/shared'
 import { z } from 'zod'
 
+import { LOOKUP_CACHE, lookupCacheInterceptor, ROLLUP_CACHE } from '../common/cache.js'
 import { zodParam } from '../common/zod-param.pipe.js'
 
 import { VdbResponseDto, VdbStatsDto } from './vdb.dto.js'
@@ -27,6 +28,7 @@ export class VdbController {
   ) {}
 
   @Get()
+  @UseInterceptors(lookupCacheInterceptor(LOOKUP_CACHE))
   @ApiQuery({ name: 'brand', required: true })
   @ApiQuery({ name: 'model', required: true })
   @ApiQuery({ name: 'kind', required: false })
@@ -37,6 +39,7 @@ export class VdbController {
 
   // Rollup for the /stats markets panel, rebuilt by `pnpm db:refresh-vdb-stats` — see vdb-stats.service.ts.
   @Get('stats')
+  @Header('Cache-Control', ROLLUP_CACHE)
   @ApiQuery({ name: 'kind', required: false, enum: VDB_VEHICLE_CLASSES })
   @ApiOkResponse({ type: VdbStatsDto })
   stats(@Query(zodParam(statsQuerySchema)) query: z.infer<typeof statsQuerySchema>): Promise<VdbStatsDto> {
