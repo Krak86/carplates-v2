@@ -124,7 +124,9 @@ export default function PowertrainDetail({ data, rareMinCars, view, onViewChange
               <thead>
                 <tr className="border-b border-[var(--color-border)] text-xs text-[var(--color-muted)] uppercase">
                   <th className="w-8 py-1 text-right font-medium">#</th>
-                  <th className="px-2 text-left font-medium" />
+                  <th className="px-2 text-left font-medium">
+                    <span className="sr-only">{t(`fuel.pt.view.${shown.view}`)}</span>
+                  </th>
                   <th className="px-2 text-right font-medium">{t('fuel.pt.col.cars')}</th>
                   <th className="px-2 text-right font-medium">{t('fuel.pt.classShare')}</th>
                   <th className="px-2 text-right font-medium">{ownHeader}</th>
@@ -138,7 +140,7 @@ export default function PowertrainDetail({ data, rareMinCars, view, onViewChange
                     style={{ '--row-i': i % COLLAPSED_ROWS } as CSSProperties}
                   >
                     <td className="py-1 text-right text-[var(--color-muted)] tabular-nums">{i + 1}</td>
-                    <td className="px-2">
+                    <th scope="row" className="px-2 text-left font-normal">
                       <span className="flex items-center gap-2">
                         <BrandLogo brand={r.brand} size="sm" placeholder />
                         <Link
@@ -149,7 +151,7 @@ export default function PowertrainDetail({ data, rareMinCars, view, onViewChange
                           {r.model ? `${r.brand} ${r.model}` : r.brand}
                         </Link>
                       </span>
-                    </td>
+                    </th>
                     <td className="px-2 text-right tabular-nums">{numberFormat.format(r.n)}</td>
                     <td className="px-2 text-right tabular-nums">{formatPercent(r.classShare)}</td>
                     <td className="px-2 text-right tabular-nums">{formatPercent(r.ownShare)}</td>

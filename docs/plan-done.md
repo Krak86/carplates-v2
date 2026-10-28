@@ -3083,6 +3083,11 @@ Trigger: the dev server showed ~22 MB / 337 requests before the first result. Th
   both a11y 100**, `color-contrast` passes; red, orange, yellow and green bands were all rendered. New findings there: **CLS 0.22**
   (the home page is 0.01; cause not investigated) and `td-has-header` (the "% of group / % of the model" table has no `<th scope>` on its row
   cells), both open in PLAN.md.
+  **Fix (2026-10-29, not yet deployed):** a PerformanceObserver showed one shift of 0.22 whose sources were `QuickLinks` (`NAV` + its
+  `div.mt-6`) moving from y 663 to off-screen: while the lazy route chunk loads, the `Suspense` fallback is a 16 px spinner, so the footer
+  sits inside the first screen and jumps below the fold when the page (skeleton, then content) renders. `App.tsx` now wraps the fallback in
+  `min-h-svh`; the same applies to every lazy route. `td-has-header`: `PowertrainDetail` row names are `<th scope="row">` and the empty
+  second header carries an sr-only view name (`fuel.pt.view.*`). Verify after deploy.
 
 ### Estimated value, weight rankings, community widgets and export ✅ BUILT (2026-10-09, `86cc500` … `bb9f055`)
 
