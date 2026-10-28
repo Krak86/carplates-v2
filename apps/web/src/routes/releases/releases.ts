@@ -11,6 +11,12 @@ export const RELEASES: readonly ReleaseDay[] = [
     date: '2026-10-28',
     items: [
       item(
+        'new',
+        'Базова ціна США з VIN (NHTSA): перевірка поруч із ціною ЄС, а для авто без ціни ЄС - власна оцінка з розмитненням',
+        'Базовая цена США по VIN (NHTSA): проверка рядом с ценой ЕС, а для авто без цены ЕС - собственная оценка с растаможкой',
+        'US base price from the VIN (NHTSA): a cross-check next to the EU price, and its own estimate with customs for cars without an EU price'
+      ),
+      item(
         'improved',
         'Новини Yahoo Finance перенесено з «Соцмереж» до «Новин»: дві підписані групи, разом не більше 5 новин',
         'Новости Yahoo Finance перенесены из «Соцсетей» в «Новости»: две подписанные группы, всего не больше 5 новостей',

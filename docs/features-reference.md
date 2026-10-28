@@ -255,6 +255,8 @@ fuel/type/displacement to registry-style inputs; it is labelled "≈ typical, no
 
 **Imported-earlier chip**: `/api/plate` returns `everImported` (any used-import op in the whole VIN history, other plates included; `hasImportOperation` in `@carplates/shared`, new cars brought in by dealers excluded). `LastOperationChip` adds a second 🌍 "Was imported" chip when the last operation is not itself an import; it opens Auction history.
 
+**US base price** (`UsBasePriceSection.tsx`, `UsBasePriceFromVin.tsx`, `us-value.helpers.ts`): NHTSA "Base Price ($)" = US MSRP of the decoded trim, filled only for some VINs (block hidden otherwise). Collapsible block on the VIN page (inside typical data) and under the plate card's value section; it never alters the EU pill/section. With an EU estimate: cross-check vs the Dutch new price ex-VAT/BPM (`priceExTaxEur` median; gap warning past `US_EU_DIFF_WARN`). Without one: the USD price goes through NBU cross rate, the same BPM curve (`estimateValue`, range +`US_EXTRA_SPREAD`) and `customsTax`. Never blended with the EU number (different taxes, specs). Needs NBU rates and the RDW answer before rendering. Keys `value.us.*`.
+
 ## Offline / PWA details
 
 Rules in CLAUDE.md are the short form. Full detail: the service worker only exists in production builds. Changing a Zod schema in

@@ -3197,5 +3197,22 @@
   "read.vin.registrySince": "The open registry publishes VINs only since 2021, so older records may have a plate and no VIN.",
   "read.vin.registryBody": "Some records carry a local body number (for example one starting Y6L) instead of the maker’s VIN. Searching by VIN finds the car under either.",
   "read.vin.registryLimits": "Since 2026 some registrations have no plate at all. Those cars can only be found by VIN.",
-  "read.vin.searchLink": "Search by plate or VIN →"
+  "read.vin.searchLink": "Search by plate or VIN →",
+  "value.us.title": "US base price (value from the VIN)",
+  "value.us.titleCheck": "US base price (cross-check)",
+  "value.us.info": "The VIN decoder (NHTSA) knows the original US list price of this exact trim, in dollars. It is shown because it is a second, independent look at the new price.\nMSRP - Manufacturer's Suggested Retail Price: the US sticker price of the base version, before options, destination fee and tax\nNHTSA - National Highway Traffic Safety Administration, the US road-safety agency whose free VIN decoder gives this price\nWhen an EU price exists - it is only a cross-check next to the Dutch new price; the EU figures above do not change\nWhen there is no EU price - typical for US-market cars - the estimate is built from this price: the same depreciation curve as for EU cars, a wider range, then Ukrainian customs\nNot every VIN has a price - many have none, then this block is hidden",
+  "value.us.base": "US base price (MSRP)",
+  "value.us.baseInfo": "MSRP stands for Manufacturer's Suggested Retail Price: the US list (sticker) price of this trim from the NHTSA VIN decoder (National Highway Traffic Safety Administration), converted at the NBU rate of the day. It excludes options, destination fee and sales tax, and is for a US-spec car.",
+  "value.us.euNew": "Dutch new price, no VAT/BPM",
+  "value.us.euNewInfo": "Median Dutch new list price of this model and year without 21 % VAT (value added tax) and BPM (the Dutch car registration tax), so it is comparable to a US price, which has no such taxes.",
+  "value.us.gap": "US price vs EU",
+  "value.us.gapInfo": "How much more (+) or less (-) the US trim costs than the Dutch median. A small gap means the two sources agree; a large one usually means a different engine, trim or equipment.",
+  "value.us.value": "US value (aged)",
+  "value.us.valueInfo": "The US price after {{age}} years: it keeps about {{percent}} % on the assumed depreciation curve (the Dutch BPM schedule, our assumption for US cars). The range is ±{{spread}} %, wider than for EU cars.",
+  "value.us.warnNoEu": "No EU price for this model, so the estimate rests on the US list price only. It is rougher than an EU-based one.",
+  "value.us.warnDiffers": "The US and EU prices differ a lot: the US car may have a different engine, trim or equipment.",
+  "value.us.warnTrim": "The US price is for the base version of this trim, options are not included. Not a market price.",
+  "value.us.altValue": "Value by the US price",
+  "value.us.altValueInfo": "The US base price aged on the same curve ({{age}} years, about {{percent}} % kept, ±{{spread}} %), before Ukrainian customs. Compare it with the EU estimate above: if they are close, the figure is more trustworthy. Not shown as a gap because the Dutch price has VAT and BPM inside.",
+  "value.us.jump": "Go to the US base price (Estimated value)"
 }

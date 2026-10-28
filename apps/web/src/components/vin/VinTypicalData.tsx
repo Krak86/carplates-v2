@@ -6,6 +6,8 @@ import type { VinDecodeResponse } from '@carplates/shared'
 import FuelEconomy from '@/components/FuelEconomy'
 import RdwSpecs from '@/components/RdwSpecs'
 import GenerationChip from '@/components/GenerationChip'
+import UsBasePriceSection from '@/components/UsBasePriceSection'
+import { usBasePriceUsd } from '@/components/us-value.helpers'
 import VdbChips from '@/components/VdbChips'
 import LazySection from '@/components/LazySection'
 import { buildFallback, toFieldMap, typicalLookup } from '@/components/vin/helpers'
@@ -29,6 +31,7 @@ export default function VinTypicalData({ data }: Props): ReactNode {
   if (!lookup) return null
 
   const { brand, model, year, kind, fuel, capacity, inputSources } = lookup
+  const baseUsd = usBasePriceUsd(fields)
 
   return (
     <div className="mt-4">
@@ -52,6 +55,17 @@ export default function VinTypicalData({ data }: Props): ReactNode {
       </div>
 
       <RdwSpecs brand={brand} model={model} year={year} kind={kind} fuel={fuel} />
+      {baseUsd != null && (
+        <UsBasePriceSection
+          baseUsd={baseUsd}
+          brand={brand}
+          model={model}
+          year={year}
+          kind={kind}
+          fuel={fuel}
+          capacity={capacity}
+        />
+      )}
       <LazySection sections={['size']}>
         <VehicleSizeSection brand={brand} model={model} year={year} kind={kind} vinFields={fields} />
       </LazySection>
