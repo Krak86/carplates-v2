@@ -887,11 +887,11 @@ VPS sizing, provider shortlist (Contabo Cloud VPS 6), static IP and DNS: [docs/d
 - ✅ Load-performance pass done 2026-10-09 (lazy sections, per-language i18n, chunk groups — `docs/plan-done.md` "Load-performance pass").
   **Remaining load-performance actions (value order; context in "Load-performance pass"):**
   1. [x] Measured 2026-10-28 on carsua.app (Fast 4G, 4× CPU): LCP 1174 ms, **CLS 0.79** (`Presence` animating open after load; fixed in code, re-measure after deploy) — `docs/plan-done.md` "Load-performance pass". [ ] Lighthouse run still open.
-  2. [ ] Preload the active language chunk (it is fetched only after the entry script runs: one extra round trip) — inline script in `index.html` + a build-time hook for the hashed filename.
+  2. [x] Language chunk preload (2026-10-28): `preloadHints()` in `vite.config.ts` injects an inline script into `index.html` that `modulepreload`s the visitor's language chunk (+ `ua` fallback) using the hashed names; its language pick mirrors `initialLang()` in `src/i18n/index.ts` - keep them in step. Re-measure after deploy.
   3. [ ] Brotli: stock Caddy has no `br` encoder (zstd + gzip at the origin, Cloudflare serves Brotli) — the API does not compress; local numbers overstate transfer.
   4. [x] Short-TTL cache for the global rollups (`/api/stats/*` except `version`, `/api/fuel/stats|powertrains`, `/api/safety/stats`, `/api/wanted/stats`): `Cache-Control: public, max-age=300` (`common/cache.ts`, 2026-10-28). [ ] Still open: a Cloudflare Cache Rule ("Eligible for cache", respect origin TTL, path `/api/stats*` etc.; Cloudflare does not cache JSON by default) and vdb / rdw / wiki lookups.
   5. [ ] Make `FuelEconomy` / `RdwSpecs` lazy for real: move the helpers they share with `CO2Badge` and the VIN code into the grouped helper chunks in `vite.config.ts`.
-  6. [ ] Hero/LCP: confirm the largest image is the hero and add a preload hint; check fonts.
+  6. [x] Hero: the same hook adds `<link rel=preload as=image type=image/avif fetchpriority=high>` for the first background photo (2026-10-28). Measured LCP element is a text badge, not the hero, so the gain is mainly paint of the background; wasted if the visitor turned the background off. [ ] Fonts not checked.
   7. [x] PostHog (and the recorder / surveys / dead-clicks / web-vitals scripts it loads) now starts on first interaction or browser idle (max 4 s); early `capture()` calls are queued (`lib/telemetry.ts`, 2026-10-28). Sentry still starts at once. Re-measure after deploy.
 - HTTP/2 + HTTP/3 + Brotli + caching setup: [docs/deploy.md](docs/deploy.md) (open UDP 443!)
 - Prod `docker-compose`: Caddy (auto-TLS + **coarse per-IP rate limit**, see

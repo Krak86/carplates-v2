@@ -6,6 +6,7 @@ import tailwindcss from '@tailwindcss/vite'
 import { minimal2023Preset } from '@vite-pwa/assets-generator/config'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
+import type { HtmlTagDescriptor, Plugin } from 'vite'
 import { imagetools } from 'vite-imagetools'
 import { VitePWA } from 'vite-plugin-pwa'
 
@@ -43,6 +44,58 @@ const CODE_GROUPS = [...VENDOR_GROUPS, ...HELPER_GROUPS]
 const schemasSource = readFileSync(fileURLToPath(new URL('../../packages/shared/src/schemas.ts', import.meta.url)))
 const OFFLINE_CACHE_BUSTER = createHash('sha1').update(schemasSource).digest('hex').slice(0, 12)
 
+// The language dictionary and the hero photo are only requested after the entry script has run (a dynamic `import()` and a
+// CSS background), one round trip late. Their hashed names exist only at build time, so this hook writes the hints into
+// `index.html`: an inline script preloads the chunk of the language the visitor will get (same pick as `initialLang`
+// in `src/i18n/index.ts` - keep them in step), plus a static preload for the first hero image.
+const LANG_CHUNKS = ['ua', 'ru', 'en'] as const
+const HERO_AVIF = /(^|\/)quilia-[^/]*-crop-[^/]*\.avif$/
+
+function preloadHints(): Plugin {
+  return {
+    name: 'carplates-preload-hints',
+    transformIndexHtml: {
+      order: 'post',
+      handler(_html, ctx): HtmlTagDescriptor[] {
+        const files = Object.values(ctx.bundle ?? {})
+        const langUrls: Record<string, string> = {}
+        for (const lang of LANG_CHUNKS) {
+          const chunk = files.find(
+            f => f.type === 'chunk' && f.facadeModuleId?.replaceAll('\\', '/').endsWith(`/src/i18n/${lang}.json`)
+          )
+          if (chunk) langUrls[lang] = `/${chunk.fileName}`
+        }
+        const tags: HtmlTagDescriptor[] = []
+        if (langUrls.ua) {
+          const script =
+            `(function(m){try{var l=new URLSearchParams(location.search).get('lang');` +
+            `if(!m[l]){try{l=localStorage.getItem('carplates.lang')}catch(e){l=null}` +
+            `if(!m[l]){var n=navigator.language.slice(0,2);l=n==='ru'?'ru':n==='uk'||n==='ua'?'ua':'en'}}` +
+            `var u=[m[l]];if(l!=='ua')u.push(m.ua);` +
+            `u.forEach(function(h){if(!h)return;var k=document.createElement('link');k.rel='modulepreload';k.href=h;document.head.appendChild(k)})}catch(e){}})` +
+            `(${JSON.stringify(langUrls)})`
+          tags.push({ tag: 'script', children: script, injectTo: 'head' })
+        }
+        const hero = files.find(f => f.type === 'asset' && HERO_AVIF.test(f.fileName))
+        if (hero) {
+          tags.push({
+            tag: 'link',
+            attrs: {
+              rel: 'preload',
+              as: 'image',
+              type: 'image/avif',
+              href: `/${hero.fileName}`,
+              fetchpriority: 'high'
+            },
+            injectTo: 'head'
+          })
+        }
+        return tags
+      }
+    }
+  }
+}
+
 export default defineConfig({
   define: {
     __OFFLINE_CACHE_BUSTER__: JSON.stringify(OFFLINE_CACHE_BUSTER)
@@ -51,6 +104,7 @@ export default defineConfig({
     react(),
     tailwindcss(),
     imagetools(),
+    preloadHints(),
     VitePWA({
       registerType: 'prompt',
       injectRegister: false,
