@@ -208,6 +208,8 @@ localStorage (`carplates.user-settings`) is the working copy; sync is whole-docu
 default layer, saved streams (auto-saved when a stream is picked in the layers panel) and ≤ 5 background presets; the active preset
 (or built-in defaults) is pushed into `useBackgroundStore` for signed-in users only.
 
+**Admin Server tab** (`/admin?tab=server`; `apps/api/src/usage/server-stats.service.ts`, `routes/admin/AdminServerTab.tsx`, contract in `account.ts`): VPS CPU, memory, disk, DB size and user counts for admins; online-only.
+
 **Admin Statistics** (`/admin?tab=stats`; `apps/api/src/usage/`, migration 0038): a global `UsageInterceptor` logs plate/VIN/photo
 lookups and sign-ins into `app.usage_events` (kind, UI language, found, has-cookie — **never** the plate/VIN, IP or user id);
 `GET /api/admin/stats` aggregates it, `GET /api/admin/analytics` proxies PostHog HogQL (10 min cache; needs

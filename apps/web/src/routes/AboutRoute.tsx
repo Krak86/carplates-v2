@@ -159,6 +159,14 @@ const SOURCES: readonly Source[] = [
     url: 'https://huggingface.co/Helsinki-NLP',
     icon: '/icons/sources/huggingface.svg'
   },
+  // No logos: Apple's and Google's marks are not cleared for reuse.
+  {
+    key: 'carplay',
+    label: 'Apple CarPlay / Android Auto',
+    url: 'https://www.apple.com/ios/carplay/',
+    tile: 'bg-slate-500'
+  },
+  { key: 'eurlex', label: 'EUR-Lex', url: 'https://eur-lex.europa.eu/eli/reg/2019/2144/oj', tile: 'bg-blue-700' },
   {
     key: 'fastAlpr',
     label: 'fast-alpr / RapidOCR',

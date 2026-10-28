@@ -3947,3 +3947,7 @@ Tue + Fri, 12 h limit). Deployed by `deploy-ingest.yml` (builds the image, write
 
 **Still open:** healthchecks.io checks + `HC_PING_NEWS|SOCIAL|WANTED|PLATES` secrets (then re-run `deploy-ingest`); confirm the first Tue/Fri no-op run; the other
 SCHEDULE.md sources (ratings, VehiclesDB, RDW, recalls, ...) stay manual.
+
+## Tesla hardware, EU baseline on the VIN page, CarPlay link-out (2026-10-28)
+
+Steps 3-4 of "Driver assist + CarPlay / Android Auto", plus the second GSR2 stage. `teslaHardware()` (`vin/helpers.ts`) estimates the Autopilot hardware generation from the model year, Tesla only, no FSD claim; it counts as an assist so the section shows. `gsr2.ts` has one status line per stage (new types 2024-07-07 ADDW and pedestrian/cyclist AEB, all new cars 2026-07-07), past tense once passed. `VinTypicalEuBaseline` shows the EU baseline in "Typical model data" when RDW knows the model. `VinSmartphoneLinks` is a link-out to Apple's and Google's own pages (their lists are not scraped: terms forbid it); shown under the assists block on the plate card and the VIN Overview tab. About page: sources `carplay` and `eurlex`, longer `about.feature.vin`.

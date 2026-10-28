@@ -704,11 +704,11 @@ Group 1 dimension callouts + garage-fit -> Group 3 (existing order). Owner says 
       `components/vin/` with `helpers.ts` parsing (values are "Standard" / "Optional" / "Not Applicable" / empty), hidden when
       nothing is filled, "standard vs optional" wording and a footnote that it is the US-market spec. If the data comes via
       the API instead, the contract goes in its own file with `.nullable().optional()`. i18n ua/ru/en, About source line,
-      `releases.ts` entry. Never say "has autopilot": only SAE level + listed systems. - [ ] **Step 2 — EU baseline by first-registration date (GSR2).** For EU/RDW cars, derive "mandatory since" systems (AEB,
+      `releases.ts` entry. Never say "has autopilot": only SAE level + listed systems. - [x] **Step 2 (done 2026-10-28) — EU baseline by first-registration date (GSR2).** For EU/RDW cars, derive "mandatory since" systems (AEB,
       lane keeping, intelligent speed assistance, driver drowsiness) from the first-registration date: new types from
       2022-07, all new cars from 2024-07. Label it a legal baseline, not the car's equipment. Verify the exact dates from the
       EU regulation (2019/2144) text before coding. - [x] **Step 3 (optional) — Tesla (done 2026-10-28, `teslaHardware`).** Only if the decode names Tesla: "Autopilot hardware" chip, no FSD claim (software
-      subscription, no public source). - [ ] **Step 4 (optional) — CarPlay / Android Auto.** Link-out "Check CarPlay / Android Auto support" to Apple's and
+      subscription, no public source). - [x] **Step 4 (done 2026-10-28, `VinSmartphoneLinks`) — CarPlay / Android Auto.** Link-out "Check CarPlay / Android Auto support" to Apple's and
       Google's own pages (like the AUTO.RIA link-out). A curated CSV of the top ~50 models only if the owner wants it, built
       by hand from manufacturer pages, with a citation per row. - **Worth it?** Step 1 yes (cheap, accurate per VIN). Step 2 yes (cheap, honest). Steps 3-4 only if time. Full
       scraped database: no.

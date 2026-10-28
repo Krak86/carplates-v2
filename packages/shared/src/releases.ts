@@ -32,6 +32,18 @@ export const RELEASES: readonly ReleaseDay[] = [
       ),
       item(
         'new',
+        'Підтримка CarPlay / Android Auto: на картці номера та VIN - посилання на офіційні сторінки Apple і Google, а в «Типових даних моделі» - правовий мінімум безпеки ЄС',
+        'Поддержка CarPlay / Android Auto: на карточке номера и VIN - ссылки на официальные страницы Apple и Google, а в «Типовых данных модели» - правовой минимум безопасности ЕС',
+        'CarPlay / Android Auto support: links to the official Apple and Google pages on the plate and VIN cards, and the EU legal safety baseline in "Typical model data"'
+      ),
+      item(
+        'data',
+        'Сторінка «Про проєкт»: нові джерела - Apple CarPlay / Android Auto і EUR-Lex (Регламент ЄС 2019/2144), оновлено опис VIN-можливостей',
+        'Страница «О проекте»: новые источники - Apple CarPlay / Android Auto и EUR-Lex (Регламент ЕС 2019/2144), обновлено описание возможностей VIN',
+        'About page: new sources - Apple CarPlay / Android Auto and EUR-Lex (Regulation (EU) 2019/2144), and a fuller VIN feature line'
+      ),
+      item(
+        'new',
         'Гра-гонки: карта дороги (вигляд зверху) з деревами, знаками та іншими авто; вмикається кнопкою «Карта»',
         'Игра-гонки: карта дороги (вид сверху) с деревьями, знаками и другими авто; включается кнопкой «Карта»',
         'Race game: a top-down road map showing the trees, signs and other cars; toggled with the Map button'
