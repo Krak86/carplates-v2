@@ -26,9 +26,9 @@ export const RELEASES: readonly ReleaseDay[] = [
       ),
       item(
         'new',
-        'Допомога водієві з VIN: адаптивний круїз, утримання в смузі, аварійне гальмування, сліпі зони та рівень автоматизації SAE - тепер і на картці номера (комплектація для ринку США)',
-        'Помощь водителю по VIN: адаптивный круиз, удержание в полосе, аварийное торможение, слепые зоны и уровень автоматизации SAE - теперь и на карточке номера (комплектация для рынка США)',
-        'Driver assists from the VIN: adaptive cruise, lane keeping, emergency braking, blind spots and the SAE automation level - now on the plate card too (US-market spec)'
+        'Допомога водієві з VIN: адаптивний круїз, утримання в смузі, аварійне гальмування, сліпі зони, рівень автоматизації SAE і покоління апаратної частини Tesla Autopilot - тепер і на картці номера (комплектація для ринку США)',
+        'Помощь водителю по VIN: адаптивный круиз, удержание в полосе, аварийное торможение, слепые зоны, уровень автоматизации SAE и поколение аппаратной части Tesla Autopilot - теперь и на карточке номера (комплектация для рынка США)',
+        'Driver assists from the VIN: adaptive cruise, lane keeping, emergency braking, blind spots, the SAE automation level and the Tesla Autopilot hardware generation - now on the plate card too (US-market spec)'
       ),
       item(
         'new',

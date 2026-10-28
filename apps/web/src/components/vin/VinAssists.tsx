@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { ASSISTS, assistLevel, saeLevelRange } from '@/components/vin/helpers'
+import { ASSISTS, assistLevel, saeLevelRange, teslaHardware } from '@/components/vin/helpers'
 import type { FieldMap } from '@/components/vin/helpers'
 import { cn } from '@/lib/cn'
 
@@ -17,7 +17,8 @@ export default function VinAssists({ fields }: Props): ReactNode {
     return level ? [{ ...a, level }] : []
   })
   const sae = saeLevelRange(fields)
-  if (present.length === 0 && !sae) return null
+  const tesla = teslaHardware(fields)
+  if (present.length === 0 && !sae && !tesla) return null
 
   return (
     <div className="space-y-2">
@@ -26,6 +27,8 @@ export default function VinAssists({ fields }: Props): ReactNode {
           {t('vin.assist.sae', { level: sae.from === sae.to ? `${sae.to}` : `${sae.from}-${sae.to}` })}
         </p>
       )}
+
+      {tesla && <p className="text-sm">{t(`vin.tesla.${tesla}`)}</p>}
 
       {present.length > 0 && (
         <ul className="flex flex-wrap gap-1.5">

@@ -605,8 +605,28 @@ export function saeLevelRange(fields: FieldMap): { from: number; to: number } | 
   return { from: Math.min(lo, hi), to: Math.max(lo, hi) }
 }
 
+export type TeslaHardware = 'hw1' | 'hw2' | 'hw23' | 'hw34'
+
+/**
+ * Tesla "Autopilot hardware" generation, estimated from the model year only (the VIN does not encode it; the switch-overs fell
+ * mid-year). Says nothing about software: FSD / paid Autopilot features have no public per-VIN source. Null for other makes.
+ */
+export function teslaHardware(fields: FieldMap): TeslaHardware | null {
+  if (!/^tesla\b/i.test(fields.get('Make') ?? '')) return null
+  const year = Number(fields.get('Model Year'))
+  if (!Number.isFinite(year) || year < 2014) return null
+  if (year <= 2016) return 'hw1'
+  if (year <= 2018) return 'hw2'
+  if (year <= 2022) return 'hw23'
+  return 'hw34'
+}
+
 export function hasAssists(fields: FieldMap): boolean {
-  return saeLevelRange(fields) !== null || ASSISTS.some(a => assistLevel(fields.get(a.variable)) !== null)
+  return (
+    saeLevelRange(fields) !== null ||
+    teslaHardware(fields) !== null ||
+    ASSISTS.some(a => assistLevel(fields.get(a.variable)) !== null)
+  )
 }
 
 export type VehicleShape = 'car' | 'motorcycle'

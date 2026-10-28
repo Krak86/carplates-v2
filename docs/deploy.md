@@ -183,8 +183,8 @@ docker compose cp /opt/carsua/backups/restore.dump postgres:/tmp/restore.dump
 docker compose exec -T postgres pg_restore --clean --if-exists --no-owner -U carplates -d carplates /tmp/restore.dump
 ```
 
-`--clean --if-exists` drops and recreates only those tables; changes since the last 03:30 run are lost. **Not yet tested on a populated DB**
-(only restored into an empty scratch container): try it once in a scratch container before relying on it.
+`--clean --if-exists` drops and recreates only those tables; changes since the last 03:30 run are lost. Tested 2026-10-28 on a populated scratch container
+(`postgres:18.6`; restore, delete all `app.users` + `app.sessions`, restore again with `--clean --if-exists`): no errors, counts back to 2 users / 5 sessions.
 
 **B. Total loss (new empty server): full first, then nightly on top.**
 
@@ -207,8 +207,8 @@ Registry data lost with the full dumps: re-ingest from `archive/` ZIPs (`backup.
    by `deploy-api`), else uploads fail with 403 AccessDenied. A `501 NotImplemented` on attempt 1 followed by success on attempt 2 is normal. A full dump takes
    ~10 min; run it under `nohup`. Nightly cron confirmed 2026-10-28 (`/etc/cron.d/carsua-backup`, 03:30 server time; dump in R2; healthchecks.io Started + OK).
    Manual `rclone` on the VPS needs `set -a; . /opt/carsua/env/backup.env; set +a` first (no rclone.conf). Never open the ping URL in a browser (counts as a ping).
-   `backup.sh archive` works but is a no-op until the first VPS ingest fills `/opt/carsua/archive`; run it and `backup.sh full` after that ingest. Still to do:
-   restore test on a populated DB, and delete the old local `C:\tmp\carsua.dump` once comfortable.
+   `backup.sh archive` works but is a no-op until the first VPS ingest fills `/opt/carsua/archive`; run it and `backup.sh full` after that ingest. Restore path A tested
+   on a populated DB 2026-10-28 (see "Restore from R2"). Still to do: delete the old local `C:\tmp\carsua.dump` once comfortable.
 2. ✅ **SSH hardening (fixed + verified 2026-10-27).** The check found the problem: sshd takes the first value it reads, `50-cloud-init.conf` (unreadable by
    `deploy`) beat `99-carsua.conf`, and password login was on. Renamed the drop-in to `00-carsua.conf` (`bootstrap.sh` now writes that name) and reloaded sshd;
    `ssh -o PubkeyAuthentication=no -o PreferredAuthentications=password deploy@<ip>` is now refused with no password prompt. Re-run that test after any sshd change.
@@ -232,19 +232,19 @@ Registry data lost with the full dumps: re-ingest from `archive/` ZIPs (`backup.
    embeds and the Google sign-in popup), `?lang=` reflection is whitelisted by `resolveLang`, the rest is cache/comment noise. `trivy image` (api/alpr, HIGH+CRITICAL): ~55 Debian OS
    findings per image with no fix available (re-scan after base-image bumps), plus 7 HIGH in the npm bundled with `node:24-slim`, now removed in `apps/api/Dockerfile`.
    Gotcha: Cloudflare Bot Fight Mode challenges GitHub runner IPs (403), so the post-deploy public `/healthz` check in `deploy-api.yml` is advisory only.
-   Still open: enforce CSP (Report-Only in `infra/Caddyfile`, after ~1 week of clean reports), account-deletion test with a throwaway account, restore test on a populated DB,
+   Still open: enforce CSP (Report-Only in `infra/Caddyfile`, after ~1 week of clean reports), account-deletion test with a throwaway account,
    re-run `trivy image` after the next base-image update.
-6. **Browser smoke test (partly done: home, plate page, link-preview card):** Google login (authorised origin `https://carsua.app`), Telegram login (`/setdomain carsua.app`;
+6. ✅ **Browser smoke test (done 2026-10-28):** home, plate page, link-preview card, Google login (authorised origin `https://carsua.app`), Telegram login (`/setdomain carsua.app`;
    check `TELEGRAM_BOT_USERNAME` is the production bot), a real email through Resend (`MAIL_FROM` is `carsua <noreply@carsua.app>`), VIN lookup, camera recognize
    (ALPR), Maps key restricted to the `carsua.app` referrer, Disqus.
-7. **Secrets hygiene.** Dev values were visible in screenshots/chat during the first deploy: rotate `POSTHOG_PERSONAL_API_KEY` and any other key you consider exposed.
+7. **Secrets hygiene (rotation skipped by choice 2026-10-28).** Dev values were visible in screenshots/chat during the first deploy: rotate `POSTHOG_PERSONAL_API_KEY` and any other key you consider exposed.
    The production `AUTH_SECRET` and `POSTGRES_PASSWORD` are separate from the dev ones. Optional secrets still unset: `SENTRY_DSN` (only `VITE_SENTRY_DSN` is set, so
    server errors are not tracked), `PLATE_RECOGNIZER_CLOUD_TOKEN`. `TURNSTILE_*` is set (2026-10-27).
 8. **Ingest cron (live 2026-10-28).** `deploy-ingest.yml` (path-filtered: `scripts/**`, shared, db, `infra/vps/*ingest*`) builds `scripts/Dockerfile`, pulls it on the VPS,
    writes `/opt/carsua/env/ingest.env` (`DATABASE_URL`, `HC_PING_*`), syncs `run-ingest.sh` / `ingest-status.sh` / the compose file and installs
    `infra/vps/ingest.cron` as the `deploy` user's crontab (replaces it; it was empty). Jobs: `news`, `social`, `wanted` daily, `plates` Tue + Fri
    (crontab times are the VPS's local time, CET). Details, the first-load procedure and gotchas: SCHEDULE.md. Check: `crontab -l`,
-   `~/ingest-status.sh`, `SELECT * FROM registry.job_runs ORDER BY id DESC`. Still open: create one healthchecks.io check per job (news/social/wanted 1 d,
+   `~/ingest-status.sh`, `SELECT * FROM registry.job_runs ORDER BY id DESC`. Skipped for now (2026-10-28), so ingest failures are not alerted: create one healthchecks.io check per job (news/social/wanted 1 d,
    plates 7 d + 1 d grace), add the GitHub secrets `HC_PING_NEWS|SOCIAL|WANTED|PLATES` to the `production` environment, re-run `deploy-ingest`.
    A `plates` run that loaded something runs `backup.sh archive` + `full` by itself. The first manual load (2026-10-28) is written up in
    `docs/plan-done.md` "Ingest cron".
