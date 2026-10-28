@@ -424,7 +424,7 @@ Files: `apps/web/src/components/RiaCheckLink.tsx` (used by `NotFoundInfo` and th
 - Code: `apps/api/src/digest/` (`digest-content.ts` pure period + content, `digest.service.ts` scheduler/claims, controllers), mail `DigestEmail` / `DIGEST_TEXT`; web `routes/profile/NotificationsSection.tsx`, `routes/auth/UnsubscribeRoute.tsx`, `routes/admin/AdminDigestCard.tsx`.
 - **Opt-in only** (`users.marketing_opt_in` default false); never switch it on at sign-in. Telegram-only users (no email) are skipped. Unsubscribing keeps `marketing_opt_in_at` as the consent record.
 - **The release log is the digest source** and lives in `packages/shared/src/releases.ts` (import `@carplates/shared/releases`, never the barrel). Only `new` items are listed; `improved|data|fix` are counts. A month without a `new` item sends nothing, so tag items honestly.
-- Sent on the 1st (Kyiv) for the previous month, 3-day catch-up window; `app.digest_sends` is the idempotency claim. Off unless `DIGEST_ENABLED=true` (never enable on dev/stage copies of production data). `MAIL_FROM_NEWS` = optional separate sender (own subdomain + SPF/DKIM/DMARC).
+- Sent on the 1st (Kyiv) for the previous month, 3-day catch-up window; `app.digest_sends` is the idempotency claim. Off unless `DIGEST_ENABLED=true` (never enable on dev/stage copies of production data). `MAIL_FROM_NEWS` = optional separate sender (own subdomain + SPF/DKIM/DMARC; it must be a verified Resend domain, a 403 `domain is not verified` in the API log means it is not). On in production since 2026-10-28.
 - Every digest carries `List-Unsubscribe` + one-click POST (`/api/digest/unsubscribe/one-click?t=`) and a footer link to `/unsubscribe#t=`. Token = `unsubscribe-token.ts`.
 
 ## Releases page (`/releases`, 2026-10-15)
