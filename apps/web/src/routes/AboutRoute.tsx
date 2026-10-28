@@ -189,6 +189,7 @@ const SOURCES: readonly Source[] = [
     tile: 'bg-orange-600'
   },
   { key: 'resend', label: 'Resend', url: 'https://resend.com', tile: 'bg-slate-500' },
+  { key: 'disqus', label: 'Disqus', url: 'https://disqus.com', tile: 'bg-slate-500' },
   {
     key: 'notoSans',
     label: 'Noto Sans',
@@ -258,6 +259,7 @@ const FEATURES = [
   'copy',
   'discuss',
   'share',
+  'appearance',
   'pwa'
 ] as const
 

@@ -17,6 +17,30 @@ export const RELEASES: readonly ReleaseDay[] = [
         'Sidebar: an "Auto" theme (follows the system), an accent color and a text size'
       ),
       item(
+        'new',
+        'Кнопка «Поділитися» також внизу сторінки результату за номером або VIN',
+        'Кнопка «Поделиться» также внизу страницы результата по номеру или VIN',
+        'A Share button also at the bottom of a plate or VIN result page'
+      ),
+      item(
+        'improved',
+        'Посилання для поширення містять номер латиницею замість закодованої кирилиці',
+        'Ссылки для отправки содержат номер латиницей вместо закодированной кириллицы',
+        'Share links carry the plate in Latin letters instead of percent-encoded Cyrillic'
+      ),
+      item(
+        'improved',
+        'PDF і Word з «Копіювати всю інформацію» мають зміст і окрему сторінку для кожного розділу',
+        'PDF и Word из «Копировать всю информацию» имеют оглавление и отдельную страницу для каждого раздела',
+        'The PDF and Word from "Copy all info" have a contents page and a page per section'
+      ),
+      item(
+        'data',
+        'На сторінці «Про проєкт» додано Disqus у джерелах і вигляд застосунку у можливостях',
+        'На странице «О проекте» добавлены Disqus в источники и внешний вид приложения в возможности',
+        'The About page now lists Disqus among its sources and app appearance among the features'
+      ),
+      item(
         'improved',
         'Встановлений застосунок більше не блимає синім під час запуску',
         'Установленное приложение больше не мигает синим при запуске',
