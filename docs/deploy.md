@@ -270,7 +270,11 @@ and unbundled, so it says nothing about production.
 - Enables **h2 and h3 by default** and advertises h3 via `Alt-Svc` (browsers use h2 on the first visit, h3 afterwards).
 - Compose must publish **`80`, `443` and `443/udp`**; the firewall must allow TCP 80, TCP 443 **and UDP 443**. Without UDP, h3 silently falls back to h2.
 - Stock Caddy 2 ships **zstd and gzip only** — `encode br` fails to load ("module not registered: http.encoders.br", verified 2026-10-15).
-  Brotli to browsers comes from Cloudflare, which re-compresses.
+  Brotli to browsers comes from Cloudflare, but only when the origin response is **uncompressed**: it passes an already gzip/zstd response
+  through (seen 2026-10-28: `content-encoding: gzip` with `accept-encoding: br`). The Caddyfile therefore compresses only requests without
+  `CF-Connecting-IP` (`@direct`); after deploying it, check `curl -sI -H 'accept-encoding: br' https://carsua.app/assets/<file>.js` shows
+  `content-encoding: br` (purge the Cloudflare cache first: the gzip copy is cached for a year). Cloudflare → Speed → Optimization →
+  Content Optimization → Brotli must be on.
 - Do not add a second `Cache-Control` for `/assets/*` in Caddy — the app already sends the right one. Put a Caddy/CDN cache in front of `/og/*`.
 
 **nginx (alternative, not used)** — `listen 443 ssl;` + `listen 443 quic reuseport;`, `http2 on; http3 on;`,
