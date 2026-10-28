@@ -248,7 +248,7 @@ Registry data lost with the full dumps: re-ingest from `archive/` ZIPs (`backup.
    plates 7 d + 1 d grace), add the GitHub secrets `HC_PING_NEWS|SOCIAL|WANTED|PLATES` to the `production` environment, re-run `deploy-ingest`.
    A `plates` run that loaded something runs `backup.sh archive` + `full` by itself. The first manual load (2026-10-28) is written up in
    `docs/plan-done.md` "Ingest cron".
-9. Housekeeping: 6 open Dependabot PRs; a Contabo snapshot once the site is stable; a Telegram `@WebpageBot` / X card-validator refresh of the old text-less preview.
+9. Housekeeping: ✅ Contabo snapshot taken 2026-10-28 (auto-deletes 2026-11-27, take a fresh one before risky changes; a rollback also reverts the DB, so re-apply the newest nightly dump after); ✅ Telegram `@WebpageBot` refresh of `https://carsua.app` (card shows title, description and OG image; send each older shared plate/VIN URL separately, X needs nothing since nothing was shared there). Open: the Dependabot PRs (count not re-checked since 2026-10-27; keep the version pins from CLAUDE.md).
 
 ### Longer term
 
