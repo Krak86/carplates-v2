@@ -2104,6 +2104,8 @@
   "share.button": "Поділитися: {{section}}",
   "share.copied": "Посилання скопійовано!",
   "share.page": "Поділитися сторінкою",
+  "share.card": "Зберегти як картинку",
+  "share.cardFailed": "Не вдалося створити картинку",
   "export.button": "Скопіювати всю інформацію",
   "export.copyClipboard": "Скопіювати в буфер обміну",
   "export.downloadTxt": "Завантажити як .txt",

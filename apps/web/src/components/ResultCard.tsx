@@ -17,6 +17,7 @@ import type { Currency, PlateLookupResponse } from '@carplates/shared'
 import BrandLogo from '@/components/BrandLogo'
 import BrandSiteChip from '@/components/BrandSiteChip'
 import PageShareButton from '@/components/PageShareButton'
+import PlateCardButton from '@/components/PlateCardButton'
 import NewCarsLink from '@/components/NewCarsLink'
 import EstimatedValueChip from '@/components/EstimatedValueChip'
 import CardTiltToggle from '@/components/CardTiltToggle'
@@ -428,6 +429,18 @@ export default function ResultCard({ data }: Props): ReactNode {
                 <NewCarsLink brand={c.brand} />
                 {brandDealerUrl && <BrandSiteChip url={brandDealerUrl} />}
                 <PageShareButton title={data.plate ?? c.vin} />
+                {data.plate && (
+                  <PlateCardButton
+                    plate={data.plate}
+                    brand={c.brand}
+                    model={c.model}
+                    year={c.makeYear}
+                    region={data.region}
+                    regionLabel={data.region ? regionLabel(data.region) : null}
+                    color={c.color}
+                    kind={c.kind}
+                  />
+                )}
               </div>
             </div>
             <Suspense fallback={<div aria-hidden className="aspect-square max-h-20 shrink-0 max-md:hidden" />}>

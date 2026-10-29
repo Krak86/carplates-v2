@@ -1630,6 +1630,8 @@
   "share.button": "Share {{section}}",
   "share.copied": "Link copied!",
   "share.page": "Share this page",
+  "share.card": "Save as picture",
+  "share.cardFailed": "Could not make the picture",
   "export.button": "Copy all info",
   "export.copyClipboard": "Copy to clipboard",
   "export.downloadTxt": "Download as .txt",
