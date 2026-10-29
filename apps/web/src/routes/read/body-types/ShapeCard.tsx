@@ -6,7 +6,7 @@ import { cn } from '@/lib/cn'
 import { SHAPE_COPY, type ExplainedShape } from '@/routes/read/body-types/content'
 import { pick, type ModelProfile } from '@/routes/read/helpers'
 import { shapeAnchor } from '@/routes/read/links'
-import ModelDimsRow from '@/routes/read/ModelDimsRow'
+import ShapeModelPicker from '@/routes/read/body-types/ShapeModelPicker'
 import ShapeSilhouette from '@/routes/read/ShapeSilhouette'
 
 type Props = {
@@ -37,14 +37,7 @@ export default function ShapeCard({ shape, highlighted, find }: Props): ReactNod
         <span aria-hidden>👀</span> <strong>{t('read.howToSpot')}:</strong> {pick(copy.spot, i18n.language)}
       </p>
 
-      {examples.length > 0 && (
-        <div className="flex flex-col gap-2">
-          <h4 className="text-sm font-semibold">{t('read.examples')}</h4>
-          {examples.map(profile => (
-            <ModelDimsRow key={`${profile.model.brand}|${profile.model.model}`} profile={profile} />
-          ))}
-        </div>
-      )}
+      {examples.length > 0 && <ShapeModelPicker shape={shape} profiles={examples} />}
     </Card>
   )
 }

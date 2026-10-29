@@ -5,11 +5,15 @@ import { Link } from 'react-router'
 import { regionName } from '@carplates/shared'
 
 import PlateSegments from '@/components/PlateSegments'
+import RegionFlag from '@/components/RegionFlag'
+import RegionFlagInfo from '@/components/RegionFlagInfo'
+import RegionMap from '@/components/RegionMap'
 import UaPlateBadge from '@/components/UaPlateBadge'
 import Card from '@/components/ui/Card'
 import { useRegionLabel } from '@/lib/region-label'
 import { VIN_PATH } from '@/routes/read/links'
 import { lookupPrefix, regionRows } from '@/routes/read/plates/helpers'
+import { PlateSearchLinks } from '@/routes/read/plates/PlatesSearchSection'
 
 const CURRENT_EXAMPLE = 'КА1234ВС'
 const LEGACY_EXAMPLE = '11АА1234'
@@ -30,15 +34,17 @@ export function AnatomySection(): ReactNode {
         <div className="flex flex-col gap-2">
           <h3 className="font-medium">{t('read.plates.current')}</h3>
           <UaPlateBadge plate={CURRENT_EXAMPLE} className="self-start" />
-          <PlateSegments plate={CURRENT_EXAMPLE} region={regionName(CURRENT_EXAMPLE) ?? null} />
+          <PlateSegments plate={CURRENT_EXAMPLE} region={regionName(CURRENT_EXAMPLE) ?? null} hideGuideLink />
         </div>
 
         <div className="flex flex-col gap-2">
           <h3 className="font-medium">{t('read.plates.legacy')}</h3>
           <UaPlateBadge plate={LEGACY_EXAMPLE} className="self-start" />
-          <PlateSegments plate={LEGACY_EXAMPLE} region={regionName(LEGACY_EXAMPLE) ?? null} />
+          <PlateSegments plate={LEGACY_EXAMPLE} region={regionName(LEGACY_EXAMPLE) ?? null} hideGuideLink />
         </div>
       </div>
+
+      <PlateSearchLinks withAr />
     </Card>
   )
 }
@@ -70,11 +76,12 @@ export function RegionsSection(): ReactNode {
         className="mb-2 w-full max-w-xs rounded-lg border border-border bg-(--color-bg) px-3 py-1.5 font-mono uppercase"
       />
 
-      <p className="mb-4 min-h-6" aria-live="polite">
+      <p className="min-h-6" aria-live="polite">
         {found?.kind === 'region' && (
           <span className="font-medium">
-            {found.prefix} → {regionLabel(found.region)}
-            {found.legacy && <span className="text-muted"> · {t('read.plates.legacyCode')}</span>}
+            {found.prefix} → <RegionFlag region={found.region} /> {regionLabel(found.region)}
+            {found.legacy && <span className="text-muted"> · {t('read.plates.legacyCode')}</span>}{' '}
+            <RegionFlagInfo region={found.region} label={regionLabel(found.region)} />
           </span>
         )}
         {found?.kind === 'service' && (
@@ -85,7 +92,9 @@ export function RegionsSection(): ReactNode {
         {found?.kind === 'unknown' && <span className="text-muted">{t('read.plates.unknownPrefix')}</span>}
       </p>
 
-      <div className="overflow-x-auto">
+      {found?.kind === 'region' && <RegionMap region={found.region} />}
+
+      <div className="mt-4 overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border text-left text-muted">
@@ -99,6 +108,7 @@ export function RegionsSection(): ReactNode {
             {REGION_ROWS.map(row => (
               <tr key={row.region} className="border-b border-border/50 align-top">
                 <td className="py-1.5 pr-3">
+                  <RegionFlag region={row.region} />{' '}
                   <Link to={`/advanced-search?${new URLSearchParams({ region: row.region })}`} className="text-primary">
                     {regionLabel(row.region)}
                   </Link>
@@ -112,6 +122,8 @@ export function RegionsSection(): ReactNode {
       </div>
 
       <p className="mt-3 text-sm text-muted">{t('read.plates.regionsNote')}</p>
+
+      <PlateSearchLinks />
     </Card>
   )
 }

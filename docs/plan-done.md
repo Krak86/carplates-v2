@@ -1821,6 +1821,15 @@ confident detection. A first fraction-based 2×2 grid was too weak for plates
 real pixels. Exercised against the rebuilt container on the 88-photo eval set
 (2026-10-01); `DSC_0098.JPG` still reads both plates.
 
+**Small-frame upscale retry (2026-10-29).** A 447×543 video screenshot of a bus
+(plate ≈50px wide) got "No plate found": frames <768px are never tiled and the
+full-frame detector missed it (it found the plate on a tight crop at ~0.7). Now
+`_predict_tiled` retries a frame that read nothing upscaled (long side →1600, max
+3×; 2× still found nothing) so the 640px tiles apply. Retry only, not always:
+upscaling every small frame added junk reads (`TOURISM`, `NJUPQ`) and unsettled a
+stacked plate (`ua_kaeo3881` 0.835→0.598). The bus plate now reads `BC1552PT` at
+0.998; all 90 eval photos give identical reads.
+
 **Photo viewer + limits hint (2026-09-30).** Uploaded-photo preview is now
 `object-contain` (whole image, not a cropped strip) and opens a full-screen
 `PhotoZoomDialog` (wheel zoom toward cursor, drag/arrow pan, `+`/`−`/`0`,
@@ -3919,6 +3928,10 @@ A hub of explainers built on the registry: **`/read`** (cards + a "coming next" 
 
 **Twelfth article `/read/recalls` (2026-10-16):** recalls vs common faults — a static "recall is not a worn part" explainer, a model picker (five curated models, `recalls/content.ts` `EXAMPLES`) driving two live blocks over the existing per-model endpoints: campaign counts per market (`rdwRecallsQuery`, `nhtsaRecallsQuery`, `caRecallsQuery`) and UK MOT fail rate by mileage vs the UK average plus the top fault groups (`motQuery`, folded in `recalls/helpers.ts`). No new API, rollup or migration. Wording stays model-level and market-labelled, never "your car has a recall".
 
+### VIN guide: history, places, old numbers, errors, in-app search (2026-10-29)
+
+`/read/vin` grew from three sections to seven: a timeline of how the VIN format came about, a photo gallery of where a VIN sits on a car by kind of label (windscreen, door pillar, maker's plate, stamped, stickers and plastic parts, documents), old and Soviet-era number patterns, why a VIN fails to decode (characters, check digit, unknown prefix, machinery and trailers, registry quirks) and how to search by VIN in the app. The breakdown box got example chips for the common errors and a specific message for letters I/O/Q and for too-long input. Conventions: `docs/features-reference.md` "Read guides".
+
 ### Card → guide cross-links (2026-10-16)
 
 Each plate-card / VIN-page section now ends with a `ReadGuideLink` (pill, guide emoji, right arrow) to the /read guide on the same topic: no content is duplicated, only linked. Placement table and rules: `docs/features-reference.md` "Read guides". Guide icon / title key / hue moved into `GUIDE_META` so card chunks do not pull the long `articles.ts` leads.
@@ -4020,3 +4033,9 @@ Steps 3-4 of "Driver assist + CarPlay / Android Auto", plus the second GSR2 stag
 Release log gained 2026-10-29 (`releases.ts`, `latest.ts` bumped): all-language news, month-grouped releases, load-speed work (ResultCard lazy + idle prefetch, language/hero preload, 5-min rollup cache, PostHog delayed), CLS and contrast fixes. About page checked against both days: the feature card (between the description and the sources) already covers every user-facing feature, and the sources list already has CarPlay / EUR-Lex, OPUS-MT, Yahoo Finance, NHTSA MSRP, Cloudflare. The new admin Dashboards links (R2, Squarespace, Contabo, Healthchecks, UptimeRobot, GitHub, Search Console, Google Cloud) are admin-only operator tools, not data sources, so they are not listed on About.
 
 **Admin links moved server-side (2026-10-29).** The operator dashboard URLs (R2, Squarespace, Contabo, Healthchecks, UptimeRobot, GitHub, ...) were in the public JS/i18n bundle. They now live in `apps/api/src/features/admin-links.ts` and are served by the admin-only `GET /api/admin/links` (`adminLinksResponseSchema` in `account.ts`); only `admin.links.intro` stays in i18n. The privacy policy (`legal.privacy.thirdParty.p`, ua/ru/en) now names Contabo (VPS), Cloudflare (CDN, R2 backups with account data) and Resend (email) as processors.
+
+## Day digest 2026-10-29 (second sync, /read guides)
+
+Commits of the day after the first sync: `/read` guides grew (plates: old plates, types, custom-plate ordering, colours, services, history, in-app search; VIN: history, photo gallery, old numbers, errors, in-app search; fleet: colour rules and fuel facts with law links via `FactList`; imports: history, reasons, 2023 customs picture, sources list), interactive guides (example picker with to-scale drawings, own parking place, odometer on recalls), customs-check link, ZAKON font option, ALPR retry on upscaled small frames, `llms.txt` + ARD manifest + curated OpenAPI, Fooocus banners, Turnstile fit, VIN hint.
+
+Release log 2026-10-29 gained the previously missing items (agent discovery, banners, ALPR retry, Turnstile/VIN hint). About page: the guides feature line now lists the new guide content, and the sources list gained `radaLaws` (zakon.rada.gov.ua, the laws the guides cite), `diia`, `avtonomera`, `tsn`, `aec` (all link-only, ua/ru/en). Sources already present and reused: `hsc`, `eurlex`, `eauto`, `youtube`.

@@ -20,6 +20,90 @@ export const RELEASES: readonly ReleaseDay[] = [
     items: [
       item(
         'improved',
+        'Для ШІ-агентів і пошуковиків: файл llms.txt, маніфест ARD та публічний опис API (OpenAPI) лише зі стабільними відкритими розділами.',
+        'Для ИИ-агентов и поисковиков: файл llms.txt, манифест ARD и публичное описание API (OpenAPI) только со стабильными открытыми разделами.',
+        'For AI agents and search engines: an llms.txt file, an ARD manifest and a public API description (OpenAPI) listing only the stable public sections.'
+      ),
+      item(
+        'improved',
+        'Гіди розділу «Довідники» отримали нові ілюстрації-банери.',
+        'Гиды раздела «Справочники» получили новые иллюстрации-баннеры.',
+        'The /read guides have new banner pictures.'
+      ),
+      item(
+        'fix',
+        'Пошук за фото знову знаходить номер на дрібних кадрах: якщо нічого не знайдено, кадр збільшується й розпізнається ще раз.',
+        'Поиск по фото снова находит номер на мелких кадрах: если ничего не найдено, кадр увеличивается и распознаётся ещё раз.',
+        'Photo search finds plates in small frames again: when nothing is detected, the frame is upscaled and read once more.'
+      ),
+      item(
+        'fix',
+        'Віджет перевірки «я не робот» тепер вміщається у вікні входу, а підказка про помилковий запит згадує формат VIN.',
+        'Виджет проверки «я не робот» теперь помещается в окне входа, а подсказка об ошибочном запросе упоминает формат VIN.',
+        'The “I am not a robot” check fits inside the sign-in popover, and the invalid-query hint now mentions the VIN format.'
+      ),
+      item(
+        'improved',
+        'Гід «Імпорт»: історія ввезення авто у світі й в Україні (1997-2024), чому люди купують авто за кордоном, митна картина 2023 року (країни, митниці), пошук ввезеного авто в застосунку та список джерел.',
+        'Гид «Импорт»: история ввоза авто в мире и в Украине (1997-2024), почему люди покупают авто за границей, таможенная картина 2023 года (страны, таможни), поиск ввезённого авто в приложении и список источников.',
+        'Imports guide: the history of importing cars in the world and in Ukraine (1997-2024), why people buy cars abroad, the 2023 customs picture (countries, offices), how to check an imported car in the app and a list of sources.'
+      ),
+      item(
+        'improved',
+        'Гід «Автопарк»: у розділі пального - тенденції та історія видів пального, типи гібридів і зарядних роз’ємів, стандарти якості EN 228/EN 590, перехід на бензин E10 з 1 липня 2026, маркування колонок ЄС, класи Euro; у розділах із законами - посилання на першоджерела.',
+        'Гид «Автопарк»: в разделе топлива - тенденции и история видов топлива, типы гибридов и зарядных разъёмов, стандарты качества EN 228/EN 590, переход на бензин E10 с 1 июля 2026, маркировка колонок ЕС, классы Euro; в разделах с законами - ссылки на первоисточники.',
+        'Fleet guide: the fuel section now covers fuel trends and history, hybrid types and charging connectors, the EN 228/EN 590 quality standards, the switch to E10 petrol on 1 July 2026, EU pump labels and Euro classes; sections that cite laws now link to the sources.'
+      ),
+      item(
+        'improved',
+        'Гід «Автопарк»: у розділі кольорів - 11 кольорів реєстру, коли зміна відтінку потребує перереєстрації, комбіновані кольори й «хамелеон», плівка поверх кольору (повна й часткова), вініл проти антигравійної плівки, строки й штрафи.',
+        'Гид «Автопарк»: в разделе цветов - 11 цветов реестра, когда смена оттенка требует перерегистрации, комбинированные цвета и «хамелеон», плёнка поверх цвета (полная и частичная), винил против антигравийной плёнки, сроки и штрафы.',
+        'Fleet guide: the colours section now covers the registry’s 11 colours, when a shade change needs re-registration, combined colours and "chameleon" paint, a film over the original colour (full and partial), vinyl versus anti-gravel film, deadlines and fines.'
+      ),
+      item(
+        'improved',
+        'Гід «VIN»: історія VIN, де шукати номер на авто (скло, стійка, табличка, вибитий номер, наклейки на пластику) з фото, старі й радянські номери, чому VIN не розбирається та як шукати за VIN у застосунку; у розборі є готові приклади помилкових VIN.',
+        'Гид «VIN»: история VIN, где искать номер на авто (стекло, стойка, табличка, выбитый номер, наклейки на пластике) с фото, старые и советские номера, почему VIN не разбирается и как искать по VIN в приложении; в разборе есть готовые примеры ошибочных VIN.',
+        'VIN guide: the history of the VIN, where to find it on a car (windscreen, pillar, plate, stamped number, stickers on plastic) with photos, old and Soviet-era numbers, why a VIN may not decode and how to search by VIN in the app; the breakdown has ready examples of faulty VINs.'
+      ),
+      item(
+        'improved',
+        'Гід «Номерні знаки»: старі радянські номери з фото, типи номерних знаків із зразками (електро, жовті, індивідуальні, відомчі), як замовити індивідуальний номер; у перевірці - доступні номерні знаки; нерозпізнаний старий номер у пошуку тепер пояснюється.',
+        'Гид «Номерные знаки»: старые советские номера с фото, типы номерных знаков с образцами (электро, жёлтые, индивидуальные, ведомственные), как заказать индивидуальный номер; в проверке - доступные номерные знаки; нераспознанный старый номер в поиске теперь объясняется.',
+        'Plates guide: old Soviet-era plates with photos, plate types with samples (electric, yellow, custom, departmental), how to order a custom plate, and an available-plates check under Verification; an old-style plate with no result in search now gets an explanation.'
+      ),
+      item(
+        'improved',
+        'Гід «Номерні знаки» доповнено: що означає колір знака, військові, поліцейські, дипломатичні й транзитні номери та історія знаків від 1946 року зі схематичними зразками.',
+        'Гид «Номерные знаки» дополнен: что означает цвет знака, военные, полицейские, дипломатические и транзитные номера и история знаков с 1946 года со схематичными образцами.',
+        'The Plates guide now explains what a plate’s colour means, covers military, police, diplomatic and transit plates, and tells the history of plates since 1946 with schematic samples.'
+      ),
+      item(
+        'improved',
+        'У гіді «Типи кузова» кожна картка має вибір прикладів: оберіть модель і побачте її креслення в масштабі з розмірами, на які можна навести.',
+        'В гиде «Типы кузова» у каждой карточки есть выбор примеров: выберите модель и увидите её чертёж в масштабе с размерами, на которые можно навести.',
+        'In the Body types guide every card has an example picker: choose a model to see its to-scale drawing with dimensions you can point at.'
+      ),
+      item(
+        'improved',
+        'У гідах «Розміри» та «Відкликання й поломки» з’явилась інтерактивність: введіть розміри свого місця, щоб побачити, які моделі туди влізуть, або показ одометра, щоб побачити відсоток відмов і проблемні зони для вашого пробігу.',
+        'В гидах «Размеры» и «Отзывы и поломки» появилась интерактивность: введите размеры своего места, чтобы увидеть, какие модели туда впишутся, или показание одометра, чтобы увидеть процент отказов и проблемные зоны для вашего пробега.',
+        'The Sizes and Recalls & faults guides are now interactive: type your own parking place to see which models fit, or your odometer to see the fail rate and problem areas for your mileage.'
+      ),
+      item(
+        'new',
+        'Розділ «Перевірка» має посилання на перевірку розмитнення авто (Митниця), а в меню «Шрифт» можна обрати системний, e-Ukraine або ZAKON.',
+        'Раздел «Проверка» получил ссылку на проверку растаможки авто (Таможня), а в меню «Шрифт» можно выбрать системный, e-Ukraine или ZAKON.',
+        'The Verification section has a customs-clearance check link, and the Font menu now offers System, e-Ukraine or ZAKON.'
+      ),
+      item(
+        'improved',
+        'На телефоні поради до фото згорнуті до двох рядків із розгортанням, а кнопка «Показати більше» під чипами стала більшою з плавною стрілкою.',
+        'На телефоне советы к фото свёрнуты до двух строк с раскрытием, а кнопка «Показать больше» под чипами стала крупнее с плавной стрелкой.',
+        'On phones the photo tips collapse to two rows and expand, and the chips “Show more” button is bigger with a smooth chevron.'
+      ),
+      item(
+        'improved',
         'Новини з усіх джерел тепер показуються всіма мовами, а журнал змін на «Що нового» згруповано за місяцями.',
         'Новости из всех источников теперь показываются на всех языках, а журнал изменений в «Что нового» сгруппирован по месяцам.',
         'News from all sources now shows in every language, and the What’s new log is grouped by month.'

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { cleanVin, EXAMPLE_VIN, readVin, yearCodeRows } from '@/routes/read/vin/helpers'
+import { cleanVin, EXAMPLE_VIN, readVin, vinIssue, yearCodeRows } from '@/routes/read/vin/helpers'
 
 describe('readVin', () => {
   it('reads maker, country, year and check digit off a VIN', () => {
@@ -39,5 +39,27 @@ describe('yearCodeRows', () => {
     expect(rows[0]).toEqual({ code: 'A', year: 2010 })
     expect(rows.at(-1)).toEqual({ code: '9', year: 2039 })
     expect(rows.map(r => r.code)).not.toContain('U')
+  })
+})
+
+describe('vinIssue', () => {
+  it('names why a typed VIN is not readable', () => {
+    expect(vinIssue('')).toBeNull()
+    expect(vinIssue(EXAMPLE_VIN)).toBeNull()
+    expect(vinIssue('1M8GDM9AOKP042788')).toBe('letters')
+    expect(vinIssue('KMHD350H6GU1234567')).toBe('long')
+    expect(vinIssue('KMHD350H6GU12345')).toBe('short')
+  })
+})
+
+describe('VIN examples', () => {
+  it('every chip behaves as its label says', async () => {
+    const { VIN_EXAMPLES } = await import('@/routes/read/vin/content')
+    const [valid, european, letter, unknown, short] = VIN_EXAMPLES.map(e => e.vin)
+    expect(readVin(valid ?? '')?.checkOk).toBe(true)
+    expect(readVin(european ?? '')).toMatchObject({ make: 'Volkswagen', checkOk: false })
+    expect(vinIssue(letter ?? '')).toBe('letters')
+    expect(readVin(unknown ?? '')?.make).toBeNull()
+    expect(vinIssue(short ?? '')).toBe('short')
   })
 })

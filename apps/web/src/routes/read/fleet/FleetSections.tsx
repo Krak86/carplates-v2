@@ -8,6 +8,8 @@ import { FUEL_ICON } from '@/components/ResultCard.helpers'
 import Card from '@/components/ui/Card'
 import Skeleton from '@/components/ui/Skeleton'
 import { statsFieldQuery } from '@/lib/queries'
+import { COLOR_FACTS, FUEL_FACTS } from '@/routes/read/fleet/content'
+import FactList from '@/routes/read/fleet/FactList'
 import { ageSummary, colorShares, fuelShares } from '@/routes/read/fleet/helpers'
 import ShareBars from '@/routes/read/fleet/ShareBars'
 import { formatCount } from '@/routes/read/helpers'
@@ -72,6 +74,8 @@ export function ColorsSection(): ReactNode {
           color: VEHICLE_COLOR_HEX[s.key]
         }))}
       />
+
+      <FactList prefix="colorFacts" items={COLOR_FACTS} />
     </Section>
   )
 }
@@ -107,6 +111,8 @@ export function FuelSection(): ReactNode {
           n: s.n
         }))}
       />
+
+      <FactList prefix="fuelFacts" items={FUEL_FACTS} />
     </Section>
   )
 }

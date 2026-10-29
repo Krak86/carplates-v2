@@ -7,7 +7,8 @@ import {
   normalizePlate,
   repairOcrPlate,
   isUaPlate,
-  isLegacyUaPlate
+  isLegacyUaPlate,
+  isSovietPlate
 } from './plate.js'
 
 describe('normalizePlate', () => {
@@ -131,5 +132,20 @@ describe('isLegacyUaPlate', () => {
   it('flags only the digits-first shape', () => {
     expect(isLegacyUaPlate('50ВТ2782')).toBe(true)
     expect(isLegacyUaPlate('BE7116AA')).toBe(false)
+  })
+})
+
+describe('isSovietPlate', () => {
+  it('matches the Soviet-era shapes in any script', () => {
+    expect(isSovietPlate('24320 ВА')).toBe(true)
+    expect(isSovietPlate('808-06 AB')).toBe(true)
+    expect(isSovietPlate('п 8388 дп')).toBe(true)
+    expect(isSovietPlate('1234КИА')).toBe(true)
+  })
+
+  it('does not match the current shapes or junk', () => {
+    expect(isSovietPlate('КА1234ВС')).toBe(false)
+    expect(isSovietPlate('11АА1234')).toBe(false)
+    expect(isSovietPlate('1234')).toBe(false)
   })
 })

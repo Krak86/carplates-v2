@@ -5,16 +5,15 @@
 `carsua.app` v2 — Ukrainian vehicle lookup by plate or VIN. pnpm monorepo; data from `data.gov.ua` in Postgres, VIN decoding via NHTSA.
 The v1 app is the sibling `../carplates/` (do not modify).
 
-Docs (**grep `^## ` headings, never read whole** — 100–400 KB): `PLAN.md` backlog + version pins · `docs/plan-done.md` finished write-ups ·
-`README.md` setup/env · `docs/features-reference.md` per-feature conventions (**read the matching section before touching a feature**) ·
-`docs/commands-reference.md` `ingest:*`/`export:*`/ALPR · `docs/{legal-and-monetization,logins,security-checklist}.md`. Everything else only on request.
+Docs (**grep `^## ` headings, never read whole**, 100–400 KB): `PLAN.md` backlog + pins · `docs/plan-done.md` write-ups · `README.md` setup/env ·
+`docs/features-reference.md` per-feature conventions (**read the matching section before touching a feature**) · `docs/commands-reference.md` ·
+`docs/{legal-and-monetization,logins,security-checklist}.md`. Others only on request.
 
 ## Layout
 
-`packages/shared` (plate normalization `normalizePlate`, regions, Zod schemas — **single source of truth, never re-implement plate
-logic**) · `packages/db` (Drizzle schema `registry`, SQL migrator) · `apps/api` (NestJS + Fastify, `src/<feature>/`, serves SPA +
-per-plate `<meta>`) · `apps/web` (Vite + React 19 + React Router, `@/` → `src/`) · `scripts/` (ingest/export CLIs via `tsx`,
-`seed-data/` = committed gzipped CSVs) · `infra/` · `services/alpr/`.
+`packages/shared` (`normalizePlate`, regions, Zod schemas — **single source of truth, never re-implement plate logic**) · `packages/db`
+(Drizzle `registry`, SQL migrator) · `apps/api` (NestJS + Fastify, `src/<feature>/`, serves SPA + per-plate `<meta>`) · `apps/web`
+(Vite + React 19 + React Router) · `scripts/` (ingest/export CLIs, `seed-data/` gzipped CSVs) · `infra/` · `services/alpr/`.
 
 Pins (why: PLAN.md): pnpm 12, Node 24, TypeScript 5.9 (not 7), NestJS 11 (not 12), Drizzle 0.45.x (not 1.0 RC), jsdom ~30.0 (30.1 breaks `.rejects.toThrow`), Tailwind v4.
 
@@ -35,10 +34,9 @@ Pins (why: PLAN.md): pnpm 12, Node 24, TypeScript 5.9 (not 7), NestJS 11 (not 12
 - **NestJS**: Zod-validated inputs, no logic in controllers, never `@Res()` (except SPA catch-all). Link previews (`apps/api/src/spa/`)
   come from the API, never Vite.
 - **i18n is per-language lazy chunks** (non-ua also loads ua). Tests rendering text `await i18nReady`; never `import '@/i18n'`.
-- **Zod `jitless`**: `@/lib/zod-config` stays the first import of `apps/web/src/main.tsx` and `vendor-zod` / `zod-config` stay separate chunks in
-  `vite.config.ts`, or the CSP reports `eval` (`docs/features-reference.md` "Agent discovery, edge cache, Zod and CSP").
-- **Edge cache**: a new cacheable `/api/*` endpoint sends `common/cache.ts` headers and goes into the Cloudflare Cache Rule expression (`docs/deploy.md`).
-  `/.well-known/openapi.json` lists only the `PUBLIC_API_PATH_PREFIXES` allowlist: nothing per-vehicle, admin, or built on scraped data.
+- **Zod `jitless`**: `@/lib/zod-config` stays the first import of `main.tsx`; `vendor-zod` / `zod-config` stay separate chunks (else CSP `eval`).
+- **Edge cache**: a new cacheable `/api/*` endpoint sends `common/cache.ts` headers and joins the Cloudflare Cache Rule (`docs/deploy.md`);
+  `openapi.json` lists only `PUBLIC_API_PATH_PREFIXES` (nothing per-vehicle, admin or scraped). Both: `docs/features-reference.md` "Agent discovery, edge cache, Zod and CSP".
 - **Below-the-fold sections are `LazySection`s**; a new shareable one must list its id in `sections`. Shared pure helpers of lazy
   chunks go in `vite.config.ts` `HELPER_GROUPS`.
 - Accounts: separate `app` schema, not re-ingestable; `account.ts`, not `schemas.ts`; admins by SQL only; online-only UI.

@@ -1,9 +1,10 @@
+import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 
-import { bandLabel, formatShare, formatTests, groupKey } from '@/components/MotFaults.helpers'
+import { bandLabel, bandOfKm, formatShare, formatTests, groupKey, MOT_MAX_KM } from '@/components/MotFaults.helpers'
 import Card from '@/components/ui/Card'
 import Skeleton from '@/components/ui/Skeleton'
 import { cn } from '@/lib/cn'
@@ -18,7 +19,7 @@ import {
   RECALLS_NOTE,
   type RecallExample
 } from '@/routes/read/recalls/content'
-import { barHeight, failCurve, topFaultGroups } from '@/routes/read/recalls/helpers'
+import { barHeight, failCurve, groupsAtBand, topFaultGroups } from '@/routes/read/recalls/helpers'
 
 const TOP_GROUPS = 5
 
@@ -150,12 +151,17 @@ export function RecallsSection({ example }: ExampleProps): ReactNode {
 export function FaultsSection({ example }: ExampleProps): ReactNode {
   const { t, i18n } = useTranslation()
   const { brand, model, year } = example
-  const { data, isPending, isError } = useQuery(motQuery(brand, model, year, 'car'))
+  const { data, isPending, isError } = useQuery(motQuery(brand, model, year))
   const match = data?.match
   const lang = i18n.language
   const curve = match ? failCurve(match) : []
   const top = Math.max(0.05, ...curve.flatMap(p => [p.failRate ?? 0, p.baselineFailRate ?? 0]))
   const groups = match ? topFaultGroups(match, TOP_GROUPS) : []
+  const [kmText, setKmText] = useState('')
+  const km = kmText === '' ? null : Math.min(Number(kmText), MOT_MAX_KM)
+  const band = match && km != null ? bandOfKm(match.edgesKm, km) : null
+  const atBand = match && band != null ? match.bands[band] : undefined
+  const bandGroups = match && band != null ? groupsAtBand(match, band, TOP_GROUPS) : []
 
   return (
     <Section
@@ -174,7 +180,10 @@ export function FaultsSection({ example }: ExampleProps): ReactNode {
               <span
                 key={p.band}
                 title={`${bandLabel(match.edgesKm, p.band)}: ${formatShare(p.failRate)} · ${t('read.recalls.ukAverage')} ${formatShare(p.baselineFailRate)} · ${formatTests(p.tests)}`}
-                className="relative flex-1 self-stretch"
+                className={cn(
+                  'relative flex-1 self-stretch transition-opacity',
+                  band != null && p.band !== band && 'opacity-30'
+                )}
               >
                 <span
                   className="absolute inset-x-0 bottom-0 rounded-t-sm bg-primary"
@@ -199,6 +208,53 @@ export function FaultsSection({ example }: ExampleProps): ReactNode {
             {t('read.recalls.faultsAxis')} · <span aria-hidden>▬</span> {t('read.recalls.ukAverage')} ·{' '}
             {t('read.recalls.testsBehind', { n: formatTests(match.tests) })}
           </p>
+
+          <label className="mt-4 flex flex-wrap items-center gap-2 text-sm">
+            <span className="font-semibold">{t('mot.car.odometer')}</span>
+            <input
+              type="text"
+              inputMode="numeric"
+              value={kmText}
+              onChange={e => setKmText(e.target.value.replace(/D/g, '').slice(0, 6))}
+              placeholder={t('mot.car.placeholder')}
+              className="w-32 rounded-lg border border-border bg-surface px-2 py-1"
+            />
+            {t('mot.car.km')}
+          </label>
+
+          {atBand && band != null ? (
+            <div className="mt-2 rounded-lg border border-border p-3" aria-live="polite">
+              <p className="font-semibold">
+                {t('mot.car.band', { band: bandLabel(match.edgesKm, band), unit: t('mot.axis.kmShort') })}
+              </p>
+              <p className="text-sm">
+                {t('mot.car.summary', {
+                  tests: formatTests(atBand.tests),
+                  name: exampleName(example),
+                  fail: formatShare(atBand.failRate),
+                  watch: formatShare(atBand.watchRate)
+                })}
+              </p>
+              <p className="mb-2 text-xs text-muted">
+                {t('read.recalls.ukAverage')} {formatShare(atBand.baselineFailRate)}
+              </p>
+
+              <h3 className="mb-1 text-sm font-semibold">{t('mot.car.groups')}</h3>
+              <ul className="space-y-1">
+                {bandGroups.map(g => (
+                  <li key={g.code} className="flex items-baseline gap-2">
+                    <span className="text-muted">{t(groupKey(g.code))}</span>
+                    <strong className="ml-auto tabular-nums">{formatShare(g.fail)}</strong>
+                    <span className="w-24 text-right text-sm text-muted tabular-nums">
+                      {t('read.recalls.watch', { share: formatShare(g.watch) })}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : (
+            <p className="mt-1 text-xs text-muted">{t('read.recalls.odoHint')}</p>
+          )}
 
           <h3 className="mt-4 mb-2 font-semibold">{t('read.recalls.topGroups')}</h3>
           <ul className="space-y-1">
