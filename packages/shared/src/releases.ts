@@ -20,6 +20,18 @@ export const RELEASES: readonly ReleaseDay[] = [
     items: [
       item(
         'improved',
+        'Гід «Автопарк»: у розділі пального - тенденції та історія видів пального, типи гібридів і зарядних роз’ємів, стандарти якості EN 228/EN 590, перехід на бензин E10 з 1 липня 2026, маркування колонок ЄС, класи Euro; у розділах із законами - посилання на першоджерела.',
+        'Гид «Автопарк»: в разделе топлива - тенденции и история видов топлива, типы гибридов и зарядных разъёмов, стандарты качества EN 228/EN 590, переход на бензин E10 с 1 июля 2026, маркировка колонок ЕС, классы Euro; в разделах с законами - ссылки на первоисточники.',
+        'Fleet guide: the fuel section now covers fuel trends and history, hybrid types and charging connectors, the EN 228/EN 590 quality standards, the switch to E10 petrol on 1 July 2026, EU pump labels and Euro classes; sections that cite laws now link to the sources.'
+      ),
+      item(
+        'improved',
+        'Гід «Автопарк»: у розділі кольорів - 11 кольорів реєстру, коли зміна відтінку потребує перереєстрації, комбіновані кольори й «хамелеон», плівка поверх кольору (повна й часткова), вініл проти антигравійної плівки, строки й штрафи.',
+        'Гид «Автопарк»: в разделе цветов - 11 цветов реестра, когда смена оттенка требует перерегистрации, комбинированные цвета и «хамелеон», плёнка поверх цвета (полная и частичная), винил против антигравийной плёнки, сроки и штрафы.',
+        'Fleet guide: the colours section now covers the registry’s 11 colours, when a shade change needs re-registration, combined colours and "chameleon" paint, a film over the original colour (full and partial), vinyl versus anti-gravel film, deadlines and fines.'
+      ),
+      item(
+        'improved',
         'Гід «VIN»: історія VIN, де шукати номер на авто (скло, стійка, табличка, вибитий номер, наклейки на пластику) з фото, старі й радянські номери, чому VIN не розбирається та як шукати за VIN у застосунку; у розборі є готові приклади помилкових VIN.',
         'Гид «VIN»: история VIN, где искать номер на авто (стекло, стойка, табличка, выбитый номер, наклейки на пластике) с фото, старые и советские номера, почему VIN не разбирается и как искать по VIN в приложении; в разборе есть готовые примеры ошибочных VIN.',
         'VIN guide: the history of the VIN, where to find it on a car (windscreen, pillar, plate, stamped number, stickers on plastic) with photos, old and Soviet-era numbers, why a VIN may not decode and how to search by VIN in the app; the breakdown has ready examples of faulty VINs.'
