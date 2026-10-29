@@ -93,7 +93,7 @@ export default function ReleasesRoute(): ReactNode {
           <section
             key={`${m.month}-${group}`}
             style={{ '--row-i': idx } as React.CSSProperties}
-            className="animate-row-in mb-3 will-change-[transform,opacity]"
+            className="mb-3 animate-row-in will-change-[transform,opacity]"
           >
             <h2>
               <button

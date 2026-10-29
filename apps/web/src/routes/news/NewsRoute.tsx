@@ -31,9 +31,7 @@ export default function NewsRoute(): ReactNode {
   // The input is open when a search is active (e.g. a shared link) or the user opened it.
   const [searchOpen, setSearchOpen] = useState(!!q)
   const [draft, setDraft] = useState(q)
-  const news = useQuery(
-    newsPageQuery({ page, sources: sourceIdsOf(selected), q, order })
-  )
+  const news = useQuery(newsPageQuery({ page, sources: sourceIdsOf(selected), q, order }))
 
   useEffect(() => (): void => clearTimeout(debounce.current), [])
 
