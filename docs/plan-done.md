@@ -430,13 +430,13 @@ registry.current_registration` returned exactly **13** and **14** raw values
   approach, since the source vocabulary is fully enumerated. `VEHICLE_COLOR_HEX`
   / `VEHICLE_COLOR_SHADOW_HEX` hold a hand-picked lit/shadow hex pair per color.
 
-  **Shapes.** Only 5 body silhouettes exist (sedan/bus/truck/motorcycle/trailer,
-  user-supplied artwork), ported into `apps/web/src/assets/vehicleShapes.tsx` as
+  **Shapes.** 11 body silhouettes in `apps/web/src/assets/vehicleShapes.tsx` as
   inline React/SVG (not `<img>` — dynamic per-vehicle coloring and the wheel
-  animation both need the SVG in the DOM). `VehicleKindIcon.tsx` maps all 13
-  kinds onto the closest of the 5 (e.g. `moped`/`quad`/`tricycle`/`motoTricycle`
-  → motorcycle, `specialized`/`special` → truck, `undetermined` → sedan) — no
-  1:1 art for the other 8. The body/shadow fill in each shape is
+  animation both need the SVG in the DOM): the original 5 (sedan/bus/old van-like
+  truck/motorcycle/trailer, user-supplied artwork) plus moped, quad, tricycle, van,
+  box truck and semi-trailer (own art, 2026-10-29). `VehicleKindIcon.tsx` maps all 13
+  kinds: `truck` → box truck, `specialized` → van, `tricycle`/`motoTricycle` → tricycle,
+  `semiTrailer` → semi-trailer, `special` → old truck, `undetermined` → sedan. The body/shadow fill in each shape is
   `var(--vehicle-body-color)` / `var(--vehicle-body-shadow-color)`, set inline
   per instance from the vehicle's resolved color; wheels/windows stay a fixed
   neutral tone, like real trim/glass. Two `prefers-reduced-motion`-aware
@@ -3758,7 +3758,7 @@ Smaller items shipped the same day as email sign-in and the truck aliases (above
 
 ## Size & parking section ✅ BUILT (2026-10-14)
 
-Files: `apps/web/src/components/size/` — `VehicleSize.helpers.ts` (merge, shape, class, forecast), `fit.ts` (norms, verdicts, tips), `silhouettes.ts`, `use-vehicle-size.ts`, `VehicleSizeSection.tsx` + four lazy tab chunks (`SizeSchemaTab`, `SizeParkingTab`, `SizeGarageTab`, `SizeNormsTab`), `SizeClassChip.tsx`. No API or migration change; every source is an existing query.
+Files: `apps/web/src/components/size/` — `VehicleSize.helpers.ts` (merge, shape, class, forecast), `fit.ts` (norms, verdicts, tips), `silhouettes.ts` (+ `SideSilhouette.tsx`, `SizeCarTop.tsx`), `use-vehicle-size.ts`, `VehicleSizeSection.tsx` + four lazy tab chunks (`SizeSchemaTab`, `SizeParkingTab`, `SizeGarageTab`, `SizeNormsTab`), `SizeClassChip.tsx`. No API or migration change; every source is an existing query.
 
 - **Merge:** per field RDW median (cm → mm) → Wikipedia generation dimensions → VIN `Wheel Base (inches)`; `completeSize` forecasts the gaps from the best known figure with per-shape typical proportions (`SHAPE_TYPICAL`; growth exponents length / wheelbase 1, width 0.5, height 0.3) and tags them `estimate` (dashed, ≈). A model with no figures but a known body shows the typical shape (`typicalOnly`); buses and trucks are never forecast.
 - **Verified norms only:** ДБН В.2.3-15:2007 п. 5.2 (2.5 × 5.3 m; 2.3 × 5.0 m on temporary lots; safety gap 0.5–0.7 m) and п. 4.6 (design car 6 × 2.1 m); ПДР п. 22.5(а) (width 2.6, height 4.0, single vehicle 12, tractor + semi-trailer 18.75, road train 22 m); German Garagenverordnung (Saxony § 4); one US city code (Lindon, UT, 9 × 18 ft). Garage sizes (3 × 6 m box, 6 × 6 m double) are labelled _typical_. Mirrors are an assumed +20 cm. The ДБН Додаток Є class table could not be read from any text version, so the A–F cuts are the rule-of-thumb segments, labelled approximate. The US and German links answer browsers but not bots (403 for curl).

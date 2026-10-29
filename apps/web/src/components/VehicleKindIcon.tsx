@@ -26,7 +26,7 @@ type Props = {
 }
 
 /**
- * 10 body shapes are drawn (see `assets/vehicleShapes.tsx`); a few `kind` values share the closest one
+ * 11 body shapes are drawn (see `assets/vehicleShapes.tsx`); a few `kind` values share the closest one
  * (e.g. both tricycle kinds, `special` and `truck`). `undetermined` falls back to the sedan silhouette too,
  * same as any other unrecognized shape would.
  */
