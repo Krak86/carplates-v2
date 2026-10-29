@@ -35,5 +35,10 @@ export default function TurnstileSlot({ siteKey, resetKey, onToken }: Props): Re
     }
   }, [siteKey, resetKey, lang, theme, onToken])
 
-  return <div ref={slotRef} className="mt-2 min-h-[65px]" />
+  // The widget iframe is a fixed 300x65, wider than the w-64 popover form: scale it to 256px (0.85) instead of clipping it.
+  return (
+    <div className="mt-2 h-[56px] w-64 max-w-full overflow-hidden">
+      <div ref={slotRef} className="w-[300px] origin-top-left scale-[0.85]" />
+    </div>
+  )
 }

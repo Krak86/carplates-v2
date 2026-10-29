@@ -77,7 +77,7 @@
   "result.series.driverCabinet": "Driver's Cabinet series (no region)",
   "result.notFound.plate": "Plate",
   "result.notFound.hintPlate": "The plate format is valid, but it isn't in the registry data. Either the vehicle was registered before January 2013 (not covered by the open data), or after 29 April 2026 - since May 2026 the registry no longer publishes plates, so those vehicles can only be found by VIN. Plates are in the database for January 2013 – 29 April 2026.",
-  "result.notFound.hintFormat": "This doesn't look like a complete Ukrainian plate (e.g. AA1234BB). Check for typos.",
+  "result.notFound.hintFormat": "This doesn't look like a complete Ukrainian plate (e.g. AA1234BB) or a VIN (17 characters, no I, O, Q, e.g. WVWZZZ1KZAW123456). Check for typos or missing characters.",
   "result.ria.hintPlate": "Older plates (before 2013) may be known to AUTO.RIA:",
   "result.ria.hintVin": "AUTO.RIA may know this vehicle:",
   "result.ria.link": "check on AUTO.RIA",
