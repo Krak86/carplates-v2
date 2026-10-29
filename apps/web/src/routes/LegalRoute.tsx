@@ -22,7 +22,7 @@ export default function LegalRoute({ doc }: Props): ReactNode {
   const other: LegalDoc = doc === 'privacy' ? 'terms' : 'privacy'
 
   return (
-    <article className="mx-auto max-w-content space-y-4">
+    <article className="mx-auto max-w-6xl space-y-4">
       <h1 className="text-2xl font-bold">{t(`legal.${doc}.heading`)}</h1>
 
       <Card className="space-y-4 text-sm text-[var(--color-fg)]">

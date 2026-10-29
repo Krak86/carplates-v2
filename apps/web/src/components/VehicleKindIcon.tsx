@@ -2,7 +2,19 @@ import type { CSSProperties, ReactNode } from 'react'
 import { VEHICLE_COLOR_HEX, VEHICLE_COLOR_SHADOW_HEX } from '@carplates/shared'
 import type { VehicleColor, VehicleKind } from '@carplates/shared'
 
-import { BusShape, MotorcycleShape, SedanShape, TrailerShape, TruckShape } from '@/assets/vehicleShapes'
+import {
+  BoxTruckShape,
+  BusShape,
+  MopedShape,
+  MotorcycleShape,
+  QuadShape,
+  SedanShape,
+  SemiTrailerShape,
+  TrailerShape,
+  TricycleShape,
+  TruckShape,
+  VanShape
+} from '@/assets/vehicleShapes'
 import { cn } from '@/lib/cn'
 
 type Props = {
@@ -14,24 +26,24 @@ type Props = {
 }
 
 /**
- * Only 5 body shapes are drawn (see `assets/vehicleShapes.tsx`) — the other 8 `kind` values
- * reuse the closest one rather than going unillustrated. `undetermined` falls back to the
- * sedan silhouette too, same as any other unrecognized shape would.
+ * 11 body shapes are drawn (see `assets/vehicleShapes.tsx`); a few `kind` values share the closest one
+ * (e.g. both tricycle kinds, `special` and `truck`). `undetermined` falls back to the sedan silhouette too,
+ * same as any other unrecognized shape would.
  */
 const SHAPE_BY_KIND: Readonly<Record<VehicleKind, (props: { spin: boolean }) => ReactNode>> = {
   passenger: SedanShape,
   undetermined: SedanShape,
-  truck: TruckShape,
-  specialized: TruckShape,
+  truck: BoxTruckShape,
+  specialized: VanShape,
   special: TruckShape,
   bus: BusShape,
   motorcycle: MotorcycleShape,
-  moped: MotorcycleShape,
-  quad: MotorcycleShape,
-  tricycle: MotorcycleShape,
-  motoTricycle: MotorcycleShape,
+  moped: MopedShape,
+  quad: QuadShape,
+  tricycle: TricycleShape,
+  motoTricycle: TricycleShape,
   trailer: TrailerShape,
-  semiTrailer: TrailerShape
+  semiTrailer: SemiTrailerShape
 }
 
 /**

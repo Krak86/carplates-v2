@@ -59,6 +59,8 @@ async function readVin(file: File, signal: AbortSignal): Promise<Reads> {
   return { values: candidates.map(c => c.plate), candidates }
 }
 
+// The whole photo goes to the server, which tiles it for small plates. Uploading only on-device crops was tried and
+// dropped: it lost plates the detector misses (docs/plan-done.md "Photo search: on-device plate crops").
 async function readPlate(file: File, signal: AbortSignal): Promise<Reads> {
   const res = await recognizePlate(await shrinkImage(file), signal)
   return { values: res.candidates.map(c => c.plate), candidates: res.candidates }

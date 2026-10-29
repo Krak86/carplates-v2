@@ -5,6 +5,7 @@ import type { PlateCandidate } from '@carplates/shared'
 
 import PhotoPlateBoxes from '@/components/PhotoPlateBoxes'
 import PhotoZoomDialog from '@/components/PhotoZoomDialog'
+import Spinner from '@/components/ui/Spinner'
 
 type Props = {
   url: string
@@ -64,6 +65,13 @@ export default function PhotoThumbnail({ url, candidates, active, pending = fals
         >
           {t('photo.skip')}
         </button>
+      )}
+
+      {pending && (
+        <p role="status" className="mt-2 flex items-center justify-center gap-2 text-center text-sm text-muted">
+          <Spinner />
+          {slow ? t('photo.slowHint') : t('photo.recognizing')}
+        </p>
       )}
 
       {zoomed && <PhotoZoomDialog url={url} candidates={candidates} active={active} onClose={() => setZoomed(false)} />}

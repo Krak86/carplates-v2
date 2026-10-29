@@ -1,14 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
-import type { ReactNode } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router'
 
 import NewsCard from '@/components/NewsCard'
-import Spinner from '@/components/ui/Spinner'
+import Skeleton from '@/components/ui/Skeleton'
 import { cn } from '@/lib/cn'
 import { toIntlLocale } from '@/lib/intl'
-import { NEWS_PAGE_SIZE, NEWS_SEARCH_MIN_CHARS, NEWS_SOURCE_GROUPS, sourceIdsOf } from '@/lib/news'
+import { NEWS_PAGE_SIZE, NEWS_SEARCH_MIN_CHARS, NEWS_SOURCE_GROUPS, newsTagColor, sourceIdsOf } from '@/lib/news'
 import { newsPageQuery } from '@/lib/queries'
 
 const SEARCH_DEBOUNCE_MS = 350
@@ -85,114 +85,36 @@ export default function NewsRoute(): ReactNode {
     update({ sources: [], q: '', order: 'desc', page: 1 })
   }
 
+  // A new page/filter keeps the previous data as a placeholder; show skeletons instead of stale rows.
+  const loading = news.isPending || news.isPlaceholderData
   const tooShort = !!draft.trim() && draft.trim().length < NEWS_SEARCH_MIN_CHARS
   const sortLabel = t(order === 'desc' ? 'news.sortNewest' : 'news.sortOldest')
 
   return (
-    <div className="mx-auto max-w-content space-y-4">
-      <h1 className="text-2xl font-bold">
-        <span aria-hidden>📰</span> {t('news.heading')}
-      </h1>
+    <div className="mx-auto max-w-6xl space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+        <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+          <h1 className="text-2xl font-bold">
+            <span aria-hidden>📰</span> {t('news.heading')}
+          </h1>
 
-      {news.data?.updatedAt && (
-        <p className="text-sm text-[var(--color-muted)]">
-          {t('news.updatedAt', { date: new Date(news.data.updatedAt).toLocaleString(toIntlLocale(i18n.language)) })}
-        </p>
-      )}
+          {news.data?.updatedAt && (
+            <p className="text-sm text-[var(--color-muted)]">
+              {t('news.updatedAt', {
+                date: new Date(news.data.updatedAt).toLocaleString(toIntlLocale(i18n.language))
+              })}
+            </p>
+          )}
+        </div>
 
-      <div className="space-y-2">
-        <div className="flex items-start gap-2">
-          <section aria-label={t('news.sources')} className="flex min-w-0 flex-1 flex-wrap gap-2">
+        <div className="flex shrink-0 gap-1">
+          {!isDefault && (
             <button
               type="button"
-              aria-pressed={!selected.length}
-              onClick={() => update({ sources: [], page: 1 })}
-              className={cn(
-                'rounded-full border border-[var(--color-border)] px-3 py-1 text-sm transition-colors',
-                selected.length ? 'hover:bg-[var(--color-surface)]' : 'bg-[var(--color-surface)] font-medium'
-              )}
-            >
-              {t('news.allSources')}
-            </button>
-
-            {NEWS_SOURCE_GROUPS.filter(g => !news.data || selected.includes(g.key) || countOf(g.ids) > 0).map(g => (
-              <button
-                key={g.key}
-                type="button"
-                aria-pressed={selected.includes(g.key)}
-                onClick={() => handleToggleSource(g.key)}
-                className={cn(
-                  'rounded-full border border-[var(--color-border)] px-3 py-1 text-sm transition-colors',
-                  selected.includes(g.key) ? 'bg-[var(--color-surface)] font-medium' : 'hover:bg-[var(--color-surface)]'
-                )}
-              >
-                {g.label}
-                {news.data && <span className="ml-1.5 text-xs text-[var(--color-muted)]">{countOf(g.ids)}</span>}
-              </button>
-            ))}
-          </section>
-
-          <div className="flex shrink-0 gap-1">
-            {!isDefault && (
-              <button
-                type="button"
-                onClick={handleReset}
-                title={t('news.reset')}
-                aria-label={t('news.reset')}
-                className="flex h-8 items-center gap-1 rounded-full border border-[var(--color-border)] px-3 text-sm hover:bg-[var(--color-surface)] hover:text-[var(--color-primary)]"
-              >
-                <svg
-                  aria-hidden
-                  viewBox="0 0 24 24"
-                  className="h-4 w-4"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5" />
-                </svg>
-                <span className="hidden sm:inline">{t('news.reset')}</span>
-              </button>
-            )}
-
-            <button
-              type="button"
-              onClick={() => update({ order: order === 'desc' ? 'asc' : 'desc', page: 1 })}
-              title={sortLabel}
-              aria-label={sortLabel}
-              className="flex h-8 items-center gap-1 rounded-full border border-[var(--color-border)] px-3 text-sm hover:bg-[var(--color-surface)]"
-            >
-              <svg
-                aria-hidden
-                viewBox="0 0 24 24"
-                className={cn(
-                  'h-4 w-4 transition-transform duration-300 motion-reduce:transition-none',
-                  order === 'asc' && 'rotate-180'
-                )}
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M12 5v14M6 13l6 6 6-6" />
-              </svg>
-              <span className="hidden sm:inline">{sortLabel}</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={handleToggleSearch}
-              aria-expanded={searchOpen}
-              aria-controls="news-search"
-              title={t('news.search')}
-              aria-label={t('news.search')}
-              className={cn(
-                'flex h-8 w-8 items-center justify-center rounded-full border border-[var(--color-border)] hover:bg-[var(--color-surface)] hover:text-[var(--color-primary)]',
-                (searchOpen || !!q) && 'bg-[var(--color-surface)] text-[var(--color-primary)]'
-              )}
+              onClick={handleReset}
+              title={t('news.reset')}
+              aria-label={t('news.reset')}
+              className="flex h-8 items-center gap-1 rounded-full border border-[var(--color-border)] px-3 text-sm hover:bg-[var(--color-surface)] hover:text-[var(--color-primary)]"
             >
               <svg
                 aria-hidden
@@ -202,13 +124,114 @@ export default function NewsRoute(): ReactNode {
                 stroke="currentColor"
                 strokeWidth="2"
                 strokeLinecap="round"
+                strokeLinejoin="round"
               >
-                <circle cx="11" cy="11" r="7" />
-                <path d="M20 20l-3.5-3.5" />
+                <path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5" />
               </svg>
+              <span className="hidden sm:inline">{t('news.reset')}</span>
             </button>
-          </div>
+          )}
+
+          <button
+            type="button"
+            onClick={() => update({ order: order === 'desc' ? 'asc' : 'desc', page: 1 })}
+            title={sortLabel}
+            aria-label={sortLabel}
+            className="flex h-8 items-center gap-1 rounded-full border border-[var(--color-border)] px-3 text-sm hover:bg-[var(--color-surface)]"
+          >
+            <svg
+              aria-hidden
+              viewBox="0 0 24 24"
+              className={cn(
+                'h-4 w-4 transition-transform duration-300 motion-reduce:transition-none',
+                order === 'asc' && 'rotate-180'
+              )}
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M12 5v14M6 13l6 6 6-6" />
+            </svg>
+            <span className="hidden sm:inline">{sortLabel}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleToggleSearch}
+            aria-expanded={searchOpen}
+            aria-controls="news-search"
+            title={t('news.search')}
+            aria-label={t('news.search')}
+            className={cn(
+              'flex h-8 w-8 items-center justify-center rounded-full border border-[var(--color-border)] hover:bg-[var(--color-surface)] hover:text-[var(--color-primary)]',
+              (searchOpen || !!q) && 'bg-[var(--color-surface)] text-[var(--color-primary)]'
+            )}
+          >
+            <svg
+              aria-hidden
+              viewBox="0 0 24 24"
+              className="h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+            >
+              <circle cx="11" cy="11" r="7" />
+              <path d="M20 20l-3.5-3.5" />
+            </svg>
+          </button>
         </div>
+      </div>
+
+      <div className="space-y-2">
+        <section aria-label={t('news.sources')} className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            aria-pressed={!selected.length}
+            onClick={() => update({ sources: [], page: 1 })}
+            className={cn(
+              'rounded-full border border-[var(--color-border)] px-3 py-1 text-sm transition-colors',
+              selected.length ? 'hover:bg-[var(--color-surface)]' : 'bg-[var(--color-surface)] font-medium'
+            )}
+          >
+            {t('news.allSources')}
+          </button>
+
+          {NEWS_SOURCE_GROUPS.filter(g => !news.data || selected.includes(g.key) || countOf(g.ids) > 0).map(g => (
+            <button
+              key={g.key}
+              type="button"
+              aria-pressed={selected.includes(g.key)}
+              onClick={() => handleToggleSource(g.key)}
+              style={{ '--tag': newsTagColor(g.hue) } as CSSProperties}
+              className={cn(
+                'inline-flex items-center rounded-full border border-[color-mix(in_oklch,var(--tag)_55%,transparent)] px-3 py-1 text-sm transition-colors',
+                selected.includes(g.key)
+                  ? 'bg-[color-mix(in_oklch,var(--tag)_30%,transparent)] font-medium'
+                  : 'bg-[color-mix(in_oklch,var(--tag)_10%,transparent)] hover:bg-[color-mix(in_oklch,var(--tag)_22%,transparent)]'
+              )}
+            >
+              {selected.includes(g.key) && (
+                <svg
+                  aria-hidden
+                  viewBox="0 0 24 24"
+                  className="mr-1 h-3.5 w-3.5 text-[var(--tag)]"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M5 12.5l4.5 4.5L19 7.5" />
+                </svg>
+              )}
+              {g.label}
+              {news.data && <span className="ml-1.5 text-xs text-[var(--color-muted)]">{countOf(g.ids)}</span>}
+            </button>
+          ))}
+        </section>
 
         <div
           id="news-search"
@@ -266,12 +289,28 @@ export default function NewsRoute(): ReactNode {
         </div>
       </div>
 
-      {news.isPending && <Spinner />}
-      {news.isError && <p className="text-sm text-[var(--color-muted)]">{t('result.error')}</p>}
-      {news.data && !news.data.items.length && <p className="text-sm text-[var(--color-muted)]">{t('news.empty')}</p>}
+      {loading && (
+        <ul role="status" aria-label={t('result.loading')} className="space-y-3">
+          {Array.from({ length: NEWS_PAGE_SIZE }, (_, i) => (
+            <li key={i} className="flex h-26 overflow-hidden rounded-lg border border-border bg-surface/60">
+              <Skeleton className="w-28 shrink-0 rounded-none sm:w-36" />
 
-      {!!news.data?.items.length && (
-        <ul className={cn('space-y-3', news.isPlaceholderData && 'opacity-60 transition-opacity')}>
+              <div className="min-w-0 flex-1 space-y-2 self-center p-2.5">
+                <Skeleton className="h-4 w-11/12" />
+                <Skeleton className="h-4 w-2/3" />
+                <Skeleton className="h-3 w-1/3" />
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+      {news.isError && <p className="text-sm text-[var(--color-muted)]">{t('result.error')}</p>}
+      {!loading && news.data && !news.data.items.length && (
+        <p className="text-sm text-[var(--color-muted)]">{t('news.empty')}</p>
+      )}
+
+      {!loading && !!news.data?.items.length && (
+        <ul className="space-y-3">
           {news.data.items.map(item => (
             <li key={item.url}>
               <NewsCard item={item} horizontal compact />

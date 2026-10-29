@@ -32,7 +32,7 @@ export default function SettingsRoute(): ReactNode {
   const tab = isTab(requested) ? requested : DEFAULT_TAB
 
   return (
-    <div className="mx-auto w-full max-w-content">
+    <div className="mx-auto w-full max-w-6xl">
       <AccountNav />
 
       <Card className="mb-4">

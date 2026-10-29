@@ -430,13 +430,13 @@ registry.current_registration` returned exactly **13** and **14** raw values
   approach, since the source vocabulary is fully enumerated. `VEHICLE_COLOR_HEX`
   / `VEHICLE_COLOR_SHADOW_HEX` hold a hand-picked lit/shadow hex pair per color.
 
-  **Shapes.** Only 5 body silhouettes exist (sedan/bus/truck/motorcycle/trailer,
-  user-supplied artwork), ported into `apps/web/src/assets/vehicleShapes.tsx` as
+  **Shapes.** 11 body silhouettes in `apps/web/src/assets/vehicleShapes.tsx` as
   inline React/SVG (not `<img>` — dynamic per-vehicle coloring and the wheel
-  animation both need the SVG in the DOM). `VehicleKindIcon.tsx` maps all 13
-  kinds onto the closest of the 5 (e.g. `moped`/`quad`/`tricycle`/`motoTricycle`
-  → motorcycle, `specialized`/`special` → truck, `undetermined` → sedan) — no
-  1:1 art for the other 8. The body/shadow fill in each shape is
+  animation both need the SVG in the DOM): the original 5 (sedan/bus/old van-like
+  truck/motorcycle/trailer, user-supplied artwork) plus moped, quad, tricycle, van,
+  box truck and semi-trailer (own art, 2026-10-29). `VehicleKindIcon.tsx` maps all 13
+  kinds: `truck` → box truck, `specialized` → van, `tricycle`/`motoTricycle` → tricycle,
+  `semiTrailer` → semi-trailer, `special` → old truck, `undetermined` → sedan. The body/shadow fill in each shape is
   `var(--vehicle-body-color)` / `var(--vehicle-body-shadow-color)`, set inline
   per instance from the vehicle's resolved color; wheels/windows stay a fixed
   neutral tone, like real trim/glass. Two `prefers-reduced-motion`-aware
@@ -3758,11 +3758,15 @@ Smaller items shipped the same day as email sign-in and the truck aliases (above
 
 ## Size & parking section ✅ BUILT (2026-10-14)
 
-Files: `apps/web/src/components/size/` — `VehicleSize.helpers.ts` (merge, shape, class, forecast), `fit.ts` (norms, verdicts, tips), `silhouettes.ts`, `use-vehicle-size.ts`, `VehicleSizeSection.tsx` + four lazy tab chunks (`SizeSchemaTab`, `SizeParkingTab`, `SizeGarageTab`, `SizeNormsTab`), `SizeClassChip.tsx`. No API or migration change; every source is an existing query.
+Files: `apps/web/src/components/size/` — `VehicleSize.helpers.ts` (merge, shape, class, forecast), `fit.ts` (norms, verdicts, tips), `silhouettes.ts` (+ `SideSilhouette.tsx`, `SizeCarTop.tsx`), `use-vehicle-size.ts`, `VehicleSizeSection.tsx` + four lazy tab chunks (`SizeSchemaTab`, `SizeParkingTab`, `SizeGarageTab`, `SizeNormsTab`), `SizeClassChip.tsx`. No API or migration change; every source is an existing query.
 
 - **Merge:** per field RDW median (cm → mm) → Wikipedia generation dimensions → VIN `Wheel Base (inches)`; `completeSize` forecasts the gaps from the best known figure with per-shape typical proportions (`SHAPE_TYPICAL`; growth exponents length / wheelbase 1, width 0.5, height 0.3) and tags them `estimate` (dashed, ≈). A model with no figures but a known body shows the typical shape (`typicalOnly`); buses and trucks are never forecast.
 - **Verified norms only:** ДБН В.2.3-15:2007 п. 5.2 (2.5 × 5.3 m; 2.3 × 5.0 m on temporary lots; safety gap 0.5–0.7 m) and п. 4.6 (design car 6 × 2.1 m); ПДР п. 22.5(а) (width 2.6, height 4.0, single vehicle 12, tractor + semi-trailer 18.75, road train 22 m); German Garagenverordnung (Saxony § 4); one US city code (Lindon, UT, 9 × 18 ft). Garage sizes (3 × 6 m box, 6 × 6 m double) are labelled _typical_. Mirrors are an assumed +20 cm. The ДБН Додаток Є class table could not be read from any text version, so the A–F cuts are the rule-of-thumb segments, labelled approximate. The US and German links answer browsers but not bots (403 for curl).
 - **UI:** `LazySection sections={['size']}`; tabs are separate chunks and the VIN is decoded only once the section is open; the header chip `📏 C-class · 4.28 m` opens the section (`openSignal`); every figure, verdict, tip and norm has a ❓; sources are ↗ links. UA / DE flags added to `MarketFlag`. Helpers are grouped in `vite.config.ts` as `helpers-size`.
+
+## Realistic vehicle drawings (2026-10-29)
+
+Side view (`SideSilhouette`): per-shape outline with real-axle wheel arches (SVG mask), pillared glass, door seams, lamps, mirror, tyres/rims in fixed colours; top view (`SizeCarTop`) tapered body + glass-house + tyres + lamps, shared by the schema, garage and parking tabs. Guides' silhouettes and the towing mass drawing (SUV + caravan, tractor + semi-trailer, now correctly with the trailer behind the towing vehicle) reuse it. New kind icons: moped, quad, tricycle, van, box truck, semi-trailer. Everything is hand-drawn original artwork (no internet silhouettes), stated on About. Not redone: VIN schematics, `sedan`/`bus`/`motorcycle`/`trailer` kind icons, the `special` kind.
 
 ## Size & parking polish, section links, export (2026-10)
 
@@ -4075,3 +4079,79 @@ Plan: `PLAN.md` "Visual stats, map logos, cards and quizzes". Convention: `docs/
 - `REGION_IDS` moved to `packages/shared/src/regionIds.ts` (web `lib/region-ids.ts` re-exports it); `Preview.regionId` carries it; `OgController` reads `public/og-flags/<id>.png`.
 - resvg cannot decode WebP, so the flags are 180 px PNGs built from `assets/flags-lg` by `pnpm --filter scripts build:og-flags` (re-run after adding a region flag; 27 files, ~280 KB). Tests in `og-card.test.ts`; checked by rendering a sample card.
 - Cached cards (LRU, edge 1 day, crawlers) show the old image until they expire.
+
+## Games hub `/play` + quizzes, step 5 of "Visual stats, map logos, cards and quizzes" (2026-10-29)
+
+- **Route:** `/play` (hub) and `/play?game=region|logo|higher` (a quiz in place). `routes/play/`: `PlayRoute` (cards for the quizzes plus `/race` and `/relax`, best score per quiz), `RegionQuiz`, `LogoQuiz`, `HigherLowerQuiz`, `QuizHeader`, `QuizEnd`, pure rounds in `helpers.ts` (+ test), `quiz-storage.ts` (best score per quiz, `carplates.quizBest`, zod + try/catch), `games.ts`. Online-only (offline shows a note). A new run remounts the quiz through a `key`, no effect.
+- **Region quiz:** `buildRegionRounds` takes 10 distinct regions of `REGION_NAMES` and builds a plate from that region's `REGIONS` prefixes (test: `regionName(plate)` maps back). `StatsMap` got a `quiz` prop (`MapQuiz`: `marks`, `onPick`, `disabled`): no tooltip, no legend, polygons are buttons painted `--label-4` (right) / `--label-0` (picked wrong).
+- **Logo quiz / higher-lower:** both read `statsTopQuery` (top 10 brands with a logo; higher-lower mixes brands, top models and regions, equal counts skipped, ends on the first miss or the end of the chain).
+- **End screen:** score, best, play again, share as a picture (`renderPlateCardPng` with plate "CARS UA", the quiz title as model and the score as fact), links to `/stats?view=map`, `/read/plates`, `/race`, plate lookup `/`.
+- **Cross links:** sidebar "Games", `/stats` map view, `/read/plates`, a 🎲 beside the region flag on the result card, and "More games" under the xl racer banner.
+- **Route checklist done:** `ROUTE_TITLE_KEYS`, `STATIC_PAGES` ua/ru/en (+ sitemap test), About `about.feature.play`, `releases.ts` item (today's day, no `latest.ts` bump), i18n `play.*` ua/ru/en.
+- **Not done:** streak is per run only (no stored best streak); no accounts/leaderboard; browser-checked region and higher-lower only (not the logo quiz, end screen, phone width or the share sheet).
+
+### /play follow-up: question count and a bigger brand pool (2026-10-29)
+
+- **Question count** (10/20/30/50, `ROUND_CHOICES`) is chosen once on the `/play` hub, kept in localStorage (`carplates.quizRounds`) and passed to every quiz as `rounds`. Higher-lower is endless and ignores it. Best scores are kept per length (`region:20`).
+- **Longer games:** `cycle()` plays shuffled passes, so a region or brand repeats only after all were used (27 regions, up to 80 brands).
+- **Brand pool:** new `GET /api/stats/brands` (top 100 raw brands from `stats_by_brand`, contract `packages/shared/src/brandStats.ts`, `brandStatsQuery`, covered by the `/api/stats/*` edge rule, not in the OpenAPI allowlist). `foldBrands` sums spellings of one logo, keeps logo brands, top 80. The logo quiz and higher-lower brand rows use it; the full `statsQuery` (~14 MB) is not used.
+
+## Search result cache (2026-10-29)
+
+- **Why:** advanced search already had every index it needs (0012–0015, 0042, 0059); the cost was the query shape. Each page or sort click re-ran the filter, pulled up to `SEARCH_COUNT_CAP` (10k) wide rows and sorted them in Node with `localeCompare`. Estimated from the code, not measured.
+- **What:** `search.service.ts` keeps an in-process LRU of match sets (16 entries, 5 min) keyed by the filters without `sort`/`dir`/`page`/`pageSize`. Page 2, a re-sort and a shared link reuse the rows; each sort order is built once per entry (`sorted` map, pointer arrays over shared rows). Sorting uses one `Intl.Collator` (same order as `localeCompare`, much cheaper). A failed query is dropped from the cache, and concurrent identical requests share one in-flight query (the entry holds the promise).
+- **Not cached at the edge:** results list plates and VINs (per vehicle), so no `Cache-Control` / Cloudflare rule. The cache is per API instance (blue/green: the other colour warms its own).
+- **Tests:** `search.service.test.ts` (one query for pages and sorts, nulls last when descending, different filters re-query, failure not cached).
+- **Next in the round:** smaller default upload (crops were tried and removed, see below); `EXPLAIN` on typical filters; see `PLAN.md` "Speed round".
+
+## Photo search: on-device plate crops (2026-10-29) - REMOVED the same day
+
+> **Outcome:** built, measured (see "Measured" at the end) and **removed**: it lost plates (15 confident reads in 10 of 90 eval photos) and "no plate may be lost" outranks speed. `lib/photo-crops.ts`, `photo-crops-helpers.ts` (+ test) and the button preloads are deleted; `readPlate` uploads the whole photo again (`shrinkImage`). Replaced by a status line in `PhotoThumbnail.tsx` (`photo.recognizing`, then `photo.slowHint` after 8 s, ua/ru/en) so a slow upload looks like work, not a hang. The text below describes what was built, for a future retry (e.g. with a better detector).
+
+- **Why:** AR was faster than photo search because it uploads a ~160 px crop found by the in-browser detector, while photo search sent the whole frame (up to 4608 px, 2.5 MB) and the server then tiled it (up to 24 tiles). On 4G the upload alone is seconds.
+- **What:** `readPlate` (`use-plate-recognition.ts`) first calls `detectPlateCrops` (`lib/photo-crops.ts`). The shared detector worker (`plate-detector.worker.ts`, same as AR) scans the photo: the whole frame, plus overlapping tiles on photos over 1400 px (`planTiles`). Boxes are de-duplicated, then up to 6 plates (biggest first) are cropped from the full-resolution bitmap with 35% padding, longest side at most 1280 px, JPEG 0.9. Each crop goes to `/api/recognize/plate/local` (2 at a time, `settlePool`). `ownReads` keeps the reads of the crop's own plate (a neighbour's plate has its own crop), `toPhotoBoxes` maps boxes back to fractions of the photo so outlines and plate groups (see "Photo search: plate groups") work unchanged, and `mergeReads` drops a plate that two crops both saw.
+- **Fallback = the old path** (`shrinkImage` + one upload): no Worker / `createImageBitmap`, detector not ready within 4 s (a slow link still downloading the 7 MB model; it keeps loading for the next photo), undecodable file, nothing detected, or no crop read. A 429 / 503 from the crop requests is rethrown instead (the full photo would hit it too). VIN photos are untouched.
+- **Only on a slow link** (`shouldUploadCrops` / `isFastConnection`, `navigator.connection`): wifi / ethernet, or a 4g link with `downlink` of 10+ Mbps, keeps the old whole-photo upload. Anything slower, Data Saver, or a browser without the API (Safari, Firefox) uses the crops. Limits: Chromium caps `downlink` at 10 and `effectiveType` never says "5g", so "fast" can only mean "10+"; the values are the browser's estimate, not a measurement of this upload. A real speed probe was not built.
+- **Preload:** `preloadPlateDetector` runs on hover/focus of the photo and camera buttons (skipped on a fast link, where the model is not used), so the model is not fetched for visitors who never use photos. The worker is terminated after 60 s idle.
+- **Server:** unchanged. A crop under 768 px is not tiled by `services/alpr/app.py` (`MIN_TILED_SIDE`) and is upscaled once if nothing reads.
+- **Tests:** `photo-crops-helpers.test.ts` (tiles, de-dupe, padding, own-plate pick, box mapping, merge, pool). The worker/canvas part has no unit test (jsdom has no `createImageBitmap`).
+- **Not verified (at build time):** no timing on a phone or throttled 4G, and `services/alpr/eval` was not re-run with crops. Recall risk: a small plate the on-device detector misses is no longer found by the server's finer tiling when another plate was found. Check both before relying on it, comparing accuracy with `services/alpr/eval/run5.txt`.
+
+### Measured (2026-10-29, desktop Chrome via devtools, real API + ALPR container)
+
+- **Method:** the detector only runs in a browser, so the 90 `services/alpr/eval/images` photos were run in a page (served by Vite `/@fs/`): `detectPlateCrops` + the real `/api/recognize/plate/local` per crop (`ownReads`/`mergeReads` as in the hook) vs `shrinkImage` + one upload, same API, 2.1 s apart (30/min limit). Only 3 photos are in `labels.csv`, so the comparison is crops vs whole photo, not vs ground truth. No fallback to the whole photo was triggered by the detector (0/90 unavailable).
+- **Upload size:** whole photo 1048 KB on average, crops 40 KB (median 15 KB, max 482 KB). Detection 0.77 s on average on a desktop (0.12-0.15 s for small images, ~0.9-1.5 s for 12 MP phone photos; a phone will be slower).
+- **Time, emulated 4G (3 phone photos, detect + upload both counted):** Fast 4G (1.5 Mbps up) crops 1.2-1.9 s vs whole 10.6-15.2 s; Slow 4G (750 kbps up) crops 1.7-5.6 s vs whole 20-29 s. The saving is the upload; break-even is only where the uplink is fast (the `isFastConnection` cut-off keeps those on the old path). First detect after a model reload under throttling was slower (3.5 s).
+- **Recall vs the whole-photo path:** confident reads (score >= 0.9) present in the whole-photo result but missing from crops: **15 in 10 photos** (e.g. `20250619_180242.jpg` 3 of 4 plates, `20150819_185238.jpg` 2, `20241103_135726.jpg` 1, `20200614_143446.jpg` 1). Crops found 2 reads the whole-photo path did not. Four photos (`IMG_20140814_192808`, `IMG_20170122_122658`, `IMG_20171229_174853`, `imz-ural_m-67-36…webp` - a labelled one) gave no crop read at all; those fall back to the whole photo in the app, so they cost time, not the plate. The misses are small or distant plates the on-device detector does not box (it also boxed false positives: 5 of 6 crops of `20250619_180242.jpg` returned 404).
+- **UI (multi-plate photo, `20250619_180242.jpg`, default Chrome link):** crops path used, outline drawn on the right plate, navigated to it; only 1 plate was found where the whole-photo path finds 4. `IMG_5763.jpg` with `navigator.connection` faked as wifi/10 Mbps: one 2.3 MB whole-photo upload, no detector fetch. A 429 on the crops was not exercised.
+- **Advanced search cache: was not working, fixed.** First timings showed no cache effect (same query 2.2-3.4 s every time, page 2 / re-sort the same). Not a stale process: after a clean restart the cache _hit_ (key found) but `await entry.rows` still took ~1.9 s. `fetchMatches` returns a Drizzle query builder, a lazy thenable that **re-executes on every `await`**, so the cache stored a query, not its result. Fix: `rows: Promise.resolve(this.fetchMatches(where))` runs it once. The unit test mock returned a plain `Promise`, which is why it passed; it now returns a lazy thenable and asserts the query _ran_ once (`runs`), not just was built.
+- **Re-timed after the fix** (`/api/search?brand=AUDI&model=A6`, localhost, 10k rows): first call 2.3 s, then page 2 / `page=3&pageSize=20` / `sort=plate` / `sort=makeYear&dir=desc` / the same query again 0.21-0.22 s each (of which ~0.2 s is localhost connect on this machine, the rest is ~10 ms). Sort keys are `SEARCH_SORT_KEYS` (`makeYear`, not `year`).
+- **Dev gotcha:** `tsx watch` restarts on a file edit can fail with `EADDRINUSE` and leave the _old_ process serving, so timings after an edit may be from stale code; kill the listener on :3000 and start again.
+
+## Photo search: upload shrink size (2026-10-29) - kept at 4608
+
+- **Method:** `SHRINK_MAX=<n> node services/alpr/eval.mjs --shrink` over the 90 eval photos (q85), confident (score >= 0.9) original reads missing after the shrink, vs `eval/results.json`.
+- **Result:** max 2560 loses **7** confident reads, max 4608 (the web `MAX_DIMENSION` in `apps/web/src/lib/image.ts`) loses **1** (`18 Апр 2015 г_ 11_35_09.jpeg`, `BC6531AH`; the other differences are low-score noise). A smaller upload costs plates, so `MAX_DIMENSION` stays 4608. Do not lower it without a recall check; 3200 (the eval default) was not run.
+- **Off the main thread (done):** `shrinkImage` runs in `lib/image.worker.ts` (one-shot worker, `OffscreenCanvas.convertToBlob`; the shared decode/scale/encode lives in `lib/image-encode.ts`). Falls back to the main thread without Worker/OffscreenCanvas, then to the original file if undecodable. Same size and quality as before, so recall is unchanged. Checked in Chrome on a 4.5 MB photo: 288 ms, main-thread stall 1 ms, valid 3000x4000 JPEG of 1.6 MB.
+- **Navigate on the plate string:** nothing to gain, the server answers with one JSON and `onSuccess` navigates immediately.
+
+## Advanced search: brand + model via the rollups (2026-10-29)
+
+- **Measured** (`EXPLAIN (ANALYZE, BUFFERS)`, 16.7M rows, `brand=AUDI&model=A6`): `brand ILIKE '%AUDI%' AND model ILIKE '%A6%'` took ~1.8 s. A 2-character model has almost no trigram selectivity: `ix_current_reg_model_trgm` returned **1.55M** candidates (1.2 s, 36k page reads), the BitmapAnd with the brand trigram (467k) left 552k rechecked rows and a lossy heap scan of 25k blocks. The 10k `LIMIT` does not help a bitmap plan.
+- **Why not exact / a new index:** `brand = 'AUDI' AND model = 'A6'` is 4 ms but returns 90 143 rows instead of 124 406: 34k real A6s are stored under spelling variants (`AUDI  A6`, `A6 ALLROAD`, `A6 AVANT 2.5 TDI`...). Dropping them is a lost-vehicle regression. A `upper()` expression index only helps the exact case.
+- **What:** when both brand and model are given, `search.service.ts` (`nameConditions`) resolves every matching spelling from `stats_by_brand` / `stats_by_model` (`ILIKE`, 14 + 25 ms, 195 brand and 126 model spellings here) and filters `brand IN (...) AND model IN (...)`, served by the existing `ix_current_reg_brand_model` btree. Identical match set (the rollups hold every distinct value of `current_registration`: 0 missing, checked), no migration. Over 1000 spellings on either side, or either filter alone, it keeps the substring `ILIKE`. An empty spelling list becomes `false`.
+- **Result:** first call 2.3 s -> 0.37 s on the live API; with `yearFrom=2020&yearTo=2021` 3.6 s -> 1.1 s. Cached pages stay ~0.2 s.
+- **Limit:** the rollups are refreshed with the registry (`refreshStats`); a new spelling is invisible to a brand + model search until then, same as the suggestions.
+- **Left:** brand + model + year/colour still spends ~1 s in a lossy bitmap heap scan (year bitmap AND brand/model bitmap, 1M rechecked rows). A composite `(brand, model, make_year)` index would remove it but costs a big build and disk on the 8.8 GB table - only if that combination proves common.
+- **Tests:** `search.service.test.ts` (spelling lookup + one registry query, empty list).
+
+## Advanced search legend and icons, news page, page width, traced silhouettes (2026-10-29, docs sync)
+
+- **Advanced search (`AdvancedSearchRoute.tsx`):** result rows show the brand logo (also beside the Make input), kind pictogram, body icon, colour, fuel, region flag and the registration-status icon before the status text; the Colour / Kind / Fuel / Status labels show the selected value's icon at a fixed height and the status dropdown options carry theirs. A collapsible **Legend** lists colours, fuels, kinds, purposes, statuses and body types. The sort-direction button reads "A-Z / 0-9" style plus a "?" (`advancedSearch.sort.plate` was missing). API: `searchResultRowSchema` gained `kind`, `body`, `operName`, `operCode`, all `.nullable().optional()` (it is `schemas.ts`, so saved offline data is discarded once).
+- **Cache bug (`309fcd9`):** the result cache stored a lazy query, not its rows, so it never saved work; it now stores the awaited rows (see "Photo search: upload shrink size" for timings).
+- **News (`NewsRoute.tsx`, `lib/news.ts`):** title, updated-at and reset/sort/search buttons share one wrapping row; `NEWS_SOURCE_GROUPS` carry a hue per outlet (`newsTagColor`, `newsGroupOfSource`); source chips are tinted with a checkmark when selected, `NewsCard` has a matching left accent and a tinted domain; page / filter loading shows skeleton rows instead of dimmed stale items.
+- **Page width:** every route page uses `max-w-6xl`; the floating scroll buttons (`ScrollButtons.tsx`) follow the page content edge.
+- **Photo search (`7bfb74c`):** whole photo again, status line while reading, slow-link hint after 8 s; `shrinkImage` runs in `lib/image.worker.ts` (details above).
+- **Side silhouettes traced from real photos (`silhouettes.ts` `SIDE_PATHS`):** sedan, hatch, wagon, coupe, SUV, MPV, van and pickup outlines were traced from side-on photos (flipped to face front-right) and the glass, door seams, lamps and mirrors regenerated to fit; motorcycle, bus and truck stay hand-drawn. Only simplified outlines are kept, no photo is shown or stored. The About drawings line says so (it no longer claims "all hand drawn"). Which photos were traced is not recorded; if a licence question comes up, redraw the outlines from catalogue dimensions instead.
+- **Pickup examples (`body-types/content.ts`):** Toyota Hilux, Ford Ranger and VW Amarok added (L 200 and Navara stay, no size data).
+- **Docs/About:** release log 2026-10-29 gained four items (`latest.ts` unchanged, same day); About feature lines for advanced search, news and drawings updated; no new data source was added today, so `SOURCES` is unchanged. `CLAUDE.md` trimmed (pins moved to `PLAN.md`).

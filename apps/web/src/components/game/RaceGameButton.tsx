@@ -1,7 +1,7 @@
 import { Suspense, lazy, useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useSearchParams } from 'react-router'
+import { Link, useSearchParams } from 'react-router'
 import { type VehicleKind } from '@carplates/shared'
 
 import BrandLogo from '@/components/BrandLogo'
@@ -128,6 +128,9 @@ export default function RaceGameButton({
               </svg>
             </span>
           </button>
+          <Link to="/play" className="mt-2 block text-center text-xs text-[var(--color-primary)] hover:underline">
+            {t('play.banner')}
+          </Link>
         </div>
       )}
 

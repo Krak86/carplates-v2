@@ -369,6 +369,14 @@ export default function ResultCard({ data }: Props): ReactNode {
                     <span className="ml-1.5 inline-flex">
                       <RegionFlagInfo region={data.region} label={regionLabel(data.region)} />
                     </span>
+                    <Link
+                      to="/play?game=region"
+                      title={t('play.quiz.region.title')}
+                      aria-label={t('play.quiz.region.title')}
+                      className="ml-1.5 align-middle no-underline"
+                    >
+                      <span aria-hidden>🎲</span>
+                    </Link>
                   </>
                 )}
                 {!data.region && (

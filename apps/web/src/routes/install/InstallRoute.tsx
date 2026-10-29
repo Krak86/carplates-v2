@@ -12,7 +12,7 @@ export default function InstallRoute(): ReactNode {
   const { canInstall, installed, ios, handleInstall } = useInstallActions()
 
   return (
-    <article className="mx-auto max-w-content space-y-4">
+    <article className="mx-auto max-w-6xl space-y-4">
       <h1 className="text-2xl font-bold">{t('install.heading')}</h1>
 
       <Card className="space-y-3 text-sm">

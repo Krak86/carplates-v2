@@ -376,6 +376,20 @@ export const STATIC_PAGES: Record<string, Record<Lang, PageText>> = {
     ru: { title: 'Cars UA - Обсуждение', description: 'Отзывы, идеи и вопросы о Cars UA.' },
     en: { title: 'Cars UA - Discuss', description: 'Feedback, ideas and questions about Cars UA.' }
   },
+  '/play': {
+    ua: {
+      title: 'Cars UA - Ігри',
+      description: 'Вгадай область за номером, марку за логотипом та «більше чи менше» за даними реєстру.'
+    },
+    ru: {
+      title: 'Cars UA - Игры',
+      description: 'Угадай область по номеру, марку по логотипу и «больше или меньше» по данным реестра.'
+    },
+    en: {
+      title: 'Cars UA - Games',
+      description: 'Guess the region from a plate, the brand from a logo, and higher or lower on registry counts.'
+    }
+  },
   '/race': {
     ua: {
       title: 'Cars UA - Тест-драйв',

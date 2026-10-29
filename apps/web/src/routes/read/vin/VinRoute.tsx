@@ -12,7 +12,7 @@ export default function VinRoute(): ReactNode {
   const { t, i18n } = useTranslation()
 
   return (
-    <div className="mx-auto w-full max-w-content space-y-4">
+    <div className="mx-auto w-full max-w-6xl space-y-4">
       <ArticleHeader
         title={t('nav.readVin')}
         lead={pick(VIN_LEAD, i18n.language)}

@@ -1,12 +1,12 @@
 import { useState } from 'react'
-import type { ReactNode } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { brandLogoUrl, type NewsItem } from '@carplates/shared'
 
 import BrandLogo from '@/components/BrandLogo'
 import { cn } from '@/lib/cn'
 import { toIntlLocale } from '@/lib/intl'
-import { newsTitle } from '@/lib/news'
+import { newsGroupOfSource, newsTagColor, newsTitle } from '@/lib/news'
 
 type Props = {
   item: NewsItem
@@ -44,6 +44,8 @@ export default function NewsCard({
   const showImage = !!item.imageUrl && !imageFailed
   const hasBrandLogo = !!fallbackBrand && !!brandLogoUrl(fallbackBrand)
   const host = hostOf(item.url)
+  const group = newsGroupOfSource(item.source)
+  const tag = group ? newsTagColor(group.hue) : undefined
   const date = new Date(item.publishedAt).toLocaleDateString(toIntlLocale(i18n.language), {
     day: 'numeric',
     month: 'short'
@@ -56,8 +58,10 @@ export default function NewsCard({
       rel="noopener noreferrer nofollow"
       tabIndex={decorative ? -1 : undefined}
       aria-hidden={decorative || undefined}
+      style={tag ? ({ '--tag': tag } as CSSProperties) : undefined}
       className={cn(
         'group overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)]/60 transition-colors hover:bg-[var(--color-surface)]',
+        tag && 'border-l-4 border-l-(--tag)',
         horizontal ? 'flex items-stretch' : 'block',
         compact ? 'w-full' : 'w-72 shrink-0'
       )}
@@ -116,7 +120,7 @@ export default function NewsCard({
         </p>
 
         <p className="truncate text-xs text-[var(--color-muted)]">
-          {host} · {date}
+          <span className={cn(tag && 'font-medium text-[var(--tag)]')}>{host}</span> · {date}
           <span className="sr-only"> - {t('news.opensNewTab')}</span>
         </p>
       </div>

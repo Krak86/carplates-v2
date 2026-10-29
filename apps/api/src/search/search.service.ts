@@ -60,6 +60,19 @@ export type SearchFilters = {
  */
 const SEARCH_COUNT_CAP = 10_000
 
+/**
+ * Repeated queries (the next page, a re-sort, a shared link) reuse the fetched match set instead of re-running the
+ * 10k-row scan: the registry only changes on ingest, so a few minutes of staleness is invisible. Bounded, in-process
+ * (one API instance per colour; the other colour just warms its own copy).
+ */
+const MATCH_CACHE_TTL_MS = 5 * 60_000
+const MATCH_CACHE_MAX = 16
+
+/** Above this many matching brand/model spellings the `= ANY` route stops paying off; the substring scan is used instead. */
+const MAX_SPELLINGS = 1000
+
+const collator = new Intl.Collator()
+
 type SortableRow = {
   plate: string
   brand: string | null
@@ -72,6 +85,15 @@ type SortableRow = {
   operName: string | null
 }
 
+type MatchRow = Awaited<ReturnType<SearchService['fetchMatches']>>[number]
+
+type MatchEntry = {
+  at: number
+  rows: Promise<MatchRow[]>
+  /** Sorted copies of the rows by "sort:dir"; the rows themselves are shared, so each costs one pointer array. */
+  sorted: Map<string, MatchRow[]>
+}
+
 function sortValue(row: SortableRow, key: SearchSortKey): string | number | null {
   if (key === 'region') return regionName(row.plate) ?? null
   if (key === 'oper') return row.operName
@@ -80,6 +102,8 @@ function sortValue(row: SortableRow, key: SearchSortKey): string | number | null
 
 @Injectable()
 export class SearchService {
+  private readonly matchCache = new Map<string, MatchEntry>()
+
   constructor(@Inject(DbService) private readonly dbService: DbService) {}
 
   /** Top-10 brands by distinctPlates matching `q` — a popular real spelling outranks the ~36k distinct ingest-noise variants. */
@@ -162,13 +186,118 @@ export class SearchService {
     return { suggestions }
   }
 
-  async search(filters: SearchFilters): Promise<SearchResponse> {
-    const db = this.dbService.db
-    const conditions = [
+  /**
+   * Brand + model are the common search and the slow one: two substring ILIKEs on a 2-3 character model such as "A6" read
+   * 1.5M trigram hits (~2 s on 16M rows). The same match set is resolved from the small stats_by_* rollups (every distinct
+   * spelling, ~75 ms) and then served by the (brand, model) btree (ix_current_reg_brand_model). Same rows, ~25x faster.
+   */
+  private async nameConditions({ brand, model }: SearchFilters): Promise<SQL[]> {
+    const substring = [
       // Substring + case-insensitive, not an exact match on the suggestion's own spelling —
       // free text typed without picking a suggestion (any case, partial word) still matches.
-      filters.brand ? ilike(currentRegistration.brand, `%${filters.brand}%`) : undefined,
-      filters.model ? ilike(currentRegistration.model, `%${filters.model}%`) : undefined,
+      brand ? ilike(currentRegistration.brand, `%${brand}%`) : undefined,
+      model ? ilike(currentRegistration.model, `%${model}%`) : undefined
+    ].filter((c): c is SQL => c != null)
+    if (!brand || !model) return substring
+
+    const db = this.dbService.db
+    const [brands, models] = await Promise.all([
+      db
+        .select({ value: statsByBrand.brand })
+        .from(statsByBrand)
+        .where(ilike(statsByBrand.brand, `%${brand}%`))
+        .limit(MAX_SPELLINGS + 1),
+      db
+        .select({ value: statsByModel.model })
+        .from(statsByModel)
+        .where(ilike(statsByModel.model, `%${model}%`))
+        .limit(MAX_SPELLINGS + 1)
+    ])
+    if (brands.length > MAX_SPELLINGS || models.length > MAX_SPELLINGS) return substring
+    // stats_by_model is per brand, so the same spelling repeats.
+    const brandValues = [...new Set(brands.map(r => r.value).filter((v): v is string => v != null))]
+    const modelValues = [...new Set(models.map(r => r.value).filter((v): v is string => v != null))]
+    if (brandValues.length === 0 || modelValues.length === 0) return [sql`false`]
+    return [inArray(currentRegistration.brand, brandValues), inArray(currentRegistration.model, modelValues)]
+  }
+
+  private async fetchMatches(filters: SearchFilters, otherConditions: SQL[]) {
+    const conditions = [...(await this.nameConditions(filters)), ...otherConditions]
+    const where = conditions.length > 0 ? and(...conditions) : undefined
+    return this.dbService.db
+      .select({
+        plate: currentRegistration.plate,
+        vin: currentRegistration.vin,
+        brand: currentRegistration.brand,
+        model: currentRegistration.model,
+        makeYear: currentRegistration.makeYear,
+        color: currentRegistration.color,
+        fuel: currentRegistration.fuel,
+        dReg: currentRegistration.dReg,
+        kind: currentRegistration.kind,
+        body: currentRegistration.body,
+        operName: currentRegistration.operName,
+        operCode: currentRegistration.operCode
+      })
+      .from(currentRegistration)
+      .where(where)
+      .limit(SEARCH_COUNT_CAP)
+  }
+
+  /** The match set for these filters (sort and page excluded), shared by concurrent and repeated requests. */
+  private cachedMatches(filters: SearchFilters, otherConditions: SQL[]): MatchEntry {
+    const { sort: _s, dir: _d, page: _p, pageSize: _ps, ...key } = filters
+    const cacheKey = JSON.stringify(key, Object.keys(key).sort())
+    const now = Date.now()
+
+    const hit = this.matchCache.get(cacheKey)
+    if (hit && now - hit.at < MATCH_CACHE_TTL_MS) {
+      this.matchCache.delete(cacheKey) // re-insert: Map order = least recently used first
+      this.matchCache.set(cacheKey, hit)
+      return hit
+    }
+
+    // fetchMatches is async, so its result is a real promise: a bare Drizzle query is a lazy thenable that re-runs on every await.
+    const entry: MatchEntry = { at: now, rows: this.fetchMatches(filters, otherConditions), sorted: new Map() }
+    // A failed query must not be served again for the next 5 minutes.
+    entry.rows.catch(() => {
+      if (this.matchCache.get(cacheKey) === entry) this.matchCache.delete(cacheKey)
+    })
+    this.matchCache.delete(cacheKey)
+    this.matchCache.set(cacheKey, entry)
+    while (this.matchCache.size > MATCH_CACHE_MAX) {
+      const oldest = this.matchCache.keys().next().value
+      if (oldest === undefined) break
+      this.matchCache.delete(oldest)
+    }
+    return entry
+  }
+
+  /** Nulls last in both directions; plate is the tiebreaker so paging stays stable. */
+  private sortedMatches(entry: MatchEntry, rows: MatchRow[], filters: SearchFilters): MatchRow[] {
+    const sortKey = `${filters.sort}:${filters.dir}`
+    const cached = entry.sorted.get(sortKey)
+    if (cached) return cached
+
+    const sign = filters.dir === 'desc' ? -1 : 1
+    const sorted = [...rows].sort((a, b) => {
+      const av = sortValue(a, filters.sort)
+      const bv = sortValue(b, filters.sort)
+      if (av == null && bv != null) return 1
+      if (av != null && bv == null) return -1
+      if (av != null && bv != null && av !== bv) {
+        const cmp =
+          typeof av === 'number' && typeof bv === 'number' ? av - bv : collator.compare(String(av), String(bv))
+        if (cmp !== 0) return cmp * sign
+      }
+      return collator.compare(a.plate, b.plate)
+    })
+    entry.sorted.set(sortKey, sorted)
+    return sorted
+  }
+
+  async search(filters: SearchFilters): Promise<SearchResponse> {
+    const conditions = [
       filters.yearFrom != null ? gte(currentRegistration.makeYear, filters.yearFrom) : undefined,
       filters.yearTo != null ? lte(currentRegistration.makeYear, filters.yearTo) : undefined,
       filters.fuel ? ilike(currentRegistration.fuel, `%${fuelKeyword(filters.fuel)}%`) : undefined,
@@ -186,47 +315,14 @@ export class SearchService {
         ? inArray(sql`left(${currentRegistration.plate}, 2)`, platePrefixesForRegion(filters.region))
         : undefined
     ].filter((c): c is SQL => c != null)
-    const where = conditions.length > 0 ? and(...conditions) : undefined
-
-    const matches = await db
-      .select({
-        plate: currentRegistration.plate,
-        vin: currentRegistration.vin,
-        brand: currentRegistration.brand,
-        model: currentRegistration.model,
-        makeYear: currentRegistration.makeYear,
-        color: currentRegistration.color,
-        fuel: currentRegistration.fuel,
-        dReg: currentRegistration.dReg,
-        // Sort-only columns, stripped from the response below.
-        kind: currentRegistration.kind,
-        body: currentRegistration.body,
-        operName: currentRegistration.operName
-      })
-      .from(currentRegistration)
-      .where(where)
-      .limit(SEARCH_COUNT_CAP)
-
-    // Nulls last in both directions; plate is the tiebreaker so paging stays stable.
-    const sign = filters.dir === 'desc' ? -1 : 1
-    matches.sort((a, b) => {
-      const av = sortValue(a, filters.sort)
-      const bv = sortValue(b, filters.sort)
-      if (av == null && bv != null) return 1
-      if (av != null && bv == null) return -1
-      if (av != null && bv != null && av !== bv) {
-        const cmp = typeof av === 'number' && typeof bv === 'number' ? av - bv : String(av).localeCompare(String(bv))
-        if (cmp !== 0) return cmp * sign
-      }
-      return a.plate.localeCompare(b.plate)
-    })
+    const entry = this.cachedMatches(filters, conditions)
+    const matches = await entry.rows
+    const sorted = this.sortedMatches(entry, matches, filters)
 
     const offset = (filters.page - 1) * filters.pageSize
-    const total = matches.length
+    const total = sorted.length
     return {
-      results: matches
-        .slice(offset, offset + filters.pageSize)
-        .map(({ kind: _k, body: _b, operName: _o, ...row }) => row),
+      results: sorted.slice(offset, offset + filters.pageSize),
       total,
       totalIsExact: total < SEARCH_COUNT_CAP,
       page: filters.page,

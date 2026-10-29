@@ -30,7 +30,7 @@ export default function BodyTypesRoute(): ReactNode {
   }, [shape, isPending])
 
   return (
-    <div className="mx-auto w-full max-w-content space-y-4">
+    <div className="mx-auto w-full max-w-6xl space-y-4">
       <ArticleHeader
         title={t('nav.readBodyTypes')}
         lead={pick(BODY_TYPES_LEAD, i18n.language)}

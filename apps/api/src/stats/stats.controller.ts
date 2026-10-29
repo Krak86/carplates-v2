@@ -8,6 +8,7 @@ import type {
   OriginStatsResponse,
   RegionBrandStatsResponse,
   RegionFacetStatsResponse,
+  BrandStatsResponse,
   SizeModelsResponse,
   StatsFieldDimension,
   StatsFieldResponse
@@ -94,6 +95,13 @@ export class StatsController {
   })
   regionBrands(): Promise<RegionBrandStatsResponse> {
     return this.statsService.regionBrands()
+  }
+
+  @Get('brands')
+  @Header('Cache-Control', ROLLUP_CACHE)
+  @ApiOkResponse({ description: 'The 100 biggest brands { brands: [{ brand, n }] } (feeds the /play quizzes)' })
+  brands(): Promise<BrandStatsResponse> {
+    return this.statsService.brands()
   }
 
   @Get('region-facets')

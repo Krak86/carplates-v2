@@ -20,7 +20,7 @@ export default function DiscussRoute(): ReactNode {
   const about = searchParams.get('about')?.trim().slice(0, MAX_ABOUT_LENGTH)
 
   return (
-    <article className="mx-auto max-w-content space-y-4">
+    <article className="mx-auto max-w-6xl space-y-4">
       <h1 className="text-2xl font-bold">{t('discuss.heading')}</h1>
 
       {about && (

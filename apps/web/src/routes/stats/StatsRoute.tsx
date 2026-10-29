@@ -285,6 +285,11 @@ export default function StatsRoute(): ReactNode {
                     rows={dimensionRows(stats.data, 'region').map(r => ({ label: r.label, value: r[metric] }))}
                   />
                 </Suspense>
+                <p className="mt-2 text-sm">
+                  <Link to="/play?game=region" className="text-[var(--color-primary)] hover:underline">
+                    🎲 {t('play.quiz.region.title')}
+                  </Link>
+                </p>
               </LoadErrorBoundary>
             ) : (
               <StatsTable

@@ -39,6 +39,7 @@ import {
   originStatsResponseSchema,
   regionBrandStatsResponseSchema,
   regionFacetStatsResponseSchema,
+  brandStatsResponseSchema,
   sizeModelsResponseSchema,
   statsFieldResponseSchema,
   statsResponseSchema,
@@ -57,6 +58,7 @@ import type {
   OriginStatsResponse,
   RegionBrandStatsResponse,
   RegionFacetStatsResponse,
+  BrandStatsResponse,
   SizeModelsResponse,
   StatsFieldDimension,
   StatsFieldResponse,
@@ -74,6 +76,8 @@ import { foldOriginStats } from './stats-origin.js'
 
 // Leaderboard depth — must match MAX_TOP_N in apps/web/src/routes/stats/helpers.ts.
 const TOP_N = 10
+// Depth of `GET /api/stats/brands` (the /play logo and count quizzes).
+const BRAND_LIST_N = 100
 /** A model needs this many registered vehicles to enter the weight boards: passenger cars match the fuel model boards' floor, the rarer kinds a lower one. */
 const MIN_PASSENGER_WEIGHT_MODEL = 1500
 const MIN_OTHER_WEIGHT_MODEL = 200
@@ -218,6 +222,19 @@ export class StatsService {
       regions.set(r.region, entry)
     }
     return regionBrandStatsResponseSchema.parse({ regions: [...regions.values()] })
+  }
+
+  /** The biggest brands by distinct plates, for the /play quizzes (same rollup as the leaderboards, just deeper). */
+  async brands(): Promise<BrandStatsResponse> {
+    const rows = await this.dbService.db
+      .select()
+      .from(statsByBrand)
+      .where(isNotNull(statsByBrand.brand))
+      .orderBy(desc(statsByBrand.distinctPlates))
+      .limit(BRAND_LIST_N)
+    return brandStatsResponseSchema.parse({
+      brands: rows.flatMap(r => (r.brand ? [{ brand: r.brand, n: r.distinctPlates }] : []))
+    })
   }
 
   /** Per plate region: top models, fuel classes and brand home countries plus the fleet (a rollup rebuilt by `db:refresh-region-facet-stats`). */

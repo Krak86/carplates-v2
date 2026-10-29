@@ -318,6 +318,18 @@ above once scoped, or dropped if research says no.
 ### Actual — ready or in progress
 
 - ✅ History, favorites, camera/photo search, registry stats (table + map), brand breakdown, kind icon + logo — done, see Phase 1.5 / "Plate image recognition" in `docs/plan-done.md`.
+- ⏳ **Speed round: advanced search + photo recognition on 4G** (researched 2026-10-29; nothing measured yet, estimates from code). Indexes are already
+  complete (0012–0015, 0042, 0059), so the cost is the query shape: every page/sort click re-fetches up to 10k wide rows (`SEARCH_COUNT_CAP`) and sorts in Node.
+  (1) ✅ result cache + `Intl.Collator` sort in `search.service.ts` (write-up in `docs/plan-done.md` "Search result cache");
+  (2) ❌ tried 2026-10-29 and **removed**: uploading only on-device plate crops (detector as in AR) was 5-10x faster on emulated 4G (1.2-5.6 s vs 10-29 s) but lost confident reads on 10 of 90 eval photos
+  (15 reads; small background plates the detector does not box) - not acceptable, no plate may be lost. Write-up and numbers: `docs/plan-done.md` "Photo search: on-device plate crops". Instead: ✅ photo search always uploads the whole photo and shows an
+  "Uploading and recognizing..." status line, which turns into a slow-connection hint after 8 s (`PhotoThumbnail.tsx`, `photo.recognizing` / `photo.slowHint`).
+  (d) ✅ cache was storing a lazy Drizzle query (re-ran on every await), fixed with `Promise.resolve`; now 2.3 s first call, 0.2 s for page 2 / re-sort (write-up in "Photo search: on-device plate crops" > Measured).
+  (e) ❌ lower upload size: 2560 loses 7 confident reads, 4608 loses 1, so `MAX_DIMENSION` stays 4608 (`docs/plan-done.md` "Photo search: upload shrink size"). (f) ✅ `shrinkImage` runs in a worker (`image.worker.ts`); navigating on the plate string needs nothing (one JSON response). (g) ✅ `EXPLAIN` on brand+model: 2-char models defeat the trigram index; spellings now resolved from `stats_by_*` and served by the btree, 2.3 s -> 0.37 s, no migration (`docs/plan-done.md` "Advanced search: brand + model via the rollups").
+  **Left in the speed round (all optional, do when it hurts):**
+  (h) 📋 composite btree `(brand, model, make_year)` (new `packages/db/migrations/NNNN_*.sql`, backward compatible, `CREATE INDEX CONCURRENTLY`-style build): brand+model+year/colour still takes ~1.1 s (lossy bitmap heap scan, 1M rechecked rows, `docs/plan-done.md` "Advanced search: brand + model via the rollups"). Cost: long build and several hundred MB on the 8.8 GB `current_registration` (16.7M rows). Measure disk and the plan with the index first; only if brand+model+year is a common combination.
+  (i) 📋 `EXPLAIN (ANALYZE, BUFFERS)` on the other combinations, not measured yet: brand alone, model alone (the `= ANY` route needs both), region, fuel, body, oper, `purpose` (unindexed). Needs one slow filter from the owner; same recipe: resolve the spellings from `stats_by_*` when a substring filter is the cost.
+  (j) 📋 the per-instance match cache is cold after every deploy/restart (first call per filter set pays the full query); a warm-up of the top brand+model pairs is possible but not needed yet.
 - ⏳ Own ALPR model + AR overlay — step 1 (self-hosted OCR service,
   preferred over the metered cloud API above) done 2026-09-27; steps 2-4
   (client-side live detection, AR overlay, polish) not started — see
@@ -333,6 +345,9 @@ above once scoped, or dropped if research says no.
 - ✅ **Size & parking section + size-class chip** — done 2026-10-14 (`?section=size&tab=schema|parking|garage|norms`; RDW +
   Wikipedia + VIN merged, gaps forecast, scaled side/top drawing, ДБН / German / US bays, ПДР limits) — see
   `docs/plan-done.md`. Open: ⏳ ДБН Додаток Є class table (only the clause 5.2 / 4.6 figures are verified).
+- ✅ **Realistic vehicle drawings** — done 2026-10-29 (side/top silhouettes with arches, towing diagram, 6 new kind icons; original art, About note). Write-up: `docs/plan-done.md`.
+  ✅ Follow-up 2026-10-29: side outlines traced from real side-on photos (`SIDE_PATHS`; source photos not recorded - redraw from catalogue dimensions if a licence question comes up), pickup examples with dimensions. Write-up: `docs/plan-done.md` "Advanced search legend and icons, news page, page width, traced silhouettes".
+- ✅ **Advanced search legend + icons, news page colours/skeletons, one page width (`max-w-6xl`)** — done 2026-10-29, see `docs/plan-done.md`.
 - ✅ **Chip "?" explainers, `?weight=` tab URLs, mobile polish (pinch zoom, photo swipe), "VIN data starts in 2021" note** — done 2026-10-14, see `docs/plan-done.md`.
 - ✅ **VIN decode overview + plate-card split** — done 2026-10-02 (tabs, VIN anatomy, equipment map, engine/origin
   cards, grouped details; plate card now has separate _Registration history_ and _VIN decode_ sections) — see
@@ -391,7 +406,7 @@ above once scoped, or dropped if research says no.
   (`track.ua-gis.com/gtfs/lviv/vehicle_position`, ~11 s; licence unchecked) — an API proxy + lazy Leaflet map would give real moving public
   transport for Львів only; (b) YouTube ISS streams can be retired or embed-blocked — swap ids in `LIVE_STREAMS` (earth / traffic / city, `apps/web/src/lib/live-background.ts`; traffic/city streams added 2026-10-05).
 
-### Visual stats, map logos, cards and quizzes — planned 2026-10-29, steps 1-4 built, step 4 browser-checked
+### Visual stats, map logos, cards and quizzes — planned 2026-10-29, steps 1-5 built
 
 **Resume here:** steps 1-3 are built, browser-checked and committed (`bb4f87e`, `45723e8`; write-ups in `docs/plan-done.md` "Overlap fix for step 2" and "Map modes, step 3"; convention `docs/features-reference.md` "Map modes"). Step 4 (plate card PNG) is committed (`daf02cf`, `d3e822f`) and browser-checked 2026-10-29 (card with badge, long model title).
 Next: (a) browser-check step 4 (`lib/plate-card.ts`, write-up in plan-done "Plate card PNG"; try a plate with and without a ranking badge, dark/light, phone share sheet); (b) the link-preview `/og/<PLATE>.png` stays the API-rendered card, but now has the region flag (top-right) and `carsua.app` (done 2026-10-29, see plan-done "OG card flag"); (c) step 5 (quiz). `releases.ts` + About lines for map markers, modes and plate card done 2026-10-29 (steps 1-4 deployed to stage). Small follow-ups: model mode shows the logo only (name is in the tooltip); the `/stats` map is online-only.
@@ -410,7 +425,7 @@ Idea round: put the registry stats on the map and in diagrams, and add small can
 3. ✅ **Map modes** (2026-10-29) - `?logos=1&mode=brand|model|fuel|origin|ev` select on `/stats`; `registry.stats_region_facet` (migration 0080), `region-facet-stats.ts`, `GET /api/stats/region-facets`, `regionFacetStatsQuery`. EV share = electric fleet share from the fuel rows. Open: `releases.ts` / About once deployed.
 4. ✅ **Shareable plate card PNG** (2026-10-29, built and browser-checked) - canvas card (plate, brand logo, region flag, year, one fact) through the `renderChartPng` pipeline; button
    on the result card; link previews stay API-side (`apps/api/src/spa/`).
-5. ⏳ **Games hub `/play` + quizzes** (decided 2026-10-29: own route `/play`) - a hub listing every game (quizzes, the racer `/race` and `/relax`, later ones) as cards, plus the quiz itself:
+5. ✅ **Games hub `/play` + quizzes** (built 2026-10-29, write-up plan-done "Games hub /play"; region and higher-lower browser-checked, logo quiz / end screen / phone not yet) (decided 2026-10-29: own route `/play`) - a hub listing every game (quizzes, the racer `/race` and `/relax`, later ones) as cards, plus the quiz itself:
    "guess the region from the plate" on `StatsMap`, then logo quiz and higher/lower from `stats/top`. Streak and best score in localStorage first, accounts later.
    Cross links both ways: `/stats` map, `/read/plates`, the result-card region line and the racer banner link to `/play`; the quiz end screen links to `/stats`, `/read/plates`, `/race`
    and a plate lookup; a score can be shared as a picture (`renderPlateCardPng` / `renderChartPng`). New public route checklist: CLAUDE.md (`ROUTE_TITLE_KEYS`, `STATIC_PAGES` ua/ru/en, sidebar, About, releases).
@@ -651,7 +666,8 @@ So showing their data/images (hotlinked or re-hosted) needs written permission. 
 could not be fetched. autosize.org answers 403 to bots (bot protection) and its footer says "© 2026 AutoSize. All rights reserved".
 Their photos, 0-1000 ratings, "who it suits" texts and compiled tables are theirs; the underlying facts (dimensions, fuel use,
 recalls, NCAP stars) come from public sources we already use. Everything below is built from our own / open data. Owner decisions
-(2026-10-10): **no multi-car compare / duel / overlay** (skipped); no contact with the site owners.
+(2026-10-10): ~~no multi-car compare / duel / overlay (skipped)~~ **reversed 2026-10-29: compare is planned, after the
+catalog pages** (see "Car compare" below); no contact with the site owners.
 
 **Group 1 — own data, new UI (no new source)**
 
@@ -668,7 +684,7 @@ recalls, NCAP stars) come from public sources we already use. Everything below i
   MPG) as a collapsible block; tyre-size column only if a verified source appears.
 - **Fleet context** (already unique to us): units in UA, regions, colours, years; **import-market view** (EU / US / JP share via
   registry + VehiclesDB markets); **variants actually sold in UA** from registrations.
-- **Segment-peer list** — skipped with compare (it is a mini-compare).
+- **Segment-peer list** — a mini-compare; do it with "Car compare" below.
 
 **Group 2 — Euro NCAP (already ingested; improvements only)**
 
@@ -744,6 +760,16 @@ Group 1 dimension callouts + garage-fit -> Group 3 (existing order). Owner says 
       (registry stats + the existing model-level sections) as indexable SEO slugs; needs a canonical make/model taxonomy
       (registry models are trim-level) and TS-built rollup tables, not a matview. Full write-up: [docs/catalog-plan.md](docs/catalog-plan.md).
       Discovery checklist around it (Search Console, IndexNow, outreach, Reddit draft): [docs/discovery-plan.md](docs/discovery-plan.md).
+- [ ] **Car compare `/compare/:a~:b`** — idea 2026-10-29, **blocked on the catalog pages above** (not started). Side-by-side
+      dimensions (silhouette overlay + table) and every spec we have (RDW, VehiclesDB, NCAP, fleet counts).
+      Why wait: registry models are trim-level, so the picker, slugs and indexing need the canonical make/model/year taxonomy and
+      per-model record from [docs/catalog-plan.md](docs/catalog-plan.md); building first means a throwaway picker and slug migration.
+      Plan: (1) catalog taxonomy + per-model record (dimensions + specs merged); (2) route as a thin layer over it, input is a
+      model ref `{make, model, year}` (not a plate), indexable only when both sides are catalog pages (add to `ROUTE_TITLE_KEYS`,
+      `STATIC_PAGES`, `@Throttle`, edge cache per CLAUDE.md); (3) entry points: plate-card section pre-filled with the current
+      car, "compare with…" link on catalog pages, embeds in `/read/*` articles (sizes, body types). Reuse `components/size/*`
+      (`SideSilhouette`, `SizeCarTop`, `FitTable`, `ModelDimsRow`) and `sizeModels`. Optional earlier step: a two-car overlay
+      widget limited to `sizeModels` models inside the sizes article (no new route, no indexing). Also covers the segment-peer list.
 - **Shareable photo-search links** — idea 2026-10-01, deferred (not started).
   Share button on the photo card uploads the shrunk image + recognition result
   (candidates with boxes, EXIF meta) to `POST /api/shares`; opening

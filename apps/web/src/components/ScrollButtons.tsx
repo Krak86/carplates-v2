@@ -19,16 +19,19 @@ const BUTTON_CLASS =
 
 type Position = { left: number; bottom: number }
 
-// Beside the page's card (right of it), and never lower than the card's bottom edge. No card / no room → the screen corner.
+// Beside the page's content (right of it), and never lower than the content's bottom edge. No room → the screen corner.
+// The right edge comes from the result card, else the first home section (`main > *` is full-width there), else the page root.
 function measure(): Position {
-  const card = document.querySelector<HTMLElement>('main .card-vt') ?? document.querySelector<HTMLElement>('main > *')
+  const card = document.querySelector<HTMLElement>('main .card-vt')
+  const page = document.querySelector<HTMLElement>('main > *')
+  const edge = card ?? document.querySelector<HTMLElement>('main .section-vt') ?? page
   const fallback = { left: window.innerWidth - BUTTON_SIZE_PX - GAP_PX, bottom: GAP_PX }
-  if (!card) return fallback
-  const rect = card.getBoundingClientRect()
-  const left = rect.right + GAP_PX
+  if (!edge || !page) return fallback
+  const left = edge.getBoundingClientRect().right + GAP_PX
   if (left + BUTTON_SIZE_PX + GAP_PX > window.innerWidth) return fallback
-  // The stack's bottom edge must stay above the card's bottom.
-  return { left, bottom: Math.max(GAP_PX, window.innerHeight - rect.bottom + GAP_PX) }
+  // The stack's bottom edge must stay above the content's bottom.
+  const { bottom } = (card ?? page).getBoundingClientRect()
+  return { left, bottom: Math.max(GAP_PX, window.innerHeight - bottom + GAP_PX) }
 }
 
 // Section headers are the shared `SectionHeader` rows; an open one carries `data-open`. Clicking the row toggles it.

@@ -336,6 +336,8 @@ The API re-ranks a group by the registry (`RegistryRankService`): an alternative
 - The service latency budget is the API's 10 s `UPSTREAM_TIMEOUT_MS` (`local-recognize.service.ts`): after any change to
   `services/alpr/app.py` time `eval.mjs` (`results.json` has `ms`; baseline ~0.6 s/photo) and do not use the app during an eval.
 
+- **Always upload the whole photo (`shrinkImage`):** uploading only on-device plate crops was tried and removed (2026-10-29) because it lost plates the detector misses; do not reintroduce it without a recall check against `services/alpr/eval`. While recognition is pending, `PhotoThumbnail` shows a status line, and a slow-connection hint after 8 s. Details: `docs/plan-done.md` "Photo search: on-device plate crops".
+
 ## Plate regions
 
 `regionName` (`packages/shared/src/regions.ts`) = letter prefix (`REGIONS`) or, for digits-first legacy plates, `LEGACY_REGIONS`.
@@ -387,7 +389,7 @@ Relation to the car: `ResultCard` passes `own` (registry fuel / cc / kW / own ma
 ## Size & parking (`?section=size`)
 
 Files: `apps/web/src/components/size/` (write-up: `docs/plan-done.md` "Size & parking section"). Share link `?section=size&tab=schema|parking|garage|norms` (`parseSizeTab`; `'size'` is in `SHARE_SECTIONS`).
-Rules: figures come from the best source per field (RDW → Wikipedia → VIN); a missing one is a **forecast** (`source: 'estimate'`, dashed, ≈, own ❓) and the wording is always "catalogue / fleet value for the model, not this car". The class (A–F, SUV, MPV) is an approximate length-based European segment, never official; the header chip reads only the Specs queries (no VIN) and is hidden for a typical-shape-only forecast. **Ship no norm number that is not verified in the source text.** A new norm = a `LEGAL_LINKS` entry (url + clause, rendered as a ↗ link) + a `PARKING_REFS` row + `size.link.*` / `size.bay.*` strings in ua/ru/en. A new body shape = `SIZE_SHAPES` + `SHAPE_TYPICAL` + a path in `silhouettes.ts` + `size.shape.*`. Verdict thresholds and the mirror allowance are constants at the top of `fit.ts`. Tabs are separate lazy chunks; the VIN is decoded only once the section is open.
+Rules: figures come from the best source per field (RDW → Wikipedia → VIN); a missing one is a **forecast** (`source: 'estimate'`, dashed, ≈, own ❓) and the wording is always "catalogue / fleet value for the model, not this car". The class (A–F, SUV, MPV) is an approximate length-based European segment, never official; the header chip reads only the Specs queries (no VIN) and is hidden for a typical-shape-only forecast. **Ship no norm number that is not verified in the source text.** A new norm = a `LEGAL_LINKS` entry (url + clause, rendered as a ↗ link) + a `PARKING_REFS` row + `size.link.*` / `size.bay.*` strings in ua/ru/en. A new body shape = `SIZE_SHAPES` + `SHAPE_TYPICAL` + an entry in every record of `silhouettes.ts` (outline, glass, details, lights, mirror, wheel, arch, overhang, draw size, top layout) + `size.shape.*`. **Drawings (2026-10-29):** all vehicle art is original hand-drawn SVG (nothing copied from the internet; About `about.feature.drawings` says so - if a third-party silhouette is ever used, add it to `SOURCES` with its licence). `SideSilhouette` (side view, unit-box outline stretched to length x height, arches cut with a mask at the real axle positions, fixed tyre/rim colours that work in dark mode) serves the size schema, the guides' `ShapeSilhouette` and the towing `RdwMassSchema`; `SizeCarTop` (top view, `orientation` up for garage/parking, right for the schema) draws tapered body, glass-house, lamps, mirrors and tyres. The kind icons (`assets/vehicleShapes.tsx`, 90x90, tinted by registry colour) have 11 shapes; `tricycle`/`motoTricycle` share one and `special` still uses the old van-like `TruckShape`. Verdict thresholds and the mirror allowance are constants at the top of `fit.ts`. Tabs are separate lazy chunks; the VIN is decoded only once the section is open.
 
 ## Read guides (`/read`, 2026-10-16)
 
@@ -511,3 +513,15 @@ Files: migration 0075, `packages/shared/src/origin.ts` (own file, no offline-cac
 ## Appearance settings (sidebar)
 
 `ui-store.ts` holds `themeMode` (`auto` = follow the OS, stored as no value under `carplates.theme`; `theme` is the resolved value), `accent` and `textSize` (`carplates.accent` / `carplates.textSize`). They are applied as `data-accent` / `data-text-size` on `<html>` (absent = default blue / medium) and styled in `global.css` after the theme and `color-gamut` blocks; `index.html` re-applies them before first paint. A new accent = `ACCENTS` entry + light/dark/p3 tokens + `ACCENT_SWATCH` in `Sidebar.tsx` + `nav.accent.*` keys. The manifest `theme_color` is neutral white on purpose; the runtime `<meta name="theme-color">` follows the theme.
+
+## Games hub (`/play`)
+
+`routes/play/`; write-up plan-done "Games hub /play". `/play?game=region|logo|higher` plays in place, online-only. Rounds are pure functions in `helpers.ts` (plates come from `REGIONS`, never re-implemented). `StatsMap` `quiz` prop = clickable polygons without tooltip/legend. Best score per quiz in localStorage (`quiz-storage.ts`); a new quiz = id in `QUIZ_IDS`, component in `QUIZ_COMPONENT`, `play.quiz.<id>.title|desc` ua/ru/en. The end screen shares a score card via `renderPlateCardPng`.
+Question count (10/20/30/50) is global, picked on the hub (`readRounds`/`writeRounds`); best score is per quiz and length. Brand pool: `GET /api/stats/brands` -> `foldBrands` (never the full `statsQuery`).
+
+## Advanced search, news and page width (2026-10-29)
+
+- **Advanced search icons:** result rows and the Colour / Kind / Fuel / Status labels reuse the shared icon components (`BrandLogo`, `VehicleKindIcon`, body, colour, fuel, `OperStatusIcon`, region flag); a new facet needs its icon in the **Legend** too. `searchResultRowSchema` extras (`kind`, `body`, `operName`, `operCode`) stay `.nullable().optional()`.
+- **News source colours:** every outlet in `NEWS_SOURCE_GROUPS` (`lib/news.ts`) has a hue; use `newsTagColor` / `newsGroupOfSource`, never a colour literal in a component. Loading states are skeleton rows, never dimmed stale items.
+- **Page width:** route pages use `mx-auto max-w-6xl`; a new route must too (the floating scroll buttons follow that edge).
+- **Side silhouettes:** `SIDE_PATHS` (`components/size/silhouettes.ts`) are traced outlines in a unit box (rear 0 … front 1); arches are cut at draw time, so keep the outline down to the sill. Do not add a photo or another site's drawing; if the source of a trace is in doubt, redraw from catalogue dimensions.
