@@ -20,6 +20,30 @@ export const RELEASES: readonly ReleaseDay[] = [
     items: [
       item(
         'improved',
+        'Сторінка «Про проєкт»: повний короткий перелік можливостей (ШІ-агенти, план розвитку) і нове джерело - Fooocus для банерів гідів.',
+        'Страница «О проекте»: полный краткий перечень возможностей (ИИ-агенты, план развития) и новый источник - Fooocus для баннеров гидов.',
+        'About page: a complete short feature list (AI agents, roadmap) and a new source, Fooocus for the guide banners.'
+      ),
+      item(
+        'new',
+        'Мапа на /stats: позначки в кожній області - логотип найпопулярнішої марки, моделі, прапор країни походження, частка пального або електромобілів; режим обирається зі списку.',
+        'Карта на /stats: отметки в каждой области - логотип самой популярной марки, модели, флаг страны происхождения, доля топлива или электромобилей; режим выбирается из списка.',
+        'Map on /stats: a marker in each region showing the top brand logo, model, origin-country flag, fuel share or EV share; pick the mode from a list.'
+      ),
+      item(
+        'new',
+        'Кнопка «Зберегти як картинку» на картці номера: готова картка з номером, логотипом, прапором регіону та рейтингом для месенджерів.',
+        'Кнопка «Сохранить как картинку» на карточке номера: готовая карточка с номером, логотипом, флагом региона и рейтингом для мессенджеров.',
+        'A “Save as picture” button on the plate card: a ready-made image with the plate, logo, region flag and ranking line to share.'
+      ),
+      item(
+        'improved',
+        'Картка-превʼю посилання тепер із прапором регіону та написом carsua.app.',
+        'Карточка-превью ссылки теперь с флагом региона и надписью carsua.app.',
+        'Link-preview cards now show the region flag and carsua.app.'
+      ),
+      item(
+        'improved',
         'Для ШІ-агентів і пошуковиків: файл llms.txt, маніфест ARD та публічний опис API (OpenAPI) лише зі стабільними відкритими розділами.',
         'Для ИИ-агентов и поисковиков: файл llms.txt, манифест ARD и публичное описание API (OpenAPI) только со стабильными открытыми разделами.',
         'For AI agents and search engines: an llms.txt file, an ARD manifest and a public API description (OpenAPI) listing only the stable public sections.'

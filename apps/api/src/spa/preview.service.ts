@@ -1,5 +1,5 @@
 import { Inject, Injectable, Logger } from '@nestjs/common'
-import { brandSlug, classifyQuery, fallbackVehicleColor, resolveVehicleColor } from '@carplates/shared'
+import { brandSlug, classifyQuery, fallbackVehicleColor, REGION_IDS, resolveVehicleColor } from '@carplates/shared'
 import type { VehicleColor } from '@carplates/shared'
 
 import { PlateService } from '../plate/plate.service.js'
@@ -16,6 +16,8 @@ export type Preview = {
   description: string
   card: { plate: string; title: string; subtitle: string; color: VehicleColor }
   brandSlug: string | null
+  /** Plates only: the region's short id (names its link-preview flag), when it has one. */
+  regionId?: string | null
   /** Plates only: what the RDW estimate needs for a `?section=value` link. */
   vehicle?: { brand: string; model: string; year: number; kind: string | null }
 }
@@ -71,6 +73,7 @@ export class PreviewService {
         color: resolveVehicleColor(c.color) ?? fallbackVehicleColor(res.plate)
       },
       brandSlug: brandSlug(c.brand),
+      regionId: (REGION_IDS as Readonly<Record<string, string>>)[res.region ?? ''] ?? null,
       vehicle:
         c.brand && c.model && c.makeYear
           ? { brand: c.brand, model: c.model, year: c.makeYear, kind: c.kind }

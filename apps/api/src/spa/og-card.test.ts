@@ -45,3 +45,18 @@ describe('renderPng', () => {
     expect(png.readUInt32BE(20)).toBe(OG_HEIGHT)
   })
 })
+
+describe('buildCardSvg flag and site address', () => {
+  const flagPng = Buffer.from('flag')
+
+  it('draws the region flag only when there is one', () => {
+    const base = { plate: 'AA1234BB', title: 't', subtitle: 's', color: 'gray' as const }
+    expect(buildCardSvg({ ...base, flagPng })).toContain(`base64,${flagPng.toString('base64')}`)
+    expect(buildCardSvg(base)).not.toContain('y="40" width="150"')
+  })
+
+  it('prints carsua.app on the plate card and on the generic card', () => {
+    expect(buildCardSvg({ plate: 'AA1234BB', title: 't', subtitle: 's', color: 'gray' })).toContain('carsua.app')
+    expect(buildCardSvg({ plate: null, title: 't', subtitle: 's', color: 'blue' })).toContain('carsua.app')
+  })
+})

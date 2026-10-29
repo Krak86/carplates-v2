@@ -17,7 +17,15 @@ is_running "api-$OLD" || OLD=none
 echo "deploy $TAG: active=$OLD -> new=$NEW"
 
 set_env "API_TAG_${NEW^^}" "$TAG"
-docker compose pull "api-$NEW"
+# containerd occasionally fails a layer commit ("rename … ingest … no such file"); a retry after clearing stale partial
+# downloads normally succeeds. Still fails the deploy (old colour keeps serving) if every attempt fails.
+for attempt in 1 2 3; do
+  docker compose pull "api-$NEW" </dev/null && break
+  [ "$attempt" = 3 ] && { echo "image pull failed after $attempt attempts" >&2; exit 1; }
+  echo "pull failed (attempt $attempt), retrying…" >&2
+  docker image prune -f >/dev/null </dev/null || true
+  sleep $((attempt * 10))
+done
 
 # Stateful services first (no-ops when already up). `up -d` never recreates them unless their definition changed.
 docker compose up -d postgres alpr caddy

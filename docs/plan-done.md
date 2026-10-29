@@ -4039,3 +4039,39 @@ Release log gained 2026-10-29 (`releases.ts`, `latest.ts` bumped): all-language 
 Commits of the day after the first sync: `/read` guides grew (plates: old plates, types, custom-plate ordering, colours, services, history, in-app search; VIN: history, photo gallery, old numbers, errors, in-app search; fleet: colour rules and fuel facts with law links via `FactList`; imports: history, reasons, 2023 customs picture, sources list), interactive guides (example picker with to-scale drawings, own parking place, odometer on recalls), customs-check link, ZAKON font option, ALPR retry on upscaled small frames, `llms.txt` + ARD manifest + curated OpenAPI, Fooocus banners, Turnstile fit, VIN hint.
 
 Release log 2026-10-29 gained the previously missing items (agent discovery, banners, ALPR retry, Turnstile/VIN hint). About page: the guides feature line now lists the new guide content, and the sources list gained `radaLaws` (zakon.rada.gov.ua, the laws the guides cite), `diia`, `avtonomera`, `tsn`, `aec` (all link-only, ua/ru/en). Sources already present and reused: `hsc`, `eurlex`, `eauto`, `youtube`.
+
+## Map brand logos, steps 1-2 of "Visual stats, map logos, cards and quizzes" (2026-10-29)
+
+Plan and remaining steps: `PLAN.md` "Visual stats, map logos, cards and quizzes". Convention: `docs/features-reference.md` "Map brand logos".
+
+- **Data (step 1):** migration `0079_stats_region_brand.sql` + `statsRegionBrand` (Drizzle) hold the top 5 passenger-car brands per plate region and the region fleet (empty `brand` row). `scripts/src/region-brand-stats.ts` builds it from `current_registration` joined to `plate_regions` (brand tidied the same way as `ev-stats.ts`: whitespace collapsed, trailing model text stripped), `region-brand-fold.ts` folds spellings by `brandSlug` (test beside it). Registered in `derived-refresh.ts`, `scripts/package.json` and root `db:refresh-region-brand-stats`. Local run: 162 rows, 27 regions.
+- **API:** `GET /api/stats/region-brands` (`StatsService.regionBrands`, `ROLLUP_CACHE`), contract `packages/shared/src/regionBrandStats.ts`; web `getRegionBrandStats` + `regionBrandStatsQuery`. Not in the public OpenAPI allowlist; the Cloudflare rule already covers `/api/stats/*`. Not in `offline-cache.ts` (online-only map).
+- **UI (step 2):** `StatsMap` `logos` prop draws a white chip + `<image>` per region at the `geoPath` centroid (size `LOGO_MIN + LOGO_GROW * sqrt(fleet / maxFleet)`), tooltip adds "Top brands". `StatsRoute` has the `?logos=1` checkbox in map view (`stats.map.logos`, `stats.map.topBrands`, ua/ru/en). `/wanted` does not pass `logos`.
+- **Not done / not verified:** no browser pass yet (small regions overlap, dark theme, phone width); no `releases.ts` / About entry (add once deployed). Code committed in `bb4f87e`.
+
+### Overlap fix for step 2
+
+`spreadLogos` (`StatsMap.helpers.ts`) relaxes overlapping chips (the bigger one moves less, chips stay inside the map box); a chip that moved more than 6 map units gets a leader line and a dot at its true centroid. Київ no longer hides under Київська область. Checked in a browser in dark and light theme and at phone width (chips ~10px there, still readable).
+
+## Map modes, step 3 of "Visual stats, map logos, cards and quizzes" (2026-10-29)
+
+Plan: `PLAN.md` "Visual stats, map logos, cards and quizzes". Convention: `docs/features-reference.md` "Map brand logos".
+
+- **Data:** migration `0080_stats_region_facet.sql` + `statsRegionFacet` (`facet`, `region`, `value`, `n`): `model` (top 5, folded by brand slug + model), `origin` (top 5 brand home countries by the `brand_origin_period` row in force in the model year, `countryAtYear`), `fuel` (every `registryFuelClass`, `unknown` left out), `fleet` (empty value). `scripts/src/region-facet-stats.ts` (`db:refresh-region-facet-stats`, in `derived-refresh.ts`), pure fold in `region-facet-fold.ts` (test beside it). Local run: 434 rows, 27 regions.
+- **API:** `GET /api/stats/region-facets` (`StatsService.regionFacets`, `ROLLUP_CACHE`), contract `packages/shared/src/regionFacetStats.ts`, web `getRegionFacetStats` + `regionFacetStatsQuery`. Not in the OpenAPI allowlist; covered by the `/api/stats/*` cache rule; not offline.
+- **UI:** `StatsMap` takes `mode` (with `logos`); `regionMarker` in `StatsMap.helpers.ts` builds the chip per mode: logo (brand; model = logo of the leading words of the model name), flag from `/country-flags` (origin, code text for former states), coloured text chip (fuel: `--label-N` HDR tokens, EV share). The tooltip line shows the top 3 with their share. `StatsRoute` has the mode select (`?mode=`, default `brand` omitted). The checkbox label is now "Markers on the map" (`stats.map.logos`). `StatsMap.helpers.ts` is in `HELPER_GROUPS` (`helpers-stats-map`). `/wanted` is unchanged.
+- **Not done:** no `releases.ts` / About entry (add once deployed); model mode shows the logo only (the name is in the tooltip).
+
+## Plate card PNG, step 4 of "Visual stats, map logos, cards and quizzes" (2026-10-29)
+
+- **What:** a "Save as picture" chip next to "Share this page" on the result card (plates only) draws a 1200x630 card (plate in the UA plate style, brand logo on a white chip, region flag + name, year, one fact, `carsua.app`) and shares it as a PNG file through the native share sheet, else downloads `<plate>.png`.
+- **Files:** `lib/plate-card.ts` (`renderPlateCardPng`, canvas only, logo/flag loaded best-effort like `fetchImageAsPng`), `components/use-plate-card-actions.ts` (badge fact from `statsTopQuery` + `rankingBadges()[0]`, `navigator.canShare` then `downloadBlob`), `components/PlateCardButton.tsx`, `share.card` / `share.cardFailed` (ua/ru/en).
+- **Colours:** the accent reads the `--label-1` token via `getComputedStyle` (oklch when `CSS.supports`), sRGB `#f97316` fallback; the canvas is requested in `display-p3`.
+- **Not done:** no test; link previews unchanged (`/og/<PLATE>.png` is still the API-rendered image, not this card) (API-side `apps/api/src/spa/`); no `releases.ts` / About entry (add once deployed).
+
+## OG card: region flag and carsua.app (2026-10-29)
+
+- `/og/<PLATE>.png` (`apps/api/src/spa/og-card.ts`) draws the plate's region flag top-right (150x100, white frame; plates only, when the region has one) and `carsua.app` bottom-right on a dark backing (plate, VIN and generic cards). Everything else is unchanged. This is separate from the browser-drawn "Save as picture" card.
+- `REGION_IDS` moved to `packages/shared/src/regionIds.ts` (web `lib/region-ids.ts` re-exports it); `Preview.regionId` carries it; `OgController` reads `public/og-flags/<id>.png`.
+- resvg cannot decode WebP, so the flags are 180 px PNGs built from `assets/flags-lg` by `pnpm --filter scripts build:og-flags` (re-run after adding a region flag; 27 files, ~280 KB). Tests in `og-card.test.ts`; checked by rendering a sample card.
+- Cached cards (LRU, edge 1 day, crawlers) show the old image until they expire.

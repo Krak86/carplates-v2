@@ -9,6 +9,7 @@ export {
   isSovietPlate
 } from './plate.js'
 export { modelFamily, type ModelFamily } from './modelFamily.js'
+export { REGION_IDS } from './regionIds.js'
 export { hasKnownWmi, lookupWmi, type WmiMatch } from './wmi.js'
 export {
   LEGACY_COUNTRIES,
@@ -89,6 +90,8 @@ export {
 } from './distribution.js'
 export { sizeModelSchema, sizeModelsResponseSchema, type SizeModel, type SizeModelsResponse } from './sizeModels.js'
 export { evSplitSchema, evStatsResponseSchema, type EvSplit, type EvStatsResponse } from './evStats.js'
+export { regionBrandStatsResponseSchema, type RegionBrandStatsResponse } from './regionBrandStats.js'
+export { regionFacetStatsResponseSchema, type RegionFacetStatsResponse } from './regionFacetStats.js'
 export { importsStatsResponseSchema, type ImportsStatsResponse } from './importsStats.js'
 export { originStatsResponseSchema, type OriginStatsResponse } from './originStats.js'
 export { SPEC_METRICS, SPEC_METRIC_COLUMN, DEFAULT_SPEC_METRIC, type SpecMetric } from './specMetrics.js'
