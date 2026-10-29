@@ -66,7 +66,8 @@ export default function FitTable({ profiles }: Props): ReactNode {
         ))}
       </fieldset>
 
-      <div className="overflow-x-auto">
+      {/* `relative`: the absolutely positioned sr-only spans would otherwise escape the scroll box and widen the page. */}
+      <div className="relative overflow-x-auto">
         <table className="w-full min-w-[34rem] text-left text-sm">
           <thead>
             <tr className="border-b border-border">
