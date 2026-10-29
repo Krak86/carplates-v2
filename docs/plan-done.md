@@ -3098,6 +3098,14 @@ Trigger: the dev server showed ~22 MB / 337 requests before the first result. Th
   all MISS then HIT with the origin `Cache-Control`; `refresh=true` stays `no-store` + DYNAMIC. Audit of "Cache API rollups" found the bare
   `/api/stats` (prefix `/api/stats/` does not match it) DYNAMIC; `"/api/stats"` added to the `in {}` list, now MISS then HIT. `/api/stats/version`
   stays DYNAMIC. The rule editor must stay in "Edit expression" mode: "Use expression builder" discards `starts_with` / `in {}`.
+  ✅ **`inspector-issues` + `td-has-header` (2026-10-29, mobile Lighthouse on `/fuel`):** a11y 100 (`td-has-header` passes), best practices 77, SEO 100.
+  `inspector-issues` = two Report-Only CSP `kEvalViolation`s from our own chunk: Zod 4 probes `new Function` when a schema is *constructed*, and
+  `z.config({ jitless: true })` in `main.tsx` ran after the chunk that builds the schemas (the entry chunk statically imports it, so ES import
+  order in the source does not help). Fix: `apps/web/src/lib/zod-config.ts` (first import of `main.tsx`) plus `vendor-zod` and `zod-config` groups in
+  `vite.config.ts` so Zod core and its config are separate chunks the entry imports before the schemas. Verified locally on `vite preview`: no
+  `Function` constructor calls on load (a `Proxy` on `window.Function`, control call registered), page renders, console clean. Re-measure on prod
+  after deploy. `deprecations` (new, 3 warnings: FencedFrame, StorageType.persistent, Protected Audience) all come from Cloudflare's injected
+  `/cdn-cgi/challenge-platform/scripts/jsd/main.js`; only switching off JS Detections would clear it.
 
 ### Estimated value, weight rankings, community widgets and export ✅ BUILT (2026-10-09, `86cc500` … `bb9f055`)
 

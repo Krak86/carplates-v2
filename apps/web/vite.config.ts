@@ -28,7 +28,11 @@ const EXPORT_LIB =
 const VENDOR_GROUPS: Array<[string, RegExp]> = [
   ['vendor-react', /\/node_modules\/(react|react-dom|scheduler|react-router)\//],
   ['vendor-query', /\/node_modules\/@tanstack\//],
-  ['vendor-i18n', /\/node_modules\/(i18next|react-i18next)\//]
+  ['vendor-i18n', /\/node_modules\/(i18next|react-i18next)\//],
+  // Zod core and its config get their own chunks: `jitless` is read when a schema is constructed, so `zod-config` must
+  // evaluate before the chunk that builds the schemas (keep `@/lib/zod-config` the first import of `main.tsx`).
+  ['vendor-zod', /\/node_modules\/zod\//],
+  ['zod-config', /\/src\/lib\/zod-config\.ts$/]
 ]
 const HELPER_GROUPS: Array<[string, RegExp]> = [
   ['helpers-ratings', /\/src\/components\/SafetyRatings\.(helpers|brands)\.ts$/],
