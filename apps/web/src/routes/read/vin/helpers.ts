@@ -40,3 +40,13 @@ export type YearCodeRow = { code: string; year: number }
 
 /** Position-10 codes of the current 30-year cycle (A = 2010 … 9 = 2039), in order. */
 export const yearCodeRows = (): YearCodeRow[] => [...YEAR_CODES].map((code, i) => ({ code, year: 2010 + i }))
+
+export type VinIssue = 'letters' | 'long' | 'short'
+
+/** Why a typed VIN is not readable yet (null when it is, or when nothing is typed). */
+export function vinIssue(input: string): VinIssue | null {
+  const vin = cleanVin(input)
+  if (!vin || isVin(vin)) return null
+  if (/[IOQ]/.test(vin)) return 'letters'
+  return vin.length > 17 ? 'long' : 'short'
+}

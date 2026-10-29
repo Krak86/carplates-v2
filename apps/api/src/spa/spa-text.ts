@@ -348,17 +348,17 @@ export const STATIC_PAGES: Record<string, Record<Lang, PageText>> = {
     ua: {
       title: 'Cars UA - VIN-код: що означають 17 символів, рік випуску і де його знайти',
       description:
-        'З чого складається VIN, як за ним дізнатися виробника, країну й модельний рік, що таке контрольна цифра, де знайти VIN на авто і чому в реєстрі його може не бути.'
+        'З чого складається VIN, як за ним дізнатися виробника, країну й модельний рік, що таке контрольна цифра, історію VIN, де його знайти на авто, старі й радянські номери, чому VIN не розбирається і як шукати за ним.'
     },
     ru: {
       title: 'Cars UA - VIN-код: что значат 17 символов, год выпуска и где его найти',
       description:
-        'Из чего состоит VIN, как по нему узнать производителя, страну и модельный год, что такое контрольная цифра, где найти VIN на авто и почему в реестре его может не быть.'
+        'Из чего состоит VIN, как по нему узнать производителя, страну и модельный год, что такое контрольная цифра, историю VIN, где его найти на авто, старые и советские номера, почему VIN не разбирается и как искать по нему.'
     },
     en: {
       title: 'Cars UA - VIN explained: what the 17 characters mean, the model year and where to find it',
       description:
-        'What a VIN is made of, how to read the maker, country and model year off it, what the check digit is, where to find the VIN on a car and why the registry may not have it.'
+        'What a VIN is made of, how to read the maker, country and model year off it, what the check digit is, the history of the VIN, where to find it on a car, old and Soviet-era numbers, why a VIN may not decode and how to search by it.'
     }
   },
   '/features': {

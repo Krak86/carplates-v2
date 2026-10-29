@@ -3928,6 +3928,10 @@ A hub of explainers built on the registry: **`/read`** (cards + a "coming next" 
 
 **Twelfth article `/read/recalls` (2026-10-16):** recalls vs common faults — a static "recall is not a worn part" explainer, a model picker (five curated models, `recalls/content.ts` `EXAMPLES`) driving two live blocks over the existing per-model endpoints: campaign counts per market (`rdwRecallsQuery`, `nhtsaRecallsQuery`, `caRecallsQuery`) and UK MOT fail rate by mileage vs the UK average plus the top fault groups (`motQuery`, folded in `recalls/helpers.ts`). No new API, rollup or migration. Wording stays model-level and market-labelled, never "your car has a recall".
 
+### VIN guide: history, places, old numbers, errors, in-app search (2026-10-29)
+
+`/read/vin` grew from three sections to seven: a timeline of how the VIN format came about, a photo gallery of where a VIN sits on a car by kind of label (windscreen, door pillar, maker's plate, stamped, stickers and plastic parts, documents), old and Soviet-era number patterns, why a VIN fails to decode (characters, check digit, unknown prefix, machinery and trailers, registry quirks) and how to search by VIN in the app. The breakdown box got example chips for the common errors and a specific message for letters I/O/Q and for too-long input. Conventions: `docs/features-reference.md` "Read guides".
+
 ### Card → guide cross-links (2026-10-16)
 
 Each plate-card / VIN-page section now ends with a `ReadGuideLink` (pill, guide emoji, right arrow) to the /read guide on the same topic: no content is duplicated, only linked. Placement table and rules: `docs/features-reference.md` "Read guides". Guide icon / title key / hue moved into `GUIDE_META` so card chunks do not pull the long `articles.ts` leads.

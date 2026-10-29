@@ -1,14 +1,15 @@
 import type { ReactNode } from 'react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router'
 
 import SegmentExplainer from '@/components/SegmentExplainer'
 import type { SegmentColor } from '@/components/SegmentExplainer'
 import Card from '@/components/ui/Card'
 import { countryName, isoFlag, VIN_SEGMENT_POSITIONS } from '@/components/vin/helpers'
 import type { VinSegmentId } from '@/components/vin/types'
-import { cleanVin, EXAMPLE_VIN, readVin, yearCodeRows } from '@/routes/read/vin/helpers'
+import { pick } from '@/routes/read/helpers'
+import { PLACES, VIN_EXAMPLES, WHERE_ALSO, WHERE_INTRO } from '@/routes/read/vin/content'
+import { cleanVin, EXAMPLE_VIN, readVin, vinIssue, yearCodeRows } from '@/routes/read/vin/helpers'
 
 const SEGMENT_COLOR: Readonly<Record<VinSegmentId, SegmentColor>> = {
   wmi: 'sky',
@@ -27,7 +28,7 @@ export function AnatomySection(): ReactNode {
   const { t, i18n } = useTranslation()
   const [input, setInput] = useState(EXAMPLE_VIN)
   const reading = readVin(input)
-  const typed = cleanVin(input)
+  const issue = vinIssue(input)
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>): void => setInput(event.target.value)
 
@@ -63,9 +64,25 @@ export function AnatomySection(): ReactNode {
         className="mb-2 w-full max-w-sm rounded-lg border border-border bg-(--color-bg) px-3 py-1.5 font-mono uppercase"
       />
 
+      <ul className="mb-2 flex flex-wrap gap-1.5" aria-label={t('read.vin.examples')}>
+        {VIN_EXAMPLES.map(example => (
+          <li key={example.vin}>
+            <button
+              type="button"
+              onClick={() => setInput(example.vin)}
+              className="rounded-full border border-border px-2.5 py-0.5 text-sm hover:bg-(--color-bg)"
+            >
+              {pick(example.label, i18n.language)}
+            </button>
+          </li>
+        ))}
+      </ul>
+
       <p className="mb-3 min-h-6 text-sm" aria-live="polite">
-        {!reading && typed.length > 0 && (
-          <span className="text-muted">{t('read.vin.incomplete', { n: typed.length, max: VIN_LENGTH })}</span>
+        {!!issue && (
+          <span className="text-muted">
+            {t(`read.vin.issue.${issue}`, { n: cleanVin(input).length, max: VIN_LENGTH })}
+          </span>
         )}
         {!!reading && !reading.make && <span className="text-muted">{t('read.vin.unknownMaker')}</span>}
       </p>
@@ -117,34 +134,44 @@ export function YearsSection(): ReactNode {
   )
 }
 
-/** Where to find the VIN, and what to know about VINs in the Ukrainian registry. */
+/** Where the VIN sits on a car, grouped by the kind of label, with photos. */
 export function WhereSection(): ReactNode {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
 
   return (
     <Card id="where" className="scroll-mt-20">
       <h2 className="mb-2 text-xl font-semibold">{t('read.vin.whereTitle')}</h2>
-      <p className="mb-3 text-muted">{t('read.vin.whereIntro')}</p>
+      <p className="mb-4 text-muted">{pick(WHERE_INTRO, i18n.language)}</p>
 
-      <ul className="mb-4 list-disc space-y-1 pl-5">
-        <li>{t('read.vin.whereWindscreen')}</li>
-        <li>{t('read.vin.wherePillar')}</li>
-        <li>{t('read.vin.whereEngine')}</li>
-        <li>{t('read.vin.whereDocs')}</li>
+      <ul className="mb-3 space-y-5">
+        {PLACES.map(place => (
+          <li key={place.id} className="border-t border-border/50 pt-4 first:border-t-0 first:pt-0">
+            <h3 className="mb-1 font-medium">{pick(place.title, i18n.language)}</h3>
+            <p className="mb-2 text-sm">{pick(place.text, i18n.language)}</p>
+
+            <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              {place.photos.map(photo => (
+                <li key={photo.file}>
+                  <figure>
+                    <img
+                      src={`/read/vin/${photo.file}.webp`}
+                      alt={pick(photo.caption, i18n.language)}
+                      loading="lazy"
+                      decoding="async"
+                      className="aspect-[4/3] w-full rounded-lg border border-border object-cover"
+                    />
+                    <figcaption className="mt-1 text-center text-xs text-muted">
+                      {pick(photo.caption, i18n.language)}
+                    </figcaption>
+                  </figure>
+                </li>
+              ))}
+            </ul>
+          </li>
+        ))}
       </ul>
 
-      <h3 className="mb-1 font-medium">{t('read.vin.registryTitle')}</h3>
-      <ul className="mb-3 list-disc space-y-1 pl-5">
-        <li>{t('read.vin.registrySince')}</li>
-        <li>{t('read.vin.registryBody')}</li>
-        <li>{t('read.vin.registryLimits')}</li>
-      </ul>
-
-      <p className="text-sm">
-        <Link to="/" className="text-primary">
-          {t('read.vin.searchLink')}
-        </Link>
-      </p>
+      <p className="text-sm text-muted">{pick(WHERE_ALSO, i18n.language)}</p>
     </Card>
   )
 }

@@ -20,6 +20,12 @@ export const RELEASES: readonly ReleaseDay[] = [
     items: [
       item(
         'improved',
+        'Гід «VIN»: історія VIN, де шукати номер на авто (скло, стійка, табличка, вибитий номер, наклейки на пластику) з фото, старі й радянські номери, чому VIN не розбирається та як шукати за VIN у застосунку; у розборі є готові приклади помилкових VIN.',
+        'Гид «VIN»: история VIN, где искать номер на авто (стекло, стойка, табличка, выбитый номер, наклейки на пластике) с фото, старые и советские номера, почему VIN не разбирается и как искать по VIN в приложении; в разборе есть готовые примеры ошибочных VIN.',
+        'VIN guide: the history of the VIN, where to find it on a car (windscreen, pillar, plate, stamped number, stickers on plastic) with photos, old and Soviet-era numbers, why a VIN may not decode and how to search by VIN in the app; the breakdown has ready examples of faulty VINs.'
+      ),
+      item(
+        'improved',
         'Гід «Номерні знаки»: старі радянські номери з фото, типи номерних знаків із зразками (електро, жовті, індивідуальні, відомчі), як замовити індивідуальний номер; у перевірці - доступні номерні знаки; нерозпізнаний старий номер у пошуку тепер пояснюється.',
         'Гид «Номерные знаки»: старые советские номера с фото, типы номерных знаков с образцами (электро, жёлтые, индивидуальные, ведомственные), как заказать индивидуальный номер; в проверке - доступные номерные знаки; нераспознанный старый номер в поиске теперь объясняется.',
         'Plates guide: old Soviet-era plates with photos, plate types with samples (electric, yellow, custom, departmental), how to order a custom plate, and an available-plates check under Verification; an old-style plate with no result in search now gets an explanation.'
