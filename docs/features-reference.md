@@ -336,6 +336,8 @@ The API re-ranks a group by the registry (`RegistryRankService`): an alternative
 - The service latency budget is the API's 10 s `UPSTREAM_TIMEOUT_MS` (`local-recognize.service.ts`): after any change to
   `services/alpr/app.py` time `eval.mjs` (`results.json` has `ms`; baseline ~0.6 s/photo) and do not use the app during an eval.
 
+- **On-device crops (2026-10-29):** `readPlate` uploads plate crops found by the AR detector instead of the whole photo (`lib/photo-crops.ts`, pure parts in `photo-crops-helpers.ts`), falling back to the full `shrinkImage` upload. Crop reads keep one group per plate and their boxes are mapped back to fractions of the photo, so the group/box convention above is unchanged. Details and open checks: `docs/plan-done.md` "Photo search: on-device plate crops".
+
 ## Plate regions
 
 `regionName` (`packages/shared/src/regions.ts`) = letter prefix (`REGIONS`) or, for digits-first legacy plates, `LEGACY_REGIONS`.

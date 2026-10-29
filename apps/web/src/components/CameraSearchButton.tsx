@@ -3,6 +3,7 @@ import type { ChangeEvent, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import CameraCaptureDialog from '@/components/CameraCaptureDialog'
+import { preloadPlateDetector } from '@/lib/photo-crops'
 import { SEARCH_BUTTON_CLASS, SEARCH_BUTTON_ICON_CLASS } from '@/components/search-button-styles'
 
 type Props = {
@@ -49,6 +50,8 @@ export default function CameraSearchButton({ isPending, disabled = false, onCapt
       <button
         type="button"
         onClick={handleClick}
+        onPointerEnter={preloadPlateDetector}
+        onFocus={preloadPlateDetector}
         disabled={isPending || disabled}
         title={disabled ? t('offline.needsConnection') : undefined}
         className={SEARCH_BUTTON_CLASS}

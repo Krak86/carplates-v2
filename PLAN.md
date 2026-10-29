@@ -321,8 +321,8 @@ above once scoped, or dropped if research says no.
 - ⏳ **Speed round: advanced search + photo recognition on 4G** (researched 2026-10-29; nothing measured yet, estimates from code). Indexes are already
   complete (0012–0015, 0042, 0059), so the cost is the query shape: every page/sort click re-fetches up to 10k wide rows (`SEARCH_COUNT_CAP`) and sorts in Node.
   (1) ✅ result cache + `Intl.Collator` sort in `search.service.ts` (write-up in `docs/plan-done.md` "Search result cache");
-  (2) 📋 photo search: run the on-device detector (`plate-detector.onnx`, as AR does), upload only plate crops (KBs, not ≤2.5 MB), keep the full-image
-  upload as fallback, server skips tiling for a crop; (3) 📋 smaller default upload (`MAX_DIMENSION` 4608 → ~2560, `shrinkImage` off the main thread),
+  (2) ✅ built 2026-10-29, **not yet timed or checked on a real phone / the eval set**: photo search runs the on-device detector (`plate-detector.onnx`, as AR
+  does) and uploads only plate crops (KBs, not ≤2.5 MB); the full-image upload stays the fallback (`docs/plan-done.md` "Photo search: on-device plate crops"); (3) 📋 smaller default upload (`MAX_DIMENSION` 4608 → ~2560, `shrinkImage` off the main thread),
   preload the detector early, navigate as soon as the plate string is known; (4) 📋 `EXPLAIN (ANALYZE, BUFFERS)` on typical filter combos, then maybe
   normalized `brand_norm`/`model_norm` columns (btree instead of trigram) and an index on `purpose`. AR is faster than photo search because it uploads a ~160 px crop, not the frame.
 - ⏳ Own ALPR model + AR overlay — step 1 (self-hosted OCR service,
