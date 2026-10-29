@@ -391,10 +391,10 @@ above once scoped, or dropped if research says no.
   (`track.ua-gis.com/gtfs/lviv/vehicle_position`, ~11 s; licence unchecked) — an API proxy + lazy Leaflet map would give real moving public
   transport for Львів only; (b) YouTube ISS streams can be retired or embed-blocked — swap ids in `LIVE_STREAMS` (earth / traffic / city, `apps/web/src/lib/live-background.ts`; traffic/city streams added 2026-10-05).
 
-### Visual stats, map logos, cards and quizzes — planned 2026-10-29, steps 1-4 built
+### Visual stats, map logos, cards and quizzes — planned 2026-10-29, steps 1-4 built, step 4 browser-checked
 
-**Resume here:** steps 1-3 are built, browser-checked and committed (`bb4f87e`, `45723e8`; write-ups in `docs/plan-done.md` "Overlap fix for step 2" and "Map modes, step 3"; convention `docs/features-reference.md` "Map modes"). Step 4 (plate card PNG) is built, uncommitted and **not yet browser-checked**.
-Next: (a) browser-check step 4 (`lib/plate-card.ts`, write-up in plan-done "Plate card PNG"; try a plate with and without a ranking badge, dark/light, phone share sheet); (b) the link-preview `/og/<PLATE>.png` stays the API-rendered card, but now has the region flag (top-right) and `carsua.app` (done 2026-10-29, see plan-done "OG card flag"); (c) step 5 (quiz). Still owed once a step is deployed: a `releases.ts` entry (new day also bumps `releases/latest.ts`) and an About line (`about.feature.*`, ua/ru/en) for the map markers + modes. Small follow-ups: model mode shows the logo only (name is in the tooltip); the `/stats` map is online-only.
+**Resume here:** steps 1-3 are built, browser-checked and committed (`bb4f87e`, `45723e8`; write-ups in `docs/plan-done.md` "Overlap fix for step 2" and "Map modes, step 3"; convention `docs/features-reference.md` "Map modes"). Step 4 (plate card PNG) is committed (`daf02cf`, `d3e822f`) and browser-checked 2026-10-29 (card with badge, long model title).
+Next: (a) browser-check step 4 (`lib/plate-card.ts`, write-up in plan-done "Plate card PNG"; try a plate with and without a ranking badge, dark/light, phone share sheet); (b) the link-preview `/og/<PLATE>.png` stays the API-rendered card, but now has the region flag (top-right) and `carsua.app` (done 2026-10-29, see plan-done "OG card flag"); (c) step 5 (quiz). `releases.ts` + About lines for map markers, modes and plate card done 2026-10-29 (steps 1-4 deployed to stage). Small follow-ups: model mode shows the logo only (name is in the tooltip); the `/stats` map is online-only.
 Setup on a fresh DB: `pnpm install`, `pnpm db:migrate`, `pnpm db:refresh-region-brand-stats` (162 rows, 27 regions), `pnpm db:refresh-region-facet-stats` (434 rows, 27 regions), `pnpm --filter @carplates/shared build` and `pnpm --filter @carplates/db build` (both consumed from `dist/`), then `pnpm dev` (web on the first free port from 5173, API on 3000). Check at `/stats?view=map&logos=1&mode=brand|model|fuel|origin|ev`.
 
 Idea round: put the registry stats on the map and in diagrams, and add small canvas/HTML interactions on top of what already exists
@@ -408,7 +408,7 @@ Idea round: put the registry stats on the map and in diagrams, and add small can
    chip at each polygon centroid, sized by the region's fleet share; tooltip lists the top 3 brands. `/wanted` does not pass `logos`.
    Browser-checked 2026-10-29 (dark + light, phone width); overlaps fixed by `spreadLogos` (chips pushed apart, leader line to the centroid). Open: `releases.ts` entry once deployed.
 3. ✅ **Map modes** (2026-10-29) - `?logos=1&mode=brand|model|fuel|origin|ev` select on `/stats`; `registry.stats_region_facet` (migration 0080), `region-facet-stats.ts`, `GET /api/stats/region-facets`, `regionFacetStatsQuery`. EV share = electric fleet share from the fuel rows. Open: `releases.ts` / About once deployed.
-4. ✅ **Shareable plate card PNG** (2026-10-29, built, not browser-checked) - canvas card (plate, brand logo, region flag, year, one fact) through the `renderChartPng` pipeline; button
+4. ✅ **Shareable plate card PNG** (2026-10-29, built and browser-checked) - canvas card (plate, brand logo, region flag, year, one fact) through the `renderChartPng` pipeline; button
    on the result card; link previews stay API-side (`apps/api/src/spa/`).
 5. ⏳ **Quiz route** - "guess the region from the plate" on the map, then logo quiz and higher/lower from `stats/top`; new public route
    (checklist in CLAUDE.md), streak in localStorage first, accounts later.

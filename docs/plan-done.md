@@ -4067,7 +4067,7 @@ Plan: `PLAN.md` "Visual stats, map logos, cards and quizzes". Convention: `docs/
 - **What:** a "Save as picture" chip next to "Share this page" on the result card (plates only) draws a 1200x630 card (plate in the UA plate style, brand logo on a white chip, region flag + name, year, one fact, `carsua.app`) and shares it as a PNG file through the native share sheet, else downloads `<plate>.png`.
 - **Files:** `lib/plate-card.ts` (`renderPlateCardPng`, canvas only, logo/flag loaded best-effort like `fetchImageAsPng`), `components/use-plate-card-actions.ts` (badge fact from `statsTopQuery` + `rankingBadges()[0]`, `navigator.canShare` then `downloadBlob`), `components/PlateCardButton.tsx`, `share.card` / `share.cardFailed` (ua/ru/en).
 - **Colours:** the accent reads the `--label-1` token via `getComputedStyle` (oklch when `CSS.supports`), sRGB `#f97316` fallback; the canvas is requested in `display-p3`.
-- **Not done:** not browser-checked yet (only `tsc` + eslint); no test; link previews unchanged (`/og/<PLATE>.png` is still the API-rendered image, not this card) (API-side `apps/api/src/spa/`); no `releases.ts` / About entry (add once deployed).
+- **Not done:** no test; link previews unchanged (`/og/<PLATE>.png` is still the API-rendered image, not this card) (API-side `apps/api/src/spa/`); no `releases.ts` / About entry (add once deployed).
 
 ## OG card: region flag and carsua.app (2026-10-29)
 
