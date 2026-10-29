@@ -37,7 +37,7 @@ export default function PlayRoute(): ReactNode {
   if (game) {
     const Quiz = QUIZ_COMPONENT[game]
     return (
-      <div className="mx-auto max-w-2xl">
+      <div className="mx-auto max-w-6xl">
         <div className="mb-3 flex items-center justify-between gap-3">
           <Link to="/play" className="text-sm text-[var(--color-primary)] hover:underline">
             {t('play.back')}
@@ -56,7 +56,7 @@ export default function PlayRoute(): ReactNode {
   }
 
   return (
-    <div className="mx-auto max-w-3xl">
+    <div className="mx-auto max-w-6xl">
       <h1 className="text-2xl font-semibold">{t('play.title')}</h1>
       <p className="mt-1 mb-4 text-[var(--color-muted)]">{t('play.intro')}</p>
 

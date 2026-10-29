@@ -50,7 +50,7 @@ export default function ReleasesRoute(): ReactNode {
   }
 
   return (
-    <div className="mx-auto w-full max-w-content">
+    <div className="mx-auto w-full max-w-6xl">
       <Card className="mb-4">
         <h1 className="mb-2 text-2xl font-bold">{t('releases.title')}</h1>
         <p className="text-[var(--color-muted)]">{t('releases.intro')}</p>

@@ -30,7 +30,7 @@ export default function AdminRoute(): ReactNode {
   const tab = isTab(requested) ? requested : DEFAULT_TAB
 
   return (
-    <div className="mx-auto w-full max-w-content">
+    <div className="mx-auto w-full max-w-6xl">
       <AccountNav />
 
       <h1 className="mb-3 text-2xl font-bold">{t('admin.title')}</h1>

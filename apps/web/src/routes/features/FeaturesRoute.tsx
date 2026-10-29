@@ -59,7 +59,7 @@ export default function FeaturesRoute(): ReactNode {
   }
 
   return (
-    <div className="mx-auto w-full max-w-content">
+    <div className="mx-auto w-full max-w-6xl">
       <AccountNav />
 
       {/* Opaque-ish panel: the page sits over a user-chosen photo/live background, so bare text isn't always legible. */}

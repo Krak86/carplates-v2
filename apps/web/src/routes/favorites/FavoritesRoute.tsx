@@ -31,7 +31,7 @@ export default function FavoritesRoute(): ReactNode {
   const visible = favorites.data ? filterFavorites(favorites.data, query, activeIds) : []
 
   return (
-    <div className="mx-auto w-full max-w-content">
+    <div className="mx-auto w-full max-w-6xl">
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-bold">{t('favorites.title')}</h1>
         {favorites.isSuccess && favorites.data.length > 0 && (

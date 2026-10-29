@@ -89,7 +89,7 @@ export default function NewsRoute(): ReactNode {
   const sortLabel = t(order === 'desc' ? 'news.sortNewest' : 'news.sortOldest')
 
   return (
-    <div className="mx-auto max-w-content space-y-4">
+    <div className="mx-auto max-w-6xl space-y-4">
       <h1 className="text-2xl font-bold">
         <span aria-hidden>📰</span> {t('news.heading')}
       </h1>

@@ -28,7 +28,7 @@ export default function ProfileRoute(): ReactNode {
   if (!user) return <Navigate to="/" replace />
 
   return (
-    <div className="mx-auto w-full max-w-content">
+    <div className="mx-auto w-full max-w-6xl">
       <AccountNav />
 
       <Card className="mb-4">

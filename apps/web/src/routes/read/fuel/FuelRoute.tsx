@@ -11,7 +11,7 @@ export default function FuelRoute(): ReactNode {
   const { t, i18n } = useTranslation()
 
   return (
-    <div className="mx-auto w-full max-w-content space-y-4">
+    <div className="mx-auto w-full max-w-6xl space-y-4">
       <ArticleHeader
         title={t('nav.readFuel')}
         lead={pick(FUEL_LEAD, i18n.language)}
