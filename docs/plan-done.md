@@ -3106,7 +3106,14 @@ Trigger: the dev server showed ~22 MB / 337 requests before the first result. Th
   `Function` constructor calls on load (a `Proxy` on `window.Function`, control call registered), page renders, console clean. ✅ Re-measured on prod after
   deploy (SW unregistered, `caches` deleted, hard reload; loaded `index-xr31a3ZQ.js` = no-store `/`; `vendor-zod` + `zod-config` chunks loaded): `/fuel` mobile
   a11y 100, best practices **100** (was 77), SEO 100, console clean, no CSP eval issue. `deprecations` passed this run, so the Cloudflare script
-  warnings are intermittent. `deprecations` (new, 3 warnings: FencedFrame, StorageType.persistent, Protected Audience) all come from Cloudflare's injected
+  warnings are intermittent.
+  **`llms.txt` + ARD manifest (2026-10-29):** `apps/web/public/llms.txt` (H1, summary, links to the stable public pages). `ai-catalog.json` (Lighthouse
+  `ard-schema`): this Lighthouse probes `/.well-known/ai-catalog.json` (the spec's newer name is `ard.json`), so both files are published with the same
+  content; the schema requires `specVersion: "1.0"` and only `specVersion` / `host` / `entries` at top level (checked with Ajv against the bundled
+  schema, plus a negative control). The single entry points at `/.well-known/openapi.json`, a curated OpenAPI document built in `main.ts` from the full
+  generated one (`publicOpenApiDoc`: path allowlist `/api/stats*` + `/api/wanted/stats`, unreferenced schemas pruned, no UI, always on regardless of
+  `ENABLE_SWAGGER`). Deliberately **not** listed: per-vehicle lookups (enumerable), admin / auth / account routes, and anything built on scraped
+  third-party sources (wiki, specs, safety ratings; `docs/legal-and-monetization.md`). Widen the allowlist one prefix at a time. `deprecations` (new, 3 warnings: FencedFrame, StorageType.persistent, Protected Audience) all come from Cloudflare's injected
   `/cdn-cgi/challenge-platform/scripts/jsd/main.js`; only switching off JS Detections would clear it.
 
 ### Estimated value, weight rankings, community widgets and export ✅ BUILT (2026-10-09, `86cc500` … `bb9f055`)

@@ -1,0 +1,22 @@
+{
+  "specVersion": "1.0",
+  "host": {
+    "displayName": "Cars UA",
+    "documentationUrl": "https://carsua.app/about",
+    "logoUrl": "https://carsua.app/logo.png"
+  },
+  "entries": [
+    {
+      "identifier": "urn:air:carsua.app:openapi:registry-stats",
+      "displayName": "Cars UA registry statistics API",
+      "description": "Read-only statistics derived from Ukraine's open vehicle registry (data.gov.ua): most common makes, colours, fuels and regions, imports, electric vehicles, and wanted-vehicle counts.",
+      "type": "application/vnd.oai.openapi+json",
+      "url": "https://carsua.app/.well-known/openapi.json",
+      "representativeQueries": [
+        "what are the most common car makes in Ukraine",
+        "how many electric vehicles are registered in Ukraine",
+        "how many vehicles are wanted in Ukraine by region"
+      ]
+    }
+  ]
+}

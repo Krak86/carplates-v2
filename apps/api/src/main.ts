@@ -10,6 +10,7 @@ import { cleanupOpenApiDoc } from 'nestjs-zod'
 
 import { AppModule } from './app.module.js'
 import { loadEnv, swaggerEnabled } from './env.js'
+import { publicOpenApiDoc } from './openapi/public-doc.js'
 
 async function bootstrap(): Promise<void> {
   const env = loadEnv()
@@ -41,8 +42,8 @@ async function bootstrap(): Promise<void> {
     credentials: true
   })
 
-  if (swaggerEnabled(env)) {
-    const doc = SwaggerModule.createDocument(
+  const doc = cleanupOpenApiDoc(
+    SwaggerModule.createDocument(
       app,
       new DocumentBuilder()
         .setTitle('Cars UA API')
@@ -50,8 +51,14 @@ async function bootstrap(): Promise<void> {
         .setVersion('0.1')
         .build()
     )
-    SwaggerModule.setup('api/docs', app, cleanupOpenApiDoc(doc), { jsonDocumentUrl: 'api/docs-json' })
-  }
+  )
+  if (swaggerEnabled(env)) SwaggerModule.setup('api/docs', app, doc, { jsonDocumentUrl: 'api/docs-json' })
+  // The curated subset that `/.well-known/ard.json` points agents at; JSON only, no UI. Always on (unlike Swagger).
+  SwaggerModule.setup('.well-known/openapi', app, publicOpenApiDoc(doc), {
+    ui: false,
+    raw: ['json'],
+    jsonDocumentUrl: '.well-known/openapi.json'
+  })
 
   await app.listen({ port: env.PORT, host: '0.0.0.0' })
   new Logger('Bootstrap').log(`API listening on http://localhost:${env.PORT}`)
