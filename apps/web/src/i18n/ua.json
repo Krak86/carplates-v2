@@ -2774,6 +2774,8 @@
   "admin.none": "-",
   "features.comingSoonEmpty": "Зараз у розробці нічого немає. Зазирніть пізніше або подивіться, що ми розглядаємо нижче.",
   "features.considering": "Розглядаємо",
+  "features.suggest": "Маєте власну ідею? Запропонуйте",
+  "features.releasesLink": "Що вже готово - дивіться в «Що нового»",
   "account.delete.title": "Видалити акаунт?",
   "account.delete.permanent": "Акаунт буде остаточно видалено через {{days}} дн.; вхід до цього строку скасує видалення. Буде видалено:",
   "account.delete.itemProfile": "ваш акаунт і профіль (ім’я, email, фото)",

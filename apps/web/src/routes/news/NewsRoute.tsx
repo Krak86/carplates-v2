@@ -8,7 +8,7 @@ import NewsCard from '@/components/NewsCard'
 import Spinner from '@/components/ui/Spinner'
 import { cn } from '@/lib/cn'
 import { toIntlLocale } from '@/lib/intl'
-import { NEWS_PAGE_SIZE, NEWS_SEARCH_MIN_CHARS, NEWS_SOURCE_GROUPS, newsLangFilter, sourceIdsOf } from '@/lib/news'
+import { NEWS_PAGE_SIZE, NEWS_SEARCH_MIN_CHARS, NEWS_SOURCE_GROUPS, sourceIdsOf } from '@/lib/news'
 import { newsPageQuery } from '@/lib/queries'
 
 const SEARCH_DEBOUNCE_MS = 350
@@ -32,7 +32,7 @@ export default function NewsRoute(): ReactNode {
   const [searchOpen, setSearchOpen] = useState(!!q)
   const [draft, setDraft] = useState(q)
   const news = useQuery(
-    newsPageQuery({ page, sources: sourceIdsOf(selected), q, order, lang: newsLangFilter(i18n.language) })
+    newsPageQuery({ page, sources: sourceIdsOf(selected), q, order })
   )
 
   useEffect(() => (): void => clearTimeout(debounce.current), [])

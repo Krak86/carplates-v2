@@ -2774,6 +2774,8 @@
   "admin.none": "-",
   "features.comingSoonEmpty": "Сейчас в разработке ничего нет. Загляните позже или посмотрите, что мы рассматриваем ниже.",
   "features.considering": "Рассматриваем",
+  "features.suggest": "Есть своя идея? Предложите",
+  "features.releasesLink": "Что уже готово - смотрите в «Что нового»",
   "account.delete.title": "Удалить аккаунт?",
   "account.delete.permanent": "Аккаунт будет окончательно удалён через {{days}} дн.; вход до этого срока отменит удаление. Будет удалено:",
   "account.delete.itemProfile": "ваш аккаунт и профиль (имя, email, фото)",

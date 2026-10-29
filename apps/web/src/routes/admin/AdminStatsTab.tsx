@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next'
 
 import Card from '@/components/ui/Card'
 import Spinner from '@/components/ui/Spinner'
-import { PAID_FEATURE_ICON } from '@/lib/paid-features'
 import { adminAnalyticsQuery, adminStatsQuery } from '@/lib/queries'
 
 type TileProps = { label: string; value: number | null }
@@ -35,7 +34,7 @@ export default function AdminStatsTab(): ReactNode {
   if (stats.isPending) return <Spinner />
   if (stats.isError) return <p className="text-red-600">{t('result.error')}</p>
 
-  const { totals, windows, daily, languages, featureOptIns } = stats.data
+  const { totals, windows, daily, languages } = stats.data
   const maxDaily = Math.max(1, ...daily.map(d => d.searches))
   const a = analytics.data
 
@@ -89,30 +88,16 @@ export default function AdminStatsTab(): ReactNode {
         </div>
       </Card>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <h2 className="mb-2 font-semibold">{t('admin.stats.languages')}</h2>
-          {languages.length === 0 && <p className="text-sm text-[var(--color-muted)]">-</p>}
-          {languages.map(l => (
-            <div key={l.lang} className="flex justify-between text-sm tabular-nums">
-              <span>{l.lang}</span>
-              <span>{l.count.toLocaleString()}</span>
-            </div>
-          ))}
-        </Card>
-
-        <Card>
-          <h2 className="mb-2 font-semibold">{t('admin.stats.optIns')}</h2>
-          {featureOptIns.map(f => (
-            <div key={f.feature} className="flex justify-between text-sm tabular-nums">
-              <span>
-                <span aria-hidden>{PAID_FEATURE_ICON[f.feature]}</span> {t(`paid.${f.feature}.title`)}
-              </span>
-              <span>{f.users}</span>
-            </div>
-          ))}
-        </Card>
-      </div>
+      <Card>
+        <h2 className="mb-2 font-semibold">{t('admin.stats.languages')}</h2>
+        {languages.length === 0 && <p className="text-sm text-[var(--color-muted)]">-</p>}
+        {languages.map(l => (
+          <div key={l.lang} className="flex justify-between text-sm tabular-nums">
+            <span>{l.lang}</span>
+            <span>{l.count.toLocaleString()}</span>
+          </div>
+        ))}
+      </Card>
 
       <Card>
         <h2 className="mb-3 font-semibold">{t('admin.stats.posthog')}</h2>

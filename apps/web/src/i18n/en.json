@@ -2294,6 +2294,8 @@
   "admin.none": "-",
   "features.comingSoonEmpty": "Nothing is in development right now. Check back soon, or see what we're considering below.",
   "features.considering": "Under consideration",
+  "features.suggest": "Have your own idea? Suggest it",
+  "features.releasesLink": "See what's already shipped in What's new",
   "account.delete.title": "Delete your account?",
   "account.delete.permanent": "Your account will be deleted for good in {{days}} days; signing in again before then cancels it. We will delete:",
   "account.delete.itemProfile": "your account and profile (name, email, photo)",

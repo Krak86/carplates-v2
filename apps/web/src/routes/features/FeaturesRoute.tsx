@@ -2,7 +2,7 @@ import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { Navigate } from 'react-router'
+import { Link, Navigate } from 'react-router'
 import type { PaidFeature } from '@carplates/shared'
 
 import AccountNav from '@/components/auth/AccountNav'
@@ -66,6 +66,9 @@ export default function FeaturesRoute(): ReactNode {
       <Card className="mb-4">
         <h1 className="mb-2 text-2xl font-bold">{t('features.title')}</h1>
         <p className="text-[var(--color-muted)]">{t('features.intro')}</p>
+        <Link to="/releases" className="mt-2 inline-block text-[var(--color-primary)] hover:underline">
+          {t('features.releasesLink')}
+        </Link>
       </Card>
 
       {HAS_TOGGLES && features.isPending && (
@@ -126,6 +129,11 @@ export default function FeaturesRoute(): ReactNode {
               </div>
             ))}
           </Card>
+          {titleKey === 'features.considering' && (
+            <Link to="/discuss" className="mt-2 inline-block text-[var(--color-primary)] hover:underline">
+              {t('features.suggest')}
+            </Link>
+          )}
         </section>
       ))}
     </div>
