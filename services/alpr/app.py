@@ -59,7 +59,9 @@ def _confidence(value: float | list[float]) -> float:
 TILE_SIZE = 640
 TILE_OVERLAP = 0.25  # a plate up to ~25% of a tile wide survives a tile seam
 MAX_TILES = 24
-MIN_TILED_SIDE = 768  # smaller frames have nothing to gain from tiling
+MIN_TILED_SIDE = 768  # smaller frames have nothing to gain from tiling; if they read nothing they are retried upscaled
+UPSCALE_TARGET_SIDE = 1600  # a ~50px plate in a 540px frame is only found from ~3x (2x: nothing)
+UPSCALE_MAX = 3  # a tiny thumbnail gains nothing past this
 DUPLICATE_OVERLAP = 0.5  # intersection / smaller box area above this = same plate
 
 
@@ -322,6 +324,19 @@ def _overlap(a: tuple[float, float, float, float], b: tuple[float, float, float,
 
 
 def _predict_tiled(frame: np.ndarray) -> list[dict[str, Any]]:
+    results = _predict_frame(frame)
+    longest = max(frame.shape[:2])
+    if results or longest >= MIN_TILED_SIDE:
+        return results
+    # Nothing found in a small frame (a screenshot of a video, a thumbnail): the detector saw a ~40px
+    # plate at its 384px letterbox and missed it. Scale up so the tiles show it at a usable size. Only a
+    # retry: on frames that already read, upscaling adds junk reads and can unsettle a tight plate crop.
+    # Boxes are fractions of the frame, so the scale doesn't leak into the response.
+    scale = min(UPSCALE_MAX, UPSCALE_TARGET_SIDE / longest)
+    return _predict_frame(cv2.resize(frame, None, fx=scale, fy=scale, interpolation=cv2.INTER_CUBIC))
+
+
+def _predict_frame(frame: np.ndarray) -> list[dict[str, Any]]:
     height, width = frame.shape[:2]
     # (box in full-frame coords, detection confidence, plate, score, every read tried for it)
     found: list[tuple[tuple[float, float, float, float], float, str, float, list[tuple[str, float]]]] = []

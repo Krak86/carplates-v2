@@ -1821,6 +1821,15 @@ confident detection. A first fraction-based 2×2 grid was too weak for plates
 real pixels. Exercised against the rebuilt container on the 88-photo eval set
 (2026-10-01); `DSC_0098.JPG` still reads both plates.
 
+**Small-frame upscale retry (2026-10-29).** A 447×543 video screenshot of a bus
+(plate ≈50px wide) got "No plate found": frames <768px are never tiled and the
+full-frame detector missed it (it found the plate on a tight crop at ~0.7). Now
+`_predict_tiled` retries a frame that read nothing upscaled (long side →1600, max
+3×; 2× still found nothing) so the 640px tiles apply. Retry only, not always:
+upscaling every small frame added junk reads (`TOURISM`, `NJUPQ`) and unsettled a
+stacked plate (`ua_kaeo3881` 0.835→0.598). The bus plate now reads `BC1552PT` at
+0.998; all 90 eval photos give identical reads.
+
 **Photo viewer + limits hint (2026-09-30).** Uploaded-photo preview is now
 `object-contain` (whole image, not a cropped strip) and opens a full-screen
 `PhotoZoomDialog` (wheel zoom toward cursor, drag/arrow pan, `+`/`−`/`0`,
