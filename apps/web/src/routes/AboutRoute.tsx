@@ -217,7 +217,9 @@ const SOURCES: readonly Source[] = [
   },
   // No logo: the typeface page does not grant reuse of the Diia / Ministry marks.
   { key: 'eUkraine', label: 'e-Ukraine typeface', url: 'https://thedigital.gov.ua/fonts', tile: 'bg-blue-700' },
-  { key: 'zakon', label: 'ZAKON typeface', url: 'https://mincult.gov.ua/zakon/', tile: 'bg-blue-700' }
+  { key: 'zakon', label: 'ZAKON typeface', url: 'https://mincult.gov.ua/zakon/', tile: 'bg-blue-700' },
+  // No logo: AI-generated banner pictures; plain tile.
+  { key: 'fooocus', label: 'Fooocus', url: 'https://github.com/lllyasviel/Fooocus', tile: 'bg-slate-500' }
 ]
 
 function SourceAvatar({ source }: { source: Source }): ReactNode {
@@ -282,7 +284,9 @@ const FEATURES = [
   'appearance',
   'digest',
   'translate',
-  'pwa'
+  'pwa',
+  'agents',
+  'roadmap'
 ] as const
 
 // Lazy-loaded (see App.tsx).
