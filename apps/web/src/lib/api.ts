@@ -1,5 +1,6 @@
 import {
   adminAnalyticsResponseSchema,
+  adminLinksResponseSchema,
   adminServerResponseSchema,
   adminStatsResponseSchema,
   adminDigestStatusSchema,
@@ -75,6 +76,7 @@ import {
 } from '@carplates/shared'
 import type {
   AdminAnalyticsResponse,
+  AdminLinksResponse,
   AdminServerResponse,
   AdminStatsResponse,
   AdminDigestStatus,
@@ -780,6 +782,10 @@ export async function getAdminStats(): Promise<AdminStatsResponse> {
 
 export async function getAdminAnalytics(): Promise<AdminAnalyticsResponse> {
   return adminAnalyticsResponseSchema.parse(await sendJson('GET', '/api/admin/analytics'))
+}
+
+export async function getAdminLinks(): Promise<AdminLinksResponse> {
+  return adminLinksResponseSchema.parse(await sendJson('GET', '/api/admin/links'))
 }
 
 export async function getAdminServer(): Promise<AdminServerResponse> {

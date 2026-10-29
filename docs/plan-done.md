@@ -3093,6 +3093,19 @@ Trigger: the dev server showed ~22 MB / 337 requests before the first result. Th
   `/safety` CLS 0.00, LCP 1327 ms; `/about` CLS 0.00, LCP 1484 ms (the taller fallback does not shift short pages). Mobile Lighthouse on `/about`
   (the page that happened to be open; `/` and `/fuel` a11y 100 were verified earlier): a11y 100, best practices 96 (`inspector-issues`),
   SEO 100; agentic-browsing 50 (`llms-txt`, `ai-catalog.json` only). `td-has-header` not re-run on `/fuel` after deploy.
+  ✅ **Edge cache verified (2026-10-29, via chrome-devtools `fetch`, `cache: 'no-store'`, two requests each):** Cloudflare Cache Rule "Cache model
+  lookups" created (expression in `docs/deploy.md`): `/api/vdb`, `/api/vdb/stats`, `/api/rdw`, `/api/rdw/recalls`, `/api/wiki`, `/api/wiki/image`
+  all MISS then HIT with the origin `Cache-Control`; `refresh=true` stays `no-store` + DYNAMIC. Audit of "Cache API rollups" found the bare
+  `/api/stats` (prefix `/api/stats/` does not match it) DYNAMIC; `"/api/stats"` added to the `in {}` list, now MISS then HIT. `/api/stats/version`
+  stays DYNAMIC. The rule editor must stay in "Edit expression" mode: "Use expression builder" discards `starts_with` / `in {}`.
+  ✅ **`inspector-issues` + `td-has-header` (2026-10-29, mobile Lighthouse on `/fuel`):** a11y 100 (`td-has-header` passes), best practices 77, SEO 100.
+  `inspector-issues` = two Report-Only CSP `kEvalViolation`s from our own chunk: Zod 4 probes `new Function` when a schema is _constructed_, and
+  `z.config({ jitless: true })` in `main.tsx` ran after the chunk that builds the schemas (the entry chunk statically imports it, so ES import
+  order in the source does not help). Fix: `apps/web/src/lib/zod-config.ts` (first import of `main.tsx`) plus `vendor-zod` and `zod-config` groups in
+  `vite.config.ts` so Zod core and its config are separate chunks the entry imports before the schemas. Verified locally on `vite preview`: no
+  `Function` constructor calls on load (a `Proxy` on `window.Function`, control call registered), page renders, console clean. Re-measure on prod
+  after deploy. `deprecations` (new, 3 warnings: FencedFrame, StorageType.persistent, Protected Audience) all come from Cloudflare's injected
+  `/cdn-cgi/challenge-platform/scripts/jsd/main.js`; only switching off JS Detections would clear it.
 
 ### Estimated value, weight rankings, community widgets and export ✅ BUILT (2026-10-09, `86cc500` … `bb9f055`)
 
@@ -3987,3 +4000,9 @@ SCHEDULE.md sources (ratings, VehiclesDB, RDW, recalls, ...) stay manual.
 ## Tesla hardware, EU baseline on the VIN page, CarPlay link-out (2026-10-28)
 
 Steps 3-4 of "Driver assist + CarPlay / Android Auto", plus the second GSR2 stage. `teslaHardware()` (`vin/helpers.ts`) estimates the Autopilot hardware generation from the model year, Tesla only, no FSD claim; it counts as an assist so the section shows. `gsr2.ts` has one status line per stage (new types 2024-07-07 ADDW and pedestrian/cyclist AEB, all new cars 2026-07-07), past tense once passed. `VinTypicalEuBaseline` shows the EU baseline in "Typical model data" when RDW knows the model. `VinSmartphoneLinks` is a link-out to Apple's and Google's own pages (their lists are not scraped: terms forbid it); shown under the assists block on the plate card and the VIN Overview tab. About page: sources `carplay` and `eurlex`, longer `about.feature.vin`.
+
+## Day digest 2026-10-28 → 2026-10-29 (docs sync)
+
+Release log gained 2026-10-29 (`releases.ts`, `latest.ts` bumped): all-language news, month-grouped releases, load-speed work (ResultCard lazy + idle prefetch, language/hero preload, 5-min rollup cache, PostHog delayed), CLS and contrast fixes. About page checked against both days: the feature card (between the description and the sources) already covers every user-facing feature, and the sources list already has CarPlay / EUR-Lex, OPUS-MT, Yahoo Finance, NHTSA MSRP, Cloudflare. The new admin Dashboards links (R2, Squarespace, Contabo, Healthchecks, UptimeRobot, GitHub, Search Console, Google Cloud) are admin-only operator tools, not data sources, so they are not listed on About.
+
+**Admin links moved server-side (2026-10-29).** The operator dashboard URLs (R2, Squarespace, Contabo, Healthchecks, UptimeRobot, GitHub, ...) were in the public JS/i18n bundle. They now live in `apps/api/src/features/admin-links.ts` and are served by the admin-only `GET /api/admin/links` (`adminLinksResponseSchema` in `account.ts`); only `admin.links.intro` stays in i18n. The privacy policy (`legal.privacy.thirdParty.p`, ua/ru/en) now names Contabo (VPS), Cloudflare (CDN, R2 backups with account data) and Resend (email) as processors.

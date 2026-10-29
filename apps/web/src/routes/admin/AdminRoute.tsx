@@ -55,10 +55,13 @@ export default function AdminRoute(): ReactNode {
         ))}
       </div>
 
-      {tab === 'users' && <AdminUsersTab />}
-      {tab === 'stats' && <AdminStatsTab />}
-      {tab === 'server' && <AdminServerTab />}
-      {tab === 'links' && <AdminLinksTab />}
+      {/* Keyed by tab so the panel remounts and eases in (opacity + transform only, GPU-composited). */}
+      <div key={tab} role="tabpanel" className="animate-row-in space-y-4">
+        {tab === 'users' && <AdminUsersTab />}
+        {tab === 'stats' && <AdminStatsTab />}
+        {tab === 'server' && <AdminServerTab />}
+        {tab === 'links' && <AdminLinksTab />}
+      </div>
     </div>
   )
 }

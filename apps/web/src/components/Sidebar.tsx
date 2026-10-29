@@ -123,11 +123,6 @@ export default function Sidebar(): ReactNode {
         <span aria-hidden>🆕</span> {t('nav.releases')}
       </NavLink>
       {user && (
-        <NavLink viewTransition to="/features" className={accountLinkClass} onClick={handleClose}>
-          <span aria-hidden>💎</span> {t('nav.features')}
-        </NavLink>
-      )}
-      {user && (
         <NavLink viewTransition to="/settings" className={accountLinkClass} onClick={handleClose}>
           <span aria-hidden>⚙️</span> {t('nav.settings')}
         </NavLink>

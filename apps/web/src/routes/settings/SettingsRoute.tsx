@@ -60,7 +60,14 @@ export default function SettingsRoute(): ReactNode {
         </div>
       </Card>
 
-      <div role="tabpanel" id={`settings-panel-${tab}`} aria-labelledby={`settings-tab-${tab}`}>
+      {/* Keyed by tab so the panel remounts and eases in (opacity + transform only, GPU-composited). */}
+      <div
+        key={tab}
+        role="tabpanel"
+        id={`settings-panel-${tab}`}
+        aria-labelledby={`settings-tab-${tab}`}
+        className="animate-row-in"
+      >
         {tab === 'appearance' && <AppearanceTab />}
         {tab === 'labels' && <LabelsTab />}
       </div>

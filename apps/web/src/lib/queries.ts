@@ -12,6 +12,7 @@ import type {
 
 import {
   getAdminAnalytics,
+  getAdminLinks,
   getAdminServer,
   getAdminStats,
   getAdminDigest,
@@ -642,6 +643,10 @@ export function adminUsersQuery() {
 
 export function adminStatsQuery() {
   return queryOptions({ queryKey: ['admin', 'stats'], queryFn: getAdminStats, staleTime: 60_000 })
+}
+
+export function adminLinksQuery() {
+  return queryOptions({ queryKey: ['admin', 'links'], queryFn: getAdminLinks, staleTime: 60 * 60_000 })
 }
 
 export function adminServerQuery() {
