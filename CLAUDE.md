@@ -35,6 +35,10 @@ Pins (why: PLAN.md): pnpm 12, Node 24, TypeScript 5.9 (not 7), NestJS 11 (not 12
 - **NestJS**: Zod-validated inputs, no logic in controllers, never `@Res()` (except SPA catch-all). Link previews (`apps/api/src/spa/`)
   come from the API, never Vite.
 - **i18n is per-language lazy chunks** (non-ua also loads ua). Tests rendering text `await i18nReady`; never `import '@/i18n'`.
+- **Zod `jitless`**: `@/lib/zod-config` stays the first import of `apps/web/src/main.tsx` and `vendor-zod` / `zod-config` stay separate chunks in
+  `vite.config.ts`, or the CSP reports `eval` (`docs/features-reference.md` "Agent discovery, edge cache, Zod and CSP").
+- **Edge cache**: a new cacheable `/api/*` endpoint sends `common/cache.ts` headers and goes into the Cloudflare Cache Rule expression (`docs/deploy.md`).
+  `/.well-known/openapi.json` lists only the `PUBLIC_API_PATH_PREFIXES` allowlist: nothing per-vehicle, admin, or built on scraped data.
 - **Below-the-fold sections are `LazySection`s**; a new shareable one must list its id in `sections`. Shared pure helpers of lazy
   chunks go in `vite.config.ts` `HELPER_GROUPS`.
 - Accounts: separate `app` schema, not re-ingestable; `account.ts`, not `schemas.ts`; admins by SQL only; online-only UI.

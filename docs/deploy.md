@@ -254,7 +254,7 @@ Registry data lost with the full dumps: re-ingest from `archive/` ZIPs (`backup.
 
 - Redis throttler store (not used by the app yet, so Redis is not in the compose file); until then limits are per-process and reset on restart,
   and blue/green briefly runs two api processes.
-- CSP is Report-Only; enforce after a clean week. Cloudflare IP ranges in the Caddyfile: re-check against cloudflare.com/ips occasionally.
+- CSP is Report-Only; enforce after a clean week (the Zod `eval` violations are fixed, `lib/zod-config.ts`; recheck Lighthouse `inspector-issues` first). Cloudflare IP ranges in the Caddyfile: re-check against cloudflare.com/ips occasionally.
 - Caddy edge `rate_limit` needs a custom build — left to Cloudflare's rule + the Nest throttler.
 - Pin GitHub Actions by commit SHA once stable (Dependabot already tracks them).
 
@@ -294,7 +294,11 @@ Per-model lookups (`/api/vdb`, `/api/rdw`, `/api/rdw/recalls`, `/api/wiki`, `/ap
 makes it effective: expression
 `(http.host eq "carsua.app" and http.request.uri.path in {"/api/vdb" "/api/vdb/stats" "/api/rdw" "/api/rdw/recalls" "/api/wiki" "/api/wiki/image"} and not http.request.uri.query contains "refresh")`,
 "Eligible for cache", Edge TTL "Use cache-control header if present, bypass cache if not", Browser TTL "Respect origin TTL", cache key left at default
-(full path + query string; do **not** enable "Ignore query string"). `/api/plate/*` and `/api/vin/*` stay uncached (per vehicle).
+(full path + query string; do **not** enable "Ignore query string"). `/api/plate/*` and `/api/vin/*` stay uncached (per vehicle). A new cacheable endpoint must be added to the matching rule expression too; verify MISS then HIT
+(first request MISS or EXPIRED, second HIT; `refresh=true` stays DYNAMIC).
+
+`/.well-known/openapi.json` (curated public OpenAPI, `apps/api/src/openapi/public-doc.ts`) is always on and needs no env var; `ENABLE_SWAGGER` still only
+controls the full Swagger UI at `/api/docs`. `llms.txt`, `.well-known/ard.json` and `ai-catalog.json` ship with the web build (`apps/web/public/`).
 
 **Pitfall: Browser Cache TTL.** Cloudflare → Caching → Configuration → **Browser Cache TTL must be "Respect Existing Headers"**. At its 4-hour
 default it rewrites the app's `no-cache` on `sw.js` / `index.html` / `registerSW.js` to `max-age=14400`, so browsers keep the old service

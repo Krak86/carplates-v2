@@ -302,6 +302,27 @@ deploy; Telegram and X keep their own preview cache.
   (`/api/auth/me` is the only skip). recognize/auth/og keep their own tighter module-level guards. Behind a proxy set `TRUST_PROXY`.
 - Legal/cookie/monetization findings: `docs/legal-and-monetization.md`.
 
+## Agent discovery, edge cache, Zod and CSP (2026-10-29)
+
+- **`llms.txt`** (`apps/web/public/`): H1 + one-line summary + links to the stable public pages only (guides, stats, fuel, safety, wanted, about, legal). A new
+  public page worth citing gets a line there. Plate/VIN pages and `/api/`, `/og/` stay out (same stance as robots.txt).
+- **ARD manifest**: `apps/web/public/.well-known/ard.json` and an identical `ai-catalog.json` (this Lighthouse probes the old name; the spec's newer one is
+  `ard.json`). Schema: `specVersion: "1.0"`, only `specVersion` / `host` / `entries` at top level, `identifier` = `urn:air:<publisher>:<ns>:<name>`,
+  2-5 `representativeQueries`, exactly one of `url` / `data`. Keep the two files identical. The API serves them from `WEB_DIST_DIR` like any static file
+  (no dotfile restriction).
+- **Public OpenAPI** (`/.well-known/openapi.json`): `main.ts` builds the full document and `publicOpenApiDoc` (`apps/api/src/openapi/public-doc.ts`) narrows it
+  to `PUBLIC_API_PATH_PREFIXES` (`/api/stats*`, `/api/wanted/stats`) and prunes unreferenced schemas; JSON only, always on, independent of `ENABLE_SWAGGER`.
+  **Only registry-derived, non-enumerable, read-only endpoints**; never per-vehicle lookups, admin / auth / account routes, or anything built on scraped
+  third-party sources (`docs/legal-and-monetization.md`). Widen one prefix at a time and extend `public-doc.test.ts`.
+- **Edge cache**: a new cacheable `/api/*` endpoint sends `ROLLUP_CACHE` (`@Header`, global rollups) or `lookupCacheInterceptor(LOOKUP_CACHE | RECALLS_CACHE)`
+  (per-model, `no-store` on `refresh=true`) from `common/cache.ts`, **and its path must be added to the matching Cloudflare Cache Rule expression**
+  (`docs/deploy.md`), or Cloudflare keeps answering DYNAMIC. Verify MISS then HIT after the rule change. A bare `/api/stats` needs its own entry:
+  `starts_with("/api/stats/")` does not match it. Edit rules in "Edit expression" mode only (the builder discards `starts_with` / `in {}`).
+- **Zod `jitless`**: `@/lib/zod-config` must stay the **first import of `main.tsx`**, and `vite.config.ts` keeps `vendor-zod` + `zod-config` as their own chunks.
+  Zod reads `jitless` when a schema is _constructed_, so the config has to evaluate before the chunk that builds the schemas; a `z.config()` call in the
+  `main.tsx` body ran too late (the entry chunk imports the schemas chunk first) and the CSP flagged two `eval` violations. Check: Lighthouse
+  `inspector-issues` passes, or a `Proxy` on `window.Function` sees no constructor call on load.
+
 ## Photo search: plate groups (2026-10-26)
 
 The ALPR returns, per plate in the photo, its best read plus up to 2 alternative reads (one character different, scored below the
