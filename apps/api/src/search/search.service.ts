@@ -68,6 +68,9 @@ const SEARCH_COUNT_CAP = 10_000
 const MATCH_CACHE_TTL_MS = 5 * 60_000
 const MATCH_CACHE_MAX = 16
 
+/** Above this many matching brand/model spellings the `= ANY` route stops paying off; the substring scan is used instead. */
+const MAX_SPELLINGS = 1000
+
 const collator = new Intl.Collator()
 
 type SortableRow = {
@@ -183,7 +186,44 @@ export class SearchService {
     return { suggestions }
   }
 
-  private fetchMatches(where: SQL | undefined) {
+  /**
+   * Brand + model are the common search and the slow one: two substring ILIKEs on a 2-3 character model such as "A6" read
+   * 1.5M trigram hits (~2 s on 16M rows). The same match set is resolved from the small stats_by_* rollups (every distinct
+   * spelling, ~75 ms) and then served by the (brand, model) btree (ix_current_reg_brand_model). Same rows, ~25x faster.
+   */
+  private async nameConditions({ brand, model }: SearchFilters): Promise<SQL[]> {
+    const substring = [
+      // Substring + case-insensitive, not an exact match on the suggestion's own spelling —
+      // free text typed without picking a suggestion (any case, partial word) still matches.
+      brand ? ilike(currentRegistration.brand, `%${brand}%`) : undefined,
+      model ? ilike(currentRegistration.model, `%${model}%`) : undefined
+    ].filter((c): c is SQL => c != null)
+    if (!brand || !model) return substring
+
+    const db = this.dbService.db
+    const [brands, models] = await Promise.all([
+      db
+        .select({ value: statsByBrand.brand })
+        .from(statsByBrand)
+        .where(ilike(statsByBrand.brand, `%${brand}%`))
+        .limit(MAX_SPELLINGS + 1),
+      db
+        .select({ value: statsByModel.model })
+        .from(statsByModel)
+        .where(ilike(statsByModel.model, `%${model}%`))
+        .limit(MAX_SPELLINGS + 1)
+    ])
+    if (brands.length > MAX_SPELLINGS || models.length > MAX_SPELLINGS) return substring
+    // stats_by_model is per brand, so the same spelling repeats.
+    const brandValues = [...new Set(brands.map(r => r.value).filter((v): v is string => v != null))]
+    const modelValues = [...new Set(models.map(r => r.value).filter((v): v is string => v != null))]
+    if (brandValues.length === 0 || modelValues.length === 0) return [sql`false`]
+    return [inArray(currentRegistration.brand, brandValues), inArray(currentRegistration.model, modelValues)]
+  }
+
+  private async fetchMatches(filters: SearchFilters, otherConditions: SQL[]) {
+    const conditions = [...(await this.nameConditions(filters)), ...otherConditions]
+    const where = conditions.length > 0 ? and(...conditions) : undefined
     return this.dbService.db
       .select({
         plate: currentRegistration.plate,
@@ -205,7 +245,7 @@ export class SearchService {
   }
 
   /** The match set for these filters (sort and page excluded), shared by concurrent and repeated requests. */
-  private cachedMatches(filters: SearchFilters, where: SQL | undefined): MatchEntry {
+  private cachedMatches(filters: SearchFilters, otherConditions: SQL[]): MatchEntry {
     const { sort: _s, dir: _d, page: _p, pageSize: _ps, ...key } = filters
     const cacheKey = JSON.stringify(key, Object.keys(key).sort())
     const now = Date.now()
@@ -217,8 +257,8 @@ export class SearchService {
       return hit
     }
 
-    // A Drizzle query is a lazy thenable that re-runs on every await; Promise.resolve runs it once.
-    const entry: MatchEntry = { at: now, rows: Promise.resolve(this.fetchMatches(where)), sorted: new Map() }
+    // fetchMatches is async, so its result is a real promise: a bare Drizzle query is a lazy thenable that re-runs on every await.
+    const entry: MatchEntry = { at: now, rows: this.fetchMatches(filters, otherConditions), sorted: new Map() }
     // A failed query must not be served again for the next 5 minutes.
     entry.rows.catch(() => {
       if (this.matchCache.get(cacheKey) === entry) this.matchCache.delete(cacheKey)
@@ -258,10 +298,6 @@ export class SearchService {
 
   async search(filters: SearchFilters): Promise<SearchResponse> {
     const conditions = [
-      // Substring + case-insensitive, not an exact match on the suggestion's own spelling —
-      // free text typed without picking a suggestion (any case, partial word) still matches.
-      filters.brand ? ilike(currentRegistration.brand, `%${filters.brand}%`) : undefined,
-      filters.model ? ilike(currentRegistration.model, `%${filters.model}%`) : undefined,
       filters.yearFrom != null ? gte(currentRegistration.makeYear, filters.yearFrom) : undefined,
       filters.yearTo != null ? lte(currentRegistration.makeYear, filters.yearTo) : undefined,
       filters.fuel ? ilike(currentRegistration.fuel, `%${fuelKeyword(filters.fuel)}%`) : undefined,
@@ -279,9 +315,7 @@ export class SearchService {
         ? inArray(sql`left(${currentRegistration.plate}, 2)`, platePrefixesForRegion(filters.region))
         : undefined
     ].filter((c): c is SQL => c != null)
-    const where = conditions.length > 0 ? and(...conditions) : undefined
-
-    const entry = this.cachedMatches(filters, where)
+    const entry = this.cachedMatches(filters, conditions)
     const matches = await entry.rows
     const sorted = this.sortedMatches(entry, matches, filters)
 

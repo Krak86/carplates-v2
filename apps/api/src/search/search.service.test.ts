@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 
+import { statsByBrand, statsByModel } from '@carplates/db'
 import type { DbService } from '../db/db.service.js'
 import { SearchService, type SearchFilters } from './search.service.js'
 
@@ -67,5 +68,47 @@ describe('SearchService.search cache', () => {
     await expect(service.search(base)).rejects.toThrow('db down')
     await expect(service.search(base)).resolves.toMatchObject({ total: 3 })
     expect(limit).toHaveBeenCalledTimes(2)
+  })
+})
+
+describe('SearchService.search brand + model', () => {
+  const rows = [row('AA0001AA', 'AUDI', 2010)]
+
+  /** `limit` answers per table: the two rollups (spelling lookups) and the registry query. */
+  function setupSpellings(spellings: { brands: string[]; models: string[] }) {
+    const main = vi.fn(() => Promise.resolve(rows))
+    // One chain per select(): the two lookups run concurrently.
+    const select = () => {
+      let table: unknown
+      const chain = {
+        from: (t: unknown) => ((table = t), chain),
+        where: () => chain,
+        limit: (): Promise<unknown[]> => {
+          if (table === statsByBrand) return Promise.resolve(spellings.brands.map(value => ({ value })))
+          if (table === statsByModel) return Promise.resolve(spellings.models.map(value => ({ value })))
+          return main()
+        }
+      }
+      return chain
+    }
+    const service = new SearchService({ db: { select } } as unknown as DbService)
+    return { service, main }
+  }
+
+  const both: SearchFilters = { ...base, brand: 'audi', model: 'a6' }
+
+  it('resolves the spellings from the rollups and still queries the registry once', async () => {
+    const { service, main } = setupSpellings({ brands: ['AUDI', 'AUDI  A6'], models: ['A6', 'A6'] })
+
+    await expect(service.search(both)).resolves.toMatchObject({ total: 1 })
+    expect(main).toHaveBeenCalledTimes(1)
+  })
+
+  it('copes with no matching spelling for one side', async () => {
+    const { service, main } = setupSpellings({ brands: [], models: ['A6'] })
+
+    // The WHERE becomes `false` (the mock cannot apply it); what matters is that an empty list does not throw.
+    await expect(service.search(both)).resolves.toMatchObject({ total: 1 })
+    expect(main).toHaveBeenCalledTimes(1)
   })
 })
