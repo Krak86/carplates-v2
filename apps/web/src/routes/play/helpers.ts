@@ -1,6 +1,10 @@
-import { REGIONS, REGION_NAMES, brandLogoUrl, type StatsTopResponse } from '@carplates/shared'
+import { REGIONS, REGION_NAMES, brandLogoUrl, brandSlug, type StatsTopResponse } from '@carplates/shared'
 
-export const ROUND_COUNT = 10
+export const ROUND_CHOICES = [10, 20, 30, 50] as const
+export type RoundChoice = (typeof ROUND_CHOICES)[number]
+export const DEFAULT_ROUNDS: RoundChoice = 10
+/** How many of the biggest brands the logo and count games draw from (the long tail is not recognizable). */
+const BRAND_POOL = 80
 const OPTION_COUNT = 4
 
 /** The twelve Cyrillic letters a plate may use (the ones that look like a Latin letter). */
@@ -31,31 +35,56 @@ export function plateForRegion(region: string, rng: Rng = Math.random): string {
   return `${pick(prefixes, rng)}${digits}${suffix}`
 }
 
-/** `count` plates of distinct regions (all 27 are on the map). */
-export function buildRegionRounds(count = ROUND_COUNT, rng: Rng = Math.random): RegionRound[] {
-  return shuffle(REGION_NAMES, rng)
-    .slice(0, count)
-    .map(region => ({ region, plate: plateForRegion(region, rng) }))
+/** `count` items: shuffled passes over `items`, so nothing repeats until every item was used once. */
+export function cycle<T>(items: readonly T[], count: number, rng: Rng = Math.random): T[] {
+  const out: T[] = []
+  while (items.length && out.length < count) out.push(...shuffle(items, rng))
+  return out.slice(0, count)
+}
+
+/** `count` plates, regions in shuffled passes over all 27 (every region once before any repeats). */
+export function buildRegionRounds(count: number = DEFAULT_ROUNDS, rng: Rng = Math.random): RegionRound[] {
+  return cycle(REGION_NAMES, count, rng).map(region => ({ region, plate: plateForRegion(region, rng) }))
 }
 
 export type LogoRound = { answer: string; options: string[] }
 
-/** Brands that have a bundled logo, from the leaderboard. */
-export function logoBrands(stats: Pick<StatsTopResponse, 'byBrand'>): string[] {
-  return stats.byBrand.map(row => row.value).filter((brand): brand is string => !!brand && !!brandLogoUrl(brand))
+export type BrandCount = { brand: string; n: number }
+
+/** Brands with a bundled logo, raw spellings of one logo summed (labelled by the biggest spelling), biggest first, capped at `BRAND_POOL`. */
+export function foldBrands(rows: readonly BrandCount[]): BrandCount[] {
+  const bySlug = new Map<string, { brand: string; top: number; n: number }>()
+  for (const row of rows) {
+    const slug = brandSlug(row.brand)
+    if (!slug || !brandLogoUrl(row.brand)) continue
+    const entry = bySlug.get(slug)
+    if (!entry) bySlug.set(slug, { brand: row.brand, top: row.n, n: row.n })
+    else {
+      entry.n += row.n
+      if (row.n > entry.top) Object.assign(entry, { brand: row.brand, top: row.n })
+    }
+  }
+  return [...bySlug.values()]
+    .sort((x, y) => y.n - x.n)
+    .slice(0, BRAND_POOL)
+    .map(({ brand, n }) => ({ brand, n }))
 }
 
-/** One round per brand (up to `count`): the logo of `answer` among `OPTION_COUNT` shuffled brand names. */
-export function buildLogoRounds(brands: readonly string[], count = ROUND_COUNT, rng: Rng = Math.random): LogoRound[] {
-  return shuffle(brands, rng)
-    .slice(0, count)
-    .map(answer => {
-      const others = shuffle(
-        brands.filter(b => b !== answer),
-        rng
-      ).slice(0, OPTION_COUNT - 1)
-      return { answer, options: shuffle([answer, ...others], rng) }
-    })
+export const logoBrands = (rows: readonly BrandCount[]): string[] => foldBrands(rows).map(b => b.brand)
+
+/** `count` rounds (every brand once before any repeats): the logo of `answer` among `OPTION_COUNT` shuffled brand names. */
+export function buildLogoRounds(
+  brands: readonly string[],
+  count: number = DEFAULT_ROUNDS,
+  rng: Rng = Math.random
+): LogoRound[] {
+  return cycle(brands, count, rng).map(answer => {
+    const others = shuffle(
+      brands.filter(b => b !== answer),
+      rng
+    ).slice(0, OPTION_COUNT - 1)
+    return { answer, options: shuffle([answer, ...others], rng) }
+  })
 }
 
 export type CountItem = {
@@ -66,13 +95,18 @@ export type CountItem = {
   n: number
 }
 
-/** Brands, models and regions of the leaderboards with their registered-car counts. */
-export function countItems(stats: Pick<StatsTopResponse, 'byBrand' | 'byRegion' | 'topModels'>): CountItem[] {
-  const items: CountItem[] = []
-  for (const row of stats.byBrand) {
-    if (row.value) items.push({ key: `brand:${row.value}`, label: row.value, brand: row.value, n: row.distinctPlates })
-  }
-  for (const row of stats.topModels) {
+/** Brands, models and regions with their registered-car counts. */
+export function countItems(
+  brands: readonly BrandCount[],
+  top: Pick<StatsTopResponse, 'byRegion' | 'topModels'>
+): CountItem[] {
+  const items: CountItem[] = foldBrands(brands).map(({ brand, n }) => ({
+    key: `brand:${brand}`,
+    label: brand,
+    brand,
+    n
+  }))
+  for (const row of top.topModels) {
     items.push({
       key: `model:${row.brand} ${row.model}`,
       label: `${row.brand} ${row.model}`,
@@ -80,7 +114,7 @@ export function countItems(stats: Pick<StatsTopResponse, 'byBrand' | 'byRegion' 
       n: row.distinctPlates
     })
   }
-  for (const row of stats.byRegion) {
+  for (const row of top.byRegion) {
     items.push({ key: `region:${row.region}`, label: row.region, brand: null, n: row.distinctPlates })
   }
   return items

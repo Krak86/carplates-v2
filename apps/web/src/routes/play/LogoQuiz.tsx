@@ -7,22 +7,22 @@ import { brandLogoUrl } from '@carplates/shared'
 import Card from '@/components/ui/Card'
 import Spinner from '@/components/ui/Spinner'
 import { cn } from '@/lib/cn'
-import { statsTopQuery } from '@/lib/queries'
+import { brandStatsQuery } from '@/lib/queries'
 import { buildLogoRounds, logoBrands } from '@/routes/play/helpers'
 import type { LogoRound } from '@/routes/play/helpers'
 import QuizEnd from '@/routes/play/QuizEnd'
 import QuizHeader from '@/routes/play/QuizHeader'
 import { readBest, writeBest } from '@/routes/play/quiz-storage'
 
-type Props = { onAgain: () => void }
+type Props = { rounds: number; onAgain: () => void }
 
-function LogoRounds({ rounds, onAgain }: Props & { rounds: LogoRound[] }): ReactNode {
+function LogoRounds({ rounds, onAgain }: { rounds: LogoRound[]; onAgain: () => void }): ReactNode {
   const { t } = useTranslation()
   const [index, setIndex] = useState(0)
   const [picked, setPicked] = useState<string | null>(null)
   const [score, setScore] = useState(0)
   const [streak, setStreak] = useState(0)
-  const [best, setBest] = useState(() => readBest('logo'))
+  const [best, setBest] = useState(() => readBest('logo', rounds.length))
 
   const round = rounds[index]
   if (!round) return <QuizEnd id="logo" score={score} best={best} total={rounds.length} onAgain={onAgain} />
@@ -41,7 +41,7 @@ function LogoRounds({ rounds, onAgain }: Props & { rounds: LogoRound[] }): React
 
   const handleNext = (): void => {
     const next = index + 1
-    if (next >= rounds.length) setBest(writeBest('logo', score))
+    if (next >= rounds.length) setBest(writeBest('logo', rounds.length, score))
     setPicked(null)
     setIndex(next)
   }
@@ -100,18 +100,24 @@ function LogoRounds({ rounds, onAgain }: Props & { rounds: LogoRound[] }): React
   )
 }
 
-function LogoRoundsLoader({ brands, onAgain }: Props & { brands: string[] }): ReactNode {
-  const [rounds] = useState(() => buildLogoRounds(brands))
+function LogoRoundsLoader({ brands, rounds: count, onAgain }: Props & { brands: string[] }): ReactNode {
+  const [rounds] = useState(() => buildLogoRounds(brands, count))
   return <LogoRounds rounds={rounds} onAgain={onAgain} />
 }
 
 /** "Which brand is this?": the logo of a top brand among four names. */
-export default function LogoQuiz({ onAgain }: Props): ReactNode {
+export default function LogoQuiz({ rounds, onAgain }: Props): ReactNode {
   const { t } = useTranslation()
-  const stats = useQuery(statsTopQuery())
+  const stats = useQuery(brandStatsQuery())
 
   if (stats.isPending) return <Spinner />
   if (stats.isError) return <p className="text-[var(--color-muted)]">{t('result.error')}</p>
 
-  return <LogoRoundsLoader brands={logoBrands(stats.data)} onAgain={onAgain} />
+  return (
+    <LogoRoundsLoader
+      brands={logoBrands(stats.data.brands.map(b => ({ brand: b.brand, n: b.n })))}
+      rounds={rounds}
+      onAgain={onAgain}
+    />
+  )
 }

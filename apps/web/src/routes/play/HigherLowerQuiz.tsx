@@ -7,7 +7,7 @@ import { brandLogoUrl } from '@carplates/shared'
 import Card from '@/components/ui/Card'
 import Spinner from '@/components/ui/Spinner'
 import { toIntlLocale } from '@/lib/intl'
-import { statsTopQuery } from '@/lib/queries'
+import { brandStatsQuery, statsTopQuery } from '@/lib/queries'
 import { localizeRegion } from '@/lib/region-label'
 import { buildChain, countItems, isHigher } from '@/routes/play/helpers'
 import type { CountItem } from '@/routes/play/helpers'
@@ -15,7 +15,7 @@ import QuizEnd from '@/routes/play/QuizEnd'
 import QuizHeader from '@/routes/play/QuizHeader'
 import { readBest, writeBest } from '@/routes/play/quiz-storage'
 
-type Props = { onAgain: () => void }
+type Props = { rounds?: number; onAgain: () => void }
 
 type FaceProps = { item: CountItem; count: string | null }
 
@@ -66,7 +66,7 @@ function Chain({ chain, onAgain }: Props & { chain: CountItem[] }): ReactNode {
   const handleNext = (): void => {
     // A miss, or the last pair of the chain, ends the run.
     if (guess !== right || index + 2 >= chain.length) {
-      setBest(writeBest('higher', score))
+      setBest(writeBest('higher', undefined, score))
       setOver(true)
       return
     }
@@ -128,9 +128,10 @@ function ChainLoader({ items, onAgain }: Props & { items: CountItem[] }): ReactN
 export default function HigherLowerQuiz({ onAgain }: Props): ReactNode {
   const { t } = useTranslation()
   const stats = useQuery(statsTopQuery())
+  const brands = useQuery(brandStatsQuery())
 
-  if (stats.isPending) return <Spinner />
-  if (stats.isError) return <p className="text-[var(--color-muted)]">{t('result.error')}</p>
+  if (stats.isPending || brands.isPending) return <Spinner />
+  if (stats.isError || brands.isError) return <p className="text-[var(--color-muted)]">{t('result.error')}</p>
 
-  return <ChainLoader items={countItems(stats.data)} onAgain={onAgain} />
+  return <ChainLoader items={countItems(brands.data.brands, stats.data)} onAgain={onAgain} />
 }

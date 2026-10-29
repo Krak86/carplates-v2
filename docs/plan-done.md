@@ -4085,3 +4085,9 @@ Plan: `PLAN.md` "Visual stats, map logos, cards and quizzes". Convention: `docs/
 - **Cross links:** sidebar "Games", `/stats` map view, `/read/plates`, a 🎲 beside the region flag on the result card, and "More games" under the xl racer banner.
 - **Route checklist done:** `ROUTE_TITLE_KEYS`, `STATIC_PAGES` ua/ru/en (+ sitemap test), About `about.feature.play`, `releases.ts` item (today's day, no `latest.ts` bump), i18n `play.*` ua/ru/en.
 - **Not done:** streak is per run only (no stored best streak); no accounts/leaderboard; browser-checked region and higher-lower only (not the logo quiz, end screen, phone width or the share sheet).
+
+### /play follow-up: question count and a bigger brand pool (2026-10-29)
+
+- **Question count** (10/20/30/50, `ROUND_CHOICES`) is chosen once on the `/play` hub, kept in localStorage (`carplates.quizRounds`) and passed to every quiz as `rounds`. Higher-lower is endless and ignores it. Best scores are kept per length (`region:20`).
+- **Longer games:** `cycle()` plays shuffled passes, so a region or brand repeats only after all were used (27 regions, up to 80 brands).
+- **Brand pool:** new `GET /api/stats/brands` (top 100 raw brands from `stats_by_brand`, contract `packages/shared/src/brandStats.ts`, `brandStatsQuery`, covered by the `/api/stats/*` edge rule, not in the OpenAPI allowlist). `foldBrands` sums spellings of one logo, keeps logo brands, top 80. The logo quiz and higher-lower brand rows use it; the full `statsQuery` (~14 MB) is not used.

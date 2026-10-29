@@ -70,6 +70,7 @@ import {
   originStatsResponseSchema,
   regionBrandStatsResponseSchema,
   regionFacetStatsResponseSchema,
+  brandStatsResponseSchema,
   sizeModelsResponseSchema,
   vehiclePhotosResponseSchema,
   vinDecodeResponseSchema,
@@ -159,6 +160,7 @@ import type {
   OriginStatsResponse,
   RegionBrandStatsResponse,
   RegionFacetStatsResponse,
+  BrandStatsResponse,
   SizeModelsResponse,
   VehicleColor,
   SearchSortDir,
@@ -268,6 +270,10 @@ export async function getSizeModels(): Promise<SizeModelsResponse> {
 
 export async function getRegionBrandStats(): Promise<RegionBrandStatsResponse> {
   return regionBrandStatsResponseSchema.parse(await getJson('/api/stats/region-brands'))
+}
+
+export async function getBrandStats(): Promise<BrandStatsResponse> {
+  return brandStatsResponseSchema.parse(await getJson('/api/stats/brands'))
 }
 
 export async function getRegionFacetStats(): Promise<RegionFacetStatsResponse> {

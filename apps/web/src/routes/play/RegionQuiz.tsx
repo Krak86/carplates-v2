@@ -11,17 +11,17 @@ import QuizHeader from '@/routes/play/QuizHeader'
 import { readBest, writeBest } from '@/routes/play/quiz-storage'
 import StatsMap from '@/routes/stats/StatsMap'
 
-type Props = { onAgain: () => void }
+type Props = { rounds: number; onAgain: () => void }
 
 /** "Which region issued this plate?": ten plates of distinct regions, answered by tapping the region on the map. */
-export default function RegionQuiz({ onAgain }: Props): ReactNode {
+export default function RegionQuiz({ rounds: roundCount, onAgain }: Props): ReactNode {
   const { t, i18n } = useTranslation()
-  const [rounds] = useState(() => buildRegionRounds())
+  const [rounds] = useState(() => buildRegionRounds(roundCount))
   const [index, setIndex] = useState(0)
   const [picked, setPicked] = useState<string | null>(null)
   const [score, setScore] = useState(0)
   const [streak, setStreak] = useState(0)
-  const [best, setBest] = useState(() => readBest('region'))
+  const [best, setBest] = useState(() => readBest('region', roundCount))
 
   const round = rounds[index]
   if (!round) return <QuizEnd id="region" score={score} best={best} total={rounds.length} onAgain={onAgain} />
@@ -45,7 +45,7 @@ export default function RegionQuiz({ onAgain }: Props): ReactNode {
 
   const handleNext = (): void => {
     const next = index + 1
-    if (next >= rounds.length) setBest(writeBest('region', score))
+    if (next >= rounds.length) setBest(writeBest('region', roundCount, score))
     setPicked(null)
     setIndex(next)
   }

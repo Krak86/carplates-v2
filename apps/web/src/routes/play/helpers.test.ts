@@ -7,7 +7,7 @@ import {
   buildRegionRounds,
   isHigher,
   plateForRegion,
-  ROUND_COUNT,
+  DEFAULT_ROUNDS,
   shuffle
 } from './helpers'
 
@@ -21,9 +21,9 @@ function seeded(seed: number): () => number {
 
 describe('region rounds', () => {
   it('builds plates that the shared plate logic maps back to the asked region', () => {
-    const rounds = buildRegionRounds(ROUND_COUNT, seeded(7))
-    expect(rounds).toHaveLength(ROUND_COUNT)
-    expect(new Set(rounds.map(r => r.region)).size).toBe(ROUND_COUNT)
+    const rounds = buildRegionRounds(DEFAULT_ROUNDS, seeded(7))
+    expect(rounds).toHaveLength(DEFAULT_ROUNDS)
+    expect(new Set(rounds.map(r => r.region)).size).toBe(DEFAULT_ROUNDS)
     for (const { plate, region } of rounds) expect(regionName(plate)).toBe(region)
   })
 
@@ -32,6 +32,18 @@ describe('region rounds', () => {
     for (const { region } of buildRegionRounds(100, rng)) {
       expect(regionName(plateForRegion(region, rng))).toBe(region)
     }
+  })
+})
+
+describe('longer games', () => {
+  it('repeats a region only after all 27 were used', () => {
+    const rounds = buildRegionRounds(50, seeded(9))
+    expect(rounds).toHaveLength(50)
+    expect(new Set(rounds.slice(0, 27).map(r => r.region)).size).toBe(27)
+  })
+
+  it('makes more logo rounds than there are brands', () => {
+    expect(buildLogoRounds(['Toyota', 'Skoda', 'Audi', 'BMW', 'Ford'], 12, seeded(4))).toHaveLength(12)
   })
 })
 
