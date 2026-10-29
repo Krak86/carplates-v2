@@ -6,6 +6,7 @@ import { PLATES_LEAD } from '@/routes/read/articles'
 import { pick } from '@/routes/read/helpers'
 import { ColorsSection, HistorySection, ServicesSection } from '@/routes/read/plates/PlatesKindsSections'
 import { LegacySection, OrderSection, SpecialSection } from '@/routes/read/plates/PlatesExtraSections'
+import { SearchSection } from '@/routes/read/plates/PlatesSearchSection'
 import { AnatomySection, FormatsSection, RegionsSection } from '@/routes/read/plates/PlatesSections'
 
 // Lazy-loaded (see App.tsx). Public, no sign-in. Static: reads only the shared plate tables, no API.
@@ -27,7 +28,8 @@ export default function PlatesRoute(): ReactNode {
           { id: 'history', label: t('read.sec.history') },
           { id: 'legacy', label: t('read.sec.legacy') },
           { id: 'special', label: t('read.sec.special') },
-          { id: 'order', label: t('read.sec.order') }
+          { id: 'order', label: t('read.sec.order') },
+          { id: 'search', label: t('read.sec.plateSearch') }
         ]}
       />
 
@@ -40,6 +42,7 @@ export default function PlatesRoute(): ReactNode {
       <LegacySection />
       <SpecialSection />
       <OrderSection />
+      <SearchSection />
     </div>
   )
 }

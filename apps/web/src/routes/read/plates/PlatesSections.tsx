@@ -13,6 +13,7 @@ import Card from '@/components/ui/Card'
 import { useRegionLabel } from '@/lib/region-label'
 import { VIN_PATH } from '@/routes/read/links'
 import { lookupPrefix, regionRows } from '@/routes/read/plates/helpers'
+import { PlateSearchLinks } from '@/routes/read/plates/PlatesSearchSection'
 
 const CURRENT_EXAMPLE = 'КА1234ВС'
 const LEGACY_EXAMPLE = '11АА1234'
@@ -42,6 +43,8 @@ export function AnatomySection(): ReactNode {
           <PlateSegments plate={LEGACY_EXAMPLE} region={regionName(LEGACY_EXAMPLE) ?? null} hideGuideLink />
         </div>
       </div>
+
+      <PlateSearchLinks withAr />
     </Card>
   )
 }
@@ -119,6 +122,8 @@ export function RegionsSection(): ReactNode {
       </div>
 
       <p className="mt-3 text-sm text-muted">{t('read.plates.regionsNote')}</p>
+
+      <PlateSearchLinks />
     </Card>
   )
 }

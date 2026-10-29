@@ -194,3 +194,54 @@ export const ORDER_RULES: L10n = {
   ru: 'Могут отказать, если надпись не соответствует требованиям: буквы «Z» и «V» отдельно и слова кириллицей с «З», «С», «В», «Ф» вместо латинских (символика вторжения) запрещены; нельзя дискриминационные или нецензурные надписи, символику учреждений и торговые марки без согласия, имитацию государственных символов, комбинации, похожие на государственные знаки; если надпись начинается с двух букв, они не должны совпадать с буквами региона.',
   en: 'A request can be refused if the inscription breaks the rules: the letters “Z” and “V” on their own, and Cyrillic words using “З”, “С”, “В”, “Ф” in place of Latin letters (invasion symbolism), are banned; so are discriminatory or obscene text, institutions’ emblems and trademarks without consent, imitations of state symbols, and combinations that look like state plates; a start of two letters must not equal a region’s letters.'
 }
+
+export const EXAMPLE_LINK_PLATE = 'КА1234ВС'
+
+export type SearchStep = { title: L10n; text: L10n }
+
+export const SEARCH_INTRO: L10n = {
+  ua: 'Знак із цієї статті можна одразу перевірити в застосунку: розшифровка регіону, марка, модель, рік, історія реєстрацій з відкритого реєстру, розшук і відкликання.',
+  ru: 'Знак из этой статьи можно сразу проверить в приложении: расшифровка региона, марка, модель, год, история регистраций из открытого реестра, розыск и отзывные кампании.',
+  en: 'Any plate from this guide can be checked in the app right away: the region, make, model, year, the registration history from the open registry, the wanted check and recalls.'
+}
+
+export const SEARCH_STEPS: SearchStep[] = [
+  {
+    title: { ua: 'Впишіть номер', ru: 'Впишите номер', en: 'Type the plate' },
+    text: {
+      ua: 'На головній у полі «Номерний знак або VIN». Латиниця й кирилиця схожих літер не відрізняються (A і А), пробіли та дефіси не заважають.',
+      ru: 'На главной в поле «Номерной знак или VIN». Латиница и кириллица похожих букв не различаются (A и А), пробелы и дефисы не мешают.',
+      en: 'On the home page, in the “Plate number or VIN” box. Look-alike Latin and Cyrillic letters count as the same (A and А), and spaces or dashes do not matter.'
+    }
+  },
+  {
+    title: { ua: 'Або знайдіть за фото', ru: 'Или найдите по фото', en: 'Or search by a photo' },
+    text: {
+      ua: 'Кнопка «Пошук за фото»: завантажте знімок авто, і застосунок сам знайде на ньому номерний знак (або кілька, якщо їх видно декілька) та відкриє результат. Розпізнавання працює у вашому браузері. Краще, щоб знак був у кадрі цілком, без сильного нахилу й відблисків.',
+      ru: 'Кнопка «Поиск по фото»: загрузите снимок авто, и приложение само найдёт на нём номерной знак (или несколько, если их видно несколько) и откроет результат. Распознавание работает в вашем браузере. Лучше, чтобы знак был в кадре целиком, без сильного наклона и бликов.',
+      en: 'The “Search by image” button: upload a photo of a car and the app finds the plate in it (or several, if more than one is visible) and opens the result. Recognition runs in your browser. It works best when the whole plate is in frame, not strongly tilted and free of glare.'
+    }
+  },
+  {
+    title: { ua: 'AR-режим: наведіть камеру', ru: 'AR-режим: наведите камеру', en: 'AR mode: point the camera' },
+    text: {
+      ua: 'Кнопка «AR-скан» вмикає камеру телефона чи ноутбука. Спершу в браузері завантажується невелика модель, що шукає на відео номерні знаки; потім поверх живого зображення малюється рамка навколо знака, а символи зчитуються з кадру. Для прочитаного номера підтягується коротка картка (регіон, марка, модель, рік), а «Відкрити повний результат» веде до повної картки. «Авто-показ» робить це сам для кожного нового знака. Розпізнавання відбувається на пристрої. Режим у бета-версії: слабке світло, швидкий рух чи брудний знак знижують точність, тому звіряйте прочитане з самим знаком.',
+      ru: 'Кнопка «AR-скан» включает камеру телефона или ноутбука. Сначала в браузере загружается небольшая модель, ищущая на видео номерные знаки; затем поверх живого изображения рисуется рамка вокруг знака, а символы считываются с кадра. Для прочитанного номера подтягивается короткая карточка (регион, марка, модель, год), а «Открыть полный результат» ведёт к полной карточке. «Авто-показ» делает это сам для каждого нового знака. Распознавание происходит на устройстве. Режим в бета-версии: слабый свет, быстрое движение или грязный знак снижают точность, поэтому сверяйте прочитанное с самим знаком.',
+      en: 'The “AR scan” button turns on the camera of your phone or laptop. First a small model that looks for plates in video is loaded in the browser; then a frame is drawn over the live picture around the plate and the characters are read from it. For a plate that was read, a short card (region, make, model, year) is fetched, and “Open full result” leads to the full card. “Auto-show” does that by itself for every new plate. Recognition runs on your device. The mode is in beta: dim light, fast motion or a dirty plate lower accuracy, so check what was read against the plate itself.'
+    }
+  },
+  {
+    title: { ua: 'Якщо нічого не знайдено', ru: 'Если ничего не найдено', en: 'If nothing is found' },
+    text: {
+      ua: 'Знак може бути не в реєстрі (реєстр відкритий з 2013 року), належати до іншої країни або стояти на авто без запису під цим номером. Перевірте символи, спробуйте VIN.',
+      ru: 'Знак может отсутствовать в реестре (реестр открыт с 2013 года), принадлежать другой стране или стоять на авто без записи под этим номером. Проверьте символы, попробуйте VIN.',
+      en: 'The plate may be absent from the registry (it is open since 2013), belong to another country, or sit on a car with no record under that number. Recheck the characters and try the VIN.'
+    }
+  }
+]
+
+export const SEARCH_NOTE: L10n = {
+  ua: 'Результат - це дані з відкритих джерел, а не офіційна довідка: перед покупкою звіряйте їх із документами й самим авто.',
+  ru: 'Результат - это данные из открытых источников, а не официальная справка: перед покупкой сверяйте их с документами и самим авто.',
+  en: 'The result is open-source data, not an official certificate: check it against the documents and the car itself before buying.'
+}
