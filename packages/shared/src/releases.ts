@@ -16,6 +16,41 @@ const item = (group: ReleaseGroup, ua: string, ru: string, en: string): ReleaseI
  */
 export const RELEASES: readonly ReleaseDay[] = [
   {
+    date: '2026-10-29',
+    items: [
+      item(
+        'improved',
+        'Новини з усіх джерел тепер показуються всіма мовами, а журнал змін на «Що нового» згруповано за місяцями.',
+        'Новости из всех источников теперь показываются на всех языках, а журнал изменений в «Что нового» сгруппирован по месяцам.',
+        'News from all sources now shows in every language, and the What’s new log is grouped by month.'
+      ),
+      item(
+        'improved',
+        'Швидше завантаження: головна сторінка вантажить менше, мова й картка результату підвантажуються наперед, а загальні підсумки кешуються на 5 хвилин.',
+        'Быстрее загрузка: главная страница грузит меньше, язык и карточка результата подгружаются заранее, а общие итоги кешируются на 5 минут.',
+        'Faster loading: the home page loads less, the language and result card are fetched ahead of time, and the global totals are cached for 5 minutes.'
+      ),
+      item(
+        'improved',
+        'Плавніші переходи між вкладками в налаштуваннях, адмінці та розділі можливостей.',
+        'Более плавные переходы между вкладками в настройках, админке и разделе возможностей.',
+        'Smoother transitions between tabs in settings, admin and features.'
+      ),
+      item(
+        'fix',
+        'Нижній колонтитул більше не стрибає під час завантаження сторінки (зокрема /fuel), а текст рівнів CO₂ і безпеки контрастніший.',
+        'Нижний колонтитул больше не прыгает при загрузке страницы (в том числе /fuel), а текст уровней CO₂ и безопасности контрастнее.',
+        'The footer no longer jumps while a page loads (notably /fuel), and the CO₂ and safety band text has higher contrast.'
+      ),
+      item(
+        'fix',
+        'Головна сторінка більше не зсувається під час появи анімованих блоків.',
+        'Главная страница больше не сдвигается при появлении анимированных блоков.',
+        'The home page no longer shifts when animated blocks appear.'
+      )
+    ]
+  },
+  {
     date: '2026-10-28',
     items: [
       item(
