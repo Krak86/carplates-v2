@@ -664,7 +664,8 @@ So showing their data/images (hotlinked or re-hosted) needs written permission. 
 could not be fetched. autosize.org answers 403 to bots (bot protection) and its footer says "© 2026 AutoSize. All rights reserved".
 Their photos, 0-1000 ratings, "who it suits" texts and compiled tables are theirs; the underlying facts (dimensions, fuel use,
 recalls, NCAP stars) come from public sources we already use. Everything below is built from our own / open data. Owner decisions
-(2026-10-10): **no multi-car compare / duel / overlay** (skipped); no contact with the site owners.
+(2026-10-10): ~~no multi-car compare / duel / overlay (skipped)~~ **reversed 2026-10-29: compare is planned, after the
+catalog pages** (see "Car compare" below); no contact with the site owners.
 
 **Group 1 — own data, new UI (no new source)**
 
@@ -681,7 +682,7 @@ recalls, NCAP stars) come from public sources we already use. Everything below i
   MPG) as a collapsible block; tyre-size column only if a verified source appears.
 - **Fleet context** (already unique to us): units in UA, regions, colours, years; **import-market view** (EU / US / JP share via
   registry + VehiclesDB markets); **variants actually sold in UA** from registrations.
-- **Segment-peer list** — skipped with compare (it is a mini-compare).
+- **Segment-peer list** — a mini-compare; do it with "Car compare" below.
 
 **Group 2 — Euro NCAP (already ingested; improvements only)**
 
@@ -757,6 +758,16 @@ Group 1 dimension callouts + garage-fit -> Group 3 (existing order). Owner says 
       (registry stats + the existing model-level sections) as indexable SEO slugs; needs a canonical make/model taxonomy
       (registry models are trim-level) and TS-built rollup tables, not a matview. Full write-up: [docs/catalog-plan.md](docs/catalog-plan.md).
       Discovery checklist around it (Search Console, IndexNow, outreach, Reddit draft): [docs/discovery-plan.md](docs/discovery-plan.md).
+- [ ] **Car compare `/compare/:a~:b`** — idea 2026-10-29, **blocked on the catalog pages above** (not started). Side-by-side
+      dimensions (silhouette overlay + table) and every spec we have (RDW, VehiclesDB, NCAP, fleet counts).
+      Why wait: registry models are trim-level, so the picker, slugs and indexing need the canonical make/model/year taxonomy and
+      per-model record from [docs/catalog-plan.md](docs/catalog-plan.md); building first means a throwaway picker and slug migration.
+      Plan: (1) catalog taxonomy + per-model record (dimensions + specs merged); (2) route as a thin layer over it, input is a
+      model ref `{make, model, year}` (not a plate), indexable only when both sides are catalog pages (add to `ROUTE_TITLE_KEYS`,
+      `STATIC_PAGES`, `@Throttle`, edge cache per CLAUDE.md); (3) entry points: plate-card section pre-filled with the current
+      car, "compare with…" link on catalog pages, embeds in `/read/*` articles (sizes, body types). Reuse `components/size/*`
+      (`SideSilhouette`, `SizeCarTop`, `FitTable`, `ModelDimsRow`) and `sizeModels`. Optional earlier step: a two-car overlay
+      widget limited to `sizeModels` models inside the sizes article (no new route, no indexing). Also covers the segment-peer list.
 - **Shareable photo-search links** — idea 2026-10-01, deferred (not started).
   Share button on the photo card uploads the shrunk image + recognition result
   (candidates with boxes, EXIF meta) to `POST /api/shares`; opening
