@@ -16,6 +16,9 @@ public OpenAPI document, per-page link previews (`features-reference.md` "Link p
   path-filtered. Instead the API injects a small semantic HTML block (h1, summary, stats table, plain links) into `#root` for
   `/cars/...`, behind the edge cache. Optional later: store the rendered block in `catalog_model.seo_html` at
   `db:refresh-catalog` time. Details: catalog-plan.md Step 5.
+- **Load stays low without a bigger VPS or new infra.** Taxonomy and hot pages in API memory, `LazySection`s never fire for
+  crawlers, MVP-sized sitemap first, 90% or more edge cache hit ratio on `/cars/*` as the target. Rules: catalog-plan.md Step 5
+  "Load".
 - **Verified bots must not be blocked.** Check Bot Fight Mode and the `/api/*` throttles (`common/throttle.ts`) against
   Googlebot/Bingbot after the pages are live.
 - **Plate/VIN pages stay `noindex`.** Indexable pages carry no personal data, only aggregates above a data threshold
@@ -31,14 +34,26 @@ public OpenAPI document, per-page link previews (`features-reference.md` "Link p
       "Додати сервіс" button (needs "Зареєструватись" / "Увійти"; the form is behind login, so its fields are unverified).
       Categories: Інформаційно-аналітичні системи · Візуалізації · Чат-боти · Мобільні застосунки. Pick "Інформаційно-аналітичні
       системи". Also post an impact story on https://forum.data.gov.ua (Обговорення). Listing text to paste, adjust to the
-      form's limits: - Title (ua): `carsua.app - перевірка авто за номером або VIN` · (en): `carsua.app - Ukrainian vehicle lookup by plate or VIN` - Description (ua): `Безкоштовний сервіс пошуку транспортного засобу за державним номером або VIN на основі відкритих
-даних МВС (data.gov.ua): марка, модель, рік, колір, пальне, регіон, історія реєстрацій. Без персональних даних
-власників. Розпізнавання номера з камери, офлайн-режим (PWA), мови: українська, російська, англійська.` - Description (en): `Free lookup of a vehicle by Ukrainian plate or VIN built on the MIA open registrations datasets from
-data.gov.ua: make, model, year, colour, fuel, region, registration history. No owner personal data. Plate recognition
-from camera, offline PWA, Ukrainian/Russian/English.` - Link: https://carsua.app · Datasets used: the MIA vehicle registration resources ingested via CKAN (use the dataset
-      names from `docs/commands-reference.md` `ingest:*`) · Contact: the project email
+      form's limits (text below).
 - [ ] Directories: Product Hunt, AlternativeTo, awesome-lists for open data / Ukrainian tech
 - [ ] Cloudflare cache rule for `/cars/*` and `/api/catalog/*` (add once the routes exist)
+
+### Diia listing text
+
+**Title** (ua): `carsua.app - перевірка авто за номером або VIN`
+
+**Title** (en): `carsua.app - Ukrainian vehicle lookup by plate or VIN`
+
+**Description** (ua): Безкоштовний сервіс пошуку транспортного засобу за державним номером або VIN на основі відкритих даних
+МВС (data.gov.ua): марка, модель, рік, колір, пальне, регіон, історія реєстрацій. Без персональних даних власників.
+Розпізнавання номера з камери, офлайн-режим (PWA), мови: українська, російська, англійська.
+
+**Description** (en): Free lookup of a vehicle by Ukrainian plate or VIN built on the MIA open registrations datasets from
+data.gov.ua: make, model, year, colour, fuel, region, registration history. No owner personal data. Plate recognition from
+camera, offline PWA, Ukrainian/Russian/English.
+
+**Link:** https://carsua.app · **Datasets used:** the MIA vehicle registration resources ingested via CKAN (dataset names from
+`docs/commands-reference.md` `ingest:*`) · **Contact:** the project email
 
 ## Phase 1: small code items (about 2-3 days total, independent of the catalog)
 
