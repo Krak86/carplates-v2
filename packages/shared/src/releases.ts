@@ -26,6 +26,12 @@ export const RELEASES: readonly ReleaseDay[] = [
       ),
       item(
         'improved',
+        'Гід «Номерні знаки» доповнено: що означає колір знака, військові, поліцейські, дипломатичні й транзитні номери та історія знаків від 1946 року зі схематичними зразками.',
+        'Гид «Номерные знаки» дополнен: что означает цвет знака, военные, полицейские, дипломатические и транзитные номера и история знаков с 1946 года со схематичными образцами.',
+        'The Plates guide now explains what a plate’s colour means, covers military, police, diplomatic and transit plates, and tells the history of plates since 1946 with schematic samples.'
+      ),
+      item(
+        'improved',
         'У гіді «Типи кузова» кожна картка має вибір прикладів: оберіть модель і побачте її креслення в масштабі з розмірами, на які можна навести.',
         'В гиде «Типы кузова» у каждой карточки есть выбор примеров: выберите модель и увидите её чертёж в масштабе с размерами, на которые можно навести.',
         'In the Body types guide every card has an example picker: choose a model to see its to-scale drawing with dimensions you can point at.'

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import ArticleHeader from '@/routes/read/ArticleHeader'
 import { PLATES_LEAD } from '@/routes/read/articles'
 import { pick } from '@/routes/read/helpers'
+import { ColorsSection, HistorySection, ServicesSection } from '@/routes/read/plates/PlatesKindsSections'
 import { LegacySection, OrderSection, SpecialSection } from '@/routes/read/plates/PlatesExtraSections'
 import { AnatomySection, FormatsSection, RegionsSection } from '@/routes/read/plates/PlatesSections'
 
@@ -21,6 +22,9 @@ export default function PlatesRoute(): ReactNode {
           { id: 'anatomy', label: t('read.sec.anatomy') },
           { id: 'regions', label: t('read.sec.regions') },
           { id: 'formats', label: t('read.sec.formats') },
+          { id: 'colors', label: t('read.sec.plateColors') },
+          { id: 'services', label: t('read.sec.services') },
+          { id: 'history', label: t('read.sec.history') },
           { id: 'legacy', label: t('read.sec.legacy') },
           { id: 'special', label: t('read.sec.special') },
           { id: 'order', label: t('read.sec.order') }
@@ -30,6 +34,9 @@ export default function PlatesRoute(): ReactNode {
       <AnatomySection />
       <RegionsSection />
       <FormatsSection />
+      <ColorsSection />
+      <ServicesSection />
+      <HistorySection />
       <LegacySection />
       <SpecialSection />
       <OrderSection />

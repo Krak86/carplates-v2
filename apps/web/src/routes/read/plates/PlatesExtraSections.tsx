@@ -5,7 +5,6 @@ import Card from '@/components/ui/Card'
 import { pick } from '@/routes/read/helpers'
 import {
   DIIA_ORDER_URL,
-  NOT_COVERED,
   OLD_PLATES_NOTE,
   ORDER_RULES,
   ORDER_STEPS,
@@ -112,7 +111,6 @@ export function SpecialSection(): ReactNode {
         })}
       </ul>
 
-      <p className="mb-2 text-sm text-muted">{pick(NOT_COVERED, i18n.language)}</p>
       <p className="text-sm text-muted">{t('read.plates.specialVerify')}</p>
     </Card>
   )
