@@ -4,18 +4,19 @@ import { cn } from '@/lib/cn'
 import type { ArticleMeta } from '@/routes/read/types'
 
 type Props = {
-  article: Pick<ArticleMeta, 'icon' | 'hue'>
+  article: Pick<ArticleMeta, 'path' | 'icon' | 'hue'>
   className?: string
 }
 
-/** Cover image of a guide: a wide-gamut oklch gradient (sRGB fallback first) with the guide's emoji. */
+/** Cover of a guide: the generated picture (`public/read/<guide>`, built by `pnpm build:read-images`) over a wide-gamut oklch gradient (sRGB fallback first), with the guide's emoji on top. */
 export default function ArticleBanner({ article, className }: Props): ReactNode {
-  const { hue } = article
+  const { hue, path } = article
+  const guide = path.split('/').pop()
 
   return (
     <div
       aria-hidden
-      className={cn('flex items-center justify-center text-6xl', className)}
+      className={cn('relative flex items-center justify-center overflow-hidden text-6xl', className)}
       style={{
         background: `linear-gradient(135deg, hsl(${hue} 70% 60%), hsl(${(hue + 40) % 360} 70% 40%))`
       }}
@@ -26,7 +27,20 @@ export default function ArticleBanner({ article, className }: Props): ReactNode 
         }
       }}
     >
-      <span className="drop-shadow-lg">{article.icon}</span>
+      <picture>
+        <source srcSet={`/read/${guide}.avif`} type="image/avif" />
+        <img
+          src={`/read/${guide}.webp`}
+          alt=""
+          loading="lazy"
+          decoding="async"
+          className="absolute inset-0 size-full object-cover"
+        />
+      </picture>
+
+      <span className="absolute inset-0 bg-black/25" />
+
+      <span className="relative drop-shadow-lg">{article.icon}</span>
     </div>
   )
 }
