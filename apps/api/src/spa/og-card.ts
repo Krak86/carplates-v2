@@ -19,6 +19,8 @@ export type CardInput = {
   color: VehicleColor
   /** Brand logo PNG, drawn bottom-right when present. */
   logoPng?: Buffer | null
+  /** Region flag PNG, drawn top-right when present. */
+  flagPng?: Buffer | null
   /** Site icon PNG for the top-left badge; falls back to the drawn glyph. */
   siteIconPng?: Buffer | null
 }
@@ -31,6 +33,10 @@ const clip = (s: string, max: number): string => (s.length > max ? `${s.slice(0,
 /** Dark translucent backing, so light text stays readable on any car-color gradient. */
 const panel = (x: number, y: number, w: number, h: number): string =>
   `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="20" fill="#0a0f1e" fill-opacity="0.78"/>`
+
+/** The site address, bottom-right on its own backing so it reads on any car-colour gradient. */
+const SITE_URL = `${panel(830, 566, 220, 46)}
+<text x="1040" y="600" text-anchor="end" font-family="${FONT_FAMILY}" font-size="28" font-weight="700" fill="#fff">carsua.app</text>`
 
 const FAVICON_GLYPH = `<g fill="none" stroke="#fff" stroke-width="44" stroke-linecap="round" stroke-linejoin="round"><path d="M110 168V290a64 64 0 0 0 128 0V168"/><path d="M282 354L342 168L402 354M301 296H383"/></g>`
 
@@ -58,6 +64,7 @@ export function buildCardSvg(input: CardInput): string {
 ${panel(50, 250, 1100, 300)}
 <text x="90" y="360" font-family="${FONT_FAMILY}" font-size="72" font-weight="700" fill="#fff">${esc(clip(input.title, 34))}</text>
 <text x="90" y="440" font-family="${FONT_FAMILY}" font-size="72" font-weight="700" fill="#fff">${esc(clip(input.subtitle, 34))}</text>
+${SITE_URL}
 </svg>`
   }
 
@@ -66,14 +73,21 @@ ${panel(50, 250, 1100, 300)}
   const logo = input.logoPng
     ? `<image x="930" y="415" width="100" height="100" href="data:image/png;base64,${input.logoPng.toString('base64')}"/>`
     : ''
+  const flag = input.flagPng
+    ? `<image x="900" y="40" width="150" height="100" preserveAspectRatio="xMidYMid slice" href="data:image/png;base64,${input.flagPng.toString('base64')}"/><rect x="900" y="40" width="150" height="100" fill="none" stroke="#fff" stroke-width="4"/>`
+    : ''
   return `${open}${background(input.color)}${header(input.siteIconPng)}
 <rect x="150" y="190" width="900" height="170" rx="22" fill="#fff" stroke="#111" stroke-width="8"/>
 <rect x="150" y="190" width="90" height="170" rx="22" fill="${BRAND_BLUE}"/>
+<rect x="165" y="214" width="60" height="22" rx="2" fill="#0057b7"/><rect x="165" y="236" width="60" height="22" rx="2" fill="#ffd700"/>
+<text x="195" y="334" text-anchor="middle" font-family="${FONT_FAMILY}" font-size="46" font-weight="700" fill="#fff">UA</text>
 <text x="645" y="${190 + 85 + Math.round(plateSize * 0.36)}" text-anchor="middle" font-family="${FONT_FAMILY}" font-size="${plateSize}" font-weight="700" fill="#111" letter-spacing="4">${esc(input.plate)}</text>
 ${panel(150, 400, 900, 150)}
 <text x="185" y="468" font-family="${FONT_FAMILY}" font-size="52" font-weight="700" fill="#fff">${esc(clip(input.title, 28))}</text>
 <text x="185" y="520" font-family="${FONT_FAMILY}" font-size="34" fill="#cbd5e1">${esc(clip(input.subtitle, 44))}</text>
 ${logo}
+${flag}
+${SITE_URL}
 </svg>`
 }
 

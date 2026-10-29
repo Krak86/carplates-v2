@@ -78,6 +78,7 @@ export class OgController {
       return buildCardSvg({ plate: null, title, subtitle, color: 'blue', siteIconPng })
     }
     const logoPng = preview.brandSlug ? readLogo(join(this.assetsDir, 'logos', `${preview.brandSlug}.png`)) : null
-    return buildCardSvg({ ...preview.card, logoPng, siteIconPng })
+    const flagPng = preview.regionId ? readLogo(join(this.assetsDir, 'og-flags', `${preview.regionId}.png`)) : null
+    return buildCardSvg({ ...preview.card, logoPng, flagPng, siteIconPng })
   }
 }

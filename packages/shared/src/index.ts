@@ -9,6 +9,7 @@ export {
   isSovietPlate
 } from './plate.js'
 export { modelFamily, type ModelFamily } from './modelFamily.js'
+export { REGION_IDS } from './regionIds.js'
 export { hasKnownWmi, lookupWmi, type WmiMatch } from './wmi.js'
 export {
   LEGACY_COUNTRIES,

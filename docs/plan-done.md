@@ -4068,3 +4068,10 @@ Plan: `PLAN.md` "Visual stats, map logos, cards and quizzes". Convention: `docs/
 - **Files:** `lib/plate-card.ts` (`renderPlateCardPng`, canvas only, logo/flag loaded best-effort like `fetchImageAsPng`), `components/use-plate-card-actions.ts` (badge fact from `statsTopQuery` + `rankingBadges()[0]`, `navigator.canShare` then `downloadBlob`), `components/PlateCardButton.tsx`, `share.card` / `share.cardFailed` (ua/ru/en).
 - **Colours:** the accent reads the `--label-1` token via `getComputedStyle` (oklch when `CSS.supports`), sRGB `#f97316` fallback; the canvas is requested in `display-p3`.
 - **Not done:** not browser-checked yet (only `tsc` + eslint); no test; link previews unchanged (`/og/<PLATE>.png` is still the API-rendered image, not this card) (API-side `apps/api/src/spa/`); no `releases.ts` / About entry (add once deployed).
+
+## OG card: region flag and carsua.app (2026-10-29)
+
+- `/og/<PLATE>.png` (`apps/api/src/spa/og-card.ts`) draws the plate's region flag top-right (150x100, white frame; plates only, when the region has one) and `carsua.app` bottom-right on a dark backing (plate, VIN and generic cards). Everything else is unchanged. This is separate from the browser-drawn "Save as picture" card.
+- `REGION_IDS` moved to `packages/shared/src/regionIds.ts` (web `lib/region-ids.ts` re-exports it); `Preview.regionId` carries it; `OgController` reads `public/og-flags/<id>.png`.
+- resvg cannot decode WebP, so the flags are 180 px PNGs built from `assets/flags-lg` by `pnpm --filter scripts build:og-flags` (re-run after adding a region flag; 27 files, ~280 KB). Tests in `og-card.test.ts`; checked by rendering a sample card.
+- Cached cards (LRU, edge 1 day, crawlers) show the old image until they expire.

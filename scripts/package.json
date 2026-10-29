@@ -123,6 +123,7 @@
     "build:kind-images": "tsx src/build-kind-images.ts",
     "build:read-images": "tsx src/build-read-images.ts",
     "build:logo-images": "tsx src/build-logo-images.ts",
+    "build:og-flags": "tsx src/build-og-flags.ts",
     "type-check": "tsc",
     "test": "vitest run"
   },
