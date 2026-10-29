@@ -371,3 +371,9 @@ export type SettingsResponse = z.infer<typeof settingsResponseSchema>
 
 export const settingsUpdateRequestSchema = settingsDocumentSchema
 export type SettingsUpdateRequest = SettingsDocument
+
+/** Operator dashboard links, served to admins only so the vendor list is not in the public JS bundle. */
+export const adminLinksResponseSchema = z.object({
+  links: z.array(z.object({ label: z.string(), href: z.string(), icon: z.string() }))
+})
+export type AdminLinksResponse = z.infer<typeof adminLinksResponseSchema>
