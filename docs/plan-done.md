@@ -3093,6 +3093,11 @@ Trigger: the dev server showed ~22 MB / 337 requests before the first result. Th
   `/safety` CLS 0.00, LCP 1327 ms; `/about` CLS 0.00, LCP 1484 ms (the taller fallback does not shift short pages). Mobile Lighthouse on `/about`
   (the page that happened to be open; `/` and `/fuel` a11y 100 were verified earlier): a11y 100, best practices 96 (`inspector-issues`),
   SEO 100; agentic-browsing 50 (`llms-txt`, `ai-catalog.json` only). `td-has-header` not re-run on `/fuel` after deploy.
+  ✅ **Edge cache verified (2026-10-29, via chrome-devtools `fetch`, `cache: 'no-store'`, two requests each):** Cloudflare Cache Rule "Cache model
+  lookups" created (expression in `docs/deploy.md`): `/api/vdb`, `/api/vdb/stats`, `/api/rdw`, `/api/rdw/recalls`, `/api/wiki`, `/api/wiki/image`
+  all MISS then HIT with the origin `Cache-Control`; `refresh=true` stays `no-store` + DYNAMIC. Audit of "Cache API rollups" found the bare
+  `/api/stats` (prefix `/api/stats/` does not match it) DYNAMIC; `"/api/stats"` added to the `in {}` list, now MISS then HIT. `/api/stats/version`
+  stays DYNAMIC. The rule editor must stay in "Edit expression" mode: "Use expression builder" discards `starts_with` / `in {}`.
 
 ### Estimated value, weight rankings, community widgets and export ✅ BUILT (2026-10-09, `86cc500` … `bb9f055`)
 

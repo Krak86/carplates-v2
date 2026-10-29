@@ -284,13 +284,13 @@ and unbundled, so it says nothing about production.
 `CF-Connecting-IP` (Fastify `trustProxy` + throttler tracker; only trust Cloudflare's IP ranges). The global rollups (`/api/stats/*` except `version`, `/api/fuel/stats`,
 `/api/fuel/powertrains`, `/api/safety/stats`, `/api/wanted/stats`) send `Cache-Control: public, max-age=300`, but Cloudflare does not cache
 JSON by default, so a Cache Rule "Cache API rollups" (created 2026-10-29, verified MISS → HIT) makes it effective at the edge: custom expression
-`(http.host eq "carsua.app" and ((starts_with(http.request.uri.path, "/api/stats/") and http.request.uri.path ne "/api/stats/version") or http.request.uri.path in {"/api/fuel/stats" "/api/fuel/powertrains" "/api/safety/stats" "/api/wanted/stats"}))`,
+`(http.host eq "carsua.app" and ((starts_with(http.request.uri.path, "/api/stats/") and http.request.uri.path ne "/api/stats/version") or http.request.uri.path in {"/api/stats" "/api/fuel/stats" "/api/fuel/powertrains" "/api/safety/stats" "/api/wanted/stats"}))`,
 "Eligible for cache", Edge TTL "Use cache-control header if present, bypass cache if not", Browser TTL "Respect origin TTL". Paste it via
 "Edit expression" and never switch back to the builder (it cannot show `starts_with` / `in {}` and wraps the text into a wildcard value).
 
 Per-model lookups (`/api/vdb`, `/api/rdw`, `/api/rdw/recalls`, `/api/wiki`, `/api/wiki/image`; keyed on brand/model/year, never on a plate or VIN) send
 `Cache-Control: public, max-age=3600, s-maxage=86400` (recalls `max-age=900, s-maxage=3600`; `lookupCacheInterceptor` in `common/cache.ts`), and
-`no-store` with `refresh=true`; `/api/vdb/stats` reuses the 5 min rollup value. A second Cache Rule "Cache model lookups" (**to create in the dashboard**)
+`no-store` with `refresh=true`; `/api/vdb/stats` reuses the 5 min rollup value. A second Cache Rule "Cache model lookups" (created 2026-10-29, verified MISS → HIT; `refresh=true` stays DYNAMIC)
 makes it effective: expression
 `(http.host eq "carsua.app" and http.request.uri.path in {"/api/vdb" "/api/vdb/stats" "/api/rdw" "/api/rdw/recalls" "/api/wiki" "/api/wiki/image"} and not http.request.uri.query contains "refresh")`,
 "Eligible for cache", Edge TTL "Use cache-control header if present, bypass cache if not", Browser TTL "Respect origin TTL", cache key left at default
