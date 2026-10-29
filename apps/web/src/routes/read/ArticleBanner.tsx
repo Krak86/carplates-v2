@@ -5,17 +5,33 @@ import type { ArticleMeta } from '@/routes/read/types'
 
 type Props = {
   article: Pick<ArticleMeta, 'path' | 'icon' | 'hue'>
+  /** `card`: greyed out until the parent `group` is hovered/focused/touched; `header`: full colour, the picture drifts with the pointer. */
+  variant?: 'card' | 'header'
   className?: string
 }
 
 /** Cover of a guide: the generated picture (`public/read/<guide>`, built by `pnpm build:read-images`) over a wide-gamut oklch gradient (sRGB fallback first), with the guide's emoji on top. */
-export default function ArticleBanner({ article, className }: Props): ReactNode {
+export default function ArticleBanner({ article, variant = 'card', className }: Props): ReactNode {
   const { hue, path } = article
   const guide = path.split('/').pop()
+  const isHeader = variant === 'header'
+
+  // Parallax: pointer position (-1..1) goes to CSS vars, the picture moves by transform only (no re-render).
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>): void => {
+    const box = e.currentTarget.getBoundingClientRect()
+    e.currentTarget.style.setProperty('--px', String(((e.clientX - box.left) / box.width) * 2 - 1))
+    e.currentTarget.style.setProperty('--py', String(((e.clientY - box.top) / box.height) * 2 - 1))
+  }
+  const handlePointerLeave = (e: React.PointerEvent<HTMLDivElement>): void => {
+    e.currentTarget.style.setProperty('--px', '0')
+    e.currentTarget.style.setProperty('--py', '0')
+  }
 
   return (
     <div
       aria-hidden
+      onPointerMove={isHeader ? handlePointerMove : undefined}
+      onPointerLeave={isHeader ? handlePointerLeave : undefined}
       className={cn('relative flex items-center justify-center overflow-hidden text-6xl', className)}
       style={{
         background: `linear-gradient(135deg, hsl(${hue} 70% 60%), hsl(${(hue + 40) % 360} 70% 40%))`
@@ -34,11 +50,21 @@ export default function ArticleBanner({ article, className }: Props): ReactNode 
           alt=""
           loading="lazy"
           decoding="async"
-          className="absolute inset-0 size-full object-cover"
+          className={cn(
+            'absolute inset-0 size-full object-cover will-change-transform',
+            isHeader
+              ? 'translate-x-[calc(var(--px,0)*-4%)] translate-y-[calc(var(--py,0)*-8%)] scale-[1.2] transition-transform duration-200 ease-out'
+              : 'opacity-45 grayscale transition duration-500 ease-out group-hover:scale-110 group-hover:opacity-100 group-hover:grayscale-0 group-focus-visible:opacity-100 group-focus-visible:grayscale-0'
+          )}
         />
       </picture>
 
-      <span className="absolute inset-0 bg-black/25" />
+      <span
+        className={cn(
+          'absolute inset-0 bg-black/25 transition-opacity duration-500',
+          !isHeader && 'group-hover:opacity-0'
+        )}
+      />
 
       <span className="relative drop-shadow-lg">{article.icon}</span>
     </div>

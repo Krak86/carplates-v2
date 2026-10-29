@@ -28,7 +28,7 @@ export default function ArticleHeader({ title, lead, backLabel, jumps }: Props):
 
   return (
     <Card className="mb-4 overflow-hidden !p-0">
-      {article && <ArticleBanner article={article} className="h-32 md:h-44" />}
+      {article && <ArticleBanner article={article} variant="header" className="h-36 md:h-56" />}
 
       <div className="p-3 md:p-4">
         <Link to={READ_PATH} viewTransition className="mb-2 inline-block text-sm text-primary">
