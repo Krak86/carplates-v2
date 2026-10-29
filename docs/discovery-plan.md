@@ -12,6 +12,10 @@ public OpenAPI document, per-page link previews (`features-reference.md` "Link p
   live `GROUP BY` over 16.7M rows. Revisit only if metrics show API latency after launch.
 - **Cache at the edge.** Cloudflare cache rule for `/cars/*` and `/api/catalog/*` (1 day or more) plus
   `Cache-Control: public, s-maxage=…` from the API. Catalog data changes monthly (delta ingest).
+- **No static prerender at build time.** Catalog data changes with the monthly ingest, not with a deploy, and deploys are
+  path-filtered. Instead the API injects a small semantic HTML block (h1, summary, stats table, plain links) into `#root` for
+  `/cars/...`, behind the edge cache. Optional later: store the rendered block in `catalog_model.seo_html` at
+  `db:refresh-catalog` time. Details: catalog-plan.md Step 5.
 - **Verified bots must not be blocked.** Check Bot Fight Mode and the `/api/*` throttles (`common/throttle.ts`) against
   Googlebot/Bingbot after the pages are live.
 - **Plate/VIN pages stay `noindex`.** Indexable pages carry no personal data, only aggregates above a data threshold
@@ -53,7 +57,7 @@ public OpenAPI document, per-page link previews (`features-reference.md` "Link p
       `/read` page has a good one
 - [ ] Each item: `releases.ts` entry, About page text, tests, docs per CLAUDE.md
 
-## Phase 2: catalog pages `/cars/:make/:model[/:year]` (about 5-8 working days)
+## Phase 2: catalog pages `/cars/:make/:model[/:year]` (about 6-9 working days)
 
 Full design: [catalog-plan.md](catalog-plan.md). Summary and estimate:
 
@@ -63,7 +67,7 @@ Full design: [catalog-plan.md](catalog-plan.md). Summary and estimate:
 | 2. Year rollup SQL + `db:refresh-catalog` script                                         | 0.5-1 day    |
 | 3. API + `packages/shared/src/catalog.ts` contract + `@Throttle`                         | 0.5 day      |
 | 4. Web: routes, `ModelYearCard`, "In Ukraine" section, extract `ModelSections`           | 1.5-2 days   |
-| 5. SEO: `metaFor` branch, JSON-LD, hreflang, chunked `/sitemap-cars-N.xml`               | 0.5-1 day    |
+| 5. SEO: `metaFor` branch, injected `#root` block, JSON-LD, hreflang, chunked sitemap, cache headers | 1-2 days |
 | 6. Docs, i18n ua/ru/en, About, releases, tests                                           | 0.5-1 day    |
 
 **MVP (about 3-4 days):** top ~300 canonical models via overrides, `/cars/:make/:model` only (no year level), "In Ukraine" stats

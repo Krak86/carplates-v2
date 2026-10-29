@@ -1,6 +1,6 @@
 # Model catalog pages: `/cars/:make/:model/:year`
 
-Status: **researched 2026-10-13, not started.** Tracked in PLAN.md "To discuss / research". Rollout, estimate (5-8 days, MVP 3-4)
+Status: **researched 2026-10-13, not started.** Tracked in PLAN.md "To discuss / research". Rollout, estimate (6-9 days, MVP 3-4)
 and the surrounding SEO/outreach checklist: [discovery-plan.md](discovery-plan.md).
 
 ## Context
@@ -121,6 +121,18 @@ capacity_p50, power_p50, imported_share, first_reg_by_year jsonb, owners_p50)`.
 - `spa.controller.ts` `metaFor`: add a `/cars/...` branch. It writes a per-page title and description (counts, years) in
   ua/ru/en, a canonical URL, and `noindex` when `!indexable`.
 - Add JSON-LD `Car`/`ProductModel` and hreflang alternates for `?lang=`.
+- **Server-injected body, no build-step prerender.** The SPA shell is already rewritten per request (`meta.ts`), but the body is
+  an empty `#root`, so a crawler must run JS to see the stats. For `/cars/...` also inject a small semantic block into `#root`:
+  `<h1>`, a one-paragraph summary, a stats table (fuel, body, top regions, imports by year) and plain `<a>` links to year pages,
+  sibling models and the make page (best crawl discovery). React replaces it on load without flicker; it must match what the
+  user sees (no cloaking). Static prerender of all pages is rejected: the data changes with the monthly ingest, not with a
+  deploy, and deploys are path-filtered.
+- **Cache:** `Cache-Control: public, s-maxage=86400, stale-while-revalidate=604800` on `/cars/*` and `/api/catalog/*`, a
+  Cloudflare cache rule, and a data-version in the cache key so the monthly ingest invalidates it. Optional in-memory LRU
+  (24 h) for the rendered shell of hot pages.
+- **Optional, after the MVP is indexed:** render the block once in `db:refresh-catalog` and store it (`catalog_model.seo_html`
+  + JSON-LD), so a request is one primary-key read plus a string replace (about 0.5 day). Top ~300 models, make pages and
+  `/cars` can be held in memory at API start.
 - `sitemap.ts`: switch to a sitemap index with chunked `/sitemap-cars-N.xml`, indexable pages only.
 - `STATIC_PAGES` gets `/cars` only. The dynamic pages get their text from the catalog table.
 
