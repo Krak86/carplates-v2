@@ -45,6 +45,7 @@ const ProfileRoute = lazy(() => import('@/routes/profile/ProfileRoute'))
 const AdminRoute = lazy(() => import('@/routes/admin/AdminRoute'))
 const AdvancedSearchRoute = lazy(() => import('@/routes/advanced-search/AdvancedSearchRoute'))
 const RaceRoute = lazy(() => import('@/routes/RaceRoute'))
+const PlayRoute = lazy(() => import('@/routes/play/PlayRoute'))
 
 export default function App(): ReactNode {
   const { pathname } = useLocation()
@@ -88,6 +89,7 @@ export default function App(): ReactNode {
             <Route path="/news" element={<NewsRoute />} />
             <Route path="/discuss" element={<DiscussRoute />} />
             <Route path="/advanced-search" element={<AdvancedSearchRoute />} />
+            <Route path="/play" element={<PlayRoute />} />
             <Route path="/race" element={<RaceRoute />} />
             <Route path="/relax" element={<RelaxRoute />} />
             <Route path="/releases" element={<ReleasesRoute />} />

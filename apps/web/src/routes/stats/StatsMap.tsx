@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import type { FocusEvent, MouseEvent, ReactNode } from 'react'
+import type { FocusEvent, KeyboardEvent, MouseEvent, ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { geoMercator, geoPath } from 'd3-geo'
 import { useTranslation } from 'react-i18next'
@@ -7,6 +7,7 @@ import { ComposableMap, Geographies, Geography } from 'react-simple-maps'
 
 import { brandLogoUrl } from '@carplates/shared'
 
+import { cn } from '@/lib/cn'
 import { toIntlLocale } from '@/lib/intl'
 import { regionBrandStatsQuery, regionFacetStatsQuery, ukraineGeographyQuery } from '@/lib/queries'
 import { localizeRegion } from '@/lib/region-label'
@@ -28,6 +29,14 @@ const LOGO_GROW = 22
 
 export type MapRow = { label: string; value: number }
 
+/** Quiz mode: no tooltip or legend (they would give the answer away), polygons are clickable and painted by `marks`. */
+export type MapQuiz = {
+  /** `REGIONS` name → verdict colour. */
+  marks: Readonly<Record<string, 'correct' | 'wrong'>>
+  onPick: (region: string) => void
+  disabled?: boolean
+}
+
 type Props = {
   /** `label` = the Ukrainian `REGIONS` name. */
   rows: MapRow[]
@@ -35,11 +44,12 @@ type Props = {
   logos?: boolean
   /** What the markers show; only read when `logos` is on. */
   mode?: MapMode
+  quiz?: MapQuiz
 }
 
 type Hover = { name: string; value: number | null; x: number; y: number; brands?: string }
 
-export default function StatsMap({ rows, logos = false, mode = DEFAULT_MAP_MODE }: Props): ReactNode {
+export default function StatsMap({ rows, logos = false, mode = DEFAULT_MAP_MODE, quiz }: Props): ReactNode {
   const { t, i18n } = useTranslation()
   const theme = useUiStore(s => s.theme)
   const geography = useQuery(ukraineGeographyQuery())
@@ -127,11 +137,19 @@ export default function StatsMap({ rows, logos = false, mode = DEFAULT_MAP_MODE 
                 const regionName = localizeRegion(name, i18n.language) ?? properties.shapeISO
                 const value = name ? valueByRegion.get(name) : undefined
                 const isHovered = hover?.name === regionName
-                const fill =
-                  value === undefined
+                const mark = quiz && name ? quiz.marks[name] : undefined
+                const fill = quiz
+                  ? mark === 'correct'
+                    ? 'var(--label-4)'
+                    : mark === 'wrong'
+                      ? 'var(--label-0)'
+                      : 'var(--color-border)'
+                  : value === undefined
                     ? 'var(--color-border)'
                     : choroplethColor(max > min ? (value - min) / (max - min) : 1, theme)
-                const label = `${regionName}: ${value === undefined ? t('stats.map.noData') : numberFormat.format(value)}`
+                const label = quiz
+                  ? regionName
+                  : `${regionName}: ${value === undefined ? t('stats.map.noData') : numberFormat.format(value)}`
                 const brands = logos ? markerFor(name)?.summary : undefined
 
                 const handleEnter = (e: MouseEvent): void => {
@@ -141,6 +159,14 @@ export default function StatsMap({ rows, logos = false, mode = DEFAULT_MAP_MODE 
                   setHover(h => (h ? { ...h, x: e.clientX, y: e.clientY } : h))
                 }
                 const handleLeave = (): void => setHover(null)
+                const handlePick = (): void => {
+                  if (quiz && name && !quiz.disabled) quiz.onPick(name)
+                }
+                const handleKeyDown = (e: KeyboardEvent<SVGPathElement>): void => {
+                  if (e.key !== 'Enter' && e.key !== ' ') return
+                  e.preventDefault()
+                  handlePick()
+                }
                 const handleFocus = (e: FocusEvent<SVGPathElement>): void => {
                   const rect = e.currentTarget.getBoundingClientRect()
                   setHover({
@@ -160,11 +186,15 @@ export default function StatsMap({ rows, logos = false, mode = DEFAULT_MAP_MODE 
                     stroke={isHovered ? 'var(--color-primary)' : 'var(--color-bg)'}
                     strokeWidth={isHovered ? 1.5 : 0.5}
                     aria-label={label}
-                    onMouseEnter={handleEnter}
-                    onMouseMove={handleMove}
+                    onMouseEnter={quiz ? undefined : handleEnter}
+                    onMouseMove={quiz ? undefined : handleMove}
                     onMouseLeave={handleLeave}
-                    onFocus={handleFocus}
+                    onFocus={quiz ? undefined : handleFocus}
                     onBlur={handleLeave}
+                    onClick={quiz ? handlePick : undefined}
+                    onKeyDown={quiz ? handleKeyDown : undefined}
+                    tabIndex={quiz ? 0 : undefined}
+                    role={quiz ? 'button' : undefined}
                     style={{ outline: 'none', cursor: 'pointer' }}
                   />
                 )
@@ -246,16 +276,18 @@ export default function StatsMap({ rows, logos = false, mode = DEFAULT_MAP_MODE 
       </div>
 
       <div className="mt-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3">
-        <div className="flex items-center gap-2 text-xs text-[var(--color-muted)]">
-          <span>{numberFormat.format(min)}</span>
-          <div
-            className="h-2 flex-1 rounded-full"
-            style={{ background: `linear-gradient(to right, ${legendStops.join(', ')})` }}
-          />
-          <span>{numberFormat.format(max)}</span>
-        </div>
+        {!quiz && (
+          <div className="flex items-center gap-2 text-xs text-[var(--color-muted)]">
+            <span>{numberFormat.format(min)}</span>
+            <div
+              className="h-2 flex-1 rounded-full"
+              style={{ background: `linear-gradient(to right, ${legendStops.join(', ')})` }}
+            />
+            <span>{numberFormat.format(max)}</span>
+          </div>
+        )}
 
-        <p className="mt-2 text-xs text-[var(--color-muted)]">{t('stats.map.attribution')}</p>
+        <p className={cn('text-xs text-[var(--color-muted)]', !quiz && 'mt-2')}>{t('stats.map.attribution')}</p>
       </div>
     </div>
   )

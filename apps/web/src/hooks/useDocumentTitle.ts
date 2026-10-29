@@ -20,6 +20,7 @@ export const ROUTE_TITLE_KEYS: Record<string, string> = {
   '/news': 'nav.news',
   '/discuss': 'nav.discuss',
   '/advanced-search': 'nav.advancedSearch',
+  '/play': 'nav.play',
   '/race': 'nav.race',
   '/relax': 'nav.relax',
   '/releases': 'nav.releases',

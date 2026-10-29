@@ -511,3 +511,7 @@ Files: migration 0075, `packages/shared/src/origin.ts` (own file, no offline-cac
 ## Appearance settings (sidebar)
 
 `ui-store.ts` holds `themeMode` (`auto` = follow the OS, stored as no value under `carplates.theme`; `theme` is the resolved value), `accent` and `textSize` (`carplates.accent` / `carplates.textSize`). They are applied as `data-accent` / `data-text-size` on `<html>` (absent = default blue / medium) and styled in `global.css` after the theme and `color-gamut` blocks; `index.html` re-applies them before first paint. A new accent = `ACCENTS` entry + light/dark/p3 tokens + `ACCENT_SWATCH` in `Sidebar.tsx` + `nav.accent.*` keys. The manifest `theme_color` is neutral white on purpose; the runtime `<meta name="theme-color">` follows the theme.
+
+## Games hub (`/play`)
+
+`routes/play/`; write-up plan-done "Games hub /play". `/play?game=region|logo|higher` plays in place, online-only. Rounds are pure functions in `helpers.ts` (plates come from `REGIONS`, never re-implemented). `StatsMap` `quiz` prop = clickable polygons without tooltip/legend. Best score per quiz in localStorage (`quiz-storage.ts`); a new quiz = id in `QUIZ_IDS`, component in `QUIZ_COMPONENT`, `play.quiz.<id>.title|desc` ua/ru/en. The end screen shares a score card via `renderPlateCardPng`.

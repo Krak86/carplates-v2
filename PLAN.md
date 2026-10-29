@@ -391,7 +391,7 @@ above once scoped, or dropped if research says no.
   (`track.ua-gis.com/gtfs/lviv/vehicle_position`, ~11 s; licence unchecked) — an API proxy + lazy Leaflet map would give real moving public
   transport for Львів only; (b) YouTube ISS streams can be retired or embed-blocked — swap ids in `LIVE_STREAMS` (earth / traffic / city, `apps/web/src/lib/live-background.ts`; traffic/city streams added 2026-10-05).
 
-### Visual stats, map logos, cards and quizzes — planned 2026-10-29, steps 1-4 built, step 4 browser-checked
+### Visual stats, map logos, cards and quizzes — planned 2026-10-29, steps 1-5 built
 
 **Resume here:** steps 1-3 are built, browser-checked and committed (`bb4f87e`, `45723e8`; write-ups in `docs/plan-done.md` "Overlap fix for step 2" and "Map modes, step 3"; convention `docs/features-reference.md` "Map modes"). Step 4 (plate card PNG) is committed (`daf02cf`, `d3e822f`) and browser-checked 2026-10-29 (card with badge, long model title).
 Next: (a) browser-check step 4 (`lib/plate-card.ts`, write-up in plan-done "Plate card PNG"; try a plate with and without a ranking badge, dark/light, phone share sheet); (b) the link-preview `/og/<PLATE>.png` stays the API-rendered card, but now has the region flag (top-right) and `carsua.app` (done 2026-10-29, see plan-done "OG card flag"); (c) step 5 (quiz). `releases.ts` + About lines for map markers, modes and plate card done 2026-10-29 (steps 1-4 deployed to stage). Small follow-ups: model mode shows the logo only (name is in the tooltip); the `/stats` map is online-only.
@@ -410,7 +410,7 @@ Idea round: put the registry stats on the map and in diagrams, and add small can
 3. ✅ **Map modes** (2026-10-29) - `?logos=1&mode=brand|model|fuel|origin|ev` select on `/stats`; `registry.stats_region_facet` (migration 0080), `region-facet-stats.ts`, `GET /api/stats/region-facets`, `regionFacetStatsQuery`. EV share = electric fleet share from the fuel rows. Open: `releases.ts` / About once deployed.
 4. ✅ **Shareable plate card PNG** (2026-10-29, built and browser-checked) - canvas card (plate, brand logo, region flag, year, one fact) through the `renderChartPng` pipeline; button
    on the result card; link previews stay API-side (`apps/api/src/spa/`).
-5. ⏳ **Games hub `/play` + quizzes** (decided 2026-10-29: own route `/play`) - a hub listing every game (quizzes, the racer `/race` and `/relax`, later ones) as cards, plus the quiz itself:
+5. ✅ **Games hub `/play` + quizzes** (built 2026-10-29, write-up plan-done "Games hub /play"; region and higher-lower browser-checked, logo quiz / end screen / phone not yet) (decided 2026-10-29: own route `/play`) - a hub listing every game (quizzes, the racer `/race` and `/relax`, later ones) as cards, plus the quiz itself:
    "guess the region from the plate" on `StatsMap`, then logo quiz and higher/lower from `stats/top`. Streak and best score in localStorage first, accounts later.
    Cross links both ways: `/stats` map, `/read/plates`, the result-card region line and the racer banner link to `/play`; the quiz end screen links to `/stats`, `/read/plates`, `/race`
    and a plate lookup; a score can be shared as a picture (`renderPlateCardPng` / `renderChartPng`). New public route checklist: CLAUDE.md (`ROUTE_TITLE_KEYS`, `STATIC_PAGES` ua/ru/en, sidebar, About, releases).

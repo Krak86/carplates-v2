@@ -277,6 +277,7 @@ const FEATURES = [
   'news',
   'whatsnew',
   'race',
+  'play',
   'account',
   'copy',
   'discuss',

@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Link } from 'react-router'
 
 import ArticleHeader from '@/routes/read/ArticleHeader'
 import { PLATES_LEAD } from '@/routes/read/articles'
@@ -43,6 +44,12 @@ export default function PlatesRoute(): ReactNode {
       <SpecialSection />
       <OrderSection />
       <SearchSection />
+
+      <p className="text-sm">
+        <Link to="/play?game=region" className="text-[var(--color-primary)] hover:underline">
+          🎲 {t('play.quiz.region.title')}
+        </Link>
+      </p>
     </div>
   )
 }

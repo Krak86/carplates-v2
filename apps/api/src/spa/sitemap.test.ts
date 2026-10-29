@@ -5,7 +5,18 @@ import { renderRobots, renderSitemap, sitemapPaths } from './sitemap.js'
 describe('sitemap', () => {
   it('lists indexable static pages, not per-device ones', () => {
     const paths = sitemapPaths()
-    for (const p of ['/about', '/privacy', '/terms', '/stats', '/fuel', '/safety', '/news', '/race', '/relax']) {
+    for (const p of [
+      '/about',
+      '/privacy',
+      '/terms',
+      '/stats',
+      '/fuel',
+      '/safety',
+      '/news',
+      '/play',
+      '/race',
+      '/relax'
+    ]) {
       expect(paths).toContain(p)
     }
     expect(paths).toContain('/advanced-search')

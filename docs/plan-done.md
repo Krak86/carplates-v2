@@ -4075,3 +4075,13 @@ Plan: `PLAN.md` "Visual stats, map logos, cards and quizzes". Convention: `docs/
 - `REGION_IDS` moved to `packages/shared/src/regionIds.ts` (web `lib/region-ids.ts` re-exports it); `Preview.regionId` carries it; `OgController` reads `public/og-flags/<id>.png`.
 - resvg cannot decode WebP, so the flags are 180 px PNGs built from `assets/flags-lg` by `pnpm --filter scripts build:og-flags` (re-run after adding a region flag; 27 files, ~280 KB). Tests in `og-card.test.ts`; checked by rendering a sample card.
 - Cached cards (LRU, edge 1 day, crawlers) show the old image until they expire.
+
+## Games hub `/play` + quizzes, step 5 of "Visual stats, map logos, cards and quizzes" (2026-10-29)
+
+- **Route:** `/play` (hub) and `/play?game=region|logo|higher` (a quiz in place). `routes/play/`: `PlayRoute` (cards for the quizzes plus `/race` and `/relax`, best score per quiz), `RegionQuiz`, `LogoQuiz`, `HigherLowerQuiz`, `QuizHeader`, `QuizEnd`, pure rounds in `helpers.ts` (+ test), `quiz-storage.ts` (best score per quiz, `carplates.quizBest`, zod + try/catch), `games.ts`. Online-only (offline shows a note). A new run remounts the quiz through a `key`, no effect.
+- **Region quiz:** `buildRegionRounds` takes 10 distinct regions of `REGION_NAMES` and builds a plate from that region's `REGIONS` prefixes (test: `regionName(plate)` maps back). `StatsMap` got a `quiz` prop (`MapQuiz`: `marks`, `onPick`, `disabled`): no tooltip, no legend, polygons are buttons painted `--label-4` (right) / `--label-0` (picked wrong).
+- **Logo quiz / higher-lower:** both read `statsTopQuery` (top 10 brands with a logo; higher-lower mixes brands, top models and regions, equal counts skipped, ends on the first miss or the end of the chain).
+- **End screen:** score, best, play again, share as a picture (`renderPlateCardPng` with plate "CARS UA", the quiz title as model and the score as fact), links to `/stats?view=map`, `/read/plates`, `/race`, plate lookup `/`.
+- **Cross links:** sidebar "Games", `/stats` map view, `/read/plates`, a 🎲 beside the region flag on the result card, and "More games" under the xl racer banner.
+- **Route checklist done:** `ROUTE_TITLE_KEYS`, `STATIC_PAGES` ua/ru/en (+ sitemap test), About `about.feature.play`, `releases.ts` item (today's day, no `latest.ts` bump), i18n `play.*` ua/ru/en.
+- **Not done:** streak is per run only (no stored best streak); no accounts/leaderboard; browser-checked region and higher-lower only (not the logo quiz, end screen, phone width or the share sheet).
