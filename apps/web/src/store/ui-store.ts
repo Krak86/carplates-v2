@@ -109,16 +109,16 @@ const startTextSize = readSaved(TEXT_SIZE_STORAGE_KEY, TEXT_SIZES, DEFAULT_TEXT_
 applyAccent(startAccent)
 applyTextSize(startTextSize)
 
-// Preview: the e-Ukraine typeface (license pending, see PLAN.md) vs the system stack; styled via `[data-font]` in global.css.
-const FONTS = ['system', 'e-ukraine'] as const
-type Font = (typeof FONTS)[number]
+// Preview: the e-Ukraine typeface (license pending, see PLAN.md) and ZAKON vs the system stack; styled via `[data-font]` in global.css.
+export const FONTS = ['system', 'e-ukraine', 'zakon'] as const
+export type Font = (typeof FONTS)[number]
 
 const FONT_STORAGE_KEY = 'carplates.font'
 
 export const FONT_PARAM = 'font'
 const DEFAULT_FONT: Font = 'system'
 
-/** `?font=` on a shared link wins for that visit; like `?lang=` it is not persisted (see `toggleFont`). */
+/** `?font=` on a shared link wins for that visit; like `?lang=` it is not persisted (see `setFont`). */
 function fontFromUrl(): Font | null {
   try {
     const fromUrl = new URLSearchParams(window.location.search).get(FONT_PARAM)
@@ -169,7 +169,7 @@ interface UiState {
   setThemeMode: (mode: ThemeMode) => void
   setAccent: (accent: Accent) => void
   setTextSize: (size: TextSize) => void
-  toggleFont: () => void
+  setFont: (font: Font) => void
   setDrawerOpen: (open: boolean) => void
   toggleCardTilt: () => void
 }
@@ -232,8 +232,7 @@ export const useUiStore = create<UiState>((set, get) => ({
       })
     })
   },
-  toggleFont: (): void => {
-    const font = get().font === 'system' ? 'e-ukraine' : 'system'
+  setFont: (font): void => {
     runLangTransition(() => {
       flushSync(() => {
         applyFont(font)

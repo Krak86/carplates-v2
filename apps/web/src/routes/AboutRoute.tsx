@@ -65,6 +65,12 @@ const SOURCES: readonly Source[] = [
   { key: 'mtsbu', label: 'MTSBU', url: 'https://policy.mtsbu.ua', icon: '/icons/sources/mtsbu.webp' },
   { key: 'shtrafua', label: 'ShtrafUA', url: 'https://shtrafua.com', icon: '/icons/shtrafua.png' },
   // No logo: the site grants no reuse of its mark.
+  {
+    key: 'customs',
+    label: 'cabinet.customs.gov.ua',
+    url: 'https://cabinet.customs.gov.ua/vtzcheck',
+    tile: 'bg-blue-700'
+  },
   { key: 'pdr', label: 'pdr.infotech.gov.ua', url: 'https://pdr.infotech.gov.ua', tile: 'bg-blue-700' },
   { key: 'drive2', label: 'DRIVE2', url: 'https://www.drive2.ru', icon: '/icons/drive2.png' },
   {
@@ -205,7 +211,8 @@ const SOURCES: readonly Source[] = [
     tile: 'bg-slate-500'
   },
   // No logo: the typeface page does not grant reuse of the Diia / Ministry marks.
-  { key: 'eUkraine', label: 'e-Ukraine typeface', url: 'https://thedigital.gov.ua/fonts', tile: 'bg-blue-700' }
+  { key: 'eUkraine', label: 'e-Ukraine typeface', url: 'https://thedigital.gov.ua/fonts', tile: 'bg-blue-700' },
+  { key: 'zakon', label: 'ZAKON typeface', url: 'https://mincult.gov.ua/zakon/', tile: 'bg-blue-700' }
 ]
 
 function SourceAvatar({ source }: { source: Source }): ReactNode {

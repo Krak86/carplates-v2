@@ -10,10 +10,16 @@ import Spinner from '@/components/ui/Spinner'
 import { LANGS } from '@/i18n'
 import type { Lang } from '@/i18n'
 import { cn } from '@/lib/cn'
-import { ACCENTS, TEXT_SIZES, THEME_MODES, useUiStore } from '@/store/ui-store'
-import type { Accent, TextSize, ThemeMode } from '@/store/ui-store'
+import { ACCENTS, FONTS, TEXT_SIZES, THEME_MODES, useUiStore } from '@/store/ui-store'
+import type { Accent, Font, TextSize, ThemeMode } from '@/store/ui-store'
 
 const LANG_LABEL: Record<Lang, string> = { ua: 'Українська', ru: 'Русский', en: 'English' }
+
+const FONT_LABEL_KEY: Record<Font, 'nav.fontSystem' | 'nav.fontEUkraine' | 'nav.fontZakon'> = {
+  system: 'nav.fontSystem',
+  'e-ukraine': 'nav.fontEUkraine',
+  zakon: 'nav.fontZakon'
+}
 
 const THEME_MODE_KEY: Record<ThemeMode, 'nav.themeAuto' | 'nav.themeLight' | 'nav.themeDark'> = {
   auto: 'nav.themeAuto',
@@ -46,7 +52,7 @@ export default function Sidebar(): ReactNode {
   const textSize = useUiStore(s => s.textSize)
   const setTextSize = useUiStore(s => s.setTextSize)
   const font = useUiStore(s => s.font)
-  const toggleFont = useUiStore(s => s.toggleFont)
+  const setFont = useUiStore(s => s.setFont)
   const setDrawerOpen = useUiStore(s => s.setDrawerOpen)
 
   const { user, isAdmin } = useSession()
@@ -217,14 +223,24 @@ export default function Sidebar(): ReactNode {
       </div>
 
       <div className="mt-4 px-3 text-xs tracking-wide text-[var(--color-muted)] uppercase">{t('nav.font')}</div>
-      <button
-        type="button"
-        aria-pressed={font === 'e-ukraine'}
-        onClick={toggleFont}
-        className="rounded-lg bg-[var(--color-surface)]/60 px-3 py-1.5 text-left text-sm transition-colors duration-200 hover:bg-[var(--color-surface)]"
-      >
-        {font === 'e-ukraine' ? t('nav.fontEUkraine') : t('nav.fontSystem')}
-      </button>
+      <div role="group" aria-label={t('nav.font')} className="flex flex-col gap-1">
+        {FONTS.map(f => (
+          <button
+            key={f}
+            type="button"
+            aria-pressed={f === font}
+            onClick={() => setFont(f)}
+            className={cn(
+              'rounded-lg px-3 py-1.5 text-left text-sm transition-colors duration-200',
+              f === font
+                ? 'bg-[var(--color-surface)] font-medium text-[var(--color-primary)]'
+                : 'bg-[var(--color-surface)]/60 text-[var(--color-muted)] hover:bg-[var(--color-surface)] hover:text-[var(--color-fg)]'
+            )}
+          >
+            {t(FONT_LABEL_KEY[f])}
+          </button>
+        ))}
+      </div>
 
       <OfflineDataSettings />
 

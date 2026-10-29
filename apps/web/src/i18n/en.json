@@ -3284,5 +3284,11 @@
   "value.us.warnTrim": "The US price is for the base version of this trim, options are not included. Not a market price.",
   "value.us.altValue": "Value by the US price",
   "value.us.altValueInfo": "The US base price aged on the same curve ({{age}} years, about {{percent}} % kept, ±{{spread}} %), before Ukrainian customs. Compare it with the EU estimate above: if they are close, the figure is more trustworthy. Not shown as a gap because the Dutch price has VAT and BPM inside.",
-  "value.us.jump": "Go to the US base price (Estimated value)"
+  "value.us.jump": "Go to the US base price (Estimated value)",
+  "verification.customs.title": "Customs clearance check",
+  "verification.customs.desc": "Check the customs-clearance status of a vehicle - cabinet.customs.gov.ua",
+  "verification.customs.about": "A State Customs Service tool for checking whether an imported vehicle has been cleared through customs.\nTZ - transportnyi zasib, a vehicle\nCustoms clearance - paying duties and completing the paperwork for a vehicle brought in from abroad",
+  "nav.fontZakon": "ZAKON (preview)",
+  "about.source.zakon": "ZAKON (Zakon Text) typeface, the national Ukrainian typeface for state institutions, an optional font in the menu. Free to use.",
+  "about.source.customs": "State Customs Service e-cabinet - link to the vehicle customs-clearance check. Links only."
 }

@@ -45,34 +45,36 @@ export default function PhotoWarnings({ meta, maxDimension, showAccuracy, mode =
     <div className="w-full max-w-content rounded-md border border-amber-500/40 bg-amber-500/15 px-2.5 py-1.5 text-sm font-medium text-amber-800 dark:text-amber-300">
       <div className="flex items-start gap-1.5">
         <span aria-hidden>{first.icon}</span>
-        <span className="min-w-0 flex-1">{first.text}</span>
-        {hasMore && (
-          <button
-            type="button"
-            onClick={() => setExpanded(open => !open)}
-            aria-expanded={expanded}
-            aria-controls="photo-warnings-more"
-            aria-label={expanded ? t('search.lessWarnings') : t('search.moreWarnings')}
-            title={expanded ? t('search.lessWarnings') : t('search.moreWarnings')}
-            className="-my-0.5 -mr-1 flex h-6 w-6 shrink-0 items-center justify-center rounded hover:bg-amber-500/20"
+        {/* Phones: the lead note shows two rows; the toggle reveals the rest of it and the other notes. */}
+        <span className={cn('min-w-0 flex-1', !expanded && 'max-sm:line-clamp-2')}>{first.text}</span>
+        <button
+          type="button"
+          onClick={() => setExpanded(open => !open)}
+          aria-expanded={expanded}
+          aria-controls={hasMore ? 'photo-warnings-more' : undefined}
+          aria-label={expanded ? t('search.lessWarnings') : t('search.moreWarnings')}
+          title={expanded ? t('search.lessWarnings') : t('search.moreWarnings')}
+          className={cn(
+            '-my-0.5 -mr-1 flex h-6 w-6 shrink-0 items-center justify-center rounded hover:bg-amber-500/20',
+            !hasMore && 'sm:hidden'
+          )}
+        >
+          <svg
+            aria-hidden
+            viewBox="0 0 24 24"
+            className={cn(
+              'h-4 w-4 transition-transform duration-300 motion-reduce:transition-none',
+              expanded && 'rotate-180'
+            )}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
           >
-            <svg
-              aria-hidden
-              viewBox="0 0 24 24"
-              className={cn(
-                'h-4 w-4 transition-transform duration-300 motion-reduce:transition-none',
-                expanded && 'rotate-180'
-              )}
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="m6 9 6 6 6-6" />
-            </svg>
-          </button>
-        )}
+            <path d="m6 9 6 6 6-6" />
+          </svg>
+        </button>
       </div>
 
       {hasMore && (

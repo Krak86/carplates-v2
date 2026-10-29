@@ -51,12 +51,25 @@ export default function CollapsibleChips({ children, className }: Props): ReactN
           type="button"
           aria-expanded={expanded}
           onClick={() => setExpanded(v => !v)}
-          className="mt-1 flex w-full items-center justify-center gap-1 text-xs text-[var(--color-primary)] md:hidden"
+          className="mt-1 flex min-h-11 w-full items-center justify-center gap-1.5 rounded-lg text-sm font-medium text-[var(--color-primary)] transition-colors active:bg-[var(--color-border)]/40 md:hidden"
         >
           {expanded ? t('result.chipsLess') : t('result.chipsMore')}
-          <span aria-hidden className={cn('inline-block transition-transform duration-200', expanded && 'rotate-180')}>
-            ▾
-          </span>
+          <svg
+            aria-hidden
+            viewBox="0 0 24 24"
+            className="size-5"
+            style={{
+              transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)',
+              transition: 'transform 300ms ease-in-out'
+            }}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="m6 9 6 6 6-6" />
+          </svg>
         </button>
       )}
     </div>
