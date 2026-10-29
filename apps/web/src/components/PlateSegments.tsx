@@ -14,6 +14,8 @@ import { PLATES_PATH } from '@/routes/read/links'
 type Props = {
   plate: string
   region: string | null
+  /** Hide the guide pill, for the guide page itself. */
+  hideGuideLink?: boolean
 }
 
 const SEGMENT_COLOR: Readonly<Record<PlateSegmentId, SegmentColor>> = {
@@ -27,7 +29,7 @@ const SEGMENT_COLOR: Readonly<Record<PlateSegmentId, SegmentColor>> = {
  * The plate as colour-coded parts (region · number · series letters). Hover, focus or tap a part to read what it
  * means — the region name is filled in from the lookup. Renders nothing for plate shapes it can't split.
  */
-export default function PlateSegments({ plate, region }: Props): ReactNode {
+export default function PlateSegments({ plate, region, hideGuideLink }: Props): ReactNode {
   const { t } = useTranslation()
   const regionLabel = useRegionLabel()
   const segments = splitPlate(plate)
@@ -55,7 +57,7 @@ export default function PlateSegments({ plate, region }: Props): ReactNode {
           icon: s.id === 'region' ? <RegionFlag region={region} /> : undefined
         }))}
       />
-      <ReadGuideLink guide={PLATES_PATH} />
+      {!hideGuideLink && <ReadGuideLink guide={PLATES_PATH} />}
     </>
   )
 }

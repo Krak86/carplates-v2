@@ -30,9 +30,9 @@ export default function VinBarcode({ vin }: Props): ReactNode {
           lineColor: '#000'
         })
         // jsbarcode writes "608px"-style sizes; a viewBox needs bare numbers.
-      const width = parseFloat(svg.getAttribute('width') ?? '0')
-      const height = parseFloat(svg.getAttribute('height') ?? '0')
-      svg.setAttribute('viewBox', `0 0 ${width} ${height}`)
+        const width = parseFloat(svg.getAttribute('width') ?? '0')
+        const height = parseFloat(svg.getAttribute('height') ?? '0')
+        svg.setAttribute('viewBox', `0 0 ${width} ${height}`)
         svg.removeAttribute('width')
         svg.removeAttribute('height')
       } catch {

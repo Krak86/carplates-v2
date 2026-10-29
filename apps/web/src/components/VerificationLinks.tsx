@@ -13,7 +13,7 @@ import { cn } from '@/lib/cn'
 import { scrollElementIntoView } from '@/lib/share-section'
 
 type VerificationSite = {
-  id: 'bdr' | 'mtsbu' | 'otk' | 'license' | 'customs' | 'shtrafua' | 'pdr'
+  id: 'bdr' | 'mtsbu' | 'otk' | 'license' | 'leisure' | 'customs' | 'shtrafua' | 'pdr'
   url: string
   /** Absent when we are not cleared to show the logo — an emoji tile is drawn instead. */
   icon?: string
@@ -31,6 +31,12 @@ const VERIFICATION_SITES: VerificationSite[] = [
   // No logos for the HSC open-data checks or the official-tests site: none grants reuse of its mark.
   { id: 'otk', url: 'https://opendata.hsc.gov.ua/search-otk/veh/', emoji: '🔧', iconClass: 'text-xl' },
   { id: 'license', url: 'https://opendata.hsc.gov.ua/check-driver-license/', emoji: '🪪', iconClass: 'text-xl' },
+  {
+    id: 'leisure',
+    url: 'https://opendata.hsc.gov.ua/check-leisure-license-plates/',
+    emoji: '🔢',
+    iconClass: 'text-xl'
+  },
   { id: 'customs', url: 'https://cabinet.customs.gov.ua/vtzcheck', emoji: '🛃', iconClass: 'text-xl' },
   { id: 'shtrafua', url: 'https://shtrafua.com', icon: '/icons/shtrafua.png', iconClass: 'h-5 w-auto' },
   { id: 'pdr', url: 'https://pdr.infotech.gov.ua/', emoji: '📝', iconClass: 'text-xl' }

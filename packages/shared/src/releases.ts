@@ -20,6 +20,12 @@ export const RELEASES: readonly ReleaseDay[] = [
     items: [
       item(
         'improved',
+        'Гід «Номерні знаки»: старі радянські номери з фото, типи номерних знаків із зразками (електро, жовті, індивідуальні, відомчі), як замовити індивідуальний номер; у перевірці - доступні номерні знаки; нерозпізнаний старий номер у пошуку тепер пояснюється.',
+        'Гид «Номерные знаки»: старые советские номера с фото, типы номерных знаков с образцами (электро, жёлтые, индивидуальные, ведомственные), как заказать индивидуальный номер; в проверке - доступные номерные знаки; нераспознанный старый номер в поиске теперь объясняется.',
+        'Plates guide: old Soviet-era plates with photos, plate types with samples (electric, yellow, custom, departmental), how to order a custom plate, and an available-plates check under Verification; an old-style plate with no result in search now gets an explanation.'
+      ),
+      item(
+        'improved',
         'У гіді «Типи кузова» кожна картка має вибір прикладів: оберіть модель і побачте її креслення в масштабі з розмірами, на які можна навести.',
         'В гиде «Типы кузова» у каждой карточки есть выбор примеров: выберите модель и увидите её чертёж в масштабе с размерами, на которые можно навести.',
         'In the Body types guide every card has an example picker: choose a model to see its to-scale drawing with dimensions you can point at.'

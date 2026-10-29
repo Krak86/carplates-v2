@@ -107,6 +107,17 @@ export function isUaPlate(input: string): boolean {
   return UA_PLATE_RES.some(re => re.test(plate))
 }
 
+// Soviet / early-independence shapes: 4-5 digits + 2-3 region letters ("24320ВА", "1234КИА"), or letter + 4 digits +
+// 2 letters ("П8388ДП"). Always 7 characters or fewer, so they never overlap the 8-char shapes above.
+const SOVIET_RES = [/^\d{4,5}[А-ЯІЇЄҐ]{2,3}$/, /^[А-ЯІЇЄҐ]\d{4}[А-ЯІЇЄҐ]{2}$/]
+
+/** True when the input looks like a Soviet-era plate (digits then region letters, or a letter + 4 digits + 2 letters). */
+export function isSovietPlate(input: string): boolean {
+  // Soviet plates were printed with a dash ("808-06 АВ"), which normalizePlate keeps.
+  const plate = normalizePlate(input).replaceAll('-', '')
+  return SOVIET_RES.some(re => re.test(plate))
+}
+
 const VIN_RE = /^[A-HJ-NPR-Z0-9]{17}$/
 
 /** A query is treated as a VIN when it is 17 chars of the ISO 3779 alphabet (no I, O, Q). */

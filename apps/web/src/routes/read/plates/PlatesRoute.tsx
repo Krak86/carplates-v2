@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import ArticleHeader from '@/routes/read/ArticleHeader'
 import { PLATES_LEAD } from '@/routes/read/articles'
 import { pick } from '@/routes/read/helpers'
+import { LegacySection, OrderSection, SpecialSection } from '@/routes/read/plates/PlatesExtraSections'
 import { AnatomySection, FormatsSection, RegionsSection } from '@/routes/read/plates/PlatesSections'
 
 // Lazy-loaded (see App.tsx). Public, no sign-in. Static: reads only the shared plate tables, no API.
@@ -19,13 +20,19 @@ export default function PlatesRoute(): ReactNode {
         jumps={[
           { id: 'anatomy', label: t('read.sec.anatomy') },
           { id: 'regions', label: t('read.sec.regions') },
-          { id: 'formats', label: t('read.sec.formats') }
+          { id: 'formats', label: t('read.sec.formats') },
+          { id: 'legacy', label: t('read.sec.legacy') },
+          { id: 'special', label: t('read.sec.special') },
+          { id: 'order', label: t('read.sec.order') }
         ]}
       />
 
       <AnatomySection />
       <RegionsSection />
       <FormatsSection />
+      <LegacySection />
+      <SpecialSection />
+      <OrderSection />
     </div>
   )
 }

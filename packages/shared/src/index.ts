@@ -5,7 +5,8 @@ export {
   classifyQuery,
   repairOcrPlate,
   isUaPlate,
-  isLegacyUaPlate
+  isLegacyUaPlate,
+  isSovietPlate
 } from './plate.js'
 export { modelFamily, type ModelFamily } from './modelFamily.js'
 export { hasKnownWmi, lookupWmi, type WmiMatch } from './wmi.js'
