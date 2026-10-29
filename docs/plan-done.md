@@ -3113,7 +3113,12 @@ Trigger: the dev server showed ~22 MB / 337 requests before the first result. Th
   schema, plus a negative control). The single entry points at `/.well-known/openapi.json`, a curated OpenAPI document built in `main.ts` from the full
   generated one (`publicOpenApiDoc`: path allowlist `/api/stats*` + `/api/wanted/stats`, unreferenced schemas pruned, no UI, always on regardless of
   `ENABLE_SWAGGER`). Deliberately **not** listed: per-vehicle lookups (enumerable), admin / auth / account routes, and anything built on scraped
-  third-party sources (wiki, specs, safety ratings; `docs/legal-and-monetization.md`). Widen the allowlist one prefix at a time. `deprecations` (new, 3 warnings: FencedFrame, StorageType.persistent, Protected Audience) all come from Cloudflare's injected
+  third-party sources (wiki, specs, safety ratings; `docs/legal-and-monetization.md`). Widen the allowlist one prefix at a time.
+  ✅ **Verified after deploy (2026-10-29):** `/llms.txt`, `/.well-known/ard.json`, `/.well-known/ai-catalog.json` and `/.well-known/openapi.json` return 200 with the
+  right content types; the OpenAPI document lists `/api/stats`, `top`, `distribution`, `size-models`, `ev`, `imports`, `origin`, `field/{dimension}`,
+  `version` and `/api/wanted/stats` only (4 schemas); `/api/docs` still returns the SPA shell (Swagger UI off). Mobile Lighthouse on `/about`:
+  agentic-browsing **98** (was 50), a11y 100, SEO 100, best practices 81 (the intermittent Cloudflare `jsd/main.js` `deprecations` came back this run).
+  `ard-schema` is valid; its 0.9 is a Low note that `application/vnd.oai.openapi+json` is not one of Lighthouse's standard discovery types. `deprecations` (new, 3 warnings: FencedFrame, StorageType.persistent, Protected Audience) all come from Cloudflare's injected
   `/cdn-cgi/challenge-platform/scripts/jsd/main.js`; only switching off JS Detections would clear it.
 
 ### Estimated value, weight rankings, community widgets and export ✅ BUILT (2026-10-09, `86cc500` … `bb9f055`)

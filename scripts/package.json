@@ -119,6 +119,7 @@
     "refresh-model-family-stats": "tsx src/model-family-stats.ts",
     "refresh-derived": "tsx src/refresh-derived.ts",
     "build:kind-images": "tsx src/build-kind-images.ts",
+    "build:read-images": "tsx src/build-read-images.ts",
     "build:logo-images": "tsx src/build-logo-images.ts",
     "type-check": "tsc",
     "test": "vitest run"

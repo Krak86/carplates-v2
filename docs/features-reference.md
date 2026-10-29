@@ -302,6 +302,27 @@ deploy; Telegram and X keep their own preview cache.
   (`/api/auth/me` is the only skip). recognize/auth/og keep their own tighter module-level guards. Behind a proxy set `TRUST_PROXY`.
 - Legal/cookie/monetization findings: `docs/legal-and-monetization.md`.
 
+## Agent discovery, edge cache, Zod and CSP (2026-10-29)
+
+- **`llms.txt`** (`apps/web/public/`): H1 + one-line summary + links to the stable public pages only (guides, stats, fuel, safety, wanted, about, legal). A new
+  public page worth citing gets a line there. Plate/VIN pages and `/api/`, `/og/` stay out (same stance as robots.txt).
+- **ARD manifest**: `apps/web/public/.well-known/ard.json` and an identical `ai-catalog.json` (this Lighthouse probes the old name; the spec's newer one is
+  `ard.json`). Schema: `specVersion: "1.0"`, only `specVersion` / `host` / `entries` at top level, `identifier` = `urn:air:<publisher>:<ns>:<name>`,
+  2-5 `representativeQueries`, exactly one of `url` / `data`. Keep the two files identical. The API serves them from `WEB_DIST_DIR` like any static file
+  (no dotfile restriction).
+- **Public OpenAPI** (`/.well-known/openapi.json`): `main.ts` builds the full document and `publicOpenApiDoc` (`apps/api/src/openapi/public-doc.ts`) narrows it
+  to `PUBLIC_API_PATH_PREFIXES` (`/api/stats*`, `/api/wanted/stats`) and prunes unreferenced schemas; JSON only, always on, independent of `ENABLE_SWAGGER`.
+  **Only registry-derived, non-enumerable, read-only endpoints**; never per-vehicle lookups, admin / auth / account routes, or anything built on scraped
+  third-party sources (`docs/legal-and-monetization.md`). Widen one prefix at a time and extend `public-doc.test.ts`.
+- **Edge cache**: a new cacheable `/api/*` endpoint sends `ROLLUP_CACHE` (`@Header`, global rollups) or `lookupCacheInterceptor(LOOKUP_CACHE | RECALLS_CACHE)`
+  (per-model, `no-store` on `refresh=true`) from `common/cache.ts`, **and its path must be added to the matching Cloudflare Cache Rule expression**
+  (`docs/deploy.md`), or Cloudflare keeps answering DYNAMIC. Verify MISS then HIT after the rule change. A bare `/api/stats` needs its own entry:
+  `starts_with("/api/stats/")` does not match it. Edit rules in "Edit expression" mode only (the builder discards `starts_with` / `in {}`).
+- **Zod `jitless`**: `@/lib/zod-config` must stay the **first import of `main.tsx`**, and `vite.config.ts` keeps `vendor-zod` + `zod-config` as their own chunks.
+  Zod reads `jitless` when a schema is _constructed_, so the config has to evaluate before the chunk that builds the schemas; a `z.config()` call in the
+  `main.tsx` body ran too late (the entry chunk imports the schemas chunk first) and the CSP flagged two `eval` violations. Check: Lighthouse
+  `inspector-issues` passes, or a `Proxy` on `window.Function` sees no constructor call on load.
+
 ## Photo search: plate groups (2026-10-26)
 
 The ALPR returns, per plate in the photo, its best read plus up to 2 alternative reads (one character different, scored below the
@@ -372,7 +393,7 @@ Rules: **a model's shape is its majority style** (`profileModel` in `read/helper
 Links: every URL is built by `readHref` (`read/links.ts`): the plate card's body row → `/read/body-types?shape=` (scrolls to and highlights the card), the size chip's ❓ → `/read/sizes?shape=&class=&brand=&model=#explorer` (explorer preset, "your car" first). Explorer state lives in the URL (`shape`, `class`, `q`). A new article = a route in `App.tsx` + `ROUTE_TITLE_KEYS` + `STATIC_PAGES` (ua/ru/en) + an `ARTICLES` entry + `nav.*` keys.
 **Card → guide cross-links:** every card/VIN section ends with `<ReadGuideLink guide={…_PATH} />` (`components/ReadGuideLink.tsx`: pill + right arrow = a route of this app; ↗ is external, ↓/↑ jump inside the card). It is a pure link duplicating no content: Basic → fleet, 🆔 VIN decode → vin, plate segments → plates, Specs → extremes, Engines → generations, Size → sizes (deep link via `readHref.sizes`), Electric → electric, Emissions → fuel, Safety → safety, Recalls + Faults → recalls, Auctions → imports. The VIN page gets them through the same components. Icon / `nav.*` title key / hue of every guide live in `GUIDE_META` (`read/links.ts`, light enough for card chunks; `ARTICLES` spreads it and adds the long leads). A new guide = `GUIDE_PATHS` + `GUIDE_META` entry, plus a section placement here if one fits.
 
-**Guide look (2026-10-16):** every article has a `hue` and topic `tags` in `ARTICLES` (`read/types.ts`; tags replaced the visible publish date on 2026-10-16, `published` stays as data); `ArticleBanner` paints the cover, `ArticleHeader` shows `ArticleTags` + copy-link. The hub is widened so 3-4 cards fit a row. A new guide sets both.
+**Guide look (2026-10-16):** every article has a `hue` and topic `tags` in `ARTICLES` (`read/types.ts`; tags replaced the visible publish date on 2026-10-16, `published` stays as data); `ArticleBanner` paints the cover, `ArticleHeader` shows `ArticleTags` + copy-link. The hub is widened so 3-4 cards fit a row. A new guide sets both. **Banner pictures (2026-10-29):** generated locally with Fooocus; originals in `apps/web/assets-src/read/<guide>.webp` (guide = last path segment), `pnpm build:read-images` → `public/read/<guide>.{avif,webp}` (800 px). `ArticleBanner` draws the picture over the gradient with the emoji on top; a new guide needs its own original + a re-run.
 
 **`/read/fleet`** (colours, fuel, fleet age; `read/fleet/`) needs no rollup: it reads `GET /api/stats/field/:dimension` (`statsFieldQuery`) for `color`, `fuel` and `year` (`year` = `stats_by_year`, the registration-action year `d_reg`, **not** the model year — the copy says so; it is not in `FieldInfoDimension`, no "?" popover). Pure folding is in `fleet/helpers.ts`: colours via `resolveVehicleColor` (orange spellings merge), fuel groups via `resolveFuelCategories` (a petrol + gas car is its own group), `ageSummary` (median year, share of the last `RECENT_YEARS`). Bars are painted from `VEHICLE_COLOR_HEX`.
 

@@ -23,7 +23,7 @@ export default function ReadHubRoute(): ReactNode {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {ARTICLES.map(article => (
           <Link key={article.path} to={article.path} viewTransition className="group block">
-            <Card className="h-full overflow-hidden !p-0 transition-colors group-hover:border-primary">
+            <Card className="h-full overflow-hidden !p-0 transition duration-300 ease-out group-hover:-translate-y-1 group-hover:border-primary group-hover:shadow-lg">
               <ArticleBanner article={article} className="h-36" />
 
               <div className="p-3 md:p-4">
