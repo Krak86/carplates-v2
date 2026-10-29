@@ -31,3 +31,16 @@ export function barHeight(share: number | null, top: number): number {
   if (share == null || top <= 0) return 0
   return Math.max(2, Math.min(100, (share / top) * 100))
 }
+
+export type BandGroup = { code: string; fail: number; watch: number }
+
+/** The `limit` fault groups with the highest fail share in one mileage band (groups with no figure there are skipped). */
+export function groupsAtBand(match: MotMatch, band: number, limit: number): BandGroup[] {
+  return match.groups
+    .flatMap(g => {
+      const fail = g.fail[band]
+      return fail == null ? [] : { code: g.code, fail, watch: g.watch[band] ?? 0 }
+    })
+    .sort((a, b) => b.fail - a.fail)
+    .slice(0, limit)
+}

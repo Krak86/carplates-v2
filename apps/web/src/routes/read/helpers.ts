@@ -7,6 +7,8 @@ import {
   sizeClass,
   sizeShape,
   type ClassResult,
+  type SizeFigure,
+  type SizeFigures,
   type SizeClass,
   type SizeShape
 } from '@/components/size/VehicleSize.helpers'
@@ -139,3 +141,14 @@ export function fleetBySegment(profiles: readonly ModelProfile[]): {
 /** Parses a `?shape=` / `?class=` value against a known list; anything else is null. */
 export const parseOneOf = <T extends string>(value: string | null | undefined, list: readonly T[]): T | null =>
   list.find(item => item === value) ?? null
+
+const figureOf = (value: number | null | undefined): SizeFigure | null =>
+  value ? { value, source: 'rdw', spread: null } : null
+
+/** Catalogue dimensions of a registry model as the Size section's figures (what the to-scale drawing takes). */
+export const figuresOf = ({ model }: ModelProfile): SizeFigures => ({
+  lengthMm: figureOf(model.lengthMm),
+  widthMm: figureOf(model.widthMm),
+  heightMm: figureOf(model.heightMm),
+  wheelbaseMm: figureOf(model.wheelbaseMm)
+})

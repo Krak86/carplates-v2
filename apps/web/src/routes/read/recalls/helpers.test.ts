@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { MotResponse } from '@carplates/shared'
 
-import { barHeight, failCurve, topFaultGroups } from '@/routes/read/recalls/helpers'
+import { barHeight, failCurve, groupsAtBand, topFaultGroups } from '@/routes/read/recalls/helpers'
 
 type Match = NonNullable<MotResponse['match']>
 
@@ -41,5 +41,20 @@ describe('barHeight', () => {
     expect(barHeight(0.1, 0.2)).toBe(50)
     expect(barHeight(0.0001, 0.2)).toBe(2)
     expect(barHeight(null, 0.2)).toBe(0)
+  })
+})
+
+describe('groupsAtBand', () => {
+  const banded = {
+    groups: [
+      { code: 'tyres', fail: [0.05, 0.1], watch: [0.2, null] },
+      { code: 'brakes', fail: [0.04, null], watch: [0.1, 0.3] },
+      { code: 'lamps', fail: [0.01, 0.2], watch: [0, 0] }
+    ]
+  } as unknown as Match
+
+  it('orders by the fail share of the band, skips groups with no figure and caps the list', () => {
+    expect(groupsAtBand(banded, 1, 5).map(g => g.code)).toEqual(['lamps', 'tyres'])
+    expect(groupsAtBand(banded, 0, 1)).toEqual([{ code: 'tyres', fail: 0.05, watch: 0.2 }])
   })
 })

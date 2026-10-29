@@ -25,6 +25,12 @@ export const RELEASES: readonly ReleaseDay[] = [
         'In the Body types guide every card has an example picker: choose a model to see its to-scale drawing with dimensions you can point at.'
       ),
       item(
+        'improved',
+        'У гідах «Розміри» та «Відкликання й поломки» з’явилась інтерактивність: введіть розміри свого місця, щоб побачити, які моделі туди влізуть, або показ одометра, щоб побачити відсоток відмов і проблемні зони для вашого пробігу.',
+        'В гидах «Размеры» и «Отзывы и поломки» появилась интерактивность: введите размеры своего места, чтобы увидеть, какие модели туда впишутся, или показание одометра, чтобы увидеть процент отказов и проблемные зоны для вашего пробега.',
+        'The Sizes and Recalls & faults guides are now interactive: type your own parking place to see which models fit, or your odometer to see the fail rate and problem areas for your mileage.'
+      ),
+      item(
         'new',
         'Розділ «Перевірка» має посилання на перевірку розмитнення авто (Митниця), а в меню «Шрифт» можна обрати системний, e-Ukraine або ZAKON.',
         'Раздел «Проверка» получил ссылку на проверку растаможки авто (Таможня), а в меню «Шрифт» можно выбрать системный, e-Ukraine или ZAKON.',

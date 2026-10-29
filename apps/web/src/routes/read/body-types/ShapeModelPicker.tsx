@@ -3,34 +3,14 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import VehicleSizeSchema from '@/components/size/VehicleSizeSchema'
-import {
-  SIZE_FIELDS,
-  mmToMetres,
-  type SizeField,
-  type SizeFigure,
-  type SizeFigures,
-  type SizeShape
-} from '@/components/size/VehicleSize.helpers'
+import { SIZE_FIELDS, mmToMetres, type SizeField, type SizeShape } from '@/components/size/VehicleSize.helpers'
 import { cn } from '@/lib/cn'
-import { displayName, modelId, type ModelProfile } from '@/routes/read/helpers'
+import { displayName, figuresOf, modelId, type ModelProfile } from '@/routes/read/helpers'
 import ModelDimsRow from '@/routes/read/ModelDimsRow'
 
 type Props = {
   shape: SizeShape
   profiles: readonly ModelProfile[]
-}
-
-const figureOf = (value: number | null | undefined): SizeFigure | null =>
-  value ? { value, source: 'rdw', spread: null } : null
-
-/** Catalogue dimensions of a registry model as the Size section's figures. */
-function figuresOf({ model }: ModelProfile): SizeFigures {
-  return {
-    lengthMm: figureOf(model.lengthMm),
-    widthMm: figureOf(model.widthMm),
-    heightMm: figureOf(model.heightMm),
-    wheelbaseMm: figureOf(model.wheelbaseMm)
-  }
 }
 
 /**

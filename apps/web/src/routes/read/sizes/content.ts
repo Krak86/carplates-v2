@@ -29,4 +29,4 @@ export const TOP_PER_SEGMENT = 3
 /** Rows of the fit table. */
 export const FIT_MODELS = 8
 /** Explorer rows before “show more”. */
-export const EXPLORER_PAGE = 12
+export const EXPLORER_PAGE = 5

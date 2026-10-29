@@ -91,7 +91,12 @@ export default function SizeExplorer({ profiles }: Props): ReactNode {
 
       <div className="flex flex-col gap-2">
         {results.map(p => (
-          <ModelDimsRow key={`${p.model.brand}|${p.model.model}`} profile={p} highlighted={p === highlighted} />
+          <ModelDimsRow
+            key={`${p.model.brand}|${p.model.model}`}
+            profile={p}
+            highlighted={p === highlighted}
+            withDrawing
+          />
         ))}
       </div>
 

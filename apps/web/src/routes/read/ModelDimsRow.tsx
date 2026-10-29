@@ -2,10 +2,11 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 
+import VehicleSizeSchema from '@/components/size/VehicleSizeSchema'
 import { mmToMetres } from '@/components/size/VehicleSize.helpers'
 import { cn } from '@/lib/cn'
 import ExamplePlates from '@/routes/read/ExamplePlates'
-import { displayName, formatCount, type ModelProfile } from '@/routes/read/helpers'
+import { displayName, figuresOf, formatCount, type ModelProfile } from '@/routes/read/helpers'
 
 type Props = {
   profile: ModelProfile
@@ -13,10 +14,17 @@ type Props = {
   highlighted?: boolean
   /** Show the "Show real plates" button and the advanced-search link. */
   withActions?: boolean
+  /** Draw the model to scale (side + top view) in the tile. */
+  withDrawing?: boolean
 }
 
 /** One model: name, approximate segment, L × W × H, how many we have, and (optionally) real plates of it. */
-export default function ModelDimsRow({ profile, highlighted = false, withActions = true }: Props): ReactNode {
+export default function ModelDimsRow({
+  profile,
+  highlighted = false,
+  withActions = true,
+  withDrawing = false
+}: Props): ReactNode {
   const { t, i18n } = useTranslation()
   const { model, cls } = profile
   const { lengthMm, widthMm, heightMm } = model
@@ -48,6 +56,10 @@ export default function ModelDimsRow({ profile, highlighted = false, withActions
         </span>
         {!lengthMm && <span className="text-muted">{t('read.noDims')}</span>}
       </div>
+
+      {withDrawing && lengthMm && widthMm && heightMm && (
+        <VehicleSizeSchema shape={profile.shape} figures={figuresOf(profile)} name={displayName(model)} />
+      )}
 
       {withActions && (
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5">
