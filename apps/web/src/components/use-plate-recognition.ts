@@ -5,8 +5,6 @@ import type { PhotoMeta, PlateCandidate } from '@carplates/shared'
 
 import { ApiError, recognizePlate, recognizeVin } from '@/lib/api'
 import { shrinkImage } from '@/lib/image'
-import { detectPlateCrops, shouldUploadCrops, type PlateCrop } from '@/lib/photo-crops'
-import { mergeReads, ownReads, settlePool, toPhotoBoxes } from '@/lib/photo-crops-helpers'
 import { readPhotoMeta } from '@/lib/photo-meta'
 import { readVinBarcode } from '@/lib/vin-barcode'
 
@@ -61,36 +59,9 @@ async function readVin(file: File, signal: AbortSignal): Promise<Reads> {
   return { values: candidates.map(c => c.plate), candidates }
 }
 
-const CROP_REQUESTS_AT_ONCE = 2
-// Errors the full photo would hit as well: retrying it would only repeat them.
-const FINAL_STATUSES = new Set([429, 503])
-
-async function readCrop(crop: PlateCrop, signal: AbortSignal): Promise<PlateCandidate[]> {
-  const res = await recognizePlate(crop.file, signal)
-  return toPhotoBoxes(ownReads(res.candidates, crop.cx, crop.cy), crop.rect)
-}
-
-/** Reads the plates found on the device from their crops (KBs). null = none read: the caller uploads the whole photo. */
-async function readCrops(crops: PlateCrop[], signal: AbortSignal): Promise<Reads | null> {
-  const settled = await settlePool(crops, CROP_REQUESTS_AT_ONCE, crop => readCrop(crop, signal))
-  const reads = settled.flatMap(r => (r.status === 'fulfilled' && r.value.length > 0 ? [r.value] : []))
-  if (reads.length === 0) {
-    const final = settled.find(
-      r => r.status === 'rejected' && r.reason instanceof ApiError && FINAL_STATUSES.has(r.reason.status)
-    )
-    if (final?.status === 'rejected') throw final.reason
-    return null
-  }
-  const candidates = mergeReads(reads)
-  return { values: candidates.map(c => c.plate), candidates }
-}
-
+// The whole photo goes to the server, which tiles it for small plates. Uploading only on-device crops was tried and
+// dropped: it lost plates the detector misses (docs/plan-done.md "Photo search: on-device plate crops").
 async function readPlate(file: File, signal: AbortSignal): Promise<Reads> {
-  // On a slow link plates are found on the device and only their crops are uploaded; the whole photo is the fallback.
-  const crops = shouldUploadCrops() ? await detectPlateCrops(file) : null
-  const fromCrops = crops && !signal.aborted ? await readCrops(crops, signal) : null
-  if (fromCrops) return fromCrops
-
   const res = await recognizePlate(await shrinkImage(file), signal)
   return { values: res.candidates.map(c => c.plate), candidates: res.candidates }
 }

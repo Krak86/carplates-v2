@@ -321,13 +321,12 @@ above once scoped, or dropped if research says no.
 - ⏳ **Speed round: advanced search + photo recognition on 4G** (researched 2026-10-29; nothing measured yet, estimates from code). Indexes are already
   complete (0012–0015, 0042, 0059), so the cost is the query shape: every page/sort click re-fetches up to 10k wide rows (`SEARCH_COUNT_CAP`) and sorts in Node.
   (1) ✅ result cache + `Intl.Collator` sort in `search.service.ts` (write-up in `docs/plan-done.md` "Search result cache");
-  (2) ✅ built 2026-10-29, **not yet timed or checked on a real phone / the eval set**: photo search runs the on-device detector (`plate-detector.onnx`, as AR
-  does) and uploads only plate crops (KBs, not ≤2.5 MB); the full-image upload stays the fallback, and crops are used **only on a slow/unknown link** (`isFastConnection`: wifi/ethernet or 4g ≥ 10 Mbps keeps the whole photo; Safari/Firefox have no
-  `navigator.connection`, so they always use crops); detector preloaded on button hover/focus, slow path only (`docs/plan-done.md` "Photo search: on-device plate crops");
-  **Test everything together before building more:** (a) real phone on throttled/real 4G, time photo search crops vs whole photo; (b) re-run `services/alpr/eval` with crops, compare with `run5.txt`
-  (recall risk: a small plate the detector misses is no longer found by server tiling); (c) multi-plate photo: outlines/groups in the right place, no duplicate plate, 429 handling;
-  (d) advanced search: page 2 / re-sort hit the cache (no second 10k-row query), a failed query is not cached; (e) fast wifi still uses the old path. Optional: a real speed probe instead of `navigator.connection`.
-  (3) 📋 smaller default upload (`MAX_DIMENSION` 4608 → ~2560 only after the eval, `shrinkImage` off the main thread), navigate as soon as the plate string is known; (4) 📋 `EXPLAIN (ANALYZE, BUFFERS)` on typical filter combos, then maybe
+  (2) ❌ tried 2026-10-29 and **removed**: uploading only on-device plate crops (detector as in AR) was 5-10x faster on emulated 4G (1.2-5.6 s vs 10-29 s) but lost confident reads on 10 of 90 eval photos
+  (15 reads; small background plates the detector does not box) - not acceptable, no plate may be lost. Write-up and numbers: `docs/plan-done.md` "Photo search: on-device plate crops". Instead: ✅ photo search always uploads the whole photo and shows an
+  "Uploading and recognizing..." status line, which turns into a slow-connection hint after 8 s (`PhotoThumbnail.tsx`, `photo.recognizing` / `photo.slowHint`).
+  **Still to check:** (d) advanced search cache not confirmed - the running API on :3000 answered the same search in 2.4-3.4 s every time (`apps/api/dist` predates the change); restart `pnpm --filter api dev` and re-time page 2 / re-sort.
+  (3) 📋 now the main lever for slow links, lossless: `MAX_DIMENSION` 4608 → ~2560 only after `SHRINK_MAX=2560 node services/alpr/eval.mjs --shrink` shows no recall loss; `shrinkImage` off the main thread; navigate as soon as the plate string is known;
+  (4) 📋 `EXPLAIN (ANALYZE, BUFFERS)` on typical filter combos (needs one slow filter from the owner), then maybe
   normalized `brand_norm`/`model_norm` columns (btree instead of trigram) and an index on `purpose`. AR is faster than photo search because it uploads a ~160 px crop, not the frame.
 - ⏳ Own ALPR model + AR overlay — step 1 (self-hosted OCR service,
   preferred over the metered cloud API above) done 2026-09-27; steps 2-4

@@ -14,6 +14,8 @@
   "search.byCamera": "Use camera",
   "search.closePhoto": "Remove photo",
   "photo.skip": "Skip recognition",
+  "photo.recognizing": "Uploading and recognizing the photo...",
+  "photo.slowHint": "Slow connection: this can take up to a minute. The whole photo is uploaded so no plate is missed.",
   "nav.search": "Search",
   "nav.about": "About",
   "nav.install": "Install app",
