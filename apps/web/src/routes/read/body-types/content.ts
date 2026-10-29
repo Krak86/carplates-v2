@@ -144,8 +144,9 @@ export const SHAPE_COPY: Readonly<Record<ExplainedShape, ShapeCopy>> = {
       en: 'An open load bed, and often more than 5 m long.'
     },
     examples: [
-      { brand: 'MITSUBISHI', model: 'L 200' },
-      { brand: 'NISSAN', model: 'NAVARA' }
+      { brand: 'TOYOTA', model: 'HILUX' },
+      { brand: 'FORD', model: 'RANGER' },
+      { brand: 'VOLKSWAGEN', model: 'AMAROK' }
     ]
   }
 }
