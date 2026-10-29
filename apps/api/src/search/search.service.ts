@@ -217,7 +217,8 @@ export class SearchService {
       return hit
     }
 
-    const entry: MatchEntry = { at: now, rows: this.fetchMatches(where), sorted: new Map() }
+    // A Drizzle query is a lazy thenable that re-runs on every await; Promise.resolve runs it once.
+    const entry: MatchEntry = { at: now, rows: Promise.resolve(this.fetchMatches(where)), sorted: new Map() }
     // A failed query must not be served again for the next 5 minutes.
     entry.rows.catch(() => {
       if (this.matchCache.get(cacheKey) === entry) this.matchCache.delete(cacheKey)

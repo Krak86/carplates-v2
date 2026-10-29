@@ -324,7 +324,8 @@ above once scoped, or dropped if research says no.
   (2) ❌ tried 2026-10-29 and **removed**: uploading only on-device plate crops (detector as in AR) was 5-10x faster on emulated 4G (1.2-5.6 s vs 10-29 s) but lost confident reads on 10 of 90 eval photos
   (15 reads; small background plates the detector does not box) - not acceptable, no plate may be lost. Write-up and numbers: `docs/plan-done.md` "Photo search: on-device plate crops". Instead: ✅ photo search always uploads the whole photo and shows an
   "Uploading and recognizing..." status line, which turns into a slow-connection hint after 8 s (`PhotoThumbnail.tsx`, `photo.recognizing` / `photo.slowHint`).
-  **Still to check:** (d) advanced search cache not confirmed - the running API on :3000 answered the same search in 2.4-3.4 s every time (`apps/api/dist` predates the change); restart `pnpm --filter api dev` and re-time page 2 / re-sort.
+  (d) ✅ cache was storing a lazy Drizzle query (re-ran on every await), fixed with `Promise.resolve`; now 2.3 s first call, 0.2 s for page 2 / re-sort (write-up in "Photo search: on-device plate crops" > Measured).
+  (e) ❌ lower upload size: 2560 loses 7 confident reads, 4608 loses 1, so `MAX_DIMENSION` stays 4608 (`docs/plan-done.md` "Photo search: upload shrink size"). **Still to do:** shrinkImage off the main thread / navigate on plate string, `EXPLAIN (ANALYZE, BUFFERS)` on a slow advanced-search filter.
   (3) 📋 now the main lever for slow links, lossless: `MAX_DIMENSION` 4608 → ~2560 only after `SHRINK_MAX=2560 node services/alpr/eval.mjs --shrink` shows no recall loss; `shrinkImage` off the main thread; navigate as soon as the plate string is known;
   (4) 📋 `EXPLAIN (ANALYZE, BUFFERS)` on typical filter combos (needs one slow filter from the owner), then maybe
   normalized `brand_norm`/`model_norm` columns (btree instead of trigram) and an index on `purpose`. AR is faster than photo search because it uploads a ~160 px crop, not the frame.
