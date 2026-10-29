@@ -22,17 +22,24 @@ export const NEWS_PAGE_SIZE = 10
 
 /** Filter chips on /news: one per outlet (infocar.ua / Carscoops publish several feeds), each covering its feed ids from `scripts/news-sources.json`. */
 export const NEWS_SOURCE_GROUPS = [
-  { key: 'infocar', label: 'infocar.ua', ids: ['infocar-news', 'infocar-new-models', 'infocar-tests'] },
-  { key: 'eauto', label: 'eauto.org.ua', ids: ['eauto'] },
-  { key: 'autoua', label: 'autoua.net', ids: ['autoua'] },
-  { key: 'mezha', label: 'mezha.ua', ids: ['mezha'] },
-  { key: 'novyny-live', label: 'novyny.live', ids: ['novyny-live'] },
-  { key: 'topgir', label: 'topgir.com.ua', ids: ['topgir'] },
-  { key: 'caranddriver', label: 'Car and Driver', ids: ['caranddriver'] },
-  { key: 'motor1', label: 'Motor1', ids: ['motor1'] },
-  { key: 'carscoops', label: 'Carscoops', ids: ['carscoops-news', 'carscoops-reviews'] },
-  { key: 'autoevolution', label: 'autoevolution', ids: ['autoevolution'] }
+  { key: 'infocar', label: 'infocar.ua', hue: 25, ids: ['infocar-news', 'infocar-new-models', 'infocar-tests'] },
+  { key: 'eauto', label: 'eauto.org.ua', hue: 60, ids: ['eauto'] },
+  { key: 'autoua', label: 'autoua.net', hue: 95, ids: ['autoua'] },
+  { key: 'mezha', label: 'mezha.ua', hue: 140, ids: ['mezha'] },
+  { key: 'novyny-live', label: 'novyny.live', hue: 170, ids: ['novyny-live'] },
+  { key: 'topgir', label: 'topgir.com.ua', hue: 205, ids: ['topgir'] },
+  { key: 'caranddriver', label: 'Car and Driver', hue: 240, ids: ['caranddriver'] },
+  { key: 'motor1', label: 'Motor1', hue: 270, ids: ['motor1'] },
+  { key: 'carscoops', label: 'Carscoops', hue: 310, ids: ['carscoops-news', 'carscoops-reviews'] },
+  { key: 'autoevolution', label: 'autoevolution', hue: 350, ids: ['autoevolution'] }
 ] as const
+
+/** Tag colour of an outlet (oklch, readable on light and dark): chip tint on /news and the accent edge of its cards. */
+export const newsTagColor = (hue: number): string => `oklch(0.62 0.16 ${hue})`
+
+/** Chip group a feed id belongs to. */
+export const newsGroupOfSource = (source: string): (typeof NEWS_SOURCE_GROUPS)[number] | undefined =>
+  NEWS_SOURCE_GROUPS.find(g => (g.ids as readonly string[]).includes(source))
 
 /** Feed ids behind the selected chip keys. */
 export function sourceIdsOf(keys: string[]): string[] {
