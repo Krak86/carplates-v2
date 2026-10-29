@@ -40,7 +40,8 @@ const HELPER_GROUPS: Array<[string, RegExp]> = [
   ['helpers-size', /\/src\/components\/size\/(VehicleSize\.helpers|fit)\.ts$/],
   ['helpers-value', /\/src\/components\/EstimatedValue\.helpers\.ts$/],
   ['helpers-origin', /\/src\/components\/OriginSection\.helpers\.ts$/],
-  ['helpers-media', /\/src\/components\/(VideoReviews|ReviewLinks|PressReviews)\.helpers\.ts$/]
+  ['helpers-media', /\/src\/components\/(VideoReviews|ReviewLinks|PressReviews)\.helpers\.ts$/],
+  ['helpers-stats-map', /\/src\/routes\/stats\/StatsMap\.helpers\.ts$/]
 ]
 const CODE_GROUPS = [...VENDOR_GROUPS, ...HELPER_GROUPS]
 

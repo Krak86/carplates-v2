@@ -4048,3 +4048,16 @@ Plan and remaining steps: `PLAN.md` "Visual stats, map logos, cards and quizzes"
 - **API:** `GET /api/stats/region-brands` (`StatsService.regionBrands`, `ROLLUP_CACHE`), contract `packages/shared/src/regionBrandStats.ts`; web `getRegionBrandStats` + `regionBrandStatsQuery`. Not in the public OpenAPI allowlist; the Cloudflare rule already covers `/api/stats/*`. Not in `offline-cache.ts` (online-only map).
 - **UI (step 2):** `StatsMap` `logos` prop draws a white chip + `<image>` per region at the `geoPath` centroid (size `LOGO_MIN + LOGO_GROW * sqrt(fleet / maxFleet)`), tooltip adds "Top brands". `StatsRoute` has the `?logos=1` checkbox in map view (`stats.map.logos`, `stats.map.topBrands`, ua/ru/en). `/wanted` does not pass `logos`.
 - **Not done / not verified:** no browser pass yet (small regions overlap, dark theme, phone width); no `releases.ts` / About entry (add once deployed). Code committed in `bb4f87e`.
+
+### Overlap fix for step 2
+
+`spreadLogos` (`StatsMap.helpers.ts`) relaxes overlapping chips (the bigger one moves less, chips stay inside the map box); a chip that moved more than 6 map units gets a leader line and a dot at its true centroid. Київ no longer hides under Київська область. Checked in a browser in dark and light theme and at phone width (chips ~10px there, still readable).
+
+## Map modes, step 3 of "Visual stats, map logos, cards and quizzes" (2026-10-29)
+
+Plan: `PLAN.md` "Visual stats, map logos, cards and quizzes". Convention: `docs/features-reference.md` "Map brand logos".
+
+- **Data:** migration `0080_stats_region_facet.sql` + `statsRegionFacet` (`facet`, `region`, `value`, `n`): `model` (top 5, folded by brand slug + model), `origin` (top 5 brand home countries by the `brand_origin_period` row in force in the model year, `countryAtYear`), `fuel` (every `registryFuelClass`, `unknown` left out), `fleet` (empty value). `scripts/src/region-facet-stats.ts` (`db:refresh-region-facet-stats`, in `derived-refresh.ts`), pure fold in `region-facet-fold.ts` (test beside it). Local run: 434 rows, 27 regions.
+- **API:** `GET /api/stats/region-facets` (`StatsService.regionFacets`, `ROLLUP_CACHE`), contract `packages/shared/src/regionFacetStats.ts`, web `getRegionFacetStats` + `regionFacetStatsQuery`. Not in the OpenAPI allowlist; covered by the `/api/stats/*` cache rule; not offline.
+- **UI:** `StatsMap` takes `mode` (with `logos`); `regionMarker` in `StatsMap.helpers.ts` builds the chip per mode: logo (brand; model = logo of the leading words of the model name), flag from `/country-flags` (origin, code text for former states), coloured text chip (fuel: `--label-N` HDR tokens, EV share). The tooltip line shows the top 3 with their share. `StatsRoute` has the mode select (`?mode=`, default `brand` omitted). The checkbox label is now "Markers on the map" (`stats.map.logos`). `StatsMap.helpers.ts` is in `HELPER_GROUPS` (`helpers-stats-map`). `/wanted` is unchanged.
+- **Not done:** no `releases.ts` / About entry (add once deployed); model mode shows the logo only (the name is in the tooltip).

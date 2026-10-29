@@ -19,6 +19,7 @@ import {
   statsByOrigin,
   statsOrigin,
   statsRegionBrand,
+  statsRegionFacet,
   statsByRegion,
   statsByRegionYear,
   statsByYear,
@@ -37,6 +38,7 @@ import {
   mergeBodyStats,
   originStatsResponseSchema,
   regionBrandStatsResponseSchema,
+  regionFacetStatsResponseSchema,
   sizeModelsResponseSchema,
   statsFieldResponseSchema,
   statsResponseSchema,
@@ -54,6 +56,7 @@ import type {
   ImportsStatsResponse,
   OriginStatsResponse,
   RegionBrandStatsResponse,
+  RegionFacetStatsResponse,
   SizeModelsResponse,
   StatsFieldDimension,
   StatsFieldResponse,
@@ -215,6 +218,25 @@ export class StatsService {
       regions.set(r.region, entry)
     }
     return regionBrandStatsResponseSchema.parse({ regions: [...regions.values()] })
+  }
+
+  /** Per plate region: top models, fuel classes and brand home countries plus the fleet (a rollup rebuilt by `db:refresh-region-facet-stats`). */
+  async regionFacets(): Promise<RegionFacetStatsResponse> {
+    const rows = await this.dbService.db.select().from(statsRegionFacet).orderBy(desc(statsRegionFacet.n))
+    type Entry = { value: string; n: number }
+    const regions = new Map<
+      string,
+      { region: string; fleet: number; models: Entry[]; fuels: Entry[]; origins: Entry[] }
+    >()
+    for (const r of rows) {
+      const entry = regions.get(r.region) ?? { region: r.region, fleet: 0, models: [], fuels: [], origins: [] }
+      if (r.facet === 'fleet') entry.fleet = r.n
+      else if (r.facet === 'model') entry.models.push({ value: r.value, n: r.n })
+      else if (r.facet === 'fuel') entry.fuels.push({ value: r.value, n: r.n })
+      else if (r.facet === 'origin') entry.origins.push({ value: r.value, n: r.n })
+      regions.set(r.region, entry)
+    }
+    return regionFacetStatsResponseSchema.parse({ regions: [...regions.values()] })
   }
 
   /** Per-model body + dimensions behind the /read explainers and the size explorer (a rollup rebuilt by `db:refresh-spec-stats`). */

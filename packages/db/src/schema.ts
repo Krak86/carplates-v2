@@ -1615,6 +1615,22 @@ export const statsRegionBrand = registry.table(
 export type StatsRegionBrandInsert = typeof statsRegionBrand.$inferInsert
 
 /**
+ * Per plate region: top passenger-car models, fuel classes and brand home countries ('model' | 'fuel' | 'origin'), plus the
+ * region's whole fleet ('fleet', '' value). Backs the map modes of /stats. Rebuilt by scripts/src/region-facet-stats.ts; see migration 0080.
+ */
+export const statsRegionFacet = registry.table(
+  'stats_region_facet',
+  {
+    facet: text('facet').notNull(),
+    region: text('region').notNull(),
+    value: text('value').notNull(),
+    n: integer('n').notNull()
+  },
+  t => [primaryKey({ columns: [t.facet, t.region, t.value] })]
+)
+export type StatsRegionFacetInsert = typeof statsRegionFacet.$inferInsert
+
+/**
  * Passenger cars per origin ('import' | 'dealer'), year of that operation, VIN build country ('' = unknown) and model. Backs
  * the /read/imports article. Rebuilt by scripts/src/imports-stats.ts; see migration 0073.
  */

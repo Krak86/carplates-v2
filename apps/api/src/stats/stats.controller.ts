@@ -7,6 +7,7 @@ import type {
   ImportsStatsResponse,
   OriginStatsResponse,
   RegionBrandStatsResponse,
+  RegionFacetStatsResponse,
   SizeModelsResponse,
   StatsFieldDimension,
   StatsFieldResponse
@@ -93,6 +94,16 @@ export class StatsController {
   })
   regionBrands(): Promise<RegionBrandStatsResponse> {
     return this.statsService.regionBrands()
+  }
+
+  @Get('region-facets')
+  @Header('Cache-Control', ROLLUP_CACHE)
+  @ApiOkResponse({
+    description:
+      'Passenger cars { regions: [{ region, fleet, models, fuels, origins: [{ value, n }] }] }: top models and brand countries and the fuel split per plate region'
+  })
+  regionFacets(): Promise<RegionFacetStatsResponse> {
+    return this.statsService.regionFacets()
   }
 
   @Get('field/:dimension')

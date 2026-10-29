@@ -62,6 +62,7 @@ import {
   getImportsStats,
   getOriginStats,
   getRegionBrandStats,
+  getRegionFacetStats,
   getSizeModels,
   getStatsDistribution,
   getStatsTop,
@@ -196,6 +197,11 @@ export function sizeModelsQuery() {
 // Top brands per plate region behind the /stats map logo layer (a small rollup rebuilt with the derived stats).
 export function regionBrandStatsQuery() {
   return queryOptions({ queryKey: ['stats', 'region-brands'], queryFn: getRegionBrandStats, staleTime: Infinity })
+}
+
+// Top models, fuel split and brand countries per plate region behind the /stats map modes.
+export function regionFacetStatsQuery() {
+  return queryOptions({ queryKey: ['stats', 'region-facets'], queryFn: getRegionFacetStats, staleTime: Infinity })
 }
 
 export function evStatsQuery() {

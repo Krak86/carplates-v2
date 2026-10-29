@@ -8,11 +8,14 @@ import { ComposableMap, Geographies, Geography } from 'react-simple-maps'
 import { brandLogoUrl } from '@carplates/shared'
 
 import { toIntlLocale } from '@/lib/intl'
-import { regionBrandStatsQuery, ukraineGeographyQuery } from '@/lib/queries'
+import { regionBrandStatsQuery, regionFacetStatsQuery, ukraineGeographyQuery } from '@/lib/queries'
 import { localizeRegion } from '@/lib/region-label'
 import type { UkraineRegionProperties } from '@/lib/api'
 import { choroplethColor } from '@/routes/stats/helpers'
 import { REGION_NAME_BY_SHAPE_ISO } from '@/routes/stats/region-geography'
+import { DEFAULT_MAP_MODE, regionMarker, spreadLogos } from '@/routes/stats/StatsMap.helpers'
+import type { LogoChip, MapMode, RegionMarker } from '@/routes/stats/StatsMap.helpers'
+import { countryLabel, flagSlug } from '@/components/vin/helpers'
 import StatsMapSkeleton from '@/routes/stats/StatsMapSkeleton'
 import { useUiStore } from '@/store/ui-store'
 
@@ -22,24 +25,26 @@ const LEGEND_STEPS = 8
 /** Logo chip side in map units: the smallest region's, plus how much a region's fleet share (of the biggest region) adds. */
 const LOGO_MIN = 18
 const LOGO_GROW = 22
-const TOOLTIP_BRANDS = 3
 
 export type MapRow = { label: string; value: number }
 
 type Props = {
   /** `label` = the Ukrainian `REGIONS` name. */
   rows: MapRow[]
-  /** Draw the biggest brand's logo on every region (fetches the per-region brand rollup). */
+  /** Draw a marker on every region (fetches the per-region rollup of the chosen `mode`). */
   logos?: boolean
+  /** What the markers show; only read when `logos` is on. */
+  mode?: MapMode
 }
 
 type Hover = { name: string; value: number | null; x: number; y: number; brands?: string }
 
-export default function StatsMap({ rows, logos = false }: Props): ReactNode {
+export default function StatsMap({ rows, logos = false, mode = DEFAULT_MAP_MODE }: Props): ReactNode {
   const { t, i18n } = useTranslation()
   const theme = useUiStore(s => s.theme)
   const geography = useQuery(ukraineGeographyQuery())
-  const regionBrands = useQuery({ ...regionBrandStatsQuery(), enabled: logos })
+  const regionBrands = useQuery({ ...regionBrandStatsQuery(), enabled: logos && mode === 'brand' })
+  const regionFacets = useQuery({ ...regionFacetStatsQuery(), enabled: logos && mode !== 'brand' })
   const [hover, setHover] = useState<Hover | null>(null)
 
   const numberFormat = new Intl.NumberFormat(toIntlLocale(i18n.language))
@@ -55,8 +60,50 @@ export default function StatsMap({ rows, logos = false }: Props): ReactNode {
   }, [geography.data])
 
   const brandsByRegion = new Map((regionBrands.data?.regions ?? []).map(r => [r.region, r]))
-  const maxFleet = Math.max(1, ...[...brandsByRegion.values()].map(r => r.fleet))
+  const facetsByRegion = new Map((regionFacets.data?.regions ?? []).map(r => [r.region, r]))
+  const markerData = (region: string | undefined) => {
+    if (!region) return undefined
+    if (mode === 'brand') {
+      const entry = brandsByRegion.get(region)
+      return entry && { fleet: entry.fleet, brands: entry.brands, models: [], fuels: [], origins: [] }
+    }
+    const entry = facetsByRegion.get(region)
+    return entry && { fleet: entry.fleet, brands: [], models: entry.models, fuels: entry.fuels, origins: entry.origins }
+  }
+  const maxFleet = Math.max(1, ...[...brandsByRegion.values(), ...facetsByRegion.values()].map(r => r.fleet))
+  const markerLabels = {
+    fuel: (fuelClass: string): string => t(`stats.map.fuel.${fuelClass}`),
+    country: (code: string): string => countryLabel(code, i18n.language, t)
+  }
+  const markerFor = (region: string | undefined): RegionMarker | null => {
+    const data = markerData(region)
+    if (!data) return null
+    const flagOf = (code: string): string | null => {
+      const slug = flagSlug(code)
+      return slug ? `/country-flags/${slug}.svg` : null
+    }
+    return regionMarker(mode, data, markerLabels, brandLogoUrl, flagOf, toIntlLocale(i18n.language))
+  }
   const path = projection ? geoPath(projection) : undefined
+
+  const logoChips: (LogoChip & { marker: RegionMarker })[] = []
+  if (logos && path && geography.data) {
+    for (const feature of geography.data.features) {
+      const properties = feature.properties as UkraineRegionProperties
+      const name = REGION_NAME_BY_SHAPE_ISO[properties.shapeISO]
+      const data = markerData(name)
+      const marker = markerFor(name)
+      const [cx, cy] = path.centroid(feature)
+      if (!data || !marker || (!marker.src && !marker.text) || !Number.isFinite(cx) || !Number.isFinite(cy)) continue
+      const size = LOGO_MIN + LOGO_GROW * Math.sqrt(data.fleet / maxFleet)
+      logoChips.push({ key: properties.shapeISO, cx, cy, size, marker })
+    }
+  }
+  const markerByKey = new Map(logoChips.map(c => [c.key, c.marker]))
+  const placedLogos = spreadLogos(logoChips, MAP_WIDTH, MAP_HEIGHT).flatMap(p => {
+    const marker = markerByKey.get(p.key)
+    return marker ? [{ ...p, marker }] : []
+  })
 
   const legendStops = Array.from({ length: LEGEND_STEPS }, (_, i) => choroplethColor(i / (LEGEND_STEPS - 1), theme))
 
@@ -85,13 +132,7 @@ export default function StatsMap({ rows, logos = false }: Props): ReactNode {
                     ? 'var(--color-border)'
                     : choroplethColor(max > min ? (value - min) / (max - min) : 1, theme)
                 const label = `${regionName}: ${value === undefined ? t('stats.map.noData') : numberFormat.format(value)}`
-                const brands = logos
-                  ? brandsByRegion
-                      .get(name ?? '')
-                      ?.brands.slice(0, TOOLTIP_BRANDS)
-                      .map(b => b.brand)
-                      .join(', ')
-                  : undefined
+                const brands = logos ? markerFor(name)?.summary : undefined
 
                 const handleEnter = (e: MouseEvent): void => {
                   setHover({ name: regionName, value: value ?? null, x: e.clientX, y: e.clientY, brands })
@@ -131,38 +172,57 @@ export default function StatsMap({ rows, logos = false }: Props): ReactNode {
             }
           </Geographies>
 
-          {logos && path && geography.data && (
+          {logos && (
             <g pointerEvents="none" aria-hidden>
-              {geography.data.features.map(feature => {
-                const properties = feature.properties as UkraineRegionProperties
-                const name = REGION_NAME_BY_SHAPE_ISO[properties.shapeISO]
-                const entry = name ? brandsByRegion.get(name) : undefined
-                const brand = entry?.brands[0]?.brand
-                const src = brandLogoUrl(brand)
-                const [cx, cy] = path.centroid(feature)
-                if (!entry || !src || !Number.isFinite(cx) || !Number.isFinite(cy)) return null
-                const size = LOGO_MIN + LOGO_GROW * Math.sqrt(entry.fleet / maxFleet)
-                return (
-                  <g key={properties.shapeISO} transform={`translate(${cx - size / 2} ${cy - size / 2})`}>
+              {placedLogos.map(chip => (
+                <g key={chip.key}>
+                  {chip.displaced && (
+                    <>
+                      <line
+                        x1={chip.cx}
+                        y1={chip.cy}
+                        x2={chip.x}
+                        y2={chip.y}
+                        stroke="var(--color-muted)"
+                        strokeWidth={0.75}
+                      />
+                      <circle cx={chip.cx} cy={chip.cy} r={1.75} fill="var(--color-muted)" />
+                    </>
+                  )}
+                  <g transform={`translate(${chip.x - chip.size / 2} ${chip.y - chip.size / 2})`}>
                     <rect
-                      width={size}
-                      height={size}
-                      rx={size / 5}
-                      fill="white"
+                      width={chip.size}
+                      height={chip.size}
+                      rx={chip.size / 5}
+                      fill={chip.marker.color ?? 'white'}
                       stroke="var(--color-border)"
                       strokeWidth={0.5}
                     />
-                    <image
-                      href={src}
-                      x={size * 0.1}
-                      y={size * 0.1}
-                      width={size * 0.8}
-                      height={size * 0.8}
-                      preserveAspectRatio="xMidYMid meet"
-                    />
+                    {chip.marker.src ? (
+                      <image
+                        href={chip.marker.src}
+                        x={chip.size * 0.1}
+                        y={chip.size * 0.1}
+                        width={chip.size * 0.8}
+                        height={chip.size * 0.8}
+                        preserveAspectRatio="xMidYMid meet"
+                      />
+                    ) : (
+                      <text
+                        x={chip.size / 2}
+                        y={chip.size / 2}
+                        textAnchor="middle"
+                        dominantBaseline="central"
+                        fontSize={chip.size * 0.26}
+                        fontWeight={600}
+                        fill={chip.marker.color ? 'white' : 'var(--color-fg)'}
+                      >
+                        {chip.marker.text}
+                      </text>
+                    )}
                   </g>
-                )
-              })}
+                </g>
+              ))}
             </g>
           )}
         </ComposableMap>
@@ -178,7 +238,7 @@ export default function StatsMap({ rows, logos = false }: Props): ReactNode {
             </div>
             {hover.brands && (
               <div className="text-[var(--color-muted)]">
-                {t('stats.map.topBrands')}: {hover.brands}
+                {t(`stats.map.top.${mode}`)}: {hover.brands}
               </div>
             )}
           </div>

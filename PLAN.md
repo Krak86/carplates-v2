@@ -391,9 +391,11 @@ above once scoped, or dropped if research says no.
   (`track.ua-gis.com/gtfs/lviv/vehicle_position`, ~11 s; licence unchecked) — an API proxy + lazy Leaflet map would give real moving public
   transport for Львів only; (b) YouTube ISS streams can be retired or embed-blocked — swap ids in `LIVE_STREAMS` (earth / traffic / city, `apps/web/src/lib/live-background.ts`; traffic/city streams added 2026-10-05).
 
-### Visual stats, map logos, cards and quizzes — planned 2026-10-29, steps 1-2 built
+### Visual stats, map logos, cards and quizzes — planned 2026-10-29, steps 1-3 built
 
-**Resume here:** steps 1-2 are written up in `docs/plan-done.md` ("Map brand logos, steps 1-2") and committed (`bb4f87e`). Next: browser-check `/stats?view=map&logos=1` (overlaps of small regions, dark theme, phone width), fix, then step 3. Run `pnpm dev`; after pulling, `pnpm db:migrate` then `pnpm db:refresh-region-brand-stats`.
+**Resume here:** steps 1-3 are built and browser-checked (all five map modes, dark/light, phone width). Step 1 is committed (`bb4f87e`); the overlap fix (`spreadLogos`) and step 3 (migration 0080, `region-facet-stats.ts`, `/api/stats/region-facets`, `mode` select) are **uncommitted** - check `git status`, suggest a commit message, do not commit unless asked. Write-ups: `docs/plan-done.md` "Overlap fix for step 2" and "Map modes, step 3"; convention: `docs/features-reference.md` "Map modes".
+Next: step 4 (plate card PNG; read `renderChartPng` first). Still owed once a step is deployed: a `releases.ts` entry (new day also bumps `releases/latest.ts`) and an About line (`about.feature.*`, ua/ru/en) for the map markers + modes. Small follow-ups: model mode shows the logo only (name is in the tooltip); the `/stats` map is online-only.
+Setup on a fresh DB: `pnpm install`, `pnpm db:migrate`, `pnpm db:refresh-region-brand-stats` (162 rows, 27 regions), `pnpm db:refresh-region-facet-stats` (434 rows, 27 regions), `pnpm --filter @carplates/shared build` and `pnpm --filter @carplates/db build` (both consumed from `dist/`), then `pnpm dev` (web on the first free port from 5173, API on 3000). Check at `/stats?view=map&logos=1&mode=brand|model|fuel|origin|ev`.
 
 Idea round: put the registry stats on the map and in diagrams, and add small canvas/HTML interactions on top of what already exists
 (`StatsMap`, `BrandLogo`, region flags, racer, `renderChartPng`). Routes touched: `/stats` + `/wanted` (shared `StatsMap`), `/` + `/:query`
@@ -404,10 +406,8 @@ Idea round: put the registry stats on the map and in diagrams, and add small can
    `GET /api/stats/region-brands`, `regionBrandStatsQuery`. Covered by the existing edge-cache rule (`/api/stats/*`).
 2. ✅ **Brand-logo layer on `StatsMap`** (2026-10-29) - `logos` prop, `/stats?view=map&logos=1` checkbox; the biggest brand's logo on a white
    chip at each polygon centroid, sized by the region's fleet share; tooltip lists the top 3 brands. `/wanted` does not pass `logos`.
-   Open: small regions (Київ, Севастополь, Чернівецька) overlap neighbours (leader lines or a size floor); real-browser pass in dark theme
-   and at phone width; `releases.ts` entry once deployed.
-3. ⏳ **Map modes** - a mode switch (top brand / top model / top fuel / top origin country flag / EV share) reusing the centroid layer; needs
-   per-region rollups for model and fuel (extend `stats_region_brand` or add sibling tables; EV share is already in `/api/stats/ev`).
+   Browser-checked 2026-10-29 (dark + light, phone width); overlaps fixed by `spreadLogos` (chips pushed apart, leader line to the centroid). Open: `releases.ts` entry once deployed.
+3. ✅ **Map modes** (2026-10-29) - `?logos=1&mode=brand|model|fuel|origin|ev` select on `/stats`; `registry.stats_region_facet` (migration 0080), `region-facet-stats.ts`, `GET /api/stats/region-facets`, `regionFacetStatsQuery`. EV share = electric fleet share from the fuel rows. Open: `releases.ts` / About once deployed.
 4. ⏳ **Shareable plate card PNG** - canvas card (plate, brand logo, region flag, year, one fact) through the `renderChartPng` pipeline; button
    on the result card; link previews stay API-side (`apps/api/src/spa/`).
 5. ⏳ **Quiz route** - "guess the region from the plate" on the map, then logo quiz and higher/lower from `stats/top`; new public route

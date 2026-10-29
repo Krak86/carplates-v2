@@ -12,6 +12,8 @@ import { cn } from '@/lib/cn'
 import { toIntlLocale } from '@/lib/intl'
 import { statsQuery } from '@/lib/queries'
 import { dimensionHasYearColumn, dimensionRows, yearBoundaryLabel, yearRange } from '@/routes/stats/helpers'
+import { DEFAULT_MAP_MODE, MAP_MODES, parseMapMode } from '@/routes/stats/StatsMap.helpers'
+import type { MapMode } from '@/routes/stats/StatsMap.helpers'
 import StatsMapSkeleton from '@/routes/stats/StatsMapSkeleton'
 import StatsSkeleton from '@/routes/stats/StatsSkeleton'
 import StatsTable from '@/routes/stats/StatsTable'
@@ -70,6 +72,7 @@ export default function StatsRoute(): ReactNode {
   const metric = parseMetric(searchParams.get('metric'))
   const view = parseView(searchParams.get('view'))
   const showLogos = searchParams.get('logos') === '1'
+  const mapMode = parseMapMode(searchParams.get('mode'))
   const effectiveDim = view === 'map' ? 'region' : dim
   const visibleDimensions =
     view === 'map' ? (['region'] as const satisfies readonly StatsDimension[]) : STATS_DIMENSIONS
@@ -95,6 +98,15 @@ export default function StatsRoute(): ReactNode {
     setSearchParams(prev => {
       const params = new URLSearchParams(prev)
       params.set('view', next)
+      return params
+    })
+  }
+
+  const handleMapModeChange = (next: MapMode): void => {
+    setSearchParams(prev => {
+      const params = new URLSearchParams(prev)
+      if (next === DEFAULT_MAP_MODE) params.delete('mode')
+      else params.set('mode', next)
       return params
     })
   }
@@ -201,10 +213,27 @@ export default function StatsRoute(): ReactNode {
             <SectionInfo section="statsTable" title={t('stats.table.title')} />
 
             {view === 'map' && (
-              <label className="flex items-center gap-2 text-sm">
-                <input type="checkbox" checked={showLogos} onChange={e => handleLogosChange(e.target.checked)} />
-                {t('stats.map.logos')}
-              </label>
+              <div className="flex flex-wrap items-center gap-3">
+                <label className="flex items-center gap-2 text-sm">
+                  <input type="checkbox" checked={showLogos} onChange={e => handleLogosChange(e.target.checked)} />
+                  {t('stats.map.logos')}
+                </label>
+
+                {showLogos && (
+                  <select
+                    aria-label={t('stats.map.mode')}
+                    value={mapMode}
+                    onChange={e => handleMapModeChange(parseMapMode(e.target.value))}
+                    className="rounded-md border border-[var(--color-border)] bg-[var(--color-bg)] px-2 py-1 text-sm"
+                  >
+                    {MAP_MODES.map(m => (
+                      <option key={m} value={m}>
+                        {t(`stats.map.mode.${m}`)}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
             )}
           </div>
 
@@ -252,6 +281,7 @@ export default function StatsRoute(): ReactNode {
                 <Suspense fallback={<StatsMapSkeleton />}>
                   <StatsMap
                     logos={showLogos}
+                    mode={mapMode}
                     rows={dimensionRows(stats.data, 'region').map(r => ({ label: r.label, value: r[metric] }))}
                   />
                 </Suspense>

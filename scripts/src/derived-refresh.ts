@@ -18,7 +18,8 @@ export const DERIVED_REFRESH_SCRIPTS = [
   'src/ev-stats.ts',
   'src/imports-stats.ts',
   'src/origin-stats.ts',
-  'src/region-brand-stats.ts'
+  'src/region-brand-stats.ts',
+  'src/region-facet-stats.ts'
 ] as const
 
 /** Runs each derived-stats script in turn (own process each — they are CLIs); throws on the first failure. */
