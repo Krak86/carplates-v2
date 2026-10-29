@@ -131,8 +131,8 @@ capacity_p50, power_p50, imported_share, first_reg_by_year jsonb, owners_p50)`.
   Cloudflare cache rule, and a data-version in the cache key so the monthly ingest invalidates it. Optional in-memory LRU
   (24 h) for the rendered shell of hot pages.
 - **Optional, after the MVP is indexed:** render the block once in `db:refresh-catalog` and store it (`catalog_model.seo_html`
-  + JSON-LD), so a request is one primary-key read plus a string replace (about 0.5 day). Top ~300 models, make pages and
-  `/cars` can be held in memory at API start.
+  - JSON-LD), so a request is one primary-key read plus a string replace (about 0.5 day). Top ~300 models, make pages and
+    `/cars` can be held in memory at API start.
 - `sitemap.ts`: switch to a sitemap index with chunked `/sitemap-cars-N.xml`, indexable pages only.
 - `STATIC_PAGES` gets `/cars` only. The dynamic pages get their text from the catalog table.
 

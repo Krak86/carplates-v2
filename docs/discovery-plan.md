@@ -31,16 +31,12 @@ public OpenAPI document, per-page link previews (`features-reference.md` "Link p
       "Додати сервіс" button (needs "Зареєструватись" / "Увійти"; the form is behind login, so its fields are unverified).
       Categories: Інформаційно-аналітичні системи · Візуалізації · Чат-боти · Мобільні застосунки. Pick "Інформаційно-аналітичні
       системи". Also post an impact story on https://forum.data.gov.ua (Обговорення). Listing text to paste, adjust to the
-      form's limits:
-      - Title (ua): `carsua.app - перевірка авто за номером або VIN` · (en): `carsua.app - Ukrainian vehicle lookup by plate or VIN`
-      - Description (ua): `Безкоштовний сервіс пошуку транспортного засобу за державним номером або VIN на основі відкритих
-        даних МВС (data.gov.ua): марка, модель, рік, колір, пальне, регіон, історія реєстрацій. Без персональних даних
-        власників. Розпізнавання номера з камери, офлайн-режим (PWA), мови: українська, російська, англійська.`
-      - Description (en): `Free lookup of a vehicle by Ukrainian plate or VIN built on the MIA open registrations datasets from
-        data.gov.ua: make, model, year, colour, fuel, region, registration history. No owner personal data. Plate recognition
-        from camera, offline PWA, Ukrainian/Russian/English.`
-      - Link: https://carsua.app · Datasets used: the MIA vehicle registration resources ingested via CKAN (use the dataset
-        names from `docs/commands-reference.md` `ingest:*`) · Contact: the project email
+      form's limits: - Title (ua): `carsua.app - перевірка авто за номером або VIN` · (en): `carsua.app - Ukrainian vehicle lookup by plate or VIN` - Description (ua): `Безкоштовний сервіс пошуку транспортного засобу за державним номером або VIN на основі відкритих
+      даних МВС (data.gov.ua): марка, модель, рік, колір, пальне, регіон, історія реєстрацій. Без персональних даних
+      власників. Розпізнавання номера з камери, офлайн-режим (PWA), мови: українська, російська, англійська.` - Description (en): `Free lookup of a vehicle by Ukrainian plate or VIN built on the MIA open registrations datasets from
+      data.gov.ua: make, model, year, colour, fuel, region, registration history. No owner personal data. Plate recognition
+      from camera, offline PWA, Ukrainian/Russian/English.` - Link: https://carsua.app · Datasets used: the MIA vehicle registration resources ingested via CKAN (use the dataset
+      names from `docs/commands-reference.md` `ingest:*`) · Contact: the project email
 - [ ] Directories: Product Hunt, AlternativeTo, awesome-lists for open data / Ukrainian tech
 - [ ] Cloudflare cache rule for `/cars/*` and `/api/catalog/*` (add once the routes exist)
 
@@ -61,14 +57,14 @@ public OpenAPI document, per-page link previews (`features-reference.md` "Link p
 
 Full design: [catalog-plan.md](catalog-plan.md). Summary and estimate:
 
-| Step                                                                                     | Estimate     |
-| ---------------------------------------------------------------------------------------- | ------------ |
-| 1. Taxonomy: `catalogKey.ts`, `catalog_alias`, overrides CSV (the risky part)            | 1.5-2 days   |
-| 2. Year rollup SQL + `db:refresh-catalog` script                                         | 0.5-1 day    |
-| 3. API + `packages/shared/src/catalog.ts` contract + `@Throttle`                         | 0.5 day      |
-| 4. Web: routes, `ModelYearCard`, "In Ukraine" section, extract `ModelSections`           | 1.5-2 days   |
-| 5. SEO: `metaFor` branch, injected `#root` block, JSON-LD, hreflang, chunked sitemap, cache headers | 1-2 days |
-| 6. Docs, i18n ua/ru/en, About, releases, tests                                           | 0.5-1 day    |
+| Step                                                                                                | Estimate   |
+| --------------------------------------------------------------------------------------------------- | ---------- |
+| 1. Taxonomy: `catalogKey.ts`, `catalog_alias`, overrides CSV (the risky part)                       | 1.5-2 days |
+| 2. Year rollup SQL + `db:refresh-catalog` script                                                    | 0.5-1 day  |
+| 3. API + `packages/shared/src/catalog.ts` contract + `@Throttle`                                    | 0.5 day    |
+| 4. Web: routes, `ModelYearCard`, "In Ukraine" section, extract `ModelSections`                      | 1.5-2 days |
+| 5. SEO: `metaFor` branch, injected `#root` block, JSON-LD, hreflang, chunked sitemap, cache headers | 1-2 days   |
+| 6. Docs, i18n ua/ru/en, About, releases, tests                                                      | 0.5-1 day  |
 
 **MVP (about 3-4 days):** top ~300 canonical models via overrides, `/cars/:make/:model` only (no year level), "In Ukraine" stats
 plus existing sections, one sitemap file. Widen only after Search Console shows indexing.
@@ -86,12 +82,12 @@ days. Seed CSV: `export:catalog:csv` only if the overrides output needs to ship 
 Read each community's self-promotion rule first. Reply to every comment in the first hours. Do not cross-post the same text
 into many subs at once. Use a screenshot or short GIF of a search.
 
-| Where                                                                  | Why                                              |
-| ---------------------------------------------------------------------- | ------------------------------------------------ |
-| Ukrainian car groups (Telegram, Facebook), r/Ukraine, r/ukraine_ua     | Core users                                       |
-| r/UsedCars, r/Cartalk, r/whatcarshouldIbuy                             | Buyers of cars imported from Ukraine/EU          |
-| r/SideProject, r/webdev, r/opensource, Show HN                         | Technical audience, links and stars              |
-| Habr, DOU.ua, dev.to                                                   | Long-lived articles, real backlinks              |
+| Where                                                              | Why                                     |
+| ------------------------------------------------------------------ | --------------------------------------- |
+| Ukrainian car groups (Telegram, Facebook), r/Ukraine, r/ukraine_ua | Core users                              |
+| r/UsedCars, r/Cartalk, r/whatcarshouldIbuy                         | Buyers of cars imported from Ukraine/EU |
+| r/SideProject, r/webdev, r/opensource, Show HN                     | Technical audience, links and stars     |
+| Habr, DOU.ua, dev.to                                               | Long-lived articles, real backlinks     |
 
 ### Draft post (English; verify every claim against the live app and `legal-and-monetization.md` before posting)
 
