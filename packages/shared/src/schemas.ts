@@ -714,7 +714,11 @@ export const searchResultRowSchema = z.object({
   makeYear: z.number().int().nullable(),
   color: z.string().nullable(),
   fuel: z.string().nullable(),
-  dReg: z.string().nullable()
+  dReg: z.string().nullable(),
+  kind: z.string().nullable().optional(),
+  body: z.string().nullable().optional(),
+  operName: z.string().nullable().optional(),
+  operCode: z.number().int().nullable().optional()
 })
 export type SearchResultRow = z.infer<typeof searchResultRowSchema>
 

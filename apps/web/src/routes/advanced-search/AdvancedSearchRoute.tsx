@@ -6,6 +6,8 @@ import {
   MIN_INDEXABLE_LENGTH,
   REGION_NAMES,
   regionName,
+  resolveVehicleColor,
+  resolveVehicleKind,
   SEARCH_SORT_KEYS,
   VEHICLE_COLORS,
   VEHICLE_FUELS,
@@ -14,11 +16,15 @@ import {
 } from '@carplates/shared'
 import type { SearchResultRow } from '@carplates/shared'
 
+import BrandLogo from '@/components/BrandLogo'
 import ColorSwatch from '@/components/ColorSwatch'
-import { FUEL_ICON, getBodyInfo, getFuelIcon } from '@/components/ResultCard.helpers'
+import { BODY_ICON, FUEL_ICON, getBodyInfo, getFuelIcon } from '@/components/ResultCard.helpers'
+import RegionFlag from '@/components/RegionFlag'
 import RegionMap from '@/components/RegionMap'
 import Card from '@/components/ui/Card'
 import Spinner from '@/components/ui/Spinner'
+import VehicleKindIcon from '@/components/VehicleKindIcon'
+import { OPER_STATUS_ICON, OPER_STATUSES, operStatus } from '@/lib/oper-info'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 import { cn } from '@/lib/cn'
 import { useRegionLabel } from '@/lib/region-label'
@@ -34,7 +40,15 @@ function ResultRow({ row }: { row: SearchResultRow }): ReactNode {
   const label = formatVehicleLabel({ brand: row.brand, model: row.model, year: row.makeYear, color: null })
   const regionLabel = useRegionLabel()
   const region = regionLabel(regionName(row.plate))
-  const iconsTitle = [row.color && `${t('field.color')}: ${row.color}`, row.fuel && `${t('field.fuel')}: ${row.fuel}`]
+  const kind = resolveVehicleKind(row.kind)
+  const body = getBodyInfo(row.body)
+  const iconsTitle = [
+    row.color && `${t('field.color')}: ${row.color}`,
+    row.fuel && `${t('field.fuel')}: ${row.fuel}`,
+    kind && `${t('advancedSearch.kind')}: ${t(`vehicleKind.${kind}`)}`,
+    row.body && `${t('advancedSearch.body')}: ${row.body}`,
+    row.operCode != null && `${t('advancedSearch.oper')}: ${t(`oper.status.${operStatus(row.operCode)}`)}`
+  ]
     .filter(Boolean)
     .join('\n')
 
@@ -44,14 +58,37 @@ function ResultRow({ row }: { row: SearchResultRow }): ReactNode {
       to={`/${row.plate}`}
       className="-mx-4 flex items-center justify-between gap-3 px-4 py-2.5 transition-colors hover:bg-[var(--color-border)]/40"
     >
-      <div className="min-w-0">
-        <div className="font-medium">{label || row.plate}</div>
-        <div className="flex items-center gap-1.5 text-sm text-[var(--color-muted)]">
-          <span className="text-[var(--color-primary)] underline">{row.plate}</span>
-          {region && <span>· {region}</span>}
+      <div className="flex min-w-0 items-center gap-3">
+        <BrandLogo brand={row.brand} size="sm" placeholder />
+        <div className="min-w-0">
+          <div className="font-medium">{label || row.plate}</div>
+          <div className="flex items-center gap-1.5 text-sm text-[var(--color-muted)]">
+            <span className="text-[var(--color-primary)] underline">{row.plate}</span>
+            {region && (
+              <span className="inline-flex items-center gap-1.5">
+                · <RegionFlag region={regionName(row.plate)} /> {region}
+              </span>
+            )}
+          </div>
+          {row.operName && (
+            <div className="truncate text-xs text-[var(--color-muted)]">
+              {row.operCode != null && <span aria-hidden>{OPER_STATUS_ICON[operStatus(row.operCode)]} </span>}
+              {row.operName}
+            </div>
+          )}
         </div>
       </div>
       <div className="flex shrink-0 items-center gap-2 text-lg" title={iconsTitle || undefined}>
+        {kind && (
+          <VehicleKindIcon
+            kind={kind}
+            color={resolveVehicleColor(row.color)}
+            animated={false}
+            className="h-6 w-6"
+            title={t(`vehicleKind.${kind}`)}
+          />
+        )}
+        {body && <span aria-hidden>{body.icon}</span>}
         <ColorSwatch value={row.color} />
         {row.fuel && <span aria-hidden>{getFuelIcon(row.fuel)}</span>}
       </div>
@@ -116,14 +153,17 @@ export default function AdvancedSearchRoute(): ReactNode {
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <label className="flex flex-col gap-1 text-sm">
               {t('advancedSearch.brand')}
-              <input
-                type="text"
-                list="advanced-search-brands"
-                value={filters.brand}
-                onChange={e => updateFilter('brand', e.target.value)}
-                placeholder={t('advancedSearch.brandPlaceholder')}
-                className={inputClass}
-              />
+              <span className="flex items-center gap-2">
+                <BrandLogo brand={filters.brand.trim() || null} />
+                <input
+                  type="text"
+                  list="advanced-search-brands"
+                  value={filters.brand}
+                  onChange={e => updateFilter('brand', e.target.value)}
+                  placeholder={t('advancedSearch.brandPlaceholder')}
+                  className={inputClass}
+                />
+              </span>
               <datalist id="advanced-search-brands">
                 {brandSuggestions.map(s => (
                   <option key={s.brand} value={s.brand} />
@@ -187,7 +227,10 @@ export default function AdvancedSearchRoute(): ReactNode {
             </label>
 
             <label className="flex flex-col gap-1 text-sm">
-              {t('advancedSearch.fuel')}
+              <span className="flex min-h-6 items-center gap-1.5">
+                {t('advancedSearch.fuel')}
+                {!!filters.fuel && <span aria-hidden>{FUEL_ICON[filters.fuel]}</span>}
+              </span>
               <select
                 value={filters.fuel}
                 onChange={e => updateFilter('fuel', e.target.value as typeof filters.fuel)}
@@ -203,7 +246,10 @@ export default function AdvancedSearchRoute(): ReactNode {
             </label>
 
             <label className="flex flex-col gap-1 text-sm">
-              {t('advancedSearch.color')}
+              <span className="flex min-h-6 items-center gap-1.5">
+                {t('advancedSearch.color')}
+                <ColorSwatch value={filters.color || null} />
+              </span>
               <select
                 value={filters.color}
                 onChange={e => updateFilter('color', e.target.value as typeof filters.color)}
@@ -219,7 +265,17 @@ export default function AdvancedSearchRoute(): ReactNode {
             </label>
 
             <label className="flex flex-col gap-1 text-sm">
-              {t('advancedSearch.kind')}
+              <span className="flex min-h-6 items-center gap-1.5">
+                {t('advancedSearch.kind')}
+                {!!filters.kind && (
+                  <VehicleKindIcon
+                    kind={filters.kind}
+                    color={filters.color || null}
+                    animated={false}
+                    className="h-6 w-6"
+                  />
+                )}
+              </span>
               <select
                 value={filters.kind}
                 onChange={e => updateFilter('kind', e.target.value as typeof filters.kind)}
@@ -298,7 +354,10 @@ export default function AdvancedSearchRoute(): ReactNode {
               </select>
             </label>
             <label className="flex flex-col gap-1 text-sm sm:col-span-2">
-              {t('advancedSearch.oper')}
+              <span className="flex min-h-6 items-center gap-1.5">
+                {t('advancedSearch.oper')}
+                {!!filters.oper && <span aria-hidden>{OPER_STATUS_ICON[operStatus(Number(filters.oper))]}</span>}
+              </span>
               <OperStatusSelect
                 value={filters.oper}
                 onChange={value => updateFilter('oper', value)}
@@ -310,6 +369,55 @@ export default function AdvancedSearchRoute(): ReactNode {
           </div>
 
           {filters.region && <RegionMap region={filters.region} />}
+
+          <details className="mt-3 text-sm">
+            <summary className="cursor-pointer text-[var(--color-primary)]">{t('advancedSearch.legend')}</summary>
+            <p className="mt-1 text-xs text-[var(--color-muted)]">{t('advancedSearch.legendHint')}</p>
+            <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+              {VEHICLE_COLORS.map(c => (
+                <li key={c} className="inline-flex items-center gap-1.5">
+                  <ColorSwatch value={c} /> {t(`vehicleColor.${c}`)}
+                </li>
+              ))}
+            </ul>
+            <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+              {VEHICLE_FUELS.map(f => (
+                <li key={f} className="inline-flex items-center gap-1.5">
+                  <span aria-hidden>{FUEL_ICON[f]}</span> {t(`vehicleFuel.${f}`)}
+                </li>
+              ))}
+            </ul>
+            <ul className="mt-2 grid gap-1 sm:grid-cols-2">
+              {VEHICLE_KINDS.map(k => (
+                <li key={k} className="inline-flex items-center gap-1.5">
+                  <VehicleKindIcon kind={k} animated={false} className="h-6 w-6" /> {t(`vehicleKind.${k}`)}
+                </li>
+              ))}
+            </ul>
+            <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+              {OPER_STATUSES.map(st => (
+                <li key={st} className="inline-flex items-center gap-1.5">
+                  <span aria-hidden>{OPER_STATUS_ICON[st]}</span> {t(`oper.status.${st}`)}
+                </li>
+              ))}
+            </ul>
+            <ul className="mt-2 grid gap-1 sm:grid-cols-2">
+              {Object.entries(BODY_ICON).map(([cat, icon]) => (
+                <li key={cat} className="flex items-start gap-1.5">
+                  <span aria-hidden>{icon}</span>
+                  <span className="text-[var(--color-muted)]">{t(`body.cat.${cat}`)}</span>
+                </li>
+              ))}
+            </ul>
+            <ul className="mt-2 space-y-1">
+              {VEHICLE_PURPOSES.map(p => (
+                <li key={p}>
+                  <b>{t(`vehiclePurpose.${p}`)}</b>:{' '}
+                  <span className="text-[var(--color-muted)]">{t(`vehiclePurposeDesc.${p}`)}</span>
+                </li>
+              ))}
+            </ul>
+          </details>
 
           <div className="mt-3 flex items-center gap-4">
             <button
@@ -380,7 +488,9 @@ export default function AdvancedSearchRoute(): ReactNode {
                 aria-label={t(dir === 'asc' ? 'advancedSearch.sortAsc' : 'advancedSearch.sortDesc')}
                 className="rounded-lg border border-[var(--color-border)] px-2 py-1 hover:bg-[var(--color-surface)]"
               >
-                {dir === 'asc' ? '↑' : '↓'}
+                {dir === 'asc' ? '↑' : '↓'}{' '}
+                {t(dir === 'asc' ? 'advancedSearch.sortAscShort' : 'advancedSearch.sortDescShort')}{' '}
+                <span aria-hidden>?</span>
               </button>
             </label>
           </div>

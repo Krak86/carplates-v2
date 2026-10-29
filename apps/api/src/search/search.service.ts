@@ -194,10 +194,10 @@ export class SearchService {
         color: currentRegistration.color,
         fuel: currentRegistration.fuel,
         dReg: currentRegistration.dReg,
-        // Sort-only columns, stripped from the response.
         kind: currentRegistration.kind,
         body: currentRegistration.body,
-        operName: currentRegistration.operName
+        operName: currentRegistration.operName,
+        operCode: currentRegistration.operCode
       })
       .from(currentRegistration)
       .where(where)
@@ -287,9 +287,7 @@ export class SearchService {
     const offset = (filters.page - 1) * filters.pageSize
     const total = sorted.length
     return {
-      results: sorted
-        .slice(offset, offset + filters.pageSize)
-        .map(({ kind: _k, body: _b, operName: _o, ...row }) => row),
+      results: sorted.slice(offset, offset + filters.pageSize),
       total,
       totalIsExact: total < SEARCH_COUNT_CAP,
       page: filters.page,
