@@ -2990,6 +2990,7 @@
   "read.noDims": "no catalogue dimensions",
   "read.search": "Search",
   "read.examples": "Examples from the registry",
+  "read.pickerHint": "Pick a model above, then point at or tap a dimension to see what it means; the others fade.",
   "read.howToSpot": "How to spot",
   "read.loadError": "Could not load the data. Try again later.",
   "read.sec.types": "Body types",
