@@ -518,3 +518,10 @@ Files: migration 0075, `packages/shared/src/origin.ts` (own file, no offline-cac
 
 `routes/play/`; write-up plan-done "Games hub /play". `/play?game=region|logo|higher` plays in place, online-only. Rounds are pure functions in `helpers.ts` (plates come from `REGIONS`, never re-implemented). `StatsMap` `quiz` prop = clickable polygons without tooltip/legend. Best score per quiz in localStorage (`quiz-storage.ts`); a new quiz = id in `QUIZ_IDS`, component in `QUIZ_COMPONENT`, `play.quiz.<id>.title|desc` ua/ru/en. The end screen shares a score card via `renderPlateCardPng`.
 Question count (10/20/30/50) is global, picked on the hub (`readRounds`/`writeRounds`); best score is per quiz and length. Brand pool: `GET /api/stats/brands` -> `foldBrands` (never the full `statsQuery`).
+
+## Advanced search, news and page width (2026-10-29)
+
+- **Advanced search icons:** result rows and the Colour / Kind / Fuel / Status labels reuse the shared icon components (`BrandLogo`, `VehicleKindIcon`, body, colour, fuel, `OperStatusIcon`, region flag); a new facet needs its icon in the **Legend** too. `searchResultRowSchema` extras (`kind`, `body`, `operName`, `operCode`) stay `.nullable().optional()`.
+- **News source colours:** every outlet in `NEWS_SOURCE_GROUPS` (`lib/news.ts`) has a hue; use `newsTagColor` / `newsGroupOfSource`, never a colour literal in a component. Loading states are skeleton rows, never dimmed stale items.
+- **Page width:** route pages use `mx-auto max-w-6xl`; a new route must too (the floating scroll buttons follow that edge).
+- **Side silhouettes:** `SIDE_PATHS` (`components/size/silhouettes.ts`) are traced outlines in a unit box (rear 0 … front 1); arches are cut at draw time, so keep the outline down to the sill. Do not add a photo or another site's drawing; if the source of a trace is in doubt, redraw from catalogue dimensions.

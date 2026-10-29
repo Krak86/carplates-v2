@@ -15,7 +15,7 @@ Docs (**grep `^## ` headings, never read whole**, 100–400 KB): `PLAN.md` backl
 (Drizzle `registry`, SQL migrator) · `apps/api` (NestJS + Fastify, `src/<feature>/`, serves SPA + per-plate `<meta>`) · `apps/web`
 (Vite + React 19 + React Router) · `scripts/` (ingest/export CLIs, `seed-data/` gzipped CSVs) · `infra/` · `services/alpr/`.
 
-Pins (why: PLAN.md): pnpm 12, Node 24, TypeScript 5.9 (not 7), NestJS 11 (not 12), Drizzle 0.45.x (not 1.0 RC), jsdom ~30.0 (30.1 breaks `.rejects.toThrow`), Tailwind v4.
+Pins (why: PLAN.md "Version pins"): Node 24, TypeScript 5.9, NestJS 11, Drizzle 0.45.x, jsdom ~30.0, Tailwind v4 - never bump to `latest`.
 
 ## Conventions
 
@@ -35,14 +35,13 @@ Pins (why: PLAN.md): pnpm 12, Node 24, TypeScript 5.9 (not 7), NestJS 11 (not 12
   come from the API, never Vite.
 - **i18n is per-language lazy chunks** (non-ua also loads ua). Tests rendering text `await i18nReady`; never `import '@/i18n'`.
 - **Zod `jitless`**: `@/lib/zod-config` stays the first import of `main.tsx`; `vendor-zod` / `zod-config` stay separate chunks (else CSP `eval`).
-- **Edge cache**: a new cacheable `/api/*` endpoint sends `common/cache.ts` headers and joins the Cloudflare Cache Rule (`docs/deploy.md`);
-  `openapi.json` lists only `PUBLIC_API_PATH_PREFIXES` (nothing per-vehicle, admin or scraped). Both: `docs/features-reference.md` "Agent discovery, edge cache, Zod and CSP".
+- **Edge cache**: a new cacheable `/api/*` endpoint sends `common/cache.ts` headers, joins the Cloudflare Cache Rule and (if public) `PUBLIC_API_PATH_PREFIXES`; read `docs/features-reference.md` "Agent discovery, edge cache, Zod and CSP".
 - **Below-the-fold sections are `LazySection`s**; a new shareable one must list its id in `sections`. Shared pure helpers of lazy
   chunks go in `vite.config.ts` `HELPER_GROUPS`.
 - Accounts: separate `app` schema, not re-ingestable; `account.ts`, not `schemas.ts`; admins by SQL only; online-only UI.
-- **Deploy** (`docs/deploy.md`): path-filtered workflows on `main`; blue/green api ⇒ migrations backward compatible; new env var ⇒ `env.ts` + `deploy-api.yml` + deploy.md.
-- **New public route** → add it to `ROUTE_TITLE_KEYS` (`useDocumentTitle.ts`; also stops the header/scroll buttons reading it as a plate) and a `STATIC_PAGES` entry (ua/ru/en) in `apps/api/src/spa/spa-text.ts`, else it is `noindex` and not in the
-  sitemap. `/api/*` is globally rate-limited (`common/throttle.ts`); add a `@Throttle` for any enumerable lookup.
+- **Deploy** (`docs/deploy.md`): blue/green api ⇒ migrations backward compatible; new env var ⇒ `env.ts` + `deploy-api.yml` + deploy.md.
+- **New public route** → `ROUTE_TITLE_KEYS` (`useDocumentTitle.ts`), a `STATIC_PAGES` entry (ua/ru/en) in `apps/api/src/spa/spa-text.ts` (else `noindex`, no sitemap),
+  `max-w-6xl` page width. Add `@Throttle` (`common/throttle.ts`) to any enumerable lookup.
 
 ## Workflow
 
@@ -51,7 +50,7 @@ Pins (why: PLAN.md): pnpm 12, Node 24, TypeScript 5.9 (not 7), NestJS 11 (not 12
 - **Seed CSVs mirror scraped tables.** After changing `registry.wiki_image` (pre-warm, `wikiAliases.ts` + re-scrape, row deletes) re-run
   `pnpm export:wiki-images:csv`; same for every other `export:*:csv` dataset (a new setup loads the CSV instead of re-scraping).
 - Run `pnpm format` first (never reformat `scripts/src/fixtures`). Tests: Vitest, colocated `*.test.ts(x)`.
-- Keep docs current: write-up → `docs/plan-done.md`, one-line ✅ → `PLAN.md`, conventions → `docs/features-reference.md`, user-facing entry → `packages/shared/src/releases.ts` (also the monthly digest source: only `new` items are mailed; new day ⇒ also bump `releases/latest.ts`, a test checks);
-  a new feature or data source also goes on the About page (`about.feature.*` / `SOURCES` + `about.source.*`, ua/ru/en).
+- Keep docs current: write-up → `docs/plan-done.md`, one-line ✅ → `PLAN.md`, conventions → `docs/features-reference.md`, user-facing entry → `packages/shared/src/releases.ts`
+  (only `new` items are mailed; new day ⇒ bump `releases/latest.ts`); new feature / data source → About (`about.feature.*`, `SOURCES` + `about.source.*`, ua/ru/en).
 
 @CLAUDE_RULES.md

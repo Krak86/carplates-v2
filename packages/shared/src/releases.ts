@@ -20,6 +20,30 @@ export const RELEASES: readonly ReleaseDay[] = [
     items: [
       item(
         'improved',
+        'Розширений пошук: логотипи марок, значки типу, кольору, пального й статусу в результатах, згорнута легенда значків і швидший пошук за маркою та моделлю.',
+        'Расширенный поиск: логотипы марок, значки типа, цвета, топлива и статуса в результатах, сворачиваемая легенда значков и более быстрый поиск по марке и модели.',
+        'Advanced search: brand logos, kind, colour, fuel and status icons in the results, a collapsible legend of the icons, and a faster make and model search.'
+      ),
+      item(
+        'improved',
+        'Новини: заголовок і кнопки в один рядок, кожне джерело має свій колір, а під час завантаження показуються заглушки замість застарілого списку. Сторінки застосунку мають однакову ширину.',
+        'Новости: заголовок и кнопки в одну строку, у каждого источника свой цвет, а при загрузке показываются заглушки вместо устаревшего списка. Страницы приложения имеют одинаковую ширину.',
+        'News: the title and buttons share one row, each source has its own colour, and loading shows placeholders instead of a stale list. App pages now share one width.'
+      ),
+      item(
+        'improved',
+        'Пошук за фото: під час розпізнавання видно стан, а на повільному зʼєднанні зʼявляється підказка. Зменшення фото більше не гальмує сторінку.',
+        'Поиск по фото: во время распознавания виден статус, а на медленном соединении появляется подсказка. Уменьшение фото больше не тормозит страницу.',
+        'Photo search: a status line shows while reading, with a hint on a slow connection. Shrinking the photo no longer slows the page.'
+      ),
+      item(
+        'improved',
+        'Контури збоку у малюнках транспорту обведені за реальними фото кузовів (седан, хетчбек, універсал, купе, SUV, MPV, фургон, пікап); у гіді «Типи кузова» для пікапа додано Hilux, Ranger і Amarok.',
+        'Контуры сбоку в рисунках транспорта обведены по реальным фото кузовов (седан, хэтчбек, универсал, купе, SUV, MPV, фургон, пикап); в гиде «Типы кузова» для пикапа добавлены Hilux, Ranger и Amarok.',
+        'Side outlines in the vehicle drawings are traced from real body-style photos (sedan, hatch, wagon, coupe, SUV, MPV, van, pickup); the Body types guide adds Hilux, Ranger and Amarok to the pickup.'
+      ),
+      item(
+        'improved',
         'Реалістичніші малюнки транспорту: боковий вигляд і вигляд зверху з колісними арками, склінням, фарами й дзеркалами (розміри, гараж, парковка, гіди), нові схеми буксирування, а також окремі значки для мопеда, квадроцикла, трицикла, фургона, вантажівки та напівпричепа. Усі малюнки оригінальні.',
         'Более реалистичные рисунки транспорта: вид сбоку и сверху с колёсными арками, остеклением, фарами и зеркалами (размеры, гараж, парковка, гиды), новые схемы буксировки, а также отдельные значки для мопеда, квадроцикла, трицикла, фургона, грузовика и полуприцепа. Все рисунки оригинальные.',
         'More realistic vehicle drawings: side and top views with wheel arches, glass, lamps and mirrors (sizes, garage, parking, guides), new towing diagrams, and separate icons for a moped, quad, tricycle, van, truck and semi-trailer. All artwork is original.'
