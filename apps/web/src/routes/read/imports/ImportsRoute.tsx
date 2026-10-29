@@ -10,6 +10,13 @@ import {
   ModelsSection,
   YearsSection
 } from '@/routes/read/imports/ImportsSections'
+import {
+  AppSection,
+  HistorySection,
+  MarketSection,
+  SourcesSection,
+  WhySection
+} from '@/routes/read/imports/ImportsStorySections'
 import { pick } from '@/routes/read/helpers'
 
 // Lazy-loaded (see App.tsx). Public, no sign-in.
@@ -27,7 +34,11 @@ export default function ImportsRoute(): ReactNode {
           { id: 'years', label: t('read.sec.impYears') },
           { id: 'models', label: t('read.sec.impModels') },
           { id: 'countries', label: t('read.sec.impCountries') },
-          { id: 'checks', label: t('read.sec.impChecks') }
+          { id: 'history', label: t('read.sec.impHistory') },
+          { id: 'why', label: t('read.sec.impWhy') },
+          { id: 'market', label: t('read.sec.impMarket') },
+          { id: 'checks', label: t('read.sec.impChecks') },
+          { id: 'app', label: t('read.sec.impApp') }
         ]}
       />
 
@@ -35,7 +46,12 @@ export default function ImportsRoute(): ReactNode {
       <YearsSection />
       <ModelsSection />
       <CountriesSection />
+      <HistorySection />
+      <WhySection />
+      <MarketSection />
       <ChecksSection />
+      <AppSection />
+      <SourcesSection />
     </div>
   )
 }

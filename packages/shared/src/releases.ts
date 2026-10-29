@@ -20,6 +20,12 @@ export const RELEASES: readonly ReleaseDay[] = [
     items: [
       item(
         'improved',
+        'Гід «Імпорт»: історія ввезення авто у світі й в Україні (1997-2024), чому люди купують авто за кордоном, митна картина 2023 року (країни, митниці), пошук ввезеного авто в застосунку та список джерел.',
+        'Гид «Импорт»: история ввоза авто в мире и в Украине (1997-2024), почему люди покупают авто за границей, таможенная картина 2023 года (страны, таможни), поиск ввезённого авто в приложении и список источников.',
+        'Imports guide: the history of importing cars in the world and in Ukraine (1997-2024), why people buy cars abroad, the 2023 customs picture (countries, offices), how to check an imported car in the app and a list of sources.'
+      ),
+      item(
+        'improved',
         'Гід «Автопарк»: у розділі пального - тенденції та історія видів пального, типи гібридів і зарядних роз’ємів, стандарти якості EN 228/EN 590, перехід на бензин E10 з 1 липня 2026, маркування колонок ЄС, класи Euro; у розділах із законами - посилання на першоджерела.',
         'Гид «Автопарк»: в разделе топлива - тенденции и история видов топлива, типы гибридов и зарядных разъёмов, стандарты качества EN 228/EN 590, переход на бензин E10 с 1 июля 2026, маркировка колонок ЕС, классы Euro; в разделах с законами - ссылки на первоисточники.',
         'Fleet guide: the fuel section now covers fuel trends and history, hybrid types and charging connectors, the EN 228/EN 590 quality standards, the switch to E10 petrol on 1 July 2026, EU pump labels and Euro classes; sections that cite laws now link to the sources.'
