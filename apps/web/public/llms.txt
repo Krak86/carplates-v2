@@ -1,0 +1,24 @@
+# Cars UA
+
+> Look up a vehicle by Ukrainian plate number or VIN. Built on the state's open vehicle registry (data.gov.ua), with VIN decoding from NHTSA. Available in Ukrainian, Russian and English.
+
+Individual plate and VIN result pages are per-vehicle lookups and are not meant for indexing; the pages below are the stable, citable content. The `/api/` and `/og/` paths are not for crawlers (see robots.txt).
+
+## Guides
+
+- [Guides](https://carsua.app/read): Cars explained on Ukrainian registry data: body types, sizes and classes, real examples.
+- [Ukrainian number plates](https://carsua.app/read/plates): What a plate is made of, which letters mean which region, the old and new formats, and plates with no region.
+
+## Statistics
+
+- [Statistics](https://carsua.app/stats): Most common makes, colors, fuels and regions in Ukraine's vehicle registry.
+- [Fuel and emissions](https://carsua.app/fuel): Fuel economy and CO2 emissions by make and model.
+- [Crash safety](https://carsua.app/safety): Euro NCAP, IIHS, NHTSA and other crash-test results by make and model.
+- [Wanted vehicles](https://carsua.app/wanted): How many vehicles are wanted in Ukraine and how many were found, by region, make, colour and year.
+
+## About
+
+- [About](https://carsua.app/about): Where the data comes from, how search works, and what Cars UA is.
+- [Privacy policy](https://carsua.app/privacy): What data we keep and what we do not collect.
+- [Terms of use](https://carsua.app/terms): The rules for using Cars UA.
+- [What's new](https://carsua.app/releases): A day-by-day log of Cars UA changes: features, improvements, data.
