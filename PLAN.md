@@ -393,6 +393,8 @@ above once scoped, or dropped if research says no.
 
 ### Visual stats, map logos, cards and quizzes — planned 2026-10-29, steps 1-2 built
 
+**Resume here:** steps 1-2 are written up in `docs/plan-done.md` ("Map brand logos, steps 1-2") and committed (`bb4f87e`). Next: browser-check `/stats?view=map&logos=1` (overlaps of small regions, dark theme, phone width), fix, then step 3. Run `pnpm dev`; after pulling, `pnpm db:migrate` then `pnpm db:refresh-region-brand-stats`.
+
 Idea round: put the registry stats on the map and in diagrams, and add small canvas/HTML interactions on top of what already exists
 (`StatsMap`, `BrandLogo`, region flags, racer, `renderChartPng`). Routes touched: `/stats` + `/wanted` (shared `StatsMap`), `/` + `/:query`
 (card), a new `/play`-style route (quiz; needs `ROUTE_TITLE_KEYS`, `STATIC_PAGES`, sidebar, About, releases).
