@@ -410,8 +410,10 @@ Idea round: put the registry stats on the map and in diagrams, and add small can
 3. ✅ **Map modes** (2026-10-29) - `?logos=1&mode=brand|model|fuel|origin|ev` select on `/stats`; `registry.stats_region_facet` (migration 0080), `region-facet-stats.ts`, `GET /api/stats/region-facets`, `regionFacetStatsQuery`. EV share = electric fleet share from the fuel rows. Open: `releases.ts` / About once deployed.
 4. ✅ **Shareable plate card PNG** (2026-10-29, built and browser-checked) - canvas card (plate, brand logo, region flag, year, one fact) through the `renderChartPng` pipeline; button
    on the result card; link previews stay API-side (`apps/api/src/spa/`).
-5. ⏳ **Quiz route** - "guess the region from the plate" on the map, then logo quiz and higher/lower from `stats/top`; new public route
-   (checklist in CLAUDE.md), streak in localStorage first, accounts later.
+5. ⏳ **Games hub `/play` + quizzes** (decided 2026-10-29: own route `/play`) - a hub listing every game (quizzes, the racer `/race` and `/relax`, later ones) as cards, plus the quiz itself:
+   "guess the region from the plate" on `StatsMap`, then logo quiz and higher/lower from `stats/top`. Streak and best score in localStorage first, accounts later.
+   Cross links both ways: `/stats` map, `/read/plates`, the result-card region line and the racer banner link to `/play`; the quiz end screen links to `/stats`, `/read/plates`, `/race`
+   and a plate lookup; a score can be shared as a picture (`renderPlateCardPng` / `renderChartPng`). New public route checklist: CLAUDE.md (`ROUTE_TITLE_KEYS`, `STATIC_PAGES` ua/ru/en, sidebar, About, releases).
 6. ⏳ **Diagrams on `/stats`** - treemap (brand -> model), heatmap (region x fuel / body), year histogram, import-wave line (`/read/imports`),
    stolen-by-year vs. registered share (`/wanted`); hand-rolled SVG + `d3-scale`/`d3-shape`, each a `LazySection`, each with an export `chart` builder.
 7. ⏳ **Later** - Sankey (origin -> brand -> fuel), bar-chart race by registration year, collectible region cards, racer "drive Ukraine" route.
