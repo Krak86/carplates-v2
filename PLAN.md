@@ -345,6 +345,7 @@ above once scoped, or dropped if research says no.
 - ✅ **Size & parking section + size-class chip** — done 2026-10-14 (`?section=size&tab=schema|parking|garage|norms`; RDW +
   Wikipedia + VIN merged, gaps forecast, scaled side/top drawing, ДБН / German / US bays, ПДР limits) — see
   `docs/plan-done.md`. Open: ⏳ ДБН Додаток Є class table (only the clause 5.2 / 4.6 figures are verified).
+- ✅ **Realistic vehicle drawings** — done 2026-10-29 (side/top silhouettes with arches, towing diagram, 6 new kind icons; original art, About note). Write-up: `docs/plan-done.md`.
 - ✅ **Chip "?" explainers, `?weight=` tab URLs, mobile polish (pinch zoom, photo swipe), "VIN data starts in 2021" note** — done 2026-10-14, see `docs/plan-done.md`.
 - ✅ **VIN decode overview + plate-card split** — done 2026-10-02 (tabs, VIN anatomy, equipment map, engine/origin
   cards, grouped details; plate card now has separate _Registration history_ and _VIN decode_ sections) — see

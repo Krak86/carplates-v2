@@ -3,6 +3,8 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { licenceFor, towVerdict } from '@/components/RdwInsights.helpers'
+import SideSilhouette, { Wheel } from '@/components/size/SideSilhouette'
+import { axlePositions, DRAW_TYPICAL } from '@/components/size/silhouettes'
 import { cn } from '@/lib/cn'
 
 type Props = {
@@ -32,12 +34,7 @@ const TRUCK_AXLE_KG = 11500
 /** Caravan-club target for the tow-ball load: about 7 % of the loaded trailer. */
 const TBM_SHARE = 0.07
 
-type Wheel = { x: number; r: number }
 type Drawing = {
-  /** Body silhouettes (SVG path data) and the window / door cut-outs drawn over them. */
-  bodies: readonly string[]
-  decor: readonly string[]
-  wheels: readonly Wheel[]
   /** Horizontal extent of each measured part. */
   gvm: readonly [number, number]
   gtm: readonly [number, number]
@@ -45,6 +42,10 @@ type Drawing = {
   coupling: number
   /** Baseline of the coupling label: above the trailer body for the tall truck. */
   couplingLabelY: number
+  /** Height of the tow ball / kingpin, where the tow-ball load arrow lands. */
+  couplingY: number
+  /** Top of the ATM bracket (its ticks hang 8 below, its label sits 8 above). */
+  atmY: number
   atm: readonly [number, number]
   gcm: readonly [number, number]
 }
@@ -52,45 +53,99 @@ type Drawing = {
 const GROUND = 116
 const DRAWINGS: Record<Variant, Drawing> = {
   car: {
-    bodies: [
-      'M20 100V80Q20 74 28 72L55 66L72 48Q75 44 80 44H118Q124 44 128 48L142 66L146 68Q150 70 150 76V100Z',
-      'M229 52H319Q333 52 333 66V100H215V66Q215 52 229 52Z'
-    ],
-    decor: [
-      'M62 66L76 50H98V66Z',
-      'M104 50H118L131 66H104Z',
-      'M232 62H278Q282 62 282 66V78H232Z',
-      'M292 62H318V96H292Z'
-    ],
-    wheels: [
-      { x: 48, r: 10 },
-      { x: 124, r: 10 },
-      { x: 272, r: 10 }
-    ],
-    gvm: [30, 145],
-    gtm: [240, 305],
-    coupling: 182,
+    gvm: [22, 142],
+    gtm: [240, 296],
+    coupling: 150,
     couplingLabelY: 68,
-    atm: [215, 333],
-    gcm: [30, 333]
+    couplingY: 96,
+    atmY: 40,
+    atm: [192, 326],
+    gcm: [22, 326]
   },
   truck: {
-    bodies: ['M18 100V62Q18 54 26 54H58L80 72V100Z', 'M92 58H382V98H92Z'],
-    decor: ['M30 60H54L68 72H30Z'],
-    wheels: [
-      { x: 40, r: 10 },
-      { x: 92, r: 10 },
-      { x: 300, r: 9 },
-      { x: 326, r: 9 },
-      { x: 352, r: 9 }
-    ],
-    gvm: [30, 105],
-    gtm: [288, 364],
-    coupling: 104,
-    couplingLabelY: 54,
-    atm: [92, 382],
-    gcm: [30, 382]
+    gvm: [18, 126],
+    gtm: [312, 378],
+    coupling: 96,
+    couplingLabelY: 28,
+    couplingY: 88,
+    atmY: 8,
+    atm: [84, 382],
+    gcm: [18, 382]
   }
+}
+
+/** The towing SUV, nose to the left, drawn from the same outline as the size schema. */
+const CAR_LEFT = 22
+const CAR_LENGTH = 120
+
+/** The caravan: a rounded box behind the car (front = left), with its window, door, roof vent and one axle. */
+const CARAVAN_BODY = 'M192 104V68Q192 60 200 56L212 52H318Q326 52 326 60V104Z'
+const CARAVAN_WINDOWS = ['M212 62H246Q250 62 250 66V78H212Z', 'M266 62H292V100H266Z', 'M300 62H318V76H300Z']
+const CARAVAN_AXLE = 268
+
+const TRACTOR_BODY = 'M18 102V68Q18 62 24 60L32 56L36 46Q38 42 44 42H64Q70 42 70 48V76H126V102Z M40 38L52 34H62V42H40Z'
+const TRACTOR_WINDOW = 'M40 52L42 47H62V62H36Z'
+const TRAILER_BODY = 'M84 94V36Q84 33 87 33H379Q382 33 382 36V94Z'
+const TRAILER_RIBS = [124, 164, 204, 244, 284, 324].map(x => `M${x} 36V90`)
+const TRUCK_WHEELS: readonly { x: number; r: number }[] = [
+  { x: 34, r: 10 },
+  { x: 104, r: 10 },
+  { x: 120, r: 10 },
+  { x: 322, r: 10 },
+  { x: 344, r: 10 },
+  { x: 366, r: 10 }
+]
+
+function OutfitArt({ variant }: { variant: Variant }): ReactNode {
+  if (variant === 'truck') {
+    return (
+      <>
+        <path d={TRACTOR_BODY} fill="currentColor" fillOpacity="0.85" />
+        <path d={TRACTOR_WINDOW} fill="var(--color-bg)" fillOpacity="0.8" />
+        <path d={TRAILER_BODY} fill="currentColor" fillOpacity="0.85" />
+        <path d={TRAILER_RIBS.join('')} stroke="var(--color-bg)" strokeOpacity="0.45" strokeWidth="1.5" fill="none" />
+        <path d="M60 102H382" stroke="currentColor" strokeWidth="3" />
+
+        {TRUCK_WHEELS.map(w => (
+          <g key={w.x}>
+            <circle cx={w.x} cy={GROUND - w.r} r={w.r + 3} fill="var(--color-bg)" />
+            <Wheel cx={w.x} cy={GROUND - w.r} r={w.r} />
+          </g>
+        ))}
+      </>
+    )
+  }
+
+  const { lengthMm, heightMm, wheelbaseMm } = DRAW_TYPICAL.suv
+  const { rear, front } = axlePositions('suv', lengthMm, wheelbaseMm)
+  const k = CAR_LENGTH / lengthMm
+  const carTop = GROUND - heightMm * k
+
+  return (
+    <>
+      <g transform={`translate(${CAR_LEFT + CAR_LENGTH} ${carTop}) scale(${-k} ${k})`}>
+        <SideSilhouette
+          shape="suv"
+          length={lengthMm}
+          height={heightMm}
+          rearAxle={rear}
+          frontAxle={front}
+          color="currentColor"
+          bodyOpacity={0.85}
+        />
+      </g>
+
+      <path d="M142 98H192" stroke="currentColor" strokeWidth="3" fill="none" />
+      <path d={CARAVAN_BODY} fill="currentColor" fillOpacity="0.85" />
+      {CARAVAN_WINDOWS.map(path => (
+        <path key={path} d={path} fill="var(--color-bg)" fillOpacity="0.8" />
+      ))}
+      <path d="M236 49H258V52H236Z" fill="currentColor" fillOpacity="0.85" />
+      <path d="M326 96H332V104H326Z" fill="currentColor" fillOpacity="0.6" />
+      <circle cx={CARAVAN_AXLE} cy={GROUND - 11} r={14} fill="var(--color-bg)" />
+      <Wheel cx={CARAVAN_AXLE} cy={GROUND - 11} r={11} />
+    </>
+  )
 }
 
 function Bracket({
@@ -199,47 +254,34 @@ export default function RdwMassSchema({
       </div>
 
       <svg
-        viewBox="0 0 400 160"
+        viewBox="0 -10 400 170"
         role="img"
         aria-label={t(`rdw.schema.alt.${variant}`)}
         className="mt-2 w-full max-w-md text-[var(--color-fg)]"
       >
         <line x1="4" x2="396" y1={GROUND} y2={GROUND} stroke="currentColor" strokeOpacity="0.3" />
 
-        {d.bodies.map(path => (
-          <path key={path} d={path} fill="currentColor" fillOpacity="0.85" />
-        ))}
-        {d.decor.map(path => (
-          <path key={path} d={path} fill="var(--color-bg)" fillOpacity="0.8" />
-        ))}
-        <line
-          x1={variant === 'car' ? 150 : 80}
-          x2={d.coupling + 4}
-          y1="96"
-          y2="96"
-          stroke="currentColor"
-          strokeWidth="3"
-        />
-        {d.wheels.map(w => (
-          <g key={w.x}>
-            <circle cx={w.x} cy={GROUND - w.r} r={w.r} fill="var(--color-bg)" stroke="currentColor" strokeWidth="3" />
-          </g>
-        ))}
+        <OutfitArt variant={variant} />
 
         <Bracket from={d.gvm[0]} to={d.gvm[1]} y={126} active={layer === 'gvm'} label={label('gvm')} />
         <Bracket from={d.gtm[0]} to={d.gtm[1]} y={126} active={layer === 'gtm'} label={label('gtm')} />
         <Bracket from={d.gcm[0]} to={d.gcm[1]} y={144} active={layer === 'gcm'} label={label('gcm')} />
 
         <g className={cn('transition-opacity', layer === 'atm' ? 'opacity-100' : 'opacity-25')}>
-          <path d={`M${d.atm[0]} 48V40H${d.atm[1]}V48`} fill="none" stroke="currentColor" strokeWidth="2" />
-          <text x={(d.atm[0] + d.atm[1]) / 2} y="32" textAnchor="middle" fontSize="11" fill="currentColor">
+          <path
+            d={`M${d.atm[0]} ${d.atmY + 8}V${d.atmY}H${d.atm[1]}V${d.atmY + 8}`}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          />
+          <text x={(d.atm[0] + d.atm[1]) / 2} y={d.atmY - 8} textAnchor="middle" fontSize="11" fill="currentColor">
             {label('atm')}
           </text>
         </g>
 
         <g className={cn('transition-opacity', layer === 'tbm' ? 'opacity-100' : 'opacity-25')}>
           <path
-            d={`M${d.coupling} ${d.couplingLabelY + 6}V104m-5-6 5 6 5-6`}
+            d={`M${d.coupling} ${d.couplingLabelY + 6}V${d.couplingY}m-5-6 5 6 5-6`}
             fill="none"
             stroke="var(--color-primary)"
             strokeWidth="2.5"

@@ -3764,6 +3764,10 @@ Files: `apps/web/src/components/size/` — `VehicleSize.helpers.ts` (merge, shap
 - **Verified norms only:** ДБН В.2.3-15:2007 п. 5.2 (2.5 × 5.3 m; 2.3 × 5.0 m on temporary lots; safety gap 0.5–0.7 m) and п. 4.6 (design car 6 × 2.1 m); ПДР п. 22.5(а) (width 2.6, height 4.0, single vehicle 12, tractor + semi-trailer 18.75, road train 22 m); German Garagenverordnung (Saxony § 4); one US city code (Lindon, UT, 9 × 18 ft). Garage sizes (3 × 6 m box, 6 × 6 m double) are labelled _typical_. Mirrors are an assumed +20 cm. The ДБН Додаток Є class table could not be read from any text version, so the A–F cuts are the rule-of-thumb segments, labelled approximate. The US and German links answer browsers but not bots (403 for curl).
 - **UI:** `LazySection sections={['size']}`; tabs are separate chunks and the VIN is decoded only once the section is open; the header chip `📏 C-class · 4.28 m` opens the section (`openSignal`); every figure, verdict, tip and norm has a ❓; sources are ↗ links. UA / DE flags added to `MarketFlag`. Helpers are grouped in `vite.config.ts` as `helpers-size`.
 
+## Realistic vehicle drawings (2026-10-29)
+
+Side view (`SideSilhouette`): per-shape outline with real-axle wheel arches (SVG mask), pillared glass, door seams, lamps, mirror, tyres/rims in fixed colours; top view (`SizeCarTop`) tapered body + glass-house + tyres + lamps, shared by the schema, garage and parking tabs. Guides' silhouettes and the towing mass drawing (SUV + caravan, tractor + semi-trailer, now correctly with the trailer behind the towing vehicle) reuse it. New kind icons: moped, quad, tricycle, van, box truck, semi-trailer. Everything is hand-drawn original artwork (no internet silhouettes), stated on About. Not redone: VIN schematics, `sedan`/`bus`/`motorcycle`/`trailer` kind icons, the `special` kind.
+
 ## Size & parking polish, section links, export (2026-10)
 
 - `ChipChevronButton` is the shared round ↓ of header chips (size class, "Imported" / "Was imported").

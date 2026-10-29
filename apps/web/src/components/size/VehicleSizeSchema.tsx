@@ -1,7 +1,9 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { FRONT_OVERHANG_SHARE, GLASS_PATHS, SIDE_PATHS, TOP_LAYOUT, WHEEL_MM } from '@/components/size/silhouettes'
+import SideSilhouette from '@/components/size/SideSilhouette'
+import SizeCarTop from '@/components/size/SizeCarTop'
+import { axlePositions, WHEEL_MM } from '@/components/size/silhouettes'
 import type { SizeField, SizeFigures, SizeShape } from '@/components/size/VehicleSize.helpers'
 import { estimatePrefix, mmToMetres } from '@/components/size/VehicleSize.helpers'
 
@@ -14,11 +16,6 @@ type Props = {
   /** Pointing at a dimension in the drawing itself (hover / tap); null when the pointer leaves. */
   onActiveChange?: (field: SizeField | null) => void
 }
-
-/** Wheelbase share of the length when no figure is known (nothing to draw an arrow for then). */
-const DEFAULT_WHEELBASE_SHARE = 0.6
-/** Mirrors stick out about this far on each side in the top view. */
-const MIRROR_MM = 100
 
 type DimProps = {
   x1: number
@@ -108,17 +105,6 @@ function Dim({
   )
 }
 
-type WheelProps = { cx: number; cy: number; r: number }
-
-function Wheel({ cx, cy, r }: WheelProps): ReactNode {
-  return (
-    <g>
-      <circle cx={cx} cy={cy} r={r} fill="var(--color-fg)" fillOpacity={0.82} />
-      <circle cx={cx} cy={cy} r={r * 0.5} fill="var(--color-surface)" fillOpacity={0.9} />
-    </g>
-  )
-}
-
 /**
  * Side and top view of the vehicle, drawn to scale from its real figures: one hand-made outline per body shape is
  * stretched to the length x height (side) and length x width (top), the wheels sit at the real wheelbase, and every
@@ -131,13 +117,9 @@ export default function VehicleSizeSchema({ shape, figures, name, active = null,
   const height = figures.heightMm?.value ?? null
   if (length == null || width == null || height == null) return null
 
-  const wheelbase = figures.wheelbaseMm?.value ?? length * DEFAULT_WHEELBASE_SHARE
-  const wheel = WHEEL_MM[shape]
-  const r = wheel / 2
-  const frontAxle = length - (length - wheelbase) * FRONT_OVERHANG_SHARE[shape]
-  const rearAxle = frontAxle - wheelbase
-  const top = TOP_LAYOUT[shape]
-  const glass = GLASS_PATHS[shape]
+  const { rear: rearAxle, front: frontAxle } = axlePositions(shape, length, figures.wheelbaseMm?.value ?? null)
+  const wheelbase = frontAxle - rearAxle
+  const r = WHEEL_MM[shape] / 2
 
   const fs = length * 0.04
   const sideY = 0
@@ -181,20 +163,7 @@ export default function VehicleSizeSchema({ shape, figures, name, active = null,
             strokeWidth={1}
             vectorEffect="non-scaling-stroke"
           />
-          <g transform={`scale(${length} ${height})`}>
-            <path
-              d={SIDE_PATHS[shape]}
-              fill="var(--color-primary)"
-              fillOpacity={0.2}
-              stroke="var(--color-primary)"
-              strokeWidth={2}
-              strokeLinejoin="round"
-              vectorEffect="non-scaling-stroke"
-            />
-            {glass && <path d={glass} fill="var(--color-surface)" fillOpacity={0.75} />}
-          </g>
-          <Wheel cx={rearAxle} cy={height - r} r={r} />
-          <Wheel cx={frontAxle} cy={height - r} r={r} />
+          <SideSilhouette shape={shape} length={length} height={height} rearAxle={rearAxle} frontAxle={frontAxle} />
 
           <Dim
             x1={-length * 0.07}
@@ -245,54 +214,13 @@ export default function VehicleSizeSchema({ shape, figures, name, active = null,
 
         {/* Top view: front to the right. */}
         <g transform={`translate(0 ${topY})`}>
-          {shape !== 'moto' && (
-            <>
-              <rect
-                x={length * top.cabin[1] - MIRROR_MM * 1.2}
-                y={-MIRROR_MM}
-                width={MIRROR_MM * 1.6}
-                height={MIRROR_MM}
-                rx={30}
-                fill="var(--color-primary)"
-                fillOpacity={0.45}
-              />
-              <rect
-                x={length * top.cabin[1] - MIRROR_MM * 1.2}
-                y={width}
-                width={MIRROR_MM * 1.6}
-                height={MIRROR_MM}
-                rx={30}
-                fill="var(--color-primary)"
-                fillOpacity={0.45}
-              />
-            </>
-          )}
-          {[rearAxle, frontAxle].map(x => (
-            <g key={x} fill="var(--color-fg)" fillOpacity={0.82}>
-              <rect x={x - r} y={width * 0.02 - 40} width={wheel} height={width * 0.17} rx={40} />
-              <rect x={x - r} y={width * 0.81 + 40} width={wheel} height={width * 0.17} rx={40} />
-            </g>
-          ))}
-          <rect
+          <SizeCarTop
             x={0}
             y={0}
-            width={length}
-            height={width}
-            rx={width * top.radius}
-            fill="var(--color-primary)"
-            fillOpacity={0.2}
-            stroke="var(--color-primary)"
-            strokeWidth={2}
-            vectorEffect="non-scaling-stroke"
-          />
-          <rect
-            x={length * top.cabin[0]}
-            y={width * 0.12}
-            width={length * (top.cabin[1] - top.cabin[0])}
-            height={width * 0.76}
-            rx={width * 0.18}
-            fill="var(--color-surface)"
-            fillOpacity={0.75}
+            dims={{ lengthMm: length, widthMm: width }}
+            shape={shape}
+            orientation="right"
+            wheelbaseMm={figures.wheelbaseMm?.value ?? null}
           />
 
           <Dim

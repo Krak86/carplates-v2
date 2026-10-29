@@ -1008,6 +1008,7 @@
   "about.feature.pwa": "Installable app (PWA) with offline mode; Ukrainian, Russian and English",
   "about.feature.agents": "For AI agents and search engines: llms.txt, an ARD manifest and a public OpenAPI description of the stable open endpoints",
   "about.feature.roadmap": "Roadmap on /features: what is planned for signed-in users and what we are considering",
+  "about.feature.drawings": "Vehicle drawings: side and top views, wheel arches, towing and garage diagrams and the kind icons are original artwork drawn for this project, not copied from other sites",
   "about.source.nationalPolice": "National Police of Ukraine - open data on wanted vehicles (CC BY) from data.gov.ua, for the stolen-vehicle check by plate and VIN. Not an official certificate.",
   "about.source.stolenIn": "History of found wanted vehicles since Aug 2020, shown on the car card and in /wanted statistics; also a link-out for a manual check. Not affiliated.",
   "about.source.bdr": "Ministry of Internal Affairs of Ukraine, automated traffic-violation search - link only.",

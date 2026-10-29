@@ -165,3 +165,127 @@ export function TrailerShape({ spin }: ShapeProps): ReactNode {
     </>
   )
 }
+
+const GLASS_FILL = '#b9c9d3'
+
+/** A scooter: step-through floor, leg shield, seat and a small wheel at each end. */
+export function MopedShape({ spin }: ShapeProps): ReactNode {
+  return (
+    <>
+      <path fill="var(--vehicle-body-color)" d="M7 46 Q7 37 16 36 H42 Q47 36 48 41 L49 54 H31 Q23 54 19 59 L10 54 Z" />
+      <path
+        fill="var(--vehicle-body-color)"
+        d="M44 49 H58 L62 28 Q63 24 67 24 H70 Q73 24 72 28 L68 51 L71 60 H58 L56 56 H44 Z"
+      />
+      <path fill="var(--vehicle-body-shadow-color)" d="M44 54 H56 L58 60 H71 L70 63 H44 Z" />
+      <path fill={HUB_FILL} d="M16 36 H42 Q44 36 44 38 H14 Q14 36 16 36 Z" />
+      <path fill={RIM_FILL} d="M58 18 H72 Q74 18 74 20 V22 H58 Z" />
+      <path d="M68 28 L75 61" stroke={RIM_FILL} strokeWidth="3" fill="none" strokeLinecap="round" />
+      <path fill={LIGHT_FILL} d="M71 24 H76 Q78 24 78 27 V29 H71 Z" />
+      <Wheel cx={21} cy={61} r={8} hubR={4} spin={spin} />
+      <Wheel cx={75} cy={61} r={8} hubR={4} spin={spin} />
+    </>
+  )
+}
+
+/** An ATV: fat knobbly wheels, fenders over them, a long seat and wide handlebars. */
+export function QuadShape({ spin }: ShapeProps): ReactNode {
+  return (
+    <>
+      <path
+        fill="var(--vehicle-body-color)"
+        d="M12 42 Q12 33 22 33 H44 L48 26 H60 L66 31 L69 44 H58 L52 49 H26 Q14 49 12 42 Z"
+      />
+      <path fill="var(--vehicle-body-shadow-color)" d="M26 49 H52 L58 44 H69 L69 48 H56 L50 53 H28 Z" />
+      <path fill={RIM_FILL} d="M56 20 H72 V24 H56 Z M64 24 H68 L70 40 H66 Z" />
+      <path fill={HUB_FILL} d="M18 33 H44 V37 H16 Z" />
+      <path fill={LIGHT_FILL} d="M69 36 H74 Q76 36 76 39 V42 H69 Z" />
+      <Wheel cx={22} cy={56} r={12} hubR={6} spin={spin} />
+      <Wheel cx={70} cy={56} r={12} hubR={6} spin={spin} />
+      <path
+        fill="var(--vehicle-body-color)"
+        d="M8 54 A14 14 0 0 1 36 54 L32 54 A10 10 0 0 0 12 54 Z M56 54 A14 14 0 0 1 84 54 L80 54 A10 10 0 0 0 60 54 Z"
+      />
+    </>
+  )
+}
+
+/** A cargo trike: scooter front, an open box on two rear wheels. */
+export function TricycleShape({ spin }: ShapeProps): ReactNode {
+  return (
+    <>
+      <path fill="var(--vehicle-body-color)" d="M2 30 H36 V58 H2 Z" />
+      <path fill="var(--vehicle-body-shadow-color)" d="M2 50 H36 V58 H2 Z" />
+      <path fill={HUB_FILL} d="M2 30 H36 V34 H2 Z" />
+      <path
+        fill="var(--vehicle-body-color)"
+        d="M38 46 H52 L57 36 Q58 34 61 34 L65 22 H72 Q75 22 74 26 L70 46 L73 58 H38 Z"
+      />
+      <path fill={GLASS_FILL} d="M59 36 L62 28 H68 L66 38 Z" />
+      <path fill={RIM_FILL} d="M60 17 H74 V21 H60 Z" />
+      <path d="M69 30 L77 61" stroke={RIM_FILL} strokeWidth="3" fill="none" strokeLinecap="round" />
+      <path fill={LIGHT_FILL} d="M72 25 H77 Q79 25 79 28 V30 H72 Z" />
+      <Wheel cx={18} cy={60} r={9} hubR={4.5} spin={spin} />
+      <Wheel cx={76} cy={61} r={8} hubR={4} spin={spin} />
+    </>
+  )
+}
+
+/** A panel van: tall box body, a short cab with a side window and a raked windscreen. */
+export function VanShape({ spin }: ShapeProps): ReactNode {
+  return (
+    <>
+      <path
+        fill="var(--vehicle-body-color)"
+        d="M3 58 V27 Q3 22 8 22 H57 Q62 22 66 27 L75 40 Q84 42 87 47 V58 Q87 60 85 60 H5 Q3 60 3 58 Z"
+      />
+      <path fill="var(--vehicle-body-shadow-color)" d="M3 52 H87 V58 Q87 60 85 60 H5 Q3 60 3 58 Z" />
+      <path fill={GLASS_FILL} d="M60 27 L69 40 H58 V27 Z" />
+      <path d="M44 24 V52 M58 24 V52" stroke="var(--vehicle-body-shadow-color)" strokeWidth="1.2" fill="none" />
+      <path fill={LIGHT_FILL} d="M82 46 H88 V51 H84 Q82 51 82 49 Z" />
+      <path fill={RIM_FILL} d="M3 46 H6 V52 H3 Z" />
+      <Wheel cx={22} cy={59} r={8.5} hubR={4.5} spin={spin} />
+      <Wheel cx={71} cy={59} r={8.5} hubR={4.5} spin={spin} />
+    </>
+  )
+}
+
+/** A semi-trailer: a long box with its rear bogie on the left and the landing legs under the kingpin at the front. */
+export function SemiTrailerShape({ spin }: ShapeProps): ReactNode {
+  return (
+    <>
+      <path fill="var(--vehicle-body-color)" d="M2 18 H86 Q88 18 88 20 V52 H2 Z" />
+      <path fill="var(--vehicle-body-shadow-color)" d="M2 46 H88 V52 H2 Z" />
+      <path
+        d="M22 20 V44 M42 20 V44 M62 20 V44"
+        stroke="var(--vehicle-body-shadow-color)"
+        strokeWidth="1.2"
+        fill="none"
+      />
+      <path fill={RIM_FILL} d="M2 52 H88 V55 H2 Z" />
+      <path fill={HUB_FILL} d="M72 55 H77 V66 H72 Z" />
+      <path fill={RIM_FILL} d="M69 64 H80 V67 H69 Z" />
+      <Wheel cx={14} cy={61} r={7} hubR={3.6} spin={spin} />
+      <Wheel cx={30} cy={61} r={7} hubR={3.6} spin={spin} />
+      <Wheel cx={46} cy={61} r={7} hubR={3.6} spin={spin} />
+    </>
+  )
+}
+
+/** A box truck: a tall cargo box behind a short cab-over cab. */
+export function BoxTruckShape({ spin }: ShapeProps): ReactNode {
+  return (
+    <>
+      <path fill="var(--vehicle-body-color)" d="M2 12 H57 Q59 12 59 14 V56 H2 Z" />
+      <path fill="var(--vehicle-body-shadow-color)" d="M2 50 H59 V56 H2 Z" />
+      <path d="M20 14 V46 M38 14 V46" stroke="var(--vehicle-body-shadow-color)" strokeWidth="1.2" fill="none" />
+      <path fill="var(--vehicle-body-color)" d="M61 56 V30 Q61 26 65 26 H73 Q76 26 78 30 L83 42 Q88 44 88 48 V56 Z" />
+      <path fill="var(--vehicle-body-shadow-color)" d="M61 51 H88 V56 H61 Z" />
+      <path fill={GLASS_FILL} d="M66 30 H72 L77 40 H66 Z" />
+      <path fill={LIGHT_FILL} d="M84 46 H88 V50 H86 Q84 50 84 48 Z" />
+      <path fill={RIM_FILL} d="M2 56 H88 V58 H2 Z" />
+      <Wheel cx={19} cy={60} r={8.5} hubR={4.5} spin={spin} />
+      <Wheel cx={72} cy={60} r={8.5} hubR={4.5} spin={spin} />
+    </>
+  )
+}

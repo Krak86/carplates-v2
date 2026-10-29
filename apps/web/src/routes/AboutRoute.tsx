@@ -287,7 +287,8 @@ const FEATURES = [
   'translate',
   'pwa',
   'agents',
-  'roadmap'
+  'roadmap',
+  'drawings'
 ] as const
 
 // Lazy-loaded (see App.tsx).
