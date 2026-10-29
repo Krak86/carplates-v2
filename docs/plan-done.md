@@ -4091,3 +4091,11 @@ Plan: `PLAN.md` "Visual stats, map logos, cards and quizzes". Convention: `docs/
 - **Question count** (10/20/30/50, `ROUND_CHOICES`) is chosen once on the `/play` hub, kept in localStorage (`carplates.quizRounds`) and passed to every quiz as `rounds`. Higher-lower is endless and ignores it. Best scores are kept per length (`region:20`).
 - **Longer games:** `cycle()` plays shuffled passes, so a region or brand repeats only after all were used (27 regions, up to 80 brands).
 - **Brand pool:** new `GET /api/stats/brands` (top 100 raw brands from `stats_by_brand`, contract `packages/shared/src/brandStats.ts`, `brandStatsQuery`, covered by the `/api/stats/*` edge rule, not in the OpenAPI allowlist). `foldBrands` sums spellings of one logo, keeps logo brands, top 80. The logo quiz and higher-lower brand rows use it; the full `statsQuery` (~14 MB) is not used.
+
+## Search result cache (2026-10-29)
+
+- **Why:** advanced search already had every index it needs (0012–0015, 0042, 0059); the cost was the query shape. Each page or sort click re-ran the filter, pulled up to `SEARCH_COUNT_CAP` (10k) wide rows and sorted them in Node with `localeCompare`. Estimated from the code, not measured.
+- **What:** `search.service.ts` keeps an in-process LRU of match sets (16 entries, 5 min) keyed by the filters without `sort`/`dir`/`page`/`pageSize`. Page 2, a re-sort and a shared link reuse the rows; each sort order is built once per entry (`sorted` map, pointer arrays over shared rows). Sorting uses one `Intl.Collator` (same order as `localeCompare`, much cheaper). A failed query is dropped from the cache, and concurrent identical requests share one in-flight query (the entry holds the promise).
+- **Not cached at the edge:** results list plates and VINs (per vehicle), so no `Cache-Control` / Cloudflare rule. The cache is per API instance (blue/green: the other colour warms its own).
+- **Tests:** `search.service.test.ts` (one query for pages and sorts, nulls last when descending, different filters re-query, failure not cached).
+- **Next in the round:** photo recognition uploads plate crops from the on-device detector instead of the whole frame; `EXPLAIN` on typical filters; see `PLAN.md` "Speed round".

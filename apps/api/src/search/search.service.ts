@@ -60,6 +60,16 @@ export type SearchFilters = {
  */
 const SEARCH_COUNT_CAP = 10_000
 
+/**
+ * Repeated queries (the next page, a re-sort, a shared link) reuse the fetched match set instead of re-running the
+ * 10k-row scan: the registry only changes on ingest, so a few minutes of staleness is invisible. Bounded, in-process
+ * (one API instance per colour; the other colour just warms its own copy).
+ */
+const MATCH_CACHE_TTL_MS = 5 * 60_000
+const MATCH_CACHE_MAX = 16
+
+const collator = new Intl.Collator()
+
 type SortableRow = {
   plate: string
   brand: string | null
@@ -72,6 +82,15 @@ type SortableRow = {
   operName: string | null
 }
 
+type MatchRow = Awaited<ReturnType<SearchService['fetchMatches']>>[number]
+
+type MatchEntry = {
+  at: number
+  rows: Promise<MatchRow[]>
+  /** Sorted copies of the rows by "sort:dir"; the rows themselves are shared, so each costs one pointer array. */
+  sorted: Map<string, MatchRow[]>
+}
+
 function sortValue(row: SortableRow, key: SearchSortKey): string | number | null {
   if (key === 'region') return regionName(row.plate) ?? null
   if (key === 'oper') return row.operName
@@ -80,6 +99,8 @@ function sortValue(row: SortableRow, key: SearchSortKey): string | number | null
 
 @Injectable()
 export class SearchService {
+  private readonly matchCache = new Map<string, MatchEntry>()
+
   constructor(@Inject(DbService) private readonly dbService: DbService) {}
 
   /** Top-10 brands by distinctPlates matching `q` — a popular real spelling outranks the ~36k distinct ingest-noise variants. */
@@ -162,8 +183,79 @@ export class SearchService {
     return { suggestions }
   }
 
+  private fetchMatches(where: SQL | undefined) {
+    return this.dbService.db
+      .select({
+        plate: currentRegistration.plate,
+        vin: currentRegistration.vin,
+        brand: currentRegistration.brand,
+        model: currentRegistration.model,
+        makeYear: currentRegistration.makeYear,
+        color: currentRegistration.color,
+        fuel: currentRegistration.fuel,
+        dReg: currentRegistration.dReg,
+        // Sort-only columns, stripped from the response.
+        kind: currentRegistration.kind,
+        body: currentRegistration.body,
+        operName: currentRegistration.operName
+      })
+      .from(currentRegistration)
+      .where(where)
+      .limit(SEARCH_COUNT_CAP)
+  }
+
+  /** The match set for these filters (sort and page excluded), shared by concurrent and repeated requests. */
+  private cachedMatches(filters: SearchFilters, where: SQL | undefined): MatchEntry {
+    const { sort: _s, dir: _d, page: _p, pageSize: _ps, ...key } = filters
+    const cacheKey = JSON.stringify(key, Object.keys(key).sort())
+    const now = Date.now()
+
+    const hit = this.matchCache.get(cacheKey)
+    if (hit && now - hit.at < MATCH_CACHE_TTL_MS) {
+      this.matchCache.delete(cacheKey) // re-insert: Map order = least recently used first
+      this.matchCache.set(cacheKey, hit)
+      return hit
+    }
+
+    const entry: MatchEntry = { at: now, rows: this.fetchMatches(where), sorted: new Map() }
+    // A failed query must not be served again for the next 5 minutes.
+    entry.rows.catch(() => {
+      if (this.matchCache.get(cacheKey) === entry) this.matchCache.delete(cacheKey)
+    })
+    this.matchCache.delete(cacheKey)
+    this.matchCache.set(cacheKey, entry)
+    while (this.matchCache.size > MATCH_CACHE_MAX) {
+      const oldest = this.matchCache.keys().next().value
+      if (oldest === undefined) break
+      this.matchCache.delete(oldest)
+    }
+    return entry
+  }
+
+  /** Nulls last in both directions; plate is the tiebreaker so paging stays stable. */
+  private sortedMatches(entry: MatchEntry, rows: MatchRow[], filters: SearchFilters): MatchRow[] {
+    const sortKey = `${filters.sort}:${filters.dir}`
+    const cached = entry.sorted.get(sortKey)
+    if (cached) return cached
+
+    const sign = filters.dir === 'desc' ? -1 : 1
+    const sorted = [...rows].sort((a, b) => {
+      const av = sortValue(a, filters.sort)
+      const bv = sortValue(b, filters.sort)
+      if (av == null && bv != null) return 1
+      if (av != null && bv == null) return -1
+      if (av != null && bv != null && av !== bv) {
+        const cmp =
+          typeof av === 'number' && typeof bv === 'number' ? av - bv : collator.compare(String(av), String(bv))
+        if (cmp !== 0) return cmp * sign
+      }
+      return collator.compare(a.plate, b.plate)
+    })
+    entry.sorted.set(sortKey, sorted)
+    return sorted
+  }
+
   async search(filters: SearchFilters): Promise<SearchResponse> {
-    const db = this.dbService.db
     const conditions = [
       // Substring + case-insensitive, not an exact match on the suggestion's own spelling —
       // free text typed without picking a suggestion (any case, partial word) still matches.
@@ -188,43 +280,14 @@ export class SearchService {
     ].filter((c): c is SQL => c != null)
     const where = conditions.length > 0 ? and(...conditions) : undefined
 
-    const matches = await db
-      .select({
-        plate: currentRegistration.plate,
-        vin: currentRegistration.vin,
-        brand: currentRegistration.brand,
-        model: currentRegistration.model,
-        makeYear: currentRegistration.makeYear,
-        color: currentRegistration.color,
-        fuel: currentRegistration.fuel,
-        dReg: currentRegistration.dReg,
-        // Sort-only columns, stripped from the response below.
-        kind: currentRegistration.kind,
-        body: currentRegistration.body,
-        operName: currentRegistration.operName
-      })
-      .from(currentRegistration)
-      .where(where)
-      .limit(SEARCH_COUNT_CAP)
-
-    // Nulls last in both directions; plate is the tiebreaker so paging stays stable.
-    const sign = filters.dir === 'desc' ? -1 : 1
-    matches.sort((a, b) => {
-      const av = sortValue(a, filters.sort)
-      const bv = sortValue(b, filters.sort)
-      if (av == null && bv != null) return 1
-      if (av != null && bv == null) return -1
-      if (av != null && bv != null && av !== bv) {
-        const cmp = typeof av === 'number' && typeof bv === 'number' ? av - bv : String(av).localeCompare(String(bv))
-        if (cmp !== 0) return cmp * sign
-      }
-      return a.plate.localeCompare(b.plate)
-    })
+    const entry = this.cachedMatches(filters, where)
+    const matches = await entry.rows
+    const sorted = this.sortedMatches(entry, matches, filters)
 
     const offset = (filters.page - 1) * filters.pageSize
-    const total = matches.length
+    const total = sorted.length
     return {
-      results: matches
+      results: sorted
         .slice(offset, offset + filters.pageSize)
         .map(({ kind: _k, body: _b, operName: _o, ...row }) => row),
       total,
