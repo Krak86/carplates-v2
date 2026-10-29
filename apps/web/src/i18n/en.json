@@ -989,7 +989,7 @@
   "about.feature.media": "Photos, 3D models (Sketchfab), 360° galleries and Wikipedia articles",
   "about.feature.origin": "Where it comes from: flags and a timeline of the brand's country, owners, assembly plant (and where else the model is built) and Ukraine, with former countries (USSR, GDR and others) by year",
   "about.feature.verify": "Verification: fines, MTSBU insurance check, technical inspection (OTK) and driving-licence checks, official traffic-rules tests, official services; MVS service-centre and nearby-services maps; a glossary of the abbreviations",
-  "about.feature.guides": "Guides on /read: plates and regions, VIN, body types and sizes, generations, fleet, imports, electric cars, fuel and CO₂, crash tests, recalls and model records - with live registry data",
+  "about.feature.guides": "Guides on /read: plates and regions (colours, service plates, history, ordering), VIN (history, where to find it, errors), body types and sizes with interactive examples, generations, fleet (colours, fuel), imports, electric cars, fuel and CO₂, crash tests, recalls and model records - with live registry data and links to the laws",
   "about.feature.stats": "Registry statistics on /stats: region map, rankings and markets; heaviest and lightest models; where cars come from (brand and assembly country)",
   "about.feature.news": "Car news from RSS feeds in all languages with a last-updated time, a searchable /news archive and share-price widgets",
   "about.feature.race": "A free 10 km test-drive racing game in the browser with photo backdrops of every region, a top-down road map, and relaxing live backgrounds; optional tilt steering on phones and offline play after the first load",
@@ -3397,5 +3397,10 @@
   "verification.customs.about": "A State Customs Service tool for checking whether an imported vehicle has been cleared through customs.\nTZ - transportnyi zasib, a vehicle\nCustoms clearance - paying duties and completing the paperwork for a vehicle brought in from abroad",
   "nav.fontZakon": "ZAKON (preview)",
   "about.source.zakon": "ZAKON (Zakon Text) typeface, the national Ukrainian typeface for state institutions, an optional font in the menu. Free to use.",
-  "about.source.customs": "State Customs Service e-cabinet - link to the vehicle customs-clearance check. Links only."
+  "about.source.customs": "State Customs Service e-cabinet - link to the vehicle customs-clearance check. Links only.",
+  "about.source.radaLaws": "Verkhovna Rada of Ukraine (zakon.rada.gov.ua) - the texts of the laws and resolutions the guides cite (registration rules, the Administrative Offences Code, fuel). Links only.",
+  "about.source.diia": "Diia - the page for ordering a custom licence plate. Link only.",
+  "about.source.avtonomera": "avtonomera.net.ua - an article on Ukrainian plates (colours, service plates, history) the plates guide is cross-checked against. Link only.",
+  "about.source.tsn": "TSN - an article on used-car imports, a source of the figures in the imports guide. Link only.",
+  "about.source.aec": "AEC Solutions - an overview of the history of car imports worldwide, a source of the imports guide. Link only."
 }

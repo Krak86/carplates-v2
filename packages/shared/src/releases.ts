@@ -20,6 +20,30 @@ export const RELEASES: readonly ReleaseDay[] = [
     items: [
       item(
         'improved',
+        'Для ШІ-агентів і пошуковиків: файл llms.txt, маніфест ARD та публічний опис API (OpenAPI) лише зі стабільними відкритими розділами.',
+        'Для ИИ-агентов и поисковиков: файл llms.txt, манифест ARD и публичное описание API (OpenAPI) только со стабильными открытыми разделами.',
+        'For AI agents and search engines: an llms.txt file, an ARD manifest and a public API description (OpenAPI) listing only the stable public sections.'
+      ),
+      item(
+        'improved',
+        'Гіди розділу «Довідники» отримали нові ілюстрації-банери.',
+        'Гиды раздела «Справочники» получили новые иллюстрации-баннеры.',
+        'The /read guides have new banner pictures.'
+      ),
+      item(
+        'fix',
+        'Пошук за фото знову знаходить номер на дрібних кадрах: якщо нічого не знайдено, кадр збільшується й розпізнається ще раз.',
+        'Поиск по фото снова находит номер на мелких кадрах: если ничего не найдено, кадр увеличивается и распознаётся ещё раз.',
+        'Photo search finds plates in small frames again: when nothing is detected, the frame is upscaled and read once more.'
+      ),
+      item(
+        'fix',
+        'Віджет перевірки «я не робот» тепер вміщається у вікні входу, а підказка про помилковий запит згадує формат VIN.',
+        'Виджет проверки «я не робот» теперь помещается в окне входа, а подсказка об ошибочном запросе упоминает формат VIN.',
+        'The “I am not a robot” check fits inside the sign-in popover, and the invalid-query hint now mentions the VIN format.'
+      ),
+      item(
+        'improved',
         'Гід «Імпорт»: історія ввезення авто у світі й в Україні (1997-2024), чому люди купують авто за кордоном, митна картина 2023 року (країни, митниці), пошук ввезеного авто в застосунку та список джерел.',
         'Гид «Импорт»: история ввоза авто в мире и в Украине (1997-2024), почему люди покупают авто за границей, таможенная картина 2023 года (страны, таможни), поиск ввезённого авто в приложении и список источников.',
         'Imports guide: the history of importing cars in the world and in Ukraine (1997-2024), why people buy cars abroad, the 2023 customs picture (countries, offices), how to check an imported car in the app and a list of sources.'

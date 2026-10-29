@@ -71,6 +71,11 @@ const SOURCES: readonly Source[] = [
     url: 'https://cabinet.customs.gov.ua/vtzcheck',
     tile: 'bg-blue-700'
   },
+  { key: 'radaLaws', label: 'zakon.rada.gov.ua', url: 'https://zakon.rada.gov.ua', tile: 'bg-blue-700' },
+  { key: 'diia', label: 'Diia', url: 'https://diia.gov.ua', tile: 'bg-slate-500' },
+  { key: 'avtonomera', label: 'avtonomera.net.ua', url: 'https://avtonomera.net.ua', tile: 'bg-slate-500' },
+  { key: 'tsn', label: 'TSN', url: 'https://tsn.ua', tile: 'bg-slate-500' },
+  { key: 'aec', label: 'AEC Solutions', url: 'https://www.aecsolutions.com', tile: 'bg-slate-500' },
   { key: 'pdr', label: 'pdr.infotech.gov.ua', url: 'https://pdr.infotech.gov.ua', tile: 'bg-blue-700' },
   { key: 'drive2', label: 'DRIVE2', url: 'https://www.drive2.ru', icon: '/icons/drive2.png' },
   {
