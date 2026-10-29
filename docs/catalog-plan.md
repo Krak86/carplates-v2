@@ -1,6 +1,7 @@
 # Model catalog pages: `/cars/:make/:model/:year`
 
-Status: **researched 2026-10-13, not started.** Tracked in PLAN.md "To discuss / research".
+Status: **researched 2026-10-13, not started.** Tracked in PLAN.md "To discuss / research". Rollout, estimate (5-8 days, MVP 3-4)
+and the surrounding SEO/outreach checklist: [discovery-plan.md](discovery-plan.md).
 
 ## Context
 

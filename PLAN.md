@@ -716,6 +716,7 @@ Group 1 dimension callouts + garage-fit -> Group 3 (existing order). Owner says 
 - [ ] **Model catalog pages `/cars/:make/:model/:year`** — researched 2026-10-13, not started. Plate-free model pages
       (registry stats + the existing model-level sections) as indexable SEO slugs; needs a canonical make/model taxonomy
       (registry models are trim-level) and TS-built rollup tables, not a matview. Full write-up: [docs/catalog-plan.md](docs/catalog-plan.md).
+      Discovery checklist around it (Search Console, IndexNow, outreach, Reddit draft): [docs/discovery-plan.md](docs/discovery-plan.md).
 - **Shareable photo-search links** — idea 2026-10-01, deferred (not started).
   Share button on the photo card uploads the shrunk image + recognition result
   (candidates with boxes, EXIF meta) to `POST /api/shares`; opening
