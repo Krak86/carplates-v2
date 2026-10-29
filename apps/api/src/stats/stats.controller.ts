@@ -6,6 +6,7 @@ import type {
   EvStatsResponse,
   ImportsStatsResponse,
   OriginStatsResponse,
+  RegionBrandStatsResponse,
   SizeModelsResponse,
   StatsFieldDimension,
   StatsFieldResponse
@@ -82,6 +83,16 @@ export class StatsController {
   })
   origin(): Promise<OriginStatsResponse> {
     return this.statsService.origin()
+  }
+
+  @Get('region-brands')
+  @Header('Cache-Control', ROLLUP_CACHE)
+  @ApiOkResponse({
+    description:
+      'Passenger cars { regions: [{ region, fleet, brands: [{ brand, n }] }] }: the 5 biggest brands per plate region'
+  })
+  regionBrands(): Promise<RegionBrandStatsResponse> {
+    return this.statsService.regionBrands()
   }
 
   @Get('field/:dimension')

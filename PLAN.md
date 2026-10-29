@@ -391,6 +391,29 @@ above once scoped, or dropped if research says no.
   (`track.ua-gis.com/gtfs/lviv/vehicle_position`, ~11 s; licence unchecked) — an API proxy + lazy Leaflet map would give real moving public
   transport for Львів only; (b) YouTube ISS streams can be retired or embed-blocked — swap ids in `LIVE_STREAMS` (earth / traffic / city, `apps/web/src/lib/live-background.ts`; traffic/city streams added 2026-10-05).
 
+### Visual stats, map logos, cards and quizzes — planned 2026-10-29, steps 1-2 built
+
+Idea round: put the registry stats on the map and in diagrams, and add small canvas/HTML interactions on top of what already exists
+(`StatsMap`, `BrandLogo`, region flags, racer, `renderChartPng`). Routes touched: `/stats` + `/wanted` (shared `StatsMap`), `/` + `/:query`
+(card), a new `/play`-style route (quiz; needs `ROUTE_TITLE_KEYS`, `STATIC_PAGES`, sidebar, About, releases).
+
+1. ✅ **Per-region brand rollup + API** (2026-10-29) - `registry.stats_region_brand` (migration 0079; top 5 brands per plate region, folded by
+   logo slug, plus the region's fleet), `scripts/src/region-brand-stats.ts` (`db:refresh-region-brand-stats`, in `db:refresh-derived`),
+   `GET /api/stats/region-brands`, `regionBrandStatsQuery`. Covered by the existing edge-cache rule (`/api/stats/*`).
+2. ✅ **Brand-logo layer on `StatsMap`** (2026-10-29) - `logos` prop, `/stats?view=map&logos=1` checkbox; the biggest brand's logo on a white
+   chip at each polygon centroid, sized by the region's fleet share; tooltip lists the top 3 brands. `/wanted` does not pass `logos`.
+   Open: small regions (Київ, Севастополь, Чернівецька) overlap neighbours (leader lines or a size floor); real-browser pass in dark theme
+   and at phone width; `releases.ts` entry once deployed.
+3. ⏳ **Map modes** - a mode switch (top brand / top model / top fuel / top origin country flag / EV share) reusing the centroid layer; needs
+   per-region rollups for model and fuel (extend `stats_region_brand` or add sibling tables; EV share is already in `/api/stats/ev`).
+4. ⏳ **Shareable plate card PNG** - canvas card (plate, brand logo, region flag, year, one fact) through the `renderChartPng` pipeline; button
+   on the result card; link previews stay API-side (`apps/api/src/spa/`).
+5. ⏳ **Quiz route** - "guess the region from the plate" on the map, then logo quiz and higher/lower from `stats/top`; new public route
+   (checklist in CLAUDE.md), streak in localStorage first, accounts later.
+6. ⏳ **Diagrams on `/stats`** - treemap (brand -> model), heatmap (region x fuel / body), year histogram, import-wave line (`/read/imports`),
+   stolen-by-year vs. registered share (`/wanted`); hand-rolled SVG + `d3-scale`/`d3-shape`, each a `LazySection`, each with an export `chart` builder.
+7. ⏳ **Later** - Sankey (origin -> brand -> fuel), bar-chart race by registration year, collectible region cards, racer "drive Ukraine" route.
+
 ### Test-drive racer game ("Free test drive" banner) — ✅ built (2026-10-08), follow-ups left
 
 Built: a desktop-only promo banner beside the result card (xl+; a 🎮 circle on lg; eases in 3 s after the card shows) opens a pseudo-3D racer in a modal. Write-up, file map and gotchas: `docs/plan-done.md` "Test-drive racer game".

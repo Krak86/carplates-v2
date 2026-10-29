@@ -114,6 +114,7 @@
     "refresh-weight-stats": "tsx src/weight-stats.ts",
     "refresh-spec-stats": "tsx src/spec-stats.ts",
     "refresh-ev-stats": "tsx src/ev-stats.ts",
+    "refresh-region-brand-stats": "tsx src/region-brand-stats.ts",
     "refresh-imports-stats": "tsx src/imports-stats.ts",
     "refresh-origin-stats": "tsx src/origin-stats.ts",
     "refresh-model-family-stats": "tsx src/model-family-stats.ts",

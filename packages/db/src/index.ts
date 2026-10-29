@@ -102,6 +102,8 @@ export {
   statsEv,
   statsImports,
   statsOrigin,
+  statsRegionBrand,
+  type StatsRegionBrandInsert,
   type StatsDistributionInsert,
   type StatsSpecInsert,
   type StatsSizeModelInsert,

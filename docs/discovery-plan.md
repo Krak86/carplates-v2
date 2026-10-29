@@ -32,10 +32,10 @@ public OpenAPI document, per-page link previews (`features-reference.md` "Link p
       Categories: Інформаційно-аналітичні системи · Візуалізації · Чат-боти · Мобільні застосунки. Pick "Інформаційно-аналітичні
       системи". Also post an impact story on https://forum.data.gov.ua (Обговорення). Listing text to paste, adjust to the
       form's limits: - Title (ua): `carsua.app - перевірка авто за номером або VIN` · (en): `carsua.app - Ukrainian vehicle lookup by plate or VIN` - Description (ua): `Безкоштовний сервіс пошуку транспортного засобу за державним номером або VIN на основі відкритих
-  даних МВС (data.gov.ua): марка, модель, рік, колір, пальне, регіон, історія реєстрацій. Без персональних даних
-  власників. Розпізнавання номера з камери, офлайн-режим (PWA), мови: українська, російська, англійська.` - Description (en): `Free lookup of a vehicle by Ukrainian plate or VIN built on the MIA open registrations datasets from
-  data.gov.ua: make, model, year, colour, fuel, region, registration history. No owner personal data. Plate recognition
-  from camera, offline PWA, Ukrainian/Russian/English.` - Link: https://carsua.app · Datasets used: the MIA vehicle registration resources ingested via CKAN (use the dataset
+даних МВС (data.gov.ua): марка, модель, рік, колір, пальне, регіон, історія реєстрацій. Без персональних даних
+власників. Розпізнавання номера з камери, офлайн-режим (PWA), мови: українська, російська, англійська.` - Description (en): `Free lookup of a vehicle by Ukrainian plate or VIN built on the MIA open registrations datasets from
+data.gov.ua: make, model, year, colour, fuel, region, registration history. No owner personal data. Plate recognition
+from camera, offline PWA, Ukrainian/Russian/English.` - Link: https://carsua.app · Datasets used: the MIA vehicle registration resources ingested via CKAN (use the dataset
       names from `docs/commands-reference.md` `ingest:*`) · Contact: the project email
 - [ ] Directories: Product Hunt, AlternativeTo, awesome-lists for open data / Ukrainian tech
 - [ ] Cloudflare cache rule for `/cars/*` and `/api/catalog/*` (add once the routes exist)

@@ -343,6 +343,7 @@ The API re-ranks a group by the registry (`RegistryRankService`): an alternative
 tables — change them together, in a new migration (0045 holds all 108 statutory pairs + code 31); `regions.statute.test.ts` asserts the
 tables equal the statute, so edit it with them. A pair is the region at issue, not the car's location.
 
+- **Map brand logos (2026-10-29):** `StatsMap` `logos` draws the biggest brand per region from `GET /api/stats/region-brands` (`stats_region_brand`, top 5 per region folded by `brandSlug`, rebuilt by `pnpm db:refresh-region-brand-stats`, part of `db:refresh-derived`; `foldRegionBrands` in `scripts/src/region-brand-fold.ts`). `/stats` turns it on with `?logos=1`; `/wanted` leaves it off. Region keys are the Ukrainian `REGIONS` names, as for the choropleth.
 - **Top-models boards read `stats_model_grouped`, not `stats_by_model`:** ZAZ / Daewoo / Chevrolet spellings are folded by `modelFamily` into one row. Rebuild with `pnpm db:refresh-model-family-stats` (after `db:refresh-stats`; `db:refresh-derived` does it). Raw `stats_by_model` still feeds the search model suggestions.
 
 ## Body type spelling ("-B")

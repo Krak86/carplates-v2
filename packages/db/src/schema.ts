@@ -1600,6 +1600,21 @@ export const statsEv = registry.table(
 export type StatsEvInsert = typeof statsEv.$inferInsert
 
 /**
+ * Biggest passenger-car brands per plate region (top 5, '' brand = the region's whole fleet). Backs the brand-logo layer of
+ * the /stats map. Rebuilt by scripts/src/region-brand-stats.ts; see migration 0079.
+ */
+export const statsRegionBrand = registry.table(
+  'stats_region_brand',
+  {
+    region: text('region').notNull(),
+    brand: text('brand').notNull(),
+    n: integer('n').notNull()
+  },
+  t => [primaryKey({ columns: [t.region, t.brand] })]
+)
+export type StatsRegionBrandInsert = typeof statsRegionBrand.$inferInsert
+
+/**
  * Passenger cars per origin ('import' | 'dealer'), year of that operation, VIN build country ('' = unknown) and model. Backs
  * the /read/imports article. Rebuilt by scripts/src/imports-stats.ts; see migration 0073.
  */

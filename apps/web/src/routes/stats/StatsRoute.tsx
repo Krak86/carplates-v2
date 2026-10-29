@@ -69,6 +69,7 @@ export default function StatsRoute(): ReactNode {
   const dim = parseDimension(searchParams.get('dim'))
   const metric = parseMetric(searchParams.get('metric'))
   const view = parseView(searchParams.get('view'))
+  const showLogos = searchParams.get('logos') === '1'
   const effectiveDim = view === 'map' ? 'region' : dim
   const visibleDimensions =
     view === 'map' ? (['region'] as const satisfies readonly StatsDimension[]) : STATS_DIMENSIONS
@@ -94,6 +95,15 @@ export default function StatsRoute(): ReactNode {
     setSearchParams(prev => {
       const params = new URLSearchParams(prev)
       params.set('view', next)
+      return params
+    })
+  }
+
+  const handleLogosChange = (next: boolean): void => {
+    setSearchParams(prev => {
+      const params = new URLSearchParams(prev)
+      if (next) params.set('logos', '1')
+      else params.delete('logos')
       return params
     })
   }
@@ -189,6 +199,13 @@ export default function StatsRoute(): ReactNode {
             </div>
 
             <SectionInfo section="statsTable" title={t('stats.table.title')} />
+
+            {view === 'map' && (
+              <label className="flex items-center gap-2 text-sm">
+                <input type="checkbox" checked={showLogos} onChange={e => handleLogosChange(e.target.checked)} />
+                {t('stats.map.logos')}
+              </label>
+            )}
           </div>
 
           <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
@@ -234,6 +251,7 @@ export default function StatsRoute(): ReactNode {
               <LoadErrorBoundary compact>
                 <Suspense fallback={<StatsMapSkeleton />}>
                   <StatsMap
+                    logos={showLogos}
                     rows={dimensionRows(stats.data, 'region').map(r => ({ label: r.label, value: r[metric] }))}
                   />
                 </Suspense>
