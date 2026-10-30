@@ -64,6 +64,11 @@ camera, offline PWA, Ukrainian/Russian/English.
 - [ ] **Open stats download** (about 0.5 day): aggregated CSV/JSON (top models, registrations per region and month), CC
       license, no plate-level rows. Cited by journalists and bloggers
 - [ ] **Embeddable badge / "check a plate" widget** (about 1 day): each embed is a backlink; keep it iframe-free if possible
+- [x] **Static page titles/descriptions rewritten** (2026-10-30, `spa-text.ts`: `/`, `/about`, `/stats`, `/wanted`, `/fuel`,
+      `/safety`, `/read`, ua/ru/en). Open: shorten the over-long `/read/*` titles (about 75 chars, cut at about 60) and
+      descriptions (over 170); after deploy re-scrape in the Facebook debugger and request indexing in Search Console
+- [ ] **Per-page share cards:** every static page uses `/og/default.png` (the home card). Add a headline per `STATIC_PAGES`
+      entry and render `/og/page/<slug>.png` from `og-card.ts` (about 0.5 day); the catalog pages reuse the same mechanism
 - [ ] **Share prompt** after a lookup ("send to a friend buying a car"); `/og/` cards already exist, make sure every stats and
       `/read` page has a good one
 - [ ] Each item: `releases.ts` entry, About page text, tests, docs per CLAUDE.md

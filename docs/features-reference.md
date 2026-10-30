@@ -293,6 +293,12 @@ deploy; Telegram and X keep their own preview cache.
   over any static file. The sitemap = every key of `STATIC_PAGES` (`spa-text.ts`) except the per-device `/history`, `/favorites`
   (`sitemap.ts` `EXCLUDED`). **A new public route must get a `STATIC_PAGES` entry (ua/ru/en)** — without it the page is `noindex` and
   absent from the sitemap. Settings/admin/plate/VIN pages stay out on purpose.
+- **`STATIC_PAGES` text style (2026-10-30):** search-facing pages (`/`, `/about`, `/stats`, `/wanted`, `/fuel`, `/safety`, `/read`, the
+  `/read/*` guides) use `<keywords> | Cars UA` titles (keywords first, about 50-65 chars; Google cuts at about 60) and 120-160 char
+  descriptions naming the open data source. Utility pages (`/install`, `/privacy`, `/terms`, `/history`, `/favorites`, `/releases`)
+  keep the short `Cars UA - <page>` form. The server tags are what crawlers and link previews see; the browser tab title comes
+  from `useDocumentTitle` (`Cars UA - <nav label>`) and intentionally stays short. Every static page still shares
+  `/og/default.png`; per-page share cards are open in `discovery-plan.md` (Phase 1).
 - **Languages:** every sitemap page is listed once per language (`/about`, `/about?lang=ru`, `?lang=en`; default `ua` = bare path), each
   `<url>` with the full `xhtml:link` hreflang set + `x-default`. The page `<head>` mirrors it (`alternates: true` in `renderMetaTags`):
   self-canonical per language + `<link rel="alternate" hreflang>`. Helpers `langUrl`/`alternateLinks` in `meta.ts`. Plate/VIN pages stay
