@@ -210,6 +210,19 @@ each block is one commit and must add its routes to the sitemap/`STATIC_PAGES` r
 (the cached shell has no such route; not fixable from the app); the client tab title is "Cars UA - BMW X5" like the plate pages (the server `<title>` is what
 search engines read).
 
+## Done and left (2026-10-30, end of day)
+
+**Done and live on prod** (checked with curl and Chrome): MVP model pages (300 indexable of 1,689), `/cars` and `/cars/:make` hubs, breadcrumbs, `BreadcrumbList` + `Car` JSON-LD, plate / VIN / `/stats` entry points, year / generation / fuel / body chips with per-generation stats, localized registry words, engine line in the injected block, 29 display-name overrides (Mazda 2/3/5/6, Multivan, Megane Scenic, Mini Cooper SD/D, MG 4, Polestar 2, DS 3, Jetour T2, Changan CS55 Plus, Honda Ciimo M-NV ...), Cloudflare cache rules (`/api/catalog/`, `/cars` + `/cars/`: MISS then HIT), prefix purge on every api deploy, `sitemap-cars.xml` with 1,029 URLs read by Google (Search Console) and Bing (Webmaster Tools, imported from Search Console), IndexNow ping on deploy. Details: `docs/plan-done.md` "Model catalog MVP", conventions: `docs/features-reference.md` "Model catalog".
+
+**Left, in order of when it can start**
+
+1. **About 2 weeks after 2026-10-30 (owner):** Search Console "Pages" (indexed vs "discovered, not indexed" for `/cars/...`), Bing "Search Performance", and the Cloudflare cache hit ratio on `/cars/*` (target 90 % or more).
+2. **Block 4, year pages `/cars/:make/:model/:year`:** only when the first 300 model pages are indexed. Then year chips become links, generation chips become real URLs, and the sitemap grows (8-15k pages; raise the IndexNow split, see the sitemap note in `features-reference.md`). If indexing is slow, fix quality first (thin text, duplicates) instead of adding pages.
+3. **Widen the index** (`CATALOG_TOP_MODELS` above 300, `CATALOG_MIN_CARS` below 200) once the top 300 are indexed and the hit ratio holds.
+4. **Not done on purpose:** `seo_html` pre-render, a data version in the edge cache key (the monthly ingest relies on the 1-day edge TTL and the deploy purge), the home page shown at `/cars/...` by an old service worker, the client tab title, KrAZ truck codes (`srhsp5`, `ydct52`) kept as real designations.
+5. **Known gap:** a client-side navigation leaves the first page's JSON-LD in the head (crawlers load each URL fresh).
+6. **After any `catalog-overrides.csv` change:** commit, wait for `deploy-ingest`, run `run-ingest.sh catalog` (15-25 min), wait for the api snapshot reload (up to 1 h, never start the idle api colour by hand), then purge `/cars` and `/api/catalog/`. See `docs/deploy.md` "Model catalog".
+
 ## Rollout order
 
 1. Steps 1-2, then check the folding quality with SQL. For example, the top 300 models should look like a real model list
