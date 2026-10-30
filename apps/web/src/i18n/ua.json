@@ -3960,5 +3960,22 @@
   "play.end.race": "Тест-драйв",
   "play.end.lookup": "Знайти номер",
   "play.rounds": "Питань у грі",
-  "play.banner": "Більше ігор"
+  "play.banner": "Більше ігор",
+  "catalog.title": "{{name}} в Україні",
+  "catalog.summary": "У реєстрі України зараз {{count}} авто {{name}}{{years}}.",
+  "catalog.summaryYears": "(роки випуску {{years}})",
+  "catalog.summaryFuel": "Найпоширеніше паливо: {{fuel}}.",
+  "catalog.summaryRegion": "Найбільше таких авто в регіоні: {{region}}.",
+  "catalog.statsHeading": "В Україні",
+  "catalog.years": "За роком випуску",
+  "catalog.fuel": "Паливо",
+  "catalog.body": "Кузов",
+  "catalog.color": "Колір",
+  "catalog.regions": "Регіони",
+  "catalog.capacityMedian": "Типовий об'єм двигуна: {{value}} см³",
+  "catalog.powerMedian": "Типова потужність: {{value}} кВт",
+  "catalog.otherModels": "Інші моделі марки",
+  "catalog.lookup": "Пошук авто за номером або VIN",
+  "catalog.notFound": "Такої моделі немає в каталозі",
+  "about.feature.catalog": "Каталог моделей /cars/{марка}/{модель}: скільки таких авто на обліку в Україні, роки випуску, паливо, кузов, кольори та регіони з відкритих даних реєстру, а також характеристики, вартість, відкликання, відгуки й фото моделі"
 }

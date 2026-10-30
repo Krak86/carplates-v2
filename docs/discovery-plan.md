@@ -1,6 +1,7 @@
 # Discovery plan: crawlers, search, other sites, users
 
-Status: **planned 2026-10-29, nothing started.** One checklist for "how do crawlers, other sites and users find carsua.app".
+Status (2026-10-30): **Phase 0 in progress, Phase 1 started, Phase 2 MVP built (needs deploy, `db:refresh-catalog` on the VPS and the two Cloudflare rules)** (static page titles and the `/og/` robots rule are deployed and verified
+on prod; the manual Phase 0 items below are not done yet). One checklist for "how do crawlers, other sites and users find carsua.app".
 The technical design of the catalog pages stays in [catalog-plan.md](catalog-plan.md) (do not copy it here, it would drift).
 Related, already done: sitemap/robots ([PLAN.md](../PLAN.md) "Bot protection, sitemap & SEO"), `llms.txt`, ARD manifest,
 public OpenAPI document, per-page link previews (`features-reference.md` "Link previews"), `/read` guides.
@@ -28,6 +29,22 @@ public OpenAPI document, per-page link previews (`features-reference.md` "Link p
 
 ## Phase 0: now, no code (about 1 hour)
 
+Done and verified on prod 2026-10-30 (curl + metatags.io + Facebook debugger):
+
+- [x] Pre-flight: `robots.txt` and `sitemap.xml` serve correctly (`application/xml`, hreflang, `https://carsua.app` URLs; Chrome shows
+      the sitemap as flat text because of the `xhtml:` namespace, harmless)
+- [x] New static titles/descriptions live in ua/ru/en for `/`, `/about`, `/stats`, `/wanted`, `/fuel`, `/safety`, `/read`
+- [x] `robots.txt` now allows `/og/default.png` and `/og/page/` and still blocks per-plate `/og/<plate>.png` (renders are expensive and
+      enumerable); `/robots.txt` had to be purged in Cloudflare by hand after the deploy
+
+Open:
+
+- [ ] **Facebook debugger shows "Corrupted Image" for `https://carsua.app/og/default.png`** (first scrape right after the deploy/purge).
+      The file itself is a valid 1200x630 PNG (114529 bytes, correct `IEND`, same bytes for a `facebookexternalhit` user agent, about
+      0.2 s uncached). Click "Scrape Again"; if it persists, look in Cloudflare Security -> Events for blocked/challenged requests to
+      `/og/default.png` from AS32934 (Facebook) and add a verified-bot exception (Bot Fight Mode / rate rules)
+- [x] `deploy-api.yml`: also purges `$URL/robots.txt` and `$URL/sitemap.xml` (exact URLs) next to the `/og/` prefix (2026-10-30; takes
+      effect on the next api deploy)
 - [ ] Google Search Console: verify the domain via DNS, submit `/sitemap.xml`, request indexing for `/`, `/stats`, `/read`
 - [ ] Bing Webmaster Tools: import from Search Console, submit the sitemap
 - [ ] **Diia Open Data services catalog** (backlink from the source itself): https://diia.data.gov.ua/services has an
@@ -36,7 +53,7 @@ public OpenAPI document, per-page link previews (`features-reference.md` "Link p
       системи". Also post an impact story on https://forum.data.gov.ua (Обговорення). Listing text to paste, adjust to the
       form's limits (text below).
 - [ ] Directories: Product Hunt, AlternativeTo, awesome-lists for open data / Ukrainian tech
-- [ ] Cloudflare cache rule for `/cars/*` and `/api/catalog/*` (add once the routes exist)
+- [ ] Cloudflare cache rules for `/cars/*` and `/api/catalog/*` (routes exist since 2026-10-30; expressions in `deploy.md` "Model catalog"; owner creates them, then verify MISS -> HIT)
 
 ### Diia listing text
 
@@ -57,8 +74,9 @@ camera, offline PWA, Ukrainian/Russian/English.
 
 ## Phase 1: small code items (about 2-3 days total, independent of the catalog)
 
-- [ ] **IndexNow** (about 1 h): API pings Bing/Yandex/Seznam on content change; key file served from the web root; env var ⇒
-      `env.ts` + `deploy-api.yml` + `deploy.md`
+- [x] **IndexNow** (2026-10-30): the api serves the key file `/<key>.txt` (`indexnow.ts`, a committed constant: the key is public
+      by design, so no env var) and `deploy-api.yml` POSTs every sitemap `<loc>` to `api.indexnow.org` after each api deploy
+      (best-effort). Needs a sitemap index once the catalog passes 10,000 URLs per request
 - [ ] **Press/About facts page** (about 2 h): what it is, data sources, update dates, logo pack, contact email. New public
       route ⇒ `ROUTE_TITLE_KEYS` + `STATIC_PAGES` (ua/ru/en) per CLAUDE.md
 - [ ] **Open stats download** (about 0.5 day): aggregated CSV/JSON (top models, registrations per region and month), CC
@@ -67,8 +85,8 @@ camera, offline PWA, Ukrainian/Russian/English.
 - [x] **Static page titles/descriptions rewritten** (2026-10-30, `spa-text.ts`: `/`, `/about`, `/stats`, `/wanted`, `/fuel`,
       `/safety`, `/read`, ua/ru/en). Open: shorten the over-long `/read/*` titles (about 75 chars, cut at about 60) and
       descriptions (over 170); after deploy re-scrape in the Facebook debugger and request indexing in Search Console
-- [ ] **Per-page share cards:** every static page uses `/og/default.png` (the home card). Add a headline per `STATIC_PAGES`
-      entry and render `/og/page/<slug>.png` from `og-card.ts` (about 0.5 day); the catalog pages reuse the same mechanism
+- [x] **Per-page share cards** (2026-10-30): `/og/page/<slug>.png` (`page-card.ts`, `buildPageCardSvg` in `og-card.ts`) is the
+      `og:image` of every static page except `/`; the catalog pages reuse the same mechanism
 - [ ] **Share prompt** after a lookup ("send to a friend buying a car"); `/og/` cards already exist, make sure every stats and
       `/read` page has a good one
 - [ ] Each item: `releases.ts` entry, About page text, tests, docs per CLAUDE.md
@@ -136,6 +154,43 @@ into many subs at once. Use a screenshot or short GIF of a search.
 ## Order of work
 
 1. Phase 0 (today), 2. catalog MVP with IndexNow and internal links, 3. outreach, 4. the rest of Phase 1, then widen the catalog.
+
+## Next (as of 2026-10-30, night)
+
+Done by the agent 2026-10-30: robots/sitemap purge on deploy; Step 1 SQL check; per-page share cards; IndexNow; **catalog MVP**
+(`/cars/:make/:model`, 1,697 pages / 300 indexable, sitemap index + `sitemap-cars.xml`, injected `#root` block, page cards;
+write-up `plan-done.md` "Model catalog MVP", conventions `features-reference.md` "Model catalog"). Uncommitted until the owner commits.
+
+### Owner, manual (in this order)
+
+1. Review, run `pnpm format`, commit and push the work (a suggested message is in the last agent reply), merge to `main`.
+2. **Deploy.** `deploy-api.yml` applies migration 0081; web deploys with it. Check the IndexNow step's log (Cloudflare Bot Fight Mode may block the runner
+   from the sitemap: the step then skips, which is fine).
+3. **On the VPS run `pnpm db:refresh-catalog` once** (about 3 min; writes only `catalog_*`). Until then `/sitemap-cars.xml` has no URLs and `/cars/...` shows home tags.
+4. **Cloudflare, two Cache Rules** (expressions in `deploy.md` "Model catalog"; paste via "Edit expression"): extend "Cache model lookups" with `/api/catalog/`, and add
+   "Cache catalog pages" for `/cars/`. Verify MISS then HIT on `/api/catalog/bmw/x5` and `/cars/bmw/x5` (and `?lang=en`).
+5. **Browser check** on prod or a local `pnpm build` with `WEB_DIST_DIR`: `/cars/bmw/x5` (light/dark, mobile width, sections load on scroll, no plate fields), view-source shows the
+   `<h1>` block in `#root`, a thin page (e.g. a model ranked above 300) has `noindex`. Spot-check the top models (`/cars/volkswagen/passat`, `/cars/zaz/lanos`, `/cars/toyota/landcruiserprado`).
+6. Search Console and Bing Webmaster: re-submit `https://carsua.app/sitemap.xml` (now an index), request indexing for 3-5 catalog URLs, then watch coverage for 1-2 weeks before widening.
+   Check Bot Fight Mode / throttles do not block verified Googlebot/Bingbot on `/cars/*` and `/api/catalog/*`.
+7. Phase 0 (not touched by the agent, do not tick for it): Diia / data.gov.ua listing + forum post, directories, re-scrape `/stats` in the Facebook debugger (purge `/og/` if the prefix
+   purge is refused on the plan).
+8. After 2 weeks: API p95 and CPU, Cloudflare hit ratio on `/cars/*` (target 90 % or more). Fix cache headers before considering a bigger VPS.
+
+### Agent, next session
+
+Read first (grep headings, never whole files): `docs/discovery-plan.md` "Decisions", "Phase 2", this section; `docs/catalog-plan.md` "Step 1 check results", Steps 4-5;
+`docs/features-reference.md` "Model catalog". Follow CLAUDE.md and CLAUDE_RULES.md; no `git commit/push`; suggest a commit message after each step.
+
+1. **Internal links** (crawlers find new pages slowly without them): plate/VIN `ResultCard` chip "All {brand} {model} in Ukraine" via `catalog_alias` (a small
+   `GET /api/catalog/lookup?brand=&model=` or a field on the card bundle; keep the plate page `noindex`), `/stats` model boards link to `/cars/...`, footer or `/read` hub link.
+2. **`/cars` and `/cars/:make` index pages** (+ `STATIC_PAGES` entry for `/cars` in ua/ru/en, `ROUTE_TITLE_KEYS`, `catalog_make` is already built; the model page then links the make).
+3. **JSON-LD** (`Dataset` or `Car`) on catalog pages where it matches real content, in the injected block; and an optional `seo_html` pre-render in `catalog_model`.
+4. **Quality pass on the taxonomy** beyond the top 300 before widening: run `db:refresh-catalog` output review for ranks 300-1,700 (leftover trims, wrong names), add `fold`/`name`/`drop` rows to
+   `scripts/src/catalog-overrides.csv`; then raise `CATALOG_TOP_MODELS` only after the owner reports Search Console indexing.
+5. **Year pages** `/cars/:make/:model/:year` and `catalog_year_stats` (catalog-plan.md Steps 2-3) only after items 1-4 and indexing data.
+6. Optional: extract the model-level sections of `ResultCard` into the shared `ModelSections` (the two copies can drift); shorten the over-long `/read/*` titles in `spa-text.ts`.
+7. IndexNow: when the sitemap passes 10,000 URLs split the deploy step's request into batches.
 
 ## Measuring
 

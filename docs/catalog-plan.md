@@ -1,6 +1,6 @@
 # Model catalog pages: `/cars/:make/:model/:year`
 
-Status: **researched 2026-10-13, not started.** Tracked in PLAN.md "To discuss / research". Rollout, estimate (6-9 days, MVP 3-4)
+Status: **MVP built 2026-10-30** (model level `/cars/:make/:model`, top 300 models, one sitemap file; conventions in `features-reference.md` "Model catalog"; year pages, `/cars` + make indexes, JSON-LD and internal links not started). Researched 2026-10-13. Tracked in PLAN.md "To discuss / research". Rollout, estimate (6-9 days, MVP 3-4)
 and the surrounding SEO/outreach checklist: [discovery-plan.md](discovery-plan.md).
 
 ## Context
@@ -83,6 +83,36 @@ top_raw_model, kind_group, indexable)`.
   - `registry.catalog_make`.
 - Script `scripts/src/catalog-build.ts` (`pnpm db:refresh-catalog`), added to `db:refresh-derived`.
 - Manual overrides in a committed `scripts/src/catalog-overrides.csv`, same idea as `generations-titles.csv`.
+
+### Step 1 check results (2026-10-30, read-only SQL on the real DB, 24,721,694 rows)
+
+The top 300 raw pairs of `stats_by_model` (by `total_rows`, 13.6M rows = 55% of the registry) were run through `makeKey` / `brandSlug`,
+`modelFamily`, `brandCandidateKey`, `wikiSearchName` and `MotFold` (`mot-real-models.json`). Result: **300 pairs fold into 181
+canonical keys**, 299 of 300 get a make slug. Rows by the rule that decided: real model 6.4M, wiki aliases 4.4M, raw (already a clean
+name, e.g. `opel/astra`) 1.3M, family 0.9M, brand candidate 0.3M, MOT prefix fold 0.3M. Verdict: **MVP (top ~300 models) is about 2
+days, the full taxonomy (78.8k pairs, ~2,000 models, kind split, VehiclesDB list) about 4 days.**
+
+Worked: the double-space brand duplicates (`VOLKSWAGEN  PASSAT` + `PASSAT`, the brand text carries the model) merge; Mazda 3/6, BMW
+`320D` to `3series`, Sprinter 313/316 CDI, Octavia A5/A7/Tour, Golf Plus, RAV-4 Hybrid fold; ZAZ codes to `slavuta`/`sens`; ВАЗ codes
+to `lada/2109` etc.
+
+Defects `catalogSlugs` must fix (Step 1 work list):
+
+1. **Make split.** `DAEWOO SENS` gives `daewoo/sens` but `ЗАЗ SENS` gives `zaz/sens`; Lanos splits `daewoo/lanos` (330k) vs `zaz/lanos`
+   (88k). Take the make from `modelFamily().brand`. **Decision: Lanos is one page, `zaz/lanos`.**
+2. **Fold order.** `MERCEDES-BENZ  SPRINTER 313 CDI` and `TOYOTA  LAND CRUISER 200` (model repeated in the brand) take the `wikiSearchName`
+   pass-through and end as `sprinter313cdi` / `landcruiser200`. Run the prefix fold on the pass-through result too.
+3. **Prado merges into Land Cruiser** (the UK-based real-model list has no Prado). **Decision: Prado is its own page**
+   (`toyota/landcruiserprado`) via `catalog-overrides.csv`.
+4. **The real-model list is UK-based**, so Opel (Vauxhall in the UK), Camry, Rogue, Escape, Highlander and Dodge never fold. Add a list
+   from VehiclesDB `make_key/model_key` + `model_generations` for Ukraine's top models.
+5. **Non-cars leak in**: trailers (`ПГ BBRD`, `KRONE SD`), and `DAF XF 105.460` (engine code, should fold to `xf`). Needs the
+   `kind_group` filter and `indexable`.
+
+To re-run the check: `docker exec carplates-v2-postgres-1 psql -U carplates -d carplates -At -F $'\t' -c "SELECT brand, model, total_rows
+FROM registry.stats_by_model WHERE brand IS NOT NULL AND model IS NOT NULL ORDER BY total_rows DESC LIMIT 300"`, then the helpers
+above in a `tsx` one-off (`MotFold.fold('car', makeKey(brand), modelKey(model), model)`). The local dev DB **is the real DB**
+(24.7M rows): SELECT only.
 
 ### Step 2: Rollup per make/model/year
 

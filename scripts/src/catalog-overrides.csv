@@ -1,0 +1,27 @@
+# Manual fixes for the model catalog (scripts/src/catalog-build.ts). `#` lines and blanks are skipped; no quoted fields.
+#   known,<makeKey>,<modelKey>                       a real model: never folded, a fold target for its trims (keys = letters and digits only)
+#   alias,<raw brand>,<raw model>,<make>,<model>     force one raw registry pair onto a page (slugs)
+#   fold,<make>,<model>,<to make>,<to model>         merge a page into another one (the known-model lists name variants as models)
+#   drop,<make>,<model>                              never a catalog page (not a car model)
+#   name,<make>,<model>,<display name>               model name shown on the page when the catalogs name it wrongly
+kind,a,b,c,d
+known,toyota,landcruiserprado
+fold,toyota,landcruiser200,toyota,landcruiser
+fold,toyota,landcruiserprado150,toyota,landcruiserprado
+fold,toyota,prado,toyota,landcruiserprado
+fold,mercedes-benz,sprinter313cdi,mercedes-benz,sprinter
+fold,mercedes-benz,sprinter316cdi,mercedes-benz,sprinter
+fold,chevrolet,niva,lada,niva
+fold,chevrolet,nubira,daewoo,nubira
+fold,ford,focuscmax,ford,cmax
+name,zaz,slavuta,Slavuta
+name,zaz,vida,Vida
+name,zaz,chance,Chance
+name,mercedes-benz,mclass,M-Class
+name,mercedes-benz,glclass,GL-Class
+name,citroen,c3,C3
+name,volkswagen,lt,LT
+name,renault,dokker,Dokker
+name,geely,mk,MK
+name,acura,mdx,MDX
+name,toyota,landcruiserprado,Land Cruiser Prado

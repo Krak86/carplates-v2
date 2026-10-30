@@ -3960,5 +3960,22 @@
   "play.end.race": "Тест-драйв",
   "play.end.lookup": "Найти номер",
   "play.rounds": "Вопросов в игре",
-  "play.banner": "Больше игр"
+  "play.banner": "Больше игр",
+  "catalog.title": "{{name}} в Украине",
+  "catalog.summary": "В реестре Украины сейчас {{count}} авто {{name}}{{years}}.",
+  "catalog.summaryYears": "(годы выпуска {{years}})",
+  "catalog.summaryFuel": "Самое распространённое топливо: {{fuel}}.",
+  "catalog.summaryRegion": "Больше всего таких авто в регионе: {{region}}.",
+  "catalog.statsHeading": "В Украине",
+  "catalog.years": "По году выпуска",
+  "catalog.fuel": "Топливо",
+  "catalog.body": "Кузов",
+  "catalog.color": "Цвет",
+  "catalog.regions": "Регионы",
+  "catalog.capacityMedian": "Типичный объём двигателя: {{value}} см³",
+  "catalog.powerMedian": "Типичная мощность: {{value}} кВт",
+  "catalog.otherModels": "Другие модели марки",
+  "catalog.lookup": "Поиск авто по номеру или VIN",
+  "catalog.notFound": "Такой модели нет в каталоге",
+  "about.feature.catalog": "Каталог моделей /cars/{марка}/{модель}: сколько таких авто на учёте в Украине, годы выпуска, топливо, кузов, цвета и регионы из открытых данных реестра, а также характеристики, стоимость, отзывы и фото модели"
 }

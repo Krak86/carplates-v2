@@ -119,6 +119,7 @@
     "refresh-imports-stats": "tsx src/imports-stats.ts",
     "refresh-origin-stats": "tsx src/origin-stats.ts",
     "refresh-model-family-stats": "tsx src/model-family-stats.ts",
+    "refresh-catalog": "tsx src/catalog-build.ts",
     "refresh-derived": "tsx src/refresh-derived.ts",
     "build:kind-images": "tsx src/build-kind-images.ts",
     "build:read-images": "tsx src/build-read-images.ts",

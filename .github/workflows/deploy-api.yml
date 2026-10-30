@@ -173,8 +173,9 @@ jobs:
           echo "::warning::public /healthz not reachable from the runner (Cloudflare Bot Fight Mode challenges CI IPs); origin check already passed"
 
       # The api renders the /og/*.png link-preview cards and Cloudflare caches them for 24 h, so a new api build
-      # (fonts, layout, data) would otherwise keep serving the old cards. Best-effort: the deploy itself already succeeded.
-      - name: Purge Cloudflare cache for the link-preview cards
+      # (fonts, layout, data) would otherwise keep serving the old cards. robots.txt and sitemap.xml are edge-cached too and
+      # change with the api build. Best-effort: the deploy itself already succeeded.
+      - name: Purge Cloudflare cache for the link-preview cards, robots.txt and sitemap.xml
         if: ${{ !inputs.sync_only }}
         env:
           CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
@@ -183,7 +184,32 @@ jobs:
         run: |
           if [ -z "$CF_API_TOKEN" ] || [ -z "$CF_ZONE_ID" ]; then echo "Cloudflare secrets not set; skipping purge"; exit 0; fi
           host="${URL#https://}"
+          # Exact URLs first: they work on every plan, so robots/sitemap are purged even if the prefix purge is refused.
+          curl -fsS -X POST "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/purge_cache" \
+            -H "Authorization: Bearer $CF_API_TOKEN" -H "Content-Type: application/json" \
+            --data "{\"files\":[\"$URL/robots.txt\",\"$URL/sitemap.xml\",\"$URL/sitemap-pages.xml\",\"$URL/sitemap-cars.xml\"]}" \
+            || echo "::warning::robots.txt/sitemap cache purge failed; purge manually"
           curl -fsS -X POST "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/purge_cache" \
             -H "Authorization: Bearer $CF_API_TOKEN" -H "Content-Type: application/json" \
             --data "{\"prefixes\":[\"$host/og/\"]}" \
             || echo "::warning::og card cache purge failed (purge by prefix may need a paid plan; purge manually)"
+
+      # IndexNow tells Bing, Yandex and the other participating engines which URLs to recrawl. The sitemap is the URL list
+      # (up to 10,000 per request): /sitemap.xml is an index, so each child sitemap is read in turn. Widening the catalog past
+      # 10,000 URLs needs this split into several requests. Best-effort like the purge.
+      - name: Ping IndexNow with the sitemap URLs
+        if: ${{ !inputs.sync_only }}
+        env:
+          URL: ${{ vars.PUBLIC_SITE_URL }}
+        run: |
+          key=$(sed -n "s/.*INDEXNOW_KEY = '\([a-f0-9]*\)'.*/\1/p" apps/api/src/spa/indexnow.ts)
+          host="${URL#https://}"
+          files=$(curl -fsS --max-time 20 "$URL/sitemap.xml" | sed -n 's|.*<loc>\([^<]*\)</loc>.*|\1|p') \
+            || { echo "::warning::sitemap not reachable from the runner; skipping IndexNow"; exit 0; }
+          urls=$(for f in $files; do curl -fsS --max-time 30 "$f" | sed -n 's|.*<loc>\([^<]*\)</loc>.*|\1|p'; done | jq -R . | jq -s .) \
+            || { echo "::warning::sitemap files not reachable from the runner; skipping IndexNow"; exit 0; }
+          echo "IndexNow: $(echo "$urls" | jq length) URL(s)"
+          jq -n --arg host "$host" --arg key "$key" --argjson urls "$urls" \
+            '{host: $host, key: $key, keyLocation: ("https://" + $host + "/" + $key + ".txt"), urlList: $urls}' \
+            | curl -fsS -X POST "https://api.indexnow.org/indexnow" -H "Content-Type: application/json; charset=utf-8" --data @- \
+            || echo "::warning::IndexNow ping failed (best-effort)"

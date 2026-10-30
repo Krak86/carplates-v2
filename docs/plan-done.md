@@ -4155,3 +4155,33 @@ Plan: `PLAN.md` "Visual stats, map logos, cards and quizzes". Convention: `docs/
 - **Side silhouettes traced from real photos (`silhouettes.ts` `SIDE_PATHS`):** sedan, hatch, wagon, coupe, SUV, MPV, van and pickup outlines were traced from side-on photos (flipped to face front-right) and the glass, door seams, lamps and mirrors regenerated to fit; motorcycle, bus and truck stay hand-drawn. Only simplified outlines are kept, no photo is shown or stored. The About drawings line says so (it no longer claims "all hand drawn"). Which photos were traced is not recorded; if a licence question comes up, redraw the outlines from catalogue dimensions instead.
 - **Pickup examples (`body-types/content.ts`):** Toyota Hilux, Ford Ranger and VW Amarok added (L 200 and Navara stay, no size data).
 - **Docs/About:** release log 2026-10-29 gained four items (`latest.ts` unchanged, same day); About feature lines for advanced search, news and drawings updated; no new data source was added today, so `SOURCES` is unchanged. `CLAUDE.md` trimmed (pins moved to `PLAN.md`).
+
+## Discovery/SEO: purge, Step 1 check, page share cards, IndexNow (2026-10-30)
+
+- **Purge:** `deploy-api.yml` purges `/robots.txt` and `/sitemap.xml` (exact URLs, any plan) before the `/og/` prefix purge.
+- **Catalog Step 1 check** (read-only SQL, 24.7M rows): top 300 raw pairs fold into 181 canonical keys; five defects and two decisions
+  (Lanos one page, Prado separate) are recorded in `docs/catalog-plan.md` "Step 1 check results". MVP about 2 days, full about 4.
+- **Page share cards:** `GET /og/page/<slug>.png` (`og.controller.ts` `pageCard`, `buildPageCardSvg` / `pageCardHeadline` in `og-card.ts`,
+  slugs in `page-card.ts`). Headline = title before the first colon (68 px, 26 chars/line; over 50 chars: 56 px, 30 chars/line; two lines
+  max), description two lines of 54 chars. Every static page except `/` uses it as `og:image`; unknown slug = 404; same font-less
+  no-cache rule as plate cards. `/read/extremes` ua title shortened to fit.
+- **IndexNow:** key constant in `apps/api/src/spa/indexnow.ts` (public by design, no env var), served at `/<key>.txt` by `SeoController`;
+  `deploy-api.yml` POSTs all sitemap `<loc>` to `api.indexnow.org` after each api deploy (best-effort).
+- **Not touched on purpose:** `releases.ts` / About (infrastructure and link previews, nothing a user sees in the app).
+
+## Model catalog MVP: `/cars/:make/:model` (2026-10-30)
+
+Design: `docs/catalog-plan.md`, conventions: `docs/features-reference.md` "Model catalog". Built in five steps:
+
+1. **`catalogSlugs`** (`packages/shared/src/catalogKey.ts`, 11 tests): fixes the five Step 1 defects. Make from `modelFamily().brand` with Lanos always `zaz/lanos`; the prefix fold also runs on the
+   `wikiSearchName` pass-through; Prado kept apart via the known set; the real-model list is injected (shared cannot read `scripts/`), so the UK bias is fixed in the build (Vauxhall to Opel, plus VehiclesDB and
+   `model_generations`); non-cars are excluded by building from passenger cars only.
+2. **Data** (migration 0081, `catalog-build.ts`, `catalog-taxonomy.ts`, `catalog-overrides.csv`): real DB (24,721,694 rows, only `catalog_*` written): 15,769 passenger pairs -> 13,885 aliased -> 1,697 pages (300 indexable),
+   109 makes, about 3 min. The first build left variant pages (`landcruiser200`, `landcruiserprado150`, `prado`, `sprinter313cdi`, `chevrolet/niva`, `chevrolet/nubira`, `focuscmax`) because VehiclesDB lists them as models; fixed with
+   `fold` overrides (and `name` overrides for wrong display names), not by changing the fold rule.
+3. **API**: `/api/catalog/:make/:model` (in-memory taxonomy, `LOOKUP_CACHE`, throttle, public OpenAPI prefix), SPA meta + injected `#root` block, thin pages `noindex`, edge-friendly HTML cache header.
+4. **Web**: `CatalogModelRoute`, `CatalogStatsSection`, `ModelSections` (model-only `LazySection`s), i18n ua/ru/en, About feature, `releases.ts` (2026-10-30, `new`).
+5. **Sitemap**: `/sitemap.xml` index + `/sitemap-pages.xml` + `/sitemap-cars.xml` (900 URLs = 300 pages x 3 languages); card `/og/page/cars--make--model.png`; deploy purge and IndexNow read the child sitemaps.
+
+Checked: shared, api (270) and web (511) tests, `tsc` in shared/api/web, curl of `/api/catalog/bmw/x5` (200 + cache header), 404 for an unknown model, 400 for an invalid slug, the index and the 900-URL cars sitemap against the dev API.
+**Not browser-checked** (light/dark, mobile width), and the injected block was only unit-tested (no `WEB_DIST_DIR` build run). **Owner to do:** the two Cloudflare rules (`deploy.md`), first `db:refresh-catalog` on the VPS, re-submit the sitemap.

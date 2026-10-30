@@ -4,10 +4,14 @@ import { join, normalize, resolve, sep } from 'node:path'
 
 import { Controller, Get, Inject, NotFoundException, Req, Res } from '@nestjs/common'
 import { ApiExcludeController } from '@nestjs/swagger'
+import type { CatalogModel } from '@carplates/shared'
 import type { FastifyReply, FastifyRequest } from 'fastify'
 
+import { catalogPageText, catalogSeoBlock, injectRoot } from '../catalog/catalog-text.js'
+import { CatalogService } from '../catalog/catalog.service.js'
 import { loadEnv } from '../env.js'
 import { injectMeta, renderMetaTags } from './meta.js'
+import { catalogPageSlug, catalogSlugsOfPath, pageCardSlug } from './page-card.js'
 import { PreviewService } from './preview.service.js'
 import { sitemapPaths } from './sitemap.js'
 import { DEFAULT_LANG, STATIC_PAGES, resolveLang, type Lang } from './spa-text.js'
@@ -42,6 +46,9 @@ const safeDecode = (s: string): string => {
   }
 }
 
+/** Catalog pages change with the monthly ingest, so the edge may keep them a day and serve stale for a week while it refreshes. */
+const CATALOG_PAGE_CACHE = 'public, max-age=0, s-maxage=86400, stale-while-revalidate=604800'
+
 // Must revalidate every load, or a stale service worker / manifest pins users to an old build.
 const NO_CACHE_FILES = new Set(['sw.js', 'registerSW.js', 'manifest.webmanifest'])
 
@@ -66,7 +73,10 @@ export class SpaController {
   // Bounded: one entry per known route × language, plus one shared '*' entry per language.
   private readonly staticMetaCache = new Map<string, string>()
 
-  constructor(@Inject(PreviewService) private readonly previews: PreviewService) {}
+  constructor(
+    @Inject(PreviewService) private readonly previews: PreviewService,
+    @Inject(CatalogService) private readonly catalog: CatalogService
+  ) {}
 
   @Get()
   root(@Req() req: FastifyRequest, @Res() reply: FastifyReply): Promise<void> {
@@ -105,8 +115,12 @@ export class SpaController {
     const html = await this.loadIndex()
     const lang = resolveLang((req.query as { lang?: string } | undefined)?.lang)
     const section = (req.query as { section?: string } | undefined)?.section
-    const meta = await this.metaFor(pathname, lang, section)
-    reply.type('text/html; charset=utf-8').header('cache-control', 'no-cache').send(injectMeta(html, meta))
+    const model = await this.catalogModelOf(pathname)
+    const meta = model ? this.catalogMeta(model, lang) : await this.metaFor(pathname, lang, section)
+    reply
+      .type('text/html; charset=utf-8')
+      .header('cache-control', model ? CATALOG_PAGE_CACHE : 'no-cache')
+      .send(model ? injectRoot(injectMeta(html, meta), catalogSeoBlock(model, lang)) : injectMeta(html, meta))
   }
 
   /** Re-read when the file changes: a web deploy repoints `WEB_DIST_DIR` (a symlink) without restarting the API. */
@@ -118,6 +132,27 @@ export class SpaController {
     this.indexHtmlCache = await readFile(file, 'utf8')
     this.indexStamp = stamp
     return this.indexHtmlCache
+  }
+
+  /** The catalog model a `/cars/:make/:model` path names, or null (any other path, or no such page). */
+  private async catalogModelOf(pathname: string): Promise<CatalogModel | null> {
+    const slugs = catalogSlugsOfPath(pathname)
+    return slugs ? this.catalog.get(slugs.make, slugs.model) : null
+  }
+
+  /** Thin pages (below the threshold or outside the MVP set) stay reachable but `noindex`. */
+  private catalogMeta(model: CatalogModel, lang: Lang): string {
+    const siteUrl = this.env.PUBLIC_SITE_URL
+    const langQuery = lang === DEFAULT_LANG ? '' : `?lang=${lang}`
+    return renderMetaTags({
+      siteUrl,
+      path: `/cars/${model.make}/${model.model}`,
+      lang,
+      ...catalogPageText(model, lang),
+      image: `${siteUrl}/og/page/${catalogPageSlug(model.make, model.model)}.png${langQuery}`,
+      noindex: !model.indexable,
+      alternates: model.indexable
+    })
   }
 
   /**
@@ -157,7 +192,7 @@ export class SpaController {
         path: known && path !== '/' ? path : '',
         lang,
         ...page,
-        image: `${siteUrl}/og/default.png${langQuery}`,
+        image: `${siteUrl}/og/${known && pageCardSlug(path) ? `page/${pageCardSlug(path)}` : 'default'}.png${langQuery}`,
         // Unknown paths (typos, not-found plates) shouldn't be indexed under the home page's tags.
         noindex: !known,
         alternates: known && sitemapPaths().includes(path)

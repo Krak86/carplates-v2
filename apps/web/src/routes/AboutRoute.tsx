@@ -274,6 +274,7 @@ const FEATURES = [
   'verify',
   'guides',
   'stats',
+  'catalog',
   'news',
   'whatsnew',
   'race',

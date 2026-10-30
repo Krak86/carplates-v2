@@ -1,16 +1,19 @@
 import { existsSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 
-import { Controller, Get, Inject, Param, Query, Res, UseGuards } from '@nestjs/common'
+import { Controller, Get, Inject, NotFoundException, Param, Query, Res, UseGuards } from '@nestjs/common'
 import { ApiExcludeController } from '@nestjs/swagger'
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler'
 import type { FastifyReply } from 'fastify'
 
+import { catalogPageText } from '../catalog/catalog-text.js'
+import { CatalogService } from '../catalog/catalog.service.js'
 import { loadEnv } from '../env.js'
 import { Lru } from './lru.js'
-import { buildCardSvg, readLogo, renderPng } from './og-card.js'
+import { buildCardSvg, buildPageCardSvg, readLogo, renderPng } from './og-card.js'
+import { catalogSlugsOfCard, pagePathForSlug } from './page-card.js'
 import { PreviewService } from './preview.service.js'
-import { TAGLINE, resolveLang, type Lang } from './spa-text.js'
+import { STATIC_PAGES, TAGLINE, resolveLang, type Lang } from './spa-text.js'
 
 // Where the web app's static assets (fonts, brand logos) live: the built dist in production,
 // the Vite public dir in dev (WEB_DIST_DIR unset).
@@ -34,7 +37,40 @@ export class OgController {
   private fontFilesFound: string[] = []
   private readonly pngCache = new Lru<Buffer>(PNG_CACHE_MAX)
 
-  constructor(@Inject(PreviewService) private readonly previews: PreviewService) {}
+  constructor(
+    @Inject(PreviewService) private readonly previews: PreviewService,
+    @Inject(CatalogService) private readonly catalog: CatalogService
+  ) {}
+
+  /** `GET /og/page/:slug.png` - share card of a static page (title + description); an unknown slug is a 404. */
+  @Get('page/:file')
+  async pageCard(
+    @Param('file') file: string,
+    @Query('lang') langParam: string | undefined,
+    @Res() reply: FastifyReply
+  ): Promise<void> {
+    const lang = resolveLang(langParam)
+    const slug = file.replace(/\.png$/i, '')
+    const catalogSlugs = catalogSlugsOfCard(slug)
+    const model = catalogSlugs ? await this.catalog.get(catalogSlugs.make, catalogSlugs.model) : null
+    const path = pagePathForSlug(slug)
+    const page = model ? catalogPageText(model, lang) : path ? STATIC_PAGES[path]?.[lang] : undefined
+    if (!page) throw new NotFoundException()
+
+    const cacheKey = `page:${lang}:${slug}`
+    const fontFiles = this.fontFiles()
+    let png = this.pngCache.get(cacheKey)
+    if (!png) {
+      const siteIconPng = readLogo(join(this.assetsDir, 'brand-icon.png'))
+      png = renderPng(buildPageCardSvg({ ...page, siteIconPng }), fontFiles)
+      // Same rule as the plate cards: a card rendered without fonts has no text, so it is never cached.
+      if (fontFiles.length > 0) this.pngCache.set(cacheKey, png)
+    }
+    reply
+      .type('image/png')
+      .header('cache-control', fontFiles.length > 0 ? CACHE_OK : CACHE_FALLBACK)
+      .send(png)
+  }
 
   @Get(':file')
   async card(

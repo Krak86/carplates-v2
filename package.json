@@ -149,6 +149,7 @@
     "db:refresh-imports-stats": "pnpm --filter @carplates/scripts refresh-imports-stats",
     "db:refresh-origin-stats": "pnpm --filter @carplates/scripts refresh-origin-stats",
     "db:refresh-model-family-stats": "pnpm --filter @carplates/scripts refresh-model-family-stats",
+    "db:refresh-catalog": "pnpm --filter @carplates/scripts refresh-catalog",
     "db:refresh-derived": "pnpm --filter @carplates/scripts refresh-derived"
   },
   "devDependencies": {

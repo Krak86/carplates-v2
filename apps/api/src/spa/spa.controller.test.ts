@@ -9,6 +9,29 @@ import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 const INDEX =
   '<!doctype html><html><head><title>old</title><meta name="description" content="old" /></head><body><div id="root"></div></body></html>'
 
+const CATALOG_MODEL = {
+  make: 'bmw',
+  model: 'x5',
+  makeName: 'BMW',
+  modelName: 'X5',
+  n: 96119,
+  yearMin: 2000,
+  yearMax: 2025,
+  topBrand: 'BMW',
+  topModel: 'X5',
+  kind: 'ЛЕГКОВИЙ',
+  indexable: true,
+  stats: {
+    years: [['2015', 5000]],
+    registered: [],
+    fuel: [['ДИЗЕЛЬНЕ ПАЛИВО', 57828]],
+    body: [],
+    color: [],
+    regions: [['М.КИЇВ', 20000]]
+  },
+  siblings: [{ model: 'x3', modelName: 'X3', n: 33133 }]
+}
+
 describe('SpaController meta injection', () => {
   let app: NestFastifyApplication
   let dist: string
@@ -39,9 +62,21 @@ describe('SpaController meta injection', () => {
         description: `Estimated EU value: ~€3,000–4,000. ${p.description}`
       })
     }
+    const { CatalogService } = await import('../catalog/catalog.service.js')
+    const catalog = {
+      get: async (make: string, model: string) =>
+        make === 'bmw' && model === 'x5'
+          ? CATALOG_MODEL
+          : make === 'bmw' && model === 'z3'
+            ? { ...CATALOG_MODEL, model: 'z3', modelName: 'Z3', indexable: false }
+            : null
+    }
     const moduleRef = await Test.createTestingModule({
       controllers: [SpaController],
-      providers: [{ provide: PreviewService, useValue: previews }]
+      providers: [
+        { provide: PreviewService, useValue: previews },
+        { provide: CatalogService, useValue: catalog }
+      ]
     }).compile()
     app = moduleRef.createNestApplication<NestFastifyApplication>(new FastifyAdapter())
     await app.init()
@@ -74,8 +109,33 @@ describe('SpaController meta injection', () => {
 
   it('serves static page tags without noindex', async () => {
     const html = await get('/about')
-    expect(html).toContain('og:image" content="https://carsua.app/og/default.png"')
+    expect(html).toContain('og:image" content="https://carsua.app/og/page/about.png"')
     expect(html).not.toContain('noindex')
+  })
+
+  it('injects a catalog page: indexable tags, h1 and sibling links in #root', async () => {
+    const res = await app.inject({ method: 'GET', url: '/cars/bmw/x5' })
+    expect(res.body).toContain('<title>BMW X5 в Україні')
+    expect(res.body).toContain('<link rel="canonical" href="https://carsua.app/cars/bmw/x5">')
+    expect(res.body).toContain('og/page/cars--bmw--x5.png')
+    expect(res.body).toContain('hreflang="x-default"')
+    expect(res.body).not.toContain('noindex')
+    expect(res.body).toContain('<div id="root"><main><h1>BMW X5 в Україні</h1>')
+    expect(res.body).toContain('<a href="/cars/bmw/x3">BMW X3</a>')
+    expect(res.headers['cache-control']).toContain('s-maxage=86400')
+  })
+
+  it('marks a thin catalog page noindex without alternates', async () => {
+    const html = await get('/cars/bmw/z3')
+    expect(html).toContain('noindex')
+    expect(html).not.toContain('hreflang')
+  })
+
+  it('treats an unknown catalog path like any unknown path', async () => {
+    const res = await app.inject({ method: 'GET', url: '/cars/bmw/nothing' })
+    expect(res.body).toContain('noindex')
+    expect(res.body).not.toContain('<main>')
+    expect(res.headers['cache-control']).toBe('no-cache')
   })
 
   it('falls back to home tags + noindex for an unknown path or plate', async () => {
