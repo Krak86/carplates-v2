@@ -57,7 +57,7 @@ export default function ScrollButtons(): ReactNode {
   // On a result page the report carries the plate / VIN (see ReportIssueLink).
   const feedbackTo = isResultRoute ? `/discuss?about=${pathname.slice(1)}` : '/discuss'
   const isShareable =
-    pathname !== '/' && !NO_SHARE_PATHS.has(pathname) && (isResultRoute || pathname in ROUTE_TITLE_KEYS)
+    !NO_SHARE_PATHS.has(pathname) && (pathname === '/' || isResultRoute || pathname in ROUTE_TITLE_KEYS)
   const { copied, share } = usePageShareActions()
   const [pos, setPos] = useState<Position>(measure)
 

@@ -61,7 +61,9 @@ export default function App(): ReactNode {
       ? t(titleKey)
       : isResultRoute
         ? decodeURIComponent(pathname.slice(1))
-        : undefined
+        : pathname === '/'
+          ? t('app.title')
+          : undefined
 
   return (
     <Layout>
