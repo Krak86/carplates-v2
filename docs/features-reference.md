@@ -596,7 +596,7 @@ are `.nullable().optional()`).
 
 ## Compare two vehicles (`/compare`, 2026-10-30)
 
-Plan: [compare-plan.md](compare-plan.md). Phase 1 (core) and the most of phase 2 (sentences, mirrored bars, radars, share bars, size overlay) are built; curves, Gantt, garage/parking verdicts, PNG save (rest of phase 2), export (3) and the tray / suggestions (4) are not. Online-only (not in `offline-cache.ts`), no API of its own: it reads the card's existing endpoints, so no `@Throttle` / edge-cache rule was needed.
+Plan: [compare-plan.md](compare-plan.md). Phases 1-3 and the client side of phase 4 are built (depreciation / registrations curves, the other four safety programmes, the new blocks in the export, tray outside the catalog, indexable pairs, `GET /api/compare` and `/read` embeds are not). Online-only (not in `offline-cache.ts`), no API of its own: it reads the card's existing endpoints, so no `@Throttle` / edge-cache rule was needed.
 
 - **Files:** `apps/web/src/components/compare/` (`ref.ts` URL refs, `resolve.ts` inputs -> `CompareCar`, `use-compare-car.ts` the queries, `rows.ts` row builders + `pruneRows`, `format.ts`, `coverage.ts`, UI `CompareSlotPicker` / `CompareSlotHeader` / `CompareTable` / `CompareChip`), route `routes/compare/CompareRoute.tsx` (before `/:query` in `App.tsx`), `ROUTE_TITLE_KEYS['/compare']`, `STATIC_PAGES['/compare']` (ua/ru/en), `compare.*` i18n.
 - **URL:** `/compare?a=plate:AA1234BB&b=m:bmw/3series/2015/diesel`; a slot is `plate:` (through `normalizePlate`), `vin:` or `m:<make slug>/<model slug>/<year>[/<fuel class>]` (catalog slugs; fuel is a `VEHICLE_FUELS` word). A bare value reads like the search box. `compareHref` keeps `:` and `/` unescaped. A malformed slot shows its picker.

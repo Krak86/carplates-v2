@@ -1,6 +1,6 @@
 # Compare two vehicles: `/compare`
 
-Status: **phase 1 (core) built 2026-10-30; phases 2-4 open.** Built-state conventions: features-reference.md "Compare two vehicles". Tracked in PLAN.md "To discuss / research" ("Car compare"). The catalog MVP
+Status: **phases 1-3 built, phase 2 finished and phase 4 client side built 2026-10-30; server-side phase 4 and export of the new blocks open.** Built-state conventions: features-reference.md "Compare two vehicles". Tracked in PLAN.md "To discuss / research" ("Car compare"). The catalog MVP
 (`/cars/:make/:model`, see [catalog-plan.md](catalog-plan.md)) is live, so the old "blocked on catalog" note is lifted.
 
 ## Decisions (owner, 2026-10-30)
@@ -104,3 +104,14 @@ Add `export.*` i18n keys. Any new field is handled in `record-formats.ts`, `expo
 
 Docs to update when built (CLAUDE.md): write-up -> `plan-done.md`, one-line check in PLAN.md, conventions -> `features-reference.md` "Compare",
 `releases.ts` entry (new day -> bump `releases/latest.ts`), About (`about.feature.compare`), ua/ru/en strings.
+
+## Next session (handoff, 2026-10-30)
+
+Nothing in phases 2-4 was checked in a browser yet; start there. Then, in this order:
+
+1. **Browser check** of `/compare?a=...&b=...` (two plates, plate vs model, two models; light / dark, phone width): ranges, safety and CO2, curves, timeline, fit, size PNG; slot B suggestions; tray on `/cars/:make` and a model page; save / list / remove; export menu.
+2. **Put the new blocks in the export** (`lib/export-compare.ts`): ranges and fit as tables, curves as `chart` sections (docx / pdf pictures), CO2 and stars as rows; radar and size-overlay pictures too.
+3. **Missing visuals:** depreciation-by-age curve (needs a per-model series), registrations per year (catalog), pills for JNCAP / C-NCAP / KNCAP / IIHS (load their queries in `use-compare-car.ts`), optional 5-year cost bar.
+4. **Tray outside the catalog:** `CompareTrayButton` on `/stats` boards, favourites, history, advanced search (plates / VINs there are `plate:` / `vin:` refs).
+5. **Server side (ask the owner first):** `GET /api/compare` bundle with edge cache (CLAUDE.md edge-cache checklist), indexable popular pairs `/compare/bmw-3series-vs-audi-a4` (pre-render like the catalog, `STATIC_PAGES` / sitemap), `/read/*` embeds.
+6. **User-facing docs, not done yet:** `releases.ts` entry (new day -> bump `releases/latest.ts`) and About (`about.feature.compare`) for phases 2-4.
