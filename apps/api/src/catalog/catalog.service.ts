@@ -59,7 +59,8 @@ export class CatalogService {
       .select({ byYear: catalogYearStats.byYear })
       .from(catalogYearStats)
       .where(and(eq(catalogYearStats.makeSlug, make), eq(catalogYearStats.modelSlug, model)))
-    const parsed = catalogYearStatsSchema.safeParse({ byYear: row?.byYear })
+    // The column holds the whole `{ byYear: { <year>: ... } }` object (see `catalog-build.ts`), not just the inner map.
+    const parsed = catalogYearStatsSchema.safeParse(row?.byYear)
     return parsed.success ? parsed.data : { byYear: {} }
   }
 
