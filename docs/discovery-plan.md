@@ -1,6 +1,7 @@
 # Discovery plan: crawlers, search, other sites, users
 
-Status: **planned 2026-10-29, nothing started.** One checklist for "how do crawlers, other sites and users find carsua.app".
+Status (2026-10-30): **Phase 0 in progress, Phase 1 started** (static page titles and the `/og/` robots rule are deployed and verified
+on prod; the manual Phase 0 items below are not done yet). One checklist for "how do crawlers, other sites and users find carsua.app".
 The technical design of the catalog pages stays in [catalog-plan.md](catalog-plan.md) (do not copy it here, it would drift).
 Related, already done: sitemap/robots ([PLAN.md](../PLAN.md) "Bot protection, sitemap & SEO"), `llms.txt`, ARD manifest,
 public OpenAPI document, per-page link previews (`features-reference.md` "Link previews"), `/read` guides.
@@ -28,6 +29,22 @@ public OpenAPI document, per-page link previews (`features-reference.md` "Link p
 
 ## Phase 0: now, no code (about 1 hour)
 
+Done and verified on prod 2026-10-30 (curl + metatags.io + Facebook debugger):
+
+- [x] Pre-flight: `robots.txt` and `sitemap.xml` serve correctly (`application/xml`, hreflang, `https://carsua.app` URLs; Chrome shows
+      the sitemap as flat text because of the `xhtml:` namespace, harmless)
+- [x] New static titles/descriptions live in ua/ru/en for `/`, `/about`, `/stats`, `/wanted`, `/fuel`, `/safety`, `/read`
+- [x] `robots.txt` now allows `/og/default.png` and `/og/page/` and still blocks per-plate `/og/<plate>.png` (renders are expensive and
+      enumerable); `/robots.txt` had to be purged in Cloudflare by hand after the deploy
+
+Open:
+
+- [ ] **Facebook debugger shows "Corrupted Image" for `https://carsua.app/og/default.png`** (first scrape right after the deploy/purge).
+      The file itself is a valid 1200x630 PNG (114529 bytes, correct `IEND`, same bytes for a `facebookexternalhit` user agent, about
+      0.2 s uncached). Click "Scrape Again"; if it persists, look in Cloudflare Security -> Events for blocked/challenged requests to
+      `/og/default.png` from AS32934 (Facebook) and add a verified-bot exception (Bot Fight Mode / rate rules)
+- [ ] `deploy-api.yml`: also purge `$host/robots.txt` and `$host/sitemap.xml` next to the `/og/` prefix (today only `/og/` is purged,
+      so edge-cached robots/sitemap stay stale for up to 24 h after a deploy)
 - [ ] Google Search Console: verify the domain via DNS, submit `/sitemap.xml`, request indexing for `/`, `/stats`, `/read`
 - [ ] Bing Webmaster Tools: import from Search Console, submit the sitemap
 - [ ] **Diia Open Data services catalog** (backlink from the source itself): https://diia.data.gov.ua/services has an
@@ -136,6 +153,15 @@ into many subs at once. Use a screenshot or short GIF of a search.
 ## Order of work
 
 1. Phase 0 (today), 2. catalog MVP with IndexNow and internal links, 3. outreach, 4. the rest of Phase 1, then widen the catalog.
+
+## Next (as of 2026-10-30)
+
+1. Owner, manual: finish Phase 0 (Search Console, Bing, Diia listing + forum post, directories), re-scrape `/stats` in the Facebook debugger.
+2. Agent: `deploy-api.yml` purge of `robots.txt` + `sitemap.xml` (small).
+3. Agent: the read-only SQL check of how the top 300 models fold into canonical makes/models (catalog-plan.md rollout step 1;
+   `SELECT count(*) FROM registry.registrations` first). It decides whether catalog Step 1 is 2 or 4 days.
+4. Agent: per-page share cards (`/og/page/<slug>.png`), then IndexNow, then the catalog MVP (Phase 2).
+5. Optional: shorten the over-long `/read/*` titles and descriptions in `spa-text.ts`; add the client tab titles if wanted.
 
 ## Measuring
 
