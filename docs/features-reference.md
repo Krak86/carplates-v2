@@ -301,7 +301,7 @@ skip an image robots.txt disallows. Keep any new generic card under an allowed p
   descriptions naming the open data source. Utility pages (`/install`, `/privacy`, `/terms`, `/history`, `/favorites`, `/releases`)
   keep the short `Cars UA - <page>` form. The server tags are what crawlers and link previews see; the browser tab title comes
   from `useDocumentTitle` (`Cars UA - <nav label>`) and intentionally stays short. Every static page still shares
-  `/og/default.png`; per-page share cards are open in `discovery-plan.md` (Phase 1).
+  `/og/default.png` except `/`; since 2026-10-30 each other static page has its own card `/og/page/<slug>.png` (`page-card.ts`: `/stats` → `stats`, `/read/vin` → `read--vin`; unknown slug = 404; headline = title before the first colon, description under it; `?lang=`).
 - **Languages:** every sitemap page is listed once per language (`/about`, `/about?lang=ru`, `?lang=en`; default `ua` = bare path), each
   `<url>` with the full `xhtml:link` hreflang set + `x-default`. The page `<head>` mirrors it (`alternates: true` in `renderMetaTags`):
   self-canonical per language + `<link rel="alternate" hreflang>`. Helpers `langUrl`/`alternateLinks` in `meta.ts`. Plate/VIN pages stay

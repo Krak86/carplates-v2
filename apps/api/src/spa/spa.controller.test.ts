@@ -74,7 +74,7 @@ describe('SpaController meta injection', () => {
 
   it('serves static page tags without noindex', async () => {
     const html = await get('/about')
-    expect(html).toContain('og:image" content="https://carsua.app/og/default.png"')
+    expect(html).toContain('og:image" content="https://carsua.app/og/page/about.png"')
     expect(html).not.toContain('noindex')
   })
 

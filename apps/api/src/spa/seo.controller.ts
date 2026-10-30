@@ -2,6 +2,7 @@ import { Controller, Get, Header } from '@nestjs/common'
 import { ApiExcludeController } from '@nestjs/swagger'
 
 import { loadEnv } from '../env.js'
+import { INDEXNOW_KEY } from './indexnow.js'
 import { renderRobots, renderSitemap } from './sitemap.js'
 
 /** Generated from PUBLIC_SITE_URL so the absolute URLs match the environment (the static robots.txt can't know it). */
@@ -22,5 +23,13 @@ export class SeoController {
   @Header('cache-control', 'public, max-age=86400')
   robots(): string {
     return renderRobots(this.siteUrl)
+  }
+
+  /** IndexNow key file: the body is the key itself, which proves we own the host. */
+  @Get(`${INDEXNOW_KEY}.txt`)
+  @Header('content-type', 'text/plain; charset=utf-8')
+  @Header('cache-control', 'public, max-age=86400')
+  indexNowKey(): string {
+    return INDEXNOW_KEY
   }
 }

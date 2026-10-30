@@ -109,3 +109,64 @@ export const readLogo = (path: string): Buffer | null => {
     return null
   }
 }
+
+export type PageCardInput = {
+  /** Page headline; the "| Cars UA" suffix is dropped (the header badge already names the site). */
+  title: string
+  /** Page description, clipped to two lines. */
+  description: string
+  siteIconPng?: Buffer | null
+}
+
+/** `"X: detail | Cars UA"` / `"Cars UA - X"` → `"X"`: the short heading, the description carries the rest. */
+export const pageCardTitle = (title: string): string =>
+  title
+    .replace(/\s*\|\s*Cars UA$/, '')
+    .replace(/^Cars UA\s*-\s*/, '')
+    .replace(/:\s.*$/, '')
+
+/** Greedy word wrap into at most `maxLines` lines of `maxChars`; the last line is clipped with an ellipsis. */
+export function wrapLines(text: string, maxChars: number, maxLines: number): string[] {
+  const lines: string[] = []
+  let line = ''
+  const words = text.split(/\s+/).filter(Boolean)
+  for (const [i, word] of words.entries()) {
+    const next = line ? `${line} ${word}` : word
+    if (next.length <= maxChars || !line) {
+      line = next
+      continue
+    }
+    if (lines.length === maxLines - 1) return [...lines, clip(`${line} ${words.slice(i).join(' ')}`, maxChars)]
+    lines.push(line)
+    line = word
+  }
+  if (line) lines.push(clip(line, maxChars))
+  return lines
+}
+
+/** The headline lines and type size of a page card. A long headline gets a smaller face (30 chars a line, not 26) to fit two lines. */
+export function pageCardHeadline(title: string): { lines: string[]; size: number; step: number } {
+  const heading = pageCardTitle(title)
+  const long = heading.length > 50
+  return { lines: wrapLines(heading, long ? 30 : 26, 2), size: long ? 56 : 68, step: long ? 68 : 82 }
+}
+
+/** The share card of a static page: headline and description on the blue site gradient. */
+export function buildPageCardSvg(input: PageCardInput): string {
+  const open = `<svg xmlns="http://www.w3.org/2000/svg" width="${OG_WIDTH}" height="${OG_HEIGHT}">`
+  const { lines: title, size, step } = pageCardHeadline(input.title)
+  const description = wrapLines(input.description, 54, 2)
+  const text = (lines: string[], y: number, size: number, step: number, weight: number, fill: string): string =>
+    lines
+      .map(
+        (l, i) =>
+          `<text x="90" y="${y + i * step}" font-family="${FONT_FAMILY}" font-size="${size}" font-weight="${weight}" fill="${fill}">${esc(l)}</text>`
+      )
+      .join('\n')
+  return `${open}${background('blue')}${header(input.siteIconPng)}
+${panel(50, 200, 1100, 340)}
+${text(title, 290, size, step, 700, '#fff')}
+${text(description, 290 + (title.length - 1) * step + 80, 34, 46, 400, '#cbd5e1')}
+${SITE_URL}
+</svg>`
+}

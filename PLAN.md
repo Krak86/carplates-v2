@@ -348,6 +348,7 @@ above once scoped, or dropped if research says no.
 - ✅ **Realistic vehicle drawings** — done 2026-10-29 (side/top silhouettes with arches, towing diagram, 6 new kind icons; original art, About note). Write-up: `docs/plan-done.md`.
   ✅ Follow-up 2026-10-29: side outlines traced from real side-on photos (`SIDE_PATHS`; source photos not recorded - redraw from catalogue dimensions if a licence question comes up), pickup examples with dimensions. Write-up: `docs/plan-done.md` "Advanced search legend and icons, news page, page width, traced silhouettes".
 - ✅ **Advanced search legend + icons, news page colours/skeletons, one page width (`max-w-6xl`)** — done 2026-10-29, see `docs/plan-done.md`.
+- ✅ **Discovery/SEO groundwork** — done 2026-10-30: robots/sitemap purge on deploy, per-page share cards `/og/page/<slug>.png`, IndexNow, catalog Step 1 fold check (catalog MVP is next, see `docs/discovery-plan.md` "Next"). Write-up: `docs/plan-done.md`.
 - ✅ **Chip "?" explainers, `?weight=` tab URLs, mobile polish (pinch zoom, photo swipe), "VIN data starts in 2021" note** — done 2026-10-14, see `docs/plan-done.md`.
 - ✅ **VIN decode overview + plate-card split** — done 2026-10-02 (tabs, VIN anatomy, equipment map, engine/origin
   cards, grouped details; plate card now has separate _Registration history_ and _VIN decode_ sections) — see

@@ -4155,3 +4155,16 @@ Plan: `PLAN.md` "Visual stats, map logos, cards and quizzes". Convention: `docs/
 - **Side silhouettes traced from real photos (`silhouettes.ts` `SIDE_PATHS`):** sedan, hatch, wagon, coupe, SUV, MPV, van and pickup outlines were traced from side-on photos (flipped to face front-right) and the glass, door seams, lamps and mirrors regenerated to fit; motorcycle, bus and truck stay hand-drawn. Only simplified outlines are kept, no photo is shown or stored. The About drawings line says so (it no longer claims "all hand drawn"). Which photos were traced is not recorded; if a licence question comes up, redraw the outlines from catalogue dimensions instead.
 - **Pickup examples (`body-types/content.ts`):** Toyota Hilux, Ford Ranger and VW Amarok added (L 200 and Navara stay, no size data).
 - **Docs/About:** release log 2026-10-29 gained four items (`latest.ts` unchanged, same day); About feature lines for advanced search, news and drawings updated; no new data source was added today, so `SOURCES` is unchanged. `CLAUDE.md` trimmed (pins moved to `PLAN.md`).
+
+## Discovery/SEO: purge, Step 1 check, page share cards, IndexNow (2026-10-30)
+
+- **Purge:** `deploy-api.yml` purges `/robots.txt` and `/sitemap.xml` (exact URLs, any plan) before the `/og/` prefix purge.
+- **Catalog Step 1 check** (read-only SQL, 24.7M rows): top 300 raw pairs fold into 181 canonical keys; five defects and two decisions
+  (Lanos one page, Prado separate) are recorded in `docs/catalog-plan.md` "Step 1 check results". MVP about 2 days, full about 4.
+- **Page share cards:** `GET /og/page/<slug>.png` (`og.controller.ts` `pageCard`, `buildPageCardSvg` / `pageCardHeadline` in `og-card.ts`,
+  slugs in `page-card.ts`). Headline = title before the first colon (68 px, 26 chars/line; over 50 chars: 56 px, 30 chars/line; two lines
+  max), description two lines of 54 chars. Every static page except `/` uses it as `og:image`; unknown slug = 404; same font-less
+  no-cache rule as plate cards. `/read/extremes` ua title shortened to fit.
+- **IndexNow:** key constant in `apps/api/src/spa/indexnow.ts` (public by design, no env var), served at `/<key>.txt` by `SeoController`;
+  `deploy-api.yml` POSTs all sitemap `<loc>` to `api.indexnow.org` after each api deploy (best-effort).
+- **Not touched on purpose:** `releases.ts` / About (infrastructure and link previews, nothing a user sees in the app).

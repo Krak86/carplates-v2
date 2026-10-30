@@ -8,6 +8,7 @@ import type { FastifyReply, FastifyRequest } from 'fastify'
 
 import { loadEnv } from '../env.js'
 import { injectMeta, renderMetaTags } from './meta.js'
+import { pageCardSlug } from './page-card.js'
 import { PreviewService } from './preview.service.js'
 import { sitemapPaths } from './sitemap.js'
 import { DEFAULT_LANG, STATIC_PAGES, resolveLang, type Lang } from './spa-text.js'
@@ -157,7 +158,7 @@ export class SpaController {
         path: known && path !== '/' ? path : '',
         lang,
         ...page,
-        image: `${siteUrl}/og/default.png${langQuery}`,
+        image: `${siteUrl}/og/${known && pageCardSlug(path) ? `page/${pageCardSlug(path)}` : 'default'}.png${langQuery}`,
         // Unknown paths (typos, not-found plates) shouldn't be indexed under the home page's tags.
         noindex: !known,
         alternates: known && sitemapPaths().includes(path)

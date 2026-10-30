@@ -74,8 +74,9 @@ camera, offline PWA, Ukrainian/Russian/English.
 
 ## Phase 1: small code items (about 2-3 days total, independent of the catalog)
 
-- [ ] **IndexNow** (about 1 h): API pings Bing/Yandex/Seznam on content change; key file served from the web root; env var ⇒
-      `env.ts` + `deploy-api.yml` + `deploy.md`
+- [x] **IndexNow** (2026-10-30): the api serves the key file `/<key>.txt` (`indexnow.ts`, a committed constant: the key is public
+      by design, so no env var) and `deploy-api.yml` POSTs every sitemap `<loc>` to `api.indexnow.org` after each api deploy
+      (best-effort). Needs a sitemap index once the catalog passes 10,000 URLs per request
 - [ ] **Press/About facts page** (about 2 h): what it is, data sources, update dates, logo pack, contact email. New public
       route ⇒ `ROUTE_TITLE_KEYS` + `STATIC_PAGES` (ua/ru/en) per CLAUDE.md
 - [ ] **Open stats download** (about 0.5 day): aggregated CSV/JSON (top models, registrations per region and month), CC
@@ -84,8 +85,8 @@ camera, offline PWA, Ukrainian/Russian/English.
 - [x] **Static page titles/descriptions rewritten** (2026-10-30, `spa-text.ts`: `/`, `/about`, `/stats`, `/wanted`, `/fuel`,
       `/safety`, `/read`, ua/ru/en). Open: shorten the over-long `/read/*` titles (about 75 chars, cut at about 60) and
       descriptions (over 170); after deploy re-scrape in the Facebook debugger and request indexing in Search Console
-- [ ] **Per-page share cards:** every static page uses `/og/default.png` (the home card). Add a headline per `STATIC_PAGES`
-      entry and render `/og/page/<slug>.png` from `og-card.ts` (about 0.5 day); the catalog pages reuse the same mechanism
+- [x] **Per-page share cards** (2026-10-30): `/og/page/<slug>.png` (`page-card.ts`, `buildPageCardSvg` in `og-card.ts`) is the
+      `og:image` of every static page except `/`; the catalog pages reuse the same mechanism
 - [ ] **Share prompt** after a lookup ("send to a friend buying a car"); `/og/` cards already exist, make sure every stats and
       `/read` page has a good one
 - [ ] Each item: `releases.ts` entry, About page text, tests, docs per CLAUDE.md
@@ -154,14 +155,19 @@ into many subs at once. Use a screenshot or short GIF of a search.
 
 1. Phase 0 (today), 2. catalog MVP with IndexNow and internal links, 3. outreach, 4. the rest of Phase 1, then widen the catalog.
 
-## Next (as of 2026-10-30)
+## Next (as of 2026-10-30, evening)
 
-1. Owner, manual: finish Phase 0 (Search Console, Bing, Diia listing + forum post, directories), re-scrape `/stats` in the Facebook debugger.
-2. Agent: `deploy-api.yml` purge of `robots.txt` + `sitemap.xml` (small).
-3. Agent: the read-only SQL check of how the top 300 models fold into canonical makes/models (catalog-plan.md rollout step 1;
-   `SELECT count(*) FROM registry.registrations` first). It decides whether catalog Step 1 is 2 or 4 days.
-4. Agent: per-page share cards (`/og/page/<slug>.png`), then IndexNow, then the catalog MVP (Phase 2).
-5. Optional: shorten the over-long `/read/*` titles and descriptions in `spa-text.ts`; add the client tab titles if wanted.
+Done by the agent 2026-10-30: `deploy-api.yml` purge of `robots.txt` + `sitemap.xml`; Step 1 SQL check (results in catalog-plan.md
+"Step 1 check results"); per-page share cards; IndexNow. Uncommitted until the owner commits.
+
+1. Owner, manual: finish Phase 0 (Search Console, Bing, Diia listing + forum post, directories), re-scrape `/stats` in the Facebook
+   debugger (the page cards show after the next api deploy; purge `/og/` if the prefix purge is refused on the plan). Check the
+   IndexNow step's log after the first deploy (Cloudflare Bot Fight Mode may block the runner from the sitemap: the step then skips).
+2. Agent: **catalog MVP (Phase 2)**, top ~300 models. Decisions taken: Lanos is one page (`zaz/lanos`), Prado its own page. Start with
+   `packages/shared/src/catalogKey.ts` + tests (defects 1-5 in catalog-plan.md), then migration + `db:refresh-catalog`, API, page,
+   sitemap file. A sitemap index is needed once the sitemap passes 10,000 URLs (also the IndexNow request limit).
+3. Optional: shorten the over-long `/read/*` titles (about 75 chars) and descriptions (over 170) in `spa-text.ts` (the card headline
+   already cuts at the first colon); client tab titles.
 
 ## Measuring
 
