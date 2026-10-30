@@ -764,7 +764,7 @@ Group 1 dimension callouts + garage-fit -> Group 3 (existing order). Owner says 
       (registry stats + the existing model-level sections) as indexable SEO slugs; needs a canonical make/model taxonomy
       (registry models are trim-level) and TS-built rollup tables, not a matview. Full write-up: [docs/catalog-plan.md](docs/catalog-plan.md).
       Discovery checklist around it (Search Console, IndexNow, outreach, Reddit draft): [docs/discovery-plan.md](docs/discovery-plan.md).
-- [ ] **Compare two vehicles `/compare`** — **phase 1 (core) done 2026-10-30** (route, plate/VIN/model resolver, mirrored pruned table, coverage strip, chips); phase 2 mostly done 2026-10-30 (sentences, mirrored bars, radars, share bars, size overlay; open: curves, Gantt, verdicts, PNG); phases 3-4 open. Exactly 2 vehicles;
+- [ ] **Compare two vehicles `/compare`** — **phase 1 (core) done 2026-10-30** (route, plate/VIN/model resolver, mirrored pruned table, coverage strip, chips); phase 2 mostly done 2026-10-30 (sentences, mirrored bars, radars, share bars, size overlay, slot editing, read guides; open: curves, Gantt, verdicts, PNG); phases 3-4 open. Exactly 2 vehicles;
       input per slot = plate, VIN or model ref (so any vehicle we hold data for, not only catalog models). Mirrored table that hides rows
       with no data on either side, radars (fixed scales, only axes both cars have), mirrored/dumbbell/share bars, depreciation and MOT curves,
       size blueprint overlay, generated difference sentences, export like "Copy all info", "Compare" chip on the plate/VIN card and catalog

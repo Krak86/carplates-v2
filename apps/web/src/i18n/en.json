@@ -3714,5 +3714,5 @@
   "compare.about.nhtsaComplaints": "How many owner complaints NHTSA received for this model year. More complaints often just means more cars sold.",
   "compare.about.motFailRate": "The share of the model's UK MOT tests that failed, over all mileages. It depends on the age of the cars tested, so no side is called better.",
   "compare.about.ukCars": "How many cars of this model are currently registered in Ukraine, from the open registry.",
-  "about.feature.compare": "Compare two cars at /compare: a plate, a VIN or a model in each slot. The side-by-side table shows only data we hold (power, size, weight, consumption, price, safety, reliability, registrations in Ukraine), with the exact car's own data kept separate; the better side is marked only where it is unambiguous."
+  "about.feature.compare": "Compare two cars at /compare: a plate, a VIN or a model in each slot. The side-by-side table shows only data we hold (power, size, weight, consumption, price, safety, reliability, registrations in Ukraine), with the exact car's own data kept separate; the better side is marked only where it is unambiguous. Above it: the main differences of each car, mirrored bars, radars, fuel and body shares and both cars at true scale (side by side, overlay, draggable divider, blueprint); every block has its own link, and a slot can be edited."
 }

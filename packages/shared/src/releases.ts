@@ -25,6 +25,12 @@ export const RELEASES: readonly ReleaseDay[] = [
         'Compare two cars at /compare: a plate, a VIN or a model in each slot, a side-by-side table with only the data we hold (power, size, weight, consumption, price, safety, reliability, registrations in Ukraine) and own data of the exact car kept apart. A Compare button sits on the plate card, the VIN card and the model page.'
       ),
       item(
+        'improved',
+        'Порівняння авто: головні відмінності кожного авто, дзеркальні стовпчики, радари (динаміка, практичність, економія, безпека), частки палива й кузова, габарити обох авто в одному масштабі (поруч, накладення, з рухомим розділювачем, креслення), редагування марки, моделі й року та посилання на кожен блок.',
+        'Сравнение авто: главные отличия каждого авто, зеркальные столбцы, радары (динамика, практичность, экономия, безопасность), доли топлива и кузова, габариты обоих авто в одном масштабе (рядом, наложение, с подвижным разделителем, чертёж), правка марки, модели и года и ссылки на каждый блок.',
+        'Compare: the main differences of each car, mirrored bars, radars (performance, practicality, economy, safety), fuel and body shares, both cars at true scale (side by side, overlay, draggable divider, blueprint), editing the make, model and year of a slot, and a link to every block.'
+      ),
+      item(
         'new',
         'Сторінка «Поділитися пошуком»: короткі посилання /go/… на пошук за номером, VIN, фото та AR-скан. Кожне має власне превʼю в месенджерах і відкриває головну з підсвіченою потрібною кнопкою; є вибір мови й мітка джерела.',
         'Страница «Поделиться поиском»: короткие ссылки /go/… на поиск по номеру, VIN, фото и AR-скан. У каждой своё превью в мессенджерах, и она открывает главную с подсвеченной нужной кнопкой; есть выбор языка и метка источника.',

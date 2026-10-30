@@ -6,8 +6,7 @@
 The v1 app is the sibling `../carplates/` (do not modify).
 
 Docs (**grep `^## ` headings, never read whole**, 100–400 KB): `PLAN.md` backlog + pins · `docs/plan-done.md` write-ups · `README.md` setup/env ·
-`docs/features-reference.md` per-feature conventions (**read the matching section before touching a feature**) · `docs/commands-reference.md` ·
-`docs/{legal-and-monetization,logins,security-checklist}.md`. Others only on request.
+`docs/features-reference.md` per-feature conventions (**read the matching section before touching a feature**) · `docs/commands-reference.md` · other `docs/*.md` only on request.
 
 ## Layout
 
@@ -31,7 +30,7 @@ Pins (why: PLAN.md "Version pins"): Node 24, TypeScript 5.9, NestJS 11, Drizzle 
 - **Offline / PWA**: service worker is production-only. Editing `schemas.ts` discards saved offline data; contracts in their own file
   (`vdb.ts`, `rdw.ts`, `account.ts`, `fx.ts`) don't — new fields there are `.nullable().optional()`. A new offline-capable `/api/*`
   query goes into `lib/offline-cache.ts`.
-- **NestJS**: Zod-validated inputs, no logic in controllers, never `@Res()` (except SPA catch-all). Link previews (`apps/api/src/spa/`)
+- **NestJS**: Zod-validated inputs, no logic in controllers, never `@Res()` (except SPA catch-all). Link previews
   come from the API, never Vite.
 - **i18n is per-language lazy chunks** (non-ua also loads ua). Tests rendering text `await i18nReady`; never `import '@/i18n'`.
 - **Zod `jitless`**: `@/lib/zod-config` stays the first import of `main.tsx`; `vendor-zod` / `zod-config` stay separate chunks (else CSP `eval`).
@@ -49,7 +48,7 @@ Pins (why: PLAN.md "Version pins"): Node 24, TypeScript 5.9, NestJS 11, Drizzle 
   `git status` / `git diff --stat`; split if logical). Never run `git commit` / `git push` unless asked.
 - **Seed CSVs mirror scraped tables.** After changing `registry.wiki_image` (pre-warm, `wikiAliases.ts` + re-scrape, row deletes) re-run
   `pnpm export:wiki-images:csv`; same for every other `export:*:csv` dataset (a new setup loads the CSV instead of re-scraping).
-- Run `pnpm format` first (never reformat `scripts/src/fixtures`). Tests: Vitest, colocated `*.test.ts(x)`.
+- `pnpm format` first (not `scripts/src/fixtures`). Tests: Vitest, colocated `*.test.ts(x)`.
 - Keep docs current: write-up → `docs/plan-done.md`, one-line ✅ → `PLAN.md`, conventions → `docs/features-reference.md`, user-facing entry → `packages/shared/src/releases.ts`
   (only `new` items are mailed; new day ⇒ bump `releases/latest.ts`); new feature / data source → About (`about.feature.*`, `SOURCES` + `about.source.*`, ua/ru/en).
 
