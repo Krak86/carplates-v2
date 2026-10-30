@@ -21,5 +21,10 @@ export function renderSitemap(siteUrl: string): string {
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${urls.join('\n')}\n</urlset>\n`
 }
 
+/**
+ * `/og/<plate|vin>.png` cards are one expensive render per plate (an enumerable set), so they stay blocked; the generic
+ * cards that static pages use as `og:image` are allowed, else Twitterbot and Google skip the image. The most specific
+ * rule wins, so the `Allow` lines override the `/og/` block.
+ */
 export const renderRobots = (siteUrl: string): string =>
-  `User-agent: *\nDisallow: /api/\nDisallow: /og/\n\nSitemap: ${siteUrl}/sitemap.xml\n`
+  `User-agent: *\nDisallow: /api/\nDisallow: /og/\nAllow: /og/default.png\nAllow: /og/page/\n\nSitemap: ${siteUrl}/sitemap.xml\n`

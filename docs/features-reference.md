@@ -285,6 +285,9 @@ SW caches `index.html`). Plate/VIN pages are `noindex`; `?lang=` selects the lan
 The card fonts (`fonts/NotoSans-*.ttf` in `WEB_DIST_DIR`) are looked up on the first render, not at boot (on a first deploy the api can start before the web
 build exists); a card rendered without fonts is not cached. Cloudflare caches `/og/*.png` for 24 h, so `deploy-api` purges the `/og/` prefix after each
 deploy; Telegram and X keep their own preview cache.
+`robots.txt` blocks `/og/` (one expensive render per plate, an enumerable set; plate pages are `noindex` anyway) but allows
+`/og/default.png` and `/og/page/` (2026-10-30): the generic cards are every static page's `og:image`, and Twitterbot/Google
+skip an image robots.txt disallows. Keep any new generic card under an allowed path.
 
 ## Sitemap, robots and rate limits
 
