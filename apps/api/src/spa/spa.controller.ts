@@ -40,7 +40,7 @@ import {
 } from './page-card.js'
 import { PreviewService } from './preview.service.js'
 import { sitemapPaths } from './sitemap.js'
-import { DEFAULT_LANG, SHARE_ALIAS_PAGES, STATIC_PAGES, resolveLang, type Lang } from './spa-text.js'
+import { DEFAULT_LANG, SHARE_ALIAS_PAGES, STATIC_PAGES, resolveLang, sectionPageText, type Lang } from './spa-text.js'
 
 const MIME: Record<string, string> = {
   '.html': 'text/html; charset=utf-8',
@@ -258,7 +258,8 @@ export class SpaController {
       const query = decodeURIComponent(segments[0] as string)
       const preview = await this.previews.describe(query, lang)
       if (preview) {
-        const text = section === 'value' ? await this.previews.describeValue(preview, lang) : preview
+        const base = section === 'value' ? await this.previews.describeValue(preview, lang) : preview
+        const text = section === 'value' ? base : sectionPageText(lang, base, section)
         return renderMetaTags({
           siteUrl,
           path: `/${encodeURIComponent(preview.value)}`,

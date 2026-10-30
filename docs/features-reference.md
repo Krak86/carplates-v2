@@ -293,6 +293,8 @@ deploy; Telegram and X keep their own preview cache.
 `/og/default.png` and `/og/page/` (2026-10-30): the generic cards are every static page's `og:image`, and Twitterbot/Google
 skip an image robots.txt disallows. Keep any new generic card under an allowed path.
 
+Plate/VIN `?section=<id>` links (2026-10-30): the title gets ` - <section label>` and the description a one-line lead (`SECTION_TEXT` / `sectionPageText`, `spa-text.ts`, ua/ru/en); `value` keeps its estimate text, an unknown id is the plain preview. The card image stays the plate card (a per-section card would multiply the expensive renders). A new `SHARE_SECTIONS` id (`share-section.ts`) needs a `SECTION_TEXT` entry.
+
 ## Share links `/go/<alias>` and `/share` (2026-10-30)
 
 - **Aliases** (`plate`, `vin`, `plate-photo`, `vin-photo`, `ar`) live in one list, `packages/shared/src/shareAliases.ts` (`SHARE_ALIASES`). A new one = that list, `SHARE_ALIAS_PAGES` (ua/ru/en, `spa-text.ts`), the `ALIAS_ICON` / `share.alias.*` i18n keys, and a pulse target in `SearchButtons`.

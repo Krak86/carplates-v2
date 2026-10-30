@@ -120,6 +120,13 @@ describe('SpaController meta injection', () => {
     expect(await get('/AA1234BB')).not.toContain('Estimated EU value')
   })
 
+  it('adds the section name and a lead sentence for other ?section= links', async () => {
+    const html = await get('/AA1234BB?section=recalls&lang=en')
+    expect(html).toContain('<title>Cars UA - AA1234BB - Toyota Camry 2015 - Recalls</title>')
+    expect(html).toContain('content="Safety recalls for the model. AA1234BB')
+    expect(await get('/AA1234BB?section=bogus')).toContain('<title>Cars UA - AA1234BB - Toyota Camry 2015</title>')
+  })
+
   it('serves static page tags without noindex', async () => {
     const html = await get('/about')
     expect(html).toContain('og:image" content="https://carsua.app/og/page/about.png"')
