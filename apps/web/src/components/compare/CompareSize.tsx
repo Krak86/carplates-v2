@@ -6,6 +6,7 @@ import { useSearchParams } from 'react-router'
 import SideSilhouette from '@/components/size/SideSilhouette'
 import SizeCarFront, { FRONT_PROFILES } from '@/components/size/SizeCarFront'
 import SizeCarTop from '@/components/size/SizeCarTop'
+import { exportFilename, saveSchemaPng } from '@/components/size/export-schema'
 import { axlePositions } from '@/components/size/silhouettes'
 import type { VehicleSize } from '@/components/size/use-vehicle-size'
 import { mmToMetres } from '@/components/size/VehicleSize.helpers'
@@ -202,6 +203,7 @@ export default function CompareSize({ sizes, names }: Props): ReactNode {
     if (initialStyle) setBlueprint(initialStyle === 'blueprint')
   }, [initialStyle, setBlueprint])
   const svgRef = useRef<SVGSVGElement>(null)
+  const figureRef = useRef<HTMLElement>(null)
 
   const [a, b] = [drawnCar(sizes[0]), drawnCar(sizes[1])] as const
   if (!a && !b) return null
@@ -224,6 +226,16 @@ export default function CompareSize({ sizes, names }: Props): ReactNode {
   const unit = t('rdw.unitM')
   const splitX = vx + (vw * split) / 100
   const inPlace = mode === 'inplace'
+  const handleSave = (): void => {
+    if (!svgRef.current || !figureRef.current) return
+    const title = names.join(' / ')
+    void saveSchemaPng(svgRef.current, {
+      source: figureRef.current,
+      title: `${title} · carsua.app`,
+      filename: exportFilename(title, blueprint),
+      blueprint
+    }).catch(() => undefined)
+  }
   const alt = t('compare.size.alt', {
     a: names[0],
     b: names[1],
@@ -282,9 +294,16 @@ export default function CompareSize({ sizes, names }: Props): ReactNode {
           label={m => t(`compare.size.mode.${m}`)}
           onChange={setMode}
         />
+        <button
+          type="button"
+          onClick={handleSave}
+          className="rounded-full border border-current px-2.5 py-0.5 text-xs text-[var(--color-muted)] hover:text-[var(--color-fg)]"
+        >
+          {t('size.schema.save')}
+        </button>
       </div>
 
-      <figure className={cn('m-0', blueprint && 'blueprint rounded-lg p-2')}>
+      <figure ref={figureRef} className={cn('m-0', blueprint && 'blueprint rounded-lg p-2')}>
         <svg
           ref={svgRef}
           viewBox={`${vx} ${vy} ${vw} ${vh}`}

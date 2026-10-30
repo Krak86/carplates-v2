@@ -7,6 +7,17 @@ import { useRegionLabel } from '@/lib/region-label'
 import { GAP, formatWithUnit } from './format'
 import type { FormatContext } from './format'
 import CompareRadars from './CompareRadars'
+import { Curves, GenerationGantt } from './CompareCurves'
+import { Dumbbells, FitVerdicts, SafetyAndCo2 } from './CompareRanges'
+import {
+  buildCo2Marks,
+  buildDumbbells,
+  buildFitRows,
+  buildGantt,
+  buildStarRows,
+  motCurves,
+  priceCurves
+} from './extras'
 import CompareSectionHeading from './CompareSectionHeading'
 import CompareShares from './CompareShares'
 import CompareSize from './CompareSize'
@@ -137,8 +148,13 @@ export default function CompareVisuals({ sections, names, loaded }: VisualsProps
     <div className="space-y-8">
       <Highlights sections={sections} names={names} />
       <Bars sections={sections} names={names} />
+      <Dumbbells items={buildDumbbells(loaded)} names={names} />
+      <SafetyAndCo2 stars={buildStarRows(loaded)} co2={buildCo2Marks(loaded)} names={names} />
+      <Curves price={priceCurves(loaded)} mot={motCurves(loaded)} names={names} />
+      <GenerationGantt gantt={buildGantt(loaded, new Date().getFullYear())} names={names} />
       <CompareShares bars={buildShareBars(loaded[0], loaded[1])} names={names} />
       <CompareSize sizes={[sizeOf(loaded[0]), sizeOf(loaded[1])]} names={names} />
+      <FitVerdicts rows={buildFitRows(loaded)} names={names} />
       {kindsMatch ? (
         <CompareRadars radars={radars} names={names} />
       ) : (

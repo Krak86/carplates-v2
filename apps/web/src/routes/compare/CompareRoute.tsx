@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate, useSearchParams } from 'react-router'
 
 import CompareExportButton from '@/components/compare/CompareExportButton'
+import { CompareSaveButton, CompareSavedList } from '@/components/compare/CompareSaved'
+import CompareSuggestions from '@/components/compare/CompareSuggestions'
 import CompareSlotHeader from '@/components/compare/CompareSlotHeader'
 import CompareSlotPicker from '@/components/compare/CompareSlotPicker'
 import CompareSectionHeading from '@/components/compare/CompareSectionHeading'
@@ -15,7 +17,7 @@ import { compareHref, formatCompareRef, parseCompareRef, sameRef } from '@/compo
 import { carTitle } from '@/components/compare/resolve'
 import { buildCompareRows, pruneRows } from '@/components/compare/rows'
 import { COMPARE_GROUPS, COMPARE_SLOTS } from '@/components/compare/types'
-import type { CompareGroup, CompareRef, CompareSlot } from '@/components/compare/types'
+import type { CompareGroup, CompareLoaded, CompareRef, CompareSlot } from '@/components/compare/types'
 import { useCompareCar } from '@/components/compare/use-compare-car'
 import type { CompareCarState } from '@/components/compare/use-compare-car'
 import Card from '@/components/ui/Card'
@@ -55,13 +57,16 @@ function SlotCard({
   refValue,
   state,
   onPick,
-  onClear
+  onClear,
+  suggestFrom
 }: {
   slot: CompareSlot
   refValue: CompareRef | null
   state: CompareCarState
   onPick: (ref: CompareRef) => void
   onClear: () => void
+  /** Car A, when this is the empty slot B: its suggestions are offered. */
+  suggestFrom?: CompareLoaded | null
 }): ReactNode {
   const { t } = useTranslation()
   const { loaded, error } = state
@@ -69,6 +74,7 @@ function SlotCard({
   return (
     <Card>
       <h2 className="sr-only">{t('compare.slot', { slot: slot.toUpperCase() })}</h2>
+      {!refValue && suggestFrom?.car && <CompareSuggestions from={suggestFrom} onPick={onPick} />}
       {!refValue && <CompareSlotPicker slot={slot} onPick={onPick} />}
       {refValue && error && (
         <div role="alert">
@@ -146,11 +152,17 @@ export default function CompareRoute(): ReactNode {
             state={states[i] as CompareCarState}
             onPick={handlePick(slot)}
             onClear={handleClear(slot)}
+            suggestFrom={slot === 'b' ? states[0].loaded : null}
           />
         ))}
       </div>
 
       {!ready && <p className="text-base text-[var(--color-muted)]">{t('compare.pickBoth')}</p>}
+      {!ready && (
+        <Card>
+          <CompareSavedList />
+        </Card>
+      )}
       {ready && sameRef(refs[0], refs[1]) && (
         <p role="status" className="text-base text-[var(--color-muted)]">
           {t('compare.sameCar')}
@@ -172,6 +184,14 @@ export default function CompareRoute(): ReactNode {
               <input type="checkbox" checked={diffOnly} onChange={e => setDiffOnly(e.target.checked)} />
               {t('compare.diffOnly')}
             </label>
+            {refs[0] && refs[1] && (
+              <CompareSaveButton
+                a={formatCompareRef(refs[0])}
+                b={formatCompareRef(refs[1])}
+                labelA={slotName(states[0], 'a')}
+                labelB={slotName(states[1], 'b')}
+              />
+            )}
             {!pending && sections.length > 0 && (
               <CompareExportButton
                 className="ml-auto"

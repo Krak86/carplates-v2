@@ -2,7 +2,19 @@ import { OVERLAY_MODES, VIEW_CHOICES } from './size-overlay'
 import type { OverlayMode, ViewChoice } from './size-overlay'
 
 /** Every block of the page that has its own link (`?section=<id>`, anchor `#compare-<id>`). */
-export const COMPARE_SECTIONS = ['highlights', 'radars', 'bars', 'shares', 'size', 'table'] as const
+export const COMPARE_SECTIONS = [
+  'highlights',
+  'radars',
+  'bars',
+  'ranges',
+  'safety',
+  'curves',
+  'timeline',
+  'shares',
+  'size',
+  'fit',
+  'table'
+] as const
 export type CompareSectionId = (typeof COMPARE_SECTIONS)[number]
 
 export const sectionAnchor = (section: CompareSectionId): string => `compare-${section}`

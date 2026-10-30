@@ -6,6 +6,7 @@ import { filterByBodyStyle, nhtsaBodyBucket, averageStarRating } from '@/compone
 import { ApiError } from '@/lib/api'
 import {
   catalogLookupQuery,
+  generationGrowthQuery,
   catalogModelQuery,
   euroNcapRatingsQuery,
   motQuery,
@@ -45,6 +46,8 @@ const EMPTY: CompareLoaded = {
   nhtsaRecalls: null,
   nhtsaComplaints: null,
   motFailRate: null,
+  mot: null,
+  generations: null,
   catalog: null
 }
 
@@ -79,6 +82,8 @@ export function useCompareCar(ref: CompareRef | null): CompareCarState {
   const nhtsaComplaints = useQuery({ ...nhtsaComplaintsQuery(brand ?? '', model ?? '', year ?? 0), ...on })
   const mot = useQuery({ ...motQuery(brand ?? '', model ?? '', year ?? 0, kind, motFuelHint(fuel)), ...on })
 
+  const growth = useQuery({ ...generationGrowthQuery(brand ?? '', model ?? ''), ...on })
+
   // A model ref already holds its catalog page; a plate or VIN asks which page its brand and model belong to.
   const lookup = useQuery({
     ...catalogLookupQuery(brand ?? '', model ?? ''),
@@ -104,12 +109,14 @@ export function useCompareCar(ref: CompareRef | null): CompareCarState {
         nhtsaRecalls: nhtsaRecalls.data?.matchedModel ? nhtsaRecalls.data.total : null,
         nhtsaComplaints: nhtsaComplaints.data?.matchedModel ? nhtsaComplaints.data.total : null,
         motFailRate: mot.data?.match ? overallFailRate(mot.data.match.bands) : null,
+        mot: mot.data?.match ? { edgesKm: mot.data.match.edgesKm, bands: mot.data.match.bands } : null,
+        generations: growth.data?.match?.generations ?? null,
         catalog
       }
 
   const base = !ref || done(baseQuery)
   const group: Record<CompareGroup, boolean> = {
-    overview: done(wiki) && done(rdw),
+    overview: done(wiki) && done(rdw) && done(growth),
     engine: done(wiki) && done(rdw),
     size: done(wiki) && done(rdw),
     economy: done(rdw),

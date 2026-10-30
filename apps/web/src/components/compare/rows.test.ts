@@ -58,6 +58,8 @@ const loaded = (over: Partial<CompareLoaded> = {}): CompareLoaded => ({
   nhtsaRecalls: null,
   nhtsaComplaints: null,
   motFailRate: null,
+  mot: null,
+  generations: null,
   catalog: null,
   ...over
 })

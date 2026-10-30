@@ -1,4 +1,12 @@
-import type { CatalogModel, EuroNcapRating, RdwMatchInfo, VehicleFuel, WikiSpecsResponse } from '@carplates/shared'
+import type {
+  CatalogModel,
+  EuroNcapRating,
+  GenerationGrowthItem,
+  MotBand,
+  RdwMatchInfo,
+  VehicleFuel,
+  WikiSpecsResponse
+} from '@carplates/shared'
 
 /** What one compare slot was given: a plate, a VIN, or a catalog model (slugs, year, optional fuel class). */
 export type CompareRef =
@@ -106,5 +114,9 @@ export type CompareLoaded = {
   nhtsaComplaints: number | null
   /** Share of UK MOT tests the model failed, all mileage bands pooled. */
   motFailRate: number | null
+  /** The MOT bands behind the fail rate (for the curve by mileage). */
+  mot: { edgesKm: number[]; bands: MotBand[] } | null
+  /** Every generation of the model with its production years (for the Gantt). */
+  generations: GenerationGrowthItem[] | null
   catalog: CatalogModel | null
 }
