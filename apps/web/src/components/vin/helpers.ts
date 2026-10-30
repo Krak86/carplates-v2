@@ -1,4 +1,4 @@
-import { isLegacyCountry, lookupWmi, type VinDecodeResponse } from '@carplates/shared'
+import { isLegacyCountry, lookupVdsModel, lookupWmi, type VinDecodeResponse } from '@carplates/shared'
 
 import { VIN_GROUPS } from '@/components/vin/types'
 import type {
@@ -321,8 +321,8 @@ export function countryLabel(code: string, lang: string, t: (key: string) => str
 
 // ---- Fallback for gaps in the NHTSA decode ------------------------------------------------------
 
-export const FALLBACK_SOURCES = ['registry', 'wmi', 'yearCode'] as const
-/** Where a value NHTSA didn't provide came from: our registry record, the VIN's 3-char prefix, or its 10th character. */
+export const FALLBACK_SOURCES = ['registry', 'wmi', 'vds', 'yearCode'] as const
+/** Where a value NHTSA didn't provide came from: our registry record, the VIN's 3-char prefix, its 4th character (model family) or its 10th. */
 export type FallbackSource = (typeof FALLBACK_SOURCES)[number]
 
 export type Derived<T> = { value: T; source: FallbackSource }
@@ -344,12 +344,20 @@ type RegistryHint = { brand?: string | null; model?: string | null; makeYear?: n
 export function buildFallback(vin: string, fields: FieldMap, registry: RegistryHint | undefined): VinFallback {
   const out: VinFallback = {}
   const wmi = lookupWmi(vin)
+  const vds = lookupVdsModel(vin)
 
   if (!fields.get('Make')) {
     if (registry?.brand) out.make = { value: registry.brand, source: 'registry' }
+    // The 4th-character table carries a clean make; some WMI makes carry the plant ("Kia (Slovakia)") and match nothing.
+    else if (vds) out.make = { value: vds.make, source: 'vds' }
     else if (wmi?.make) out.make = { value: wmi.make, source: 'wmi' }
   }
-  if (!fields.get('Model') && registry?.model) out.model = { value: registry.model, source: 'registry' }
+  if (!fields.get('Model')) {
+    // The 4th-character model only stands in when the make is the one it belongs to.
+    const makeMatches = !registry?.brand || registry.brand.toUpperCase() === vds?.make.toUpperCase()
+    if (registry?.model) out.model = { value: registry.model, source: 'registry' }
+    else if (vds && makeMatches && !fields.get('Make')) out.model = { value: vds.model, source: 'vds' }
+  }
   if (!fields.get('Plant Country') && wmi) out.country = { value: wmi.country, source: 'wmi' }
 
   if (!fields.get('Model Year')) {
@@ -359,6 +367,25 @@ export function buildFallback(vin: string, fields: FieldMap, registry: RegistryH
     else if (coded) out.year = { value: coded, source: 'yearCode' }
   }
   return out
+}
+
+const NORTH_AMERICA = new Set(['US', 'CA', 'MX'])
+
+/**
+ * The manufacturer to show. NHTSA files some European prefixes under the importer's US address (U5Y = "HYUNDAI-KIA AMERICA
+ * TECHNICAL CENTER") and gives no plant country; when the prefix table puts the car outside North America we show the
+ * prefix maker instead of that importer. `derived` marks a value NHTSA did not supply.
+ */
+export function manufacturerOf(
+  fields: FieldMap,
+  fallback: VinFallback
+): { value: string | undefined; derived: boolean } {
+  const nhtsa = fields.get('Manufacturer Name')
+  const importerOnly =
+    !!nhtsa && !fields.get('Plant Country') && !!fallback.country && !NORTH_AMERICA.has(fallback.country.value)
+  if (nhtsa && !importerOnly) return { value: nhtsa, derived: false }
+  const own = fallback.make?.value
+  return own ? { value: own, derived: true } : { value: nhtsa, derived: false }
 }
 
 /** NHTSA fuel names → the registry keywords the shared fuel resolver (and the RDW powertrain filter) understand. */

@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 
 import Flag from '@/components/Flag'
 import VinDerivedChip from '@/components/vin/VinDerivedChip'
-import { countryIso, countryName, flagSlug } from '@/components/vin/helpers'
+import { countryIso, countryName, flagSlug, manufacturerOf } from '@/components/vin/helpers'
 import type { FieldMap, VinFallback } from '@/components/vin/helpers'
 
 type Props = {
@@ -16,7 +16,7 @@ export default function VinOriginCard({ fields, fallback }: Props): ReactNode {
   const { t, i18n } = useTranslation()
   const city = fields.get('Plant City')
   const nhtsaCountry = fields.get('Plant Country')
-  const manufacturer = fields.get('Manufacturer Name') ?? fallback.make?.value
+  const { value: manufacturer, derived: manufacturerDerived } = manufacturerOf(fields, fallback)
   const derivedCountry = nhtsaCountry ? undefined : fallback.country
   if (!city && !nhtsaCountry && !derivedCountry && !manufacturer) return null
 
@@ -41,7 +41,7 @@ export default function VinOriginCard({ fields, fallback }: Props): ReactNode {
         {manufacturer && (
           <div className="text-sm text-[var(--color-muted)]">
             {manufacturer}
-            {!fields.get('Manufacturer Name') && fallback.make && <VinDerivedChip source={fallback.make.source} />}
+            {manufacturerDerived && fallback.make && <VinDerivedChip source={fallback.make.source} />}
           </div>
         )}
       </div>

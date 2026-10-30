@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common'
 import { brandOriginPeriod, brandOwnership, modelPlant, wmiPrefix } from '@carplates/db'
-import { brandSlug, isVin, lookupWmi, modelKey, vinRegion } from '@carplates/shared'
+import { brandSlug, hasKnownWmi, isVin, lookupWmi, modelKey, vinRegion } from '@carplates/shared'
 import type { BrandOriginPeriod, BrandOwnership, ModelPlant, OriginResponse } from '@carplates/shared'
 import { and, asc, eq, max } from 'drizzle-orm'
 
@@ -137,8 +137,13 @@ export function resolveWmi(
   const wmi = vin.slice(0, 3)
   const region = vinRegion(vin)
   const row = pickByYear(rows, year)
-  if (row?.countryCode) return { wmi, maker: row.maker, countryCode: row.countryCode, region }
-
   const fallback = lookupWmi(vin)
+  // vPIC files a prefix under the manufacturer's address, so importers' European prefixes come back as "US" (U5Y = HATCI).
+  // The curated table names the plant country by hand and wins for the country whenever it lists the exact prefix.
+  if (row?.countryCode) {
+    const countryCode = hasKnownWmi(vin) && fallback ? fallback.country : row.countryCode
+    return { wmi, maker: row.maker, countryCode, region }
+  }
+
   return { wmi, maker: row?.maker ?? fallback?.make ?? null, countryCode: fallback?.country ?? null, region }
 }

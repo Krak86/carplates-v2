@@ -13,7 +13,7 @@ import { cn } from '@/lib/cn'
 import { scrollElementIntoView } from '@/lib/share-section'
 
 type VerificationSite = {
-  id: 'bdr' | 'mtsbu' | 'otk' | 'license' | 'leisure' | 'customs' | 'shtrafua' | 'pdr'
+  id: 'bdr' | 'mtsbu' | 'otk' | 'license' | 'leisure' | 'customs' | 'shtrafua' | 'pdr' | 'historia'
   url: string
   /** Absent when we are not cleared to show the logo — an emoji tile is drawn instead. */
   icon?: string
@@ -39,7 +39,9 @@ const VERIFICATION_SITES: VerificationSite[] = [
   },
   { id: 'customs', url: 'https://cabinet.customs.gov.ua/vtzcheck', emoji: '🛃', iconClass: 'text-xl' },
   { id: 'shtrafua', url: 'https://shtrafua.com', icon: '/icons/shtrafua.png', iconClass: 'h-5 w-auto' },
-  { id: 'pdr', url: 'https://pdr.infotech.gov.ua/', emoji: '📝', iconClass: 'text-xl' }
+  { id: 'pdr', url: 'https://pdr.infotech.gov.ua/', emoji: '📝', iconClass: 'text-xl' },
+  // Polish government service (no logo: its mark is not licensed for reuse). Link-out only - it needs the plate, VIN and first-registration date together.
+  { id: 'historia', url: 'https://www.gov.pl/web/gov/sprawdz-historie-pojazdu', emoji: '🇵🇱', iconClass: 'text-xl' }
 ]
 
 /**

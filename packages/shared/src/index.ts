@@ -11,6 +11,7 @@ export {
 export { modelFamily, type ModelFamily } from './modelFamily.js'
 export { REGION_IDS } from './regionIds.js'
 export { hasKnownWmi, lookupWmi, type WmiMatch } from './wmi.js'
+export { lookupVdsModel, type VdsMatch } from './vds.js'
 export {
   LEGACY_COUNTRIES,
   ORIGIN_PLANT_SOURCES,
