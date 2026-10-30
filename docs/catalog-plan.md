@@ -184,7 +184,7 @@ capacity_p50, power_p50, imported_share, first_reg_by_year jsonb, owners_p50)`.
 
 ## Next: make the pages usable, not only crawlable (added 2026-10-30)
 
-**Status 2026-10-30: blocks 1-3 are implemented locally (uncommitted/undeployed at the time of writing); block 4 (year pages) is next, and only after Search Console shows the first 300 pages indexed.** Original state after the MVP rollout: the model pages are live and indexable (300), Cloudflare caches them, and the prod browser check passed, but **nothing in the
+**Status 2026-10-30: blocks 1-3 and 5 are deployed and browser-checked on prod (plate and VIN links, hubs, chips, generation stats, caching, sitemap 1,029 URLs read by Search Console). Block 4 (year pages) is next, and only after Search Console shows the first 300 pages indexed (check about 2 weeks after the sitemap read, 2026-10-30).** Original state after the MVP rollout: the model pages are live and indexable (300), Cloudflare caches them, and the prod browser check passed, but **nothing in the
 app links to them**: only Google and a typed URL reach one. Fuel/body/colour/region are localized (`registryLabels.ts`, `regionLabels.ts`). Build order below;
 each block is one commit and must add its routes to the sitemap/`STATIC_PAGES` rules in CLAUDE.md.
 
@@ -204,7 +204,7 @@ each block is one commit and must add its routes to the sitemap/`STATIC_PAGES` r
    no network beyond the section calls. Fuel/body chips can reuse `registryLabel`.
 4. **Year pages `/cars/:make/:model/:year`** (the original plan above, about 8-15k pages). Wait until Search Console shows the first 300 pages indexed (1-2 weeks);
    the model page then gets year chips that link to them, and generation chips become real URLs.
-5. **Cheap extras, anytime:** ~~retry the catalog load within a minute when it is empty~~ (_done 2026-10-30, `EMPTY_RELOAD_MS` in `CatalogService`); `Car` JSON-LD; localized `Typical engine` text.
+5. **Cheap extras, anytime.** _Done 2026-10-30:_ the empty-catalog retry (`EMPTY_RELOAD_MS` in `CatalogService`), `Car` JSON-LD next to the `BreadcrumbList` (`catalogCarJsonLd`, model pages only), and the typical engine size / power line in the server-injected block in ua/ru/en (the web page already had it).
 
 **Left as is on purpose (2026-10-30):** a browser that still has the previous service worker shows the home page at `/cars/...` until the update installs
 (the cached shell has no such route; not fixable from the app); the client tab title is "Cars UA - BMW X5" like the plate pages (the server `<title>` is what

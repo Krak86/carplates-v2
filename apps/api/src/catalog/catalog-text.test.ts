@@ -3,6 +3,7 @@ import type { CatalogMake, CatalogModel } from '@carplates/shared'
 
 import {
   breadcrumbJsonLd,
+  catalogCarJsonLd,
   catalogCrumbs,
   catalogIndexSeoBlock,
   catalogMakePageText,
@@ -92,6 +93,37 @@ describe('catalogSeoBlock', () => {
     const html = catalogSeoBlock({ ...MODEL, modelName: 'A<b>' }, 'ua')
     expect(html).toContain('<a href="/cars/bmw/x5">')
     expect(html).toContain('A&lt;b&gt;')
+  })
+})
+
+describe('engine line and Car JSON-LD', () => {
+  const withEngine: CatalogModel = { ...MODEL, stats: { ...MODEL.stats, capacityP50: 2993, powerP50: 210 } }
+
+  it('adds the typical engine line to the block in each language, and nothing when unknown', () => {
+    expect(catalogSeoBlock(withEngine, 'en')).toContain('<p>Typical engine size: 2,993 cc · Typical power: 210 kW</p>')
+    expect(catalogSeoBlock(withEngine, 'ua')).toContain("Типовий об'єм двигуна: 2")
+    expect(catalogSeoBlock(withEngine, 'ru')).toContain('Типичный объём двигателя: 2')
+    expect(catalogSeoBlock(MODEL, 'en')).not.toContain('Typical')
+    expect(catalogSeoBlock({ ...MODEL, stats: { ...MODEL.stats, powerP50: 150 } }, 'en')).toContain(
+      '<p>Typical power: 150 kW</p>'
+    )
+  })
+
+  it('describes the model as a Car with localized fuel/body and the typical engine', () => {
+    const ld = catalogCarJsonLd('https://carsua.app', withEngine, 'en') as Record<string, unknown>
+    expect(ld).toMatchObject({
+      '@type': 'Car',
+      name: 'BMW 3 Series',
+      url: 'https://carsua.app/cars/bmw/3series?lang=en',
+      brand: { '@type': 'Brand', name: 'BMW' },
+      fuelType: 'diesel',
+      bodyType: 'sedan',
+      vehicleEngine: {
+        engineDisplacement: { value: 2993, unitCode: 'CMQ' },
+        enginePower: { value: 210, unitCode: 'KWT' }
+      }
+    })
+    expect(catalogCarJsonLd('https://carsua.app', MODEL, 'ua')).not.toHaveProperty('vehicleEngine')
   })
 })
 

@@ -17,6 +17,7 @@ import type { FastifyReply, FastifyRequest } from 'fastify'
 
 import {
   breadcrumbJsonLd,
+  catalogCarJsonLd,
   catalogCrumbs,
   catalogIndexSeoBlock,
   catalogMakePageText,
@@ -221,7 +222,7 @@ export class SpaController {
       image: `${siteUrl}/og/page/${catalogPageSlug(model.make, model.model)}.png${langQuery}`,
       noindex: !model.indexable,
       alternates: model.indexable,
-      jsonLd: breadcrumbJsonLd(siteUrl, catalogModelCrumbs(model, lang), lang)
+      jsonLd: [breadcrumbJsonLd(siteUrl, catalogModelCrumbs(model, lang), lang), catalogCarJsonLd(siteUrl, model, lang)]
     })
   }
 

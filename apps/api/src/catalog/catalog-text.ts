@@ -26,6 +26,9 @@ type Copy = {
   body: string
   color: string
   regions: string
+  /** Same wording as the web `catalog.capacityMedian` / `catalog.powerMedian` strings. */
+  capacityMedian: (value: string) => string
+  powerMedian: (value: string) => string
   cars: string
   models: string
   home: string
@@ -54,6 +57,8 @@ const COPY: Record<Lang, Copy> = {
     body: 'Кузов',
     color: 'Колір',
     regions: 'Регіони',
+    capacityMedian: v => `Типовий об'єм двигуна: ${v} см³`,
+    powerMedian: v => `Типова потужність: ${v} кВт`,
     cars: 'авто',
     models: 'Інші моделі марки',
     home: 'Пошук авто за номером або VIN',
@@ -82,6 +87,8 @@ const COPY: Record<Lang, Copy> = {
     body: 'Кузов',
     color: 'Цвет',
     regions: 'Регионы',
+    capacityMedian: v => `Типичный объём двигателя: ${v} см³`,
+    powerMedian: v => `Типичная мощность: ${v} кВт`,
     cars: 'авто',
     models: 'Другие модели марки',
     home: 'Поиск авто по номеру или VIN',
@@ -110,6 +117,8 @@ const COPY: Record<Lang, Copy> = {
     body: 'Body',
     color: 'Colour',
     regions: 'Regions',
+    capacityMedian: v => `Typical engine size: ${v} cc`,
+    powerMedian: v => `Typical power: ${v} kW`,
     cars: 'cars',
     models: 'Other models of the make',
     home: 'Look up a car by plate or VIN',
@@ -161,6 +170,33 @@ export function breadcrumbJsonLd(siteUrl: string, crumbs: Crumb[], lang: Lang): 
       name: c.name,
       item: langUrl(siteUrl, c.path === '/' ? '' : c.path, lang)
     }))
+  }
+}
+
+/**
+ * `Car` JSON-LD of a model page: the model's name and make plus its typical (most common) fuel, body and engine from the
+ * registry. It describes the model, not a car for sale, so there are no offers.
+ */
+export function catalogCarJsonLd(siteUrl: string, m: CatalogModel, lang: Lang): object {
+  const { stats } = m
+  const fuel = localizeRegistryRows('fuel', stats.fuel, lang)[0]?.[0]
+  const body = localizeRegistryRows('body', stats.body, lang)[0]?.[0]
+  const engine = {
+    ...(stats.capacityP50
+      ? { engineDisplacement: { '@type': 'QuantitativeValue', value: stats.capacityP50, unitCode: 'CMQ' } }
+      : {}),
+    ...(stats.powerP50 ? { enginePower: { '@type': 'QuantitativeValue', value: stats.powerP50, unitCode: 'KWT' } } : {})
+  }
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Car',
+    name: catalogName(m),
+    url: langUrl(siteUrl, catalogPath(m.make, m.model), lang),
+    brand: { '@type': 'Brand', name: m.makeName },
+    model: m.modelName,
+    ...(fuel ? { fuelType: fuel } : {}),
+    ...(body ? { bodyType: body } : {}),
+    ...(Object.keys(engine).length ? { vehicleEngine: { '@type': 'EngineSpecification', ...engine } } : {})
   }
 }
 
@@ -232,6 +268,12 @@ export function catalogSeoBlock(m: CatalogModel, lang: Lang): string {
   const topRegion = regions[0]?.[0]
   const biggestYears = [...stats.years].sort((a, b) => b[1] - a[1]).slice(0, BLOCK_YEARS)
   const byYear = biggestYears.sort((a, b) => Number(a[0]) - Number(b[0]))
+  const engine = [
+    stats.capacityP50 ? c.capacityMedian(fmt(stats.capacityP50, lang)) : null,
+    stats.powerP50 ? c.powerMedian(fmt(stats.powerP50, lang)) : null
+  ]
+    .filter(Boolean)
+    .join(' · ')
   const makeLink = `<li><a href="${esc(catalogMakePath(m.make))}${langQuery(lang)}">${esc(c.allOfMake(m.makeName))}</a></li>`
   const links = m.siblings
     .map(
@@ -249,6 +291,7 @@ export function catalogSeoBlock(m: CatalogModel, lang: Lang): string {
     table(c.body, localizeRegistryRows('body', stats.body, lang).slice(0, BLOCK_ROWS), m.n, lang),
     table(c.color, localizeRegistryRows('color', stats.color, lang).slice(0, BLOCK_ROWS), m.n, lang),
     table(c.regions, regions.slice(0, BLOCK_ROWS), m.n, lang),
+    engine ? `<p>${esc(engine)}</p>` : '',
     `<nav><h2>${esc(c.models)}</h2><ul>${makeLink}${links}</ul></nav>`,
     `<p><a href="/${langQuery(lang)}">${esc(c.home)}</a></p>`,
     `</main>`
