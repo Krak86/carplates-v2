@@ -36,6 +36,7 @@ export default function CatalogMakeRoute(): ReactNode {
   const query = useQuery({ ...catalogMakeQuery(slug), enabled: params.success })
   const make = query.data
   const format = new Intl.NumberFormat(toIntlLocale(i18n.language))
+  const maxCount = Math.max(1, ...(make?.models.map(m => m.n) ?? []))
   useDocumentTitle(make?.makeName)
 
   if (!params.success || (query.error instanceof ApiError && query.error.status === 404)) return <CatalogMakeNotFound />
@@ -80,26 +81,52 @@ export default function CatalogMakeRoute(): ReactNode {
 
       <Card>
         <h2 className="mb-2 text-lg font-semibold">{t('catalog.modelsHeading')}</h2>
-        <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
-          {make.models.map(m => {
-            const years = yearRangeLabel(m)
+        <table className="w-full text-base">
+          <thead>
+            <tr className="border-b border-[var(--color-border)] text-left text-sm text-[var(--color-muted)]">
+              <th scope="col" className="py-1.5 pr-3 font-normal">
+                {t('catalog.colModel')}
+              </th>
+              <th scope="col" className="py-1.5 pr-3 text-right font-normal">
+                {t('catalog.colCars')}
+              </th>
+              <th scope="col" className="hidden py-1.5 pr-3 font-normal sm:table-cell">
+                {t('catalog.colYears')}
+              </th>
+              <th scope="col" className="hidden w-1/4 py-1.5 font-normal md:table-cell">
+                <span className="sr-only">%</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {make.models.map(m => {
+              const years = yearRangeLabel(m)
+              const pct = Math.max(1, Math.round((m.n / maxCount) * 100))
 
-            return (
-              <li key={m.model}>
-                <Link
-                  to={catalogPath(make.make, m.model)}
-                  className="flex items-baseline justify-between gap-3 rounded-lg border border-[var(--color-border)] px-3 py-2 transition-colors hover:border-[var(--color-primary)]"
+              return (
+                <tr
+                  key={m.model}
+                  className="border-b border-[var(--color-border)]/50 transition-colors last:border-0 hover:bg-[var(--color-primary)]/10"
                 >
-                  <span className="min-w-0 truncate text-base font-medium">{`${make.makeName} ${m.modelName}`}</span>
-                  <span className="shrink-0 text-right text-sm text-[var(--color-muted)]">
-                    {t('catalog.carsCount', { count: format.format(m.n) })}
-                    {years ? ` · ${years}` : ''}
-                  </span>
-                </Link>
-              </li>
-            )
-          })}
-        </ul>
+                  <th scope="row" className="py-1.5 pr-3 text-left font-medium">
+                    <Link to={catalogPath(make.make, m.model)} className="hover:text-[var(--color-primary)]">
+                      {`${make.makeName} ${m.modelName}`}
+                    </Link>
+                  </th>
+                  <td className="py-1.5 pr-3 text-right tabular-nums">{format.format(m.n)}</td>
+                  <td className="hidden py-1.5 pr-3 text-[var(--color-muted)] tabular-nums sm:table-cell">{years}</td>
+                  <td className="hidden py-1.5 md:table-cell">
+                    <span
+                      aria-hidden
+                      className="block h-2 rounded bg-[var(--color-primary)]"
+                      style={{ width: `${pct}%` }}
+                    />
+                  </td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
       </Card>
     </main>
   )
