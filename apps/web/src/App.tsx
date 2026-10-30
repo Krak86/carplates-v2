@@ -40,6 +40,7 @@ const RecallsRoute = lazy(() => import('@/routes/read/recalls/RecallsRoute'))
 const CatalogIndexRoute = lazy(() => import('@/routes/catalog/CatalogIndexRoute'))
 const CatalogMakeRoute = lazy(() => import('@/routes/catalog/CatalogMakeRoute'))
 const CatalogModelRoute = lazy(() => import('@/routes/catalog/CatalogModelRoute'))
+const CompareRoute = lazy(() => import('@/routes/compare/CompareRoute'))
 const GoRoute = lazy(() => import('@/routes/go/GoRoute'))
 const ShareRoute = lazy(() => import('@/routes/share/ShareRoute'))
 const FeaturesRoute = lazy(() => import('@/routes/features/FeaturesRoute'))
@@ -116,6 +117,7 @@ export default function App(): ReactNode {
             <Route path="/cars" element={<CatalogIndexRoute />} />
             <Route path="/cars/:make" element={<CatalogMakeRoute />} />
             <Route path="/cars/:make/:model" element={<CatalogModelRoute />} />
+            <Route path="/compare" element={<CompareRoute />} />
             <Route path="/share" element={<ShareRoute />} />
             <Route path="/go/:alias" element={<GoRoute />} />
             <Route path="/features" element={<FeaturesRoute />} />

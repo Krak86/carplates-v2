@@ -81,6 +81,13 @@
   --color-mot-watch: #3987e5;
 }
 
+/* /compare: car A is blue, car B orange - the two validated MOT slots above, so the sRGB fallback, the dark steps and the
+   P3 / oklch versions are inherited (a custom property resolves its var() on the same element, so each theme block wins). */
+:root {
+  --color-compare-a: var(--color-mot-watch);
+  --color-compare-b: var(--color-mot-fail);
+}
+
 /* Favorite-label palette (index = `label.color`, see FAVORITE_LABEL_COLOR_COUNT): ten well-separated hues, the sRGB
    fallback here and the wide-gamut versions in the `color-gamut` blocks below. Labels are always shown with their
    name too, so color is never the only signal. */

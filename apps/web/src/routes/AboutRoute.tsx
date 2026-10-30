@@ -290,6 +290,7 @@ const FEATURES = [
   'guides',
   'stats',
   'catalog',
+  'compare',
   'news',
   'whatsnew',
   'race',

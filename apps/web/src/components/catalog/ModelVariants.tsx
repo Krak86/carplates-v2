@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import type { ReactNode } from 'react'
+import { resolveFuelCategories } from '@carplates/shared'
 import type { CatalogModel } from '@carplates/shared'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 
+import CompareChip from '@/components/compare/CompareChip'
 import { generationLabel, generationSpanText } from '@/components/GenerationChip.helpers'
 import { toIntlLocale } from '@/lib/intl'
 import { catalogYearsQuery, generationGrowthQuery } from '@/lib/queries'
@@ -79,6 +81,17 @@ export default function ModelVariants({ model }: Props): ReactNode {
             onPick: () => setBody(o.value)
           }))}
         />
+        {year !== null && (
+          <CompareChip
+            from={{
+              kind: 'model',
+              make: model.make,
+              model: model.model,
+              year,
+              fuel: resolveFuelCategories(fuel)[0] ?? null
+            }}
+          />
+        )}
       </div>
 
       {!!currentGeneration && !!byYear && (

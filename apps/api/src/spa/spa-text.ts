@@ -113,6 +113,23 @@ export const STATIC_PAGES: Record<string, Record<Lang, PageText>> = {
         'A catalog of the makes and models registered in Ukraine: cars on the road, model years, fuel and regions from the open vehicle registry.'
     }
   },
+  '/compare': {
+    ua: {
+      title: 'Порівняння двох авто: за номером, VIN або моделлю | Cars UA',
+      description:
+        'Порівняйте два авто поруч: потужність, розміри, вагу, витрату, ціну, безпеку та відгуки. Вкажіть номер, VIN або модель - показуємо лише ті дані, які є.'
+    },
+    ru: {
+      title: 'Сравнение двух авто: по номеру, VIN или модели | Cars UA',
+      description:
+        'Сравните два авто рядом: мощность, размеры, вес, расход, цену, безопасность и отзывы. Укажите номер, VIN или модель - показываем только те данные, что есть.'
+    },
+    en: {
+      title: 'Compare two cars by plate, VIN or model | Cars UA',
+      description:
+        'Put two cars side by side: power, size, weight, consumption, price, safety and reliability. Enter a plate, a VIN or a model - only data we actually hold is shown.'
+    }
+  },
   '/stats': {
     ua: {
       title: 'Статистика авто в Україні: марки, кольори, паливо | Cars UA',

@@ -20,6 +20,12 @@ export const RELEASES: readonly ReleaseDay[] = [
     items: [
       item(
         'new',
+        'Порівняння двох авто на /compare: номер, VIN або модель у кожному полі, таблиця поруч лише з наявними даними (потужність, розміри, вага, витрата, ціна, безпека, надійність, облік в Україні) і окремо дані саме цього авто. Кнопка «Порівняти» є на картці номера, VIN і сторінці моделі.',
+        'Сравнение двух авто на /compare: номер, VIN или модель в каждом поле, таблица рядом только с имеющимися данными (мощность, размеры, вес, расход, цена, безопасность, надёжность, учёт в Украине) и отдельно данные именно этого авто. Кнопка «Сравнить» есть на карточке номера, VIN и странице модели.',
+        'Compare two cars at /compare: a plate, a VIN or a model in each slot, a side-by-side table with only the data we hold (power, size, weight, consumption, price, safety, reliability, registrations in Ukraine) and own data of the exact car kept apart. A Compare button sits on the plate card, the VIN card and the model page.'
+      ),
+      item(
+        'new',
         'Сторінка «Поділитися пошуком»: короткі посилання /go/… на пошук за номером, VIN, фото та AR-скан. Кожне має власне превʼю в месенджерах і відкриває головну з підсвіченою потрібною кнопкою; є вибір мови й мітка джерела.',
         'Страница «Поделиться поиском»: короткие ссылки /go/… на поиск по номеру, VIN, фото и AR-скан. У каждой своё превью в мессенджерах, и она открывает главную с подсвеченной нужной кнопкой; есть выбор языка и метка источника.',
         'Share a search page: short /go/… links to plate, VIN, photo and AR-scan search. Each has its own preview in messengers and opens the home page with the matching button highlighted; pick a language and add a source tag.'
