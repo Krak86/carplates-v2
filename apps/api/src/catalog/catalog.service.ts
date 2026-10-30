@@ -15,6 +15,8 @@ import { DbService } from '../db/db.service.js'
 
 /** The taxonomy is a few thousand rows; re-read it this often so a monthly `db:refresh-catalog` shows up without a restart. */
 const RELOAD_MS = 60 * 60 * 1000
+/** An empty first load (the build has not run yet) is retried this soon instead of after an hour. */
+const EMPTY_RELOAD_MS = 60 * 1000
 const SIBLINGS = 12
 
 type Snapshot = {
@@ -95,7 +97,12 @@ export class CatalogService {
   }
 
   private async load(): Promise<Snapshot> {
-    if (this.snapshot && Date.now() - this.snapshot.at < RELOAD_MS) return this.snapshot
+    if (
+      this.snapshot &&
+      Date.now() - this.snapshot.at < (this.snapshot.models.size > 0 ? RELOAD_MS : EMPTY_RELOAD_MS)
+    ) {
+      return this.snapshot
+    }
     this.loading ??= this.read()
       .then(s => (this.snapshot = s))
       .catch((err: unknown) => {

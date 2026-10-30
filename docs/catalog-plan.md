@@ -204,8 +204,7 @@ each block is one commit and must add its routes to the sitemap/`STATIC_PAGES` r
    no network beyond the section calls. Fuel/body chips can reuse `registryLabel`.
 4. **Year pages `/cars/:make/:model/:year`** (the original plan above, about 8-15k pages). Wait until Search Console shows the first 300 pages indexed (1-2 weeks);
    the model page then gets year chips that link to them, and generation chips become real URLs.
-5. **Cheap extras, anytime:** retry the catalog load within a minute when it is empty (`CatalogService` caches an empty first load for an hour, so the sitemap
-   stays empty after the first build until the next reload); `Car` JSON-LD; localized `Typical engine` text.
+5. **Cheap extras, anytime:** ~~retry the catalog load within a minute when it is empty~~ (_done 2026-10-30, `EMPTY_RELOAD_MS` in `CatalogService`); `Car` JSON-LD; localized `Typical engine` text.
 
 **Left as is on purpose (2026-10-30):** a browser that still has the previous service worker shows the home page at `/cars/...` until the update installs
 (the cached shell has no such route; not fixable from the app); the client tab title is "Cars UA - BMW X5" like the plate pages (the server `<title>` is what

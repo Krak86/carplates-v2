@@ -564,7 +564,7 @@ are `.nullable().optional()`).
   VehiclesDB lists name variants such as `landcruiser200` / `sprinter313cdi` as models), `drop`, `name` (display name). After a build, spot-check the top models for
   leftover trims and fix them with a `fold` row, not in `catalogSlugs`. Real DB 2026-10-30: 15,769 passenger pairs -> 1,697 pages (300 indexable) in 109 makes.
 - **API** (`apps/api/src/catalog/`): `GET /api/catalog/:make/:model` (Zod params, `LOOKUP_CACHE`, `CATALOG_THROTTLE`, 404 = no page). `CatalogService` keeps all
-  `catalog_model` rows in process memory and reloads hourly (no per-request query). `/api/catalog` is in `PUBLIC_API_PATH_PREFIXES` (registry aggregates only).
+  `catalog_model` rows in process memory and reloads hourly (no per-request query; an empty snapshot, i.e. before the first `catalog` build, is re-read after 1 minute). `/api/catalog` is in `PUBLIC_API_PATH_PREFIXES` (registry aggregates only).
 - **Generation stats** (2026-10-30): `catalog_year_stats` (migration 0082, built by `catalog-build.ts` in the same grouping-sets pass shape, top 5 per year) holds fuel / body /
   colour / regions per make year. `GET /api/catalog/:make/:model/years` reads it on demand (not kept in API memory; empty `byYear` until the first rebuild after the
   migration, and the panel then stays hidden). `ModelVariants` shows the picked generation's summed tables (`GenerationStats`, `sumYearStats` in `catalog.ts`) and the car
