@@ -38,6 +38,11 @@ export function Dumbbells({ items, names }: { items: readonly Dumbbell[]; names:
           <li key={d.key} className="border-b border-[var(--color-border)]/50 py-3 first:pt-0 last:border-b-0">
             <div className="text-center text-sm text-[var(--color-muted)]">
               {t(d.labelKey)}
+              {d.zoomed && (
+                <span className="ml-1 text-xs" title={t('compare.ranges.zoomedHint')}>
+                  ({t('compare.ranges.zoomed')})
+                </span>
+              )}
               {d.smallSample && (
                 <span role="img" aria-label={t('compare.smallSample')} title={t('compare.smallSample')}>
                   {' '}

@@ -30,6 +30,31 @@ describe('buildDumbbells', () => {
     expect(power).toMatchObject({ key: 'power', axisMin: 0, axisMax: 150 })
     expect(buildDumbbells([a, empty()])).toEqual([])
   })
+
+  it('zooms a row whose cars span a sliver of the group axis and keeps towing off the masses axis', () => {
+    const a = empty({
+      rdw: rdwWith({
+        wheelbaseCm: { min: 260, median: 262, max: 267 },
+        lengthCm: { min: 400, median: 430, max: 450 },
+        massKg: { min: 1000, median: 1200, max: 1500 },
+        towBrakedKg: { min: 1000, median: 1200, max: 1500 }
+      })
+    })
+    const b = empty({
+      rdw: rdwWith({
+        wheelbaseCm: { min: 282, median: 283, max: 283.5 },
+        lengthCm: { min: 470, median: 490, max: 500 },
+        massKg: { min: 1500, median: 1700, max: 2000 },
+        towBrakedKg: { min: 1000, median: 1500, max: 2500 }
+      })
+    })
+    const rows = Object.fromEntries(buildDumbbells([a, b]).map(d => [d.key, d]))
+    expect(rows.wheelbase).toMatchObject({ zoomed: true })
+    expect(rows.wheelbase?.axisMin).toBeGreaterThan(200)
+    expect(rows.length).toMatchObject({ zoomed: false, axisMin: 0, axisMax: 500 })
+    expect(rows.mass).toMatchObject({ zoomed: false, axisMax: 2000 })
+    expect(rows.towBraked).toMatchObject({ zoomed: false, axisMax: 2500 })
+  })
 })
 
 describe('curves', () => {

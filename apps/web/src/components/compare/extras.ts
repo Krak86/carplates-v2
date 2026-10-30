@@ -26,9 +26,17 @@ export type Dumbbell = {
   axisMin: number
   axisMax: number
   ranges: readonly [Range, Range]
+  /** The axis is cut to the two cars' span, not zero-based (they would be a sliver on the shared axis). */
+  zoomed: boolean
   /** Either range comes from fewer than `RDW_MIN_DISPLAY_N` vehicles. */
   smallSample: boolean
 }
+
+const TOW_KEYS: ReadonlySet<string> = new Set(['towBraked', 'towUnbraked'])
+/** Both cars together span less than this share of the group axis: zoom that row. */
+const ZOOM_SPAN_SHARE = 0.15
+/** Margin on each side of a zoomed axis, as a share of the span. */
+const ZOOM_PAD = 0.15
 
 /** min - median - max of each RDW measure the two cars share, one row per measure on a common axis. */
 export function buildDumbbells(loaded: readonly [CompareLoaded, CompareLoaded]): Dumbbell[] {
@@ -45,15 +53,27 @@ export function buildDumbbells(loaded: readonly [CompareLoaded, CompareLoaded]):
       decimals: def.format?.decimals ?? 0,
       axisMin: Math.min(a.min, b.min),
       axisMax: Math.max(a.max, b.max),
+      zoomed: false,
       ranges: [a, b],
       smallSample: loaded.some(x => (x.rdw?.specs.n ?? Infinity) < RDW_MIN_DISPLAY_N)
     })
   }
-  // Every axis starts at zero, so the same position always means the same share of the maximum; measures in the
-  // same unit (the masses, the lengths) share one axis, so their lines compare across rows too.
+  // Axes start at zero, so the same position always means the same share of the maximum; measures in the same
+  // group (the masses, the lengths; towing limits apart from the masses) share one axis, so their lines compare
+  // across rows too. A measure whose two cars span only a sliver of that axis (noise, wheelbase) is zoomed instead.
+  const groupOf = (d: Dumbbell): string => `${d.unitKey ?? d.key}${TOW_KEYS.has(d.key) ? ':tow' : ''}`
   const axisMax = new Map<string, number>()
-  for (const d of out) axisMax.set(d.unitKey ?? d.key, Math.max(axisMax.get(d.unitKey ?? d.key) ?? 0, d.axisMax))
-  return out.map(d => ({ ...d, axisMin: 0, axisMax: axisMax.get(d.unitKey ?? d.key) ?? d.axisMax }))
+  for (const d of out) axisMax.set(groupOf(d), Math.max(axisMax.get(groupOf(d)) ?? 0, d.axisMax))
+  return out.map(d => {
+    const max = axisMax.get(groupOf(d)) ?? d.axisMax
+    const lo = Math.min(d.ranges[0].min, d.ranges[1].min)
+    const hi = Math.max(d.ranges[0].max, d.ranges[1].max)
+    if (max > 0 && (hi - lo) / max < ZOOM_SPAN_SHARE) {
+      const pad = (hi - lo) * ZOOM_PAD
+      return { ...d, axisMin: Math.max(0, lo - pad), axisMax: hi + pad, zoomed: true }
+    }
+    return { ...d, axisMin: 0, axisMax: max, zoomed: false }
+  })
 }
 
 /** Position 0..1 of `value` on a dumbbell's axis. */
