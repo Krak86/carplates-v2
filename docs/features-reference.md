@@ -596,7 +596,7 @@ are `.nullable().optional()`).
 
 ## Compare two vehicles (`/compare`, 2026-10-30)
 
-Plan: [compare-plan.md](compare-plan.md). Phase 1 (core) is built; radars/bars/size overlay (phase 2), export (3) and the tray / suggestions (4) are not. Online-only (not in `offline-cache.ts`), no API of its own: it reads the card's existing endpoints, so no `@Throttle` / edge-cache rule was needed.
+Plan: [compare-plan.md](compare-plan.md). Phase 1 (core) and the first part of phase 2 (sentences, mirrored bars) are built; radars/share bars/curves/size overlay (rest of phase 2), export (3) and the tray / suggestions (4) are not. Online-only (not in `offline-cache.ts`), no API of its own: it reads the card's existing endpoints, so no `@Throttle` / edge-cache rule was needed.
 
 - **Files:** `apps/web/src/components/compare/` (`ref.ts` URL refs, `resolve.ts` inputs -> `CompareCar`, `use-compare-car.ts` the queries, `rows.ts` row builders + `pruneRows`, `format.ts`, `coverage.ts`, UI `CompareSlotPicker` / `CompareSlotHeader` / `CompareTable` / `CompareChip`), route `routes/compare/CompareRoute.tsx` (before `/:query` in `App.tsx`), `ROUTE_TITLE_KEYS['/compare']`, `STATIC_PAGES['/compare']` (ua/ru/en), `compare.*` i18n.
 - **URL:** `/compare?a=plate:AA1234BB&b=m:bmw/3series/2015/diesel`; a slot is `plate:` (through `normalizePlate`), `vin:` or `m:<make slug>/<model slug>/<year>[/<fuel class>]` (catalog slugs; fuel is a `VEHICLE_FUELS` word). A bare value reads like the search box. `compareHref` keeps `:` and `/` unescaped. A malformed slot shows its picker.
@@ -607,4 +607,6 @@ Plan: [compare-plan.md](compare-plan.md). Phase 1 (core) is built; radars/bars/s
 - **"Better" is marked only where unambiguous** (`betterSide`): lower price / mass / CO2 / consumption / noise, higher power / power-to-weight / top speed / range / tow limit / seats / safety scores. Dimensions, recall and complaint counts (they follow fleet size) and the MOT fail rate (it follows the age of the cars tested) are neutral. No overall score. The mark is a ✓ plus bold plus screen-reader text, never colour alone.
 - **Colours:** `--color-compare-a` / `--color-compare-b` (global.css) alias the validated MOT blue / orange tokens, so the dark steps and the P3 / oklch versions are inherited.
 - **Entry points:** `CompareChip` on the plate card chip row, the VIN card chip row and `ModelVariants` (picked year / fuel carry over). Slot A is prefilled, slot B opens with the picker.
-- **Tests:** `ref.test.ts`, `resolve.test.ts`, `rows.test.ts` (builders, pruning, `betterSide`, coverage, formatting).
+- **Sidebar / QuickLinks:** `nav.compare` (next to "Cars by make").
+- **Visuals (phase 2, part 1):** `visuals.ts` (pure: `numericPairs` = unit rows where both cars have a positive number; `buildHighlights` = top 5 relative differences >= 5 %, the larger side named; `buildBars`; `SIDE_COLOR`) + `CompareVisuals.tsx` above the table. Bars start at zero, scaled to the larger value of each row, aria-hidden; the values are printed text and the table is the data table. Sentences use a neutral "has N% more" so ua/ru need no gender agreement.
+- **Tests:** `ref.test.ts`, `resolve.test.ts`, `rows.test.ts` (builders, pruning, `betterSide`, coverage, formatting)., `visuals.test.ts`.

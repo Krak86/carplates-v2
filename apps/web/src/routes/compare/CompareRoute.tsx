@@ -5,6 +5,7 @@ import { useNavigate, useSearchParams } from 'react-router'
 
 import CompareSlotHeader from '@/components/compare/CompareSlotHeader'
 import CompareSlotPicker from '@/components/compare/CompareSlotPicker'
+import CompareVisuals from '@/components/compare/CompareVisuals'
 import CompareTable from '@/components/compare/CompareTable'
 import { compareHref, formatCompareRef, parseCompareRef, sameRef } from '@/components/compare/ref'
 import { carTitle } from '@/components/compare/resolve'
@@ -72,7 +73,10 @@ export default function CompareRoute(): ReactNode {
   const states = [useCompareCar(refs[0]), useCompareCar(refs[1])] as const
 
   const go = (a: CompareRef | null, b: CompareRef | null): void => void navigate(compareHref(a, b))
-  const handlePick = (slot: CompareSlot) => (ref: CompareRef): void => (slot === 'a' ? go(ref, refs[1]) : go(refs[0], ref))
+  const handlePick =
+    (slot: CompareSlot) =>
+    (ref: CompareRef): void =>
+      slot === 'a' ? go(ref, refs[1]) : go(refs[0], ref)
   const handleClear = (slot: CompareSlot) => (): void => (slot === 'a' ? go(null, refs[1]) : go(refs[0], null))
   const handleSwap = (): void => go(refs[1], refs[0])
 
@@ -128,6 +132,12 @@ export default function CompareRoute(): ReactNode {
               {t('compare.diffOnly')}
             </label>
           </div>
+
+          {!pending && (
+            <div className="mb-6">
+              <CompareVisuals sections={sections} names={[slotName(states[0], 'a'), slotName(states[1], 'b')]} />
+            </div>
+          )}
 
           <CompareTable
             sections={sections}

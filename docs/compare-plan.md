@@ -19,6 +19,7 @@ Route goes **before** `/:query` in `App.tsx`. New public route checklist (CLAUDE
 (ua/ru/en, `noindex` unless indexed pairs are added later), `max-w-6xl`, `@Throttle` on any new enumerable endpoint, edge cache rules.
 
 Every input resolves to one `CompareCar`: `{ brand, model, year, kind, fuel, capacity, powerKw, body, ownWeight, totalWeight, registry? }`.
+
 - **plate**: `plateQuery` (row + the card bundle `/api/card/:plate`, which already carries rdw, vdb, ev, wikiSpecs in one call).
 - **VIN**: `vinQuery` decode, brand/model/year from the NHTSA fields.
 - **model ref**: the catalog (`catalogLookupQuery`, `GET /api/catalog/:make/:model`) gives `topBrand` / `topModel` / `kind` / typical year;
@@ -96,8 +97,8 @@ Add `export.*` i18n keys. Any new field is handled in `record-formats.ts`, `expo
 
 ## Phases
 
-1. **Core (DONE 2026-10-30; sidebar entry not added yet):** route, input resolver (plate / VIN / model), `CompareCar`, header + coverage strip, mirrored table with pruning, plate-card chip. Tests for the resolver, row builders, pruning.
-2. **Visuals:** radars, bars, curves, share bars, size overlay, generated sentences.
+1. **Core (DONE 2026-10-30; sidebar entry added):** route, input resolver (plate / VIN / model), `CompareCar`, header + coverage strip, mirrored table with pruning, plate-card chip. Tests for the resolver, row builders, pruning.
+2. **Visuals (sentences + mirrored bars DONE 2026-10-30; rest open):** radars, bars, curves, share bars, size overlay, generated sentences.
 3. **Export:** report builder, formats, sources.
 4. **Growth:** compare tray, slot B suggestions, saved comparisons (IndexedDB like history), optional indexable popular pairs `/compare/bmw-3series-vs-audi-a4` (pre-rendered like the catalog), `GET /api/compare` bundle for edge caching, `/read/*` article embeds.
 

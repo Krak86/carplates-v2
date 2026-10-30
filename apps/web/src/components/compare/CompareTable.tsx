@@ -13,6 +13,7 @@ import type { FormatContext } from './format'
 import { betterSide, isSame } from './rows'
 import type { CompareSection } from './rows'
 import type { CompareRow } from './types'
+import { SIDE_COLOR } from './visuals'
 
 type Props = {
   sections: readonly CompareSection[]
@@ -21,8 +22,6 @@ type Props = {
   /** Hide the rows where both cars show the same value. */
   diffOnly: boolean
 }
-
-const SIDE_COLOR = ['var(--color-compare-a)', 'var(--color-compare-b)'] as const
 
 function GroupLabel({ group, exact }: { group: string; exact: boolean }): ReactNode {
   const { t } = useTranslation()
