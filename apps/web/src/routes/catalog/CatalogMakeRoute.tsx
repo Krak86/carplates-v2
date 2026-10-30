@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { CATALOG_INDEX_PATH, catalogMakeParamsSchema, catalogPath } from '@carplates/shared'
 import { useQuery } from '@tanstack/react-query'
@@ -13,7 +14,7 @@ import { ApiError } from '@/lib/api'
 import { toIntlLocale } from '@/lib/intl'
 import { catalogMakeQuery } from '@/lib/queries'
 
-import { yearRangeLabel } from './helpers'
+import { filterModels, yearRangeLabel } from './helpers'
 
 function CatalogMakeNotFound(): ReactNode {
   const { t } = useTranslation()
@@ -33,6 +34,7 @@ export default function CatalogMakeRoute(): ReactNode {
   const { t, i18n } = useTranslation()
   const params = catalogMakeParamsSchema.safeParse(useParams())
   const slug = params.success ? params.data.make : ''
+  const [filter, setFilter] = useState('')
   const query = useQuery({ ...catalogMakeQuery(slug), enabled: params.success })
   const make = query.data
   const format = new Intl.NumberFormat(toIntlLocale(i18n.language))
@@ -54,6 +56,8 @@ export default function CatalogMakeRoute(): ReactNode {
       </Card>
     )
   }
+
+  const visibleModels = filterModels(make.models, filter)
 
   return (
     <main className="mx-auto w-full max-w-6xl space-y-4">
@@ -80,53 +84,68 @@ export default function CatalogMakeRoute(): ReactNode {
       </Card>
 
       <Card>
-        <h2 className="mb-2 text-lg font-semibold">{t('catalog.modelsHeading')}</h2>
-        <table className="w-full text-base">
-          <thead>
-            <tr className="border-b border-[var(--color-border)] text-left text-sm text-[var(--color-muted)]">
-              <th scope="col" className="py-1.5 pr-3 font-normal">
-                {t('catalog.colModel')}
-              </th>
-              <th scope="col" className="py-1.5 pr-3 text-right font-normal">
-                {t('catalog.colCars')}
-              </th>
-              <th scope="col" className="hidden py-1.5 pr-3 font-normal sm:table-cell">
-                {t('catalog.colYears')}
-              </th>
-              <th scope="col" className="hidden w-1/4 py-1.5 font-normal md:table-cell">
-                <span className="sr-only">%</span>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {make.models.map(m => {
-              const years = yearRangeLabel(m)
-              const pct = Math.max(1, Math.round((m.n / maxCount) * 100))
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-lg font-semibold">{t('catalog.modelsHeading')}</h2>
+          <input
+            type="search"
+            value={filter}
+            onChange={e => setFilter(e.target.value)}
+            aria-label={t('catalog.filterModelLabel')}
+            placeholder={t('catalog.filterModelLabel')}
+            className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-1.5 text-base sm:max-w-xs"
+          />
+        </div>
 
-              return (
-                <tr
-                  key={m.model}
-                  className="border-b border-[var(--color-border)]/50 transition-colors last:border-0 hover:bg-[var(--color-primary)]/10"
-                >
-                  <th scope="row" className="py-1.5 pr-3 text-left font-medium">
-                    <Link to={catalogPath(make.make, m.model)} className="hover:text-[var(--color-primary)]">
-                      {`${make.makeName} ${m.modelName}`}
-                    </Link>
-                  </th>
-                  <td className="py-1.5 pr-3 text-right tabular-nums">{format.format(m.n)}</td>
-                  <td className="hidden py-1.5 pr-3 text-[var(--color-muted)] tabular-nums sm:table-cell">{years}</td>
-                  <td className="hidden py-1.5 md:table-cell">
-                    <span
-                      aria-hidden
-                      className="block h-2 rounded bg-[var(--color-primary)]"
-                      style={{ width: `${pct}%` }}
-                    />
-                  </td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
+        {visibleModels.length === 0 ? (
+          <p className="text-base text-[var(--color-muted)]">{t('catalog.noModelMatch')}</p>
+        ) : (
+          <table className="w-full text-base">
+            <thead>
+              <tr className="border-b border-[var(--color-border)] text-left text-sm text-[var(--color-muted)]">
+                <th scope="col" className="py-1.5 pr-3 font-normal">
+                  {t('catalog.colModel')}
+                </th>
+                <th scope="col" className="py-1.5 pr-3 text-right font-normal">
+                  {t('catalog.colCars')}
+                </th>
+                <th scope="col" className="hidden py-1.5 pr-3 font-normal sm:table-cell">
+                  {t('catalog.colYears')}
+                </th>
+                <th scope="col" className="hidden w-1/4 py-1.5 font-normal md:table-cell">
+                  <span className="sr-only">%</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {visibleModels.map(m => {
+                const years = yearRangeLabel(m)
+                const pct = Math.max(1, Math.round((m.n / maxCount) * 100))
+
+                return (
+                  <tr
+                    key={m.model}
+                    className="border-b border-[var(--color-border)]/50 transition-colors last:border-0 hover:bg-[var(--color-primary)]/10"
+                  >
+                    <th scope="row" className="py-1.5 pr-3 text-left font-medium">
+                      <Link to={catalogPath(make.make, m.model)} className="hover:text-[var(--color-primary)]">
+                        {`${make.makeName} ${m.modelName}`}
+                      </Link>
+                    </th>
+                    <td className="py-1.5 pr-3 text-right tabular-nums">{format.format(m.n)}</td>
+                    <td className="hidden py-1.5 pr-3 text-[var(--color-muted)] tabular-nums sm:table-cell">{years}</td>
+                    <td className="hidden py-1.5 md:table-cell">
+                      <span
+                        aria-hidden
+                        className="block h-2 rounded bg-[var(--color-primary)]"
+                        style={{ width: `${pct}%` }}
+                      />
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        )}
       </Card>
     </main>
   )

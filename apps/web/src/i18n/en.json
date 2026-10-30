@@ -3545,6 +3545,8 @@
   "catalog.pickYear": "Model year",
   "catalog.pickGeneration": "Generation",
   "catalog.modelsHeading": "Models",
+  "catalog.filterModelLabel": "Find a model",
+  "catalog.noModelMatch": "No model matches",
   "catalog.colModel": "Model",
   "catalog.colCars": "Cars",
   "catalog.colYears": "Years",

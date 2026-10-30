@@ -4025,6 +4025,8 @@
   "catalog.pickYear": "Год выпуска",
   "catalog.pickGeneration": "Поколение",
   "catalog.modelsHeading": "Модели",
+  "catalog.filterModelLabel": "Найти модель",
+  "catalog.noModelMatch": "Ни одной модели не найдено",
   "catalog.colModel": "Модель",
   "catalog.colCars": "Авто",
   "catalog.colYears": "Годы",

@@ -6,6 +6,12 @@ export function filterMakes(makes: CatalogMakeSummary[], text: string): CatalogM
   return needle ? makes.filter(m => m.makeName.toLowerCase().includes(needle) || m.make.includes(needle)) : makes
 }
 
+/** The models whose name or slug contains the typed text (case-insensitive); all of them for an empty filter. */
+export function filterModels<T extends { model: string; modelName: string }>(models: T[], text: string): T[] {
+  const needle = text.trim().toLowerCase()
+  return needle ? models.filter(m => m.modelName.toLowerCase().includes(needle) || m.model.includes(needle)) : models
+}
+
 type Counts = CatalogModel['stats']['years']
 
 /** The model year with the most cars: the "typical" year that the per-year sections (specs, value, recalls) are asked about. */
