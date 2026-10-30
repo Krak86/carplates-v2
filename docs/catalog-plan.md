@@ -1,6 +1,6 @@
 # Model catalog pages: `/cars/:make/:model/:year`
 
-Status: **MVP built 2026-10-30** (model level `/cars/:make/:model`, top 300 models, one sitemap file; conventions in `features-reference.md` "Model catalog"; year pages, `/cars` + make indexes, JSON-LD and internal links not started). Researched 2026-10-13. Tracked in PLAN.md "To discuss / research". Rollout, estimate (6-9 days, MVP 3-4)
+Status: **MVP live 2026-10-30** (model level `/cars/:make/:model`, top 300 models, one sitemap file, deployed, built on the VPS, cached; conventions in `features-reference.md` "Model catalog"; next steps in "Next: make the pages usable" below: entry points from plate cards, `/cars` + make hubs, breadcrumbs, variant chips, then year pages). Researched 2026-10-13. Tracked in PLAN.md "To discuss / research". Rollout, estimate (6-9 days, MVP 3-4)
 and the surrounding SEO/outreach checklist: [discovery-plan.md](discovery-plan.md).
 
 ## Context
@@ -181,6 +181,35 @@ capacity_p50, power_p50, imported_share, first_reg_by_year jsonb, owners_p50)`.
 
 - `features-reference.md` gets a "Model catalog" section.
 - Write-up in `plan-done.md`; seed CSV via `export:catalog:csv` for the overrides output, if needed.
+
+## Next: make the pages usable, not only crawlable (added 2026-10-30)
+
+State after the MVP rollout: the model pages are live and indexable (300), Cloudflare caches them, and the prod browser check passed, but **nothing in the
+app links to them**: only Google and a typed URL reach one. Fuel/body/colour/region are localized (`registryLabels.ts`, `regionLabels.ts`). Build order below;
+each block is one commit and must add its routes to the sitemap/`STATIC_PAGES` rules in CLAUDE.md.
+
+1. **Entry points (cheapest, most value).**
+   - Plate and VIN result cards: the make/model line links to `/cars/<make>/<model>` ("All BMW X5 in Ukraine"), same tab. The web **cannot** compute the slug:
+     `catalogSlugs(brand, model, known)` needs the known-model set the build uses. So resolve it on the server: add the slugs to the plate/VIN response from
+     `catalog_alias` (a new field in a contract file, `.nullable().optional()`, not `schemas.ts`), or a small `GET /api/catalog/lookup?brand=&model=` read from the
+     in-memory `CatalogService`. Only link when the page exists (a model below `CATALOG_KEEP_MIN_CARS` has no row). Mind the offline cache (`lib/offline-cache.ts`).
+   - `/stats` model boards and the About page link to the catalog; the home page gets a "Browse by make" link to `/cars`.
+2. **Hub pages and breadcrumbs.**
+   - `/cars` (all makes with counts) and `/cars/:make` (the make's models with counts, indexable when the make has an indexable model). Both from `catalog_make` /
+     `catalog_model`; add to `ROUTE_TITLE_KEYS`, `STATIC_PAGES` (`/cars`) and the sitemap, with the same server-injected `#root` block as the model page.
+   - Breadcrumb on every catalog page (Home > Cars > BMW > X5), plain `<a>` links, plus `BreadcrumbList` JSON-LD in the head and the same trail in the injected block.
+   - Model page: replace the plain "Other models of the make" with chips (make link first, then sibling models by size), keep the plain links in the block.
+3. **Variant chips on the model page (no new URLs).** A year chip row (typical year highlighted) and, where `model_generations` has data, generation chips. Picking one
+   re-feeds the `ModelSections` (`year`, `fuel`, `body`, `capacity` props already exist) client-side, so specs, value and recalls follow the choice. Local state,
+   no network beyond the section calls. Fuel/body chips can reuse `registryLabel`.
+4. **Year pages `/cars/:make/:model/:year`** (the original plan above, about 8-15k pages). Wait until Search Console shows the first 300 pages indexed (1-2 weeks);
+   the model page then gets year chips that link to them, and generation chips become real URLs.
+5. **Cheap extras, anytime:** retry the catalog load within a minute when it is empty (`CatalogService` caches an empty first load for an hour, so the sitemap
+   stays empty after the first build until the next reload); `Car` JSON-LD; localized `Typical engine` text.
+
+**Left as is on purpose (2026-10-30):** a browser that still has the previous service worker shows the home page at `/cars/...` until the update installs
+(the cached shell has no such route; not fixable from the app); the client tab title is "Cars UA - BMW X5" like the plate pages (the server `<title>` is what
+search engines read).
 
 ## Rollout order
 
