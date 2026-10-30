@@ -78,7 +78,7 @@ export function overallFailRate(bands: readonly { tests: number; failRate: numbe
   return tests > 0 ? rated.reduce((sum, b) => sum + b.tests * (b.failRate as number), 0) / tests : null
 }
 
-const sizeOf = (x: CompareLoaded): ReturnType<typeof computeVehicleSize> =>
+export const sizeOf = (x: CompareLoaded): ReturnType<typeof computeVehicleSize> =>
   x.car ? computeVehicleSize({ rdw: x.rdw, wiki: x.wiki, kind: x.car.kind, body: x.car.body }) : null
 
 function overviewRows(side: Side, t: Translate): CompareRow[] {

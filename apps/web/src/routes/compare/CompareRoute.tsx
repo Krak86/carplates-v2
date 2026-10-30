@@ -1,10 +1,12 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useSearchParams } from 'react-router'
 
 import CompareSlotHeader from '@/components/compare/CompareSlotHeader'
 import CompareSlotPicker from '@/components/compare/CompareSlotPicker'
+import CompareSectionHeading from '@/components/compare/CompareSectionHeading'
+import { parseSection, sectionAnchor } from '@/components/compare/compare-share'
 import CompareVisuals from '@/components/compare/CompareVisuals'
 import CompareTable from '@/components/compare/CompareTable'
 import { compareHref, formatCompareRef, parseCompareRef, sameRef } from '@/components/compare/ref'
@@ -15,6 +17,7 @@ import type { CompareGroup, CompareRef, CompareSlot } from '@/components/compare
 import { useCompareCar } from '@/components/compare/use-compare-car'
 import type { CompareCarState } from '@/components/compare/use-compare-car'
 import Card from '@/components/ui/Card'
+import { scrollElementIntoView } from '@/lib/share-section'
 import SectionSkeleton from '@/components/ui/SectionSkeleton'
 
 const slotName = (state: CompareCarState, slot: CompareSlot): string => {
@@ -64,7 +67,8 @@ export default function CompareRoute(): ReactNode {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [params] = useSearchParams()
-  const [diffOnly, setDiffOnly] = useState(false)
+  const [diffOnly, setDiffOnly] = useState(params.get('diff') === '1')
+  const scrolled = useRef(false)
 
   const refs: readonly [CompareRef | null, CompareRef | null] = [
     parseCompareRef(params.get('a')),
@@ -88,6 +92,16 @@ export default function CompareRoute(): ReactNode {
     ? pruneRows(buildCompareRows(states[0].loaded, states[1].loaded, t, new Date().getFullYear()), settled)
     : { sections: [], hidden: 0 }
   const pending = sections.some(s => s.pending)
+  const target = parseSection(params)
+
+  useEffect(() => {
+    // A section link scrolls to its block once the rows have settled (before that the page keeps growing).
+    if (!target || !ready || pending || scrolled.current) return
+    const el = document.getElementById(sectionAnchor(target))
+    if (!el) return
+    scrolled.current = true
+    scrollElementIntoView(el)
+  }, [target, ready, pending])
 
   return (
     <main className="mx-auto w-full max-w-6xl space-y-4">
@@ -135,9 +149,19 @@ export default function CompareRoute(): ReactNode {
 
           {!pending && (
             <div className="mb-6">
-              <CompareVisuals sections={sections} names={[slotName(states[0], 'a'), slotName(states[1], 'b')]} />
+              <CompareVisuals
+                sections={sections}
+                names={[slotName(states[0], 'a'), slotName(states[1], 'b')]}
+                loaded={[states[0].loaded, states[1].loaded]}
+              />
             </div>
           )}
+
+          <CompareSectionHeading
+            section="table"
+            title={t('compare.table.title')}
+            state={diffOnly ? { diff: '1' } : {}}
+          />
 
           <CompareTable
             sections={sections}

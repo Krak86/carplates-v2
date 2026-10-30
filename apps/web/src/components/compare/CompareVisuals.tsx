@@ -6,7 +6,15 @@ import { useRegionLabel } from '@/lib/region-label'
 
 import { GAP, formatWithUnit } from './format'
 import type { FormatContext } from './format'
+import CompareRadars from './CompareRadars'
+import CompareSectionHeading from './CompareSectionHeading'
+import CompareShares from './CompareShares'
+import CompareSize from './CompareSize'
+import { buildRadars, sameKind } from './radar'
+import { sizeOf } from './rows'
 import type { CompareSection } from './rows'
+import { buildShareBars } from './shares'
+import type { CompareLoaded } from './types'
 import { MAX_HIGHLIGHTS, SIDE_COLOR, buildBars, buildHighlights } from './visuals'
 
 type Props = {
@@ -25,9 +33,7 @@ function Highlights({ sections, names }: Props): ReactNode {
 
   return (
     <section aria-labelledby="compare-highlights">
-      <h2 id="compare-highlights" className="mb-2 text-lg font-semibold">
-        {t('compare.highlights.title')}
-      </h2>
+      <CompareSectionHeading section="highlights" title={t('compare.highlights.title')} />
       <div className="grid gap-4 md:grid-cols-2">
         {([0, 1] as const).map(side => {
           const items = all.filter(h => h.side === side).slice(0, MAX_HIGHLIGHTS)
@@ -62,9 +68,7 @@ function Bars({ sections, names }: Props): ReactNode {
 
   return (
     <section aria-labelledby="compare-bars">
-      <h2 id="compare-bars" className="mb-1 text-lg font-semibold">
-        {t('compare.bars.title')}
-      </h2>
+      <CompareSectionHeading section="bars" title={t('compare.bars.title')} />
       <p className="mb-3 text-sm text-[var(--color-muted)]">{t('compare.bars.note')}</p>
       <div className="mb-2 grid grid-cols-[1fr_4.5rem_1fr] gap-2 text-sm font-semibold">
         <span className="text-right break-words">{names[0]}</span>
@@ -116,13 +120,32 @@ function Bars({ sections, names }: Props): ReactNode {
   )
 }
 
-/** Generated difference sentences and mirrored bars with a centre delta; the table below carries every value. */
-export default function CompareVisuals({ sections, names }: Props): ReactNode {
+type VisualsProps = Props & {
+  /** What each car's queries returned: the share bars and the size overlay read from it, not from the rows. */
+  loaded: readonly [CompareLoaded, CompareLoaded]
+}
+
+/** The visual layer above the table: sentences, radars, mirrored bars, share bars and the size overlay. */
+export default function CompareVisuals({ sections, names, loaded }: VisualsProps): ReactNode {
+  const { t } = useTranslation()
   if (sections.every(s => s.pending || s.rows.length === 0)) return null
+  const rows = sections.flatMap(s => s.rows)
+  const kindsMatch = sameKind(loaded[0].car?.kind, loaded[1].car?.kind)
+  const radars = kindsMatch ? buildRadars(rows) : []
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <Highlights sections={sections} names={names} />
       <Bars sections={sections} names={names} />
+      <CompareShares bars={buildShareBars(loaded[0], loaded[1])} names={names} />
+      <CompareSize sizes={[sizeOf(loaded[0]), sizeOf(loaded[1])]} names={names} />
+      {kindsMatch ? (
+        <CompareRadars radars={radars} names={names} />
+      ) : (
+        <p role="status" className="text-base text-[var(--color-muted)]">
+          {t('compare.radar.kindMismatch')}
+        </p>
+      )}
     </div>
   )
 }

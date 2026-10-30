@@ -98,7 +98,7 @@ Add `export.*` i18n keys. Any new field is handled in `record-formats.ts`, `expo
 ## Phases
 
 1. **Core (DONE 2026-10-30; sidebar entry added):** route, input resolver (plate / VIN / model), `CompareCar`, header + coverage strip, mirrored table with pruning, plate-card chip. Tests for the resolver, row builders, pruning.
-2. **Visuals (sentences + mirrored bars DONE 2026-10-30; rest open):** radars, bars, curves, share bars, size overlay, generated sentences.
+2. **Visuals (sentences, mirrored bars, radars, share bars, size overlay DONE 2026-10-30; open: curves, Gantt, dumbbells, star pills, CO2 scale, garage/parking verdicts, PNG save):** radars, bars, curves, share bars, size overlay, generated sentences.
 3. **Export:** report builder, formats, sources.
 4. **Growth:** compare tray, slot B suggestions, saved comparisons (IndexedDB like history), optional indexable popular pairs `/compare/bmw-3series-vs-audi-a4` (pre-rendered like the catalog), `GET /api/compare` bundle for edge caching, `/read/*` article embeds.
 
