@@ -1,6 +1,6 @@
 # Compare two vehicles: `/compare`
 
-Status: **researched 2026-10-30, not started.** Tracked in PLAN.md "To discuss / research" ("Car compare"). The catalog MVP
+Status: **phase 1 (core) built 2026-10-30; phases 2-4 open.** Built-state conventions: features-reference.md "Compare two vehicles". Tracked in PLAN.md "To discuss / research" ("Car compare"). The catalog MVP
 (`/cars/:make/:model`, see [catalog-plan.md](catalog-plan.md)) is live, so the old "blocked on catalog" note is lifted.
 
 ## Decisions (owner, 2026-10-30)
@@ -96,7 +96,7 @@ Add `export.*` i18n keys. Any new field is handled in `record-formats.ts`, `expo
 
 ## Phases
 
-1. **Core:** route, input resolver (plate / VIN / model), `CompareCar`, header + coverage strip, mirrored table with pruning, plate-card chip. Tests for the resolver, row builders, pruning.
+1. **Core (DONE 2026-10-30; sidebar entry not added yet):** route, input resolver (plate / VIN / model), `CompareCar`, header + coverage strip, mirrored table with pruning, plate-card chip. Tests for the resolver, row builders, pruning.
 2. **Visuals:** radars, bars, curves, share bars, size overlay, generated sentences.
 3. **Export:** report builder, formats, sources.
 4. **Growth:** compare tray, slot B suggestions, saved comparisons (IndexedDB like history), optional indexable popular pairs `/compare/bmw-3series-vs-audi-a4` (pre-rendered like the catalog), `GET /api/compare` bundle for edge caching, `/read/*` article embeds.
