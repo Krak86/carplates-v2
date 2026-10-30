@@ -54,6 +54,9 @@ describe('catalogSeoBlock', () => {
     expect(html).toContain('<h1>BMW 3 Series in Ukraine</h1>')
     expect(html).toContain('The most common fuel: diesel.')
     expect(html).toContain('<th scope="row">diesel</th>')
+    expect(catalogSeoBlock({ ...MODEL, stats: { ...MODEL.stats, regions: [['Київ', 20000]] } }, 'en')).toContain(
+      '<th scope="row">Kyiv</th>'
+    )
     expect(html).toContain('55%')
     expect(html).toContain('<a href="/cars/bmw/x5?lang=en">BMW X5</a>')
   })

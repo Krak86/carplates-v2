@@ -745,6 +745,7 @@ export {
   type CatalogSibling,
   type CatalogStats
 } from './catalog.js'
+export { localizeRegion } from './regionLabels.js'
 export { localizeRegistryRows, registryLabel, type RegistryLabelKind } from './registryLabels.js'
 export {
   SHARE_ALIASES,

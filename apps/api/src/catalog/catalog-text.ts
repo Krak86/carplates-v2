@@ -1,4 +1,4 @@
-import { catalogPath, localizeRegistryRows } from '@carplates/shared'
+import { catalogPath, localizeRegion, localizeRegistryRows } from '@carplates/shared'
 import type { CatalogModel } from '@carplates/shared'
 
 import { DEFAULT_LANG, type Lang } from '../spa/spa-text.js'
@@ -6,7 +6,7 @@ import { DEFAULT_LANG, type Lang } from '../spa/spa-text.js'
 /**
  * Server-side text of the catalog pages: the per-page `<title>` / description and the semantic block injected into `#root`
  * for crawlers (the web page renders the same facts, so this is never cloaking). Copy lives here because the API cannot
- * import the web i18n bundles. Fuel, body and colour are localized by `registryLabel` (shared); regions stay the registry's Ukrainian text.
+ * import the web i18n bundles. Fuel, body and colour are localized by `registryLabel` (shared); regions by `localizeRegion`.
  */
 
 type Copy = {
@@ -119,7 +119,8 @@ export function catalogSeoBlock(m: CatalogModel, lang: Lang): string {
   const { stats } = m
   const fuel = localizeRegistryRows('fuel', stats.fuel, lang)
   const topFuel = fuel[0]?.[0]
-  const topRegion = stats.regions[0]?.[0]
+  const regions = stats.regions.map(([name, n]): [string, number] => [localizeRegion(name, lang), n])
+  const topRegion = regions[0]?.[0]
   const biggestYears = [...stats.years].sort((a, b) => b[1] - a[1]).slice(0, BLOCK_YEARS)
   const byYear = biggestYears.sort((a, b) => Number(a[0]) - Number(b[0]))
   const links = m.siblings
@@ -136,7 +137,7 @@ export function catalogSeoBlock(m: CatalogModel, lang: Lang): string {
     table(c.fuel, fuel.slice(0, BLOCK_ROWS), m.n, lang),
     table(c.body, localizeRegistryRows('body', stats.body, lang).slice(0, BLOCK_ROWS), m.n, lang),
     table(c.color, localizeRegistryRows('color', stats.color, lang).slice(0, BLOCK_ROWS), m.n, lang),
-    table(c.regions, stats.regions.slice(0, BLOCK_ROWS), m.n, lang),
+    table(c.regions, regions.slice(0, BLOCK_ROWS), m.n, lang),
     links ? `<nav><h2>${esc(c.models)}</h2><ul>${links}</ul></nav>` : '',
     `<p><a href="/${langQuery(lang)}">${esc(c.home)}</a></p>`,
     `</main>`
