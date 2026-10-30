@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest'
 
-import { AUCTION_SITES, AUCTION_SITE_IDS, auctionOpenUrl, hasImportOperation } from '@/lib/auction-sites'
+import {
+  AUCTION_SITES,
+  AUCTION_SITE_IDS,
+  asiaSitesForVin,
+  auctionOpenUrl,
+  hasImportOperation
+} from '@/lib/auction-sites'
 
 const VIN = 'WBA3A5C50CF256985'
 
@@ -23,6 +29,16 @@ describe('auction sites', () => {
     expect(auctionOpenUrl(bidfax!, VIN, 'ru')).toBe('https://en.bidfax.info/')
     expect(auctionOpenUrl(bidcars!, VIN, 'ua')).toBe('https://bid.cars/ua')
     expect(auctionOpenUrl(bidcars!, VIN, 'ru')).toBe('https://bid.cars/ru')
+  })
+
+  it('offers Asia history reports by VIN country prefix only', () => {
+    const ids = (vin: string) => asiaSitesForVin(vin).map(s => s.id)
+    expect(ids('JTDKB20U093456789')).toEqual(['carvx'])
+    expect(ids('KMHDH41EX8U123456')).toEqual(['checkcar'])
+    expect(ids('LFV2A21J970123456')).toEqual(['chinavehiclehistory'])
+    expect(ids('kna1234567890abcd')).toEqual(['checkcar'])
+    expect(ids('KF12345678901234')).toEqual([])
+    expect(ids(VIN)).toEqual([])
   })
 
   it('detects an import by code or by operation name', () => {

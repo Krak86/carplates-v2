@@ -1,4 +1,4 @@
-export const AUCTION_REGION_ICON = { us: '🇺🇸', eu: '🇪🇺', kr: '🇰🇷' } as const
+export const AUCTION_REGION_ICON = { us: '🇺🇸', eu: '🇪🇺', kr: '🇰🇷', jp: '🇯🇵', cn: '🇨🇳' } as const
 type AuctionRegion = keyof typeof AUCTION_REGION_ICON
 
 export const AUCTION_SITE_IDS = [
@@ -9,15 +9,23 @@ export const AUCTION_SITE_IDS = [
   'iaai',
   'statvin',
   'openlane',
-  'encar'
+  'encar',
+  'carvx',
+  'checkcar',
+  'chinavehiclehistory'
 ] as const
 export type AuctionSiteId = (typeof AUCTION_SITE_IDS)[number]
 
 type AuctionSite = {
   id: AuctionSiteId
   region: AuctionRegion
-  /** `main` = an archive that answers "was this VIN sold at auction"; `extra` = last-resort resources without a VIN archive. */
-  tier: 'main' | 'extra'
+  /**
+   * `main` = an archive that answers "was this VIN sold at auction"; `extra` = last-resort resources without a VIN archive;
+   * `asia` = paid history reports for Japan / Korea / China cars, offered only when the VIN prefix matches `vinPrefix`.
+   */
+  tier: 'main' | 'extra' | 'asia'
+  /** `asia` tier: the VIN's country prefix (WMI start) this report covers. */
+  vinPrefix?: RegExp
   /** Site root in the visitor's language — where a manual site is opened (the VIN is pasted into its search box). */
   home: (lang: string) => string
   /** Builds a search URL that carries the VIN; absent = the site needs a session / has no VIN-in-URL search (modal). */
@@ -54,8 +62,24 @@ export const AUCTION_SITES: readonly AuctionSite[] = [
   { id: 'iaai', region: 'us', tier: 'extra', home: () => 'https://www.iaai.com/' },
   { id: 'statvin', region: 'us', tier: 'extra', home: () => 'https://stat.vin/' },
   { id: 'openlane', region: 'eu', tier: 'extra', home: () => 'https://www.openlane.eu/' },
-  { id: 'encar', region: 'kr', tier: 'extra', home: () => 'https://www.encar.com/' }
+  { id: 'encar', region: 'kr', tier: 'extra', home: () => 'https://www.encar.com/' },
+  // The Asia reports have no VIN-in-URL search (form only): they open through the copy-and-paste modal.
+  { id: 'carvx', region: 'jp', tier: 'asia', vinPrefix: /^J/, home: () => 'https://carvx.jp/' },
+  { id: 'checkcar', region: 'kr', tier: 'asia', vinPrefix: /^K[L-R]/, home: () => 'https://checkcar.vin/' },
+  {
+    id: 'chinavehiclehistory',
+    region: 'cn',
+    tier: 'asia',
+    vinPrefix: /^L/,
+    home: () => 'https://www.chinavehiclehistory.com/'
+  }
 ]
+
+/** Asia history reports that cover this VIN's country (Japan `J`, Korea `KL`-`KR`, China `L`); empty for any other VIN. */
+export function asiaSitesForVin(vin: string): readonly AuctionSite[] {
+  const upper = vin.toUpperCase()
+  return AUCTION_SITES.filter(site => site.tier === 'asia' && !!site.vinPrefix?.test(upper))
+}
 
 /** Sites of one tier, in display order. */
 export function auctionSitesByTier(tier: AuctionSite['tier']): readonly AuctionSite[] {

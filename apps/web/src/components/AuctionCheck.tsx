@@ -7,7 +7,13 @@ import AuctionVinModal from '@/components/AuctionVinModal'
 import SectionInfo from '@/components/SectionInfo'
 import ShareButton from '@/components/ShareButton'
 import VinToggleSection from '@/components/vin/VinToggleSection'
-import { AUCTION_REGION_ICON, AUCTION_SITES, auctionOpenUrl, auctionSitesByTier } from '@/lib/auction-sites'
+import {
+  AUCTION_REGION_ICON,
+  AUCTION_SITES,
+  asiaSitesForVin,
+  auctionOpenUrl,
+  auctionSitesByTier
+} from '@/lib/auction-sites'
 import type { AuctionSiteId } from '@/lib/auction-sites'
 import { copyToClipboard, scrollElementIntoView } from '@/lib/share-section'
 import ReadGuideLink from '@/components/ReadGuideLink'
@@ -29,7 +35,8 @@ const ROW_CLASS =
 /**
  * Collapsed "Auction history" section (shareable via `?section=auctions`): links to public auction archives (Copart /
  * IAAI re-publishers) to see whether this VIN was ever sold as a damaged lot. Archives that bind a search to a visitor
- * session open a modal with the VIN to copy (language-aware home pages). A short "more resources" list closes the section.
+ * session open a modal with the VIN to copy (language-aware home pages). Japan / Korea / China VINs also get paid
+ * history reports of their home country. A short "more resources" list closes the section.
  * Link-out only — nothing is sent from here.
  */
 export default function AuctionCheck({ vin, imported = false, openSignal = 0 }: Props): ReactNode {
@@ -40,6 +47,7 @@ export default function AuctionCheck({ vin, imported = false, openSignal = 0 }: 
   const [modalId, setModalId] = useState<AuctionSiteId | null>(null)
   const title = t('auctions.title')
   const modalSite = AUCTION_SITES.find(site => site.id === modalId)
+  const asiaSites = asiaSitesForVin(vin)
 
   useEffect(() => {
     if ((isShared || openSignal > 0) && sectionRef.current) scrollElementIntoView(sectionRef.current)
@@ -110,6 +118,14 @@ export default function AuctionCheck({ vin, imported = false, openSignal = 0 }: 
       <p className="mb-2 text-sm text-[var(--color-muted)]">{t('auctions.intro')}</p>
       <ul className="space-y-1">{auctionSitesByTier('main').map(site => renderSite(site, false))}</ul>
       <p className="mt-2 text-sm text-[var(--color-muted)]">{t('auctions.note')}</p>
+
+      {asiaSites.length > 0 && (
+        <div className="mt-3">
+          <div className="mb-1 text-sm font-semibold">{t('auctions.asiaTitle')}</div>
+          <p className="mb-1 text-sm text-[var(--color-muted)]">{t('auctions.asiaIntro')}</p>
+          <ul className="space-y-1">{asiaSites.map(site => renderSite(site, true))}</ul>
+        </div>
+      )}
 
       <div className="mt-3">
         <div className="mb-1 text-sm font-semibold">🧭 {t('auctions.extraTitle')}</div>
