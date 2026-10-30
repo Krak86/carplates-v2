@@ -130,9 +130,20 @@ capacity_p50, power_p50, imported_share, first_reg_by_year jsonb, owners_p50)`.
 - **Cache:** `Cache-Control: public, s-maxage=86400, stale-while-revalidate=604800` on `/cars/*` and `/api/catalog/*`, a
   Cloudflare cache rule, and a data-version in the cache key so the monthly ingest invalidates it. Optional in-memory LRU
   (24 h) for the rendered shell of hot pages.
-- **Optional, after the MVP is indexed:** render the block once in `db:refresh-catalog` and store it (`catalog_model.seo_html`
-  - JSON-LD), so a request is one primary-key read plus a string replace (about 0.5 day). Top ~300 models, make pages and
-    `/cars` can be held in memory at API start.
+- **Optional, after the MVP is indexed:** render the block and the JSON-LD once in `db:refresh-catalog` and store them in
+  `catalog_model.seo_html`, so a request is one primary-key read plus a string replace (about 0.5 day).
+- **Load (decided 2026-10-29).** Expected extra load is small and comes from crawlers (tens of thousands of URLs over a few
+  weeks), not users. Rules:
+  - Keep the taxonomy (makes/models, a few thousand rows) in API process memory, loaded at start and reloaded when the data
+    version changes. Faster than Redis (no network hop). Redis (already in the production compose) only if a cache shared
+    across blue/green api instances is wanted, or together with the Redis throttler store.
+  - Top ~300 models, make pages and `/cars` stay in memory.
+  - The `LazySection`s load client-side on scroll, so crawlers never trigger the heavy section calls. Keep the SSR block
+    limited to catalog-table data and keep the per-IP `@Throttle` on the section APIs.
+  - Start the sitemap with the MVP set (top ~300 models) and widen only while metrics stay flat.
+  - Run `db:refresh-catalog` after the ingest in the quiet window, same ordering as `db:refresh-derived`.
+  - After launch watch API p95 and CPU for two weeks; target a Cloudflare cache hit ratio of 90% or more on `/cars/*`. Fix
+    cache headers before considering a bigger VPS.
 - `sitemap.ts`: switch to a sitemap index with chunked `/sitemap-cars-N.xml`, indexable pages only.
 - `STATIC_PAGES` gets `/cars` only. The dynamic pages get their text from the catalog table.
 

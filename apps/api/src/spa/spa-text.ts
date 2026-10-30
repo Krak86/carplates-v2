@@ -25,23 +25,37 @@ export const TAGLINE: Record<Lang, [string, string]> = {
 export const STATIC_PAGES: Record<string, Record<Lang, PageText>> = {
   '/': {
     ua: {
-      title: 'Cars UA - номери та VIN',
-      description: 'Пошук даних про транспортний засіб за номерним знаком або VIN-кодом. Відкриті дані реєстру України.'
+      title: 'Перевірка авто за номером або VIN в Україні | Cars UA',
+      description:
+        'Пошук авто за номерним знаком або VIN-кодом: марка, модель, рік, паливо, регіон та історія реєстрацій. Відкриті дані реєстру України.'
     },
     ru: {
-      title: 'Cars UA - номера и VIN',
+      title: 'Проверка авто по номеру или VIN в Украине | Cars UA',
       description:
-        'Поиск данных о транспортном средстве по номерному знаку или VIN-коду. Открытые данные реестра Украины.'
+        'Поиск авто по номерному знаку или VIN-коду: марка, модель, год, топливо, регион и история регистраций. Открытые данные реестра Украины.'
     },
     en: {
-      title: 'Cars UA - plates & VIN',
-      description: "Look up a vehicle by Ukrainian plate number or VIN. Built on the state's open vehicle registry."
+      title: 'Ukrainian car lookup by plate or VIN | Cars UA',
+      description:
+        "Look up a vehicle by Ukrainian plate number or VIN: make, model, year, fuel, region and registration history. Built on the state's open vehicle registry."
     }
   },
   '/about': {
-    ua: { title: 'Cars UA - Про сервіс', description: 'Звідки дані, як працює пошук і що таке Cars UA.' },
-    ru: { title: 'Cars UA - О сервисе', description: 'Откуда данные, как работает поиск и что такое Cars UA.' },
-    en: { title: 'Cars UA - About', description: 'Where the data comes from, how search works, and what Cars UA is.' }
+    ua: {
+      title: 'Про Cars UA: пошук авто на відкритих даних України',
+      description:
+        'Звідки дані (data.gov.ua), як працює пошук за номером і VIN та що таке Cars UA: сервіс на відкритих даних про транспортні засоби України.'
+    },
+    ru: {
+      title: 'О Cars UA: поиск авто на открытых данных Украины',
+      description:
+        'Откуда данные (data.gov.ua), как работает поиск по номеру и VIN и что такое Cars UA: сервис на открытых данных о транспортных средствах Украины.'
+    },
+    en: {
+      title: 'About Cars UA: car lookup on Ukrainian open data',
+      description:
+        'Where the data comes from (data.gov.ua), how plate and VIN search works, and what Cars UA is: a service built on open vehicle data from Ukraine.'
+    }
   },
   '/install': {
     ua: {
@@ -82,58 +96,67 @@ export const STATIC_PAGES: Record<string, Record<Lang, PageText>> = {
   },
   '/stats': {
     ua: {
-      title: 'Cars UA - Статистика',
-      description: 'Найпопулярніші марки, кольори, паливо та регіони за реєстром транспортних засобів України.'
+      title: 'Статистика авто в Україні: марки, кольори, паливо | Cars UA',
+      description:
+        'Найпопулярніші марки, кольори, паливо та регіони за відкритим реєстром транспортних засобів України. Дані з data.gov.ua.'
     },
     ru: {
-      title: 'Cars UA - Статистика',
-      description: 'Самые популярные марки, цвета, топливо и регионы по реестру транспортных средств Украины.'
+      title: 'Статистика авто в Украине: марки, цвета, топливо | Cars UA',
+      description:
+        'Самые популярные марки, цвета, топливо и регионы по открытому реестру транспортных средств Украины. Данные с data.gov.ua.'
     },
     en: {
-      title: 'Cars UA - Statistics',
-      description: "Most common makes, colors, fuels and regions in Ukraine's vehicle registry."
+      title: 'Ukraine car statistics: makes, colours, fuels | Cars UA',
+      description:
+        "Most common makes, colours, fuels and regions in Ukraine's open vehicle registry. Data from data.gov.ua."
     }
   },
   '/wanted': {
     ua: {
-      title: 'Cars UA - Розшук авто: статистика',
+      title: 'Авто в розшуку в Україні: статистика за регіонами і марками | Cars UA',
       description: 'Скільки авто в розшуку в Україні, скільки знайдено, за регіонами, марками, кольорами та роками.'
     },
     ru: {
-      title: 'Cars UA - Розыск авто: статистика',
+      title: 'Авто в розыске в Украине: статистика по регионам и маркам | Cars UA',
       description: 'Сколько авто в розыске в Украине, сколько найдено, по регионам, маркам, цветам и годам.'
     },
     en: {
-      title: 'Cars UA - Wanted vehicles: statistics',
+      title: 'Wanted vehicles in Ukraine: statistics by region and make | Cars UA',
       description: 'How many vehicles are wanted in Ukraine and how many were found, by region, make, colour and year.'
     }
   },
   '/fuel': {
     ua: {
-      title: 'Cars UA - Пальне та викиди',
-      description: 'Витрата пального та викиди CO₂ за марками й моделями за реєстром України.'
+      title: 'Витрата пального та викиди CO₂ авто за марками й моделями | Cars UA',
+      description:
+        'Витрата пального та викиди CO₂ за марками й моделями авто, які їздять в Україні, за відкритим реєстром транспортних засобів.'
     },
     ru: {
-      title: 'Cars UA - Топливо и выбросы',
-      description: 'Расход топлива и выбросы CO₂ по маркам и моделям по реестру Украины.'
+      title: 'Расход топлива и выбросы CO₂ авто по маркам и моделям | Cars UA',
+      description:
+        'Расход топлива и выбросы CO₂ по маркам и моделям авто, которые ездят в Украине, по открытому реестру транспортных средств.'
     },
     en: {
-      title: 'Cars UA - Fuel & emissions',
-      description: "Fuel economy and CO₂ emissions by make and model, from Ukraine's vehicle registry."
+      title: 'Car fuel economy and CO₂ emissions by make and model | Cars UA',
+      description:
+        'Fuel economy and CO₂ emissions by make and model for the cars driving in Ukraine, from the open vehicle registry.'
     }
   },
   '/safety': {
     ua: {
-      title: 'Cars UA - Безпека в ДТП',
-      description: 'Результати краш-тестів Euro NCAP, IIHS, NHTSA та інших за марками й моделями.'
+      title: 'Краш-тести авто: оцінки Euro NCAP, IIHS, NHTSA за моделями | Cars UA',
+      description:
+        'Результати краш-тестів Euro NCAP, IIHS, NHTSA та інших за марками й моделями авто, які їздять в Україні.'
     },
     ru: {
-      title: 'Cars UA - Безопасность в ДТП',
-      description: 'Результаты краш-тестов Euro NCAP, IIHS, NHTSA и других по маркам и моделям.'
+      title: 'Краш-тесты авто: оценки Euro NCAP, IIHS, NHTSA по моделям | Cars UA',
+      description:
+        'Результаты краш-тестов Euro NCAP, IIHS, NHTSA и других по маркам и моделям авто, которые ездят в Украине.'
     },
     en: {
-      title: 'Cars UA - Crash safety',
-      description: 'Euro NCAP, IIHS, NHTSA and other crash-test results by make and model.'
+      title: 'Car crash tests: Euro NCAP, IIHS, NHTSA ratings by model | Cars UA',
+      description:
+        'Euro NCAP, IIHS, NHTSA and other crash-test results by make and model for the cars driving in Ukraine.'
     }
   },
   '/releases': {
@@ -149,18 +172,19 @@ export const STATIC_PAGES: Record<string, Record<Lang, PageText>> = {
   },
   '/read': {
     ua: {
-      title: 'Cars UA - Довідник',
+      title: 'Довідник авто: типи кузова, розміри й класи, електромобілі | Cars UA',
       description:
-        'Авто простими словами на даних українського реєстру: типи кузова, розміри й класи, реальні приклади.'
+        'Авто простими словами на даних українського реєстру: типи кузова, розміри й класи, електромобілі, номерні знаки, реальні приклади.'
     },
     ru: {
-      title: 'Cars UA - Справочник',
+      title: 'Справочник авто: типы кузова, размеры и классы, электромобили | Cars UA',
       description:
-        'Авто простыми словами на данных украинского реестра: типы кузова, размеры и классы, реальные примеры.'
+        'Авто простыми словами на данных украинского реестра: типы кузова, размеры и классы, электромобили, номерные знаки, реальные примеры.'
     },
     en: {
-      title: 'Cars UA - Guides',
-      description: 'Cars explained on Ukrainian registry data: body types, sizes and classes, real examples.'
+      title: 'Car guides: body types, sizes and classes, electric cars | Cars UA',
+      description:
+        'Cars explained on Ukrainian registry data: body types, sizes and classes, electric cars, number plates, real examples.'
     }
   },
   '/read/body-types': {
