@@ -7,6 +7,7 @@ import { Link, useParams } from 'react-router'
 
 import BrandLogo from '@/components/BrandLogo'
 import CatalogBreadcrumb from '@/components/catalog/CatalogBreadcrumb'
+import { CompareTrayBar, CompareTrayButton } from '@/components/compare/CompareTray'
 import CatalogSiblingChips from '@/components/catalog/CatalogSiblingChips'
 import ModelVariants from '@/components/catalog/ModelVariants'
 import Card from '@/components/ui/Card'
@@ -18,7 +19,7 @@ import { localizeRegion } from '@/lib/region-label'
 import { catalogModelQuery } from '@/lib/queries'
 
 import CatalogStatsSection from './CatalogStatsSection'
-import { yearRangeLabel } from './helpers'
+import { typicalYear, yearRangeLabel } from './helpers'
 
 function CatalogNotFound(): ReactNode {
   const { t } = useTranslation()
@@ -95,6 +96,20 @@ export default function CatalogModelRoute(): ReactNode {
           </h1>
         </div>
         <CatalogSummary model={model} />
+        {typicalYear(model.stats.years) && (
+          <p className="mt-2">
+            <CompareTrayButton
+              reference={{
+                kind: 'model',
+                make: model.make,
+                model: model.model,
+                year: typicalYear(model.stats.years) as number,
+                fuel: null
+              }}
+              label={`${model.makeName} ${model.modelName}`.trim()}
+            />
+          </p>
+        )}
         <p className="mt-2 text-base">
           <Link to="/" className="text-[var(--color-primary)] underline">
             {t('catalog.lookup')}
@@ -112,6 +127,7 @@ export default function CatalogModelRoute(): ReactNode {
         <h2 className="mb-2 text-lg font-semibold">{t('catalog.otherModels')}</h2>
         <CatalogSiblingChips model={model} />
       </Card>
+      <CompareTrayBar />
     </main>
   )
 }

@@ -5,7 +5,8 @@ import { Link } from 'react-router'
 const ROWS = [
   [
     { to: '/history', icon: '🕘', key: 'history.viewLink' },
-    { to: '/favorites', icon: '⭐', key: 'favorites.viewLink' }
+    { to: '/favorites', icon: '⭐', key: 'favorites.viewLink' },
+    { to: '/compare', icon: '⚖️', key: 'nav.compare' }
   ],
   [
     { to: '/stats', icon: '📊', key: 'stats.viewLink' },

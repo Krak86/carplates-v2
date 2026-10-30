@@ -13,6 +13,7 @@ import type { VinDecodeResponse } from '@carplates/shared'
 
 import BrandLogo from '@/components/BrandLogo'
 import CatalogModelChip from '@/components/catalog/CatalogModelChip'
+import CompareChip from '@/components/compare/CompareChip'
 import CardTiltToggle from '@/components/CardTiltToggle'
 import RaceGameButton from '@/components/game/RaceGameButton'
 import CarWikiInfo from '@/components/CarWikiInfo'
@@ -119,6 +120,7 @@ export default function VinResult({ data }: Props): ReactNode {
           />
           <SteeringChip steering={fields.get('Steering Location')} />
           <CatalogModelChip brand={vehicle.brand} model={vehicle.model} />
+          <CompareChip from={{ kind: 'vin', vin: data.vin }} />
         </div>
 
         {registry && (

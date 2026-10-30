@@ -4,6 +4,7 @@ import { CATALOG_INDEX_PATH, catalogMakeParamsSchema, catalogPath } from '@carpl
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { Link, useParams } from 'react-router'
+import { CompareTrayBar, CompareTrayButton } from '@/components/compare/CompareTray'
 
 import BrandLogo from '@/components/BrandLogo'
 import CatalogBreadcrumb from '@/components/catalog/CatalogBreadcrumb'
@@ -130,6 +131,20 @@ export default function CatalogMakeRoute(): ReactNode {
                       <Link to={catalogPath(make.make, m.model)} className="hover:text-[var(--color-primary)]">
                         {`${make.makeName} ${m.modelName}`}
                       </Link>
+                      {m.yearMin && m.yearMax && (
+                        <span className="ml-2 align-middle">
+                          <CompareTrayButton
+                            reference={{
+                              kind: 'model',
+                              make: make.make,
+                              model: m.model,
+                              year: Math.round((m.yearMin + m.yearMax) / 2),
+                              fuel: null
+                            }}
+                            label={`${make.makeName} ${m.modelName}`}
+                          />
+                        </span>
+                      )}
                     </th>
                     <td className="py-1.5 pr-3 text-right tabular-nums">{format.format(m.n)}</td>
                     <td className="hidden py-1.5 pr-3 text-[var(--color-muted)] tabular-nums sm:table-cell">{years}</td>
@@ -147,6 +162,7 @@ export default function CatalogMakeRoute(): ReactNode {
           </table>
         )}
       </Card>
+      <CompareTrayBar />
     </main>
   )
 }

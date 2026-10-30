@@ -1,6 +1,6 @@
 # Compare two vehicles: `/compare`
 
-Status: **researched 2026-10-30, not started.** Tracked in PLAN.md "To discuss / research" ("Car compare"). The catalog MVP
+Status: **phases 1-3 built, phase 2 finished and phase 4 client side built 2026-10-30; server-side phase 4 and export of the new blocks open.** Built-state conventions: features-reference.md "Compare two vehicles". Tracked in PLAN.md "To discuss / research" ("Car compare"). The catalog MVP
 (`/cars/:make/:model`, see [catalog-plan.md](catalog-plan.md)) is live, so the old "blocked on catalog" note is lifted.
 
 ## Decisions (owner, 2026-10-30)
@@ -19,6 +19,7 @@ Route goes **before** `/:query` in `App.tsx`. New public route checklist (CLAUDE
 (ua/ru/en, `noindex` unless indexed pairs are added later), `max-w-6xl`, `@Throttle` on any new enumerable endpoint, edge cache rules.
 
 Every input resolves to one `CompareCar`: `{ brand, model, year, kind, fuel, capacity, powerKw, body, ownWeight, totalWeight, registry? }`.
+
 - **plate**: `plateQuery` (row + the card bundle `/api/card/:plate`, which already carries rdw, vdb, ev, wikiSpecs in one call).
 - **VIN**: `vinQuery` decode, brand/model/year from the NHTSA fields.
 - **model ref**: the catalog (`catalogLookupQuery`, `GET /api/catalog/:make/:model`) gives `topBrand` / `topModel` / `kind` / typical year;
@@ -96,10 +97,21 @@ Add `export.*` i18n keys. Any new field is handled in `record-formats.ts`, `expo
 
 ## Phases
 
-1. **Core:** route, input resolver (plate / VIN / model), `CompareCar`, header + coverage strip, mirrored table with pruning, plate-card chip. Tests for the resolver, row builders, pruning.
-2. **Visuals:** radars, bars, curves, share bars, size overlay, generated sentences.
-3. **Export:** report builder, formats, sources.
-4. **Growth:** compare tray, slot B suggestions, saved comparisons (IndexedDB like history), optional indexable popular pairs `/compare/bmw-3series-vs-audi-a4` (pre-rendered like the catalog), `GET /api/compare` bundle for edge caching, `/read/*` article embeds.
+1. **Core (DONE 2026-10-30; sidebar entry added):** route, input resolver (plate / VIN / model), `CompareCar`, header + coverage strip, mirrored table with pruning, plate-card chip. Tests for the resolver, row builders, pruning.
+2. **Visuals (DONE 2026-10-30 except the items below):** sentences, mirrored bars, radars, share bars, size overlay, plus min-median-max dumbbells (RDW), Euro NCAP / NHTSA star rows, CO2 on the card scale, NL new price by model year and UK MOT fail rate by mileage curves, a generations timeline (one `Timeline` per car), parking / garage verdicts, size overlay PNG save. Not built: depreciation-by-age and registrations-per-year curves (no per-model series is loaded for them), pills for the four other safety programmes (only Euro NCAP and NHTSA are loaded), the optional 5-year cost bar.
+3. **Export (core DONE 2026-10-30):** `buildCompareReport` + `CompareExportButton` (clipboard / txt / md / csv / docx / pdf: highlights, one table per group with the better side marked, notes, sources). Open: chart sections (radars, size overlay PNG) in docx / pdf.
+4. **Growth (client side DONE 2026-10-30):** compare tray (`store/compare-tray-store.ts`, `CompareTray.tsx`: "Add to compare" on `/cars/:make` rows and the model page, sticky bar), slot B suggestions (`suggestions.ts`: same model on another fuel, previous generation, sibling models), saved comparisons (IndexedDB `lib/compare-db.ts`, this browser only). Open: tray buttons on `/stats` boards, favourites, history and advanced search; indexable popular pairs `/compare/bmw-3series-vs-audi-a4` (pre-render, sitemap), `GET /api/compare` bundle for edge caching, `/read/*` article embeds; the new blocks are not in the export yet.
 
 Docs to update when built (CLAUDE.md): write-up -> `plan-done.md`, one-line check in PLAN.md, conventions -> `features-reference.md` "Compare",
 `releases.ts` entry (new day -> bump `releases/latest.ts`), About (`about.feature.compare`), ua/ru/en strings.
+
+## Next session (handoff, 2026-10-30)
+
+Browser-checked 2026-10-30 (dark theme, desktop; Ranges also light and 390px): ranges, curves, generations timeline. Not yet checked: safety and CO2, fit, size PNG, slot B suggestions, tray, saved comparisons, export menu, light / phone for curves and timeline. Then, in this order:
+
+1. **Browser check** of the rest, `/compare?a=...&b=...` (two plates, plate vs model, two models; light / dark, phone width): safety and CO2, fit, size PNG; slot B suggestions; tray on `/cars/:make` and a model page; save / list / remove; export menu.
+2. **Put the new blocks in the export** (`lib/export-compare.ts`): ranges and fit as tables, curves as `chart` sections (docx / pdf pictures), CO2 and stars as rows; radar and size-overlay pictures too.
+3. **Missing visuals:** depreciation-by-age curve (needs a per-model series), registrations per year (catalog), pills for JNCAP / C-NCAP / KNCAP / IIHS (load their queries in `use-compare-car.ts`), optional 5-year cost bar.
+4. **Tray outside the catalog:** `CompareTrayButton` on `/stats` boards, favourites, history, advanced search (plates / VINs there are `plate:` / `vin:` refs).
+5. **Server side (ask the owner first):** `GET /api/compare` bundle with edge cache (CLAUDE.md edge-cache checklist), indexable popular pairs `/compare/bmw-3series-vs-audi-a4` (pre-render like the catalog, `STATIC_PAGES` / sitemap), `/read/*` embeds.
+6. ~~User-facing docs~~ done 2026-10-30: `releases.ts` entries and About (`about.feature.compare`) for phases 2-4.

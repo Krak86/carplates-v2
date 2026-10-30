@@ -5,6 +5,8 @@ import { cn } from '@/lib/cn'
 export type TimelineItem = {
   key: string
   content: ReactNode
+  /** Fills this item's dot; defaults to the first item when `highlightFirst` is on. */
+  highlight?: boolean
 }
 
 type Props = {
@@ -32,7 +34,7 @@ export default function Timeline({ items, arrows = 'up', highlightFirst = true }
                 aria-hidden
                 className={cn(
                   'mt-1 h-3 w-3 shrink-0 rounded-full border-2',
-                  highlightFirst && index === 0
+                  (item.highlight ?? (highlightFirst && index === 0))
                     ? 'border-[var(--color-primary)] bg-[var(--color-primary)]'
                     : 'border-[var(--color-border)] bg-[var(--color-surface)]'
                 )}

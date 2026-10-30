@@ -155,42 +155,16 @@ into many subs at once. Use a screenshot or short GIF of a search.
 
 1. Phase 0 (today), 2. catalog MVP with IndexNow and internal links, 3. outreach, 4. the rest of Phase 1, then widen the catalog.
 
-## Next (as of 2026-10-30, night)
+## Next (updated 2026-10-30, end of day)
 
-Done by the agent 2026-10-30: robots/sitemap purge on deploy; Step 1 SQL check; per-page share cards; IndexNow; **catalog MVP**
-(`/cars/:make/:model`, 1,697 pages / 300 indexable, sitemap index + `sitemap-cars.xml`, injected `#root` block, page cards;
-write-up `plan-done.md` "Model catalog MVP", conventions `features-reference.md` "Model catalog"). Uncommitted until the owner commits.
+Catalog MVP, internal links, `/cars` + `/cars/:make` hubs, JSON-LD, Cloudflare rules, Search Console / Bing and IndexNow are **done and live**; the done / left list is [catalog-plan.md](catalog-plan.md) "Done and left" (the old night-of-2026-10-30 owner / agent checklist that stood here is obsolete).
 
-### Owner, manual (in this order)
+Still open from this plan:
 
-1. Review, run `pnpm format`, commit and push the work (a suggested message is in the last agent reply), merge to `main`.
-2. **Deploy.** `deploy-api.yml` applies migration 0081; web deploys with it. Check the IndexNow step's log (Cloudflare Bot Fight Mode may block the runner
-   from the sitemap: the step then skips, which is fine).
-3. **On the VPS run `pnpm db:refresh-catalog` once** (about 3 min; writes only `catalog_*`). Until then `/sitemap-cars.xml` has no URLs and `/cars/...` shows home tags.
-4. **Cloudflare, two Cache Rules** (expressions in `deploy.md` "Model catalog"; paste via "Edit expression"): extend "Cache model lookups" with `/api/catalog/`, and add
-   "Cache catalog pages" for `/cars/`. Verify MISS then HIT on `/api/catalog/bmw/x5` and `/cars/bmw/x5` (and `?lang=en`).
-5. **Browser check** on prod or a local `pnpm build` with `WEB_DIST_DIR`: `/cars/bmw/x5` (light/dark, mobile width, sections load on scroll, no plate fields), view-source shows the
-   `<h1>` block in `#root`, a thin page (e.g. a model ranked above 300) has `noindex`. Spot-check the top models (`/cars/volkswagen/passat`, `/cars/zaz/lanos`, `/cars/toyota/landcruiserprado`).
-6. Search Console and Bing Webmaster: re-submit `https://carsua.app/sitemap.xml` (now an index), request indexing for 3-5 catalog URLs, then watch coverage for 1-2 weeks before widening.
-   Check Bot Fight Mode / throttles do not block verified Googlebot/Bingbot on `/cars/*` and `/api/catalog/*`.
-7. Phase 0 (not touched by the agent, do not tick for it): Diia / data.gov.ua listing + forum post, directories, re-scrape `/stats` in the Facebook debugger (purge `/og/` if the prefix
-   purge is refused on the plan).
-8. After 2 weeks: API p95 and CPU, Cloudflare hit ratio on `/cars/*` (target 90 % or more). Fix cache headers before considering a bigger VPS.
-
-### Agent, next session
-
-Read first (grep headings, never whole files): `docs/discovery-plan.md` "Decisions", "Phase 2", this section; `docs/catalog-plan.md` "Step 1 check results", Steps 4-5;
-`docs/features-reference.md` "Model catalog". Follow CLAUDE.md and CLAUDE_RULES.md; no `git commit/push`; suggest a commit message after each step.
-
-1. **Internal links** (crawlers find new pages slowly without them): plate/VIN `ResultCard` chip "All {brand} {model} in Ukraine" via `catalog_alias` (a small
-   `GET /api/catalog/lookup?brand=&model=` or a field on the card bundle; keep the plate page `noindex`), `/stats` model boards link to `/cars/...`, footer or `/read` hub link.
-2. **`/cars` and `/cars/:make` index pages** (+ `STATIC_PAGES` entry for `/cars` in ua/ru/en, `ROUTE_TITLE_KEYS`, `catalog_make` is already built; the model page then links the make).
-3. **JSON-LD** (`Dataset` or `Car`) on catalog pages where it matches real content, in the injected block; and an optional `seo_html` pre-render in `catalog_model`.
-4. **Quality pass on the taxonomy** beyond the top 300 before widening: run `db:refresh-catalog` output review for ranks 300-1,700 (leftover trims, wrong names), add `fold`/`name`/`drop` rows to
-   `scripts/src/catalog-overrides.csv`; then raise `CATALOG_TOP_MODELS` only after the owner reports Search Console indexing.
-5. **Year pages** `/cars/:make/:model/:year` and `catalog_year_stats` (catalog-plan.md Steps 2-3) only after items 1-4 and indexing data.
-6. Optional: extract the model-level sections of `ResultCard` into the shared `ModelSections` (the two copies can drift); shorten the over-long `/read/*` titles in `spa-text.ts`.
-7. IndexNow: when the sitemap passes 10,000 URLs split the deploy step's request into batches.
+1. **Owner, about 2026-11-13:** Search Console "Pages", Bing, `/cars/*` cache hit ratio (target 90 % or more); then year pages (block 4) and widening the index.
+2. **Owner, Phase 0 outreach:** Diia / data.gov.ua listing + forum post, directories, re-scrape `/stats` in the Facebook debugger.
+3. **Agent:** quality pass on the taxonomy beyond the top 300 (`catalog-overrides.csv`) before raising `CATALOG_TOP_MODELS`; optional shared `ModelSections` extraction; shorten the over-long `/read/*` titles in `spa-text.ts`; split the IndexNow request into batches past 10,000 sitemap URLs.
+4. **Compare pairs** as indexable pages are tracked in [compare-plan.md](compare-plan.md) phase 4.
 
 ## Measuring
 

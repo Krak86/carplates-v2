@@ -68,7 +68,14 @@ export default function VinTypicalData({ data }: Props): ReactNode {
         />
       )}
       <LazySection sections={['size']}>
-        <VehicleSizeSection brand={brand} model={model} year={year} kind={kind} vinFields={fields} />
+        <VehicleSizeSection
+          brand={brand}
+          model={model}
+          year={year}
+          kind={kind}
+          vinFields={fields}
+          compareFrom={{ kind: 'vin', vin: data.vin }}
+        />
       </LazySection>
       <FuelEconomy brand={brand} model={model} year={year} fuel={fuel} capacity={capacity} kind={kind} />
       <VinTypicalEuBaseline brand={brand} model={model} year={year} kind={kind} />

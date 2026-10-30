@@ -52,6 +52,7 @@ import { useVehicleSize } from '@/components/size/use-vehicle-size'
 import ElectricLink from '@/components/ElectricLink'
 import { getBodyInfo, getFuelIcon } from '@/components/ResultCard.helpers'
 import PaidFeatureSections from '@/components/paid/PaidFeatureSections'
+import CompareChip from '@/components/compare/CompareChip'
 import GenerationChip from '@/components/GenerationChip'
 import SizeClassChip from '@/components/size/SizeClassChip'
 import VdbChips from '@/components/VdbChips'
@@ -433,6 +434,11 @@ export default function ResultCard({ data }: Props): ReactNode {
                 />
                 <TopStatBadges brand={c.brand} model={c.model} color={c.color} region={data.region} kind={c.kind} />
                 <VdbChips brand={c.brand} model={c.model} kind={c.kind} />
+                {(data.plate || hasVin) && (
+                  <CompareChip
+                    from={data.plate ? { kind: 'plate', plate: data.plate } : { kind: 'vin', vin: c.vin ?? '' }}
+                  />
+                )}
                 <Model3dButton brand={c.brand} model={c.model} />
                 <Model360Button brand={c.brand} model={c.model} />
                 <RaceTestDriveChip onOpen={() => setRaceOpenSignal(n => n + 1)} />
@@ -831,6 +837,9 @@ export default function ResultCard({ data }: Props): ReactNode {
               body={c.body}
               vin={hasVin ? c.vin : null}
               openSignal={sizeOpenSignal}
+              compareFrom={
+                data.plate ? { kind: 'plate', plate: data.plate } : hasVin ? { kind: 'vin', vin: c.vin ?? '' } : null
+              }
             />
           </LazySection>
           <LazySection sections={['assists']}>

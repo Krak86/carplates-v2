@@ -101,7 +101,7 @@ export function buildNewsSections(input: ExportNewsInput, t: Translate, lang: st
 
 type SourceEntry = { label: string; url: string }
 
-const SOURCE = {
+export const SOURCE = {
   registry: { label: 'data.gov.ua', url: 'https://data.gov.ua' },
   nhtsa: { label: 'NHTSA', url: 'https://www.nhtsa.gov' },
   euroncap: { label: 'Euro NCAP', url: 'https://www.euroncap.com' },

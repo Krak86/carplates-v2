@@ -81,6 +81,13 @@
   --color-mot-watch: #3987e5;
 }
 
+/* /compare: car A is blue, car B orange - the two validated MOT slots above, so the sRGB fallback, the dark steps and the
+   P3 / oklch versions are inherited (a custom property resolves its var() on the same element, so each theme block wins). */
+:root {
+  --color-compare-a: var(--color-mot-watch);
+  --color-compare-b: var(--color-mot-fail);
+}
+
 /* Favorite-label palette (index = `label.color`, see FAVORITE_LABEL_COLOR_COUNT): ten well-separated hues, the sRGB
    fallback here and the wide-gamut versions in the `color-gamut` blocks below. Labels are always shown with their
    name too, so color is never the only signal. */
@@ -888,6 +895,8 @@ body {
   --sil-rim: hsl(215 70% 34%);
   --sil-spoke: var(--bp-line);
   --sil-lamp: hsl(215 70% 40%);
+  --color-compare-a: hsl(185 90% 68%);
+  --color-compare-b: hsl(35 100% 66%);
   --sil-tail: hsl(210 60% 80%);
   background: var(--bp-paper);
   color: var(--bp-line);
@@ -904,6 +913,8 @@ body {
     --sil-tyre: oklch(0.32 0.13 258);
     --sil-rim: oklch(0.43 0.13 258);
     --sil-lamp: oklch(0.5 0.12 255);
+    --color-compare-a: oklch(0.86 0.12 205);
+    --color-compare-b: oklch(0.85 0.16 70);
     --sil-tail: oklch(0.84 0.07 245);
   }
 }
