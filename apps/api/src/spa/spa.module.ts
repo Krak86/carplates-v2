@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common'
 import { ThrottlerModule } from '@nestjs/throttler'
 
+import { CatalogModule } from '../catalog/catalog.module.js'
 import { PlateModule } from '../plate/plate.module.js'
 import { RdwModule } from '../rdw/rdw.module.js'
 import { VinModule } from '../vin/vin.module.js'
@@ -10,7 +11,7 @@ import { SeoController } from './seo.controller.js'
 import { SpaController } from './spa.controller.js'
 
 @Module({
-  imports: [PlateModule, VinModule, RdwModule, ThrottlerModule.forRoot([{ ttl: 60_000, limit: 60 }])],
+  imports: [CatalogModule, PlateModule, VinModule, RdwModule, ThrottlerModule.forRoot([{ ttl: 60_000, limit: 60 }])],
   // OgController first: the SPA catch-all (`*`) must not shadow /og/*.
   controllers: [OgController, SeoController, SpaController],
   providers: [PreviewService]

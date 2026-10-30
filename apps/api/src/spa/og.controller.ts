@@ -6,10 +6,12 @@ import { ApiExcludeController } from '@nestjs/swagger'
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler'
 import type { FastifyReply } from 'fastify'
 
+import { catalogPageText } from '../catalog/catalog-text.js'
+import { CatalogService } from '../catalog/catalog.service.js'
 import { loadEnv } from '../env.js'
 import { Lru } from './lru.js'
 import { buildCardSvg, buildPageCardSvg, readLogo, renderPng } from './og-card.js'
-import { pagePathForSlug } from './page-card.js'
+import { catalogSlugsOfCard, pagePathForSlug } from './page-card.js'
 import { PreviewService } from './preview.service.js'
 import { STATIC_PAGES, TAGLINE, resolveLang, type Lang } from './spa-text.js'
 
@@ -35,19 +37,24 @@ export class OgController {
   private fontFilesFound: string[] = []
   private readonly pngCache = new Lru<Buffer>(PNG_CACHE_MAX)
 
-  constructor(@Inject(PreviewService) private readonly previews: PreviewService) {}
+  constructor(
+    @Inject(PreviewService) private readonly previews: PreviewService,
+    @Inject(CatalogService) private readonly catalog: CatalogService
+  ) {}
 
   /** `GET /og/page/:slug.png` - share card of a static page (title + description); an unknown slug is a 404. */
   @Get('page/:file')
-  pageCard(
+  async pageCard(
     @Param('file') file: string,
     @Query('lang') langParam: string | undefined,
     @Res() reply: FastifyReply
-  ): void {
+  ): Promise<void> {
     const lang = resolveLang(langParam)
     const slug = file.replace(/\.png$/i, '')
+    const catalogSlugs = catalogSlugsOfCard(slug)
+    const model = catalogSlugs ? await this.catalog.get(catalogSlugs.make, catalogSlugs.model) : null
     const path = pagePathForSlug(slug)
-    const page = path ? STATIC_PAGES[path]?.[lang] : undefined
+    const page = model ? catalogPageText(model, lang) : path ? STATIC_PAGES[path]?.[lang] : undefined
     if (!page) throw new NotFoundException()
 
     const cacheKey = `page:${lang}:${slug}`

@@ -5,7 +5,7 @@ import type { OpenAPIObject } from '@nestjs/swagger'
  * registry: no per-vehicle lookups (enumerable), no admin / auth / account routes, and nothing built on scraped
  * third-party sources (see docs/legal-and-monetization.md). Extend deliberately, one prefix at a time.
  */
-export const PUBLIC_API_PATH_PREFIXES = ['/api/stats', '/api/wanted/stats'] as const
+export const PUBLIC_API_PATH_PREFIXES = ['/api/stats', '/api/wanted/stats', '/api/catalog'] as const
 
 const isPublicPath = (path: string): boolean =>
   PUBLIC_API_PATH_PREFIXES.some(prefix => path === prefix || path.startsWith(`${prefix}/`))

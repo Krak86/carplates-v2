@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { renderRobots, renderSitemap, sitemapPaths } from './sitemap.js'
+import { renderCatalogSitemap, renderRobots, renderSitemap, renderSitemapIndex, sitemapPaths } from './sitemap.js'
 
 describe('sitemap', () => {
   it('lists indexable static pages, not per-device ones', () => {
@@ -49,6 +49,21 @@ describe('sitemap', () => {
     expect(xml).toContain('hreflang="uk" href="https://carsua.app/about"')
     expect(xml).toContain('hreflang="x-default" href="https://carsua.app/about"')
     expect(xml.match(/<url>/g)).toHaveLength(sitemapPaths().length * 3)
+  })
+
+  it('lists the sitemap files in an index', () => {
+    const xml = renderSitemapIndex('https://carsua.app')
+    expect(xml).toContain('<sitemapindex')
+    expect(xml).toContain('<loc>https://carsua.app/sitemap-pages.xml</loc>')
+    expect(xml).toContain('<loc>https://carsua.app/sitemap-cars.xml</loc>')
+  })
+
+  it('renders catalog pages in every language with hreflang', () => {
+    const xml = renderCatalogSitemap('https://carsua.app', [['bmw', '3series']])
+    expect(xml).toContain('<loc>https://carsua.app/cars/bmw/3series</loc>')
+    expect(xml).toContain('<loc>https://carsua.app/cars/bmw/3series?lang=en</loc>')
+    expect(xml).toContain('hreflang="x-default" href="https://carsua.app/cars/bmw/3series"')
+    expect(xml.match(/<url>/g)).toHaveLength(3)
   })
 
   it('points robots.txt at the sitemap', () => {

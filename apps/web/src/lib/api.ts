@@ -1,4 +1,5 @@
 import {
+  catalogModelSchema,
   adminAnalyticsResponseSchema,
   adminLinksResponseSchema,
   adminServerResponseSchema,
@@ -78,6 +79,7 @@ import {
   wikiInfoResponseSchema
 } from '@carplates/shared'
 import type {
+  CatalogModel,
   AdminAnalyticsResponse,
   AdminLinksResponse,
   AdminServerResponse,
@@ -487,6 +489,13 @@ export async function getFuelEconomy({
   if (fuel) params.set('fuel', fuel)
   if (capacity) params.set('capacity', String(capacity))
   return fuelEconomyResponseSchema.parse(await getJson(`/api/fuel?${params.toString()}`))
+}
+
+/** Registry rollup of one catalog model (`/cars/:make/:model`). A 404 means there is no such page. */
+export async function getCatalogModel(make: string, model: string): Promise<CatalogModel> {
+  return catalogModelSchema.parse(
+    await getJson(`/api/catalog/${encodeURIComponent(make)}/${encodeURIComponent(model)}`)
+  )
 }
 
 export async function getSafetyStats(): Promise<SafetyStatsResponse> {

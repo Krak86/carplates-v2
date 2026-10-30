@@ -16,6 +16,17 @@ const item = (group: ReleaseGroup, ua: string, ru: string, en: string): ReleaseI
  */
 export const RELEASES: readonly ReleaseDay[] = [
   {
+    date: '2026-10-30',
+    items: [
+      item(
+        'new',
+        'Каталог моделей: сторінки /cars/{марка}/{модель} з кількістю авто на обліку в Україні, роками випуску, паливом, кузовом, кольорами й регіонами, плюс характеристики, вартість, відкликання, відгуки та фото моделі. Спершу найпоширеніші 300 моделей.',
+        'Каталог моделей: страницы /cars/{марка}/{модель} с количеством авто на учёте в Украине, годами выпуска, топливом, кузовом, цветами и регионами, плюс характеристики, стоимость, отзывы и фото модели. Сначала самые распространённые 300 моделей.',
+        'Model catalog: /cars/{make}/{model} pages with how many cars are registered in Ukraine, model years, fuel, body, colours and regions, plus specs, value, recalls, reviews and photos of the model. The 300 most common models come first.'
+      )
+    ]
+  },
+  {
     date: '2026-10-29',
     items: [
       item(

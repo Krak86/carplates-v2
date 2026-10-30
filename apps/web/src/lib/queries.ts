@@ -11,7 +11,9 @@ import type {
 } from '@carplates/shared'
 
 import {
+  ApiError,
   getAdminAnalytics,
+  getCatalogModel,
   getAdminLinks,
   getAdminServer,
   getAdminStats,
@@ -480,6 +482,16 @@ export function powertrainStatsQuery() {
     queryKey: ['powertrain-stats'],
     queryFn: getPowertrainStats,
     staleTime: Infinity
+  })
+}
+
+// One catalog model (`/cars/:make/:model`): online-only (the page is a crawl target, not an offline feature). A 404 is final.
+export function catalogModelQuery(make: string, model: string) {
+  return queryOptions({
+    queryKey: ['catalog-model', make, model],
+    queryFn: () => getCatalogModel(make, model),
+    staleTime: Infinity,
+    retry: (count, error) => !(error instanceof ApiError && error.status === 404) && count < 2
   })
 }
 

@@ -1,6 +1,6 @@
 # Discovery plan: crawlers, search, other sites, users
 
-Status (2026-10-30): **Phase 0 in progress, Phase 1 started** (static page titles and the `/og/` robots rule are deployed and verified
+Status (2026-10-30): **Phase 0 in progress, Phase 1 started, Phase 2 MVP built (needs deploy, `db:refresh-catalog` on the VPS and the two Cloudflare rules)** (static page titles and the `/og/` robots rule are deployed and verified
 on prod; the manual Phase 0 items below are not done yet). One checklist for "how do crawlers, other sites and users find carsua.app".
 The technical design of the catalog pages stays in [catalog-plan.md](catalog-plan.md) (do not copy it here, it would drift).
 Related, already done: sitemap/robots ([PLAN.md](../PLAN.md) "Bot protection, sitemap & SEO"), `llms.txt`, ARD manifest,
@@ -53,7 +53,7 @@ Open:
       системи". Also post an impact story on https://forum.data.gov.ua (Обговорення). Listing text to paste, adjust to the
       form's limits (text below).
 - [ ] Directories: Product Hunt, AlternativeTo, awesome-lists for open data / Ukrainian tech
-- [ ] Cloudflare cache rule for `/cars/*` and `/api/catalog/*` (add once the routes exist)
+- [ ] Cloudflare cache rules for `/cars/*` and `/api/catalog/*` (routes exist since 2026-10-30; expressions in `deploy.md` "Model catalog"; owner creates them, then verify MISS -> HIT)
 
 ### Diia listing text
 
@@ -163,7 +163,7 @@ Done by the agent 2026-10-30: `deploy-api.yml` purge of `robots.txt` + `sitemap.
 1. Owner, manual: finish Phase 0 (Search Console, Bing, Diia listing + forum post, directories), re-scrape `/stats` in the Facebook
    debugger (the page cards show after the next api deploy; purge `/og/` if the prefix purge is refused on the plan). Check the
    IndexNow step's log after the first deploy (Cloudflare Bot Fight Mode may block the runner from the sitemap: the step then skips).
-2. Agent: **catalog MVP (Phase 2)**, top ~300 models. Decisions taken: Lanos is one page (`zaz/lanos`), Prado its own page. Start with
+2. Agent: **catalog MVP (Phase 2): built 2026-10-30** (`/cars/:make/:model`, sitemap index + `sitemap-cars.xml`, injected `#root` block, page cards). Next here: owner deploys, runs `pnpm db:refresh-catalog` on the VPS, creates the cache rules and submits `sitemap.xml` again; then internal links (plate/VIN cards, `/stats`) and year pages. Original brief: top ~300 models. Decisions taken: Lanos is one page (`zaz/lanos`), Prado its own page. Start with
    `packages/shared/src/catalogKey.ts` + tests (defects 1-5 in catalog-plan.md), then migration + `db:refresh-catalog`, API, page,
    sitemap file. A sitemap index is needed once the sitemap passes 10,000 URLs (also the IndexNow request limit).
 3. Optional: shorten the over-long `/read/*` titles (about 75 chars) and descriptions (over 170) in `spa-text.ts` (the card headline

@@ -1730,3 +1730,49 @@ export const wmiPrefix = registry.table(
 )
 export type WmiPrefixRow = typeof wmiPrefix.$inferSelect
 export type WmiPrefixInsert = typeof wmiPrefix.$inferInsert
+
+/**
+ * Model catalog (`/cars/:make/:model`): raw registry (brand, model) -> slugs, one row per model with its rollup, one per make.
+ * Rebuilt by scripts/src/catalog-build.ts; see migration 0081.
+ */
+export const catalogAlias = registry.table(
+  'catalog_alias',
+  {
+    brand: text('brand').notNull(),
+    model: text('model').notNull(),
+    makeSlug: text('make_slug').notNull(),
+    modelSlug: text('model_slug').notNull(),
+    how: text('how').notNull()
+  },
+  t => [primaryKey({ columns: [t.brand, t.model] }), index('ix_catalog_alias_slugs').on(t.makeSlug, t.modelSlug)]
+)
+export type CatalogAliasInsert = typeof catalogAlias.$inferInsert
+
+export const catalogModel = registry.table(
+  'catalog_model',
+  {
+    makeSlug: text('make_slug').notNull(),
+    modelSlug: text('model_slug').notNull(),
+    makeName: text('make_name').notNull(),
+    modelName: text('model_name').notNull(),
+    n: integer('n').notNull(),
+    yearMin: smallint('year_min'),
+    yearMax: smallint('year_max'),
+    topRawBrand: text('top_raw_brand').notNull(),
+    topRawModel: text('top_raw_model').notNull(),
+    kindGroup: text('kind_group').notNull(),
+    rank: integer('rank').notNull(),
+    indexable: boolean('indexable').notNull(),
+    stats: jsonb('stats').notNull()
+  },
+  t => [primaryKey({ columns: [t.makeSlug, t.modelSlug] })]
+)
+export type CatalogModelInsert = typeof catalogModel.$inferInsert
+
+export const catalogMake = registry.table('catalog_make', {
+  makeSlug: text('make_slug').primaryKey(),
+  makeName: text('make_name').notNull(),
+  n: integer('n').notNull(),
+  models: integer('models').notNull()
+})
+export type CatalogMakeInsert = typeof catalogMake.$inferInsert

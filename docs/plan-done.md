@@ -4168,3 +4168,20 @@ Plan: `PLAN.md` "Visual stats, map logos, cards and quizzes". Convention: `docs/
 - **IndexNow:** key constant in `apps/api/src/spa/indexnow.ts` (public by design, no env var), served at `/<key>.txt` by `SeoController`;
   `deploy-api.yml` POSTs all sitemap `<loc>` to `api.indexnow.org` after each api deploy (best-effort).
 - **Not touched on purpose:** `releases.ts` / About (infrastructure and link previews, nothing a user sees in the app).
+
+## Model catalog MVP: `/cars/:make/:model` (2026-10-30)
+
+Design: `docs/catalog-plan.md`, conventions: `docs/features-reference.md` "Model catalog". Built in five steps:
+
+1. **`catalogSlugs`** (`packages/shared/src/catalogKey.ts`, 11 tests): fixes the five Step 1 defects. Make from `modelFamily().brand` with Lanos always `zaz/lanos`; the prefix fold also runs on the
+   `wikiSearchName` pass-through; Prado kept apart via the known set; the real-model list is injected (shared cannot read `scripts/`), so the UK bias is fixed in the build (Vauxhall to Opel, plus VehiclesDB and
+   `model_generations`); non-cars are excluded by building from passenger cars only.
+2. **Data** (migration 0081, `catalog-build.ts`, `catalog-taxonomy.ts`, `catalog-overrides.csv`): real DB (24,721,694 rows, only `catalog_*` written): 15,769 passenger pairs -> 13,885 aliased -> 1,697 pages (300 indexable),
+   109 makes, about 3 min. The first build left variant pages (`landcruiser200`, `landcruiserprado150`, `prado`, `sprinter313cdi`, `chevrolet/niva`, `chevrolet/nubira`, `focuscmax`) because VehiclesDB lists them as models; fixed with
+   `fold` overrides (and `name` overrides for wrong display names), not by changing the fold rule.
+3. **API**: `/api/catalog/:make/:model` (in-memory taxonomy, `LOOKUP_CACHE`, throttle, public OpenAPI prefix), SPA meta + injected `#root` block, thin pages `noindex`, edge-friendly HTML cache header.
+4. **Web**: `CatalogModelRoute`, `CatalogStatsSection`, `ModelSections` (model-only `LazySection`s), i18n ua/ru/en, About feature, `releases.ts` (2026-10-30, `new`).
+5. **Sitemap**: `/sitemap.xml` index + `/sitemap-pages.xml` + `/sitemap-cars.xml` (900 URLs = 300 pages x 3 languages); card `/og/page/cars--make--model.png`; deploy purge and IndexNow read the child sitemaps.
+
+Checked: shared, api (270) and web (511) tests, `tsc` in shared/api/web, curl of `/api/catalog/bmw/x5` (200 + cache header), 404 for an unknown model, 400 for an invalid slug, the index and the 900-URL cars sitemap against the dev API.
+**Not browser-checked** (light/dark, mobile width), and the injected block was only unit-tested (no `WEB_DIST_DIR` build run). **Owner to do:** the two Cloudflare rules (`deploy.md`), first `db:refresh-catalog` on the VPS, re-submit the sitemap.

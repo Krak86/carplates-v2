@@ -3480,5 +3480,22 @@
   "play.end.race": "Test drive",
   "play.end.lookup": "Look up a plate",
   "play.rounds": "Questions per game",
-  "play.banner": "More games"
+  "play.banner": "More games",
+  "catalog.title": "{{name}} in Ukraine",
+  "catalog.summary": "Ukraine's registry currently lists {{count}} {{name}} cars{{years}}.",
+  "catalog.summaryYears": "(built {{years}})",
+  "catalog.summaryFuel": "The most common fuel: {{fuel}}.",
+  "catalog.summaryRegion": "Most of them are registered in: {{region}}.",
+  "catalog.statsHeading": "In Ukraine",
+  "catalog.years": "By model year",
+  "catalog.fuel": "Fuel",
+  "catalog.body": "Body",
+  "catalog.color": "Colour",
+  "catalog.regions": "Regions",
+  "catalog.capacityMedian": "Typical engine size: {{value}} cc",
+  "catalog.powerMedian": "Typical power: {{value}} kW",
+  "catalog.otherModels": "Other models of the make",
+  "catalog.lookup": "Look up a car by plate or VIN",
+  "catalog.notFound": "This model is not in the catalog",
+  "about.feature.catalog": "Model catalog at /cars/{make}/{model}: how many of the model are registered in Ukraine, model years, fuel, body, colours and regions from the open registry, plus specs, value, recalls, reviews and photos of the model"
 }

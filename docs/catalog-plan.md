@@ -1,6 +1,6 @@
 # Model catalog pages: `/cars/:make/:model/:year`
 
-Status: **researched 2026-10-13, not started.** Tracked in PLAN.md "To discuss / research". Rollout, estimate (6-9 days, MVP 3-4)
+Status: **MVP built 2026-10-30** (model level `/cars/:make/:model`, top 300 models, one sitemap file; conventions in `features-reference.md` "Model catalog"; year pages, `/cars` + make indexes, JSON-LD and internal links not started). Researched 2026-10-13. Tracked in PLAN.md "To discuss / research". Rollout, estimate (6-9 days, MVP 3-4)
 and the surrounding SEO/outreach checklist: [discovery-plan.md](discovery-plan.md).
 
 ## Context
