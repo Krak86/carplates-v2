@@ -54,4 +54,12 @@ describe('sitemap', () => {
   it('points robots.txt at the sitemap', () => {
     expect(renderRobots('https://carsua.app')).toContain('Sitemap: https://carsua.app/sitemap.xml')
   })
+
+  it('blocks per-plate cards but allows the generic ones', () => {
+    const robots = renderRobots('https://carsua.app')
+    expect(robots).toContain('Disallow: /api/')
+    expect(robots).toContain('Disallow: /og/\n')
+    expect(robots).toContain('Allow: /og/default.png')
+    expect(robots).toContain('Allow: /og/page/')
+  })
 })
