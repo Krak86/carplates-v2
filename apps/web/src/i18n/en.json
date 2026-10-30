@@ -3565,5 +3565,5 @@
   "catalog.allOfMake": "All {{make}} models",
   "catalog.carsCount": "{{count}} cars",
   "catalog.modelsCount": "{{count}} models",
-  "about.feature.catalog": "Model catalog at /cars (all makes), /cars/{make} and /cars/{make}/{model}: how many of the model are registered in Ukraine, model years, fuel, body, colours and regions from the open registry, plus specs, value, recalls, reviews and photos of the model"
+  "about.feature.catalog": "Model catalog at /cars (all makes), /cars/{make} and /cars/{make}/{model}: how many of the model are registered in Ukraine, model years, fuel, body, colours and regions from the open registry, plus specs, value, recalls, reviews and photos of the model. Reachable from the sidebar (Cars by make): each make lists its models in a searchable table, and the generation chips show car counts with fuel, body, colour and region stats per generation"
 }

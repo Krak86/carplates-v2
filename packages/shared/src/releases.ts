@@ -38,6 +38,12 @@ export const RELEASES: readonly ReleaseDay[] = [
       ),
       item(
         'improved',
+        'Каталог авто: пункт «Авто за марками» у бічному меню, моделі марки в таблиці з пошуком, а чипи поколінь показують кількість авто та статистику поколінь.',
+        'Каталог авто: пункт «Авто по маркам» в боковом меню, модели марки в таблице с поиском, а чипы поколений показывают количество авто и статистику поколений.',
+        'Car catalog: a "Cars by make" sidebar entry, the models of each make in a searchable table, and generation chips with car counts and per-generation stats.'
+      ),
+      item(
+        'improved',
         'Сторінка моделі: чипи року, покоління, пального й кузова - характеристики, вартість і відкликання одразу підлаштовуються під вибір.',
         'Страница модели: чипы года, поколения, топлива и кузова - характеристики, стоимость и отзывы сразу подстраиваются под выбор.',
         'Model page: year, generation, fuel and body chips - specs, value and recalls follow your pick.'
