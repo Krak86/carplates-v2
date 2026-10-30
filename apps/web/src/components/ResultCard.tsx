@@ -837,6 +837,9 @@ export default function ResultCard({ data }: Props): ReactNode {
               body={c.body}
               vin={hasVin ? c.vin : null}
               openSignal={sizeOpenSignal}
+              compareFrom={
+                data.plate ? { kind: 'plate', plate: data.plate } : hasVin ? { kind: 'vin', vin: c.vin ?? '' } : null
+              }
             />
           </LazySection>
           <LazySection sections={['assists']}>

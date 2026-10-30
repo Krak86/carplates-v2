@@ -159,7 +159,7 @@ function RadarBarsFallback({ radar, ctx }: { radar: Radar; ctx: FormatContext })
 function RadarData({ radar, names, ctx }: { radar: Radar; names: Props['names']; ctx: FormatContext }): ReactNode {
   const { t } = useTranslation()
   return (
-    <details className="mt-1 text-sm">
+    <details open className="mt-1 text-sm">
       <summary className="cursor-pointer text-[var(--color-primary)]">{t('compare.radar.data')}</summary>
       <table className="mt-1 w-full border-collapse">
         <caption className="sr-only">{t(`compare.radar.${radar.id}`)}</caption>

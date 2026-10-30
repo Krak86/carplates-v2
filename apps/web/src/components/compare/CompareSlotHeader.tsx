@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import type { ReactNode } from 'react'
+import { resolveFuelCategories } from '@carplates/shared'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 
@@ -7,14 +9,17 @@ import { cn } from '@/lib/cn'
 import { wikiImageQuery } from '@/lib/queries'
 
 import { coverageOf } from './coverage'
+import { ModelPicker } from './CompareSlotPicker'
 import { carTitle } from './resolve'
 import { COMPARE_SOURCES } from './types'
-import type { CompareLoaded, CompareSlot } from './types'
+import type { CompareLoaded, CompareRef, CompareSlot } from './types'
 
 type Props = {
   slot: CompareSlot
   loaded: CompareLoaded
   onClear: () => void
+  /** The edited make / model / year / fuel, as a model ref (a typical car of that model). */
+  onPick: (ref: CompareRef) => void
 }
 
 const SLOT_COLOR: Record<CompareSlot, string> = { a: 'var(--color-compare-a)', b: 'var(--color-compare-b)' }
@@ -28,8 +33,9 @@ function inputLabel(loaded: CompareLoaded, t: (key: string) => string): string {
 }
 
 /** One car's head: photo, name, what was entered, the coverage strip (which sources matched) and a way to change it. */
-export default function CompareSlotHeader({ slot, loaded, onClear }: Props): ReactNode {
+export default function CompareSlotHeader({ slot, loaded, onClear, onPick }: Props): ReactNode {
   const { t } = useTranslation()
+  const [editing, setEditing] = useState(false)
   const { car } = loaded
   const hasQuery = !!(car?.brand || car?.model)
   const photo = useQuery({
@@ -41,7 +47,7 @@ export default function CompareSlotHeader({ slot, loaded, onClear }: Props): Rea
   const coverage = coverageOf(loaded)
   const credit = [photo?.attribution?.author, photo?.attribution?.license].filter(Boolean).join(' · ')
 
-  return (
+  const header = (
     <div className="flex gap-3" style={{ borderTop: `4px solid ${SLOT_COLOR[slot]}` }}>
       <div className="min-w-0 flex-1 pt-2">
         <div className="flex items-center gap-2">
@@ -72,9 +78,19 @@ export default function CompareSlotHeader({ slot, loaded, onClear }: Props): Rea
           ))}
         </ul>
 
-        <button type="button" onClick={onClear} className="mt-2 text-sm text-[var(--color-primary)] underline">
-          {t('compare.change')}
-        </button>
+        <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+          <button
+            type="button"
+            onClick={() => setEditing(v => !v)}
+            aria-expanded={editing}
+            className="text-sm text-[var(--color-primary)] underline"
+          >
+            {t('compare.edit')}
+          </button>
+          <button type="button" onClick={onClear} className="text-sm text-[var(--color-primary)] underline">
+            {t('compare.change')}
+          </button>
+        </div>
       </div>
 
       {photo && (
@@ -92,5 +108,27 @@ export default function CompareSlotHeader({ slot, loaded, onClear }: Props): Rea
         </figure>
       )}
     </div>
+  )
+
+  return (
+    <>
+      {header}
+      {editing && (
+        <ModelPicker
+          slot={slot}
+          initial={{
+            make: loaded.catalog?.make ?? '',
+            model: loaded.catalog?.model ?? '',
+            year: car.year,
+            fuel: resolveFuelCategories(car.fuel)[0] ?? null
+          }}
+          onPick={ref => {
+            setEditing(false)
+            onPick(ref)
+          }}
+          onCancel={() => setEditing(false)}
+        />
+      )}
+    </>
   )
 }

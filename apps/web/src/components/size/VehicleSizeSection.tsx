@@ -4,6 +4,8 @@ import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router'
 
+import CompareChip from '@/components/compare/CompareChip'
+import type { CompareRef } from '@/components/compare/types'
 import SectionHeader from '@/components/SectionHeader'
 import SectionInfo from '@/components/SectionInfo'
 import ShareButton from '@/components/ShareButton'
@@ -32,6 +34,8 @@ type Props = Omit<VehicleSizeInput, 'vinFields'> & {
   vinFields?: ReadonlyMap<string, string> | null
   /** Bumped by the header chip: each change opens the section and scrolls to it (0 = never asked). */
   openSignal?: number
+  /** The car to put in slot A of `/compare`; without it the section shows no compare chip. */
+  compareFrom?: CompareRef | null
 }
 
 const TAB_ICON: Readonly<Record<SizeTab, string>> = { schema: '📐', parking: '🅿️', garage: '🏠', norms: '⚖️' }
@@ -42,7 +46,13 @@ const TAB_ICON: Readonly<Record<SizeTab, string>> = { schema: '📐', parking: '
  * a garage, with the norms and their sources. Collapsed by default; opens from the header chip (`openSignal`) or a
  * `?section=size&tab=schema|parking|garage|norms` share link. Lazy: mounted by `LazySection`.
  */
-export default function VehicleSizeSection({ vin, vinFields, openSignal = 0, ...input }: Props): ReactNode {
+export default function VehicleSizeSection({
+  vin,
+  vinFields,
+  openSignal = 0,
+  compareFrom,
+  ...input
+}: Props): ReactNode {
   const { t } = useTranslation()
   const [searchParams] = useSearchParams()
   const isShared = searchParams.get('section') === 'size'
@@ -100,8 +110,9 @@ export default function VehicleSizeSection({ vin, vinFields, openSignal = 0, ...
         <div className="overflow-hidden">
           <p className="mt-2 text-xs text-[var(--color-muted)]">{t('size.lead', { sources: lead })}</p>
 
-          <div className="mt-2 empty:hidden">
+          <div className="mt-2 flex flex-wrap items-center gap-2 empty:hidden">
             <SpecsJumpLink group="body" brand={input.brand} model={input.model} year={input.year} kind={input.kind} />
+            {compareFrom && <CompareChip from={compareFrom} />}
           </div>
 
           {typicalOnly && (

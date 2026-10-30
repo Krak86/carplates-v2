@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router'
 
+import SectionInfo from '@/components/SectionInfo'
 import { useCopyFeedback } from '@/components/use-copy-feedback'
 import i18n from '@/i18n'
 import { setFontParam } from '@/store/ui-store'
@@ -33,6 +34,7 @@ export default function CompareSectionHeading({ section, title, state = {} }: Pr
       <h2 id={sectionAnchor(section)} className="text-lg font-semibold">
         {title}
       </h2>
+      <SectionInfo section={`compare.${section}`} title={title} />
       <button
         type="button"
         title={t('compare.share.section')}

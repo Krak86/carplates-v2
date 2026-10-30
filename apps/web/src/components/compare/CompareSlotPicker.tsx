@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { FormEvent, ReactNode } from 'react'
 import { resolveFuelCategories } from '@carplates/shared'
+import type { VehicleFuel } from '@carplates/shared'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 
@@ -16,23 +17,44 @@ type Props = {
   onPick: (ref: CompareRef) => void
 }
 
+/** What the picker starts from when it edits a car already in the slot. */
+export type ModelPickerInitial = {
+  make: string
+  model: string
+  year: number | null
+  fuel: VehicleFuel | null
+}
+
+type ModelPickerProps = Props & {
+  initial?: ModelPickerInitial
+  /** Shown only when the picker edits a filled slot. */
+  onCancel?: () => void
+}
+
 const FIELD = 'rounded-md border border-[var(--color-border)] bg-[var(--color-bg)] px-2 py-1.5 text-base'
 const BUTTON =
   'rounded-md bg-[var(--color-primary)] px-3 py-1.5 text-base text-[var(--color-primary-fg)] disabled:opacity-50'
 
 /** The model picker: make, model, year, fuel - all from the catalog, so the ref carries its slugs. */
-function ModelPicker({ slot, onPick }: Props): ReactNode {
+export function ModelPicker({ slot, onPick, initial, onCancel }: ModelPickerProps): ReactNode {
   const { t, i18n } = useTranslation()
-  const [make, setMake] = useState('')
-  const [model, setModel] = useState('')
-  const [year, setYear] = useState<number | null>(null)
-  const [fuel, setFuel] = useState('')
+  const [make, setMake] = useState(initial?.make ?? '')
+  const [model, setModel] = useState(initial?.model ?? '')
+  const [year, setYear] = useState<number | null>(initial?.year ?? null)
+  // null = untouched: the select shows the option of the car's own fuel until the reader picks another.
+  const [pickedFuel, setPickedFuel] = useState<string | null>(null)
   const makes = useQuery(catalogMakesQuery()).data?.makes ?? []
   const models = useQuery({ ...catalogMakeQuery(make), enabled: !!make }).data?.models ?? []
   const page = useQuery({ ...catalogModelQuery(make, model), enabled: !!make && !!model }).data
   const years = page ? variantYears(page.stats.years, page.n) : []
   const fuels = page ? variantOptions('fuel', page.stats.fuel, page.n, i18n.language) : []
   const chosenYear = year ?? (page ? typicalYear(page.stats.years) : null)
+  const initialFuel = initial?.fuel
+  const fuel =
+    pickedFuel ?? (initialFuel ? (fuels.find(o => resolveFuelCategories(o.value)[0] === initialFuel)?.value ?? '') : '')
+  const setFuel = setPickedFuel
+  // A year outside the model's list (a plate car older than the catalog's span) would show a blank select.
+  const yearOptions = chosenYear && !years.includes(chosenYear) && page ? [chosenYear, ...years] : years
 
   return (
     <fieldset className="mt-3 flex flex-wrap items-end gap-2 border-0 p-0">
@@ -80,7 +102,7 @@ function ModelPicker({ slot, onPick }: Props): ReactNode {
         disabled={!page}
         onChange={e => setYear(Number(e.target.value))}
       >
-        {years.map(y => (
+        {yearOptions.map(y => (
           <option key={y} value={y}>
             {y}
           </option>
@@ -110,8 +132,17 @@ function ModelPicker({ slot, onPick }: Props): ReactNode {
         }}
         data-slot={slot}
       >
-        {t('compare.picker.add')}
+        {t(onCancel ? 'compare.picker.apply' : 'compare.picker.add')}
       </button>
+      {onCancel && (
+        <button
+          type="button"
+          className="px-2 py-1.5 text-base text-[var(--color-primary)] underline"
+          onClick={onCancel}
+        >
+          {t('compare.picker.cancel')}
+        </button>
+      )}
     </fieldset>
   )
 }

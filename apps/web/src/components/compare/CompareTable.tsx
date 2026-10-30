@@ -3,13 +3,16 @@ import { useTranslation } from 'react-i18next'
 
 import InfoPopover from '@/components/InfoPopover'
 import InfoText from '@/components/InfoText'
+import ReadGuideLink from '@/components/ReadGuideLink'
 import Skeleton from '@/components/ui/Skeleton'
 import { cn } from '@/lib/cn'
 import { toIntlLocale } from '@/lib/intl'
 import { useRegionLabel } from '@/lib/region-label'
+import type { GuidePath } from '@/routes/read/links'
 
 import { formatWithUnit } from './format'
 import type { FormatContext } from './format'
+import { guidesByGroup } from './guides'
 import { betterSide, isSame } from './rows'
 import type { CompareSection } from './rows'
 import type { CompareRow } from './types'
@@ -21,6 +24,8 @@ type Props = {
   names: readonly [string, string]
   /** Hide the rows where both cars show the same value. */
   diffOnly: boolean
+  /** Either car is electric (the EV article is linked then). */
+  electric: boolean
 }
 
 function GroupLabel({ group, exact }: { group: string; exact: boolean }): ReactNode {
@@ -85,11 +90,13 @@ function Cell({ row, side, ctx }: { row: CompareRow; side: 0 | 1; ctx: FormatCon
 function SectionBody({
   section,
   diffOnly,
-  ctx
+  ctx,
+  guides
 }: {
   section: CompareSection
   diffOnly: boolean
   ctx: FormatContext
+  guides: readonly GuidePath[]
 }): ReactNode {
   const rows = diffOnly ? section.rows.filter(r => !isSame(r)) : section.rows
   if (!section.pending && rows.length === 0) return null
@@ -120,15 +127,31 @@ function SectionBody({
           </tr>
         ))
       )}
+      {!section.pending && guides.length > 0 && (
+        <tr>
+          <td colSpan={3} className="pt-1 pb-2">
+            <div className="flex flex-wrap gap-2">
+              {guides.map(guide => (
+                <ReadGuideLink key={guide} guide={guide} className="mt-0" />
+              ))}
+            </div>
+          </td>
+        </tr>
+      )}
     </tbody>
   )
 }
 
 /** The mirrored table: label | car A | car B, one `<tbody>` per group. Rows are already pruned by `pruneRows`. */
-export default function CompareTable({ sections, names, diffOnly }: Props): ReactNode {
+export default function CompareTable({ sections, names, diffOnly, electric }: Props): ReactNode {
   const { t, i18n } = useTranslation()
   const regionLabel = useRegionLabel()
   const ctx: FormatContext = { locale: toIntlLocale(i18n.language), lang: i18n.language, t, regionLabel }
+
+  const guides = guidesByGroup(
+    sections.filter(s => !s.pending && s.rows.length > 0).map(s => s.group),
+    electric
+  )
 
   return (
     <table className="w-full table-fixed border-collapse">
@@ -156,7 +179,13 @@ export default function CompareTable({ sections, names, diffOnly }: Props): Reac
         </tr>
       </thead>
       {sections.map(section => (
-        <SectionBody key={section.group} section={section} diffOnly={diffOnly} ctx={ctx} />
+        <SectionBody
+          key={section.group}
+          section={section}
+          diffOnly={diffOnly}
+          ctx={ctx}
+          guides={guides[section.group] ?? []}
+        />
       ))}
     </table>
   )

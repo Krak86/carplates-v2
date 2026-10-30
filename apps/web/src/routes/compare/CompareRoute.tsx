@@ -7,6 +7,7 @@ import CompareSlotHeader from '@/components/compare/CompareSlotHeader'
 import CompareSlotPicker from '@/components/compare/CompareSlotPicker'
 import CompareSectionHeading from '@/components/compare/CompareSectionHeading'
 import { parseSection, sectionAnchor } from '@/components/compare/compare-share'
+import { anyElectric } from '@/components/compare/guides'
 import CompareVisuals from '@/components/compare/CompareVisuals'
 import CompareTable from '@/components/compare/CompareTable'
 import { compareHref, formatCompareRef, parseCompareRef, sameRef } from '@/components/compare/ref'
@@ -19,11 +20,31 @@ import type { CompareCarState } from '@/components/compare/use-compare-car'
 import Card from '@/components/ui/Card'
 import { scrollElementIntoView } from '@/lib/share-section'
 import SectionSkeleton from '@/components/ui/SectionSkeleton'
+import Skeleton from '@/components/ui/Skeleton'
 
 const slotName = (state: CompareCarState, slot: CompareSlot): string => {
   const car = state.loaded.car
   const title = car ? [carTitle(car), car.year].filter(Boolean).join(' ') : ''
   return title || slot.toUpperCase()
+}
+
+/** Reserves the room of the visual blocks (sentences, bars, radars) so the table does not jump when they arrive. */
+function VisualsSkeleton(): ReactNode {
+  const { t } = useTranslation()
+
+  return (
+    <div role="status" aria-busy="true" aria-label={t('result.loading')} className="mb-6 space-y-8">
+      <div className="grid gap-4 md:grid-cols-2">
+        <Skeleton className="h-24 w-full" />
+        <Skeleton className="h-24 w-full" />
+      </div>
+      <Skeleton className="h-64 w-full" />
+      <div className="grid gap-6 md:grid-cols-2">
+        <Skeleton className="h-72 w-full" />
+        <Skeleton className="h-72 w-full" />
+      </div>
+    </div>
+  )
 }
 
 function SlotCard({
@@ -57,7 +78,9 @@ function SlotCard({
         </div>
       )}
       {refValue && !error && !loaded.car && <SectionSkeleton rows={3} />}
-      {refValue && !error && loaded.car && <CompareSlotHeader slot={slot} loaded={loaded} onClear={onClear} />}
+      {refValue && !error && loaded.car && (
+        <CompareSlotHeader slot={slot} loaded={loaded} onClear={onClear} onPick={onPick} />
+      )}
     </Card>
   )
 }
@@ -147,6 +170,7 @@ export default function CompareRoute(): ReactNode {
             </label>
           </div>
 
+          {pending && <VisualsSkeleton />}
           {!pending && (
             <div className="mb-6">
               <CompareVisuals
@@ -167,6 +191,7 @@ export default function CompareRoute(): ReactNode {
             sections={sections}
             names={[slotName(states[0], 'a'), slotName(states[1], 'b')]}
             diffOnly={diffOnly}
+            electric={anyElectric([states[0].loaded.car, states[1].loaded.car])}
           />
 
           {!pending && sections.length === 0 && (
