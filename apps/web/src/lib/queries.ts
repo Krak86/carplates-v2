@@ -13,6 +13,9 @@ import type {
 import {
   ApiError,
   getAdminAnalytics,
+  getCatalogLookup,
+  getCatalogMake,
+  getCatalogMakes,
   getCatalogModel,
   getAdminLinks,
   getAdminServer,
@@ -482,6 +485,30 @@ export function powertrainStatsQuery() {
     queryKey: ['powertrain-stats'],
     queryFn: getPowertrainStats,
     staleTime: Infinity
+  })
+}
+
+// Which catalog page a card's brand + model links to: online-only and stable until the next monthly rebuild.
+export function catalogLookupQuery(brand: string, model: string) {
+  return queryOptions({
+    queryKey: ['catalog-lookup', brand, model],
+    queryFn: () => getCatalogLookup(brand, model),
+    staleTime: Infinity,
+    retry: false
+  })
+}
+
+// The `/cars` make index and one `/cars/:make` page: online-only like the model page; a 404 is final.
+export function catalogMakesQuery() {
+  return queryOptions({ queryKey: ['catalog-makes'], queryFn: getCatalogMakes, staleTime: Infinity })
+}
+
+export function catalogMakeQuery(make: string) {
+  return queryOptions({
+    queryKey: ['catalog-make', make],
+    queryFn: () => getCatalogMake(make),
+    staleTime: Infinity,
+    retry: (count, error) => !(error instanceof ApiError && error.status === 404) && count < 2
   })
 }
 

@@ -1,20 +1,50 @@
-import { Controller, Get, Inject, NotFoundException, Param, UseInterceptors } from '@nestjs/common'
+import { Controller, Get, Inject, NotFoundException, Param, Query, UseInterceptors } from '@nestjs/common'
 import { ApiNotFoundResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger'
 import { Throttle } from '@nestjs/throttler'
-import { catalogParamsSchema } from '@carplates/shared'
-import type { CatalogParams } from '@carplates/shared'
+import { catalogLookupQuerySchema, catalogMakeParamsSchema, catalogParamsSchema } from '@carplates/shared'
+import type { CatalogLookupQuery, CatalogMakeParams, CatalogParams } from '@carplates/shared'
 
 import { LOOKUP_CACHE, lookupCacheInterceptor } from '../common/cache.js'
 import { CATALOG_THROTTLE } from '../common/throttle.js'
 import { zodParam } from '../common/zod-param.pipe.js'
 
-import { CatalogModelDto } from './catalog.dto.js'
+import { CatalogLookupDto, CatalogMakeDto, CatalogMakesDto, CatalogModelDto } from './catalog.dto.js'
 import { CatalogService } from './catalog.service.js'
 
 @ApiTags('catalog')
 @Controller('api/catalog')
 export class CatalogController {
   constructor(@Inject(CatalogService) private readonly catalog: CatalogService) {}
+
+  /** Which catalog page (if any) a plate or VIN card's brand + model belongs to; the card links only when one exists. */
+  @Get('lookup')
+  @Throttle(CATALOG_THROTTLE)
+  @UseInterceptors(lookupCacheInterceptor(LOOKUP_CACHE))
+  @ApiOkResponse({ type: CatalogLookupDto })
+  lookup(@Query(zodParam(catalogLookupQuerySchema)) query: CatalogLookupQuery): Promise<CatalogLookupDto> {
+    return this.catalog.lookup(query.brand, query.model)
+  }
+
+  /** Every make with its car count: the `/cars` index. */
+  @Get('makes')
+  @Throttle(CATALOG_THROTTLE)
+  @UseInterceptors(lookupCacheInterceptor(LOOKUP_CACHE))
+  @ApiOkResponse({ type: CatalogMakesDto })
+  async makes(): Promise<CatalogMakesDto> {
+    return { makes: await this.catalog.makes() }
+  }
+
+  /** One make and its model pages: `/cars/:make`. */
+  @Get(':make')
+  @Throttle(CATALOG_THROTTLE)
+  @UseInterceptors(lookupCacheInterceptor(LOOKUP_CACHE))
+  @ApiOkResponse({ type: CatalogMakeDto })
+  @ApiNotFoundResponse({ description: 'No catalog page for this make' })
+  async make(@Param(zodParam(catalogMakeParamsSchema)) params: CatalogMakeParams): Promise<CatalogMakeDto> {
+    const found = await this.catalog.make(params.make)
+    if (!found) throw new NotFoundException()
+    return found
+  }
 
   /** Registry rollup of one model (cars on the road, years, fuel, body, colours, regions) from the precomputed catalog tables. */
   @Get(':make/:model')

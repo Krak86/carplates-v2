@@ -15,6 +15,7 @@ import {
 import type { Currency, PlateLookupResponse } from '@carplates/shared'
 
 import BrandLogo from '@/components/BrandLogo'
+import CatalogModelLink from '@/components/catalog/CatalogModelLink'
 import BrandSiteChip from '@/components/BrandSiteChip'
 import PageShareButton from '@/components/PageShareButton'
 import PlateCardButton from '@/components/PlateCardButton'
@@ -333,7 +334,10 @@ export default function ResultCard({ data }: Props): ReactNode {
               <div className="flex items-center gap-2 text-xl font-semibold">
                 <BrandLogo brand={c.brand} />
                 <span className="min-w-0 break-words">
-                  {[c.brand, c.model].filter(Boolean).join(' ')} {c.makeYear ? `(${c.makeYear})` : ''}
+                  <CatalogModelLink brand={c.brand} model={c.model}>
+                    {[c.brand, c.model].filter(Boolean).join(' ')}
+                  </CatalogModelLink>{' '}
+                  {c.makeYear ? `(${c.makeYear})` : ''}
                 </span>
                 <CopyAllInfoButton
                   className="shrink-0"

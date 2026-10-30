@@ -21,6 +21,13 @@ describe('renderMetaTags', () => {
     expect(html).toContain('og:locale" content="uk_UA"')
   })
 
+  it('emits JSON-LD once and never lets it close the script element', () => {
+    const tags = renderMetaTags({ ...base, jsonLd: { name: '</script><b>' } })
+    expect(tags.match(/application\/ld\+json/g)).toHaveLength(1)
+    expect(tags).toContain('\\u003c/script>')
+    expect(renderMetaTags(base)).not.toContain('ld+json')
+  })
+
   it('adds noindex only when asked', () => {
     expect(renderMetaTags(base)).not.toContain('robots')
     expect(renderMetaTags({ ...base, noindex: true })).toContain('noindex')

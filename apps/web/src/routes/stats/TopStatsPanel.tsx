@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import type { StatsTopResponse } from '@carplates/shared'
 
 import BrandLogo from '@/components/BrandLogo'
+import CatalogModelLink from '@/components/catalog/CatalogModelLink'
 import ColorSwatch from '@/components/ColorSwatch'
 import SectionInfo from '@/components/SectionInfo'
 import Card from '@/components/ui/Card'
@@ -24,6 +25,8 @@ type LeaderboardEntry = {
   /** A brand logo, when the entry has one — kept separate from `label` so it sits in its own fixed-width slot. */
   brand?: string
   label: string
+  /** A model entry: its label links to the catalog page of `brand` + `model` when there is one. */
+  model?: string
   count: number
   highlighted?: boolean
 }
@@ -99,7 +102,13 @@ function Leaderboard({
                 {showColorSwatch && <ColorSwatch value={entry.label} />}
                 {/* title: native tooltip with the untruncated text — same pattern as the dep/kind hints elsewhere. */}
                 <span className="truncate font-medium" title={entry.label}>
-                  {entry.label}
+                  {entry.model !== undefined ? (
+                    <CatalogModelLink brand={entry.brand} model={entry.model}>
+                      {entry.label}
+                    </CatalogModelLink>
+                  ) : (
+                    entry.label
+                  )}
                 </span>
               </span>
               <span className="shrink-0 text-[var(--color-muted)]">{numberFormat.format(entry.count)}</span>
@@ -137,6 +146,7 @@ export default function TopStatsPanel({ stats, highlightModel }: Props): ReactNo
     key: `${row.brand}-${row.model}`,
     brand: row.brand,
     label: `${row.brand} ${row.model}`,
+    model: row.model,
     count: row.distinctPlates,
     highlighted: row.brand === highlightModel?.brand && row.model === highlightModel?.model
   }))

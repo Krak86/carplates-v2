@@ -32,6 +32,16 @@ const CATALOG_MODEL = {
   siblings: [{ model: 'x3', modelName: 'X3', n: 33133 }]
 }
 
+const CATALOG_MAKE = {
+  make: 'bmw',
+  makeName: 'BMW',
+  n: 480666,
+  modelCount: 56,
+  topBrand: 'BMW',
+  indexable: true,
+  models: [{ model: 'x5', modelName: 'X5', n: 96119, yearMin: 2000, yearMax: 2025 }]
+}
+
 describe('SpaController meta injection', () => {
   let app: NestFastifyApplication
   let dist: string
@@ -64,6 +74,9 @@ describe('SpaController meta injection', () => {
     }
     const { CatalogService } = await import('../catalog/catalog.service.js')
     const catalog = {
+      makes: async () => [{ ...CATALOG_MAKE, models: undefined }],
+      make: async (slug: string) =>
+        slug === 'bmw' ? CATALOG_MAKE : slug === 'zaz' ? { ...CATALOG_MAKE, make: 'zaz', indexable: false } : null,
       get: async (make: string, model: string) =>
         make === 'bmw' && model === 'x5'
           ? CATALOG_MODEL
@@ -134,9 +147,42 @@ describe('SpaController meta injection', () => {
     expect(res.body).toContain('og/page/cars--bmw--x5.png')
     expect(res.body).toContain('hreflang="x-default"')
     expect(res.body).not.toContain('noindex')
-    expect(res.body).toContain('<div id="root"><main><h1>BMW X5 в Україні</h1>')
+    expect(res.body).toContain('<div id="root"><main><nav aria-label="Навігація"><ol><li><a href="/">Головна</a></li>')
+    expect(res.body).toContain('<li><a href="/cars/bmw">BMW</a></li><li>X5</li>')
+    expect(res.body).toContain('<h1>BMW X5 в Україні</h1>')
+    expect(res.body).toContain('<a href="/cars/bmw">Усі моделі BMW</a>')
     expect(res.body).toContain('<a href="/cars/bmw/x3">BMW X3</a>')
+    expect(res.body).toContain('"@type":"BreadcrumbList"')
+    expect(res.body).toContain('"item":"https://carsua.app/cars/bmw/x5"')
     expect(res.headers['cache-control']).toContain('s-maxage=86400')
+  })
+
+  it('serves the /cars index with the make list, breadcrumb data and the static page tags', async () => {
+    const res = await app.inject({ method: 'GET', url: '/cars?lang=en' })
+    expect(res.body).toContain('<title>Cars in Ukraine by make and model | Cars UA</title>')
+    expect(res.body).toContain('<link rel="canonical" href="https://carsua.app/cars?lang=en">')
+    expect(res.body).toContain('<h1>Cars in Ukraine by make</h1>')
+    expect(res.body).toContain('<a href="/cars/bmw?lang=en">BMW</a>')
+    expect(res.body).toContain('"@type":"BreadcrumbList"')
+    expect(res.body).not.toContain('noindex')
+    expect(res.headers['cache-control']).toContain('s-maxage=86400')
+  })
+
+  it('serves a /cars/:make page; a make without an indexable model is noindex', async () => {
+    const res = await app.inject({ method: 'GET', url: '/cars/bmw' })
+    expect(res.body).toContain('<title>BMW в Україні: моделі та кількість авто | Cars UA</title>')
+    expect(res.body).toContain('<link rel="canonical" href="https://carsua.app/cars/bmw">')
+    expect(res.body).toContain('og/page/cars--bmw.png')
+    expect(res.body).toContain('<a href="/cars/bmw/x5">BMW X5</a> - 96')
+    expect(res.body).not.toContain('noindex')
+    expect(await get('/cars/zaz')).toContain('noindex')
+  })
+
+  it('treats an unknown make like any unknown path', async () => {
+    const res = await app.inject({ method: 'GET', url: '/cars/nosuchmake' })
+    expect(res.body).toContain('noindex')
+    expect(res.body).not.toContain('<main>')
+    expect(res.headers['cache-control']).toBe('no-cache')
   })
 
   it('marks a thin catalog page noindex without alternates', async () => {

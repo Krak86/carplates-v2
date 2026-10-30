@@ -1,4 +1,10 @@
-import type { CatalogModel } from '@carplates/shared'
+import type { CatalogMakeSummary, CatalogModel } from '@carplates/shared'
+
+/** The makes whose name contains the typed text (case-insensitive); all of them for an empty filter. */
+export function filterMakes(makes: CatalogMakeSummary[], text: string): CatalogMakeSummary[] {
+  const needle = text.trim().toLowerCase()
+  return needle ? makes.filter(m => m.makeName.toLowerCase().includes(needle) || m.make.includes(needle)) : makes
+}
 
 type Counts = CatalogModel['stats']['years']
 

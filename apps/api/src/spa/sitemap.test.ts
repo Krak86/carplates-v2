@@ -66,6 +66,17 @@ describe('sitemap', () => {
     expect(xml.match(/<url>/g)).toHaveLength(3)
   })
 
+  it('lists the indexable make pages before the model pages', () => {
+    const xml = renderCatalogSitemap('https://carsua.app', [['bmw', '3series']], ['bmw'])
+    expect(xml).toContain('<loc>https://carsua.app/cars/bmw</loc>')
+    expect(xml.indexOf('/cars/bmw</loc>')).toBeLessThan(xml.indexOf('/cars/bmw/3series</loc>'))
+    expect(xml.match(/<url>/g)).toHaveLength(6)
+  })
+
+  it('lists the /cars index among the static pages', () => {
+    expect(sitemapPaths()).toContain('/cars')
+  })
+
   it('points robots.txt at the sitemap', () => {
     expect(renderRobots('https://carsua.app')).toContain('Sitemap: https://carsua.app/sitemap.xml')
   })

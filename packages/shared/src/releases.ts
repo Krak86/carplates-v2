@@ -29,6 +29,24 @@ export const RELEASES: readonly ReleaseDay[] = [
         'Каталог моделей: сторінки /cars/{марка}/{модель} з кількістю авто на обліку в Україні, роками випуску, паливом, кузовом, кольорами й регіонами, плюс характеристики, вартість, відкликання, відгуки та фото моделі. Спершу найпоширеніші 300 моделей.',
         'Каталог моделей: страницы /cars/{марка}/{модель} с количеством авто на учёте в Украине, годами выпуска, топливом, кузовом, цветами и регионами, плюс характеристики, стоимость, отзывы и фото модели. Сначала самые распространённые 300 моделей.',
         'Model catalog: /cars/{make}/{model} pages with how many cars are registered in Ukraine, model years, fuel, body, colours and regions, plus specs, value, recalls, reviews and photos of the model. The 300 most common models come first.'
+      ),
+      item(
+        'new',
+        'Огляд за марками: сторінки /cars і /cars/{марка} зі списком марок та моделей, кількістю авто на обліку, навігацією «хлібні крихти» і швидкими переходами між моделями однієї марки.',
+        'Обзор по маркам: страницы /cars и /cars/{марка} со списком марок и моделей, количеством авто на учёте, навигацией «хлебные крошки» и быстрыми переходами между моделями одной марки.',
+        'Browse by make: /cars and /cars/{make} pages listing the makes and models with how many cars are registered, breadcrumb navigation and quick jumps between models of one make.'
+      ),
+      item(
+        'improved',
+        'Сторінка моделі: чипи року, покоління, пального й кузова - характеристики, вартість і відкликання одразу підлаштовуються під вибір.',
+        'Страница модели: чипы года, поколения, топлива и кузова - характеристики, стоимость и отзывы сразу подстраиваются под выбор.',
+        'Model page: year, generation, fuel and body chips - specs, value and recalls follow your pick.'
+      ),
+      item(
+        'improved',
+        'Марка й модель на картці авто за номером, чип на картці VIN і топ моделей на сторінці статистики тепер ведуть на сторінку моделі в каталозі.',
+        'Марка и модель на карточке авто по номеру, чип на карточке VIN и топ моделей на странице статистики теперь ведут на страницу модели в каталоге.',
+        'The make and model on a plate card, a chip on the VIN card and the top models on the stats page now link to the model page in the catalog.'
       )
     ]
   },

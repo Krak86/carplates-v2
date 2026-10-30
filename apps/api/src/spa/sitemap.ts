@@ -1,4 +1,4 @@
-import { catalogPath } from '@carplates/shared'
+import { catalogMakePath, catalogPath } from '@carplates/shared'
 
 import { alternateLinks, langUrl } from './meta.js'
 import { LANGS, STATIC_PAGES } from './spa-text.js'
@@ -32,9 +32,13 @@ export function renderSitemap(siteUrl: string): string {
   return `${URLSET_OPEN}\n${urlEntries(siteUrl, sitemapPaths()).join('\n')}\n</urlset>\n`
 }
 
-/** The catalog file: the indexable `/cars/:make/:model` pages (the MVP set, widened only while metrics stay flat). */
-export function renderCatalogSitemap(siteUrl: string, pages: readonly (readonly [string, string])[]): string {
-  const paths = pages.map(([make, model]) => catalogPath(make, model))
+/** The catalog file: the make pages with an indexable model, then the indexable `/cars/:make/:model` pages (the MVP set, widened only while metrics stay flat). */
+export function renderCatalogSitemap(
+  siteUrl: string,
+  pages: readonly (readonly [string, string])[],
+  makes: readonly string[] = []
+): string {
+  const paths = [...makes.map(catalogMakePath), ...pages.map(([make, model]) => catalogPath(make, model))]
   return `${URLSET_OPEN}\n${urlEntries(siteUrl, paths).join('\n')}\n</urlset>\n`
 }
 

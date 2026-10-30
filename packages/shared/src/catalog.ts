@@ -60,6 +60,31 @@ export const catalogModelSchema = z.object({
 })
 export type CatalogModel = z.infer<typeof catalogModelSchema>
 
+/** One make on the `/cars` index and the head of a `/cars/:make` page. */
+export const catalogMakeSummarySchema = z.object({
+  /** Slug (the URL): `bmw`. */
+  make: z.string(),
+  makeName: z.string(),
+  /** Current passenger cars of the make (every model with a page). */
+  n: z.number(),
+  modelCount: z.number(),
+  /** The most common raw registry spelling of the make's biggest model: the input of `BrandLogo`. */
+  topBrand: z.string(),
+  /** At least one model page of the make is indexable, so the make page is too (else `noindex`). */
+  indexable: z.boolean()
+})
+export type CatalogMakeSummary = z.infer<typeof catalogMakeSummarySchema>
+
+/** `GET /api/catalog/makes`: every make, biggest first. */
+export const catalogMakesSchema = z.object({ makes: z.array(catalogMakeSummarySchema) })
+export type CatalogMakes = z.infer<typeof catalogMakesSchema>
+
+/** `GET /api/catalog/:make`: the make and all its model pages, biggest first. */
+export const catalogMakeSchema = catalogMakeSummarySchema.extend({
+  models: z.array(catalogSiblingSchema.extend({ yearMin: z.number().nullable(), yearMax: z.number().nullable() }))
+})
+export type CatalogMake = z.infer<typeof catalogMakeSchema>
+
 /** A catalog URL part: lower-case letters and digits, optional hyphens (`mercedes-benz`, `3series`). */
 export const catalogSlugSchema = z
   .string()
@@ -67,7 +92,25 @@ export const catalogSlugSchema = z
   .max(64)
   .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
 
+export const catalogMakeParamsSchema = z.object({ make: catalogSlugSchema })
+export type CatalogMakeParams = z.infer<typeof catalogMakeParamsSchema>
+
 export const catalogParamsSchema = z.object({ make: catalogSlugSchema, model: catalogSlugSchema })
 export type CatalogParams = z.infer<typeof catalogParamsSchema>
 
-export const catalogPath = (make: string, model: string): string => `/cars/${make}/${model}`
+export const CATALOG_INDEX_PATH = '/cars'
+export const catalogMakePath = (make: string): string => `${CATALOG_INDEX_PATH}/${make}`
+export const catalogPath = (make: string, model: string): string => `${catalogMakePath(make)}/${model}`
+
+/** `GET /api/catalog/lookup`: a raw registry or VIN-decoded brand + model, resolved to the page that exists for it. */
+export const catalogLookupQuerySchema = z.object({
+  brand: z.string().trim().min(1).max(64),
+  model: z.string().trim().min(1).max(96)
+})
+export type CatalogLookupQuery = z.infer<typeof catalogLookupQuerySchema>
+
+/** `page` is null when the model has no catalog page (below `CATALOG_KEEP_MIN_CARS`, a non-passenger kind or an unknown spelling). */
+export const catalogLookupSchema = z.object({
+  page: z.object({ make: z.string(), model: z.string() }).nullable()
+})
+export type CatalogLookup = z.infer<typeof catalogLookupSchema>

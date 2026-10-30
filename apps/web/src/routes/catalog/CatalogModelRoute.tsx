@@ -1,12 +1,14 @@
 import type { ReactNode } from 'react'
-import { catalogParamsSchema, catalogPath, localizeRegistryRows } from '@carplates/shared'
+import { CATALOG_INDEX_PATH, catalogMakePath, catalogParamsSchema, localizeRegistryRows } from '@carplates/shared'
 import type { CatalogModel } from '@carplates/shared'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { Link, useParams } from 'react-router'
 
 import BrandLogo from '@/components/BrandLogo'
-import ModelSections from '@/components/catalog/ModelSections'
+import CatalogBreadcrumb from '@/components/catalog/CatalogBreadcrumb'
+import CatalogSiblingChips from '@/components/catalog/CatalogSiblingChips'
+import ModelVariants from '@/components/catalog/ModelVariants'
 import Card from '@/components/ui/Card'
 import SectionSkeleton from '@/components/ui/SectionSkeleton'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
@@ -16,7 +18,7 @@ import { localizeRegion } from '@/lib/region-label'
 import { catalogModelQuery } from '@/lib/queries'
 
 import CatalogStatsSection from './CatalogStatsSection'
-import { typicalYear, yearRangeLabel } from './helpers'
+import { yearRangeLabel } from './helpers'
 
 function CatalogNotFound(): ReactNode {
   const { t } = useTranslation()
@@ -76,6 +78,15 @@ export default function CatalogModelRoute(): ReactNode {
 
   return (
     <main className="mx-auto w-full max-w-6xl space-y-4">
+      <CatalogBreadcrumb
+        crumbs={[
+          { label: t('catalog.crumbHome'), to: '/' },
+          { label: t('catalog.crumbCars'), to: CATALOG_INDEX_PATH },
+          { label: model.makeName, to: catalogMakePath(model.make) },
+          { label: model.modelName }
+        ]}
+      />
+
       <Card>
         <div className="mb-2 flex items-center gap-3">
           <BrandLogo brand={model.topBrand} size="sm" placeholder />
@@ -94,31 +105,13 @@ export default function CatalogModelRoute(): ReactNode {
       <CatalogStatsSection model={model} />
 
       <Card>
-        <ModelSections
-          brand={model.topBrand}
-          model={model.topModel}
-          year={typicalYear(model.stats.years)}
-          kind={model.kind}
-          fuel={model.stats.fuel[0]?.[0] ?? null}
-          capacity={model.stats.capacityP50 ?? null}
-          body={model.stats.body[0]?.[0] ?? null}
-        />
+        <ModelVariants key={`${model.make}/${model.model}`} model={model} />
       </Card>
 
-      {model.siblings.length > 0 && (
-        <Card>
-          <h2 className="mb-2 text-lg font-semibold">{t('catalog.otherModels')}</h2>
-          <ul className="flex flex-wrap gap-x-4 gap-y-1 text-base">
-            {model.siblings.map(s => (
-              <li key={s.model}>
-                <Link to={catalogPath(model.make, s.model)} className="text-[var(--color-primary)] underline">
-                  {`${model.makeName} ${s.modelName}`}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </Card>
-      )}
+      <Card>
+        <h2 className="mb-2 text-lg font-semibold">{t('catalog.otherModels')}</h2>
+        <CatalogSiblingChips model={model} />
+      </Card>
     </main>
   )
 }

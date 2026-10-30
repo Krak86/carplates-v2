@@ -3,9 +3,13 @@ import { describe, expect, it } from 'vitest'
 
 import { buildPageCardSvg, pageCardHeadline, pageCardTitle, wrapLines } from './og-card.js'
 import {
+  catalogMakeCardSlug,
+  catalogMakeOfCard,
+  catalogMakeOfPath,
   catalogPageSlug,
   catalogSlugsOfCard,
   catalogSlugsOfPath,
+  isCatalogIndexPath,
   pageCardSlug,
   pagePathForSlug,
   shareAliasCardSlug,
@@ -20,6 +24,21 @@ describe('catalog page slugs', () => {
     expect(catalogSlugsOfCard('cars--bmw')).toBeNull()
     expect(catalogSlugsOfCard('stats')).toBeNull()
     expect(catalogSlugsOfCard('cars--BMW--x5')).toBeNull()
+  })
+
+  it('reads the make of a /cars/:make path and its card slug', () => {
+    expect(catalogMakeOfPath('/cars/bmw')).toBe('bmw')
+    expect(catalogMakeOfPath('/cars/bmw/')).toBe('bmw')
+    expect(catalogMakeOfPath('/cars')).toBeNull()
+    expect(catalogMakeOfPath('/cars/bmw/x5')).toBeNull()
+    expect(catalogMakeOfPath('/cars/BMW')).toBeNull()
+    expect(catalogMakeCardSlug('mercedes-benz')).toBe('cars--mercedes-benz')
+    expect(catalogMakeOfCard('cars--mercedes-benz')).toBe('mercedes-benz')
+    expect(catalogMakeOfCard('cars--bmw--x5')).toBeNull()
+    expect(catalogMakeOfCard('cars')).toBeNull()
+    expect(isCatalogIndexPath('/cars')).toBe(true)
+    expect(isCatalogIndexPath('/cars/')).toBe(true)
+    expect(isCatalogIndexPath('/cars/bmw')).toBe(false)
   })
 
   it('reads make and model from a /cars path', () => {

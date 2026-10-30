@@ -34,6 +34,27 @@ export function catalogSlugsOfPath(pathname: string): { make: string; model: str
   return slugOk(make).success && slugOk(model).success ? { make, model } : null
 }
 
+/** The make of a `/cars/:make` path (a trailing slash is fine), or null for any other path or an invalid slug. */
+export function catalogMakeOfPath(pathname: string): string | null {
+  const [root, make, ...rest] = pathname.split('/').filter(Boolean)
+  return root === CARS_PREFIX && make && rest.length === 0 && slugOk(make).success ? make : null
+}
+
+/** True for `/cars` itself (the make index). */
+export const isCatalogIndexPath = (pathname: string): boolean => {
+  const [root, ...rest] = pathname.split('/').filter(Boolean)
+  return root === CARS_PREFIX && rest.length === 0
+}
+
+/** `/og/page/<slug>.png` slug of a make page: `bmw` -> `cars--bmw`. */
+export const catalogMakeCardSlug = (make: string): string => `${CARS_PREFIX}--${make}`
+
+/** The make a make card slug names (`cars--bmw`), or null when it is not one. */
+export function catalogMakeOfCard(slug: string): string | null {
+  const [root, make, ...rest] = slug.split('--')
+  return root === CARS_PREFIX && make && rest.length === 0 ? catalogMakeOfPath(`/cars/${make}`) : null
+}
+
 /** The make and model a catalog card slug names, or null when it is not one. */
 export function catalogSlugsOfCard(slug: string): { make: string; model: string } | null {
   const [root, make, model, ...rest] = slug.split('--')

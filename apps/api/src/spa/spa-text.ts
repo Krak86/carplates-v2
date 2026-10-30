@@ -96,6 +96,23 @@ export const STATIC_PAGES: Record<string, Record<Lang, PageText>> = {
     ru: { title: 'Cars UA - Избранное', description: 'Сохранённые вами автомобили.' },
     en: { title: 'Cars UA - Favorites', description: 'Vehicles you saved.' }
   },
+  '/cars': {
+    ua: {
+      title: 'Авто в Україні за марками та моделями | Cars UA',
+      description:
+        'Каталог марок і моделей авто на обліку в Україні: кількість авто, роки випуску, паливо та регіони за відкритими даними реєстру.'
+    },
+    ru: {
+      title: 'Авто в Украине по маркам и моделям | Cars UA',
+      description:
+        'Каталог марок и моделей авто на учёте в Украине: количество авто, годы выпуска, топливо и регионы по открытым данным реестра.'
+    },
+    en: {
+      title: 'Cars in Ukraine by make and model | Cars UA',
+      description:
+        'A catalog of the makes and models registered in Ukraine: cars on the road, model years, fuel and regions from the open vehicle registry.'
+    }
+  },
   '/stats': {
     ua: {
       title: 'Статистика авто в Україні: марки, кольори, паливо | Cars UA',

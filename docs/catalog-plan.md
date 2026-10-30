@@ -188,18 +188,18 @@ State after the MVP rollout: the model pages are live and indexable (300), Cloud
 app links to them**: only Google and a typed URL reach one. Fuel/body/colour/region are localized (`registryLabels.ts`, `regionLabels.ts`). Build order below;
 each block is one commit and must add its routes to the sitemap/`STATIC_PAGES` rules in CLAUDE.md.
 
-1. **Entry points (cheapest, most value).**
+1. **Entry points (cheapest, most value).** _Done 2026-10-30 (`GET /api/catalog/lookup`, `useCatalogPath`; the "Browse by make" link ships with block 2 because `/cars` does not exist before it)._
    - Plate and VIN result cards: the make/model line links to `/cars/<make>/<model>` ("All BMW X5 in Ukraine"), same tab. The web **cannot** compute the slug:
      `catalogSlugs(brand, model, known)` needs the known-model set the build uses. So resolve it on the server: add the slugs to the plate/VIN response from
      `catalog_alias` (a new field in a contract file, `.nullable().optional()`, not `schemas.ts`), or a small `GET /api/catalog/lookup?brand=&model=` read from the
      in-memory `CatalogService`. Only link when the page exists (a model below `CATALOG_KEEP_MIN_CARS` has no row). Mind the offline cache (`lib/offline-cache.ts`).
    - `/stats` model boards and the About page link to the catalog; the home page gets a "Browse by make" link to `/cars`.
-2. **Hub pages and breadcrumbs.**
+2. **Hub pages and breadcrumbs.** _Done 2026-10-30 (`/cars`, `/cars/:make`, `CatalogBreadcrumb`, `BreadcrumbList`, `CatalogSiblingChips`, sitemap + "Browse by make" in `QuickLinks`)._
    - `/cars` (all makes with counts) and `/cars/:make` (the make's models with counts, indexable when the make has an indexable model). Both from `catalog_make` /
      `catalog_model`; add to `ROUTE_TITLE_KEYS`, `STATIC_PAGES` (`/cars`) and the sitemap, with the same server-injected `#root` block as the model page.
    - Breadcrumb on every catalog page (Home > Cars > BMW > X5), plain `<a>` links, plus `BreadcrumbList` JSON-LD in the head and the same trail in the injected block.
    - Model page: replace the plain "Other models of the make" with chips (make link first, then sibling models by size), keep the plain links in the block.
-3. **Variant chips on the model page (no new URLs).** A year chip row (typical year highlighted) and, where `model_generations` has data, generation chips. Picking one
+3. **Variant chips on the model page (no new URLs).** _Done 2026-10-30 (`ModelVariants`)._ A year chip row (typical year highlighted) and, where `model_generations` has data, generation chips. Picking one
    re-feeds the `ModelSections` (`year`, `fuel`, `body`, `capacity` props already exist) client-side, so specs, value and recalls follow the choice. Local state,
    no network beyond the section calls. Fuel/body chips can reuse `registryLabel`.
 4. **Year pages `/cars/:make/:model/:year`** (the original plan above, about 8-15k pages). Wait until Search Console shows the first 300 pages indexed (1-2 weeks);

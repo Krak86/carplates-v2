@@ -32,7 +32,7 @@ export class SeoController {
   @Header('content-type', 'application/xml; charset=utf-8')
   @Header('cache-control', 'public, max-age=86400')
   async sitemapCars(): Promise<string> {
-    return renderCatalogSitemap(this.siteUrl, await this.catalog.indexable())
+    return renderCatalogSitemap(this.siteUrl, await this.catalog.indexable(), await this.catalog.indexableMakes())
   }
 
   @Get('robots.txt')
