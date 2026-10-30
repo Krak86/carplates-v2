@@ -184,7 +184,7 @@ capacity_p50, power_p50, imported_share, first_reg_by_year jsonb, owners_p50)`.
 
 ## Next: make the pages usable, not only crawlable (added 2026-10-30)
 
-State after the MVP rollout: the model pages are live and indexable (300), Cloudflare caches them, and the prod browser check passed, but **nothing in the
+**Status 2026-10-30: blocks 1-3 are implemented locally (uncommitted/undeployed at the time of writing); block 4 (year pages) is next, and only after Search Console shows the first 300 pages indexed.** Original state after the MVP rollout: the model pages are live and indexable (300), Cloudflare caches them, and the prod browser check passed, but **nothing in the
 app links to them**: only Google and a typed URL reach one. Fuel/body/colour/region are localized (`registryLabels.ts`, `regionLabels.ts`). Build order below;
 each block is one commit and must add its routes to the sitemap/`STATIC_PAGES` rules in CLAUDE.md.
 
