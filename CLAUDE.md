@@ -10,9 +10,8 @@ Docs (**grep `^## ` headings, never read whole**, 100–400 KB): `PLAN.md` backl
 
 ## Layout
 
-`packages/shared` (`normalizePlate`, regions, Zod schemas — **single source of truth, never re-implement plate logic**) · `packages/db`
-(Drizzle `registry`, SQL migrator) · `apps/api` (NestJS + Fastify, `src/<feature>/`, serves SPA + per-plate `<meta>`) · `apps/web`
-(Vite + React 19 + React Router) · `scripts/` (ingest/export CLIs, `seed-data/` gzipped CSVs) · `infra/` · `services/alpr/`.
+`packages/shared` (`normalizePlate`, regions, Zod schemas — **single source of truth, never re-implement plate logic**) · `packages/db` ·
+`apps/api` (`src/<feature>/`; serves the SPA + per-plate `<meta>`) · `apps/web` · `scripts/` (ingest/export CLIs, `seed-data/` gzipped CSVs) · `infra/` · `services/alpr/`.
 
 Pins (why: PLAN.md "Version pins"): Node 24, TypeScript 5.9, NestJS 11, Drizzle 0.45.x, jsdom ~30.0, Tailwind v4 - never bump to `latest`.
 
@@ -44,10 +43,10 @@ Pins (why: PLAN.md "Version pins"): Node 24, TypeScript 5.9, NestJS 11, Drizzle 
 
 ## Workflow
 
-- After each big update give a suggested commit message (subject + bullet per change, covering everything uncommitted: check
-  `git status` / `git diff --stat`; split if logical). Never run `git commit` / `git push` unless asked.
-- **Seed CSVs mirror scraped tables.** After changing `registry.wiki_image` (pre-warm, `wikiAliases.ts` + re-scrape, row deletes) re-run
-  `pnpm export:wiki-images:csv`; same for every other `export:*:csv` dataset (a new setup loads the CSV instead of re-scraping).
+- After each big update give a suggested commit message (subject + bullet per change, all uncommitted work: `git status` / `git diff --stat`;
+  split if logical). Never run `git commit` / `git push` unless asked.
+- **Seed CSVs mirror scraped tables.** After changing a scraped table (e.g. `registry.wiki_image`: pre-warm, `wikiAliases.ts` + re-scrape,
+  row deletes) re-run its `pnpm export:*:csv` (a new setup loads the CSV instead of re-scraping).
 - `pnpm format` first (not `scripts/src/fixtures`). Tests: Vitest, colocated `*.test.ts(x)`.
 - Keep docs current: write-up → `docs/plan-done.md`, one-line ✅ → `PLAN.md`, conventions → `docs/features-reference.md`, user-facing entry → `packages/shared/src/releases.ts`
   (only `new` items are mailed; new day ⇒ bump `releases/latest.ts`); new feature / data source → About (`about.feature.*`, `SOURCES` + `about.source.*`, ua/ru/en).

@@ -184,6 +184,13 @@ const SOURCES: readonly Source[] = [
     url: 'https://github.com/ankandrew/fast-alpr',
     icon: '/icons/sources/github.webp'
   },
+  // No logo: commercial mark, no licence found; plain tile.
+  {
+    key: 'plateRecognizer',
+    label: 'Plate Recognizer',
+    url: 'https://platerecognizer.com',
+    tile: 'bg-slate-500'
+  },
   { key: 'youtube', label: 'YouTube', url: 'https://www.youtube.com', icon: '/icons/sources/youtube.webp' },
   {
     key: 'googleSignIn',

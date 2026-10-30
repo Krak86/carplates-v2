@@ -3479,6 +3479,7 @@
   "about.source.carvx": "CarVX - Japanese export-history report by VIN (link-out, no data fetched).",
   "about.source.checkcar": "Checkcar.vin - Korean vehicle-history report by VIN (link-out, no data fetched).",
   "about.source.chinavehiclehistory": "China Vehicle History - Chinese vehicle-history report by VIN (link-out, no data fetched).",
+  "about.source.plateRecognizer": "Plate Recognizer - optional cloud plate reading for search by photo; the photo is sent there only when this fallback is switched on.",
   "about.source.historiaPojazdu": "Historia Pojazdu (gov.pl) - official Polish vehicle-history check for EU-bought cars (link-out).",
   "about.source.customs": "State Customs Service e-cabinet - link to the vehicle customs-clearance check. Links only.",
   "about.source.radaLaws": "Verkhovna Rada of Ukraine (zakon.rada.gov.ua) - the texts of the laws and resolutions the guides cite (registration rules, the Administrative Offences Code, fuel). Links only.",
@@ -3755,5 +3756,5 @@
   "compare.about.nhtsaComplaints": "How many owner complaints NHTSA received for this model year. More complaints often just means more cars sold.",
   "compare.about.motFailRate": "The share of the model's UK MOT tests that failed, over all mileages. It depends on the age of the cars tested, so no side is called better.",
   "compare.about.ukCars": "How many cars of this model are currently registered in Ukraine, from the open registry.",
-  "about.feature.compare": "Compare two cars at /compare: a plate, a VIN or a model in each slot. The side-by-side table shows only data we hold (power, size, weight, consumption, price, safety, reliability, registrations in Ukraine), with the exact car's own data kept separate; the better side is marked only where it is unambiguous. Above it: the main differences of each car, mirrored bars, radars, fuel and body shares and both cars at true scale (side by side, overlay, draggable divider, blueprint); every block has its own link, and a slot can be edited."
+  "about.feature.compare": "Compare two cars at /compare: a plate, a VIN or a model in each slot (editable), with suggestions for the second slot and a tray on the catalog pages. A side-by-side table shows only data we hold, with the exact car kept apart and the better side marked only where it is unambiguous. Above it: main differences, mirrored bars, radars, min-median-max ranges, crash-test stars and CO₂, price and MOT curves, generation timelines, fuel and body shares, parking fit and both cars at true scale. Every block has its own link; comparisons can be saved in this browser or exported (clipboard, txt, md, csv, docx, pdf)"
 }

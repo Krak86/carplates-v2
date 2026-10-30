@@ -25,6 +25,18 @@ export const RELEASES: readonly ReleaseDay[] = [
         'Compare two cars at /compare: a plate, a VIN or a model in each slot, a side-by-side table with only the data we hold (power, size, weight, consumption, price, safety, reliability, registrations in Ukraine) and own data of the exact car kept apart. A Compare button sits on the plate card, the VIN card and the model page.'
       ),
       item(
+        'new',
+        'Порівняння авто: меню «Зберегти порівняння» (буфер, txt, md, csv, docx, pdf), збережені порівняння в цьому браузері, підказки для другого авто (та сама модель з іншим паливом, попереднє покоління, сусідні моделі) та кнопка «Додати до порівняння» у каталозі з нижньою панеллю.',
+        'Сравнение авто: меню «Сохранить сравнение» (буфер, txt, md, csv, docx, pdf), сохранённые сравнения в этом браузере, подсказки для второго авто (та же модель с другим топливом, предыдущее поколение, соседние модели) и кнопка «Добавить к сравнению» в каталоге с нижней панелью.',
+        'Compare: a "Save comparison" menu (clipboard, txt, md, csv, docx, pdf), comparisons saved in this browser, suggestions for the second car (same model on another fuel, previous generation, sibling models) and an "Add to compare" button in the catalog with a bottom bar.'
+      ),
+      item(
+        'improved',
+        'Порівняння авто: діапазони мін-медіана-макс на одній шкалі від нуля (вузькі показники масштабуються), зірки краш-тестів і CO₂ на шкалі картки, криві ціни в Нідерландах і відмов MOT за пробігом, покоління обох моделей двома стрічками та вміщення в паркомісця й гаражі.',
+        'Сравнение авто: диапазоны мин-медиана-макс на одной шкале от нуля (узкие показатели масштабируются), звёзды краш-тестов и CO₂ на шкале карточки, кривые цены в Нидерландах и отказов MOT по пробегу, поколения обеих моделей двумя лентами и вместимость в парковки и гаражи.',
+        'Compare: min-median-max ranges on one scale from zero (narrow measures are zoomed), crash-test stars and CO₂ on the result-card scale, Dutch price and MOT failure curves by mileage, the generations of both models as two timelines, and parking and garage fit.'
+      ),
+      item(
         'improved',
         'Порівняння авто: головні відмінності кожного авто, дзеркальні стовпчики, радари (динаміка, практичність, економія, безпека), частки палива й кузова, габарити обох авто в одному масштабі (поруч, накладення, з рухомим розділювачем, креслення), редагування марки, моделі й року та посилання на кожен блок.',
         'Сравнение авто: главные отличия каждого авто, зеркальные столбцы, радары (динамика, практичность, экономия, безопасность), доли топлива и кузова, габариты обоих авто в одном масштабе (рядом, наложение, с подвижным разделителем, чертёж), правка марки, модели и года и ссылки на каждый блок.',

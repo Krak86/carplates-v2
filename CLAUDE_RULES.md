@@ -4,9 +4,8 @@ Lint and Prettier already cover formatting and common React/Drizzle/TanStack rul
 
 ## Environment
 
-**No Python on this machine.** For bulk or scripted edits use the Edit tool (`replace_all` where it fits), or a Node/`tsx`
-one-off — never `python`/`python3`. Don't announce this each time; just do it. pnpm here forwards a literal `--`: run
-`pnpm ingest:mot --dir …`, not `pnpm ingest:mot -- --dir …`.
+**No Python on this machine** — for bulk edits use Edit (`replace_all`) or a Node/`tsx` one-off, never `python`; don't announce it.
+pnpm here forwards a literal `--`: run `pnpm ingest:mot --dir …`, not `pnpm ingest:mot -- --dir …`.
 
 ## Code standards
 
