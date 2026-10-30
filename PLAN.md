@@ -349,7 +349,7 @@ above once scoped, or dropped if research says no.
   ✅ Follow-up 2026-10-29: side outlines traced from real side-on photos (`SIDE_PATHS`; source photos not recorded - redraw from catalogue dimensions if a licence question comes up), pickup examples with dimensions. Write-up: `docs/plan-done.md` "Advanced search legend and icons, news page, page width, traced silhouettes".
 - ✅ **Advanced search legend + icons, news page colours/skeletons, one page width (`max-w-6xl`)** — done 2026-10-29, see `docs/plan-done.md`.
 - ✅ **Share links `/go/<alias>` + `/share` page** (2026-10-30; per-alias previews, client redirect to home with the entry pulsing). Write-up: `docs/plan-done.md` "Share links"; conventions `docs/features-reference.md` "Share links".
-- ✅ **Catalog MVP `/cars/:make/:model`** (2026-10-30; top 300 models indexable, 1,697 pages, sitemap index + `sitemap-cars.xml`, injected `#root` block, `db:refresh-catalog`). Live 2026-10-30 (first build on the VPS, Cloudflare rules, prod browser check done). Open: resubmit sitemap in Search Console/Bing (owner), ~~internal links~~ (plate/VIN cards and `/stats` link to the pages since 2026-10-30; the rest of the plan: `docs/catalog-plan.md` "Next: make the pages usable"), year pages. `/cars` + `/cars/:make` hubs, breadcrumbs and BreadcrumbList JSON-LD done 2026-10-30. Write-up: `docs/plan-done.md` "Model catalog MVP"; conventions `docs/features-reference.md` "Model catalog".
+- ✅ **Catalog MVP `/cars/:make/:model`** (2026-10-30; top 300 models indexable, 1,697 pages, sitemap index + `sitemap-cars.xml`, injected `#root` block, `db:refresh-catalog`). Live 2026-10-30 (first build on the VPS, Cloudflare rules, prod browser check done). Blocks 1-3 and 5 of `docs/catalog-plan.md` "Next: make the pages usable" are deployed and checked on prod 2026-10-30 (plate/VIN/`/stats` links, `/cars` + `/cars/:make` hubs, breadcrumbs, year/generation/fuel/body chips with generation stats, `Car` JSON-LD, engine line, sitemap 1,029 URLs read by Search Console). Open: Bing sitemap submit (owner), check Search Console "Pages" about 2 weeks after 2026-10-30, then **year pages** (block 4) only when the first 300 pages are indexed. Write-up: `docs/plan-done.md` "Model catalog MVP"; conventions `docs/features-reference.md` "Model catalog".
 - ✅ **Discovery/SEO groundwork** — done 2026-10-30: robots/sitemap purge on deploy, per-page share cards `/og/page/<slug>.png`, IndexNow, catalog Step 1 fold check (catalog MVP is next, see `docs/discovery-plan.md` "Next"). Write-up: `docs/plan-done.md`.
 - ✅ **Size drawing blueprint + front view, VIN EU fallback / Asia history links, section share text** — done 2026-10-30. Write-up: `docs/plan-done.md` "Size drawing, VIN fallbacks…"; conventions `docs/features-reference.md` "Blueprint style".
 - ✅ **Chip "?" explainers, `?weight=` tab URLs, mobile polish (pinch zoom, photo swipe), "VIN data starts in 2021" note** — done 2026-10-14, see `docs/plan-done.md`.
@@ -764,16 +764,12 @@ Group 1 dimension callouts + garage-fit -> Group 3 (existing order). Owner says 
       (registry stats + the existing model-level sections) as indexable SEO slugs; needs a canonical make/model taxonomy
       (registry models are trim-level) and TS-built rollup tables, not a matview. Full write-up: [docs/catalog-plan.md](docs/catalog-plan.md).
       Discovery checklist around it (Search Console, IndexNow, outreach, Reddit draft): [docs/discovery-plan.md](docs/discovery-plan.md).
-- [ ] **Car compare `/compare/:a~:b`** — idea 2026-10-29, **blocked on the catalog pages above** (not started). Side-by-side
-      dimensions (silhouette overlay + table) and every spec we have (RDW, VehiclesDB, NCAP, fleet counts).
-      Why wait: registry models are trim-level, so the picker, slugs and indexing need the canonical make/model/year taxonomy and
-      per-model record from [docs/catalog-plan.md](docs/catalog-plan.md); building first means a throwaway picker and slug migration.
-      Plan: (1) catalog taxonomy + per-model record (dimensions + specs merged); (2) route as a thin layer over it, input is a
-      model ref `{make, model, year}` (not a plate), indexable only when both sides are catalog pages (add to `ROUTE_TITLE_KEYS`,
-      `STATIC_PAGES`, `@Throttle`, edge cache per CLAUDE.md); (3) entry points: plate-card section pre-filled with the current
-      car, "compare with…" link on catalog pages, embeds in `/read/*` articles (sizes, body types). Reuse `components/size/*`
-      (`SideSilhouette`, `SizeCarTop`, `FitTable`, `ModelDimsRow`) and `sizeModels`. Optional earlier step: a two-car overlay
-      widget limited to `sizeModels` models inside the sizes article (no new route, no indexing). Also covers the segment-peer list.
+- [ ] **Compare two vehicles `/compare`** — researched 2026-10-30, **not started, unblocked** (catalog MVP is live). Exactly 2 vehicles;
+      input per slot = plate, VIN or model ref (so any vehicle we hold data for, not only catalog models). Mirrored table that hides rows
+      with no data on either side, radars (fixed scales, only axes both cars have), mirrored/dumbbell/share bars, depreciation and MOT curves,
+      size blueprint overlay, generated difference sentences, export like "Copy all info", "Compare" chip on the plate/VIN card and catalog
+      page (slot A prefilled). Phases: (1) core, (2) visuals, (3) export, (4) tray / suggestions / saved / indexable pairs.
+      Full plan: [docs/compare-plan.md](docs/compare-plan.md). Also covers the segment-peer list and a `/read/sizes` overlay embed.
 - **Shareable photo-search links** — idea 2026-10-01, deferred (not started).
   Share button on the photo card uploads the shrunk image + recognition result
   (candidates with boxes, EXIF meta) to `POST /api/shares`; opening
