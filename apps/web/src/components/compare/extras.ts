@@ -22,7 +22,7 @@ export type Dumbbell = {
   labelKey: string
   unitKey?: string
   decimals: number
-  /** The shared axis of both cars: a row is drawn on one scale so the lengths compare. */
+  /** The shared axis of both cars and of every measure in the same unit: from zero to the largest value. */
   axisMin: number
   axisMax: number
   ranges: readonly [Range, Range]
@@ -38,20 +38,22 @@ export function buildDumbbells(loaded: readonly [CompareLoaded, CompareLoaded]):
     const ranges = both(loaded, x => (x.rdw ? def.pick(x.rdw.specs) : null))
     const [a, b] = ranges
     if (!a || !b || a.max === a.min || b.max === b.min) continue
-    const axisMin = Math.min(a.min, b.min)
-    const axisMax = Math.max(a.max, b.max)
     out.push({
       key: def.key,
       labelKey: `rdw.${def.key}`,
       unitKey: def.unitKey,
       decimals: def.format?.decimals ?? 0,
-      axisMin,
-      axisMax,
+      axisMin: Math.min(a.min, b.min),
+      axisMax: Math.max(a.max, b.max),
       ranges: [a, b],
       smallSample: loaded.some(x => (x.rdw?.specs.n ?? Infinity) < RDW_MIN_DISPLAY_N)
     })
   }
-  return out
+  // Every axis starts at zero, so the same position always means the same share of the maximum; measures in the
+  // same unit (the masses, the lengths) share one axis, so their lines compare across rows too.
+  const axisMax = new Map<string, number>()
+  for (const d of out) axisMax.set(d.unitKey ?? d.key, Math.max(axisMax.get(d.unitKey ?? d.key) ?? 0, d.axisMax))
+  return out.map(d => ({ ...d, axisMin: 0, axisMax: axisMax.get(d.unitKey ?? d.key) ?? d.axisMax }))
 }
 
 /** Position 0..1 of `value` on a dumbbell's axis. */

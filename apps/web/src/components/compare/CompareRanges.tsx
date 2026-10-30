@@ -26,10 +26,17 @@ export function Dumbbells({ items, names }: { items: readonly Dumbbell[]; names:
     <section aria-labelledby="compare-ranges">
       <CompareSectionHeading section="ranges" title={t('compare.ranges.title')} />
       <p className="mb-3 text-sm text-[var(--color-muted)]">{t('compare.ranges.note')}</p>
-      <ul className="space-y-4">
+      <p className="mb-3 text-sm font-semibold" aria-hidden>
+        {names.map((name, side) => (
+          <span key={side} className="mr-4">
+            <span style={{ color: SIDE_COLOR[side as 0 | 1] }}>{side === 0 ? '▼' : '▲'}</span> {name}
+          </span>
+        ))}
+      </p>
+      <ul>
         {items.map(d => (
-          <li key={d.key}>
-            <div className="mb-1 text-center text-sm text-[var(--color-muted)]">
+          <li key={d.key} className="border-b border-[var(--color-border)]/50 py-3 first:pt-0 last:border-b-0">
+            <div className="text-center text-sm text-[var(--color-muted)]">
               {t(d.labelKey)}
               {d.smallSample && (
                 <span role="img" aria-label={t('compare.smallSample')} title={t('compare.smallSample')}>
@@ -38,33 +45,51 @@ export function Dumbbells({ items, names }: { items: readonly Dumbbell[]; names:
                 </span>
               )}
             </div>
-            {([0, 1] as const).map(side => {
-              const r = d.ranges[side]
-              const unit = d.unitKey ? ` ${t(d.unitKey)}` : ''
-              return (
-                <div key={side} className="mb-1">
-                  <div className="relative h-4" aria-hidden>
+            {/* One track per measure like the CO2 scale: car 1 above the middle (▼), car 2 below (▲). */}
+            <div className="relative pt-5 pb-5" aria-hidden>
+              <div className="relative h-3 rounded-full bg-[var(--color-border)]/60">
+                {([0, 1] as const).map(side => {
+                  const r = d.ranges[side]
+                  return (
                     <div
-                      className="absolute top-1/2 h-1 -translate-y-1/2 rounded-full opacity-40"
+                      key={side}
+                      className={`absolute h-1.5 rounded-full ${side === 0 ? 'top-0' : 'bottom-0'}`}
                       style={{
+                        minWidth: 4,
                         left: `${axisPosition(d, r.min) * 100}%`,
                         width: `${(axisPosition(d, r.max) - axisPosition(d, r.min)) * 100}%`,
                         background: SIDE_COLOR[side]
                       }}
                     />
-                    <div
-                      className="absolute top-1/2 size-3 -translate-x-1/2 -translate-y-1/2 rounded-full"
-                      style={{ left: `${axisPosition(d, r.median) * 100}%`, background: SIDE_COLOR[side] }}
-                    />
-                  </div>
-                  <div className="text-sm">
+                  )
+                })}
+              </div>
+              {([0, 1] as const).map(side => (
+                <div
+                  key={side}
+                  className={`absolute -translate-x-1/2 text-xs ${side === 0 ? 'top-0' : 'bottom-0'}`}
+                  style={{ left: `${axisPosition(d, d.ranges[side].median) * 100}%`, color: SIDE_COLOR[side] }}
+                >
+                  {side === 0 ? '▼' : '▲'}
+                </div>
+              ))}
+            </div>
+            <div className="space-y-0.5 text-sm">
+              {([0, 1] as const).map(side => {
+                const r = d.ranges[side]
+                const unit = d.unitKey ? ` ${t(d.unitKey)}` : ''
+                return (
+                  <div key={side}>
+                    <span aria-hidden style={{ color: SIDE_COLOR[side] }}>
+                      {side === 0 ? '▼' : '▲'}{' '}
+                    </span>
                     <span className="sr-only">{names[side]}: </span>
                     {num(d, r.min)} · <strong>{num(d, r.median)}</strong> · {num(d, r.max)}
                     {unit}
                   </div>
-                </div>
-              )
-            })}
+                )
+              })}
+            </div>
           </li>
         ))}
       </ul>

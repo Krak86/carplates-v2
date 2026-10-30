@@ -27,7 +27,7 @@ describe('buildDumbbells', () => {
     const a = empty({ rdw: rdwWith({ powerKw: { min: 60, median: 80, max: 100 } }) })
     const b = empty({ rdw: rdwWith({ powerKw: { min: 90, median: 120, max: 150 } }) })
     const [power] = buildDumbbells([a, b])
-    expect(power).toMatchObject({ key: 'power', axisMin: 60, axisMax: 150 })
+    expect(power).toMatchObject({ key: 'power', axisMin: 0, axisMax: 150 })
     expect(buildDumbbells([a, empty()])).toEqual([])
   })
 })

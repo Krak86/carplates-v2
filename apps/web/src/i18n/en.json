@@ -3596,7 +3596,7 @@
   "compare.saved.note": "Kept in this browser only; nothing is sent anywhere.",
   "compare.saved.remove": "Remove {{name}} from saved",
   "compare.ranges.title": "Ranges",
-  "compare.ranges.note": "Each line runs from the lowest to the highest value among the Dutch vehicles of the model and year; the dot and the bold number are the median. Both cars share one axis per measure.",
+  "compare.ranges.note": "The grey bar is the scale: it starts at zero on the left and ends at the largest value of that unit. The coloured line runs from the lowest to the highest value among the Dutch vehicles of the model and year, and the triangle and the bold number are the median (half of the vehicles are below it). Overlapping lines mean similar cars; separate lines mean one is clearly larger. Both cars and all measures in the same unit (all masses, all lengths) share one scale, so lines compare across rows.",
   "compare.safety.title": "Safety and CO2",
   "compare.safety.ncap": "Euro NCAP stars",
   "compare.safety.nhtsa": "NHTSA stars (mean)",
