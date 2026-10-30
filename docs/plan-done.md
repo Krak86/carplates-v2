@@ -4169,6 +4169,11 @@ Plan: `PLAN.md` "Visual stats, map logos, cards and quizzes". Convention: `docs/
   `deploy-api.yml` POSTs all sitemap `<loc>` to `api.indexnow.org` after each api deploy (best-effort).
 - **Not touched on purpose:** `releases.ts` / About (infrastructure and link previews, nothing a user sees in the app).
 
+## Share links `/go/<alias>` and `/share` page (2026-10-30)
+
+- Five alias URLs with their own link previews that redirect client-side to the home page and pulse the matching search entry; a public `/share` page lists them with copy buttons, language switch and `src` tag. Conventions: `docs/features-reference.md` "Share links".
+- Chosen over server redirects because scrapers follow 301/302 and would show the home preview; the alias is `noindex` and kept out of the sitemap.
+
 ## Model catalog MVP: `/cars/:make/:model` (2026-10-30)
 
 Design: `docs/catalog-plan.md`, conventions: `docs/features-reference.md` "Model catalog". Built in five steps:

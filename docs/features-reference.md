@@ -291,6 +291,13 @@ deploy; Telegram and X keep their own preview cache.
 `/og/default.png` and `/og/page/` (2026-10-30): the generic cards are every static page's `og:image`, and Twitterbot/Google
 skip an image robots.txt disallows. Keep any new generic card under an allowed path.
 
+## Share links `/go/<alias>` and `/share` (2026-10-30)
+
+- **Aliases** (`plate`, `vin`, `plate-photo`, `vin-photo`, `ar`) live in one list, `packages/shared/src/shareAliases.ts` (`SHARE_ALIASES`). A new one = that list, `SHARE_ALIAS_PAGES` (ua/ru/en, `spa-text.ts`), the `ALIAS_ICON` / `share.alias.*` i18n keys, and a pulse target in `SearchButtons`.
+- **Preview, then redirect:** the API answers `/go/<alias>` with a normal 200 `index.html` carrying the alias tags (`noindex`, `og:url` = the alias itself, `og:image` = `/og/page/go--<alias>.png`, under the allowed `/og/page/`). Never a server 301/302: scrapers follow it and show the home card. `GoRoute` then `<Navigate replace>`s to `/` keeping the query (`lang`, `src`) with router state `{ searchFocus }`, and fires `share_link_opened`.
+- **Pulse:** `useSearchFocus` reads that state; `SearchField` / `SearchButtons` put the `search-focus` utility (`global.css`, reduced motion = still ring) on the input or button, and the state is cleared after ~3.6 s so a reload does not replay it. Photo/camera pickers need a user gesture, so the link only highlights, it never opens them.
+- **`/share`** (public, in `STATIC_PAGES` and the sitemap; the `/go/*` pages are not) lists every alias with the card thumbnail, a copy field, a language switch and a `src` tag (`sanitizeSource`). Ads: prefer landing on a real page; an instant redirect can read as cloaking to ad platforms.
+
 ## Sitemap, robots and rate limits
 
 - **Legacy VIN (not 17 chars):** the registry stores pre-1981 / Soviet chassis numbers in `vin` (e.g. `382590`). `ResultCard` shows them as plain text with an "old-style number" chip (`result.vinLegacy*`), no link, and skips the VIN decode section / NHTSA / VIN registry history. Test with `isVin` from `@carplates/shared`.

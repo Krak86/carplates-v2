@@ -20,6 +20,12 @@ export const RELEASES: readonly ReleaseDay[] = [
     items: [
       item(
         'new',
+        'Сторінка «Поділитися пошуком»: короткі посилання /go/… на пошук за номером, VIN, фото та AR-скан. Кожне має власне превʼю в месенджерах і відкриває головну з підсвіченою потрібною кнопкою; є вибір мови й мітка джерела.',
+        'Страница «Поделиться поиском»: короткие ссылки /go/… на поиск по номеру, VIN, фото и AR-скан. У каждой своё превью в мессенджерах, и она открывает главную с подсвеченной нужной кнопкой; есть выбор языка и метка источника.',
+        'Share a search page: short /go/… links to plate, VIN, photo and AR-scan search. Each has its own preview in messengers and opens the home page with the matching button highlighted; pick a language and add a source tag.'
+      ),
+      item(
+        'new',
         'Каталог моделей: сторінки /cars/{марка}/{модель} з кількістю авто на обліку в Україні, роками випуску, паливом, кузовом, кольорами й регіонами, плюс характеристики, вартість, відкликання, відгуки та фото моделі. Спершу найпоширеніші 300 моделей.',
         'Каталог моделей: страницы /cars/{марка}/{модель} с количеством авто на учёте в Украине, годами выпуска, топливом, кузовом, цветами и регионами, плюс характеристики, стоимость, отзывы и фото модели. Сначала самые распространённые 300 моделей.',
         'Model catalog: /cars/{make}/{model} pages with how many cars are registered in Ukraine, model years, fuel, body, colours and regions, plus specs, value, recalls, reviews and photos of the model. The 300 most common models come first.'

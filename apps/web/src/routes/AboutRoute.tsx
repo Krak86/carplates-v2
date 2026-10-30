@@ -262,6 +262,7 @@ const FEATURES = [
   'vin',
   'origin',
   'recognition',
+  'share',
   'advanced',
   'specs',
   'performance',

@@ -4,17 +4,17 @@ import { join, normalize, resolve, sep } from 'node:path'
 
 import { Controller, Get, Inject, NotFoundException, Req, Res } from '@nestjs/common'
 import { ApiExcludeController } from '@nestjs/swagger'
-import type { CatalogModel } from '@carplates/shared'
+import { shareAliasOfPath, shareAliasPath, type CatalogModel } from '@carplates/shared'
 import type { FastifyReply, FastifyRequest } from 'fastify'
 
 import { catalogPageText, catalogSeoBlock, injectRoot } from '../catalog/catalog-text.js'
 import { CatalogService } from '../catalog/catalog.service.js'
 import { loadEnv } from '../env.js'
 import { injectMeta, renderMetaTags } from './meta.js'
-import { catalogPageSlug, catalogSlugsOfPath, pageCardSlug } from './page-card.js'
+import { catalogPageSlug, catalogSlugsOfPath, pageCardSlug, shareAliasCardSlug } from './page-card.js'
 import { PreviewService } from './preview.service.js'
 import { sitemapPaths } from './sitemap.js'
-import { DEFAULT_LANG, STATIC_PAGES, resolveLang, type Lang } from './spa-text.js'
+import { DEFAULT_LANG, SHARE_ALIAS_PAGES, STATIC_PAGES, resolveLang, type Lang } from './spa-text.js'
 
 const MIME: Record<string, string> = {
   '.html': 'text/html; charset=utf-8',
@@ -163,6 +163,26 @@ export class SpaController {
     const segments = pathname.split('/').filter(Boolean)
     const siteUrl = this.env.PUBLIC_SITE_URL
     const langQuery = lang === DEFAULT_LANG ? '' : `?lang=${lang}`
+
+    // Share/campaign link: its own preview here (scrapers do not run JS), then the SPA sends the visitor to the home page.
+    // og:url stays the alias itself - pointing it at `/` would make Facebook re-scrape the home page's tags instead.
+    const alias = shareAliasOfPath(pathname)
+    if (alias) {
+      const cacheKey = `go:${alias}:${lang}`
+      let block = this.staticMetaCache.get(cacheKey)
+      if (!block) {
+        block = renderMetaTags({
+          siteUrl,
+          path: shareAliasPath(alias),
+          lang,
+          ...SHARE_ALIAS_PAGES[alias][lang],
+          image: `${siteUrl}/og/page/${shareAliasCardSlug(alias)}.png${langQuery}`,
+          noindex: true
+        })
+        this.staticMetaCache.set(cacheKey, block)
+      }
+      return block
+    }
 
     if (segments.length === 1 && !(`/${segments[0]}` in STATIC_PAGES)) {
       const query = decodeURIComponent(segments[0] as string)

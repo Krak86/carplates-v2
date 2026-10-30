@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from 'react-router'
 
 import { useIdleReady } from '@/hooks/useIdleReady'
+import { useSearchFocus } from '@/hooks/useSearchFocus'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 import { cn } from '@/lib/cn'
 
@@ -31,6 +32,7 @@ export default function SearchField({
   const navigate = useNavigate()
   const online = useOnlineStatus()
   const idle = useIdleReady()
+  const focus = useSearchFocus(idle)
   const [value, setValue] = useState(initialValue)
   const [advancedOpen, setAdvancedOpen] = useState(false)
 
@@ -90,7 +92,10 @@ export default function SearchField({
             aria-label={t('search.placeholder')}
             autoFocus={autoFocus}
             autoComplete="on"
-            className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] py-2 pr-9 pl-9 outline-none focus:border-[var(--color-primary)]"
+            className={cn(
+              'w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] py-2 pr-9 pl-9 outline-none focus:border-[var(--color-primary)]',
+              (focus === 'plate' || focus === 'vin') && 'search-focus'
+            )}
           />
           <button
             type="button"
@@ -147,6 +152,7 @@ export default function SearchField({
             <SearchButtons
               isRecognizing={isRecognizing}
               online={online}
+              focus={focus}
               onPickPhoto={onPickPhoto}
               onPickVinPhoto={onPickVinPhoto}
             />

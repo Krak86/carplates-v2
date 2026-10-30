@@ -113,6 +113,20 @@ describe('SpaController meta injection', () => {
     expect(html).not.toContain('noindex')
   })
 
+  it('gives a share alias its own noindex preview with itself as og:url', async () => {
+    const html = await get('/go/ar?lang=en')
+    expect(html).toContain('AR plate scanner')
+    expect(html).toContain('og:image" content="https://carsua.app/og/page/go--ar.png?lang=en"')
+    expect(html).toContain('og:url" content="https://carsua.app/go/ar"')
+    expect(html).toContain('noindex')
+  })
+
+  it('treats an unknown share alias like any unknown path', async () => {
+    const html = await get('/go/nope')
+    expect(html).not.toContain('og/page/go--')
+    expect(html).toContain('noindex')
+  })
+
   it('injects a catalog page: indexable tags, h1 and sibling links in #root', async () => {
     const res = await app.inject({ method: 'GET', url: '/cars/bmw/x5' })
     expect(res.body).toContain('<title>BMW X5 в Україні')

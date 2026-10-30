@@ -745,3 +745,11 @@ export {
   type CatalogSibling,
   type CatalogStats
 } from './catalog.js'
+export {
+  SHARE_ALIASES,
+  SHARE_ALIAS_PREFIX,
+  isShareAlias,
+  shareAliasOfPath,
+  shareAliasPath,
+  type ShareAlias
+} from './shareAliases.js'

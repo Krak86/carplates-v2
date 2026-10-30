@@ -11,9 +11,9 @@ import { CatalogService } from '../catalog/catalog.service.js'
 import { loadEnv } from '../env.js'
 import { Lru } from './lru.js'
 import { buildCardSvg, buildPageCardSvg, readLogo, renderPng } from './og-card.js'
-import { catalogSlugsOfCard, pagePathForSlug } from './page-card.js'
+import { catalogSlugsOfCard, pagePathForSlug, shareAliasOfCard } from './page-card.js'
 import { PreviewService } from './preview.service.js'
-import { STATIC_PAGES, TAGLINE, resolveLang, type Lang } from './spa-text.js'
+import { SHARE_ALIAS_PAGES, STATIC_PAGES, TAGLINE, resolveLang, type Lang } from './spa-text.js'
 
 // Where the web app's static assets (fonts, brand logos) live: the built dist in production,
 // the Vite public dir in dev (WEB_DIST_DIR unset).
@@ -54,7 +54,14 @@ export class OgController {
     const catalogSlugs = catalogSlugsOfCard(slug)
     const model = catalogSlugs ? await this.catalog.get(catalogSlugs.make, catalogSlugs.model) : null
     const path = pagePathForSlug(slug)
-    const page = model ? catalogPageText(model, lang) : path ? STATIC_PAGES[path]?.[lang] : undefined
+    const alias = shareAliasOfCard(slug)
+    const page = model
+      ? catalogPageText(model, lang)
+      : alias
+        ? SHARE_ALIAS_PAGES[alias][lang]
+        : path
+          ? STATIC_PAGES[path]?.[lang]
+          : undefined
     if (!page) throw new NotFoundException()
 
     const cacheKey = `page:${lang}:${slug}`

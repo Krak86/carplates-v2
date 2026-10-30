@@ -394,6 +394,38 @@ body {
   }
 }
 
+/* A `/go/<alias>` link lands on the home page with the matching search entry pulsing. The ring is the primary token itself
+   first (sRGB-safe), then a translucent oklch mix; reduced motion keeps a still ring instead of the pulse. */
+@keyframes search-focus-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+    transform: scale(1);
+  }
+  40% {
+    box-shadow: 0 0 0 6px var(--search-focus-ring, var(--color-primary));
+    transform: scale(1.06);
+  }
+  70% {
+    box-shadow: 0 0 0 10px transparent;
+    transform: scale(1);
+  }
+}
+
+@utility search-focus {
+  border-color: var(--color-primary);
+  animation: search-focus-pulse 1100ms ease-out 3;
+
+  @supports (color: color-mix(in oklch, red, blue)) {
+    --search-focus-ring: color-mix(in oklch, var(--color-primary) 55%, transparent);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+    box-shadow: 0 0 0 3px var(--color-primary);
+  }
+}
+
 /* Header chips are tinted by data group, so the row reads at a glance: registry (green), cross-market (violet), stats
    leaderboards (blue), 3D / 360 views (pink), weight (amber), fuel (lime), safety (red). sRGB fallbacks first, then
    wide-gamut versions on P3 displays. `chip-tone` derives border / fill / glow from the group's `--chip`. */

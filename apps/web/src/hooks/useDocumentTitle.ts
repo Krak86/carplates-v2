@@ -37,6 +37,7 @@ export const ROUTE_TITLE_KEYS: Record<string, string> = {
   '/read/vin': 'nav.readVin',
   '/read/extremes': 'nav.readExtremes',
   '/read/recalls': 'nav.readRecalls',
+  '/share': 'nav.share',
   '/features': 'nav.features',
   '/settings': 'nav.settings',
   '/profile': 'auth.profile',

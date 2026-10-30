@@ -1,3 +1,5 @@
+import type { ShareAlias } from '@carplates/shared'
+
 /** Server-side copy for link previews — the SPA's i18n bundles live in the web app, which the API can't import. */
 export const LANGS = ['ua', 'ru', 'en'] as const
 export type Lang = (typeof LANGS)[number]
@@ -445,6 +447,97 @@ export const STATIC_PAGES: Record<string, Record<Lang, PageText>> = {
     en: {
       title: 'Cars UA - Advanced search',
       description: 'Search vehicles by make, model, year, color, fuel and region.'
+    }
+  },
+  '/share': {
+    ua: {
+      title: 'Cars UA - Поділитися пошуком',
+      description: 'Короткі посилання на пошук за номером, VIN, фото та AR-скан: копіюйте й діліться з готовим превʼю.'
+    },
+    ru: {
+      title: 'Cars UA - Поделиться поиском',
+      description: 'Короткие ссылки на поиск по номеру, VIN, фото и AR-скан: копируйте и делитесь с готовым превью.'
+    },
+    en: {
+      title: 'Cars UA - Share a search',
+      description: 'Short links to search by plate, VIN, photo and AR scan: copy and share them with a ready preview.'
+    }
+  }
+}
+
+/**
+ * `/go/<alias>` link previews (share/campaign links, see `shareAliases.ts` in shared). Not in `STATIC_PAGES`: they stay out of
+ * the sitemap and are `noindex`; the home page is their canonical.
+ */
+export const SHARE_ALIAS_PAGES: Record<ShareAlias, Record<Lang, PageText>> = {
+  plate: {
+    ua: {
+      title: 'Пошук авто за номером | Cars UA',
+      description: 'Введіть номерний знак і дізнайтеся марку, модель, рік, паливо, регіон та історію реєстрацій.'
+    },
+    ru: {
+      title: 'Поиск авто по номеру | Cars UA',
+      description: 'Введите номерной знак и узнайте марку, модель, год, топливо, регион и историю регистраций.'
+    },
+    en: {
+      title: 'Find a car by plate number | Cars UA',
+      description: 'Enter a Ukrainian plate to see make, model, year, fuel, region and registration history.'
+    }
+  },
+  vin: {
+    ua: {
+      title: 'Перевірка авто за VIN-кодом | Cars UA',
+      description: 'Розшифруйте VIN: марка, модель, рік, країна походження та історія в реєстрі України.'
+    },
+    ru: {
+      title: 'Проверка авто по VIN-коду | Cars UA',
+      description: 'Расшифруйте VIN: марка, модель, год, страна происхождения и история в реестре Украины.'
+    },
+    en: {
+      title: 'Check a car by VIN | Cars UA',
+      description: 'Decode a VIN: make, model, year, country of origin and history in the Ukrainian registry.'
+    }
+  },
+  'plate-photo': {
+    ua: {
+      title: 'Пошук авто за фото номера | Cars UA',
+      description: 'Сфотографуйте або завантажте фото номерного знака - номер розпізнається просто в браузері.'
+    },
+    ru: {
+      title: 'Поиск авто по фото номера | Cars UA',
+      description: 'Сфотографируйте или загрузите фото номерного знака - номер распознаётся прямо в браузере.'
+    },
+    en: {
+      title: 'Find a car from a plate photo | Cars UA',
+      description: 'Take or upload a photo of a number plate and it is read right in your browser.'
+    }
+  },
+  'vin-photo': {
+    ua: {
+      title: 'Розпізнавання VIN за фото | Cars UA',
+      description: 'Сфотографуйте VIN на авто чи документі - код розпізнається, і ви одразу бачите дані про авто.'
+    },
+    ru: {
+      title: 'Распознавание VIN по фото | Cars UA',
+      description: 'Сфотографируйте VIN на авто или документе - код распознаётся, и вы сразу видите данные об авто.'
+    },
+    en: {
+      title: 'Read a VIN from a photo | Cars UA',
+      description: 'Photograph the VIN on a car or a document and see the vehicle data right away.'
+    }
+  },
+  ar: {
+    ua: {
+      title: 'AR-скан номерів камерою | Cars UA',
+      description: 'Наведіть камеру на авто: номерні знаки розпізнаються наживо, а дані зʼявляються поруч.'
+    },
+    ru: {
+      title: 'AR-скан номеров камерой | Cars UA',
+      description: 'Наведите камеру на авто: номерные знаки распознаются вживую, а данные появляются рядом.'
+    },
+    en: {
+      title: 'AR plate scanner with your camera | Cars UA',
+      description: 'Point your camera at a car: plates are read live and the vehicle data shows up beside them.'
     }
   }
 }

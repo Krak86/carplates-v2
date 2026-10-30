@@ -1,4 +1,4 @@
-import { catalogSlugSchema } from '@carplates/shared'
+import { catalogSlugSchema, isShareAlias, type ShareAlias } from '@carplates/shared'
 
 import { STATIC_PAGES } from './spa-text.js'
 
@@ -8,6 +8,17 @@ export const pageCardSlug = (path: string): string | null => (path === '/' ? nul
 /** The static path a card slug names, or null for an unknown slug (so the route cannot render arbitrary text). */
 export const pagePathForSlug = (slug: string): string | null =>
   Object.keys(STATIC_PAGES).find(p => pageCardSlug(p) === slug) ?? null
+
+const GO_CARD_PREFIX = 'go'
+
+/** `/og/page/<slug>.png` slug of a share alias: `ar` → `go--ar`. */
+export const shareAliasCardSlug = (alias: ShareAlias): string => `${GO_CARD_PREFIX}--${alias}`
+
+/** The share alias a card slug names, or null when it is not one. */
+export function shareAliasOfCard(slug: string): ShareAlias | null {
+  const [root, alias, ...rest] = slug.split('--')
+  return root === GO_CARD_PREFIX && rest.length === 0 && isShareAlias(alias) ? alias : null
+}
 
 const CARS_PREFIX = 'cars'
 
