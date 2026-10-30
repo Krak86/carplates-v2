@@ -29,9 +29,9 @@ const BLUEPRINT_STORAGE_KEY = 'carplates.blueprint'
 
 function initialBlueprintEnabled(): boolean {
   try {
-    return localStorage.getItem(BLUEPRINT_STORAGE_KEY) === 'true'
+    return localStorage.getItem(BLUEPRINT_STORAGE_KEY) !== 'false'
   } catch {
-    return false
+    return true
   }
 }
 
@@ -192,7 +192,7 @@ interface UiState {
   setFont: (font: Font) => void
   setDrawerOpen: (open: boolean) => void
   toggleCardTilt: () => void
-  toggleBlueprint: () => void
+  setBlueprintEnabled: (enabled: boolean) => void
 }
 
 export const useUiStore = create<UiState>((set, get) => ({
@@ -277,12 +277,10 @@ export const useUiStore = create<UiState>((set, get) => ({
       persistCardTiltEnabled(cardTiltEnabled)
       return { cardTiltEnabled }
     }),
-  toggleBlueprint: (): void =>
-    set(s => {
-      const blueprintEnabled = !s.blueprintEnabled
-      persistBlueprintEnabled(blueprintEnabled)
-      return { blueprintEnabled }
-    })
+  setBlueprintEnabled: (blueprintEnabled): void => {
+    persistBlueprintEnabled(blueprintEnabled)
+    set({ blueprintEnabled })
+  }
 }))
 
 // In `auto` mode the theme tracks the OS live (e.g. the phone's day/night schedule).

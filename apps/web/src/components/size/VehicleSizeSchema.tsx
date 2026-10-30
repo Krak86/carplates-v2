@@ -1,4 +1,4 @@
-import { useId } from 'react'
+import { useId, useRef } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -7,6 +7,7 @@ import SizeCarTop from '@/components/size/SizeCarTop'
 import { axlePositions, WHEEL_MM } from '@/components/size/silhouettes'
 import type { SizeField, SizeFigures, SizeShape } from '@/components/size/VehicleSize.helpers'
 import { estimatePrefix, mmToMetres } from '@/components/size/VehicleSize.helpers'
+import { exportFilename, saveSchemaPng } from '@/components/size/export-schema'
 import { cn } from '@/lib/cn'
 import { useUiStore } from '@/store/ui-store'
 
@@ -125,7 +126,9 @@ export default function VehicleSizeSchema({ shape, figures, name, active = null,
   const { t } = useTranslation()
   const gridId = useId().replace(/:/g, '')
   const blueprint = useUiStore(s => s.blueprintEnabled)
-  const toggleBlueprint = useUiStore(s => s.toggleBlueprint)
+  const setBlueprint = useUiStore(s => s.setBlueprintEnabled)
+  const figureRef = useRef<HTMLElement>(null)
+  const svgRef = useRef<SVGSVGElement>(null)
   const length = figures.lengthMm?.value ?? null
   const width = figures.widthMm?.value ?? null
   const height = figures.heightMm?.value ?? null
@@ -149,6 +152,16 @@ export default function VehicleSizeSchema({ shape, figures, name, active = null,
     `${estimatePrefix(figures[field]?.source ?? 'rdw')}${mmToMetres(value)} ${t('rdw.unitM')}`
   const isDashed = (field: keyof SizeFigures): boolean => figures[field]?.source === 'estimate'
 
+  const handleSave = (): void => {
+    if (!svgRef.current || !figureRef.current) return
+    void saveSchemaPng(svgRef.current, {
+      source: figureRef.current,
+      title: `${name} · ${t('size.schema.blueprintScale', { m: gridMajorMm(length) / 1000 })} · carsua.app`,
+      filename: exportFilename(name, blueprint),
+      blueprint
+    }).catch(() => undefined)
+  }
+
   const major = gridMajorMm(length)
   const minor = major / 5
   const alt = t('size.schema.alt', {
@@ -159,24 +172,39 @@ export default function VehicleSizeSchema({ shape, figures, name, active = null,
   })
 
   return (
-    <figure className={cn('mt-2 max-w-2xl', blueprint && 'blueprint rounded-lg p-2')}>
-      <div className="mb-1 flex justify-end">
+    <figure ref={figureRef} className={cn('mt-2 max-w-2xl', blueprint && 'blueprint rounded-lg p-2')}>
+      <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
+        <div role="tablist" aria-label={t('size.schema.view')} className="flex gap-1">
+          {[true, false].map(isBlueprint => (
+            <button
+              key={String(isBlueprint)}
+              type="button"
+              role="tab"
+              aria-selected={blueprint === isBlueprint}
+              onClick={() => setBlueprint(isBlueprint)}
+              className={cn(
+                'rounded-full border px-2.5 py-0.5 text-xs',
+                blueprint === isBlueprint
+                  ? 'border-current font-semibold'
+                  : 'border-transparent text-[var(--color-muted)] hover:text-[var(--color-fg)]'
+              )}
+            >
+              {t(isBlueprint ? 'size.schema.blueprint' : 'size.schema.classic')}
+            </button>
+          ))}
+        </div>
+
         <button
           type="button"
-          aria-pressed={blueprint}
-          onClick={toggleBlueprint}
-          className={cn(
-            'rounded-full border px-2 py-0.5 text-xs',
-            blueprint
-              ? 'border-current'
-              : 'border-[var(--color-border)] text-[var(--color-muted)] hover:text-[var(--color-fg)]'
-          )}
+          onClick={handleSave}
+          className="rounded-full border border-current px-2.5 py-0.5 text-xs text-[var(--color-muted)] hover:text-[var(--color-fg)]"
         >
-          {t('size.schema.blueprint')}
+          {t('size.schema.save')}
         </button>
       </div>
 
       <svg
+        ref={svgRef}
         role="img"
         aria-label={alt}
         viewBox={`${viewX} ${viewY} ${viewW} ${viewH}`}
