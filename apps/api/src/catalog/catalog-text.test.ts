@@ -52,10 +52,28 @@ describe('catalogSeoBlock', () => {
   it('renders h1, summary, tables and plain sibling links', () => {
     const html = catalogSeoBlock(MODEL, 'en')
     expect(html).toContain('<h1>BMW 3 Series in Ukraine</h1>')
-    expect(html).toContain('The most common fuel: дизельне паливо.')
-    expect(html).toContain('<th scope="row">ДИЗЕЛЬНЕ ПАЛИВО</th>')
+    expect(html).toContain('The most common fuel: diesel.')
+    expect(html).toContain('<th scope="row">diesel</th>')
     expect(html).toContain('55%')
     expect(html).toContain('<a href="/cars/bmw/x5?lang=en">BMW X5</a>')
+  })
+
+  it('shows the registry words in Ukrainian and merges body variants', () => {
+    const html = catalogSeoBlock(
+      {
+        ...MODEL,
+        stats: {
+          ...MODEL.stats,
+          body: [
+            ['СЕДАН-B', 50],
+            ['СЕДАН', 30]
+          ]
+        }
+      },
+      'ua'
+    )
+    expect(html).toContain('<th scope="row">дизельне паливо</th>')
+    expect(html).toContain('<th scope="row">седан</th><td>80</td>')
   })
 
   it('keeps the default language links bare and escapes text', () => {

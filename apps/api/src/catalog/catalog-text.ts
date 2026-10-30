@@ -1,4 +1,4 @@
-import { catalogPath } from '@carplates/shared'
+import { catalogPath, localizeRegistryRows } from '@carplates/shared'
 import type { CatalogModel } from '@carplates/shared'
 
 import { DEFAULT_LANG, type Lang } from '../spa/spa-text.js'
@@ -6,7 +6,7 @@ import { DEFAULT_LANG, type Lang } from '../spa/spa-text.js'
 /**
  * Server-side text of the catalog pages: the per-page `<title>` / description and the semantic block injected into `#root`
  * for crawlers (the web page renders the same facts, so this is never cloaking). Copy lives here because the API cannot
- * import the web i18n bundles. Registry values (fuel, body, colour, region) are the registry's own Ukrainian text.
+ * import the web i18n bundles. Fuel, body and colour are localized by `registryLabel` (shared); regions stay the registry's Ukrainian text.
  */
 
 type Copy = {
@@ -87,7 +87,6 @@ const yearRange = (m: CatalogModel): string =>
   m.yearMin && m.yearMax ? (m.yearMin === m.yearMax ? String(m.yearMin) : `${m.yearMin}-${m.yearMax}`) : ''
 
 const fmt = (n: number, lang: Lang): string => n.toLocaleString(NUMBER_LOCALE[lang])
-const lower = (s: string): string => s.toLocaleLowerCase('uk-UA')
 
 /** Per-page `<title>` and description (the same `PageText` shape as the static pages). */
 export function catalogPageText(m: CatalogModel, lang: Lang): { title: string; description: string } {
@@ -118,7 +117,8 @@ export function catalogSeoBlock(m: CatalogModel, lang: Lang): string {
   const c = COPY[lang]
   const name = catalogName(m)
   const { stats } = m
-  const topFuel = stats.fuel[0]?.[0]
+  const fuel = localizeRegistryRows('fuel', stats.fuel, lang)
+  const topFuel = fuel[0]?.[0]
   const topRegion = stats.regions[0]?.[0]
   const biggestYears = [...stats.years].sort((a, b) => b[1] - a[1]).slice(0, BLOCK_YEARS)
   const byYear = biggestYears.sort((a, b) => Number(a[0]) - Number(b[0]))
@@ -131,11 +131,11 @@ export function catalogSeoBlock(m: CatalogModel, lang: Lang): string {
   return [
     `<main>`,
     `<h1>${esc(c.h1(name))}</h1>`,
-    `<p>${esc(c.summary(name, fmt(m.n, lang), yearRange(m), topFuel ? lower(topFuel) : '', topRegion ?? ''))}</p>`,
+    `<p>${esc(c.summary(name, fmt(m.n, lang), yearRange(m), topFuel ?? '', topRegion ?? ''))}</p>`,
     table(c.years, byYear, m.n, lang),
-    table(c.fuel, stats.fuel.slice(0, BLOCK_ROWS), m.n, lang),
-    table(c.body, stats.body.slice(0, BLOCK_ROWS), m.n, lang),
-    table(c.color, stats.color.slice(0, BLOCK_ROWS), m.n, lang),
+    table(c.fuel, fuel.slice(0, BLOCK_ROWS), m.n, lang),
+    table(c.body, localizeRegistryRows('body', stats.body, lang).slice(0, BLOCK_ROWS), m.n, lang),
+    table(c.color, localizeRegistryRows('color', stats.color, lang).slice(0, BLOCK_ROWS), m.n, lang),
     table(c.regions, stats.regions.slice(0, BLOCK_ROWS), m.n, lang),
     links ? `<nav><h2>${esc(c.models)}</h2><ul>${links}</ul></nav>` : '',
     `<p><a href="/${langQuery(lang)}">${esc(c.home)}</a></p>`,

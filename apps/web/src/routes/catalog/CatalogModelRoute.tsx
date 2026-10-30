@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { catalogParamsSchema, catalogPath } from '@carplates/shared'
+import { catalogParamsSchema, catalogPath, localizeRegistryRows } from '@carplates/shared'
 import type { CatalogModel } from '@carplates/shared'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
@@ -35,14 +35,14 @@ function CatalogSummary({ model }: { model: CatalogModel }): ReactNode {
   const { t, i18n } = useTranslation()
   const name = `${model.makeName} ${model.modelName}`.trim()
   const years = yearRangeLabel(model)
-  const topFuel = model.stats.fuel[0]?.[0]
+  const topFuel = localizeRegistryRows('fuel', model.stats.fuel, i18n.language)[0]?.[0]
   const topRegion = model.stats.regions[0]?.[0]
   const count = model.n.toLocaleString(toIntlLocale(i18n.language))
 
   return (
     <p className="text-base">
       {t('catalog.summary', { name, count, years: years ? ` ${t('catalog.summaryYears', { years })}` : '' })}
-      {topFuel ? ` ${t('catalog.summaryFuel', { fuel: topFuel.toLocaleLowerCase('uk-UA') })}` : ''}
+      {topFuel ? ` ${t('catalog.summaryFuel', { fuel: topFuel })}` : ''}
       {topRegion ? ` ${t('catalog.summaryRegion', { region: localizeRegion(topRegion, i18n.language) })}` : ''}
     </p>
   )

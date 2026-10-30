@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { localizeRegistryRows } from '@carplates/shared'
 import type { CatalogModel } from '@carplates/shared'
 import { useTranslation } from 'react-i18next'
 
@@ -19,7 +20,6 @@ export default function CatalogStatsSection({ model }: Props): ReactNode {
   const { stats, n } = model
   const numberFormat = new Intl.NumberFormat(toIntlLocale(i18n.language))
   const formatCount = (value: number): string => numberFormat.format(value)
-  const lowerLabel = (label: string): string => label.toLocaleLowerCase('uk-UA')
 
   return (
     <Card>
@@ -34,23 +34,20 @@ export default function CatalogStatsSection({ model }: Props): ReactNode {
         />
         <CatalogBarList
           title={t('catalog.fuel')}
-          rows={stats.fuel.slice(0, CATALOG_BLOCK_ROWS)}
+          rows={localizeRegistryRows('fuel', stats.fuel, i18n.language).slice(0, CATALOG_BLOCK_ROWS)}
           total={n}
-          formatLabel={lowerLabel}
           formatCount={formatCount}
         />
         <CatalogBarList
           title={t('catalog.body')}
-          rows={stats.body.slice(0, CATALOG_BLOCK_ROWS)}
+          rows={localizeRegistryRows('body', stats.body, i18n.language).slice(0, CATALOG_BLOCK_ROWS)}
           total={n}
-          formatLabel={lowerLabel}
           formatCount={formatCount}
         />
         <CatalogBarList
           title={t('catalog.color')}
-          rows={stats.color.slice(0, CATALOG_BLOCK_ROWS)}
+          rows={localizeRegistryRows('color', stats.color, i18n.language).slice(0, CATALOG_BLOCK_ROWS)}
           total={n}
-          formatLabel={lowerLabel}
           formatCount={formatCount}
         />
         <CatalogBarList
