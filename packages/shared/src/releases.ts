@@ -47,6 +47,24 @@ export const RELEASES: readonly ReleaseDay[] = [
         'Марка й модель на картці авто за номером, чип на картці VIN і топ моделей на сторінці статистики тепер ведуть на сторінку моделі в каталозі.',
         'Марка и модель на карточке авто по номеру, чип на карточке VIN и топ моделей на странице статистики теперь ведут на страницу модели в каталоге.',
         'The make and model on a plate card, a chip on the VIN card and the top models on the stats page now link to the model page in the catalog.'
+      ),
+      item(
+        'improved',
+        'Малюнок габаритів: креслення за замовчуванням, вкладки «Креслення / Колір», вид спереду та збереження в PNG.',
+        'Рисунок габаритов: чертёж по умолчанию, вкладки «Чертёж / Цвет», вид спереди и сохранение в PNG.',
+        'Size drawing: blueprint by default, Blueprint / Colour tabs, a front view and Save as PNG.'
+      ),
+      item(
+        'improved',
+        'VIN: для європейських номерів модель підбирається за кодом, для японських, корейських і китайських авто в розділі аукціонів є посилання на історію в країні походження, а для авто з ЄС - на Historia Pojazdu.',
+        'VIN: для европейских номеров модель подбирается по коду, для японских, корейских и китайских авто в разделе аукционов есть ссылки на историю в стране происхождения, а для авто из ЕС - на Historia Pojazdu.',
+        'VIN: EU numbers now get a model guess from the code, Japanese, Korean and Chinese cars get country-of-origin history links in the auction section, and EU cars a link to Historia Pojazdu.'
+      ),
+      item(
+        'improved',
+        'Посилання на розділ (?section=) тепер мають власні заголовок і опис у превʼю; каталог показує кількість авто за поколіннями, а моделі, паливо й регіони - українською, російською чи англійською.',
+        'Ссылки на раздел (?section=) теперь имеют собственные заголовок и описание в превью; каталог показывает количество авто по поколениям, а топливо, кузов и регионы - на выбранном языке.',
+        'Links to a section (?section=) now have their own title and description in previews; the catalog shows car counts per generation, and fuel, body and regions in your language.'
       )
     ]
   },
