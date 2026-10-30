@@ -37,7 +37,11 @@ const FuelRoute = lazy(() => import('@/routes/read/fuel/FuelRoute'))
 const VinRoute = lazy(() => import('@/routes/read/vin/VinRoute'))
 const ExtremesRoute = lazy(() => import('@/routes/read/extremes/ExtremesRoute'))
 const RecallsRoute = lazy(() => import('@/routes/read/recalls/RecallsRoute'))
+const CatalogIndexRoute = lazy(() => import('@/routes/catalog/CatalogIndexRoute'))
+const CatalogMakeRoute = lazy(() => import('@/routes/catalog/CatalogMakeRoute'))
 const CatalogModelRoute = lazy(() => import('@/routes/catalog/CatalogModelRoute'))
+const GoRoute = lazy(() => import('@/routes/go/GoRoute'))
+const ShareRoute = lazy(() => import('@/routes/share/ShareRoute'))
 const FeaturesRoute = lazy(() => import('@/routes/features/FeaturesRoute'))
 const SettingsRoute = lazy(() => import('@/routes/settings/SettingsRoute'))
 const EmailLinkRoute = lazy(() => import('@/routes/auth/EmailLinkRoute'))
@@ -61,7 +65,9 @@ export default function App(): ReactNode {
       ? t(titleKey)
       : isResultRoute
         ? decodeURIComponent(pathname.slice(1))
-        : undefined
+        : pathname === '/'
+          ? t('app.title')
+          : undefined
 
   return (
     <Layout>
@@ -107,7 +113,11 @@ export default function App(): ReactNode {
             <Route path="/read/vin" element={<VinRoute />} />
             <Route path="/read/extremes" element={<ExtremesRoute />} />
             <Route path="/read/recalls" element={<RecallsRoute />} />
+            <Route path="/cars" element={<CatalogIndexRoute />} />
+            <Route path="/cars/:make" element={<CatalogMakeRoute />} />
             <Route path="/cars/:make/:model" element={<CatalogModelRoute />} />
+            <Route path="/share" element={<ShareRoute />} />
+            <Route path="/go/:alias" element={<GoRoute />} />
             <Route path="/features" element={<FeaturesRoute />} />
             <Route path="/settings" element={<SettingsRoute />} />
             <Route path="/auth/email" element={<EmailLinkRoute />} />

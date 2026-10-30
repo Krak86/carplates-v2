@@ -12,9 +12,9 @@
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 
-import { catalogAlias, catalogMake, catalogModel, createDb } from '@carplates/db'
-import type { CatalogMakeInsert, CatalogModelInsert } from '@carplates/db'
-import type { CatalogStats } from '@carplates/shared'
+import { catalogAlias, catalogMake, catalogModel, catalogYearStats, createDb } from '@carplates/db'
+import type { CatalogMakeInsert, CatalogModelInsert, CatalogYearStatsInsert } from '@carplates/db'
+import type { CatalogStats, CatalogYearStats } from '@carplates/shared'
 import { sql } from 'drizzle-orm'
 
 import { parseCatalogOverrides } from './catalog-overrides.js'
@@ -26,6 +26,8 @@ const BATCH = 2000
 /** Years with fewer cars than this share of the model are registry noise, not part of its year range. */
 const YEAR_NOISE_SHARE = 0.001
 const TOP = { fuel: 8, body: 6, color: 8, regions: 10 }
+/** Per-year lists are capped harder: a model has up to ~40 years, and the generation stats sum several of them. */
+const TOP_PER_YEAR = 5
 /** MOT keys are `kind|makeKey|modelKey`, with the UK's make names. */
 const MOT_MAKE_TO_REGISTRY: Readonly<Record<string, string>> = { vauxhall: 'opel' }
 
@@ -102,7 +104,7 @@ async function main(): Promise<void> {
       `${aliases.length} aliased pair(s) -> ${models.length} model page(s), ${models.filter(m => m.indexable).length} indexable`
     )
 
-    const stats = await rollup(db, models, aliases)
+    const { stats, byYear } = await rollup(db, models, aliases)
 
     const makeAgg = new Map<string, CatalogMakeInsert>()
     const modelRows: CatalogModelInsert[] = models.map(m => {
@@ -137,10 +139,18 @@ async function main(): Promise<void> {
     })
 
     await db.transaction(async tx => {
-      await tx.execute(sql`TRUNCATE registry.catalog_alias, registry.catalog_model, registry.catalog_make`)
+      await tx.execute(
+        sql`TRUNCATE registry.catalog_alias, registry.catalog_model, registry.catalog_make, registry.catalog_year_stats`
+      )
       for (let i = 0; i < aliases.length; i += BATCH) await tx.insert(catalogAlias).values(aliases.slice(i, i + BATCH))
       for (let i = 0; i < modelRows.length; i += 200) await tx.insert(catalogModel).values(modelRows.slice(i, i + 200))
       await tx.insert(catalogMake).values([...makeAgg.values()])
+      const yearRows: CatalogYearStatsInsert[] = [...byYear].map(([key, stats]) => {
+        const [makeSlug = '', modelSlug = ''] = key.split('/')
+        return { makeSlug, modelSlug, byYear: stats }
+      })
+      for (let i = 0; i < yearRows.length; i += 200)
+        await tx.insert(catalogYearStats).values(yearRows.slice(i, i + 200))
     })
     log(`wrote ${aliases.length} alias(es), ${modelRows.length} model(s), ${makeAgg.size} make(s)`)
     for (const m of modelRows.slice(0, 15))
@@ -155,10 +165,11 @@ async function rollup(
   db: ReturnType<typeof createDb>['db'],
   models: readonly ModelAgg[],
   aliases: readonly AliasRow[]
-): Promise<Map<string, CatalogStats>> {
+): Promise<{ stats: Map<string, CatalogStats>; byYear: Map<string, CatalogYearStats> }> {
   const kept = new Set(models.map(m => `${m.makeSlug}/${m.modelSlug}`))
   const pairs = aliases.filter(a => kept.has(`${a.makeSlug}/${a.modelSlug}`))
   const out = new Map<string, CatalogStats>()
+  const byYear = new Map<string, CatalogYearStats>()
   const year = new Date().getFullYear()
 
   await db.transaction(async tx => {
@@ -205,6 +216,56 @@ async function rollup(
       if (dim && value !== null && value !== undefined) g[dim].push([String(value), r.n])
     }
 
+    // Same scan shape, per make year: each year's total and its top fuel / body / colour / regions (generation stats).
+    const perYear = await tx.execute<{
+      make_slug: string
+      model_slug: string
+      g: number
+      year: number
+      fuel: string | null
+      body: string | null
+      color: string | null
+      region: string | null
+      n: number
+    }>(sql`
+      SELECT make_slug, model_slug, GROUPING(fuel, body, color, region)::int AS g, year, fuel, body, color, region, count(*)::int AS n
+      FROM (
+        SELECT p.make_slug, p.model_slug, c.make_year AS year, c.fuel, c.body, c.color, r.region
+        FROM registry.current_registration c
+        JOIN catalog_pair p ON p.brand = c.brand AND p.model = c.model
+        LEFT JOIN registry.plate_regions r ON r.prefix = left(c.plate, 2)
+        WHERE c.kind = ${PASSENGER_KIND} AND c.make_year BETWEEN 1950 AND ${year + 1}
+      ) s
+      GROUP BY s.make_slug, s.model_slug, s.year, GROUPING SETS ((), (fuel), (body), (color), (region))
+    `)
+    const perYearAcc = new Map<string, Map<number, CatalogYearStats['byYear'][string]>>()
+    for (const r of perYear.rows) {
+      const key = `${r.make_slug}/${r.model_slug}`
+      const years = perYearAcc.get(key) ?? new Map()
+      perYearAcc.set(key, years)
+      const row = years.get(r.year) ?? { n: 0, fuel: [], body: [], color: [], regions: [] }
+      years.set(r.year, row)
+      // GROUPING(fuel, body, color, region): 15 = no dimension (the year total), then one bit cleared per grouped column.
+      if (r.g === 15) row.n = r.n
+      else if (r.g === 7 && r.fuel) row.fuel.push([r.fuel, r.n])
+      else if (r.g === 11 && r.body) row.body.push([r.body, r.n])
+      else if (r.g === 13 && r.color) row.color.push([r.color, r.n])
+      else if (r.g === 14 && r.region) row.regions.push([r.region, r.n])
+    }
+    for (const [key, years] of perYearAcc) {
+      const rows: CatalogYearStats['byYear'] = {}
+      for (const [y, row] of years) {
+        rows[String(y)] = {
+          n: row.n,
+          fuel: top(row.fuel, TOP_PER_YEAR),
+          body: top(row.body, TOP_PER_YEAR),
+          color: top(row.color, TOP_PER_YEAR),
+          regions: top(row.regions, TOP_PER_YEAR)
+        }
+      }
+      byYear.set(key, { byYear: rows })
+    }
+
     const pct = await tx.execute<{ make_slug: string; model_slug: string; cap: number | null; pwr: number | null }>(sql`
       SELECT p.make_slug, p.model_slug,
              percentile_disc(0.5) WITHIN GROUP (ORDER BY c.capacity) FILTER (WHERE c.capacity > 0) AS cap,
@@ -230,7 +291,7 @@ async function rollup(
       })
     }
   })
-  return out
+  return { stats: out, byYear }
 }
 
 main().catch((err: unknown) => {

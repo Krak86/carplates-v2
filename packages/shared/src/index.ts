@@ -11,6 +11,7 @@ export {
 export { modelFamily, type ModelFamily } from './modelFamily.js'
 export { REGION_IDS } from './regionIds.js'
 export { hasKnownWmi, lookupWmi, type WmiMatch } from './wmi.js'
+export { lookupVdsModel, type VdsMatch } from './vds.js'
 export {
   LEGACY_COUNTRIES,
   ORIGIN_PLANT_SOURCES,
@@ -730,17 +731,44 @@ export {
 } from './wanted.js'
 export type { WantedRecord, WantedResponse, WantedStatsResponse, WantedStatsRow, WantedStatsVehicle } from './wanted.js'
 export {
+  CATALOG_INDEX_PATH,
   CATALOG_KEEP_MIN_CARS,
   CATALOG_MIN_CARS,
   CATALOG_TOP_MODELS,
+  catalogLookupQuerySchema,
+  catalogLookupSchema,
+  catalogMakePath,
+  catalogMakeParamsSchema,
+  catalogMakeSchema,
+  catalogMakeSummarySchema,
+  catalogMakesSchema,
   catalogModelSchema,
   catalogParamsSchema,
   catalogPath,
   catalogSiblingSchema,
   catalogSlugSchema,
   catalogStatsSchema,
+  catalogYearStatsSchema,
+  sumYearStats,
+  type CatalogYearStats,
+  type CatalogLookup,
+  type CatalogLookupQuery,
+  type CatalogMake,
+  type CatalogMakeParams,
+  type CatalogMakeSummary,
+  type CatalogMakes,
   type CatalogModel,
   type CatalogParams,
   type CatalogSibling,
   type CatalogStats
 } from './catalog.js'
+export { localizeRegion } from './regionLabels.js'
+export { localizeRegistryRows, registryLabel, type RegistryLabelKind } from './registryLabels.js'
+export {
+  SHARE_ALIASES,
+  SHARE_ALIAS_PREFIX,
+  isShareAlias,
+  shareAliasOfPath,
+  shareAliasPath,
+  type ShareAlias
+} from './shareAliases.js'

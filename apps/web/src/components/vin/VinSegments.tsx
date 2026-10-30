@@ -7,6 +7,7 @@ import {
   countryFlag,
   countryName,
   isoFlag,
+  manufacturerOf,
   resolveYear,
   splitVin,
   VIN_SEGMENT_POSITIONS
@@ -46,10 +47,11 @@ export default function VinSegments({ vin, fields, fallback }: Props): ReactNode
   // Values NHTSA lacked come from the VIN prefix — say so, so they aren't mistaken for a full decode.
   const approx = (text: string, derived: boolean): string =>
     derived ? `${text} (≈ ${t('vin.derived.wmi.label')})` : text
-  const maker = fields.get('Manufacturer Name') ?? fields.get('Make') ?? fallback.make?.value
+  const manufacturer = manufacturerOf(fields, fallback)
+  const maker = manufacturer.value ?? fields.get('Make')
   const params: Record<string, string> = {
     make: fields.get('Make') ?? fallback.make?.value ?? '-',
-    manufacturer: maker ? approx(maker, !fields.get('Manufacturer Name') && !fields.get('Make')) : '-',
+    manufacturer: maker ? approx(maker, manufacturer.derived || (!manufacturer.value && !fields.get('Make'))) : '-',
     country: country ? approx(`${flag ? `${flag} ` : ''}${country}`, !nhtsaCountry) : '-',
     city: fields.get('Plant City') ?? '-',
     year: year ? String(year) : '-',

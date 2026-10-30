@@ -106,6 +106,8 @@ export {
   catalogAlias,
   catalogModel,
   catalogMake,
+  catalogYearStats,
+  type CatalogYearStatsInsert,
   type CatalogAliasInsert,
   type CatalogModelInsert,
   type CatalogMakeInsert,

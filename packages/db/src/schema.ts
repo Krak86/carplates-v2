@@ -1769,6 +1769,17 @@ export const catalogModel = registry.table(
 )
 export type CatalogModelInsert = typeof catalogModel.$inferInsert
 
+export const catalogYearStats = registry.table(
+  'catalog_year_stats',
+  {
+    makeSlug: text('make_slug').notNull(),
+    modelSlug: text('model_slug').notNull(),
+    byYear: jsonb('by_year').notNull()
+  },
+  t => [primaryKey({ columns: [t.makeSlug, t.modelSlug] })]
+)
+export type CatalogYearStatsInsert = typeof catalogYearStats.$inferInsert
+
 export const catalogMake = registry.table('catalog_make', {
   makeSlug: text('make_slug').primaryKey(),
   makeName: text('make_name').notNull(),

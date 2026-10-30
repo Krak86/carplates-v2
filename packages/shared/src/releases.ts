@@ -20,9 +20,57 @@ export const RELEASES: readonly ReleaseDay[] = [
     items: [
       item(
         'new',
+        'Сторінка «Поділитися пошуком»: короткі посилання /go/… на пошук за номером, VIN, фото та AR-скан. Кожне має власне превʼю в месенджерах і відкриває головну з підсвіченою потрібною кнопкою; є вибір мови й мітка джерела.',
+        'Страница «Поделиться поиском»: короткие ссылки /go/… на поиск по номеру, VIN, фото и AR-скан. У каждой своё превью в мессенджерах, и она открывает главную с подсвеченной нужной кнопкой; есть выбор языка и метка источника.',
+        'Share a search page: short /go/… links to plate, VIN, photo and AR-scan search. Each has its own preview in messengers and opens the home page with the matching button highlighted; pick a language and add a source tag.'
+      ),
+      item(
+        'new',
         'Каталог моделей: сторінки /cars/{марка}/{модель} з кількістю авто на обліку в Україні, роками випуску, паливом, кузовом, кольорами й регіонами, плюс характеристики, вартість, відкликання, відгуки та фото моделі. Спершу найпоширеніші 300 моделей.',
         'Каталог моделей: страницы /cars/{марка}/{модель} с количеством авто на учёте в Украине, годами выпуска, топливом, кузовом, цветами и регионами, плюс характеристики, стоимость, отзывы и фото модели. Сначала самые распространённые 300 моделей.',
         'Model catalog: /cars/{make}/{model} pages with how many cars are registered in Ukraine, model years, fuel, body, colours and regions, plus specs, value, recalls, reviews and photos of the model. The 300 most common models come first.'
+      ),
+      item(
+        'new',
+        'Огляд за марками: сторінки /cars і /cars/{марка} зі списком марок та моделей, кількістю авто на обліку, навігацією «хлібні крихти» і швидкими переходами між моделями однієї марки.',
+        'Обзор по маркам: страницы /cars и /cars/{марка} со списком марок и моделей, количеством авто на учёте, навигацией «хлебные крошки» и быстрыми переходами между моделями одной марки.',
+        'Browse by make: /cars and /cars/{make} pages listing the makes and models with how many cars are registered, breadcrumb navigation and quick jumps between models of one make.'
+      ),
+      item(
+        'improved',
+        'Каталог авто: пункт «Авто за марками» у бічному меню, моделі марки в таблиці з пошуком, а чипи поколінь показують кількість авто та статистику поколінь.',
+        'Каталог авто: пункт «Авто по маркам» в боковом меню, модели марки в таблице с поиском, а чипы поколений показывают количество авто и статистику поколений.',
+        'Car catalog: a "Cars by make" sidebar entry, the models of each make in a searchable table, and generation chips with car counts and per-generation stats.'
+      ),
+      item(
+        'improved',
+        'Сторінка моделі: чипи року, покоління, пального й кузова - характеристики, вартість і відкликання одразу підлаштовуються під вибір.',
+        'Страница модели: чипы года, поколения, топлива и кузова - характеристики, стоимость и отзывы сразу подстраиваются под выбор.',
+        'Model page: year, generation, fuel and body chips - specs, value and recalls follow your pick.'
+      ),
+      item(
+        'improved',
+        'Марка й модель на картці авто за номером, чип на картці VIN і топ моделей на сторінці статистики тепер ведуть на сторінку моделі в каталозі.',
+        'Марка и модель на карточке авто по номеру, чип на карточке VIN и топ моделей на странице статистики теперь ведут на страницу модели в каталоге.',
+        'The make and model on a plate card, a chip on the VIN card and the top models on the stats page now link to the model page in the catalog.'
+      ),
+      item(
+        'improved',
+        'Малюнок габаритів: креслення за замовчуванням, вкладки «Креслення / Колір», вид спереду та збереження в PNG.',
+        'Рисунок габаритов: чертёж по умолчанию, вкладки «Чертёж / Цвет», вид спереди и сохранение в PNG.',
+        'Size drawing: blueprint by default, Blueprint / Colour tabs, a front view and Save as PNG.'
+      ),
+      item(
+        'improved',
+        'VIN: для європейських номерів модель підбирається за кодом, для японських, корейських і китайських авто в розділі аукціонів є посилання на історію в країні походження, а для авто з ЄС - на Historia Pojazdu.',
+        'VIN: для европейских номеров модель подбирается по коду, для японских, корейских и китайских авто в разделе аукционов есть ссылки на историю в стране происхождения, а для авто из ЕС - на Historia Pojazdu.',
+        'VIN: EU numbers now get a model guess from the code, Japanese, Korean and Chinese cars get country-of-origin history links in the auction section, and EU cars a link to Historia Pojazdu.'
+      ),
+      item(
+        'improved',
+        'Посилання на розділ (?section=) тепер мають власні заголовок і опис у превʼю; каталог показує кількість авто за поколіннями, а моделі, паливо й регіони - українською, російською чи англійською.',
+        'Ссылки на раздел (?section=) теперь имеют собственные заголовок и описание в превью; каталог показывает количество авто по поколениям, а топливо, кузов и регионы - на выбранном языке.',
+        'Links to a section (?section=) now have their own title and description in previews; the catalog shows car counts per generation, and fuel, body and regions in your language.'
       )
     ]
   },

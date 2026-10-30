@@ -25,6 +25,24 @@ function persistCardTiltEnabled(enabled: boolean): void {
   }
 }
 
+const BLUEPRINT_STORAGE_KEY = 'carplates.blueprint'
+
+function initialBlueprintEnabled(): boolean {
+  try {
+    return localStorage.getItem(BLUEPRINT_STORAGE_KEY) !== 'false'
+  } catch {
+    return true
+  }
+}
+
+function persistBlueprintEnabled(enabled: boolean): void {
+  try {
+    localStorage.setItem(BLUEPRINT_STORAGE_KEY, String(enabled))
+  } catch {
+    /* private mode / disabled storage */
+  }
+}
+
 const THEME_STORAGE_KEY = 'carplates.theme'
 const THEME_COLORS: Record<Theme, string> = { light: '#ffffff', dark: '#0f141f' }
 
@@ -165,6 +183,8 @@ interface UiState {
   font: Font
   drawerOpen: boolean
   cardTiltEnabled: boolean
+  /** Size drawings in blueprint style (white lines on a scaled grid). */
+  blueprintEnabled: boolean
   setLang: (lang: Lang) => Promise<void>
   setThemeMode: (mode: ThemeMode) => void
   setAccent: (accent: Accent) => void
@@ -172,6 +192,7 @@ interface UiState {
   setFont: (font: Font) => void
   setDrawerOpen: (open: boolean) => void
   toggleCardTilt: () => void
+  setBlueprintEnabled: (enabled: boolean) => void
 }
 
 export const useUiStore = create<UiState>((set, get) => ({
@@ -184,6 +205,7 @@ export const useUiStore = create<UiState>((set, get) => ({
   font: startFont,
   drawerOpen: false,
   cardTiltEnabled: initialCardTiltEnabled(),
+  blueprintEnabled: initialBlueprintEnabled(),
   setLang: async lang => {
     set({ langLoading: lang })
     try {
@@ -254,7 +276,11 @@ export const useUiStore = create<UiState>((set, get) => ({
       const cardTiltEnabled = !s.cardTiltEnabled
       persistCardTiltEnabled(cardTiltEnabled)
       return { cardTiltEnabled }
-    })
+    }),
+  setBlueprintEnabled: (blueprintEnabled): void => {
+    persistBlueprintEnabled(blueprintEnabled)
+    set({ blueprintEnabled })
+  }
 }))
 
 // In `auto` mode the theme tracks the OS live (e.g. the phone's day/night schedule).

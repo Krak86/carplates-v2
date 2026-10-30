@@ -394,6 +394,38 @@ body {
   }
 }
 
+/* A `/go/<alias>` link lands on the home page with the matching search entry pulsing. The ring is the primary token itself
+   first (sRGB-safe), then a translucent oklch mix; reduced motion keeps a still ring instead of the pulse. */
+@keyframes search-focus-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+    transform: scale(1);
+  }
+  40% {
+    box-shadow: 0 0 0 6px var(--search-focus-ring, var(--color-primary));
+    transform: scale(1.06);
+  }
+  70% {
+    box-shadow: 0 0 0 10px transparent;
+    transform: scale(1);
+  }
+}
+
+@utility search-focus {
+  border-color: var(--color-primary);
+  animation: search-focus-pulse 1100ms ease-out 3;
+
+  @supports (color: color-mix(in oklch, red, blue)) {
+    --search-focus-ring: color-mix(in oklch, var(--color-primary) 55%, transparent);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+    box-shadow: 0 0 0 3px var(--color-primary);
+  }
+}
+
 /* Header chips are tinted by data group, so the row reads at a glance: registry (green), cross-market (violet), stats
    leaderboards (blue), 3D / 360 views (pink), weight (amber), fuel (lime), safety (red). sRGB fallbacks first, then
    wide-gamut versions on P3 displays. `chip-tone` derives border / fill / glow from the group's `--chip`. */
@@ -836,5 +868,42 @@ body {
 
   .news-track {
     animation: none;
+  }
+}
+
+/* Blueprint style of the size drawings (`VehicleSizeSchema`): the same SVG, recoloured through the tokens it already reads
+   (white lines on deep blue, a yellow accent for the pointed dimension). Same in light and dark mode, like real drawing paper.
+   Wide-gamut blues on P3 displays, sRGB fallback first. */
+.blueprint {
+  --bp-paper: hsl(215 80% 28%);
+  --bp-line: hsl(210 60% 94%);
+  --bp-grid: hsl(210 80% 80%);
+  --color-primary: var(--bp-line);
+  --color-fg: var(--bp-line);
+  --color-muted: hsl(210 60% 80%);
+  --color-surface: hsl(215 80% 22%);
+  --color-border: hsl(210 60% 60% / 0.6);
+  --dim-active: hsl(48 100% 65%);
+  --sil-tyre: hsl(215 80% 24%);
+  --sil-rim: hsl(215 70% 34%);
+  --sil-spoke: var(--bp-line);
+  --sil-lamp: hsl(215 70% 40%);
+  --sil-tail: hsl(210 60% 80%);
+  background: var(--bp-paper);
+  color: var(--bp-line);
+}
+
+@media (color-gamut: p3) {
+  .blueprint {
+    --bp-paper: oklch(0.38 0.15 258);
+    --bp-line: oklch(0.96 0.02 245);
+    --bp-grid: oklch(0.8 0.1 245);
+    --color-muted: oklch(0.84 0.07 245);
+    --color-surface: oklch(0.3 0.13 258);
+    --dim-active: oklch(0.9 0.17 95);
+    --sil-tyre: oklch(0.32 0.13 258);
+    --sil-rim: oklch(0.43 0.13 258);
+    --sil-lamp: oklch(0.5 0.12 255);
+    --sil-tail: oklch(0.84 0.07 245);
   }
 }

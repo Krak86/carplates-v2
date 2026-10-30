@@ -1,6 +1,6 @@
 # Discovery plan: crawlers, search, other sites, users
 
-Status (2026-10-30): **Phase 0 in progress, Phase 1 started, Phase 2 MVP built (needs deploy, `db:refresh-catalog` on the VPS and the two Cloudflare rules)** (static page titles and the `/og/` robots rule are deployed and verified
+Status (2026-10-30): **Phase 0 in progress, Phase 1 started, Phase 2 MVP live (deployed, catalog built on the VPS, Cloudflare rules and prod browser check done; sitemap resubmit pending)** (static page titles and the `/og/` robots rule are deployed and verified
 on prod; the manual Phase 0 items below are not done yet). One checklist for "how do crawlers, other sites and users find carsua.app".
 The technical design of the catalog pages stays in [catalog-plan.md](catalog-plan.md) (do not copy it here, it would drift).
 Related, already done: sitemap/robots ([PLAN.md](../PLAN.md) "Bot protection, sitemap & SEO"), `llms.txt`, ARD manifest,

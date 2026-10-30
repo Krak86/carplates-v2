@@ -4,17 +4,43 @@ import { join, normalize, resolve, sep } from 'node:path'
 
 import { Controller, Get, Inject, NotFoundException, Req, Res } from '@nestjs/common'
 import { ApiExcludeController } from '@nestjs/swagger'
-import type { CatalogModel } from '@carplates/shared'
+import {
+  CATALOG_INDEX_PATH,
+  catalogMakePath,
+  catalogPath,
+  shareAliasOfPath,
+  shareAliasPath,
+  type CatalogMake,
+  type CatalogModel
+} from '@carplates/shared'
 import type { FastifyReply, FastifyRequest } from 'fastify'
 
-import { catalogPageText, catalogSeoBlock, injectRoot } from '../catalog/catalog-text.js'
+import {
+  breadcrumbJsonLd,
+  catalogCrumbs,
+  catalogIndexSeoBlock,
+  catalogMakePageText,
+  catalogMakeSeoBlock,
+  catalogModelCrumbs,
+  catalogPageText,
+  catalogSeoBlock,
+  injectRoot
+} from '../catalog/catalog-text.js'
 import { CatalogService } from '../catalog/catalog.service.js'
 import { loadEnv } from '../env.js'
 import { injectMeta, renderMetaTags } from './meta.js'
-import { catalogPageSlug, catalogSlugsOfPath, pageCardSlug } from './page-card.js'
+import {
+  catalogMakeCardSlug,
+  catalogMakeOfPath,
+  catalogPageSlug,
+  catalogSlugsOfPath,
+  isCatalogIndexPath,
+  pageCardSlug,
+  shareAliasCardSlug
+} from './page-card.js'
 import { PreviewService } from './preview.service.js'
 import { sitemapPaths } from './sitemap.js'
-import { DEFAULT_LANG, STATIC_PAGES, resolveLang, type Lang } from './spa-text.js'
+import { DEFAULT_LANG, SHARE_ALIAS_PAGES, STATIC_PAGES, resolveLang, sectionPageText, type Lang } from './spa-text.js'
 
 const MIME: Record<string, string> = {
   '.html': 'text/html; charset=utf-8',
@@ -115,12 +141,12 @@ export class SpaController {
     const html = await this.loadIndex()
     const lang = resolveLang((req.query as { lang?: string } | undefined)?.lang)
     const section = (req.query as { section?: string } | undefined)?.section
-    const model = await this.catalogModelOf(pathname)
-    const meta = model ? this.catalogMeta(model, lang) : await this.metaFor(pathname, lang, section)
+    const catalog = await this.catalogPageOf(pathname, lang)
+    const meta = catalog?.meta ?? (await this.metaFor(pathname, lang, section))
     reply
       .type('text/html; charset=utf-8')
-      .header('cache-control', model ? CATALOG_PAGE_CACHE : 'no-cache')
-      .send(model ? injectRoot(injectMeta(html, meta), catalogSeoBlock(model, lang)) : injectMeta(html, meta))
+      .header('cache-control', catalog ? CATALOG_PAGE_CACHE : 'no-cache')
+      .send(catalog ? injectRoot(injectMeta(html, meta), catalog.block) : injectMeta(html, meta))
   }
 
   /** Re-read when the file changes: a web deploy repoints `WEB_DIST_DIR` (a symlink) without restarting the API. */
@@ -134,10 +160,53 @@ export class SpaController {
     return this.indexHtmlCache
   }
 
-  /** The catalog model a `/cars/:make/:model` path names, or null (any other path, or no such page). */
-  private async catalogModelOf(pathname: string): Promise<CatalogModel | null> {
+  /**
+   * Meta tags + the `#root` block of a catalog page (`/cars`, `/cars/:make`, `/cars/:make/:model`), or null for any other
+   * path or a make/model with no page (those fall through to the normal unknown-path handling).
+   */
+  private async catalogPageOf(pathname: string, lang: Lang): Promise<{ meta: string; block: string } | null> {
+    if (isCatalogIndexPath(pathname)) return this.catalogIndexPage(lang)
     const slugs = catalogSlugsOfPath(pathname)
-    return slugs ? this.catalog.get(slugs.make, slugs.model) : null
+    if (slugs) {
+      const model = await this.catalog.get(slugs.make, slugs.model)
+      return model ? { meta: this.catalogMeta(model, lang), block: catalogSeoBlock(model, lang) } : null
+    }
+    const makeSlug = catalogMakeOfPath(pathname)
+    const make = makeSlug ? await this.catalog.make(makeSlug) : null
+    return make ? { meta: this.catalogMakeMeta(make, lang), block: catalogMakeSeoBlock(make, lang) } : null
+  }
+
+  /** `/cars` is a static page (title, sitemap entry), plus the make list in the block. */
+  private async catalogIndexPage(lang: Lang): Promise<{ meta: string; block: string }> {
+    const siteUrl = this.env.PUBLIC_SITE_URL
+    const langQuery = lang === DEFAULT_LANG ? '' : `?lang=${lang}`
+    return {
+      meta: renderMetaTags({
+        siteUrl,
+        path: CATALOG_INDEX_PATH,
+        lang,
+        ...(STATIC_PAGES[CATALOG_INDEX_PATH] as NonNullable<(typeof STATIC_PAGES)[string]>)[lang],
+        image: `${siteUrl}/og/page/${pageCardSlug(CATALOG_INDEX_PATH)}.png${langQuery}`,
+        alternates: true,
+        jsonLd: breadcrumbJsonLd(siteUrl, catalogCrumbs(lang), lang)
+      }),
+      block: catalogIndexSeoBlock(await this.catalog.makes(), lang)
+    }
+  }
+
+  private catalogMakeMeta(make: CatalogMake, lang: Lang): string {
+    const siteUrl = this.env.PUBLIC_SITE_URL
+    const langQuery = lang === DEFAULT_LANG ? '' : `?lang=${lang}`
+    return renderMetaTags({
+      siteUrl,
+      path: catalogMakePath(make.make),
+      lang,
+      ...catalogMakePageText(make, lang),
+      image: `${siteUrl}/og/page/${catalogMakeCardSlug(make.make)}.png${langQuery}`,
+      noindex: !make.indexable,
+      alternates: make.indexable,
+      jsonLd: breadcrumbJsonLd(siteUrl, catalogCrumbs(lang, { slug: make.make, name: make.makeName }), lang)
+    })
   }
 
   /** Thin pages (below the threshold or outside the MVP set) stay reachable but `noindex`. */
@@ -146,12 +215,13 @@ export class SpaController {
     const langQuery = lang === DEFAULT_LANG ? '' : `?lang=${lang}`
     return renderMetaTags({
       siteUrl,
-      path: `/cars/${model.make}/${model.model}`,
+      path: catalogPath(model.make, model.model),
       lang,
       ...catalogPageText(model, lang),
       image: `${siteUrl}/og/page/${catalogPageSlug(model.make, model.model)}.png${langQuery}`,
       noindex: !model.indexable,
-      alternates: model.indexable
+      alternates: model.indexable,
+      jsonLd: breadcrumbJsonLd(siteUrl, catalogModelCrumbs(model, lang), lang)
     })
   }
 
@@ -164,11 +234,32 @@ export class SpaController {
     const siteUrl = this.env.PUBLIC_SITE_URL
     const langQuery = lang === DEFAULT_LANG ? '' : `?lang=${lang}`
 
+    // Share/campaign link: its own preview here (scrapers do not run JS), then the SPA sends the visitor to the home page.
+    // og:url stays the alias itself - pointing it at `/` would make Facebook re-scrape the home page's tags instead.
+    const alias = shareAliasOfPath(pathname)
+    if (alias) {
+      const cacheKey = `go:${alias}:${lang}`
+      let block = this.staticMetaCache.get(cacheKey)
+      if (!block) {
+        block = renderMetaTags({
+          siteUrl,
+          path: shareAliasPath(alias),
+          lang,
+          ...SHARE_ALIAS_PAGES[alias][lang],
+          image: `${siteUrl}/og/page/${shareAliasCardSlug(alias)}.png${langQuery}`,
+          noindex: true
+        })
+        this.staticMetaCache.set(cacheKey, block)
+      }
+      return block
+    }
+
     if (segments.length === 1 && !(`/${segments[0]}` in STATIC_PAGES)) {
       const query = decodeURIComponent(segments[0] as string)
       const preview = await this.previews.describe(query, lang)
       if (preview) {
-        const text = section === 'value' ? await this.previews.describeValue(preview, lang) : preview
+        const base = section === 'value' ? await this.previews.describeValue(preview, lang) : preview
+        const text = section === 'value' ? base : sectionPageText(lang, base, section)
         return renderMetaTags({
           siteUrl,
           path: `/${encodeURIComponent(preview.value)}`,

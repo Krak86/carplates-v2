@@ -1,7 +1,16 @@
 import { describe, expect, it } from 'vitest'
-import type { CatalogModel } from '@carplates/shared'
+import type { CatalogMake, CatalogModel } from '@carplates/shared'
 
-import { catalogPageText, catalogSeoBlock, injectRoot } from './catalog-text.js'
+import {
+  breadcrumbJsonLd,
+  catalogCrumbs,
+  catalogIndexSeoBlock,
+  catalogMakePageText,
+  catalogMakeSeoBlock,
+  catalogPageText,
+  catalogSeoBlock,
+  injectRoot
+} from './catalog-text.js'
 
 const MODEL: CatalogModel = {
   make: 'bmw',
@@ -52,10 +61,31 @@ describe('catalogSeoBlock', () => {
   it('renders h1, summary, tables and plain sibling links', () => {
     const html = catalogSeoBlock(MODEL, 'en')
     expect(html).toContain('<h1>BMW 3 Series in Ukraine</h1>')
-    expect(html).toContain('The most common fuel: дизельне паливо.')
-    expect(html).toContain('<th scope="row">ДИЗЕЛЬНЕ ПАЛИВО</th>')
+    expect(html).toContain('The most common fuel: diesel.')
+    expect(html).toContain('<th scope="row">diesel</th>')
+    expect(catalogSeoBlock({ ...MODEL, stats: { ...MODEL.stats, regions: [['Київ', 20000]] } }, 'en')).toContain(
+      '<th scope="row">Kyiv</th>'
+    )
     expect(html).toContain('55%')
     expect(html).toContain('<a href="/cars/bmw/x5?lang=en">BMW X5</a>')
+  })
+
+  it('shows the registry words in Ukrainian and merges body variants', () => {
+    const html = catalogSeoBlock(
+      {
+        ...MODEL,
+        stats: {
+          ...MODEL.stats,
+          body: [
+            ['СЕДАН-B', 50],
+            ['СЕДАН', 30]
+          ]
+        }
+      },
+      'ua'
+    )
+    expect(html).toContain('<th scope="row">дизельне паливо</th>')
+    expect(html).toContain('<th scope="row">седан</th><td>80</td>')
   })
 
   it('keeps the default language links bare and escapes text', () => {
@@ -71,5 +101,61 @@ describe('injectRoot', () => {
       '<body><div id="root"><main/></div></body>'
     )
     expect(injectRoot('<div id="root" data-x="1"></div>', '<main/>')).toBe('<div id="root" data-x="1"></div>')
+  })
+})
+
+const MAKE: CatalogMake = {
+  make: 'bmw',
+  makeName: 'BMW',
+  n: 480666,
+  modelCount: 2,
+  topBrand: 'BMW',
+  indexable: true,
+  models: [
+    { model: '5series', modelName: '5 Series', n: 132203, yearMin: 1984, yearMax: 2025 },
+    { model: 'x5', modelName: 'X5', n: 96119, yearMin: 2000, yearMax: null }
+  ]
+}
+
+describe('catalog breadcrumbs', () => {
+  it('builds Home > Cars > make > model and numbers the JSON-LD items from 1', () => {
+    const crumbs = catalogCrumbs('en', { slug: 'bmw', name: 'BMW' }, { name: 'X5', path: '/cars/bmw/x5' })
+    expect(crumbs.map(c => c.name)).toEqual(['Home', 'Cars', 'BMW', 'X5'])
+    const ld = breadcrumbJsonLd('https://carsua.app', crumbs, 'en') as { itemListElement: Record<string, unknown>[] }
+    expect(ld.itemListElement.map(i => i.position)).toEqual([1, 2, 3, 4])
+    expect(ld.itemListElement[0]?.item).toBe('https://carsua.app/?lang=en')
+    expect(ld.itemListElement[3]?.item).toBe('https://carsua.app/cars/bmw/x5?lang=en')
+  })
+
+  it('puts the trail and the make link in the model block, in the page language', () => {
+    const html = catalogSeoBlock(MODEL, 'en')
+    expect(html).toContain('<nav aria-label="Breadcrumb"><ol><li><a href="/?lang=en">Home</a></li>')
+    expect(html).toContain('<li><a href="/cars/bmw?lang=en">BMW</a></li><li>3 Series</li>')
+    expect(html).toContain('<a href="/cars/bmw?lang=en">All BMW models</a>')
+  })
+})
+
+describe('make and index blocks', () => {
+  it('lists every model of the make with count and years', () => {
+    const html = catalogMakeSeoBlock(MAKE, 'en')
+    expect(html).toContain('<h1>BMW in Ukraine</h1>')
+    expect(html).toContain('<a href="/cars/bmw/5series?lang=en">BMW 5 Series</a> - 132,203 cars (1984-2025)')
+    expect(html).toContain('<a href="/cars/bmw/x5?lang=en">BMW X5</a> - 96,119 cars</li>')
+    expect(catalogMakePageText(MAKE, 'ua').title).toBe('BMW в Україні: моделі та кількість авто | Cars UA')
+  })
+
+  it('lists every make on the index', () => {
+    const { models: _models, ...summary } = MAKE
+    const html = catalogIndexSeoBlock([summary], 'ua')
+    expect(html).toContain('<h1>Авто в Україні за марками</h1>')
+    expect(html).toContain('<a href="/cars/bmw">BMW</a>')
+  })
+
+  it('has no em dash in any language', () => {
+    const { models: _models, ...summary } = MAKE
+    for (const lang of ['ua', 'ru', 'en'] as const) {
+      expect(catalogMakeSeoBlock(MAKE, lang) + catalogIndexSeoBlock([summary], lang)).not.toContain('—')
+      expect(catalogMakePageText(MAKE, lang).description).not.toContain('—')
+    }
   })
 })

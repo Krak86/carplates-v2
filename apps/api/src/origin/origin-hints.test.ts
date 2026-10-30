@@ -95,6 +95,13 @@ describe('resolveWmi', () => {
     expect(wmi).toEqual({ wmi: 'WVW', maker: 'Volkswagen', countryCode: 'DE', region: 'europe' })
   })
 
+  it('trusts the curated plant country over a vPIC importer address (U5Y Kia Slovakia, not US)', () => {
+    const wmi = resolveWmi('U5YHN512BDL007162', 2012, [
+      { fromYear: 0, toYear: null, maker: 'Hyundai-Kia', countryCode: 'US' }
+    ])
+    expect(wmi).toEqual({ wmi: 'U5Y', maker: 'Hyundai-Kia', countryCode: 'SK', region: 'europe' })
+  })
+
   it('falls back to the curated list for a prefix vPIC lacks (TMB Skoda)', () => {
     expect(resolveWmi('TMBJJ7NE3J0000001', 2018, [])).toMatchObject({ wmi: 'TMB', countryCode: 'CZ' })
   })

@@ -1,8 +1,21 @@
+import { SHARE_ALIASES } from '@carplates/shared'
 import { describe, expect, it } from 'vitest'
 
 import { buildPageCardSvg, pageCardHeadline, pageCardTitle, wrapLines } from './og-card.js'
-import { catalogPageSlug, catalogSlugsOfCard, catalogSlugsOfPath, pageCardSlug, pagePathForSlug } from './page-card.js'
-import { LANGS, STATIC_PAGES } from './spa-text.js'
+import {
+  catalogMakeCardSlug,
+  catalogMakeOfCard,
+  catalogMakeOfPath,
+  catalogPageSlug,
+  catalogSlugsOfCard,
+  catalogSlugsOfPath,
+  isCatalogIndexPath,
+  pageCardSlug,
+  pagePathForSlug,
+  shareAliasCardSlug,
+  shareAliasOfCard
+} from './page-card.js'
+import { LANGS, SHARE_ALIAS_PAGES, STATIC_PAGES } from './spa-text.js'
 
 describe('catalog page slugs', () => {
   it('round-trips a catalog card slug', () => {
@@ -11,6 +24,21 @@ describe('catalog page slugs', () => {
     expect(catalogSlugsOfCard('cars--bmw')).toBeNull()
     expect(catalogSlugsOfCard('stats')).toBeNull()
     expect(catalogSlugsOfCard('cars--BMW--x5')).toBeNull()
+  })
+
+  it('reads the make of a /cars/:make path and its card slug', () => {
+    expect(catalogMakeOfPath('/cars/bmw')).toBe('bmw')
+    expect(catalogMakeOfPath('/cars/bmw/')).toBe('bmw')
+    expect(catalogMakeOfPath('/cars')).toBeNull()
+    expect(catalogMakeOfPath('/cars/bmw/x5')).toBeNull()
+    expect(catalogMakeOfPath('/cars/BMW')).toBeNull()
+    expect(catalogMakeCardSlug('mercedes-benz')).toBe('cars--mercedes-benz')
+    expect(catalogMakeOfCard('cars--mercedes-benz')).toBe('mercedes-benz')
+    expect(catalogMakeOfCard('cars--bmw--x5')).toBeNull()
+    expect(catalogMakeOfCard('cars')).toBeNull()
+    expect(isCatalogIndexPath('/cars')).toBe(true)
+    expect(isCatalogIndexPath('/cars/')).toBe(true)
+    expect(isCatalogIndexPath('/cars/bmw')).toBe(false)
   })
 
   it('reads make and model from a /cars path', () => {
@@ -60,6 +88,24 @@ describe('buildPageCardSvg', () => {
     for (const page of Object.values(STATIC_PAGES))
       for (const lang of LANGS) {
         const { lines } = pageCardHeadline(page[lang].title)
+        expect(lines.length).toBeLessThanOrEqual(2)
+        expect(lines.some(l => l.endsWith('…'))).toBe(false)
+      }
+  })
+})
+
+describe('share alias cards', () => {
+  it('round-trips a card slug and rejects anything else', () => {
+    for (const alias of SHARE_ALIASES) expect(shareAliasOfCard(shareAliasCardSlug(alias))).toBe(alias)
+    expect(shareAliasOfCard('go--nope')).toBeNull()
+    expect(shareAliasOfCard('go--ar--x')).toBeNull()
+    expect(shareAliasOfCard('stats')).toBeNull()
+  })
+
+  it('has copy in every language, with titles within two card lines', () => {
+    for (const alias of SHARE_ALIASES)
+      for (const lang of LANGS) {
+        const { lines } = pageCardHeadline(SHARE_ALIAS_PAGES[alias][lang].title)
         expect(lines.length).toBeLessThanOrEqual(2)
         expect(lines.some(l => l.endsWith('…'))).toBe(false)
       }

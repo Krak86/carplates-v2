@@ -219,7 +219,21 @@ const SOURCES: readonly Source[] = [
   { key: 'eUkraine', label: 'e-Ukraine typeface', url: 'https://thedigital.gov.ua/fonts', tile: 'bg-blue-700' },
   { key: 'zakon', label: 'ZAKON typeface', url: 'https://mincult.gov.ua/zakon/', tile: 'bg-blue-700' },
   // No logo: AI-generated banner pictures; plain tile.
-  { key: 'fooocus', label: 'Fooocus', url: 'https://github.com/lllyasviel/Fooocus', tile: 'bg-slate-500' }
+  { key: 'fooocus', label: 'Fooocus', url: 'https://github.com/lllyasviel/Fooocus', tile: 'bg-slate-500' },
+  { key: 'carvx', label: 'CarVX', url: 'https://carvx.jp', tile: 'bg-slate-500' },
+  { key: 'checkcar', label: 'Checkcar.vin', url: 'https://checkcar.vin', tile: 'bg-slate-500' },
+  {
+    key: 'chinavehiclehistory',
+    label: 'China Vehicle History',
+    url: 'https://www.chinavehiclehistory.com',
+    tile: 'bg-slate-500'
+  },
+  {
+    key: 'historiaPojazdu',
+    label: 'Historia Pojazdu (gov.pl)',
+    url: 'https://historiapojazdu.gov.pl',
+    tile: 'bg-blue-700'
+  }
 ]
 
 function SourceAvatar({ source }: { source: Source }): ReactNode {
@@ -262,6 +276,7 @@ const FEATURES = [
   'vin',
   'origin',
   'recognition',
+  'share',
   'advanced',
   'specs',
   'performance',
@@ -282,7 +297,7 @@ const FEATURES = [
   'account',
   'copy',
   'discuss',
-  'share',
+  'sharecard',
   'appearance',
   'digest',
   'translate',

@@ -1,11 +1,16 @@
+import { useId, useRef } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import SideSilhouette from '@/components/size/SideSilhouette'
+import SizeCarFront, { FRONT_PROFILES } from '@/components/size/SizeCarFront'
 import SizeCarTop from '@/components/size/SizeCarTop'
 import { axlePositions, WHEEL_MM } from '@/components/size/silhouettes'
 import type { SizeField, SizeFigures, SizeShape } from '@/components/size/VehicleSize.helpers'
 import { estimatePrefix, mmToMetres } from '@/components/size/VehicleSize.helpers'
+import { exportFilename, saveSchemaPng } from '@/components/size/export-schema'
+import { cn } from '@/lib/cn'
+import { useUiStore } from '@/store/ui-store'
 
 type Props = {
   shape: SizeShape
@@ -15,6 +20,14 @@ type Props = {
   active?: SizeField | null
   /** Pointing at a dimension in the drawing itself (hover / tap); null when the pointer leaves. */
   onActiveChange?: (field: SizeField | null) => void
+}
+
+/** The pointed dimension; the blueprint style swaps it for a yellow. */
+const ACTIVE_COLOR = 'var(--dim-active, var(--color-primary))'
+
+/** Blueprint grid in millimetres: a minor line every `major / 5`, a bold one every `major` (a bus needs a coarser grid). */
+function gridMajorMm(lengthMm: number): number {
+  return lengthMm > 8000 ? 2000 : 1000
 }
 
 type DimProps = {
@@ -69,9 +82,9 @@ function Dim({
 
   return (
     <g
-      stroke={isActive ? 'var(--color-primary)' : 'var(--color-muted)'}
+      stroke={isActive ? ACTIVE_COLOR : 'var(--color-muted)'}
       strokeWidth={isActive ? 2.4 : 1.2}
-      fill={isActive ? 'var(--color-primary)' : 'var(--color-fg)'}
+      fill={isActive ? ACTIVE_COLOR : 'var(--color-fg)'}
       opacity={isFaded ? 0.2 : 1}
       fontWeight={isActive ? 700 : undefined}
       className="cursor-pointer transition-opacity"
@@ -112,6 +125,11 @@ function Dim({
  */
 export default function VehicleSizeSchema({ shape, figures, name, active = null, onActiveChange }: Props): ReactNode {
   const { t } = useTranslation()
+  const gridId = useId().replace(/:/g, '')
+  const blueprint = useUiStore(s => s.blueprintEnabled)
+  const setBlueprint = useUiStore(s => s.setBlueprintEnabled)
+  const figureRef = useRef<HTMLElement>(null)
+  const svgRef = useRef<SVGSVGElement>(null)
   const length = figures.lengthMm?.value ?? null
   const width = figures.widthMm?.value ?? null
   const height = figures.heightMm?.value ?? null
@@ -129,12 +147,27 @@ export default function VehicleSizeSchema({ shape, figures, name, active = null,
   const viewX = -length * 0.16
   const viewY = -length * 0.03
   const viewW = length * 1.36
-  const viewH = topY + width + length * 0.1 - viewY
+  const hasFront = FRONT_PROFILES[shape] != null
+  const frontY = topY + width + length * 0.12
+  const frontX = (length - width) / 2
+  const viewH = (hasFront ? frontY + height + length * 0.16 : topY + width + length * 0.1) - viewY
 
   const text = (field: keyof SizeFigures, value: number): string =>
     `${estimatePrefix(figures[field]?.source ?? 'rdw')}${mmToMetres(value)} ${t('rdw.unitM')}`
   const isDashed = (field: keyof SizeFigures): boolean => figures[field]?.source === 'estimate'
 
+  const handleSave = (): void => {
+    if (!svgRef.current || !figureRef.current) return
+    void saveSchemaPng(svgRef.current, {
+      source: figureRef.current,
+      title: `${name} · ${t('size.schema.blueprintScale', { m: gridMajorMm(length) / 1000 })} · carsua.app`,
+      filename: exportFilename(name, blueprint),
+      blueprint
+    }).catch(() => undefined)
+  }
+
+  const major = gridMajorMm(length)
+  const minor = major / 5
   const alt = t('size.schema.alt', {
     name,
     length: text('lengthMm', length),
@@ -143,14 +176,74 @@ export default function VehicleSizeSchema({ shape, figures, name, active = null,
   })
 
   return (
-    <figure className="mt-2">
+    <figure ref={figureRef} className={cn('mt-2 max-w-2xl', blueprint && 'blueprint rounded-lg p-2')}>
+      <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
+        <div role="tablist" aria-label={t('size.schema.view')} className="flex gap-1">
+          {[true, false].map(isBlueprint => (
+            <button
+              key={String(isBlueprint)}
+              type="button"
+              role="tab"
+              aria-selected={blueprint === isBlueprint}
+              onClick={() => setBlueprint(isBlueprint)}
+              className={cn(
+                'rounded-full border px-2.5 py-0.5 text-xs',
+                blueprint === isBlueprint
+                  ? 'border-current font-semibold'
+                  : 'border-transparent text-[var(--color-muted)] hover:text-[var(--color-fg)]'
+              )}
+            >
+              {t(isBlueprint ? 'size.schema.blueprint' : 'size.schema.classic')}
+            </button>
+          ))}
+        </div>
+
+        <button
+          type="button"
+          onClick={handleSave}
+          className="rounded-full border border-current px-2.5 py-0.5 text-xs text-[var(--color-muted)] hover:text-[var(--color-fg)]"
+        >
+          {t('size.schema.save')}
+        </button>
+      </div>
+
       <svg
+        ref={svgRef}
         role="img"
         aria-label={alt}
         viewBox={`${viewX} ${viewY} ${viewW} ${viewH}`}
-        className="h-auto w-full max-w-2xl text-[var(--color-fg)]"
+        className="h-auto w-full text-[var(--color-fg)]"
       >
         <title>{alt}</title>
+
+        {blueprint && (
+          <>
+            <defs>
+              <pattern id={`${gridId}n`} width={minor} height={minor} patternUnits="userSpaceOnUse">
+                <path
+                  d={`M${minor} 0 V${minor} M0 ${minor} H${minor}`}
+                  fill="none"
+                  stroke="var(--bp-grid)"
+                  strokeOpacity={0.22}
+                  strokeWidth={0.6}
+                  vectorEffect="non-scaling-stroke"
+                />
+              </pattern>
+              <pattern id={`${gridId}j`} width={major} height={major} patternUnits="userSpaceOnUse">
+                <path
+                  d={`M${major} 0 V${major} M0 ${major} H${major}`}
+                  fill="none"
+                  stroke="var(--bp-grid)"
+                  strokeOpacity={0.45}
+                  strokeWidth={1}
+                  vectorEffect="non-scaling-stroke"
+                />
+              </pattern>
+            </defs>
+            <rect x={viewX} y={viewY} width={viewW} height={viewH} fill={`url(#${gridId}n)`} />
+            <rect x={viewX} y={viewY} width={viewW} height={viewH} fill={`url(#${gridId}j)`} />
+          </>
+        )}
 
         {/* Side view: front to the right. */}
         <g transform={`translate(0 ${sideY})`}>
@@ -237,9 +330,43 @@ export default function VehicleSizeSchema({ shape, figures, name, active = null,
             onActiveChange={onActiveChange}
           />
         </g>
+        {hasFront && (
+          <g>
+            <line
+              x1={frontX - length * 0.1}
+              y1={frontY + height}
+              x2={frontX + width + length * 0.1}
+              y2={frontY + height}
+              stroke="var(--color-muted)"
+              strokeWidth={1}
+              vectorEffect="non-scaling-stroke"
+            />
+            <SizeCarFront x={frontX} y={frontY} widthMm={width} heightMm={height} shape={shape} />
+            <Dim
+              x1={frontX}
+              y1={frontY + height + length * 0.07}
+              x2={frontX + width}
+              y2={frontY + height + length * 0.07}
+              label={text('widthMm', width)}
+              fontSize={fs}
+              dashed={isDashed('widthMm')}
+              field="widthMm"
+              active={active}
+              onActiveChange={onActiveChange}
+            />
+          </g>
+        )}
       </svg>
 
-      <figcaption className="mt-1 text-xs text-[var(--color-muted)]">{t('size.schema.caption')}</figcaption>
+      <figcaption className="mt-1 text-xs text-[var(--color-muted)]">
+        {blueprint ? t('size.schema.blueprintCaption', { m: major / 1000 }) : t('size.schema.caption')}
+      </figcaption>
+
+      {blueprint && (
+        <div className="mt-1 ml-auto w-fit border border-current px-2 py-0.5 text-xs">
+          {name} · {t('size.schema.blueprintScale', { m: major / 1000 })} · carsua.app
+        </div>
+      )}
     </figure>
   )
 }

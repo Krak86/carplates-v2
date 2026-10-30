@@ -1,5 +1,9 @@
 import {
+  catalogLookupSchema,
+  catalogMakeSchema,
+  catalogMakesSchema,
   catalogModelSchema,
+  catalogYearStatsSchema,
   adminAnalyticsResponseSchema,
   adminLinksResponseSchema,
   adminServerResponseSchema,
@@ -79,7 +83,11 @@ import {
   wikiInfoResponseSchema
 } from '@carplates/shared'
 import type {
+  CatalogLookup,
+  CatalogMake,
+  CatalogMakes,
   CatalogModel,
+  CatalogYearStats,
   AdminAnalyticsResponse,
   AdminLinksResponse,
   AdminServerResponse,
@@ -491,10 +499,32 @@ export async function getFuelEconomy({
   return fuelEconomyResponseSchema.parse(await getJson(`/api/fuel?${params.toString()}`))
 }
 
+/** The catalog page (if any) a brand + model belongs to: `page` is null when there is none, so a card links only to real pages. */
+export async function getCatalogLookup(brand: string, model: string): Promise<CatalogLookup> {
+  return catalogLookupSchema.parse(await getJson(`/api/catalog/lookup?${new URLSearchParams({ brand, model })}`))
+}
+
+/** Every make with its car count (`/cars`). */
+export async function getCatalogMakes(): Promise<CatalogMakes> {
+  return catalogMakesSchema.parse(await getJson('/api/catalog/makes'))
+}
+
+/** One make and its model pages (`/cars/:make`). A 404 means there is no such page. */
+export async function getCatalogMake(make: string): Promise<CatalogMake> {
+  return catalogMakeSchema.parse(await getJson(`/api/catalog/${encodeURIComponent(make)}`))
+}
+
 /** Registry rollup of one catalog model (`/cars/:make/:model`). A 404 means there is no such page. */
 export async function getCatalogModel(make: string, model: string): Promise<CatalogModel> {
   return catalogModelSchema.parse(
     await getJson(`/api/catalog/${encodeURIComponent(make)}/${encodeURIComponent(model)}`)
+  )
+}
+
+/** Per make year breakdown of one catalog model (the generation stats). Empty `byYear` until the catalog is rebuilt. */
+export async function getCatalogYears(make: string, model: string): Promise<CatalogYearStats> {
+  return catalogYearStatsSchema.parse(
+    await getJson(`/api/catalog/${encodeURIComponent(make)}/${encodeURIComponent(model)}/years`)
   )
 }
 

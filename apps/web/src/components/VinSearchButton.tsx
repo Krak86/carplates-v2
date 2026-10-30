@@ -4,16 +4,18 @@ import { useTranslation } from 'react-i18next'
 
 import { SEARCH_BUTTON_CLASS, SEARCH_BUTTON_ICON_CLASS } from '@/components/search-button-styles'
 import Spinner from '@/components/ui/Spinner'
+import { cn } from '@/lib/cn'
 
 type Props = {
   isPending: boolean
   disabled?: boolean
+  highlight?: boolean
   onPick: (file: File) => void
 }
 
 // Phones open the camera directly (a VIN sticker is usually shot, not browsed for); desktop gets the
 // file picker. No live/AR mode: a VIN needs a sharp full-resolution still, not a video stream.
-export default function VinSearchButton({ isPending, disabled = false, onPick }: Props): ReactNode {
+export default function VinSearchButton({ isPending, disabled = false, highlight = false, onPick }: Props): ReactNode {
   const { t } = useTranslation()
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -31,7 +33,7 @@ export default function VinSearchButton({ isPending, disabled = false, onPick }:
         onClick={() => inputRef.current?.click()}
         disabled={isPending || disabled}
         title={disabled ? t('offline.needsConnection') : undefined}
-        className={SEARCH_BUTTON_CLASS}
+        className={cn(SEARCH_BUTTON_CLASS, highlight && 'search-focus')}
       >
         {isPending ? (
           <span className={SEARCH_BUTTON_ICON_CLASS}>

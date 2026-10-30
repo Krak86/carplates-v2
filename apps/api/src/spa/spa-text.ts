@@ -1,3 +1,5 @@
+import type { ShareAlias } from '@carplates/shared'
+
 /** Server-side copy for link previews — the SPA's i18n bundles live in the web app, which the API can't import. */
 export const LANGS = ['ua', 'ru', 'en'] as const
 export type Lang = (typeof LANGS)[number]
@@ -93,6 +95,23 @@ export const STATIC_PAGES: Record<string, Record<Lang, PageText>> = {
     ua: { title: 'Cars UA - Обране', description: 'Збережені вами автомобілі.' },
     ru: { title: 'Cars UA - Избранное', description: 'Сохранённые вами автомобили.' },
     en: { title: 'Cars UA - Favorites', description: 'Vehicles you saved.' }
+  },
+  '/cars': {
+    ua: {
+      title: 'Авто в Україні за марками та моделями | Cars UA',
+      description:
+        'Каталог марок і моделей авто на обліку в Україні: кількість авто, роки випуску, паливо та регіони за відкритими даними реєстру.'
+    },
+    ru: {
+      title: 'Авто в Украине по маркам и моделям | Cars UA',
+      description:
+        'Каталог марок и моделей авто на учёте в Украине: количество авто, годы выпуска, топливо и регионы по открытым данным реестра.'
+    },
+    en: {
+      title: 'Cars in Ukraine by make and model | Cars UA',
+      description:
+        'A catalog of the makes and models registered in Ukraine: cars on the road, model years, fuel and regions from the open vehicle registry.'
+    }
   },
   '/stats': {
     ua: {
@@ -446,6 +465,97 @@ export const STATIC_PAGES: Record<string, Record<Lang, PageText>> = {
       title: 'Cars UA - Advanced search',
       description: 'Search vehicles by make, model, year, color, fuel and region.'
     }
+  },
+  '/share': {
+    ua: {
+      title: 'Cars UA - Поділитися пошуком',
+      description: 'Короткі посилання на пошук за номером, VIN, фото та AR-скан: копіюйте й діліться з готовим превʼю.'
+    },
+    ru: {
+      title: 'Cars UA - Поделиться поиском',
+      description: 'Короткие ссылки на поиск по номеру, VIN, фото и AR-скан: копируйте и делитесь с готовым превью.'
+    },
+    en: {
+      title: 'Cars UA - Share a search',
+      description: 'Short links to search by plate, VIN, photo and AR scan: copy and share them with a ready preview.'
+    }
+  }
+}
+
+/**
+ * `/go/<alias>` link previews (share/campaign links, see `shareAliases.ts` in shared). Not in `STATIC_PAGES`: they stay out of
+ * the sitemap and are `noindex`; the home page is their canonical.
+ */
+export const SHARE_ALIAS_PAGES: Record<ShareAlias, Record<Lang, PageText>> = {
+  plate: {
+    ua: {
+      title: 'Пошук авто за номером | Cars UA',
+      description: 'Введіть номерний знак і дізнайтеся марку, модель, рік, паливо, регіон та історію реєстрацій.'
+    },
+    ru: {
+      title: 'Поиск авто по номеру | Cars UA',
+      description: 'Введите номерной знак и узнайте марку, модель, год, топливо, регион и историю регистраций.'
+    },
+    en: {
+      title: 'Find a car by plate number | Cars UA',
+      description: 'Enter a Ukrainian plate to see make, model, year, fuel, region and registration history.'
+    }
+  },
+  vin: {
+    ua: {
+      title: 'Перевірка авто за VIN-кодом | Cars UA',
+      description: 'Розшифруйте VIN: марка, модель, рік, країна походження та історія в реєстрі України.'
+    },
+    ru: {
+      title: 'Проверка авто по VIN-коду | Cars UA',
+      description: 'Расшифруйте VIN: марка, модель, год, страна происхождения и история в реестре Украины.'
+    },
+    en: {
+      title: 'Check a car by VIN | Cars UA',
+      description: 'Decode a VIN: make, model, year, country of origin and history in the Ukrainian registry.'
+    }
+  },
+  'plate-photo': {
+    ua: {
+      title: 'Пошук авто за фото номера | Cars UA',
+      description: 'Сфотографуйте або завантажте фото номерного знака - номер розпізнається просто в браузері.'
+    },
+    ru: {
+      title: 'Поиск авто по фото номера | Cars UA',
+      description: 'Сфотографируйте или загрузите фото номерного знака - номер распознаётся прямо в браузере.'
+    },
+    en: {
+      title: 'Find a car from a plate photo | Cars UA',
+      description: 'Take or upload a photo of a number plate and it is read right in your browser.'
+    }
+  },
+  'vin-photo': {
+    ua: {
+      title: 'Розпізнавання VIN за фото | Cars UA',
+      description: 'Сфотографуйте VIN на авто чи документі - код розпізнається, і ви одразу бачите дані про авто.'
+    },
+    ru: {
+      title: 'Распознавание VIN по фото | Cars UA',
+      description: 'Сфотографируйте VIN на авто или документе - код распознаётся, и вы сразу видите данные об авто.'
+    },
+    en: {
+      title: 'Read a VIN from a photo | Cars UA',
+      description: 'Photograph the VIN on a car or a document and see the vehicle data right away.'
+    }
+  },
+  ar: {
+    ua: {
+      title: 'AR-скан номерів камерою | Cars UA',
+      description: 'Наведіть камеру на авто: номерні знаки розпізнаються наживо, а дані зʼявляються поруч.'
+    },
+    ru: {
+      title: 'AR-скан номеров камерой | Cars UA',
+      description: 'Наведите камеру на авто: номерные знаки распознаются вживую, а данные появляются рядом.'
+    },
+    en: {
+      title: 'AR plate scanner with your camera | Cars UA',
+      description: 'Point your camera at a car: plates are read live and the vehicle data shows up beside them.'
+    }
   }
 }
 
@@ -472,6 +582,163 @@ export function valuePageText(lang: Lang, base: PageText, lowEur: number, highEu
     title: base.title,
     description: `${VALUE_NOTE[lang](`~€${fmt(lowEur)}–${fmt(highEur)}`)} ${base.description}`
   }
+}
+
+/** Per `?section=` share target: the label added to the title and the lead sentence of the description (ua / ru / en). */
+const SECTION_TEXT: Record<string, Record<Lang, [label: string, lead: string]>> = {
+  verification: {
+    ua: ['Перевірка', 'Перевірка авто за відкритими базами.'],
+    ru: ['Проверка', 'Проверка авто по открытым базам.'],
+    en: ['Verification', 'Vehicle checks against open databases.']
+  },
+  basic: {
+    ua: ['Основні дані', 'Основні дані з реєстру.'],
+    ru: ['Основные данные', 'Основные данные из реестра.'],
+    en: ['Basic data', 'Basic registry data.']
+  },
+  history: {
+    ua: ['Історія реєстрацій', 'Історія реєстрацій авто.'],
+    ru: ['История регистраций', 'История регистраций авто.'],
+    en: ['Registration history', 'Registration history of the vehicle.']
+  },
+  specs: {
+    ua: ['Характеристики', 'Технічні характеристики авто.'],
+    ru: ['Характеристики', 'Технические характеристики авто.'],
+    en: ['Specifications', 'Technical specifications of the vehicle.']
+  },
+  engines: {
+    ua: ['Двигуни', 'Двигуни та комплектації моделі.'],
+    ru: ['Двигатели', 'Двигатели и комплектации модели.'],
+    en: ['Engines', 'Engines and trims of the model.']
+  },
+  size: {
+    ua: ['Розміри', 'Розміри та маса авто.'],
+    ru: ['Размеры', 'Размеры и масса авто.'],
+    en: ['Dimensions', 'Dimensions and weight of the vehicle.']
+  },
+  recalls: {
+    ua: ['Відкликання', 'Сервісні кампанії та відкликання моделі.'],
+    ru: ['Отзывы', 'Сервисные кампании и отзывы модели.'],
+    en: ['Recalls', 'Safety recalls for the model.']
+  },
+  faults: {
+    ua: ['Типові поломки', 'Типові несправності моделі.'],
+    ru: ['Типичные поломки', 'Типичные неисправности модели.'],
+    en: ['Common faults', 'Common faults of the model.']
+  },
+  electric: {
+    ua: ['Електромобіль', 'Дані про батарею та запас ходу.'],
+    ru: ['Электромобиль', 'Данные о батарее и запасе хода.'],
+    en: ['Electric', 'Battery and range data.']
+  },
+  value: {
+    ua: ['Вартість', 'Орієнтовна вартість авто.'],
+    ru: ['Стоимость', 'Ориентировочная стоимость авто.'],
+    en: ['Value', 'Estimated value of the vehicle.']
+  },
+  vin: {
+    ua: ['VIN', 'Розшифровка VIN-коду.'],
+    ru: ['VIN', 'Расшифровка VIN-кода.'],
+    en: ['VIN', 'VIN decoding.']
+  },
+  emissions: {
+    ua: ['Викиди', 'Витрата пального та викиди CO2.'],
+    ru: ['Выбросы', 'Расход топлива и выбросы CO2.'],
+    en: ['Emissions', 'Fuel use and CO2 emissions.']
+  },
+  ratings: {
+    ua: ['Рейтинги безпеки', 'Краш-тести та рейтинги безпеки.'],
+    ru: ['Рейтинги безопасности', 'Краш-тесты и рейтинги безопасности.'],
+    en: ['Safety ratings', 'Crash tests and safety ratings.']
+  },
+  nearby: {
+    ua: ['Авто поруч', 'Схожі авто в тому ж регіоні.'],
+    ru: ['Авто рядом', 'Похожие авто в том же регионе.'],
+    en: ['Nearby cars', 'Similar cars in the same region.']
+  },
+  reviews: {
+    ua: ['Відгуки', 'Відгуки власників про модель.'],
+    ru: ['Отзывы', 'Отзывы владельцев о модели.'],
+    en: ['Reviews', 'Owner reviews of the model.']
+  },
+  videos: {
+    ua: ['Відеоогляди', 'Відеоогляди моделі.'],
+    ru: ['Видеообзоры', 'Видеообзоры модели.'],
+    en: ['Video reviews', 'Video reviews of the model.']
+  },
+  wiki: {
+    ua: ['Про модель', 'Стаття про модель з Вікіпедії.'],
+    ru: ['О модели', 'Статья о модели из Википедии.'],
+    en: ['About the model', 'Wikipedia article about the model.']
+  },
+  photos: {
+    ua: ['Фото', 'Фото моделі.'],
+    ru: ['Фото', 'Фото модели.'],
+    en: ['Photos', 'Photos of the model.']
+  },
+  model3d: {
+    ua: ['3D-модель', '3D-модель авто.'],
+    ru: ['3D-модель', '3D-модель авто.'],
+    en: ['3D model', '3D model of the vehicle.']
+  },
+  model360: {
+    ua: ['Огляд 360°', 'Огляд авто на 360°.'],
+    ru: ['Обзор 360°', 'Обзор авто на 360°.'],
+    en: ['360° view', '360° view of the vehicle.']
+  },
+  race: {
+    ua: ['Гонка', 'Порівняйте розгін двох авто.'],
+    ru: ['Гонка', 'Сравните разгон двух авто.'],
+    en: ['Race', 'Compare the acceleration of two cars.']
+  },
+  ar: {
+    ua: ['AR-режим', 'Авто в доповненій реальності.'],
+    ru: ['AR-режим', 'Авто в дополненной реальности.'],
+    en: ['AR view', 'The vehicle in augmented reality.']
+  },
+  news: {
+    ua: ['Новини', 'Новини про модель.'],
+    ru: ['Новости', 'Новости о модели.'],
+    en: ['News', 'News about the model.']
+  },
+  social: {
+    ua: ['Соцмережі', 'Згадки моделі в соцмережах.'],
+    ru: ['Соцсети', 'Упоминания модели в соцсетях.'],
+    en: ['Social', 'Mentions of the model on social media.']
+  },
+  stock: {
+    ua: ['Наявність', 'Наявність схожих авто на ринку.'],
+    ru: ['Наличие', 'Наличие похожих авто на рынке.'],
+    en: ['In stock', 'Similar cars available on the market.']
+  },
+  auctions: {
+    ua: ['Аукціони', 'Аукціонні лоти та ціни.'],
+    ru: ['Аукционы', 'Аукционные лоты и цены.'],
+    en: ['Auctions', 'Auction lots and prices.']
+  },
+  origin: {
+    ua: ['Походження', 'Країна походження та імпорт авто.'],
+    ru: ['Происхождение', 'Страна происхождения и импорт авто.'],
+    en: ['Origin', 'Country of origin and import of the vehicle.']
+  },
+  assists: {
+    ua: ['Системи допомоги', 'Системи допомоги водієві.'],
+    ru: ['Системы помощи', 'Системы помощи водителю.'],
+    en: ['Driver assists', 'Driver assistance systems.']
+  },
+  wanted: {
+    ua: ['Розшук', 'Перевірка за базою розшуку.'],
+    ru: ['Розыск', 'Проверка по базе розыска.'],
+    en: ['Wanted', 'Check against the wanted-vehicles list.']
+  }
+}
+
+/** `?section=<other>` share link: the section name in the title, a one-line lead in the description. Unknown section = unchanged. */
+export function sectionPageText(lang: Lang, base: PageText, section: string | undefined): PageText {
+  const text = section && Object.hasOwn(SECTION_TEXT, section) ? SECTION_TEXT[section]?.[lang] : undefined
+  if (!text) return base
+  const [label, lead] = text
+  return { title: `${base.title} - ${label}`, description: `${lead} ${base.description}` }
 }
 
 type Facts = { value: string; car: string | null; year: string | null; extra: Array<string | null | undefined> }

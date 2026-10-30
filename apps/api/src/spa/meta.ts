@@ -12,6 +12,8 @@ export type MetaInput = {
   noindex?: boolean
   /** Indexable static pages: self-canonical per language plus hreflang alternates for all of them. */
   alternates?: boolean
+  /** Structured data (catalog pages: `BreadcrumbList`), emitted as one `application/ld+json` script. */
+  jsonLd?: object
 }
 
 /** hreflang codes (ISO 639-1; `ua` is the app's key for Ukrainian). */
@@ -56,6 +58,10 @@ export function renderMetaTags(m: MetaInput): string {
       ? alternateLinks(m.siteUrl, m.path).map(
           a => `<link rel="alternate" hreflang="${a.hreflang}" href="${esc(a.href)}">`
         )
+      : []),
+    // `<` is escaped so a name can never close the script element.
+    ...(m.jsonLd
+      ? [`<script type="application/ld+json">${JSON.stringify(m.jsonLd).replace(/</g, '\\u003c')}</script>`]
       : [])
   ].join('\n    ')
 }
