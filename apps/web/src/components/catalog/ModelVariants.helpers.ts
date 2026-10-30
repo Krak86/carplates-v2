@@ -28,6 +28,13 @@ export function generationOfYear<G extends Span>(generations: readonly G[], year
   return best
 }
 
+/** Registry cars whose make year falls inside the generation's span. */
+export function carsInSpan(years: Counts, span: Span): number {
+  let total = 0
+  for (const [y, n] of years) if (Number(y) >= span.yearFrom && Number(y) <= (span.yearTo ?? Infinity)) total += n
+  return total
+}
+
 /** The year to show when a generation is picked: the one with the most registry cars inside its span, else its first year. */
 export function yearInSpan(years: Counts, span: Span): number {
   let best: [number, number] | null = null

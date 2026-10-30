@@ -3543,6 +3543,8 @@
   "catalog.makeSummary": "Ukraine's registry currently lists {{count}} {{make}} cars across {{models}} models.",
   "catalog.pickHint": "Pick a variant: specs, value, recalls and the other sections below follow your choice.",
   "catalog.pickYear": "Model year",
+  "catalog.generationStats": "Cars of {{name}} in Ukraine",
+  "catalog.generationShare": "{{count}} cars, {{share}}% of the model",
   "catalog.pickGeneration": "Generation",
   "catalog.modelsHeading": "Models",
   "catalog.filterModelLabel": "Find a model",

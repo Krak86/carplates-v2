@@ -3,6 +3,7 @@ import {
   catalogMakeSchema,
   catalogMakesSchema,
   catalogModelSchema,
+  catalogYearStatsSchema,
   adminAnalyticsResponseSchema,
   adminLinksResponseSchema,
   adminServerResponseSchema,
@@ -86,6 +87,7 @@ import type {
   CatalogMake,
   CatalogMakes,
   CatalogModel,
+  CatalogYearStats,
   AdminAnalyticsResponse,
   AdminLinksResponse,
   AdminServerResponse,
@@ -516,6 +518,13 @@ export async function getCatalogMake(make: string): Promise<CatalogMake> {
 export async function getCatalogModel(make: string, model: string): Promise<CatalogModel> {
   return catalogModelSchema.parse(
     await getJson(`/api/catalog/${encodeURIComponent(make)}/${encodeURIComponent(model)}`)
+  )
+}
+
+/** Per make year breakdown of one catalog model (the generation stats). Empty `byYear` until the catalog is rebuilt. */
+export async function getCatalogYears(make: string, model: string): Promise<CatalogYearStats> {
+  return catalogYearStatsSchema.parse(
+    await getJson(`/api/catalog/${encodeURIComponent(make)}/${encodeURIComponent(model)}/years`)
   )
 }
 

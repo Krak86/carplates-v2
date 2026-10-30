@@ -4023,6 +4023,8 @@
   "catalog.makeSummary": "У реєстрі України зараз {{count}} авто {{make}}, моделей: {{models}}.",
   "catalog.pickHint": "Оберіть варіант: характеристики, вартість, відкликання та інші розділи нижче підлаштуються під ваш вибір.",
   "catalog.pickYear": "Рік випуску",
+  "catalog.generationStats": "Авто покоління {{name}} в Україні",
+  "catalog.generationShare": "{{count}} авто, {{share}}% моделі",
   "catalog.pickGeneration": "Покоління",
   "catalog.modelsHeading": "Моделі",
   "catalog.filterModelLabel": "Знайти модель",

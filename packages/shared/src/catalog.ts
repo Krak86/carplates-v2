@@ -31,6 +31,59 @@ export const catalogStatsSchema = z.object({
 })
 export type CatalogStats = z.infer<typeof catalogStatsSchema>
 
+/**
+ * Per make year, the same lists as `CatalogStats` (each year's top few): the input of the generation stats. Keys are make years;
+ * `n` is the year's car count.
+ */
+export const catalogYearStatsSchema = z.object({
+  byYear: z.record(
+    z.string(),
+    z.object({
+      n: z.number(),
+      fuel: countsSchema,
+      body: countsSchema,
+      color: countsSchema,
+      regions: countsSchema
+    })
+  )
+})
+export type CatalogYearStats = z.infer<typeof catalogYearStatsSchema>
+
+type YearSums = {
+  n: number
+  fuel: [string, number][]
+  body: [string, number][]
+  color: [string, number][]
+  regions: [string, number][]
+}
+
+/** Adds up the years `from..to` (`to` null = open end) of a model's per-year stats; each list is biggest first. */
+export function sumYearStats(stats: CatalogYearStats, from: number, to: number | null): YearSums {
+  const sums = {
+    n: 0,
+    fuel: new Map<string, number>(),
+    body: new Map<string, number>(),
+    color: new Map<string, number>(),
+    regions: new Map<string, number>()
+  }
+  for (const [year, row] of Object.entries(stats.byYear)) {
+    const y = Number(year)
+    if (y < from || y > (to ?? Infinity)) continue
+    sums.n += row.n
+    for (const key of ['fuel', 'body', 'color', 'regions'] as const) {
+      for (const [label, n] of row[key]) sums[key].set(label, (sums[key].get(label) ?? 0) + n)
+    }
+  }
+  const ranked = (m: Map<string, number>): [string, number][] => [...m].sort((a, b) => b[1] - a[1])
+  return {
+    n: sums.n,
+    fuel: ranked(sums.fuel),
+    body: ranked(sums.body),
+    color: ranked(sums.color),
+    regions: ranked(sums.regions)
+  }
+}
+
 export const catalogSiblingSchema = z.object({
   model: z.string(),
   modelName: z.string(),

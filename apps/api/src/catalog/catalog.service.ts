@@ -1,7 +1,15 @@
 import { Inject, Injectable, Logger } from '@nestjs/common'
-import { catalogAlias, catalogMake, catalogModel } from '@carplates/db'
-import { CATALOG_TOP_MODELS, brandSlug, catalogStatsSchema, modelKey } from '@carplates/shared'
-import type { CatalogLookup, CatalogMake, CatalogMakeSummary, CatalogModel, CatalogSibling } from '@carplates/shared'
+import { catalogAlias, catalogMake, catalogModel, catalogYearStats } from '@carplates/db'
+import { CATALOG_TOP_MODELS, brandSlug, catalogStatsSchema, catalogYearStatsSchema, modelKey } from '@carplates/shared'
+import type {
+  CatalogLookup,
+  CatalogMake,
+  CatalogMakeSummary,
+  CatalogModel,
+  CatalogSibling,
+  CatalogYearStats
+} from '@carplates/shared'
+import { and, eq } from 'drizzle-orm'
 
 import { DbService } from '../db/db.service.js'
 
@@ -37,6 +45,20 @@ export class CatalogService {
 
   async get(make: string, model: string): Promise<CatalogModel | null> {
     return (await this.load()).models.get(`${make}/${model}`) ?? null
+  }
+
+  /**
+   * The per-year breakdown of a model (generation stats), read on demand: ~10 KB a model, too much to keep for every page in
+   * memory. An empty one when the model has a page but the build predates `catalog_year_stats`; null when it has no page.
+   */
+  async byYear(make: string, model: string): Promise<CatalogYearStats | null> {
+    if (!(await this.load()).models.has(`${make}/${model}`)) return null
+    const [row] = await this.dbService.db
+      .select({ byYear: catalogYearStats.byYear })
+      .from(catalogYearStats)
+      .where(and(eq(catalogYearStats.makeSlug, make), eq(catalogYearStats.modelSlug, model)))
+    const parsed = catalogYearStatsSchema.safeParse({ byYear: row?.byYear })
+    return parsed.success ? parsed.data : { byYear: {} }
   }
 
   /**

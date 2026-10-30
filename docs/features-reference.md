@@ -565,6 +565,10 @@ are `.nullable().optional()`).
   leftover trims and fix them with a `fold` row, not in `catalogSlugs`. Real DB 2026-10-30: 15,769 passenger pairs -> 1,697 pages (300 indexable) in 109 makes.
 - **API** (`apps/api/src/catalog/`): `GET /api/catalog/:make/:model` (Zod params, `LOOKUP_CACHE`, `CATALOG_THROTTLE`, 404 = no page). `CatalogService` keeps all
   `catalog_model` rows in process memory and reloads hourly (no per-request query). `/api/catalog` is in `PUBLIC_API_PATH_PREFIXES` (registry aggregates only).
+- **Generation stats** (2026-10-30): `catalog_year_stats` (migration 0082, built by `catalog-build.ts` in the same grouping-sets pass shape, top 5 per year) holds fuel / body /
+  colour / regions per make year. `GET /api/catalog/:make/:model/years` reads it on demand (not kept in API memory; empty `byYear` until the first rebuild after the
+  migration, and the panel then stays hidden). `ModelVariants` shows the picked generation's summed tables (`GenerationStats`, `sumYearStats` in `catalog.ts`) and the car
+  count on every generation chip (`carsInSpan`). Per-year tops are capped, so the tail of a generation's list is slightly undercounted.
 - **SPA meta** (`spa.controller.ts`): a `/cars/:make/:model` path that exists gets its own title/description (`catalog-text.ts`, ua/ru/en), self-canonical + hreflang
   when indexable (`noindex, follow` and no alternates when thin), the card `/og/page/cars--<make>--<model>.png`, and a **server-injected block in `#root`**
   (`catalogSeoBlock`: h1, summary, stats tables, plain sibling links; React replaces it on mount, so keep it identical in facts to `CatalogModelRoute`).

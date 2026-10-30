@@ -4023,6 +4023,8 @@
   "catalog.makeSummary": "В реестре Украины сейчас {{count}} авто {{make}}, моделей: {{models}}.",
   "catalog.pickHint": "Выберите вариант: характеристики, стоимость, отзывы и другие разделы ниже подстроятся под ваш выбор.",
   "catalog.pickYear": "Год выпуска",
+  "catalog.generationStats": "Авто поколения {{name}} в Украине",
+  "catalog.generationShare": "{{count}} авто, {{share}}% модели",
   "catalog.pickGeneration": "Поколение",
   "catalog.modelsHeading": "Модели",
   "catalog.filterModelLabel": "Найти модель",

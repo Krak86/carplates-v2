@@ -5,10 +5,12 @@ import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 
 import { generationLabel, generationSpanText } from '@/components/GenerationChip.helpers'
-import { generationGrowthQuery } from '@/lib/queries'
+import { toIntlLocale } from '@/lib/intl'
+import { catalogYearsQuery, generationGrowthQuery } from '@/lib/queries'
 import { typicalYear } from '@/routes/catalog/helpers'
 
-import { generationOfYear, variantOptions, variantYears, yearInSpan } from './ModelVariants.helpers'
+import GenerationStats from './GenerationStats'
+import { carsInSpan, generationOfYear, variantOptions, variantYears, yearInSpan } from './ModelVariants.helpers'
 import ModelSections from './ModelSections'
 import VariantChipRow from './VariantChipRow'
 
@@ -29,6 +31,8 @@ export default function ModelVariants({ model }: Props): ReactNode {
   const [body, setBody] = useState<string | null>(stats.body[0]?.[0] ?? null)
   const generations = useQuery(generationGrowthQuery(model.topBrand, model.topModel)).data?.match?.generations ?? []
   const currentGeneration = generationOfYear(generations, year)
+  const byYear = useQuery({ ...catalogYearsQuery(model.make, model.model), enabled: generations.length > 0 }).data
+  const formatCount = new Intl.NumberFormat(toIntlLocale(i18n.language)).format
 
   const fuels = variantOptions('fuel', stats.fuel, model.n, i18n.language)
   const bodies = variantOptions('body', stats.body, model.n, i18n.language)
@@ -52,7 +56,7 @@ export default function ModelVariants({ model }: Props): ReactNode {
           title={t('catalog.pickGeneration')}
           chips={generations.map(g => ({
             key: `${g.code}-${g.yearFrom}`,
-            label: `${generationLabel(g, t)} · ${generationSpanText(g, t)}`,
+            label: `${generationLabel(g, t)} · ${generationSpanText(g, t)} · ${formatCount(carsInSpan(stats.years, g))}`,
             active: g === currentGeneration,
             onPick: () => setYear(yearInSpan(stats.years, g))
           }))}
@@ -76,6 +80,15 @@ export default function ModelVariants({ model }: Props): ReactNode {
           }))}
         />
       </div>
+
+      {!!currentGeneration && !!byYear && (
+        <GenerationStats
+          name={generationLabel(currentGeneration, t)}
+          span={currentGeneration}
+          byYear={byYear}
+          modelTotal={model.n}
+        />
+      )}
 
       <ModelSections
         brand={model.topBrand}

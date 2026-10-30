@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { generationOfYear, variantOptions, variantYears, yearInSpan } from './ModelVariants.helpers'
+import { carsInSpan, generationOfYear, variantOptions, variantYears, yearInSpan } from './ModelVariants.helpers'
 
 const YEARS: [string, number][] = [
   ['1999', 1],
@@ -64,5 +64,13 @@ describe('variantOptions', () => {
     const options = variantOptions('body', rows, 1060, 'en')
     expect(options.map(o => o.value)).toEqual(['СЕДАН', 'УНІВЕРСАЛ'])
     expect(options.map(o => o.label)).not.toContain('null')
+  })
+})
+
+describe('carsInSpan', () => {
+  it('sums the cars whose year is inside the span, open-ended when the generation is current', () => {
+    expect(carsInSpan(YEARS, { yearFrom: 2005, yearTo: 2007 })).toBe(2000)
+    expect(carsInSpan(YEARS, { yearFrom: 2012, yearTo: null })).toBe(1000)
+    expect(carsInSpan(YEARS, { yearFrom: 1990, yearTo: 1995 })).toBe(0)
   })
 })

@@ -17,6 +17,7 @@ import {
   getCatalogMake,
   getCatalogMakes,
   getCatalogModel,
+  getCatalogYears,
   getAdminLinks,
   getAdminServer,
   getAdminStats,
@@ -509,6 +510,16 @@ export function catalogMakeQuery(make: string) {
     queryFn: () => getCatalogMake(make),
     staleTime: Infinity,
     retry: (count, error) => !(error instanceof ApiError && error.status === 404) && count < 2
+  })
+}
+
+// Per make year counts of a catalog model, fetched once the model page shows generation chips: online-only, stable until the next rebuild.
+export function catalogYearsQuery(make: string, model: string) {
+  return queryOptions({
+    queryKey: ['catalog-years', make, model],
+    queryFn: () => getCatalogYears(make, model),
+    staleTime: Infinity,
+    retry: false
   })
 }
 

@@ -8,7 +8,13 @@ import { LOOKUP_CACHE, lookupCacheInterceptor } from '../common/cache.js'
 import { CATALOG_THROTTLE } from '../common/throttle.js'
 import { zodParam } from '../common/zod-param.pipe.js'
 
-import { CatalogLookupDto, CatalogMakeDto, CatalogMakesDto, CatalogModelDto } from './catalog.dto.js'
+import {
+  CatalogLookupDto,
+  CatalogMakeDto,
+  CatalogMakesDto,
+  CatalogModelDto,
+  CatalogYearStatsDto
+} from './catalog.dto.js'
 import { CatalogService } from './catalog.service.js'
 
 @ApiTags('catalog')
@@ -42,6 +48,18 @@ export class CatalogController {
   @ApiNotFoundResponse({ description: 'No catalog page for this make' })
   async make(@Param(zodParam(catalogMakeParamsSchema)) params: CatalogMakeParams): Promise<CatalogMakeDto> {
     const found = await this.catalog.make(params.make)
+    if (!found) throw new NotFoundException()
+    return found
+  }
+
+  /** Per make year fuel / body / colour / region counts of one model: the input of the generation stats. */
+  @Get(':make/:model/years')
+  @Throttle(CATALOG_THROTTLE)
+  @UseInterceptors(lookupCacheInterceptor(LOOKUP_CACHE))
+  @ApiOkResponse({ type: CatalogYearStatsDto })
+  @ApiNotFoundResponse({ description: 'No catalog page for this make/model' })
+  async years(@Param(zodParam(catalogParamsSchema)) params: CatalogParams): Promise<CatalogYearStatsDto> {
+    const found = await this.catalog.byYear(params.make, params.model)
     if (!found) throw new NotFoundException()
     return found
   }
