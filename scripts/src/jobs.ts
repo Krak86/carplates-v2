@@ -13,7 +13,9 @@ export const JOBS = {
   wanted: { command: 'tsx src/wanted.ts', timeoutMin: 15 },
   // Real work ~monthly (new CKAN month; ~2-3 h, a first load on an empty ingested_resources ~6 h); other runs no-op after one
   // API call (ingest-full.ts). /archive = /opt/carsua/archive on the host.
-  plates: { command: 'tsx src/ingest-full.ts --archive /archive', timeoutMin: 720 }
+  plates: { command: 'tsx src/ingest-full.ts --archive /archive', timeoutMin: 720 },
+  // Manual only (no cron entry): `run-ingest.sh catalog` rebuilds the catalog_* tables (~3 min), e.g. the first time after deploying the catalog.
+  catalog: { command: 'tsx src/catalog-build.ts', timeoutMin: 20 }
 } as const satisfies Record<string, Job>
 
 export type JobName = keyof typeof JOBS

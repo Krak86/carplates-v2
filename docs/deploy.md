@@ -302,7 +302,7 @@ makes it effective: expression
 `public, max-age=0, s-maxage=86400, stale-while-revalidate=604800` for existing catalog pages, so add a Cache Rule "Cache catalog pages": `(http.host eq "carsua.app" and starts_with(http.request.uri.path, "/cars/"))`,
 "Eligible for cache", Edge TTL "Use cache-control header if present, bypass cache if not", Browser TTL "Respect origin TTL", default cache key (the `?lang=` query must stay in it). Target: 90 % or more cache hit ratio on `/cars/*`.
 Verify MISS then HIT for both. The monthly ingest does not purge these: pages are at most a day stale; purge `/cars/` by prefix (or everything) after a big re-ingest if that matters. After the first prod deploy run
-`pnpm db:refresh-catalog` on the VPS once (ingests run it through `db:refresh-derived` from then on); until then the catalog is empty and `/sitemap-cars.xml` has no URLs.
+`ssh deploy@<ip> bash /opt/carsua/compose/run-ingest.sh catalog` once (the VPS has no pnpm; the `catalog` job runs `tsx src/catalog-build.ts` in the ingest image, ~3 min, logged in `registry.job_runs`; ingests run it through `db:refresh-derived` from then on; needs the `deploy-ingest` run for this commit finished first); until then the catalog is empty and `/sitemap-cars.xml` has no URLs.
 
 `/.well-known/openapi.json` (curated public OpenAPI, `apps/api/src/openapi/public-doc.ts`) is always on and needs no env var; `ENABLE_SWAGGER` still only
 controls the full Swagger UI at `/api/docs`. `llms.txt`, `.well-known/ard.json` and `ai-catalog.json` ship with the web build (`apps/web/public/`).
