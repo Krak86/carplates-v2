@@ -173,8 +173,9 @@ jobs:
           echo "::warning::public /healthz not reachable from the runner (Cloudflare Bot Fight Mode challenges CI IPs); origin check already passed"
 
       # The api renders the /og/*.png link-preview cards and Cloudflare caches them for 24 h, so a new api build
-      # (fonts, layout, data) would otherwise keep serving the old cards. Best-effort: the deploy itself already succeeded.
-      - name: Purge Cloudflare cache for the link-preview cards
+      # (fonts, layout, data) would otherwise keep serving the old cards. robots.txt and sitemap.xml are edge-cached too and
+      # change with the api build. Best-effort: the deploy itself already succeeded.
+      - name: Purge Cloudflare cache for the link-preview cards, robots.txt and sitemap.xml
         if: ${{ !inputs.sync_only }}
         env:
           CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
@@ -183,6 +184,11 @@ jobs:
         run: |
           if [ -z "$CF_API_TOKEN" ] || [ -z "$CF_ZONE_ID" ]; then echo "Cloudflare secrets not set; skipping purge"; exit 0; fi
           host="${URL#https://}"
+          # Exact URLs first: they work on every plan, so robots/sitemap are purged even if the prefix purge is refused.
+          curl -fsS -X POST "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/purge_cache" \
+            -H "Authorization: Bearer $CF_API_TOKEN" -H "Content-Type: application/json" \
+            --data "{\"files\":[\"$URL/robots.txt\",\"$URL/sitemap.xml\"]}" \
+            || echo "::warning::robots.txt/sitemap.xml cache purge failed; purge manually"
           curl -fsS -X POST "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/purge_cache" \
             -H "Authorization: Bearer $CF_API_TOKEN" -H "Content-Type: application/json" \
             --data "{\"prefixes\":[\"$host/og/\"]}" \

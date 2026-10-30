@@ -43,8 +43,8 @@ Open:
       The file itself is a valid 1200x630 PNG (114529 bytes, correct `IEND`, same bytes for a `facebookexternalhit` user agent, about
       0.2 s uncached). Click "Scrape Again"; if it persists, look in Cloudflare Security -> Events for blocked/challenged requests to
       `/og/default.png` from AS32934 (Facebook) and add a verified-bot exception (Bot Fight Mode / rate rules)
-- [ ] `deploy-api.yml`: also purge `$host/robots.txt` and `$host/sitemap.xml` next to the `/og/` prefix (today only `/og/` is purged,
-      so edge-cached robots/sitemap stay stale for up to 24 h after a deploy)
+- [x] `deploy-api.yml`: also purges `$URL/robots.txt` and `$URL/sitemap.xml` (exact URLs) next to the `/og/` prefix (2026-10-30; takes
+      effect on the next api deploy)
 - [ ] Google Search Console: verify the domain via DNS, submit `/sitemap.xml`, request indexing for `/`, `/stats`, `/read`
 - [ ] Bing Webmaster Tools: import from Search Console, submit the sitemap
 - [ ] **Diia Open Data services catalog** (backlink from the source itself): https://diia.data.gov.ua/services has an
