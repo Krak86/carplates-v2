@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import Timeline from '@/components/Timeline'
 import { toIntlLocale } from '@/lib/intl'
 
 import CompareSectionHeading from './CompareSectionHeading'
@@ -9,7 +10,7 @@ import { SIDE_COLOR } from './visuals'
 
 type Names = readonly [string, string]
 
-const BOX = { width: 360, height: 190, left: 44, right: 10, top: 12, bottom: 28 }
+const BOX = { width: 360, height: 190, left: 60, right: 10, top: 12, bottom: 28 }
 
 function Curve({
   title,
@@ -126,66 +127,53 @@ export function Curves({
   )
 }
 
-const GANTT_ROW = 18
-
-/** Production years of every generation of both models on one axis; the car's own generation is outlined. */
-export function GenerationGantt({ gantt, names }: { gantt: Gantt | null; names: Names }): ReactNode {
+/** Generations of both models, one newest-first timeline per car; the compared car's own generation is marked. */
+export function GenerationTimeline({ gantt, names }: { gantt: Gantt | null; names: Names }): ReactNode {
   const { t } = useTranslation()
   if (!gantt) return null
-  const width = 360
-  const left = 6
-  const span = gantt.to - gantt.from + 1
-  const x = (year: number): number => left + ((year - gantt.from) / span) * (width - left - 6)
-  const rows = ([0, 1] as const).flatMap(side => gantt.bars.filter(b => b.side === side))
-  const height = rows.length * GANTT_ROW + 22
 
   return (
     <section aria-labelledby="compare-timeline">
       <CompareSectionHeading section="timeline" title={t('compare.timeline.title')} />
-      <p className="mb-2 text-sm text-[var(--color-muted)]">{t('compare.timeline.note')}</p>
-      <svg
-        viewBox={`0 0 ${width} ${height}`}
-        role="img"
-        aria-label={t('compare.timeline.alt', { a: names[0], b: names[1] })}
-        className="h-auto w-full"
-      >
-        {rows.map((bar, i) => {
-          const y = i * GANTT_ROW + 2
-          const x1 = x(bar.yearFrom)
-          const bw = Math.max(x(bar.yearTo + 1) - x1, 4)
+      <p className="mb-3 text-sm text-[var(--color-muted)]">{t('compare.timeline.note')}</p>
+      <div className="grid gap-x-8 gap-y-4 md:grid-cols-2">
+        {([0, 1] as const).map(side => {
+          const bars = gantt.bars.filter(b => b.side === side).sort((p, q) => q.yearFrom - p.yearFrom)
+          if (bars.length === 0) return null
           return (
-            <g key={`${bar.side}-${bar.label}-${bar.yearFrom}`}>
-              <rect
-                x={x1}
-                y={y}
-                width={bw}
-                height={GANTT_ROW - 5}
-                rx="3"
-                fill={SIDE_COLOR[bar.side]}
-                fillOpacity={bar.current ? 1 : 0.35}
-                stroke={bar.current ? 'var(--color-fg)' : 'none'}
-                strokeWidth="1.5"
+            <div key={side}>
+              <h3
+                className="mb-2 text-base font-semibold"
+                style={{ borderLeft: `3px solid ${SIDE_COLOR[side]}`, paddingLeft: 8 }}
+              >
+                {names[side]}
+              </h3>
+              <Timeline
+                arrows="up"
+                items={bars.map(bar => ({
+                  key: `${bar.label}-${bar.yearFrom}`,
+                  highlight: bar.current,
+                  content: (
+                    <>
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="font-medium">
+                          {bar.yearFrom}-{bar.ongoing ? '' : bar.yearTo}
+                        </span>
+                        {bar.current && (
+                          <span className="rounded-full bg-[var(--color-primary)]/15 px-2 py-0.5 text-xs font-semibold text-[var(--color-primary)]">
+                            {t('compare.timeline.current')}
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-sm text-[var(--color-muted)]">{bar.label}</div>
+                    </>
+                  )
+                }))}
               />
-              <text x={x1 + 4} y={y + 9} fontSize="9" fill="var(--color-fg)">
-                {bar.label} {bar.yearFrom}-{bar.ongoing ? '' : bar.yearTo}
-              </text>
-            </g>
+            </div>
           )
         })}
-        <text x={left} y={height - 4} fontSize="10" fill="var(--color-muted)">
-          {gantt.from}
-        </text>
-        <text x={width - 6} y={height - 4} textAnchor="end" fontSize="10" fill="var(--color-muted)">
-          {gantt.to}
-        </text>
-      </svg>
-      <p className="text-sm">
-        {([0, 1] as const).map(side => (
-          <span key={side} className="mr-4" style={{ borderLeft: `3px solid ${SIDE_COLOR[side]}`, paddingLeft: 6 }}>
-            {names[side]}
-          </span>
-        ))}
-      </p>
+      </div>
     </section>
   )
 }
