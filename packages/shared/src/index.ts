@@ -124,6 +124,14 @@ export {
 } from './commonsImage.js'
 export { wikiSearchName, type WikiSearchName } from './wikiAliases.js'
 export {
+  CATALOG_HOWS,
+  catalogSlugs,
+  foldKnownModel,
+  type CatalogHow,
+  type CatalogSlugs,
+  type KnownModels
+} from './catalogKey.js'
+export {
   COMMONS_API,
   IMAGEINFO_BATCH,
   MAX_ATTEMPTS,
