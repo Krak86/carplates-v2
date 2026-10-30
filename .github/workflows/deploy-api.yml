@@ -175,7 +175,9 @@ jobs:
       # The api renders the /og/*.png link-preview cards and Cloudflare caches them for 24 h, so a new api build
       # (fonts, layout, data) would otherwise keep serving the old cards. robots.txt and sitemap.xml are edge-cached too and
       # change with the api build. Best-effort: the deploy itself already succeeded.
-      - name: Purge Cloudflare cache for the link-preview cards, robots.txt and sitemap.xml
+      # /cars* HTML (s-maxage 1 day) embeds the hashed web asset names and the server-rendered tags, so it must go with the build;
+      # /api/catalog/ answers are edge-cached 1 day too.
+      - name: Purge Cloudflare cache for the link-preview cards, catalog pages, robots.txt and sitemap.xml
         if: ${{ !inputs.sync_only }}
         env:
           CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
@@ -191,8 +193,8 @@ jobs:
             || echo "::warning::robots.txt/sitemap cache purge failed; purge manually"
           curl -fsS -X POST "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/purge_cache" \
             -H "Authorization: Bearer $CF_API_TOKEN" -H "Content-Type: application/json" \
-            --data "{\"prefixes\":[\"$host/og/\"]}" \
-            || echo "::warning::og card cache purge failed (purge by prefix may need a paid plan; purge manually)"
+            --data "{\"prefixes\":[\"$host/og/\",\"$host/cars\",\"$host/api/catalog/\"]}" \
+            || echo "::warning::og card / catalog cache purge failed (purge by prefix may need a paid plan; purge manually)"
 
       # IndexNow tells Bing, Yandex and the other participating engines which URLs to recrawl. The sitemap is the URL list
       # (up to 10,000 per request): /sitemap.xml is an index, so each child sitemap is read in turn. Widening the catalog past
