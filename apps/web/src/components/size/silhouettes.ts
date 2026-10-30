@@ -125,12 +125,13 @@ export const MIRROR_PATHS: Readonly<Partial<Record<SizeShape, string>>> = {
   truck: 'M0.9 0.3 Q0.9 0.24 0.94 0.245 L0.95 0.3 Z'
 }
 
-export const TAIL_COLOR = '#d4372c'
+/** Each reads a `--sil-*` variable so the blueprint style can recolour it; the fallback is the real colour. */
+export const TAIL_COLOR = 'var(--sil-tail, #d4372c)'
 /** Fixed, not themed: a tyre is dark and a rim is metal in both light and dark mode. */
-export const TYRE_COLOR = '#23262b'
-export const RIM_COLOR = '#c9ced6'
-export const SPOKE_COLOR = '#6b717b'
-export const LAMP_COLOR = '#f1eed6'
+export const TYRE_COLOR = 'var(--sil-tyre, #23262b)'
+export const RIM_COLOR = 'var(--sil-rim, #c9ced6)'
+export const SPOKE_COLOR = 'var(--sil-spoke, #6b717b)'
+export const LAMP_COLOR = 'var(--sil-lamp, #f1eed6)'
 
 /** Wheel diameter (mm) per shape. */
 export const WHEEL_MM: Readonly<Record<SizeShape, number>> = {
