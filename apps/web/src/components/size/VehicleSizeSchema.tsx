@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import SideSilhouette from '@/components/size/SideSilhouette'
+import SizeCarFront, { FRONT_PROFILES } from '@/components/size/SizeCarFront'
 import SizeCarTop from '@/components/size/SizeCarTop'
 import { axlePositions, WHEEL_MM } from '@/components/size/silhouettes'
 import type { SizeField, SizeFigures, SizeShape } from '@/components/size/VehicleSize.helpers'
@@ -146,7 +147,10 @@ export default function VehicleSizeSchema({ shape, figures, name, active = null,
   const viewX = -length * 0.16
   const viewY = -length * 0.03
   const viewW = length * 1.36
-  const viewH = topY + width + length * 0.1 - viewY
+  const hasFront = FRONT_PROFILES[shape] != null
+  const frontY = topY + width + length * 0.12
+  const frontX = (length - width) / 2
+  const viewH = (hasFront ? frontY + height + length * 0.16 : topY + width + length * 0.1) - viewY
 
   const text = (field: keyof SizeFigures, value: number): string =>
     `${estimatePrefix(figures[field]?.source ?? 'rdw')}${mmToMetres(value)} ${t('rdw.unitM')}`
@@ -326,6 +330,32 @@ export default function VehicleSizeSchema({ shape, figures, name, active = null,
             onActiveChange={onActiveChange}
           />
         </g>
+        {hasFront && (
+          <g>
+            <line
+              x1={frontX - length * 0.1}
+              y1={frontY + height}
+              x2={frontX + width + length * 0.1}
+              y2={frontY + height}
+              stroke="var(--color-muted)"
+              strokeWidth={1}
+              vectorEffect="non-scaling-stroke"
+            />
+            <SizeCarFront x={frontX} y={frontY} widthMm={width} heightMm={height} shape={shape} />
+            <Dim
+              x1={frontX}
+              y1={frontY + height + length * 0.07}
+              x2={frontX + width}
+              y2={frontY + height + length * 0.07}
+              label={text('widthMm', width)}
+              fontSize={fs}
+              dashed={isDashed('widthMm')}
+              field="widthMm"
+              active={active}
+              onActiveChange={onActiveChange}
+            />
+          </g>
+        )}
       </svg>
 
       <figcaption className="mt-1 text-xs text-[var(--color-muted)]">
