@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useSearchParams } from 'react-router'
 
+import CompareExportButton from '@/components/compare/CompareExportButton'
 import CompareSlotHeader from '@/components/compare/CompareSlotHeader'
 import CompareSlotPicker from '@/components/compare/CompareSlotPicker'
 import CompareSectionHeading from '@/components/compare/CompareSectionHeading'
@@ -18,6 +19,8 @@ import type { CompareGroup, CompareRef, CompareSlot } from '@/components/compare
 import { useCompareCar } from '@/components/compare/use-compare-car'
 import type { CompareCarState } from '@/components/compare/use-compare-car'
 import Card from '@/components/ui/Card'
+import { toIntlLocale } from '@/lib/intl'
+import { useRegionLabel } from '@/lib/region-label'
 import { scrollElementIntoView } from '@/lib/share-section'
 import SectionSkeleton from '@/components/ui/SectionSkeleton'
 import Skeleton from '@/components/ui/Skeleton'
@@ -87,7 +90,8 @@ function SlotCard({
 
 // Lazy-loaded (see App.tsx). `/compare?a=plate:AA1234BB&b=m:bmw/3series/2015/diesel`: two cars, one mirrored table.
 export default function CompareRoute(): ReactNode {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const regionLabel = useRegionLabel()
   const navigate = useNavigate()
   const [params] = useSearchParams()
   const [diffOnly, setDiffOnly] = useState(params.get('diff') === '1')
@@ -168,6 +172,19 @@ export default function CompareRoute(): ReactNode {
               <input type="checkbox" checked={diffOnly} onChange={e => setDiffOnly(e.target.checked)} />
               {t('compare.diffOnly')}
             </label>
+            {!pending && sections.length > 0 && (
+              <CompareExportButton
+                className="ml-auto"
+                input={{
+                  names: [slotName(states[0], 'a'), slotName(states[1], 'b')],
+                  sections,
+                  hidden,
+                  url: `${window.location.origin}${compareHref(refs[0], refs[1])}`,
+                  diffOnly,
+                  ctx: { locale: toIntlLocale(i18n.language), lang: i18n.language, t, regionLabel }
+                }}
+              />
+            )}
           </div>
 
           {pending && <VisualsSkeleton />}
