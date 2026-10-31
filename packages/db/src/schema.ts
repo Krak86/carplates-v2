@@ -4,6 +4,7 @@ import {
   bigserial,
   boolean,
   date,
+  doublePrecision,
   index,
   integer,
   jsonb,
@@ -1035,6 +1036,108 @@ export const auctionLots = registry.table(
 )
 export type AuctionLotRow = typeof auctionLots.$inferSelect
 export type AuctionLotInsert = typeof auctionLots.$inferInsert
+
+/**
+ * Road-safety (DTP) statistics from Patrol Police files (pre-aggregated, not per-crash) and the hazardous-section CSVs
+ * (data.gov.ua, CC BY). `period` is the last reported month (12 = full year, 1..9 = year-to-date); `region` is the canonical
+ * `plate_regions` name. See docs/road-safety-plan.md.
+ */
+export const dtpRegionYear = registry.table(
+  'dtp_region_year',
+  {
+    region: text('region').notNull(),
+    year: smallint('year').notNull(),
+    period: smallint('period').notNull(),
+    crashes: integer('crashes').notNull(),
+    deaths: integer('deaths').notNull(),
+    injured: integer('injured').notNull(),
+    pedestrianCrashes: integer('pedestrian_crashes'),
+    childCrashes: integer('child_crashes')
+  },
+  t => [primaryKey({ columns: [t.region, t.year, t.period] })]
+)
+
+export const dtpCauseYear = registry.table(
+  'dtp_cause_year',
+  {
+    year: smallint('year').notNull(),
+    period: smallint('period').notNull(),
+    cause: text('cause').notNull(),
+    crashes: integer('crashes').notNull(),
+    deaths: integer('deaths').notNull(),
+    injured: integer('injured').notNull()
+  },
+  t => [primaryKey({ columns: [t.year, t.period, t.cause] })]
+)
+
+export const dtpTypeYear = registry.table(
+  'dtp_type_year',
+  {
+    year: smallint('year').notNull(),
+    period: smallint('period').notNull(),
+    type: text('type').notNull(),
+    crashes: integer('crashes').notNull(),
+    deaths: integer('deaths').notNull(),
+    injured: integer('injured').notNull()
+  },
+  t => [primaryKey({ columns: [t.year, t.period, t.type] })]
+)
+
+/** Crashes over `month` (1..12), `weekday` (1 = Monday) or `hour` (0..23). */
+export const dtpTimeYear = registry.table(
+  'dtp_time_year',
+  {
+    year: smallint('year').notNull(),
+    period: smallint('period').notNull(),
+    dim: text('dim', { enum: ['month', 'weekday', 'hour'] }).notNull(),
+    bucket: smallint('bucket').notNull(),
+    crashes: integer('crashes').notNull(),
+    deaths: integer('deaths').notNull(),
+    injured: integer('injured').notNull()
+  },
+  t => [primaryKey({ columns: [t.year, t.period, t.dim, t.bucket] })]
+)
+
+export const dtpRoadYear = registry.table(
+  'dtp_road_year',
+  {
+    roadCode: text('road_code').notNull(),
+    year: smallint('year').notNull(),
+    period: smallint('period').notNull(),
+    roadName: text('road_name').notNull(),
+    crashes: integer('crashes').notNull(),
+    deaths: integer('deaths').notNull(),
+    injured: integer('injured').notNull()
+  },
+  t => [primaryKey({ columns: [t.roadCode, t.year, t.period] })]
+)
+
+/** Hazardous sections and crash concentration places; coordinates are null when missing or outside Ukraine. */
+export const dtpHazardSection = registry.table(
+  'dtp_hazard_section',
+  {
+    year: smallint('year').notNull(),
+    kind: text('kind', { enum: ['hazard', 'concentration'] }).notNull(),
+    seq: integer('seq').notNull(),
+    region: text('region').notNull(),
+    roadCode: text('road_code').notNull(),
+    roadName: text('road_name').notNull(),
+    kmStart: integer('km_start'),
+    kmEnd: integer('km_end'),
+    latStart: doublePrecision('lat_start'),
+    lonStart: doublePrecision('lon_start'),
+    latEnd: doublePrecision('lat_end'),
+    lonEnd: doublePrecision('lon_end'),
+    crashes3y: integer('crashes_3y'),
+    rate: numeric('rate', { precision: 6, scale: 2, mode: 'number' }),
+    hazardLevel: text('hazard_level')
+  },
+  t => [
+    primaryKey({ columns: [t.year, t.kind, t.seq] }),
+    index('ix_dtp_hazard_section_region').on(t.year, t.region),
+    index('ix_dtp_hazard_section_road').on(t.roadCode)
+  ]
+)
 
 /** stolen.in.ua scrape resume state: one row per fetched month page (`aug-20`). */
 export const wantedScrapePages = registry.table('wanted_scrape_pages', {
