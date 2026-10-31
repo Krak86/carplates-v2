@@ -20,6 +20,12 @@ export const RELEASES: readonly ReleaseDay[] = [
     items: [
       item(
         'new',
+        'Пошук за номером, якого немає в реєстрі, тепер перевіряє списки розшуку (авто та «Гарпун», зокрема старі номери) і лоти СЕТАМ: якщо збіг є, показано банер про інше джерело, відомі дані про авто та VIN, а за наявності VIN - повну картку VIN; розділи розшуку й аукціонів відкриті одразу, а на сторінці VIN вони тепер враховують і номер',
+        'Поиск по номеру, которого нет в реестре, теперь проверяет списки розыска (авто и «Гарпун», в том числе старые номера) и лоты СЕТАМ: при совпадении показан баннер об ином источнике, известные данные об авто и VIN, а при наличии VIN - полная карточка VIN; разделы розыска и аукционов открыты сразу, а на странице VIN они теперь учитывают и номер',
+        'Searching a plate that is not in the registry now checks the wanted lists (vehicles and "Garpun", including old plates) and SETAM lots: on a match you get a banner about the other source, the vehicle data and VIN, and with a VIN the full VIN card; the wanted and auction sections open right away, and on the VIN page they now use the plate as well'
+      ),
+      item(
+        'new',
         'В історії авто на картці з’явилися події розшуку: коли транспортний засіб чи номерний знак (Гарпун) внесли до списку й коли зняли, поряд з реєстраційними операціями та аукціонами; розділ тепер називається «Історія авто»',
         'В истории авто на карточке появились события розыска: когда транспортное средство или номерной знак (Гарпун) внесли в список и когда сняли, рядом с регистрационными операциями и аукционами; раздел теперь называется «История авто»',
         'The car history on the card now shows wanted-list events: when a vehicle or a plate (Garpun) was put on the list and when it was removed, next to the registration operations and auctions; the section is now called "Car history"'
