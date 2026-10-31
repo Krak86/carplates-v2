@@ -15,6 +15,7 @@ import { auctionStatsQuery, fxQuery } from '@/lib/queries'
 import StatsSkeleton from '@/routes/stats/StatsSkeleton'
 import AuctionsBreakdown from '@/routes/auctions/AuctionsBreakdown'
 import AuctionsLotList from '@/routes/auctions/AuctionsLotList'
+import AuctionsNewLots from '@/routes/auctions/AuctionsNewLots'
 import { dimensionRows, formatDelta } from '@/routes/auctions/helpers'
 import { AUCTION_DIMENSIONS, AUCTION_DIMENSION_ICONS } from '@/routes/auctions/types'
 import type { FilterableDimension } from '@/routes/auctions/types'
@@ -58,6 +59,11 @@ export default function AuctionsRoute(): ReactNode {
     document.getElementById('auction-lots')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
+  const handleShowOpen = (): void => {
+    setParams({ outcome: 'open', sort: 'newest', asc: null, status: null })
+    document.getElementById('auction-lots')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
   return (
     <div className="mx-auto w-full max-w-6xl">
       <div className="mb-4 flex flex-wrap items-center gap-3">
@@ -98,6 +104,8 @@ export default function AuctionsRoute(): ReactNode {
               </Card>
             ))}
           </div>
+
+          <AuctionsNewLots currency={currency} fx={fx} onShowAll={handleShowOpen} />
 
           <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
             <div className="flex flex-wrap gap-1 rounded-lg bg-[var(--color-bg)]/85 p-1 backdrop-blur-sm">

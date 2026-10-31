@@ -137,6 +137,22 @@ export default function AuctionsLotList({ query, makes, regions, currency, fx, o
         </label>
 
         <label className="flex flex-col gap-1 text-xs text-[var(--color-muted)]">
+          {t('auctions.page.statusLabel')}
+          <select
+            value={query.status ?? ''}
+            onChange={e => onChange({ status: e.target.value })}
+            className={cn(FIELD, 'max-w-44')}
+          >
+            <option value="">{t('auctions.page.any')}</option>
+            {Object.entries(LOT_STATUS_KEYS).map(([status, key]) => (
+              <option key={status} value={status}>
+                {t(`uaAuctions.status.${key}`)}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label className="flex flex-col gap-1 text-xs text-[var(--color-muted)]">
           {t('auctions.page.outcomeLabel')}
           <select value={query.outcome} onChange={e => onChange({ outcome: e.target.value })} className={FIELD}>
             {AUCTION_OUTCOMES.map(o => (

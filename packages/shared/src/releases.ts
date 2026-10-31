@@ -26,9 +26,9 @@ export const RELEASES: readonly ReleaseDay[] = [
       ),
       item(
         'new',
-        'Сторінка /auctions: усі лоти українських аукціонів арештованих авто (СЕТАМ) зі статистикою за регіонами, марками, роками й місяцями (скільки продано, середня різниця між ціною продажу й стартовою, медіана ціни), фільтрами за маркою, регіоном, результатом і ціною та посиланням на лот',
-        'Страница /auctions: все лоты украинских аукционов арестованных авто (СЕТАМ) со статистикой по регионам, маркам, годам и месяцам (сколько продано, средняя разница между ценой продажи и стартовой, медиана цены), фильтрами по марке, региону, результату и цене и ссылкой на лот',
-        'An /auctions page: every lot of the Ukrainian seized-car auctions (SETAM) with statistics by region, make, year and month (how many sold, average sale vs start price, median price), filters by make, region, result and price, and a link to each lot'
+        'Сторінка /auctions: усі лоти українських аукціонів арештованих авто (СЕТАМ) зі статистикою за регіонами, марками, роками й місяцями (скільки продано, середня різниця між ціною продажу й стартовою, медіана ціни), фільтрами за маркою, регіоном, статусом, результатом і ціною, блоком нових відкритих лотів і посиланням на кожен лот',
+        'Страница /auctions: все лоты украинских аукционов арестованных авто (СЕТАМ) со статистикой по регионам, маркам, годам и месяцам (сколько продано, средняя разница между ценой продажи и стартовой, медиана цены), фильтрами по марке, региону, статусу, результату и цене, блоком новых открытых лотов и ссылкой на каждый лот',
+        'An /auctions page: every lot of the Ukrainian seized-car auctions (SETAM) with statistics by region, make, year and month (how many sold, average sale vs start price, median price), filters by make, region, status, result and price, a block of the newest open lots, and a link to each lot'
       ),
       item(
         'improved',

@@ -160,6 +160,7 @@ export class AuctionsStatsService {
     const where = and(
       query.make ? eq(auctionLots.make, query.make) : undefined,
       query.region ? eq(auctionLots.region, query.region) : undefined,
+      query.status ? eq(auctionLots.status, query.status) : undefined,
       query.minPrice !== undefined ? gte(auctionLots.startPrice, query.minPrice) : undefined,
       query.maxPrice !== undefined ? lte(auctionLots.startPrice, query.maxPrice) : undefined,
       outcomeFilter[query.outcome]

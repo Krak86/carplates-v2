@@ -27,6 +27,7 @@ export function useAuctionFilters() {
   const query: AuctionListQuery = {
     make: searchParams.get('make') ?? undefined,
     region: searchParams.get('region') ?? undefined,
+    status: searchParams.get('status') ?? undefined,
     outcome,
     sort,
     asc: searchParams.get('asc') === 'true' ? 'true' : 'false',

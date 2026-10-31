@@ -62,6 +62,8 @@ export const AUCTION_PAGE_SIZE = 25
 export const auctionListQuerySchema = z.object({
   make: z.string().trim().min(1).max(60).optional(),
   region: z.string().trim().min(1).max(60).optional(),
+  /** Feed status as published (`Торги відбулися`, …), exact match. */
+  status: z.string().trim().min(1).max(60).optional(),
   outcome: z.enum(AUCTION_OUTCOMES).default(DEFAULT_AUCTION_OUTCOME),
   /** Start price bounds, hryvnias. */
   minPrice: z.coerce.number().min(0).max(1e10).optional(),
@@ -78,6 +80,7 @@ export const auctionListQuerySchema = z.object({
 export type AuctionListQuery = {
   make?: string
   region?: string
+  status?: string
   outcome?: AuctionOutcome
   minPrice?: number
   maxPrice?: number
