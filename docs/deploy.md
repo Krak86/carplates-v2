@@ -243,10 +243,10 @@ Registry data lost with the full dumps: re-ingest from `archive/` ZIPs (`backup.
    server errors are not tracked), `PLATE_RECOGNIZER_CLOUD_TOKEN`. `TURNSTILE_*` is set (2026-10-27).
 8. **Ingest cron (live 2026-10-28).** `deploy-ingest.yml` (path-filtered: `scripts/**`, shared, db, `infra/vps/*ingest*`) builds `scripts/Dockerfile`, pulls it on the VPS,
    writes `/opt/carsua/env/ingest.env` (`DATABASE_URL`, `HC_PING_*`), syncs `run-ingest.sh` / `ingest-status.sh` / the compose file and installs
-   `infra/vps/ingest.cron` as the `deploy` user's crontab (replaces it; it was empty). Jobs: `news`, `social`, `wanted` + `wanted-plates` (Garpun, 04:45) + `auctions` (SETAM lots, 04:55) daily, `plates` Tue + Fri
+   `infra/vps/ingest.cron` as the `deploy` user's crontab (replaces it; it was empty). Jobs: `news`, `social`, `wanted` + `wanted-plates` (Garpun, 04:45) + `auctions` (SETAM lots, 04:55) daily, `dtp-patrol` (road-crash XLSX, 5th of the month 05:35) and `dtp-hazards` (hazardous sections, 10 Feb 05:45), `plates` Tue + Fri
    (crontab times are the VPS's local time, CET). Details, the first-load procedure and gotchas: SCHEDULE.md. Check: `crontab -l`,
    `~/ingest-status.sh`, `SELECT * FROM registry.job_runs ORDER BY id DESC`. Skipped for now (2026-10-28), so ingest failures are not alerted: create one healthchecks.io check per job (news/social/wanted/wanted-plates/auctions 1 d,
-   plates 7 d + 1 d grace), add the GitHub secrets `HC_PING_NEWS|SOCIAL|WANTED|WANTED_PLATES|AUCTIONS|PLATES` to the `production` environment, re-run `deploy-ingest`.
+   plates 7 d + 1 d grace, dtp-patrol 35 d + 3 d grace, dtp-hazards 400 d + 7 d grace), add the GitHub secrets `HC_PING_NEWS|SOCIAL|WANTED|WANTED_PLATES|AUCTIONS|PLATES|DTP_PATROL|DTP_HAZARDS` to the `production` environment, re-run `deploy-ingest`.
    A `plates` run that loaded something runs `backup.sh archive` + `full` by itself. The first manual load (2026-10-28) is written up in
    `docs/plan-done.md` "Ingest cron".
    First load of Garpun + SETAM (2026-10-31): `run-ingest.sh wanted-plates` once, and the SETAM backfill `docker compose run --rm --no-deps -T --user "$(id -u):$(id -g)" ingest tsx src/auctions.ts --all` (`run-ingest.sh auctions` loads only the newest 2 files). If `/api/auctions/stats` was requested while the table was empty it keeps serving zeros (API memory 10 min + Cloudflare 5 min): restart the live api colour, then purge that URL. Details: `docs/garpun-auctions-plan.md`.

@@ -8,7 +8,8 @@ import {
   parseYearParam,
   partialMonth,
   peakBucket,
-  rankedRegions
+  rankedRegions,
+  regionCrashFact
 } from './helpers'
 
 const region = (name: string, rankDeaths: number, rankRate: number | null) => ({
@@ -99,5 +100,24 @@ describe('mapRows', () => {
 
   it('maps the rate rounded to one decimal and skips regions without one', () => {
     expect(mapRows(rows, 'rate')).toEqual([{ label: 'A', value: 3.5 }])
+  })
+})
+
+describe('regionCrashFact', () => {
+  const data = {
+    year: 2025,
+    period: 12,
+    years: [],
+    national: { crashes: 3, deaths: 3, injured: 3 },
+    regions: [region('A', 2, 1), { ...region('B', 1, 2), crashes: 40 }]
+  }
+
+  it('gives crashes, the deaths rank and the region count', () => {
+    expect(regionCrashFact(data, 'B')).toEqual({ year: 2025, crashes: 40, rank: 1, of: 2 })
+  })
+
+  it('is null for an unknown or missing region', () => {
+    expect(regionCrashFact(data, 'C')).toBeNull()
+    expect(regionCrashFact(data, null)).toBeNull()
   })
 })

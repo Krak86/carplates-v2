@@ -4284,3 +4284,5 @@ Question: are there free sources for ex-USSR/Russian cars, Baltic registry data 
 - **Lazy:** map, roads, causes and time are `LazySection`s (own chunks and queries). None is shareable by `?section=`, so nothing was added to `SHARE_SECTIONS`.
 - **Site plumbing:** About `SOURCES` `patrolPolice` + `irsu` and `about.feature.roadSafety`, `section.about.roadSafety`, release entry 2026-11-01. Hazardous sections (Infrastructure Restoration Agency) are loaded and served by the API but not drawn on the page yet.
 - **Tests:** `road-safety/helpers.test.ts`.
+- **Plate-card chip (step 8):** `components/RegionCrashChip.tsx` ("Region: N crashes in <year>, rank k of M", deaths rank, links to `/road-safety`), rendered in `ResultCard` after `TopStatBadges`; `regionCrashFact` in `routes/road-safety/helpers.ts`. Online-only (no `offline-cache.ts`), nothing when the region has no row. i18n `result.regionCrashes*`.
+- **Refresh cron (step 10):** jobs `dtp-patrol` (monthly, the 5th) and `dtp-hazards` (yearly, 10 Feb) in `scripts/src/jobs.ts`, `ingest.cron`, `run-ingest.sh`, `HC_PING_DTP_*` in `deploy-ingest.yml`; the healthchecks.io checks and GitHub secrets are still to create.

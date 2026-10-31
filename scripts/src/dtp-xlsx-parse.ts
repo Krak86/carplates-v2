@@ -30,7 +30,7 @@ const text = (v: unknown): string =>
   v === null || v === undefined
     ? ''
     : String(v)
-        .replace(/[\s ]+/g, ' ')
+        .replace(/[\s\u00a0]+/g, ' ')
         .trim()
 
 const num = (v: unknown): number | null => {

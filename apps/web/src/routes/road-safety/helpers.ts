@@ -66,3 +66,12 @@ export function mapRows(regions: readonly RegionRow[], metric: RegionMapMetric):
   }
   return rows
 }
+
+export type RegionCrashFact = { year: number; crashes: number; rank: number; of: number }
+
+/** The plate card's "N crashes in <year>, rank k of M" for one region (deaths rank), or null when the year has no row for it. */
+export function regionCrashFact(data: RoadSafetyRegionsResponse, region: string | null): RegionCrashFact | null {
+  const row = region ? data.regions.find(r => r.region === region) : undefined
+  if (!row) return null
+  return { year: data.year, crashes: row.crashes, rank: row.rankDeaths, of: data.regions.length }
+}

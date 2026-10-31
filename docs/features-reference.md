@@ -660,5 +660,6 @@ Plan: [compare-plan.md](compare-plan.md). Phases 1-3 and the client side of phas
 - **Sections:** map, roads, causes and time are `LazySection`s without `sections` ids (not shareable by `?section=`); a shareable one would need a `SHARE_SECTIONS` id plus a `SECTION_TEXT` entry in `spa-text.ts`.
 - **Names:** region labels are the Ukrainian `REGIONS` names; road names, causes and crash types are shown as the Patrol Police files spell them (Ukrainian, not translated).
 - **Sources / licence:** Patrol Police statistics (no explicit licence, cite the source) and Infrastructure Restoration Agency hazardous sections (CC BY, data.gov.ua). About `SOURCES` `patrolPolice` and `irsu`.
-- **Open:** plate-card region link (plan step 8), monthly refresh cron (step 10), the Cloudflare Cache Rule must list `/api/road-safety/` (expression in `docs/deploy.md`, edited in the dashboard), `/api/road-safety` is not in `PUBLIC_API_PATH_PREFIXES`.
-- **Tests:** `routes/road-safety/helpers.test.ts`; API `road-safety/helpers.test.ts`.
+- **Plate-card chip:** `RegionCrashChip` (in `ResultCard`) shows the plate region's crashes and deaths rank from `roadSafetyRegionsQuery()`; online-only, hidden when there is no row. **Refresh:** cron jobs `dtp-patrol` (monthly) and `dtp-hazards` (yearly), healthchecks `HC_PING_DTP_PATROL|HAZARDS`; re-export seed CSVs by hand after a real change.
+- **Open:** the Cloudflare Cache Rule must list `/api/road-safety/` (expression in `docs/deploy.md`, edited in the dashboard), `/api/road-safety` is not in `PUBLIC_API_PATH_PREFIXES`.
+- **Tests:** `routes/road-safety/helpers.test.ts` (incl. `regionCrashFact`); API `road-safety/helpers.test.ts`.

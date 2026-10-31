@@ -23,6 +23,12 @@ export const RELEASES: readonly ReleaseDay[] = [
         'Сторінка /road-safety зі статистикою ДТП за даними Патрульної поліції: загиблі й ДТП за областями (також на 100 000 зареєстрованих авто), дороги державного значення, причини й види ДТП, година й день тижня, вибір року; це зведені дані без марок і моделей, тож не ризик окремої моделі',
         'Страница /road-safety со статистикой ДТП по данным Патрульной полиции: погибшие и ДТП по областям (также на 100 000 зарегистрированных авто), дороги государственного значения, причины и виды ДТП, час и день недели, выбор года; это сводные данные без марок и моделей, поэтому не риск отдельной модели',
         'A new /road-safety page with road crash statistics from Patrol Police data: deaths and crashes by region (also per 100,000 registered cars), state roads, crash causes and types, hour and weekday, with a year picker; the figures are aggregates without makes or models, so not a per-model risk'
+      ),
+      item(
+        'new',
+        'У картці номера з’явився чип з ДТП в області номера (кількість за рік і місце за загиблими), який веде на /road-safety',
+        'В карточке номера появился чип с ДТП в области номера (число за год и место по погибшим), который ведет на /road-safety',
+        'The plate card now shows a chip with road crashes in the plate region (count for the year and rank by deaths), linking to /road-safety'
       )
     ]
   },
