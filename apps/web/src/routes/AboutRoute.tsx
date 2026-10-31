@@ -312,7 +312,8 @@ const FEATURES = [
   'pwa',
   'agents',
   'roadmap',
-  'drawings'
+  'drawings',
+  'contact'
 ] as const
 
 // Lazy-loaded (see App.tsx).
@@ -372,6 +373,10 @@ export default function AboutRoute(): ReactNode {
             {' · '}
             <Link to="/terms" className="text-[var(--color-primary)] underline">
               {t('legal.terms.heading')}
+            </Link>
+            {' · '}
+            <Link to="/contact" className="text-[var(--color-primary)] underline">
+              {t('contact.heading')}
             </Link>
           </p>
         </div>

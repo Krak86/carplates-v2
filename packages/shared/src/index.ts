@@ -772,3 +772,11 @@ export {
   shareAliasPath,
   type ShareAlias
 } from './shareAliases.js'
+export {
+  CONTACT_MESSAGE_MAX,
+  CONTACT_MESSAGE_MIN,
+  CONTACT_TOPICS,
+  contactConfigSchema,
+  contactRequestSchema
+} from './contact.js'
+export type { ContactConfig, ContactRequest, ContactTopic } from './contact.js'

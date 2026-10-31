@@ -12,6 +12,7 @@ import {
   adminDigestTestResponseSchema,
   adminUsersResponseSchema,
   authConfigResponseSchema,
+  contactConfigSchema,
   REAUTH_REQUIRED,
   emailStartResponseSchema,
   reauthResponseSchema,
@@ -95,6 +96,8 @@ import type {
   AdminDigestStatus,
   AdminUsersResponse,
   AuthConfigResponse,
+  ContactConfig,
+  ContactRequest,
   FeaturesResponse,
   FeaturesUpdateRequest,
   SessionResponse,
@@ -874,4 +877,12 @@ export async function getWanted(plate: string | null, vin: string | null): Promi
 /** Aggregates for the /wanted page: totals, by year / region / brand / model / type / colour, recent lists. */
 export async function getWantedStats(): Promise<WantedStatsResponse> {
   return wantedStatsResponseSchema.parse(await getJson('/api/wanted/stats'))
+}
+
+export async function getContactConfig(): Promise<ContactConfig> {
+  return contactConfigSchema.parse(await getJson('/api/contact/config'))
+}
+
+export async function sendContactMessage(request: ContactRequest): Promise<void> {
+  await sendJson('POST', '/api/contact', request)
 }

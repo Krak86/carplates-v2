@@ -11,6 +11,7 @@ export const ROUTE_TITLE_KEYS: Record<string, string> = {
   '/install': 'install.heading',
   '/privacy': 'legal.privacy.heading',
   '/terms': 'legal.terms.heading',
+  '/contact': 'contact.heading',
   '/history': 'nav.history',
   '/favorites': 'nav.favorites',
   '/stats': 'nav.stats',

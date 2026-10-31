@@ -16,6 +16,17 @@ const item = (group: ReleaseGroup, ua: string, ru: string, en: string): ReleaseI
  */
 export const RELEASES: readonly ReleaseDay[] = [
   {
+    date: '2026-10-31',
+    items: [
+      item(
+        'new',
+        'Сторінка /contact: форма зв’язку, що приватно доходить до команди (поштову адресу не публікуємо), і можливість замовити новий застосунок; посилання «© рік carsua.app» тепер у футері кожної сторінки',
+        'Страница /contact: форма связи, которая приватно доходит до команды (почтовый адрес не публикуем), и возможность заказать новое приложение; ссылка «© год carsua.app» теперь в футере каждой страницы',
+        'A /contact page: a form that reaches the team privately (no email address is published) and a way to order a new app; a "© year carsua.app" link now sits in the footer of every page'
+      )
+    ]
+  },
+  {
     date: '2026-10-30',
     items: [
       item(

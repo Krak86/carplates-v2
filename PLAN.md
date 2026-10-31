@@ -1118,6 +1118,7 @@ card-on-file subscriptions; revisit with real quotes.
 - ✅ **Monthly digest mail (2026-10-28):** opt-in on /profile, sent on the 1st for the previous month from the release log (only if it had a `new` item), one-click unsubscribe, admin test send; migration 0078, `DIGEST_ENABLED=true` on prod; first real send 2026-11-01, check it then — see `docs/plan-done.md`.
 - ✅ **Racer / flags / verification polish (2026-10-25):** region backdrops, smoke + wreck, 10 km end, flag preview, OTK + licence links, glossary, RIA copy-first modal; About sources MVS HSC + flag-icons — see `docs/plan-done.md`.
 - ✅ **About sources (2026-10-14):** 8 auction link-out sites added as logo-less tiles (no logo licence found), Telegram Login logo added — see `docs/plan-done.md`.
+- ✅ **Contact page + footer copyright (2026-10-31):** `/contact` (who we are, order an app, Resend-backed form with throttle + Turnstile + honeypot, `CONTACT_TO` secret) and `© year carsua.app` in every footer — see `docs/plan-done.md`.
 - **Other providers (researched 2026-10-12, not planned yet):** GitHub (client id + secret, code flow), Microsoft
   (client id, OIDC), Facebook/Meta (app id + secret, needs privacy URL + data-deletion URL + Live app), Apple (Services
   ID + Team ID + Key ID + `.p8`, $99/yr, secret JWT rotates ≤ 6 months — skip unless a store app ships).

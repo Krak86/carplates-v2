@@ -234,3 +234,4 @@ To see real HTML mails run `docker compose -f infra/docker-compose.yml up -d mai
 <http://localhost:8025>. Template previews (dev only): <http://localhost:3000/api/dev/emails>. For the magic link to open the
 Vite app set `PUBLIC_SITE_URL=http://localhost:5173`. Production refuses to boot without `AUTH_SECRET` (≥ 32 chars), a real
 `PUBLIC_SITE_URL` and `MAIL_TRANSPORT=smtp|resend`; send from a subdomain (`mail.carsua.app`) with SPF + DKIM from the provider and a DMARC record.
+The `/contact` form mails `CONTACT_TO` (a private inbox, never shown on the site) through the same transport; leave it unset and the form is disabled. Locally set it with `MAIL_TRANSPORT=smtp` (Mailpit) or `log` (prints to the API log).

@@ -52,6 +52,10 @@ export default function LegalRoute({ doc }: Props): ReactNode {
             {t('nav.discuss')}
           </Link>
           {' · '}
+          <Link to="/contact" className="text-[var(--color-primary)] underline">
+            {t('contact.heading')}
+          </Link>
+          {' · '}
           <Link to={`/${other}`} className="text-[var(--color-primary)] underline">
             {t(`legal.${other}.heading`)}
           </Link>

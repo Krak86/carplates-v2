@@ -24,6 +24,7 @@ import {
   getAdminDigest,
   getAdminUsers,
   getAuthConfig,
+  getContactConfig,
   getSessions,
   getSignInMethods,
   getCardBundle,
@@ -741,4 +742,8 @@ export function wantedQuery(plate: string | null, vin: string | null) {
 // /wanted page aggregates — live data like wantedQuery (no offline group); the API caches 10 min.
 export function wantedStatsQuery() {
   return queryOptions({ queryKey: ['wanted', 'stats'], queryFn: getWantedStats, staleTime: 5 * 60_000 })
+}
+
+export function contactConfigQuery() {
+  return queryOptions({ queryKey: ['contact', 'config'], queryFn: getContactConfig, staleTime: 5 * 60_000 })
 }

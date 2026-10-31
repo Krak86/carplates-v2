@@ -62,6 +62,8 @@ const envSchema = z.object({
   SMTP_URL: z.string().default('smtp://localhost:1025'),
   MAIL_FROM: z.string().default('carsua.app <no-reply@localhost>'),
   MAIL_REPLY_TO: z.string().optional(),
+  /** Private inbox that receives `/contact` form messages. Absent → the form is disabled (`enabled: false`, POST 503). */
+  CONTACT_TO: z.string().optional(),
   /** Sender of the monthly digest (a separate subdomain keeps its reputation apart from the sign-in codes); falls back to `MAIL_FROM`. */
   MAIL_FROM_NEWS: z.string().optional(),
   /** Monthly "what's new" digest to opted-in users: sent on the 1st for the previous month. Off by default (never mails from dev/stage data). */

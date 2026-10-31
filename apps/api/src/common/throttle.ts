@@ -27,3 +27,5 @@ export const ORIGIN_THROTTLE = { medium: { limit: 60, ttl: 60_000 } }
 export const CATALOG_THROTTLE = { medium: { limit: 60, ttl: 60_000 } }
 /** Token-checked unsubscribe endpoints: a forged-token guesser gets few tries (a real user needs one). */
 export const UNSUBSCRIBE_THROTTLE = { medium: { limit: 20, ttl: 60_000 } }
+/** Contact form: it sends a real email, so a few messages per IP per hour is plenty. */
+export const CONTACT_THROTTLE = { default: { ttl: 3_600_000, limit: 5 } }
