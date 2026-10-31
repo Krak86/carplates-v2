@@ -27,6 +27,8 @@ type Props = {
   vin: string | null
   /** Bumped by the header chip: each change opens the section and scrolls to it (0 = never asked). */
   openSignal?: number
+  /** Starts expanded without scrolling to the section (the page shows it as part of the first view). */
+  startOpen?: boolean
 }
 
 const LINK_CLASS = 'text-[var(--color-primary)] underline'
@@ -48,7 +50,7 @@ function ExternalLink({ href, children }: { href: string; children: ReactNode })
  * collapsed until the visitor opens it (header chip, share link). Closes with static copy: a short history of the Ukrainian
  * auctions, a comparison with world practice, and where to take part (link-out to the SETAM home, no per-lot URL).
  */
-export default function UaAuctionCheck({ plate, vin, openSignal = 0 }: Props): ReactNode {
+export default function UaAuctionCheck({ plate, vin, openSignal = 0, startOpen = false }: Props): ReactNode {
   const { t, i18n } = useTranslation()
   const [searchParams] = useSearchParams()
   const isShared = searchParams.get('section') === 'ua-auctions'
@@ -89,7 +91,7 @@ export default function UaAuctionCheck({ plate, vin, openSignal = 0 }: Props): R
       actions={<ShareButton section="ua-auctions" label={t('share.button', { section: title })} />}
       showLabel={t('uaAuctions.show')}
       hideLabel={t('uaAuctions.hide')}
-      defaultOpen={isShared}
+      defaultOpen={isShared || startOpen}
       openSignal={openSignal}
     >
       {isError && <p className="mb-2 text-sm text-[var(--color-muted)]">{t('uaAuctions.error')}</p>}

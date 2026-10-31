@@ -102,6 +102,7 @@
   "result.notFound.plate": "Plate",
   "otherSources.banner": "Not in the vehicle registry, but this plate appears in another source: {{sources}}.",
   "otherSources.note": "The details below come from that source, not from the registry. They describe the vehicle at the time of the record and may be incomplete or out of date.",
+  "otherSources.noteVin": "The card below is built from the VIN found in that source. The registry history, if any, belongs to the VIN and may show a different plate; the other details are from the source and may be out of date.",
   "otherSources.vehicle": "Vehicle",
   "otherSources.type": "Type",
   "result.notFound.hintPlate": "The plate format is valid, but it isn't in the registry data. Either the vehicle was registered before January 2013 (not covered by the open data), or after 29 April 2026 - since May 2026 the registry no longer publishes plates, so those vehicles can only be found by VIN. Plates are in the database for January 2013 – 29 April 2026.",

@@ -1,11 +1,14 @@
+import { lazy, Suspense } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router'
 import { useQuery } from '@tanstack/react-query'
+import { isVin } from '@carplates/shared'
 
 import UaAuctionCheck from '@/components/UaAuctionCheck'
 import WantedCheck from '@/components/WantedCheck'
-import { auctionLotsQuery, wantedQuery } from '@/lib/queries'
+import { auctionLotsQuery, vinQuery, wantedQuery } from '@/lib/queries'
+
+const VinResult = lazy(() => import('@/components/VinResult'))
 
 type Props = {
   plate: string
@@ -15,10 +18,10 @@ type Props = {
 const firstOf = <T,>(values: (T | null | undefined)[]): T | null => values.find(v => !!v) ?? null
 
 /**
- * Shown under a registry 404 for a valid plate: when the plate is in the wanted lists or a SETAM auction lot, say so and
- * show what those sources hold (vehicle, VIN, the sections themselves). Renders nothing while loading or without a hit.
- * Shares both queries with the card sections, so there are no extra requests. Only the plate is the key: a VIN found here
- * links to its own page for a registry lookup.
+ * Shown under a registry 404 for a plate: when the plate is in the wanted lists or a SETAM auction lot, say so and show what
+ * those sources hold. With a VIN-shaped VIN in those records the full VIN card follows (registry history of the VIN, decode,
+ * the same wanted / auction sections keyed on plate AND VIN); without one the sections open by themselves so the page
+ * starts with the data visible. Renders nothing while loading or without a hit. Shares its queries with the sections.
  */
 export default function OtherSourcesFound({ plate }: Props): ReactNode {
   const { t } = useTranslation()
@@ -30,6 +33,11 @@ export default function OtherSourcesFound({ plate }: Props): ReactNode {
   const lots = auctions?.lots ?? []
   const inWanted = records.length > 0 || plates.length > 0
   const inAuctions = lots.length > 0
+
+  const vin = firstOf([...records.map(r => r.vin), ...lots.map(l => l.vin)])
+  const usableVin = vin && isVin(vin) ? vin : null
+  const vinCard = useQuery({ ...vinQuery(usableVin ?? ''), enabled: !!usableVin }).data
+
   if (!inWanted && !inAuctions) return null
 
   const brand = firstOf([...records.map(r => r.brand), ...lots.map(l => l.make)])
@@ -37,7 +45,6 @@ export default function OtherSourcesFound({ plate }: Props): ReactNode {
   const year = firstOf(lots.map(l => l.year))
   const color = firstOf(records.map(r => r.color))
   const vehicleType = firstOf(records.map(r => r.vehicleType))
-  const vin = firstOf([...records.map(r => r.vin), ...lots.map(l => l.vin)])
   const vehicle = [brand, model, year].filter(Boolean).join(' ')
   const sources = [inWanted && t('wanted.title'), inAuctions && t('uaAuctions.title')].filter(Boolean).join(', ')
 
@@ -45,14 +52,7 @@ export default function OtherSourcesFound({ plate }: Props): ReactNode {
     [t('otherSources.vehicle'), vehicle || null],
     [t('otherSources.type'), vehicleType],
     [t('wanted.color'), color],
-    [
-      t('wanted.vin'),
-      vin && (
-        <Link to={`/${vin}`} className="font-mono text-[var(--color-primary)] underline">
-          {vin}
-        </Link>
-      )
-    ]
+    [t('wanted.vin'), vin && <span className="font-mono">{vin}</span>]
   ]
 
   return (
@@ -64,7 +64,8 @@ export default function OtherSourcesFound({ plate }: Props): ReactNode {
         {t('otherSources.banner', { sources })}
       </p>
 
-      {facts.some(([, value]) => !!value) && (
+      {/* The VIN card shows the vehicle itself; the short list is for when there is no card. */}
+      {!vinCard && facts.some(([, value]) => !!value) && (
         <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm">
           {facts.map(([label, value]) =>
             value ? (
@@ -77,11 +78,19 @@ export default function OtherSourcesFound({ plate }: Props): ReactNode {
         </dl>
       )}
 
-      <p className="text-sm text-[var(--color-muted)]">{t('otherSources.note')}</p>
+      <p className="text-sm text-[var(--color-muted)]">{t(vinCard ? 'otherSources.noteVin' : 'otherSources.note')}</p>
 
-      {inWanted && <WantedCheck plate={plate} vin={null} />}
+      {vinCard ? (
+        <Suspense fallback={null}>
+          <VinResult data={vinCard} searchedPlate={plate} openAuctions />
+        </Suspense>
+      ) : (
+        <>
+          {inWanted && <WantedCheck plate={plate} vin={null} />}
 
-      {inAuctions && <UaAuctionCheck plate={plate} vin={null} />}
+          {inAuctions && <UaAuctionCheck plate={plate} vin={null} startOpen />}
+        </>
+      )}
     </div>
   )
 }
