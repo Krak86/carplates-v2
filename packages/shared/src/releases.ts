@@ -20,6 +20,48 @@ export const RELEASES: readonly ReleaseDay[] = [
     items: [
       item(
         'new',
+        'Довідник /read/auctions: що таке лот на українському аукціоні арештованого майна, як узяти участь, цифри з наших даних про лоти СЕТАМ, практика США й Британії, коротка історія аукціонів і що перевірити перед ставкою',
+        'Справочник /read/auctions: что такое лот на украинском аукционе арестованного имущества, как принять участие, цифры из наших данных о лотах СЕТАМ, практика США и Британии, краткая история аукционов и что проверить перед ставкой',
+        'New /read/auctions guide: what a lot is at a Ukrainian auction of seized property, how to take part, figures from our SETAM lot data, practice in the USA and the UK, a short history of auctions and what to check before you bid'
+      ),
+      item(
+        'new',
+        'На картці авто з лотом СЕТАМ з’явився рядок «Перевірка ціни» (ціна продажу проти медіани інших проданих лотів тієї ж моделі), а в історії реєстрацій - позначки «На аукціоні» з місяцем і ціною',
+        'На карточке авто с лотом СЕТАМ появилась строка «Проверка цены» (цена продажи против медианы других проданных лотов той же модели), а в истории регистраций - отметки «На аукционе» с месяцем и ценой',
+        'The car card shows a "Price check" line for a SETAM lot (sale price against the median of other sold lots of the same model), and the registration history has "At auction" markers with the month and price'
+      ),
+      item(
+        'new',
+        'Сторінка /wanted має вкладку «Номерні знаки (Гарпун)»: статистика розшуку номерів за роком події, регіоном (таблиця й карта) та підрозділом поліції, список нещодавно внесених номерів, пояснення до обох вкладок і плавна зміна вмісту; на сторінках марок каталогу з’явився рядок «На українських аукціонах» (лоти, продано, медіана ціни) з посиланням на лоти марки, а на /auctions - нові картки: частка проданих, сума продажів і лоти, виставлені повторно',
+        'Страница /wanted получила вкладку «Номерные знаки (Гарпун)»: статистика розыска номеров по году события, региону (таблица и карта) и подразделению полиции, список недавно внесённых номеров, пояснения к обеим вкладкам и плавная смена содержимого; на страницах марок каталога появилась строка «На украинских аукционах» (лоты, продано, медиана цены) со ссылкой на лоты марки, а на /auctions - новые карточки: доля проданных, сумма продаж и повторно выставленные лоты',
+        'The /wanted page has a "Plates (Garpun)" tab: statistics of wanted plates by year of the event, region (table and map) and police unit, a list of the most recent plates, an explainer on both tabs and a smooth content shift; catalog make pages show an "At Ukrainian auctions" line (lots, sold, median price) linking to the lots of that make, and /auctions has new cards: sold share, total sales and re-listed lots'
+      ),
+      item(
+        'new',
+        'Розділ «Українські аукціони» на картці авто й сторінці VIN: лоти торгів СЕТАМ арештованим і конфіскованим майном, де згадано номер або VIN (номер лота, статус, стартова й кінцева ціна, регіон), усі лоти від новіших до старіших, продані виділено; значок «З аукціону» в шапці, коротка історія торгів і порівняння із закордонною практикою',
+        'Раздел «Украинские аукционы» на карточке авто и странице VIN: лоты торгов СЕТАМ арестованным и конфискованным имуществом, где упомянут номер или VIN (номер лота, статус, стартовая и конечная цена, регион), все лоты от новых к старым, проданные выделены; значок «С аукциона» в шапке, краткая история торгов и сравнение с зарубежной практикой',
+        'A "Ukrainian auctions" section on the plate card and VIN page: SETAM auction lots of seized and confiscated property that name the plate or VIN (lot number, status, starting and sale price, region), all lots newest first with sold ones highlighted; a "From auction" chip in the header, a short history of the auctions and a comparison with practice abroad'
+      ),
+      item(
+        'new',
+        'Сторінка /auctions: усі лоти українських аукціонів арештованих авто (СЕТАМ) зі статистикою за регіонами, марками, роками й місяцями (скільки продано, середня різниця між ціною продажу й стартовою, медіана ціни), фільтрами за маркою, регіоном, статусом, результатом і ціною, блоком нових відкритих лотів і посиланням на кожен лот',
+        'Страница /auctions: все лоты украинских аукционов арестованных авто (СЕТАМ) со статистикой по регионам, маркам, годам и месяцам (сколько продано, средняя разница между ценой продажи и стартовой, медиана цены), фильтрами по марке, региону, статусу, результату и цене, блоком новых открытых лотов и ссылкой на каждый лот',
+        'An /auctions page: every lot of the Ukrainian seized-car auctions (SETAM) with statistics by region, make, year and month (how many sold, average sale vs start price, median price), filters by make, region, status, result and price, a block of the newest open lots, and a link to each lot'
+      ),
+      item(
+        'improved',
+        'Номер лота в розділі «Українські аукціони» тепер є посиланням: відкриває цей лот на сайті СЕТАМ',
+        'Номер лота в разделе «Украинские аукционы» теперь ссылка: открывает этот лот на сайте СЕТАМ',
+        'The lot number in the "Ukrainian auctions" section is now a link that opens that lot on the SETAM site'
+      ),
+      item(
+        'new',
+        'Перевірка розшуку тепер охоплює й другий список Нацполіції «Гарпун» (номерні знаки в розшуку, оновлюється щодня): якщо номер там є, на картці з’являється жовтий значок «Гарпун» і пояснення, що розшук номера ще не доводить викрадення авто, а також історія зі списку',
+        'Проверка розыска теперь охватывает и второй список Нацполиции «Гарпун» (номерные знаки в розыске, обновляется ежедневно): если номер там есть, на карточке появляется жёлтый значок «Гарпун» и пояснение, что розыск номера ещё не доказывает угон авто, а также история из списка',
+        'The wanted check now also covers the second National Police list, "Garpun" (wanted licence plates, refreshed daily): if the plate is there, the card shows an amber "Garpun" chip and a note that a wanted plate does not prove the car is stolen, plus the plate\'s history on the list'
+      ),
+      item(
+        'new',
         'Сторінка /contact: форма зв’язку, що приватно доходить до команди (поштову адресу не публікуємо), і можливість замовити новий застосунок; авторизовані пишуть одразу, анонімні підтверджують пошту кодом з листа, одне повідомлення раз на 10 хвилин; посилання «© рік carsua.app» тепер у футері кожної сторінки',
         'Страница /contact: форма связи, которая приватно доходит до команды (почтовый адрес не публикуем), и возможность заказать новое приложение; авторизованные пишут сразу, анонимные подтверждают почту кодом из письма, одно сообщение раз в 10 минут; ссылка «© год carsua.app» теперь в футере каждой страницы',
         'A /contact page: a form that reaches the team privately (no email address is published) and a way to order a new app; signed-in users write directly, anonymous senders confirm their email with an emailed code, one message per 10 minutes; a "© year carsua.app" link now sits in the footer of every page'

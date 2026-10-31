@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { Link, useParams } from 'react-router'
 
 import BrandLogo from '@/components/BrandLogo'
+import CatalogAuctionLine from '@/components/catalog/CatalogAuctionLine'
 import CatalogBreadcrumb from '@/components/catalog/CatalogBreadcrumb'
 import { CompareTrayBar, CompareTrayButton } from '@/components/compare/CompareTray'
 import CatalogSiblingChips from '@/components/catalog/CatalogSiblingChips'
@@ -96,6 +97,7 @@ export default function CatalogModelRoute(): ReactNode {
           </h1>
         </div>
         <CatalogSummary model={model} />
+        <CatalogAuctionLine makeName={model.makeName} />
         {typicalYear(model.stats.years) && (
           <p className="mt-2">
             <CompareTrayButton

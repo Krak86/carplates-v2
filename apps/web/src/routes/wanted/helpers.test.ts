@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
 
-import { displayLabel, foundPercent, groupYears, mapRows } from '@/routes/wanted/helpers'
+import type { WantedStatsResponse } from '@carplates/shared'
+
+import { displayLabel, foundPercent, groupYears, mapRows, plateDimensionRows } from '@/routes/wanted/helpers'
 
 describe('foundPercent', () => {
   it('is the found share of stolen', () => {
@@ -47,5 +49,25 @@ describe('displayLabel', () => {
 
   it('localizes regions', () => {
     expect(displayLabel('region', 'Львівська область', 'en')).toBe('Lviv Oblast')
+  })
+})
+
+describe('plateDimensionRows', () => {
+  const row = (label: string) => ({ label, stolen: 1, found: 0, wanted: 1 })
+  const stats = {
+    plates: { byRegion: [row('Київ')], byUnit: [row('ГУНП')] }
+  } as unknown as WantedStatsResponse
+
+  it('picks the tab rows', () => {
+    expect(plateDimensionRows(stats, 'region')).toEqual([row('Київ')])
+    expect(plateDimensionRows(stats, 'unit')).toEqual([row('ГУНП')])
+  })
+
+  it('is empty without a plates block', () => {
+    expect(plateDimensionRows({} as WantedStatsResponse, 'unit')).toEqual([])
+  })
+
+  it('keeps a police unit name as sent', () => {
+    expect(displayLabel('unit', 'ВІДДІЛ ПОЛІЦІЇ №1', 'ua')).toBe('ВІДДІЛ ПОЛІЦІЇ №1')
   })
 })

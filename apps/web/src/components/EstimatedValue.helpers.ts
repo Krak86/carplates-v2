@@ -20,6 +20,12 @@ const SIGN: Readonly<Record<Currency, string>> = { EUR: '€', USD: '$', UAH: '�
 /** Rounding grain per currency: false precision otherwise (a hryvnia figure of 243,517 says more than we know). */
 const STEP: Readonly<Record<Currency, number>> = { EUR: 100, USD: 100, UAH: 1000 }
 
+/** The NBU's own rate table for that day, in the page language (it has no Russian version). */
+export const nbuRatesUrl = (lang: string, isoDate: string): string => {
+  const [y, m, d] = isoDate.split('-')
+  return `https://bank.gov.ua/${lang === 'en' ? 'en' : 'ua'}/markets/exchangerates?date=${d}.${m}.${y}&period=daily`
+}
+
 type Rates = Pick<FxResponse, 'eurUah' | 'usdUah'>
 
 /** "11 700" — a euro amount converted to `currency`, rounded to its grain and grouped by locale. */

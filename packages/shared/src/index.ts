@@ -722,14 +722,62 @@ export { newsFeedResponseSchema, newsFeedPageResponseSchema } from './news.js'
 export type { NewsFeedResponse, NewsFeedPageResponse } from './news.js'
 
 export {
+  auctionLotSchema,
+  auctionResponseSchema,
+  auctionPriceCheckSchema,
+  MIN_PRICE_PEERS,
+  auctionListLotSchema,
+  auctionListQuerySchema,
+  auctionListResponseSchema,
+  auctionStatsRowSchema,
+  auctionStatsResponseSchema,
+  AUCTION_OUTCOMES,
+  AUCTION_SORTS,
+  AUCTION_PAGE_SIZE,
+  DEFAULT_AUCTION_OUTCOME,
+  DEFAULT_AUCTION_SORT,
+  AUCTIONS_DATASET_URL,
+  SETAM_URL,
+  PROZORRO_SALE_URL,
+  setamLotUrl
+} from './auctions.js'
+export type {
+  AuctionLot,
+  AuctionResponse,
+  AuctionPriceCheck,
+  AuctionListLot,
+  AuctionListParams,
+  AuctionListQuery,
+  AuctionListResponse,
+  AuctionOutcome,
+  AuctionSort,
+  AuctionStatsRow,
+  AuctionStatsResponse
+} from './auctions.js'
+
+export {
   wantedRecordSchema,
+  wantedPlateSchema,
   wantedResponseSchema,
   wantedStatsResponseSchema,
   wantedStatsRowSchema,
+  wantedPlatesStatsSchema,
+  wantedPlateRecentSchema,
   wantedStatsVehicleSchema,
-  stolenInUaUrl
+  stolenInUaUrl,
+  WANTED_VEHICLES_DATASET_URL,
+  WANTED_PLATES_DATASET_URL
 } from './wanted.js'
-export type { WantedRecord, WantedResponse, WantedStatsResponse, WantedStatsRow, WantedStatsVehicle } from './wanted.js'
+export type {
+  WantedRecord,
+  WantedPlate,
+  WantedResponse,
+  WantedStatsResponse,
+  WantedPlatesStats,
+  WantedPlateRecent,
+  WantedStatsRow,
+  WantedStatsVehicle
+} from './wanted.js'
 export {
   CATALOG_INDEX_PATH,
   CATALOG_KEEP_MIN_CARS,

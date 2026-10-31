@@ -177,6 +177,23 @@ export const STATIC_PAGES: Record<string, Record<Lang, PageText>> = {
       description: 'How many vehicles are wanted in Ukraine and how many were found, by region, make, colour and year.'
     }
   },
+  '/auctions': {
+    ua: {
+      title: 'Українські аукціони арештованих авто: лоти та статистика | Cars UA',
+      description:
+        'Легкові й вантажні авто з торгів СЕТАМ: лоти, ціни продажу, статистика за регіонами, марками й роками.'
+    },
+    ru: {
+      title: 'Украинские аукционы арестованных авто: лоты и статистика | Cars UA',
+      description:
+        'Легковые и грузовые авто с торгов СЕТАМ: лоты, цены продажи, статистика по регионам, маркам и годам.'
+    },
+    en: {
+      title: 'Ukrainian seized-car auctions: lots and statistics | Cars UA',
+      description:
+        'Cars and trucks from SETAM auctions in Ukraine: lots, sale prices and statistics by region, make and year.'
+    }
+  },
   '/fuel': {
     ua: {
       title: 'Витрата пального та викиди CO₂ авто за марками й моделями | Cars UA',
@@ -333,6 +350,23 @@ export const STATIC_PAGES: Record<string, Record<Lang, PageText>> = {
       title: 'Cars UA - Electric cars in Ukraine: years, regions, models, charging',
       description:
         'How many electric cars and hybrids Ukraine has, which years they are from, where they are, which models lead and how the charging plugs differ.'
+    }
+  },
+  '/read/auctions': {
+    ua: {
+      title: 'Cars UA - Аукціони авто: українські торги СЕТАМ, світова практика та історія',
+      description:
+        'Що таке лот на аукціоні арештованого майна, як узяти участь, що показують наші дані про лоти СЕТАМ, чим це відрізняється від США й Британії, коротка історія аукціонів і що перевірити перед ставкою.'
+    },
+    ru: {
+      title: 'Cars UA - Аукционы авто: украинские торги СЕТАМ, мировая практика и история',
+      description:
+        'Что такое лот на аукционе арестованного имущества, как принять участие, что показывают наши данные о лотах СЕТАМ, чем это отличается от США и Британии, краткая история аукционов и что проверить перед ставкой.'
+    },
+    en: {
+      title: 'Cars UA - Car auctions: Ukrainian SETAM sales, practice abroad and history',
+      description:
+        'What a lot is at an auction of seized property, how to take part, what our data on SETAM lots shows, how it differs from the USA and the UK, a short history of auctions and what to check before you bid.'
     }
   },
   '/read/imports': {
@@ -758,6 +792,11 @@ const SECTION_TEXT: Record<string, Record<Lang, [label: string, lead: string]>> 
     ua: ['Системи допомоги', 'Системи допомоги водієві.'],
     ru: ['Системы помощи', 'Системы помощи водителю.'],
     en: ['Driver assists', 'Driver assistance systems.']
+  },
+  'ua-auctions': {
+    ua: ['Українські аукціони', 'Лоти СЕТАМ з цим номером або VIN.'],
+    ru: ['Украинские аукционы', 'Лоты СЕТАМ с этим номером или VIN.'],
+    en: ['Ukrainian auctions', 'SETAM auction lots with this plate or VIN.']
   },
   wanted: {
     ua: ['Розшук', 'Перевірка за базою розшуку.'],

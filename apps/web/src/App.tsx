@@ -19,6 +19,7 @@ const HistoryRoute = lazy(() => import('@/routes/history/HistoryRoute'))
 const FavoritesRoute = lazy(() => import('@/routes/favorites/FavoritesRoute'))
 const StatsRoute = lazy(() => import('@/routes/stats/StatsRoute'))
 const WantedStatsRoute = lazy(() => import('@/routes/wanted/WantedStatsRoute'))
+const AuctionsRoute = lazy(() => import('@/routes/auctions/AuctionsRoute'))
 const FuelStatsRoute = lazy(() => import('@/routes/fuel/FuelStatsRoute'))
 const SafetyStatsRoute = lazy(() => import('@/routes/safety/SafetyStatsRoute'))
 const NewsRoute = lazy(() => import('@/routes/news/NewsRoute'))
@@ -38,6 +39,7 @@ const FuelRoute = lazy(() => import('@/routes/read/fuel/FuelRoute'))
 const VinRoute = lazy(() => import('@/routes/read/vin/VinRoute'))
 const ExtremesRoute = lazy(() => import('@/routes/read/extremes/ExtremesRoute'))
 const RecallsRoute = lazy(() => import('@/routes/read/recalls/RecallsRoute'))
+const AuctionsGuideRoute = lazy(() => import('@/routes/read/auctions/AuctionsGuideRoute'))
 const CatalogIndexRoute = lazy(() => import('@/routes/catalog/CatalogIndexRoute'))
 const CatalogMakeRoute = lazy(() => import('@/routes/catalog/CatalogMakeRoute'))
 const CatalogModelRoute = lazy(() => import('@/routes/catalog/CatalogModelRoute'))
@@ -94,6 +96,7 @@ export default function App(): ReactNode {
             <Route path="/favorites" element={<FavoritesRoute />} />
             <Route path="/stats" element={<StatsRoute />} />
             <Route path="/wanted" element={<WantedStatsRoute />} />
+            <Route path="/auctions" element={<AuctionsRoute />} />
             <Route path="/fuel" element={<FuelStatsRoute />} />
             <Route path="/safety" element={<SafetyStatsRoute />} />
             <Route path="/news" element={<NewsRoute />} />
@@ -116,6 +119,7 @@ export default function App(): ReactNode {
             <Route path="/read/vin" element={<VinRoute />} />
             <Route path="/read/extremes" element={<ExtremesRoute />} />
             <Route path="/read/recalls" element={<RecallsRoute />} />
+            <Route path="/read/auctions" element={<AuctionsGuideRoute />} />
             <Route path="/cars" element={<CatalogIndexRoute />} />
             <Route path="/cars/:make" element={<CatalogMakeRoute />} />
             <Route path="/cars/:make/:model" element={<CatalogModelRoute />} />

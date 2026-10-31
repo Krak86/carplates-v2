@@ -1,4 +1,4 @@
-import type { OriginResponse, WantedRecord, WantedResponse } from '@carplates/shared'
+import type { OriginResponse, WantedPlate, WantedRecord, WantedResponse } from '@carplates/shared'
 
 import { buildOriginView, ukraineFromActions, yearRange } from '@/components/OriginSection.helpers'
 import { countryLabel } from '@/components/vin/helpers'
@@ -14,12 +14,19 @@ type Row = { label: string; value: string; note?: boolean }
 
 const DASH = '-'
 
-type WantedVerdict = 'wanted' | 'was' | 'clear'
+type WantedVerdict = 'wanted' | 'plate' | 'was' | 'clear'
 
-export const WANTED_TONE: Readonly<Record<WantedVerdict, ExportTone>> = { wanted: 'alert', was: 'neutral', clear: 'ok' }
+export const WANTED_TONE: Readonly<Record<WantedVerdict, ExportTone>> = {
+  wanted: 'alert',
+  plate: 'alert',
+  was: 'neutral',
+  clear: 'ok'
+}
 
 export function wantedVerdict(data: WantedResponse): WantedVerdict {
-  return data.wanted ? 'wanted' : data.records.length > 0 ? 'was' : 'clear'
+  if (data.wanted) return 'wanted'
+  if (data.plateWanted) return 'plate'
+  return data.records.length > 0 || !!data.plates?.length ? 'was' : 'clear'
 }
 
 function localeOf(lang: string): string {
@@ -126,6 +133,18 @@ function recordValue(record: WantedRecord, t: Translate, lang: string): string {
     .join(' · ')
 }
 
+function plateRecordValue(record: WantedPlate, t: Translate, lang: string): string {
+  const removed =
+    record.status === 'removed' ? `${t('wanted.removedAt')}: ${dateOf(record.removedAt, lang) ?? DASH}` : null
+  return [
+    t(`wanted.plates.status.${record.status}`),
+    record.seizedAt ? `${t('wanted.plates.reportedAt')}: ${dateOf(record.seizedAt, lang) ?? DASH}` : null,
+    removed
+  ]
+    .filter(Boolean)
+    .join(' · ')
+}
+
 /** Mirrors WantedCheck: the verdict, every matching record and when the police list was last refreshed. */
 export function buildWantedSection(input: ExportInput, t: Translate): ExportKeyValueSection | null {
   const data = input.wanted
@@ -139,6 +158,9 @@ export function buildWantedSection(input: ExportInput, t: Translate): ExportKeyV
     const vehicle = [record.brand, record.model].filter(Boolean).join(' ') || t('wanted.vehicle')
     push(rows, vehicle, recordValue(record, t, input.lang))
   }
+
+  for (const record of data.plates ?? []) push(rows, t('export.wantedPlate'), plateRecordValue(record, t, input.lang))
+  if (data.plateWanted) push(rows, DASH, t('wanted.plates.warning'), true)
 
   push(rows, t('export.wantedChecked'), dateOf(data.checkedAt, input.lang))
   push(rows, t('export.source'), t('export.wantedSource'))

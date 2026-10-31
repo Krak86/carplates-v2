@@ -13,6 +13,7 @@ export const FUEL_PATH = '/read/fuel'
 export const VIN_PATH = '/read/vin'
 export const EXTREMES_PATH = '/read/extremes'
 export const RECALLS_PATH = '/read/recalls'
+export const AUCTIONS_GUIDE_PATH = '/read/auctions'
 
 export const GUIDE_PATHS = [
   BODY_TYPES_PATH,
@@ -26,7 +27,8 @@ export const GUIDE_PATHS = [
   SAFETY_PATH,
   FUEL_PATH,
   EXTREMES_PATH,
-  RECALLS_PATH
+  RECALLS_PATH,
+  AUCTIONS_GUIDE_PATH
 ] as const
 export type GuidePath = (typeof GUIDE_PATHS)[number]
 
@@ -43,7 +45,8 @@ export const GUIDE_META: Record<GuidePath, { icon: string; titleKey: string; hue
   [SAFETY_PATH]: { icon: '🛡️', titleKey: 'nav.readSafety', hue: 25 },
   [FUEL_PATH]: { icon: '⛽', titleKey: 'nav.readFuel', hue: 100 },
   [EXTREMES_PATH]: { icon: '🏆', titleKey: 'nav.readExtremes', hue: 80 },
-  [RECALLS_PATH]: { icon: '🔧', titleKey: 'nav.readRecalls', hue: 45 }
+  [RECALLS_PATH]: { icon: '🔧', titleKey: 'nav.readRecalls', hue: 45 },
+  [AUCTIONS_GUIDE_PATH]: { icon: '🔨', titleKey: 'nav.readAuctions', hue: 15 }
 }
 
 /** Shapes the body-types article has a card for (the plate card links only these). */

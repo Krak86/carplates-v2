@@ -72,6 +72,7 @@ import Card from '@/components/ui/Card'
 import Model3dButton from '@/components/Model3dButton'
 import Model360Button from '@/components/Model360Button'
 import VerificationLinks from '@/components/VerificationLinks'
+import UaAuctionChip from '@/components/ua-auctions/UaAuctionChip'
 import WantedChip from '@/components/WantedChip'
 import VinDecodeTabs from '@/components/vin/VinDecodeTabs'
 import OriginChip from '@/components/OriginChip'
@@ -101,6 +102,7 @@ const VehicleKindIcon = lazy(() => import('@/components/VehicleKindIcon'))
 const OriginSection = lazy(() => import('@/components/OriginSection'))
 const AuctionCheck = lazy(() => import('@/components/AuctionCheck'))
 const WantedCheck = lazy(() => import('@/components/WantedCheck'))
+const UaAuctionCheck = lazy(() => import('@/components/UaAuctionCheck'))
 const StockSection = lazy(() => import('@/components/StockSection'))
 const SocialSection = lazy(() => import('@/components/SocialSection'))
 const NewsSection = lazy(() => import('@/components/NewsSection'))
@@ -174,6 +176,7 @@ export default function ResultCard({ data }: Props): ReactNode {
   // The "imported" status chip opens the Auction history section (mounting it first if it is still lazy).
   const [auctionOpenSignal, setAuctionOpenSignal] = useState(0)
   const [wantedOpenSignal, setWantedOpenSignal] = useState(0)
+  const [uaAuctionOpenSignal, setUaAuctionOpenSignal] = useState(0)
   // The origin (flags) chip opens the "Where it comes from" section the same way.
   const [originOpenSignal, setOriginOpenSignal] = useState(0)
   // Links inside the Specs block open the section that goes deeper.
@@ -406,6 +409,11 @@ export default function ResultCard({ data }: Props): ReactNode {
                   vin={hasVin ? c.vin : null}
                   onOpen={() => setWantedOpenSignal(n => n + 1)}
                 />
+                <UaAuctionChip
+                  plate={data.plate}
+                  vin={hasVin ? c.vin : null}
+                  onOpen={() => setUaAuctionOpenSignal(n => n + 1)}
+                />
                 <LastOperationChip
                   operCode={c.operCode}
                   operName={c.operName}
@@ -485,14 +493,6 @@ export default function ResultCard({ data }: Props): ReactNode {
           />
 
           <PlateSegments plate={data.plate} region={data.region} />
-
-          <VerificationLinks />
-
-          {(data.plate || hasVin) && (
-            <LazySection sections={['wanted']} forceMount={wantedOpenSignal > 0}>
-              <WantedCheck plate={data.plate} vin={hasVin ? c.vin : null} openSignal={wantedOpenSignal} />
-            </LazySection>
-          )}
 
           <div ref={basicRef} className="mt-3 border-t border-[var(--color-border)] pt-3">
             <SectionHeader
@@ -784,7 +784,11 @@ export default function ResultCard({ data }: Props): ReactNode {
             {plateHistory.isPending && <SectionSkeleton />}
             {plateHistory.isError && <p className="text-base text-[var(--color-muted)]">{t('result.error')}</p>}
             {plateHistory.data && (
-              <RegistrationTimeline actions={plateHistory.data.actions} currentPlate={data.plate} />
+              <RegistrationTimeline
+                actions={plateHistory.data.actions}
+                currentPlate={data.plate}
+                auctionKeys={{ plate: data.plate, vin: hasVin ? c.vin : null }}
+              />
             )}
 
             {hasVin && (vinDetail.isPending || vinDetail.isError || vinDetail.data?.registry) && (
@@ -804,6 +808,18 @@ export default function ResultCard({ data }: Props): ReactNode {
 
             {!c.vin && plateHistory.data && <VinSince2021Note variant="noVin" />}
           </VinToggleSection>
+
+          {(data.plate || hasVin) && (
+            <LazySection sections={['wanted']} forceMount={wantedOpenSignal > 0}>
+              <WantedCheck plate={data.plate} vin={hasVin ? c.vin : null} openSignal={wantedOpenSignal} />
+            </LazySection>
+          )}
+
+          {(data.plate || hasVin) && (
+            <LazySection sections={['ua-auctions']} forceMount={uaAuctionOpenSignal > 0}>
+              <UaAuctionCheck plate={data.plate} vin={hasVin ? c.vin : null} openSignal={uaAuctionOpenSignal} />
+            </LazySection>
+          )}
 
           <LazySection sections={['specs']} forceMount={specsJump.signal > 0}>
             <RdwSpecs
@@ -955,6 +971,8 @@ export default function ResultCard({ data }: Props): ReactNode {
             </LazySection>
           )}
           <PaidFeatureSections hasPlate={!!data.plate} hasVin={hasVin} />
+
+          <VerificationLinks />
 
           <ReportIssueLink about={data.plate ?? c.vin ?? undefined} className="mt-4" />
         </Card>

@@ -14,6 +14,7 @@ Individual plate and VIN result pages are per-vehicle lookups and are not meant 
 - [Statistics](https://carsua.app/stats): Most common makes, colors, fuels and regions in Ukraine's vehicle registry.
 - [Fuel and emissions](https://carsua.app/fuel): Fuel economy and CO2 emissions by make and model.
 - [Crash safety](https://carsua.app/safety): Euro NCAP, IIHS, NHTSA and other crash-test results by make and model.
+- [Ukrainian auctions](https://carsua.app/auctions): Cars and trucks from SETAM auctions of seized property in Ukraine: lots, sale prices and statistics by region, make and year.
 - [Wanted vehicles](https://carsua.app/wanted): How many vehicles are wanted in Ukraine and how many were found, by region, make, colour and year.
 
 ## About

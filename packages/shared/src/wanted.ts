@@ -30,6 +30,24 @@ export const wantedRecordSchema = z.object({
 })
 export type WantedRecord = z.infer<typeof wantedRecordSchema>
 
+/**
+ * A wanted licence PLATE (Garpun list, National Police open data, CC BY): only the plate is wanted, no VIN / brand. Not proof that
+ * this car is stolen (plates get lost or cloned). Same history model as the vehicle records.
+ */
+export const wantedPlateSchema = z.object({
+  id: z.string(),
+  status: z.enum(['wanted', 'removed']),
+  plate: z.string(),
+  /** ISO date the plate was reported (the feed also holds a few absurd dates: those come as null). */
+  seizedAt: z.string().nullable(),
+  /** ISO date the police recorded it. */
+  insertedAt: z.string().nullable(),
+  organUnit: z.string().nullable(),
+  /** ISO timestamp of the first of our runs that no longer saw the plate; null while wanted. */
+  removedAt: z.string().nullable()
+})
+export type WantedPlate = z.infer<typeof wantedPlateSchema>
+
 export const wantedResponseSchema = z.object({
   /** At least one matching record is still on the list. */
   wanted: z.boolean(),
@@ -40,7 +58,15 @@ export const wantedResponseSchema = z.object({
   /** Earliest first-seen timestamp we hold — removals before it were not tracked. */
   trackedSince: z.string().nullable(),
   /** Set when `trackedSince` comes from the scraped stolen.in.ua history (attribution on the card). */
-  historySource: z.literal('stolen.in.ua').nullable().optional()
+  historySource: z.literal('stolen.in.ua').nullable().optional(),
+  /** Garpun list: records for the queried plate (the VIN is never matched), currently wanted first. Absent in old cached responses. */
+  plates: z.array(wantedPlateSchema).nullable().optional(),
+  /** At least one Garpun record is still on the list (kept apart from `wanted`, which is the vehicle list only). */
+  plateWanted: z.boolean().nullable().optional(),
+  /** ISO timestamp of the newest Garpun ingest run (own clock: `checkedAt` belongs to the vehicle list). Only for plate lookups. */
+  platesCheckedAt: z.string().nullable().optional(),
+  /** Earliest first-seen timestamp of the Garpun list: removals before it were not tracked (no scraped history exists for Garpun). */
+  platesTrackedSince: z.string().nullable().optional()
 })
 export type WantedResponse = z.infer<typeof wantedResponseSchema>
 
@@ -65,6 +91,37 @@ export const wantedStatsVehicleSchema = z.object({
 })
 export type WantedStatsVehicle = z.infer<typeof wantedStatsVehicleSchema>
 
+export const wantedPlateRecentSchema = z.object({
+  plate: z.string(),
+  seizedAt: z.string().nullable(),
+  region: z.string().nullable(),
+  /** Police unit that entered the plate (Ukrainian). */
+  unit: z.string().nullable()
+})
+export type WantedPlateRecent = z.infer<typeof wantedPlateRecentSchema>
+
+/** Garpun (wanted PLATES) block of `/api/wanted/stats`. Rows reuse the vehicle shape: `stolen` = every plate record, `found` = left the feed, `wanted` = still on it. */
+export const wantedPlatesStatsSchema = z.object({
+  summary: z.object({
+    wantedNow: z.number(),
+    /** Plates that left the feed since our first run (found or cancelled: the feed does not say which). */
+    resolvedTotal: z.number(),
+    /** Records with a usable seizure date (absurd dates are stored as null). */
+    withDate: z.number(),
+    /** ISO date of our first run: the feed has no older history. */
+    trackedSince: z.string().nullable()
+  }),
+  /** Seizure year, ascending (label = year). */
+  byYear: z.array(wantedStatsRowSchema),
+  byRegion: z.array(wantedStatsRowSchema),
+  /** Police unit that entered the plate (label = the unit name, Ukrainian), top 100. */
+  byUnit: z.array(wantedStatsRowSchema),
+  /** Newest seizure dates among plates still on the list. */
+  recent: z.array(wantedPlateRecentSchema).nullable().optional(),
+  checkedAt: z.string().nullable()
+})
+export type WantedPlatesStats = z.infer<typeof wantedPlatesStatsSchema>
+
 /** Aggregates for the `/wanted` page. Own contract: new fields must be `.nullable().optional()`. */
 export const wantedStatsResponseSchema = z.object({
   summary: z.object({
@@ -88,6 +145,8 @@ export const wantedStatsResponseSchema = z.object({
   byColor: z.array(wantedStatsRowSchema),
   recentStolen: z.array(wantedStatsVehicleSchema),
   recentFound: z.array(wantedStatsVehicleSchema),
+  /** Garpun wanted-plates aggregates (the second list). */
+  plates: wantedPlatesStatsSchema.nullable().optional(),
   /** Newest `last_seen_at` of the feed: when the data was last refreshed. */
   checkedAt: z.string().nullable()
 })
@@ -95,3 +154,7 @@ export type WantedStatsResponse = z.infer<typeof wantedStatsResponseSchema>
 
 /** stolen.in.ua per-plate page (Latin plate) — the link-out for a manual check. */
 export const stolenInUaUrl = (plateLatin: string): string => `https://stolen.in.ua/v/${encodeURIComponent(plateLatin)}`
+
+/** data.gov.ua pages of the two police lists (the card links to both). */
+export const WANTED_VEHICLES_DATASET_URL = 'https://data.gov.ua/dataset/2cd12755-834b-4c43-9026-fe356ce93af5'
+export const WANTED_PLATES_DATASET_URL = 'https://data.gov.ua/dataset/licplatewanted'

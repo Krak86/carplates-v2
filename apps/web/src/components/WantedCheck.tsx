@@ -3,13 +3,19 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useSearchParams } from 'react-router'
 import { useQuery } from '@tanstack/react-query'
-import { denormalizePlate, stolenInUaUrl } from '@carplates/shared'
-import type { WantedRecord } from '@carplates/shared'
+import {
+  denormalizePlate,
+  stolenInUaUrl,
+  WANTED_PLATES_DATASET_URL,
+  WANTED_VEHICLES_DATASET_URL
+} from '@carplates/shared'
+import type { WantedPlate, WantedRecord } from '@carplates/shared'
 
 import SectionInfo from '@/components/SectionInfo'
 import ShareButton from '@/components/ShareButton'
 import VinToggleSection from '@/components/vin/VinToggleSection'
 import { cn } from '@/lib/cn'
+import { wantedVerdict } from '@/lib/export-verify'
 import { toIntlLocale } from '@/lib/intl'
 import { depMapsUrl } from '@/lib/maps'
 import { wantedQuery } from '@/lib/queries'
@@ -22,7 +28,6 @@ type Props = {
   openSignal?: number
 }
 
-const DATASET_URL = 'https://data.gov.ua/dataset/2cd12755-834b-4c43-9026-fe356ce93af5'
 const LINK_CLASS = 'text-[var(--color-primary)] underline'
 
 function Row({ label, value }: { label: string; value: ReactNode }): ReactNode {
@@ -90,9 +95,58 @@ function WantedRecordCard({ record }: { record: WantedRecord }): ReactNode {
   )
 }
 
+function WantedPlateCard({ record }: { record: WantedPlate }): ReactNode {
+  const { t, i18n } = useTranslation()
+  const locale = toIntlLocale(i18n.language)
+  const date = (iso: string | null): string | null => (iso ? new Date(iso).toLocaleDateString(locale) : null)
+  const isWanted = record.status === 'wanted'
+
+  return (
+    <li
+      className={cn(
+        'rounded-lg border p-3 text-sm',
+        isWanted ? 'border-amber-500/60 bg-amber-500/10' : 'border-[var(--color-border)] bg-[var(--color-border)]/20'
+      )}
+    >
+      <p className="font-semibold">
+        {isWanted ? '🔎 ' : '✔️ '}
+        {t(`wanted.plates.status.${record.status}`)}
+      </p>
+
+      <dl className="mt-1.5 space-y-0.5">
+        <Row label={t('wanted.plate')} value={record.plate} />
+        <Row label={t('wanted.plates.reportedAt')} value={date(record.seizedAt)} />
+        <Row label={t('wanted.registeredAt')} value={date(record.insertedAt)} />
+        <Row
+          label={t('wanted.organ')}
+          value={
+            record.organUnit && (
+              <>
+                {record.organUnit}{' '}
+                <a
+                  href={depMapsUrl(record.organUnit)}
+                  target="_blank"
+                  rel="noopener noreferrer nofollow"
+                  className={LINK_CLASS + ' whitespace-nowrap'}
+                >
+                  📍 {t('wanted.map')} ↗<span className="sr-only">{t('field.opensNewTab')}</span>
+                </a>
+              </>
+            )
+          }
+        />
+        <Row label={t('wanted.removedAt')} value={date(record.removedAt)} />
+      </dl>
+
+      {!isWanted && <p className="mt-1.5 text-[var(--color-muted)]">{t('wanted.removedNote')}</p>}
+    </li>
+  )
+}
+
 /**
  * Collapsed "Wanted (stolen)" section (shareable via `?section=wanted`): is this plate / VIN on the National Police list of
- * vehicles wanted for unlawful taking — now, and in the snapshots we kept. Opens by itself when there is a record. The title
+ * vehicles wanted for unlawful taking (vehicle records first) or the Garpun list of wanted plates (plate-only, not proof) — now,
+ * and in the snapshots we kept. Opens by itself when there is a record. The title
  * chip is the answer at a glance. A link to stolen.in.ua (same open data) is the manual check.
  */
 export default function WantedCheck({ plate, vin, openSignal = 0 }: Props): ReactNode {
@@ -108,7 +162,8 @@ export default function WantedCheck({ plate, vin, openSignal = 0 }: Props): Reac
   }, [isShared, openSignal])
 
   const records = data?.records ?? []
-  const verdict = !data ? null : data.wanted ? 'wanted' : records.length > 0 ? 'was' : 'clear'
+  const plates = data?.plates ?? []
+  const verdict = !data ? null : wantedVerdict(data)
   const locale = toIntlLocale(i18n.language)
   const stolenUrl = plate ? stolenInUaUrl(denormalizePlate(plate)) : null
 
@@ -138,11 +193,11 @@ export default function WantedCheck({ plate, vin, openSignal = 0 }: Props): Reac
       showLabel={t('wanted.show')}
       hideLabel={t('wanted.hide')}
       defaultOpen={isShared}
-      openSignal={openSignal + (records.length > 0 ? 1 : 0)}
+      openSignal={openSignal + (records.length > 0 || plates.length > 0 ? 1 : 0)}
     >
       {isError && <p className="mb-2 text-sm text-[var(--color-muted)]">{t('wanted.error')}</p>}
 
-      {data && records.length === 0 && <p className="mb-2 text-sm">✅ {t('wanted.clear')}</p>}
+      {data && records.length === 0 && plates.length === 0 && <p className="mb-2 text-sm">✅ {t('wanted.clear')}</p>}
 
       {records.length > 0 && (
         <ul className="mb-2 space-y-2">
@@ -150,6 +205,25 @@ export default function WantedCheck({ plate, vin, openSignal = 0 }: Props): Reac
             <WantedRecordCard key={record.id} record={record} />
           ))}
         </ul>
+      )}
+
+      {plates.length > 0 && (
+        <section className="mb-2">
+          <h4 className="mb-1.5 text-sm font-semibold">{t('wanted.plates.heading')}</h4>
+          <ul className="space-y-2">
+            {plates.map(record => (
+              <WantedPlateCard key={record.id} record={record} />
+            ))}
+          </ul>
+          {data?.plateWanted && <p className="mt-1.5 text-sm font-medium">{t('wanted.plates.warning')}</p>}
+          <p className="mt-1.5 text-sm text-[var(--color-muted)]">
+            {data?.platesCheckedAt
+              ? t('wanted.plates.checkedAt', { date: new Date(data.platesCheckedAt).toLocaleString(locale) })
+              : t('wanted.neverLoaded')}
+            {data?.platesTrackedSince &&
+              ` ${t('wanted.plates.trackedSince', { date: new Date(data.platesTrackedSince).toLocaleDateString(locale) })}`}
+          </p>
+        </section>
       )}
 
       {data && (
@@ -164,6 +238,8 @@ export default function WantedCheck({ plate, vin, openSignal = 0 }: Props): Reac
         </p>
       )}
 
+      <p className="mt-2 text-sm text-[var(--color-muted)]">{t('wanted.explainer')}</p>
+
       <p className="mt-2 text-sm text-[var(--color-muted)]">{t('wanted.note')}</p>
 
       <ul className="mt-2 space-y-1 text-sm">
@@ -177,10 +253,22 @@ export default function WantedCheck({ plate, vin, openSignal = 0 }: Props): Reac
           </li>
         )}
         <li>
-          <a href={DATASET_URL} target="_blank" rel="noopener noreferrer nofollow" className={LINK_CLASS}>
+          <a
+            href={WANTED_VEHICLES_DATASET_URL}
+            target="_blank"
+            rel="noopener noreferrer nofollow"
+            className={LINK_CLASS}
+          >
             data.gov.ua ↗
           </a>{' '}
           <span className="text-[var(--color-muted)]">{t('wanted.link.dataset')}</span>
+          <span className="sr-only">{t('field.opensNewTab')}</span>
+        </li>
+        <li>
+          <a href={WANTED_PLATES_DATASET_URL} target="_blank" rel="noopener noreferrer nofollow" className={LINK_CLASS}>
+            data.gov.ua ↗
+          </a>{' '}
+          <span className="text-[var(--color-muted)]">{t('wanted.link.garpun')}</span>
           <span className="sr-only">{t('field.opensNewTab')}</span>
         </li>
         <li>

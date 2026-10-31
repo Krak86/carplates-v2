@@ -1,7 +1,8 @@
-import { queryOptions } from '@tanstack/react-query'
+import { keepPreviousData, queryOptions } from '@tanstack/react-query'
 import type { QueryClient, QueryKey } from '@tanstack/react-query'
 import { normalizePlate } from '@carplates/shared'
 import type {
+  AuctionListQuery,
   CardBundleResponse,
   MotFuelHint,
   PlateLookupResponse,
@@ -39,6 +40,9 @@ import {
   getOpenEv,
   getMot,
   getCaRecalls,
+  getAuctionLots,
+  getAuctionList,
+  getAuctionStats,
   getWanted,
   getWantedStats,
   getGenerationGrowth,
@@ -746,4 +750,27 @@ export function wantedStatsQuery() {
 
 export function contactConfigQuery() {
   return queryOptions({ queryKey: ['contact', 'config'], queryFn: getContactConfig, staleTime: 5 * 60_000 })
+}
+
+// Ukrainian (SETAM) auction lots for a plate / VIN (pnpm ingest:auctions) - live data like wantedQuery: online-only, no offline group.
+export function auctionLotsQuery(plate: string | null, vin: string | null) {
+  return queryOptions({
+    queryKey: ['auction-lots', plate, vin],
+    queryFn: () => getAuctionLots(plate, vin),
+    staleTime: 5 * 60_000
+  })
+}
+
+// /auctions page aggregates and lot list: live data like wantedStatsQuery (online-only, no offline group); the API caches stats 10 min.
+export function auctionStatsQuery() {
+  return queryOptions({ queryKey: ['auction-stats'], queryFn: getAuctionStats, staleTime: 5 * 60_000 })
+}
+
+export function auctionListQuery(query: AuctionListQuery) {
+  return queryOptions({
+    queryKey: ['auction-list', query],
+    queryFn: () => getAuctionList(query),
+    staleTime: 5 * 60_000,
+    placeholderData: keepPreviousData
+  })
 }
