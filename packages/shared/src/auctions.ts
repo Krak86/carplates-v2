@@ -25,6 +25,8 @@ export const auctionLotSchema = z.object({
   vin: z.string().nullable(),
   /** Which of the queried keys the lot matched. */
   matchedBy: z.enum(['plate', 'vin', 'both']),
+  /** `YYYY-MM` of the monthly open-data file that last changed the lot: roughly when its auction ended (the feed has no exact date). */
+  month: z.string().nullable().optional(),
   /** ISO timestamp the lot first appeared in our copy of the feed. */
   firstSeenAt: z.string(),
   /** ISO timestamp of its last real change (status / price). */

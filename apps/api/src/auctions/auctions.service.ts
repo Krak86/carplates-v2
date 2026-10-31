@@ -5,6 +5,12 @@ import { and, desc, eq, or } from 'drizzle-orm'
 
 import { DbService } from '../db/db.service.js'
 
+/** `auctions-31-08-2024.csv` -> `2024-08`; null for any other file name. */
+export const lotMonth = (sourceFile: string): string | null => {
+  const m = /^auctions-\d{2}-(\d{2})-(\d{4})\.csv$/.exec(sourceFile)
+  return m ? `${m[2]}-${m[1]}` : null
+}
+
 @Injectable()
 export class AuctionsService {
   constructor(@Inject(DbService) private readonly dbService: DbService) {}
@@ -47,6 +53,7 @@ export class AuctionsService {
         plate: r.plate,
         vin: r.vin,
         matchedBy: plateHit && vinHit ? 'both' : plateHit ? 'plate' : 'vin',
+        month: lotMonth(r.sourceFile),
         firstSeenAt: r.firstSeenAt.toISOString(),
         updatedAt: r.updatedAt.toISOString()
       }

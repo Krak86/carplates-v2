@@ -14,7 +14,8 @@ import {
   formatMoneyRange,
   riaSearchUrl,
   valueWarnings,
-  type UkrPrice
+  type UkrPrice,
+  nbuRatesUrl
 } from '@/components/EstimatedValue.helpers'
 import InfoPopover from '@/components/InfoPopover'
 import { cn } from '@/lib/cn'
@@ -30,12 +31,6 @@ type Props = {
   /** NBU rates, or null while loading / unavailable (then only euros can be shown). */
   fx: FxResponse | null
   locale: string
-}
-
-/** The NBU's own rate table for that day, in the page language (it has no Russian version). */
-const nbuRatesUrl = (lang: string, isoDate: string): string => {
-  const [y, m, d] = isoDate.split('-')
-  return `https://bank.gov.ua/${lang === 'en' ? 'en' : 'ua'}/markets/exchangerates?date=${d}.${m}.${y}&period=daily`
 }
 
 const PERCENT = (rate: number): number => Math.round(rate * 100)

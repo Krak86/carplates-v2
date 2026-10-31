@@ -31,6 +31,7 @@ import VinDecodeTabs from '@/components/vin/VinDecodeTabs'
 import VinTypicalData from '@/components/vin/VinTypicalData'
 import LazySection from '@/components/LazySection'
 import OriginChip from '@/components/OriginChip'
+import UaAuctionChip from '@/components/ua-auctions/UaAuctionChip'
 import SteeringChip from '@/components/SteeringChip'
 import { useCardMotion } from '@/hooks/useCardMotion'
 import { ukraineFromActions } from '@/components/OriginSection.helpers'
@@ -57,6 +58,7 @@ export default function VinResult({ data }: Props): ReactNode {
   const region = plate ? (regionName(plate) ?? null) : null
   // The origin chip opens the "Where it comes from" section (mounting it first if it is still lazy).
   const [originOpenSignal, setOriginOpenSignal] = useState(0)
+  const [uaAuctionOpenSignal, setUaAuctionOpenSignal] = useState(0)
   const tiltEnabled = useUiStore(s => s.cardTiltEnabled)
   const glowRef = useCardMotion<HTMLDivElement>(tiltEnabled)
   useCarHeroImageActions({ brand: vehicle.brand, model: vehicle.model, year: vehicle.year, key: data.vin })
@@ -121,6 +123,7 @@ export default function VinResult({ data }: Props): ReactNode {
           />
           <SteeringChip steering={fields.get('Steering Location')} />
           <CatalogModelChip brand={vehicle.brand} model={vehicle.model} />
+          <UaAuctionChip plate={null} vin={data.vin} onOpen={() => setUaAuctionOpenSignal(n => n + 1)} />
           <CompareChip from={{ kind: 'vin', vin: data.vin }} />
         </div>
 
@@ -160,8 +163,8 @@ export default function VinResult({ data }: Props): ReactNode {
           <WantedCheck plate={null} vin={data.vin} />
         </LazySection>
 
-        <LazySection sections={['ua-auctions']}>
-          <UaAuctionCheck plate={null} vin={data.vin} />
+        <LazySection sections={['ua-auctions']} forceMount={uaAuctionOpenSignal > 0}>
+          <UaAuctionCheck plate={null} vin={data.vin} openSignal={uaAuctionOpenSignal} />
         </LazySection>
 
         <LazySection sections={['origin']} forceMount={originOpenSignal > 0}>

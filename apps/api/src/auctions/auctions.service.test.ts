@@ -22,6 +22,7 @@ function lotRow(over: Record<string, unknown> = {}) {
     make: 'SUBARU',
     model: 'FORESTER',
     year: 2007,
+    sourceFile: 'auctions-31-08-2024.csv',
     firstSeenAt: new Date('2026-09-01T00:00:00Z'),
     updatedAt: new Date('2026-09-02T00:00:00Z'),
     ...over
@@ -55,6 +56,7 @@ describe('AuctionsService.lookup', () => {
       [200, true, 'plate'],
       [100, false, 'plate']
     ])
+    expect(res.lots[0]?.month).toBe('2024-08')
   })
 
   it('reports matchedBy vin / both', async () => {

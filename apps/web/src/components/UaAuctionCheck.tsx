@@ -1,16 +1,22 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router'
 import { useQuery } from '@tanstack/react-query'
 import { AUCTIONS_DATASET_URL, PROZORRO_SALE_URL, SETAM_URL } from '@carplates/shared'
+import type { Currency } from '@carplates/shared'
 
 import SectionInfo from '@/components/SectionInfo'
 import ShareButton from '@/components/ShareButton'
+import Timeline from '@/components/Timeline'
+import AuctionCurrency from '@/components/ua-auctions/AuctionCurrency'
+import UaAuctionStatus from '@/components/ua-auctions/UaAuctionStatus'
+import UaAuctionChart from '@/components/ua-auctions/UaAuctionChart'
 import UaAuctionLot from '@/components/ua-auctions/UaAuctionLot'
+import { OPEN_STATUS, VISIBLE_NOT_SOLD } from '@/components/ua-auctions/helpers'
 import VinToggleSection from '@/components/vin/VinToggleSection'
 import { toIntlLocale } from '@/lib/intl'
-import { auctionLotsQuery } from '@/lib/queries'
+import { auctionLotsQuery, fxQuery } from '@/lib/queries'
 import { scrollElementIntoView } from '@/lib/share-section'
 
 type Props = {
@@ -48,6 +54,15 @@ export default function UaAuctionCheck({ plate, vin, openSignal = 0 }: Props): R
   const title = t('uaAuctions.title')
   const locale = toIntlLocale(i18n.language)
   const lots = data?.lots ?? []
+  const [showAll, setShowAll] = useState(false)
+  const [currency, setCurrency] = useState<Currency>('UAH')
+  const fx = useQuery({ ...fxQuery(), enabled: lots.length > 0 }).data ?? null
+  // Sold and open lots always show; of the not-sold ones only the newest few until the visitor asks for the rest.
+  const isNotSold = (l: (typeof lots)[number]): boolean => !l.sold && l.status !== OPEN_STATUS
+  const notSoldCount = lots.filter(isNotSold).length
+  const hiddenCount = showAll ? 0 : Math.max(0, notSoldCount - VISIBLE_NOT_SOLD)
+  let notSoldSeen = 0
+  const shown = lots.filter(l => !isNotSold(l) || showAll || ++notSoldSeen <= VISIBLE_NOT_SOLD)
 
   useEffect(() => {
     if ((isShared || openSignal > 0) && sectionRef.current) scrollElementIntoView(sectionRef.current)
@@ -80,11 +95,32 @@ export default function UaAuctionCheck({ plate, vin, openSignal = 0 }: Props): R
 
       {lots.length > 0 && (
         <>
-          <ul className="mb-2 space-y-2">
-            {lots.map(lot => (
-              <UaAuctionLot key={lot.lotNo} lot={lot} />
-            ))}
-          </ul>
+          <UaAuctionStatus lots={lots} currency={currency} fx={fx} />
+
+          <AuctionCurrency currency={currency} onChange={setCurrency} fx={fx} />
+
+          <UaAuctionChart lots={lots} currency={currency} fx={fx} />
+
+          <Timeline
+            items={shown.map(lot => ({
+              key: String(lot.lotNo),
+              highlight: lot.sold,
+              content: <UaAuctionLot lot={lot} currency={currency} fx={fx} />
+            }))}
+            highlightFirst={false}
+          />
+
+          {(hiddenCount > 0 || (showAll && notSoldCount > VISIBLE_NOT_SOLD)) && (
+            <button
+              type="button"
+              onClick={() => setShowAll(v => !v)}
+              className="mb-2 text-sm text-[var(--color-primary)] underline"
+            >
+              {showAll ? t('uaAuctions.less') : t('uaAuctions.more', { count: hiddenCount })}
+            </button>
+          )}
+
+          <p className="mb-2 text-xs text-[var(--color-muted)]">{t('uaAuctions.monthNote')}</p>
           <p className="mb-2 text-sm text-[var(--color-muted)]">{t('uaAuctions.caveat')}</p>
         </>
       )}
