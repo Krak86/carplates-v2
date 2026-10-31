@@ -17,6 +17,7 @@ import {
   getRoadSafetyCauses,
   getRoadSafetyRegions,
   getRoadSafetyRoads,
+  getRoadSafetyHazards,
   getRoadSafetyTime,
   getCatalogLookup,
   getCatalogMake,
@@ -565,6 +566,14 @@ export const roadSafetyRegionsQuery = (year?: number) => roadSafetyQuery('region
 export const roadSafetyRoadsQuery = (year?: number) => roadSafetyQuery('roads', getRoadSafetyRoads, year)
 export const roadSafetyCausesQuery = (year?: number) => roadSafetyQuery('causes', getRoadSafetyCauses, year)
 export const roadSafetyTimeQuery = (year?: number) => roadSafetyQuery('time', getRoadSafetyTime, year)
+
+export const roadSafetyHazardsQuery = (opts: { year?: number; region?: string; kind?: string }) =>
+  queryOptions({
+    queryKey: ['road-safety', 'hazards', opts.year ?? null, opts.region ?? null, opts.kind ?? null],
+    queryFn: () => getRoadSafetyHazards(opts),
+    staleTime: 60 * 60_000,
+    placeholderData: keepPreviousData
+  })
 
 // Static build asset, never changes at runtime — precached by the service worker, so try it even offline.
 export function ukraineGeographyQuery() {

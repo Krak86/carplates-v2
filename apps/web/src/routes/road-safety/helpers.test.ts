@@ -2,6 +2,11 @@ import { describe, expect, it } from 'vitest'
 
 import {
   barPercent,
+  correlationStrength,
+  fleetPoints,
+  kmLabel,
+  pearson,
+  regionFacts,
   fillBuckets,
   hourLabel,
   mapRows,
@@ -119,5 +124,64 @@ describe('regionCrashFact', () => {
   it('is null for an unknown or missing region', () => {
     expect(regionCrashFact(data, 'C')).toBeNull()
     expect(regionCrashFact(data, null)).toBeNull()
+  })
+})
+
+describe('pearson', () => {
+  it('is 1 for a perfect line and -1 for a falling one', () => {
+    expect(pearson([1, 2, 3, 4], [2, 4, 6, 8])).toBeCloseTo(1)
+    expect(pearson([1, 2, 3, 4], [8, 6, 4, 2])).toBeCloseTo(-1)
+  })
+
+  it('is null for too few points or no variance', () => {
+    expect(pearson([1, 2], [1, 2])).toBeNull()
+    expect(pearson([1, 1, 1], [1, 2, 3])).toBeNull()
+  })
+})
+
+describe('correlationStrength', () => {
+  it('buckets |r|', () => {
+    expect(correlationStrength(0.1)).toBe('none')
+    expect(correlationStrength(-0.4)).toBe('weak')
+    expect(correlationStrength(0.6)).toBe('moderate')
+    expect(correlationStrength(-0.95)).toBe('strong')
+  })
+})
+
+describe('fleetPoints and regionFacts', () => {
+  const rows = [
+    { ...region('A', 1, 1), fleet: 100, deaths: 50, crashes: 200 },
+    { ...region('B', 2, 2), fleet: 100, deaths: 30, crashes: 400 },
+    { ...region('C', 3, 3), fleet: 200, deaths: 20, crashes: 300 },
+    { ...region('D', 4, null), fleet: null, deaths: 5, crashes: 50 }
+  ]
+
+  it('ratios compare the share of deaths with the share of cars', () => {
+    const points = fleetPoints(rows)
+    expect(points).toHaveLength(3)
+    expect(points.find(p => p.region === 'A')?.ratio).toBeCloseTo(2)
+    expect(points.find(p => p.region === 'C')?.ratio).toBeCloseTo(0.4)
+  })
+
+  it('finds the extremes', () => {
+    const f = regionFacts(rows)
+    expect(f?.mostDeaths.region).toBe('A')
+    expect(f?.fewestDeaths.region).toBe('D')
+    expect(f?.deadliest?.region).toBe('A')
+    expect(f?.safest?.region).toBe('C')
+    expect(f?.overRepresented?.region).toBe('A')
+    expect(f?.underRepresented?.region).toBe('C')
+  })
+
+  it('is null with fewer than three regions', () => {
+    expect(regionFacts(rows.slice(0, 2))).toBeNull()
+  })
+})
+
+describe('kmLabel', () => {
+  it('formats metres as km+m', () => {
+    expect(kmLabel(12300)).toBe('12+300')
+    expect(kmLabel(5)).toBe('0+005')
+    expect(kmLabel(null)).toBe('')
   })
 })

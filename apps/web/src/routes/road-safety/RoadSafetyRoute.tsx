@@ -13,14 +13,18 @@ import { cn } from '@/lib/cn'
 import { toIntlLocale } from '@/lib/intl'
 import { roadSafetyRegionsQuery } from '@/lib/queries'
 import { parseYearParam, partialMonth } from '@/routes/road-safety/helpers'
+import FactsSection from '@/routes/road-safety/FactsSection'
+import FleetCorrelation from '@/routes/road-safety/FleetCorrelation'
 import RegionMap from '@/routes/road-safety/RegionMap'
 import RegionRanking from '@/routes/road-safety/RegionRanking'
 import SectionSkeleton from '@/routes/road-safety/SectionSkeleton'
+import SourceData from '@/routes/road-safety/SourceData'
 import StatsSkeleton from '@/routes/stats/StatsSkeleton'
 
 const RoadsSection = lazy(() => import('@/routes/road-safety/RoadsSection'))
 const CausesSection = lazy(() => import('@/routes/road-safety/CausesSection'))
 const TimeSection = lazy(() => import('@/routes/road-safety/TimeSection'))
+const HazardsSection = lazy(() => import('@/routes/road-safety/HazardsSection'))
 
 const FOOTNOTE_KEYS = ['injuredOnly', 'occupied', 'gaps', 'notPerModel'] as const
 
@@ -65,6 +69,8 @@ export default function RoadSafetyRoute(): ReactNode {
 
       {data && (
         <>
+          <SourceData data={data} />
+
           <div className="mb-3 flex flex-wrap items-center gap-2">
             <span className="text-sm text-[var(--color-muted)]">{t('roadSafety.year')}</span>
 
@@ -114,7 +120,11 @@ export default function RoadSafetyRoute(): ReactNode {
             <RegionMap regions={data.regions} />
           </LazySection>
 
+          <FactsSection regions={data.regions} year={data.year} />
+
           <RegionRanking regions={data.regions} />
+
+          <FleetCorrelation regions={data.regions} />
 
           <LazySection fallback={<SectionSkeleton />}>
             <LoadErrorBoundary compact>
@@ -131,6 +141,12 @@ export default function RoadSafetyRoute(): ReactNode {
           <LazySection fallback={<SectionSkeleton />}>
             <LoadErrorBoundary compact>
               <TimeSection year={requestedYear} />
+            </LoadErrorBoundary>
+          </LazySection>
+
+          <LazySection fallback={<SectionSkeleton />}>
+            <LoadErrorBoundary compact>
+              <HazardsSection year={requestedYear} regionNames={data.regions.map(r => r.region).toSorted()} />
             </LoadErrorBoundary>
           </LazySection>
 

@@ -75,3 +75,108 @@ export function regionCrashFact(data: RoadSafetyRegionsResponse, region: string 
   if (!row) return null
   return { year: data.year, crashes: row.crashes, rank: row.rankDeaths, of: data.regions.length }
 }
+
+type FleetRow = Pick<RegionRow, 'region' | 'crashes' | 'deaths' | 'injured' | 'fleet'>
+
+/** Pearson correlation of two equal-length series, or null with fewer than 3 points or no variance. */
+export function pearson(xs: readonly number[], ys: readonly number[]): number | null {
+  const n = Math.min(xs.length, ys.length)
+  if (n < 3) return null
+  const mx = xs.slice(0, n).reduce((a, b) => a + b, 0) / n
+  const my = ys.slice(0, n).reduce((a, b) => a + b, 0) / n
+  let sxy = 0
+  let sxx = 0
+  let syy = 0
+  for (let i = 0; i < n; i++) {
+    const dx = (xs[i] ?? 0) - mx
+    const dy = (ys[i] ?? 0) - my
+    sxy += dx * dy
+    sxx += dx * dx
+    syy += dy * dy
+  }
+  return sxx === 0 || syy === 0 ? null : sxy / Math.sqrt(sxx * syy)
+}
+
+/** Words for |r|: the page shows the number too, this only keeps the text honest ("strong", not "proves"). */
+export function correlationStrength(r: number): 'none' | 'weak' | 'moderate' | 'strong' {
+  const a = Math.abs(r)
+  if (a < 0.3) return 'none'
+  if (a < 0.5) return 'weak'
+  if (a < 0.8) return 'moderate'
+  return 'strong'
+}
+
+export type FleetPoint = {
+  region: string
+  fleet: number
+  deaths: number
+  crashes: number
+  /** Share of national deaths divided by share of the national fleet: 1 = as many deaths as its cars suggest. */
+  ratio: number
+}
+
+/** Regions that have both a fleet figure and crashes, with the deaths-to-fleet ratio. Empty when there is nothing to compare. */
+export function fleetPoints(regions: readonly FleetRow[]): FleetPoint[] {
+  const rows = regions.filter(r => r.fleet !== null && r.fleet > 0)
+  const fleetTotal = rows.reduce((a, r) => a + (r.fleet ?? 0), 0)
+  const deathsTotal = rows.reduce((a, r) => a + r.deaths, 0)
+  if (fleetTotal === 0 || deathsTotal === 0) return []
+  return rows.map(r => ({
+    region: r.region,
+    fleet: r.fleet ?? 0,
+    deaths: r.deaths,
+    crashes: r.crashes,
+    ratio: r.deaths / deathsTotal / ((r.fleet ?? 0) / fleetTotal)
+  }))
+}
+
+export type RegionFacts = {
+  mostDeaths: RegionRow
+  fewestDeaths: RegionRow
+  highestRate: RegionRow | null
+  lowestRate: RegionRow | null
+  /** Deaths per 100 crashes: how often a crash kills. */
+  deadliest: { region: string; per100: number } | null
+  safest: { region: string; per100: number } | null
+  /** Largest and smallest deaths-to-fleet ratio. */
+  overRepresented: FleetPoint | null
+  underRepresented: FleetPoint | null
+  /** Top-3 regions' share of national deaths in percent, over the regions in the data. */
+  top3Share: number
+}
+
+/** Interesting cases of one year for the facts block, or null with fewer than 3 regions. */
+export function regionFacts(regions: readonly RegionRow[]): RegionFacts | null {
+  if (regions.length < 3) return null
+  const byDeaths = rankedRegions(regions, 'deaths')
+  const byRate = rankedRegions(regions, 'rate')
+  const lethal = regions
+    .filter(r => r.crashes >= 100)
+    .map(r => ({ region: r.region, per100: (r.deaths / r.crashes) * 100 }))
+    .toSorted((a, b) => b.per100 - a.per100)
+  const points = fleetPoints(regions).toSorted((a, b) => b.ratio - a.ratio)
+  const total = regions.reduce((a, r) => a + r.deaths, 0)
+  const top3 = byDeaths.slice(0, 3).reduce((a, r) => a + r.deaths, 0)
+  return {
+    mostDeaths: byDeaths[0] as RegionRow,
+    fewestDeaths: byDeaths[byDeaths.length - 1] as RegionRow,
+    highestRate: byRate[0] ?? null,
+    lowestRate: byRate[byRate.length - 1] ?? null,
+    deadliest: lethal[0] ?? null,
+    safest: lethal[lethal.length - 1] ?? null,
+    overRepresented: points[0] ?? null,
+    underRepresented: points[points.length - 1] ?? null,
+    top3Share: total > 0 ? (top3 / total) * 100 : 0
+  }
+}
+
+/** OpenStreetMap link for a hazard point. */
+export function osmUrl(lat: number, lon: number): string {
+  return `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}#map=15/${lat}/${lon}`
+}
+
+/** "12+300" km marker for a metre value, or '' when missing. */
+export function kmLabel(metres: number | null): string {
+  if (metres === null) return ''
+  return `${Math.floor(metres / 1000)}+${String(metres % 1000).padStart(3, '0')}`
+}

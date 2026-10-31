@@ -53,6 +53,7 @@ import {
   powertrainStatsResponseSchema,
   safetyStatsResponseSchema,
   roadSafetyCausesResponseSchema,
+  roadSafetyHazardsResponseSchema,
   roadSafetyRegionsResponseSchema,
   roadSafetyRoadsResponseSchema,
   roadSafetyTimeResponseSchema,
@@ -166,6 +167,7 @@ import type {
   PowertrainStatsResponse,
   SafetyStatsResponse,
   RoadSafetyCausesResponse,
+  RoadSafetyHazardsResponse,
   RoadSafetyRegionsResponse,
   RoadSafetyRoadsResponse,
   RoadSafetyTimeResponse,
@@ -569,6 +571,19 @@ export async function getRoadSafetyCauses(year?: number): Promise<RoadSafetyCaus
 
 export async function getRoadSafetyTime(year?: number): Promise<RoadSafetyTimeResponse> {
   return roadSafetyTimeResponseSchema.parse(await getJson(`/api/road-safety/time${yearSuffix(year)}`))
+}
+
+export async function getRoadSafetyHazards(opts: {
+  year?: number
+  region?: string
+  kind?: string
+}): Promise<RoadSafetyHazardsResponse> {
+  const params = new URLSearchParams()
+  if (opts.year !== undefined) params.set('year', String(opts.year))
+  if (opts.region) params.set('region', opts.region)
+  if (opts.kind) params.set('kind', opts.kind)
+  const qs = params.toString()
+  return roadSafetyHazardsResponseSchema.parse(await getJson(`/api/road-safety/hazards${qs ? `?${qs}` : ''}`))
 }
 
 export async function getFuelStats(): Promise<FuelStatsResponse> {
