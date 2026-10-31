@@ -4294,3 +4294,12 @@ Question: are there free sources for ex-USSR/Russian cars, Baltic registry data 
 - **Cross links:** `components/RelatedPages.tsx` at the bottom of all six pages, driven by `lib/related-pages.ts` (`RELATED_PAGES`, 16 pairs; `RELATED_TARGETS` deep-links the regional map of `/stats` and `/wanted`). Each pair has a number-free hint `related.<from>.<to>` saying what the other page answers.
 - **Not done:** live cross-dataset facts (e.g. thefts per 1,000 registered cars by region) would need a new API query.
 - **Docs:** `docs/features-reference.md` section, release entry 2026-11-01.
+
+## Road-safety context in `/read/safety` (2026-11-01) ✅
+
+- **Why:** crash tests only mean something next to what happens in real crashes; the article now reads the `/road-safety` data (no new API, rollup or migration).
+- **`RoadSection`:** newest-year national crashes / deaths / injured and deaths per 100 crashes; deaths-by-year bars (one `roadSafetyRegionsQuery(year)` per year via `useQueries`, partial years faded and starred, the headline compares the last two full years only); pedestrian and child share of crashes (`crashShare`, null when no region reports the column).
+- **`WhySection`:** top 5 crash types and causes as a share of deaths, peak hour and weekday, `TEST_LINKS` (pedestrians, children, collisions, obstacles → what Euro NCAP / IIHS test) and a note that most causes are driver behaviour.
+- **Helpers (`read/safety/helpers.ts`, tested):** `changePercent`, `lastTwoFullYears`, `deathsPer100Crashes`, `crashShare`. Copy in `content.ts` (`ROAD_NOTE`, `WHY_NOTE`, `TEST_LINKS`), keys `read.sec.safRoad|safWhy`, `read.safety.*` (ua/ru/en), `SAFETY_LEAD` extended.
+- **Not done:** SEO title/description of `/read/safety` in `spa-text.ts` unchanged; ideas left: crash score vs deaths per 100k by region, month seasonality, hazardous sections for the plate's region.
+- **Docs:** `docs/features-reference.md` (`/read/safety` paragraph), release entry 2026-11-01.
