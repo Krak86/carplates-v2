@@ -29,11 +29,11 @@ const VERIFICATION_SITES: VerificationSite[] = [
   { id: 'bdr', url: 'https://bdr.mvs.gov.ua/', icon: '/icons/bdr.svg', iconClass: 'size-8' },
   { id: 'mtsbu', url: 'https://policy.mtsbu.ua/', icon: '/icons/mtsbu.svg', darkBg: true, iconClass: 'h-5 w-auto' },
   // No logos for the HSC open-data checks or the official-tests site: none grants reuse of its mark.
-  { id: 'otk', url: 'https://opendata.hsc.gov.ua/search-otk/veh/', emoji: '🔧', iconClass: 'text-xl' },
-  { id: 'license', url: 'https://opendata.hsc.gov.ua/check-driver-license/', emoji: '🪪', iconClass: 'text-xl' },
+  { id: 'otk', url: 'https://solutions.mvs.gov.ua/search-otk', emoji: '🔧', iconClass: 'text-xl' },
+  { id: 'license', url: 'https://solutions.mvs.gov.ua/check-driver-license', emoji: '🪪', iconClass: 'text-xl' },
   {
     id: 'leisure',
-    url: 'https://opendata.hsc.gov.ua/check-leisure-license-plates/',
+    url: 'https://solutions.mvs.gov.ua/check-leisure-license-plates',
     emoji: '🔢',
     iconClass: 'text-xl'
   },

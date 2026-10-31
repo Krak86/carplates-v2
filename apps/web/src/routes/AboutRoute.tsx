@@ -25,13 +25,13 @@ const SOURCES: readonly Source[] = [
   {
     key: 'mot',
     label: 'DVSA MOT',
-    url: 'https://www.data.gov.uk/dataset/anonymised_mot_test',
+    url: 'https://www.data.gov.uk/dataset/e3939ef8-30c7-4ca8-9c7c-ad9475cc9b2f/anonymised_mot_test',
     mask: '/icons/sources/dvsa.svg'
   },
   {
     key: 'ca',
     label: 'Transport Canada',
-    url: 'https://tc.canada.ca/en/road-transportation/motor-vehicle-safety',
+    url: 'https://tc.canada.ca/en/road-transportation',
     tile: 'bg-red-700'
   },
   { key: 'rdw', label: 'RDW', url: 'https://opendata.rdw.nl', icon: '/icons/sources/rdw.webp' },
@@ -60,7 +60,7 @@ const SOURCES: readonly Source[] = [
     tile: 'bg-blue-700'
   },
   { key: 'setam', label: 'SETAM', url: 'https://setam.net.ua', tile: 'bg-blue-700' },
-  { key: 'hsc', label: 'MVS HSC open data', url: 'https://opendata.hsc.gov.ua', tile: 'bg-blue-700' },
+  { key: 'hsc', label: 'MVS HSC open data', url: 'https://solutions.mvs.gov.ua', tile: 'bg-blue-700' },
   { key: 'stolenIn', label: 'stolen.in.ua', url: 'https://stolen.in.ua', icon: '/icons/sources/stolenin.svg' },
   { key: 'bdr', label: 'MVS (bdr.mvs.gov.ua)', url: 'https://bdr.mvs.gov.ua', icon: '/icons/bdr.svg' },
   { key: 'mtsbu', label: 'MTSBU', url: 'https://policy.mtsbu.ua', icon: '/icons/sources/mtsbu.webp' },

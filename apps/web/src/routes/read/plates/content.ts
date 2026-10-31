@@ -4,7 +4,7 @@ import type { L10n } from '@/routes/read/types'
 // order page, the samples PDF of MIA order No. 166). Prices are as published there (2023): never restate them as current.
 
 export const DIIA_ORDER_URL = 'https://diia.gov.ua/services/zamovlennya-individualnogo-nomernogo-znaka'
-export const LEISURE_CHECK_URL = 'https://opendata.hsc.gov.ua/check-leisure-license-plates/'
+export const LEISURE_CHECK_URL = 'https://solutions.mvs.gov.ua/check-leisure-license-plates'
 export const ORDER_VIDEO_URL = 'https://www.youtube.com/watch?v=EaHwGNc8cck'
 
 export const SOURCES: { url: string; label: L10n }[] = [
