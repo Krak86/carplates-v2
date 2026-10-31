@@ -7,6 +7,7 @@ import {
   index,
   integer,
   jsonb,
+  numeric,
   pgSchema,
   primaryKey,
   real,
@@ -996,6 +997,44 @@ export const wantedPlates = registry.table(
 )
 export type WantedPlateRow = typeof wantedPlates.$inferSelect
 export type WantedPlateInsert = typeof wantedPlates.$inferInsert
+
+/**
+ * A SETAM auction lot for a car or truck (data.gov.ua, CC BY). `plate` / `vin` / `make` / `model` / `year` are parsed from the
+ * free-text `titleRaw` and null when the title lacks them. The winner column of the feed is deliberately not stored.
+ */
+export const auctionLots = registry.table(
+  'auction_lots',
+  {
+    lotNo: integer('lot_no').primaryKey(),
+    proceedingNo: text('proceeding_no'),
+    status: text('status').notNull(),
+    category: text('category').notNull(),
+    region: text('region'),
+    startPrice: numeric('start_price', { precision: 14, scale: 2, mode: 'number' }),
+    salePrice: numeric('sale_price', { precision: 14, scale: 2, mode: 'number' }),
+    titleRaw: text('title_raw').notNull(),
+    plate: text('plate'),
+    vin: text('vin'),
+    make: text('make'),
+    model: text('model'),
+    year: smallint('year'),
+    sourceFile: text('source_file').notNull(),
+    firstSeenAt: timestamp('first_seen_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
+  },
+  t => [
+    index('ix_auction_lots_plate')
+      .on(t.plate)
+      .where(sql`${t.plate} is not null`),
+    index('ix_auction_lots_vin')
+      .on(t.vin)
+      .where(sql`${t.vin} is not null`),
+    index('ix_auction_lots_make_model').on(t.make, t.model),
+    index('ix_auction_lots_status').on(t.status)
+  ]
+)
+export type AuctionLotRow = typeof auctionLots.$inferSelect
+export type AuctionLotInsert = typeof auctionLots.$inferInsert
 
 /** stolen.in.ua scrape resume state: one row per fetched month page (`aug-20`). */
 export const wantedScrapePages = registry.table('wanted_scrape_pages', {

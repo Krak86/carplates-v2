@@ -243,10 +243,10 @@ Registry data lost with the full dumps: re-ingest from `archive/` ZIPs (`backup.
    server errors are not tracked), `PLATE_RECOGNIZER_CLOUD_TOKEN`. `TURNSTILE_*` is set (2026-10-27).
 8. **Ingest cron (live 2026-10-28).** `deploy-ingest.yml` (path-filtered: `scripts/**`, shared, db, `infra/vps/*ingest*`) builds `scripts/Dockerfile`, pulls it on the VPS,
    writes `/opt/carsua/env/ingest.env` (`DATABASE_URL`, `HC_PING_*`), syncs `run-ingest.sh` / `ingest-status.sh` / the compose file and installs
-   `infra/vps/ingest.cron` as the `deploy` user's crontab (replaces it; it was empty). Jobs: `news`, `social`, `wanted` + `wanted-plates` (Garpun, 04:45) daily, `plates` Tue + Fri
+   `infra/vps/ingest.cron` as the `deploy` user's crontab (replaces it; it was empty). Jobs: `news`, `social`, `wanted` + `wanted-plates` (Garpun, 04:45) + `auctions` (SETAM lots, 04:55) daily, `plates` Tue + Fri
    (crontab times are the VPS's local time, CET). Details, the first-load procedure and gotchas: SCHEDULE.md. Check: `crontab -l`,
-   `~/ingest-status.sh`, `SELECT * FROM registry.job_runs ORDER BY id DESC`. Skipped for now (2026-10-28), so ingest failures are not alerted: create one healthchecks.io check per job (news/social/wanted/wanted-plates 1 d,
-   plates 7 d + 1 d grace), add the GitHub secrets `HC_PING_NEWS|SOCIAL|WANTED|WANTED_PLATES|PLATES` to the `production` environment, re-run `deploy-ingest`.
+   `~/ingest-status.sh`, `SELECT * FROM registry.job_runs ORDER BY id DESC`. Skipped for now (2026-10-28), so ingest failures are not alerted: create one healthchecks.io check per job (news/social/wanted/wanted-plates/auctions 1 d,
+   plates 7 d + 1 d grace), add the GitHub secrets `HC_PING_NEWS|SOCIAL|WANTED|WANTED_PLATES|AUCTIONS|PLATES` to the `production` environment, re-run `deploy-ingest`.
    A `plates` run that loaded something runs `backup.sh archive` + `full` by itself. The first manual load (2026-10-28) is written up in
    `docs/plan-done.md` "Ingest cron".
 9. Housekeeping: ✅ Contabo snapshot taken 2026-10-28 (auto-deletes 2026-11-27, take a fresh one before risky changes; a rollback also reverts the DB, so re-apply the newest nightly dump after); ✅ Telegram `@WebpageBot` refresh of `https://carsua.app` (card shows title, description and OG image; send each older shared plate/VIN URL separately, X needs nothing since nothing was shared there). Open: the Dependabot PRs (count not re-checked since 2026-10-27; keep the version pins from CLAUDE.md).

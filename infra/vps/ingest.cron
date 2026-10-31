@@ -9,6 +9,8 @@ PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 25 4 * * *   bash /opt/carsua/compose/run-ingest.sh social >> /opt/carsua/backups/ingest.log 2>&1
 40 4 * * *   bash /opt/carsua/compose/run-ingest.sh wanted >> /opt/carsua/backups/ingest.log 2>&1
 45 4 * * *   bash /opt/carsua/compose/run-ingest.sh wanted-plates >> /opt/carsua/backups/ingest.log 2>&1
+# SETAM auction lots (newest two monthly CSVs; a skipped day is caught up by the next run).
+55 4 * * *   bash /opt/carsua/compose/run-ingest.sh auctions >> /opt/carsua/backups/ingest.log 2>&1
 
 # data.gov.ua plates: Tue + Fri, after the 03:30 backup. A no-op run is one CKAN call; the monthly load holds a lock on registrations.
 15 5 * * 2,5 bash /opt/carsua/compose/run-ingest.sh plates >> /opt/carsua/backups/ingest.log 2>&1
