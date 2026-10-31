@@ -115,7 +115,10 @@ export const SOURCE = {
     label: 'Transport Canada',
     url: 'https://wwwapps.tc.gc.ca/Saf-Sec-Sur/7/VRDB-BDRV/search-recherche/menu.aspx'
   },
-  mot: { label: 'DVSA MOT (data.gov.uk)', url: 'https://www.data.gov.uk/dataset/e3939ef8-30c7-4ca8-9c7c-ad9475cc9b2f/anonymised_mot_test' },
+  mot: {
+    label: 'DVSA MOT (data.gov.uk)',
+    url: 'https://www.data.gov.uk/dataset/e3939ef8-30c7-4ca8-9c7c-ad9475cc9b2f/anonymised_mot_test'
+  },
   wiki: { label: 'Wikipedia / Wikidata', url: 'https://www.wikipedia.org' },
   vdb: { label: 'VehiclesDB', url: 'https://vehiclesdb.com' },
   nbu: { label: 'NBU', url: 'https://bank.gov.ua' },

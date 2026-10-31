@@ -21,6 +21,7 @@ export const ROUTE_TITLE_KEYS: Record<string, string> = {
   '/auctions': 'auctions.page.title',
   '/fuel': 'nav.fuel',
   '/safety': 'nav.safety',
+  '/road-safety': 'nav.roadSafety',
   '/news': 'nav.news',
   '/discuss': 'nav.discuss',
   '/advanced-search': 'nav.advancedSearch',

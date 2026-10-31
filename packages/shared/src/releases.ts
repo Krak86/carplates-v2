@@ -16,6 +16,47 @@ const item = (group: ReleaseGroup, ua: string, ru: string, en: string): ReleaseI
  */
 export const RELEASES: readonly ReleaseDay[] = [
   {
+    date: '2026-11-01',
+    items: [
+      item(
+        'improved',
+        'На головній сторінці пошуку прибрано рядок «Безкоштовно, без реклами, відкриті дані» під слоганом; він лишається в шапці сайту',
+        'На главной странице поиска убрана строка «Бесплатно, без рекламы, открытые данные» под слоганом; она остается в шапке сайта',
+        'The search page no longer repeats the "Free, no ads, open data" line under the tagline; it stays in the site header'
+      ),
+      item(
+        'improved',
+        'Стаття /read/safety тепер пов’язує краш-тести з безпекою доріг: загиблі за роками, частка пішоходів і дітей, види й причини ДТП, пік за годиною та днем і що з цього перевіряють тести',
+        'Статья /read/safety теперь связывает краш-тесты с безопасностью дорог: погибшие по годам, доля пешеходов и детей, виды и причины ДТП, пик по часу и дню и что из этого проверяют тесты',
+        'The /read/safety article now ties crash tests to road safety: deaths by year, the share of pedestrians and children, crash types and causes, the peak hour and weekday, and which of these the tests cover'
+      ),
+      item(
+        'new',
+        'На сторінках /stats, /wanted, /auctions, /fuel, /safety і /road-safety угорі з’явився блок «Джерела даних», а внизу блок «Пов’язана статистика» з посиланнями на сусідні сторінки і підказкою, що там побачити',
+        'На страницах /stats, /wanted, /auctions, /fuel, /safety и /road-safety вверху появился блок «Источники данных», а внизу блок «Связанная статистика» со ссылками на соседние страницы и подсказкой, что там увидеть',
+        'The /stats, /wanted, /auctions, /fuel, /safety and /road-safety pages now open with a "Source data" block and end with a "Related statistics" block linking to the neighbouring pages with a hint of what to look for there'
+      ),
+      item(
+        'new',
+        'Сторінка /road-safety зі статистикою ДТП за даними Патрульної поліції: загиблі й ДТП за областями (також на 100 000 зареєстрованих авто), дороги державного значення, причини й види ДТП, година й день тижня, вибір року; це зведені дані без марок і моделей, тож не ризик окремої моделі',
+        'Страница /road-safety со статистикой ДТП по данным Патрульной полиции: погибшие и ДТП по областям (также на 100 000 зарегистрированных авто), дороги государственного значения, причины и виды ДТП, час и день недели, выбор года; это сводные данные без марок и моделей, поэтому не риск отдельной модели',
+        'A new /road-safety page with road crash statistics from Patrol Police data: deaths and crashes by region (also per 100,000 registered cars), state roads, crash causes and types, hour and weekday, with a year picker; the figures are aggregates without makes or models, so not a per-model risk'
+      ),
+      item(
+        'new',
+        'На /road-safety: джерела даних, цікаві випадки, зв’язок кількості зареєстрованих авто з ДТП за областями та аварійно небезпечні ділянки доріг зі списком і мапою',
+        'На /road-safety: источники данных, интересные случаи, связь числа зарегистрированных авто с ДТП по областям и аварийно опасные участки дорог со списком и картой',
+        'The /road-safety page now shows its source data, interesting cases, how registered cars relate to crashes by region, and hazardous road sections as a list and a map'
+      ),
+      item(
+        'new',
+        'У картці номера з’явився чип з ДТП в області номера (кількість за рік і місце за загиблими), який веде на /road-safety',
+        'В карточке номера появился чип с ДТП в области номера (число за год и место по погибшим), который ведет на /road-safety',
+        'The plate card now shows a chip with road crashes in the plate region (count for the year and rank by deaths), linking to /road-safety'
+      )
+    ]
+  },
+  {
     date: '2026-10-31',
     items: [
       item(

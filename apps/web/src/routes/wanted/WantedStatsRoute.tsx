@@ -5,6 +5,8 @@ import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router'
 
 import LoadErrorBoundary from '@/components/LoadErrorBoundary'
+import PageSources from '@/components/PageSources'
+import RelatedPages from '@/components/RelatedPages'
 import Card from '@/components/ui/Card'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 import { cn } from '@/lib/cn'
@@ -138,6 +140,22 @@ export default function WantedStatsRoute(): ReactNode {
         <p className="mb-4 rounded-md border border-amber-500/40 bg-amber-500/15 px-3 py-2 text-sm font-medium text-amber-800 dark:text-amber-300">
           {t('offline.needsConnection')}
         </p>
+      )}
+
+      {data && (
+        <PageSources
+          sources={[
+            {
+              label: t('pageSources.wanted.police'),
+              url: 'https://data.gov.ua/dataset/2cd12755-834b-4c43-9026-fe356ce93af5',
+              note: showPlates ? t('pageSources.wanted.platesNote') : t('pageSources.wanted.vehiclesNote')
+            },
+            ...(showPlates
+              ? []
+              : [{ label: 'stolen.in.ua', url: 'https://stolen.in.ua', note: t('pageSources.wanted.archiveNote') }])
+          ]}
+          lines={[t('pageSources.wanted.caveat')]}
+        />
       )}
 
       {stats.isPending && stats.fetchStatus !== 'paused' && <StatsSkeleton variant="registry" />}
@@ -285,6 +303,8 @@ export default function WantedStatsRoute(): ReactNode {
           </>
         )}
       </div>
+
+      {data && <RelatedPages page="wanted" />}
     </div>
   )
 }

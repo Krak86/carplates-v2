@@ -243,10 +243,10 @@ Registry data lost with the full dumps: re-ingest from `archive/` ZIPs (`backup.
    server errors are not tracked), `PLATE_RECOGNIZER_CLOUD_TOKEN`. `TURNSTILE_*` is set (2026-10-27).
 8. **Ingest cron (live 2026-10-28).** `deploy-ingest.yml` (path-filtered: `scripts/**`, shared, db, `infra/vps/*ingest*`) builds `scripts/Dockerfile`, pulls it on the VPS,
    writes `/opt/carsua/env/ingest.env` (`DATABASE_URL`, `HC_PING_*`), syncs `run-ingest.sh` / `ingest-status.sh` / the compose file and installs
-   `infra/vps/ingest.cron` as the `deploy` user's crontab (replaces it; it was empty). Jobs: `news`, `social`, `wanted` + `wanted-plates` (Garpun, 04:45) + `auctions` (SETAM lots, 04:55) daily, `plates` Tue + Fri
+   `infra/vps/ingest.cron` as the `deploy` user's crontab (replaces it; it was empty). Jobs: `news`, `social`, `wanted` + `wanted-plates` (Garpun, 04:45) + `auctions` (SETAM lots, 04:55) daily, `dtp-patrol` (road-crash XLSX, 5th of the month 05:35) and `dtp-hazards` (hazardous sections, 10 Feb 05:45), `plates` Tue + Fri
    (crontab times are the VPS's local time, CET). Details, the first-load procedure and gotchas: SCHEDULE.md. Check: `crontab -l`,
    `~/ingest-status.sh`, `SELECT * FROM registry.job_runs ORDER BY id DESC`. Skipped for now (2026-10-28), so ingest failures are not alerted: create one healthchecks.io check per job (news/social/wanted/wanted-plates/auctions 1 d,
-   plates 7 d + 1 d grace), add the GitHub secrets `HC_PING_NEWS|SOCIAL|WANTED|WANTED_PLATES|AUCTIONS|PLATES` to the `production` environment, re-run `deploy-ingest`.
+   plates 7 d + 1 d grace, dtp-patrol 35 d + 3 d grace, dtp-hazards 400 d + 7 d grace), add the GitHub secrets `HC_PING_NEWS|SOCIAL|WANTED|WANTED_PLATES|AUCTIONS|PLATES|DTP_PATROL|DTP_HAZARDS` to the `production` environment, re-run `deploy-ingest`.
    A `plates` run that loaded something runs `backup.sh archive` + `full` by itself. The first manual load (2026-10-28) is written up in
    `docs/plan-done.md` "Ingest cron".
    First load of Garpun + SETAM (2026-10-31): `run-ingest.sh wanted-plates` once, and the SETAM backfill `docker compose run --rm --no-deps -T --user "$(id -u):$(id -g)" ingest tsx src/auctions.ts --all` (`run-ingest.sh auctions` loads only the newest 2 files). If `/api/auctions/stats` was requested while the table was empty it keeps serving zeros (API memory 10 min + Cloudflare 5 min): restart the live api colour, then purge that URL. Details: `docs/garpun-auctions-plan.md`.
@@ -284,9 +284,9 @@ and unbundled, so it says nothing about production.
 
 **Cloudflare in front** — h2/h3 + Brotli on by default; hashed `/assets/*` cached at the edge; SSL mode Full (strict). The client IP arrives in
 `CF-Connecting-IP` (Fastify `trustProxy` + throttler tracker; only trust Cloudflare's IP ranges). The global rollups (`/api/stats/*` except `version`, `/api/fuel/stats`,
-`/api/fuel/powertrains`, `/api/safety/stats`, `/api/wanted/stats`, `/api/auctions/stats`) send `Cache-Control: public, max-age=300`, but Cloudflare does not cache
+`/api/fuel/powertrains`, `/api/safety/stats`, `/api/road-safety/*`, `/api/wanted/stats`, `/api/auctions/stats`) send `Cache-Control: public, max-age=300`, but Cloudflare does not cache
 JSON by default, so a Cache Rule "Cache API rollups" (created 2026-10-29, verified MISS → HIT) makes it effective at the edge: custom expression
-`(http.host eq "carsua.app" and ((starts_with(http.request.uri.path, "/api/stats/") and http.request.uri.path ne "/api/stats/version") or http.request.uri.path in {"/api/stats" "/api/fuel/stats" "/api/fuel/powertrains" "/api/safety/stats" "/api/wanted/stats" "/api/auctions/stats"}))`,
+`(http.host eq "carsua.app" and ((starts_with(http.request.uri.path, "/api/stats/") and http.request.uri.path ne "/api/stats/version") or starts_with(http.request.uri.path, "/api/road-safety/") or http.request.uri.path in {"/api/stats" "/api/fuel/stats" "/api/fuel/powertrains" "/api/safety/stats" "/api/wanted/stats" "/api/auctions/stats"}))`,
 "Eligible for cache", Edge TTL "Use cache-control header if present, bypass cache if not", Browser TTL "Respect origin TTL". `/api/stats/*` (not the other rollups) sends `STATS_CACHE` instead: `max-age=300, s-maxage=21600, stale-while-revalidate=3600` (edge 6 h; every api deploy purges the exact stats URLs plus the `/api/stats/` prefix, best-effort; after a cron or ingest refresh purge them by hand if 6 h of lag matters). Live rule updated with `"/api/auctions/stats"` on 2026-10-31 (verify MISS then HIT after the API deploy; `/api/auctions/lots` is per-query and not edge-cached). Paste it via
 "Edit expression" and never switch back to the builder (it cannot show `starts_with` / `in {}` and wraps the text into a wildcard value).
 

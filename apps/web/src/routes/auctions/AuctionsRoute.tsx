@@ -5,6 +5,8 @@ import { useTranslation } from 'react-i18next'
 import { AUCTIONS_DATASET_URL, PROZORRO_SALE_URL, SETAM_URL } from '@carplates/shared'
 import type { Currency } from '@carplates/shared'
 
+import PageSources from '@/components/PageSources'
+import RelatedPages from '@/components/RelatedPages'
 import Card from '@/components/ui/Card'
 import AuctionCurrency from '@/components/ua-auctions/AuctionCurrency'
 import { formatPrice } from '@/components/ua-auctions/helpers'
@@ -108,6 +110,14 @@ export default function AuctionsRoute(): ReactNode {
 
       {data && (
         <>
+          <PageSources
+            sources={[
+              { label: 'data.gov.ua', url: AUCTIONS_DATASET_URL, note: t('pageSources.auctions.dataset') },
+              { label: 'SETAM', url: SETAM_URL, note: t('pageSources.auctions.setam') },
+              { label: 'Prozorro.Sale', url: PROZORRO_SALE_URL, note: t('pageSources.auctions.prozorro') }
+            ]}
+          />
+
           <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
             {cards.map(c => (
               <Card key={c.label}>
@@ -181,6 +191,8 @@ export default function AuctionsRoute(): ReactNode {
               Prozorro.Sale
             </a>
           </p>
+
+          <RelatedPages page="auctions" />
         </>
       )}
     </div>

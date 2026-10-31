@@ -93,6 +93,28 @@ export { sizeModelSchema, sizeModelsResponseSchema, type SizeModel, type SizeMod
 export { evSplitSchema, evStatsResponseSchema, type EvSplit, type EvStatsResponse } from './evStats.js'
 export { regionBrandStatsResponseSchema, type RegionBrandStatsResponse } from './regionBrandStats.js'
 export { regionFacetStatsResponseSchema, type RegionFacetStatsResponse } from './regionFacetStats.js'
+export {
+  HAZARD_KINDS,
+  roadSafetyCausesResponseSchema,
+  roadSafetyHazardsQuerySchema,
+  roadSafetyHazardsResponseSchema,
+  roadSafetyRegionsResponseSchema,
+  roadSafetyRoadsQuerySchema,
+  roadSafetyRoadsResponseSchema,
+  roadSafetyTimeResponseSchema,
+  roadSafetyYearQuerySchema,
+  roadSafetyYearSchema,
+  type HazardKind,
+  type RoadSafetyCausesResponse,
+  type RoadSafetyHazardsQuery,
+  type RoadSafetyHazardsResponse,
+  type RoadSafetyRegionsResponse,
+  type RoadSafetyRoadsQuery,
+  type RoadSafetyRoadsResponse,
+  type RoadSafetyTimeResponse,
+  type RoadSafetyYear,
+  type RoadSafetyYearQuery
+} from './roadSafety.js'
 export { brandStatsResponseSchema, type BrandStatsResponse } from './brandStats.js'
 export { importsStatsResponseSchema, type ImportsStatsResponse } from './importsStats.js'
 export { originStatsResponseSchema, type OriginStatsResponse } from './originStats.js'

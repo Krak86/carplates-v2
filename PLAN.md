@@ -318,7 +318,7 @@ above once scoped, or dropped if research says no.
 - ✅ **Home blocks, brand line, quiz full screen (2026-10-31)** - see plan-done "Home blocks, brand line, quiz full screen".
 - [ ] **Garpun wanted plates + SETAM auctions (2026-10-31; Garpun steps 1-3 + auctions steps 4-5 (DB, parser, schedule) done, step 6 + per-lot SETAM link + `/auctions` page (step 7a) done; Garpun tab on `/wanted` + auction cards + catalog make line done 2026-10-31; step 9 (read article) done; steps 11 + direct lot link skipped (SETAM terms); deployed + first load + API checks done 2026-10-31 (docs/garpun-auctions-plan.md "Production first load"); open: browser / phone checks, first cron rows, healthchecks, step 12 (later))** — two new data.gov.ua feeds: wanted plates joined into the `/wanted` card section with a Garpun chip, and car lots from SETAM auctions as a card section + `/auctions` route + stats. Steps: `docs/garpun-auctions-plan.md`.
 
-- [ ] **Road safety `/safety` (DTP stats; 2026-10-31, researched, nothing built)** — Patrol Police yearly/monthly XLSX + hazardous-sections CSVs (CC BY): dangerous regions (also per 100k cars), roads, causes, choropleth map, region link on the plate card. **No make/model in any source, so no "top models in DTP" chips.** Step 0 = read the hazard CSV columns (coordinates?). Steps: `docs/road-safety-plan.md`.
+- [ ] **Road safety (DTP stats; 2026-10-31): page, plate-card chip and refresh cron done (2026-11-01), open (owner, not code): healthchecks + secrets for `dtp-*`, first production load, Cloudflare Cache Rule edit, legal review - see "Your to-do" in `docs/road-safety-plan.md`** — see the ✅ line below and `docs/road-safety-plan.md`. **No make/model in any source, so no "top models in DTP" chips.**
 
 ### Actual — ready or in progress
 
@@ -1130,6 +1130,9 @@ card-on-file subscriptions; revisit with real quotes.
 - ✅ **Racer / flags / verification polish (2026-10-25):** region backdrops, smoke + wreck, 10 km end, flag preview, OTK + licence links, glossary, RIA copy-first modal; About sources MVS HSC + flag-icons — see `docs/plan-done.md`.
 - ✅ **About sources (2026-10-14):** 8 auction link-out sites added as logo-less tiles (no logo licence found), Telegram Login logo added — see `docs/plan-done.md`.
 - ✅ **Contact page + footer copyright (2026-10-31):** `/contact` (who we are, order an app, Resend-backed form with throttle + Turnstile + honeypot, `CONTACT_TO` secret) and `© year carsua.app` in every footer — see `docs/plan-done.md`.
+- ✅ **Road crash statistics page `/road-safety` (2026-11-01):** regions (deaths and per 100k registered cars, map), state roads, causes and types, hour and weekday, year picker, footnotes; Patrol Police + Infrastructure Restoration Agency sources; plate-card region crash chip; `dtp-patrol` / `dtp-hazards` cron jobs — see `docs/plan-done.md`.
+- ✅ **Source strip + related pages on all statistics pages (2026-11-01):** `PageSources` "Source data" card and `RelatedPages` cross links on `/stats`, `/wanted`, `/auctions`, `/fuel`, `/safety`, `/road-safety` — see `docs/plan-done.md`.
+- ✅ **Road-safety context in `/read/safety` (2026-11-01):** "On the road" (national totals, deaths by year, pedestrian/child share) and "Tests and crashes" (crash types and causes, peak time, what each programme tests) sections reading the `/road-safety` queries - see `docs/plan-done.md`.
 - **Other providers (researched 2026-10-12, not planned yet):** GitHub (client id + secret, code flow), Microsoft
   (client id, OIDC), Facebook/Meta (app id + secret, needs privacy URL + data-deletion URL + Live app), Apple (Services
   ID + Team ID + Key ID + `.p8`, $99/yr, secret JWT rotates ≤ 6 months — skip unless a store app ships).

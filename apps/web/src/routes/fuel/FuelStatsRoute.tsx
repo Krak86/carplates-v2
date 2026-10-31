@@ -6,6 +6,8 @@ import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router'
 
 import { CO2_BAND_COLOR, CO2_BAND_TEXT_COLOR } from '@/components/CO2Badge.helpers'
+import PageSources from '@/components/PageSources'
+import RelatedPages from '@/components/RelatedPages'
 import SectionInfo from '@/components/SectionInfo'
 import Card from '@/components/ui/Card'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
@@ -89,6 +91,18 @@ export default function FuelStatsRoute(): ReactNode {
 
       {data && (
         <>
+          <PageSources
+            sources={[
+              {
+                label: 'EPA / fueleconomy.gov',
+                url: 'https://www.fueleconomy.gov',
+                note: t('pageSources.fuel.epa')
+              },
+              { label: 'EEA', url: 'https://www.eea.europa.eu', note: t('pageSources.fuel.eea') }
+            ]}
+            lines={[t('pageSources.fleet')]}
+          />
+
           <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
             <Card>
               <div className="text-xs text-[var(--color-muted)] uppercase">{t('fuel.summary.fleetAvg')}</div>
@@ -168,6 +182,8 @@ export default function FuelStatsRoute(): ReactNode {
               <span>{(data.distribution.at(-1)?.from ?? 0) + data.bandWidth}</span>
             </div>
           </Card>
+
+          <RelatedPages page="fuel" />
         </>
       )}
     </div>

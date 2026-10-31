@@ -104,3 +104,53 @@ export const LIMITS: readonly Limit[] = [
     }
   }
 ]
+
+export const ROAD_NOTE: L10n = {
+  ua: 'Це дані Патрульної поліції про ДТП з потерпілими, а не про окремі марки: з них не можна дізнатися, яке авто небезпечніше. Вони показують, у яких умовах ці авто їздять, тобто від чого саме мають захищати краш-тести.',
+  ru: 'Это данные Патрульной полиции о ДТП с пострадавшими, а не об отдельных марках: из них нельзя узнать, какое авто опаснее. Они показывают, в каких условиях эти авто ездят, то есть от чего именно должны защищать краш-тесты.',
+  en: 'This is Patrol Police data on crashes with casualties, not on individual makes: it cannot tell you which car is more dangerous. It shows the conditions these cars drive in, that is, what crash tests are meant to protect against.'
+}
+
+export const WHY_NOTE: L10n = {
+  ua: 'Краш-тест перевіряє лише те, що кузов і подушки роблять під час удару, тобто «пасивну» безпеку. Більшість причин у списку вище - швидкість, дистанція, виїзд на зустрічну - це поведінка водія, і її тест не змінить. Зате від тяжкості наслідків після удару авто з високою оцінкою захищає краще, а системи допомоги, які оцінює Euro NCAP, можуть удару не допустити.',
+  ru: 'Краш-тест проверяет лишь то, что кузов и подушки делают во время удара, то есть «пассивную» безопасность. Большинство причин в списке выше - скорость, дистанция, выезд на встречную - это поведение водителя, и тест его не изменит. Зато от тяжести последствий после удара авто с высокой оценкой защищает лучше, а системы помощи, которые оценивает Euro NCAP, могут не допустить удара.',
+  en: 'A crash test checks only what the body and airbags do during the impact, the “passive” safety. Most causes listed above - speed, following distance, driving onto the oncoming lane - are driver behaviour, which no test changes. What a well-rated car does is soften the outcome once the impact happens, and the assistance systems Euro NCAP grades can prevent the impact altogether.'
+}
+
+export type Link = { key: 'pedestrians' | 'children' | 'frontal' | 'assist'; text: L10n }
+
+/** What each kind of crash has to do with what the programmes test. Wording avoids numbers, so it never goes stale. */
+export const TEST_LINKS: readonly Link[] = [
+  {
+    key: 'pedestrians',
+    text: {
+      ua: 'Наїзд на пішохода - окрема група ДТП. Euro NCAP перевіряє, як капот і бампер б’ють пішохода, та чи гальмує авто саме.',
+      ru: 'Наезд на пешехода - отдельная группа ДТП. Euro NCAP проверяет, как капот и бампер бьют пешехода и тормозит ли авто само.',
+      en: 'A pedestrian hit is its own group of crashes. Euro NCAP checks how the bonnet and bumper strike a pedestrian, and whether the car brakes by itself.'
+    }
+  },
+  {
+    key: 'children',
+    text: {
+      ua: 'ДТП за участі дітей. Euro NCAP окремо оцінює захист дитини в кріслі на манекенах 6 і 10 років.',
+      ru: 'ДТП с участием детей. Euro NCAP отдельно оценивает защиту ребёнка в кресле на манекенах 6 и 10 лет.',
+      en: 'Crashes involving children. Euro NCAP grades child protection separately, with 6- and 10-year-old dummies in their seats.'
+    }
+  },
+  {
+    key: 'frontal',
+    text: {
+      ua: 'Зіткнення та виїзд на зустрічну. Фронтальні тести (з повним і частковим перекриттям) відтворюють саме їх; IIHS додає тест із малим перекриттям.',
+      ru: 'Столкновения и выезд на встречную. Фронтальные тесты (с полным и частичным перекрытием) воспроизводят именно их; IIHS добавляет тест с малым перекрытием.',
+      en: 'Collisions and driving onto the oncoming lane. The frontal tests (full and partial overlap) recreate exactly these; IIHS adds a small-overlap test.'
+    }
+  },
+  {
+    key: 'assist',
+    text: {
+      ua: 'Наїзд на перешкоду й на авто, що стоїть. Автономне гальмування та контроль смуги, що входять в оцінку Euro NCAP, націлені на ці ДТП.',
+      ru: 'Наезд на препятствие и на стоящее авто. Автономное торможение и контроль полосы, входящие в оценку Euro NCAP, нацелены на эти ДТП.',
+      en: 'Hitting an obstacle or a stationary car. The autonomous braking and lane assist inside the Euro NCAP grade are aimed at these crashes.'
+    }
+  }
+]

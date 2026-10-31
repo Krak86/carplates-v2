@@ -5,7 +5,7 @@
 `carsua.app` v2 — Ukrainian vehicle lookup by plate or VIN. pnpm monorepo; data from `data.gov.ua` in Postgres, VIN decoding via NHTSA.
 The v1 app is the sibling `../carplates/` (do not modify).
 
-Docs (**grep `^## ` headings, never read whole**, 100–400 KB): `PLAN.md` backlog + pins · `docs/plan-done.md` write-ups · `README.md` setup/env ·
+Docs (**grep `^## ` headings, never read whole**): `PLAN.md` backlog + pins · `docs/plan-done.md` write-ups · `README.md` setup/env ·
 `docs/features-reference.md` per-feature conventions (**read the matching section before touching a feature**) · `docs/commands-reference.md` · other `docs/*.md` only on request.
 
 ## Layout
@@ -49,6 +49,6 @@ Pins (why: PLAN.md "Version pins"): Node 24, TypeScript 5.9, NestJS 11, Drizzle 
   row deletes) re-run its `pnpm export:*:csv` (a new setup loads the CSV instead of re-scraping).
 - `pnpm format` first (not `scripts/src/fixtures`). Tests: Vitest, colocated `*.test.ts(x)`.
 - Keep docs current: write-up → `docs/plan-done.md`, one-line ✅ → `PLAN.md`, conventions → `docs/features-reference.md`, user-facing entry → `packages/shared/src/releases.ts`
-  (only `new` items are mailed; new day ⇒ bump `releases/latest.ts`); new feature / data source → About (`about.feature.*`, `SOURCES` + `about.source.*`, ua/ru/en).
+  (only `new` items are mailed; new day ⇒ bump `routes/releases/latest.ts`); new feature / data source → About (`FEATURES` + `about.brief.*` + `about.feature.*`, `SOURCES` + `about.source.*`, ua/ru/en).
 
 @CLAUDE_RULES.md

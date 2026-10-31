@@ -16,6 +16,11 @@ export const JOBS = {
   // SETAM auction lots (newest 2 monthly CSVs, ~1 000 vehicle lots, seconds). Idempotent and nothing is lost on a skipped day (lots
   // are snapshots, a later run catches up); the first VPS run needs `--all` once for the history (SCHEDULE.md).
   auctions: { command: 'tsx src/auctions.ts', timeoutMin: 15 },
+  // Patrol Police road-crash XLSX (docs/road-safety-plan.md): a new NN.YYYY.xlsx appears monthly; a year is replaced in one transaction and a
+  // run with nothing newer rewrites the same numbers. Hazardous-section CSVs (data.gov.ua) change about once a year. Re-export the seed CSVs
+  // locally after a real change (pnpm export:dtp:csv).
+  'dtp-patrol': { command: 'tsx src/dtp-patrol.ts', timeoutMin: 20 },
+  'dtp-hazards': { command: 'tsx src/dtp.ts', timeoutMin: 20 },
   // Real work ~monthly (new CKAN month; ~2-3 h, a first load on an empty ingested_resources ~6 h); other runs no-op after one
   // API call (ingest-full.ts). /archive = /opt/carsua/archive on the host.
   plates: { command: 'tsx src/ingest-full.ts --archive /archive', timeoutMin: 720 },

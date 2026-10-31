@@ -39,6 +39,7 @@ import { NewsModule } from './news/news.module.js'
 import { StocksModule } from './stocks/stocks.module.js'
 import { SocialModule } from './social/social.module.js'
 import { ReviewsModule } from './reviews/reviews.module.js'
+import { RoadSafetyModule } from './road-safety/road-safety.module.js'
 import { SafetyModule } from './safety/safety.module.js'
 import { SearchModule } from './search/search.module.js'
 import { SpaModule } from './spa/spa.module.js'
@@ -68,6 +69,7 @@ import { WikispecsModule } from './wikispecs/wikispecs.module.js'
     CardModule,
     CatalogModule,
     OriginModule,
+    RoadSafetyModule,
     VinModule,
     RecognizeModule,
     NewsModule,

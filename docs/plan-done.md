@@ -4276,3 +4276,30 @@ Question: are there free sources for ex-USSR/Russian cars, Baltic registry data 
 - **Quizzes:** full-screen button in `PlayRoute`.
 - **Catalog:** cross links between the cars catalog and advanced search.
 - **Docs/About:** About features (recalls on VIN, home blocks, full screen) and releases updated; planning docs added: `docs/road-safety-plan.md`, `docs/prozorro-sale-auctions-plan.md`.
+
+## Road crash statistics page `/road-safety` (2026-11-01) ✅
+
+- **Route:** `/road-safety` (`/safety` is the vehicle crash-ratings page), sidebar link, `ROUTE_TITLE_KEYS`, `STATIC_PAGES` ua/ru/en (indexed, in the sitemap). Web code in `apps/web/src/routes/road-safety/`; data from `GET /api/road-safety/*` (plan steps 4-5).
+- **Page:** year picker (`?year=`, partial years marked "months 1-N"), national totals, region map (reuses `StatsMap`, so geoBoundaries ODbL attribution is the map's own line), top regions by deaths and by deaths per 100k registered cars (fleet = today's registrations, labelled as cars, not drivers), state roads, causes and types, hour and weekday peaks, footnotes (injured/killed only, occupied regions, war-year gaps, not a per-model risk) and the sources line.
+- **Lazy:** map, roads, causes and time are `LazySection`s (own chunks and queries). None is shareable by `?section=`, so nothing was added to `SHARE_SECTIONS`.
+- **Site plumbing:** About `SOURCES` `patrolPolice` + `irsu` and `about.feature.roadSafety`, `section.about.roadSafety`, release entry 2026-11-01. Hazardous sections (Infrastructure Restoration Agency) are loaded and served by the API; the page shows them as a list and a map (see page extras).
+- **Tests:** `road-safety/helpers.test.ts`.
+- **Page extras (2026-11-01):** source data strip on top, interesting-cases block, fleet vs deaths / crashes scatter with Pearson r and the regions furthest from their fleet share, hazardous sections with List / Map tabs (kind tabs, region filter, OSM links; `HazardMap` draws region outlines from `StatsMap` geometry plus hazard points with hover details).
+- **Plate-card chip (step 8):** `components/RegionCrashChip.tsx` ("Region: N crashes in <year>, rank k of M", deaths rank, links to `/road-safety`), rendered in `ResultCard` after `TopStatBadges`; `regionCrashFact` in `routes/road-safety/helpers.ts`. Online-only (no `offline-cache.ts`), nothing when the region has no row. i18n `result.regionCrashes*`.
+- **Refresh cron (step 10):** jobs `dtp-patrol` (monthly, the 5th) and `dtp-hazards` (yearly, 10 Feb) in `scripts/src/jobs.ts`, `ingest.cron`, `run-ingest.sh`, `HC_PING_DTP_*` in `deploy-ingest.yml`; the healthchecks.io checks and GitHub secrets are still to create.
+
+## Source strip and related pages on statistics pages (2026-11-01) ✅
+
+- **Source strip:** shared `components/PageSources.tsx` ("Source data" card: links with notes, plain lines, optional footer) on `/stats`, `/wanted`, `/auctions`, `/fuel`, `/safety`; `/road-safety` `SourceData` now wraps it. Strings `pageSources.*` (ua/ru/en).
+- **Cross links:** `components/RelatedPages.tsx` at the bottom of all six pages, driven by `lib/related-pages.ts` (`RELATED_PAGES`, 16 pairs; `RELATED_TARGETS` deep-links the regional map of `/stats` and `/wanted`). Each pair has a number-free hint `related.<from>.<to>` saying what the other page answers.
+- **Not done:** live cross-dataset facts (e.g. thefts per 1,000 registered cars by region) would need a new API query.
+- **Docs:** `docs/features-reference.md` section, release entry 2026-11-01.
+
+## Road-safety context in `/read/safety` (2026-11-01) ✅
+
+- **Why:** crash tests only mean something next to what happens in real crashes; the article now reads the `/road-safety` data (no new API, rollup or migration).
+- **`RoadSection`:** newest-year national crashes / deaths / injured and deaths per 100 crashes; deaths-by-year bars (one `roadSafetyRegionsQuery(year)` per year via `useQueries`, partial years faded and starred, the headline compares the last two full years only); pedestrian and child share of crashes (`crashShare`, null when no region reports the column).
+- **`WhySection`:** top 5 crash types and causes as a share of deaths, peak hour and weekday, `TEST_LINKS` (pedestrians, children, collisions, obstacles → what Euro NCAP / IIHS test) and a note that most causes are driver behaviour.
+- **Helpers (`read/safety/helpers.ts`, tested):** `changePercent`, `lastTwoFullYears`, `deathsPer100Crashes`, `crashShare`. Copy in `content.ts` (`ROAD_NOTE`, `WHY_NOTE`, `TEST_LINKS`), keys `read.sec.safRoad|safWhy`, `read.safety.*` (ua/ru/en), `SAFETY_LEAD` extended.
+- **Not done:** SEO title/description of `/read/safety` in `spa-text.ts` unchanged; ideas left: crash score vs deaths per 100k by region, month seasonality, hazardous sections for the plate's region.
+- **Docs:** `docs/features-reference.md` (`/read/safety` paragraph), release entry 2026-11-01.

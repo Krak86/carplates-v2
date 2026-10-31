@@ -39,7 +39,7 @@ export const STATIC_PAGES: Record<string, Record<Lang, PageText>> = {
     en: {
       title: 'Ukrainian car lookup by plate or VIN | Cars UA',
       description:
-        "Look up a vehicle by Ukrainian plate number or VIN: make, model, year, fuel, region and registration history. Free, no ads, open data only."
+        'Look up a vehicle by Ukrainian plate number or VIN: make, model, year, fuel, region and registration history. Free, no ads, open data only.'
     }
   },
   '/about': {
@@ -226,6 +226,23 @@ export const STATIC_PAGES: Record<string, Record<Lang, PageText>> = {
       title: 'Car crash tests: Euro NCAP, IIHS, NHTSA ratings by model | Cars UA',
       description:
         'Euro NCAP, IIHS, NHTSA and other crash-test results by make and model for the cars driving in Ukraine.'
+    }
+  },
+  '/road-safety': {
+    ua: {
+      title: 'Статистика ДТП в Україні: області, дороги, причини | Cars UA',
+      description:
+        'Загиблі та ДТП за областями (також на 100 000 авто), дорогами державного значення, причинами, годиною й днем тижня за даними Патрульної поліції.'
+    },
+    ru: {
+      title: 'Статистика ДТП в Украине: области, дороги, причины | Cars UA',
+      description:
+        'Погибшие и ДТП по областям (также на 100 000 авто), дорогам государственного значения, причинам, часу и дню недели по данным Патрульной полиции.'
+    },
+    en: {
+      title: 'Road crash statistics in Ukraine: regions, roads, causes | Cars UA',
+      description:
+        'Deaths and crashes by region (also per 100,000 cars), state roads, causes, hour and weekday, from Patrol Police data.'
     }
   },
   '/releases': {
