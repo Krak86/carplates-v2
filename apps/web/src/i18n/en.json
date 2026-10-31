@@ -1166,7 +1166,7 @@
   "about.feature.fuel": "Fuel economy and CO₂ (EPA, EEA), with /fuel and /safety overview pages",
   "about.feature.value": "Estimated value: depreciation curve, Ukrainian customs duties, NBU exchange rates, US base price from the VIN (NHTSA MSRP)",
   "about.feature.auctions": "Auction history by VIN, links to lot archives and, for Japanese, Korean and Chinese VINs, history reports from the country of origin",
-  "about.feature.uaAuctions": "Ukrainian auctions: lots of the SETAM auctions of seized and confiscated property that name the plate or VIN (lot number, status, starting and sale price, region, title), all lots newest first with sold ones highlighted, a \"From auction\" chip, a short history of the auctions and how other countries do it; all lots with statistics are on the Auctions page (/auctions).",
+  "about.feature.uaAuctions": "Ukrainian auctions: lots of the SETAM auctions of seized and confiscated property that name the plate or VIN (lot number, status, starting and sale price, region, title), all lots newest first with sold ones highlighted, a \"From auction\" chip, a short history of the auctions and how other countries do it; all lots with statistics are on the Auctions page (/auctions); a guide to Ukrainian and world auctions is at /read/auctions.",
   "about.feature.reviews": "Reviews and test drives, videos, owner posts and social threads (Bluesky, Stack Exchange, Lemmy)",
   "about.feature.media": "Photos, 3D models (Sketchfab), 360° galleries and Wikipedia articles",
   "about.feature.origin": "Where it comes from: flags and a timeline of the brand's country, owners, assembly plant (and where else the model is built) and Ukraine, with former countries (USSR, GDR and others) by year",
