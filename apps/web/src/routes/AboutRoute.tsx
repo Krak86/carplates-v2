@@ -236,6 +236,10 @@ const SOURCES: readonly Source[] = [
     url: 'https://www.chinavehiclehistory.com',
     tile: 'bg-slate-500'
   },
+  { key: 'carvertical', label: 'carVertical', url: 'https://www.carvertical.com', tile: 'bg-slate-500' },
+  { key: 'autodna', label: 'AutoDNA', url: 'https://www.autodna.com', tile: 'bg-slate-500' },
+  { key: 'carfax', label: 'Carfax', url: 'https://www.carfax.com', tile: 'bg-slate-500' },
+  { key: 'autocheck', label: 'AutoCheck', url: 'https://www.autocheck.com', tile: 'bg-slate-500' },
   {
     key: 'historiaPojazdu',
     label: 'Historia Pojazdu (gov.pl)',

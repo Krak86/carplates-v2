@@ -12,7 +12,11 @@ export const AUCTION_SITE_IDS = [
   'encar',
   'carvx',
   'checkcar',
-  'chinavehiclehistory'
+  'chinavehiclehistory',
+  'carvertical',
+  'autodna',
+  'carfax',
+  'autocheck'
 ] as const
 export type AuctionSiteId = (typeof AUCTION_SITE_IDS)[number]
 
@@ -21,9 +25,10 @@ type AuctionSite = {
   region: AuctionRegion
   /**
    * `main` = an archive that answers "was this VIN sold at auction"; `extra` = last-resort resources without a VIN archive;
-   * `asia` = paid history reports for Japan / Korea / China cars, offered only when the VIN prefix matches `vinPrefix`.
+   * `asia` = paid history reports for Japan / Korea / China cars, offered only when the VIN prefix matches `vinPrefix`;
+   * `history` = paid crash / damage / mileage history reports (insurance claims, service records) for any VIN.
    */
-  tier: 'main' | 'extra' | 'asia'
+  tier: 'main' | 'extra' | 'asia' | 'history'
   /** `asia` tier: the VIN's country prefix (WMI start) this report covers. */
   vinPrefix?: RegExp
   /** Site root in the visitor's language — where a manual site is opened (the VIN is pasted into its search box). */
@@ -72,7 +77,12 @@ export const AUCTION_SITES: readonly AuctionSite[] = [
     tier: 'asia',
     vinPrefix: /^L/,
     home: () => 'https://www.chinavehiclehistory.com/'
-  }
+  },
+  // Paid global reports: the free step is only a VIN decode, the crash records sit behind the purchase. Form only.
+  { id: 'carvertical', region: 'eu', tier: 'history', home: () => 'https://www.carvertical.com/' },
+  { id: 'autodna', region: 'eu', tier: 'history', home: () => 'https://www.autodna.com/' },
+  { id: 'carfax', region: 'us', tier: 'history', home: () => 'https://www.carfax.com/' },
+  { id: 'autocheck', region: 'us', tier: 'history', home: () => 'https://www.autocheck.com/' }
 ]
 
 /** Asia history reports that cover this VIN's country (Japan `J`, Korea `KL`-`KR`, China `L`); empty for any other VIN. */
