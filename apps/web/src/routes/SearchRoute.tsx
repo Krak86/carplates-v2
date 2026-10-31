@@ -39,6 +39,7 @@ import { historyQuery, plateQuery, statsTopQuery, vinQuery } from '@/lib/queries
 import { capture } from '@/lib/telemetry'
 import { formatVehicleLabel } from '@/lib/vehicle-label'
 import HomeFuelSection from '@/routes/stats/HomeFuelSection'
+import HomeAuctionsSection from '@/routes/stats/HomeAuctionsSection'
 import HomeNewsSection from '@/routes/stats/HomeNewsSection'
 import HomeSafetySection from '@/routes/stats/HomeSafetySection'
 import HomeStatsSkeleton from '@/routes/stats/HomeStatsSkeleton'
@@ -394,6 +395,12 @@ export default function SearchRoute(): ReactNode {
         <Presence show={showHomeStats}>
           <LazySection fallback={null}>
             <HomeWantedSection />
+          </LazySection>
+        </Presence>
+
+        <Presence show={showHomeStats}>
+          <LazySection fallback={null}>
+            <HomeAuctionsSection />
           </LazySection>
         </Presence>
 
