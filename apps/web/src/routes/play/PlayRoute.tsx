@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useSearchParams } from 'react-router'
@@ -33,16 +33,42 @@ export default function PlayRoute(): ReactNode {
   const [run, setRun] = useState(0)
   const [rounds, setRounds] = useState<RoundChoice>(readRounds)
   const game = parseQuizId(params.get('game'))
+  const frameRef = useRef<HTMLDivElement>(null)
+  const [fullscreen, setFullscreen] = useState(false)
+
+  useEffect(() => {
+    const handleChange = (): void =>
+      setFullscreen(!!document.fullscreenElement && document.fullscreenElement === frameRef.current)
+    document.addEventListener('fullscreenchange', handleChange)
+    return () => document.removeEventListener('fullscreenchange', handleChange)
+  }, [])
+
+  const handleToggleFullscreen = (): void => {
+    if (document.fullscreenElement) void document.exitFullscreen()
+    else void frameRef.current?.requestFullscreen().catch(() => undefined)
+  }
 
   if (game) {
     const Quiz = QUIZ_COMPONENT[game]
     return (
-      <div className="mx-auto max-w-6xl">
+      <div
+        ref={frameRef}
+        className={cn('mx-auto max-w-6xl', fullscreen && 'h-full max-w-none overflow-auto bg-[var(--color-bg)] p-4')}
+      >
         <div className="mb-3 flex items-center justify-between gap-3">
           <Link to="/play" className="text-sm text-[var(--color-primary)] hover:underline">
             {t('play.back')}
           </Link>
           <h1 className="text-lg font-semibold">{t(`play.quiz.${game}.title`)}</h1>
+          {document.fullscreenEnabled && (
+            <button
+              type="button"
+              onClick={handleToggleFullscreen}
+              className="rounded border border-[var(--color-border)] px-2 py-0.5 text-sm hover:border-[var(--color-primary)]"
+            >
+              {fullscreen ? t('play.exitFullscreen') : t('play.fullscreen')}
+            </button>
+          )}
         </div>
         {online ? <Quiz key={run} rounds={rounds} onAgain={() => setRun(r => r + 1)} /> : <p>{t('play.offline')}</p>}
       </div>

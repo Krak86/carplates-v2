@@ -315,7 +315,10 @@ Snapshot of what's actually next, split from what still needs a decision
 before it's buildable. Not a phase — items here get folded into Phases 2-5
 above once scoped, or dropped if research says no.
 
+- ✅ **Home blocks, brand line, quiz full screen (2026-10-31)** - see plan-done "Home blocks, brand line, quiz full screen".
 - [ ] **Garpun wanted plates + SETAM auctions (2026-10-31; Garpun steps 1-3 + auctions steps 4-5 (DB, parser, schedule) done, step 6 + per-lot SETAM link + `/auctions` page (step 7a) done; Garpun tab on `/wanted` + auction cards + catalog make line done 2026-10-31; step 9 (read article) done; steps 11 + direct lot link skipped (SETAM terms); deployed + first load + API checks done 2026-10-31 (docs/garpun-auctions-plan.md "Production first load"); open: browser / phone checks, first cron rows, healthchecks, step 12 (later))** — two new data.gov.ua feeds: wanted plates joined into the `/wanted` card section with a Garpun chip, and car lots from SETAM auctions as a card section + `/auctions` route + stats. Steps: `docs/garpun-auctions-plan.md`.
+
+- [ ] **Road safety `/safety` (DTP stats; 2026-10-31, researched, nothing built)** — Patrol Police yearly/monthly XLSX + hazardous-sections CSVs (CC BY): dangerous regions (also per 100k cars), roads, causes, choropleth map, region link on the plate card. **No make/model in any source, so no "top models in DTP" chips.** Step 0 = read the hazard CSV columns (coordinates?). Steps: `docs/road-safety-plan.md`.
 
 ### Actual — ready or in progress
 
@@ -365,11 +368,10 @@ above once scoped, or dropped if research says no.
 - ✅ **VIN decode overview + plate-card split** — done 2026-10-02 (tabs, VIN anatomy, equipment map, engine/origin
   cards, grouped details; plate card now has separate _Registration history_ and _VIN decode_ sections) — see
   `docs/plan-done.md`. Open follow-ups:
-  - ⏳ VIN page: headline the current plate (`registry.plate` / `registry.plateInferred`, already returned by
+  - ⏭️ **Skipped 2026-10-31 (owner):** VIN page: headline the current plate (`registry.plate` / `registry.plateInferred`, already returned by
     `/api/vin/:vin`, still unused there); retitle the registry timeline to match `result.historyTitle`.
-  - ⏳ Translate the Raw-tab / detail-row labels (NHTSA variable names) and common values into ua/ru — deferred until
-    the new view had been judged.
-  - ⏳ Polish: hide the GVWR class scale for motorcycles (meaningless there); drop the near-duplicate Vehicle Type /
+  - ⏭️ **Skipped 2026-10-31 (owner):** Translate the Raw-tab / detail-row labels (NHTSA variable names) and common values into ua/ru (Raw stays exact English by design).
+  - ⏭️ **Skipped 2026-10-31 (owner):** Polish: hide the GVWR class scale for motorcycles (meaningless there); drop the near-duplicate Vehicle Type /
     Body Class chips; Windows renders flag emoji as letters (consider SVG flags); compute the VIN check digit locally
     for non-NHTSA-covered markets.
 
@@ -380,7 +382,7 @@ above once scoped, or dropped if research says no.
 - ✅ **Stock news widget + Social chip, mobile sidebar buttons, viewport-safe info popups, `/install` page, `pnpm tunnel`** (2026-10-13, `ffceeff` … `55a1fcb`) — built, see `docs/plan-done.md` ("Stock news, mobile sidebar…"). **Open:** news rides the same unofficial Yahoo endpoints as the share price (drop the widget if they break).
 - ✅ **Skeleton placeholders** for stats pages and homepage stats (2026-10-06, `de0a53c`) and the **About page sources + icons** (`9b974fd`) — built, see `docs/plan-done.md`.
 - ✅ **Weight rankings, Stack Exchange + Lemmy community posts, richer "Copy all info" export, WebP brand logos** (2026-10-09, `3f7a596` … `bb9f055`) — built, see `docs/plan-done.md` and `docs/features-reference.md`. **Open:** Stack Exchange / Lemmy are unauthenticated public APIs (rate limits unmeasured — judge on real traffic, drop the widget column if they throttle); weight edges for models with few vehicles are percentile-based, so tiny samples are noisy (per-group floor only); Lighthouse/LCP not yet measured after the perf pass (Phase 4).
-- 📋 **Feature guide** (`/features`-style tour with Playwright screenshots, ua/ru/en) — planned 2026-10-06, not started: [FEATURES_PLAN.md](FEATURES_PLAN.md). The "What's new" part shipped as the `/releases` page (2026-10-15, no bell). **Conflicts with the
+- ⏭️ **Feature guide + "What's new" bell** (`/features`-style tour with Playwright screenshots, ua/ru/en) — planned 2026-10-06, **skipped 2026-10-31**: [FEATURES_PLAN.md](FEATURES_PLAN.md). The "What's new" part shipped as the `/releases` page (2026-10-15, no bell). **Conflicts with the
   paid-features route** — see Phase 5 "Stage A".
 
 - ✅ **Wanted (stolen) vehicles** — built 2026-10-15 (`5bed8de`), see above and `docs/plan-done.md` (original design archived there).
@@ -389,7 +391,8 @@ above once scoped, or dropped if research says no.
 - ✅ **Pre-public secrets audit, production DB-credential guard, first Dependabot round** (2026-10-15) — see `docs/plan-done.md`. **Open:** run
   gitleaks over the full history before flipping the repo public; `@tanstack/react-table` 9 migration (v8 held).
 
-- 📋 **Window sticker** (Monroney-style spec label, PDF/print) — idea 2026-10-13, researched, not started.
+- ⏭️ **Window sticker** (Monroney-style spec label, PDF/print) — idea 2026-10-13, **skipped 2026-10-31**: no demand signal, no new data (MSRP/options unavailable),
+  and the PDF export + plate card PNG already cover printing/sharing. If it returns, build only a one-page summary layout on the existing PDF export, not a Monroney page.
   - **Templates:** no free official one to reuse. The US Monroney label is mandated by the Automobile Information
     Disclosure Act (1958) and the EPA fuel-economy label by 40 CFR 600 — specs only, no licensed artwork; the EU has
     the CO₂/fuel label (Directive 1999/94/EC) at the point of sale; Ukraine mandates nothing. So we design our own
@@ -747,7 +750,9 @@ Group 1 dimension callouts + garage-fit -> Group 3 (existing order). Owner says 
 
 ### To discuss / research
 
-- [ ] **Driver assist + CarPlay / Android Auto** — researched 2026-10-28, not started. Owner says "go" per step. **Step 1 ✅ 2026-10-28** (ASSISTS extended, SAE level, US-spec footnote, shareable plate-card section with explainer; see features-reference "VIN page" > Driver assists). **Step 2 ✅ 2026-10-28** (EU GSR2 baseline by model year, `vin/gsr2.ts`; seen working on Porsche Taycan 2023 НС0500YС). Steps 3-4 optional, ask the owner first. Open polish (owner not yet decided): the NHTSA chips (US spec, ✓) and the EU baseline chips (dashed) can look contradictory on one card (e.g. a US-decoded Taycan) - add a separator line ("above: decoded equipment; below: what EU law required") and/or hide baseline chips whose system already shows ✓. Polish ✅ (divider + note on top). ADDW and pedestrian/cyclist AEB rows ✅ (second GSR2 stage). VIN page baseline ✅ (`VinTypicalEuBaseline`, inside "Typical model data", only when the NL register knows the model). Step 4 link-out ✅ (`VinSmartphoneLinks`; curated CSV not built).
+- [x] **RU/BY/Baltic car databases and СТО repair data (researched 2026-10-31, nothing to build)** - cats.parts is a BMW/Mini-only shop catalog (no API, no licence); no free open dataset for Russian/Belarusian cars (7zap/ilcats = browse-only, scraping ruled out); Baltic inspection data (LV CSDD, LT TRANSEKSTA, EE Transpordiamet) has no usable VIN; СТО data (labor times, torque, parts cross-refs) is paid (TecDoc, MOTOR, Autodata). Only built: NHTSA/RDW/CA recalls + complaints on the VIN page ✅. Open idea: generic OBD DTC code lookup page (not started). Write-up: `docs/plan-done.md` "RU/BY/Baltic data and СТО research".
+
+- [ ] **Driver assist + CarPlay / Android Auto** — researched 2026-10-28, not started. Owner says "go" per step. **Step 1 ✅ 2026-10-28** (ASSISTS extended, SAE level, US-spec footnote, shareable plate-card section with explainer; see features-reference "VIN page" > Driver assists). **Step 2 ✅ 2026-10-28** (EU GSR2 baseline by model year, `vin/gsr2.ts`; seen working on Porsche Taycan 2023 НС0500YС). Steps 3-4 ✅ 2026-10-28 (owner closed the remaining polish 2026-10-31, nothing open). Polish (decided): the NHTSA chips (US spec, ✓) and the EU baseline chips (dashed) can look contradictory on one card (e.g. a US-decoded Taycan) - add a separator line ("above: decoded equipment; below: what EU law required") and/or hide baseline chips whose system already shows ✓. Polish ✅ (divider + note on top). ADDW and pedestrian/cyclist AEB rows ✅ (second GSR2 stage). VIN page baseline ✅ (`VinTypicalEuBaseline`, inside "Typical model data", only when the NL register knows the model). Step 4 link-out ✅ (`VinSmartphoneLinks`; curated CSV not built).
       **Legal (verified 2026-10-28): do NOT scrape Apple's CarPlay list or Google's Android Auto page.** Apple site terms ban
       "page-scrape / robot / spider" and copying (robots.txt is open, the ToS still applies); Google terms ban scraping content
       "that doesn't belong to you"; EU database right covers the compilation even though single facts are free. No open dataset
@@ -779,7 +784,7 @@ Group 1 dimension callouts + garage-fit -> Group 3 (existing order). Owner says 
       size blueprint overlay, generated difference sentences, export like "Copy all info", "Compare" chip on the plate/VIN card and catalog
       page (slot A prefilled). Phases: (1) core, (2) visuals, (3) export, (4) tray / suggestions / saved / indexable pairs.
       Full plan: [docs/compare-plan.md](docs/compare-plan.md). Also covers the segment-peer list and a `/read/sizes` overlay embed.
-- **Shareable photo-search links** — idea 2026-10-01, deferred (not started).
+- ⏭️ **Shareable photo-search links** — idea 2026-10-01, **skipped 2026-10-31** (not started; design kept below in case it returns).
   Share button on the photo card uploads the shrunk image + recognition result
   (candidates with boxes, EXIF meta) to `POST /api/shares`; opening
   `/<plate>?p=<token>` fetches it and fills the same `photo` state in
@@ -984,22 +989,19 @@ in-memory store resets on restart and isn't shared across instances), body-email
 
 Code-level audit findings and the full pre-deploy gate: [docs/security-checklist.md](docs/security-checklist.md) (2026-10-13).
 
-- [ ] Set `TRUST_PROXY=true` **only** once Caddy/Cloudflare is in front and the API port is not publicly reachable; otherwise
-      `X-Forwarded-For` is spoofable and the per-IP limits are bypassable (or all users share the proxy's IP).
-- [ ] Firewall: expose only 80/443 (+ UDP 443 for HTTP/3); API, Postgres and Redis ports closed to the internet; SSH key-only (✅ verified 2026-10-27), fail2ban.
-- [ ] Caddy edge limits from "Rate-limit policy" below (all paths 120/60s; `/api/*` 60/60s + 1000/1h; `/og/*` 300/60s).
+- [x] `TRUST_PROXY=true` is set in `infra/docker-compose.prod.yml` (Caddy + Cloudflare in front; Caddy trusts `CF-Connecting-IP` only from Cloudflare's ranges). Set only when the API port is not publicly reachable, else `X-Forwarded-For` is spoofable.
+- [x] Firewall: ✅ verified 2026-10-31 from outside (`Test-NetConnection`, IPv4): 22/80/443 open; 3000 (api), 5432 (Postgres), 6379 (Redis) closed. ✅ SSH key-only (verified 2026-10-27). ✅ IPv6 + Docker verified on the VPS 2026-10-31 (`ss -tln`, `docker ps`): nothing listens on 3000/5432/6379; only Caddy publishes 80/443 (tcp, IPv4 + IPv6) and 443/udp (HTTP/3); api, alpr and Postgres are internal-only; Caddy admin 2019 unpublished; public IPv6 `2a02:c207:2370:1852::1`. Optional, skipped by choice: fail2ban (SSH is key-only), Caddy IP allowlist for `/api/admin/*` (use Cloudflare Access instead if wanted).
+- [x] ~~Caddy edge limits~~ **Dropped 2026-10-31:** Caddy `rate_limit` needs a custom build; covered by the Cloudflare WAF rule + the Nest throttler (`docs/deploy.md` "Longer term"). The "Rate-limit policy" numbers below are now reference only.
 - [x] Cloudflare (free tier) in front: ✅ Bot Fight Mode, WAF rate-limit rule on `/api/plate*` and `/api/vin*` (30/10 s per IP), HTTP/3, Always Use HTTPS (2026-10-28,
       `docs/deploy.md` step 4). "Under Attack" stays a manual incident toggle. Trust only Cloudflare's IP ranges / `CF-Connecting-IP` (Caddyfile; re-check the ranges occasionally).
-- [x] Cloudflare Turnstile on sign-in "send code" — keys set in production (2026-10-27). [ ] Still open: feedback/discuss submit and (optionally) camera recognize — never on plain search.
-- [ ] Headers at Caddy: `Strict-Transport-Security`, a Content-Security-Policy (allow YouTube, Sketchfab, Google Maps, PostHog,
-      Sentry, Google Identity; start in `Report-Only`), `Permissions-Policy` (camera/geolocation for self only).
-- [ ] Redis-backed throttler storage (shared counters, survives restarts); global daily counter for paid third-party keys
-      (Plate Recognizer budget is already capped; add the same for any future RIA key).
-- [ ] Swagger (`ENABLE_SWAGGER`) off in production; `/api/admin/*` reachable only for admin sessions (consider IP-allowlisting at Caddy).
-- [ ] Secrets only in server env / secret store; rotate the Google client, PostHog personal key and Plate Recognizer token if ever exposed.
+- [x] Cloudflare Turnstile on sign-in "send code" (keys set in production 2026-10-27) and on the feedback/contact submit (`contact.controller.ts`). Discuss is Disqus (own spam protection), so no Turnstile there. Optional: camera recognize — never on plain search.
+- [ ] Headers at Caddy: ✅ `Strict-Transport-Security` and a Report-Only CSP are in `infra/Caddyfile`. Open: **enforce CSP** after ~1 week of clean reports (recheck Lighthouse `inspector-issues` first); verify `Permissions-Policy` (camera/geolocation for self only).
+- [ ] Redis-backed throttler storage (shared counters, survives restarts, covers the blue/green overlap) — **not started**, Redis is not in the compose file; low priority. Global daily counter for paid third-party keys (Plate Recognizer budget is already capped; only needed if a RIA key is added).
+- [x] Swagger is off in production (`swaggerEnabled`: `ENABLE_SWAGGER` or non-production; `/api/docs` serves the SPA shell). [x] `/api/admin/*` verified 2026-10-31: all three admin controllers (`features/admin`, `digest`, `usage-admin`) carry a class-level `@UseGuards(AdminGuard)` (session + `role = 'admin'`, else 401/403); the dev-only `/api/dev/emails` controller is not registered in production. Optional: IP-allowlist at Caddy.
+- [x] Secrets: production `AUTH_SECRET` / `POSTGRES_PASSWORD` differ from dev. Rotation **skipped by choice 2026-10-28**; rotate `POSTHOG_PERSONAL_API_KEY` and any other key shown in chat/screenshots if you consider it exposed.
 - [ ] `robots.txt`/sitemap: verify `PUBLIC_SITE_URL` is the real origin, submit `sitemap.xml` in Google Search Console and Bing Webmaster.
-- [ ] Cookie/consent and licence decisions before ads or telemetry go live: [docs/legal-and-monetization.md](docs/legal-and-monetization.md).
-- [ ] Uptime monitor on `/healthz`, Sentry alerts on 429 spikes, log retention/rotation.
+- [ ] Cookie/consent and licence decisions before ads go live (not before): [docs/legal-and-monetization.md](docs/legal-and-monetization.md).
+- [ ] Monitoring: ✅ UptimeRobot on `/healthz` + home (2026-10-28). Open: server Sentry is fully wired in code (`instrument.ts`, `deploy-api.yml`) and the GitHub secret `SENTRY_DSN` + variable `ENABLE_TELEMETRY=true` are set in the `production` environment (seen 2026-10-31). Open: confirm server events actually reach Sentry (re-run `deploy-api` if it ran before they were set; the DSN must be the Node project's), then a Sentry alert on 429 spikes; healthchecks.io checks + `HC_PING_*` secrets for the ingest crons; log retention/rotation.
 
 ### Backup policy (Phase 4)
 

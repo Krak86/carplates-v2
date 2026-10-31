@@ -20,6 +20,36 @@ export const RELEASES: readonly ReleaseDay[] = [
     items: [
       item(
         'new',
+        'На головній сторінці з’явилися блоки з свіжими номерами з розшуку («Гарпун») і найновішими лотами аукціонів',
+        'На главной странице появились блоки со свежими номерами из розыска («Гарпун») и новейшими лотами аукционов',
+        'The home page has new blocks with recent wanted plates (Garpun) and the newest auction lots'
+      ),
+      item(
+        'improved',
+        'Новий слоган і позначка «Безкоштовно, без реклами, відкриті дані» на головній і в описах посилань',
+        'Новый слоган и пометка «Бесплатно, без рекламы, открытые данные» на главной и в описаниях ссылок',
+        'A new slogan and a "Free, no ads, open data" note on the home page and in link previews'
+      ),
+      item(
+        'improved',
+        'В іграх-вікторинах з’явилася кнопка «на весь екран»',
+        'В играх-викторинах появилась кнопка «на весь экран»',
+        'The quiz games have a full-screen button'
+      ),
+      item(
+        'improved',
+        'Каталог авто і розширений пошук тепер пов’язані перехресними посиланнями',
+        'Каталог авто и расширенный поиск теперь связаны перекрёстными ссылками',
+        'The car catalog and advanced search now link to each other'
+      ),
+      item(
+        'improved',
+        'На сторінці VIN у блоці «типові дані моделі» з’явився розділ «Відкликання»: кампанії ЄС (RDW), США (NHTSA) і Канади та скарги власників, як і на картці номера; це дані по моделі й року, а не по цьому VIN',
+        'На странице VIN в блоке «типичные данные модели» появился раздел «Отзывы»: кампании ЕС (RDW), США (NHTSA) и Канады и жалобы владельцев, как и на карточке номера; это данные по модели и году, а не по этому VIN',
+        'The VIN page now has a "Recalls" section inside the typical model data: EU (RDW), US (NHTSA) and Canadian campaigns plus owner complaints, as on the plate card; model and year level, not specific to this VIN'
+      ),
+      item(
+        'new',
         'У розділі аукціонів з’явилася група «Історія ДТП (платні звіти)»: посилання на carVertical, AutoDNA, Carfax і AutoCheck, бо жодне безкоштовне джерело не показує ДТП окремого авто; VIN копіюється, ми нічого не надсилаємо',
         'В разделе аукционов появилась группа «История ДТП (платные отчёты)»: ссылки на carVertical, AutoDNA, Carfax и AutoCheck, так как ни один бесплатный источник не показывает ДТП отдельного авто; VIN копируется, мы ничего не отправляем',
         'The auctions section has a new "Crash history (paid reports)" group linking to carVertical, AutoDNA, Carfax and AutoCheck, since no free source shows the accidents of a single car; the VIN is copied and we send nothing'

@@ -242,6 +242,7 @@ export default function SearchRoute(): ReactNode {
                 <p className="rounded bg-[var(--color-surface)]/20 px-1.5 py-0.5 text-sm text-[var(--color-fg)]">
                   {t('app.tagline')}
                 </p>
+                <p className="w-full text-center text-xs text-[var(--color-muted)]">{t('app.free')}</p>
               </div>
             </div>
           </div>

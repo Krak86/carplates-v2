@@ -14,6 +14,7 @@ import { buildFallback, toFieldMap, typicalLookup } from '@/components/vin/helpe
 import VinTypicalEuBaseline from '@/components/vin/VinTypicalEuBaseline'
 
 const VehicleSizeSection = lazy(() => import('@/components/size/VehicleSizeSection'))
+const RdwRecalls = lazy(() => import('@/components/RdwRecalls'))
 
 type Props = {
   data: VinDecodeResponse
@@ -79,6 +80,9 @@ export default function VinTypicalData({ data }: Props): ReactNode {
       </LazySection>
       <FuelEconomy brand={brand} model={model} year={year} fuel={fuel} capacity={capacity} kind={kind} />
       <VinTypicalEuBaseline brand={brand} model={model} year={year} kind={kind} />
+      <LazySection sections={['recalls']}>
+        <RdwRecalls brand={brand} model={model} year={year} kind={kind} />
+      </LazySection>
     </div>
   )
 }
