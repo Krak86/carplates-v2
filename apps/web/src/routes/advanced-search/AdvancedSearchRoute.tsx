@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import {
+  CATALOG_INDEX_PATH,
   MIN_BRAND_LENGTH,
   MIN_INDEXABLE_LENGTH,
   REGION_NAMES,
@@ -135,6 +136,11 @@ export default function AdvancedSearchRoute(): ReactNode {
       <div className="mb-4 inline-block rounded-lg bg-[var(--color-bg)]/85 px-3 py-1.5 backdrop-blur-sm">
         <h1 className="text-2xl font-bold">{t('advancedSearch.title')}</h1>
         <p className="text-[var(--color-muted)]">{t('advancedSearch.subtitle')}</p>
+        <p className="text-sm">
+          <Link to={CATALOG_INDEX_PATH} className="text-primary underline">
+            {t('advancedSearch.catalogLink')}
+          </Link>
+        </p>
       </div>
 
       {!online && (

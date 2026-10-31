@@ -7,6 +7,7 @@ import { Link, useParams } from 'react-router'
 import { CompareTrayBar, CompareTrayButton } from '@/components/compare/CompareTray'
 
 import BrandLogo from '@/components/BrandLogo'
+import CatalogAdvancedSearchNote from '@/components/catalog/CatalogAdvancedSearchNote'
 import CatalogAuctionLine from '@/components/catalog/CatalogAuctionLine'
 import CatalogBreadcrumb from '@/components/catalog/CatalogBreadcrumb'
 import Card from '@/components/ui/Card'
@@ -163,6 +164,10 @@ export default function CatalogMakeRoute(): ReactNode {
             </tbody>
           </table>
         )}
+      </Card>
+
+      <Card>
+        <CatalogAdvancedSearchNote brand={make.topBrand} />
       </Card>
       <CompareTrayBar />
     </main>

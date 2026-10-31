@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { Link, useParams } from 'react-router'
 
 import BrandLogo from '@/components/BrandLogo'
+import CatalogAdvancedSearchNote from '@/components/catalog/CatalogAdvancedSearchNote'
 import CatalogAuctionLine from '@/components/catalog/CatalogAuctionLine'
 import CatalogBreadcrumb from '@/components/catalog/CatalogBreadcrumb'
 import { CompareTrayBar, CompareTrayButton } from '@/components/compare/CompareTray'
@@ -133,6 +134,10 @@ export default function CatalogModelRoute(): ReactNode {
       <Card>
         <h2 className="mb-2 text-lg font-semibold">{t('catalog.otherModels')}</h2>
         <CatalogSiblingChips model={model} />
+      </Card>
+
+      <Card>
+        <CatalogAdvancedSearchNote brand={model.topBrand} model={model.topModel} />
       </Card>
       <CompareTrayBar />
     </main>
