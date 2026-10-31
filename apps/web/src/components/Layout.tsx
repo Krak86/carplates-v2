@@ -109,6 +109,9 @@ export default function Layout({ children }: Props): ReactNode {
           <img src="/brand-icon.png" alt="" width={28} height={28} className="size-7 rounded-md" />
           {t('app.title')}
         </Link>
+        <span className="hidden shrink-0 rounded-full border border-[var(--color-border)] px-2 py-0.5 text-xs text-[var(--color-muted)] lg:inline">
+          {t('app.free')}
+        </span>
         {vehicleLabel && (
           <span className="flex h-full min-w-0 items-center gap-1.5 text-sm text-[var(--color-muted)]">
             <BrandLogo brand={vehicleLabel.brand} className="self-center" />

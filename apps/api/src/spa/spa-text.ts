@@ -18,9 +18,9 @@ type PageText = { title: string; description: string }
 export const SITE_NAME = 'Cars UA'
 
 export const TAGLINE: Record<Lang, [string, string]> = {
-  ua: ['Пошук авто за номером', 'або VIN-кодом'],
-  ru: ['Поиск авто по номеру', 'или VIN-коду'],
-  en: ['Find a car by plate', 'or VIN code']
+  ua: ['Уся публічна інформація про авто', 'за номером або VIN'],
+  ru: ['Вся публичная информация об авто', 'по номеру или VIN'],
+  en: ['All public data about a car', 'by plate or VIN']
 }
 
 /** Static routes: one entry per route, rendered once per language (and cached by the controller). */
@@ -29,17 +29,17 @@ export const STATIC_PAGES: Record<string, Record<Lang, PageText>> = {
     ua: {
       title: 'Перевірка авто за номером або VIN в Україні | Cars UA',
       description:
-        'Пошук авто за номерним знаком або VIN-кодом: марка, модель, рік, паливо, регіон та історія реєстрацій. Відкриті дані реєстру України.'
+        'Пошук авто за номерним знаком або VIN-кодом: марка, модель, рік, паливо, регіон та історія реєстрацій. Безкоштовно, без реклами, лише відкриті дані.'
     },
     ru: {
       title: 'Проверка авто по номеру или VIN в Украине | Cars UA',
       description:
-        'Поиск авто по номерному знаку или VIN-коду: марка, модель, год, топливо, регион и история регистраций. Открытые данные реестра Украины.'
+        'Поиск авто по номерному знаку или VIN-коду: марка, модель, год, топливо, регион и история регистраций. Бесплатно, без рекламы, только открытые данные.'
     },
     en: {
       title: 'Ukrainian car lookup by plate or VIN | Cars UA',
       description:
-        "Look up a vehicle by Ukrainian plate number or VIN: make, model, year, fuel, region and registration history. Built on the state's open vehicle registry."
+        "Look up a vehicle by Ukrainian plate number or VIN: make, model, year, fuel, region and registration history. Free, no ads, open data only."
     }
   },
   '/about': {
