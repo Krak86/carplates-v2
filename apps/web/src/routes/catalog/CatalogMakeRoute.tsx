@@ -7,6 +7,7 @@ import { Link, useParams } from 'react-router'
 import { CompareTrayBar, CompareTrayButton } from '@/components/compare/CompareTray'
 
 import BrandLogo from '@/components/BrandLogo'
+import CatalogAuctionLine from '@/components/catalog/CatalogAuctionLine'
 import CatalogBreadcrumb from '@/components/catalog/CatalogBreadcrumb'
 import Card from '@/components/ui/Card'
 import SectionSkeleton from '@/components/ui/SectionSkeleton'
@@ -82,6 +83,7 @@ export default function CatalogMakeRoute(): ReactNode {
             models: format.format(make.modelCount)
           })}
         </p>
+        <CatalogAuctionLine makeName={make.makeName} />
       </Card>
 
       <Card>

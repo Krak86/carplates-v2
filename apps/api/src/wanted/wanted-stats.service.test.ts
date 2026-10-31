@@ -23,6 +23,23 @@ function setup() {
         }
       ]
     }
+    if (text.includes('platesNow')) {
+      return [
+        {
+          platesNow: 6,
+          platesResolved: 1,
+          platesWithDate: 5,
+          trackedSince: '2026-10-31T04:45:00Z',
+          platesSeen: LAST_SEEN
+        }
+      ]
+    }
+    if (text.includes('wanted_plates') && text.includes('extract(year')) {
+      return [{ label: '2022', stolen: '4', found: '0', wanted: '4' }]
+    }
+    if (text.includes('wanted_plates') && text.includes('AS label')) {
+      return [{ label: 'ГУНП У ЛУГАНСЬКІЙ ОБЛАСТІ', stolen: 4, found: 0, wanted: 4 }]
+    }
     if (text.includes('extract(year')) return [{ label: '2021', stolen: '5', found: '3', wanted: '2' }]
     if (text.includes('seizedAt')) {
       return [
@@ -62,6 +79,21 @@ describe('WantedStatsService', () => {
     expect(stats.byRegion[0]?.label).toBe('KYIV')
     expect(stats.recentFound[0]?.resolvedAt).toBe('2026-10-02T10:00:00.000Z')
     expect(stats.checkedAt).toBe(LAST_SEEN)
+  })
+
+  it('adds the Garpun plates block', async () => {
+    const { service } = setup()
+    const { plates } = await service.stats()
+
+    expect(plates?.summary).toEqual({
+      wantedNow: 6,
+      resolvedTotal: 1,
+      withDate: 5,
+      trackedSince: '2026-10-31T04:45:00.000Z'
+    })
+    expect(plates?.byYear).toEqual([{ label: '2022', stolen: 4, found: 0, wanted: 4 }])
+    expect(plates?.byUnit[0]?.label).toBe('ГУНП У ЛУГАНСЬКІЙ ОБЛАСТІ')
+    expect(plates?.byRegion).toHaveLength(1)
   })
 
   it('serves the cache while the feed has not been refreshed', async () => {

@@ -44,11 +44,23 @@ export default function AuctionsRoute(): ReactNode {
     ? [
         { label: t('auctions.page.card.lots'), value: numberFormat.format(summary.lots) },
         { label: t('auctions.page.card.sold'), value: numberFormat.format(summary.sold) },
+        {
+          label: t('auctions.page.card.soldShare'),
+          value: summary.lots > 0 ? `${Math.round((summary.sold / summary.lots) * 100)}%` : '-'
+        },
         { label: t('auctions.page.card.open'), value: numberFormat.format(summary.open) },
         { label: t('auctions.page.card.avgDelta'), value: formatDelta(summary.avgDeltaPercent, locale) },
         {
           label: t('auctions.page.card.medianSale'),
           value: formatPrice(summary.medianSale, currency, fx, locale) ?? '-'
+        },
+        {
+          label: t('auctions.page.card.totalSale'),
+          value: formatPrice(summary.totalSale, currency, fx, locale) ?? '-'
+        },
+        {
+          label: t('auctions.page.card.relisted'),
+          value: summary.relistedProceedings == null ? '-' : numberFormat.format(summary.relistedProceedings)
         }
       ]
     : []
@@ -96,7 +108,7 @@ export default function AuctionsRoute(): ReactNode {
 
       {data && (
         <>
-          <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+          <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
             {cards.map(c => (
               <Card key={c.label}>
                 <div className="text-xs text-[var(--color-muted)] uppercase">{c.label}</div>

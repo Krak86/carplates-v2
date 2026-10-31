@@ -3,7 +3,7 @@ import type { WantedStatsResponse, WantedStatsRow } from '@carplates/shared'
 import { displayBrand } from '@/lib/display-brand'
 import { localizeRegion } from '@/lib/region-label'
 import { TRACKED_FROM_YEAR } from '@/routes/wanted/types'
-import type { WantedDimension, WantedMetric, WantedTableRow } from '@/routes/wanted/types'
+import type { WantedDimension, WantedMetric, WantedPlateDimension, WantedTableRow } from '@/routes/wanted/types'
 
 /** Found share of all records, 0-100 (0 for an empty row). */
 export function foundPercent(row: Pick<WantedStatsRow, 'stolen' | 'found'>): number {
@@ -28,6 +28,11 @@ export function dimensionRows(stats: WantedStatsResponse, dim: WantedDimension):
     case 'color':
       return stats.byColor
   }
+}
+
+/** Rows of one Garpun tab; empty when the API sent no plates block (an older API). */
+export function plateDimensionRows(stats: WantedStatsResponse, dim: WantedPlateDimension): WantedStatsRow[] {
+  return (dim === 'region' ? stats.plates?.byRegion : stats.plates?.byUnit) ?? []
 }
 
 /** Per-year bars: every year before `TRACKED_FROM_YEAR` is summed into one leading row labelled by `earlierLabel`. */
@@ -59,12 +64,14 @@ function sentenceCase(text: string): string {
 }
 
 /** A label for display: regions localized, brands title-cased, others sentence-cased. The raw label stays the key. */
-export function displayLabel(dim: WantedDimension, label: string, lang: string): string {
+export function displayLabel(dim: WantedDimension | WantedPlateDimension, label: string, lang: string): string {
   switch (dim) {
     case 'region':
       return localizeRegion(label, lang)
     case 'brand':
       return displayBrand(label)
+    case 'unit':
+      return label
     case 'model':
     case 'type':
     case 'color':

@@ -20,6 +20,12 @@ export const RELEASES: readonly ReleaseDay[] = [
     items: [
       item(
         'new',
+        'Сторінка /wanted має вкладку «Номерні знаки (Гарпун)»: статистика розшуку номерів за роком події, регіоном (таблиця й карта) та підрозділом поліції; на сторінках марок каталогу з’явився рядок «На українських аукціонах» (лоти, продано, медіана ціни) з посиланням на лоти марки, а на /auctions - нові картки: частка проданих, сума продажів і лоти, виставлені повторно',
+        'Страница /wanted получила вкладку «Номерные знаки (Гарпун)»: статистика розыска номеров по году события, региону (таблица и карта) и подразделению полиции; на страницах марок каталога появилась строка «На украинских аукционах» (лоты, продано, медиана цены) со ссылкой на лоты марки, а на /auctions - новые карточки: доля проданных, сумма продаж и повторно выставленные лоты',
+        'The /wanted page has a "Plates (Garpun)" tab: statistics of wanted plates by year of the event, region (table and map) and police unit; catalog make pages show an "At Ukrainian auctions" line (lots, sold, median price) linking to the make's lots, and /auctions has new cards: sold share, total sales and re-listed lots'
+      ),
+      item(
+        'new',
         'Розділ «Українські аукціони» на картці авто й сторінці VIN: лоти торгів СЕТАМ арештованим і конфіскованим майном, де згадано номер або VIN (номер лота, статус, стартова й кінцева ціна, регіон), усі лоти від новіших до старіших, продані виділено; значок «З аукціону» в шапці, коротка історія торгів і порівняння із закордонною практикою',
         'Раздел «Украинские аукционы» на карточке авто и странице VIN: лоты торгов СЕТАМ арестованным и конфискованным имуществом, где упомянут номер или VIN (номер лота, статус, стартовая и конечная цена, регион), все лоты от новых к старым, проданные выделены; значок «С аукциона» в шапке, краткая история торгов и сравнение с зарубежной практикой',
         'A "Ukrainian auctions" section on the plate card and VIN page: SETAM auction lots of seized and confiscated property that name the plate or VIN (lot number, status, starting and sale price, region), all lots newest first with sold ones highlighted; a "From auction" chip in the header, a short history of the auctions and a comparison with practice abroad'

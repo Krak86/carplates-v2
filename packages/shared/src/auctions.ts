@@ -123,7 +123,11 @@ export const auctionStatsResponseSchema = z.object({
     medianSale: z.number().nullable(),
     medianStart: z.number().nullable(),
     /** Sum of the sale prices (UAH). */
-    totalSale: z.number()
+    totalSale: z.number(),
+    /** Proceedings that produced more than one lot (a car re-listed after a failed round). */
+    relistedProceedings: z.number().nullable().optional(),
+    /** Most lots in one proceeding. */
+    maxRounds: z.number().nullable().optional()
   }),
   /** `YYYY-MM` of the feed file that last changed the lot, ascending. */
   byMonth: z.array(auctionStatsRowSchema),

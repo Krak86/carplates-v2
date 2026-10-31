@@ -40,6 +40,7 @@ type SummaryOut = {
   medianStart: number | null
   totalSale: number | null
 }
+type RelistOut = { relisted: number; maxRounds: number | null }
 
 const toRow = (r: RowOut): AuctionStatsRow => ({
   label: r.label,
@@ -96,7 +97,7 @@ export class AuctionsStatsService {
             GROUP BY 1 ORDER BY lots DESC, label LIMIT ${TOP}`
       )
 
-    const [summary, month, region, make, year, checkedAt] = await Promise.all([
+    const [summary, relist, month, region, make, year, checkedAt] = await Promise.all([
       db.execute<SummaryOut>(
         sql`SELECT count(*)::int AS lots,
                    (count(*) FILTER (WHERE sale_price IS NOT NULL))::int AS sold,
@@ -108,6 +109,10 @@ export class AuctionsStatsService {
                    (percentile_cont(0.5) WITHIN GROUP (ORDER BY start_price) FILTER (WHERE start_price IS NOT NULL))::float8 AS "medianStart",
                    (sum(sale_price))::float8 AS "totalSale"
             FROM registry.auction_lots`
+      ),
+      db.execute<RelistOut>(
+        sql`SELECT (count(*) FILTER (WHERE n > 1))::int AS relisted, max(n)::int AS "maxRounds"
+            FROM (SELECT count(*) AS n FROM registry.auction_lots WHERE proceeding_no IS NOT NULL GROUP BY proceeding_no) p`
       ),
       db.execute<RowOut>(
         sql`SELECT regexp_replace(source_file, '^auctions-\\d{2}-(\\d{2})-(\\d{4})\\.csv$', '\\2-\\1') AS label, ${AGGREGATES}
@@ -136,7 +141,9 @@ export class AuctionsStatsService {
         avgDeltaPercent: s?.avgDelta == null ? null : Math.round(Number(s.avgDelta) * 10) / 10,
         medianSale: s?.medianSale == null ? null : Math.round(Number(s.medianSale)),
         medianStart: s?.medianStart == null ? null : Math.round(Number(s.medianStart)),
-        totalSale: Math.round(Number(s?.totalSale ?? 0))
+        totalSale: Math.round(Number(s?.totalSale ?? 0)),
+        relistedProceedings: Number(relist.rows[0]?.relisted ?? 0),
+        maxRounds: relist.rows[0]?.maxRounds == null ? null : Number(relist.rows[0].maxRounds)
       },
       byMonth: month.rows.map(toRow),
       byRegion: region.rows.map(toRow),

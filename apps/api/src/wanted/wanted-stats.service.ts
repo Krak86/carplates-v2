@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common'
-import type { WantedStatsResponse, WantedStatsRow, WantedStatsVehicle } from '@carplates/shared'
+import type { WantedPlatesStats, WantedStatsResponse, WantedStatsRow, WantedStatsVehicle } from '@carplates/shared'
 import { sql } from 'drizzle-orm'
 
 import { DbService } from '../db/db.service.js'
@@ -17,6 +17,13 @@ type SummaryRow = {
   medianDays: number | null
   historySince: string | null
   lastSeen: Date | string | null
+}
+type PlatesSummaryRow = {
+  platesNow: number
+  platesResolved: number
+  platesWithDate: number
+  trackedSince: Date | string | null
+  platesSeen: Date | string | null
 }
 type DimRow = { label: string; stolen: number; found: number; wanted: number }
 type VehicleRow = {
@@ -72,7 +79,8 @@ export class WantedStatsService {
       const {
         rows: [probe]
       } = await db.execute<{ lastSeen: Date | string | null }>(
-        sql`SELECT max(last_seen_at) AS "lastSeen" FROM registry.wanted_vehicles`
+        sql`SELECT greatest((SELECT max(last_seen_at) FROM registry.wanted_vehicles),
+                             (SELECT max(last_seen_at) FROM registry.wanted_plates)) AS "lastSeen"`
       )
       const lastSeen = probe?.lastSeen ? new Date(probe.lastSeen).toISOString() : null
       if (lastSeen === this.cache.lastSeen) return this.cache.value
@@ -88,7 +96,31 @@ export class WantedStatsService {
             GROUP BY 1 ORDER BY stolen DESC, label LIMIT ${TOP}`
       )
 
-    const [summaryRows, years, region, brand, model, type, color, recentStolen, recentFound] = await Promise.all([
+    const plateDim = (expr: string) =>
+      db.execute<DimRow>(
+        sql`SELECT ${sql.raw(expr)} AS label, count(*)::int AS stolen,
+                   (count(*) FILTER (WHERE resolved_at IS NOT NULL))::int AS found,
+                   (count(*) FILTER (WHERE resolved_at IS NULL))::int AS wanted
+            FROM registry.wanted_plates
+            WHERE ${sql.raw(expr)} IS NOT NULL
+            GROUP BY 1 ORDER BY stolen DESC, label LIMIT ${TOP}`
+      )
+
+    const [
+      summaryRows,
+      years,
+      region,
+      brand,
+      model,
+      type,
+      color,
+      recentStolen,
+      recentFound,
+      plateSummary,
+      plateYears,
+      plateRegion,
+      plateUnit
+    ] = await Promise.all([
       db.execute<SummaryRow>(
         sql`SELECT (count(*) FILTER (WHERE resolved_at IS NULL))::int AS "wantedNow",
                    (count(*) FILTER (WHERE resolved_at IS NOT NULL))::int AS "foundTotal",
@@ -126,11 +158,47 @@ export class WantedStatsService {
                    resolved_at AS "resolvedAt", region
             FROM registry.wanted_vehicles WHERE resolved_at IS NOT NULL AND resolved_exact
             ORDER BY resolved_at DESC, source_id LIMIT ${RECENT}`
-      )
+      ),
+      db.execute<PlatesSummaryRow>(
+        sql`SELECT (count(*) FILTER (WHERE resolved_at IS NULL))::int AS "platesNow",
+                   (count(*) FILTER (WHERE resolved_at IS NOT NULL))::int AS "platesResolved",
+                   (count(seized_at))::int AS "platesWithDate",
+                   min(first_seen_at) AS "trackedSince",
+                   max(last_seen_at) AS "platesSeen"
+            FROM registry.wanted_plates`
+      ),
+      db.execute<DimRow>(
+        sql`SELECT extract(year FROM seized_at)::int::text AS label, count(*)::int AS stolen,
+                   (count(*) FILTER (WHERE resolved_at IS NOT NULL))::int AS found,
+                   (count(*) FILTER (WHERE resolved_at IS NULL))::int AS wanted
+            FROM registry.wanted_plates WHERE seized_at IS NOT NULL
+            GROUP BY 1 ORDER BY 1`
+      ),
+      plateDim('region'),
+      plateDim('organ_unit')
     ])
 
     const s = summaryRows.rows[0]
-    const lastSeen = s?.lastSeen ? new Date(s.lastSeen).toISOString() : null
+    const p = plateSummary.rows[0]
+    const iso = (v: Date | string | null | undefined): string | null => (v ? new Date(v).toISOString() : null)
+    // Same value as the freshness probe: newest refresh of either list.
+    const lastSeen =
+      [iso(s?.lastSeen), iso(p?.platesSeen)]
+        .filter((v): v is string => !!v)
+        .sort()
+        .at(-1) ?? null
+    const plates: WantedPlatesStats = {
+      summary: {
+        wantedNow: Number(p?.platesNow ?? 0),
+        resolvedTotal: Number(p?.platesResolved ?? 0),
+        withDate: Number(p?.platesWithDate ?? 0),
+        trackedSince: iso(p?.trackedSince)
+      },
+      byYear: plateYears.rows.map(toRow),
+      byRegion: plateRegion.rows.map(toRow),
+      byUnit: plateUnit.rows.map(toRow),
+      checkedAt: iso(p?.platesSeen)
+    }
     const value: WantedStatsResponse = {
       summary: {
         wantedNow: Number(s?.wantedNow ?? 0),
@@ -149,6 +217,7 @@ export class WantedStatsService {
       byColor: color.rows.map(toRow),
       recentStolen: recentStolen.rows.map(toVehicle),
       recentFound: recentFound.rows.map(toVehicle),
+      plates,
       checkedAt: lastSeen
     }
     this.cache = { at: now, lastSeen, value }

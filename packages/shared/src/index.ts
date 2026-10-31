@@ -758,6 +758,7 @@ export {
   wantedResponseSchema,
   wantedStatsResponseSchema,
   wantedStatsRowSchema,
+  wantedPlatesStatsSchema,
   wantedStatsVehicleSchema,
   stolenInUaUrl,
   WANTED_VEHICLES_DATASET_URL,
@@ -768,6 +769,7 @@ export type {
   WantedPlate,
   WantedResponse,
   WantedStatsResponse,
+  WantedPlatesStats,
   WantedStatsRow,
   WantedStatsVehicle
 } from './wanted.js'

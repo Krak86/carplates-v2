@@ -44,7 +44,9 @@ function setup(rows: unknown[] = [], total = 0) {
           withPlate: 16263,
           withVin: 14978,
           medianStart: 66000,
-          totalSale: 718880650.4
+          totalSale: 718880650.4,
+          relisted: 2100,
+          maxRounds: 9
         }
       ]
     })
@@ -70,7 +72,14 @@ describe('AuctionsStatsService.stats', () => {
     const res = await service.stats()
 
     expect(auctionStatsResponseSchema.safeParse(res).error?.issues).toBeUndefined()
-    expect(res.summary).toMatchObject({ lots: 16866, sold: 4686, open: 1717, totalSale: 718880650 })
+    expect(res.summary).toMatchObject({
+      lots: 16866,
+      sold: 4686,
+      open: 1717,
+      totalSale: 718880650,
+      relistedProceedings: 2100,
+      maxRounds: 9
+    })
     expect(res.byRegion[0]).toMatchObject({ label: 'Київ', avgDeltaPercent: 27.1, medianSale: 72749 })
     expect(res.checkedAt).toBe(FINISHED.toISOString())
   })

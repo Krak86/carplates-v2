@@ -20,11 +20,15 @@ import { useTranslation } from 'react-i18next'
 import ColorSwatch from '@/components/ColorSwatch'
 import { toIntlLocale } from '@/lib/intl'
 import { displayLabel } from '@/routes/wanted/helpers'
-import type { WantedDimension, WantedMetric, WantedTableRow } from '@/routes/wanted/types'
+import type { WantedDimension, WantedMetric, WantedPlateDimension, WantedTableRow } from '@/routes/wanted/types'
 
 type Props = {
   rows: WantedTableRow[]
-  dimension: WantedDimension
+  dimension: WantedDimension | WantedPlateDimension
+  /** Header of the first count column; defaults to "Stolen" (Garpun passes its own). */
+  totalHeader?: string
+  /** Drop the found / found % columns (Garpun until a plate has left the feed). */
+  hideFound?: boolean
   labelHeader: string
   defaultSortKey: WantedMetric
 }
@@ -41,7 +45,14 @@ const features = tableFeatures({
 
 const columnHelper = createColumnHelper<typeof features, WantedTableRow>()
 
-export default function WantedStatsTable({ rows, dimension, labelHeader, defaultSortKey }: Props): ReactNode {
+export default function WantedStatsTable({
+  rows,
+  dimension,
+  labelHeader,
+  defaultSortKey,
+  totalHeader,
+  hideFound
+}: Props): ReactNode {
   const { t, i18n } = useTranslation()
   const [sorting, setSorting] = useState<SortingState>([{ id: defaultSortKey, desc: true }])
   const [globalFilter, setGlobalFilter] = useState('')
@@ -52,7 +63,7 @@ export default function WantedStatsTable({ rows, dimension, labelHeader, default
     maximumFractionDigits: 1
   })
 
-  const columns = columnHelper.columns([
+  const allColumns = columnHelper.columns([
     columnHelper.accessor('label', {
       header: labelHeader,
       cell: c => (
@@ -63,7 +74,7 @@ export default function WantedStatsTable({ rows, dimension, labelHeader, default
       )
     }),
     columnHelper.accessor('stolen', {
-      header: t('wanted.stats.col.stolen'),
+      header: totalHeader ?? t('wanted.stats.col.stolen'),
       cell: c => numberFormat.format(c.getValue())
     }),
     columnHelper.accessor('found', {
@@ -79,6 +90,9 @@ export default function WantedStatsTable({ rows, dimension, labelHeader, default
       cell: c => `${percentFormat.format(c.getValue())}%`
     })
   ])
+  const columns = hideFound
+    ? allColumns.filter(c => !('accessorKey' in c) || (c.accessorKey !== 'found' && c.accessorKey !== 'foundPercent'))
+    : allColumns
 
   const table = useTable({
     features,

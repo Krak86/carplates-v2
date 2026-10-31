@@ -16,13 +16,24 @@ import { dimensionRows, groupYears, mapRows, withFoundPercent } from '@/routes/w
 import {
   DEFAULT_WANTED_DIMENSION,
   DEFAULT_WANTED_METRIC,
+  DEFAULT_WANTED_PLATE_DIMENSION,
+  DEFAULT_WANTED_SOURCE,
   DEFAULT_WANTED_VIEW,
   WANTED_DIMENSIONS,
   WANTED_DIMENSION_ICONS,
   WANTED_METRICS,
+  WANTED_PLATE_DIMENSIONS,
+  WANTED_SOURCES,
   WANTED_VIEWS
 } from '@/routes/wanted/types'
-import type { WantedDimension, WantedMetric, WantedView } from '@/routes/wanted/types'
+import type {
+  WantedDimension,
+  WantedMetric,
+  WantedPlateDimension,
+  WantedSource,
+  WantedView
+} from '@/routes/wanted/types'
+import WantedPlatesPanel from '@/routes/wanted/WantedPlatesPanel'
 import WantedRecentList from '@/routes/wanted/WantedRecentList'
 import WantedStatsTable from '@/routes/wanted/WantedStatsTable'
 import WantedYearChart from '@/routes/wanted/WantedYearChart'
@@ -50,6 +61,12 @@ export default function WantedStatsRoute(): ReactNode {
   const dim: WantedDimension = parseOf(WANTED_DIMENSIONS, searchParams.get('dim'), DEFAULT_WANTED_DIMENSION)
   const metric: WantedMetric = parseOf(WANTED_METRICS, searchParams.get('metric'), DEFAULT_WANTED_METRIC)
   const view: WantedView = parseOf(WANTED_VIEWS, searchParams.get('view'), DEFAULT_WANTED_VIEW)
+  const source: WantedSource = parseOf(WANTED_SOURCES, searchParams.get('src'), DEFAULT_WANTED_SOURCE)
+  const plateDim: WantedPlateDimension = parseOf(
+    WANTED_PLATE_DIMENSIONS,
+    searchParams.get('dim'),
+    DEFAULT_WANTED_PLATE_DIMENSION
+  )
   const effectiveDim = view === 'map' ? 'region' : dim
 
   const setParam = (key: string, value: string, drop?: string): void => {
@@ -64,9 +81,23 @@ export default function WantedStatsRoute(): ReactNode {
   const handleDimensionChange = (next: WantedDimension): void =>
     setParam('dim', next, next === 'region' ? undefined : 'view')
 
+  // Switching list drops the other list's tab / view so a stale `dim` cannot leak across.
+  const handleSourceChange = (next: WantedSource): void =>
+    setSearchParams(prev => {
+      const params = new URLSearchParams(prev)
+      if (next === DEFAULT_WANTED_SOURCE) params.delete('src')
+      else params.set('src', next)
+      params.delete('dim')
+      params.delete('view')
+      params.delete('metric')
+      return params
+    })
+
   const numberFormat = new Intl.NumberFormat(toIntlLocale(i18n.language))
   const data = stats.data
   const summary = data?.summary
+  const plates = data?.plates
+  const showPlates = source === 'plates' && !!plates
 
   const cards = summary
     ? [
@@ -87,7 +118,7 @@ export default function WantedStatsRoute(): ReactNode {
           {t('wanted.stats.title')}
         </h1>
 
-        {summary?.historySince && (
+        {!showPlates && summary?.historySince && (
           <p className="inline-block rounded bg-[var(--color-bg)]/85 px-2 py-1 text-sm text-[var(--color-muted)] backdrop-blur-sm">
             {t('wanted.stats.historySince', { date: summary.historySince.slice(0, 10) })}
           </p>
@@ -112,7 +143,36 @@ export default function WantedStatsRoute(): ReactNode {
 
       {stats.isError && <p className="text-[var(--color-muted)]">{t('result.error')}</p>}
 
-      {data && (
+      {data && plates && (
+        <div className="mb-4 inline-flex gap-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-1">
+          {WANTED_SOURCES.map(src => (
+            <button
+              key={src}
+              type="button"
+              onClick={() => handleSourceChange(src)}
+              className={cn(
+                'rounded-md border px-3 py-1 text-sm transition-colors duration-200',
+                src === source ? SEG_ON : SEG_OFF
+              )}
+            >
+              {t(`wanted.stats.tab.${src}`)}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {data && showPlates && (
+        <WantedPlatesPanel
+          data={data}
+          plates={plates}
+          dim={plateDim}
+          view={view}
+          onDimensionChange={next => setParam('dim', next, next === 'region' ? undefined : 'view')}
+          onViewChange={next => setParam('view', next)}
+        />
+      )}
+
+      {data && !showPlates && (
         <>
           <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
             {cards.map(c => (
