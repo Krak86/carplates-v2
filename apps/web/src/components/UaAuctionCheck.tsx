@@ -42,9 +42,9 @@ function ExternalLink({ href, children }: { href: string; children: ReactNode })
 
 /**
  * Collapsed "Ukrainian auctions" section (`?section=ua-auctions`; the older US-archive section is `auctions`): SETAM lots of
- * seized / confiscated property whose title named this plate or VIN, all lots newest first with sold ones highlighted. Opens by
- * itself when there is a lot. Closes with static copy: a short history of the Ukrainian auctions, a comparison with
- * world practice, and where to take part (link-out to the SETAM home, no per-lot URL).
+ * seized / confiscated property whose title named this plate or VIN, all lots newest first with sold ones highlighted. Stays
+ * collapsed until the visitor opens it (header chip, share link). Closes with static copy: a short history of the Ukrainian
+ * auctions, a comparison with world practice, and where to take part (link-out to the SETAM home, no per-lot URL).
  */
 export default function UaAuctionCheck({ plate, vin, openSignal = 0 }: Props): ReactNode {
   const { t, i18n } = useTranslation()
@@ -88,7 +88,7 @@ export default function UaAuctionCheck({ plate, vin, openSignal = 0 }: Props): R
       showLabel={t('uaAuctions.show')}
       hideLabel={t('uaAuctions.hide')}
       defaultOpen={isShared}
-      openSignal={openSignal + (lots.length > 0 ? 1 : 0)}
+      openSignal={openSignal}
     >
       {isError && <p className="mb-2 text-sm text-[var(--color-muted)]">{t('uaAuctions.error')}</p>}
 

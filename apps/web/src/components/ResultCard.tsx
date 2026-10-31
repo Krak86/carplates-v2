@@ -494,20 +494,6 @@ export default function ResultCard({ data }: Props): ReactNode {
 
           <PlateSegments plate={data.plate} region={data.region} />
 
-          <VerificationLinks />
-
-          {(data.plate || hasVin) && (
-            <LazySection sections={['wanted']} forceMount={wantedOpenSignal > 0}>
-              <WantedCheck plate={data.plate} vin={hasVin ? c.vin : null} openSignal={wantedOpenSignal} />
-            </LazySection>
-          )}
-
-          {(data.plate || hasVin) && (
-            <LazySection sections={['ua-auctions']} forceMount={uaAuctionOpenSignal > 0}>
-              <UaAuctionCheck plate={data.plate} vin={hasVin ? c.vin : null} openSignal={uaAuctionOpenSignal} />
-            </LazySection>
-          )}
-
           <div ref={basicRef} className="mt-3 border-t border-[var(--color-border)] pt-3">
             <SectionHeader
               icon="📋"
@@ -823,6 +809,18 @@ export default function ResultCard({ data }: Props): ReactNode {
             {!c.vin && plateHistory.data && <VinSince2021Note variant="noVin" />}
           </VinToggleSection>
 
+          {(data.plate || hasVin) && (
+            <LazySection sections={['wanted']} forceMount={wantedOpenSignal > 0}>
+              <WantedCheck plate={data.plate} vin={hasVin ? c.vin : null} openSignal={wantedOpenSignal} />
+            </LazySection>
+          )}
+
+          {(data.plate || hasVin) && (
+            <LazySection sections={['ua-auctions']} forceMount={uaAuctionOpenSignal > 0}>
+              <UaAuctionCheck plate={data.plate} vin={hasVin ? c.vin : null} openSignal={uaAuctionOpenSignal} />
+            </LazySection>
+          )}
+
           <LazySection sections={['specs']} forceMount={specsJump.signal > 0}>
             <RdwSpecs
               brand={c.brand}
@@ -973,6 +971,8 @@ export default function ResultCard({ data }: Props): ReactNode {
             </LazySection>
           )}
           <PaidFeatureSections hasPlate={!!data.plate} hasVin={hasVin} />
+
+          <VerificationLinks />
 
           <ReportIssueLink about={data.plate ?? c.vin ?? undefined} className="mt-4" />
         </Card>

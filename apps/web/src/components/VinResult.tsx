@@ -148,6 +148,14 @@ export default function VinResult({ data }: Props): ReactNode {
           </div>
         )}
 
+        <LazySection sections={['wanted']}>
+          <WantedCheck plate={null} vin={data.vin} />
+        </LazySection>
+
+        <LazySection sections={['ua-auctions']} forceMount={uaAuctionOpenSignal > 0}>
+          <UaAuctionCheck plate={null} vin={data.vin} openSignal={uaAuctionOpenSignal} />
+        </LazySection>
+
         <VinDecodeTabs
           data={data}
           overviewExtras={
@@ -158,14 +166,6 @@ export default function VinResult({ data }: Props): ReactNode {
             </>
           }
         />
-
-        <LazySection sections={['wanted']}>
-          <WantedCheck plate={null} vin={data.vin} />
-        </LazySection>
-
-        <LazySection sections={['ua-auctions']} forceMount={uaAuctionOpenSignal > 0}>
-          <UaAuctionCheck plate={null} vin={data.vin} openSignal={uaAuctionOpenSignal} />
-        </LazySection>
 
         <LazySection sections={['origin']} forceMount={originOpenSignal > 0}>
           <OriginSection
