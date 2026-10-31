@@ -91,6 +91,15 @@ export const wantedStatsVehicleSchema = z.object({
 })
 export type WantedStatsVehicle = z.infer<typeof wantedStatsVehicleSchema>
 
+export const wantedPlateRecentSchema = z.object({
+  plate: z.string(),
+  seizedAt: z.string().nullable(),
+  region: z.string().nullable(),
+  /** Police unit that entered the plate (Ukrainian). */
+  unit: z.string().nullable()
+})
+export type WantedPlateRecent = z.infer<typeof wantedPlateRecentSchema>
+
 /** Garpun (wanted PLATES) block of `/api/wanted/stats`. Rows reuse the vehicle shape: `stolen` = every plate record, `found` = left the feed, `wanted` = still on it. */
 export const wantedPlatesStatsSchema = z.object({
   summary: z.object({
@@ -107,6 +116,8 @@ export const wantedPlatesStatsSchema = z.object({
   byRegion: z.array(wantedStatsRowSchema),
   /** Police unit that entered the plate (label = the unit name, Ukrainian), top 100. */
   byUnit: z.array(wantedStatsRowSchema),
+  /** Newest seizure dates among plates still on the list. */
+  recent: z.array(wantedPlateRecentSchema).nullable().optional(),
   checkedAt: z.string().nullable()
 })
 export type WantedPlatesStats = z.infer<typeof wantedPlatesStatsSchema>

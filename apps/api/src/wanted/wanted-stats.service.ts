@@ -25,6 +25,7 @@ type PlatesSummaryRow = {
   trackedSince: Date | string | null
   platesSeen: Date | string | null
 }
+type PlateRecentRow = { plate: string; seizedAt: string | null; region: string | null; unit: string | null }
 type DimRow = { label: string; stolen: number; found: number; wanted: number }
 type VehicleRow = {
   brand: string | null
@@ -119,7 +120,8 @@ export class WantedStatsService {
       plateSummary,
       plateYears,
       plateRegion,
-      plateUnit
+      plateUnit,
+      plateRecent
     ] = await Promise.all([
       db.execute<SummaryRow>(
         sql`SELECT (count(*) FILTER (WHERE resolved_at IS NULL))::int AS "wantedNow",
@@ -175,7 +177,12 @@ export class WantedStatsService {
             GROUP BY 1 ORDER BY 1`
       ),
       plateDim('region'),
-      plateDim('organ_unit')
+      plateDim('organ_unit'),
+      db.execute<PlateRecentRow>(
+        sql`SELECT plate, seized_at::text AS "seizedAt", region, organ_unit AS unit
+            FROM registry.wanted_plates WHERE resolved_at IS NULL AND seized_at IS NOT NULL
+            ORDER BY seized_at DESC, source_id LIMIT ${RECENT}`
+      )
     ])
 
     const s = summaryRows.rows[0]
@@ -197,6 +204,7 @@ export class WantedStatsService {
       byYear: plateYears.rows.map(toRow),
       byRegion: plateRegion.rows.map(toRow),
       byUnit: plateUnit.rows.map(toRow),
+      recent: plateRecent.rows.map(r => ({ ...r, seizedAt: r.seizedAt ? String(r.seizedAt).slice(0, 10) : null })),
       checkedAt: iso(p?.platesSeen)
     }
     const value: WantedStatsResponse = {

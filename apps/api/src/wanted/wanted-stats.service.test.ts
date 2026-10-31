@@ -34,6 +34,9 @@ function setup() {
         }
       ]
     }
+    if (text.includes('wanted_plates') && text.includes('AS unit')) {
+      return [{ plate: 'AA1234BB', seizedAt: '2026-10-01', region: 'Київ', unit: 'ГУНП' }]
+    }
     if (text.includes('wanted_plates') && text.includes('extract(year')) {
       return [{ label: '2022', stolen: '4', found: '0', wanted: '4' }]
     }
@@ -94,6 +97,7 @@ describe('WantedStatsService', () => {
     expect(plates?.byYear).toEqual([{ label: '2022', stolen: 4, found: 0, wanted: 4 }])
     expect(plates?.byUnit[0]?.label).toBe('ГУНП У ЛУГАНСЬКІЙ ОБЛАСТІ')
     expect(plates?.byRegion).toHaveLength(1)
+    expect(plates?.recent?.[0]).toEqual({ plate: 'AA1234BB', seizedAt: '2026-10-01', region: 'Київ', unit: 'ГУНП' })
   })
 
   it('serves the cache while the feed has not been refreshed', async () => {

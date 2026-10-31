@@ -334,6 +334,45 @@ body {
   }
 }
 
+/* Tab content shifting: the new tab's content slides in from the side it sits on (second tab from the right, first from the left). */
+@keyframes tab-shift-from-right {
+  from {
+    opacity: 0;
+    transform: translateX(32px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes tab-shift-from-left {
+  from {
+    opacity: 0;
+    transform: translateX(-32px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@utility animate-tab-from-right {
+  animation: tab-shift-from-right 320ms cubic-bezier(0.22, 1, 0.36, 1);
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+@utility animate-tab-from-left {
+  animation: tab-shift-from-left 320ms cubic-bezier(0.22, 1, 0.36, 1);
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
 /* Modals: the backdrop fades and the panel rises / scales in; `data-closing` plays the same in reverse (the component
    unmounts on the panel's animationend). */
 @keyframes modal-backdrop {

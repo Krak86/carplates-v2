@@ -11,6 +11,7 @@ import StatsMapSkeleton from '@/routes/stats/StatsMapSkeleton'
 import { groupYears, mapRows, plateDimensionRows, withFoundPercent } from '@/routes/wanted/helpers'
 import { WANTED_PLATE_DIMENSIONS, WANTED_PLATE_DIMENSION_ICONS, WANTED_VIEWS } from '@/routes/wanted/types'
 import type { WantedPlateDimension, WantedView } from '@/routes/wanted/types'
+import WantedPlatesRecentList from '@/routes/wanted/WantedPlatesRecentList'
 import WantedStatsTable from '@/routes/wanted/WantedStatsTable'
 import WantedYearChart from '@/routes/wanted/WantedYearChart'
 
@@ -133,6 +134,11 @@ export default function WantedPlatesPanel({
           />
         )}
       </div>
+
+      <Card className="mb-6">
+        <h2 className="mb-2 text-lg font-semibold">{t('wanted.stats.plates.recent')}</h2>
+        <WantedPlatesRecentList plates={plates.recent ?? []} />
+      </Card>
 
       <p className="mb-6 text-xs text-[var(--color-muted)]">{t('wanted.stats.plates.source')}</p>
     </>
