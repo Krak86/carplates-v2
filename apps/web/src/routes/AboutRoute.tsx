@@ -383,6 +383,15 @@ export default function AboutRoute(): ReactNode {
       </Card>
 
       <Card className="space-y-3 text-sm text-[var(--color-fg)]">
+        <h2 className="font-semibold">{t('about.briefHeading')}</h2>
+        <ul className="grid list-disc gap-x-6 gap-y-1 pl-5 sm:grid-cols-2 lg:grid-cols-3">
+          {FEATURES.map(key => (
+            <li key={key}>{t(`about.brief.${key}`)}</li>
+          ))}
+        </ul>
+      </Card>
+
+      <Card className="space-y-3 text-sm text-[var(--color-fg)]">
         <h2 className="font-semibold">{t('about.featuresHeading')}</h2>
         <ul className="list-disc space-y-1.5 pl-5">
           {FEATURES.map(key => (
