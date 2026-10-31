@@ -127,6 +127,7 @@
     "export:generations:csv": "pnpm --filter @carplates/scripts export:generations:csv",
     "ingest:ca-recalls": "pnpm --filter @carplates/scripts ingest:ca-recalls",
     "ingest:wanted": "pnpm --filter @carplates/scripts ingest:wanted",
+    "ingest:wanted-plates": "pnpm --filter @carplates/scripts ingest:wanted-plates",
     "ingest:wanted-history": "pnpm --filter @carplates/scripts ingest:wanted-history",
     "ingest:ca-recalls:csv": "pnpm --filter @carplates/scripts ingest:ca-recalls:csv",
     "export:ca-recalls:csv": "pnpm --filter @carplates/scripts export:ca-recalls:csv",

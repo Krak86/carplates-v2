@@ -9,11 +9,11 @@ Drafted 2026-10-31 (research only, no code yet). Two new `data.gov.ua` sources (
 
 ### Garpun vs the existing wanted table
 
-| | `registry.wanted_vehicles` (CarsWanted, dataset `2cd12755…`) | Garpun `licplatewanted` |
-| --- | --- | --- |
-| Meaning | a **vehicle** is wanted for unlawful taking | a **plate** is wanted |
-| Rows | 79 291 (≈102 k in our table incl. stolen.in.ua history) | 20 181 (20 040 distinct plates, 7 rows with null plate) |
-| Fields | brand, model, type, colour, plate, body no. (VIN), chassis, theft date, unit | `id`, `vehiclenumber`, `illegalseizuredate`, `organunit`, `insertdate` |
+|         | `registry.wanted_vehicles` (CarsWanted, dataset `2cd12755…`)                 | Garpun `licplatewanted`                                                |
+| ------- | ---------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| Meaning | a **vehicle** is wanted for unlawful taking                                  | a **plate** is wanted                                                  |
+| Rows    | 79 291 (≈102 k in our table incl. stolen.in.ua history)                      | 20 181 (20 040 distinct plates, 7 rows with null plate)                |
+| Fields  | brand, model, type, colour, plate, body no. (VIN), chassis, theft date, unit | `id`, `vehiclenumber`, `illegalseizuredate`, `organunit`, `insertdate` |
 
 - Overlap: only **41** of 20 040 Garpun plates are in CarsWanted. They are different facts, use both.
 - ~10 200 rows are 2022 Luhansk police entries (probably occupation-related); some dates are bogus (1530, 1950). A wanted plate is **not** proof that this car is stolen (lost / cloned plates).
@@ -48,7 +48,7 @@ Drafted 2026-10-31 (research only, no code yet). Two new `data.gov.ua` sources (
 
 Read first: `docs/features-reference.md` "Wanted vehicles (stolen check)", "Auction history", "Agent discovery, edge cache, Zod and CSP"; `SCHEDULE.md`; `scripts/src/wanted.ts` (pattern to copy).
 
-1. [ ] **Garpun: DB + ingest.** Migration `NNNN_wanted_plates.sql` -> `registry.wanted_plates` (`source_id` PK, `plate` normalized, `seized_at`, `inserted_at`, `organ_unit`, `region` via `organUnitRegion`, `first_seen_at`, `resolved_at`). Own table, not `wanted_vehicles` (no VIN/brand). `scripts/src/wanted-plates.ts` + `pnpm ingest:wanted-plates`: resolve the file through CKAN, Zod-parse rows, skip null plates, clamp absurd dates, upsert, set `resolved_at` for rows missing from the feed, refuse a feed under ~5 000 rows. Tests for the parser. Add to `backup.sh` `IRREPLACEABLE` (resolved history cannot be re-created).
+1. [x] **Garpun: DB + ingest** (done 2026-10-31: migration 0083, 20 174 rows / 20 040 plates loaded locally, 46 plates also in `wanted_vehicles`, all rows got a region). Migration `NNNN_wanted_plates.sql` -> `registry.wanted_plates` (`source_id` PK, `plate` normalized, `seized_at`, `inserted_at`, `organ_unit`, `region` via `organUnitRegion`, `first_seen_at`, `resolved_at`). Own table, not `wanted_vehicles` (no VIN/brand). `scripts/src/wanted-plates.ts` + `pnpm ingest:wanted-plates`: resolve the file through CKAN, Zod-parse rows, skip null plates, clamp absurd dates, upsert, set `resolved_at` for rows missing from the feed, refuse a feed under ~5 000 rows. Tests for the parser. Add to `backup.sh` `IRREPLACEABLE` (resolved history cannot be re-created).
 2. [ ] **Garpun: API + card.** Add `plates: []` next to the vehicle records in `packages/shared/src/wanted.ts` (own file, `.nullable().optional()`), `wanted.service.ts` lookup by `normalizePlate`. In `WantedCheck.tsx` / `WantedChip.tsx`: vehicle records first, then a "Wanted plate" block, a Garpun chip, and an explainer (what each list is; plate-only match is not proof; check the VIN). ua/ru/en strings (no em dash in UI text). Update the `export-verify.ts` wanted section + sources, `/about` (`about.feature.*`, `SOURCES`, `about.source.*`).
 3. [ ] **Garpun: schedule.** `jobs.ts` + `run-ingest.sh` job `wanted-plates`; `infra/vps/ingest.cron` at 04:45 (after `wanted` 04:40); `SCHEDULE.md`, `docs/deploy.md`, healthchecks note. Seed CSV only if it turns out to be non-re-scrapable (it is not: skip).
 4. [ ] **Auctions: DB + parser.** Migration -> `registry.auction_lots` (`lot_no` PK, `proceeding_no`, `status`, `category`, `region`, `start_price`, `sale_price`, `title_raw`, `plate`, `vin`, `make`, `model`, `year`, `source_file`, `first_seen_at`, `updated_at`); indexes on `plate`, `vin`, `(make, model)`, `status`. `scripts/src/auctions.ts` (+ `auctions-parse.ts`): CKAN file list, only `Легкові` / `Вантажні` categories, parse title with `normalizePlate` + VIN checksum, keep lots without plate/VIN (for stats), never store `Переможець`. Fixture tests built from real titles (several title formats). Run a full backfill locally, report counts of parsed / unparsed. Not in seed CSVs (re-ingestable).

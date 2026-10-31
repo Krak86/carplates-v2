@@ -22,7 +22,7 @@ trap 'ping /fail' ERR
 ping /start
 
 # Tables that exist only in this database (feeds roll over / history is ours); kept in the nightly dump.
-IRREPLACEABLE=(wanted_vehicles news_items social_posts owner_posts missed_lookups ingested_resources)
+IRREPLACEABLE=(wanted_vehicles wanted_plates news_items social_posts owner_posts missed_lookups ingested_resources)
 
 case "$MODE" in
   nightly)

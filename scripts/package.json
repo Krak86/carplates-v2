@@ -94,6 +94,7 @@
     "export:generations:csv": "tsx src/generations.ts --export-csv seed-data/model-generations.csv.gz",
     "ingest:ca-recalls": "tsx src/ca-recalls.ts",
     "ingest:wanted": "tsx src/wanted.ts",
+    "ingest:wanted-plates": "tsx src/wanted-plates.ts",
     "ingest:wanted-history": "tsx src/wanted-history.ts",
     "ingest:wanted-history:csv": "tsx src/wanted-history-csv.ts",
     "export:wanted-history:csv": "tsx src/wanted-history-csv.ts --export-csv",
