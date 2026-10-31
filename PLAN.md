@@ -367,11 +367,10 @@ above once scoped, or dropped if research says no.
 - ✅ **VIN decode overview + plate-card split** — done 2026-10-02 (tabs, VIN anatomy, equipment map, engine/origin
   cards, grouped details; plate card now has separate _Registration history_ and _VIN decode_ sections) — see
   `docs/plan-done.md`. Open follow-ups:
-  - ⏳ VIN page: headline the current plate (`registry.plate` / `registry.plateInferred`, already returned by
+  - ⏭️ **Skipped 2026-10-31 (owner):** VIN page: headline the current plate (`registry.plate` / `registry.plateInferred`, already returned by
     `/api/vin/:vin`, still unused there); retitle the registry timeline to match `result.historyTitle`.
-  - ⏳ Translate the Raw-tab / detail-row labels (NHTSA variable names) and common values into ua/ru — deferred until
-    the new view had been judged.
-  - ⏳ Polish: hide the GVWR class scale for motorcycles (meaningless there); drop the near-duplicate Vehicle Type /
+  - ⏭️ **Skipped 2026-10-31 (owner):** Translate the Raw-tab / detail-row labels (NHTSA variable names) and common values into ua/ru (Raw stays exact English by design).
+  - ⏭️ **Skipped 2026-10-31 (owner):** Polish: hide the GVWR class scale for motorcycles (meaningless there); drop the near-duplicate Vehicle Type /
     Body Class chips; Windows renders flag emoji as letters (consider SVG flags); compute the VIN check digit locally
     for non-NHTSA-covered markets.
 
@@ -750,7 +749,7 @@ Group 1 dimension callouts + garage-fit -> Group 3 (existing order). Owner says 
 
 ### To discuss / research
 
-- [ ] **Driver assist + CarPlay / Android Auto** — researched 2026-10-28, not started. Owner says "go" per step. **Step 1 ✅ 2026-10-28** (ASSISTS extended, SAE level, US-spec footnote, shareable plate-card section with explainer; see features-reference "VIN page" > Driver assists). **Step 2 ✅ 2026-10-28** (EU GSR2 baseline by model year, `vin/gsr2.ts`; seen working on Porsche Taycan 2023 НС0500YС). Steps 3-4 optional, ask the owner first. Open polish (owner not yet decided): the NHTSA chips (US spec, ✓) and the EU baseline chips (dashed) can look contradictory on one card (e.g. a US-decoded Taycan) - add a separator line ("above: decoded equipment; below: what EU law required") and/or hide baseline chips whose system already shows ✓. Polish ✅ (divider + note on top). ADDW and pedestrian/cyclist AEB rows ✅ (second GSR2 stage). VIN page baseline ✅ (`VinTypicalEuBaseline`, inside "Typical model data", only when the NL register knows the model). Step 4 link-out ✅ (`VinSmartphoneLinks`; curated CSV not built).
+- [ ] **Driver assist + CarPlay / Android Auto** — researched 2026-10-28, not started. Owner says "go" per step. **Step 1 ✅ 2026-10-28** (ASSISTS extended, SAE level, US-spec footnote, shareable plate-card section with explainer; see features-reference "VIN page" > Driver assists). **Step 2 ✅ 2026-10-28** (EU GSR2 baseline by model year, `vin/gsr2.ts`; seen working on Porsche Taycan 2023 НС0500YС). Steps 3-4 ✅ 2026-10-28 (owner closed the remaining polish 2026-10-31, nothing open). Polish (decided): the NHTSA chips (US spec, ✓) and the EU baseline chips (dashed) can look contradictory on one card (e.g. a US-decoded Taycan) - add a separator line ("above: decoded equipment; below: what EU law required") and/or hide baseline chips whose system already shows ✓. Polish ✅ (divider + note on top). ADDW and pedestrian/cyclist AEB rows ✅ (second GSR2 stage). VIN page baseline ✅ (`VinTypicalEuBaseline`, inside "Typical model data", only when the NL register knows the model). Step 4 link-out ✅ (`VinSmartphoneLinks`; curated CSV not built).
       **Legal (verified 2026-10-28): do NOT scrape Apple's CarPlay list or Google's Android Auto page.** Apple site terms ban
       "page-scrape / robot / spider" and copying (robots.txt is open, the ToS still applies); Google terms ban scraping content
       "that doesn't belong to you"; EU database right covers the compilation even though single facts are free. No open dataset
