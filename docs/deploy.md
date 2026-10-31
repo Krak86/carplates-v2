@@ -249,6 +249,7 @@ Registry data lost with the full dumps: re-ingest from `archive/` ZIPs (`backup.
    plates 7 d + 1 d grace), add the GitHub secrets `HC_PING_NEWS|SOCIAL|WANTED|WANTED_PLATES|AUCTIONS|PLATES` to the `production` environment, re-run `deploy-ingest`.
    A `plates` run that loaded something runs `backup.sh archive` + `full` by itself. The first manual load (2026-10-28) is written up in
    `docs/plan-done.md` "Ingest cron".
+   First load of Garpun + SETAM (2026-10-31): `run-ingest.sh wanted-plates` once, and the SETAM backfill `docker compose run --rm --no-deps -T --user "$(id -u):$(id -g)" ingest tsx src/auctions.ts --all` (`run-ingest.sh auctions` loads only the newest 2 files). If `/api/auctions/stats` was requested while the table was empty it keeps serving zeros (API memory 10 min + Cloudflare 5 min): restart the live api colour, then purge that URL. Details: `docs/garpun-auctions-plan.md`.
 9. Housekeeping: ✅ Contabo snapshot taken 2026-10-28 (auto-deletes 2026-11-27, take a fresh one before risky changes; a rollback also reverts the DB, so re-apply the newest nightly dump after); ✅ Telegram `@WebpageBot` refresh of `https://carsua.app` (card shows title, description and OG image; send each older shared plate/VIN URL separately, X needs nothing since nothing was shared there). Open: the Dependabot PRs (count not re-checked since 2026-10-27; keep the version pins from CLAUDE.md).
 
 ### Longer term
@@ -286,7 +287,7 @@ and unbundled, so it says nothing about production.
 `/api/fuel/powertrains`, `/api/safety/stats`, `/api/wanted/stats`, `/api/auctions/stats`) send `Cache-Control: public, max-age=300`, but Cloudflare does not cache
 JSON by default, so a Cache Rule "Cache API rollups" (created 2026-10-29, verified MISS → HIT) makes it effective at the edge: custom expression
 `(http.host eq "carsua.app" and ((starts_with(http.request.uri.path, "/api/stats/") and http.request.uri.path ne "/api/stats/version") or http.request.uri.path in {"/api/stats" "/api/fuel/stats" "/api/fuel/powertrains" "/api/safety/stats" "/api/wanted/stats" "/api/auctions/stats"}))`,
-"Eligible for cache", Edge TTL "Use cache-control header if present, bypass cache if not", Browser TTL "Respect origin TTL". Live rule updated with `"/api/auctions/stats"` on 2026-10-31 (verify MISS then HIT after the API deploy; `/api/auctions/lots` is per-query and not edge-cached). Paste it via
+"Eligible for cache", Edge TTL "Use cache-control header if present, bypass cache if not", Browser TTL "Respect origin TTL". `/api/stats/*` (not the other rollups) sends `STATS_CACHE` instead: `max-age=300, s-maxage=21600, stale-while-revalidate=3600` (edge 6 h; every api deploy purges the exact stats URLs plus the `/api/stats/` prefix, best-effort; after a cron or ingest refresh purge them by hand if 6 h of lag matters). Live rule updated with `"/api/auctions/stats"` on 2026-10-31 (verify MISS then HIT after the API deploy; `/api/auctions/lots` is per-query and not edge-cached). Paste it via
 "Edit expression" and never switch back to the builder (it cannot show `starts_with` / `in {}` and wraps the text into a wildcard value).
 
 Per-model lookups (`/api/vdb`, `/api/rdw`, `/api/rdw/recalls`, `/api/wiki`, `/api/wiki/image`; keyed on brand/model/year, never on a plate or VIN) send

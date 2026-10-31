@@ -46,9 +46,13 @@ const UaAuctionCheck = lazy(() => import('@/components/UaAuctionCheck'))
 
 type Props = {
   data: VinDecodeResponse
+  /** Plate the visitor searched when this VIN was reached through another source (the registry has no row for it). */
+  searchedPlate?: string | null
+  /** Starts the auctions section expanded, without scrolling to it (the first view stays at the top). */
+  openAuctions?: boolean
 }
 
-export default function VinResult({ data }: Props): ReactNode {
+export default function VinResult({ data, searchedPlate = null, openAuctions = false }: Props): ReactNode {
   const { t } = useTranslation()
   const registry = data.registry
   const vehicle = extractVehicleInfo(data)
@@ -59,6 +63,8 @@ export default function VinResult({ data }: Props): ReactNode {
   // The origin chip opens the "Where it comes from" section (mounting it first if it is still lazy).
   const [originOpenSignal, setOriginOpenSignal] = useState(0)
   const [uaAuctionOpenSignal, setUaAuctionOpenSignal] = useState(0)
+  // Wanted / auction lookups use the plate too (Garpun lists plates only, lots may name only the plate); the searched one wins.
+  const sourcePlate = searchedPlate ?? plate
   const tiltEnabled = useUiStore(s => s.cardTiltEnabled)
   const glowRef = useCardMotion<HTMLDivElement>(tiltEnabled)
   useCarHeroImageActions({ brand: vehicle.brand, model: vehicle.model, year: vehicle.year, key: data.vin })
@@ -123,7 +129,7 @@ export default function VinResult({ data }: Props): ReactNode {
           />
           <SteeringChip steering={fields.get('Steering Location')} />
           <CatalogModelChip brand={vehicle.brand} model={vehicle.model} />
-          <UaAuctionChip plate={null} vin={data.vin} onOpen={() => setUaAuctionOpenSignal(n => n + 1)} />
+          <UaAuctionChip plate={sourcePlate} vin={data.vin} onOpen={() => setUaAuctionOpenSignal(n => n + 1)} />
           <CompareChip from={{ kind: 'vin', vin: data.vin }} />
         </div>
 
@@ -149,11 +155,16 @@ export default function VinResult({ data }: Props): ReactNode {
         )}
 
         <LazySection sections={['wanted']}>
-          <WantedCheck plate={null} vin={data.vin} />
+          <WantedCheck plate={sourcePlate} vin={data.vin} />
         </LazySection>
 
-        <LazySection sections={['ua-auctions']} forceMount={uaAuctionOpenSignal > 0}>
-          <UaAuctionCheck plate={null} vin={data.vin} openSignal={uaAuctionOpenSignal} />
+        <LazySection sections={['ua-auctions']} forceMount={uaAuctionOpenSignal > 0 || openAuctions}>
+          <UaAuctionCheck
+            plate={sourcePlate}
+            vin={data.vin}
+            openSignal={uaAuctionOpenSignal}
+            startOpen={openAuctions}
+          />
         </LazySection>
 
         <VinDecodeTabs

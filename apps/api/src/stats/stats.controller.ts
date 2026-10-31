@@ -14,7 +14,7 @@ import type {
   StatsFieldResponse
 } from '@carplates/shared'
 
-import { ROLLUP_CACHE } from '../common/cache.js'
+import { STATS_CACHE } from '../common/cache.js'
 import { zodParam } from '../common/zod-param.pipe.js'
 import { DataVersionResponseDto, StatsResponseDto, StatsTopResponseDto } from './stats.dto.js'
 import { StatsService } from './stats.service.js'
@@ -25,21 +25,21 @@ export class StatsController {
   constructor(@Inject(StatsService) private readonly statsService: StatsService) {}
 
   @Get()
-  @Header('Cache-Control', ROLLUP_CACHE)
+  @Header('Cache-Control', STATS_CACHE)
   @ApiOkResponse({ type: StatsResponseDto })
   get(): Promise<StatsResponseDto> {
     return this.statsService.get()
   }
 
   @Get('top')
-  @Header('Cache-Control', ROLLUP_CACHE)
+  @Header('Cache-Control', STATS_CACHE)
   @ApiOkResponse({ type: StatsTopResponseDto })
   top(): Promise<StatsTopResponseDto> {
     return this.statsService.top()
   }
 
   @Get('distribution')
-  @Header('Cache-Control', ROLLUP_CACHE)
+  @Header('Cache-Control', STATS_CACHE)
   @ApiOkResponse({
     description: 'Fleet histograms { width, buckets: [[edge, cars]] } for power, hp/tonne and engine size'
   })
@@ -48,7 +48,7 @@ export class StatsController {
   }
 
   @Get('size-models')
-  @Header('Cache-Control', ROLLUP_CACHE)
+  @Header('Cache-Control', STATS_CACHE)
   @ApiOkResponse({
     description:
       'Passenger models { brand, model, n, body, rdwBody, lengthMm, widthMm, heightMm, wheelbaseMm }, biggest first'
@@ -58,7 +58,7 @@ export class StatsController {
   }
 
   @Get('ev')
-  @Header('Cache-Control', ROLLUP_CACHE)
+  @Header('Cache-Control', STATS_CACHE)
   @ApiOkResponse({
     description:
       'Electrified passenger cars { total, fleet, byYear, byRegion, topModels }: electric-only vs hybrid with electricity'
@@ -68,7 +68,7 @@ export class StatsController {
   }
 
   @Get('imports')
-  @Header('Cache-Control', ROLLUP_CACHE)
+  @Header('Cache-Control', STATS_CACHE)
   @ApiOkResponse({
     description:
       'Used imports vs dealer sales { total, byYear, byCountry, topModels } by registration operation; country = the VIN build country'
@@ -78,7 +78,7 @@ export class StatsController {
   }
 
   @Get('origin')
-  @Header('Cache-Control', ROLLUP_CACHE)
+  @Header('Cache-Control', STATS_CACHE)
   @ApiOkResponse({
     description:
       'Passenger cars { total, byBrand, byPlant } by brand home country and VIN assembly country (ISO or a former state by model year; empty country = unknown)'
@@ -88,7 +88,7 @@ export class StatsController {
   }
 
   @Get('region-brands')
-  @Header('Cache-Control', ROLLUP_CACHE)
+  @Header('Cache-Control', STATS_CACHE)
   @ApiOkResponse({
     description:
       'Passenger cars { regions: [{ region, fleet, brands: [{ brand, n }] }] }: the 5 biggest brands per plate region'
@@ -98,14 +98,14 @@ export class StatsController {
   }
 
   @Get('brands')
-  @Header('Cache-Control', ROLLUP_CACHE)
+  @Header('Cache-Control', STATS_CACHE)
   @ApiOkResponse({ description: 'The 100 biggest brands { brands: [{ brand, n }] } (feeds the /play quizzes)' })
   brands(): Promise<BrandStatsResponse> {
     return this.statsService.brands()
   }
 
   @Get('region-facets')
-  @Header('Cache-Control', ROLLUP_CACHE)
+  @Header('Cache-Control', STATS_CACHE)
   @ApiOkResponse({
     description:
       'Passenger cars { regions: [{ region, fleet, models, fuels, origins: [{ value, n }] }] }: top models and brand countries and the fuel split per plate region'
@@ -115,7 +115,7 @@ export class StatsController {
   }
 
   @Get('field/:dimension')
-  @Header('Cache-Control', ROLLUP_CACHE)
+  @Header('Cache-Control', STATS_CACHE)
   @ApiParam({ name: 'dimension', enum: STATS_FIELD_DIMENSIONS })
   @ApiOkResponse({ description: 'Rows of { value, totalRows, distinctPlates, distinctVins }' })
   field(

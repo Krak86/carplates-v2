@@ -20,6 +20,36 @@ export const RELEASES: readonly ReleaseDay[] = [
     items: [
       item(
         'new',
+        'У розділі аукціонів з’явилася група «Історія ДТП (платні звіти)»: посилання на carVertical, AutoDNA, Carfax і AutoCheck, бо жодне безкоштовне джерело не показує ДТП окремого авто; VIN копіюється, ми нічого не надсилаємо',
+        'В разделе аукционов появилась группа «История ДТП (платные отчёты)»: ссылки на carVertical, AutoDNA, Carfax и AutoCheck, так как ни один бесплатный источник не показывает ДТП отдельного авто; VIN копируется, мы ничего не отправляем',
+        'The auctions section has a new "Crash history (paid reports)" group linking to carVertical, AutoDNA, Carfax and AutoCheck, since no free source shows the accidents of a single car; the VIN is copied and we send nothing'
+      ),
+      item(
+        'new',
+        'Пошук за номером, якого немає в реєстрі, тепер перевіряє списки розшуку (авто та «Гарпун», зокрема старі номери) і лоти СЕТАМ: якщо збіг є, показано банер про інше джерело, відомі дані про авто та VIN, а за наявності VIN - повну картку VIN; розділи розшуку й аукціонів відкриті одразу, а на сторінці VIN вони тепер враховують і номер',
+        'Поиск по номеру, которого нет в реестре, теперь проверяет списки розыска (авто и «Гарпун», в том числе старые номера) и лоты СЕТАМ: при совпадении показан баннер об ином источнике, известные данные об авто и VIN, а при наличии VIN - полная карточка VIN; разделы розыска и аукционов открыты сразу, а на странице VIN они теперь учитывают и номер',
+        'Searching a plate that is not in the registry now checks the wanted lists (vehicles and "Garpun", including old plates) and SETAM lots: on a match you get a banner about the other source, the vehicle data and VIN, and with a VIN the full VIN card; the wanted and auction sections open right away, and on the VIN page they now use the plate as well'
+      ),
+      item(
+        'new',
+        'В історії авто на картці з’явилися події розшуку: коли транспортний засіб чи номерний знак (Гарпун) внесли до списку й коли зняли, поряд з реєстраційними операціями та аукціонами; розділ тепер називається «Історія авто»',
+        'В истории авто на карточке появились события розыска: когда транспортное средство или номерной знак (Гарпун) внесли в список и когда сняли, рядом с регистрационными операциями и аукционами; раздел теперь называется «История авто»',
+        'The car history on the card now shows wanted-list events: when a vehicle or a plate (Garpun) was put on the list and when it was removed, next to the registration operations and auctions; the section is now called "Car history"'
+      ),
+      item(
+        'improved',
+        'На сторінках моделей каталогу з’явилася кнопка «Показати номери»: показує найновіші зареєстровані авто цієї моделі',
+        'На страницах моделей каталога появилась кнопка «Показать номера»: показывает самые новые зарегистрированные авто этой модели',
+        'Catalog model pages have a "Show plates" button that lists the newest registered cars of the model'
+      ),
+      item(
+        'improved',
+        'У грі «Вгадай марку» назва під емблемою тепер розмита, доки не оберете відповідь',
+        'В игре «Угадай марку» название под эмблемой теперь размыто, пока не выберете ответ',
+        'In the "Guess the brand" game the name under the emblem is now blurred until you pick an answer'
+      ),
+      item(
+        'new',
         'Довідник /read/auctions: що таке лот на українському аукціоні арештованого майна, як узяти участь, цифри з наших даних про лоти СЕТАМ, практика США й Британії, коротка історія аукціонів і що перевірити перед ставкою',
         'Справочник /read/auctions: что такое лот на украинском аукционе арестованного имущества, как принять участие, цифры из наших данных о лотах СЕТАМ, практика США и Британии, краткая история аукционов и что проверить перед ставкой',
         'New /read/auctions guide: what a lot is at a Ukrainian auction of seized property, how to take part, figures from our SETAM lot data, practice in the USA and the UK, a short history of auctions and what to check before you bid'

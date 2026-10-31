@@ -128,7 +128,13 @@ export default function AuctionCheck({ vin, imported = false, openSignal = 0 }: 
       )}
 
       <div className="mt-3">
-        <div className="mb-1 text-sm font-semibold">🧭 {t('auctions.extraTitle')}</div>
+        <div className="mb-1 text-sm font-semibold">{t('auctions.historyTitle')}</div>
+        <p className="mb-1 text-sm text-[var(--color-muted)]">{t('auctions.historyIntro')}</p>
+        <ul className="space-y-1">{auctionSitesByTier('history').map(site => renderSite(site, true))}</ul>
+      </div>
+
+      <div className="mt-3">
+        <div className="mb-1 text-sm font-semibold">🧭{t('auctions.extraTitle')}</div>
         <p className="mb-1 text-sm text-[var(--color-muted)]">{t('auctions.extraIntro')}</p>
         <ul className="space-y-1">{auctionSitesByTier('extra').map(site => renderSite(site, true))}</ul>
       </div>

@@ -8,6 +8,7 @@ import Card from '@/components/ui/Card'
 import Spinner from '@/components/ui/Spinner'
 import { cn } from '@/lib/cn'
 import { brandStatsQuery } from '@/lib/queries'
+import { LOGO_TEXT_TOP } from '@/routes/play/logo-text'
 import { buildLogoRounds, logoBrands } from '@/routes/play/helpers'
 import type { LogoRound } from '@/routes/play/helpers'
 import QuizEnd from '@/routes/play/QuizEnd'
@@ -28,6 +29,8 @@ function LogoRounds({ rounds, onAgain }: { rounds: LogoRound[]; onAgain: () => v
   if (!round) return <QuizEnd id="logo" score={score} best={best} total={rounds.length} onAgain={onAgain} />
 
   const answered = picked !== null
+  const logoUrl = brandLogoUrl(round.answer)
+  const textTop = LOGO_TEXT_TOP[logoUrl?.split('/').pop()?.split('.')[0] ?? '']
 
   const handlePick = (brand: string): void => {
     setPicked(brand)
@@ -52,11 +55,21 @@ function LogoRounds({ rounds, onAgain }: { rounds: LogoRound[]; onAgain: () => v
 
       <p className="text-center text-sm text-[var(--color-muted)]">{t('play.logo.question')}</p>
       <div className="mx-auto my-3 flex h-32 w-48 items-center justify-center rounded-xl bg-white p-4 shadow-sm">
-        <img
-          src={brandLogoUrl(round.answer) ?? undefined}
-          alt={answered ? round.answer : t('play.logo.alt')}
-          className="max-h-full max-w-full object-contain"
-        />
+        <span className="relative flex max-h-24 max-w-40">
+          <img
+            src={logoUrl ?? undefined}
+            alt={answered ? round.answer : t('play.logo.alt')}
+            className="max-h-24 max-w-40 object-contain"
+          />
+          {/* Most logos spell the brand under the emblem: blur that strip until answered (a name inside the emblem stays) */}
+          {!answered && textTop !== undefined && (
+            <span
+              aria-hidden
+              className="absolute inset-x-0 bottom-0 backdrop-blur-[6px]"
+              style={{ top: `${textTop * 100}%` }}
+            />
+          )}
+        </span>
       </div>
 
       <div className="grid grid-cols-2 gap-2">

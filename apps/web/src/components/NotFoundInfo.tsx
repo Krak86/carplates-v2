@@ -4,6 +4,7 @@ import { Link } from 'react-router'
 import { isSovietPlate, isUaPlate, normalizePlate, regionName } from '@carplates/shared'
 
 import NoRegionBadge from '@/components/NoRegionBadge'
+import OtherSourcesFound from '@/components/OtherSourcesFound'
 import RiaCheckLink from '@/components/RiaCheckLink'
 import { useRegionLabel } from '@/lib/region-label'
 import { PLATES_PATH } from '@/routes/read/links'
@@ -33,6 +34,9 @@ export default function NotFoundInfo({ value }: Props): ReactNode {
           <dd>{regionLabel(regionName(plate)) ?? <NoRegionBadge plate={plate} />}</dd>
         </dl>
       )}
+
+      {/* Old-format plates are the likeliest to be in the wanted lists only, so Soviet shapes are looked up too. */}
+      {(isPlate || isSoviet) && <OtherSourcesFound plate={plate} />}
 
       <p className="mt-2 text-sm text-[var(--color-muted)]">
         {isPlate ? t('result.notFound.hintPlate') : t('result.notFound.hintFormat')}
