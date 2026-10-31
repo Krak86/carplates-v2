@@ -382,7 +382,7 @@ above once scoped, or dropped if research says no.
 - ✅ **Stock news widget + Social chip, mobile sidebar buttons, viewport-safe info popups, `/install` page, `pnpm tunnel`** (2026-10-13, `ffceeff` … `55a1fcb`) — built, see `docs/plan-done.md` ("Stock news, mobile sidebar…"). **Open:** news rides the same unofficial Yahoo endpoints as the share price (drop the widget if they break).
 - ✅ **Skeleton placeholders** for stats pages and homepage stats (2026-10-06, `de0a53c`) and the **About page sources + icons** (`9b974fd`) — built, see `docs/plan-done.md`.
 - ✅ **Weight rankings, Stack Exchange + Lemmy community posts, richer "Copy all info" export, WebP brand logos** (2026-10-09, `3f7a596` … `bb9f055`) — built, see `docs/plan-done.md` and `docs/features-reference.md`. **Open:** Stack Exchange / Lemmy are unauthenticated public APIs (rate limits unmeasured — judge on real traffic, drop the widget column if they throttle); weight edges for models with few vehicles are percentile-based, so tiny samples are noisy (per-group floor only); Lighthouse/LCP not yet measured after the perf pass (Phase 4).
-- 📋 **Feature guide** (`/features`-style tour with Playwright screenshots, ua/ru/en) — planned 2026-10-06, not started: [FEATURES_PLAN.md](FEATURES_PLAN.md). The "What's new" part shipped as the `/releases` page (2026-10-15, no bell). **Conflicts with the
+- ⏭️ **Feature guide + "What's new" bell** (`/features`-style tour with Playwright screenshots, ua/ru/en) — planned 2026-10-06, **skipped 2026-10-31**: [FEATURES_PLAN.md](FEATURES_PLAN.md). The "What's new" part shipped as the `/releases` page (2026-10-15, no bell). **Conflicts with the
   paid-features route** — see Phase 5 "Stage A".
 
 - ✅ **Wanted (stolen) vehicles** — built 2026-10-15 (`5bed8de`), see above and `docs/plan-done.md` (original design archived there).
@@ -391,7 +391,8 @@ above once scoped, or dropped if research says no.
 - ✅ **Pre-public secrets audit, production DB-credential guard, first Dependabot round** (2026-10-15) — see `docs/plan-done.md`. **Open:** run
   gitleaks over the full history before flipping the repo public; `@tanstack/react-table` 9 migration (v8 held).
 
-- 📋 **Window sticker** (Monroney-style spec label, PDF/print) — idea 2026-10-13, researched, not started.
+- ⏭️ **Window sticker** (Monroney-style spec label, PDF/print) — idea 2026-10-13, **skipped 2026-10-31**: no demand signal, no new data (MSRP/options unavailable),
+  and the PDF export + plate card PNG already cover printing/sharing. If it returns, build only a one-page summary layout on the existing PDF export, not a Monroney page.
   - **Templates:** no free official one to reuse. The US Monroney label is mandated by the Automobile Information
     Disclosure Act (1958) and the EPA fuel-economy label by 40 CFR 600 — specs only, no licensed artwork; the EU has
     the CO₂/fuel label (Directive 1999/94/EC) at the point of sale; Ukraine mandates nothing. So we design our own
@@ -781,7 +782,7 @@ Group 1 dimension callouts + garage-fit -> Group 3 (existing order). Owner says 
       size blueprint overlay, generated difference sentences, export like "Copy all info", "Compare" chip on the plate/VIN card and catalog
       page (slot A prefilled). Phases: (1) core, (2) visuals, (3) export, (4) tray / suggestions / saved / indexable pairs.
       Full plan: [docs/compare-plan.md](docs/compare-plan.md). Also covers the segment-peer list and a `/read/sizes` overlay embed.
-- **Shareable photo-search links** — idea 2026-10-01, deferred (not started).
+- ⏭️ **Shareable photo-search links** — idea 2026-10-01, **skipped 2026-10-31** (not started; design kept below in case it returns).
   Share button on the photo card uploads the shrunk image + recognition result
   (candidates with boxes, EXIF meta) to `POST /api/shares`; opening
   `/<plate>?p=<token>` fetches it and fills the same `photo` state in
