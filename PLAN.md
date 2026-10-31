@@ -987,18 +987,18 @@ in-memory store resets on restart and isn't shared across instances), body-email
 Code-level audit findings and the full pre-deploy gate: [docs/security-checklist.md](docs/security-checklist.md) (2026-10-13).
 
 - [x] `TRUST_PROXY=true` is set in `infra/docker-compose.prod.yml` (Caddy + Cloudflare in front; Caddy trusts `CF-Connecting-IP` only from Cloudflare's ranges). Set only when the API port is not publicly reachable, else `X-Forwarded-For` is spoofable.
-- [ ] Firewall: expose only 80/443 (+ UDP 443 for HTTP/3); API, Postgres and Redis ports closed to the internet; fail2ban. ✅ SSH key-only (verified 2026-10-27). **Not re-verified** — check the VPS firewall state.
+- [x] Firewall: ✅ verified 2026-10-31 from outside (`Test-NetConnection`, IPv4): 22/80/443 open; 3000 (api), 5432 (Postgres), 6379 (Redis) closed. ✅ SSH key-only (verified 2026-10-27). Open: IPv6 check, UDP 443 (HTTP/3), fail2ban.
 - [x] ~~Caddy edge limits~~ **Dropped 2026-10-31:** Caddy `rate_limit` needs a custom build; covered by the Cloudflare WAF rule + the Nest throttler (`docs/deploy.md` "Longer term"). The "Rate-limit policy" numbers below are now reference only.
 - [x] Cloudflare (free tier) in front: ✅ Bot Fight Mode, WAF rate-limit rule on `/api/plate*` and `/api/vin*` (30/10 s per IP), HTTP/3, Always Use HTTPS (2026-10-28,
       `docs/deploy.md` step 4). "Under Attack" stays a manual incident toggle. Trust only Cloudflare's IP ranges / `CF-Connecting-IP` (Caddyfile; re-check the ranges occasionally).
 - [x] Cloudflare Turnstile on sign-in "send code" (keys set in production 2026-10-27) and on the feedback/contact submit (`contact.controller.ts`). Discuss is Disqus (own spam protection), so no Turnstile there. Optional: camera recognize — never on plain search.
 - [ ] Headers at Caddy: ✅ `Strict-Transport-Security` and a Report-Only CSP are in `infra/Caddyfile`. Open: **enforce CSP** after ~1 week of clean reports (recheck Lighthouse `inspector-issues` first); verify `Permissions-Policy` (camera/geolocation for self only).
 - [ ] Redis-backed throttler storage (shared counters, survives restarts, covers the blue/green overlap) — **not started**, Redis is not in the compose file; low priority. Global daily counter for paid third-party keys (Plate Recognizer budget is already capped; only needed if a RIA key is added).
-- [x] Swagger is off in production (`swaggerEnabled`: `ENABLE_SWAGGER` or non-production; `/api/docs` serves the SPA shell). [ ] `/api/admin/*` admin-only guard **not re-verified** (consider IP-allowlisting at Caddy).
+- [x] Swagger is off in production (`swaggerEnabled`: `ENABLE_SWAGGER` or non-production; `/api/docs` serves the SPA shell). [x] `/api/admin/*` verified 2026-10-31: all three admin controllers (`features/admin`, `digest`, `usage-admin`) carry a class-level `@UseGuards(AdminGuard)` (session + `role = 'admin'`, else 401/403); the dev-only `/api/dev/emails` controller is not registered in production. Optional: IP-allowlist at Caddy.
 - [x] Secrets: production `AUTH_SECRET` / `POSTGRES_PASSWORD` differ from dev. Rotation **skipped by choice 2026-10-28**; rotate `POSTHOG_PERSONAL_API_KEY` and any other key shown in chat/screenshots if you consider it exposed.
 - [ ] `robots.txt`/sitemap: verify `PUBLIC_SITE_URL` is the real origin, submit `sitemap.xml` in Google Search Console and Bing Webmaster.
 - [ ] Cookie/consent and licence decisions before ads go live (not before): [docs/legal-and-monetization.md](docs/legal-and-monetization.md).
-- [ ] Monitoring: ✅ UptimeRobot on `/healthz` + home (2026-10-28). Open: set server `SENTRY_DSN` (unset, so server errors are untracked) + alert on 429 spikes; healthchecks.io checks + `HC_PING_*` secrets for the ingest crons; log retention/rotation.
+- [ ] Monitoring: ✅ UptimeRobot on `/healthz` + home (2026-10-28). Open: server Sentry is fully wired in code (`instrument.ts`, `deploy-api.yml`) but needs the GitHub secret `SENTRY_DSN` + variable `ENABLE_TELEMETRY=true` in the `production` environment, then a re-run of `deploy-api` (unset today, so server errors are untracked); then a Sentry alert on 429 spikes; healthchecks.io checks + `HC_PING_*` secrets for the ingest crons; log retention/rotation.
 
 ### Backup policy (Phase 4)
 
