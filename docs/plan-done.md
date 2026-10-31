@@ -4268,3 +4268,11 @@ Question: are there free sources for ex-USSR/Russian cars, Baltic registry data 
 - **СТО repair data:** nothing free, open and complete. NHTSA recalls/complaints/TSBs free (US models); Open Labor Project (community labor times, torque, fluids, DTC; public API paid, licence unverified); MOTOR (paid, API/bulk); TecDoc (paid, standard for OEM numbers/analogs/fitment in Europe and Ukraine; cheapest via resellers, gray zone); Autodata/Haynes Pro/ALLDATA (paid, labor times and torque); CarMD/CarsXE (small free tiers); generic OBD-II DTC code lists are plentiful and open.
 - **Shipped:** recalls on the VIN page - `VinTypicalData` mounts `RdwRecalls` (EU RDW, US NHTSA, CA + NHTSA complaints) for the VIN's typical make/model/year, `LazySection` id `recalls`. NHTSA has no per-VIN recall API, so it stays model-year level. Notes in `docs/features-reference.md` "VIN page"; release note in `packages/shared/src/releases.ts` (`improved`).
 - **Not started:** generic OBD DTC lookup page (open code lists; would need a new public route: `ROUTE_TITLE_KEYS`, `STATIC_PAGES` ua/ru/en, `@Throttle` if enumerable).
+
+## Home blocks, brand line, quiz full screen (2026-10-31) ✅
+
+- **Home page:** recent Garpun plates (`HomeWantedSection`) and the newest auction lots (`HomeAuctionsSection`). Conventions in `docs/features-reference.md` "Home page blocks and brand line".
+- **Brand line:** slogan + "Free, no ads, open data" notice (`app.free`) in the layout, search page, `index.html` and `spa-text.ts`.
+- **Quizzes:** full-screen button in `PlayRoute`.
+- **Catalog:** cross links between the cars catalog and advanced search.
+- **Docs/About:** About features (recalls on VIN, home blocks, full screen) and releases updated; planning docs added: `docs/road-safety-plan.md`, `docs/prozorro-sale-auctions-plan.md`.

@@ -554,6 +554,13 @@ Files: migration 0075, `packages/shared/src/origin.ts` (own file, no offline-cac
 `routes/play/`; write-up plan-done "Games hub /play". `/play?game=region|logo|higher` plays in place, online-only. Rounds are pure functions in `helpers.ts` (plates come from `REGIONS`, never re-implemented). `StatsMap` `quiz` prop = clickable polygons without tooltip/legend. Best score per quiz in localStorage (`quiz-storage.ts`); a new quiz = id in `QUIZ_IDS`, component in `QUIZ_COMPONENT`, `play.quiz.<id>.title|desc` ua/ru/en. The end screen shares a score card via `renderPlateCardPng`.
 Question count (10/20/30/50) is global, picked on the hub (`readRounds`/`writeRounds`); best score is per quiz and length. Brand pool: `GET /api/stats/brands` -> `foldBrands` (never the full `statsQuery`).
 
+**Full screen** (2026-10-31): `PlayRoute` wraps the quiz frame in `frameRef` and toggles the Fullscreen API on it (`fullscreenchange` keeps the state in sync); no per-quiz code.
+
+## Home page blocks and brand line (2026-10-31)
+
+- **Home blocks** (`routes/stats/`): `HomeWantedSection` also lists the newest Garpun plates; `HomeAuctionsSection` lists the newest SETAM lots (link to `/auctions`, lot link via `setamLotUrl`). Both render on `SearchRoute`.
+- **Brand line:** `app.tagline` + `app.free` ("Free, no ads, open data") show in `Layout` and under the search box; the same text is in `index.html` and `spa-text.ts` so link previews match. Change all four together (ua/ru/en).
+
 ## Advanced search, news and page width (2026-10-29)
 
 - **Advanced search icons:** result rows and the Colour / Kind / Fuel / Status labels reuse the shared icon components (`BrandLogo`, `VehicleKindIcon`, body, colour, fuel, `OperStatusIcon`, region flag); a new facet needs its icon in the **Legend** too. `searchResultRowSchema` extras (`kind`, `body`, `operName`, `operCode`) stay `.nullable().optional()`.
