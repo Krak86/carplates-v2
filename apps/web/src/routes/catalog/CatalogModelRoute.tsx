@@ -19,6 +19,8 @@ import { toIntlLocale } from '@/lib/intl'
 import { localizeRegion } from '@/lib/region-label'
 import { catalogModelQuery } from '@/lib/queries'
 
+import ExamplePlates from '@/routes/read/ExamplePlates'
+
 import CatalogStatsSection from './CatalogStatsSection'
 import { typicalYear, yearRangeLabel } from './helpers'
 
@@ -112,6 +114,9 @@ export default function CatalogModelRoute(): ReactNode {
             />
           </p>
         )}
+        <div className="mt-2">
+          <ExamplePlates brand={model.topBrand} model={model.topModel} />
+        </div>
         <p className="mt-2 text-base">
           <Link to="/" className="text-[var(--color-primary)] underline">
             {t('catalog.lookup')}
