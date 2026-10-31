@@ -79,6 +79,15 @@ Read first: `docs/features-reference.md` "Wanted vehicles (stolen check)", "Auct
 - **Folding trap:** fold look-alikes only on the make match / the found model name, never on the whole tail (the Cyrillic stop words "модель", "року" must stay Cyrillic).
 - **Deploy order for auctions:** merge -> API deploy runs migration 0084 (empty table) -> `deploy-ingest` installs the 04:55 cron -> run the backfill ONCE on the VPS (`docker compose run --rm --no-deps -T ingest tsx src/auctions.ts --all`, from `/opt/carsua/compose` with `COMPOSE_FILE=docker-compose.prod.yml`; `run-ingest.sh auctions` only loads the newest 2 files). Optional: healthchecks.io check + GitHub secret `HC_PING_AUCTIONS`.
 
+## Start here for step 6 (handoff, 2026-10-31)
+
+- State: steps 1-5 done and verified locally, **nothing committed** (check `git status` / `git log`; suggested commit messages were given per step). Local DB has `registry.auction_lots` (16 866 lots) and `wanted_plates`. Migration 0084 is applied locally; next migration number is **0085**.
+- Read first: this file (Findings, Decisions, Notes from steps 1-3 and 4, Answered questions), CLAUDE.md, `docs/features-reference.md` sections "Agent discovery, edge cache, Zod and CSP", "Wanted vehicles (stolen check)", "VIN page", "Offline / PWA details". (The "Auction history" section is the older US-auction history of imported cars, a different feature: do not mix it up.)
+- Patterns to copy for step 6: API `apps/api/src/wanted/` (controller / dto / module / service + tests), contract `packages/shared/src/wanted.ts` (own file, `.nullable().optional()`), web `WantedCheck.tsx` / `WantedChip.tsx`; lookup by `normalizePlate` / VIN as in `plate.service.ts` / `vin.service.ts`. Run `pnpm --filter @carplates/shared build` after editing shared.
+- Decided (user): show **all lots, sold highlighted** (sold = `sale_price IS NOT NULL`); link the **SETAM home** (`setam.net.ua`), no per-lot URL. Card needs: all lot data (lot number, proceeding no, status, category, region, start / sale price, year, raw title), a short history of Ukrainian auctions, a comparison with world practice, links to take part (verify URLs in a browser, not only by fetch). **Verify bill 11139 status and source every history / world-practice fact** before writing static copy; UI text uses "-", never an em dash.
+- Data caveats to show or respect: a re-listed car has several lots (list newest first); winners are never stored; foreign / Soviet plates in `plate`; ~2 % of lots have no make; a lot plate matching a registry plate does not prove it is the same car today (old lots).
+- After step 6: tick it here, `docs/features-reference.md` section, About entries (`about.feature.*`, `SOURCES` + `about.source.*`, ua/ru/en), `releases.ts` (`new` item; bump `releases/latest.ts` on a new day), tests, `pnpm format`, suggested commit message. Then steps 7 and 8.
+
 ## Answered questions (user, 2026-10-31)
 
 - Auction card: **show all lots, sold ones highlighted** ("sold" = `sale_price IS NOT NULL`; the rest listed as not sold / open / stopped).
