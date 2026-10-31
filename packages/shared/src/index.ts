@@ -723,13 +723,23 @@ export type { NewsFeedResponse, NewsFeedPageResponse } from './news.js'
 
 export {
   wantedRecordSchema,
+  wantedPlateSchema,
   wantedResponseSchema,
   wantedStatsResponseSchema,
   wantedStatsRowSchema,
   wantedStatsVehicleSchema,
-  stolenInUaUrl
+  stolenInUaUrl,
+  WANTED_VEHICLES_DATASET_URL,
+  WANTED_PLATES_DATASET_URL
 } from './wanted.js'
-export type { WantedRecord, WantedResponse, WantedStatsResponse, WantedStatsRow, WantedStatsVehicle } from './wanted.js'
+export type {
+  WantedRecord,
+  WantedPlate,
+  WantedResponse,
+  WantedStatsResponse,
+  WantedStatsRow,
+  WantedStatsVehicle
+} from './wanted.js'
 export {
   CATALOG_INDEX_PATH,
   CATALOG_KEEP_MIN_CARS,

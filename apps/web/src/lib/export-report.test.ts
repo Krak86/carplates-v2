@@ -569,6 +569,33 @@ describe('buildExportReport news and sources', () => {
     expect(toneOf(false)).toBe('ok')
   })
 
+  it('flags a plate that is only on the Garpun list and keeps the not-proof warning', () => {
+    const checkedAt = '2026-10-27T00:00:00Z'
+    const plates = [
+      {
+        id: 'g1',
+        status: 'wanted' as const,
+        plate: 'АА1234АА',
+        seizedAt: '2026-03-10',
+        insertedAt: null,
+        organUnit: null,
+        removedAt: null
+      }
+    ]
+    const report = buildExportReport(
+      baseInput({
+        wanted: { wanted: false, records: [], plates, plateWanted: true, checkedAt, trackedSince: checkedAt }
+      }),
+      t
+    )
+    const section = report.sections.find(s => s.id === 'wanted')
+    expect(section?.type === 'kv' && section.tone).toBe('alert')
+    const rows = section?.type === 'kv' ? section.rows : []
+    expect(rows[0]).toEqual({ label: 'export.wantedStatus', value: 'wanted.chip.plate' })
+    expect(rows.map(r => r.label)).toContain('export.wantedPlate')
+    expect(rows.map(r => r.value)).toContain('wanted.plates.warning')
+  })
+
   it('builds the cover strip from the verdict, region, year and fuel', () => {
     const report = buildExportReport(baseInput({ current: registration({ fuel: 'БЕНЗИН' }) }), t)
     expect(report.summary?.map(s => s.text)).toEqual(['Київська область', '2020', 'БЕНЗИН'])

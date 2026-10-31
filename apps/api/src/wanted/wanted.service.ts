@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common'
-import { wantedVehicles } from '@carplates/db'
-import type { WantedRecord, WantedResponse } from '@carplates/shared'
+import { wantedPlates, wantedVehicles } from '@carplates/db'
+import type { WantedPlate, WantedRecord, WantedResponse } from '@carplates/shared'
 import { desc, eq, or, sql } from 'drizzle-orm'
 
 import { DbService } from '../db/db.service.js'
@@ -23,13 +23,22 @@ export class WantedService {
     ]
     const where = or(...keys)
 
-    const [rows, [meta]] = await Promise.all([
+    const [rows, plateRows, [meta]] = await Promise.all([
       where
         ? db
             .select()
             .from(wantedVehicles)
             .where(where)
             .orderBy(sql`${wantedVehicles.resolvedAt} is not null`, desc(wantedVehicles.seizedAt))
+            .limit(50)
+        : [],
+      // Garpun lists plates only: a VIN-only lookup has nothing to match.
+      plate
+        ? db
+            .select()
+            .from(wantedPlates)
+            .where(eq(wantedPlates.plate, plate))
+            .orderBy(sql`${wantedPlates.resolvedAt} is not null`, desc(wantedPlates.seizedAt))
             .limit(50)
         : [],
       db
@@ -63,11 +72,22 @@ export class WantedService {
       source: r.source === 'stolen.in.ua' ? 'stolen.in.ua' : 'feed',
       removedExact: r.resolvedExact
     }))
+    const plates: WantedPlate[] = plateRows.map(r => ({
+      id: r.sourceId,
+      status: r.resolvedAt ? 'removed' : 'wanted',
+      plate: r.plate,
+      seizedAt: r.seizedAt,
+      insertedAt: r.insertedAt,
+      organUnit: r.organUnit,
+      removedAt: r.resolvedAt?.toISOString() ?? null
+    }))
     const historySince = meta?.historySince ?? null
 
     return {
       wanted: records.some(r => r.status === 'wanted'),
       records,
+      plates,
+      plateWanted: plates.some(p => p.status === 'wanted'),
       checkedAt: meta?.checkedAt ? new Date(meta.checkedAt).toISOString() : null,
       trackedSince: historySince
         ? new Date(historySince).toISOString()
