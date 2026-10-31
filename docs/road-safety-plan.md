@@ -22,14 +22,16 @@ Patrol Police file (12.2025.xlsx, 15 sheets) is **pre-aggregated, not crash reco
 
 No national per-crash open dataset with coordinates was found (not proven absent).
 
-## Step 0 results (2026-10-31, partial)
+## Step 0 results (2026-10-31)
 
 - **Hazard CSVs (2025)** are semicolon-separated, UTF-8 BOM, `;` columns match on every row, English headers but Ukrainian values. `roadHazardousAreas` 505 rows (18 regions), `placesOfConcentration...` 329 rows (22 regions), `total...` 24 regions (no Kyiv city). Columns: region, road index (`М-30`, trailing spaces), road name, km+m start / end, **start / end GPS**, accident count over 3 years; places also has a rate coefficient and hazard level (`null` literal for missing).
 - **Coordinates exist but are dirty**: start GPS parses for 482/505 (hazard) and 311/329 (places). Failures: missing or comma-glued numbers (`48.4328426, 364633821`), single value, `lat, lat` instead of `lat lon`. Separators vary (`, ` or space). Parser must validate to Ukraine bbox and drop / flag bad rows, not guess.
 - **Road codes** are `М-30`, `Т-02-12`, `Р-15`, `Н-17`; 77 / 83 distinct. Values carry trailing spaces, and the 2020 Patrol file has a **Latin `P`** (`P-17`) where others use Cyrillic `Р`: normalise before joining. Join with Patrol per-road sheet not yet verified on real rows.
 - **Patrol sheets**: all workbooks have numeric sheet names (`Зміст`, `2`..`15`); 2020 has 16 sheets, 2022 and 2025 have 15. Titles change: 2020 "ДТП з постраждалими", 2022+ "з загиблими та/або травмованими"; sheet 14 was "незадовільного стану доріг" (+ separate streets sheet 15 in 2020), later "порушення правил утримання". So map by **title text, not sheet index**. `.xls` 2017-19 needs a different reader.
 - **No xlsx reader in the repo yet** (no `xlsx` / `exceljs` dependency): ingest CLI will need one (pin the version, check licence).
-- **Open**: per-road sheet row-level join, region boundary source and licence.
+- **Road join (verified on 12.2025.xlsx)**: the per-road sheet (file `sheet9.xml`; not sheet-index stable) is only a **2024 vs 2025 comparison** per state road: col A code, B name, C/D crashes, F/G deaths, I/J injured, E/H/K % change, header over 3 rows, 236 data rows. 67 of 83 distinct hazard-CSV codes match it. Unmatched: `Т-` roads (`Т-09-06`, `Т-14-01`..), combined labels like `Р-84 (Т-14-19)`, and an empty code. So the join is partial: hazard sections of unmatched roads show without road totals, and codes need a normaliser (trim, Latin to Cyrillic, take the first token).
+- **Boundaries**: geoBoundaries gbOpen `UKR/ADM1` (27 units, represents 2017) is **ODbL 1.0, sourced from OpenStreetMap**, not CC BY. Needs "© OpenStreetMap contributors" attribution on the map and in About `SOURCES`; a static choropleth is a produced work, but keep the GeoJSON file itself marked ODbL. The 2017 units still include Crimea and Sevastopol: check the oblast names against `packages/shared` regions at build time. Alternative to evaluate: a UA-specific boundary set (e.g. `alexbabintsev/ua-geo` found in search, licence unverified).
+- **Step 0 is done** apart from the licence check on any alternative boundary set.
 
 ## Decisions to confirm
 
