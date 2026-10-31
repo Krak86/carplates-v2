@@ -19,6 +19,7 @@ const HistoryRoute = lazy(() => import('@/routes/history/HistoryRoute'))
 const FavoritesRoute = lazy(() => import('@/routes/favorites/FavoritesRoute'))
 const StatsRoute = lazy(() => import('@/routes/stats/StatsRoute'))
 const WantedStatsRoute = lazy(() => import('@/routes/wanted/WantedStatsRoute'))
+const AuctionsRoute = lazy(() => import('@/routes/auctions/AuctionsRoute'))
 const FuelStatsRoute = lazy(() => import('@/routes/fuel/FuelStatsRoute'))
 const SafetyStatsRoute = lazy(() => import('@/routes/safety/SafetyStatsRoute'))
 const NewsRoute = lazy(() => import('@/routes/news/NewsRoute'))
@@ -94,6 +95,7 @@ export default function App(): ReactNode {
             <Route path="/favorites" element={<FavoritesRoute />} />
             <Route path="/stats" element={<StatsRoute />} />
             <Route path="/wanted" element={<WantedStatsRoute />} />
+            <Route path="/auctions" element={<AuctionsRoute />} />
             <Route path="/fuel" element={<FuelStatsRoute />} />
             <Route path="/safety" element={<SafetyStatsRoute />} />
             <Route path="/news" element={<NewsRoute />} />

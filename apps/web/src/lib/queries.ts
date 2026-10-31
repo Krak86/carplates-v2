@@ -1,7 +1,8 @@
-import { queryOptions } from '@tanstack/react-query'
+import { keepPreviousData, queryOptions } from '@tanstack/react-query'
 import type { QueryClient, QueryKey } from '@tanstack/react-query'
 import { normalizePlate } from '@carplates/shared'
 import type {
+  AuctionListQuery,
   CardBundleResponse,
   MotFuelHint,
   PlateLookupResponse,
@@ -40,6 +41,8 @@ import {
   getMot,
   getCaRecalls,
   getAuctionLots,
+  getAuctionList,
+  getAuctionStats,
   getWanted,
   getWantedStats,
   getGenerationGrowth,
@@ -755,5 +758,19 @@ export function auctionLotsQuery(plate: string | null, vin: string | null) {
     queryKey: ['auction-lots', plate, vin],
     queryFn: () => getAuctionLots(plate, vin),
     staleTime: 5 * 60_000
+  })
+}
+
+// /auctions page aggregates and lot list: live data like wantedStatsQuery (online-only, no offline group); the API caches stats 10 min.
+export function auctionStatsQuery() {
+  return queryOptions({ queryKey: ['auction-stats'], queryFn: getAuctionStats, staleTime: 5 * 60_000 })
+}
+
+export function auctionListQuery(query: AuctionListQuery) {
+  return queryOptions({
+    queryKey: ['auction-list', query],
+    queryFn: () => getAuctionList(query),
+    staleTime: 5 * 60_000,
+    placeholderData: keepPreviousData
   })
 }

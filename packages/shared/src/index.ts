@@ -724,12 +724,33 @@ export type { NewsFeedResponse, NewsFeedPageResponse } from './news.js'
 export {
   auctionLotSchema,
   auctionResponseSchema,
+  auctionListLotSchema,
+  auctionListQuerySchema,
+  auctionListResponseSchema,
+  auctionStatsRowSchema,
+  auctionStatsResponseSchema,
+  AUCTION_OUTCOMES,
+  AUCTION_SORTS,
+  AUCTION_PAGE_SIZE,
+  DEFAULT_AUCTION_OUTCOME,
+  DEFAULT_AUCTION_SORT,
   AUCTIONS_DATASET_URL,
   SETAM_URL,
   PROZORRO_SALE_URL,
   setamLotUrl
 } from './auctions.js'
-export type { AuctionLot, AuctionResponse } from './auctions.js'
+export type {
+  AuctionLot,
+  AuctionResponse,
+  AuctionListLot,
+  AuctionListParams,
+  AuctionListQuery,
+  AuctionListResponse,
+  AuctionOutcome,
+  AuctionSort,
+  AuctionStatsRow,
+  AuctionStatsResponse
+} from './auctions.js'
 
 export {
   wantedRecordSchema,

@@ -33,6 +33,8 @@ import {
   fxResponseSchema,
   caRecallsResponseSchema,
   auctionResponseSchema,
+  auctionListResponseSchema,
+  auctionStatsResponseSchema,
   wantedResponseSchema,
   wantedStatsResponseSchema,
   generationGrowthResponseSchema,
@@ -128,6 +130,9 @@ import type {
   FxResponse,
   CaRecallsResponse,
   AuctionResponse,
+  AuctionListQuery,
+  AuctionListResponse,
+  AuctionStatsResponse,
   WantedResponse,
   WantedStatsResponse,
   GenerationGrowthResponse,
@@ -900,4 +905,18 @@ export async function getAuctionLots(plate: string | null, vin: string | null): 
   if (plate) params.set('plate', plate)
   if (vin) params.set('vin', vin)
   return auctionResponseSchema.parse(await getJson(`/api/auctions?${params.toString()}`))
+}
+
+/** Aggregates for the /auctions page: totals and breakdowns by month / region / make / year. */
+export async function getAuctionStats(): Promise<AuctionStatsResponse> {
+  return auctionStatsResponseSchema.parse(await getJson('/api/auctions/stats'))
+}
+
+/** One page of the public auction lot list (filters, sort). */
+export async function getAuctionList(query: AuctionListQuery): Promise<AuctionListResponse> {
+  const params = new URLSearchParams()
+  for (const [key, value] of Object.entries(query)) {
+    if (value !== undefined && value !== '') params.set(key, String(value))
+  }
+  return auctionListResponseSchema.parse(await getJson(`/api/auctions/lots?${params.toString()}`))
 }

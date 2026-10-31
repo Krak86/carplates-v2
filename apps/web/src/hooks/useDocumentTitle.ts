@@ -18,6 +18,7 @@ export const ROUTE_TITLE_KEYS: Record<string, string> = {
   '/cars': 'catalog.browseTitle',
   '/compare': 'compare.title',
   '/wanted': 'wanted.stats.title',
+  '/auctions': 'auctions.page.title',
   '/fuel': 'nav.fuel',
   '/safety': 'nav.safety',
   '/news': 'nav.news',

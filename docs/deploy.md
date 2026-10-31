@@ -283,10 +283,10 @@ and unbundled, so it says nothing about production.
 
 **Cloudflare in front** — h2/h3 + Brotli on by default; hashed `/assets/*` cached at the edge; SSL mode Full (strict). The client IP arrives in
 `CF-Connecting-IP` (Fastify `trustProxy` + throttler tracker; only trust Cloudflare's IP ranges). The global rollups (`/api/stats/*` except `version`, `/api/fuel/stats`,
-`/api/fuel/powertrains`, `/api/safety/stats`, `/api/wanted/stats`) send `Cache-Control: public, max-age=300`, but Cloudflare does not cache
+`/api/fuel/powertrains`, `/api/safety/stats`, `/api/wanted/stats`, `/api/auctions/stats`) send `Cache-Control: public, max-age=300`, but Cloudflare does not cache
 JSON by default, so a Cache Rule "Cache API rollups" (created 2026-10-29, verified MISS → HIT) makes it effective at the edge: custom expression
-`(http.host eq "carsua.app" and ((starts_with(http.request.uri.path, "/api/stats/") and http.request.uri.path ne "/api/stats/version") or http.request.uri.path in {"/api/stats" "/api/fuel/stats" "/api/fuel/powertrains" "/api/safety/stats" "/api/wanted/stats"}))`,
-"Eligible for cache", Edge TTL "Use cache-control header if present, bypass cache if not", Browser TTL "Respect origin TTL". Paste it via
+`(http.host eq "carsua.app" and ((starts_with(http.request.uri.path, "/api/stats/") and http.request.uri.path ne "/api/stats/version") or http.request.uri.path in {"/api/stats" "/api/fuel/stats" "/api/fuel/powertrains" "/api/safety/stats" "/api/wanted/stats" "/api/auctions/stats"}))`,
+"Eligible for cache", Edge TTL "Use cache-control header if present, bypass cache if not", Browser TTL "Respect origin TTL". **TODO on deploy (2026-10-31): add `"/api/auctions/stats"` to the live rule.** (`/api/auctions/lots` is per-query and not edge-cached.) Paste it via
 "Edit expression" and never switch back to the builder (it cannot show `starts_with` / `in {}` and wraps the text into a wildcard value).
 
 Per-model lookups (`/api/vdb`, `/api/rdw`, `/api/rdw/recalls`, `/api/wiki`, `/api/wiki/image`; keyed on brand/model/year, never on a plate or VIN) send

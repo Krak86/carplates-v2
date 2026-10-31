@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useSearchParams } from 'react-router'
+import { Link, useSearchParams } from 'react-router'
 import { useQuery } from '@tanstack/react-query'
 import { AUCTIONS_DATASET_URL, PROZORRO_SALE_URL, SETAM_URL } from '@carplates/shared'
 import type { Currency } from '@carplates/shared'
@@ -152,6 +152,12 @@ export default function UaAuctionCheck({ plate, vin, openSignal = 0 }: Props): R
       </details>
 
       <ul className="mt-2 space-y-1 text-sm">
+        <li>
+          <Link to="/auctions" className={LINK_CLASS}>
+            {t('auctions.page.title')}
+          </Link>{' '}
+          <span className="text-[var(--color-muted)]">{t('auctions.page.link')}</span>
+        </li>
         <li>
           <ExternalLink href={SETAM_URL}>setam.net.ua</ExternalLink>{' '}
           <span className="text-[var(--color-muted)]">{t('uaAuctions.link.setam')}</span>

@@ -177,6 +177,23 @@ export const STATIC_PAGES: Record<string, Record<Lang, PageText>> = {
       description: 'How many vehicles are wanted in Ukraine and how many were found, by region, make, colour and year.'
     }
   },
+  '/auctions': {
+    ua: {
+      title: 'Українські аукціони арештованих авто: лоти та статистика | Cars UA',
+      description:
+        'Легкові й вантажні авто з торгів СЕТАМ: лоти, ціни продажу, статистика за регіонами, марками й роками.'
+    },
+    ru: {
+      title: 'Украинские аукционы арестованных авто: лоты и статистика | Cars UA',
+      description:
+        'Легковые и грузовые авто с торгов СЕТАМ: лоты, цены продажи, статистика по регионам, маркам и годам.'
+    },
+    en: {
+      title: 'Ukrainian seized-car auctions: lots and statistics | Cars UA',
+      description:
+        'Cars and trucks from SETAM auctions in Ukraine: lots, sale prices and statistics by region, make and year.'
+    }
+  },
   '/fuel': {
     ua: {
       title: 'Витрата пального та викиди CO₂ авто за марками й моделями | Cars UA',
