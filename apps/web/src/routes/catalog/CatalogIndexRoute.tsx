@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 
 import BrandLogo from '@/components/BrandLogo'
+import CatalogAdvancedSearchNote from '@/components/catalog/CatalogAdvancedSearchNote'
 import CatalogBreadcrumb from '@/components/catalog/CatalogBreadcrumb'
 import Card from '@/components/ui/Card'
 import SectionSkeleton from '@/components/ui/SectionSkeleton'
@@ -86,6 +87,10 @@ export default function CatalogIndexRoute(): ReactNode {
             ))}
           </ul>
         )}
+      </Card>
+
+      <Card>
+        <CatalogAdvancedSearchNote />
       </Card>
     </main>
   )

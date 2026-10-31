@@ -588,6 +588,9 @@ are `.nullable().optional()`).
   HTML is sent with `public, max-age=0, s-maxage=86400, stale-while-revalidate=604800`. Fuel, body and colour are localized (ua/ru/en) by `registryLabel` / `localizeRegistryRows`
   (`packages/shared/src/registryLabels.ts`, used by the page and the block): lowercase, the stray ` B` / `-B` body suffix dropped and the rows that read the same merged;
   an unknown word falls back to the Ukrainian one, so add new registry words to that table. Regions go through `localizeRegion` (`regionLabels.ts`, shared; `apps/web/src/lib/region-label.ts` re-exports it) on the page and in the block. An unknown `/cars/...` path behaves like any unknown path (home tags, `noindex`, `no-cache`).
+- **Cross links with advanced search** (2026-10-31): `/cars`, make and model pages end with `CatalogAdvancedSearchNote` (links to `/advanced-search`, prefilled with the
+  page's `topBrand` / `topModel`, and says why the catalog can miss cars: passenger only, spellings folded, no page below `CATALOG_KEEP_MIN_CARS`, unknown brand or Cyrillic-only name).
+  The advanced search header links back to `/cars`. The note is client-only, not part of `catalogSeoBlock`.
 - **Sitemap**: `/sitemap.xml` is now an **index** of `/sitemap-pages.xml` (static pages) and `/sitemap-cars.xml` (indexable catalog pages, 3 languages each, hreflang).
   Each file is far below the 50,000-URL limit; IndexNow takes 10,000 URLs per request (the deploy step reads every child sitemap; split the request when the catalog
   passes that). `deploy-api.yml` purges all three sitemap URLs.
