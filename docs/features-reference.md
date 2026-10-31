@@ -336,7 +336,7 @@ Plate/VIN `?section=<id>` links (2026-10-30): the title gets ` - <section label>
   to `PUBLIC_API_PATH_PREFIXES` (`/api/stats*`, `/api/wanted/stats`, `/api/catalog`) and prunes unreferenced schemas; JSON only, always on, independent of `ENABLE_SWAGGER`.
   **Only registry-derived, non-enumerable, read-only endpoints**; never per-vehicle lookups, admin / auth / account routes, or anything built on scraped
   third-party sources (`docs/legal-and-monetization.md`). Widen one prefix at a time and extend `public-doc.test.ts`.
-- **Edge cache**: a new cacheable `/api/*` endpoint sends `ROLLUP_CACHE` (`@Header`, global rollups) or `lookupCacheInterceptor(LOOKUP_CACHE | RECALLS_CACHE)`
+- **Edge cache**: a new cacheable `/api/*` endpoint sends `ROLLUP_CACHE` (`@Header`, global rollups; `/api/stats/*` use the longer `STATS_CACHE`, 6 h at the edge, purged per api deploy: add a new stats path to the purge list in `deploy-api.yml`) or `lookupCacheInterceptor(LOOKUP_CACHE | RECALLS_CACHE)`
   (per-model, `no-store` on `refresh=true`) from `common/cache.ts`, **and its path must be added to the matching Cloudflare Cache Rule expression**
   (`docs/deploy.md`), or Cloudflare keeps answering DYNAMIC. Verify MISS then HIT after the rule change. A bare `/api/stats` needs its own entry:
   `starts_with("/api/stats/")` does not match it. Edit rules in "Edit expression" mode only (the builder discards `starts_with` / `in {}`).

@@ -190,11 +190,11 @@ jobs:
           # Exact URLs first: they work on every plan, so robots/sitemap are purged even if the prefix purge is refused.
           curl -fsS -X POST "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/purge_cache" \
             -H "Authorization: Bearer $CF_API_TOKEN" -H "Content-Type: application/json" \
-            --data "{\"files\":[\"$URL/robots.txt\",\"$URL/sitemap.xml\",\"$URL/sitemap-pages.xml\",\"$URL/sitemap-cars.xml\"]}" \
-            || echo "::warning::robots.txt/sitemap cache purge failed; purge manually"
+            --data "{\"files\":[\"$URL/robots.txt\",\"$URL/sitemap.xml\",\"$URL/sitemap-pages.xml\",\"$URL/sitemap-cars.xml\",\"$URL/api/stats\",\"$URL/api/stats/top\",\"$URL/api/stats/distribution\",\"$URL/api/stats/size-models\",\"$URL/api/stats/ev\",\"$URL/api/stats/imports\",\"$URL/api/stats/origin\",\"$URL/api/stats/region-brands\",\"$URL/api/stats/brands\",\"$URL/api/stats/region-facets\"]}" \
+            || echo "::warning::robots.txt/sitemap/stats cache purge failed; purge manually"
           curl -fsS -X POST "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/purge_cache" \
             -H "Authorization: Bearer $CF_API_TOKEN" -H "Content-Type: application/json" \
-            --data "{\"prefixes\":[\"$host/og/\",\"$host/cars\",\"$host/api/catalog/\"]}" \
+            --data "{\"prefixes\":[\"$host/og/\",\"$host/cars\",\"$host/api/catalog/\",\"$host/api/stats/\"]}" \
             || echo "::warning::og card / catalog cache purge failed (purge by prefix may need a paid plan; purge manually)"
 
       # IndexNow tells Bing, Yandex and the other participating engines which URLs to recrawl. The sitemap is the URL list

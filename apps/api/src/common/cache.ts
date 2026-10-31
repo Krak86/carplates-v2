@@ -5,6 +5,12 @@ import { tap } from 'rxjs'
 /** Global rollups rebuilt by cron (Tue + Fri), the same for everyone: browser + Cloudflare edge may reuse them for 5 min. */
 export const ROLLUP_CACHE = 'public, max-age=300'
 
+/**
+ * `/api/stats/*` rollups only change on the cron / ingest, so Cloudflare keeps them 6 h and serves a stale copy for 1 h more while
+ * it revalidates (the cold MISS is the slow query). Every api deploy purges them (`deploy-api.yml`), so a contract change never meets a stale body.
+ */
+export const STATS_CACHE = 'public, max-age=300, s-maxage=21600, stale-while-revalidate=3600'
+
 /** Per-model lookups (vdb, rdw, wiki): browser 1 h, Cloudflare edge 1 day (`s-maxage`); the data only changes on ingest or re-scrape. */
 export const LOOKUP_CACHE = 'public, max-age=3600, s-maxage=86400'
 /** RDW recalls are updated by the authority itself, so keep the edge copy short. */
