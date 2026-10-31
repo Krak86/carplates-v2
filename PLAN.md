@@ -1131,6 +1131,7 @@ card-on-file subscriptions; revisit with real quotes.
 - ✅ **About sources (2026-10-14):** 8 auction link-out sites added as logo-less tiles (no logo licence found), Telegram Login logo added — see `docs/plan-done.md`.
 - ✅ **Contact page + footer copyright (2026-10-31):** `/contact` (who we are, order an app, Resend-backed form with throttle + Turnstile + honeypot, `CONTACT_TO` secret) and `© year carsua.app` in every footer — see `docs/plan-done.md`.
 - ✅ **Road crash statistics page `/road-safety` (2026-11-01):** regions (deaths and per 100k registered cars, map), state roads, causes and types, hour and weekday, year picker, footnotes; Patrol Police + Infrastructure Restoration Agency sources; plate-card region crash chip; `dtp-patrol` / `dtp-hazards` cron jobs — see `docs/plan-done.md`.
+- ✅ **Source strip + related pages on all statistics pages (2026-11-01):** `PageSources` "Source data" card and `RelatedPages` cross links on `/stats`, `/wanted`, `/auctions`, `/fuel`, `/safety`, `/road-safety` — see `docs/plan-done.md`.
 - **Other providers (researched 2026-10-12, not planned yet):** GitHub (client id + secret, code flow), Microsoft
   (client id, OIDC), Facebook/Meta (app id + secret, needs privacy URL + data-deletion URL + Live app), Apple (Services
   ID + Team ID + Key ID + `.p8`, $99/yr, secret JWT rotates ≤ 6 months — skip unless a store app ships).

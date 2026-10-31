@@ -4287,3 +4287,10 @@ Question: are there free sources for ex-USSR/Russian cars, Baltic registry data 
 - **Page extras (2026-11-01):** source data strip on top, interesting-cases block, fleet vs deaths / crashes scatter with Pearson r and the regions furthest from their fleet share, hazardous sections list (kind tabs, region filter, OSM links).
 - **Plate-card chip (step 8):** `components/RegionCrashChip.tsx` ("Region: N crashes in <year>, rank k of M", deaths rank, links to `/road-safety`), rendered in `ResultCard` after `TopStatBadges`; `regionCrashFact` in `routes/road-safety/helpers.ts`. Online-only (no `offline-cache.ts`), nothing when the region has no row. i18n `result.regionCrashes*`.
 - **Refresh cron (step 10):** jobs `dtp-patrol` (monthly, the 5th) and `dtp-hazards` (yearly, 10 Feb) in `scripts/src/jobs.ts`, `ingest.cron`, `run-ingest.sh`, `HC_PING_DTP_*` in `deploy-ingest.yml`; the healthchecks.io checks and GitHub secrets are still to create.
+
+## Source strip and related pages on statistics pages (2026-11-01) ✅
+
+- **Source strip:** shared `components/PageSources.tsx` ("Source data" card: links with notes, plain lines, optional footer) on `/stats`, `/wanted`, `/auctions`, `/fuel`, `/safety`; `/road-safety` `SourceData` now wraps it. Strings `pageSources.*` (ua/ru/en).
+- **Cross links:** `components/RelatedPages.tsx` at the bottom of all six pages, driven by `lib/related-pages.ts` (`RELATED_PAGES`, 16 pairs; `RELATED_TARGETS` deep-links the regional map of `/stats` and `/wanted`). Each pair has a number-free hint `related.<from>.<to>` saying what the other page answers.
+- **Not done:** live cross-dataset facts (e.g. thefts per 1,000 registered cars by region) would need a new API query.
+- **Docs:** `docs/features-reference.md` section, release entry 2026-11-01.
