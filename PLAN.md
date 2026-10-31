@@ -317,6 +317,8 @@ above once scoped, or dropped if research says no.
 
 - [ ] **Garpun wanted plates + SETAM auctions (2026-10-31; Garpun steps 1-3 + auctions steps 4-5 (DB, parser, schedule) done, step 6 + per-lot SETAM link + `/auctions` page (step 7a) done; Garpun tab on `/wanted` + auction cards + catalog make line done 2026-10-31; step 9 (read article) done; steps 11 + direct lot link skipped (SETAM terms); deployed + first load + API checks done 2026-10-31 (docs/garpun-auctions-plan.md "Production first load"); open: browser / phone checks, first cron rows, healthchecks, step 12 (later))** — two new data.gov.ua feeds: wanted plates joined into the `/wanted` card section with a Garpun chip, and car lots from SETAM auctions as a card section + `/auctions` route + stats. Steps: `docs/garpun-auctions-plan.md`.
 
+- [ ] **Road safety `/safety` (DTP stats; 2026-10-31, researched, nothing built)** — Patrol Police yearly/monthly XLSX + hazardous-sections CSVs (CC BY): dangerous regions (also per 100k cars), roads, causes, choropleth map, region link on the plate card. **No make/model in any source, so no "top models in DTP" chips.** Step 0 = read the hazard CSV columns (coordinates?). Steps: `docs/road-safety-plan.md`.
+
 ### Actual — ready or in progress
 
 - ✅ History, favorites, camera/photo search, registry stats (table + map), brand breakdown, kind icon + logo — done, see Phase 1.5 / "Plate image recognition" in `docs/plan-done.md`.
