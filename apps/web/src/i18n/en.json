@@ -3662,6 +3662,8 @@
   "play.title": "Games",
   "play.intro": "Quick games built on the registry data. Everything stays on your device: only the best score is saved.",
   "play.back": "< All games",
+  "play.fullscreen": "Full screen",
+  "play.exitFullscreen": "Exit full screen",
   "play.offline": "The quizzes need a connection. Go online to play.",
   "play.best": "Best: {{score}}",
   "play.round": "Round {{n}} of {{total}}",
