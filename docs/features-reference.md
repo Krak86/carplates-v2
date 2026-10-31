@@ -559,7 +559,7 @@ Question count (10/20/30/50) is global, picked on the hub (`readRounds`/`writeRo
 ## Home page blocks and brand line (2026-10-31)
 
 - **Home blocks** (`routes/stats/`): `HomeWantedSection` also lists the newest Garpun plates; `HomeAuctionsSection` lists the newest SETAM lots (link to `/auctions`, lot link via `setamLotUrl`). Both render on `SearchRoute`.
-- **Brand line:** `app.tagline` + `app.free` ("Free, no ads, open data") show in `Layout` and under the search box; the same text is in `index.html` and `spa-text.ts` so link previews match. Change all four together (ua/ru/en).
+- **Brand line:** `app.tagline` + `app.free` ("Free, no ads, open data") show in `Layout` (`app.free` header badge only; not on the search page); the same text is in `index.html` and `spa-text.ts` so link previews match. Change all together (ua/ru/en).
 
 ## Advanced search, news and page width (2026-10-29)
 
