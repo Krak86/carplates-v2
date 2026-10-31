@@ -11,6 +11,8 @@ export const JOBS = {
   news: { command: 'tsx src/news.ts', timeoutMin: 15 },
   social: { command: 'tsx src/social.ts', timeoutMin: 20 },
   wanted: { command: 'tsx src/wanted.ts', timeoutMin: 15 },
+  // Garpun wanted plates (~20 k rows, seconds): after `wanted` (04:40); a skipped day loses resolved history like `wanted`.
+  'wanted-plates': { command: 'tsx src/wanted-plates.ts', timeoutMin: 10 },
   // Real work ~monthly (new CKAN month; ~2-3 h, a first load on an empty ingested_resources ~6 h); other runs no-op after one
   // API call (ingest-full.ts). /archive = /opt/carsua/archive on the host.
   plates: { command: 'tsx src/ingest-full.ts --archive /archive', timeoutMin: 720 },

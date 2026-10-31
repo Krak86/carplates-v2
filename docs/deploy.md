@@ -160,11 +160,11 @@ pulls without a login. Settings → Actions → "Require approval for all outsid
 
 ## Backups (free, only what cannot be rebuilt)
 
-| Data                                                                                                                                                   | Backup                                                                                                                                           |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `app.*` (users, sessions, settings…) + `registry.wanted_vehicles`, `news_items`, `social_posts`, `owner_posts`, `missed_lookups`, `ingested_resources` | `backup.sh nightly` at 03:30 → R2 `nightly/`, 14 days kept (KB–MB)                                                                               |
-| `registry.registrations` + matview                                                                                                                     | source ZIPs in `/opt/carsua/archive` → `backup.sh archive` (~1.2 GB); one `backup.sh full` after each monthly ingest (keeps 2; size = your dump) |
-| Scraped tables (wiki, RDW, MOT, safety, VehiclesDB…)                                                                                                   | none — rebuilt from the committed seed CSVs                                                                                                      |
+| Data                                                                                                                                                                    | Backup                                                                                                                                           |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `app.*` (users, sessions, settings…) + `registry.wanted_vehicles`, `wanted_plates`, `news_items`, `social_posts`, `owner_posts`, `missed_lookups`, `ingested_resources` | `backup.sh nightly` at 03:30 → R2 `nightly/`, 14 days kept (KB–MB)                                                                               |
+| `registry.registrations` + matview                                                                                                                                      | source ZIPs in `/opt/carsua/archive` → `backup.sh archive` (~1.2 GB); one `backup.sh full` after each monthly ingest (keeps 2; size = your dump) |
+| Scraped tables (wiki, RDW, MOT, safety, VehiclesDB…)                                                                                                                    | none — rebuilt from the committed seed CSVs                                                                                                      |
 
 R2 free tier = 10 GB (no egress fees). ZIPs + one full dump may exceed it — if so, keep one full dump or rely on ZIPs + re-ingest. Contabo
 snapshots are an extra, not the backup. `pg_dump` caveat (verified): `--schema` is ignored once `-t` is used, so the script lists `-t 'app.*'`.
@@ -243,10 +243,10 @@ Registry data lost with the full dumps: re-ingest from `archive/` ZIPs (`backup.
    server errors are not tracked), `PLATE_RECOGNIZER_CLOUD_TOKEN`. `TURNSTILE_*` is set (2026-10-27).
 8. **Ingest cron (live 2026-10-28).** `deploy-ingest.yml` (path-filtered: `scripts/**`, shared, db, `infra/vps/*ingest*`) builds `scripts/Dockerfile`, pulls it on the VPS,
    writes `/opt/carsua/env/ingest.env` (`DATABASE_URL`, `HC_PING_*`), syncs `run-ingest.sh` / `ingest-status.sh` / the compose file and installs
-   `infra/vps/ingest.cron` as the `deploy` user's crontab (replaces it; it was empty). Jobs: `news`, `social`, `wanted` daily, `plates` Tue + Fri
+   `infra/vps/ingest.cron` as the `deploy` user's crontab (replaces it; it was empty). Jobs: `news`, `social`, `wanted` + `wanted-plates` (Garpun, 04:45) daily, `plates` Tue + Fri
    (crontab times are the VPS's local time, CET). Details, the first-load procedure and gotchas: SCHEDULE.md. Check: `crontab -l`,
-   `~/ingest-status.sh`, `SELECT * FROM registry.job_runs ORDER BY id DESC`. Skipped for now (2026-10-28), so ingest failures are not alerted: create one healthchecks.io check per job (news/social/wanted 1 d,
-   plates 7 d + 1 d grace), add the GitHub secrets `HC_PING_NEWS|SOCIAL|WANTED|PLATES` to the `production` environment, re-run `deploy-ingest`.
+   `~/ingest-status.sh`, `SELECT * FROM registry.job_runs ORDER BY id DESC`. Skipped for now (2026-10-28), so ingest failures are not alerted: create one healthchecks.io check per job (news/social/wanted/wanted-plates 1 d,
+   plates 7 d + 1 d grace), add the GitHub secrets `HC_PING_NEWS|SOCIAL|WANTED|WANTED_PLATES|PLATES` to the `production` environment, re-run `deploy-ingest`.
    A `plates` run that loaded something runs `backup.sh archive` + `full` by itself. The first manual load (2026-10-28) is written up in
    `docs/plan-done.md` "Ingest cron".
 9. Housekeeping: ✅ Contabo snapshot taken 2026-10-28 (auto-deletes 2026-11-27, take a fresh one before risky changes; a rollback also reverts the DB, so re-apply the newest nightly dump after); ✅ Telegram `@WebpageBot` refresh of `https://carsua.app` (card shows title, description and OG image; send each older shared plate/VIN URL separately, X needs nothing since nothing was shared there). Open: the Dependabot PRs (count not re-checked since 2026-10-27; keep the version pins from CLAUDE.md).
