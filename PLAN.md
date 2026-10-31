@@ -987,7 +987,7 @@ in-memory store resets on restart and isn't shared across instances), body-email
 Code-level audit findings and the full pre-deploy gate: [docs/security-checklist.md](docs/security-checklist.md) (2026-10-13).
 
 - [x] `TRUST_PROXY=true` is set in `infra/docker-compose.prod.yml` (Caddy + Cloudflare in front; Caddy trusts `CF-Connecting-IP` only from Cloudflare's ranges). Set only when the API port is not publicly reachable, else `X-Forwarded-For` is spoofable.
-- [x] Firewall: ✅ verified 2026-10-31 from outside (`Test-NetConnection`, IPv4): 22/80/443 open; 3000 (api), 5432 (Postgres), 6379 (Redis) closed. ✅ SSH key-only (verified 2026-10-27). Open: IPv6 check, UDP 443 (HTTP/3), fail2ban.
+- [x] Firewall: ✅ verified 2026-10-31 from outside (`Test-NetConnection`, IPv4): 22/80/443 open; 3000 (api), 5432 (Postgres), 6379 (Redis) closed. ✅ SSH key-only (verified 2026-10-27). ✅ IPv6 + Docker verified on the VPS 2026-10-31 (`ss -tln`, `docker ps`): nothing listens on 3000/5432/6379; only Caddy publishes 80/443 (tcp, IPv4 + IPv6) and 443/udp (HTTP/3); api, alpr and Postgres are internal-only; Caddy admin 2019 unpublished; public IPv6 `2a02:c207:2370:1852::1`. Optional, skipped by choice: fail2ban (SSH is key-only), Caddy IP allowlist for `/api/admin/*` (use Cloudflare Access instead if wanted).
 - [x] ~~Caddy edge limits~~ **Dropped 2026-10-31:** Caddy `rate_limit` needs a custom build; covered by the Cloudflare WAF rule + the Nest throttler (`docs/deploy.md` "Longer term"). The "Rate-limit policy" numbers below are now reference only.
 - [x] Cloudflare (free tier) in front: ✅ Bot Fight Mode, WAF rate-limit rule on `/api/plate*` and `/api/vin*` (30/10 s per IP), HTTP/3, Always Use HTTPS (2026-10-28,
       `docs/deploy.md` step 4). "Under Attack" stays a manual incident toggle. Trust only Cloudflare's IP ranges / `CF-Connecting-IP` (Caddyfile; re-check the ranges occasionally).
@@ -998,7 +998,7 @@ Code-level audit findings and the full pre-deploy gate: [docs/security-checklist
 - [x] Secrets: production `AUTH_SECRET` / `POSTGRES_PASSWORD` differ from dev. Rotation **skipped by choice 2026-10-28**; rotate `POSTHOG_PERSONAL_API_KEY` and any other key shown in chat/screenshots if you consider it exposed.
 - [ ] `robots.txt`/sitemap: verify `PUBLIC_SITE_URL` is the real origin, submit `sitemap.xml` in Google Search Console and Bing Webmaster.
 - [ ] Cookie/consent and licence decisions before ads go live (not before): [docs/legal-and-monetization.md](docs/legal-and-monetization.md).
-- [ ] Monitoring: ✅ UptimeRobot on `/healthz` + home (2026-10-28). Open: server Sentry is fully wired in code (`instrument.ts`, `deploy-api.yml`) but needs the GitHub secret `SENTRY_DSN` + variable `ENABLE_TELEMETRY=true` in the `production` environment, then a re-run of `deploy-api` (unset today, so server errors are untracked); then a Sentry alert on 429 spikes; healthchecks.io checks + `HC_PING_*` secrets for the ingest crons; log retention/rotation.
+- [ ] Monitoring: ✅ UptimeRobot on `/healthz` + home (2026-10-28). Open: server Sentry is fully wired in code (`instrument.ts`, `deploy-api.yml`) and the GitHub secret `SENTRY_DSN` + variable `ENABLE_TELEMETRY=true` are set in the `production` environment (seen 2026-10-31). Open: confirm server events actually reach Sentry (re-run `deploy-api` if it ran before they were set; the DSN must be the Node project's), then a Sentry alert on 429 spikes; healthchecks.io checks + `HC_PING_*` secrets for the ingest crons; log retention/rotation.
 
 ### Backup policy (Phase 4)
 
