@@ -98,6 +98,8 @@
     "ingest:auctions": "tsx src/auctions.ts",
     "ingest:dtp": "tsx src/dtp.ts",
     "ingest:dtp:patrol": "tsx src/dtp-patrol.ts",
+    "ingest:dtp:csv": "tsx src/dtp-csv.ts",
+    "export:dtp:csv": "tsx src/dtp-csv.ts --export-csv",
     "ingest:wanted-history": "tsx src/wanted-history.ts",
     "ingest:wanted-history:csv": "tsx src/wanted-history-csv.ts",
     "export:wanted-history:csv": "tsx src/wanted-history-csv.ts --export-csv",

@@ -47,7 +47,7 @@ const REQUIRED_FIELDS: readonly (keyof HazardCells)[] = ['seq', 'region', 'roadC
 export function hazardLayout(headerCells: string[]): Partial<Record<keyof HazardCells, number>> {
   const layout: Partial<Record<keyof HazardCells, number>> = {}
   headerCells.forEach((raw, idx) => {
-    const cell = raw.replace(/^﻿/, '').trim()
+    const cell = raw.replace(/^\uFEFF/, '').trim()
     const hit = HEADER_FIELDS.find(([re]) => re.test(cell))
     if (hit) layout[hit[1]] = idx
   })
@@ -145,7 +145,7 @@ export function parseHazardCsv(text: string, year: number, kind: HazardKind): Ha
     const seq = intCell(cell(r, 'seq'))
     const region = dtpRegion(cell(r, 'region'))
     const code = roadCode(cell(r, 'roadCode'))
-    if (seq === null || !region || !code) {
+    if (seq === null || !region) {
       invalid++
       continue
     }
@@ -158,7 +158,7 @@ export function parseHazardCsv(text: string, year: number, kind: HazardKind): Ha
       kind,
       seq,
       region,
-      roadCode: code,
+      roadCode: code ?? '',
       roadName: (cell(r, 'roadName') ?? '').trim().replace(/\s+/g, ' '),
       kmStart: kmToMetres(cell(r, 'kmStart')),
       kmEnd: kmToMetres(cell(r, 'kmEnd')),

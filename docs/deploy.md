@@ -284,9 +284,9 @@ and unbundled, so it says nothing about production.
 
 **Cloudflare in front** — h2/h3 + Brotli on by default; hashed `/assets/*` cached at the edge; SSL mode Full (strict). The client IP arrives in
 `CF-Connecting-IP` (Fastify `trustProxy` + throttler tracker; only trust Cloudflare's IP ranges). The global rollups (`/api/stats/*` except `version`, `/api/fuel/stats`,
-`/api/fuel/powertrains`, `/api/safety/stats`, `/api/wanted/stats`, `/api/auctions/stats`) send `Cache-Control: public, max-age=300`, but Cloudflare does not cache
+`/api/fuel/powertrains`, `/api/safety/stats`, `/api/road-safety/*`, `/api/wanted/stats`, `/api/auctions/stats`) send `Cache-Control: public, max-age=300`, but Cloudflare does not cache
 JSON by default, so a Cache Rule "Cache API rollups" (created 2026-10-29, verified MISS → HIT) makes it effective at the edge: custom expression
-`(http.host eq "carsua.app" and ((starts_with(http.request.uri.path, "/api/stats/") and http.request.uri.path ne "/api/stats/version") or http.request.uri.path in {"/api/stats" "/api/fuel/stats" "/api/fuel/powertrains" "/api/safety/stats" "/api/wanted/stats" "/api/auctions/stats"}))`,
+`(http.host eq "carsua.app" and ((starts_with(http.request.uri.path, "/api/stats/") and http.request.uri.path ne "/api/stats/version") or starts_with(http.request.uri.path, "/api/road-safety/") or http.request.uri.path in {"/api/stats" "/api/fuel/stats" "/api/fuel/powertrains" "/api/safety/stats" "/api/wanted/stats" "/api/auctions/stats"}))`,
 "Eligible for cache", Edge TTL "Use cache-control header if present, bypass cache if not", Browser TTL "Respect origin TTL". `/api/stats/*` (not the other rollups) sends `STATS_CACHE` instead: `max-age=300, s-maxage=21600, stale-while-revalidate=3600` (edge 6 h; every api deploy purges the exact stats URLs plus the `/api/stats/` prefix, best-effort; after a cron or ingest refresh purge them by hand if 6 h of lag matters). Live rule updated with `"/api/auctions/stats"` on 2026-10-31 (verify MISS then HIT after the API deploy; `/api/auctions/lots` is per-query and not edge-cached). Paste it via
 "Edit expression" and never switch back to the builder (it cannot show `starts_with` / `in {}` and wraps the text into a wildcard value).
 

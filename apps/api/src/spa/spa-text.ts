@@ -39,7 +39,7 @@ export const STATIC_PAGES: Record<string, Record<Lang, PageText>> = {
     en: {
       title: 'Ukrainian car lookup by plate or VIN | Cars UA',
       description:
-        "Look up a vehicle by Ukrainian plate number or VIN: make, model, year, fuel, region and registration history. Free, no ads, open data only."
+        'Look up a vehicle by Ukrainian plate number or VIN: make, model, year, fuel, region and registration history. Free, no ads, open data only.'
     }
   },
   '/about': {

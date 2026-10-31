@@ -62,9 +62,9 @@ describe('parseHazardCsv', () => {
 
   it('keeps valid rows and counts the dropped ones', () => {
     expect(parsed.rows).toBe(5)
-    expect(parsed.sections).toHaveLength(3)
-    expect(parsed.invalid).toBe(2)
-    expect(parsed.noCoords).toBe(1)
+    expect(parsed.sections).toHaveLength(4)
+    expect(parsed.invalid).toBe(1)
+    expect(parsed.noCoords).toBe(2)
   })
 
   it('maps a full row', () => {
@@ -90,6 +90,7 @@ describe('parseHazardCsv', () => {
   it('treats the literal null level as missing and keeps rows with bad coordinates', () => {
     expect(parsed.sections[1]).toMatchObject({ roadCode: 'Р-17', hazardLevel: null })
     expect(parsed.sections[2]).toMatchObject({ roadCode: 'Р-84', latStart: null, lonStart: null, latEnd: null })
+    expect(parsed.sections[3]).toMatchObject({ roadCode: '', roadName: 'Без коду' })
   })
 
   it('throws on a file without the required columns', () => {
