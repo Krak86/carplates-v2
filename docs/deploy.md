@@ -249,6 +249,7 @@ Registry data lost with the full dumps: re-ingest from `archive/` ZIPs (`backup.
    plates 7 d + 1 d grace), add the GitHub secrets `HC_PING_NEWS|SOCIAL|WANTED|WANTED_PLATES|AUCTIONS|PLATES` to the `production` environment, re-run `deploy-ingest`.
    A `plates` run that loaded something runs `backup.sh archive` + `full` by itself. The first manual load (2026-10-28) is written up in
    `docs/plan-done.md` "Ingest cron".
+   First load of Garpun + SETAM (2026-10-31): `run-ingest.sh wanted-plates` once, and the SETAM backfill `docker compose run --rm --no-deps -T --user "$(id -u):$(id -g)" ingest tsx src/auctions.ts --all` (`run-ingest.sh auctions` loads only the newest 2 files). If `/api/auctions/stats` was requested while the table was empty it keeps serving zeros (API memory 10 min + Cloudflare 5 min): restart the live api colour, then purge that URL. Details: `docs/garpun-auctions-plan.md`.
 9. Housekeeping: ✅ Contabo snapshot taken 2026-10-28 (auto-deletes 2026-11-27, take a fresh one before risky changes; a rollback also reverts the DB, so re-apply the newest nightly dump after); ✅ Telegram `@WebpageBot` refresh of `https://carsua.app` (card shows title, description and OG image; send each older shared plate/VIN URL separately, X needs nothing since nothing was shared there). Open: the Dependabot PRs (count not re-checked since 2026-10-27; keep the version pins from CLAUDE.md).
 
 ### Longer term
