@@ -1,6 +1,6 @@
 # Road safety (DTP) stats: regions, roads, causes
 
-Drafted 2026-10-31. **Status: research done, nothing built.** Plan only; build after the step 0 checks.
+Drafted 2026-10-31. **Status: step 0 done, step 1 (migration `0085_road_safety.sql`) written, step 2 half done:** `scripts/src/dtp.ts` + `dtp-parse.ts` load the hazard CSVs (`pnpm ingest:dtp`; dry-run on the real 2025 files: 329 of 329 concentration places, 501 of 505 hazard sections kept). The Patrol Police XLSX loader (needs an xlsx reader dependency) is not started. Migration not yet applied to any database.
 
 ## Findings (verified 2026-10-31)
 

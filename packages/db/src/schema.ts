@@ -1139,6 +1139,8 @@ export const dtpHazardSection = registry.table(
   ]
 )
 
+export type DtpHazardSectionInsert = typeof dtpHazardSection.$inferInsert
+
 /** stolen.in.ua scrape resume state: one row per fetched month page (`aug-20`). */
 export const wantedScrapePages = registry.table('wanted_scrape_pages', {
   month: text('month').primaryKey(),
