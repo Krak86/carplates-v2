@@ -22,6 +22,15 @@ Patrol Police file (12.2025.xlsx, 15 sheets) is **pre-aggregated, not crash reco
 
 No national per-crash open dataset with coordinates was found (not proven absent).
 
+## Step 0 results (2026-10-31, partial)
+
+- **Hazard CSVs (2025)** are semicolon-separated, UTF-8 BOM, `;` columns match on every row, English headers but Ukrainian values. `roadHazardousAreas` 505 rows (18 regions), `placesOfConcentration...` 329 rows (22 regions), `total...` 24 regions (no Kyiv city). Columns: region, road index (`М-30`, trailing spaces), road name, km+m start / end, **start / end GPS**, accident count over 3 years; places also has a rate coefficient and hazard level (`null` literal for missing).
+- **Coordinates exist but are dirty**: start GPS parses for 482/505 (hazard) and 311/329 (places). Failures: missing or comma-glued numbers (`48.4328426, 364633821`), single value, `lat, lat` instead of `lat lon`. Separators vary (`, ` or space). Parser must validate to Ukraine bbox and drop / flag bad rows, not guess.
+- **Road codes** are `М-30`, `Т-02-12`, `Р-15`, `Н-17`; 77 / 83 distinct. Values carry trailing spaces, and the 2020 Patrol file has a **Latin `P`** (`P-17`) where others use Cyrillic `Р`: normalise before joining. Join with Patrol per-road sheet not yet verified on real rows.
+- **Patrol sheets**: all workbooks have numeric sheet names (`Зміст`, `2`..`15`); 2020 has 16 sheets, 2022 and 2025 have 15. Titles change: 2020 "ДТП з постраждалими", 2022+ "з загиблими та/або травмованими"; sheet 14 was "незадовільного стану доріг" (+ separate streets sheet 15 in 2020), later "порушення правил утримання". So map by **title text, not sheet index**. `.xls` 2017-19 needs a different reader.
+- **No xlsx reader in the repo yet** (no `xlsx` / `exceljs` dependency): ingest CLI will need one (pin the version, check licence).
+- **Open**: per-road sheet row-level join, region boundary source and licence.
+
 ## Decisions to confirm
 
 1. New route `/safety` (name open), not a section of the plate card: it is region / road data, not vehicle data.
