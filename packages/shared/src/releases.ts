@@ -20,6 +20,12 @@ export const RELEASES: readonly ReleaseDay[] = [
     items: [
       item(
         'new',
+        'Розділ «Українські аукціони» на картці авто й сторінці VIN: лоти торгів СЕТАМ арештованим і конфіскованим майном, де згадано номер або VIN (номер лота, статус, стартова й кінцева ціна, регіон), усі лоти від новіших до старіших, продані виділено; значок «З аукціону» в шапці, коротка історія торгів і порівняння із закордонною практикою',
+        'Раздел «Украинские аукционы» на карточке авто и странице VIN: лоты торгов СЕТАМ арестованным и конфискованным имуществом, где упомянут номер или VIN (номер лота, статус, стартовая и конечная цена, регион), все лоты от новых к старым, проданные выделены; значок «С аукциона» в шапке, краткая история торгов и сравнение с зарубежной практикой',
+        'A "Ukrainian auctions" section on the plate card and VIN page: SETAM auction lots of seized and confiscated property that name the plate or VIN (lot number, status, starting and sale price, region), all lots newest first with sold ones highlighted; a "From auction" chip in the header, a short history of the auctions and a comparison with practice abroad'
+      ),
+      item(
+        'new',
         'Перевірка розшуку тепер охоплює й другий список Нацполіції «Гарпун» (номерні знаки в розшуку, оновлюється щодня): якщо номер там є, на картці з’являється жовтий значок «Гарпун» і пояснення, що розшук номера ще не доводить викрадення авто, а також історія зі списку',
         'Проверка розыска теперь охватывает и второй список Нацполиции «Гарпун» (номерные знаки в розыске, обновляется ежедневно): если номер там есть, на карточке появляется жёлтый значок «Гарпун» и пояснение, что розыск номера ещё не доказывает угон авто, а также история из списка',
         'The wanted check now also covers the second National Police list, "Garpun" (wanted licence plates, refreshed daily): if the plate is there, the card shows an amber "Garpun" chip and a note that a wanted plate does not prove the car is stolen, plus the plate\'s history on the list'

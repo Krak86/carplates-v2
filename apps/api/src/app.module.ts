@@ -24,6 +24,7 @@ import { MotModule } from './mot/mot.module.js'
 import { CaRecallsModule } from './ca-recalls/ca-recalls.module.js'
 import { RiaModule } from './ria/ria.module.js'
 import { WantedModule } from './wanted/wanted.module.js'
+import { AuctionsModule } from './auctions/auctions.module.js'
 import { GenerationsModule } from './generations/generations.module.js'
 import { NhtsaModule } from './nhtsa/nhtsa.module.js'
 import { RdwModule } from './rdw/rdw.module.js'
@@ -81,6 +82,7 @@ import { WikispecsModule } from './wikispecs/wikispecs.module.js'
     NhtsaModule,
     CaRecallsModule,
     WantedModule,
+    AuctionsModule,
     RiaModule,
     GenerationsModule,
     WikispecsModule,

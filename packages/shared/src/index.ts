@@ -722,6 +722,15 @@ export { newsFeedResponseSchema, newsFeedPageResponseSchema } from './news.js'
 export type { NewsFeedResponse, NewsFeedPageResponse } from './news.js'
 
 export {
+  auctionLotSchema,
+  auctionResponseSchema,
+  AUCTIONS_DATASET_URL,
+  SETAM_URL,
+  PROZORRO_SALE_URL
+} from './auctions.js'
+export type { AuctionLot, AuctionResponse } from './auctions.js'
+
+export {
   wantedRecordSchema,
   wantedPlateSchema,
   wantedResponseSchema,

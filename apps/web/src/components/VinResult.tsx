@@ -41,6 +41,7 @@ import { useUiStore } from '@/store/ui-store'
 const AuctionCheck = lazy(() => import('@/components/AuctionCheck'))
 const OriginSection = lazy(() => import('@/components/OriginSection'))
 const WantedCheck = lazy(() => import('@/components/WantedCheck'))
+const UaAuctionCheck = lazy(() => import('@/components/UaAuctionCheck'))
 
 type Props = {
   data: VinDecodeResponse
@@ -157,6 +158,10 @@ export default function VinResult({ data }: Props): ReactNode {
 
         <LazySection sections={['wanted']}>
           <WantedCheck plate={null} vin={data.vin} />
+        </LazySection>
+
+        <LazySection sections={['ua-auctions']}>
+          <UaAuctionCheck plate={null} vin={data.vin} />
         </LazySection>
 
         <LazySection sections={['origin']} forceMount={originOpenSignal > 0}>

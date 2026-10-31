@@ -759,6 +759,11 @@ const SECTION_TEXT: Record<string, Record<Lang, [label: string, lead: string]>> 
     ru: ['Системы помощи', 'Системы помощи водителю.'],
     en: ['Driver assists', 'Driver assistance systems.']
   },
+  'ua-auctions': {
+    ua: ['Українські аукціони', 'Лоти СЕТАМ з цим номером або VIN.'],
+    ru: ['Украинские аукционы', 'Лоты СЕТАМ с этим номером или VIN.'],
+    en: ['Ukrainian auctions', 'SETAM auction lots with this plate or VIN.']
+  },
   wanted: {
     ua: ['Розшук', 'Перевірка за базою розшуку.'],
     ru: ['Розыск', 'Проверка по базе розыска.'],

@@ -72,6 +72,7 @@ import Card from '@/components/ui/Card'
 import Model3dButton from '@/components/Model3dButton'
 import Model360Button from '@/components/Model360Button'
 import VerificationLinks from '@/components/VerificationLinks'
+import UaAuctionChip from '@/components/ua-auctions/UaAuctionChip'
 import WantedChip from '@/components/WantedChip'
 import VinDecodeTabs from '@/components/vin/VinDecodeTabs'
 import OriginChip from '@/components/OriginChip'
@@ -101,6 +102,7 @@ const VehicleKindIcon = lazy(() => import('@/components/VehicleKindIcon'))
 const OriginSection = lazy(() => import('@/components/OriginSection'))
 const AuctionCheck = lazy(() => import('@/components/AuctionCheck'))
 const WantedCheck = lazy(() => import('@/components/WantedCheck'))
+const UaAuctionCheck = lazy(() => import('@/components/UaAuctionCheck'))
 const StockSection = lazy(() => import('@/components/StockSection'))
 const SocialSection = lazy(() => import('@/components/SocialSection'))
 const NewsSection = lazy(() => import('@/components/NewsSection'))
@@ -174,6 +176,7 @@ export default function ResultCard({ data }: Props): ReactNode {
   // The "imported" status chip opens the Auction history section (mounting it first if it is still lazy).
   const [auctionOpenSignal, setAuctionOpenSignal] = useState(0)
   const [wantedOpenSignal, setWantedOpenSignal] = useState(0)
+  const [uaAuctionOpenSignal, setUaAuctionOpenSignal] = useState(0)
   // The origin (flags) chip opens the "Where it comes from" section the same way.
   const [originOpenSignal, setOriginOpenSignal] = useState(0)
   // Links inside the Specs block open the section that goes deeper.
@@ -406,6 +409,11 @@ export default function ResultCard({ data }: Props): ReactNode {
                   vin={hasVin ? c.vin : null}
                   onOpen={() => setWantedOpenSignal(n => n + 1)}
                 />
+                <UaAuctionChip
+                  plate={data.plate}
+                  vin={hasVin ? c.vin : null}
+                  onOpen={() => setUaAuctionOpenSignal(n => n + 1)}
+                />
                 <LastOperationChip
                   operCode={c.operCode}
                   operName={c.operName}
@@ -491,6 +499,12 @@ export default function ResultCard({ data }: Props): ReactNode {
           {(data.plate || hasVin) && (
             <LazySection sections={['wanted']} forceMount={wantedOpenSignal > 0}>
               <WantedCheck plate={data.plate} vin={hasVin ? c.vin : null} openSignal={wantedOpenSignal} />
+            </LazySection>
+          )}
+
+          {(data.plate || hasVin) && (
+            <LazySection sections={['ua-auctions']} forceMount={uaAuctionOpenSignal > 0}>
+              <UaAuctionCheck plate={data.plate} vin={hasVin ? c.vin : null} openSignal={uaAuctionOpenSignal} />
             </LazySection>
           )}
 

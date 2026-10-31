@@ -59,6 +59,7 @@ const SOURCES: readonly Source[] = [
     url: 'https://data.gov.ua/dataset/2cd12755-834b-4c43-9026-fe356ce93af5',
     tile: 'bg-blue-700'
   },
+  { key: 'setam', label: 'SETAM', url: 'https://setam.net.ua', tile: 'bg-blue-700' },
   { key: 'hsc', label: 'MVS HSC open data', url: 'https://opendata.hsc.gov.ua', tile: 'bg-blue-700' },
   { key: 'stolenIn', label: 'stolen.in.ua', url: 'https://stolen.in.ua', icon: '/icons/sources/stolenin.svg' },
   { key: 'bdr', label: 'MVS (bdr.mvs.gov.ua)', url: 'https://bdr.mvs.gov.ua', icon: '/icons/bdr.svg' },
@@ -291,6 +292,7 @@ const FEATURES = [
   'fuel',
   'value',
   'auctions',
+  'uaAuctions',
   'reviews',
   'media',
   'verify',

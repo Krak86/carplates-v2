@@ -39,6 +39,7 @@ import {
   getOpenEv,
   getMot,
   getCaRecalls,
+  getAuctionLots,
   getWanted,
   getWantedStats,
   getGenerationGrowth,
@@ -746,4 +747,13 @@ export function wantedStatsQuery() {
 
 export function contactConfigQuery() {
   return queryOptions({ queryKey: ['contact', 'config'], queryFn: getContactConfig, staleTime: 5 * 60_000 })
+}
+
+// Ukrainian (SETAM) auction lots for a plate / VIN (pnpm ingest:auctions) - live data like wantedQuery: online-only, no offline group.
+export function auctionLotsQuery(plate: string | null, vin: string | null) {
+  return queryOptions({
+    queryKey: ['auction-lots', plate, vin],
+    queryFn: () => getAuctionLots(plate, vin),
+    staleTime: 5 * 60_000
+  })
 }

@@ -32,6 +32,7 @@ import {
   fuelEconomyResponseSchema,
   fxResponseSchema,
   caRecallsResponseSchema,
+  auctionResponseSchema,
   wantedResponseSchema,
   wantedStatsResponseSchema,
   generationGrowthResponseSchema,
@@ -126,6 +127,7 @@ import type {
   FuelEconomyResponse,
   FxResponse,
   CaRecallsResponse,
+  AuctionResponse,
   WantedResponse,
   WantedStatsResponse,
   GenerationGrowthResponse,
@@ -890,4 +892,12 @@ export async function sendContactMessage(request: ContactRequest): Promise<void>
 
 export async function startContactCode(request: ContactStartRequest): Promise<EmailStartResponse> {
   return emailStartResponseSchema.parse(await sendJson('POST', '/api/contact/start', request))
+}
+
+/** SETAM auction lots (seized property) that named this plate and/or VIN, newest lot first. */
+export async function getAuctionLots(plate: string | null, vin: string | null): Promise<AuctionResponse> {
+  const params = new URLSearchParams()
+  if (plate) params.set('plate', plate)
+  if (vin) params.set('vin', vin)
+  return auctionResponseSchema.parse(await getJson(`/api/auctions?${params.toString()}`))
 }

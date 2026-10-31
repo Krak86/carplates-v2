@@ -1,0 +1,48 @@
+import { z } from 'zod'
+
+/**
+ * A SETAM auction lot (seized / confiscated property, Cabinet Resolution 835) for a car or truck, from the data.gov.ua open
+ * data (CC BY). Plate / VIN / make / model / year are parsed from the free-text title and null when it lacks them; the winner
+ * is never stored. Own file: no offline-cache bust when it grows, so new fields must be `.nullable().optional()`.
+ */
+export const auctionLotSchema = z.object({
+  lotNo: z.number(),
+  proceedingNo: z.string().nullable(),
+  /** Feed status, Ukrainian (`Торги відбулися`, `Торги не відбулися`, …): the card maps the known ones. */
+  status: z.string(),
+  category: z.string(),
+  region: z.string().nullable(),
+  startPrice: z.number().nullable(),
+  salePrice: z.number().nullable(),
+  /** Sold = the lot has a sale price (also true while awaiting payment / the act). */
+  sold: z.boolean(),
+  year: z.number().nullable(),
+  make: z.string().nullable(),
+  model: z.string().nullable(),
+  /** The lot title as published (free text). */
+  title: z.string(),
+  plate: z.string().nullable(),
+  vin: z.string().nullable(),
+  /** Which of the queried keys the lot matched. */
+  matchedBy: z.enum(['plate', 'vin', 'both']),
+  /** ISO timestamp the lot first appeared in our copy of the feed. */
+  firstSeenAt: z.string(),
+  /** ISO timestamp of its last real change (status / price). */
+  updatedAt: z.string()
+})
+export type AuctionLot = z.infer<typeof auctionLotSchema>
+
+export const auctionResponseSchema = z.object({
+  /** At least one lot is sold (has a sale price). */
+  anySold: z.boolean(),
+  /** Newest lot first (a re-listed car gets a new lot number). */
+  lots: z.array(auctionLotSchema),
+  /** ISO timestamp of the last successful auction ingest run; null if it never ran. */
+  checkedAt: z.string().nullable()
+})
+export type AuctionResponse = z.infer<typeof auctionResponseSchema>
+
+/** data.gov.ua page of the lot list, SETAM (organiser of the auctions) and Prozorro.Sale (the administrator of the e-auction system). */
+export const AUCTIONS_DATASET_URL = 'https://data.gov.ua/dataset/eda4e3cf-0dda-46a1-a78a-ee264ebbfe97'
+export const SETAM_URL = 'https://setam.net.ua/'
+export const PROZORRO_SALE_URL = 'https://prozorro.sale/'
