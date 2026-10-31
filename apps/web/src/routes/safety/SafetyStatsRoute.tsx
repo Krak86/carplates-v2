@@ -5,6 +5,8 @@ import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router'
 
 import { CO2_BAND_COLOR, CO2_BAND_TEXT_COLOR } from '@/components/CO2Badge.helpers'
+import PageSources from '@/components/PageSources'
+import RelatedPages from '@/components/RelatedPages'
 import SectionInfo from '@/components/SectionInfo'
 import Card from '@/components/ui/Card'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
@@ -90,6 +92,18 @@ export default function SafetyStatsRoute(): ReactNode {
 
       {data && (
         <>
+          <PageSources
+            sources={[
+              { label: 'Euro NCAP', url: 'https://www.euroncap.com' },
+              { label: 'JNCAP / NASVA', url: 'https://www.nasva.go.jp' },
+              { label: 'C-NCAP / CATARC', url: 'https://www.c-ncap.org.cn' },
+              { label: 'KNCAP', url: 'https://www.kncap.org' },
+              { label: 'IIHS', url: 'https://www.iihs.org' },
+              { label: 'NHTSA', url: 'https://www.nhtsa.gov', note: t('pageSources.safety.nhtsa') }
+            ]}
+            lines={[t('pageSources.fleet')]}
+          />
+
           <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
             <Card>
               <div className="text-xs text-[var(--color-muted)] uppercase">{t('safety.summary.fleetAvg')}</div>
@@ -169,6 +183,8 @@ export default function SafetyStatsRoute(): ReactNode {
               <span>{(data.distribution.at(-1)?.from ?? 0) + data.bandWidth}</span>
             </div>
           </Card>
+
+          <RelatedPages page="safety" />
         </>
       )}
     </div>

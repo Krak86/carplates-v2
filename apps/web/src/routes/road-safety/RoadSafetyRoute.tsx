@@ -6,6 +6,7 @@ import { useSearchParams } from 'react-router'
 
 import LazySection from '@/components/LazySection'
 import LoadErrorBoundary from '@/components/LoadErrorBoundary'
+import RelatedPages from '@/components/RelatedPages'
 import SectionInfo from '@/components/SectionInfo'
 import Card from '@/components/ui/Card'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
@@ -149,6 +150,8 @@ export default function RoadSafetyRoute(): ReactNode {
               <HazardsSection year={requestedYear} regionNames={data.regions.map(r => r.region).toSorted()} />
             </LoadErrorBoundary>
           </LazySection>
+
+          <RelatedPages page="roadSafety" />
 
           <Card className="mb-6">
             <h2 className="mb-2 text-base font-semibold">{t('roadSafety.footnotes.title')}</h2>

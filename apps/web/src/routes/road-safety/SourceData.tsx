@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import type { RoadSafetyRegionsResponse } from '@carplates/shared'
 import { useTranslation } from 'react-i18next'
 
-import Card from '@/components/ui/Card'
+import PageSources from '@/components/PageSources'
 import { partialMonth } from '@/routes/road-safety/helpers'
 
 type Props = {
@@ -19,33 +19,17 @@ export default function SourceData({ data }: Props): ReactNode {
   const month = current ? partialMonth(current) : null
 
   return (
-    <Card className="mb-4">
-      <h2 className="mb-2 text-base font-semibold">{t('roadSafety.source.title')}</h2>
-
-      <ul className="space-y-1 text-sm">
-        <li>
-          <a href={PATROL_URL} target="_blank" rel="noopener noreferrer" className="font-medium underline">
-            {t('roadSafety.source.patrol')}
-          </a>{' '}
-          <span className="text-[var(--color-muted)]">{t('roadSafety.source.patrolNote')}</span>
-        </li>
-
-        <li>
-          <a href={HAZARD_URL} target="_blank" rel="noopener noreferrer" className="font-medium underline">
-            {t('roadSafety.source.hazards')}
-          </a>{' '}
-          <span className="text-[var(--color-muted)]">{t('roadSafety.source.hazardsNote')}</span>
-        </li>
-
-        <li className="text-[var(--color-muted)]">{t('roadSafety.source.fleet')}</li>
-      </ul>
-
-      <p className="mt-2 text-xs text-[var(--color-muted)]">
-        {month === null
+    <PageSources
+      sources={[
+        { label: t('roadSafety.source.patrol'), url: PATROL_URL, note: t('roadSafety.source.patrolNote') },
+        { label: t('roadSafety.source.hazards'), url: HAZARD_URL, note: t('roadSafety.source.hazardsNote') }
+      ]}
+      lines={[t('roadSafety.source.fleet')]}
+      footer={`${
+        month === null
           ? t('roadSafety.source.periodFull', { year: data.year })
-          : t('roadSafety.source.periodPartial', { year: data.year, month })}{' '}
-        {t('roadSafety.source.counted')}
-      </p>
-    </Card>
+          : t('roadSafety.source.periodPartial', { year: data.year, month })
+      } ${t('roadSafety.source.counted')}`}
+    />
   )
 }

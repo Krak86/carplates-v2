@@ -664,3 +664,8 @@ Plan: [compare-plan.md](compare-plan.md). Phases 1-3 and the client side of phas
 - **Plate-card chip:** `RegionCrashChip` (in `ResultCard`) shows the plate region's crashes and deaths rank from `roadSafetyRegionsQuery()`; online-only, hidden when there is no row. **Refresh:** cron jobs `dtp-patrol` (monthly) and `dtp-hazards` (yearly), healthchecks `HC_PING_DTP_PATROL|HAZARDS`; re-export seed CSVs by hand after a real change.
 - **Open:** the Cloudflare Cache Rule must list `/api/road-safety/` (expression in `docs/deploy.md`, edited in the dashboard), `/api/road-safety` is not in `PUBLIC_API_PATH_PREFIXES`.
 - **Tests:** `routes/road-safety/helpers.test.ts` (incl. `regionCrashFact`); API `road-safety/helpers.test.ts`.
+
+## Source strip and related pages on statistics pages (2026-11-01)
+
+- **`PageSources`** (`components/PageSources.tsx`): the "Source data" card at the top of `/stats`, `/wanted`, `/auctions`, `/fuel`, `/safety`, `/road-safety` (road-safety's `SourceData` wraps it). A new statistics page passes `sources` (label, url, optional note), `lines` (plain text) and an optional `footer`; strings live under `pageSources.<page>.*`.
+- **`RelatedPages`** (`components/RelatedPages.tsx`) at the bottom: cross links driven by `lib/related-pages.ts` (`RELATED_PAGES`, `RELATED_TARGETS` for deep links such as the regional map). Every pair needs a hint `related.<from>.<to>` (ua/ru/en) that says what the other page answers; add a pair only where the comparison is real. Hints carry no numbers, so they never go stale.

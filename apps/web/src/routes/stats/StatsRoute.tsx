@@ -5,6 +5,8 @@ import { useTranslation } from 'react-i18next'
 import { Link, useSearchParams } from 'react-router'
 
 import LoadErrorBoundary from '@/components/LoadErrorBoundary'
+import PageSources from '@/components/PageSources'
+import RelatedPages from '@/components/RelatedPages'
 import SectionInfo from '@/components/SectionInfo'
 import Card from '@/components/ui/Card'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
@@ -162,6 +164,14 @@ export default function StatsRoute(): ReactNode {
 
       {stats.isSuccess && (
         <>
+          <PageSources
+            sources={[
+              { label: 'data.gov.ua', url: 'https://data.gov.ua', note: t('pageSources.stats.registry') },
+              { label: 'NHTSA vPIC', url: 'https://vpic.nhtsa.dot.gov/api/', note: t('pageSources.stats.vin') }
+            ]}
+            lines={[t('pageSources.stats.counted')]}
+          />
+
           <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
             <Card>
               <div className="text-xs text-[var(--color-muted)] uppercase">{t('stats.summary.totalRows')}</div>
@@ -302,6 +312,8 @@ export default function StatsRoute(): ReactNode {
               />
             )}
           </div>
+
+          <RelatedPages page="stats" />
         </>
       )}
     </div>

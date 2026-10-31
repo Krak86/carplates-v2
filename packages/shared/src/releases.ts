@@ -20,6 +20,12 @@ export const RELEASES: readonly ReleaseDay[] = [
     items: [
       item(
         'new',
+        'На сторінках /stats, /wanted, /auctions, /fuel, /safety і /road-safety угорі з’явився блок «Джерела даних», а внизу блок «Пов’язана статистика» з посиланнями на сусідні сторінки і підказкою, що там побачити',
+        'На страницах /stats, /wanted, /auctions, /fuel, /safety и /road-safety вверху появился блок «Источники данных», а внизу блок «Связанная статистика» со ссылками на соседние страницы и подсказкой, что там увидеть',
+        'The /stats, /wanted, /auctions, /fuel, /safety and /road-safety pages now open with a "Source data" block and end with a "Related statistics" block linking to the neighbouring pages with a hint of what to look for there'
+      ),
+      item(
+        'new',
         'Сторінка /road-safety зі статистикою ДТП за даними Патрульної поліції: загиблі й ДТП за областями (також на 100 000 зареєстрованих авто), дороги державного значення, причини й види ДТП, година й день тижня, вибір року; це зведені дані без марок і моделей, тож не ризик окремої моделі',
         'Страница /road-safety со статистикой ДТП по данным Патрульной полиции: погибшие и ДТП по областям (также на 100 000 зарегистрированных авто), дороги государственного значения, причины и виды ДТП, час и день недели, выбор года; это сводные данные без марок и моделей, поэтому не риск отдельной модели',
         'A new /road-safety page with road crash statistics from Patrol Police data: deaths and crashes by region (also per 100,000 registered cars), state roads, crash causes and types, hour and weekday, with a year picker; the figures are aggregates without makes or models, so not a per-model risk'
