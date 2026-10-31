@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import ArticleHeader from '@/routes/read/ArticleHeader'
 import { SAFETY_LEAD } from '@/routes/read/articles'
 import { pick } from '@/routes/read/helpers'
+import { RoadSection, WhySection } from '@/routes/read/safety/RoadSections'
 import {
   FleetSection,
   LimitsSection,
@@ -27,6 +28,8 @@ export default function SafetyRoute(): ReactNode {
           { id: 'fleet', label: t('read.sec.safFleet') },
           { id: 'years', label: t('read.sec.safYears') },
           { id: 'models', label: t('read.sec.safModels') },
+          { id: 'road', label: t('read.sec.safRoad') },
+          { id: 'why', label: t('read.sec.safWhy') },
           { id: 'limits', label: t('read.sec.safLimits') }
         ]}
       />
@@ -35,6 +38,8 @@ export default function SafetyRoute(): ReactNode {
       <FleetSection />
       <YearsSection />
       <ModelsSection />
+      <RoadSection />
+      <WhySection />
       <LimitsSection />
     </div>
   )

@@ -59,9 +59,9 @@ export const IMPORTS_LEAD: L10n = {
 }
 
 export const SAFETY_LEAD: L10n = {
-  ua: 'Які авто на наших дорогах мають оцінки краш-тестів, як вони змінюються з роками випуску і які моделі найкращі та найслабші? Ще - що ці оцінки не кажуть.',
-  ru: 'Какие авто на наших дорогах имеют оценки краш-тестов, как они меняются по годам выпуска и какие модели лучшие и слабейшие? А ещё - о чём эти оценки не говорят.',
-  en: 'Which cars on our roads have crash-test ratings, how do they change with the model year, and which models are the best and the weakest? Plus what those ratings do not tell you.'
+  ua: 'Які авто на наших дорогах мають оцінки краш-тестів, як вони змінюються з роками випуску і які моделі найкращі та найслабші? Ще - що показує статистика ДТП і як вона пов’язана з краш-тестами.',
+  ru: 'Какие авто на наших дорогах имеют оценки краш-тестов, как они меняются по годам выпуска и какие модели лучшие и слабейшие? А ещё - что показывает статистика ДТП и как она связана с краш-тестами.',
+  en: 'Which cars on our roads have crash-test ratings, how do they change with the model year, and which models are the best and the weakest? Plus what the crash statistics show and how they relate to crash tests.'
 }
 
 export const FUEL_LEAD: L10n = {

@@ -45,3 +45,42 @@ export function bandShares(
   for (const { from, n } of distribution) out[crashBand(from + bandWidth / 2)] += n
   return out
 }
+
+export type YearTotals = { year: number; partial: boolean; crashes: number; deaths: number; injured: number }
+
+/** Change from `previous` to `current` in percent, rounded to a whole number; null without a base to compare to. */
+export function changePercent(previous: number, current: number): number | null {
+  return previous > 0 ? Math.round(((current - previous) / previous) * 100) : null
+}
+
+/** Newest full year and the full year before it (partial years are not comparable), null when there are fewer than two. */
+export function lastTwoFullYears(rows: readonly YearTotals[]): { previous: YearTotals; latest: YearTotals } | null {
+  const full = rows.filter(r => !r.partial).toSorted((a, b) => a.year - b.year)
+  const latest = full[full.length - 1]
+  const previous = full[full.length - 2]
+  return latest && previous ? { previous, latest } : null
+}
+
+/** Deaths per 100 crashes: how often a crash kills (one decimal), null without crashes. */
+export function deathsPer100Crashes(totals: Pick<YearTotals, 'crashes' | 'deaths'>): number | null {
+  return totals.crashes > 0 ? Math.round((totals.deaths / totals.crashes) * 1000) / 10 : null
+}
+
+/**
+ * Share of crashes with a pedestrian (or a child) over the regions that report it, in percent with one decimal.
+ * Null when no region has the figure, so an unreported column is never shown as 0%.
+ */
+export function crashShare(
+  regions: readonly { crashes: number; pedestrianCrashes?: number | null; childCrashes?: number | null }[],
+  key: 'pedestrianCrashes' | 'childCrashes'
+): number | null {
+  let part = 0
+  let whole = 0
+  for (const r of regions) {
+    const value = r[key]
+    if (value == null) continue
+    part += value
+    whole += r.crashes
+  }
+  return whole > 0 ? percentOf(part, whole) : null
+}

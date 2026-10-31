@@ -19,6 +19,12 @@ export const RELEASES: readonly ReleaseDay[] = [
     date: '2026-11-01',
     items: [
       item(
+        'improved',
+        'Стаття /read/safety тепер пов’язує краш-тести з безпекою доріг: загиблі за роками, частка пішоходів і дітей, види й причини ДТП, пік за годиною та днем і що з цього перевіряють тести',
+        'Статья /read/safety теперь связывает краш-тесты с безопасностью дорог: погибшие по годам, доля пешеходов и детей, виды и причины ДТП, пик по часу и дню и что из этого проверяют тесты',
+        'The /read/safety article now ties crash tests to road safety: deaths by year, the share of pedestrians and children, crash types and causes, the peak hour and weekday, and which of these the tests cover'
+      ),
+      item(
         'new',
         'На сторінках /stats, /wanted, /auctions, /fuel, /safety і /road-safety угорі з’явився блок «Джерела даних», а внизу блок «Пов’язана статистика» з посиланнями на сусідні сторінки і підказкою, що там побачити',
         'На страницах /stats, /wanted, /auctions, /fuel, /safety и /road-safety вверху появился блок «Источники данных», а внизу блок «Связанная статистика» со ссылками на соседние страницы и подсказкой, что там увидеть',
