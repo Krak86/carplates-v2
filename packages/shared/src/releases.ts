@@ -38,6 +38,12 @@ export const RELEASES: readonly ReleaseDay[] = [
       ),
       item(
         'new',
+        'На /road-safety: джерела даних, цікаві випадки, зв’язок кількості зареєстрованих авто з ДТП за областями та аварійно небезпечні ділянки доріг зі списком і мапою',
+        'На /road-safety: источники данных, интересные случаи, связь числа зарегистрированных авто с ДТП по областям и аварийно опасные участки дорог со списком и картой',
+        'The /road-safety page now shows its source data, interesting cases, how registered cars relate to crashes by region, and hazardous road sections as a list and a map'
+      ),
+      item(
+        'new',
         'У картці номера з’явився чип з ДТП в області номера (кількість за рік і місце за загиблими), який веде на /road-safety',
         'В карточке номера появился чип с ДТП в области номера (число за год и место по погибшим), который ведет на /road-safety',
         'The plate card now shows a chip with road crashes in the plate region (count for the year and rank by deaths), linking to /road-safety'

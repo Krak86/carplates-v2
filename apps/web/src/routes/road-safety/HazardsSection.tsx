@@ -8,6 +8,7 @@ import Card from '@/components/ui/Card'
 import { toIntlLocale } from '@/lib/intl'
 import { roadSafetyHazardsQuery } from '@/lib/queries'
 import { kmLabel, osmUrl } from '@/routes/road-safety/helpers'
+import HazardMap from '@/routes/road-safety/HazardMap'
 import SectionSkeleton from '@/routes/road-safety/SectionSkeleton'
 import SegmentedTabs from '@/routes/road-safety/SegmentedTabs'
 
@@ -20,12 +21,16 @@ type Props = {
 const KINDS = ['hazard', 'concentration'] as const
 type Kind = (typeof KINDS)[number]
 const DEFAULT_KIND: Kind = 'hazard'
+const VIEWS = ['list', 'map'] as const
+type View = (typeof VIEWS)[number]
+const DEFAULT_VIEW: View = 'list'
 const ALL = ''
 
 /** Hazardous road sections and crash concentration places with a region filter and map links. Lazy, like the other sections. */
 export default function HazardsSection({ year, regionNames }: Props): ReactNode {
   const { t, i18n } = useTranslation()
   const [kind, setKind] = useState<Kind>(DEFAULT_KIND)
+  const [view, setView] = useState<View>(DEFAULT_VIEW)
   const [region, setRegion] = useState(ALL)
   const hazards = useQuery(roadSafetyHazardsQuery({ year, kind, region: region || undefined }))
   const numberFormat = new Intl.NumberFormat(toIntlLocale(i18n.language))
@@ -64,44 +69,52 @@ export default function HazardsSection({ year, regionNames }: Props): ReactNode 
         </select>
       </label>
 
+      <div className="mb-3">
+        <SegmentedTabs values={VIEWS} value={view} onChange={setView} label={v => t(`roadSafety.hazards.view.${v}`)} />
+      </div>
+
+      {view === 'map' && <HazardMap hazards={rows} />}
+
       {rows.length === 0 && <p className="text-sm text-[var(--color-muted)]">{t('roadSafety.hazards.empty')}</p>}
 
-      <ExpandableList
-        className="divide-y divide-[var(--color-border)]/40"
-        items={rows.map((h, i) => (
-          <li
-            key={`${h.roadCode}-${h.kmStart}-${i}`}
-            className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5 py-1.5 text-sm"
-          >
-            <span className="font-medium">{h.roadCode || t('roadSafety.hazards.bypass')}</span>
+      {view === 'list' && (
+        <ExpandableList
+          className="divide-y divide-[var(--color-border)]/40"
+          items={rows.map((h, i) => (
+            <li
+              key={`${h.roadCode}-${h.kmStart}-${i}`}
+              className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5 py-1.5 text-sm"
+            >
+              <span className="font-medium">{h.roadCode || t('roadSafety.hazards.bypass')}</span>
 
-            <span className="min-w-0 flex-1 truncate text-[var(--color-muted)]" title={h.roadName}>
-              {h.roadName}
-            </span>
-
-            {h.kmStart !== null && (
-              <span className="tabular-nums">
-                km {kmLabel(h.kmStart)}
-                {h.kmEnd !== null && h.kmEnd !== h.kmStart ? ` - ${kmLabel(h.kmEnd)}` : ''}
+              <span className="min-w-0 flex-1 truncate text-[var(--color-muted)]" title={h.roadName}>
+                {h.roadName}
               </span>
-            )}
 
-            {h.crashes3y !== null && (
-              <span className="tabular-nums">
-                {t('roadSafety.hazards.crashes3y', { count: numberFormat.format(h.crashes3y) })}
-              </span>
-            )}
+              {h.kmStart !== null && (
+                <span className="tabular-nums">
+                  km {kmLabel(h.kmStart)}
+                  {h.kmEnd !== null && h.kmEnd !== h.kmStart ? ` - ${kmLabel(h.kmEnd)}` : ''}
+                </span>
+              )}
 
-            {!region && <span className="text-xs text-[var(--color-muted)]">{h.region}</span>}
+              {h.crashes3y !== null && (
+                <span className="tabular-nums">
+                  {t('roadSafety.hazards.crashes3y', { count: numberFormat.format(h.crashes3y) })}
+                </span>
+              )}
 
-            {h.lat !== null && h.lon !== null && (
-              <a href={osmUrl(h.lat, h.lon)} target="_blank" rel="noopener noreferrer" className="text-xs underline">
-                {t('roadSafety.hazards.map')}
-              </a>
-            )}
-          </li>
-        ))}
-      />
+              {!region && <span className="text-xs text-[var(--color-muted)]">{h.region}</span>}
+
+              {h.lat !== null && h.lon !== null && (
+                <a href={osmUrl(h.lat, h.lon)} target="_blank" rel="noopener noreferrer" className="text-xs underline">
+                  {t('roadSafety.hazards.map')}
+                </a>
+              )}
+            </li>
+          ))}
+        />
+      )}
     </Card>
   )
 }
