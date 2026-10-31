@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import { useQuery } from '@tanstack/react-query'
 import { setamLotUrl } from '@carplates/shared'
-import type { AuctionLot, Registration } from '@carplates/shared'
+import type { Registration, WantedResponse } from '@carplates/shared'
+import type { TFunction } from 'i18next'
 
 import CopyButton from '@/components/CopyButton'
 import InfoPopover from '@/components/InfoPopover'
@@ -12,7 +13,7 @@ import type { TimelineItem } from '@/components/Timeline'
 import { OPEN_STATUS, formatLotMonth, formatPrice, timelineLots } from '@/components/ua-auctions/helpers'
 import { cn } from '@/lib/cn'
 import { toIntlLocale } from '@/lib/intl'
-import { auctionLotsQuery } from '@/lib/queries'
+import { auctionLotsQuery, wantedQuery } from '@/lib/queries'
 import { depMapsUrl } from '@/lib/maps'
 import { type OperCategory, operCategory, operInfoKey } from '@/lib/oper-info'
 import { plateRegionLabel } from '@/lib/plate-region'
@@ -52,10 +53,47 @@ function mergeLots(items: TimelineItem[], lots: readonly { at: number; item: Tim
   return merged
 }
 
-/** Where a lot goes in a newest-first list: above the first action registered on or before the lot month (feed has months only). */
-function lotInsertIndex(actions: readonly Registration[], lot: AuctionLot): number {
-  const at = actions.findIndex(a => !!a.dReg && !!lot.month && a.dReg.slice(0, 7) <= lot.month)
+/** Where a dated marker goes in a newest-first list: above the first action registered on or before `day` (a full date or a month). */
+function insertIndex(actions: readonly Registration[], day: string | null): number {
+  const at = actions.findIndex(a => !!a.dReg && !!day && a.dReg.slice(0, day.length) <= day)
   return at === -1 ? actions.length : at
+}
+
+/** Wanted-list events of this plate / VIN as timeline markers: put on the list (taking date) and, once known, taken off. */
+function wantedMarkers(
+  data: WantedResponse | undefined,
+  t: TFunction,
+  locale: string
+): { day: string | null; item: TimelineItem }[] {
+  const fmt = (iso: string): string => new Date(iso).toLocaleDateString(locale)
+  const events: { id: string; icon: string; key: string; iso: string | null }[] = []
+
+  for (const r of data?.records ?? []) {
+    events.push({ id: `w-${r.id}`, icon: '🚨', key: 'added', iso: r.seizedAt ?? r.registeredAt })
+    // A month-only removal carries our scrape time, not the real date: leave it out rather than show a wrong one.
+    if (r.status === 'removed' && r.removedExact !== false) {
+      events.push({ id: `w-${r.id}-off`, icon: '✔️', key: 'removed', iso: r.removedAt })
+    }
+  }
+  for (const r of data?.plates ?? []) {
+    events.push({ id: `g-${r.id}`, icon: '🔎', key: 'plateAdded', iso: r.seizedAt ?? r.insertedAt })
+    if (r.status === 'removed') events.push({ id: `g-${r.id}-off`, icon: '✔️', key: 'plateRemoved', iso: r.removedAt })
+  }
+
+  return events
+    .filter(e => !!e.iso)
+    .map(e => ({
+      day: (e.iso as string).slice(0, 10),
+      item: {
+        key: e.id,
+        content: (
+          <div className="text-sm">
+            <span aria-hidden>{e.icon}</span>{' '}
+            <span className="font-medium">{t(`wanted.timeline.${e.key}`, { date: fmt(e.iso as string) })}</span>
+          </div>
+        )
+      } satisfies TimelineItem
+    }))
 }
 
 /**
@@ -69,10 +107,11 @@ export default function RegistrationTimeline({ actions, currentPlate, auctionKey
   const keys = auctionKeys ?? { plate: null, vin: null }
   const lots =
     useQuery({ ...auctionLotsQuery(keys.plate, keys.vin), enabled: !!keys.plate || !!keys.vin }).data?.lots ?? []
+  const wanted = useQuery({ ...wantedQuery(keys.plate, keys.vin), enabled: !!keys.plate || !!keys.vin }).data
   const locale = toIntlLocale(i18n.language)
 
   const lotItems = timelineLots(lots).map(lot => ({
-    at: lotInsertIndex(actions, lot),
+    at: insertIndex(actions, lot.month ?? null),
     lot,
     item: {
       key: `lot-${lot.lotNo}`,
@@ -220,7 +259,7 @@ export default function RegistrationTimeline({ actions, currentPlate, auctionKey
             )
           }
         }),
-        lotItems
+        [...lotItems, ...wantedMarkers(wanted, t, locale).map(m => ({ at: insertIndex(actions, m.day), item: m.item }))]
       )}
     />
   )
