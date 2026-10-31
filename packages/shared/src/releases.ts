@@ -20,6 +20,12 @@ export const RELEASES: readonly ReleaseDay[] = [
     items: [
       item(
         'improved',
+        'На головній сторінці пошуку прибрано рядок «Безкоштовно, без реклами, відкриті дані» під слоганом; він лишається в шапці сайту',
+        'На главной странице поиска убрана строка «Бесплатно, без рекламы, открытые данные» под слоганом; она остается в шапке сайта',
+        'The search page no longer repeats the "Free, no ads, open data" line under the tagline; it stays in the site header'
+      ),
+      item(
+        'improved',
         'Стаття /read/safety тепер пов’язує краш-тести з безпекою доріг: загиблі за роками, частка пішоходів і дітей, види й причини ДТП, пік за годиною та днем і що з цього перевіряють тести',
         'Статья /read/safety теперь связывает краш-тесты с безопасностью дорог: погибшие по годам, доля пешеходов и детей, виды и причины ДТП, пик по часу и дню и что из этого проверяют тесты',
         'The /read/safety article now ties crash tests to road safety: deaths by year, the share of pedestrians and children, crash types and causes, the peak hour and weekday, and which of these the tests cover'
