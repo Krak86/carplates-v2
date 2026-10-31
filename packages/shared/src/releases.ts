@@ -20,6 +20,12 @@ export const RELEASES: readonly ReleaseDay[] = [
     items: [
       item(
         'new',
+        'На картці авто з лотом СЕТАМ з’явився рядок «Перевірка ціни» (ціна продажу проти медіани інших проданих лотів тієї ж моделі), а в історії реєстрацій - позначки «На аукціоні» з місяцем і ціною',
+        'На карточке авто с лотом СЕТАМ появилась строка «Проверка цены» (цена продажи против медианы других проданных лотов той же модели), а в истории регистраций - отметки «На аукционе» с месяцем и ценой',
+        'The car card shows a "Price check" line for a SETAM lot (sale price against the median of other sold lots of the same model), and the registration history has "At auction" markers with the month and price'
+      ),
+      item(
+        'new',
         'Сторінка /wanted має вкладку «Номерні знаки (Гарпун)»: статистика розшуку номерів за роком події, регіоном (таблиця й карта) та підрозділом поліції, список нещодавно внесених номерів, пояснення до обох вкладок і плавна зміна вмісту; на сторінках марок каталогу з’явився рядок «На українських аукціонах» (лоти, продано, медіана ціни) з посиланням на лоти марки, а на /auctions - нові картки: частка проданих, сума продажів і лоти, виставлені повторно',
         'Страница /wanted получила вкладку «Номерные знаки (Гарпун)»: статистика розыска номеров по году события, региону (таблица и карта) и подразделению полиции, список недавно внесённых номеров, пояснения к обеим вкладкам и плавная смена содержимого; на страницах марок каталога появилась строка «На украинских аукционах» (лоты, продано, медиана цены) со ссылкой на лоты марки, а на /auctions - новые карточки: доля проданных, сумма продаж и повторно выставленные лоты',
         'The /wanted page has a "Plates (Garpun)" tab: statistics of wanted plates by year of the event, region (table and map) and police unit, a list of the most recent plates, an explainer on both tabs and a smooth content shift; catalog make pages show an "At Ukrainian auctions" line (lots, sold, median price) linking to the lots of that make, and /auctions has new cards: sold share, total sales and re-listed lots'

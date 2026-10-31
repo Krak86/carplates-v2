@@ -144,7 +144,7 @@ export default function VinResult({ data }: Props): ReactNode {
               </span>
             </div>
 
-            <VinRegistryHistory registry={registry} />
+            <VinRegistryHistory registry={registry} vin={data.vin} />
           </div>
         )}
 

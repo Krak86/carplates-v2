@@ -798,7 +798,11 @@ export default function ResultCard({ data }: Props): ReactNode {
             {plateHistory.isPending && <SectionSkeleton />}
             {plateHistory.isError && <p className="text-base text-[var(--color-muted)]">{t('result.error')}</p>}
             {plateHistory.data && (
-              <RegistrationTimeline actions={plateHistory.data.actions} currentPlate={data.plate} />
+              <RegistrationTimeline
+                actions={plateHistory.data.actions}
+                currentPlate={data.plate}
+                auctionKeys={{ plate: data.plate, vin: hasVin ? c.vin : null }}
+              />
             )}
 
             {hasVin && (vinDetail.isPending || vinDetail.isError || vinDetail.data?.registry) && (

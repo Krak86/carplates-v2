@@ -29,10 +29,16 @@ function lotRow(over: Record<string, unknown> = {}) {
   }
 }
 
-function setup(rows: unknown[]) {
+function setup(rows: unknown[], peerCount = 5) {
   const select = vi.fn().mockImplementation((cols?: unknown) => ({
     from: (table: unknown) => {
-      const result = cols ? [{ finishedAt: FINISHED }] : table === auctionLots ? rows : []
+      const result = cols
+        ? 'finishedAt' in (cols as object)
+          ? [{ finishedAt: FINISHED }]
+          : [{ peers: peerCount, median: 100000 }]
+        : table === auctionLots
+          ? rows
+          : []
       const chain = Object.assign(Promise.resolve(result), {
         where: () => chain,
         orderBy: () => chain,
@@ -57,6 +63,29 @@ describe('AuctionsService.lookup', () => {
       [100, false, 'plate']
     ])
     expect(res.lots[0]?.month).toBe('2024-08')
+  })
+
+  it('adds a price check for the newest sold lot against its peers', async () => {
+    const { service } = setup([lotRow({ lotNo: 200, salePrice: 150000 }), lotRow()])
+    const res = await service.lookup('АА2335ЕТ', null)
+    expect(auctionResponseSchema.safeParse(res).error?.issues).toBeUndefined()
+    expect(res.priceCheck).toEqual({
+      lotNo: 200,
+      make: 'SUBARU',
+      model: 'FORESTER',
+      year: 2007,
+      salePrice: 150000,
+      peers: 5,
+      medianSale: 100000,
+      deltaPercent: 50
+    })
+  })
+
+  it('skips the price check with too few peers or no sold lot', async () => {
+    const thin = await setup([lotRow({ salePrice: 150000 })], 2).service.lookup('АА2335ЕТ', null)
+    expect(thin.priceCheck).toBeNull()
+    const unsold = await setup([lotRow()]).service.lookup('АА2335ЕТ', null)
+    expect(unsold.priceCheck).toBeNull()
   })
 
   it('reports matchedBy vin / both', async () => {

@@ -724,6 +724,8 @@ export type { NewsFeedResponse, NewsFeedPageResponse } from './news.js'
 export {
   auctionLotSchema,
   auctionResponseSchema,
+  auctionPriceCheckSchema,
+  MIN_PRICE_PEERS,
   auctionListLotSchema,
   auctionListQuerySchema,
   auctionListResponseSchema,
@@ -742,6 +744,7 @@ export {
 export type {
   AuctionLot,
   AuctionResponse,
+  AuctionPriceCheck,
   AuctionListLot,
   AuctionListParams,
   AuctionListQuery,

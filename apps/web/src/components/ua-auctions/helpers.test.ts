@@ -8,7 +8,8 @@ import {
   convertUah,
   formatPrice,
   priceDeltaPercent,
-  priceSeries
+  priceSeries,
+  timelineLots
 } from './helpers'
 
 describe('priceDeltaPercent', () => {
@@ -67,5 +68,13 @@ describe('priceSeries', () => {
       [30, 1],
       [40, null]
     ])
+  })
+})
+
+describe('timelineLots', () => {
+  const lot = (lotNo: number, sold: boolean) => ({ lotNo, sold }) as AuctionLot
+  it('keeps sold lots and the newest lot', () => {
+    expect(timelineLots([lot(4, false), lot(3, false), lot(2, true), lot(1, false)]).map(l => l.lotNo)).toEqual([4, 2])
+    expect(timelineLots([])).toEqual([])
   })
 })

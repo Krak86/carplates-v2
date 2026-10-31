@@ -12,6 +12,7 @@ import Timeline from '@/components/Timeline'
 import AuctionCurrency from '@/components/ua-auctions/AuctionCurrency'
 import UaAuctionStatus from '@/components/ua-auctions/UaAuctionStatus'
 import UaAuctionChart from '@/components/ua-auctions/UaAuctionChart'
+import UaAuctionPriceCheck from '@/components/ua-auctions/UaAuctionPriceCheck'
 import UaAuctionLot from '@/components/ua-auctions/UaAuctionLot'
 import { OPEN_STATUS, VISIBLE_NOT_SOLD } from '@/components/ua-auctions/helpers'
 import VinToggleSection from '@/components/vin/VinToggleSection'
@@ -96,6 +97,8 @@ export default function UaAuctionCheck({ plate, vin, openSignal = 0 }: Props): R
       {lots.length > 0 && (
         <>
           <UaAuctionStatus lots={lots} currency={currency} fx={fx} />
+
+          <UaAuctionPriceCheck check={data?.priceCheck} currency={currency} fx={fx} />
 
           <AuctionCurrency currency={currency} onChange={setCurrency} fx={fx} />
 

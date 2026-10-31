@@ -4235,3 +4235,7 @@ Footer `© {year} carsua.app` on every route linking to the new `/contact` page:
 - **Step 10a:** `/auctions` cards: sold share, total sales, re-listed proceedings (2 765 locally, from `relistedProceedings`). **10b:** "At Ukrainian auctions" line on make and model catalog pages (`CatalogAuctionLine`, Toyota: 366 lots, 140 sold, median 229 101 UAH). **10c:** the open-lots block already existed on `/auctions` (step 7a); the home / wanted placement is not done.
 - **Follow-ups:** Garpun tab got a recent-plates list (`plates.recent`, links to the plate cards); the feed has no "reason wanted" field, so none is shown. Both `/wanted` tabs open with an explainer, and switching tabs slides the content in from its side (`animate-tab-from-*` in `global.css`).
 - Reused `/api/auctions/stats`, so no new endpoint and no new Cloudflare rule: the existing manual item still applies (add `/api/auctions/stats` to the live cache rule, text in `docs/deploy.md`).
+
+## Auction price check and owner-history markers (2026-10-31)
+
+- **10d:** `priceCheck` on `GET /api/auctions` (newest sold lot vs median of other sold lots of the same make + model [+ year], at least 3 peers) and the `UaAuctionPriceCheck` line; **10e:** "At auction" markers (sold lots + newest lot) in `RegistrationTimeline` via `auctionKeys`. Verified locally: АС4358ЕІ (VW Caddy sold 45 375 vs median 145 151 of 20 = -69 %), ВІ5652АМ (ВАЗ 2101, -7 %), ОО0780АВ (unique G 400 D, no line). Details in `docs/features-reference.md`.

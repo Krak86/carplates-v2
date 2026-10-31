@@ -57,7 +57,7 @@ export default function UaAuctionLot({ lot, currency, fx }: Props): ReactNode {
               title={t('uaAuctions.openOnSetam')}
               className="underline"
             >
-              {lot.lotNo}
+              {lot.lotNo} ↗<span className="sr-only">{t('field.opensNewTab')}</span>
             </a>
           }
         />

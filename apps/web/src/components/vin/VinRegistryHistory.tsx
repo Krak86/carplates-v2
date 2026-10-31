@@ -14,10 +14,12 @@ import { scrollElementIntoView } from '@/lib/share-section'
 
 type Props = {
   registry: VinRegistry
+  /** Looks up Ukrainian auction lots of this VIN for the timeline. */
+  vin: string
 }
 
 /** The state-registry timeline for this VIN — collapsed by default, like the plate view's history. */
-export default function VinRegistryHistory({ registry }: Props): ReactNode {
+export default function VinRegistryHistory({ registry, vin }: Props): ReactNode {
   const { t } = useTranslation()
   const [searchParams] = useSearchParams()
   const isShared = searchParams.get('section') === 'history'
@@ -43,7 +45,7 @@ export default function VinRegistryHistory({ registry }: Props): ReactNode {
       info={<SectionInfo section="history" title={t('vin.registryTitle')} />}
       actions={<ShareButton section="history" label={t('share.button', { section: t('vin.registryTitle') })} />}
     >
-      <RegistrationTimeline actions={registry.actions} />
+      <RegistrationTimeline actions={registry.actions} auctionKeys={{ plate: null, vin }} />
 
       <VinSince2021Note />
     </VinToggleSection>

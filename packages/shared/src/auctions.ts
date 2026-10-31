@@ -34,11 +34,34 @@ export const auctionLotSchema = z.object({
 })
 export type AuctionLot = z.infer<typeof auctionLotSchema>
 
+/**
+ * The newest sold lot of the car against the other sold lots of the same make and model (same year when at least
+ * `MIN_PRICE_PEERS` of them exist). Computed from our own copy of the feed; the lot itself is excluded.
+ */
+export const auctionPriceCheckSchema = z.object({
+  lotNo: z.number(),
+  make: z.string(),
+  model: z.string(),
+  /** Set when the peers share the model year, null when they are the whole make + model. */
+  year: z.number().nullable(),
+  salePrice: z.number(),
+  peers: z.number(),
+  medianSale: z.number(),
+  /** (salePrice / medianSale - 1) in percent: positive = this car sold above the median. */
+  deltaPercent: z.number()
+})
+export type AuctionPriceCheck = z.infer<typeof auctionPriceCheckSchema>
+
+/** Fewest sold peers a price check needs. */
+export const MIN_PRICE_PEERS = 3
+
 export const auctionResponseSchema = z.object({
   /** At least one lot is sold (has a sale price). */
   anySold: z.boolean(),
   /** Newest lot first (a re-listed car gets a new lot number). */
   lots: z.array(auctionLotSchema),
+  /** Null / absent without a sold lot that has make, model and enough sold peers. */
+  priceCheck: auctionPriceCheckSchema.nullable().optional(),
   /** ISO timestamp of the last successful auction ingest run; null if it never ran. */
   checkedAt: z.string().nullable()
 })

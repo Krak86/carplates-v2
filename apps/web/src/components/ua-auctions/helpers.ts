@@ -79,3 +79,8 @@ export function formatPrice(
     convertUah(uah, shown, rates)
   )
 }
+
+/** Lots worth a marker in the owner-history timeline: every sold lot, plus the newest lot when it did not sell. */
+export function timelineLots(lots: readonly AuctionLot[]): AuctionLot[] {
+  return lots.filter((l, i) => l.sold || i === 0)
+}
