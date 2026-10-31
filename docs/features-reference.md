@@ -650,3 +650,15 @@ Plan: [compare-plan.md](compare-plan.md). Phases 1-3 and the client side of phas
 - **Web:** `routes/ContactRoute.tsx` (4 cards: who, order an app, form, link to `/discuss`), `components/contact/ContactForm.tsx` + `use-contact-actions.ts` (signed-in: one step, read-only account email; anonymous: Turnstile, then code step). Online-only, not in `offline-cache.ts`. Footer line lives in `QuickLinks.tsx`; About and the legal pages link to `/contact`.
 - **SEO:** `ROUTE_TITLE_KEYS['/contact']`, `STATIC_PAGES['/contact']` (ua/ru/en, so it is indexed and in the sitemap).
 - **Tests:** `contact.test.ts` (shared), `contact-mail.test.ts`, `contact.service.test.ts`, `ContactForm.test.tsx`.
+
+## Road crash statistics (`/road-safety`, 2026-11-01)
+
+- **Why a separate route:** region / road data, not vehicle data; `/safety` is the vehicle crash-ratings page, `/api/safety` its API, `/api/road-safety` the DTP API. Plan and data findings: `docs/road-safety-plan.md`.
+- **Contracts:** `packages/shared/src/roadSafety.ts` (own file, new fields `.nullable().optional()`). Queries `roadSafety{Regions,Roads,Causes,Time}Query(year?)` in `lib/queries.ts`: online-only, no `offline-cache.ts` entry; `year` undefined = the API default (latest full year), the response says which year it answered.
+- **Honesty rules (keep in every new block):** only crashes with injured or killed people; occupied regions are missing or starred; war years have gaps; **never a per-make / per-model risk** (the sources have no vehicle data). Per-100k uses _today's_ registered passenger cars for every year (cars, not drivers); regions without a fleet figure are left out of the rate ranking.
+- **Map:** reuses `routes/stats/StatsMap` (`rows` = `{ label: REGIONS name, value }`), so the geoBoundaries / OpenStreetMap ODbL attribution is the map's own line (`stats.map.attribution`) and About lists OpenStreetMap. A region missing for the year is drawn "no data".
+- **Sections:** map, roads, causes and time are `LazySection`s without `sections` ids (not shareable by `?section=`); a shareable one would need a `SHARE_SECTIONS` id plus a `SECTION_TEXT` entry in `spa-text.ts`.
+- **Names:** region labels are the Ukrainian `REGIONS` names; road names, causes and crash types are shown as the Patrol Police files spell them (Ukrainian, not translated).
+- **Sources / licence:** Patrol Police statistics (no explicit licence, cite the source) and Infrastructure Restoration Agency hazardous sections (CC BY, data.gov.ua). About `SOURCES` `patrolPolice` and `irsu`.
+- **Open:** plate-card region link (plan step 8), monthly refresh cron (step 10), the Cloudflare Cache Rule must list `/api/road-safety/` (expression in `docs/deploy.md`, edited in the dashboard), `/api/road-safety` is not in `PUBLIC_API_PATH_PREFIXES`.
+- **Tests:** `routes/road-safety/helpers.test.ts`; API `road-safety/helpers.test.ts`.

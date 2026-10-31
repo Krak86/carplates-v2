@@ -13,6 +13,7 @@ describe('sitemap', () => {
       '/stats',
       '/fuel',
       '/safety',
+      '/road-safety',
       '/news',
       '/play',
       '/race',

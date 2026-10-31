@@ -228,6 +228,23 @@ export const STATIC_PAGES: Record<string, Record<Lang, PageText>> = {
         'Euro NCAP, IIHS, NHTSA and other crash-test results by make and model for the cars driving in Ukraine.'
     }
   },
+  '/road-safety': {
+    ua: {
+      title: 'Статистика ДТП в Україні: області, дороги, причини | Cars UA',
+      description:
+        'Загиблі та ДТП за областями (також на 100 000 авто), дорогами державного значення, причинами, годиною й днем тижня за даними Патрульної поліції.'
+    },
+    ru: {
+      title: 'Статистика ДТП в Украине: области, дороги, причины | Cars UA',
+      description:
+        'Погибшие и ДТП по областям (также на 100 000 авто), дорогам государственного значения, причинам, часу и дню недели по данным Патрульной полиции.'
+    },
+    en: {
+      title: 'Road crash statistics in Ukraine: regions, roads, causes | Cars UA',
+      description:
+        'Deaths and crashes by region (also per 100,000 cars), state roads, causes, hour and weekday, from Patrol Police data.'
+    }
+  },
   '/releases': {
     ua: { title: 'Cars UA - Що нового', description: 'Історія змін Cars UA за днями: можливості, покращення, дані.' },
     ru: {

@@ -78,6 +78,18 @@ const SOURCES: readonly Source[] = [
   { key: 'tsn', label: 'TSN', url: 'https://tsn.ua', tile: 'bg-slate-500' },
   { key: 'aec', label: 'AEC Solutions', url: 'https://www.aecsolutions.com', tile: 'bg-slate-500' },
   { key: 'pdr', label: 'pdr.infotech.gov.ua', url: 'https://pdr.infotech.gov.ua', tile: 'bg-blue-700' },
+  {
+    key: 'patrolPolice',
+    label: 'Patrol Police of Ukraine',
+    url: 'https://patrolpolice.gov.ua/statystyka/',
+    tile: 'bg-blue-700'
+  },
+  {
+    key: 'irsu',
+    label: 'Infrastructure Restoration Agency',
+    url: 'https://data.gov.ua/dataset/9b6a7292-b0cd-419e-8143-19da0661edfb',
+    tile: 'bg-blue-700'
+  },
   { key: 'drive2', label: 'DRIVE2', url: 'https://www.drive2.ru', icon: '/icons/drive2.png' },
   {
     key: 'flagIcons',
@@ -294,6 +306,7 @@ const FEATURES = [
   'specs',
   'performance',
   'safety',
+  'roadSafety',
   'fuel',
   'value',
   'auctions',

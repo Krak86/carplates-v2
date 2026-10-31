@@ -1,0 +1,103 @@
+import { describe, expect, it } from 'vitest'
+
+import {
+  barPercent,
+  fillBuckets,
+  hourLabel,
+  mapRows,
+  parseYearParam,
+  partialMonth,
+  peakBucket,
+  rankedRegions
+} from './helpers'
+
+const region = (name: string, rankDeaths: number, rankRate: number | null) => ({
+  region: name,
+  crashes: 1,
+  deaths: 1,
+  injured: 1,
+  fleet: 1,
+  deathsPer100k: rankRate === null ? null : 1,
+  crashesPer100k: null,
+  rankDeaths,
+  rankDeathsPer100k: rankRate
+})
+
+describe('parseYearParam', () => {
+  it('accepts a plausible year only', () => {
+    expect(parseYearParam('2025')).toBe(2025)
+    expect(parseYearParam(null)).toBeUndefined()
+    expect(parseYearParam('abc')).toBeUndefined()
+    expect(parseYearParam('1800')).toBeUndefined()
+    expect(parseYearParam('20.5')).toBeUndefined()
+  })
+})
+
+describe('rankedRegions', () => {
+  const rows = [region('A', 2, 1), region('B', 1, null), region('C', 3, 2)]
+
+  it('orders by deaths rank', () => {
+    expect(rankedRegions(rows, 'deaths').map(r => r.region)).toEqual(['B', 'A', 'C'])
+  })
+
+  it('orders by rate rank and drops regions without a rate', () => {
+    expect(rankedRegions(rows, 'rate').map(r => r.region)).toEqual(['A', 'C'])
+  })
+})
+
+describe('barPercent', () => {
+  it('scales to the max, keeps small values visible, zero stays empty', () => {
+    expect(barPercent(50, 100)).toBe(50)
+    expect(barPercent(1, 1000)).toBe(2)
+    expect(barPercent(0, 10)).toBe(0)
+    expect(barPercent(5, 0)).toBe(0)
+  })
+})
+
+describe('peakBucket', () => {
+  it('returns the busiest bucket, the first on a tie, null when empty', () => {
+    expect(
+      peakBucket([
+        { bucket: 1, crashes: 3 },
+        { bucket: 2, crashes: 9 },
+        { bucket: 3, crashes: 9 }
+      ])?.bucket
+    ).toBe(2)
+    expect(peakBucket([])).toBeNull()
+    expect(peakBucket([{ bucket: 1, crashes: 0 }])).toBeNull()
+  })
+})
+
+describe('fillBuckets', () => {
+  it('adds zero columns for missing buckets', () => {
+    expect(fillBuckets([{ bucket: 1, crashes: 4 }], 0, 2)).toEqual([
+      { bucket: 0, crashes: 0 },
+      { bucket: 1, crashes: 4 },
+      { bucket: 2, crashes: 0 }
+    ])
+  })
+})
+
+describe('labels', () => {
+  it('pads hours', () => expect(hourLabel(7)).toBe('07:00'))
+
+  it('reports the month of a partial year only', () => {
+    expect(partialMonth({ year: 2026, period: 9, partial: true })).toBe(9)
+    expect(partialMonth({ year: 2025, period: 12, partial: false })).toBeNull()
+  })
+})
+
+describe('mapRows', () => {
+  const rows = [{ ...region('A', 1, 1), deaths: 7, deathsPer100k: 3.456 }, region('B', 2, null)]
+
+  it('maps deaths for every region', () => {
+    expect(mapRows(rows, 'deaths')).toEqual([
+      { label: 'A', value: 7 },
+      { label: 'B', value: 1 }
+    ])
+  })
+
+  it('maps the rate rounded to one decimal and skips regions without one', () => {
+    expect(mapRows(rows, 'rate')).toEqual([{ label: 'A', value: 3.5 }])
+  })
+})

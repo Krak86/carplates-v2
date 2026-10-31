@@ -22,6 +22,7 @@ const WantedStatsRoute = lazy(() => import('@/routes/wanted/WantedStatsRoute'))
 const AuctionsRoute = lazy(() => import('@/routes/auctions/AuctionsRoute'))
 const FuelStatsRoute = lazy(() => import('@/routes/fuel/FuelStatsRoute'))
 const SafetyStatsRoute = lazy(() => import('@/routes/safety/SafetyStatsRoute'))
+const RoadSafetyRoute = lazy(() => import('@/routes/road-safety/RoadSafetyRoute'))
 const NewsRoute = lazy(() => import('@/routes/news/NewsRoute'))
 const DiscussRoute = lazy(() => import('@/routes/DiscussRoute'))
 const RelaxRoute = lazy(() => import('@/routes/RelaxRoute'))
@@ -99,6 +100,7 @@ export default function App(): ReactNode {
             <Route path="/auctions" element={<AuctionsRoute />} />
             <Route path="/fuel" element={<FuelStatsRoute />} />
             <Route path="/safety" element={<SafetyStatsRoute />} />
+            <Route path="/road-safety" element={<RoadSafetyRoute />} />
             <Route path="/news" element={<NewsRoute />} />
             <Route path="/discuss" element={<DiscussRoute />} />
             <Route path="/advanced-search" element={<AdvancedSearchRoute />} />

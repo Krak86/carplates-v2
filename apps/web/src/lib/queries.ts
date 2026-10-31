@@ -14,6 +14,10 @@ import type {
 import {
   ApiError,
   getAdminAnalytics,
+  getRoadSafetyCauses,
+  getRoadSafetyRegions,
+  getRoadSafetyRoads,
+  getRoadSafetyTime,
   getCatalogLookup,
   getCatalogMake,
   getCatalogMakes,
@@ -546,6 +550,21 @@ export function safetyStatsQuery() {
     staleTime: Infinity
   })
 }
+
+// /road-safety page (Patrol Police crash aggregates): online-only, no offline group; the API caches like the stats rollups.
+// `year` undefined = the API's default (latest full year); the response says which year it answered.
+const roadSafetyQuery = <T>(name: string, fn: (year?: number) => Promise<T>, year?: number) =>
+  queryOptions({
+    queryKey: ['road-safety', name, year ?? null],
+    queryFn: () => fn(year),
+    staleTime: 60 * 60_000,
+    placeholderData: keepPreviousData
+  })
+
+export const roadSafetyRegionsQuery = (year?: number) => roadSafetyQuery('regions', getRoadSafetyRegions, year)
+export const roadSafetyRoadsQuery = (year?: number) => roadSafetyQuery('roads', getRoadSafetyRoads, year)
+export const roadSafetyCausesQuery = (year?: number) => roadSafetyQuery('causes', getRoadSafetyCauses, year)
+export const roadSafetyTimeQuery = (year?: number) => roadSafetyQuery('time', getRoadSafetyTime, year)
 
 // Static build asset, never changes at runtime — precached by the service worker, so try it even offline.
 export function ukraineGeographyQuery() {

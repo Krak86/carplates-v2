@@ -52,6 +52,10 @@ import {
   fuelStatsResponseSchema,
   powertrainStatsResponseSchema,
   safetyStatsResponseSchema,
+  roadSafetyCausesResponseSchema,
+  roadSafetyRegionsResponseSchema,
+  roadSafetyRoadsResponseSchema,
+  roadSafetyTimeResponseSchema,
   iihsRatingsResponseSchema,
   jncapRatingsResponseSchema,
   models3dResponseSchema,
@@ -161,6 +165,10 @@ import type {
   FuelStatsResponse,
   PowertrainStatsResponse,
   SafetyStatsResponse,
+  RoadSafetyCausesResponse,
+  RoadSafetyRegionsResponse,
+  RoadSafetyRoadsResponse,
+  RoadSafetyTimeResponse,
   IihsRatingsResponse,
   JncapRatingsResponse,
   KncapRatingsResponse,
@@ -541,6 +549,26 @@ export async function getCatalogYears(make: string, model: string): Promise<Cata
 
 export async function getSafetyStats(): Promise<SafetyStatsResponse> {
   return safetyStatsResponseSchema.parse(await getJson('/api/safety/stats'))
+}
+
+const yearSuffix = (year?: number): string => (year === undefined ? '' : `?year=${year}`)
+
+export async function getRoadSafetyRegions(year?: number): Promise<RoadSafetyRegionsResponse> {
+  return roadSafetyRegionsResponseSchema.parse(await getJson(`/api/road-safety/regions${yearSuffix(year)}`))
+}
+
+export async function getRoadSafetyRoads(year?: number): Promise<RoadSafetyRoadsResponse> {
+  const params = new URLSearchParams({ limit: '15' })
+  if (year !== undefined) params.set('year', String(year))
+  return roadSafetyRoadsResponseSchema.parse(await getJson(`/api/road-safety/roads?${params.toString()}`))
+}
+
+export async function getRoadSafetyCauses(year?: number): Promise<RoadSafetyCausesResponse> {
+  return roadSafetyCausesResponseSchema.parse(await getJson(`/api/road-safety/causes${yearSuffix(year)}`))
+}
+
+export async function getRoadSafetyTime(year?: number): Promise<RoadSafetyTimeResponse> {
+  return roadSafetyTimeResponseSchema.parse(await getJson(`/api/road-safety/time${yearSuffix(year)}`))
 }
 
 export async function getFuelStats(): Promise<FuelStatsResponse> {

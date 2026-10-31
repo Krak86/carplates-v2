@@ -4276,3 +4276,11 @@ Question: are there free sources for ex-USSR/Russian cars, Baltic registry data 
 - **Quizzes:** full-screen button in `PlayRoute`.
 - **Catalog:** cross links between the cars catalog and advanced search.
 - **Docs/About:** About features (recalls on VIN, home blocks, full screen) and releases updated; planning docs added: `docs/road-safety-plan.md`, `docs/prozorro-sale-auctions-plan.md`.
+
+## Road crash statistics page `/road-safety` (2026-11-01) ✅
+
+- **Route:** `/road-safety` (`/safety` is the vehicle crash-ratings page), sidebar link, `ROUTE_TITLE_KEYS`, `STATIC_PAGES` ua/ru/en (indexed, in the sitemap). Web code in `apps/web/src/routes/road-safety/`; data from `GET /api/road-safety/*` (plan steps 4-5).
+- **Page:** year picker (`?year=`, partial years marked "months 1-N"), national totals, region map (reuses `StatsMap`, so geoBoundaries ODbL attribution is the map's own line), top regions by deaths and by deaths per 100k registered cars (fleet = today's registrations, labelled as cars, not drivers), state roads, causes and types, hour and weekday peaks, footnotes (injured/killed only, occupied regions, war-year gaps, not a per-model risk) and the sources line.
+- **Lazy:** map, roads, causes and time are `LazySection`s (own chunks and queries). None is shareable by `?section=`, so nothing was added to `SHARE_SECTIONS`.
+- **Site plumbing:** About `SOURCES` `patrolPolice` + `irsu` and `about.feature.roadSafety`, `section.about.roadSafety`, release entry 2026-11-01. Hazardous sections (Infrastructure Restoration Agency) are loaded and served by the API but not drawn on the page yet.
+- **Tests:** `road-safety/helpers.test.ts`.
