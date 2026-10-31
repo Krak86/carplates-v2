@@ -25,6 +25,12 @@ export const RELEASES: readonly ReleaseDay[] = [
         'A "Ukrainian auctions" section on the plate card and VIN page: SETAM auction lots of seized and confiscated property that name the plate or VIN (lot number, status, starting and sale price, region), all lots newest first with sold ones highlighted; a "From auction" chip in the header, a short history of the auctions and a comparison with practice abroad'
       ),
       item(
+        'improved',
+        'Номер лота в розділі «Українські аукціони» тепер є посиланням: відкриває цей лот на сайті СЕТАМ',
+        'Номер лота в разделе «Украинские аукционы» теперь ссылка: открывает этот лот на сайте СЕТАМ',
+        'The lot number in the "Ukrainian auctions" section is now a link that opens that lot on the SETAM site'
+      ),
+      item(
         'new',
         'Перевірка розшуку тепер охоплює й другий список Нацполіції «Гарпун» (номерні знаки в розшуку, оновлюється щодня): якщо номер там є, на картці з’являється жовтий значок «Гарпун» і пояснення, що розшук номера ще не доводить викрадення авто, а також історія зі списку',
         'Проверка розыска теперь охватывает и второй список Нацполиции «Гарпун» (номерные знаки в розыске, обновляется ежедневно): если номер там есть, на карточке появляется жёлтый значок «Гарпун» и пояснение, что розыск номера ещё не доказывает угон авто, а также история из списка',
