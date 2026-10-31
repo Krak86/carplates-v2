@@ -315,6 +315,8 @@ Snapshot of what's actually next, split from what still needs a decision
 before it's buildable. Not a phase — items here get folded into Phases 2-5
 above once scoped, or dropped if research says no.
 
+- [ ] **Garpun wanted plates + SETAM auctions (2026-10-31, researched, not started)** — two new data.gov.ua feeds: wanted plates joined into the `/wanted` card section with a Garpun chip, and car lots from SETAM auctions as a card section + `/auctions` route + stats. Steps: `docs/garpun-auctions-plan.md`.
+
 ### Actual — ready or in progress
 
 - ✅ History, favorites, camera/photo search, registry stats (table + map), brand breakdown, kind icon + logo — done, see Phase 1.5 / "Plate image recognition" in `docs/plan-done.md`.
