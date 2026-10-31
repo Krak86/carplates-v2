@@ -48,3 +48,11 @@ export type AuctionResponse = z.infer<typeof auctionResponseSchema>
 export const AUCTIONS_DATASET_URL = 'https://data.gov.ua/dataset/eda4e3cf-0dda-46a1-a78a-ee264ebbfe97'
 export const SETAM_URL = 'https://setam.net.ua/'
 export const PROZORRO_SALE_URL = 'https://prozorro.sale/'
+
+/**
+ * SETAM page of one lot. The feed's `lotNo` is not the `/auction/{id}` id of the site (lot 608546 lives at `/auction/603050`),
+ * but the site's server-side list filter by lot number returns exactly that lot, so this link needs no scraping.
+ */
+export function setamLotUrl(lotNo: number): string {
+  return `${SETAM_URL}auctions/filters/number=${lotNo};`
+}

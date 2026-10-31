@@ -430,6 +430,7 @@
   "uaAuctions.salePrice": "Цена продажи",
   "uaAuctions.vsStart": "к стартовой",
   "uaAuctions.titleRaw": "Название лота",
+  "uaAuctions.openOnSetam": "Открыть этот лот на SETAM",
   "uaAuctions.empty": "Ни один лот СЕТАМ не упоминает этот номер или VIN.",
   "uaAuctions.error": "Не удалось загрузить лоты аукционов. Попробуйте позже.",
   "uaAuctions.chart.title": "Динамика цен по лотам",

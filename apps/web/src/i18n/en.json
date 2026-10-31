@@ -430,6 +430,7 @@
   "uaAuctions.salePrice": "Sale price",
   "uaAuctions.vsStart": "vs start",
   "uaAuctions.titleRaw": "Lot title",
+  "uaAuctions.openOnSetam": "Open this lot on SETAM",
   "uaAuctions.empty": "No SETAM auction lot names this plate or VIN.",
   "uaAuctions.error": "Could not load auction lots. Try again later.",
   "uaAuctions.chart.title": "Price dynamics by lot",

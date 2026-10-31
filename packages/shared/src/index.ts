@@ -726,7 +726,8 @@ export {
   auctionResponseSchema,
   AUCTIONS_DATASET_URL,
   SETAM_URL,
-  PROZORRO_SALE_URL
+  PROZORRO_SALE_URL,
+  setamLotUrl
 } from './auctions.js'
 export type { AuctionLot, AuctionResponse } from './auctions.js'
 

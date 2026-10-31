@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { setamLotUrl } from '@carplates/shared'
 import type { AuctionLot, Currency, FxResponse } from '@carplates/shared'
 
 import {
@@ -46,7 +47,20 @@ export default function UaAuctionLot({ lot, currency, fx }: Props): ReactNode {
   const details = (
     <>
       <dl className="mt-1.5 space-y-0.5">
-        <Row label={t('uaAuctions.lotNo')} value={String(lot.lotNo)} />
+        <Row
+          label={t('uaAuctions.lotNo')}
+          value={
+            <a
+              href={setamLotUrl(lot.lotNo)}
+              target="_blank"
+              rel="noopener noreferrer"
+              title={t('uaAuctions.openOnSetam')}
+              className="underline"
+            >
+              {lot.lotNo}
+            </a>
+          }
+        />
         <Row label={t('uaAuctions.proceedingNo')} value={lot.proceedingNo} />
         <Row
           label={t('uaAuctions.vehicle')}
