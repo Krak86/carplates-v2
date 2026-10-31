@@ -20,6 +20,24 @@ export const RELEASES: readonly ReleaseDay[] = [
     items: [
       item(
         'new',
+        'В історії авто на картці з’явилися події розшуку: коли транспортний засіб чи номерний знак (Гарпун) внесли до списку й коли зняли, поряд з реєстраційними операціями та аукціонами; розділ тепер називається «Історія авто»',
+        'В истории авто на карточке появились события розыска: когда транспортное средство или номерной знак (Гарпун) внесли в список и когда сняли, рядом с регистрационными операциями и аукционами; раздел теперь называется «История авто»',
+        'The car history on the card now shows wanted-list events: when a vehicle or a plate (Garpun) was put on the list and when it was removed, next to the registration operations and auctions; the section is now called "Car history"'
+      ),
+      item(
+        'improved',
+        'На сторінках моделей каталогу з’явилася кнопка «Показати номери»: показує найновіші зареєстровані авто цієї моделі',
+        'На страницах моделей каталога появилась кнопка «Показать номера»: показывает самые новые зарегистрированные авто этой модели',
+        'Catalog model pages have a "Show plates" button that lists the newest registered cars of the model'
+      ),
+      item(
+        'improved',
+        'У грі «Вгадай марку» назва під емблемою тепер розмита, доки не оберете відповідь',
+        'В игре «Угадай марку» название под эмблемой теперь размыто, пока не выберете ответ',
+        'In the "Guess the brand" game the name under the emblem is now blurred until you pick an answer'
+      ),
+      item(
+        'new',
         'Довідник /read/auctions: що таке лот на українському аукціоні арештованого майна, як узяти участь, цифри з наших даних про лоти СЕТАМ, практика США й Британії, коротка історія аукціонів і що перевірити перед ставкою',
         'Справочник /read/auctions: что такое лот на украинском аукционе арестованного имущества, как принять участие, цифры из наших данных о лотах СЕТАМ, практика США и Британии, краткая история аукционов и что проверить перед ставкой',
         'New /read/auctions guide: what a lot is at a Ukrainian auction of seized property, how to take part, figures from our SETAM lot data, practice in the USA and the UK, a short history of auctions and what to check before you bid'

@@ -304,6 +304,7 @@ const FEATURES = [
   'whatsnew',
   'race',
   'play',
+  'relax',
   'account',
   'copy',
   'discuss',
