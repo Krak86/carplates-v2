@@ -2,7 +2,7 @@
  * Loads the road hazardous sections and crash concentration places (Infrastructure Restoration Agency, open data, CC BY,
  * data.gov.ua dataset `9b6a7292-…`) into `registry.dtp_hazard_section` (`dtp-parse.ts`). Each yearly CSV is a full snapshot,
  * so a (year, kind) pair is replaced in one transaction. The year comes from the resource file name (`…-2025.csv`).
- * The Patrol Police XLSX tables (`registry.dtp_*_year`) are not loaded yet. See docs/road-safety-plan.md.
+ * The Patrol Police XLSX tables (`registry.dtp_*_year`) load with `pnpm ingest:dtp:patrol`. See docs/road-safety-plan.md.
  *
  *   pnpm ingest:dtp                          # every yearly CSV of the dataset
  *   pnpm ingest:dtp --dry-run                # download + print counts, write nothing

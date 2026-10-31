@@ -1083,7 +1083,7 @@ export const dtpTypeYear = registry.table(
   t => [primaryKey({ columns: [t.year, t.period, t.type] })]
 )
 
-/** Crashes over `month` (1..12), `weekday` (1 = Monday) or `hour` (0..23). */
+/** Crashes over `weekday` (1 = Monday) or `hour` (0..23); `month` is reserved. Deaths / injured are not reported per bucket. */
 export const dtpTimeYear = registry.table(
   'dtp_time_year',
   {
@@ -1092,8 +1092,8 @@ export const dtpTimeYear = registry.table(
     dim: text('dim', { enum: ['month', 'weekday', 'hour'] }).notNull(),
     bucket: smallint('bucket').notNull(),
     crashes: integer('crashes').notNull(),
-    deaths: integer('deaths').notNull(),
-    injured: integer('injured').notNull()
+    deaths: integer('deaths'),
+    injured: integer('injured')
   },
   t => [primaryKey({ columns: [t.year, t.period, t.dim, t.bucket] })]
 )
@@ -1140,6 +1140,11 @@ export const dtpHazardSection = registry.table(
 )
 
 export type DtpHazardSectionInsert = typeof dtpHazardSection.$inferInsert
+export type DtpRegionYearInsert = typeof dtpRegionYear.$inferInsert
+export type DtpCauseYearInsert = typeof dtpCauseYear.$inferInsert
+export type DtpTypeYearInsert = typeof dtpTypeYear.$inferInsert
+export type DtpTimeYearInsert = typeof dtpTimeYear.$inferInsert
+export type DtpRoadYearInsert = typeof dtpRoadYear.$inferInsert
 
 /** stolen.in.ua scrape resume state: one row per fetched month page (`aug-20`). */
 export const wantedScrapePages = registry.table('wanted_scrape_pages', {

@@ -37,15 +37,16 @@ CREATE TABLE registry.dtp_type_year (
   PRIMARY KEY (year, period, type)
 );
 
--- Crashes over `month` (1..12), `weekday` (1 = Monday .. 7) or `hour` (0..23).
+-- Crashes over `weekday` (1 = Monday .. 7) or `hour` (0..23) (`month` is reserved for the monthly files); deaths / injured
+-- are null because these Patrol Police tables count crashes only.
 CREATE TABLE registry.dtp_time_year (
   year    smallint NOT NULL,
   period  smallint NOT NULL,
   dim     text NOT NULL CHECK (dim IN ('month', 'weekday', 'hour')),
   bucket  smallint NOT NULL,
   crashes integer NOT NULL,
-  deaths  integer NOT NULL,
-  injured integer NOT NULL,
+  deaths  integer,
+  injured integer,
   PRIMARY KEY (year, period, dim, bucket)
 );
 

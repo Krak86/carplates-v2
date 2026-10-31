@@ -97,6 +97,7 @@
     "ingest:wanted-plates": "tsx src/wanted-plates.ts",
     "ingest:auctions": "tsx src/auctions.ts",
     "ingest:dtp": "tsx src/dtp.ts",
+    "ingest:dtp:patrol": "tsx src/dtp-patrol.ts",
     "ingest:wanted-history": "tsx src/wanted-history.ts",
     "ingest:wanted-history:csv": "tsx src/wanted-history-csv.ts",
     "export:wanted-history:csv": "tsx src/wanted-history-csv.ts --export-csv",
@@ -141,6 +142,7 @@
     "drizzle-orm": "0.45.4",
     "iconv-lite": "^0.7.3",
     "pg": "^8.23.1",
+    "read-excel-file": "9.3.14",
     "unzipper": "^0.12.5",
     "zod": "^4.6.6"
   },
