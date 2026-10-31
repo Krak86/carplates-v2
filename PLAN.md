@@ -986,22 +986,19 @@ in-memory store resets on restart and isn't shared across instances), body-email
 
 Code-level audit findings and the full pre-deploy gate: [docs/security-checklist.md](docs/security-checklist.md) (2026-10-13).
 
-- [ ] Set `TRUST_PROXY=true` **only** once Caddy/Cloudflare is in front and the API port is not publicly reachable; otherwise
-      `X-Forwarded-For` is spoofable and the per-IP limits are bypassable (or all users share the proxy's IP).
-- [ ] Firewall: expose only 80/443 (+ UDP 443 for HTTP/3); API, Postgres and Redis ports closed to the internet; SSH key-only (✅ verified 2026-10-27), fail2ban.
-- [ ] Caddy edge limits from "Rate-limit policy" below (all paths 120/60s; `/api/*` 60/60s + 1000/1h; `/og/*` 300/60s).
+- [x] `TRUST_PROXY=true` is set in `infra/docker-compose.prod.yml` (Caddy + Cloudflare in front; Caddy trusts `CF-Connecting-IP` only from Cloudflare's ranges). Set only when the API port is not publicly reachable, else `X-Forwarded-For` is spoofable.
+- [ ] Firewall: expose only 80/443 (+ UDP 443 for HTTP/3); API, Postgres and Redis ports closed to the internet; fail2ban. ✅ SSH key-only (verified 2026-10-27). **Not re-verified** — check the VPS firewall state.
+- [x] ~~Caddy edge limits~~ **Dropped 2026-10-31:** Caddy `rate_limit` needs a custom build; covered by the Cloudflare WAF rule + the Nest throttler (`docs/deploy.md` "Longer term"). The "Rate-limit policy" numbers below are now reference only.
 - [x] Cloudflare (free tier) in front: ✅ Bot Fight Mode, WAF rate-limit rule on `/api/plate*` and `/api/vin*` (30/10 s per IP), HTTP/3, Always Use HTTPS (2026-10-28,
       `docs/deploy.md` step 4). "Under Attack" stays a manual incident toggle. Trust only Cloudflare's IP ranges / `CF-Connecting-IP` (Caddyfile; re-check the ranges occasionally).
-- [x] Cloudflare Turnstile on sign-in "send code" — keys set in production (2026-10-27). [ ] Still open: feedback/discuss submit and (optionally) camera recognize — never on plain search.
-- [ ] Headers at Caddy: `Strict-Transport-Security`, a Content-Security-Policy (allow YouTube, Sketchfab, Google Maps, PostHog,
-      Sentry, Google Identity; start in `Report-Only`), `Permissions-Policy` (camera/geolocation for self only).
-- [ ] Redis-backed throttler storage (shared counters, survives restarts); global daily counter for paid third-party keys
-      (Plate Recognizer budget is already capped; add the same for any future RIA key).
-- [ ] Swagger (`ENABLE_SWAGGER`) off in production; `/api/admin/*` reachable only for admin sessions (consider IP-allowlisting at Caddy).
-- [ ] Secrets only in server env / secret store; rotate the Google client, PostHog personal key and Plate Recognizer token if ever exposed.
+- [x] Cloudflare Turnstile on sign-in "send code" (keys set in production 2026-10-27) and on the feedback/contact submit (`contact.controller.ts`). Discuss is Disqus (own spam protection), so no Turnstile there. Optional: camera recognize — never on plain search.
+- [ ] Headers at Caddy: ✅ `Strict-Transport-Security` and a Report-Only CSP are in `infra/Caddyfile`. Open: **enforce CSP** after ~1 week of clean reports (recheck Lighthouse `inspector-issues` first); verify `Permissions-Policy` (camera/geolocation for self only).
+- [ ] Redis-backed throttler storage (shared counters, survives restarts, covers the blue/green overlap) — **not started**, Redis is not in the compose file; low priority. Global daily counter for paid third-party keys (Plate Recognizer budget is already capped; only needed if a RIA key is added).
+- [x] Swagger is off in production (`swaggerEnabled`: `ENABLE_SWAGGER` or non-production; `/api/docs` serves the SPA shell). [ ] `/api/admin/*` admin-only guard **not re-verified** (consider IP-allowlisting at Caddy).
+- [x] Secrets: production `AUTH_SECRET` / `POSTGRES_PASSWORD` differ from dev. Rotation **skipped by choice 2026-10-28**; rotate `POSTHOG_PERSONAL_API_KEY` and any other key shown in chat/screenshots if you consider it exposed.
 - [ ] `robots.txt`/sitemap: verify `PUBLIC_SITE_URL` is the real origin, submit `sitemap.xml` in Google Search Console and Bing Webmaster.
-- [ ] Cookie/consent and licence decisions before ads or telemetry go live: [docs/legal-and-monetization.md](docs/legal-and-monetization.md).
-- [ ] Uptime monitor on `/healthz`, Sentry alerts on 429 spikes, log retention/rotation.
+- [ ] Cookie/consent and licence decisions before ads go live (not before): [docs/legal-and-monetization.md](docs/legal-and-monetization.md).
+- [ ] Monitoring: ✅ UptimeRobot on `/healthz` + home (2026-10-28). Open: set server `SENTRY_DSN` (unset, so server errors are untracked) + alert on 429 spikes; healthchecks.io checks + `HC_PING_*` secrets for the ingest crons; log retention/rotation.
 
 ### Backup policy (Phase 4)
 
