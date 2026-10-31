@@ -216,6 +216,13 @@ export default function WantedCheck({ plate, vin, openSignal = 0 }: Props): Reac
             ))}
           </ul>
           {data?.plateWanted && <p className="mt-1.5 text-sm font-medium">{t('wanted.plates.warning')}</p>}
+          <p className="mt-1.5 text-sm text-[var(--color-muted)]">
+            {data?.platesCheckedAt
+              ? t('wanted.plates.checkedAt', { date: new Date(data.platesCheckedAt).toLocaleString(locale) })
+              : t('wanted.neverLoaded')}
+            {data?.platesTrackedSince &&
+              ` ${t('wanted.plates.trackedSince', { date: new Date(data.platesTrackedSince).toLocaleDateString(locale) })}`}
+          </p>
         </section>
       )}
 

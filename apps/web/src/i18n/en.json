@@ -396,6 +396,8 @@
   "wanted.plates.status.wanted": "Plate is wanted",
   "wanted.plates.status.removed": "Plate no longer wanted",
   "wanted.plates.reportedAt": "Reported on",
+  "wanted.plates.checkedAt": "Garpun list last refreshed in our database: {{date}}.",
+  "wanted.plates.trackedSince": "We have tracked plates leaving the Garpun list since {{date}}; earlier removals are unknown.",
   "wanted.plates.warning": "A wanted plate is not proof that this car is stolen: plates get lost, stolen or cloned. Compare the VIN and the documents of the car with the registration data.",
   "wanted.explainer": "The police publish two lists. \"Wanted vehicles\" lists cars taken unlawfully (make, colour, VIN). \"Garpun\" lists only licence plates (no make, no VIN), for example lost, stolen or occupation-related plates. They rarely overlap, so both are checked.",
   "wanted.link.garpun": "- the Garpun open dataset (wanted plates)",

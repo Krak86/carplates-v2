@@ -23,7 +23,7 @@ export class WantedService {
     ]
     const where = or(...keys)
 
-    const [rows, plateRows, [meta]] = await Promise.all([
+    const [rows, plateRows, [meta], [plateMeta]] = await Promise.all([
       where
         ? db
             .select()
@@ -49,7 +49,15 @@ export class WantedService {
             string | null
           >`min(${wantedVehicles.seizedAt}) filter (where ${wantedVehicles.source} = 'stolen.in.ua' and ${wantedVehicles.seizedAt} >= '2020-08-01')`
         })
-        .from(wantedVehicles)
+        .from(wantedVehicles),
+      plate
+        ? db
+            .select({
+              checkedAt: sql<Date | null>`max(${wantedPlates.lastSeenAt})`,
+              trackedSince: sql<Date | null>`min(${wantedPlates.firstSeenAt})`
+            })
+            .from(wantedPlates)
+        : []
     ])
 
     const vinMatches = (r: { vin: string | null; vinAlt: string | null }): boolean =>
@@ -88,6 +96,8 @@ export class WantedService {
       records,
       plates,
       plateWanted: plates.some(p => p.status === 'wanted'),
+      platesCheckedAt: plateMeta?.checkedAt ? new Date(plateMeta.checkedAt).toISOString() : null,
+      platesTrackedSince: plateMeta?.trackedSince ? new Date(plateMeta.trackedSince).toISOString() : null,
       checkedAt: meta?.checkedAt ? new Date(meta.checkedAt).toISOString() : null,
       trackedSince: historySince
         ? new Date(historySince).toISOString()

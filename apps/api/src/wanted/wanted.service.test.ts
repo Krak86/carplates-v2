@@ -49,6 +49,8 @@ describe('WantedService.lookup', () => {
     expect(wantedResponseSchema.safeParse(res).error?.issues).toBeUndefined()
     expect(res.wanted).toBe(false)
     expect(res.plateWanted).toBe(true)
+    expect(res.platesCheckedAt).toBe(LAST_SEEN.toISOString())
+    expect(res.platesTrackedSince).toBe(LAST_SEEN.toISOString())
     expect(res.plates).toHaveLength(2)
     expect(res.plates?.[0]).toMatchObject({ id: 'g1', status: 'wanted', removedAt: null, plate: 'ВА0399ЕН' })
     expect(res.plates?.[1]).toMatchObject({ status: 'removed', removedAt: '2026-05-01T00:00:00.000Z' })
@@ -68,6 +70,7 @@ describe('WantedService.lookup', () => {
 
     expect(res.plates).toEqual([])
     expect(res.plateWanted).toBe(false)
+    expect(res.platesCheckedAt).toBeNull()
     // vehicle lookup + the freshness probe only
     expect(select).toHaveBeenCalledTimes(2)
   })

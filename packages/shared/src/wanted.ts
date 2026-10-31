@@ -62,7 +62,11 @@ export const wantedResponseSchema = z.object({
   /** Garpun list: records for the queried plate (the VIN is never matched), currently wanted first. Absent in old cached responses. */
   plates: z.array(wantedPlateSchema).nullable().optional(),
   /** At least one Garpun record is still on the list (kept apart from `wanted`, which is the vehicle list only). */
-  plateWanted: z.boolean().nullable().optional()
+  plateWanted: z.boolean().nullable().optional(),
+  /** ISO timestamp of the newest Garpun ingest run (own clock: `checkedAt` belongs to the vehicle list). Only for plate lookups. */
+  platesCheckedAt: z.string().nullable().optional(),
+  /** Earliest first-seen timestamp of the Garpun list: removals before it were not tracked (no scraped history exists for Garpun). */
+  platesTrackedSince: z.string().nullable().optional()
 })
 export type WantedResponse = z.infer<typeof wantedResponseSchema>
 
