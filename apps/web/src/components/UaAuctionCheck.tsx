@@ -6,6 +6,7 @@ import { useQuery } from '@tanstack/react-query'
 import { AUCTIONS_DATASET_URL, PROZORRO_SALE_URL, SETAM_URL } from '@carplates/shared'
 import type { Currency } from '@carplates/shared'
 
+import ReadGuideLink from '@/components/ReadGuideLink'
 import SectionInfo from '@/components/SectionInfo'
 import ShareButton from '@/components/ShareButton'
 import Timeline from '@/components/Timeline'
@@ -19,6 +20,7 @@ import VinToggleSection from '@/components/vin/VinToggleSection'
 import { toIntlLocale } from '@/lib/intl'
 import { auctionLotsQuery, fxQuery } from '@/lib/queries'
 import { scrollElementIntoView } from '@/lib/share-section'
+import { AUCTIONS_GUIDE_PATH } from '@/routes/read/links'
 
 type Props = {
   plate: string | null
@@ -153,6 +155,8 @@ export default function UaAuctionCheck({ plate, vin, openSignal = 0 }: Props): R
           ))}
         </ul>
       </details>
+
+      <ReadGuideLink guide={AUCTIONS_GUIDE_PATH} />
 
       <ul className="mt-2 space-y-1 text-sm">
         <li>

@@ -20,6 +20,12 @@ export const RELEASES: readonly ReleaseDay[] = [
     items: [
       item(
         'new',
+        'Довідник /read/auctions: що таке лот на українському аукціоні арештованого майна, як узяти участь, цифри з наших даних про лоти СЕТАМ, практика США й Британії, коротка історія аукціонів і що перевірити перед ставкою',
+        'Справочник /read/auctions: что такое лот на украинском аукционе арестованного имущества, как принять участие, цифры из наших данных о лотах СЕТАМ, практика США и Британии, краткая история аукционов и что проверить перед ставкой',
+        'New /read/auctions guide: what a lot is at a Ukrainian auction of seized property, how to take part, figures from our SETAM lot data, practice in the USA and the UK, a short history of auctions and what to check before you bid'
+      ),
+      item(
+        'new',
         'На картці авто з лотом СЕТАМ з’явився рядок «Перевірка ціни» (ціна продажу проти медіани інших проданих лотів тієї ж моделі), а в історії реєстрацій - позначки «На аукціоні» з місяцем і ціною',
         'На карточке авто с лотом СЕТАМ появилась строка «Проверка цены» (цена продажи против медианы других проданных лотов той же модели), а в истории регистраций - отметки «На аукционе» с месяцем и ценой',
         'The car card shows a "Price check" line for a SETAM lot (sale price against the median of other sold lots of the same model), and the registration history has "At auction" markers with the month and price'

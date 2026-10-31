@@ -1,4 +1,5 @@
 import {
+  AUCTIONS_GUIDE_PATH,
   BODY_TYPES_PATH,
   ELECTRIC_PATH,
   EXTREMES_PATH,
@@ -87,6 +88,12 @@ export const RECALLS_LEAD: L10n = {
   en: 'What is a recall, how does it differ from a common fault, and what wears out on a model as the miles add up? EU, US and Canadian campaigns and UK inspection data, shown on popular models.'
 }
 
+export const AUCTIONS_LEAD: L10n = {
+  ua: 'Що таке лот на аукціоні арештованого майна, як узяти участь, скільки лотів у наших даних і чим це відрізняється від США чи Британії? Ще - коротка історія аукціонів і що перевірити перед ставкою.',
+  ru: 'Что такое лот на аукционе арестованного имущества, как принять участие, сколько лотов в наших данных и чем это отличается от США или Британии? А ещё - краткая история аукционов и что проверить перед ставкой.',
+  en: 'What is a lot at an auction of seized property, how do you take part, how many lots are in our data, and how does it differ from the USA or the UK? Plus a short history of auctions and what to check before you bid.'
+}
+
 export const BODY_TYPES_TAGS: L10n[] = [
   { ua: 'Кузови', ru: 'Кузова', en: 'Bodies' },
   { ua: 'Приклади з реєстру', ru: 'Примеры из реестра', en: 'Registry examples' }
@@ -152,6 +159,12 @@ export const RECALLS_TAGS: L10n[] = [
   { ua: 'Несправності', ru: 'Неисправности', en: 'Faults' }
 ]
 
+export const AUCTIONS_TAGS: L10n[] = [
+  { ua: 'Аукціони', ru: 'Аукционы', en: 'Auctions' },
+  { ua: 'СЕТАМ', ru: 'СЕТАМ', en: 'SETAM' },
+  { ua: 'Купівля', ru: 'Покупка', en: 'Buying' }
+]
+
 /** The published explainers, in hub order. A new article = a route in App.tsx + `STATIC_PAGES` (spa-text.ts) + `GUIDE_META` (links.ts) + an entry here. */
 export const ARTICLES: readonly ArticleMeta[] = [
   { path: BODY_TYPES_PATH, ...GUIDE_META[BODY_TYPES_PATH], lead: BODY_TYPES_LEAD, tags: BODY_TYPES_TAGS },
@@ -165,7 +178,8 @@ export const ARTICLES: readonly ArticleMeta[] = [
   { path: SAFETY_PATH, ...GUIDE_META[SAFETY_PATH], lead: SAFETY_LEAD, tags: SAFETY_TAGS },
   { path: FUEL_PATH, ...GUIDE_META[FUEL_PATH], lead: FUEL_LEAD, tags: FUEL_TAGS },
   { path: EXTREMES_PATH, ...GUIDE_META[EXTREMES_PATH], lead: EXTREMES_LEAD, tags: EXTREMES_TAGS },
-  { path: RECALLS_PATH, ...GUIDE_META[RECALLS_PATH], lead: RECALLS_LEAD, tags: RECALLS_TAGS }
+  { path: RECALLS_PATH, ...GUIDE_META[RECALLS_PATH], lead: RECALLS_LEAD, tags: RECALLS_TAGS },
+  { path: AUCTIONS_GUIDE_PATH, ...GUIDE_META[AUCTIONS_GUIDE_PATH], lead: AUCTIONS_LEAD, tags: AUCTIONS_TAGS }
 ]
 
 /** Themes planned next, listed in the hub so readers see where it is going. */

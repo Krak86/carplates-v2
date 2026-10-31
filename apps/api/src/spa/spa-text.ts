@@ -352,6 +352,23 @@ export const STATIC_PAGES: Record<string, Record<Lang, PageText>> = {
         'How many electric cars and hybrids Ukraine has, which years they are from, where they are, which models lead and how the charging plugs differ.'
     }
   },
+  '/read/auctions': {
+    ua: {
+      title: 'Cars UA - Аукціони авто: українські торги СЕТАМ, світова практика та історія',
+      description:
+        'Що таке лот на аукціоні арештованого майна, як узяти участь, що показують наші дані про лоти СЕТАМ, чим це відрізняється від США й Британії, коротка історія аукціонів і що перевірити перед ставкою.'
+    },
+    ru: {
+      title: 'Cars UA - Аукционы авто: украинские торги СЕТАМ, мировая практика и история',
+      description:
+        'Что такое лот на аукционе арестованного имущества, как принять участие, что показывают наши данные о лотах СЕТАМ, чем это отличается от США и Британии, краткая история аукционов и что проверить перед ставкой.'
+    },
+    en: {
+      title: 'Cars UA - Car auctions: Ukrainian SETAM sales, practice abroad and history',
+      description:
+        'What a lot is at an auction of seized property, how to take part, what our data on SETAM lots shows, how it differs from the USA and the UK, a short history of auctions and what to check before you bid.'
+    }
+  },
   '/read/imports': {
     ua: {
       title: 'Cars UA - Авто з-за кордону: ввезені та куплені через дилера, країна за VIN',

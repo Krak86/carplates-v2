@@ -39,6 +39,7 @@ const FuelRoute = lazy(() => import('@/routes/read/fuel/FuelRoute'))
 const VinRoute = lazy(() => import('@/routes/read/vin/VinRoute'))
 const ExtremesRoute = lazy(() => import('@/routes/read/extremes/ExtremesRoute'))
 const RecallsRoute = lazy(() => import('@/routes/read/recalls/RecallsRoute'))
+const AuctionsGuideRoute = lazy(() => import('@/routes/read/auctions/AuctionsGuideRoute'))
 const CatalogIndexRoute = lazy(() => import('@/routes/catalog/CatalogIndexRoute'))
 const CatalogMakeRoute = lazy(() => import('@/routes/catalog/CatalogMakeRoute'))
 const CatalogModelRoute = lazy(() => import('@/routes/catalog/CatalogModelRoute'))
@@ -118,6 +119,7 @@ export default function App(): ReactNode {
             <Route path="/read/vin" element={<VinRoute />} />
             <Route path="/read/extremes" element={<ExtremesRoute />} />
             <Route path="/read/recalls" element={<RecallsRoute />} />
+            <Route path="/read/auctions" element={<AuctionsGuideRoute />} />
             <Route path="/cars" element={<CatalogIndexRoute />} />
             <Route path="/cars/:make" element={<CatalogMakeRoute />} />
             <Route path="/cars/:make/:model" element={<CatalogModelRoute />} />
