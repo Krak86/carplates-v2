@@ -98,6 +98,7 @@ import type {
   AuthConfigResponse,
   ContactConfig,
   ContactRequest,
+  ContactStartRequest,
   FeaturesResponse,
   FeaturesUpdateRequest,
   SessionResponse,
@@ -885,4 +886,8 @@ export async function getContactConfig(): Promise<ContactConfig> {
 
 export async function sendContactMessage(request: ContactRequest): Promise<void> {
   await sendJson('POST', '/api/contact', request)
+}
+
+export async function startContactCode(request: ContactStartRequest): Promise<EmailStartResponse> {
+  return emailStartResponseSchema.parse(await sendJson('POST', '/api/contact/start', request))
 }

@@ -5,10 +5,12 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { i18nReady } from '@/i18n'
 
-const getContactConfig = vi.hoisted(() => vi.fn())
+await i18nReady
+
+const api = vi.hoisted(() => ({ getContactConfig: vi.fn(), getSession: vi.fn() }))
 vi.mock('@/lib/api', async importOriginal => ({
   ...(await importOriginal<typeof import('@/lib/api')>()),
-  getContactConfig
+  ...api
 }))
 
 import ContactForm from '@/components/contact/ContactForm'
@@ -25,21 +27,28 @@ function renderForm(): void {
 }
 
 describe('ContactForm', () => {
-  beforeEach(async () => {
-    await i18nReady
-    getContactConfig.mockReset()
+  beforeEach(() => {
+    api.getContactConfig.mockReset().mockResolvedValue({ enabled: true, turnstileSiteKey: null })
+    api.getSession.mockReset().mockResolvedValue({ user: null })
   })
 
-  it('shows the form when the API says it is enabled', async () => {
-    getContactConfig.mockResolvedValue({ enabled: true, turnstileSiteKey: null })
+  it('asks an anonymous sender for a confirmation code first', async () => {
     renderForm()
-    expect(await screen.findByLabelText(/message|повідомлення/i)).toBeTruthy()
+    expect(await screen.findByRole('button', { name: /confirmation code|код підтвердження/i })).toBeTruthy()
+  })
+
+  it('lets a signed-in user send directly with their account email', async () => {
+    api.getSession.mockResolvedValue({ user: { id: 'u1', email: 'member@example.com', role: 'user' } })
+    renderForm()
+    const email = (await screen.findByDisplayValue('member@example.com')) as HTMLInputElement
+    expect(email.readOnly).toBe(true)
+    expect(await screen.findByRole('button', { name: /^(send|надіслати)$/i })).toBeTruthy()
   })
 
   it('shows a notice instead of the form when it is disabled', async () => {
-    getContactConfig.mockResolvedValue({ enabled: false, turnstileSiteKey: null })
+    api.getContactConfig.mockResolvedValue({ enabled: false, turnstileSiteKey: null })
     renderForm()
     expect(await screen.findByText(/not available|недоступна/i)).toBeTruthy()
-    expect(screen.queryByRole('button', { name: /send|надіслати/i })).toBeNull()
+    expect(screen.queryByRole('button')).toBeNull()
   })
 })

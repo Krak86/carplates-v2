@@ -27,6 +27,6 @@ import { TurnstileService } from './turnstile.js'
     AdminGuard,
     SessionCookieInterceptor
   ],
-  exports: [AuthService, SessionGuard, SudoGuard, AdminGuard, TurnstileService]
+  exports: [AuthService, EmailChallengeService, SessionGuard, SudoGuard, AdminGuard, TurnstileService]
 })
 export class AuthModule {}

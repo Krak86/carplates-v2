@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
-import { CONTACT_MESSAGE_MAX, CONTACT_TOPICS } from '@carplates/shared'
+import { CONTACT_COOLDOWN_MINUTES, CONTACT_MAX_LINKS, CONTACT_MESSAGE_MAX, CONTACT_TOPICS } from '@carplates/shared'
 
 import TurnstileSlot from '@/components/auth/TurnstileSlot'
 import { useContactActions } from '@/components/contact/use-contact-actions'
@@ -15,7 +15,13 @@ const LABEL_CLASS = 'mb-1 block text-xs font-medium text-[var(--color-muted)]'
 export default function ContactForm(): ReactNode {
   const { t } = useTranslation()
   const config = useQuery(contactConfigQuery())
-  const form = useContactActions()
+  const form = useContactActions(config.data?.turnstileSiteKey ?? null)
+
+  const submitKey = form.signedIn
+    ? 'contact.form.submit'
+    : form.needsCode
+      ? 'contact.form.submitCode'
+      : 'contact.form.getCode'
 
   if (config.isPending) return null
 
@@ -57,10 +63,12 @@ export default function ContactForm(): ReactNode {
           required
           value={form.email}
           onChange={form.handleEmailChange}
+          readOnly={form.signedIn}
           maxLength={254}
           autoComplete="email"
           className={INPUT_CLASS}
         />
+        {form.signedIn && <p className="mt-1 text-xs text-[var(--color-muted)]">{t('contact.form.accountEmail')}</p>}
       </div>
 
       <div>
@@ -89,6 +97,11 @@ export default function ContactForm(): ReactNode {
           maxLength={CONTACT_MESSAGE_MAX}
           className={INPUT_CLASS}
         />
+        {form.tooManyLinks && (
+          <p role="alert" className="mt-1 text-xs text-red-600">
+            {t('contact.form.tooManyLinks', { max: CONTACT_MAX_LINKS })}
+          </p>
+        )}
       </div>
 
       {/* Honeypot: invisible and unreachable for people, tempting for form-filling bots. */}
@@ -103,7 +116,23 @@ export default function ContactForm(): ReactNode {
         />
       </div>
 
-      {config.data.turnstileSiteKey && (
+      {form.needsCode && (
+        <div>
+          <label className={LABEL_CLASS} htmlFor="contact-code">
+            {t('contact.form.code', { email: form.email })}
+          </label>
+          <input
+            id="contact-code"
+            value={form.code}
+            onChange={form.handleCodeChange}
+            inputMode="numeric"
+            autoComplete="one-time-code"
+            className={INPUT_CLASS}
+          />
+        </div>
+      )}
+
+      {!form.signedIn && !form.needsCode && config.data.turnstileSiteKey && (
         <TurnstileSlot
           siteKey={config.data.turnstileSiteKey}
           resetKey={form.turnstileResetKey}
@@ -122,8 +151,12 @@ export default function ContactForm(): ReactNode {
         disabled={!form.canSubmit}
         className="rounded-lg bg-[var(--color-primary)] px-4 py-2 text-sm font-semibold text-[var(--color-primary-fg)] disabled:opacity-50"
       >
-        {t('contact.form.submit')}
+        {t(submitKey)}
       </button>
+
+      <p className="text-xs text-[var(--color-muted)]">
+        {t('contact.form.cooldown', { minutes: CONTACT_COOLDOWN_MINUTES })}
+      </p>
     </form>
   )
 }
