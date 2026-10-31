@@ -16,6 +16,23 @@ const item = (group: ReleaseGroup, ua: string, ru: string, en: string): ReleaseI
  */
 export const RELEASES: readonly ReleaseDay[] = [
   {
+    date: '2026-10-31',
+    items: [
+      item(
+        'new',
+        'Сторінка /contact: форма зв’язку, що приватно доходить до команди (поштову адресу не публікуємо), і можливість замовити новий застосунок; авторизовані пишуть одразу, анонімні підтверджують пошту кодом з листа, одне повідомлення раз на 10 хвилин; посилання «© рік carsua.app» тепер у футері кожної сторінки',
+        'Страница /contact: форма связи, которая приватно доходит до команды (почтовый адрес не публикуем), и возможность заказать новое приложение; авторизованные пишут сразу, анонимные подтверждают почту кодом из письма, одно сообщение раз в 10 минут; ссылка «© год carsua.app» теперь в футере каждой страницы',
+        'A /contact page: a form that reaches the team privately (no email address is published) and a way to order a new app; signed-in users write directly, anonymous senders confirm their email with an emailed code, one message per 10 minutes; a "© year carsua.app" link now sits in the footer of every page'
+      ),
+      item(
+        'improved',
+        'Сторінка «Про застосунок»: коротка добірка всіх можливостей перед докладним описом; Cloudflare Turnstile і Resend в джерелах згадують і форму зв’язку',
+        'Страница «О приложении»: краткая подборка всех возможностей перед подробным описанием; Cloudflare Turnstile и Resend в источниках упоминают и форму связи',
+        'About page: a short overview of every feature above the detailed list; the Cloudflare Turnstile and Resend sources now mention the contact form too'
+      )
+    ]
+  },
+  {
     date: '2026-10-30',
     items: [
       item(

@@ -9,6 +9,7 @@ describe('sitemap', () => {
       '/about',
       '/privacy',
       '/terms',
+      '/contact',
       '/stats',
       '/fuel',
       '/safety',

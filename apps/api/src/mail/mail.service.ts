@@ -16,6 +16,8 @@ export type OutgoingMail = {
   from?: string
   /** Extra headers, e.g. `List-Unsubscribe`. */
   headers?: Record<string, string>
+  /** Overrides `MAIL_REPLY_TO` (the contact form replies straight to the sender). */
+  replyTo?: string
 }
 
 const RESEND_URL = 'https://api.resend.com/emails'
@@ -59,7 +61,7 @@ export class MailService {
         html: mail.html,
         text: mail.text,
         ...(mail.headers ? { headers: mail.headers } : {}),
-        ...(this.env.MAIL_REPLY_TO ? { reply_to: this.env.MAIL_REPLY_TO } : {})
+        ...((mail.replyTo ?? this.env.MAIL_REPLY_TO) ? { reply_to: mail.replyTo ?? this.env.MAIL_REPLY_TO } : {})
       }),
       signal: AbortSignal.timeout(SEND_TIMEOUT_MS)
     })
@@ -78,7 +80,7 @@ export class MailService {
       html: mail.html,
       text: mail.text,
       headers: mail.headers,
-      replyTo: this.env.MAIL_REPLY_TO
+      replyTo: mail.replyTo ?? this.env.MAIL_REPLY_TO
     })
   }
 }

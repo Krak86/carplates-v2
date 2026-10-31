@@ -20,12 +20,14 @@ const LEGAL_LINKS = [
   { to: '/install', key: 'install.heading' },
   { to: '/privacy', key: 'legal.privacy.heading' },
   { to: '/terms', key: 'legal.terms.heading' },
+  { to: '/contact', key: 'contact.footerLink' },
   { to: '/discuss', key: 'report.footer' }
 ] as const
 
 /** Shortcut links shown at the bottom of every page. */
 export default function QuickLinks(): ReactNode {
   const { t } = useTranslation()
+  const year = new Date().getFullYear()
 
   return (
     <nav className="flex flex-col items-center gap-3 px-4 pb-6 md:pb-8">
@@ -54,6 +56,12 @@ export default function QuickLinks(): ReactNode {
           </Link>
         ))}
       </div>
+
+      <p className="text-xs text-[var(--color-muted)]">
+        <Link viewTransition to="/contact" className="hover:text-[var(--color-fg)] hover:underline">
+          {t('footer.copyright', { year })}
+        </Link>
+      </p>
     </nav>
   )
 }

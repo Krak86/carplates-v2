@@ -43,7 +43,7 @@ export async function renderSample(
       unsubscribeUrl: 'https://carsua.app/unsubscribe#t=sample'
     })
   }
-  if (kind === 'signIn' || kind === 'setEmail' || kind === 'reauth') {
+  if (kind === 'signIn' || kind === 'setEmail' || kind === 'reauth' || kind === 'contact') {
     return renderCodeMail({ kind, lang, code: '123456', link, minutes: 15, device: 'Chrome on Windows' })
   }
   return renderNoticeMail({

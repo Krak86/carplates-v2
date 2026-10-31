@@ -23,12 +23,13 @@ import {
   hashLinkToken
 } from './email-challenge.js'
 
-export type ChallengePurpose = 'sign_in' | 'set_email' | 'reauth'
+export type ChallengePurpose = 'sign_in' | 'set_email' | 'reauth' | 'contact'
 
 const KIND_BY_PURPOSE: Record<ChallengePurpose, CodeMailKind> = {
   sign_in: 'signIn',
   set_email: 'setEmail',
-  reauth: 'reauth'
+  reauth: 'reauth',
+  contact: 'contact'
 }
 
 export type CreateChallengeInput = {

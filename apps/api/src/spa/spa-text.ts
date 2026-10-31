@@ -86,6 +86,22 @@ export const STATIC_PAGES: Record<string, Record<Lang, PageText>> = {
     ru: { title: 'Cars UA - Условия использования', description: 'Правила использования сервиса Cars UA.' },
     en: { title: 'Cars UA - Terms of use', description: 'The rules for using Cars UA.' }
   },
+  '/contact': {
+    ua: {
+      title: 'Cars UA - Контакти та замовлення застосунків',
+      description:
+        'Напишіть команді Cars UA або замовте новий застосунок: вебзастосунки, інструменти на відкритих даних.'
+    },
+    ru: {
+      title: 'Cars UA - Контакты и заказ приложений',
+      description:
+        'Напишите команде Cars UA или закажите новое приложение: веб-приложения, инструменты на открытых данных.'
+    },
+    en: {
+      title: 'Cars UA - Contact and custom apps',
+      description: 'Write to the Cars UA team or order a new app: web apps and tools built on open data.'
+    }
+  },
   '/history': {
     ua: { title: 'Cars UA - Історія пошуку', description: 'Ваші останні пошуки за номером і VIN.' },
     ru: { title: 'Cars UA - История поиска', description: 'Ваши последние поиски по номеру и VIN.' },

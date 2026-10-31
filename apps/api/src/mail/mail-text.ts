@@ -1,7 +1,7 @@
 import type { Lang } from '../spa/spa-text.js'
 
 /** Email kinds. Code emails carry a 6-digit code + magic link; notice emails are informational with an optional button. */
-export const CODE_MAIL_KINDS = ['signIn', 'setEmail', 'reauth'] as const
+export const CODE_MAIL_KINDS = ['signIn', 'setEmail', 'reauth', 'contact'] as const
 export const NOTICE_MAIL_KINDS = ['emailChanged', 'newSignIn', 'deletionScheduled'] as const
 /** The monthly "what's new" mail; not a sign-in / security kind, so it has its own text table (`DIGEST_TEXT`). */
 export const DIGEST_MAIL_KIND = 'digest'
@@ -126,10 +126,35 @@ const REAUTH_TEXT: Record<Lang, CodeMailText> = {
   }
 }
 
+const CONTACT_TEXT: Record<Lang, CodeMailText> = {
+  ua: {
+    ...SIGN_IN_TEXT.ua,
+    subject: code => `${code} - підтвердіть пошту для повідомлення на carsua.app`,
+    heading: 'Підтвердіть свою пошту',
+    intro: 'Ви хочете написати команді carsua.app. Введіть цей код у формі, щоб підтвердити, що ця пошта ваша.',
+    button: 'Підтвердити'
+  },
+  ru: {
+    ...SIGN_IN_TEXT.ru,
+    subject: code => `${code} - подтвердите почту для сообщения на carsua.app`,
+    heading: 'Подтвердите свою почту',
+    intro: 'Вы хотите написать команде carsua.app. Введите этот код в форме, чтобы подтвердить, что эта почта ваша.',
+    button: 'Подтвердить'
+  },
+  en: {
+    ...SIGN_IN_TEXT.en,
+    subject: code => `${code} confirms your email for a message to carsua.app`,
+    heading: 'Confirm your email',
+    intro: 'You are writing to the carsua.app team. Enter this code in the form to confirm the address is yours.',
+    button: 'Confirm'
+  }
+}
+
 export const CODE_TEXT: Record<CodeMailKind, Record<Lang, CodeMailText>> = {
   signIn: SIGN_IN_TEXT,
   setEmail: SET_EMAIL_TEXT,
-  reauth: REAUTH_TEXT
+  reauth: REAUTH_TEXT,
+  contact: CONTACT_TEXT
 }
 
 export const NOTICE_TEXT: Record<NoticeMailKind, Record<Lang, NoticeMailText>> = {

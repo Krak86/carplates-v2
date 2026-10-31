@@ -312,7 +312,8 @@ const FEATURES = [
   'pwa',
   'agents',
   'roadmap',
-  'drawings'
+  'drawings',
+  'contact'
 ] as const
 
 // Lazy-loaded (see App.tsx).
@@ -373,8 +374,21 @@ export default function AboutRoute(): ReactNode {
             <Link to="/terms" className="text-[var(--color-primary)] underline">
               {t('legal.terms.heading')}
             </Link>
+            {' · '}
+            <Link to="/contact" className="text-[var(--color-primary)] underline">
+              {t('contact.heading')}
+            </Link>
           </p>
         </div>
+      </Card>
+
+      <Card className="space-y-3 text-sm text-[var(--color-fg)]">
+        <h2 className="font-semibold">{t('about.briefHeading')}</h2>
+        <ul className="grid list-disc gap-x-6 gap-y-1 pl-5 sm:grid-cols-2 lg:grid-cols-3">
+          {FEATURES.map(key => (
+            <li key={key}>{t(`about.brief.${key}`)}</li>
+          ))}
+        </ul>
       </Card>
 
       <Card className="space-y-3 text-sm text-[var(--color-fg)]">
