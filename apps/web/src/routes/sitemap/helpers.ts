@@ -42,7 +42,11 @@ export const SITEMAP_GROUPS: readonly SitemapGroup[] = [
   {
     id: 'cars',
     icon: '🚗',
-    links: [link('/cars', '🚗', 'nav.cars'), link('/compare', '⚖️', 'nav.compare')]
+    links: [
+      link('/cars', '🚗', 'nav.cars'),
+      link('/compare', '⚖️', 'nav.compare'),
+      link('/customs', '🧮', 'nav.customs')
+    ]
   },
   {
     id: 'stats',
@@ -129,7 +133,16 @@ export const SITEMAP_TIPS: readonly SitemapTip[] = [
 ]
 
 /** Routes that exist but are not pages to browse to: a plate/VIN lookup, share links, e-mail links, the admin area. */
-export const HIDDEN_ROUTES: readonly string[] = ['/:query', '/go/:alias', '/auth/email', '/unsubscribe', '/admin', '*']
+export const HIDDEN_ROUTES: readonly string[] = [
+  '/:query',
+  '/go/:alias',
+  '/auth/email',
+  '/unsubscribe',
+  '/login',
+  '/logout',
+  '/admin',
+  '*'
+]
 
 /** Catalog detail pages are reached from `/cars`, not listed one by one. */
 export const CATALOG_ROUTES: readonly string[] = ['/cars/:make', '/cars/:make/:model']

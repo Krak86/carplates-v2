@@ -2,11 +2,19 @@ import type { ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
-import { setamLotUrl } from '@carplates/shared'
 
 import LoadErrorBoundary from '@/components/LoadErrorBoundary'
 import Card from '@/components/ui/Card'
-import { formatLotMonth, formatPrice } from '@/components/ua-auctions/helpers'
+import {
+  formatLotMonth,
+  formatPrice,
+  lotKey,
+  lotLink,
+  lotMonthOf,
+  lotSourceAccent,
+  mixLots
+} from '@/components/ua-auctions/helpers'
+import { cn } from '@/lib/cn'
 import { toIntlLocale } from '@/lib/intl'
 import { auctionListQuery } from '@/lib/queries'
 
@@ -16,8 +24,10 @@ const TEASER_SIZE = 5
 export default function HomeAuctionsSection(): ReactNode {
   const { t, i18n } = useTranslation()
   const locale = toIntlLocale(i18n.language)
-  const { data } = useQuery(auctionListQuery({ outcome: 'open', sort: 'newest' }))
-  const lots = data?.lots.slice(0, TEASER_SIZE) ?? []
+  // Same mix as the /auctions "new lots" card: Prozorro lots are newer and would crowd SETAM out of a single list.
+  const setam = useQuery(auctionListQuery({ outcome: 'open', sort: 'newest', source: 'setam' })).data
+  const prozorro = useQuery(auctionListQuery({ outcome: 'open', sort: 'newest', source: 'prozorro' })).data
+  const lots = mixLots(setam?.lots ?? [], prozorro?.lots ?? [], TEASER_SIZE)
 
   if (lots.length === 0) return null
 
@@ -34,9 +44,12 @@ export default function HomeAuctionsSection(): ReactNode {
               const price = formatPrice(lot.startPrice, 'UAH', null, locale)
 
               return (
-                <li key={lot.lotNo} className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5 py-2">
+                <li
+                  key={lotKey(lot)}
+                  className={cn('flex flex-wrap items-baseline gap-x-3 gap-y-0.5 py-2 pl-2', lotSourceAccent(lot))}
+                >
                   <a
-                    href={setamLotUrl(lot.lotNo)}
+                    href={lotLink(lot) ?? undefined}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="font-semibold text-[var(--color-primary)] underline"
@@ -46,7 +59,7 @@ export default function HomeAuctionsSection(): ReactNode {
                   </a>
 
                   <span className="min-w-0 flex-1 text-xs text-[var(--color-muted)]">
-                    {[formatLotMonth(lot.month, locale), lot.region].filter(Boolean).join(' · ')}
+                    {[formatLotMonth(lotMonthOf(lot), locale), lot.region].filter(Boolean).join(' · ')}
                   </span>
 
                   {price && <span className="text-sm tabular-nums">{price}</span>}

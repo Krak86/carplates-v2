@@ -1,11 +1,21 @@
 import type { ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { setamLotUrl } from '@carplates/shared'
 import type { Currency, FxResponse } from '@carplates/shared'
 
+import UaAuctionThumb from '@/components/ua-auctions/UaAuctionThumb'
 import Card from '@/components/ui/Card'
-import { formatLotMonth, formatPrice } from '@/components/ua-auctions/helpers'
+import {
+  formatLotMonth,
+  formatPrice,
+  lotKey,
+  lotLink,
+  lotMonthOf,
+  lotSourceAccent,
+  lotSource,
+  mixLots
+} from '@/components/ua-auctions/helpers'
+import { cn } from '@/lib/cn'
 import { toIntlLocale } from '@/lib/intl'
 import { auctionListQuery } from '@/lib/queries'
 
@@ -22,8 +32,11 @@ const SHOWN = 6
 export default function AuctionsNewLots({ currency, fx, onShowAll }: Props): ReactNode {
   const { t, i18n } = useTranslation()
   const locale = toIntlLocale(i18n.language)
-  const { data } = useQuery(auctionListQuery({ outcome: 'open', sort: 'newest' }))
-  const lots = data?.lots.slice(0, SHOWN) ?? []
+  // Prozorro lots are newer and would fill the whole list, so each source is asked on its own and the two are interleaved.
+  const setam = useQuery(auctionListQuery({ outcome: 'open', sort: 'newest', source: 'setam' })).data
+  const prozorro = useQuery(auctionListQuery({ outcome: 'open', sort: 'newest', source: 'prozorro' })).data
+  const lots = mixLots(setam?.lots ?? [], prozorro?.lots ?? [], SHOWN)
+  const total = (setam?.total ?? 0) + (prozorro?.total ?? 0)
 
   if (lots.length === 0) return null
 
@@ -33,36 +46,52 @@ export default function AuctionsNewLots({ currency, fx, onShowAll }: Props): Rea
         <h2 className="text-lg font-semibold">{t('auctions.page.new.title')}</h2>
 
         <button type="button" onClick={onShowAll} className="text-sm text-[var(--color-primary)] underline">
-          {t('auctions.page.new.all', { count: data?.total ?? lots.length })}
+          {t('auctions.page.new.all', { count: total || lots.length })}
         </button>
       </div>
 
       <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {lots.map(lot => (
           <li
-            key={lot.lotNo}
-            className="rounded-lg border border-[var(--color-border)] bg-[var(--color-border)]/20 p-3 text-sm"
-          >
-            <p className="font-semibold">🔔 {[lot.make, lot.model, lot.year].filter(Boolean).join(' ') || lot.title}</p>
-
-            <p className="text-[var(--color-muted)]">
-              {[formatLotMonth(lot.month, locale), lot.region].filter(Boolean).join(' · ')}
-            </p>
-
-            {lot.startPrice !== null && (
-              <p className="mt-1">
-                {t('uaAuctions.startPrice')}: <strong>{formatPrice(lot.startPrice, currency, fx, locale)}</strong>
-              </p>
+            key={lotKey(lot)}
+            className={cn(
+              'flex gap-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-border)]/20 p-3 text-sm',
+              lotSourceAccent(lot)
             )}
+          >
+            <UaAuctionThumb
+              docIds={lot.photos}
+              label={[lot.make, lot.model, lot.year].filter(Boolean).join(' ') || lot.title}
+              href={lotLink(lot)}
+              make={lot.make}
+              model={lot.model}
+              year={lot.year}
+              source={lotSource(lot)}
+            />
+            <div className="min-w-0 flex-1">
+              <p className="font-semibold">
+                🔔 {[lot.make, lot.model, lot.year].filter(Boolean).join(' ') || lot.title}
+              </p>
 
-            <a
-              href={setamLotUrl(lot.lotNo)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-1 inline-block text-[var(--color-primary)] underline"
-            >
-              {t('auctions.page.new.open')} ↗<span className="sr-only">{t('field.opensNewTab')}</span>
-            </a>
+              <p className="text-[var(--color-muted)]">
+                {[formatLotMonth(lotMonthOf(lot), locale), lot.region].filter(Boolean).join(' · ')}
+              </p>
+
+              {lot.startPrice !== null && (
+                <p className="mt-1">
+                  {t('uaAuctions.startPrice')}: <strong>{formatPrice(lot.startPrice, currency, fx, locale)}</strong>
+                </p>
+              )}
+
+              <a
+                href={lotLink(lot) ?? undefined}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-1 inline-block text-[var(--color-primary)] underline"
+              >
+                {t('auctions.page.new.open')} ↗<span className="sr-only">{t('field.opensNewTab')}</span>
+              </a>
+            </div>
           </li>
         ))}
       </ul>

@@ -1,0 +1,133 @@
+{
+  "documents": [
+    {
+      "documentType": "illustration",
+      "format": "image/jpeg",
+      "url": "https://procedure.prozorro.sale/api/documents/public/e66bebd073e4405d8af6e264e179719f",
+      "id": "7b018c38f3ab4a13ba2e1b3f8617b152",
+      "_ds_id": "e66bebd073e4405d8af6e264e179719f"
+    },
+    {
+      "documentType": "technicalSpecifications",
+      "format": "application/x-zip-compressed",
+      "url": "https://procedure.prozorro.sale/api/documents/public/9b78a93613af4e2a9ef8b4ce46b3bd05",
+      "id": "e0063bdf499248239b9b4c3186a4bb71",
+      "_ds_id": "9b78a93613af4e2a9ef8b4ce46b3bd05"
+    }
+  ],
+  "_protect_level": "high",
+  "description": {
+    "uk_UA": "Потребує заміни ланцюгів, ремонту циліндрів нахилу, шум в редукторі вед.моста, тріщини в РВТ. Без зарядного пристрою. Акумуляторна батарея 48V 7EPzB 735 з системою Акваматік- мала остаточна ємність"
+  },
+  "guarantee": {
+    "amount": 1860,
+    "currency": "UAH"
+  },
+  "title": {
+    "uk_UA": "Електронавантажувач Тойота №92 мод. 7FB25 рама 33885"
+  },
+  "_protected": false,
+  "sellingMethod": "commercialSell-english",
+  "valueAddedTaxCharged": false,
+  "auctionPeriod": {
+    "startDate": "2026-10-28T10:30:00.000000Z"
+  },
+  "value": {
+    "amount": 186000,
+    "valueAddedTaxIncluded": true,
+    "currency": "UAH"
+  },
+  "tenderPeriod": {
+    "endDate": "2026-10-27T18:00:00.000000Z",
+    "startDate": "2026-10-14T14:26:22.800000Z"
+  },
+  "owner": "e-tender.ua",
+  "minimalStep": {
+    "amount": 0.01,
+    "currency": "UAH"
+  },
+  "registrationFee": {
+    "amount": 340,
+    "currency": "UAH"
+  },
+  "dateModified": "2026-10-20T04:56:59.642000Z",
+  "lotId": "372",
+  "datePublished": "2026-10-14T14:26:22.797000Z",
+  "auctionId": "CSE001-UA-20261014-51644",
+  "metaInfo": {
+    "directions": [
+      "commercialSell"
+    ],
+    "categories": [
+      "transportSale"
+    ],
+    "auctionTypes": [
+      "english"
+    ]
+  },
+  "sellingEntity": {
+    "identifier": {
+      "legalName": {
+        "uk_UA": "ТОВАРИСТВО З ОБМЕЖЕНОЮ ВІДПОВІДАЛЬНІСТЮ \"САНДОРА\""
+      },
+      "scheme": "UA-EDR",
+      "id": "22430008"
+    },
+    "address": {
+      "postalCode": "57262",
+      "locality": {
+        "uk_UA": "Миколаївське"
+      },
+      "countryName": {
+        "en_US": "Ukraine",
+        "uk_UA": "Україна"
+      },
+      "region": {
+        "uk_UA": "Миколаївська область"
+      }
+    },
+    "name": {
+      "uk_UA": "ТОВАРИСТВО З ОБМЕЖЕНОЮ ВІДПОВІДАЛЬНІСТЮ \"САНДОРА\""
+    }
+  },
+  "minNumberOfQualifiedBids": 2,
+  "awards": [],
+  "tenderAttempts": 1,
+  "items": [
+    {
+      "itemProps": {
+        "itemPropsType": "vehicle",
+        "productionYear": 2008,
+        "damagePresence": true,
+        "damagedDescription": "Потребує заміни ланцюгів, ремонту циліндрів нахилу, шум в редукторі вед.моста, тріщини в РВТ"
+      },
+      "quantity": 1,
+      "address": {
+        "locality": {
+          "uk_UA": "Миколаївське"
+        },
+        "region": {
+          "uk_UA": "Миколаївська область"
+        }
+      },
+      "commercialSellItemType": "assets",
+      "description": {
+        "uk_UA": "Потребує заміни ланцюгів, ремонту циліндрів нахилу, шум в редукторі вед.моста, тріщини в РВТ. Без зарядного пристрою. Акумуляторна батарея 48V 7EPzB 735 з системою Акваматік- мала остаточна ємність"
+      },
+      "location": {
+        "latitude": "46.92529549719512",
+        "longitude": "32.12338313025426"
+      },
+      "id": "eca9dc4be1c14a6fa58fdf7b92d00343",
+      "classification": {
+        "scheme": "CAV",
+        "description": {
+          "en_US": "Transport equipment and auxiliary products to transportation",
+          "uk_UA": "Транспортне обладнання та допоміжне приладдя до нього"
+        },
+        "id": "34000000-7"
+      }
+    }
+  ],
+  "status": "cancelled"
+}

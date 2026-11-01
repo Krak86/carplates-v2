@@ -1,12 +1,11 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
-import { isSovietPlate, isUaPlate, normalizePlate, regionName } from '@carplates/shared'
+import { isSovietPlate, isUaPlate, normalizePlate } from '@carplates/shared'
 
-import NoRegionBadge from '@/components/NoRegionBadge'
+import FavoriteButton from '@/components/FavoriteButton'
 import OtherSourcesFound from '@/components/OtherSourcesFound'
 import RiaCheckLink from '@/components/RiaCheckLink'
-import { useRegionLabel } from '@/lib/region-label'
 import { PLATES_PATH } from '@/routes/read/links'
 
 type Props = {
@@ -16,27 +15,19 @@ type Props = {
 /** What we can still say about a plate with no registry match: its normalized form, region, and why it may be missing. */
 export default function NotFoundInfo({ value }: Props): ReactNode {
   const { t } = useTranslation()
-  const regionLabel = useRegionLabel()
   const plate = normalizePlate(value)
   const isPlate = isUaPlate(value)
   const isSoviet = !isPlate && isSovietPlate(value)
 
   return (
-    <div className="w-full max-w-content rounded-md bg-[var(--color-surface)]/20 px-3 py-2 text-left">
-      <p className="text-center text-[var(--color-muted)]">{t('result.noResults', { value })}</p>
+    <div className="relative w-full max-w-content rounded-md bg-[var(--color-surface)]/20 px-3 py-2 text-left">
+      {/* Saved without a registry match, so it is already in the user's list if a later data update adds it. */}
+      <FavoriteButton kind="plate" value={plate} label={null} className="absolute top-1 right-1" />
+      <p className="px-10 text-center text-[var(--color-muted)]">{t('result.noResults', { value })}</p>
 
-      {isPlate && (
-        <dl className="mt-2 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm">
-          <dt className="text-[var(--color-muted)]">{t('result.notFound.plate')}</dt>
-          <dd className="font-mono font-semibold">{plate}</dd>
-
-          <dt className="text-[var(--color-muted)]">{t('result.region')}</dt>
-          <dd>{regionLabel(regionName(plate)) ?? <NoRegionBadge plate={plate} />}</dd>
-        </dl>
-      )}
-
-      {/* Old-format plates are the likeliest to be in the wanted lists only, so Soviet shapes are looked up too. */}
-      {(isPlate || isSoviet) && <OtherSourcesFound plate={plate} />}
+      {/* Old-format plates are the likeliest to be in the wanted lists only, so Soviet shapes are looked up too.
+          Its plate line and data list are drawn like the registry card. */}
+      {(isPlate || isSoviet) && <OtherSourcesFound plate={plate} showPlate={isPlate} />}
 
       <p className="mt-2 text-sm text-[var(--color-muted)]">
         {isPlate ? t('result.notFound.hintPlate') : t('result.notFound.hintFormat')}

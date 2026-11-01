@@ -53,9 +53,9 @@ export const ELECTRIC_LEAD: L10n = {
 }
 
 export const IMPORTS_LEAD: L10n = {
-  ua: 'Скільки авто ввезено з-за кордону, а скільки куплено через дилера, які моделі ввозять найчастіше і що VIN каже про країну виробництва? Ще - що перевірити перед купівлею.',
-  ru: 'Сколько авто ввезено из-за границы, а сколько куплено через дилера, какие модели ввозят чаще всего и что VIN говорит о стране сборки? А ещё - что проверить перед покупкой.',
-  en: 'How many cars were brought in from abroad and how many bought through a dealer, which models are imported most, and what does the VIN say about the country of build? Plus what to check before buying.'
+  ua: 'Скільки авто ввезено з-за кордону, а скільки куплено через дилера, які моделі ввозять найчастіше і що VIN каже про країну виробництва? Ще - скільки коштує розмитнення і що перевірити перед купівлею.',
+  ru: 'Сколько авто ввезено из-за границы, а сколько куплено через дилера, какие модели ввозят чаще всего и что VIN говорит о стране сборки? А ещё - сколько стоит растаможка и что проверить перед покупкой.',
+  en: 'How many cars were brought in from abroad and how many bought through a dealer, which models are imported most, and what does the VIN say about the country of build? Plus what customs costs and what to check before buying.'
 }
 
 export const SAFETY_LEAD: L10n = {
@@ -89,9 +89,9 @@ export const RECALLS_LEAD: L10n = {
 }
 
 export const AUCTIONS_LEAD: L10n = {
-  ua: 'Що таке лот на аукціоні арештованого майна, як узяти участь, скільки лотів у наших даних і чим це відрізняється від США чи Британії? Ще - коротка історія аукціонів і що перевірити перед ставкою.',
-  ru: 'Что такое лот на аукционе арестованного имущества, как принять участие, сколько лотов в наших данных и чем это отличается от США или Британии? А ещё - краткая история аукционов и что проверить перед ставкой.',
-  en: 'What is a lot at an auction of seized property, how do you take part, how many lots are in our data, and how does it differ from the USA or the UK? Plus a short history of auctions and what to check before you bid.'
+  ua: 'Що таке лот на аукціоні арештованого майна, хто продає авто на СЕТАМ і Prozorro.Продажах, скільки лотів у наших даних, як узяти участь і чим це відрізняється від США чи Британії? Ще - приклади реальних лотів, коротка історія аукціонів і що перевірити перед ставкою.',
+  ru: 'Что такое лот на аукционе арестованного имущества, кто продаёт авто на СЕТАМ и Prozorro.Продажи, сколько лотов в наших данных, как принять участие и чем это отличается от США или Британии? А ещё - примеры реальных лотов, краткая история аукционов и что проверить перед ставкой.',
+  en: 'What is a lot at an auction of seized property, who sells cars on SETAM and Prozorro.Sale, how many lots are in our data, how do you take part, and how does it differ from the USA or the UK? Plus examples of real lots, a short history of auctions and what to check before you bid.'
 }
 
 export const BODY_TYPES_TAGS: L10n[] = [

@@ -8,7 +8,7 @@ import Card from '@/components/ui/Card'
 import Spinner from '@/components/ui/Spinner'
 import { cn } from '@/lib/cn'
 import { brandStatsQuery } from '@/lib/queries'
-import { LOGO_TEXT_TOP } from '@/routes/play/logo-text'
+import { logoTextMask } from '@/routes/play/logo-text'
 import { buildLogoRounds, logoBrands } from '@/routes/play/helpers'
 import type { LogoRound } from '@/routes/play/helpers'
 import QuizEnd from '@/routes/play/QuizEnd'
@@ -30,7 +30,7 @@ function LogoRounds({ rounds, onAgain }: { rounds: LogoRound[]; onAgain: () => v
 
   const answered = picked !== null
   const logoUrl = brandLogoUrl(round.answer)
-  const textTop = LOGO_TEXT_TOP[logoUrl?.split('/').pop()?.split('.')[0] ?? '']
+  const mask = answered ? undefined : logoTextMask(logoUrl?.split('/').pop()?.split('.')[0] ?? '')
 
   const handlePick = (brand: string): void => {
     setPicked(brand)
@@ -60,13 +60,16 @@ function LogoRounds({ rounds, onAgain }: { rounds: LogoRound[]; onAgain: () => v
             src={logoUrl ?? undefined}
             alt={answered ? round.answer : t('play.logo.alt')}
             className="max-h-24 max-w-40 object-contain"
+            style={mask?.sharp}
           />
-          {/* Most logos spell the brand under the emblem: blur that strip until answered (a name inside the emblem stays) */}
-          {!answered && textTop !== undefined && (
-            <span
+          {/* Most logos spell the brand: a blurred copy hides the name until answered (the sharp one has a hole there) */}
+          {mask && (
+            <img
+              src={logoUrl ?? undefined}
+              alt=""
               aria-hidden
-              className="absolute inset-x-0 bottom-0 backdrop-blur-[6px]"
-              style={{ top: `${textTop * 100}%` }}
+              className="absolute inset-0 size-full object-contain blur-[6px]"
+              style={mask.blurred}
             />
           )}
         </span>

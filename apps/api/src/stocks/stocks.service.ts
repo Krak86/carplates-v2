@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common'
-import { stockCompanyFor, yahooFinanceNewsUrl, yahooFinanceUrl } from '@carplates/shared'
-import type { StockNewsResponse, StockRange, StockResponse } from '@carplates/shared'
+import { isStockInstrumentSymbol, stockCompanyFor, yahooFinanceNewsUrl, yahooFinanceUrl } from '@carplates/shared'
+import type { StockNewsResponse, StockQuoteResponse, StockRange, StockResponse } from '@carplates/shared'
 import { z } from 'zod'
 
 const CHART_URL = 'https://query1.finance.yahoo.com/v8/finance/chart'
@@ -23,7 +23,12 @@ const chartSchema = z.object({
           meta: z.object({
             currency: z.string().optional(),
             regularMarketPrice: z.number().optional(),
-            chartPreviousClose: z.number().optional()
+            chartPreviousClose: z.number().optional(),
+            longName: z.string().optional(),
+            fullExchangeName: z.string().optional(),
+            fiftyTwoWeekHigh: z.number().optional(),
+            fiftyTwoWeekLow: z.number().optional(),
+            regularMarketVolume: z.number().optional()
           }),
           timestamp: z.array(z.number()).optional(),
           indicators: z.object({ quote: z.array(z.object({ close: z.array(z.number().nullable()).optional() })) })
@@ -35,12 +40,23 @@ const chartSchema = z.object({
 
 const EMPTY: StockResponse = { company: null, currency: null, price: null, baseline: null, points: [] }
 
+const EMPTY_QUOTE: StockQuoteResponse = {
+  symbol: '',
+  name: null,
+  exchange: null,
+  currency: null,
+  price: null,
+  baseline: null,
+  points: []
+}
+
 const EMPTY_NEWS: StockNewsResponse = { company: null, moreUrl: null, items: [] }
 
 @Injectable()
 export class StocksService {
   private readonly logger = new Logger(StocksService.name)
   private readonly cache = new Map<string, { at: number; value: StockResponse }>()
+  private readonly quoteCache = new Map<string, { at: number; value: StockQuoteResponse }>()
   private readonly newsCache = new Map<string, { at: number; value: StockNewsResponse }>()
 
   async lookup(brand: string, range: StockRange): Promise<StockResponse> {
@@ -63,11 +79,50 @@ export class StocksService {
     }
   }
 
-  private async fetchChart(
-    company: NonNullable<ReturnType<typeof stockCompanyFor>>,
+  /** One instrument of the brand's listed company (main listing, preferred, ADR, other venue); anything else is empty. */
+  async quote(brand: string, symbol: string, range: StockRange): Promise<StockQuoteResponse> {
+    const company = stockCompanyFor(brand)
+    const empty: StockQuoteResponse = { ...EMPTY_QUOTE, symbol }
+    if (!company || !isStockInstrumentSymbol(company, symbol)) return empty
+
+    const key = `${symbol}|${range}`
+    const hit = this.quoteCache.get(key)
+    if (hit && Date.now() - hit.at < CACHE_TTL_MS) return hit.value
+
+    try {
+      const { result, points, baseline } = await this.fetchSeries(symbol, range)
+      // Yahoo reports 0 for a fact it does not have (a closed or thinly traded venue).
+      const fact = (n: number | undefined): number | null => (n ? n : null)
+      const value: StockQuoteResponse = {
+        symbol,
+        name: result.meta.longName ?? null,
+        exchange: result.meta.fullExchangeName ?? null,
+        currency: result.meta.currency ?? null,
+        price: result.meta.regularMarketPrice ?? points.at(-1)?.[1] ?? null,
+        baseline,
+        points,
+        yearLow: fact(result.meta.fiftyTwoWeekLow),
+        yearHigh: fact(result.meta.fiftyTwoWeekHigh),
+        volume: fact(result.meta.regularMarketVolume)
+      }
+      if (this.quoteCache.size >= CACHE_MAX) this.quoteCache.delete(this.quoteCache.keys().next().value!)
+      this.quoteCache.set(key, { at: Date.now(), value })
+      return value
+    } catch (err) {
+      this.logger.warn(`Stock quote failed for ${symbol}: ${err instanceof Error ? err.message : err}`)
+      return hit?.value ?? empty
+    }
+  }
+
+  private async fetchSeries(
+    symbol: string,
     range: StockRange
-  ): Promise<StockResponse> {
-    const url = `${CHART_URL}/${encodeURIComponent(company.symbol)}?range=${range}&interval=${INTERVAL[range]}`
+  ): Promise<{
+    result: NonNullable<z.infer<typeof chartSchema>['chart']['result']>[number]
+    points: [number, number][]
+    baseline: number | null
+  }> {
+    const url = `${CHART_URL}/${encodeURIComponent(symbol)}?range=${range}&interval=${INTERVAL[range]}`
     const res = await fetch(url, {
       headers: { 'User-Agent': 'Mozilla/5.0 (compatible; carsua.app)', Accept: 'application/json' },
       signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS)
@@ -85,6 +140,15 @@ export class StocksService {
     // 1d: change vs the previous session's close; longer ranges: vs the first close of the range.
     const baseline =
       range === '1d' ? (result.meta.chartPreviousClose ?? points[0]?.[1] ?? null) : (points[0]?.[1] ?? null)
+
+    return { result, points, baseline }
+  }
+
+  private async fetchChart(
+    company: NonNullable<ReturnType<typeof stockCompanyFor>>,
+    range: StockRange
+  ): Promise<StockResponse> {
+    const { result, points, baseline } = await this.fetchSeries(company.symbol, range)
 
     return {
       company: { id: company.id, name: company.name, symbol: company.symbol, url: yahooFinanceUrl(company.symbol) },

@@ -81,6 +81,7 @@ jobs:
           HC_PING_WANTED: ${{ secrets.HC_PING_WANTED }}
           HC_PING_WANTED_PLATES: ${{ secrets.HC_PING_WANTED_PLATES }}
           HC_PING_AUCTIONS: ${{ secrets.HC_PING_AUCTIONS }}
+          HC_PING_PROZORRO_AUCTIONS: ${{ secrets.HC_PING_PROZORRO_AUCTIONS }}
           HC_PING_PLATES: ${{ secrets.HC_PING_PLATES }}
           HC_PING_DTP_PATROL: ${{ secrets.HC_PING_DTP_PATROL }}
           HC_PING_DTP_HAZARDS: ${{ secrets.HC_PING_DTP_HAZARDS }}
@@ -91,7 +92,7 @@ jobs:
           emit() { for n in "$@"; do v="${!n:-}"; [ -n "$v" ] && printf '%s=%s\n' "$n" "$v"; done; return 0; }
           {
             printf 'DATABASE_URL=postgres://carplates:%s@postgres:5432/carplates\n' "$POSTGRES_PASSWORD"
-            emit HC_PING_NEWS HC_PING_SOCIAL HC_PING_WANTED HC_PING_WANTED_PLATES HC_PING_AUCTIONS HC_PING_PLATES HC_PING_DTP_PATROL HC_PING_DTP_HAZARDS HC_PING_RDW_RECALLS HC_PING_CA_RECALLS
+            emit HC_PING_NEWS HC_PING_SOCIAL HC_PING_WANTED HC_PING_WANTED_PLATES HC_PING_AUCTIONS HC_PING_PROZORRO_AUCTIONS HC_PING_PLATES HC_PING_DTP_PATROL HC_PING_DTP_HAZARDS HC_PING_RDW_RECALLS HC_PING_CA_RECALLS
           } > ingest.env
           ssh vps 'umask 077; cat > /opt/carsua/env/ingest.env.new && mv /opt/carsua/env/ingest.env.new /opt/carsua/env/ingest.env' < ingest.env
           rm -f ingest.env

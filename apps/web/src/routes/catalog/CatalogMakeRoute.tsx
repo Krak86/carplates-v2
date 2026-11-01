@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { lazy, useState } from 'react'
 import type { ReactNode } from 'react'
-import { CATALOG_INDEX_PATH, catalogMakeParamsSchema, catalogPath } from '@carplates/shared'
+import { CATALOG_INDEX_PATH, catalogMakeParamsSchema, catalogPath, stockCompanyFor } from '@carplates/shared'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { Link, useParams } from 'react-router'
@@ -10,6 +10,7 @@ import BrandLogo from '@/components/BrandLogo'
 import CatalogAdvancedSearchNote from '@/components/catalog/CatalogAdvancedSearchNote'
 import CatalogAuctionLine from '@/components/catalog/CatalogAuctionLine'
 import CatalogBreadcrumb from '@/components/catalog/CatalogBreadcrumb'
+import LazySection from '@/components/LazySection'
 import Card from '@/components/ui/Card'
 import SectionSkeleton from '@/components/ui/SectionSkeleton'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
@@ -18,6 +19,19 @@ import { toIntlLocale } from '@/lib/intl'
 import { catalogMakeQuery } from '@/lib/queries'
 
 import { filterModels, yearRangeLabel } from './helpers'
+
+const SharePriceSection = lazy(() => import('@/components/SharePriceSection'))
+
+/** The make's share price in its own card; nothing at all for a make with no listed company. */
+function SharePriceCard({ brand }: { brand: string }): ReactNode {
+  if (!stockCompanyFor(brand)) return null
+
+  return (
+    <Card>
+      <SharePriceSection brand={brand} standalone half />
+    </Card>
+  )
+}
 
 function CatalogMakeNotFound(): ReactNode {
   const { t } = useTranslation()
@@ -165,6 +179,10 @@ export default function CatalogMakeRoute(): ReactNode {
           </table>
         )}
       </Card>
+
+      <LazySection>
+        <SharePriceCard brand={make.topBrand} />
+      </LazySection>
 
       <Card>
         <CatalogAdvancedSearchNote brand={make.topBrand} />

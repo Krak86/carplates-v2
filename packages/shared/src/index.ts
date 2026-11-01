@@ -234,6 +234,18 @@ export {
   type StockCompany,
   type StockRange
 } from './stockCompanies.js'
+export {
+  STOCK_INSTRUMENT_KINDS,
+  bondSearchUrl,
+  instrumentLinks,
+  isStockInstrumentSymbol,
+  stockInstrumentsFor,
+  stockQuoteResponseSchema,
+  tradingViewUrl,
+  type StockInstrument,
+  type StockInstrumentKind,
+  type StockQuoteResponse
+} from './stockInstruments.js'
 export { MAX_VIDEOS, videoLookup, type InfocarVideoRow } from './infocarVideoLookup.js'
 export { MAX_OWNER_POSTS, edriveModelSlug, ownerPostLookup, type OwnerPostLookupRow } from './edriveLookup.js'
 export { MAX_TOPGEAR_REVIEWS, topgearLookup, type TopgearLookupRow } from './topgearLookup.js'
@@ -350,6 +362,21 @@ export {
 } from './rdwValue.js'
 export { customsAgeK, customsFuel, customsTax, UKR_DUTY_RATE, UKR_VAT_RATE } from './ukrCustoms.js'
 export type { CustomsFuel, CustomsTax } from './ukrCustoms.js'
+export {
+  buildCustomsQuery,
+  calcImportCosts,
+  CUSTOMS_PRESETS,
+  CUSTOMS_RULES,
+  customsRulesSchema,
+  DEFAULT_IMPORT_FUEL,
+  IMPORT_FUELS,
+  importAgeK,
+  mapFuel,
+  parseCustomsQuery,
+  pickCustomsRules,
+  UA_IMPORT_2026_1
+} from './customs.js'
+export type { CustomsQuery, CustomsRules, ImportCosts, ImportFuel, ImportInput } from './customs.js'
 export { convertEur, CURRENCIES, fxResponseSchema } from './fx.js'
 export type { Currency, FxResponse } from './fx.js'
 export { RIA_CHECK_URL, riaCheckResponseSchema } from './riaCheck.js'
@@ -755,6 +782,8 @@ export {
   auctionLotSchema,
   auctionResponseSchema,
   auctionPriceCheckSchema,
+  auctionVehicleSchema,
+  VEHICLE_CONFLICT_FIELDS,
   MIN_PRICE_PEERS,
   auctionListLotSchema,
   auctionListQuerySchema,
@@ -769,18 +798,36 @@ export {
   AUCTIONS_DATASET_URL,
   SETAM_URL,
   PROZORRO_SALE_URL,
-  setamLotUrl
+  setamLotUrl,
+  AUCTION_SOURCES,
+  DEFAULT_AUCTION_SOURCE,
+  AUCTION_GROUPS,
+  AUCTION_TYPES,
+  PROZORRO_SELLER_KINDS,
+  PROZORRO_STATUS_LABELS,
+  PROZORRO_DOCUMENT_BASE,
+  PROZORRO_DOC_ID_RE,
+  auctionGroup,
+  prozorroStatusLabel,
+  prozorroAuctionUrl,
+  prozorroDocumentUrl
 } from './auctions.js'
 export type {
   AuctionLot,
   AuctionResponse,
   AuctionPriceCheck,
+  AuctionVehicle,
+  VehicleConflictField,
   AuctionListLot,
   AuctionListParams,
   AuctionListQuery,
   AuctionListResponse,
   AuctionOutcome,
   AuctionSort,
+  AuctionSource,
+  AuctionGroup,
+  AuctionType,
+  ProzorroSellerKind,
   AuctionStatsRow,
   AuctionStatsResponse
 } from './auctions.js'

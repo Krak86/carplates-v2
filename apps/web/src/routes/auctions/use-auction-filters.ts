@@ -1,6 +1,21 @@
 import { useSearchParams } from 'react-router'
-import { AUCTION_OUTCOMES, AUCTION_SORTS, DEFAULT_AUCTION_OUTCOME, DEFAULT_AUCTION_SORT } from '@carplates/shared'
-import type { AuctionListQuery, AuctionOutcome, AuctionSort } from '@carplates/shared'
+import {
+  AUCTION_GROUPS,
+  AUCTION_OUTCOMES,
+  AUCTION_SORTS,
+  AUCTION_SOURCES,
+  AUCTION_TYPES,
+  DEFAULT_AUCTION_OUTCOME,
+  DEFAULT_AUCTION_SORT
+} from '@carplates/shared'
+import type {
+  AuctionGroup,
+  AuctionListQuery,
+  AuctionOutcome,
+  AuctionSort,
+  AuctionSource,
+  AuctionType
+} from '@carplates/shared'
 
 import { AUCTION_DIMENSIONS, DEFAULT_AUCTION_DIMENSION } from '@/routes/auctions/types'
 import type { AuctionDimension } from '@/routes/auctions/types'
@@ -9,13 +24,17 @@ function parseOf<T extends string>(list: readonly T[], value: string | null, fal
   return (list as readonly string[]).includes(value ?? '') ? (value as T) : fallback
 }
 
+/** An optional filter: the value when it is one of `list`, else no filter. */
+const parseOptional = <T extends string>(list: readonly T[], value: string | null): T | undefined =>
+  (list as readonly string[]).includes(value ?? '') ? (value as T) : undefined
+
 const parseNumber = (value: string | null): number | undefined => {
   if (!value) return undefined
   const n = Number(value)
   return Number.isFinite(n) && n >= 0 ? n : undefined
 }
 
-/** The `/auctions` filters live in the URL (`?make=&region=&outcome=&sort=&asc=&min=&max=&page=&dim=`) so a view can be shared. */
+/** The `/auctions` filters live in the URL (`?source=&group=&type=&make=&region=&outcome=&sort=&asc=&min=&max=&page=&dim=`) so a view can be shared. */
 export function useAuctionFilters() {
   const [searchParams, setSearchParams] = useSearchParams()
 
@@ -24,7 +43,15 @@ export function useAuctionFilters() {
   const sort: AuctionSort = parseOf(AUCTION_SORTS, searchParams.get('sort'), DEFAULT_AUCTION_SORT)
   const page = Math.max(1, Math.floor(parseNumber(searchParams.get('page')) ?? 1))
 
+  const source: AuctionSource | undefined = parseOptional(AUCTION_SOURCES, searchParams.get('source'))
+  const group: AuctionGroup | undefined = parseOptional(AUCTION_GROUPS, searchParams.get('group'))
+
+  const auctionType: AuctionType | undefined = parseOptional(AUCTION_TYPES, searchParams.get('type'))
+
   const query: AuctionListQuery = {
+    source,
+    group,
+    auctionType,
     make: searchParams.get('make') ?? undefined,
     region: searchParams.get('region') ?? undefined,
     status: searchParams.get('status') ?? undefined,

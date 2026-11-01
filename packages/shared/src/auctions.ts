@@ -1,12 +1,88 @@
 import { z } from 'zod'
 
+/** Where a lot comes from. A lot without `source` (offline data saved before Prozorro.Sale was added) is a SETAM lot. */
+export const AUCTION_SOURCES = ['setam', 'prozorro'] as const
+export type AuctionSource = (typeof AUCTION_SOURCES)[number]
+export const DEFAULT_AUCTION_SOURCE: AuctionSource = 'setam'
+
+/** Auction types of a Prozorro.Sale lot: `english` (price rises), `dutch` (price falls), `withoutAuction`, `priorityEnglish`. */
+export const AUCTION_TYPES = ['english', 'dutch', 'withoutAuction', 'priorityEnglish'] as const
+export type AuctionType = (typeof AUCTION_TYPES)[number]
+
+/** Seller kinds of a Prozorro.Sale auction (`scripts/src/prozorro-parse.ts` derives it at ingest from the seller and Prozorro's own tags). */
+export const PROZORRO_SELLER_KINDS = ['bank', 'customs', 'bankruptcy', 'arma', 'state', 'commercial', 'lease'] as const
+export type ProzorroSellerKind = (typeof PROZORRO_SELLER_KINDS)[number]
+
+/**
+ * Subcategories of the lot list, in presentation order. SETAM lots form their own group, Prozorro lots follow their seller
+ * (small privatization is told apart by the selling method, the rest of `state` is alienation and company property).
+ */
+export const AUCTION_GROUPS = [
+  'setam',
+  'customs',
+  'bankruptcy',
+  'privatization',
+  'state',
+  'bank',
+  'arma',
+  'commercial',
+  'lease'
+] as const
+export type AuctionGroup = (typeof AUCTION_GROUPS)[number]
+
+export function auctionGroup(
+  source: AuctionSource,
+  sellerKind: string | null | undefined,
+  sellingMethod: string | null | undefined
+): AuctionGroup {
+  if (source === 'setam') return 'setam'
+  if (/^(?:small|large)?privatization/i.test(sellingMethod ?? '')) return 'privatization'
+  return (PROZORRO_SELLER_KINDS as readonly string[]).includes(sellerKind ?? '')
+    ? (sellerKind as ProzorroSellerKind)
+    : 'state'
+}
+
+/**
+ * Prozorro auction status -> the SETAM status wording the lot list and card already know (`uaAuctions.status.*`), so the open /
+ * sold / not-sold logic is one. A status not listed is shown as published. `rawStatus` keeps the original.
+ */
+export const PROZORRO_STATUS_LABELS: Readonly<Record<string, string>> = {
+  active_rectification: 'Реєстрація учасників',
+  active_tendering: 'Реєстрація учасників',
+  // bidding is over, the winner is being qualified: still undecided, so it counts as open
+  active_qualification: 'Реєстрація учасників',
+  active_awarded: 'Складання акту',
+  pending_payment: 'Очікування сплати',
+  complete: 'Торги відбулися',
+  unsuccessful: 'Торги не відбулися',
+  cancelled: 'Торги припинено'
+}
+export const prozorroStatusLabel = (status: string): string => PROZORRO_STATUS_LABELS[status] ?? status
+
+/** Public page of one Prozorro.Sale auction. The ID is the full one with its prefix (`BRE001-UA-...`); without it the page is a 404. */
+export const prozorroAuctionUrl = (auctionId: string): string => `https://prozorro.sale/auction/${auctionId}/`
+
+/** Document store of Prozorro.Sale: photos are content-addressed and public. The API resizer takes only the 32-hex id. */
+export const PROZORRO_DOCUMENT_BASE = 'https://procedure.prozorro.sale/api/documents/public/'
+export const PROZORRO_DOC_ID_RE = /^[0-9a-f]{32}$/
+export const prozorroDocumentUrl = (docId: string): string => `${PROZORRO_DOCUMENT_BASE}${docId}`
+
 /**
  * A SETAM auction lot (seized / confiscated property, Cabinet Resolution 835) for a car or truck, from the data.gov.ua open
  * data (CC BY). Plate / VIN / make / model / year are parsed from the free-text title and null when it lacks them; the winner
  * is never stored. Own file: no offline-cache bust when it grows, so new fields must be `.nullable().optional()`.
  */
 export const auctionLotSchema = z.object({
-  lotNo: z.number(),
+  /** Stable key across both sources: `setam:<lotNo>` or `prozorro:<auctionId>`. Absent in data saved before Prozorro.Sale. */
+  id: z.string().nullable().optional(),
+  /** Absent / `setam` = SETAM. */
+  source: z.enum(AUCTION_SOURCES).nullable().optional(),
+  group: z.enum(AUCTION_GROUPS).nullable().optional(),
+  /** SETAM lot number; null for a Prozorro.Sale auction (its key is `auctionId`). */
+  lotNo: z.number().nullable(),
+  /** Prozorro.Sale only: the full auction ID and the public page of the auction. */
+  auctionId: z.string().nullable().optional(),
+  url: z.string().nullable().optional(),
   proceedingNo: z.string().nullable(),
   /** Feed status, Ukrainian (`Торги відбулися`, `Торги не відбулися`, …): the card maps the known ones. */
   status: z.string(),
@@ -30,7 +106,30 @@ export const auctionLotSchema = z.object({
   /** ISO timestamp the lot first appeared in our copy of the feed. */
   firstSeenAt: z.string(),
   /** ISO timestamp of its last real change (status / price). */
-  updatedAt: z.string()
+  updatedAt: z.string(),
+  // Prozorro.Sale only from here (all absent on SETAM lots). Own file: new fields stay `.nullable().optional()`.
+  /** Seller as published (arbitration manager, customs office, bank, state company ...). */
+  sellerName: z.string().nullable().optional(),
+  sellerKind: z.enum(PROZORRO_SELLER_KINDS).nullable().optional(),
+  /** `english` (price rises), `dutch` (price falls), `withoutAuction`, `priorityEnglish`. */
+  auctionType: z.string().nullable().optional(),
+  /** Prozorro status as published (`active_tendering`, `complete`, `unsuccessful` ...): the web maps it to a label. */
+  rawStatus: z.string().nullable().optional(),
+  /** ISO start of the bidding. */
+  auctionStart: z.string().nullable().optional(),
+  minimalStep: z.number().nullable().optional(),
+  guarantee: z.number().nullable().optional(),
+  color: z.string().nullable().optional(),
+  kilometrage: z.number().nullable().optional(),
+  fuel: z.string().nullable().optional(),
+  engineCc: z.number().nullable().optional(),
+  transmission: z.string().nullable().optional(),
+  condition: z.string().nullable().optional(),
+  damaged: z.boolean().nullable().optional(),
+  damageText: z.string().nullable().optional(),
+  locality: z.string().nullable().optional(),
+  /** Photo document ids (32 hex), see `prozorroDocumentUrl`; newest upload order as published. */
+  photos: z.array(z.string()).nullable().optional()
 })
 export type AuctionLot = z.infer<typeof auctionLotSchema>
 
@@ -55,7 +154,41 @@ export type AuctionPriceCheck = z.infer<typeof auctionPriceCheckSchema>
 /** Fewest sold peers a price check needs. */
 export const MIN_PRICE_PEERS = 3
 
+/** Vehicle fields where SETAM (parsed title) and Prozorro (structured props) can disagree; the merge flags them instead of picking silently. */
+export const VEHICLE_CONFLICT_FIELDS = ['make', 'model', 'year'] as const
+export type VehicleConflictField = (typeof VEHICLE_CONFLICT_FIELDS)[number]
+
+/**
+ * The car behind a plate / VIN lookup as one block, built from all its lots: each field once, a Prozorro structured value wins
+ * over a SETAM parsed title, inside one source the newest lot wins. Own contract: new fields stay `.nullable().optional()`.
+ */
+export const auctionVehicleSchema = z.object({
+  plate: z.string().nullable(),
+  vin: z.string().nullable(),
+  make: z.string().nullable(),
+  model: z.string().nullable(),
+  year: z.number().nullable(),
+  color: z.string().nullable(),
+  kilometrage: z.number().nullable(),
+  fuel: z.string().nullable(),
+  engineCc: z.number().nullable(),
+  transmission: z.string().nullable(),
+  condition: z.string().nullable(),
+  damaged: z.boolean().nullable(),
+  damageText: z.string().nullable(),
+  /** Fields where the sources disagree, each with the value every source gave (the first entry is the one shown above). */
+  conflicts: z.array(
+    z.object({
+      field: z.enum(VEHICLE_CONFLICT_FIELDS),
+      values: z.array(z.object({ source: z.enum(AUCTION_SOURCES), value: z.union([z.string(), z.number()]) }))
+    })
+  )
+})
+export type AuctionVehicle = z.infer<typeof auctionVehicleSchema>
+
 export const auctionResponseSchema = z.object({
+  /** Merged facts of the car, null / absent without lots. */
+  vehicle: auctionVehicleSchema.nullable().optional(),
   /** At least one lot is sold (has a sale price). */
   anySold: z.boolean(),
   /** Newest lot first (a re-listed car gets a new lot number). */
@@ -83,6 +216,11 @@ export const AUCTION_PAGE_SIZE = 25
 
 /** Query of `GET /api/auctions/lots` (the web builds it, the API parses it). Empty / absent = no filter. */
 export const auctionListQuerySchema = z.object({
+  /** Both sources unless set. */
+  source: z.enum(AUCTION_SOURCES).optional(),
+  group: z.enum(AUCTION_GROUPS).optional(),
+  /** Prozorro lots only (SETAM lots have none, so a type filter drops them). */
+  auctionType: z.enum(AUCTION_TYPES).optional(),
   make: z.string().trim().min(1).max(60).optional(),
   region: z.string().trim().min(1).max(60).optional(),
   /** Feed status as published (`Торги відбулися`, …), exact match. */
@@ -101,6 +239,9 @@ export const auctionListQuerySchema = z.object({
 })
 /** What the web sends (the schema's `z.input` is `unknown` for the coerced fields). */
 export type AuctionListQuery = {
+  source?: AuctionSource
+  group?: AuctionGroup
+  auctionType?: AuctionType
   make?: string
   region?: string
   status?: string

@@ -1,0 +1,178 @@
+{
+  "documents": [
+    {
+      "documentType": "illustration",
+      "format": "image/pjpeg",
+      "url": "https://procedure.prozorro.sale/api/documents/public/5857410ad88442028bb12f4ef6fc7138",
+      "id": "0664b886971845c3b2de4103efcf49b8",
+      "_ds_id": "5857410ad88442028bb12f4ef6fc7138"
+    },
+    {
+      "documentType": "illustration",
+      "format": "image/pjpeg",
+      "url": "https://procedure.prozorro.sale/api/documents/public/72e745871dde4755ad8cfef92b2c10c8",
+      "id": "43e76e1f4c5d44e9a78a7019663e16d1",
+      "_ds_id": "72e745871dde4755ad8cfef92b2c10c8"
+    },
+    {
+      "documentType": "illustration",
+      "format": "image/pjpeg",
+      "url": "https://procedure.prozorro.sale/api/documents/public/7c9ce720b8a244228e2d62b0fd97e222",
+      "id": "fa6287b72bd949eb82c5d6ccf9db35c0",
+      "_ds_id": "7c9ce720b8a244228e2d62b0fd97e222"
+    },
+    {
+      "documentType": "evaluationCriteria",
+      "format": "application/msword",
+      "url": "https://procedure.prozorro.sale/api/documents/public/08d80614b0e644f58fd0dd51c38deca1",
+      "id": "3ff066c1a0d34c8281c3e69333e4db49",
+      "_ds_id": "08d80614b0e644f58fd0dd51c38deca1"
+    }
+  ],
+  "_protect_level": "high",
+  "description": {
+    "uk_UA": "VOLKSWAGEN JETTA, рік випуску: 2016, VIN: WV2ZZZ2КZНХ073052, реєстраційний номер: АА7836РК, Колір: Білий, Об'єм двигуна: 1598 см3. З усіх питань прохання телефонувати відповідальній особі за огляд."
+  },
+  "guarantee": {
+    "amount": 15665,
+    "currency": "UAH"
+  },
+  "title": {
+    "uk_UA": "VOLKSWAGEN JETTA, рік випуску: 2016, VIN: WV2ZZZ2КZНХ073052, реєстраційний номер: АА7836РК"
+  },
+  "auctionUrl": "https://auction.prozorro.sale/CSE001-UA-20260924-12605",
+  "_protected": false,
+  "sellingMethod": "commercialSell-english",
+  "valueAddedTaxCharged": false,
+  "auctionPeriod": {
+    "endDate": "2026-10-09T10:01:03.548000Z",
+    "startDate": "2026-10-09T09:05:00.000000Z"
+  },
+  "tenderPeriod": {
+    "endDate": "2026-10-08T17:00:00.000000Z",
+    "startDate": "2026-09-24T10:25:08.941000Z"
+  },
+  "value": {
+    "amount": 313300,
+    "valueAddedTaxIncluded": true,
+    "currency": "UAH"
+  },
+  "owner": "smarttender.biz",
+  "minimalStep": {
+    "amount": 3133,
+    "currency": "UAH"
+  },
+  "registrationFee": {
+    "amount": 510,
+    "currency": "UAH"
+  },
+  "dateModified": "2026-10-15T07:49:19.293000Z",
+  "lotId": "А12-26",
+  "datePublished": "2026-09-24T10:25:08.935000Z",
+  "auctionId": "CSE001-UA-20260924-12605",
+  "metaInfo": {
+    "directions": [
+      "commercialSell"
+    ],
+    "categories": [
+      "cars"
+    ],
+    "auctionTypes": [
+      "english"
+    ]
+  },
+  "sellingEntity": {
+    "identifier": {
+      "legalName": {
+        "uk_UA": "АКЦІОНЕРНЕ ТОВАРИСТВО \"РАЙФФАЙЗЕН БАНК\""
+      },
+      "scheme": "UA-EDR",
+      "id": "14305909"
+    },
+    "address": {
+      "postalCode": "01011",
+      "locality": {
+        "uk_UA": "Київ"
+      },
+      "countryName": {
+        "uk_UA": "Україна"
+      },
+      "region": {
+        "uk_UA": "Київська область"
+      }
+    },
+    "name": {
+      "uk_UA": "АКЦІОНЕРНЕ ТОВАРИСТВО \"РАЙФФАЙЗЕН БАНК\""
+    }
+  },
+  "minNumberOfQualifiedBids": 1,
+  "awards": [
+    {
+      "status": "active",
+      "value": {
+        "amount": 410005,
+        "currency": "UAH"
+      }
+    },
+    {
+      "status": "pending_waiting",
+      "value": {
+        "amount": 410000,
+        "currency": "UAH"
+      }
+    }
+  ],
+  "tenderAttempts": 1,
+  "items": [
+    {
+      "itemProps": {
+        "itemPropsType": "vehicle",
+        "color": "Білий",
+        "configuration": "Центральний замок, мультимедіа, ABS",
+        "productionYear": 2016,
+        "damagePresence": true,
+        "engineCapacity": 1598,
+        "damagedDescription": "Клапан ЕГР",
+        "condition": "Справна",
+        "transmission": "manual",
+        "fuelType": "diesel",
+        "kilometrage": 201751,
+        "identificationNumber": "WV2ZZZ2КZНХ073052",
+        "model": "JETTA",
+        "brand": "VOLKSWAGEN"
+      },
+      "quantity": 1,
+      "address": {
+        "locality": {
+          "uk_UA": "Київ"
+        },
+        "region": {
+          "uk_UA": "Київська область"
+        }
+      },
+      "commercialSellItemType": "assets",
+      "description": {
+        "uk_UA": "ЛЕГКОВИЙ СЕДАН, VOLKSWAGEN JETTA"
+      },
+      "location": {
+        "latitude": "48.91982000",
+        "longitude": "24.71114000"
+      },
+      "id": "e088aacc5e544c51ab633c5dc57422a2",
+      "classification": {
+        "scheme": "CAV",
+        "description": {
+          "en_US": "Passenger cars",
+          "uk_UA": "Легкові автомобілі"
+        },
+        "id": "34110000-1"
+      }
+    }
+  ],
+  "inactivationDate": "2026-09-24T12:33:41.075000Z",
+  "qualificationPeriod": {
+    "endDate": "2026-11-06T16:00:00.000000Z",
+    "startDate": "2026-10-09T10:01:03.603000Z"
+  },
+  "status": "active_awarded"
+}

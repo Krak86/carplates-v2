@@ -1,0 +1,157 @@
+{
+  "documents": [
+    {
+      "documentType": "illustration",
+      "format": "image/jpeg",
+      "url": "https://procedure.prozorro.sale/api/documents/public/95dd3762e08d4d36835f042e4afcad2a",
+      "id": "8afce10f5628451d99ed0f5ebdf255ae",
+      "_ds_id": "95dd3762e08d4d36835f042e4afcad2a"
+    },
+    {
+      "documentType": "illustration",
+      "format": "image/jpeg",
+      "url": "https://procedure.prozorro.sale/api/documents/public/1b63305b233142ea96130f39866c3581",
+      "id": "00bfe60e6a804564b68582a021025eb5",
+      "_ds_id": "1b63305b233142ea96130f39866c3581"
+    },
+    {
+      "documentType": "illustration",
+      "format": "image/jpeg",
+      "url": "https://procedure.prozorro.sale/api/documents/public/13e28614a183424eb255d5e4c2ee15c6",
+      "id": "2f8a8299dacb4ed4b5a020711f5c23f2",
+      "_ds_id": "13e28614a183424eb255d5e4c2ee15c6"
+    },
+    {
+      "documentType": "courtDecision",
+      "format": "application/pdf",
+      "url": "https://procedure.prozorro.sale/api/documents/public/c011bc822b2c4fd3a4321dbaa03fcb8b",
+      "id": "fbdcb23d10f24bf6961c6747f83fbad9",
+      "_ds_id": "c011bc822b2c4fd3a4321dbaa03fcb8b"
+    }
+  ],
+  "description": {
+    "uk_UA": "Справа про банкрутство №924/700/24 Фермерського господарства \"Золотий Жайвір\" ( вул. Запорізька 11,м. Волочиськ, Хмельницька обл. 31200, код ЄДРПОУ 35578504) в провадженні господарського  Хмельницької області . Вид аукціону: перший аукціон, який проводиться без можливості зниження початкової вартості. Відомості про лот: Лот № 1. Вид та найменування майна: Колісний транспортний засіб – вантажний автомобіль RENAULT 11GTA, 2003 року випуску, об'єм двигуна 11929см3, VIN - VF611GTA000122884, реєстраційний номер - АА3895КК, дизельне паливо,  пробіг 988816км, по всьому кузову наявні незначні пошкодження лакофарбового покриття, подряпини, сколи та неусунуті сліди експлуатації, колір - білий,  свідоцтво про реєстрацію СТЕ9972136. Відомості про замовника аукціону: ліквідатор Фермерського господарства \"Золотий Жайвір\" – арбітражний керуючий Білик Олександр Анатолійович, свідоцтво про право на здійснення діяльності арбітражного керуючого № 929 дата видачі 03.07.2013р.; місцезнаходження офісу:18031, м. Черкаси, вул. Надпільна 55; засоби зв’язку: + 380975060527, e-mail:ak-bilyk@ukr.net Повноваження ліквідатора Фермерського господарства \"Золотий Жайвір\"  – арбітражного керуючого Білика Олександра"
+  },
+  "guarantee": {
+    "amount": 23016,
+    "currency": "UAH"
+  },
+  "title": {
+    "uk_UA": "Аукціон з продажу майна банкрута колісного транспортного засобу – вантажний  автомобіль RENAULT 11GTA, 2003 року випуску, VIN - VF611GTA000122884, реєстраційний номер - АА3895КК, колір - білий."
+  },
+  "isTaxInvoiceProvided": false,
+  "_protected": false,
+  "economicCourtName": {
+    "en_US": "",
+    "uk_UA": "Господарський суд Хмельницької області"
+  },
+  "sellingMethod": "bankRuptcy-english",
+  "valueAddedTaxCharged": false,
+  "auctionPeriod": {
+    "startDate": "2026-10-13T09:15:00.000000Z"
+  },
+  "tenderPeriod": {
+    "endDate": "2026-10-12T17:00:00.000000Z",
+    "startDate": "2026-09-24T18:15:27.281000Z"
+  },
+  "value": {
+    "amount": 230160,
+    "valueAddedTaxIncluded": false,
+    "currency": "UAH"
+  },
+  "owner": "e-tender.ua",
+  "minimalStep": {
+    "amount": 2301.6,
+    "currency": "UAH"
+  },
+  "sellingMethodType": {
+    "uk_UA": "Aукціон - без можливості зниження початкової ціни"
+  },
+  "dateModified": "2026-10-12T17:00:03.966000Z",
+  "lotId": "1",
+  "datePublished": "2026-09-24T18:15:27.275000Z",
+  "auctionId": "BRE001-UA-20260924-95103",
+  "metaInfo": {
+    "directions": [
+      "bankRuptcy"
+    ],
+    "categories": [
+      "transportSale"
+    ],
+    "auctionTypes": [
+      "english"
+    ]
+  },
+  "sellingEntity": {
+    "identifier": {
+      "legalName": {
+        "uk_UA": "Арбітражний керуючий БІЛИК ОЛЕКСАНДР АНАТОЛІЙОВИЧ"
+      },
+      "scheme": "UA-IPN",
+      "id": "2604008837"
+    },
+    "address": {
+      "postalCode": "18031",
+      "locality": {
+        "uk_UA": "Черкаси"
+      },
+      "countryName": {
+        "en_US": "Ukraine",
+        "uk_UA": "Україна"
+      },
+      "region": {
+        "uk_UA": "Черкаська область"
+      }
+    },
+    "name": {
+      "uk_UA": "Арбітражний керуючий БІЛИК ОЛЕКСАНДР АНАТОЛІЙОВИЧ"
+    }
+  },
+  "bankruptcyCaseNumber": {
+    "en_US": "",
+    "uk_UA": "№924/700/24"
+  },
+  "minNumberOfQualifiedBids": 1,
+  "awards": [],
+  "tenderAttempts": 1,
+  "items": [
+    {
+      "bankRuptcyItemType": "assets",
+      "itemProps": {
+        "condition": "По всьому кузову наявні незначні пошкодження лакофарбового покриття, подряпини, сколи та неусунуті сліди експлуатації.",
+        "itemPropsType": "vehicle",
+        "fuelType": "diesel",
+        "color": "білий",
+        "kilometrage": 988816,
+        "identificationNumber": "VF611GTA000122884",
+        "model": "11GTA",
+        "productionYear": 2003,
+        "damagePresence": false,
+        "brand": "RENAULT",
+        "engineCapacity": 11929
+      },
+      "quantity": 1,
+      "address": {
+        "locality": {
+          "uk_UA": "Київ"
+        },
+        "region": {
+          "uk_UA": "Київ"
+        }
+      },
+      "description": {
+        "uk_UA": "Колісний транспортний засіб – вантажний автомобіль RENAULT 11GTA, 2003 року випуску, об'єм двигуна 11929см3, VIN - VF611GTA000122884, реєстраційний номер - АА3895КК, дизельне паливо,  пробіг 988816км, по всьому кузову наявні незначні пошкодження лакофарбового покриття, подряпини, сколи та неусунуті сліди експлуатації, колір - білий,  свідоцтво про реєстрацію СТЕ9972136"
+      },
+      "id": "dc378a668e5a4f6a9fe1479877f4d47e",
+      "classification": {
+        "scheme": "CAV",
+        "description": {
+          "en_US": "Second-hand goods vehicles",
+          "uk_UA": "Вантажні транспортні засоби, що були у використанні"
+        },
+        "id": "34137000-6"
+      }
+    }
+  ],
+  "status": "unsuccessful"
+}

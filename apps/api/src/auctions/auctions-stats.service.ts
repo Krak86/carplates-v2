@@ -1,20 +1,22 @@
 import { Inject, Injectable } from '@nestjs/common'
-import { auctionLots, jobRuns } from '@carplates/db'
+import { jobRuns } from '@carplates/db'
 import { AUCTION_PAGE_SIZE } from '@carplates/shared'
 import type {
-  AuctionListLot,
   AuctionListParams,
   AuctionListResponse,
   AuctionSort,
+  AuctionSource,
   AuctionStatsResponse,
   AuctionStatsRow
 } from '@carplates/shared'
-import { and, desc, eq, gte, lte, sql } from 'drizzle-orm'
+import { and, desc, eq, inArray, sql } from 'drizzle-orm'
 import type { SQL } from 'drizzle-orm'
 
 import { DbService } from '../db/db.service.js'
 
-import { lotMonth } from './auctions.service.js'
+import { AUCTION_JOBS } from './auctions.service.js'
+import { groupFilter, sourceFilter, unionLots, unionRowToLot } from './auctions-union.js'
+import type { UnionRow } from './auctions-union.js'
 
 const TOP = 100
 const CACHE_MS = 10 * 60 * 1000
@@ -60,16 +62,19 @@ const AGGREGATES = sql`count(*)::int AS lots,
 
 /** Sort key per `sort` value: whitelisted SQL, never user input. Lots without the key sort last either way. */
 const SORT_EXPR: Readonly<Record<AuctionSort, SQL>> = {
-  newest: sql`lot_no`,
-  salePrice: sql`sale_price`,
-  startPrice: sql`start_price`,
-  discount: sql`(sale_price / nullif(start_price, 0))`,
-  year: sql`year`
+  newest: sql`l.when_at`,
+  salePrice: sql`l.sale_price`,
+  startPrice: sql`l.start_price`,
+  discount: sql`(l.sale_price / nullif(l.start_price, 0))`,
+  year: sql`l.year`
 }
+
+/** The union as a CTE `l`, narrowed to one source when asked. */
+const lotsWhere = (source: AuctionSource | undefined): SQL => sql`WHERE ${sourceFilter(source) ?? sql`true`}`
 
 @Injectable()
 export class AuctionsStatsService {
-  private cache: { at: number; value: AuctionStatsResponse } | null = null
+  private cache = new Map<string, { at: number; value: AuctionStatsResponse }>()
 
   constructor(@Inject(DbService) private readonly dbService: DbService) {}
 
@@ -77,29 +82,33 @@ export class AuctionsStatsService {
     const [run] = await this.dbService.db
       .select({ finishedAt: jobRuns.finishedAt })
       .from(jobRuns)
-      .where(and(eq(jobRuns.job, 'auctions'), eq(jobRuns.status, 'ok')))
+      .where(and(inArray(jobRuns.job, AUCTION_JOBS), eq(jobRuns.status, 'ok')))
       .orderBy(desc(jobRuns.startedAt))
       .limit(1)
     return run?.finishedAt?.toISOString() ?? null
   }
 
-  /** Aggregates over every stored lot, cached 10 minutes (the feed changes once a day). */
-  async stats(): Promise<AuctionStatsResponse> {
+  /** Aggregates over every stored lot of both sources (or one), cached 10 minutes per source (the feeds change once a day). */
+  async stats(source?: AuctionSource): Promise<AuctionStatsResponse> {
+    const key = source ?? 'all'
     const now = Date.now()
-    if (this.cache && now - this.cache.at < CACHE_MS) return this.cache.value
+    const hit = this.cache.get(key)
+    if (hit && now - hit.at < CACHE_MS) return hit.value
     const { db } = this.dbService
+    const scope = lotsWhere(source)
 
     const dim = (expr: string) =>
       db.execute<RowOut>(
-        sql`SELECT ${sql.raw(expr)} AS label, ${AGGREGATES}
-            FROM registry.auction_lots
-            WHERE ${sql.raw(expr)} IS NOT NULL
+        sql`WITH l AS (${unionLots})
+            SELECT ${sql.raw(expr)} AS label, ${AGGREGATES}
+            FROM l ${scope} AND ${sql.raw(expr)} IS NOT NULL
             GROUP BY 1 ORDER BY lots DESC, label LIMIT ${TOP}`
       )
 
     const [summary, relist, month, region, make, year, checkedAt] = await Promise.all([
       db.execute<SummaryOut>(
-        sql`SELECT count(*)::int AS lots,
+        sql`WITH l AS (${unionLots})
+            SELECT count(*)::int AS lots,
                    (count(*) FILTER (WHERE sale_price IS NOT NULL))::int AS sold,
                    (count(*) FILTER (WHERE sale_price IS NULL AND status = ${OPEN_STATUS}))::int AS open,
                    (count(*) FILTER (WHERE plate IS NOT NULL))::int AS "withPlate",
@@ -108,23 +117,26 @@ export class AuctionsStatsService {
                    (percentile_cont(0.5) WITHIN GROUP (ORDER BY sale_price) FILTER (WHERE sale_price IS NOT NULL))::float8 AS "medianSale",
                    (percentile_cont(0.5) WITHIN GROUP (ORDER BY start_price) FILTER (WHERE start_price IS NOT NULL))::float8 AS "medianStart",
                    (sum(sale_price))::float8 AS "totalSale"
-            FROM registry.auction_lots`
+            FROM l ${scope}`
       ),
+      // Proceedings exist on SETAM lots only: a Prozorro auction has no proceeding number and never counts here.
       db.execute<RelistOut>(
-        sql`SELECT (count(*) FILTER (WHERE n > 1))::int AS relisted, max(n)::int AS "maxRounds"
-            FROM (SELECT count(*) AS n FROM registry.auction_lots WHERE proceeding_no IS NOT NULL GROUP BY proceeding_no) p`
+        sql`WITH l AS (${unionLots})
+            SELECT (count(*) FILTER (WHERE n > 1))::int AS relisted, max(n)::int AS "maxRounds"
+            FROM (SELECT count(*) AS n FROM l ${scope} AND proceeding_no IS NOT NULL GROUP BY proceeding_no) p`
       ),
       db.execute<RowOut>(
-        sql`SELECT regexp_replace(source_file, '^auctions-\\d{2}-(\\d{2})-(\\d{4})\\.csv$', '\\2-\\1') AS label, ${AGGREGATES}
-            FROM registry.auction_lots
-            WHERE source_file ~ '^auctions-\\d{2}-\\d{2}-\\d{4}\\.csv$'
+        sql`WITH l AS (${unionLots})
+            SELECT to_char(when_at AT TIME ZONE 'UTC', 'YYYY-MM') AS label, ${AGGREGATES}
+            FROM l ${scope}
             GROUP BY 1 ORDER BY 1`
       ),
       dim('region'),
       dim('make'),
       db.execute<RowOut>(
-        sql`SELECT year::text AS label, ${AGGREGATES}
-            FROM registry.auction_lots WHERE year IS NOT NULL
+        sql`WITH l AS (${unionLots})
+            SELECT year::text AS label, ${AGGREGATES}
+            FROM l ${scope} AND year IS NOT NULL
             GROUP BY 1 ORDER BY 1`
       ),
       this.checkedAt()
@@ -151,64 +163,49 @@ export class AuctionsStatsService {
       byYear: year.rows.map(toRow),
       checkedAt
     }
-    this.cache = { at: now, value }
+    this.cache.set(key, { at: now, value })
     return value
   }
 
-  /** One page of lots matching the filters (parsed by `auctionListQuerySchema`), sorted; lots without the sort key last. */
+  /** One page of lots of both sources matching the filters (parsed by `auctionListQuerySchema`), sorted; lots without the sort key last. */
   async list(query: AuctionListParams): Promise<AuctionListResponse> {
     const { db } = this.dbService
     const outcomeFilter: Record<string, SQL | undefined> = {
       all: undefined,
-      sold: sql`${auctionLots.salePrice} IS NOT NULL`,
-      open: sql`${auctionLots.salePrice} IS NULL AND ${auctionLots.status} = ${OPEN_STATUS}`,
-      notSold: sql`${auctionLots.salePrice} IS NULL AND ${auctionLots.status} <> ${OPEN_STATUS}`
+      sold: sql`l.sale_price IS NOT NULL`,
+      open: sql`l.sale_price IS NULL AND l.status = ${OPEN_STATUS}`,
+      notSold: sql`l.sale_price IS NULL AND l.status <> ${OPEN_STATUS}`
     }
-    const where = and(
-      query.make ? eq(auctionLots.make, query.make) : undefined,
-      query.region ? eq(auctionLots.region, query.region) : undefined,
-      query.status ? eq(auctionLots.status, query.status) : undefined,
-      query.minPrice !== undefined ? gte(auctionLots.startPrice, query.minPrice) : undefined,
-      query.maxPrice !== undefined ? lte(auctionLots.startPrice, query.maxPrice) : undefined,
+    const conditions = [
+      sourceFilter(query.source),
+      groupFilter(query.group),
+      query.auctionType ? sql`l.auction_type = ${query.auctionType}` : undefined,
+      query.make ? sql`l.make = ${query.make}` : undefined,
+      query.region ? sql`l.region = ${query.region}` : undefined,
+      query.status ? sql`l.status = ${query.status}` : undefined,
+      query.minPrice !== undefined ? sql`l.start_price >= ${query.minPrice}` : undefined,
+      query.maxPrice !== undefined ? sql`l.start_price <= ${query.maxPrice}` : undefined,
       outcomeFilter[query.outcome]
-    )
+    ].filter((c): c is SQL => !!c)
+    const where = conditions.length > 0 ? sql`WHERE ${sql.join(conditions, sql` AND `)}` : sql``
     const direction = query.asc ? sql`ASC` : sql`DESC`
     const offset = (query.page - 1) * AUCTION_PAGE_SIZE
 
-    const [rows, [count]] = await Promise.all([
-      db
-        .select()
-        .from(auctionLots)
-        .where(where)
-        .orderBy(sql`${SORT_EXPR[query.sort]} ${direction} NULLS LAST`, desc(auctionLots.lotNo))
-        .limit(AUCTION_PAGE_SIZE)
-        .offset(offset),
-      db
-        .select({ total: sql<number>`count(*)::int` })
-        .from(auctionLots)
-        .where(where)
+    const [rows, count] = await Promise.all([
+      db.execute<UnionRow>(
+        sql`WITH l AS (${unionLots})
+            SELECT l.* FROM l ${where}
+            ORDER BY ${SORT_EXPR[query.sort]} ${direction} NULLS LAST, l.when_at DESC, l.lot_no DESC NULLS LAST, l.auction_id DESC NULLS LAST
+            LIMIT ${AUCTION_PAGE_SIZE} OFFSET ${offset}`
+      ),
+      db.execute<{ total: number }>(sql`WITH l AS (${unionLots}) SELECT count(*)::int AS total FROM l ${where}`)
     ])
 
-    const lots: AuctionListLot[] = rows.map(r => ({
-      lotNo: r.lotNo,
-      proceedingNo: r.proceedingNo,
-      status: r.status,
-      category: r.category,
-      region: r.region,
-      startPrice: r.startPrice,
-      salePrice: r.salePrice,
-      sold: r.salePrice !== null,
-      year: r.year,
-      make: r.make,
-      model: r.model,
-      title: r.titleRaw,
-      plate: r.plate,
-      vin: r.vin,
-      month: lotMonth(r.sourceFile),
-      firstSeenAt: r.firstSeenAt.toISOString(),
-      updatedAt: r.updatedAt.toISOString()
-    }))
-
-    return { total: Number(count?.total ?? 0), page: query.page, pageSize: AUCTION_PAGE_SIZE, lots }
+    return {
+      total: Number(count.rows[0]?.total ?? 0),
+      page: query.page,
+      pageSize: AUCTION_PAGE_SIZE,
+      lots: rows.rows.map(unionRowToLot)
+    }
   }
 }

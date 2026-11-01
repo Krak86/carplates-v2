@@ -1,14 +1,11 @@
 import { lazy } from 'react'
 import type { ReactNode } from 'react'
-import { useTranslation } from 'react-i18next'
 import type { VinDecodeResponse } from '@carplates/shared'
 
 import FuelEconomy from '@/components/FuelEconomy'
 import RdwSpecs from '@/components/RdwSpecs'
-import GenerationChip from '@/components/GenerationChip'
 import UsBasePriceSection from '@/components/UsBasePriceSection'
 import { usBasePriceUsd } from '@/components/us-value.helpers'
-import VdbChips from '@/components/VdbChips'
 import LazySection from '@/components/LazySection'
 import { buildFallback, toFieldMap, typicalLookup } from '@/components/vin/helpers'
 import VinTypicalEuBaseline from '@/components/vin/VinTypicalEuBaseline'
@@ -26,36 +23,16 @@ type Props = {
  * fallback tags — and says when the make / model / year it was looked up by were estimates themselves.
  */
 export default function VinTypicalData({ data }: Props): ReactNode {
-  const { t } = useTranslation()
   const fields = toFieldMap(data.results)
   const fallback = buildFallback(data.vin, fields, data.registry?.actions[0])
   const lookup = typicalLookup(fields, fallback)
   if (!lookup) return null
 
-  const { brand, model, year, kind, fuel, capacity, inputSources } = lookup
+  const { brand, model, year, kind, fuel, capacity } = lookup
   const baseUsd = usBasePriceUsd(fields)
 
   return (
     <div className="mt-4">
-      <div className="rounded-md border border-dashed border-[var(--color-border)] px-2.5 py-1.5 text-sm">
-        <p className="font-medium">
-          <span className="mr-1.5 rounded-full border border-dashed border-[var(--color-border)] px-1.5 py-px text-xs font-normal text-[var(--color-muted)]">
-            ≈ {t('vin.typical.label')}
-          </span>
-          {t('vin.typical.title', { name: `${brand} ${model}` })}
-        </p>
-        <p className="mt-0.5 text-[var(--color-muted)]">{t('vin.typical.why')}</p>
-        {inputSources.length > 0 && (
-          <p className="mt-0.5 text-[var(--color-muted)]">
-            {t('vin.typical.inputs', { sources: inputSources.map(s => t(`vin.derived.${s}.label`)).join(', ') })}
-          </p>
-        )}
-        <div className="mt-1.5 flex flex-wrap gap-1.5 empty:hidden">
-          <VdbChips brand={brand} model={model} kind={kind} />
-          <GenerationChip brand={brand} model={model} year={year} />
-        </div>
-      </div>
-
       <RdwSpecs brand={brand} model={model} year={year} kind={kind} fuel={fuel} />
       {baseUsd != null && (
         <UsBasePriceSection

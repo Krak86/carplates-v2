@@ -4344,3 +4344,49 @@ A human-readable map of every public route, grouped by category (search, cars, s
 - **Catalog:** `routes/data-status/datasets.ts`. Scheduled sources name their `job` (last ok run from the server); hand-refreshed ones carry `refreshedOn`, the date of the last seed-CSV export. Status = age of the last sync against the cadence (fresh up to 1.25 periods, due up to 2, stale beyond); a failed or timed-out newest run is `failing`.
 - Not changed on purpose: "Jan 2013 - 29 Apr 2026" in the not-found hint and About is a statement about plates, which really end there.
 - **Scheduler honesty (same day):** only sources with a cron line say "updated automatically". `rdw-recalls` (monthly, 2nd 05:55) and `ca-recalls` (quarterly, 3rd of Jan/Apr/Jul/Oct 06:15, `--refresh`) became scheduled jobs (`jobs.ts`, `ingest.cron`, `run-ingest.sh`, `HC_PING_RDW_RECALLS|CA_RECALLS` in `deploy-ingest.yml`, `deploy.md`, `SCHEDULE.md`); their seed CSVs are still exported by hand. The registry line on `/data-status` has its own chip (`registryStatus`: fresh to 75 days behind, due to 120, then stale). Group descriptions no longer claim we automate the half-yearly/yearly sources.
+
+## Prozorro.Sale vehicle auctions next to SETAM (2026-11-01) ✅
+
+Plan and decisions: `docs/prozorro-sale-auctions-plan.md`; conventions: `docs/features-reference.md` "Prozorro.Sale lots in Auction history".
+
+- **Data:** `registry.prozorro_auctions` (0087), parser `prozorro-parse.ts` (vehicle test, plate/VIN, seller kind from `sellingEntity` / tags / `BANK_EDRPOU`), feed reader `prozorro-feed.ts`, daily job `prozorro-auctions`. Local DB: 14 431 Prozorro rows (full history 2017-2026, 33 MB) next to 16 866 SETAM lots.
+- **API:** union query for lookup / list / stats, merged `vehicle` facts, photo resizer `/api/auctions/photo/:docId` (WebP 320 / 960 / 1600).
+- **Web:** grouped lots with chips, merged specs with conflicts, photo thumbnails + zoom, per-source chart markers, `/auctions` source tabs, category / type filters with "?" help, About source, i18n ua/ru/en.
+- **Browser check (same day):** Renault card with both sources (groups, chips, specs, chart legend), a lot with 130 photos at 390 px, `/auctions?source=prozorro&group=customs`. Fixed: empty "()" in the status line and timeline for a Prozorro lot sold without an auction (no date; new `*Undated` texts); the zoom dialog's plate-box toggle is hidden when there are no plate candidates.
+- **Backfill (2026-11-01):** parser guard for template-text property lots (`isTemplateItem`, "ТЗ/СГ" in brand / model / color; 3 rows removed). Full crawl 2017-01-01 to now: 674 460 feed records, 26 min, 14 431 rows; 1.0 percent multi-vehicle auctions (one row per auction stays); overlap with SETAM 12 VINs / 19 plates; dump `prozorro_auctions.sql.gz` (8.1 MB) made for the VPS. Totals and the restore steps are in `docs/prozorro-sale-auctions-plan.md` step 4.
+- **Still open:** load the dump on the VPS after merge + API deploy (plan step 4 d-f), the Cloudflare Cache Rule edit for the photo path.
+- **Guide update (2026-11-01):** `/read/auctions` got a "Who sells" section (SETAM, customs, bankruptcy, banks, ARMA / state / privatization, `SELLERS` in `content.ts`), an "Examples" section (3 real sold Prozorro lots, no plates, each linking to `/auctions?source=prozorro&group=…`; prices checked against `/api/auctions/lots` on 2026-11-01), a "One lot, one source" fact (about 20 cars in both tables), the Prozorro open-data source and a refreshed lead. Examples are static: re-check them if the parser or bank list changes.
+
+## Share price section (phones + catalog) ✅ DONE (2026-11-01)
+
+The share-price chart lived only in the desktop-only left `StockWidget` on `/` + `/:query`. Now:
+
+- `StockQuote` (price, change, sparkline, 1D/1M/1Y, Yahoo link) extracted from the widget; both use it.
+- `SharePriceSection` - collapsed, shareable `?section=shares`, hidden for unlisted makes, fetches once opened; in `ResultCard` and catalog `ModelSections`; open `standalone` card on `/cars/:make` (`make.topBrand`).
+- `shares` added to `SHARE_SECTIONS` and `spa-text.ts` `SECTION_TEXT`; About `FEATURES` + `about.brief/feature.shares`; `section.about.shares` info popup; release entry.
+- Checked the Kia 1D drop (-11.73%) against Yahoo: `chartPreviousClose` 108300 vs price 95600, a real move, not a baseline bug.
+- Not built: a market-index chart (no index series in `apps/api/src/stocks`).
+- **Instruments + bonds (same day):** the section got a chip per instrument of the listed company (Hyundai 1st/2nd/3rd preferred `005385/005387/005389.KS`, ADRs such as `TM`/`HMC`/`NSANY`, OTC lines, second listings like `RACE.MI`, `9866.HK`, `002594.SZ`), each with its own chart and facts (`GET /api/stocks/quote`), a "what is this" line per kind, Yahoo + TradingView links, and a bonds note with a web-search link (the Frankfurt search URL was dead: "Content not available"). Tickers probed live; `HYMTF`, `KIMTF`, `BMW3.DE`, `BMWYY`, `GELYY` return nothing on Yahoo and are left out. Bond prices have no free API, so bonds are link-out only. The desktop side widget is unchanged.
+
+## Import customs calculator `/customs` (2026-11-01) ✅
+
+Duty, excise, VAT and the pension fee for a car imported to Ukraine, at the NBU euro rate. Six steps, conventions in `docs/features-reference.md` "Import customs calculator".
+
+1. **Shared calc** (`packages/shared/src/customs.ts`): versioned rules `ua-import-2026.1`, `calcImportCosts`, query parser, `mapFuel`, presets (fixtures: the 3 presets, excise EUR 480 / 1,200 / 60). Also fixed `customsAgeK` (now - make year, no -1; Tax Code art. 215.3.5-1).
+2. **Route** `/customs`: form, result with every step, official sources, presets, rules audit card; route checklist done.
+3. **Sitemap**: `STATIC_PAGES` entry, `/sitemap` page entry, tests in `apps/api/src/spa/sitemap.test.ts` and `routes/sitemap/helpers.test.ts`.
+4. **Read guides**: `CostSection` in `/read/imports` with shared `CustomsCalcLinks`; no rates quoted (an `/read/auctions` section was added and then removed: that guide is about Ukrainian auctions).
+5. **Prefill link**: VIN page engine card only (hidden for cars with a Ukrainian registry history); hybrids never prefilled and the form fuel stays empty until picked. Auction-lot links were built and removed (lots are sold in UAH inside Ukraine); `AuctionCheck` has a plain `/customs` link.
+6. **Docs and release**: About, `releases.ts` `new` item, features-reference, this entry.
+
+Verification: excise formula and thresholds, age coefficient, EV per-kWh rate, pension tiers and the 2026 minimum (3328) were checked on zakon.rada.gov.ua. Customs Tariff 2697-IX (duty 10%, EV 0%) and Cabinet resolutions 1740 and 1129 could not be checked in the primary text. Hybrids use petrol rates and are shown as an estimate. Later / low priority: links from `/cars/:make/:model`, `/compare`, `/fuel`.
+
+## Not-found plates, favorites, login pages and polish (2026-11-01) ✅
+
+Small items shipped between the Prozorro.Sale and customs work; conventions are in `docs/features-reference.md` ("Other-source fallback for registry 404s", "Side widgets on a 404", share aliases, "Registration certificate fallback").
+
+- **Plates missing from the registry:** the other-sources card follows the registry card (photo, region, merged facts below the photo, wiki model photo as the last hero slide after the lot photos); side widgets show for not-found plates and VINs known from wanted / auctions; such plates and VINs can be favorited, `FAVORITES_LIMIT` raised to 300 (`packages/shared/src/account.ts`).
+- **Accounts pages:** `/login` and `/logout` routes plus `/go/login` and `/go/signup` share aliases.
+- **ALPR:** plate read from a registration certificate photo when `/recognize` finds none.
+- **UI:** guide topic chips colorized (`topic-colors.ts`) and collapsed to two rows on mobile; plate region in the test-drive modal header; logo quiz blurs brand names inside the emblems; empty state in the saved comparisons card.
+- **Docs and About:** About `recognition` / `share` / `account` texts extended, release items added for 2026-11-01 (`latest.ts` unchanged, same day); CLAUDE.md trimmed.

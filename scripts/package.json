@@ -97,6 +97,7 @@
     "ingest:wanted": "tsx src/wanted.ts",
     "ingest:wanted-plates": "tsx src/wanted-plates.ts",
     "ingest:auctions": "tsx src/auctions.ts",
+    "ingest:prozorro": "tsx src/prozorro.ts",
     "ingest:dtp": "tsx src/dtp.ts",
     "ingest:dtp:patrol": "tsx src/dtp-patrol.ts",
     "ingest:dtp:csv": "tsx src/dtp-csv.ts",

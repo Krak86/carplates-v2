@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 
 import VinDerivedChip from '@/components/vin/VinDerivedChip'
 import { useVinText } from '@/components/vin/use-vin-text'
+import { vehicleParts } from '@/components/vin/helpers'
 import type { FieldMap, VinFallback } from '@/components/vin/helpers'
 
 type Props = {
@@ -12,14 +13,7 @@ type Props = {
 /** "KIA Sportage 2017" plus trim / vehicle type / body chips. Values NHTSA lacked are filled from `fallback` and tagged. */
 export default function VinHeadline({ fields, fallback }: Props): ReactNode {
   const vinText = useVinText()
-  const parts = [
-    { key: 'make', text: fields.get('Make'), derived: fallback.make },
-    { key: 'model', text: fields.get('Model'), derived: fallback.model },
-    { key: 'year', text: fields.get('Model Year'), derived: fallback.year }
-  ].flatMap(p => {
-    const text = p.text ?? (p.derived ? String(p.derived.value) : undefined)
-    return text ? [{ key: p.key, text, source: p.text ? undefined : p.derived?.source }] : []
-  })
+  const parts = vehicleParts(fields, fallback)
   const chips = ['Trim', 'Series', 'Body Class', 'Vehicle Type'].flatMap(variable => {
     const raw = fields.get(variable)
     return raw ? [vinText.value(variable, raw)] : []

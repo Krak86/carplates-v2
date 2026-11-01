@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 
 import Card from '@/components/ui/Card'
+import CustomsCalcLinks from '@/routes/read/CustomsCalcLinks'
 import { pick } from '@/routes/read/helpers'
 import {
   APP_INTRO,
@@ -63,6 +64,22 @@ export function WhySection(): ReactNode {
       </ul>
 
       <p className="text-sm text-muted">{pick(WHY_NOTE, i18n.language)}</p>
+    </Card>
+  )
+}
+
+/** What an import costs at customs: no rates here (they change yearly), the calculator holds them. */
+export function CostSection(): ReactNode {
+  const { t } = useTranslation()
+
+  return (
+    <Card id="cost" className="scroll-mt-20">
+      <h2 className="mb-2 text-xl font-semibold">{t('read.imports.costTitle')}</h2>
+      <p className="mb-3 text-muted">{t('read.imports.costIntro')}</p>
+      <div className="mb-3">
+        <CustomsCalcLinks />
+      </div>
+      <p className="text-sm text-muted">{t('read.imports.costNote')}</p>
     </Card>
   )
 }

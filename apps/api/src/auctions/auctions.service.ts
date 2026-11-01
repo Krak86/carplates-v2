@@ -2,34 +2,35 @@ import { Inject, Injectable } from '@nestjs/common'
 import { auctionLots, jobRuns } from '@carplates/db'
 import { MIN_PRICE_PEERS } from '@carplates/shared'
 import type { AuctionLot, AuctionPriceCheck, AuctionResponse } from '@carplates/shared'
-import { and, desc, eq, isNotNull, ne, or, sql } from 'drizzle-orm'
+import { and, desc, eq, inArray, isNotNull, ne, sql } from 'drizzle-orm'
+import type { SQL } from 'drizzle-orm'
 
 import { DbService } from '../db/db.service.js'
 
-/** `auctions-31-08-2024.csv` -> `2024-08`; null for any other file name. */
-export const lotMonth = (sourceFile: string): string | null => {
-  const m = /^auctions-\d{2}-(\d{2})-(\d{4})\.csv$/.exec(sourceFile)
-  return m ? `${m[2]}-${m[1]}` : null
-}
+import { unionLots, unionRowToLot } from './auctions-union.js'
+import type { UnionRow } from './auctions-union.js'
+import { mergeVehicle } from './vehicle-merge.js'
+
+/** Jobs that feed the lots; "checked at" is the newest successful run of either. */
+export const AUCTION_JOBS = ['auctions', 'prozorro-auctions']
+
+/** Newest lots returned per plate / VIN (both sources together). */
+const LOOKUP_LIMIT = 50
 
 @Injectable()
 export class AuctionsService {
   constructor(@Inject(DbService) private readonly dbService: DbService) {}
 
   /**
-   * Every lot whose parsed plate or VIN equals the given one, newest lot number first. `checkedAt` is the finish of the last
-   * successful `auctions` job (a lot row's own `updated_at` only moves when the lot changed). A lot plate that is also in the
-   * registry does not prove it is the same car today: the card says so.
-   */
-  /**
    * Compares the newest sold lot with the other sold lots of the same make + model (and year when enough of them share it).
    * Lots of one car re-listed later are peers too: a few of them skew a thin sample, hence the `MIN_PRICE_PEERS` floor.
    */
   private async priceCheck(lots: readonly AuctionLot[]): Promise<AuctionPriceCheck | null> {
     const lot = lots.find(l => l.sold && l.salePrice !== null && l.make && l.model)
-    if (!lot?.make || !lot.model || lot.salePrice === null) return null
+    if (!lot?.make || !lot.model || lot.salePrice === null || lot.lotNo === null) return null
 
     const { db } = this.dbService
+    const lotNo = lot.lotNo
     const peers = async (year: number | null) => {
       const [row] = await db
         .select({
@@ -42,7 +43,7 @@ export class AuctionsService {
             eq(auctionLots.make, lot.make as string),
             eq(auctionLots.model, lot.model as string),
             isNotNull(auctionLots.salePrice),
-            ne(auctionLots.lotNo, lot.lotNo),
+            ne(auctionLots.lotNo, lotNo),
             year === null ? undefined : eq(auctionLots.year, year)
           )
         )
@@ -58,7 +59,7 @@ export class AuctionsService {
     if (found.peers < MIN_PRICE_PEERS || !found.median) return null
 
     return {
-      lotNo: lot.lotNo,
+      lotNo,
       make: lot.make,
       model: lot.model,
       year,
@@ -69,49 +70,44 @@ export class AuctionsService {
     }
   }
 
+  /**
+   * Every lot of both sources (SETAM, Prozorro.Sale) whose plate or VIN equals the given one, newest first. `checkedAt` is the
+   * finish of the last successful SETAM `auctions` job (a lot row's own `updated_at` only moves when the lot changed). A lot
+   * plate that is also in the registry does not prove it is the same car today: the card says so.
+   */
   async lookup(plate: string | null, vin: string | null): Promise<AuctionResponse> {
     const { db } = this.dbService
-    const where = or(plate ? eq(auctionLots.plate, plate) : undefined, vin ? eq(auctionLots.vin, vin) : undefined)
+    const keys = [plate ? sql`l.plate = ${plate}` : undefined, vin ? sql`l.vin = ${vin}` : undefined].filter(
+      (k): k is SQL => !!k
+    )
 
-    const [rows, [run]] = await Promise.all([
-      where ? db.select().from(auctionLots).where(where).orderBy(desc(auctionLots.lotNo)).limit(50) : [],
+    const [found, [run]] = await Promise.all([
+      keys.length === 0
+        ? { rows: [] as UnionRow[] }
+        : db.execute<UnionRow>(
+            sql`WITH l AS (${unionLots}) SELECT l.* FROM l WHERE ${sql.join(keys, sql` OR `)}
+                ORDER BY l.when_at DESC, l.lot_no DESC NULLS LAST, l.auction_id DESC NULLS LAST LIMIT ${LOOKUP_LIMIT}`
+          ),
       db
         .select({ finishedAt: jobRuns.finishedAt })
         .from(jobRuns)
-        .where(and(eq(jobRuns.job, 'auctions'), eq(jobRuns.status, 'ok')))
+        .where(and(inArray(jobRuns.job, AUCTION_JOBS), eq(jobRuns.status, 'ok')))
         .orderBy(desc(jobRuns.startedAt))
         .limit(1)
     ])
 
-    const lots: AuctionLot[] = rows.map(r => {
+    const lots: AuctionLot[] = found.rows.map(r => {
       const plateHit = !!plate && r.plate === plate
       const vinHit = !!vin && r.vin === vin
-      return {
-        lotNo: r.lotNo,
-        proceedingNo: r.proceedingNo,
-        status: r.status,
-        category: r.category,
-        region: r.region,
-        startPrice: r.startPrice,
-        salePrice: r.salePrice,
-        sold: r.salePrice !== null,
-        year: r.year,
-        make: r.make,
-        model: r.model,
-        title: r.titleRaw,
-        plate: r.plate,
-        vin: r.vin,
-        matchedBy: plateHit && vinHit ? 'both' : plateHit ? 'plate' : 'vin',
-        month: lotMonth(r.sourceFile),
-        firstSeenAt: r.firstSeenAt.toISOString(),
-        updatedAt: r.updatedAt.toISOString()
-      }
+      return { ...unionRowToLot(r), matchedBy: plateHit && vinHit ? 'both' : plateHit ? 'plate' : 'vin' }
     })
 
     return {
       anySold: lots.some(l => l.sold),
+      vehicle: mergeVehicle(lots),
       lots,
-      priceCheck: await this.priceCheck(lots),
+      // SETAM lots only: the peers are SETAM sales (Prozorro prices come from other kinds of sellers and are not comparable).
+      priceCheck: await this.priceCheck(lots.filter(l => l.source !== 'prozorro')),
       checkedAt: run?.finishedAt?.toISOString() ?? null
     }
   }

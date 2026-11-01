@@ -12,7 +12,7 @@ import type { PlateRecognizeResponse } from '@carplates/shared'
 import { alprLocalEnabled, loadEnv } from '../env.js'
 import { mapPlateReaderResults } from './recognize.mapper.js'
 import { RegistryRankService } from './registry-rank.service.js'
-import type { PlateReaderResponse, UploadedImage } from './recognize.types.js'
+import type { PlateReaderResponse, PlateReaderResult, UploadedImage, VinReaderResponse } from './recognize.types.js'
 
 const ACCEPTED_MIME = new Set(['image/jpeg', 'image/png', 'image/webp'])
 // Tiled multi-crop inference on the VPS can take well over 10 s; stays under the 60 s requestTimeout in main.ts.
@@ -56,8 +56,35 @@ export class LocalRecognizeService {
       throw new BadGatewayException(`Local ALPR request failed: ${(err as Error).message}`)
     }
 
-    const candidates = mapPlateReaderResults(payload.results ?? [])
+    let candidates = mapPlateReaderResults(payload.results ?? [])
+    if (candidates.length === 0) candidates = mapPlateReaderResults(await this.readDocumentPlates(form))
     if (candidates.length === 0) throw new NotFoundException('No plate found in the image')
     return { candidates: await this.registryRank.rank(candidates) }
+  }
+
+  /**
+   * Fallback for a registration certificate (or any printed document): the plate detector finds nothing on a card,
+   * so read its text with the VIN route's OCR and offer every plate-shaped token (the mapper drops the rest).
+   * Best-effort: a failure here is the same "no plate found" as an empty read.
+   */
+  private async readDocumentPlates(form: FormData): Promise<PlateReaderResult[]> {
+    try {
+      const res = await fetch(`${this.env.ALPR_LOCAL_URL}/recognize/vin`, {
+        method: 'POST',
+        headers: { accept: 'application/json', ...(this.env.ALPR_API_KEY && { 'x-alpr-key': this.env.ALPR_API_KEY }) },
+        body: form,
+        signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS)
+      })
+      if (!res.ok) return []
+      const { lines = [] } = (await res.json()) as VinReaderResponse
+      return lines.flatMap(({ text, score, box }) =>
+        text
+          .split(/\s+/)
+          .filter(Boolean)
+          .map(plate => ({ plate, score, ...(box && { box }) }))
+      )
+    } catch {
+      return []
+    }
   }
 }

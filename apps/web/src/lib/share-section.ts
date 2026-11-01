@@ -29,6 +29,7 @@ export const SHARE_SECTIONS = [
   'news',
   'social',
   'stock',
+  'shares',
   'auctions',
   'origin',
   'assists',

@@ -9,13 +9,13 @@ import type { Currency } from '@carplates/shared'
 import ReadGuideLink from '@/components/ReadGuideLink'
 import SectionInfo from '@/components/SectionInfo'
 import ShareButton from '@/components/ShareButton'
-import Timeline from '@/components/Timeline'
 import AuctionCurrency from '@/components/ua-auctions/AuctionCurrency'
 import UaAuctionStatus from '@/components/ua-auctions/UaAuctionStatus'
 import UaAuctionChart from '@/components/ua-auctions/UaAuctionChart'
 import UaAuctionPriceCheck from '@/components/ua-auctions/UaAuctionPriceCheck'
-import UaAuctionLot from '@/components/ua-auctions/UaAuctionLot'
-import { OPEN_STATUS, VISIBLE_NOT_SOLD } from '@/components/ua-auctions/helpers'
+import UaAuctionGroup from '@/components/ua-auctions/UaAuctionGroup'
+import UaAuctionVehicle from '@/components/ua-auctions/UaAuctionVehicle'
+import { groupLots, lotSource } from '@/components/ua-auctions/helpers'
 import VinToggleSection from '@/components/vin/VinToggleSection'
 import { toIntlLocale } from '@/lib/intl'
 import { auctionLotsQuery, fxQuery } from '@/lib/queries'
@@ -59,15 +59,11 @@ export default function UaAuctionCheck({ plate, vin, openSignal = 0, startOpen =
   const title = t('uaAuctions.title')
   const locale = toIntlLocale(i18n.language)
   const lots = data?.lots ?? []
-  const [showAll, setShowAll] = useState(false)
   const [currency, setCurrency] = useState<Currency>('UAH')
   const fx = useQuery({ ...fxQuery(), enabled: lots.length > 0 }).data ?? null
-  // Sold and open lots always show; of the not-sold ones only the newest few until the visitor asks for the rest.
-  const isNotSold = (l: (typeof lots)[number]): boolean => !l.sold && l.status !== OPEN_STATUS
-  const notSoldCount = lots.filter(isNotSold).length
-  const hiddenCount = showAll ? 0 : Math.max(0, notSoldCount - VISIBLE_NOT_SOLD)
-  let notSoldSeen = 0
-  const shown = lots.filter(l => !isNotSold(l) || showAll || ++notSoldSeen <= VISIBLE_NOT_SOLD)
+  const groups = groupLots(lots)
+  // The merged specs only add something once a Prozorro lot (structured fields, photos) is among the lots.
+  const vehicle = lots.some(l => lotSource(l) === 'prozorro') ? data?.vehicle : null
 
   useEffect(() => {
     if ((isShared || openSignal > 0) && sectionRef.current) scrollElementIntoView(sectionRef.current)
@@ -108,24 +104,18 @@ export default function UaAuctionCheck({ plate, vin, openSignal = 0, startOpen =
 
           <UaAuctionChart lots={lots} currency={currency} fx={fx} />
 
-          <Timeline
-            items={shown.map(lot => ({
-              key: String(lot.lotNo),
-              highlight: lot.sold,
-              content: <UaAuctionLot lot={lot} currency={currency} fx={fx} />
-            }))}
-            highlightFirst={false}
-          />
+          {vehicle && <UaAuctionVehicle vehicle={vehicle} />}
 
-          {(hiddenCount > 0 || (showAll && notSoldCount > VISIBLE_NOT_SOLD)) && (
-            <button
-              type="button"
-              onClick={() => setShowAll(v => !v)}
-              className="mb-2 text-sm text-[var(--color-primary)] underline"
-            >
-              {showAll ? t('uaAuctions.less') : t('uaAuctions.more', { count: hiddenCount })}
-            </button>
-          )}
+          {groups.map((group, i) => (
+            <UaAuctionGroup
+              key={group.group}
+              group={group}
+              currency={currency}
+              fx={fx}
+              collapsible={groups.length > 1}
+              defaultOpen={i === 0}
+            />
+          ))}
 
           <p className="mb-2 text-xs text-[var(--color-muted)]">{t('uaAuctions.monthNote')}</p>
           <p className="mb-2 text-sm text-[var(--color-muted)]">{t('uaAuctions.caveat')}</p>

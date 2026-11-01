@@ -337,6 +337,22 @@ export type VinFallback = {
 
 type RegistryHint = { brand?: string | null; model?: string | null; makeYear?: number | null }
 
+export type VehiclePart = { key: 'make' | 'model' | 'year'; text: string; source: FallbackSource | undefined }
+
+/** Make / model / year for a headline: the NHTSA value, else the fallback (tagged with its source). Empty when neither has any. */
+export function vehicleParts(fields: FieldMap, fallback: VinFallback): VehiclePart[] {
+  return (
+    [
+      { key: 'make', text: fields.get('Make'), derived: fallback.make },
+      { key: 'model', text: fields.get('Model'), derived: fallback.model },
+      { key: 'year', text: fields.get('Model Year'), derived: fallback.year }
+    ] as const
+  ).flatMap(p => {
+    const text = p.text ?? (p.derived ? String(p.derived.value) : undefined)
+    return text ? [{ key: p.key, text, source: p.text ? undefined : p.derived?.source }] : []
+  })
+}
+
 /**
  * Fills only what NHTSA left empty. Priority: NHTSA > our registry record for this VIN > VIN-prefix table > year code.
  * Nothing here overwrites a decoded value, and each value carries its source so the UI can label it.

@@ -35,7 +35,8 @@ import UaAuctionChip from '@/components/ua-auctions/UaAuctionChip'
 import SteeringChip from '@/components/SteeringChip'
 import { useCardMotion } from '@/hooks/useCardMotion'
 import { ukraineFromActions } from '@/components/OriginSection.helpers'
-import { countryIso, toFieldMap } from '@/components/vin/helpers'
+import VinVehicleSummary from '@/components/vin/VinVehicleSummary'
+import { buildFallback, countryIso, toFieldMap } from '@/components/vin/helpers'
 import { hasImportOperation } from '@/lib/auction-sites'
 import { useUiStore } from '@/store/ui-store'
 
@@ -48,11 +49,9 @@ type Props = {
   data: VinDecodeResponse
   /** Plate the visitor searched when this VIN was reached through another source (the registry has no row for it). */
   searchedPlate?: string | null
-  /** Starts the auctions section expanded, without scrolling to it (the first view stays at the top). */
-  openAuctions?: boolean
 }
 
-export default function VinResult({ data, searchedPlate = null, openAuctions = false }: Props): ReactNode {
+export default function VinResult({ data, searchedPlate = null }: Props): ReactNode {
   const { t } = useTranslation()
   const registry = data.registry
   const vehicle = extractVehicleInfo(data)
@@ -88,6 +87,12 @@ export default function VinResult({ data, searchedPlate = null, openAuctions = f
           .filter(Boolean)
           .join(' ')}
       />
+      {/* On the VIN page only; behind a plate the "other sources" block above already names the vehicle. */}
+      {!searchedPlate && (
+        <div className="mb-3">
+          <VinVehicleSummary fields={fields} fallback={buildFallback(data.vin, fields, registry?.actions[0])} />
+        </div>
+      )}
       <Card
         ref={glowRef}
         className="group relative isolate w-full transform-[perspective(var(--tilt-perspective,1200px))_rotateX(var(--tilt-x,0deg))_rotateY(var(--tilt-y,0deg))] overflow-hidden shadow-2xl! transition-[transform,box-shadow] duration-200 ease-out will-change-transform backface-hidden hover:shadow-xl!"
@@ -158,25 +163,22 @@ export default function VinResult({ data, searchedPlate = null, openAuctions = f
           <WantedCheck plate={sourcePlate} vin={data.vin} />
         </LazySection>
 
-        <LazySection sections={['ua-auctions']} forceMount={uaAuctionOpenSignal > 0 || openAuctions}>
-          <UaAuctionCheck
-            plate={sourcePlate}
-            vin={data.vin}
-            openSignal={uaAuctionOpenSignal}
-            startOpen={openAuctions}
-          />
+        <LazySection sections={['ua-auctions']} forceMount={uaAuctionOpenSignal > 0}>
+          <UaAuctionCheck plate={sourcePlate} vin={data.vin} openSignal={uaAuctionOpenSignal} />
         </LazySection>
 
-        <VinDecodeTabs
-          data={data}
-          overviewExtras={
-            <>
-              <SafetyRatings brand={vehicle.brand} model={vehicle.model} year={vehicle.year} body={vehicle.body} />
-              <CarWikiInfo brand={vehicle.brand} model={vehicle.model} year={vehicle.year} />
-              <VinTypicalData data={data} />
-            </>
-          }
-        />
+        <div className="mt-4">
+          <VinDecodeTabs
+            data={data}
+            overviewExtras={
+              <>
+                <SafetyRatings brand={vehicle.brand} model={vehicle.model} year={vehicle.year} body={vehicle.body} />
+                <CarWikiInfo brand={vehicle.brand} model={vehicle.model} year={vehicle.year} />
+                <VinTypicalData data={data} />
+              </>
+            }
+          />
+        </div>
 
         <LazySection sections={['origin']} forceMount={originOpenSignal > 0}>
           <OriginSection

@@ -160,6 +160,23 @@ export const STATIC_PAGES: Record<string, Record<Lang, PageText>> = {
         'A catalog of the makes and models registered in Ukraine: cars on the road, model years, fuel and regions from the open vehicle registry.'
     }
   },
+  '/customs': {
+    ua: {
+      title: 'Калькулятор розмитнення авто 2026: мито, акциз, ПДВ | Cars UA',
+      description:
+        'Розрахуйте орієнтовну вартість розмитнення авто 2026: мито, акциз за віком і об’ємом двигуна, ПДВ та пенсійний збір для бензину, дизеля, гібрида й електромобіля.'
+    },
+    ru: {
+      title: 'Калькулятор растаможки авто 2026: пошлина, акциз, НДС | Cars UA',
+      description:
+        'Рассчитайте ориентировочную стоимость растаможки авто 2026: пошлина, акциз по возрасту и объёму двигателя, НДС и пенсионный сбор для бензина, дизеля, гибрида и электромобиля.'
+    },
+    en: {
+      title: 'Car import customs calculator 2026: duty, excise, VAT | Cars UA',
+      description:
+        'Estimate the Ukrainian customs cost of an imported car in 2026: duty, excise by age and engine size, VAT and the pension fee for petrol, diesel, hybrid and electric cars.'
+    }
+  },
   '/compare': {
     ua: {
       title: 'Порівняння двох авто: за номером, VIN або моделлю | Cars UA',
@@ -212,17 +229,17 @@ export const STATIC_PAGES: Record<string, Record<Lang, PageText>> = {
     ua: {
       title: 'Українські аукціони арештованих авто: лоти та статистика | Cars UA',
       description:
-        'Легкові й вантажні авто з торгів СЕТАМ: лоти, ціни продажу, статистика за регіонами, марками й роками.'
+        'Легкові й вантажні авто з торгів СЕТАМ і Prozorro.Продажів: лоти, ціни продажу, статистика за регіонами, марками й роками.'
     },
     ru: {
       title: 'Украинские аукционы арестованных авто: лоты и статистика | Cars UA',
       description:
-        'Легковые и грузовые авто с торгов СЕТАМ: лоты, цены продажи, статистика по регионам, маркам и годам.'
+        'Легковые и грузовые авто с торгов СЕТАМ и Prozorro.Продажи: лоты, цены продажи, статистика по регионам, маркам и годам.'
     },
     en: {
       title: 'Ukrainian seized-car auctions: lots and statistics | Cars UA',
       description:
-        'Cars and trucks from SETAM auctions in Ukraine: lots, sale prices and statistics by region, make and year.'
+        'Cars and trucks from SETAM and Prozorro.Sale auctions in Ukraine: lots, sale prices and statistics by region, make and year.'
     }
   },
   '/fuel': {
@@ -671,6 +688,49 @@ export const SHARE_ALIAS_PAGES: Record<ShareAlias, Record<Lang, PageText>> = {
       title: 'AR plate scanner with your camera | Cars UA',
       description: 'Point your camera at a car: plates are read live and the vehicle data shows up beside them.'
     }
+  },
+  login: {
+    ua: {
+      title: 'Вхід в акаунт | Cars UA',
+      description: 'Увійдіть через Google, Telegram або email, щоб синхронізувати обране та історію між пристроями.'
+    },
+    ru: {
+      title: 'Вход в аккаунт | Cars UA',
+      description:
+        'Войдите через Google, Telegram или email, чтобы синхронизировать избранное и историю между устройствами.'
+    },
+    en: {
+      title: 'Sign in to your account | Cars UA',
+      description: 'Sign in with Google, Telegram or email to sync favorites and history across your devices.'
+    }
+  },
+  signup: {
+    ua: {
+      title: 'Створити акаунт | Cars UA',
+      description: 'Безкоштовна реєстрація через Google, Telegram або email: обране та історія завжди під рукою.'
+    },
+    ru: {
+      title: 'Создать аккаунт | Cars UA',
+      description: 'Бесплатная регистрация через Google, Telegram или email: избранное и история всегда под рукой.'
+    },
+    en: {
+      title: 'Create an account | Cars UA',
+      description: 'Sign up free with Google, Telegram or email and keep your favorites and history at hand.'
+    }
+  },
+  logout: {
+    ua: {
+      title: 'Вихід з акаунта | Cars UA',
+      description: 'Підтвердіть вихід з акаунта Cars UA на цьому пристрої.'
+    },
+    ru: {
+      title: 'Выход из аккаунта | Cars UA',
+      description: 'Подтвердите выход из аккаунта Cars UA на этом устройстве.'
+    },
+    en: {
+      title: 'Sign out of your account | Cars UA',
+      description: 'Confirm that you want to sign out of Cars UA on this device.'
+    }
   }
 }
 
@@ -826,6 +886,11 @@ const SECTION_TEXT: Record<string, Record<Lang, [label: string, lead: string]>> 
     ru: ['Наличие', 'Наличие похожих авто на рынке.'],
     en: ['In stock', 'Similar cars available on the market.']
   },
+  shares: {
+    ua: ['Акції', 'Ціна акцій виробника марки.'],
+    ru: ['Акции', 'Цена акций производителя марки.'],
+    en: ['Share price', 'Share price of the make’s maker.']
+  },
   auctions: {
     ua: ['Аукціони', 'Аукціонні лоти та ціни.'],
     ru: ['Аукционы', 'Аукционные лоты и цены.'],
@@ -842,9 +907,9 @@ const SECTION_TEXT: Record<string, Record<Lang, [label: string, lead: string]>> 
     en: ['Driver assists', 'Driver assistance systems.']
   },
   'ua-auctions': {
-    ua: ['Українські аукціони', 'Лоти СЕТАМ з цим номером або VIN.'],
-    ru: ['Украинские аукционы', 'Лоты СЕТАМ с этим номером или VIN.'],
-    en: ['Ukrainian auctions', 'SETAM auction lots with this plate or VIN.']
+    ua: ['Українські аукціони', 'Лоти СЕТАМ і Prozorro.Продажів з цим номером або VIN.'],
+    ru: ['Украинские аукционы', 'Лоты СЕТАМ и Prozorro.Продажи с этим номером или VIN.'],
+    en: ['Ukrainian auctions', 'SETAM and Prozorro.Sale auction lots with this plate or VIN.']
   },
   wanted: {
     ua: ['Розшук', 'Перевірка за базою розшуку.'],

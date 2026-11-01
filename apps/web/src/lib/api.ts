@@ -72,6 +72,7 @@ import {
   newsFeedPageResponseSchema,
   socialResponseSchema,
   stockResponseSchema,
+  stockQuoteResponseSchema,
   stockNewsResponseSchema,
   reviewsResponseSchema,
   safetyRatingsResponseSchema,
@@ -162,6 +163,7 @@ import type {
   SocialResponse,
   StockNewsResponse,
   StockRange,
+  StockQuoteResponse,
   StockResponse,
   ReviewsResponse,
   FuelStatsResponse,
@@ -749,6 +751,12 @@ export async function getStock(brand: string, range: StockRange): Promise<StockR
   return stockResponseSchema.parse(await getJson(`/api/stocks?brand=${encodeURIComponent(brand)}&range=${range}`))
 }
 
+/** One instrument (main listing, preferred, ADR, other venue) of the make's listed company, with the facts Yahoo reports. */
+export async function getStockQuote(brand: string, symbol: string, range: StockRange): Promise<StockQuoteResponse> {
+  const params = new URLSearchParams({ brand, symbol, range })
+  return stockQuoteResponseSchema.parse(await getJson(`/api/stocks/quote?${params}`))
+}
+
 /** Yahoo Finance headlines of the listed company behind a car's brand (live, proxied); empty when the brand has no listing. */
 export async function getStockNews(brand: string): Promise<StockNewsResponse> {
   return stockNewsResponseSchema.parse(await getJson(`/api/stocks/news?brand=${encodeURIComponent(brand)}`))
@@ -955,6 +963,10 @@ export async function getAuctionLots(plate: string | null, vin: string | null): 
   if (vin) params.set('vin', vin)
   return auctionResponseSchema.parse(await getJson(`/api/auctions?${params.toString()}`))
 }
+
+/** A Prozorro.Sale photo resized (WebP) by our API; `width` must be one the resizer serves (see `PHOTO_WIDTHS` in the API). */
+export const auctionPhotoUrl = (docId: string, width: number): string =>
+  `${BASE}/api/auctions/photo/${docId}?w=${width}`
 
 /** Aggregates for the /auctions page: totals and breakdowns by month / region / make / year. */
 export async function getAuctionStats(): Promise<AuctionStatsResponse> {

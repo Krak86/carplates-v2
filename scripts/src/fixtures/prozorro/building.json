@@ -1,0 +1,212 @@
+{
+  "ownershipType": "municipal",
+  "clarificationPeriod": {
+    "endDate": "2026-08-30T08:57:23.994000Z",
+    "startDate": "2026-08-30T08:57:23.994000Z"
+  },
+  "assetHolder": {
+    "identifier": {
+      "legalName": {
+        "uk_UA": "Департамент комунального майна Сумської міської ради"
+      },
+      "scheme": "UA-EDR",
+      "id": "45913807"
+    },
+    "address": {
+      "streetAddress": {
+        "uk_UA": "вул. Восркесеньска, 8А"
+      },
+      "postalCode": "40000",
+      "locality": {
+        "uk_UA": "Суми"
+      },
+      "countryName": {
+        "uk_UA": "Україна"
+      },
+      "region": {
+        "uk_UA": "Сумська область"
+      }
+    },
+    "contactPoint": {
+      "name": {
+        "uk_UA": "Кононенко Олена Володимирівна"
+      },
+      "telephone": "0542780104",
+      "email": "dkm@smr.gov.ua"
+    },
+    "name": {
+      "uk_UA": "Департамент комунального майна Сумської міської ради"
+    },
+    "representativeInfo": "посадова інструкція"
+  },
+  "documents": [
+    {
+      "documentType": "illustration",
+      "format": "application/pdf",
+      "url": "https://procedure.prozorro.sale/api/documents/public/ecbc179212d445be971d44a120d62b55",
+      "id": "301e2b5d6f6e4747a254c75e70ede200",
+      "_ds_id": "ecbc179212d445be971d44a120d62b55"
+    },
+    {
+      "documentType": "technicalSpecifications",
+      "format": "application/pdf",
+      "url": "https://procedure.prozorro.sale/api/documents/public/dee55503e8dc4274b2895a746cea3bd5",
+      "id": "8c69768d657c4856b64fb5e36c1ed07a",
+      "_ds_id": "dee55503e8dc4274b2895a746cea3bd5"
+    }
+  ],
+  "_protect_level": "high",
+  "description": {
+    "uk_UA": "Окремо розташована одноповрехова нежитлова будівля площею 46,2 кв.м. Інженерні комунікації відсутні. Технічний стан будівлі - незадовільний"
+  },
+  "guarantee": {
+    "amount": 14544,
+    "currency": "UAH"
+  },
+  "title": {
+    "uk_UA": "Нежитлове приміщення по вул. Парковій, 4/2 у м. Суми"
+  },
+  "_protected": false,
+  "dateCompleted": "2026-10-08T06:24:37.946000Z",
+  "sellingMethod": "smallPrivatization-english",
+  "valueAddedTaxCharged": false,
+  "auctionPeriod": {
+    "startDate": "2026-09-07T08:45:00.000000Z"
+  },
+  "tenderPeriod": {
+    "endDate": "2026-09-06T17:00:00.000000Z",
+    "startDate": "2026-08-30T08:57:23.994000Z"
+  },
+  "value": {
+    "amount": 72720,
+    "valueAddedTaxIncluded": false,
+    "currency": "UAH"
+  },
+  "owner": "smarttender.biz",
+  "minimalStep": {
+    "amount": 727.2,
+    "currency": "UAH"
+  },
+  "registrationFee": {
+    "amount": 1729.4,
+    "currency": "UAH"
+  },
+  "saleCondition": "yes",
+  "dateModified": "2026-10-08T06:24:38.104000Z",
+  "datePublished": "2026-08-30T08:57:23.992000Z",
+  "auctionId": "SPE001-UA-20260830-79640",
+  "disqualifiedBids": [],
+  "metaInfo": {
+    "directions": [
+      "sellOut"
+    ],
+    "categories": [
+      "commercialSale"
+    ],
+    "auctionTypes": [
+      "english"
+    ]
+  },
+  "sellingEntity": {
+    "identifier": {
+      "legalName": {
+        "uk_UA": "Департамент комунального майна Сумської міської ради"
+      },
+      "scheme": "UA-EDR",
+      "id": "45913807"
+    },
+    "address": {
+      "postalCode": "40000",
+      "locality": {
+        "uk_UA": "Суми"
+      },
+      "countryName": {
+        "uk_UA": "Україна"
+      },
+      "region": {
+        "uk_UA": "Сумська область"
+      }
+    },
+    "name": {
+      "uk_UA": "Департамент комунального майна Сумської міської ради"
+    },
+    "representativeInfo": "Посадова інструкція"
+  },
+  "awards": [
+    {
+      "status": "active",
+      "value": {
+        "amount": 73000,
+        "currency": "UAH"
+      }
+    }
+  ],
+  "minNumberOfQualifiedBids": 1,
+  "tenderAttempts": 1,
+  "admissionPeriod": {
+    "endDate": "2026-09-11T15:00:00.000000Z",
+    "startDate": "2026-09-06T17:00:04.974000Z"
+  },
+  "relatedEntities": [
+    {
+      "_id": "6a4bb662dcd2f179f0b7e3f7",
+      "type": "asset",
+      "objectId": "RAS001-UA-20260706-69174",
+      "url": "/api/registry/assets/6a4bb662dcd2f179f0b7e3f7"
+    },
+    {
+      "_id": "6a914d73ca4098a5d02e0dd9",
+      "type": "announcement",
+      "objectId": "JAS001-UA-20260828-53975",
+      "url": "/api/jobber/announcements/jas/6a914d73ca4098a5d02e0dd9"
+    },
+    {
+      "_id": "6ac7372681bc13357b211d7f",
+      "type": "execution",
+      "objectId": "RES001-UA-20261008-12012",
+      "url": "/api/registry/executions/6ac7372681bc13357b211d7f"
+    }
+  ],
+  "items": [
+    {
+      "itemProps": {
+        "totalObjectArea": 46.2,
+        "itemPropsType": "realEstate",
+        "serviceAutonomousHeating": false,
+        "generalCondition": "незадовільний",
+        "serviceWater": false
+      },
+      "quantity": 46.2,
+      "address": {
+        "locality": {
+          "uk_UA": "Суми"
+        },
+        "region": {
+          "uk_UA": "Сумська область"
+        }
+      },
+      "smallPrivatizationItemType": "assets",
+      "description": {
+        "uk_UA": "Нежитлове приміщення по вул. Парковій, 4/2 у м. Суми"
+      },
+      "location": {
+        "latitude": "50.89086000",
+        "longitude": "34.82494000"
+      },
+      "id": "b5f05b926a224795ac115159c0f89bc5",
+      "classification": {
+        "scheme": "CAV",
+        "description": {
+          "en_US": "Trade property",
+          "uk_UA": "Торгова нерухомість"
+        },
+        "id": "04220000-6"
+      }
+    }
+  ],
+  "qualificationPeriod": {
+    "endDate": "2026-10-19T15:00:00.000000Z",
+    "startDate": "2026-09-06T17:00:04.974000Z"
+  },
+  "status": "complete"
+}

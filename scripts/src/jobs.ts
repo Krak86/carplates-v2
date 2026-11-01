@@ -16,6 +16,10 @@ export const JOBS = {
   // SETAM auction lots (newest 2 monthly CSVs, ~1 000 vehicle lots, seconds). Idempotent and nothing is lost on a skipped day (lots
   // are snapshots, a later run catches up); the first VPS run needs `--all` once for the history (SCHEDULE.md).
   auctions: { command: 'tsx src/auctions.ts', timeoutMin: 15 },
+  // Prozorro.Sale vehicle auctions (docs/prozorro-sale-auctions-plan.md): reads the feed from the newest stored change minus 1 day (~370 records a
+  // day on average (1 400 on busy days), 4-14 requests, seconds). A skipped day is caught up by the next run; after an outage of weeks the cursor still resumes where it stopped.
+  // The first VPS run needs the history once: `tsx src/prozorro.ts --from 2017-04-01` (SCHEDULE.md).
+  'prozorro-auctions': { command: 'tsx src/prozorro.ts', timeoutMin: 45 },
   // Patrol Police road-crash XLSX (docs/road-safety-plan.md): a new NN.YYYY.xlsx appears monthly; a year is replaced in one transaction and a
   // run with nothing newer rewrites the same numbers. Hazardous-section CSVs (data.gov.ua) change about once a year. Re-export the seed CSVs
   // locally after a real change (pnpm export:dtp:csv).

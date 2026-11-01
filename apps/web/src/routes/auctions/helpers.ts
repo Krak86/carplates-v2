@@ -1,4 +1,5 @@
-import type { AuctionStatsResponse, AuctionStatsRow } from '@carplates/shared'
+import { AUCTION_GROUPS } from '@carplates/shared'
+import type { AuctionGroup, AuctionSource, AuctionStatsResponse, AuctionStatsRow } from '@carplates/shared'
 
 import type { AuctionColumn, AuctionDimension, AuctionTableRow } from '@/routes/auctions/types'
 
@@ -60,3 +61,7 @@ export function monthLabel(label: string, locale: string): string {
     timeZone: 'UTC'
   })
 }
+
+/** Lot categories that can exist under a source filter: SETAM has only its own group, Prozorro every other one. */
+export const groupsForSource = (source: AuctionSource | undefined): readonly AuctionGroup[] =>
+  source === undefined ? AUCTION_GROUPS : AUCTION_GROUPS.filter(g => (g === 'setam') === (source === 'setam'))

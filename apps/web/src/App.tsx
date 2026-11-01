@@ -48,12 +48,15 @@ const CatalogModelRoute = lazy(() => import('@/routes/catalog/CatalogModelRoute'
 const CompareRoute = lazy(() => import('@/routes/compare/CompareRoute'))
 const GoRoute = lazy(() => import('@/routes/go/GoRoute'))
 const SitemapRoute = lazy(() => import('@/routes/sitemap/SitemapRoute'))
+const CustomsRoute = lazy(() => import('@/routes/customs/CustomsRoute'))
 const DataStatusRoute = lazy(() => import('@/routes/data-status/DataStatusRoute'))
 const ShareRoute = lazy(() => import('@/routes/share/ShareRoute'))
 const FeaturesRoute = lazy(() => import('@/routes/features/FeaturesRoute'))
 const SettingsRoute = lazy(() => import('@/routes/settings/SettingsRoute'))
 const EmailLinkRoute = lazy(() => import('@/routes/auth/EmailLinkRoute'))
 const UnsubscribeRoute = lazy(() => import('@/routes/auth/UnsubscribeRoute'))
+const LoginRoute = lazy(() => import('@/routes/auth/LoginRoute'))
+const LogoutRoute = lazy(() => import('@/routes/auth/LogoutRoute'))
 const ProfileRoute = lazy(() => import('@/routes/profile/ProfileRoute'))
 const AdminRoute = lazy(() => import('@/routes/admin/AdminRoute'))
 const AdvancedSearchRoute = lazy(() => import('@/routes/advanced-search/AdvancedSearchRoute'))
@@ -131,6 +134,7 @@ export default function App(): ReactNode {
             <Route path="/cars/:make/:model" element={<CatalogModelRoute />} />
             <Route path="/compare" element={<CompareRoute />} />
             <Route path="/sitemap" element={<SitemapRoute />} />
+            <Route path="/customs" element={<CustomsRoute />} />
             <Route path="/data-status" element={<DataStatusRoute />} />
             <Route path="/share" element={<ShareRoute />} />
             <Route path="/go/:alias" element={<GoRoute />} />
@@ -138,6 +142,8 @@ export default function App(): ReactNode {
             <Route path="/settings" element={<SettingsRoute />} />
             <Route path="/auth/email" element={<EmailLinkRoute />} />
             <Route path="/unsubscribe" element={<UnsubscribeRoute />} />
+            <Route path="/login" element={<LoginRoute />} />
+            <Route path="/logout" element={<LogoutRoute />} />
             <Route path="/profile" element={<ProfileRoute />} />
             <Route path="/admin" element={<AdminRoute />} />
             <Route path="/:query" element={<SearchRoute />} />

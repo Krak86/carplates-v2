@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { resolveVehicleKind } from '@carplates/shared'
 
 import VehicleKindPlaceholder from '@/components/VehicleKindPlaceholder'
+import UaAuctionHero from '@/components/ua-auctions/UaAuctionHero'
 import { useCarHeroImageActions } from '@/components/use-car-hero-image-actions'
 
 type Props = {
@@ -14,6 +15,8 @@ type Props = {
   /** Same identity `useCarHeroImageActions` keys the ambient background override on — VIN when the
    *  result has one, otherwise the plate. */
   vehicleKey: string | null
+  /** Prozorro.Sale lot photo ids of this very car: when present they lead the hero, the model photo follows as the last slide (the real car beats a stock one). */
+  lotPhotos?: readonly string[]
 }
 
 /**
@@ -21,7 +24,7 @@ type Props = {
  * but with the car photo for its make/model/year (our stored copy first, Wikimedia as the server-side fallback) —
  * only rendered by the caller when no photo is attached.
  */
-export default function WikiHeroImage({ brand, model, year, rawKind, vehicleKey }: Props): ReactNode {
+export default function WikiHeroImage({ brand, model, year, rawKind, vehicleKey, lotPhotos = [] }: Props): ReactNode {
   const { t } = useTranslation()
   const { query: heroImage, refresh, isRefreshing } = useCarHeroImageActions({ brand, model, year, key: vehicleKey })
   const image = heroImage.isSuccess ? heroImage.data.image : null
@@ -31,6 +34,16 @@ export default function WikiHeroImage({ brand, model, year, rawKind, vehicleKey 
   const [failedUrl, setFailedUrl] = useState<string | null>(null)
   const hasQuery = Boolean(brand || model)
   const isPending = hasQuery && heroImage.isPending
+
+  if (lotPhotos.length > 0) {
+    return (
+      <UaAuctionHero
+        docIds={lotPhotos}
+        label={[brand, model, year].filter(Boolean).join(' ')}
+        modelPhoto={image ? { url: image.url, credit: creditParts.join(', ') || null } : null}
+      />
+    )
+  }
 
   // Settled with no image (or the image failed to load) → a kind placeholder in the same slot,
   // or nothing at all when the registry gave no recognizable kind (e.g. a VIN-only decode).

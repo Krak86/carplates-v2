@@ -1,0 +1,164 @@
+{
+  "isPerishable": false,
+  "documents": [
+    {
+      "documentType": "illustration",
+      "format": "image/jpeg",
+      "url": "https://procedure.prozorro.sale/api/documents/public/13edad57d2ba48d087af5b67778ba6a6",
+      "id": "fbffd7cfbe744cd9a56e71ef48705a58",
+      "_ds_id": "13edad57d2ba48d087af5b67778ba6a6"
+    },
+    {
+      "documentType": "illustration",
+      "format": "image/jpeg",
+      "url": "https://procedure.prozorro.sale/api/documents/public/7c091bbb68cd4bf28e45cbed7fdbfc51",
+      "id": "d7b50321e25244eca7347860de39db07",
+      "_ds_id": "7c091bbb68cd4bf28e45cbed7fdbfc51"
+    },
+    {
+      "documentType": "illustration",
+      "format": "image/jpeg",
+      "url": "https://procedure.prozorro.sale/api/documents/public/9a48a9b4cce744c0bfaa03a7383aa59d",
+      "id": "7b0b5457ca854a4489c5b3c11f47fec1",
+      "_ds_id": "9a48a9b4cce744c0bfaa03a7383aa59d"
+    },
+    {
+      "documentType": "notice",
+      "format": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "url": "https://procedure.prozorro.sale/api/documents/public/b6b3773b37bb41b2bd73af53501a6a59",
+      "id": "dbc4033623574d36acdc33450614b1e3",
+      "_ds_id": "b6b3773b37bb41b2bd73af53501a6a59"
+    }
+  ],
+  "description": {
+    "uk_UA": "Транспортний засіб   марки «SKODA»,  модель «OCTAVIA», номер кузов/шасі  TMBCG21U542894707, 2004 року випуску, об’єм двигуна 1896 см.куб., дизель,  колір – сірий, бувший у використанні."
+  },
+  "guarantee": {
+    "amount": 9154.19,
+    "currency": "UAH"
+  },
+  "title": {
+    "uk_UA": "Перший митний аукціон Транспортний засіб   марки «SKODA»,  модель «OCTAVIA», номер кузов/шасі  TMBCG21U542894707, 2004 року випуску, об’єм двигуна 1896 см.куб., дизель,  колір – сірий, бувший у використанні."
+  },
+  "_protected": false,
+  "sellingMethod": "basicSell-english",
+  "valueAddedTaxCharged": false,
+  "auctionPeriod": {
+    "startDate": "2026-11-17T09:05:00.000000Z"
+  },
+  "value": {
+    "amount": 183083.86,
+    "valueAddedTaxIncluded": false,
+    "currency": "UAH"
+  },
+  "tenderPeriod": {
+    "endDate": "2026-11-16T18:00:00.000000Z",
+    "startDate": "2026-10-28T08:30:54.099000Z"
+  },
+  "owner": "sale.uub.com.ua",
+  "minimalStep": {
+    "amount": 1830.84,
+    "currency": "UAH"
+  },
+  "registrationFee": {
+    "amount": 170,
+    "currency": "UAH"
+  },
+  "dateModified": "2026-10-28T08:30:54.103000Z",
+  "lotId": "ХМ-45",
+  "datePublished": "2026-10-28T08:30:54.090000Z",
+  "auctionId": "BSE001-UA-20261028-88811",
+  "disqualifiedBids": [],
+  "metaInfo": {
+    "directions": [
+      "otherAssets"
+    ],
+    "categories": [
+      "cars"
+    ],
+    "auctionTypes": [
+      "english"
+    ]
+  },
+  "sellingEntity": {
+    "identifier": {
+      "legalName": {
+        "en_US": "",
+        "uk_UA": "ХМЕЛЬНИЦЬКА МИТНИЦЯ"
+      },
+      "scheme": "UA-EDR",
+      "id": "43997560"
+    },
+    "address": {
+      "postalCode": "29010",
+      "locality": {
+        "en_US": "",
+        "uk_UA": "місто Хмельницький(з)"
+      },
+      "countryName": {
+        "en_US": "",
+        "uk_UA": "Україна"
+      },
+      "region": {
+        "en_US": "",
+        "uk_UA": "Хмельницька область"
+      }
+    },
+    "name": {
+      "en_US": "",
+      "uk_UA": "ХМЕЛЬНИЦЬКА МИТНИЦЯ"
+    }
+  },
+  "minNumberOfQualifiedBids": 1,
+  "awards": [],
+  "tenderAttempts": 1,
+  "x_additionalInformation": {
+    "uk_UA": "Категорія  – легковий, тип кузов - хетчбек, тип коробки передач - механічна, фактичні показники одометра не визначено у зв’язку з відсутністю електроживлення. "
+  },
+  "items": [
+    {
+      "itemProps": {
+        "itemPropsType": "vehicle",
+        "fuelType": "diesel",
+        "color": "сірий",
+        "identificationNumber": "TMBCG21U542894707",
+        "model": "OCTAVIA",
+        "productionYear": 2004,
+        "damagePresence": false,
+        "brand": "SKODA",
+        "engineCapacity": 1896,
+        "damagedDescription": "Пошкодження лакофарбового покриття кузова (подряпини). Наявні сліди корозії лівої задньої арки, правих передніх дверей. Наскрізна корозія порогів, правої стійки. Деформація заднього бамперу. Відсутня обшивка в кришці багажника та в лівих передніх дверях. Порушення функціональних можливостей склопідіймача лівих передніх дверей. Забруднення, пошкодження та потертості сидінь та салону "
+      },
+      "quantity": 1,
+      "address": {
+        "locality": {
+          "en_US": "",
+          "uk_UA": "ХМЕЛЬНИЦЬКА ОБЛАСТЬ/М.ХМЕЛЬНИЦЬКИЙ"
+        },
+        "region": {
+          "en_US": "",
+          "uk_UA": "Хмельницька область"
+        }
+      },
+      "description": {
+        "uk_UA": "Транспортний засіб   марки «SKODA»,  модель «OCTAVIA», номер кузов/шасі  TMBCG21U542894707, 2004 року випуску, об’єм двигуна 1896 см.куб., дизель,  колір – сірий, бувший у використанні."
+      },
+      "location": {
+        "elevation": "",
+        "latitude": "",
+        "longitude": ""
+      },
+      "basicSellItemType": "assets",
+      "id": "287e0eb2d08144bd9ab411fbf8cadf48",
+      "classification": {
+        "scheme": "CAV",
+        "description": {
+          "en_US": "Passenger cars",
+          "uk_UA": "Легкові автомобілі"
+        },
+        "id": "34110000-1"
+      }
+    }
+  ],
+  "status": "active_tendering"
+}

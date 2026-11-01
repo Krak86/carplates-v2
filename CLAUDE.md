@@ -33,11 +33,11 @@ Pins (why: PLAN.md "Version pins"): Node 24, TypeScript 5.9, NestJS 11, Drizzle 
   come from the API, never Vite.
 - **i18n is per-language lazy chunks** (non-ua also loads ua). Tests rendering text `await i18nReady`; never `import '@/i18n'`.
 - **Zod `jitless`**: `@/lib/zod-config` stays the first import of `main.tsx`; `vendor-zod` / `zod-config` stay separate chunks (else CSP `eval`).
-- **Edge cache**: a new cacheable `/api/*` endpoint sends `common/cache.ts` headers, joins the Cloudflare Cache Rule and (if public) `PUBLIC_API_PATH_PREFIXES` (see features-reference "Agent discovery, edge cache…").
+- **Edge cache**: a new cacheable `/api/*` endpoint → `common/cache.ts` headers + Cloudflare Cache Rule (+ `PUBLIC_API_PATH_PREFIXES` if public); see features-reference.
 - **Below-the-fold sections are `LazySection`s**; a new shareable one must list its id in `sections`. Shared pure helpers of lazy
   chunks go in `vite.config.ts` `HELPER_GROUPS`.
-- Accounts: separate `app` schema, not re-ingestable; `account.ts`, not `schemas.ts`; admins by SQL only; online-only UI.
-- **Deploy** (`docs/deploy.md`): blue/green api ⇒ migrations backward compatible; new env var ⇒ `env.ts` + `deploy-api.yml` + deploy.md.
+- Accounts: separate `app` schema, contracts in `account.ts`, admins by SQL only (details: features-reference "Accounts").
+- **Deploy**: blue/green ⇒ backward-compatible migrations; new env var ⇒ `env.ts` + `deploy-api.yml` + `docs/deploy.md`.
 - **New public route** → `ROUTE_TITLE_KEYS` (`useDocumentTitle.ts`), a `STATIC_PAGES` entry (ua/ru/en) in `apps/api/src/spa/spa-text.ts` (else `noindex`, no sitemap),
   `max-w-6xl` page width. Add `@Throttle` (`common/throttle.ts`) to any enumerable lookup.
 
@@ -45,7 +45,7 @@ Pins (why: PLAN.md "Version pins"): Node 24, TypeScript 5.9, NestJS 11, Drizzle 
 
 - After each big update give a suggested commit message (subject + bullet per change, all uncommitted work: `git status` / `git diff --stat`;
   split if logical). Never run `git commit` / `git push` unless asked.
-- **Seed CSVs mirror scraped tables.** After changing one (e.g. `registry.wiki_image`), re-run its `pnpm export:*:csv`.
+- **Seed CSVs mirror scraped tables**: after changing one, re-run its `pnpm export:*:csv`.
 - `pnpm format` first (not `scripts/src/fixtures`). Tests: Vitest, colocated `*.test.ts(x)`.
 - Keep docs current: write-up → `docs/plan-done.md`, one-line ✅ → `PLAN.md`, conventions → `docs/features-reference.md`, user-facing entry → `packages/shared/src/releases.ts`
   (only `new` items are mailed; new day ⇒ bump `routes/releases/latest.ts`); new feature / data source → About (`FEATURES` + `about.brief.*` + `about.feature.*`, `SOURCES` + `about.source.*`, ua/ru/en).

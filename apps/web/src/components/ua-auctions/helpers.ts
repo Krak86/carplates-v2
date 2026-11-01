@@ -1,4 +1,75 @@
-import type { AuctionLot, Currency, FxResponse } from '@carplates/shared'
+import { setamLotUrl } from '@carplates/shared'
+import type { AuctionGroup, AuctionLot, Currency, FxResponse } from '@carplates/shared'
+
+type LotRef = Pick<AuctionLot, 'id' | 'lotNo' | 'url' | 'source' | 'auctionId'>
+
+/** Where a lot comes from; data saved before Prozorro.Sale has no `source` and is SETAM. */
+export const lotSource = (lot: Pick<AuctionLot, 'source'>): 'setam' | 'prozorro' => lot.source ?? 'setam'
+
+/** Left accent stripe of a lot card by source (SETAM amber, Prozorro.Sale sky), so a mixed list reads at a glance. */
+export const lotSourceAccent = (lot: Pick<AuctionLot, 'source'>): string =>
+  lotSource(lot) === 'prozorro' ? 'border-l-4 border-l-sky-500' : 'border-l-4 border-l-amber-500'
+
+/** `count` lots from two newest-first lists, alternating a, b, a, b ...; when one runs out the other fills the rest. */
+export function mixLots<T>(a: readonly T[], b: readonly T[], count: number): T[] {
+  const out: T[] = []
+  for (let i = 0; out.length < count && (i < a.length || i < b.length); i++) {
+    if (i < a.length) out.push(a[i] as T)
+    if (out.length < count && i < b.length) out.push(b[i] as T)
+  }
+  return out
+}
+
+/** `YYYY-MM` of a lot: the SETAM feed month, else the month the Prozorro bidding starts (that feed has no file month). */
+export const lotMonthOf = (lot: Pick<AuctionLot, 'month' | 'auctionStart'>): string | null =>
+  lot.month ?? lot.auctionStart?.slice(0, 7) ?? null
+
+/** Subcategory of a lot; data saved before Prozorro.Sale has none and is SETAM. */
+export const lotGroup = (lot: Pick<AuctionLot, 'group'>): AuctionGroup => lot.group ?? 'setam'
+
+export type LotGroup = { group: AuctionGroup; lots: AuctionLot[] }
+
+/**
+ * Splits a newest-first lot list into subcategories. Groups come in the order of their newest lot, so the first group is the
+ * one with the latest lot (the card opens it); inside a group the lots keep their newest-first order.
+ */
+export function groupLots(lots: readonly AuctionLot[]): LotGroup[] {
+  const byGroup = new Map<AuctionGroup, AuctionLot[]>()
+  for (const lot of lots) {
+    const group = lotGroup(lot)
+    const list = byGroup.get(group)
+    if (list) list.push(lot)
+    else byGroup.set(group, [lot])
+  }
+  return [...byGroup].map(([group, list]) => ({ group, lots: list }))
+}
+
+/** Photo widths of the API resizer (`apps/api/src/auctions/photo.schema.ts`): a thumbnail and the full-screen view. */
+export const PHOTO_THUMB_WIDTH = 320
+/** Most lot photos the hero offers (the lots section lists them all). */
+export const MAX_HERO_LOT_PHOTOS = 8
+export const PHOTO_FULL_WIDTH = 1600
+
+/** Thumbnails shown before the "show more" button. */
+export const PHOTO_PREVIEW_COUNT = 4
+
+/** Enum values Prozorro publishes for fuel and gearbox; anything else (free text) is shown as published. */
+export const FUEL_TYPES = ['gasoline', 'diesel', 'electric', 'hybrid', 'naturalGas', 'other'] as const
+export const TRANSMISSIONS = ['manual', 'automatic', 'semiAutomatic', 'other'] as const
+
+/** `value` when it is one of `list`, else null: the caller translates the known ones and prints the rest as published. */
+export const knownValue = (list: readonly string[], value: string | null | undefined): string | null =>
+  value && list.includes(value) ? value : null
+
+/** Stable React key of a lot of either source (data saved before Prozorro.Sale has no `id`). */
+export const lotKey = (lot: LotRef): string => lot.id ?? `setam:${lot.lotNo}`
+
+/** The lot's own auction page (SETAM or Prozorro.Sale); null when neither a link nor a lot number is known. */
+export const lotLink = (lot: LotRef): string | null => lot.url ?? (lot.lotNo === null ? null : setamLotUrl(lot.lotNo))
+
+/** What the card prints as the lot's number: the SETAM lot number, or the full Prozorro auction ID. */
+export const lotNumber = (lot: LotRef): string =>
+  lot.source === 'prozorro' ? (lot.auctionId ?? '') : String(lot.lotNo ?? '')
 
 /** Feed status (Ukrainian) -> i18n key suffix of `uaAuctions.status.*`; an unknown status is shown as published. */
 export const LOT_STATUS_KEYS: Readonly<Record<string, string>> = {
@@ -34,15 +105,31 @@ export function formatLotMonth(month: string | null | undefined, locale: string)
 /** Not-sold lots shown before the "show more" button; sold and open lots are always shown. */
 export const VISIBLE_NOT_SOLD = 3
 
+/** A lot that is neither sold nor still open: the card folds these behind "show more". */
+export const isNotSoldLot = (lot: Pick<AuctionLot, 'sold' | 'status'>): boolean =>
+  !lot.sold && lot.status !== OPEN_STATUS
+
+/** Sold and open lots always show; of the not-sold ones the newest `VISIBLE_NOT_SOLD` until `showAll`. `hidden` is what "show more" reveals. */
+export function visibleLots(
+  lots: readonly AuctionLot[],
+  showAll: boolean
+): { shown: AuctionLot[]; hidden: number; notSold: number } {
+  const notSold = lots.filter(isNotSoldLot).length
+  let seen = 0
+  const shown = lots.filter(l => !isNotSoldLot(l) || showAll || ++seen <= VISIBLE_NOT_SOLD)
+  return { shown, hidden: lots.length - shown.length, notSold }
+}
+
 export type PricePoint = {
   lot: AuctionLot
   /** 1-based round within the lot's proceeding (lots sharing a proceeding number are repeat auctions); null without a proceeding. */
   round: number | null
 }
 
-/** Lots with a start price, oldest first (lot numbers grow with time), each tagged with its round in the proceeding. */
+/** Lots with a start price, oldest first, each tagged with its round in the proceeding. */
 export function priceSeries(lots: readonly AuctionLot[]): PricePoint[] {
-  const oldestFirst = lots.filter(l => l.startPrice !== null).toSorted((a, b) => a.lotNo - b.lotNo)
+  // The API answers newest first (both sources), so oldest first is the reverse.
+  const oldestFirst = lots.filter(l => l.startPrice !== null).toReversed()
   const seen = new Map<string, number>()
   return oldestFirst.map(lot => {
     if (!lot.proceedingNo) return { lot, round: null }

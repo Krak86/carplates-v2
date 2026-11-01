@@ -93,6 +93,8 @@ becomes available.
 
 - VPS result: ~60 cold plate lookups/s, 0 errors. Optional, only if traffic grows: merge the 4 sequential queries in `plate.service.ts`, raise `shared_buffers`, CPU-profile the api (`docs/deploy.md` "Load testing").
 
+### Not-found plates, favorites (300), `/login` + `/logout`, certificate photo, polish ✅ DONE (2026-11-01) — see `docs/plan-done.md`
+
 ### Releases page (`/releases`) ✅ DONE (2026-10-15) — see `docs/plan-done.md`
 
 ### AUTO.RIA link-out for plates/VINs not in the registry ✅ DONE (2026-10-25) — link only; RIA data use is restricted, see `docs/legal-and-monetization.md`
@@ -390,6 +392,7 @@ above once scoped, or dropped if research says no.
   _unofficial_ chart endpoint (no key, no SLA, terms unclear) — fine for a side widget, but cache longer / drop it if it ever rate-limits or breaks, and don't build anything on it; (b) `stockCompanies.ts` covers 32 tickers —
   brands without a listed parent (or private groups) simply show nothing; (c) Bluesky shows whatever the keyword search returns (no relevance/spam filter beyond the opt-out label) — judge on real plates; (d) browser-check at
   ≥ 1400 px with the left sidebar open (overlap) and on the VIN / photo-result routes.
+- ✅ **Share price section for phones + catalog** (2026-11-01) - `SharePriceSection` (`?section=shares`) on result cards, catalog model pages and an open card on `/cars/:make`; `StockQuote` shared with the desktop left widget. Instruments (preferred / ADR / OTC / second listing) with charts + facts, and a bonds note, added the same day (`/api/stocks/quote`). Write-up: `docs/plan-done.md`. **Open:** market-index chart not built (needs a new multi-ticker endpoint); bond price charts (no free source); the left widget stays main-listing only.
 - ✅ **Stock news widget + Social chip, mobile sidebar buttons, viewport-safe info popups, `/install` page, `pnpm tunnel`** (2026-10-13, `ffceeff` … `55a1fcb`) — built, see `docs/plan-done.md` ("Stock news, mobile sidebar…"). **Open:** news rides the same unofficial Yahoo endpoints as the share price (drop the widget if they break).
 - ✅ **Skeleton placeholders** for stats pages and homepage stats (2026-10-06, `de0a53c`) and the **About page sources + icons** (`9b974fd`) — built, see `docs/plan-done.md`.
 - ✅ **Weight rankings, Stack Exchange + Lemmy community posts, richer "Copy all info" export, WebP brand logos** (2026-10-09, `3f7a596` … `bb9f055`) — built, see `docs/plan-done.md` and `docs/features-reference.md`. **Open:** Stack Exchange / Lemmy are unauthenticated public APIs (rate limits unmeasured — judge on real traffic, drop the widget column if they throttle); weight edges for models with few vehicles are percentile-based, so tiny samples are noisy (per-group floor only); Lighthouse/LCP not yet measured after the perf pass (Phase 4).
@@ -805,18 +808,49 @@ Group 1 dimension callouts + garage-fit -> Group 3 (existing order). Owner says 
       size blueprint overlay, generated difference sentences, export like "Copy all info", "Compare" chip on the plate/VIN card and catalog
       page (slot A prefilled). Phases: (1) core, (2) visuals, (3) export, (4) tray / suggestions / saved / indexable pairs.
       Full plan: [docs/compare-plan.md](docs/compare-plan.md). Also covers the segment-peer list and a `/read/sizes` overlay embed.
-- ⏭️ **Shareable photo-search links** — idea 2026-10-01, **skipped 2026-10-31** (not started; design kept below in case it returns).
-  Share button on the photo card uploads the shrunk image + recognition result
-  (candidates with boxes, EXIF meta) to `POST /api/shares`; opening
-  `/<plate>?p=<token>` fetches it and fills the same `photo` state in
-  `use-plate-recognition.ts`, so the UX matches a local upload with no
-  re-recognition. Storage: `registry.shared_photos` (`id` token, `image bytea`,
-  `candidates jsonb`, `meta jsonb`, `created_at`, `expires_at`); image served
-  from `GET /api/shares/:token/image`, also used as `og:image` by the existing
-  meta-injection. Open decisions: strip EXIF GPS by default (opt-in to include),
-  expiry (~30 days), upload throttle (~10/h/IP), re-encode to JPEG/WebP, show
-  "public to anyone with the link" notice, keep `/api/shares` out of the
-  offline cache. Move blobs to disk/S3 in Phase 4.
+- 📝 **Shareable photo-search links: signed-in only, private expiring link** — idea 2026-10-01, skipped 2026-10-31, **re-designed 2026-11-01 (research only, not started)**.
+  Share button on the photo card; opening `/<plate>?p=<token>` fills the same `photo` state in `use-plate-recognition.ts` with no re-recognition on the viewer's side.
+  The photo is a private, time-limited capability link, never a public image host.
+  - **Privacy: the uploaded file is already pure pixels.** `shrinkImage` re-encodes through a canvas, which drops EXIF/GPS/device/ISO/maker notes/ICC
+    (only `readPhotoMeta` reads the ORIGINAL file, on-device). Share the shrunk file, **never the original, never `meta`** (no GPS, no capture date).
+    Defence in depth: the API rejects anything that is not JPEG/WebP or still has an APP1/APP13/COM segment (cheap marker walk, no new dependency).
+    Pixels can still show faces, other plates, house numbers, so the share dialog says "everything visible in the photo is public to anyone with the link".
+    **Not shareable:** photos recognized via the registration-certificate fallback (`readDocumentPlates`; name/address on the document): hide the button.
+  - **Faces are blurred on the server (decided 2026-11-01).** `services/alpr` already ships OpenCV (`cv2`), whose `FaceDetectorYN` runs the small MIT-licensed YuNet ONNX
+    model (~230 KB, CPU, tens of ms). New `/anonymize` endpoint: detect faces on the full-resolution upload, blur them (strong Gaussian/pixelate, boxes padded ~30%), return the JPEG.
+    Server-side so a client cannot skip it. Recall is not 100% (profiles, tiny/far faces, masks, occlusion), so: the dialog shows the **blurred preview before confirming**
+    and says "faces are blurred automatically, check the preview"; later option to tap a plate box in the preview to blur other plates. Eval on a few own photos with people before shipping (as for `services/alpr/eval`).
+  - **Retention is fixed, not editable (decided 2026-11-01): 7 days** (one constant, `SHARE_TTL_DAYS`; 30 is the alternative but 7 means less exposure of other people's photos and ~4x less storage).
+    No extend, no choice. Per-user cap **3 active shares** (constant, 5 is the alternative); at the cap the dialog asks to delete an old one first.
+    A "My shares" list in the account (thumbnail, plate, expires in N days, copy link, **Delete**): Delete removes the row and the storage object immediately; expiry does the same via a daily API job.
+    Expired/deleted → "this link has expired". Account deletion deletes its shares. The API enforces the exact `expires_at`; the bucket lifecycle rule (delete after 8 days) is only the backstop (R2 lifecycle runs daily).
+    Say it in the dialog: a messenger/crawler that already fetched the `og:image` may keep its own copy after expiry.
+  - **Link = capability URL:** token 128-bit random (base64url), only its SHA-256 stored (like `carsua_sid`); `X-Robots-Tag: noindex` and `Referrer-Policy: no-referrer`
+    on the share endpoints, never in the sitemap. Image via `GET /api/shares/:token/image` (API checks token + expiry, streams from storage, `Cache-Control` no longer
+    than the time left); also the `og:image` through the existing meta-injection. `/api/shares` stays out of the offline cache and out of `PUBLIC_API_PATH_PREFIXES`.
+    **Not presigned storage URLs:** R2 presigned GETs work only on the `r2.cloudflarestorage.com` S3 host (not a custom domain), bypass our expiry/revoke check and make `og:image` unstable.
+  - **Storage: a second private Cloudflare R2 bucket (`carsua-shares`)**, free within limits and already our provider for backups: 10 GB-month storage, 1M writes + 10M reads
+    per month, **no egress fees**. Free third-party hosts (the Gemini list: ImgBB, Postimages, MyIMGs, MEGA) were checked and rejected: all are public-URL hosts (anyone with the URL,
+    nothing private), we would have no exact expiry/delete control (ImgBB can expire an upload, the others cannot, MyIMGs is permanent by design, MEGA is a file cloud with no stable hotlink for `og:image`),
+    their terms/uptime/limits can change, the user's photo goes to an extra third-party processor (Privacy page + GDPR/Ukrainian law), and bans on "bulk automated uploads" are common. R2 keeps it
+    on one provider we already trust, with private objects behind our API. Also rejected: Postgres `bytea` (`app.*` is in the nightly `pg_dump` to R2, blobs bloat every backup).
+    Rows in the **`app` schema** (user data, backed up): `app.shared_photos` (`id`, `user_id`, `token_hash`, `object_key`, `plate`, `candidates jsonb` as 0-1 fractions, `bytes`, `created_at`, `expires_at`).
+    Own R2 token (this bucket only); new env vars → `env.ts` + `deploy-api.yml` + deploy.md.
+  - **Image size: detect big, store small.** The upload is the existing `shrinkImage` file (up to ~2.5 MB, max side 4608 px) so ALPR and the face detector see full resolution.
+    The stored copy is made after that: blur, then downscale to max side **1600 px**, JPEG q~80 (~250-450 KB; plate boxes are kept as fractions so they still line up), hard cap 600 KB.
+    Nothing is ever re-recognized from the stored copy. Budget: 10 GB / 0.45 MB ≈ 22,000 images; 3 per user ⇒ ~7,000 users with all slots full, realistically far more.
+    **Global free-tier guard:** `POST /api/shares` refuses with "sharing is temporarily unavailable" when the sum of `bytes` of active rows passes ~8 GB (`SHARE_STORAGE_CAP_BYTES`), so we never leave the free tier
+    (beyond it R2 is $0.015/GB-month, i.e. pennies, but the guard keeps it at zero).
+  - **Trust and abuse:** the client never sends the recognition result. `POST /api/shares` **re-runs the ALPR on the uploaded bytes** (~0.6 s) and stores the server's
+    own candidates/boxes, so nobody can attach a plate to an unrelated photo, and a photo with **no plate found is rejected** (not usable as a general image host).
+    Also `SessionGuard` (accountable uploader), `@Throttle` ~10/h/user + per IP, size cap, a "Report" link on the shared view (contact flow), admin takedown by SQL
+    (`UPDATE app.shared_photos SET revoked_at = now()`); never log the image or the plate tied to the user.
+  - **Signed-in only, photo picked before signing in:** the Share button shows for everyone; an anonymous click opens the login popover with "sign in to share this photo".
+    The shrunk photo is **parked in IndexedDB** (one `pending-share` record, JPEG blob ≤ ~2.5 MB, 1 h TTL, deleted on use / sign-out / expiry; pattern of `lib/idb.ts`),
+    because the Google button signs in without a reload (state would survive) but the email magic link or Telegram widget can reload or open another tab.
+    Once the session becomes authenticated the page reads the record and reopens the share dialog with the photo; if it is gone the dialog says "pick the photo again".
+    Viewing a share stays public, only creating is gated.
+  - **Open decisions:** 7 vs 30 days and 3 vs 5 shares (both single constants); whether the preview lets the user blur other plates (later).
 - **Show key "test drive" facts for a looked-up car** — surface curated
   specs/review highlights (not just registry fields) for the car's
   make/model/year. Needs a data source: is there a free API, or does this
@@ -824,7 +858,8 @@ Group 1 dimension callouts + garage-fit -> Group 3 (existing order). Owner says 
 - **Auth with Google** — Phase 5 already specs Passport Google OAuth; open
   question is scope beyond syncing history/favorites to the cloud — what
   else should be account-gated (cross-device sync, data export, change
-  alerts on a saved plate/VIN)?
+  alerts on a saved plate/VIN)? One answer since 2026-11-01: creating a
+  shared photo link (see "Shareable photo-search links").
 - **Use more of the NHTSA vPIC decoder surface — researched, nothing left worth adding (2026-09-24)** —
   full endpoint catalog enumerated from `vpic.nhtsa.dot.gov/api/`: Decode
   (`DecodeVin`, `DecodeVinValues` flat, `DecodeVinExtended`,
@@ -966,6 +1001,14 @@ Group 1 dimension callouts + garage-fit -> Group 3 (existing order). Owner says 
 
 - ✅ Export polish: prettier PDF / Word done 2026-10-27 (verdict banner, origin timeline, table polish, cover strip; `docs/plan-done.md` "Export polish"). Skipped on purpose: country flags in origin rows, extra chart types, a PDF layout library.
 - ✅ About page refresh (Cloudflare source, discuss + share features) and photo-search timeout fix done 2026-10-27 (`docs/plan-done.md` "About page refresh").
+
+- **Import customs calculator `/customs` (done 2026-11-01; write-up: `docs/plan-done.md` "Import customs calculator").** Duty + excise + VAT + pension fee for a car imported to UA, rules as a versioned object (`ua-import-2026.1`, valid 2026-01-01..2026-12-31), NBU EUR rate via `fx.ts`. Steps (each is shippable on its own; run `pnpm format`, tests, suggest a commit after each):
+  1. ✅ (2026-11-01) **Shared calc** (`packages/shared/src/customs.ts` + test): `calcImportCosts(input, rules)`; formulas: duty 10% (0% EV, 0% EUR.1), excise petrol €50/cm³k up to 3000 else €100, diesel €75 up to 3500 else €150, x age coefficient (current year - model year, min 1, max 15), EV €1/kWh, VAT 20% of (value + duty + excise), pension 3/4/5% of UAH value at 165/290 x subsistence minimum (₴3,328 in 2026; EV exempt). Fixtures = the 3 preset examples (€480 / €1,200 / €60 excise). Also the query-param parser (Zod: `fuel,value,cc,year,kwh,duty,eur1`) and `mapFuel()` (free text / NHTSA / Prozorro -> petrol|diesel|hybrid|ev|null). **Verify first** against zakon.rada.gov.ua: EV excise/duty for 2026, hybrid excise, cm³ thresholds, under-1-year cars. Build `@carplates/shared`.
+  2. ✅ (2026-11-01) **`/customs` route**: form + result + "what was counted" + official sources + 3 preset links + rules audit card; defaults to the petrol preset, computes on load when params exist. Own contract file for the rules (new fields `.nullable().optional()`); EUR rate from the existing NBU/fx path. Route checklist: `ROUTE_TITLE_KEYS`, `STATIC_PAGES` ua/ru/en (`spa-text.ts`), `max-w-6xl`, App.tsx lazy route, i18n ua/ru/en.
+  3. ✅ (2026-11-01) **Sitemap**: XML (`STATIC_PAGES` entry + `apps/api/src/spa/sitemap.test.ts` list) and the `/sitemap` page (`routes/sitemap/helpers.ts` + its test).
+  4. ✅ (2026-11-01) **Read guides**: `CostSection` in `/read/imports` (compact calc + presets, add to `jumps`), short section + link in `/read/auctions`, entry in `routes/read/links.ts` / `/read` index.
+  5. ✅ (2026-11-01; VIN page only, hidden for registered cars; lot links removed because lots are sold in UAH inside UA; plain link in `AuctionCheck`; empty fuel option) **Prefill links**: `/auctions` lot card and `AuctionCheck`/`AuctionVinModal` (year, `fuel`, `engineCc`, price -> EUR via NBU; only when `year` + `engineCc` exist), VIN page `VinEngineCard` (cc, fuel, year; value empty). Hybrids need an explicit user choice.
+  6. ✅ (2026-11-01; `latest.ts` already 2026-11-01) **Docs and release**: About (`FEATURES` + `about.brief.*` + `about.feature.*`, `SOURCES` NBU + Tax Code), `releases.ts` `new` item (+ `latest.ts` bump), `features-reference.md` section, `plan-done.md`, ✅ line here. Later/low priority: links from `/cars/:make/:model`, `/compare`, `/fuel`.
 
 ## Phase 4 — VPS / production
 
@@ -1153,6 +1196,7 @@ card-on-file subscriptions; revisit with real quotes.
 - ✅ **Contact page + footer copyright (2026-10-31):** `/contact` (who we are, order an app, Resend-backed form with throttle + Turnstile + honeypot, `CONTACT_TO` secret) and `© year carsua.app` in every footer — see `docs/plan-done.md`.
 - ✅ **Road crash statistics page `/road-safety` (2026-11-01):** regions (deaths and per 100k registered cars, map), state roads, causes and types, hour and weekday, year picker, footnotes; Patrol Police + Infrastructure Restoration Agency sources; plate-card region crash chip; `dtp-patrol` / `dtp-hazards` cron jobs — see `docs/plan-done.md`.
 - ✅ **Source strip + related pages on all statistics pages (2026-11-01):** `PageSources` "Source data" card and `RelatedPages` cross links on `/stats`, `/wanted`, `/auctions`, `/fuel`, `/safety`, `/road-safety` — see `docs/plan-done.md`.
+- ✅ **Prozorro.Sale vehicle auctions (2026-11-01):** second auction source with grouped lots, merged vehicle facts, photos through our resizer and `/auctions` source filters; local backfill done (14 431 rows, dump ready), VPS load and the Cloudflare cache rule still to do — see `docs/plan-done.md`.
 - ✅ **Road-safety context in `/read/safety` (2026-11-01):** "On the road" (national totals, deaths by year, pedestrian/child share) and "Tests and crashes" (crash types and causes, peak time, what each programme tests) sections reading the `/road-safety` queries - see `docs/plan-done.md`.
 - **Other providers (researched 2026-10-12, not planned yet):** GitHub (client id + secret, code flow), Microsoft
   (client id, OIDC), Facebook/Meta (app id + secret, needs privacy URL + data-deletion URL + Live app), Apple (Services

@@ -2,9 +2,10 @@ import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
-import { type VehicleKind } from '@carplates/shared'
+import { regionName, type VehicleKind } from '@carplates/shared'
 
 import BrandLogo from '@/components/BrandLogo'
+import RegionFlag from '@/components/RegionFlag'
 import ShareButton from '@/components/ShareButton'
 import RaceGameStage from '@/components/game/RaceGameStage'
 import {
@@ -52,6 +53,7 @@ export default function RaceGameModal({
   onClose
 }: Props): ReactNode {
   const { t } = useTranslation()
+  const plateRegion = regionName(plate)
   const [config, setConfig] = useState<RacerConfig>(() => ({
     color,
     body: bodyForKind(kind, bodyText),
@@ -90,6 +92,12 @@ export default function RaceGameModal({
               <span className="ml-1 inline-flex items-center gap-1.5 font-normal text-[var(--color-muted)]">
                 <BrandLogo brand={brand ?? null} />
                 {vehicleLabel}
+              </span>
+            )}
+            {plateRegion && (
+              <span className="ml-1 inline-flex items-center gap-1.5 font-normal text-[var(--color-muted)]">
+                <RegionFlag region={plateRegion} />
+                {plateRegion}
               </span>
             )}
           </div>

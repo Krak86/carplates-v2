@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useSearchParams } from 'react-router'
 
@@ -9,6 +9,7 @@ import Card from '@/components/ui/Card'
 import { cn } from '@/lib/cn'
 import { ARTICLES, UPCOMING } from '@/routes/read/articles'
 import { articleTopics, filterArticles, pick } from '@/routes/read/helpers'
+import { topicChipStyle } from '@/routes/read/topic-colors'
 
 const TOPICS = articleTopics(ARTICLES)
 
@@ -18,6 +19,7 @@ const CHIP_CLASS = 'rounded-full border px-3 py-0.5 text-sm transition-colors ho
 export default function ReadHubRoute(): ReactNode {
   const { t, i18n } = useTranslation()
   const [params, setParams] = useSearchParams()
+  const [topicsOpen, setTopicsOpen] = useState(false)
   const query = params.get('q') ?? ''
   const topic = params.get('topic') ?? ''
   const shown = filterArticles(ARTICLES, query, topic, i18n.language, article => t(article.titleKey))
@@ -50,7 +52,15 @@ export default function ReadHubRoute(): ReactNode {
           className="w-full rounded-lg border border-border bg-bg px-3 py-2 text-sm"
         />
 
-        <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label={t('read.hub.topics')}>
+        {/* Phones show two chip rows (26px chip + 6px gap) until expanded; sm+ always shows all. */}
+        <div
+          className={cn(
+            'flex flex-wrap items-center gap-1.5 overflow-hidden sm:max-h-none',
+            !topicsOpen && 'max-h-14.5'
+          )}
+          role="group"
+          aria-label={t('read.hub.topics')}
+        >
           <button
             type="button"
             aria-pressed={topic === ''}
@@ -65,15 +75,26 @@ export default function ReadHubRoute(): ReactNode {
               type="button"
               aria-pressed={topic === tag.en}
               onClick={() => handleParam('topic', topic === tag.en ? '' : tag.en)}
+              style={topicChipStyle(tag.en)}
               className={cn(
                 CHIP_CLASS,
-                topic === tag.en ? 'border-primary bg-primary/15 text-primary' : 'border-border'
+                'border-(--chip)/45 text-(--chip) hover:border-(--chip)',
+                topic === tag.en ? 'border-(--chip) bg-(--chip)/25 font-semibold' : 'bg-(--chip)/10'
               )}
             >
               {pick(tag, i18n.language)}
             </button>
           ))}
         </div>
+
+        <button
+          type="button"
+          aria-expanded={topicsOpen}
+          onClick={() => setTopicsOpen(open => !open)}
+          className="text-sm text-primary hover:underline sm:hidden"
+        >
+          {topicsOpen ? t('read.hub.showLess') : t('read.hub.showAll')}
+        </button>
 
         <p className="text-xs text-muted" role="status">
           {t('read.hub.count', { count: shown.length })}
@@ -98,22 +119,19 @@ export default function ReadHubRoute(): ReactNode {
               className={cn('group block', featured && 'lg:col-span-2')}
             >
               <Card className="flex h-full flex-col gap-3 p-4 transition duration-300 ease-out group-hover:-translate-y-1 group-hover:border-primary group-hover:shadow-lg md:p-6">
-                <div className="flex items-center gap-3">
-                  <ArticleBanner
-                    article={article}
-                    compact
-                    className={cn('shrink-0 rounded-full', featured ? 'size-20 !text-4xl' : 'size-14 !text-2xl')}
-                  />
+                {/* Wide rectangular cover; the featured tile gets a more panoramic crop. */}
+                <ArticleBanner
+                  article={article}
+                  className={cn('w-full rounded-xl', featured ? 'aspect-video lg:aspect-[21/9]' : 'aspect-video')}
+                />
 
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold tracking-wide text-primary uppercase">
-                      {article.tags[0] ? pick(article.tags[0], i18n.language) : t('read.hub.badge')}
-                    </p>
-                    <p className="text-xs text-muted">
-                      <span aria-hidden>📖</span> {t('read.hub.badge')}
-                    </p>
-                  </div>
-                </div>
+                <p className="text-xs text-muted">
+                  <span className="font-semibold tracking-wide text-primary uppercase">
+                    {article.tags[0] ? pick(article.tags[0], i18n.language) : t('read.hub.badge')}
+                  </span>
+                  {' · '}
+                  <span aria-hidden>📖</span> {t('read.hub.badge')}
+                </p>
 
                 <h2 className={cn('leading-tight font-bold', featured ? 'text-2xl md:text-3xl' : 'text-xl')}>
                   {t(article.titleKey)}

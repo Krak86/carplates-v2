@@ -1,0 +1,135 @@
+{
+  "documents": [
+    {
+      "documentType": "illustration",
+      "format": "image/jpeg",
+      "url": "https://procedure.prozorro.sale/api/documents/public/f71c51dfe1a9467db6264f75cfff158f",
+      "id": "0672abeb5ee64679ae04f003cbb7feed",
+      "_ds_id": "f71c51dfe1a9467db6264f75cfff158f"
+    },
+    {
+      "documentType": "illustration",
+      "format": "image/jpeg",
+      "url": "https://procedure.prozorro.sale/api/documents/public/4069709bac084b58a521d3e779a669d9",
+      "id": "f28100e03f764d93aea9e00ee06f5b70",
+      "_ds_id": "4069709bac084b58a521d3e779a669d9"
+    },
+    {
+      "documentType": "illustration",
+      "format": "image/jpeg",
+      "url": "https://procedure.prozorro.sale/api/documents/public/be6f3d0ae1dc4ccbb1394e9f11fc9074",
+      "id": "a06104177ef34de5bc34bff1dc82e067",
+      "_ds_id": "be6f3d0ae1dc4ccbb1394e9f11fc9074"
+    },
+    {
+      "documentType": "illustration",
+      "format": "video/mp4",
+      "url": "https://procedure.prozorro.sale/api/documents/public/0d9c88a14c86447590421d7c13aba8d3",
+      "id": "fa5e4b66bdd045ac9df24035f06481f8",
+      "_ds_id": "0d9c88a14c86447590421d7c13aba8d3"
+    }
+  ],
+  "_protect_level": "high",
+  "description": {
+    "uk_UA": "До продажу на аукціоні пропонується транспортний засіб Renault Megane 2015 року випуску. Реєстраційний номер СВ3534ЕА. Номер шасі VF1RFB00356373036. Автомобіль знаходиться в задовільному стані, повністю обслугований. Автомобіль територіально знаходиться в Чернігівській обл. смт. Варва, вул. Миру 17"
+  },
+  "guarantee": {
+    "amount": 23750,
+    "currency": "UAH"
+  },
+  "title": {
+    "uk_UA": "Аукціон з продажу транспортного засобу Renault Megane 2015 року"
+  },
+  "_protected": false,
+  "sellingMethod": "commercialSell-english",
+  "valueAddedTaxCharged": false,
+  "auctionPeriod": {
+    "startDate": "2026-10-09T09:15:00.000000Z"
+  },
+  "value": {
+    "amount": 475000,
+    "valueAddedTaxIncluded": false,
+    "currency": "UAH"
+  },
+  "tenderPeriod": {
+    "endDate": "2026-10-08T17:00:00.000000Z",
+    "startDate": "2026-09-29T05:52:20.708000Z"
+  },
+  "owner": "ubase.com.ua",
+  "minimalStep": {
+    "amount": 4750,
+    "currency": "UAH"
+  },
+  "dateModified": "2026-10-08T17:00:06.623000Z",
+  "lotId": "1",
+  "datePublished": "2026-09-29T05:52:20.701000Z",
+  "auctionId": "CSE001-UA-20260929-83806",
+  "metaInfo": {
+    "directions": [
+      "commercialSell"
+    ],
+    "categories": [
+      "cars"
+    ],
+    "auctionTypes": [
+      "english"
+    ]
+  },
+  "sellingEntity": {
+    "identifier": {
+      "legalName": {
+        "uk_UA": "Телюк Микола Висильович"
+      },
+      "scheme": "UA-IPN",
+      "id": "2531911351"
+    },
+    "address": {
+      "postalCode": "17600",
+      "locality": {
+        "uk_UA": "смт. Варва"
+      },
+      "countryName": {
+        "uk_UA": "Україна"
+      },
+      "region": {
+        "uk_UA": "Чернігівська область"
+      }
+    },
+    "name": {
+      "uk_UA": "Телюк Микола Висильович"
+    }
+  },
+  "minNumberOfQualifiedBids": 1,
+  "awards": [],
+  "tenderAttempts": 1,
+  "x_additionalInformation": {
+    "uk_UA": "Для отримання додаткової інформації та ознайомлення телефонуйте (050)977-70-43 Телюк Микола"
+  },
+  "items": [
+    {
+      "quantity": 1,
+      "address": {
+        "locality": {
+          "uk_UA": "смт. Варва"
+        },
+        "region": {
+          "uk_UA": "Чернігівська область"
+        }
+      },
+      "commercialSellItemType": "assets",
+      "description": {
+        "uk_UA": "До продажу на аукціоні пропонується транспортний засіб Renault Megane 2015 року випуску. Реєстраційний номер СВ3534ЕА. Номер шасі VF1RFB00356373036. Автомобіль знаходиться в задовільному стані, повністю обслугований. Автомобіль територіально знаходиться в Чернігівській обл. смт. Варва, вул. Миру 17."
+      },
+      "id": "2e01375fa220445ebfd2f0c573d4e248",
+      "classification": {
+        "scheme": "CAV",
+        "description": {
+          "en_US": "Passenger cars",
+          "uk_UA": "Легкові автомобілі"
+        },
+        "id": "34110000-1"
+      }
+    }
+  ],
+  "status": "unsuccessful"
+}

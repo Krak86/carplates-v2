@@ -24,6 +24,10 @@ describe('sitemap', () => {
     expect([...listed].filter(path => path !== '/' && !(path in ROUTE_TITLE_KEYS))).toEqual([])
   })
 
+  it('lists the import customs calculator', () => {
+    expect(listed.has('/customs')).toBe(true)
+  })
+
   it('lists each link once', () => {
     const all = SITEMAP_GROUPS.flatMap(g => g.links.map(l => l.to))
     expect(new Set(all).size).toBe(all.length)

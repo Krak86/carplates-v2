@@ -1,0 +1,181 @@
+{
+  "documents": [
+    {
+      "documentType": "illustration",
+      "format": "image/jpeg",
+      "url": "https://procedure.prozorro.sale/api/documents/public/cc48afa8e5584648a30a5bf48242da4f",
+      "id": "7a105d863d244c86aadc76e8e5889959",
+      "_ds_id": "cc48afa8e5584648a30a5bf48242da4f"
+    },
+    {
+      "documentType": "illustration",
+      "format": "image/jpeg",
+      "url": "https://procedure.prozorro.sale/api/documents/public/732b29e6c8dc47ecb69dc34917f96ddf",
+      "id": "f4e0293a87ed4b67a4c725c0a0ec0912",
+      "_ds_id": "732b29e6c8dc47ecb69dc34917f96ddf"
+    },
+    {
+      "documentType": "illustration",
+      "format": "image/jpeg",
+      "url": "https://procedure.prozorro.sale/api/documents/public/aa7c656eaef448eab7e5cee8bd609f66",
+      "id": "39ab084417d947efb6a1d1c9f9cc4f79",
+      "_ds_id": "aa7c656eaef448eab7e5cee8bd609f66"
+    },
+    {
+      "documentType": "minutesOfTheCreditorsCommittee",
+      "format": "application/pdf",
+      "url": "https://procedure.prozorro.sale/api/documents/public/805fe0b085314f54be3bdfd4e5f29a27",
+      "id": "f60746601bf249fca964dbd5c68fc8b9",
+      "_ds_id": "805fe0b085314f54be3bdfd4e5f29a27"
+    }
+  ],
+  "description": {
+    "uk_UA": "Арбітражний керуючий Усачов Олег Миколайович (свідоцтво про право на здійснення діяльності арбітражного керуючого № 362 від 27.02.2013р.) який є ліквідатором АТ \"ДНІПРОВАЖМАШ\" (ЄДРПОУ 00168076, адреса: 49000, м. Дніпро, вул. Сухий Острів, 3) у справі про банкрутство № 904/857/25 та діє на підставі постанови Господарського суду Дніпропетровської області від 17.11.2025р. оголошує про проведення аукціону з продажу майна боржника АКЦІОНЕРНОГО ТОВАРИСТВА «ДНІПРОВАЖМАШ»  (49000, м. Дніпро, вул. Сухий Острів, 3, код ЄДРПОУ 00168076), а саме Skoda Octavia A7, 2019 року випуску, реєстраційний номер АЕ3915РО, ідентифікаційний номер (VIN-код) TMBAN2NE5KB007409.\r\nТраспортний засіб перебуває у незадовільному технічному стані, тривалий час не експлуатується та потребує проведення ремонтних робіт.\r\nНаявна корозія складових кузова, частково пошкодження лакофарбового покриття, скла заднього обзору, лобового скла, несправності двигуна та ходової частини.\r\n\r\nКомплектація стандартна, проте потребує уточнення під час огляду або за запитом.\r\n\r\nТехнічний паспорт на транспортний засіб відсутній."
+  },
+  "guarantee": {
+    "amount": 18364,
+    "currency": "UAH"
+  },
+  "title": {
+    "uk_UA": "Аукціон з продажу майна боржника АКЦІОНЕРНОГО ТОВАРИСТВА «ДНІПРОВАЖМАШ»  (49000, м. Дніпро, вул. Сухий Острів, 3, код ЄДРПОУ 00168076), а саме Skoda Octavia A7, 2019 р.в., д.н.з. АЕ3915РО."
+  },
+  "isTaxInvoiceProvided": false,
+  "auctionUrl": "https://auction.prozorro.sale/BRE001-UA-20260917-96928",
+  "_protected": false,
+  "dateCompleted": "2026-10-20T12:25:58.216000Z",
+  "economicCourtName": {
+    "uk_UA": "Господарський суд Дніпропетровської області"
+  },
+  "sellingMethod": "bankRuptcy-english",
+  "valueAddedTaxCharged": false,
+  "auctionPeriod": {
+    "endDate": "2026-10-02T10:55:04.214000Z",
+    "startDate": "2026-10-02T09:50:00.000000Z"
+  },
+  "tenderPeriod": {
+    "endDate": "2026-10-01T17:00:00.000000Z",
+    "startDate": "2026-09-17T13:01:41.781000Z"
+  },
+  "value": {
+    "amount": 183640,
+    "valueAddedTaxIncluded": false,
+    "currency": "UAH"
+  },
+  "owner": "nrcukraine.com.ua",
+  "minimalStep": {
+    "amount": 1836.4,
+    "currency": "UAH"
+  },
+  "sellingMethodType": {
+    "uk_UA": "Aукціон - без можливості зниження початкової ціни"
+  },
+  "dateModified": "2026-10-20T12:25:58.224000Z",
+  "lotId": "00168076-15",
+  "datePublished": "2026-09-17T13:01:41.775000Z",
+  "auctionId": "BRE001-UA-20260917-96928",
+  "metaInfo": {
+    "directions": [
+      "bankRuptcy"
+    ],
+    "categories": [
+      "cars"
+    ],
+    "auctionTypes": [
+      "english"
+    ]
+  },
+  "sellingEntity": {
+    "identifier": {
+      "legalName": {
+        "uk_UA": "Арбітражний керуючий Усачов Олег Миколайович"
+      },
+      "scheme": "UA-IPN",
+      "id": "2844400530"
+    },
+    "address": {
+      "postalCode": "51931",
+      "locality": {
+        "uk_UA": "м. Кам'янське"
+      },
+      "countryName": {
+        "uk_UA": "Україна"
+      },
+      "region": {
+        "uk_UA": "Дніпропетровська область"
+      }
+    },
+    "name": {
+      "uk_UA": "Арбітражний керуючий Усачов Олег Миколайович"
+    }
+  },
+  "bankruptcyCaseNumber": {
+    "uk_UA": "904/857/25"
+  },
+  "minNumberOfQualifiedBids": 1,
+  "awards": [
+    {
+      "status": "active",
+      "value": {
+        "amount": 353900,
+        "currency": "UAH"
+      }
+    },
+    {
+      "status": "cancelled",
+      "value": {
+        "amount": 353888.1,
+        "currency": "UAH"
+      }
+    }
+  ],
+  "tenderAttempts": 1,
+  "x_additionalInformation": {
+    "uk_UA": "Розмір винагороди оператора та порядок її сплати: згідно Розділу ІV постанови КМУ №865 від 02.10.2019р.\r\n\r\nПорядок сплати ціни: відповідно до ст. 85 Кодексу України з процедур банкрутства.\r\n\r\nПорядок та умови отримання майна переможцем аукціону, в тому числі порядок передачі (відвантаження) рухомого майна, якщо воно є предметом аукціону: відповідно до ст. 87 та ст. 88 Кодексу України з процедур банкрутства. Поки транспортний засіб знаходиться на території АТ \"Дніпроважмаш\", ризик його випадкової загибелі або пошкодження несе Покупець.\r\n"
+  },
+  "items": [
+    {
+      "bankRuptcyItemType": "assets",
+      "itemProps": {
+        "itemPropsType": "vehicle",
+        "color": "сірий",
+        "productionYear": 2019,
+        "damagePresence": true,
+        "engineCapacity": 1598,
+        "damagedDescription": "Наявна корозія складових кузова, частково пошкодження лакофарбового покриття, скла заднього обзору, лобового скла, несправності двигуна та ходової сатини",
+        "condition": "незадовільний",
+        "transmission": "manual",
+        "fuelType": "gasoline",
+        "kilometrage": 100000,
+        "identificationNumber": "TMBAN2NE5KB007409 ",
+        "model": "Octavia А7",
+        "brand": "Skoda"
+      },
+      "quantity": 1,
+      "address": {
+        "locality": {
+          "uk_UA": "м. Дніпро"
+        },
+        "region": {
+          "uk_UA": "Дніпропетровська область"
+        }
+      },
+      "description": {
+        "uk_UA": "Автомобіль Skoda Octavia A7, 2019 року випуску, реєстраційний номер АЕ3915РО, ідентифікаційний номер (VIN-код) TMBAN2NE5KB007409.\r\n\r\nКомплектація стандартна, проте потребує уточнення під час огляду або за запитом.\r\n\r\nТраспортний засіб перебуває у незадовільному технічному стані, тривалий час не експлуатується та потребує проведення ремонтних робіт.\r\nНаявна корозія складових кузова, частково пошкодження лакофарбового покриття, скла заднього обзору, лобового скла, несправності двигуна та ходової сатини.\r\n\r\nТехнічний паспорт на транспортний засіб відсутній."
+      },
+      "id": "8d9e3c9f10bb42ed8aed226626485ab5",
+      "classification": {
+        "scheme": "CAV",
+        "description": {
+          "en_US": "Saloon cars",
+          "uk_UA": "Легкові автомобілі типу «седан»"
+        },
+        "id": "34111200-0"
+      }
+    }
+  ],
+  "qualificationPeriod": {
+    "endDate": "2026-11-07T11:09:13.850000Z",
+    "startDate": "2026-10-02T10:55:04.260000Z"
+  },
+  "status": "complete"
+}

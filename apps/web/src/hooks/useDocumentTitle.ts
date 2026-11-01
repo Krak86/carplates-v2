@@ -17,6 +17,7 @@ export const ROUTE_TITLE_KEYS: Record<string, string> = {
   '/stats': 'nav.stats',
   '/cars': 'catalog.browseTitle',
   '/compare': 'compare.title',
+  '/customs': 'customs.title',
   '/wanted': 'wanted.stats.title',
   '/auctions': 'auctions.page.title',
   '/fuel': 'nav.fuel',
@@ -49,6 +50,8 @@ export const ROUTE_TITLE_KEYS: Record<string, string> = {
   '/features': 'nav.features',
   '/settings': 'nav.settings',
   '/profile': 'auth.profile',
+  '/login': 'auth.signIn',
+  '/logout': 'auth.signOut',
   '/unsubscribe': 'digest.unsubscribe.title',
   '/admin': 'nav.admin'
 }

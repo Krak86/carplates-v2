@@ -9,7 +9,9 @@ export type Source = { href: string; title: L10n; note: L10n }
 
 export const SECTIONS = {
   lots: { ua: 'Що таке лот', ru: 'Что такое лот', en: 'What a lot is' },
+  sellers: { ua: 'Хто продає', ru: 'Кто продаёт', en: 'Who sells' },
   live: { ua: 'У цифрах', ru: 'В цифрах', en: 'In numbers' },
+  examples: { ua: 'Приклади', ru: 'Примеры', en: 'Examples' },
   take: { ua: 'Як взяти участь', ru: 'Как принять участие', en: 'How to take part' },
   world: { ua: 'У світі', ru: 'В мире', en: 'Elsewhere' },
   history: { ua: 'Історія', ru: 'История', en: 'History' },
@@ -24,9 +26,9 @@ export const LOTS_TITLE: L10n = {
 }
 
 export const LOTS_INTRO: L10n = {
-  ua: 'Більшість авто на українських електронних аукціонах - це арештоване або конфісковане майно, яке продають у межах виконавчого провадження. Продавець - не автосалон, а держава через організатора торгів, тому стан і документи авто можуть бути будь-якими.',
-  ru: 'Большинство авто на украинских электронных аукционах - это арестованное или конфискованное имущество, которое продают в рамках исполнительного производства. Продавец - не автосалон, а государство через организатора торгов, поэтому состояние и документы авто могут быть любыми.',
-  en: 'Most cars at Ukrainian electronic auctions are seized or confiscated property sold in an enforcement proceeding. The seller is not a dealer but the state, through the auction organiser, so the condition and the papers of a car can be anything.'
+  ua: 'Більшість авто на українських електронних аукціонах - це арештоване або конфісковане майно, яке продають у межах виконавчого провадження, а також майно банкрутів, митниці та банків. Продавець - не автосалон, а держава, банк чи керуючий через організатора торгів, тому стан і документи авто можуть бути будь-якими.',
+  ru: 'Большинство авто на украинских электронных аукционах - это арестованное или конфискованное имущество, которое продают в рамках исполнительного производства, а также имущество банкротов, таможни и банков. Продавец - не автосалон, а государство, банк или управляющий через организатора торгов, поэтому состояние и документы авто могут быть любыми.',
+  en: 'Most cars at Ukrainian electronic auctions are seized or confiscated property sold in an enforcement proceeding, plus property of bankrupt firms, customs and banks. The seller is not a dealer but the state, a bank or a trustee, through the auction organiser, so the condition and the papers of a car can be anything.'
 }
 
 export const LOTS: Fact[] = [
@@ -56,8 +58,166 @@ export const LOTS: Fact[] = [
       ru: 'У нас «продано» означает, что в данных есть цена продажи. Остальные лоты - не проданные, открытые для ставок или остановленные. Цена продажи - это цена торгов, а не оценка состояния авто.',
       en: 'Here “sold” means the data holds a sale price. The other lots are unsold, open for bids or stopped. A sale price is the price of the auction, not a verdict on the condition of the car.'
     }
+  },
+  {
+    id: 'twoSources',
+    title: {
+      ua: 'Один лот - одне джерело',
+      ru: 'Один лот - один источник',
+      en: 'One lot, one source'
+    },
+    text: {
+      ua: 'Лот СЕТАМ і аукціон Prozorro.Продажів - різні торги з різними номерами, навіть якщо це те саме авто: у нашій базі такий збіг знайшовся лише приблизно в двадцяти авто. Тож історія номера чи VIN може мати лоти з обох джерел.',
+      ru: 'Лот СЕТАМ и аукцион Prozorro.Продажи - разные торги с разными номерами, даже если это одно и то же авто: в нашей базе такое совпадение нашлось лишь примерно у двадцати авто. Так что история номера или VIN может иметь лоты из обоих источников.',
+      en: 'A SETAM lot and a Prozorro.Sale auction are separate sales with separate numbers, even for the same car: in our database only about twenty cars appear in both. So the history of one plate or VIN can hold lots from both sources.'
+    }
   }
 ]
+
+export const SELLERS_TITLE: L10n = {
+  ua: 'Хто продає авто на аукціонах',
+  ru: 'Кто продаёт авто на аукционах',
+  en: 'Who sells cars at auctions'
+}
+
+export const SELLERS_INTRO: L10n = {
+  ua: 'Окрім СЕТАМ, авто продають через Prozorro.Продажі. Ми беремо лише аукціони, де є номер або VIN авто, і ділимо їх на категорії за продавцем (так само на сторінці /auctions).',
+  ru: 'Кроме СЕТАМ, авто продают через Prozorro.Продажи. Мы берём только аукционы, где есть номер или VIN авто, и делим их на категории по продавцу (так же на странице /auctions).',
+  en: 'Besides SETAM, cars are sold through Prozorro.Sale. We take only auctions that name a plate or a VIN and group them by seller (the same groups as on /auctions).'
+}
+
+export const SELLERS: Fact[] = [
+  {
+    id: 'setam',
+    title: { ua: 'СЕТАМ', ru: 'СЕТАМ', en: 'SETAM' },
+    text: {
+      ua: 'Арештоване майно за виконавчими провадженнями: державні виконавці та приватні виконавці, часто звичайні вживані авто.',
+      ru: 'Арестованное имущество по исполнительным производствам: государственные и частные исполнители, часто обычные подержанные авто.',
+      en: 'Property seized in enforcement proceedings, from state and private enforcers; often ordinary used cars.'
+    }
+  },
+  {
+    id: 'customs',
+    title: { ua: 'Митниця', ru: 'Таможня', en: 'Customs' },
+    text: {
+      ua: 'Авто, конфісковані або відчужені митницею. Документи та комплектність варто звіряти особливо уважно.',
+      ru: 'Авто, конфискованные или отчуждённые таможней. Документы и комплектность стоит сверять особенно внимательно.',
+      en: 'Cars confiscated or alienated by customs. Check the papers and what is included with extra care.'
+    }
+  },
+  {
+    id: 'bankruptcy',
+    title: { ua: 'Банкрутство', ru: 'Банкротство', en: 'Bankruptcy' },
+    text: {
+      ua: 'Майно підприємств-банкрутів, яке продає арбітражний керуючий: службові легковики, вантажівки, трактори. Найбільша категорія Prozorro за кількістю проданих лотів у наших даних.',
+      ru: 'Имущество предприятий-банкротов, которое продаёт арбитражный управляющий: служебные легковые, грузовики, тракторы. Крупнейшая категория Prozorro по числу проданных лотов в наших данных.',
+      en: 'Assets of bankrupt firms sold by a trustee: company cars, trucks, tractors. The largest Prozorro category by sold lots in our data.'
+    }
+  },
+  {
+    id: 'bank',
+    title: { ua: 'Банки', ru: 'Банки', en: 'Banks' },
+    text: {
+      ua: 'Застави та власне майно банків. Список банків ми ведемо самі, тож він може бути неповним.',
+      ru: 'Залоги и собственное имущество банков. Список банков мы ведём сами, так что он может быть неполным.',
+      en: 'Pledged and own assets of banks. We keep the bank list ourselves, so it may be incomplete.'
+    }
+  },
+  {
+    id: 'other',
+    title: {
+      ua: 'АРМА, держава, приватизація',
+      ru: 'АРМА, государство, приватизация',
+      en: 'ARMA, the state, privatization'
+    },
+    text: {
+      ua: 'Активи, передані АРМА, майно державних і комунальних підприємств та мала приватизація. Таких авто мало, зате лоти бувають дорогі й нестандартні; їх можуть зупинити або скасувати.',
+      ru: 'Активы, переданные АРМА, имущество государственных и коммунальных предприятий и малая приватизация. Таких авто мало, зато лоты бывают дорогие и нестандартные; их могут остановить или отменить.',
+      en: 'Assets handed to ARMA, property of state and municipal firms and small privatization. There are few such cars, but the lots can be pricey and unusual, and they can be stopped or cancelled.'
+    }
+  }
+]
+
+export const SELLERS_NOTE: L10n = {
+  ua: 'Категорія - наш висновок із даних продавця й тегів Prozorro, а не офіційний статус лота. Тип торгів теж різний: англійський (ціна зростає), голландський (ціна падає) або продаж без аукціону.',
+  ru: 'Категория - наш вывод из данных продавца и тегов Prozorro, а не официальный статус лота. Тип торгов тоже разный: английский (цена растёт), голландский (цена падает) или продажа без аукциона.',
+  en: 'The category is our reading of the seller data and the Prozorro tags, not an official status of the lot. The auction type varies too: English (the price rises), Dutch (the price falls) or a sale without an auction.'
+}
+
+export type Example = {
+  id: string
+  group: 'customs' | 'bank' | 'bankruptcy'
+  title: L10n
+  /** Start and sale prices, hryvnias, as published in the feed (checked 2026-11-01). */
+  start: number
+  sale: number
+  text: L10n
+}
+
+export const EXAMPLES_TITLE: L10n = {
+  ua: 'Приклади з наших даних',
+  ru: 'Примеры из наших данных',
+  en: 'Examples from our data'
+}
+
+export const EXAMPLES_INTRO: L10n = {
+  ua: 'Справжні продані лоти Prozorro.Продажів за 2026 рік (дані на 1 листопада): марка, рік і ціни без номерів. Лише ілюстрація: стан авто в ціні не видно.',
+  ru: 'Настоящие проданные лоты Prozorro.Продажи за 2026 год (данные на 1 ноября): марка, год и цены без номеров. Только иллюстрация: состояние авто в цене не видно.',
+  en: 'Real sold Prozorro.Sale lots from 2026 (data of 1 November): make, year and prices, no plates. An illustration only: the price does not show the condition.'
+}
+
+export const EXAMPLES: Example[] = [
+  {
+    id: 'bank-superb',
+    group: 'bank',
+    title: { ua: 'Skoda Superb 2011, банк', ru: 'Skoda Superb 2011, банк', en: 'Skoda Superb 2011, bank' },
+    start: 195_210,
+    sale: 210_000,
+    text: {
+      ua: 'Продано трохи вище стартової ціни: торги майже не підняли її.',
+      ru: 'Продано немного выше стартовой цены: торги почти не подняли её.',
+      en: 'Sold a little above the start price: the bidding barely raised it.'
+    }
+  },
+  {
+    id: 'customs-octavia',
+    group: 'customs',
+    title: {
+      ua: 'Skoda Octavia Tour 2007, митниця',
+      ru: 'Skoda Octavia Tour 2007, таможня',
+      en: 'Skoda Octavia Tour 2007, customs'
+    },
+    start: 88_206,
+    sale: 130_001,
+    text: {
+      ua: 'Ціна продажу майже на половину вища за стартову: торги її помітно підняли.',
+      ru: 'Цена продажи почти на половину выше стартовой: торги заметно подняли её.',
+      en: 'The sale price is almost half again above the start price: the bidding raised it noticeably.'
+    }
+  },
+  {
+    id: 'bankruptcy-logan',
+    group: 'bankruptcy',
+    title: {
+      ua: 'Renault Logan 2013, банкрутство',
+      ru: 'Renault Logan 2013, банкротство',
+      en: 'Renault Logan 2013, bankruptcy'
+    },
+    start: 138_000,
+    sale: 4_666,
+    text: {
+      ua: 'Ціна продажу в рази нижча за стартову. Така цифра в даних може бути помилкою або наслідком голландського торгу; перевіряйте лот, не довіряйте числу.',
+      ru: 'Цена продажи в разы ниже стартовой. Такая цифра в данных может быть ошибкой или следствием голландских торгов; проверяйте лот, не доверяйте числу.',
+      en: 'The sale price is many times below the start price. Such a number in the data can be an error or the result of a Dutch auction; check the lot, do not trust the figure.'
+    }
+  }
+]
+
+export const EXAMPLES_NOTE: L10n = {
+  ua: 'Відкрийте /auctions, оберіть джерело Prozorro і категорію, щоб побачити всі лоти. Ціни переглядайте на сторінці лота.',
+  ru: 'Откройте /auctions, выберите источник Prozorro и категорию, чтобы увидеть все лоты. Цены смотрите на странице лота.',
+  en: 'Open /auctions, pick the Prozorro source and a category to see all the lots. Read prices on the lot page.'
+}
 
 export const LIVE_TITLE: L10n = {
   ua: 'Що показують наші дані',
@@ -66,9 +226,9 @@ export const LIVE_TITLE: L10n = {
 }
 
 export const LIVE_INTRO: L10n = {
-  ua: 'Легкові та вантажні авто з відкритих даних СЕТАМ, які ми завантажуємо щодня. Це лише ті лоти, що потрапили в набір даних, а не весь ринок.',
-  ru: 'Легковые и грузовые авто из открытых данных СЕТАМ, которые мы загружаем ежедневно. Это только те лоты, что попали в набор данных, а не весь рынок.',
-  en: 'Cars and trucks from the SETAM open data, which we load daily. These are only the lots in the dataset, not the whole market.'
+  ua: 'Легкові та вантажні авто з відкритих даних СЕТАМ і Prozorro.Продажів, які ми завантажуємо щодня. Це лише ті лоти, що потрапили в набір даних, а не весь ринок.',
+  ru: 'Легковые и грузовые авто из открытых данных СЕТАМ и Prozorro.Продажи, которые мы загружаем ежедневно. Это только те лоты, что попали в набор данных, а не весь рынок.',
+  en: 'Cars and trucks from the open data of SETAM and Prozorro.Sale, which we load daily. These are only the lots in the dataset, not the whole market.'
 }
 
 export const LIVE_NOTE: L10n = {
@@ -332,6 +492,73 @@ export const SOURCES: Source[] = [
       ua: 'ліцензія CC BY; звідси наші лоти',
       ru: 'лицензия CC BY; отсюда наши лоты',
       en: 'CC BY; where our lots come from'
+    }
+  },
+  {
+    href: 'https://prozorro.sale/opendata',
+    title: {
+      ua: 'Відкриті дані Prozorro.Продажів',
+      ru: 'Открытые данные Prozorro.Продажи',
+      en: 'Prozorro.Sale open data'
+    },
+    note: {
+      ua: 'вільне використання з посиланням на джерело; звідси лоти Prozorro',
+      ru: 'свободное использование со ссылкой на источник; отсюда лоты Prozorro',
+      en: 'free reuse with a link to the source; where our Prozorro lots come from'
+    }
+  },
+  {
+    href: 'https://uk.wikipedia.org/wiki/Prozorro',
+    title: { ua: 'Prozorro (Вікіпедія)', ru: 'Prozorro (Википедия)', en: 'Prozorro (Wikipedia)' },
+    note: {
+      ua: 'система публічних закупівель і продажів',
+      ru: 'система публичных закупок и продаж',
+      en: 'the public procurement and sales system'
+    }
+  },
+  {
+    href: 'https://www.usmarshals.gov/',
+    title: { ua: 'Служба маршалів США', ru: 'Служба маршалов США', en: 'US Marshals Service' },
+    note: {
+      ua: 'продаж конфіскованого майна',
+      ru: 'продажа конфискованного имущества',
+      en: 'sales of forfeited assets'
+    }
+  },
+  {
+    href: 'https://www.gsaauctions.gov/',
+    title: { ua: 'GSA Auctions', ru: 'GSA Auctions', en: 'GSA Auctions' },
+    note: {
+      ua: 'торги державними авто США',
+      ru: 'торги государственными авто США',
+      en: 'US government vehicle sales'
+    }
+  },
+  {
+    href: 'https://www.copart.com/',
+    title: { ua: 'Copart', ru: 'Copart', en: 'Copart' },
+    note: {
+      ua: 'страхові salvage-аукціони',
+      ru: 'страховые salvage-аукционы',
+      en: 'insurance salvage auctions'
+    }
+  },
+  {
+    href: 'https://www.iaai.com/',
+    title: { ua: 'IAA', ru: 'IAA', en: 'IAA' },
+    note: {
+      ua: 'страхові salvage-аукціони',
+      ru: 'страховые salvage-аукционы',
+      en: 'insurance salvage auctions'
+    }
+  },
+  {
+    href: 'https://en.wikipedia.org/wiki/Pertinax',
+    title: { ua: 'Pertinax (Вікіпедія)', ru: 'Pertinax (Википедия)', en: 'Pertinax (Wikipedia)' },
+    note: {
+      ua: '193 р. і торги за владу',
+      ru: '193 г. и торги за власть',
+      en: 'AD 193 and the sale of the empire'
     }
   },
   {

@@ -5,9 +5,11 @@ import ArticleHeader from '@/routes/read/ArticleHeader'
 import { AUCTIONS_LEAD } from '@/routes/read/articles'
 import {
   CheckSection,
+  ExamplesSection,
   HistorySection,
   LiveSection,
   LotsSection,
+  SellersSection,
   SourcesSection,
   TakeSection,
   WorldSection
@@ -28,7 +30,9 @@ export default function AuctionsGuideRoute(): ReactNode {
         backLabel={t('read.back')}
         jumps={[
           { id: 'lots', label: pick(SECTIONS.lots, lang) },
+          { id: 'sellers', label: pick(SECTIONS.sellers, lang) },
           { id: 'live', label: pick(SECTIONS.live, lang) },
+          { id: 'examples', label: pick(SECTIONS.examples, lang) },
           { id: 'take', label: pick(SECTIONS.take, lang) },
           { id: 'world', label: pick(SECTIONS.world, lang) },
           { id: 'history', label: pick(SECTIONS.history, lang) },
@@ -38,7 +42,9 @@ export default function AuctionsGuideRoute(): ReactNode {
       />
 
       <LotsSection />
+      <SellersSection />
       <LiveSection />
+      <ExamplesSection />
       <TakeSection />
       <WorldSection />
       <HistorySection />

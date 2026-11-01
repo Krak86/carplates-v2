@@ -6,6 +6,7 @@ import { useLocation, useParams, useSearchParams } from 'react-router'
 import {
   classifyQuery,
   DEFAULT_WEIGHT_GROUP,
+  isSovietPlate,
   isUaPlate,
   isVin,
   normalizePlate,
@@ -14,6 +15,7 @@ import {
 
 import LazySection from '@/components/LazySection'
 import LoadErrorBoundary from '@/components/LoadErrorBoundary'
+import FavoriteButton from '@/components/FavoriteButton'
 import NotFoundInfo from '@/components/NotFoundInfo'
 import RiaCheckLink from '@/components/RiaCheckLink'
 import PhotoMetaInfo from '@/components/PhotoMetaInfo'
@@ -26,6 +28,7 @@ import Spinner from '@/components/ui/Spinner'
 import { usePlateRecognition } from '@/components/use-plate-recognition'
 import { extractVehicleInfo } from '@/components/VinResult.helpers'
 import WikiHeroImage from '@/components/WikiHeroImage'
+import { MAX_HERO_LOT_PHOTOS } from '@/components/ua-auctions/helpers'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { useSideCommunity } from '@/hooks/useSideCommunity'
 import { useSideWidgetsVisible } from '@/hooks/useSideWidgetsVisible'
@@ -35,7 +38,7 @@ import { cn } from '@/lib/cn'
 import { recordVisit } from '@/lib/history-db'
 import { MAX_DIMENSION } from '@/lib/image'
 import { toIntlLocale } from '@/lib/intl'
-import { historyQuery, plateQuery, statsTopQuery, vinQuery } from '@/lib/queries'
+import { auctionLotsQuery, historyQuery, plateQuery, statsTopQuery, vinQuery, wantedQuery } from '@/lib/queries'
 import { capture } from '@/lib/telemetry'
 import { formatVehicleLabel } from '@/lib/vehicle-label'
 import HomeFuelSection from '@/routes/stats/HomeFuelSection'
@@ -135,6 +138,46 @@ export default function SearchRoute(): ReactNode {
     }
   }
 
+  // Same keys the auction chip / section use for this card (shared cache, no extra request). Photos of the car's own lots
+  // beat the stock model photo in the hero slot; newest lot first, capped so the strip stays short.
+  // A registry 404 for a format-valid plate / VIN: the same keys `OtherSourcesFound` uses (shared cache), so a vehicle
+  // known only from the wanted lists or an auction lot still names the side widgets' brand.
+  const notFound = active.error instanceof ApiError && active.error.status === 404
+  const otherKeys = !notFound
+    ? null
+    : kind === 'plate' && (isUaPlate(raw) || isSovietPlate(raw))
+      ? { plate: normalizePlate(raw), vin: null }
+      : kind === 'vin' && isVin(raw)
+        ? { plate: null, vin: raw.replace(/\s+/g, '').toUpperCase() }
+        : null
+  const lotKeys =
+    kind === 'plate' && plate.data
+      ? {
+          plate: plate.data.plate,
+          vin: plate.data.current.vin && isVin(plate.data.current.vin) ? plate.data.current.vin : null
+        }
+      : kind === 'vin' && vin.data
+        ? { plate: vin.data.registry?.plate ?? null, vin: vin.data.vin }
+        : (otherKeys ?? { plate: null, vin: null })
+  const lots = useQuery({
+    ...auctionLotsQuery(lotKeys.plate, lotKeys.vin),
+    enabled: !!lotKeys.plate || !!lotKeys.vin
+  }).data?.lots
+  const lotPhotos = (lots ?? []).flatMap(l => l.photos ?? []).slice(0, MAX_HERO_LOT_PHOTOS)
+  const otherWanted = useQuery({
+    ...wantedQuery(otherKeys?.plate ?? null, otherKeys?.vin ?? null),
+    enabled: !!otherKeys
+  }).data
+
+  // Vehicle for the side widgets only (the hero slot above stays registry-driven: `OtherSourcesFound` draws its own).
+  const otherRecords = otherWanted?.records ?? []
+  const otherLots = otherKeys ? (lots ?? []) : []
+  const otherBrand = [...otherRecords.map(r => r.brand), ...otherLots.map(l => l.make)].find(b => !!b) ?? null
+  const otherModel = [...otherRecords.map(r => r.model), ...otherLots.map(l => l.model)].find(m => !!m) ?? null
+  const sideVehicle =
+    wikiHeroVehicle ??
+    (otherBrand ? { brand: otherBrand, model: otherModel, year: otherLots.find(l => !!l.year)?.year ?? null } : null)
+
   const {
     recognize,
     recognizeVin,
@@ -147,9 +190,9 @@ export default function SearchRoute(): ReactNode {
 
   const community = useSideCommunity(
     sideWidgets && !recognizeErrorKey,
-    wikiHeroVehicle?.brand ?? undefined,
-    wikiHeroVehicle?.model ?? null,
-    wikiHeroVehicle?.year ?? null,
+    sideVehicle?.brand ?? undefined,
+    sideVehicle?.model ?? null,
+    sideVehicle?.year ?? null,
     kind === 'plate'
   )
 
@@ -211,7 +254,6 @@ export default function SearchRoute(): ReactNode {
   const shownValue = (kind === 'plate' && plate.data?.plate) || (kind === 'vin' && vin.data?.vin) || raw
   useDocumentTitle(shownValue ? [shownValue, titleCar].filter(Boolean).join(' - ') : null)
 
-  const notFound = active.error instanceof ApiError && active.error.status === 404
   // Centered only on a pristine page — any input, photo, or recognition error pins the search to the top.
   const isIdle = !raw && !photo && !recognizeErrorKey
   // The header already shows the vehicle once something is searched or a photo attached — the title steps aside.
@@ -296,6 +338,7 @@ export default function SearchRoute(): ReactNode {
             year={wikiHeroVehicle.year}
             rawKind={wikiHeroVehicle.rawKind}
             vehicleKey={wikiHeroVehicle.key}
+            lotPhotos={lotPhotos}
           />
         )}
         <Presence show={!!photo && photo.candidates.length > 1}>
@@ -330,9 +373,14 @@ export default function SearchRoute(): ReactNode {
             <NotFoundInfo value={raw} />
           ) : (
             <div className="flex flex-col items-center">
-              <p className="rounded bg-[var(--color-surface)]/20 px-1.5 py-0.5 text-[var(--color-muted)]">
-                {notFound ? t('result.noResults', { value: raw }) : t('result.error')}
-              </p>
+              <div className="flex items-center gap-2">
+                <p className="rounded bg-[var(--color-surface)]/20 px-1.5 py-0.5 text-[var(--color-muted)]">
+                  {notFound ? t('result.noResults', { value: raw }) : t('result.error')}
+                </p>
+                {notFound && kind === 'vin' && (
+                  <FavoriteButton kind="vin" value={raw.replace(/\s+/g, '').toUpperCase()} label={null} />
+                )}
+              </div>
 
               {notFound && kind === 'vin' && <RiaCheckLink kind="vin" value={raw.replace(/\s+/g, '').toUpperCase()} />}
             </div>
@@ -405,11 +453,11 @@ export default function SearchRoute(): ReactNode {
         </Presence>
 
         {/* Right column (desktop only, appears after a delay): news on top, the new-cars brand card below — either one alone takes the top slot. */}
-        {sideWidgets && !recognizeErrorKey && wikiHeroVehicle?.brand && (
+        {sideWidgets && !recognizeErrorKey && sideVehicle?.brand && (
           <div className="pointer-events-none fixed top-20 right-4 z-10 flex max-h-[calc(100vh-6rem)] w-60 flex-col gap-3 overflow-x-hidden overflow-y-auto">
             <LoadErrorBoundary compact>
               <Suspense fallback={null}>
-                <NewsWidget brand={wikiHeroVehicle.brand} model={wikiHeroVehicle.model} year={wikiHeroVehicle.year} />
+                <NewsWidget brand={sideVehicle.brand} model={sideVehicle.model} year={sideVehicle.year} />
               </Suspense>
             </LoadErrorBoundary>
 
@@ -431,7 +479,7 @@ export default function SearchRoute(): ReactNode {
 
             <LoadErrorBoundary compact>
               <Suspense fallback={null}>
-                <NewCarsWidget key={wikiHeroVehicle.brand} brand={wikiHeroVehicle.brand} />
+                <NewCarsWidget key={sideVehicle.brand} brand={sideVehicle.brand} />
               </Suspense>
             </LoadErrorBoundary>
           </div>
@@ -464,16 +512,12 @@ export default function SearchRoute(): ReactNode {
         )}
 
         {/* Left column (desktop only, appears after a delay): Bluesky on top, share price below — either one alone takes the top slot. */}
-        {sideWidgets && !recognizeErrorKey && wikiHeroVehicle?.brand && (
+        {sideWidgets && !recognizeErrorKey && sideVehicle?.brand && (
           <div className="pointer-events-none fixed top-20 left-4 z-10 flex max-h-[calc(100vh-6rem)] w-60 flex-col gap-3 overflow-x-hidden overflow-y-auto">
             {kind === 'plate' && (
               <LoadErrorBoundary compact>
                 <Suspense fallback={null}>
-                  <BlueskyWidget
-                    brand={wikiHeroVehicle.brand}
-                    model={wikiHeroVehicle.model}
-                    year={wikiHeroVehicle.year}
-                  />
+                  <BlueskyWidget brand={sideVehicle.brand} model={sideVehicle.model} year={sideVehicle.year} />
                 </Suspense>
               </LoadErrorBoundary>
             )}
@@ -488,7 +532,7 @@ export default function SearchRoute(): ReactNode {
 
             <LoadErrorBoundary compact>
               <Suspense fallback={null}>
-                <StockWidget brand={wikiHeroVehicle.brand} />
+                <StockWidget brand={sideVehicle.brand} />
               </Suspense>
             </LoadErrorBoundary>
           </div>

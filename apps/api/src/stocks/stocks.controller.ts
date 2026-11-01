@@ -5,13 +5,15 @@ import { DEFAULT_STOCK_RANGE, STOCK_RANGES } from '@carplates/shared'
 
 import { zodParam } from '../common/zod-param.pipe.js'
 
-import { StockDto, StockNewsDto } from './stocks.dto.js'
+import { StockDto, StockNewsDto, StockQuoteDto } from './stocks.dto.js'
 import { StocksService } from './stocks.service.js'
 
 const querySchema = z.object({
   brand: z.string().trim().min(1).max(60),
   range: z.enum(STOCK_RANGES).default(DEFAULT_STOCK_RANGE)
 })
+
+const quoteQuerySchema = querySchema.extend({ symbol: z.string().trim().min(1).max(20) })
 
 const newsQuerySchema = querySchema.pick({ brand: true })
 
@@ -28,6 +30,17 @@ export class StocksController {
   @ApiOkResponse({ type: StockDto })
   lookup(@Query(zodParam(querySchema)) query: z.infer<typeof querySchema>): Promise<StockDto> {
     return this.stocksService.lookup(query.brand, query.range)
+  }
+
+  // One instrument of that company (preferred shares, ADR, other venue): `symbol` must be one of its known instruments.
+  @Get('quote')
+  @Header('Cache-Control', 'public, max-age=300')
+  @ApiQuery({ name: 'brand', required: true })
+  @ApiQuery({ name: 'symbol', required: true })
+  @ApiQuery({ name: 'range', required: false, enum: STOCK_RANGES })
+  @ApiOkResponse({ type: StockQuoteDto })
+  quote(@Query(zodParam(quoteQuerySchema)) query: z.infer<typeof quoteQuerySchema>): Promise<StockQuoteDto> {
+    return this.stocksService.quote(query.brand, query.symbol, query.range)
   }
 
   // Headlines of the same listed company (Yahoo Finance RSS, proxied for CORS); empty for an unlisted brand.
