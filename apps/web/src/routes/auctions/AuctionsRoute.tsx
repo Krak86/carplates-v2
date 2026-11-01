@@ -6,6 +6,7 @@ import { AUCTIONS_DATASET_URL, PROZORRO_SALE_URL, SETAM_URL } from '@carplates/s
 import type { Currency } from '@carplates/shared'
 
 import PageSources from '@/components/PageSources'
+import ReadGuideLink from '@/components/ReadGuideLink'
 import RelatedPages from '@/components/RelatedPages'
 import Card from '@/components/ui/Card'
 import AuctionCurrency from '@/components/ua-auctions/AuctionCurrency'
@@ -14,6 +15,7 @@ import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 import { cn } from '@/lib/cn'
 import { toIntlLocale } from '@/lib/intl'
 import { auctionStatsQuery, fxQuery } from '@/lib/queries'
+import { AUCTIONS_GUIDE_PATH } from '@/routes/read/links'
 import StatsSkeleton from '@/routes/stats/StatsSkeleton'
 import AuctionsBreakdown from '@/routes/auctions/AuctionsBreakdown'
 import AuctionsLotList from '@/routes/auctions/AuctionsLotList'
@@ -98,6 +100,8 @@ export default function AuctionsRoute(): ReactNode {
         {t('auctions.page.intro')}
       </p>
 
+      <ReadGuideLink guide={AUCTIONS_GUIDE_PATH} className="mt-0 mb-4" />
+
       {!online && (
         <p className="mb-4 rounded-md border border-amber-500/40 bg-amber-500/15 px-3 py-2 text-sm font-medium text-amber-800 dark:text-amber-300">
           {t('offline.needsConnection')}
@@ -161,6 +165,8 @@ export default function AuctionsRoute(): ReactNode {
 
           <p className="mb-8 text-xs text-[var(--color-muted)]">{t('uaAuctions.monthNote')}</p>
 
+          <ReadGuideLink guide={AUCTIONS_GUIDE_PATH} href={`${AUCTIONS_GUIDE_PATH}#take`} className="mt-0 mb-4" />
+
           <Card className="mb-6">
             <h2 id="auction-lots" className="mb-3 scroll-mt-4 text-lg font-semibold">
               {t('auctions.page.lots')}
@@ -191,6 +197,8 @@ export default function AuctionsRoute(): ReactNode {
               Prozorro.Sale
             </a>
           </p>
+
+          <ReadGuideLink guide={AUCTIONS_GUIDE_PATH} href={`${AUCTIONS_GUIDE_PATH}#check`} className="mt-0 mb-6" />
 
           <RelatedPages page="auctions" />
         </>
