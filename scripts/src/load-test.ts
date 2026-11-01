@@ -5,6 +5,8 @@
  *   pnpm load-test --sample 5000 --out plates.txt                      # sample real plates from DATABASE_URL
  *   pnpm load-test --plates plates.txt --base-url http://localhost:3000 # run (default stages 5,20,50,100)
  *
+ * On the VPS (no repo): bundle with esbuild (docs/deploy.md "Load testing") and run the .mjs in a node:24 container.
+ *
  * Flags: --stages 5,20,50 · --stage-seconds 60 · --max-p95-ms 1000 · --max-error-pct 1 · --allow-remote
  *
  * Run it against the origin, not through Cloudflare: the per-IP Nest throttle (100/min) and the WAF rule (30/10 s)
@@ -13,8 +15,6 @@
  */
 import { readFile, writeFile } from 'node:fs/promises'
 import { parseArgs } from 'node:util'
-import { createDb } from '@carplates/db'
-import { sql } from 'drizzle-orm'
 import { exceedsThreshold, parsePlates, resolveTarget, runStage, type StageResult } from './load-test-lib.js'
 
 const { values } = parseArgs({
@@ -32,6 +32,8 @@ const { values } = parseArgs({
 })
 
 async function samplePlates(count: number, file: string): Promise<void> {
+  // Loaded here, not at the top, so the bundled script runs on a host without the repo (`--plates` mode needs no DB).
+  const [{ createDb }, { sql }] = await Promise.all([import('@carplates/db'), import('drizzle-orm')])
   const { db, close } = createDb()
   try {
     // ~0.2% block sample of the 20M+ row matview, then shuffled: random cold rows without a full scan.

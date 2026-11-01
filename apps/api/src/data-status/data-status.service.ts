@@ -10,6 +10,12 @@ type JobRow = { job: string; status: string; started_at: Date | string; ok_at: D
 
 const iso = (value: Date | string): string => new Date(value).toISOString()
 
+/** A `WITH NO DATA` view throws (Postgres 55000) instead of returning zero rows until its first refresh. */
+const isUnpopulated = (error: unknown): boolean => {
+  const cause = (error as { cause?: { code?: string } } | null)?.cause
+  return (error as { code?: string } | null)?.code === '55000' || cause?.code === '55000'
+}
+
 @Injectable()
 export class DataStatusService {
   constructor(@Inject(DbService) private readonly dbService: DbService) {}
@@ -18,7 +24,14 @@ export class DataStatusService {
   async get(): Promise<DataStatusResponse> {
     const db = this.dbService.db
     const [span, runs] = await Promise.all([
-      db.select().from(statsDataSpan).limit(1),
+      db
+        .select()
+        .from(statsDataSpan)
+        .limit(1)
+        .catch((error: unknown) => {
+          if (isUnpopulated(error)) return []
+          throw error
+        }),
       db.execute<JobRow>(sql`
         SELECT DISTINCT ON (r.job) r.job, r.status, r.started_at,
           (SELECT max(o.finished_at) FROM registry.job_runs o WHERE o.job = r.job AND o.status = 'ok') AS ok_at

@@ -323,7 +323,7 @@ Plate/VIN `?section=<id>` links (2026-10-30): the title gets ` - <section label>
   `noindex` with a bare canonical.
 - Rate limits: one global `ThrottlerGuard` (`AppModule`, `common/throttle.ts`) counts **only `/api/*`** per IP (short/medium/long).
   Heavy or enumerable routes add `@Throttle(...)` constants from the same file (plate, VIN); never skip a route without a reason
-  (`/api/auth/me` is the only skip). recognize/auth/og keep their own tighter module-level guards. Behind a proxy set `TRUST_PROXY`.
+  (`/api/auth/me` is the only skip). recognize/auth/og keep their own tighter module-level guards. Behind a proxy set `TRUST_PROXY`. `THROTTLE_DISABLED=true` turns the **global** guard off for local load tests (`pnpm load-test`); `throttleDisabled()` in `env.ts` ignores it when `NODE_ENV=production`, and the per-module guards (recognize/auth/og/contact) are unaffected.
 - Legal/cookie/monetization findings: `docs/legal-and-monetization.md`.
 
 ## Agent discovery, edge cache, Zod and CSP (2026-10-29)
@@ -684,4 +684,6 @@ Plan: [compare-plan.md](compare-plan.md). Phases 1-3 and the client side of phas
 
 - **The "data covers ..." label states where the DATA ends**, never the calendar: `monthYearLabel(registry.lastDate)` from `GET /api/data-status` (`stats_data_span`, rebuilt by `refreshStats()`). Never derive a coverage label from `new Date()`.
 - **A new data source = a row in `routes/data-status/datasets.ts`** (`CADENCES`, `job` for a scheduled one, else `refreshedOn`). **Bump `refreshedOn` in the same commit that re-exports its seed CSV**, or the page shows it stale. `helpers.test.ts` fails a hand-refreshed row without a date. A new scheduled job: add it to `scripts/src/jobs.ts`, the crontab and this list, with the same `job` name.
+- **A new `WITH NO DATA` materialized view must be refreshed on the VPS right after its migration deploys** (`psql -c "REFRESH MATERIALIZED VIEW registry.<name>"`): an unpopulated view throws (55000), not an empty result. `DataStatusService` tolerates it; other readers may not.
 - Status is computed in the browser (`datasetStatus`) from the `job_runs` log + the catalog; the API sends no verdicts. The endpoint is in neither `PUBLIC_API_PATH_PREFIXES` nor the Cloudflare Cache Rule.
+- About lists it as the `dataStatus` feature (`about.brief.dataStatus` / `about.feature.dataStatus`, ua/ru/en); no new source (data.gov.ua is already credited).

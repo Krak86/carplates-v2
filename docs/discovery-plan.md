@@ -152,7 +152,13 @@ into many subs at once. Use a screenshot or short GIF of a search.
 >
 > Link: https://carsua.app. Feedback welcome, especially on plates where the data looks wrong or incomplete.
 
-- [ ] Ukrainian version (Telegram/Facebook) and a longer Habr/DOU write-up (data-engineering angle: open data, PWA, ALPR)
+- [ ] Ukrainian version (Telegram/Facebook)
+- [ ] **Technical article, one at a time** (data-engineering angle, not an ad; the service link goes at the end): 1. DOU.ua in Ukrainian,
+      2. dev.to in English (adapted from the DOU text; dev.to is English-speaking, a Ukrainian post there gets little reach and links are
+      mostly `nofollow`, so it is a portfolio / long-tail piece), 3. Habr only after the audience check. Topic ideas: loading about
+      16M registrations from CKAN CSVs with header-driven mapping, or an offline-first PWA with plate recognition. Mention the Diia
+      Open Data listing once it is approved, but do not wait for it (Telegram / Facebook groups and analytics do not depend on it;
+      the media pitch to Mezha / ICT.ua and the forum post do)
 
 ## Social channels (assessment 2026-11-01, from general knowledge, not measured: check against Search Console / Cloudflare analytics)
 

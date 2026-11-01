@@ -208,7 +208,21 @@ Never aim it at `https://carsua.app`: Cloudflare WAF (30/10 s) and the Nest thro
 2. Target the origin: a restored copy locally (or `ssh -L 3000:<api container ip>:3000 vps`). The per-IP throttle answers 429, so start the **local** api with `THROTTLE_DISABLED=true` (ignored when `NODE_ENV=production`, so it cannot loosen the VPS; for a VPS run you would need a staging deploy).
 3. Run off-peak while watching `docker stats` (api limit 1 GB), `iostat` and `pg_stat_activity`: `pnpm load-test --plates plates.txt`.
 
-Expect the ceiling to be cold-disk Postgres reads (hot set ~9 GB vs 2 GB `shared_buffers`), then API memory. Prefer a restored copy to production: an OOM kill takes Postgres down with the API.
+**On the VPS itself** (no tunnel; the SSH tunnel from a home PC adds 100-250 ms and caps throughput, so it measures the tunnel):
+
+1. Bundle on your PC: `node_modules/.pnpm/esbuild@<ver>/node_modules/esbuild/bin/esbuild scripts/src/load-test.ts --bundle --platform=node --format=esm --target=node24 --external:@carplates/db --external:drizzle-orm --outfile=load-test.mjs`, and `scp` it plus the plates file to the VPS.
+2. Throwaway api (same image, `NODE_ENV=development` so `THROTTLE_DISABLED` works, `DIGEST_ENABLED=false` so it cannot mail the digest twice, `--cpus 2 --memory 1g`, no published ports), named `loadtest-api` on `carsua_default`.
+3. Generator: `docker run --rm --network carsua_default -v "$PWD":/t -w /t node:24-alpine node load-test.mjs --plates plates.txt --base-url http://loadtest-api:3100 --allow-remote`.
+4. Clean up: `docker rm -f loadtest-api`, delete the copied files.
+
+**Result (2026-11-01, Contabo Cloud VPS 6, throwaway api on 2 CPUs / 1 GB, 20 000 random real plates, generator on the VPS):** 5 users 49 req/s (p50 64 ms, p95 294 ms), 20 users 63 req/s (p50 254 ms, p95 754 ms), 50 users 61 req/s (p50 748 ms, p95 1960 ms, stopped there), 0 errors, real api container idle (0-2.5 % CPU). So the ceiling for **cold** lookups is **~60 req/s** (~5 M lookups/day); more users only queue. The same 20 000 plates ran at ~660-1090 req/s on a dev PC (warm cache), so the VPS is ~10-15x slower per lookup. Not fully explained; measured pieces:
+
+- `EXPLAIN (ANALYZE, BUFFERS)` of the four lookup queries on the VPS: all index scans (same plans as local, no missing index), ~10 ms execution + ~3 ms planning for a cold plate; the slow ones show `read=` (page reads from disk/OS cache, ~1-2 ms each). `shared_buffers` is 2 GB, box memory use only ~16 %.
+- `plate.service.ts` runs 4 queries in sequence per lookup (current row, identity actions, VIN history, worn-plate history); Postgres sat at ~86 % of one core and the api process near one core at ~60 req/s.
+- Sentry tracing (`ENABLE_TELEMETRY`) costs ~40 % throughput locally (1010 -> 604 req/s at 20 users): real but not the main cause.
+- A tunnel from a home PC adds 100-250 ms per request and caps throughput (it measured the tunnel, 58 req/s at 20 users); always generate the load on the VPS.
+
+Not worth tuning at current traffic (Cloudflare cache + per-IP limits sit in front). If it ever matters: merge the four lookups into fewer round trips, raise `shared_buffers`, CPU-profile the api on the VPS. Prefer a throwaway container or a restored copy to hammering production: an OOM kill takes Postgres down with the api. The ingest cron runs on the same box and skews results while it is active.
 
 ## Still open
 

@@ -202,7 +202,7 @@ pnpm load-test --sample 5000 --out plates.txt   # needs DATABASE_URL: block-samp
 pnpm load-test --plates plates.txt              # stepped run (5/20/50/100 users, 60 s each); stops at p95 > 1 s or 1% 5xx; 429s are excluded
 ```
 
-Run it against a **local** api started with `THROTTLE_DISABLED=true` (ignored in production). Procedure: `docs/deploy.md` "Load test".
+Run it against a **local** api started with `THROTTLE_DISABLED=true` (ignored in production). On the VPS: bundle with esbuild and run the `.mjs` in a `node:24-alpine` container against a throwaway api (`--base-url http://loadtest-api:3100 --allow-remote`). Procedure and measured results: `docs/deploy.md` "Load testing".
 
 ## First-time setup with real data
 
