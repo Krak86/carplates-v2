@@ -167,16 +167,18 @@ export default function VinResult({ data, searchedPlate = null }: Props): ReactN
           <UaAuctionCheck plate={sourcePlate} vin={data.vin} openSignal={uaAuctionOpenSignal} />
         </LazySection>
 
-        <VinDecodeTabs
-          data={data}
-          overviewExtras={
-            <>
-              <SafetyRatings brand={vehicle.brand} model={vehicle.model} year={vehicle.year} body={vehicle.body} />
-              <CarWikiInfo brand={vehicle.brand} model={vehicle.model} year={vehicle.year} />
-              <VinTypicalData data={data} />
-            </>
-          }
-        />
+        <div className="mt-4">
+          <VinDecodeTabs
+            data={data}
+            overviewExtras={
+              <>
+                <SafetyRatings brand={vehicle.brand} model={vehicle.model} year={vehicle.year} body={vehicle.body} />
+                <CarWikiInfo brand={vehicle.brand} model={vehicle.model} year={vehicle.year} />
+                <VinTypicalData data={data} />
+              </>
+            }
+          />
+        </div>
 
         <LazySection sections={['origin']} forceMount={originOpenSignal > 0}>
           <OriginSection
