@@ -4313,3 +4313,9 @@ The ALPR container had no authentication of its own; it was protected only by ne
 - **Deploy:** `deploy-api.yml` writes `ALPR_API_KEY` to `api.env` and to a new `env/alpr.env`; `docker-compose.prod.yml` gives only `alpr` that file (`required: false`), so it never sees the api's other secrets. Secret `ALPR_API_KEY` (`openssl rand -hex 24`) documented in `docs/deploy.md`.
 - **Rollout order:** deploy api first (writes both files), then ALPR (the recreate picks up the key). Either order is safe: api sends the header regardless, ALPR enforces only once it has the key.
 - **Verified in prod (2026-11-01):** a call from inside the container without the key returns 401; `ALPR_API_KEY` is identical in `api.env` and `alpr.env`.
+
+## Games navigation, Relax zen mode, guides hub search (2026-11-01) ✅
+
+- `components/game/GamesNav.tsx`: chips to the hub, every quiz (`/play?game=`), `/race` and `/relax` (current page marked); shown on `RaceRoute` and `RelaxRoute`.
+- `/relax`: a card (what it is, 3 steps, Zen + Share buttons) and the `LayersPanel` inline (the header layers button is hidden on phones). **Zen mode** = `useUiStore.zen` (never persisted): `Layout` hides the header and `QuickLinks`, `App` the page share button, `ScrollButtons` stay unmounted; Esc or a faint corner button exits, leaving the route resets it.
+- `/read`: search box + topic chips (`articleTopics`, `filterArticles` in `read/helpers.ts`, URL params `q` / `topic`), "Guide" label on every card, phones get a compact row (thumbnail beside the text, `ArticleBanner compact`).

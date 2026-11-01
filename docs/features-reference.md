@@ -554,6 +554,8 @@ Files: migration 0075, `packages/shared/src/origin.ts` (own file, no offline-cac
 `routes/play/`; write-up plan-done "Games hub /play". `/play?game=region|logo|higher` plays in place, online-only. Rounds are pure functions in `helpers.ts` (plates come from `REGIONS`, never re-implemented). `StatsMap` `quiz` prop = clickable polygons without tooltip/legend. Best score per quiz in localStorage (`quiz-storage.ts`); a new quiz = id in `QUIZ_IDS`, component in `QUIZ_COMPONENT`, `play.quiz.<id>.title|desc` ua/ru/en. The end screen shares a score card via `renderPlateCardPng`.
 Question count (10/20/30/50) is global, picked on the hub (`readRounds`/`writeRounds`); best score is per quiz and length. Brand pool: `GET /api/stats/brands` -> `foldBrands` (never the full `statsQuery`).
 
+**Game links** (2026-11-01): `/race` and `/relax` start with `GamesNav` (hub + every game); a new game goes into `QUIZ_IDS` / `RACER_LINKS` and shows up there too. **Zen** (`/relax`): `useUiStore.zen` hides the header, footer links, page share button and scroll buttons; only `RelaxRoute` sets it and resets it on unmount, so no other route can inherit it. The guides hub (`/read`) filters with `?q=` / `?topic=` (English tag text).
+
 **Full screen** (2026-10-31): `PlayRoute` wraps the quiz frame in `frameRef` and toggles the Fullscreen API on it (`fullscreenchange` keeps the state in sync); no per-quiz code.
 
 ## Home page blocks and brand line (2026-10-31)

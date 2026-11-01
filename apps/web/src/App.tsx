@@ -10,6 +10,7 @@ import { ROUTE_TITLE_KEYS, useDocumentTitle } from '@/hooks/useDocumentTitle'
 import PageShareButton from '@/components/PageShareButton'
 import { NO_SHARE_PATHS } from '@/components/use-page-share-actions'
 import SearchRoute from '@/routes/SearchRoute'
+import { useUiStore } from '@/store/ui-store'
 
 const AboutRoute = lazy(() => import('@/routes/AboutRoute'))
 const LegalRoute = lazy(() => import('@/routes/LegalRoute'))
@@ -60,6 +61,7 @@ const PlayRoute = lazy(() => import('@/routes/play/PlayRoute'))
 export default function App(): ReactNode {
   const { pathname } = useLocation()
   const { t } = useTranslation()
+  const zen = useUiStore(s => s.zen)
   const titleKey = ROUTE_TITLE_KEYS[pathname]
   useDocumentTitle(titleKey ? t(titleKey) : undefined)
   // A plate / VIN result page is a single segment that is not a static route; the floating share button is hidden on mobile.
@@ -138,7 +140,7 @@ export default function App(): ReactNode {
             <Route path="*" element={<SearchRoute />} />
           </Routes>
         </Suspense>
-        {shareTitle && (
+        {shareTitle && !zen && (
           <div className="mt-6 flex justify-center">
             <PageShareButton title={shareTitle} />
           </div>

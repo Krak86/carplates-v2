@@ -1,8 +1,11 @@
 import type { SizeModel } from '@carplates/shared'
 import { describe, expect, it } from 'vitest'
 
+import type { ArticleMeta } from '@/routes/read/types'
 import {
+  articleTopics,
   displayModel,
+  filterArticles,
   filterProfiles,
   fleetBySegment,
   parseOneOf,
@@ -96,5 +99,45 @@ describe('labels and ranges', () => {
     expect(parseOneOf('suv', ['suv', 'van'] as const)).toBe('suv')
     expect(parseOneOf('boat', ['suv', 'van'] as const)).toBeNull()
     expect(parseOneOf(null, ['suv'] as const)).toBeNull()
+  })
+})
+
+const article = (path: string, lead: string, tags: string[]): ArticleMeta => ({
+  path,
+  icon: '📘',
+  titleKey: `nav.${path}`,
+  hue: 0,
+  lead: { ua: lead, ru: lead, en: lead },
+  tags: tags.map(tag => ({ ua: tag, ru: tag, en: tag }))
+})
+
+const GUIDES = [
+  article('fuel', 'What we run on', ['Fuel', 'Emissions']),
+  article('fleet', 'Colours and age', ['Fleet', 'Fuel']),
+  article('vin', 'Read a VIN', ['VIN'])
+]
+const TITLES: Record<string, string> = { fuel: 'Fuel and CO2', fleet: 'What Ukraine drives', vin: 'VIN explained' }
+const titleOf = (a: ArticleMeta): string => TITLES[a.path] ?? ''
+
+describe('articleTopics', () => {
+  it('lists each tag once, the most used first', () => {
+    expect(articleTopics(GUIDES).map(t => t.en)).toEqual(['Fuel', 'Emissions', 'Fleet', 'VIN'])
+  })
+})
+
+describe('filterArticles', () => {
+  it('returns everything for an empty search and topic', () => {
+    expect(filterArticles(GUIDES, ' ', '', 'en', titleOf)).toHaveLength(3)
+  })
+
+  it('narrows by topic', () => {
+    expect(filterArticles(GUIDES, '', 'Fuel', 'en', titleOf).map(a => a.path)).toEqual(['fuel', 'fleet'])
+  })
+
+  it('searches title, lead and tags case-insensitively, combined with the topic', () => {
+    expect(filterArticles(GUIDES, 'DRIVES', '', 'en', titleOf).map(a => a.path)).toEqual(['fleet'])
+    expect(filterArticles(GUIDES, 'colours', '', 'en', titleOf).map(a => a.path)).toEqual(['fleet'])
+    expect(filterArticles(GUIDES, 'emissions', '', 'en', titleOf).map(a => a.path)).toEqual(['fuel'])
+    expect(filterArticles(GUIDES, 'vin', 'Fuel', 'en', titleOf)).toEqual([])
   })
 })

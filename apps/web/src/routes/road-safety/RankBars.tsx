@@ -50,7 +50,7 @@ export default function RankBars({ rows, ariaLabel, collapsible = false, wrapDet
       </span>
 
       {row.detail && wrapDetail && (
-        <span className="col-start-2 col-end-5 text-xs wrap-break-wordtext-[var(--color-muted)]">{row.detail}</span>
+        <span className="wrap-break-wordtext-[var(--color-muted)] col-start-2 col-end-5 text-xs">{row.detail}</span>
       )}
     </li>
   ))

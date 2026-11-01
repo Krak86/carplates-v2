@@ -20,6 +20,18 @@ export const RELEASES: readonly ReleaseDay[] = [
     items: [
       item(
         'improved',
+        'Сторінка «Релакс»: пояснення, вибір фону прямо на сторінці (і на телефоні) та дзен-режим, що ховає все, крім фону; на сторінках тест-драйву й релаксу з’явилися посилання на всі ігри',
+        'Страница «Релакс»: пояснение, выбор фона прямо на странице (и на телефоне) и дзен-режим, который прячет всё, кроме фона; на страницах тест-драйва и релакса появились ссылки на все игры',
+        'The Relax page now explains itself, lets you pick the background right there (phones too) and has a zen mode that hides everything but the background; the test drive and relax pages link to every game'
+      ),
+      item(
+        'improved',
+        'Довідник: пошук і фільтр за темами, позначка «Стаття» на кожній картці та компактні картки на телефоні',
+        'Справочник: поиск и фильтр по темам, пометка «Статья» на каждой карточке и компактные карточки на телефоне',
+        'Guides: search and topic filter, a "Guide" label on every card and compact cards on phones'
+      ),
+      item(
+        'improved',
         'На головній сторінці пошуку прибрано рядок «Безкоштовно, без реклами, відкриті дані» під слоганом; він лишається в шапці сайту',
         'На главной странице поиска убрана строка «Бесплатно, без рекламы, открытые данные» под слоганом; она остается в шапке сайта',
         'The search page no longer repeats the "Free, no ads, open data" line under the tagline; it stays in the site header'

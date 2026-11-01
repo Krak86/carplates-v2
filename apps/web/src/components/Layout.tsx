@@ -37,6 +37,7 @@ export default function Layout({ children }: Props): ReactNode {
   const { t } = useTranslation()
   const drawerOpen = useUiStore(s => s.drawerOpen)
   const setDrawerOpen = useUiStore(s => s.setDrawerOpen)
+  const zen = useUiStore(s => s.zen)
   const vehicleLabel = useHeaderVehicleLabel()
   const backgroundMode = useBackgroundMode()
   // The scroll buttons' chunk is only fetched once the user first scrolls.
@@ -94,7 +95,10 @@ export default function Layout({ children }: Props): ReactNode {
         </Suspense>
       )}
       <BackgroundDevPanel />
-      <header className="header-vt sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-[var(--color-border)] bg-[var(--color-bg)]/50 px-4 py-3 backdrop-blur-md">
+      <header
+        hidden={zen}
+        className="header-vt sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-[var(--color-border)] bg-[var(--color-bg)]/50 px-4 py-3 backdrop-blur-md"
+      >
         <button
           type="button"
           aria-label="menu"
@@ -159,11 +163,11 @@ export default function Layout({ children }: Props): ReactNode {
         <div className="flex min-w-0 flex-1 flex-col">
           <main className="page-vt min-w-0 flex-1 p-2 md:p-8">{children}</main>
 
-          <QuickLinks />
+          {!zen && <QuickLinks />}
         </div>
       </div>
 
-      {hasScrolled && (
+      {hasScrolled && !zen && (
         <Suspense fallback={null}>
           <ScrollButtons />
         </Suspense>

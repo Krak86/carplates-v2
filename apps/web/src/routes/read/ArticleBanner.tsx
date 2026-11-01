@@ -7,11 +7,13 @@ type Props = {
   article: Pick<ArticleMeta, 'path' | 'icon' | 'hue'>
   /** `card`: greyed out until the parent `group` is hovered/focused/touched; `header`: full colour, the picture drifts with the pointer. */
   variant?: 'card' | 'header'
+  /** A smaller emoji, for the thumbnail beside a hub card's text on phones. */
+  compact?: boolean
   className?: string
 }
 
 /** Cover of a guide: the generated picture (`public/read/<guide>`, built by `pnpm build:read-images`) over a wide-gamut oklch gradient (sRGB fallback first), with the guide's emoji on top. */
-export default function ArticleBanner({ article, variant = 'card', className }: Props): ReactNode {
+export default function ArticleBanner({ article, variant = 'card', compact = false, className }: Props): ReactNode {
   const { hue, path } = article
   const guide = path.split('/').pop()
   const isHeader = variant === 'header'
@@ -32,7 +34,11 @@ export default function ArticleBanner({ article, variant = 'card', className }: 
       aria-hidden
       onPointerMove={isHeader ? handlePointerMove : undefined}
       onPointerLeave={isHeader ? handlePointerLeave : undefined}
-      className={cn('relative flex items-center justify-center overflow-hidden text-6xl', className)}
+      className={cn(
+        'relative flex items-center justify-center overflow-hidden',
+        compact ? 'text-4xl' : 'text-6xl',
+        className
+      )}
       style={{
         background: `linear-gradient(135deg, hsl(${hue} 70% 60%), hsl(${(hue + 40) % 360} 70% 40%))`
       }}
