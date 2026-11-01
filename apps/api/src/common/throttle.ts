@@ -24,8 +24,6 @@ export const GLOBAL_THROTTLE: ThrottlerModuleOptions = {
 /** Tighter per-route caps for the endpoints a registry scraper would enumerate (overrides `medium`). */
 export const PLATE_LOOKUP_THROTTLE = { medium: { limit: 100, ttl: 60_000 } }
 export const VIN_DECODE_THROTTLE = { medium: { limit: 30, ttl: 60_000 } }
-/** Photo resizer: only cache misses reach the API (Cloudflare keeps each variant), a miss costs a download and a resize. A page of lots asks for dozens of thumbnails. */
-export const PHOTO_THROTTLE = { medium: { limit: 240, ttl: 60_000 } }
 /** Brand origin: the brand list is enumerable, though each answer is small. */
 export const ORIGIN_THROTTLE = { medium: { limit: 60, ttl: 60_000 } }
 /** Catalog pages: an enumerable set (make x model), though the answer is one precomputed row. */

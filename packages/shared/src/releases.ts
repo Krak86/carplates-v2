@@ -16,6 +16,41 @@ const item = (group: ReleaseGroup, ua: string, ru: string, en: string): ReleaseI
  */
 export const RELEASES: readonly ReleaseDay[] = [
   {
+    date: '2026-11-02',
+    items: [
+      item(
+        'new',
+        'На сторінках з даними (розшук, аукціони, безпека доріг, пальне, безпека, новини) з’явилося посилання «Свіжість даних» із датою останнього оновлення',
+        'На страницах с данными (розыск, аукционы, безопасность дорог, топливо, безопасность, новости) появилась ссылка «Свежесть данных» с датой последнего обновления',
+        'Data pages (wanted, auctions, road safety, fuel, safety, news) now link to Data freshness with the date of the last update'
+      ),
+      item(
+        'data',
+        'Прозорро.Продажі: завантажено архів аукціонів (понад 14 тисяч лотів з номером або VIN), далі оновлюється щодня',
+        'Прозорро.Продажи: загружен архив аукционов (более 14 тысяч лотов с номером или VIN), дальше обновляется ежедневно',
+        'Prozorro.Sale: the auction archive is loaded (over 14 thousand lots with a plate or VIN) and refreshed daily'
+      ),
+      item(
+        'fix',
+        'Фото лотів Прозорро.Продажі тепер відкриваються напряму з їхнього сайту',
+        'Фото лотов Прозорро.Продажи теперь открываются напрямую с их сайта',
+        'Prozorro.Sale lot photos now load directly from their site'
+      ),
+      item(
+        'fix',
+        'Завершені аукціони Прозорро з майбутньою датою початку більше не показуються як лоти 2027 року; у статистиці аукціонів середня різниця ціни рахується за медіаною',
+        'Завершённые аукционы Прозорро с будущей датой начала больше не показываются как лоты 2027 года; в статистике аукционов средняя разница цены считается по медиане',
+        'Finished Prozorro auctions with a future start date no longer show as 2027 lots; the auction stats now use the median price change'
+      ),
+      item(
+        'fix',
+        'Підписи обраного на картках результатів більше не обрізаються',
+        'Подписи избранного на карточках результатов больше не обрезаются',
+        'Favorite labels on result cards are no longer clipped'
+      )
+    ]
+  },
+  {
     date: '2026-11-01',
     items: [
       item(

@@ -14,24 +14,19 @@ describe('UaAuctionPhotos', () => {
     expect(container).toBeEmptyDOMElement()
   })
 
-  it('shows lazy 320 px thumbnails first and reveals the rest on request', () => {
+  it('shows lazy thumbnails of the original files first and reveals the rest on request', () => {
     render(<UaAuctionPhotos docIds={ids} label="Renault" />)
     const images = screen.getAllByRole('img')
     expect(images).toHaveLength(4)
-    expect(images[0]?.getAttribute('src')).toContain(`/api/auctions/photo/${ids[0]}?w=320`)
+    expect(images[0]?.getAttribute('src')).toBe(`https://procedure.prozorro.sale/api/documents/public/${ids[0]}`)
     expect(images[0]?.getAttribute('loading')).toBe('lazy')
 
     fireEvent.click(screen.getByRole('button', { name: /\(2\)/ }))
     expect(screen.getAllByRole('img')).toHaveLength(6)
   })
 
-  it('falls back to the original file, then hides the photo', () => {
+  it('hides a photo that fails to load', () => {
     render(<UaAuctionPhotos docIds={ids.slice(0, 2)} label="Renault" />)
-    fireEvent.error(screen.getAllByRole('img')[0] as HTMLElement)
-    expect(screen.getAllByRole('img')[0]?.getAttribute('src')).toBe(
-      `https://procedure.prozorro.sale/api/documents/public/${ids[0]}`
-    )
-
     fireEvent.error(screen.getAllByRole('img')[0] as HTMLElement)
     expect(screen.getAllByRole('img')).toHaveLength(1)
   })

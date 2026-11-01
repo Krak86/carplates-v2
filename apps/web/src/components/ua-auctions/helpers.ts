@@ -44,11 +44,8 @@ export function groupLots(lots: readonly AuctionLot[]): LotGroup[] {
   return [...byGroup].map(([group, list]) => ({ group, lots: list }))
 }
 
-/** Photo widths of the API resizer (`apps/api/src/auctions/photo.schema.ts`): a thumbnail and the full-screen view. */
-export const PHOTO_THUMB_WIDTH = 320
 /** Most lot photos the hero offers (the lots section lists them all). */
 export const MAX_HERO_LOT_PHOTOS = 8
-export const PHOTO_FULL_WIDTH = 1600
 
 /** Thumbnails shown before the "show more" button. */
 export const PHOTO_PREVIEW_COUNT = 4

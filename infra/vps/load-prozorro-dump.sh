@@ -11,7 +11,8 @@ HOST="${2:-vps}"
 
 # psql inside the postgres container; extra psql args and stdin pass through (the remote script reads them from "$@" / stdin).
 remote_psql() {
-  ssh "$HOST" bash -s -- "$@" <<'REMOTE'
+  # ssh joins its arguments into one string for the remote shell, so quote each one (SQL has spaces and parentheses).
+  ssh "$HOST" "bash -s -- $(printf '%q ' "$@")" <<'REMOTE'
 cd /opt/carsua/compose
 export COMPOSE_FILE=docker-compose.prod.yml
 exec docker compose exec -T postgres sh -c 'psql -U "$POSTGRES_USER" "$POSTGRES_DB" "$@"' sh "$@"
@@ -27,10 +28,10 @@ echo "loading $DUMP"
 # The script text above is the ssh stdin, so the dump travels in a second step: stage it as a file on the VPS.
 scp -q "$DUMP" "$HOST:prozorro_auctions.sql.gz"
 ssh "$HOST" 'cd /opt/carsua/compose && export COMPOSE_FILE=docker-compose.prod.yml &&
-  gzip -dc ~/prozorro_auctions.sql.gz | grep -v "^\\\(un\)\?restrict " |
+  gzip -dc ~/prozorro_auctions.sql.gz | sed -e "/^.restrict /d" -e "/^.unrestrict /d" |
   docker compose exec -T postgres sh -c '"'"'psql -U "$POSTGRES_USER" "$POSTGRES_DB" -v ON_ERROR_STOP=1 -q'"'"''
 echo "rows after load: $(count)"
 
-ssh "$HOST" '/opt/carsua/compose/run-ingest.sh prozorro-auctions' </dev/null
+ssh "$HOST" 'bash /opt/carsua/compose/run-ingest.sh prozorro-auctions' </dev/null
 echo "rows after daily run: $(count) (expect the dump's rows plus a few)"
 ssh "$HOST" 'rm -f ~/prozorro_auctions.sql.gz'

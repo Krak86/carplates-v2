@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { useSearchParams } from 'react-router'
+import { Link, useSearchParams } from 'react-router'
 
 import NewsCard from '@/components/NewsCard'
 import Skeleton from '@/components/ui/Skeleton'
@@ -105,6 +105,12 @@ export default function NewsRoute(): ReactNode {
               })}
             </p>
           )}
+
+          <p className="text-sm">
+            <Link viewTransition to="/data-status" className="text-primary underline">
+              {t('dataStatus.link')}
+            </Link>
+          </p>
         </div>
 
         <div className="flex shrink-0 gap-1">

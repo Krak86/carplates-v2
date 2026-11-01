@@ -4350,11 +4350,12 @@ A human-readable map of every public route, grouped by category (search, cars, s
 Plan and decisions: `docs/prozorro-sale-auctions-plan.md`; conventions: `docs/features-reference.md` "Prozorro.Sale lots in Auction history".
 
 - **Data:** `registry.prozorro_auctions` (0087), parser `prozorro-parse.ts` (vehicle test, plate/VIN, seller kind from `sellingEntity` / tags / `BANK_EDRPOU`), feed reader `prozorro-feed.ts`, daily job `prozorro-auctions`. Local DB: 14 431 Prozorro rows (full history 2017-2026, 33 MB) next to 16 866 SETAM lots.
-- **API:** union query for lookup / list / stats, merged `vehicle` facts, photo resizer `/api/auctions/photo/:docId` (WebP 320 / 960 / 1600).
+- **API:** union query for lookup / list / stats, merged `vehicle` facts, photo resizer `/api/auctions/photo/:docId` (WebP 320 / 960 / 1600; removed 2026-11-02, see the follow-up).
 - **Web:** grouped lots with chips, merged specs with conflicts, photo thumbnails + zoom, per-source chart markers, `/auctions` source tabs, category / type filters with "?" help, About source, i18n ua/ru/en.
 - **Browser check (same day):** Renault card with both sources (groups, chips, specs, chart legend), a lot with 130 photos at 390 px, `/auctions?source=prozorro&group=customs`. Fixed: empty "()" in the status line and timeline for a Prozorro lot sold without an auction (no date; new `*Undated` texts); the zoom dialog's plate-box toggle is hidden when there are no plate candidates.
 - **Backfill (2026-11-01):** parser guard for template-text property lots (`isTemplateItem`, "ТЗ/СГ" in brand / model / color; 3 rows removed). Full crawl 2017-01-01 to now: 674 460 feed records, 26 min, 14 431 rows; 1.0 percent multi-vehicle auctions (one row per auction stays); overlap with SETAM 12 VINs / 19 plates; dump `prozorro_auctions.sql.gz` (8.1 MB) made for the VPS. Totals and the restore steps are in `docs/prozorro-sale-auctions-plan.md` step 4.
-- **Still open:** load the dump on the VPS after merge + API deploy (plan step 4 d-f), the Cloudflare Cache Rule edit for the photo path.
+- **VPS load (2026-11-02):** `infra/vps/load-prozorro-dump.sh` loaded the dump (14 431 rows) and ran the daily job once (0 inserted, 6 updated).
+- **Follow-up (2026-11-02, after the deploy):** the live check found that Prozorro's Cloudflare challenges every server-side image fetch (VPS `403` `cf-mitigated: challenge`; Cloudflare Image Transformations also failed with 9408), so the resizer, `sharp` in `apps/api`, the photo route / throttle / cache constants and the web fallback chain were removed and photos load straight from Prozorro. Two data bugs from the same check: cancelled auctions with a bidding start in the future (2022 lots shown as July 2027, first under "newest"; 105 rows have a future start, 103 legitimately running) now get the registration start (`PROZORRO_START`), and the stats `avgDeltaPercent` is a median (a 0.50 UAH start gave +26 254 percent on average; now +8.3). The VPS dump load is done (see above).
 - **Guide update (2026-11-01):** `/read/auctions` got a "Who sells" section (SETAM, customs, bankruptcy, banks, ARMA / state / privatization, `SELLERS` in `content.ts`), an "Examples" section (3 real sold Prozorro lots, no plates, each linking to `/auctions?source=prozorro&group=…`; prices checked against `/api/auctions/lots` on 2026-11-01), a "One lot, one source" fact (about 20 cars in both tables), the Prozorro open-data source and a refreshed lead. Examples are static: re-check them if the parser or bank list changes.
 
 ## Share price section (phones + catalog) ✅ DONE (2026-11-01)
@@ -4390,3 +4391,11 @@ Small items shipped between the Prozorro.Sale and customs work; conventions are 
 - **ALPR:** plate read from a registration certificate photo when `/recognize` finds none.
 - **UI:** guide topic chips colorized (`topic-colors.ts`) and collapsed to two rows on mobile; plate region in the test-drive modal header; logo quiz blurs brand names inside the emblems; empty state in the saved comparisons card.
 - **Docs and About:** About `recognition` / `share` / `account` texts extended, release items added for 2026-11-01 (`latest.ts` unchanged, same day); CLAUDE.md trimmed.
+
+## Data freshness links, favorite labels popover, Prozorro photos (2026-11-02) ✅
+
+- **Freshness chip:** `DataFreshness` ("Updated <date>" + `/data-status` link) on `/wanted`, `/auctions`, `/road-safety`, `/fuel`, `/safety`; a link next to the update time on `/news`. Convention in `docs/features-reference.md`.
+- **Favorite labels popover:** rendered in a portal with fixed positioning, flips upward near the viewport bottom, closes on scroll/resize (result cards no longer clip it).
+- **Prozorro photos:** the resizer was dropped (see the Prozorro.Sale entry follow-up); About source text now says photos load directly.
+- **Prozorro backfill:** dump loaded on the VPS (14 431 rows) with `infra/vps/load-prozorro-dump.sh` (quoting and runner fixed).
+- **Docs and release:** `releases.ts` 2026-11-02 (`latest.ts` bumped), About `prozorro` source and `dataStatus` feature texts, PLAN.md build order for shareable photo links.
