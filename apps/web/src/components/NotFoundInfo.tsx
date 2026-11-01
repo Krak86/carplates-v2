@@ -1,12 +1,10 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
-import { isSovietPlate, isUaPlate, normalizePlate, regionName } from '@carplates/shared'
+import { isSovietPlate, isUaPlate, normalizePlate } from '@carplates/shared'
 
-import NoRegionBadge from '@/components/NoRegionBadge'
 import OtherSourcesFound from '@/components/OtherSourcesFound'
 import RiaCheckLink from '@/components/RiaCheckLink'
-import { useRegionLabel } from '@/lib/region-label'
 import { PLATES_PATH } from '@/routes/read/links'
 
 type Props = {
@@ -16,24 +14,17 @@ type Props = {
 /** What we can still say about a plate with no registry match: its normalized form, region, and why it may be missing. */
 export default function NotFoundInfo({ value }: Props): ReactNode {
   const { t } = useTranslation()
-  const regionLabel = useRegionLabel()
   const plate = normalizePlate(value)
   const isPlate = isUaPlate(value)
   const isSoviet = !isPlate && isSovietPlate(value)
-  const leadFacts: [string, ReactNode][] = isPlate
-    ? [
-        [t('result.notFound.plate'), <span className="font-mono">{plate}</span>],
-        [t('result.region'), regionLabel(regionName(plate)) ?? <NoRegionBadge plate={plate} />]
-      ]
-    : []
 
   return (
     <div className="w-full max-w-content rounded-md bg-[var(--color-surface)]/20 px-3 py-2 text-left">
       <p className="text-center text-[var(--color-muted)]">{t('result.noResults', { value })}</p>
 
       {/* Old-format plates are the likeliest to be in the wanted lists only, so Soviet shapes are looked up too.
-          The plate and region are listed by it, below the photo, together with what the other sources hold. */}
-      {(isPlate || isSoviet) && <OtherSourcesFound plate={plate} leadFacts={leadFacts} />}
+          Its plate line and data list are drawn like the registry card. */}
+      {(isPlate || isSoviet) && <OtherSourcesFound plate={plate} showPlate={isPlate} />}
 
       <p className="mt-2 text-sm text-[var(--color-muted)]">
         {isPlate ? t('result.notFound.hintPlate') : t('result.notFound.hintFormat')}

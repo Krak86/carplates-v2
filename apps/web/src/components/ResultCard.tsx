@@ -56,8 +56,7 @@ import CompareChip from '@/components/compare/CompareChip'
 import GenerationChip from '@/components/GenerationChip'
 import SizeClassChip from '@/components/size/SizeClassChip'
 import VdbChips from '@/components/VdbChips'
-import InfoPopover from '@/components/InfoPopover'
-import InfoText from '@/components/InfoText'
+import FieldRow from '@/components/FieldRow'
 import PlateSegments from '@/components/PlateSegments'
 import UaPlateBadge from '@/components/UaPlateBadge'
 import SectionHeader from '@/components/SectionHeader'
@@ -125,37 +124,6 @@ const VehicleSizeSection = lazy(() => import('@/components/size/VehicleSizeSecti
 
 type Props = {
   data: PlateLookupResponse
-}
-
-// `info` is a `field.about.<info>` i18n key — adds a ❓ with a plain-language explanation of the field.
-// `infoExtra` is rendered under that explanation inside the same popover.
-function Row({
-  label,
-  value,
-  info,
-  infoExtra
-}: {
-  label: string
-  value: ReactNode
-  info?: string
-  infoExtra?: ReactNode
-}): ReactNode {
-  const { t } = useTranslation()
-  if (value == null || value === '') return null
-  return (
-    <div className="-mx-4 flex justify-between gap-4 px-4 py-1.5 text-base transition-colors hover:bg-[var(--color-border)]/40">
-      <span className="flex items-center gap-1.5 rounded bg-[var(--color-surface)]/20 px-1 py-0.5 text-[var(--color-muted)]">
-        {label}
-        {info && (
-          <InfoPopover label={t('vin.info.about', { field: label })} title={label}>
-            <InfoText text={t(`field.about.${info}`)} />
-            {infoExtra}
-          </InfoPopover>
-        )}
-      </span>
-      <span className="rounded bg-[var(--color-surface)]/20 px-1 py-0.5 text-right font-medium">{value}</span>
-    </div>
-  )
 }
 
 export default function ResultCard({ data }: Props): ReactNode {
@@ -523,7 +491,7 @@ export default function ResultCard({ data }: Props): ReactNode {
           >
             <div className="overflow-hidden">
               <div className="divide-y divide-[var(--color-border)]">
-                <Row
+                <FieldRow
                   label={t('field.body')}
                   info="body"
                   value={
@@ -557,7 +525,7 @@ export default function ResultCard({ data }: Props): ReactNode {
                     )
                   }
                 />
-                <Row
+                <FieldRow
                   label={engineLabel}
                   value={
                     engineValue != null && engineValue !== '' && hasSpecs('engine') ? (
@@ -571,7 +539,7 @@ export default function ResultCard({ data }: Props): ReactNode {
                   }
                   info={hasCapacity ? 'capacity' : 'power'}
                 />
-                <Row
+                <FieldRow
                   label={t('field.color')}
                   info="color"
                   value={
@@ -592,7 +560,7 @@ export default function ResultCard({ data }: Props): ReactNode {
                     )
                   }
                 />
-                <Row
+                <FieldRow
                   label={t('field.fuel')}
                   info="fuel"
                   value={
@@ -607,7 +575,7 @@ export default function ResultCard({ data }: Props): ReactNode {
                     )
                   }
                 />
-                <Row
+                <FieldRow
                   label={t('field.weight')}
                   value={
                     c.ownWeight && (
@@ -619,7 +587,7 @@ export default function ResultCard({ data }: Props): ReactNode {
                   }
                   info="weight"
                 />
-                <Row
+                <FieldRow
                   label={t('field.kind')}
                   info="kind"
                   value={
@@ -632,25 +600,25 @@ export default function ResultCard({ data }: Props): ReactNode {
                     )
                   }
                 />
-                <Row
+                <FieldRow
                   label={t('field.purpose')}
                   value={c.purpose}
                   info="purpose"
                   infoExtra={<PurposeInfo current={c.purpose} />}
                 />
-                {hasCapacity && <Row label={t('field.power')} value={c.powerKwt} info="power" />}
-                <Row
+                {hasCapacity && <FieldRow label={t('field.power')} value={c.powerKwt} info="power" />}
+                <FieldRow
                   label={t('field.owner')}
                   info="owner"
                   infoExtra={<OwnerInfo person={c.person} />}
                   value={c.person === 'P' ? t('field.ownerPrivate') : t('field.ownerCompany')}
                 />
-                <Row
+                <FieldRow
                   label={t('field.ownersCount')}
                   info="ownersCount"
                   value={t('field.ownersCountValue', { count: data.ownersCount })}
                 />
-                <Row
+                <FieldRow
                   label={t('field.regDate')}
                   info="regDate"
                   value={
@@ -662,7 +630,7 @@ export default function ResultCard({ data }: Props): ReactNode {
                     )
                   }
                 />
-                <Row
+                <FieldRow
                   label={t('field.dep')}
                   info="dep"
                   value={
@@ -682,7 +650,7 @@ export default function ResultCard({ data }: Props): ReactNode {
                     ) : null
                   }
                 />
-                <Row
+                <FieldRow
                   label={t('field.koatuu')}
                   value={
                     c.regAddrKoatuu &&
@@ -690,7 +658,7 @@ export default function ResultCard({ data }: Props): ReactNode {
                   }
                   info="koatuu"
                 />
-                <Row
+                <FieldRow
                   label={t('field.vin')}
                   info="vin"
                   value={
@@ -772,7 +740,7 @@ export default function ResultCard({ data }: Props): ReactNode {
             actions={<ShareButton section="history" label={t('share.button', { section: t('result.historyLabel') })} />}
           >
             <div className="mb-2">
-              <Row
+              <FieldRow
                 label={t('field.ownersCount')}
                 info="ownersCount"
                 value={t('field.ownersCountValue', { count: data.ownersCount })}
