@@ -4319,3 +4319,7 @@ The ALPR container had no authentication of its own; it was protected only by ne
 - `components/game/GamesNav.tsx`: chips to the hub, every quiz (`/play?game=`), `/race` and `/relax` (current page marked); shown on `RaceRoute` and `RelaxRoute`.
 - `/relax`: a card (what it is, 3 steps, Zen + Share buttons) and the `LayersPanel` inline (the header layers button is hidden on phones). **Zen mode** = `useUiStore.zen` (never persisted): `Layout` hides the header and `QuickLinks`, `App` the page share button, `ScrollButtons` stay unmounted; Esc or a faint corner button exits, leaving the route resets it.
 - `/read`: search box + topic chips (`articleTopics`, `filterArticles` in `read/helpers.ts`, URL params `q` / `topic`), "Guide" label on every card, phones get a compact row (thumbnail beside the text, `ArticleBanner compact`).
+
+## Sitemap page `/sitemap` (2026-11-01) ✅
+
+A human-readable map of every public route, grouped by category (search, cars, statistics, guides, games, community, account, about) with emojis, in the chosen language, no filters. Below the groups a "Everywhere on the site" block describes what has no URL: the sidebar settings (language, theme, accent, text size, font, offline data), the background layers popup, the news bell and the profile/sign-in popup. Linked from the footer. Details: `docs/features-reference.md` "Sitemap page".

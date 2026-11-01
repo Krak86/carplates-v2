@@ -102,6 +102,20 @@ export const STATIC_PAGES: Record<string, Record<Lang, PageText>> = {
       description: 'Write to the Cars UA team or order a new app: web apps and tools built on open data.'
     }
   },
+  '/sitemap': {
+    ua: {
+      title: 'Cars UA - Карта сайту',
+      description: 'Усі сторінки Cars UA за розділами: пошук, статистика, довідник, ігри та інше.'
+    },
+    ru: {
+      title: 'Cars UA - Карта сайта',
+      description: 'Все страницы Cars UA по разделам: поиск, статистика, справочник, игры и другое.'
+    },
+    en: {
+      title: 'Cars UA - Sitemap',
+      description: 'Every Cars UA page by section: search, statistics, guides, games and more.'
+    }
+  },
   '/history': {
     ua: { title: 'Cars UA - Історія пошуку', description: 'Ваші останні пошуки за номером і VIN.' },
     ru: { title: 'Cars UA - История поиска', description: 'Ваши последние поиски по номеру и VIN.' },

@@ -21,6 +21,7 @@ const LEGAL_LINKS = [
   { to: '/privacy', key: 'legal.privacy.heading' },
   { to: '/terms', key: 'legal.terms.heading' },
   { to: '/contact', key: 'contact.footerLink' },
+  { to: '/sitemap', key: 'nav.sitemap' },
   { to: '/discuss', key: 'report.footer' }
 ] as const
 

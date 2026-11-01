@@ -671,3 +671,9 @@ Plan: [compare-plan.md](compare-plan.md). Phases 1-3 and the client side of phas
 
 - **`PageSources`** (`components/PageSources.tsx`): the "Source data" card at the top of `/stats`, `/wanted`, `/auctions`, `/fuel`, `/safety`, `/road-safety` (road-safety's `SourceData` wraps it). A new statistics page passes `sources` (label, url, optional note), `lines` (plain text) and an optional `footer`; strings live under `pageSources.<page>.*`.
 - **`RelatedPages`** (`components/RelatedPages.tsx`) at the bottom: cross links driven by `lib/related-pages.ts` (`RELATED_PAGES`, `RELATED_TARGETS` for deep links such as the regional map). Every pair needs a hint `related.<from>.<to>` (ua/ru/en) that says what the other page answers; add a pair only where the comparison is real. Hints carry no numbers, so they never go stale.
+
+## Sitemap page (`/sitemap`, 2026-11-01)
+
+- `routes/sitemap/`: `helpers.ts` holds the tree (`SITEMAP_GROUPS` links, `SITEMAP_TIPS` for URL-less features, `HIDDEN_ROUTES`, `CATALOG_ROUTES`), `SitemapRoute.tsx` renders it. Guide links come from `GUIDE_META` and game links from `QUIZ_IDS` / `RACER_LINKS`, so a new article or game appears by itself.
+- **A new route in `App.tsx` must be added to `SITEMAP_GROUPS` (or `HIDDEN_ROUTES` when it is not a page to browse to)**: `helpers.test.ts` reads `App.tsx` and fails otherwise. Text lives in `sitemap.*` (ua/ru/en); labels reuse the existing `nav.*` keys.
+- Not the same as `/sitemap.xml` (crawlers, `SeoController`). The page has a `STATIC_PAGES` entry and sits in the footer (`QuickLinks`).
