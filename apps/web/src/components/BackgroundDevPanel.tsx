@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { useSearchParams } from 'react-router'
 
@@ -13,7 +13,7 @@ const devLabel = (id: string): string => {
 }
 
 // Dev-only tuning panel for BackgroundPhotos — never shown to regular visitors.
-// Opens via ?debug=bg on first load, or Ctrl+Shift+B at any time. Not i18n'd:
+// Opens via ?debug=bg on first load (no keyboard shortcut). Not i18n'd:
 // this is a developer tool, not end-user UI.
 export default function BackgroundDevPanel(): ReactNode {
   const [searchParams] = useSearchParams()
@@ -22,17 +22,6 @@ export default function BackgroundDevPanel(): ReactNode {
   const photosEnabled = useBackgroundStore(s => s.photosEnabled)
   const setField = useBackgroundStore(s => s.setField)
   const reset = useBackgroundStore(s => s.reset)
-
-  useEffect(() => {
-    function handleKeyDown(event: KeyboardEvent): void {
-      if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === 'b') {
-        event.preventDefault()
-        setOpen(v => !v)
-      }
-    }
-    window.addEventListener('keydown', handleKeyDown)
-    return (): void => window.removeEventListener('keydown', handleKeyDown)
-  }, [])
 
   if (!open) return null
 
