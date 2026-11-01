@@ -1046,6 +1046,69 @@ export type AuctionLotRow = typeof auctionLots.$inferSelect
 export type AuctionLotInsert = typeof auctionLots.$inferInsert
 
 /**
+ * A Prozorro.Sale vehicle auction that carries a plate or VIN (procedure.prozorro.sale feed). One row per auction, keyed on the
+ * full `auctionId`. Seller and tag fields are stored raw next to the derived `sellerKind`; photos are URLs only.
+ */
+export const prozorroAuctions = registry.table(
+  'prozorro_auctions',
+  {
+    auctionId: text('auction_id').primaryKey(),
+    sellingMethod: text('selling_method'),
+    status: text('status').notNull(),
+    value: numeric('value', { precision: 14, scale: 2, mode: 'number' }),
+    minimalStep: numeric('minimal_step', { precision: 14, scale: 2, mode: 'number' }),
+    guarantee: numeric('guarantee', { precision: 14, scale: 2, mode: 'number' }),
+    finalPrice: numeric('final_price', { precision: 14, scale: 2, mode: 'number' }),
+    auctionStart: timestamp('auction_start', { withTimezone: true }),
+    tenderStart: timestamp('tender_start', { withTimezone: true }),
+    tenderEnd: timestamp('tender_end', { withTimezone: true }),
+    plate: text('plate'),
+    vin: text('vin'),
+    make: text('make'),
+    model: text('model'),
+    year: smallint('year'),
+    color: text('color'),
+    kilometrage: integer('kilometrage'),
+    fuel: text('fuel'),
+    engineCc: integer('engine_cc'),
+    transmission: text('transmission'),
+    condition: text('condition'),
+    damaged: boolean('damaged'),
+    damageText: text('damage_text'),
+    region: text('region'),
+    locality: text('locality'),
+    lat: doublePrecision('lat'),
+    lon: doublePrecision('lon'),
+    titleRaw: text('title_raw').notNull(),
+    descriptionRaw: text('description_raw'),
+    sellerName: text('seller_name'),
+    sellerEdrpou: text('seller_edrpou'),
+    sellerKind: text('seller_kind'),
+    categories: jsonb('categories').$type<string[]>().notNull().default(sql`'[]'::jsonb`),
+    directions: jsonb('directions').$type<string[]>().notNull().default(sql`'[]'::jsonb`),
+    auctionType: text('auction_type'),
+    photoUrls: jsonb('photo_urls').$type<string[]>().notNull().default(sql`'[]'::jsonb`),
+    sourceModifiedAt: timestamp('source_modified_at', { withTimezone: true }).notNull(),
+    firstSeenAt: timestamp('first_seen_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
+  },
+  t => [
+    index('ix_prozorro_auctions_plate')
+      .on(t.plate)
+      .where(sql`${t.plate} is not null`),
+    index('ix_prozorro_auctions_vin')
+      .on(t.vin)
+      .where(sql`${t.vin} is not null`),
+    index('ix_prozorro_auctions_status').on(t.status),
+    index('ix_prozorro_auctions_auction_start').on(t.auctionStart),
+    index('ix_prozorro_auctions_seller_kind').on(t.sellerKind),
+    index('ix_prozorro_auctions_modified').on(t.sourceModifiedAt)
+  ]
+)
+export type ProzorroAuctionRow = typeof prozorroAuctions.$inferSelect
+export type ProzorroAuctionInsert = typeof prozorroAuctions.$inferInsert
+
+/**
  * Road-safety (DTP) statistics from Patrol Police files (pre-aggregated, not per-crash) and the hazardous-section CSVs
  * (data.gov.ua, CC BY). `period` is the last reported month (12 = full year, 1..9 = year-to-date); `region` is the canonical
  * `plate_regions` name. See docs/road-safety-plan.md.
