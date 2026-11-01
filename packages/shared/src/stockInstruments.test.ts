@@ -34,6 +34,8 @@ describe('tradingViewUrl', () => {
     expect(tradingViewUrl('000270.KS')).toBe('https://www.tradingview.com/symbols/KRX-000270/')
     expect(tradingViewUrl('7203.T')).toBe('https://www.tradingview.com/symbols/TSE-7203/')
     expect(tradingViewUrl('0175.HK')).toBe('https://www.tradingview.com/symbols/HKEX-175/')
+    expect(tradingViewUrl('RNO.PA')).toBe('https://www.tradingview.com/symbols/EURONEXT-RNO/')
+    expect(tradingViewUrl('VOLCAR-B.ST')).toBe('https://www.tradingview.com/symbols/OMXSTO-VOLCAR_B/')
     expect(tradingViewUrl('TSLA')).toBe('https://www.tradingview.com/symbols/TSLA/')
   })
 })

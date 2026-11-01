@@ -92,7 +92,7 @@ const TRADINGVIEW_EXCHANGES: Readonly<Record<string, string>> = {
   T: 'TSE',
   DE: 'XETR',
   MI: 'MIL',
-  PA: 'EURONEXTPARIS',
+  PA: 'EURONEXT',
   ST: 'OMXSTO',
   NS: 'NSE',
   BO: 'BSE',
@@ -107,14 +107,18 @@ export function tradingViewUrl(symbol: string): string {
   const exchange = dot > 0 ? TRADINGVIEW_EXCHANGES[symbol.slice(dot + 1)] : undefined
   if (!exchange) return `https://www.tradingview.com/symbols/${encodeURIComponent(symbol)}/`
 
-  const ticker = symbol.slice(0, dot)
-  // Hong Kong tickers are written without the leading zeros ("0175" -> "175"); Korean, Chinese and Japanese ones keep them.
+  // Hong Kong tickers are written without the leading zeros ("0175" -> "175"); Korean, Chinese and Japanese ones keep
+  // them. A share class dash becomes an underscore ("VOLCAR-B" -> "VOLCAR_B"). Each pattern was checked live (200).
+  const ticker = symbol.slice(0, dot).replace('-', '_')
   return `https://www.tradingview.com/symbols/${exchange}-${exchange === 'HKEX' ? ticker.replace(/^0+/, '') : ticker}/`
 }
 
-/** Frankfurt exchange search: the best free place to look for a maker's bonds. */
+/**
+ * A web search for the maker's bonds (ISIN, coupon, maturity). Exchange search pages were tried and are unusable:
+ * Deutsche Boerse's shows "Content not available", Stuttgart and Investing.com block plain requests.
+ */
 export const bondSearchUrl = (companyName: string): string =>
-  `https://www.boerse-frankfurt.de/en/search/result?searchTerms=${encodeURIComponent(companyName)}`
+  `https://www.google.com/search?q=${encodeURIComponent(`${companyName} bonds ISIN coupon maturity`)}`
 
 export const instrumentLinks = (symbol: string): { yahoo: string; tradingView: string } => ({
   yahoo: yahooFinanceUrl(symbol),

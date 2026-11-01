@@ -25,7 +25,7 @@ export default function StockBonds({ companyName, symbol }: Props): ReactNode {
           rel="noopener noreferrer"
           className="text-primary underline"
         >
-          {t('stock.bonds.frankfurt', { name: companyName })} ↗
+          {t('stock.bonds.search', { name: companyName })} ↗
           <span className="sr-only"> - {t('newCarsWidget.opensNewTab')}</span>
         </a>
         <a href={tradingViewUrl(symbol)} target="_blank" rel="noopener noreferrer" className="text-primary underline">
