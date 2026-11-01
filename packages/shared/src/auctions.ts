@@ -5,6 +5,10 @@ export const AUCTION_SOURCES = ['setam', 'prozorro'] as const
 export type AuctionSource = (typeof AUCTION_SOURCES)[number]
 export const DEFAULT_AUCTION_SOURCE: AuctionSource = 'setam'
 
+/** Auction types of a Prozorro.Sale lot: `english` (price rises), `dutch` (price falls), `withoutAuction`, `priorityEnglish`. */
+export const AUCTION_TYPES = ['english', 'dutch', 'withoutAuction', 'priorityEnglish'] as const
+export type AuctionType = (typeof AUCTION_TYPES)[number]
+
 /** Seller kinds of a Prozorro.Sale auction (`scripts/src/prozorro-parse.ts` derives it at ingest from the seller and Prozorro's own tags). */
 export const PROZORRO_SELLER_KINDS = ['bank', 'customs', 'bankruptcy', 'arma', 'state', 'commercial', 'lease'] as const
 export type ProzorroSellerKind = (typeof PROZORRO_SELLER_KINDS)[number]
@@ -215,6 +219,8 @@ export const auctionListQuerySchema = z.object({
   /** Both sources unless set. */
   source: z.enum(AUCTION_SOURCES).optional(),
   group: z.enum(AUCTION_GROUPS).optional(),
+  /** Prozorro lots only (SETAM lots have none, so a type filter drops them). */
+  auctionType: z.enum(AUCTION_TYPES).optional(),
   make: z.string().trim().min(1).max(60).optional(),
   region: z.string().trim().min(1).max(60).optional(),
   /** Feed status as published (`Торги відбулися`, …), exact match. */
@@ -235,6 +241,7 @@ export const auctionListQuerySchema = z.object({
 export type AuctionListQuery = {
   source?: AuctionSource
   group?: AuctionGroup
+  auctionType?: AuctionType
   make?: string
   region?: string
   status?: string

@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
-import { AUCTION_OUTCOMES, AUCTION_SORTS } from '@carplates/shared'
+import { AUCTION_OUTCOMES, AUCTION_SORTS, AUCTION_TYPES } from '@carplates/shared'
 import type { AuctionListLot, AuctionListQuery, AuctionStatsRow, Currency, FxResponse } from '@carplates/shared'
 
 import {
@@ -38,7 +38,15 @@ type Props = {
 const FIELD =
   'rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-2 py-1.5 text-sm text-[var(--color-fg)]'
 
-function LotRow({ lot, currency, fx }: { lot: AuctionListLot; currency: Currency; fx: FxResponse | null }): ReactNode {
+type LotRowProps = {
+  lot: AuctionListLot
+  currency: Currency
+  fx: FxResponse | null
+  query: AuctionListQuery
+  onChange: (changes: Record<string, string | null>) => void
+}
+
+function LotRow({ lot, currency, fx, query, onChange }: LotRowProps): ReactNode {
   const { t, i18n } = useTranslation()
   const locale = toIntlLocale(i18n.language)
   const statusKey = LOT_STATUS_KEYS[lot.status]
@@ -55,7 +63,12 @@ function LotRow({ lot, currency, fx }: { lot: AuctionListLot; currency: Currency
       )}
     >
       <p className="font-semibold">
-        {lot.sold ? '💰' : isOpen ? '🔔' : '🔨'} {vehicle} <UaAuctionChips lot={lot} />
+        {lot.sold ? '💰' : isOpen ? '🔔' : '🔨'} {vehicle}{' '}
+        <UaAuctionChips
+          lot={lot}
+          onSelect={onChange}
+          selected={{ source: query.source, group: query.group, auctionType: query.auctionType }}
+        />
       </p>
 
       <p className="text-[var(--color-muted)]">
@@ -138,6 +151,22 @@ export default function AuctionsLotList({ query, makes, regions, currency, fx, o
             {groupsForSource(query.source).map(g => (
               <option key={g} value={g}>
                 {t(`uaAuctions.group.${g}`)}
+              </option>
+            ))}
+          </select>
+        </AuctionFilterField>
+
+        <AuctionFilterField id="auction-filter-type" label={t('auctions.page.typeLabel')} help="type">
+          <select
+            id="auction-filter-type"
+            value={query.auctionType ?? ''}
+            onChange={e => onChange({ type: e.target.value })}
+            className={cn(FIELD, 'max-w-44')}
+          >
+            <option value="">{t('auctions.page.any')}</option>
+            {AUCTION_TYPES.map(a => (
+              <option key={a} value={a}>
+                {t(`uaAuctions.auctionType.${a}`)}
               </option>
             ))}
           </select>
@@ -266,7 +295,7 @@ export default function AuctionsLotList({ query, makes, regions, currency, fx, o
 
           <ul className={cn('space-y-2', isPlaceholderData && 'opacity-60')}>
             {data.lots.map(lot => (
-              <LotRow key={lotKey(lot)} lot={lot} currency={currency} fx={fx} />
+              <LotRow key={lotKey(lot)} lot={lot} currency={currency} fx={fx} query={query} onChange={onChange} />
             ))}
           </ul>
 

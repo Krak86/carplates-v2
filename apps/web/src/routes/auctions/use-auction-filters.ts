@@ -4,10 +4,18 @@ import {
   AUCTION_OUTCOMES,
   AUCTION_SORTS,
   AUCTION_SOURCES,
+  AUCTION_TYPES,
   DEFAULT_AUCTION_OUTCOME,
   DEFAULT_AUCTION_SORT
 } from '@carplates/shared'
-import type { AuctionGroup, AuctionListQuery, AuctionOutcome, AuctionSort, AuctionSource } from '@carplates/shared'
+import type {
+  AuctionGroup,
+  AuctionListQuery,
+  AuctionOutcome,
+  AuctionSort,
+  AuctionSource,
+  AuctionType
+} from '@carplates/shared'
 
 import { AUCTION_DIMENSIONS, DEFAULT_AUCTION_DIMENSION } from '@/routes/auctions/types'
 import type { AuctionDimension } from '@/routes/auctions/types'
@@ -26,7 +34,7 @@ const parseNumber = (value: string | null): number | undefined => {
   return Number.isFinite(n) && n >= 0 ? n : undefined
 }
 
-/** The `/auctions` filters live in the URL (`?source=&group=&make=&region=&outcome=&sort=&asc=&min=&max=&page=&dim=`) so a view can be shared. */
+/** The `/auctions` filters live in the URL (`?source=&group=&type=&make=&region=&outcome=&sort=&asc=&min=&max=&page=&dim=`) so a view can be shared. */
 export function useAuctionFilters() {
   const [searchParams, setSearchParams] = useSearchParams()
 
@@ -38,9 +46,12 @@ export function useAuctionFilters() {
   const source: AuctionSource | undefined = parseOptional(AUCTION_SOURCES, searchParams.get('source'))
   const group: AuctionGroup | undefined = parseOptional(AUCTION_GROUPS, searchParams.get('group'))
 
+  const auctionType: AuctionType | undefined = parseOptional(AUCTION_TYPES, searchParams.get('type'))
+
   const query: AuctionListQuery = {
     source,
     group,
+    auctionType,
     make: searchParams.get('make') ?? undefined,
     region: searchParams.get('region') ?? undefined,
     status: searchParams.get('status') ?? undefined,

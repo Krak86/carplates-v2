@@ -179,6 +179,7 @@ export class AuctionsStatsService {
     const conditions = [
       sourceFilter(query.source),
       groupFilter(query.group),
+      query.auctionType ? sql`l.auction_type = ${query.auctionType}` : undefined,
       query.make ? sql`l.make = ${query.make}` : undefined,
       query.region ? sql`l.region = ${query.region}` : undefined,
       query.status ? sql`l.status = ${query.status}` : undefined,

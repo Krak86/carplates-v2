@@ -775,6 +775,7 @@ export {
   AUCTION_SOURCES,
   DEFAULT_AUCTION_SOURCE,
   AUCTION_GROUPS,
+  AUCTION_TYPES,
   PROZORRO_SELLER_KINDS,
   PROZORRO_STATUS_LABELS,
   PROZORRO_DOCUMENT_BASE,
@@ -798,6 +799,7 @@ export type {
   AuctionSort,
   AuctionSource,
   AuctionGroup,
+  AuctionType,
   ProzorroSellerKind,
   AuctionStatsRow,
   AuctionStatsResponse
