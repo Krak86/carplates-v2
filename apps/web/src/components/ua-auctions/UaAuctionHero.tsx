@@ -1,19 +1,17 @@
 import { useRef, useState } from 'react'
 import type { PointerEvent, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { prozorroDocumentUrl } from '@carplates/shared'
 
 import PhotoZoomDialog from '@/components/PhotoZoomDialog'
-import { PHOTO_FULL_WIDTH, PHOTO_THUMB_WIDTH } from '@/components/ua-auctions/helpers'
-import { auctionPhotoUrl } from '@/lib/api'
 import { cn } from '@/lib/cn'
 
-const HERO_WIDTH = 960
 const SWIPE_MIN_PX = 40
 
 /** Stock photo of the car's make/model, shown as the last slide after the lot photos. */
 type ModelPhoto = { url: string; credit: string | null }
 
-type Slide = { key: string; src: string; thumb: string; full: string; isModel: boolean }
+type Slide = { key: string; src: string; isModel: boolean }
 
 const MODEL_KEY = 'model'
 
@@ -39,16 +37,8 @@ export default function UaAuctionHero({ docIds, label, modelPhoto = null }: Prop
   const swipe = useRef<{ x: number; y: number; moved: boolean } | null>(null)
 
   const slides: Slide[] = [
-    ...docIds.map(id => ({
-      key: id,
-      src: auctionPhotoUrl(id, HERO_WIDTH),
-      thumb: auctionPhotoUrl(id, PHOTO_THUMB_WIDTH),
-      full: auctionPhotoUrl(id, PHOTO_FULL_WIDTH),
-      isModel: false
-    })),
-    ...(modelPhoto
-      ? [{ key: MODEL_KEY, src: modelPhoto.url, thumb: modelPhoto.url, full: modelPhoto.url, isModel: true }]
-      : [])
+    ...docIds.map(id => ({ key: id, src: prozorroDocumentUrl(id), isModel: false })),
+    ...(modelPhoto ? [{ key: MODEL_KEY, src: modelPhoto.url, isModel: true }] : [])
   ].filter(slide => !failed.has(slide.key))
   if (slides.length === 0) return null
   const current = Math.min(index, slides.length - 1)
@@ -138,7 +128,7 @@ export default function UaAuctionHero({ docIds, label, modelPhoto = null }: Prop
                 )}
               >
                 <img
-                  src={s.thumb}
+                  src={s.src}
                   alt=""
                   loading="lazy"
                   decoding="async"
@@ -152,7 +142,7 @@ export default function UaAuctionHero({ docIds, label, modelPhoto = null }: Prop
         </ul>
       )}
 
-      {zoomed && <PhotoZoomDialog url={slide.full} candidates={[]} active={null} onClose={() => setZoomed(false)} />}
+      {zoomed && <PhotoZoomDialog url={slide.src} candidates={[]} active={null} onClose={() => setZoomed(false)} />}
     </div>
   )
 }

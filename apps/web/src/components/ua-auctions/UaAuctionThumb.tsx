@@ -6,8 +6,6 @@ import { brandLogoUrl, prozorroDocumentUrl } from '@carplates/shared'
 
 import BrandLogo from '@/components/BrandLogo'
 import LazySection from '@/components/LazySection'
-import { PHOTO_THUMB_WIDTH } from '@/components/ua-auctions/helpers'
-import { auctionPhotoUrl } from '@/lib/api'
 import { cn } from '@/lib/cn'
 import { wikiImageQuery } from '@/lib/queries'
 
@@ -25,9 +23,6 @@ type Props = {
   /** Tints and names the placeholder tile when there is no picture at all. */
   source?: 'setam' | 'prozorro'
 }
-
-/** `thumb` = our resized WebP, `original` = the full file from Prozorro (the resizer failed), `hidden` = both failed. */
-type Stage = 'thumb' | 'original' | 'hidden'
 
 const TILE =
   'relative aspect-[4/3] w-28 shrink-0 self-start overflow-hidden rounded-md bg-[var(--color-border)]/30 sm:w-36'
@@ -103,7 +98,7 @@ function ModelPreview(props: PreviewProps): ReactNode {
 
 /**
  * First photo of a Prozorro.Sale lot as a small fixed-ratio tile for list cards, with the photo count in a corner badge.
- * Without photos (or once both files failed) it shows the model's stock photo with a "model photo" badge, or, with no stock photo either, a placeholder tile (make logo, else a tinted tile).
+ * Without photos (or once the file failed) it shows the model's stock photo with a "model photo" badge, or, with no stock photo either, a placeholder tile (make logo, else a tinted tile).
  */
 export default function UaAuctionThumb({
   docIds,
@@ -115,19 +110,18 @@ export default function UaAuctionThumb({
   source = 'setam'
 }: Props): ReactNode {
   const { t } = useTranslation()
-  const [stage, setStage] = useState<Stage>('thumb')
+  const [failed, setFailed] = useState(false)
   const first = docIds?.[0]
-  if (!first || stage === 'hidden')
-    return <ModelPreview make={make} model={model} year={year} label={label} source={source} />
+  if (!first || failed) return <ModelPreview make={make} model={model} year={year} label={label} source={source} />
 
   const image = (
     <img
-      src={stage === 'thumb' ? auctionPhotoUrl(first, PHOTO_THUMB_WIDTH) : prozorroDocumentUrl(first)}
+      src={prozorroDocumentUrl(first)}
       alt={t('uaAuctions.photo.alt', { label, n: 1 })}
       loading="lazy"
       decoding="async"
       referrerPolicy="no-referrer"
-      onError={() => setStage(stage === 'thumb' ? 'original' : 'hidden')}
+      onError={() => setFailed(true)}
       className="h-full w-full object-cover"
     />
   )

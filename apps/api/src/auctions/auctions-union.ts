@@ -18,6 +18,14 @@ const STATUS_CASE = sql.join(
 /** `auctions-31-08-2024.csv` -> the last day of 2024-08 (UTC); null for any other file name. */
 const SETAM_MONTH_END = sql`((to_date(substring(source_file from '\\d{2}-(\\d{2}-\\d{4})\\.csv$'), 'MM-YYYY') + interval '1 month' - interval '1 day') AT TIME ZONE 'UTC')`
 
+/**
+ * A finished Prozorro auction whose bidding start lies in the future is a seller's typo (a 2022 lot cancelled with a start in 2027):
+ * the date would sort it first under "newest" and put it in a month that has not happened. Such a lot gets the registration
+ * start instead; running auctions keep their scheduled start.
+ */
+const PROZORRO_START = sql`(CASE WHEN auction_start > now() AND status IN ('cancelled', 'unsuccessful', 'complete')
+                               THEN coalesce(tender_start, source_modified_at) ELSE auction_start END)`
+
 export const unionLots: SQL = sql`
   SELECT 'setam'::text AS source,
          'setam'::text AS grp,
@@ -66,12 +74,12 @@ export const unionLots: SQL = sql`
          title_raw,
          plate,
          vin,
-         coalesce(auction_start, tender_start, source_modified_at),
+         coalesce(${PROZORRO_START}, tender_start, source_modified_at),
          NULL::text,
          first_seen_at,
          updated_at,
          selling_method, seller_name, seller_kind, auction_type,
-         auction_start, minimal_step::float8, guarantee::float8,
+         ${PROZORRO_START}, minimal_step::float8, guarantee::float8,
          color, kilometrage, fuel, engine_cc,
          transmission, condition, damaged, damage_text,
          locality, photo_urls

@@ -851,6 +851,15 @@ Group 1 dimension callouts + garage-fit -> Group 3 (existing order). Owner says 
     Once the session becomes authenticated the page reads the record and reopens the share dialog with the photo; if it is gone the dialog says "pick the photo again".
     Viewing a share stays public, only creating is gated.
   - **Open decisions:** 7 vs 30 days and 3 vs 5 shares (both single constants); whether the preview lets the user blur other plates (later).
+  - **Resume / build order (~3-5 h, four committable slices):**
+    1. `services/alpr`: `/anonymize` (YuNet face blur) + tests + a face eval on own photos (~1 h). **First verify** the OpenCV build pulled in by `fast-alpr` has `cv2.FaceDetectorYN`
+       (needs OpenCV >= 4.5.4); if not, run the same ONNX model through `onnxruntime` (already in the image). Model file (~230 KB): commit under `services/alpr/` or fetch in the Dockerfile.
+    2. API + DB: migration `app.shared_photos`, R2 client + env vars, `POST/GET/DELETE /api/shares` (re-run ALPR, blur, downscale to 1600 px, caps, throttle, global 8 GB guard),
+       daily expiry job, `og:image` + meta injection, tests (~1.5-2 h).
+    3. Web: Share button + dialog with blurred preview, anonymous login hand-off via IndexedDB `pending-share`, "My shares" list with Delete, viewer, i18n ua/ru/en, tests (~1.5-2 h).
+    4. Docs + release: `plan-done.md`, `features-reference.md`, `releases.ts`, About, Privacy/Terms text (~0.5 h).
+  - **Infra: no new Docker service.** Blur lives in the existing `services/alpr` container (rebuild + redeploy that image), the API changes ship in the existing blue/green api container
+    (expiry job runs inside it), R2 is external. The user must create the `carsua-shares` bucket + token and add the secrets to `deploy-api.yml` / GitHub.
 - **Show key "test drive" facts for a looked-up car** — surface curated
   specs/review highlights (not just registry fields) for the car's
   make/model/year. Needs a data source: is there a free API, or does this
@@ -1196,7 +1205,7 @@ card-on-file subscriptions; revisit with real quotes.
 - ✅ **Contact page + footer copyright (2026-10-31):** `/contact` (who we are, order an app, Resend-backed form with throttle + Turnstile + honeypot, `CONTACT_TO` secret) and `© year carsua.app` in every footer — see `docs/plan-done.md`.
 - ✅ **Road crash statistics page `/road-safety` (2026-11-01):** regions (deaths and per 100k registered cars, map), state roads, causes and types, hour and weekday, year picker, footnotes; Patrol Police + Infrastructure Restoration Agency sources; plate-card region crash chip; `dtp-patrol` / `dtp-hazards` cron jobs — see `docs/plan-done.md`.
 - ✅ **Source strip + related pages on all statistics pages (2026-11-01):** `PageSources` "Source data" card and `RelatedPages` cross links on `/stats`, `/wanted`, `/auctions`, `/fuel`, `/safety`, `/road-safety` — see `docs/plan-done.md`.
-- ✅ **Prozorro.Sale vehicle auctions (2026-11-01):** second auction source with grouped lots, merged vehicle facts, photos through our resizer and `/auctions` source filters; backfilled and loaded on the VPS (14 431 rows); only the Cloudflare cache rule for the photo path is still to do — see `docs/plan-done.md`.
+- ✅ **Prozorro.Sale vehicle auctions (2026-11-01):** second auction source with grouped lots, merged vehicle facts, photos straight from Prozorro (a resizer was tried and dropped: its Cloudflare blocks server fetches) and `/auctions` source filters; backfilled and loaded on the VPS (14 431 rows); future-dated finished lots fixed, stats delta is a median — see `docs/plan-done.md`.
 - ✅ **Road-safety context in `/read/safety` (2026-11-01):** "On the road" (national totals, deaths by year, pedestrian/child share) and "Tests and crashes" (crash types and causes, peak time, what each programme tests) sections reading the `/road-safety` queries - see `docs/plan-done.md`.
 - **Other providers (researched 2026-10-12, not planned yet):** GitHub (client id + secret, code flow), Microsoft
   (client id, OIDC), Facebook/Meta (app id + secret, needs privacy URL + data-deletion URL + Live app), Apple (Services

@@ -53,11 +53,18 @@ const toRow = (r: RowOut): AuctionStatsRow => ({
   medianSale: r.medianSale == null ? null : Math.round(Number(r.medianSale))
 })
 
+/**
+ * Sale vs start in percent, as the median over sold lots (named `avgDelta` in the contract, which keeps saved offline data valid):
+ * a mean is ruined by symbolic starts (0.50 UAH sold at 100 000 UAH is +19 999 920 percent).
+ */
+const DELTA_MEDIAN = sql`(percentile_cont(0.5) WITHIN GROUP (ORDER BY (sale_price / start_price - 1) * 100)
+  FILTER (WHERE sale_price IS NOT NULL AND start_price > 0))::float8`
+
 /** Aggregate columns shared by every breakdown (a sold lot = it has a sale price). */
 const AGGREGATES = sql`count(*)::int AS lots,
   (count(*) FILTER (WHERE sale_price IS NOT NULL))::int AS sold,
   (count(*) FILTER (WHERE sale_price IS NULL AND status = ${OPEN_STATUS}))::int AS open,
-  (avg((sale_price / start_price - 1) * 100) FILTER (WHERE sale_price IS NOT NULL AND start_price > 0))::float8 AS "avgDelta",
+  ${DELTA_MEDIAN} AS "avgDelta",
   (percentile_cont(0.5) WITHIN GROUP (ORDER BY sale_price) FILTER (WHERE sale_price IS NOT NULL))::float8 AS "medianSale"`
 
 /** Sort key per `sort` value: whitelisted SQL, never user input. Lots without the key sort last either way. */
@@ -113,7 +120,7 @@ export class AuctionsStatsService {
                    (count(*) FILTER (WHERE sale_price IS NULL AND status = ${OPEN_STATUS}))::int AS open,
                    (count(*) FILTER (WHERE plate IS NOT NULL))::int AS "withPlate",
                    (count(*) FILTER (WHERE vin IS NOT NULL))::int AS "withVin",
-                   (avg((sale_price / start_price - 1) * 100) FILTER (WHERE sale_price IS NOT NULL AND start_price > 0))::float8 AS "avgDelta",
+                   ${DELTA_MEDIAN} AS "avgDelta",
                    (percentile_cont(0.5) WITHIN GROUP (ORDER BY sale_price) FILTER (WHERE sale_price IS NOT NULL))::float8 AS "medianSale",
                    (percentile_cont(0.5) WITHIN GROUP (ORDER BY start_price) FILTER (WHERE start_price IS NOT NULL))::float8 AS "medianStart",
                    (sum(sale_price))::float8 AS "totalSale"
