@@ -789,6 +789,12 @@ Group 1 dimension callouts + garage-fit -> Group 3 (existing order). Owner says 
       (registry stats + the existing model-level sections) as indexable SEO slugs; needs a canonical make/model taxonomy
       (registry models are trim-level) and TS-built rollup tables, not a matview. Full write-up: [docs/catalog-plan.md](docs/catalog-plan.md).
       Discovery checklist around it (Search Console, IndexNow, outreach, Reddit draft): [docs/discovery-plan.md](docs/discovery-plan.md).
+- [ ] **Telegram bot** (plate or VIN in, short answer + link to the carsua.app page out; idea 2026-11-01, build only after the audience check in
+      [docs/discovery-plan.md](docs/discovery-plan.md) "Social channels"). Plan: `apps/api/src/telegram/` (webhook controller without logic,
+      Zod-validated update, service with explicit `@Inject` reusing `plate.service` / `vin.service` and `normalizePlate`, never re-implement plate logic);
+      env `TELEGRAM_BOT_TOKEN` + `TELEGRAM_WEBHOOK_SECRET` in `env.ts`, `deploy-api.yml`, `docs/deploy.md`; `@Throttle` on the webhook plus a per-user
+      limit; reply language from `language_code` (ua/ru/en); rows with `plate = null` resolve by VIN; honest "not found" with a site link; no owner
+      personal data. Tests: update parsing and reply formatting. Owner creates the bot in @BotFather. Estimate about 1 day for text replies.
 - [ ] **Compare two vehicles `/compare`** — **phase 1 (core) done 2026-10-30** (route, plate/VIN/model resolver, mirrored pruned table, coverage strip, chips); phase 2 done 2026-10-30 (adds ranges, stars, CO2 scale, price / MOT curves, generations timeline, fit verdicts, PNG; open: depreciation and registrations curves); phase 3 export core done (`CompareExportButton`; open: pictures and the new blocks in docx/pdf); phase 4 client side done (tray, slot B suggestions, saved comparisons; open: tray outside the catalog, indexable pairs, `GET /api/compare`, `/read` embeds). Exactly 2 vehicles;
       input per slot = plate, VIN or model ref (so any vehicle we hold data for, not only catalog models). Mirrored table that hides rows
       with no data on either side, radars (fixed scales, only axes both cars have), mirrored/dumbbell/share bars, depreciation and MOT curves,
