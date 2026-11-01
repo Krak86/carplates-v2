@@ -15,6 +15,7 @@
     "dev": "pnpm -r --parallel dev",
     "build": "pnpm --filter @carplates/shared --filter @carplates/db build && pnpm --filter @carplates/api --filter @carplates/web build",
     "tunnel": "pnpm --filter @carplates/scripts tunnel",
+    "load-test": "pnpm --filter @carplates/scripts load-test",
     "preview:prod": "pnpm build && pnpm --filter @carplates/api preview",
     "lint": "eslint . --cache --cache-location node_modules/.cache/eslint/",
     "lint:fix": "eslint . --fix --cache --cache-location node_modules/.cache/eslint/",

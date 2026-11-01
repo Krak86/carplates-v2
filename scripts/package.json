@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "tunnel": "tsx src/tunnel.ts",
+    "load-test": "tsx src/load-test.ts",
     "seed": "tsx src/seed.ts",
     "refresh-stats": "tsx src/refresh-stats.ts",
     "ingest": "tsx src/ingest.ts",

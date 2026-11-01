@@ -199,6 +199,17 @@ docker compose exec -T postgres pg_restore --clean --if-exists --no-owner -U car
 
 Registry data lost with the full dumps: re-ingest from `archive/` ZIPs (`backup.sh archive`) or data.gov.ua (`ingest:*`).
 
+## Load testing
+
+`pnpm load-test` (`scripts/src/load-test.ts`) ramps concurrent cold `GET /api/plate/:plate` lookups in steps (5, 20, 50, 100 users, 60 s each) and stops at the first stage over p95 1 s or 1% 5xx.
+Never aim it at `https://carsua.app`: Cloudflare WAF (30/10 s) and the Nest throttle (100/min) answer 429 first and it counts as real traffic.
+
+1. Plates: `pnpm load-test --sample 5000 --out plates.txt` (needs `DATABASE_URL`; block-samples `current_registration`).
+2. Target the origin: `ssh -L 3000:<api container ip>:3000 vps`, or a restored copy locally. The throttle still applies per IP, so on a copy raise `GLOBAL_THROTTLE` / `PLATE_LOOKUP_THROTTLE` temporarily.
+3. Run off-peak while watching `docker stats` (api limit 1 GB), `iostat` and `pg_stat_activity`: `pnpm load-test --plates plates.txt`.
+
+Expect the ceiling to be cold-disk Postgres reads (hot set ~9 GB vs 2 GB `shared_buffers`), then API memory. Prefer a restored copy to production: an OOM kill takes Postgres down with the API.
+
 ## Still open
 
 ### Next steps after the first deploy (2026-10-27, in this order)
