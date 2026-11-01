@@ -1,7 +1,49 @@
 import { setamLotUrl } from '@carplates/shared'
-import type { AuctionLot, Currency, FxResponse } from '@carplates/shared'
+import type { AuctionGroup, AuctionLot, Currency, FxResponse } from '@carplates/shared'
 
 type LotRef = Pick<AuctionLot, 'id' | 'lotNo' | 'url' | 'source' | 'auctionId'>
+
+/** Where a lot comes from; data saved before Prozorro.Sale has no `source` and is SETAM. */
+export const lotSource = (lot: Pick<AuctionLot, 'source'>): 'setam' | 'prozorro' => lot.source ?? 'setam'
+
+/** `YYYY-MM` of a lot: the SETAM feed month, else the month the Prozorro bidding starts (that feed has no file month). */
+export const lotMonthOf = (lot: Pick<AuctionLot, 'month' | 'auctionStart'>): string | null =>
+  lot.month ?? lot.auctionStart?.slice(0, 7) ?? null
+
+/** Subcategory of a lot; data saved before Prozorro.Sale has none and is SETAM. */
+export const lotGroup = (lot: Pick<AuctionLot, 'group'>): AuctionGroup => lot.group ?? 'setam'
+
+export type LotGroup = { group: AuctionGroup; lots: AuctionLot[] }
+
+/**
+ * Splits a newest-first lot list into subcategories. Groups come in the order of their newest lot, so the first group is the
+ * one with the latest lot (the card opens it); inside a group the lots keep their newest-first order.
+ */
+export function groupLots(lots: readonly AuctionLot[]): LotGroup[] {
+  const byGroup = new Map<AuctionGroup, AuctionLot[]>()
+  for (const lot of lots) {
+    const group = lotGroup(lot)
+    const list = byGroup.get(group)
+    if (list) list.push(lot)
+    else byGroup.set(group, [lot])
+  }
+  return [...byGroup].map(([group, list]) => ({ group, lots: list }))
+}
+
+/** Photo widths of the API resizer (`apps/api/src/auctions/photo.schema.ts`): a thumbnail and the full-screen view. */
+export const PHOTO_THUMB_WIDTH = 320
+export const PHOTO_FULL_WIDTH = 1600
+
+/** Thumbnails shown before the "show more" button. */
+export const PHOTO_PREVIEW_COUNT = 4
+
+/** Enum values Prozorro publishes for fuel and gearbox; anything else (free text) is shown as published. */
+export const FUEL_TYPES = ['gasoline', 'diesel', 'electric', 'hybrid', 'naturalGas', 'other'] as const
+export const TRANSMISSIONS = ['manual', 'automatic', 'semiAutomatic', 'other'] as const
+
+/** `value` when it is one of `list`, else null: the caller translates the known ones and prints the rest as published. */
+export const knownValue = (list: readonly string[], value: string | null | undefined): string | null =>
+  value && list.includes(value) ? value : null
 
 /** Stable React key of a lot of either source (data saved before Prozorro.Sale has no `id`). */
 export const lotKey = (lot: LotRef): string => lot.id ?? `setam:${lot.lotNo}`
@@ -46,6 +88,21 @@ export function formatLotMonth(month: string | null | undefined, locale: string)
 
 /** Not-sold lots shown before the "show more" button; sold and open lots are always shown. */
 export const VISIBLE_NOT_SOLD = 3
+
+/** A lot that is neither sold nor still open: the card folds these behind "show more". */
+export const isNotSoldLot = (lot: Pick<AuctionLot, 'sold' | 'status'>): boolean =>
+  !lot.sold && lot.status !== OPEN_STATUS
+
+/** Sold and open lots always show; of the not-sold ones the newest `VISIBLE_NOT_SOLD` until `showAll`. `hidden` is what "show more" reveals. */
+export function visibleLots(
+  lots: readonly AuctionLot[],
+  showAll: boolean
+): { shown: AuctionLot[]; hidden: number; notSold: number } {
+  const notSold = lots.filter(isNotSoldLot).length
+  let seen = 0
+  const shown = lots.filter(l => !isNotSoldLot(l) || showAll || ++seen <= VISIBLE_NOT_SOLD)
+  return { shown, hidden: lots.length - shown.length, notSold }
+}
 
 export type PricePoint = {
   lot: AuctionLot

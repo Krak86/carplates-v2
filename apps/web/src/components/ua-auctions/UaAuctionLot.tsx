@@ -8,9 +8,13 @@ import {
   formatLotMonth,
   formatPrice,
   lotLink,
+  lotMonthOf,
   lotNumber,
+  lotSource,
   priceDeltaPercent
 } from '@/components/ua-auctions/helpers'
+import UaAuctionChips from '@/components/ua-auctions/UaAuctionChips'
+import UaAuctionPhotos from '@/components/ua-auctions/UaAuctionPhotos'
 import { cn } from '@/lib/cn'
 import { toIntlLocale } from '@/lib/intl'
 
@@ -41,7 +45,9 @@ export default function UaAuctionLot({ lot, currency, fx }: Props): ReactNode {
   const statusLabel = statusKey ? t(`uaAuctions.status.${statusKey}`) : lot.status
   const delta = priceDeltaPercent(lot.startPrice, lot.salePrice)
   const isOpen = lot.status === OPEN_STATUS
-  const month = formatLotMonth(lot.month, locale)
+  const month = formatLotMonth(lotMonthOf(lot), locale)
+  const isProzorro = lotSource(lot) === 'prozorro'
+  const vehicleName = [lot.make, lot.model, lot.year].filter(Boolean).join(' ')
   const verdict = lot.sold ? t('uaAuctions.sold') : isOpen ? t('uaAuctions.open') : t('uaAuctions.notSold')
   const icon = lot.sold ? '💰' : isOpen ? '🔔' : '🔨'
 
@@ -55,7 +61,7 @@ export default function UaAuctionLot({ lot, currency, fx }: Props): ReactNode {
               href={lotLink(lot) ?? undefined}
               target="_blank"
               rel="noopener noreferrer"
-              title={lot.source === 'prozorro' ? undefined : t('uaAuctions.openOnSetam')}
+              title={t(isProzorro ? 'uaAuctions.openOnProzorro' : 'uaAuctions.openOnSetam')}
               className="underline"
             >
               {lotNumber(lot)} ↗<span className="sr-only">{t('field.opensNewTab')}</span>
@@ -63,12 +69,11 @@ export default function UaAuctionLot({ lot, currency, fx }: Props): ReactNode {
           }
         />
         <Row label={t('uaAuctions.proceedingNo')} value={lot.proceedingNo} />
-        <Row
-          label={t('uaAuctions.vehicle')}
-          value={[lot.make, lot.model, lot.year].filter(Boolean).join(' ') || null}
-        />
-        <Row label={t('uaAuctions.category')} value={lot.category} />
-        <Row label={t('uaAuctions.region')} value={lot.region} />
+        <Row label={t('uaAuctions.vehicle')} value={vehicleName || null} />
+        {/* A Prozorro lot has no car category (the feed puts the group there), its group chip is in the header. */}
+        <Row label={t('uaAuctions.category')} value={isProzorro ? null : lot.category} />
+        <Row label={t('uaAuctions.seller')} value={lot.sellerName} />
+        <Row label={t('uaAuctions.region')} value={[lot.region, lot.locality].filter(Boolean).join(', ') || null} />
         <Row label={t('uaAuctions.startPrice')} value={formatPrice(lot.startPrice, currency, fx, locale)} />
         <Row
           label={t('uaAuctions.salePrice')}
@@ -89,6 +94,14 @@ export default function UaAuctionLot({ lot, currency, fx }: Props): ReactNode {
         <Row label={t('wanted.vin')} value={lot.vin} />
       </dl>
 
+      {lot.damageText && (
+        <p className="mt-1.5 rounded-md bg-amber-500/10 px-2 py-1">
+          ⚠️ {t('uaAuctions.damage')}: {lot.damageText}
+        </p>
+      )}
+
+      <UaAuctionPhotos docIds={lot.photos ?? []} label={vehicleName || lotNumber(lot)} />
+
       <p className="mt-1.5 text-xs text-[var(--color-muted)]">
         {t('uaAuctions.titleRaw')}: {lot.title}
       </p>
@@ -106,7 +119,8 @@ export default function UaAuctionLot({ lot, currency, fx }: Props): ReactNode {
           <span className="text-[var(--color-muted)]">
             {` · ${statusLabel}`}
             {lot.startPrice !== null && ` · ${formatPrice(lot.startPrice, currency, fx, locale)}`}
-          </span>
+          </span>{' '}
+          <UaAuctionChips lot={lot} />
         </summary>
         {details}
       </details>
@@ -123,7 +137,7 @@ export default function UaAuctionLot({ lot, currency, fx }: Props): ReactNode {
       <p className="font-semibold">
         {icon} {month ? `${month} · ` : ''}
         {verdict}
-        {` · ${statusLabel}`}
+        {` · ${statusLabel}`} <UaAuctionChips lot={lot} />
       </p>
       {details}
     </div>

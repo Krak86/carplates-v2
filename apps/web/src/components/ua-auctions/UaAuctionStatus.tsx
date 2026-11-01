@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { AuctionLot, Currency, FxResponse } from '@carplates/shared'
 
-import { OPEN_STATUS, formatLotMonth, formatPrice } from '@/components/ua-auctions/helpers'
+import { OPEN_STATUS, formatLotMonth, formatPrice, lotMonthOf } from '@/components/ua-auctions/helpers'
 import { cn } from '@/lib/cn'
 import { toIntlLocale } from '@/lib/intl'
 
@@ -20,7 +20,7 @@ export default function UaAuctionStatus({ lots, currency, fx }: Props): ReactNod
   const latest = lots[0]
   if (!latest) return null
 
-  const month = formatLotMonth(latest.month, locale) ?? ''
+  const month = formatLotMonth(lotMonthOf(latest), locale) ?? ''
   const isOpen = latest.status === OPEN_STATUS
   const kind = latest.sold ? 'sold' : isOpen ? 'open' : 'notSold'
   const text = t(`uaAuctions.now.${kind}`, {

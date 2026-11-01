@@ -15,6 +15,7 @@ import {
   formatPrice,
   lotKey,
   lotLink,
+  lotMonthOf,
   lotNumber,
   timelineLots
 } from '@/components/ua-auctions/helpers'
@@ -118,7 +119,7 @@ export default function RegistrationTimeline({ actions, currentPlate, auctionKey
   const locale = toIntlLocale(i18n.language)
 
   const lotItems = timelineLots(lots).map(lot => ({
-    at: insertIndex(actions, lot.month ?? null),
+    at: insertIndex(actions, lotMonthOf(lot)),
     lot,
     item: {
       key: `lot-${lotKey(lot)}`,
@@ -128,7 +129,7 @@ export default function RegistrationTimeline({ actions, currentPlate, auctionKey
           <span aria-hidden>🔨</span>{' '}
           <span className="font-medium">
             {t(`uaAuctions.timeline.${lot.sold ? 'sold' : lot.status === OPEN_STATUS ? 'open' : 'notSold'}`, {
-              month: formatLotMonth(lot.month, locale) ?? '-',
+              month: formatLotMonth(lotMonthOf(lot), locale) ?? '-',
               price: formatPrice(lot.salePrice ?? lot.startPrice, 'UAH', null, locale) ?? '-'
             })}
           </span>{' '}

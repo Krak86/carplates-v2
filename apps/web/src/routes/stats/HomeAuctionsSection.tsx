@@ -5,7 +5,7 @@ import { Link } from 'react-router'
 
 import LoadErrorBoundary from '@/components/LoadErrorBoundary'
 import Card from '@/components/ui/Card'
-import { formatLotMonth, formatPrice, lotKey, lotLink } from '@/components/ua-auctions/helpers'
+import { formatLotMonth, formatPrice, lotKey, lotLink, lotMonthOf } from '@/components/ua-auctions/helpers'
 import { toIntlLocale } from '@/lib/intl'
 import { auctionListQuery } from '@/lib/queries'
 
@@ -45,7 +45,7 @@ export default function HomeAuctionsSection(): ReactNode {
                   </a>
 
                   <span className="min-w-0 flex-1 text-xs text-[var(--color-muted)]">
-                    {[formatLotMonth(lot.month, locale), lot.region].filter(Boolean).join(' · ')}
+                    {[formatLotMonth(lotMonthOf(lot), locale), lot.region].filter(Boolean).join(' · ')}
                   </span>
 
                   {price && <span className="text-sm tabular-nums">{price}</span>}

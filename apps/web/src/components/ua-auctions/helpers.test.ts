@@ -2,14 +2,20 @@ import type { AuctionLot } from '@carplates/shared'
 import { describe, expect, it } from 'vitest'
 
 import {
+  FUEL_TYPES,
   LOT_STATUS_KEYS,
   OPEN_STATUS,
+  TRANSMISSIONS,
   formatLotMonth,
   convertUah,
   formatPrice,
+  groupLots,
+  knownValue,
+  lotMonthOf,
   priceDeltaPercent,
   priceSeries,
-  timelineLots
+  timelineLots,
+  visibleLots
 } from './helpers'
 
 describe('priceDeltaPercent', () => {
@@ -68,6 +74,65 @@ describe('priceSeries', () => {
       [30, 1],
       [40, null]
     ])
+  })
+})
+
+describe('groupLots', () => {
+  const lot = (id: string, group: AuctionLot['group']): AuctionLot => ({ id, group }) as AuctionLot
+
+  it('orders groups by their newest lot and keeps the lots newest first', () => {
+    const groups = groupLots([lot('a', 'customs'), lot('b', 'setam'), lot('c', 'customs'), lot('d', 'bank')])
+    expect(groups.map(g => [g.group, g.lots.map(l => l.id)])).toEqual([
+      ['customs', ['a', 'c']],
+      ['setam', ['b']],
+      ['bank', ['d']]
+    ])
+  })
+
+  it('puts lots saved before Prozorro.Sale (no group) into the SETAM group', () => {
+    expect(groupLots([lot('a', undefined), lot('b', null)]).map(g => g.group)).toEqual(['setam'])
+    expect(groupLots([])).toEqual([])
+  })
+})
+
+describe('visibleLots', () => {
+  const lot = (id: string, sold: boolean, status = 'Торги не відбулися'): AuctionLot =>
+    ({ id, sold, status }) as AuctionLot
+  const lots = [
+    lot('open', false, OPEN_STATUS),
+    lot('n1', false),
+    lot('sold', true, 'Торги відбулися'),
+    lot('n2', false),
+    lot('n3', false),
+    lot('n4', false),
+    lot('n5', false)
+  ]
+
+  it('always shows sold and open lots plus the newest not-sold ones', () => {
+    const { shown, hidden, notSold } = visibleLots(lots, false)
+    expect(shown.map(l => l.id)).toEqual(['open', 'n1', 'sold', 'n2', 'n3'])
+    expect(hidden).toBe(2)
+    expect(notSold).toBe(5)
+  })
+
+  it('shows everything on request', () => {
+    expect(visibleLots(lots, true)).toMatchObject({ hidden: 0, shown: lots })
+  })
+})
+
+describe('lotMonthOf', () => {
+  it('prefers the SETAM feed month and falls back to the Prozorro bidding start', () => {
+    expect(lotMonthOf({ month: '2024-08', auctionStart: null })).toBe('2024-08')
+    expect(lotMonthOf({ month: null, auctionStart: '2026-10-28T09:00:00.000Z' })).toBe('2026-10')
+    expect(lotMonthOf({ month: null, auctionStart: undefined })).toBeNull()
+  })
+})
+
+describe('knownValue', () => {
+  it('passes the enum values and drops free text', () => {
+    expect(knownValue(FUEL_TYPES, 'diesel')).toBe('diesel')
+    expect(knownValue(FUEL_TYPES, 'бензин')).toBeNull()
+    expect(knownValue(TRANSMISSIONS, null)).toBeNull()
   })
 })
 

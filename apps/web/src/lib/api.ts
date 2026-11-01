@@ -956,6 +956,10 @@ export async function getAuctionLots(plate: string | null, vin: string | null): 
   return auctionResponseSchema.parse(await getJson(`/api/auctions?${params.toString()}`))
 }
 
+/** A Prozorro.Sale photo resized (WebP) by our API; `width` must be one the resizer serves (see `PHOTO_WIDTHS` in the API). */
+export const auctionPhotoUrl = (docId: string, width: number): string =>
+  `${BASE}/api/auctions/photo/${docId}?w=${width}`
+
 /** Aggregates for the /auctions page: totals and breakdowns by month / region / make / year. */
 export async function getAuctionStats(): Promise<AuctionStatsResponse> {
   return auctionStatsResponseSchema.parse(await getJson('/api/auctions/stats'))

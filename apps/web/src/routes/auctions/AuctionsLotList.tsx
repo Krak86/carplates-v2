@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
-import { AUCTION_OUTCOMES, AUCTION_SORTS } from '@carplates/shared'
+import { AUCTION_GROUPS, AUCTION_OUTCOMES, AUCTION_SORTS, AUCTION_SOURCES } from '@carplates/shared'
 import type { AuctionListLot, AuctionListQuery, AuctionStatsRow, Currency, FxResponse } from '@carplates/shared'
 
 import {
@@ -12,9 +12,11 @@ import {
   formatPrice,
   lotKey,
   lotLink,
+  lotMonthOf,
   lotNumber,
   priceDeltaPercent
 } from '@/components/ua-auctions/helpers'
+import UaAuctionChips from '@/components/ua-auctions/UaAuctionChips'
 import { cn } from '@/lib/cn'
 import { toIntlLocale } from '@/lib/intl'
 import { auctionListQuery } from '@/lib/queries'
@@ -50,11 +52,16 @@ function LotRow({ lot, currency, fx }: { lot: AuctionListLot; currency: Currency
       )}
     >
       <p className="font-semibold">
-        {lot.sold ? '💰' : isOpen ? '🔔' : '🔨'} {vehicle}
+        {lot.sold ? '💰' : isOpen ? '🔔' : '🔨'} {vehicle} <UaAuctionChips lot={lot} />
       </p>
 
       <p className="text-[var(--color-muted)]">
-        {[formatLotMonth(lot.month, locale), statusKey ? t(`uaAuctions.status.${statusKey}`) : lot.status, lot.region]
+        {[
+          formatLotMonth(lotMonthOf(lot), locale),
+          statusKey ? t(`uaAuctions.status.${statusKey}`) : lot.status,
+          lot.region,
+          lot.sellerName
+        ]
           .filter(Boolean)
           .join(' · ')}
       </p>
@@ -106,6 +113,34 @@ export default function AuctionsLotList({ query, makes, regions, currency, fx, o
   return (
     <div>
       <div className="mb-3 flex flex-wrap items-end gap-2">
+        <label className="flex flex-col gap-1 text-xs text-[var(--color-muted)]">
+          {t('auctions.page.sourceLabel')}
+          <select value={query.source ?? ''} onChange={e => onChange({ source: e.target.value })} className={FIELD}>
+            <option value="">{t('auctions.page.any')}</option>
+            {AUCTION_SOURCES.map(s => (
+              <option key={s} value={s}>
+                {t(`uaAuctions.source.${s}`)}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label className="flex flex-col gap-1 text-xs text-[var(--color-muted)]">
+          {t('auctions.page.groupLabel')}
+          <select
+            value={query.group ?? ''}
+            onChange={e => onChange({ group: e.target.value })}
+            className={cn(FIELD, 'max-w-44')}
+          >
+            <option value="">{t('auctions.page.any')}</option>
+            {AUCTION_GROUPS.map(g => (
+              <option key={g} value={g}>
+                {t(`uaAuctions.group.${g}`)}
+              </option>
+            ))}
+          </select>
+        </label>
+
         <label className="flex flex-col gap-1 text-xs text-[var(--color-muted)]">
           {t('auctions.page.dimension.make')}
           <select

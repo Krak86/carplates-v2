@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import type { Currency, FxResponse } from '@carplates/shared'
 
 import Card from '@/components/ui/Card'
-import { formatLotMonth, formatPrice, lotKey, lotLink } from '@/components/ua-auctions/helpers'
+import { formatLotMonth, formatPrice, lotKey, lotLink, lotMonthOf } from '@/components/ua-auctions/helpers'
 import { toIntlLocale } from '@/lib/intl'
 import { auctionListQuery } from '@/lib/queries'
 
@@ -45,7 +45,7 @@ export default function AuctionsNewLots({ currency, fx, onShowAll }: Props): Rea
             <p className="font-semibold">🔔 {[lot.make, lot.model, lot.year].filter(Boolean).join(' ') || lot.title}</p>
 
             <p className="text-[var(--color-muted)]">
-              {[formatLotMonth(lot.month, locale), lot.region].filter(Boolean).join(' · ')}
+              {[formatLotMonth(lotMonthOf(lot), locale), lot.region].filter(Boolean).join(' · ')}
             </p>
 
             {lot.startPrice !== null && (
