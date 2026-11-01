@@ -4416,6 +4416,8 @@
   "read.hub.all": "Все",
   "read.hub.empty": "Ничего не найдено. Очистите поиск или выберите другую тему.",
   "read.hub.badge": "Статья",
+  "read.hub.showAll": "Показать все темы",
+  "read.hub.showLess": "Свернуть",
   "catalog.title": "{{name}} в Украине",
   "catalog.auction.line": "На украинских аукционах: {{lots}} лотов, продано {{sold}}",
   "catalog.auction.median": ", медиана цены продажи: {{price}}",

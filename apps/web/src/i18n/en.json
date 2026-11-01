@@ -3934,6 +3934,8 @@
   "read.hub.all": "All",
   "read.hub.empty": "No guides match. Clear the search or pick another topic.",
   "read.hub.badge": "Guide",
+  "read.hub.showAll": "Show all topics",
+  "read.hub.showLess": "Show less",
   "catalog.title": "{{name}} in Ukraine",
   "catalog.auction.line": "At Ukrainian auctions: {{lots}} lots, {{sold}} sold",
   "catalog.auction.median": ", median sale price: {{price}}",

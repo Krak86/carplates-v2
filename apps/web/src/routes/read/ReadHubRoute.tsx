@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useSearchParams } from 'react-router'
 
@@ -18,6 +18,7 @@ const CHIP_CLASS = 'rounded-full border px-3 py-0.5 text-sm transition-colors ho
 export default function ReadHubRoute(): ReactNode {
   const { t, i18n } = useTranslation()
   const [params, setParams] = useSearchParams()
+  const [topicsOpen, setTopicsOpen] = useState(false)
   const query = params.get('q') ?? ''
   const topic = params.get('topic') ?? ''
   const shown = filterArticles(ARTICLES, query, topic, i18n.language, article => t(article.titleKey))
@@ -50,7 +51,15 @@ export default function ReadHubRoute(): ReactNode {
           className="w-full rounded-lg border border-border bg-bg px-3 py-2 text-sm"
         />
 
-        <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label={t('read.hub.topics')}>
+        {/* Phones show two chip rows (26px chip + 6px gap) until expanded; sm+ always shows all. */}
+        <div
+          className={cn(
+            'flex flex-wrap items-center gap-1.5 overflow-hidden sm:max-h-none',
+            !topicsOpen && 'max-h-14.5'
+          )}
+          role="group"
+          aria-label={t('read.hub.topics')}
+        >
           <button
             type="button"
             aria-pressed={topic === ''}
@@ -74,6 +83,15 @@ export default function ReadHubRoute(): ReactNode {
             </button>
           ))}
         </div>
+
+        <button
+          type="button"
+          aria-expanded={topicsOpen}
+          onClick={() => setTopicsOpen(open => !open)}
+          className="text-sm text-primary hover:underline sm:hidden"
+        >
+          {topicsOpen ? t('read.hub.showLess') : t('read.hub.showAll')}
+        </button>
 
         <p className="text-xs text-muted" role="status">
           {t('read.hub.count', { count: shown.length })}

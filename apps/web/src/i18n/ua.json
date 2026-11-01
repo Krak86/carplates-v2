@@ -4416,6 +4416,8 @@
   "read.hub.all": "Усі",
   "read.hub.empty": "Нічого не знайдено. Очистіть пошук або оберіть іншу тему.",
   "read.hub.badge": "Стаття",
+  "read.hub.showAll": "Показати всі теми",
+  "read.hub.showLess": "Згорнути",
   "catalog.title": "{{name}} в Україні",
   "catalog.auction.line": "На українських аукціонах: {{lots}} лотів, продано {{sold}}",
   "catalog.auction.median": ", медіана ціни продажу: {{price}}",
