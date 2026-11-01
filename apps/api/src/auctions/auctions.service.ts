@@ -9,6 +9,7 @@ import { DbService } from '../db/db.service.js'
 
 import { unionLots, unionRowToLot } from './auctions-union.js'
 import type { UnionRow } from './auctions-union.js'
+import { mergeVehicle } from './vehicle-merge.js'
 
 /** Jobs that feed the lots; "checked at" is the newest successful run of either. */
 export const AUCTION_JOBS = ['auctions', 'prozorro-auctions']
@@ -103,6 +104,7 @@ export class AuctionsService {
 
     return {
       anySold: lots.some(l => l.sold),
+      vehicle: mergeVehicle(lots),
       lots,
       // SETAM lots only: the peers are SETAM sales (Prozorro prices come from other kinds of sellers and are not comparable).
       priceCheck: await this.priceCheck(lots.filter(l => l.source !== 'prozorro')),

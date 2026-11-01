@@ -150,7 +150,41 @@ export type AuctionPriceCheck = z.infer<typeof auctionPriceCheckSchema>
 /** Fewest sold peers a price check needs. */
 export const MIN_PRICE_PEERS = 3
 
+/** Vehicle fields where SETAM (parsed title) and Prozorro (structured props) can disagree; the merge flags them instead of picking silently. */
+export const VEHICLE_CONFLICT_FIELDS = ['make', 'model', 'year'] as const
+export type VehicleConflictField = (typeof VEHICLE_CONFLICT_FIELDS)[number]
+
+/**
+ * The car behind a plate / VIN lookup as one block, built from all its lots: each field once, a Prozorro structured value wins
+ * over a SETAM parsed title, inside one source the newest lot wins. Own contract: new fields stay `.nullable().optional()`.
+ */
+export const auctionVehicleSchema = z.object({
+  plate: z.string().nullable(),
+  vin: z.string().nullable(),
+  make: z.string().nullable(),
+  model: z.string().nullable(),
+  year: z.number().nullable(),
+  color: z.string().nullable(),
+  kilometrage: z.number().nullable(),
+  fuel: z.string().nullable(),
+  engineCc: z.number().nullable(),
+  transmission: z.string().nullable(),
+  condition: z.string().nullable(),
+  damaged: z.boolean().nullable(),
+  damageText: z.string().nullable(),
+  /** Fields where the sources disagree, each with the value every source gave (the first entry is the one shown above). */
+  conflicts: z.array(
+    z.object({
+      field: z.enum(VEHICLE_CONFLICT_FIELDS),
+      values: z.array(z.object({ source: z.enum(AUCTION_SOURCES), value: z.union([z.string(), z.number()]) }))
+    })
+  )
+})
+export type AuctionVehicle = z.infer<typeof auctionVehicleSchema>
+
 export const auctionResponseSchema = z.object({
+  /** Merged facts of the car, null / absent without lots. */
+  vehicle: auctionVehicleSchema.nullable().optional(),
   /** At least one lot is sold (has a sale price). */
   anySold: z.boolean(),
   /** Newest lot first (a re-listed car gets a new lot number). */
