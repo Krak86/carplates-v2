@@ -699,6 +699,20 @@ export const SHARE_ALIAS_PAGES: Record<ShareAlias, Record<Lang, PageText>> = {
       title: 'Create an account | Cars UA',
       description: 'Sign up free with Google, Telegram or email and keep your favorites and history at hand.'
     }
+  },
+  logout: {
+    ua: {
+      title: 'Вихід з акаунта | Cars UA',
+      description: 'Підтвердіть вихід з акаунта Cars UA на цьому пристрої.'
+    },
+    ru: {
+      title: 'Выход из аккаунта | Cars UA',
+      description: 'Подтвердите выход из аккаунта Cars UA на этом устройстве.'
+    },
+    en: {
+      title: 'Sign out of your account | Cars UA',
+      description: 'Confirm that you want to sign out of Cars UA on this device.'
+    }
   }
 }
 

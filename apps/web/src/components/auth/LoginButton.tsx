@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next'
 
 import { useSession } from '@/components/auth/use-session'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
-import { useSearchFocus } from '@/hooks/useSearchFocus'
 import { cn } from '@/lib/cn'
 
 // Google's script is only fetched once this popover opens (see lib/google-identity.ts).
@@ -25,7 +24,6 @@ export default function LoginButton({ inSidebar = false, onNavigate }: Props): R
   const { t } = useTranslation()
   const online = useOnlineStatus()
   const { user } = useSession()
-  const focus = useSearchFocus(!inSidebar)
   const [open, setOpen] = useState(false)
   const rootRef = useRef<HTMLDivElement>(null)
 
@@ -65,10 +63,7 @@ export default function LoginButton({ inSidebar = false, onNavigate }: Props): R
         aria-expanded={open}
         title={user?.email ?? user?.name ?? label}
         onClick={() => setOpen(o => !o)}
-        className={cn(
-          'flex h-10 w-10 items-center justify-center overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] shadow hover:bg-[var(--color-surface)]',
-          !user && (focus === 'login' || focus === 'signup') && 'search-focus'
-        )}
+        className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] shadow hover:bg-[var(--color-surface)]"
       >
         {user?.avatarUrl ? (
           <img src={user.avatarUrl} alt="" referrerPolicy="no-referrer" className="h-full w-full object-cover" />

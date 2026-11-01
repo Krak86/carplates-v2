@@ -2,7 +2,7 @@
  * Campaign / share links: `/go/<alias>` serves its own link preview (API) and then sends the visitor to the home page,
  * pointing at one search entry (web). One list, so the API meta, the redirect and the `/share` page cannot drift apart.
  */
-export const SHARE_ALIASES = ['plate', 'vin', 'plate-photo', 'vin-photo', 'ar', 'login', 'signup'] as const
+export const SHARE_ALIASES = ['plate', 'vin', 'plate-photo', 'vin-photo', 'ar', 'login', 'signup', 'logout'] as const
 export type ShareAlias = (typeof SHARE_ALIASES)[number]
 
 export const SHARE_ALIAS_PREFIX = '/go'

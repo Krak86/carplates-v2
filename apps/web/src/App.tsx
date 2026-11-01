@@ -54,7 +54,9 @@ const FeaturesRoute = lazy(() => import('@/routes/features/FeaturesRoute'))
 const SettingsRoute = lazy(() => import('@/routes/settings/SettingsRoute'))
 const EmailLinkRoute = lazy(() => import('@/routes/auth/EmailLinkRoute'))
 const UnsubscribeRoute = lazy(() => import('@/routes/auth/UnsubscribeRoute'))
-const ProfileRoute = lazy(() => import('@/routes/profile/ProfileRoute'))
+const LoginRoute = lazy(() => import('@/routes/auth/LoginRoute'))
+const LogoutRoute = lazy(() => import('@/routes/auth/LogoutRoute'))
+const ProfileRoute =lazy(() => import('@/routes/profile/ProfileRoute'))
 const AdminRoute = lazy(() => import('@/routes/admin/AdminRoute'))
 const AdvancedSearchRoute = lazy(() => import('@/routes/advanced-search/AdvancedSearchRoute'))
 const RaceRoute = lazy(() => import('@/routes/RaceRoute'))
@@ -138,7 +140,9 @@ export default function App(): ReactNode {
             <Route path="/settings" element={<SettingsRoute />} />
             <Route path="/auth/email" element={<EmailLinkRoute />} />
             <Route path="/unsubscribe" element={<UnsubscribeRoute />} />
-            <Route path="/profile" element={<ProfileRoute />} />
+            <Route path="/login" element={<LoginRoute />} />
+            <Route path="/logout" element={<LogoutRoute />} />
+            <Route path="/profile"element={<ProfileRoute />} />
             <Route path="/admin" element={<AdminRoute />} />
             <Route path="/:query" element={<SearchRoute />} />
             <Route path="*" element={<SearchRoute />} />

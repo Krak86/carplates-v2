@@ -15,7 +15,8 @@ const ALIAS_ICON: Record<ShareAlias, string> = {
   'vin-photo': '🔖',
   ar: '🔍',
   login: '🔑',
-  signup: '✨'
+  signup: '✨',
+  logout: '🚪'
 }
 
 const LANG_LABEL: Record<Lang, string> = { ua: 'UA', ru: 'RU', en: 'EN' }
