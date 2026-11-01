@@ -21,6 +21,9 @@ export const JOBS = {
   // locally after a real change (pnpm export:dtp:csv).
   'dtp-patrol': { command: 'tsx src/dtp-patrol.ts', timeoutMin: 20 },
   'dtp-hazards': { command: 'tsx src/dtp.ts', timeoutMin: 20 },
+  // Manual only (no cron entry): first load of the road-safety tables from the seed CSVs baked into the image (the only seed-data the
+  // image carries, .dockerignore); insert-only, safe to repeat. Then the two jobs above keep them current.
+  'dtp-seed': { command: 'tsx src/dtp-csv.ts', timeoutMin: 5 },
   // Real work ~monthly (new CKAN month; ~2-3 h, a first load on an empty ingested_resources ~6 h); other runs no-op after one
   // API call (ingest-full.ts). /archive = /opt/carsua/archive on the host.
   plates: { command: 'tsx src/ingest-full.ts --archive /archive', timeoutMin: 720 },

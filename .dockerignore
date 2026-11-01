@@ -7,7 +7,8 @@
 .github
 .vscode
 scripts/.data
-scripts/seed-data
+scripts/seed-data/*
+!scripts/seed-data/dtp-*.csv.gz
 services
 docs
 infra
