@@ -160,6 +160,23 @@ export const STATIC_PAGES: Record<string, Record<Lang, PageText>> = {
         'A catalog of the makes and models registered in Ukraine: cars on the road, model years, fuel and regions from the open vehicle registry.'
     }
   },
+  '/customs': {
+    ua: {
+      title: 'Калькулятор розмитнення авто 2026: мито, акциз, ПДВ | Cars UA',
+      description:
+        'Розрахуйте орієнтовну вартість розмитнення авто 2026: мито, акциз за віком і об’ємом двигуна, ПДВ та пенсійний збір для бензину, дизеля, гібрида й електромобіля.'
+    },
+    ru: {
+      title: 'Калькулятор растаможки авто 2026: пошлина, акциз, НДС | Cars UA',
+      description:
+        'Рассчитайте ориентировочную стоимость растаможки авто 2026: пошлина, акциз по возрасту и объёму двигателя, НДС и пенсионный сбор для бензина, дизеля, гибрида и электромобиля.'
+    },
+    en: {
+      title: 'Car import customs calculator 2026: duty, excise, VAT | Cars UA',
+      description:
+        'Estimate the Ukrainian customs cost of an imported car in 2026: duty, excise by age and engine size, VAT and the pension fee for petrol, diesel, hybrid and electric cars.'
+    }
+  },
   '/compare': {
     ua: {
       title: 'Порівняння двох авто: за номером, VIN або моделлю | Cars UA',

@@ -42,7 +42,11 @@ export const SITEMAP_GROUPS: readonly SitemapGroup[] = [
   {
     id: 'cars',
     icon: '🚗',
-    links: [link('/cars', '🚗', 'nav.cars'), link('/compare', '⚖️', 'nav.compare')]
+    links: [
+      link('/cars', '🚗', 'nav.cars'),
+      link('/compare', '⚖️', 'nav.compare'),
+      link('/customs', '🧮', 'nav.customs')
+    ]
   },
   {
     id: 'stats',
