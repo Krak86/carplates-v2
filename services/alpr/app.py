@@ -12,8 +12,10 @@ recognize.mapper.ts (normalizePlate/repairOcrPlate/dedup/sort) needs no
 changes to consume either backend.
 """
 
+import hmac
 import io
 import logging
+import os
 import re
 from types import SimpleNamespace
 from typing import Any
@@ -23,7 +25,7 @@ import numpy as np
 from fast_alpr import ALPR
 from fast_plate_ocr.core.process import preprocess_image
 from fast_plate_ocr.inference.plate_recognizer import _load_image_from_source
-from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi import Depends, FastAPI, File, Header, HTTPException, UploadFile
 from PIL import Image, ImageOps
 from rapidocr_onnxruntime import RapidOCR
 
@@ -399,6 +401,16 @@ def healthz() -> dict[str, str]:
     return {"status": "ok"}
 
 
+# Shared secret with the API (`ALPR_API_KEY` on both sides). Unset = open, for a bare local run; /healthz stays open
+# for the container healthcheck.
+API_KEY = os.environ.get("ALPR_API_KEY", "")
+
+
+def _require_key(x_alpr_key: str = Header(default="")) -> None:
+    if API_KEY and not hmac.compare_digest(x_alpr_key, API_KEY):
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
+
 # The API already caps uploads at 4 MB; this is the same guard one hop later, with headroom.
 MAX_UPLOAD_BYTES = 6 * 1024 * 1024
 
@@ -412,7 +424,7 @@ def _read_capped(image: UploadFile) -> bytes:
 
 # Plain `def` (not `async def`) on purpose: the inference is CPU-bound, so FastAPI runs the handler in its
 # threadpool and a slow photo no longer queues every other upload behind it on the event loop.
-@app.post("/recognize")
+@app.post("/recognize", dependencies=[Depends(_require_key)])
 def recognize(image: UploadFile = File(...)) -> dict[str, list[dict[str, Any]]]:
     raw = _read_capped(image)
     if not raw:
@@ -484,7 +496,7 @@ def _ocr_lines(frame: np.ndarray, **kwargs: Any) -> list[dict[str, Any]]:
     return lines
 
 
-@app.post("/recognize/vin")
+@app.post("/recognize/vin", dependencies=[Depends(_require_key)])
 def recognize_vin(image: UploadFile = File(...)) -> dict[str, list[dict[str, Any]]]:
     raw = _read_capped(image)
     if not raw:

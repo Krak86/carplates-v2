@@ -45,7 +45,7 @@ export class LocalRecognizeService {
     try {
       const res = await fetch(`${this.env.ALPR_LOCAL_URL}/recognize`, {
         method: 'POST',
-        headers: { accept: 'application/json' },
+        headers: { accept: 'application/json', ...(this.env.ALPR_API_KEY && { 'x-alpr-key': this.env.ALPR_API_KEY }) },
         body: form,
         signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS)
       })
