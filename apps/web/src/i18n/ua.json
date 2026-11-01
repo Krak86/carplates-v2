@@ -498,6 +498,8 @@
   "uaAuctions.photo.more": "Показати ще фото ({{count}})",
   "uaAuctions.photo.less": "Сховати фото",
   "uaAuctions.hero.caption": "Фото лота аукціону {{n}} / {{total}} - авто зараз може виглядати інакше",
+  "uaAuctions.hero.modelCaption": "Фото моделі - не саме цей автомобіль",
+  "uaAuctions.hero.modelCaptionCredit": "Фото моделі - не саме цей автомобіль. Фото: {{credit}}",
   "uaAuctions.hero.prev": "Попереднє фото",
   "uaAuctions.thumb.preview": "Фото моделі",
   "uaAuctions.hero.next": "Наступне фото",

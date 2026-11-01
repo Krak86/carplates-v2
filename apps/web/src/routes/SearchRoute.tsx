@@ -26,6 +26,7 @@ import Spinner from '@/components/ui/Spinner'
 import { usePlateRecognition } from '@/components/use-plate-recognition'
 import { extractVehicleInfo } from '@/components/VinResult.helpers'
 import WikiHeroImage from '@/components/WikiHeroImage'
+import { MAX_HERO_LOT_PHOTOS } from '@/components/ua-auctions/helpers'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { useSideCommunity } from '@/hooks/useSideCommunity'
 import { useSideWidgetsVisible } from '@/hooks/useSideWidgetsVisible'
@@ -53,8 +54,6 @@ const WeightModelsCards = lazy(() => import('@/routes/stats/WeightModelsCards'))
 
 /** Stands in for a missing board (rollup not built yet): renders nothing rather than a half-empty card. */
 const EMPTY_WEIGHT_BOARD: WeightBoard = { heaviest: [], lightest: [] }
-/** Most lot photos the hero offers (the lots section lists them all). */
-const MAX_HERO_LOT_PHOTOS = 8
 const NewsWidget = lazy(() => import('@/components/NewsWidget'))
 const BlueskyWidget = lazy(() => import('@/components/BlueskyWidget'))
 const CommunityWidget = lazy(() => import('@/components/CommunityWidget'))

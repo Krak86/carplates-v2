@@ -7,6 +7,8 @@ import { isVin } from '@carplates/shared'
 import { extractVehicleInfo } from '@/components/VinResult.helpers'
 import UaAuctionCheck from '@/components/UaAuctionCheck'
 import WantedCheck from '@/components/WantedCheck'
+import WikiHeroImage from '@/components/WikiHeroImage'
+import { MAX_HERO_LOT_PHOTOS } from '@/components/ua-auctions/helpers'
 import { auctionLotsQuery, vinQuery, wantedQuery } from '@/lib/queries'
 
 const VinResult = lazy(() => import('@/components/VinResult'))
@@ -48,6 +50,7 @@ export default function OtherSourcesFound({ plate }: Props): ReactNode {
   const vehicleType = firstOf(records.map(r => r.vehicleType))
   const vehicle = [brand, model, year].filter(Boolean).join(' ')
   const cardNamesVehicle = !!vinCard && !!extractVehicleInfo(vinCard).brand
+  const lotPhotos = lots.flatMap(l => l.photos ?? []).slice(0, MAX_HERO_LOT_PHOTOS)
   const sources = [inWanted && t('wanted.title'), inAuctions && t('uaAuctions.title')].filter(Boolean).join(', ')
 
   const facts: [string, ReactNode][] = [
@@ -65,6 +68,16 @@ export default function OtherSourcesFound({ plate }: Props): ReactNode {
       >
         {t('otherSources.banner', { sources })}
       </p>
+
+      {/* Same hero slot as a registry hit: the lots' own photos, then the model photo (nothing when neither exists). */}
+      <WikiHeroImage
+        brand={brand}
+        model={model}
+        year={year}
+        rawKind={vehicleType}
+        vehicleKey={usableVin ?? plate}
+        lotPhotos={lotPhotos}
+      />
 
       {/* The VIN card shows the vehicle itself; the short list is for when there is no card or the decode named no make. */}
       {!cardNamesVehicle && facts.some(([, value]) => !!value) && (

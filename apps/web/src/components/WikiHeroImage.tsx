@@ -15,7 +15,7 @@ type Props = {
   /** Same identity `useCarHeroImageActions` keys the ambient background override on — VIN when the
    *  result has one, otherwise the plate. */
   vehicleKey: string | null
-  /** Prozorro.Sale lot photo ids of this very car: when present they replace the model photo (the real car beats a stock one). */
+  /** Prozorro.Sale lot photo ids of this very car: when present they lead the hero, the model photo follows as the last slide (the real car beats a stock one). */
   lotPhotos?: readonly string[]
 }
 
@@ -36,7 +36,13 @@ export default function WikiHeroImage({ brand, model, year, rawKind, vehicleKey,
   const isPending = hasQuery && heroImage.isPending
 
   if (lotPhotos.length > 0) {
-    return <UaAuctionHero docIds={lotPhotos} label={[brand, model, year].filter(Boolean).join(' ')} />
+    return (
+      <UaAuctionHero
+        docIds={lotPhotos}
+        label={[brand, model, year].filter(Boolean).join(' ')}
+        modelPhoto={image ? { url: image.url, credit: creditParts.join(', ') || null } : null}
+      />
+    )
   }
 
   // Settled with no image (or the image failed to load) → a kind placeholder in the same slot,

@@ -496,6 +496,8 @@
   "uaAuctions.photo.more": "Show more photos ({{count}})",
   "uaAuctions.photo.less": "Hide photos",
   "uaAuctions.hero.caption": "Auction lot photo {{n}} / {{total}} - may not show the car as it is now",
+  "uaAuctions.hero.modelCaption": "Model photo - not this exact car",
+  "uaAuctions.hero.modelCaptionCredit": "Model photo - not this exact car. Photo: {{credit}}",
   "uaAuctions.hero.prev": "Previous photo",
   "uaAuctions.thumb.preview": "Model photo",
   "uaAuctions.hero.next": "Next photo",
