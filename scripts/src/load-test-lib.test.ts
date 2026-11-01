@@ -90,6 +90,7 @@ describe('runStage', () => {
     const { result } = await run(() => 429)
     expect(result.throttled).toBeGreaterThan(0)
     expect(result.errorPct).toBe(0)
+    expect(result.rps).toBe(0)
   })
 
   it('counts 5xx and network failures as errors, 404 as success', async () => {

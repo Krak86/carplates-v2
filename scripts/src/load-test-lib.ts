@@ -63,8 +63,11 @@ export async function runStage(
           signal: AbortSignal.timeout(10_000)
         })
         await res.arrayBuffer()
-        if (res.status === 429) throttled++
-        else if (res.status >= 500) errors++
+        if (res.status === 429) {
+          throttled++ // instant reply from the throttle: not a latency or throughput sample
+          continue
+        }
+        if (res.status >= 500) errors++
         latencies.push(performance.now() - started)
       } catch {
         errors++
