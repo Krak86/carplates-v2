@@ -4380,3 +4380,13 @@ Duty, excise, VAT and the pension fee for a car imported to Ukraine, at the NBU 
 6. **Docs and release**: About, `releases.ts` `new` item, features-reference, this entry.
 
 Verification: excise formula and thresholds, age coefficient, EV per-kWh rate, pension tiers and the 2026 minimum (3328) were checked on zakon.rada.gov.ua. Customs Tariff 2697-IX (duty 10%, EV 0%) and Cabinet resolutions 1740 and 1129 could not be checked in the primary text. Hybrids use petrol rates and are shown as an estimate. Later / low priority: links from `/cars/:make/:model`, `/compare`, `/fuel`.
+
+## Not-found plates, favorites, login pages and polish (2026-11-01) ✅
+
+Small items shipped between the Prozorro.Sale and customs work; conventions are in `docs/features-reference.md` ("Other-source fallback for registry 404s", "Side widgets on a 404", share aliases, "Registration certificate fallback").
+
+- **Plates missing from the registry:** the other-sources card follows the registry card (photo, region, merged facts below the photo, wiki model photo as the last hero slide after the lot photos); side widgets show for not-found plates and VINs known from wanted / auctions; such plates and VINs can be favorited, `FAVORITES_LIMIT` raised to 300 (`packages/shared/src/account.ts`).
+- **Accounts pages:** `/login` and `/logout` routes plus `/go/login` and `/go/signup` share aliases.
+- **ALPR:** plate read from a registration certificate photo when `/recognize` finds none.
+- **UI:** guide topic chips colorized (`topic-colors.ts`) and collapsed to two rows on mobile; plate region in the test-drive modal header; logo quiz blurs brand names inside the emblems; empty state in the saved comparisons card.
+- **Docs and About:** About `recognition` / `share` / `account` texts extended, release items added for 2026-11-01 (`latest.ts` unchanged, same day); CLAUDE.md trimmed.

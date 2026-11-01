@@ -20,6 +20,42 @@ export const RELEASES: readonly ReleaseDay[] = [
     items: [
       item(
         'new',
+        'Якщо на фото немає номера, його тепер читає з фото свідоцтва про реєстрацію',
+        'Если на фото нет номера, его теперь читает с фото свидетельства о регистрации',
+        'When a photo shows no plate, the plate is now read from a registration certificate photo'
+      ),
+      item(
+        'new',
+        'В обране можна додавати й номери та VIN, яких немає в реєстрі; ліміт обраного збільшено до 300. Є окремі сторінки /login і /logout та посилання /go/login, /go/signup для поширення',
+        'В избранное можно добавлять и номера и VIN, которых нет в реестре; лимит избранного увеличен до 300. Есть отдельные страницы /login и /logout и ссылки /go/login, /go/signup для распространения',
+        'Favorites now accept plates and VINs missing from the registry, and the limit is raised to 300; there are separate /login and /logout pages and /go/login, /go/signup share links'
+      ),
+      item(
+        'improved',
+        'Номер, знайдений лише в розшуку чи на аукціоні, показується карткою як у реєстрі: фото, регіон і факти з усіх джерел, а збоку - ті самі віджети, що й для авто з реєстру',
+        'Номер, найденный только в розыске или на аукционе, показывается карточкой как в реестре: фото, регион и факты из всех источников, а сбоку - те же виджеты, что и для авто из реестра',
+        'A plate found only in a wanted list or an auction now gets a registry-style card with photo, region and facts from every source, plus the same side widgets as a registry car'
+      ),
+      item(
+        'improved',
+        'На сторінці VIN угорі є короткий опис авто, фото лотів стоять у шапці, а останнім слайдом іде фото моделі з Вікіпедії; на /auctions кольорові значки лотів працюють як фільтри, а лоти мають мініатюри',
+        'На странице VIN вверху есть краткое описание авто, фото лотов стоят в шапке, а последним слайдом идёт фото модели из Википедии; на /auctions цветные значки лотов работают как фильтры, а лоты имеют миниатюры',
+        'The VIN page opens with a vehicle summary, lot photos sit in the hero followed by the Wikipedia model photo, and on /auctions the colour-coded lot chips work as filters and lots have thumbnails'
+      ),
+      item(
+        'improved',
+        'У довіднику теми тепер кольорові й займають два рядки на телефоні; у вікні тест-драйву в заголовку видно регіон номера',
+        'В справочнике темы теперь цветные и занимают две строки на телефоне; в окне тест-драйва в заголовке виден регион номера',
+        'Guide topic chips are now colour-coded and fit two rows on phones, and the test-drive window shows the plate region in its header'
+      ),
+      item(
+        'fix',
+        'У вікторині логотипів розмиваються назви марок усередині самих емблем; у картці збережених порівнянь з’явився порожній стан',
+        'В викторине логотипов размываются названия марок внутри самих эмблем; в карточке сохранённых сравнений появилось пустое состояние',
+        'The logo quiz now blurs brand names inside the emblems themselves, and the saved comparisons card shows an empty state'
+      ),
+      item(
+        'new',
         'Калькулятор розмитнення авто /customs: мито, акциз за об’ємом двигуна й віком, ПДВ і збір до Пенсійного фонду для бензинових, дизельних, гібридних та електричних авто за правилами 2026 року, за курсом євро НБУ; кожен крок видно, а посилання зі сторінки VIN заповнює форму саме. Це оцінка, остаточну суму визначає митниця',
         'Калькулятор растаможки авто /customs: пошлина, акциз по объёму двигателя и возрасту, НДС и сбор в Пенсионный фонд для бензиновых, дизельных, гибридных и электрических авто по правилам 2026 года, по курсу евро НБУ; каждый шаг виден, а ссылка со страницы VIN сама заполняет форму. Это оценка, окончательную сумму определяет таможня',
         'A new /customs calculator estimates the cost of bringing a car into Ukraine: duty, excise by engine size and age, VAT and the pension fee for petrol, diesel, hybrid and electric cars under the 2026 rules, at the NBU euro rate; every step is shown, and a link from the VIN page fills the form in. An estimate, the customs office sets the final amount'
