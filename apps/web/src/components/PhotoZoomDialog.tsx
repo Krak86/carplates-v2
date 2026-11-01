@@ -184,16 +184,18 @@ export default function PhotoZoomDialog({ url, candidates, active, onClose }: Pr
       </div>
 
       <div className="absolute top-3 right-3 flex items-center gap-2">
-        <button
-          type="button"
-          onClick={() => setShowBoxes(v => !v)}
-          aria-pressed={showBoxes}
-          aria-label={showBoxes ? t('photo.boxesHide') : t('photo.boxesShow')}
-          title={showBoxes ? t('photo.boxesHide') : t('photo.boxesShow')}
-          className={`${buttonClass} ${showBoxes ? '' : 'opacity-60'}`}
-        >
-          🏷
-        </button>
+        {candidates.length > 0 && (
+          <button
+            type="button"
+            onClick={() => setShowBoxes(v => !v)}
+            aria-pressed={showBoxes}
+            aria-label={showBoxes ? t('photo.boxesHide') : t('photo.boxesShow')}
+            title={showBoxes ? t('photo.boxesHide') : t('photo.boxesShow')}
+            className={`${buttonClass} ${showBoxes ? '' : 'opacity-60'}`}
+          >
+            🏷
+          </button>
+        )}
         <button
           type="button"
           onClick={() => handleZoomButton(1 / BUTTON_STEP)}

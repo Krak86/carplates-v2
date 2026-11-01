@@ -23,7 +23,9 @@ export default function UaAuctionStatus({ lots, currency, fx }: Props): ReactNod
   const month = formatLotMonth(lotMonthOf(latest), locale) ?? ''
   const isOpen = latest.status === OPEN_STATUS
   const kind = latest.sold ? 'sold' : isOpen ? 'open' : 'notSold'
-  const text = t(`uaAuctions.now.${kind}`, {
+  // A Prozorro lot sold without an auction has no date at all
+  const key = month || kind === 'open' ? kind : `${kind}Undated`
+  const text = t(`uaAuctions.now.${key}`, {
     month,
     price: formatPrice(latest.salePrice ?? latest.startPrice, currency, fx, locale) ?? '-',
     count: lots.length

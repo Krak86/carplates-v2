@@ -4344,3 +4344,13 @@ A human-readable map of every public route, grouped by category (search, cars, s
 - **Catalog:** `routes/data-status/datasets.ts`. Scheduled sources name their `job` (last ok run from the server); hand-refreshed ones carry `refreshedOn`, the date of the last seed-CSV export. Status = age of the last sync against the cadence (fresh up to 1.25 periods, due up to 2, stale beyond); a failed or timed-out newest run is `failing`.
 - Not changed on purpose: "Jan 2013 - 29 Apr 2026" in the not-found hint and About is a statement about plates, which really end there.
 - **Scheduler honesty (same day):** only sources with a cron line say "updated automatically". `rdw-recalls` (monthly, 2nd 05:55) and `ca-recalls` (quarterly, 3rd of Jan/Apr/Jul/Oct 06:15, `--refresh`) became scheduled jobs (`jobs.ts`, `ingest.cron`, `run-ingest.sh`, `HC_PING_RDW_RECALLS|CA_RECALLS` in `deploy-ingest.yml`, `deploy.md`, `SCHEDULE.md`); their seed CSVs are still exported by hand. The registry line on `/data-status` has its own chip (`registryStatus`: fresh to 75 days behind, due to 120, then stale). Group descriptions no longer claim we automate the half-yearly/yearly sources.
+
+## Prozorro.Sale vehicle auctions next to SETAM (2026-11-01) ✅
+
+Plan and decisions: `docs/prozorro-sale-auctions-plan.md`; conventions: `docs/features-reference.md` "Prozorro.Sale lots in Auction history".
+
+- **Data:** `registry.prozorro_auctions` (0087), parser `prozorro-parse.ts` (vehicle test, plate/VIN, seller kind from `sellingEntity` / tags / `BANK_EDRPOU`), feed reader `prozorro-feed.ts`, daily job `prozorro-auctions`. Local DB: 14 434 Prozorro rows next to 16 866 SETAM lots.
+- **API:** union query for lookup / list / stats, merged `vehicle` facts, photo resizer `/api/auctions/photo/:docId` (WebP 320 / 960 / 1600).
+- **Web:** grouped lots with chips, merged specs with conflicts, photo thumbnails + zoom, per-source chart markers, `/auctions` source tabs, category / type filters with "?" help, About source, i18n ua/ru/en.
+- **Browser check (same day):** Renault card with both sources (groups, chips, specs, chart legend), a lot with 130 photos at 390 px, `/auctions?source=prozorro&group=customs`. Fixed: empty "()" in the status line and timeline for a Prozorro lot sold without an auction (no date; new `*Undated` texts); the zoom dialog's plate-box toggle is hidden when there are no plate candidates.
+- **Still open:** VPS backfill (plan step 4), the Cloudflare Cache Rule edit for the photo path, a parser guard for template-text property lots (3 local rows).

@@ -60,6 +60,7 @@ const SOURCES: readonly Source[] = [
     tile: 'bg-blue-700'
   },
   { key: 'setam', label: 'SETAM', url: 'https://setam.net.ua', tile: 'bg-blue-700' },
+  { key: 'prozorro', label: 'Prozorro.Sale', url: 'https://prozorro.sale/opendata/', tile: 'bg-blue-700' },
   { key: 'hsc', label: 'MVS HSC open data', url: 'https://solutions.mvs.gov.ua', tile: 'bg-blue-700' },
   { key: 'stolenIn', label: 'stolen.in.ua', url: 'https://stolen.in.ua', icon: '/icons/sources/stolenin.svg' },
   { key: 'bdr', label: 'MVS (bdr.mvs.gov.ua)', url: 'https://bdr.mvs.gov.ua', icon: '/icons/bdr.svg' },

@@ -212,17 +212,17 @@ export const STATIC_PAGES: Record<string, Record<Lang, PageText>> = {
     ua: {
       title: 'Українські аукціони арештованих авто: лоти та статистика | Cars UA',
       description:
-        'Легкові й вантажні авто з торгів СЕТАМ: лоти, ціни продажу, статистика за регіонами, марками й роками.'
+        'Легкові й вантажні авто з торгів СЕТАМ і Prozorro.Продажів: лоти, ціни продажу, статистика за регіонами, марками й роками.'
     },
     ru: {
       title: 'Украинские аукционы арестованных авто: лоты и статистика | Cars UA',
       description:
-        'Легковые и грузовые авто с торгов СЕТАМ: лоты, цены продажи, статистика по регионам, маркам и годам.'
+        'Легковые и грузовые авто с торгов СЕТАМ и Prozorro.Продажи: лоты, цены продажи, статистика по регионам, маркам и годам.'
     },
     en: {
       title: 'Ukrainian seized-car auctions: lots and statistics | Cars UA',
       description:
-        'Cars and trucks from SETAM auctions in Ukraine: lots, sale prices and statistics by region, make and year.'
+        'Cars and trucks from SETAM and Prozorro.Sale auctions in Ukraine: lots, sale prices and statistics by region, make and year.'
     }
   },
   '/fuel': {
@@ -842,9 +842,9 @@ const SECTION_TEXT: Record<string, Record<Lang, [label: string, lead: string]>> 
     en: ['Driver assists', 'Driver assistance systems.']
   },
   'ua-auctions': {
-    ua: ['Українські аукціони', 'Лоти СЕТАМ з цим номером або VIN.'],
-    ru: ['Украинские аукционы', 'Лоты СЕТАМ с этим номером или VIN.'],
-    en: ['Ukrainian auctions', 'SETAM auction lots with this plate or VIN.']
+    ua: ['Українські аукціони', 'Лоти СЕТАМ і Prozorro.Продажів з цим номером або VIN.'],
+    ru: ['Украинские аукционы', 'Лоты СЕТАМ и Prozorro.Продажи с этим номером или VIN.'],
+    en: ['Ukrainian auctions', 'SETAM and Prozorro.Sale auction lots with this plate or VIN.']
   },
   wanted: {
     ua: ['Розшук', 'Перевірка за базою розшуку.'],

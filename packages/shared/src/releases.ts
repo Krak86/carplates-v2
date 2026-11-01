@@ -19,6 +19,12 @@ export const RELEASES: readonly ReleaseDay[] = [
     date: '2026-11-01',
     items: [
       item(
+        'new',
+        'Українські аукціони тепер і з Прозорро.Продажів: лоти митниці, банкрутства, приватизації та банків з номером або VIN авто, з фото, продавцем і значками, поруч із лотами СЕТАМ; на /auctions є вкладки джерел і фільтри за категорією та типом торгів',
+        'Украинские аукционы теперь и с Прозорро.Продажи: лоты таможни, банкротства, приватизации и банков с номером или VIN авто, с фото, продавцем и значками, рядом с лотами СЕТАМ; на /auctions есть вкладки источников и фильтры по категории и типу торгов',
+        'Ukrainian auctions now include Prozorro.Sale: customs, bankruptcy, privatization and bank lots with a car plate or VIN, with photos, seller and chips, next to the SETAM lots; /auctions has source tabs and filters by category and auction type'
+      ),
+      item(
         'fix',
         'Сторінка /data-status більше не видає помилку, поки статистика реєстру ще не перераховується: дати просто не показуються',
         'Страница /data-status больше не выдаёт ошибку, пока статистика реестра ещё не пересчитывается: даты просто не показываются',

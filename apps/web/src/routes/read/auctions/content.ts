@@ -66,9 +66,9 @@ export const LIVE_TITLE: L10n = {
 }
 
 export const LIVE_INTRO: L10n = {
-  ua: 'Легкові та вантажні авто з відкритих даних СЕТАМ, які ми завантажуємо щодня. Це лише ті лоти, що потрапили в набір даних, а не весь ринок.',
-  ru: 'Легковые и грузовые авто из открытых данных СЕТАМ, которые мы загружаем ежедневно. Это только те лоты, что попали в набор данных, а не весь рынок.',
-  en: 'Cars and trucks from the SETAM open data, which we load daily. These are only the lots in the dataset, not the whole market.'
+  ua: 'Легкові та вантажні авто з відкритих даних СЕТАМ і Prozorro.Продажів, які ми завантажуємо щодня. Це лише ті лоти, що потрапили в набір даних, а не весь ринок.',
+  ru: 'Легковые и грузовые авто из открытых данных СЕТАМ и Prozorro.Продажи, которые мы загружаем ежедневно. Это только те лоты, что попали в набор данных, а не весь рынок.',
+  en: 'Cars and trucks from the open data of SETAM and Prozorro.Sale, which we load daily. These are only the lots in the dataset, not the whole market.'
 }
 
 export const LIVE_NOTE: L10n = {

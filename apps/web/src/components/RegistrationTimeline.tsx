@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import { useQuery } from '@tanstack/react-query'
-import type { Registration, WantedResponse } from '@carplates/shared'
+import type { AuctionLot, Registration, WantedResponse } from '@carplates/shared'
 import type { TFunction } from 'i18next'
 
 import CopyButton from '@/components/CopyButton'
@@ -51,6 +51,12 @@ type Props = {
 }
 
 /** Puts each lot marker into the action items at its position (`at` = index in the action list, ascending after the sort). */
+/** A lot sold without an auction (Prozorro) has no date, so it gets the wording without a month. */
+function timelineKey(lot: AuctionLot, dated: boolean): string {
+  const kind = lot.sold ? 'sold' : lot.status === OPEN_STATUS ? 'open' : 'notSold'
+  return `uaAuctions.timeline.${dated || kind === 'open' ? kind : `${kind}Undated`}`
+}
+
 function mergeLots(items: TimelineItem[], lots: readonly { at: number; item: TimelineItem }[]): TimelineItem[] {
   const merged = [...items]
   ;[...lots]
@@ -128,7 +134,7 @@ export default function RegistrationTimeline({ actions, currentPlate, auctionKey
         <div className="text-sm">
           <span aria-hidden>🔨</span>{' '}
           <span className="font-medium">
-            {t(`uaAuctions.timeline.${lot.sold ? 'sold' : lot.status === OPEN_STATUS ? 'open' : 'notSold'}`, {
+            {t(timelineKey(lot, !!formatLotMonth(lotMonthOf(lot), locale)), {
               month: formatLotMonth(lotMonthOf(lot), locale) ?? '-',
               price: formatPrice(lot.salePrice ?? lot.startPrice, 'UAH', null, locale) ?? '-'
             })}
