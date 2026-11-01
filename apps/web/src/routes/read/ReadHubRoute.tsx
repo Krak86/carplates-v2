@@ -86,28 +86,48 @@ export default function ReadHubRoute(): ReactNode {
         </Card>
       )}
 
-      {/* Phones: one compact row per guide (thumbnail beside the text); wider screens: banner cards in a grid. */}
-      <div className="grid gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4">
-        {shown.map(article => (
-          <Link key={article.path} to={article.path} viewTransition className="group block">
-            <Card className="h-full overflow-hidden !p-0 transition duration-300 ease-out group-hover:-translate-y-1 group-hover:border-primary group-hover:shadow-lg max-sm:flex">
-              <ArticleBanner article={article} className="hidden h-36 sm:flex" />
-              <ArticleBanner article={article} compact className="w-24 shrink-0 self-stretch sm:hidden" />
+      {/* Blog-style tiles: round cover + label, big title, lead excerpt. The first tile spans two columns on desktop. */}
+      <div className="grid gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
+        {shown.map((article, index) => {
+          const featured = index === 0
+          return (
+            <Link
+              key={article.path}
+              to={article.path}
+              viewTransition
+              className={cn('group block', featured && 'lg:col-span-2')}
+            >
+              <Card className="flex h-full flex-col gap-3 p-4 transition duration-300 ease-out group-hover:-translate-y-1 group-hover:border-primary group-hover:shadow-lg md:p-6">
+                <div className="flex items-center gap-3">
+                  <ArticleBanner
+                    article={article}
+                    compact
+                    className={cn('shrink-0 rounded-full', featured ? 'size-20 !text-4xl' : 'size-14 !text-2xl')}
+                  />
 
-              <div className="min-w-0 p-3 md:p-4">
-                <p className="mb-1 text-xs font-medium tracking-wide text-primary uppercase">
-                  <span aria-hidden>📖</span> {t('read.hub.badge')}
-                </p>
-                <h2 className="mb-1 text-lg leading-snug font-semibold">{t(article.titleKey)}</h2>
-                <ArticleTags article={article} className="mb-1.5 max-sm:hidden" />
-                <p className="line-clamp-3 text-sm text-muted sm:line-clamp-none">
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold tracking-wide text-primary uppercase">
+                      {article.tags[0] ? pick(article.tags[0], i18n.language) : t('read.hub.badge')}
+                    </p>
+                    <p className="text-xs text-muted">
+                      <span aria-hidden>📖</span> {t('read.hub.badge')}
+                    </p>
+                  </div>
+                </div>
+
+                <h2 className={cn('leading-tight font-bold', featured ? 'text-2xl md:text-3xl' : 'text-xl')}>
+                  {t(article.titleKey)}
+                </h2>
+
+                <p className={cn('text-muted', featured ? 'line-clamp-4' : 'line-clamp-5')}>
                   {pick(article.lead, i18n.language)}
                 </p>
-                <span className="mt-2 inline-block text-sm text-primary">{t('read.hub.open')} →</span>
-              </div>
-            </Card>
-          </Link>
-        ))}
+
+                <ArticleTags article={article} className="mt-auto pt-1" />
+              </Card>
+            </Link>
+          )
+        })}
       </div>
 
       {UPCOMING.length > 0 && (
