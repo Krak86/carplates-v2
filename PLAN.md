@@ -89,6 +89,8 @@ becomes available.
 
 ### Data freshness: real data-end label + `/data-status` ✅ DONE (2026-11-01) — see `docs/plan-done.md`
 
+### Data freshness links on every data page, favorite labels popover fix ✅ DONE (2026-11-02) — see `docs/plan-done.md`
+
 ### Hub tiles, mobile region quiz, load test (`pnpm load-test`, `THROTTLE_DISABLED`) ✅ DONE (2026-11-01) — see `docs/plan-done.md`
 
 - VPS result: ~60 cold plate lookups/s, 0 errors. Optional, only if traffic grows: merge the 4 sequential queries in `plate.service.ts`, raise `shared_buffers`, CPU-profile the api (`docs/deploy.md` "Load testing").

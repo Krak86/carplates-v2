@@ -2,8 +2,7 @@
 
 ## What this is
 
-`carsua.app` v2 — Ukrainian vehicle lookup by plate or VIN. pnpm monorepo; data from `data.gov.ua` in Postgres, VIN decoding via NHTSA.
-v1 is the sibling `../carplates/` (do not modify).
+`carsua.app` v2 — Ukrainian vehicle lookup by plate or VIN (pnpm monorepo, Postgres, NHTSA). v1 is `../carplates/` (do not modify).
 
 Docs (**grep `^## ` headings, never read whole**): `PLAN.md` backlog + pins · `docs/plan-done.md` write-ups · `README.md` setup/env ·
 `docs/features-reference.md` per-feature conventions (**read the matching section before touching a feature**) · `docs/commands-reference.md` · other `docs/*.md` only on request.
@@ -26,9 +25,8 @@ Pins (why: PLAN.md "Version pins"): Node 24, TypeScript 5.9, NestJS 11, Drizzle 
   Schema change = new `packages/db/migrations/NNNN_*.sql`.
 - **Never erase a real-data DB without asking.** Before `db:seed` or any `TRUNCATE`/`DROP`/bulk `DELETE` on `registry.registrations`
   or `registry.ingested_resources`, run `SELECT count(*) FROM registry.registrations` — thousands = synthetic, millions = real → ask.
-- **Offline / PWA**: service worker is production-only. Editing `schemas.ts` discards saved offline data; contracts in their own file
-  (`vdb.ts`, `rdw.ts`, `account.ts`, `fx.ts`) don't — new fields there are `.nullable().optional()`. A new offline-capable `/api/*`
-  query goes into `lib/offline-cache.ts`.
+- **Offline / PWA**: editing `schemas.ts` discards saved offline data; contracts in their own file (`vdb.ts`, `rdw.ts`, `account.ts`, `fx.ts`)
+  don't — new fields there are `.nullable().optional()`. A new offline-capable `/api/*` query goes into `lib/offline-cache.ts`.
 - **NestJS**: Zod-validated inputs, no logic in controllers, never `@Res()` (except SPA catch-all). Link previews
   come from the API, never Vite.
 - **i18n is per-language lazy chunks** (non-ua also loads ua). Tests rendering text `await i18nReady`; never `import '@/i18n'`.
@@ -36,7 +34,6 @@ Pins (why: PLAN.md "Version pins"): Node 24, TypeScript 5.9, NestJS 11, Drizzle 
 - **Edge cache**: a new cacheable `/api/*` endpoint → `common/cache.ts` headers + Cloudflare Cache Rule (+ `PUBLIC_API_PATH_PREFIXES` if public); see features-reference.
 - **Below-the-fold sections are `LazySection`s**; a new shareable one must list its id in `sections`. Shared pure helpers of lazy
   chunks go in `vite.config.ts` `HELPER_GROUPS`.
-- Accounts: separate `app` schema, contracts in `account.ts`, admins by SQL only (details: features-reference "Accounts").
 - **Deploy**: blue/green ⇒ backward-compatible migrations; new env var ⇒ `env.ts` + `deploy-api.yml` + `docs/deploy.md`.
 - **New public route** → `ROUTE_TITLE_KEYS` (`useDocumentTitle.ts`), a `STATIC_PAGES` entry (ua/ru/en) in `apps/api/src/spa/spa-text.ts` (else `noindex`, no sitemap),
   `max-w-6xl` page width. Add `@Throttle` (`common/throttle.ts`) to any enumerable lookup.

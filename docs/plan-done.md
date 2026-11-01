@@ -4391,3 +4391,11 @@ Small items shipped between the Prozorro.Sale and customs work; conventions are 
 - **ALPR:** plate read from a registration certificate photo when `/recognize` finds none.
 - **UI:** guide topic chips colorized (`topic-colors.ts`) and collapsed to two rows on mobile; plate region in the test-drive modal header; logo quiz blurs brand names inside the emblems; empty state in the saved comparisons card.
 - **Docs and About:** About `recognition` / `share` / `account` texts extended, release items added for 2026-11-01 (`latest.ts` unchanged, same day); CLAUDE.md trimmed.
+
+## Data freshness links, favorite labels popover, Prozorro photos (2026-11-02) ✅
+
+- **Freshness chip:** `DataFreshness` ("Updated <date>" + `/data-status` link) on `/wanted`, `/auctions`, `/road-safety`, `/fuel`, `/safety`; a link next to the update time on `/news`. Convention in `docs/features-reference.md`.
+- **Favorite labels popover:** rendered in a portal with fixed positioning, flips upward near the viewport bottom, closes on scroll/resize (result cards no longer clip it).
+- **Prozorro photos:** the resizer was dropped (see the Prozorro.Sale entry follow-up); About source text now says photos load directly.
+- **Prozorro backfill:** dump loaded on the VPS (14 431 rows) with `infra/vps/load-prozorro-dump.sh` (quoting and runner fixed).
+- **Docs and release:** `releases.ts` 2026-11-02 (`latest.ts` bumped), About `prozorro` source and `dataStatus` feature texts, PLAN.md build order for shareable photo links.
