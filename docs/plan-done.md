@@ -4349,8 +4349,9 @@ A human-readable map of every public route, grouped by category (search, cars, s
 
 Plan and decisions: `docs/prozorro-sale-auctions-plan.md`; conventions: `docs/features-reference.md` "Prozorro.Sale lots in Auction history".
 
-- **Data:** `registry.prozorro_auctions` (0087), parser `prozorro-parse.ts` (vehicle test, plate/VIN, seller kind from `sellingEntity` / tags / `BANK_EDRPOU`), feed reader `prozorro-feed.ts`, daily job `prozorro-auctions`. Local DB: 14 434 Prozorro rows next to 16 866 SETAM lots.
+- **Data:** `registry.prozorro_auctions` (0087), parser `prozorro-parse.ts` (vehicle test, plate/VIN, seller kind from `sellingEntity` / tags / `BANK_EDRPOU`), feed reader `prozorro-feed.ts`, daily job `prozorro-auctions`. Local DB: 14 431 Prozorro rows (full history 2017-2026, 33 MB) next to 16 866 SETAM lots.
 - **API:** union query for lookup / list / stats, merged `vehicle` facts, photo resizer `/api/auctions/photo/:docId` (WebP 320 / 960 / 1600).
 - **Web:** grouped lots with chips, merged specs with conflicts, photo thumbnails + zoom, per-source chart markers, `/auctions` source tabs, category / type filters with "?" help, About source, i18n ua/ru/en.
 - **Browser check (same day):** Renault card with both sources (groups, chips, specs, chart legend), a lot with 130 photos at 390 px, `/auctions?source=prozorro&group=customs`. Fixed: empty "()" in the status line and timeline for a Prozorro lot sold without an auction (no date; new `*Undated` texts); the zoom dialog's plate-box toggle is hidden when there are no plate candidates.
-- **Still open:** VPS backfill (plan step 4), the Cloudflare Cache Rule edit for the photo path, a parser guard for template-text property lots (3 local rows).
+- **Backfill (2026-11-01):** parser guard for template-text property lots (`isTemplateItem`, "ТЗ/СГ" in brand / model / color; 3 rows removed). Full crawl 2017-01-01 to now: 674 460 feed records, 26 min, 14 431 rows; 1.0 percent multi-vehicle auctions (one row per auction stays); overlap with SETAM 12 VINs / 19 plates; dump `prozorro_auctions.sql.gz` (8.1 MB) made for the VPS. Totals and the restore steps are in `docs/prozorro-sale-auctions-plan.md` step 4.
+- **Still open:** load the dump on the VPS after merge + API deploy (plan step 4 d-f), the Cloudflare Cache Rule edit for the photo path.

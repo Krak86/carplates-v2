@@ -155,6 +155,13 @@ describe('Prozorro vehicle auctions', () => {
 })
 
 describe('Prozorro rejects', () => {
+  it('a property lot whose vehicle props are the form template text is rejected (XTH330900T0781969)', () => {
+    expect(toProzorroAuctionInsert(fixture('template-vehicle-property-lot'), NOW)).toEqual({
+      ok: false,
+      reason: 'no-identifier'
+    })
+  })
+
   it('a building is not a vehicle', () => {
     expect(toProzorroAuctionInsert(fixture('building'), NOW)).toEqual({ ok: false, reason: 'not-vehicle' })
   })

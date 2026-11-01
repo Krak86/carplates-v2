@@ -137,6 +137,14 @@ const isVehicleItem = (item: Item, title: string | null): boolean => {
   return VEHICLE_WORDS_RE.test(`${item.description?.uk_UA ?? ''} ${title ?? ''}`)
 }
 
+/**
+ * A property lot (bankruptcy estate with a vehicle list in the description) fills the vehicle props with the form's column header
+ * ("НАЙМЕНУВАННЯ ТЗ/СГ, МАРКА, МОДЕЛЬ, ..."). The identifiers found in such a lot belong to one of many vehicles, so it is no row.
+ */
+const TEMPLATE_PROPS_RE = /ТЗ\s*\/\s*СГ/iu
+const isTemplateItem = (props: Item['itemProps']): boolean =>
+  [props?.brand, props?.model, props?.color].some(v => v && TEMPLATE_PROPS_RE.test(v))
+
 // ---------------------------------------------------------------------------------------------------------------------
 // Identifiers
 // ---------------------------------------------------------------------------------------------------------------------
@@ -240,6 +248,7 @@ export function toProzorroAuctionInsert(raw: unknown, now = new Date()): Prozorr
   const description = text(a.description?.uk_UA)
   for (const item of vehicleItems) {
     const props = item.itemProps
+    if (isTemplateItem(props)) continue
     const itemText = text(item.description?.uk_UA)
     const sources = [itemText, title, description]
     const vin = findVin(props?.identificationNumber) ?? sources.map(findVin).find(v => v) ?? null
