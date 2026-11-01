@@ -119,22 +119,19 @@ export default function ReadHubRoute(): ReactNode {
               className={cn('group block', featured && 'lg:col-span-2')}
             >
               <Card className="flex h-full flex-col gap-3 p-4 transition duration-300 ease-out group-hover:-translate-y-1 group-hover:border-primary group-hover:shadow-lg md:p-6">
-                <div className="flex items-center gap-3">
-                  <ArticleBanner
-                    article={article}
-                    compact
-                    className={cn('shrink-0 rounded-full', featured ? 'size-20 !text-4xl' : 'size-14 !text-2xl')}
-                  />
+                {/* Wide rectangular cover; the featured tile gets a more panoramic crop. */}
+                <ArticleBanner
+                  article={article}
+                  className={cn('w-full rounded-xl', featured ? 'aspect-video lg:aspect-[21/9]' : 'aspect-video')}
+                />
 
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold tracking-wide text-primary uppercase">
-                      {article.tags[0] ? pick(article.tags[0], i18n.language) : t('read.hub.badge')}
-                    </p>
-                    <p className="text-xs text-muted">
-                      <span aria-hidden>📖</span> {t('read.hub.badge')}
-                    </p>
-                  </div>
-                </div>
+                <p className="text-xs text-muted">
+                  <span className="font-semibold tracking-wide text-primary uppercase">
+                    {article.tags[0] ? pick(article.tags[0], i18n.language) : t('read.hub.badge')}
+                  </span>
+                  {' · '}
+                  <span aria-hidden>📖</span> {t('read.hub.badge')}
+                </p>
 
                 <h2 className={cn('leading-tight font-bold', featured ? 'text-2xl md:text-3xl' : 'text-xl')}>
                   {t(article.titleKey)}
