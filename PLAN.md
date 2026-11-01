@@ -87,6 +87,8 @@ becomes available.
 
 ### Sitemap page `/sitemap` ✅ DONE (2026-11-01) — see `docs/plan-done.md`
 
+### Hub tiles, mobile region quiz, load test (`pnpm load-test`, `THROTTLE_DISABLED`) ✅ DONE (2026-11-01) — see `docs/plan-done.md`
+
 ### Releases page (`/releases`) ✅ DONE (2026-10-15) — see `docs/plan-done.md`
 
 ### AUTO.RIA link-out for plates/VINs not in the registry ✅ DONE (2026-10-25) — link only; RIA data use is restricted, see `docs/legal-and-monetization.md`

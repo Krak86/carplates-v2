@@ -32,6 +32,18 @@ export const RELEASES: readonly ReleaseDay[] = [
       ),
       item(
         'improved',
+        'Ігри на /play отримали плитки-постери, а довідник /read - плитки як у блозі; вікторина «Регіон» стала зручнішою на телефоні',
+        'Игры на /play получили плитки-постеры, а справочник /read - плитки как в блоге; викторина «Регион» стала удобнее на телефоне',
+        'The /play games now have poster tiles and the /read guides hub has blog-style tiles; the region quiz is easier on phones'
+      ),
+      item(
+        'improved',
+        'У блоці «Також знайдено» вибраний номер підсвічено, а в аукціонних лотах рядок авто показується, навіть коли VIN не назвав марку; довгі назви доріг у /road-safety тепер переносяться',
+        'В блоке «Также найдено» выбранный номер подсвечен, а в аукционных лотах строка авто показывается, даже когда VIN не назвал марку; длинные названия дорог в /road-safety теперь переносятся',
+        'The selected plate is highlighted in "Also found", auction lots show the vehicle line even when the VIN decode names no make, and long road names wrap on /road-safety'
+      ),
+      item(
+        'improved',
         'Довідник: пошук і фільтр за темами, позначка «Стаття» на кожній картці та компактні картки на телефоні',
         'Справочник: поиск и фильтр по темам, пометка «Статья» на каждой карточке и компактные карточки на телефоне',
         'Guides: search and topic filter, a "Guide" label on every card and compact cards on phones'

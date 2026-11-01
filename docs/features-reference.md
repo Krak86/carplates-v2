@@ -556,6 +556,8 @@ Question count (10/20/30/50) is global, picked on the hub (`readRounds`/`writeRo
 
 **Game links** (2026-11-01): `/race` and `/relax` start with `GamesNav` (hub + every game); a new game goes into `QUIZ_IDS` / `RACER_LINKS` and shows up there too. **Zen** (`/relax`): `useUiStore.zen` hides the header, footer links, page share button and scroll buttons; only `RelaxRoute` sets it and resets it on unmount, so no other route can inherit it. The guides hub (`/read`) filters with `?q=` / `?topic=` (English tag text).
 
+**Hub tiles and mobile map** (2026-11-01): the hub lists games as poster tiles (`GameTile.tsx`, picture/gradient from the `games.ts` entry, hue in `global.css`); a new game adds its `games.ts` entry. The region quiz on phones uses bigger tap targets via `StatsMap` (`quiz` prop; the map code was restructured, behaviour on desktop unchanged). The `/read` hub uses blog-style tiles (`ReadHubRoute.tsx`).
+
 **Full screen** (2026-10-31): `PlayRoute` wraps the quiz frame in `frameRef` and toggles the Fullscreen API on it (`fullscreenchange` keeps the state in sync); no per-quiz code.
 
 ## Home page blocks and brand line (2026-10-31)
