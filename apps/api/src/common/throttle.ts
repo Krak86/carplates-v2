@@ -1,6 +1,8 @@
 import type { ExecutionContext } from '@nestjs/common'
 import type { ThrottlerModuleOptions } from '@nestjs/throttler'
 
+import { loadEnv, throttleDisabled } from '../env.js'
+
 /**
  * Global per-IP limits for `/api/*` (PLAN.md "Rate-limit policy"). Deliberately looser than a bare 10/s: one page
  * load fires a burst of lazy-section queries, and mobile carriers put many users behind one IP. Tune from PostHog.
@@ -13,6 +15,7 @@ export const GLOBAL_THROTTLE: ThrottlerModuleOptions = {
     { name: 'long', ttl: 3_600_000, limit: 1_500 }
   ],
   skipIf: (ctx: ExecutionContext): boolean => {
+    if (throttleDisabled(loadEnv())) return true
     const req = ctx.switchToHttp().getRequest<{ url?: string }>()
     return !req.url?.startsWith('/api/')
   }

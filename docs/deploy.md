@@ -205,7 +205,7 @@ Registry data lost with the full dumps: re-ingest from `archive/` ZIPs (`backup.
 Never aim it at `https://carsua.app`: Cloudflare WAF (30/10 s) and the Nest throttle (100/min) answer 429 first and it counts as real traffic.
 
 1. Plates: `pnpm load-test --sample 5000 --out plates.txt` (needs `DATABASE_URL`; block-samples `current_registration`).
-2. Target the origin: `ssh -L 3000:<api container ip>:3000 vps`, or a restored copy locally. The throttle still applies per IP, so on a copy raise `GLOBAL_THROTTLE` / `PLATE_LOOKUP_THROTTLE` temporarily.
+2. Target the origin: a restored copy locally (or `ssh -L 3000:<api container ip>:3000 vps`). The per-IP throttle answers 429, so start the **local** api with `THROTTLE_DISABLED=true` (ignored when `NODE_ENV=production`, so it cannot loosen the VPS; for a VPS run you would need a staging deploy).
 3. Run off-peak while watching `docker stats` (api limit 1 GB), `iostat` and `pg_stat_activity`: `pnpm load-test --plates plates.txt`.
 
 Expect the ceiling to be cold-disk Postgres reads (hot set ~9 GB vs 2 GB `shared_buffers`), then API memory. Prefer a restored copy to production: an OOM kill takes Postgres down with the API.
