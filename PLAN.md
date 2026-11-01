@@ -451,6 +451,10 @@ Idea round: put the registry stats on the map and in diagrams, and add small can
    stolen-by-year vs. registered share (`/wanted`); hand-rolled SVG + `d3-scale`/`d3-shape`, each a `LazySection`, each with an export `chart` builder.
 7. ⏳ **Later** - Sankey (origin -> brand -> fuel), bar-chart race by registration year, collectible region cards, racer "drive Ukraine" route.
 
+### Air-raid alerts: plate-region badge, `alarm` background layer, history page — researched 2026-11-01, **waiting on the Ukraine Alarm API key**
+
+Plan, terms, rejection path: `docs/alarm-plan.md`. Steps: ⏳ poller + `/api/alarms` (mock until the key) · ⏳ region badge on the plate result · ⏳ `alarm` layer (`BACKGROUND_MODES`, `/relax`) · ⏳ history ingest from the MIT siren dataset (no key needed) · ⏳ safety-over-time page next to DTP stats (no "most bombed", no combined score) · ⏳ later: districts, SSE, webhook.
+
 ### Test-drive racer game ("Free test drive" banner) — ✅ built (2026-10-08), follow-ups left
 
 Built: a desktop-only promo banner beside the result card (xl+; a 🎮 circle on lg; eases in 3 s after the card shows) opens a pseudo-3D racer in a modal. Write-up, file map and gotchas: `docs/plan-done.md` "Test-drive racer game".

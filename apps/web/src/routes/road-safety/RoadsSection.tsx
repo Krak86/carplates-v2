@@ -29,6 +29,7 @@ export default function RoadsSection({ year }: Props): ReactNode {
       <RankBars
         ariaLabel={t('roadSafety.roads.title')}
         collapsible
+        wrapDetail
         rows={roads.data.roads.map(r => ({
           key: r.roadCode,
           label: r.roadCode,

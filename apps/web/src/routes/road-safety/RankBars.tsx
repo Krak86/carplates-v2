@@ -18,10 +18,12 @@ type Props = {
   ariaLabel: string
   /** Collapse to the first few rows with a "show more" button. */
   collapsible?: boolean
+  /** Show a long detail on its own wrapping line under the bar instead of after the value. */
+  wrapDetail?: boolean
 }
 
 /** Ranked horizontal bars: label, bar scaled to the largest value, value and a muted detail. */
-export default function RankBars({ rows, ariaLabel, collapsible = false }: Props): ReactNode {
+export default function RankBars({ rows, ariaLabel, collapsible = false, wrapDetail = false }: Props): ReactNode {
   const max = Math.max(0, ...rows.map(r => r.value))
 
   const items = rows.map((row, i) => (
@@ -44,8 +46,12 @@ export default function RankBars({ rows, ariaLabel, collapsible = false }: Props
 
       <span className="text-right whitespace-nowrap tabular-nums">
         {row.valueText}
-        {row.detail && <span className="ml-1 text-xs text-[var(--color-muted)]">{row.detail}</span>}
+        {row.detail && !wrapDetail && <span className="ml-1 text-xs text-[var(--color-muted)]">{row.detail}</span>}
       </span>
+
+      {row.detail && wrapDetail && (
+        <span className="col-start-2 col-end-5 text-xs wrap-break-wordtext-[var(--color-muted)]">{row.detail}</span>
+      )}
     </li>
   ))
 
