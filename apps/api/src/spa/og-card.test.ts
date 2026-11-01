@@ -2,7 +2,7 @@ import { join } from 'node:path'
 
 import { describe, expect, it } from 'vitest'
 
-import { buildCardSvg, OG_HEIGHT, OG_WIDTH, renderPng } from './og-card.js'
+import { buildCardSvg, genericCardSize, OG_HEIGHT, OG_WIDTH, renderPng } from './og-card.js'
 
 const FONTS = ['NotoSans-Regular.ttf', 'NotoSans-Bold.ttf'].map(f =>
   join(import.meta.dirname, '../../../web/public/fonts', f)
@@ -31,6 +31,14 @@ describe('buildCardSvg', () => {
   it('draws the generic site card when there is no plate', () => {
     const svg = buildCardSvg({ plate: null, title: 'T', subtitle: 'S', color: 'blue' })
     expect(svg).not.toContain('stroke="#111"')
+  })
+
+  it('shrinks the generic card text so the longest tagline fits the panel', () => {
+    expect(genericCardSize('T', 'S')).toBe(72)
+    expect(genericCardSize('Уся публічна інформація про авто', 'за номером або VIN')).toBeLessThan(60)
+    expect(
+      buildCardSvg({ plate: null, title: 'Уся публічна інформація про авто', subtitle: 's', color: 'blue' })
+    ).not.toContain('…')
   })
 })
 

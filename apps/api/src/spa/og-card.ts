@@ -56,14 +56,22 @@ function background(color: VehicleColor): string {
 </linearGradient></defs><rect width="${OG_WIDTH}" height="${OG_HEIGHT}" fill="url(#g)"/>`
 }
 
+/** Type size of the generic card: 72 px, smaller when the longer line would pass the 1020 px of text room (about 0.58 em a character, bold Noto Sans). */
+export function genericCardSize(title: string, subtitle: string): number {
+  const longest = Math.max(title.length, subtitle.length, 1)
+  return Math.min(72, Math.floor(1020 / (longest * 0.58)))
+}
+
 /** The SVG for a plate/VIN card, or — when `plate` is null — the generic site card. */
 export function buildCardSvg(input: CardInput): string {
   const open = `<svg xmlns="http://www.w3.org/2000/svg" width="${OG_WIDTH}" height="${OG_HEIGHT}">`
   if (input.plate === null) {
+    // Both lines share one face, shrunk until the longer one fits the panel (the Cyrillic tagline is wider than 72 px allows).
+    const size = genericCardSize(input.title, input.subtitle)
     return `${open}${background('blue')}${header(input.siteIconPng)}
 ${panel(50, 250, 1100, 300)}
-<text x="90" y="360" font-family="${FONT_FAMILY}" font-size="72" font-weight="700" fill="#fff">${esc(clip(input.title, 34))}</text>
-<text x="90" y="440" font-family="${FONT_FAMILY}" font-size="72" font-weight="700" fill="#fff">${esc(clip(input.subtitle, 34))}</text>
+<text x="90" y="360" font-family="${FONT_FAMILY}" font-size="${size}" font-weight="700" fill="#fff">${esc(input.title)}</text>
+<text x="90" y="440" font-family="${FONT_FAMILY}" font-size="${size}" font-weight="700" fill="#fff">${esc(input.subtitle)}</text>
 ${SITE_URL}
 </svg>`
   }

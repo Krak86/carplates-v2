@@ -39,21 +39,22 @@ Done and verified on prod 2026-10-30 (curl + metatags.io + Facebook debugger):
 
 Open:
 
-- [ ] **Facebook debugger shows "Corrupted Image" for `https://carsua.app/og/default.png`** (first scrape right after the deploy/purge).
+- [x] **Facebook debugger "Corrupted Image" for `https://carsua.app/og/default.png`** gone: re-scraped 2026-11-01, 206, 1200x630 (it was the first scrape right after the deploy/purge). The scrape showed the Ukrainian tagline overflowing its panel; fixed 2026-11-01 (`genericCardSize` in `og-card.ts`), re-scrape after the next api deploy and purge `/og/default.png`.
+      Original note:
       The file itself is a valid 1200x630 PNG (114529 bytes, correct `IEND`, same bytes for a `facebookexternalhit` user agent, about
       0.2 s uncached). Click "Scrape Again"; if it persists, look in Cloudflare Security -> Events for blocked/challenged requests to
       `/og/default.png` from AS32934 (Facebook) and add a verified-bot exception (Bot Fight Mode / rate rules)
 - [x] `deploy-api.yml`: also purges `$URL/robots.txt` and `$URL/sitemap.xml` (exact URLs) next to the `/og/` prefix (2026-10-30; takes
       effect on the next api deploy)
-- [ ] Google Search Console: verify the domain via DNS, submit `/sitemap.xml`, request indexing for `/`, `/stats`, `/read`
-- [ ] Bing Webmaster Tools: import from Search Console, submit the sitemap
+- [x] Google Search Console: domain verified, `/sitemap.xml` read (see PLAN.md catalog line); request indexing for `/`, `/stats`, `/read` is optional
+- [x] Bing Webmaster Tools: imported from Search Console, sitemap submitted
 - [ ] **Diia Open Data services catalog** (backlink from the source itself): https://diia.data.gov.ua/services has an
       "Додати сервіс" button (needs "Зареєструватись" / "Увійти"; the form is behind login, so its fields are unverified).
       Categories: Інформаційно-аналітичні системи · Візуалізації · Чат-боти · Мобільні застосунки. Pick "Інформаційно-аналітичні
       системи". Also post an impact story on https://forum.data.gov.ua (Обговорення). Listing text to paste, adjust to the
       form's limits (text below).
 - [ ] Directories: Product Hunt, AlternativeTo, awesome-lists for open data / Ukrainian tech
-- [ ] Cloudflare cache rules for `/cars/*` and `/api/catalog/*` (routes exist since 2026-10-30; expressions in `deploy.md` "Model catalog"; owner creates them, then verify MISS -> HIT)
+- [x] Cloudflare cache rules for `/cars/*` and `/api/catalog/*` (created and verified MISS -> HIT 2026-10-30, re-checked 2026-11-01)
 
 ### Diia listing text
 
