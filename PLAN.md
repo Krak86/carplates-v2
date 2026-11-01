@@ -91,6 +91,8 @@ becomes available.
 
 ### Hub tiles, mobile region quiz, load test (`pnpm load-test`, `THROTTLE_DISABLED`) ✅ DONE (2026-11-01) — see `docs/plan-done.md`
 
+- VPS result: ~60 cold plate lookups/s, 0 errors. Optional, only if traffic grows: merge the 4 sequential queries in `plate.service.ts`, raise `shared_buffers`, CPU-profile the api (`docs/deploy.md` "Load testing").
+
 ### Releases page (`/releases`) ✅ DONE (2026-10-15) — see `docs/plan-done.md`
 
 ### AUTO.RIA link-out for plates/VINs not in the registry ✅ DONE (2026-10-25) — link only; RIA data use is restricted, see `docs/legal-and-monetization.md`

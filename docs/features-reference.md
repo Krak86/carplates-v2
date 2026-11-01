@@ -323,7 +323,7 @@ Plate/VIN `?section=<id>` links (2026-10-30): the title gets ` - <section label>
   `noindex` with a bare canonical.
 - Rate limits: one global `ThrottlerGuard` (`AppModule`, `common/throttle.ts`) counts **only `/api/*`** per IP (short/medium/long).
   Heavy or enumerable routes add `@Throttle(...)` constants from the same file (plate, VIN); never skip a route without a reason
-  (`/api/auth/me` is the only skip). recognize/auth/og keep their own tighter module-level guards. Behind a proxy set `TRUST_PROXY`.
+  (`/api/auth/me` is the only skip). recognize/auth/og keep their own tighter module-level guards. Behind a proxy set `TRUST_PROXY`. `THROTTLE_DISABLED=true` turns the **global** guard off for local load tests (`pnpm load-test`); `throttleDisabled()` in `env.ts` ignores it when `NODE_ENV=production`, and the per-module guards (recognize/auth/og/contact) are unaffected.
 - Legal/cookie/monetization findings: `docs/legal-and-monetization.md`.
 
 ## Agent discovery, edge cache, Zod and CSP (2026-10-29)
