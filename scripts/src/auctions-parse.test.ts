@@ -94,6 +94,15 @@ describe('lot title parsing', () => {
     expect(parseLotTitle('Автомобіль VAZ 21043, 2004 року випуску', NOW)).toMatchObject({ make: 'ВАЗ', model: '21043' })
   })
 
+  it('finds a make that is followed straight by the plate label (no model)', () => {
+    expect(
+      parseLotTitle(
+        'Добровільний продаж. Транспортний засіб ZHONG XING, ДНЗ: BC8484AK, 2005 року випуску, VIN: LTA6GH3B061001185',
+        NOW
+      )
+    ).toMatchObject({ make: 'ZHONG XING', model: null, year: 2005 })
+  })
+
   it('keeps foreign, Soviet-era and dashed plates', () => {
     expect(
       titlePlate('Автомобіль Renault Scenic, польський номерний знак EL9N097, номер кузову VF1JA050525988424')

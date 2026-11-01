@@ -146,6 +146,8 @@ not a parallel feature, hence the step order below.
 
 **Moped plates, constrained decoding, alternative reads (2026-10-26) ✅** — row-wise reader for three-row moped plates, slot-class decoding with the registry's real letter set, one-character alternatives returned per plate and shown as numbered/colored chip groups; also a latency regression found and fixed (worst photo 98 s -> 1.3 s): `docs/plan-done.md` ("Own ALPR: moped plates, constrained decoding, alternative reads").
 
+**Shared-secret auth (2026-11-01) ✅** — the ALPR container requires `x-alpr-key` (`ALPR_API_KEY`, shared with the api via `env/alpr.env`): `docs/plan-done.md` ("Own ALPR: shared-secret auth").
+
 **Own ALPR — open actions (as of 2026-10-26, continue here):**
 
 - ⏳ **Ground truth for the eval — partly done.** `services/alpr/eval/labels.csv` (gitignored) has 3 plates, recall 3/3 (`forte_ft__645663814hd.webp` `AB1918AB`, `imz-ural_m-67-36__605381145hd.webp` `AH4018AC`, `ua_ai1920ja.jpg` `AI1920JA`). **Still to do:** the photos for `BX5213BO` (white-rack Mercedes 1940) and `BC3064XC` (red truck) are not in `eval/images/` (not found; copy them in and add the rows), and the other 85 photos are unlabelled, so recall is still measured on 3 files only. The `ALT_CONFIDENT_*` and `ALT_MIN_SCORE` values stay untuned until more are labelled.

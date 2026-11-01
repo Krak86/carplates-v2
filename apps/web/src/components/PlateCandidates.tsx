@@ -42,46 +42,61 @@ export default function PlateCandidates({ candidates, active, onSelect }: Props)
   return (
     <div className="flex w-full max-w-content flex-wrap items-center gap-2 rounded-md border border-[var(--color-surface)] bg-[var(--color-surface)]/80 px-2.5 py-1.5 backdrop-blur-sm">
       <span className="text-sm font-medium text-[var(--color-fg)]">{t(labelKey)}</span>
-      {groups.map(group => (
-        <span
-          key={group.index}
-          role="group"
-          aria-label={t('recognize.plateN', { n: group.index + 1 })}
-          style={grouped ? { borderColor: group.color } : undefined}
-          className={cn('inline-flex items-center gap-1', grouped && 'rounded-full border-2 p-0.5')}
-        >
-          {grouped && groups.length > 1 && (
-            <span
-              aria-hidden
-              style={{ backgroundColor: group.color }}
-              className="ml-0.5 grid size-5 shrink-0 place-items-center rounded-full text-xs leading-none font-bold text-black"
-            >
-              {group.index + 1}
-            </span>
-          )}
-          {group.candidates.map((c, i) => (
-            <span key={c.plate} className="inline-flex items-center gap-1">
-              {i > 0 && (
-                <span title={t('recognize.sameCarReads')} className="text-[var(--color-fg)]">
-                  <ChainIcon />
-                </span>
-              )}
-              <button
-                type="button"
-                onClick={() => onSelect(c.plate)}
-                className={cn(
-                  'rounded-full border px-3 py-1 text-sm',
-                  c.plate === active
-                    ? 'border-[var(--color-primary)] bg-[var(--color-primary)]/10 text-[var(--color-primary)]'
-                    : 'border-[var(--color-surface)] hover:bg-[var(--color-surface)]/20'
-                )}
+      {groups.map(group => {
+        const groupActive = group.candidates.some(c => c.plate === active)
+
+        return (
+          <span
+            key={group.index}
+            role="group"
+            aria-label={t('recognize.plateN', { n: group.index + 1 })}
+            style={
+              grouped
+                ? {
+                    borderColor: group.color,
+                    ...(groupActive ? { boxShadow: `0 0 10px ${group.color}` } : null)
+                  }
+                : undefined
+            }
+            className={cn(
+              'inline-flex items-center gap-1',
+              grouped && 'rounded-full border-2 p-0.5',
+              grouped && !groupActive && 'opacity-50'
+            )}
+          >
+            {grouped && groups.length > 1 && (
+              <span
+                aria-hidden
+                style={{ backgroundColor: group.color }}
+                className="ml-0.5 grid size-5 shrink-0 place-items-center rounded-full text-xs leading-none font-bold text-black"
               >
-                {c.plate}
-              </button>
-            </span>
-          ))}
-        </span>
-      ))}
+                {group.index + 1}
+              </span>
+            )}
+            {group.candidates.map((c, i) => (
+              <span key={c.plate} className="inline-flex items-center gap-1">
+                {i > 0 && (
+                  <span title={t('recognize.sameCarReads')} className="text-[var(--color-fg)]">
+                    <ChainIcon />
+                  </span>
+                )}
+                <button
+                  type="button"
+                  onClick={() => onSelect(c.plate)}
+                  className={cn(
+                    'rounded-full border px-3 py-1 text-sm',
+                    c.plate === active
+                      ? 'border-[var(--color-primary)] bg-[var(--color-primary)] font-semibold text-black'
+                      : 'border-[var(--color-surface)] hover:bg-[var(--color-surface)]/20'
+                  )}
+                >
+                  {c.plate}
+                </button>
+              </span>
+            ))}
+          </span>
+        )
+      })}
     </div>
   )
 }
