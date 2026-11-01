@@ -321,6 +321,7 @@ const FEATURES = [
   'catalog',
   'compare',
   'news',
+  'shares',
   'whatsnew',
   'race',
   'play',

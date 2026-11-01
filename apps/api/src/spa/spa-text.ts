@@ -826,6 +826,11 @@ const SECTION_TEXT: Record<string, Record<Lang, [label: string, lead: string]>> 
     ru: ['Наличие', 'Наличие похожих авто на рынке.'],
     en: ['In stock', 'Similar cars available on the market.']
   },
+  shares: {
+    ua: ['Акції', 'Ціна акцій виробника марки.'],
+    ru: ['Акции', 'Цена акций производителя марки.'],
+    en: ['Share price', 'Share price of the make’s maker.']
+  },
   auctions: {
     ua: ['Аукціони', 'Аукціонні лоти та ціни.'],
     ru: ['Аукционы', 'Аукционные лоты и цены.'],

@@ -8,6 +8,7 @@ import LazySection from '@/components/LazySection'
 // car's own figures (history, VIN, wanted, auctions, assists) is not here. A new model-level section goes in both places.
 const OriginSection = lazy(() => import('@/components/OriginSection'))
 const StockSection = lazy(() => import('@/components/StockSection'))
+const SharePriceSection = lazy(() => import('@/components/SharePriceSection'))
 const SocialSection = lazy(() => import('@/components/SocialSection'))
 const NewsSection = lazy(() => import('@/components/NewsSection'))
 const CarWikiInfo = lazy(() => import('@/components/CarWikiInfo'))
@@ -102,6 +103,9 @@ export default function ModelSections({ brand, model, year, kind, fuel, capacity
       </LazySection>
       <LazySection sections={['stock']}>
         <StockSection brand={brand} model={model} year={year} />
+      </LazySection>
+      <LazySection sections={['shares']}>
+        <SharePriceSection brand={brand} half />
       </LazySection>
       <LazySection sections={['origin']}>
         <OriginSection brand={brand} model={model} year={year} />

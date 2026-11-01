@@ -4355,3 +4355,13 @@ Plan and decisions: `docs/prozorro-sale-auctions-plan.md`; conventions: `docs/fe
 - **Browser check (same day):** Renault card with both sources (groups, chips, specs, chart legend), a lot with 130 photos at 390 px, `/auctions?source=prozorro&group=customs`. Fixed: empty "()" in the status line and timeline for a Prozorro lot sold without an auction (no date; new `*Undated` texts); the zoom dialog's plate-box toggle is hidden when there are no plate candidates.
 - **Backfill (2026-11-01):** parser guard for template-text property lots (`isTemplateItem`, "ТЗ/СГ" in brand / model / color; 3 rows removed). Full crawl 2017-01-01 to now: 674 460 feed records, 26 min, 14 431 rows; 1.0 percent multi-vehicle auctions (one row per auction stays); overlap with SETAM 12 VINs / 19 plates; dump `prozorro_auctions.sql.gz` (8.1 MB) made for the VPS. Totals and the restore steps are in `docs/prozorro-sale-auctions-plan.md` step 4.
 - **Still open:** load the dump on the VPS after merge + API deploy (plan step 4 d-f), the Cloudflare Cache Rule edit for the photo path.
+
+## Share price section (phones + catalog) ✅ DONE (2026-11-01)
+
+The share-price chart lived only in the desktop-only left `StockWidget` on `/` + `/:query`. Now:
+
+- `StockQuote` (price, change, sparkline, 1D/1M/1Y, Yahoo link) extracted from the widget; both use it.
+- `SharePriceSection` - collapsed, shareable `?section=shares`, hidden for unlisted makes, fetches once opened; in `ResultCard` and catalog `ModelSections`; open `standalone` card on `/cars/:make` (`make.topBrand`).
+- `shares` added to `SHARE_SECTIONS` and `spa-text.ts` `SECTION_TEXT`; About `FEATURES` + `about.brief/feature.shares`; `section.about.shares` info popup; release entry.
+- Checked the Kia 1D drop (-11.73%) against Yahoo: `chartPreviousClose` 108300 vs price 95600, a real move, not a baseline bug.
+- Not built: a market-index chart (no index series in `apps/api/src/stocks`).

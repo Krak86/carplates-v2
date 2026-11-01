@@ -104,6 +104,7 @@ const AuctionCheck = lazy(() => import('@/components/AuctionCheck'))
 const WantedCheck = lazy(() => import('@/components/WantedCheck'))
 const UaAuctionCheck = lazy(() => import('@/components/UaAuctionCheck'))
 const StockSection = lazy(() => import('@/components/StockSection'))
+const SharePriceSection = lazy(() => import('@/components/SharePriceSection'))
 const SocialSection = lazy(() => import('@/components/SocialSection'))
 const NewsSection = lazy(() => import('@/components/NewsSection'))
 const NearbyServices = lazy(() => import('@/components/NearbyServices'))
@@ -907,6 +908,9 @@ export default function ResultCard({ data }: Props): ReactNode {
           </LazySection>
           <LazySection sections={['stock']}>
             <StockSection brand={c.brand} model={c.model} year={c.makeYear} />
+          </LazySection>
+          <LazySection sections={['shares']}>
+            <SharePriceSection brand={c.brand} />
           </LazySection>
           {c.brand && (
             <LazySection sections={['origin']} forceMount={originOpenSignal > 0}>

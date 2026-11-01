@@ -1,10 +1,14 @@
 import type { ReactNode } from 'react'
 
+import { cn } from '@/lib/cn'
+
 type Props = {
   points: [number, number][]
   /** Dotted reference line (previous close); null = none. */
   baseline: number | null
   up: boolean
+  /** Taller plot, for a wide container. */
+  tall?: boolean
 }
 
 const WIDTH = 216
@@ -12,7 +16,7 @@ const HEIGHT = 80
 const PAD = 2
 
 /** Dependency-free area/line sparkline; red when the period is down, green when up (as on Google Finance). */
-export default function StockChart({ points, baseline, up }: Props): ReactNode {
+export default function StockChart({ points, baseline, up, tall = false }: Props): ReactNode {
   const values = points.map(p => p[1])
   const min = Math.min(...values, baseline ?? Infinity)
   const max = Math.max(...values, baseline ?? -Infinity)
@@ -25,7 +29,12 @@ export default function StockChart({ points, baseline, up }: Props): ReactNode {
   const color = up ? '#16a34a' : '#ef4444'
 
   return (
-    <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} aria-hidden className="h-20 w-full overflow-visible">
+    <svg
+      viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
+      preserveAspectRatio="none"
+      aria-hidden
+      className={cn('w-full overflow-visible', tall ? 'h-32' : 'h-20')}
+    >
       <defs>
         <linearGradient id="stock-fill" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" stopColor={color} stopOpacity="0.3" />
@@ -56,7 +65,14 @@ export default function StockChart({ points, baseline, up }: Props): ReactNode {
         strokeLinejoin="round"
         vectorEffect="non-scaling-stroke"
       />
-      <circle cx={x(points.length - 1)} cy={y(values[values.length - 1]!)} r="2.5" fill={color} />
+      {/* A zero-length round-capped stroke: stays a circle when the SVG is stretched to the container width. */}
+      <path
+        d={`M${x(points.length - 1)} ${y(values[values.length - 1]!)}h0`}
+        stroke={color}
+        strokeWidth="5"
+        strokeLinecap="round"
+        vectorEffect="non-scaling-stroke"
+      />
     </svg>
   )
 }
