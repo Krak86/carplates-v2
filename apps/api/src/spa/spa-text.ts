@@ -671,6 +671,34 @@ export const SHARE_ALIAS_PAGES: Record<ShareAlias, Record<Lang, PageText>> = {
       title: 'AR plate scanner with your camera | Cars UA',
       description: 'Point your camera at a car: plates are read live and the vehicle data shows up beside them.'
     }
+  },
+  login: {
+    ua: {
+      title: 'Вхід в акаунт | Cars UA',
+      description: 'Увійдіть через Google, Telegram або email, щоб синхронізувати обране та історію між пристроями.'
+    },
+    ru: {
+      title: 'Вход в аккаунт | Cars UA',
+      description: 'Войдите через Google, Telegram или email, чтобы синхронизировать избранное и историю между устройствами.'
+    },
+    en: {
+      title: 'Sign in to your account | Cars UA',
+      description: 'Sign in with Google, Telegram or email to sync favorites and history across your devices.'
+    }
+  },
+  signup: {
+    ua: {
+      title: 'Створити акаунт | Cars UA',
+      description: 'Безкоштовна реєстрація через Google, Telegram або email: обране та історія завжди під рукою.'
+    },
+    ru: {
+      title: 'Создать аккаунт | Cars UA',
+      description: 'Бесплатная регистрация через Google, Telegram или email: избранное и история всегда под рукой.'
+    },
+    en: {
+      title: 'Create an account | Cars UA',
+      description: 'Sign up free with Google, Telegram or email and keep your favorites and history at hand.'
+    }
   }
 }
 
