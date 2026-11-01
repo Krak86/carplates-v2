@@ -503,6 +503,7 @@ Files: `apps/web/src/components/RiaCheckLink.tsx` (used by `NotFoundInfo` and th
 - **Dormant code:** `apps/api/src/ria/` (`GET /api/ria-check/:plate`, TTL cache, 4 calls / 90 s budget under RIA's 5 / 90 s cap) and the `riaCheckResponseSchema` contract stay behind `RIA_CHECK_ENABLED` (off, wired in `deploy-api.yml` + `deploy.md`). Nothing in the web calls it. Enable only with RIA's written consent, and then add a client query + card again.
 - No offline group, no new route (so no `ROUTE_TITLE_KEYS` / `STATIC_PAGES` entry).
 
+- **Side widgets on a 404 (2026-11-01):** `SearchRoute` derives `sideVehicle` (registry vehicle, else brand / model / year from the wanted records and auction lots under the same `wantedQuery` / `auctionLotsQuery` keys as `OtherSourcesFound`, plate and VIN) so the left / right columns (news, Bluesky, community, stock, new cars) show for a vehicle known only from those sources. The hero slot stays registry-driven (`OtherSourcesFound` draws its own).
 - **Copy before leaving (2026-10-26):** `RiaCheckLink` opens the auction-style modal (`AuctionVinModal` with `copyLabel` / `title` / `step1` / `step2` overrides, `result.ria.*`): the normalized plate / VIN to copy, then the site.
 
 ## Verification links and chip tooltips (2026-10-25)
