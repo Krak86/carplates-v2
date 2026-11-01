@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
-import { AUCTION_GROUPS, AUCTION_OUTCOMES, AUCTION_SORTS, AUCTION_SOURCES } from '@carplates/shared'
+import { AUCTION_OUTCOMES, AUCTION_SORTS } from '@carplates/shared'
 import type { AuctionListLot, AuctionListQuery, AuctionStatsRow, Currency, FxResponse } from '@carplates/shared'
 
 import {
@@ -20,7 +20,10 @@ import UaAuctionChips from '@/components/ua-auctions/UaAuctionChips'
 import { cn } from '@/lib/cn'
 import { toIntlLocale } from '@/lib/intl'
 import { auctionListQuery } from '@/lib/queries'
-import { pageCount } from '@/routes/auctions/helpers'
+import AuctionFilterField from '@/routes/auctions/AuctionFilterField'
+import AuctionMakeSearch from '@/routes/auctions/AuctionMakeSearch'
+import AuctionSourceTabs from '@/routes/auctions/AuctionSourceTabs'
+import { groupsForSource, pageCount } from '@/routes/auctions/helpers'
 
 type Props = {
   query: AuctionListQuery
@@ -112,55 +115,47 @@ export default function AuctionsLotList({ query, makes, regions, currency, fx, o
 
   return (
     <div>
-      <div className="mb-3 flex flex-wrap items-end gap-2">
-        <label className="flex flex-col gap-1 text-xs text-[var(--color-muted)]">
-          {t('auctions.page.sourceLabel')}
-          <select value={query.source ?? ''} onChange={e => onChange({ source: e.target.value })} className={FIELD}>
-            <option value="">{t('auctions.page.any')}</option>
-            {AUCTION_SOURCES.map(s => (
-              <option key={s} value={s}>
-                {t(`uaAuctions.source.${s}`)}
-              </option>
-            ))}
-          </select>
-        </label>
+      <AuctionSourceTabs
+        source={query.source}
+        onChange={source =>
+          onChange({
+            source: source ?? null,
+            // A category of the other source cannot match any more.
+            ...(query.group && !groupsForSource(source).includes(query.group) ? { group: null } : {})
+          })
+        }
+      />
 
-        <label className="flex flex-col gap-1 text-xs text-[var(--color-muted)]">
-          {t('auctions.page.groupLabel')}
+      <div className="mb-3 flex flex-wrap items-end gap-2">
+        <AuctionFilterField id="auction-filter-group" label={t('auctions.page.groupLabel')} help="group">
           <select
+            id="auction-filter-group"
             value={query.group ?? ''}
             onChange={e => onChange({ group: e.target.value })}
             className={cn(FIELD, 'max-w-44')}
           >
             <option value="">{t('auctions.page.any')}</option>
-            {AUCTION_GROUPS.map(g => (
+            {groupsForSource(query.source).map(g => (
               <option key={g} value={g}>
                 {t(`uaAuctions.group.${g}`)}
               </option>
             ))}
           </select>
-        </label>
+        </AuctionFilterField>
 
-        <label className="flex flex-col gap-1 text-xs text-[var(--color-muted)]">
-          {t('auctions.page.dimension.make')}
-          <select
-            value={query.make ?? ''}
-            onChange={e => onChange({ make: e.target.value })}
-            className={cn(FIELD, 'max-w-44')}
-          >
-            <option value="">{t('auctions.page.any')}</option>
-            {makes.map(m => (
-              <option key={m.label} value={m.label}>
-                {m.label}
-              </option>
-            ))}
-            {query.make && !makes.some(m => m.label === query.make) && <option value={query.make}>{query.make}</option>}
-          </select>
-        </label>
+        <AuctionFilterField id="auction-filter-make" label={t('auctions.page.dimension.make')} help="make">
+          <AuctionMakeSearch
+            id="auction-filter-make"
+            value={query.make}
+            makes={makes}
+            className={cn(FIELD, 'w-40')}
+            onChange={make => onChange({ make })}
+          />
+        </AuctionFilterField>
 
-        <label className="flex flex-col gap-1 text-xs text-[var(--color-muted)]">
-          {t('auctions.page.dimension.region')}
+        <AuctionFilterField id="auction-filter-region" label={t('auctions.page.dimension.region')} help="region">
           <select
+            id="auction-filter-region"
             value={query.region ?? ''}
             onChange={e => onChange({ region: e.target.value })}
             className={cn(FIELD, 'max-w-44')}
@@ -172,11 +167,11 @@ export default function AuctionsLotList({ query, makes, regions, currency, fx, o
               </option>
             ))}
           </select>
-        </label>
+        </AuctionFilterField>
 
-        <label className="flex flex-col gap-1 text-xs text-[var(--color-muted)]">
-          {t('auctions.page.statusLabel')}
+        <AuctionFilterField id="auction-filter-status" label={t('auctions.page.statusLabel')} help="status">
           <select
+            id="auction-filter-status"
             value={query.status ?? ''}
             onChange={e => onChange({ status: e.target.value })}
             className={cn(FIELD, 'max-w-44')}
@@ -188,22 +183,26 @@ export default function AuctionsLotList({ query, makes, regions, currency, fx, o
               </option>
             ))}
           </select>
-        </label>
+        </AuctionFilterField>
 
-        <label className="flex flex-col gap-1 text-xs text-[var(--color-muted)]">
-          {t('auctions.page.outcomeLabel')}
-          <select value={query.outcome} onChange={e => onChange({ outcome: e.target.value })} className={FIELD}>
+        <AuctionFilterField id="auction-filter-outcome" label={t('auctions.page.outcomeLabel')} help="outcome">
+          <select
+            id="auction-filter-outcome"
+            value={query.outcome}
+            onChange={e => onChange({ outcome: e.target.value })}
+            className={FIELD}
+          >
             {AUCTION_OUTCOMES.map(o => (
               <option key={o} value={o}>
                 {t(`auctions.page.outcome.${o}`)}
               </option>
             ))}
           </select>
-        </label>
+        </AuctionFilterField>
 
-        <label className="flex flex-col gap-1 text-xs text-[var(--color-muted)]">
-          {t('auctions.page.minPrice')}
+        <AuctionFilterField id="auction-filter-min" label={t('auctions.page.minPrice')} help="price">
           <input
+            id="auction-filter-min"
             key={`min-${query.minPrice ?? ''}`}
             type="number"
             min={0}
@@ -212,11 +211,11 @@ export default function AuctionsLotList({ query, makes, regions, currency, fx, o
             onBlur={e => onChange({ min: e.target.value })}
             className={cn(FIELD, 'w-28')}
           />
-        </label>
+        </AuctionFilterField>
 
-        <label className="flex flex-col gap-1 text-xs text-[var(--color-muted)]">
-          {t('auctions.page.maxPrice')}
+        <AuctionFilterField id="auction-filter-max" label={t('auctions.page.maxPrice')} help="price">
           <input
+            id="auction-filter-max"
             key={`max-${query.maxPrice ?? ''}`}
             type="number"
             min={0}
@@ -225,18 +224,22 @@ export default function AuctionsLotList({ query, makes, regions, currency, fx, o
             onBlur={e => onChange({ max: e.target.value })}
             className={cn(FIELD, 'w-28')}
           />
-        </label>
+        </AuctionFilterField>
 
-        <label className="flex flex-col gap-1 text-xs text-[var(--color-muted)]">
-          {t('auctions.page.sortLabel')}
-          <select value={query.sort} onChange={e => onChange({ sort: e.target.value })} className={FIELD}>
+        <AuctionFilterField id="auction-filter-sort" label={t('auctions.page.sortLabel')} help="sort">
+          <select
+            id="auction-filter-sort"
+            value={query.sort}
+            onChange={e => onChange({ sort: e.target.value })}
+            className={FIELD}
+          >
             {AUCTION_SORTS.map(s => (
               <option key={s} value={s}>
                 {t(`auctions.page.sort.${s}`)}
               </option>
             ))}
           </select>
-        </label>
+        </AuctionFilterField>
 
         <button
           type="button"

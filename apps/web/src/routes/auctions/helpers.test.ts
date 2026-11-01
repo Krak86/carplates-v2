@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest'
 
-import { formatDelta, monthLabel, pageCount, soldPercent, sortRows, withSoldPercent } from '@/routes/auctions/helpers'
+import {
+  formatDelta,
+  groupsForSource,
+  monthLabel,
+  pageCount,
+  soldPercent,
+  sortRows,
+  withSoldPercent
+} from '@/routes/auctions/helpers'
 
 const row = (label: string, lots: number, sold: number, avgDeltaPercent: number | null, medianSale: number | null) => ({
   label,
@@ -51,5 +59,14 @@ describe('monthLabel', () => {
   it('formats YYYY-MM and passes other labels through', () => {
     expect(monthLabel('2024-08', 'en')).toContain('2024')
     expect(monthLabel('Київ', 'en')).toBe('Київ')
+  })
+})
+
+describe('groupsForSource', () => {
+  it('keeps every category without a source and splits SETAM from Prozorro', () => {
+    expect(groupsForSource(undefined)).toContain('setam')
+    expect(groupsForSource('setam')).toEqual(['setam'])
+    expect(groupsForSource('prozorro')).not.toContain('setam')
+    expect(groupsForSource('prozorro')).toContain('customs')
   })
 })
