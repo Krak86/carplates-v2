@@ -20,6 +20,12 @@ export const RELEASES: readonly ReleaseDay[] = [
     items: [
       item(
         'new',
+        'Сторінка /data-status: за який період реєстри в базі, коли востаннє оновлювалось кожне джерело (щодня, щомісяця, раз на пів року) і що застаріло. Підпис на /stats тепер показує реальну останню дату даних, а не поточний місяць',
+        'Страница /data-status: за какой период реестры в базе, когда в последний раз обновлялся каждый источник (ежедневно, ежемесячно, раз в полгода) и что устарело. Подпись на /stats теперь показывает реальную последнюю дату данных, а не текущий месяц',
+        'A new /data-status page shows the period the registries cover, when each source was last updated (daily, monthly, twice a year) and what is stale. The /stats label now shows the real last date of the data instead of the current month'
+      ),
+      item(
+        'new',
         'Сторінка /sitemap: карта сайту з усіма сторінками за розділами, а також підказки про меню, фон, дзвіночок і профіль; посилання на неї внизу кожної сторінки',
         'Страница /sitemap: карта сайта со всеми страницами по разделам, а также подсказки о меню, фоне, колокольчике и профиле; ссылка на неё внизу каждой страницы',
         'A new /sitemap page lists every page by section, with notes on the menu, background, bell and profile; it is linked in the footer of every page'

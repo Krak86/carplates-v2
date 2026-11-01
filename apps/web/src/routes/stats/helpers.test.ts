@@ -13,7 +13,7 @@ import {
   rankingBadges,
   topModels,
   topRegions,
-  yearBoundaryLabel,
+  monthYearLabel,
   yearRange
 } from './helpers'
 
@@ -165,17 +165,16 @@ describe('yearRange', () => {
   })
 })
 
-describe('yearBoundaryLabel', () => {
-  const now = new Date(2026, 8, 23) // 2026-09-23, month is 0-indexed
-
-  it('is just the year when it is not the current calendar year', () => {
-    expect(yearBoundaryLabel(2013, 'en-US', now)).toBe('2013')
-    expect(yearBoundaryLabel(2025, 'en-US', now)).toBe('2025')
+describe('monthYearLabel', () => {
+  it('names the month of the date, whatever day it is (no timezone shift at month ends)', () => {
+    expect(monthYearLabel('2026-08-31', 'en-US')).toBe('August 2026')
+    expect(monthYearLabel('2026-09-01', 'en-US')).toBe('September 2026')
+    expect(monthYearLabel('2026-08-15', 'uk-UA')).toBe('серпень 2026 р.')
   })
 
-  it('appends the current month when the year is the current calendar year', () => {
-    expect(yearBoundaryLabel(2026, 'en-US', now)).toBe('September 2026')
-    expect(yearBoundaryLabel(2026, 'uk-UA', now)).toBe('вересень 2026 р.')
+  it('is null for anything that is not an ISO date', () => {
+    expect(monthYearLabel('', 'en-US')).toBeNull()
+    expect(monthYearLabel('2026-08', 'en-US')).toBeNull()
   })
 })
 

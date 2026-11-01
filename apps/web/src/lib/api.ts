@@ -27,6 +27,7 @@ import {
   brandSuggestionsResponseSchema,
   cardBundleResponseSchema,
   cncapRatingsResponseSchema,
+  dataStatusResponseSchema,
   dataVersionResponseSchema,
   euroNcapRatingsResponseSchema,
   fuelEconomyResponseSchema,
@@ -184,6 +185,7 @@ import type {
   StatsFieldDimension,
   StatsFieldResponse,
   StatsResponse,
+  DataStatusResponse,
   StatsTopResponse,
   DistributionResponse,
   EvStatsResponse,
@@ -285,6 +287,10 @@ export async function plateHistory(plate: string): Promise<PlateHistoryResponse>
 
 export async function decodeVin(vin: string): Promise<VinDecodeResponse> {
   return vinDecodeResponseSchema.parse(await getJson(`/api/vin/${encodeURIComponent(vin)}`))
+}
+
+export async function getDataStatus(): Promise<DataStatusResponse> {
+  return dataStatusResponseSchema.parse(await getJson('/api/data-status'))
 }
 
 export async function getStats(): Promise<StatsResponse> {

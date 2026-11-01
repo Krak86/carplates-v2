@@ -24,6 +24,11 @@ export const JOBS = {
   // Manual only (no cron entry): first load of the road-safety tables from the seed CSVs baked into the image (the only seed-data the
   // image carries, .dockerignore); insert-only, safe to repeat. Then the two jobs above keep them current.
   'dtp-seed': { command: 'tsx src/dtp-csv.ts', timeoutMin: 5 },
+  // Recall registers that refresh themselves (no seed CSV involved): RDW campaigns are upserted by reference code (seconds, the model links are
+  // replaced wholesale), Transport Canada replaces both tables after a ~200 MB download (`--refresh`: never trust a cached copy). The seed CSVs
+  // are still re-exported by hand (`pnpm export:rdw-recalls:csv`, `export:ca-recalls:csv`) after review.
+  'rdw-recalls': { command: 'tsx src/rdw-recalls.ts', timeoutMin: 20 },
+  'ca-recalls': { command: 'tsx src/ca-recalls.ts --refresh', timeoutMin: 45 },
   // Real work ~monthly (new CKAN month; ~2-3 h, a first load on an empty ingested_resources ~6 h); other runs no-op after one
   // API call (ingest-full.ts). /archive = /opt/carsua/archive on the host.
   plates: { command: 'tsx src/ingest-full.ts --archive /archive', timeoutMin: 720 },

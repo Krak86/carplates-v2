@@ -18,3 +18,7 @@ PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 # Road crashes (Patrol Police XLSX, new file each month) on the 5th; hazardous-section CSVs (data.gov.ua) yearly, 10 Feb. A no-op run rewrites the same rows.
 35 5 5 * *   bash /opt/carsua/compose/run-ingest.sh dtp-patrol >> /opt/carsua/backups/ingest.log 2>&1
 45 5 10 2 *  bash /opt/carsua/compose/run-ingest.sh dtp-hazards >> /opt/carsua/backups/ingest.log 2>&1
+
+# Recall registers: RDW (NL) monthly on the 2nd, Transport Canada quarterly on the 3rd of Jan/Apr/Jul/Oct (~200 MB download, hence the quiet slot).
+55 5 2 * *   bash /opt/carsua/compose/run-ingest.sh rdw-recalls >> /opt/carsua/backups/ingest.log 2>&1
+15 6 3 1,4,7,10 *   bash /opt/carsua/compose/run-ingest.sh ca-recalls >> /opt/carsua/backups/ingest.log 2>&1

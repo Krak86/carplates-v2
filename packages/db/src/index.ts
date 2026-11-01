@@ -9,6 +9,7 @@ export {
   statsByRegionYear,
   statsByBody,
   statsByOper,
+  statsDataSpan,
   statsByKind,
   statsByColor,
   statsByFuel,

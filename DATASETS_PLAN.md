@@ -256,6 +256,9 @@ repo openly.
 - **Owner's answer sent:** web-only pet project (v2), only wants data it is allowed to use, asks what can be reused from the
   site. **Status: awaiting their reply** (no answer to the first or the follow-up with specific questions: use as specs, how to
   get the data, attribution wording, limits). Keep the whole thread as the licence record. No reply = treat as no.
+- **2026-11-01:** they replied that they first want to see the new version of the site. Sent a new message via the contact form
+  with the link (https://carsua.app: free, no ads, no paywall), the specs fields we would use, attribution offer, and the same three
+  questions (permission and how to get the data, credit wording, limits). **Status: awaiting their reply.**
 
 **Source choice (revised 2026-10-08):** only whatever autoevolution itself agrees to provide or allow, in writing. No GitHub
 copy, and still no crawling of their site without an explicit yes.

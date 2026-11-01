@@ -72,6 +72,7 @@ import {
   getJncapRatings,
   getKncapRatings,
   getSafetyRatings,
+  getDataStatus,
   getStats,
   getStatsField,
   getEvStats,
@@ -188,6 +189,11 @@ export function storageEstimateQuery() {
     staleTime: 0,
     networkMode: 'always'
   })
+}
+
+// The registry's real date span + the cron run log. Small and online-only; the cron moves it at most a few times a day.
+export function dataStatusQuery() {
+  return queryOptions({ queryKey: ['data-status'], queryFn: getDataStatus, staleTime: 5 * 60_000 })
 }
 
 // Only changes on the monthly ingest cron (see PLAN.md, "Registry statistics") — never refetch on its own.
