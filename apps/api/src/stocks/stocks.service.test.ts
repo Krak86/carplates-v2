@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
-import { parseNewsRss } from './stocks.service.js'
+import { parseNewsRss, StocksService } from './stocks.service.js'
 
 const FEED = `<?xml version="1.0"?><rss version="2.0"><channel>
 <item><description>Shares &amp; bonds rose</description><guid isPermaLink="false">abc-1</guid>
@@ -27,5 +27,16 @@ describe('parseNewsRss', () => {
 
   it('returns nothing for a feed without items', () => {
     expect(parseNewsRss('<rss><channel></channel></rss>')).toEqual([])
+  })
+})
+
+describe('StocksService.quote', () => {
+  it('answers an empty series for a symbol that is not an instrument of the brand (no upstream call)', async () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch')
+    const q = await new StocksService().quote('Kia', 'TSLA', '1mo')
+
+    expect(q).toMatchObject({ symbol: 'TSLA', points: [], price: null })
+    expect(fetchSpy).not.toHaveBeenCalled()
+    fetchSpy.mockRestore()
   })
 })

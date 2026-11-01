@@ -234,6 +234,18 @@ export {
   type StockCompany,
   type StockRange
 } from './stockCompanies.js'
+export {
+  STOCK_INSTRUMENT_KINDS,
+  bondSearchUrl,
+  instrumentLinks,
+  isStockInstrumentSymbol,
+  stockInstrumentsFor,
+  stockQuoteResponseSchema,
+  tradingViewUrl,
+  type StockInstrument,
+  type StockInstrumentKind,
+  type StockQuoteResponse
+} from './stockInstruments.js'
 export { MAX_VIDEOS, videoLookup, type InfocarVideoRow } from './infocarVideoLookup.js'
 export { MAX_OWNER_POSTS, edriveModelSlug, ownerPostLookup, type OwnerPostLookupRow } from './edriveLookup.js'
 export { MAX_TOPGEAR_REVIEWS, topgearLookup, type TopgearLookupRow } from './topgearLookup.js'

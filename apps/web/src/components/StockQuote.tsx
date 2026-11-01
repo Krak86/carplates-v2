@@ -5,7 +5,7 @@ import type { StockRange, StockResponse } from '@carplates/shared'
 
 import StockChart from '@/components/StockChart'
 import { cn } from '@/lib/cn'
-import { toIntlLocale } from '@/lib/intl'
+import { formatStockMoney } from '@/components/stock-helpers'
 
 type Props = {
   data: StockResponse
@@ -20,12 +20,7 @@ export default function StockQuote({ data, range, onRangeChange, tall }: Props):
   const company = data.company
   if (!company || data.points.length < 2) return null
 
-  const money = (n: number): string =>
-    new Intl.NumberFormat(toIntlLocale(i18n.language), {
-      style: 'currency',
-      currency: data.currency ?? 'USD',
-      maximumFractionDigits: n >= 1000 ? 0 : 2
-    }).format(n)
+  const money = (n: number): string => formatStockMoney(n, data.currency, i18n.language)
   const price = data.price ?? data.points[data.points.length - 1]![1]
   const change = data.baseline != null ? price - data.baseline : 0
   const changePct = data.baseline ? (change / data.baseline) * 100 : 0

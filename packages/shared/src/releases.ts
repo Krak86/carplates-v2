@@ -20,6 +20,12 @@ export const RELEASES: readonly ReleaseDay[] = [
     items: [
       item(
         'new',
+        'У розділі «Акції» тепер усі інструменти компанії марки: прості та привілейовані акції, ADR, позабіржові рядки та лістинги на інших біржах, кожен зі своїм графіком, поясненням, біржею, діапазоном за 52 тижні, обсягом і посиланнями на Yahoo Finance та TradingView; додано пояснення про облігації',
+        'В разделе «Акции» теперь все инструменты компании марки: обычные и привилегированные акции, ADR, внебиржевые строки и листинги на других биржах, каждый со своим графиком, пояснением, биржей, диапазоном за 52 недели, объёмом и ссылками на Yahoo Finance и TradingView; добавлено пояснение об облигациях',
+        'The Share price section now covers every instrument of the maker: ordinary and preferred shares, ADRs, OTC lines and second listings, each with its own chart, explanation, exchange, 52-week range, volume and Yahoo Finance / TradingView links, plus a note on bonds'
+      ),
+      item(
+        'new',
         'Розділ «Акції» з ціною акцій виробника марки та графіком за день, місяць або рік: тепер і на телефоні, на сторінках моделей і марок каталогу, а не лише збоку на комп’ютері',
         'Раздел «Акции» с ценой акций производителя марки и графиком за день, месяц или год: теперь и на телефоне, на страницах моделей и марок каталога, а не только сбоку на компьютере',
         'A new Share price section shows the maker’s share price and a 1-day, 1-month or 1-year chart: now on phones and on the catalog model and make pages, not only in the desktop side panel'

@@ -66,6 +66,7 @@ import {
   getSocial,
   getStock,
   getStockNews,
+  getStockQuote,
   getReviews,
   getSafetyStats,
   getIihsRatings,
@@ -690,6 +691,14 @@ export function stockQuery(brand: string, range: StockRange) {
   return queryOptions({
     queryKey: ['stock', brand, range],
     queryFn: () => getStock(brand, range),
+    staleTime: 5 * 60 * 1000
+  })
+}
+
+export function stockQuoteQuery(brand: string, symbol: string, range: StockRange) {
+  return queryOptions({
+    queryKey: ['stock-quote', brand, symbol, range],
+    queryFn: () => getStockQuote(brand, symbol, range),
     staleTime: 5 * 60 * 1000
   })
 }
