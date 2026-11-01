@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { setamLotUrl } from '@carplates/shared'
 import type { AuctionLot, Currency, FxResponse } from '@carplates/shared'
 
 import {
@@ -8,6 +7,8 @@ import {
   OPEN_STATUS,
   formatLotMonth,
   formatPrice,
+  lotLink,
+  lotNumber,
   priceDeltaPercent
 } from '@/components/ua-auctions/helpers'
 import { cn } from '@/lib/cn'
@@ -51,13 +52,13 @@ export default function UaAuctionLot({ lot, currency, fx }: Props): ReactNode {
           label={t('uaAuctions.lotNo')}
           value={
             <a
-              href={setamLotUrl(lot.lotNo)}
+              href={lotLink(lot) ?? undefined}
               target="_blank"
               rel="noopener noreferrer"
-              title={t('uaAuctions.openOnSetam')}
+              title={lot.source === 'prozorro' ? undefined : t('uaAuctions.openOnSetam')}
               className="underline"
             >
-              {lot.lotNo} ↗<span className="sr-only">{t('field.opensNewTab')}</span>
+              {lotNumber(lot)} ↗<span className="sr-only">{t('field.opensNewTab')}</span>
             </a>
           }
         />

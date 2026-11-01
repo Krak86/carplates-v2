@@ -1084,10 +1084,19 @@ export const prozorroAuctions = registry.table(
     sellerName: text('seller_name'),
     sellerEdrpou: text('seller_edrpou'),
     sellerKind: text('seller_kind'),
-    categories: jsonb('categories').$type<string[]>().notNull().default(sql`'[]'::jsonb`),
-    directions: jsonb('directions').$type<string[]>().notNull().default(sql`'[]'::jsonb`),
+    categories: jsonb('categories')
+      .$type<string[]>()
+      .notNull()
+      .default(sql`'[]'::jsonb`),
+    directions: jsonb('directions')
+      .$type<string[]>()
+      .notNull()
+      .default(sql`'[]'::jsonb`),
     auctionType: text('auction_type'),
-    photoUrls: jsonb('photo_urls').$type<string[]>().notNull().default(sql`'[]'::jsonb`),
+    photoUrls: jsonb('photo_urls')
+      .$type<string[]>()
+      .notNull()
+      .default(sql`'[]'::jsonb`),
     sourceModifiedAt: timestamp('source_modified_at', { withTimezone: true }).notNull(),
     firstSeenAt: timestamp('first_seen_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()

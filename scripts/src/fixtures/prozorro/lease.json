@@ -1,0 +1,232 @@
+{
+  "relatedOrganizations": {
+    "ownershipType": "municipal",
+    "propertyOwner": {
+      "identifier": {
+        "legalName": {
+          "uk_UA": "Миколаївський міський палац культури \"Молодіжний\""
+        },
+        "scheme": "UA-EDR",
+        "id": "37157138"
+      },
+      "address": {
+        "streetAddress": {
+          "uk_UA": "вул. Театральна, буд. 1"
+        },
+        "postalCode": "54018",
+        "locality": {
+          "uk_UA": "Миколаїв"
+        },
+        "countryName": {
+          "en_US": "Ukraine",
+          "uk_UA": "Україна"
+        },
+        "region": {
+          "uk_UA": "Миколаївська область"
+        },
+        "addressID": {
+          "scheme": "koatuu",
+          "name": {
+            "uk_UA": "МИКОЛАЇВ"
+          },
+          "id": "4810100000"
+        }
+      },
+      "contactPoint": {
+        "name": {
+          "uk_UA": "Мелкікян Марія"
+        },
+        "telephone": "+380939231576",
+        "email": "molodijniy@gmail.com"
+      },
+      "name": {
+        "uk_UA": "Миколаївський міський палац культури \"Молодіжний\""
+      }
+    },
+    "sellingEntity": {
+      "identifier": {
+        "legalName": {
+          "uk_UA": "Миколаївський міський палац культури \"Молодіжний\""
+        },
+        "scheme": "UA-EDR",
+        "id": "37157138"
+      },
+      "address": {
+        "streetAddress": {
+          "uk_UA": "вул. Театральна, буд. 1"
+        },
+        "postalCode": "54018",
+        "locality": {
+          "uk_UA": "Миколаїв"
+        },
+        "countryName": {
+          "en_US": "Ukraine",
+          "uk_UA": "Україна"
+        },
+        "region": {
+          "uk_UA": "Миколаївська область"
+        },
+        "addressID": {
+          "scheme": "koatuu",
+          "name": {
+            "uk_UA": "МИКОЛАЇВ"
+          },
+          "id": "4810100000"
+        }
+      },
+      "contactPoint": {
+        "name": {
+          "uk_UA": "Мелкікян Марія"
+        },
+        "telephone": "+38939231576",
+        "email": "molodijniy@gmail.com"
+      },
+      "name": {
+        "uk_UA": "Миколаївський міський палац культури \"Молодіжний\""
+      }
+    }
+  },
+  "documents": [
+    {
+      "documentType": "illustration",
+      "format": "image/jpeg",
+      "url": "https://procedure.prozorro.sale/api/documents/public/a03f9c8c995240d293c79e7a6fba4117",
+      "id": "17429a4bddf842199e5310bcfc55c3a1",
+      "_ds_id": "a03f9c8c995240d293c79e7a6fba4117"
+    },
+    {
+      "documentType": "contractProforma",
+      "format": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "url": "https://procedure.prozorro.sale/api/documents/public/0be40a9d42f44a1492a8b90678ee768e",
+      "id": "26f1500818634e2cb2477ea573efc7db",
+      "_ds_id": "0be40a9d42f44a1492a8b90678ee768e"
+    }
+  ],
+  "_protect_level": "medium",
+  "description": {
+    "uk_UA": "Оренда колісного транспортного засібу, автобусу SCANIA IRIZAR Century, ідентифікаційний номер YS2KGX20001873698, 2001 року випуску, державний реєстраційний номер ВЕ0198ВТ з метою здійснення пасажирських перевезень."
+  },
+  "guarantee": {
+    "amount": 4323.6,
+    "currency": "UAH"
+  },
+  "title": {
+    "uk_UA": "Оренда колісного транспортного засібу, автобусу SCANIA IRIZAR Century"
+  },
+  "listType": "First",
+  "calcOnBookValue": false,
+  "_protected": true,
+  "dateCompleted": "2026-10-08T21:05:02.503000Z",
+  "sellingMethod": "legitimatePropertyLease-english",
+  "valueAddedTaxCharged": true,
+  "auctionPeriod": {
+    "startDate": "2026-09-11T08:20:00.000000Z"
+  },
+  "tenderPeriod": {
+    "endDate": "2026-09-10T17:00:00.000000Z",
+    "startDate": "2026-09-01T15:00:00.000000Z"
+  },
+  "value": {
+    "amount": 16670,
+    "valueAddedTaxIncluded": false,
+    "currency": "UAH"
+  },
+  "owner": "e-tender.ua",
+  "minimalStep": {
+    "amount": 166.7,
+    "currency": "UAH"
+  },
+  "registrationFee": {
+    "amount": 864.7,
+    "currency": "UAH"
+  },
+  "registryId": "65d71960ffcc2c09d3f1940c",
+  "dateModified": "2026-10-08T21:05:02.509000Z",
+  "lotId": "1",
+  "registryObjectId": "RGL001-UA-20240222-23458",
+  "leaseDuration": "P1Y",
+  "datePublished": "2026-08-31T20:00:56.495000Z",
+  "auctionId": "LLE001-UA-20260831-79791",
+  "leaseRules": {
+    "intendedUseRestrictionDescription": "Оренда пасажирського автобусу марки SCANIA CENTURY Миколаївського міського палацу культури «Молодіжний», з метою використання під здійснення пасажирських перевезень.",
+    "intendedUseRestrictionMethod": "onlyDescribed"
+  },
+  "disqualifiedBids": [],
+  "metaInfo": {
+    "directions": [
+      "legitimatePropertyLease"
+    ],
+    "categories": [
+      "transportLease"
+    ],
+    "auctionTypes": [
+      "english"
+    ]
+  },
+  "martialLawDisclaimer": false,
+  "valuePeriod": "month",
+  "minNumberOfQualifiedBids": 1,
+  "awards": [
+    {
+      "status": "active",
+      "value": {
+        "amount": 17020,
+        "currency": "UAH"
+      }
+    }
+  ],
+  "tenderAttempts": 1,
+  "items": [
+    {
+      "itemType": "vehicle",
+      "quantity": 1,
+      "address": {
+        "locality": {
+          "uk_UA": "Миколаїв"
+        },
+        "region": {
+          "uk_UA": "Миколаївська область"
+        }
+      },
+      "description": {
+        "en_US": "",
+        "uk_UA": "Колісний транспортний засіб, автобус SCANIA IRIZAR Century, ідентифікаційний номер YS2K6X20001873693, 2011 року випуску, державний реєстраційний номер ВЕ0198ВТ"
+      },
+      "location": {
+        "latitude": "46.94744980707282",
+        "longitude": "32.08059930790136"
+      },
+      "id": "bc80e158de0f45ce9bd78f02682140d9",
+      "vehicleProps": {
+        "condition": "Термін експлуатації - 13 років",
+        "transmission": "manual",
+        "itemPropsType": "vehicle",
+        "fuelType": "diesel",
+        "color": "Білий",
+        "identificationNumber": "YS2K6X20001873693",
+        "model": "IRIZAR Century",
+        "productionYear": 2011,
+        "damagePresence": false,
+        "brand": "SCANIA",
+        "engineCapacity": 12740
+      },
+      "classification": {
+        "scheme": "CAV",
+        "description": {
+          "en_US": "Motor vehicles",
+          "uk_UA": "Мототранспортні засоби"
+        },
+        "id": "34100000-8"
+      },
+      "title": {
+        "en_US": "",
+        "uk_UA": "Пасажирський автобус марки SCANIA CENTURY Миколаївського міського палацу культури «Молодіжний»"
+      }
+    }
+  ],
+  "qualificationPeriod": {
+    "endDate": "2026-10-08T15:00:00.000000Z",
+    "startDate": "2026-09-10T17:00:05.549000Z"
+  },
+  "status": "complete"
+}

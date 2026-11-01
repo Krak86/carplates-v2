@@ -769,7 +769,18 @@ export {
   AUCTIONS_DATASET_URL,
   SETAM_URL,
   PROZORRO_SALE_URL,
-  setamLotUrl
+  setamLotUrl,
+  AUCTION_SOURCES,
+  DEFAULT_AUCTION_SOURCE,
+  AUCTION_GROUPS,
+  PROZORRO_SELLER_KINDS,
+  PROZORRO_STATUS_LABELS,
+  PROZORRO_DOCUMENT_BASE,
+  PROZORRO_DOC_ID_RE,
+  auctionGroup,
+  prozorroStatusLabel,
+  prozorroAuctionUrl,
+  prozorroDocumentUrl
 } from './auctions.js'
 export type {
   AuctionLot,
@@ -781,6 +792,9 @@ export type {
   AuctionListResponse,
   AuctionOutcome,
   AuctionSort,
+  AuctionSource,
+  AuctionGroup,
+  ProzorroSellerKind,
   AuctionStatsRow,
   AuctionStatsResponse
 } from './auctions.js'

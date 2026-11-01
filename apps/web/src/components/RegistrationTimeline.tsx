@@ -2,7 +2,6 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import { useQuery } from '@tanstack/react-query'
-import { setamLotUrl } from '@carplates/shared'
 import type { Registration, WantedResponse } from '@carplates/shared'
 import type { TFunction } from 'i18next'
 
@@ -10,7 +9,15 @@ import CopyButton from '@/components/CopyButton'
 import InfoPopover from '@/components/InfoPopover'
 import Timeline from '@/components/Timeline'
 import type { TimelineItem } from '@/components/Timeline'
-import { OPEN_STATUS, formatLotMonth, formatPrice, timelineLots } from '@/components/ua-auctions/helpers'
+import {
+  OPEN_STATUS,
+  formatLotMonth,
+  formatPrice,
+  lotKey,
+  lotLink,
+  lotNumber,
+  timelineLots
+} from '@/components/ua-auctions/helpers'
 import { cn } from '@/lib/cn'
 import { toIntlLocale } from '@/lib/intl'
 import { auctionLotsQuery, wantedQuery } from '@/lib/queries'
@@ -114,7 +121,7 @@ export default function RegistrationTimeline({ actions, currentPlate, auctionKey
     at: insertIndex(actions, lot.month ?? null),
     lot,
     item: {
-      key: `lot-${lot.lotNo}`,
+      key: `lot-${lotKey(lot)}`,
       highlight: lot.sold,
       content: (
         <div className="text-sm">
@@ -125,14 +132,16 @@ export default function RegistrationTimeline({ actions, currentPlate, auctionKey
               price: formatPrice(lot.salePrice ?? lot.startPrice, 'UAH', null, locale) ?? '-'
             })}
           </span>{' '}
-          <a
-            href={setamLotUrl(lot.lotNo)}
-            target="_blank"
-            rel="noopener noreferrer nofollow"
-            className="text-[var(--color-muted)] underline"
-          >
-            {t('uaAuctions.lotNo')} {lot.lotNo} ↗<span className="sr-only">{t('field.opensNewTab')}</span>
-          </a>
+          {lotLink(lot) && (
+            <a
+              href={lotLink(lot) ?? undefined}
+              target="_blank"
+              rel="noopener noreferrer nofollow"
+              className="text-[var(--color-muted)] underline"
+            >
+              {t('uaAuctions.lotNo')} {lotNumber(lot)} ↗<span className="sr-only">{t('field.opensNewTab')}</span>
+            </a>
+          )}
         </div>
       )
     } satisfies TimelineItem

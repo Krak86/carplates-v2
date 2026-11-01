@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
-import { AUCTION_OUTCOMES, AUCTION_SORTS, setamLotUrl } from '@carplates/shared'
+import { AUCTION_OUTCOMES, AUCTION_SORTS } from '@carplates/shared'
 import type { AuctionListLot, AuctionListQuery, AuctionStatsRow, Currency, FxResponse } from '@carplates/shared'
 
 import {
@@ -10,6 +10,9 @@ import {
   OPEN_STATUS,
   formatLotMonth,
   formatPrice,
+  lotKey,
+  lotLink,
+  lotNumber,
   priceDeltaPercent
 } from '@/components/ua-auctions/helpers'
 import { cn } from '@/lib/cn'
@@ -74,12 +77,12 @@ function LotRow({ lot, currency, fx }: { lot: AuctionListLot; currency: Currency
 
       <p className="mt-1 flex flex-wrap gap-x-4 gap-y-1">
         <a
-          href={setamLotUrl(lot.lotNo)}
+          href={lotLink(lot) ?? undefined}
           target="_blank"
           rel="noopener noreferrer"
           className="text-[var(--color-primary)] underline"
         >
-          {t('uaAuctions.lotNo')} {lot.lotNo} ↗<span className="sr-only">{t('field.opensNewTab')}</span>
+          {t('uaAuctions.lotNo')} {lotNumber(lot)} ↗<span className="sr-only">{t('field.opensNewTab')}</span>
         </a>
 
         {carPath && (
@@ -225,7 +228,7 @@ export default function AuctionsLotList({ query, makes, regions, currency, fx, o
 
           <ul className={cn('space-y-2', isPlaceholderData && 'opacity-60')}>
             {data.lots.map(lot => (
-              <LotRow key={lot.lotNo} lot={lot} currency={currency} fx={fx} />
+              <LotRow key={lotKey(lot)} lot={lot} currency={currency} fx={fx} />
             ))}
           </ul>
 

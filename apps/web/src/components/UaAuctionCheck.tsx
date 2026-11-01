@@ -15,7 +15,7 @@ import UaAuctionStatus from '@/components/ua-auctions/UaAuctionStatus'
 import UaAuctionChart from '@/components/ua-auctions/UaAuctionChart'
 import UaAuctionPriceCheck from '@/components/ua-auctions/UaAuctionPriceCheck'
 import UaAuctionLot from '@/components/ua-auctions/UaAuctionLot'
-import { OPEN_STATUS, VISIBLE_NOT_SOLD } from '@/components/ua-auctions/helpers'
+import { OPEN_STATUS, VISIBLE_NOT_SOLD, lotKey } from '@/components/ua-auctions/helpers'
 import VinToggleSection from '@/components/vin/VinToggleSection'
 import { toIntlLocale } from '@/lib/intl'
 import { auctionLotsQuery, fxQuery } from '@/lib/queries'
@@ -110,7 +110,7 @@ export default function UaAuctionCheck({ plate, vin, openSignal = 0, startOpen =
 
           <Timeline
             items={shown.map(lot => ({
-              key: String(lot.lotNo),
+              key: lotKey(lot),
               highlight: lot.sold,
               content: <UaAuctionLot lot={lot} currency={currency} fx={fx} />
             }))}

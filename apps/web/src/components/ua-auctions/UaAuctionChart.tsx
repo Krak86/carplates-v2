@@ -8,6 +8,8 @@ import {
   formatCompactUah,
   formatLotMonth,
   formatPrice,
+  lotKey,
+  lotNumber,
   priceSeries
 } from '@/components/ua-auctions/helpers'
 import { toIntlLocale } from '@/lib/intl'
@@ -49,7 +51,7 @@ export default function UaAuctionChart({ lots, currency: wanted, fx }: Props): R
   const summary = points
     .map(
       p =>
-        `${formatLotMonth(p.lot.month, locale) ?? p.lot.lotNo}: ${formatPrice(p.lot.startPrice, currency, fx, locale)}${p.lot.sold ? ` -> ${formatPrice(p.lot.salePrice, currency, fx, locale)}` : ''}`
+        `${formatLotMonth(p.lot.month, locale) ?? lotNumber(p.lot)}: ${formatPrice(p.lot.startPrice, currency, fx, locale)}${p.lot.sold ? ` -> ${formatPrice(p.lot.salePrice, currency, fx, locale)}` : ''}`
     )
     .join('; ')
 
@@ -82,7 +84,7 @@ export default function UaAuctionChart({ lots, currency: wanted, fx }: Props): R
         {points.map((p, i) =>
           i > 0 && p.round !== null && p.round === 1 ? (
             <line
-              key={`d${p.lot.lotNo}`}
+              key={`d${lotKey(p.lot)}`}
               x1={(x(i) + x(i - 1)) / 2}
               x2={(x(i) + x(i - 1)) / 2}
               y1={PAD.top}
@@ -96,7 +98,7 @@ export default function UaAuctionChart({ lots, currency: wanted, fx }: Props): R
         <path d={line} fill="none" stroke="var(--color-primary)" strokeWidth={2} strokeLinejoin="round" />
 
         {points.map((p, i) => (
-          <g key={p.lot.lotNo}>
+          <g key={lotKey(p.lot)}>
             <circle
               cx={x(i)}
               cy={y(p.lot.startPrice ?? 0)}
@@ -105,7 +107,7 @@ export default function UaAuctionChart({ lots, currency: wanted, fx }: Props): R
               stroke="var(--color-surface)"
               strokeWidth={2}
             >
-              <title>{`${formatLotMonth(p.lot.month, locale) ?? ''} #${p.lot.lotNo}: ${formatPrice(p.lot.startPrice, currency, fx, locale)}`}</title>
+              <title>{`${formatLotMonth(p.lot.month, locale) ?? ''} #${lotNumber(p.lot)}: ${formatPrice(p.lot.startPrice, currency, fx, locale)}`}</title>
             </circle>
             {p.lot.salePrice !== null && (
               <circle

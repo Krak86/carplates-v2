@@ -1,0 +1,289 @@
+{
+  "documents": [
+    {
+      "documentType": "illustration",
+      "format": "image/svg+xml",
+      "url": "https://procedure.prozorro.sale/api/documents/public/6153c34e7718446fb95660ab7e64d4d6",
+      "id": "7dd4786fd1c04425b511ce734d45140b",
+      "_ds_id": "6153c34e7718446fb95660ab7e64d4d6"
+    },
+    {
+      "documentType": "illustration",
+      "format": "image/jpeg",
+      "url": "https://procedure.prozorro.sale/api/documents/public/4dd63e7039b5440da66613680eff8201",
+      "id": "a5d2c5f358304478a31c02c2307e8b2f",
+      "_ds_id": "4dd63e7039b5440da66613680eff8201"
+    },
+    {
+      "documentType": "illustration",
+      "format": "image/jpeg",
+      "url": "https://procedure.prozorro.sale/api/documents/public/e9181cad605f4abc8b12605cceb2578d",
+      "id": "91b53cadd54849e9bd3aa32ded635035",
+      "_ds_id": "e9181cad605f4abc8b12605cceb2578d"
+    },
+    {
+      "documentType": "restrictions",
+      "format": "application/pdf",
+      "url": "https://procedure.prozorro.sale/api/documents/public/cfcef53514f34c128aa1f67b30edc958",
+      "id": "8bbb547c318946f1b8a16027ebba892a",
+      "_ds_id": "cfcef53514f34c128aa1f67b30edc958"
+    }
+  ],
+  "discount": {
+    "discountPercent": 20,
+    "discount": true,
+    "previousAuctionValue": {
+      "amount": 698000,
+      "valueAddedTaxIncluded": false,
+      "currency": "UAH"
+    }
+  },
+  "description": {
+    "uk_UA": "Повторний аукціон з продажу майна банкрута (заставленого) - ТОВАРИСТВА З ОБМЕЖЕНОЮ ВІДПОВІДАЛЬНІСТЮ \"КИЇВСЬКИЙ ЗАВОД НАПОЇВ \"РОСИНКА\" (ідентифікаційний код 39695169, 03057, м. Київ, вул. Антона Цедіка, будинок 6) в процедурі банкрутства у справі № 910/9767/21, порушеній Господарським судом міста Києва. Детальний опис лоту наведено в додатках. Загальний опис Лот № 3: \n1)\tСпеціалізований вантажний фургон Ізотермічний–С, MERCEDES-BENZ ATEGO 1218L 2004, № шасі (кузова, рами) - WDB9702571K854606, реєстраційний номер -AA3273CO.\n2)\tСпеціалізований вантажний фургон Ізотермічний–С, MERCEDES-BENZ ATEGO 1218L, 2003, № шасі (кузова, рами) -WDB9702571K849383, реєстраційний номер - АА1003СО.\n3)\tСпеціалізований вантажний сідловий Тягач-Е МА3 544008 рік випуску – 2005, № шасі (кузова, рами) – Y3M54400850001380, реєстраційний номер - AA9564AО.\nВ додатках до аукціону надано всі наявні у Ліквідатора документи та інформацію про майно.\nПоряд з цим зауважую, що наявні документи є вичерпними. \nДля спрощення аналізу лоту нижче наведено короткий опис Лоту.\nДетальний опис лоту:\n1.\tСпеціалізований вантажний фургон Ізотермічний–С, MERCEDES-BENZ ATEGO 1218L 2004, № шасі (кузова, рами) - WDB9702571K854606, реєс"
+  },
+  "guarantee": {
+    "amount": 55840,
+    "currency": "UAH"
+  },
+  "title": {
+    "uk_UA": "Повторний аукціон з продажу майна банкрута (заставленого) - ТОВАРИСТВА З ОБМЕЖЕНОЮ ВІДПОВІДАЛЬНІСТЮ \"КИЇВСЬКИЙ ЗАВОД НАПОЇВ \"РОСИНКА\" (ідентифікаційний код 39695169, 03057, м. Київ, вул. Антона Цедіка, будинок 6) в процедурі банкрутства у справі № 910/9767/21, порушеній Господарським судом міста Києва."
+  },
+  "isTaxInvoiceProvided": false,
+  "_protected": false,
+  "dateCompleted": "2026-10-23T11:44:21.874000Z",
+  "economicCourtName": {
+    "uk_UA": "Господарський суд міста Києва"
+  },
+  "sellingMethod": "bankRuptcy-english",
+  "valueAddedTaxCharged": false,
+  "auctionPeriod": {
+    "startDate": "2026-10-12T08:20:00.000000Z"
+  },
+  "previousAuctionId": "BRE001-UA-20260908-17064",
+  "tenderPeriod": {
+    "endDate": "2026-10-11T17:00:00.000000Z",
+    "startDate": "2026-09-30T08:48:25.577000Z"
+  },
+  "value": {
+    "amount": 558400,
+    "valueAddedTaxIncluded": false,
+    "currency": "UAH"
+  },
+  "owner": "tender-online.com.ua",
+  "minimalStep": {
+    "amount": 5584,
+    "currency": "UAH"
+  },
+  "sellingMethodType": {
+    "uk_UA": "Перший повторний аукціон - без можливості зниження початкової ціни"
+  },
+  "dateModified": "2026-10-23T11:44:21.885000Z",
+  "lotId": "Лот 3",
+  "datePublished": "2026-09-30T08:48:25.557000Z",
+  "auctionId": "BRE001-UA-20260930-62316",
+  "metaInfo": {
+    "directions": [
+      "bankRuptcy"
+    ],
+    "categories": [
+      "transportSale"
+    ],
+    "auctionTypes": [
+      "english"
+    ]
+  },
+  "sellingEntity": {
+    "identifier": {
+      "legalName": {
+        "en_US": "",
+        "uk_UA": "Арбітражний керуючий Гаращенко Ігор Володимирович"
+      },
+      "scheme": "UA-IPN",
+      "id": "3088211772"
+    },
+    "address": {
+      "postalCode": "03179",
+      "locality": {
+        "en_US": "",
+        "uk_UA": "Київ"
+      },
+      "countryName": {
+        "en_US": "",
+        "uk_UA": "Україна"
+      },
+      "region": {
+        "en_US": "",
+        "uk_UA": "Київ"
+      }
+    },
+    "name": {
+      "en_US": "",
+      "uk_UA": "Арбітражний керуючий Гаращенко Ігор Володимирович"
+    }
+  },
+  "bankruptcyCaseNumber": {
+    "uk_UA": "№ 910/9767/21"
+  },
+  "minNumberOfQualifiedBids": 1,
+  "awards": [
+    {
+      "status": "active",
+      "value": {
+        "amount": 559400,
+        "currency": "UAH"
+      }
+    }
+  ],
+  "tenderAttempts": 2,
+  "x_additionalInformation": {
+    "uk_UA": "Додаткову інформацію щодо аукціону та майна можливо отримати у Замовника аукціону – Арбітражного керуючого Гаращенко Ігор Володимирович: тел. +380506893051; likvgiv@gmail.com"
+  },
+  "items": [
+    {
+      "bankRuptcyItemType": "assets",
+      "itemProps": {
+        "itemPropsType": "vehicle",
+        "color": "Синій",
+        "configuration": "Невідома",
+        "productionYear": 2004,
+        "damagePresence": true,
+        "engineCapacity": 4300,
+        "damagedDescription": "не робочий, не на ходу, не заводиться",
+        "condition": "не робочий, не на ходу, не заводиться",
+        "transmission": "manual",
+        "fuelType": "diesel",
+        "kilometrage": 999999,
+        "identificationNumber": "WDB9702571K854606",
+        "model": "ATEGO 1218L",
+        "brand": "MERCEDES-BENZ"
+      },
+      "quantity": 1,
+      "address": {
+        "locality": {
+          "en_US": "",
+          "uk_UA": "М.КИЇВ"
+        },
+        "region": {
+          "en_US": "",
+          "uk_UA": "Київ"
+        }
+      },
+      "description": {
+        "uk_UA": "Майно банкрута (заставленого) - ТОВАРИСТВА З ОБМЕЖЕНОЮ ВІДПОВІДАЛЬНІСТЮ \"КИЇВСЬКИЙ ЗАВОД НАПОЇВ \"РОСИНКА\" (ідентифікаційний код 39695169, 03057, м. Київ, вул. Антона Цедіка, будинок 6) в процедурі банкрутства у справі № 910/9767/21, порушеній Господарським судом міста Києва. Детальний опис лоту наведено в додатках."
+      },
+      "location": {
+        "elevation": "",
+        "latitude": "",
+        "longitude": ""
+      },
+      "id": "3f1344a151de41b19e121fb38e5cda96",
+      "classification": {
+        "scheme": "CAV",
+        "description": {
+          "en_US": "Second-hand goods vehicles",
+          "uk_UA": "Вантажні транспортні засоби, що були у використанні"
+        },
+        "id": "34137000-6"
+      }
+    },
+    {
+      "bankRuptcyItemType": "assets",
+      "itemProps": {
+        "itemPropsType": "vehicle",
+        "color": "Синій",
+        "configuration": "Невідомо",
+        "productionYear": 2003,
+        "damagePresence": true,
+        "engineCapacity": 4300,
+        "damagedDescription": "не робочий, не на ходу, не заводиться",
+        "condition": "не робочий, не на ходу, не заводиться",
+        "transmission": "manual",
+        "fuelType": "diesel",
+        "kilometrage": 999999,
+        "identificationNumber": "WDB9702571K849383",
+        "model": "ATEGO 1218L",
+        "brand": "MERCEDES-BENZ"
+      },
+      "quantity": 1,
+      "address": {
+        "locality": {
+          "en_US": "",
+          "uk_UA": "М.КИЇВ"
+        },
+        "region": {
+          "en_US": "",
+          "uk_UA": "Київ"
+        }
+      },
+      "description": {
+        "uk_UA": "Майно банкрута (заставленого) - ТОВАРИСТВА З ОБМЕЖЕНОЮ ВІДПОВІДАЛЬНІСТЮ \"КИЇВСЬКИЙ ЗАВОД НАПОЇВ \"РОСИНКА\" (ідентифікаційний код 39695169, 03057, м. Київ, вул. Антона Цедіка, будинок 6) в процедурі банкрутства у справі № 910/9767/21, порушеній Господарським судом міста Києва. Детальний опис лоту наведено в додатках."
+      },
+      "location": {
+        "elevation": "",
+        "latitude": "",
+        "longitude": ""
+      },
+      "id": "53b82d6dabf14826a6aa70ca075f028f",
+      "classification": {
+        "scheme": "CAV",
+        "description": {
+          "en_US": "Second-hand goods vehicles",
+          "uk_UA": "Вантажні транспортні засоби, що були у використанні"
+        },
+        "id": "34137000-6"
+      }
+    },
+    {
+      "bankRuptcyItemType": "assets",
+      "itemProps": {
+        "itemPropsType": "vehicle",
+        "color": "Синій",
+        "configuration": "Невідомо",
+        "productionYear": 2005,
+        "damagePresence": true,
+        "engineCapacity": 14860,
+        "damagedDescription": "не робочий, не на ходу, не заводиться",
+        "condition": "не робочий, не на ходу, не заводиться",
+        "transmission": "manual",
+        "fuelType": "diesel",
+        "kilometrage": 999999,
+        "identificationNumber": "Y3M54400850001380",
+        "model": "544008",
+        "brand": "МА3 "
+      },
+      "quantity": 1,
+      "address": {
+        "locality": {
+          "en_US": "",
+          "uk_UA": "М.КИЇВ"
+        },
+        "region": {
+          "en_US": "",
+          "uk_UA": "Київ"
+        }
+      },
+      "description": {
+        "uk_UA": "Майно банкрута (заставленого) - ТОВАРИСТВА З ОБМЕЖЕНОЮ ВІДПОВІДАЛЬНІСТЮ \"КИЇВСЬКИЙ ЗАВОД НАПОЇВ \"РОСИНКА\" (ідентифікаційний код 39695169, 03057, м. Київ, вул. Антона Цедіка, будинок 6) в процедурі банкрутства у справі № 910/9767/21, порушеній Господарським судом міста Києва. Детальний опис лоту наведено в додатках."
+      },
+      "location": {
+        "elevation": "",
+        "latitude": "",
+        "longitude": ""
+      },
+      "id": "0e92c1a73bc9417ba0643e7df2dc1ca0",
+      "classification": {
+        "scheme": "CAV",
+        "description": {
+          "en_US": "Second-hand goods vehicles",
+          "uk_UA": "Вантажні транспортні засоби, що були у використанні"
+        },
+        "id": "34137000-6"
+      }
+    }
+  ],
+  "qualificationPeriod": {
+    "endDate": "2026-11-10T18:00:05.438000Z",
+    "startDate": "2026-10-11T17:00:05.387000Z"
+  },
+  "status": "complete"
+}

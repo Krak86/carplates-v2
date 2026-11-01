@@ -54,13 +54,13 @@ describe('priceSeries', () => {
   const lot = (lotNo: number, proceedingNo: string | null, startPrice: number | null): AuctionLot =>
     ({ lotNo, proceedingNo, startPrice }) as AuctionLot
 
-  it('sorts oldest first and numbers rounds per proceeding', () => {
+  it('turns the newest-first answer around and numbers rounds per proceeding', () => {
     const series = priceSeries([
+      lot(50, 'A', null),
+      lot(40, null, 3),
       lot(30, 'B', 5),
       lot(20, 'A', 9),
-      lot(10, 'A', 12),
-      lot(40, null, 3),
-      lot(50, 'A', null)
+      lot(10, 'A', 12)
     ])
     expect(series.map(p => [p.lot.lotNo, p.round])).toEqual([
       [10, 1],

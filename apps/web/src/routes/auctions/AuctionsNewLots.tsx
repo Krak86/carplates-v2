@@ -1,11 +1,10 @@
 import type { ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { setamLotUrl } from '@carplates/shared'
 import type { Currency, FxResponse } from '@carplates/shared'
 
 import Card from '@/components/ui/Card'
-import { formatLotMonth, formatPrice } from '@/components/ua-auctions/helpers'
+import { formatLotMonth, formatPrice, lotKey, lotLink } from '@/components/ua-auctions/helpers'
 import { toIntlLocale } from '@/lib/intl'
 import { auctionListQuery } from '@/lib/queries'
 
@@ -40,7 +39,7 @@ export default function AuctionsNewLots({ currency, fx, onShowAll }: Props): Rea
       <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {lots.map(lot => (
           <li
-            key={lot.lotNo}
+            key={lotKey(lot)}
             className="rounded-lg border border-[var(--color-border)] bg-[var(--color-border)]/20 p-3 text-sm"
           >
             <p className="font-semibold">🔔 {[lot.make, lot.model, lot.year].filter(Boolean).join(' ') || lot.title}</p>
@@ -56,7 +55,7 @@ export default function AuctionsNewLots({ currency, fx, onShowAll }: Props): Rea
             )}
 
             <a
-              href={setamLotUrl(lot.lotNo)}
+              href={lotLink(lot) ?? undefined}
               target="_blank"
               rel="noopener noreferrer"
               className="mt-1 inline-block text-[var(--color-primary)] underline"

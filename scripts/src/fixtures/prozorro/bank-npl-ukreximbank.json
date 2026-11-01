@@ -1,0 +1,172 @@
+{
+  "isPerishable": false,
+  "documents": [
+    {
+      "documentType": "illustration",
+      "format": "image/jpeg",
+      "url": "https://procedure.prozorro.sale/api/documents/public/5a9e89a5d1d7474cb4dab948d9286530",
+      "id": "6de611b060af4489a7dc30817eda12f2",
+      "_ds_id": "5a9e89a5d1d7474cb4dab948d9286530"
+    },
+    {
+      "documentType": "illustration",
+      "format": "image/jpeg",
+      "url": "https://procedure.prozorro.sale/api/documents/public/b5f7233cd33544c593db2ca0ba2aeb99",
+      "id": "7a41b18d23b444ee81661afa1371aca2",
+      "_ds_id": "b5f7233cd33544c593db2ca0ba2aeb99"
+    },
+    {
+      "documentType": "illustration",
+      "format": "image/jpeg",
+      "url": "https://procedure.prozorro.sale/api/documents/public/80e8cc46882240959e69a64986469ef0",
+      "id": "14e314f4183e405aac3aeee3d15e2135",
+      "_ds_id": "80e8cc46882240959e69a64986469ef0"
+    },
+    {
+      "documentType": "x_presentation",
+      "format": "application/pdf",
+      "url": "https://procedure.prozorro.sale/api/documents/public/6d5051d17c6749f3b6c95fefe1cf8350",
+      "id": "4514e48571b14ccbbb05130c1b416f3c",
+      "_ds_id": "6d5051d17c6749f3b6c95fefe1cf8350"
+    }
+  ],
+  "description": {
+    "uk_UA": "АВТОМОБИЛЬ VOLKSWAGEN PASSAT B-6 легковий седан, реєстраційний номер: АН7640ЕС, VIN: WVWZZZ3CZ8E251488, чорного кольору, 2008 року випуску"
+  },
+  "guarantee": {
+    "amount": 12492,
+    "currency": "UAH"
+  },
+  "title": {
+    "uk_UA": "Транспортний засіб VOLKSWAGEN PASSAT B-6, легковий седан, реєстраційний номер: АН7640ЕС, VIN: WVWZZZ3CZ8E251488, чорного кольору, 2008 року випуску"
+  },
+  "_protected": false,
+  "sellingMethod": "basicSell-english",
+  "valueAddedTaxCharged": false,
+  "auctionPeriod": {
+    "startDate": "2026-10-14T09:40:00.000000Z"
+  },
+  "tenderPeriod": {
+    "endDate": "2026-10-13T17:00:00.000000Z",
+    "startDate": "2026-09-28T12:19:09.221000Z"
+  },
+  "value": {
+    "amount": 124920,
+    "valueAddedTaxIncluded": true,
+    "currency": "UAH"
+  },
+  "owner": "smarttender.biz",
+  "minimalStep": {
+    "amount": 1249.2,
+    "currency": "UAH"
+  },
+  "registrationFee": {
+    "amount": 340,
+    "currency": "UAH"
+  },
+  "dateModified": "2026-10-21T14:16:50.231000Z",
+  "lotId": "428-ПМ",
+  "datePublished": "2026-09-28T12:19:09.211000Z",
+  "auctionId": "BSE001-UA-20260928-49050",
+  "disqualifiedBids": [],
+  "metaInfo": {
+    "directions": [
+      "otherAssets"
+    ],
+    "categories": [
+      "npl",
+      "cars"
+    ],
+    "auctionTypes": [
+      "english"
+    ]
+  },
+  "sellingEntity": {
+    "identifier": {
+      "legalName": {
+        "uk_UA": "Акціонерне товариство \"Державний експортно-імпортний банк України\""
+      },
+      "scheme": "UA-EDR",
+      "id": "00032112"
+    },
+    "address": {
+      "postalCode": "03150",
+      "locality": {
+        "uk_UA": "Київ"
+      },
+      "countryName": {
+        "uk_UA": "Україна"
+      },
+      "region": {
+        "uk_UA": "Київська область"
+      }
+    },
+    "name": {
+      "uk_UA": "Акціонерне товариство \"Державний експортно-імпортний банк України\""
+    }
+  },
+  "minNumberOfQualifiedBids": 1,
+  "awards": [
+    {
+      "status": "active",
+      "value": {
+        "amount": 153750,
+        "currency": "UAH"
+      }
+    }
+  ],
+  "tenderAttempts": 1,
+  "x_additionalInformation": {
+    "uk_UA": "Істотні умови договору, порядок формування початкової (стартової) ціни та інші умови зазначені в електронному документі \"ІНФОРМАЦІЯ ПРО МАЙНО ТА ВИМОГИ ДО УЧАСНИКІВ ТА ПЕРЕМОЖЦЯ\" Регламент ЕТС розміщений на веб-сайті ДП «Прозорро.Продажі» в розділі \"Майданчикам\", «Документи, що регулюють напрями діяльності», розділ « Продаж майна і права користування»."
+  },
+  "items": [
+    {
+      "itemProps": {
+        "itemPropsType": "vehicle",
+        "color": "чорний",
+        "productionYear": 2008,
+        "damagePresence": false,
+        "engineCapacity": 1798,
+        "damagedDescription": "Динаміка та витрати: Максимальна швидкість, км/год.: 220 Витрати пального (міський цикл), л. на 100 км: 10.4 Витрати пального (заміський цикл), л. на 100 км: 6 Витрати пального (змішаний цикл), л. на 100 км: 7.6 Норма токсичності: Euro IV Двигун: Двигун: 1.8 TSI (Турбо) Код двигуна: BZB/CDAA (EA888) Тип двигуна: ДВЗ Тип пального: Бензин Об’єм двигуна, куб.см: 1798 Розташування циліндрів: в ряд Кількість циліндрів: 4 Кількість клапанів: 16 Потужність, к.с.: 160 Крутний момент, Нм: 250 Габарити: Кількість місць: 5 Довжина, мм: 4765 Ширина, мм: 1820 Висота, мм: 1472 Колісна база, мм: 2709 Споряджена маса, кг: 1343 Повна маса, кг: 1950 Об’єм багажника, л: 541 Об’єм паливного баку, л: 68 Кліренс, мм: 150 Гальмівна система: Передні гальма - дискові вентильовані Задні гальма - дискові КПП та привід: Коробка передач: 6-MКП Тип коробки передач: Механіка Кількість передач: 6 Привід: Передній Стан майна: Фактичний пробіг (одометр), км.: 327 739 Потребує ремонту (авто на ходу): 1) ДВЗ/турбіна - підвищена витрата моторної оливи/ некоректна робота нагнітача (відсутній наддув) 2) Стан ЛФП - загальний стан незадовільний (передні двері, передні крила, пороги наскрізна корозія) 3) Ходова частина – потребує заміни сайлент-блоків важелів (по колу) 4) Салон – потребує хімчистки та ремонту покриття стелі (провисання матеріалу по всій площині, розшарування) 5) Сколи та мікротріщини вітрового Скла 6) двигун запускається, проте через короткий час зупиняється Комплектація: Колір - чорний Матеріал салону – тканина Система кондиціонування – двозонний клімат-контроль Ключі запалення, компл – 2 Запасне колесо - повнорозмірне Колісний ключ Домкрат",
+        "condition": "задовільний",
+        "transmission": "manual",
+        "fuelType": "gasoline",
+        "kilometrage": 327739,
+        "identificationNumber": "WVWZZZ3CZ8E251488",
+        "model": "PASSAT B-6",
+        "brand": "VOLKSWAGEN"
+      },
+      "quantity": 1,
+      "address": {
+        "locality": {
+          "uk_UA": "Київ"
+        },
+        "region": {
+          "uk_UA": "Київська область"
+        }
+      },
+      "description": {
+        "uk_UA": "АВТОМОБИЛЬ VOLKSWAGEN PASSAT B-6 легковий седан, реєстраційний номер: АН7640ЕС, VIN: WVWZZZ3CZ8E251488, чорного кольору, 2008 року випуску"
+      },
+      "location": {
+        "latitude": "50.41915000",
+        "longitude": "30.51992000"
+      },
+      "basicSellItemType": "assets",
+      "id": "b6901887b8ee4d9fa689ff2bc4f8dcca",
+      "classification": {
+        "scheme": "CAV",
+        "description": {
+          "en_US": "Second-hand transport vehicles",
+          "uk_UA": "Транспортні засоби, що були у використанні"
+        },
+        "id": "34115300-9"
+      }
+    }
+  ],
+  "qualificationPeriod": {
+    "endDate": "2026-11-10T16:00:00.000000Z",
+    "startDate": "2026-10-13T17:00:03.594000Z"
+  },
+  "status": "active_awarded"
+}

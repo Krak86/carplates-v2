@@ -1,4 +1,17 @@
+import { setamLotUrl } from '@carplates/shared'
 import type { AuctionLot, Currency, FxResponse } from '@carplates/shared'
+
+type LotRef = Pick<AuctionLot, 'id' | 'lotNo' | 'url' | 'source' | 'auctionId'>
+
+/** Stable React key of a lot of either source (data saved before Prozorro.Sale has no `id`). */
+export const lotKey = (lot: LotRef): string => lot.id ?? `setam:${lot.lotNo}`
+
+/** The lot's own auction page (SETAM or Prozorro.Sale); null when neither a link nor a lot number is known. */
+export const lotLink = (lot: LotRef): string | null => lot.url ?? (lot.lotNo === null ? null : setamLotUrl(lot.lotNo))
+
+/** What the card prints as the lot's number: the SETAM lot number, or the full Prozorro auction ID. */
+export const lotNumber = (lot: LotRef): string =>
+  lot.source === 'prozorro' ? (lot.auctionId ?? '') : String(lot.lotNo ?? '')
 
 /** Feed status (Ukrainian) -> i18n key suffix of `uaAuctions.status.*`; an unknown status is shown as published. */
 export const LOT_STATUS_KEYS: Readonly<Record<string, string>> = {
@@ -40,9 +53,10 @@ export type PricePoint = {
   round: number | null
 }
 
-/** Lots with a start price, oldest first (lot numbers grow with time), each tagged with its round in the proceeding. */
+/** Lots with a start price, oldest first, each tagged with its round in the proceeding. */
 export function priceSeries(lots: readonly AuctionLot[]): PricePoint[] {
-  const oldestFirst = lots.filter(l => l.startPrice !== null).toSorted((a, b) => a.lotNo - b.lotNo)
+  // The API answers newest first (both sources), so oldest first is the reverse.
+  const oldestFirst = lots.filter(l => l.startPrice !== null).toReversed()
   const seen = new Map<string, number>()
   return oldestFirst.map(lot => {
     if (!lot.proceedingNo) return { lot, round: null }

@@ -2,11 +2,10 @@ import type { ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
-import { setamLotUrl } from '@carplates/shared'
 
 import LoadErrorBoundary from '@/components/LoadErrorBoundary'
 import Card from '@/components/ui/Card'
-import { formatLotMonth, formatPrice } from '@/components/ua-auctions/helpers'
+import { formatLotMonth, formatPrice, lotKey, lotLink } from '@/components/ua-auctions/helpers'
 import { toIntlLocale } from '@/lib/intl'
 import { auctionListQuery } from '@/lib/queries'
 
@@ -34,9 +33,9 @@ export default function HomeAuctionsSection(): ReactNode {
               const price = formatPrice(lot.startPrice, 'UAH', null, locale)
 
               return (
-                <li key={lot.lotNo} className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5 py-2">
+                <li key={lotKey(lot)} className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5 py-2">
                   <a
-                    href={setamLotUrl(lot.lotNo)}
+                    href={lotLink(lot) ?? undefined}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="font-semibold text-[var(--color-primary)] underline"

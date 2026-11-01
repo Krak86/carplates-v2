@@ -11,6 +11,9 @@ export const ROLLUP_CACHE = 'public, max-age=300'
  */
 export const STATS_CACHE = 'public, max-age=300, s-maxage=21600, stale-while-revalidate=3600'
 
+/** Auction photos are content-addressed (the document id is a hash of the file), so a resized variant never changes. */
+export const PHOTO_CACHE = 'public, max-age=31536000, immutable'
+
 /** Per-model lookups (vdb, rdw, wiki): browser 1 h, Cloudflare edge 1 day (`s-maxage`); the data only changes on ingest or re-scrape. */
 export const LOOKUP_CACHE = 'public, max-age=3600, s-maxage=86400'
 /** RDW recalls are updated by the authority itself, so keep the edge copy short. */

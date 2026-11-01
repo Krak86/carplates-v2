@@ -1,0 +1,154 @@
+{
+  "documents": [
+    {
+      "documentType": "illustration",
+      "format": "image/jpeg",
+      "url": "https://procedure.prozorro.sale/api/documents/public/ec3b24a37efd40cdaea20621e5470f7c",
+      "id": "81ab482da843435ba135e4006af84b8d",
+      "_ds_id": "ec3b24a37efd40cdaea20621e5470f7c"
+    },
+    {
+      "documentType": "illustration",
+      "format": "image/jpeg",
+      "url": "https://procedure.prozorro.sale/api/documents/public/8b236fc156e444709fdce80c716935d1",
+      "id": "d0655fa79c5541119ba125fa8873b905",
+      "_ds_id": "8b236fc156e444709fdce80c716935d1"
+    },
+    {
+      "documentType": "illustration",
+      "format": "image/jpeg",
+      "url": "https://procedure.prozorro.sale/api/documents/public/ba2b44b9b7164d3082c122ae893da0bf",
+      "id": "2687c82160f04ff9a0487e6012f7bc53",
+      "_ds_id": "ba2b44b9b7164d3082c122ae893da0bf"
+    }
+  ],
+  "_protect_level": "high",
+  "description": {
+    "uk_UA": "Продажа автобус КАВЗ,списаний, непридатний для подальшої експлуатації, для реалізації як металобрухт"
+  },
+  "guarantee": {
+    "amount": 246.4,
+    "currency": "UAH"
+  },
+  "title": {
+    "uk_UA": "Продажа автобус КАВЗ,списаний, непридатний для подальшої експлуатації, для реалізації як металобрухт"
+  },
+  "_protected": false,
+  "sellingMethod": "commercialSell-english",
+  "valueAddedTaxCharged": false,
+  "auctionPeriod": {
+    "startDate": "2026-10-19T08:40:00.000000Z"
+  },
+  "tenderPeriod": {
+    "endDate": "2026-10-18T17:00:00.000000Z",
+    "startDate": "2026-10-08T09:13:58.093000Z"
+  },
+  "value": {
+    "amount": 24640,
+    "valueAddedTaxIncluded": false,
+    "currency": "UAH"
+  },
+  "owner": "e-tender.ua",
+  "minimalStep": {
+    "amount": 246.4,
+    "currency": "UAH"
+  },
+  "registrationFee": {
+    "amount": 119,
+    "currency": "UAH"
+  },
+  "dateModified": "2026-10-26T13:19:43.459000Z",
+  "lotId": "1",
+  "datePublished": "2026-10-08T09:13:58.089000Z",
+  "auctionId": "CSE001-UA-20261008-74764",
+  "metaInfo": {
+    "directions": [
+      "commercialSell"
+    ],
+    "categories": [
+      "cars"
+    ],
+    "auctionTypes": [
+      "english"
+    ]
+  },
+  "sellingEntity": {
+    "identifier": {
+      "legalName": {
+        "uk_UA": "КОМУНАЛЬНЕ ПІДПРИЄМСТВО \"ДИТЯЧИЙ САНАТОРНО-ОЗДОРОВЧИЙ КОМПЛЕКС \"ЕЛЕКТРОНІК-РІВНЕ\" РІВНЕНСЬКОЇ МІСЬКОЇ РАДИ"
+      },
+      "scheme": "UA-EDR",
+      "id": "31383192"
+    },
+    "address": {
+      "postalCode": "33028",
+      "locality": {
+        "uk_UA": "Рівне"
+      },
+      "countryName": {
+        "en_US": "Ukraine",
+        "uk_UA": "Україна"
+      },
+      "region": {
+        "uk_UA": "Рівненська область"
+      }
+    },
+    "name": {
+      "uk_UA": "КОМУНАЛЬНЕ ПІДПРИЄМСТВО \"ДИТЯЧИЙ САНАТОРНО-ОЗДОРОВЧИЙ КОМПЛЕКС \"ЕЛЕКТРОНІК-РІВНЕ\" РІВНЕНСЬКОЇ МІСЬКОЇ РАДИ"
+    }
+  },
+  "minNumberOfQualifiedBids": 1,
+  "awards": [
+    {
+      "status": "pending",
+      "value": {
+        "amount": 25501,
+        "currency": "UAH"
+      }
+    }
+  ],
+  "tenderAttempts": 1,
+  "items": [
+    {
+      "itemProps": {
+        "condition": "Металобрух",
+        "itemPropsType": "vehicle",
+        "model": "автобус",
+        "productionYear": 1989,
+        "damagePresence": false,
+        "brand": "Автобус КАВЗ"
+      },
+      "quantity": 1,
+      "address": {
+        "locality": {
+          "uk_UA": "Олександрія"
+        },
+        "region": {
+          "uk_UA": "Рівненська область"
+        }
+      },
+      "commercialSellItemType": "assets",
+      "description": {
+        "uk_UA": "Автобус марки КАВЗ, 1989 року випуску, масою 4 480,00 кг, списано з балансу та знято з державної реєстрації як транспортний засіб."
+      },
+      "location": {
+        "latitude": "50.72075637230463",
+        "longitude": "26.32925801010411"
+      },
+      "id": "107e6856174941d6b82f339f13df6bd9",
+      "classification": {
+        "scheme": "CAV",
+        "description": {
+          "en_US": "Passenger cars",
+          "uk_UA": "Легкові автомобілі"
+        },
+        "id": "34110000-1"
+      }
+    }
+  ],
+  "qualificationPeriod": {
+    "endDate": "2026-11-13T16:00:00.000000Z",
+    "startDate": "2026-10-18T17:00:06.018000Z"
+  },
+  "status": "cancelled"
+}
