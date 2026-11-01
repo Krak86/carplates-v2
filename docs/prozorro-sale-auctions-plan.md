@@ -75,6 +75,8 @@ Read first: `docs/features-reference.md` "Auction history", "Agent discovery, ed
 9. [ ] **Docs and close-out.** `docs/features-reference.md` (new source, merge rule, link format), `docs/plan-done.md` write-up, one-line ✅ in `PLAN.md`, `releases.ts` item (new day means bump `releases/latest.ts`), About `SOURCES` + `about.source.*` (ua/ru/en), `/read/auctions` guide text if it names sources, the photo resizer convention (route, widths, size cap, cache headers), `pnpm format`, suggested commit message. Give example plates and VINs (both sources, Prozorro only, damaged, many photos).
 10. [ ] **Later.** Only if hotlinked images turn out to expire or break often: copy photos to our own storage (size and licence to check first, about 7 x 250 KB per auction). The other Prozorro lot types (leases) are out of scope. (Seller fields are no longer "later": `sellingEntity` carries them, see above.)
 
+**Next:** step 8 (UI). Start by listing the distinct local `prozorro_auctions.status` values for the group "latest status"; the web reads `AuctionResponse.vehicle` (step 7) for the specs block and keeps `conflicts` visible. Then 9, merge + deploy, step 4 (VPS backfill). **Cloudflare, after the API deploy:** the Cache Rule "Cache API rollups" must get `starts_with(http.request.uri.path, "/api/auctions/photo/")` (the expression in `docs/deploy.md` already lists it; the live rule is not yet edited), then check MISS then HIT on a photo URL.
+
 ## Open questions (check during the steps)
 
 - Does the overlap (6 vehicles in October, about 3 percent of the Prozorro vehicles with an identifier) change with the full history, and is a SETAM lot ever the same sale as a Prozorro auction? Step 4 can count VIN matches across both tables.
