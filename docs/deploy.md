@@ -167,7 +167,7 @@ pulls without a login. Settings → Actions → "Require approval for all outsid
 | `registry.registrations` + matview                                                                                                                                      | source ZIPs in `/opt/carsua/archive` → `backup.sh archive` (~1.2 GB); one `backup.sh full` after each monthly ingest (keeps 2; size = your dump) |
 | Scraped tables (wiki, RDW, MOT, safety, VehiclesDB…)                                                                                                                    | none — rebuilt from the committed seed CSVs                                                                                                      |
 
-Planned (PLAN.md "Shareable photo-search links"): a second private bucket `carsua-shares` with its own token and a lifecycle rule "delete after 31 days"; shared photos count toward the same 10 GB free tier and are **not** part of `backup.sh` (only the `app.shared_photos` rows are, via `app.*`).
+Planned (PLAN.md "Shareable photo-search links"): a second private bucket `carsua-shares` with its own token and a lifecycle rule "delete after 8 days" (shares live 7 days, max 3 per user, ~450 KB each, API refuses new shares past ~8 GB); shared photos count toward the same 10 GB free tier and are **not** part of `backup.sh` (only the `app.shared_photos` rows are, via `app.*`).
 
 R2 free tier = 10 GB (no egress fees). ZIPs + one full dump may exceed it — if so, keep one full dump or rely on ZIPs + re-ingest. Contabo
 snapshots are an extra, not the backup. `pg_dump` caveat (verified): `--schema` is ignored once `-t` is used, so the script lists `-t 'app.*'`.
