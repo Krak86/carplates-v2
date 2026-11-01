@@ -40,6 +40,24 @@ describe('LocalRecognizeService', () => {
     await expect(service.recognize(image)).rejects.toBeInstanceOf(NotFoundException)
   })
 
+  it('falls back to document text OCR (registration certificate) when no plate is detected', async () => {
+    const fetchMock = vi.mocked(fetch)
+    fetchMock.mockResolvedValueOnce(jsonResponse({ results: [] })).mockResolvedValueOnce(
+      jsonResponse({
+        lines: [
+          { text: 'СВІДОЦТВО ПРО РЕЄСТРАЦІЮ', score: 0.9 },
+          { text: 'BC4447AT', score: 0.95, box: { x: 0.4, y: 0.3, w: 0.2, h: 0.03 } },
+          { text: '06.03.2007', score: 0.9 }
+        ]
+      })
+    )
+
+    const result = await new LocalRecognizeService(passThroughRank).recognize(image)
+
+    expect(result.candidates.map(c => c.plate)).toEqual(['ВС4447АТ'])
+    expect(fetchMock.mock.calls[1]?.[0]).toBe('http://localhost:8088/recognize/vin')
+  })
+
   it('throws BadGatewayException on a non-ok upstream response', async () => {
     vi.mocked(fetch).mockResolvedValue(jsonResponse({}, 500))
     const service = new LocalRecognizeService(passThroughRank)

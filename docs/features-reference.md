@@ -374,6 +374,7 @@ The API re-ranks a group by the registry (`RegistryRankService`): an alternative
 - The service latency budget is the API's 10 s `UPSTREAM_TIMEOUT_MS` (`local-recognize.service.ts`): after any change to
   `services/alpr/app.py` time `eval.mjs` (`results.json` has `ms`; baseline ~0.6 s/photo) and do not use the app during an eval.
 
+- **Registration certificate fallback (2026-11-01):** when `/recognize` finds no plate, `LocalRecognizeService.readDocumentPlates` runs the VIN route's text OCR (`/recognize/vin`) and feeds every whitespace token through `mapPlateReaderResults` (only complete UA plates survive). Best-effort: a failure there is the same 404 "no plate found". Same upload, so the certificate's name/address reach the server but are not stored or logged.
 - **Always upload the whole photo (`shrinkImage`):** uploading only on-device plate crops was tried and removed (2026-10-29) because it lost plates the detector misses; do not reintroduce it without a recall check against `services/alpr/eval`. While recognition is pending, `PhotoThumbnail` shows a status line, and a slow-connection hint after 8 s. Details: `docs/plan-done.md` "Photo search: on-device plate crops".
 
 ## Plate regions
