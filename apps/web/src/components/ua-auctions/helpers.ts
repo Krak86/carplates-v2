@@ -6,6 +6,20 @@ type LotRef = Pick<AuctionLot, 'id' | 'lotNo' | 'url' | 'source' | 'auctionId'>
 /** Where a lot comes from; data saved before Prozorro.Sale has no `source` and is SETAM. */
 export const lotSource = (lot: Pick<AuctionLot, 'source'>): 'setam' | 'prozorro' => lot.source ?? 'setam'
 
+/** Left accent stripe of a lot card by source (SETAM amber, Prozorro.Sale sky), so a mixed list reads at a glance. */
+export const lotSourceAccent = (lot: Pick<AuctionLot, 'source'>): string =>
+  lotSource(lot) === 'prozorro' ? 'border-l-4 border-l-sky-500' : 'border-l-4 border-l-amber-500'
+
+/** `count` lots from two newest-first lists, alternating a, b, a, b ...; when one runs out the other fills the rest. */
+export function mixLots<T>(a: readonly T[], b: readonly T[], count: number): T[] {
+  const out: T[] = []
+  for (let i = 0; out.length < count && (i < a.length || i < b.length); i++) {
+    if (i < a.length) out.push(a[i] as T)
+    if (out.length < count && i < b.length) out.push(b[i] as T)
+  }
+  return out
+}
+
 /** `YYYY-MM` of a lot: the SETAM feed month, else the month the Prozorro bidding starts (that feed has no file month). */
 export const lotMonthOf = (lot: Pick<AuctionLot, 'month' | 'auctionStart'>): string | null =>
   lot.month ?? lot.auctionStart?.slice(0, 7) ?? null

@@ -12,6 +12,7 @@ import {
   groupLots,
   knownValue,
   lotMonthOf,
+  mixLots,
   priceDeltaPercent,
   priceSeries,
   timelineLots,
@@ -141,5 +142,16 @@ describe('timelineLots', () => {
   it('keeps sold lots and the newest lot', () => {
     expect(timelineLots([lot(4, false), lot(3, false), lot(2, true), lot(1, false)]).map(l => l.lotNo)).toEqual([4, 2])
     expect(timelineLots([])).toEqual([])
+  })
+})
+
+describe('mixLots', () => {
+  it('alternates the two lists', () => {
+    expect(mixLots(['a1', 'a2', 'a3'], ['b1', 'b2', 'b3'], 4)).toEqual(['a1', 'b1', 'a2', 'b2'])
+  })
+
+  it('lets the longer list fill the rest', () => {
+    expect(mixLots(['a1'], ['b1', 'b2', 'b3'], 5)).toEqual(['a1', 'b1', 'b2', 'b3'])
+    expect(mixLots([], ['b1', 'b2'], 5)).toEqual(['b1', 'b2'])
   })
 })

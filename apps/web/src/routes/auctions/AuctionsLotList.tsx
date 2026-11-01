@@ -14,6 +14,7 @@ import {
   lotLink,
   lotMonthOf,
   lotNumber,
+  lotSourceAccent,
   priceDeltaPercent
 } from '@/components/ua-auctions/helpers'
 import UaAuctionChips from '@/components/ua-auctions/UaAuctionChips'
@@ -59,7 +60,8 @@ function LotRow({ lot, currency, fx, query, onChange }: LotRowProps): ReactNode 
     <li
       className={cn(
         'rounded-lg border p-3 text-sm',
-        lot.sold ? 'border-green-600/60 bg-green-600/10' : 'border-[var(--color-border)] bg-[var(--color-border)]/20'
+        lot.sold ? 'border-green-600/60 bg-green-600/10' : 'border-[var(--color-border)] bg-[var(--color-border)]/20',
+        lotSourceAccent(lot)
       )}
     >
       <p className="font-semibold">

@@ -4,7 +4,16 @@ import { useTranslation } from 'react-i18next'
 import type { Currency, FxResponse } from '@carplates/shared'
 
 import Card from '@/components/ui/Card'
-import { formatLotMonth, formatPrice, lotKey, lotLink, lotMonthOf } from '@/components/ua-auctions/helpers'
+import {
+  formatLotMonth,
+  formatPrice,
+  lotKey,
+  lotLink,
+  lotMonthOf,
+  lotSourceAccent,
+  mixLots
+} from '@/components/ua-auctions/helpers'
+import { cn } from '@/lib/cn'
 import { toIntlLocale } from '@/lib/intl'
 import { auctionListQuery } from '@/lib/queries'
 
@@ -21,8 +30,11 @@ const SHOWN = 6
 export default function AuctionsNewLots({ currency, fx, onShowAll }: Props): ReactNode {
   const { t, i18n } = useTranslation()
   const locale = toIntlLocale(i18n.language)
-  const { data } = useQuery(auctionListQuery({ outcome: 'open', sort: 'newest' }))
-  const lots = data?.lots.slice(0, SHOWN) ?? []
+  // Prozorro lots are newer and would fill the whole list, so each source is asked on its own and the two are interleaved.
+  const setam = useQuery(auctionListQuery({ outcome: 'open', sort: 'newest', source: 'setam' })).data
+  const prozorro = useQuery(auctionListQuery({ outcome: 'open', sort: 'newest', source: 'prozorro' })).data
+  const lots = mixLots(setam?.lots ?? [], prozorro?.lots ?? [], SHOWN)
+  const total = (setam?.total ?? 0) + (prozorro?.total ?? 0)
 
   if (lots.length === 0) return null
 
@@ -32,7 +44,7 @@ export default function AuctionsNewLots({ currency, fx, onShowAll }: Props): Rea
         <h2 className="text-lg font-semibold">{t('auctions.page.new.title')}</h2>
 
         <button type="button" onClick={onShowAll} className="text-sm text-[var(--color-primary)] underline">
-          {t('auctions.page.new.all', { count: data?.total ?? lots.length })}
+          {t('auctions.page.new.all', { count: total || lots.length })}
         </button>
       </div>
 
@@ -40,7 +52,10 @@ export default function AuctionsNewLots({ currency, fx, onShowAll }: Props): Rea
         {lots.map(lot => (
           <li
             key={lotKey(lot)}
-            className="rounded-lg border border-[var(--color-border)] bg-[var(--color-border)]/20 p-3 text-sm"
+            className={cn(
+              'rounded-lg border border-[var(--color-border)] bg-[var(--color-border)]/20 p-3 text-sm',
+              lotSourceAccent(lot)
+            )}
           >
             <p className="font-semibold">🔔 {[lot.make, lot.model, lot.year].filter(Boolean).join(' ') || lot.title}</p>
 
