@@ -4303,3 +4303,13 @@ Question: are there free sources for ex-USSR/Russian cars, Baltic registry data 
 - **Helpers (`read/safety/helpers.ts`, tested):** `changePercent`, `lastTwoFullYears`, `deathsPer100Crashes`, `crashShare`. Copy in `content.ts` (`ROAD_NOTE`, `WHY_NOTE`, `TEST_LINKS`), keys `read.sec.safRoad|safWhy`, `read.safety.*` (ua/ru/en), `SAFETY_LEAD` extended.
 - **Not done:** SEO title/description of `/read/safety` in `spa-text.ts` unchanged; ideas left: crash score vs deaths per 100k by region, month seasonality, hazardous sections for the plate's region.
 - **Docs:** `docs/features-reference.md` (`/read/safety` paragraph), release entry 2026-11-01.
+
+## Own ALPR: shared-secret auth (2026-11-01)
+
+The ALPR container had no authentication of its own; it was protected only by network isolation (prod: no published port, dev: `127.0.0.1`), so any container on the internal Docker network could call it.
+
+- **Service:** `services/alpr/app.py` `_require_key` dependency on `/recognize` and `/recognize/vin`: 401 unless `x-alpr-key` equals `ALPR_API_KEY` (`hmac.compare_digest`). Unset = open (bare local run). `/healthz` stays open for the container healthcheck.
+- **API:** optional `ALPR_API_KEY` in `env.ts`; `local-recognize.service.ts` and `vin-recognize.service.ts` send the header when set.
+- **Deploy:** `deploy-api.yml` writes `ALPR_API_KEY` to `api.env` and to a new `env/alpr.env`; `docker-compose.prod.yml` gives only `alpr` that file (`required: false`), so it never sees the api's other secrets. Secret `ALPR_API_KEY` (`openssl rand -hex 24`) documented in `docs/deploy.md`.
+- **Rollout order:** deploy api first (writes both files), then ALPR (the recreate picks up the key). Either order is safe: api sends the header regardless, ALPR enforces only once it has the key.
+- **Verified in prod (2026-11-01):** a call from inside the container without the key returns 401; `ALPR_API_KEY` is identical in `api.env` and `alpr.env`.
