@@ -4313,3 +4313,23 @@ The ALPR container had no authentication of its own; it was protected only by ne
 - **Deploy:** `deploy-api.yml` writes `ALPR_API_KEY` to `api.env` and to a new `env/alpr.env`; `docker-compose.prod.yml` gives only `alpr` that file (`required: false`), so it never sees the api's other secrets. Secret `ALPR_API_KEY` (`openssl rand -hex 24`) documented in `docs/deploy.md`.
 - **Rollout order:** deploy api first (writes both files), then ALPR (the recreate picks up the key). Either order is safe: api sends the header regardless, ALPR enforces only once it has the key.
 - **Verified in prod (2026-11-01):** a call from inside the container without the key returns 401; `ALPR_API_KEY` is identical in `api.env` and `alpr.env`.
+
+## Games navigation, Relax zen mode, guides hub search (2026-11-01) ✅
+
+- `components/game/GamesNav.tsx`: chips to the hub, every quiz (`/play?game=`), `/race` and `/relax` (current page marked); shown on `RaceRoute` and `RelaxRoute`.
+- `/relax`: a card (what it is, 3 steps, Zen + Share buttons) and the `LayersPanel` inline (the header layers button is hidden on phones). **Zen mode** = `useUiStore.zen` (never persisted): `Layout` hides the header and `QuickLinks`, `App` the page share button, `ScrollButtons` stay unmounted; Esc or a faint corner button exits, leaving the route resets it.
+- `/read`: search box + topic chips (`articleTopics`, `filterArticles` in `read/helpers.ts`, URL params `q` / `topic`), "Guide" label on every card, phones get a compact row (thumbnail beside the text, `ArticleBanner compact`).
+
+## Hub tiles, region quiz on mobile, small fixes, load test (2026-11-01) ✅
+
+- **Hubs:** `/play` poster tiles (`GameTile.tsx`, `games.ts`), `/read` blog-style tiles (`ReadHubRoute.tsx`).
+- **Region quiz:** easier on phones (bigger targets); `StatsMap` restructured, desktop unchanged.
+- **Plate card:** the selected chip is highlighted in "Also found" (`PlateCandidates.tsx`); auction lots keep the vehicle line when the VIN decode names no make (`OtherSourcesFound.tsx`, `auctions-parse.ts`); long road names wrap in the `/road-safety` roads card.
+- **Link previews:** the generic OG card tagline now fits inside its panel (`og-card.ts`, tested); `.github/dependabot.yml` tweak.
+- **Load test:** `pnpm load-test` (`scripts/src/load-test.ts` + tested `load-test-lib.ts`) ramps cold plate lookups in steps; 429s are excluded from latency/rps. `THROTTLE_DISABLED` (`env.ts`, `throttle.ts`) switches the per-IP throttle off locally and is ignored in production. Procedure in `docs/deploy.md`, commands in `docs/commands-reference.md`.
+- **Deploy:** first-load jobs and seed CSVs for road-safety / region-facet data ship in the ingest image (`jobs.ts`, `run-ingest.sh`, `.dockerignore`).
+- **Planned:** air-raid alert badge, background layer and history (`docs/alarm-plan.md`).
+
+## Sitemap page `/sitemap` (2026-11-01) ✅
+
+A human-readable map of every public route, grouped by category (search, cars, statistics, guides, games, community, account, about) with emojis, in the chosen language, no filters. Below the groups a "Everywhere on the site" block describes what has no URL: the sidebar settings (language, theme, accent, text size, font, offline data), the background layers popup, the news bell and the profile/sign-in popup. Linked from the footer. Details: `docs/features-reference.md` "Sitemap page".

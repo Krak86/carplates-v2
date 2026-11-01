@@ -14,7 +14,7 @@ import {
 } from '@/components/size/VehicleSize.helpers'
 import { displayBrand } from '@/lib/display-brand'
 import { toIntlLocale } from '@/lib/intl'
-import { LANG_FALLBACK, type L10n } from '@/routes/read/types'
+import { LANG_FALLBACK, type ArticleMeta, type L10n } from '@/routes/read/types'
 
 const PASSENGER_KIND = 'ЛЕГКОВИЙ'
 
@@ -94,6 +94,36 @@ export const formatCount = (n: number, language: string): string => n.toLocaleSt
 
 /** Picks the reader's language from inline prose. */
 export const pick = (text: L10n, language: string): string => text[language as keyof L10n] ?? text[LANG_FALLBACK]
+
+/** Topic chips of the guides hub: every distinct tag (keyed by its English text), the most used first, ties in hub order. */
+export function articleTopics(articles: readonly ArticleMeta[]): L10n[] {
+  const topics = new Map<string, { tag: L10n; count: number }>()
+  for (const article of articles) {
+    for (const tag of article.tags) {
+      const known = topics.get(tag.en)
+      if (known) known.count += 1
+      else topics.set(tag.en, { tag, count: 1 })
+    }
+  }
+  return [...topics.values()].sort((a, b) => b.count - a.count).map(topic => topic.tag)
+}
+
+/** Guides matching the hub's search box (title, lead or a tag, case-insensitive) and the picked topic (an English tag, '' = all). */
+export function filterArticles(
+  articles: readonly ArticleMeta[],
+  query: string,
+  topic: string,
+  language: string,
+  titleOf: (article: ArticleMeta) => string
+): ArticleMeta[] {
+  const needle = query.trim().toLowerCase()
+  return articles.filter(article => {
+    if (topic && !article.tags.some(tag => tag.en === topic)) return false
+    if (!needle) return true
+    const haystack = [titleOf(article), pick(article.lead, language), ...article.tags.map(tag => pick(tag, language))]
+    return haystack.some(text => text.toLowerCase().includes(needle))
+  })
+}
 
 export type LengthRange = { fromMm: number | null; toMm: number | null }
 

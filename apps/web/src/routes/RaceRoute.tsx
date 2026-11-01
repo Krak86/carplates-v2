@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import GamesNav from '@/components/game/GamesNav'
 import RaceGameChip from '@/components/game/RaceGameChip'
 import RaceGameStage from '@/components/game/RaceGameStage'
 import Card from '@/components/ui/Card'
@@ -77,6 +78,8 @@ export default function RaceRoute(): ReactNode {
 
   return (
     <article className="mx-auto max-w-6xl space-y-4">
+      <GamesNav />
+
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="text-2xl font-bold">
           <span aria-hidden>🎮</span> {t('race.page.heading')}

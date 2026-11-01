@@ -19,6 +19,36 @@ export const RELEASES: readonly ReleaseDay[] = [
     date: '2026-11-01',
     items: [
       item(
+        'new',
+        'Сторінка /sitemap: карта сайту з усіма сторінками за розділами, а також підказки про меню, фон, дзвіночок і профіль; посилання на неї внизу кожної сторінки',
+        'Страница /sitemap: карта сайта со всеми страницами по разделам, а также подсказки о меню, фоне, колокольчике и профиле; ссылка на неё внизу каждой страницы',
+        'A new /sitemap page lists every page by section, with notes on the menu, background, bell and profile; it is linked in the footer of every page'
+      ),
+      item(
+        'improved',
+        'Сторінка «Релакс»: пояснення, вибір фону прямо на сторінці (і на телефоні) та дзен-режим, що ховає все, крім фону; на сторінках тест-драйву й релаксу з’явилися посилання на всі ігри',
+        'Страница «Релакс»: пояснение, выбор фона прямо на странице (и на телефоне) и дзен-режим, который прячет всё, кроме фона; на страницах тест-драйва и релакса появились ссылки на все игры',
+        'The Relax page now explains itself, lets you pick the background right there (phones too) and has a zen mode that hides everything but the background; the test drive and relax pages link to every game'
+      ),
+      item(
+        'improved',
+        'Ігри на /play отримали плитки-постери, а довідник /read - плитки як у блозі; вікторина «Регіон» стала зручнішою на телефоні',
+        'Игры на /play получили плитки-постеры, а справочник /read - плитки как в блоге; викторина «Регион» стала удобнее на телефоне',
+        'The /play games now have poster tiles and the /read guides hub has blog-style tiles; the region quiz is easier on phones'
+      ),
+      item(
+        'improved',
+        'У блоці «Також знайдено» вибраний номер підсвічено, а в аукціонних лотах рядок авто показується, навіть коли VIN не назвав марку; довгі назви доріг у /road-safety тепер переносяться',
+        'В блоке «Также найдено» выбранный номер подсвечен, а в аукционных лотах строка авто показывается, даже когда VIN не назвал марку; длинные названия дорог в /road-safety теперь переносятся',
+        'The selected plate is highlighted in "Also found", auction lots show the vehicle line even when the VIN decode names no make, and long road names wrap on /road-safety'
+      ),
+      item(
+        'improved',
+        'Довідник: пошук і фільтр за темами, позначка «Стаття» на кожній картці та компактні картки на телефоні',
+        'Справочник: поиск и фильтр по темам, пометка «Статья» на каждой карточке и компактные карточки на телефоне',
+        'Guides: search and topic filter, a "Guide" label on every card and compact cards on phones'
+      ),
+      item(
         'improved',
         'На головній сторінці пошуку прибрано рядок «Безкоштовно, без реклами, відкриті дані» під слоганом; він лишається в шапці сайту',
         'На главной странице поиска убрана строка «Бесплатно, без рекламы, открытые данные» под слоганом; она остается в шапке сайта',

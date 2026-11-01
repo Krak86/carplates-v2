@@ -136,6 +136,23 @@
   }
 }
 
+/* Games hub poster tile (Steam/Epic library style): portrait cover, gradient from `--hue`. sRGB fallback first, then
+   oklch on P3 displays. */
+.game-cover {
+  aspect-ratio: 3 / 4;
+  background:
+    radial-gradient(circle at 30% 20%, hsl(var(--hue) 90% 70% / 0.45), transparent 60%),
+    linear-gradient(160deg, hsl(var(--hue) 70% 48%), hsl(calc(var(--hue) + 50) 75% 14%));
+}
+
+@media (color-gamut: p3) {
+  .game-cover {
+    background:
+      radial-gradient(circle at 30% 20%, oklch(0.85 0.22 var(--hue) / 0.5), transparent 60%),
+      linear-gradient(160deg, oklch(0.6 0.25 var(--hue)), oklch(0.2 0.1 calc(var(--hue) + 50)));
+  }
+}
+
 /* Wide gamut: same hues as the sRGB tokens above, pushed to chroma sRGB can't show. Only on P3
    displays (`color-gamut: p3`); everything else keeps the sRGB fallback. Dark block comes second
    so it wins on equal specificity. */

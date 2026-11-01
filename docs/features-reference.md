@@ -554,6 +554,10 @@ Files: migration 0075, `packages/shared/src/origin.ts` (own file, no offline-cac
 `routes/play/`; write-up plan-done "Games hub /play". `/play?game=region|logo|higher` plays in place, online-only. Rounds are pure functions in `helpers.ts` (plates come from `REGIONS`, never re-implemented). `StatsMap` `quiz` prop = clickable polygons without tooltip/legend. Best score per quiz in localStorage (`quiz-storage.ts`); a new quiz = id in `QUIZ_IDS`, component in `QUIZ_COMPONENT`, `play.quiz.<id>.title|desc` ua/ru/en. The end screen shares a score card via `renderPlateCardPng`.
 Question count (10/20/30/50) is global, picked on the hub (`readRounds`/`writeRounds`); best score is per quiz and length. Brand pool: `GET /api/stats/brands` -> `foldBrands` (never the full `statsQuery`).
 
+**Game links** (2026-11-01): `/race` and `/relax` start with `GamesNav` (hub + every game); a new game goes into `QUIZ_IDS` / `RACER_LINKS` and shows up there too. **Zen** (`/relax`): `useUiStore.zen` hides the header, footer links, page share button and scroll buttons; only `RelaxRoute` sets it and resets it on unmount, so no other route can inherit it. The guides hub (`/read`) filters with `?q=` / `?topic=` (English tag text).
+
+**Hub tiles and mobile map** (2026-11-01): the hub lists games as poster tiles (`GameTile.tsx`, picture/gradient from the `games.ts` entry, hue in `global.css`); a new game adds its `games.ts` entry. The region quiz on phones uses bigger tap targets via `StatsMap` (`quiz` prop; the map code was restructured, behaviour on desktop unchanged). The `/read` hub uses blog-style tiles (`ReadHubRoute.tsx`).
+
 **Full screen** (2026-10-31): `PlayRoute` wraps the quiz frame in `frameRef` and toggles the Fullscreen API on it (`fullscreenchange` keeps the state in sync); no per-quiz code.
 
 ## Home page blocks and brand line (2026-10-31)
@@ -662,10 +666,16 @@ Plan: [compare-plan.md](compare-plan.md). Phases 1-3 and the client side of phas
 - **Sources / licence:** Patrol Police statistics (no explicit licence, cite the source) and Infrastructure Restoration Agency hazardous sections (CC BY, data.gov.ua). About `SOURCES` `patrolPolice` and `irsu`.
 - **Source strip, facts, fleet correlation, hazards (2026-11-01):** `SourceData` (top: links to Patrol Police stats and the data.gov.ua dataset, shown period), `FactsSection` (extremes of deaths, rate, deaths per 100 crashes and deaths-vs-fleet ratio via `regionFacts`), `FleetCorrelation` (SVG scatter of registered cars vs deaths / crashes, Pearson r via `pearson`, wording through `correlationStrength`; always shown with the "correlation is not a cause" caveat), `HazardsSection` (lazy; List / Map tabs, kind tabs + region filter, `GET /api/road-safety/hazards`, OSM links only for non-null coordinates; `HazardMap` draws region outlines from the `StatsMap` geometry plus the hazard points with hover details). `SegmentedTabs` is the shared pressed-button group. Pure helpers are tested in `helpers.test.ts`.
 - **Plate-card chip:** `RegionCrashChip` (in `ResultCard`) shows the plate region's crashes and deaths rank from `roadSafetyRegionsQuery()`; online-only, hidden when there is no row. **Refresh:** cron jobs `dtp-patrol` (monthly) and `dtp-hazards` (yearly), healthchecks `HC_PING_DTP_PATROL|HAZARDS`; re-export seed CSVs by hand after a real change.
-- **Open:** the Cloudflare Cache Rule must list `/api/road-safety/` (expression in `docs/deploy.md`, edited in the dashboard), `/api/road-safety` is not in `PUBLIC_API_PATH_PREFIXES`.
+- The Cloudflare Cache Rule lists `/api/road-safety/` (expression in `docs/deploy.md`; live and verified MISS then HIT 2026-11-01). `/api/road-safety` stays out of `PUBLIC_API_PATH_PREFIXES` on purpose (no explicit Patrol Police licence; decided 2026-11-01).
 - **Tests:** `routes/road-safety/helpers.test.ts` (incl. `regionCrashFact`); API `road-safety/helpers.test.ts`.
 
 ## Source strip and related pages on statistics pages (2026-11-01)
 
 - **`PageSources`** (`components/PageSources.tsx`): the "Source data" card at the top of `/stats`, `/wanted`, `/auctions`, `/fuel`, `/safety`, `/road-safety` (road-safety's `SourceData` wraps it). A new statistics page passes `sources` (label, url, optional note), `lines` (plain text) and an optional `footer`; strings live under `pageSources.<page>.*`.
 - **`RelatedPages`** (`components/RelatedPages.tsx`) at the bottom: cross links driven by `lib/related-pages.ts` (`RELATED_PAGES`, `RELATED_TARGETS` for deep links such as the regional map). Every pair needs a hint `related.<from>.<to>` (ua/ru/en) that says what the other page answers; add a pair only where the comparison is real. Hints carry no numbers, so they never go stale.
+
+## Sitemap page (`/sitemap`, 2026-11-01)
+
+- `routes/sitemap/`: `helpers.ts` holds the tree (`SITEMAP_GROUPS` links, `SITEMAP_TIPS` for URL-less features, `HIDDEN_ROUTES`, `CATALOG_ROUTES`), `SitemapRoute.tsx` renders it. Guide links come from `GUIDE_META` and game links from `QUIZ_IDS` / `RACER_LINKS`, so a new article or game appears by itself.
+- **A new route in `App.tsx` must be added to `SITEMAP_GROUPS` (or `HIDDEN_ROUTES` when it is not a page to browse to)**: `helpers.test.ts` reads `App.tsx` and fails otherwise. Text lives in `sitemap.*` (ua/ru/en); labels reuse the existing `nav.*` keys.
+- Not the same as `/sitemap.xml` (crawlers, `SeoController`). The page has a `STATIC_PAGES` entry and sits in the footer (`QuickLinks`).

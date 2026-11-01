@@ -85,6 +85,10 @@ using an API isn't a viable substitute (ToS risk, fragile against markup
 changes, no stable auth story). Revisit only if a free/affordable token
 becomes available.
 
+### Sitemap page `/sitemap` ✅ DONE (2026-11-01) — see `docs/plan-done.md`
+
+### Hub tiles, mobile region quiz, load test (`pnpm load-test`, `THROTTLE_DISABLED`) ✅ DONE (2026-11-01) — see `docs/plan-done.md`
+
 ### Releases page (`/releases`) ✅ DONE (2026-10-15) — see `docs/plan-done.md`
 
 ### AUTO.RIA link-out for plates/VINs not in the registry ✅ DONE (2026-10-25) — link only; RIA data use is restricted, see `docs/legal-and-monetization.md`
@@ -320,7 +324,7 @@ above once scoped, or dropped if research says no.
 - ✅ **Home blocks, brand line, quiz full screen (2026-10-31)** - see plan-done "Home blocks, brand line, quiz full screen".
 - [ ] **Garpun wanted plates + SETAM auctions (2026-10-31; Garpun steps 1-3 + auctions steps 4-5 (DB, parser, schedule) done, step 6 + per-lot SETAM link + `/auctions` page (step 7a) done; Garpun tab on `/wanted` + auction cards + catalog make line done 2026-10-31; step 9 (read article) done; steps 11 + direct lot link skipped (SETAM terms); deployed + first load + API checks done 2026-10-31 (docs/garpun-auctions-plan.md "Production first load"); open: browser / phone checks, first cron rows, healthchecks, step 12 (later))** — two new data.gov.ua feeds: wanted plates joined into the `/wanted` card section with a Garpun chip, and car lots from SETAM auctions as a card section + `/auctions` route + stats. Steps: `docs/garpun-auctions-plan.md`.
 
-- [ ] **Road safety (DTP stats; 2026-10-31): page, plate-card chip and refresh cron done (2026-11-01), open (owner, not code): healthchecks + secrets for `dtp-*`, first production load, Cloudflare Cache Rule edit, legal review - see "Your to-do" in `docs/road-safety-plan.md`** — see the ✅ line below and `docs/road-safety-plan.md`. **No make/model in any source, so no "top models in DTP" chips.**
+- [ ] **Road safety (DTP stats; 2026-10-31): page, plate-card chip and refresh cron done (2026-11-01), first production load + Cloudflare Cache Rule done and verified 2026-11-01; open (owner, not code): healthchecks + secrets for `dtp-*` (skipped for now), dark/desktop look (legal review decided 2026-11-01: `/api/road-safety` stays out of `PUBLIC_API_PATH_PREFIXES`) - see "Your to-do" in `docs/road-safety-plan.md`** — see the ✅ line below and `docs/road-safety-plan.md`. **No make/model in any source, so no "top models in DTP" chips.**
 
 ### Actual — ready or in progress
 
@@ -357,10 +361,11 @@ above once scoped, or dropped if research says no.
 - ✅ **Advanced search legend + icons, news page colours/skeletons, one page width (`max-w-6xl`)** — done 2026-10-29, see `docs/plan-done.md`.
 - ✅ **Share links `/go/<alias>` + `/share` page** (2026-10-30; per-alias previews, client redirect to home with the entry pulsing). Write-up: `docs/plan-done.md` "Share links"; conventions `docs/features-reference.md` "Share links".
 - ✅ **Catalog MVP `/cars/:make/:model`** (2026-10-30; top 300 models indexable, 1,697 pages, sitemap index + `sitemap-cars.xml`, injected `#root` block, `db:refresh-catalog`). Live 2026-10-30 (first build on the VPS, Cloudflare rules, prod browser check done). Blocks 1-3 and 5 of `docs/catalog-plan.md` "Next: make the pages usable" are deployed and checked on prod 2026-10-30 (plate/VIN/`/stats` links, `/cars` + `/cars/:make` hubs, breadcrumbs, year/generation/fuel/body chips with generation stats, `Car` JSON-LD, engine line, sitemap 1,029 URLs read by Search Console). Bing is submitted (imported from Search Console), 29 display-name overrides are live, the catalog job timeout is 60 min. Open: check Search Console "Pages", Bing and the `/cars/*` cache hit ratio about 2 weeks after 2026-10-30, then **year pages** (block 4) only when the first 300 pages are indexed. Full done / left list: `docs/catalog-plan.md` "Done and left". Write-up: `docs/plan-done.md` "Model catalog MVP"; conventions `docs/features-reference.md` "Model catalog".
-- 🟡 **`/api/stats/*` edge cache 6 h (`STATS_CACHE`)** — coded 2026-10-31, not deployed yet. Sitemap deliberately unchanged (`/stats?...` views are query variants of one indexed page). Conventions: `docs/features-reference.md` "Agent discovery, edge cache…". **After the api deploy test:**
+- [ ] **Dependency updates, later (owner, 2026-11-01; 5 open Dependabot PRs, 3 days old).** #65 minor-and-patch group (5 updates, CI green): review the diff and merge first. #66 `@nestjs/platform-fastify` 12, #67 `@nestjs/testing` 12, #69 `@nestjs/core` 12 (CI red): close, Nest 12 is pinned until `nestjs-zod` lists `@nestjs/* ^12` (see "Version pins"). #68 `typescript` 6.0.3 (CI green): close, TypeScript stays `~5.9` (see pins). `.github/dependabot.yml` now ignores major bumps of `@nestjs/*` and `typescript`, so they stop coming back; remove those two ignores when the pin is lifted. Also to bump then: the `pnpm audit --prod` findings (moderate `minimatch` to 11.0.1+ and `glob` to 14.0.2+ via `@fastify/static` and others; low `deepmerge`, no patch yet).
+- 🟡 **`/api/stats/*` edge cache 6 h (`STATS_CACHE`)** — coded 2026-10-31, deployed and verified on `/api/stats/top` 2026-11-01 (MISS then HIT, `s-maxage=21600`); the browser, timing and cron-lag checks below are still open. Sitemap deliberately unchanged (`/stats?...` views are query variants of one indexed page). Conventions: `docs/features-reference.md` "Agent discovery, edge cache…". **After the api deploy test:**
   - [ ] Deploy run's "Purge Cloudflare cache" step succeeded for the exact URLs (a prefix-purge warning is fine on the free plan).
-  - [ ] `curl -sI https://carsua.app/api/stats/top` twice: `cache-control` has `s-maxage=21600, stale-while-revalidate=3600`; `cf-cache-status` MISS (or EXPIRED) then HIT. Repeat for `/api/stats`, `/api/stats/ev`, `/api/stats/field/<dimension>`.
-  - [ ] `/api/stats/version` still has no cache header (offline cache keys on it) and `/api/fuel/stats` still answers `max-age=300`.
+  - [x] `curl -sI https://carsua.app/api/stats/top` twice: `cache-control` has `s-maxage=21600, stale-while-revalidate=3600`; `cf-cache-status` HIT (checked 2026-11-01; the other stats URLs not repeated).
+  - [x] `/api/stats/version` still has no cache header (DYNAMIC) and `/api/fuel/stats` still answers `max-age=300` (HIT), checked 2026-11-01.
   - [ ] Open `/stats` in prod (hard reload): all views load (map, EV, imports, origin, weight tabs), no Zod errors in the console, Network shows `/api/stats/*` from cache (HIT) on a second load.
   - [ ] Time `/stats` cold vs warm (Lighthouse or DevTools); expect the warm API calls to drop to edge latency.
   - [ ] After the next Tue/Fri cron or ingest: confirm new numbers show within 6 h, or purge `/api/stats*` by hand; note the observed lag here.

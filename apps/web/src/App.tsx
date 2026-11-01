@@ -10,6 +10,7 @@ import { ROUTE_TITLE_KEYS, useDocumentTitle } from '@/hooks/useDocumentTitle'
 import PageShareButton from '@/components/PageShareButton'
 import { NO_SHARE_PATHS } from '@/components/use-page-share-actions'
 import SearchRoute from '@/routes/SearchRoute'
+import { useUiStore } from '@/store/ui-store'
 
 const AboutRoute = lazy(() => import('@/routes/AboutRoute'))
 const LegalRoute = lazy(() => import('@/routes/LegalRoute'))
@@ -46,6 +47,7 @@ const CatalogMakeRoute = lazy(() => import('@/routes/catalog/CatalogMakeRoute'))
 const CatalogModelRoute = lazy(() => import('@/routes/catalog/CatalogModelRoute'))
 const CompareRoute = lazy(() => import('@/routes/compare/CompareRoute'))
 const GoRoute = lazy(() => import('@/routes/go/GoRoute'))
+const SitemapRoute = lazy(() => import('@/routes/sitemap/SitemapRoute'))
 const ShareRoute = lazy(() => import('@/routes/share/ShareRoute'))
 const FeaturesRoute = lazy(() => import('@/routes/features/FeaturesRoute'))
 const SettingsRoute = lazy(() => import('@/routes/settings/SettingsRoute'))
@@ -60,6 +62,7 @@ const PlayRoute = lazy(() => import('@/routes/play/PlayRoute'))
 export default function App(): ReactNode {
   const { pathname } = useLocation()
   const { t } = useTranslation()
+  const zen = useUiStore(s => s.zen)
   const titleKey = ROUTE_TITLE_KEYS[pathname]
   useDocumentTitle(titleKey ? t(titleKey) : undefined)
   // A plate / VIN result page is a single segment that is not a static route; the floating share button is hidden on mobile.
@@ -126,6 +129,7 @@ export default function App(): ReactNode {
             <Route path="/cars/:make" element={<CatalogMakeRoute />} />
             <Route path="/cars/:make/:model" element={<CatalogModelRoute />} />
             <Route path="/compare" element={<CompareRoute />} />
+            <Route path="/sitemap" element={<SitemapRoute />} />
             <Route path="/share" element={<ShareRoute />} />
             <Route path="/go/:alias" element={<GoRoute />} />
             <Route path="/features" element={<FeaturesRoute />} />
@@ -138,7 +142,7 @@ export default function App(): ReactNode {
             <Route path="*" element={<SearchRoute />} />
           </Routes>
         </Suspense>
-        {shareTitle && (
+        {shareTitle && !zen && (
           <div className="mt-6 flex justify-center">
             <PageShareButton title={shareTitle} />
           </div>

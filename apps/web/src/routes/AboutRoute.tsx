@@ -334,7 +334,8 @@ const FEATURES = [
   'agents',
   'roadmap',
   'drawings',
-  'contact'
+  'contact',
+  'sitemap'
 ] as const
 
 // Lazy-loaded (see App.tsx).

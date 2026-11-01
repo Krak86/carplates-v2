@@ -182,6 +182,8 @@ interface UiState {
   textSize: TextSize
   font: Font
   drawerOpen: boolean
+  /** Relax zen mode: header, footer links and share buttons are hidden so only the background shows (never persisted). */
+  zen: boolean
   cardTiltEnabled: boolean
   /** Size drawings in blueprint style (white lines on a scaled grid). */
   blueprintEnabled: boolean
@@ -191,6 +193,7 @@ interface UiState {
   setTextSize: (size: TextSize) => void
   setFont: (font: Font) => void
   setDrawerOpen: (open: boolean) => void
+  setZen: (zen: boolean) => void
   toggleCardTilt: () => void
   setBlueprintEnabled: (enabled: boolean) => void
 }
@@ -204,6 +207,7 @@ export const useUiStore = create<UiState>((set, get) => ({
   textSize: startTextSize,
   font: startFont,
   drawerOpen: false,
+  zen: false,
   cardTiltEnabled: initialCardTiltEnabled(),
   blueprintEnabled: initialBlueprintEnabled(),
   setLang: async lang => {
@@ -271,6 +275,7 @@ export const useUiStore = create<UiState>((set, get) => ({
     }
   },
   setDrawerOpen: (drawerOpen): void => set({ drawerOpen }),
+  setZen: (zen): void => set(zen ? { zen, drawerOpen: false } : { zen }),
   toggleCardTilt: (): void =>
     set(s => {
       const cardTiltEnabled = !s.cardTiltEnabled

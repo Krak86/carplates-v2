@@ -44,6 +44,7 @@ export const ROUTE_TITLE_KEYS: Record<string, string> = {
   '/read/recalls': 'nav.readRecalls',
   '/read/auctions': 'nav.readAuctions',
   '/share': 'nav.share',
+  '/sitemap': 'nav.sitemap',
   '/features': 'nav.features',
   '/settings': 'nav.settings',
   '/profile': 'auth.profile',

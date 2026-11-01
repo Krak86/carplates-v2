@@ -17,14 +17,12 @@ pnpm here forwards a literal `--`: run `pnpm ingest:mot --dir …`, not `pnpm in
   never `LIST[0]`** (order is presentation, the default is semantics).
 - URLs / env vars live in one module (`apps/web/src/lib/api.ts`, `apps/api/src/env.ts`). Remove unused code.
 - Zod for **all** cross-boundary data (API responses, env, CSV rows, route params); `?.` / `??` for anything that crossed one.
-- `!!value` for a positive check, `!value` for a negative. Event handlers `handleX`; constants `CONSTANT_CASE`; props type is
-  always `Props`; `type` over `interface`.
-- Components (`apps/web`): default export, one per file; complex ones → sub-components + a hook; semantic HTML, blank lines between
-  JSX blocks; React 19 ref-as-prop (`ref?: React.Ref<T>`, `React.ComponentRef<T>`).
+- `!!value` for a positive check. Event handlers `handleX`; props type is always `Props`; `type` over `interface`.
+- Components (`apps/web`): default export, one per file; complex ones → sub-components + a hook; React 19 ref-as-prop.
 - State: Zustand (`useUiStore`, ~3 fields, always a selector) = shared UI state; TanStack Query = all server state, `queryOptions()`
   co-locating key + fn; `useState` = local only.
 - `@types/*` majors must match the runtime package's major.
-- Tailwind v4, CSS-first: tokens in the `@theme` block of `apps/web/src/styles/global.css`, no `tailwind.config`, no v3 directives. Light default, `[data-theme='dark']` tokens; theme is auto/light/dark via the sidebar Appearance setting.
+- Tailwind v4, CSS-first: tokens in the `@theme` block of `apps/web/src/styles/global.css`, no `tailwind.config`; dark = `[data-theme='dark']` tokens.
 
 ## Performance (React Compiler)
 

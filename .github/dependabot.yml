@@ -11,6 +11,11 @@ updates:
       # jsdom ~30.0 pinned: 30.1 breaks `.rejects.toThrow` (see PLAN.md); patches stay allowed.
       - dependency-name: jsdom
         update-types: [version-update:semver-minor, version-update:semver-major]
+      # Pins (PLAN.md "Version pins"): Nest 12 waits for nestjs-zod, TypeScript stays ~5.9 for typescript-eslint.
+      - dependency-name: '@nestjs/*'
+        update-types: [version-update:semver-major]
+      - dependency-name: typescript
+        update-types: [version-update:semver-major]
   - package-ecosystem: docker
     directories: ['/apps/api', '/services/alpr']
     schedule: { interval: weekly }

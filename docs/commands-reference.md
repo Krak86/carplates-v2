@@ -195,6 +195,15 @@ node services/alpr/eval.mjs --shrink   # same, but photos re-encoded like the we
 them with `extractVins` in `packages/shared/src/vin-read.ts`, WMI table in `packages/shared/src/wmi.ts`) — see docs/plan-done.md
 "VIN photo search" and PLAN.md "Own ALPR model".
 
+## Load test
+
+```bash
+pnpm load-test --sample 5000 --out plates.txt   # needs DATABASE_URL: block-sample plates from current_registration
+pnpm load-test --plates plates.txt              # stepped run (5/20/50/100 users, 60 s each); stops at p95 > 1 s or 1% 5xx; 429s are excluded
+```
+
+Run it against a **local** api started with `THROTTLE_DISABLED=true` (ignored in production). Procedure: `docs/deploy.md` "Load test".
+
 ## First-time setup with real data
 
 `pnpm install && pnpm db:up && pnpm db:migrate && pnpm ingest:full && pnpm ingest:euroncap:csv && pnpm ingest:jncap:csv && pnpm ingest:cncap:csv && pnpm ingest:kncap:csv && pnpm ingest:iihs:csv && pnpm dev`
