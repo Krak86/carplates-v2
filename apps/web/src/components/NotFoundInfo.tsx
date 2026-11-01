@@ -20,23 +20,20 @@ export default function NotFoundInfo({ value }: Props): ReactNode {
   const plate = normalizePlate(value)
   const isPlate = isUaPlate(value)
   const isSoviet = !isPlate && isSovietPlate(value)
+  const leadFacts: [string, ReactNode][] = isPlate
+    ? [
+        [t('result.notFound.plate'), <span className="font-mono">{plate}</span>],
+        [t('result.region'), regionLabel(regionName(plate)) ?? <NoRegionBadge plate={plate} />]
+      ]
+    : []
 
   return (
     <div className="w-full max-w-content rounded-md bg-[var(--color-surface)]/20 px-3 py-2 text-left">
       <p className="text-center text-[var(--color-muted)]">{t('result.noResults', { value })}</p>
 
-      {isPlate && (
-        <dl className="mt-2 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm">
-          <dt className="text-[var(--color-muted)]">{t('result.notFound.plate')}</dt>
-          <dd className="font-mono font-semibold">{plate}</dd>
-
-          <dt className="text-[var(--color-muted)]">{t('result.region')}</dt>
-          <dd>{regionLabel(regionName(plate)) ?? <NoRegionBadge plate={plate} />}</dd>
-        </dl>
-      )}
-
-      {/* Old-format plates are the likeliest to be in the wanted lists only, so Soviet shapes are looked up too. */}
-      {(isPlate || isSoviet) && <OtherSourcesFound plate={plate} />}
+      {/* Old-format plates are the likeliest to be in the wanted lists only, so Soviet shapes are looked up too.
+          The plate and region are listed by it, below the photo, together with what the other sources hold. */}
+      {(isPlate || isSoviet) && <OtherSourcesFound plate={plate} leadFacts={leadFacts} />}
 
       <p className="mt-2 text-sm text-[var(--color-muted)]">
         {isPlate ? t('result.notFound.hintPlate') : t('result.notFound.hintFormat')}
