@@ -630,6 +630,8 @@
   "vin.since2021.body": "The open registry started publishing VINs only in 2021. Older records have no VIN, so a car's earlier plates and owners are not linked by VIN and may be missing here.",
   "vin.since2021.noVin": "No VIN is published for this plate: VINs appear in the open registry only since 2021. The same car may be listed under another plate with a VIN - search by VIN to find all of them.",
   "vin.source": "Source: NHTSA vPIC",
+  "vin.summary.note": "A short summary of the vehicle. The card below keeps the exact decoded data.",
+  "vin.summary.noteDerived": "A short summary of the vehicle; values marked ≈ were not decoded but taken from another source. The card below keeps the exact decoded data.",
   "vin.tab.overview": "Overview",
   "vin.tab.raw": "Raw data",
   "vin.status.clean": "Decoded cleanly - check digit is valid",
