@@ -1,3 +1,4 @@
+import DataFreshness from '@/components/DataFreshness'
 import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
@@ -94,6 +95,8 @@ export default function AuctionsRoute(): ReactNode {
               : t('uaAuctions.neverLoaded')}
           </p>
         )}
+
+        <DataFreshness />
       </div>
 
       <p className="mb-4 max-w-3xl rounded-lg bg-[var(--color-bg)]/85 px-3 py-2 text-sm backdrop-blur-sm">

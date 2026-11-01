@@ -1,3 +1,4 @@
+import DataFreshness from '@/components/DataFreshness'
 import { Suspense, lazy } from 'react'
 import type { ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
@@ -128,6 +129,8 @@ export default function WantedStatsRoute(): ReactNode {
               : t('wanted.neverLoaded')}
           </p>
         )}
+
+        <DataFreshness />
 
         {!showPlates && summary?.historySince && (
           <p className="inline-block rounded bg-[var(--color-bg)]/85 px-2 py-1 text-sm text-[var(--color-muted)] backdrop-blur-sm">

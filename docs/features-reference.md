@@ -703,6 +703,7 @@ Plan: [compare-plan.md](compare-plan.md). Phases 1-3 and the client side of phas
 - **A new data source = a row in `routes/data-status/datasets.ts`** (`CADENCES`, `job` for a scheduled one, else `refreshedOn`). **Bump `refreshedOn` in the same commit that re-exports its seed CSV**, or the page shows it stale. `helpers.test.ts` fails a hand-refreshed row without a date. A new scheduled job: add it to `scripts/src/jobs.ts`, the crontab and this list, with the same `job` name.
 - **A new `WITH NO DATA` materialized view must be refreshed on the VPS right after its migration deploys** (`psql -c "REFRESH MATERIALIZED VIEW registry.<name>"`): an unpopulated view throws (55000), not an empty result. `DataStatusService` tolerates it; other readers may not.
 - Status is computed in the browser (`datasetStatus`) from the `job_runs` log + the catalog; the API sends no verdicts. The endpoint is in neither `PUBLIC_API_PATH_PREFIXES` nor the Cloudflare Cache Rule.
+- **Every page fed by a job or seed CSV links `/data-status`** via `components/DataFreshness` (`/wanted`, `/auctions`, `/road-safety`, `/fuel`, `/safety`; `/stats` and `/news` have their own inline link). Pass `datasets={[ids from datasets.ts]}` to also show "Updated <date>" (newest sync among them); omit it where the page prints its own timestamp. A new data page adds the chip.
 - About lists it as the `dataStatus` feature (`about.brief.dataStatus` / `about.feature.dataStatus`, ua/ru/en); no new source (data.gov.ua is already credited).
 
 ## Import customs calculator (`/customs`, 2026-11-01)

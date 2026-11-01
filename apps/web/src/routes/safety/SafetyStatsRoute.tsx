@@ -1,3 +1,4 @@
+import DataFreshness from '@/components/DataFreshness'
 import type { ReactNode } from 'react'
 import type { SafetyStatsRow } from '@carplates/shared'
 import { useQuery } from '@tanstack/react-query'
@@ -72,12 +73,14 @@ export default function SafetyStatsRoute(): ReactNode {
 
   return (
     <div className="mx-auto w-full max-w-6xl">
-      <div className="mb-4 flex items-center gap-3">
+      <div className="mb-4 flex flex-wrap items-center gap-3">
         <h1 className="inline-block rounded-lg bg-[var(--color-bg)]/85 px-3 py-1.5 text-2xl font-bold backdrop-blur-sm">
           {t('safety.title')}
         </h1>
 
         <SectionInfo section="safetySummary" title={t('safety.title')} />
+
+        <DataFreshness datasets={['euroncap', 'jncap', 'cncap', 'kncap', 'iihs']} />
       </div>
 
       {!online && (
