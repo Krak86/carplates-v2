@@ -5,7 +5,15 @@ import { copyToClipboard, shareBaseUrl } from '@/lib/share-section'
 import { setFontParam } from '@/store/ui-store'
 
 /** Personal / admin pages: a shared link would only show the recipient their own (or a login) view. */
-export const NO_SHARE_PATHS = new Set(['/history', '/favorites', '/settings', '/profile', '/login', '/logout', '/admin'])
+export const NO_SHARE_PATHS = new Set([
+  '/history',
+  '/favorites',
+  '/settings',
+  '/profile',
+  '/login',
+  '/logout',
+  '/admin'
+])
 
 type UsePageShareActions = {
   copied: boolean

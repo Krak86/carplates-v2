@@ -679,7 +679,8 @@ export const SHARE_ALIAS_PAGES: Record<ShareAlias, Record<Lang, PageText>> = {
     },
     ru: {
       title: 'Вход в аккаунт | Cars UA',
-      description: 'Войдите через Google, Telegram или email, чтобы синхронизировать избранное и историю между устройствами.'
+      description:
+        'Войдите через Google, Telegram или email, чтобы синхронизировать избранное и историю между устройствами.'
     },
     en: {
       title: 'Sign in to your account | Cars UA',

@@ -23,5 +23,11 @@ export default function GoRoute(): ReactNode {
   const target = valid ? ACCOUNT_TARGET[alias] : undefined
 
   // Account links open their own page; the others land on the home page and pulse a search entry.
-  return <Navigate to={{ pathname: target ?? '/', search }} replace state={valid && !target ? { searchFocus: alias } : null} />
+  return (
+    <Navigate
+      to={{ pathname: target ?? '/', search }}
+      replace
+      state={valid && !target ? { searchFocus: alias } : null}
+    />
+  )
 }

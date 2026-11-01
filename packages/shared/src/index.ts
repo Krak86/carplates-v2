@@ -362,6 +362,21 @@ export {
 } from './rdwValue.js'
 export { customsAgeK, customsFuel, customsTax, UKR_DUTY_RATE, UKR_VAT_RATE } from './ukrCustoms.js'
 export type { CustomsFuel, CustomsTax } from './ukrCustoms.js'
+export {
+  buildCustomsQuery,
+  calcImportCosts,
+  CUSTOMS_PRESETS,
+  CUSTOMS_RULES,
+  customsRulesSchema,
+  DEFAULT_IMPORT_FUEL,
+  IMPORT_FUELS,
+  importAgeK,
+  mapFuel,
+  parseCustomsQuery,
+  pickCustomsRules,
+  UA_IMPORT_2026_1
+} from './customs.js'
+export type { CustomsQuery, CustomsRules, ImportCosts, ImportFuel, ImportInput } from './customs.js'
 export { convertEur, CURRENCIES, fxResponseSchema } from './fx.js'
 export type { Currency, FxResponse } from './fx.js'
 export { RIA_CHECK_URL, riaCheckResponseSchema } from './riaCheck.js'
