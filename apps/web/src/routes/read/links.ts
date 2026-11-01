@@ -14,6 +14,8 @@ export const VIN_PATH = '/read/vin'
 export const EXTREMES_PATH = '/read/extremes'
 export const RECALLS_PATH = '/read/recalls'
 export const AUCTIONS_GUIDE_PATH = '/read/auctions'
+/** Not a guide: the import customs calculator the imports and auctions guides link to. */
+export const CUSTOMS_PATH = '/customs'
 
 export const GUIDE_PATHS = [
   BODY_TYPES_PATH,

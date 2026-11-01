@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Link } from 'react-router'
 import type { AuctionLot, Currency, FxResponse } from '@carplates/shared'
 
 import {
@@ -17,6 +18,7 @@ import UaAuctionChips from '@/components/ua-auctions/UaAuctionChips'
 import UaAuctionPhotos from '@/components/ua-auctions/UaAuctionPhotos'
 import { cn } from '@/lib/cn'
 import { toIntlLocale } from '@/lib/intl'
+import { customsLotHref } from '@/routes/customs/helpers'
 
 type Props = {
   lot: AuctionLot
@@ -48,6 +50,7 @@ export default function UaAuctionLot({ lot, currency, fx }: Props): ReactNode {
   const month = formatLotMonth(lotMonthOf(lot), locale)
   const isProzorro = lotSource(lot) === 'prozorro'
   const vehicleName = [lot.make, lot.model, lot.year].filter(Boolean).join(' ')
+  const customsPath = customsLotHref(lot, fx)
   const verdict = lot.sold ? t('uaAuctions.sold') : isOpen ? t('uaAuctions.open') : t('uaAuctions.notSold')
   const icon = lot.sold ? '💰' : isOpen ? '🔔' : '🔨'
 
@@ -93,6 +96,14 @@ export default function UaAuctionLot({ lot, currency, fx }: Props): ReactNode {
         <Row label={t('wanted.plate')} value={lot.plate} />
         <Row label={t('wanted.vin')} value={lot.vin} />
       </dl>
+
+      {customsPath && (
+        <p className="mt-1.5">
+          <Link to={customsPath} title={t('customs.prefill.hint')} className="text-[var(--color-primary)] underline">
+            {t('customs.prefill.link')}
+          </Link>
+        </p>
+      )}
 
       {lot.damageText && (
         <p className="mt-1.5 rounded-md bg-amber-500/10 px-2 py-1">

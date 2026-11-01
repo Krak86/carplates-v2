@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Link } from 'react-router'
 
 import InfoPopover from '@/components/InfoPopover'
 import InfoText from '@/components/InfoText'
@@ -7,6 +8,7 @@ import { displacementLiters, enginePower, gvwrClass, parseEngineLayout } from '@
 import type { FieldMap } from '@/components/vin/helpers'
 import { useVinText } from '@/components/vin/use-vin-text'
 import type { EngineLayout } from '@/components/vin/types'
+import { customsPrefillHref } from '@/routes/customs/helpers'
 
 type Props = {
   fields: FieldMap
@@ -41,6 +43,15 @@ export default function VinEngineCard({ fields }: Props): ReactNode {
     chip('Electrification Level', 'electrification'),
     chip('Transmission Style', 'transmission')
   ].filter((c): c is Chip => !!c)
+
+  const customsPath = customsPrefillHref({
+    fuelText: ['Fuel Type - Primary', 'Fuel Type - Secondary', 'Electrification Level']
+      .map(variable => fields.get(variable))
+      .filter(Boolean)
+      .join(' '),
+    cc: liters ? Math.round(liters * 1000) : null,
+    year: Number(fields.get('Model Year')) || null
+  })
 
   if (!cylinders && !liters && !hp && !fuel && chips.length === 0) return null
 
@@ -120,6 +131,14 @@ export default function VinEngineCard({ fields }: Props): ReactNode {
             </span>
           ))}
         </div>
+      )}
+
+      {customsPath && (
+        <p className="mt-3 text-sm">
+          <Link to={customsPath} className="text-primary underline">
+            {t('customs.prefill.link')}
+          </Link>
+        </p>
       )}
     </div>
   )

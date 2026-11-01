@@ -53,9 +53,9 @@ export const ELECTRIC_LEAD: L10n = {
 }
 
 export const IMPORTS_LEAD: L10n = {
-  ua: 'Скільки авто ввезено з-за кордону, а скільки куплено через дилера, які моделі ввозять найчастіше і що VIN каже про країну виробництва? Ще - що перевірити перед купівлею.',
-  ru: 'Сколько авто ввезено из-за границы, а сколько куплено через дилера, какие модели ввозят чаще всего и что VIN говорит о стране сборки? А ещё - что проверить перед покупкой.',
-  en: 'How many cars were brought in from abroad and how many bought through a dealer, which models are imported most, and what does the VIN say about the country of build? Plus what to check before buying.'
+  ua: 'Скільки авто ввезено з-за кордону, а скільки куплено через дилера, які моделі ввозять найчастіше і що VIN каже про країну виробництва? Ще - скільки коштує розмитнення і що перевірити перед купівлею.',
+  ru: 'Сколько авто ввезено из-за границы, а сколько куплено через дилера, какие модели ввозят чаще всего и что VIN говорит о стране сборки? А ещё - сколько стоит растаможка и что проверить перед покупкой.',
+  en: 'How many cars were brought in from abroad and how many bought through a dealer, which models are imported most, and what does the VIN say about the country of build? Plus what customs costs and what to check before buying.'
 }
 
 export const SAFETY_LEAD: L10n = {

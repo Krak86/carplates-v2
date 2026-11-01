@@ -310,6 +310,7 @@ const FEATURES = [
   'roadSafety',
   'fuel',
   'value',
+  'customs',
   'auctions',
   'uaAuctions',
   'reviews',

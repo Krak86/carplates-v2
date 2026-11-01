@@ -12,6 +12,7 @@ import {
 } from '@/routes/read/imports/ImportsSections'
 import {
   AppSection,
+  CostSection,
   HistorySection,
   MarketSection,
   SourcesSection,
@@ -36,6 +37,7 @@ export default function ImportsRoute(): ReactNode {
           { id: 'countries', label: t('read.sec.impCountries') },
           { id: 'history', label: t('read.sec.impHistory') },
           { id: 'why', label: t('read.sec.impWhy') },
+          { id: 'cost', label: t('read.sec.impCost') },
           { id: 'market', label: t('read.sec.impMarket') },
           { id: 'checks', label: t('read.sec.impChecks') },
           { id: 'app', label: t('read.sec.impApp') }
@@ -48,6 +50,7 @@ export default function ImportsRoute(): ReactNode {
       <CountriesSection />
       <HistorySection />
       <WhySection />
+      <CostSection />
       <MarketSection />
       <ChecksSection />
       <AppSection />

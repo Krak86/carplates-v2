@@ -68,6 +68,8 @@ Legend: ✅ in place · ⚠️ gap, fix before deploy · 🔜 not applicable yet
 5. New embed/third-party origin → add it to the CSP allow-list and note why.
 6. New cookie → `HttpOnly; Secure; SameSite`. New redirect target → relative paths only.
 7. Don't log secrets, tokens, full plates tied to a user, or request bodies of auth routes.
+8. User-uploaded files (planned photo shares): sign-in required, MIME + magic-byte check, size cap, no EXIF/APP segments stored, server-side recognition (never trust a client result),
+   capability token stored only as a SHA-256, exact expiry/revoke enforced by the API (storage lifecycle is just cleanup), `noindex` + `no-referrer`, private bucket with its own scoped token.
 
 ## 6. Verifying periodically (suggested automation)
 

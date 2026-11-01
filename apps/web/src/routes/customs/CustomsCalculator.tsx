@@ -73,9 +73,10 @@ export default function CustomsCalculator({ query, hasParams }: Props): ReactNod
           <select
             id="customs-fuel"
             value={form.fuel}
-            onChange={e => setForm(prev => ({ ...prev, fuel: e.target.value as ImportFuel }))}
+            onChange={e => setForm(prev => ({ ...prev, fuel: e.target.value as ImportFuel | '' }))}
             className={INPUT_CLASS}
           >
+            {form.fuel === '' && <option value="">{t('customs.form.fuelChoose')}</option>}
             {IMPORT_FUELS.map(fuel => (
               <option key={fuel} value={fuel}>
                 {t(`customs.fuel.${fuel}`)}

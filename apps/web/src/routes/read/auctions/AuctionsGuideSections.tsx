@@ -7,10 +7,13 @@ import { SETAM_URL } from '@carplates/shared'
 import Card from '@/components/ui/Card'
 import { toIntlLocale } from '@/lib/intl'
 import { auctionStatsQuery } from '@/lib/queries'
+import CustomsCalcLinks from '@/routes/read/CustomsCalcLinks'
 import { pick } from '@/routes/read/helpers'
 import {
   CHECK_TITLE,
   CHECKS,
+  COST_TEXT,
+  COST_TITLE,
   EXAMPLES,
   EXAMPLES_INTRO,
   EXAMPLES_NOTE,
@@ -220,6 +223,19 @@ export function HistorySection(): ReactNode {
       </ol>
 
       <p className="text-sm text-muted">{pick(HISTORY_NOTE, i18n.language)}</p>
+    </Card>
+  )
+}
+
+/** Customs cost of a car bought abroad; the rates live in the calculator, not here. */
+export function CostSection(): ReactNode {
+  const { i18n } = useTranslation()
+
+  return (
+    <Card id="cost" className="scroll-mt-20">
+      <h2 className="mb-2 text-xl font-semibold">{pick(COST_TITLE, i18n.language)}</h2>
+      <p className="mb-3 text-muted">{pick(COST_TEXT, i18n.language)}</p>
+      <CustomsCalcLinks />
     </Card>
   )
 }

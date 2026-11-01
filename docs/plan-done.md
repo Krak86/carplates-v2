@@ -4367,3 +4367,16 @@ The share-price chart lived only in the desktop-only left `StockWidget` on `/` +
 - Checked the Kia 1D drop (-11.73%) against Yahoo: `chartPreviousClose` 108300 vs price 95600, a real move, not a baseline bug.
 - Not built: a market-index chart (no index series in `apps/api/src/stocks`).
 - **Instruments + bonds (same day):** the section got a chip per instrument of the listed company (Hyundai 1st/2nd/3rd preferred `005385/005387/005389.KS`, ADRs such as `TM`/`HMC`/`NSANY`, OTC lines, second listings like `RACE.MI`, `9866.HK`, `002594.SZ`), each with its own chart and facts (`GET /api/stocks/quote`), a "what is this" line per kind, Yahoo + TradingView links, and a bonds note with a web-search link (the Frankfurt search URL was dead: "Content not available"). Tickers probed live; `HYMTF`, `KIMTF`, `BMW3.DE`, `BMWYY`, `GELYY` return nothing on Yahoo and are left out. Bond prices have no free API, so bonds are link-out only. The desktop side widget is unchanged.
+
+## Import customs calculator `/customs` (2026-11-01) ✅
+
+Duty, excise, VAT and the pension fee for a car imported to Ukraine, at the NBU euro rate. Six steps, conventions in `docs/features-reference.md` "Import customs calculator".
+
+1. **Shared calc** (`packages/shared/src/customs.ts`): versioned rules `ua-import-2026.1`, `calcImportCosts`, query parser, `mapFuel`, presets (fixtures: the 3 presets, excise EUR 480 / 1,200 / 60). Also fixed `customsAgeK` (now - make year, no -1; Tax Code art. 215.3.5-1).
+2. **Route** `/customs`: form, result with every step, official sources, presets, rules audit card; route checklist done.
+3. **Sitemap**: `STATIC_PAGES` entry, `/sitemap` page entry, tests in `apps/api/src/spa/sitemap.test.ts` and `routes/sitemap/helpers.test.ts`.
+4. **Read guides**: `CostSection` in `/read/imports`, a section in `/read/auctions`, shared `CustomsCalcLinks`; no rates quoted.
+5. **Prefill links**: `/auctions` lot card, the plate card's lot, the VIN page engine card; hybrids are never prefilled and the form's fuel stays empty until the user picks (new empty option, no result until then).
+6. **Docs and release**: About, `releases.ts` `new` item, features-reference, this entry.
+
+Verification: excise formula and thresholds, age coefficient, EV per-kWh rate, pension tiers and the 2026 minimum (3328) were checked on zakon.rada.gov.ua. Customs Tariff 2697-IX (duty 10%, EV 0%) and Cabinet resolutions 1740 and 1129 could not be checked in the primary text. Hybrids use petrol rates and are shown as an estimate. Later / low priority: links from `/cars/:make/:model`, `/compare`, `/fuel`.

@@ -1,7 +1,7 @@
 import {
   buildCustomsQuery,
   CUSTOMS_PRESETS,
-  DEFAULT_IMPORT_FUEL,
+  mapFuel,
   type CustomsQuery,
   type ImportFuel,
   type ImportInput
@@ -9,7 +9,8 @@ import {
 
 /** The form keeps what the user typed as text; `formToInput` turns it into numbers. */
 export type FormState = {
-  fuel: ImportFuel
+  /** Empty until chosen: a link without a classifiable fuel (a hybrid, unknown text) leaves the choice to the user. */
+  fuel: ImportFuel | ''
   value: string
   cc: string
   year: string
@@ -36,7 +37,7 @@ export function initialForm(query: CustomsQuery, hasParams: boolean): FormState 
     }
   }
   return {
-    fuel: query.fuel ?? DEFAULT_IMPORT_FUEL,
+    fuel: query.fuel ?? '',
     value: text(query.value),
     cc: text(query.cc),
     year: text(query.year),
@@ -52,8 +53,9 @@ export function parsePositive(raw: string): number | null {
   return Number.isFinite(n) && n > 0 ? n : null
 }
 
-/** Null until the customs value and the model year are usable; cc / kwh stay optional (the result says what is missing). */
+/** Null until the fuel, the customs value and the model year are usable; cc / kwh stay optional (the result says what is missing). */
 export function formToInput(form: FormState, nowYear: number, eurUah: number): ImportInput | null {
+  if (form.fuel === '') return null
   const valueEur = parsePositive(form.value)
   const year = parsePositive(form.year)
   if (valueEur == null || year == null || year < 1900 || year > nowYear + 1) return null
@@ -77,6 +79,46 @@ export function presetHref(preset: (typeof CUSTOMS_PRESETS)[number]): string {
   const cc = 'cc' in preset ? preset.cc : undefined
   const kwh = 'kwh' in preset ? preset.kwh : undefined
   return `/customs?${buildCustomsQuery({ fuel, value, year, cc, kwh })}`
+}
+
+export type PrefillSpec = {
+  /** Free fuel text of the source (lot, NHTSA); hybrids and unclassified text leave the fuel field empty. */
+  fuelText?: string | null
+  cc?: number | null
+  year?: number | null
+  /** Customs value guess in euros; omitted when unknown (the user types it). */
+  valueEur?: number | null
+}
+
+/** `/customs?...` link for a car found elsewhere in the app; null without both the engine size and the year. */
+export function customsPrefillHref({ fuelText, cc, year, valueEur }: PrefillSpec): string | null {
+  if (!cc || cc <= 0 || !year) return null
+  const fuel = mapFuel(fuelText)
+  return `/customs?${buildCustomsQuery({
+    fuel: fuel === 'hybrid' ? undefined : (fuel ?? undefined),
+    cc,
+    year,
+    value: valueEur && valueEur > 0 ? valueEur : undefined
+  })}`
+}
+
+type LotSpec = {
+  year?: number | null
+  engineCc?: number | null
+  fuel?: string | null
+  startPrice?: number | null
+  salePrice?: number | null
+}
+
+/** Prefill link of an auction lot: the sale (else start) price in hryvnias becomes euros at the NBU rate, as an editable estimate. */
+export function customsLotHref(lot: LotSpec, fx: { eurUah: number } | null): string | null {
+  const uah = lot.salePrice ?? lot.startPrice
+  return customsPrefillHref({
+    fuelText: lot.fuel,
+    cc: lot.engineCc,
+    year: lot.year,
+    valueEur: uah && fx ? uah / fx.eurUah : null
+  })
 }
 
 export function formatEur(n: number, locale: string): string {
