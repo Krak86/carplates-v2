@@ -84,7 +84,7 @@ export default function OtherSourcesFound({ plate }: Props): ReactNode {
 
       {vinCard ? (
         <Suspense fallback={null}>
-          <VinResult data={vinCard} searchedPlate={plate} openAuctions />
+          <VinResult data={vinCard} searchedPlate={plate} />
         </Suspense>
       ) : (
         <>
