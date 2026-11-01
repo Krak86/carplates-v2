@@ -3900,6 +3900,7 @@
   "compare.saved.save": "Save comparison",
   "compare.saved.unsave": "Saved",
   "compare.saved.title": "Saved comparisons",
+  "compare.saved.empty": "Nothing saved yet. Compare two cars and press Save comparison to keep it here (in this browser only).",
   "compare.saved.note": "Kept in this browser only; nothing is sent anywhere.",
   "compare.saved.remove": "Remove {{name}} from saved",
   "compare.ranges.title": "Ranges",

@@ -50,14 +50,15 @@ export function CompareSavedList(): ReactNode {
     mutationFn: removeComparison,
     onSuccess: () => client.invalidateQueries({ queryKey: SAVED_KEY })
   })
-  if (saved.length === 0) return null
 
   return (
     <section aria-labelledby="compare-saved-title">
       <h2 id="compare-saved-title" className="mb-1 text-lg font-semibold">
         {t('compare.saved.title')}
       </h2>
-      <p className="mb-2 text-sm text-[var(--color-muted)]">{t('compare.saved.note')}</p>
+      <p className="mb-2 text-sm text-[var(--color-muted)]">
+        {t(saved.length === 0 ? 'compare.saved.empty' : 'compare.saved.note')}
+      </p>
       <ul className="space-y-1.5">
         {saved.map(s => (
           <li key={s.id} className="flex items-center gap-2 text-base">
