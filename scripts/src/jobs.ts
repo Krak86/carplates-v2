@@ -27,6 +27,9 @@ export const JOBS = {
   // Real work ~monthly (new CKAN month; ~2-3 h, a first load on an empty ingested_resources ~6 h); other runs no-op after one
   // API call (ingest-full.ts). /archive = /opt/carsua/archive on the host.
   plates: { command: 'tsx src/ingest-full.ts --archive /archive', timeoutMin: 720 },
+  // Manual only (no cron entry): rebuilds registry.stats_region_facet (regional fleet = the road-safety per-100k map, /stats map modes) when
+  // a `plates` run has not (the table is empty until the first refreshDerived); a single transaction-sized aggregate over current_registration.
+  'region-facet': { command: 'tsx src/region-facet-stats.ts', timeoutMin: 60 },
   // Manual only (no cron entry): `run-ingest.sh catalog` rebuilds the catalog_* tables (15-25 min on the real registry; the tables are
   // replaced in one transaction at the end, so a timeout leaves the previous catalog intact), e.g. after changing catalog-overrides.csv.
   catalog: { command: 'tsx src/catalog-build.ts', timeoutMin: 60 }
