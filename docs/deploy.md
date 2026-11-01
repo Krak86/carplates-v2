@@ -208,6 +208,13 @@ Never aim it at `https://carsua.app`: Cloudflare WAF (30/10 s) and the Nest thro
 2. Target the origin: a restored copy locally (or `ssh -L 3000:<api container ip>:3000 vps`). The per-IP throttle answers 429, so start the **local** api with `THROTTLE_DISABLED=true` (ignored when `NODE_ENV=production`, so it cannot loosen the VPS; for a VPS run you would need a staging deploy).
 3. Run off-peak while watching `docker stats` (api limit 1 GB), `iostat` and `pg_stat_activity`: `pnpm load-test --plates plates.txt`.
 
+**On the VPS itself** (no tunnel; the SSH tunnel from a home PC adds 100-250 ms and caps throughput, so it measures the tunnel):
+
+1. Bundle on your PC: `node_modules/.pnpm/esbuild@<ver>/node_modules/esbuild/bin/esbuild scripts/src/load-test.ts --bundle --platform=node --format=esm --target=node24 --external:@carplates/db --external:drizzle-orm --outfile=load-test.mjs`, and `scp` it plus the plates file to the VPS.
+2. Throwaway api (same image, `NODE_ENV=development` so `THROTTLE_DISABLED` works, `DIGEST_ENABLED=false` so it cannot mail the digest twice, `--cpus 2 --memory 1g`, no published ports), named `loadtest-api` on `carsua_default`.
+3. Generator: `docker run --rm --network carsua_default -v "$PWD":/t -w /t node:24-alpine node load-test.mjs --plates plates.txt --base-url http://loadtest-api:3100 --allow-remote`.
+4. Clean up: `docker rm -f loadtest-api`, delete the copied files.
+
 Expect the ceiling to be cold-disk Postgres reads (hot set ~9 GB vs 2 GB `shared_buffers`), then API memory. Prefer a restored copy to production: an OOM kill takes Postgres down with the API.
 
 ## Still open
