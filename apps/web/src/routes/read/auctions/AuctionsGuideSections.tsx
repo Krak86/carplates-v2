@@ -11,6 +11,10 @@ import { pick } from '@/routes/read/helpers'
 import {
   CHECK_TITLE,
   CHECKS,
+  EXAMPLES,
+  EXAMPLES_INTRO,
+  EXAMPLES_NOTE,
+  EXAMPLES_TITLE,
   HISTORY,
   HISTORY_INTRO,
   HISTORY_NOTE,
@@ -21,6 +25,10 @@ import {
   LOTS,
   LOTS_INTRO,
   LOTS_TITLE,
+  SELLERS,
+  SELLERS_INTRO,
+  SELLERS_NOTE,
+  SELLERS_TITLE,
   SOURCES,
   SOURCES_NOTE,
   TAKE_INTRO,
@@ -58,6 +66,52 @@ export function LotsSection(): ReactNode {
       <p className="mb-3 text-muted">{pick(LOTS_INTRO, i18n.language)}</p>
 
       <FactList facts={LOTS} />
+    </Card>
+  )
+}
+
+/** The sellers behind SETAM and Prozorro.Sale lots, in the same groups as the /auctions filter. */
+export function SellersSection(): ReactNode {
+  const { i18n } = useTranslation()
+
+  return (
+    <Card id="sellers" className="scroll-mt-20">
+      <h2 className="mb-2 text-xl font-semibold">{pick(SELLERS_TITLE, i18n.language)}</h2>
+      <p className="mb-3 text-muted">{pick(SELLERS_INTRO, i18n.language)}</p>
+
+      <FactList facts={SELLERS} />
+
+      <p className="text-sm text-muted">{pick(SELLERS_NOTE, i18n.language)}</p>
+    </Card>
+  )
+}
+
+/** A few real sold Prozorro lots, without plates, each linking to its group on /auctions. */
+export function ExamplesSection(): ReactNode {
+  const { t, i18n } = useTranslation()
+  const nf = new Intl.NumberFormat(toIntlLocale(i18n.language))
+
+  return (
+    <Card id="examples" className="scroll-mt-20">
+      <h2 className="mb-2 text-xl font-semibold">{pick(EXAMPLES_TITLE, i18n.language)}</h2>
+      <p className="mb-3 text-muted">{pick(EXAMPLES_INTRO, i18n.language)}</p>
+
+      <ul className="mb-3 grid gap-3 sm:grid-cols-3">
+        {EXAMPLES.map(example => (
+          <li key={example.id} className="rounded-lg bg-(--color-bg) p-3">
+            <h3 className="font-medium">{pick(example.title, i18n.language)}</h3>
+            <p className="my-1 text-sm tabular-nums">
+              {nf.format(example.start)} ₴ → <strong>{nf.format(example.sale)} ₴</strong>
+            </p>
+            <p className="mb-2 text-sm text-muted">{pick(example.text, i18n.language)}</p>
+            <Link to={`/auctions?source=prozorro&group=${example.group}`} className="text-sm text-primary">
+              {t('auctions.page.title')} →
+            </Link>
+          </li>
+        ))}
+      </ul>
+
+      <p className="text-sm text-muted">{pick(EXAMPLES_NOTE, i18n.language)}</p>
     </Card>
   )
 }
