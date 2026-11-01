@@ -4,9 +4,9 @@ import { useTranslation } from 'react-i18next'
 import { Link, useSearchParams } from 'react-router'
 
 import { cn } from '@/lib/cn'
-import Card from '@/components/ui/Card'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
-import { parseQuizId, QUIZ_EMOJI, QUIZ_IDS, RACER_LINKS } from '@/routes/play/games'
+import GameTile from '@/routes/play/GameTile'
+import { parseQuizId, QUIZ_EMOJI, QUIZ_HUE, QUIZ_IDS, RACER_HUE, RACER_LINKS } from '@/routes/play/games'
 import type { QuizId } from '@/routes/play/games'
 import HigherLowerQuiz from '@/routes/play/HigherLowerQuiz'
 import LogoQuiz from '@/routes/play/LogoQuiz'
@@ -20,9 +20,6 @@ const QUIZ_COMPONENT: Readonly<Record<QuizId, (props: { rounds: number; onAgain:
   logo: LogoQuiz,
   higher: HigherLowerQuiz
 }
-
-const CARD_CLASS =
-  'flex h-full flex-col gap-1 transition-colors hover:border-[var(--color-primary)] focus-visible:outline-2'
 
 // Lazy-loaded (see App.tsx). `?game=<id>` plays a quiz in place; the bare route is the hub of every game.
 export default function PlayRoute(): ReactNode {
@@ -106,20 +103,19 @@ export default function PlayRoute(): ReactNode {
         ))}
       </div>
 
-      <ul className="grid gap-3 sm:grid-cols-2">
+      <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-5">
         {QUIZ_IDS.map(id => {
           const best = readBest(id, id === 'higher' ? undefined : rounds)
           return (
             <li key={id}>
-              <button type="button" onClick={() => handleOpen(id)} className="block h-full w-full text-left">
-                <Card className={CARD_CLASS}>
-                  <span aria-hidden className="text-2xl">
-                    {QUIZ_EMOJI[id]}
-                  </span>
-                  <span className="font-medium">{t(`play.quiz.${id}.title`)}</span>
-                  <span className="text-sm text-[var(--color-muted)]">{t(`play.quiz.${id}.desc`)}</span>
-                  {best > 0 && <span className="mt-auto pt-1 text-xs">{t('play.best', { score: best })}</span>}
-                </Card>
+              <button type="button" onClick={() => handleOpen(id)} className="block h-full w-full">
+                <GameTile
+                  emoji={QUIZ_EMOJI[id]}
+                  hue={QUIZ_HUE[id]}
+                  title={t(`play.quiz.${id}.title`)}
+                  desc={t(`play.quiz.${id}.desc`)}
+                  note={best > 0 ? t('play.best', { score: best }) : undefined}
+                />
               </button>
             </li>
           )
@@ -128,13 +124,12 @@ export default function PlayRoute(): ReactNode {
         {RACER_LINKS.map(link => (
           <li key={link.to}>
             <Link to={link.to} viewTransition className="block h-full">
-              <Card className={CARD_CLASS}>
-                <span aria-hidden className="text-2xl">
-                  {link.emoji}
-                </span>
-                <span className="font-medium">{t(`play.${link.key}.title`)}</span>
-                <span className="text-sm text-[var(--color-muted)]">{t(`play.${link.key}.desc`)}</span>
-              </Card>
+              <GameTile
+                emoji={link.emoji}
+                hue={RACER_HUE[link.key]}
+                title={t(`play.${link.key}.title`)}
+                desc={t(`play.${link.key}.desc`)}
+              />
             </Link>
           </li>
         ))}

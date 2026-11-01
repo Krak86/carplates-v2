@@ -12,3 +12,7 @@ export const RACER_LINKS = [
 ] as const
 
 export const QUIZ_EMOJI: Readonly<Record<QuizId, string>> = { region: '🗺️', logo: '🏷️', higher: '⚖️' }
+
+/** Cover hue (0-360) of each game's poster tile on the hub, see `.game-cover` in global.css. */
+export const QUIZ_HUE: Readonly<Record<QuizId, number>> = { region: 150, logo: 30, higher: 285 }
+export const RACER_HUE: Readonly<Record<(typeof RACER_LINKS)[number]['key'], number>> = { race: 15, relax: 200 }
