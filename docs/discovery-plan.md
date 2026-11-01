@@ -158,17 +158,17 @@ into many subs at once. Use a screenshot or short GIF of a search.
 
 The audience is not confirmed yet. First step: read the country, language and landing-page split in the analytics, then pick one or two channels.
 
-| Channel | Worth it? | Notes |
-| --- | --- | --- |
-| Telegram (groups, then a bot, then maybe a channel) | **Yes, first** | The main messenger and news source in Ukraine; car-buying chats are where the use case is. Join, help first, share once per group, read the rules. A channel (`@carsua_app`) only for release / data updates; a group only after repeat users appear. Bot: PLAN.md backlog |
-| Facebook groups | **Yes** | Older, car-buying audience; many local and model-club groups. Same rule: one post per group, read the self-promotion rule. Page itself is low value |
-| YouTube | Later | Strong for "how to check a car before buying" tutorials and screen recordings; slow to build but long-lived and searchable |
-| Viber | Skip | Used for private chats and communities, no discovery, hard to share into |
-| Instagram | Skip for now | Reels with a plate-check demo could work, but needs steady content; low link value |
-| TikTok | Skip for now | Short demo videos ("check this plate"), reach is random, needs a content habit |
-| Threads / X | Skip | Small Ukrainian audience, little use case |
-| Reddit | Selective | r/SideProject, r/webdev, r/opensource for the technical audience; links are `nofollow` |
-| Habr | Optional, later | Russian-language, mixed reputation among Ukrainians; decide after the audience data. DOU.ua and dev.to come first |
+| Channel                                             | Worth it?       | Notes                                                                                                                                                                                                                                                                      |
+| --------------------------------------------------- | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Telegram (groups, then a bot, then maybe a channel) | **Yes, first**  | The main messenger and news source in Ukraine; car-buying chats are where the use case is. Join, help first, share once per group, read the rules. A channel (`@carsua_app`) only for release / data updates; a group only after repeat users appear. Bot: PLAN.md backlog |
+| Facebook groups                                     | **Yes**         | Older, car-buying audience; many local and model-club groups. Same rule: one post per group, read the self-promotion rule. Page itself is low value                                                                                                                        |
+| YouTube                                             | Later           | Strong for "how to check a car before buying" tutorials and screen recordings; slow to build but long-lived and searchable                                                                                                                                                 |
+| Viber                                               | Skip            | Used for private chats and communities, no discovery, hard to share into                                                                                                                                                                                                   |
+| Instagram                                           | Skip for now    | Reels with a plate-check demo could work, but needs steady content; low link value                                                                                                                                                                                         |
+| TikTok                                              | Skip for now    | Short demo videos ("check this plate"), reach is random, needs a content habit                                                                                                                                                                                             |
+| Threads / X                                         | Skip            | Small Ukrainian audience, little use case                                                                                                                                                                                                                                  |
+| Reddit                                              | Selective       | r/SideProject, r/webdev, r/opensource for the technical audience; links are `nofollow`                                                                                                                                                                                     |
+| Habr                                                | Optional, later | Russian-language, mixed reputation among Ukrainians; decide after the audience data. DOU.ua and dev.to come first                                                                                                                                                          |
 
 - [ ] Check analytics for audience (country, UI language, top pages) before posting anywhere beyond Telegram / Facebook car groups
 - [ ] Pick 5-10 Telegram and Facebook car-buying groups (search: `авто з пробігом`, `автопідбір`, `авто з Європи`, model clubs), read the rules, post once each with a screenshot

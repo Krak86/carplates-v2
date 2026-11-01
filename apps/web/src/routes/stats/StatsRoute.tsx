@@ -12,8 +12,8 @@ import Card from '@/components/ui/Card'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 import { cn } from '@/lib/cn'
 import { toIntlLocale } from '@/lib/intl'
-import { statsQuery } from '@/lib/queries'
-import { dimensionHasYearColumn, dimensionRows, yearBoundaryLabel, yearRange } from '@/routes/stats/helpers'
+import { dataStatusQuery, statsQuery } from '@/lib/queries'
+import { dimensionHasYearColumn, dimensionRows, monthYearLabel, yearRange } from '@/routes/stats/helpers'
 import { DEFAULT_MAP_MODE, MAP_MODES, parseMapMode } from '@/routes/stats/StatsMap.helpers'
 import type { MapMode } from '@/routes/stats/StatsMap.helpers'
 import StatsMapSkeleton from '@/routes/stats/StatsMapSkeleton'
@@ -57,6 +57,7 @@ export default function StatsRoute(): ReactNode {
   const { t, i18n } = useTranslation()
   const online = useOnlineStatus()
   const stats = useQuery(statsQuery())
+  const dataStatus = useQuery(dataStatusQuery())
   const [searchParams, setSearchParams] = useSearchParams()
   // Captured once at mount, like ResultCard's `isSharedHistory` — a ResultCard badge deep
   // link (?dim=brand&highlight=VOLKSWAGEN, or ?highlightModel=VOLKSWAGEN::PASSAT for the
@@ -124,6 +125,8 @@ export default function StatsRoute(): ReactNode {
 
   const numberFormat = new Intl.NumberFormat(toIntlLocale(i18n.language))
   const range = stats.data ? yearRange(stats.data) : null
+  const lastDate = dataStatus.data?.registry.lastDate
+  const dataEnd = lastDate ? monthYearLabel(lastDate, toIntlLocale(i18n.language)) : null
 
   return (
     <div className="mx-auto w-full max-w-6xl">
@@ -145,9 +148,12 @@ export default function StatsRoute(): ReactNode {
         {stats.isSuccess && range && (
           <p className="inline-block rounded bg-[var(--color-bg)]/85 px-2 py-1 text-sm text-[var(--color-muted)] backdrop-blur-sm">
             {t('stats.yearRange', {
-              min: yearBoundaryLabel(range.min, toIntlLocale(i18n.language)),
-              max: yearBoundaryLabel(range.max, toIntlLocale(i18n.language))
-            })}
+              min: range.min,
+              max: dataEnd ?? range.max
+            })}{' '}
+            <Link viewTransition to="/data-status" className="text-primary underline">
+              {t('dataStatus.link')}
+            </Link>
           </p>
         )}
       </div>

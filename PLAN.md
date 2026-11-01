@@ -87,6 +87,8 @@ becomes available.
 
 ### Sitemap page `/sitemap` ✅ DONE (2026-11-01) — see `docs/plan-done.md`
 
+### Data freshness: real data-end label + `/data-status` ✅ DONE (2026-11-01) — see `docs/plan-done.md`
+
 ### Hub tiles, mobile region quiz, load test (`pnpm load-test`, `THROTTLE_DISABLED`) ✅ DONE (2026-11-01) — see `docs/plan-done.md`
 
 ### Releases page (`/releases`) ✅ DONE (2026-10-15) — see `docs/plan-done.md`

@@ -115,6 +115,14 @@ export {
   type RoadSafetyYear,
   type RoadSafetyYearQuery
 } from './roadSafety.js'
+export {
+  dataStatusResponseSchema,
+  jobStatusSchema,
+  registrySpanSchema,
+  type DataStatusResponse,
+  type JobStatus,
+  type RegistrySpan
+} from './dataStatus.js'
 export { brandStatsResponseSchema, type BrandStatsResponse } from './brandStats.js'
 export { importsStatsResponseSchema, type ImportsStatsResponse } from './importsStats.js'
 export { originStatsResponseSchema, type OriginStatsResponse } from './originStats.js'

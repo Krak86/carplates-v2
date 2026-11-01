@@ -679,3 +679,9 @@ Plan: [compare-plan.md](compare-plan.md). Phases 1-3 and the client side of phas
 - `routes/sitemap/`: `helpers.ts` holds the tree (`SITEMAP_GROUPS` links, `SITEMAP_TIPS` for URL-less features, `HIDDEN_ROUTES`, `CATALOG_ROUTES`), `SitemapRoute.tsx` renders it. Guide links come from `GUIDE_META` and game links from `QUIZ_IDS` / `RACER_LINKS`, so a new article or game appears by itself.
 - **A new route in `App.tsx` must be added to `SITEMAP_GROUPS` (or `HIDDEN_ROUTES` when it is not a page to browse to)**: `helpers.test.ts` reads `App.tsx` and fails otherwise. Text lives in `sitemap.*` (ua/ru/en); labels reuse the existing `nav.*` keys.
 - Not the same as `/sitemap.xml` (crawlers, `SeoController`). The page has a `STATIC_PAGES` entry and sits in the footer (`QuickLinks`).
+
+## Data freshness (`/data-status`, 2026-11-01)
+
+- **The "data covers ..." label states where the DATA ends**, never the calendar: `monthYearLabel(registry.lastDate)` from `GET /api/data-status` (`stats_data_span`, rebuilt by `refreshStats()`). Never derive a coverage label from `new Date()`.
+- **A new data source = a row in `routes/data-status/datasets.ts`** (`CADENCES`, `job` for a scheduled one, else `refreshedOn`). **Bump `refreshedOn` in the same commit that re-exports its seed CSV**, or the page shows it stale. `helpers.test.ts` fails a hand-refreshed row without a date. A new scheduled job: add it to `scripts/src/jobs.ts`, the crontab and this list, with the same `job` name.
+- Status is computed in the browser (`datasetStatus`) from the `job_runs` log + the catalog; the API sends no verdicts. The endpoint is in neither `PUBLIC_API_PATH_PREFIXES` nor the Cloudflare Cache Rule.

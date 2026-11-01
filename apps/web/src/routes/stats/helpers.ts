@@ -132,14 +132,14 @@ export function yearRange(stats: StatsResponse): { min: number; max: number } | 
 }
 
 /**
- * Human label for one end of the year range: just the year, or "Month Year"
- * when that end is the current calendar year — `byYear` has no month
- * breakdown, and the registry only updates monthly (see CLAUDE.md), so the
- * current year's total is never actually a full year yet.
+ * "August 2026" from an ISO date ("2026-08-31"); `null` for anything else. The label states where the DATA ends (the registry's real last
+ * registration date, `/api/data-status`), never the calendar: the registry lags the clock by weeks.
  */
-export function yearBoundaryLabel(year: number, locale: string, now: Date = new Date()): string {
-  if (year !== now.getFullYear()) return String(year)
-  return new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric' }).format(now)
+export function monthYearLabel(isoDate: string, locale: string): string | null {
+  const match = /^(\d{4})-(\d{2})-\d{2}$/.exec(isoDate)
+  if (!match) return null
+  const date = new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, 1))
+  return new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(date)
 }
 
 // The dataviz skill's documented sequential-blue ramp (steps 100→700,

@@ -180,6 +180,14 @@ export const statsByOper = registry
   })
   .existing()
 
+/** One row: first / last registration date (ISO dates) — see migrations/0086_stats_data_span.sql. */
+export const statsDataSpan = registry
+  .materializedView('stats_data_span', {
+    firstDate: date('first_date'),
+    lastDate: date('last_date')
+  })
+  .existing()
+
 /** Brand x year 2D rollup — see migrations/0004_stats_by_brand.sql. */
 export const statsByBrandYear = registry
   .materializedView('stats_by_brand_year', {

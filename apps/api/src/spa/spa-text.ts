@@ -116,6 +116,23 @@ export const STATIC_PAGES: Record<string, Record<Lang, PageText>> = {
       description: 'Every Cars UA page by section: search, statistics, guides, games and more.'
     }
   },
+  '/data-status': {
+    ua: {
+      title: 'Cars UA - Актуальність даних',
+      description:
+        'За який період реєстри в базі Cars UA, коли востаннє оновлювалось кожне джерело і що застаріло: щодня, щомісяця, раз на пів року.'
+    },
+    ru: {
+      title: 'Cars UA - Актуальность данных',
+      description:
+        'За какой период реестры в базе Cars UA, когда в последний раз обновлялся каждый источник и что устарело: ежедневно, ежемесячно, раз в полгода.'
+    },
+    en: {
+      title: 'Cars UA - Data freshness',
+      description:
+        'The period the Cars UA registry data covers, when each source was last updated and what is stale: daily, monthly, half-yearly.'
+    }
+  },
   '/history': {
     ua: { title: 'Cars UA - Історія пошуку', description: 'Ваші останні пошуки за номером і VIN.' },
     ru: { title: 'Cars UA - История поиска', description: 'Ваши последние поиски по номеру и VIN.' },

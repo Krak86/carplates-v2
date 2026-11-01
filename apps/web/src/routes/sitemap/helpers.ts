@@ -100,6 +100,7 @@ export const SITEMAP_GROUPS: readonly SitemapGroup[] = [
       link('/contact', '✉️', 'contact.heading'),
       link('/privacy', '🔒', 'legal.privacy.heading'),
       link('/terms', '📄', 'legal.terms.heading'),
+      link('/data-status', '🗓️', 'nav.dataStatus'),
       link('/sitemap', '🗺️', 'nav.sitemap')
     ]
   }
