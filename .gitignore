@@ -42,3 +42,6 @@ apps/web/assets-src/kind/logos/
 
 # e-Ukraine typeface preview — license unconfirmed (PLAN.md), do not commit
 # apps/web/public/fonts/e-ukraine/
+
+# load-test sample (pnpm load-test --sample)
+scripts/plates.txt

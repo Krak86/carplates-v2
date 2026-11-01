@@ -91,6 +91,9 @@ const envSchema = z.object({
    *  X-Forwarded-For, not the proxy's. Leave off when the API is exposed directly — the header would be spoofable. */
   TRUST_PROXY: boolish,
 
+  /** Turns the global per-IP throttle off for local load tests (`pnpm load-test`). Ignored when NODE_ENV=production. */
+  THROTTLE_DISABLED: boolish,
+
   /** Swagger UI at /api/docs — off in production unless explicitly enabled. */
   ENABLE_SWAGGER: boolish,
 
@@ -135,6 +138,7 @@ function assertProductionEnv(env: Env): void {
 export const authSecret = (env: Env): string => env.AUTH_SECRET ?? 'dev-only-auth-secret-not-for-production!!'
 export const turnstileEnabled = (env: Env): boolean => Boolean(env.TURNSTILE_SECRET_KEY && env.TURNSTILE_SITE_KEY)
 
+export const throttleDisabled = (env: Env): boolean => env.THROTTLE_DISABLED && env.NODE_ENV !== 'production'
 export const telemetryEnabled = (env: Env): boolean => env.ENABLE_TELEMETRY && Boolean(env.SENTRY_DSN)
 export const swaggerEnabled = (env: Env): boolean => env.ENABLE_SWAGGER || env.NODE_ENV !== 'production'
 export const plateRecognizerCloudEnabled = (env: Env): boolean =>
