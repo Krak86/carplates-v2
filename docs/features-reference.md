@@ -199,7 +199,7 @@ caches). Account UI is online-only: `useSession()` reports anonymous while offli
 `SessionGuard`/`AdminGuard` + `@CurrentUser()`; cookies are set via `WithSessionCookie`, not `@Res()`.
 
 **Favorites/history sync** (`apps/api/src/sync/`, `use-saved-sync-actions.ts`): IndexedDB stays the source of truth, deletes are
-tombstones (`deleted: true`, 30-day TTL), conflicts = newest `date` wins per `kind:value`, lists capped at `FAVORITES_LIMIT` 100 /
+tombstones (`deleted: true`, 30-day TTL), conflicts = newest `date` wins per `kind:value`, lists capped at `FAVORITES_LIMIT` 300 /
 `HISTORY_LIMIT` 200 (oldest dropped, no age expiry). Table `app.user_saved_entries`.
 
 **Settings** (`/settings`, tabs; `apps/api/src/settings/`, `store/settings-store.ts`, `use-user-settings-actions.ts`): one JSON

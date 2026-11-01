@@ -14,6 +14,7 @@ import {
 
 import LazySection from '@/components/LazySection'
 import LoadErrorBoundary from '@/components/LoadErrorBoundary'
+import FavoriteButton from '@/components/FavoriteButton'
 import NotFoundInfo from '@/components/NotFoundInfo'
 import RiaCheckLink from '@/components/RiaCheckLink'
 import PhotoMetaInfo from '@/components/PhotoMetaInfo'
@@ -349,9 +350,14 @@ export default function SearchRoute(): ReactNode {
             <NotFoundInfo value={raw} />
           ) : (
             <div className="flex flex-col items-center">
-              <p className="rounded bg-[var(--color-surface)]/20 px-1.5 py-0.5 text-[var(--color-muted)]">
-                {notFound ? t('result.noResults', { value: raw }) : t('result.error')}
-              </p>
+              <div className="flex items-center gap-2">
+                <p className="rounded bg-[var(--color-surface)]/20 px-1.5 py-0.5 text-[var(--color-muted)]">
+                  {notFound ? t('result.noResults', { value: raw }) : t('result.error')}
+                </p>
+                {notFound && kind === 'vin' && (
+                  <FavoriteButton kind="vin" value={raw.replace(/\s+/g, '').toUpperCase()} label={null} />
+                )}
+              </div>
 
               {notFound && kind === 'vin' && <RiaCheckLink kind="vin" value={raw.replace(/\s+/g, '').toUpperCase()} />}
             </div>

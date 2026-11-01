@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import { isSovietPlate, isUaPlate, normalizePlate } from '@carplates/shared'
 
+import FavoriteButton from '@/components/FavoriteButton'
 import OtherSourcesFound from '@/components/OtherSourcesFound'
 import RiaCheckLink from '@/components/RiaCheckLink'
 import { PLATES_PATH } from '@/routes/read/links'
@@ -19,8 +20,10 @@ export default function NotFoundInfo({ value }: Props): ReactNode {
   const isSoviet = !isPlate && isSovietPlate(value)
 
   return (
-    <div className="w-full max-w-content rounded-md bg-[var(--color-surface)]/20 px-3 py-2 text-left">
-      <p className="text-center text-[var(--color-muted)]">{t('result.noResults', { value })}</p>
+    <div className="relative w-full max-w-content rounded-md bg-[var(--color-surface)]/20 px-3 py-2 text-left">
+      {/* Saved without a registry match, so it is already in the user's list if a later data update adds it. */}
+      <FavoriteButton kind="plate" value={plate} label={null} className="absolute top-1 right-1" />
+      <p className="px-10 text-center text-[var(--color-muted)]">{t('result.noResults', { value })}</p>
 
       {/* Old-format plates are the likeliest to be in the wanted lists only, so Soviet shapes are looked up too.
           Its plate line and data list are drawn like the registry card. */}

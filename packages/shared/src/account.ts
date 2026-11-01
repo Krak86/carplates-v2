@@ -249,7 +249,7 @@ export const adminAnalyticsResponseSchema = z.object({
 export type AdminAnalyticsResponse = z.infer<typeof adminAnalyticsResponseSchema>
 
 /** Favorites / history cross-device sync. Each list is capped; past the cap the OLDEST entries are dropped. Nothing expires by age. */
-export const FAVORITES_LIMIT = 100
+export const FAVORITES_LIMIT = 300
 export const HISTORY_LIMIT = 200
 
 /** A user may define this many favorite labels; each gets its own color (an index into the web palette). */
