@@ -3,7 +3,7 @@
 ## What this is
 
 `carsua.app` v2 — Ukrainian vehicle lookup by plate or VIN. pnpm monorepo; data from `data.gov.ua` in Postgres, VIN decoding via NHTSA.
-The v1 app is the sibling `../carplates/` (do not modify).
+v1 is the sibling `../carplates/` (do not modify).
 
 Docs (**grep `^## ` headings, never read whole**): `PLAN.md` backlog + pins · `docs/plan-done.md` write-ups · `README.md` setup/env ·
 `docs/features-reference.md` per-feature conventions (**read the matching section before touching a feature**) · `docs/commands-reference.md` · other `docs/*.md` only on request.

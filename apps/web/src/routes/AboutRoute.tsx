@@ -316,6 +316,7 @@ const FEATURES = [
   'verify',
   'guides',
   'stats',
+  'dataStatus',
   'catalog',
   'compare',
   'news',
