@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { isVin } from '@carplates/shared'
 
+import { extractVehicleInfo } from '@/components/VinResult.helpers'
 import UaAuctionCheck from '@/components/UaAuctionCheck'
 import WantedCheck from '@/components/WantedCheck'
 import { auctionLotsQuery, vinQuery, wantedQuery } from '@/lib/queries'
@@ -46,13 +47,14 @@ export default function OtherSourcesFound({ plate }: Props): ReactNode {
   const color = firstOf(records.map(r => r.color))
   const vehicleType = firstOf(records.map(r => r.vehicleType))
   const vehicle = [brand, model, year].filter(Boolean).join(' ')
+  const cardNamesVehicle = !!vinCard && !!extractVehicleInfo(vinCard).brand
   const sources = [inWanted && t('wanted.title'), inAuctions && t('uaAuctions.title')].filter(Boolean).join(', ')
 
   const facts: [string, ReactNode][] = [
     [t('otherSources.vehicle'), vehicle || null],
     [t('otherSources.type'), vehicleType],
     [t('wanted.color'), color],
-    [t('wanted.vin'), vin && <span className="font-mono">{vin}</span>]
+    [t('wanted.vin'), !vinCard && vin && <span className="font-mono">{vin}</span>]
   ]
 
   return (
@@ -64,8 +66,8 @@ export default function OtherSourcesFound({ plate }: Props): ReactNode {
         {t('otherSources.banner', { sources })}
       </p>
 
-      {/* The VIN card shows the vehicle itself; the short list is for when there is no card. */}
-      {!vinCard && facts.some(([, value]) => !!value) && (
+      {/* The VIN card shows the vehicle itself; the short list is for when there is no card or the decode named no make. */}
+      {!cardNamesVehicle && facts.some(([, value]) => !!value) && (
         <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm">
           {facts.map(([label, value]) =>
             value ? (

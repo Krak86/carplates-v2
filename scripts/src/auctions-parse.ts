@@ -268,6 +268,7 @@ const MAKES: Readonly<Record<string, readonly string[]>> = {
   TATA: ['TATA', 'ТАТА'],
   VOLKSWAGEN: ['VOLKSWAGEN', 'VOLKSVAGEN', 'VW', 'ФОЛЬКСВАГЕН'],
   VOLVO: ['VOLVO', 'ВОЛЬВО'],
+  'ZHONG XING': ['ZHONG XING', 'ZHONGXING'],
   АЗЛК: ['АЗЛК'],
   БЕЛАЗ: ['БЕЛАЗ'],
   БОГДАН: ['БОГДАН'],
