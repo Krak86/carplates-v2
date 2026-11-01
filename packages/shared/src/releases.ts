@@ -20,9 +20,9 @@ export const RELEASES: readonly ReleaseDay[] = [
     items: [
       item(
         'new',
-        'Калькулятор розмитнення авто /customs: мито, акциз за об’ємом двигуна й віком, ПДВ і збір до Пенсійного фонду для бензинових, дизельних, гібридних та електричних авто за правилами 2026 року, за курсом євро НБУ; кожен крок видно, а посилання з лотів аукціонів і сторінки VIN заповнюють форму самі. Це оцінка, остаточну суму визначає митниця',
-        'Калькулятор растаможки авто /customs: пошлина, акциз по объёму двигателя и возрасту, НДС и сбор в Пенсионный фонд для бензиновых, дизельных, гибридных и электрических авто по правилам 2026 года, по курсу евро НБУ; каждый шаг виден, а ссылки из лотов аукционов и страницы VIN сами заполняют форму. Это оценка, окончательную сумму определяет таможня',
-        'A new /customs calculator estimates the cost of bringing a car into Ukraine: duty, excise by engine size and age, VAT and the pension fee for petrol, diesel, hybrid and electric cars under the 2026 rules, at the NBU euro rate; every step is shown, and links from auction lots and the VIN page fill the form in. An estimate, the customs office sets the final amount'
+        'Калькулятор розмитнення авто /customs: мито, акциз за об’ємом двигуна й віком, ПДВ і збір до Пенсійного фонду для бензинових, дизельних, гібридних та електричних авто за правилами 2026 року, за курсом євро НБУ; кожен крок видно, а посилання зі сторінки VIN заповнює форму саме. Це оцінка, остаточну суму визначає митниця',
+        'Калькулятор растаможки авто /customs: пошлина, акциз по объёму двигателя и возрасту, НДС и сбор в Пенсионный фонд для бензиновых, дизельных, гибридных и электрических авто по правилам 2026 года, по курсу евро НБУ; каждый шаг виден, а ссылка со страницы VIN сама заполняет форму. Это оценка, окончательную сумму определяет таможня',
+        'A new /customs calculator estimates the cost of bringing a car into Ukraine: duty, excise by engine size and age, VAT and the pension fee for petrol, diesel, hybrid and electric cars under the 2026 rules, at the NBU euro rate; every step is shown, and a link from the VIN page fills the form in. An estimate, the customs office sets the final amount'
       ),
       item(
         'improved',

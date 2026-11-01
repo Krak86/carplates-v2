@@ -86,6 +86,8 @@ export type UkrPrice = {
   high: CustomsTax
   /** The capacity used came from the Dutch register's typical figure, not from this car's registry row. */
   capacityFromRdw: boolean
+  /** Engine size used for the excise (cm3), null when unknown. */
+  capacityCc: number | null
 }
 
 /** EU estimate (low / mid / high) → the same car imported to Ukraine today, customs paid. */
@@ -96,7 +98,7 @@ export function ukrPrice(match: RdwMatchInfo, estimate: Estimate, car: CarFacts,
   const capacityFromRdw = own == null && rdw != null
   const capacityCc = own ?? rdw
   const at = (baseEur: number): CustomsTax => customsTax({ baseEur, fuel, capacityCc, makeYear: car.makeYear, nowYear })
-  return { mid: at(estimate.midEur), low: at(estimate.lowEur), high: at(estimate.highEur), capacityFromRdw }
+  return { mid: at(estimate.midEur), low: at(estimate.lowEur), high: at(estimate.highEur), capacityFromRdw, capacityCc }
 }
 
 export type ValueWarning = { key: string; values?: Record<string, string | number> }

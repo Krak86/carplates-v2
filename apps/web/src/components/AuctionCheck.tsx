@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useSearchParams } from 'react-router'
+import { Link, useSearchParams } from 'react-router'
 
 import AuctionVinModal from '@/components/AuctionVinModal'
 import SectionInfo from '@/components/SectionInfo'
@@ -17,7 +17,7 @@ import {
 import type { AuctionSiteId } from '@/lib/auction-sites'
 import { copyToClipboard, scrollElementIntoView } from '@/lib/share-section'
 import ReadGuideLink from '@/components/ReadGuideLink'
-import { IMPORTS_PATH } from '@/routes/read/links'
+import { CUSTOMS_PATH, IMPORTS_PATH } from '@/routes/read/links'
 
 type Props = {
   vin: string
@@ -147,6 +147,12 @@ export default function AuctionCheck({ vin, imported = false, openSignal = 0 }: 
           ))}
         </ul>
       </div>
+
+      <p className="mt-3 text-sm">
+        <Link to={CUSTOMS_PATH} className="text-primary underline">
+          {t('read.cost.open')}
+        </Link>
+      </p>
 
       <ReadGuideLink guide={IMPORTS_PATH} />
 

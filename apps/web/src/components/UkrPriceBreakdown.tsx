@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Link } from 'react-router'
 import {
   CURRENCIES,
   UKR_DUTY_RATE,
@@ -19,6 +20,7 @@ import {
 } from '@/components/EstimatedValue.helpers'
 import InfoPopover from '@/components/InfoPopover'
 import { cn } from '@/lib/cn'
+import { customsPrefillHref } from '@/routes/customs/helpers'
 
 type Props = {
   match: RdwMatchInfo
@@ -54,6 +56,12 @@ export default function UkrPriceBreakdown({
   const money = (eur: number): string => formatMoney(eur, currency, fx, locale)
   const warnings = valueWarnings(match, estimate, price, fuel)
   const mid = price.mid
+  const customsPath = customsPrefillHref({
+    fuelText: fuel,
+    cc: price.capacityCc,
+    year: makeYear || null,
+    valueEur: Math.round(mid.baseEur)
+  })
   const sign = { EUR: '€', USD: '$', UAH: '₴' }[currency]
 
   return (
@@ -133,11 +141,17 @@ export default function UkrPriceBreakdown({
         ))}
       </ul>
 
+      {customsPath && (
+        <Link to={customsPath} className="block text-xs text-[var(--color-primary)] underline">
+          {t('value.ua.customsCalc')}
+        </Link>
+      )}
+
       <a
         href={riaSearchUrl(match.makeName, match.modelName, makeYear)}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-block text-xs text-[var(--color-primary)] underline"
+        className="block text-xs text-[var(--color-primary)] underline"
       >
         {t('value.ua.ria')} ↗
       </a>

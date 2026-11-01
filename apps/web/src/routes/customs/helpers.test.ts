@@ -1,14 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { CUSTOMS_PRESETS, parseCustomsQuery } from '@carplates/shared'
 
-import {
-  customsLotHref,
-  customsPrefillHref,
-  formToInput,
-  initialForm,
-  parsePositive,
-  presetHref
-} from '@/routes/customs/helpers'
+import { customsPrefillHref, formToInput, initialForm, parsePositive, presetHref } from '@/routes/customs/helpers'
 
 describe('customs helpers', () => {
   it('defaults to the petrol preset without params', () => {
@@ -70,13 +63,5 @@ describe('prefill links', () => {
       '/customs?cc=1800&year=2019'
     )
     expect(customsPrefillHref({ cc: 1800, year: 2019, fuelText: null })).toBe('/customs?cc=1800&year=2019')
-  })
-
-  it('turns the lot price into euros at the NBU rate, sale price first', () => {
-    const lot = { year: 2018, engineCc: 2000, fuel: 'diesel', startPrice: 200_000, salePrice: 400_000 }
-    expect(customsLotHref(lot, { eurUah: 50 })).toBe('/customs?fuel=diesel&value=8000&cc=2000&year=2018')
-    expect(customsLotHref({ ...lot, salePrice: null }, { eurUah: 50 })).toContain('value=4000')
-    expect(customsLotHref(lot, null)).toBe('/customs?fuel=diesel&cc=2000&year=2018')
-    expect(customsLotHref({ ...lot, engineCc: null }, { eurUah: 50 })).toBeNull()
   })
 })

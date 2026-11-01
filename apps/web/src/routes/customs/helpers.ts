@@ -90,7 +90,7 @@ export type PrefillSpec = {
   valueEur?: number | null
 }
 
-/** `/customs?...` link for a car found elsewhere in the app; null without both the engine size and the year. */
+/** `/customs?...` link for a car found elsewhere in the app (the VIN page); null without both the engine size and the year. */
 export function customsPrefillHref({ fuelText, cc, year, valueEur }: PrefillSpec): string | null {
   if (!cc || cc <= 0 || !year) return null
   const fuel = mapFuel(fuelText)
@@ -100,25 +100,6 @@ export function customsPrefillHref({ fuelText, cc, year, valueEur }: PrefillSpec
     year,
     value: valueEur && valueEur > 0 ? valueEur : undefined
   })}`
-}
-
-type LotSpec = {
-  year?: number | null
-  engineCc?: number | null
-  fuel?: string | null
-  startPrice?: number | null
-  salePrice?: number | null
-}
-
-/** Prefill link of an auction lot: the sale (else start) price in hryvnias becomes euros at the NBU rate, as an editable estimate. */
-export function customsLotHref(lot: LotSpec, fx: { eurUah: number } | null): string | null {
-  const uah = lot.salePrice ?? lot.startPrice
-  return customsPrefillHref({
-    fuelText: lot.fuel,
-    cc: lot.engineCc,
-    year: lot.year,
-    valueEur: uah && fx ? uah / fx.eurUah : null
-  })
 }
 
 export function formatEur(n: number, locale: string): string {

@@ -5,7 +5,6 @@ import ArticleHeader from '@/routes/read/ArticleHeader'
 import { AUCTIONS_LEAD } from '@/routes/read/articles'
 import {
   CheckSection,
-  CostSection,
   ExamplesSection,
   HistorySection,
   LiveSection,
@@ -37,7 +36,6 @@ export default function AuctionsGuideRoute(): ReactNode {
           { id: 'take', label: pick(SECTIONS.take, lang) },
           { id: 'world', label: pick(SECTIONS.world, lang) },
           { id: 'history', label: pick(SECTIONS.history, lang) },
-          { id: 'cost', label: pick(SECTIONS.cost, lang) },
           { id: 'check', label: pick(SECTIONS.check, lang) },
           { id: 'sources', label: pick(SECTIONS.sources, lang) }
         ]}
@@ -50,7 +48,6 @@ export default function AuctionsGuideRoute(): ReactNode {
       <TakeSection />
       <WorldSection />
       <HistorySection />
-      <CostSection />
       <CheckSection />
       <SourcesSection />
     </div>

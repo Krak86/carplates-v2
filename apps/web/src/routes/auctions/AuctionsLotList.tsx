@@ -27,7 +27,6 @@ import AuctionFilterField from '@/routes/auctions/AuctionFilterField'
 import AuctionMakeSearch from '@/routes/auctions/AuctionMakeSearch'
 import AuctionSourceTabs from '@/routes/auctions/AuctionSourceTabs'
 import { groupsForSource, pageCount } from '@/routes/auctions/helpers'
-import { customsLotHref } from '@/routes/customs/helpers'
 
 type Props = {
   query: AuctionListQuery
@@ -58,7 +57,6 @@ function LotRow({ lot, currency, fx, query, onChange }: LotRowProps): ReactNode 
   const isOpen = lot.status === OPEN_STATUS && !lot.sold
   const carPath = lot.plate ? `/${lot.plate}` : lot.vin ? `/${lot.vin}` : null
   const vehicle = [lot.make, lot.model, lot.year].filter(Boolean).join(' ') || lot.title
-  const customsPath = customsLotHref(lot, fx)
 
   return (
     <li
@@ -123,12 +121,6 @@ function LotRow({ lot, currency, fx, query, onChange }: LotRowProps): ReactNode 
           >
             {t('uaAuctions.lotNo')} {lotNumber(lot)} ↗<span className="sr-only">{t('field.opensNewTab')}</span>
           </a>
-
-          {customsPath && (
-            <Link to={customsPath} title={t('customs.prefill.hint')} className="text-[var(--color-primary)] underline">
-              {t('customs.prefill.link')}
-            </Link>
-          )}
 
           {carPath && (
             <Link to={carPath} className="text-[var(--color-primary)] underline">

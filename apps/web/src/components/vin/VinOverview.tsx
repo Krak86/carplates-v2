@@ -59,7 +59,7 @@ export default function VinOverview({ data }: Props): ReactNode {
 
       {hasEngineData(fields) && (
         <VinSection icon="⚙️" title={t('vin.engine.title')}>
-          <VinEngineCard fields={fields} />
+          <VinEngineCard fields={fields} registered={!!data.registry} />
         </VinSection>
       )}
 

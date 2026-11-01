@@ -15,7 +15,6 @@ export const SECTIONS = {
   take: { ua: 'Як взяти участь', ru: 'Как принять участие', en: 'How to take part' },
   world: { ua: 'У світі', ru: 'В мире', en: 'Elsewhere' },
   history: { ua: 'Історія', ru: 'История', en: 'History' },
-  cost: { ua: 'Розмитнення', ru: 'Растаможка', en: 'Customs cost' },
   check: { ua: 'Перед купівлею', ru: 'Перед покупкой', en: 'Before you buy' },
   sources: { ua: 'Джерела', ru: 'Источники', en: 'Sources' }
 } as const satisfies Record<string, L10n>
@@ -412,18 +411,6 @@ export const HISTORY_NOTE: L10n = {
   ua: 'Дати з джерел нижче; про 193 рік і 1759-й історики не мають єдиної думки. Статус законопроєкту перевіряйте на сайті Верховної Ради.',
   ru: 'Даты из источников ниже; насчёт 193 года и 1759-го историки не имеют единого мнения. Статус законопроекта проверяйте на сайте Верховной Рады.',
   en: 'Dates are from the sources below; historians are not unanimous on AD 193 and on 1759. Check the status of the bill on the Verkhovna Rada site.'
-}
-
-export const COST_TITLE: L10n = {
-  ua: 'Авто з лота за кордону: скільки це на митниці',
-  ru: 'Авто с лота из-за границы: сколько это на таможне',
-  en: 'A car from an auction abroad: what it costs at customs'
-}
-
-export const COST_TEXT: L10n = {
-  ua: 'Ціна на аукціоні - це лише частина суми. До неї додаються мито, акциз, ПДВ і збір до Пенсійного фонду, а для авто з-за кордону ще й доставка. Калькулятор рахує митну частину за правилами поточного року; це оцінка, остаточну суму визначає митниця.',
-  ru: 'Цена на аукционе - лишь часть суммы. К ней добавляются пошлина, акциз, НДС и сбор в Пенсионный фонд, а для авто из-за границы ещё и доставка. Калькулятор считает таможенную часть по правилам текущего года; это оценка, окончательную сумму определяет таможня.',
-  en: 'The auction price is only part of the total. Duty, excise, VAT and the pension fund fee come on top, and a car from abroad also needs delivery. The calculator works out the customs part under the current year’s rules; it is an estimate, the customs office sets the final amount.'
 }
 
 export const CHECK_TITLE: L10n = {

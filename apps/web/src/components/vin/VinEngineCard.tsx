@@ -12,6 +12,8 @@ import { customsPrefillHref } from '@/routes/customs/helpers'
 
 type Props = {
   fields: FieldMap
+  /** The car has a Ukrainian registry history: it is already in the country, so no import estimate. */
+  registered?: boolean
 }
 
 // Gauge ceilings: a bar at 100% means "at or above this", not a physical limit.
@@ -22,7 +24,7 @@ const MAX_DRAWN_CYLINDERS = 16
 const BORE = 7
 
 /** Engine summary: cylinder layout glyph, headline numbers, and gauges for power, size and weight class. */
-export default function VinEngineCard({ fields }: Props): ReactNode {
+export default function VinEngineCard({ fields, registered = false }: Props): ReactNode {
   const { t } = useTranslation()
   const text = useVinText()
   const { l: unitL, hp: unitHp, kw: unitKw } = text.units
@@ -44,14 +46,16 @@ export default function VinEngineCard({ fields }: Props): ReactNode {
     chip('Transmission Style', 'transmission')
   ].filter((c): c is Chip => !!c)
 
-  const customsPath = customsPrefillHref({
-    fuelText: ['Fuel Type - Primary', 'Fuel Type - Secondary', 'Electrification Level']
-      .map(variable => fields.get(variable))
-      .filter(Boolean)
-      .join(' '),
-    cc: liters ? Math.round(liters * 1000) : null,
-    year: Number(fields.get('Model Year')) || null
-  })
+  const customsPath = registered
+    ? null
+    : customsPrefillHref({
+        fuelText: ['Fuel Type - Primary', 'Fuel Type - Secondary', 'Electrification Level']
+          .map(variable => fields.get(variable))
+          .filter(Boolean)
+          .join(' '),
+        cc: liters ? Math.round(liters * 1000) : null,
+        year: Number(fields.get('Model Year')) || null
+      })
 
   if (!cylinders && !liters && !hp && !fuel && chips.length === 0) return null
 

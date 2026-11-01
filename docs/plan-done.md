@@ -4375,8 +4375,8 @@ Duty, excise, VAT and the pension fee for a car imported to Ukraine, at the NBU 
 1. **Shared calc** (`packages/shared/src/customs.ts`): versioned rules `ua-import-2026.1`, `calcImportCosts`, query parser, `mapFuel`, presets (fixtures: the 3 presets, excise EUR 480 / 1,200 / 60). Also fixed `customsAgeK` (now - make year, no -1; Tax Code art. 215.3.5-1).
 2. **Route** `/customs`: form, result with every step, official sources, presets, rules audit card; route checklist done.
 3. **Sitemap**: `STATIC_PAGES` entry, `/sitemap` page entry, tests in `apps/api/src/spa/sitemap.test.ts` and `routes/sitemap/helpers.test.ts`.
-4. **Read guides**: `CostSection` in `/read/imports`, a section in `/read/auctions`, shared `CustomsCalcLinks`; no rates quoted.
-5. **Prefill links**: `/auctions` lot card, the plate card's lot, the VIN page engine card; hybrids are never prefilled and the form's fuel stays empty until the user picks (new empty option, no result until then).
+4. **Read guides**: `CostSection` in `/read/imports` with shared `CustomsCalcLinks`; no rates quoted (an `/read/auctions` section was added and then removed: that guide is about Ukrainian auctions).
+5. **Prefill link**: VIN page engine card only (hidden for cars with a Ukrainian registry history); hybrids never prefilled and the form fuel stays empty until picked. Auction-lot links were built and removed (lots are sold in UAH inside Ukraine); `AuctionCheck` has a plain `/customs` link.
 6. **Docs and release**: About, `releases.ts` `new` item, features-reference, this entry.
 
 Verification: excise formula and thresholds, age coefficient, EV per-kWh rate, pension tiers and the 2026 minimum (3328) were checked on zakon.rada.gov.ua. Customs Tariff 2697-IX (duty 10%, EV 0%) and Cabinet resolutions 1740 and 1129 could not be checked in the primary text. Hybrids use petrol rates and are shown as an estimate. Later / low priority: links from `/cars/:make/:model`, `/compare`, `/fuel`.
