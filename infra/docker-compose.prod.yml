@@ -10,7 +10,7 @@ x-logging: &logging
 
 x-api: &api
   restart: unless-stopped
-  env_file: ../env/api.env
+  env_file: ../env/api.env # includes ALPR_API_KEY (the same value is in alpr.env)
   environment:
     NODE_ENV: production
     TRUST_PROXY: 'true'
@@ -50,6 +50,7 @@ services:
   alpr:
     image: ghcr.io/${GH_OWNER}/carsua-alpr:${ALPR_TAG:-latest}
     restart: unless-stopped
+    env_file: [{ path: ../env/alpr.env, required: false }] # ALPR_API_KEY only; absent until the first api deploy writes it
     user: '10001:10001'
     read_only: true
     tmpfs: ['/tmp']

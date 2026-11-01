@@ -114,6 +114,7 @@ jobs:
           R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
           BACKUP_BUCKET: ${{ vars.BACKUP_BUCKET }}
           HC_PING_BACKUP: ${{ secrets.HC_PING_BACKUP }}
+          ALPR_API_KEY: ${{ secrets.ALPR_API_KEY }}
         run: |
           : "${POSTGRES_PASSWORD:?POSTGRES_PASSWORD secret is missing}"
           : "${AUTH_SECRET:?AUTH_SECRET secret is missing}"
@@ -127,14 +128,16 @@ jobs:
             emit AUTH_SECRET PUBLIC_SITE_URL MAIL_TRANSPORT MAIL_FROM MAIL_REPLY_TO MAIL_FROM_NEWS DIGEST_ENABLED RESEND_API_KEY CONTACT_TO SMTP_URL \
               GOOGLE_CLIENT_ID TELEGRAM_BOT_TOKEN TELEGRAM_BOT_USERNAME TURNSTILE_SITE_KEY TURNSTILE_SECRET_KEY \
               PLATE_RECOGNIZER_CLOUD_TOKEN PLATE_RECOGNIZER_CLOUD_ENABLED RIA_CHECK_ENABLED PIXABAY_API_KEY \
-              POSTHOG_PERSONAL_API_KEY POSTHOG_PROJECT_ID SENTRY_DSN SENTRY_ORG_SLUG ENABLE_TELEMETRY
+              POSTHOG_PERSONAL_API_KEY POSTHOG_PROJECT_ID SENTRY_DSN SENTRY_ORG_SLUG ENABLE_TELEMETRY ALPR_API_KEY
           } > api.env
+          emit ALPR_API_KEY > alpr.env
           printf 'POSTGRES_USER=carplates\nPOSTGRES_PASSWORD=%s\nPOSTGRES_DB=carplates\n' "$POSTGRES_PASSWORD" > postgres.env
           printf 'GH_OWNER=%s\n' "$GH_OWNER" > owner.env
 
           # umask 077 so the files are never group/world-readable, even briefly.
           ssh vps 'umask 077; cat > /opt/carsua/env/api.env.new && mv /opt/carsua/env/api.env.new /opt/carsua/env/api.env' < api.env
           ssh vps 'umask 077; cat > /opt/carsua/env/postgres.env.new && mv /opt/carsua/env/postgres.env.new /opt/carsua/env/postgres.env' < postgres.env
+          ssh vps 'umask 077; cat > /opt/carsua/env/alpr.env.new && mv /opt/carsua/env/alpr.env.new /opt/carsua/env/alpr.env' < alpr.env
           # GH_OWNER lives in compose/.env next to the colour tags; replace just that line.
           ssh vps 'cd /opt/carsua/compose && touch .env && { grep -v "^GH_OWNER=" .env || true; cat; } > .env.tmp && mv .env.tmp .env' < owner.env
           if [ -n "$CF_ORIGIN_CERT" ] && [ -n "$CF_ORIGIN_KEY" ]; then
@@ -150,7 +153,7 @@ jobs:
             } > backup.env
             ssh vps 'umask 077; cat > /opt/carsua/env/backup.env' < backup.env
           fi
-          rm -f api.env postgres.env owner.env backup.env
+          rm -f api.env alpr.env postgres.env owner.env backup.env
 
       - name: Start Postgres only (sync_only)
         if: ${{ inputs.sync_only }}

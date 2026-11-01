@@ -31,6 +31,8 @@ const envSchema = z.object({
 
   /** Own-model ALPR container (services/alpr, `pnpm alpr:up`). Absent → the local recognize route answers 503. */
   ALPR_LOCAL_URL: z.string().optional(),
+  /** Shared secret the ALPR container requires in `x-alpr-key` (same `ALPR_API_KEY` on both sides). Unset → no header, ALPR open. */
+  ALPR_API_KEY: z.string().optional(),
 
   /** AUTO.RIA's free "check a car" answer, the fallback for plates our registry lacks (pre-2013). Unofficial, undocumented
    *  endpoint capped at 5 calls / 90 s per IP, so it is opt-in: off unless explicitly enabled. */

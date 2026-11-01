@@ -115,6 +115,7 @@ pnpm ingest:rdw   # RDW (Dutch register, CC0) specs -> registry.rdw_specs: min/m
                   # server-side by RDW's SODA API (one joined query per make, cached in scripts/.data/rdw/; ~1 h cold). Flags: --make SKODA,
                   # --min-vehicles N (default 50), --dry-run, --refresh. Result-card "Specs" block via GET /api/rdw.
                   # Also fills price_by_fuel (migration 0050) for the value panel's per-fuel table; a new aggregate column needs --refresh (~1 h) + export:rdw:csv
+pnpm ingest:dtp:csv  /  export:dtp:csv   # seed-data/dtp-*.csv.gz (road-safety tables; part of ingest:ratings:csv). On the VPS: `run-ingest.sh dtp-seed`
 pnpm ingest:rdw:csv   # load the committed RDW seed (seed-data/rdw-specs.csv.gz) — seconds, no download (part of ingest:ratings:csv)
 pnpm export:rdw:csv   # re-dump the table to that CSV — run after every real re-ingest
 pnpm ingest:rdw-recalls   # RDW recall campaigns (CC0) -> registry.rdw_recalls + rdw_recall_models; ~21k small rows read page by page (seconds). --dry-run. Block "Recalls" via GET /api/rdw/recalls
