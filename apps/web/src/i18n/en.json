@@ -497,6 +497,7 @@
   "uaAuctions.photo.less": "Hide photos",
   "uaAuctions.hero.caption": "Auction lot photo {{n}} / {{total}} - may not show the car as it is now",
   "uaAuctions.hero.prev": "Previous photo",
+  "uaAuctions.thumb.preview": "Model photo",
   "uaAuctions.hero.next": "Next photo",
   "uaAuctions.specs.title": "The car as described in its lots",
   "uaAuctions.specs.kilometrage": "Mileage",

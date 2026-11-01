@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import type { Currency, FxResponse } from '@carplates/shared'
 
+import UaAuctionThumb from '@/components/ua-auctions/UaAuctionThumb'
 import Card from '@/components/ui/Card'
 import {
   formatLotMonth,
@@ -11,6 +12,7 @@ import {
   lotLink,
   lotMonthOf,
   lotSourceAccent,
+  lotSource,
   mixLots
 } from '@/components/ua-auctions/helpers'
 import { cn } from '@/lib/cn'
@@ -53,30 +55,43 @@ export default function AuctionsNewLots({ currency, fx, onShowAll }: Props): Rea
           <li
             key={lotKey(lot)}
             className={cn(
-              'rounded-lg border border-[var(--color-border)] bg-[var(--color-border)]/20 p-3 text-sm',
+              'flex gap-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-border)]/20 p-3 text-sm',
               lotSourceAccent(lot)
             )}
           >
-            <p className="font-semibold">🔔 {[lot.make, lot.model, lot.year].filter(Boolean).join(' ') || lot.title}</p>
-
-            <p className="text-[var(--color-muted)]">
-              {[formatLotMonth(lotMonthOf(lot), locale), lot.region].filter(Boolean).join(' · ')}
-            </p>
-
-            {lot.startPrice !== null && (
-              <p className="mt-1">
-                {t('uaAuctions.startPrice')}: <strong>{formatPrice(lot.startPrice, currency, fx, locale)}</strong>
+            <UaAuctionThumb
+              docIds={lot.photos}
+              label={[lot.make, lot.model, lot.year].filter(Boolean).join(' ') || lot.title}
+              href={lotLink(lot)}
+              make={lot.make}
+              model={lot.model}
+              year={lot.year}
+              source={lotSource(lot)}
+            />
+            <div className="min-w-0 flex-1">
+              <p className="font-semibold">
+                🔔 {[lot.make, lot.model, lot.year].filter(Boolean).join(' ') || lot.title}
               </p>
-            )}
 
-            <a
-              href={lotLink(lot) ?? undefined}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-1 inline-block text-[var(--color-primary)] underline"
-            >
-              {t('auctions.page.new.open')} ↗<span className="sr-only">{t('field.opensNewTab')}</span>
-            </a>
+              <p className="text-[var(--color-muted)]">
+                {[formatLotMonth(lotMonthOf(lot), locale), lot.region].filter(Boolean).join(' · ')}
+              </p>
+
+              {lot.startPrice !== null && (
+                <p className="mt-1">
+                  {t('uaAuctions.startPrice')}: <strong>{formatPrice(lot.startPrice, currency, fx, locale)}</strong>
+                </p>
+              )}
+
+              <a
+                href={lotLink(lot) ?? undefined}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-1 inline-block text-[var(--color-primary)] underline"
+              >
+                {t('auctions.page.new.open')} ↗<span className="sr-only">{t('field.opensNewTab')}</span>
+              </a>
+            </div>
           </li>
         ))}
       </ul>

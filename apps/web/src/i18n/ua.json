@@ -499,6 +499,7 @@
   "uaAuctions.photo.less": "Сховати фото",
   "uaAuctions.hero.caption": "Фото лота аукціону {{n}} / {{total}} - авто зараз може виглядати інакше",
   "uaAuctions.hero.prev": "Попереднє фото",
+  "uaAuctions.thumb.preview": "Фото моделі",
   "uaAuctions.hero.next": "Наступне фото",
   "uaAuctions.specs.title": "Автомобіль за даними лотів",
   "uaAuctions.specs.kilometrage": "Пробіг",

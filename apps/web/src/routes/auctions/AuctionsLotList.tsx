@@ -15,9 +15,11 @@ import {
   lotMonthOf,
   lotNumber,
   lotSourceAccent,
+  lotSource,
   priceDeltaPercent
 } from '@/components/ua-auctions/helpers'
 import UaAuctionChips from '@/components/ua-auctions/UaAuctionChips'
+import UaAuctionThumb from '@/components/ua-auctions/UaAuctionThumb'
 import { cn } from '@/lib/cn'
 import { toIntlLocale } from '@/lib/intl'
 import { auctionListQuery } from '@/lib/queries'
@@ -59,63 +61,74 @@ function LotRow({ lot, currency, fx, query, onChange }: LotRowProps): ReactNode 
   return (
     <li
       className={cn(
-        'rounded-lg border p-3 text-sm',
+        'flex gap-3 rounded-lg border p-3 text-sm',
         lot.sold ? 'border-green-600/60 bg-green-600/10' : 'border-[var(--color-border)] bg-[var(--color-border)]/20',
         lotSourceAccent(lot)
       )}
     >
-      <p className="font-semibold">
-        {lot.sold ? '💰' : isOpen ? '🔔' : '🔨'} {vehicle}{' '}
-        <UaAuctionChips
-          lot={lot}
-          onSelect={onChange}
-          selected={{ source: query.source, group: query.group, auctionType: query.auctionType }}
-        />
-      </p>
+      <UaAuctionThumb
+        docIds={lot.photos}
+        label={vehicle}
+        href={lotLink(lot)}
+        make={lot.make}
+        model={lot.model}
+        year={lot.year}
+        source={lotSource(lot)}
+      />
+      <div className="min-w-0 flex-1">
+        <p className="font-semibold">
+          {lot.sold ? '💰' : isOpen ? '🔔' : '🔨'} {vehicle}{' '}
+          <UaAuctionChips
+            lot={lot}
+            onSelect={onChange}
+            selected={{ source: query.source, group: query.group, auctionType: query.auctionType }}
+          />
+        </p>
 
-      <p className="text-[var(--color-muted)]">
-        {[
-          formatLotMonth(lotMonthOf(lot), locale),
-          statusKey ? t(`uaAuctions.status.${statusKey}`) : lot.status,
-          lot.region,
-          lot.sellerName
-        ]
-          .filter(Boolean)
-          .join(' · ')}
-      </p>
+        <p className="text-[var(--color-muted)]">
+          {[
+            formatLotMonth(lotMonthOf(lot), locale),
+            statusKey ? t(`uaAuctions.status.${statusKey}`) : lot.status,
+            lot.region,
+            lot.sellerName
+          ]
+            .filter(Boolean)
+            .join(' · ')}
+        </p>
 
-      <p className="mt-1">
-        {lot.startPrice !== null && (
-          <span>
-            {t('uaAuctions.startPrice')}: {formatPrice(lot.startPrice, currency, fx, locale)}
-          </span>
-        )}
-        {lot.salePrice !== null && (
-          <span className="ml-3">
-            {t('uaAuctions.salePrice')}: <strong>{formatPrice(lot.salePrice, currency, fx, locale)}</strong>
-            {delta !== null && delta !== 0 && (
-              <span className="text-[var(--color-muted)]">{` (${delta > 0 ? '+' : ''}${delta}%)`}</span>
-            )}
-          </span>
-        )}
-      </p>
+        <p className="mt-1">
+          {lot.startPrice !== null && (
+            <span>
+              {t('uaAuctions.startPrice')}: {formatPrice(lot.startPrice, currency, fx, locale)}
+            </span>
+          )}
+          {lot.salePrice !== null && (
+            <span className="ml-3">
+              {t('uaAuctions.salePrice')}: <strong>{formatPrice(lot.salePrice, currency, fx, locale)}</strong>
+              {delta !== null && delta !== 0 && (
+                <span className="text-[var(--color-muted)]">{` (${delta > 0 ? '+' : ''}${delta}%)`}</span>
+              )}
+            </span>
+          )}
+        </p>
 
-      <p className="mt-1 flex flex-wrap gap-x-4 gap-y-1">
-        <a
-          href={lotLink(lot) ?? undefined}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-[var(--color-primary)] underline"
-        >
-          {t('uaAuctions.lotNo')} {lotNumber(lot)} ↗<span className="sr-only">{t('field.opensNewTab')}</span>
-        </a>
+        <p className="mt-1 flex flex-wrap gap-x-4 gap-y-1">
+          <a
+            href={lotLink(lot) ?? undefined}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[var(--color-primary)] underline"
+          >
+            {t('uaAuctions.lotNo')} {lotNumber(lot)} ↗<span className="sr-only">{t('field.opensNewTab')}</span>
+          </a>
 
-        {carPath && (
-          <Link to={carPath} className="text-[var(--color-primary)] underline">
-            {t('auctions.page.openCar')}: {lot.plate ?? lot.vin}
-          </Link>
-        )}
-      </p>
+          {carPath && (
+            <Link to={carPath} className="text-[var(--color-primary)] underline">
+              {t('auctions.page.openCar')}: {lot.plate ?? lot.vin}
+            </Link>
+          )}
+        </p>
+      </div>
     </li>
   )
 }
