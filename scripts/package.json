@@ -138,7 +138,7 @@
   "dependencies": {
     "@carplates/db": "workspace:*",
     "@carplates/shared": "workspace:*",
-    "@huggingface/transformers": "4.3.1",
+    "@huggingface/transformers": "4.3.2",
     "cheerio": "^1.2.0",
     "csv-parse": "^7.0.3",
     "csv-stringify": "^6.9.0",
