@@ -9,6 +9,7 @@ import Card from '@/components/ui/Card'
 import { cn } from '@/lib/cn'
 import { ARTICLES, UPCOMING } from '@/routes/read/articles'
 import { articleTopics, filterArticles, pick } from '@/routes/read/helpers'
+import { topicChipStyle } from '@/routes/read/topic-colors'
 
 const TOPICS = articleTopics(ARTICLES)
 
@@ -74,9 +75,11 @@ export default function ReadHubRoute(): ReactNode {
               type="button"
               aria-pressed={topic === tag.en}
               onClick={() => handleParam('topic', topic === tag.en ? '' : tag.en)}
+              style={topicChipStyle(tag.en)}
               className={cn(
                 CHIP_CLASS,
-                topic === tag.en ? 'border-primary bg-primary/15 text-primary' : 'border-border'
+                'border-(--chip)/45 text-(--chip) hover:border-(--chip)',
+                topic === tag.en ? 'border-(--chip) bg-(--chip)/25 font-semibold' : 'bg-(--chip)/10'
               )}
             >
               {pick(tag, i18n.language)}

@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { pick } from '@/routes/read/helpers'
+import { topicChipStyle } from '@/routes/read/topic-colors'
 import type { ArticleMeta } from '@/routes/read/types'
 
 type Props = {
@@ -16,7 +17,11 @@ export default function ArticleTags({ article, className = '' }: Props): ReactNo
   return (
     <ul className={`flex flex-wrap gap-1.5 ${className}`}>
       {article.tags.map(tag => (
-        <li key={tag.en} className="rounded-full bg-(--color-bg) px-2 py-0.5 text-xs text-muted">
+        <li
+          key={tag.en}
+          style={topicChipStyle(tag.en)}
+          className="rounded-full border border-(--chip)/45 bg-(--chip)/10 px-2 py-0.5 text-xs text-(--chip)"
+        >
           {pick(tag, i18n.language)}
         </li>
       ))}
