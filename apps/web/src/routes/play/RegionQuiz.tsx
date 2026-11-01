@@ -19,6 +19,7 @@ export default function RegionQuiz({ rounds: roundCount, onAgain }: Props): Reac
   const [rounds] = useState(() => buildRegionRounds(roundCount))
   const [index, setIndex] = useState(0)
   const [picked, setPicked] = useState<string | null>(null)
+  const [selected, setSelected] = useState<string | null>(null)
   const [score, setScore] = useState(0)
   const [streak, setStreak] = useState(0)
   const [best, setBest] = useState(() => readBest('region', roundCount))
@@ -33,7 +34,8 @@ export default function RegionQuiz({ rounds: roundCount, onAgain }: Props): Reac
     : {}
   const regionLabel = localizeRegion(round.region, i18n.language)
 
-  const handlePick = (region: string): void => {
+  // A tap only selects (a fat finger can miss a small region); the answer is committed by the button.
+  const handleAnswer = (region: string): void => {
     setPicked(region)
     if (region === round.region) {
       setScore(s => s + 1)
@@ -47,6 +49,7 @@ export default function RegionQuiz({ rounds: roundCount, onAgain }: Props): Reac
     const next = index + 1
     if (next >= rounds.length) setBest(writeBest('region', roundCount, score))
     setPicked(null)
+    setSelected(null)
     setIndex(next)
   }
 
@@ -59,15 +62,25 @@ export default function RegionQuiz({ rounds: roundCount, onAgain }: Props): Reac
         <UaPlateBadge plate={round.plate} />
       </div>
 
-      <StatsMap rows={[]} quiz={{ marks, onPick: handlePick, disabled: answered }} />
+      <StatsMap rows={[]} quiz={{ marks, selected, onPick: setSelected, disabled: answered }} />
 
       <div className="mt-3 flex min-h-10 items-center justify-between gap-3" aria-live="polite">
         <p className="text-sm">
-          {!answered && <span className="text-[var(--color-muted)]">{t('play.region.hint')}</span>}
+          {!answered && !selected && <span className="text-[var(--color-muted)]">{t('play.region.hint')}</span>}
+          {!answered && selected && <span className="font-medium">{localizeRegion(selected, i18n.language)}</span>}
           {answered && (
             <span className="font-medium">{t(isRight ? 'play.right' : 'play.wrong', { name: regionLabel })}</span>
           )}
         </p>
+        {!answered && selected && (
+          <button
+            type="button"
+            onClick={() => handleAnswer(selected)}
+            className="rounded-lg bg-[var(--color-primary)] px-4 py-2 text-sm font-medium text-white hover:opacity-90"
+          >
+            {t('play.confirm', { name: localizeRegion(selected, i18n.language) })}
+          </button>
+        )}
         {answered && (
           <button
             type="button"

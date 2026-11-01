@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import type { FocusEvent, KeyboardEvent, MouseEvent, ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { geoMercator, geoPath } from 'd3-geo'
@@ -26,6 +26,8 @@ const LEGEND_STEPS = 8
 /** Logo chip side in map units: the smallest region's, plus how much a region's fleet share (of the biggest region) adds. */
 const LOGO_MIN = 18
 const LOGO_GROW = 22
+const MAX_ZOOM = 4
+const ZOOM_STEP = 1
 
 export type MapRow = { label: string; value: number }
 
@@ -33,6 +35,8 @@ export type MapRow = { label: string; value: number }
 export type MapQuiz = {
   /** `REGIONS` name → verdict colour. */
   marks: Readonly<Record<string, 'correct' | 'wrong'>>
+  /** The region tapped but not yet answered (painted in the primary colour). */
+  selected?: string | null
   onPick: (region: string) => void
   disabled?: boolean
 }
@@ -56,6 +60,23 @@ export default function StatsMap({ rows, logos = false, mode = DEFAULT_MAP_MODE,
   const regionBrands = useQuery({ ...regionBrandStatsQuery(), enabled: logos && mode === 'brand' })
   const regionFacets = useQuery({ ...regionFacetStatsQuery(), enabled: logos && mode !== 'brand' })
   const [hover, setHover] = useState<Hover | null>(null)
+  // Quiz only: the map grows inside a scrollable frame (native touch panning) so small regions are easy to hit.
+  const [zoom, setZoom] = useState(1)
+  const frameRef = useRef<HTMLDivElement>(null)
+
+  const handleZoom = (next: number): void => {
+    const frame = frameRef.current
+    const clamped = Math.min(MAX_ZOOM, Math.max(1, next))
+    if (!frame || clamped === zoom) return
+    // Keep the centre of the view fixed while the content grows or shrinks.
+    const centreX = (frame.scrollLeft + frame.clientWidth / 2) / zoom
+    const centreY = (frame.scrollTop + frame.clientHeight / 2) / zoom
+    setZoom(clamped)
+    requestAnimationFrame(() => {
+      frame.scrollLeft = centreX * clamped - frame.clientWidth / 2
+      frame.scrollTop = centreY * clamped - frame.clientHeight / 2
+    })
+  }
 
   const numberFormat = new Intl.NumberFormat(toIntlLocale(i18n.language))
 
@@ -128,134 +149,167 @@ export default function StatsMap({ rows, logos = false, mode = DEFAULT_MAP_MODE,
   return (
     <div>
       <div className="relative rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-2">
-        <ComposableMap width={MAP_WIDTH} height={MAP_HEIGHT} projection={projection} className="h-auto w-full">
-          <Geographies geography={geography.data}>
-            {({ geographies }) =>
-              geographies.map(geo => {
-                const properties = geo.properties as UkraineRegionProperties
-                const name = REGION_NAME_BY_SHAPE_ISO[properties.shapeISO]
-                const regionName = localizeRegion(name, i18n.language) ?? properties.shapeISO
-                const value = name ? valueByRegion.get(name) : undefined
-                const isHovered = hover?.name === regionName
-                const mark = quiz && name ? quiz.marks[name] : undefined
-                const fill = quiz
-                  ? mark === 'correct'
-                    ? 'var(--label-4)'
-                    : mark === 'wrong'
-                      ? 'var(--label-0)'
-                      : 'var(--color-border)'
-                  : value === undefined
-                    ? 'var(--color-border)'
-                    : choroplethColor(max > min ? (value - min) / (max - min) : 1, theme)
-                const label = quiz
-                  ? regionName
-                  : `${regionName}: ${value === undefined ? t('stats.map.noData') : numberFormat.format(value)}`
-                const brands = logos ? markerFor(name)?.summary : undefined
+        {quiz && (
+          <div className="absolute top-3 right-3 z-10 flex flex-col gap-1">
+            <button
+              type="button"
+              aria-label={t('play.zoomIn')}
+              disabled={zoom >= MAX_ZOOM}
+              onClick={() => handleZoom(zoom + ZOOM_STEP)}
+              className="size-9 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] text-lg leading-none disabled:opacity-40"
+            >
+              +
+            </button>
+            <button
+              type="button"
+              aria-label={t('play.zoomOut')}
+              disabled={zoom <= 1}
+              onClick={() => handleZoom(zoom - ZOOM_STEP)}
+              className="size-9 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] text-lg leading-none disabled:opacity-40"
+            >
+              -
+            </button>
+          </div>
+        )}
 
-                const handleEnter = (e: MouseEvent): void => {
-                  setHover({ name: regionName, value: value ?? null, x: e.clientX, y: e.clientY, brands })
-                }
-                const handleMove = (e: MouseEvent): void => {
-                  setHover(h => (h ? { ...h, x: e.clientX, y: e.clientY } : h))
-                }
-                const handleLeave = (): void => setHover(null)
-                const handlePick = (): void => {
-                  if (quiz && name && !quiz.disabled) quiz.onPick(name)
-                }
-                const handleKeyDown = (e: KeyboardEvent<SVGPathElement>): void => {
-                  if (e.key !== 'Enter' && e.key !== ' ') return
-                  e.preventDefault()
-                  handlePick()
-                }
-                const handleFocus = (e: FocusEvent<SVGPathElement>): void => {
-                  const rect = e.currentTarget.getBoundingClientRect()
-                  setHover({
-                    name: regionName,
-                    value: value ?? null,
-                    x: rect.left + rect.width / 2,
-                    y: rect.top,
-                    brands
-                  })
-                }
+        <div ref={frameRef} className={cn(quiz && 'max-h-[70vh] overflow-auto')}>
+          <ComposableMap
+            width={MAP_WIDTH}
+            height={MAP_HEIGHT}
+            projection={projection}
+            className="h-auto"
+            style={{ width: quiz ? `${zoom * 100}%` : '100%' }}
+          >
+            <Geographies geography={geography.data}>
+              {({ geographies }) =>
+                geographies.map(geo => {
+                  const properties = geo.properties as UkraineRegionProperties
+                  const name = REGION_NAME_BY_SHAPE_ISO[properties.shapeISO]
+                  const regionName = localizeRegion(name, i18n.language) ?? properties.shapeISO
+                  const value = name ? valueByRegion.get(name) : undefined
+                  const isHovered = hover?.name === regionName
+                  const mark = quiz && name ? quiz.marks[name] : undefined
+                  const fill = quiz
+                    ? mark === 'correct'
+                      ? 'var(--label-4)'
+                      : mark === 'wrong'
+                        ? 'var(--label-0)'
+                        : name && name === quiz.selected
+                          ? 'var(--color-primary)'
+                          : 'var(--color-border)'
+                    : value === undefined
+                      ? 'var(--color-border)'
+                      : choroplethColor(max > min ? (value - min) / (max - min) : 1, theme)
+                  const label = quiz
+                    ? regionName
+                    : `${regionName}: ${value === undefined ? t('stats.map.noData') : numberFormat.format(value)}`
+                  const brands = logos ? markerFor(name)?.summary : undefined
 
-                return (
-                  <Geography
-                    key={geo.rsmKey}
-                    geography={geo}
-                    fill={fill}
-                    stroke={isHovered ? 'var(--color-primary)' : 'var(--color-bg)'}
-                    strokeWidth={isHovered ? 1.5 : 0.5}
-                    aria-label={label}
-                    onMouseEnter={quiz ? undefined : handleEnter}
-                    onMouseMove={quiz ? undefined : handleMove}
-                    onMouseLeave={handleLeave}
-                    onFocus={quiz ? undefined : handleFocus}
-                    onBlur={handleLeave}
-                    onClick={quiz ? handlePick : undefined}
-                    onKeyDown={quiz ? handleKeyDown : undefined}
-                    tabIndex={quiz ? 0 : undefined}
-                    role={quiz ? 'button' : undefined}
-                    style={{ outline: 'none', cursor: 'pointer' }}
-                  />
-                )
-              })
-            }
-          </Geographies>
+                  const handleEnter = (e: MouseEvent): void => {
+                    setHover({ name: regionName, value: value ?? null, x: e.clientX, y: e.clientY, brands })
+                  }
+                  const handleMove = (e: MouseEvent): void => {
+                    setHover(h => (h ? { ...h, x: e.clientX, y: e.clientY } : h))
+                  }
+                  const handleLeave = (): void => setHover(null)
+                  const handlePick = (): void => {
+                    if (quiz && name && !quiz.disabled) quiz.onPick(name)
+                  }
+                  const handleKeyDown = (e: KeyboardEvent<SVGPathElement>): void => {
+                    if (e.key !== 'Enter' && e.key !== ' ') return
+                    e.preventDefault()
+                    handlePick()
+                  }
+                  const handleFocus = (e: FocusEvent<SVGPathElement>): void => {
+                    const rect = e.currentTarget.getBoundingClientRect()
+                    setHover({
+                      name: regionName,
+                      value: value ?? null,
+                      x: rect.left + rect.width / 2,
+                      y: rect.top,
+                      brands
+                    })
+                  }
 
-          {logos && (
-            <g pointerEvents="none" aria-hidden>
-              {placedLogos.map(chip => (
-                <g key={chip.key}>
-                  {chip.displaced && (
-                    <>
-                      <line
-                        x1={chip.cx}
-                        y1={chip.cy}
-                        x2={chip.x}
-                        y2={chip.y}
-                        stroke="var(--color-muted)"
-                        strokeWidth={0.75}
-                      />
-                      <circle cx={chip.cx} cy={chip.cy} r={1.75} fill="var(--color-muted)" />
-                    </>
-                  )}
-                  <g transform={`translate(${chip.x - chip.size / 2} ${chip.y - chip.size / 2})`}>
-                    <rect
-                      width={chip.size}
-                      height={chip.size}
-                      rx={chip.size / 5}
-                      fill={chip.marker.color ?? 'white'}
-                      stroke="var(--color-border)"
-                      strokeWidth={0.5}
+                  return (
+                    <Geography
+                      key={geo.rsmKey}
+                      geography={geo}
+                      fill={fill}
+                      stroke={isHovered ? 'var(--color-primary)' : 'var(--color-bg)'}
+                      strokeWidth={isHovered ? 1.5 : 0.5}
+                      aria-label={label}
+                      onMouseEnter={quiz ? undefined : handleEnter}
+                      onMouseMove={quiz ? undefined : handleMove}
+                      onMouseLeave={handleLeave}
+                      onFocus={quiz ? undefined : handleFocus}
+                      onBlur={handleLeave}
+                      onClick={quiz ? handlePick : undefined}
+                      onKeyDown={quiz ? handleKeyDown : undefined}
+                      tabIndex={quiz ? 0 : undefined}
+                      role={quiz ? 'button' : undefined}
+                      style={{ outline: 'none', cursor: 'pointer' }}
                     />
-                    {chip.marker.src ? (
-                      <image
-                        href={chip.marker.src}
-                        x={chip.size * 0.1}
-                        y={chip.size * 0.1}
-                        width={chip.size * 0.8}
-                        height={chip.size * 0.8}
-                        preserveAspectRatio="xMidYMid meet"
-                      />
-                    ) : (
-                      <text
-                        x={chip.size / 2}
-                        y={chip.size / 2}
-                        textAnchor="middle"
-                        dominantBaseline="central"
-                        fontSize={chip.size * 0.26}
-                        fontWeight={600}
-                        fill={chip.marker.color ? 'white' : 'var(--color-fg)'}
-                      >
-                        {chip.marker.text}
-                      </text>
+                  )
+                })
+              }
+            </Geographies>
+
+            {logos && (
+              <g pointerEvents="none" aria-hidden>
+                {placedLogos.map(chip => (
+                  <g key={chip.key}>
+                    {chip.displaced && (
+                      <>
+                        <line
+                          x1={chip.cx}
+                          y1={chip.cy}
+                          x2={chip.x}
+                          y2={chip.y}
+                          stroke="var(--color-muted)"
+                          strokeWidth={0.75}
+                        />
+                        <circle cx={chip.cx} cy={chip.cy} r={1.75} fill="var(--color-muted)" />
+                      </>
                     )}
+                    <g transform={`translate(${chip.x - chip.size / 2} ${chip.y - chip.size / 2})`}>
+                      <rect
+                        width={chip.size}
+                        height={chip.size}
+                        rx={chip.size / 5}
+                        fill={chip.marker.color ?? 'white'}
+                        stroke="var(--color-border)"
+                        strokeWidth={0.5}
+                      />
+                      {chip.marker.src ? (
+                        <image
+                          href={chip.marker.src}
+                          x={chip.size * 0.1}
+                          y={chip.size * 0.1}
+                          width={chip.size * 0.8}
+                          height={chip.size * 0.8}
+                          preserveAspectRatio="xMidYMid meet"
+                        />
+                      ) : (
+                        <text
+                          x={chip.size / 2}
+                          y={chip.size / 2}
+                          textAnchor="middle"
+                          dominantBaseline="central"
+                          fontSize={chip.size * 0.26}
+                          fontWeight={600}
+                          fill={chip.marker.color ? 'white' : 'var(--color-fg)'}
+                        >
+                          {chip.marker.text}
+                        </text>
+                      )}
+                    </g>
                   </g>
-                </g>
-              ))}
-            </g>
-          )}
-        </ComposableMap>
+                ))}
+              </g>
+            )}
+          </ComposableMap>
+        </div>
 
         {hover && (
           <div
