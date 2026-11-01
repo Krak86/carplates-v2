@@ -161,7 +161,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@tanstack/eslint-plugin-query": "^5.104.5",
+    "@tanstack/eslint-plugin-query": "^5.105.0",
     "concurrently": "^10.0.6",
     "eslint": "^10.13.0",
     "eslint-config-prettier": "^10.1.8",
@@ -173,7 +173,7 @@
     "prettier": "^3.9.10",
     "prettier-plugin-tailwindcss": "^0.8.1",
     "typescript": "~5.9.3",
-    "typescript-eslint": "^8.72.0",
+    "typescript-eslint": "^8.72.1",
     "vitest": "^5.0.4"
   }
 }
