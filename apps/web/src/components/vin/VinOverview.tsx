@@ -43,7 +43,7 @@ export default function VinOverview({ data }: Props): ReactNode {
       <VinStatusBanner fields={fields} />
       <VinSegments vin={data.vin} fields={fields} fallback={fallback} />
       <VinHeadline fields={fields} fallback={fallback} />
-      <VinFallbackNote fallback={fallback} />
+      <VinFallbackNote fields={fields} fallback={fallback} />
 
       {showCar && (
         <VinSection icon="🚗" title={t('vin.car.title')}>

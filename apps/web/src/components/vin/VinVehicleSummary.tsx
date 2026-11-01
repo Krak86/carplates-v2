@@ -22,10 +22,18 @@ export default function VinVehicleSummary({ fields, fallback }: Props): ReactNod
   // One tag per distinct source, after the last word it covers.
   const tagAfter = new Map<string, string>()
   for (const p of parts) if (p.source) tagAfter.set(p.source, p.key)
-  const derived = parts.some(p => p.source)
+  const sources = [...tagAfter.keys()].map(s => t(`vin.derived.${s}.label`)).join(', ')
 
   return (
     <div className="space-y-2 px-0.5">
+      {tagAfter.size > 0 && (
+        <p
+          role="status"
+          className="rounded-md border border-amber-500/40 bg-amber-500/15 px-2.5 py-1.5 text-sm font-medium text-amber-800 dark:text-amber-300"
+        >
+          {t('vin.summary.banner', { sources })}
+        </p>
+      )}
       <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm">
         <dt className="text-[var(--color-muted)]">{t('otherSources.vehicle')}</dt>
         <dd className="font-semibold">
@@ -37,7 +45,7 @@ export default function VinVehicleSummary({ fields, fallback }: Props): ReactNod
           ))}
         </dd>
       </dl>
-      <p className="text-sm text-[var(--color-muted)]">{t(derived ? 'vin.summary.noteDerived' : 'vin.summary.note')}</p>
+      <p className="text-sm text-[var(--color-muted)]">{t('vin.summary.note')}</p>
     </div>
   )
 }

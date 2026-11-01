@@ -35,7 +35,7 @@ import { cn } from '@/lib/cn'
 import { recordVisit } from '@/lib/history-db'
 import { MAX_DIMENSION } from '@/lib/image'
 import { toIntlLocale } from '@/lib/intl'
-import { historyQuery, plateQuery, statsTopQuery, vinQuery } from '@/lib/queries'
+import { auctionLotsQuery, historyQuery, plateQuery, statsTopQuery, vinQuery } from '@/lib/queries'
 import { capture } from '@/lib/telemetry'
 import { formatVehicleLabel } from '@/lib/vehicle-label'
 import HomeFuelSection from '@/routes/stats/HomeFuelSection'
@@ -53,6 +53,8 @@ const WeightModelsCards = lazy(() => import('@/routes/stats/WeightModelsCards'))
 
 /** Stands in for a missing board (rollup not built yet): renders nothing rather than a half-empty card. */
 const EMPTY_WEIGHT_BOARD: WeightBoard = { heaviest: [], lightest: [] }
+/** Most lot photos the hero offers (the lots section lists them all). */
+const MAX_HERO_LOT_PHOTOS = 8
 const NewsWidget = lazy(() => import('@/components/NewsWidget'))
 const BlueskyWidget = lazy(() => import('@/components/BlueskyWidget'))
 const CommunityWidget = lazy(() => import('@/components/CommunityWidget'))
@@ -134,6 +136,23 @@ export default function SearchRoute(): ReactNode {
       key: vin.data.vin
     }
   }
+
+  // Same keys the auction chip / section use for this card (shared cache, no extra request). Photos of the car's own lots
+  // beat the stock model photo in the hero slot; newest lot first, capped so the strip stays short.
+  const lotKeys =
+    kind === 'plate' && plate.data
+      ? {
+          plate: plate.data.plate,
+          vin: plate.data.current.vin && isVin(plate.data.current.vin) ? plate.data.current.vin : null
+        }
+      : kind === 'vin' && vin.data
+        ? { plate: vin.data.registry?.plate ?? null, vin: vin.data.vin }
+        : { plate: null, vin: null }
+  const lots = useQuery({
+    ...auctionLotsQuery(lotKeys.plate, lotKeys.vin),
+    enabled: !!lotKeys.plate || !!lotKeys.vin
+  }).data?.lots
+  const lotPhotos = (lots ?? []).flatMap(l => l.photos ?? []).slice(0, MAX_HERO_LOT_PHOTOS)
 
   const {
     recognize,
@@ -296,6 +315,7 @@ export default function SearchRoute(): ReactNode {
             year={wikiHeroVehicle.year}
             rawKind={wikiHeroVehicle.rawKind}
             vehicleKey={wikiHeroVehicle.key}
+            lotPhotos={lotPhotos}
           />
         )}
         <Presence show={!!photo && photo.candidates.length > 1}>
