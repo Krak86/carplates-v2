@@ -1174,6 +1174,24 @@ created_at)`, `search_history (user_id, query, kind, found, created_at)`. Same
   (drop anonymous-only); EU cookie-consent surface; account deletion + data export.
 - **Cheaper interim:** recent searches in `localStorage` (no account), like v1.
 
+## cars.ua listing status — **blocked on permission (letter sent 2026-11-01)**
+
+Show "for sale / sold on CARS.UA" for a car, matched **by VIN only** (ads carry a VIN, never a plate; plate → VIN via our DB).
+Outreach: Ukrainian letter sent to support@cars.ua (Cars.ua, ФОП Магунов Д.І.); the dealer route (Autocars, Uman) is the fallback.
+
+- **Why blocked:** cars.ua has no API/feed/widget; `/terms/` says listing content belongs to its posters and bans unfair-competition and
+  disruptive use via third parties; `/public/` bans personal-data databases and copying where owners forbid it. **No scraping without written permission.**
+- **Asked for:** free minimal data (VIN, active/sold, date, listing URL, optional price) via API / CSV-JSON export / rate-limited fetch; paid terms open for later.
+- **Data we keep:** VIN, status, `first_seen` / `last_seen` / `sold_at`, URL. **Never** phones or names, **no** photos. We keep our own record because
+  cars.ua deletes private-seller archived ads after 12 months.
+- **Build (after approval):** migration `registry.listings` (`vin`, `source`, `status`, dates, `url`) · ingest script in `scripts/` · read in
+  `vin.service.ts` / `plate.service.ts` · own contract file `listings.ts` (new fields `.nullable().optional()`) · status block with link ·
+  history event ("listed" / "sold") + chip (for sale / was for sale / sold) · About `FEATURES` + `SOURCES` (ua/ru/en) · release note.
+- **Copy:** dates are "first/last seen", not a sale date; "sold" ≠ ownership change.
+- **Phase 2 (separate agreement):** similar cars by make/model/year and images. Not part of the first release.
+- **Until a reply:** no code; optional fallback = a "search on cars.ua" link built from the VIN.
+- **Next:** on reply, update this section; if silent for a few weeks, send the Autocars dealer letter.
+
 ## Later, conditional
 
 SSR for `/:plate` only if organic search traffic matters · region as a real
