@@ -48,11 +48,13 @@ Open:
       effect on the next api deploy)
 - [x] Google Search Console: domain verified, `/sitemap.xml` read (see PLAN.md catalog line); request indexing for `/`, `/stats`, `/read` is optional
 - [x] Bing Webmaster Tools: imported from Search Console, sitemap submitted
-- [ ] **Diia Open Data services catalog** (backlink from the source itself): https://diia.data.gov.ua/services has an
-      "Додати сервіс" button (needs "Зареєструватись" / "Увійти"; the form is behind login, so its fields are unverified).
-      Categories: Інформаційно-аналітичні системи · Візуалізації · Чат-боти · Мобільні застосунки. Pick "Інформаційно-аналітичні
-      системи". Also post an impact story on https://forum.data.gov.ua (Обговорення). Listing text to paste, adjust to the
-      form's limits (text below).
+- [x] **Diia Open Data services catalog** (backlink from the source itself): submitted for moderation 2026-11-01 via
+      https://diia.data.gov.ua/services "Додати сервіс". Form fields: name, 256x256 image (from `logo.png`), description, dataset
+      links (3: registrations `06779371-...`, 2026 archive `0ffd8b75-...`, wanted `2cd12755-...`), email, phone, service URL,
+      App Store / Google Play (empty), developer name. Open: wait for moderation, then check the listing and its backlink
+- [ ] **data.gov.ua forum post** (impact story, Обговорення): `https://forum.data.gov.ua` did not resolve in DNS on 2026-11-01
+      (diia.data.gov.ua still links to it). Retry in a day or two; meanwhile optionally write via https://data.gov.ua/feedback.
+      Listing text for the post: see "Diia listing text" below
 - [ ] Directories: Product Hunt, AlternativeTo, awesome-lists for open data / Ukrainian tech
 - [x] Cloudflare cache rules for `/cars/*` and `/api/catalog/*` (created and verified MISS -> HIT 2026-10-30, re-checked 2026-11-01)
 
@@ -151,6 +153,26 @@ into many subs at once. Use a screenshot or short GIF of a search.
 > Link: https://carsua.app. Feedback welcome, especially on plates where the data looks wrong or incomplete.
 
 - [ ] Ukrainian version (Telegram/Facebook) and a longer Habr/DOU write-up (data-engineering angle: open data, PWA, ALPR)
+
+## Social channels (assessment 2026-11-01, from general knowledge, not measured: check against Search Console / Cloudflare analytics)
+
+The audience is not confirmed yet. First step: read the country, language and landing-page split in the analytics, then pick one or two channels.
+
+| Channel | Worth it? | Notes |
+| --- | --- | --- |
+| Telegram (groups, then a bot, then maybe a channel) | **Yes, first** | The main messenger and news source in Ukraine; car-buying chats are where the use case is. Join, help first, share once per group, read the rules. A channel (`@carsua_app`) only for release / data updates; a group only after repeat users appear. Bot: PLAN.md backlog |
+| Facebook groups | **Yes** | Older, car-buying audience; many local and model-club groups. Same rule: one post per group, read the self-promotion rule. Page itself is low value |
+| YouTube | Later | Strong for "how to check a car before buying" tutorials and screen recordings; slow to build but long-lived and searchable |
+| Viber | Skip | Used for private chats and communities, no discovery, hard to share into |
+| Instagram | Skip for now | Reels with a plate-check demo could work, but needs steady content; low link value |
+| TikTok | Skip for now | Short demo videos ("check this plate"), reach is random, needs a content habit |
+| Threads / X | Skip | Small Ukrainian audience, little use case |
+| Reddit | Selective | r/SideProject, r/webdev, r/opensource for the technical audience; links are `nofollow` |
+| Habr | Optional, later | Russian-language, mixed reputation among Ukrainians; decide after the audience data. DOU.ua and dev.to come first |
+
+- [ ] Check analytics for audience (country, UI language, top pages) before posting anywhere beyond Telegram / Facebook car groups
+- [ ] Pick 5-10 Telegram and Facebook car-buying groups (search: `авто з пробігом`, `автопідбір`, `авто з Європи`, model clubs), read the rules, post once each with a screenshot
+- [ ] Telegram bot: see PLAN.md backlog
 
 ## Order of work
 
