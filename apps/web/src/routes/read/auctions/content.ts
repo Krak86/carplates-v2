@@ -335,6 +335,60 @@ export const SOURCES: Source[] = [
     }
   },
   {
+    href: 'https://uk.wikipedia.org/wiki/Prozorro',
+    title: { ua: 'Prozorro (Вікіпедія)', ru: 'Prozorro (Википедия)', en: 'Prozorro (Wikipedia)' },
+    note: {
+      ua: 'система публічних закупівель і продажів',
+      ru: 'система публичных закупок и продаж',
+      en: 'the public procurement and sales system'
+    }
+  },
+  {
+    href: 'https://www.usmarshals.gov/',
+    title: { ua: 'Служба маршалів США', ru: 'Служба маршалов США', en: 'US Marshals Service' },
+    note: {
+      ua: 'продаж конфіскованого майна',
+      ru: 'продажа конфискованного имущества',
+      en: 'sales of forfeited assets'
+    }
+  },
+  {
+    href: 'https://www.gsaauctions.gov/',
+    title: { ua: 'GSA Auctions', ru: 'GSA Auctions', en: 'GSA Auctions' },
+    note: {
+      ua: 'торги державними авто США',
+      ru: 'торги государственными авто США',
+      en: 'US government vehicle sales'
+    }
+  },
+  {
+    href: 'https://www.copart.com/',
+    title: { ua: 'Copart', ru: 'Copart', en: 'Copart' },
+    note: {
+      ua: 'страхові salvage-аукціони',
+      ru: 'страховые salvage-аукционы',
+      en: 'insurance salvage auctions'
+    }
+  },
+  {
+    href: 'https://www.iaai.com/',
+    title: { ua: 'IAA', ru: 'IAA', en: 'IAA' },
+    note: {
+      ua: 'страхові salvage-аукціони',
+      ru: 'страховые salvage-аукционы',
+      en: 'insurance salvage auctions'
+    }
+  },
+  {
+    href: 'https://en.wikipedia.org/wiki/Pertinax',
+    title: { ua: 'Pertinax (Вікіпедія)', ru: 'Pertinax (Википедия)', en: 'Pertinax (Wikipedia)' },
+    note: {
+      ua: '193 р. і торги за владу',
+      ru: '193 г. и торги за власть',
+      en: 'AD 193 and the sale of the empire'
+    }
+  },
+  {
     href: 'https://en.wikipedia.org/wiki/Auction',
     title: { ua: 'Auction (Вікіпедія)', ru: 'Auction (Википедия)', en: 'Auction (Wikipedia)' },
     note: {
