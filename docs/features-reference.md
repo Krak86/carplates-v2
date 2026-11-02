@@ -616,6 +616,8 @@ are `.nullable().optional()`).
   colour / regions per make year. `GET /api/catalog/:make/:model/years` reads it on demand (not kept in API memory; empty `byYear` until the first rebuild after the
   migration, and the panel then stays hidden). `ModelVariants` shows the picked generation's summed tables (`GenerationStats`, `sumYearStats` in `catalog.ts`) and the car
   count on every generation chip (`carsInSpan`). Per-year tops are capped, so the tail of a generation's list is slightly undercounted.
+- **Make page extras (2026-11-02):** `/cars/:make` has top chips (new-cars link, brand site, top-10 badge from stats) and, below the models table, reviews, videos, social and cars-in-stock sections, all `LazySection`s listed in `sections` (`?section=`). Share price answers to `?section=shares` so a shared link mounts and scrolls to it.
+- **Logo quiz blur:** brands whose wordmark sits in the emblem (Opel, Jeep, Forte, DAF) are listed in `LOGO_TEXT_BOX`, which blurs the letters until the answer.
 - **SPA meta** (`spa.controller.ts`): a `/cars/:make/:model` path that exists gets its own title/description (`catalog-text.ts`, ua/ru/en), self-canonical + hreflang
   when indexable (`noindex, follow` and no alternates when thin), the card `/og/page/cars--<make>--<model>.png`, and a **server-injected block in `#root`**
   (`catalogSeoBlock`: h1, summary, stats tables, plain sibling links; React replaces it on mount, so keep it identical in facts to `CatalogModelRoute`).

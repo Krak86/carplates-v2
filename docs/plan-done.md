@@ -4399,3 +4399,13 @@ Small items shipped between the Prozorro.Sale and customs work; conventions are 
 - **Prozorro photos:** the resizer was dropped (see the Prozorro.Sale entry follow-up); About source text now says photos load directly.
 - **Prozorro backfill:** dump loaded on the VPS (14 431 rows) with `infra/vps/load-prozorro-dump.sh` (quoting and runner fixed).
 - **Docs and release:** `releases.ts` 2026-11-02 (`latest.ts` bumped), About `prozorro` source and `dataStatus` feature texts, PLAN.md build order for shareable photo links.
+
+### Later the same day (2026-11-02)
+
+- **Latest record per source:** `GET /api/data-status` returns `latest` (dataset id to newest record date); `DatasetGroup` prints "Latest record: ..." (a month for month-granular sources).
+- **Plates outside the registry:** the preview (meta + `/og/<plate>.png`) and the not-found page fall back to wanted lists and auction lots; `vehicleKindFromTitle` reads the type from a lot title, `isShortSeriesPlate` matches series like АХ22925. The other-sources card shows the type and hides "unknown" / "other" values.
+- **Prozorro VIN fix:** `findVin` needs a letter and a digit, so 17-digit asset numbers are no longer stored as VINs; `infra/vps/fix-prozorro-numeric-vin.sh` cleans old rows (dry run, `--apply`).
+- **Page share QR:** `ShareQr` / `ShareQrButton` on `PageShareButton` and `ScrollButtons`; catalog pages get both share buttons.
+- **Catalog make page:** chips and extra sections; `?section=shares` scrolls to the share price.
+- **Logo quiz:** Opel, Jeep, Forte, DAF wordmarks blurred; fullscreen is exited on leaving a game.
+- **Docs and About:** release items, About `share` / `catalog` / `otherSources` texts, CLAUDE.md trimmed.

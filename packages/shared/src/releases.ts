@@ -19,6 +19,36 @@ export const RELEASES: readonly ReleaseDay[] = [
     date: '2026-11-02',
     items: [
       item(
+        'new',
+        'Сторінка марки /cars/{марка} отримала швидкі посилання (нові авто, сайт бренду, топ-10) і розділи з оглядами, відео, соцмережами та авто в наявності',
+        'Страница марки /cars/{марка} получила быстрые ссылки (новые авто, сайт бренда, топ-10) и разделы с обзорами, видео, соцсетями и авто в наличии',
+        'The make page /cars/{make} has quick links (new cars, brand site, top 10) and sections with reviews, videos, social and cars in stock'
+      ),
+      item(
+        'improved',
+        'Номери поза реєстром (розшук, аукціони) тепер мають повноцінне прев’ю посилання: марка, модель, рік, колір, регіон і тип; сторінка джерел показує тип авто',
+        'Номера вне реестра (розыск, аукционы) теперь имеют полноценное превью ссылки: марка, модель, год, цвет, регион и тип; карточка источников показывает тип авто',
+        'Plates outside the registry (wanted, auctions) now get a full link preview: make, model, year, colour, region and type; the other-sources card shows the vehicle type'
+      ),
+      item(
+        'improved',
+        'На сторінці «Свіжість даних» біля кожного джерела видно дату найновішого запису',
+        'На странице «Свежесть данных» у каждого источника видна дата самой новой записи',
+        'Data freshness shows the newest record date for each source'
+      ),
+      item(
+        'fix',
+        'Логотипи Opel, Jeep, DAF і Forte в грі «Логотипи» частково розмиті, щоб назва не підказувала відповідь; повний екран закривається при виході з гри',
+        'Логотипы Opel, Jeep, DAF и Forte в игре «Логотипы» частично размыты, чтобы название не подсказывало ответ; полный экран закрывается при выходе из игры',
+        'Opel, Jeep, DAF and Forte logos in the logo quiz are partly blurred so the name does not give the answer away; fullscreen closes when you leave a game'
+      ),
+      item(
+        'fix',
+        'Прозорро: довгі номери активів (наприклад, суден) більше не вважаються VIN',
+        'Прозорро: длинные номера активов (например, судов) больше не считаются VIN',
+        'Prozorro: long asset numbers (for example vessels) are no longer mistaken for VINs'
+      ),
+      item(
         'improved',
         'Поруч із «Поділитися сторінкою» є QR-код: скануйте телефоном, щоб відкрити сторінку',
         'Рядом с «Поделиться страницей» есть QR-код: сканируйте телефоном, чтобы открыть страницу',
