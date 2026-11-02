@@ -9,6 +9,7 @@ import type { CreateShareResponse } from '@carplates/shared'
 
 import { shareErrorKey } from '@/components/share-photo.helpers'
 import { useCopyFeedback } from '@/components/use-copy-feedback'
+import PhotoPlateBoxes from '@/components/PhotoPlateBoxes'
 import ShareRemovedList from '@/components/ShareRemovedList'
 import Spinner from '@/components/ui/Spinner'
 import { createShare, deleteShare, shareImageUrl } from '@/lib/api'
@@ -51,6 +52,7 @@ export default function SharePhotoDialog({ file, onClose }: Props): ReactNode {
   const closedRef = useRef(false)
   const [confirmed, setConfirmed] = useState<string | null>(null)
   const [zoomed, setZoomed] = useState(false)
+  const [showBoxes, setShowBoxes] = useState(true)
 
   const refreshList = (): void => void queryClient.invalidateQueries({ queryKey: myPhotoSharesQuery().queryKey })
 
@@ -131,25 +133,40 @@ export default function SharePhotoDialog({ file, onClose }: Props): ReactNode {
 
             {share && (
               <div className="space-y-3 text-sm">
-                <button
-                  type="button"
-                  onClick={() => setZoomed(true)}
-                  aria-label={t('photoShare.zoom')}
-                  title={t('photoShare.zoom')}
-                  className="group relative flex w-full cursor-zoom-in justify-center rounded-lg bg-black/80"
-                >
-                  <img
-                    src={shareImageUrl(share.token)}
-                    alt={t('photoShare.previewAlt')}
-                    className="max-h-64 max-w-full rounded-lg"
-                  />
-                  <span
-                    aria-hidden
-                    className="absolute right-2 bottom-2 flex h-8 w-8 items-center justify-center rounded-full bg-black/60 text-base text-white group-hover:bg-black/80"
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setZoomed(true)}
+                    aria-label={t('photoShare.zoom')}
+                    title={t('photoShare.zoom')}
+                    className="group relative flex w-full cursor-zoom-in justify-center rounded-lg bg-black/80 pt-5"
                   >
-                    🔍
-                  </span>
-                </button>
+                    <span className="relative inline-block">
+                      <img
+                        src={shareImageUrl(share.token)}
+                        alt={t('photoShare.previewAlt')}
+                        className="block max-h-64 max-w-full rounded-lg"
+                      />
+                      {showBoxes && <PhotoPlateBoxes candidates={share.candidates} active={null} />}
+                    </span>
+                    <span
+                      aria-hidden
+                      className="absolute right-2 bottom-2 flex h-8 w-8 items-center justify-center rounded-full bg-black/60 text-base text-white group-hover:bg-black/80"
+                    >
+                      🔍
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowBoxes(v => !v)}
+                    aria-pressed={showBoxes}
+                    aria-label={showBoxes ? t('photo.boxesHide') : t('photo.boxesShow')}
+                    title={showBoxes ? t('photo.boxesHide') : t('photo.boxesShow')}
+                    className={`absolute top-2 right-2 flex h-8 w-8 items-center justify-center rounded-full bg-black/60 text-base text-white hover:bg-black/80 ${showBoxes ? '' : 'opacity-60'}`}
+                  >
+                    🏷
+                  </button>
+                </div>
                 {confirmed ? (
                   <>
                     <p className="font-medium" role="status">

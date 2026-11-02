@@ -143,7 +143,8 @@ export class SharesService {
         plate: r.plate,
         createdAt: r.createdAt.toISOString(),
         expiresAt: r.expiresAt.toISOString(),
-        removed: r.removed
+        removed: r.removed,
+        candidates: r.candidates
       })),
       max: shareMaxActive(role)
     }

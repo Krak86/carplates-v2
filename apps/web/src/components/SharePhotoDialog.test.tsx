@@ -17,7 +17,7 @@ const created = {
   id: '11111111-1111-4111-8111-111111111111',
   token: 'AAAAAAAAAAAAAAAAAAAAAA',
   plate: 'АА1234ВВ',
-  candidates: [{ plate: 'АА1234ВВ', raw: 'AA1234BB', score: 0.9 }],
+  candidates: [{ plate: 'АА1234ВВ', raw: 'AA1234BB', score: 0.9, box: { x: 0.1, y: 0.4, w: 0.2, h: 0.1 } }],
   expiresAt: new Date(Date.now() + 7 * 86_400_000).toISOString()
 }
 
@@ -98,6 +98,15 @@ describe('SharePhotoDialog', () => {
     await waitFor(() => expect(screen.getAllByRole('dialog').length).toBe(1))
     expect(onClose).not.toHaveBeenCalled()
     expect(api.deleteShare).not.toHaveBeenCalled()
+  })
+
+  it('outlines the parsed plates on the preview and lets the user hide them', async () => {
+    api.createShare.mockResolvedValue(created)
+    renderDialog(new File(['x'], 'a.jpg'))
+    await screen.findByRole('img')
+    expect(screen.getByText('АА1234ВВ')).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: /hide plate labels/i }))
+    expect(screen.queryByText('АА1234ВВ')).toBeNull()
   })
 
   it('asks to pick the photo again when the parked one is gone', () => {

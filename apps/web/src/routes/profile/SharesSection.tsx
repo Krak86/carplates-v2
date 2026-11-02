@@ -110,7 +110,7 @@ export default function SharesSection(): ReactNode {
         <Suspense fallback={null}>
           <PhotoZoomDialog
             url={ownShareImageUrl(zoomed.id)}
-            candidates={[]}
+            candidates={zoomed.candidates ?? []}
             active={null}
             onClose={() => setZoomIndex(null)}
             {...(list.length > 1 && { onPrev: () => step(-1), onNext: () => step(1) })}

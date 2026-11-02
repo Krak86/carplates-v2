@@ -317,7 +317,8 @@ describe('SharesService my shares', () => {
           plate: row.plate,
           createdAt: row.createdAt.toISOString(),
           expiresAt: row.expiresAt.toISOString(),
-          removed: null
+          removed: null,
+          candidates
         }
       ],
       max: SHARE_MAX_ACTIVE

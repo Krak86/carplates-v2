@@ -66,7 +66,9 @@ export const myShareSchema = z.object({
   plate: z.string(),
   createdAt: z.string(),
   expiresAt: z.string(),
-  removed: shareRemovedSchema.nullable().optional()
+  removed: shareRemovedSchema.nullable().optional(),
+  /** The plate reads with their boxes, for the outlines on the zoomed photo (owner only). */
+  candidates: z.array(plateCandidateSchema).optional()
 })
 export type MyShare = z.infer<typeof myShareSchema>
 
