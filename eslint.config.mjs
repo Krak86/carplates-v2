@@ -28,6 +28,7 @@ export default tseslint.config(
       'eslint-rules/**',
       '.claude/mods/**',
       'services/alpr/eval.mjs',
+      'services/alpr/eval-faces.mjs',
       'services/alpr/eval/**',
       'infra/db/migrations/**'
     ]
