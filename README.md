@@ -132,7 +132,7 @@ step for a clean setup**: `db:seed`, `ingest`/`ingest:full`, and each
 their own run — the Quick start commands above are the complete recipe.
 
 User-writable account data lives in its own **`app` schema** (`users`, `auth_identities`, `sessions`,
-`user_features`, `user_saved_entries`, `user_settings`, `usage_events`; migrations `0034`–`0038`), separate from the derived, re-ingestable `registry` — `db:seed` and the ingests never touch it.
+`user_features`, `user_saved_entries`, `user_settings`, `usage_events`, `shared_photos` for the private photo links; migrations `0034`–`0038`, `0088`–`0091`), separate from the derived, re-ingestable `registry` — `db:seed` and the ingests never touch it.
 To make someone an admin (they must have signed in once):
 `UPDATE app.users SET role = 'admin' WHERE email = 'you@gmail.com';`
 
