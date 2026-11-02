@@ -320,6 +320,8 @@ Plate/VIN `?section=<id>` links (2026-10-30): the title gets ` - <section label>
 - **Pulse:** `useSearchFocus` reads that state; `SearchField` / `SearchButtons` put the `search-focus` utility (`global.css`, reduced motion = still ring) on the input or button, and the state is cleared after ~3.6 s so a reload does not replay it. Photo/camera pickers need a user gesture, so the link only highlights, it never opens them.
 - **`/share`** (public, in `STATIC_PAGES` and the sitemap; the `/go/*` pages are not) lists every alias with the card thumbnail, a copy field, a language switch and a `src` tag (`sanitizeSource`). Ads: prefer landing on a real page; an instant redirect can read as cloaking to ad platforms.
 
+- **Page share QR (2026-11-02):** `PageShareButton` has a `QR` chip beside the share chip; its popover renders `ShareQr` (lazy chunk, `uqr` `encode` drawn as one inline SVG path, no `data:` image so CSP-safe). Always black on white, whatever the theme. The URL comes from `buildPageShareUrl()` (shared with the share action: `lang` + font). Not on per-section share buttons or the quiz image card.
+
 ## Sitemap, robots and rate limits
 
 - **Legacy VIN (not 17 chars):** the registry stores pre-1981 / Soviet chassis numbers in `vin` (e.g. `382590`). `ResultCard` shows them as plain text with an "old-style number" chip (`result.vinLegacy*`), no link, and skips the VIN decode section / NHTSA / VIN registry history. Test with `isVin` from `@carplates/shared`.

@@ -1952,6 +1952,8 @@
   "share.button": "Share {{section}}",
   "share.copied": "Link copied!",
   "share.page": "Share this page",
+  "share.qr": "Show QR code",
+  "share.qrHint": "Scan with your phone to open this page",
   "share.card": "Save as picture",
   "share.cardFailed": "Could not make the picture",
   "export.button": "Copy all info",
