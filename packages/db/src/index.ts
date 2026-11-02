@@ -51,6 +51,7 @@ export {
   userSavedEntries,
   userSettings,
   usageEvents,
+  sharedPhotos,
   type UserRow,
   iihsRatings,
   fuelEconomy,

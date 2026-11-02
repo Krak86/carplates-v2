@@ -7,8 +7,8 @@ import Card from '@/components/ui/Card'
 export type LegalDoc = 'privacy' | 'terms'
 
 const SECTIONS: Record<LegalDoc, readonly string[]> = {
-  privacy: ['registry', 'device', 'account', 'thirdParty', 'rights'],
-  terms: ['use', 'data', 'conduct', 'liability', 'changes']
+  privacy: ['registry', 'device', 'account', 'sharedPhotos', 'thirdParty', 'rights'],
+  terms: ['use', 'data', 'conduct', 'sharedPhotos', 'liability', 'changes']
 }
 
 /** Sections that end with a link to the About page's data-sources list. */

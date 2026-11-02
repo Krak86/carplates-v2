@@ -32,6 +32,8 @@ import {
   getAuthConfig,
   getContactConfig,
   getSessions,
+  getMyShares,
+  getShare,
   getSignInMethods,
   getCardBundle,
   getFeatures,
@@ -742,6 +744,21 @@ export function signInMethodsQuery() {
 
 export function sessionsListQuery() {
   return queryOptions({ queryKey: ['auth', 'sessions'], queryFn: getSessions, staleTime: 30_000 })
+}
+
+/** The signed-in user's active shared photo links. Online-only (the `account` key stays out of `offline-cache.ts`). */
+export function myPhotoSharesQuery() {
+  return queryOptions({ queryKey: ['account', 'shares'], queryFn: getMyShares, staleTime: 30_000 })
+}
+
+/** A shared photo link's metadata (viewer). A dead link answers 410 for good, so no retry. */
+export function sharedPhotoQuery(token: string) {
+  return queryOptions({
+    queryKey: ['account', 'shared-photo', token],
+    queryFn: () => getShare(token),
+    retry: false,
+    staleTime: 60_000
+  })
 }
 
 export function featuresQuery() {

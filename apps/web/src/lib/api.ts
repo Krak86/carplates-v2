@@ -1,4 +1,7 @@
 import {
+  createShareResponseSchema,
+  mySharesResponseSchema,
+  shareMetaResponseSchema,
   catalogLookupSchema,
   catalogMakeSchema,
   catalogMakesSchema,
@@ -94,6 +97,9 @@ import {
   wikiInfoResponseSchema
 } from '@carplates/shared'
 import type {
+  CreateShareResponse,
+  MySharesResponse,
+  ShareMetaResponse,
   CatalogLookup,
   CatalogMake,
   CatalogMakes,
@@ -683,7 +689,10 @@ export async function getUkraineGeography(): Promise<UkraineGeography> {
  * exists but nothing in the web app calls it. See PLAN.md's "Own ALPR model"
  * section.
  */
-export async function recognizePlate(file: File, signal?: AbortSignal): Promise<PlateRecognizeResponse> {
+export async function recognizePlate(
+  file: File,
+  signal?: AbortSignal
+): Promise<PlateRecognizeResponse & { fromDocument: boolean }> {
   const form = new FormData()
   form.append('image', file)
 
@@ -693,7 +702,8 @@ export async function recognizePlate(file: File, signal?: AbortSignal): Promise<
     signal,
     headers: { accept: 'application/json' }
   })
-  return plateRecognizeResponseSchema.parse(await unwrap(res))
+  const body = await unwrap(res)
+  return { ...plateRecognizeResponseSchema.parse(body), fromDocument: isDocumentRead(body) }
 }
 
 export async function recognizeVin(file: File, signal?: AbortSignal): Promise<VinRecognizeResponse> {
@@ -707,6 +717,43 @@ export async function recognizeVin(file: File, signal?: AbortSignal): Promise<Vi
     headers: { accept: 'application/json' }
   })
   return vinRecognizeResponseSchema.parse(await unwrap(res))
+}
+
+/** The recognizer marks a read taken from a registration certificate (name/address on it): such a photo is not shareable. */
+const recognizeSourceSchema = z.object({ source: z.literal('document').optional() })
+
+export function isDocumentRead(body: unknown): boolean {
+  return recognizeSourceSchema.safeParse(body).data?.source === 'document'
+}
+
+/** Shared photo links (signed-in): contract in packages/shared/src/shares.ts, never cached offline. */
+export async function createShare(file: File, signal?: AbortSignal): Promise<CreateShareResponse> {
+  const form = new FormData()
+  form.append('image', file)
+  const res = await fetch(`${BASE}/api/shares`, {
+    method: 'POST',
+    body: form,
+    signal,
+    credentials: 'include',
+    headers: { accept: 'application/json' }
+  })
+  return createShareResponseSchema.parse(await unwrap(res))
+}
+
+export async function getMyShares(): Promise<MySharesResponse> {
+  return mySharesResponseSchema.parse(await sendJson('GET', '/api/shares'))
+}
+
+export async function deleteShare(id: string): Promise<void> {
+  await sendJson('DELETE', `/api/shares/${encodeURIComponent(id)}`)
+}
+
+export async function getShare(token: string): Promise<ShareMetaResponse> {
+  return shareMetaResponseSchema.parse(await getJson(`/api/shares/${encodeURIComponent(token)}`))
+}
+
+export function shareImageUrl(token: string): string {
+  return `${BASE}/api/shares/${encodeURIComponent(token)}/image`
 }
 
 export async function getModels3d(brand: string, model: string): Promise<Models3dResponse> {

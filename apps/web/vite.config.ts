@@ -166,6 +166,9 @@ export default defineConfig({
           'assets/SettingsRoute-*.js',
           'assets/ProfileRoute-*.js',
           'assets/AdminRoute-*.js',
+          // Sharing a photo needs the session and the API; the dialog is fetched on the first click.
+          'assets/SharePhotoDialog-*.js',
+          'assets/PendingShareResume-*.js',
           // The "test your car" racer is fetched on demand after an explicit confirmation, then runtime-cached (below).
           'assets/RaceGameModal-*.js',
           'assets/engine-*.js'

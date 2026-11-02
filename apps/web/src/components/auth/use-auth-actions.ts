@@ -18,7 +18,9 @@ import {
   verifyEmailLink
 } from '@/lib/api'
 import { disableGoogleAutoSelect } from '@/lib/google-identity'
-import { adminUsersQuery, featuresQuery, sessionQuery } from '@/lib/queries'
+import { adminUsersQuery, featuresQuery, myPhotoSharesQuery, sessionQuery } from '@/lib/queries'
+import { clearPendingShare } from '@/lib/pending-share'
+import { clearShareTokens } from '@/lib/share-links'
 
 type UseAuthActions = {
   signIn: ReturnType<typeof useMutation<SessionResponse, Error, string>>
@@ -38,6 +40,7 @@ export function useAuthActions(): UseAuthActions {
     // Anything keyed to the previous identity (feature toggles, admin lists) must not leak across accounts.
     queryClient.removeQueries({ queryKey: featuresQuery().queryKey })
     queryClient.removeQueries({ queryKey: adminUsersQuery().queryKey })
+    queryClient.removeQueries({ queryKey: myPhotoSharesQuery().queryKey })
   }
 
   const signIn = useMutation({ mutationFn: signInWithGoogle, onSuccess: setSession })
@@ -51,6 +54,9 @@ export function useAuthActions(): UseAuthActions {
   const signOutMutation = useMutation({
     mutationFn: signOut,
     onSuccess: data => {
+      // A parked photo and this device's share links belong to the account that is leaving.
+      void clearPendingShare()
+      clearShareTokens()
       disableGoogleAutoSelect()
       setSession(data)
     }

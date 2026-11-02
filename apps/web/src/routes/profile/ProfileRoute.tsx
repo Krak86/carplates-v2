@@ -11,6 +11,7 @@ import DangerZoneSection from '@/routes/profile/DangerZoneSection'
 import DevicesSection from '@/routes/profile/DevicesSection'
 import IdentitySection from '@/routes/profile/IdentitySection'
 import NotificationsSection from '@/routes/profile/NotificationsSection'
+import SharesSection from '@/routes/profile/SharesSection'
 import ReauthGate from '@/routes/profile/ReauthGate'
 import SignInMethodsSection from '@/routes/profile/SignInMethodsSection'
 
@@ -21,7 +22,8 @@ export default function ProfileRoute(): ReactNode {
   const { hash } = useLocation()
 
   useEffect(() => {
-    if (user && hash === '#devices') document.getElementById('devices')?.scrollIntoView({ behavior: 'smooth' })
+    if (user && (hash === '#devices' || hash === '#shares'))
+      document.getElementById(hash.slice(1))?.scrollIntoView({ behavior: 'smooth' })
   }, [user, hash])
 
   if (isPending) return <Spinner />
@@ -40,6 +42,7 @@ export default function ProfileRoute(): ReactNode {
         <SignInMethodsSection />
         <NotificationsSection user={user} />
         <DevicesSection />
+        <SharesSection />
         <DangerZoneSection user={user} />
       </ReauthGate>
     </div>

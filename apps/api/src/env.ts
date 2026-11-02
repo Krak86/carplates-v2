@@ -34,6 +34,13 @@ const envSchema = z.object({
   /** Shared secret the ALPR container requires in `x-alpr-key` (same `ALPR_API_KEY` on both sides). Unset → no header, ALPR open. */
   ALPR_API_KEY: z.string().optional(),
 
+  /** Private R2 bucket for shared photo links (S3 API). All of endpoint + both keys needed (and ALPR_LOCAL_URL for the face blur),
+   *  else `POST /api/shares` answers 503. The token is scoped to this bucket only, separate from the backup token. */
+  SHARES_R2_ENDPOINT: z.string().optional(),
+  SHARES_R2_BUCKET: z.string().default('carsua-shares'),
+  SHARES_R2_ACCESS_KEY_ID: z.string().optional(),
+  SHARES_R2_SECRET_ACCESS_KEY: z.string().optional(),
+
   /** AUTO.RIA's free "check a car" answer, the fallback for plates our registry lacks (pre-2013). Unofficial, undocumented
    *  endpoint capped at 5 calls / 90 s per IP, so it is opt-in: off unless explicitly enabled. */
   RIA_CHECK_ENABLED: boolish,
@@ -146,4 +153,7 @@ export const plateRecognizerCloudEnabled = (env: Env): boolean =>
 export const posthogQueryEnabled = (env: Env): boolean =>
   Boolean(env.POSTHOG_PERSONAL_API_KEY) && Boolean(env.POSTHOG_PROJECT_ID)
 export const alprLocalEnabled = (env: Env): boolean => Boolean(env.ALPR_LOCAL_URL)
+export const sharesStorageConfigured = (env: Env): boolean =>
+  Boolean(env.SHARES_R2_ENDPOINT && env.SHARES_R2_ACCESS_KEY_ID && env.SHARES_R2_SECRET_ACCESS_KEY)
+export const sharesEnabled = (env: Env): boolean => sharesStorageConfigured(env) && alprLocalEnabled(env)
 export const pixabayEnabled = (env: Env): boolean => Boolean(env.PIXABAY_API_KEY)

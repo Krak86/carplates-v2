@@ -8,6 +8,8 @@ export type MetaInput = {
   title: string
   description: string
   image: string
+  /** MIME type of `image` when it is not one of our 1200x630 PNG cards (shared photos are JPEGs of unknown size: no width/height tags). */
+  imageType?: string
   /** Plate/VIN pages: keep millions of per-vehicle URLs out of search indexes (link unfurlers still read the tags). */
   noindex?: boolean
   /** Indexable static pages: self-canonical per language plus hreflang alternates for all of them. */
@@ -46,9 +48,13 @@ export function renderMetaTags(m: MetaInput): string {
     `<meta property="og:locale" content="${OG_LOCALE[m.lang]}">`,
     `<meta property="og:url" content="${esc(canonical)}">`,
     `<meta property="og:image" content="${esc(m.image)}">`,
-    `<meta property="og:image:type" content="image/png">`,
-    `<meta property="og:image:width" content="${OG_WIDTH}">`,
-    `<meta property="og:image:height" content="${OG_HEIGHT}">`,
+    `<meta property="og:image:type" content="${esc(m.imageType ?? 'image/png')}">`,
+    ...(m.imageType
+      ? []
+      : [
+          `<meta property="og:image:width" content="${OG_WIDTH}">`,
+          `<meta property="og:image:height" content="${OG_HEIGHT}">`
+        ]),
     `<meta name="twitter:card" content="summary_large_image">`,
     `<meta name="twitter:title" content="${esc(m.title)}">`,
     `<meta name="twitter:description" content="${esc(m.description)}">`,

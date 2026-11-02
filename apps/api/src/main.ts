@@ -33,7 +33,8 @@ async function bootstrap(): Promise<void> {
     .getInstance()
     .addHook('onSend', async (_req, reply) => {
       reply.header('x-content-type-options', 'nosniff')
-      reply.header('referrer-policy', 'strict-origin-when-cross-origin')
+      // Not when a route chose its own: shared-photo links send `no-referrer` (the token is in the URL).
+      if (!reply.hasHeader('referrer-policy')) reply.header('referrer-policy', 'strict-origin-when-cross-origin')
       reply.header('x-frame-options', 'SAMEORIGIN')
     })
   await app.register(multipart, { limits: { fileSize: 4 * 1024 * 1024, files: 1, fields: 4 } })

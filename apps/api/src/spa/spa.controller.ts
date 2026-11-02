@@ -10,6 +10,7 @@ import {
   catalogPath,
   shareAliasOfPath,
   shareAliasPath,
+  shareTokenSchema,
   type CatalogMake,
   type CatalogModel
 } from '@carplates/shared'
@@ -29,6 +30,8 @@ import {
 } from '../catalog/catalog-text.js'
 import { CatalogService } from '../catalog/catalog.service.js'
 import { loadEnv } from '../env.js'
+import { SHARE_PRIVACY_HEADERS } from '../shares/share-http.js'
+import { SharesService } from '../shares/shares.service.js'
 import { injectMeta, renderMetaTags } from './meta.js'
 import {
   catalogMakeCardSlug,
@@ -41,7 +44,16 @@ import {
 } from './page-card.js'
 import { PreviewService } from './preview.service.js'
 import { sitemapPaths } from './sitemap.js'
-import { DEFAULT_LANG, SHARE_ALIAS_PAGES, STATIC_PAGES, resolveLang, sectionPageText, type Lang } from './spa-text.js'
+import {
+  DEFAULT_LANG,
+  SHARE_ALIAS_PAGES,
+  SHARE_EXPIRED_PAGE,
+  SITE_NAME,
+  STATIC_PAGES,
+  resolveLang,
+  sectionPageText,
+  type Lang
+} from './spa-text.js'
 
 const MIME: Record<string, string> = {
   '.html': 'text/html; charset=utf-8',
@@ -102,7 +114,8 @@ export class SpaController {
 
   constructor(
     @Inject(PreviewService) private readonly previews: PreviewService,
-    @Inject(CatalogService) private readonly catalog: CatalogService
+    @Inject(CatalogService) private readonly catalog: CatalogService,
+    @Inject(SharesService) private readonly shares: SharesService
   ) {}
 
   @Get()
@@ -140,14 +153,58 @@ export class SpaController {
       )
     }
     const html = await this.loadIndex()
-    const lang = resolveLang((req.query as { lang?: string } | undefined)?.lang)
-    const section = (req.query as { section?: string } | undefined)?.section
+    const query = req.query as { lang?: string; section?: string; p?: string } | undefined
+    const lang = resolveLang(query?.lang)
+    const section = query?.section
+    const shared = await this.sharedPhotoMeta(pathname, query?.p, lang)
+    if (shared) {
+      // A capability link: never cached, never indexed, no Referer (the token is in the URL).
+      reply
+        .type('text/html; charset=utf-8')
+        .header('cache-control', 'no-store')
+        .header('x-robots-tag', SHARE_PRIVACY_HEADERS['x-robots-tag'])
+        .header('referrer-policy', SHARE_PRIVACY_HEADERS['referrer-policy'])
+        .send(injectMeta(html, shared))
+      return
+    }
     const catalog = await this.catalogPageOf(pathname, lang)
     const meta = catalog?.meta ?? (await this.metaFor(pathname, lang, section))
     reply
       .type('text/html; charset=utf-8')
       .header('cache-control', catalog ? CATALOG_PAGE_CACHE : 'no-cache')
       .send(catalog ? injectRoot(injectMeta(html, meta), catalog.block) : injectMeta(html, meta))
+  }
+
+  /**
+   * Meta tags of `/<plate>?p=<token>` (a shared photo): the photo itself as `og:image`, or a neutral "link expired" block when
+   * the share is expired, deleted or the token is not valid. `null` for any other path (those take the normal route).
+   */
+  private async sharedPhotoMeta(pathname: string, token: string | undefined, lang: Lang): Promise<string | null> {
+    const segments = pathname.split('/').filter(Boolean)
+    if (!token || segments.length !== 1 || `/${segments[0]}` in STATIC_PAGES) return null
+    const siteUrl = this.env.PUBLIC_SITE_URL
+    const share = shareTokenSchema.safeParse(token).success ? await this.shares.metaFor(token) : null
+    if (!share) {
+      return renderMetaTags({
+        siteUrl,
+        path: '',
+        lang,
+        ...SHARE_EXPIRED_PAGE[lang],
+        image: `${siteUrl}/og/default.png${lang === DEFAULT_LANG ? '' : `?lang=${lang}`}`,
+        noindex: true
+      })
+    }
+    const preview = await this.previews.describe(share.plate, lang)
+    return renderMetaTags({
+      siteUrl,
+      path: `/${encodeURIComponent(share.plate)}?p=${token}`,
+      lang,
+      title: preview?.title ?? `${SITE_NAME} - ${share.plate}`,
+      description: preview?.description ?? share.plate,
+      image: `${siteUrl}/api/shares/${token}/image`,
+      imageType: 'image/jpeg',
+      noindex: true
+    })
   }
 
   /** Re-read when the file changes: a web deploy repoints `WEB_DIST_DIR` (a symlink) without restarting the API. */

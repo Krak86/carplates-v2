@@ -9,6 +9,9 @@ import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 const INDEX =
   '<!doctype html><html><head><title>old</title><meta name="description" content="old" /></head><body><div id="root"></div></body></html>'
 
+const LIVE_TOKEN = 'AAAAAAAAAAAAAAAAAAAAAA'
+const DEAD_TOKEN = 'BBBBBBBBBBBBBBBBBBBBBB'
+
 const CATALOG_MODEL = {
   make: 'bmw',
   model: 'x5',
@@ -84,11 +87,17 @@ describe('SpaController meta injection', () => {
             ? { ...CATALOG_MODEL, model: 'z3', modelName: 'Z3', indexable: false }
             : null
     }
+    const { SharesService } = await import('../shares/shares.service.js')
+    const shares = {
+      metaFor: async (token: string) =>
+        token === LIVE_TOKEN ? { plate: 'AA1234BB', expiresAt: new Date(Date.now() + 86_400_000) } : null
+    }
     const moduleRef = await Test.createTestingModule({
       controllers: [SpaController],
       providers: [
         { provide: PreviewService, useValue: previews },
-        { provide: CatalogService, useValue: catalog }
+        { provide: CatalogService, useValue: catalog },
+        { provide: SharesService, useValue: shares }
       ]
     }).compile()
     app = moduleRef.createNestApplication<NestFastifyApplication>(new FastifyAdapter())
@@ -203,6 +212,36 @@ describe('SpaController meta injection', () => {
     expect(res.body).toContain('noindex')
     expect(res.body).not.toContain('<main>')
     expect(res.headers['cache-control']).toBe('no-cache')
+  })
+
+  it('uses the shared photo as og:image on /<plate>?p=<token>, private and unindexed', async () => {
+    const res = await app.inject({ method: 'GET', url: `/AA1234BB?p=${LIVE_TOKEN}` })
+    expect(res.body).toContain(`og:image" content="https://carsua.app/api/shares/${LIVE_TOKEN}/image"`)
+    expect(res.body).toContain('og:image:type" content="image/jpeg"')
+    expect(res.body).not.toContain('og:image:width')
+    expect(res.body).toContain('<title>Cars UA - AA1234BB - Toyota Camry 2015</title>')
+    expect(res.body).toContain('noindex')
+    expect(res.headers['cache-control']).toBe('no-store')
+    expect(res.headers['x-robots-tag']).toBe('noindex')
+    expect(res.headers['referrer-policy']).toBe('no-referrer')
+  })
+
+  it('answers an expired, deleted or malformed share token with a neutral "link expired" page', async () => {
+    for (const p of [DEAD_TOKEN, 'not-a-token']) {
+      const res = await app.inject({ method: 'GET', url: `/AA1234BB?p=${p}&lang=en` })
+      expect(res.body).toContain('<title>Cars UA - link expired</title>')
+      expect(res.body).not.toContain('AA1234BB')
+      expect(res.body).not.toContain('/api/shares/')
+      expect(res.body).toContain('noindex')
+      expect(res.headers['cache-control']).toBe('no-store')
+      expect(res.headers['referrer-policy']).toBe('no-referrer')
+    }
+  })
+
+  it('ignores ?p= on static pages and the home page', async () => {
+    const html = await get(`/about?p=${LIVE_TOKEN}`)
+    expect(html).toContain('og:image" content="https://carsua.app/og/page/about.png"')
+    expect(html).not.toContain('noindex')
   })
 
   it('falls back to home tags + noindex for an unknown path or plate', async () => {
