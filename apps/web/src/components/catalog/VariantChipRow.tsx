@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 
+import Skeleton from '@/components/ui/Skeleton'
 import { cn } from '@/lib/cn'
 
 export type VariantChip = {
@@ -12,10 +13,13 @@ export type VariantChip = {
 type Props = {
   title: string
   chips: VariantChip[]
+  /** Chips still loading: hold the row's height with a placeholder instead of popping in later. */
+  pending?: boolean
 }
 
 /** One labelled row of toggle chips. Local state only: picking one re-feeds the sections below, it never changes the URL. */
-export default function VariantChipRow({ title, chips }: Props): ReactNode {
+export default function VariantChipRow({ title, chips, pending = false }: Props): ReactNode {
+  if (pending && chips.length < 2) return <Skeleton className="h-7 w-2/3 max-w-md rounded-full" />
   if (chips.length < 2) return null
 
   return (

@@ -13,7 +13,6 @@ import { CompareTrayBar, CompareTrayButton } from '@/components/compare/CompareT
 import CatalogSiblingChips from '@/components/catalog/CatalogSiblingChips'
 import ModelVariants from '@/components/catalog/ModelVariants'
 import Card from '@/components/ui/Card'
-import SectionSkeleton from '@/components/ui/SectionSkeleton'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { ApiError } from '@/lib/api'
 import { toIntlLocale } from '@/lib/intl'
@@ -22,6 +21,7 @@ import { catalogModelQuery } from '@/lib/queries'
 
 import ExamplePlates from '@/routes/read/ExamplePlates'
 
+import CatalogPageSkeleton from './CatalogPageSkeleton'
 import CatalogStatsSection from './CatalogStatsSection'
 import { typicalYear, yearRangeLabel } from './helpers'
 
@@ -73,13 +73,7 @@ export default function CatalogModelRoute(): ReactNode {
       </Card>
     )
   }
-  if (!model) {
-    return (
-      <Card>
-        <SectionSkeleton rows={5} />
-      </Card>
-    )
-  }
+  if (!model) return <CatalogPageSkeleton variant="model" />
 
   return (
     <main className="mx-auto w-full max-w-6xl space-y-4">

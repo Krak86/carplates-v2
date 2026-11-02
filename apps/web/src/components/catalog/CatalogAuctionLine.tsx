@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 
+import Skeleton from '@/components/ui/Skeleton'
 import { formatPrice } from '@/components/ua-auctions/helpers'
 import { toIntlLocale } from '@/lib/intl'
 import { auctionStatsQuery } from '@/lib/queries'
@@ -16,6 +17,8 @@ export default function CatalogAuctionLine({ makeName }: Props): ReactNode {
   const { t, i18n } = useTranslation()
   const stats = useQuery(auctionStatsQuery())
   const wanted = makeName.trim().toUpperCase()
+  // Reserve the line while the shared stats load, so it does not push the content below it down when it appears.
+  if (stats.isPending) return <Skeleton className="mt-2 h-6 w-3/4 max-w-md" />
   const row = stats.data?.byMake.find(r => r.label.toUpperCase() === wanted)
   if (!row) return null
 

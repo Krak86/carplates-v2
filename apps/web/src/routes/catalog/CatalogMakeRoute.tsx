@@ -15,12 +15,12 @@ import LazySection from '@/components/LazySection'
 import NewCarsLink from '@/components/NewCarsLink'
 import TopStatBadges from '@/components/TopStatBadges'
 import Card from '@/components/ui/Card'
-import SectionSkeleton from '@/components/ui/SectionSkeleton'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { ApiError } from '@/lib/api'
 import { toIntlLocale } from '@/lib/intl'
 import { catalogMakeQuery } from '@/lib/queries'
 
+import CatalogPageSkeleton from './CatalogPageSkeleton'
 import { filterModels, yearRangeLabel } from './helpers'
 
 const SharePriceSection = lazy(() => import('@/components/SharePriceSection'))
@@ -74,13 +74,7 @@ export default function CatalogMakeRoute(): ReactNode {
       </Card>
     )
   }
-  if (!make) {
-    return (
-      <Card>
-        <SectionSkeleton rows={5} />
-      </Card>
-    )
-  }
+  if (!make) return <CatalogPageSkeleton variant="make" />
 
   const visibleModels = filterModels(make.models, filter)
   const brandSiteUrl = dealerUrl(make.topBrand)

@@ -31,7 +31,8 @@ export default function ModelVariants({ model }: Props): ReactNode {
   const [year, setYear] = useState(() => typicalYear(stats.years))
   const [fuel, setFuel] = useState<string | null>(stats.fuel[0]?.[0] ?? null)
   const [body, setBody] = useState<string | null>(stats.body[0]?.[0] ?? null)
-  const generations = useQuery(generationGrowthQuery(model.topBrand, model.topModel)).data?.match?.generations ?? []
+  const generationsQuery = useQuery(generationGrowthQuery(model.topBrand, model.topModel))
+  const generations = generationsQuery.data?.match?.generations ?? []
   const currentGeneration = generationOfYear(generations, year)
   const byYear = useQuery({ ...catalogYearsQuery(model.make, model.model), enabled: generations.length > 0 }).data
   const formatCount = new Intl.NumberFormat(toIntlLocale(i18n.language)).format
@@ -56,6 +57,7 @@ export default function ModelVariants({ model }: Props): ReactNode {
         />
         <VariantChipRow
           title={t('catalog.pickGeneration')}
+          pending={generationsQuery.isPending}
           chips={generations.map(g => ({
             key: `${g.code}-${g.yearFrom}`,
             label: `${generationLabel(g, t)} · ${generationSpanText(g, t)} · ${formatCount(carsInSpan(stats.years, g))}`,
