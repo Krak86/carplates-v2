@@ -200,7 +200,7 @@ export class SpaController {
       path: `/${encodeURIComponent(share.plate)}?p=${token}`,
       lang,
       ...sharedPhotoText(lang, share.plate, share.expiresAt, preview),
-      image: `${siteUrl}/api/shares/${token}/image`,
+      image: `${siteUrl}/api/shares/${token}/og`,
       imageType: 'image/jpeg',
       ...(share.width && share.height && { imageSize: { width: share.width, height: share.height } }),
       noindex: true

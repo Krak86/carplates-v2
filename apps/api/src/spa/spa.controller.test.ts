@@ -218,7 +218,7 @@ describe('SpaController meta injection', () => {
 
   it('uses the shared photo as og:image on /<plate>?p=<token>, private and unindexed', async () => {
     const res = await app.inject({ method: 'GET', url: `/AA1234BB?p=${LIVE_TOKEN}` })
-    expect(res.body).toContain(`og:image" content="https://carsua.app/api/shares/${LIVE_TOKEN}/image"`)
+    expect(res.body).toContain(`og:image" content="https://carsua.app/api/shares/${LIVE_TOKEN}/og"`)
     expect(res.body).toContain('og:image:type" content="image/jpeg"')
     expect(res.body).toContain('og:image:width" content="1600"')
     expect(res.body).toContain('og:image:height" content="900"')

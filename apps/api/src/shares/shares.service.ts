@@ -49,6 +49,7 @@ import {
   newShareToken,
   sniffShareFormat
 } from './helpers.js'
+import { drawPlateOutlines } from './outlines.js'
 import { renderRetouch } from './retouch.js'
 import { SharesRepository } from './shares.repository.js'
 import { SHARE_OBJECT_STORE } from './types.js'
@@ -241,6 +242,15 @@ export class SharesService {
     const object = await this.store.get(row.objectKey)
     if (!object) throw new GoneException(SHARE_EXPIRED)
     return { ...object, maxAgeS: cacheSecondsLeft(row.expiresAt) }
+  }
+
+  /** The link-preview copy: the stored photo with the plates outlined (the plain `image` stays clean). */
+  async previewImage(token: string): Promise<{ body: Buffer; maxAgeS: number }> {
+    const row = await this.live(token)
+    const object = await this.store.get(row.objectKey)
+    if (!object) throw new GoneException(SHARE_EXPIRED)
+    const body = await drawPlateOutlines(await readAll(object.stream), row.candidates)
+    return { body, maxAgeS: cacheSecondsLeft(row.expiresAt) }
   }
 
   /** For the SPA's `<meta>` injection: `null` when the link is expired, deleted or was never valid. */
