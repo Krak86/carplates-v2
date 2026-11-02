@@ -138,6 +138,13 @@ describe('SpaController meta injection', () => {
     expect(await get('/AA1234BB?section=bogus')).toContain('<title>Cars UA - AA1234BB - Toyota Camry 2015</title>')
   })
 
+  it('gives ?section= links their own og:url (preview cache key) while canonical stays the plate', async () => {
+    const html = await get('/AA1234BB?section=recalls&tab=x')
+    expect(html).toContain('og:url" content="https://carsua.app/AA1234BB?section=recalls"')
+    expect(html).toContain('rel="canonical" href="https://carsua.app/AA1234BB"')
+    expect(await get('/AA1234BB?section=bogus')).toContain('og:url" content="https://carsua.app/AA1234BB"')
+  })
+
   it('serves static page tags without noindex', async () => {
     const html = await get('/about')
     expect(html).toContain('og:image" content="https://carsua.app/og/page/about.png"')

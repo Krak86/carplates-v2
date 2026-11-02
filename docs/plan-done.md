@@ -4512,3 +4512,12 @@ Follow-ups to "Shareable photo-search links"; each step shippable alone, all new
 - **About:** new feature `photoZoom`; new sources `yunet` (OpenCV Zoo face model behind the share blur) and `uqr` (QR code generator).
 - **Link preview text:** `sharedPhotoText` (`spa-text.ts`) adds a note (faces blurred, plates recognized, valid until <date>) to the description and gives plates outside the registry the title "car photo <plate>" (they had no description before).
 - **Release notes:** all of the above are in the 2026-11-02 day of `releases.ts`.
+
+## Link-preview polish, /discuss contact link, security plan (2026-11-02, late) ✅
+
+- **Shared photo link image:** `shares/outlines.ts` draws the parsed plates in amber on the `og:image` (`/api/shares/<token>/og`), same boxes as the dialog preview (S6).
+- **`?section=` links:** `og:url` carries `?section=<id>` (+ `&lang=` when not ua) for known share sections (`MetaInput.ogUrl`, `isShareSection`); `canonical` stays the bare plate. Telegram/Facebook key their preview cache on `og:url`, so every section link reused the first cached preview.
+- **Static page text limits:** over-long titles and descriptions of `STATIC_PAGES` shortened; `meta.test.ts` now enforces title ≤ 65, description ≤ 200 characters and uniqueness per language (a new page that breaks it fails CI).
+- **/discuss:** one line linking to `/contact` for private messages and custom apps (`discuss.contact.*`, ua/ru/en).
+- **Security:** `docs/security-hardening-plan-2026-11.md` - assessment (the app is already hardened), local pentest lab runbook, prioritized open items (CSP enforcement, Redis throttler, Postgres roles) and a phased execution plan. Doc only, no code changed. Next: Phase A in the plan's "Handoff" (fold into `security-checklist.md`, add `docs/pentest-lab.md`).
+- **Docs/release:** `features-reference.md` "Link previews" and "Shared photo links", `releases.ts` (2026-11-02), About `sharecard` text.

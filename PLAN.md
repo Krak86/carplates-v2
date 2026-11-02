@@ -93,6 +93,8 @@ becomes available.
 
 ### Page share QR, make page extras, plates outside the registry preview, latest record per source ✅ DONE (2026-11-02) — see `docs/plan-done.md`
 
+### Link-preview polish (plate outlines, section og:url, preview length guard), /discuss contact link ✅ DONE (2026-11-02) — see `docs/plan-done.md`
+
 ### Hub tiles, mobile region quiz, load test (`pnpm load-test`, `THROTTLE_DISABLED`) ✅ DONE (2026-11-01) — see `docs/plan-done.md`
 
 - VPS result: ~60 cold plate lookups/s, 0 errors. Optional, only if traffic grows: merge the 4 sequential queries in `plate.service.ts`, raise `shared_buffers`, CPU-profile the api (`docs/deploy.md` "Load testing").
@@ -1022,7 +1024,7 @@ in-memory store resets on restart and isn't shared across instances), body-email
 
 ### Deploy-time security checklist (do when setting up the VPS)
 
-Code-level audit findings and the full pre-deploy gate: [docs/security-checklist.md](docs/security-checklist.md) (2026-10-13).
+Code-level audit findings and the full pre-deploy gate: [docs/security-checklist.md](docs/security-checklist.md) (2026-10-13). Assessment, pentest-lab runbook and prioritized hardening list: [docs/security-hardening-plan-2026-11.md](docs/security-hardening-plan-2026-11.md) (2026-11-02, plan only; its Phase A folds it into the checklist).
 
 - [x] `TRUST_PROXY=true` is set in `infra/docker-compose.prod.yml` (Caddy + Cloudflare in front; Caddy trusts `CF-Connecting-IP` only from Cloudflare's ranges). Set only when the API port is not publicly reachable, else `X-Forwarded-For` is spoofable.
 - [x] Firewall: ✅ verified 2026-10-31 from outside (`Test-NetConnection`, IPv4): 22/80/443 open; 3000 (api), 5432 (Postgres), 6379 (Redis) closed. ✅ SSH key-only (verified 2026-10-27). ✅ IPv6 + Docker verified on the VPS 2026-10-31 (`ss -tln`, `docker ps`): nothing listens on 3000/5432/6379; only Caddy publishes 80/443 (tcp, IPv4 + IPv6) and 443/udp (HTTP/3); api, alpr and Postgres are internal-only; Caddy admin 2019 unpublished; public IPv6 `2a02:c207:2370:1852::1`. Optional, skipped by choice: fail2ban (SSH is key-only), Caddy IP allowlist for `/api/admin/*` (use Cloudflare Access instead if wanted).

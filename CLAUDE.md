@@ -4,8 +4,8 @@
 
 `carsua.app` v2 — Ukrainian vehicle lookup by plate or VIN (pnpm monorepo, Postgres, NHTSA). v1 is `../carplates/` (do not modify).
 
-Docs (huge: **grep `^## ` headings, never read whole**): `PLAN.md` backlog + pins · `docs/plan-done.md` · `README.md` setup/env ·
-`docs/features-reference.md` (**read the matching section before touching a feature**) · `docs/commands-reference.md` · other `docs/*.md` only on request.
+Docs are huge: **grep `^## ` headings, never read whole**. `PLAN.md` backlog + pins · `docs/plan-done.md` · `README.md` setup/env ·
+`docs/features-reference.md` (**read the matching section before touching a feature**) · `docs/commands-reference.md` · other `docs/*.md` on request.
 
 ## Layout
 
@@ -31,7 +31,7 @@ Pins (why: PLAN.md "Version pins"): Node 24, TypeScript 5.9, NestJS 11, Drizzle 
   come from the API, never Vite.
 - **i18n is per-language lazy chunks** (non-ua also loads ua). Tests rendering text `await i18nReady`; never `import '@/i18n'`.
 - **Zod `jitless`**: `@/lib/zod-config` stays the first import of `main.tsx`; `vendor-zod` / `zod-config` stay separate chunks (else CSP `eval`).
-- **Edge cache**: a new cacheable `/api/*` endpoint → `common/cache.ts` headers + Cloudflare Cache Rule (+ `PUBLIC_API_PATH_PREFIXES` if public); see features-reference.
+- **Edge cache**: a new cacheable `/api/*` endpoint → `common/cache.ts` headers + Cloudflare Cache Rule (+ `PUBLIC_API_PATH_PREFIXES` if public).
 - **Below-the-fold sections are `LazySection`s**; a new shareable one must list its id in `sections`. Shared pure helpers of lazy
   chunks go in `vite.config.ts` `HELPER_GROUPS`.
 - **Deploy**: blue/green ⇒ backward-compatible migrations; new env var ⇒ `env.ts` + `deploy-api.yml` + `docs/deploy.md`.
@@ -41,7 +41,7 @@ Pins (why: PLAN.md "Version pins"): Node 24, TypeScript 5.9, NestJS 11, Drizzle 
 ## Workflow
 
 - After each big update suggest a commit message (subject + bullet per change, from `git status`; split if logical). Never `git commit` / `git push` unless asked.
-- **Seed CSVs mirror scraped tables**: after changing one, re-run its `pnpm export:*:csv`.
+- Seed CSVs mirror scraped tables: after changing one, re-run its `pnpm export:*:csv`.
 - `pnpm format` first (not `scripts/src/fixtures`). Tests: Vitest, colocated `*.test.ts(x)`.
 - Docs: write-up → `plan-done.md`, one-line ✅ → `PLAN.md`, conventions → `features-reference.md`, user-facing → `shared/src/releases.ts`
   (only `new` mailed; new day ⇒ bump `web/src/routes/releases/latest.ts`); new feature/source → `AboutRoute.tsx` (`FEATURES`/`SOURCES` + `about.brief|feature|source.*`, ua/ru/en).

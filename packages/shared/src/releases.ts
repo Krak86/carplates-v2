@@ -20,6 +20,18 @@ export const RELEASES: readonly ReleaseDay[] = [
     items: [
       item(
         'improved',
+        'Посилання на розділ сторінки авто (?section=) тепер має власне превʼю в месенджерах, а заголовки превʼю сторінок стали коротшими',
+        'Ссылка на раздел страницы авто (?section=) теперь имеет собственное превью в мессенджерах, а заголовки превью страниц стали короче',
+        'A link to a section of a vehicle page (?section=) now gets its own preview in messengers, and page preview titles are shorter'
+      ),
+      item(
+        'improved',
+        'На сторінці «Обговорення» є посилання на форму зв’язку для приватних повідомлень',
+        'На странице «Обсуждение» есть ссылка на форму связи для личных сообщений',
+        'The Discussion page links to the contact form for private messages'
+      ),
+      item(
+        'improved',
         'Превʼю посилання на фото у месенджерах показує фото з обведеними номерами',
         'Превью ссылки на фото в мессенджерах показывает фото с обведёнными номерами',
         'A shared photo link preview in messengers shows the photo with the plates outlined'

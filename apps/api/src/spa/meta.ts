@@ -12,6 +12,8 @@ export type MetaInput = {
   imageType?: string
   /** Pixel size of a non-card `image`; both set = width/height tags, else none. */
   imageSize?: { width: number; height: number }
+  /** Overrides `og:url` only (canonical stays `path`): Telegram/Facebook key their preview cache on it, so section links need their own. */
+  ogUrl?: string
   /** Plate/VIN pages: keep millions of per-vehicle URLs out of search indexes (link unfurlers still read the tags). */
   noindex?: boolean
   /** Indexable static pages: self-canonical per language plus hreflang alternates for all of them. */
@@ -48,7 +50,7 @@ export function renderMetaTags(m: MetaInput): string {
     `<meta property="og:description" content="${esc(m.description)}">`,
     `<meta property="og:type" content="website">`,
     `<meta property="og:locale" content="${OG_LOCALE[m.lang]}">`,
-    `<meta property="og:url" content="${esc(canonical)}">`,
+    `<meta property="og:url" content="${esc(m.ogUrl ?? canonical)}">`,
     `<meta property="og:image" content="${esc(m.image)}">`,
     `<meta property="og:image:type" content="${esc(m.imageType ?? 'image/png')}">`,
     ...(m.imageType

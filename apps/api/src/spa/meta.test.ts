@@ -64,6 +64,22 @@ describe('spa-text', () => {
     for (const langs of Object.values(STATIC_PAGES)) expect(Object.keys(langs).sort()).toEqual(['en', 'ru', 'ua'])
   })
 
+  it('keeps static page titles and descriptions within preview limits and unique per language', () => {
+    for (const lang of ['ua', 'ru', 'en'] as const) {
+      const titles = new Set<string>()
+      const descriptions = new Set<string>()
+      for (const [path, langs] of Object.entries(STATIC_PAGES)) {
+        const { title, description } = langs[lang]
+        expect(title.length, `${path} ${lang} title`).toBeLessThanOrEqual(65)
+        expect(description.length, `${path} ${lang} description`).toBeLessThanOrEqual(200)
+        expect(titles.has(title), `${path} ${lang} duplicate title`).toBe(false)
+        expect(descriptions.has(description), `${path} ${lang} duplicate description`).toBe(false)
+        titles.add(title)
+        descriptions.add(description)
+      }
+    }
+  })
+
   it('builds vehicle page text', () => {
     const t = vehiclePageText(
       'en',
