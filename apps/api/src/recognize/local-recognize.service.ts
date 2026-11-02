@@ -29,7 +29,8 @@ export class LocalRecognizeService {
 
   constructor(@Inject(RegistryRankService) private readonly registryRank: RegistryRankService) {}
 
-  async recognize(image: UploadedImage): Promise<PlateRecognizeResponse> {
+  /** `documentFallback: false` = a plate in the photo only (shared photos must not accept a registration certificate). */
+  async recognize(image: UploadedImage, options: { documentFallback?: boolean } = {}): Promise<PlateRecognizeResponse> {
     if (!alprLocalEnabled(this.env)) {
       throw new ServiceUnavailableException('Local plate recognition is not configured')
     }
@@ -57,7 +58,9 @@ export class LocalRecognizeService {
     }
 
     let candidates = mapPlateReaderResults(payload.results ?? [])
-    if (candidates.length === 0) candidates = mapPlateReaderResults(await this.readDocumentPlates(form))
+    if (candidates.length === 0 && options.documentFallback !== false) {
+      candidates = mapPlateReaderResults(await this.readDocumentPlates(form))
+    }
     if (candidates.length === 0) throw new NotFoundException('No plate found in the image')
     return { candidates: await this.registryRank.rank(candidates) }
   }

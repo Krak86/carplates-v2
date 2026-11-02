@@ -812,7 +812,7 @@ Group 1 dimension callouts + garage-fit -> Group 3 (existing order). Owner says 
       size blueprint overlay, generated difference sentences, export like "Copy all info", "Compare" chip on the plate/VIN card and catalog
       page (slot A prefilled). Phases: (1) core, (2) visuals, (3) export, (4) tray / suggestions / saved / indexable pairs.
       Full plan: [docs/compare-plan.md](docs/compare-plan.md). Also covers the segment-peer list and a `/read/sizes` overlay embed.
-- 📝 **Shareable photo-search links: signed-in only, private expiring link** — idea 2026-10-01, skipped 2026-10-31, **re-designed 2026-11-01 (research only, not started)**.
+- 📝 **Shareable photo-search links: signed-in only, private expiring link** — idea 2026-10-01, skipped 2026-10-31, **re-designed 2026-11-01; building: slices 1-2 (alpr `/anonymize`, API + DB) done 2026-11-02 and uncommitted, slices 3-4 (web, docs + release) not started**.
   Share button on the photo card; opening `/<plate>?p=<token>` fills the same `photo` state in `use-plate-recognition.ts` with no re-recognition on the viewer's side.
   The photo is a private, time-limited capability link, never a public image host.
   - **Privacy: the uploaded file is already pure pixels.** `shrinkImage` re-encodes through a canvas, which drops EXIF/GPS/device/ISO/maker notes/ICC
@@ -863,8 +863,10 @@ Group 1 dimension callouts + garage-fit -> Group 3 (existing order). Owner says 
        The API still has to downscale to 1600 px / q~80 (sharp), call `/recognize` on the original bytes, and wire a client method next to `local-recognize.service.ts`
        (same 10 s timeout idea). Hand-counted recall on own photos ~94% on the beach shot, misses = profile / looking down / tiny faces; false boxes on logos/bumpers are possible.
        Needs an ALPR image redeploy before slice 2 can run in prod (manual, user).
-    2. API + DB: migration `app.shared_photos`, R2 client + env vars, `POST/GET/DELETE /api/shares` (re-run ALPR, blur, downscale to 1600 px, caps, throttle, global 8 GB guard),
+    2. ✅ **Done 2026-11-02 (uncommitted until reviewed)** API + DB: migration `app.shared_photos`, R2 client + env vars, `POST/GET/DELETE /api/shares` (re-run ALPR, blur, downscale to 1600 px, caps, throttle, global 8 GB guard),
        daily expiry job, `og:image` + meta injection, tests (~1.5-2 h).
+       **Outcome:** `apps/api/src/shares/` (conventions: features-reference.md "Shared photo links"), migration 0088, contract `packages/shared/src/shares.ts`. Manual steps (bucket, lifecycle rule, token, secrets, ALPR redeploy): docs/deploy.md "Shared photo links".
+       Gap for slice 3: the token is returned **only by `POST /api/shares`** (only its hash is stored), so `GET /api/shares` cannot give "copy link" in My shares; the web must keep the link it got at creation (localStorage), or the token becomes `HMAC(AUTH_SECRET, id)` (recomputable by the owner; one function in `shares/helpers.ts`, decide before slice 3).
     3. Web: Share button + dialog with blurred preview, anonymous login hand-off via IndexedDB `pending-share`, "My shares" list with Delete, viewer, i18n ua/ru/en, tests (~1.5-2 h).
     4. Docs + release: `plan-done.md`, `features-reference.md`, `releases.ts`, About, Privacy/Terms text (~0.5 h).
   - **Infra: no new Docker service.** Blur lives in the existing `services/alpr` container (rebuild + redeploy that image), the API changes ship in the existing blue/green api container

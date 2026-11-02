@@ -15,6 +15,7 @@ import { and, count, eq, gt, lt, sql } from 'drizzle-orm'
 import { DbService } from '../db/db.service.js'
 import { loadEnv } from '../env.js'
 import { MailService } from '../mail/mail.service.js'
+import { SharesCleanupService } from '../shares/shares-cleanup.service.js'
 import { DEFAULT_LANG, LANGS } from '../spa/spa-text.js'
 import type { Lang } from '../spa/spa-text.js'
 
@@ -64,7 +65,8 @@ export class AuthService {
     @Inject(DbService) private readonly dbService: DbService,
     @Inject(EmailChallengeService) private readonly challenges: EmailChallengeService,
     @Inject(TurnstileService) private readonly turnstile: TurnstileService,
-    @Inject(MailService) private readonly mail: MailService
+    @Inject(MailService) private readonly mail: MailService,
+    @Inject(SharesCleanupService) private readonly shares: SharesCleanupService
   ) {}
 
   get googleClientId(): string | null {
@@ -214,6 +216,8 @@ export class AuthService {
       .where(eq(users.id, userId))
       .returning()
     await db.delete(sessions).where(eq(sessions.userId, userId))
+    // Shared photo links go now (not after the grace period): deleting the account means the photos go too.
+    await this.shares.deleteForUsers([userId])
     this.logger.log(`Scheduled deletion of account ${userId}`)
     if (user?.email) {
       await this.notify(user.email, {

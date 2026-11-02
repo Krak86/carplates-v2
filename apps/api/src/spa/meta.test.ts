@@ -74,3 +74,20 @@ describe('spa-text', () => {
     expect(t.description).toContain('Toyota Camry, 2015, Petrol')
   })
 })
+
+describe('renderMetaTags with a non-card image', () => {
+  it('states the image type and omits the card dimensions', () => {
+    const html = renderMetaTags({
+      siteUrl: 'https://carsua.app',
+      path: '/AA1234BB',
+      lang: 'en',
+      title: 't',
+      description: 'd',
+      image: 'https://carsua.app/api/shares/x/image',
+      imageType: 'image/jpeg'
+    })
+    expect(html).toContain('og:image:type" content="image/jpeg"')
+    expect(html).not.toContain('og:image:width')
+    expect(html).not.toContain('og:image:height')
+  })
+})

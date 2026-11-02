@@ -58,6 +58,16 @@ describe('LocalRecognizeService', () => {
     expect(fetchMock.mock.calls[1]?.[0]).toBe('http://localhost:8088/recognize/vin')
   })
 
+  it('skips the document fallback when asked (shared photos must show a plate, not a certificate)', async () => {
+    const fetchMock = vi.mocked(fetch)
+    fetchMock.mockResolvedValue(jsonResponse({ results: [] }))
+
+    const service = new LocalRecognizeService(passThroughRank)
+    await expect(service.recognize(image, { documentFallback: false })).rejects.toBeInstanceOf(NotFoundException)
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    expect(fetchMock.mock.calls[0]?.[0]).toBe('http://localhost:8088/recognize')
+  })
+
   it('throws BadGatewayException on a non-ok upstream response', async () => {
     vi.mocked(fetch).mockResolvedValue(jsonResponse({}, 500))
     const service = new LocalRecognizeService(passThroughRank)

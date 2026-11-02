@@ -916,3 +916,18 @@ export {
   countLinks
 } from './contact.js'
 export type { ContactConfig, ContactRequest, ContactStartRequest, ContactTopic } from './contact.js'
+export {
+  SHARE_EXPIRED,
+  SHARE_LIMIT_REACHED,
+  SHARE_MAX_ACTIVE,
+  SHARE_MAX_UPLOAD_BYTES,
+  SHARE_NO_PLATE,
+  SHARE_TTL_DAYS,
+  SHARING_UNAVAILABLE,
+  createShareResponseSchema,
+  myShareSchema,
+  mySharesResponseSchema,
+  shareMetaResponseSchema,
+  shareTokenSchema
+} from './shares.js'
+export type { CreateShareResponse, MyShare, MySharesResponse, ShareMetaResponse } from './shares.js'

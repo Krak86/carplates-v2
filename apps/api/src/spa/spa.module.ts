@@ -5,6 +5,7 @@ import { AuctionsModule } from '../auctions/auctions.module.js'
 import { CatalogModule } from '../catalog/catalog.module.js'
 import { PlateModule } from '../plate/plate.module.js'
 import { RdwModule } from '../rdw/rdw.module.js'
+import { SharesModule } from '../shares/shares.module.js'
 import { VinModule } from '../vin/vin.module.js'
 import { WantedModule } from '../wanted/wanted.module.js'
 import { OgController } from './og.controller.js'
@@ -19,6 +20,7 @@ import { SpaController } from './spa.controller.js'
     PlateModule,
     VinModule,
     RdwModule,
+    SharesModule,
     WantedModule,
     ThrottlerModule.forRoot([{ ttl: 60_000, limit: 60 }])
   ],

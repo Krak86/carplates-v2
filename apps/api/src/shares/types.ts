@@ -1,0 +1,38 @@
+import type { Readable } from 'node:stream'
+
+import type { PlateCandidate } from '@carplates/shared'
+
+export type ShareFormat = 'jpeg' | 'webp'
+
+/** Private object storage for the stored copies (R2 in production). */
+export type ShareObjectStore = {
+  put(key: string, body: Buffer, contentType: string): Promise<void>
+  /** `null` when the object does not exist. */
+  get(key: string): Promise<{ stream: Readable; length: number | null } | null>
+  /** Idempotent: a missing object is not an error. */
+  delete(key: string): Promise<void>
+}
+
+export const SHARE_OBJECT_STORE = 'SHARE_OBJECT_STORE'
+
+export type ShareRecord = {
+  id: string
+  userId: string
+  objectKey: string
+  plate: string
+  candidates: PlateCandidate[]
+  bytes: number
+  createdAt: Date
+  expiresAt: Date
+  revokedAt: Date | null
+}
+
+export type NewShare = Pick<
+  ShareRecord,
+  'id' | 'userId' | 'objectKey' | 'plate' | 'candidates' | 'bytes' | 'expiresAt'
+> & {
+  tokenHash: string
+}
+
+/** Metadata answer for the SPA's `<meta>` injection: `null` = expired, deleted or unknown. */
+export type ShareMeta = { plate: string; expiresAt: Date } | null

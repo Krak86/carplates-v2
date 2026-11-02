@@ -15,6 +15,7 @@ import { MailModule } from './mail/mail.module.js'
 import { MissedModule } from './missed/missed.module.js'
 import { FeaturesModule } from './features/features.module.js'
 import { SettingsModule } from './settings/settings.module.js'
+import { SharesModule, SharesStorageModule } from './shares/shares.module.js'
 import { SyncModule } from './sync/sync.module.js'
 import { FuelModule } from './fuel/fuel.module.js'
 import { FxModule } from './fx/fx.module.js'
@@ -63,6 +64,8 @@ import { WikispecsModule } from './wikispecs/wikispecs.module.js'
     ContactModule,
     DigestModule,
     FeaturesModule,
+    SharesStorageModule,
+    SharesModule,
     SyncModule,
     SettingsModule,
     UsageModule,

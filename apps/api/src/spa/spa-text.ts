@@ -966,3 +966,19 @@ export function vehiclePageText(lang: Lang, f: Facts, kind: 'plate' | 'vin' | 'o
     description: `${kind === 'vin' ? 'VIN ' : ''}${f.value}${facts ? `: ${facts}` : ''}. ${note}`
   }
 }
+
+/** `/<plate>?p=<token>` of an expired, deleted or unknown shared photo: neutral text, never the plate. */
+export const SHARE_EXPIRED_PAGE: Record<Lang, PageText> = {
+  ua: {
+    title: `${SITE_NAME} - посилання застаріло`,
+    description: 'Це посилання на фото більше не діє: власник видалив його або минув строк (7 днів).'
+  },
+  ru: {
+    title: `${SITE_NAME} - ссылка устарела`,
+    description: 'Эта ссылка на фото больше не действует: владелец удалил его или прошёл срок (7 дней).'
+  },
+  en: {
+    title: `${SITE_NAME} - link expired`,
+    description: 'This photo link no longer works: the owner deleted it or its 7 days are up.'
+  }
+}

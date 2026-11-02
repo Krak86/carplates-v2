@@ -1,4 +1,4 @@
-import { BadRequestException, Controller, Inject, PayloadTooLargeException, Post, Req, UseGuards } from '@nestjs/common'
+import { Controller, Inject, Post, Req, UseGuards } from '@nestjs/common'
 import { ApiConsumes, ApiOkResponse, ApiTags } from '@nestjs/swagger'
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler'
 import type { FastifyRequest } from 'fastify'
@@ -6,17 +6,8 @@ import type { FastifyRequest } from 'fastify'
 import { CloudRecognizeService } from './cloud-recognize.service.js'
 import { LocalRecognizeService } from './local-recognize.service.js'
 import { PlateRecognizeDto, VinRecognizeDto } from './recognize.dto.js'
+import { readUpload } from './read-upload.js'
 import { VinRecognizeService } from './vin-recognize.service.js'
-
-async function readUpload(req: FastifyRequest): Promise<{ buffer: Buffer; mimetype: string; filename: string }> {
-  const part = await req.file()
-  if (!part) throw new BadRequestException('Expected a multipart form with an "image" file field')
-  try {
-    return { buffer: await part.toBuffer(), mimetype: part.mimetype, filename: part.filename }
-  } catch {
-    throw new PayloadTooLargeException('Image is too large')
-  }
-}
 
 @ApiTags('recognize')
 @Controller('api/recognize')

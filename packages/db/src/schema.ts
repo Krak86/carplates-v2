@@ -2046,3 +2046,28 @@ export const catalogMake = registry.table('catalog_make', {
   models: integer('models').notNull()
 })
 export type CatalogMakeInsert = typeof catalogMake.$inferInsert
+
+/** Shareable photo-search links: the photo itself lives in a private R2 bucket (`object_key`), the link is a capability token. */
+export const sharedPhotos = app.table(
+  'shared_photos',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id').notNull(),
+    /** SHA-256 hex of the 128-bit link token; the token itself is never stored. */
+    tokenHash: text('token_hash').notNull(),
+    objectKey: text('object_key').notNull(),
+    plate: text('plate').notNull(),
+    /** The server's own ALPR reads as `PlateCandidate[]` (boxes are 0-1 fractions). */
+    candidates: jsonb('candidates').notNull(),
+    bytes: integer('bytes').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    /** Admin takedown: `UPDATE app.shared_photos SET revoked_at = now() WHERE …`. */
+    revokedAt: timestamp('revoked_at', { withTimezone: true })
+  },
+  t => [
+    uniqueIndex('ux_shared_photos_token').on(t.tokenHash),
+    index('ix_shared_photos_user').on(t.userId),
+    index('ix_shared_photos_expires').on(t.expiresAt)
+  ]
+)
