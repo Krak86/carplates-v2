@@ -4,8 +4,8 @@
 
 `carsua.app` v2 — Ukrainian vehicle lookup by plate or VIN (pnpm monorepo, Postgres, NHTSA). v1 is `../carplates/` (do not modify).
 
-Docs (**grep `^## ` headings, never read whole**): `PLAN.md` backlog + pins · `docs/plan-done.md` write-ups · `README.md` setup/env ·
-`docs/features-reference.md` per-feature conventions (**read the matching section before touching a feature**) · `docs/commands-reference.md` · other `docs/*.md` only on request.
+Docs (**grep `^## ` headings, never read whole**; plan-done 535 KB, features-reference 190 KB, PLAN 145 KB): `PLAN.md` backlog + pins · `docs/plan-done.md` · `README.md` setup/env ·
+`docs/features-reference.md` (**read the matching section before touching a feature**) · `docs/commands-reference.md` · other `docs/*.md` only on request.
 
 ## Layout
 
@@ -44,7 +44,7 @@ Pins (why: PLAN.md "Version pins"): Node 24, TypeScript 5.9, NestJS 11, Drizzle 
   split if logical). Never run `git commit` / `git push` unless asked.
 - **Seed CSVs mirror scraped tables**: after changing one, re-run its `pnpm export:*:csv`.
 - `pnpm format` first (not `scripts/src/fixtures`). Tests: Vitest, colocated `*.test.ts(x)`.
-- Keep docs current: write-up → `docs/plan-done.md`, one-line ✅ → `PLAN.md`, conventions → `docs/features-reference.md`, user-facing entry → `packages/shared/src/releases.ts`
-  (only `new` items are mailed; new day ⇒ bump `routes/releases/latest.ts`); new feature / data source → About (`FEATURES` + `about.brief.*` + `about.feature.*`, `SOURCES` + `about.source.*`, ua/ru/en).
+- Docs: write-up → `plan-done.md`, one-line ✅ → `PLAN.md`, conventions → `features-reference.md`, user-facing → `shared/src/releases.ts`
+  (only `new` mailed; new day ⇒ bump `web/src/routes/releases/latest.ts`); new feature/source → `AboutRoute.tsx` (`FEATURES`/`SOURCES` + `about.brief|feature|source.*`, ua/ru/en).
 
 @CLAUDE_RULES.md

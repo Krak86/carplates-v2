@@ -47,11 +47,20 @@ pnpm monorepo · Node 24 · React 19 + Vite 8 · NestJS 11 + Fastify · Drizzle 
 
 ## Quick start
 
+Prerequisites: **Node 24** (`>=24 <25`), **pnpm 12**, **Docker** (Postgres 18.6; the optional ALPR container and Mailpit also run in it).
+Real-data setup needs ~20 GB of free disk and, for the few commands that download ZIPs by hand (UK MOT), [7-Zip](https://www.7-zip.org).
+No Python is needed on the host (the ALPR service has its own image).
+
 ```bash
 pnpm install
-pnpm db:up            # postgres:18.6 in Docker
+cp apps/api/.env.example apps/api/.env      # optional: only needed for the API keys in "Environment reference" below
+cp apps/web/.env.example apps/web/.env      # optional: Maps embed key, telemetry, Disqus
+pnpm db:up            # postgres:18.6 in Docker (dev credentials carplates:carplates, port 5432)
 pnpm db:migrate
 ```
+
+Everything works with an empty `.env`: plate/VIN search, stats, sign-in by email code (printed in the API log) and every
+seeded dataset need no key. Keys only switch on the extras listed under "Environment reference".
 
 Then load data one of two ways — pick one, both work against the same schema:
 
@@ -68,13 +77,27 @@ multi-registration plate (`КА0001АА`), or a real 17-char VIN.
 ### Option B — real data (hours, ~20 GB)
 
 ```bash
-pnpm ingest:full       # all 13 years from data.gov.ua + 2026 plate recovery + backfill
-pnpm ingest:euroncap:csv   # real Euro NCAP crash-test ratings, from a committed CSV — seconds, no scraping
-pnpm ingest:jncap:csv      # real JNCAP (Japan) ratings, from a committed CSV — seconds, no scraping
-pnpm ingest:cncap:csv      # real C-NCAP (China) ratings, from a committed CSV — seconds, no fetching
-pnpm ingest:kncap:csv      # real KNCAP (Korea) ratings, from a committed CSV — seconds, no fetching
-pnpm ingest:iihs:csv       # real IIHS (US) ratings, from a committed CSV — seconds, no scraping
+pnpm ingest:all        # RECOMMENDED: db:migrate + ingest:full + every committed seed CSV (below) + derived rollups
 pnpm dev
+```
+
+`ingest:all` runs `ingest:full` (the registry, hours) and `ingest:ratings:csv` (all seed CSVs in `scripts/seed-data/`, minutes,
+no scraping) concurrently, then `db:refresh-derived`. The seed CSVs fill: Euro NCAP / JNCAP / C-NCAP / KNCAP / IIHS ratings,
+EPA + EEA fuel economy, infocar / ITC / Mezha / e-drive / TopGear / press reviews, infocar + Honda + YouTube videos, Sketchfab 3D
+models, CarShow360 galleries, Winner Imports stock, Wikimedia hero photos, VehiclesDB, RDW specs + recalls, Transport Canada
+recalls (+ NLLB recall translations), Open EV Data, UK MOT common faults, Wikidata generations + brand origin, Wikipedia
+spec tables, VIN WMI prefixes, model plants, auto news + brand YouTube posts, stolen-car history (stolen.in.ua) and the DTP
+road-safety tables. Per-command details: [docs/commands-reference.md](docs/commands-reference.md).
+
+Not seeded on purpose (live feeds, run on a schedule on the VPS, see [SCHEDULE.md](SCHEDULE.md)): `ingest:wanted` (National Police
+wanted vehicles), `ingest:wanted-plates` (Garpun), `ingest:auctions` (SETAM), `ingest:prozorro`, `ingest:news`, `ingest:social`,
+`ingest:dtp:patrol`, `ingest:rdw-recalls`, `ingest:ca-recalls`. Run any of them once by hand to fill its card locally.
+Also not seeded: `registry.missed_lookups` (user telemetry), `stats_*` (rebuilt by `db:refresh-derived`) and `app.*` (accounts).
+
+Manual alternative (the five rating loads only, no other seed data):
+
+```bash
+pnpm ingest:full && pnpm ingest:euroncap:csv && pnpm ingest:jncap:csv && pnpm ingest:cncap:csv && pnpm ingest:kncap:csv && pnpm ingest:iihs:csv
 ```
 
 `ingest:full` chains three steps — see [scripts/src/ingest-full.ts](scripts/src/ingest-full.ts)
@@ -138,14 +161,20 @@ Everything above (plate/VIN search) works with zero external keys. These
 features are optional add-ons, each gated on its own key in `apps/api/.env` —
 absent, the app runs fine and that one feature just answers "unavailable":
 
-| Feature                          | Env var                                                                         | Get a free key at                                                                             |
-| -------------------------------- | ------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| Find a plate by photo/camera     | `PLATE_RECOGNIZER_CLOUD_TOKEN`                                                  | [platerecognizer.com](https://platerecognizer.com)                                            |
-| "What it might look like" photos | `PIXABAY_API_KEY`                                                               | [pixabay.com/api/docs](https://pixabay.com/api/docs/)                                         |
-| Sign in with Google              | `GOOGLE_CLIENT_ID`                                                              | [console.cloud.google.com](https://console.cloud.google.com/apis/credentials)                 |
-| Sign in with Telegram            | `TELEGRAM_BOT_TOKEN` + `TELEGRAM_BOT_USERNAME`                                  | [@BotFather](https://t.me/BotFather) (`/newbot`, then `/setdomain`, https only)               |
-| Email sign-in (code + link)      | `MAIL_TRANSPORT` (+ `RESEND_API_KEY` or `SMTP_URL`), `MAIL_FROM`, `AUTH_SECRET` | [resend.com](https://resend.com) (3k mails/month free) · Brevo, Postmark, SES via SMTP        |
-| Bot check on "send code"         | `TURNSTILE_SITE_KEY` + `TURNSTILE_SECRET_KEY`                                   | [dash.cloudflare.com → Turnstile](https://dash.cloudflare.com/?to=/:account/turnstile) (free) |
+| Feature                          | Env var                                                                              | Get a free key at                                                                             |
+| -------------------------------- | ------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------- |
+| Find a plate by photo/camera     | `PLATE_RECOGNIZER_CLOUD_TOKEN`                                                       | [platerecognizer.com](https://platerecognizer.com)                                            |
+| "What it might look like" photos | `PIXABAY_API_KEY`                                                                    | [pixabay.com/api/docs](https://pixabay.com/api/docs/)                                         |
+| Sign in with Google              | `GOOGLE_CLIENT_ID`                                                                   | [console.cloud.google.com](https://console.cloud.google.com/apis/credentials)                 |
+| Sign in with Telegram            | `TELEGRAM_BOT_TOKEN` + `TELEGRAM_BOT_USERNAME`                                       | [@BotFather](https://t.me/BotFather) (`/newbot`, then `/setdomain`, https only)               |
+| Email sign-in (code + link)      | `MAIL_TRANSPORT` (+ `RESEND_API_KEY` or `SMTP_URL`), `MAIL_FROM`, `AUTH_SECRET`      | [resend.com](https://resend.com) (3k mails/month free) · Brevo, Postmark, SES via SMTP        |
+| Bot check on "send code"         | `TURNSTILE_SITE_KEY` + `TURNSTILE_SECRET_KEY`                                        | [dash.cloudflare.com → Turnstile](https://dash.cloudflare.com/?to=/:account/turnstile) (free) |
+| Own-model plate recognition      | `ALPR_LOCAL_URL` (+ `ALPR_API_KEY`)                                                  | no account: `pnpm alpr:build && pnpm alpr:up` (see "Self-hosted ALPR" below)                  |
+| Shared photo links               | `SHARES_R2_ENDPOINT` + `SHARES_R2_ACCESS_KEY_ID` + `SHARES_R2_SECRET_ACCESS_KEY`     | Cloudflare R2 private bucket (needs `ALPR_LOCAL_URL` too, for the face blur); docs/deploy.md  |
+| Admin live analytics             | `POSTHOG_PERSONAL_API_KEY` + `POSTHOG_PROJECT_ID`                                    | [posthog.com](https://posthog.com) → personal API key, scope `query:read`                     |
+| Error reporting (API / web)      | `ENABLE_TELEMETRY=true` + `SENTRY_DSN` / `VITE_ENABLE_TELEMETRY` + `VITE_SENTRY_DSN` | [sentry.io](https://sentry.io)                                                                |
+| AUTO.RIA fallback for old plates | `RIA_CHECK_ENABLED=true`                                                             | no key (unofficial endpoint, 5 calls / 90 s per IP, so off by default)                        |
+| Contact form inbox               | `CONTACT_TO` (or `MAIL_REPLY_TO`)                                                    | any mailbox; neither set = the form is disabled                                               |
 
 Add whichever you want to `apps/api/.env` (see `apps/api/.env.example`), then
 restart `pnpm dev` — both are read once at process start, so editing `.env`
@@ -164,6 +193,66 @@ build/dev start, so restart `pnpm dev` after changing it.
 Production-only API settings: `PUBLIC_SITE_URL` (real origin — used by link previews, `/sitemap.xml` and `/robots.txt`) and
 `TRUST_PROXY=true` (only behind Caddy/Cloudflare, so per-IP rate limits see the client IP). Deploy checklist: `PLAN.md` "Deploy-time
 security checklist".
+
+### Environment reference
+
+Every variable the app reads. API: validated in [apps/api/src/env.ts](apps/api/src/env.ts) (a bad value stops the boot).
+In production the same names are GitHub Environment `production` secrets / variables, written to the VPS by `deploy-api.yml` (list and
+setup order: [docs/deploy.md](docs/deploy.md) "Secrets and variables"). **Bold** = required in production.
+
+| Variable                                                                                           | Default                                | Meaning                                                                                                                            |
+| -------------------------------------------------------------------------------------------------- | -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `NODE_ENV`                                                                                         | `development`                          | `production` turns on the boot checks below                                                                                        |
+| `PORT`                                                                                             | `3000`                                 | API port                                                                                                                           |
+| **`DATABASE_URL`**                                                                                 | dev Postgres                           | Production refuses the dev credentials; CI builds it from `POSTGRES_PASSWORD`. Scripts read it too                                 |
+| `WEB_DIST_DIR`                                                                                     | unset                                  | Built web app the API serves (unset in dev: Vite serves it). `/web/current` on the VPS                                             |
+| **`PUBLIC_SITE_URL`**                                                                              | `http://localhost:3000`                | Public https origin: link previews, sitemap, robots, magic links. Not localhost in production                                      |
+| `NHTSA_BASE_URL`, `NHTSA_SAFETY_RATINGS_BASE_URL`                                                  | NHTSA vPIC / `api.nhtsa.gov`           | VIN decode and 5-star ratings (keyless, proxied)                                                                                   |
+| `PLATE_RECOGNIZER_CLOUD_TOKEN`, `PLATE_RECOGNIZER_CLOUD_ENABLED`, `…_URL`, `…_MONTHLY_BUDGET`      | off, 2000 / month                      | Paid cloud OCR fallback: needs the token **and** `ENABLED=true`                                                                    |
+| `ALPR_LOCAL_URL`, `ALPR_API_KEY`                                                                   | unset                                  | Self-hosted ALPR container. Same `ALPR_API_KEY` on both sides (sent as `x-alpr-key`); unset key = ALPR open                        |
+| `SHARES_R2_ENDPOINT`, `SHARES_R2_BUCKET`, `SHARES_R2_ACCESS_KEY_ID`, `SHARES_R2_SECRET_ACCESS_KEY` | bucket `carsua-shares`                 | Private R2 bucket for shared photo links; all three + `ALPR_LOCAL_URL` or `POST /api/shares` answers 503                           |
+| `RIA_CHECK_ENABLED`, `RIA_CHECK_BASE_URL`                                                          | `false`, `https://auto.ria.com`        | AUTO.RIA "check a car" fallback for plates missing from the registry                                                               |
+| `PIXABAY_API_KEY`, `PIXABAY_BASE_URL`                                                              | unset                                  | "What it might look like" photos; unset = 503                                                                                      |
+| `WIKI_IMAGE_SOURCE`                                                                                | `commons`                              | Hero image strategy: `commons` (year-aware) or `wiki` (article lead image)                                                         |
+| `GOOGLE_CLIENT_ID`                                                                                 | unset                                  | Google sign-in (public, not a secret)                                                                                              |
+| `TELEGRAM_BOT_TOKEN` (secret), `TELEGRAM_BOT_USERNAME`                                             | unset                                  | Telegram sign-in; BotFather `/setdomain` (https only)                                                                              |
+| **`AUTH_SECRET`**                                                                                  | dev-only fallback                      | ≥ 32 chars, keys the HMAC of email codes (`openssl rand -base64 48`)                                                               |
+| **`MAIL_TRANSPORT`**                                                                               | `log`                                  | `log` (dev), `smtp` or `resend`; production refuses `log`                                                                          |
+| `RESEND_API_KEY`, `SMTP_URL`                                                                       | unset, `smtp://localhost:1025`         | Resend key (required for `resend`) / Mailpit or any SMTP provider                                                                  |
+| `MAIL_FROM`, `MAIL_REPLY_TO`, `MAIL_FROM_NEWS`                                                     | `carsua.app <no-reply@localhost>`      | Sender, reply-to mailbox, and the digest sender (its domain must be verified in Resend)                                            |
+| `CONTACT_TO`                                                                                       | falls back to `MAIL_REPLY_TO`          | Private inbox for the `/contact` form                                                                                              |
+| `DIGEST_ENABLED`                                                                                   | `false`                                | Monthly "what's new" mail on the 1st to opted-in users. Never turn on against dev/stage data                                       |
+| `TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY`                                                       | unset                                  | Cloudflare Turnstile on "send code"; no secret = check skipped                                                                     |
+| `ACCOUNT_DELETION_GRACE_DAYS`, `SESSION_TTL_DAYS`                                                  | `14`, `30`                             | Restore window of a deleted account; sliding session lifetime. Not passed by CI (defaults apply in production)                     |
+| `POSTHOG_PERSONAL_API_KEY`, `POSTHOG_PROJECT_ID`, `POSTHOG_API_HOST`                               | unset, unset, `https://eu.posthog.com` | Admin Statistics tab (HogQL). Use `https://us.posthog.com` for a US project (host is not passed by CI: add it to `deploy-api.yml`) |
+| `SENTRY_ORG_SLUG`                                                                                  | unset                                  | Only builds the Sentry dashboard link on the admin Statistics tab                                                                  |
+| `ENABLE_TELEMETRY`, `SENTRY_DSN`, `SENTRY_TRACES_SAMPLE_RATE`                                      | off, unset, `0.1`                      | Sentry is inert unless the flag **and** the DSN are set                                                                            |
+| `TRUST_PROXY`                                                                                      | `false`                                | `true` only behind Caddy/Cloudflare (per-IP limits read `X-Forwarded-For`)                                                         |
+| `THROTTLE_DISABLED`, `ENABLE_SWAGGER`                                                              | `false`                                | Load tests only (ignored in production); Swagger at `/api/docs` is on in dev, off in production unless enabled                     |
+| `GIT_SHA`                                                                                          | unset                                  | Set per deploy by CI                                                                                                               |
+
+Web build (`apps/web/.env`, read by Vite at dev/build start; **public**, bundled into the JS): `VITE_API_BASE` (leave empty: same origin),
+`VITE_GOOGLE_MAPS_EMBED_KEY` (restrict to your referrer in Google Cloud), `VITE_DISQUS_SHORT_NAME`, `VITE_ENABLE_TELEMETRY`,
+`VITE_POSTHOG_KEY`, `VITE_POSTHOG_HOST`, `VITE_SENTRY_DSN`, `VITE_GIT_SHA` (set by CI).
+
+Scripts only (shell or `apps/api/.env`; none are needed for `pnpm ingest:all`): `GOOGLE_API_KEY` (YouTube Data API v3 for `ingest:youtube-videos`),
+`SKETCHFAB_TOKEN` (optional, raises the Sketchfab rate limit), `CLOUDFLARE_TUNNEL_TOKEN` (`pnpm tunnel --hostname`), `SHRINK_MAX` / `SHRINK_Q`
+(ALPR `eval.mjs --shrink`), `HC_PING_<JOB>` (healthchecks.io ping URLs for the VPS cron jobs, in `/opt/carsua/env/ingest.env`).
+
+CI-only GitHub secrets (never read by the app): `VPS_HOST`, `VPS_USER`, `VPS_SSH_KEY`, `VPS_KNOWN_HOSTS`, `POSTGRES_PASSWORD`,
+`CF_ORIGIN_CERT`, `CF_ORIGIN_KEY`, `CF_API_TOKEN`, `CF_ZONE_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_ENDPOINT`,
+`BACKUP_BUCKET`, `HC_PING_BACKUP` and the `HC_PING_*` list in docs/deploy.md.
+
+### Self-hosted ALPR (optional)
+
+`pnpm alpr:build && pnpm alpr:up` runs `services/alpr` (FastAPI + `fast-alpr` ONNX, CPU-only; plate reading, VIN OCR via RapidOCR,
+face blur `/anonymize` with a committed YuNet model) on `:8088`. Set `ALPR_LOCAL_URL=http://localhost:8088` in `apps/api/.env`
+(and the same `ALPR_API_KEY` in the container env if you use one). Without it the local recognize route answers 503.
+
+### Production setup from scratch
+
+Server, Cloudflare, R2 backups, GitHub Environment, first deploy, DB restore, cron jobs and shared-photo bucket: [docs/deploy.md](docs/deploy.md)
+(follow "Where to get what" then "First-time setup (in this order)"). Roles and sign-in set-up: [docs/logins.md](docs/logins.md).
 
 ## Offline / PWA
 

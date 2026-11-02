@@ -11,7 +11,9 @@ import CatalogAuctionLine from '@/components/catalog/CatalogAuctionLine'
 import CatalogBreadcrumb from '@/components/catalog/CatalogBreadcrumb'
 import { CompareTrayBar, CompareTrayButton } from '@/components/compare/CompareTray'
 import CatalogSiblingChips from '@/components/catalog/CatalogSiblingChips'
+import CatalogViewChips from '@/components/catalog/CatalogViewChips'
 import ModelVariants from '@/components/catalog/ModelVariants'
+import TopStatBadges from '@/components/TopStatBadges'
 import Card from '@/components/ui/Card'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { ApiError } from '@/lib/api'
@@ -109,6 +111,10 @@ export default function CatalogModelRoute(): ReactNode {
             />
           </p>
         )}
+        <div className="mt-2 flex flex-wrap items-center gap-2">
+          <TopStatBadges brand={model.topBrand} model={model.topModel} color={null} region={null} kind={model.kind} />
+          <CatalogViewChips model={model} />
+        </div>
         <div className="mt-2">
           <ExamplePlates brand={model.topBrand} model={model.topModel} />
         </div>

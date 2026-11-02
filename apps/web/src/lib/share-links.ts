@@ -1,3 +1,4 @@
+import { denormalizePlate, isUaPlate } from '@carplates/shared'
 import type { MyShare } from '@carplates/shared'
 
 /**
@@ -56,7 +57,8 @@ export function clearShareTokens(): void {
 }
 
 export function shareUrl(plate: string, token: string, origin = window.location.origin): string {
-  return `${origin}/${encodeURIComponent(plate)}?p=${token}`
+  // Latin look-alikes keep the link readable (a Cyrillic path pastes as `%D0%92…`); the API normalizes both.
+  return `${origin}/${encodeURIComponent(isUaPlate(plate) ? denormalizePlate(plate) : plate)}?p=${token}`
 }
 
 /** Whole days left, rounded up, never below 0. */

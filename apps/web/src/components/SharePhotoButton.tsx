@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { useSession } from '@/components/auth/use-session'
+import ShareIcon from '@/components/ShareIcon'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 import { shrinkImage } from '@/lib/image'
 import { clearPendingShare, savePendingShare } from '@/lib/pending-share'
@@ -42,8 +43,9 @@ export default function SharePhotoButton({ file }: Props): ReactNode {
       <button
         type="button"
         onClick={handleClick}
-        className="absolute bottom-2 left-2 rounded-full bg-black/70 px-3 py-1 text-xs font-medium text-white hover:bg-black/90"
+        className="absolute bottom-2 left-2 inline-flex items-center gap-1.5 rounded-full bg-black/70 px-3 py-1 text-xs font-medium text-white hover:bg-black/90"
       >
+        <ShareIcon />
         {t('photoShare.button')}
       </button>
 

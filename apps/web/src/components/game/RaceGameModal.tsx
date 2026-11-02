@@ -82,8 +82,8 @@ export default function RaceGameModal({
   return createPortal(
     <div className="fixed inset-0 z-30 flex items-center justify-center bg-black/60 p-4" role="dialog" aria-modal>
       <div className="max-h-full w-full max-w-6xl overflow-x-hidden overflow-y-auto rounded-xl bg-[var(--color-surface)] p-4">
-        <div className="mb-3 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-1.5 font-semibold">
+        <div className="mb-3 flex items-start justify-between gap-3">
+          <div className="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-1 font-semibold">
             <span aria-hidden className="leading-none">
               🎮
             </span>
@@ -111,7 +111,7 @@ export default function RaceGameModal({
               type="button"
               onClick={onClose}
               aria-label={t('race.close')}
-              className="text-[var(--color-muted)] hover:text-[var(--color-fg)]"
+              className="-m-2 p-2 text-[var(--color-muted)] hover:text-[var(--color-fg)]"
             >
               ✕
             </button>

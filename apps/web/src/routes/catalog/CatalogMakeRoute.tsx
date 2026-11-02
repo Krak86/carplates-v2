@@ -11,6 +11,7 @@ import BrandSiteChip from '@/components/BrandSiteChip'
 import CatalogAdvancedSearchNote from '@/components/catalog/CatalogAdvancedSearchNote'
 import CatalogAuctionLine from '@/components/catalog/CatalogAuctionLine'
 import CatalogBreadcrumb from '@/components/catalog/CatalogBreadcrumb'
+import CatalogMakeViewChips from '@/components/catalog/CatalogMakeViewChips'
 import LazySection from '@/components/LazySection'
 import NewCarsLink from '@/components/NewCarsLink'
 import TopStatBadges from '@/components/TopStatBadges'
@@ -104,6 +105,7 @@ export default function CatalogMakeRoute(): ReactNode {
         <CatalogAuctionLine makeName={make.makeName} />
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <TopStatBadges brand={make.topBrand} model={null} color={null} region={null} kind={null} />
+          <CatalogMakeViewChips make={make.make} topModelSlug={make.models[0]?.model} />
           <NewCarsLink brand={make.topBrand} />
           {brandSiteUrl && <BrandSiteChip url={brandSiteUrl} />}
         </div>
