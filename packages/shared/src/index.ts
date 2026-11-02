@@ -930,6 +930,8 @@ export {
   mySharesResponseSchema,
   shareMaxActive,
   shareMetaResponseSchema,
+  shareRemovedSchema,
+  shareSizeSchema,
   shareTokenSchema
 } from './shares.js'
-export type { CreateShareResponse, MyShare, MySharesResponse, ShareMetaResponse } from './shares.js'
+export type { CreateShareResponse, MyShare, MySharesResponse, ShareMetaResponse, ShareRemoved } from './shares.js'

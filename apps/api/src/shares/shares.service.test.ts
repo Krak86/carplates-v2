@@ -66,7 +66,7 @@ function setup() {
     delete: vi.fn(async () => undefined)
   }
   const recognizer = { recognize: vi.fn(async () => ({ candidates })) }
-  const anonymizer = { anonymize: vi.fn(async () => blurred) }
+  const anonymizer = { anonymize: vi.fn(async () => ({ image: blurred, faces: 2 })) }
   const service = new SharesService(
     repo as unknown as SharesRepository,
     store,
@@ -85,6 +85,7 @@ const record = (over: Partial<ShareRecord> = {}): ShareRecord => ({
   bytes: 1000,
   width: 1600,
   height: 900,
+  removed: null,
   createdAt: new Date(),
   expiresAt: new Date(Date.now() + 3 * 86_400_000),
   revokedAt: null,
@@ -108,6 +109,11 @@ describe('SharesService.create', () => {
     expect(res.token).toMatch(/^[A-Za-z0-9_-]{22}$/)
     expect(res.plate).toBe('АА1234ВВ')
     expect(res.candidates).toEqual(candidates)
+    expect(res.removed).toEqual({
+      facesBlurred: 2,
+      originalSize: { width: 64, height: 64 },
+      storedSize: { width: 1600, height: 1067 }
+    })
     const days = (Date.parse(res.expiresAt) - Date.now()) / 86_400_000
     expect(days).toBeGreaterThan(SHARE_TTL_DAYS - 0.01)
     expect(days).toBeLessThanOrEqual(SHARE_TTL_DAYS)
@@ -306,7 +312,13 @@ describe('SharesService my shares', () => {
     const res = await s.service.listMine('u1')
     expect(res).toEqual({
       shares: [
-        { id: row.id, plate: row.plate, createdAt: row.createdAt.toISOString(), expiresAt: row.expiresAt.toISOString() }
+        {
+          id: row.id,
+          plate: row.plate,
+          createdAt: row.createdAt.toISOString(),
+          expiresAt: row.expiresAt.toISOString(),
+          removed: null
+        }
       ],
       max: SHARE_MAX_ACTIVE
     })

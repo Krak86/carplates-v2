@@ -2063,6 +2063,8 @@ export const sharedPhotos = app.table(
     /** Pixel size of the stored copy (null for rows from before migration 0089): sent as og:image:width/height. */
     width: integer('width'),
     height: integer('height'),
+    /** `{ facesBlurred, originalSize, storedSize }` (null before migration 0090): what the copy lost versus the upload. */
+    removed: jsonb('removed'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
     /** Admin takedown: `UPDATE app.shared_photos SET revoked_at = now() WHERE …`. */

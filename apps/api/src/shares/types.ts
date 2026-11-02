@@ -1,6 +1,6 @@
 import type { Readable } from 'node:stream'
 
-import type { PlateCandidate } from '@carplates/shared'
+import type { PlateCandidate, ShareRemoved } from '@carplates/shared'
 
 export type ShareFormat = 'jpeg' | 'webp'
 
@@ -25,6 +25,7 @@ export type ShareRecord = {
   /** Pixel size of the stored copy; null for shares made before it was recorded. */
   width: number | null
   height: number | null
+  removed: ShareRemoved | null
   createdAt: Date
   expiresAt: Date
   revokedAt: Date | null
@@ -32,7 +33,7 @@ export type ShareRecord = {
 
 export type NewShare = Pick<
   ShareRecord,
-  'id' | 'userId' | 'objectKey' | 'plate' | 'candidates' | 'bytes' | 'width' | 'height' | 'expiresAt'
+  'id' | 'userId' | 'objectKey' | 'plate' | 'candidates' | 'bytes' | 'width' | 'height' | 'removed' | 'expiresAt'
 > & {
   tokenHash: string
 }

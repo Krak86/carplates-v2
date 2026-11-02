@@ -9,6 +9,7 @@ import type { CreateShareResponse } from '@carplates/shared'
 
 import { shareErrorKey } from '@/components/share-photo.helpers'
 import { useCopyFeedback } from '@/components/use-copy-feedback'
+import ShareRemovedList from '@/components/ShareRemovedList'
 import Spinner from '@/components/ui/Spinner'
 import { createShare, deleteShare, shareImageUrl } from '@/lib/api'
 import { shrinkImage } from '@/lib/image'
@@ -164,12 +165,18 @@ export default function SharePhotoDialog({ file, onClose }: Props): ReactNode {
                     />
                   </>
                 ) : (
-                  <ul className="list-disc space-y-1 pl-5 text-[var(--color-muted)]">
-                    <li className="font-medium text-[var(--color-fg)]">{t('photoShare.checkFaces')}</li>
-                    <li>{t('photoShare.publicNote')}</li>
-                    <li>{t('photoShare.expiresNote', { days: SHARE_TTL_DAYS })}</li>
-                    <li>{t('photoShare.copyNote')}</li>
-                  </ul>
+                  <>
+                    <div className="rounded-lg border border-[var(--color-border)] p-3 text-xs text-[var(--color-muted)]">
+                      <p className="mb-1 font-medium text-[var(--color-fg)]">{t('photoShare.removed.title')}</p>
+                      <ShareRemovedList removed={share.removed} />
+                    </div>
+                    <ul className="list-disc space-y-1 pl-5 text-[var(--color-muted)]">
+                      <li className="font-medium text-[var(--color-fg)]">{t('photoShare.checkFaces')}</li>
+                      <li>{t('photoShare.publicNote')}</li>
+                      <li>{t('photoShare.expiresNote', { days: SHARE_TTL_DAYS })}</li>
+                      <li>{t('photoShare.copyNote')}</li>
+                    </ul>
+                  </>
                 )}
               </div>
             )}

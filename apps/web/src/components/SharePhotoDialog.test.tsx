@@ -9,6 +9,11 @@ import { ApiError } from '@/lib/api'
 import { savedShareToken } from '@/lib/share-links'
 
 const created = {
+  removed: {
+    facesBlurred: 2,
+    originalSize: { width: 3000, height: 2000 },
+    storedSize: { width: 1600, height: 1067 }
+  },
   id: '11111111-1111-4111-8111-111111111111',
   token: 'AAAAAAAAAAAAAAAAAAAAAA',
   plate: 'АА1234ВВ',
@@ -54,6 +59,8 @@ describe('SharePhotoDialog', () => {
 
     const img = await screen.findByRole('img')
     expect(img.getAttribute('src')).toContain(`/api/shares/${created.token}/image`)
+    expect(screen.getByText(/faces blurred: 2/i)).toBeTruthy()
+    expect(screen.getByText(/resized from 3000x2000 to 1600x1067 px/i)).toBeTruthy()
 
     fireEvent.click(screen.getByRole('button', { name: /create and copy/i }))
     await waitFor(() => expect(savedShareToken(created.id)).toBe(created.token))

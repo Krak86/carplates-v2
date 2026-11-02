@@ -25,7 +25,13 @@ import {
   shareMaxActive,
   shareTokenSchema
 } from '@carplates/shared'
-import type { CreateShareResponse, MySharesResponse, PlateCandidate, ShareMetaResponse } from '@carplates/shared'
+import type {
+  CreateShareResponse,
+  MySharesResponse,
+  PlateCandidate,
+  ShareMetaResponse,
+  ShareRemoved
+} from '@carplates/shared'
 
 import { loadEnv, sharesEnabled } from '../env.js'
 import { LocalRecognizeService } from '../recognize/local-recognize.service.js'
@@ -48,6 +54,9 @@ import type { ShareMeta, ShareObjectStore, ShareRecord } from './types.js'
 const DAY_MS = 24 * 60 * 60 * 1000
 /** The owner's thumbnails may be reused briefly (a deleted share must disappear soon). */
 const OWN_IMAGE_MAX_AGE_S = 300
+
+const toSize = (s: { width: number | null; height: number | null }): ShareRemoved['originalSize'] =>
+  s.width && s.height ? { width: s.width, height: s.height } : null
 
 export type ShareImage = { stream: Readable; length: number | null; maxAgeS: number }
 
@@ -84,11 +93,17 @@ export class SharesService {
     const plate = normalizePlate(candidates[0]?.plate ?? '')
     if (!plate) throw new UnprocessableEntityException(SHARE_NO_PLATE)
 
-    const blurred = await this.anonymizer.anonymize(upload.buffer, `image/${format}`)
+    const original = await imageSize(upload.buffer)
+    const { image: blurred, faces } = await this.anonymizer.anonymize(upload.buffer, `image/${format}`)
     const stored = await downscaleForShare(blurred)
     if (!stored) throw new UnprocessableEntityException('Photo is too detailed to share')
 
     const size = await imageSize(stored)
+    const removed: ShareRemoved = {
+      facesBlurred: faces,
+      originalSize: toSize(original),
+      storedSize: toSize(size)
+    }
     const token = newShareToken()
     const id = randomUUID()
     const objectKey = `shares/${id}.jpg`
@@ -107,6 +122,7 @@ export class SharesService {
           bytes: stored.byteLength,
           width: size.width,
           height: size.height,
+          removed,
           expiresAt
         },
         max
@@ -116,7 +132,7 @@ export class SharesService {
       if (!inserted) await this.deleteObject(objectKey)
     }
     if (!inserted) throw new ConflictException(SHARE_LIMIT_REACHED)
-    return { id, token, plate, candidates, expiresAt: expiresAt.toISOString() }
+    return { id, token, plate, candidates, expiresAt: expiresAt.toISOString(), removed }
   }
 
   async listMine(userId: string, role?: string): Promise<MySharesResponse> {
@@ -126,7 +142,8 @@ export class SharesService {
         id: r.id,
         plate: r.plate,
         createdAt: r.createdAt.toISOString(),
-        expiresAt: r.expiresAt.toISOString()
+        expiresAt: r.expiresAt.toISOString(),
+        removed: r.removed
       })),
       max: shareMaxActive(role)
     }

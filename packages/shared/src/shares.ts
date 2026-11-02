@@ -29,6 +29,21 @@ export const SHARE_EXPIRED = 'SHARE_EXPIRED' // 410: expired, deleted or never e
 /** 128 random bits as base64url. */
 export const shareTokenSchema = z.string().regex(/^[A-Za-z0-9_-]{22}$/)
 
+/** Pixel size of an image. */
+export const shareSizeSchema = z.object({ width: z.number().int(), height: z.number().int() })
+
+/**
+ * What the shared copy lost versus the uploaded photo, so the user sees it before sharing. Always also true (not stored):
+ * EXIF / GPS / camera / time metadata and the file name are gone, the copy is re-encoded.
+ */
+export const shareRemovedSchema = z.object({
+  facesBlurred: z.number().int().nonnegative(),
+  /** Size of the upload and of the stored copy; null when it could not be read. */
+  originalSize: shareSizeSchema.nullable(),
+  storedSize: shareSizeSchema.nullable()
+})
+export type ShareRemoved = z.infer<typeof shareRemovedSchema>
+
 /** GET /api/shares/:token - what the viewer needs to fill the photo state without re-recognizing. */
 export const shareMetaResponseSchema = z.object({
   plate: z.string(),
@@ -41,7 +56,8 @@ export type ShareMetaResponse = z.infer<typeof shareMetaResponseSchema>
 /** POST /api/shares - the token is returned once, only its SHA-256 is stored. */
 export const createShareResponseSchema = shareMetaResponseSchema.extend({
   id: z.uuid(),
-  token: shareTokenSchema
+  token: shareTokenSchema,
+  removed: shareRemovedSchema.nullable().optional()
 })
 export type CreateShareResponse = z.infer<typeof createShareResponseSchema>
 
@@ -49,7 +65,8 @@ export const myShareSchema = z.object({
   id: z.uuid(),
   plate: z.string(),
   createdAt: z.string(),
-  expiresAt: z.string()
+  expiresAt: z.string(),
+  removed: shareRemovedSchema.nullable().optional()
 })
 export type MyShare = z.infer<typeof myShareSchema>
 

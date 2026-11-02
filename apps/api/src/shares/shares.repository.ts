@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common'
 import { sharedPhotos } from '@carplates/db'
-import type { PlateCandidate } from '@carplates/shared'
+import type { PlateCandidate, ShareRemoved } from '@carplates/shared'
 import { and, asc, count, desc, eq, inArray, isNull, lte, or, sql } from 'drizzle-orm'
 
 import { DbService } from '../db/db.service.js'
@@ -17,6 +17,7 @@ const toRecord = (row: Row): ShareRecord => ({
   bytes: row.bytes,
   width: row.width,
   height: row.height,
+  removed: row.removed as ShareRemoved | null,
   createdAt: row.createdAt,
   expiresAt: row.expiresAt,
   revokedAt: row.revokedAt

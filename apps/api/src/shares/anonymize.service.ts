@@ -6,12 +6,14 @@ import { alprLocalEnabled, loadEnv } from '../env.js'
 // Face blur takes ~0.3 s (0.8 s max) on the VPS; generous for a cold container, well under the proxy's 60 s.
 const TIMEOUT_MS = 20_000
 
-/** Client of the ALPR container's `POST /anonymize`: blurs faces and returns a re-encoded, EXIF-free JPEG at the input resolution. */
+export type AnonymizedImage = { image: Buffer; faces: number }
+
+/** Client of the ALPR container's `POST /anonymize`: blurs faces and returns a re-encoded, EXIF-free JPEG at the input resolution plus the face count (`X-Faces-Blurred`). */
 @Injectable()
 export class AnonymizeService {
   private readonly env = loadEnv()
 
-  async anonymize(image: Buffer, mimetype: string): Promise<Buffer> {
+  async anonymize(image: Buffer, mimetype: string): Promise<AnonymizedImage> {
     if (!alprLocalEnabled(this.env)) throw new ServiceUnavailableException(SHARING_UNAVAILABLE)
     const form = new FormData()
     form.append('image', new Blob([new Uint8Array(image)], { type: mimetype }), 'photo')
@@ -28,6 +30,7 @@ export class AnonymizeService {
     }
     if (res.status === 413) throw new PayloadTooLargeException('Image is too large')
     if (!res.ok) throw new BadGatewayException(`Face blur failed: status ${res.status}`)
-    return Buffer.from(await res.arrayBuffer())
+    const faces = Number.parseInt(res.headers.get('x-faces-blurred') ?? '', 10)
+    return { image: Buffer.from(await res.arrayBuffer()), faces: Number.isFinite(faces) && faces >= 0 ? faces : 0 }
   }
 }

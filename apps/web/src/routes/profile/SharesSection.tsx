@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
+import ShareRemovedList from '@/components/ShareRemovedList'
 import { useCopyFeedback } from '@/components/use-copy-feedback'
 import Card from '@/components/ui/Card'
 import Spinner from '@/components/ui/Spinner'
@@ -83,6 +84,10 @@ export default function SharesSection(): ReactNode {
                 <div className="text-xs text-[var(--color-muted)]">
                   {t('photoShare.mine.expires', { count: daysLeft(share.expiresAt) })}
                 </div>
+                <details className="mt-1 text-xs text-[var(--color-muted)]">
+                  <summary className="cursor-pointer">{t('photoShare.mine.removed')}</summary>
+                  <ShareRemovedList removed={share.removed} />
+                </details>
               </div>
               <div className="flex shrink-0 gap-2">
                 {token && <CopyLinkButton link={shareUrl(share.plate, token)} />}
