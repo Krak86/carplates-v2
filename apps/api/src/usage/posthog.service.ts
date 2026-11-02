@@ -78,7 +78,7 @@ export class PosthogService {
       return value
     } catch (err) {
       this.logger.warn(`PostHog query failed: ${String(err)}`)
-      return adminAnalyticsResponseSchema.parse({ configured: true, error: 'PostHog query failed', ...empty, links })
+      return adminAnalyticsResponseSchema.parse({ configured: true, error: `PostHog query failed (${err instanceof Error ? err.message : 'unknown'})`, ...empty, links })
     }
   }
 
