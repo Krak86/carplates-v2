@@ -213,7 +213,7 @@ default layer, saved streams (auto-saved when a stream is picked in the layers p
 **Admin Statistics** (`/admin?tab=stats`; `apps/api/src/usage/`, migration 0038): a global `UsageInterceptor` logs plate/VIN/photo
 lookups and sign-ins into `app.usage_events` (kind, UI language, found, has-cookie — **never** the plate/VIN, IP or user id);
 `GET /api/admin/stats` aggregates it, `GET /api/admin/analytics` proxies PostHog HogQL (10 min cache; needs
-`POSTHOG_PERSONAL_API_KEY` + `POSTHOG_PROJECT_ID`, optional `POSTHOG_API_HOST` (passed by `deploy-api.yml`; EU default, US project needs `https://us.posthog.com`), `SENTRY_ORG_SLUG` for the link). Add a new counted
+`POSTHOG_PERSONAL_API_KEY` + `POSTHOG_PROJECT_ID`, optional `POSTHOG_API_HOST` (passed by `deploy-api.yml`; code default is EU, production uses the US cloud: repo variable `https://us.posthog.com`, not the ingest host `us.i.posthog.com`), `SENTRY_ORG_SLUG` for the link). Add a new counted
 route in `ROUTE_KINDS` + `USAGE_KINDS` (`account.ts`) + the `admin.stats.kind.*` i18n keys.
 
 **Telegram login** (`auth/telegram-login.ts`, `POST /api/auth/telegram`, web `TelegramSignInButton` + `lib/telegram-login.ts`):
