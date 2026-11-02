@@ -51,9 +51,13 @@ describe('share links stored on this device', () => {
     expect(savedShareToken(ID_A)).toBe(TOKEN)
   })
 
-  it('builds /<plate>?p=<token> with an encoded plate', () => {
-    expect(shareUrl('АА1234ВВ', TOKEN, 'https://carsua.app')).toBe(
-      `https://carsua.app/${encodeURIComponent('АА1234ВВ')}?p=${TOKEN}`
+  it('builds /<plate>?p=<token> with the plate in Latin look-alikes', () => {
+    expect(shareUrl('АА1234ВВ', TOKEN, 'https://carsua.app')).toBe(`https://carsua.app/AA1234BB?p=${TOKEN}`)
+  })
+
+  it('keeps a plate that is not a Ukrainian plate as is, encoded', () => {
+    expect(shareUrl('ЩЩ', TOKEN, 'https://carsua.app')).toBe(
+      `https://carsua.app/${encodeURIComponent('ЩЩ')}?p=${TOKEN}`
     )
   })
 
