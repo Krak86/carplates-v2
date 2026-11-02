@@ -28,6 +28,13 @@ export default function UaAuctionPhotos({ docIds, label }: Props): ReactNode {
   const shown = showAll ? docIds : docIds.slice(0, PHOTO_PREVIEW_COUNT)
   const hiddenCount = docIds.length - shown.length
   const fail = (docId: string): void => setFailed(prev => new Set(prev).add(docId))
+  // The dialog walks all photos (not just the shown row), skipping ones that failed to load.
+  const zoomable = docIds.filter(id => !failed.has(id))
+  const zoomedIndex = zoomed ? zoomable.indexOf(zoomed) : -1
+  const step = (delta: number): void => {
+    const next = zoomable[(Math.max(zoomedIndex, 0) + delta + zoomable.length) % zoomable.length]
+    if (next) setZoomed(next)
+  }
 
   return (
     <div className="mt-2">
@@ -82,6 +89,9 @@ export default function UaAuctionPhotos({ docIds, label }: Props): ReactNode {
           candidates={[]}
           active={null}
           onClose={() => setZoomed(null)}
+          onPrev={zoomable.length > 1 ? () => step(-1) : undefined}
+          onNext={zoomable.length > 1 ? () => step(1) : undefined}
+          position={{ n: zoomedIndex + 1, total: zoomable.length }}
         />
       )}
     </div>

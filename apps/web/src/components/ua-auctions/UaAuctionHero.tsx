@@ -149,7 +149,17 @@ export default function UaAuctionHero({ docIds, label, modelPhoto = null }: Prop
         </ul>
       )}
 
-      {zoomed && <PhotoZoomDialog url={slide.src} candidates={[]} active={null} onClose={() => setZoomed(false)} />}
+      {zoomed && (
+        <PhotoZoomDialog
+          url={slide.src}
+          candidates={[]}
+          active={null}
+          onClose={() => setZoomed(false)}
+          onPrev={slides.length > 1 ? () => go(-1) : undefined}
+          onNext={slides.length > 1 ? () => go(1) : undefined}
+          position={{ n: current + 1, total: slides.length }}
+        />
+      )}
     </div>
   )
 }

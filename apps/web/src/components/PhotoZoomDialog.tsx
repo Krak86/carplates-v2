@@ -17,7 +17,14 @@ type Props = {
   candidates: PlateCandidate[]
   active: string | null
   onClose: () => void
+  /** Gallery navigation: when both are set, arrows (buttons, keys, swipe at fit scale) step through the photos. */
+  onPrev?: () => void
+  onNext?: () => void
+  /** Shown as "n / total" in the corner. */
+  position?: { n: number; total: number }
 }
+
+const SWIPE_MIN_PX = 50
 
 type View = { scale: number; x: number; y: number }
 
@@ -36,13 +43,29 @@ function zoomAt(view: View, factor: number, px: number, py: number): View {
   return { scale, x: px - (px - view.x) * ratio, y: py - (py - view.y) * ratio }
 }
 
-export default function PhotoZoomDialog({ url, candidates, active, onClose }: Props): ReactNode {
+export default function PhotoZoomDialog({
+  url,
+  candidates,
+  active,
+  onClose,
+  onPrev,
+  onNext,
+  position
+}: Props): ReactNode {
   const { t } = useTranslation()
   const viewportRef = useRef<HTMLDivElement>(null)
   const pointersRef = useRef(new Map<number, { x: number; y: number }>())
   const pinchRef = useRef<number | null>(null)
+  const swipeRef = useRef<{ x: number; y: number } | null>(null)
   const [view, setView] = useState<View>(FIT)
+  const [shownUrl, setShownUrl] = useState(url)
   const [showBoxes, setShowBoxes] = useState(true)
+  // A different photo starts at fit scale.
+  if (shownUrl !== url) {
+    setShownUrl(url)
+    setView(FIT)
+  }
+  const canNavigate = !!onPrev && !!onNext
 
   // React attaches wheel listeners as passive, which can't preventDefault the
   // page scroll — so this one is wired by hand.
@@ -69,6 +92,7 @@ export default function PhotoZoomDialog({ url, candidates, active, onClose }: Pr
   const handlePointerDown = (e: PointerEvent<HTMLDivElement>): void => {
     pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY })
     pinchRef.current = null
+    swipeRef.current = pointersRef.current.size === 1 ? { x: e.clientX, y: e.clientY } : null
     e.currentTarget.setPointerCapture(e.pointerId)
   }
 
@@ -106,8 +130,13 @@ export default function PhotoZoomDialog({ url, candidates, active, onClose }: Pr
   }
 
   const handlePointerUp = (e: PointerEvent<HTMLDivElement>): void => {
+    const start = swipeRef.current
+    swipeRef.current = null
     pointersRef.current.delete(e.pointerId)
     pinchRef.current = null
+    if (!start || !canNavigate || e.type === 'pointercancel' || view.scale > MIN_SCALE) return
+    const dx = e.clientX - start.x
+    if (Math.abs(dx) > SWIPE_MIN_PX && Math.abs(dx) > Math.abs(e.clientY - start.y)) (dx < 0 ? onNext : onPrev)?.()
   }
 
   const handleDoubleClick = (e: MouseEvent<HTMLDivElement>): void => {
@@ -137,10 +166,12 @@ export default function PhotoZoomDialog({ url, candidates, active, onClose }: Pr
         setShowBoxes(v => !v)
         break
       case 'ArrowLeft':
-        setView(v => (v.scale === MIN_SCALE ? v : { ...v, x: v.x + KEY_PAN_PX }))
+        if (canNavigate && view.scale === MIN_SCALE) onPrev?.()
+        else setView(v => (v.scale === MIN_SCALE ? v : { ...v, x: v.x + KEY_PAN_PX }))
         break
       case 'ArrowRight':
-        setView(v => (v.scale === MIN_SCALE ? v : { ...v, x: v.x - KEY_PAN_PX }))
+        if (canNavigate && view.scale === MIN_SCALE) onNext?.()
+        else setView(v => (v.scale === MIN_SCALE ? v : { ...v, x: v.x - KEY_PAN_PX }))
         break
       case 'ArrowUp':
         setView(v => (v.scale === MIN_SCALE ? v : { ...v, y: v.y + KEY_PAN_PX }))
@@ -219,6 +250,26 @@ export default function PhotoZoomDialog({ url, candidates, active, onClose }: Pr
           ✕
         </button>
       </div>
+
+      {canNavigate &&
+        ([-1, 1] as const).map(step => (
+          <button
+            key={step}
+            type="button"
+            onClick={step < 0 ? onPrev : onNext}
+            onPointerDown={e => e.stopPropagation()}
+            aria-label={t(step < 0 ? 'uaAuctions.hero.prev' : 'uaAuctions.hero.next')}
+            className={`${buttonClass} absolute top-1/2 -translate-y-1/2 ${step < 0 ? 'left-3' : 'right-3'}`}
+          >
+            {step < 0 ? '‹' : '›'}
+          </button>
+        ))}
+
+      {position && (
+        <p className="pointer-events-none absolute top-3 left-3 rounded-full bg-black/60 px-3 py-1 text-xs text-white">
+          {position.n} / {position.total}
+        </p>
+      )}
 
       <p className="pointer-events-none absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full bg-black/60 px-3 py-1 text-xs text-white">
         {t('photo.zoomHint')}
