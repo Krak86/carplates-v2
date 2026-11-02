@@ -22,6 +22,8 @@ type Props = {
   onNext?: () => void
   /** Shown as "n / total" in the corner. */
   position?: { n: number; total: number }
+  /** Opened over another modal (z-50): stack above it. */
+  raised?: boolean
 }
 
 const SWIPE_MIN_PX = 50
@@ -50,7 +52,8 @@ export default function PhotoZoomDialog({
   onClose,
   onPrev,
   onNext,
-  position
+  position,
+  raised
 }: Props): ReactNode {
   const { t } = useTranslation()
   const viewportRef = useRef<HTMLDivElement>(null)
@@ -191,7 +194,12 @@ export default function PhotoZoomDialog({
   // Portaled: view-transition-named ancestors (<main>, search field, card) are stacking contexts and
   // transformed ancestors are `fixed` containing blocks — inline, this sat under the header and stats panels.
   return createPortal(
-    <div className="fixed inset-0 z-40 bg-black/90" role="dialog" aria-modal aria-label={t('photo.zoomTitle')}>
+    <div
+      className={`fixed inset-0 bg-black/90 ${raised ? 'z-[60]' : 'z-40'}`}
+      role="dialog"
+      aria-modal
+      aria-label={t('photo.zoomTitle')}
+    >
       <div
         ref={viewportRef}
         tabIndex={-1}

@@ -4475,6 +4475,7 @@
   "photoShare.pickAgain": "The photo is no longer saved. Pick the photo again, then press Share.",
   "photoShare.error.generic": "Could not share the photo. Try again later.",
   "photoShare.error.limit": "You already have the maximum number of active shared photos ({{max}}). Delete an old one and try again.",
+  "photoShare.zoom": "Enlarge photo",
   "photoShare.openMine": "My shared photos",
   "photoShare.error.noPlate": "No plate was found in this photo, so it cannot be shared.",
   "photoShare.error.unavailable": "Sharing is temporarily unavailable. Try again later.",

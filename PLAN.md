@@ -816,7 +816,7 @@ Group 1 dimension callouts + garage-fit -> Group 3 (existing order). Owner says 
 - **Shared photos v2 (2026-11-02, in progress)** — steps, each shippable alone; everything new is lazy (inside `SharePhotoDialog` / `SharesSection` chunks, in PWA `globIgnores`), loaded only when the user opens Share:
   - ✅ **S1** admin cap 50 (`shareMaxActive(role)`), limit error names the max + links to `/profile#shares`, "My shared photos" link after the link is copied.
   - ✅ **S2** profile thumbnails in `SharesSection` from `GET /api/shares/:id/preview` (owner-only, `private, max-age<=300`, works on any device); click opens the lazy `PhotoZoomDialog` with prev/next.
-  - **S3** share dialog: zoom icon / click on the preview opens the full-size image (same modal).
+  - ✅ **S3** share dialog: the preview is a button with a zoom icon that opens the lazy `PhotoZoomDialog` (`raised`, z-60) over the dialog; plate boxes toggle with the 🏷 button.
   - **S4** link-preview robustness (item "sometimes the wiki image shows"): check prod for a Cloudflare cache rule ignoring `?p=` on HTML and for 429s from the 60/min image throttle on shared crawler IPs; add `og:image:width/height` + `og:image:secure_url` (store dimensions in `app.shared_photos`, migration) and raise the image throttle.
   - **S5** "what was removed" list: server returns `removed` (faces blurred N, plates drawn/kept, EXIF/GPS stripped, resized) from `anonymize` + the pipeline; shown in the dialog and stored (`removed jsonb`, migration) for My shared photos.
   - **S6** coloured plate boxes on the preview: draw the ALPR `candidates` boxes with the plate text (canvas overlay client-side from the existing boxes; optionally baked into a second stored image).

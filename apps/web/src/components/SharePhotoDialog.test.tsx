@@ -81,6 +81,18 @@ describe('SharePhotoDialog', () => {
     expect((await screen.findByText(/maximum number/i)).textContent).toMatch(/delete/i)
   })
 
+  it('opens the preview full size over the dialog without closing it or deleting the upload', async () => {
+    api.createShare.mockResolvedValue(created)
+    const { onClose } = renderDialog(new File(['x'], 'a.jpg'))
+    fireEvent.click(await screen.findByRole('button', { name: /enlarge photo/i }))
+    await screen.findByRole('dialog', { name: /photo viewer/i })
+    expect(screen.getAllByRole('dialog').length).toBe(2)
+    fireEvent.click(await screen.findByRole('button', { name: /close photo/i }))
+    await waitFor(() => expect(screen.getAllByRole('dialog').length).toBe(1))
+    expect(onClose).not.toHaveBeenCalled()
+    expect(api.deleteShare).not.toHaveBeenCalled()
+  })
+
   it('asks to pick the photo again when the parked one is gone', () => {
     renderDialog(null)
     expect(screen.getByText(/pick the photo again/i)).toBeTruthy()
