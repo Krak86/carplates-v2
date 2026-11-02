@@ -151,7 +151,7 @@ describe('SharePhotoDialog', () => {
       expect(strokes[0]?.mode).toBe('add')
       expect(strokes[0]?.points[0]).toEqual([0.5, 0.5])
       const img = await screen.findByAltText(/preview of the photo/i)
-      expect(img.getAttribute('src')).toContain('/image?v=1')
+      expect(img.getAttribute('src')).toContain('/image?v=2')
       expect(screen.getByText(/faces blurred: 3/i)).toBeTruthy()
     })
 
@@ -163,7 +163,7 @@ describe('SharePhotoDialog', () => {
       fireEvent.click(screen.getByRole('button', { name: /redo/i }))
       fireEvent.click(screen.getByRole('button', { name: /cancel editing/i }))
       expect(api.retouchShare).not.toHaveBeenCalled()
-      expect((await screen.findByAltText(/preview of the photo/i)).getAttribute('src')).not.toContain('?v=')
+      expect((await screen.findByAltText(/preview of the photo/i)).getAttribute('src')).toContain('/image?v=1')
     })
 
     it('says so when the unblurred upload is gone (409) and stays in the editor', async () => {

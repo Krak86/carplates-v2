@@ -15,7 +15,7 @@ if (BRUSH_STEPS.some(r => r < SHARE_BRUSH_MIN || r > SHARE_BRUSH_MAX))
 
 export type BlurMode = RetouchStroke['mode']
 
-/** Points closer than this (0-1 fractions) to the previous one add nothing to the polyline. */
+/** Points closer than a quarter of the brush radius (0-1 fractions, at least this) to the previous one add nothing: a dense polyline of wide round joins is slow to paint. */
 const MIN_STEP = 0.002
 const MAX_STROKE_POINTS = 2000
 
@@ -30,10 +30,10 @@ export function canAddStroke(strokes: RetouchStroke[]): boolean {
 }
 
 /** Appends a point unless it is too close to the last one or the stroke is full. */
-export function extendStroke(points: [number, number][], x: number, y: number): [number, number][] {
+export function extendStroke(points: [number, number][], x: number, y: number, radius = 0): [number, number][] {
   const last = points[points.length - 1]
   if (points.length >= MAX_STROKE_POINTS) return points
-  if (last && Math.hypot(last[0] - x, last[1] - y) < MIN_STEP) return points
+  if (last && Math.hypot(last[0] - x, last[1] - y) < Math.max(MIN_STEP, radius / 4)) return points
   return [...points, [x, y]]
 }
 

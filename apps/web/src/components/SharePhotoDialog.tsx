@@ -57,7 +57,8 @@ export default function SharePhotoDialog({ file, onClose }: Props): ReactNode {
   // Manual blur editor: the strokes saved so far, how many times the copy was re-rendered (cache-buster), what it removed now.
   const [editing, setEditing] = useState(false)
   const [strokes, setStrokes] = useState<RetouchStroke[]>([])
-  const [version, setVersion] = useState(0)
+  // Always >= 1: the dialog never loads the plain /image URL, so the browser cannot hold a pre-retouch copy of the one the link opens.
+  const [version, setVersion] = useState(1)
   const [removed, setRemoved] = useState<CreateShareResponse['removed']>(undefined)
 
   const refreshList = (): void => void queryClient.invalidateQueries({ queryKey: myPhotoSharesQuery().queryKey })

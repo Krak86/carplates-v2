@@ -4477,6 +4477,7 @@
   "photoShare.error.limit": "You already have the maximum number of active shared photos ({{max}}). Delete an old one and try again.",
   "photoShare.zoom": "Enlarge photo",
   "photoShare.edit.open": "Edit blur",
+  "photoShare.edit.zoom": "Zoom: {{level}}x (click to change)",
   "photoShare.edit.hint": "Paint over what should be blurred. \"Erase blur\" brings the original back under the brush, even over a blurred face. Save applies it on the server.",
   "photoShare.edit.privacy": "The original photo is kept privately only until you create the link or close this window, then it is deleted.",
   "photoShare.edit.canvas": "Painting area over the photo",

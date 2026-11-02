@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { PointerEvent, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { RetouchStroke } from '@carplates/shared'
@@ -19,6 +19,8 @@ type Props = {
   onCancel: () => void
 }
 
+const ZOOMS = [1, 2, 3] as const
+
 const TOOL_BUTTON =
   'rounded-lg border border-[var(--color-border)] px-3 py-1.5 text-xs hover:bg-[var(--color-bg)] disabled:opacity-40'
 
@@ -33,6 +35,9 @@ export default function PhotoBlurEditor({ src, initial, saving, error, onSave, o
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const draftRef = useRef<RetouchStroke | null>(null)
   const ringRef = useRef<{ x: number; y: number } | null>(null)
+  const frameRef = useRef(0)
+  // Zoom of the painting area (the photo is scaled inside a scrollable frame, so strokes stay precise on small details).
+  const [zoom, setZoom] = useState<(typeof ZOOMS)[number]>(1)
 
   const paint = (): void => {
     const canvas = canvasRef.current
@@ -41,6 +46,17 @@ export default function PhotoBlurEditor({ src, initial, saving, error, onSave, o
     const ring = ringRef.current
     paintStrokes(canvas, draft ? [...brush.strokes, draft] : brush.strokes, ring && { ...ring, radius: brush.radius })
   }
+
+  // Pointer events arrive faster than frames: paint once per frame.
+  const schedulePaint = (): void => {
+    if (frameRef.current) return
+    frameRef.current = requestAnimationFrame(() => {
+      frameRef.current = 0
+      paint()
+    })
+  }
+
+  useEffect(() => (): void => cancelAnimationFrame(frameRef.current), [])
 
   // The canvas is an external system: repaint when the strokes or brush change and when the photo is resized.
   useEffect(() => {
@@ -61,15 +77,15 @@ export default function PhotoBlurEditor({ src, initial, saving, error, onSave, o
     if (saving) return
     e.currentTarget.setPointerCapture(e.pointerId)
     draftRef.current = { mode: brush.mode, radius: brush.radius, points: [pointAt(e)] }
-    paint()
+    schedulePaint()
   }
 
   const onMove = (e: PointerEvent<HTMLCanvasElement>): void => {
     const [x, y] = pointAt(e)
     ringRef.current = { x, y }
     const draft = draftRef.current
-    if (draft) draftRef.current = { ...draft, points: extendStroke(draft.points, x, y) }
-    paint()
+    if (draft) draftRef.current = { ...draft, points: extendStroke(draft.points, x, y, draft.radius) }
+    schedulePaint()
   }
 
   const onUp = (): void => {
@@ -80,29 +96,48 @@ export default function PhotoBlurEditor({ src, initial, saving, error, onSave, o
 
   const onLeave = (): void => {
     ringRef.current = null
-    paint()
+    schedulePaint()
   }
 
   return (
     <div className="space-y-2" aria-busy={saving}>
-      <div className="flex justify-center rounded-lg bg-black/80 p-2">
-        <span className="relative inline-block">
-          <img src={src} alt="" className="block max-h-[50vh] max-w-full rounded-lg select-none" draggable={false} />
-          <canvas
-            ref={canvasRef}
-            role="img"
-            aria-label={t('photoShare.edit.canvas')}
-            onPointerDown={onDown}
-            onPointerMove={onMove}
-            onPointerUp={onUp}
-            onPointerCancel={onUp}
-            onPointerLeave={onLeave}
-            className={cn(
-              'absolute inset-0 h-full w-full touch-none rounded-lg',
-              saving ? 'cursor-wait' : 'cursor-none'
-            )}
-          />
-        </span>
+      <div className="relative">
+        <div className="flex max-h-[60vh] overflow-auto rounded-lg bg-black/80 p-2">
+          <span
+            className="relative m-auto inline-block"
+            style={zoom > 1 ? { width: `${zoom * 100}%`, flexShrink: 0 } : undefined}
+          >
+            <img
+              src={src}
+              alt=""
+              className={cn('block rounded-lg select-none', zoom === 1 ? 'max-h-[50vh] max-w-full' : 'h-auto w-full')}
+              draggable={false}
+            />
+            <canvas
+              ref={canvasRef}
+              role="img"
+              aria-label={t('photoShare.edit.canvas')}
+              onPointerDown={onDown}
+              onPointerMove={onMove}
+              onPointerUp={onUp}
+              onPointerCancel={onUp}
+              onPointerLeave={onLeave}
+              className={cn(
+                'absolute inset-0 h-full w-full touch-none rounded-lg',
+                saving ? 'cursor-wait' : 'cursor-none'
+              )}
+            />
+          </span>
+        </div>
+        <button
+          type="button"
+          onClick={() => setZoom(z => ZOOMS[(ZOOMS.indexOf(z) + 1) % ZOOMS.length] ?? 1)}
+          aria-label={t('photoShare.edit.zoom', { level: zoom })}
+          title={t('photoShare.edit.zoom', { level: zoom })}
+          className="absolute top-2 right-2 flex h-8 min-w-8 items-center justify-center rounded-full bg-black/60 px-2 text-base text-white hover:bg-black/80"
+        >
+          🔍{zoom > 1 && <span className="ml-1 text-xs">{zoom}x</span>}
+        </button>
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
