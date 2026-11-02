@@ -206,6 +206,13 @@ Run it against a **local** api started with `THROTTLE_DISABLED=true` (ignored in
 
 ## First-time setup with real data
 
-`pnpm install && pnpm db:up && pnpm db:migrate && pnpm ingest:full && pnpm ingest:euroncap:csv && pnpm ingest:jncap:csv && pnpm ingest:cncap:csv && pnpm ingest:kncap:csv && pnpm ingest:iihs:csv && pnpm dev`
-(hours, ~20 GB). Equivalent: `pnpm install && pnpm db:up && pnpm ingest:all && pnpm dev` — same end state, each ingest writes a
-disjoint table; only shrinks wall-clock once `scripts/.data/*.zip` is cached (a fresh clone is bottlenecked on the ~20 GB CKAN download).
+Recommended: `pnpm install && pnpm db:up && pnpm ingest:all && pnpm dev` (hours, ~20 GB; `ingest:all` runs `db:migrate` itself). It loads the
+registry plus **every** committed seed CSV (`ingest:ratings:csv`: ratings, fuel, reviews, videos, 3D/360, VehiclesDB, RDW, recalls, MOT,
+generations, brand origin, WMI, model plants, news/social, wanted history, DTP, recall translations) and rebuilds the derived rollups. Each ingest
+writes a disjoint table; the run only shrinks wall-clock once `scripts/.data/*.zip` is cached (a fresh clone is bottlenecked on the ~20 GB CKAN download).
+Minimal variant (registry + the five crash-test sources only):
+`pnpm install && pnpm db:up && pnpm db:migrate && pnpm ingest:full && pnpm ingest:euroncap:csv && pnpm ingest:jncap:csv && pnpm ingest:cncap:csv && pnpm ingest:kncap:csv && pnpm ingest:iihs:csv && pnpm dev`.
+
+Afterwards, once by hand and optional, the live feeds that have no seed (the VPS cron runs them daily/monthly, see SCHEDULE.md):
+`pnpm ingest:wanted`, `ingest:wanted-plates`, `ingest:auctions --all`, `ingest:prozorro`, `ingest:news`, `ingest:social`, `ingest:dtp:patrol`,
+`ingest:rdw-recalls`, `ingest:ca-recalls`. Env variables and API keys: README "Environment reference".
