@@ -54,7 +54,8 @@ function setup() {
     insertUnderCap: vi.fn(async (_share: NewShare, _max: number) => true),
     listActive: vi.fn(async () => [] as ShareRecord[]),
     findByTokenHash: vi.fn(async () => null as ShareRecord | null),
-    deleteOwned: vi.fn(async () => null as ShareRecord | null)
+    deleteOwned: vi.fn(async () => null as ShareRecord | null),
+    findActiveOwned: vi.fn(async () => null as ShareRecord | null)
   }
   const store: ShareObjectStore = {
     put: vi.fn(async () => undefined),
@@ -267,6 +268,15 @@ describe('SharesService reading a link', () => {
     s.repo.findByTokenHash.mockResolvedValue(record())
     vi.mocked(s.store.get).mockResolvedValue(null)
     await expect(s.service.image(newShareToken())).rejects.toBeInstanceOf(GoneException)
+  })
+
+  it('ownImage serves the owner their own photo (cache capped at 5 min) and 404s otherwise', async () => {
+    await expect(s.service.ownImage('u1', record().id)).rejects.toBeInstanceOf(NotFoundException)
+    s.repo.findActiveOwned.mockResolvedValue(record())
+    expect((await s.service.ownImage('u1', record().id)).maxAgeS).toBe(300)
+    expect(s.repo.findActiveOwned).toHaveBeenCalledWith('u1', record().id)
+    vi.mocked(s.store.get).mockResolvedValue(null)
+    await expect(s.service.ownImage('u1', record().id)).rejects.toBeInstanceOf(NotFoundException)
   })
 
   it('metaFor is null for a dead link and the plate + expiry for a live one', async () => {

@@ -61,6 +61,18 @@ export class SharesController {
     await this.shares.remove(user.id, id)
   }
 
+  /** The owner's photo by share id; `/image` below is the public, token-keyed one. */
+  @Get(':id/preview')
+  @UseGuards(SessionGuard, SharePrivacyHeadersGuard)
+  @UseInterceptors(ShareImageInterceptor)
+  async preview(
+    @CurrentUser() user: SessionUser,
+    @Param('id', zodParam(z.uuid())) id: string
+  ): Promise<ShareImageResult> {
+    const { stream, length, maxAgeS } = await this.shares.ownImage(user.id, id)
+    return new ShareImageResult(new StreamableFile(stream, { type: 'image/jpeg', ...(length && { length }) }), maxAgeS)
+  }
+
   @Get(':token')
   @UseGuards(SharePrivacyHeadersGuard, ThrottlerGuard)
   @Throttle(VIEW_THROTTLE)

@@ -45,6 +45,8 @@ import { SHARE_OBJECT_STORE } from './types.js'
 import type { ShareMeta, ShareObjectStore, ShareRecord } from './types.js'
 
 const DAY_MS = 24 * 60 * 60 * 1000
+/** The owner's thumbnails may be reused briefly (a deleted share must disappear soon). */
+const OWN_IMAGE_MAX_AGE_S = 300
 
 export type ShareImage = { stream: Readable; length: number | null; maxAgeS: number }
 
@@ -131,6 +133,15 @@ export class SharesService {
     const row = await this.repo.deleteOwned(userId, id)
     if (!row) throw new NotFoundException('Share not found')
     await this.deleteObject(row.objectKey)
+  }
+
+  /** The owner's own copy by share id (thumbnails in My shared photos; the token is not kept, so it cannot be used there). */
+  async ownImage(userId: string, id: string): Promise<ShareImage> {
+    const row = await this.repo.findActiveOwned(userId, id)
+    if (!row) throw new NotFoundException('Share not found')
+    const object = await this.store.get(row.objectKey)
+    if (!object) throw new NotFoundException('Share not found')
+    return { ...object, maxAgeS: Math.min(cacheSecondsLeft(row.expiresAt), OWN_IMAGE_MAX_AGE_S) }
   }
 
   async describe(token: string): Promise<ShareMetaResponse> {

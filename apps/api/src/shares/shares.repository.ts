@@ -73,6 +73,15 @@ export class SharesRepository {
     return row ? toRecord(row) : null
   }
 
+  /** One of the user's own active shares, or `null` (not theirs, expired, revoked, gone). */
+  async findActiveOwned(userId: string, id: string): Promise<ShareRecord | null> {
+    const [row] = await this.dbService.db
+      .select()
+      .from(sharedPhotos)
+      .where(and(eq(sharedPhotos.id, id), eq(sharedPhotos.userId, userId), active))
+    return row ? toRecord(row) : null
+  }
+
   /** Deletes one of the user's own shares and returns it (for its object key), or `null` when it is not theirs / gone. */
   async deleteOwned(userId: string, id: string): Promise<ShareRecord | null> {
     const [row] = await this.dbService.db

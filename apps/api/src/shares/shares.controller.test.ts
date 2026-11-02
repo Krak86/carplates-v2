@@ -23,6 +23,7 @@ const shares = {
   remove: vi.fn(async (_user: string, id: string) => {
     if (id !== ID) throw new NotFoundException('Share not found')
   }),
+  ownImage: vi.fn(async () => ({ stream: Readable.from([Buffer.from('jpeg')]), length: 4, maxAgeS: 300 })),
   describe: vi.fn(async (token: string) => {
     if (token !== TOKEN) throw new GoneException('SHARE_EXPIRED')
     return { plate: 'АА1234ВВ', candidates: [], expiresAt: '2026-11-09T00:00:00.000Z' }
@@ -89,6 +90,15 @@ describe('SharesController over HTTP', () => {
     expect(res.headers['x-robots-tag']).toBe('noindex')
     expect(res.headers['referrer-policy']).toBe('no-referrer')
     expect(res.rawPayload.toString()).toBe('jpeg')
+  })
+
+  it('serves the owner preview by id, only with a session', async () => {
+    expect((await inject('GET', `/api/shares/${ID}/preview`)).statusCode).toBe(403)
+    const res = await inject('GET', `/api/shares/${ID}/preview`, 'u1')
+    expect(res.statusCode).toBe(200)
+    expect(res.headers['cache-control']).toBe('private, max-age=300')
+    expect(res.headers['x-robots-tag']).toBe('noindex')
+    expect((await inject('GET', '/api/shares/not-a-uuid/preview', 'u1')).statusCode).toBe(400)
   })
 
   it('answers an expired or unknown link with 410 and still sends the privacy headers', async () => {

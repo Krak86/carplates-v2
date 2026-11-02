@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { Suspense, lazy, useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -6,9 +6,12 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useCopyFeedback } from '@/components/use-copy-feedback'
 import Card from '@/components/ui/Card'
 import Spinner from '@/components/ui/Spinner'
-import { deleteShare, shareImageUrl } from '@/lib/api'
+import { deleteShare, ownShareImageUrl } from '@/lib/api'
 import { myPhotoSharesQuery } from '@/lib/queries'
 import { daysLeft, forgetShareToken, pruneShareTokens, savedShareToken, shareUrl } from '@/lib/share-links'
+
+// Loaded on the first click on a thumbnail, not with the profile page.
+const PhotoZoomDialog = lazy(() => import('@/components/PhotoZoomDialog'))
 
 function CopyLinkButton({ link }: { link: string }): ReactNode {
   const { t } = useTranslation()
@@ -26,14 +29,16 @@ function CopyLinkButton({ link }: { link: string }): ReactNode {
 
 /**
  * Photo links the user shared. The API keeps only a hash of each token, so "Copy link" exists for the shares created on
- * this device (see `lib/share-links.ts`); every share can be deleted, which removes the photo at once.
+ * this device (see `lib/share-links.ts`); every share can be deleted, which removes the photo at once. Thumbnails come
+ * from the owner route (by share id), so they show on every device.
  */
 export default function SharesSection(): ReactNode {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
   const shares = useQuery(myPhotoSharesQuery())
   const list = shares.data?.shares ?? []
-  const [openId, setOpenId] = useState<string | null>(null)
+  const [zoomIndex, setZoomIndex] = useState<number | null>(null)
+  const zoomed = zoomIndex === null ? undefined : list[zoomIndex]
 
   const remove = useMutation({
     mutationFn: deleteShare,
@@ -47,6 +52,8 @@ export default function SharesSection(): ReactNode {
     if (shares.data) pruneShareTokens(shares.data.shares)
   }, [shares.data])
 
+  const step = (delta: number): void => setZoomIndex(i => (i === null ? i : (i + delta + list.length) % list.length))
+
   return (
     <Card id="shares" className="mb-4 scroll-mt-20">
       <h2 className="text-lg font-semibold">{t('photoShare.mine.title')}</h2>
@@ -59,52 +66,53 @@ export default function SharesSection(): ReactNode {
       )}
 
       <ul className="divide-y divide-[var(--color-border)]">
-        {list.map(share => {
+        {list.map((share, index) => {
           const token = savedShareToken(share.id)
           return (
-            <li key={share.id} className="py-3">
-              <div className="flex items-center justify-between gap-3">
-                <div className="min-w-0 text-sm">
-                  {token ? (
-                    <button
-                      type="button"
-                      aria-expanded={openId === share.id}
-                      onClick={() => setOpenId(openId === share.id ? null : share.id)}
-                      className="max-w-full truncate font-medium underline decoration-dotted underline-offset-2"
-                    >
-                      {share.plate}
-                    </button>
-                  ) : (
-                    <div className="truncate font-medium">{share.plate}</div>
-                  )}
-                  <div className="text-xs text-[var(--color-muted)]">
-                    {t('photoShare.mine.expires', { count: daysLeft(share.expiresAt) })}
-                  </div>
-                </div>
-                <div className="flex shrink-0 gap-2">
-                  {token && <CopyLinkButton link={shareUrl(share.plate, token)} />}
-                  <button
-                    type="button"
-                    disabled={remove.isPending}
-                    onClick={() => remove.mutate(share.id)}
-                    className="rounded-lg border border-[var(--color-border)] px-3 py-1.5 text-sm text-red-600 hover:bg-[var(--color-bg)] disabled:opacity-50"
-                  >
-                    {t('photoShare.mine.delete')}
-                  </button>
+            <li key={share.id} className="flex items-center gap-3 py-3">
+              <button
+                type="button"
+                onClick={() => setZoomIndex(index)}
+                aria-label={t('photoShare.mine.preview', { plate: share.plate })}
+                className="h-14 w-20 shrink-0 overflow-hidden rounded-lg border border-[var(--color-border)] bg-black/70"
+              >
+                <img src={ownShareImageUrl(share.id)} alt="" loading="lazy" className="h-full w-full object-cover" />
+              </button>
+              <div className="min-w-0 flex-1 text-sm">
+                <div className="truncate font-medium">{share.plate}</div>
+                <div className="text-xs text-[var(--color-muted)]">
+                  {t('photoShare.mine.expires', { count: daysLeft(share.expiresAt) })}
                 </div>
               </div>
-              {token && openId === share.id && (
-                <img
-                  src={shareImageUrl(token)}
-                  alt={t('photoShare.mine.preview', { plate: share.plate })}
-                  className="mt-3 max-h-80 w-auto max-w-full rounded-lg"
-                />
-              )}
+              <div className="flex shrink-0 gap-2">
+                {token && <CopyLinkButton link={shareUrl(share.plate, token)} />}
+                <button
+                  type="button"
+                  disabled={remove.isPending}
+                  onClick={() => remove.mutate(share.id)}
+                  className="rounded-lg border border-[var(--color-border)] px-3 py-1.5 text-sm text-red-600 hover:bg-[var(--color-bg)] disabled:opacity-50"
+                >
+                  {t('photoShare.mine.delete')}
+                </button>
+              </div>
             </li>
           )
         })}
       </ul>
       {remove.isError && <p className="text-sm text-red-600">{t('auth.error')}</p>}
+
+      {zoomed && zoomIndex !== null && (
+        <Suspense fallback={null}>
+          <PhotoZoomDialog
+            url={ownShareImageUrl(zoomed.id)}
+            candidates={[]}
+            active={null}
+            onClose={() => setZoomIndex(null)}
+            {...(list.length > 1 && { onPrev: () => step(-1), onNext: () => step(1) })}
+            position={{ n: zoomIndex + 1, total: list.length }}
+          />
+        </Suspense>
+      )}
     </Card>
   )
 }

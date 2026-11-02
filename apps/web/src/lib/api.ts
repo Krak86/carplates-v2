@@ -756,6 +756,11 @@ export function shareImageUrl(token: string): string {
   return `${BASE}/api/shares/${encodeURIComponent(token)}/image`
 }
 
+/** The signed-in owner's copy by share id (works on any device, unlike the token URL). */
+export function ownShareImageUrl(id: string): string {
+  return `${BASE}/api/shares/${encodeURIComponent(id)}/preview`
+}
+
 export async function getModels3d(brand: string, model: string): Promise<Models3dResponse> {
   const params = new URLSearchParams({ brand, model })
   return models3dResponseSchema.parse(await getJson(`/api/models3d?${params.toString()}`))
