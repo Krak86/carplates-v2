@@ -55,6 +55,7 @@ describe('LocalRecognizeService', () => {
     const result = await new LocalRecognizeService(passThroughRank).recognize(image)
 
     expect(result.candidates.map(c => c.plate)).toEqual(['ВС4447АТ'])
+    expect(result.source).toBe('document')
     expect(fetchMock.mock.calls[1]?.[0]).toBe('http://localhost:8088/recognize/vin')
   })
 

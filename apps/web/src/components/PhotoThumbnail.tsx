@@ -5,6 +5,7 @@ import type { PlateCandidate } from '@carplates/shared'
 
 import PhotoPlateBoxes from '@/components/PhotoPlateBoxes'
 import PhotoZoomDialog from '@/components/PhotoZoomDialog'
+import SharePhotoButton from '@/components/SharePhotoButton'
 import Spinner from '@/components/ui/Spinner'
 
 type Props = {
@@ -13,12 +14,21 @@ type Props = {
   active: string | null
   /** True while the recognition request is in flight; a skip button appears if it drags on. */
   pending?: boolean
+  /** The picked file when this photo may be shared (plate photo, not a certificate); null hides the Share button. */
+  shareFile?: File | null
   onClose: () => void
 }
 
 const SKIP_AFTER_MS = 8000
 
-export default function PhotoThumbnail({ url, candidates, active, pending = false, onClose }: Props): ReactNode {
+export default function PhotoThumbnail({
+  url,
+  candidates,
+  active,
+  pending = false,
+  shareFile = null,
+  onClose
+}: Props): ReactNode {
   const { t } = useTranslation()
   const [zoomed, setZoomed] = useState(false)
   const [slow, setSlow] = useState(false)
@@ -66,6 +76,8 @@ export default function PhotoThumbnail({ url, candidates, active, pending = fals
           {t('photo.skip')}
         </button>
       )}
+
+      {!pending && shareFile && <SharePhotoButton file={shareFile} />}
 
       {pending && (
         <p role="status" className="mt-2 flex items-center justify-center gap-2 text-center text-sm text-muted">

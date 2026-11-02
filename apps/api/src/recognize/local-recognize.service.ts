@@ -30,7 +30,10 @@ export class LocalRecognizeService {
   constructor(@Inject(RegistryRankService) private readonly registryRank: RegistryRankService) {}
 
   /** `documentFallback: false` = a plate in the photo only (shared photos must not accept a registration certificate). */
-  async recognize(image: UploadedImage, options: { documentFallback?: boolean } = {}): Promise<PlateRecognizeResponse> {
+  async recognize(
+    image: UploadedImage,
+    options: { documentFallback?: boolean } = {}
+  ): Promise<PlateRecognizeResponse & { source?: 'document' }> {
     if (!alprLocalEnabled(this.env)) {
       throw new ServiceUnavailableException('Local plate recognition is not configured')
     }
@@ -58,11 +61,17 @@ export class LocalRecognizeService {
     }
 
     let candidates = mapPlateReaderResults(payload.results ?? [])
+    let fromDocument = false
     if (candidates.length === 0 && options.documentFallback !== false) {
       candidates = mapPlateReaderResults(await this.readDocumentPlates(form))
+      fromDocument = candidates.length > 0
     }
     if (candidates.length === 0) throw new NotFoundException('No plate found in the image')
-    return { candidates: await this.registryRank.rank(candidates) }
+    // `source` is outside the shared schema (editing it would discard offline data): the web reads it to hide Share.
+    return {
+      candidates: await this.registryRank.rank(candidates),
+      ...(fromDocument && { source: 'document' as const })
+    }
   }
 
   /**

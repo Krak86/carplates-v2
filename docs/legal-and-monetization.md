@@ -46,7 +46,7 @@ launching ads or paid features. The project-specific findings are the useful par
   written consent (contact `verified_cars@auto.ria.com`). Same rule for any other RIA endpoint.
 - Fine to monetize with attribution: Wikipedia/Commons (CC BY-SA, share-alike), NHTSA (public domain), RDW (CC0), Open EV Data (MIT).
 - Images (wiki-images, photos): per-image licence check first.
-- **User-shared photos (planned, PLAN.md "Shareable photo-search links"):** we would host third-party content, so before building: Terms say the uploader owns/may share the
+- **User-shared photos (planned, docs/plan-done.md "Shareable photo-search links"):** we would host third-party content, so before building: Terms say the uploader owns/may share the
   photo and grants a limited licence to show it at the link until it expires; Privacy lists the photo as personal data (faces blurred automatically on a best-effort basis, stored 7 days, deleted on
   request or with the account, EXIF/GPS never stored, faces/plates in the pixels are the uploader's responsibility); a takedown route (Report link + admin revoke).
   Sign-in only, a plate must be detected, throttled. Keep the share endpoints `noindex`.

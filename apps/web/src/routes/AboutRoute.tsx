@@ -302,6 +302,7 @@ const FEATURES = [
   'vin',
   'origin',
   'recognition',
+  'photoShare',
   'share',
   'advanced',
   'specs',

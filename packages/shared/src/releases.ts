@@ -20,6 +20,12 @@ export const RELEASES: readonly ReleaseDay[] = [
     items: [
       item(
         'new',
+        'Поділитися фото пошуку за приватним посиланням: обличчя розмиваються автоматично, посилання діє 7 днів, фото можна видалити в профілі («Мої фото з посиланнями»)',
+        'Поделиться фото поиска по приватной ссылке: лица размываются автоматически, ссылка действует 7 дней, фото можно удалить в профиле («Мои фото со ссылками»)',
+        'Share a photo search by private link: faces are blurred automatically, the link works for 7 days, and you can delete the photo in your profile (My shared photos)'
+      ),
+      item(
+        'new',
         'Сторінка марки /cars/{марка} отримала швидкі посилання (нові авто, сайт бренду, топ-10) і розділи з оглядами, відео, соцмережами та авто в наявності',
         'Страница марки /cars/{марка} получила быстрые ссылки (новые авто, сайт бренда, топ-10) и разделы с обзорами, видео, соцсетями и авто в наличии',
         'The make page /cars/{make} has quick links (new cars, brand site, top 10) and sections with reviews, videos, social and cars in stock'

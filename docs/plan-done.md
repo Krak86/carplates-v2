@@ -4409,3 +4409,79 @@ Small items shipped between the Prozorro.Sale and customs work; conventions are 
 - **Catalog make page:** chips and extra sections; `?section=shares` scrolls to the share price.
 - **Logo quiz:** Opel, Jeep, Forte, DAF wordmarks blurred; fullscreen is exited on leaving a game.
 - **Docs and About:** release items, About `share` / `catalog` / `otherSources` texts, CLAUDE.md trimmed.
+
+## Shareable photo-search links (2026-11-02) ✅
+
+Was PLAN.md "Shareable photo-search links"; design as decided, then the outcome per slice.
+
+Share button on the photo card; opening `/<plate>?p=<token>` fills the same `photo` state in `use-plate-recognition.ts` with no re-recognition on the viewer's side.
+The photo is a private, time-limited capability link, never a public image host.
+
+- **Privacy: the uploaded file is already pure pixels.** `shrinkImage` re-encodes through a canvas, which drops EXIF/GPS/device/ISO/maker notes/ICC
+  (only `readPhotoMeta` reads the ORIGINAL file, on-device). Share the shrunk file, **never the original, never `meta`** (no GPS, no capture date).
+  Defence in depth: the API rejects anything that is not JPEG/WebP or still has an APP1/APP13/COM segment (cheap marker walk, no new dependency).
+  Pixels can still show faces, other plates, house numbers, so the share dialog says "everything visible in the photo is public to anyone with the link".
+  **Not shareable:** photos recognized via the registration-certificate fallback (`readDocumentPlates`; name/address on the document): hide the button.
+- **Faces are blurred on the server (decided 2026-11-01).** `services/alpr` already ships OpenCV (`cv2`), whose `FaceDetectorYN` runs the small MIT-licensed YuNet ONNX
+  model (~230 KB, CPU, tens of ms). New `/anonymize` endpoint: detect faces on the full-resolution upload, blur them (strong Gaussian/pixelate, boxes padded ~30%), return the JPEG.
+  Server-side so a client cannot skip it. Recall is not 100% (profiles, tiny/far faces, masks, occlusion), so: the dialog shows the **blurred preview before confirming**
+  and says "faces are blurred automatically, check the preview"; later option to tap a plate box in the preview to blur other plates. Eval on a few own photos with people before shipping (as for `services/alpr/eval`).
+- **Retention is fixed, not editable (decided 2026-11-01): 7 days** (one constant, `SHARE_TTL_DAYS`; 30 is the alternative but 7 means less exposure of other people's photos and ~4x less storage).
+  No extend, no choice. Per-user cap **3 active shares** (constant, 5 is the alternative); at the cap the dialog asks to delete an old one first.
+  A "My shares" list in the account (thumbnail, plate, expires in N days, copy link, **Delete**): Delete removes the row and the storage object immediately; expiry does the same via a daily API job.
+  Expired/deleted → "this link has expired". Account deletion deletes its shares. The API enforces the exact `expires_at`; the bucket lifecycle rule (delete after 8 days) is only the backstop (R2 lifecycle runs daily).
+  Say it in the dialog: a messenger/crawler that already fetched the `og:image` may keep its own copy after expiry.
+- **Link = capability URL:** token 128-bit random (base64url), only its SHA-256 stored (like `carsua_sid`); `X-Robots-Tag: noindex` and `Referrer-Policy: no-referrer`
+  on the share endpoints, never in the sitemap. Image via `GET /api/shares/:token/image` (API checks token + expiry, streams from storage, `Cache-Control` no longer
+  than the time left); also the `og:image` through the existing meta-injection. `/api/shares` stays out of the offline cache and out of `PUBLIC_API_PATH_PREFIXES`.
+  **Not presigned storage URLs:** R2 presigned GETs work only on the `r2.cloudflarestorage.com` S3 host (not a custom domain), bypass our expiry/revoke check and make `og:image` unstable.
+- **Storage: a second private Cloudflare R2 bucket (`carsua-shares`)**, free within limits and already our provider for backups: 10 GB-month storage, 1M writes + 10M reads
+  per month, **no egress fees**. Free third-party hosts (the Gemini list: ImgBB, Postimages, MyIMGs, MEGA) were checked and rejected: all are public-URL hosts (anyone with the URL,
+  nothing private), we would have no exact expiry/delete control (ImgBB can expire an upload, the others cannot, MyIMGs is permanent by design, MEGA is a file cloud with no stable hotlink for `og:image`),
+  their terms/uptime/limits can change, the user's photo goes to an extra third-party processor (Privacy page + GDPR/Ukrainian law), and bans on "bulk automated uploads" are common. R2 keeps it
+  on one provider we already trust, with private objects behind our API. Also rejected: Postgres `bytea` (`app.*` is in the nightly `pg_dump` to R2, blobs bloat every backup).
+  Rows in the **`app` schema** (user data, backed up): `app.shared_photos` (`id`, `user_id`, `token_hash`, `object_key`, `plate`, `candidates jsonb` as 0-1 fractions, `bytes`, `created_at`, `expires_at`).
+  Own R2 token (this bucket only); new env vars → `env.ts` + `deploy-api.yml` + deploy.md.
+- **Image size: detect big, store small.** The upload is the existing `shrinkImage` file (up to ~2.5 MB, max side 4608 px) so ALPR and the face detector see full resolution.
+  The stored copy is made after that: blur, then downscale to max side **1600 px**, JPEG q~80 (~250-450 KB; plate boxes are kept as fractions so they still line up), hard cap 600 KB.
+  Nothing is ever re-recognized from the stored copy. Budget: 10 GB / 0.45 MB ≈ 22,000 images; 3 per user ⇒ ~7,000 users with all slots full, realistically far more.
+  **Global free-tier guard:** `POST /api/shares` refuses with "sharing is temporarily unavailable" when the sum of `bytes` of active rows passes ~8 GB (`SHARE_STORAGE_CAP_BYTES`), so we never leave the free tier
+  (beyond it R2 is $0.015/GB-month, i.e. pennies, but the guard keeps it at zero).
+- **Trust and abuse:** the client never sends the recognition result. `POST /api/shares` **re-runs the ALPR on the uploaded bytes** (~0.6 s) and stores the server's
+  own candidates/boxes, so nobody can attach a plate to an unrelated photo, and a photo with **no plate found is rejected** (not usable as a general image host).
+  Also `SessionGuard` (accountable uploader), `@Throttle` ~10/h/user + per IP, size cap, a "Report" link on the shared view (contact flow), admin takedown by SQL
+  (`UPDATE app.shared_photos SET revoked_at = now()`); never log the image or the plate tied to the user.
+- **Signed-in only, photo picked before signing in:** the Share button shows for everyone; an anonymous click opens the login popover with "sign in to share this photo".
+  The shrunk photo is **parked in IndexedDB** (one `pending-share` record, JPEG blob ≤ ~2.5 MB, 1 h TTL, deleted on use / sign-out / expiry; pattern of `lib/idb.ts`),
+  because the Google button signs in without a reload (state would survive) but the email magic link or Telegram widget can reload or open another tab.
+  Once the session becomes authenticated the page reads the record and reopens the share dialog with the photo; if it is gone the dialog says "pick the photo again".
+  Viewing a share stays public, only creating is gated.
+- **Open decisions:** 7 vs 30 days and 3 vs 5 shares (both single constants); whether the preview lets the user blur other plates (later);
+  **"Copy link" in My shares (decide before slice 3):** keep the random token and have the web store the link it got at creation (localStorage), or derive the token as `HMAC(AUTH_SECRET, id)` so the owner's link is recomputable (see the slice 2 "Gap" note).
+- **Resume / build order (~3-5 h, four committable slices):**
+  1. ✅ **Done 2026-11-02 (uncommitted until reviewed)** `services/alpr`: `/anonymize` (YuNet face blur) + tests + a face eval on own photos (~1 h). **First verify** the OpenCV build pulled in by `fast-alpr` has `cv2.FaceDetectorYN`
+     (needs OpenCV >= 4.5.4); if not, run the same ONNX model through `onnxruntime` (already in the image). Model file (~230 KB): commit under `services/alpr/` or fetch in the Dockerfile.
+     **Outcome:** OpenCV 5.0.0 has `FaceDetectorYN`; model committed in `services/alpr/models/`. Contract for slice 2: `POST /anonymize` (multipart `image`, `X-Alpr-Key`)
+     returns `image/jpeg` at the **full input resolution** (no downscale, no EXIF) + `X-Faces-Blurred: N`; 400 undecodable, 413 > 6 MB, 502 failure; ~0.3 s median, ~0.8 s max.
+     The API still has to downscale to 1600 px / q~80 (sharp), call `/recognize` on the original bytes, and wire a client method next to `local-recognize.service.ts`
+     (same 10 s timeout idea). Hand-counted recall on own photos ~94% on the beach shot, misses = profile / looking down / tiny faces; false boxes on logos/bumpers are possible.
+     Needs an ALPR image redeploy before slice 2 can run in prod (manual, user).
+  2. ✅ **Done 2026-11-02 (uncommitted until reviewed)** API + DB: migration `app.shared_photos`, R2 client + env vars, `POST/GET/DELETE /api/shares` (re-run ALPR, blur, downscale to 1600 px, caps, throttle, global 8 GB guard),
+     daily expiry job, `og:image` + meta injection, tests (~1.5-2 h).
+     **Outcome:** `apps/api/src/shares/` (conventions: features-reference.md "Shared photo links"), migration 0088, contract `packages/shared/src/shares.ts`. Manual steps (bucket, lifecycle rule, token, secrets, ALPR redeploy): docs/deploy.md "Shared photo links".
+     Gap for slice 3: the token is returned **only by `POST /api/shares`** (only its hash is stored), so `GET /api/shares` cannot give "copy link" in My shares; the web must keep the link it got at creation (localStorage), or the token becomes `HMAC(AUTH_SECRET, id)` (recomputable by the owner; one function in `shares/helpers.ts`, decide before slice 3).
+  3. Web: Share button + dialog with blurred preview, anonymous login hand-off via IndexedDB `pending-share`, "My shares" list with Delete, viewer, i18n ua/ru/en, tests (~1.5-2 h).
+  4. Docs + release: `plan-done.md`, `features-reference.md`, `releases.ts`, About, Privacy/Terms text (~0.5 h).
+- **Infra: no new Docker service.** Blur lives in the existing `services/alpr` container (rebuild + redeploy that image), the API changes ship in the existing blue/green api container
+  (expiry job runs inside it), R2 is external. The user must create the `carsua-shares` bucket + token and add the secrets to `deploy-api.yml` / GitHub.
+
+### Slices 3-4: web, docs and release (2026-11-02)
+
+- **Web:** `SharePhotoButton` on the photo card (`PhotoThumbnail` `shareFile`) -> `SharePhotoDialog` (lazy). The dialog **uploads on open** (the API blurs and stores) and previews `/api/shares/:token/image`; "Create and copy link" confirms, any other close `DELETE`s the upload (there is no separate preview endpoint). Errors: `share-photo.helpers.ts` (`shareErrorKey`).
+- **Hidden for certificates:** the API marks a read taken from the registration-certificate fallback with `source: 'document'` (outside `schemas.ts`; `local-recognize.service.ts`), the web keeps it as `photo.fromDocument` and `isShareable` hides Share.
+- **Anonymous:** an inline sign-in panel on the card (Google / Telegram / email, the same lazy components as the login popover) and the shrunk photo parked in IndexedDB (`lib/pending-share.ts`, 1 h, deleted on use/sign-out) with a `localStorage` marker; after a reloading sign-in `SearchRoute` mounts `PendingShareResume`, which reopens the dialog or says "pick the photo again".
+- **Copy link decision (2026-11-02): option (a).** Only the token's SHA-256 is stored; the web keeps the token of shares made on this device in `localStorage` (`lib/share-links.ts`, cleared on sign-out, pruned against the server list). Shares made elsewhere show Delete only. An HMAC-derived token (b) was rejected: one secret would unlock every link and `GET /api/shares` would return live links.
+- **My shares:** `routes/profile/SharesSection.tsx` on `/profile` (`#shares`), key `['account','shares']`.
+- **Viewer:** `/<plate>?p=<token>` -> `useSharedPhoto` -> `openShared` in `use-plate-recognition.ts` (no recognition); 410 or a malformed token -> `SharedPhotoNotice` "link expired"; Report links to `/contact`.
+- **Docs/release:** `features-reference.md` "Shared photo links (web)", `releases.ts`, About `photoShare`, Privacy/Terms `sharedPhotos` sections (7 days, blur, account deletion, 14-day backup of the metadata rows). i18n keys are `photoShare.*` (`share.*` belongs to the /share page).
+- **Open:** blur other plates in the preview; a real preview endpoint so cancelling does not touch storage.

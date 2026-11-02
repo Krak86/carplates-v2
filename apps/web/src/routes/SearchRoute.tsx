@@ -1,4 +1,4 @@
-import { Suspense, lazy, useEffect } from 'react'
+import { Suspense, lazy, useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
@@ -14,6 +14,7 @@ import {
   type WeightBoard
 } from '@carplates/shared'
 
+import { useSession } from '@/components/auth/use-session'
 import LazySection from '@/components/LazySection'
 import LoadErrorBoundary from '@/components/LoadErrorBoundary'
 import FavoriteButton from '@/components/FavoriteButton'
@@ -26,7 +27,10 @@ import PlateCandidates from '@/components/PlateCandidates'
 import SearchField from '@/components/SearchField'
 import Presence from '@/components/ui/Presence'
 import Spinner from '@/components/ui/Spinner'
+import { isShareable } from '@/components/share-photo.helpers'
+import SharedPhotoNotice from '@/components/SharedPhotoNotice'
 import { usePlateRecognition } from '@/components/use-plate-recognition'
+import { useSharedPhoto } from '@/components/use-shared-photo'
 import { extractVehicleInfo } from '@/components/VinResult.helpers'
 import WikiHeroImage from '@/components/WikiHeroImage'
 import { MAX_HERO_LOT_PHOTOS } from '@/components/ua-auctions/helpers'
@@ -37,6 +41,7 @@ import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 import { ApiError } from '@/lib/api'
 import { cn } from '@/lib/cn'
 import { recordVisit } from '@/lib/history-db'
+import { hasPendingShare } from '@/lib/pending-share'
 import { MAX_DIMENSION } from '@/lib/image'
 import { toIntlLocale } from '@/lib/intl'
 import { auctionLotsQuery, historyQuery, plateQuery, statsTopQuery, vinQuery, wantedQuery } from '@/lib/queries'
@@ -63,12 +68,16 @@ const CommunityWidget = lazy(() => import('@/components/CommunityWidget'))
 const StockNewsWidget = lazy(() => import('@/components/StockNewsWidget'))
 const NewCarsWidget = lazy(() => import('@/components/NewCarsWidget'))
 const StockWidget = lazy(() => import('@/components/StockWidget'))
+const PendingShareResume = lazy(() => import('@/components/PendingShareResume'))
 
 export default function SearchRoute(): ReactNode {
   const { t, i18n } = useTranslation()
   const params = useParams()
   const [searchParams] = useSearchParams()
   const queryClient = useQueryClient()
+  const { user } = useSession()
+  // A sign-in that reloaded the page (email link, Telegram) leaves a parked photo: reopen the share dialog once.
+  const [resumeShare, setResumeShare] = useState(() => hasPendingShare())
   const online = useOnlineStatus()
   // Not precached by the service worker (live data), so offline they are never mounted.
   const sideWidgets = useSideWidgetsVisible() && online
@@ -182,12 +191,15 @@ export default function SearchRoute(): ReactNode {
   const {
     recognize,
     recognizeVin,
+    openShared,
     isPending: isRecognizing,
     errorKey: recognizeErrorKey,
     photo,
     dismissPhoto,
     selectCandidate
   } = usePlateRecognition({ currentValue: raw || null, linkedValue })
+
+  const sharedPhoto = useSharedPhoto(searchParams.get('p'), openShared)
 
   const community = useSideCommunity(
     sideWidgets && !recognizeErrorKey,
@@ -308,6 +320,11 @@ export default function SearchRoute(): ReactNode {
           </p>
         )}
 
+        {resumeShare && user && (
+          <Suspense fallback={null}>
+            <PendingShareResume onDone={() => setResumeShare(false)} />
+          </Suspense>
+        )}
         <Presence show={!!photo}>
           {photo && (
             <PhotoThumbnail
@@ -315,10 +332,13 @@ export default function SearchRoute(): ReactNode {
               candidates={photo.candidates}
               active={raw || null}
               pending={isRecognizing}
+              shareFile={isShareable(photo, photo.candidates.length) ? photo.file : null}
               onClose={dismissPhoto}
             />
           )}
         </Presence>
+        {sharedPhoto.expired && !photo && <SharedPhotoNotice />}
+        {photo?.shared && sharedPhoto.meta && <SharedPhotoNotice expiresAt={sharedPhoto.meta.expiresAt} />}
         <Presence show={!!photo?.meta && photo.mode === 'plate'}>
           {photo?.meta && <PhotoMetaInfo meta={photo.meta} />}
         </Presence>

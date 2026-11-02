@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { useNavigate } from 'react-router'
-import type { PhotoMeta, PlateCandidate } from '@carplates/shared'
+import type { PhotoMeta, PlateCandidate, ShareMetaResponse } from '@carplates/shared'
 
-import { ApiError, recognizePlate, recognizeVin } from '@/lib/api'
+import { ApiError, recognizePlate, recognizeVin, shareImageUrl } from '@/lib/api'
 import { shrinkImage } from '@/lib/image'
 import { readPhotoMeta } from '@/lib/photo-meta'
 import { readVinBarcode } from '@/lib/vin-barcode'
@@ -22,6 +22,12 @@ export type PhotoThumbnail = {
   mode: 'plate' | 'vin'
   /** True once the recognize request has succeeded or failed (vs. still in flight). */
   settled: boolean
+  /** The picked file, for "Share" (shrunk on use); null for a photo opened from a shared link. */
+  file: File | null
+  /** The plate was read from a registration certificate (name/address on it): the photo is never shareable. */
+  fromDocument: boolean
+  /** Opened from someone's shared link: shown as is, nothing was recognized here. */
+  shared: boolean
 }
 
 type UsePlateRecognitionParams = {
@@ -34,6 +40,8 @@ type UsePlateRecognitionParams = {
 type UsePlateRecognition = {
   recognize: (file: File) => void
   recognizeVin: (file: File) => void
+  /** Fills the photo state from a shared link's metadata (no recognition) and keeps the route on its plate. */
+  openShared: (token: string, meta: ShareMetaResponse) => void
   isPending: boolean
   errorKey: string | null
   photo: PhotoThumbnail | null
@@ -42,7 +50,7 @@ type UsePlateRecognition = {
 }
 
 type Job = { file: File; mode: 'plate' | 'vin' }
-type Reads = { values: string[]; candidates: PlateCandidate[] }
+type Reads = { values: string[]; candidates: PlateCandidate[]; fromDocument?: boolean }
 
 /** A VIN barcode is read on-device when the browser can; otherwise the photo goes to the server OCR. */
 async function readVin(file: File, signal: AbortSignal): Promise<Reads> {
@@ -63,7 +71,7 @@ async function readVin(file: File, signal: AbortSignal): Promise<Reads> {
 // dropped: it lost plates the detector misses (docs/plan-done.md "Photo search: on-device plate crops").
 async function readPlate(file: File, signal: AbortSignal): Promise<Reads> {
   const res = await recognizePlate(await shrinkImage(file), signal)
-  return { values: res.candidates.map(c => c.plate), candidates: res.candidates }
+  return { values: res.candidates.map(c => c.plate), candidates: res.candidates, fromDocument: res.fromDocument }
 }
 
 function errorKeyFor(error: Error | null, mode: Job['mode']): string | null {
@@ -107,6 +115,7 @@ export function usePlateRecognition({ currentValue, linkedValue }: UsePlateRecog
               ...prev,
               connected: new Set([...prev.connected, ...data.values]),
               candidates: data.candidates,
+              fromDocument: data.fromDocument === true,
               settled: true
             }
           : prev
@@ -123,7 +132,17 @@ export function usePlateRecognition({ currentValue, linkedValue }: UsePlateRecog
     void navigate('/', { viewTransition: true })
     setPhoto(prev => {
       if (prev) URL.revokeObjectURL(prev.url)
-      return { url: URL.createObjectURL(file), connected: new Set(), candidates: [], meta: null, mode, settled: false }
+      return {
+        url: URL.createObjectURL(file),
+        connected: new Set(),
+        candidates: [],
+        meta: null,
+        mode,
+        settled: false,
+        file,
+        fromDocument: false,
+        shared: false
+      }
     })
     if (mode === 'plate') void readPhotoMeta(file).then(meta => setPhoto(prev => (prev ? { ...prev, meta } : prev)))
     mutate({ file, mode })
@@ -131,6 +150,23 @@ export function usePlateRecognition({ currentValue, linkedValue }: UsePlateRecog
 
   const recognize = (file: File): void => start(file, 'plate')
   const recognizeVinPhoto = (file: File): void => start(file, 'vin')
+
+  const openShared = (token: string, meta: ShareMetaResponse): void => {
+    setPhoto(prev => {
+      if (prev) URL.revokeObjectURL(prev.url)
+      return {
+        url: shareImageUrl(token),
+        connected: new Set([meta.plate, ...meta.candidates.map(c => c.plate)]),
+        candidates: meta.candidates,
+        meta: null,
+        mode: 'plate',
+        settled: true,
+        file: null,
+        fromDocument: false,
+        shared: true
+      }
+    })
+  }
 
   const selectCandidate = (plate: string): void => {
     void navigate(`/${encodeURIComponent(plate)}`, { viewTransition: true })
@@ -178,6 +214,7 @@ export function usePlateRecognition({ currentValue, linkedValue }: UsePlateRecog
   return {
     recognize,
     recognizeVin: recognizeVinPhoto,
+    openShared,
     isPending,
     errorKey: errorKeyFor(error, variables?.mode ?? 'plate'),
     photo,
