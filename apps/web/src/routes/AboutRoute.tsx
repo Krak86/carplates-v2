@@ -258,7 +258,14 @@ const SOURCES: readonly Source[] = [
     label: 'Historia Pojazdu (gov.pl)',
     url: 'https://historiapojazdu.gov.pl',
     tile: 'bg-blue-700'
-  }
+  },
+  {
+    key: 'yunet',
+    label: 'OpenCV Zoo / YuNet',
+    url: 'https://github.com/opencv/opencv_zoo',
+    icon: '/icons/sources/github.webp'
+  },
+  { key: 'uqr', label: 'uqr', url: 'https://github.com/unjs/uqr', icon: '/icons/sources/github.webp' }
 ]
 
 function SourceAvatar({ source }: { source: Source }): ReactNode {
@@ -316,6 +323,7 @@ const FEATURES = [
   'uaAuctions',
   'reviews',
   'media',
+  'photoZoom',
   'verify',
   'guides',
   'stats',

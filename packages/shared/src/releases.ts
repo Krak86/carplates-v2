@@ -20,6 +20,30 @@ export const RELEASES: readonly ReleaseDay[] = [
     items: [
       item(
         'new',
+        'У перегляді фото є кнопки «назад» і «далі», а на фото лотів аукціону - позначка збільшення',
+        'В просмотре фото есть кнопки «назад» и «дальше», а на фото лотов аукциона - значок увеличения',
+        'The photo viewer has previous and next buttons, and auction lot photos carry a zoom badge'
+      ),
+      item(
+        'improved',
+        'У «Моїх фото з посиланнями» мініатюру можна відкрити для перегляду; номер у посиланні пишеться схожими латинськими літерами, тож він читається, а не перетворюється на %D0%92…',
+        'В «Моих фото со ссылками» миниатюру можно открыть для просмотра; номер в ссылке пишется похожими латинскими буквами, поэтому он читается, а не превращается в %D0%92…',
+        'In My shared photos you can click a thumbnail to preview it; the plate in a shared link is written in Latin look-alike letters so it stays readable instead of turning into %D0%92…'
+      ),
+      item(
+        'improved',
+        'Сторінки марки та моделі в каталозі більше не «стрибають» під час завантаження',
+        'Страницы марки и модели в каталоге больше не «прыгают» при загрузке',
+        'Catalog make and model pages no longer jump while loading'
+      ),
+      item(
+        'fix',
+        'Кнопка закриття у вікні гонки на телефоні завжди видима; перехід з сторінки марки до аукціонних лотів прокручує до лотів',
+        'Кнопка закрытия в окне гонки на телефоне всегда видна; переход со страницы марки к аукционным лотам прокручивает к лотам',
+        'The close button in the race window stays visible on phones; opening auctions from a make page scrolls to the lots'
+      ),
+      item(
+        'new',
         'Сторінки моделі та марки в каталозі показують чипи поширеності (рейтинги, де ще продається), 3D- та 360°-перегляд і тест-драйв',
         'Страницы модели и марки в каталоге показывают чипы распространённости (рейтинги, где ещё продаётся), 3D- и 360°-просмотр и тест-драйв',
         'Catalog model and make pages show popularity chips (rankings, where else it is sold), 3D and 360° views and the test drive'

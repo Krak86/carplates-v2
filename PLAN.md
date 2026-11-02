@@ -813,6 +813,7 @@ Group 1 dimension callouts + garage-fit -> Group 3 (existing order). Owner says 
       page (slot A prefilled). Phases: (1) core, (2) visuals, (3) export, (4) tray / suggestions / saved / indexable pairs.
       Full plan: [docs/compare-plan.md](docs/compare-plan.md). Also covers the segment-peer list and a `/read/sizes` overlay embed.
 - ✅ **Shareable photo-search links** — done 2026-11-02 (signed-in users share a plate photo as a private 7-day link; faces blurred server-side, R2 storage, My shares in `/profile`, viewer at `/<plate>?p=<token>`). Write-up: `docs/plan-done.md` "Shareable photo-search links". Manual setup (bucket, token, secrets, ALPR redeploy): `docs/deploy.md` "Shared photo links".
+- ✅ **Photo viewer prev/next, share-link polish, catalog skeletons** — done 2026-11-02. Write-up: `docs/plan-done.md` "Photo viewer, share-link polish, catalog skeletons".
 - **Show key "test drive" facts for a looked-up car** — surface curated
   specs/review highlights (not just registry fields) for the car's
   make/model/year. Needs a data source: is there a free API, or does this

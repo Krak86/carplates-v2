@@ -4487,3 +4487,12 @@ The photo is a private, time-limited capability link, never a public image host.
 - **Open:** blur other plates in the preview; a real preview endpoint so cancelling does not touch storage.
 - **Deployed and verified 2026-11-02:** bucket, 8-day lifecycle rule, R2 token, secrets, ALPR image and API are live; sharing works end to end. First prod try answered 503 `SHARING_UNAVAILABLE` because `SHARES_R2_SECRET_ACCESS_KEY` was not set yet (see docs/deploy.md).
 - **CI fixes on the way:** `apps/api` `sharp` ^0.34 -> ^0.35.5 (`pnpm audit --prod --audit-level=high` flagged libvips/libheif/librsvg; `scripts` was already on 0.35); the noise-image `downscaleForShare` test got a 30 s timeout (about 5 s on a CI runner).
+
+## Photo viewer, share-link polish, catalog skeletons (2026-11-02) ✅
+
+- **Photo zoom modal:** prev/next buttons over the photos of the current gallery (car, auction lot, My shared photos); the auction lot carousel shows a zoom badge on the photo so it reads as enlargeable.
+- **My shared photos:** clicking a thumbnail previews it; shared links write the plate in Latin look-alikes (`shareUrl` in `lib/share-links.ts`) so a pasted link stays readable (the API normalizes both).
+- **Catalog:** skeletons for make and model pages remove the layout shift; model and make pages show popularity, 3D/360° and test-drive chips; `/auctions` opened from a make page scrolls to the lots.
+- **Fixes:** race modal close button stays visible on mobile; `sharp` 0.35.5 (see "Shareable photo-search links").
+- **About:** new feature `photoZoom`; new sources `yunet` (OpenCV Zoo face model behind the share blur) and `uqr` (QR code generator).
+- **Release notes:** all of the above are in the 2026-11-02 day of `releases.ts`.
