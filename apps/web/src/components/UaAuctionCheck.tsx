@@ -153,7 +153,7 @@ export default function UaAuctionCheck({ plate, vin, openSignal = 0, startOpen =
       <ul className="mt-2 space-y-1 text-sm">
         <li>
           <Link to="/auctions" className={LINK_CLASS}>
-            {t('auctions.page.title')}
+            {t('auctions.page.title')} <span aria-hidden>→</span>
           </Link>{' '}
           <span className="text-[var(--color-muted)]">{t('auctions.page.link')}</span>
         </li>

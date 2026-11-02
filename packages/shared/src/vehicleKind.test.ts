@@ -1,6 +1,19 @@
 import { describe, expect, it } from 'vitest'
 
-import { resolveVehicleKind, sourceValueForKind, VEHICLE_KINDS } from './vehicleKind.js'
+import { resolveVehicleKind, sourceValueForKind, vehicleKindFromTitle, VEHICLE_KINDS } from './vehicleKind.js'
+
+describe('vehicleKindFromTitle', () => {
+  it('reads the kind a lot title names, a semi-trailer before a trailer', () => {
+    expect(vehicleKindFromTitle('транспортний засіб Trailor S363EL, напівпричіп, з можливістю')).toBe('semiTrailer')
+    expect(vehicleKindFromTitle('Причіп до легкового автомобіля')).toBe('trailer')
+    expect(vehicleKindFromTitle('Мотоцикл Honda')).toBe('motorcycle')
+  })
+
+  it('is null when the title names no kind', () => {
+    expect(vehicleKindFromTitle('Toyota Camry 2015')).toBeNull()
+    expect(vehicleKindFromTitle(null)).toBeNull()
+  })
+})
 
 describe('resolveVehicleKind', () => {
   it('maps every real registry kind value', () => {

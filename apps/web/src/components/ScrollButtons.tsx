@@ -22,7 +22,8 @@ type Position = { left: number; bottom: number }
 // Beside the page's content (right of it), and never lower than the content's bottom edge. No room → the screen corner.
 // The right edge comes from the result card, else the first home section (`main > *` is full-width there), else the page root.
 function measure(): Position {
-  const card = document.querySelector<HTMLElement>('main .card-vt')
+  // `[data-scroll-edge]`: a result-like block without a `.card-vt` (the plate-not-found card, whose view-transition name would clash with the VIN card inside it).
+  const card = document.querySelector<HTMLElement>('main .card-vt, main [data-scroll-edge]')
   const page = document.querySelector<HTMLElement>('main > *')
   const edge = card ?? document.querySelector<HTMLElement>('main .section-vt') ?? page
   const fallback = { left: window.innerWidth - BUTTON_SIZE_PX - GAP_PX, bottom: GAP_PX }

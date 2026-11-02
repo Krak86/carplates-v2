@@ -44,6 +44,28 @@ export function resolveVehicleKind(kind: string | null | undefined): VehicleKind
   return KIND_BY_SOURCE_VALUE[kind.trim().toUpperCase()] ?? null
 }
 
+/**
+ * Free-text keywords (lower case, nominative stems) that name a kind inside an auction lot title ("... Trailor S363EL,
+ * напівпричіп, ..."). Only the kinds a lot title names outright; order matters (`напівпричіп` contains `причіп`).
+ */
+const KIND_TITLE_KEYWORDS: ReadonlyArray<readonly [string, VehicleKind]> = [
+  ['напівпричіп', 'semiTrailer'],
+  ['причіп', 'trailer'],
+  ['мотоцикл', 'motorcycle'],
+  ['мопед', 'moped'],
+  ['квадроцикл', 'quad'],
+  ['автобус', 'bus'],
+  ['вантажн', 'truck'],
+  ['легков', 'passenger']
+]
+
+/** The kind a free-text title names (an auction lot title), or `null` when it names none. */
+export function vehicleKindFromTitle(title: string | null | undefined): VehicleKind | null {
+  if (!title) return null
+  const text = title.toLowerCase()
+  return KIND_TITLE_KEYWORDS.find(([keyword]) => text.includes(keyword))?.[1] ?? null
+}
+
 /** Inverse of `KIND_BY_SOURCE_VALUE`, derived once from it (never hand-duplicated) — 1:1 since `kind` (unlike `color`) has no alternate source spellings. */
 const SOURCE_VALUE_BY_KIND: Readonly<Record<VehicleKind, string>> = Object.fromEntries(
   Object.entries(KIND_BY_SOURCE_VALUE).map(([source, kind]) => [kind, source])

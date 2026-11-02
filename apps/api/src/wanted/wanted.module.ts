@@ -6,6 +6,7 @@ import { WantedStatsService } from './wanted-stats.service.js'
 
 @Module({
   controllers: [WantedController],
-  providers: [WantedService, WantedStatsService]
+  providers: [WantedService, WantedStatsService],
+  exports: [WantedService]
 })
 export class WantedModule {}

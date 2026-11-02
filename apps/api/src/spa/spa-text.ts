@@ -1,4 +1,4 @@
-import type { ShareAlias } from '@carplates/shared'
+import type { ShareAlias, VehicleKind } from '@carplates/shared'
 
 /** Server-side copy for link previews — the SPA's i18n bundles live in the web app, which the API can't import. */
 export const LANGS = ['ua', 'ru', 'en'] as const
@@ -740,7 +740,30 @@ const REGISTRY_NOTE: Record<Lang, string> = {
   en: 'Data from the state open vehicle registry.'
 }
 
+const OTHER_SOURCES_NOTE: Record<Lang, string> = {
+  ua: 'Немає в державному реєстрі, дані з інших відкритих джерел (розшук, аукціони).',
+  ru: 'Нет в государственном реестре, данные из других открытых источников (розыск, аукционы).',
+  en: 'Not in the state registry; data from other open sources (wanted lists, auctions).'
+}
+
 const UNKNOWN_VEHICLE: Record<Lang, string> = { ua: 'авто', ru: 'авто', en: 'vehicle' }
+
+/** Vehicle type (`VehicleKind`) as a card / description label, for plates found only in the wanted lists or auction lots. */
+export const KIND_LABEL: Record<VehicleKind, Record<Lang, string>> = {
+  passenger: { ua: 'Легковий', ru: 'Легковой', en: 'Passenger car' },
+  truck: { ua: 'Вантажний', ru: 'Грузовой', en: 'Truck' },
+  bus: { ua: 'Автобус', ru: 'Автобус', en: 'Bus' },
+  motorcycle: { ua: 'Мотоцикл', ru: 'Мотоцикл', en: 'Motorcycle' },
+  moped: { ua: 'Мопед', ru: 'Мопед', en: 'Moped' },
+  trailer: { ua: 'Причіп', ru: 'Прицеп', en: 'Trailer' },
+  semiTrailer: { ua: 'Напівпричіп', ru: 'Полуприцеп', en: 'Semi-trailer' },
+  quad: { ua: 'Квадроцикл', ru: 'Квадроцикл', en: 'Quad bike' },
+  tricycle: { ua: 'Трицикл', ru: 'Трицикл', en: 'Tricycle' },
+  motoTricycle: { ua: 'Мототрицикл', ru: 'Мототрицикл', en: 'Motor tricycle' },
+  specialized: { ua: 'Спеціалізований', ru: 'Специализированный', en: 'Specialized vehicle' },
+  special: { ua: 'Спеціальний', ru: 'Специальный', en: 'Special vehicle' },
+  undetermined: { ua: 'Не визначено', ru: 'Не определено', en: 'Undetermined' }
+}
 
 const VALUE_NOTE: Record<Lang, (range: string) => string> = {
   ua: range =>
@@ -929,10 +952,15 @@ export function sectionPageText(lang: Lang, base: PageText, section: string | un
 type Facts = { value: string; car: string | null; year: string | null; extra: Array<string | null | undefined> }
 
 /** Title/description for a plate or VIN page — "Cars UA - AA1234BB - Toyota Camry 2015". */
-export function vehiclePageText(lang: Lang, f: Facts, kind: 'plate' | 'vin'): PageText {
+export function vehiclePageText(lang: Lang, f: Facts, kind: 'plate' | 'vin' | 'other'): PageText {
   const year = f.year ? ` ${f.year}` : ''
   const facts = [f.car, f.year, ...f.extra].filter(Boolean).join(', ')
-  const note = kind === 'vin' ? `${REGISTRY_NOTE[lang]} NHTSA vPIC.` : REGISTRY_NOTE[lang]
+  const note =
+    kind === 'other'
+      ? OTHER_SOURCES_NOTE[lang]
+      : kind === 'vin'
+        ? `${REGISTRY_NOTE[lang]} NHTSA vPIC.`
+        : REGISTRY_NOTE[lang]
   return {
     title: `${SITE_NAME} - ${f.value} - ${f.car ?? UNKNOWN_VEHICLE[lang]}${year}`,
     description: `${kind === 'vin' ? 'VIN ' : ''}${f.value}${facts ? `: ${facts}` : ''}. ${note}`

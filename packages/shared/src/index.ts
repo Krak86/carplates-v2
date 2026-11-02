@@ -127,7 +127,13 @@ export { brandStatsResponseSchema, type BrandStatsResponse } from './brandStats.
 export { importsStatsResponseSchema, type ImportsStatsResponse } from './importsStats.js'
 export { originStatsResponseSchema, type OriginStatsResponse } from './originStats.js'
 export { SPEC_METRICS, SPEC_METRIC_COLUMN, DEFAULT_SPEC_METRIC, type SpecMetric } from './specMetrics.js'
-export { VEHICLE_KINDS, resolveVehicleKind, sourceValueForKind, type VehicleKind } from './vehicleKind.js'
+export {
+  VEHICLE_KINDS,
+  resolveVehicleKind,
+  sourceValueForKind,
+  vehicleKindFromTitle,
+  type VehicleKind
+} from './vehicleKind.js'
 export { VEHICLE_PURPOSES, sourceValueForPurpose, type VehiclePurpose } from './vehiclePurpose.js'
 export {
   VEHICLE_COLORS,

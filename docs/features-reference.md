@@ -309,6 +309,8 @@ deploy; Telegram and X keep their own preview cache.
 `/og/default.png` and `/og/page/` (2026-10-30): the generic cards are every static page's `og:image`, and Twitterbot/Google
 skip an image robots.txt disallows. Keep any new generic card under an allowed path.
 
+**Plates outside the registry (2026-11-02):** a registry 404 falls back to `PreviewService.describeOtherSources` (wanted lists + auction lots: make, model, year, colour, type), so the meta tags and `/og/<plate>.png` carry what those sources know; it rethrows the 404 when they know nothing. A lot has no type field, so the type comes from the lot title (`vehicleKindFromTitle`, shared; labels `KIND_LABEL`, `spa-text.ts`), also used by `OtherSourcesFound`'s "Type" row. That card hides feed placeholders ("Невідомо" colour, "other" fuel) and the whole Basic data block when nothing else is left. `NotFoundInfo` carries `data-scroll-edge` so `ScrollButtons` docks beside it (it has no `.card-vt`; reusing that class would clash with the VIN card's view-transition name).
+
 Plate/VIN `?section=<id>` links (2026-10-30): the title gets ` - <section label>` and the description a one-line lead (`SECTION_TEXT` / `sectionPageText`, `spa-text.ts`, ua/ru/en); `value` keeps its estimate text, an unknown id is the plain preview. The card image stays the plate card (a per-section card would multiply the expensive renders). A new `SHARE_SECTIONS` id (`share-section.ts`) needs a `SECTION_TEXT` entry.
 
 ## Share links `/go/<alias>` and `/share` (2026-10-30)
