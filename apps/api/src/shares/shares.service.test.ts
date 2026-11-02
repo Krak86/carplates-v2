@@ -83,6 +83,8 @@ const record = (over: Partial<ShareRecord> = {}): ShareRecord => ({
   plate: 'АА1234ВВ',
   candidates,
   bytes: 1000,
+  width: 1600,
+  height: 900,
   createdAt: new Date(),
   expiresAt: new Date(Date.now() + 3 * 86_400_000),
   revokedAt: null,
@@ -283,7 +285,12 @@ describe('SharesService reading a link', () => {
     expect(await s.service.metaFor(newShareToken())).toBeNull()
     const row = record()
     s.repo.findByTokenHash.mockResolvedValue(row)
-    expect(await s.service.metaFor(newShareToken())).toEqual({ plate: row.plate, expiresAt: row.expiresAt })
+    expect(await s.service.metaFor(newShareToken())).toEqual({
+      plate: row.plate,
+      expiresAt: row.expiresAt,
+      width: 1600,
+      height: 900
+    })
   })
 })
 

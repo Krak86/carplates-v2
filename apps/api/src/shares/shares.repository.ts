@@ -15,6 +15,8 @@ const toRecord = (row: Row): ShareRecord => ({
   plate: row.plate,
   candidates: row.candidates as PlateCandidate[],
   bytes: row.bytes,
+  width: row.width,
+  height: row.height,
   createdAt: row.createdAt,
   expiresAt: row.expiresAt,
   revokedAt: row.revokedAt

@@ -203,6 +203,7 @@ export class SpaController {
       description: preview?.description ?? share.plate,
       image: `${siteUrl}/api/shares/${token}/image`,
       imageType: 'image/jpeg',
+      ...(share.width && share.height && { imageSize: { width: share.width, height: share.height } }),
       noindex: true
     })
   }

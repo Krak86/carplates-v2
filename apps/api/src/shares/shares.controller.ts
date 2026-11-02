@@ -28,6 +28,8 @@ import { SharesService } from './shares.service.js'
 const CREATE_THROTTLE = { default: { limit: 10, ttl: 3_600_000 }, long: { limit: 30, ttl: 3_600_000 } }
 /** Link lookups: the token is unguessable, this only bounds a scraper. */
 const VIEW_THROTTLE = { default: { limit: 60, ttl: 60_000 } }
+/** The image: messenger crawlers share a few IPs and every preview fetches it, so a 429 here shows the generic card instead of the photo. (The global per-IP `medium` 150/min still applies.) */
+const IMAGE_THROTTLE = { default: { limit: 120, ttl: 60_000 } }
 
 /**
  * Shareable photo-search links. Owner routes need a session; the two token routes are public capability URLs and stay
@@ -84,7 +86,7 @@ export class SharesController {
   @Get(':token/image')
   @UseGuards(SharePrivacyHeadersGuard, ThrottlerGuard)
   @UseInterceptors(ShareImageInterceptor)
-  @Throttle(VIEW_THROTTLE)
+  @Throttle(IMAGE_THROTTLE)
   async image(@Param('token') token: string): Promise<ShareImageResult> {
     const { stream, length, maxAgeS } = await this.shares.image(token)
     return new ShareImageResult(new StreamableFile(stream, { type: 'image/jpeg', ...(length && { length }) }), maxAgeS)

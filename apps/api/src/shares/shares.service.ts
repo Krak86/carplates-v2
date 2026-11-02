@@ -37,6 +37,7 @@ import {
   downscaleForShare,
   findForbiddenMetadata,
   hashShareToken,
+  imageSize,
   newShareToken,
   sniffShareFormat
 } from './helpers.js'
@@ -87,6 +88,7 @@ export class SharesService {
     const stored = await downscaleForShare(blurred)
     if (!stored) throw new UnprocessableEntityException('Photo is too detailed to share')
 
+    const size = await imageSize(stored)
     const token = newShareToken()
     const id = randomUUID()
     const objectKey = `shares/${id}.jpg`
@@ -103,6 +105,8 @@ export class SharesService {
           plate,
           candidates,
           bytes: stored.byteLength,
+          width: size.width,
+          height: size.height,
           expiresAt
         },
         max
@@ -160,8 +164,8 @@ export class SharesService {
   /** For the SPA's `<meta>` injection: `null` when the link is expired, deleted or was never valid. */
   async metaFor(token: string): Promise<ShareMeta> {
     try {
-      const { plate, expiresAt } = await this.live(token)
-      return { plate, expiresAt }
+      const { plate, expiresAt, width, height } = await this.live(token)
+      return { plate, expiresAt, width, height }
     } catch (err) {
       if (err instanceof GoneException) return null
       throw err

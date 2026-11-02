@@ -2060,6 +2060,9 @@ export const sharedPhotos = app.table(
     /** The server's own ALPR reads as `PlateCandidate[]` (boxes are 0-1 fractions). */
     candidates: jsonb('candidates').notNull(),
     bytes: integer('bytes').notNull(),
+    /** Pixel size of the stored copy (null for rows from before migration 0089): sent as og:image:width/height. */
+    width: integer('width'),
+    height: integer('height'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
     /** Admin takedown: `UPDATE app.shared_photos SET revoked_at = now() WHERE …`. */
