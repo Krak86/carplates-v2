@@ -40,7 +40,22 @@ export default function PlayRoute(): ReactNode {
     return () => document.removeEventListener('fullscreenchange', handleChange)
   }, [])
 
-  const handleToggleFullscreen = (): void => {
+  // Fullscreen belongs to a game: leaving it (back to the hub, another route) exits fullscreen too.
+  const inGame = !!game
+  useEffect(() => {
+    if (inGame) return undefined
+    if (document.fullscreenElement) void document.exitFullscreen().catch(() => undefined)
+    return undefined
+  }, [inGame])
+
+  useEffect(
+    () => () => {
+      if (document.fullscreenElement) void document.exitFullscreen().catch(() => undefined)
+    },
+    []
+  )
+
+  const handleToggleFullscreen =(): void => {
     if (document.fullscreenElement) void document.exitFullscreen()
     else void frameRef.current?.requestFullscreen().catch(() => undefined)
   }

@@ -105,6 +105,7 @@ export const LOGO_TEXT_BOX: Readonly<Record<string, readonly [number, number, nu
   mitsubishi: [0, 0.7, 1, 1],
   musstang: [0, 0.5, 1, 0.72],
   nissan: [0.06, 0.38, 0.94, 0.62],
+  opel: [0.28, 0.06, 0.72, 0.3],
   spark: [0.28, 0.38, 0.9, 0.64],
   volvo: [0.26, 0.38, 0.72, 0.6]
 }
