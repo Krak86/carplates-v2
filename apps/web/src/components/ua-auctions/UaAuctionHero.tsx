@@ -108,7 +108,14 @@ export default function UaAuctionHero({ docIds, label, modelPhoto = null }: Prop
             </button>
           ))}
 
-        <div className="absolute bottom-2 left-2 max-w-[85%] rounded bg-black/60 px-1.5 py-0.5 text-[10px] text-white/85">
+        <span
+          aria-hidden
+          className="pointer-events-none absolute right-2 bottom-2 rounded-full bg-black/60 px-2 py-0.5 text-xs text-white"
+        >
+          🔍
+        </span>
+
+        <div className="absolute bottom-2 left-2 max-w-[calc(100%-3.5rem)] rounded bg-black/60 px-1.5 py-0.5 text-[10px] text-white/85">
           {caption}
         </div>
       </div>
