@@ -23,6 +23,8 @@ const shares = {
   remove: vi.fn(async (_user: string, id: string) => {
     if (id !== ID) throw new NotFoundException('Share not found')
   }),
+  retouch: vi.fn(async () => ({ facesBlurred: 1, originalSize: null, storedSize: null })),
+  dropOriginal: vi.fn(async () => undefined),
   ownImage: vi.fn(async () => ({ stream: Readable.from([Buffer.from('jpeg')]), length: 4, maxAgeS: 300 })),
   describe: vi.fn(async (token: string) => {
     if (token !== TOKEN) throw new GoneException('SHARE_EXPIRED')
@@ -70,8 +72,8 @@ describe('SharesController over HTTP', () => {
 
   afterAll(() => app.close())
 
-  const inject = (method: 'GET' | 'POST' | 'DELETE', url: string, user?: string) =>
-    app.inject({ method, url, headers: user ? { 'x-test-user': user } : {} })
+  const inject = (method: 'GET' | 'POST' | 'DELETE', url: string, user?: string, payload?: object) =>
+    app.inject({ method, url, headers: user ? { 'x-test-user': user } : {}, ...(payload && { payload }) })
 
   it('serves the metadata without indexing, referrer or caching', async () => {
     const res = await inject('GET', `/api/shares/${TOKEN}`)
@@ -122,6 +124,29 @@ describe('SharesController over HTTP', () => {
     expect(shares.remove).toHaveBeenCalledWith('u1', ID)
     expect((await inject('DELETE', '/api/shares/11111111-1111-4111-8111-111111111111', 'u1')).statusCode).toBe(404)
     expect((await inject('DELETE', '/api/shares/nope', 'u1')).statusCode).toBe(400)
+  })
+
+  it('retouches with validated strokes, only for the owner session', async () => {
+    const body = { strokes: [{ mode: 'add', radius: 0.05, points: [[0.1, 0.2]] }] }
+    expect((await inject('POST', `/api/shares/${ID}/retouch`, undefined, body)).statusCode).toBe(403)
+    const res = await inject('POST', `/api/shares/${ID}/retouch`, 'u1', body)
+    expect(res.statusCode).toBe(200)
+    expect(res.headers['cache-control']).toBe('no-store')
+    expect(res.json()).toEqual({ removed: { facesBlurred: 1, originalSize: null, storedSize: null } })
+    expect(shares.retouch).toHaveBeenCalledWith('u1', ID, body.strokes)
+    for (const bad of [
+      { strokes: [{ mode: 'add', radius: 0.9, points: [[0.1, 0.2]] }] },
+      { strokes: [{ mode: 'blur', radius: 0.05, points: [[0.1, 0.2]] }] },
+      { strokes: [{ mode: 'add', radius: 0.05, points: [[1.5, 0.2]] }] },
+      { strokes: [{ mode: 'add', radius: 0.05, points: [] }] }
+    ])
+      expect((await inject('POST', `/api/shares/${ID}/retouch`, 'u1', bad)).statusCode).toBe(400)
+  })
+
+  it('drops the original with 204', async () => {
+    expect((await inject('DELETE', `/api/shares/${ID}/original`)).statusCode).toBe(403)
+    expect((await inject('DELETE', `/api/shares/${ID}/original`, 'u1')).statusCode).toBe(204)
+    expect(shares.dropOriginal).toHaveBeenCalledWith('u1', ID)
   })
 
   it('limits creating to 10 per hour per user, not per IP', async () => {

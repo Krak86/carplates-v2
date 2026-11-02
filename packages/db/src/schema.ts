@@ -2065,6 +2065,8 @@ export const sharedPhotos = app.table(
     height: integer('height'),
     /** `{ facesBlurred, originalSize, storedSize }` (null before migration 0090): what the copy lost versus the upload. */
     removed: jsonb('removed'),
+    /** Private unblurred upload kept only until the share is confirmed (manual blur editor), null otherwise (migration 0091). */
+    originalKey: text('original_key'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
     /** Admin takedown: `UPDATE app.shared_photos SET revoked_at = now() WHERE …`. */
@@ -2073,6 +2075,9 @@ export const sharedPhotos = app.table(
   t => [
     uniqueIndex('ux_shared_photos_token').on(t.tokenHash),
     index('ix_shared_photos_user').on(t.userId),
-    index('ix_shared_photos_expires').on(t.expiresAt)
+    index('ix_shared_photos_expires').on(t.expiresAt),
+    index('ix_shared_photos_original')
+      .on(t.createdAt)
+      .where(sql`${t.originalKey} is not null`)
   ]
 )

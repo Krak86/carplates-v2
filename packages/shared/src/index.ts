@@ -922,16 +922,34 @@ export {
   SHARE_MAX_ACTIVE,
   SHARE_MAX_ACTIVE_ADMIN,
   SHARE_MAX_UPLOAD_BYTES,
+  SHARE_NO_ORIGINAL,
   SHARE_NO_PLATE,
+  SHARE_ORIGINAL_TTL_MINUTES,
+  SHARE_RETOUCH_MAX_POINTS,
+  SHARE_RETOUCH_MAX_STROKES,
+  SHARE_BRUSH_MAX,
+  SHARE_BRUSH_MIN,
   SHARE_TTL_DAYS,
   SHARING_UNAVAILABLE,
   createShareResponseSchema,
   myShareSchema,
   mySharesResponseSchema,
+  retouchShareRequestSchema,
+  retouchShareResponseSchema,
+  retouchStrokeSchema,
   shareMaxActive,
   shareMetaResponseSchema,
   shareRemovedSchema,
   shareSizeSchema,
   shareTokenSchema
 } from './shares.js'
-export type { CreateShareResponse, MyShare, MySharesResponse, ShareMetaResponse, ShareRemoved } from './shares.js'
+export type {
+  CreateShareResponse,
+  MyShare,
+  MySharesResponse,
+  RetouchShareRequest,
+  RetouchShareResponse,
+  RetouchStroke,
+  ShareMetaResponse,
+  ShareRemoved
+} from './shares.js'

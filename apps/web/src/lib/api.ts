@@ -1,6 +1,7 @@
 import {
   createShareResponseSchema,
   mySharesResponseSchema,
+  retouchShareResponseSchema,
   shareMetaResponseSchema,
   catalogLookupSchema,
   catalogMakeSchema,
@@ -99,6 +100,8 @@ import {
 import type {
   CreateShareResponse,
   MySharesResponse,
+  RetouchShareResponse,
+  RetouchStroke,
   ShareMetaResponse,
   CatalogLookup,
   CatalogMake,
@@ -748,12 +751,25 @@ export async function deleteShare(id: string): Promise<void> {
   await sendJson('DELETE', `/api/shares/${encodeURIComponent(id)}`)
 }
 
+/** Manual blur editor: every stroke so far; the server re-renders the copy from the unblurred upload (same link). */
+export async function retouchShare(id: string, strokes: RetouchStroke[]): Promise<RetouchShareResponse> {
+  return retouchShareResponseSchema.parse(
+    await sendJson('POST', `/api/shares/${encodeURIComponent(id)}/retouch`, { strokes })
+  )
+}
+
+/** Confirm: the server deletes the private unblurred upload. */
+export async function dropShareOriginal(id: string): Promise<void> {
+  await sendJson('DELETE', `/api/shares/${encodeURIComponent(id)}/original`)
+}
+
 export async function getShare(token: string): Promise<ShareMetaResponse> {
   return shareMetaResponseSchema.parse(await getJson(`/api/shares/${encodeURIComponent(token)}`))
 }
 
-export function shareImageUrl(token: string): string {
-  return `${BASE}/api/shares/${encodeURIComponent(token)}/image`
+/** `version` is a cache-buster for the copy that was just retouched. */
+export function shareImageUrl(token: string, version = 0): string {
+  return `${BASE}/api/shares/${encodeURIComponent(token)}/image${version ? `?v=${version}` : ''}`
 }
 
 /** The signed-in owner's copy by share id (works on any device, unlike the token URL). */

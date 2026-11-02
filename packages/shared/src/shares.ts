@@ -75,3 +75,42 @@ export type MyShare = z.infer<typeof myShareSchema>
 /** GET /api/shares - the signed-in user's active shares. */
 export const mySharesResponseSchema = z.object({ shares: z.array(myShareSchema), max: z.number().int() })
 export type MySharesResponse = z.infer<typeof mySharesResponseSchema>
+
+/** The unblurred upload is kept only this long for the blur editor; the dialog deletes it on confirm / cancel (hourly sweep as backstop). */
+export const SHARE_ORIGINAL_TTL_MINUTES = 60
+export const SHARE_NO_ORIGINAL = 'SHARE_NO_ORIGINAL' // 409: the unblurred upload is gone (confirmed or swept), the blur can no longer be edited
+
+/** Brush limits of the manual blur editor (also enforced by the server). */
+export const SHARE_RETOUCH_MAX_STROKES = 300
+export const SHARE_RETOUCH_MAX_POINTS = 20_000
+export const SHARE_BRUSH_MIN = 0.005
+export const SHARE_BRUSH_MAX = 0.15
+
+/** Fractions 0-1 of the photo, so a stroke lines up with the stored (downscaled) copy and the original alike. */
+const unit = z.number().min(0).max(1)
+
+/** One brush stroke: a polyline of 0-1 points; `radius` is a fraction of the photo's longer side. */
+export const retouchStrokeSchema = z.object({
+  mode: z.enum(['add', 'erase']),
+  radius: z.number().min(SHARE_BRUSH_MIN).max(SHARE_BRUSH_MAX),
+  points: z
+    .array(z.tuple([unit, unit]))
+    .min(1)
+    .max(2000)
+})
+export type RetouchStroke = z.infer<typeof retouchStrokeSchema>
+
+/**
+ * POST /api/shares/:id/retouch - every stroke so far, in order (the server always re-renders from the unblurred upload:
+ * auto face blur, then "add" strokes blur and "erase" strokes restore). A flattened image from the client is never accepted.
+ */
+export const retouchShareRequestSchema = z.object({
+  strokes: z
+    .array(retouchStrokeSchema)
+    .max(SHARE_RETOUCH_MAX_STROKES)
+    .refine(list => list.reduce((n, s) => n + s.points.length, 0) <= SHARE_RETOUCH_MAX_POINTS, 'Too many points')
+})
+export type RetouchShareRequest = z.infer<typeof retouchShareRequestSchema>
+
+export const retouchShareResponseSchema = z.object({ removed: shareRemovedSchema.nullable() })
+export type RetouchShareResponse = z.infer<typeof retouchShareResponseSchema>

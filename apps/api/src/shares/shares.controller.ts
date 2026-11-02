@@ -2,6 +2,7 @@ import {
   Controller,
   Delete,
   Get,
+  Body,
   Header,
   HttpCode,
   Inject,
@@ -14,7 +15,15 @@ import {
 } from '@nestjs/common'
 import { ApiConsumes, ApiTags } from '@nestjs/swagger'
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler'
-import type { CreateShareResponse, MySharesResponse, SessionUser, ShareMetaResponse } from '@carplates/shared'
+import { retouchShareRequestSchema } from '@carplates/shared'
+import type {
+  CreateShareResponse,
+  MySharesResponse,
+  RetouchShareRequest,
+  RetouchShareResponse,
+  SessionUser,
+  ShareMetaResponse
+} from '@carplates/shared'
 import type { FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
@@ -26,6 +35,8 @@ import { SharesService } from './shares.service.js'
 
 /** Creating is the expensive, abusable call: 10/h per user (`default`, tracked by `UserThrottlerGuard`) and 30/h per IP (`long`, the global guard). */
 const CREATE_THROTTLE = { default: { limit: 10, ttl: 3_600_000 }, long: { limit: 30, ttl: 3_600_000 } }
+/** Retouching re-runs the face blur on the original: 40/h per user, 120/h per IP. */
+const RETOUCH_THROTTLE = { default: { limit: 40, ttl: 3_600_000 }, long: { limit: 120, ttl: 3_600_000 } }
 /** Link lookups: the token is unguessable, this only bounds a scraper. */
 const VIEW_THROTTLE = { default: { limit: 60, ttl: 60_000 } }
 /** The image: messenger crawlers share a few IPs and every preview fetches it, so a 429 here shows the generic card instead of the photo. (The global per-IP `medium` 150/min still applies.) */
@@ -61,6 +72,28 @@ export class SharesController {
   @HttpCode(204)
   async remove(@CurrentUser() user: SessionUser, @Param('id', zodParam(z.uuid())) id: string): Promise<void> {
     await this.shares.remove(user.id, id)
+  }
+
+  /** Manual blur editor: re-renders the copy from the unblurred upload with the user's strokes; the link keeps working. */
+  @Post(':id/retouch')
+  @HttpCode(200)
+  @UseGuards(SessionGuard, UserThrottlerGuard)
+  @Throttle(RETOUCH_THROTTLE)
+  @Header('Cache-Control', 'no-store')
+  async retouch(
+    @CurrentUser() user: SessionUser,
+    @Param('id', zodParam(z.uuid())) id: string,
+    @Body(zodParam(retouchShareRequestSchema)) body: RetouchShareRequest
+  ): Promise<RetouchShareResponse> {
+    return { removed: await this.shares.retouch(user.id, id, body.strokes) }
+  }
+
+  /** Confirm / done: deletes the private unblurred upload (the blur can no longer be edited). */
+  @Delete(':id/original')
+  @UseGuards(SessionGuard)
+  @HttpCode(204)
+  async dropOriginal(@CurrentUser() user: SessionUser, @Param('id', zodParam(z.uuid())) id: string): Promise<void> {
+    await this.shares.dropOriginal(user.id, id)
   }
 
   /** The owner's photo by share id; `/image` below is the public, token-keyed one. */

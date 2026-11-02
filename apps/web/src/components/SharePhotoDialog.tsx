@@ -5,19 +5,20 @@ import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { SHARE_MAX_ACTIVE, SHARE_TTL_DAYS } from '@carplates/shared'
-import type { CreateShareResponse } from '@carplates/shared'
+import type { CreateShareResponse, RetouchStroke } from '@carplates/shared'
 
-import { shareErrorKey } from '@/components/share-photo.helpers'
+import { retouchErrorKey, shareErrorKey } from '@/components/share-photo.helpers'
 import { useCopyFeedback } from '@/components/use-copy-feedback'
 import PhotoPlateBoxes from '@/components/PhotoPlateBoxes'
 import ShareRemovedList from '@/components/ShareRemovedList'
 import Spinner from '@/components/ui/Spinner'
-import { createShare, deleteShare, shareImageUrl } from '@/lib/api'
+import { createShare, deleteShare, dropShareOriginal, retouchShare, shareImageUrl } from '@/lib/api'
 import { shrinkImage } from '@/lib/image'
 import { myPhotoSharesQuery } from '@/lib/queries'
 import { saveShareToken, shareUrl } from '@/lib/share-links'
 
 // Loaded on the first click on the preview.
+const PhotoBlurEditor = lazy(() => import('@/components/PhotoBlurEditor'))
 const PhotoZoomDialog = lazy(() => import('@/components/PhotoZoomDialog'))
 
 type Props = {
@@ -53,6 +54,11 @@ export default function SharePhotoDialog({ file, onClose }: Props): ReactNode {
   const [confirmed, setConfirmed] = useState<string | null>(null)
   const [zoomed, setZoomed] = useState(false)
   const [showBoxes, setShowBoxes] = useState(true)
+  // Manual blur editor: the strokes saved so far, how many times the copy was re-rendered (cache-buster), what it removed now.
+  const [editing, setEditing] = useState(false)
+  const [strokes, setStrokes] = useState<RetouchStroke[]>([])
+  const [version, setVersion] = useState(0)
+  const [removed, setRemoved] = useState<CreateShareResponse['removed']>(undefined)
 
   const refreshList = (): void => void queryClient.invalidateQueries({ queryKey: myPhotoSharesQuery().queryKey })
 
@@ -68,6 +74,17 @@ export default function SharePhotoDialog({ file, onClose }: Props): ReactNode {
   // Only read for the "limit reached" message, which names the user's own cap (admins have a higher one).
   const mine = useQuery({ ...myPhotoSharesQuery(), enabled: create.isError })
 
+  const retouch = useMutation({
+    mutationFn: (next: RetouchStroke[]) => retouchShare(share?.id ?? '', next).then(res => ({ next, ...res })),
+    onSuccess: res => {
+      setStrokes(res.next)
+      setRemoved(res.removed)
+      setVersion(v => v + 1)
+      setEditing(false)
+      refreshList()
+    }
+  })
+
   useEffect(() => {
     if (!file || startedRef.current) return
     startedRef.current = true
@@ -82,6 +99,8 @@ export default function SharePhotoDialog({ file, onClose }: Props): ReactNode {
 
   const confirm = (): void => {
     if (!share) return
+    // The unblurred upload is only kept for the blur editor; the user is done with it now.
+    void dropShareOriginal(share.id).catch(() => undefined)
     const link = shareUrl(share.plate, share.token)
     saveShareToken(share.id, share.token, share.expiresAt)
     copy(link)
@@ -131,7 +150,23 @@ export default function SharePhotoDialog({ file, onClose }: Props): ReactNode {
               </div>
             )}
 
-            {share && (
+            {share && editing && (
+              <Suspense fallback={<Spinner />}>
+                <PhotoBlurEditor
+                  src={shareImageUrl(share.token, version)}
+                  initial={strokes}
+                  saving={retouch.isPending}
+                  error={retouch.isError ? t(retouchErrorKey(retouch.error)) : null}
+                  onSave={retouch.mutate}
+                  onCancel={() => {
+                    retouch.reset()
+                    setEditing(false)
+                  }}
+                />
+              </Suspense>
+            )}
+
+            {share && !editing && (
               <div className="space-y-3 text-sm">
                 <div className="relative">
                   <button
@@ -143,7 +178,7 @@ export default function SharePhotoDialog({ file, onClose }: Props): ReactNode {
                   >
                     <span className="relative inline-block">
                       <img
-                        src={shareImageUrl(share.token)}
+                        src={shareImageUrl(share.token, version)}
                         alt={t('photoShare.previewAlt')}
                         className="block max-h-64 max-w-full rounded-lg"
                       />
@@ -185,8 +220,15 @@ export default function SharePhotoDialog({ file, onClose }: Props): ReactNode {
                   <>
                     <div className="rounded-lg border border-[var(--color-border)] p-3 text-xs text-[var(--color-muted)]">
                       <p className="mb-1 font-medium text-[var(--color-fg)]">{t('photoShare.removed.title')}</p>
-                      <ShareRemovedList removed={share.removed} />
+                      <ShareRemovedList removed={removed === undefined ? share.removed : removed} />
                     </div>
+                    <button
+                      type="button"
+                      onClick={() => setEditing(true)}
+                      className="rounded-lg border border-[var(--color-border)] px-3 py-1.5 text-xs font-medium hover:bg-[var(--color-bg)]"
+                    >
+                      {t('photoShare.edit.open')}
+                    </button>
                     <ul className="list-disc space-y-1 pl-5 text-[var(--color-muted)]">
                       <li className="font-medium text-[var(--color-fg)]">{t('photoShare.checkFaces')}</li>
                       <li>{t('photoShare.publicNote')}</li>
@@ -210,7 +252,8 @@ export default function SharePhotoDialog({ file, onClose }: Props): ReactNode {
                 <button
                   type="button"
                   onClick={confirm}
-                  className="rounded-lg bg-[var(--color-primary)] px-4 py-2 text-sm font-medium text-white hover:opacity-90"
+                  disabled={editing}
+                  className="rounded-lg bg-[var(--color-primary)] px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50"
                 >
                   {t('photoShare.confirm')}
                 </button>
@@ -224,7 +267,7 @@ export default function SharePhotoDialog({ file, onClose }: Props): ReactNode {
         <Suspense fallback={null}>
           <PhotoZoomDialog
             raised
-            url={shareImageUrl(share.token)}
+            url={shareImageUrl(share.token, version)}
             candidates={share.candidates}
             active={null}
             onClose={() => setZoomed(false)}

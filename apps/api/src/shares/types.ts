@@ -26,6 +26,8 @@ export type ShareRecord = {
   width: number | null
   height: number | null
   removed: ShareRemoved | null
+  /** The private unblurred upload while the blur editor may still need it; null once confirmed, cancelled or swept. */
+  originalKey: string | null
   createdAt: Date
   expiresAt: Date
   revokedAt: Date | null
@@ -33,7 +35,17 @@ export type ShareRecord = {
 
 export type NewShare = Pick<
   ShareRecord,
-  'id' | 'userId' | 'objectKey' | 'plate' | 'candidates' | 'bytes' | 'width' | 'height' | 'removed' | 'expiresAt'
+  | 'id'
+  | 'userId'
+  | 'objectKey'
+  | 'originalKey'
+  | 'plate'
+  | 'candidates'
+  | 'bytes'
+  | 'width'
+  | 'height'
+  | 'removed'
+  | 'expiresAt'
 > & {
   tokenHash: string
 }

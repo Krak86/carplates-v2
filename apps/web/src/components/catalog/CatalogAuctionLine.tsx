@@ -29,7 +29,10 @@ export default function CatalogAuctionLine({ makeName }: Props): ReactNode {
     <p className="mt-2 text-base">
       {t('catalog.auction.line', { lots: row.lots.toLocaleString(locale), sold: row.sold.toLocaleString(locale) })}
       {median ? t('catalog.auction.median', { price: median }) : ''}.{' '}
-      <Link to={`/auctions?make=${encodeURIComponent(row.label)}#auction-lots`} className="text-[var(--color-primary)] underline">
+      <Link
+        to={`/auctions?make=${encodeURIComponent(row.label)}#auction-lots`}
+        className="text-[var(--color-primary)] underline"
+      >
         {t('catalog.auction.link')}
       </Link>
     </p>
