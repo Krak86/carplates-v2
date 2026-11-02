@@ -854,7 +854,8 @@ Group 1 dimension callouts + garage-fit -> Group 3 (existing order). Owner says 
     because the Google button signs in without a reload (state would survive) but the email magic link or Telegram widget can reload or open another tab.
     Once the session becomes authenticated the page reads the record and reopens the share dialog with the photo; if it is gone the dialog says "pick the photo again".
     Viewing a share stays public, only creating is gated.
-  - **Open decisions:** 7 vs 30 days and 3 vs 5 shares (both single constants); whether the preview lets the user blur other plates (later).
+  - **Open decisions:** 7 vs 30 days and 3 vs 5 shares (both single constants); whether the preview lets the user blur other plates (later);
+    **"Copy link" in My shares (decide before slice 3):** keep the random token and have the web store the link it got at creation (localStorage), or derive the token as `HMAC(AUTH_SECRET, id)` so the owner's link is recomputable (see the slice 2 "Gap" note).
   - **Resume / build order (~3-5 h, four committable slices):**
     1. ✅ **Done 2026-11-02 (uncommitted until reviewed)** `services/alpr`: `/anonymize` (YuNet face blur) + tests + a face eval on own photos (~1 h). **First verify** the OpenCV build pulled in by `fast-alpr` has `cv2.FaceDetectorYN`
        (needs OpenCV >= 4.5.4); if not, run the same ONNX model through `onnxruntime` (already in the image). Model file (~230 KB): commit under `services/alpr/` or fetch in the Dockerfile.
