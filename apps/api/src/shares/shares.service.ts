@@ -17,15 +17,23 @@ import {
 import {
   SHARE_EXPIRED,
   SHARE_LIMIT_REACHED,
-  SHARE_MAX_ACTIVE,
   SHARE_MAX_UPLOAD_BYTES,
+  SHARE_NO_ORIGINAL,
   SHARE_NO_PLATE,
   SHARE_TTL_DAYS,
   SHARING_UNAVAILABLE,
   normalizePlate,
+  shareMaxActive,
   shareTokenSchema
 } from '@carplates/shared'
-import type { CreateShareResponse, MySharesResponse, PlateCandidate, ShareMetaResponse } from '@carplates/shared'
+import type {
+  CreateShareResponse,
+  MySharesResponse,
+  PlateCandidate,
+  RetouchStroke,
+  ShareMetaResponse,
+  ShareRemoved
+} from '@carplates/shared'
 
 import { loadEnv, sharesEnabled } from '../env.js'
 import { LocalRecognizeService } from '../recognize/local-recognize.service.js'
@@ -37,14 +45,29 @@ import {
   downscaleForShare,
   findForbiddenMetadata,
   hashShareToken,
+  imageSize,
   newShareToken,
   sniffShareFormat
 } from './helpers.js'
+import { renderRetouch } from './retouch.js'
 import { SharesRepository } from './shares.repository.js'
 import { SHARE_OBJECT_STORE } from './types.js'
 import type { ShareMeta, ShareObjectStore, ShareRecord } from './types.js'
 
 const DAY_MS = 24 * 60 * 60 * 1000
+/** The owner's thumbnails may be reused briefly (a deleted share must disappear soon). */
+const OWN_IMAGE_MAX_AGE_S = 300
+
+const originalKeyOf = (id: string): string => `shares/${id}.orig`
+
+const toSize = (s: { width: number | null; height: number | null }): ShareRemoved['originalSize'] =>
+  s.width && s.height ? { width: s.width, height: s.height } : null
+
+async function readAll(stream: Readable): Promise<Buffer> {
+  const chunks: Buffer[] = []
+  for await (const chunk of stream) chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk as string))
+  return Buffer.concat(chunks)
+}
 
 export type ShareImage = { stream: Readable; length: number | null; maxAgeS: number }
 
@@ -66,12 +89,13 @@ export class SharesService {
     @Inject(AnonymizeService) private readonly anonymizer: AnonymizeService
   ) {}
 
-  async create(userId: string, upload: UploadedImage): Promise<CreateShareResponse> {
+  async create(userId: string, upload: UploadedImage, role?: string): Promise<CreateShareResponse> {
     if (!sharesEnabled(this.env)) throw new ServiceUnavailableException(SHARING_UNAVAILABLE)
     const format = this.validateUpload(upload.buffer)
+    const max = shareMaxActive(role)
 
     // Cheap refusals before the ALPR + blur work.
-    if ((await this.repo.countActive(userId)) >= SHARE_MAX_ACTIVE) throw new ConflictException(SHARE_LIMIT_REACHED)
+    if ((await this.repo.countActive(userId)) >= max) throw new ConflictException(SHARE_LIMIT_REACHED)
     if ((await this.repo.activeBytes()) >= SHARE_STORAGE_CAP_BYTES)
       throw new ServiceUnavailableException(SHARING_UNAVAILABLE)
 
@@ -80,16 +104,31 @@ export class SharesService {
     const plate = normalizePlate(candidates[0]?.plate ?? '')
     if (!plate) throw new UnprocessableEntityException(SHARE_NO_PLATE)
 
-    const blurred = await this.anonymizer.anonymize(upload.buffer, `image/${format}`)
+    const original = await imageSize(upload.buffer)
+    const { image: blurred, faces } = await this.anonymizer.anonymize(upload.buffer, `image/${format}`)
     const stored = await downscaleForShare(blurred)
     if (!stored) throw new UnprocessableEntityException('Photo is too detailed to share')
 
+    const size = await imageSize(stored)
+    const removed: ShareRemoved = {
+      facesBlurred: faces,
+      originalSize: toSize(original),
+      storedSize: toSize(size)
+    }
     const token = newShareToken()
     const id = randomUUID()
     const objectKey = `shares/${id}.jpg`
+    // Kept (private) only until the dialog confirms or is closed: the blur editor re-renders from it.
+    const originalKey = originalKeyOf(id)
     const expiresAt = new Date(Date.now() + SHARE_TTL_DAYS * DAY_MS)
     await this.store.put(objectKey, stored, 'image/jpeg')
     let inserted = false
+    try {
+      await this.store.put(originalKey, upload.buffer, `image/${format}`)
+    } catch (err) {
+      await this.deleteObject(objectKey)
+      throw err
+    }
     try {
       inserted = await this.repo.insertUnderCap(
         {
@@ -97,31 +136,40 @@ export class SharesService {
           userId,
           tokenHash: hashShareToken(token),
           objectKey,
+          originalKey,
           plate,
           candidates,
           bytes: stored.byteLength,
+          width: size.width,
+          height: size.height,
+          removed,
           expiresAt
         },
-        SHARE_MAX_ACTIVE
+        max
       )
     } finally {
       // No row, no object: a lost race for the last slot, or a failed insert, must not leave the photo in the bucket.
-      if (!inserted) await this.deleteObject(objectKey)
+      if (!inserted) {
+        await this.deleteObject(objectKey)
+        await this.deleteObject(originalKey)
+      }
     }
     if (!inserted) throw new ConflictException(SHARE_LIMIT_REACHED)
-    return { id, token, plate, candidates, expiresAt: expiresAt.toISOString() }
+    return { id, token, plate, candidates, expiresAt: expiresAt.toISOString(), removed }
   }
 
-  async listMine(userId: string): Promise<MySharesResponse> {
+  async listMine(userId: string, role?: string): Promise<MySharesResponse> {
     const rows = await this.repo.listActive(userId)
     return {
       shares: rows.map(r => ({
         id: r.id,
         plate: r.plate,
         createdAt: r.createdAt.toISOString(),
-        expiresAt: r.expiresAt.toISOString()
+        expiresAt: r.expiresAt.toISOString(),
+        removed: r.removed,
+        candidates: r.candidates
       })),
-      max: SHARE_MAX_ACTIVE
+      max: shareMaxActive(role)
     }
   }
 
@@ -130,6 +178,56 @@ export class SharesService {
     const row = await this.repo.deleteOwned(userId, id)
     if (!row) throw new NotFoundException('Share not found')
     await this.deleteObject(row.objectKey)
+    if (row.originalKey) await this.deleteObject(row.originalKey)
+  }
+
+  /** Confirm: the user is happy with the blur, so the unblurred upload goes now. Idempotent. */
+  async dropOriginal(userId: string, id: string): Promise<void> {
+    const key = await this.repo.clearOriginal(userId, id)
+    if (key) await this.deleteObject(key)
+  }
+
+  /**
+   * Manual blur editor: re-renders the stored copy from the unblurred upload (auto face blur, then the user's strokes in
+   * order) and replaces the object under the same key, so the token and any copied link stay valid.
+   */
+  async retouch(userId: string, id: string, strokes: RetouchStroke[]): Promise<ShareRemoved | null> {
+    if (!sharesEnabled(this.env)) throw new ServiceUnavailableException(SHARING_UNAVAILABLE)
+    const row = await this.repo.findActiveOwned(userId, id)
+    if (!row) throw new NotFoundException('Share not found')
+    const object = row.originalKey ? await this.store.get(row.originalKey) : null
+    if (!object) throw new ConflictException(SHARE_NO_ORIGINAL)
+    const original = await readAll(object.stream)
+    const format = sniffShareFormat(original)
+    if (!format) throw new ConflictException(SHARE_NO_ORIGINAL)
+
+    const { image: auto, faces } = await this.anonymizer.anonymize(original, `image/${format}`)
+    const stored = await downscaleForShare(await renderRetouch(original, auto, strokes))
+    if (!stored) throw new UnprocessableEntityException('Photo is too detailed to share')
+    const size = await imageSize(stored)
+    const removed: ShareRemoved = {
+      facesBlurred: faces,
+      originalSize: row.removed?.originalSize ?? toSize(await imageSize(original)),
+      storedSize: toSize(size)
+    }
+    await this.store.put(row.objectKey, stored, 'image/jpeg')
+    const updated = await this.repo.updateRetouched(userId, id, {
+      bytes: stored.byteLength,
+      width: size.width,
+      height: size.height,
+      removed
+    })
+    if (!updated) throw new NotFoundException('Share not found')
+    return removed
+  }
+
+  /** The owner's own copy by share id (thumbnails in My shared photos; the token is not kept, so it cannot be used there). */
+  async ownImage(userId: string, id: string): Promise<ShareImage> {
+    const row = await this.repo.findActiveOwned(userId, id)
+    if (!row) throw new NotFoundException('Share not found')
+    const object = await this.store.get(row.objectKey)
+    if (!object) throw new NotFoundException('Share not found')
+    return { ...object, maxAgeS: Math.min(cacheSecondsLeft(row.expiresAt), OWN_IMAGE_MAX_AGE_S) }
   }
 
   async describe(token: string): Promise<ShareMetaResponse> {
@@ -148,8 +246,8 @@ export class SharesService {
   /** For the SPA's `<meta>` injection: `null` when the link is expired, deleted or was never valid. */
   async metaFor(token: string): Promise<ShareMeta> {
     try {
-      const { plate, expiresAt } = await this.live(token)
-      return { plate, expiresAt }
+      const { plate, expiresAt, width, height } = await this.live(token)
+      return { plate, expiresAt, width, height }
     } catch (err) {
       if (err instanceof GoneException) return null
       throw err

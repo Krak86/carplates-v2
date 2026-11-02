@@ -17,7 +17,8 @@ describe('AnonymizeService', () => {
     )
     const out = await new AnonymizeService().anonymize(Buffer.from('original'), 'image/jpeg')
 
-    expect(out.toString()).toBe('blurred')
+    expect(out.image.toString()).toBe('blurred')
+    expect(out.faces).toBe(2)
     const [url, init] = vi.mocked(fetch).mock.calls[0] ?? []
     expect(url).toBe('http://alpr:8088/anonymize')
     expect((init?.headers as Record<string, string>)['x-alpr-key']).toBe('alpr-secret')

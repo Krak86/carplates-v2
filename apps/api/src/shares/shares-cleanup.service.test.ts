@@ -4,11 +4,13 @@ import { SharesCleanupService } from './shares-cleanup.service.js'
 import type { SharesRepository } from './shares.repository.js'
 import type { ShareObjectStore } from './types.js'
 
-function setup(due: { id: string; objectKey: string }[][]) {
+function setup(due: { id: string; objectKey: string; originalKey?: string | null }[][]) {
   const batches = [...due]
   const repo = {
     listDue: vi.fn(async () => batches.shift() ?? []),
     deleteByIds: vi.fn(async () => undefined),
+    listStaleOriginals: vi.fn(async (_before: Date, _limit: number) => [{ id: '1', originalKey: 'shares/1.orig' }]),
+    clearOriginals: vi.fn(async (_ids: string[]) => undefined),
     deleteOfUsers: vi.fn(async () => ['shares/a.jpg', 'shares/b.jpg'])
   }
   const store: ShareObjectStore = {
@@ -73,5 +75,31 @@ describe('SharesCleanupService.deleteForUsers', () => {
     await expect(service.deleteForUsers(['u1'])).resolves.toBeUndefined()
     repo.deleteOfUsers.mockRejectedValue(new Error('db down'))
     await expect(service.deleteForUsers(['u1'])).resolves.toBeUndefined()
+  })
+})
+
+describe('SharesCleanupService originals', () => {
+  it('expire also deletes the unblurred upload of a due share', async () => {
+    const { service, store } = setup([[{ id: '1', objectKey: 'shares/1.jpg', originalKey: 'shares/1.orig' }]])
+    await service.expire()
+    expect(vi.mocked(store.delete).mock.calls.map(c => c[0])).toEqual(['shares/1.jpg', 'shares/1.orig'])
+  })
+
+  it('sweeps unblurred uploads of abandoned dialogs and clears their keys', async () => {
+    const { service, repo, store } = setup([])
+    expect(await service.sweepOriginals()).toBe(1)
+    const cutoff = repo.listStaleOriginals.mock.calls[0]?.[0] as Date
+    expect(Date.now() - cutoff.getTime()).toBeGreaterThanOrEqual(59 * 60_000)
+    expect(store.delete).toHaveBeenCalledWith('shares/1.orig')
+    expect(repo.clearOriginals).toHaveBeenCalledWith(['1'])
+  })
+
+  it('keeps the key of an upload it could not delete, and never throws', async () => {
+    const { service, repo, store } = setup([])
+    vi.mocked(store.delete).mockRejectedValueOnce(new Error('r2 down'))
+    expect(await service.sweepOriginals()).toBe(0)
+    expect(repo.clearOriginals).toHaveBeenCalledWith([])
+    repo.listStaleOriginals.mockRejectedValue(new Error('db down'))
+    expect(await service.sweepOriginals()).toBe(0)
   })
 })

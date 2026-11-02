@@ -4,7 +4,7 @@
 
 `carsua.app` v2 — Ukrainian vehicle lookup by plate or VIN (pnpm monorepo, Postgres, NHTSA). v1 is `../carplates/` (do not modify).
 
-Docs (**grep `^## ` headings, never read whole**; plan-done 535 KB, features-reference 190 KB, PLAN 145 KB): `PLAN.md` backlog + pins · `docs/plan-done.md` · `README.md` setup/env ·
+Docs (huge: **grep `^## ` headings, never read whole**): `PLAN.md` backlog + pins · `docs/plan-done.md` · `README.md` setup/env ·
 `docs/features-reference.md` (**read the matching section before touching a feature**) · `docs/commands-reference.md` · other `docs/*.md` only on request.
 
 ## Layout
@@ -40,8 +40,7 @@ Pins (why: PLAN.md "Version pins"): Node 24, TypeScript 5.9, NestJS 11, Drizzle 
 
 ## Workflow
 
-- After each big update give a suggested commit message (subject + bullet per change, all uncommitted work: `git status` / `git diff --stat`;
-  split if logical). Never run `git commit` / `git push` unless asked.
+- After each big update suggest a commit message (subject + bullet per change, from `git status`; split if logical). Never `git commit` / `git push` unless asked.
 - **Seed CSVs mirror scraped tables**: after changing one, re-run its `pnpm export:*:csv`.
 - `pnpm format` first (not `scripts/src/fixtures`). Tests: Vitest, colocated `*.test.ts(x)`.
 - Docs: write-up → `plan-done.md`, one-line ✅ → `PLAN.md`, conventions → `features-reference.md`, user-facing → `shared/src/releases.ts`

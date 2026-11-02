@@ -90,4 +90,19 @@ describe('renderMetaTags with a non-card image', () => {
     expect(html).not.toContain('og:image:width')
     expect(html).not.toContain('og:image:height')
   })
+
+  it('sends the stored size of a shared photo when it is known', () => {
+    const html = renderMetaTags({
+      siteUrl: 'https://carsua.app',
+      path: '/AA1234BB',
+      lang: 'en',
+      title: 't',
+      description: 'd',
+      image: 'https://carsua.app/api/shares/x/image',
+      imageType: 'image/jpeg',
+      imageSize: { width: 1600, height: 900 }
+    })
+    expect(html).toContain('og:image:width" content="1600"')
+    expect(html).toContain('og:image:height" content="900"')
+  })
 })

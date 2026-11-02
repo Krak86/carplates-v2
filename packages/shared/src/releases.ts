@@ -19,6 +19,18 @@ export const RELEASES: readonly ReleaseDay[] = [
     date: '2026-11-02',
     items: [
       item(
+        'improved',
+        'Посилання на фото у месенджерах показує більше тексту: опис із позначкою, що фото приватне, і датою завершення дії посилання',
+        'Ссылка на фото в мессенджерах показывает больше текста: описание с пометкой, что фото приватное, и датой окончания действия ссылки',
+        'A shared photo link in messengers shows more text: a description noting the photo is private, with the date the link expires'
+      ),
+      item(
+        'improved',
+        'Перед створенням посилання на фото можна дописати розмиття пензлем або повернути оригінал, а також побачити, що саме видалено з фото; номери на перегляді обведені',
+        'Перед созданием ссылки на фото можно дорисовать размытие кистью или вернуть оригинал, а также увидеть, что именно удалено из фото; номера на просмотре обведены',
+        'Before creating a photo link you can paint extra blur with a brush or restore the original, see what was removed from the photo, and the plates are outlined in the preview'
+      ),
+      item(
         'new',
         'У перегляді фото є кнопки «назад» і «далі», а на фото лотів аукціону - позначка збільшення',
         'В просмотре фото есть кнопки «назад» и «дальше», а на фото лотов аукциона - значок увеличения',

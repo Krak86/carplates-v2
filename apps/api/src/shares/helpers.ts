@@ -106,6 +106,16 @@ export async function downscaleForShare(input: Buffer): Promise<Buffer | null> {
   return null
 }
 
+/** Pixel size of an encoded image; null when it cannot be read (the link preview then sends no size tags). */
+export async function imageSize(input: Buffer): Promise<{ width: number | null; height: number | null }> {
+  try {
+    const { width, height } = await sharp(input).metadata()
+    return { width: width ?? null, height: height ?? null }
+  } catch {
+    return { width: null, height: null }
+  }
+}
+
 /** Seconds a response may be cached: never longer than the time left, never more than an hour, never negative. */
 export const cacheSecondsLeft = (expiresAt: Date, now = Date.now()): number =>
   Math.max(0, Math.min(3600, Math.floor((expiresAt.getTime() - now) / 1000)))

@@ -11,7 +11,7 @@ import {
   UnsupportedMediaTypeException
 } from '@nestjs/common'
 import type { PlateCandidate } from '@carplates/shared'
-import { SHARE_MAX_ACTIVE, SHARE_MAX_UPLOAD_BYTES, SHARE_TTL_DAYS } from '@carplates/shared'
+import { SHARE_MAX_ACTIVE, SHARE_MAX_ACTIVE_ADMIN, SHARE_MAX_UPLOAD_BYTES, SHARE_TTL_DAYS } from '@carplates/shared'
 import sharp from 'sharp'
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -54,7 +54,10 @@ function setup() {
     insertUnderCap: vi.fn(async (_share: NewShare, _max: number) => true),
     listActive: vi.fn(async () => [] as ShareRecord[]),
     findByTokenHash: vi.fn(async () => null as ShareRecord | null),
-    deleteOwned: vi.fn(async () => null as ShareRecord | null)
+    deleteOwned: vi.fn(async () => null as ShareRecord | null),
+    findActiveOwned: vi.fn(async () => null as ShareRecord | null),
+    updateRetouched: vi.fn(async () => true),
+    clearOriginal: vi.fn(async () => null as string | null)
   }
   const store: ShareObjectStore = {
     put: vi.fn(async () => undefined),
@@ -65,7 +68,7 @@ function setup() {
     delete: vi.fn(async () => undefined)
   }
   const recognizer = { recognize: vi.fn(async () => ({ candidates })) }
-  const anonymizer = { anonymize: vi.fn(async () => blurred) }
+  const anonymizer = { anonymize: vi.fn(async () => ({ image: blurred, faces: 2 })) }
   const service = new SharesService(
     repo as unknown as SharesRepository,
     store,
@@ -82,6 +85,10 @@ const record = (over: Partial<ShareRecord> = {}): ShareRecord => ({
   plate: 'АА1234ВВ',
   candidates,
   bytes: 1000,
+  width: 1600,
+  height: 900,
+  removed: null,
+  originalKey: null,
   createdAt: new Date(),
   expiresAt: new Date(Date.now() + 3 * 86_400_000),
   revokedAt: null,
@@ -105,6 +112,11 @@ describe('SharesService.create', () => {
     expect(res.token).toMatch(/^[A-Za-z0-9_-]{22}$/)
     expect(res.plate).toBe('АА1234ВВ')
     expect(res.candidates).toEqual(candidates)
+    expect(res.removed).toEqual({
+      facesBlurred: 2,
+      originalSize: { width: 64, height: 64 },
+      storedSize: { width: 1600, height: 1067 }
+    })
     const days = (Date.parse(res.expiresAt) - Date.now()) / 86_400_000
     expect(days).toBeGreaterThan(SHARE_TTL_DAYS - 0.01)
     expect(days).toBeLessThanOrEqual(SHARE_TTL_DAYS)
@@ -125,6 +137,14 @@ describe('SharesService.create', () => {
     })
     expect((row as { tokenHash: string }).tokenHash).toBe(hashShareToken(res.token))
     expect(JSON.stringify(row)).not.toContain(res.token)
+  })
+
+  it('lets an admin go past the regular cap, up to the admin cap', async () => {
+    s.repo.countActive.mockResolvedValue(SHARE_MAX_ACTIVE)
+    await expect(s.service.create('u1', upload(), 'admin')).resolves.toMatchObject({ plate: 'АА1234ВВ' })
+    expect((await s.service.listMine('u1', 'admin')).max).toBe(SHARE_MAX_ACTIVE_ADMIN)
+    s.repo.countActive.mockResolvedValue(SHARE_MAX_ACTIVE_ADMIN)
+    await expect(s.service.create('u1', upload(), 'admin')).rejects.toBeInstanceOf(ConflictException)
   })
 
   it('refuses at the per-user cap before doing any ALPR or blur work', async () => {
@@ -155,12 +175,22 @@ describe('SharesService.create', () => {
     await expect(s.service.create('u1', upload())).rejects.toBeInstanceOf(ConflictException)
     const key = vi.mocked(s.store.put).mock.calls[0]?.[0]
     expect(s.store.delete).toHaveBeenCalledWith(key)
+    expect(s.store.delete).toHaveBeenCalledWith(`shares/${key?.slice(7, -4)}.orig`)
+  })
+
+  it('keeps the unblurred upload privately for the blur editor', async () => {
+    const res = await s.service.create('u1', upload())
+    const [key, body, type] = vi.mocked(s.store.put).mock.calls[1] ?? []
+    expect(key).toBe(`shares/${res.id}.orig`)
+    expect(body).toBe(jpeg)
+    expect(type).toBe('image/jpeg')
+    expect(s.repo.insertUnderCap.mock.calls[0]?.[0]).toMatchObject({ originalKey: key })
   })
 
   it('deletes the stored object when the insert fails', async () => {
     s.repo.insertUnderCap.mockRejectedValue(new Error('db down'))
     await expect(s.service.create('u1', upload())).rejects.toThrow('db down')
-    expect(s.store.delete).toHaveBeenCalledTimes(1)
+    expect(s.store.delete).toHaveBeenCalledTimes(2) // the copy and the unblurred upload
   })
 
   it('rejects a photo with no plate (and never blurs or stores it)', async () => {
@@ -261,11 +291,25 @@ describe('SharesService reading a link', () => {
     await expect(s.service.image(newShareToken())).rejects.toBeInstanceOf(GoneException)
   })
 
+  it('ownImage serves the owner their own photo (cache capped at 5 min) and 404s otherwise', async () => {
+    await expect(s.service.ownImage('u1', record().id)).rejects.toBeInstanceOf(NotFoundException)
+    s.repo.findActiveOwned.mockResolvedValue(record())
+    expect((await s.service.ownImage('u1', record().id)).maxAgeS).toBe(300)
+    expect(s.repo.findActiveOwned).toHaveBeenCalledWith('u1', record().id)
+    vi.mocked(s.store.get).mockResolvedValue(null)
+    await expect(s.service.ownImage('u1', record().id)).rejects.toBeInstanceOf(NotFoundException)
+  })
+
   it('metaFor is null for a dead link and the plate + expiry for a live one', async () => {
     expect(await s.service.metaFor(newShareToken())).toBeNull()
     const row = record()
     s.repo.findByTokenHash.mockResolvedValue(row)
-    expect(await s.service.metaFor(newShareToken())).toEqual({ plate: row.plate, expiresAt: row.expiresAt })
+    expect(await s.service.metaFor(newShareToken())).toEqual({
+      plate: row.plate,
+      expiresAt: row.expiresAt,
+      width: 1600,
+      height: 900
+    })
   })
 })
 
@@ -281,7 +325,14 @@ describe('SharesService my shares', () => {
     const res = await s.service.listMine('u1')
     expect(res).toEqual({
       shares: [
-        { id: row.id, plate: row.plate, createdAt: row.createdAt.toISOString(), expiresAt: row.expiresAt.toISOString() }
+        {
+          id: row.id,
+          plate: row.plate,
+          createdAt: row.createdAt.toISOString(),
+          expiresAt: row.expiresAt.toISOString(),
+          removed: null,
+          candidates
+        }
       ],
       max: SHARE_MAX_ACTIVE
     })
@@ -305,6 +356,57 @@ describe('SharesService my shares', () => {
     s.repo.deleteOwned.mockResolvedValue(record())
     vi.mocked(s.store.delete).mockRejectedValue(new Error('r2 down'))
     await expect(s.service.remove('u1', record().id)).resolves.toBeUndefined()
+  })
+})
+
+describe('SharesService blur editor', () => {
+  let s: ReturnType<typeof setup>
+  const withOriginal = () => record({ originalKey: 'shares/3b0f7c1e-6f0b-4c6e-9b53-0a1f9a5f6a11.orig' })
+  beforeEach(() => {
+    s = setup()
+    s.repo.findActiveOwned.mockResolvedValue(withOriginal())
+    vi.mocked(s.store.get).mockImplementation(async () => ({ stream: Readable.from([jpeg]), length: jpeg.byteLength }))
+  })
+
+  it('re-renders from the original, replaces the object under the same key and updates the row', async () => {
+    const removed = await s.service.retouch('u1', record().id, [{ mode: 'add', radius: 0.05, points: [[0.5, 0.5]] }])
+    expect(s.anonymizer.anonymize).toHaveBeenCalledWith(jpeg, 'image/jpeg')
+    const [key, body, type] = vi.mocked(s.store.put).mock.calls[0] ?? []
+    expect(key).toBe(record().objectKey)
+    expect(type).toBe('image/jpeg')
+    const meta = await sharp(body as Buffer).metadata()
+    expect(s.repo.updateRetouched).toHaveBeenCalledWith('u1', record().id, {
+      bytes: (body as Buffer).byteLength,
+      width: meta.width,
+      height: meta.height,
+      removed
+    })
+    expect(removed).toMatchObject({ facesBlurred: 2, originalSize: { width: 64, height: 64 } })
+  })
+
+  it("is a 404 for somebody else's share, a 409 once the original is gone", async () => {
+    s.repo.findActiveOwned.mockResolvedValue(null)
+    await expect(s.service.retouch('u2', record().id, [])).rejects.toBeInstanceOf(NotFoundException)
+    s.repo.findActiveOwned.mockResolvedValue(record())
+    await expect(s.service.retouch('u1', record().id, [])).rejects.toBeInstanceOf(ConflictException)
+    s.repo.findActiveOwned.mockResolvedValue(withOriginal())
+    vi.mocked(s.store.get).mockResolvedValue(null)
+    await expect(s.service.retouch('u1', record().id, [])).rejects.toBeInstanceOf(ConflictException)
+    expect(s.store.put).not.toHaveBeenCalled()
+  })
+
+  it('dropOriginal deletes the unblurred object and is idempotent', async () => {
+    s.repo.clearOriginal.mockResolvedValueOnce('shares/x.orig')
+    await s.service.dropOriginal('u1', record().id)
+    expect(s.store.delete).toHaveBeenCalledWith('shares/x.orig')
+    await s.service.dropOriginal('u1', record().id)
+    expect(s.store.delete).toHaveBeenCalledTimes(1)
+  })
+
+  it('removing a share also removes its unblurred upload', async () => {
+    s.repo.deleteOwned.mockResolvedValue(withOriginal())
+    await s.service.remove('u1', record().id)
+    expect(s.store.delete).toHaveBeenCalledWith(withOriginal().originalKey)
   })
 })
 

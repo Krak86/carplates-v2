@@ -48,7 +48,7 @@ import {
   DEFAULT_LANG,
   SHARE_ALIAS_PAGES,
   SHARE_EXPIRED_PAGE,
-  SITE_NAME,
+  sharedPhotoText,
   STATIC_PAGES,
   resolveLang,
   sectionPageText,
@@ -199,10 +199,10 @@ export class SpaController {
       siteUrl,
       path: `/${encodeURIComponent(share.plate)}?p=${token}`,
       lang,
-      title: preview?.title ?? `${SITE_NAME} - ${share.plate}`,
-      description: preview?.description ?? share.plate,
+      ...sharedPhotoText(lang, share.plate, share.expiresAt, preview),
       image: `${siteUrl}/api/shares/${token}/image`,
       imageType: 'image/jpeg',
+      ...(share.width && share.height && { imageSize: { width: share.width, height: share.height } }),
       noindex: true
     })
   }

@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common'
 import { sharedPhotos } from '@carplates/db'
-import type { PlateCandidate } from '@carplates/shared'
-import { and, asc, count, desc, eq, inArray, isNull, lte, or, sql } from 'drizzle-orm'
+import type { PlateCandidate, ShareRemoved } from '@carplates/shared'
+import { and, asc, count, desc, eq, inArray, isNotNull, isNull, lt, lte, or, sql } from 'drizzle-orm'
 
 import { DbService } from '../db/db.service.js'
 import type { NewShare, ShareRecord } from './types.js'
@@ -15,6 +15,10 @@ const toRecord = (row: Row): ShareRecord => ({
   plate: row.plate,
   candidates: row.candidates as PlateCandidate[],
   bytes: row.bytes,
+  width: row.width,
+  height: row.height,
+  removed: row.removed as ShareRemoved | null,
+  originalKey: row.originalKey,
   createdAt: row.createdAt,
   expiresAt: row.expiresAt,
   revokedAt: row.revokedAt
@@ -73,6 +77,15 @@ export class SharesRepository {
     return row ? toRecord(row) : null
   }
 
+  /** One of the user's own active shares, or `null` (not theirs, expired, revoked, gone). */
+  async findActiveOwned(userId: string, id: string): Promise<ShareRecord | null> {
+    const [row] = await this.dbService.db
+      .select()
+      .from(sharedPhotos)
+      .where(and(eq(sharedPhotos.id, id), eq(sharedPhotos.userId, userId), active))
+    return row ? toRecord(row) : null
+  }
+
   /** Deletes one of the user's own shares and returns it (for its object key), or `null` when it is not theirs / gone. */
   async deleteOwned(userId: string, id: string): Promise<ShareRecord | null> {
     const [row] = await this.dbService.db
@@ -83,9 +96,9 @@ export class SharesRepository {
   }
 
   /** Rows past `expires_at` or revoked, oldest first. */
-  async listDue(limit: number): Promise<{ id: string; objectKey: string }[]> {
+  async listDue(limit: number): Promise<{ id: string; objectKey: string; originalKey: string | null }[]> {
     return this.dbService.db
-      .select({ id: sharedPhotos.id, objectKey: sharedPhotos.objectKey })
+      .select({ id: sharedPhotos.id, objectKey: sharedPhotos.objectKey, originalKey: sharedPhotos.originalKey })
       .from(sharedPhotos)
       .where(or(lte(sharedPhotos.expiresAt, sql`now()`), sql`${sharedPhotos.revokedAt} is not null`))
       .orderBy(asc(sharedPhotos.expiresAt))
@@ -102,7 +115,49 @@ export class SharesRepository {
     const rows = await this.dbService.db
       .delete(sharedPhotos)
       .where(inArray(sharedPhotos.userId, userIds))
-      .returning({ key: sharedPhotos.objectKey })
-    return rows.map(r => r.key)
+      .returning({ key: sharedPhotos.objectKey, originalKey: sharedPhotos.originalKey })
+    return rows.flatMap(r => (r.originalKey ? [r.key, r.originalKey] : [r.key]))
+  }
+
+  /** Swaps the stored copy's numbers after a retouch (same object key, so the link stays valid); false when the share is gone. */
+  async updateRetouched(
+    userId: string,
+    id: string,
+    patch: Pick<ShareRecord, 'bytes' | 'width' | 'height' | 'removed'>
+  ): Promise<boolean> {
+    const rows = await this.dbService.db
+      .update(sharedPhotos)
+      .set(patch)
+      .where(and(eq(sharedPhotos.id, id), eq(sharedPhotos.userId, userId), active))
+      .returning({ id: sharedPhotos.id })
+    return rows.length > 0
+  }
+
+  /** Forgets the unblurred upload of the user's own share and returns its key (to delete the object), or null when it has none. */
+  async clearOriginal(userId: string, id: string): Promise<string | null> {
+    const row = await this.findActiveOwned(userId, id)
+    if (!row?.originalKey) return null
+    const rows = await this.dbService.db
+      .update(sharedPhotos)
+      .set({ originalKey: null })
+      .where(and(eq(sharedPhotos.id, id), eq(sharedPhotos.originalKey, row.originalKey)))
+      .returning({ id: sharedPhotos.id })
+    return rows.length ? row.originalKey : null
+  }
+
+  /** Unblurred uploads older than the cutoff (an abandoned dialog), oldest first. */
+  async listStaleOriginals(before: Date, limit: number): Promise<{ id: string; originalKey: string }[]> {
+    const rows = await this.dbService.db
+      .select({ id: sharedPhotos.id, originalKey: sharedPhotos.originalKey })
+      .from(sharedPhotos)
+      .where(and(isNotNull(sharedPhotos.originalKey), lt(sharedPhotos.createdAt, before)))
+      .orderBy(asc(sharedPhotos.createdAt))
+      .limit(limit)
+    return rows.flatMap(r => (r.originalKey ? [{ id: r.id, originalKey: r.originalKey }] : []))
+  }
+
+  async clearOriginals(ids: string[]): Promise<void> {
+    if (ids.length)
+      await this.dbService.db.update(sharedPhotos).set({ originalKey: null }).where(inArray(sharedPhotos.id, ids))
   }
 }

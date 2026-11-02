@@ -90,7 +90,9 @@ describe('SpaController meta injection', () => {
     const { SharesService } = await import('../shares/shares.service.js')
     const shares = {
       metaFor: async (token: string) =>
-        token === LIVE_TOKEN ? { plate: 'AA1234BB', expiresAt: new Date(Date.now() + 86_400_000) } : null
+        token === LIVE_TOKEN
+          ? { plate: 'AA1234BB', expiresAt: new Date(Date.now() + 86_400_000), width: 1600, height: 900 }
+          : null
     }
     const moduleRef = await Test.createTestingModule({
       controllers: [SpaController],
@@ -218,7 +220,8 @@ describe('SpaController meta injection', () => {
     const res = await app.inject({ method: 'GET', url: `/AA1234BB?p=${LIVE_TOKEN}` })
     expect(res.body).toContain(`og:image" content="https://carsua.app/api/shares/${LIVE_TOKEN}/image"`)
     expect(res.body).toContain('og:image:type" content="image/jpeg"')
-    expect(res.body).not.toContain('og:image:width')
+    expect(res.body).toContain('og:image:width" content="1600"')
+    expect(res.body).toContain('og:image:height" content="900"')
     expect(res.body).toContain('<title>Cars UA - AA1234BB - Toyota Camry 2015</title>')
     expect(res.body).toContain('noindex')
     expect(res.headers['cache-control']).toBe('no-store')

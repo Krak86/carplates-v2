@@ -10,6 +10,8 @@ export type MetaInput = {
   image: string
   /** MIME type of `image` when it is not one of our 1200x630 PNG cards (shared photos are JPEGs of unknown size: no width/height tags). */
   imageType?: string
+  /** Pixel size of a non-card `image`; both set = width/height tags, else none. */
+  imageSize?: { width: number; height: number }
   /** Plate/VIN pages: keep millions of per-vehicle URLs out of search indexes (link unfurlers still read the tags). */
   noindex?: boolean
   /** Indexable static pages: self-canonical per language plus hreflang alternates for all of them. */
@@ -50,7 +52,12 @@ export function renderMetaTags(m: MetaInput): string {
     `<meta property="og:image" content="${esc(m.image)}">`,
     `<meta property="og:image:type" content="${esc(m.imageType ?? 'image/png')}">`,
     ...(m.imageType
-      ? []
+      ? m.imageSize
+        ? [
+            `<meta property="og:image:width" content="${m.imageSize.width}">`,
+            `<meta property="og:image:height" content="${m.imageSize.height}">`
+          ]
+        : []
       : [
           `<meta property="og:image:width" content="${OG_WIDTH}">`,
           `<meta property="og:image:height" content="${OG_HEIGHT}">`

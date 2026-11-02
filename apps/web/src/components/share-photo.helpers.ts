@@ -1,4 +1,10 @@
-import { SHARE_EXPIRED, SHARE_LIMIT_REACHED, SHARE_NO_PLATE, SHARING_UNAVAILABLE } from '@carplates/shared'
+import {
+  SHARE_EXPIRED,
+  SHARE_LIMIT_REACHED,
+  SHARE_NO_ORIGINAL,
+  SHARE_NO_PLATE,
+  SHARING_UNAVAILABLE
+} from '@carplates/shared'
 
 import { ApiError } from '@/lib/api'
 
@@ -20,6 +26,13 @@ export function shareErrorKey(error: unknown): string {
     default:
       return 'photoShare.error.generic'
   }
+}
+
+/** Saving the blur editor: a 409 means the unblurred upload is gone (not the share limit), the rest is as for creating. */
+export function retouchErrorKey(error: unknown): string {
+  if (error instanceof ApiError && (error.message === SHARE_NO_ORIGINAL || error.status === 409))
+    return 'photoShare.edit.gone'
+  return shareErrorKey(error)
 }
 
 /** The Share button: a shrunk, metadata-free copy of a photo this browser picked, recognized from a plate (never a certificate). */

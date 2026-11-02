@@ -4459,14 +4459,14 @@ The photo is a private, time-limited capability link, never a public image host.
 - **Open decisions:** 7 vs 30 days and 3 vs 5 shares (both single constants); whether the preview lets the user blur other plates (later);
   **"Copy link" in My shares (decide before slice 3):** keep the random token and have the web store the link it got at creation (localStorage), or derive the token as `HMAC(AUTH_SECRET, id)` so the owner's link is recomputable (see the slice 2 "Gap" note).
 - **Resume / build order (~3-5 h, four committable slices):**
-  1. ✅ **Done 2026-11-02 (uncommitted until reviewed)** `services/alpr`: `/anonymize` (YuNet face blur) + tests + a face eval on own photos (~1 h). **First verify** the OpenCV build pulled in by `fast-alpr` has `cv2.FaceDetectorYN`
+  1. ✅ **Done 2026-11-02 (committed)** `services/alpr`: `/anonymize` (YuNet face blur) + tests + a face eval on own photos (~1 h). **First verify** the OpenCV build pulled in by `fast-alpr` has `cv2.FaceDetectorYN`
      (needs OpenCV >= 4.5.4); if not, run the same ONNX model through `onnxruntime` (already in the image). Model file (~230 KB): commit under `services/alpr/` or fetch in the Dockerfile.
      **Outcome:** OpenCV 5.0.0 has `FaceDetectorYN`; model committed in `services/alpr/models/`. Contract for slice 2: `POST /anonymize` (multipart `image`, `X-Alpr-Key`)
      returns `image/jpeg` at the **full input resolution** (no downscale, no EXIF) + `X-Faces-Blurred: N`; 400 undecodable, 413 > 6 MB, 502 failure; ~0.3 s median, ~0.8 s max.
      The API still has to downscale to 1600 px / q~80 (sharp), call `/recognize` on the original bytes, and wire a client method next to `local-recognize.service.ts`
      (same 10 s timeout idea). Hand-counted recall on own photos ~94% on the beach shot, misses = profile / looking down / tiny faces; false boxes on logos/bumpers are possible.
      Needs an ALPR image redeploy before slice 2 can run in prod (manual, user).
-  2. ✅ **Done 2026-11-02 (uncommitted until reviewed)** API + DB: migration `app.shared_photos`, R2 client + env vars, `POST/GET/DELETE /api/shares` (re-run ALPR, blur, downscale to 1600 px, caps, throttle, global 8 GB guard),
+  2. ✅ **Done 2026-11-02 (committed)** API + DB: migration `app.shared_photos`, R2 client + env vars, `POST/GET/DELETE /api/shares` (re-run ALPR, blur, downscale to 1600 px, caps, throttle, global 8 GB guard),
      daily expiry job, `og:image` + meta injection, tests (~1.5-2 h).
      **Outcome:** `apps/api/src/shares/` (conventions: features-reference.md "Shared photo links"), migration 0088, contract `packages/shared/src/shares.ts`. Manual steps (bucket, lifecycle rule, token, secrets, ALPR redeploy): docs/deploy.md "Shared photo links".
      Gap for slice 3: the token is returned **only by `POST /api/shares`** (only its hash is stored), so `GET /api/shares` cannot give "copy link" in My shares; the web must keep the link it got at creation (localStorage), or the token becomes `HMAC(AUTH_SECRET, id)` (recomputable by the owner; one function in `shares/helpers.ts`, decide before slice 3).
@@ -4488,6 +4488,21 @@ The photo is a private, time-limited capability link, never a public image host.
 - **Deployed and verified 2026-11-02:** bucket, 8-day lifecycle rule, R2 token, secrets, ALPR image and API are live; sharing works end to end. First prod try answered 503 `SHARING_UNAVAILABLE` because `SHARES_R2_SECRET_ACCESS_KEY` was not set yet (see docs/deploy.md).
 - **CI fixes on the way:** `apps/api` `sharp` ^0.34 -> ^0.35.5 (`pnpm audit --prod --audit-level=high` flagged libvips/libheif/librsvg; `scripts` was already on 0.35); the noise-image `downscaleForShare` test got a 30 s timeout (about 5 s on a CI runner).
 
+## Shared photos v2, S1-S7 (2026-11-02) ✅
+
+Follow-ups to "Shareable photo-search links"; each step shippable alone, all new UI lazy inside `SharePhotoDialog` / `SharesSection`. Conventions: features-reference.md "Shared photo links".
+
+- **S1** admin cap 50 (`shareMaxActive(role)`); the limit error names the user's max and links to `/profile#shares`.
+- **S2** owner-only `GET /api/shares/:id/preview` (share id, not the token; `private, max-age<=300`) for the My shared photos thumbnails; click opens the lazy `PhotoZoomDialog` with prev/next.
+- **S3** the dialog preview opens a raised `PhotoZoomDialog`; 🏷 toggles the plate outlines.
+- **S4** `og:image:width/height` from `shared_photos.width/height` (migration 0089), image throttle 120/min. Still by hand: the curl check in deploy.md on production.
+- **S5** `removed` ({ facesBlurred, originalSize, storedSize }, migration 0090) from the ALPR `X-Faces-Blurred` header + sharp sizes; `ShareRemovedList` in the dialog and My shared photos.
+- **S6** `PhotoPlateBoxes` outline the parsed plates on the preview; `GET /api/shares` returns `candidates`.
+- **S7 manual blur editor.** Decision (user, 2026-11-02): **option A**, keep the unblurred upload privately so "erase blur" can restore it, over option B (paint onto the blurred copy only, no original kept, can only add blur). Privacy trade-off: the original lives as `shares/<id>.orig` (migration 0091 `original_key`) only while the dialog is open; deleted on confirm (`DELETE /api/shares/:id/original`), cancel / close / delete, expiry, account deletion, and by a 15-minute sweep (older than 60 min) with the bucket's 8-day rule as the last backstop; Privacy text and deploy.md say so.
+  `POST /api/shares/:id/retouch` re-renders from the original every time (ALPR auto face blur, then the user's strokes in order: `add` lays a pixelated + blurred frame, `erase` the original, through an SVG mask at <= 1600 px), replaces the object under the same key (token and copied link stay valid). The client sends only 0-1 polylines, never pixels. Web: lazy `PhotoBlurEditor` (canvas, add / erase, brush size, undo / redo, zoom 1x-3x, Save); saved strokes stay in the dialog.
+  Fixed on the first real run: the migration had not been applied locally (500 on create); the browser cached the plain `/image` URL so the link showed the pre-edit copy (the dialog now always loads `?v=N`, N >= 1); painting lagged (one paint per frame, points spaced by a quarter of the brush radius); a raw sharp `composite` returned 4 channels and scrambled the frame (`removeAlpha()`).
+  Open: a retouch leaves the owner thumbnail in My shared photos stale for up to 5 min (`/preview` cache).
+
 ## Photo viewer, share-link polish, catalog skeletons (2026-11-02) ✅
 
 - **Photo zoom modal:** prev/next buttons over the photos of the current gallery (car, auction lot, My shared photos); the auction lot carousel shows a zoom badge on the photo so it reads as enlargeable.
@@ -4495,4 +4510,5 @@ The photo is a private, time-limited capability link, never a public image host.
 - **Catalog:** skeletons for make and model pages remove the layout shift; model and make pages show popularity, 3D/360° and test-drive chips; `/auctions` opened from a make page scrolls to the lots.
 - **Fixes:** race modal close button stays visible on mobile; `sharp` 0.35.5 (see "Shareable photo-search links").
 - **About:** new feature `photoZoom`; new sources `yunet` (OpenCV Zoo face model behind the share blur) and `uqr` (QR code generator).
+- **Link preview text:** `sharedPhotoText` (`spa-text.ts`) adds a note (faces blurred, plates recognized, valid until <date>) to the description and gives plates outside the registry the title "car photo <plate>" (they had no description before).
 - **Release notes:** all of the above are in the 2026-11-02 day of `releases.ts`.
