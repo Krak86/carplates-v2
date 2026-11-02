@@ -213,26 +213,26 @@ export const STATIC_PAGES: Record<string, Record<Lang, PageText>> = {
   },
   '/wanted': {
     ua: {
-      title: 'Авто в розшуку в Україні: статистика за регіонами і марками | Cars UA',
+      title: 'Авто в розшуку в Україні: за регіонами і марками | Cars UA',
       description: 'Скільки авто в розшуку в Україні, скільки знайдено, за регіонами, марками, кольорами та роками.'
     },
     ru: {
-      title: 'Авто в розыске в Украине: статистика по регионам и маркам | Cars UA',
+      title: 'Авто в розыске в Украине: по регионам и маркам | Cars UA',
       description: 'Сколько авто в розыске в Украине, сколько найдено, по регионам, маркам, цветам и годам.'
     },
     en: {
-      title: 'Wanted vehicles in Ukraine: statistics by region and make | Cars UA',
+      title: 'Wanted vehicles in Ukraine: by region and make | Cars UA',
       description: 'How many vehicles are wanted in Ukraine and how many were found, by region, make, colour and year.'
     }
   },
   '/auctions': {
     ua: {
-      title: 'Українські аукціони арештованих авто: лоти та статистика | Cars UA',
+      title: 'Аукціони арештованих авто в Україні: лоти і ціни | Cars UA',
       description:
         'Легкові й вантажні авто з торгів СЕТАМ і Prozorro.Продажів: лоти, ціни продажу, статистика за регіонами, марками й роками.'
     },
     ru: {
-      title: 'Украинские аукционы арестованных авто: лоты и статистика | Cars UA',
+      title: 'Аукционы арестованных авто в Украине: лоты и цены | Cars UA',
       description:
         'Легковые и грузовые авто с торгов СЕТАМ и Prozorro.Продажи: лоты, цены продажи, статистика по регионам, маркам и годам.'
     },
@@ -244,12 +244,12 @@ export const STATIC_PAGES: Record<string, Record<Lang, PageText>> = {
   },
   '/fuel': {
     ua: {
-      title: 'Витрата пального та викиди CO₂ авто за марками й моделями | Cars UA',
+      title: 'Витрата пального та CO₂ авто за марками й моделями | Cars UA',
       description:
         'Витрата пального та викиди CO₂ за марками й моделями авто, які їздять в Україні, за відкритим реєстром транспортних засобів.'
     },
     ru: {
-      title: 'Расход топлива и выбросы CO₂ авто по маркам и моделям | Cars UA',
+      title: 'Расход топлива и CO₂ авто по маркам и моделям | Cars UA',
       description:
         'Расход топлива и выбросы CO₂ по маркам и моделям авто, которые ездят в Украине, по открытому реестру транспортных средств.'
     },
@@ -261,17 +261,17 @@ export const STATIC_PAGES: Record<string, Record<Lang, PageText>> = {
   },
   '/safety': {
     ua: {
-      title: 'Краш-тести авто: оцінки Euro NCAP, IIHS, NHTSA за моделями | Cars UA',
+      title: 'Краш-тести авто: Euro NCAP, IIHS, NHTSA за моделями | Cars UA',
       description:
         'Результати краш-тестів Euro NCAP, IIHS, NHTSA та інших за марками й моделями авто, які їздять в Україні.'
     },
     ru: {
-      title: 'Краш-тесты авто: оценки Euro NCAP, IIHS, NHTSA по моделям | Cars UA',
+      title: 'Краш-тесты авто: Euro NCAP, IIHS, NHTSA по моделям | Cars UA',
       description:
         'Результаты краш-тестов Euro NCAP, IIHS, NHTSA и других по маркам и моделям авто, которые ездят в Украине.'
     },
     en: {
-      title: 'Car crash tests: Euro NCAP, IIHS, NHTSA ratings by model | Cars UA',
+      title: 'Car crash tests: Euro NCAP, IIHS, NHTSA by model | Cars UA',
       description:
         'Euro NCAP, IIHS, NHTSA and other crash-test results by make and model for the cars driving in Ukraine.'
     }
@@ -288,7 +288,7 @@ export const STATIC_PAGES: Record<string, Record<Lang, PageText>> = {
         'Погибшие и ДТП по областям (также на 100 000 авто), дорогам государственного значения, причинам, часу и дню недели по данным Патрульной полиции.'
     },
     en: {
-      title: 'Road crash statistics in Ukraine: regions, roads, causes | Cars UA',
+      title: 'Road crash statistics in Ukraine: regions and roads | Cars UA',
       description:
         'Deaths and crashes by region (also per 100,000 cars), state roads, causes, hour and weekday, from Patrol Police data.'
     }
@@ -306,17 +306,17 @@ export const STATIC_PAGES: Record<string, Record<Lang, PageText>> = {
   },
   '/read': {
     ua: {
-      title: 'Довідник авто: типи кузова, розміри й класи, електромобілі | Cars UA',
+      title: 'Довідник авто: кузови, розміри, класи, електромобілі | Cars UA',
       description:
         'Авто простими словами на даних українського реєстру: типи кузова, розміри й класи, електромобілі, номерні знаки, реальні приклади.'
     },
     ru: {
-      title: 'Справочник авто: типы кузова, размеры и классы, электромобили | Cars UA',
+      title: 'Справочник авто: кузова, размеры, классы, электромобили | Cars UA',
       description:
         'Авто простыми словами на данных украинского реестра: типы кузова, размеры и классы, электромобили, номерные знаки, реальные примеры.'
     },
     en: {
-      title: 'Car guides: body types, sizes and classes, electric cars | Cars UA',
+      title: 'Car guides: body types, sizes, classes, electric cars | Cars UA',
       description:
         'Cars explained on Ukrainian registry data: body types, sizes and classes, electric cars, number plates, real examples.'
     }
@@ -402,87 +402,87 @@ export const STATIC_PAGES: Record<string, Record<Lang, PageText>> = {
   },
   '/read/electric': {
     ua: {
-      title: 'Cars UA - Електромобілі в Україні: роки, регіони, моделі, зарядка',
+      title: 'Cars UA - Електромобілі в Україні: роки, регіони, моделі',
       description:
         'Скільки в Україні електромобілів і гібридів, з яких років, де їх найбільше, які моделі лідирують і чим відрізняються роз’єми зарядки.'
     },
     ru: {
-      title: 'Cars UA - Электромобили в Украине: годы, регионы, модели, зарядка',
+      title: 'Cars UA - Электромобили в Украине: годы, регионы, модели',
       description:
         'Сколько в Украине электромобилей и гибридов, каких лет, где их больше всего, какие модели лидируют и чем отличаются разъёмы зарядки.'
     },
     en: {
-      title: 'Cars UA - Electric cars in Ukraine: years, regions, models, charging',
+      title: 'Cars UA - Electric cars in Ukraine: years, regions, models',
       description:
         'How many electric cars and hybrids Ukraine has, which years they are from, where they are, which models lead and how the charging plugs differ.'
     }
   },
   '/read/auctions': {
     ua: {
-      title: 'Cars UA - Аукціони авто: українські торги СЕТАМ, світова практика та історія',
+      title: 'Cars UA - Аукціони авто: торги СЕТАМ, практика та історія',
       description:
-        'Що таке лот на аукціоні арештованого майна, як узяти участь, що показують наші дані про лоти СЕТАМ, чим це відрізняється від США й Британії, коротка історія аукціонів і що перевірити перед ставкою.'
+        'Що таке лот на аукціоні арештованого майна, як узяти участь, що показують дані про лоти СЕТАМ, чим це відрізняється від США й Британії і що перевірити перед ставкою.'
     },
     ru: {
-      title: 'Cars UA - Аукционы авто: украинские торги СЕТАМ, мировая практика и история',
+      title: 'Cars UA - Аукционы авто: торги СЕТАМ, практика и история',
       description:
-        'Что такое лот на аукционе арестованного имущества, как принять участие, что показывают наши данные о лотах СЕТАМ, чем это отличается от США и Британии, краткая история аукционов и что проверить перед ставкой.'
+        'Что такое лот на аукционе арестованного имущества, как принять участие, что показывают данные о лотах СЕТАМ, чем это отличается от США и Британии и что проверить перед ставкой.'
     },
     en: {
-      title: 'Cars UA - Car auctions: Ukrainian SETAM sales, practice abroad and history',
+      title: 'Cars UA - Car auctions: SETAM sales, practice and history',
       description:
-        'What a lot is at an auction of seized property, how to take part, what our data on SETAM lots shows, how it differs from the USA and the UK, a short history of auctions and what to check before you bid.'
+        'What a lot is at a seized-property auction, how to take part, what our SETAM lot data shows, how it differs from the USA and the UK and what to check before you bid.'
     }
   },
   '/read/imports': {
     ua: {
-      title: 'Cars UA - Авто з-за кордону: ввезені та куплені через дилера, країна за VIN',
+      title: 'Cars UA - Авто з-за кордону: імпорт, дилери, країна за VIN',
       description:
         'Скільки авто ввезено з-за кордону й скільки куплено через дилера, які моделі ввозять найчастіше, що VIN каже про країну виробництва і що перевірити перед купівлею.'
     },
     ru: {
-      title: 'Cars UA - Авто из-за границы: ввезённые и купленные через дилера, страна по VIN',
+      title: 'Cars UA - Авто из-за границы: импорт, дилеры, страна по VIN',
       description:
         'Сколько авто ввезено из-за границы и сколько куплено через дилера, какие модели ввозят чаще всего, что VIN говорит о стране сборки и что проверить перед покупкой.'
     },
     en: {
-      title: 'Cars UA - Cars from abroad: imports vs dealer-bought, country by VIN',
+      title: 'Cars UA - Cars from abroad: imports, dealers, country by VIN',
       description:
         'How many cars were brought in from abroad and how many bought through a dealer, which models are imported most, what the VIN says about the country of build and what to check before buying.'
     }
   },
   '/read/safety': {
     ua: {
-      title: 'Cars UA - Краш-тести: оцінки безпеки авто в Україні за роками й моделями',
+      title: 'Cars UA - Краш-тести: оцінки безпеки авто за моделями',
       description:
         'Які авто в Україні мають оцінки Euro NCAP, IIHS, JNCAP, C-NCAP і KNCAP, як вони змінюються за роками випуску, які моделі найкращі та найслабші і чого ці оцінки не кажуть.'
     },
     ru: {
-      title: 'Cars UA - Краш-тесты: оценки безопасности авто в Украине по годам и моделям',
+      title: 'Cars UA - Краш-тесты: оценки безопасности авто по моделям',
       description:
         'Какие авто в Украине имеют оценки Euro NCAP, IIHS, JNCAP, C-NCAP и KNCAP, как они меняются по годам выпуска, какие модели лучшие и слабейшие и о чём эти оценки не говорят.'
     },
     en: {
-      title: 'Cars UA - Crash tests: car safety ratings in Ukraine by year and model',
+      title: 'Cars UA - Crash tests: car safety ratings by year and model',
       description:
         'Which cars in Ukraine have Euro NCAP, IIHS, JNCAP, C-NCAP and KNCAP ratings, how they change with the model year, which models are the best and the weakest, and what the ratings do not tell you.'
     }
   },
   '/read/fuel': {
     ua: {
-      title: 'Cars UA - Паливо й викиди CO₂: на чому їздить Україна, чисті та витратні моделі',
+      title: 'Cars UA - Паливо й викиди CO₂: на чому їздить Україна',
       description:
         'Бензин, дизель, газ, гібрид чи електро: на чому їздить Україна, скільки CO₂ викидає середнє авто, як це змінюється за роками випуску, які моделі найчистіші та найвитратніші і як ми оцінюємо викиди.'
     },
     ru: {
-      title: 'Cars UA - Топливо и выбросы CO₂: на чём ездит Украина, чистые и затратные модели',
+      title: 'Cars UA - Топливо и выбросы CO₂: на чём ездит Украина',
       description:
-        'Бензин, дизель, газ, гибрид или электро: на чём ездит Украина, сколько CO₂ выбрасывает среднее авто, как это меняется по годам выпуска, какие модели самые чистые и самые затратные и как мы оцениваем выбросы.'
+        'Бензин, дизель, газ, гибрид или электро: на чём ездит Украина, сколько CO₂ выбрасывает среднее авто, как это меняется по годам, какие модели самые чистые и затратные и как мы оцениваем выбросы.'
     },
     en: {
-      title: 'Cars UA - Fuel and CO₂ emissions: what Ukraine runs on, cleanest and thirstiest models',
+      title: 'Cars UA - Fuel and CO₂ emissions: what Ukraine runs on',
       description:
-        'Petrol, diesel, gas, hybrid or electric: what Ukraine runs on, how much CO₂ the average car emits, how it changes with the model year, which models are the cleanest and the most CO₂-heavy, and how we estimate emissions.'
+        'Petrol, diesel, gas, hybrid or electric: what Ukraine runs on, how much CO₂ the average car emits, how it changes by year, which models are cleanest and most CO₂-heavy, and how we estimate it.'
     }
   },
   '/read/extremes': {
@@ -497,9 +497,9 @@ export const STATIC_PAGES: Record<string, Record<Lang, PageText>> = {
         'Рекордсмены украинского реестра: какая модель самая тяжёлая и лёгкая, кто самый мощный, с самым большим двигателем, самым высоким или длинным кузовом и самым большим баком - и как читать эти рейтинги.'
     },
     en: {
-      title: 'Cars UA - Heaviest, lightest and most powerful car models in Ukraine',
+      title: 'Cars UA - Heaviest and most powerful car models in Ukraine',
       description:
-        'The Ukrainian registry’s record holders: which model is the heaviest and the lightest, the most powerful, with the biggest engine, the tallest or longest body and the largest fuel tank, and how to read these rankings.'
+        'The Ukrainian registry’s record holders: the heaviest, lightest and most powerful models, the biggest engine, the tallest or longest body and the largest fuel tank, and how to read these rankings.'
     }
   },
   '/read/recalls': {
@@ -521,19 +521,19 @@ export const STATIC_PAGES: Record<string, Record<Lang, PageText>> = {
   },
   '/read/vin': {
     ua: {
-      title: 'Cars UA - VIN-код: що означають 17 символів, рік випуску і де його знайти',
+      title: 'Cars UA - VIN-код: що означають 17 символів і де його знайти',
       description:
-        'З чого складається VIN, як за ним дізнатися виробника, країну й модельний рік, що таке контрольна цифра, історію VIN, де його знайти на авто, старі й радянські номери, чому VIN не розбирається і як шукати за ним.'
+        'З чого складається VIN, як дізнатися виробника, країну й модельний рік, що таке контрольна цифра, де знайти VIN на авто, чому він не розбирається і як шукати за ним.'
     },
     ru: {
-      title: 'Cars UA - VIN-код: что значат 17 символов, год выпуска и где его найти',
+      title: 'Cars UA - VIN-код: что значат 17 символов и где его найти',
       description:
-        'Из чего состоит VIN, как по нему узнать производителя, страну и модельный год, что такое контрольная цифра, историю VIN, где его найти на авто, старые и советские номера, почему VIN не разбирается и как искать по нему.'
+        'Из чего состоит VIN, как узнать производителя, страну и модельный год, что такое контрольная цифра, где найти VIN на авто, почему он не разбирается и как искать по нему.'
     },
     en: {
-      title: 'Cars UA - VIN explained: what the 17 characters mean, the model year and where to find it',
+      title: 'Cars UA - VIN explained: what the 17 characters mean',
       description:
-        'What a VIN is made of, how to read the maker, country and model year off it, what the check digit is, the history of the VIN, where to find it on a car, old and Soviet-era numbers, why a VIN may not decode and how to search by it.'
+        'What a VIN is made of, how to read the maker, country and model year off it, the check digit, where to find it on a car, why it may not decode and how to search by it.'
     }
   },
   '/features': {
