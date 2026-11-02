@@ -51,6 +51,7 @@ import {
   sharedPhotoText,
   STATIC_PAGES,
   resolveLang,
+  isShareSection,
   sectionPageText,
   type Lang
 } from './spa-text.js'
@@ -318,9 +319,13 @@ export class SpaController {
       if (preview) {
         const base = section === 'value' ? await this.previews.describeValue(preview, lang) : preview
         const text = section === 'value' ? base : sectionPageText(lang, base, section)
+        const platePath = `/${encodeURIComponent(preview.value)}`
         return renderMetaTags({
           siteUrl,
-          path: `/${encodeURIComponent(preview.value)}`,
+          path: platePath,
+          ogUrl: isShareSection(section)
+            ? `${siteUrl}${platePath}?section=${encodeURIComponent(section)}${lang === DEFAULT_LANG ? '' : `&lang=${lang}`}`
+            : undefined,
           lang,
           title: text.title,
           description: text.description,

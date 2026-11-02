@@ -942,6 +942,10 @@ const SECTION_TEXT: Record<string, Record<Lang, [label: string, lead: string]>> 
 }
 
 /** `?section=<other>` share link: the section name in the title, a one-line lead in the description. Unknown section = unchanged. */
+/** A `?section=` id that gets its own preview text (`value` included), so its link is a distinct page for unfurlers. */
+export const isShareSection = (section: string | undefined): section is string =>
+  !!section && (section === 'value' || Object.hasOwn(SECTION_TEXT, section))
+
 export function sectionPageText(lang: Lang, base: PageText, section: string | undefined): PageText {
   const text = section && Object.hasOwn(SECTION_TEXT, section) ? SECTION_TEXT[section]?.[lang] : undefined
   if (!text) return base
