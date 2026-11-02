@@ -353,9 +353,10 @@ above once scoped, or dropped if research says no.
   (h) 📋 composite btree `(brand, model, make_year)` (new `packages/db/migrations/NNNN_*.sql`, backward compatible, `CREATE INDEX CONCURRENTLY`-style build): brand+model+year/colour still takes ~1.1 s (lossy bitmap heap scan, 1M rechecked rows, `docs/plan-done.md` "Advanced search: brand + model via the rollups"). Cost: long build and several hundred MB on the 8.8 GB `current_registration` (16.7M rows). Measure disk and the plan with the index first; only if brand+model+year is a common combination.
   (i) 📋 `EXPLAIN (ANALYZE, BUFFERS)` on the other combinations, not measured yet: brand alone, model alone (the `= ANY` route needs both), region, fuel, body, oper, `purpose` (unindexed). Needs one slow filter from the owner; same recipe: resolve the spellings from `stats_by_*` when a substring filter is the cost.
   (j) 📋 the per-instance match cache is cold after every deploy/restart (first call per filter set pays the full query); a warm-up of the top brand+model pairs is possible but not needed yet.
+- 📋 **What is left overall: [docs/leftovers.md](docs/leftovers.md)** (triage 2026-11-02).
 - ⏳ Own ALPR model + AR overlay — step 1 (self-hosted OCR service,
-  preferred over the metered cloud API above) done 2026-09-27; steps 2-4
-  (client-side live detection, AR overlay, polish) not started — see
+  preferred over the metered cloud API above) done 2026-09-27; the AR scan
+  dialog (`ArCameraDialog.tsx`) has since shipped, remaining polish/eval work — see
   "Own ALPR model + AR overlay" under Phase 3 for the full plan and exact
   resume point. Accuracy work since (EXIF rotation, padded OCR, tile-seam fix,
   registry-verified plate shapes, photo EXIF info, stacked two-row plates,
