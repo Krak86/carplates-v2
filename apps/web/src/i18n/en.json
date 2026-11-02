@@ -4489,6 +4489,7 @@
   "photoShare.mine.expires_other": "Expires in {{count}} days",
   "photoShare.mine.copy": "Copy link",
   "photoShare.mine.delete": "Delete",
+  "photoShare.mine.preview": "Shared photo, {{plate}}",
   "about.brief.photoShare": "Share a photo by private link",
   "about.feature.photoShare": "Share a photo-search result: signed-in users can create a private link to a plate photo. Faces are blurred automatically and the blurred preview is shown before you confirm; the link works for 7 days (up to 3 active links), then the photo is deleted. Anyone with the link sees the photo and the plate result, nothing else. Manage and delete your links in the profile (My shared photos); photos of registration certificates cannot be shared.",
   "legal.privacy.sharedPhotos.h": "Shared photos",
