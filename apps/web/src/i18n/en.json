@@ -1316,7 +1316,7 @@
   "about.feature.whatsnew": "What’s new: a bell in the header with a dot for unseen updates, the latest changes in a dropdown and a full day-by-day log on /releases",
   "about.feature.copy": "“Copy all info”: clipboard, txt, md, csv, docx, pdf (with a contents page and a page per section); history and favorites export",
   "about.feature.discuss": "Discussion: comments under cars and news for signed-in users",
-  "about.feature.sharecard": "Share links with link-preview cards (plus a Save as picture card) (plate in Latin letters, make, photo, chosen font) for messengers and social networks; a Share button also sits at the bottom of a result page",
+  "about.feature.sharecard": "Share links with link-preview cards (plus a Save as picture card) (plate in Latin letters, make, photo, chosen font) for messengers and social networks; a Share button also sits at the bottom of a result page The preview of a section link (?section=) is cached separately.",
   "about.feature.appearance": "Appearance: theme (auto, light, dark), accent color, text size and font, in the sidebar",
   "about.feature.digest": "Optional monthly news by email: a short list of new features once a month, only when there are some; switched on in your profile, one-click unsubscribe",
   "about.feature.translate": "Translate in place: reviews, recall texts and posts in your language, with the browser translator or small cached on-device models",
