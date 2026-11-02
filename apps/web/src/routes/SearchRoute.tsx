@@ -6,6 +6,7 @@ import { useLocation, useParams, useSearchParams } from 'react-router'
 import {
   classifyQuery,
   DEFAULT_WEIGHT_GROUP,
+  isShortSeriesPlate,
   isSovietPlate,
   isUaPlate,
   isVin,
@@ -145,7 +146,7 @@ export default function SearchRoute(): ReactNode {
   const notFound = active.error instanceof ApiError && active.error.status === 404
   const otherKeys = !notFound
     ? null
-    : kind === 'plate' && (isUaPlate(raw) || isSovietPlate(raw))
+    : kind === 'plate' && (isUaPlate(raw) || isSovietPlate(raw) || isShortSeriesPlate(raw))
       ? { plate: normalizePlate(raw), vin: null }
       : kind === 'vin' && isVin(raw)
         ? { plate: null, vin: raw.replace(/\s+/g, '').toUpperCase() }

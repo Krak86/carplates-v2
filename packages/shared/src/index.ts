@@ -6,6 +6,7 @@ export {
   repairOcrPlate,
   isUaPlate,
   isLegacyUaPlate,
+  isShortSeriesPlate,
   isSovietPlate
 } from './plate.js'
 export { modelFamily, type ModelFamily } from './modelFamily.js'
