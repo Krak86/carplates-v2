@@ -55,7 +55,7 @@ export default function PlayRoute(): ReactNode {
     []
   )
 
-  const handleToggleFullscreen =(): void => {
+  const handleToggleFullscreen = (): void => {
     if (document.fullscreenElement) void document.exitFullscreen()
     else void frameRef.current?.requestFullscreen().catch(() => undefined)
   }

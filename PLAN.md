@@ -856,7 +856,7 @@ Group 1 dimension callouts + garage-fit -> Group 3 (existing order). Owner says 
     Viewing a share stays public, only creating is gated.
   - **Open decisions:** 7 vs 30 days and 3 vs 5 shares (both single constants); whether the preview lets the user blur other plates (later).
   - **Resume / build order (~3-5 h, four committable slices):**
-    1. `services/alpr`: `/anonymize` (YuNet face blur) + tests + a face eval on own photos (~1 h). **First verify** the OpenCV build pulled in by `fast-alpr` has `cv2.FaceDetectorYN`
+    1. ✅ **Done 2026-11-02 (uncommitted until reviewed)** `services/alpr`: `/anonymize` (YuNet face blur) + tests + a face eval on own photos (~1 h). **First verify** the OpenCV build pulled in by `fast-alpr` has `cv2.FaceDetectorYN`
        (needs OpenCV >= 4.5.4); if not, run the same ONNX model through `onnxruntime` (already in the image). Model file (~230 KB): commit under `services/alpr/` or fetch in the Dockerfile.
     2. API + DB: migration `app.shared_photos`, R2 client + env vars, `POST/GET/DELETE /api/shares` (re-run ALPR, blur, downscale to 1600 px, caps, throttle, global 8 GB guard),
        daily expiry job, `og:image` + meta injection, tests (~1.5-2 h).
