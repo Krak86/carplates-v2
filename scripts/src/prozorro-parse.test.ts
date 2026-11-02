@@ -111,6 +111,7 @@ describe('Prozorro vehicle auctions', () => {
     expect(findVin('шасі 165463/4100G033754')).toBeNull()
     expect(findVin('Y7D322130X1007697270500X0006426')).toBeNull()
     expect(findVin('Автомобільнийзасіб')).toBeNull()
+    expect(findVin('42022010000000065')).toBeNull()
   })
 
   it('commercial lot without itemProps: VIN and plate come from the item text', () => {
