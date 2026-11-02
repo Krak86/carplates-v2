@@ -135,7 +135,8 @@ describe('downscaleForShare', () => {
   it('steps the quality down to fit the hard cap, or gives up with null', async () => {
     // Pure noise at 1600 px is far over 600 KB even at q50.
     expect(await downscaleForShare(await raw(1600, 1600, true).png().toBuffer())).toBeNull()
-  })
+    // Several mozjpeg passes over a noise image: ~5 s on a shared CI runner, so the default timeout is too tight.
+  }, 30_000)
 })
 
 describe('cacheSecondsLeft', () => {

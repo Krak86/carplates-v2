@@ -1,5 +1,5 @@
 import DataFreshness from '@/components/DataFreshness'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
@@ -69,6 +69,17 @@ export default function AuctionsRoute(): ReactNode {
         }
       ]
     : []
+
+  // `/auctions#auction-lots` (e.g. from the catalog) lands on the lot list; it only exists once the stats have loaded, and
+  // Layout's scroll-to-top on navigation runs first, so scroll on the next frame.
+  const hasData = !!data
+  useEffect(() => {
+    if (!hasData || window.location.hash !== '#auction-lots') return
+    const id = requestAnimationFrame(() => {
+      document.getElementById('auction-lots')?.scrollIntoView({ block: 'start' })
+    })
+    return () => cancelAnimationFrame(id)
+  }, [hasData])
 
   // A breakdown row opens the lot list filtered to that region / make.
   const handlePick = (dim: FilterableDimension, value: string): void => {
