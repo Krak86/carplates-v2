@@ -20,6 +20,12 @@ export const RELEASES: readonly ReleaseDay[] = [
     items: [
       item(
         'new',
+        'Сторінки моделі та марки в каталозі показують чипи поширеності (рейтинги, де ще продається), 3D- та 360°-перегляд і тест-драйв',
+        'Страницы модели и марки в каталоге показывают чипы распространённости (рейтинги, где ещё продаётся), 3D- и 360°-просмотр и тест-драйв',
+        'Catalog model and make pages show popularity chips (rankings, where else it is sold), 3D and 360° views and the test drive'
+      ),
+      item(
+        'new',
         'Поділитися фото пошуку за приватним посиланням: обличчя розмиваються автоматично, посилання діє 7 днів, фото можна видалити в профілі («Мої фото з посиланнями»)',
         'Поделиться фото поиска по приватной ссылке: лица размываются автоматически, ссылка действует 7 дней, фото можно удалить в профиле («Мои фото со ссылками»)',
         'Share a photo search by private link: faces are blurred automatically, the link works for 7 days, and you can delete the photo in your profile (My shared photos)'
