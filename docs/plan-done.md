@@ -4510,4 +4510,5 @@ Follow-ups to "Shareable photo-search links"; each step shippable alone, all new
 - **Catalog:** skeletons for make and model pages remove the layout shift; model and make pages show popularity, 3D/360° and test-drive chips; `/auctions` opened from a make page scrolls to the lots.
 - **Fixes:** race modal close button stays visible on mobile; `sharp` 0.35.5 (see "Shareable photo-search links").
 - **About:** new feature `photoZoom`; new sources `yunet` (OpenCV Zoo face model behind the share blur) and `uqr` (QR code generator).
+- **Link preview text:** `sharedPhotoText` (`spa-text.ts`) adds a note (faces blurred, plates recognized, valid until <date>) to the description and gives plates outside the registry the title "car photo <plate>" (they had no description before).
 - **Release notes:** all of the above are in the 2026-11-02 day of `releases.ts`.
