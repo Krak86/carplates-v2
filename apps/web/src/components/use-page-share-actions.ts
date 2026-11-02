@@ -15,6 +15,9 @@ export const NO_SHARE_PATHS = new Set([
   '/admin'
 ])
 
+/** The catalog: `/cars`, `/cars/:make`, `/cars/:make/:model` (with or without a trailing slash). */
+export const isCatalogPath = (pathname: string): boolean => /^\/cars(\/|$)/.test(pathname)
+
 type UsePageShareActions = {
   copied: boolean
   share: () => Promise<void>
