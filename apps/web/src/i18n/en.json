@@ -1752,6 +1752,8 @@
   "about.source.eUkraine": "e-Ukraine typeface by the Ministry of Digital Transformation of Ukraine, an optional font in the menu. Its licence terms are not clearly stated (the site footer says CC BY 4.0), so this preview may be removed on request.",
   "discuss.heading": "Discuss",
   "discuss.unavailable": "Comments aren't available right now.",
+  "discuss.contact.p1": "Need to reach us privately, or want a custom app? Use the",
+  "discuss.contact.link": "contact form",
   "history.title": "Search history",
   "history.viewLink": "View search history",
   "history.empty": "No searches yet.",

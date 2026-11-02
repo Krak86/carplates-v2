@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { DiscussionEmbed } from 'disqus-react'
 import { useTranslation } from 'react-i18next'
-import { useSearchParams } from 'react-router'
+import { Link, useSearchParams } from 'react-router'
 
 import { useCopyFeedback } from '@/components/use-copy-feedback'
 import Card from '@/components/ui/Card'
@@ -49,6 +49,13 @@ export default function DiscussRoute(): ReactNode {
           <p className="text-sm text-[var(--color-muted)]">{t('discuss.unavailable')}</p>
         )}
       </Card>
+
+      <p className="text-sm text-[var(--color-muted)]">
+        {t('discuss.contact.p1')}{' '}
+        <Link to="/contact" className="text-[var(--color-primary)] underline">
+          {t('discuss.contact.link')}
+        </Link>
+      </p>
     </article>
   )
 }
