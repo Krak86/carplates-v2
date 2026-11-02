@@ -20,6 +20,12 @@ export const RELEASES: readonly ReleaseDay[] = [
     items: [
       item(
         'improved',
+        'Превʼю посилання на фото у месенджерах показує фото з обведеними номерами',
+        'Превью ссылки на фото в мессенджерах показывает фото с обведёнными номерами',
+        'A shared photo link preview in messengers shows the photo with the plates outlined'
+      ),
+      item(
+        'improved',
         'Посилання на фото у месенджерах показує більше тексту: опис із позначкою, що фото приватне, і датою завершення дії посилання',
         'Ссылка на фото в мессенджерах показывает больше текста: описание с пометкой, что фото приватное, и датой окончания действия ссылки',
         'A shared photo link in messengers shows more text: a description noting the photo is private, with the date the link expires'
