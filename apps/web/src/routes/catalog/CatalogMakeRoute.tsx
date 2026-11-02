@@ -180,7 +180,7 @@ export default function CatalogMakeRoute(): ReactNode {
         )}
       </Card>
 
-      <LazySection>
+      <LazySection sections={['shares']}>
         <SharePriceCard brand={make.topBrand} />
       </LazySection>
 
