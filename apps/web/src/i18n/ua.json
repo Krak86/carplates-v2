@@ -4808,6 +4808,7 @@
   "dataStatus.byHand": "Оновлюється вручну і зберігається в базі",
   "dataStatus.byRequest": "Запитується наживо при кожному пошуку",
   "dataStatus.synced": "Оновлено {{date}}",
+  "dataStatus.latest": "Найновіший запис: {{date}}",
   "dataStatus.neverSynced": "Оновлень ще не зафіксовано",
   "dataStatus.status.fresh": "Свіже",
   "dataStatus.status.fresh.desc": "оновлено в межах звичайного ритму",

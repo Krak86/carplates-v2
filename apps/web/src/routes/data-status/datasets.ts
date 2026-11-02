@@ -15,6 +15,7 @@ export const DATASETS: readonly Dataset[] = [
     cadence: 'monthly',
     job: 'plates',
     checkEveryDays: 7,
+    latestByMonth: true,
     refreshedOn: '2026-10-28'
   },
   {
@@ -56,6 +57,7 @@ export const DATASETS: readonly Dataset[] = [
     to: '/road-safety',
     cadence: 'monthly',
     job: 'dtp-patrol',
+    latestByMonth: true,
     refreshedOn: '2026-10-31'
   },
   {

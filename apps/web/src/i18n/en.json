@@ -4326,6 +4326,7 @@
   "dataStatus.byHand": "Updated by hand and checked in",
   "dataStatus.byRequest": "Asked live on every request",
   "dataStatus.synced": "Updated {{date}}",
+  "dataStatus.latest": "Latest record: {{date}}",
   "dataStatus.neverSynced": "No update recorded yet",
   "dataStatus.status.fresh": "Fresh",
   "dataStatus.status.fresh.desc": "updated within its normal rhythm",
