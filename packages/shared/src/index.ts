@@ -920,6 +920,7 @@ export {
   SHARE_EXPIRED,
   SHARE_LIMIT_REACHED,
   SHARE_MAX_ACTIVE,
+  SHARE_MAX_ACTIVE_ADMIN,
   SHARE_MAX_UPLOAD_BYTES,
   SHARE_NO_PLATE,
   SHARE_TTL_DAYS,
@@ -927,6 +928,7 @@ export {
   createShareResponseSchema,
   myShareSchema,
   mySharesResponseSchema,
+  shareMaxActive,
   shareMetaResponseSchema,
   shareTokenSchema
 } from './shares.js'

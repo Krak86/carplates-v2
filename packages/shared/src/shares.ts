@@ -11,6 +11,12 @@ import { plateCandidateSchema } from './schemas.js'
 export const SHARE_TTL_DAYS = 7
 /** Active (not expired, not deleted) shares per user. */
 export const SHARE_MAX_ACTIVE = 3
+/** Active shares an admin may hold (testing and takedown work). */
+export const SHARE_MAX_ACTIVE_ADMIN = 50
+/** The per-user cap: admins get `SHARE_MAX_ACTIVE_ADMIN`, everyone else `SHARE_MAX_ACTIVE`. */
+export function shareMaxActive(role: string | undefined): number {
+  return role === 'admin' ? SHARE_MAX_ACTIVE_ADMIN : SHARE_MAX_ACTIVE
+}
 /** Largest accepted upload (the client's `shrinkImage` file is ~2.5 MB). */
 export const SHARE_MAX_UPLOAD_BYTES = 3 * 1024 * 1024
 

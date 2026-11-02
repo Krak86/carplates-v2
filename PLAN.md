@@ -813,6 +813,14 @@ Group 1 dimension callouts + garage-fit -> Group 3 (existing order). Owner says 
       page (slot A prefilled). Phases: (1) core, (2) visuals, (3) export, (4) tray / suggestions / saved / indexable pairs.
       Full plan: [docs/compare-plan.md](docs/compare-plan.md). Also covers the segment-peer list and a `/read/sizes` overlay embed.
 - ✅ **Shareable photo-search links** — done 2026-11-02 (signed-in users share a plate photo as a private 7-day link; faces blurred server-side, R2 storage, My shares in `/profile`, viewer at `/<plate>?p=<token>`). Write-up: `docs/plan-done.md` "Shareable photo-search links". Manual setup (bucket, token, secrets, ALPR redeploy): `docs/deploy.md` "Shared photo links".
+- **Shared photos v2 (2026-11-02, in progress)** — steps, each shippable alone; everything new is lazy (inside `SharePhotoDialog` / `SharesSection` chunks, in PWA `globIgnores`), loaded only when the user opens Share:
+  - ✅ **S1** admin cap 50 (`shareMaxActive(role)`), limit error names the max + links to `/profile#shares`, "My shared photos" link after the link is copied.
+  - **S2** profile: small thumbnails in `SharesSection` (needs a token: `GET /api/shares/mine/:id/image`, owner-only, `private, no-store`, so thumbs work on other devices too) + click opens the full-size zoom modal (reuse the photo zoom modal).
+  - **S3** share dialog: zoom icon / click on the preview opens the full-size image (same modal).
+  - **S4** link-preview robustness (item "sometimes the wiki image shows"): check prod for a Cloudflare cache rule ignoring `?p=` on HTML and for 429s from the 60/min image throttle on shared crawler IPs; add `og:image:width/height` + `og:image:secure_url` (store dimensions in `app.shared_photos`, migration) and raise the image throttle.
+  - **S5** "what was removed" list: server returns `removed` (faces blurred N, plates drawn/kept, EXIF/GPS stripped, resized) from `anonymize` + the pipeline; shown in the dialog and stored (`removed jsonb`, migration) for My shared photos.
+  - **S6** coloured plate boxes on the preview: draw the ALPR `candidates` boxes with the plate text (canvas overlay client-side from the existing boxes; optionally baked into a second stored image).
+  - **S7** manual blur editor: lazy `PhotoBlurEditor` (canvas, brush +/- size, add/erase blur, undo/redo); upload the mask with `POST /api/shares/:id/retouch`, the server re-blurs from the stored *original* (so keep the unblurred upload in a short-lived private key until confirm) and replaces the object. Needs a decision on keeping the original until confirm/cancel (privacy note in deploy.md).
 - ✅ **Photo viewer prev/next, share-link polish, catalog skeletons** — done 2026-11-02. Write-up: `docs/plan-done.md` "Photo viewer, share-link polish, catalog skeletons".
 - **Show key "test drive" facts for a looked-up car** — surface curated
   specs/review highlights (not just registry fields) for the car's

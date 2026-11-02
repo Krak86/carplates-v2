@@ -17,12 +17,12 @@ import {
 import {
   SHARE_EXPIRED,
   SHARE_LIMIT_REACHED,
-  SHARE_MAX_ACTIVE,
   SHARE_MAX_UPLOAD_BYTES,
   SHARE_NO_PLATE,
   SHARE_TTL_DAYS,
   SHARING_UNAVAILABLE,
   normalizePlate,
+  shareMaxActive,
   shareTokenSchema
 } from '@carplates/shared'
 import type { CreateShareResponse, MySharesResponse, PlateCandidate, ShareMetaResponse } from '@carplates/shared'
@@ -66,12 +66,13 @@ export class SharesService {
     @Inject(AnonymizeService) private readonly anonymizer: AnonymizeService
   ) {}
 
-  async create(userId: string, upload: UploadedImage): Promise<CreateShareResponse> {
+  async create(userId: string, upload: UploadedImage, role?: string): Promise<CreateShareResponse> {
     if (!sharesEnabled(this.env)) throw new ServiceUnavailableException(SHARING_UNAVAILABLE)
     const format = this.validateUpload(upload.buffer)
+    const max = shareMaxActive(role)
 
     // Cheap refusals before the ALPR + blur work.
-    if ((await this.repo.countActive(userId)) >= SHARE_MAX_ACTIVE) throw new ConflictException(SHARE_LIMIT_REACHED)
+    if ((await this.repo.countActive(userId)) >= max) throw new ConflictException(SHARE_LIMIT_REACHED)
     if ((await this.repo.activeBytes()) >= SHARE_STORAGE_CAP_BYTES)
       throw new ServiceUnavailableException(SHARING_UNAVAILABLE)
 
@@ -102,7 +103,7 @@ export class SharesService {
           bytes: stored.byteLength,
           expiresAt
         },
-        SHARE_MAX_ACTIVE
+        max
       )
     } finally {
       // No row, no object: a lost race for the last slot, or a failed insert, must not leave the photo in the bucket.
@@ -112,7 +113,7 @@ export class SharesService {
     return { id, token, plate, candidates, expiresAt: expiresAt.toISOString() }
   }
 
-  async listMine(userId: string): Promise<MySharesResponse> {
+  async listMine(userId: string, role?: string): Promise<MySharesResponse> {
     const rows = await this.repo.listActive(userId)
     return {
       shares: rows.map(r => ({
@@ -121,7 +122,7 @@ export class SharesService {
         createdAt: r.createdAt.toISOString(),
         expiresAt: r.expiresAt.toISOString()
       })),
-      max: SHARE_MAX_ACTIVE
+      max: shareMaxActive(role)
     }
   }
 

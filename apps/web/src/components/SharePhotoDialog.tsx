@@ -2,8 +2,9 @@ import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { SHARE_TTL_DAYS } from '@carplates/shared'
+import { Link } from 'react-router'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { SHARE_MAX_ACTIVE, SHARE_TTL_DAYS } from '@carplates/shared'
 import type { CreateShareResponse } from '@carplates/shared'
 
 import { shareErrorKey } from '@/components/share-photo.helpers'
@@ -18,6 +19,19 @@ type Props = {
   /** The picked photo; null when it could not be restored after sign-in ("pick the photo again"). */
   file: File | null
   onClose: () => void
+}
+
+function MineLink({ onClick }: { onClick: () => void }): ReactNode {
+  const { t } = useTranslation()
+  return (
+    <Link
+      to="/profile#shares"
+      onClick={onClick}
+      className="inline-block font-medium text-[var(--color-primary)] underline underline-offset-2"
+    >
+      {t('photoShare.openMine')}
+    </Link>
+  )
 }
 
 /**
@@ -44,6 +58,8 @@ export default function SharePhotoDialog({ file, onClose }: Props): ReactNode {
     }
   })
   const share: CreateShareResponse | undefined = create.data
+  // Only read for the "limit reached" message, which names the user's own cap (admins have a higher one).
+  const mine = useQuery({ ...myPhotoSharesQuery(), enabled: create.isError })
 
   useEffect(() => {
     if (!file || startedRef.current) return
@@ -96,7 +112,14 @@ export default function SharePhotoDialog({ file, onClose }: Props): ReactNode {
           </p>
         )}
 
-        {create.isError && <p className="text-sm text-red-600">{t(shareErrorKey(create.error))}</p>}
+        {create.isError && (
+          <div className="space-y-2 text-sm">
+            <p className="text-red-600">
+              {t(shareErrorKey(create.error), { max: mine.data?.max ?? SHARE_MAX_ACTIVE })}
+            </p>
+            {shareErrorKey(create.error) === 'photoShare.error.limit' && <MineLink onClick={close} />}
+          </div>
+        )}
 
         {share && (
           <div className="space-y-3 text-sm">
@@ -112,6 +135,7 @@ export default function SharePhotoDialog({ file, onClose }: Props): ReactNode {
                 <p className="font-medium" role="status">
                   {t('photoShare.copied')}
                 </p>
+                <MineLink onClick={close} />
                 <input
                   readOnly
                   value={confirmed}

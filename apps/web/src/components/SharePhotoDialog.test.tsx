@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { MemoryRouter } from 'react-router'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { i18nReady } from '@/i18n'
@@ -31,7 +32,9 @@ function renderDialog(file: File | null): { onClose: () => void } {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   render(
     <QueryClientProvider client={client}>
-      <SharePhotoDialog file={file} onClose={onClose} />
+      <MemoryRouter>
+        <SharePhotoDialog file={file} onClose={onClose} />
+      </MemoryRouter>
     </QueryClientProvider>
   )
   return { onClose }

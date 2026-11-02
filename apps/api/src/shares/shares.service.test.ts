@@ -11,7 +11,7 @@ import {
   UnsupportedMediaTypeException
 } from '@nestjs/common'
 import type { PlateCandidate } from '@carplates/shared'
-import { SHARE_MAX_ACTIVE, SHARE_MAX_UPLOAD_BYTES, SHARE_TTL_DAYS } from '@carplates/shared'
+import { SHARE_MAX_ACTIVE, SHARE_MAX_ACTIVE_ADMIN, SHARE_MAX_UPLOAD_BYTES, SHARE_TTL_DAYS } from '@carplates/shared'
 import sharp from 'sharp'
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -125,6 +125,14 @@ describe('SharesService.create', () => {
     })
     expect((row as { tokenHash: string }).tokenHash).toBe(hashShareToken(res.token))
     expect(JSON.stringify(row)).not.toContain(res.token)
+  })
+
+  it('lets an admin go past the regular cap, up to the admin cap', async () => {
+    s.repo.countActive.mockResolvedValue(SHARE_MAX_ACTIVE)
+    await expect(s.service.create('u1', upload(), 'admin')).resolves.toMatchObject({ plate: 'АА1234ВВ' })
+    expect((await s.service.listMine('u1', 'admin')).max).toBe(SHARE_MAX_ACTIVE_ADMIN)
+    s.repo.countActive.mockResolvedValue(SHARE_MAX_ACTIVE_ADMIN)
+    await expect(s.service.create('u1', upload(), 'admin')).rejects.toBeInstanceOf(ConflictException)
   })
 
   it('refuses at the per-user cap before doing any ALPR or blur work', async () => {

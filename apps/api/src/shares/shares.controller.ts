@@ -44,14 +44,14 @@ export class SharesController {
   @Header('Cache-Control', 'no-store')
   @ApiConsumes('multipart/form-data')
   async create(@CurrentUser() user: SessionUser, @Req() req: FastifyRequest): Promise<CreateShareResponse> {
-    return this.shares.create(user.id, await readUpload(req))
+    return this.shares.create(user.id, await readUpload(req), user.role)
   }
 
   @Get()
   @UseGuards(SessionGuard)
   @Header('Cache-Control', 'no-store')
   listMine(@CurrentUser() user: SessionUser): Promise<MySharesResponse> {
-    return this.shares.listMine(user.id)
+    return this.shares.listMine(user.id, user.role)
   }
 
   @Delete(':id')
