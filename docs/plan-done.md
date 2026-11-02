@@ -4488,6 +4488,21 @@ The photo is a private, time-limited capability link, never a public image host.
 - **Deployed and verified 2026-11-02:** bucket, 8-day lifecycle rule, R2 token, secrets, ALPR image and API are live; sharing works end to end. First prod try answered 503 `SHARING_UNAVAILABLE` because `SHARES_R2_SECRET_ACCESS_KEY` was not set yet (see docs/deploy.md).
 - **CI fixes on the way:** `apps/api` `sharp` ^0.34 -> ^0.35.5 (`pnpm audit --prod --audit-level=high` flagged libvips/libheif/librsvg; `scripts` was already on 0.35); the noise-image `downscaleForShare` test got a 30 s timeout (about 5 s on a CI runner).
 
+## Shared photos v2, S1-S7 (2026-11-02) ✅
+
+Follow-ups to "Shareable photo-search links"; each step shippable alone, all new UI lazy inside `SharePhotoDialog` / `SharesSection`. Conventions: features-reference.md "Shared photo links".
+
+- **S1** admin cap 50 (`shareMaxActive(role)`); the limit error names the user's max and links to `/profile#shares`.
+- **S2** owner-only `GET /api/shares/:id/preview` (share id, not the token; `private, max-age<=300`) for the My shared photos thumbnails; click opens the lazy `PhotoZoomDialog` with prev/next.
+- **S3** the dialog preview opens a raised `PhotoZoomDialog`; 🏷 toggles the plate outlines.
+- **S4** `og:image:width/height` from `shared_photos.width/height` (migration 0089), image throttle 120/min. Still by hand: the curl check in deploy.md on production.
+- **S5** `removed` ({ facesBlurred, originalSize, storedSize }, migration 0090) from the ALPR `X-Faces-Blurred` header + sharp sizes; `ShareRemovedList` in the dialog and My shared photos.
+- **S6** `PhotoPlateBoxes` outline the parsed plates on the preview; `GET /api/shares` returns `candidates`.
+- **S7 manual blur editor.** Decision (user, 2026-11-02): **option A**, keep the unblurred upload privately so "erase blur" can restore it, over option B (paint onto the blurred copy only, no original kept, can only add blur). Privacy trade-off: the original lives as `shares/<id>.orig` (migration 0091 `original_key`) only while the dialog is open; deleted on confirm (`DELETE /api/shares/:id/original`), cancel / close / delete, expiry, account deletion, and by a 15-minute sweep (older than 60 min) with the bucket's 8-day rule as the last backstop; Privacy text and deploy.md say so.
+  `POST /api/shares/:id/retouch` re-renders from the original every time (ALPR auto face blur, then the user's strokes in order: `add` lays a pixelated + blurred frame, `erase` the original, through an SVG mask at <= 1600 px), replaces the object under the same key (token and copied link stay valid). The client sends only 0-1 polylines, never pixels. Web: lazy `PhotoBlurEditor` (canvas, add / erase, brush size, undo / redo, zoom 1x-3x, Save); saved strokes stay in the dialog.
+  Fixed on the first real run: the migration had not been applied locally (500 on create); the browser cached the plain `/image` URL so the link showed the pre-edit copy (the dialog now always loads `?v=N`, N >= 1); painting lagged (one paint per frame, points spaced by a quarter of the brush radius); a raw sharp `composite` returned 4 channels and scrambled the frame (`removeAlpha()`).
+  Open: a retouch leaves the owner thumbnail in My shared photos stale for up to 5 min (`/preview` cache).
+
 ## Photo viewer, share-link polish, catalog skeletons (2026-11-02) ✅
 
 - **Photo zoom modal:** prev/next buttons over the photos of the current gallery (car, auction lot, My shared photos); the auction lot carousel shows a zoom badge on the photo so it reads as enlargeable.
