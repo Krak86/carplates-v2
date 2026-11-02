@@ -982,3 +982,47 @@ export const SHARE_EXPIRED_PAGE: Record<Lang, PageText> = {
     description: 'This photo link no longer works: the owner deleted it or its 7 days are up.'
   }
 }
+
+const SHARE_PHOTO_TEXT: Record<
+  Lang,
+  { locale: string; title: (plate: string) => string; note: (until: string) => string }
+> = {
+  ua: {
+    locale: 'uk-UA',
+    title: plate => `${SITE_NAME} - фото авто ${plate}`,
+    note: until =>
+      `Фото за приватним посиланням: обличчя розмито, номери розпізнано. Посилання діє до ${until}. Відкрийте, щоб побачити дані за номером.`
+  },
+  ru: {
+    locale: 'ru-RU',
+    title: plate => `${SITE_NAME} - фото авто ${plate}`,
+    note: until =>
+      `Фото по приватной ссылке: лица размыты, номера распознаны. Ссылка действует до ${until}. Откройте, чтобы увидеть данные по номеру.`
+  },
+  en: {
+    locale: 'en-GB',
+    title: plate => `${SITE_NAME} - car photo ${plate}`,
+    note: until =>
+      `Photo shared by private link: faces blurred, plates recognized. The link works until ${until}. Open it to see the vehicle data for the plate.`
+  }
+}
+
+/** Title + description of a shared photo link: the plate preview text (if the plate is known) plus a note about the photo and the expiry date. */
+export function sharedPhotoText(
+  lang: Lang,
+  plate: string,
+  expiresAt: Date,
+  preview: { title: string; description: string } | null
+): PageText {
+  const t = SHARE_PHOTO_TEXT[lang]
+  const until = expiresAt.toLocaleDateString(t.locale, {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'Europe/Kyiv'
+  })
+  return {
+    title: preview?.title ?? t.title(plate),
+    description: [preview?.description, t.note(until)].filter(Boolean).join(' ')
+  }
+}
