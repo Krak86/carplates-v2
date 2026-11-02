@@ -124,4 +124,14 @@ export class SharesController {
     const { stream, length, maxAgeS } = await this.shares.image(token)
     return new ShareImageResult(new StreamableFile(stream, { type: 'image/jpeg', ...(length && { length }) }), maxAgeS)
   }
+
+  /** The same photo with the plates outlined: what `og:image` points at (link previews). */
+  @Get(':token/og')
+  @UseGuards(SharePrivacyHeadersGuard, ThrottlerGuard)
+  @UseInterceptors(ShareImageInterceptor)
+  @Throttle(IMAGE_THROTTLE)
+  async ogImage(@Param('token') token: string): Promise<ShareImageResult> {
+    const { body, maxAgeS } = await this.shares.previewImage(token)
+    return new ShareImageResult(new StreamableFile(body, { type: 'image/jpeg', length: body.byteLength }), maxAgeS)
+  }
 }
