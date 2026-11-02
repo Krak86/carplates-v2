@@ -15,9 +15,19 @@ export const NO_SHARE_PATHS = new Set([
   '/admin'
 ])
 
+/** The catalog: `/cars`, `/cars/:make`, `/cars/:make/:model` (with or without a trailing slash). */
+export const isCatalogPath = (pathname: string): boolean => /^\/cars(\/|$)/.test(pathname)
+
 type UsePageShareActions = {
   copied: boolean
   share: () => Promise<void>
+}
+
+/** The current page's link with the sharer's language and font. */
+export function buildPageShareUrl(): string {
+  const params = new URLSearchParams({ lang: i18n.language })
+  setFontParam(params)
+  return `${shareBaseUrl()}?${params.toString()}`
 }
 
 /** Shares the current page's link (native share sheet, else clipboard). The link carries the sharer's language. */
@@ -25,9 +35,7 @@ export function usePageShareActions(title?: string): UsePageShareActions {
   const [copied, setCopied] = useState(false)
 
   const share = async (): Promise<void> => {
-    const params = new URLSearchParams({ lang: i18n.language })
-    setFontParam(params)
-    const url = `${shareBaseUrl()}?${params.toString()}`
+    const url = buildPageShareUrl()
     if (typeof navigator.share === 'function') {
       try {
         await navigator.share({ title: title ?? document.title, url })

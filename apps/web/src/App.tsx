@@ -8,7 +8,7 @@ import LoadErrorBoundary from '@/components/LoadErrorBoundary'
 import Spinner from '@/components/ui/Spinner'
 import { ROUTE_TITLE_KEYS, useDocumentTitle } from '@/hooks/useDocumentTitle'
 import PageShareButton from '@/components/PageShareButton'
-import { NO_SHARE_PATHS } from '@/components/use-page-share-actions'
+import { isCatalogPath, NO_SHARE_PATHS } from '@/components/use-page-share-actions'
 import SearchRoute from '@/routes/SearchRoute'
 import { useUiStore } from '@/store/ui-store'
 
@@ -70,7 +70,8 @@ export default function App(): ReactNode {
   const titleKey = ROUTE_TITLE_KEYS[pathname]
   useDocumentTitle(titleKey ? t(titleKey) : undefined)
   // A plate / VIN result page is a single segment that is not a static route; the floating share button is hidden on mobile.
-  const isResultRoute = pathname !== '/' && pathname.split('/').filter(Boolean).length === 1 && !titleKey
+  const isCatalog = isCatalogPath(pathname)
+  const isResultRoute = pathname !== '/' && pathname.split('/').filter(Boolean).length === 1 && !titleKey && !isCatalog
   const shareTitle = NO_SHARE_PATHS.has(pathname)
     ? undefined
     : titleKey
@@ -80,6 +81,8 @@ export default function App(): ReactNode {
         : pathname === '/'
           ? t('app.title')
           : undefined
+  // Catalog make / model pages have no static title key: the share sheet falls back to the page's own `document.title`.
+  const showShare = !zen && (shareTitle !== undefined || isCatalog)
 
   return (
     <Layout>
@@ -150,7 +153,7 @@ export default function App(): ReactNode {
             <Route path="*" element={<SearchRoute />} />
           </Routes>
         </Suspense>
-        {shareTitle && !zen && (
+        {showShare && (
           <div className="mt-6 flex justify-center">
             <PageShareButton title={shareTitle} />
           </div>

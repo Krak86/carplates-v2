@@ -8,16 +8,19 @@ import { toIntlLocale } from '@/lib/intl'
 import { datasetStatus, lastSync } from '@/routes/data-status/helpers'
 import StatusChip from '@/routes/data-status/StatusChip'
 import type { Cadence, Dataset } from '@/routes/data-status/types'
+import { monthYearLabel } from '@/routes/stats/helpers'
 
 type Props = {
   cadence: Cadence
   datasets: readonly Dataset[]
   jobs: readonly JobStatus[]
+  latest: Readonly<Record<string, string | null>>
 }
 
-export default function DatasetGroup({ cadence, datasets, jobs }: Props): ReactNode {
+export default function DatasetGroup({ cadence, datasets, jobs, latest }: Props): ReactNode {
   const { t, i18n } = useTranslation()
   const dateFormat = new Intl.DateTimeFormat(toIntlLocale(i18n.language), { dateStyle: 'medium' })
+  const dayFormat = new Intl.DateTimeFormat(toIntlLocale(i18n.language), { dateStyle: 'medium', timeZone: 'UTC' })
 
   return (
     <Card id={cadence} className="space-y-2">
@@ -27,6 +30,12 @@ export default function DatasetGroup({ cadence, datasets, jobs }: Props): ReactN
       <ul className="divide-y divide-border text-sm">
         {datasets.map(dataset => {
           const synced = lastSync(dataset, jobs)
+          const newest = latest[dataset.id]
+          const newestLabel = newest
+            ? dataset.latestByMonth
+              ? monthYearLabel(newest, toIntlLocale(i18n.language))
+              : dayFormat.format(new Date(`${newest}T00:00:00Z`))
+            : null
           return (
             <li key={dataset.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 py-2">
               <span className="min-w-0 flex-1 basis-56">
@@ -47,6 +56,7 @@ export default function DatasetGroup({ cadence, datasets, jobs }: Props): ReactN
               </span>
               <span className="text-muted">
                 {synced ? t('dataStatus.synced', { date: dateFormat.format(synced) }) : t('dataStatus.neverSynced')}
+                {newestLabel && <span className="block text-xs">{t('dataStatus.latest', { date: newestLabel })}</span>}
               </span>
               <StatusChip status={datasetStatus(dataset, jobs)} />
             </li>

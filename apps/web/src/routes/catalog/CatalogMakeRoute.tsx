@@ -1,16 +1,19 @@
 import { lazy, useState } from 'react'
 import type { ReactNode } from 'react'
-import { CATALOG_INDEX_PATH, catalogMakeParamsSchema, catalogPath, stockCompanyFor } from '@carplates/shared'
+import { CATALOG_INDEX_PATH, catalogMakeParamsSchema, catalogPath, dealerUrl, stockCompanyFor } from '@carplates/shared'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { Link, useParams } from 'react-router'
 import { CompareTrayBar, CompareTrayButton } from '@/components/compare/CompareTray'
 
 import BrandLogo from '@/components/BrandLogo'
+import BrandSiteChip from '@/components/BrandSiteChip'
 import CatalogAdvancedSearchNote from '@/components/catalog/CatalogAdvancedSearchNote'
 import CatalogAuctionLine from '@/components/catalog/CatalogAuctionLine'
 import CatalogBreadcrumb from '@/components/catalog/CatalogBreadcrumb'
 import LazySection from '@/components/LazySection'
+import NewCarsLink from '@/components/NewCarsLink'
+import TopStatBadges from '@/components/TopStatBadges'
 import Card from '@/components/ui/Card'
 import SectionSkeleton from '@/components/ui/SectionSkeleton'
 import { useDocumentTitle } from '@/hooks/useDocumentTitle'
@@ -21,6 +24,11 @@ import { catalogMakeQuery } from '@/lib/queries'
 import { filterModels, yearRangeLabel } from './helpers'
 
 const SharePriceSection = lazy(() => import('@/components/SharePriceSection'))
+// The same lazy chunks as the plate card and the model page: a make has no model or year, so each looks the make up alone.
+const ReviewLinks = lazy(() => import('@/components/ReviewLinks'))
+const VideoReviews = lazy(() => import('@/components/VideoReviews'))
+const SocialSection = lazy(() => import('@/components/SocialSection'))
+const StockSection = lazy(() => import('@/components/StockSection'))
 
 /** The make's share price in its own card; nothing at all for a make with no listed company. */
 function SharePriceCard({ brand }: { brand: string }): ReactNode {
@@ -75,6 +83,7 @@ export default function CatalogMakeRoute(): ReactNode {
   }
 
   const visibleModels = filterModels(make.models, filter)
+  const brandSiteUrl = dealerUrl(make.topBrand)
 
   return (
     <main className="mx-auto w-full max-w-6xl space-y-4">
@@ -99,6 +108,11 @@ export default function CatalogMakeRoute(): ReactNode {
           })}
         </p>
         <CatalogAuctionLine makeName={make.makeName} />
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <TopStatBadges brand={make.topBrand} model={null} color={null} region={null} kind={null} />
+          <NewCarsLink brand={make.topBrand} />
+          {brandSiteUrl && <BrandSiteChip url={brandSiteUrl} />}
+        </div>
       </Card>
 
       <Card>
@@ -180,7 +194,22 @@ export default function CatalogMakeRoute(): ReactNode {
         )}
       </Card>
 
-      <LazySection>
+      <Card>
+        <LazySection sections={['reviews']}>
+          <ReviewLinks brand={make.topBrand} model={null} year={null} />
+        </LazySection>
+        <LazySection sections={['videos']}>
+          <VideoReviews brand={make.topBrand} model={null} year={null} />
+        </LazySection>
+        <LazySection sections={['social']}>
+          <SocialSection brand={make.topBrand} model={null} year={null} />
+        </LazySection>
+        <LazySection sections={['stock']}>
+          <StockSection brand={make.topBrand} model={null} year={null} />
+        </LazySection>
+      </Card>
+
+      <LazySection sections={['shares']}>
         <SharePriceCard brand={make.topBrand} />
       </LazySection>
 

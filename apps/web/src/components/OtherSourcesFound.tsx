@@ -9,6 +9,8 @@ import {
   normalizePlate,
   regionName,
   resolveVehicleColor,
+  sourceValueForKind,
+  vehicleKindFromTitle,
   VEHICLE_COLOR_HEX
 } from '@carplates/shared'
 
@@ -54,6 +56,11 @@ const cardMotionClass =
 
 /** First non-empty value of a field across the matched records (newest first), null when none carries it. */
 const firstOf = <T,>(values: (T | null | undefined)[]): T | null => values.find(v => !!v) ?? null
+
+const UNKNOWN_TEXTS = ['невідомо', 'unknown', 'не вказано']
+
+const isUnknownText = (value: string | null | undefined): boolean =>
+  !value || UNKNOWN_TEXTS.includes(value.trim().toLowerCase())
 
 /** The registry card's title block: plate badge + copy + region, under an optional logo + vehicle name. */
 function CardHeader({
@@ -147,9 +154,12 @@ export default function OtherSourcesFound({ plate, showPlate }: Props): ReactNod
   const brand = firstOf([...records.map(r => r.brand), ...lots.map(l => l.make)])
   const model = firstOf([...records.map(r => r.model), ...lots.map(l => l.model)])
   const year = firstOf(lots.map(l => l.year))
-  const color = firstOf([...records.map(r => r.color), ...lots.map(l => l.color)])
-  const vehicleType = firstOf(records.map(r => r.vehicleType))
-  const fuel = firstOf(lots.map(l => l.fuel))
+  // A feed's "unknown" colour / "other" fuel say nothing about the car: dropped, so a lot with only those has no basic data.
+  const color = firstOf([...records.map(r => r.color), ...lots.map(l => l.color)].filter(c => !isUnknownText(c)))
+  // The wanted feed names the type; a lot only has it inside its title ("... Trailor S363EL, напівпричіп, ...").
+  const lotKind = firstOf(lots.map(l => vehicleKindFromTitle(l.title)))
+  const vehicleType = firstOf(records.map(r => r.vehicleType)) ?? (lotKind ? sourceValueForKind(lotKind) : null)
+  const fuel = firstOf(lots.map(l => l.fuel).filter(f => f !== 'other' && !isUnknownText(f)))
   const knownFuel = knownValue(FUEL_TYPES, fuel)
   const engineCc = firstOf(lots.map(l => l.engineCc))
   const transmission = firstOf(lots.map(l => l.transmission))

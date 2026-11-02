@@ -28,4 +28,6 @@ export type Dataset = {
   checkEveryDays?: number
   /** ISO date of the last manual refresh (the seed CSV's last export). For a job it is the day the schedule went live and only covers the time before its first recorded run. */
   refreshedOn?: string
+  /** The newest record date is a month, not a day (the source publishes whole months): shown as "November 2026". */
+  latestByMonth?: boolean
 }

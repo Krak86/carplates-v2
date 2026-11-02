@@ -118,6 +118,15 @@ export function isSovietPlate(input: string): boolean {
   return SOVIET_RES.some(re => re.test(plate))
 }
 
+// Short series without the 8-char shape (tractor / machinery style "АХ22925", 1-3 letters then 3-6 digits, optional letters after).
+const SHORT_SERIES_RE = /^[АВСЕНІКМОРТХA-Z]{1,3}\d{3,6}[АВСЕНІКМОРТХA-Z]{0,3}$/
+
+/** True for a short letters + digits series that is neither a full UA plate nor a Soviet one; no registry shape, but wanted lists and auction lots may carry it. */
+export function isShortSeriesPlate(input: string): boolean {
+  const plate = normalizePlate(input)
+  return SHORT_SERIES_RE.test(plate) && !isUaPlate(plate) && !isSovietPlate(plate)
+}
+
 const VIN_RE = /^[A-HJ-NPR-Z0-9]{17}$/
 
 /** A query is treated as a VIN when it is 17 chars of the ISO 3779 alphabet (no I, O, Q). */

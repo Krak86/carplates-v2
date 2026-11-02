@@ -25,9 +25,11 @@ import numpy as np
 from fast_alpr import ALPR
 from fast_plate_ocr.core.process import preprocess_image
 from fast_plate_ocr.inference.plate_recognizer import _load_image_from_source
-from fastapi import Depends, FastAPI, File, Header, HTTPException, UploadFile
+from fastapi import Depends, FastAPI, File, Header, HTTPException, Response, UploadFile
 from PIL import Image, ImageOps
 from rapidocr_onnxruntime import RapidOCR
+
+from anonymize import UndecodableImage, anonymize
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("alpr")
@@ -447,6 +449,23 @@ def recognize(image: UploadFile = File(...)) -> dict[str, list[dict[str, Any]]]:
         raise HTTPException(status_code=502, detail="ALPR inference failed")
 
     return {"results": results}
+
+
+# Face blur for a shared photo (the API stores the returned JPEG). Server-side so a client cannot skip it. The face
+# count lets the API log/guard; recall is not 100%, the web dialog shows the blurred preview before confirming.
+@app.post("/anonymize", dependencies=[Depends(_require_key)])
+def anonymize_photo(image: UploadFile = File(...)) -> Response:
+    raw = _read_capped(image)
+    if not raw:
+        raise HTTPException(status_code=400, detail="Uploaded image is empty")
+    try:
+        jpeg, faces = anonymize(raw)
+    except UndecodableImage as exc:
+        raise HTTPException(status_code=400, detail="Could not decode image") from exc
+    except Exception:
+        logger.exception("Face blur failed")
+        raise HTTPException(status_code=502, detail="Face blur failed")
+    return Response(content=jpeg, media_type="image/jpeg", headers={"X-Faces-Blurred": str(faces)})
 
 
 # Stamped / embossed VINs (light, widely spaced characters on dark metal) often defeat the detector on the

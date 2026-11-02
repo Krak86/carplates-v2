@@ -26,6 +26,8 @@ export type JobStatus = z.infer<typeof jobStatusSchema>
  */
 export const dataStatusResponseSchema = z.object({
   registry: registrySpanSchema,
-  jobs: z.array(jobStatusSchema)
+  jobs: z.array(jobStatusSchema),
+  /** Newest record date inside each source (dataset id -> ISO date), for the sources whose rows carry one; `null` while empty. */
+  latest: z.record(z.string(), isoDateSchema.nullable()).default({})
 })
 export type DataStatusResponse = z.infer<typeof dataStatusResponseSchema>

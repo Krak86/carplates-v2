@@ -66,7 +66,13 @@ export default function DataStatusRoute(): ReactNode {
 
           <div className="grid gap-4 lg:grid-cols-2">
             {groupByCadence(DATASETS).map(group => (
-              <DatasetGroup key={group.cadence} cadence={group.cadence} datasets={group.datasets} jobs={jobs} />
+              <DatasetGroup
+                key={group.cadence}
+                cadence={group.cadence}
+                datasets={group.datasets}
+                jobs={jobs}
+                latest={status.data?.latest ?? {}}
+              />
             ))}
           </div>
         </>

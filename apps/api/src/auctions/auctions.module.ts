@@ -6,6 +6,7 @@ import { AuctionsStatsService } from './auctions-stats.service.js'
 
 @Module({
   controllers: [AuctionsController],
-  providers: [AuctionsService, AuctionsStatsService]
+  providers: [AuctionsService, AuctionsStatsService],
+  exports: [AuctionsService]
 })
 export class AuctionsModule {}

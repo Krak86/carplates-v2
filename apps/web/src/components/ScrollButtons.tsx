@@ -3,7 +3,8 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useLocation } from 'react-router'
 
-import { NO_SHARE_PATHS, usePageShareActions } from '@/components/use-page-share-actions'
+import ShareQrButton from '@/components/ShareQrButton'
+import { isCatalogPath, NO_SHARE_PATHS, usePageShareActions } from '@/components/use-page-share-actions'
 import { ROUTE_TITLE_KEYS } from '@/hooks/useDocumentTitle'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { useScrolledNow } from '@/hooks/useSideWidgetsVisible'
@@ -22,7 +23,8 @@ type Position = { left: number; bottom: number }
 // Beside the page's content (right of it), and never lower than the content's bottom edge. No room → the screen corner.
 // The right edge comes from the result card, else the first home section (`main > *` is full-width there), else the page root.
 function measure(): Position {
-  const card = document.querySelector<HTMLElement>('main .card-vt')
+  // `[data-scroll-edge]`: a result-like block without a `.card-vt` (the plate-not-found card, whose view-transition name would clash with the VIN card inside it).
+  const card = document.querySelector<HTMLElement>('main .card-vt, main [data-scroll-edge]')
   const page = document.querySelector<HTMLElement>('main > *')
   const edge = card ?? document.querySelector<HTMLElement>('main .section-vt') ?? page
   const fallback = { left: window.innerWidth - BUTTON_SIZE_PX - GAP_PX, bottom: GAP_PX }
@@ -57,7 +59,8 @@ export default function ScrollButtons(): ReactNode {
   // On a result page the report carries the plate / VIN (see ReportIssueLink).
   const feedbackTo = isResultRoute ? `/discuss?about=${pathname.slice(1)}` : '/discuss'
   const isShareable =
-    !NO_SHARE_PATHS.has(pathname) && (pathname === '/' || isResultRoute || pathname in ROUTE_TITLE_KEYS)
+    !NO_SHARE_PATHS.has(pathname) &&
+    (pathname === '/' || isResultRoute || pathname in ROUTE_TITLE_KEYS || isCatalogPath(pathname))
   const { copied, share } = usePageShareActions()
   const [pos, setPos] = useState<Position>(measure)
 
@@ -126,6 +129,10 @@ export default function ScrollButtons(): ReactNode {
             {copied ? t('share.copied') : ''}
           </span>
         </button>
+      )}
+
+      {isShareable && (
+        <ShareQrButton variant="floating" className={BUTTON_CLASS} tabIndex={scrolled ? undefined : -1} />
       )}
 
       {pathname !== '/discuss' && (

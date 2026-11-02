@@ -159,7 +159,8 @@ const VIN_TOKEN_RE = new RegExp(`(?<![${ALNUM}])[${ALNUM}]{17}(?![${ALNUM}])`, '
 export function findVin(input: string | null | undefined): string | null {
   for (const m of (input ?? '').matchAll(VIN_TOKEN_RE)) {
     const vin = denormalizePlate(m[0]).toUpperCase()
-    if (isVin(vin) && /\d/.test(vin)) return vin
+    // Needs a digit and a letter: a 17-digit run is an asset / vessel registry number ("42022010000000065", a ship), not a VIN.
+    if (isVin(vin) && /\d/.test(vin) && /[A-Z]/.test(vin)) return vin
   }
   return null
 }

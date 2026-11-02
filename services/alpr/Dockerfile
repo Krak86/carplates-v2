@@ -14,7 +14,10 @@ RUN apt-get update \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY app.py warmup.py ./
+# models/: YuNet face detector (MIT, ~230 KB) is committed rather than downloaded, so the build needs no network
+# beyond pip and the weights are pinned to the exact file the eval ran against.
+COPY app.py anonymize.py warmup.py ./
+COPY models ./models
 
 # Bakes the ONNX model weights into this image layer at build time, so the
 # container has no runtime network dependency once built.

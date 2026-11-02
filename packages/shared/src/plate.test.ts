@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+  isShortSeriesPlate,
   classifyQuery,
   denormalizePlate,
   isVin,
@@ -147,5 +148,19 @@ describe('isSovietPlate', () => {
     expect(isSovietPlate('КА1234ВС')).toBe(false)
     expect(isSovietPlate('11АА1234')).toBe(false)
     expect(isSovietPlate('1234')).toBe(false)
+  })
+})
+
+describe('isShortSeriesPlate', () => {
+  it('matches a short letters + digits series, in Latin or Cyrillic', () => {
+    expect(isShortSeriesPlate('AX22925')).toBe(true)
+    expect(isShortSeriesPlate('АХ22925')).toBe(true)
+  })
+
+  it('leaves full UA, Soviet and junk shapes to their own checks', () => {
+    expect(isShortSeriesPlate('AA1234BB')).toBe(false)
+    expect(isShortSeriesPlate('24320ВА')).toBe(false)
+    expect(isShortSeriesPlate('hello')).toBe(false)
+    expect(isShortSeriesPlate('12345')).toBe(false)
   })
 })
