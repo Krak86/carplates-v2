@@ -858,6 +858,11 @@ Group 1 dimension callouts + garage-fit -> Group 3 (existing order). Owner says 
   - **Resume / build order (~3-5 h, four committable slices):**
     1. ✅ **Done 2026-11-02 (uncommitted until reviewed)** `services/alpr`: `/anonymize` (YuNet face blur) + tests + a face eval on own photos (~1 h). **First verify** the OpenCV build pulled in by `fast-alpr` has `cv2.FaceDetectorYN`
        (needs OpenCV >= 4.5.4); if not, run the same ONNX model through `onnxruntime` (already in the image). Model file (~230 KB): commit under `services/alpr/` or fetch in the Dockerfile.
+       **Outcome:** OpenCV 5.0.0 has `FaceDetectorYN`; model committed in `services/alpr/models/`. Contract for slice 2: `POST /anonymize` (multipart `image`, `X-Alpr-Key`)
+       returns `image/jpeg` at the **full input resolution** (no downscale, no EXIF) + `X-Faces-Blurred: N`; 400 undecodable, 413 > 6 MB, 502 failure; ~0.3 s median, ~0.8 s max.
+       The API still has to downscale to 1600 px / q~80 (sharp), call `/recognize` on the original bytes, and wire a client method next to `local-recognize.service.ts`
+       (same 10 s timeout idea). Hand-counted recall on own photos ~94% on the beach shot, misses = profile / looking down / tiny faces; false boxes on logos/bumpers are possible.
+       Needs an ALPR image redeploy before slice 2 can run in prod (manual, user).
     2. API + DB: migration `app.shared_photos`, R2 client + env vars, `POST/GET/DELETE /api/shares` (re-run ALPR, blur, downscale to 1600 px, caps, throttle, global 8 GB guard),
        daily expiry job, `og:image` + meta injection, tests (~1.5-2 h).
     3. Web: Share button + dialog with blurred preview, anonymous login hand-off via IndexedDB `pending-share`, "My shares" list with Delete, viewer, i18n ua/ru/en, tests (~1.5-2 h).
