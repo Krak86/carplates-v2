@@ -313,21 +313,28 @@ Legend: 👤 = you (Ruslan) · 🤖 = Claude (next session). "[code]" = touches 
 **Phase A — docs into the repo (doc-only, safe to do first)**
 1. 🤖 **Update `docs/security-checklist.md`**: bump "as of" to the current date, mark the newly-verified items ✅, add the **CSP report-sink design** to finding #2, correct **finding #1** to fixed/recurring, and reflect the **Part 0.5 infra settings** status. Keep CLAUDE.md doc conventions.
 2. 🤖 **Create `docs/pentest-lab.md`** from Part 2 (the local-only attack runbook: setup + per-vuln payload → expected blocked result + ZAP baseline). Cross-link it with `security-checklist.md`.
-3. 👤 **Review + commit** the new/updated mds.
+3. 🤖 **Cross-reference pointers (one line each, no content duplication):**
+   - `PLAN.md` "Deploy-time security checklist" (~line 1025): add a line linking `docs/pentest-lab.md` (and `docs/security-checklist.md`, already linked there).
+   - `docs/security-checklist.md` header: "Companion: `docs/pentest-lab.md`".
+   - Add the open items as `[ ]` backlog lines in that PLAN.md section: enforce CSP + `/api/csp-report` sink, HSTS `includeSubDomains`/`preload`, origin-level header fallback, Postgres least-privilege roles. **Extend the existing lines** (CSP enforcement, Redis throttler) rather than duplicating them.
+   - Not needed: `docs/deploy.md` (already points to checklist §7) and `CLAUDE.md` (says "other docs only on request").
+4. 🤖 **Reconcile the fail2ban mismatch:** PLAN.md line ~1028 says "skipped by choice", `docs/deploy.md` says `bootstrap.sh` installs it. Check `infra/vps/bootstrap.sh` and make both docs match.
+5. 🤖 **Remove the standalone plan** `docs/security-hardening-plan-2026-11.md` once its content is folded into the checklist + pentest lab and the pointers name only the final docs (single source of truth, no overlapping audit docs).
+6. 👤 **Review + commit** the new/updated mds.
 
 **Phase B — CSP enforcement (the biggest single win)**
-4. 🤖 Add **`POST /api/csp-report`** (throttled, Zod-validated, noise-filtered, forwards to Sentry) + `report-uri /api/csp-report` in `infra/Caddyfile`. [code]
-5. 👤 Deploy, then **exercise every flow for ~1 week** (plate/VIN lookup, Google/Telegram/email auth, Turnstile, YouTube/Sketchfab/Maps embeds, Disqus, PostHog, share) and watch the Sentry CSP reports.
-6. 👤+🤖 When reports are clean: flip **`Content-Security-Policy-Report-Only` → `Content-Security-Policy`** in `infra/Caddyfile`; re-walk the flows on the live enforced version. [code]
+7. 🤖 Add **`POST /api/csp-report`** (throttled, Zod-validated, noise-filtered, forwards to Sentry) + `report-uri /api/csp-report` in `infra/Caddyfile`. [code]
+8. 👤 Deploy, then **exercise every flow for ~1 week** (plate/VIN lookup, Google/Telegram/email auth, Turnstile, YouTube/Sketchfab/Maps embeds, Disqus, PostHog, share) and watch the Sentry CSP reports.
+9. 👤+🤖 When reports are clean: flip **`Content-Security-Policy-Report-Only` → `Content-Security-Policy`** in `infra/Caddyfile`; re-walk the flows on the live enforced version. [code]
 
 **Phase C — smaller hardening (as time allows)**
-7. 🤖 **HSTS `includeSubDomains; preload`** in `infra/Caddyfile` once all subdomains are confirmed HTTPS. [code]
-8. 🤖 **Origin-level header fallback** in `apps/api/src/main.ts` `onSend` (so a direct-origin hit isn't header-naked). [code]
-9. 🤖 Draft **`pnpm security:check`** + a CI job (audit-high + gitleaks + Trivy) and the Dependabot path trigger. [code]
-10. 👤 Decide on **Redis-backed throttler** and **Postgres least-privilege roles** (bigger infra changes — schedule separately).
+10. 🤖 **HSTS `includeSubDomains; preload`** in `infra/Caddyfile` once all subdomains are confirmed HTTPS. [code]
+11. 🤖 **Origin-level header fallback** in `apps/api/src/main.ts` `onSend` (so a direct-origin hit isn't header-naked). [code]
+12. 🤖 Draft **`pnpm security:check`** + a CI job (audit-high + gitleaks + Trivy) and the Dependabot path trigger. [code]
+13. 👤 Decide on **Redis-backed throttler** and **Postgres least-privilege roles** (bigger infra changes — schedule separately).
 
 **Phase D — set the cadence once (from Part 3 / checklist §6)**
-11. 🤖 Wire the tiered schedule: CI gates on every PR + every dep-update PR (blocking); weekly Trivy/Dependabot; monthly Sentry-CSP + live-header review; quarterly ZAP baseline vs staging.
+14. 🤖 Wire the tiered schedule: CI gates on every PR + every dep-update PR (blocking); weekly Trivy/Dependabot; monthly Sentry-CSP + live-header review; quarterly ZAP baseline vs staging.
 
 ## Handoff for the next session
 
@@ -339,6 +346,11 @@ Paste this into a fresh session tomorrow:
 > **Do Phase A only, doc-only, no code:** (1) update `docs/security-checklist.md` — bump the date, mark
 > verified items, add the CSP report-sink design to finding #2, correct finding #1 to fixed/recurring,
 > and reflect the Part 0.5 infra settings; (2) create `docs/pentest-lab.md` from the plan's Part 2
-> (local pentest runbook), cross-linked with the checklist. Follow CLAUDE.md doc conventions. Do **not**
+> (local pentest runbook), cross-linked with the checklist; (3) add one-line pointers in PLAN.md's
+> "Deploy-time security checklist" and the checklist header, and add the open items as `[ ]` backlog
+> lines there (extend existing CSP/Redis lines, don't duplicate); (4) reconcile the fail2ban mismatch
+> between PLAN.md (~line 1028, "skipped") and docs/deploy.md ("installed") by checking
+> `infra/vps/bootstrap.sh`; (5) delete the standalone `docs/security-hardening-plan-2026-11.md` once its
+> content is folded in, so pointers name only the final docs. Follow CLAUDE.md doc conventions. Do **not**
 > touch code or infra yet — stop after the docs and give me a suggested commit message. We'll do Phase B
 > (the `/api/csp-report` endpoint + CSP enforcement) after I review.
