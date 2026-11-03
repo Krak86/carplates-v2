@@ -4518,6 +4518,7 @@
   "photoShare.mine.expires_one": "Expires in {{count}} day",
   "photoShare.mine.expires_other": "Expires in {{count}} days",
   "photoShare.mine.copy": "Copy link",
+  "photoShare.mine.share": "Share",
   "photoShare.mine.delete": "Delete",
   "photoShare.mine.preview": "Shared photo, {{plate}}",
   "about.brief.photoShare": "Share a photo by private link",

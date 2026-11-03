@@ -62,6 +62,18 @@ export function shareUrl(plate: string, token: string, origin = window.location.
 }
 
 /** Whole days left, rounded up, never below 0. */
+/** Whether the browser has a native share sheet to hand the link to. */
+export const canNativeShare = (): boolean => typeof navigator.share === 'function'
+
+/** Opens the native share sheet with the link; a dismissed sheet is not an error. */
+export async function nativeShareLink(url: string, title: string): Promise<void> {
+  try {
+    await navigator.share({ title, url })
+  } catch (e) {
+    if (!(e instanceof DOMException && e.name === 'AbortError')) throw e
+  }
+}
+
 export function daysLeft(expiresAt: string, now = Date.now()): number {
   return Math.max(0, Math.ceil((Date.parse(expiresAt) - now) / 86_400_000))
 }

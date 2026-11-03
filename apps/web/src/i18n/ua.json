@@ -5000,6 +5000,7 @@
   "photoShare.mine.expires_one": "Діє ще {{count}} день",
   "photoShare.mine.expires_other": "Діє ще {{count}} дн.",
   "photoShare.mine.copy": "Копіювати посилання",
+  "photoShare.mine.share": "Поділитися",
   "photoShare.mine.delete": "Видалити",
   "photoShare.mine.preview": "Фото з посиланням, {{plate}}",
   "about.brief.photoShare": "Поділитися фото за приватним посиланням",
