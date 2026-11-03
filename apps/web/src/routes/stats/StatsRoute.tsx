@@ -28,6 +28,7 @@ import StatsTable from '@/routes/stats/StatsTable'
 import TopStatsPanel from '@/routes/stats/TopStatsPanel'
 import VdbStatsPanel from '@/routes/stats/VdbStatsPanel'
 import WeightModelsPanel from '@/routes/stats/WeightModelsPanel'
+import MonthlyTrendPanel from '@/routes/stats/MonthlyTrendPanel'
 import AgeStatsPanel from '@/routes/stats/AgeStatsPanel'
 import OriginStatsPanel from '@/routes/stats/OriginStatsPanel'
 import SpecModelsPanel from '@/routes/stats/SpecModelsPanel'
@@ -241,6 +242,8 @@ export default function StatsRoute(): ReactNode {
           {tab === 'overview' && (
             <div className="animate-fade-in">
               <TopStatsPanel stats={stats.data} highlightModel={highlightModel} />
+
+              <MonthlyTrendPanel />
 
               <AgeStatsPanel />
             </div>

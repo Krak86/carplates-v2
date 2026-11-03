@@ -87,6 +87,7 @@ import {
   distributionResponseSchema,
   evStatsResponseSchema,
   importsStatsResponseSchema,
+  monthlyStatsResponseSchema,
   originStatsResponseSchema,
   regionBrandStatsResponseSchema,
   regionFacetStatsResponseSchema,
@@ -201,6 +202,7 @@ import type {
   DistributionResponse,
   EvStatsResponse,
   ImportsStatsResponse,
+  MonthlyStatsResponse,
   OriginStatsResponse,
   RegionBrandStatsResponse,
   RegionFacetStatsResponse,
@@ -334,6 +336,10 @@ export async function getEvStats(): Promise<EvStatsResponse> {
 
 export async function getImportsStats(): Promise<ImportsStatsResponse> {
   return importsStatsResponseSchema.parse(await getJson('/api/stats/imports'))
+}
+
+export async function getMonthlyStats(): Promise<MonthlyStatsResponse> {
+  return monthlyStatsResponseSchema.parse(await getJson('/api/stats/monthly'))
 }
 
 export async function getOriginStats(): Promise<OriginStatsResponse> {

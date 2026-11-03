@@ -129,6 +129,15 @@ export const statsByYear = registry
   .materializedView('stats_by_year', { year: integer('year'), ...statsMetrics })
   .existing()
 
+/** Registry operations per month and kind (`op_group`: new / import / resale) - see migrations/0092_stats_by_month.sql. */
+export const statsByMonth = registry
+  .materializedView('stats_by_month', {
+    month: text('month').notNull(),
+    opGroup: text('op_group'),
+    n: bigint('n', { mode: 'number' }).notNull()
+  })
+  .existing()
+
 /** By oblast (plate-prefix -> `registry.plate_regions`, mirrors `REGIONS` in `@carplates/shared`). */
 export const statsByRegion = registry
   .materializedView('stats_by_region', { region: text('region').notNull(), ...statsMetrics })

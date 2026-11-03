@@ -369,7 +369,7 @@ above once scoped, or dropped if research says no.
 - ✅ **Size & parking section + size-class chip** — done 2026-10-14 (`?section=size&tab=schema|parking|garage|norms`; RDW +
   Wikipedia + VIN merged, gaps forecast, scaled side/top drawing, ДБН / German / US bays, ПДР limits) — see
   `docs/plan-done.md`. Open: ⏳ ДБН Додаток Є class table (only the clause 5.2 / 4.6 figures are verified).
-- ✅ **/stats tabs + fleet age chart** — done 2026-11-03 (overview / rankings / origin / registry tabs, age bars with % / count). Write-up: `docs/plan-done.md`. Open: monthly trend chart.
+- ✅ **/stats tabs + fleet age chart** — done 2026-11-03 (overview / rankings / origin / registry tabs, age bars with % / count). Write-up: `docs/plan-done.md`. Monthly trend chart added the same day (rollup `stats_by_month`). Open: cars-only filter, reuse on /fuel, /road-safety, /wanted.
 - ✅ **Realistic vehicle drawings** — done 2026-10-29 (side/top silhouettes with arches, towing diagram, 6 new kind icons; original art, About note). Write-up: `docs/plan-done.md`.
   ✅ Follow-up 2026-10-29: side outlines traced from real side-on photos (`SIDE_PATHS`; source photos not recorded - redraw from catalogue dimensions if a licence question comes up), pickup examples with dimensions. Write-up: `docs/plan-done.md` "Advanced search legend and icons, news page, page width, traced silhouettes".
 - ✅ **Advanced search legend + icons, news page colours/skeletons, one page width (`max-w-6xl`)** — done 2026-10-29, see `docs/plan-done.md`.

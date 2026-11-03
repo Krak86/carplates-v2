@@ -4526,5 +4526,6 @@ Follow-ups to "Shareable photo-search links"; each step shippable alone, all new
 
 - **Why:** the page was one long stack of panels; RST's stats (age bars, share/count toggle, tabs) showed what was missing. Not copied 1:1: own teal-to-amber ramp, plain SVG-free CSS bars, no new dependency.
 - **Done:** four tabs (`?tab=`, old deep links resolve to the right tab), age chart with % / count toggle fed by `byMakeYear` on `/api/stats/origin`.
-- **Not done:** monthly trend chart (needs a new endpoint plus cache rule, check query cost first); reuse of the bar chart on /fuel, /road-safety, /wanted.
+- **Monthly trend (same day):** matview `stats_by_month` (migration 0092, ~12 s refresh; the live query was ~2 s), `/api/stats/monthly`, `MonthlyTrendPanel` with All / New / Imported / Resale chips and a year-earlier line. No new cache rule: it sits under `/api/stats/*`. Run `db:refresh-stats` on the VPS after deploy.
+- **Not done:** a passenger-cars-only filter for the trend (the rollup covers all kinds); reuse of the bar chart on /fuel, /road-safety, /wanted.
 - **Docs/release:** `features-reference.md` "/stats tabs and fleet age chart", `releases.ts` (2026-11-03), About stats line.

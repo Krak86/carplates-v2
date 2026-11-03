@@ -17,6 +17,7 @@ export {
   statsByBrandYear,
   statsByModel,
   statsModelGrouped,
+  statsByMonth,
   statsByOrigin,
   ingestedResources,
   jobRuns,
