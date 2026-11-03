@@ -44,6 +44,13 @@ launching ads or paid features. The project-specific findings are the useful par
   consequences (cl. 1.6.8). The not-found card therefore only links to `auto.ria.com/uk/check-car/` (`RiaCheckLink`). The
   server-side fetcher (`apps/api/src/ria/`, `RIA_CHECK_ENABLED`) stays **off and unused by the web**; turn it on only with RIA's
   written consent (contact `verified_cars@auto.ria.com`). Same rule for any other RIA endpoint.
+  - **Deliberate exception (2026-11-03, `docs/market-plan.md`):** the "Cars in stock" section may show Auto.ria listing cards
+    **delivered by the CarAPIS aggregator** (we fetch nothing from auto.ria.com ourselves, no scraping, no seller contacts or
+    personal data). Every card is labelled "Auto.ria, data from CarAPIS" with a link-out to the listing; the answer is cached for
+    days only, never written to seed CSVs or exposed as a raw feed. Kill switch: `MARKET_UA_ENABLED=false` removes the
+    Ukrainian (Auto.ria) rows at once. The owner emails `verified_cars@auto.ria.com` (draft in market-plan.md) **only after
+    seeing the feature live**; no reply is expected and the app does not depend on one. If RIA objects, flip the switch.
+    The rule above (RIA's own endpoints, `apps/api/src/ria/`) is unchanged.
 - Fine to monetize with attribution: Wikipedia/Commons (CC BY-SA, share-alike), NHTSA (public domain), RDW (CC0), Open EV Data (MIT).
 - Images (wiki-images, photos): per-image licence check first.
 - **User-shared photos (planned, docs/plan-done.md "Shareable photo-search links"):** we would host third-party content, so before building: Terms say the uploader owns/may share the

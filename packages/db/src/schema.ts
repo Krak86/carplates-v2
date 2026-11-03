@@ -2091,3 +2091,35 @@ export const sharedPhotos = app.table(
       .where(sql`${t.originalKey} is not null`)
   ]
 )
+
+/** "Cars for sale" cache (CarAPIS, docs/market-plan.md): mapped answers by key (`list:` / `detail:` / `slug:`), kept for stale-while-revalidate. */
+export const marketCache = app.table(
+  'market_cache',
+  {
+    key: text('key').primaryKey(),
+    payload: jsonb('payload').notNull(),
+    fetchedAt: timestamp('fetched_at', { withTimezone: true }).notNull().defaultNow()
+  },
+  t => [index('ix_market_cache_fetched').on(t.fetchedAt)]
+)
+
+/** Listing ids seen in a cached list answer: the allow-list of `GET /api/market/go/:id`. */
+export const marketListing = app.table(
+  'market_listing',
+  {
+    id: text('id').primaryKey(),
+    cacheKey: text('cache_key').notNull(),
+    seenAt: timestamp('seen_at', { withTimezone: true }).notNull().defaultNow()
+  },
+  t => [index('ix_market_listing_seen').on(t.seenAt)]
+)
+
+/** CarAPIS requests per UTC day (no rate-limit header upstream, so we count): list calls stop at 85, details may use the rest of 100. */
+export const marketBudget = app.table('market_budget', {
+  day: date('day').primaryKey(),
+  listUsed: integer('list_used').notNull().default(0),
+  detailUsed: integer('detail_used').notNull().default(0),
+  cacheHits: integer('cache_hits').notNull().default(0),
+  ua: integer('ua').notNull().default(0),
+  eu: integer('eu').notNull().default(0)
+})

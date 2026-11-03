@@ -14,6 +14,13 @@ importer's new/used photo rows moved below under a "From the official brand site
 - `country=UA` returns only `auto_ria_ua` (Kia Ceed: 143 rows, Skoda Octavia: 1,797). No other Ukrainian source exists in the 57 (no OLX.ua / RST). `/sources/` marks each source `live` or `on_demand` (Copart, IAAI, Mobile.de, AutoScout24 are `on_demand` = not in the free catalogue). Free-tier EU sources seen: Otomoto, Kleinanzeigen, Subito, Leboncoin, Autotrader UK, Blocket, Marktplaats, Autovit, ss.lv, finn.no, dba.dk.
 - Model names differ from ours (`/models/?brand=kia&search=ce` lists `ced`, `cd-ceed`, ...). Map via `brandSlug` / `modelKey` from the catalog first; a slug lookup costs extra requests, so cache it.
 
+## Step 1 probe results (2026-11-03, 3 requests)
+
+- **Trucks and buses exist in the free catalogue:** `body_type=truck` = 14,027 rows, `body_type=bus` = 1,773 (so the `vehicle_kind` -> `body_type` mapping is worth building). Truck rows come mostly from `tweedehands_be`, `ememain_be`, `autobell` (KR) and `kleinanzeigen`; bus rows from `willhaben` (AT), `kleinanzeigen`, `otomoto`. Not checked: UA truck/bus rows (no `country=UA` combination tried).
+- **`/sources/` = 57 sources, row keys `code,name,region,country,availability,last_parsed_at`** (the field is `availability`, values `live` / `on_demand`). **No US source exists at all** (no Copart, IAAI, Manheim); the only North American ones are `autotrader_ca` and `kijiji_ca` (Canada). So the fallback is DE / PL / FR / IT / BE / NL ..., never US.
+- **`on_demand` now = `beforward`, `ss_lv`** (everything else, incl. `autoscout24`, `auto_ria_ua`, `otomoto`, `leboncoin`, `kleinanzeigen`, `subito`, `marktplaats`, `autotrader`, `autovit`, is `live`; the earlier note that AutoScout24 is `on_demand` is outdated: it is `live`).
+- `MARKET_COUNTRY_ORDER` (step 2): `DE, PL, FR, IT, BE, NL, AT, CZ, SK, RO, LT/LV (none live except ss_lv on_demand), GB, CA, ...`, explicit constant; unknown countries last.
+
 ## Terms and legal (read before building)
 
 - CarAPIS Terms (updated 2026-10-16): **allowed** = integrate into own systems, display listings on our own site/app to our own users, cache photos to serve them. **Forbidden** = resell / redistribute raw or near-raw data or expose it as our own feed/API/dataset, build a competing catalogue, remove watermarks/attribution, exceed or test rate limits, share the key. Compliance with copyright / database / data-protection law is on us (cl. 5).
