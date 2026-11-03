@@ -20,6 +20,12 @@ export const RELEASES: readonly ReleaseDay[] = [
     items: [
       item(
         'improved',
+        'Під картою на /stats - топ-3 регіони за обраним показником: частка від усієї країни та кількість',
+        'Под картой на /stats - топ-3 региона по выбранному показателю: доля от всей страны и количество',
+        'Under the /stats map: the top 3 regions for the chosen metric, with their share of the country and the count'
+      ),
+      item(
+        'improved',
         'Графік реєстрацій за місяцями на /stats: перемикач «Легкові / Усі ТЗ» для порівняння з даними лише по легкових авто',
         'График регистраций по месяцам на /stats: переключатель «Легковые / Все ТС» для сравнения с данными только по легковым авто',
         'Registrations by month on /stats: a Cars / All vehicles switch, to compare with passenger-car-only figures'

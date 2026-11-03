@@ -22,6 +22,7 @@ import {
 } from '@/routes/stats/helpers'
 import { DEFAULT_MAP_MODE, MAP_MODES, parseMapMode } from '@/routes/stats/StatsMap.helpers'
 import type { MapMode } from '@/routes/stats/StatsMap.helpers'
+import RegionTopStrip from '@/routes/stats/RegionTopStrip'
 import StatsMapSkeleton from '@/routes/stats/StatsMapSkeleton'
 import StatsSkeleton from '@/routes/stats/StatsSkeleton'
 import StatsTable from '@/routes/stats/StatsTable'
@@ -374,6 +375,7 @@ export default function StatsRoute(): ReactNode {
                           rows={dimensionRows(stats.data, 'region').map(r => ({ label: r.label, value: r[metric] }))}
                         />
                       </Suspense>
+                      <RegionTopStrip stats={stats.data} metric={metric} />
                       <p className="mt-2 text-sm">
                         <Link to="/play?game=region" className="text-[var(--color-primary)] hover:underline">
                           🎲 {t('play.quiz.region.title')}
