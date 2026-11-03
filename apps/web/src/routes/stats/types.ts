@@ -18,6 +18,18 @@ export type StatsMetric = (typeof STATS_METRICS)[number]
 export const STATS_VIEWS = ['table', 'map'] as const
 export type StatsView = (typeof STATS_VIEWS)[number]
 
+/** Page sections: overview (leaderboards + age), rankings (weight/spec models), origin (+ markets), registry (table/map). */
+export const STATS_TABS = ['overview', 'rankings', 'origin', 'registry'] as const
+export type StatsTab = (typeof STATS_TABS)[number]
+export const DEFAULT_STATS_TAB: StatsTab = 'overview'
+
+export const TAB_ICONS: Readonly<Record<StatsTab, string>> = {
+  overview: '📊',
+  rankings: '🏆',
+  origin: '🌍',
+  registry: '🗂️'
+}
+
 // Explicit, not STATS_DIMENSIONS[0] / STATS_METRICS[0] — order here is
 // presentation (tab order), the default is a separate, semantic choice.
 export const DEFAULT_STATS_DIMENSION: StatsDimension = 'region'

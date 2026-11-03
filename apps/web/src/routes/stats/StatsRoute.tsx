@@ -13,7 +13,13 @@ import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 import { cn } from '@/lib/cn'
 import { toIntlLocale } from '@/lib/intl'
 import { dataStatusQuery, statsQuery } from '@/lib/queries'
-import { dimensionHasYearColumn, dimensionRows, monthYearLabel, yearRange } from '@/routes/stats/helpers'
+import {
+  dimensionHasYearColumn,
+  dimensionRows,
+  monthYearLabel,
+  resolveStatsTab,
+  yearRange
+} from '@/routes/stats/helpers'
 import { DEFAULT_MAP_MODE, MAP_MODES, parseMapMode } from '@/routes/stats/StatsMap.helpers'
 import type { MapMode } from '@/routes/stats/StatsMap.helpers'
 import StatsMapSkeleton from '@/routes/stats/StatsMapSkeleton'
@@ -33,9 +39,11 @@ import {
   METRIC_ICONS,
   STATS_DIMENSIONS,
   STATS_METRICS,
-  STATS_VIEWS
+  STATS_TABS,
+  STATS_VIEWS,
+  TAB_ICONS
 } from '@/routes/stats/types'
-import type { StatsDimension, StatsMetric, StatsView } from '@/routes/stats/types'
+import type { StatsDimension, StatsMetric, StatsTab, StatsView } from '@/routes/stats/types'
 
 const StatsMap = lazy(() => import('@/routes/stats/StatsMap'))
 
@@ -75,6 +83,7 @@ export default function StatsRoute(): ReactNode {
   const dim = parseDimension(searchParams.get('dim'))
   const metric = parseMetric(searchParams.get('metric'))
   const view = parseView(searchParams.get('view'))
+  const tab = resolveStatsTab(searchParams)
   const showLogos = searchParams.get('logos') === '1'
   const mapMode = parseMapMode(searchParams.get('mode'))
   const effectiveDim = view === 'map' ? 'region' : dim
@@ -94,6 +103,14 @@ export default function StatsRoute(): ReactNode {
     setSearchParams(prev => {
       const params = new URLSearchParams(prev)
       params.set('metric', next)
+      return params
+    })
+  }
+
+  const handleTabChange = (next: StatsTab): void => {
+    setSearchParams(prev => {
+      const params = new URLSearchParams(prev)
+      params.set('tab', next)
       return params
     })
   }
@@ -198,129 +215,168 @@ export default function StatsRoute(): ReactNode {
             </Card>
           </div>
 
-          <TopStatsPanel stats={stats.data} highlightModel={highlightModel} />
+          <div
+            role="tablist"
+            className="mb-4 flex flex-wrap gap-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-1"
+          >
+            {STATS_TABS.map(tb => (
+              <button
+                key={tb}
+                type="button"
+                role="tab"
+                aria-selected={tb === tab}
+                onClick={() => handleTabChange(tb)}
+                className={cn(
+                  'flex-1 rounded-md border px-3 py-1.5 text-sm whitespace-nowrap transition-colors duration-200',
+                  tb === tab
+                    ? 'border-transparent bg-[var(--color-primary)] font-medium text-[var(--color-primary-fg)]'
+                    : 'border-transparent text-[var(--color-muted)] hover:bg-[var(--color-bg)] hover:text-[var(--color-fg)]'
+                )}
+              >
+                <span aria-hidden>{TAB_ICONS[tb]}</span> {t(`stats.tab.${tb}`)}
+              </button>
+            ))}
+          </div>
 
-          <WeightModelsPanel />
+          {tab === 'overview' && (
+            <div className="animate-fade-in">
+              <TopStatsPanel stats={stats.data} highlightModel={highlightModel} />
 
-          <SpecModelsPanel />
-
-          <AgeStatsPanel />
-
-          <OriginStatsPanel />
-
-          <VdbStatsPanel />
-
-          <div className="mb-4 flex items-center gap-2">
-            <div className="inline-flex gap-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-1">
-              {STATS_VIEWS.map(v => (
-                <button
-                  key={v}
-                  type="button"
-                  onClick={() => handleViewChange(v)}
-                  className={cn(
-                    'rounded-md border px-3 py-1 text-sm transition-colors duration-200',
-                    v === view
-                      ? 'border-transparent bg-[var(--color-bg)] font-medium text-[var(--color-fg)] shadow-sm'
-                      : 'border-[var(--color-border)]/50 bg-[var(--color-bg)]/50 text-[var(--color-muted)] hover:border-[var(--color-border)] hover:bg-[var(--color-bg)] hover:text-[var(--color-fg)]'
-                  )}
-                >
-                  {t(`stats.view.${v}`)}
-                </button>
-              ))}
+              <AgeStatsPanel />
             </div>
+          )}
 
-            <SectionInfo section="statsTable" title={t('stats.table.title')} />
+          {tab === 'rankings' && (
+            <div className="animate-fade-in">
+              <WeightModelsPanel />
 
-            {view === 'map' && (
-              <div className="flex flex-wrap items-center gap-3">
-                <label className="flex items-center gap-2 text-sm">
-                  <input type="checkbox" checked={showLogos} onChange={e => handleLogosChange(e.target.checked)} />
-                  {t('stats.map.logos')}
-                </label>
+              <SpecModelsPanel />
+            </div>
+          )}
 
-                {showLogos && (
-                  <select
-                    aria-label={t('stats.map.mode')}
-                    value={mapMode}
-                    onChange={e => handleMapModeChange(parseMapMode(e.target.value))}
-                    className="rounded-md border border-[var(--color-border)] bg-[var(--color-bg)] px-2 py-1 text-sm"
-                  >
-                    {MAP_MODES.map(m => (
-                      <option key={m} value={m}>
-                        {t(`stats.map.mode.${m}`)}
-                      </option>
-                    ))}
-                  </select>
+          {tab === 'origin' && (
+            <div className="animate-fade-in">
+              <OriginStatsPanel />
+
+              <VdbStatsPanel />
+            </div>
+          )}
+
+          {tab === 'registry' && (
+            <>
+              <div className="mb-4 flex items-center gap-2">
+                <div className="inline-flex gap-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-1">
+                  {STATS_VIEWS.map(v => (
+                    <button
+                      key={v}
+                      type="button"
+                      onClick={() => handleViewChange(v)}
+                      className={cn(
+                        'rounded-md border px-3 py-1 text-sm transition-colors duration-200',
+                        v === view
+                          ? 'border-transparent bg-[var(--color-bg)] font-medium text-[var(--color-fg)] shadow-sm'
+                          : 'border-[var(--color-border)]/50 bg-[var(--color-bg)]/50 text-[var(--color-muted)] hover:border-[var(--color-border)] hover:bg-[var(--color-bg)] hover:text-[var(--color-fg)]'
+                      )}
+                    >
+                      {t(`stats.view.${v}`)}
+                    </button>
+                  ))}
+                </div>
+
+                <SectionInfo section="statsTable" title={t('stats.table.title')} />
+
+                {view === 'map' && (
+                  <div className="flex flex-wrap items-center gap-3">
+                    <label className="flex items-center gap-2 text-sm">
+                      <input type="checkbox" checked={showLogos} onChange={e => handleLogosChange(e.target.checked)} />
+                      {t('stats.map.logos')}
+                    </label>
+
+                    {showLogos && (
+                      <select
+                        aria-label={t('stats.map.mode')}
+                        value={mapMode}
+                        onChange={e => handleMapModeChange(parseMapMode(e.target.value))}
+                        className="rounded-md border border-[var(--color-border)] bg-[var(--color-bg)] px-2 py-1 text-sm"
+                      >
+                        {MAP_MODES.map(m => (
+                          <option key={m} value={m}>
+                            {t(`stats.map.mode.${m}`)}
+                          </option>
+                        ))}
+                      </select>
+                    )}
+                  </div>
                 )}
               </div>
-            )}
-          </div>
 
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-            <div className="flex flex-wrap gap-1 rounded-lg bg-[var(--color-bg)]/85 p-1 backdrop-blur-sm">
-              {visibleDimensions.map(d => (
-                <button
-                  key={d}
-                  type="button"
-                  onClick={() => handleDimensionChange(d)}
-                  className={cn(
-                    'rounded-md border px-3 py-1.5 text-sm transition-colors duration-200',
-                    d === effectiveDim
-                      ? 'border-transparent bg-[var(--color-primary)] text-[var(--color-primary-fg)]'
-                      : 'border-[var(--color-border)]/50 bg-[var(--color-surface)]/50 text-[var(--color-muted)] hover:border-[var(--color-border)] hover:bg-[var(--color-surface)] hover:text-[var(--color-fg)]'
-                  )}
-                >
-                  <span aria-hidden>{DIMENSION_ICONS[d]}</span> {t(`stats.dimension.${d}`)}
-                </button>
-              ))}
-            </div>
+              <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+                <div className="flex flex-wrap gap-1 rounded-lg bg-[var(--color-bg)]/85 p-1 backdrop-blur-sm">
+                  {visibleDimensions.map(d => (
+                    <button
+                      key={d}
+                      type="button"
+                      onClick={() => handleDimensionChange(d)}
+                      className={cn(
+                        'rounded-md border px-3 py-1.5 text-sm transition-colors duration-200',
+                        d === effectiveDim
+                          ? 'border-transparent bg-[var(--color-primary)] text-[var(--color-primary-fg)]'
+                          : 'border-[var(--color-border)]/50 bg-[var(--color-surface)]/50 text-[var(--color-muted)] hover:border-[var(--color-border)] hover:bg-[var(--color-surface)] hover:text-[var(--color-fg)]'
+                      )}
+                    >
+                      <span aria-hidden>{DIMENSION_ICONS[d]}</span> {t(`stats.dimension.${d}`)}
+                    </button>
+                  ))}
+                </div>
 
-            <div className="inline-flex gap-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-1">
-              {STATS_METRICS.map(m => (
-                <button
-                  key={m}
-                  type="button"
-                  onClick={() => handleMetricChange(m)}
-                  className={cn(
-                    'rounded-md border px-3 py-1 text-sm transition-colors duration-200',
-                    m === metric
-                      ? 'border-transparent bg-[var(--color-bg)] font-medium text-[var(--color-fg)] shadow-sm'
-                      : 'border-[var(--color-border)]/50 bg-[var(--color-bg)]/50 text-[var(--color-muted)] hover:border-[var(--color-border)] hover:bg-[var(--color-bg)] hover:text-[var(--color-fg)]'
-                  )}
-                >
-                  <span aria-hidden>{METRIC_ICONS[m]}</span> {t(`stats.column.${m}`)}
-                </button>
-              ))}
-            </div>
-          </div>
+                <div className="inline-flex gap-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-1">
+                  {STATS_METRICS.map(m => (
+                    <button
+                      key={m}
+                      type="button"
+                      onClick={() => handleMetricChange(m)}
+                      className={cn(
+                        'rounded-md border px-3 py-1 text-sm transition-colors duration-200',
+                        m === metric
+                          ? 'border-transparent bg-[var(--color-bg)] font-medium text-[var(--color-fg)] shadow-sm'
+                          : 'border-[var(--color-border)]/50 bg-[var(--color-bg)]/50 text-[var(--color-muted)] hover:border-[var(--color-border)] hover:bg-[var(--color-bg)] hover:text-[var(--color-fg)]'
+                      )}
+                    >
+                      <span aria-hidden>{METRIC_ICONS[m]}</span> {t(`stats.column.${m}`)}
+                    </button>
+                  ))}
+                </div>
+              </div>
 
-          <div key={`${view}-${effectiveDim}-${metric}`} className="animate-fade-in">
-            {view === 'map' ? (
-              <LoadErrorBoundary compact>
-                <Suspense fallback={<StatsMapSkeleton />}>
-                  <StatsMap
-                    logos={showLogos}
-                    mode={mapMode}
-                    rows={dimensionRows(stats.data, 'region').map(r => ({ label: r.label, value: r[metric] }))}
+              <div key={`${view}-${effectiveDim}-${metric}`} className="animate-fade-in">
+                {view === 'map' ? (
+                  <LoadErrorBoundary compact>
+                    <Suspense fallback={<StatsMapSkeleton />}>
+                      <StatsMap
+                        logos={showLogos}
+                        mode={mapMode}
+                        rows={dimensionRows(stats.data, 'region').map(r => ({ label: r.label, value: r[metric] }))}
+                      />
+                    </Suspense>
+                    <p className="mt-2 text-sm">
+                      <Link to="/play?game=region" className="text-[var(--color-primary)] hover:underline">
+                        🎲 {t('play.quiz.region.title')}
+                      </Link>
+                    </p>
+                  </LoadErrorBoundary>
+                ) : (
+                  <StatsTable
+                    rows={dimensionRows(stats.data, effectiveDim)}
+                    labelHeader={t(`stats.dimension.${effectiveDim}`)}
+                    showYearColumn={dimensionHasYearColumn(effectiveDim)}
+                    defaultSortKey={metric}
+                    highlightLabel={highlightLabel}
+                    showColorSwatch={effectiveDim === 'color'}
                   />
-                </Suspense>
-                <p className="mt-2 text-sm">
-                  <Link to="/play?game=region" className="text-[var(--color-primary)] hover:underline">
-                    🎲 {t('play.quiz.region.title')}
-                  </Link>
-                </p>
-              </LoadErrorBoundary>
-            ) : (
-              <StatsTable
-                rows={dimensionRows(stats.data, effectiveDim)}
-                labelHeader={t(`stats.dimension.${effectiveDim}`)}
-                showYearColumn={dimensionHasYearColumn(effectiveDim)}
-                defaultSortKey={metric}
-                highlightLabel={highlightLabel}
-                showColorSwatch={effectiveDim === 'color'}
-              />
-            )}
-          </div>
+                )}
+              </div>
+            </>
+          )}
 
           <RelatedPages page="stats" />
         </>
