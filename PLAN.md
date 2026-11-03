@@ -1231,6 +1231,8 @@ Outreach: Ukrainian letter sent to support@cars.ua (Cars.ua, ФОП Магуно
 Write-up: `docs/plan-done.md` "Market offers (CarAPIS)"; conventions: `docs/features-reference.md` "Market offers"; plan and facts: [docs/market-plan.md](docs/market-plan.md).
 
 - ✅ Cars for sale block on top of `StockSection` (UA first, EU fallback), detail modal, redirect link, budget counter, admin Server tile, `/data-status` row, About, release note
+- ✅ Large view modal (grid / rows / table, sort), USD / EUR / UAH price chip, block skeleton, CarAPIS admin Dashboards link (2026-11-03)
+- [ ] After deploy: compare our "requests used" counter with the usage page at my.carapis.com; confirm the real daily limit (assumed 100) and the reset time (assumed 00:00 UTC), adjust `DAILY_LIMIT` in `market.service.ts` if they differ
 - [ ] After deploy: set the `CARAPIS_API_KEY` GitHub secret (optional vars `MARKET_UA_ENABLED`, `MARKET_SHOW_BUDGET`) ⏳
 - [ ] After deploy: check "requests used" on the admin Server tab after a day (cache hits vs UA / EU), rotate the dev key
 - [ ] After deploy: open a plate page, a catalog page and `?section=stock` in production; confirm `go/:id` opens the listing (the 204 path, over budget, is untested in a browser)

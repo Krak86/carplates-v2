@@ -26,6 +26,12 @@ export const RELEASES: readonly ReleaseDay[] = [
       ),
       item(
         'improved',
+        'Авто на продаж: велике вікно зі списком (сітка, рядки, таблиця, сортування) і перемикач валюти цін - USD, EUR, UAH',
+        'Авто на продажу: большое окно со списком (сетка, строки, таблица, сортировка) и переключатель валюты цен - USD, EUR, UAH',
+        'Cars for sale: a large list view (grid, rows, table, sorting) and a price currency switch - USD, EUR, UAH'
+      ),
+      item(
+        'improved',
         'Під картою на /stats - топ-3 регіони за обраним показником: частка від усієї країни та кількість',
         'Под картой на /stats - топ-3 региона по выбранному показателю: доля от всей страны и количество',
         'Under the /stats map: the top 3 regions for the chosen metric, with their share of the country and the count'
