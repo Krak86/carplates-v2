@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { monthAxisLabel, niceMax, trendPoints } from './MonthlyTrendPanel.helpers'
+import { hasCarSplit, monthAxisLabel, niceMax, trendPoints } from './MonthlyTrendPanel.helpers'
 
 const months = Array.from({ length: 24 }, (_, i) => ({
   month: `${2024 + Math.floor((i + 8) / 12)}-${String(((i + 8) % 12) + 1).padStart(2, '0')}`,
@@ -24,6 +24,25 @@ describe('trendPoints', () => {
 
   it('has no previous value without a year of history', () => {
     expect(trendPoints(months.slice(-12), 'all').every(p => p.previous === null)).toBe(true)
+  })
+
+  it('counts passenger cars only in the cars scope', () => {
+    const withCars = months.map(m => ({ ...m, cars: { new: 1, import: 2, resale: 3 } }))
+    expect(trendPoints(withCars, 'all', 'cars').at(-1)).toMatchObject({ value: 6, previous: 6 })
+    expect(trendPoints(withCars, 'import', 'cars').at(-1)?.value).toBe(2)
+    expect(trendPoints(withCars, 'all', 'all').at(-1)?.value).toBe(23 + 110)
+  })
+
+  it('falls back to the totals when the cars split is missing', () => {
+    expect(trendPoints(months, 'new', 'cars').at(-1)?.value).toBe(23)
+  })
+})
+
+describe('hasCarSplit', () => {
+  it('needs every month to carry cars', () => {
+    expect(hasCarSplit([])).toBe(false)
+    expect(hasCarSplit(months)).toBe(false)
+    expect(hasCarSplit(months.map(m => ({ ...m, cars: { new: 0, import: 0, resale: 0 } })))).toBe(true)
   })
 })
 

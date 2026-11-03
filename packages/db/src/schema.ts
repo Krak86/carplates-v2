@@ -129,11 +129,12 @@ export const statsByYear = registry
   .materializedView('stats_by_year', { year: integer('year'), ...statsMetrics })
   .existing()
 
-/** Registry operations per month and kind (`op_group`: new / import / resale) - see migrations/0092_stats_by_month.sql. */
+/** Registry operations per month, group (`op_group`: new / import / resale) and cars-vs-other (`is_car`) - see migrations/0093_stats_by_month_cars.sql. */
 export const statsByMonth = registry
   .materializedView('stats_by_month', {
     month: text('month').notNull(),
     opGroup: text('op_group'),
+    isCar: boolean('is_car').notNull(),
     n: bigint('n', { mode: 'number' }).notNull()
   })
   .existing()

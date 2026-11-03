@@ -10,16 +10,28 @@ import { toIntlLocale } from '@/lib/intl'
 import { monthlyStatsQuery } from '@/lib/queries'
 import {
   DEFAULT_TREND_FILTER,
+  DEFAULT_TREND_SCOPE,
   TREND_FILTERS,
+  TREND_SCOPES,
+  hasCarSplit,
   monthAxisLabel,
   niceMax,
   trendPoints
 } from '@/routes/stats/MonthlyTrendPanel.helpers'
-import type { TrendFilter } from '@/routes/stats/MonthlyTrendPanel.helpers'
+import type { TrendFilter, TrendScope } from '@/routes/stats/MonthlyTrendPanel.helpers'
 
 const WIDTH = 640
 const HEIGHT = 250
 const PAD = { left: 52, right: 8, top: 10, bottom: 26 }
+
+function chipClass(active: boolean): string {
+  return cn(
+    'rounded-full border px-3 py-1 text-sm transition-colors duration-200',
+    active
+      ? 'border-transparent bg-[var(--color-primary)] text-[var(--color-primary-fg)]'
+      : 'border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-muted)] hover:text-[var(--color-fg)]'
+  )
+}
 
 /** "2026-08" -> "2025-08": the same month a year earlier. */
 function yearEarlier(month: string): string {
@@ -35,12 +47,14 @@ export default function MonthlyTrendPanel(): ReactNode {
   const { t, i18n } = useTranslation()
   const { data } = useQuery(monthlyStatsQuery())
   const [filter, setFilter] = useState<TrendFilter>(DEFAULT_TREND_FILTER)
+  const [scope, setScope] = useState<TrendScope>(DEFAULT_TREND_SCOPE)
   if (!data || data.months.length === 0) return null
 
   const locale = toIntlLocale(i18n.language)
   const compact = new Intl.NumberFormat(locale, { notation: 'compact', maximumFractionDigits: 0 })
   const full = new Intl.NumberFormat(locale)
-  const points = trendPoints(data.months, filter)
+  const split = hasCarSplit(data.months)
+  const points = trendPoints(data.months, filter, split ? scope : 'all')
   const max = niceMax(points.reduce((m, p) => Math.max(m, p.value, p.previous ?? 0), 0))
   const innerW = WIDTH - PAD.left - PAD.right
   const innerH = HEIGHT - PAD.top - PAD.bottom
@@ -58,23 +72,36 @@ export default function MonthlyTrendPanel(): ReactNode {
 
         <SectionInfo section="statsTrend" title={t('stats.trend.title')} />
 
-        <div role="group" className="ml-auto flex flex-wrap gap-1">
-          {TREND_FILTERS.map(f => (
-            <button
-              key={f}
-              type="button"
-              aria-pressed={f === filter}
-              onClick={() => setFilter(f)}
-              className={cn(
-                'rounded-full border px-3 py-1 text-sm transition-colors duration-200',
-                f === filter
-                  ? 'border-transparent bg-[var(--color-primary)] text-[var(--color-primary-fg)]'
-                  : 'border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-muted)] hover:text-[var(--color-fg)]'
-              )}
-            >
-              {t(`stats.trend.filter.${f}`)}
-            </button>
-          ))}
+        <div className="ml-auto flex flex-wrap items-center gap-x-4 gap-y-2">
+          {split && (
+            <div role="group" aria-label={t('stats.trend.scope.label')} className="flex flex-wrap gap-1">
+              {TREND_SCOPES.map(s => (
+                <button
+                  key={s}
+                  type="button"
+                  aria-pressed={s === scope}
+                  onClick={() => setScope(s)}
+                  className={chipClass(s === scope)}
+                >
+                  {t(`stats.trend.scope.${s}`)}
+                </button>
+              ))}
+            </div>
+          )}
+
+          <div role="group" className="flex flex-wrap gap-1">
+            {TREND_FILTERS.map(f => (
+              <button
+                key={f}
+                type="button"
+                aria-pressed={f === filter}
+                onClick={() => setFilter(f)}
+                className={chipClass(f === filter)}
+              >
+                {t(`stats.trend.filter.${f}`)}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 

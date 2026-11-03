@@ -14,7 +14,8 @@ import { CUSTOMS_PATH } from '@/routes/read/links'
 export function useVinCustomsHref(vin: string): string {
   const { data } = useQuery(vinQuery(vin))
   const fields = data ? toFieldMap(data.results) : null
-  const lookup = data && fields ? typicalLookup(fields, buildFallback(data.vin, fields, data.registry?.actions[0])) : null
+  const lookup =
+    data && fields ? typicalLookup(fields, buildFallback(data.vin, fields, data.registry?.actions[0])) : null
   const { brand, model, year, kind, fuel, capacity } = lookup ?? {}
   const rdw = useQuery({
     ...rdwQuery(brand ?? '', model ?? '', year ?? 0, kind),
