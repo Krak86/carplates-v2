@@ -11,6 +11,7 @@ describe('foldOriginStats', () => {
       { brandCountry: 'JP', plantCountry: 'JP', n: 6 }
     ])
     expect(out.total).toBe(113)
+    expect(out.byMakeYear).toEqual([{ year: 0, n: 113 }])
     expect(out.byBrand).toEqual([
       { country: 'DE', n: 7 },
       { country: 'JP', n: 6 },
@@ -24,6 +25,18 @@ describe('foldOriginStats', () => {
   })
 
   it('is empty without rows', () => {
-    expect(foldOriginStats([])).toEqual({ total: 0, byBrand: [], byPlant: [] })
+    expect(foldOriginStats([])).toEqual({ total: 0, byBrand: [], byPlant: [], byMakeYear: [] })
+  })
+
+  it('sums per model year, ascending', () => {
+    const out = foldOriginStats([
+      { makeYear: 2010, brandCountry: 'DE', plantCountry: 'DE', n: 3 },
+      { makeYear: 1999, brandCountry: 'DE', plantCountry: 'DE', n: 1 },
+      { makeYear: 2010, brandCountry: 'JP', plantCountry: 'JP', n: 4 }
+    ])
+    expect(out.byMakeYear).toEqual([
+      { year: 1999, n: 1 },
+      { year: 2010, n: 7 }
+    ])
   })
 })

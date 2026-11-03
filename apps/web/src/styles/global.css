@@ -136,6 +136,25 @@
   }
 }
 
+/* /stats age chart: newest to oldest, teal to amber. sRGB fallback, oklch on P3 displays. */
+:root {
+  --age-0: hsl(172 70% 38%);
+  --age-1: hsl(150 60% 42%);
+  --age-2: hsl(95 55% 46%);
+  --age-3: hsl(45 90% 50%);
+  --age-4: hsl(24 90% 54%);
+}
+
+@media (color-gamut: p3) {
+  :root {
+    --age-0: oklch(0.7 0.14 185);
+    --age-1: oklch(0.74 0.2 150);
+    --age-2: oklch(0.8 0.22 118);
+    --age-3: oklch(0.84 0.2 88);
+    --age-4: oklch(0.72 0.22 50);
+  }
+}
+
 /* Games hub poster tile (Steam/Epic library style): portrait cover, gradient from `--hue`. sRGB fallback first, then
    oklch on P3 displays. */
 .game-cover {
