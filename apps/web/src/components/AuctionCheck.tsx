@@ -6,6 +6,7 @@ import { Link, useSearchParams } from 'react-router'
 import AuctionVinModal from '@/components/AuctionVinModal'
 import SectionInfo from '@/components/SectionInfo'
 import ShareButton from '@/components/ShareButton'
+import { useVinCustomsHref } from '@/components/vin/use-vin-customs-href'
 import VinToggleSection from '@/components/vin/VinToggleSection'
 import {
   AUCTION_REGION_ICON,
@@ -17,7 +18,7 @@ import {
 import type { AuctionSiteId } from '@/lib/auction-sites'
 import { copyToClipboard, scrollElementIntoView } from '@/lib/share-section'
 import ReadGuideLink from '@/components/ReadGuideLink'
-import { CUSTOMS_PATH, IMPORTS_PATH } from '@/routes/read/links'
+import { IMPORTS_PATH } from '@/routes/read/links'
 
 type Props = {
   vin: string
@@ -48,6 +49,7 @@ export default function AuctionCheck({ vin, imported = false, openSignal = 0 }: 
   const title = t('auctions.title')
   const modalSite = AUCTION_SITES.find(site => site.id === modalId)
   const asiaSites = asiaSitesForVin(vin)
+  const customsPath = useVinCustomsHref(vin)
 
   useEffect(() => {
     if ((isShared || openSignal > 0) && sectionRef.current) scrollElementIntoView(sectionRef.current)
@@ -149,7 +151,7 @@ export default function AuctionCheck({ vin, imported = false, openSignal = 0 }: 
       </div>
 
       <p className="mt-3 text-sm">
-        <Link to={CUSTOMS_PATH} className="text-primary underline">
+        <Link to={customsPath} className="text-primary underline">
           {t('read.cost.open')}
         </Link>
       </p>

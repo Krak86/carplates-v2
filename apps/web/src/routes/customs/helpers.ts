@@ -1,8 +1,11 @@
 import {
   buildCustomsQuery,
+  convertEur,
   CUSTOMS_PRESETS,
   mapFuel,
+  type Currency,
   type CustomsQuery,
+  type FxResponse,
   type ImportFuel,
   type ImportInput
 } from '@carplates/shared'
@@ -102,12 +105,26 @@ export function customsPrefillHref({ fuelText, cc, year, valueEur }: PrefillSpec
   })}`
 }
 
+const SIGN: Readonly<Record<Currency, string>> = { EUR: '€', USD: '$', UAH: '₴' }
+
 export function formatEur(n: number, locale: string): string {
   return `€ ${n.toLocaleString(locale, { maximumFractionDigits: 2 })}`
 }
 
 export function formatUah(n: number, locale: string): string {
   return `₴ ${n.toLocaleString(locale, { maximumFractionDigits: 2 })}`
+}
+
+/** A euro amount in the shown currency, exact to the cent (customs figures are not estimates); euros until the NBU rates arrive. */
+export function formatCurrency(
+  eur: number,
+  currency: Currency,
+  fx: Pick<FxResponse, 'eurUah' | 'usdUah'> | null,
+  locale: string
+): string {
+  const shown = fx ? currency : 'EUR'
+  const value = fx ? convertEur(eur, shown, fx) : eur
+  return `${SIGN[shown]} ${value.toLocaleString(locale, { maximumFractionDigits: 2 })}`
 }
 
 export const percent = (rate: number): string => `${Math.round(rate * 1000) / 10}%`

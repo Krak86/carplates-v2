@@ -4,6 +4,7 @@ import {
   CUSTOMS_PRESETS,
   IMPORT_FUELS,
   pickCustomsRules,
+  type Currency,
   type CustomsQuery,
   type ImportFuel
 } from '@carplates/shared'
@@ -11,6 +12,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 
+import AuctionCurrency from '@/components/ua-auctions/AuctionCurrency'
 import Card from '@/components/ui/Card'
 import { toIntlLocale } from '@/lib/intl'
 import { fxQuery } from '@/lib/queries'
@@ -33,6 +35,7 @@ export default function CustomsCalculator({ query, hasParams }: Props): ReactNod
   const locale = toIntlLocale(i18n.language)
   const fx = useQuery(fxQuery()).data ?? null
   const [form, setForm] = useState<FormState>(() => initialForm(query, hasParams))
+  const [currency, setCurrency] = useState<Currency>('EUR')
 
   const today = new Date()
   const rules = pickCustomsRules(today.toISOString())
@@ -122,7 +125,10 @@ export default function CustomsCalculator({ query, hasParams }: Props): ReactNod
         </div>
       </Card>
 
-      <CustomsResult costs={costs} input={input} rules={rules} fx={fx} locale={locale} />
+      <div className="space-y-4">
+        <AuctionCurrency currency={currency} onChange={setCurrency} fx={fx} baseCurrency="EUR" />
+        <CustomsResult costs={costs} input={input} rules={rules} fx={fx} locale={locale} currency={currency} />
+      </div>
     </div>
   )
 }
