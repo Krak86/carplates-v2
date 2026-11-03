@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 import {
   barPercent,
   correlationStrength,
+  distanceKm,
   fleetPoints,
   kmLabel,
   pearson,
@@ -14,7 +15,8 @@ import {
   partialMonth,
   peakBucket,
   rankedRegions,
-  regionCrashFact
+  regionCrashFact,
+  streetViewUrl
 } from './helpers'
 
 const region = (name: string, rankDeaths: number, rankRate: number | null) => ({
@@ -183,5 +185,21 @@ describe('kmLabel', () => {
     expect(kmLabel(12300)).toBe('12+300')
     expect(kmLabel(5)).toBe('0+005')
     expect(kmLabel(null)).toBe('')
+  })
+})
+
+describe('streetViewUrl and distanceKm', () => {
+  it('builds a pano link', () => {
+    expect(streetViewUrl(50.45, 30.52)).toBe(
+      'https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=50.45,30.52'
+    )
+  })
+
+  it('measures Kyiv to Lviv at roughly 470 km and zero for the same point', () => {
+    const kyiv = { lat: 50.4501, lon: 30.5234 }
+    const lviv = { lat: 49.8397, lon: 24.0297 }
+    expect(distanceKm(kyiv, lviv)).toBeGreaterThan(460)
+    expect(distanceKm(kyiv, lviv)).toBeLessThan(480)
+    expect(distanceKm(kyiv, kyiv)).toBe(0)
   })
 })

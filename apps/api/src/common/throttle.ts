@@ -31,6 +31,8 @@ export const VIN_DECODE_THROTTLE = { medium: { limit: 30, ttl: 60_000 } }
 export const ORIGIN_THROTTLE = { medium: { limit: 60, ttl: 60_000 } }
 /** Catalog pages: an enumerable set (make x model), though the answer is one precomputed row. */
 export const CATALOG_THROTTLE = { medium: { limit: 60, ttl: 60_000 } }
+/** Market listings: a make x model set plus detail / redirect clicks; answers come from our cache, misses spend a 100-a-day upstream quota. */
+export const MARKET_THROTTLE = { medium: { limit: 40, ttl: 60_000 } }
 /** Road-safety rollups and the hazard list (filterable by region and kind): small precomputed answers, edge-cached. */
 export const ROAD_SAFETY_THROTTLE = { medium: { limit: 60, ttl: 60_000 } }
 /** Token-checked unsubscribe endpoints: a forged-token guesser gets few tries (a real user needs one). */

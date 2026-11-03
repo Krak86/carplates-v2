@@ -121,5 +121,6 @@ export const DATASETS: readonly Dataset[] = [
   { id: 'openEv', name: 'Open EV Data (upstream frozen at 2020-07)', cadence: 'frozen', refreshedOn: '2026-10-09' },
 
   // Asked per request
-  { id: 'nhtsa', name: 'NHTSA: VIN decoding, recalls, ratings', cadence: 'live' }
+  { id: 'nhtsa', name: 'NHTSA: VIN decoding, recalls, ratings', cadence: 'live' },
+  { id: 'carapis', name: 'CarAPIS: cars for sale (Auto.ria, European marketplaces)', to: '/cars', cadence: 'live' }
 ]

@@ -4,6 +4,7 @@ import { normalizePlate } from '@carplates/shared'
 import type {
   AuctionListQuery,
   CardBundleResponse,
+  MarketKind,
   MotFuelHint,
   PlateLookupResponse,
   StatsFieldDimension,
@@ -52,6 +53,8 @@ import {
   getAuctionStats,
   getWanted,
   getWantedStats,
+  getMarket,
+  getMarketDetail,
   getGenerationGrowth,
   getGenerations,
   getWikiSpecs,
@@ -805,6 +808,29 @@ export function wantedQuery(plate: string | null, vin: string | null) {
     queryKey: ['wanted', plate, vin],
     queryFn: () => getWanted(plate, vin),
     staleTime: 5 * 60_000
+  })
+}
+
+/**
+ * "Cars for sale" (CarAPIS, 100 requests a day on the API side): online-only, no offline group. The API caches ~3 days in
+ * Postgres, so a long stale time here costs nothing; no retry (a 429 or an over-budget answer must not be hammered).
+ */
+export function marketQuery(make: string, model: string, kind: MarketKind) {
+  return queryOptions({
+    queryKey: ['market', kind, make, model],
+    queryFn: () => getMarket(make, model, kind),
+    staleTime: 30 * 60_000,
+    retry: false
+  })
+}
+
+/** One listing's modal detail; the API keeps it ~7 days. Same rules as `marketQuery`. */
+export function marketDetailQuery(id: string) {
+  return queryOptions({
+    queryKey: ['market', 'detail', id],
+    queryFn: () => getMarketDetail(id),
+    staleTime: 60 * 60_000,
+    retry: false
   })
 }
 

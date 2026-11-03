@@ -370,15 +370,15 @@ above once scoped, or dropped if research says no.
   Wikipedia + VIN merged, gaps forecast, scaled side/top drawing, ДБН / German / US bays, ПДР limits) — see
   `docs/plan-done.md`. Open: ⏳ ДБН Додаток Є class table (only the clause 5.2 / 4.6 figures are verified).
 - ✅ **/stats tabs + fleet age chart** — done 2026-11-03 (overview / rankings / origin / registry tabs, age bars with % / count). Write-up: `docs/plan-done.md`. Monthly trend chart added the same day (rollup `stats_by_month`). Cars / All vehicles filter for the trend added the same day (migration `0093`). Shared `components/charts/` reused on /fuel, /road-safety and /wanted.
-  - [ ] **After deploy (2026-11-03):** migrations `0092_stats_by_month` and `0093_stats_by_month_cars` are applied by the deploy (blue/green safe). 0093 drops and rebuilds the matview `WITH DATA` (about 12 s inside the migration, which takes a lock on the view meanwhile), so no manual refresh is needed. Check the migration step of the deploy run passed and the api health check is green. If the view is ever empty (`{"months":[]}`), run `REFRESH MATERIALIZED VIEW registry.stats_by_month` on the VPS (about 12 s on 24.7M rows); the next `plates` ingest's `refreshStats` also fills it. No `jobs.ts` entry exists for a stats-only refresh.
-  - [ ] Purge `/api/stats/monthly` and `/api/stats/origin` at Cloudflare (the edge may hold the old shapes for 6 h). Then `curl -s https://carsua.app/api/stats/monthly`: 24 months, each with a `cars` object; twice, `cf-cache-status` HIT with `s-maxage=21600`.
-  - [ ] Prod browser check, light / dark / phone width (hard reload): `/stats` (Cars / All vehicles chips change the bars, Age and Monthly charts look unchanged after the `ColumnChart` / `BarList` refactor), `/wanted` (stolen columns + found line, legend), `/road-safety` (hour and weekday charts: peak solid, axis labels readable on a phone), `/fuel` (adoption-by-year rows). No console errors.
-  - [ ] `/stats?tab=registry&view=map`: the Top 3 regions strip under the map follows the metric chips and stacks on a phone.
+  - [x] **After deploy (2026-11-03; checked on prod right after the deploy: 0093 is applied, `/api/stats/monthly` has all 24 months with `cars`, the last month's cars total matches the local DB):** migrations `0092_stats_by_month` and `0093_stats_by_month_cars` are applied by the deploy (blue/green safe). 0093 drops and rebuilds the matview `WITH DATA` (about 12 s inside the migration, which takes a lock on the view meanwhile), so no manual refresh is needed. Check the migration step of the deploy run passed and the api health check is green. If the view is ever empty (`{"months":[]}`), run `REFRESH MATERIALIZED VIEW registry.stats_by_month` on the VPS (about 12 s on 24.7M rows); the next `plates` ingest's `refreshStats` also fills it. No `jobs.ts` entry exists for a stats-only refresh.
+  - [x] (checked 2026-11-03: first request MISS, second HIT with `s-maxage=21600`, `Age: 0`, so the edge was already fresh; 24 months, every one with `cars`) Purge `/api/stats/monthly` and `/api/stats/origin` at Cloudflare (the edge may hold the old shapes for 6 h). Then `curl -s https://carsua.app/api/stats/monthly`: 24 months, each with a `cars` object; twice, `cf-cache-status` HIT with `s-maxage=21600`.
+  - [~] (2026-11-03, Chrome DevTools at phone width 485 px, dark mode, no console errors: `/stats` Cars chip and monthly + age charts, `/wanted` stolen columns + found line, `/road-safety` hour + weekday charts with a solid peak, `/fuel?pt=electric&ptView=years` rows all OK. Still open: **light mode**, a desktop width, and the weekday chart cap added after this check (`TimeSection`, deploy it first)) Prod browser check, light / dark / phone width (hard reload): `/stats` (Cars / All vehicles chips change the bars, Age and Monthly charts look unchanged after the `ColumnChart` / `BarList` refactor), `/wanted` (stolen columns + found line, legend), `/road-safety` (hour and weekday charts: peak solid, axis labels readable on a phone), `/fuel` (adoption-by-year rows). No console errors.
+  - [~] (2026-11-03: strip is live, Kyiv 13.6% / Dnipropetrovsk 7.5% / Lviv 6.7% for Plates; still to look at its layout and the Plates / VINs / Rows switch) `/stats?tab=registry&view=map`: the Top 3 regions strip under the map follows the metric chips and stacks on a phone.
   - [ ] Cars figure sanity check: the cars-only monthly total should be in the range of RST's passenger-car numbers for the same month (the point of the filter); note any gap here.
-  - [ ] Check `curl -s https://carsua.app/api/stats/monthly` returns 24 months (not `{"months":[]}`) and, twice, `cf-cache-status` HIT with `s-maxage=21600` (no new Cloudflare rule: it is under `/api/stats/*`). If it was fetched empty before the refresh, purge `/api/stats/monthly`.
-  - [ ] `/api/stats/origin` now has `byMakeYear`; the edge may serve the old shape for up to 6 h, then the Age chart appears. Purge `/api/stats/origin` to see it at once.
-  - [ ] Open `/stats` in prod (hard reload): the four tabs, the slide animation, the Age and Monthly charts (light, dark, phone width), and a few old deep links (`?dim=brand&highlight=BMW`, `?view=map`, `?weight=truck`, `?highlightModel=VOLKSWAGEN::PASSAT`) land on the right tab. No Zod errors in the console.
-  - [ ] Public OpenAPI doc `/.well-known/openapi.json` lists `/api/stats/monthly` (the prefix `/api/stats` is allowlisted, so no code change is needed).
+  - [x] (done 2026-11-03, see above) Check `curl -s https://carsua.app/api/stats/monthly` returns 24 months (not `{"months":[]}`) and, twice, `cf-cache-status` HIT with `s-maxage=21600` (no new Cloudflare rule: it is under `/api/stats/*`). If it was fetched empty before the refresh, purge `/api/stats/monthly`.
+  - [x] (checked 2026-11-03: `byMakeYear` is served, 102 rows) `/api/stats/origin` now has `byMakeYear`; the edge may serve the old shape for up to 6 h, then the Age chart appears. Purge `/api/stats/origin` to see it at once.
+  - [~] (2026-11-03: four tabs, Age and Monthly charts seen; deep links not tried) Open `/stats` in prod (hard reload): the four tabs, the slide animation, the Age and Monthly charts (light, dark, phone width), and a few old deep links (`?dim=brand&highlight=BMW`, `?view=map`, `?weight=truck`, `?highlightModel=VOLKSWAGEN::PASSAT`) land on the right tab. No Zod errors in the console.
+  - [x] (checked 2026-11-03: listed) Public OpenAPI doc `/.well-known/openapi.json` lists `/api/stats/monthly` (the prefix `/api/stats` is allowlisted, so no code change is needed).
   - **Next, in this order:**
     1. [x] **Cars-only filter for the trend** - done 2026-11-03: migration `0093_stats_by_month_cars` (rebuilt `WITH DATA`, so no refresh is needed after deploy), `months[].cars`, Cars / All vehicles chips. After deploy: check `/api/stats/monthly` has `cars` per month and purge `/api/stats/monthly` at Cloudflare (the edge may hold the old shape for 6 h).
     2. [x] **Shared chart components, then reuse** - done 2026-11-03: `components/charts/ColumnChart` (SVG columns + optional line; trend, /wanted years, /road-safety hour and weekday) and `BarList` (horizontal rows; age chart, /fuel year adoption). Colors `--age-*`, no API change. Check the four pages in a browser (light, dark, phone width): the /wanted found series is now a line, not paired columns.
@@ -1186,6 +1186,7 @@ card-on-file subscriptions; revisit with real quotes.
 - ✅ **Source strip + related pages on all statistics pages (2026-11-01):** `PageSources` "Source data" card and `RelatedPages` cross links on `/stats`, `/wanted`, `/auctions`, `/fuel`, `/safety`, `/road-safety` — see `docs/plan-done.md`.
 - ✅ **Prozorro.Sale vehicle auctions (2026-11-01):** second auction source with grouped lots, merged vehicle facts, photos straight from Prozorro (a resizer was tried and dropped: its Cloudflare blocks server fetches) and `/auctions` source filters; backfilled and loaded on the VPS (14 431 rows); future-dated finished lots fixed, stats delta is a median — see `docs/plan-done.md`.
 - ✅ **Road-safety context in `/read/safety` (2026-11-01):** "On the road" (national totals, deaths by year, pedestrian/child share) and "Tests and crashes" (crash types and causes, peak time, what each programme tests) sections reading the `/road-safety` queries - see `docs/plan-done.md`.
+- ✅ **Hazard map on OSM, customs currency + VIN prefill, native Share (2026-11-03):** Leaflet map with Street View links and "Near me", `/customs?cur=`, `navigator.share` for photo links. Write-up: `docs/plan-done.md`.
 - **Other providers (researched 2026-10-12, not planned yet):** GitHub (client id + secret, code flow), Microsoft
   (client id, OIDC), Facebook/Meta (app id + secret, needs privacy URL + data-deletion URL + Live app), Apple (Services
   ID + Team ID + Key ID + `.p8`, $99/yr, secret JWT rotates ≤ 6 months — skip unless a store app ships).
@@ -1225,6 +1226,26 @@ Outreach: Ukrainian letter sent to support@cars.ua (Cars.ua, ФОП Магуно
 - **Phase 2 (separate agreement):** similar cars by make/model/year and images. Not part of the first release.
 - **Until a reply:** no code; optional fallback = a "search on cars.ua" link built from the VIN.
 - **Next:** on reply, update this section; if silent for a few weeks, send the Autocars dealer letter.
+
+## Market offers in "Cars in stock" (CarAPIS) ✅ built 2026-11-03, awaiting deploy
+
+Write-up: `docs/plan-done.md` "Market offers (CarAPIS)"; conventions: `docs/features-reference.md` "Market offers"; plan and facts: [docs/market-plan.md](docs/market-plan.md).
+
+- ✅ Cars for sale block on top of `StockSection` (UA first, EU fallback), detail modal, redirect link, budget counter, admin Server tile, `/data-status` row, About, release note
+- ✅ Large view modal (grid / rows / table, sort), USD / EUR / UAH price chip, block skeleton, CarAPIS admin Dashboards link (2026-11-03)
+- [ ] After deploy: compare our "requests used" counter with the usage page at my.carapis.com; confirm the real daily limit (assumed 100) and the reset time (assumed 00:00 UTC), adjust `DAILY_LIMIT` in `market.service.ts` if they differ
+- [ ] After deploy: set the `CARAPIS_API_KEY` GitHub secret (optional vars `MARKET_UA_ENABLED`, `MARKET_SHOW_BUDGET`) ⏳
+- [ ] After deploy: check "requests used" on the admin Server tab after a day (cache hits vs UA / EU), rotate the dev key
+- [ ] After deploy: open a plate page, a catalog page and `?section=stock` in production; confirm `go/:id` opens the listing (the 204 path, over budget, is untested in a browser)
+- [ ] Owner emails Auto.ria (draft in the plan) after seeing it live; if they object, set `MARKET_UA_ENABLED=false`
+- [ ] Optional: localize CarAPIS region names (cards show the English ones, e.g. "Kyiv") and a few raw values ("manufacturer warranty")
+
+## 3DTuning "Customize in 3D" links - research done 2026-11-03, not started
+
+Facts and steps: [docs/tuning-3d-plan.md](docs/tuning-3d-plan.md). Not embeddable (`X-Frame-Options: deny`), link-out only; the sitemap lists 2,463 car pages (133 makes), no scraping needed.
+
+- [ ] Sitemap to seed CSV + `tuning_links` migration, then measure the match rate against our make/model/year set
+- [ ] Matching helper, API lookup, "Customize in 3D" `LazySection` (ua/ru/en), docs
 
 ## Later, conditional
 

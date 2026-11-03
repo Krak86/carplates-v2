@@ -23,6 +23,7 @@ import { CardModule } from './card/card.module.js'
 import { EvModule } from './ev/ev.module.js'
 import { MotModule } from './mot/mot.module.js'
 import { CaRecallsModule } from './ca-recalls/ca-recalls.module.js'
+import { MarketModule } from './market/market.module.js'
 import { RiaModule } from './ria/ria.module.js'
 import { WantedModule } from './wanted/wanted.module.js'
 import { AuctionsModule } from './auctions/auctions.module.js'
@@ -90,6 +91,7 @@ import { WikispecsModule } from './wikispecs/wikispecs.module.js'
     CaRecallsModule,
     WantedModule,
     AuctionsModule,
+    MarketModule,
     RiaModule,
     GenerationsModule,
     WikispecsModule,

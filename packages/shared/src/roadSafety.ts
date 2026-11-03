@@ -130,6 +130,8 @@ export const roadSafetyHazardsResponseSchema = z.object({
       kmEnd: z.number().int().nullable(),
       lat: z.number().nullable(),
       lon: z.number().nullable(),
+      latEnd: z.number().nullable().optional(),
+      lonEnd: z.number().nullable().optional(),
       crashes3y: countSchema.nullable(),
       rate: z.number().nullable(),
       hazardLevel: z.string().nullable()

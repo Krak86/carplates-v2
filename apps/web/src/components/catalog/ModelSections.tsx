@@ -102,7 +102,7 @@ export default function ModelSections({ brand, model, year, kind, fuel, capacity
         <SocialSection brand={brand} model={model} year={year} />
       </LazySection>
       <LazySection sections={['stock']}>
-        <StockSection brand={brand} model={model} year={year} />
+        <StockSection brand={brand} model={model} year={year} kind={kind} />
       </LazySection>
       <LazySection sections={['shares']}>
         <SharePriceSection brand={brand} half />

@@ -5,6 +5,12 @@ const boolish = z
   .optional()
   .transform(v => v === 'true' || v === '1')
 
+/** Like `boolish` but true when unset: only an explicit `false` / `0` turns it off. */
+const onByDefault = z
+  .enum(['true', 'false', '1', '0', ''])
+  .optional()
+  .transform(v => v !== 'false' && v !== '0')
+
 const DEV_DB_CREDENTIALS = 'carplates:carplates@'
 
 const envSchema = z.object({
@@ -45,6 +51,15 @@ const envSchema = z.object({
    *  endpoint capped at 5 calls / 90 s per IP, so it is opt-in: off unless explicitly enabled. */
   RIA_CHECK_ENABLED: boolish,
   RIA_CHECK_BASE_URL: z.string().default('https://auto.ria.com'),
+
+  /** CarAPIS listings for the "Cars for sale" block (docs/market-plan.md). Absent → the feature is off. **Secret**: `.env` / the
+   *  deploy secret only. Free tier = 100 requests/day, counted by the API itself. */
+  CARAPIS_API_KEY: z.string().optional(),
+  CARAPIS_BASE_URL: z.string().default('https://api.carapis.com/apix/api'),
+  /** Kill switch for the Ukrainian (Auto.ria, delivered by CarAPIS) rows: on unless set to `false` / `0`. */
+  MARKET_UA_ENABLED: onByDefault,
+  /** Show "requests left today" in the section: on unless set to `false` / `0` (the admin Server tab always shows it). */
+  MARKET_SHOW_BUDGET: onByDefault,
 
   PIXABAY_BASE_URL: z.string().default('https://pixabay.com/api/'),
   /** Absent → the photos route answers 503. */
@@ -156,4 +171,5 @@ export const alprLocalEnabled = (env: Env): boolean => Boolean(env.ALPR_LOCAL_UR
 export const sharesStorageConfigured = (env: Env): boolean =>
   Boolean(env.SHARES_R2_ENDPOINT && env.SHARES_R2_ACCESS_KEY_ID && env.SHARES_R2_SECRET_ACCESS_KEY)
 export const sharesEnabled = (env: Env): boolean => sharesStorageConfigured(env) && alprLocalEnabled(env)
+export const marketEnabled = (env: Env): boolean => Boolean(env.CARAPIS_API_KEY)
 export const pixabayEnabled = (env: Env): boolean => Boolean(env.PIXABAY_API_KEY)

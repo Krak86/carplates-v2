@@ -130,6 +130,14 @@ export default function AdminServerTab(): ReactNode {
           value={latest ? `${(latest.processRssBytes / 1024 ** 2).toFixed(0)} MB` : '-'}
           sub={`${s.nodeVersion}, ${formatDuration(s.processUptimeSeconds)}`}
         />
+        {s.market && (
+          <Tile
+            label={t('admin.server.market')}
+            value={`${s.market.used} / ${s.market.limit}`}
+            sub={t('admin.server.marketSub', { hits: s.market.cacheHits, ua: s.market.ua, eu: s.market.eu })}
+            percent={s.market.limit > 0 ? (s.market.used / s.market.limit) * 100 : null}
+          />
+        )}
       </section>
 
       {s.samples.length < 2 ? (

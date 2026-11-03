@@ -12,7 +12,7 @@ Docs are huge: **grep `^## ` headings, never read whole**. `PLAN.md` backlog + p
 `packages/shared` (`normalizePlate`, regions, Zod schemas — **single source of truth, never re-implement plate logic**) · `packages/db` ·
 `apps/api` (`src/<feature>/`; serves the SPA + per-plate `<meta>`) · `apps/web` · `scripts/` (ingest/export CLIs, `seed-data/` gzipped CSVs) · `infra/` · `services/alpr/`.
 
-Pins (why: PLAN.md "Version pins"): Node 24, TypeScript 5.9, NestJS 11, Drizzle 0.45.x, jsdom ~30.0, Tailwind v4 - never bump to `latest`.
+Pins (PLAN.md "Version pins"): Node 24, TS 5.9, NestJS 11, Drizzle 0.45.x, jsdom ~30.0, Tailwind v4 - never bump to `latest`.
 
 ## Conventions
 
@@ -40,8 +40,8 @@ Pins (why: PLAN.md "Version pins"): Node 24, TypeScript 5.9, NestJS 11, Drizzle 
 
 ## Workflow
 
-- **Open to-dos / "what is left after deploy":** `grep -n "\[ \]" PLAN.md` (unchecked boxes; post-deploy checks sit under each feature's "After deploy" item, `⏳` = blocked). Every feature that needs a VPS step or a prod check adds its boxes there.
-- After each big update suggest a commit message (subject + bullet per change, from `git status`; split if logical). Never `git commit` / `git push` unless asked.
+- **Open to-dos / "what is left after deploy":** `grep -n "\[ \]" PLAN.md` (`⏳` = blocked). A feature needing a VPS step or prod check adds its boxes under "After deploy".
+- After a big update suggest a commit message (subject + bullet per change). Never `git commit` / `git push` unless asked.
 - Seed CSVs mirror scraped tables: after changing one, re-run its `pnpm export:*:csv`.
 - `pnpm format` first (not `scripts/src/fixtures`). Tests: Vitest, colocated `*.test.ts(x)`.
 - Docs: write-up → `plan-done.md`, one-line ✅ → `PLAN.md`, conventions → `features-reference.md`, user-facing → `shared/src/releases.ts`

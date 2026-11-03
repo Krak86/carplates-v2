@@ -393,6 +393,35 @@ export type { CustomsQuery, CustomsRules, ImportCosts, ImportFuel, ImportInput }
 export { convertEur, CURRENCIES, fxResponseSchema } from './fx.js'
 export type { Currency, FxResponse } from './fx.js'
 export { RIA_CHECK_URL, riaCheckResponseSchema } from './riaCheck.js'
+export {
+  DEFAULT_MARKET_KIND,
+  MARKET_BODY_FILTER,
+  MARKET_COUNTRY_ORDER,
+  MARKET_KINDS,
+  MARKET_SOURCE_NAMES,
+  MARKET_UA_MIN_ROWS,
+  MARKET_UA_SOURCE,
+  marketBudgetSchema,
+  marketCardSchema,
+  marketCountryRank,
+  marketDetailSchema,
+  marketIdSchema,
+  marketKindSchema,
+  marketParamsSchema,
+  marketQuerySchema,
+  marketResponseSchema,
+  marketSourceName,
+  sortMarketCards
+} from './market.js'
+export type {
+  MarketBudget,
+  MarketCard,
+  MarketDetail,
+  MarketKind,
+  MarketParams,
+  MarketQuery,
+  MarketResponse
+} from './market.js'
 export type { RiaCheckResponse } from './riaCheck.js'
 export { cardBundleResponseSchema, type CardBundleResponse } from './card.js'
 export {
@@ -643,9 +672,11 @@ export {
   adminStatsResponseSchema,
   adminAnalyticsResponseSchema,
   adminLinksResponseSchema,
+  adminMarketStatsSchema,
   adminServerResponseSchema,
   serverSampleSchema,
   type AdminLinksResponse,
+  type AdminMarketStats,
   type AdminServerResponse,
   type ServerSample,
   USAGE_KINDS,

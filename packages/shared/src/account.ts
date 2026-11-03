@@ -215,6 +215,17 @@ export const serverSampleSchema = z.object({
 })
 export type ServerSample = z.infer<typeof serverSampleSchema>
 
+/** CarAPIS "cars for sale" counters of the UTC day (the free tier allows 100 requests). Null / absent = the feature is off. */
+export const adminMarketStatsSchema = z.object({
+  used: z.number(),
+  limit: z.number(),
+  cacheHits: z.number(),
+  /** Lists answered with Ukrainian rows only / with the European fallback. */
+  ua: z.number(),
+  eu: z.number()
+})
+export type AdminMarketStats = z.infer<typeof adminMarketStatsSchema>
+
 export const adminServerResponseSchema = z.object({
   cpuCores: z.number(),
   cpuModel: z.string(),
@@ -230,7 +241,8 @@ export const adminServerResponseSchema = z.object({
   dbSizeBytes: z.number().nullable(),
   dbConnections: z.number().nullable(),
   /** Oldest first; kept in memory, so it restarts empty with the API. */
-  samples: z.array(serverSampleSchema)
+  samples: z.array(serverSampleSchema),
+  market: adminMarketStatsSchema.nullable().optional()
 })
 export type AdminServerResponse = z.infer<typeof adminServerResponseSchema>
 
