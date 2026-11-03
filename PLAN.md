@@ -1240,6 +1240,13 @@ Write-up: `docs/plan-done.md` "Market offers (CarAPIS)"; conventions: `docs/feat
 - [ ] Owner emails Auto.ria (draft in the plan) after seeing it live; if they object, set `MARKET_UA_ENABLED=false`
 - [ ] Optional: localize CarAPIS region names (cards show the English ones, e.g. "Kyiv") and a few raw values ("manufacturer warranty")
 
+## 3DTuning "Customize in 3D" links - research done 2026-11-03, not started
+
+Facts and steps: [docs/tuning-3d-plan.md](docs/tuning-3d-plan.md). Not embeddable (`X-Frame-Options: deny`), link-out only; the sitemap lists 2,463 car pages (133 makes), no scraping needed.
+
+- [ ] Sitemap to seed CSV + `tuning_links` migration, then measure the match rate against our make/model/year set
+- [ ] Matching helper, API lookup, "Customize in 3D" `LazySection` (ua/ru/en), docs
+
 ## Later, conditional
 
 SSR for `/:plate` only if organic search traffic matters · region as a real
