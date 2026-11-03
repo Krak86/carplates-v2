@@ -586,6 +586,11 @@ Files: migration 0075, `packages/shared/src/origin.ts` (own file, no offline-cac
 - **Stats panel (`/stats`, `OriginStatsPanel`):** passenger cars by brand home country and by VIN assembly country, from the rollup `stats_origin` (migration 0076, `pnpm db:refresh-origin-stats`, part of `db:refresh-derived`; re-run after `ingest:brand-origin` / `ingest:wmi`). Same period rules as the VIN page (`pickByYear` + `countryAtYear` by model year; Soviet-built = USSR). Unknown brand or non-standard VIN counts under "unknown", never guessed. `GET /api/stats/origin`, online-only.
 - **A VIN with no brand** (no registry match and no NHTSA Make) shows no chip or section; there is no WMI-only brand fallback.
 
+## /stats tabs and fleet age chart (2026-11-03)
+
+- **Tabs:** `STATS_TABS` (`types.ts`): overview (top leaderboards + age), rankings (weight/spec models), origin (origin + VDB markets), registry (table/map). Kept in `?tab=`; without it `resolveStatsTab` (`helpers.ts`) maps old deep links: `weight` -> rankings, `dim`/`view`/`highlight` -> registry, else overview (`highlightModel` lands on the overview leaderboards). A new /stats deep link needs no `tab` if its params already resolve to the right one.
+- **Age chart (`AgeStatsPanel`):** passenger cars by age (new / 1-5 / 6-10 / 11-20 / 21+) from `byMakeYear` of `/api/stats/origin` (the `stats_origin` rollup keeps `make_year`; no migration; field is `.nullable().optional()`). Buckets are built client-side from the current year (`AgeStatsPanel.helpers.ts`); year 0 = unknown, kept out of the shares. Colors `--age-0..4` in `global.css` (sRGB fallback, oklch on P3). Online-only like the origin panel.
+
 ## Claude Code mod: Token Weather (2026-10-27)
 
 - **Dev tooling, not an app feature.** `.claude/mods/token-weather/` is a self-contained Claude Code plugin (context-window forecast band above the prompt); the app never imports it. Excluded from ESLint (`.claude/mods/**`), outside the pnpm workspace. Shows in the terminal CLI and the VS Code panel.

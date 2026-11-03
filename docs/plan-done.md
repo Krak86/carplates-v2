@@ -4521,3 +4521,10 @@ Follow-ups to "Shareable photo-search links"; each step shippable alone, all new
 - **/discuss:** one line linking to `/contact` for private messages and custom apps (`discuss.contact.*`, ua/ru/en).
 - **Security:** `docs/security-hardening-plan-2026-11.md` - assessment (the app is already hardened), local pentest lab runbook, prioritized open items (CSP enforcement, Redis throttler, Postgres roles) and a phased execution plan. Doc only, no code changed. Next: Phase A in the plan's "Handoff" (fold into `security-checklist.md`, add `docs/pentest-lab.md`).
 - **Docs/release:** `features-reference.md` "Link previews" and "Shared photo links", `releases.ts` (2026-11-02), About `sharecard` text.
+
+## /stats tabs + fleet age chart (2026-11-03) ✅
+
+- **Why:** the page was one long stack of panels; RST's stats (age bars, share/count toggle, tabs) showed what was missing. Not copied 1:1: own teal-to-amber ramp, plain SVG-free CSS bars, no new dependency.
+- **Done:** four tabs (`?tab=`, old deep links resolve to the right tab), age chart with % / count toggle fed by `byMakeYear` on `/api/stats/origin`.
+- **Not done:** monthly trend chart (needs a new endpoint plus cache rule, check query cost first); reuse of the bar chart on /fuel, /road-safety, /wanted.
+- **Docs/release:** `features-reference.md` "/stats tabs and fleet age chart", `releases.ts` (2026-11-03), About stats line.

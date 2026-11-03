@@ -16,6 +16,23 @@ const item = (group: ReleaseGroup, ua: string, ru: string, en: string): ReleaseI
  */
 export const RELEASES: readonly ReleaseDay[] = [
   {
+    date: '2026-11-03',
+    items: [
+      item(
+        'improved',
+        'Статистика (/stats) розбита на вкладки: огляд, рейтинги, походження й реєстр; старі посилання працюють як раніше',
+        'Статистика (/stats) разбита на вкладки: обзор, рейтинги, происхождение и реестр; старые ссылки работают как раньше',
+        'Statistics (/stats) is split into tabs: overview, rankings, origin and registry; old links keep working'
+      ),
+      item(
+        'new',
+        'Діаграма віку автопарку: частка нових авто та авто 1-5, 6-10, 11-20 і 21+ років, з перемикачем % / кількість',
+        'Диаграмма возраста автопарка: доля новых авто и авто 1-5, 6-10, 11-20 и 21+ лет, с переключателем % / количество',
+        'Fleet age chart: the share of new cars and cars aged 1-5, 6-10, 11-20 and 21+ years, with a % / count toggle'
+      )
+    ]
+  },
+  {
     date: '2026-11-02',
     items: [
       item(
