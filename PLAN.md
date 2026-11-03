@@ -1226,6 +1226,17 @@ Outreach: Ukrainian letter sent to support@cars.ua (Cars.ua, ФОП Магуно
 - **Until a reply:** no code; optional fallback = a "search on cars.ua" link built from the VIN.
 - **Next:** on reply, update this section; if silent for a few weeks, send the Autocars dealer letter.
 
+## Market offers in "Cars in stock" (CarAPIS) — **planned, awaiting legal decision**
+
+Plan, API test results, iframe research and the hand-off prompt: [docs/market-plan.md](docs/market-plan.md). For-sale cards by make + model
+(1-2 CarAPIS requests, cached ~3 days, free tier 100/day) on top of `StockSection`; importer rows move below.
+
+- [x] Decided 2026-11-03: show Auto.ria rows delivered by CarAPIS with a "data from CarAPIS" label (kill switch `MARKET_UA_ENABLED`); email Auto.ria (draft in the plan) only after seeing it live
+- [ ] Probe truck/bus coverage in the free catalogue; fallback country order (US 43% / DE 10% / PL 9% of H1 2026 imports, US auctions not in the free tier)
+- [ ] Admin Server tab: Market tile (requests used / 100)
+- [ ] Build steps 1-9 of the plan, then About `FEATURES` + `SOURCES`, release note
+- [ ] After deploy: `CARAPIS_API_KEY` on the VPS ⏳, check requests used per day, rotate the dev key
+
 ## Later, conditional
 
 SSR for `/:plate` only if organic search traffic matters · region as a real
