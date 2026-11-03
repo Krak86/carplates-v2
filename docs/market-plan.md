@@ -1,6 +1,6 @@
 # Market offers in the "Cars in stock" section (CarAPIS) - plan
 
-Status: **steps 1-4 done (API side), steps 5-10 open** - see "Progress and facts learned" below. Earlier status: planned (research and API tests done 2026-11-03). Goal: a block of real for-sale cards for the
+Status: **steps 1-9 done (2026-11-03), step 10 = commit message; see PLAN.md for the post-deploy boxes**. Older note: steps 1-4 done (API side) - see "Progress and facts learned" below. Earlier status: planned (research and API tests done 2026-11-03). Goal: a block of real for-sale cards for the
 car's make + model at the top of the existing `StockSection` (`?section=stock`), fed by the CarAPIS catalog API, with the
 importer's new/used photo rows moved below under a "From the official brand site" label.
 
@@ -81,11 +81,11 @@ Header check with a browser User-Agent (JS frame-busting cannot be seen from hea
 2. [x] (done: shared `market.ts`, env, deploy-api.yml, deploy.md, README) **Shared contract + env:** `packages/shared/src/market.ts` (+ tests), `env.ts` (`CARAPIS_API_KEY`, `MARKET_UA_ENABLED`), `deploy-api.yml`, `docs/deploy.md`; build shared.
 3. [x] (done: migration `0094_market_cache.sql`) **DB:** migration for cache + budget; no data erased.
 4. [x] (done: `apps/api/src/market/`, 29 tests) **API provider + service:** `CarapisProvider` (fetch, Zod-validate upstream, timeout, no key = off), `MarketService` (two-step flow, slug map, TTLs + stale-while-revalidate, budget), controller (no logic; list, detail and `go/:id` redirect with the cached-id allow-list), module registered in `app.module.ts`. Vitest: slug mapping, UA->EU fallback threshold, TTLs and SWR, budget cutoff, 429 not cached, RIA kill switch, `go/:id` rejects an unknown id and redirects a known one without a second upstream call.
-5. **Web data layer:** `marketQuery`, `use-market-actions.ts`, helpers/types (`market/helpers.ts`, `types.ts`), tests.
-6. **Web UI:** `MarketBlock` + card + modal, restructure `StockSection` (market on top, importer rows labelled below), `SectionInfo` text, i18n ua/ru/en, counter line.
-7. **Data-status and admin:** dataset row on `/data-status`; admin Server-tab "Market" tile (used/limit, cache hits, UA vs EU fallbacks) from `GET /api/admin/server`.
-8. **Manual check** with the real key on a plate page, a catalog page and `?section=stock`; look at the requests used; test the empty-UA fallback on a rare model, the over-budget path and the no-key path.
-9. **Docs after finishing:** `plan-done.md` write-up, one-line check in `PLAN.md`, `features-reference.md` section ("Market offers"), `shared/src/releases.ts` entry (new day => bump `web/src/routes/releases/latest.ts`), **`AboutRoute.tsx`**: `FEATURES` + `SOURCES` (CarAPIS, Auto.ria via CarAPIS, marketplaces) with `about.brief|feature|source.*` ua/ru/en, README env, post-deploy boxes in PLAN.md ("set `CARAPIS_API_KEY` on the VPS", "check requests used after a day").
+5. [x] **Web data layer:** `marketQuery`, `use-market-actions.ts`, helpers/types (`market/helpers.ts`, `types.ts`), tests.
+6. [x] **Web UI:** `MarketBlock` + card + modal, restructure `StockSection` (market on top, importer rows labelled below), `SectionInfo` text, i18n ua/ru/en, counter line.
+7. [x] **Data-status and admin:** dataset row on `/data-status`; admin Server-tab "Market" tile (used/limit, cache hits, UA vs EU fallbacks) from `GET /api/admin/server`.
+8. [x] (4 real requests) **Manual check** with the real key on a plate page, a catalog page and `?section=stock`; look at the requests used; test the empty-UA fallback on a rare model, the over-budget path and the no-key path.
+9. [x] **Docs after finishing:** `plan-done.md` write-up, one-line check in `PLAN.md`, `features-reference.md` section ("Market offers"), `shared/src/releases.ts` entry (new day => bump `web/src/routes/releases/latest.ts`), **`AboutRoute.tsx`**: `FEATURES` + `SOURCES` (CarAPIS, Auto.ria via CarAPIS, marketplaces) with `about.brief|feature|source.*` ua/ru/en, README env, post-deploy boxes in PLAN.md ("set `CARAPIS_API_KEY` on the VPS", "check requests used after a day").
 10. Suggest a commit message (never commit unless asked).
 
 ## Decisions (2026-11-03)

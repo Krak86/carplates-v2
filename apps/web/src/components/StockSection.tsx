@@ -8,6 +8,8 @@ import { MARKET_SITES } from '@/components/EstimatedValue.helpers'
 import SectionInfo from '@/components/SectionInfo'
 import ShareButton from '@/components/ShareButton'
 import StockRow from '@/components/StockRow'
+import MarketBlock from '@/components/market/MarketBlock'
+import { useMarketActions } from '@/components/market/use-market-actions'
 import { useStockPhotosActions } from '@/components/use-stock-photos-actions'
 import VinToggleSection from '@/components/vin/VinToggleSection'
 import { displayBrand } from '@/lib/display-brand'
@@ -20,6 +22,8 @@ type Props = {
   model?: string | null
   /** Make year of the looked-up car (for the classifieds links). */
   year?: number | null
+  /** Registry kind text (or our own kind): decides the CarAPIS body filter; trailers, motorcycles ... hide the market block. */
+  kind?: string | null
 }
 
 /**
@@ -29,7 +33,7 @@ type Props = {
  * 1–2 model years linking to its used-cars page. Each row has up to 3 cards; every photo and every ad line is distinct
  * across both rows, and a row shrinks to the photos found (hidden with none). Link-out only — nothing is copied from the importer's site.
  */
-export default function StockSection({ brand, model, year }: Props): ReactNode {
+export default function StockSection({ brand, model, year, kind }: Props): ReactNode {
   const { t } = useTranslation()
   const [searchParams] = useSearchParams()
   const isShared = searchParams.get('section') === 'stock'
@@ -43,6 +47,9 @@ export default function StockSection({ brand, model, year }: Props): ReactNode {
   // The photo lookups (up to ~24 requests) start only once the section is opened.
   const photos = useStockPhotosActions(brand ?? '', !!brand && open, !!usedUrl)
   const newTarget = newCarsUrl(brand)
+  // CarAPIS listings (the daily request budget is on the API side): requested only once the section is open.
+  const listings = useMarketActions({ brand, model, kind, year }, open)
+  const marketView = listings.view
 
   const newCards = photos.fresh.filter(p => !failedUrls.includes(p.image.url))
   const usedCards = photos.used.filter(p => !failedUrls.includes(p.image.url))
@@ -73,9 +80,20 @@ export default function StockSection({ brand, model, year }: Props): ReactNode {
       defaultOpen={isShared}
       onOpenChange={setOpen}
     >
-      {open && photos.isPending && <SectionSkeleton />}
-      {open && hasImporter && !photos.isPending && !hasCards && (
+      {open && (photos.isPending || listings.isPending) && <SectionSkeleton />}
+      {open && hasImporter && !photos.isPending && !hasCards && !marketView && (
         <p className="text-base text-muted">{t('section.empty')}</p>
+      )}
+
+      {marketView && brand && model && (
+        <MarketBlock view={marketView} brandName={name} brand={brand} model={model} kind={kind} year={year} />
+      )}
+
+      {marketView && (hasCards || hasImporter) && (
+        <p className="mb-2 flex items-center gap-1.5 text-sm font-medium">
+          <span>{t('newCarsSection.officialLabel', { brand: name })}</span>
+          <SectionInfo section="stockOfficial" title={t('newCarsSection.officialLabel', { brand: name })} />
+        </p>
       )}
 
       <StockRow

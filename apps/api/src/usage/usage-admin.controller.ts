@@ -4,6 +4,7 @@ import { createZodDto } from 'nestjs-zod'
 import { adminAnalyticsResponseSchema, adminServerResponseSchema, adminStatsResponseSchema } from '@carplates/shared'
 
 import { AdminGuard } from '../auth/session.guard.js'
+import { MarketService } from '../market/market.service.js'
 
 import { PosthogService } from './posthog.service.js'
 import { ServerStatsService } from './server-stats.service.js'
@@ -20,7 +21,8 @@ export class UsageAdminController {
   constructor(
     @Inject(UsageService) private readonly usage: UsageService,
     @Inject(PosthogService) private readonly posthog: PosthogService,
-    @Inject(ServerStatsService) private readonly serverStats: ServerStatsService
+    @Inject(ServerStatsService) private readonly serverStats: ServerStatsService,
+    @Inject(MarketService) private readonly market: MarketService
   ) {}
 
   @Get('stats')
@@ -40,7 +42,9 @@ export class UsageAdminController {
   @Get('server')
   @Header('Cache-Control', 'no-store')
   @ApiOkResponse({ type: AdminServerDto })
-  server(): Promise<AdminServerDto> {
-    return this.serverStats.snapshot()
+  async server(): Promise<AdminServerDto> {
+    // A failing counter must never hide the host numbers.
+    const [snapshot, market] = await Promise.all([this.serverStats.snapshot(), this.market.stats().catch(() => null)])
+    return { ...snapshot, market }
   }
 }

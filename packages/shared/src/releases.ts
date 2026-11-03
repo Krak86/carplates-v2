@@ -19,6 +19,12 @@ export const RELEASES: readonly ReleaseDay[] = [
     date: '2026-11-03',
     items: [
       item(
+        'new',
+        'Авто на продаж: у розділі «Авто в наявності» реальні оголошення за маркою й моделлю (спершу Україна, а коли українських мало - Європа) з ціною, пробігом і посиланням на оригінал; дані з CarAPIS',
+        'Авто на продажу: в разделе «Авто в наличии» реальные объявления по марке и модели (сначала Украина, а когда украинских мало - Европа) с ценой, пробегом и ссылкой на оригинал; данные из CarAPIS',
+        'Cars for sale: the Cars in stock section now lists real listings for the make and model (Ukraine first, Europe when Ukraine has few) with price, mileage and a link to the original; data from CarAPIS'
+      ),
+      item(
         'improved',
         'Під картою на /stats - топ-3 регіони за обраним показником: частка від усієї країни та кількість',
         'Под картой на /stats - топ-3 региона по выбранному показателю: доля от всей страны и количество',

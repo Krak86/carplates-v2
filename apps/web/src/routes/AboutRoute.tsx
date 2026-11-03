@@ -10,6 +10,8 @@ type Source = { key: string; label: string; url?: string; icon?: string; mask?: 
 
 const SOURCES: readonly Source[] = [
   { key: 'dataGovUa', label: 'data.gov.ua', url: 'https://data.gov.ua', icon: '/icons/sources/datagovua.webp' },
+  // No logo cleared for CarAPIS: a plain tile.
+  { key: 'carapis', label: 'CarAPIS', url: 'https://carapis.com', tile: 'bg-emerald-700' },
   { key: 'nhtsa', label: 'NHTSA', url: 'https://www.nhtsa.gov', icon: '/icons/sources/nhtsa.webp' },
   { key: 'wikipedia', label: 'Wikipedia', url: 'https://www.wikipedia.org', mask: '/icons/wikipedia-w.svg' },
   { key: 'pixabay', label: 'Pixabay', url: 'https://pixabay.com', icon: '/icons/sources/pixabay.webp' },
@@ -321,6 +323,7 @@ const FEATURES = [
   'customs',
   'auctions',
   'uaAuctions',
+  'market',
   'reviews',
   'media',
   'photoZoom',

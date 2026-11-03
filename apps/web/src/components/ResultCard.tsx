@@ -907,7 +907,7 @@ export default function ResultCard({ data }: Props): ReactNode {
             <SocialSection brand={c.brand} model={c.model} year={c.makeYear} />
           </LazySection>
           <LazySection sections={['stock']}>
-            <StockSection brand={c.brand} model={c.model} year={c.makeYear} />
+            <StockSection brand={c.brand} model={c.model} year={c.makeYear} kind={c.kind} />
           </LazySection>
           <LazySection sections={['shares']}>
             <SharePriceSection brand={c.brand} />

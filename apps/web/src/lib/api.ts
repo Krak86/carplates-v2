@@ -42,6 +42,8 @@ import {
   auctionStatsResponseSchema,
   wantedResponseSchema,
   wantedStatsResponseSchema,
+  marketResponseSchema,
+  marketDetailSchema,
   generationGrowthResponseSchema,
   generationsResponseSchema,
   wikiSpecsResponseSchema,
@@ -100,6 +102,9 @@ import {
 } from '@carplates/shared'
 import type {
   CreateShareResponse,
+  MarketDetail,
+  MarketKind,
+  MarketResponse,
   MySharesResponse,
   RetouchShareResponse,
   RetouchStroke,
@@ -1011,6 +1016,17 @@ export async function getWanted(plate: string | null, vin: string | null): Promi
   if (plate) params.set('plate', plate)
   if (vin) params.set('vin', vin)
   return wantedResponseSchema.parse(await getJson(`/api/wanted?${params.toString()}`))
+}
+
+/** "Cars for sale" (CarAPIS) for a make + model: raw registry / VIN-decoded names, the API maps them to catalogue slugs. */
+export async function getMarket(make: string, model: string, kind: MarketKind): Promise<MarketResponse> {
+  const path = `/api/market/${encodeURIComponent(make)}/${encodeURIComponent(model)}?kind=${kind}`
+  return marketResponseSchema.parse(await getJson(path))
+}
+
+/** One listing's detail for the modal (1 CarAPIS request on a cache miss). */
+export async function getMarketDetail(id: string): Promise<MarketDetail> {
+  return marketDetailSchema.parse(await getJson(`/api/market/vehicle/${encodeURIComponent(id)}`))
 }
 
 /** Aggregates for the /wanted page: totals, by year / region / brand / model / type / colour, recent lists. */

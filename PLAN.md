@@ -1226,16 +1226,16 @@ Outreach: Ukrainian letter sent to support@cars.ua (Cars.ua, ФОП Магуно
 - **Until a reply:** no code; optional fallback = a "search on cars.ua" link built from the VIN.
 - **Next:** on reply, update this section; if silent for a few weeks, send the Autocars dealer letter.
 
-## Market offers in "Cars in stock" (CarAPIS) — **planned, awaiting legal decision**
+## Market offers in "Cars in stock" (CarAPIS) ✅ built 2026-11-03, awaiting deploy
 
-Plan, API test results, iframe research and the hand-off prompt: [docs/market-plan.md](docs/market-plan.md). For-sale cards by make + model
-(1-2 CarAPIS requests, cached ~3 days, free tier 100/day) on top of `StockSection`; importer rows move below.
+Write-up: `docs/plan-done.md` "Market offers (CarAPIS)"; conventions: `docs/features-reference.md` "Market offers"; plan and facts: [docs/market-plan.md](docs/market-plan.md).
 
-- [x] Decided 2026-11-03: show Auto.ria rows delivered by CarAPIS with a "data from CarAPIS" label (kill switch `MARKET_UA_ENABLED`); email Auto.ria (draft in the plan) only after seeing it live
-- [ ] Probe truck/bus coverage in the free catalogue; fallback country order (US 43% / DE 10% / PL 9% of H1 2026 imports, US auctions not in the free tier)
-- [ ] Admin Server tab: Market tile (requests used / 100)
-- [ ] Build steps 1-9 of the plan, then About `FEATURES` + `SOURCES`, release note
-- [ ] After deploy: `CARAPIS_API_KEY` on the VPS ⏳, check requests used per day, rotate the dev key
+- ✅ Cars for sale block on top of `StockSection` (UA first, EU fallback), detail modal, redirect link, budget counter, admin Server tile, `/data-status` row, About, release note
+- [ ] After deploy: set the `CARAPIS_API_KEY` GitHub secret (optional vars `MARKET_UA_ENABLED`, `MARKET_SHOW_BUDGET`) ⏳
+- [ ] After deploy: check "requests used" on the admin Server tab after a day (cache hits vs UA / EU), rotate the dev key
+- [ ] After deploy: open a plate page, a catalog page and `?section=stock` in production; confirm `go/:id` opens the listing (the 204 path, over budget, is untested in a browser)
+- [ ] Owner emails Auto.ria (draft in the plan) after seeing it live; if they object, set `MARKET_UA_ENABLED=false`
+- [ ] Optional: localize CarAPIS region names (cards show the English ones, e.g. "Kyiv") and a few raw values ("manufacturer warranty")
 
 ## Later, conditional
 
