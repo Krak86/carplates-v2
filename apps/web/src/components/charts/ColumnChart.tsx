@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 
 import { niceMax, showsLabel } from '@/components/charts/helpers'
+import { cn } from '@/lib/cn'
 
 export type ChartColumn = {
   key: string
@@ -26,6 +27,8 @@ type Props = {
   labelFrom?: 'start' | 'end'
   width?: number
   height?: number
+  /** Extra classes on the `<svg>` (it is `w-full` by default), e.g. a max width so a narrow chart keeps its text size. */
+  className?: string
 }
 
 const PAD = { left: 52, right: 8, top: 10, bottom: 26 }
@@ -41,7 +44,8 @@ export default function ColumnChart({
   labelEvery = 1,
   labelFrom = 'end',
   width = 640,
-  height = 250
+  height = 250,
+  className
 }: Props): ReactNode {
   const max = niceMax(columns.reduce((m, c) => Math.max(m, c.value, c.secondary ?? 0), 0))
   const innerW = width - PAD.left - PAD.right
@@ -54,7 +58,7 @@ export default function ColumnChart({
   const linePoints = columns.flatMap((c, i) => (c.secondary == null ? [] : [`${x(i)},${y(c.secondary)}`]))
 
   return (
-    <svg viewBox={`0 0 ${width} ${height}`} className="w-full" role="img" aria-label={ariaLabel}>
+    <svg viewBox={`0 0 ${width} ${height}`} className={cn('w-full', className)} role="img" aria-label={ariaLabel}>
       {[0, max / 2, max].map(v => (
         <g key={v}>
           <line

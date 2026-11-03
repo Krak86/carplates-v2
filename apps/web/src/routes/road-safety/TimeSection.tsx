@@ -20,9 +20,12 @@ type ColumnsProps = {
   peak: number
   /** Show the label of every n-th column only (24 hour labels do not fit a phone). */
   labelEvery?: number
+  /** SVG units; the chart scales to its box, so a narrow one is capped where it stacks (phones) to keep its text size. */
+  width: number
+  className?: string
 }
 
-function Columns({ buckets, label, ariaLabel, peak, labelEvery = 1 }: ColumnsProps): ReactNode {
+function Columns({ buckets, label, ariaLabel, peak, labelEvery = 1, width, className }: ColumnsProps): ReactNode {
   const columns = buckets.map(b => ({
     key: String(b.bucket),
     label: label(b.bucket),
@@ -38,8 +41,9 @@ function Columns({ buckets, label, ariaLabel, peak, labelEvery = 1 }: ColumnsPro
       formatTick={v => String(v)}
       labelEvery={labelEvery}
       labelFrom="start"
-      width={labelEvery > 1 ? 480 : 320}
+      width={width}
       height={190}
+      className={className}
     />
   )
 }
@@ -83,6 +87,7 @@ export default function TimeSection({ year }: Props): ReactNode {
             ariaLabel={t('roadSafety.time.byHour')}
             peak={peakHour.bucket}
             labelEvery={3}
+            width={480}
           />
         )}
 
@@ -92,6 +97,8 @@ export default function TimeSection({ year }: Props): ReactNode {
             label={n => weekdayLabel(n, locale)}
             ariaLabel={t('roadSafety.time.byWeekday')}
             peak={peakWeekday.bucket}
+            width={320}
+            className="mx-auto max-w-xs lg:mx-0 lg:max-w-none"
           />
         )}
       </div>
