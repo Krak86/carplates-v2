@@ -19,6 +19,24 @@ export const RELEASES: readonly ReleaseDay[] = [
     date: '2026-11-03',
     items: [
       item(
+        'improved',
+        'Карта небезпечних ділянок на /road-safety тепер на OpenStreetMap: посилання на Street View для кожної точки та кнопка «Поблизу мене»',
+        'Карта опасных участков на /road-safety теперь на OpenStreetMap: ссылка на Street View для каждой точки и кнопка «Рядом со мной»',
+        'The hazard map on /road-safety now uses OpenStreetMap: a Street View link for every point and a "Near me" button'
+      ),
+      item(
+        'improved',
+        'Калькулятор розмитнення: посилання зі сторінки VIN підставляє дані авто, а ціну лота можна ввести в USD, EUR або UAH',
+        'Калькулятор растаможки: ссылка со страницы VIN подставляет данные авто, а цену лота можно ввести в USD, EUR или UAH',
+        'Customs calculator: the link from the VIN page prefills the car, and a lot price can be entered in USD, EUR or UAH'
+      ),
+      item(
+        'improved',
+        'Посилання на фото можна надіслати кнопкою «Поділитися» системного меню телефона',
+        'Ссылку на фото можно отправить кнопкой «Поделиться» системного меню телефона',
+        'A photo link can be sent with the native Share button of the phone'
+      ),
+      item(
         'new',
         'Авто на продаж: у розділі «Авто в наявності» реальні оголошення за маркою й моделлю (спершу Україна, а коли українських мало - Європа) з ціною, пробігом і посиланням на оригінал; дані з CarAPIS',
         'Авто на продажу: в разделе «Авто в наличии» реальные объявления по марке и модели (сначала Украина, а когда украинских мало - Европа) с ценой, пробегом и ссылкой на оригинал; данные из CarAPIS',

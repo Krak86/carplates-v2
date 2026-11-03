@@ -2377,7 +2377,7 @@
   "roadSafety.hazards.nearMeFailed": "Location unavailable.",
   "roadSafety.hazards.distance": "{{km}} km away",
   "section.about.roadSafety": "Road crashes with injured or killed people in Ukraine, from Patrol Police statistics.\nCrashes, deaths, injured - totals of the selected year; a partial year runs only to the month shown\nRegions - ranked by deaths and by deaths per 100,000 passenger cars registered in the region today (cars, not drivers)\nRoads, causes, time - state roads, causes and types of crashes, hour and weekday\nThe data are aggregates: there is no make or model of the vehicles in them",
-  "about.feature.roadSafety": "Road crash statistics (/road-safety): deaths and crashes by region (also per 100,000 cars), state roads, causes, hour and weekday, by year",
+  "about.feature.roadSafety": "Road crash statistics (/road-safety): deaths and crashes by region (also per 100,000 cars), state roads, causes, hour and weekday, by year, a hazard-section map on OpenStreetMap with Street View links and a Near me button",
   "about.source.patrolPolice": "Patrol Police of Ukraine - yearly and year-to-date crash statistics (crashes with injured or killed people) by region, road, cause and time.",
   "about.source.irsu": "Infrastructure Restoration Agency (data.gov.ua, CC BY) - hazardous road sections and crash concentration places.",
   "nav.wanted": "Wanted vehicles",

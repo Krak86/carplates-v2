@@ -1186,6 +1186,7 @@ card-on-file subscriptions; revisit with real quotes.
 - ✅ **Source strip + related pages on all statistics pages (2026-11-01):** `PageSources` "Source data" card and `RelatedPages` cross links on `/stats`, `/wanted`, `/auctions`, `/fuel`, `/safety`, `/road-safety` — see `docs/plan-done.md`.
 - ✅ **Prozorro.Sale vehicle auctions (2026-11-01):** second auction source with grouped lots, merged vehicle facts, photos straight from Prozorro (a resizer was tried and dropped: its Cloudflare blocks server fetches) and `/auctions` source filters; backfilled and loaded on the VPS (14 431 rows); future-dated finished lots fixed, stats delta is a median — see `docs/plan-done.md`.
 - ✅ **Road-safety context in `/read/safety` (2026-11-01):** "On the road" (national totals, deaths by year, pedestrian/child share) and "Tests and crashes" (crash types and causes, peak time, what each programme tests) sections reading the `/road-safety` queries - see `docs/plan-done.md`.
+- ✅ **Hazard map on OSM, customs currency + VIN prefill, native Share (2026-11-03):** Leaflet map with Street View links and "Near me", `/customs?cur=`, `navigator.share` for photo links. Write-up: `docs/plan-done.md`.
 - **Other providers (researched 2026-10-12, not planned yet):** GitHub (client id + secret, code flow), Microsoft
   (client id, OIDC), Facebook/Meta (app id + secret, needs privacy URL + data-deletion URL + Live app), Apple (Services
   ID + Team ID + Key ID + `.p8`, $99/yr, secret JWT rotates ≤ 6 months — skip unless a store app ships).
