@@ -24,19 +24,20 @@ importer's new/used photo rows moved below under a "From the official brand site
 
 Header check with a browser User-Agent (JS frame-busting cannot be seen from headers):
 
-| Site | Response | Framing headers |
-|---|---|---|
-| auto.ria.com (search page) | 200 | none (no `X-Frame-Options`, no CSP) |
-| rst.ua | 200 with browser UA (403 for curl without one) | none |
-| autoscout24.com | 200 | none |
-| olx.ua | 200 | `X-Frame-Options: SAMEORIGIN` = **blocked** |
-| otomoto.pl | 200 | `X-Frame-Options: SAMEORIGIN` = **blocked** |
+| Site                       | Response                                       | Framing headers                             |
+| -------------------------- | ---------------------------------------------- | ------------------------------------------- |
+| auto.ria.com (search page) | 200                                            | none (no `X-Frame-Options`, no CSP)         |
+| rst.ua                     | 200 with browser UA (403 for curl without one) | none                                        |
+| autoscout24.com            | 200                                            | none                                        |
+| olx.ua                     | 200                                            | `X-Frame-Options: SAMEORIGIN` = **blocked** |
+| otomoto.pl                 | 200                                            | `X-Frame-Options: SAMEORIGIN` = **blocked** |
 
 - Technically RIA / RST / AutoScout24 are not blocked by headers, but: our own CSP (`infra/Caddyfile`, Report-Only now) has a `frame-src` allow-list, so each host would have to be added (and enforced CSP would then block others); they may use JS frame-busting or bot checks (untested); third-party cookies/ads/consent walls inside a frame, mobile layout and no attribution for us; and **framing a site whose terms forbid republishing is the riskier cousin of link-out**, not a safe middle. Recommendation: **do not iframe**. Keep link-out (`riaSearchUrl`, `rstSearchUrl`, OLX) and API cards. If wanted later, ask RIA / RST for written permission first and test frame-busting in a real browser.
 
 ## Design
 
 ### API: `apps/api/src/market/` (new feature; every constructor dep has `@Inject(Token)`)
+
 1. `GET /api/market/:make/:model` (Zod params, `@Throttle`, **not** in `PUBLIC_API_PATH_PREFIXES` / the Cloudflare cache rule; the budget forbids edge caching) returns `{ kind: 'ua' | 'eu', items: MarketCard[], fetchedAt, budget: { used, limit } | null }`. `MarketCard` = id, source code + display name, country iso2, year, priceUsd, priceOriginal + currency, mileage, fuel, transmission, body, region, thumb, lastSeenAt, hasAccident.
 2. **Two-step flow:** request 1 `country=UA` (`auto_ria_ua` only) with `page_size=50`; if fewer than ~6 rows, request 2 without `country` (EU/US, non-UA rows) and return `kind: 'eu'`. Common models cost 1 request, rare ones 2. Year is **not** part of the key; the web may filter by year client-side.
 3. **Cache** under `brand+model`, TTL ~3 days for results, ~1 day for empty, never for 429/5xx. In-memory map (bounded, like `RiaService`) **plus a DB table** (migration `NNNN_market_cache.sql`, backward-compatible, `payload jsonb`, `fetched_at`) so a blue/green deploy does not burn the daily quota. Slug map cached too.
@@ -50,6 +51,7 @@ Header check with a browser User-Agent (JS frame-busting cannot be seen from hea
 7. Contract in its own file `packages/shared/src/market.ts` (`marketResponseSchema`, new fields `.nullable().optional()`), then `pnpm --filter @carplates/shared build`.
 
 ### Web: restructure `StockSection.tsx` (one section, two blocks)
+
 1. **Top block "Cars for sale" (new):** `MarketBlock` = a hook `use-market-actions.ts` + sub-components; `marketQuery` via `queryOptions()`, key `brand+model` (shared by plate card, catalog page and any `?section=stock`). Fetch only once the section is open (existing `open` state). Online-only (not in `offline-cache.ts`).
 2. Header row: tags/chips for the dataset (`UA` or `Europe`, "via CarAPIS", "prices are asking prices, USD"), a `?` (`SectionInfo`, new section id `market`) explaining the source, freshness (`last seen`), what the flag/country means and why Ukraine may be empty; **requests-left counter** ("CarAPIS requests today: 37 / 100") when `budget` is present (small muted line; also on `/data-status`).
 3. Cards: photo, year, price (USD + original), mileage, fuel, region + flag, source badge, `last seen` date. Tap opens a modal (detail request) with description, photos, the detail fields above and "Open at source" = the `/api/market/go/:id` link, plus attribution ("Data from CarAPIS").
@@ -59,9 +61,11 @@ Header check with a browser User-Agent (JS frame-busting cannot be seen from hea
 6. i18n ua/ru/en (never `import '@/i18n'`; tests `await i18nReady`), UI text uses "-" not "—". Default export, one component per file, props type `Props`, derive during render, no sync `setState` in effects.
 
 ### Data-status
+
 - A row in `routes/data-status/datasets.ts` (`CarAPIS listings`, cadence = on demand). The always-visible counter lives on the **admin Server tab** (see Decisions, item 4); the public line in the section is switchable with `MARKET_SHOW_BUDGET`.
 
 ### Future-proofing (other marketplaces / solutions)
+
 - Put CarAPIS behind a small `MarketProvider` interface (`search(make, model, opts) -> MarketCard[]`, `detail(id) -> MarketDetail`, `budget()`), registered in `MarketModule`; the service merges providers in priority order and caches per provider. A new API (another aggregator, a dealer feed, cars.ua if permission arrives - see PLAN.md "cars.ua listing status") = one new provider file + a source badge, no web change. Keep per-provider terms notes in this file.
 
 ## Steps (each ends green: `pnpm format`, lint, typecheck, Vitest)
@@ -78,6 +82,7 @@ Header check with a browser User-Agent (JS frame-busting cannot be seen from hea
 10. Suggest a commit message (never commit unless asked).
 
 ## Decisions (2026-11-03)
+
 1. **Auto.ria rows via CarAPIS: show.** Every card carries the label "Дані з CarAPIS" (ua) / "Data from CarAPIS" with the source name ("Auto.ria") - we do not scrape anything ourselves. Keep `MARKET_UA_ENABLED` as a kill switch and record the exception in `legal-and-monetization.md`. The owner will see it working in the app first, **then** email Auto.ria (draft below); if they object, flip the switch. No reply is expected, and the app does not depend on it.
 2. **Vehicle types = what our app handles**: car, truck, bus (motorcycle only if CarAPIS has it). No ships, boats or other kinds. Map the registry `vehicle_kind` to the CarAPIS `body_type` filter (`car` -> sedan|hatchback|wagon|suv|coupe|convertible|crossover|minivan|van, `truck` -> truck|pickup, `bus` -> bus); cache key becomes `kind+brand+model`. **Untested:** whether the free catalogue holds trucks/buses at all - spend 2 requests on `body_type=truck` / `bus` before building the mapping; if empty, the block simply hides for those kinds.
 3. **EU/US fallback order** follows where Ukraine's imports come from. Customs data for H1 2026 (all passenger cars, over 70% used; UNN, 2026-07-28): **USA 73.2k (43%), Germany 17.3k (10%), Poland 14.6k (9%)** = 62%; the other 50+ countries are not broken out in what I found (France, Lithuania, Czechia, Italy, Canada, Japan, China are plausible next ones: check the State Customs Service / Ukravtoprom release). Practical catch: **the US auction sources (Copart, IAAI, Manheim) are `on_demand`, not in the free catalogue**, so on the free tier the fallback order is effectively DE (Kleinanzeigen, AutoScout24) > PL (Otomoto) > FR (Leboncoin) > others, and US only if a US source appears in `/sources/` as `live`. Implement as a `MARKET_COUNTRY_ORDER` constant (shared, explicit, not derived) used to sort/pick cards; re-check `/sources/` at build time.

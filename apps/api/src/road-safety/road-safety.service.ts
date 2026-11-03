@@ -181,6 +181,8 @@ export class RoadSafetyService {
         kmEnd: r.kmEnd,
         lat: r.latStart,
         lon: r.lonStart,
+        latEnd: r.latEnd,
+        lonEnd: r.lonEnd,
         crashes3y: r.crashes3y,
         rate: r.rate === null ? null : Number(r.rate),
         hazardLevel: r.hazardLevel
