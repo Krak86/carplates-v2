@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { hasCarSplit, monthAxisLabel, niceMax, trendPoints } from './MonthlyTrendPanel.helpers'
+import { hasCarSplit, monthAxisLabel, trendPoints, yearEarlier } from './MonthlyTrendPanel.helpers'
 
 const months = Array.from({ length: 24 }, (_, i) => ({
   month: `${2024 + Math.floor((i + 8) / 12)}-${String(((i + 8) % 12) + 1).padStart(2, '0')}`,
@@ -46,14 +46,12 @@ describe('hasCarSplit', () => {
   })
 })
 
-describe('niceMax / monthAxisLabel', () => {
-  it('rounds the axis up', () => {
-    expect(niceMax(0)).toBe(1)
-    expect(niceMax(204573)).toBe(250000)
-    expect(niceMax(100000)).toBe(100000)
-  })
-
+describe('monthAxisLabel / yearEarlier', () => {
   it('formats months', () => {
     expect(monthAxisLabel('2026-08')).toBe('08.26')
+  })
+
+  it('steps a month back a year', () => {
+    expect(yearEarlier('2026-08')).toBe('2025-08')
   })
 })

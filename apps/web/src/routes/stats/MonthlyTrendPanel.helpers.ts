@@ -40,12 +40,9 @@ export function trendPoints(
   })
 }
 
-/** A round upper bound for the axis (1, 2, 2.5, 5 x 10^n) and its ticks (0, half, max). */
-export function niceMax(max: number): number {
-  if (max <= 0) return 1
-  const pow = 10 ** Math.floor(Math.log10(max))
-  const step = [1, 2, 2.5, 5, 10].find(s => s * pow >= max) ?? 10
-  return step * pow
+/** "2026-08" -> "2025-08": the same month a year earlier. */
+export function yearEarlier(month: string): string {
+  return month.replace(/^\d{4}/, y => String(Number(y) - 1))
 }
 
 /** "2026-08" -> "08.26" (compact axis label). */

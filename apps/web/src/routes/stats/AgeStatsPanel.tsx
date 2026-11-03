@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 
+import BarList from '@/components/charts/BarList'
 import SectionInfo from '@/components/SectionInfo'
 import Card from '@/components/ui/Card'
 import { cn } from '@/lib/cn'
@@ -26,7 +27,13 @@ export default function AgeStatsPanel(): ReactNode {
   const numberFormat = new Intl.NumberFormat(locale)
   const percentFormat = new Intl.NumberFormat(locale, { style: 'percent', maximumFractionDigits: 1 })
   const { bars, unknown, total } = ageBars(data.byMakeYear, new Date().getFullYear())
-  const maxValue = bars.reduce((max, b) => Math.max(max, mode === 'share' ? b.share : b.n), 0)
+  const items = bars.map(b => ({
+    key: b.key,
+    label: t(`stats.age.bucket.${b.key}`),
+    value: mode === 'share' ? b.share : b.n,
+    display: mode === 'share' ? percentFormat.format(b.share) : numberFormat.format(b.n),
+    color: b.colorVar
+  }))
 
   return (
     <Card className="mb-6">
@@ -55,27 +62,7 @@ export default function AgeStatsPanel(): ReactNode {
         </div>
       </div>
 
-      <ol className="space-y-2 text-sm">
-        {bars.map(b => {
-          const value = mode === 'share' ? b.share : b.n
-          return (
-            <li key={b.key} className="flex items-center gap-3">
-              <span className="w-24 shrink-0 sm:w-28">{t(`stats.age.bucket.${b.key}`)}</span>
-
-              <div className="h-7 min-w-0 flex-1" aria-hidden>
-                <div
-                  className="h-full rounded-md transition-[width] duration-500"
-                  style={{ width: `${maxValue > 0 ? (value / maxValue) * 100 : 0}%`, backgroundColor: b.colorVar }}
-                />
-              </div>
-
-              <span className="w-20 shrink-0 text-right font-medium tabular-nums">
-                {mode === 'share' ? percentFormat.format(b.share) : numberFormat.format(b.n)}
-              </span>
-            </li>
-          )
-        })}
-      </ol>
+      <BarList items={items} />
 
       <p className="mt-3 text-xs text-[var(--color-muted)]">
         {t('stats.age.total', { count: total, formatted: numberFormat.format(total) })}
