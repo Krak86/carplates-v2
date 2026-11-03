@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useSearchParams } from 'react-router'
 
+import AuctionPriceCheck from '@/components/AuctionPriceCheck'
 import AuctionVinModal from '@/components/AuctionVinModal'
 import SectionInfo from '@/components/SectionInfo'
 import ShareButton from '@/components/ShareButton'
@@ -29,6 +30,7 @@ type Props = {
 }
 
 const FACT_COUNT = 4
+const PRICE_CHECK_ID = 'auction-price-check'
 
 const ROW_CLASS =
   'flex w-full items-start justify-between gap-3 rounded-md px-2 py-1.5 text-left text-base text-[var(--color-primary)] transition-colors hover:bg-[var(--color-border)]/40'
@@ -117,7 +119,20 @@ export default function AuctionCheck({ vin, imported = false, openSignal = 0 }: 
       defaultOpen={isShared}
       openSignal={openSignal}
     >
-      <p className="mb-2 text-sm text-[var(--color-muted)]">{t('auctions.intro')}</p>
+      <p className="mb-2 text-sm text-[var(--color-muted)]">
+        {t('auctions.intro')}{' '}
+        <button
+          type="button"
+          onClick={() => {
+            const target = document.getElementById(PRICE_CHECK_ID)
+            if (target) scrollElementIntoView(target)
+            target?.querySelector('input')?.focus({ preventScroll: true })
+          }}
+          className="text-left text-primary underline"
+        >
+          {t('auctions.introLink')} ↓
+        </button>
+      </p>
       <ul className="space-y-1">{auctionSitesByTier('main').map(site => renderSite(site, false))}</ul>
       <p className="mt-2 text-sm text-[var(--color-muted)]">{t('auctions.note')}</p>
 
@@ -148,6 +163,12 @@ export default function AuctionCheck({ vin, imported = false, openSignal = 0 }: 
             <li key={i}>{t(`auctions.fact.${i + 1}`)}</li>
           ))}
         </ul>
+      </div>
+
+      <div id={PRICE_CHECK_ID} className="mt-3 text-sm">
+        <div className="mb-1 font-semibold">🧮 {t('auctions.verifyTitle')}</div>
+        <p className="text-[var(--color-muted)]">{t('auctions.verify')}</p>
+        <AuctionPriceCheck customsPath={customsPath} />
       </div>
 
       <p className="mt-3 text-sm">

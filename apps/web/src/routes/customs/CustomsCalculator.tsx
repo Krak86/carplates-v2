@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from 'react'
 import {
   calcImportCosts,
+  CURRENCIES,
   CUSTOMS_PRESETS,
   IMPORT_FUELS,
   pickCustomsRules,
@@ -35,11 +36,11 @@ export default function CustomsCalculator({ query, hasParams }: Props): ReactNod
   const locale = toIntlLocale(i18n.language)
   const fx = useQuery(fxQuery()).data ?? null
   const [form, setForm] = useState<FormState>(() => initialForm(query, hasParams))
-  const [currency, setCurrency] = useState<Currency>('EUR')
+  const [currency, setCurrency] = useState<Currency>(query.cur ?? 'EUR')
 
   const today = new Date()
   const rules = pickCustomsRules(today.toISOString())
-  const input = formToInput(form, today.getFullYear(), fx?.eurUah ?? 1)
+  const input = formToInput(form, today.getFullYear(), fx?.eurUah ?? 1, fx?.usdUah ?? 1)
   const costs = input && rules ? calcImportCosts(input, rules) : null
   const isEv = form.fuel === 'ev'
 
@@ -88,8 +89,23 @@ export default function CustomsCalculator({ query, hasParams }: Props): ReactNod
           </select>
         </div>
         <div>
-          {textField('value', 'customs-value', t('customs.form.value'), 'decimal')}
+          <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-2">
+            {textField('value', 'customs-value', t('customs.form.value'), 'decimal')}
+            <select
+              aria-label={t('customs.form.valueCurrency')}
+              value={form.valueCurrency}
+              onChange={e => setForm(prev => ({ ...prev, valueCurrency: e.target.value as Currency }))}
+              className={INPUT_CLASS}
+            >
+              {CURRENCIES.map(c => (
+                <option key={c} value={c} disabled={c !== 'EUR' && !fx}>
+                  {c}
+                </option>
+              ))}
+            </select>
+          </div>
           <p className="mt-1 text-xs text-muted">{t('customs.form.valueHint')}</p>
+          <p className="mt-1 text-xs text-muted">{t('customs.form.valueHint2')}</p>
         </div>
         <div className="grid grid-cols-2 gap-3">
           {textField('year', 'customs-year', t('customs.form.year'), 'numeric')}
