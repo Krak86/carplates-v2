@@ -16,6 +16,41 @@ const item = (group: ReleaseGroup, ua: string, ru: string, en: string): ReleaseI
  */
 export const RELEASES: readonly ReleaseDay[] = [
   {
+    date: '2026-11-03',
+    items: [
+      item(
+        'improved',
+        'Під картою на /stats - топ-3 регіони за обраним показником: частка від усієї країни та кількість',
+        'Под картой на /stats - топ-3 региона по выбранному показателю: доля от всей страны и количество',
+        'Under the /stats map: the top 3 regions for the chosen metric, with their share of the country and the count'
+      ),
+      item(
+        'improved',
+        'Графік реєстрацій за місяцями на /stats: перемикач «Легкові / Усі ТЗ» для порівняння з даними лише по легкових авто',
+        'График регистраций по месяцам на /stats: переключатель «Легковые / Все ТС» для сравнения с данными только по легковым авто',
+        'Registrations by month on /stats: a Cars / All vehicles switch, to compare with passenger-car-only figures'
+      ),
+      item(
+        'new',
+        'Графік реєстрацій за місяцями на /stats: останні 12 місяців проти тих самих місяців рік тому, з фільтром нові / імпорт / вторинний ринок',
+        'График регистраций по месяцам на /stats: последние 12 месяцев против тех же месяцев год назад, с фильтром новые / импорт / вторичный рынок',
+        'Registrations by month on /stats: the last 12 months against the same months a year earlier, filterable to new / imported / resale'
+      ),
+      item(
+        'improved',
+        'Статистика (/stats) розбита на вкладки: огляд, рейтинги, походження й реєстр; старі посилання працюють як раніше',
+        'Статистика (/stats) разбита на вкладки: обзор, рейтинги, происхождение и реестр; старые ссылки работают как раньше',
+        'Statistics (/stats) is split into tabs: overview, rankings, origin and registry; old links keep working'
+      ),
+      item(
+        'new',
+        'Діаграма віку автопарку: частка нових авто та авто 1-5, 6-10, 11-20 і 21+ років, з перемикачем % / кількість',
+        'Диаграмма возраста автопарка: доля новых авто и авто 1-5, 6-10, 11-20 и 21+ лет, с переключателем % / количество',
+        'Fleet age chart: the share of new cars and cars aged 1-5, 6-10, 11-20 and 21+ years, with a % / count toggle'
+      )
+    ]
+  },
+  {
     date: '2026-11-02',
     items: [
       item(

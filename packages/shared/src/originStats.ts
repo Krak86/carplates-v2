@@ -11,6 +11,11 @@ const countriesSchema = z.array(z.object({ country: z.string(), n: countSchema }
 export const originStatsResponseSchema = z.object({
   total: countSchema,
   byBrand: countriesSchema,
-  byPlant: countriesSchema
+  byPlant: countriesSchema,
+  /** Cars per model year, ascending; year 0 = unknown. Backs the age chart (buckets are built client-side). */
+  byMakeYear: z
+    .array(z.object({ year: z.number().int().nonnegative(), n: countSchema }))
+    .nullable()
+    .optional()
 })
 export type OriginStatsResponse = z.infer<typeof originStatsResponseSchema>

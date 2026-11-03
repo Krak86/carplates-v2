@@ -9,7 +9,15 @@ import Card from '@/components/ui/Card'
 import Spinner from '@/components/ui/Spinner'
 import { deleteShare, ownShareImageUrl } from '@/lib/api'
 import { myPhotoSharesQuery } from '@/lib/queries'
-import { daysLeft, forgetShareToken, pruneShareTokens, savedShareToken, shareUrl } from '@/lib/share-links'
+import {
+  canNativeShare,
+  daysLeft,
+  forgetShareToken,
+  nativeShareLink,
+  pruneShareTokens,
+  savedShareToken,
+  shareUrl
+} from '@/lib/share-links'
 
 // Loaded on the first click on a thumbnail, not with the profile page.
 const PhotoZoomDialog = lazy(() => import('@/components/PhotoZoomDialog'))
@@ -91,6 +99,17 @@ export default function SharesSection(): ReactNode {
               </div>
               <div className="flex shrink-0 gap-2">
                 {token && <CopyLinkButton link={shareUrl(share.plate, token)} />}
+                {token && canNativeShare() && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      void nativeShareLink(shareUrl(share.plate, token), t('photoShare.title')).catch(() => undefined)
+                    }
+                    className="shrink-0 rounded-lg border border-[var(--color-border)] px-3 py-1.5 text-sm hover:bg-[var(--color-bg)]"
+                  >
+                    {t('photoShare.mine.share')}
+                  </button>
+                )}
                 <button
                   type="button"
                   disabled={remove.isPending}

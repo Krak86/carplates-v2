@@ -11,12 +11,14 @@ type Props = {
   onChange: (currency: Currency) => void
   /** NBU rates, or null while loading: the switch stays disabled and prices stay in hryvnias. */
   fx: FxResponse | null
+  /** The currency that works without rates (the lot feed is in hryvnias, the customs calculator in euros). */
+  baseCurrency?: Currency
 }
 
 const CURRENCIES = ['EUR', 'USD', 'UAH'] as const
 
 /** UAH / USD / EUR switch for the lot prices (they are hryvnias in the feed), with the NBU rate line under it. */
-export default function AuctionCurrency({ currency, onChange, fx }: Props): ReactNode {
+export default function AuctionCurrency({ currency, onChange, fx, baseCurrency = 'UAH' }: Props): ReactNode {
   const { t, i18n } = useTranslation()
   const locale = toIntlLocale(i18n.language)
 
@@ -32,7 +34,7 @@ export default function AuctionCurrency({ currency, onChange, fx }: Props): Reac
           <button
             key={c}
             type="button"
-            disabled={!fx && c !== 'UAH'}
+            disabled={!fx && c !== baseCurrency}
             aria-pressed={c === currency}
             onClick={() => onChange(c)}
             className={cn(

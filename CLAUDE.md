@@ -40,6 +40,7 @@ Pins (why: PLAN.md "Version pins"): Node 24, TypeScript 5.9, NestJS 11, Drizzle 
 
 ## Workflow
 
+- **Open to-dos / "what is left after deploy":** `grep -n "\[ \]" PLAN.md` (unchecked boxes; post-deploy checks sit under each feature's "After deploy" item, `⏳` = blocked). Every feature that needs a VPS step or a prod check adds its boxes there.
 - After each big update suggest a commit message (subject + bullet per change, from `git status`; split if logical). Never `git commit` / `git push` unless asked.
 - Seed CSVs mirror scraped tables: after changing one, re-run its `pnpm export:*:csv`.
 - `pnpm format` first (not `scripts/src/fixtures`). Tests: Vitest, colocated `*.test.ts(x)`.

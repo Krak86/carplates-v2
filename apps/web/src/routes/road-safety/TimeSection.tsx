@@ -2,8 +2,8 @@ import type { ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 
+import ColumnChart from '@/components/charts/ColumnChart'
 import Card from '@/components/ui/Card'
-import { cn } from '@/lib/cn'
 import { toIntlLocale } from '@/lib/intl'
 import { roadSafetyTimeQuery } from '@/lib/queries'
 import { fillBuckets, hourLabel, peakBucket, weekdayLabel } from '@/routes/road-safety/helpers'
@@ -23,29 +23,24 @@ type ColumnsProps = {
 }
 
 function Columns({ buckets, label, ariaLabel, peak, labelEvery = 1 }: ColumnsProps): ReactNode {
-  const biggest = Math.max(1, ...buckets.map(b => b.crashes))
+  const columns = buckets.map(b => ({
+    key: String(b.bucket),
+    label: label(b.bucket),
+    value: b.crashes,
+    title: `${label(b.bucket)}: ${b.crashes}`,
+    faded: b.bucket !== peak
+  }))
 
   return (
-    <div>
-      <div className="flex h-32 items-end gap-0.5" role="img" aria-label={ariaLabel}>
-        {buckets.map(b => (
-          <span
-            key={b.bucket}
-            title={`${label(b.bucket)}: ${b.crashes}`}
-            className={cn('flex-1 rounded-t-sm bg-[var(--color-primary)]', b.bucket !== peak && 'opacity-50')}
-            style={{ height: `${Math.max(2, (b.crashes / biggest) * 100)}%` }}
-          />
-        ))}
-      </div>
-
-      <div className="mt-1 flex gap-0.5 text-xs text-[var(--color-muted)] tabular-nums">
-        {buckets.map((b, i) => (
-          <span key={b.bucket} className="flex-1 text-center whitespace-nowrap">
-            {i % labelEvery === 0 ? label(b.bucket) : ''}
-          </span>
-        ))}
-      </div>
-    </div>
+    <ColumnChart
+      columns={columns}
+      ariaLabel={ariaLabel}
+      formatTick={v => String(v)}
+      labelEvery={labelEvery}
+      labelFrom="start"
+      width={labelEvery > 1 ? 480 : 320}
+      height={190}
+    />
   )
 }
 

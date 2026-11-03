@@ -1,5 +1,7 @@
 import { z } from 'zod'
 
+import { CURRENCIES, type Currency } from './fx.js'
+
 /**
  * Import customs calculator (`/customs`): duty + excise + VAT + pension fee for a car imported to Ukraine.
  * Own contract file (not `schemas.ts`), so changing it does not discard saved offline data: new fields on
@@ -193,12 +195,14 @@ export const CUSTOMS_PRESETS = [
 ] as const satisfies readonly (CustomsQuery & { id: string })[]
 
 /**
- * `/customs?fuel=&value=&cc=&year=&kwh=&duty=&eur1=`. Every field is parsed on its own: a bad or missing one is
+ * `/customs?fuel=&value=&cur=&cc=&year=&kwh=&duty=&eur1=`. Every field is parsed on its own: a bad or missing one is
  * dropped (the form leaves it empty) instead of rejecting the whole link. `duty` is a duty rate in percent.
  */
 export type CustomsQuery = {
   fuel?: ImportFuel
   value?: number
+  /** Currency `value` is typed in (an auction price in dollars); absent = euros. */
+  cur?: Currency
   cc?: number
   year?: number
   kwh?: number
@@ -209,6 +213,7 @@ export type CustomsQuery = {
 const queryFieldSchemas = {
   fuel: z.enum(IMPORT_FUELS),
   value: z.coerce.number().positive().max(10_000_000),
+  cur: z.enum(CURRENCIES),
   cc: z.coerce.number().int().positive().max(20000),
   year: z.coerce.number().int().min(1900).max(2100),
   kwh: z.coerce.number().positive().max(1000),
@@ -220,10 +225,10 @@ const TRUE_VALUES = new Set(['1', 'true', 'yes'])
 /** Parses the route's search params; the second value is whether any known param was present and valid. */
 export function parseCustomsQuery(params: URLSearchParams): { query: CustomsQuery; hasParams: boolean } {
   const query: CustomsQuery = {}
-  for (const key of ['fuel', 'value', 'cc', 'year', 'kwh', 'duty'] as const) {
+  for (const key of ['fuel', 'value', 'cur', 'cc', 'year', 'kwh', 'duty'] as const) {
     const raw = params.get(key)
     if (raw == null || raw.trim() === '') continue
-    const parsed = queryFieldSchemas[key].safeParse(raw.trim().toLowerCase())
+    const parsed = queryFieldSchemas[key].safeParse(key === 'cur' ? raw.trim().toUpperCase() : raw.trim().toLowerCase())
     if (parsed.success) (query as Record<string, unknown>)[key] = parsed.data
   }
   const eur1 = params.get('eur1')
@@ -236,6 +241,7 @@ export function buildCustomsQuery(query: CustomsQuery): string {
   const params = new URLSearchParams()
   if (query.fuel) params.set('fuel', query.fuel)
   if (query.value != null) params.set('value', String(Math.round(query.value)))
+  if (query.cur && query.cur !== 'EUR') params.set('cur', query.cur)
   if (query.cc != null) params.set('cc', String(Math.round(query.cc)))
   if (query.year != null) params.set('year', String(query.year))
   if (query.kwh != null) params.set('kwh', String(query.kwh))

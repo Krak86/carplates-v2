@@ -80,6 +80,7 @@ import {
   getStatsField,
   getEvStats,
   getImportsStats,
+  getMonthlyStats,
   getOriginStats,
   getRegionBrandStats,
   getBrandStats,
@@ -240,6 +241,10 @@ export function evStatsQuery() {
 
 export function importsStatsQuery() {
   return queryOptions({ queryKey: ['stats', 'imports'], queryFn: getImportsStats, staleTime: Infinity })
+}
+
+export function monthlyStatsQuery() {
+  return queryOptions({ queryKey: ['stats', 'monthly'], queryFn: getMonthlyStats, staleTime: Infinity })
 }
 
 export function originStatsQuery() {

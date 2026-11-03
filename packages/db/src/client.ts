@@ -28,6 +28,7 @@ export async function refreshCurrentRegistration(db: Db): Promise<void> {
 export async function refreshStats(db: Db): Promise<void> {
   await db.execute(sql`REFRESH MATERIALIZED VIEW registry.stats_summary`)
   await db.execute(sql`REFRESH MATERIALIZED VIEW registry.stats_by_year`)
+  await db.execute(sql`REFRESH MATERIALIZED VIEW registry.stats_by_month`)
   await db.execute(sql`REFRESH MATERIALIZED VIEW registry.stats_by_region`)
   await db.execute(sql`REFRESH MATERIALIZED VIEW registry.stats_by_region_year`)
   await db.execute(sql`REFRESH MATERIALIZED VIEW registry.stats_by_body`)

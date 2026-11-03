@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import type { PowertrainClass } from '@carplates/shared'
 import { useTranslation } from 'react-i18next'
 
+import BarList from '@/components/charts/BarList'
 import { toIntlLocale } from '@/lib/intl'
 import { formatPercent } from '@/routes/fuel/helpers'
 
@@ -13,32 +14,29 @@ type Props = {
 export default function PowertrainYearTrend({ data }: Props): ReactNode {
   const { t, i18n } = useTranslation()
   const numberFormat = new Intl.NumberFormat(toIntlLocale(i18n.language))
-  const maxShare = Math.max(...data.byYear.map(y => y.share), 0.01)
+  const items = data.byYear.map(y => ({
+    key: String(y.year),
+    label: String(y.year),
+    value: y.share,
+    display: (
+      <>
+        {formatPercent(y.share)}{' '}
+        <span className="text-xs font-normal text-[var(--color-muted)]">
+          {t('fuel.cars', { count: numberFormat.format(y.n) })}
+        </span>
+      </>
+    )
+  }))
 
   return (
     <div>
       <p className="mb-2 text-xs text-[var(--color-muted)]">{t('fuel.pt.yearShare')}</p>
-      <ul className="space-y-1">
-        {data.byYear.map(y => (
-          <li key={y.year} className="grid grid-cols-[3rem_1fr_auto] items-center gap-2 text-sm">
-            <span className="tabular-nums">{y.year}</span>
-
-            <span className="h-3 overflow-hidden rounded-full bg-[var(--color-border)]/40">
-              <span
-                className="block h-full rounded-full bg-[var(--color-primary)]"
-                style={{ width: `${(y.share / maxShare) * 100}%` }}
-              />
-            </span>
-
-            <span className="text-right whitespace-nowrap tabular-nums">
-              {formatPercent(y.share)}{' '}
-              <span className="text-xs text-[var(--color-muted)]">
-                {t('fuel.cars', { count: numberFormat.format(y.n) })}
-              </span>
-            </span>
-          </li>
-        ))}
-      </ul>
+      <BarList
+        items={items}
+        labelClassName="w-12"
+        valueClassName="w-auto min-w-24 whitespace-nowrap"
+        barClassName="h-3"
+      />
     </div>
   )
 }

@@ -1,9 +1,9 @@
 import type { ReactNode } from 'react'
-import type { CustomsRules, FxResponse, ImportCosts, ImportInput } from '@carplates/shared'
+import type { Currency, CustomsRules, FxResponse, ImportCosts, ImportInput } from '@carplates/shared'
 import { useTranslation } from 'react-i18next'
 
 import Card from '@/components/ui/Card'
-import { formatEur, formatUah, percent } from '@/routes/customs/helpers'
+import { formatCurrency, formatUah, percent } from '@/routes/customs/helpers'
 
 type Props = {
   costs: ImportCosts | null
@@ -11,11 +11,12 @@ type Props = {
   rules: CustomsRules | null
   fx: FxResponse | null
   locale: string
+  currency: Currency
 }
 
 const NOTE_CLASS = 'rounded-lg bg-[var(--color-bg)] p-2 text-sm'
 
-export default function CustomsResult({ costs, input, rules, fx, locale }: Props): ReactNode {
+export default function CustomsResult({ costs, input, rules, fx, locale, currency }: Props): ReactNode {
   const { t } = useTranslation()
 
   if (!rules) {
@@ -33,7 +34,7 @@ export default function CustomsResult({ costs, input, rules, fx, locale }: Props
     )
   }
 
-  const eur = (n: number): string => formatEur(n, locale)
+  const eur = (n: number): string => formatCurrency(n, currency, fx, locale)
   const isEv = input.fuel === 'ev'
   const rows: { key: string; label: string; value: string }[] = [
     { key: 'value', label: t('customs.result.value'), value: eur(costs.valueEur) },
@@ -85,11 +86,11 @@ export default function CustomsResult({ costs, input, rules, fx, locale }: Props
             <>
               <div className="flex justify-between gap-3">
                 <dt>{t('customs.result.pension', { rate: percent(costs.pensionRate) })}</dt>
-                <dd className="tabular-nums">{formatUah(costs.pensionUah, locale)}</dd>
+                <dd className="tabular-nums">{eur(costs.pensionUah / fx.eurUah)}</dd>
               </div>
               <div className="flex justify-between gap-3 border-t border-border pt-1.5 text-base font-bold">
                 <dt>{t('customs.result.totalUah')}</dt>
-                <dd className="tabular-nums">{formatUah(costs.totalUah, locale)}</dd>
+                <dd className="tabular-nums">{eur(costs.totalUah / fx.eurUah)}</dd>
               </div>
             </>
           )}

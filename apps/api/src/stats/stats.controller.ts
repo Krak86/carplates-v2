@@ -5,6 +5,7 @@ import type {
   DistributionResponse,
   EvStatsResponse,
   ImportsStatsResponse,
+  MonthlyStatsResponse,
   OriginStatsResponse,
   RegionBrandStatsResponse,
   RegionFacetStatsResponse,
@@ -75,6 +76,16 @@ export class StatsController {
   })
   imports(): Promise<ImportsStatsResponse> {
     return this.statsService.imports()
+  }
+
+  @Get('monthly')
+  @Header('Cache-Control', STATS_CACHE)
+  @ApiOkResponse({
+    description:
+      'Registry operations per month { months: [{ month: YYYY-MM, new, import, resale }] }, last 24 months: new-vehicle registrations, used imports and resales'
+  })
+  monthly(): Promise<MonthlyStatsResponse> {
+    return this.statsService.monthly()
   }
 
   @Get('origin')

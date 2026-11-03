@@ -127,6 +127,12 @@ export {
 export { brandStatsResponseSchema, type BrandStatsResponse } from './brandStats.js'
 export { importsStatsResponseSchema, type ImportsStatsResponse } from './importsStats.js'
 export { originStatsResponseSchema, type OriginStatsResponse } from './originStats.js'
+export {
+  MONTHLY_GROUPS,
+  monthlyStatsResponseSchema,
+  type MonthlyGroup,
+  type MonthlyStatsResponse
+} from './monthlyStats.js'
 export { SPEC_METRICS, SPEC_METRIC_COLUMN, DEFAULT_SPEC_METRIC, type SpecMetric } from './specMetrics.js'
 export {
   VEHICLE_KINDS,

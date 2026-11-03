@@ -2,7 +2,8 @@ import { weightGroupOfKind, type StatsByModelRow, type StatsResponse, type Stats
 
 import { isKnownFuel } from '@/components/ResultCard.helpers'
 
-import type { StatsDimension, StatsRow } from './types'
+import { DEFAULT_STATS_TAB, STATS_TABS } from './types'
+import type { StatsDimension, StatsRow, StatsTab } from './types'
 
 // The full StatsResponse is assignable to this too, so the stats page and the light
 // /api/stats/top payload share the same leaderboard helpers.
@@ -129,6 +130,18 @@ export function yearRange(stats: StatsResponse): { min: number; max: number } | 
   const years = stats.byYear.map(r => r.year).filter((y): y is number => y !== null)
   if (years.length === 0) return null
   return { min: Math.min(...years), max: Math.max(...years) }
+}
+
+/**
+ * The active page tab. An explicit `tab` wins; otherwise the params of an old deep link pick the tab that holds their
+ * target (`weight` -> rankings, `dim`/`view`/`highlight` -> registry), so every existing /stats link still lands right.
+ */
+export function resolveStatsTab(params: URLSearchParams): StatsTab {
+  const explicit = params.get('tab')
+  if ((STATS_TABS as readonly string[]).includes(explicit ?? '')) return explicit as StatsTab
+  if (params.has('weight')) return 'rankings'
+  if (params.has('dim') || params.has('view') || params.has('highlight')) return 'registry'
+  return DEFAULT_STATS_TAB
 }
 
 /**

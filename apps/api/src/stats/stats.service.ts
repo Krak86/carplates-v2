@@ -17,6 +17,7 @@ import {
   statsByKind,
   statsModelGrouped,
   statsByOrigin,
+  statsByMonth,
   statsOrigin,
   statsRegionBrand,
   statsRegionFacet,
@@ -36,6 +37,7 @@ import {
   evStatsResponseSchema,
   importsStatsResponseSchema,
   mergeBodyStats,
+  monthlyStatsResponseSchema,
   originStatsResponseSchema,
   regionBrandStatsResponseSchema,
   regionFacetStatsResponseSchema,
@@ -55,6 +57,7 @@ import type {
   EvStatsResponse,
   Histogram,
   ImportsStatsResponse,
+  MonthlyStatsResponse,
   OriginStatsResponse,
   RegionBrandStatsResponse,
   RegionFacetStatsResponse,
@@ -72,6 +75,7 @@ import type {
 import { DbService } from '../db/db.service.js'
 import { FuelStatsService } from '../fuel/fuel-stats.service.js'
 import { SafetyStatsService } from '../safety/safety-stats.service.js'
+import { foldMonthlyStats } from './stats-monthly.js'
 import { foldOriginStats } from './stats-origin.js'
 
 // Leaderboard depth — must match MAX_TOP_N in apps/web/src/routes/stats/helpers.ts.
@@ -203,6 +207,12 @@ export class StatsService {
         .slice(0, IMPORT_TOP_COUNTRIES),
       topModels: [...models.values()].sort((a, b) => b.n - a.n).slice(0, IMPORT_TOP_MODELS)
     })
+  }
+
+  /** Registry operations per month (new / import / resale), last 24 months; a rollup rebuilt by `db:refresh-stats`. */
+  async monthly(): Promise<MonthlyStatsResponse> {
+    const rows = await this.dbService.db.select().from(statsByMonth)
+    return monthlyStatsResponseSchema.parse(foldMonthlyStats(rows))
   }
 
   /** Passenger cars by brand home country and VIN assembly country (a rollup rebuilt by `db:refresh-origin-stats`). */

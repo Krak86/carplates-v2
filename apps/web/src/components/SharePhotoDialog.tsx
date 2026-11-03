@@ -15,7 +15,7 @@ import Spinner from '@/components/ui/Spinner'
 import { createShare, deleteShare, dropShareOriginal, retouchShare, shareImageUrl } from '@/lib/api'
 import { shrinkImage } from '@/lib/image'
 import { myPhotoSharesQuery } from '@/lib/queries'
-import { saveShareToken, shareUrl } from '@/lib/share-links'
+import { canNativeShare, nativeShareLink, saveShareToken, shareUrl } from '@/lib/share-links'
 
 // Loaded on the first click on the preview.
 const PhotoBlurEditor = lazy(() => import('@/components/PhotoBlurEditor'))
@@ -216,6 +216,15 @@ export default function SharePhotoDialog({ file, onClose }: Props): ReactNode {
                       aria-label={t('photoShare.linkLabel')}
                       className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-xs"
                     />
+                    {canNativeShare() && (
+                      <button
+                        type="button"
+                        onClick={() => void nativeShareLink(confirmed, t('photoShare.title')).catch(() => undefined)}
+                        className="rounded-lg border border-[var(--color-border)] px-3 py-1.5 text-xs font-medium hover:bg-[var(--color-bg)]"
+                      >
+                        {t('photoShare.mine.share')}
+                      </button>
+                    )}
                   </>
                 ) : (
                   <>
