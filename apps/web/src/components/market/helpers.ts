@@ -1,10 +1,45 @@
+import type { TFunction } from 'i18next'
 import { DEFAULT_MARKET_KIND, MARKET_KINDS, resolveVehicleKind } from '@carplates/shared'
-import type { MarketCard, MarketKind, MarketResponse } from '@carplates/shared'
+import type { Currency, FxResponse, MarketCard, MarketKind, MarketResponse } from '@carplates/shared'
 
 import type { MarketView, ResolvedMarketKind } from './types'
 
-/** Cards shown before "show more". */
+/** Cards shown in the block before "show more" (which opens the full list in a modal). */
 export const MARKET_VISIBLE = 6
+
+/** Order of the price chip's cycle. USD is the feed's own currency and the default. */
+export const MARKET_CURRENCIES = ['USD', 'EUR', 'UAH'] as const satisfies readonly Currency[]
+export const DEFAULT_MARKET_CURRENCY: Currency = 'USD'
+
+/** Layouts of the full-list modal. */
+export const MARKET_VIEWS = ['grid', 'rows', 'table'] as const
+export type MarketLayout = (typeof MARKET_VIEWS)[number]
+export const DEFAULT_MARKET_LAYOUT: MarketLayout = 'grid'
+
+/** Sort orders of the full-list modal; `relevance` keeps the block's own order (same year first). */
+export const MARKET_SORTS = ['relevance', 'priceAsc', 'priceDesc', 'yearDesc', 'mileageAsc'] as const
+export type MarketSort = (typeof MARKET_SORTS)[number]
+export const DEFAULT_MARKET_SORT: MarketSort = 'relevance'
+
+const sortValue: Record<Exclude<MarketSort, 'relevance'>, (card: MarketCard) => number | null | undefined> = {
+  priceAsc: card => card.priceUsd,
+  priceDesc: card => (card.priceUsd == null ? null : -card.priceUsd),
+  yearDesc: card => (card.year == null ? null : -card.year),
+  mileageAsc: card => (card.mileage && card.mileage > 0 ? card.mileage : null)
+}
+
+/** Cards in the chosen order; a card without the sorted value goes last, ties keep the incoming order. */
+export function orderCards(cards: readonly MarketCard[], sort: MarketSort): MarketCard[] {
+  if (sort === 'relevance') return [...cards]
+  const value = sortValue[sort]
+  return cards
+    .map((card, index) => ({ card, index, v: value(card) }))
+    .sort((a, b) => {
+      if (a.v == null || b.v == null) return a.v == null && b.v == null ? a.index - b.index : a.v == null ? 1 : -1
+      return a.v - b.v || a.index - b.index
+    })
+    .map(entry => entry.card)
+}
 
 const isMarketKind = (value: string): value is MarketKind => (MARKET_KINDS as readonly string[]).includes(value)
 
@@ -54,14 +89,44 @@ export function formatUsd(value: number | null | undefined, locale: string): str
   return new Intl.NumberFormat(locale, { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value)
 }
 
-/** Price in the listing's own currency (`PLN 52 000`), shown only when it differs from USD. */
+type Rates = Pick<FxResponse, 'eurUah' | 'usdUah'>
+
+/** The currency actually shown: the wanted one once the NBU rates are in, USD (the feed's own) until then. */
+export const effectiveMarketCurrency = (wanted: Currency, rates: Rates | null): Currency => (rates ? wanted : 'USD')
+
+/** Converts a USD asking price at the NBU rates (UAH per USD / EUR). */
+export function convertUsd(usd: number, currency: Currency, rates: Rates | null): number {
+  if (!rates || currency === 'USD') return usd
+  return currency === 'UAH' ? usd * rates.usdUah : (usd * rates.usdUah) / rates.eurUah
+}
+
+/** Asking price in the chosen currency (whole units), or null. Falls back to USD without rates. */
+export function formatPriceIn(
+  usd: number | null | undefined,
+  currency: Currency,
+  rates: Rates | null,
+  locale: string
+): string | null {
+  if (usd == null || !Number.isFinite(usd)) return null
+  const shown = effectiveMarketCurrency(currency, rates)
+  return new Intl.NumberFormat(locale, { style: 'currency', currency: shown, maximumFractionDigits: 0 }).format(
+    convertUsd(usd, shown, rates)
+  )
+}
+
+/** Next currency of the chip: USD -> EUR -> UAH -> USD. */
+export const nextMarketCurrency = (current: Currency): Currency =>
+  MARKET_CURRENCIES[(MARKET_CURRENCIES.indexOf(current) + 1) % MARKET_CURRENCIES.length] ?? DEFAULT_MARKET_CURRENCY
+
+/** Price in the listing's own currency (`PLN 52 000`), shown only when it differs from the currency already shown. */
 export function formatOriginalPrice(
   value: number | null | undefined,
   currency: string | null | undefined,
-  locale: string
+  locale: string,
+  shown: Currency = 'USD'
 ): string | null {
   const code = (currency ?? '').trim().toUpperCase()
-  if (value == null || !Number.isFinite(value) || !/^[A-Z]{3}$/.test(code) || code === 'USD') return null
+  if (value == null || !Number.isFinite(value) || !/^[A-Z]{3}$/.test(code) || code === shown) return null
   try {
     return new Intl.NumberFormat(locale, { style: 'currency', currency: code, maximumFractionDigits: 0 }).format(value)
   } catch {
@@ -92,3 +157,17 @@ export const marketValueKey = (value: string): string =>
 
 /** Fallback text of an unknown value: `plug_in_hybrid` -> `plug in hybrid`. */
 export const marketValueText = (value: string): string => value.trim().replace(/_+/g, ' ')
+
+/** Translated CarAPIS free-text value (`gasoline` -> "petrol"), the raw text as the fallback. */
+export const marketWord = (t: TFunction, value: string): string =>
+  t(marketValueKey(value), { defaultValue: marketValueText(value) })
+
+/** Mileage, fuel and gearbox of a card, translated; missing ones are left out. */
+export function marketFacts(card: MarketCard, t: TFunction, locale: string): string[] {
+  const mileage = formatMileageKm(card.mileage, locale)
+  return [
+    mileage ? t('market.km', { km: mileage }) : null,
+    card.fuel ? marketWord(t, card.fuel) : null,
+    card.transmission ? marketWord(t, card.transmission) : null
+  ].filter((fact): fact is string => !!fact)
+}

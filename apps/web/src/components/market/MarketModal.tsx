@@ -10,17 +10,20 @@ import {
   countryFlag,
   formatMileageKm,
   formatOriginalPrice,
-  formatUsd,
+  formatPriceIn,
   marketGoHref,
   marketValueKey,
   marketValueText,
   seenDay
 } from './helpers'
+import type { MarketCurrency } from './use-market-currency'
+import { useEscape } from './use-escape'
 import { useMarketDetailActions } from './use-market-detail-actions'
 
 type Props = {
   card: MarketCard
   title: string
+  money: MarketCurrency
   onClose: () => void
 }
 
@@ -54,8 +57,9 @@ function useFacts(card: MarketCard, detail: MarketDetail | undefined): Array<[st
  * Detail of one listing. Portaled (the card's 3D tilt would contain `position: fixed`). The only request is the detail call
  * (the API caches it ~7 days); "Open at source" is the redirect link `/api/market/go/:id`, a plain `<a>`.
  */
-export default function MarketModal({ card, title, onClose }: Props): ReactNode {
+export default function MarketModal({ card, title, money, onClose }: Props): ReactNode {
   const { t, i18n } = useTranslation()
+  useEscape(onClose)
   const locale = toIntlLocale(i18n.language)
   const query = useMarketDetailActions(card.id)
   const detail = query.data
@@ -64,14 +68,14 @@ export default function MarketModal({ card, title, onClose }: Props): ReactNode 
   const [failed, setFailed] = useState<readonly string[]>([])
   const photos = (detail?.photos ?? []).filter(url => !failed.includes(url))
   const main = photos[photoIndex] ?? photos[0] ?? card.thumb ?? null
-  const price = formatUsd(card.priceUsd, locale)
-  const original = formatOriginalPrice(card.priceOriginal, card.currencyOriginal, locale)
+  const price = formatPriceIn(card.priceUsd, money.shown, money.rates, locale)
+  const original = formatOriginalPrice(card.priceOriginal, card.currencyOriginal, locale, money.shown)
   const seen = seenDay(detail?.lastSeenAt ?? card.lastSeenAt)
   const checked = seenDay(detail?.availabilityCheckedAt)
 
   return createPortal(
     <div
-      className="fixed inset-0 z-30 flex items-center justify-center bg-black/50 p-4"
+      className="fixed inset-0 z-40 flex items-center justify-center bg-black/50 p-4"
       role="dialog"
       aria-modal
       aria-label={title}

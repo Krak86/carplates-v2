@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { MarketCard } from '@carplates/shared'
@@ -10,12 +10,13 @@ import type { MarketView } from './types'
 
 await i18nReady
 
-const api = vi.hoisted(() => ({ getMarketDetail: vi.fn(), getWikiImage: vi.fn() }))
+const api = vi.hoisted(() => ({ getMarketDetail: vi.fn(), getWikiImage: vi.fn(), getFx: vi.fn() }))
 
 vi.mock('@/lib/api', async importOriginal => ({
   ...(await importOriginal<typeof import('@/lib/api')>()),
   getMarketDetail: api.getMarketDetail,
-  getWikiImage: api.getWikiImage
+  getWikiImage: api.getWikiImage,
+  getFx: api.getFx
 }))
 
 const card = (n: number, extra: Partial<MarketCard> = {}): MarketCard => ({
@@ -56,6 +57,9 @@ describe('MarketBlock', () => {
     api.getMarketDetail.mockReset()
     api.getWikiImage.mockReset()
     api.getWikiImage.mockResolvedValue({ image: null })
+    api.getFx.mockReset()
+    api.getFx.mockRejectedValue(new Error('no rates'))
+    localStorage.clear()
   })
 
   it('shows the dataset chips, the cards and the attribution', () => {
@@ -88,12 +92,41 @@ describe('MarketBlock', () => {
     expect(screen.queryByText(/requests today/)).toBeNull()
   })
 
-  it('folds cards past the visible limit behind show more', () => {
+  it('opens the full list in a modal from "Show more", with layouts and sorting', () => {
     renderBlock(view(Array.from({ length: 8 }, (_, i) => card(i + 1))))
     expect(screen.getAllByRole('button', { name: /\$/ })).toHaveLength(6)
     fireEvent.click(screen.getByRole('button', { name: 'Show more (2)' }))
-    expect(screen.getAllByRole('button', { name: /\$/ })).toHaveLength(8)
-    expect(screen.getByRole('button', { name: 'Show less' })).toBeInTheDocument()
+
+    const dialog = screen.getByRole('dialog')
+    expect(within(dialog).getByText('8 listings')).toBeInTheDocument()
+    expect(within(dialog).getAllByRole('button', { name: /\$/ })).toHaveLength(8)
+
+    fireEvent.click(within(dialog).getByRole('button', { name: /Table/ }))
+    expect(within(dialog).getByRole('table')).toBeInTheDocument()
+    expect(within(dialog).getAllByRole('row')).toHaveLength(9)
+
+    fireEvent.change(within(dialog).getByRole('combobox'), { target: { value: 'priceDesc' } })
+    expect(within(dialog).getAllByRole('row')[1]).toHaveTextContent('$7,008')
+
+    fireEvent.click(within(dialog).getByRole('button', { name: /Rows/ }))
+    expect(within(dialog).queryByRole('table')).toBeNull()
+
+    fireEvent.keyDown(document, { key: 'Escape' })
+    expect(screen.queryByRole('dialog')).toBeNull()
+  })
+
+  it('opens the same modal from the header button', () => {
+    renderBlock(view([card(1), card(2)]))
+    fireEvent.click(screen.getByRole('button', { name: /Open large view/ }))
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+  })
+
+  it('cycles the price currency from the chip', () => {
+    renderBlock(view([card(1)]))
+    expect(screen.getByRole('button', { name: 'asking prices, USD' })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'asking prices, USD' }))
+    // no NBU rates in the test: the prices stay in USD until they arrive
+    expect(screen.getByText('$7,001')).toBeInTheDocument()
   })
 
   it('falls back to a text tile when a card has no photo and no model photo exists', () => {

@@ -33,5 +33,6 @@ export const ADMIN_LINKS = [
     icon: '🔐'
   },
   { label: 'Telegram - BotFather (login bot)', href: 'https://t.me/BotFather', icon: '✈️' },
-  { label: 'Disqus - comments moderation', href: 'https://disqus.com/admin/', icon: '💬' }
+  { label: 'Disqus - comments moderation', href: 'https://disqus.com/admin/', icon: '💬' },
+  { label: 'CarAPIS - cars for sale API (key and usage)', href: 'https://my.carapis.com/', icon: '🚙' }
 ] as const

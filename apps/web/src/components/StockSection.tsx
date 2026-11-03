@@ -9,6 +9,7 @@ import SectionInfo from '@/components/SectionInfo'
 import ShareButton from '@/components/ShareButton'
 import StockRow from '@/components/StockRow'
 import MarketBlock from '@/components/market/MarketBlock'
+import MarketSkeleton from '@/components/market/MarketSkeleton'
 import { useMarketActions } from '@/components/market/use-market-actions'
 import { useStockPhotosActions } from '@/components/use-stock-photos-actions'
 import VinToggleSection from '@/components/vin/VinToggleSection'
@@ -80,7 +81,8 @@ export default function StockSection({ brand, model, year, kind }: Props): React
       defaultOpen={isShared}
       onOpenChange={setOpen}
     >
-      {open && (photos.isPending || listings.isPending) && <SectionSkeleton />}
+      {open && listings.isPending && <MarketSkeleton />}
+      {open && photos.isPending && !listings.isPending && <SectionSkeleton />}
       {open && hasImporter && !photos.isPending && !hasCards && !marketView && (
         <p className="text-base text-muted">{t('section.empty')}</p>
       )}
