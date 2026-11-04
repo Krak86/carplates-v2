@@ -5,16 +5,9 @@ import { Link, useSearchParams } from 'react-router'
 
 import { cn } from '@/lib/cn'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
+import ExternalGames from '@/routes/play/ExternalGames'
 import GameTile from '@/routes/play/GameTile'
-import {
-  EXTERNAL_GAMES,
-  parseQuizId,
-  QUIZ_EMOJI,
-  QUIZ_HUE,
-  QUIZ_IDS,
-  RACER_HUE,
-  RACER_LINKS
-} from '@/routes/play/games'
+import { parseQuizId, QUIZ_EMOJI, QUIZ_HUE, QUIZ_IDS, RACER_HUE, RACER_LINKS } from '@/routes/play/games'
 import type { QuizId } from '@/routes/play/games'
 import HigherLowerQuiz from '@/routes/play/HigherLowerQuiz'
 import LogoQuiz from '@/routes/play/LogoQuiz'
@@ -158,34 +151,7 @@ export default function PlayRoute(): ReactNode {
         ))}
       </ul>
 
-      <section className="mt-8" aria-labelledby="play-external">
-        <h2 id="play-external" className="text-xl font-semibold">
-          {t('play.external.title')}
-        </h2>
-        <p className="mt-1 mb-4 text-sm text-[var(--color-muted)]">{t('play.external.intro')}</p>
-        <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-5">
-          {EXTERNAL_GAMES.map(game => (
-            <li key={game.id}>
-              <a
-                href={game.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={`${t(`play.external.${game.id}.title`)} (${t('play.external.newTab')})`}
-                className="block h-full"
-              >
-                <GameTile
-                  external
-                  emoji={game.emoji}
-                  hue={game.hue}
-                  title={t(`play.external.${game.id}.title`)}
-                  desc={t(`play.external.${game.id}.desc`)}
-                  note={t(`play.external.${game.id}.note`)}
-                />
-              </a>
-            </li>
-          ))}
-        </ul>
-      </section>
+      <ExternalGames />
 
       <p className="mt-4 text-sm text-[var(--color-muted)]">
         <Link to="/stats?view=map" className="text-[var(--color-primary)] hover:underline">
