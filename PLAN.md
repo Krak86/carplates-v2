@@ -1244,7 +1244,7 @@ Write-up: `docs/plan-done.md` "Market offers (CarAPIS)"; conventions: `docs/feat
 
 ## 3DTuning "Customize in 3D" links ✅ 2026-11-04
 
-✅ Sitemap ingest, `registry.tuning_links` (0096), body-aware matcher, `/api/tuning`, "Customize in 3D" `LazySection`: **48.2% of cars get a link**, never a guess. Write-up: `docs/plan-done.md` "3DTuning", conventions: `docs/features-reference.md` "3DTuning link-out", plan: [docs/tuning-3d-plan.md](docs/tuning-3d-plan.md).
+✅ Sitemap ingest, `registry.tuning_links` (0096), body-aware matcher, `/api/tuning`, "Customize in 3D" chip: **48.2% of cars get a link**, never a guess. Write-up: `docs/plan-done.md` "3DTuning", conventions: `docs/features-reference.md` "3DTuning link-out", plan: [docs/tuning-3d-plan.md](docs/tuning-3d-plan.md).
 
 - [ ] **After deploy:** migration 0096 is applied by the API deploy; load the table on the VPS with `docker compose run --rm --no-deps -T ingest pnpm ingest:3dtuning:csv` (or `tsx src/ingest-3dtuning.ts --from-csv seed-data/3dtuning-links.csv.gz`); add `/api/tuning` to the Cloudflare Cache Rule "Cache model lookups" (see `docs/deploy.md`) and check MISS then HIT; open a car with a known link (e.g. a BMW 3 Series sedan 2007) and a car without one.
 - [ ] Optional: grow `MODEL_ALIASES` from `pnpm ingest:3dtuning --match-report`; re-run `pnpm ingest:3dtuning` and `export:3dtuning:csv` now and then (their sitemap changes); ask 3DTuning via `/b2b` about an affiliate link

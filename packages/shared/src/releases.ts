@@ -20,9 +20,9 @@ export const RELEASES: readonly ReleaseDay[] = [
     items: [
       item(
         'improved',
-        'Картка авто: розділ «Налаштувати в 3D» веде на відповідну сторінку 3DTuning (потрібне покоління й кузов; якщо не певні, посилання немає)',
-        'Карточка авто: раздел «Настроить в 3D» ведёт на подходящую страницу 3DTuning (нужное поколение и кузов; если не уверены, ссылки нет)',
-        'Car card: a "Customize in 3D" section links to the matching 3DTuning page (the right generation and body; no link when we are not sure)'
+        'Картка авто: чип «Налаштувати в 3D» веде на відповідну сторінку 3DTuning (потрібне покоління й кузов; якщо не певні, посилання немає)',
+        'Карточка авто: чип «Настроить в 3D» ведёт на подходящую страницу 3DTuning (нужное поколение и кузов; если не уверены, ссылки нет)',
+        'Car card: a "Customize in 3D" chip links to the matching 3DTuning page (the right generation and body; no link when we are not sure)'
       ),
       item(
         'improved',

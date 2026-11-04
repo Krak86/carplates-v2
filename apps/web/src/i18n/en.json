@@ -895,7 +895,6 @@
   "model3d.open": "3D view ({{n}})",
   "model3d.title": "3D models - {{label}}",
   "tuning3d.title": "Customize in 3D",
-  "tuning3d.open": "Open on 3DTuning",
   "tuning3d.hint": "A 3D model of this car's generation (from {{year}}) on 3dtuning.com: try wheels, paint and body kits. Opens in a new tab.",
   "model3d.prev": "Previous model",
   "model3d.next": "Next model",
