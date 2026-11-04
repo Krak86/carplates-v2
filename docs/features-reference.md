@@ -740,6 +740,7 @@ Plan: [compare-plan.md](compare-plan.md). Phases 1-3 and the client side of phas
 
 - `routes/sitemap/`: `helpers.ts` holds the tree (`SITEMAP_GROUPS` links, `SITEMAP_TIPS` for URL-less features, `HIDDEN_ROUTES`, `CATALOG_ROUTES`), `SitemapRoute.tsx` renders it. Guide links come from `GUIDE_META` and game links from `QUIZ_IDS` / `RACER_LINKS`, so a new article or game appears by itself.
 - **A new route in `App.tsx` must be added to `SITEMAP_GROUPS` (or `HIDDEN_ROUTES` when it is not a page to browse to)**: `helpers.test.ts` reads `App.tsx` and fails otherwise. Text lives in `sitemap.*` (ua/ru/en); labels reuse the existing `nav.*` keys.
+- Groups mirror the sidebar (`components/sidebar-groups.ts`, six groups: search, stats, personal, read, interactive, misc); a new nav link goes into both.
 - Not the same as `/sitemap.xml` (crawlers, `SeoController`). The page has a `STATIC_PAGES` entry and sits in the footer (`QuickLinks`).
 
 ## Data freshness (`/data-status`, 2026-11-01)

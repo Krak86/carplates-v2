@@ -145,6 +145,7 @@ const SOURCES: readonly Source[] = [
   { key: 'winner', label: 'Winner Imports', url: 'https://stock.winner.ua', icon: '/icons/sources/winner.svg' },
   // No logo cleared for 3DTuning: a plain tile.
   { key: 'tuning3d', label: '3DTuning', url: 'https://www.3dtuning.com', tile: 'bg-slate-700' },
+  { key: 'oemLinks', label: 'Morgan, Lucid, Koenigsegg, Aston Martin, Lamborghini', tile: 'bg-zinc-700' },
   { key: 'sketchfab', label: 'Sketchfab', url: 'https://sketchfab.com', icon: '/icons/sources/sketchfab.webp' },
   {
     key: 'wikimedia',
@@ -330,6 +331,7 @@ const FEATURES = [
   'value',
   'customs',
   'tuning3d',
+  'showroom',
   'auctions',
   'uaAuctions',
   'market',

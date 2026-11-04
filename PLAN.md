@@ -1258,7 +1258,10 @@ Write-up: `docs/plan-done.md` "Market offers (CarAPIS)"; conventions: `docs/feat
 - [ ] **After deploy:** open `/showroom`, search "bmw", open a 360, a 3D and a Customize entry.
 - ✅ Showroom kind `oem` (official configurator / model-page links: Morgan, Lucid, Koenigsegg, Aston Martin, Lamborghini; 29 links). Write-up: `docs/plan-done.md` "Official OEM links".
 - [ ] **After deploy:** run `pnpm ingest:oem-links:csv` on the VPS (new table); more makes (BMW, Kia, VW, Hyundai, Skoda) need a browser-based probe first (their configurators are per-market apps).
-- [ ] Release note (`releases.ts` + `latest.ts`) and `AboutRoute.tsx` feature entry for the showroom; own AR/XR views later.
+- ✅ (2026-11-04) Release note (`releases.ts`), `AboutRoute.tsx` feature + OEM source entry.
+- [ ] Own AR/XR views later.
+- ✅ ZAKON typeface fetched by `pnpm fetch:zakon-font` (gitignored, not committed); sidebar regrouped into six groups with footer links (`sidebar-groups.ts`). Write-up: `docs/plan-done.md` "Sidebar groups and ZAKON font".
+- [ ] **After deploy:** run `pnpm fetch:zakon-font` wherever the web app is built (the font is not in git), else the ZAKON face falls back.
 
 ## Later, conditional
 

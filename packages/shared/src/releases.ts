@@ -19,6 +19,18 @@ export const RELEASES: readonly ReleaseDay[] = [
     date: '2026-11-04',
     items: [
       item(
+        'new',
+        'Віртуальний шоурум /showroom: усі авто з оглядом 360°, 3D-моделлю чи посиланням «Налаштувати в 3D» на одній сторінці, плюс офіційні сторінки Morgan, Lucid, Koenigsegg, Aston Martin і Lamborghini; пошук, вигляд сіткою, списком чи галереєю, а посилання зберігає вибір',
+        'Виртуальный шоурум /showroom: все авто с обзором 360°, 3D-моделью или ссылкой «Настроить в 3D» на одной странице, плюс официальные страницы Morgan, Lucid, Koenigsegg, Aston Martin и Lamborghini; поиск, вид сеткой, списком или галереей, а ссылка сохраняет выбор',
+        'Virtual showroom /showroom: every car with a 360° view, a 3D model or a "Customize in 3D" link on one page, plus official Morgan, Lucid, Koenigsegg, Aston Martin and Lamborghini pages; search, grid, list or gallery layout, and the link keeps your choices'
+      ),
+      item(
+        'improved',
+        'Бічне меню: посилання згруповано в шість блоків, дрібніший текст, унизу контакти, карта сайту, стан даних і відгук',
+        'Боковое меню: ссылки сгруппированы в шесть блоков, мельче текст, внизу контакты, карта сайта, состояние данных и отзыв',
+        'Sidebar: links grouped into six blocks with smaller text, and contact, sitemap, data status and feedback links at the bottom'
+      ),
+      item(
         'improved',
         'Картка авто: чип «Налаштувати в 3D» веде на відповідну сторінку 3DTuning (потрібне покоління й кузов; якщо не певні, посилання немає)',
         'Карточка авто: чип «Настроить в 3D» ведёт на подходящую страницу 3DTuning (нужное поколение и кузов; если не уверены, ссылки нет)',
