@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import {
   AUCTION_GROUPS,
+  auctionReason,
   PROZORRO_STATUS_LABELS,
   auctionGroup,
   auctionLotSchema,
@@ -90,5 +91,12 @@ describe('prozorro status and links', () => {
     expect(prozorroDocumentUrl('a'.repeat(32))).toBe(
       `https://procedure.prozorro.sale/api/documents/public/${'a'.repeat(32)}`
     )
+  })
+
+  it('reads the reason a SETAM lot is for sale from its title', () => {
+    expect(auctionReason('Конфіскація майна за рішенням суду: Автомобіль марки Mercedes-Benz')).toBe('confiscation')
+    expect(auctionReason('Майно конфісковане за рішенням суду')).toBe('confiscation')
+    expect(auctionReason('Добровільний продаж. Транспортний засіб ВАЗ 2107')).toBe('voluntary')
+    expect(auctionReason('Легковий автомобіль марки «Volkswagen»')).toBeNull()
   })
 })

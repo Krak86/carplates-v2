@@ -20,6 +20,9 @@ export const JOBS = {
   // day on average (1 400 on busy days), 4-14 requests, seconds). A skipped day is caught up by the next run; after an outage of weeks the cursor still resumes where it stopped.
   // The first VPS run needs the history once: `tsx src/prozorro.ts --from 2017-04-01` (SCHEDULE.md).
   'prozorro-auctions': { command: 'tsx src/prozorro.ts', timeoutMin: 45 },
+  // Debtors register (~800 MB ZIP, 11 M rows streamed once) -> debt category / issuer / bailiff office of each SETAM lot's proceeding. Only OPEN
+  // proceedings are listed, so a lot is covered when a run happens while its proceeding is open: weekly. Upserts, never deletes.
+  'auction-proceedings': { command: 'tsx src/auction-proceedings.ts', timeoutMin: 60 },
   // Patrol Police road-crash XLSX (docs/road-safety-plan.md): a new NN.YYYY.xlsx appears monthly; a year is replaced in one transaction and a
   // run with nothing newer rewrites the same numbers. Hazardous-section CSVs (data.gov.ua) change about once a year. Re-export the seed CSVs
   // locally after a real change (pnpm export:dtp:csv).

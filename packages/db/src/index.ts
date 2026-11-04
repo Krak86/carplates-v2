@@ -103,6 +103,8 @@ export {
   type AuctionLotRow,
   type AuctionLotInsert,
   auctionLots,
+  auctionProceedings,
+  type AuctionProceedingInsert,
   prozorroAuctions,
   type ProzorroAuctionRow,
   type ProzorroAuctionInsert,

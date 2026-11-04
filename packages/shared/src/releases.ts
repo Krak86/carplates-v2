@@ -16,6 +16,17 @@ const item = (group: ReleaseGroup, ua: string, ru: string, en: string): ReleaseI
  */
 export const RELEASES: readonly ReleaseDay[] = [
   {
+    date: '2026-11-04',
+    items: [
+      item(
+        'improved',
+        'Лоти СЕТАМ: підстава продажу, категорія стягнення, орган, що видав виконавчий документ, і виконавча служба - з Єдиного реєстру боржників (особа боржника не показується)',
+        'Лоты СЕТАМ: основание продажи, категория взыскания, орган, выдавший исполнительный документ, и исполнительная служба - из Единого реестра должников (личность должника не показывается)',
+        'SETAM lots: reason for sale, type of enforcement, the body that issued the writ and the enforcement office - from the Unified Register of Debtors (the debtor is not shown)'
+      )
+    ]
+  },
+  {
     date: '2026-11-03',
     items: [
       item(

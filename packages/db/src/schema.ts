@@ -1056,6 +1056,20 @@ export type AuctionLotRow = typeof auctionLots.$inferSelect
 export type AuctionLotInsert = typeof auctionLots.$inferInsert
 
 /**
+ * Debt category, issuing body and bailiff office of a SETAM lot's enforcement proceeding, from the Unified Register of Debtors
+ * (`scripts/src/auction-proceedings.ts`). No debtor identity is stored. Rows are never deleted: the register drops closed proceedings.
+ */
+export const auctionProceedings = registry.table('auction_proceedings', {
+  proceedingNo: text('proceeding_no').primaryKey(),
+  category: text('category'),
+  issuer: text('issuer'),
+  bailiffOffice: text('bailiff_office'),
+  firstSeenAt: timestamp('first_seen_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
+})
+export type AuctionProceedingInsert = typeof auctionProceedings.$inferInsert
+
+/**
  * A Prozorro.Sale vehicle auction that carries a plate or VIN (procedure.prozorro.sale feed). One row per auction, keyed on the
  * full `auctionId`. Seller and tag fields are stored raw next to the derived `sellerKind`; photos are URLs only.
  */

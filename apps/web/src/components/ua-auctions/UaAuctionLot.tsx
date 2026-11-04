@@ -25,6 +25,9 @@ type Props = {
   fx: FxResponse | null
 }
 
+/** A register category starts lower-case ("стягнення аліментів"); the row reads better capitalised. */
+const upperFirst = (v: string | null | undefined): string | null => (v ? v.charAt(0).toUpperCase() + v.slice(1) : null)
+
 function Row({ label, value }: { label: string; value: ReactNode }): ReactNode {
   if (!value) return null
   return (
@@ -70,6 +73,10 @@ export default function UaAuctionLot({ lot, currency, fx }: Props): ReactNode {
           }
         />
         <Row label={t('uaAuctions.proceedingNo')} value={lot.proceedingNo} />
+        <Row label={t('uaAuctions.reason')} value={lot.reason ? t(`uaAuctions.reason.${lot.reason}`) : null} />
+        <Row label={t('uaAuctions.debtCategory')} value={upperFirst(lot.proceeding?.category)} />
+        <Row label={t('uaAuctions.writIssuer')} value={lot.proceeding?.issuer} />
+        <Row label={t('uaAuctions.bailiffOffice')} value={lot.proceeding?.bailiffOffice} />
         <Row label={t('uaAuctions.vehicle')} value={vehicleName || null} />
         {/* A Prozorro lot has no car category (the feed puts the group there), its group chip is in the header. */}
         <Row label={t('uaAuctions.category')} value={isProzorro ? null : lot.category} />
@@ -100,6 +107,8 @@ export default function UaAuctionLot({ lot, currency, fx }: Props): ReactNode {
           ⚠️ {t('uaAuctions.damage')}: {lot.damageText}
         </p>
       )}
+
+      {lot.proceeding && <p className="mt-1.5 text-xs text-[var(--color-muted)]">{t('uaAuctions.registerNote')}</p>}
 
       <UaAuctionPhotos docIds={lot.photos ?? []} label={vehicleName || lotNumber(lot)} />
 

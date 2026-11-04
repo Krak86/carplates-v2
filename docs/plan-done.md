@@ -4549,3 +4549,13 @@ Follow-ups to "Shareable photo-search links"; each step shippable alone, all new
 - **Native Share:** `SharePhotoDialog` and the profile "My shared photos" list use `navigator.share` when available (`lib/share-links.ts`), copy-link stays the fallback; `Spinner` no longer renders as an oval.
 - **Shared charts / stats tabs / market block:** see the entries above; all three have release notes.
 - **Docs/release:** `releases.ts` (2026-11-03: hazard map, customs, native Share), About `roadSafety` / `customs` / `photoShare` texts, this entry.
+
+## SETAM lot reason and debtors register (2026-11-04)
+
+Question: what more can be learned about a SETAM "arrested property" lot (reason, owner)? Verified live:
+- The SETAM feed has no owner or reason column; the title prefix ("Конфіскація майна за рішенням суду", "Добровільний продаж") is the only reason and survives on ~10 % of our lots. `auctionReason` reads it.
+- **Unified Register of Debtors** joins on the proceeding number: 1 304 of 3 975 proceedings found (open ones only), giving debt category, issuing body and bailiff office. The screenshot lot 608367 (proceeding 71795326) resolves to "конфіскація у кримінальному проваджені", Дрогобицький міськрайонний суд, Дрогобицький ВДВС. The register also holds the debtor's name and birth date (private persons): **not stored, not shown**.
+- **ARMA arrest register** has no VIN or plate on vehicles (0 of 955 in an 80 MB sample): not joinable, not built.
+- Built: migration 0095 `registry.auction_proceedings`, `scripts/src/auction-proceedings.ts` (+ parse + 5 tests), job `auction-proceedings` (Sunday 02:10, `HC_PING_AUCTION_PROCEEDINGS`), shared `auctionReason` / `auctionProceedingSchema` / `GENERIC_DEBT_CATEGORY`, left join in `auctions-union.ts`, lot rows "Reason for sale", "Type of enforcement", "Writ issued by", "Enforcement office" + a source note in `UaAuctionLot` (ua/ru/en).
+- Local numbers: open lots covered 267 of 1 717 (16 %), all lots 3 348 of 16 866; the share rises as weekly runs catch proceedings while open.
+- **After deploy:** merge, API deploy (migration 0095), `deploy-ingest` (cron), then once `docker compose run --rm --no-deps -T ingest tsx src/auction-proceedings.ts` on the VPS; check disk (~1 GB temp ZIP in `/tmp`).
