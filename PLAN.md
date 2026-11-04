@@ -340,6 +340,7 @@ above once scoped, or dropped if research says no.
 
 ### Actual — ready or in progress
 
+- [ ] **UI / integration / e2e tests (researched 2026-11-04, nothing built)** — real-Postgres integration suite, Playwright smoke (~10 specs), both gating deploy via `ci.yml`. Steps 1-7: [TESTING_PLAN.md](TESTING_PLAN.md).
 - ✅ History, favorites, camera/photo search, registry stats (table + map), brand breakdown, kind icon + logo — done, see Phase 1.5 / "Plate image recognition" in `docs/plan-done.md`.
 - ⏳ **Speed round: advanced search + photo recognition on 4G** (researched 2026-10-29; nothing measured yet, estimates from code). Indexes are already
   complete (0012–0015, 0042, 0059), so the cost is the query shape: every page/sort click re-fetches up to 10k wide rows (`SEARCH_COUNT_CAP`) and sorts in Node.
