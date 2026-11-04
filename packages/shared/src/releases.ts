@@ -23,6 +23,24 @@ export const RELEASES: readonly ReleaseDay[] = [
         'Лоти СЕТАМ: підстава продажу, категорія стягнення, орган, що видав виконавчий документ, і виконавча служба - з Єдиного реєстру боржників (особа боржника не показується)',
         'Лоты СЕТАМ: основание продажи, категория взыскания, орган, выдавший исполнительный документ, и исполнительная служба - из Единого реестра должников (личность должника не показывается)',
         'SETAM lots: reason for sale, type of enforcement, the body that issued the writ and the enforcement office - from the Unified Register of Debtors (the debtor is not shown)'
+      ),
+      item(
+        'improved',
+        'Історія реєстрацій: біля кожного лота є посилання «↓», що відкриває розділ українських аукціонів і прокручує до цього лота; кожен лот можна згорнути, а історію й світові аукціони відкриває посилання на гід /read/auctions',
+        'История регистраций: у каждого лота есть ссылка «↓», открывающая раздел украинских аукционов и прокручивающая к этому лоту; каждый лот можно свернуть, а историю и мировые аукционы открывает ссылка на гид /read/auctions',
+        'Registration history: each lot has a "↓" link that opens the Ukrainian auctions section and scrolls to that lot; every lot can be collapsed, and the history and world auctions open from a link to the /read/auctions guide'
+      ),
+      item(
+        'improved',
+        'Телефон: профіль і сторінка безпеки доріг більше не мають горизонтальної прокрутки, а список небезпечних ділянок читається повністю (код дороги, кілометр, ДТП, назва, посилання)',
+        'Телефон: профиль и страница безопасности дорог больше не прокручиваются вбок, а список опасных участков читается полностью (код дороги, километр, ДТП, название, ссылки)',
+        'Phone: the profile and road-safety pages no longer scroll sideways, and the hazard list reads in full (road code, kilometre, crashes, name, links)'
+      ),
+      item(
+        'fix',
+        'Посилання з #якорем (наприклад, /read/auctions#world) тепер прокручують до потрібного розділу',
+        'Ссылки с #якорем (например, /read/auctions#world) теперь прокручивают к нужному разделу',
+        'Links with a #anchor (for example /read/auctions#world) now scroll to the right section'
       )
     ]
   },

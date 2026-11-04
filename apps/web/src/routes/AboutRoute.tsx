@@ -63,6 +63,12 @@ const SOURCES: readonly Source[] = [
   },
   { key: 'setam', label: 'SETAM', url: 'https://setam.net.ua', tile: 'bg-blue-700' },
   { key: 'prozorro', label: 'Prozorro.Sale', url: 'https://prozorro.sale/opendata/', tile: 'bg-blue-700' },
+  {
+    key: 'debtors',
+    label: 'Unified Register of Debtors',
+    url: 'https://data.gov.ua/dataset/506734bf-2480-448c-a2b4-90b6d06df11e',
+    tile: 'bg-blue-700'
+  },
   { key: 'hsc', label: 'MVS HSC open data', url: 'https://solutions.mvs.gov.ua', tile: 'bg-blue-700' },
   { key: 'stolenIn', label: 'stolen.in.ua', url: 'https://stolen.in.ua', icon: '/icons/sources/stolenin.svg' },
   { key: 'bdr', label: 'MVS (bdr.mvs.gov.ua)', url: 'https://bdr.mvs.gov.ua', icon: '/icons/bdr.svg' },

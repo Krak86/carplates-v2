@@ -4553,9 +4553,18 @@ Follow-ups to "Shareable photo-search links"; each step shippable alone, all new
 ## SETAM lot reason and debtors register (2026-11-04)
 
 Question: what more can be learned about a SETAM "arrested property" lot (reason, owner)? Verified live:
+
 - The SETAM feed has no owner or reason column; the title prefix ("Конфіскація майна за рішенням суду", "Добровільний продаж") is the only reason and survives on ~10 % of our lots. `auctionReason` reads it.
 - **Unified Register of Debtors** joins on the proceeding number: 1 304 of 3 975 proceedings found (open ones only), giving debt category, issuing body and bailiff office. The screenshot lot 608367 (proceeding 71795326) resolves to "конфіскація у кримінальному проваджені", Дрогобицький міськрайонний суд, Дрогобицький ВДВС. The register also holds the debtor's name and birth date (private persons): **not stored, not shown**.
 - **ARMA arrest register** has no VIN or plate on vehicles (0 of 955 in an 80 MB sample): not joinable, not built.
 - Built: migration 0095 `registry.auction_proceedings`, `scripts/src/auction-proceedings.ts` (+ parse + 5 tests), job `auction-proceedings` (Sunday 02:10, `HC_PING_AUCTION_PROCEEDINGS`), shared `auctionReason` / `auctionProceedingSchema` / `GENERIC_DEBT_CATEGORY`, left join in `auctions-union.ts`, lot rows "Reason for sale", "Type of enforcement", "Writ issued by", "Enforcement office" + a source note in `UaAuctionLot` (ua/ru/en).
 - Local numbers: open lots covered 267 of 1 717 (16 %), all lots 3 348 of 16 866; the share rises as weekly runs catch proceedings while open.
 - **After deploy:** merge, API deploy (migration 0095), `deploy-ingest` (cron), then once `docker compose run --rm --no-deps -T ingest tsx src/auction-proceedings.ts` on the VPS; check disk (~1 GB temp ZIP in `/tmp`).
+
+## Housekeeping after the reason feature (2026-11-04)
+
+- `/data-status`: two entries in `datasets.ts` - `prozorroAuctions` (daily, job `prozorro-auctions`, live on the VPS since 2026-11-02, it was missing) and `auctionProceedings` (weekly, job `auction-proceedings`). The jobs' last runs come from `registry.job_runs`, no API change needed.
+- About: source `debtors` (Unified Register of Debtors, `about.source.debtors` ua/ru/en) and one added sentence in `about.feature.uaAuctions`. The brief + full feature cards already sit between the main card and the sources card (all 46 features).
+- `releases.ts` 2026-11-04 now also lists the day's other commits: "↓" jump to a lot from the registration history and collapsible lots (`9074cee`), phone layouts of profile / road-safety and the readable hazard list (`9074cee`, `392a255`), #anchor scrolling in `Layout` (`392a255`, fixes `/read/auctions#world`).
+- Deploy order for a fresh environment is in `docs/deploy.md` (first load of the debtors register): the job needs `auction_lots` filled first.
+- `CLAUDE.md` + `CLAUDE_RULES.md` reviewed: 4.2 KB + 2.4 KB (about 1.7 k tokens), every line is a rule the linters and tests do not catch, so nothing was cut (trimming would save ~100 tokens and risk losing a rule). The big docs (PLAN 156 KB, features-reference 202 KB, plan-done 549 KB) are never auto-loaded; they are read by heading only.
