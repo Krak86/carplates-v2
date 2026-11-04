@@ -31,23 +31,7 @@ export const SITEMAP_GROUPS: readonly SitemapGroup[] = [
   {
     id: 'search',
     icon: '🔍',
-    links: [
-      link('/', '🔍', 'nav.search'),
-      link('/advanced-search', '🧭', 'nav.advancedSearch'),
-      link('/history', '🕘', 'nav.history'),
-      link('/favorites', '⭐', 'nav.favorites'),
-      link('/share', '🔗', 'nav.share')
-    ]
-  },
-  {
-    id: 'cars',
-    icon: '🚗',
-    links: [
-      link('/cars', '🚗', 'nav.cars'),
-      link('/compare', '⚖️', 'nav.compare'),
-      link('/showroom', '🎬', 'nav.showroom'),
-      link('/customs', '🧮', 'nav.customs')
-    ]
+    links: [link('/', '🔍', 'nav.search'), link('/advanced-search', '🧭', 'nav.advancedSearch')]
   },
   {
     id: 'stats',
@@ -62,46 +46,47 @@ export const SITEMAP_GROUPS: readonly SitemapGroup[] = [
     ]
   },
   {
+    id: 'personal',
+    icon: '👤',
+    links: [
+      link('/history', '🕘', 'nav.history'),
+      link('/favorites', '⭐', 'nav.favorites'),
+      link('/profile', '👤', 'auth.profile'),
+      link('/settings', '⚙️', 'nav.settings')
+    ]
+  },
+  {
     id: 'read',
     icon: '📖',
     links: [
       link('/read', '📖', 'nav.read'),
-      ...Object.entries(GUIDE_META).map(([to, meta]) => link(to, meta.icon, meta.titleKey))
+      ...Object.entries(GUIDE_META).map(([to, meta]) => link(to, meta.icon, meta.titleKey)),
+      link('/about', 'ℹ️', 'nav.about'),
+      link('/releases', '🆕', 'nav.releases'),
+      link('/news', '📰', 'nav.news'),
+      link('/discuss', '💬', 'nav.discuss')
     ]
   },
   {
-    id: 'play',
-    icon: '🎲',
+    id: 'interactive',
+    icon: '🎮',
     links: [
+      link('/cars', '🚗', 'nav.cars'),
+      link('/compare', '⚖️', 'nav.compare'),
+      link('/showroom', '🎬', 'nav.showroom'),
       link('/play', '🎲', 'nav.play'),
       ...QUIZ_IDS.map(id => link(`/play?game=${id}`, QUIZ_EMOJI[id], `play.quiz.${id}.title`)),
       ...RACER_LINKS.map(r => link(r.to, r.emoji, `play.${r.key}.title`))
     ]
   },
   {
-    id: 'community',
-    icon: '💬',
+    id: 'misc',
+    icon: '🧰',
     links: [
-      link('/news', '📰', 'nav.news'),
-      link('/discuss', '💬', 'nav.discuss'),
-      link('/releases', '🆕', 'nav.releases')
-    ]
-  },
-  {
-    id: 'account',
-    icon: '👤',
-    links: [
-      link('/profile', '👤', 'auth.profile'),
-      link('/settings', '⚙️', 'nav.settings'),
-      link('/features', '✨', 'nav.features')
-    ]
-  },
-  {
-    id: 'about',
-    icon: 'ℹ️',
-    links: [
-      link('/about', 'ℹ️', 'nav.about'),
+      link('/customs', '🧮', 'nav.customs'),
+      link('/share', '🔗', 'nav.share'),
       link('/install', '📲', 'nav.install'),
+      link('/features', '✨', 'nav.features'),
       link('/contact', '✉️', 'contact.heading'),
       link('/privacy', '🔒', 'legal.privacy.heading'),
       link('/terms', '📄', 'legal.terms.heading'),

@@ -6,6 +6,7 @@ import { useSession } from '@/components/auth/use-session'
 import LoginButton from '@/components/auth/LoginButton'
 import LayersButton from '@/components/LayersButton'
 import OfflineDataSettings from '@/components/OfflineDataSettings'
+import { SIDEBAR_FOOTER_LINKS, SIDEBAR_GROUPS } from '@/components/sidebar-groups'
 import Spinner from '@/components/ui/Spinner'
 import { LANGS } from '@/i18n'
 import type { Lang } from '@/i18n'
@@ -61,13 +62,13 @@ export default function Sidebar(): ReactNode {
 
   const linkClass = ({ isActive }: { isActive: boolean }): string =>
     cn(
-      'block rounded-lg bg-[var(--color-surface)]/60 px-3 py-2 transition-colors duration-200 hover:bg-[var(--color-surface)]',
+      'block rounded-lg bg-[var(--color-surface)]/60 px-3 py-1.5 text-sm transition-colors duration-200 hover:bg-[var(--color-surface)]',
       isActive ? 'bg-[var(--color-surface)] font-medium' : 'text-[var(--color-muted)] hover:text-[var(--color-fg)]'
     )
 
   const accountLinkClass = ({ isActive }: { isActive: boolean }): string =>
     cn(
-      'block rounded-lg px-3 py-2 transition-colors duration-200 hover:bg-[var(--color-primary)]/20',
+      'block rounded-lg px-3 py-1.5 text-sm transition-colors duration-200 hover:bg-[var(--color-primary)]/20',
       isActive
         ? 'bg-[var(--color-primary)]/20 font-medium'
         : 'bg-[var(--color-primary)]/10 text-[var(--color-muted)] hover:text-[var(--color-fg)]'
@@ -80,85 +81,35 @@ export default function Sidebar(): ReactNode {
         <LayersButton inSidebar />
         <LoginButton inSidebar onNavigate={handleClose} />
       </div>
-      <NavLink viewTransition to="/" className={linkClass} onClick={handleClose} end>
-        <span aria-hidden>🔍</span> {t('nav.search')}
-      </NavLink>
-      <NavLink viewTransition to="/advanced-search" className={linkClass} onClick={handleClose}>
-        <span aria-hidden>🧭</span> {t('nav.advancedSearch')}
-      </NavLink>
-      <NavLink viewTransition to="/about" className={linkClass} onClick={handleClose}>
-        <span aria-hidden>ℹ️</span> {t('nav.about')}
-      </NavLink>
-      <NavLink viewTransition to="/history" className={linkClass} onClick={handleClose}>
-        <span aria-hidden>🕘</span> {t('nav.history')}
-      </NavLink>
-      <NavLink viewTransition to="/favorites" className={linkClass} onClick={handleClose}>
-        <span aria-hidden>⭐</span> {t('nav.favorites')}
-      </NavLink>
-      <NavLink viewTransition to="/stats" className={linkClass} onClick={handleClose}>
-        <span aria-hidden>📊</span> {t('nav.stats')}
-      </NavLink>
-      <NavLink viewTransition to="/cars" className={linkClass} onClick={handleClose}>
-        <span aria-hidden>🚗</span> {t('nav.cars')}
-      </NavLink>
-      <NavLink viewTransition to="/compare" className={linkClass} onClick={handleClose}>
-        <span aria-hidden>⚖️</span> {t('nav.compare')}
-      </NavLink>
-      <NavLink viewTransition to="/showroom" className={linkClass} onClick={handleClose}>
-        <span aria-hidden>🎬</span> {t('nav.showroom')}
-      </NavLink>
-      <NavLink viewTransition to="/fuel" className={linkClass} onClick={handleClose}>
-        <span aria-hidden>🌿</span> {t('nav.fuel')}
-      </NavLink>
-      <NavLink viewTransition to="/safety" className={linkClass} onClick={handleClose}>
-        <span aria-hidden>🛡️</span> {t('nav.safety')}
-      </NavLink>
-      <NavLink viewTransition to="/road-safety" className={linkClass} onClick={handleClose}>
-        <span aria-hidden>🛣️</span> {t('nav.roadSafety')}
-      </NavLink>
-      <NavLink viewTransition to="/wanted" className={linkClass} onClick={handleClose}>
-        <span aria-hidden>🚨</span> {t('nav.wanted')}
-      </NavLink>
-      <NavLink viewTransition to="/auctions" className={linkClass} onClick={handleClose}>
-        <span aria-hidden>🔨</span> {t('nav.auctions')}
-      </NavLink>
-      <NavLink viewTransition to="/news" className={linkClass} onClick={handleClose}>
-        <span aria-hidden>📰</span> {t('nav.news')}
-      </NavLink>
-      <NavLink viewTransition to="/discuss" className={linkClass} onClick={handleClose}>
-        <span aria-hidden>💬</span> {t('nav.discuss')}
-      </NavLink>
-      <NavLink viewTransition to="/play" className={linkClass} onClick={handleClose}>
-        <span aria-hidden>🎲</span> {t('nav.play')}
-      </NavLink>
-      <NavLink viewTransition to="/race" className={linkClass} onClick={handleClose}>
-        <span aria-hidden>🎮</span> {t('nav.race')}
-      </NavLink>
-      <NavLink viewTransition to="/relax" className={linkClass} onClick={handleClose}>
-        <span aria-hidden>🧘</span> {t('nav.relax')}
-      </NavLink>
-      <NavLink viewTransition to="/read" className={linkClass} onClick={handleClose}>
-        <span aria-hidden>📖</span> {t('nav.read')}
-      </NavLink>
-      <NavLink viewTransition to="/share" className={linkClass} onClick={handleClose}>
-        <span aria-hidden>🔗</span> {t('nav.share')}
-      </NavLink>
-      <NavLink viewTransition to="/install" className={linkClass} onClick={handleClose}>
-        <span aria-hidden>📲</span> {t('nav.install')}
-      </NavLink>
-      <NavLink viewTransition to="/releases" className={linkClass} onClick={handleClose}>
-        <span aria-hidden>🆕</span> {t('nav.releases')}
-      </NavLink>
-      {user && (
-        <NavLink viewTransition to="/settings" className={accountLinkClass} onClick={handleClose}>
-          <span aria-hidden>⚙️</span> {t('nav.settings')}
-        </NavLink>
-      )}
-      {isAdmin && (
-        <NavLink viewTransition to="/admin" className={accountLinkClass} onClick={handleClose}>
-          <span aria-hidden>🛠️</span> {t('nav.admin')}
-        </NavLink>
-      )}
+      {SIDEBAR_GROUPS.map((group, i) => (
+        <div
+          key={group.id}
+          className={cn('flex flex-col gap-0.5', i > 0 && 'mt-2 border-t border-[var(--color-border)]/40 pt-2')}
+        >
+          {group.links.map(item => (
+            <NavLink
+              key={item.to}
+              viewTransition
+              to={item.to}
+              className={linkClass}
+              onClick={handleClose}
+              end={item.end}
+            >
+              <span aria-hidden>{item.icon}</span> {t(item.labelKey)}
+            </NavLink>
+          ))}
+          {group.id === 'personal' && user && (
+            <NavLink viewTransition to="/settings" className={accountLinkClass} onClick={handleClose}>
+              <span aria-hidden>⚙️</span> {t('nav.settings')}
+            </NavLink>
+          )}
+          {group.id === 'personal' && isAdmin && (
+            <NavLink viewTransition to="/admin" className={accountLinkClass} onClick={handleClose}>
+              <span aria-hidden>🛠️</span> {t('nav.admin')}
+            </NavLink>
+          )}
+        </div>
+      ))}
 
       <div className="mt-4 px-3 text-xs tracking-wide text-[var(--color-muted)] uppercase">{t('nav.language')}</div>
       {LANGS.map(l => (
@@ -265,13 +216,12 @@ export default function Sidebar(): ReactNode {
 
       <OfflineDataSettings />
 
-      <div className="mt-4 flex gap-3 px-3 text-xs text-[var(--color-muted)]">
-        <NavLink to="/privacy" className="underline hover:text-[var(--color-fg)]" onClick={handleClose}>
-          {t('legal.privacy.heading')}
-        </NavLink>
-        <NavLink to="/terms" className="underline hover:text-[var(--color-fg)]" onClick={handleClose}>
-          {t('legal.terms.heading')}
-        </NavLink>
+      <div className="mt-4 flex flex-wrap gap-x-3 gap-y-1 border-t border-[var(--color-border)]/40 px-3 pt-3 text-xs text-[var(--color-muted)]">
+        {SIDEBAR_FOOTER_LINKS.map(item => (
+          <NavLink key={item.to} to={item.to} className="underline hover:text-[var(--color-fg)]" onClick={handleClose}>
+            {t(item.labelKey)}
+          </NavLink>
+        ))}
       </div>
     </nav>
   )
