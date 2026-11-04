@@ -28,6 +28,7 @@ export const SIDEBAR_GROUPS: readonly SidebarGroup[] = [
       { to: '/fuel', icon: '🌿', labelKey: 'nav.fuel' },
       { to: '/safety', icon: '🛡️', labelKey: 'nav.safety' },
       { to: '/road-safety', icon: '🛣️', labelKey: 'nav.roadSafety' },
+      { to: '/alarms', icon: '🚨', labelKey: 'nav.alarms' },
       { to: '/wanted', icon: '🚨', labelKey: 'nav.wanted' },
       { to: '/auctions', icon: '🔨', labelKey: 'nav.auctions' }
     ]

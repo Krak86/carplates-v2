@@ -4,13 +4,16 @@ import { loadEnv } from '../env.js'
 import { ALARM_SOURCE } from './alarm-source.js'
 import { AlarmController } from './alarm.controller.js'
 import { AlarmService } from './alarm.service.js'
+import { AlarmHistoryController } from './history.controller.js'
+import { AlarmHistoryService } from './history.service.js'
 import { MockAlarmSource } from './mock.source.js'
 import { UkraineAlarmSource } from './ukrainealarm.source.js'
 
 @Module({
-  controllers: [AlarmController],
+  controllers: [AlarmController, AlarmHistoryController],
   providers: [
     AlarmService,
+    AlarmHistoryService,
     UkraineAlarmSource,
     MockAlarmSource,
     {

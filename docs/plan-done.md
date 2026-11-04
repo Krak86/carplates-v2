@@ -4606,3 +4606,30 @@ Research first: only premium makes expose stable configurator links and allow sc
 - **ZAKON font:** `scripts/src/fetch-zakon-font.ts` (`pnpm fetch:zakon-font`, `--force`) downloads Zakon-Regular/Bold.otf from mincult.gov.ua into `apps/web/public/fonts/zakon/` (gitignored); `@font-face` paths fixed.
 - **Showroom polish:** layouts (`?layout=`), Wikimedia thumbnail fallback, shareable `?open=&show=` state, skeletons.
 - **Docs / About:** `TESTING_PLAN.md` added (integration and e2e plan, nothing built). About: `showroom` feature + brief and the `oemLinks` source; `releases.ts` 2026-11-04 gained the showroom (`new`) and sidebar (`improved`) items.
+
+## Air-raid alerts: poller, region chip, `/alarms` (2026-11-04) ✅
+
+Plan and live API findings: `docs/alarm-plan.md`.
+
+- **Step 1 (deployed, verified on prod):** `apps/api/src/alarm/` polls Ukraine Alarm every 30 s (pauses on 429) and serves `GET /api/alarms` from memory, one entry per oblast (`full` / `partial`, level, types, areas). Contract in `packages/shared/src/alarm.ts`. `ALARM_MOCK=true` for dev.
+- **Step 2:** `RegionAlarmChip` on the plate result (shared `alarmsQuery`, `enabled: !!region`, refetch 60 s while visible). Nothing is shown for no region, no alert, loading or 503.
+- **Step 2b:** `/alarms` (`routes/alarms/`): own discrete map (whole / partial / none) plus a text list, so colour is never alone. 503 shows "no data" and no map. Checked in the browser: live full + partial, empty list, 503.
+- **Step 3:** `alarm` background layer (`AlarmBackground`, `BACKGROUND_MODES`, picker / share link / `/relax` pick it up automatically; `defaultMode` tolerant via `.catch`). Sitemap page entry added.
+- **Rules:** fail closed; online-only (no `schemas.ts`, no `offline-cache.ts`, not in link previews); wording informational, never a weapon name.
+- **Docs / About:** `releases.ts` item (`new`), About `alarms` feature + `ukraineAlarm` source (ua/ru/en).
+
+## Air-raid alert history ingest (2026-11-04) ✅
+
+Step 4 of `docs/alarm-plan.md`. Per-oblast rollup chosen over raw rows (seed 527 KB instead of ~8-10 MB; raion detail dropped).
+
+- `registry.alarm_history_daily` (migration 0098), `scripts/src/alarm-history-parse.ts` (+ test), `alarm-history-csv.ts`, `ingest-alarm-history.ts`. Real run: 299,275 official + 120,357 volunteer rows, 0 skipped, 56,800 day rows.
+- Fixed the `ingest:ratings:csv` chain: it named `oemlinks` but had no command for it (names and commands are positional); both `oem-links:csv` and `alarm-history:csv` are in now.
+- About `sirenDataset` source (MIT, eTryvoga). Not done: daily refresh cron, step 5 page.
+
+## Air-raid alert history page (2026-11-04) ✅
+
+Step 5 of `docs/alarm-plan.md`. Built as a section of `/alarms` (no new route, so no new-route checklist), not of `/road-safety`.
+
+- `GET /api/alarms/history?year=` (own controller / service / pure helpers + test in `apps/api/src/alarm/`), edge-cached with `STATS_CACHE`, throttled, Cloudflare rule entry `/api/alarms/history` in `docs/deploy.md` (to add to the live rule after deploy).
+- `AlarmHistorySection`: year picker, official / volunteer switch, estimated-end share, map (hours under alert or alert count) and a per-region table (alerts, time, longest alert, crashes, deaths), footnotes for the honesty rules. Checked in the browser (phone width, volunteer switch, 404 state).
+- Docs / About: `releases.ts` item, About `alarms` feature text, `features-reference.md`.

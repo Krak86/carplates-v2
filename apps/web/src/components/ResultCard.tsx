@@ -63,6 +63,7 @@ import SectionHeader from '@/components/SectionHeader'
 import SectionCount from '@/components/SectionCount'
 import SectionInfo from '@/components/SectionInfo'
 import ShareButton from '@/components/ShareButton'
+import RegionAlarmChip from '@/components/RegionAlarmChip'
 import RegionCrashChip from '@/components/RegionCrashChip'
 import TopStatBadges from '@/components/TopStatBadges'
 import { useCarHeroImageActions } from '@/components/use-car-hero-image-actions'
@@ -413,6 +414,7 @@ export default function ResultCard({ data }: Props): ReactNode {
                   onOpenSection={() => setSizeOpenSignal(n => n + 1)}
                 />
                 <TopStatBadges brand={c.brand} model={c.model} color={c.color} region={data.region} kind={c.kind} />
+                <RegionAlarmChip region={data.region} />
                 <RegionCrashChip region={data.region} />
                 <VdbChips brand={c.brand} model={c.model} kind={c.kind} />
                 {(data.plate || hasVin) && (

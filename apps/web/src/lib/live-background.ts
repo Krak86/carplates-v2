@@ -9,7 +9,8 @@ export const MODE_ICON: Readonly<Record<BackgroundMode, string>> = {
   map: '🗺️',
   earth: '🌍',
   traffic: '🚦',
-  city: '🏙️'
+  city: '🏙️',
+  alarm: '🚨'
 }
 
 export type MapView = { lat: number; lon: number; zoom: number }
@@ -50,6 +51,7 @@ const APP_PAGES = new Set([
   'advanced-search',
   'race',
   'relax',
+  'alarms',
   'features',
   'admin',
   'settings'

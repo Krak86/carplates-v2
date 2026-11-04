@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
+import type { AuctionListLot } from '@carplates/shared'
 
 import LoadErrorBoundary from '@/components/LoadErrorBoundary'
 import Card from '@/components/ui/Card'
@@ -9,7 +10,6 @@ import {
   formatLotMonth,
   formatPrice,
   lotKey,
-  lotLink,
   lotMonthOf,
   lotSourceAccent,
   mixLots
@@ -20,6 +20,10 @@ import { auctionListQuery } from '@/lib/queries'
 
 const TEASER_SIZE = 5
 
+/** In-app car page of a lot (plate first, else VIN), or null when the lot names neither. */
+const carPathOf = (lot: Pick<AuctionListLot, 'plate' | 'vin'>): string | null =>
+  lot.plate ? `/${lot.plate}` : lot.vin ? `/${lot.vin}` : null
+
 /** Mounted by `LazySection`, so its query starts only once the section nears the viewport. */
 export default function HomeAuctionsSection(): ReactNode {
   const { t, i18n } = useTranslation()
@@ -27,7 +31,8 @@ export default function HomeAuctionsSection(): ReactNode {
   // Same mix as the /auctions "new lots" card: Prozorro lots are newer and would crowd SETAM out of a single list.
   const setam = useQuery(auctionListQuery({ outcome: 'open', sort: 'newest', source: 'setam' })).data
   const prozorro = useQuery(auctionListQuery({ outcome: 'open', sort: 'newest', source: 'prozorro' })).data
-  const lots = mixLots(setam?.lots ?? [], prozorro?.lots ?? [], TEASER_SIZE)
+  // Only lots that name a plate / VIN: each row links to our own car page, so a lot without one would have nothing to open.
+  const lots = mixLots((setam?.lots ?? []).filter(carPathOf), (prozorro?.lots ?? []).filter(carPathOf), TEASER_SIZE)
 
   if (lots.length === 0) return null
 
@@ -42,21 +47,27 @@ export default function HomeAuctionsSection(): ReactNode {
           <ul className="divide-y divide-[var(--color-border)]">
             {lots.map(lot => {
               const price = formatPrice(lot.startPrice, 'UAH', null, locale)
+              const carPath = carPathOf(lot)
 
               return (
                 <li
                   key={lotKey(lot)}
                   className={cn('flex flex-wrap items-baseline gap-x-3 gap-y-0.5 py-2 pl-2', lotSourceAccent(lot))}
                 >
-                  <a
-                    href={lotLink(lot) ?? undefined}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-semibold text-[var(--color-primary)] underline"
-                  >
+                  <span className="font-semibold">
                     {[lot.make, lot.model, lot.year].filter(Boolean).join(' ') || lot.title}
-                    <span className="sr-only">{t('field.opensNewTab')}</span>
-                  </a>
+                  </span>
+
+                  {carPath && (
+                    <Link
+                      viewTransition
+                      to={carPath}
+                      className="font-mono text-sm text-[var(--color-primary)] underline"
+                    >
+                      {lot.plate ?? lot.vin} <span aria-hidden>→</span>
+                      <span className="sr-only">{t('auctions.page.openCar')}</span>
+                    </Link>
+                  )}
 
                   <span className="min-w-0 flex-1 text-xs text-[var(--color-muted)]">
                     {[formatLotMonth(lotMonthOf(lot), locale), lot.region].filter(Boolean).join(' · ')}

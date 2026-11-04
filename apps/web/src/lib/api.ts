@@ -1,4 +1,6 @@
 import {
+  alarmHistoryResponseSchema,
+  alarmsResponseSchema,
   createShareResponseSchema,
   mySharesResponseSchema,
   retouchShareResponseSchema,
@@ -104,6 +106,8 @@ import {
   wikiInfoResponseSchema
 } from '@carplates/shared'
 import type {
+  AlarmHistoryResponse,
+  AlarmsResponse,
   CreateShareResponse,
   MarketDetail,
   MarketKind,
@@ -589,6 +593,16 @@ export async function getSafetyStats(): Promise<SafetyStatsResponse> {
 }
 
 const yearSuffix = (year?: number): string => (year === undefined ? '' : `?year=${year}`)
+
+/** Online-only air-raid alerts (docs/alarm-plan.md). Throws `ApiError` on 503 (no or stale data): callers hide, never show "no alert". */
+export async function getAlarms(): Promise<AlarmsResponse> {
+  return alarmsResponseSchema.parse(await getJson('/api/alarms'))
+}
+
+/** Online-only yearly air-raid alert history (MIT siren dataset rollup); `year` undefined = the newest year. */
+export async function getAlarmHistory(year?: number): Promise<AlarmHistoryResponse> {
+  return alarmHistoryResponseSchema.parse(await getJson(`/api/alarms/history${yearSuffix(year)}`))
+}
 
 export async function getRoadSafetyRegions(year?: number): Promise<RoadSafetyRegionsResponse> {
   return roadSafetyRegionsResponseSchema.parse(await getJson(`/api/road-safety/regions${yearSuffix(year)}`))
