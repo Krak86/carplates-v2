@@ -112,6 +112,21 @@ export class ShowroomService {
     }
   }
 
+  /** One stored Wikimedia photo per model (the model-level row, else the newest year), keyed like the catalog entries. */
+  private async wikiPhotos(): Promise<Map<string, string>> {
+    const { rows } = await this.dbService.db.execute<{ brand: string; model: string; image_url: string }>(
+      sql`SELECT DISTINCT ON (brand, model) brand, model, image_url FROM registry.wiki_image
+          WHERE status = 'ok' AND image_url LIKE 'https://%'
+          ORDER BY brand, model, (year = 0) DESC, year DESC`
+    )
+    const photos = new Map<string, string>()
+    for (const r of rows) {
+      const key = keyOf(r.brand, r.model)
+      if (!photos.has(key)) photos.set(key, r.image_url)
+    }
+    return photos
+  }
+
   /** One entry per make/model across the four persisted catalogs; most immersive kinds first, then by label. */
   private async catalog(): Promise<ShowroomItem[]> {
     if (this.cached && Date.now() - this.cached.at < CATALOG_TTL_MS) return this.cached.items
@@ -176,6 +191,10 @@ export class ShowroomService {
     // 3DTuning's own slugs only create an entry when no other catalog knows the model.
     for (const r of rowsTuning) touch(r.makeSlug, r.modelSlug).nTuning += r.n
     for (const r of rowsOem) touch(r.makeSlug, r.modelSlug).nOem += r.n
+
+    // No Sketchfab thumbnail: our stored Wikimedia photo of the model, when we have one (hotlinked, like the 3D thumbnails).
+    const wiki = await this.wikiPhotos()
+    for (const [key, item] of items) item.thumbUrl ??= wiki.get(key) ?? null
 
     const list = [...items.entries()].map(([key, item]) => ({
       ...item,

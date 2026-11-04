@@ -1023,6 +1023,12 @@ export {
 } from './tuning3d.js'
 export {
   DEFAULT_SHOWROOM_FILTER,
+  DEFAULT_SHOWROOM_VIEW,
+  SHOWROOM_SHARE_PARAMS,
+  SHOWROOM_VIEWS,
+  parseShowroomOpen,
+  parseShowroomView,
+  showroomOpenParam,
   OEM_LINK_KINDS,
   SHOWROOM_FILTERS,
   SHOWROOM_KINDS,
@@ -1042,6 +1048,8 @@ export {
   type ShowroomItem,
   type ShowroomKind,
   type ShowroomList,
+  type ShowroomOpen,
+  type ShowroomView,
   type ShowroomOemLink,
   type ShowroomTuningPage
 } from './showroom.js'

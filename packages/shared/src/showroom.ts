@@ -16,6 +16,33 @@ export const DEFAULT_SHOWROOM_FILTER: ShowroomFilter = 'all'
 
 export const SHOWROOM_PAGE_SIZE = 48
 
+/** Page layouts (`?layout=`): big cards, compact rows, or images only. */
+export const SHOWROOM_VIEWS = ['grid', 'list', 'gallery'] as const
+export type ShowroomView = (typeof SHOWROOM_VIEWS)[number]
+export const DEFAULT_SHOWROOM_VIEW: ShowroomView = 'grid'
+
+export const parseShowroomView = (value: string | null | undefined): ShowroomView =>
+  SHOWROOM_VIEWS.find(v => v === value) ?? DEFAULT_SHOWROOM_VIEW
+
+/** The query params that make a showroom link reproduce the page: tab, search, layout and the open entry (`open=brand/model&show=kind`). */
+export const SHOWROOM_SHARE_PARAMS = ['kind', 'q', 'layout', 'open', 'show'] as const
+
+export type ShowroomOpen = { brandSlug: string; modelSlug: string; kind: ShowroomKind }
+
+/** `?open=` value of an entry. */
+export const showroomOpenParam = (brandSlug: string, modelSlug: string): string => `${brandSlug}/${modelSlug}`
+
+/** `?open=brand/model&show=360` -> the entry to open, or null when either is missing or unknown. */
+export function parseShowroomOpen(
+  open: string | null | undefined,
+  show: string | null | undefined
+): ShowroomOpen | null {
+  const kind = SHOWROOM_KINDS.find(k => k === show)
+  const at = open?.indexOf('/') ?? -1
+  if (!open || !kind || at < 1 || at === open.length - 1) return null
+  return { brandSlug: open.slice(0, at), modelSlug: open.slice(at + 1), kind }
+}
+
 /** `?kind=` of the page: anything unknown is `all`. */
 export const parseShowroomFilter = (value: string | null | undefined): ShowroomFilter =>
   SHOWROOM_FILTERS.find(f => f === value) ?? DEFAULT_SHOWROOM_FILTER
@@ -99,11 +126,15 @@ export function showroomMatches(item: ShowroomItem, query: string): boolean {
   return words.every(w => haystack.includes(w))
 }
 
-/** A slug as a name: "mercedes-benz" -> "Mercedes Benz", "x5" -> "X5", "gt" -> "GT" (a 1-3 letter word without a vowel is upper-cased). */
+/** A slug as a name: "mercedes-benz" -> "Mercedes Benz", "x5" -> "X5", "gt" -> "GT", "db12" -> "DB12" (a 1-3 letter word without a vowel, or 1-2 letters plus digits, is upper-cased). */
 export function showroomTitleize(slug: string): string {
   return slug
     .split(/[-.\s]+/)
     .filter(Boolean)
-    .map(w => (/^[a-z]{1,3}$/.test(w) && !/[aeiouy]/.test(w) ? w.toUpperCase() : w[0]!.toUpperCase() + w.slice(1)))
+    .map(w =>
+      (/^[a-z]{1,3}$/.test(w) && !/[aeiouy]/.test(w)) || /^[a-z]{1,2}\d+$/.test(w)
+        ? w.toUpperCase()
+        : w[0]!.toUpperCase() + w.slice(1)
+    )
     .join(' ')
 }

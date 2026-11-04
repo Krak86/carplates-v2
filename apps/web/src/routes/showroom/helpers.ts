@@ -1,7 +1,15 @@
-import type { ShowroomItem, ShowroomKind, ShowroomTuningPage } from '@carplates/shared'
+import type { ShowroomItem, ShowroomKind, ShowroomTuningPage, ShowroomView } from '@carplates/shared'
 
-/** A showroom entry opened in a modal, and which kind of view was asked for. */
-export type OpenView = { item: ShowroomItem; kind: ShowroomKind }
+/** A showroom entry opened in a modal (by slug, so a shared link can restore it), and which kind of view was asked for. */
+export type OpenView = { brandSlug: string; modelSlug: string; kind: ShowroomKind }
+
+/** Grid classes per layout. */
+export const showroomGridClass = (view: ShowroomView): string =>
+  view === 'list'
+    ? 'grid gap-2 grid-cols-1'
+    : view === 'gallery'
+      ? 'grid gap-2 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'
+      : 'grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
 
 export const SEARCH_DEBOUNCE_MS = 350
 

@@ -21,8 +21,8 @@ type Props = {
  * provider's viewer on its own. Nothing is shown while loading or when the entry has none of the asked kind.
  */
 export default function ShowroomViewer({ open, onClose }: Props): ReactNode {
-  const { item, kind } = open
-  const { data } = useQuery(showroomDetailQuery(item.brandSlug, item.modelSlug))
+  const { brandSlug, modelSlug, kind } = open
+  const { data } = useQuery(showroomDetailQuery(brandSlug, modelSlug))
   if (!data) return null
 
   return (
