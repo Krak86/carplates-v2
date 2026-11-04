@@ -485,9 +485,9 @@ Idea round: put the registry stats on the map and in diagrams, and add small can
    stolen-by-year vs. registered share (`/wanted`); hand-rolled SVG + `d3-scale`/`d3-shape`, each a `LazySection`, each with an export `chart` builder.
 7. ⏳ **Later** - Sankey (origin -> brand -> fuel), bar-chart race by registration year, collectible region cards, racer "drive Ukraine" route.
 
-### Air-raid alerts: plate-region badge, `alarm` background layer, history page — key received 2026-11-04, step 1 built
+### Air-raid alerts: plate-region badge, `alarm` background layer, history page — key received 2026-11-04, steps 1-2b built
 
-Plan, terms, live API findings, rejection path: `docs/alarm-plan.md`. Steps: ✅ poller + `/api/alarms` (built and checked live 2026-11-04, awaiting deploy) · ⏳ region badge on the plate result · ⏳ `alarm` layer (`BACKGROUND_MODES`, `/relax`) · ⏳ history ingest from the MIT siren dataset (no key needed) · ⏳ safety-over-time page next to DTP stats (no "most bombed", no combined score) · ⏳ later: districts, SSE, webhook.
+Plan, terms, live API findings, rejection path: `docs/alarm-plan.md`. Steps: ✅ poller + `/api/alarms` (deployed and verified on prod 2026-11-04) · ✅ region badge on the plate result (checked in the browser, uncommitted) · 🔨 `/alarms` map page (built, not yet run in the browser, uncommitted) · ⏳ `alarm` layer (`BACKGROUND_MODES`, `/relax`) · ⏳ history ingest from the MIT siren dataset (no key needed) · ⏳ safety-over-time page next to DTP stats (no "most bombed", no combined score) · ⏳ later: districts, SSE, webhook.
 
 ### Test-drive racer game ("Free test drive" banner) — ✅ built (2026-10-08), follow-ups left
 
