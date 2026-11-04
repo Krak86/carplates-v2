@@ -4559,7 +4559,7 @@ Question: what more can be learned about a SETAM "arrested property" lot (reason
 - **ARMA arrest register** has no VIN or plate on vehicles (0 of 955 in an 80 MB sample): not joinable, not built.
 - Built: migration 0095 `registry.auction_proceedings`, `scripts/src/auction-proceedings.ts` (+ parse + 5 tests), job `auction-proceedings` (Sunday 02:10, `HC_PING_AUCTION_PROCEEDINGS`), shared `auctionReason` / `auctionProceedingSchema` / `GENERIC_DEBT_CATEGORY`, left join in `auctions-union.ts`, lot rows "Reason for sale", "Type of enforcement", "Writ issued by", "Enforcement office" + a source note in `UaAuctionLot` (ua/ru/en).
 - Local numbers: open lots covered 267 of 1 717 (16 %), all lots 3 348 of 16 866; the share rises as weekly runs catch proceedings while open.
-- **After deploy:** merge, API deploy (migration 0095), `deploy-ingest` (cron), then once `docker compose run --rm --no-deps -T ingest tsx src/auction-proceedings.ts` on the VPS; check disk (~1 GB temp ZIP in `/tmp`).
+- **After deploy:** merge, API deploy (migration 0095), `deploy-ingest` (cron), then once `bash /opt/carsua/compose/run-ingest.sh auction-proceedings` (as the deploy user; the bare `docker compose run` fails outside the compose dir) on the VPS; check disk (~1 GB temp ZIP in `/tmp`).
 
 ## Housekeeping after the reason feature (2026-11-04)
 
@@ -4568,3 +4568,26 @@ Question: what more can be learned about a SETAM "arrested property" lot (reason
 - `releases.ts` 2026-11-04 now also lists the day's other commits: "↓" jump to a lot from the registration history and collapsible lots (`9074cee`), phone layouts of profile / road-safety and the readable hazard list (`9074cee`, `392a255`), #anchor scrolling in `Layout` (`392a255`, fixes `/read/auctions#world`).
 - Deploy order for a fresh environment is in `docs/deploy.md` (first load of the debtors register): the job needs `auction_lots` filled first.
 - `CLAUDE.md` + `CLAUDE_RULES.md` reviewed: 4.2 KB + 2.4 KB (about 1.7 k tokens), every line is a rule the linters and tests do not catch, so nothing was cut (trimming would save ~100 tokens and risk losing a rule). The big docs (PLAN 156 KB, features-reference 202 KB, plan-done 549 KB) are never auto-loaded; they are read by heading only.
+- **Live on the VPS (2026-11-04):** deployed, then `bash /opt/carsua/compose/run-ingest.sh auction-proceedings` ran ok in about 3 min (09:23-09:26 UTC): 11 664 592 register rows read, **1 309 of 3 982 proceedings found and stored** (locally 1 304 of 3 975, so the ratio matches), logged in `registry.job_runs` (so `/data-status` shows the job). Checked in the browser on plate АА8292ТМ: the four rows and the source note render. The bare `docker compose run ...` line from the first write-up fails outside `/opt/carsua/compose` (`no configuration file provided`); always use `run-ingest.sh <job>`.
+
+## 3DTuning "Customize in 3D" link-out (2026-11-04) ✅
+
+Plan and research: [tuning-3d-plan.md](tuning-3d-plan.md). Their pages cannot be iframed, so it is a link-out only; no content is copied.
+
+- **Data:** `pnpm ingest:3dtuning` parses `https://www.3dtuning.com/sitemap.xml` (cached in `scripts/.data/tuning3d/`) into `registry.tuning_links` (migration 0096, new table only): 2,462 car pages, 133 makes, 1,518 make+model pairs (one sitemap entry has the typo year 3013 and is rejected). Seed `scripts/seed-data/3dtuning-links.csv.gz` (`pnpm export:3dtuning:csv`, loaded by `ingest:3dtuning:csv` inside `ingest:ratings:csv`). The stored `path` has no locale.
+- **Matching** (one place, `packages/shared/src/tuning3d.ts`, pure): make + model by a punctuation-free key (`3.series` = `3-series` = `3 Series`), make alias table (`mercedes-benz` to `mercedes`, `vaz` to `lada`), our make prefix dropped from the model (`mazda3` to `3`), then the page with the largest `startYear <= car year`. **Never a wrong link**, so a link needs all of: a model on their site; a body class the car can be (registry body mapped to families: sedan, hatchback, wagon, suv, coupe, convertible, van, pickup; `УНІВЕРСАЛ` is the registry catch-all and allows wagon, suv, hatchback and van; an unknown body only links a model with a single body class); at most 12 years since the generation started (the sitemap has no end year); no newer generation listed for another body of the same model (more than 2 years newer = stale); one generation only (several door counts of one generation count as one).
+- **Measured** with `pnpm ingest:3dtuning --match-report` (catalog population, 13.3M cars, body split estimated from each model's body shares): **48.2% of cars get a link** (631 of 1,689 models). Misses: car older than their first page 19.5%, model not on their site 18.0% (zaz, lada priora and kalina, volkswagen transporter, toyota landcruiser: their slugs carry the generation), body class mismatch 7.8%, stale 2.5%, ambiguous 1.8%, gap over 12 years 1.7%, make missing 0.5%. Grow `MODEL_ALIASES` from this report only with certain pairs.
+- **API:** `GET /api/tuning?brand&model&year[&body]` (`apps/api/src/tuning/`), answer `{ link: { path, body, generation, startYear } | null }`. The index is read from the table once an hour; brand and model resolve through the catalog alias like `/api/catalog/lookup`. `TUNING_THROTTLE`, `LOOKUP_CACHE` headers, not in `PUBLIC_API_PATH_PREFIXES` (third-party derived).
+- **Web:** `TuningChip` (a chip beside the 3D view and 360 chips, with an info popover; no section, nothing to share), hidden unless there is a link and the device is online; the link opens in a new tab with `rel="noopener noreferrer"`, locale `ru-RU` for ua and ru, `en-US` otherwise (they have no uk-UA). Not offline-cached: it is a link out.
+- About: `tuning3d` feature and source (plain tile, no logo cleared); `releases.ts` 2026-11-04 (`improved`, so not mailed).
+
+## Virtual showroom `/showroom` (2026-11-04) ✅
+
+Route name chosen to stay technology-neutral, so AR / XR can join 360°, 3D and tuning without a rename.
+
+- **Data:** no new tables. One in-memory catalog (rebuilt hourly) from `car_models_360`, `winner_360`, `car_models_3d` and `tuning_links`; entries merge on `tuningMakeKey(make)` + `tuningKey(model)`. Measured on the dev DB: 2,184 entries (360°: 479, 3D: 1,129, tuning: 1,500).
+- **API:** `GET /api/showroom?q&kind&offset` (48 per page, per-kind counts) and `GET /api/showroom/detail?brand&model` (404 when empty); `SHOWROOM_THROTTLE`, `LOOKUP_CACHE`. Shared contract and helpers in `packages/shared/src/showroom.ts` (+ tests).
+- **Web:** `routes/showroom/` (search debounced into `?q=`, kind chips `?kind=`, cards with a button per kind). Entries open in `Model360Modal` / `Model3dModal` (new `hideShare` prop) via `ShowroomViewer`; 3DTuning is a link-out modal per generation. AR / XR teaser card states only what works today (AR inside the Sketchfab viewer).
+- **Navigation:** sidebar (after Compare), home `QuickLinks`, `/sitemap` page, `STATIC_PAGES` ua/ru/en, `ROUTE_TITLE_KEYS`.
+- Also fixed a duplicated `tuningQuery` in `queries.ts`.
+- **Not done yet:** `releases.ts` / `latest.ts` note, `AboutRoute.tsx` entry (tracked in PLAN.md).

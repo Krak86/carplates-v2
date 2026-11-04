@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "tunnel": "tsx src/tunnel.ts",
+    "fetch:zakon-font": "tsx src/fetch-zakon-font.ts",
     "load-test": "tsx src/load-test.ts",
     "seed": "tsx src/seed.ts",
     "refresh-stats": "tsx src/refresh-stats.ts",
@@ -75,6 +76,9 @@
     "ingest:rdw:csv": "tsx src/rdw.ts --from-csv seed-data/rdw-specs.csv.gz",
     "ingest:brand-origin": "tsx src/ingest-brand-origin.ts",
     "ingest:wmi": "tsx src/ingest-wmi.ts",
+    "ingest:3dtuning": "tsx src/ingest-3dtuning.ts",
+    "ingest:3dtuning:csv": "tsx src/ingest-3dtuning.ts --from-csv seed-data/3dtuning-links.csv.gz",
+    "export:3dtuning:csv": "tsx src/ingest-3dtuning.ts --export-csv seed-data/3dtuning-links.csv.gz",
     "ingest:model-plants": "tsx src/ingest-model-plants.ts",
     "ingest:brand-origin:csv": "tsx src/ingest-brand-origin.ts --from-csv seed-data/brand-origin.csv.gz",
     "export:brand-origin:csv": "tsx src/ingest-brand-origin.ts --export-csv seed-data/brand-origin.csv.gz",

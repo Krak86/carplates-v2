@@ -70,6 +70,7 @@ import { useChipsPending } from '@/components/use-chips-pending'
 import { useCopyFeedback } from '@/components/use-copy-feedback'
 import Card from '@/components/ui/Card'
 import Model3dButton from '@/components/Model3dButton'
+import TuningChip from '@/components/TuningChip'
 import Model360Button from '@/components/Model360Button'
 import VerificationLinks from '@/components/VerificationLinks'
 import UaAuctionChip from '@/components/ua-auctions/UaAuctionChip'
@@ -100,6 +101,7 @@ import SectionSkeleton from '@/components/ui/SectionSkeleton'
 const FavoriteButton = lazy(() => import('@/components/FavoriteButton'))
 const VehicleKindIcon = lazy(() => import('@/components/VehicleKindIcon'))
 const OriginSection = lazy(() => import('@/components/OriginSection'))
+const TuningSection = lazy(() => import('@/components/TuningSection'))
 const AuctionCheck = lazy(() => import('@/components/AuctionCheck'))
 const WantedCheck = lazy(() => import('@/components/WantedCheck'))
 const UaAuctionCheck = lazy(() => import('@/components/UaAuctionCheck'))
@@ -420,6 +422,7 @@ export default function ResultCard({ data }: Props): ReactNode {
                 )}
                 <Model3dButton brand={c.brand} model={c.model} />
                 <Model360Button brand={c.brand} model={c.model} />
+                <TuningChip brand={c.brand} model={c.model} year={c.makeYear} body={c.body} />
                 <RaceTestDriveChip onOpen={() => setRaceOpenSignal(n => n + 1)} />
               </CollapsibleChips>
               <div className="mt-2 flex flex-wrap items-center gap-2 empty:hidden">
@@ -896,6 +899,9 @@ export default function ResultCard({ data }: Props): ReactNode {
           </LazySection>
           <LazySection sections={['nearby']}>
             <NearbyServices brand={c.brand} />
+          </LazySection>
+          <LazySection>
+            <TuningSection brand={c.brand} model={c.model} year={c.makeYear} body={c.body} />
           </LazySection>
           <LazySection sections={['photos']}>
             <VehiclePhotos brand={c.brand} model={c.model} year={c.makeYear} />

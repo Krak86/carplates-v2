@@ -211,6 +211,7 @@ export {
   brandOwnership,
   modelPlant,
   wmiPrefix,
+  tuningLinks,
   type BrandOriginPeriodRow,
   type BrandOriginPeriodInsert,
   type BrandOwnershipRow,
@@ -218,7 +219,9 @@ export {
   type ModelPlantRow,
   type ModelPlantInsert,
   type WmiPrefixRow,
-  type WmiPrefixInsert
+  type WmiPrefixInsert,
+  type TuningLinkRow,
+  type TuningLinkInsert
 } from './schema.js'
 export {
   createDb,

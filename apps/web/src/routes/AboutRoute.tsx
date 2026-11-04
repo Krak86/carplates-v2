@@ -143,6 +143,8 @@ const SOURCES: readonly Source[] = [
   { key: 'topgear', label: 'TopGear', url: 'https://www.topgear.com/car-reviews', icon: '/icons/topgear.webp' },
   { key: 'carshow360', label: 'CarShow360', url: 'https://carshow360.net', icon: '/icons/sources/carshow360.webp' },
   { key: 'winner', label: 'Winner Imports', url: 'https://stock.winner.ua', icon: '/icons/sources/winner.svg' },
+  // No logo cleared for 3DTuning: a plain tile.
+  { key: 'tuning3d', label: '3DTuning', url: 'https://www.3dtuning.com', tile: 'bg-slate-700' },
   { key: 'sketchfab', label: 'Sketchfab', url: 'https://sketchfab.com', icon: '/icons/sources/sketchfab.webp' },
   {
     key: 'wikimedia',
@@ -327,6 +329,7 @@ const FEATURES = [
   'fuel',
   'value',
   'customs',
+  'tuning3d',
   'auctions',
   'uaAuctions',
   'market',

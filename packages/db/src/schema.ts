@@ -2014,6 +2014,23 @@ export const wmiPrefix = registry.table(
 export type WmiPrefixRow = typeof wmiPrefix.$inferSelect
 export type WmiPrefixInsert = typeof wmiPrefix.$inferInsert
 
+/** 3DTuning car pages (link-out index, see migration 0096): `path` has no locale. */
+export const tuningLinks = registry.table(
+  'tuning_links',
+  {
+    makeSlug: text('make_slug').notNull(),
+    modelSlug: text('model_slug').notNull(),
+    body: text('body').notNull().default(''),
+    generation: text('generation').notNull().default(''),
+    startYear: smallint('start_year').notNull(),
+    path: text('path').primaryKey(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
+  },
+  t => [index('ix_tuning_links_make_model').on(t.makeSlug, t.modelSlug)]
+)
+export type TuningLinkRow = typeof tuningLinks.$inferSelect
+export type TuningLinkInsert = typeof tuningLinks.$inferInsert
+
 /**
  * Model catalog (`/cars/:make/:model`): raw registry (brand, model) -> slugs, one row per model with its rollup, one per make.
  * Rebuilt by scripts/src/catalog-build.ts; see migration 0081.

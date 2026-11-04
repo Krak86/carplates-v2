@@ -20,6 +20,12 @@ export const RELEASES: readonly ReleaseDay[] = [
     items: [
       item(
         'improved',
+        'Картка авто: чип «Налаштувати в 3D» веде на відповідну сторінку 3DTuning (потрібне покоління й кузов; якщо не певні, посилання немає)',
+        'Карточка авто: чип «Настроить в 3D» ведёт на подходящую страницу 3DTuning (нужное поколение и кузов; если не уверены, ссылки нет)',
+        'Car card: a "Customize in 3D" chip links to the matching 3DTuning page (the right generation and body; no link when we are not sure)'
+      ),
+      item(
+        'improved',
         'Лоти СЕТАМ: підстава продажу, категорія стягнення, орган, що видав виконавчий документ, і виконавча служба - з Єдиного реєстру боржників (особа боржника не показується)',
         'Лоты СЕТАМ: основание продажи, категория взыскания, орган, выдавший исполнительный документ, и исполнительная служба - из Единого реестра должников (личность должника не показывается)',
         'SETAM lots: reason for sale, type of enforcement, the body that issued the writ and the enforcement office - from the Unified Register of Debtors (the debtor is not shown)'

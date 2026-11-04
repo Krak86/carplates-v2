@@ -49,6 +49,7 @@ const CompareRoute = lazy(() => import('@/routes/compare/CompareRoute'))
 const GoRoute = lazy(() => import('@/routes/go/GoRoute'))
 const SitemapRoute = lazy(() => import('@/routes/sitemap/SitemapRoute'))
 const CustomsRoute = lazy(() => import('@/routes/customs/CustomsRoute'))
+const ShowroomRoute = lazy(() => import('@/routes/showroom/ShowroomRoute'))
 const DataStatusRoute = lazy(() => import('@/routes/data-status/DataStatusRoute'))
 const ShareRoute = lazy(() => import('@/routes/share/ShareRoute'))
 const FeaturesRoute = lazy(() => import('@/routes/features/FeaturesRoute'))
@@ -138,6 +139,7 @@ export default function App(): ReactNode {
             <Route path="/compare" element={<CompareRoute />} />
             <Route path="/sitemap" element={<SitemapRoute />} />
             <Route path="/customs" element={<CustomsRoute />} />
+            <Route path="/showroom" element={<ShowroomRoute />} />
             <Route path="/data-status" element={<DataStatusRoute />} />
             <Route path="/share" element={<ShareRoute />} />
             <Route path="/go/:alias" element={<GoRoute />} />
