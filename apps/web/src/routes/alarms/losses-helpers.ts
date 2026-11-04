@@ -37,3 +37,6 @@ export function totalsPath(points: LossesHistoryResponse['points'], maxPoints = 
     })
     .join('')
 }
+
+/** First day of the full-scale invasion: the infographic counts "from" here, though upstream's first record is 25 Feb. */
+export const WAR_START_DATE = '2022-02-24'

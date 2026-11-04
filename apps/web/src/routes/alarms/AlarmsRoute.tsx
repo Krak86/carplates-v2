@@ -99,7 +99,7 @@ export default function AlarmsRoute(): ReactNode {
       </LazySection>
 
       {/* War-loss figures come from our own daily copy, so they show even when the live feed is down. */}
-      <LazySection fallback={<StatsMapSkeleton />}>
+      <LazySection sections={['losses']} fallback={<StatsMapSkeleton />}>
         <LoadErrorBoundary compact>
           <LossesSection />
         </LoadErrorBoundary>

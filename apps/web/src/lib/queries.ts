@@ -958,8 +958,9 @@ export const lossesQuery = () =>
   queryOptions({ queryKey: ['losses'], queryFn: getLosses, staleTime: 60 * 60_000, retry: false })
 
 /** One loss category over time (~1,700 points); changes once a day. */
-export const lossesHistoryQuery = (category: LossCategory) =>
+export const lossesHistoryQuery = (category: LossCategory, enabled = true) =>
   queryOptions({
+    enabled,
     queryKey: ['losses', 'history', category],
     queryFn: () => getLossesHistory(category),
     staleTime: 60 * 60_000,

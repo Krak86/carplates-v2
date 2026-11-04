@@ -1,14 +1,20 @@
-import { useState } from 'react'
+import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { DEFAULT_LOSS_CATEGORY } from '@carplates/shared'
 import type { LossCategory } from '@carplates/shared'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
+import { useSearchParams } from 'react-router'
+
+import ShareButton from '@/components/ShareButton'
+import { scrollElementIntoView } from '@/lib/share-section'
 
 import Card from '@/components/ui/Card'
 import { toIntlLocale } from '@/lib/intl'
 import { lossesHistoryQuery, lossesQuery } from '@/lib/queries'
 import { CHART_HEIGHT, CHART_WIDTH, lossRows, signed, totalsPath } from '@/routes/alarms/losses-helpers'
+
+const LossesInfographic = lazy(() => import('@/routes/alarms/LossesInfographic'))
 
 /**
  * The General Staff's approximate figures for Russian losses, from our own daily copy (`/api/losses`, relayed by
@@ -19,9 +25,17 @@ export default function LossesSection(): ReactNode {
   const { t, i18n } = useTranslation()
   const locale = toIntlLocale(i18n.language)
   const [category, setCategory] = useState<LossCategory>(DEFAULT_LOSS_CATEGORY)
+  const [searchParams] = useSearchParams()
+  const isShared = searchParams.get('section') === 'losses'
+  const sectionRef = useRef<HTMLDivElement>(null)
   const losses = useQuery(lossesQuery())
   const history = useQuery(lossesHistoryQuery(category))
   const data = losses.data
+
+  const ready = !!data
+  useEffect(() => {
+    if (isShared && ready && sectionRef.current) scrollElementIntoView(sectionRef.current)
+  }, [isShared, ready])
 
   if (losses.isError || !data) return null
 
@@ -39,8 +53,11 @@ export default function LossesSection(): ReactNode {
   const first = points[0]
 
   return (
-    <Card className="mb-6">
-      <h2 className="mb-1 text-lg font-semibold">{t('losses.title')}</h2>
+    <Card className="mb-6" ref={sectionRef}>
+      <div className="mb-1 flex items-center justify-between gap-2">
+        <h2 className="text-lg font-semibold">{t('losses.title')}</h2>
+        <ShareButton section="losses" label={t('losses.share')} />
+      </div>
       <p className="mb-1 text-sm text-[var(--color-muted)]">{t('losses.intro')}</p>
       <p className="mb-3 text-xs text-[var(--color-muted)]">
         {t('losses.asOf', { date: date(data.date), day: data.day ?? '-' })}
@@ -54,6 +71,11 @@ export default function LossesSection(): ReactNode {
         )}
       </p>
 
+      <Suspense fallback={null}>
+        <LossesInfographic data={data} />
+      </Suspense>
+
+      <h3 className="mt-6 mb-2 text-sm font-medium">{t('losses.view.details')}</h3>
       <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
         {rows.map(row => (
           <li key={row.category}>
