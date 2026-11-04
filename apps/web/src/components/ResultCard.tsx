@@ -101,6 +101,7 @@ import SectionSkeleton from '@/components/ui/SectionSkeleton'
 const FavoriteButton = lazy(() => import('@/components/FavoriteButton'))
 const VehicleKindIcon = lazy(() => import('@/components/VehicleKindIcon'))
 const OriginSection = lazy(() => import('@/components/OriginSection'))
+const TuningSection = lazy(() => import('@/components/TuningSection'))
 const AuctionCheck = lazy(() => import('@/components/AuctionCheck'))
 const WantedCheck = lazy(() => import('@/components/WantedCheck'))
 const UaAuctionCheck = lazy(() => import('@/components/UaAuctionCheck'))
@@ -898,6 +899,9 @@ export default function ResultCard({ data }: Props): ReactNode {
           </LazySection>
           <LazySection sections={['nearby']}>
             <NearbyServices brand={c.brand} />
+          </LazySection>
+          <LazySection>
+            <TuningSection brand={c.brand} model={c.model} year={c.makeYear} body={c.body} />
           </LazySection>
           <LazySection sections={['photos']}>
             <VehiclePhotos brand={c.brand} model={c.model} year={c.makeYear} />

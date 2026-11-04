@@ -669,6 +669,15 @@ export function tuningQuery(brand: string, model: string, year: number, body?: s
   })
 }
 
+// 3DTuning "Customize in 3D" link of a brand/model/year/body: persisted index (pnpm ingest:3dtuning), changes only on a re-crawl.
+export function tuningQuery(brand: string, model: string, year: number, body?: string | null) {
+  return queryOptions({
+    queryKey: ['tuning', brand, model, year, body ?? null],
+    queryFn: () => getTuning(brand, model, year, body),
+    staleTime: Infinity
+  })
+}
+
 // CarShow360 360° galleries of a brand/model — persisted reference data (pnpm ingest:carshow360), changes only on a re-crawl.
 export function models360Query(brand: string, model: string) {
   return queryOptions({
