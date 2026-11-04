@@ -17,6 +17,7 @@ import {
   ApiError,
   getAdminAnalytics,
   getAlarmHistory,
+  getAlarmStats,
   getAlarms,
   getRoadSafetyCauses,
   getRoadSafetyRegions,
@@ -95,6 +96,7 @@ import {
   getStatsDistribution,
   getStatsTop,
   getUkraineGeography,
+  getAlarmGeography,
   getModels3d,
   getTuning,
   getShowroom,
@@ -606,6 +608,17 @@ export const alarmHistoryQuery = (year?: number) =>
     retry: false
   })
 
+/** Today's recorded alerts; refreshed each minute while the tab is visible. */
+export const alarmStatsQuery = () =>
+  queryOptions({
+    queryKey: ['alarms', 'stats'],
+    queryFn: getAlarmStats,
+    staleTime: 30_000,
+    refetchInterval: 60_000,
+    refetchIntervalInBackground: false,
+    retry: false
+  })
+
 export const roadSafetyRegionsQuery = (year?: number) => roadSafetyQuery('regions', getRoadSafetyRegions, year)
 export const roadSafetyRoadsQuery = (year?: number) => roadSafetyQuery('roads', getRoadSafetyRoads, year)
 export const roadSafetyCausesQuery = (year?: number) => roadSafetyQuery('causes', getRoadSafetyCauses, year)
@@ -624,6 +637,17 @@ export function ukraineGeographyQuery() {
   return queryOptions({
     queryKey: ['ukraine-geography'],
     queryFn: getUkraineGeography,
+    staleTime: Infinity,
+    networkMode: 'offlineFirst'
+  })
+}
+
+// Alarm-map shape layers: static build assets like the oblast file above.
+export function alarmGeographyQuery(layer: 'oblasts' | 'raions' | 'hromadas', enabled = true) {
+  return queryOptions({
+    queryKey: ['alarm-geography', layer],
+    queryFn: () => getAlarmGeography(layer),
+    enabled,
     staleTime: Infinity,
     networkMode: 'offlineFirst'
   })

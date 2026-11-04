@@ -2064,6 +2064,30 @@ export const alarmHistoryDaily = registry.table(
 export type AlarmHistoryDailyRow = typeof alarmHistoryDaily.$inferSelect
 export type AlarmHistoryDailyInsert = typeof alarmHistoryDaily.$inferInsert
 
+/** Live air-raid alerts recorded by the API poller, one row per area alert (open while `ended_at` is null); migration 0099. */
+export const alarmEvents = registry.table(
+  'alarm_events',
+  {
+    id: bigserial('id', { mode: 'number' }).primaryKey(),
+    areaId: text('area_id').notNull(),
+    areaName: text('area_name').notNull(),
+    region: text('region').notNull(),
+    kind: text('kind').notNull(),
+    level: text('level'),
+    types: text('types').array().notNull(),
+    startedAt: timestamp('started_at', { withTimezone: true }).notNull(),
+    endedAt: timestamp('ended_at', { withTimezone: true })
+  },
+  t => [
+    index('ix_alarm_events_started').on(t.startedAt),
+    uniqueIndex('ux_alarm_events_open')
+      .on(t.areaId)
+      .where(sql`${t.endedAt} IS NULL`)
+  ]
+)
+export type AlarmEventRow = typeof alarmEvents.$inferSelect
+export type AlarmEventInsert = typeof alarmEvents.$inferInsert
+
 /**
  * Model catalog (`/cars/:make/:model`): raw registry (brand, model) -> slugs, one row per model with its rollup, one per make.
  * Rebuilt by scripts/src/catalog-build.ts; see migration 0081.

@@ -1,5 +1,6 @@
 import {
   alarmHistoryResponseSchema,
+  alarmStatsResponseSchema,
   alarmsResponseSchema,
   createShareResponseSchema,
   mySharesResponseSchema,
@@ -107,6 +108,7 @@ import {
 } from '@carplates/shared'
 import type {
   AlarmHistoryResponse,
+  AlarmStatsResponse,
   AlarmsResponse,
   CreateShareResponse,
   MarketDetail,
@@ -604,6 +606,11 @@ export async function getAlarmHistory(year?: number): Promise<AlarmHistoryRespon
   return alarmHistoryResponseSchema.parse(await getJson(`/api/alarms/history${yearSuffix(year)}`))
 }
 
+/** Online-only: today's alerts from the API recorder (Kyiv day). */
+export async function getAlarmStats(): Promise<AlarmStatsResponse> {
+  return alarmStatsResponseSchema.parse(await getJson('/api/alarms/stats'))
+}
+
 export async function getRoadSafetyRegions(year?: number): Promise<RoadSafetyRegionsResponse> {
   return roadSafetyRegionsResponseSchema.parse(await getJson(`/api/road-safety/regions${yearSuffix(year)}`))
 }
@@ -715,6 +722,15 @@ export async function getUkraineGeography(): Promise<UkraineGeography> {
   const res = await fetch('/ukraine-adm1.geojson', { headers: { accept: 'application/geo+json' } })
   if (!res.ok) throw new ApiError(res.status, res.statusText)
   return res.json() as Promise<UkraineGeography>
+}
+
+// Static alarm-map shapes (oblasts / raions / communities), same rules as `getUkraineGeography`.
+export async function getAlarmGeography(
+  layer: 'oblasts' | 'raions' | 'hromadas'
+): Promise<FeatureCollection<Geometry>> {
+  const res = await fetch(`/ukraine-alarm-${layer}.geojson`, { headers: { accept: 'application/geo+json' } })
+  if (!res.ok) throw new ApiError(res.status, res.statusText)
+  return res.json() as Promise<FeatureCollection<Geometry>>
 }
 
 /**

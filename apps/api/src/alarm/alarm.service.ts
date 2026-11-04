@@ -1,11 +1,12 @@
 import { Inject, Injectable, Logger, ServiceUnavailableException } from '@nestjs/common'
 import type { OnModuleDestroy, OnModuleInit } from '@nestjs/common'
-import { activeAlarmRegions, buildOblastIndex } from '@carplates/shared'
-import type { AlarmRegion, AlarmsResponse, OblastIndex } from '@carplates/shared'
+import { activeAlarmAreas, activeAlarmRegions, buildOblastIndex } from '@carplates/shared'
+import type { ActiveAlarmArea, AlarmRegion, AlarmsResponse, OblastIndex } from '@carplates/shared'
 
 import { loadEnv } from '../env.js'
 import { AlarmRateLimitedError, ALARM_SOURCE } from './alarm-source.js'
 import type { AlarmSource } from './alarm-source.js'
+import { AlarmEventsService } from './events.service.js'
 import { isFresh } from './helpers.js'
 
 /** The region tree changes rarely; one call a day (the upstream limit is per minute, so it is spent carefully). */
@@ -27,7 +28,10 @@ export class AlarmService implements OnModuleInit, OnModuleDestroy {
   private pausedUntil = 0
   private timer: NodeJS.Timeout | undefined
 
-  constructor(@Inject(ALARM_SOURCE) private readonly source: AlarmSource) {}
+  constructor(
+    @Inject(ALARM_SOURCE) private readonly source: AlarmSource,
+    @Inject(AlarmEventsService) private readonly events: AlarmEventsService
+  ) {}
 
   onModuleInit(): void {
     if (!this.source.enabled || this.env.NODE_ENV === 'test') return
@@ -48,8 +52,10 @@ export class AlarmService implements OnModuleInit, OnModuleDestroy {
         this.index = buildOblastIndex(await this.source.fetchRegions())
         this.indexAt = now
       }
-      this.regions = activeAlarmRegions(await this.source.fetchAlerts(), this.index)
+      const upstream = await this.source.fetchAlerts()
+      this.regions = activeAlarmRegions(upstream, this.index)
       this.fetchedAt = Date.now()
+      await this.recordEvents(activeAlarmAreas(upstream, this.index))
     } catch (err) {
       if (err instanceof AlarmRateLimitedError) {
         this.pausedUntil = Date.now() + (err.retryAfterSeconds + 1) * 1000
@@ -58,6 +64,15 @@ export class AlarmService implements OnModuleInit, OnModuleDestroy {
       }
       // Keep the old snapshot: it goes stale on its own and `current()` then refuses it.
       this.log.warn(`alarm poll failed: ${(err as Error).message}`)
+    }
+  }
+
+  /** A recorder failure (DB down) must never take the live map down: the live snapshot is already stored. */
+  private async recordEvents(areas: readonly ActiveAlarmArea[]): Promise<void> {
+    try {
+      await this.events.record(areas, new Date())
+    } catch (err) {
+      this.log.warn(`alarm event recording failed: ${(err as Error).message}`)
     }
   }
 

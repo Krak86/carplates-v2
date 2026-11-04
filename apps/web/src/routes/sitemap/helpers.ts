@@ -41,7 +41,7 @@ export const SITEMAP_GROUPS: readonly SitemapGroup[] = [
       link('/fuel', '🌿', 'nav.fuel'),
       link('/safety', '🛡️', 'nav.safety'),
       link('/road-safety', '🛣️', 'nav.roadSafety'),
-      link('/alarms', '🚨', 'nav.alarms'),
+      link('/alarms', '🚀', 'nav.alarms'),
       link('/wanted', '🚨', 'nav.wanted'),
       link('/auctions', '🔨', 'nav.auctions')
     ]
