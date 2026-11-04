@@ -24,6 +24,7 @@ import { EvModule } from './ev/ev.module.js'
 import { MotModule } from './mot/mot.module.js'
 import { CaRecallsModule } from './ca-recalls/ca-recalls.module.js'
 import { AlarmModule } from './alarm/alarm.module.js'
+import { LossesModule } from './losses/losses.module.js'
 import { MarketModule } from './market/market.module.js'
 import { RiaModule } from './ria/ria.module.js'
 import { WantedModule } from './wanted/wanted.module.js'
@@ -97,6 +98,7 @@ import { WikispecsModule } from './wikispecs/wikispecs.module.js'
     WantedModule,
     AuctionsModule,
     AlarmModule,
+    LossesModule,
     MarketModule,
     RiaModule,
     GenerationsModule,

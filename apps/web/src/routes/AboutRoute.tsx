@@ -147,6 +147,8 @@ const SOURCES: readonly Source[] = [
   { key: 'tuning3d', label: '3DTuning', url: 'https://www.3dtuning.com', tile: 'bg-slate-700' },
   // No logo cleared for Ukraine Alarm: a plain tile.
   { key: 'ukraineAlarm', label: 'Ukraine Alarm', url: 'https://www.ukrainealarm.com', tile: 'bg-red-700' },
+  // No logo cleared for russianwarship.rip: a plain tile.
+  { key: 'russianWarship', label: 'russianwarship.rip', url: 'https://russianwarship.rip', tile: 'bg-slate-700' },
   {
     key: 'sirenDataset',
     label: 'Ukrainian air raid sirens dataset',

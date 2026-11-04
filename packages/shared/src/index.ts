@@ -1,4 +1,23 @@
 export {
+  DEFAULT_LOSS_CATEGORY,
+  LOSSES_SOURCE_URL,
+  lossIncrease,
+  lossRecordToRow,
+  LOSS_CATEGORIES,
+  lossesHistoryQuerySchema,
+  lossesHistoryResponseSchema,
+  lossesResponseSchema,
+  upstreamLossLatestSchema,
+  upstreamLossPageSchema,
+  upstreamLossRecordSchema,
+  type LossCategory,
+  type LossCounters,
+  type LossesHistoryQuery,
+  type LossesHistoryResponse,
+  type LossesResponse,
+  type UpstreamLossRecord
+} from './losses.js'
+export {
   ALARM_HISTORY_SOURCES,
   ALARM_SCOPES,
   ALARM_TYPES,

@@ -2088,6 +2088,18 @@ export const alarmEvents = registry.table(
 export type AlarmEventRow = typeof alarmEvents.$inferSelect
 export type AlarmEventInsert = typeof alarmEvents.$inferInsert
 
+/** Daily war-loss totals (General Staff figures via russianwarship.rip), migration 0100. `stats` = totals, `increase` = the day's change. */
+export const warLossesDaily = registry.table('war_losses_daily', {
+  day: date('day', { mode: 'string' }).primaryKey(),
+  dayNumber: integer('day_number'),
+  resource: text('resource'),
+  stats: jsonb('stats').$type<Record<string, number | null | undefined>>().notNull(),
+  increase: jsonb('increase').$type<Record<string, number | null | undefined>>().notNull().default({}),
+  fetchedAt: timestamp('fetched_at', { withTimezone: true }).notNull().defaultNow()
+})
+export type WarLossesDailyRow = typeof warLossesDaily.$inferSelect
+export type WarLossesDailyInsert = typeof warLossesDaily.$inferInsert
+
 /**
  * Model catalog (`/cars/:make/:model`): raw registry (brand, model) -> slugs, one row per model with its rollup, one per make.
  * Rebuilt by scripts/src/catalog-build.ts; see migration 0081.

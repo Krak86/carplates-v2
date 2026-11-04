@@ -45,3 +45,5 @@ export const ALARM_HISTORY_THROTTLE = { medium: { limit: 60, ttl: 60_000 } }
 export const UNSUBSCRIBE_THROTTLE = { medium: { limit: 20, ttl: 60_000 } }
 /** Contact form (code request and send, each its own counter): a real email goes out, so a dozen per IP per hour is plenty. */
 export const CONTACT_THROTTLE = { default: { ttl: 3_600_000, limit: 12 } }
+/** War-loss figures: one small daily row and a per-category history, edge-cached. */
+export const LOSSES_THROTTLE = { medium: { limit: 60, ttl: 60_000 } }

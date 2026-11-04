@@ -2,6 +2,8 @@ import {
   alarmHistoryResponseSchema,
   alarmStatsResponseSchema,
   alarmsResponseSchema,
+  lossesHistoryResponseSchema,
+  lossesResponseSchema,
   createShareResponseSchema,
   mySharesResponseSchema,
   retouchShareResponseSchema,
@@ -110,6 +112,9 @@ import type {
   AlarmHistoryResponse,
   AlarmStatsResponse,
   AlarmsResponse,
+  LossCategory,
+  LossesHistoryResponse,
+  LossesResponse,
   CreateShareResponse,
   MarketDetail,
   MarketKind,
@@ -1128,4 +1133,14 @@ export async function getShowroom(q: string, kind: ShowroomFilter, offset: numbe
 export async function getShowroomDetail(brand: string, model: string): Promise<ShowroomDetail> {
   const params = new URLSearchParams({ brand, model })
   return showroomDetailSchema.parse(await getJson(`/api/showroom/detail?${params.toString()}`))
+}
+
+/** Online-only war-loss figures (General Staff approximate numbers, our own daily copy). 404 until the first day is stored. */
+export async function getLosses(): Promise<LossesResponse> {
+  return lossesResponseSchema.parse(await getJson('/api/losses'))
+}
+
+/** Online-only: one loss category over time, oldest first. */
+export async function getLossesHistory(category: LossCategory): Promise<LossesHistoryResponse> {
+  return lossesHistoryResponseSchema.parse(await getJson(`/api/losses/history?category=${category}`))
 }

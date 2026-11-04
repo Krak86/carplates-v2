@@ -21,6 +21,7 @@ const LEGEND = [
 const AlarmMap = lazy(() => import('@/routes/alarms/AlarmMap'))
 const AlarmStatsSection = lazy(() => import('@/routes/alarms/AlarmStatsSection'))
 const AlarmHistorySection = lazy(() => import('@/routes/alarms/AlarmHistorySection'))
+const LossesSection = lazy(() => import('@/routes/alarms/LossesSection'))
 
 // Lazy-loaded (see App.tsx). Online-only: no `offline-cache.ts` entry. Informational, not a warning system.
 export default function AlarmsRoute(): ReactNode {
@@ -94,6 +95,13 @@ export default function AlarmsRoute(): ReactNode {
       <LazySection fallback={<StatsMapSkeleton />}>
         <LoadErrorBoundary compact>
           <AlarmStatsSection />
+        </LoadErrorBoundary>
+      </LazySection>
+
+      {/* War-loss figures come from our own daily copy, so they show even when the live feed is down. */}
+      <LazySection fallback={<StatsMapSkeleton />}>
+        <LoadErrorBoundary compact>
+          <LossesSection />
         </LoadErrorBoundary>
       </LazySection>
 
