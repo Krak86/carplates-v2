@@ -11,6 +11,9 @@ export const ROLLUP_CACHE = 'public, max-age=300'
  */
 export const STATS_CACHE = 'public, max-age=300, s-maxage=21600, stale-while-revalidate=3600'
 
+/** Air-raid alerts: our own poller refreshes every ~30 s, so the browser and the edge may reuse a copy for 30 s (never longer: stale = wrong). */
+export const ALARM_CACHE = 'public, max-age=30, s-maxage=30'
+
 /** Per-model lookups (vdb, rdw, wiki): browser 1 h, Cloudflare edge 1 day (`s-maxage`); the data only changes on ingest or re-scrape. */
 export const LOOKUP_CACHE = 'public, max-age=3600, s-maxage=86400'
 /** RDW recalls are updated by the authority itself, so keep the edge copy short. */
