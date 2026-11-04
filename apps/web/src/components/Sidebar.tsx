@@ -63,14 +63,16 @@ export default function Sidebar(): ReactNode {
   const linkClass = ({ isActive }: { isActive: boolean }): string =>
     cn(
       'block rounded-lg bg-[var(--color-surface)]/60 px-3 py-1.5 text-sm transition-colors duration-200 hover:bg-[var(--color-surface)]',
-      isActive ? 'bg-[var(--color-surface)] font-medium' : 'text-[var(--color-muted)] hover:text-[var(--color-fg)]'
+      isActive
+        ? 'bg-[var(--color-primary)]/15 font-medium text-[var(--color-primary)] shadow-[inset_3px_0_0_var(--color-primary)]'
+        : 'text-[var(--color-muted)] hover:text-[var(--color-fg)]'
     )
 
   const accountLinkClass = ({ isActive }: { isActive: boolean }): string =>
     cn(
       'block rounded-lg px-3 py-1.5 text-sm transition-colors duration-200 hover:bg-[var(--color-primary)]/20',
       isActive
-        ? 'bg-[var(--color-primary)]/20 font-medium'
+        ? 'bg-[var(--color-primary)]/25 font-medium shadow-[inset_3px_0_0_var(--color-primary)]'
         : 'bg-[var(--color-primary)]/10 text-[var(--color-muted)] hover:text-[var(--color-fg)]'
     )
 
