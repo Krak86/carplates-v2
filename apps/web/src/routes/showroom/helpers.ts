@@ -13,8 +13,6 @@ export const showroomGridClass = (view: ShowroomView): string =>
 
 export const SEARCH_DEBOUNCE_MS = 350
 
-export const SHOWROOM_GAME_URL = 'https://nfsu2.xyz/'
-
 /** The kinds an entry has, in display order, with their counts. */
 export function itemKinds(item: ShowroomItem): { kind: ShowroomKind; n: number }[] {
   return [

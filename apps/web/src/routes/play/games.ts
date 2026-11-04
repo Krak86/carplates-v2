@@ -11,6 +11,12 @@ export const RACER_LINKS = [
   { to: '/relax', emoji: '🧘', key: 'relax' }
 ] as const
 
+/**
+ * Third-party games on their own sites, listed in a separate hub section. All open in a new tab: add `embed` support only after
+ * checking the site's headers (`X-Frame-Options` / `frame-ancestors`); nfsu2.xyz sends DENY, so it cannot go in a modal.
+ */
+export const EXTERNAL_GAMES = [{ id: 'nfsu2', url: 'https://nfsu2.xyz/', emoji: '🏁', hue: 340 }] as const
+
 export const QUIZ_EMOJI: Readonly<Record<QuizId, string>> = { region: '🗺️', logo: '🏷️', higher: '⚖️' }
 
 /** Cover hue (0-360) of each game's poster tile on the hub, see `.game-cover` in global.css. */
