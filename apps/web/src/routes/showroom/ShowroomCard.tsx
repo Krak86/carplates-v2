@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from 'react'
+import { useState, type CSSProperties, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { ShowroomItem, ShowroomKind, ShowroomView } from '@carplates/shared'
 
@@ -21,6 +21,8 @@ const KIND_ICON: Readonly<Record<ShowroomKind, string>> = { '360': '🔄', '3d':
 export default function ShowroomCard({ item, view = 'grid', index = 0, onOpen }: Props): ReactNode {
   const { t } = useTranslation()
   const online = useOnlineStatus()
+  /** The thumbnail URL that failed to load (dead link): show the placeholder instead of a broken-image icon. */
+  const [failedUrl, setFailedUrl] = useState<string | null>(null)
   const kindLabel = (kind: ShowroomKind, n: number): string =>
     kind === '360'
       ? t('model360.open', { n })
@@ -52,13 +54,20 @@ export default function ShowroomCard({ item, view = 'grid', index = 0, onOpen }:
       </button>
     ))
 
-  const image = item.thumbUrl ? (
-    <img src={item.thumbUrl} alt="" loading="lazy" className="absolute inset-0 size-full object-cover" />
-  ) : (
-    <div className="absolute inset-0 flex items-center justify-center bg-border/40 text-4xl" aria-hidden>
-      🚗
-    </div>
-  )
+  const image =
+    item.thumbUrl && failedUrl !== item.thumbUrl ? (
+      <img
+        src={item.thumbUrl}
+        alt=""
+        loading="lazy"
+        onError={() => setFailedUrl(item.thumbUrl)}
+        className="absolute inset-0 size-full object-cover"
+      />
+    ) : (
+      <div className="absolute inset-0 flex items-center justify-center bg-border/40 text-4xl" aria-hidden>
+        🚗
+      </div>
+    )
 
   const base = 'animate-row-in overflow-hidden rounded-xl border border-border bg-surface shadow-sm'
   const style = { '--row-i': index % 12 } as CSSProperties
