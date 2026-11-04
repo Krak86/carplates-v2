@@ -489,6 +489,14 @@ Idea round: put the registry stats on the map and in diagrams, and add small can
 
 Plan, terms, live API findings, rejection path: `docs/alarm-plan.md`. Steps: ✅ poller + `/api/alarms` (deployed and verified on prod 2026-11-04) · ✅ region badge on the plate result · ✅ `/alarms` map page (checked in the browser: full, partial, none, 503) · ✅ `alarm` layer (`BACKGROUND_MODES`, `/relax`; checked in the browser) · ✅ history ingest from the MIT siren dataset (`registry.alarm_history_daily`, migration 0098, seed `alarm-history.csv.gz`; daily refresh cron not built) · ⏳ safety-over-time page next to DTP stats (no "most bombed", no combined score) · ⏳ later: districts, SSE, webhook. ✅ active list with start time / duration + recorder `alarm_events` + today stats (2026-11-04) · ⏳ later: day timeline, average duration per district.
 
+### War-loss figures + Ukrstat population (researched 2026-11-05, not started)
+
+Findings and planned shape: `docs/alarm-plan.md` "Research: war-loss figures and Ukrstat data". zsu.gov.ua blocks bots (403); use `russianwarship.rip` (third-party, ~1,700 daily records).
+
+- [ ] Losses: table + backfill/daily fetch + `GET /api/losses` (+ `/history`) + `LazySection` on `/alarms` (own DB; ua/ru/en names for the 15 categories; About `SOURCES`; Cloudflare Cache Rule + `docs/deploy.md`).
+- [ ] Ukrstat: check `DF_POPULATION_STRUCTURE` REGION codes and latest year, then a static population table in `packages/shared` -> `/read/plates` `RegionsSection` + per-100k metric in `AlarmHistorySection`.
+- ⏳ Fuel prices from Ukrstat: only if `DF_PRICE_CHANGE_CONSUMER_GOODS_SERVICE` has petrol/diesel items (unchecked).
+
 ### Test-drive racer game ("Free test drive" banner) — ✅ built (2026-10-08), follow-ups left
 
 Built: a desktop-only promo banner beside the result card (xl+; a 🎮 circle on lg; eases in 3 s after the card shows) opens a pseudo-3D racer in a modal. Write-up, file map and gotchas: `docs/plan-done.md` "Test-drive racer game".
@@ -1268,6 +1276,8 @@ Write-up: `docs/plan-done.md` "Market offers (CarAPIS)"; conventions: `docs/feat
 - [ ] **After deploy:** run `pnpm fetch:zakon-font` wherever the web app is built (the font is not in git), else the ZAKON face falls back.
 
 ## Later, conditional
+
+Checked and skipped: Derzhstat "Транспорт України" yearbook (2026-11-05) - national transport activity totals, no vehicle/fleet/accident data; see `DATASETS_PLAN.md` "Skipped (with reason)".
 
 SSR for `/:plate` only if organic search traffic matters · region as a real
 indexed column if region filtering is needed · Drizzle v1 upgrade per the
