@@ -26,7 +26,7 @@ const LossesSection = lazy(() => import('@/routes/alarms/LossesSection'))
 // Lazy-loaded (see App.tsx). Online-only: no `offline-cache.ts` entry. Informational, not a warning system.
 export default function AlarmsRoute(): ReactNode {
   const { t, i18n } = useTranslation()
-  const [showLabels, setShowLabels] = useState(false)
+  const [showLabels, setShowLabels] = useState(true)
   const alarms = useQuery(alarmsQuery())
   const data = alarms.data
   const count = data?.regions.length ?? 0
@@ -66,6 +66,8 @@ export default function AlarmsRoute(): ReactNode {
             </button>
           </div>
 
+          <p className="mb-3 text-xs text-[var(--color-muted)]">{t('alarms.source')}</p>
+
           <LoadErrorBoundary compact>
             <Suspense fallback={<StatsMapSkeleton />}>
               <AlarmMap regions={data.regions} showLabels={showLabels} />
@@ -86,8 +88,6 @@ export default function AlarmsRoute(): ReactNode {
           </ul>
 
           <ActiveAlarmList regions={sortedAlarms(data.regions)} nowIso={data.fetchedAt} />
-
-          <p className="mt-3 text-xs text-[var(--color-muted)]">{t('alarms.source')}</p>
         </Card>
       )}
 

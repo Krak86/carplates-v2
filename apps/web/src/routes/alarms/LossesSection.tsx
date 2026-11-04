@@ -1,13 +1,13 @@
-import { lazy, Suspense, useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import { DEFAULT_LOSS_CATEGORY } from '@carplates/shared'
 import type { LossCategory } from '@carplates/shared'
 import { useQuery } from '@tanstack/react-query'
+import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router'
 
 import ShareButton from '@/components/ShareButton'
-import { scrollElementIntoView } from '@/lib/share-section'
 
 import Card from '@/components/ui/Card'
 import { toIntlLocale } from '@/lib/intl'
@@ -27,15 +27,21 @@ export default function LossesSection(): ReactNode {
   const [category, setCategory] = useState<LossCategory>(DEFAULT_LOSS_CATEGORY)
   const [searchParams] = useSearchParams()
   const isShared = searchParams.get('section') === 'losses'
-  const sectionRef = useRef<HTMLDivElement>(null)
+  // A shared link opens the figures in a modal, so the visitor does not have to scroll down to them.
+  const [dismissed, setDismissed] = useState(false)
+  const isModal = isShared && !dismissed
   const losses = useQuery(lossesQuery())
   const history = useQuery(lossesHistoryQuery(category))
   const data = losses.data
 
-  const ready = !!data
   useEffect(() => {
-    if (isShared && ready && sectionRef.current) scrollElementIntoView(sectionRef.current)
-  }, [isShared, ready])
+    if (!isModal) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setDismissed(true)
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [isModal])
 
   if (losses.isError || !data) return null
 
@@ -52,11 +58,23 @@ export default function LossesSection(): ReactNode {
   const path = totalsPath(points)
   const first = points[0]
 
-  return (
-    <Card className="mb-6" ref={sectionRef}>
+  const card = (
+    <Card className={isModal ? undefined : 'mb-6'}>
       <div className="mb-1 flex items-center justify-between gap-2">
         <h2 className="text-lg font-semibold">{t('losses.title')}</h2>
-        <ShareButton section="losses" label={t('losses.share')} />
+        <span className="flex items-center gap-2">
+          <ShareButton section="losses" label={t('losses.share')} />
+          {isModal && (
+            <button
+              type="button"
+              onClick={() => setDismissed(true)}
+              aria-label={t('losses.close')}
+              className="text-[var(--color-muted)] hover:text-[var(--color-fg)]"
+            >
+              ✕
+            </button>
+          )}
+        </span>
       </div>
       <p className="mb-1 text-sm text-[var(--color-muted)]">{t('losses.intro')}</p>
       <p className="mb-3 text-xs text-[var(--color-muted)]">
@@ -122,5 +140,21 @@ export default function LossesSection(): ReactNode {
 
       <p className="mt-3 text-xs text-[var(--color-muted)]">{t('losses.disclaimer')}</p>
     </Card>
+  )
+
+  // Portal: the page's Cards use a 3D tilt `transform`, which would make a fixed overlay center on the Card, not the viewport.
+  if (!isModal) return card
+  return createPortal(
+    <div
+      className="fixed inset-0 z-30 flex items-center justify-center bg-black/50 p-4"
+      role="dialog"
+      aria-modal
+      onClick={e => {
+        if (e.target === e.currentTarget) setDismissed(true)
+      }}
+    >
+      <div className="max-h-full w-full max-w-4xl overflow-y-auto rounded-xl">{card}</div>
+    </div>,
+    document.body
   )
 }
