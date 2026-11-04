@@ -4580,3 +4580,14 @@ Plan and research: [tuning-3d-plan.md](tuning-3d-plan.md). Their pages cannot be
 - **API:** `GET /api/tuning?brand&model&year[&body]` (`apps/api/src/tuning/`), answer `{ link: { path, body, generation, startYear } | null }`. The index is read from the table once an hour; brand and model resolve through the catalog alias like `/api/catalog/lookup`. `TUNING_THROTTLE`, `LOOKUP_CACHE` headers, not in `PUBLIC_API_PATH_PREFIXES` (third-party derived).
 - **Web:** `TuningChip` (a chip beside the 3D view and 360 chips, with an info popover; no section, nothing to share), hidden unless there is a link and the device is online; the link opens in a new tab with `rel="noopener noreferrer"`, locale `ru-RU` for ua and ru, `en-US` otherwise (they have no uk-UA). Not offline-cached: it is a link out.
 - About: `tuning3d` feature and source (plain tile, no logo cleared); `releases.ts` 2026-11-04 (`improved`, so not mailed).
+
+## Virtual showroom `/showroom` (2026-11-04) ✅
+
+Route name chosen to stay technology-neutral, so AR / XR can join 360°, 3D and tuning without a rename.
+
+- **Data:** no new tables. One in-memory catalog (rebuilt hourly) from `car_models_360`, `winner_360`, `car_models_3d` and `tuning_links`; entries merge on `tuningMakeKey(make)` + `tuningKey(model)`. Measured on the dev DB: 2,184 entries (360°: 479, 3D: 1,129, tuning: 1,500).
+- **API:** `GET /api/showroom?q&kind&offset` (48 per page, per-kind counts) and `GET /api/showroom/detail?brand&model` (404 when empty); `SHOWROOM_THROTTLE`, `LOOKUP_CACHE`. Shared contract and helpers in `packages/shared/src/showroom.ts` (+ tests).
+- **Web:** `routes/showroom/` (search debounced into `?q=`, kind chips `?kind=`, cards with a button per kind). Entries open in `Model360Modal` / `Model3dModal` (new `hideShare` prop) via `ShowroomViewer`; 3DTuning is a link-out modal per generation. AR / XR teaser card states only what works today (AR inside the Sketchfab viewer).
+- **Navigation:** sidebar (after Compare), home `QuickLinks`, `/sitemap` page, `STATIC_PAGES` ua/ru/en, `ROUTE_TITLE_KEYS`.
+- Also fixed a duplicated `tuningQuery` in `queries.ts`.
+- **Not done yet:** `releases.ts` / `latest.ts` note, `AboutRoute.tsx` entry (tracked in PLAN.md).

@@ -1251,7 +1251,7 @@ Write-up: `docs/plan-done.md` "Market offers (CarAPIS)"; conventions: `docs/feat
 
 ## Virtual showroom (`/showroom`) ✅ built 2026-11-04, awaiting deploy
 
-✅ One searchable page for all 360° / 3D / 3DTuning cars, opened in the existing modals; AR/XR teaser card. Conventions: `docs/features-reference.md` "Virtual showroom".
+✅ One searchable page for all 360° / 3D / 3DTuning cars, opened in the existing modals; AR/XR teaser card; linked from the sidebar and home quick links. Write-up: `docs/plan-done.md` "Virtual showroom", conventions: `docs/features-reference.md` "Virtual showroom".
 
 - [ ] **After deploy:** add `/api/showroom` and `/api/showroom/detail` to the Cloudflare Cache Rule "Cache model lookups" (expression in `docs/deploy.md`); open `/showroom`, search "bmw", open a 360, a 3D and a Customize entry.
 - [ ] Release note (`releases.ts` + `latest.ts`) and `AboutRoute.tsx` feature entry for the showroom; own AR/XR views later.
