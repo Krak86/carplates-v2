@@ -53,9 +53,9 @@ export default function ShowroomCard({ item, view = 'grid', index = 0, onOpen }:
     ))
 
   const image = item.thumbUrl ? (
-    <img src={item.thumbUrl} alt="" loading="lazy" className="size-full object-cover" />
+    <img src={item.thumbUrl} alt="" loading="lazy" className="absolute inset-0 size-full object-cover" />
   ) : (
-    <div className="flex size-full items-center justify-center bg-border/40 text-4xl" aria-hidden>
+    <div className="absolute inset-0 flex items-center justify-center bg-border/40 text-4xl" aria-hidden>
       🚗
     </div>
   )
@@ -66,7 +66,7 @@ export default function ShowroomCard({ item, view = 'grid', index = 0, onOpen }:
   if (view === 'list')
     return (
       <li style={style} className={cn(base, 'flex items-center gap-3 p-2')}>
-        <div className="aspect-video w-28 shrink-0 overflow-hidden rounded-lg sm:w-36">{image}</div>
+        <div className="relative aspect-video w-28 shrink-0 overflow-hidden rounded-lg sm:w-36">{image}</div>
         <div className="flex min-w-0 flex-1 flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
           <h2 className="truncate font-semibold" title={item.label}>
             {item.label}
@@ -79,7 +79,7 @@ export default function ShowroomCard({ item, view = 'grid', index = 0, onOpen }:
   if (view === 'gallery')
     return (
       <li style={style} className={cn(base, 'group relative aspect-4/3')}>
-        <div className="size-full transition-transform duration-300 group-hover:scale-105">{image}</div>
+        <div className="relative size-full transition-transform duration-300 group-hover:scale-105">{image}</div>
         <div className="absolute inset-x-0 bottom-0 flex flex-col gap-1.5 bg-linear-to-t from-black/75 to-transparent p-2.5 pt-8">
           <h2 className="truncate text-sm font-semibold text-white" title={item.label}>
             {item.label}
@@ -91,7 +91,7 @@ export default function ShowroomCard({ item, view = 'grid', index = 0, onOpen }:
 
   return (
     <li style={style} className={cn(base, 'flex flex-col')}>
-      <div className="aspect-video w-full">{image}</div>
+      <div className="relative aspect-video w-full shrink-0 overflow-hidden">{image}</div>
       <div className="flex flex-1 flex-col gap-2 p-3">
         <h2 className="truncate font-semibold" title={item.label}>
           {item.label}

@@ -1,7 +1,7 @@
 # TESTING_PLAN.md - UI, integration and e2e tests
 
 Researched 2026-11-04. **Nothing is built yet.** Each step below is one session: start it with
-*"do TESTING_PLAN.md step N"* and tick its box when done.
+_"do TESTING_PLAN.md step N"_ and tick its box when done.
 
 ## Context
 
@@ -77,12 +77,7 @@ Sources: [Vitest Browser Mode vs Playwright](https://epicweb.dev/vitest-browser-
   5. Language switch ua -> en -> ru loads the i18n chunks and changes visible text.
   - Done when: all green locally; removing `@/lib/zod-config` from the top of `main.tsx` makes spec 1 fail (revert after).
 
-- [ ] **6. Smoke specs 6-10 + e2e in CI**
-  6. Dark theme toggle persists after reload.
-  7. One static page per type (`/about`, `/stats`, `/showroom`) renders and is not `noindex`.
-  8. PWA: service worker registers; after one lookup, offline still shows the cached result (`lib/offline-cache.ts`).
-  9. `@axe-core/playwright` on home and the result page: no serious/critical issues.
-  10. 404 route.
+- [ ] **6. Smoke specs 6-10 + e2e in CI** 6. Dark theme toggle persists after reload. 7. One static page per type (`/about`, `/stats`, `/showroom`) renders and is not `noindex`. 8. PWA: service worker registers; after one lookup, offline still shows the cached result (`lib/offline-cache.ts`). 9. `@axe-core/playwright` on home and the result page: no serious/critical issues. 10. 404 route.
   - CI: extend the `integration` job with `pnpm build`, `playwright install --with-deps chromium` (cached by version), `pnpm e2e`,
     upload the report/trace as an artifact on failure, skip e2e on docs-only changes (paths filter or `git diff`).
   - Skip: login, contact/Turnstile, ALPR upload, admin (third-party dependent, low return).

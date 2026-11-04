@@ -61,6 +61,14 @@ const envSchema = z.object({
   /** Show "requests left today" in the section: on unless set to `false` / `0` (the admin Server tab always shows it). */
   MARKET_SHOW_BUDGET: onByDefault,
 
+  /** Ukraine Alarm API key (docs/alarm-plan.md). **Secret**. Absent (and no mock) → `GET /api/alarms` answers 503 and no poller runs. */
+  ALARM_API_KEY: z.string().optional(),
+  ALARM_BASE_URL: z.string().default('https://api.ukrainealarm.com'),
+  /** Seconds between upstream polls (the terms ask for server-side polling, not per-visitor calls). */
+  ALARM_POLL_SECONDS: z.coerce.number().int().min(10).max(300).default(30),
+  /** Dev only: serve a fixed fake alert list instead of calling upstream. Ignored in production. */
+  ALARM_MOCK: boolish,
+
   PIXABAY_BASE_URL: z.string().default('https://pixabay.com/api/'),
   /** Absent → the photos route answers 503. */
   PIXABAY_API_KEY: z.string().optional(),
