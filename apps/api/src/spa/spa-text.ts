@@ -310,6 +310,23 @@ export const STATIC_PAGES: Record<string, Record<Lang, PageText>> = {
         'Deaths and crashes by region (also per 100,000 cars), state roads, causes, hour and weekday, from Patrol Police data.'
     }
   },
+  '/alarms': {
+    ua: {
+      title: 'Мапа повітряних тривог по областях | Cars UA',
+      description:
+        'Де зараз діє повітряна тривога: область повністю чи частково. Лише інформація, не система оповіщення.'
+    },
+    ru: {
+      title: 'Карта воздушных тревог по областям | Cars UA',
+      description:
+        'Где сейчас действует воздушная тревога: область полностью или частично. Только информация, не система оповещения.'
+    },
+    en: {
+      title: 'Air raid alert map by region | Cars UA',
+      description:
+        'Where an air raid alert is active now: the whole region or part of it. Informational only, not a warning system.'
+    }
+  },
   '/releases': {
     ua: { title: 'Cars UA - Що нового', description: 'Історія змін Cars UA за днями: можливості, покращення, дані.' },
     ru: {
