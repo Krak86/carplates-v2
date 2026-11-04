@@ -31,6 +31,8 @@ type Props = {
   initialWinnerId?: number | null
   /** View to open on (a shared link's); defaults to the cabin. */
   initialInterior?: boolean
+  /** Hides the share button where the page URL is not a car page (the showroom). */
+  hideShare?: boolean
   onClose: () => void
 }
 
@@ -49,6 +51,7 @@ export default function Model360Modal({
   initialId,
   initialWinnerId,
   initialInterior = true,
+  hideShare,
   onClose
 }: Props): ReactNode {
   const { t, i18n } = useTranslation()
@@ -105,11 +108,13 @@ export default function Model360Modal({
             <div className="truncate text-sm text-[var(--color-muted)]">{name}</div>
           </div>
           <div className="flex shrink-0 items-center gap-3">
-            <ShareButton
-              section="model360"
-              tab={shareTab}
-              label={t('share.button', { section: t('model360.shareName') })}
-            />
+            {!hideShare && (
+              <ShareButton
+                section="model360"
+                tab={shareTab}
+                label={t('share.button', { section: t('model360.shareName') })}
+              />
+            )}
             <button
               type="button"
               onClick={onClose}

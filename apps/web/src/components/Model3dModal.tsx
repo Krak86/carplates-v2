@@ -14,6 +14,8 @@ type Props = {
   label: string
   /** Model to show first (a shared link's uid); falls back to the first one if it isn't in the list. */
   initialUid?: string | null
+  /** Hides the share button where the page URL is not a car page (the showroom). */
+  hideShare?: boolean
   onClose: () => void
 }
 
@@ -24,7 +26,7 @@ type Props = {
  * viewer clicks the chip, so a result card never contacts Sketchfab on its own. Portal for the same reason as
  * YouTubeModal: the Card's 3D tilt transform would otherwise become the `position: fixed` containing block.
  */
-export default function Model3dModal({ models, label, initialUid, onClose }: Props): ReactNode {
+export default function Model3dModal({ models, label, initialUid, hideShare, onClose }: Props): ReactNode {
   const { t } = useTranslation()
   const [index, setIndex] = useState(() =>
     Math.max(
@@ -45,11 +47,13 @@ export default function Model3dModal({ models, label, initialUid, onClose }: Pro
             <div className="truncate text-sm text-[var(--color-muted)]">{current.name}</div>
           </div>
           <div className="flex shrink-0 items-center gap-3">
-            <ShareButton
-              section="model3d"
-              tab={current.uid}
-              label={t('share.button', { section: t('model3d.shareName') })}
-            />
+            {!hideShare && (
+              <ShareButton
+                section="model3d"
+                tab={current.uid}
+                label={t('share.button', { section: t('model3d.shareName') })}
+              />
+            )}
             <button
               type="button"
               onClick={onClose}

@@ -45,6 +45,7 @@ export const SITEMAP_GROUPS: readonly SitemapGroup[] = [
     links: [
       link('/cars', '🚗', 'nav.cars'),
       link('/compare', '⚖️', 'nav.compare'),
+      link('/showroom', '🎬', 'nav.showroom'),
       link('/customs', '🧮', 'nav.customs')
     ]
   },

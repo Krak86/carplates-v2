@@ -1249,6 +1249,13 @@ Write-up: `docs/plan-done.md` "Market offers (CarAPIS)"; conventions: `docs/feat
 - [ ] **After deploy:** migration 0096 is applied by the API deploy; load the table on the VPS with `docker compose run --rm --no-deps -T ingest pnpm ingest:3dtuning:csv` (or `tsx src/ingest-3dtuning.ts --from-csv seed-data/3dtuning-links.csv.gz`); add `/api/tuning` to the Cloudflare Cache Rule "Cache model lookups" (see `docs/deploy.md`) and check MISS then HIT; open a car with a known link (e.g. a BMW 3 Series sedan 2007) and a car without one.
 - [ ] Optional: grow `MODEL_ALIASES` from `pnpm ingest:3dtuning --match-report`; re-run `pnpm ingest:3dtuning` and `export:3dtuning:csv` now and then (their sitemap changes); ask 3DTuning via `/b2b` about an affiliate link
 
+## Virtual showroom (`/showroom`) ✅ built 2026-11-04, awaiting deploy
+
+✅ One searchable page for all 360° / 3D / 3DTuning cars, opened in the existing modals; AR/XR teaser card. Conventions: `docs/features-reference.md` "Virtual showroom".
+
+- [ ] **After deploy:** add `/api/showroom` and `/api/showroom/detail` to the Cloudflare Cache Rule "Cache model lookups" (expression in `docs/deploy.md`); open `/showroom`, search "bmw", open a 360, a 3D and a Customize entry.
+- [ ] Release note (`releases.ts` + `latest.ts`) and `AboutRoute.tsx` feature entry for the showroom; own AR/XR views later.
+
 ## Later, conditional
 
 SSR for `/:plate` only if organic search traffic matters · region as a real

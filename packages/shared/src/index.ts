@@ -1009,6 +1009,7 @@ export {
   matchTuning,
   parseTuningPage,
   tuningKey,
+  tuningMakeKey,
   tuningLocaleFor,
   tuningUrl,
   type Tuning3dLocale,
@@ -1020,3 +1021,23 @@ export {
   type TuningQuery,
   type TuningResponse
 } from './tuning3d.js'
+export {
+  DEFAULT_SHOWROOM_FILTER,
+  SHOWROOM_FILTERS,
+  SHOWROOM_KINDS,
+  SHOWROOM_PAGE_SIZE,
+  parseShowroomFilter,
+  showroomDetailSchema,
+  showroomHas,
+  showroomItemSchema,
+  showroomListSchema,
+  showroomMatches,
+  showroomTitleize,
+  showroomTuningPageSchema,
+  type ShowroomDetail,
+  type ShowroomFilter,
+  type ShowroomItem,
+  type ShowroomKind,
+  type ShowroomList,
+  type ShowroomTuningPage
+} from './showroom.js'

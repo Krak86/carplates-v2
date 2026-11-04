@@ -31,6 +31,8 @@ export const VIN_DECODE_THROTTLE = { medium: { limit: 30, ttl: 60_000 } }
 export const ORIGIN_THROTTLE = { medium: { limit: 60, ttl: 60_000 } }
 /** 3DTuning link-out: a make x model x year set, one tiny cached answer. */
 export const TUNING_THROTTLE = { medium: { limit: 60, ttl: 60_000 } }
+/** `/api/showroom`: a search box fires a request per pause, so a little looser than a single lookup. */
+export const SHOWROOM_THROTTLE = { medium: { limit: 90, ttl: 60_000 } }
 /** Catalog pages: an enumerable set (make x model), though the answer is one precomputed row. */
 export const CATALOG_THROTTLE = { medium: { limit: 60, ttl: 60_000 } }
 /** Market listings: a make x model set plus detail / redirect clicks; answers come from our cache, misses spend a 100-a-day upstream quota. */

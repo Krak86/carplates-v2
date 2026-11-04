@@ -349,11 +349,11 @@ JSON by default, so a Cache Rule "Cache API rollups" (created 2026-10-29, verifi
 "Eligible for cache", Edge TTL "Use cache-control header if present, bypass cache if not", Browser TTL "Respect origin TTL". `/api/stats/*` (not the other rollups) sends `STATS_CACHE` instead: `max-age=300, s-maxage=21600, stale-while-revalidate=3600` (edge 6 h; every api deploy purges the exact stats URLs plus the `/api/stats/` prefix, best-effort; after a cron or ingest refresh purge them by hand if 6 h of lag matters). Live rule updated with `"/api/auctions/stats"` on 2026-10-31 (verify MISS then HIT after the API deploy; `/api/auctions/lots` is per-query and not edge-cached). Paste it via
 "Edit expression" and never switch back to the builder (it cannot show `starts_with` / `in {}` and wraps the text into a wildcard value).
 
-Per-model lookups (`/api/vdb`, `/api/rdw`, `/api/rdw/recalls`, `/api/wiki`, `/api/wiki/image`, `/api/tuning`; keyed on brand/model/year, never on a plate or VIN) send
+Per-model lookups (`/api/vdb`, `/api/rdw`, `/api/rdw/recalls`, `/api/wiki`, `/api/wiki/image`, `/api/tuning`, `/api/showroom`; keyed on brand/model/year, never on a plate or VIN) send
 `Cache-Control: public, max-age=3600, s-maxage=86400` (recalls `max-age=900, s-maxage=3600`; `lookupCacheInterceptor` in `common/cache.ts`), and
 `no-store` with `refresh=true`; `/api/vdb/stats` reuses the 5 min rollup value. A second Cache Rule "Cache model lookups" (created 2026-10-29, verified MISS → HIT; `refresh=true` stays DYNAMIC)
 makes it effective: expression
-`(http.host eq "carsua.app" and http.request.uri.path in {"/api/vdb" "/api/vdb/stats" "/api/rdw" "/api/rdw/recalls" "/api/wiki" "/api/wiki/image" "/api/tuning"} and not http.request.uri.query contains "refresh")`,
+`(http.host eq "carsua.app" and http.request.uri.path in {"/api/vdb" "/api/vdb/stats" "/api/rdw" "/api/rdw/recalls" "/api/wiki" "/api/wiki/image" "/api/tuning" "/api/showroom" "/api/showroom/detail"} and not http.request.uri.query contains "refresh")`,
 "Eligible for cache", Edge TTL "Use cache-control header if present, bypass cache if not", Browser TTL "Respect origin TTL", cache key left at default
 (full path + query string; do **not** enable "Ignore query string"). `/api/plate/*` and `/api/vin/*` stay uncached (per vehicle). A new cacheable endpoint must be added to the matching rule expression too; verify MISS then HIT
 (first request MISS or EXPIRED, second HIT; `refresh=true` stays DYNAMIC).

@@ -68,6 +68,8 @@ import {
   jncapRatingsResponseSchema,
   models3dResponseSchema,
   tuningResponseSchema,
+  showroomDetailSchema,
+  showroomListSchema,
   models360ResponseSchema,
   kncapRatingsResponseSchema,
   modelSuggestionsResponseSchema,
@@ -174,6 +176,9 @@ import type {
   VdbVehicleClass,
   Models3dResponse,
   TuningResponse,
+  ShowroomDetail,
+  ShowroomFilter,
+  ShowroomList,
   Models360Response,
   NewsFeedPageResponse,
   NewsFeedResponse,
@@ -1080,4 +1085,17 @@ export async function getTuning(
   const params = new URLSearchParams({ brand, model, year: String(year) })
   if (body) params.set('body', body)
   return tuningResponseSchema.parse(await getJson(`/api/tuning?${params.toString()}`))
+}
+
+/** One page of the virtual showroom (every make/model with a 360, 3D or 3DTuning view). */
+export async function getShowroom(q: string, kind: ShowroomFilter, offset: number): Promise<ShowroomList> {
+  const params = new URLSearchParams({ kind, offset: String(offset) })
+  if (q) params.set('q', q)
+  return showroomListSchema.parse(await getJson(`/api/showroom?${params.toString()}`))
+}
+
+/** What one showroom entry opens, by the slugs the list returned. */
+export async function getShowroomDetail(brand: string, model: string): Promise<ShowroomDetail> {
+  const params = new URLSearchParams({ brand, model })
+  return showroomDetailSchema.parse(await getJson(`/api/showroom/detail?${params.toString()}`))
 }

@@ -41,6 +41,12 @@ const MAKE_ALIASES: Readonly<Record<string, string>> = {
   vaz: 'lada'
 }
 
+/** Their make key for one of our make slugs (`mercedes-benz` -> `mercedes`); the squashed slug itself when the names agree. */
+export const tuningMakeKey = (ourMake: string): string => {
+  const key = tuningKey(ourMake)
+  return MAKE_ALIASES[key] ?? key
+}
+
 /** `<makeKey>/<modelKey>` (ours) -> extra model keys on their side. Grown from the match-rate report; keep it small and certain. */
 const MODEL_ALIASES: Readonly<Record<string, readonly string[]>> = {}
 

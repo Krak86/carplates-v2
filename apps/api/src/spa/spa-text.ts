@@ -177,6 +177,23 @@ export const STATIC_PAGES: Record<string, Record<Lang, PageText>> = {
         'Estimate the Ukrainian customs cost of an imported car in 2026: duty, excise by age and engine size, VAT and the pension fee for petrol, diesel, hybrid and electric cars.'
     }
   },
+  '/showroom': {
+    ua: {
+      title: 'Віртуальний шоурум: 360°, 3D і тюнінг авто | Cars UA',
+      description:
+        'Шукайте марку чи модель і відкривайте авто в 360°, у 3D-моделях та конфігураторі 3D-тюнінгу просто на сторінці. Далі - AR та XR.'
+    },
+    ru: {
+      title: 'Виртуальный шоурум: 360°, 3D и тюнинг авто | Cars UA',
+      description:
+        'Ищите марку или модель и открывайте авто в 360°, в 3D-моделях и конфигураторе 3D-тюнинга прямо на странице. Дальше - AR и XR.'
+    },
+    en: {
+      title: 'Virtual car showroom: 360°, 3D and tuning views | Cars UA',
+      description:
+        'Search a make or model and open the car in a 360° walk-around, community 3D models and a 3D tuning configurator. AR and XR next.'
+    }
+  },
   '/compare': {
     ua: {
       title: 'Порівняння двох авто: за номером, VIN або моделлю | Cars UA',

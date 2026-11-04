@@ -50,6 +50,7 @@ import { UsageModule } from './usage/usage.module.js'
 import { CatalogModule } from './catalog/catalog.module.js'
 import { DataStatusModule } from './data-status/data-status.module.js'
 import { OriginModule } from './origin/origin.module.js'
+import { ShowroomModule } from './showroom/showroom.module.js'
 import { TuningModule } from './tuning/tuning.module.js'
 import { VinModule } from './vin/vin.module.js'
 import { WikiModule } from './wiki/wiki.module.js'
@@ -75,6 +76,7 @@ import { WikispecsModule } from './wikispecs/wikispecs.module.js'
     CardModule,
     CatalogModule,
     OriginModule,
+    ShowroomModule,
     TuningModule,
     DataStatusModule,
     RoadSafetyModule,

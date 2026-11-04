@@ -1,4 +1,4 @@
-import { keepPreviousData, queryOptions } from '@tanstack/react-query'
+import { infiniteQueryOptions, keepPreviousData, queryOptions } from '@tanstack/react-query'
 import type { QueryClient, QueryKey } from '@tanstack/react-query'
 import { normalizePlate } from '@carplates/shared'
 import type {
@@ -7,6 +7,7 @@ import type {
   MarketKind,
   MotFuelHint,
   PlateLookupResponse,
+  ShowroomFilter,
   StatsFieldDimension,
   StockRange,
   VdbVehicleClass
@@ -94,6 +95,8 @@ import {
   getUkraineGeography,
   getModels3d,
   getTuning,
+  getShowroom,
+  getShowroomDetail,
   getModels360,
   getVehiclePhotos,
   getWikiImage,
@@ -669,11 +672,24 @@ export function tuningQuery(brand: string, model: string, year: number, body?: s
   })
 }
 
-// 3DTuning "Customize in 3D" link of a brand/model/year/body: persisted index (pnpm ingest:3dtuning), changes only on a re-crawl.
-export function tuningQuery(brand: string, model: string, year: number, body?: string | null) {
+// Virtual showroom list and entries - persisted reference data (the four 360 / 3D / 3DTuning ingests), changes only on a re-crawl.
+export function showroomQuery(q: string, kind: ShowroomFilter) {
+  return infiniteQueryOptions({
+    queryKey: ['showroom', q, kind],
+    queryFn: ({ pageParam }) => getShowroom(q, kind, pageParam),
+    initialPageParam: 0,
+    getNextPageParam: (last, pages) => {
+      const loaded = pages.reduce((sum, p) => sum + p.items.length, 0)
+      return loaded < last.total ? loaded : undefined
+    },
+    staleTime: 3_600_000
+  })
+}
+
+export function showroomDetailQuery(brand: string, model: string) {
   return queryOptions({
-    queryKey: ['tuning', brand, model, year, body ?? null],
-    queryFn: () => getTuning(brand, model, year, body),
+    queryKey: ['showroom-detail', brand, model],
+    queryFn: () => getShowroomDetail(brand, model),
     staleTime: Infinity
   })
 }
