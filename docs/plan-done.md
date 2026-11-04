@@ -4617,3 +4617,11 @@ Plan and live API findings: `docs/alarm-plan.md`.
 - **Step 3:** `alarm` background layer (`AlarmBackground`, `BACKGROUND_MODES`, picker / share link / `/relax` pick it up automatically; `defaultMode` tolerant via `.catch`). Sitemap page entry added.
 - **Rules:** fail closed; online-only (no `schemas.ts`, no `offline-cache.ts`, not in link previews); wording informational, never a weapon name.
 - **Docs / About:** `releases.ts` item (`new`), About `alarms` feature + `ukraineAlarm` source (ua/ru/en).
+
+## Air-raid alert history ingest (2026-11-04) ✅
+
+Step 4 of `docs/alarm-plan.md`. Per-oblast rollup chosen over raw rows (seed 527 KB instead of ~8-10 MB; raion detail dropped).
+
+- `registry.alarm_history_daily` (migration 0098), `scripts/src/alarm-history-parse.ts` (+ test), `alarm-history-csv.ts`, `ingest-alarm-history.ts`. Real run: 299,275 official + 120,357 volunteer rows, 0 skipped, 56,800 day rows.
+- Fixed the `ingest:ratings:csv` chain: it named `oemlinks` but had no command for it (names and commands are positional); both `oem-links:csv` and `alarm-history:csv` are in now.
+- About `sirenDataset` source (MIT, eTryvoga). Not done: daily refresh cron, step 5 page.

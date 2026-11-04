@@ -1756,6 +1756,7 @@
   "about.source.sketchfab": "Community 3D car models shown in the 3D view; played from Sketchfab's own viewer, with the author credited.",
   "about.source.tuning3d": "The car pages listed in 3DTuning's public sitemap, used only to link out to the matching 3D configurator; none of its content is copied.",
   "about.source.ukraineAlarm": "Live air raid alerts per oblast, polled by our server and shown without weapon types or movement; informational only. Credit: Ukraine Alarm (Stfalcon).",
+  "about.source.sirenDataset": "Air raid alert history (2022 onwards) from the MIT-licensed siren dataset by Vadym Klymenko (official data and the eTryvoga volunteer channel), rolled up per region; Crimea, Sevastopol and the permanent Luhansk alert are not included.",
   "about.source.oemLinks": "Official model pages and configurators of Morgan, Lucid, Koenigsegg, Aston Martin and Lamborghini; used only to link out, none of their content is copied.",
   "about.source.googleMaps": "City-map background, nearby-places maps and registration-office map links.",
   "about.source.wikimedia": "Hero photos of a make and model and region photos for the test-drive backdrops, hotlinked from Wikimedia Commons with author and licence credited (metadata only).",

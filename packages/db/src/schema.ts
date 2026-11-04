@@ -2047,6 +2047,23 @@ export const oemLinks = registry.table(
 export type OemLinkRow = typeof oemLinks.$inferSelect
 export type OemLinkInsert = typeof oemLinks.$inferInsert
 
+/** Air-raid alert history per oblast, source and UTC start day (MIT siren dataset rollup, see migration 0098). */
+export const alarmHistoryDaily = registry.table(
+  'alarm_history_daily',
+  {
+    region: text('region').notNull(),
+    source: text('source').notNull(),
+    day: date('day', { mode: 'string' }).notNull(),
+    alerts: integer('alerts').notNull(),
+    seconds: integer('seconds').notNull(),
+    longestSeconds: integer('longest_seconds').notNull(),
+    estimatedAlerts: integer('estimated_alerts').notNull().default(0)
+  },
+  t => [primaryKey({ columns: [t.region, t.source, t.day] }), index('ix_alarm_history_daily_day').on(t.day)]
+)
+export type AlarmHistoryDailyRow = typeof alarmHistoryDaily.$inferSelect
+export type AlarmHistoryDailyInsert = typeof alarmHistoryDaily.$inferInsert
+
 /**
  * Model catalog (`/cars/:make/:model`): raw registry (brand, model) -> slugs, one row per model with its rollup, one per make.
  * Rebuilt by scripts/src/catalog-build.ts; see migration 0081.
