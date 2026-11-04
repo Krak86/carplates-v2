@@ -95,6 +95,7 @@ import {
   getStatsDistribution,
   getStatsTop,
   getUkraineGeography,
+  getAlarmGeography,
   getModels3d,
   getTuning,
   getShowroom,
@@ -624,6 +625,17 @@ export function ukraineGeographyQuery() {
   return queryOptions({
     queryKey: ['ukraine-geography'],
     queryFn: getUkraineGeography,
+    staleTime: Infinity,
+    networkMode: 'offlineFirst'
+  })
+}
+
+// Alarm-map shape layers: static build assets like the oblast file above.
+export function alarmGeographyQuery(layer: 'oblasts' | 'raions' | 'hromadas', enabled = true) {
+  return queryOptions({
+    queryKey: ['alarm-geography', layer],
+    queryFn: () => getAlarmGeography(layer),
+    enabled,
     staleTime: Infinity,
     networkMode: 'offlineFirst'
   })

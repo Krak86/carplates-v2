@@ -717,6 +717,15 @@ export async function getUkraineGeography(): Promise<UkraineGeography> {
   return res.json() as Promise<UkraineGeography>
 }
 
+// Static alarm-map shapes (oblasts / raions / communities), same rules as `getUkraineGeography`.
+export async function getAlarmGeography(
+  layer: 'oblasts' | 'raions' | 'hromadas'
+): Promise<FeatureCollection<Geometry>> {
+  const res = await fetch(`/ukraine-alarm-${layer}.geojson`, { headers: { accept: 'application/geo+json' } })
+  if (!res.ok) throw new ApiError(res.status, res.statusText)
+  return res.json() as Promise<FeatureCollection<Geometry>>
+}
+
 /**
  * Uses only the self-hosted, free own-model recognizer (services/alpr). There
  * is deliberately no fallback to the metered Plate Recognizer cloud API — if

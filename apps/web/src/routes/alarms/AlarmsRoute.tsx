@@ -1,4 +1,4 @@
-import { Suspense, lazy } from 'react'
+import { Suspense, lazy, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
@@ -9,8 +9,14 @@ import Card from '@/components/ui/Card'
 import { toIntlLocale } from '@/lib/intl'
 import { alarmsQuery } from '@/lib/queries'
 import { localizeRegion } from '@/lib/region-label'
-import { ALARM_FILL, sortedAlarms } from '@/routes/alarms/helpers'
+import { ALARM_FILL, levelFill, sortedAlarms } from '@/routes/alarms/helpers'
 import StatsMapSkeleton from '@/routes/stats/StatsMapSkeleton'
+
+const LEGEND = [
+  { key: 'red', fill: levelFill('Red', false), label: 'alarms.legend.red' },
+  { key: 'yellow', fill: levelFill('Yellow', false), label: 'alarms.legend.yellow' },
+  { key: 'none', fill: ALARM_FILL.none, label: 'alarms.status.none' }
+] as const
 
 const AlarmMap = lazy(() => import('@/routes/alarms/AlarmMap'))
 const AlarmHistorySection = lazy(() => import('@/routes/alarms/AlarmHistorySection'))
@@ -18,6 +24,7 @@ const AlarmHistorySection = lazy(() => import('@/routes/alarms/AlarmHistorySecti
 // Lazy-loaded (see App.tsx). Online-only: no `offline-cache.ts` entry. Informational, not a warning system.
 export default function AlarmsRoute(): ReactNode {
   const { t, i18n } = useTranslation()
+  const [showLabels, setShowLabels] = useState(false)
   const alarms = useQuery(alarmsQuery())
   const data = alarms.data
   const list = data ? sortedAlarms(data.regions) : []
@@ -46,23 +53,32 @@ export default function AlarmsRoute(): ReactNode {
           <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
             <span className="font-medium">{t('alarms.count', { count: list.length })}</span>
             {time && <span className="text-[var(--color-muted)]">{t('alarms.updated', { time })}</span>}
+            <span className="text-xs text-[var(--color-muted)]">{t('alarms.refresh')}</span>
+            <button
+              type="button"
+              aria-pressed={showLabels}
+              onClick={() => setShowLabels(v => !v)}
+              className="ml-auto rounded-md border border-[var(--color-border)] px-2 py-0.5 text-xs aria-pressed:bg-[var(--color-border)]"
+            >
+              {t('alarms.showRegions')}
+            </button>
           </div>
 
           <LoadErrorBoundary compact>
             <Suspense fallback={<StatsMapSkeleton />}>
-              <AlarmMap regions={data.regions} />
+              <AlarmMap regions={data.regions} showLabels={showLabels} />
             </Suspense>
           </LoadErrorBoundary>
 
           <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-[var(--color-muted)]">
-            {(['full', 'partial', 'none'] as const).map(status => (
-              <li key={status} className="inline-flex items-center gap-1.5">
+            {LEGEND.map(item => (
+              <li key={item.key} className="inline-flex items-center gap-1.5">
                 <span
                   aria-hidden
                   className="inline-block size-3 rounded-sm border border-[var(--color-border)]"
-                  style={{ background: ALARM_FILL[status] }}
+                  style={{ background: item.fill }}
                 />
-                {t(`alarms.status.${status}`)}
+                {t(item.label)}
               </li>
             ))}
           </ul>

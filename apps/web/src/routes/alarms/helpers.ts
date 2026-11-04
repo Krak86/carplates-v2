@@ -13,6 +13,18 @@ export const ALARM_FILL: Readonly<Record<AlarmStatus, string>> = {
 export const statusOf = (regions: readonly AlarmRegion[], region: string | undefined): AlarmStatus =>
   regions.find(r => r.region === region)?.scope ?? 'none'
 
+/** Fill of an alerted area by its upstream level (Yellow = warmer tint); `soft` = fallback for an area we cannot place. */
+export const levelFill = (level: string | null | undefined, soft: boolean): string => {
+  const scope: AlarmScope = soft ? 'partial' : 'full'
+  return level === 'Yellow' ? ALARM_FILL_YELLOW[scope] : ALARM_FILL[scope]
+}
+
+/** Warmer tint for a region whose upstream `level` is Yellow (list shows the raw level; meaning unconfirmed). */
+const ALARM_FILL_YELLOW: Readonly<Record<AlarmScope, string>> = {
+  full: 'oklch(0.8 0.16 85)',
+  partial: 'color-mix(in oklab, oklch(0.8 0.16 85) 55%, var(--color-surface))'
+}
+
 /** Full-oblast alerts first, then partial; the API already sorts by name and the sort is stable. */
 export const sortedAlarms = (regions: readonly AlarmRegion[]): AlarmRegion[] =>
   [...regions].sort((a, b) => Number(b.scope === 'full') - Number(a.scope === 'full'))
