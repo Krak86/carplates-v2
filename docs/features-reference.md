@@ -771,3 +771,11 @@ Plan: [compare-plan.md](compare-plan.md). Phases 1-3 and the client side of phas
 - **Currency (2026-11-03):** `/customs?cur=` selects the price currency; `AuctionPriceCheck` takes a lot price in USD / EUR / UAH and converts at the NBU rate before linking.
 - **Guides:** `CostSection` in `/read/imports` (`#cost`, between Why and Market) uses `read/CustomsCalcLinks.tsx` (calculator link + the three presets); `/read/auctions` has no cost section (it is about Ukrainian auctions). The guide quotes **no rates** (they change yearly). `/customs` is not a guide (`CUSTOMS_PATH` in `read/links.ts`); the imports lead mentions it.
 - About: `customs` feature (`about.brief.customs` / `about.feature.customs`); the existing NBU and `radaLaws` source texts now mention the calculator and the Tax Code.
+
+## 3DTuning link-out ("Customize in 3D", 2026-11-04)
+
+- Link-out only (their pages send `X-Frame-Options: deny`); never copy or embed their images or configurator. Data = their public sitemap, loaded by `scripts/src/ingest-3dtuning.ts` into `registry.tuning_links` (`path` without the locale).
+- **One matcher**: `packages/shared/src/tuning3d.ts` (`parseTuningPage`, `buildTuningIndex`, `matchTuning`, `registryBodyFamilies`, `tuningUrl`); the script's `--match-report`, the API and the tests all use it. The rule is **no confident match = no link**: model on their site, body class compatible (`УНІВЕРСАЛ` is broad), at most 12 years after the generation start, not stale against a newer generation of another body, one generation. `matchTuning` returns `unique`, `same-generation`, `ambiguous` or `none` with a reason; only the first two give a link.
+- Contract `tuningResponseSchema` lives in `tuning3d.ts` (not `schemas.ts`: offline data is not discarded). `GET /api/tuning` has `TUNING_THROTTLE`, `LOOKUP_CACHE` and is listed in the "Cache model lookups" Cloudflare rule; it is **not** in `PUBLIC_API_PATH_PREFIXES`.
+- Web: `TuningSection` (lazy, hidden without a link or offline), locale `ru-RU` for ua and ru, else `en-US`. UI strings `tuning3d.*`.
+- Growing coverage: run `pnpm ingest:3dtuning --match-report`; add only certain model pairs to `MODEL_ALIASES` (their model slugs often carry the generation: `golf.7`, `golf.vii`, `transporter.t5`). After a change run `pnpm --filter @carplates/shared build` (scripts and the API read `dist/`).

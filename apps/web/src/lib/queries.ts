@@ -93,6 +93,7 @@ import {
   getStatsTop,
   getUkraineGeography,
   getModels3d,
+  getTuning,
   getModels360,
   getVehiclePhotos,
   getWikiImage,
@@ -655,6 +656,15 @@ export function models3dQuery(brand: string, model: string) {
   return queryOptions({
     queryKey: ['models3d', brand, model],
     queryFn: () => getModels3d(brand, model),
+    staleTime: Infinity
+  })
+}
+
+// 3DTuning "Customize in 3D" link of a brand/model/year/body - persisted index (pnpm ingest:3dtuning), changes only on a re-crawl.
+export function tuningQuery(brand: string, model: string, year: number, body?: string | null) {
+  return queryOptions({
+    queryKey: ['tuning', brand, model, year, body ?? null],
+    queryFn: () => getTuning(brand, model, year, body),
     staleTime: Infinity
   })
 }

@@ -1186,7 +1186,7 @@ card-on-file subscriptions; revisit with real quotes.
 - ✅ **Source strip + related pages on all statistics pages (2026-11-01):** `PageSources` "Source data" card and `RelatedPages` cross links on `/stats`, `/wanted`, `/auctions`, `/fuel`, `/safety`, `/road-safety` — see `docs/plan-done.md`.
 - ✅ **Prozorro.Sale vehicle auctions (2026-11-01):** second auction source with grouped lots, merged vehicle facts, photos straight from Prozorro (a resizer was tried and dropped: its Cloudflare blocks server fetches) and `/auctions` source filters; backfilled and loaded on the VPS (14 431 rows); future-dated finished lots fixed, stats delta is a median — see `docs/plan-done.md`.
 - ✅ **SETAM lot reason (2026-11-04):** debt category, issuing court and bailiff office per lot from the Unified Register of Debtors (weekly job, no debtor data stored) plus a title-based reason; ARMA register checked and rejected (no VIN/plate) - see `docs/plan-done.md`.
-  - [ ] **After deploy:** migration 0095 is applied by the API deploy; `deploy-ingest` installs the Sunday 02:10 cron; run once on the VPS `docker compose run --rm --no-deps -T ingest tsx src/auction-proceedings.ts` (~800 MB temp ZIP, check free disk); optional secret `HC_PING_AUCTION_PROCEEDINGS`; then open a SETAM lot of a confiscation case and check the "Type of enforcement" rows.
+  - [x] **After deploy (2026-11-04, loaded on the VPS: 1 309 of 3 982 proceedings, job ok):** migration 0095 is applied by the API deploy; `deploy-ingest` installs the Sunday 02:10 cron; run once on the VPS `bash /opt/carsua/compose/run-ingest.sh auction-proceedings` (as the deploy user; the bare `docker compose run` fails outside the compose dir) (~800 MB temp ZIP, check free disk); optional secret `HC_PING_AUCTION_PROCEEDINGS`; then open a SETAM lot of a confiscation case and check the "Type of enforcement" rows.
 - ✅ **Road-safety context in `/read/safety` (2026-11-01):** "On the road" (national totals, deaths by year, pedestrian/child share) and "Tests and crashes" (crash types and causes, peak time, what each programme tests) sections reading the `/road-safety` queries - see `docs/plan-done.md`.
 - ✅ **Hazard map on OSM, customs currency + VIN prefill, native Share (2026-11-03):** Leaflet map with Street View links and "Near me", `/customs?cur=`, `navigator.share` for photo links. Write-up: `docs/plan-done.md`.
 - **Other providers (researched 2026-10-12, not planned yet):** GitHub (client id + secret, code flow), Microsoft
@@ -1242,12 +1242,12 @@ Write-up: `docs/plan-done.md` "Market offers (CarAPIS)"; conventions: `docs/feat
 - [ ] Owner emails Auto.ria (draft in the plan) after seeing it live; if they object, set `MARKET_UA_ENABLED=false`
 - [ ] Optional: localize CarAPIS region names (cards show the English ones, e.g. "Kyiv") and a few raw values ("manufacturer warranty")
 
-## 3DTuning "Customize in 3D" links - research done 2026-11-03, not started
+## 3DTuning "Customize in 3D" links ✅ 2026-11-04
 
-Facts and steps: [docs/tuning-3d-plan.md](docs/tuning-3d-plan.md). Not embeddable (`X-Frame-Options: deny`), link-out only; the sitemap lists 2,463 car pages (133 makes), no scraping needed.
+✅ Sitemap ingest, `registry.tuning_links` (0096), body-aware matcher, `/api/tuning`, "Customize in 3D" `LazySection`: **48.2% of cars get a link**, never a guess. Write-up: `docs/plan-done.md` "3DTuning", conventions: `docs/features-reference.md` "3DTuning link-out", plan: [docs/tuning-3d-plan.md](docs/tuning-3d-plan.md).
 
-- [ ] Sitemap to seed CSV + `tuning_links` migration, then measure the match rate against our make/model/year set
-- [ ] Matching helper, API lookup, "Customize in 3D" `LazySection` (ua/ru/en), docs
+- [ ] **After deploy:** migration 0096 is applied by the API deploy; load the table on the VPS with `docker compose run --rm --no-deps -T ingest pnpm ingest:3dtuning:csv` (or `tsx src/ingest-3dtuning.ts --from-csv seed-data/3dtuning-links.csv.gz`); add `/api/tuning` to the Cloudflare Cache Rule "Cache model lookups" (see `docs/deploy.md`) and check MISS then HIT; open a car with a known link (e.g. a BMW 3 Series sedan 2007) and a car without one.
+- [ ] Optional: grow `MODEL_ALIASES` from `pnpm ingest:3dtuning --match-report`; re-run `pnpm ingest:3dtuning` and `export:3dtuning:csv` now and then (their sitemap changes); ask 3DTuning via `/b2b` about an affiliate link
 
 ## Later, conditional
 

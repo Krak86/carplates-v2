@@ -996,3 +996,27 @@ export type {
   ShareMetaResponse,
   ShareRemoved
 } from './shares.js'
+export {
+  DEFAULT_TUNING_3D_LOCALE,
+  MAX_GENERATION_GAP_YEARS,
+  TUNING_3D_LOCALES,
+  TUNING_BODY_FAMILIES,
+  pageBodyFamily,
+  registryBodyFamilies,
+  tuningResponseSchema,
+  TUNING_3D_ORIGIN,
+  buildTuningIndex,
+  matchTuning,
+  parseTuningPage,
+  tuningKey,
+  tuningLocaleFor,
+  tuningUrl,
+  type Tuning3dLocale,
+  type Tuning3dPage,
+  type TuningIndex,
+  type TuningMatch,
+  type TuningBodyFamily,
+  type TuningMiss,
+  type TuningQuery,
+  type TuningResponse
+} from './tuning3d.js'

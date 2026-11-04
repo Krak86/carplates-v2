@@ -67,6 +67,7 @@ import {
   iihsRatingsResponseSchema,
   jncapRatingsResponseSchema,
   models3dResponseSchema,
+  tuningResponseSchema,
   models360ResponseSchema,
   kncapRatingsResponseSchema,
   modelSuggestionsResponseSchema,
@@ -172,6 +173,7 @@ import type {
   VdbStatsResponse,
   VdbVehicleClass,
   Models3dResponse,
+  TuningResponse,
   Models360Response,
   NewsFeedPageResponse,
   NewsFeedResponse,
@@ -1066,4 +1068,16 @@ export async function getAuctionList(query: AuctionListQuery): Promise<AuctionLi
     if (value !== undefined && value !== '') params.set(key, String(value))
   }
   return auctionListResponseSchema.parse(await getJson(`/api/auctions/lots?${params.toString()}`))
+}
+
+/** The 3DTuning page to link for a car, or `link: null` (see `matchTuning`). */
+export async function getTuning(
+  brand: string,
+  model: string,
+  year: number,
+  body?: string | null
+): Promise<TuningResponse> {
+  const params = new URLSearchParams({ brand, model, year: String(year) })
+  if (body) params.set('body', body)
+  return tuningResponseSchema.parse(await getJson(`/api/tuning?${params.toString()}`))
 }
