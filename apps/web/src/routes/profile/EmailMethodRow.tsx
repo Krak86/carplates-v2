@@ -77,7 +77,7 @@ export default function EmailMethodRow({ email }: Props): ReactNode {
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
           <div className="text-sm font-medium">{t('profile.methods.email')}</div>
-          <div className="truncate text-sm text-[var(--color-muted)]">{email ?? t('profile.methods.emailNone')}</div>
+          <div className="text-sm break-all text-[var(--color-muted)]">{email ?? t('profile.methods.emailNone')}</div>
         </div>
         {!editing && (
           <button
@@ -91,7 +91,7 @@ export default function EmailMethodRow({ email }: Props): ReactNode {
       </div>
 
       {editing && !challenge && (
-        <form onSubmit={handleSend} className="mt-3 flex gap-2">
+        <form onSubmit={handleSend} className="mt-3 flex flex-wrap gap-2">
           <input
             type="email"
             value={draft}

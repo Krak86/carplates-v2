@@ -90,7 +90,7 @@ spec tables, VIN WMI prefixes, model plants, auto news + brand YouTube posts, st
 road-safety tables. Per-command details: [docs/commands-reference.md](docs/commands-reference.md).
 
 Not seeded on purpose (live feeds, run on a schedule on the VPS, see [SCHEDULE.md](SCHEDULE.md)): `ingest:wanted` (National Police
-wanted vehicles), `ingest:wanted-plates` (Garpun), `ingest:auctions` (SETAM), `ingest:prozorro`, `ingest:news`, `ingest:social`,
+wanted vehicles), `ingest:wanted-plates` (Garpun), `ingest:auctions` (SETAM), `ingest:prozorro`, `ingest:auction-proceedings` (debtors register, reasons for SETAM lots), `ingest:news`, `ingest:social`,
 `ingest:dtp:patrol`, `ingest:rdw-recalls`, `ingest:ca-recalls`. Run any of them once by hand to fill its card locally.
 Also not seeded: `registry.missed_lookups` (user telemetry), `stats_*` (rebuilt by `db:refresh-derived`) and `app.*` (accounts).
 

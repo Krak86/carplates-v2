@@ -78,7 +78,7 @@ export default function SharesSection(): ReactNode {
         {list.map((share, index) => {
           const token = savedShareToken(share.id)
           return (
-            <li key={share.id} className="flex items-center gap-3 py-3">
+            <li key={share.id} className="flex flex-wrap items-center gap-x-3 gap-y-2 py-3">
               <button
                 type="button"
                 onClick={() => setZoomIndex(index)}
@@ -87,7 +87,7 @@ export default function SharesSection(): ReactNode {
               >
                 <img src={ownShareImageUrl(share.id)} alt="" loading="lazy" className="h-full w-full object-cover" />
               </button>
-              <div className="min-w-0 flex-1 text-sm">
+              <div className="min-w-0 flex-1 basis-32 text-sm">
                 <div className="truncate font-medium">{share.plate}</div>
                 <div className="text-xs text-[var(--color-muted)]">
                   {t('photoShare.mine.expires', { count: daysLeft(share.expiresAt) })}
@@ -97,7 +97,7 @@ export default function SharesSection(): ReactNode {
                   <ShareRemovedList removed={share.removed} />
                 </details>
               </div>
-              <div className="flex shrink-0 gap-2">
+              <div className="flex flex-wrap gap-2 max-sm:w-full">
                 {token && <CopyLinkButton link={shareUrl(share.plate, token)} />}
                 {token && canNativeShare() && (
                   <button

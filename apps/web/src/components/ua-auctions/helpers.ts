@@ -168,3 +168,6 @@ export function formatPrice(
 export function timelineLots(lots: readonly AuctionLot[]): AuctionLot[] {
   return lots.filter((l, i) => l.sold || i === 0)
 }
+
+/** Window event: the history timeline asks the "Ukrainian auctions" section to open and scroll to a lot (detail = `lotKey`). */
+export const OPEN_UA_LOT_EVENT = 'carsua:open-ua-lot'

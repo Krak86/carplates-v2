@@ -67,6 +67,34 @@ export const PROZORRO_DOCUMENT_BASE = 'https://procedure.prozorro.sale/api/docum
 export const PROZORRO_DOC_ID_RE = /^[0-9a-f]{32}$/
 export const prozorroDocumentUrl = (docId: string): string => `${PROZORRO_DOCUMENT_BASE}${docId}`
 
+/** Why a SETAM lot is for sale, as far as the lot title says (`Конфіскація майна за рішенням суду: …`, `Добровільний продаж. …`). */
+export const AUCTION_REASONS = ['confiscation', 'voluntary'] as const
+export type AuctionReason = (typeof AUCTION_REASONS)[number]
+
+/** The reason named in a SETAM lot title; null when the title says nothing (about nine lots in ten: the feed keeps the prefix only sometimes). */
+export function auctionReason(title: string): AuctionReason | null {
+  if (/конфіск/i.test(title)) return 'confiscation'
+  if (/добровільн/i.test(title)) return 'voluntary'
+  return null
+}
+
+/** The register's catch-all category: it says nothing about the debt, so it is not shown. */
+export const GENERIC_DEBT_CATEGORY = 'документ, що не підпадає під згадані категорії'
+
+/**
+ * What the Unified Register of Debtors (Ministry of Justice, CC BY) says about the enforcement proceeding behind a SETAM lot. Text as
+ * published (Ukrainian). Never carries the debtor: no name, birth date or tax id is stored. Own contract: stays `.nullable().optional()`.
+ */
+export const auctionProceedingSchema = z.object({
+  /** Debt category, e.g. `конфіскація у справі про порушення митних правил`, `стягнення аліментів`. */
+  category: z.string().nullable(),
+  /** Body that issued the writ (court, tax office, ...). */
+  issuer: z.string().nullable(),
+  /** Bailiff office running the proceeding. */
+  bailiffOffice: z.string().nullable()
+})
+export type AuctionProceeding = z.infer<typeof auctionProceedingSchema>
+
 /**
  * A SETAM auction lot (seized / confiscated property, Cabinet Resolution 835) for a car or truck, from the data.gov.ua open
  * data (CC BY). Plate / VIN / make / model / year are parsed from the free-text title and null when it lacks them; the winner
@@ -129,7 +157,12 @@ export const auctionLotSchema = z.object({
   damageText: z.string().nullable().optional(),
   locality: z.string().nullable().optional(),
   /** Photo document ids (32 hex), see `prozorroDocumentUrl`; newest upload order as published. */
-  photos: z.array(z.string()).nullable().optional()
+  photos: z.array(z.string()).nullable().optional(),
+  // SETAM only: why the lot is for sale.
+  /** Reason named in the title; null when it names none. */
+  reason: z.enum(AUCTION_REASONS).nullable().optional(),
+  /** Debtors-register facts of the lot's proceeding; null when the proceeding is not (or no longer) listed there. */
+  proceeding: auctionProceedingSchema.nullable().optional()
 })
 export type AuctionLot = z.infer<typeof auctionLotSchema>
 

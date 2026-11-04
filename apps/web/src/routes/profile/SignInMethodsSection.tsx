@@ -36,7 +36,7 @@ function ProviderRow({ provider, linked, detail }: ProviderRowProps): ReactNode 
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
           <div className="text-sm font-medium">{t(`profile.methods.${provider}`)}</div>
-          <div className="truncate text-sm text-[var(--color-muted)]">
+          <div className="text-sm break-words text-[var(--color-muted)]">
             {linked
               ? [t('profile.methods.linked'), detail].filter(Boolean).join(' · ')
               : t('profile.methods.notLinked')}
@@ -55,7 +55,7 @@ function ProviderRow({ provider, linked, detail }: ProviderRowProps): ReactNode 
       </div>
 
       {linked && confirming && (
-        <div className="mt-2 flex items-center gap-2 text-sm">
+        <div className="mt-2 flex flex-wrap items-center gap-2 text-sm">
           <span>{t('profile.methods.unlinkConfirm')}</span>
           <button
             type="button"

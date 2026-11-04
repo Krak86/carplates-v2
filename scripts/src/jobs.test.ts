@@ -8,6 +8,7 @@ describe('jobs', () => {
     expect(isJobName('wanted-plates')).toBe(true)
     expect(isJobName('auctions')).toBe(true)
     expect(isJobName('prozorro-auctions')).toBe(true)
+    expect(isJobName('auction-proceedings')).toBe(true)
     expect(isJobName('dtp-patrol')).toBe(true)
     expect(isJobName('dtp-hazards')).toBe(true)
     expect(isJobName('rdw-recalls')).toBe(true)

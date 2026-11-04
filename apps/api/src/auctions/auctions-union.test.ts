@@ -1,7 +1,7 @@
 import { auctionListLotSchema } from '@carplates/shared'
 import { describe, expect, it } from 'vitest'
 
-import { lotMonth, photoDocIds, unionRowToLot } from './auctions-union.js'
+import { lotMonth, photoDocIds, proceedingOf, unionRowToLot } from './auctions-union.js'
 import { PHOTO_DOC, prozorroRow, unionRow } from './auctions-union.fixtures.js'
 
 describe('union rows', () => {
@@ -56,5 +56,32 @@ describe('union rows', () => {
     expect(lotMonth('auctions-31-08-2024.csv')).toBe('2024-08')
     expect(lotMonth('whatever.csv')).toBeNull()
     expect(lotMonth(null)).toBeNull()
+  })
+
+  it('adds the reason and the debtors-register facts to a SETAM lot, never to a Prozorro one', () => {
+    const lot = unionRowToLot(
+      unionRow({
+        title: 'Конфіскація майна за рішенням суду: Автомобіль',
+        debt_category: 'стягнення аліментів',
+        writ_issuer: 'Дрогобицький міськрайонний суд',
+        bailiff_office: 'Дрогобицький ВДВС'
+      })
+    )
+    expect(auctionListLotSchema.safeParse(lot).error?.issues).toBeUndefined()
+    expect(lot.reason).toBe('confiscation')
+    expect(lot.proceeding).toEqual({
+      category: 'стягнення аліментів',
+      issuer: 'Дрогобицький міськрайонний суд',
+      bailiffOffice: 'Дрогобицький ВДВС'
+    })
+    expect(unionRowToLot(prozorroRow())).toMatchObject({ reason: null, proceeding: null })
+  })
+
+  it('drops the register catch-all category and returns null when nothing is known', () => {
+    expect(proceedingOf(unionRow({ debt_category: 'документ, що не підпадає під згадані категорії' }))).toBeNull()
+    expect(
+      proceedingOf(unionRow({ debt_category: 'документ, що не підпадає під згадані категорії', writ_issuer: 'Суд' }))
+    ).toEqual({ category: null, issuer: 'Суд', bailiffOffice: null })
+    expect(proceedingOf(unionRow())).toBeNull()
   })
 })

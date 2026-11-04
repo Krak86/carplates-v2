@@ -214,5 +214,5 @@ Minimal variant (registry + the five crash-test sources only):
 `pnpm install && pnpm db:up && pnpm db:migrate && pnpm ingest:full && pnpm ingest:euroncap:csv && pnpm ingest:jncap:csv && pnpm ingest:cncap:csv && pnpm ingest:kncap:csv && pnpm ingest:iihs:csv && pnpm dev`.
 
 Afterwards, once by hand and optional, the live feeds that have no seed (the VPS cron runs them daily/monthly, see SCHEDULE.md):
-`pnpm ingest:wanted`, `ingest:wanted-plates`, `ingest:auctions --all`, `ingest:prozorro`, `ingest:news`, `ingest:social`, `ingest:dtp:patrol`,
+`pnpm ingest:wanted`, `ingest:wanted-plates`, `ingest:auctions --all`, `ingest:prozorro`, `ingest:auction-proceedings [--dry-run --file x.zip]`, `ingest:news`, `ingest:social`, `ingest:dtp:patrol`,
 `ingest:rdw-recalls`, `ingest:ca-recalls`. Env variables and API keys: README "Environment reference".

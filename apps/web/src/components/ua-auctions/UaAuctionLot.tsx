@@ -7,6 +7,7 @@ import {
   OPEN_STATUS,
   formatLotMonth,
   formatPrice,
+  lotKey,
   lotLink,
   lotMonthOf,
   lotNumber,
@@ -23,6 +24,9 @@ type Props = {
   currency: Currency
   fx: FxResponse | null
 }
+
+/** A register category starts lower-case ("стягнення аліментів"); the row reads better capitalised. */
+const upperFirst = (v: string | null | undefined): string | null => (v ? v.charAt(0).toUpperCase() + v.slice(1) : null)
 
 function Row({ label, value }: { label: string; value: ReactNode }): ReactNode {
   if (!value) return null
@@ -69,6 +73,10 @@ export default function UaAuctionLot({ lot, currency, fx }: Props): ReactNode {
           }
         />
         <Row label={t('uaAuctions.proceedingNo')} value={lot.proceedingNo} />
+        <Row label={t('uaAuctions.reason')} value={lot.reason ? t(`uaAuctions.reason.${lot.reason}`) : null} />
+        <Row label={t('uaAuctions.debtCategory')} value={upperFirst(lot.proceeding?.category)} />
+        <Row label={t('uaAuctions.writIssuer')} value={lot.proceeding?.issuer} />
+        <Row label={t('uaAuctions.bailiffOffice')} value={lot.proceeding?.bailiffOffice} />
         <Row label={t('uaAuctions.vehicle')} value={vehicleName || null} />
         {/* A Prozorro lot has no car category (the feed puts the group there), its group chip is in the header. */}
         <Row label={t('uaAuctions.category')} value={isProzorro ? null : lot.category} />
@@ -100,6 +108,8 @@ export default function UaAuctionLot({ lot, currency, fx }: Props): ReactNode {
         </p>
       )}
 
+      {lot.proceeding && <p className="mt-1.5 text-xs text-[var(--color-muted)]">{t('uaAuctions.registerNote')}</p>}
+
       <UaAuctionPhotos docIds={lot.photos ?? []} label={vehicleName || lotNumber(lot)} />
 
       <p className="mt-1.5 text-xs text-[var(--color-muted)]">
@@ -108,38 +118,30 @@ export default function UaAuctionLot({ lot, currency, fx }: Props): ReactNode {
     </>
   )
 
-  if (!lot.sold && !isOpen) {
-    return (
-      <details className="rounded-lg border border-[var(--color-border)] bg-[var(--color-border)]/20 px-3 py-2 text-sm">
-        <summary className="cursor-pointer">
-          <span className="font-semibold">
-            {icon} {month ? `${month} · ` : ''}
-            {verdict}
-          </span>
-          <span className="text-[var(--color-muted)]">
-            {` · ${statusLabel}`}
-            {lot.startPrice !== null && ` · ${formatPrice(lot.startPrice, currency, fx, locale)}`}
-          </span>{' '}
-          <UaAuctionChips lot={lot} />
-        </summary>
-        {details}
-      </details>
-    )
-  }
+  // Every lot collapses to its summary line; a sold or open lot starts expanded (the ones that matter), the rest closed.
+  const expanded = lot.sold || isOpen
 
   return (
-    <div
+    <details
+      id={`ua-lot-${lotKey(lot)}`}
+      open={expanded}
       className={cn(
-        'rounded-lg border p-3 text-sm',
+        'scroll-mt-20 rounded-lg border px-3 py-2 text-sm',
         lot.sold ? 'border-green-600/60 bg-green-600/10' : 'border-[var(--color-border)] bg-[var(--color-border)]/20'
       )}
     >
-      <p className="font-semibold">
-        {icon} {month ? `${month} · ` : ''}
-        {verdict}
-        {` · ${statusLabel}`} <UaAuctionChips lot={lot} />
-      </p>
+      <summary className="cursor-pointer">
+        <span className="font-semibold">
+          {icon} {month ? `${month} · ` : ''}
+          {verdict}
+        </span>
+        <span className={expanded ? undefined : 'text-[var(--color-muted)]'}>
+          {` · ${statusLabel}`}
+          {!expanded && lot.startPrice !== null && ` · ${formatPrice(lot.startPrice, currency, fx, locale)}`}
+        </span>{' '}
+        <UaAuctionChips lot={lot} />
+      </summary>
       {details}
-    </div>
+    </details>
   )
 }

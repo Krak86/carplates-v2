@@ -42,6 +42,22 @@ export const DATASETS: readonly Dataset[] = [
     job: 'auctions',
     refreshedOn: '2026-10-31'
   },
+  {
+    id: 'prozorroAuctions',
+    name: 'Prozorro.Sale: vehicle auctions',
+    to: '/auctions',
+    cadence: 'daily',
+    job: 'prozorro-auctions',
+    refreshedOn: '2026-11-02'
+  },
+  {
+    id: 'auctionProceedings',
+    name: 'Ministry of Justice: Unified Register of Debtors (reason for SETAM lots)',
+    to: '/auctions',
+    cadence: 'weekly',
+    job: 'auction-proceedings',
+    refreshedOn: '2026-11-04'
+  },
   { id: 'news', name: 'News (RSS)', to: '/news', cadence: 'daily', job: 'news', refreshedOn: '2026-10-28' },
   {
     id: 'social',

@@ -17,6 +17,7 @@ import {
   lotLink,
   lotMonthOf,
   lotNumber,
+  OPEN_UA_LOT_EVENT,
   timelineLots
 } from '@/components/ua-auctions/helpers'
 import { cn } from '@/lib/cn'
@@ -148,7 +149,19 @@ export default function RegistrationTimeline({ actions, currentPlate, auctionKey
             >
               {t('uaAuctions.lotNo')} {lotNumber(lot)} ↗<span className="sr-only">{t('field.opensNewTab')}</span>
             </a>
-          )}
+          )}{' '}
+          <a
+            href={`#ua-lot-${lotKey(lot)}`}
+            onClick={e => {
+              e.preventDefault()
+              window.dispatchEvent(new CustomEvent(OPEN_UA_LOT_EVENT, { detail: lotKey(lot) }))
+            }}
+            title={t('uaAuctions.jumpToLot')}
+            className="text-[var(--color-primary)]"
+          >
+            <span aria-hidden>↓</span>
+            <span className="sr-only">{t('uaAuctions.jumpToLot')}</span>
+          </a>
         </div>
       )
     } satisfies TimelineItem

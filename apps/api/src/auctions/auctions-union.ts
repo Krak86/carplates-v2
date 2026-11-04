@@ -1,5 +1,18 @@
-import { PROZORRO_DOC_ID_RE, PROZORRO_STATUS_LABELS, prozorroAuctionUrl, setamLotUrl } from '@carplates/shared'
-import type { AuctionGroup, AuctionListLot, AuctionSource, ProzorroSellerKind } from '@carplates/shared'
+import {
+  GENERIC_DEBT_CATEGORY,
+  PROZORRO_DOC_ID_RE,
+  PROZORRO_STATUS_LABELS,
+  auctionReason,
+  prozorroAuctionUrl,
+  setamLotUrl
+} from '@carplates/shared'
+import type {
+  AuctionGroup,
+  AuctionListLot,
+  AuctionProceeding,
+  AuctionSource,
+  ProzorroSellerKind
+} from '@carplates/shared'
 import { sql } from 'drizzle-orm'
 import type { SQL } from 'drizzle-orm'
 
@@ -31,10 +44,10 @@ export const unionLots: SQL = sql`
          'setam'::text AS grp,
          lot_no::int AS lot_no,
          NULL::text AS auction_id,
-         proceeding_no,
+         al.proceeding_no,
          status,
          NULL::text AS raw_status,
-         category,
+         al.category,
          region,
          start_price::float8 AS start_price,
          sale_price::float8 AS sale_price,
@@ -44,16 +57,18 @@ export const unionLots: SQL = sql`
          title_raw AS title,
          plate,
          vin,
-         coalesce(${SETAM_MONTH_END}, first_seen_at) AS when_at,
+         coalesce(${SETAM_MONTH_END}, al.first_seen_at) AS when_at,
          source_file,
-         first_seen_at,
-         updated_at,
+         al.first_seen_at,
+         al.updated_at,
          NULL::text AS selling_method, NULL::text AS seller_name, NULL::text AS seller_kind, NULL::text AS auction_type,
          NULL::timestamptz AS auction_start, NULL::float8 AS minimal_step, NULL::float8 AS guarantee,
          NULL::text AS color, NULL::int AS kilometrage, NULL::text AS fuel, NULL::int AS engine_cc,
          NULL::text AS transmission, NULL::text AS condition, NULL::boolean AS damaged, NULL::text AS damage_text,
-         NULL::text AS locality, '[]'::jsonb AS photo_urls
-  FROM registry.auction_lots
+         NULL::text AS locality, '[]'::jsonb AS photo_urls,
+         ap.category AS debt_category, ap.issuer AS writ_issuer, ap.bailiff_office
+  FROM registry.auction_lots al
+  LEFT JOIN registry.auction_proceedings ap ON ap.proceeding_no = al.proceeding_no
   UNION ALL
   SELECT 'prozorro'::text,
          CASE WHEN selling_method ~* '^(small|large)?privatization' THEN 'privatization'
@@ -82,7 +97,8 @@ export const unionLots: SQL = sql`
          ${PROZORRO_START}, minimal_step::float8, guarantee::float8,
          color, kilometrage, fuel, engine_cc,
          transmission, condition, damaged, damage_text,
-         locality, photo_urls
+         locality, photo_urls,
+         NULL::text, NULL::text, NULL::text
   FROM registry.prozorro_auctions`
 
 /** `source` / `group` filters as SQL over the union (`l`), whitelisted values only. */
@@ -131,6 +147,10 @@ export type UnionRow = {
   damage_text: string | null
   locality: string | null
   photo_urls: string[] | null
+  // Debtors register (SETAM lots only); optional so a hand-built row without them stays valid.
+  debt_category?: string | null
+  writ_issuer?: string | null
+  bailiff_office?: string | null
 }
 
 /** `auctions-31-08-2024.csv` -> `2024-08`; null for any other file name. */
@@ -145,6 +165,14 @@ const iso = (v: Date | string): string => new Date(v).toISOString()
 export function photoDocIds(urls: readonly string[] | null): string[] {
   const ids = (urls ?? []).map(u => u.split('/').pop() ?? '').filter(id => PROZORRO_DOC_ID_RE.test(id))
   return [...new Set(ids)]
+}
+
+/** The register facts of a SETAM lot; null without any (the generic catch-all category counts as nothing). */
+export function proceedingOf(r: UnionRow): AuctionProceeding | null {
+  const category = r.debt_category && r.debt_category !== GENERIC_DEBT_CATEGORY ? r.debt_category : null
+  const issuer = r.writ_issuer ?? null
+  const bailiffOffice = r.bailiff_office ?? null
+  return category || issuer || bailiffOffice ? { category, issuer, bailiffOffice } : null
 }
 
 /** A union row as a list lot (the card adds `matchedBy`). Prozorro: no lot number, no proceeding, `sold` = a winning award exists. */
@@ -190,6 +218,8 @@ export function unionRowToLot(r: UnionRow): AuctionListLot {
     damaged: r.damaged,
     damageText: r.damage_text,
     locality: r.locality,
-    photos: photoDocIds(r.photo_urls)
+    photos: photoDocIds(r.photo_urls),
+    reason: r.source === 'setam' ? auctionReason(r.title) : null,
+    proceeding: proceedingOf(r)
   }
 }
