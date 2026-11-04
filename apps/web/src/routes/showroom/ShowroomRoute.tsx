@@ -21,6 +21,7 @@ import { showroomQuery } from '@/lib/queries'
 import ShowroomAr from '@/routes/showroom/ShowroomAr'
 import ShowroomCard from '@/routes/showroom/ShowroomCard'
 import ShowroomCardSkeleton from '@/routes/showroom/ShowroomCardSkeleton'
+import ShowroomGame from '@/routes/showroom/ShowroomGame'
 import ShowroomViewer from '@/routes/showroom/ShowroomViewer'
 import ShowroomViewToggle from '@/routes/showroom/ShowroomViewToggle'
 import { SEARCH_DEBOUNCE_MS, showroomGridClass } from '@/routes/showroom/helpers'
@@ -114,6 +115,8 @@ export default function ShowroomRoute(): ReactNode {
         <p className="font-medium text-primary">{t('showroom.tagline')}</p>
         <p className="text-muted">{t('showroom.intro')}</p>
       </Card>
+
+      <ShowroomGame />
 
       <ShowroomAr onShow3d={() => setKind('3d')} />
 

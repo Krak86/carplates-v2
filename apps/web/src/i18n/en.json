@@ -4802,5 +4802,9 @@
   "showroom.ar.title": "AR and XR",
   "showroom.ar.badge": "Growing",
   "showroom.ar.desc": "Put a car at full size in your own driveway. Many 3D models here can already be placed in the real world on a phone: open one and look for the AR icon in the viewer (it appears when your device and the model author allow it). Our own AR and XR views are next.",
-  "showroom.ar.button": "Show 3D models to try in AR"
+  "showroom.ar.button": "Show 3D models to try in AR",
+  "showroom.game.title": "Drive one: Underground 2",
+  "showroom.game.badge": "Fan project",
+  "showroom.game.desc": "Need for Speed: Underground 2 (2004) running in the browser, with free roam, online races and touch or controller support. Best on desktop Chrome or Firefox; phones work but are not the target. It opens on nfsu2.xyz in a new tab (it cannot be embedded here), and it is an unofficial fan project that we only link to.",
+  "showroom.game.button": "Play on nfsu2.xyz"
 }
