@@ -27,6 +27,9 @@ import { useUiStore } from '@/store/ui-store'
 const loadSidebar = () => import('@/components/Sidebar')
 const Sidebar = lazy(loadSidebar)
 const LiveBackground = lazy(() => import('@/components/LiveBackground'))
+const HASH_SCROLL_MS = 100
+const HASH_SCROLL_TRIES = 30
+
 const ScrollButtons = lazy(() => import('@/components/ScrollButtons'))
 
 type Props = {
@@ -44,7 +47,7 @@ export default function Layout({ children }: Props): ReactNode {
   const hasScrolled = useScrolledOnRoute()
   useUserSettingsActions()
   useApplyLayoutFromUrl()
-  const { pathname } = useLocation()
+  const { pathname, hash } = useLocation()
   // Sidebar is lazy-loaded (not part of the LCP path) — stay unmounted until
   // the first open, then keep mounted so close gets a transition instead of a hard unmount.
   const [hasOpened, setHasOpened] = useState(false)
@@ -60,9 +63,21 @@ export default function Layout({ children }: Props): ReactNode {
   }, [pathname])
 
   // Following a plate/VIN link otherwise keeps the old scroll offset — land on the new result's top.
+  // A `#id` link (e.g. /read/auctions#world) lands on that element instead; the page is a lazy chunk, so wait for it to render.
   useEffect(() => {
-    window.scrollTo({ top: 0 })
-  }, [pathname])
+    const id = safeDecode(hash.slice(1))
+    if (!id) {
+      window.scrollTo({ top: 0 })
+      return
+    }
+    let tries = 0
+    const timer = window.setInterval(() => {
+      const el = document.getElementById(id)
+      if (el) el.scrollIntoView({ block: 'start' })
+      if (el || ++tries >= HASH_SCROLL_TRIES) window.clearInterval(timer)
+    }, HASH_SCROLL_MS)
+    return () => window.clearInterval(timer)
+  }, [pathname, hash])
 
   useEffect(() => {
     if (drawerOpen) setHasOpened(true)
@@ -181,4 +196,12 @@ export default function Layout({ children }: Props): ReactNode {
       />
     </div>
   )
+}
+
+function safeDecode(value: string): string {
+  try {
+    return decodeURIComponent(value)
+  } catch {
+    return value
+  }
 }

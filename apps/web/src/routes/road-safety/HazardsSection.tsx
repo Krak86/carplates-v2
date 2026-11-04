@@ -112,58 +112,57 @@ export default function HazardsSection({ year, regionNames }: Props): ReactNode 
         <ExpandableList
           className="divide-y divide-[var(--color-border)]/40"
           items={rows.map((h, i) => (
-            <li
-              key={`${h.roadCode}-${h.kmStart}-${i}`}
-              className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5 py-1.5 text-sm"
-            >
-              <span className="font-medium">{h.roadCode || t('roadSafety.hazards.bypass')}</span>
+            <li key={`${h.roadCode}-${h.kmStart}-${i}`} className="py-2 text-sm">
+              <div className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
+                <span className="font-semibold">{h.roadCode || t('roadSafety.hazards.bypass')}</span>
 
-              <span className="min-w-0 flex-1 truncate text-[var(--color-muted)]" title={h.roadName}>
-                {h.roadName}
-              </span>
+                {h.kmStart !== null && (
+                  <span className="tabular-nums">
+                    km {kmLabel(h.kmStart)}
+                    {h.kmEnd !== null && h.kmEnd !== h.kmStart ? ` - ${kmLabel(h.kmEnd)}` : ''}
+                  </span>
+                )}
 
-              {h.kmStart !== null && (
-                <span className="tabular-nums">
-                  km {kmLabel(h.kmStart)}
-                  {h.kmEnd !== null && h.kmEnd !== h.kmStart ? ` - ${kmLabel(h.kmEnd)}` : ''}
-                </span>
-              )}
+                {h.crashes3y !== null && (
+                  <span className="ml-auto font-medium tabular-nums">
+                    {t('roadSafety.hazards.crashes3y', { count: numberFormat.format(h.crashes3y) })}
+                  </span>
+                )}
+              </div>
 
-              {h.crashes3y !== null && (
-                <span className="tabular-nums">
-                  {t('roadSafety.hazards.crashes3y', { count: numberFormat.format(h.crashes3y) })}
-                </span>
-              )}
+              {h.roadName && <div className="mt-0.5 break-words text-[var(--color-muted)]">{h.roadName}</div>}
 
-              {!region && <span className="text-xs text-[var(--color-muted)]">{h.region}</span>}
+              <div className="mt-0.5 flex flex-wrap items-baseline gap-x-3 gap-y-1 text-xs">
+                {!region && <span className="text-[var(--color-muted)]">{h.region}</span>}
 
-              {distance(h) !== null && (
-                <span className="text-xs text-[var(--color-muted)] tabular-nums">
-                  {t('roadSafety.hazards.distance', { km: numberFormat.format(Math.round(distance(h) ?? 0)) })}
-                </span>
-              )}
+                {distance(h) !== null && (
+                  <span className="text-[var(--color-muted)] tabular-nums">
+                    {t('roadSafety.hazards.distance', { km: numberFormat.format(Math.round(distance(h) ?? 0)) })}
+                  </span>
+                )}
 
-              {h.lat !== null && h.lon !== null && (
-                <>
-                  <a
-                    href={osmUrl(h.lat, h.lon)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-xs underline"
-                  >
-                    {t('roadSafety.hazards.map')}
-                  </a>
+                {h.lat !== null && h.lon !== null && (
+                  <>
+                    <a
+                      href={osmUrl(h.lat, h.lon)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[var(--color-primary)] underline"
+                    >
+                      {t('roadSafety.hazards.map')}
+                    </a>
 
-                  <a
-                    href={streetViewUrl(h.lat, h.lon)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-xs underline"
-                  >
-                    {t('roadSafety.hazards.streetView')}
-                  </a>
-                </>
-              )}
+                    <a
+                      href={streetViewUrl(h.lat, h.lon)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[var(--color-primary)] underline"
+                    >
+                      {t('roadSafety.hazards.streetView')}
+                    </a>
+                  </>
+                )}
+              </div>
             </li>
           ))}
         />
