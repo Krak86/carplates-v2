@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import type { AlarmRegion } from '@carplates/shared'
 
@@ -7,7 +8,9 @@ import type { AlarmGeoProperties } from '@/routes/alarms/geo-match'
 
 const load = (layer: string): { properties: AlarmGeoProperties }[] =>
   (
-    JSON.parse(readFileSync(`public/ukraine-alarm-${layer}.geojson`, 'utf8')) as {
+    JSON.parse(
+      readFileSync(resolve(import.meta.dirname, '../../../public/ukraine-alarm-' + layer + '.geojson'), 'utf8')
+    ) as {
       features: { properties: AlarmGeoProperties }[]
     }
   ).features
