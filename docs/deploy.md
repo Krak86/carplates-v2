@@ -353,7 +353,7 @@ Per-model lookups (`/api/vdb`, `/api/rdw`, `/api/rdw/recalls`, `/api/wiki`, `/ap
 `Cache-Control: public, max-age=3600, s-maxage=86400` (recalls `max-age=900, s-maxage=3600`; `lookupCacheInterceptor` in `common/cache.ts`), and
 `no-store` with `refresh=true`; `/api/vdb/stats` reuses the 5 min rollup value. A second Cache Rule "Cache model lookups" (created 2026-10-29, verified MISS → HIT; `refresh=true` stays DYNAMIC)
 makes it effective: expression
-`(http.host eq "carsua.app" and http.request.uri.path in {"/api/vdb" "/api/vdb/stats" "/api/rdw" "/api/rdw/recalls" "/api/wiki" "/api/wiki/image" "/api/tuning" "/api/showroom" "/api/showroom/detail"} and not http.request.uri.query contains "refresh")`,
+`(http.host eq "carsua.app" and (http.request.uri.path in {"/api/vdb" "/api/vdb/stats" "/api/rdw" "/api/rdw/recalls" "/api/wiki" "/api/wiki/image" "/api/tuning" "/api/showroom" "/api/showroom/detail"} or starts_with(http.request.uri.path, "/api/catalog/")) and not http.request.uri.query contains "refresh")` (live since 2026-11-04, MISS then HIT on tuning and showroom),
 "Eligible for cache", Edge TTL "Use cache-control header if present, bypass cache if not", Browser TTL "Respect origin TTL", cache key left at default
 (full path + query string; do **not** enable "Ignore query string"). `/api/plate/*` and `/api/vin/*` stay uncached (per vehicle). A new cacheable endpoint must be added to the matching rule expression too; verify MISS then HIT
 (first request MISS or EXPIRED, second HIT; `refresh=true` stays DYNAMIC).
