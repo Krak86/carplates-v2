@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
+import { Link } from 'react-router'
 
 import { alarmsQuery } from '@/lib/queries'
 
@@ -23,13 +24,15 @@ export default function RegionAlarmChip({ region }: Props): ReactNode {
     .join(' ')
 
   return (
-    <span
+    <Link
+      viewTransition
+      to="/alarms"
       title={title}
-      className="inline-flex animate-chip-in items-center gap-1 rounded-full border chip-tone py-0.5 pr-2 pl-2 text-xs text-[var(--color-fg)] transition-colors chip-safety"
+      className="inline-flex animate-chip-in items-center gap-1 rounded-full border chip-tone py-0.5 pr-2 pl-2 text-xs text-fg transition-colors chip-safety hover:brightness-110"
     >
       <span aria-hidden>🚨</span>
       {alarm.scope === 'full' ? t('result.alarmFull') : t('result.alarmPartial')}
       {!!alarm.level && <span className="opacity-70">({alarm.level})</span>}
-    </span>
+    </Link>
   )
 }
