@@ -31,6 +31,9 @@ export const JOBS = {
   // Manual only (no cron entry): first load of the road-safety tables from the seed CSVs baked into the image (the only seed-data the
   // image carries, .dockerignore); insert-only, safe to repeat. Then the two jobs above keep them current.
   'dtp-seed': { command: 'tsx src/dtp-csv.ts', timeoutMin: 5 },
+  // Manual only (no cron entry yet): downloads the MIT siren dataset CSVs from GitHub and replaces registry.alarm_history_daily in one transaction
+  // (the seed CSV is not in the image). Run once after the migration 0098 deploy; a daily refresh cron is not built.
+  'alarm-history': { command: 'tsx src/ingest-alarm-history.ts', timeoutMin: 10 },
   // Recall registers that refresh themselves (no seed CSV involved): RDW campaigns are upserted by reference code (seconds, the model links are
   // replaced wholesale), Transport Canada replaces both tables after a ~200 MB download (`--refresh`: never trust a cached copy). The seed CSVs
   // are still re-exported by hand (`pnpm export:rdw-recalls:csv`, `export:ca-recalls:csv`) after review.
