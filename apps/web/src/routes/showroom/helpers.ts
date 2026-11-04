@@ -10,7 +10,8 @@ export function itemKinds(item: ShowroomItem): { kind: ShowroomKind; n: number }
   return [
     { kind: '360' as const, n: item.n360 },
     { kind: '3d' as const, n: item.n3d },
-    { kind: 'tuning' as const, n: item.nTuning }
+    { kind: 'tuning' as const, n: item.nTuning },
+    { kind: 'oem' as const, n: item.nOem }
   ].filter(k => k.n > 0)
 }
 

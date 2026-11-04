@@ -10,6 +10,7 @@ const item = (over: Partial<ShowroomItem> = {}): ShowroomItem => ({
   n360: 0,
   n3d: 0,
   nTuning: 0,
+  nOem: 0,
   thumbUrl: null,
   ...over
 })

@@ -1023,6 +1023,7 @@ export {
 } from './tuning3d.js'
 export {
   DEFAULT_SHOWROOM_FILTER,
+  OEM_LINK_KINDS,
   SHOWROOM_FILTERS,
   SHOWROOM_KINDS,
   SHOWROOM_PAGE_SIZE,
@@ -1032,12 +1033,15 @@ export {
   showroomItemSchema,
   showroomListSchema,
   showroomMatches,
+  showroomOemLinkSchema,
   showroomTitleize,
   showroomTuningPageSchema,
+  type OemLinkKind,
   type ShowroomDetail,
   type ShowroomFilter,
   type ShowroomItem,
   type ShowroomKind,
   type ShowroomList,
+  type ShowroomOemLink,
   type ShowroomTuningPage
 } from './showroom.js'

@@ -1254,6 +1254,8 @@ Write-up: `docs/plan-done.md` "Market offers (CarAPIS)"; conventions: `docs/feat
 ✅ One searchable page for all 360° / 3D / 3DTuning cars, opened in the existing modals; AR/XR teaser card; linked from the sidebar and home quick links. Write-up: `docs/plan-done.md` "Virtual showroom", conventions: `docs/features-reference.md` "Virtual showroom".
 
 - [ ] **After deploy:** add `/api/showroom` and `/api/showroom/detail` to the Cloudflare Cache Rule "Cache model lookups" (expression in `docs/deploy.md`); open `/showroom`, search "bmw", open a 360, a 3D and a Customize entry.
+- ✅ Showroom kind `oem` (official configurator / model-page links: Morgan, Lucid, Koenigsegg, Aston Martin, Lamborghini; 29 links). Write-up: `docs/plan-done.md` "Official OEM links".
+- [ ] **After deploy:** run `pnpm ingest:oem-links:csv` on the VPS (new table); more makes (BMW, Kia, VW, Hyundai, Skoda) need a browser-based probe first (their configurators are per-market apps).
 - [ ] Release note (`releases.ts` + `latest.ts`) and `AboutRoute.tsx` feature entry for the showroom; own AR/XR views later.
 
 ## Later, conditional

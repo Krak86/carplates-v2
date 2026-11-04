@@ -6,7 +6,7 @@ import { model3dSchema, model360Schema, winner360Schema } from './schemas.js'
  * Virtual showroom (`/showroom`): every make/model that has an immersive view, whatever the source.
  * New immersive kinds (AR, XR, ...) are added to `SHOWROOM_KINDS` and to the counts of `showroomItemSchema`.
  */
-export const SHOWROOM_KINDS = ['360', '3d', 'tuning'] as const
+export const SHOWROOM_KINDS = ['360', '3d', 'tuning', 'oem'] as const
 export type ShowroomKind = (typeof SHOWROOM_KINDS)[number]
 
 /** A list filter: one kind, or everything. */
@@ -28,6 +28,8 @@ export const showroomItemSchema = z.object({
   n360: z.number().int().nonnegative(),
   n3d: z.number().int().nonnegative(),
   nTuning: z.number().int().nonnegative(),
+  /** Official manufacturer links (configurator, model page). */
+  nOem: z.number().int().nonnegative(),
   thumbUrl: z.string().nullable()
 })
 export type ShowroomItem = z.infer<typeof showroomItemSchema>
@@ -40,7 +42,8 @@ export const showroomListSchema = z.object({
     all: z.number().int().nonnegative(),
     '360': z.number().int().nonnegative(),
     '3d': z.number().int().nonnegative(),
-    tuning: z.number().int().nonnegative()
+    tuning: z.number().int().nonnegative(),
+    oem: z.number().int().nonnegative()
   })
 })
 export type ShowroomList = z.infer<typeof showroomListSchema>
@@ -53,25 +56,39 @@ export const showroomTuningPageSchema = z.object({
 })
 export type ShowroomTuningPage = z.infer<typeof showroomTuningPageSchema>
 
+/** Kinds of official link: the manufacturer's own configurator, or just its model page. */
+export const OEM_LINK_KINDS = ['configurator', 'model-page'] as const
+export type OemLinkKind = (typeof OEM_LINK_KINDS)[number]
+
+export const showroomOemLinkSchema = z.object({
+  url: z.string(),
+  variant: z.string(),
+  kind: z.enum(OEM_LINK_KINDS)
+})
+export type ShowroomOemLink = z.infer<typeof showroomOemLinkSchema>
+
 /** Everything one showroom entry opens: the same shapes the car-card modals take. */
 export const showroomDetailSchema = z.object({
   label: z.string(),
   models3d: z.array(model3dSchema),
   models360: z.array(model360Schema),
   winner: z.array(winner360Schema),
-  tuning: z.array(showroomTuningPageSchema)
+  tuning: z.array(showroomTuningPageSchema),
+  oem: z.array(showroomOemLinkSchema)
 })
 export type ShowroomDetail = z.infer<typeof showroomDetailSchema>
 
 /** Does the item have this kind? */
 export const showroomHas = (item: ShowroomItem, kind: ShowroomFilter): boolean =>
   kind === 'all'
-    ? item.n360 + item.n3d + item.nTuning > 0
+    ? item.n360 + item.n3d + item.nTuning + item.nOem > 0
     : kind === '360'
       ? item.n360 > 0
       : kind === '3d'
         ? item.n3d > 0
-        : item.nTuning > 0
+        : kind === 'tuning'
+          ? item.nTuning > 0
+          : item.nOem > 0
 
 /** Every search word must appear in the label or the slugs (case and punctuation ignored). */
 export function showroomMatches(item: ShowroomItem, query: string): boolean {

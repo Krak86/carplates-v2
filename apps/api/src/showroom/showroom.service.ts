@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common'
-import { carModels360, carModels3d, tuningLinks, winner360 } from '@carplates/db'
+import { carModels360, carModels3d, oemLinks, tuningLinks, winner360 } from '@carplates/db'
 import {
   MAX_MODELS_3D,
   SHOWROOM_PAGE_SIZE,
@@ -38,7 +38,8 @@ export class ShowroomService {
       all: all.length,
       '360': all.filter(i => showroomHas(i, '360')).length,
       '3d': all.filter(i => showroomHas(i, '3d')).length,
-      tuning: all.filter(i => showroomHas(i, 'tuning')).length
+      tuning: all.filter(i => showroomHas(i, 'tuning')).length,
+      oem: all.filter(i => showroomHas(i, 'oem')).length
     }
     const hits = all.filter(i => showroomHas(i, kind) && (!q || showroomMatches(i, q)))
     return { items: hits.slice(offset, offset + limit), total: hits.length, counts }
@@ -48,7 +49,7 @@ export class ShowroomService {
   async detail(brandSlug: string, modelSlug: string): Promise<ShowroomDetail | null> {
     const { db } = this.dbService
 
-    const [rows3d, rows360, rowsWinner, tuningRows] = await Promise.all([
+    const [rows3d, rows360, rowsWinner, tuningRows, oemRows] = await Promise.all([
       db
         .select()
         .from(carModels3d)
@@ -62,8 +63,15 @@ export class ShowroomService {
         .orderBy(desc(carModels360.id)),
       db.select().from(winner360).where(eq(winner360.brandSlug, brandSlug)),
       // ~2.5k small rows and slugs differ in punctuation (`alfa-romeo` / `alfa.romeo`), so they are compared squashed, in memory.
-      db.select().from(tuningLinks)
+      db.select().from(tuningLinks),
+      // A few dozen rows; compared squashed, in memory, like the tuning pages.
+      db.select().from(oemLinks)
     ])
+    const oem = oemRows
+      .filter(
+        r => tuningMakeKey(r.makeSlug) === tuningMakeKey(brandSlug) && tuningKey(r.modelSlug) === tuningKey(modelSlug)
+      )
+      .sort((a, b) => a.variant.localeCompare(b.variant) || a.kind.localeCompare(b.kind))
     const winnerRows = rowsWinner
       .filter(r => winner360ModelSlug(r.model) === modelSlug)
       .sort((a, b) => (b.year ?? 0) - (a.year ?? 0))
@@ -72,7 +80,7 @@ export class ShowroomService {
         r => tuningMakeKey(r.makeSlug) === tuningMakeKey(brandSlug) && tuningKey(r.modelSlug) === tuningKey(modelSlug)
       )
       .sort((a, b) => b.startYear - a.startYear)
-    if (rows3d.length + rows360.length + winnerRows.length + tuning.length === 0) return null
+    if (rows3d.length + rows360.length + winnerRows.length + tuning.length + oem.length === 0) return null
 
     const entry = (await this.catalog()).find(i => keyOf(i.brandSlug, i.modelSlug) === keyOf(brandSlug, modelSlug))
     return {
@@ -97,7 +105,10 @@ export class ShowroomService {
         title: r.title
       })),
       winner: winnerRows.map(r => ({ photoRecid: r.photoRecid, year: r.year, version: r.version, fuel: r.fuel })),
-      tuning: tuning.map(r => ({ path: r.path, body: r.body, generation: r.generation, startYear: r.startYear }))
+      tuning: tuning.map(r => ({ path: r.path, body: r.body, generation: r.generation, startYear: r.startYear })),
+      oem: oem.flatMap(r =>
+        r.kind === 'configurator' || r.kind === 'model-page' ? [{ url: r.url, variant: r.variant, kind: r.kind }] : []
+      )
     }
   }
 
@@ -106,7 +117,7 @@ export class ShowroomService {
     if (this.cached && Date.now() - this.cached.at < CATALOG_TTL_MS) return this.cached.items
     const { db } = this.dbService
 
-    const [rows3d, rows360, rowsWinner, rowsTuning] = await Promise.all([
+    const [rows3d, rows360, rowsWinner, rowsTuning, rowsOem] = await Promise.all([
       db
         .select({
           brandSlug: carModels3d.brandSlug,
@@ -130,7 +141,11 @@ export class ShowroomService {
       db
         .select({ makeSlug: tuningLinks.makeSlug, modelSlug: tuningLinks.modelSlug, n: count() })
         .from(tuningLinks)
-        .groupBy(tuningLinks.makeSlug, tuningLinks.modelSlug)
+        .groupBy(tuningLinks.makeSlug, tuningLinks.modelSlug),
+      db
+        .select({ makeSlug: oemLinks.makeSlug, modelSlug: oemLinks.modelSlug, n: count() })
+        .from(oemLinks)
+        .groupBy(oemLinks.makeSlug, oemLinks.modelSlug)
     ])
 
     const items = new Map<string, ShowroomItem>()
@@ -139,7 +154,7 @@ export class ShowroomService {
       const key = keyOf(brandSlug, modelSlug)
       let item = items.get(key)
       if (!item) {
-        item = { brandSlug, modelSlug, label: '', n360: 0, n3d: 0, nTuning: 0, thumbUrl: null }
+        item = { brandSlug, modelSlug, label: '', n360: 0, n3d: 0, nTuning: 0, nOem: 0, thumbUrl: null }
         items.set(key, item)
       }
       return item
@@ -160,12 +175,14 @@ export class ShowroomService {
     }
     // 3DTuning's own slugs only create an entry when no other catalog knows the model.
     for (const r of rowsTuning) touch(r.makeSlug, r.modelSlug).nTuning += r.n
+    for (const r of rowsOem) touch(r.makeSlug, r.modelSlug).nOem += r.n
 
     const list = [...items.entries()].map(([key, item]) => ({
       ...item,
       label: names.get(key) ?? titleOf(item.brandSlug, item.modelSlug)
     }))
-    const kinds = (i: ShowroomItem): number => Number(i.n360 > 0) + Number(i.n3d > 0) + Number(i.nTuning > 0)
+    const kinds = (i: ShowroomItem): number =>
+      Number(i.n360 > 0) + Number(i.n3d > 0) + Number(i.nTuning > 0) + Number(i.nOem > 0)
     list.sort((a, b) => kinds(b) - kinds(a) || a.label.localeCompare(b.label))
 
     this.cached = { items: list, at: Date.now() }

@@ -4591,3 +4591,11 @@ Route name chosen to stay technology-neutral, so AR / XR can join 360°, 3D and 
 - **Navigation:** sidebar (after Compare), home `QuickLinks`, `/sitemap` page, `STATIC_PAGES` ua/ru/en, `ROUTE_TITLE_KEYS`.
 - Also fixed a duplicated `tuningQuery` in `queries.ts`.
 - **Not done yet:** `releases.ts` / `latest.ts` note, `AboutRoute.tsx` entry (tracked in PLAN.md).
+
+## Official OEM links in the showroom (2026-11-04) ✅
+
+Research first: only premium makes expose stable configurator links and allow scraping; mass-market configurators are per-market apps (Toyota disallows them in robots.txt, Mercedes / Tesla / Porsche return 403), so there is no 3DTuning-style year match for them.
+
+- **Data:** `registry.oem_links` (migration 0097), loaded by `ingest-oem-links.ts`; 29 links for 5 makes. Link-out only.
+- **Showroom:** new kind `oem` (`SHOWROOM_KINDS`, `nOem`, `counts.oem`, `detail.oem`), `ShowroomOemModal`, filter chip "Official".
+- **Tests:** `scripts/src/oem-links-parse.test.ts`.

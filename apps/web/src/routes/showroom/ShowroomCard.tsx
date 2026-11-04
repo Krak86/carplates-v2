@@ -10,14 +10,20 @@ type Props = {
   onOpen: (kind: ShowroomKind) => void
 }
 
-const KIND_ICON: Readonly<Record<ShowroomKind, string>> = { '360': '🔄', '3d': '🧊', tuning: '🛠️' }
+const KIND_ICON: Readonly<Record<ShowroomKind, string>> = { '360': '🔄', '3d': '🧊', tuning: '🛠️', oem: '🏭' }
 
 /** One make/model: a thumbnail (when a 3D model has one) and a button per immersive view it has. */
 export default function ShowroomCard({ item, onOpen }: Props): ReactNode {
   const { t } = useTranslation()
   const online = useOnlineStatus()
   const kindLabel = (kind: ShowroomKind, n: number): string =>
-    kind === '360' ? t('model360.open', { n }) : kind === '3d' ? t('model3d.open', { n }) : t('tuning3d.title')
+    kind === '360'
+      ? t('model360.open', { n })
+      : kind === '3d'
+        ? t('model3d.open', { n })
+        : kind === 'tuning'
+          ? t('tuning3d.title')
+          : t('showroom.oem.button')
 
   return (
     <li className="flex flex-col overflow-hidden rounded-xl border border-border bg-surface shadow-sm">

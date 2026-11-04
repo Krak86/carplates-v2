@@ -8,6 +8,7 @@ import type { OpenView } from '@/routes/showroom/helpers'
 const Model360Modal = lazy(() => import('@/components/Model360Modal'))
 const Model3dModal = lazy(() => import('@/components/Model3dModal'))
 const ShowroomTuningModal = lazy(() => import('@/routes/showroom/ShowroomTuningModal'))
+const ShowroomOemModal = lazy(() => import('@/routes/showroom/ShowroomOemModal'))
 
 type Props = {
   open: OpenView
@@ -34,6 +35,9 @@ export default function ShowroomViewer({ open, onClose }: Props): ReactNode {
       )}
       {kind === 'tuning' && data.tuning.length > 0 && (
         <ShowroomTuningModal label={data.label} pages={data.tuning} onClose={onClose} />
+      )}
+      {kind === 'oem' && data.oem.length > 0 && (
+        <ShowroomOemModal label={data.label} links={data.oem} onClose={onClose} />
       )}
     </Suspense>
   )

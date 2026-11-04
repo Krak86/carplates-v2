@@ -2031,6 +2031,22 @@ export const tuningLinks = registry.table(
 export type TuningLinkRow = typeof tuningLinks.$inferSelect
 export type TuningLinkInsert = typeof tuningLinks.$inferInsert
 
+/** Official manufacturer links (configurator / model page; link-out only, see migration 0097). */
+export const oemLinks = registry.table(
+  'oem_links',
+  {
+    makeSlug: text('make_slug').notNull(),
+    modelSlug: text('model_slug').notNull(),
+    variant: text('variant').notNull().default(''),
+    url: text('url').notNull(),
+    kind: text('kind').notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
+  },
+  t => [primaryKey({ columns: [t.makeSlug, t.modelSlug, t.variant, t.url] })]
+)
+export type OemLinkRow = typeof oemLinks.$inferSelect
+export type OemLinkInsert = typeof oemLinks.$inferInsert
+
 /**
  * Model catalog (`/cars/:make/:model`): raw registry (brand, model) -> slugs, one row per model with its rollup, one per make.
  * Rebuilt by scripts/src/catalog-build.ts; see migration 0081.
