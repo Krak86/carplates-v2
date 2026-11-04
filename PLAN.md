@@ -1238,7 +1238,8 @@ Write-up: `docs/plan-done.md` "Market offers (CarAPIS)"; conventions: `docs/feat
 - ✅ Large view modal (grid / rows / table, sort), USD / EUR / UAH price chip, block skeleton, CarAPIS admin Dashboards link (2026-11-03)
 - [ ] After deploy: compare our "requests used" counter with the usage page at my.carapis.com; confirm the real daily limit (assumed 100) and the reset time (assumed 00:00 UTC), adjust `DAILY_LIMIT` in `market.service.ts` if they differ
 - [ ] After deploy: set the `CARAPIS_API_KEY` GitHub secret (optional vars `MARKET_UA_ENABLED`, `MARKET_SHOW_BUDGET`) ⏳
-- [ ] Air-raid alerts, before deploy: add the `ALARM_API_KEY` GitHub secret (without it `/api/alarms` answers 503, harmless). After deploy: `curl https://carsua.app/api/alarms` returns regions; add `"/api/alarms"` to the Cloudflare Cache Rule (`docs/deploy.md`), verify MISS then HIT; ask Stfalcon for the per-minute request limit ⏳
+- [x] Air-raid alerts, step 1 deployed and verified on prod 2026-11-04: `ALARM_API_KEY` secret set, `/api/alarms` returns live regions, Cloudflare Cache Rule includes `/api/alarms` (MISS then HIT)
+- [ ] Air-raid alerts: ask Stfalcon for the per-minute request limit (poller defaults to 30 s and pauses on 429) ⏳
 - [ ] After deploy: check "requests used" on the admin Server tab after a day (cache hits vs UA / EU), rotate the dev key
 - [ ] After deploy: open a plate page, a catalog page and `?section=stock` in production; confirm `go/:id` opens the listing (the 204 path, over budget, is untested in a browser)
 - [ ] Owner emails Auto.ria (draft in the plan) after seeing it live; if they object, set `MARKET_UA_ENABLED=false`
