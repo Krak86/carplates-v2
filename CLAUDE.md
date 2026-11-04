@@ -12,7 +12,7 @@ Docs are huge: **grep `^## ` headings, never read whole**. `PLAN.md` backlog + p
 `packages/shared` (`normalizePlate`, regions, Zod schemas — **single source of truth, never re-implement plate logic**) · `packages/db` ·
 `apps/api` (`src/<feature>/`; serves the SPA + per-plate `<meta>`) · `apps/web` · `scripts/` (ingest/export CLIs, `seed-data/` gzipped CSVs) · `infra/` · `services/alpr/`.
 
-Pins (PLAN.md "Version pins"): Node 24, TS 5.9, NestJS 11, Drizzle 0.45.x, jsdom ~30.0, Tailwind v4 - never bump to `latest`.
+Version pins (PLAN.md "Version pins"): never bump to `latest`.
 
 ## Conventions
 
@@ -34,7 +34,8 @@ Pins (PLAN.md "Version pins"): Node 24, TS 5.9, NestJS 11, Drizzle 0.45.x, jsdom
 - **Edge cache**: a new cacheable `/api/*` endpoint → `common/cache.ts` headers + Cloudflare Cache Rule (+ `PUBLIC_API_PATH_PREFIXES` if public).
 - **Below-the-fold sections are `LazySection`s**; a new shareable one must list its id in `sections`. Shared pure helpers of lazy
   chunks go in `vite.config.ts` `HELPER_GROUPS`.
-- **Deploy**: blue/green ⇒ backward-compatible migrations; new env var ⇒ `env.ts` + `deploy-api.yml` + `docs/deploy.md`.
+- **Deploy**: blue/green ⇒ backward-compatible migrations; new env var ⇒ `env.ts` + `deploy-api.yml` + `docs/deploy.md`;
+  new ingest job ⇒ `scripts/src/jobs.ts` + `run-ingest.sh` + `infra/vps/ingest.cron` + a `/data-status` row.
 - **New public route** → `ROUTE_TITLE_KEYS` (`useDocumentTitle.ts`), a `STATIC_PAGES` entry (ua/ru/en) in `apps/api/src/spa/spa-text.ts` (else `noindex`, no sitemap),
   `max-w-6xl` page width. Add `@Throttle` (`common/throttle.ts`) to any enumerable lookup.
 

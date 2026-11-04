@@ -494,6 +494,7 @@ Plan, terms, live API findings, rejection path: `docs/alarm-plan.md`. Steps: ✅
 Findings and planned shape: `docs/alarm-plan.md` "Research: war-loss figures and Ukrstat data". zsu.gov.ua blocks bots (403); use `russianwarship.rip` (third-party, ~1,700 daily records).
 
 - ✅ Losses (2026-11-05): table, `ingest:losses` backfill, API fetch every 6 h, `GET /api/losses` (+ `/history`), `LossesSection` on `/alarms`; write-up `docs/plan-done.md` "War-loss figures on `/alarms`".
+- ✅ Polish (2026-11-05): infographic + details modal for losses, map zoom/drag, alert type labels, collapsed active list, daily `losses` cron (04:50) + `/data-status` row, About/releases updated.
   - [ ] After deploy: `run-ingest.sh losses` once; add `/api/losses` + `/api/losses/history` to the Cloudflare Cache Rule (verify MISS then HIT); look at `/alarms` on prod.
 - [ ] Ukrstat (checked 2026-11-05: `REGION` = KATOTTG, latest year **2022** pre-war, Crimea / Sevastopol end 2014; details in `docs/plan-done.md`): decide whether a pre-war denominator is acceptable, then a static population table in `packages/shared` -> `/read/plates` `RegionsSection` + per-100k metric in `AlarmHistorySection`.
 - ⏳ Fuel prices from Ukrstat: only if `DF_PRICE_CHANGE_CONSUMER_GOODS_SERVICE` has petrol/diesel items (unchecked).

@@ -4647,5 +4647,12 @@ General Staff "approximate" figures of Russian losses, relayed by the community 
 - **UI:** `LossesSection` (LazySection under `AlarmStatsSection`, inside `LoadErrorBoundary compact`): 15 category buttons (total + signed daily change), a hand-rolled SVG running-total chart of the picked category (`losses-helpers.ts`, tested), "approximate" wording in the title, intro and footnote, date, day number, link to the source post. Names `losses.cat.*` (ua/ru/en; `/terms` is 404). About `SOURCES` credit `russianWarship`. Error / 404 hides the section.
 - **Deploy:** run `run-ingest.sh losses` once after the migration; add `/api/losses` + `/api/losses/history` to the Cloudflare Cache Rule (`docs/deploy.md`).
 
+### `/alarms` polish round (2026-11-05) ✅
+
+- **Losses:** shareable infographic (`lib/losses-infographic.ts`, `LossesInfographic.tsx`, tested) and a details modal (`losses.view.details`, `losses.close`) instead of an always-open chart; the section id is in `share-section.ts`.
+- **Map and list:** `AlarmMap` zooms and drags; alert types get names (`alarms.type.*`) and icons (`alarmTypeIconOf`, incl. chemical / radiation / other); `ActiveAlarmList` starts collapsed.
+- **Ops:** job `losses` runs daily at 04:50 (`infra/vps/ingest.cron`, repairs gaps) and has a `/data-status` row (`datasets.ts` + `data-status.service.ts` `max(day)`). Seed CSV not needed.
+- **Docs/UI:** About gets a `losses` feature + brief and a fuller `alarms` text; `releases.ts` day 2026-11-05.
+
 ### Ukrstat population - check result (2026-11-05, nothing built)
 `DF_POPULATION_STRUCTURE` 8.0.1: `REGION` is **KATOTTG** (`UA` + 2-digit oblast code + zeros + a suffix, e.g. Kharkiv `UA63000000000041885`; `UA00000000000000000` = Ukraine; 28 values: 24 oblasts, Kyiv city `UA80...`, Crimea `UA01...`, Sevastopol `UA85...`), not the plate-region names, so a KATOTTG -> `REGIONS` map is needed. Indicator `PNMI_01` = size of the existing population (`PNMI_02` = permanent; `PNMI_03/04` = averages), key `PNMI_01.<region>._T._T._T.A`. **Latest annual year is 2022** (national 41,167,335, the pre-invasion 1 Jan 2022 figure); Crimea and Sevastopol stop in 2014. Per-100k figures would therefore use a pre-war denominator, which must be said on the page.

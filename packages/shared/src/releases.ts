@@ -16,6 +16,29 @@ const item = (group: ReleaseGroup, ua: string, ru: string, en: string): ReleaseI
  */
 export const RELEASES: readonly ReleaseDay[] = [
   {
+    date: '2026-11-05',
+    items: [
+      item(
+        'new',
+        'Втрати росії на /alarms: орієнтовні дані Генерального штабу за 15 категоріями зі змінами за добу, графік наростання, вікно з деталями та інфографіка, якою можна поділитися; це приблизні цифри, ми зберігаємо власну щоденну копію',
+        'Потери россии на /alarms: ориентировочные данные Генерального штаба по 15 категориям с изменением за сутки, график нарастания, окно с деталями и инфографика, которой можно поделиться; это приблизительные цифры, мы храним собственную ежедневную копию',
+        'Russian losses on /alarms: the General Staff\'s approximate figures in 15 categories with the daily change, a running-total chart, a details window and a shareable infographic; the numbers are approximate and we keep our own daily copy'
+      ),
+      item(
+        'new',
+        'Тривоги зараз: список активних тривог з часом початку й тривалістю та сьогоднішні цифри (скільки було, найдовша, за годинами й областями); список згорнуто, а тип тривоги підписано',
+        'Тревоги сейчас: список активных тревог со временем начала и длительностью и сегодняшние цифры (сколько было, самая долгая, по часам и областям); список свернут, а тип тревоги подписан',
+        'Alerts right now: a list of active alerts with start time and duration, and today\'s numbers (how many, the longest, by hour and region); the list is collapsed and the alert type is labelled'
+      ),
+      item(
+        'improved',
+        'Мапа тривог масштабується й перетягується, а райони та громади показано з підписами; на сторінці /data-status з\'явилися дані про втрати',
+        'Карта тревог масштабируется и перетаскивается, а районы и общины показаны с подписями; на странице /data-status появились данные о потерях',
+        'The alert map zooms and drags, with district and community labels; /data-status now lists the war-loss data'
+      )
+    ]
+  },
+  {
     date: '2026-11-04',
     items: [
       item(

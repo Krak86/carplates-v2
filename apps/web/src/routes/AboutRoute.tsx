@@ -343,6 +343,7 @@ const FEATURES = [
   'tuning3d',
   'showroom',
   'alarms',
+  'losses',
   'auctions',
   'uaAuctions',
   'market',
