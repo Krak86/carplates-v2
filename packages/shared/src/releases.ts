@@ -20,6 +20,12 @@ export const RELEASES: readonly ReleaseDay[] = [
     items: [
       item(
         'new',
+        'Повітряні тривоги: мапа областей на /alarms і чип у результаті за номером, якщо в регіоні авто зараз діє тривога; лише інформація, не система оповіщення, а без даних ми так і пишемо',
+        'Воздушные тревоги: карта областей на /alarms и чип в результате по номеру, если в регионе авто сейчас действует тревога; только информация, не система оповещения, а без данных мы так и пишем',
+        'Air raid alerts: an oblast map at /alarms and a chip on the plate result when the car\'s region has an active alert; informational only, not a warning system, and we say "no data" when the feed is down'
+      ),
+      item(
+        'new',
         'Віртуальний шоурум /showroom: усі авто з оглядом 360°, 3D-моделлю чи посиланням «Налаштувати в 3D» на одній сторінці, плюс офіційні сторінки Morgan, Lucid, Koenigsegg, Aston Martin і Lamborghini; пошук, вигляд сіткою, списком чи галереєю, а посилання зберігає вибір',
         'Виртуальный шоурум /showroom: все авто с обзором 360°, 3D-моделью или ссылкой «Настроить в 3D» на одной странице, плюс официальные страницы Morgan, Lucid, Koenigsegg, Aston Martin и Lamborghini; поиск, вид сеткой, списком или галереей, а ссылка сохраняет выбор',
         'Virtual showroom /showroom: every car with a 360° view, a 3D model or a "Customize in 3D" link on one page, plus official Morgan, Lucid, Koenigsegg, Aston Martin and Lamborghini pages; search, grid, list or gallery layout, and the link keeps your choices'

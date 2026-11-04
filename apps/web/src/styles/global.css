@@ -993,3 +993,18 @@ body {
     --sil-tail: oklch(0.84 0.07 245);
   }
 }
+
+/* Air-raid alert layer: a slow pulse on alarmed oblasts; still under reduced motion. */
+@keyframes alarm-pulse {
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.alarm-pulse {
+  animation: alarm-pulse 3s ease-in-out infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}

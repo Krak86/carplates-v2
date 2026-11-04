@@ -313,8 +313,8 @@ export const syncResponseSchema = z.object({
 })
 export type SyncResponse = z.infer<typeof syncResponseSchema>
 
-/** Page-background layers (photos, map, three YouTube live streams). Order = presentation order in the layers panel. */
-export const BACKGROUND_MODES = ['images', 'map', 'earth', 'traffic', 'city'] as const
+/** Page-background layers (photos, map, three YouTube live streams, the air-raid alert map). Order = presentation order in the layers panel. */
+export const BACKGROUND_MODES = ['images', 'map', 'earth', 'traffic', 'city', 'alarm'] as const
 export type BackgroundMode = (typeof BACKGROUND_MODES)[number]
 
 /** Layers that play a YouTube live stream picked from a selector (the rest are photos / the map). */
@@ -356,8 +356,8 @@ export type BackgroundPreset = z.infer<typeof backgroundPresetSchema>
  * localStorage. New settings tabs add fields here; the whole document is last-write-wins by `updatedAt`.
  */
 export const userSettingsSchema = z.object({
-  /** Layer shown on load (the layers panel only changes it for the session). */
-  defaultMode: z.enum(BACKGROUND_MODES),
+  /** Layer shown on load (the layers panel only changes it for the session). `.catch`: a layer added later reads as photos in a client that does not know it. */
+  defaultMode: z.enum(BACKGROUND_MODES).catch('images'),
   /** Live stream per stream layer — updated automatically when the user picks a stream in the layers panel. */
   streams: z.record(z.enum(STREAM_MODES), z.string().min(1).max(32)),
   presets: z.array(backgroundPresetSchema).max(BACKGROUND_PRESET_LIMIT),

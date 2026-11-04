@@ -1,9 +1,11 @@
-import { useEffect, useState } from 'react'
+import { Suspense, lazy, useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 
 import { useBackgroundMode } from '@/hooks/useBackgroundMode'
 import { STREAM_PLAYER_SIZE, isStreamMode, mapUrl, streamEmbedUrl } from '@/lib/live-background'
 import { useLiveBackgroundStore } from '@/store/live-background-store'
+
+const AlarmBackground = lazy(() => import('@/components/AlarmBackground'))
 
 function useCoverScale(): number {
   const [scale, setScale] = useState(1)
@@ -23,6 +25,14 @@ export default function LiveBackground(): ReactNode {
   const view = useLiveBackgroundStore(s => s.mapView)
   const streams = useLiveBackgroundStore(s => s.streams)
   const scale = useCoverScale()
+
+  if (mode === 'alarm') {
+    return (
+      <Suspense fallback={null}>
+        <AlarmBackground />
+      </Suspense>
+    )
+  }
 
   const src = isStreamMode(mode) ? streamEmbedUrl(streams[mode]) : mode === 'map' ? mapUrl(view) : undefined
   if (!src) return null
