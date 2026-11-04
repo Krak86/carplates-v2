@@ -340,6 +340,7 @@ above once scoped, or dropped if research says no.
 
 ### Actual — ready or in progress
 
+- [ ] **UI / integration / e2e tests (researched 2026-11-04, nothing built)** — real-Postgres integration suite, Playwright smoke (~10 specs), both gating deploy via `ci.yml`. Steps 1-7: [TESTING_PLAN.md](TESTING_PLAN.md).
 - ✅ History, favorites, camera/photo search, registry stats (table + map), brand breakdown, kind icon + logo — done, see Phase 1.5 / "Plate image recognition" in `docs/plan-done.md`.
 - ⏳ **Speed round: advanced search + photo recognition on 4G** (researched 2026-10-29; nothing measured yet, estimates from code). Indexes are already
   complete (0012–0015, 0042, 0059), so the cost is the query shape: every page/sort click re-fetches up to 10k wide rows (`SEARCH_COUNT_CAP`) and sorts in Node.
@@ -1246,15 +1247,21 @@ Write-up: `docs/plan-done.md` "Market offers (CarAPIS)"; conventions: `docs/feat
 
 ✅ Sitemap ingest, `registry.tuning_links` (0096), body-aware matcher, `/api/tuning`, "Customize in 3D" chip: **48.2% of cars get a link**, never a guess. Write-up: `docs/plan-done.md` "3DTuning", conventions: `docs/features-reference.md` "3DTuning link-out", plan: [docs/tuning-3d-plan.md](docs/tuning-3d-plan.md).
 
-- [ ] **After deploy:** migration 0096 is applied by the API deploy; load the table on the VPS with `docker compose run --rm --no-deps -T ingest pnpm ingest:3dtuning:csv` (or `tsx src/ingest-3dtuning.ts --from-csv seed-data/3dtuning-links.csv.gz`); add `/api/tuning` to the Cloudflare Cache Rule "Cache model lookups" (see `docs/deploy.md`) and check MISS then HIT; open a car with a known link (e.g. a BMW 3 Series sedan 2007) and a car without one.
+- [ ] **After deploy:** migration 0096 is applied by the API deploy; load the table on the VPS with `docker compose run --rm --no-deps -T ingest pnpm ingest:3dtuning:csv` (or `tsx src/ingest-3dtuning.ts --from-csv seed-data/3dtuning-links.csv.gz`); (Cloudflare Cache Rule for `/api/tuning` done 2026-11-04, MISS then HIT); open a car with a known link (e.g. a BMW 3 Series sedan 2007) and a car without one.
 - [ ] Optional: grow `MODEL_ALIASES` from `pnpm ingest:3dtuning --match-report`; re-run `pnpm ingest:3dtuning` and `export:3dtuning:csv` now and then (their sitemap changes); ask 3DTuning via `/b2b` about an affiliate link
 
 ## Virtual showroom (`/showroom`) ✅ built 2026-11-04, awaiting deploy
 
 ✅ One searchable page for all 360° / 3D / 3DTuning cars, opened in the existing modals; AR/XR teaser card; linked from the sidebar and home quick links. Write-up: `docs/plan-done.md` "Virtual showroom", conventions: `docs/features-reference.md` "Virtual showroom".
 
-- [ ] **After deploy:** add `/api/showroom` and `/api/showroom/detail` to the Cloudflare Cache Rule "Cache model lookups" (expression in `docs/deploy.md`); open `/showroom`, search "bmw", open a 360, a 3D and a Customize entry.
-- [ ] Release note (`releases.ts` + `latest.ts`) and `AboutRoute.tsx` feature entry for the showroom; own AR/XR views later.
+- [x] (done 2026-11-04: `/api/showroom`, `/api/showroom/detail` and `/api/tuning` added to the Cloudflare Cache Rule "Cache model lookups"; MISS then HIT on all, `refresh` stays DYNAMIC) **After deploy:** Cloudflare rule.
+- [ ] **After deploy:** open `/showroom`, search "bmw", open a 360, a 3D and a Customize entry.
+- ✅ Showroom kind `oem` (official configurator / model-page links: Morgan, Lucid, Koenigsegg, Aston Martin, Lamborghini; 29 links). Write-up: `docs/plan-done.md` "Official OEM links".
+- [ ] **After deploy:** run `pnpm ingest:oem-links:csv` on the VPS (new table); more makes (BMW, Kia, VW, Hyundai, Skoda) need a browser-based probe first (their configurators are per-market apps).
+- ✅ (2026-11-04) Release note (`releases.ts`), `AboutRoute.tsx` feature + OEM source entry.
+- [ ] Own AR/XR views later.
+- ✅ ZAKON typeface fetched by `pnpm fetch:zakon-font` (gitignored, not committed); sidebar regrouped into six groups with footer links (`sidebar-groups.ts`). Write-up: `docs/plan-done.md` "Sidebar groups and ZAKON font".
+- [ ] **After deploy:** run `pnpm fetch:zakon-font` wherever the web app is built (the font is not in git), else the ZAKON face falls back.
 
 ## Later, conditional
 

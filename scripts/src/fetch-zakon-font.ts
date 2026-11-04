@@ -12,7 +12,13 @@ const force = process.argv.includes('--force')
 await mkdir(OUT_DIR, { recursive: true })
 for (const name of FILES) {
   const dest = path.join(OUT_DIR, name)
-  if (!force && (await stat(dest).then(() => true, () => false))) {
+  if (
+    !force &&
+    (await stat(dest).then(
+      () => true,
+      () => false
+    ))
+  ) {
     console.log(`skip ${name} (exists)`)
     continue
   }

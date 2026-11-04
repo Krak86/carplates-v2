@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { SHOWROOM_SHARE_PARAMS } from '@carplates/shared'
 
 import i18n from '@/i18n'
 import { copyToClipboard, shareBaseUrl } from '@/lib/share-section'
@@ -23,9 +24,16 @@ type UsePageShareActions = {
   share: () => Promise<void>
 }
 
-/** The current page's link with the sharer's language and font. */
+/** The current page's link with the sharer's language and font; the showroom also keeps its tab, search, layout and open entry. */
 export function buildPageShareUrl(): string {
   const params = new URLSearchParams({ lang: i18n.language })
+  if (window.location.pathname.replace(/\/$/, '') === '/showroom') {
+    const current = new URLSearchParams(window.location.search)
+    for (const key of SHOWROOM_SHARE_PARAMS) {
+      const value = current.get(key)
+      if (value) params.set(key, value)
+    }
+  }
   setFontParam(params)
   return `${shareBaseUrl()}?${params.toString()}`
 }

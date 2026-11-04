@@ -4591,3 +4591,18 @@ Route name chosen to stay technology-neutral, so AR / XR can join 360°, 3D and 
 - **Navigation:** sidebar (after Compare), home `QuickLinks`, `/sitemap` page, `STATIC_PAGES` ua/ru/en, `ROUTE_TITLE_KEYS`.
 - Also fixed a duplicated `tuningQuery` in `queries.ts`.
 - **Not done yet:** `releases.ts` / `latest.ts` note, `AboutRoute.tsx` entry (tracked in PLAN.md).
+
+## Official OEM links in the showroom (2026-11-04) ✅
+
+Research first: only premium makes expose stable configurator links and allow scraping; mass-market configurators are per-market apps (Toyota disallows them in robots.txt, Mercedes / Tesla / Porsche return 403), so there is no 3DTuning-style year match for them.
+
+- **Data:** `registry.oem_links` (migration 0097), loaded by `ingest-oem-links.ts`; 29 links for 5 makes. Link-out only.
+- **Showroom:** new kind `oem` (`SHOWROOM_KINDS`, `nOem`, `counts.oem`, `detail.oem`), `ShowroomOemModal`, filter chip "Official".
+- **Tests:** `scripts/src/oem-links-parse.test.ts`.
+
+## Sidebar groups, ZAKON font, About and releases (2026-11-04) ✅
+
+- **Sidebar:** links split into six groups (search, stats, personal, read, interactive, misc) with hairline separators, definitions in `components/sidebar-groups.ts`; settings / admin join "personal" when signed in or admin; `text-sm`, tighter padding; footer links (contact, sitemap, data status, feedback, privacy, terms). `/sitemap` regrouped the same way.
+- **ZAKON font:** `scripts/src/fetch-zakon-font.ts` (`pnpm fetch:zakon-font`, `--force`) downloads Zakon-Regular/Bold.otf from mincult.gov.ua into `apps/web/public/fonts/zakon/` (gitignored); `@font-face` paths fixed.
+- **Showroom polish:** layouts (`?layout=`), Wikimedia thumbnail fallback, shareable `?open=&show=` state, skeletons.
+- **Docs / About:** `TESTING_PLAN.md` added (integration and e2e plan, nothing built). About: `showroom` feature + brief and the `oemLinks` source; `releases.ts` 2026-11-04 gained the showroom (`new`) and sidebar (`improved`) items.

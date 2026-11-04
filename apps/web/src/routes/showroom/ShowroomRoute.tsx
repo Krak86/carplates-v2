@@ -1,12 +1,18 @@
 import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
-import { SHOWROOM_FILTERS, parseShowroomFilter } from '@carplates/shared'
-import type { ShowroomFilter } from '@carplates/shared'
+import {
+  DEFAULT_SHOWROOM_VIEW,
+  SHOWROOM_FILTERS,
+  parseShowroomFilter,
+  parseShowroomOpen,
+  parseShowroomView,
+  showroomOpenParam
+} from '@carplates/shared'
+import type { ShowroomFilter, ShowroomKind, ShowroomView } from '@carplates/shared'
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router'
 
-import SectionSkeleton from '@/components/ui/SectionSkeleton'
 import Card from '@/components/ui/Card'
 import { useDebouncedValue } from '@/hooks/useDebouncedValue'
 import { cn } from '@/lib/cn'
@@ -14,9 +20,10 @@ import { toIntlLocale } from '@/lib/intl'
 import { showroomQuery } from '@/lib/queries'
 import ShowroomAr from '@/routes/showroom/ShowroomAr'
 import ShowroomCard from '@/routes/showroom/ShowroomCard'
+import ShowroomCardSkeleton from '@/routes/showroom/ShowroomCardSkeleton'
 import ShowroomViewer from '@/routes/showroom/ShowroomViewer'
-import { SEARCH_DEBOUNCE_MS } from '@/routes/showroom/helpers'
-import type { OpenView } from '@/routes/showroom/helpers'
+import ShowroomViewToggle from '@/routes/showroom/ShowroomViewToggle'
+import { SEARCH_DEBOUNCE_MS, showroomGridClass } from '@/routes/showroom/helpers'
 
 // Lazy-loaded (see App.tsx).
 export default function ShowroomRoute(): ReactNode {
@@ -26,7 +33,9 @@ export default function ShowroomRoute(): ReactNode {
   const urlQuery = params.get('q') ?? ''
   const [draft, setDraft] = useState(urlQuery)
   const q = useDebouncedValue(draft.trim(), SEARCH_DEBOUNCE_MS)
-  const [open, setOpen] = useState<OpenView | null>(null)
+  const view = parseShowroomView(params.get('layout'))
+  // The open entry lives in the URL (`open=brand/model&show=kind`), so a shared link re-opens it and Back closes it.
+  const open = parseShowroomOpen(params.get('open'), params.get('show'))
   const format = new Intl.NumberFormat(toIntlLocale(i18n.language))
 
   // The URL follows the (debounced) search, so a link to a search can be shared.
@@ -43,22 +52,52 @@ export default function ShowroomRoute(): ReactNode {
     )
   }, [q, urlQuery, setParams])
 
-  const setKind = (next: ShowroomFilter): void =>
+  const updateParams = (change: (next: URLSearchParams) => void, replace = true): void =>
     setParams(
       prev => {
         const copy = new URLSearchParams(prev)
-        if (next === 'all') copy.delete('kind')
-        else copy.set('kind', next)
+        change(copy)
         return copy
       },
-      { replace: true }
+      { replace }
     )
+
+  const setKind = (next: ShowroomFilter): void =>
+    updateParams(p => {
+      if (next === 'all') p.delete('kind')
+      else p.set('kind', next)
+    })
+
+  const setView = (next: ShowroomView): void =>
+    updateParams(p => {
+      if (next === DEFAULT_SHOWROOM_VIEW) p.delete('layout')
+      else p.set('layout', next)
+    })
+
+  // Opening adds a history entry (Back closes it); closing replaces it.
+  const openEntry = (brandSlug: string, modelSlug: string, kind: ShowroomKind): void =>
+    updateParams(p => {
+      p.set('open', showroomOpenParam(brandSlug, modelSlug))
+      p.set('show', kind)
+    }, false)
+
+  const closeEntry = (): void =>
+    updateParams(p => {
+      p.delete('open')
+      p.delete('show')
+    })
 
   const result = useInfiniteQuery(showroomQuery(q, kind))
   const pages = result.data?.pages ?? []
   const items = pages.flatMap(p => p.items)
   const total = pages[0]?.total ?? 0
   const counts = pages[0]?.counts
+
+  // The grid is keyed on the last SETTLED search + tab (derived during render, not an effect): it re-mounts, and its cards ease in,
+  // only when new results arrive, not while the previous ones are still shown dimmed.
+  const searchKey = `${q}|${kind}`
+  const [settledKey, setSettledKey] = useState(searchKey)
+  if (!result.isPlaceholderData && result.data && settledKey !== searchKey) setSettledKey(searchKey)
 
   const filterLabel = (f: ShowroomFilter): string => {
     const n = counts ? format.format(counts[f]) : ''
@@ -87,21 +126,24 @@ export default function ShowroomRoute(): ReactNode {
           placeholder={t('showroom.search')}
           className="w-full rounded-lg border border-border bg-bg px-3 py-2 text-base"
         />
-        <div role="group" aria-label={t('showroom.filter.label')} className="flex flex-wrap gap-1.5">
-          {SHOWROOM_FILTERS.map(f => (
-            <button
-              key={f}
-              type="button"
-              aria-pressed={kind === f}
-              onClick={() => setKind(f)}
-              className={cn(
-                'cursor-pointer rounded-full border px-3 py-1 text-sm',
-                kind === f ? 'border-primary bg-primary text-white' : 'border-border hover:border-primary'
-              )}
-            >
-              {filterLabel(f)}
-            </button>
-          ))}
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div role="group" aria-label={t('showroom.filter.label')} className="flex flex-wrap gap-1.5">
+            {SHOWROOM_FILTERS.map(f => (
+              <button
+                key={f}
+                type="button"
+                aria-pressed={kind === f}
+                onClick={() => setKind(f)}
+                className={cn(
+                  'cursor-pointer rounded-full border px-3 py-1 text-sm transition-colors duration-200',
+                  kind === f ? 'border-primary bg-primary text-white' : 'border-border hover:border-primary'
+                )}
+              >
+                {filterLabel(f)}
+              </button>
+            ))}
+          </div>
+          <ShowroomViewToggle view={view} onChange={setView} />
         </div>
       </Card>
 
@@ -110,21 +152,29 @@ export default function ShowroomRoute(): ReactNode {
           <p className="text-muted">{t('result.error')}</p>
         </Card>
       ) : !result.data ? (
-        <Card>
-          <SectionSkeleton rows={4} />
-        </Card>
+        <ShowroomCardSkeleton view={view} />
       ) : items.length === 0 ? (
-        <Card>
+        <Card key={settledKey} className="animate-fade-in">
           <p className="text-muted">{t('showroom.empty')}</p>
         </Card>
       ) : (
         <>
-          <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {items.map(item => (
+          <ul
+            key={`${settledKey}|${view}`}
+            aria-busy={result.isPlaceholderData}
+            className={cn(
+              showroomGridClass(view),
+              'transition-opacity duration-200',
+              result.isPlaceholderData && 'opacity-50'
+            )}
+          >
+            {items.map((item, i) => (
               <ShowroomCard
                 key={`${item.brandSlug}/${item.modelSlug}`}
                 item={item}
-                onOpen={view => setOpen({ item, kind: view })}
+                view={view}
+                index={i}
+                onOpen={kind => openEntry(item.brandSlug, item.modelSlug, kind)}
               />
             ))}
           </ul>
@@ -144,7 +194,7 @@ export default function ShowroomRoute(): ReactNode {
         </>
       )}
 
-      {open && <ShowroomViewer open={open} onClose={() => setOpen(null)} />}
+      {open && <ShowroomViewer open={open} onClose={closeEntry} />}
     </article>
   )
 }
