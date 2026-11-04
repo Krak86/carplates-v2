@@ -30,7 +30,17 @@ export const sortedAlarms = (regions: readonly AlarmRegion[]): AlarmRegion[] =>
   [...regions].sort((a, b) => Number(b.scope === 'full') - Number(a.scope === 'full'))
 
 /** Static icon per upstream alert type (never a weapon); unknown types get the generic one. */
-const ALARM_TYPE_ICON: Readonly<Record<string, string>> = { AIR: '🚨', ARTILLERY: '💥', URBAN_FIGHTS: '⚠️' }
+const ALARM_TYPE_ICON: Readonly<Record<string, string>> = {
+  AIR: '🚨',
+  ARTILLERY: '💥',
+  URBAN_FIGHTS: '⚠️',
+  CHEMICAL: '☣️',
+  NUCLEAR: '☢️',
+  OTHER: '❗'
+}
+
+/** Icon for one alert type. */
+export const alarmTypeIconOf = (type: string): string => ALARM_TYPE_ICON[type] ?? '🚨'
 
 /** Icon of the region's first known type. */
 export const alarmTypeIcon = (types: readonly string[]): string =>

@@ -21,11 +21,12 @@ const LEGEND = [
 const AlarmMap = lazy(() => import('@/routes/alarms/AlarmMap'))
 const AlarmStatsSection = lazy(() => import('@/routes/alarms/AlarmStatsSection'))
 const AlarmHistorySection = lazy(() => import('@/routes/alarms/AlarmHistorySection'))
+const LossesSection = lazy(() => import('@/routes/alarms/LossesSection'))
 
 // Lazy-loaded (see App.tsx). Online-only: no `offline-cache.ts` entry. Informational, not a warning system.
 export default function AlarmsRoute(): ReactNode {
   const { t, i18n } = useTranslation()
-  const [showLabels, setShowLabels] = useState(false)
+  const [showLabels, setShowLabels] = useState(true)
   const alarms = useQuery(alarmsQuery())
   const data = alarms.data
   const count = data?.regions.length ?? 0
@@ -43,9 +44,17 @@ export default function AlarmsRoute(): ReactNode {
       {alarms.isPending && <StatsMapSkeleton />}
 
       {/* 503 (no or stale data) is an error here: say "no data", never draw a calm map. */}
+      {/* The base map still draws, dimmed and without any alert colour, so it cannot read as "calm". */}
       {alarms.isError && (
-        <Card>
-          <p className="text-[var(--color-muted)]">{t('alarms.noData')}</p>
+        <Card className="mb-6">
+          <p className="mb-3 text-[var(--color-muted)]">{t('alarms.noData')}</p>
+          <div className="opacity-40 grayscale">
+            <LoadErrorBoundary compact>
+              <Suspense fallback={<StatsMapSkeleton />}>
+                <AlarmMap regions={[]} showLabels={showLabels} />
+              </Suspense>
+            </LoadErrorBoundary>
+          </div>
         </Card>
       )}
 
@@ -64,6 +73,8 @@ export default function AlarmsRoute(): ReactNode {
               {t('alarms.showRegions')}
             </button>
           </div>
+
+          <p className="mb-3 text-xs text-[var(--color-muted)]">{t('alarms.source')}</p>
 
           <LoadErrorBoundary compact>
             <Suspense fallback={<StatsMapSkeleton />}>
@@ -85,8 +96,6 @@ export default function AlarmsRoute(): ReactNode {
           </ul>
 
           <ActiveAlarmList regions={sortedAlarms(data.regions)} nowIso={data.fetchedAt} />
-
-          <p className="mt-3 text-xs text-[var(--color-muted)]">{t('alarms.source')}</p>
         </Card>
       )}
 
@@ -94,6 +103,13 @@ export default function AlarmsRoute(): ReactNode {
       <LazySection fallback={<StatsMapSkeleton />}>
         <LoadErrorBoundary compact>
           <AlarmStatsSection />
+        </LoadErrorBoundary>
+      </LazySection>
+
+      {/* War-loss figures come from our own daily copy, so they show even when the live feed is down. */}
+      <LazySection sections={['losses']} fallback={<StatsMapSkeleton />}>
+        <LoadErrorBoundary compact>
+          <LossesSection />
         </LoadErrorBoundary>
       </LazySection>
 

@@ -55,6 +55,30 @@ export default function AlarmMap({ regions, showLabels = false }: Props): ReactN
   const [offset, setOffset] = useState({ x: 0, y: 0 })
   const [isFullscreen, setIsFullscreen] = useState(false)
   const frameRef = useRef<HTMLDivElement>(null)
+  const svgRef = useRef<SVGSVGElement>(null)
+  const zoomRef = useRef(zoom)
+
+  useEffect(() => {
+    zoomRef.current = zoom
+  }, [zoom])
+
+  // Wheel zoom needs a non-passive native listener to stop the page from scrolling. At 1x, scrolling down
+  // still scrolls the page, so the map never traps the wheel.
+  const hasMap = !geography.isPending && !geography.isError
+  useEffect(() => {
+    const svg = svgRef.current
+    if (!svg) return
+    const onWheel = (e: WheelEvent) => {
+      const current = zoomRef.current
+      if (e.deltaY > 0 && current <= 1) return
+      e.preventDefault()
+      const k = Math.min(MAX_ZOOM, Math.max(1, current * (e.deltaY < 0 ? ZOOM_STEP : 1 / ZOOM_STEP)))
+      setZoom(k)
+      if (k === 1) setOffset({ x: 0, y: 0 })
+    }
+    svg.addEventListener('wheel', onWheel, { passive: false })
+    return () => svg.removeEventListener('wheel', onWheel)
+  }, [hasMap])
   const dragRef = useRef<{ x: number; y: number; ox: number; oy: number } | null>(null)
 
   useEffect(() => {
@@ -116,16 +140,19 @@ export default function AlarmMap({ regions, showLabels = false }: Props): ReactN
         </button>
       </div>
       <svg
+        ref={svgRef}
         viewBox={`0 0 ${MAP_WIDTH} ${MAP_HEIGHT}`}
         className="h-auto"
         style={{
           width: '100%',
           maxHeight: isFullscreen ? '100vh' : undefined,
           touchAction: zoom > 1 ? 'none' : 'pan-y',
-          cursor: zoom > 1 ? 'grab' : undefined
+          cursor: 'grab',
+          userSelect: 'none'
         }}
         onPointerDown={e => {
-          if (zoom <= 1) return
+          // Touch keeps scrolling the page at 1x; a mouse can always drag.
+          if (zoom <= 1 && e.pointerType !== 'mouse') return
           e.currentTarget.setPointerCapture(e.pointerId)
           dragRef.current = { x: e.clientX, y: e.clientY, ox: offset.x, oy: offset.y }
         }}
@@ -133,7 +160,12 @@ export default function AlarmMap({ regions, showLabels = false }: Props): ReactN
           const drag = dragRef.current
           if (!drag) return
           const scale = MAP_WIDTH / e.currentTarget.getBoundingClientRect().width
-          setOffset({ x: drag.ox + (e.clientX - drag.x) * scale, y: drag.oy + (e.clientY - drag.y) * scale })
+          const limitX = (MAP_WIDTH * zoom) / 2
+          const limitY = (MAP_HEIGHT * zoom) / 2
+          setOffset({
+            x: Math.min(limitX, Math.max(-limitX, drag.ox + (e.clientX - drag.x) * scale)),
+            y: Math.min(limitY, Math.max(-limitY, drag.oy + (e.clientY - drag.y) * scale))
+          })
         }}
         onPointerUp={() => {
           dragRef.current = null

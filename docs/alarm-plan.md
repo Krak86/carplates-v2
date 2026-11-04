@@ -38,6 +38,21 @@ Release checklist per step: `docs/plan-done.md` write-up, `docs/features-referen
 
 Access can be refused without a reason (4.2). Steps 4 and 5 do not need the key and go ahead on the MIT dataset alone (refreshed daily from the repo, a cron job like `dtp-patrol`). For live status, the options are: ask again with the clarified use, try another provider (alerts.in.ua has its own key and terms, not read yet), or drop steps 1-3 and keep only history. The feature code is built behind the poller interface so the source can be swapped.
 
+## Research: war-loss figures and Ukrstat data (2026-11-05, nothing built)
+
+**Russian losses.** `zsu.gov.ua/oriientovni-vtraty-protyvnyka` answers automated requests with 403, and no official feed exists (the General Staff posts on Facebook / Telegram). Use the community API `https://russianwarship.rip/api/v2/` instead (third-party, no docs, no SLA, no rate limit stated; verified live 2026-11-05):
+
+- `GET /statistics/latest`, `GET /statistics/{YYYY-MM-DD}`, `GET /statistics?offset=&limit=` (paged, `paging.next_url|last_url`; about 1,700 daily records, last offset 1710). `/terms/uk` is 404, so category names need our own i18n.
+- Record: `{ date, day, resource, war_status{code,alias}, stats{...}, increase{...} }`. 15 numeric categories: `personnel_units, tanks, armoured_fighting_vehicles, artillery_systems, mlrs, aa_warfare_systems, planes, helicopters, vehicles_fuel_tanks, warships_cutters, cruise_missiles, uav_systems, special_military_equip, atgm_srbm_systems, submarines`.
+- Early days are skipped (Feb 24-26 2022 reported together); `resource` points to mil.gov.ua early on and a General Staff Facebook post later. Figures are the General Staff's "approximate" numbers: label them so, credit the source in About `SOURCES`.
+- Planned shape: own table (daily rows, so history survives an outage), backfill script + daily fetch, `GET /api/losses` + `/api/losses/history` (Zod contract in its own `shared` file, new fields `.nullable().optional()`, `@Throttle`, edge cache + Cloudflare Cache Rule, not in `PUBLIC_API_PATH_PREFIXES`), online-only. UI: a new `LazySection` under the stats section of `/alarms` (own DB, shows when the live feed is down). Informational wording only.
+
+**Ukrstat (`stat.gov.ua`).** Open SDMX REST (2.1 / 3.0, JSON or XML, no auth seen), base `https://stat.gov.ua/sdmx/workspaces/default:integration/registry/sdmx/`; `2.1/dataflow?detail=full` is about 139 KB (fetch once, never at runtime); `references=descendants` exceeds 10 MB, so use narrow calls. Guide: `stat.gov.ua/uk/node/5823`.
+
+- Useful: `DF_POPULATION_STRUCTURE` (v8.0.1, DSD `DSD_POPULATION_STR` 3.0.0; dimensions INDICATOR, REGION, AGE, GENDER, TERRAIN_TYPE, FREQ + TIME_PERIOD) for population per oblast. **Not yet checked:** region code format (oblast vs KATOTTG) and the latest year.
+- Not useful: no vehicle / registration / road-accident dataflows (transport ones are enterprise activity); fuel flows (`DF_FUEL_USAGE_AND_RESERVES_*`, `DF_NRG_FUEL_*`) are national consumption / stocks, not pump prices; `DF_PRICE_CHANGE_CONSUMER_GOODS_SERVICE` fuel items unconfirmed.
+- Planned use: a **static** population table in `packages/shared` (refreshed by a script; population changes about yearly) for `/read/plates` `RegionsSection` (stays API-free), plus a "per 100k residents" metric in `AlarmHistorySection` (same join as `roadSafetyRegionsQuery`; keep the no-combined-score rule).
+
 ## Owner actions
 
 - Submit the access form (draft text in the session: free site, no ads today, server-side polling every 15-30 s, informational only, no copying of the API). Use an email that is read: contract changes arrive there.

@@ -34,6 +34,9 @@ export const JOBS = {
   // Manual only (no cron entry yet): downloads the MIT siren dataset CSVs from GitHub and replaces registry.alarm_history_daily in one transaction
   // (the seed CSV is not in the image). Run once after the migration 0098 deploy; a daily refresh cron is not built.
   'alarm-history': { command: 'tsx src/ingest-alarm-history.ts', timeoutMin: 10 },
+  // Daily (04:50): pages russianwarship.rip /statistics (~1,700 daily records) into registry.war_losses_daily (upsert, safe to repeat). The API itself
+  // fetches only /statistics/latest every 6 h, so run this once by hand after the migration 0100 deploy; the cron repairs gaps and shows on /data-status.
+  losses: { command: 'tsx src/ingest-losses.ts', timeoutMin: 10 },
   // Recall registers that refresh themselves (no seed CSV involved): RDW campaigns are upserted by reference code (seconds, the model links are
   // replaced wholesale), Transport Canada replaces both tables after a ~200 MB download (`--refresh`: never trust a cached copy). The seed CSVs
   // are still re-exported by hand (`pnpm export:rdw-recalls:csv`, `export:ca-recalls:csv`) after review.

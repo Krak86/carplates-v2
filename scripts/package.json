@@ -79,6 +79,7 @@
     "ingest:alarm-history": "tsx src/ingest-alarm-history.ts",
     "ingest:alarm-history:csv": "tsx src/ingest-alarm-history.ts --from-csv seed-data/alarm-history.csv.gz",
     "export:alarm-history:csv": "tsx src/ingest-alarm-history.ts --export-csv seed-data/alarm-history.csv.gz",
+    "ingest:losses": "tsx src/ingest-losses.ts",
     "ingest:oem-links": "tsx src/ingest-oem-links.ts",
     "ingest:oem-links:csv": "tsx src/ingest-oem-links.ts --from-csv seed-data/oem-links.csv.gz",
     "export:oem-links:csv": "tsx src/ingest-oem-links.ts --export-csv seed-data/oem-links.csv.gz",

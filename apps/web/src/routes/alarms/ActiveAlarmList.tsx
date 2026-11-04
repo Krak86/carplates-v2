@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { toIntlLocale } from '@/lib/intl'
 import { localizeRegion } from '@/lib/region-label'
 import {
-  alarmTypeIcon,
+  alarmTypeIconOf,
   daysAgo,
   filterAlarmRegions,
   formatAlarmDuration,
@@ -25,6 +25,7 @@ export default function ActiveAlarmList({ regions, nowIso }: Props): ReactNode {
   const { t, i18n } = useTranslation()
   const locale = toIntlLocale(i18n.language)
   const [query, setQuery] = useState('')
+  const [listOpen, setListOpen] = useState(false)
   const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(new Set())
 
   const visible = filterAlarmRegions(regions, query, r => localizeRegion(r, i18n.language))
@@ -54,22 +55,37 @@ export default function ActiveAlarmList({ regions, nowIso }: Props): ReactNode {
   return (
     <section className="mt-4" aria-label={t('alarms.list.title')}>
       <div className="mb-2 flex flex-wrap items-center gap-2">
-        <h2 className="text-lg font-semibold">{t('alarms.list.title')}</h2>
-        <input
-          type="search"
-          value={query}
-          onChange={e => setQuery(e.target.value)}
-          placeholder={t('alarms.list.search')}
-          aria-label={t('alarms.list.search')}
-          className="ml-auto w-full rounded-md border border-[var(--color-border)] bg-transparent px-2 py-1 text-sm sm:w-64"
-        />
+        <h2 className="text-lg font-semibold">
+          <button
+            type="button"
+            aria-expanded={listOpen}
+            onClick={() => setListOpen(v => !v)}
+            className="flex items-center gap-2 text-left"
+          >
+            <span aria-hidden className="text-xs text-[var(--color-muted)]">
+              {listOpen ? '▾' : '▸'}
+            </span>
+            {t('alarms.list.title')}
+            <span className="text-sm font-normal text-[var(--color-muted)]">({regions.length})</span>
+          </button>
+        </h2>
+        {listOpen && (
+          <input
+            type="search"
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            placeholder={t('alarms.list.search')}
+            aria-label={t('alarms.list.search')}
+            className="ml-auto w-full rounded-md border border-[var(--color-border)] bg-transparent px-2 py-1 text-sm sm:w-64"
+          />
+        )}
       </div>
 
-      {visible.length === 0 && (
+      {listOpen && visible.length === 0 && (
         <p className="text-sm text-[var(--color-muted)]">{t(query ? 'alarms.list.noMatch' : 'alarms.list.none')}</p>
       )}
 
-      <div className="grid gap-2">
+      <div className="grid gap-2" hidden={!listOpen}>
         {visible.map(r => {
           const open = !collapsed.has(r.region)
           const rows = regionRows(r)
@@ -97,9 +113,16 @@ export default function ActiveAlarmList({ regions, nowIso }: Props): ReactNode {
                       className="grid grid-cols-[1fr_auto] items-center gap-x-3 rounded-md border border-l-4 border-[var(--color-border)] px-3 py-1.5 text-sm"
                       style={{ borderLeftColor: levelFill(area.level, false) }}
                     >
-                      <span className="flex min-w-0 items-center gap-2">
-                        <span aria-hidden>{alarmTypeIcon(area.types)}</span>
-                        <span className="truncate">{area.name}</span>
+                      <span className="min-w-0">
+                        <span className="block truncate">{area.name}</span>
+                        <span className="flex flex-wrap gap-x-3 text-xs text-[var(--color-muted)]">
+                          {area.types.map(type => (
+                            <span key={type} className="inline-flex items-center gap-1">
+                              <span aria-hidden>{alarmTypeIconOf(type)}</span>
+                              {t(`alarms.type.${type}`)}
+                            </span>
+                          ))}
+                        </span>
                       </span>
                       <span className="text-right text-[var(--color-muted)]">
                         {since ? (

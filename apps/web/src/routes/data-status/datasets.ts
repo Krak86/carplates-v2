@@ -58,6 +58,14 @@ export const DATASETS: readonly Dataset[] = [
     job: 'auction-proceedings',
     refreshedOn: '2026-11-04'
   },
+  {
+    id: 'losses',
+    name: 'General Staff of the Armed Forces: Russian losses (russianwarship.rip)',
+    to: '/alarms',
+    cadence: 'daily',
+    job: 'losses',
+    refreshedOn: '2026-11-05'
+  },
   { id: 'news', name: 'News (RSS)', to: '/news', cadence: 'daily', job: 'news', refreshedOn: '2026-10-28' },
   {
     id: 'social',

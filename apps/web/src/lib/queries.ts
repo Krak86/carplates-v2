@@ -4,6 +4,7 @@ import { normalizePlate } from '@carplates/shared'
 import type {
   AuctionListQuery,
   CardBundleResponse,
+  LossCategory,
   MarketKind,
   MotFuelHint,
   PlateLookupResponse,
@@ -19,6 +20,8 @@ import {
   getAlarmHistory,
   getAlarmStats,
   getAlarms,
+  getLosses,
+  getLossesHistory,
   getRoadSafetyCauses,
   getRoadSafetyRegions,
   getRoadSafetyRoads,
@@ -949,3 +952,17 @@ export function auctionListQuery(query: AuctionListQuery) {
     placeholderData: keepPreviousData
   })
 }
+
+/** War-loss totals: one row a day, so an hour is fresh enough. A 404 (nothing stored) hides the section. */
+export const lossesQuery = () =>
+  queryOptions({ queryKey: ['losses'], queryFn: getLosses, staleTime: 60 * 60_000, retry: false })
+
+/** One loss category over time (~1,700 points); changes once a day. */
+export const lossesHistoryQuery = (category: LossCategory, enabled = true) =>
+  queryOptions({
+    enabled,
+    queryKey: ['losses', 'history', category],
+    queryFn: () => getLossesHistory(category),
+    staleTime: 60 * 60_000,
+    retry: false
+  })
