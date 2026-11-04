@@ -20,6 +20,12 @@ export const RELEASES: readonly ReleaseDay[] = [
     items: [
       item(
         'new',
+        'Історія тривог на /alarms: скільки часу кожна область була під тривогою за роками (офіційні дані чи волонтерські), поруч з ДТП того ж року; це час під тривогою, а не кількість атак',
+        'История тревог на /alarms: сколько времени каждая область была под тревогой по годам (официальные данные или волонтерские), рядом с ДТП того же года; это время под тревогой, а не число атак',
+        'Alert history on /alarms: how long each region spent under an air raid alert by year (official or volunteer data), next to the road crashes of the same year; it is time under alert, not a count of attacks'
+      ),
+      item(
+        'new',
         'Повітряні тривоги: мапа областей на /alarms і чип у результаті за номером, якщо в регіоні авто зараз діє тривога; лише інформація, не система оповіщення, а без даних ми так і пишемо',
         'Воздушные тревоги: карта областей на /alarms и чип в результате по номеру, если в регионе авто сейчас действует тревога; только информация, не система оповещения, а без данных мы так и пишем',
         'Air raid alerts: an oblast map at /alarms and a chip on the plate result when the car\'s region has an active alert; informational only, not a warning system, and we say "no data" when the feed is down'

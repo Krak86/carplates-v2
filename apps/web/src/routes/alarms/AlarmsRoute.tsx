@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 
+import LazySection from '@/components/LazySection'
 import LoadErrorBoundary from '@/components/LoadErrorBoundary'
 import Card from '@/components/ui/Card'
 import { toIntlLocale } from '@/lib/intl'
@@ -12,6 +13,7 @@ import { ALARM_FILL, sortedAlarms } from '@/routes/alarms/helpers'
 import StatsMapSkeleton from '@/routes/stats/StatsMapSkeleton'
 
 const AlarmMap = lazy(() => import('@/routes/alarms/AlarmMap'))
+const AlarmHistorySection = lazy(() => import('@/routes/alarms/AlarmHistorySection'))
 
 // Lazy-loaded (see App.tsx). Online-only: no `offline-cache.ts` entry. Informational, not a warning system.
 export default function AlarmsRoute(): ReactNode {
@@ -82,6 +84,13 @@ export default function AlarmsRoute(): ReactNode {
           <p className="mt-3 text-xs text-[var(--color-muted)]">{t('alarms.source')}</p>
         </Card>
       )}
+
+      {/* History comes from our own table, so it shows even when the live feed is down. */}
+      <LazySection fallback={<StatsMapSkeleton />}>
+        <LoadErrorBoundary compact>
+          <AlarmHistorySection />
+        </LoadErrorBoundary>
+      </LazySection>
     </div>
   )
 }

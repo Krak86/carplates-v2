@@ -156,6 +156,51 @@ const entryLevel = (entry: UpstreamRegionAlerts): string | null => {
   return best
 }
 
+/**
+ * `GET /api/alarms/history?year=`: per oblast and source, one year of alerts from the MIT siren dataset (docs/alarm-plan.md step 5).
+ * Alerts are continuous periods per oblast (overlapping raion rows merged), counted on the UTC start day. `official` and
+ * `volunteer` are never mixed (the volunteer file estimates end times: `estimatedAlerts`). Crimea, Sevastopol and the permanent
+ * Luhansk alert are not in the data. A siren is a threat, not a strike: nothing here counts attacks.
+ */
+export const ALARM_HISTORY_SOURCES = ['official', 'volunteer'] as const
+export type AlarmHistorySource = (typeof ALARM_HISTORY_SOURCES)[number]
+export const DEFAULT_ALARM_HISTORY_SOURCE: AlarmHistorySource = 'official'
+
+export const alarmHistoryQuerySchema = z.object({
+  year: z.coerce.number().int().min(2000).max(2100).optional()
+})
+export type AlarmHistoryQuery = z.infer<typeof alarmHistoryQuerySchema>
+
+const historyCountSchema = z.number().int().nonnegative()
+
+export const alarmHistoryRegionSchema = z.object({
+  /** Plate region name, as in `REGIONS`. */
+  region: z.string(),
+  alerts: historyCountSchema,
+  /** Total time under alert in the year. */
+  seconds: historyCountSchema,
+  longestSeconds: historyCountSchema,
+  /** Alerts with an estimated end time (volunteer `naive`). */
+  estimatedAlerts: historyCountSchema
+})
+export type AlarmHistoryRegion = z.infer<typeof alarmHistoryRegionSchema>
+
+export const alarmHistoryResponseSchema = z.object({
+  year: z.number().int(),
+  /** Years with any data, newest first. */
+  years: z.array(z.number().int()),
+  /** Only sources that have rows in the year. `firstDay` / `lastDay` = the first / last day with an alert (ISO date). */
+  sources: z.array(
+    z.object({
+      source: z.enum(ALARM_HISTORY_SOURCES),
+      firstDay: z.string(),
+      lastDay: z.string(),
+      regions: z.array(alarmHistoryRegionSchema)
+    })
+  )
+})
+export type AlarmHistoryResponse = z.infer<typeof alarmHistoryResponseSchema>
+
 /** Every entry with an active alert, grouped under our region (oblast). Pure, so it is unit-tested. */
 export function activeAlarmRegions(upstream: readonly UpstreamRegionAlerts[], index: OblastIndex): AlarmRegion[] {
   const byRegion = new Map<string, AlarmRegion>()

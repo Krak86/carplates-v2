@@ -39,6 +39,8 @@ export const CATALOG_THROTTLE = { medium: { limit: 60, ttl: 60_000 } }
 export const MARKET_THROTTLE = { medium: { limit: 40, ttl: 60_000 } }
 /** Road-safety rollups and the hazard list (filterable by region and kind): small precomputed answers, edge-cached. */
 export const ROAD_SAFETY_THROTTLE = { medium: { limit: 60, ttl: 60_000 } }
+/** Air-raid alert history by year: a small precomputed rollup, edge-cached. */
+export const ALARM_HISTORY_THROTTLE = { medium: { limit: 60, ttl: 60_000 } }
 /** Token-checked unsubscribe endpoints: a forged-token guesser gets few tries (a real user needs one). */
 export const UNSUBSCRIBE_THROTTLE = { medium: { limit: 20, ttl: 60_000 } }
 /** Contact form (code request and send, each its own counter): a real email goes out, so a dozen per IP per hour is plenty. */

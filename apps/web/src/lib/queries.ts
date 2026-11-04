@@ -16,6 +16,7 @@ import type {
 import {
   ApiError,
   getAdminAnalytics,
+  getAlarmHistory,
   getAlarms,
   getRoadSafetyCauses,
   getRoadSafetyRegions,
@@ -592,6 +593,16 @@ export const alarmsQuery = () =>
     staleTime: 30_000,
     refetchInterval: 60_000,
     refetchIntervalInBackground: false,
+    retry: false
+  })
+
+/** Yearly alert history: changes only on ingest, so an hour is fresh enough. */
+export const alarmHistoryQuery = (year?: number) =>
+  queryOptions({
+    queryKey: ['alarms', 'history', year ?? null],
+    queryFn: () => getAlarmHistory(year),
+    staleTime: 60 * 60_000,
+    placeholderData: keepPreviousData,
     retry: false
   })
 

@@ -485,7 +485,7 @@ Idea round: put the registry stats on the map and in diagrams, and add small can
    stolen-by-year vs. registered share (`/wanted`); hand-rolled SVG + `d3-scale`/`d3-shape`, each a `LazySection`, each with an export `chart` builder.
 7. ⏳ **Later** - Sankey (origin -> brand -> fuel), bar-chart race by registration year, collectible region cards, racer "drive Ukraine" route.
 
-### Air-raid alerts: plate-region badge, `alarm` background layer, history page — key received 2026-11-04, steps 1-4 built
+### Air-raid alerts: plate-region badge, `alarm` background layer, history page — key received 2026-11-04, steps 1-5 built
 
 Plan, terms, live API findings, rejection path: `docs/alarm-plan.md`. Steps: ✅ poller + `/api/alarms` (deployed and verified on prod 2026-11-04) · ✅ region badge on the plate result · ✅ `/alarms` map page (checked in the browser: full, partial, none, 503) · ✅ `alarm` layer (`BACKGROUND_MODES`, `/relax`; checked in the browser) · ✅ history ingest from the MIT siren dataset (`registry.alarm_history_daily`, migration 0098, seed `alarm-history.csv.gz`; daily refresh cron not built) · ⏳ safety-over-time page next to DTP stats (no "most bombed", no combined score) · ⏳ later: districts, SSE, webhook.
 
@@ -1240,6 +1240,7 @@ Write-up: `docs/plan-done.md` "Market offers (CarAPIS)"; conventions: `docs/feat
 - [ ] After deploy: set the `CARAPIS_API_KEY` GitHub secret (optional vars `MARKET_UA_ENABLED`, `MARKET_SHOW_BUDGET`) ⏳
 - [x] Air-raid alerts, step 1 deployed and verified on prod 2026-11-04: `ALARM_API_KEY` secret set, `/api/alarms` returns live regions, Cloudflare Cache Rule includes `/api/alarms` (MISS then HIT)
 - [ ] Air-raid alerts: ask Stfalcon for the per-minute request limit (poller defaults to 30 s and pauses on 429) ⏳
+- [ ] **After deploy** (air-raid steps 2-5): add `"/api/alarms/history"` to the Cloudflare Cache Rule (`docs/deploy.md`), check the history section on `/alarms`; run `pnpm ingest:alarm-history:csv` on the VPS (new table `registry.alarm_history_daily`, migration 0098); check `/alarms`, the plate chip and `/relax?layout=alarm` on prod
 - [ ] After deploy: check "requests used" on the admin Server tab after a day (cache hits vs UA / EU), rotate the dev key
 - [ ] After deploy: open a plate page, a catalog page and `?section=stock` in production; confirm `go/:id` opens the listing (the 204 path, over budget, is untested in a browser)
 - [ ] Owner emails Auto.ria (draft in the plan) after seeing it live; if they object, set `MARKET_UA_ENABLED=false`
