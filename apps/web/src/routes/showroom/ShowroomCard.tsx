@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { ShowroomItem, ShowroomKind } from '@carplates/shared'
 
@@ -7,13 +7,15 @@ import { itemKinds } from '@/routes/showroom/helpers'
 
 type Props = {
   item: ShowroomItem
+  /** Position in the grid: staggers the entrance animation (capped by the `animate-row-in` utility). */
+  index?: number
   onOpen: (kind: ShowroomKind) => void
 }
 
 const KIND_ICON: Readonly<Record<ShowroomKind, string>> = { '360': '🔄', '3d': '🧊', tuning: '🛠️', oem: '🏭' }
 
 /** One make/model: a thumbnail (when a 3D model has one) and a button per immersive view it has. */
-export default function ShowroomCard({ item, onOpen }: Props): ReactNode {
+export default function ShowroomCard({ item, index = 0, onOpen }: Props): ReactNode {
   const { t } = useTranslation()
   const online = useOnlineStatus()
   const kindLabel = (kind: ShowroomKind, n: number): string =>
@@ -26,7 +28,11 @@ export default function ShowroomCard({ item, onOpen }: Props): ReactNode {
           : t('showroom.oem.button')
 
   return (
-    <li className="flex flex-col overflow-hidden rounded-xl border border-border bg-surface shadow-sm">
+    <li
+      // Cards added by "show more" restart their index at 0 of the new batch: the delay is capped, so it stays short.
+      style={{ '--row-i': index % 12 } as CSSProperties}
+      className="flex animate-row-in flex-col overflow-hidden rounded-xl border border-border bg-surface shadow-sm"
+    >
       {item.thumbUrl ? (
         <img src={item.thumbUrl} alt="" loading="lazy" className="aspect-video w-full object-cover" />
       ) : (

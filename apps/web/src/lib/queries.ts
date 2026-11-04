@@ -682,7 +682,9 @@ export function showroomQuery(q: string, kind: ShowroomFilter) {
       const loaded = pages.reduce((sum, p) => sum + p.items.length, 0)
       return loaded < last.total ? loaded : undefined
     },
-    staleTime: 3_600_000
+    staleTime: 3_600_000,
+    // Switching a tab or typing keeps the previous cards on screen (dimmed) until the new ones arrive.
+    placeholderData: keepPreviousData
   })
 }
 
