@@ -44,9 +44,17 @@ export default function AlarmsRoute(): ReactNode {
       {alarms.isPending && <StatsMapSkeleton />}
 
       {/* 503 (no or stale data) is an error here: say "no data", never draw a calm map. */}
+      {/* The base map still draws, dimmed and without any alert colour, so it cannot read as "calm". */}
       {alarms.isError && (
-        <Card>
-          <p className="text-[var(--color-muted)]">{t('alarms.noData')}</p>
+        <Card className="mb-6">
+          <p className="mb-3 text-[var(--color-muted)]">{t('alarms.noData')}</p>
+          <div className="opacity-40 grayscale">
+            <LoadErrorBoundary compact>
+              <Suspense fallback={<StatsMapSkeleton />}>
+                <AlarmMap regions={[]} showLabels={showLabels} />
+              </Suspense>
+            </LoadErrorBoundary>
+          </div>
         </Card>
       )}
 
