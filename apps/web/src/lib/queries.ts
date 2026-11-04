@@ -16,6 +16,7 @@ import type {
 import {
   ApiError,
   getAdminAnalytics,
+  getAlarms,
   getRoadSafetyCauses,
   getRoadSafetyRegions,
   getRoadSafetyRoads,
@@ -581,6 +582,17 @@ const roadSafetyQuery = <T>(name: string, fn: (year?: number) => Promise<T>, yea
     queryFn: () => fn(year),
     staleTime: 60 * 60_000,
     placeholderData: keepPreviousData
+  })
+
+/** Live air-raid alerts, shared by every card. Refetches each minute only while the tab is visible; a failure (503 stale) leaves no data. */
+export const alarmsQuery = () =>
+  queryOptions({
+    queryKey: ['alarms'],
+    queryFn: getAlarms,
+    staleTime: 30_000,
+    refetchInterval: 60_000,
+    refetchIntervalInBackground: false,
+    retry: false
   })
 
 export const roadSafetyRegionsQuery = (year?: number) => roadSafetyQuery('regions', getRoadSafetyRegions, year)
