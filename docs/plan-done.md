@@ -4633,3 +4633,7 @@ Step 5 of `docs/alarm-plan.md`. Built as a section of `/alarms` (no new route, s
 - `GET /api/alarms/history?year=` (own controller / service / pure helpers + test in `apps/api/src/alarm/`), edge-cached with `STATS_CACHE`, throttled, Cloudflare rule entry `/api/alarms/history` in `docs/deploy.md` (to add to the live rule after deploy).
 - `AlarmHistorySection`: year picker, official / volunteer switch, estimated-end share, map (hours under alert or alert count) and a per-region table (alerts, time, longest alert, crashes, deaths), footnotes for the honesty rules. Checked in the browser (phone width, volunteer switch, 404 state).
 - Docs / About: `releases.ts` item, About `alarms` feature text, `features-reference.md`.
+
+## Air-raid alerts: active list and today stats (2026-11-04) ✅
+
+- `/alarms` list now shows start time and duration per area (grouped by oblast, searchable); new recorder table `registry.alarm_events` (migration 0099) filled by the poller; `GET /api/alarms/stats` + `AlarmStatsSection` (total, longest, shortest, by hour, by oblast). Details in `features-reference.md`.

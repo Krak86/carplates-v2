@@ -117,7 +117,9 @@ export const alarmAreaSchema = z.object({
   kind: z.string(),
   types: z.array(z.enum(ALARM_TYPES)),
   /** Upstream level as is (`Red`, `Yellow`, ...). Meaning of the levels not yet confirmed with the provider. */
-  level: z.string().nullable().optional()
+  level: z.string().nullable().optional(),
+  /** ISO time the alert in this area started (earliest upstream `createdAt`), when the feed gives it. */
+  since: z.string().nullable().optional()
 })
 export type AlarmArea = z.infer<typeof alarmAreaSchema>
 
@@ -201,6 +203,83 @@ export const alarmHistoryResponseSchema = z.object({
 })
 export type AlarmHistoryResponse = z.infer<typeof alarmHistoryResponseSchema>
 
+/** Earliest start among the alert levels of an upstream entry (ISO), or null when the feed gives none. */
+const entrySince = (entry: UpstreamRegionAlerts): string | null => {
+  let best: { iso: string; ms: number } | null = null
+  for (const alert of entry.activeAlerts ?? []) {
+    for (const l of alert.activeAlertLevels ?? []) {
+      const ms = l.createdAt ? Date.parse(l.createdAt) : Number.NaN
+      if (!Number.isNaN(ms) && (!best || ms < best.ms)) best = { iso: new Date(ms).toISOString(), ms }
+    }
+  }
+  return best?.iso ?? null
+}
+
+/** One alerted area (state, district or community) with the oblast it belongs to: the unit the event recorder tracks. */
+export type ActiveAlarmArea = {
+  areaId: string
+  region: string
+  name: string
+  kind: string
+  types: AlarmType[]
+  level: string | null
+  since: string | null
+}
+
+/** Flat list of every alerted area that maps to one of our oblasts. Pure, so it is unit-tested. */
+export function activeAlarmAreas(upstream: readonly UpstreamRegionAlerts[], index: OblastIndex): ActiveAlarmArea[] {
+  const out: ActiveAlarmArea[] = []
+  for (const entry of upstream) {
+    const alerts = entry.activeAlerts ?? []
+    if (alerts.length === 0) continue
+    const hit = index.get(entry.regionId)
+    if (!hit) continue
+    out.push({
+      areaId: entry.regionId,
+      region: hit.region,
+      name: entry.regionName,
+      kind: entry.regionType,
+      types: [...new Set(alerts.map(a => alarmTypeOf(a.type)))],
+      level: entryLevel(entry),
+      since: entrySince(entry)
+    })
+  }
+  return out
+}
+
+/**
+ * `GET /api/alarms/stats`: today's (Europe/Kyiv day) alerts from our own recorder (`registry.alarm_events`), which starts
+ * empty and fills from the day it was switched on (`recordingSince`). An alert is counted on its start day. Never a
+ * count of attacks: a siren is a threat. Permanent alerts that began before today (Crimea, Luhansk) are not counted.
+ */
+export const alarmStatsEventSchema = z.object({
+  /** Area name as the feed gives it. */
+  name: z.string(),
+  /** Plate region name, as in `REGIONS`. */
+  region: z.string(),
+  startedAt: z.string(),
+  seconds: z.number().int().nonnegative(),
+  ongoing: z.boolean()
+})
+
+export const alarmStatsResponseSchema = z.object({
+  /** Kyiv calendar day the numbers are for (`YYYY-MM-DD`). */
+  day: z.string(),
+  /** ISO time of the first recorded alert: nothing earlier exists in the numbers. Null while nothing was recorded. */
+  recordingSince: z.string().nullable(),
+  total: z.number().int().nonnegative(),
+  /** Alerts of the previous Kyiv day; null when the recorder was not yet running for all of it. */
+  previousTotal: z.number().int().nonnegative().nullable(),
+  longest: alarmStatsEventSchema.nullable(),
+  /** Shortest finished alert (an ongoing one is not final). */
+  shortest: alarmStatsEventSchema.nullable(),
+  /** 24 counters by Kyiv hour of the alert start. */
+  byHour: z.array(z.number().int().nonnegative()).length(24),
+  byRegion: z.array(z.object({ region: z.string(), count: z.number().int().positive() }))
+})
+export type AlarmStatsEvent = z.infer<typeof alarmStatsEventSchema>
+export type AlarmStatsResponse = z.infer<typeof alarmStatsResponseSchema>
+
 /** Every entry with an active alert, grouped under our region (oblast). Pure, so it is unit-tested. */
 export function activeAlarmRegions(upstream: readonly UpstreamRegionAlerts[], index: OblastIndex): AlarmRegion[] {
   const byRegion = new Map<string, AlarmRegion>()
@@ -211,7 +290,7 @@ export function activeAlarmRegions(upstream: readonly UpstreamRegionAlerts[], in
     if (!hit) continue
     const types = [...new Set(alerts.map(a => alarmTypeOf(a.type)))]
     const level = entryLevel(entry)
-    const area: AlarmArea = { name: entry.regionName, kind: entry.regionType, types, level }
+    const area: AlarmArea = { name: entry.regionName, kind: entry.regionType, types, level, since: entrySince(entry) }
     const current = byRegion.get(hit.region) ?? {
       region: hit.region,
       scope: 'partial' as AlarmScope,

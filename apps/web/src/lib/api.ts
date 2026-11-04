@@ -1,5 +1,6 @@
 import {
   alarmHistoryResponseSchema,
+  alarmStatsResponseSchema,
   alarmsResponseSchema,
   createShareResponseSchema,
   mySharesResponseSchema,
@@ -107,6 +108,7 @@ import {
 } from '@carplates/shared'
 import type {
   AlarmHistoryResponse,
+  AlarmStatsResponse,
   AlarmsResponse,
   CreateShareResponse,
   MarketDetail,
@@ -602,6 +604,11 @@ export async function getAlarms(): Promise<AlarmsResponse> {
 /** Online-only yearly air-raid alert history (MIT siren dataset rollup); `year` undefined = the newest year. */
 export async function getAlarmHistory(year?: number): Promise<AlarmHistoryResponse> {
   return alarmHistoryResponseSchema.parse(await getJson(`/api/alarms/history${yearSuffix(year)}`))
+}
+
+/** Online-only: today's alerts from the API recorder (Kyiv day). */
+export async function getAlarmStats(): Promise<AlarmStatsResponse> {
+  return alarmStatsResponseSchema.parse(await getJson('/api/alarms/stats'))
 }
 
 export async function getRoadSafetyRegions(year?: number): Promise<RoadSafetyRegionsResponse> {

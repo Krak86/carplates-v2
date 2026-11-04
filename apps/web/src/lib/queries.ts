@@ -17,6 +17,7 @@ import {
   ApiError,
   getAdminAnalytics,
   getAlarmHistory,
+  getAlarmStats,
   getAlarms,
   getRoadSafetyCauses,
   getRoadSafetyRegions,
@@ -604,6 +605,17 @@ export const alarmHistoryQuery = (year?: number) =>
     queryFn: () => getAlarmHistory(year),
     staleTime: 60 * 60_000,
     placeholderData: keepPreviousData,
+    retry: false
+  })
+
+/** Today's recorded alerts; refreshed each minute while the tab is visible. */
+export const alarmStatsQuery = () =>
+  queryOptions({
+    queryKey: ['alarms', 'stats'],
+    queryFn: getAlarmStats,
+    staleTime: 30_000,
+    refetchInterval: 60_000,
+    refetchIntervalInBackground: false,
     retry: false
   })
 

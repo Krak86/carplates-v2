@@ -3,12 +3,12 @@ import type { ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 
+import ActiveAlarmList from '@/routes/alarms/ActiveAlarmList'
 import LazySection from '@/components/LazySection'
 import LoadErrorBoundary from '@/components/LoadErrorBoundary'
 import Card from '@/components/ui/Card'
 import { toIntlLocale } from '@/lib/intl'
 import { alarmsQuery } from '@/lib/queries'
-import { localizeRegion } from '@/lib/region-label'
 import { ALARM_FILL, levelFill, sortedAlarms } from '@/routes/alarms/helpers'
 import StatsMapSkeleton from '@/routes/stats/StatsMapSkeleton'
 
@@ -19,6 +19,7 @@ const LEGEND = [
 ] as const
 
 const AlarmMap = lazy(() => import('@/routes/alarms/AlarmMap'))
+const AlarmStatsSection = lazy(() => import('@/routes/alarms/AlarmStatsSection'))
 const AlarmHistorySection = lazy(() => import('@/routes/alarms/AlarmHistorySection'))
 
 // Lazy-loaded (see App.tsx). Online-only: no `offline-cache.ts` entry. Informational, not a warning system.
@@ -27,7 +28,7 @@ export default function AlarmsRoute(): ReactNode {
   const [showLabels, setShowLabels] = useState(false)
   const alarms = useQuery(alarmsQuery())
   const data = alarms.data
-  const list = data ? sortedAlarms(data.regions) : []
+  const count = data?.regions.length ?? 0
   const time = data
     ? new Date(data.fetchedAt).toLocaleTimeString(toIntlLocale(i18n.language), { hour: '2-digit', minute: '2-digit' })
     : null
@@ -51,7 +52,7 @@ export default function AlarmsRoute(): ReactNode {
       {data && (
         <Card className="mb-6">
           <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
-            <span className="font-medium">{t('alarms.count', { count: list.length })}</span>
+            <span className="font-medium">{t('alarms.count', { count })}</span>
             {time && <span className="text-[var(--color-muted)]">{t('alarms.updated', { time })}</span>}
             <span className="text-xs text-[var(--color-muted)]">{t('alarms.refresh')}</span>
             <button
@@ -83,23 +84,18 @@ export default function AlarmsRoute(): ReactNode {
             ))}
           </ul>
 
-          {list.length > 0 && (
-            <ul className="mt-4 grid gap-1 text-sm sm:grid-cols-2">
-              {list.map(r => (
-                <li key={r.region} className="flex justify-between gap-2 border-b border-[var(--color-border)]/50 py-1">
-                  <span>{localizeRegion(r.region, i18n.language)}</span>
-                  <span className="text-[var(--color-muted)]">
-                    {r.scope === 'full' ? t('alarms.status.full') : t('alarms.status.partial')}
-                    {!!r.level && ` (${r.level})`}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          )}
+          <ActiveAlarmList regions={sortedAlarms(data.regions)} nowIso={data.fetchedAt} />
 
           <p className="mt-3 text-xs text-[var(--color-muted)]">{t('alarms.source')}</p>
         </Card>
       )}
+
+      {/* Own recorder: shows even when the live feed is down (it answers from the database). */}
+      <LazySection fallback={<StatsMapSkeleton />}>
+        <LoadErrorBoundary compact>
+          <AlarmStatsSection />
+        </LoadErrorBoundary>
+      </LazySection>
 
       {/* History comes from our own table, so it shows even when the live feed is down. */}
       <LazySection fallback={<StatsMapSkeleton />}>

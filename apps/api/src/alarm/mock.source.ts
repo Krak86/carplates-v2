@@ -25,23 +25,30 @@ export class MockAlarmSource implements AlarmSource {
 
   fetchAlerts(): Promise<UpstreamRegionAlerts[]> {
     const now = new Date().toISOString()
+    const ago = (minutes: number): string => new Date(Date.now() - minutes * 60_000).toISOString()
     const entry = (
       regionId: string,
       regionName: string,
       regionType: string,
       types: string[],
+      minutesAgo: number,
       alertLevel = 'Red'
     ): UpstreamRegionAlerts => ({
       regionId,
       regionType,
       regionName,
       lastUpdate: now,
-      activeAlerts: types.map(type => ({ type, regionType, lastUpdate: now, activeAlertLevels: [{ alertLevel }] }))
+      activeAlerts: types.map(type => ({
+        type,
+        regionType,
+        lastUpdate: now,
+        activeAlertLevels: [{ alertLevel, createdAt: ago(minutesAgo) }]
+      }))
     })
     return Promise.resolve([
-      entry('126', 'Богодухівський район', 'District', ['AIR']),
-      entry('20', 'Сумська область', 'State', ['AIR', 'ARTILLERY']),
-      entry('31', 'м. Київ', 'State', ['AIR'], 'Yellow')
+      entry('126', 'Богодухівський район', 'District', ['AIR'], 25),
+      entry('20', 'Сумська область', 'State', ['AIR', 'ARTILLERY'], 95),
+      entry('31', 'м. Київ', 'State', ['AIR'], 7, 'Yellow')
     ])
   }
 }
