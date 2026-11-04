@@ -626,6 +626,7 @@
   "uaAuctions.caveat": "A lot is matched by the plate or VIN written in its title. Lots can be years old and a plate can be reused, so a match does not prove it is the same car today: compare the VIN and documents. The winner is never shown (the source only gives an anonymous participant number). A lot is \"sold\" when it has a sale price.",
   "uaAuctions.checkedAt": "Auction list last refreshed in our database: {{date}}.",
   "uaAuctions.neverLoaded": "The auction list has not been loaded on this server yet.",
+  "uaAuctions.jumpToLot": "Jump to this lot in the auctions section",
   "uaAuctions.history.title": "Short history of Ukrainian auctions",
   "uaAuctions.history.1": "Electronic auctions of seized property in Ukraine started as a pilot project in 2014 and are run by the state enterprise SETAM of the Ministry of Justice.",
   "uaAuctions.history.2": "On 1 September 2020 the Ministry of Justice signed an order to sell seized property through the Prozorro.Sale electronic system: the state enterprise Prozorro.Sale became the administrator, more than 40 trading platforms connected, and SETAM stayed the organiser (lots, storage, voluntary sales).",

@@ -40,8 +40,8 @@ export default function DevicesSection(): ReactNode {
 
       <ul className="divide-y divide-[var(--color-border)]">
         {list.map(session => (
-          <li key={session.id} className="flex items-center justify-between gap-3 py-3">
-            <div className="min-w-0 text-sm">
+          <li key={session.id} className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 py-3">
+            <div className="min-w-0 flex-1 basis-40 text-sm">
               <div className="truncate font-medium">
                 {session.device}
                 {session.current && (
@@ -50,7 +50,7 @@ export default function DevicesSection(): ReactNode {
                   </span>
                 )}
               </div>
-              <div className="truncate text-xs text-[var(--color-muted)]">
+              <div className="text-xs break-words text-[var(--color-muted)] sm:truncate">
                 {t('profile.devices.lastSeen', {
                   when: new Date(session.lastSeenAt).toLocaleString(LOCALES[lang] ?? 'en-GB', {
                     dateStyle: 'medium',

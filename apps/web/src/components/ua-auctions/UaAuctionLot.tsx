@@ -7,6 +7,7 @@ import {
   OPEN_STATUS,
   formatLotMonth,
   formatPrice,
+  lotKey,
   lotLink,
   lotMonthOf,
   lotNumber,
@@ -108,38 +109,30 @@ export default function UaAuctionLot({ lot, currency, fx }: Props): ReactNode {
     </>
   )
 
-  if (!lot.sold && !isOpen) {
-    return (
-      <details className="rounded-lg border border-[var(--color-border)] bg-[var(--color-border)]/20 px-3 py-2 text-sm">
-        <summary className="cursor-pointer">
-          <span className="font-semibold">
-            {icon} {month ? `${month} · ` : ''}
-            {verdict}
-          </span>
-          <span className="text-[var(--color-muted)]">
-            {` · ${statusLabel}`}
-            {lot.startPrice !== null && ` · ${formatPrice(lot.startPrice, currency, fx, locale)}`}
-          </span>{' '}
-          <UaAuctionChips lot={lot} />
-        </summary>
-        {details}
-      </details>
-    )
-  }
+  // Every lot collapses to its summary line; a sold or open lot starts expanded (the ones that matter), the rest closed.
+  const expanded = lot.sold || isOpen
 
   return (
-    <div
+    <details
+      id={`ua-lot-${lotKey(lot)}`}
+      open={expanded}
       className={cn(
-        'rounded-lg border p-3 text-sm',
+        'scroll-mt-20 rounded-lg border px-3 py-2 text-sm',
         lot.sold ? 'border-green-600/60 bg-green-600/10' : 'border-[var(--color-border)] bg-[var(--color-border)]/20'
       )}
     >
-      <p className="font-semibold">
-        {icon} {month ? `${month} · ` : ''}
-        {verdict}
-        {` · ${statusLabel}`} <UaAuctionChips lot={lot} />
-      </p>
+      <summary className="cursor-pointer">
+        <span className="font-semibold">
+          {icon} {month ? `${month} · ` : ''}
+          {verdict}
+        </span>
+        <span className={expanded ? undefined : 'text-[var(--color-muted)]'}>
+          {` · ${statusLabel}`}
+          {!expanded && lot.startPrice !== null && ` · ${formatPrice(lot.startPrice, currency, fx, locale)}`}
+        </span>{' '}
+        <UaAuctionChips lot={lot} />
+      </summary>
       {details}
-    </div>
+    </details>
   )
 }

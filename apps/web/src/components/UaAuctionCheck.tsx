@@ -15,7 +15,7 @@ import UaAuctionChart from '@/components/ua-auctions/UaAuctionChart'
 import UaAuctionPriceCheck from '@/components/ua-auctions/UaAuctionPriceCheck'
 import UaAuctionGroup from '@/components/ua-auctions/UaAuctionGroup'
 import UaAuctionVehicle from '@/components/ua-auctions/UaAuctionVehicle'
-import { groupLots, lotSource } from '@/components/ua-auctions/helpers'
+import { OPEN_UA_LOT_EVENT, groupLots, lotSource } from '@/components/ua-auctions/helpers'
 import VinToggleSection from '@/components/vin/VinToggleSection'
 import { toIntlLocale } from '@/lib/intl'
 import { auctionLotsQuery, fxQuery } from '@/lib/queries'
@@ -32,8 +32,6 @@ type Props = {
 }
 
 const LINK_CLASS = 'text-[var(--color-primary)] underline'
-const HISTORY_COUNT = 4
-const WORLD_COUNT = 4
 
 function ExternalLink({ href, children }: { href: string; children: ReactNode }): ReactNode {
   const { t } = useTranslation()
@@ -65,9 +63,37 @@ export default function UaAuctionCheck({ plate, vin, openSignal = 0, startOpen =
   // The merged specs only add something once a Prozorro lot (structured fields, photos) is among the lots.
   const vehicle = lots.some(l => lotSource(l) === 'prozorro') ? data?.vehicle : null
 
+  // A "↓" link in the registration history asks to open this section and jump to one lot.
+  const [jump, setJump] = useState(0)
+  const jumpLot = useRef<string | null>(null)
+  const signal = openSignal + jump
+
   useEffect(() => {
-    if ((isShared || openSignal > 0) && sectionRef.current) scrollElementIntoView(sectionRef.current)
-  }, [isShared, openSignal])
+    const onJump = (e: Event): void => {
+      jumpLot.current = (e as CustomEvent<string>).detail
+      setJump(n => n + 1)
+    }
+    window.addEventListener(OPEN_UA_LOT_EVENT, onJump)
+    return () => window.removeEventListener(OPEN_UA_LOT_EVENT, onJump)
+  }, [])
+
+  useEffect(() => {
+    if (!(isShared || signal > 0) || !sectionRef.current) return
+    const key = jumpLot.current
+    jumpLot.current = null
+    // The lots render with the section; wait a frame so a just-opened group / lot exists before looking it up.
+    const timer = window.setTimeout(
+      () => {
+        const lot = key ? document.getElementById(`ua-lot-${key}`) : null
+        if (!lot || !sectionRef.current) return scrollElementIntoView(sectionRef.current as HTMLElement)
+        for (let el: Element | null = lot; el; el = el.parentElement)
+          if (el instanceof HTMLDetailsElement) el.open = true
+        lot.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      },
+      key ? 350 : 0
+    )
+    return () => window.clearTimeout(timer)
+  }, [isShared, signal])
 
   return (
     <VinToggleSection
@@ -88,7 +114,7 @@ export default function UaAuctionCheck({ plate, vin, openSignal = 0, startOpen =
       showLabel={t('uaAuctions.show')}
       hideLabel={t('uaAuctions.hide')}
       defaultOpen={isShared || startOpen}
-      openSignal={openSignal}
+      openSignal={signal}
     >
       {isError && <p className="mb-2 text-sm text-[var(--color-muted)]">{t('uaAuctions.error')}</p>}
 
@@ -130,25 +156,20 @@ export default function UaAuctionCheck({ plate, vin, openSignal = 0, startOpen =
         </p>
       )}
 
-      <details className="mt-2 text-sm">
-        <summary className="cursor-pointer font-medium">{t('uaAuctions.history.title')}</summary>
-        <ul className="mt-1.5 list-disc space-y-1 pl-5 text-[var(--color-muted)]">
-          {Array.from({ length: HISTORY_COUNT }, (_, i) => (
-            <li key={i}>{t(`uaAuctions.history.${i + 1}`)}</li>
-          ))}
-        </ul>
-      </details>
-
-      <details className="mt-2 text-sm">
-        <summary className="cursor-pointer font-medium">{t('uaAuctions.world.title')}</summary>
-        <ul className="mt-1.5 list-disc space-y-1 pl-5 text-[var(--color-muted)]">
-          {Array.from({ length: WORLD_COUNT }, (_, i) => (
-            <li key={i}>{t(`uaAuctions.world.${i + 1}`)}</li>
-          ))}
-        </ul>
-      </details>
-
       <ReadGuideLink guide={AUCTIONS_GUIDE_PATH} />
+
+      <ul className="mt-2 space-y-1 text-sm">
+        <li>
+          <Link to={`${AUCTIONS_GUIDE_PATH}#history`} className={LINK_CLASS}>
+            {t('uaAuctions.history.title')} <span aria-hidden>→</span>
+          </Link>
+        </li>
+        <li>
+          <Link to={`${AUCTIONS_GUIDE_PATH}#world`} className={LINK_CLASS}>
+            {t('uaAuctions.world.title')} <span aria-hidden>→</span>
+          </Link>
+        </li>
+      </ul>
 
       <ul className="mt-2 space-y-1 text-sm">
         <li>

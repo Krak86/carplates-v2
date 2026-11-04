@@ -124,7 +124,8 @@ function LotRow({ lot, currency, fx, query, onChange }: LotRowProps): ReactNode 
 
           {carPath && (
             <Link to={carPath} className="text-[var(--color-primary)] underline">
-              {t('auctions.page.openCar')}: {lot.plate ?? lot.vin}
+              {lot.plate ?? lot.vin} <span aria-hidden>→</span>
+              <span className="sr-only">{t('auctions.page.openCar')}</span>
             </Link>
           )}
         </p>
