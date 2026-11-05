@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import type { ReactNode } from 'react'
+import type { PointerEvent, ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { geoCentroid, geoMercator, geoPath } from 'd3-geo'
 import { useTranslation } from 'react-i18next'
@@ -24,6 +24,12 @@ const OBLAST_SUFFIX = /\s+(область|oblast)$/i
 type Props = {
   regions: readonly AlarmRegion[]
   showLabels?: boolean
+}
+
+/** Distance between the first two active touch points (0 if fewer than two). */
+function pinchDistance(pointers: ReadonlyMap<number, { x: number; y: number }>): number {
+  const [a, b] = [...pointers.values()]
+  return a && b ? Math.hypot(a.x - b.x, a.y - b.y) : 0
 }
 
 type GeoFeature = { properties: AlarmGeoProperties }
@@ -80,6 +86,8 @@ export default function AlarmMap({ regions, showLabels = false }: Props): ReactN
     return () => svg.removeEventListener('wheel', onWheel)
   }, [hasMap])
   const dragRef = useRef<{ x: number; y: number; ox: number; oy: number } | null>(null)
+  const pointersRef = useRef(new Map<number, { x: number; y: number }>())
+  const pinchRef = useRef<{ dist: number; zoom: number } | null>(null)
 
   useEffect(() => {
     const onChange = () => setIsFullscreen(document.fullscreenElement === frameRef.current)
@@ -91,6 +99,13 @@ export default function AlarmMap({ regions, showLabels = false }: Props): ReactN
     const k = Math.min(MAX_ZOOM, Math.max(1, next))
     setZoom(k)
     if (k === 1) setOffset({ x: 0, y: 0 })
+  }
+  const endPointer = (e: PointerEvent<SVGSVGElement>) => {
+    pointersRef.current.delete(e.pointerId)
+    pinchRef.current = null
+    // One finger left after a pinch: carry on panning from where it is.
+    const [rest] = [...pointersRef.current.values()]
+    dragRef.current = rest && zoom > 1 ? { x: rest.x, y: rest.y, ox: offset.x, oy: offset.y } : null
   }
   const toggleFullscreen = () => {
     if (document.fullscreenElement) void document.exitFullscreen()
@@ -151,12 +166,28 @@ export default function AlarmMap({ regions, showLabels = false }: Props): ReactN
           userSelect: 'none'
         }}
         onPointerDown={e => {
+          pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY })
+          if (pointersRef.current.size === 2) {
+            // Second finger: pinch-zoom from the current scale.
+            pinchRef.current = { dist: pinchDistance(pointersRef.current) || 1, zoom }
+            dragRef.current = null
+            for (const id of pointersRef.current.keys()) e.currentTarget.setPointerCapture(id)
+            return
+          }
           // Touch keeps scrolling the page at 1x; a mouse can always drag.
           if (zoom <= 1 && e.pointerType !== 'mouse') return
           e.currentTarget.setPointerCapture(e.pointerId)
           dragRef.current = { x: e.clientX, y: e.clientY, ox: offset.x, oy: offset.y }
         }}
         onPointerMove={e => {
+          if (pointersRef.current.has(e.pointerId)) {
+            pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY })
+          }
+          const pinch = pinchRef.current
+          if (pinch && pointersRef.current.size >= 2) {
+            zoomTo(pinch.zoom * (pinchDistance(pointersRef.current) / pinch.dist))
+            return
+          }
           const drag = dragRef.current
           if (!drag) return
           const scale = MAP_WIDTH / e.currentTarget.getBoundingClientRect().width
@@ -167,12 +198,8 @@ export default function AlarmMap({ regions, showLabels = false }: Props): ReactN
             y: Math.min(limitY, Math.max(-limitY, drag.oy + (e.clientY - drag.y) * scale))
           })
         }}
-        onPointerUp={() => {
-          dragRef.current = null
-        }}
-        onPointerCancel={() => {
-          dragRef.current = null
-        }}
+        onPointerUp={endPointer}
+        onPointerCancel={endPointer}
       >
         <g
           transform={`translate(${MAP_WIDTH / 2 + offset.x} ${MAP_HEIGHT / 2 + offset.y}) scale(${zoom}) translate(${-MAP_WIDTH / 2} ${-MAP_HEIGHT / 2})`}

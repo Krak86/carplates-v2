@@ -79,7 +79,11 @@ export default function SearchField({
           </button>
           <span
             role="tooltip"
-            className="pointer-events-none absolute top-full left-0 z-10 mt-1 w-max max-w-[min(13rem,80vw)] rounded-md bg-[var(--color-fg)] px-2 py-1 text-left text-xs text-[var(--color-bg)] opacity-0 shadow transition-opacity delay-300 duration-150 group-has-[button:focus-visible]:opacity-100 group-has-[button:hover]:opacity-100"
+            className={cn(
+              'pointer-events-none absolute top-full left-0 z-10 mt-1 w-max max-w-[min(13rem,80vw)] rounded-md bg-[var(--color-fg)] px-2 py-1 text-left text-xs text-[var(--color-bg)] opacity-0 shadow transition-opacity delay-300 duration-150',
+              // Once the toggle is clicked the hint is redundant (touch keeps :hover/:focus stuck on it).
+              !advancedOpen && 'group-has-[button:focus-visible]:opacity-100 group-has-[button:hover]:opacity-100'
+            )}
           >
             <span className="block font-semibold">{t('search.advancedToggle')}</span>
             <span className="block opacity-75">{t('search.advancedHint')}</span>

@@ -14,29 +14,12 @@ export const RACER_LINKS = [
 /**
  * Third-party games on their own sites, listed in a separate hub section. `embed` games open in a modal iframe; the rest open in a
  * new tab. Set `embed` only after checking the site's headers (`X-Frame-Options` / `frame-ancestors`) AND adding its origin to the
- * CSP `frame-src`. Checked 2026-11-05: phoboslab.org sends neither header; nfsu2.xyz (DENY), dos.zone (frame-ancestors allow-list),
- * wasmarcade.app and seeles.ai (SAMEORIGIN) refuse framing.
+ * CSP `frame-src`. Checked 2026-11-05: phoboslab.org sends neither header; nfsu2.xyz (DENY) and wasmarcade.app (SAMEORIGIN) refuse framing.
  */
 export const EXTERNAL_GAMES = [
   { id: 'nfsu2', url: 'https://nfsu2.xyz/', emoji: '🏁', hue: 340, embed: false },
   { id: 'wipeout', url: 'https://phoboslab.org/wipegame/', emoji: '🚀', hue: 210, embed: true },
   { id: 'gta3', url: 'https://wasmarcade.app/play/gta-3', emoji: '🔫', hue: 25, embed: false },
-  { id: 'vicecity', url: 'https://dos.zone/grand-theft-auto-vice-city/', emoji: '🌴', hue: 320, embed: false },
-  {
-    id: 'realdrive',
-    url: 'https://www.seeles.ai/games/racing/realdrive-ultimate-3d-car-simulator',
-    emoji: '🚗',
-    hue: 130,
-    embed: false
-  },
-  {
-    id: 'drivequest',
-    url: 'https://www.seeles.ai/games/racing/drive-quest-open-world-driving-adventure',
-    emoji: '🗺️',
-    hue: 175,
-    embed: false
-  },
-  { id: 'driftrunner', url: 'https://www.seeles.ai/games/racing/drift-runner-3d', emoji: '💨', hue: 260, embed: false }
 ] as const
 
 export type ExternalGame = (typeof EXTERNAL_GAMES)[number]

@@ -66,11 +66,10 @@ export default function AlarmsRoute(): ReactNode {
             <span className="text-xs text-[var(--color-muted)]">{t('alarms.refresh')}</span>
             <button
               type="button"
-              aria-pressed={showLabels}
               onClick={() => setShowLabels(v => !v)}
-              className="ml-auto rounded-md border border-[var(--color-border)] px-2 py-0.5 text-xs aria-pressed:bg-[var(--color-border)]"
+              className="ml-auto rounded-md border border-[var(--color-border)] px-2 py-0.5 text-xs"
             >
-              {t('alarms.showRegions')}
+              {t(showLabels ? 'alarms.hideRegions' : 'alarms.showRegions')}
             </button>
           </div>
 
