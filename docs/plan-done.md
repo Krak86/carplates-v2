@@ -4657,11 +4657,12 @@ General Staff "approximate" figures of Russian losses, relayed by the community 
 ### Ukrstat population - check result (2026-11-05, nothing built)
 `DF_POPULATION_STRUCTURE` 8.0.1: `REGION` is **KATOTTG** (`UA` + 2-digit oblast code + zeros + a suffix, e.g. Kharkiv `UA63000000000041885`; `UA00000000000000000` = Ukraine; 28 values: 24 oblasts, Kyiv city `UA80...`, Crimea `UA01...`, Sevastopol `UA85...`), not the plate-region names, so a KATOTTG -> `REGIONS` map is needed. Indicator `PNMI_01` = size of the existing population (`PNMI_02` = permanent; `PNMI_03/04` = averages), key `PNMI_01.<region>._T._T._T.A`. **Latest annual year is 2022** (national 41,167,335, the pre-invasion 1 Jan 2022 figure); Crimea and Sevastopol stop in 2014. Per-100k figures would therefore use a pre-war denominator, which must be said on the page.
 
-## `/alarms` views: Cars and regions, Rhythm (2026-11-05) ✅
+## `/alarms` views: Cars and regions, Rhythm, Roads (2026-11-05) ✅
 
 Goal (owner): keep the classic alarm page as is and add alternative views on the **same live red / yellow map**.
 - **Shell:** `?view=` tabs (`views.ts`, `AlarmsRoute`), `LiveView` = the old page unchanged, `AlarmMapCard` = the shared map card, `AlarmMap` gained `overlay` and `onSelectRegion` / `selectedRegion`. One `alarmsQuery` for all views.
 - **Cars and regions:** fleet chips (5 modes of the `/stats` map, reusing the region rollups and `spreadLogos`) + `RegionCard` (alert status, fleet, last year alerts / hours next to crashes / deaths). No new API. Checked in the browser (desktop, 390 px phone, forced 503: only neutral fills, card says "no data"). Fixes after the check: chips moved above the region names, brand logos on white chips in the card.
 - **Rhythm:** 24-hour chart of today's alerts vs crashes by hour (shares of own totals). Owner chose "today only" (no backend work); the multi-day and hourly-history options stay open.
-- **Not built yet:** "Alerts vs fleet" scatter (needs a fleet-age rollup for the age option), "Roads" (hazard points + deaths per region).
+- **Roads:** `RoadsView` draws `roadSafetyHazardsQuery` (hazard / concentration toggle) as neutral blue dots (size = crashes over 3 years) via the overlay; `AlarmMap` overlay context gained `project(lon, lat)`. Clicking a region shows its deaths / crashes (`roadSafetyRegionsQuery`) and section count. Dots with missing or out-of-Ukraine coordinates are skipped (`roads-helpers.ts`). No new API. Checked in the browser (desktop); phone and forced 503 not checked.
+- **Not built yet:** "Alerts vs fleet" scatter (needs a fleet-age rollup for the age option).
 - **Docs/UI:** `features-reference.md` "Views / tabs", About `alarms` text, `releases.ts` day 2026-11-05.
