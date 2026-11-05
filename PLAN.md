@@ -489,6 +489,10 @@ Idea round: put the registry stats on the map and in diagrams, and add small can
 
 Plan, terms, live API findings, rejection path: `docs/alarm-plan.md`. Steps: ✅ poller + `/api/alarms` (deployed and verified on prod 2026-11-04) · ✅ region badge on the plate result · ✅ `/alarms` map page (checked in the browser: full, partial, none, 503) · ✅ `alarm` layer (`BACKGROUND_MODES`, `/relax`; checked in the browser) · ✅ history ingest from the MIT siren dataset (`registry.alarm_history_daily`, migration 0098, seed `alarm-history.csv.gz`; daily refresh cron not built) · ⏳ safety-over-time page next to DTP stats (no "most bombed", no combined score) · ⏳ later: districts, SSE, webhook. ✅ active list with start time / duration + recorder `alarm_events` + today stats (2026-11-04) · ⏳ later: day timeline, average duration per district.
 
+- ✅ `/alarms` views (2026-11-05): `?view=` tabs on the same live map - Cars and regions (fleet chips + region card), Rhythm (alerts vs crashes by hour, today only); write-up `docs/plan-done.md` "`/alarms` views".
+  - [ ] After deploy: look at `/alarms?view=cars` and `?view=rhythm` on prod (chips above names, region card numbers, Rhythm uses the live recorder; check the `recordingSince` date is the real recorder start).
+- ⏳ `/alarms` views next: "Alerts vs fleet" scatter (hours under alert vs EV / diesel share, fleet age needs a new rollup; strong "correlation, not cause" note), "Roads" (hazard sections as map points + deaths per region); later: Rhythm over many days (multi-day endpoint over `alarm_events` or hourly history rollup), `?mode=` / selected region in the URL.
+
 ### War-loss figures + Ukrstat population (losses built 2026-11-05, Ukrstat checked, not built)
 
 Findings and planned shape: `docs/alarm-plan.md` "Research: war-loss figures and Ukrstat data". zsu.gov.ua blocks bots (403); use `russianwarship.rip` (third-party, ~1,700 daily records).
