@@ -1292,7 +1292,7 @@ Write-up: `docs/plan-done.md` "Market offers (CarAPIS)"; conventions: `docs/feat
 - ✅ (2026-11-04) Release note (`releases.ts`), `AboutRoute.tsx` feature + OEM source entry.
 - [ ] Own AR/XR views later.
 - ✅ ZAKON typeface fetched by `pnpm fetch:zakon-font` (gitignored, not committed); sidebar regrouped into six groups with footer links (`sidebar-groups.ts`). Write-up: `docs/plan-done.md` "Sidebar groups and ZAKON font".
-- [ ] **After deploy:** run `pnpm fetch:zakon-font` wherever the web app is built (the font is not in git), else the ZAKON face falls back.
+- [ ] **After deploy:** ZAKON font (found missing on prod 2026-11-05: `/fonts/zakon/*.otf` returned the SPA shell). The web app is built in GitHub Actions, not on the VPS, so `deploy-web.yml` now runs `node scripts/src/fetch-zakon-font.ts` before the build. Open: run `deploy-web`, then `curl -sI https://carsua.app/fonts/zakon/Zakon-Regular.otf` must give `content-type: font/otf` (not text/html).
 
 ## Later, conditional
 
