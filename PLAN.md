@@ -1266,8 +1266,20 @@ Write-up: `docs/plan-done.md` "Market offers (CarAPIS)"; conventions: `docs/feat
 
 ✅ Sitemap ingest, `registry.tuning_links` (0096), body-aware matcher, `/api/tuning`, "Customize in 3D" chip: **48.2% of cars get a link**, never a guess. Write-up: `docs/plan-done.md` "3DTuning", conventions: `docs/features-reference.md` "3DTuning link-out", plan: [docs/tuning-3d-plan.md](docs/tuning-3d-plan.md).
 
-- [ ] **After deploy:** migration 0096 is applied by the API deploy; load the table on the VPS with `docker compose run --rm --no-deps -T ingest pnpm ingest:3dtuning:csv` (or `tsx src/ingest-3dtuning.ts --from-csv seed-data/3dtuning-links.csv.gz`); (Cloudflare Cache Rule for `/api/tuning` done 2026-11-04, MISS then HIT); open a car with a known link (e.g. a BMW 3 Series sedan 2007) and a car without one.
+- [ ] **After deploy:** migration 0096 is applied by the API deploy; the table is loaded by `seed-if-empty` (see "One-off seed tables" below; the old `docker compose run … ingest:3dtuning:csv` cannot work, the seed file was not in the ingest image); (Cloudflare Cache Rule for `/api/tuning` done 2026-11-04, MISS then HIT); open a car with a known link (e.g. a BMW 3 Series sedan 2007) and a car without one.
 - [ ] Optional: grow `MODEL_ALIASES` from `pnpm ingest:3dtuning --match-report`; re-run `pnpm ingest:3dtuning` and `export:3dtuning:csv` now and then (their sitemap changes); ask 3DTuning via `/b2b` about an affiliate link
+
+## One-off seed tables + `/data-status` "Every minute" ✅ built 2026-11-05, awaiting deploy
+
+✅ `run-ingest.sh seed-if-empty` (`scripts/src/seed-if-empty.ts`) loads the 3dtuning / oem-links / alarm-history seed CSVs only into EMPTY tables; runs by itself (non-fatal) after the migration in `deploy-api.sh` and at the end of `deploy-ingest.yml`. The three seed files are let into the ingest image (`.dockerignore`). `/data-status` gained the `minutely` cadence (Ukraine Alarm) and rows for 3DTuning, OEM links, siren history, OCHA outlines; `/stats` prints "Updated <date>". Conventions: `docs/features-reference.md` "Data freshness".
+
+- [ ] **After deploy** (order: `deploy-api`, `deploy-ingest`; either order works, the second one loads whatever the first could not): read both deploy logs for `seed-if-empty: … empty, loading …` / `already there, skipped` and no `warn: seed-if-empty failed`.
+- [ ] **On the VPS**, if a log shows the warning or a table is still empty: `bash /opt/carsua/compose/run-ingest.sh seed-if-empty` (safe to repeat), then check the counts:
+  `docker compose -f /opt/carsua/compose/docker-compose.prod.yml exec -T postgres sh -c 'psql -U $POSTGRES_USER $POSTGRES_DB -tAc "SELECT (SELECT count(*) FROM registry.tuning_links), (SELECT count(*) FROM registry.oem_links), (SELECT count(*) FROM registry.alarm_history_daily)"'` (expect 2462 / 29 / thousands, none 0).
+- [ ] Confirm the run was logged: `bash /opt/carsua/compose/ingest-status.sh` lists `seed-if-empty` as `ok`.
+- [ ] If `docker compose pull ingest` ran before the image was rebuilt, `seed-if-empty` fails with a missing seed file: re-run `deploy-ingest` (workflow_dispatch) and repeat the step above.
+- [ ] Browser checks: `/data-status` shows the "Every minute" group first (Ukraine Alarm, status Live) and the new rows (3DTuning, OEM links, siren history, OCHA outlines); `/stats` coverage line shows "Оновлено <date> Актуальність даних"; a car with a known 3DTuning link (BMW 3 Series sedan 2007) shows "Customize in 3D"; `/showroom` lists the `oem` entries; the history section on `/alarms` has data.
+- [ ] Optional: a cron / job that folds finished days of `alarm_events` into `alarm_history_daily` (the history CSVs are static); re-run `export:*:csv` + bump `refreshedOn` in `datasets.ts` after any real refresh of these three.
 
 ## Virtual showroom (`/showroom`) ✅ built 2026-11-04, awaiting deploy
 
@@ -1276,7 +1288,7 @@ Write-up: `docs/plan-done.md` "Market offers (CarAPIS)"; conventions: `docs/feat
 - [x] (done 2026-11-04: `/api/showroom`, `/api/showroom/detail` and `/api/tuning` added to the Cloudflare Cache Rule "Cache model lookups"; MISS then HIT on all, `refresh` stays DYNAMIC) **After deploy:** Cloudflare rule.
 - [ ] **After deploy:** open `/showroom`, search "bmw", open a 360, a 3D and a Customize entry.
 - ✅ Showroom kind `oem` (official configurator / model-page links: Morgan, Lucid, Koenigsegg, Aston Martin, Lamborghini; 29 links). Write-up: `docs/plan-done.md` "Official OEM links".
-- [ ] **After deploy:** run `pnpm ingest:oem-links:csv` on the VPS (new table); more makes (BMW, Kia, VW, Hyundai, Skoda) need a browser-based probe first (their configurators are per-market apps).
+- [ ] **After deploy:** `oem_links` is loaded by `seed-if-empty` (see "One-off seed tables" below); more makes (BMW, Kia, VW, Hyundai, Skoda) need a browser-based probe first (their configurators are per-market apps).
 - ✅ (2026-11-04) Release note (`releases.ts`), `AboutRoute.tsx` feature + OEM source entry.
 - [ ] Own AR/XR views later.
 - ✅ ZAKON typeface fetched by `pnpm fetch:zakon-font` (gitignored, not committed); sidebar regrouped into six groups with footer links (`sidebar-groups.ts`). Write-up: `docs/plan-done.md` "Sidebar groups and ZAKON font".
