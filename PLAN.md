@@ -1252,7 +1252,7 @@ Write-up: `docs/plan-done.md` "Market offers (CarAPIS)"; conventions: `docs/feat
 - ✅ Cars for sale block on top of `StockSection` (UA first, EU fallback), detail modal, redirect link, budget counter, admin Server tile, `/data-status` row, About, release note
 - ✅ Large view modal (grid / rows / table, sort), USD / EUR / UAH price chip, block skeleton, CarAPIS admin Dashboards link (2026-11-03)
 - [ ] After deploy: compare our "requests used" counter with the usage page at my.carapis.com; confirm the real daily limit (assumed 100) and the reset time (assumed 00:00 UTC), adjust `DAILY_LIMIT` in `market.service.ts` if they differ
-- [ ] After deploy: set the `CARAPIS_API_KEY` GitHub secret (optional vars `MARKET_UA_ENABLED`, `MARKET_SHOW_BUDGET`) ⏳
+- [x] (secret added 2026-11-05; stock listings already live on prod) After deploy: set the `CARAPIS_API_KEY` GitHub secret (optional vars `MARKET_UA_ENABLED`, `MARKET_SHOW_BUDGET`) ⏳
 - [x] Air-raid alerts, step 1 deployed and verified on prod 2026-11-04: `ALARM_API_KEY` secret set, `/api/alarms` returns live regions, Cloudflare Cache Rule includes `/api/alarms` (MISS then HIT)
 - [ ] Air-raid alerts: ask Stfalcon for the per-minute request limit (poller defaults to 30 s and pauses on 429) ⏳
 - [ ] **After deploy** (air-raid steps 2-5): ✅ 2026-11-05 `/api/alarms/history` (+ `/stats`, `/api/losses*`) in the live Cloudflare Cache Rule, MISS then HIT; history table loaded (endpoint answers 200). ✅ history section on `/alarms` checked on prod 2026-11-05. ✅ plate chip (Kharkiv plate) and `/relax?layout=alarm` checked on prod 2026-11-05
@@ -1297,7 +1297,7 @@ Write-up: `docs/plan-done.md` "Market offers (CarAPIS)"; conventions: `docs/feat
 - ✅ (2026-11-04) Release note (`releases.ts`), `AboutRoute.tsx` feature + OEM source entry.
 - [ ] Own AR/XR views later.
 - ✅ ZAKON typeface fetched by `pnpm fetch:zakon-font` (gitignored, not committed); sidebar regrouped into six groups with footer links (`sidebar-groups.ts`). Write-up: `docs/plan-done.md` "Sidebar groups and ZAKON font".
-- [ ] **After deploy:** ZAKON font (found missing on prod 2026-11-05: `/fonts/zakon/*.otf` returned the SPA shell). The web app is built in GitHub Actions, not on the VPS, so `deploy-web.yml` now runs `node scripts/src/fetch-zakon-font.ts` before the build. Open: run `deploy-web`, then `curl -sI https://carsua.app/fonts/zakon/Zakon-Regular.otf` must give `content-type: font/otf` (not text/html).
+- [x] (verified 2026-11-05 after `deploy-web`: both .otf files are real fonts (OTTO), served as `application/octet-stream`, both `Zakon` faces `loaded`, body font `Zakon, ui-serif…`, no console errors) **After deploy:** ZAKON font (found missing on prod 2026-11-05: `/fonts/zakon/*.otf` returned the SPA shell). The web app is built in GitHub Actions, not on the VPS, so `deploy-web.yml` now runs `node scripts/src/fetch-zakon-font.ts` before the build. Open: run `deploy-web`, then `curl -sI https://carsua.app/fonts/zakon/Zakon-Regular.otf` must not be text/html (it is octet-stream, which browsers accept).
 
 ## Later, conditional
 

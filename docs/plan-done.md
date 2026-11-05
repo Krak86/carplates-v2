@@ -4603,7 +4603,7 @@ Research first: only premium makes expose stable configurator links and allow sc
 ## Sidebar groups, ZAKON font, About and releases (2026-11-04) ✅
 
 - **Sidebar:** links split into six groups (search, stats, personal, read, interactive, misc) with hairline separators, definitions in `components/sidebar-groups.ts`; settings / admin join "personal" when signed in or admin; `text-sm`, tighter padding; footer links (contact, sitemap, data status, feedback, privacy, terms). `/sitemap` regrouped the same way.
-- **ZAKON font:** `scripts/src/fetch-zakon-font.ts` (`pnpm fetch:zakon-font`, `--force`) downloads Zakon-Regular/Bold.otf from mincult.gov.ua into `apps/web/public/fonts/zakon/` (gitignored); `@font-face` paths fixed.
+- **ZAKON font:** `scripts/src/fetch-zakon-font.ts` (`pnpm fetch:zakon-font`, `--force`) downloads Zakon-Regular/Bold.otf from mincult.gov.ua into `apps/web/public/fonts/zakon/` (gitignored); `@font-face` paths fixed. 2026-11-05: prod served the SPA shell for `/fonts/zakon/*.otf` because the CI build never had the font; `deploy-web.yml` now runs `node scripts/src/fetch-zakon-font.ts` (Node 24 strips types) before the build. Verified live: real OpenType files, both faces `loaded`.
 - **Showroom polish:** layouts (`?layout=`), Wikimedia thumbnail fallback, shareable `?open=&show=` state, skeletons.
 - **Docs / About:** `TESTING_PLAN.md` added (integration and e2e plan, nothing built). About: `showroom` feature + brief and the `oemLinks` source; `releases.ts` 2026-11-04 gained the showroom (`new`) and sidebar (`improved`) items.
 

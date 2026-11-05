@@ -145,7 +145,7 @@ pnpm export:brand-origin:csv   # re-dump both tables to those CSVs — run after
 pnpm ingest:wmi   # VIN world-manufacturer identifiers (NHTSA vPIC) -> registry.wmi_prefix; ~2.7k calls cached in scripts/.data/wmi/ (resumable; NHTSA 403s a throttled IP after a few hundred calls, use a VPN or wait). --dry-run, --refresh. vPIC lacks many non-US WMIs (TMB, JTD, XTA): the API falls back to packages/shared/src/wmi.ts
 pnpm ingest:wmi:csv   # load the committed seed (seed-data/wmi.csv.gz; replaces the table) — part of ingest:ratings:csv
 pnpm ingest:3dtuning   # 3DTuning car pages (public sitemap, cached in scripts/.data/tuning3d/) -> registry.tuning_links for "Customize in 3D". --dry-run, --refresh, --match-report [--top N] (match rate of our catalog against the pages, read-only)
-pnpm fetch:zakon-font   # download the ZAKON typeface (Zakon-Regular/Bold.otf, mincult.gov.ua) into apps/web/public/fonts/zakon/ (gitignored); idempotent, --force
+pnpm fetch:zakon-font   # download the ZAKON typeface (Zakon-Regular/Bold.otf, mincult.gov.ua) into apps/web/public/fonts/zakon/ (gitignored); idempotent, --force; CI runs it before the web build (`deploy-web.yml`), so prod has the font
 pnpm ingest:oem-links   # official OEM configurator links (Morgan, Lucid, Koenigsegg, Aston Martin, Lamborghini) -> registry.oem_links; `pnpm ingest:oem-links:csv` loads the committed seed
 bash infra/vps/run-ingest.sh seed-if-empty   # VPS: loads the 3dtuning / oem-links / alarm-history seed CSVs into EMPTY tables only (also runs on deploy)
 pnpm ingest:3dtuning:csv   # load the committed seed (seed-data/3dtuning-links.csv.gz; replaces the table) - part of ingest:ratings:csv; `pnpm export:3dtuning:csv` rewrites it
