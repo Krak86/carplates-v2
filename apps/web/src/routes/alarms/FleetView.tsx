@@ -13,6 +13,7 @@ import AlarmMapCard from '@/routes/alarms/AlarmMapCard'
 import FleetScatter from '@/routes/alarms/FleetScatter'
 import { DEFAULT_FLEET_METRIC, FLEET_METRICS, scatterPoints } from '@/routes/alarms/fleet-helpers'
 import type { FleetMetric } from '@/routes/alarms/fleet-helpers'
+import { useChoiceParam, useRegionParam } from '@/routes/alarms/view-params'
 import SegmentedTabs from '@/routes/road-safety/SegmentedTabs'
 import StatsMapSkeleton from '@/routes/stats/StatsMapSkeleton'
 
@@ -29,9 +30,9 @@ type Props = {
 export default function FleetView({ data, isPending, isError }: Props): ReactNode {
   const { t, i18n } = useTranslation()
   const locale = toIntlLocale(i18n.language)
-  const [metric, setMetric] = useState<FleetMetric>(DEFAULT_FLEET_METRIC)
+  const [metric, setMetric] = useChoiceParam<FleetMetric>('fuel', FLEET_METRICS, DEFAULT_FLEET_METRIC)
   const [hovered, setHovered] = useState<string | null>(null)
-  const [pinned, setPinned] = useState<string | null>(null)
+  const [pinned, setPinned] = useRegionParam()
   const history = useQuery(alarmHistoryQuery())
   const facets = useQuery(regionFacetStatsQuery())
 
@@ -79,7 +80,7 @@ export default function FleetView({ data, isPending, isError }: Props): ReactNod
               locale={locale}
               active={active}
               onActive={setHovered}
-              onPick={r => setPinned(p => (p === r ? null : r))}
+              onPick={r => setPinned(pinned === r ? null : r)}
             />
             <p className="mt-2 text-sm text-[var(--color-muted)]">
               {active ? (localizeRegion(active, i18n.language) ?? active) : t('alarms.fleet.pick')}

@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
@@ -11,6 +10,7 @@ import { regionBrandStatsQuery, regionFacetStatsQuery } from '@/lib/queries'
 import AlarmMapCard from '@/routes/alarms/AlarmMapCard'
 import type { AlarmMapOverlayContext } from '@/routes/alarms/AlarmMap'
 import { fleetSummary, markerChips } from '@/routes/alarms/cars-helpers'
+import { useChoiceParam, useRegionParam } from '@/routes/alarms/view-params'
 import RegionCard from '@/routes/alarms/RegionCard'
 import SegmentedTabs from '@/routes/road-safety/SegmentedTabs'
 import { DEFAULT_MAP_MODE, MAP_MODES } from '@/routes/stats/StatsMap.helpers'
@@ -29,8 +29,8 @@ type Props = {
 export default function CarsView({ data, isPending, isError }: Props): ReactNode {
   const { t, i18n } = useTranslation()
   const locale = toIntlLocale(i18n.language)
-  const [mode, setMode] = useState<MapMode>(DEFAULT_MAP_MODE)
-  const [region, setRegion] = useState<string | null>(null)
+  const [mode, setMode] = useChoiceParam<MapMode>('mode', MAP_MODES, DEFAULT_MAP_MODE)
+  const [region, setRegion] = useRegionParam()
   const brands = useQuery({ ...regionBrandStatsQuery(), enabled: mode === 'brand' || region !== null })
   const facets = useQuery({ ...regionFacetStatsQuery(), enabled: mode !== 'brand' || region !== null })
 

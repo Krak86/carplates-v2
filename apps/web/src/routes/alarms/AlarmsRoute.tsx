@@ -9,6 +9,7 @@ import { cn } from '@/lib/cn'
 import { alarmsQuery } from '@/lib/queries'
 import StatsMapSkeleton from '@/routes/stats/StatsMapSkeleton'
 import { ALARM_VIEWS, DEFAULT_ALARM_VIEW, parseAlarmView } from '@/routes/alarms/views'
+import { VIEW_OWN_PARAMS } from '@/routes/alarms/view-params'
 import type { AlarmView } from '@/routes/alarms/views'
 
 const CarsView = lazy(() => import('@/routes/alarms/CarsView'))
@@ -27,6 +28,7 @@ export default function AlarmsRoute(): ReactNode {
   const handleViewChange = (next: AlarmView): void => {
     setSearchParams(prev => {
       const params = new URLSearchParams(prev)
+      for (const key of VIEW_OWN_PARAMS) params.delete(key)
       if (next === DEFAULT_ALARM_VIEW) params.delete('view')
       else params.set('view', next)
       return params

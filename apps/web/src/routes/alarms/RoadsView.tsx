@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
@@ -12,6 +11,7 @@ import { localizeRegion } from '@/lib/region-label'
 import AlarmMapCard from '@/routes/alarms/AlarmMapCard'
 import type { AlarmMapOverlayContext } from '@/routes/alarms/AlarmMap'
 import { hazardDots, regionRoads } from '@/routes/alarms/roads-helpers'
+import { useChoiceParam, useRegionParam } from '@/routes/alarms/view-params'
 import SegmentedTabs from '@/routes/road-safety/SegmentedTabs'
 
 type Props = {
@@ -31,8 +31,8 @@ const DOT_FILL = 'oklch(0.45 0.15 260)'
 export default function RoadsView({ data, isPending, isError }: Props): ReactNode {
   const { t, i18n } = useTranslation()
   const numberFormat = new Intl.NumberFormat(toIntlLocale(i18n.language))
-  const [kind, setKind] = useState<HazardKind>(DEFAULT_KIND)
-  const [region, setRegion] = useState<string | null>(null)
+  const [kind, setKind] = useChoiceParam<HazardKind>('kind', HAZARD_KINDS, DEFAULT_KIND)
+  const [region, setRegion] = useRegionParam()
   const hazards = useQuery(roadSafetyHazardsQuery({ kind }))
   const regions = useQuery(roadSafetyRegionsQuery())
 
