@@ -5,6 +5,7 @@ import { Link, useSearchParams } from 'react-router'
 
 import { cn } from '@/lib/cn'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
+import ExternalGames from '@/routes/play/ExternalGames'
 import GameTile from '@/routes/play/GameTile'
 import { parseQuizId, QUIZ_EMOJI, QUIZ_HUE, QUIZ_IDS, RACER_HUE, RACER_LINKS } from '@/routes/play/games'
 import type { QuizId } from '@/routes/play/games'
@@ -149,6 +150,8 @@ export default function PlayRoute(): ReactNode {
           </li>
         ))}
       </ul>
+
+      <ExternalGames />
 
       <p className="mt-4 text-sm text-[var(--color-muted)]">
         <Link to="/stats?view=map" className="text-[var(--color-primary)] hover:underline">

@@ -7,10 +7,12 @@ type Props = {
   desc: string
   /** Small line under the description, e.g. the best score. */
   note?: string
+  /** Opens on another site in a new tab: shows the ↗ badge. */
+  external?: boolean
 }
 
 /** Library-style poster: portrait gradient cover with a big emoji, the title and a one-line note below. */
-export default function GameTile({ emoji, hue, title, desc, note }: Props): ReactNode {
+export default function GameTile({ emoji, hue, title, desc, note, external }: Props): ReactNode {
   return (
     <div className="group flex h-full flex-col gap-2 text-left">
       <div
@@ -20,6 +22,15 @@ export default function GameTile({ emoji, hue, title, desc, note }: Props): Reac
         <span aria-hidden className="text-7xl drop-shadow-lg transition-transform duration-300 group-hover:scale-110">
           {emoji}
         </span>
+
+        {external && (
+          <span
+            aria-hidden
+            className="absolute top-2 right-2 rounded-full bg-black/60 px-2 py-0.5 text-sm font-bold text-white"
+          >
+            ↗
+          </span>
+        )}
 
         <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-3 text-lg leading-tight font-bold text-white">
           {title}

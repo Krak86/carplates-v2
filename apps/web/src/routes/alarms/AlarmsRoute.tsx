@@ -95,6 +95,18 @@ export default function AlarmsRoute(): ReactNode {
             ))}
           </ul>
 
+          <p className="mt-3 text-xs text-[var(--color-muted)]">
+            {t('alarms.movement')}{' '}
+            <a
+              href="https://alerts.in.ua"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline underline-offset-2 hover:text-[var(--color-fg)]"
+            >
+              {t('alarms.movementLink')}
+            </a>
+          </p>
+
           <ActiveAlarmList regions={sortedAlarms(data.regions)} nowIso={data.fetchedAt} />
         </Card>
       )}
