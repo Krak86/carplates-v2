@@ -18,7 +18,7 @@ Keep it short: when an item ships, delete it here and add the ✅ line to PLAN.m
 - [ ] **Stats edge-cache checks** - browser load of `/stats`, cold vs warm timing, cron-lag note (PLAN.md `STATS_CACHE`).
 - [ ] **Dependabot** - merge #65, close #66-#69 (Nest 12 / TS 6 pinned), bump the `pnpm audit` findings.
 - [ ] **Catalog year pages** (block 4) - check Search Console about 2026-11-13; build only if the first 300 pages are indexed.
-- [ ] **Run the security hardening plan** - `docs/security-hardening-plan-2026-11.md`.
+- [ ] **Run the security hardening plan** - phases B-D: CSP report sink + enforcement, HSTS and origin-header fallback, cadence (`docs/security-checklist.md`, `docs/pentest-lab.md`).
 
 ## 2. Research / maybe later
 
