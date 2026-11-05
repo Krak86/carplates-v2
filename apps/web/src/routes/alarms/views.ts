@@ -1,5 +1,5 @@
 /** Views (tabs) of `/alarms`, chosen with `?view=`. Every view draws the same live alarm map; see `AlarmMapCard`. */
-export const ALARM_VIEWS = ['live', 'cars', 'rhythm'] as const
+export const ALARM_VIEWS = ['live', 'cars', 'rhythm', 'roads'] as const
 export type AlarmView = (typeof ALARM_VIEWS)[number]
 
 export const DEFAULT_ALARM_VIEW: AlarmView = 'live'

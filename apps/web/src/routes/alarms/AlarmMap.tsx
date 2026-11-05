@@ -25,6 +25,8 @@ const OBLAST_SUFFIX = /\s+(область|oblast)$/i
 export type AlarmMapOverlayContext = {
   centers: ReadonlyMap<string, readonly [number, number]>
   zoom: number
+  /** Projects a point (lon, lat) to map units; null when the map is not ready. */
+  project: (lon: number, lat: number) => readonly [number, number] | null
 }
 
 type Props = {
@@ -307,7 +309,7 @@ export default function AlarmMap({
               })}
             </g>
           )}
-          {overlay?.({ centers, zoom })}
+          {overlay?.({ centers, zoom, project: (lon, lat) => projection?.([lon, lat]) ?? null })}
         </g>
       </svg>
     </div>
