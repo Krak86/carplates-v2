@@ -9,6 +9,9 @@
 scripts/.data
 scripts/seed-data/*
 !scripts/seed-data/dtp-*.csv.gz
+!scripts/seed-data/3dtuning-links.csv.gz
+!scripts/seed-data/oem-links.csv.gz
+!scripts/seed-data/alarm-history.csv.gz
 services
 docs
 infra

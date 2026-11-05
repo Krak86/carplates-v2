@@ -152,6 +152,20 @@ export const DATASETS: readonly Dataset[] = [
   { id: 'origin', name: 'Brand origin, VIN plants (WMI)', to: '/stats', cadence: 'yearly', refreshedOn: '2026-10-26' },
   { id: 'openEv', name: 'Open EV Data (upstream frozen at 2020-07)', cadence: 'frozen', refreshedOn: '2026-10-09' },
   {
+    id: 'tuning3d',
+    name: '3DTuning: car pages for "Customize in 3D"',
+    to: '/cars',
+    cadence: 'yearly',
+    refreshedOn: '2026-11-04'
+  },
+  {
+    id: 'oemLinks',
+    name: 'Official OEM configurator links (Morgan, Lucid, Koenigsegg, Aston Martin, Lamborghini)',
+    to: '/cars',
+    cadence: 'yearly',
+    refreshedOn: '2026-11-04'
+  },
+  {
     id: 'alarmHistory',
     name: 'Air-raid alert history (siren CSVs, official and volunteer)',
     to: '/alarms',

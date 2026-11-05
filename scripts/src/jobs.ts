@@ -31,6 +31,9 @@ export const JOBS = {
   // Manual only (no cron entry): first load of the road-safety tables from the seed CSVs baked into the image (the only seed-data the
   // image carries, .dockerignore); insert-only, safe to repeat. Then the two jobs above keep them current.
   'dtp-seed': { command: 'tsx src/dtp-csv.ts', timeoutMin: 5 },
+  // Manual only (no cron entry), safe after every deploy: loads the 3dtuning / oem-links / alarm-history seed CSVs (baked into the image) into
+  // the tables that are still EMPTY; a table with rows is skipped.
+  'seed-if-empty': { command: 'tsx src/seed-if-empty.ts', timeoutMin: 5 },
   // Manual only (no cron entry yet): downloads the MIT siren dataset CSVs from GitHub and replaces registry.alarm_history_daily in one transaction
   // (the seed CSV is not in the image). Run once after the migration 0098 deploy; a daily refresh cron is not built.
   'alarm-history': { command: 'tsx src/ingest-alarm-history.ts', timeoutMin: 10 },

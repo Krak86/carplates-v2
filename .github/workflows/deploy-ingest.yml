@@ -111,4 +111,6 @@ jobs:
           crontab ingest.cron
           docker image prune -f >/dev/null
           echo "ingest image $1 ready; crontab installed"
+          # Load the one-off seed CSVs into tables that are still empty (skips filled ones); non-fatal: a table may not exist until the api deploy migrates.
+          bash ./run-ingest.sh seed-if-empty </dev/null || echo "warn: seed-if-empty failed (non-fatal)"
           EOF
