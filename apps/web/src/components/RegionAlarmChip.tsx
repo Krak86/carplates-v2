@@ -32,7 +32,6 @@ export default function RegionAlarmChip({ region }: Props): ReactNode {
     >
       <span aria-hidden>🚨</span>
       {alarm.scope === 'full' ? t('result.alarmFull') : t('result.alarmPartial')}
-      {!!alarm.level && <span className="opacity-70">({alarm.level})</span>}
     </Link>
   )
 }
