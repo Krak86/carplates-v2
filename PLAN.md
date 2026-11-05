@@ -1251,7 +1251,12 @@ Write-up: `docs/plan-done.md` "Market offers (CarAPIS)"; conventions: `docs/feat
 - [x] Air-raid alerts, step 1 deployed and verified on prod 2026-11-04: `ALARM_API_KEY` secret set, `/api/alarms` returns live regions, Cloudflare Cache Rule includes `/api/alarms` (MISS then HIT)
 - [ ] Air-raid alerts: ask Stfalcon for the per-minute request limit (poller defaults to 30 s and pauses on 429) ⏳
 - [ ] **After deploy** (air-raid steps 2-5): ✅ 2026-11-05 `/api/alarms/history` (+ `/stats`, `/api/losses*`) in the live Cloudflare Cache Rule, MISS then HIT; history table loaded (endpoint answers 200). Open: check the history section on `/alarms`, the plate chip and `/relax?layout=alarm` on prod
-- [ ] **After deploy** (air-raid list + stats): migration 0099 (`registry.alarm_events`) applies on deploy; add `/api/alarms/stats` to the Cloudflare Cache Rule (`docs/deploy.md`); after a few alarms check the stats card and the list start times on `/alarms` (counts only cover the time since the recorder started)
+- [ ] **After deploy** (air-raid list + stats): migration 0099 (`registry.alarm_events`) applies on deploy; ✅ 2026-11-05 `/api/alarms/stats` is in the live Cloudflare Cache Rule (MISS then HIT); after a few alarms check the stats card and the list start times on `/alarms` (counts only cover the time since the recorder started)
+- [ ] **After deploy** (`/stats?logos=1` map shows no brand logos on prod, found 2026-11-05): `/api/stats/region-brands` answers `{"regions":[]}` because `registry.stats_region_brand` is empty on the VPS (only a `plates` run fills it). New manual job `region-brand` (`scripts/src/jobs.ts`, `run-ingest.sh`, note in `docs/deploy.md`).
+  - [ ] Run `bash /opt/carsua/compose/run-ingest.sh region-brand` on the VPS (expect ~162 rows, 27 regions).
+  - [ ] Purge `https://carsua.app/api/stats/region-brands` at Cloudflare (the empty answer is edge-cached 6 h), then `curl -s https://carsua.app/api/stats/region-brands` returns 27 regions.
+  - [ ] Open `/stats?tab=registry&dim=region&metric=totalRows&view=map&logos=1` (hard reload): a logo in every region with "Топ марка", no Zod errors.
+  - [ ] Switch the other map modes in the dropdown (model, fuel, origin, EV): markers appear; if not, `stats_region_facet` is empty too, run `run-ingest.sh region-facet` and purge `/api/stats/region-facets`.
 - [ ] After deploy: check "requests used" on the admin Server tab after a day (cache hits vs UA / EU), rotate the dev key
 - [ ] After deploy: open a plate page, a catalog page and `?section=stock` in production; confirm `go/:id` opens the listing (the 204 path, over budget, is untested in a browser)
 - [ ] Owner emails Auto.ria (draft in the plan) after seeing it live; if they object, set `MARKET_UA_ENABLED=false`
