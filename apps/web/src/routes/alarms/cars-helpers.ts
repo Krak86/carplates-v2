@@ -6,6 +6,7 @@ const MAP_HEIGHT = 520
 /** Chip side in map units: the smallest region's, plus how much the fleet share (of the biggest region) adds. */
 const CHIP_MIN = 14
 const CHIP_GROW = 16
+const LABEL_CLEARANCE = 5
 
 type Entry = { value: string; n: number }
 type BrandsEntry = { fleet: number; brands: { brand: string; n: number }[] }
@@ -77,7 +78,9 @@ export function markerChips(
     const data = dataOf(region)
     const marker = data && regionMarker(mode, data, labels, logoOf, flagOf, locale)
     if (!data || !marker || (!marker.src && !marker.text) || !Number.isFinite(cx) || !Number.isFinite(cy)) continue
-    chips.push({ key: region, cx, cy, size: CHIP_MIN + CHIP_GROW * Math.sqrt(data.fleet / maxFleet), marker })
+    const size = CHIP_MIN + CHIP_GROW * Math.sqrt(data.fleet / maxFleet)
+    // Sit above the region name (drawn at the centre) instead of covering it.
+    chips.push({ key: region, cx, cy: cy - size / 2 - LABEL_CLEARANCE, size, marker })
   }
   const markerByKey = new Map(chips.map(c => [c.key, c.marker]))
   return spreadLogos(chips, MAP_WIDTH, MAP_HEIGHT).flatMap(p => {

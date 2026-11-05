@@ -67,7 +67,14 @@ export default function RegionCard({ region, alerts, fleet }: Props): ReactNode 
                       const logo = brandLogoUrl(b.brand)
                       return (
                         <span key={b.brand} className="inline-flex items-center gap-1">
-                          {logo && <img src={logo} alt="" className="size-4 object-contain" loading="lazy" />}
+                          {logo && (
+                            <img
+                              src={logo}
+                              alt=""
+                              className="size-5 rounded bg-white object-contain p-0.5"
+                              loading="lazy"
+                            />
+                          )}
                           {b.brand} {share(b.n)}
                         </span>
                       )
