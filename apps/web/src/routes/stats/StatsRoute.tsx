@@ -13,6 +13,8 @@ import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 import { cn } from '@/lib/cn'
 import { toIntlLocale } from '@/lib/intl'
 import { dataStatusQuery, statsQuery } from '@/lib/queries'
+import { DATASETS } from '@/routes/data-status/datasets'
+import { lastSync } from '@/routes/data-status/helpers'
 import {
   dimensionHasYearColumn,
   dimensionRows,
@@ -155,6 +157,11 @@ export default function StatsRoute(): ReactNode {
   const range = stats.data ? yearRange(stats.data) : null
   const lastDate = dataStatus.data?.registry.lastDate
   const dataEnd = lastDate ? monthYearLabel(lastDate, toIntlLocale(i18n.language)) : null
+  const platesDataset = DATASETS.find(d => d.id === 'plates')
+  const syncedAt = platesDataset ? lastSync(platesDataset, dataStatus.data?.jobs ?? []) : null
+  const syncedLabel = syncedAt
+    ? new Intl.DateTimeFormat(toIntlLocale(i18n.language), { dateStyle: 'medium' }).format(syncedAt)
+    : null
 
   return (
     <div className="mx-auto w-full max-w-6xl">
@@ -179,6 +186,7 @@ export default function StatsRoute(): ReactNode {
               min: range.min,
               max: dataEnd ?? range.max
             })}{' '}
+            {syncedLabel && <>{t('dataStatus.synced', { date: syncedLabel })} </>}
             <Link viewTransition to="/data-status" className="text-primary underline">
               {t('dataStatus.link')}
             </Link>

@@ -6,6 +6,14 @@ import type { Dataset } from '@/routes/data-status/types'
  * last seed-CSV export (`pnpm export:*:csv`): **bump it in the same commit that re-exports the seed**.
  */
 export const DATASETS: readonly Dataset[] = [
+  // Polled by the API process itself (no cron job, nothing in job_runs)
+  {
+    id: 'alarms',
+    name: 'Ukraine Alarm: air-raid alerts',
+    to: '/alarms',
+    cadence: 'minutely'
+  },
+
   // Scheduled (infra/vps/ingest.cron)
   // `refreshedOn` of a job = the day its schedule went live (SCHEDULE.md): what is known before the first recorded run.
   {
@@ -143,6 +151,34 @@ export const DATASETS: readonly Dataset[] = [
   { id: 'mot', name: 'DVSA: UK MOT common faults', cadence: 'yearly', refreshedOn: '2026-10-12' },
   { id: 'origin', name: 'Brand origin, VIN plants (WMI)', to: '/stats', cadence: 'yearly', refreshedOn: '2026-10-26' },
   { id: 'openEv', name: 'Open EV Data (upstream frozen at 2020-07)', cadence: 'frozen', refreshedOn: '2026-10-09' },
+  {
+    id: 'tuning3d',
+    name: '3DTuning: car pages for "Customize in 3D"',
+    to: '/cars',
+    cadence: 'yearly',
+    refreshedOn: '2026-11-04'
+  },
+  {
+    id: 'oemLinks',
+    name: 'Official OEM configurator links (Morgan, Lucid, Koenigsegg, Aston Martin, Lamborghini)',
+    to: '/cars',
+    cadence: 'yearly',
+    refreshedOn: '2026-11-04'
+  },
+  {
+    id: 'alarmHistory',
+    name: 'Air-raid alert history (siren CSVs, official and volunteer)',
+    to: '/alarms',
+    cadence: 'yearly',
+    refreshedOn: '2026-11-04'
+  },
+  {
+    id: 'alarmBoundaries',
+    name: 'UN OCHA COD-AB: oblast, raion and community outlines (2020)',
+    to: '/alarms',
+    cadence: 'frozen',
+    refreshedOn: '2026-11-04'
+  },
 
   // Asked per request
   { id: 'nhtsa', name: 'NHTSA: VIN decoding, recalls, ratings', cadence: 'live' },

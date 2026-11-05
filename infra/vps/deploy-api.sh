@@ -35,6 +35,11 @@ docker compose up -d postgres alpr caddy
 echo "migrating…"
 docker compose run --rm --no-deps -T "api-$NEW" node node_modules/@carplates/db/dist/migrate.js </dev/null
 
+# One-off seed tables (3dtuning, oem-links, alarm-history): loads each seed CSV only while its table is empty. Never fails the deploy
+# (the ingest image on the VPS may predate the seed files; deploy-ingest.yml runs the same step once its image is pulled).
+echo "seeding empty one-off tables…"
+bash ./run-ingest.sh seed-if-empty </dev/null || echo "warn: seed-if-empty failed (non-fatal)" >&2
+
 docker compose up -d --no-deps "api-$NEW"
 cid="$(docker compose ps -q "api-$NEW")"
 for _ in $(seq 1 45); do

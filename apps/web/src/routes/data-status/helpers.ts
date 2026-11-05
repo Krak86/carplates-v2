@@ -20,7 +20,7 @@ export function lastSync(dataset: Dataset, jobs: readonly JobStatus[]): Date | n
 
 /** `failing` wins over the age: the newest run of the dataset's job ended `failed` or `timeout`. */
 export function datasetStatus(dataset: Dataset, jobs: readonly JobStatus[], now: Date = new Date()): Status {
-  if (dataset.cadence === 'live') return 'live'
+  if (dataset.cadence === 'live' || dataset.cadence === 'minutely') return 'live'
   if (dataset.cadence === 'frozen') return 'frozen'
   const run = dataset.job ? jobs.find(j => j.job === dataset.job) : undefined
   if (run && (run.lastStatus === 'failed' || run.lastStatus === 'timeout')) return 'failing'

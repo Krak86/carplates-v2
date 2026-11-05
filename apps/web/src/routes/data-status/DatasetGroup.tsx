@@ -49,13 +49,17 @@ export default function DatasetGroup({ cadence, datasets, jobs, latest }: Props)
                 <span className="block text-xs text-muted">
                   {dataset.job
                     ? t('dataStatus.byJob')
-                    : dataset.cadence === 'live'
-                      ? t('dataStatus.byRequest')
-                      : t('dataStatus.byHand')}
+                    : dataset.cadence === 'minutely'
+                      ? t('dataStatus.byPoll')
+                      : dataset.cadence === 'live'
+                        ? t('dataStatus.byRequest')
+                        : t('dataStatus.byHand')}
                 </span>
               </span>
               <span className="text-muted">
-                {synced ? t('dataStatus.synced', { date: dateFormat.format(synced) }) : t('dataStatus.neverSynced')}
+                {synced
+                  ? t('dataStatus.synced', { date: dateFormat.format(synced) })
+                  : dataset.cadence !== 'minutely' && t('dataStatus.neverSynced')}
                 {newestLabel && <span className="block text-xs">{t('dataStatus.latest', { date: newestLabel })}</span>}
               </span>
               <StatusChip status={datasetStatus(dataset, jobs)} />
