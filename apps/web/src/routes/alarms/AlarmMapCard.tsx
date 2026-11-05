@@ -25,6 +25,9 @@ type Props = {
   isError: boolean
   /** Extra SVG above the alarm fills (never recolours them). */
   overlay?: (ctx: AlarmMapOverlayContext) => ReactNode
+  /** Makes oblasts selectable; selection only outlines, never recolours. */
+  onSelectRegion?: (region: string) => void
+  selectedRegion?: string | null
   /** Shown inside the card under the legend (the active list in the classic view). */
   children?: ReactNode
 }
@@ -33,7 +36,15 @@ type Props = {
  * The live alarm map shared by every `/alarms` view: same red / yellow / none fills, same fail-closed rule
  * (503 = dimmed base map and "no data", never a calm map), plus an optional overlay for the view's own data.
  */
-export default function AlarmMapCard({ data, isPending, isError, overlay, children }: Props): ReactNode {
+export default function AlarmMapCard({
+  data,
+  isPending,
+  isError,
+  overlay,
+  onSelectRegion,
+  selectedRegion,
+  children
+}: Props): ReactNode {
   const { t, i18n } = useTranslation()
   const [showLabels, setShowLabels] = useState(true)
   const count = data?.regions.length ?? 0
@@ -53,7 +64,13 @@ export default function AlarmMapCard({ data, isPending, isError, overlay, childr
           <div className="opacity-40 grayscale">
             <LoadErrorBoundary compact>
               <Suspense fallback={<StatsMapSkeleton />}>
-                <AlarmMap regions={[]} showLabels={showLabels} overlay={overlay} />
+                <AlarmMap
+                  regions={[]}
+                  showLabels={showLabels}
+                  overlay={overlay}
+                  onSelectRegion={onSelectRegion}
+                  selectedRegion={selectedRegion}
+                />
               </Suspense>
             </LoadErrorBoundary>
           </div>
@@ -79,7 +96,13 @@ export default function AlarmMapCard({ data, isPending, isError, overlay, childr
 
           <LoadErrorBoundary compact>
             <Suspense fallback={<StatsMapSkeleton />}>
-              <AlarmMap regions={data.regions} showLabels={showLabels} overlay={overlay} />
+              <AlarmMap
+                regions={data.regions}
+                showLabels={showLabels}
+                overlay={overlay}
+                onSelectRegion={onSelectRegion}
+                selectedRegion={selectedRegion}
+              />
             </Suspense>
           </LoadErrorBoundary>
 

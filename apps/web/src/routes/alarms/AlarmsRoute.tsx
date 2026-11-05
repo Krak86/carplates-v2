@@ -1,3 +1,4 @@
+import { Suspense, lazy } from 'react'
 import type { ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
@@ -6,8 +7,11 @@ import { useSearchParams } from 'react-router'
 import LiveView from '@/routes/alarms/LiveView'
 import { cn } from '@/lib/cn'
 import { alarmsQuery } from '@/lib/queries'
+import StatsMapSkeleton from '@/routes/stats/StatsMapSkeleton'
 import { ALARM_VIEWS, DEFAULT_ALARM_VIEW, parseAlarmView } from '@/routes/alarms/views'
 import type { AlarmView } from '@/routes/alarms/views'
+
+const CarsView = lazy(() => import('@/routes/alarms/CarsView'))
 
 // Lazy-loaded (see App.tsx). Online-only: no `offline-cache.ts` entry. Informational, not a warning system.
 export default function AlarmsRoute(): ReactNode {
@@ -60,6 +64,11 @@ export default function AlarmsRoute(): ReactNode {
       )}
 
       {view === 'live' && <LiveView data={alarms.data} isPending={alarms.isPending} isError={alarms.isError} />}
+      {view === 'cars' && (
+        <Suspense fallback={<StatsMapSkeleton />}>
+          <CarsView data={alarms.data} isPending={alarms.isPending} isError={alarms.isError} />
+        </Suspense>
+      )}
     </div>
   )
 }

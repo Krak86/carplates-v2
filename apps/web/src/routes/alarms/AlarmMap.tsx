@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import type { PointerEvent, ReactNode } from 'react'
+import type { KeyboardEvent, PointerEvent, ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { geoCentroid, geoMercator, geoPath } from 'd3-geo'
 import { useTranslation } from 'react-i18next'
@@ -32,6 +32,9 @@ type Props = {
   showLabels?: boolean
   /** Extra SVG drawn above the alarm fills (markers, badges). It must never recolour the alarm shapes. */
   overlay?: (ctx: AlarmMapOverlayContext) => ReactNode
+  /** Makes oblasts selectable (click / Enter); the fill stays the alarm colour, selection only adds an outline. */
+  onSelectRegion?: (region: string) => void
+  selectedRegion?: string | null
 }
 
 /** Distance between the first two active touch points (0 if fewer than two). */
@@ -43,7 +46,13 @@ function pinchDistance(pointers: ReadonlyMap<number, { x: number; y: number }>):
 type GeoFeature = { properties: AlarmGeoProperties }
 
 /** Oblasts, raions and communities (UN OCHA COD shapes): each alerted area is painted with its own level. */
-export default function AlarmMap({ regions, showLabels = false, overlay }: Props): ReactNode {
+export default function AlarmMap({
+  regions,
+  showLabels = false,
+  overlay,
+  onSelectRegion,
+  selectedRegion
+}: Props): ReactNode {
   const { t, i18n } = useTranslation()
   const needs = (layer: 'raions' | 'hromadas'): boolean =>
     regions.some(r => r.scope === 'partial' && r.areas.some(a => areaTarget(r.region, a)?.layer === layer))
@@ -103,6 +112,8 @@ export default function AlarmMap({ regions, showLabels = false, overlay }: Props
     return () => svg.removeEventListener('wheel', onWheel)
   }, [hasMap])
   const dragRef = useRef<{ x: number; y: number; ox: number; oy: number } | null>(null)
+  // A drag that ends on a region must not select it.
+  const movedRef = useRef(false)
   const pointersRef = useRef(new Map<number, { x: number; y: number }>())
   const pinchRef = useRef<{ dist: number; zoom: number } | null>(null)
 
@@ -183,6 +194,7 @@ export default function AlarmMap({ regions, showLabels = false, overlay }: Props
           userSelect: 'none'
         }}
         onPointerDown={e => {
+          movedRef.current = false
           pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY })
           if (pointersRef.current.size === 2) {
             // Second finger: pinch-zoom from the current scale.
@@ -207,6 +219,7 @@ export default function AlarmMap({ regions, showLabels = false, overlay }: Props
           }
           const drag = dragRef.current
           if (!drag) return
+          if (Math.hypot(e.clientX - drag.x, e.clientY - drag.y) > 4) movedRef.current = true
           const scale = MAP_WIDTH / e.currentTarget.getBoundingClientRect().width
           const limitX = (MAP_WIDTH * zoom) / 2
           const limitY = (MAP_HEIGHT * zoom) / 2
@@ -231,9 +244,24 @@ export default function AlarmMap({ regions, showLabels = false, overlay }: Props
                 key={o}
                 d={path(feature) ?? undefined}
                 fill={paint ? levelFill(paint.level, paint.kind === 'fallback') : ALARM_FILL.none}
-                stroke="var(--color-bg)"
-                strokeWidth={0.5 / zoom}
+                stroke={selectedRegion === region ? 'var(--color-primary)' : 'var(--color-bg)'}
+                strokeWidth={(selectedRegion === region ? 2 : 0.5) / zoom}
                 aria-label={`${localizeRegion(region, i18n.language) ?? o}: ${t(`alarms.status.${status}`)}`}
+                {...(onSelectRegion
+                  ? {
+                      role: 'button',
+                      tabIndex: 0,
+                      style: { cursor: 'pointer', outline: 'none' },
+                      onClick: () => {
+                        if (!movedRef.current) onSelectRegion(region)
+                      },
+                      onKeyDown: (e: KeyboardEvent<SVGPathElement>) => {
+                        if (e.key !== 'Enter' && e.key !== ' ') return
+                        e.preventDefault()
+                        onSelectRegion(region)
+                      }
+                    }
+                  : {})}
               />
             )
           })}
