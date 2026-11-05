@@ -1,38 +1,30 @@
-import { Suspense, lazy, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
+import { useSearchParams } from 'react-router'
 
-import ActiveAlarmList from '@/routes/alarms/ActiveAlarmList'
-import LazySection from '@/components/LazySection'
-import LoadErrorBoundary from '@/components/LoadErrorBoundary'
-import Card from '@/components/ui/Card'
-import { toIntlLocale } from '@/lib/intl'
+import LiveView from '@/routes/alarms/LiveView'
+import { cn } from '@/lib/cn'
 import { alarmsQuery } from '@/lib/queries'
-import { ALARM_FILL, levelFill, sortedAlarms } from '@/routes/alarms/helpers'
-import StatsMapSkeleton from '@/routes/stats/StatsMapSkeleton'
-
-const LEGEND = [
-  { key: 'red', fill: levelFill('Red', false), label: 'alarms.legend.red' },
-  { key: 'yellow', fill: levelFill('Yellow', false), label: 'alarms.legend.yellow' },
-  { key: 'none', fill: ALARM_FILL.none, label: 'alarms.status.none' }
-] as const
-
-const AlarmMap = lazy(() => import('@/routes/alarms/AlarmMap'))
-const AlarmStatsSection = lazy(() => import('@/routes/alarms/AlarmStatsSection'))
-const AlarmHistorySection = lazy(() => import('@/routes/alarms/AlarmHistorySection'))
-const LossesSection = lazy(() => import('@/routes/alarms/LossesSection'))
+import { ALARM_VIEWS, DEFAULT_ALARM_VIEW, parseAlarmView } from '@/routes/alarms/views'
+import type { AlarmView } from '@/routes/alarms/views'
 
 // Lazy-loaded (see App.tsx). Online-only: no `offline-cache.ts` entry. Informational, not a warning system.
 export default function AlarmsRoute(): ReactNode {
-  const { t, i18n } = useTranslation()
-  const [showLabels, setShowLabels] = useState(true)
+  const { t } = useTranslation()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const view = parseAlarmView(searchParams.get('view'))
+  // One query for every view: switching tabs never refetches, and the map stays live.
   const alarms = useQuery(alarmsQuery())
-  const data = alarms.data
-  const count = data?.regions.length ?? 0
-  const time = data
-    ? new Date(data.fetchedAt).toLocaleTimeString(toIntlLocale(i18n.language), { hour: '2-digit', minute: '2-digit' })
-    : null
+
+  const handleViewChange = (next: AlarmView): void => {
+    setSearchParams(prev => {
+      const params = new URLSearchParams(prev)
+      if (next === DEFAULT_ALARM_VIEW) params.delete('view')
+      else params.set('view', next)
+      return params
+    })
+  }
 
   return (
     <div className="mx-auto w-full max-w-6xl">
@@ -41,95 +33,33 @@ export default function AlarmsRoute(): ReactNode {
       </h1>
       <p className="mb-4 text-sm text-[var(--color-muted)]">{t('alarms.intro')}</p>
 
-      {alarms.isPending && <StatsMapSkeleton />}
-
-      {/* 503 (no or stale data) is an error here: say "no data", never draw a calm map. */}
-      {/* The base map still draws, dimmed and without any alert colour, so it cannot read as "calm". */}
-      {alarms.isError && (
-        <Card className="mb-6">
-          <p className="mb-3 text-[var(--color-muted)]">{t('alarms.noData')}</p>
-          <div className="opacity-40 grayscale">
-            <LoadErrorBoundary compact>
-              <Suspense fallback={<StatsMapSkeleton />}>
-                <AlarmMap regions={[]} showLabels={showLabels} />
-              </Suspense>
-            </LoadErrorBoundary>
-          </div>
-        </Card>
-      )}
-
-      {data && (
-        <Card className="mb-6">
-          <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
-            <span className="font-medium">{t('alarms.count', { count })}</span>
-            {time && <span className="text-[var(--color-muted)]">{t('alarms.updated', { time })}</span>}
-            <span className="text-xs text-[var(--color-muted)]">{t('alarms.refresh')}</span>
+      {/* Hidden while the classic view is the only one. */}
+      {ALARM_VIEWS.length > 1 && (
+        <div
+          role="tablist"
+          className="mb-4 flex flex-wrap gap-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-1"
+        >
+          {ALARM_VIEWS.map(v => (
             <button
+              key={v}
               type="button"
-              onClick={() => setShowLabels(v => !v)}
-              className="ml-auto rounded-md border border-[var(--color-border)] px-2 py-0.5 text-xs"
+              role="tab"
+              aria-selected={v === view}
+              onClick={() => handleViewChange(v)}
+              className={cn(
+                'flex-1 rounded-md border px-3 py-1.5 text-sm whitespace-nowrap transition-colors duration-200',
+                v === view
+                  ? 'border-transparent bg-[var(--color-primary)] font-medium text-[var(--color-primary-fg)]'
+                  : 'border-transparent text-[var(--color-muted)] hover:bg-[var(--color-bg)] hover:text-[var(--color-fg)]'
+              )}
             >
-              {t(showLabels ? 'alarms.hideRegions' : 'alarms.showRegions')}
+              {t(`alarms.view.${v}`)}
             </button>
-          </div>
-
-          <p className="mb-3 text-xs text-[var(--color-muted)]">{t('alarms.source')}</p>
-
-          <LoadErrorBoundary compact>
-            <Suspense fallback={<StatsMapSkeleton />}>
-              <AlarmMap regions={data.regions} showLabels={showLabels} />
-            </Suspense>
-          </LoadErrorBoundary>
-
-          <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-[var(--color-muted)]">
-            {LEGEND.map(item => (
-              <li key={item.key} className="inline-flex items-center gap-1.5">
-                <span
-                  aria-hidden
-                  className="inline-block size-3 rounded-sm border border-[var(--color-border)]"
-                  style={{ background: item.fill }}
-                />
-                {t(item.label)}
-              </li>
-            ))}
-          </ul>
-
-          <p className="mt-3 text-xs text-[var(--color-muted)]">
-            {t('alarms.movement')}{' '}
-            <a
-              href="https://alerts.in.ua"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline underline-offset-2 hover:text-[var(--color-fg)]"
-            >
-              {t('alarms.movementLink')}
-            </a>
-          </p>
-
-          <ActiveAlarmList regions={sortedAlarms(data.regions)} nowIso={data.fetchedAt} />
-        </Card>
+          ))}
+        </div>
       )}
 
-      {/* Own recorder: shows even when the live feed is down (it answers from the database). */}
-      <LazySection fallback={<StatsMapSkeleton />}>
-        <LoadErrorBoundary compact>
-          <AlarmStatsSection />
-        </LoadErrorBoundary>
-      </LazySection>
-
-      {/* War-loss figures come from our own daily copy, so they show even when the live feed is down. */}
-      <LazySection sections={['losses']} fallback={<StatsMapSkeleton />}>
-        <LoadErrorBoundary compact>
-          <LossesSection />
-        </LoadErrorBoundary>
-      </LazySection>
-
-      {/* History comes from our own table, so it shows even when the live feed is down. */}
-      <LazySection fallback={<StatsMapSkeleton />}>
-        <LoadErrorBoundary compact>
-          <AlarmHistorySection />
-        </LoadErrorBoundary>
-      </LazySection>
+      {view === 'live' && <LiveView data={alarms.data} isPending={alarms.isPending} isError={alarms.isError} />}
     </div>
   )
 }

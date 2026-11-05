@@ -21,9 +21,17 @@ const ZOOM_STEP = 1.6
 /** Trailing "область" / "Oblast" dropped so the labels fit inside the shapes. */
 const OBLAST_SUFFIX = /\s+(область|oblast)$/i
 
+/** What an `overlay` gets: projected region centres (plate-region name → x, y in map units) and the current zoom. */
+export type AlarmMapOverlayContext = {
+  centers: ReadonlyMap<string, readonly [number, number]>
+  zoom: number
+}
+
 type Props = {
   regions: readonly AlarmRegion[]
   showLabels?: boolean
+  /** Extra SVG drawn above the alarm fills (markers, badges). It must never recolour the alarm shapes. */
+  overlay?: (ctx: AlarmMapOverlayContext) => ReactNode
 }
 
 /** Distance between the first two active touch points (0 if fewer than two). */
@@ -35,7 +43,7 @@ function pinchDistance(pointers: ReadonlyMap<number, { x: number; y: number }>):
 type GeoFeature = { properties: AlarmGeoProperties }
 
 /** Oblasts, raions and communities (UN OCHA COD shapes): each alerted area is painted with its own level. */
-export default function AlarmMap({ regions, showLabels = false }: Props): ReactNode {
+export default function AlarmMap({ regions, showLabels = false, overlay }: Props): ReactNode {
   const { t, i18n } = useTranslation()
   const needs = (layer: 'raions' | 'hromadas'): boolean =>
     regions.some(r => r.scope === 'partial' && r.areas.some(a => areaTarget(r.region, a)?.layer === layer))
@@ -47,6 +55,15 @@ export default function AlarmMap({ regions, showLabels = false }: Props): ReactN
     () => (oblasts.data ? geoMercator().fitSize([MAP_WIDTH, MAP_HEIGHT], oblasts.data) : undefined),
     [oblasts.data]
   )
+  const centers = useMemo(() => {
+    const map = new Map<string, readonly [number, number]>()
+    if (!oblasts.data || !projection) return map
+    for (const feature of oblasts.data.features) {
+      const point = projection(geoCentroid(feature))
+      if (point) map.set(regionOfOblast((feature.properties as unknown as AlarmGeoProperties).o), point)
+    }
+    return map
+  }, [oblasts.data, projection])
   const raionIndex = useMemo(
     () => (raions.data ? indexLayer(raions.data.features as unknown as GeoFeature[]) : undefined),
     [raions.data]
@@ -262,6 +279,7 @@ export default function AlarmMap({ regions, showLabels = false }: Props): ReactN
               })}
             </g>
           )}
+          {overlay?.({ centers, zoom })}
         </g>
       </svg>
     </div>

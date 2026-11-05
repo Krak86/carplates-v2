@@ -2812,6 +2812,7 @@
   "alarms.status.none": "Тревоги нет",
   "alarms.showRegions": "Показать названия областей",
   "alarms.hideRegions": "Скрыть названия областей",
+  "alarms.view.live": "Сейчас",
   "alarms.zoomIn": "Увеличить",
   "alarms.zoomOut": "Уменьшить",
   "alarms.fullscreen": "На весь экран",
