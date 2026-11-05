@@ -1,9 +1,19 @@
-/** How often a source is expected to change, in the order the page lists them. `frozen`: upstream no longer updates. `live`: asked per request, nothing to sync. */
-export const CADENCES = ['daily', 'weekly', 'monthly', 'quarterly', 'halfYearly', 'yearly', 'frozen', 'live'] as const
+/** How often a source is expected to change, in the order the page lists them. `minutely`: polled by the server about every minute. `frozen`: upstream no longer updates. `live`: asked per request, nothing to sync. */
+export const CADENCES = [
+  'minutely',
+  'daily',
+  'weekly',
+  'monthly',
+  'quarterly',
+  'halfYearly',
+  'yearly',
+  'frozen',
+  'live'
+] as const
 export type Cadence = (typeof CADENCES)[number]
 
-/** Days between expected syncs; `frozen` / `live` never go stale. */
-export const CADENCE_DAYS: Record<Exclude<Cadence, 'frozen' | 'live'>, number> = {
+/** Days between expected syncs; `minutely` / `frozen` / `live` never go stale. */
+export const CADENCE_DAYS: Record<Exclude<Cadence, 'minutely' | 'frozen' | 'live'>, number> = {
   daily: 1,
   weekly: 7,
   monthly: 31,

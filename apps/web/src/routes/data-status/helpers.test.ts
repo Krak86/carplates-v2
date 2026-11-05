@@ -77,12 +77,15 @@ describe('catalog', () => {
   })
 
   it('gives every non-live dataset a known date, so none is ever "unknown"', () => {
-    const missing = DATASETS.filter(d => d.cadence !== 'live' && !d.refreshedOn).map(d => d.id)
+    const missing = DATASETS.filter(d => d.cadence !== 'live' && d.cadence !== 'minutely' && !d.refreshedOn).map(
+      d => d.id
+    )
     expect(missing).toEqual([])
   })
 
   it('groups by cadence in display order and counts statuses', () => {
-    expect(groupByCadence(DATASETS)[0]?.cadence).toBe('daily')
+    expect(groupByCadence(DATASETS)[0]?.cadence).toBe('minutely')
+    expect(groupByCadence(DATASETS)[1]?.cadence).toBe('daily')
     expect(countByStatus(['fresh', 'fresh', 'stale'])).toEqual({ fresh: 2, stale: 1 })
   })
 })
