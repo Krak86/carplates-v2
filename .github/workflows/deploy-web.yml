@@ -38,6 +38,10 @@ jobs:
       - run: pnpm install --frozen-lockfile --filter @carplates/web...
       - run: pnpm --filter @carplates/shared build
 
+      - name: Fetch ZAKON font
+        # The font is git-ignored; without it the ZAKON face falls back. Plain node (24 strips types), so no scripts-package install.
+        run: node scripts/src/fetch-zakon-font.ts
+
       - name: Build web
         # Everything VITE_* is public once bundled, so these are variables, not secrets.
         env:
