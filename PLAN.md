@@ -394,8 +394,8 @@ above once scoped, or dropped if research says no.
   - [ ] Deploy run's "Purge Cloudflare cache" step succeeded for the exact URLs (a prefix-purge warning is fine on the free plan).
   - [x] `curl -sI https://carsua.app/api/stats/top` twice: `cache-control` has `s-maxage=21600, stale-while-revalidate=3600`; `cf-cache-status` HIT (checked 2026-11-01; the other stats URLs not repeated).
   - [x] `/api/stats/version` still has no cache header (DYNAMIC) and `/api/fuel/stats` still answers `max-age=300` (HIT), checked 2026-11-01.
-  - [ ] Open `/stats` in prod (hard reload): all views load (map, EV, imports, origin, weight tabs), no Zod errors in the console, Network shows `/api/stats/*` from cache (HIT) on a second load.
-  - [ ] Time `/stats` cold vs warm (Lighthouse or DevTools); expect the warm API calls to drop to edge latency.
+  - [~] (2026-11-05: map views and Registry tab seen clean, console empty; EV, imports, origin and weight tabs not all walked) Open `/stats` in prod (hard reload): all views load (map, EV, imports, origin, weight tabs), no Zod errors in the console, Network shows `/api/stats/*` from cache (HIT) on a second load.
+  - [~] (2026-11-05: mobile Lighthouse on `/stats` a11y 100, best practices 100, SEO 100, agentic 98; `/api/stats/*` MISS then HIT on monthly, region-brands, region-facets; cold vs warm timings not recorded) Time `/stats` cold vs warm (Lighthouse or DevTools); expect the warm API calls to drop to edge latency.
   - [ ] After the next Tue/Fri cron or ingest: confirm new numbers show within 6 h, or purge `/api/stats*` by hand; note the observed lag here.
 - ✅ **Discovery/SEO groundwork** — done 2026-10-30: robots/sitemap purge on deploy, per-page share cards `/og/page/<slug>.png`, IndexNow, catalog Step 1 fold check (catalog MVP is next, see `docs/discovery-plan.md` "Next"). Write-up: `docs/plan-done.md`.
 - ✅ **Size drawing blueprint + front view, VIN EU fallback / Asia history links, section share text** — done 2026-10-30. Write-up: `docs/plan-done.md` "Size drawing, VIN fallbacks…"; conventions `docs/features-reference.md` "Blueprint style".
