@@ -34,6 +34,8 @@ export const PAINT_SKIP_REASONS = [
   'multiple_cars',
   'wrap',
   'dark_neutral',
+  'dark_paint',
+  'dark_body',
   'low_coverage'
 ] as const
 export type PaintSkipReason = (typeof PAINT_SKIP_REASONS)[number]
@@ -69,7 +71,16 @@ const CAR_THRESHOLD = 127
 const K = 5
 const MIN_AREA = 0.08
 const MAX_AREA = 0.92
-const MIN_PAINT_SHARE = 0.12
+const MIN_PAINT_SHARE = 0.2
+/** Upper part of the car box (windows, roof): paint there must also match the body lightness, glass reflections do not. */
+const GLASS_BAND = 0.32
+const GLASS_SIGMA_NEUTRAL = 14
+const GLASS_SIGMA_COLOURED = 22
+/** Coloured paint darker than this (maroon, near-black blue) is as unreliable as black. */
+const DARK_PAINT_L = 32
+/** Median lightness of the mid body band (below the glass, above the bumper) under this = a dark car whatever the lit patches say. */
+const DARK_BODY_L = 34
+const DARK_BODY_CHROMA = 18
 const COLOURED_CHROMA = 20
 const BLUR_SIGMA = 1.1
 
@@ -216,6 +227,19 @@ export function scanPaint({ rgb, width: w, height: h, prob }: PaintScanInput): P
 
   if (isWrapped(lab, idx)) return { status: 'skip', reason: 'wrap', bodyArea }
 
+  const midL: number[] = []
+  const midC: number[] = []
+  for (const i of idx) {
+    const fy = (((i / w) | 0) - c0.y0) / (c0.y1 - c0.y0 + 1)
+    if (fy > GLASS_BAND && fy < 0.62) {
+      midL.push(lab[i * 3]!)
+      midC.push(Math.hypot(lab[i * 3 + 1]!, lab[i * 3 + 2]!))
+    }
+  }
+  if (midL.length && median(midL) < DARK_BODY_L && median(midC) < DARK_BODY_CHROMA) {
+    return { status: 'skip', reason: 'dark_body', bodyArea }
+  }
+
   const { cent, assign } = kMeans(lab, idx)
 
   // Paint cluster: area in the body band (10-62 % of the box height, inner 90 % of the width); dark clusters (glass, tyres) penalised.
@@ -264,6 +288,10 @@ export function scanPaint({ rgb, width: w, height: h, prob }: PaintScanInput): P
       const sl = Math.max(16, sigma * 1.5)
       v = Math.exp(-((L - c[0]) ** 2) / (2 * sl * sl)) * Math.exp(-(Math.hypot(a, b) ** 2) / (2 * 16 * 16))
     }
+    if (((p / w) | 0) - c0.y0 < GLASS_BAND * bh) {
+      const gs = paintChroma > COLOURED_CHROMA ? GLASS_SIGMA_COLOURED : GLASS_SIGMA_NEUTRAL
+      v *= Math.exp(-((L - c[0]) ** 2) / (2 * gs * gs))
+    }
     weight[p] = v * Math.min(1, (prob[p]! / 255 - 0.5) * 4)
     if (v > 0.6) {
       strong++
@@ -274,6 +302,7 @@ export function scanPaint({ rgb, width: w, height: h, prob }: PaintScanInput): P
   const paintShare = strong / idx.length
 
   if (paintChroma <= COLOURED_CHROMA && c[0] < 45) return { status: 'skip', reason: 'dark_neutral', bodyArea }
+  if (paintChroma > COLOURED_CHROMA && c[0] < DARK_PAINT_L) return { status: 'skip', reason: 'dark_paint', bodyArea }
   if (paintShare < MIN_PAINT_SHARE || yMean <= 0) return { status: 'skip', reason: 'low_coverage', bodyArea }
 
   const blurred = gaussianBlur(weight, w, h, BLUR_SIGMA)

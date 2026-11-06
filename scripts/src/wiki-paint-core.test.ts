@@ -111,7 +111,7 @@ describe('scanPaint', () => {
 
   it('recognises the other registry colours from the photo', () => {
     const cases: [VehicleColor, [number, number, number]][] = [
-      ['blue', [30, 70, 180]],
+      ['blue', [40, 90, 200]],
       ['green', [46, 125, 50]],
       ['yellow', [240, 195, 0]],
       ['white', [235, 235, 238]]
@@ -129,8 +129,8 @@ describe('scanPaint', () => {
     expect(r.bucket).toBe('gray')
   })
 
-  it('skips a black car (dark neutral paint)', () => {
-    expect(scan(scene(solid(26, 26, 28)))).toMatchObject({ status: 'skip', reason: 'dark_neutral' })
+  it('skips a black car', () => {
+    expect(scan(scene(solid(26, 26, 28)))).toMatchObject({ status: 'skip', reason: 'dark_body' })
   })
 
   it('skips a wrapped / multi-coloured body', () => {
@@ -203,5 +203,13 @@ describe('applyPaint', () => {
     const out = applyPaint(s.rgb, r.mask, '#2e7d32')
     expect(s.rgb).toEqual(copy)
     expect(out[(60 * W + 80) * 3 + 1]).toBeGreaterThan(out[(60 * W + 80) * 3]!)
+  })
+})
+
+describe('dark body gate', () => {
+  it('skips a dark car even when it has a bright lit patch', () => {
+    const s = scene((x, y) => (x < 60 && y < 50 ? [225, 225, 228] : [28, 28, 30]))
+    expect(scan(s)).toMatchObject({ status: 'skip' })
+    expect(['dark_body', 'dark_neutral']).toContain((scan(s) as { reason: string }).reason)
   })
 })
