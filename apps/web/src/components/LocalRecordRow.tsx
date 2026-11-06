@@ -4,7 +4,9 @@ import { Link } from 'react-router'
 import type { FavoriteLabel } from '@carplates/shared'
 
 import BrandLogo from '@/components/BrandLogo'
+import CompareChip from '@/components/compare/CompareChip'
 import LabelChip from '@/components/LabelChip'
+import { parseCompareRef } from '@carplates/shared'
 import { cn } from '@/lib/cn'
 import { toIntlLocale } from '@/lib/intl'
 import { brandFromLabel } from '@/lib/vehicle-label'
@@ -48,8 +50,10 @@ export default function LocalRecordRow({
 
   const logo = <BrandLogo brand={brandFromLabel(label)} size="sm" />
 
+  const compareRef = parseCompareRef(value)
   const badges = (
     <>
+      {compareRef && <CompareChip from={compareRef} label={[label, value].filter(Boolean).join(' ')} />}
       {notFound && (
         <span
           title={t('history.notFoundHint')}

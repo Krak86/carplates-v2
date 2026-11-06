@@ -9,6 +9,7 @@ import type { FastifyReply } from 'fastify'
 import { catalogMakePageText, catalogPageText } from '../catalog/catalog-text.js'
 import { CatalogService } from '../catalog/catalog.service.js'
 import { loadEnv } from '../env.js'
+import { ComparePreviewService } from './compare-preview.js'
 import { Lru } from './lru.js'
 import { buildCardSvg, buildPageCardSvg, readLogo, renderPng } from './og-card.js'
 import { catalogMakeOfCard, catalogSlugsOfCard, pagePathForSlug, shareAliasOfCard } from './page-card.js'
@@ -39,7 +40,8 @@ export class OgController {
 
   constructor(
     @Inject(PreviewService) private readonly previews: PreviewService,
-    @Inject(CatalogService) private readonly catalog: CatalogService
+    @Inject(CatalogService) private readonly catalog: CatalogService,
+    @Inject(ComparePreviewService) private readonly compare: ComparePreviewService
   ) {}
 
   /** `GET /og/page/:slug.png` - share card of a static page (title + description); an unknown slug is a 404. */
@@ -75,6 +77,32 @@ export class OgController {
       const siteIconPng = readLogo(join(this.assetsDir, 'brand-icon.png'))
       png = renderPng(buildPageCardSvg({ ...page, siteIconPng }), fontFiles)
       // Same rule as the plate cards: a card rendered without fonts has no text, so it is never cached.
+      if (fontFiles.length > 0) this.pngCache.set(cacheKey, png)
+    }
+    reply
+      .type('image/png')
+      .header('cache-control', fontFiles.length > 0 ? CACHE_OK : CACHE_FALLBACK)
+      .send(png)
+  }
+
+  /** `GET /og/compare.png?a=plate:BE6756HE&b=…` - share card of a comparison: both cars' names big, plates and years small. */
+  @Get('compare.png')
+  async compareCard(
+    @Query('a') a: string | undefined,
+    @Query('b') b: string | undefined,
+    @Query('lang') langParam: string | undefined,
+    @Res() reply: FastifyReply
+  ): Promise<void> {
+    const lang = resolveLang(langParam)
+    const text = await this.compare.describe(a, b, lang)
+    if (!text) throw new NotFoundException()
+
+    const cacheKey = `compare:${lang}:${a}|${b}`
+    const fontFiles = this.fontFiles()
+    let png = this.pngCache.get(cacheKey)
+    if (!png) {
+      const siteIconPng = readLogo(join(this.assetsDir, 'brand-icon.png'))
+      png = renderPng(buildPageCardSvg({ ...text.card, siteIconPng }), fontFiles)
       if (fontFiles.length > 0) this.pngCache.set(cacheKey, png)
     }
     reply

@@ -3,6 +3,8 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useSearchParams } from 'react-router'
 
+import CompareQueue from '@/components/compare/CompareQueue'
+import CompareShareButton from '@/components/compare/CompareShareButton'
 import CompareExportButton from '@/components/compare/CompareExportButton'
 import { CompareSaveButton, CompareSavedList } from '@/components/compare/CompareSaved'
 import CompareSuggestions from '@/components/compare/CompareSuggestions'
@@ -115,6 +117,13 @@ export default function CompareRoute(): ReactNode {
     (ref: CompareRef): void =>
       slot === 'a' ? go(ref, refs[1]) : go(refs[0], ref)
   const handleClear = (slot: CompareSlot) => (): void => (slot === 'a' ? go(null, refs[1]) : go(refs[0], null))
+  // A car already in the other slot swaps places, so the two slots never show the same car.
+  const handleAssign = (slot: CompareSlot, ref: CompareRef): void => {
+    const other = slot === 'a' ? refs[1] : refs[0]
+    const kept = sameRef(other, ref) ? (slot === 'a' ? refs[0] : refs[1]) : other
+    if (slot === 'a') go(ref, kept)
+    else go(kept, ref)
+  }
   const handleSwap = (): void => go(refs[1], refs[0])
 
   const ready = !!refs[0] && !!refs[1]
@@ -142,6 +151,8 @@ export default function CompareRoute(): ReactNode {
         <h1 className="mb-1 text-xl font-semibold">{t('compare.title')}</h1>
         <p className="text-base text-[var(--color-muted)]">{t('compare.intro')}</p>
       </Card>
+
+      <CompareQueue refs={refs} onAssign={handleAssign} />
 
       <div className="grid gap-4 md:grid-cols-2">
         {COMPARE_SLOTS.map((slot, i) => (
@@ -184,6 +195,7 @@ export default function CompareRoute(): ReactNode {
               <input type="checkbox" checked={diffOnly} onChange={e => setDiffOnly(e.target.checked)} />
               {t('compare.diffOnly')}
             </label>
+            {refs[0] && refs[1] && <CompareShareButton a={refs[0]} b={refs[1]} />}
             {refs[0] && refs[1] && (
               <CompareSaveButton
                 a={formatCompareRef(refs[0])}
@@ -238,6 +250,12 @@ export default function CompareRoute(): ReactNode {
             <p className="mt-3 text-sm text-[var(--color-muted)]">{t('compare.hidden', { count: hidden })}</p>
           )}
           <p className="mt-3 text-sm text-[var(--color-muted)]">{t('compare.footnote')}</p>
+        </Card>
+      )}
+
+      {ready && (
+        <Card>
+          <CompareSavedList />
         </Card>
       )}
     </main>

@@ -85,6 +85,7 @@ export default function ModelVariants({ model }: Props): ReactNode {
         />
         {year !== null && (
           <CompareChip
+            label={`${model.makeName} ${model.modelName} ${year}`}
             from={{
               kind: 'model',
               make: model.make,

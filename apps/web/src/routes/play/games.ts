@@ -19,7 +19,7 @@ export const RACER_LINKS = [
 export const EXTERNAL_GAMES = [
   { id: 'nfsu2', url: 'https://nfsu2.xyz/', emoji: '🏁', hue: 340, embed: false },
   { id: 'wipeout', url: 'https://phoboslab.org/wipegame/', emoji: '🚀', hue: 210, embed: true },
-  { id: 'gta3', url: 'https://wasmarcade.app/play/gta-3', emoji: '🔫', hue: 25, embed: false },
+  { id: 'gta3', url: 'https://wasmarcade.app/play/gta-3', emoji: '🔫', hue: 25, embed: false }
 ] as const
 
 export type ExternalGame = (typeof EXTERNAL_GAMES)[number]

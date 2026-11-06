@@ -32,6 +32,7 @@ import { CatalogService } from '../catalog/catalog.service.js'
 import { loadEnv } from '../env.js'
 import { SHARE_PRIVACY_HEADERS } from '../shares/share-http.js'
 import { SharesService } from '../shares/shares.service.js'
+import { ComparePreviewService } from './compare-preview.js'
 import { injectMeta, renderMetaTags } from './meta.js'
 import {
   catalogMakeCardSlug,
@@ -116,7 +117,8 @@ export class SpaController {
   constructor(
     @Inject(PreviewService) private readonly previews: PreviewService,
     @Inject(CatalogService) private readonly catalog: CatalogService,
-    @Inject(SharesService) private readonly shares: SharesService
+    @Inject(SharesService) private readonly shares: SharesService,
+    @Inject(ComparePreviewService) private readonly compare: ComparePreviewService
   ) {}
 
   @Get()
@@ -154,7 +156,7 @@ export class SpaController {
       )
     }
     const html = await this.loadIndex()
-    const query = req.query as { lang?: string; section?: string; p?: string } | undefined
+    const query = req.query as { lang?: string; section?: string; p?: string; a?: string; b?: string } | undefined
     const lang = resolveLang(query?.lang)
     const section = query?.section
     const shared = await this.sharedPhotoMeta(pathname, query?.p, lang)
@@ -169,7 +171,7 @@ export class SpaController {
       return
     }
     const catalog = await this.catalogPageOf(pathname, lang)
-    const meta = catalog?.meta ?? (await this.metaFor(pathname, lang, section))
+    const meta = catalog?.meta ?? (await this.metaFor(pathname, lang, section, { a: query?.a, b: query?.b }))
     reply
       .type('text/html; charset=utf-8')
       .header('cache-control', catalog ? CATALOG_PAGE_CACHE : 'no-cache')
@@ -288,7 +290,12 @@ export class SpaController {
    * Plate/VIN deep links get per-vehicle tags (first load only — in-app navigation never hits the
    * server); every other path gets its static page tags, rendered once per path+language and cached.
    */
-  private async metaFor(pathname: string, lang: Lang, section?: string): Promise<string> {
+  private async metaFor(
+    pathname: string,
+    lang: Lang,
+    section?: string,
+    pair?: { a?: string; b?: string }
+  ): Promise<string> {
     const segments = pathname.split('/').filter(Boolean)
     const siteUrl = this.env.PUBLIC_SITE_URL
     const langQuery = lang === DEFAULT_LANG ? '' : `?lang=${lang}`
@@ -330,6 +337,30 @@ export class SpaController {
           title: text.title,
           description: text.description,
           image: `${siteUrl}/og/${encodeURIComponent(preview.value)}.png${langQuery}`,
+          noindex: true
+        })
+      }
+    }
+
+    // `/compare?a=…&b=…`: both cars in the title, the description and the card (a half-filled link keeps the static tags).
+    if (
+      segments.length === 1 &&
+      segments[0] === 'compare' &&
+      typeof pair?.a === 'string' &&
+      typeof pair.b === 'string'
+    ) {
+      const text = await this.compare.describe(pair.a, pair.b, lang)
+      if (text) {
+        const pairQuery = new URLSearchParams({ a: pair.a, b: pair.b })
+        if (lang !== DEFAULT_LANG) pairQuery.set('lang', lang)
+        return renderMetaTags({
+          siteUrl,
+          path: '/compare',
+          ogUrl: `${siteUrl}/compare?${pairQuery.toString()}`,
+          lang,
+          title: text.title,
+          description: text.description,
+          image: `${siteUrl}/og/compare.png?${pairQuery.toString()}`,
           noindex: true
         })
       }

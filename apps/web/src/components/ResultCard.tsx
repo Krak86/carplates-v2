@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { Link, useSearchParams } from 'react-router'
 import {
   dealerUrl,
+  denormalizePlate,
   fallbackVehicleColor,
   isVin,
   normalizeBody,
@@ -420,6 +421,9 @@ export default function ResultCard({ data }: Props): ReactNode {
                 {(data.plate || hasVin) && (
                   <CompareChip
                     from={data.plate ? { kind: 'plate', plate: data.plate } : { kind: 'vin', vin: c.vin ?? '' }}
+                    label={[c.brand, c.model, c.makeYear, data.plate ? denormalizePlate(data.plate) : c.vin]
+                      .filter(Boolean)
+                      .join(' ')}
                   />
                 )}
                 <Model3dButton brand={c.brand} model={c.model} />

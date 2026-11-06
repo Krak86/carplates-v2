@@ -58,6 +58,7 @@ describe('SpaController meta injection', () => {
     // loadEnv() caches on first call, so the controller must be imported after the env is stubbed.
     const { SpaController } = await import('./spa.controller.js')
     const { PreviewService } = await import('./preview.service.js')
+    const { ComparePreviewService } = await import('./compare-preview.js')
     const previews = {
       describe: async (query: string) =>
         query === 'AA1234BB'
@@ -98,6 +99,7 @@ describe('SpaController meta injection', () => {
       controllers: [SpaController],
       providers: [
         { provide: PreviewService, useValue: previews },
+        ComparePreviewService,
         { provide: CatalogService, useValue: catalog },
         { provide: SharesService, useValue: shares }
       ]
@@ -113,6 +115,20 @@ describe('SpaController meta injection', () => {
   })
 
   const get = async (url: string): Promise<string> => (await app.inject({ method: 'GET', url })).body
+
+  it('names both cars of a /compare link in the title, description and card image', async () => {
+    const html = await get('/compare?a=plate:AA1234BB&b=m:bmw/x5/2015&lang=en')
+    expect(html).toContain('<title>AA1234BB vs BMW X5 | Cars UA</title>')
+    expect(html).toContain(
+      'og:image" content="https://carsua.app/og/compare.png?a=plate%3AAA1234BB&amp;b=m%3Abmw%2Fx5%2F2015&amp;lang=en"'
+    )
+    expect(html).toContain('noindex')
+  })
+
+  it('keeps the static /compare tags for a half-filled or malformed link', async () => {
+    expect(await get('/compare?a=plate:AA1234BB')).toContain('Порівняння двох авто')
+    expect(await get('/compare?a=plate:AA1234BB&b=m:BMW')).toContain('Порівняння двох авто')
+  })
 
   it('injects per-vehicle tags with noindex on a known plate', async () => {
     const html = await get('/AA1234BB?lang=ua')

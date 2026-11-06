@@ -1,3 +1,4 @@
+import { formatCompareRef, parseCompareRef } from './ref'
 import { OVERLAY_MODES, VIEW_CHOICES } from './size-overlay'
 import type { OverlayMode, ViewChoice } from './size-overlay'
 
@@ -34,8 +35,9 @@ export function compareShareParams(
 ): URLSearchParams {
   const out = new URLSearchParams()
   for (const key of ['a', 'b']) {
-    const value = current.get(key)
-    if (value) out.set(key, value)
+    // Re-written through the parser, so a Cyrillic plate typed into the address bar is shared in Latin letters.
+    const ref = parseCompareRef(current.get(key))
+    if (ref) out.set(key, formatCompareRef(ref))
   }
   out.set('section', section)
   for (const [key, value] of Object.entries(state)) if (value) out.set(key, value)
