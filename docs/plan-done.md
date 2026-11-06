@@ -4672,6 +4672,15 @@ Goal (owner): keep the classic alarm page as is and add alternative views on the
 - **Not built yet (owner skipped, 2026-11-05):** fleet age on the scatter (a third option of the Electro / Diesel toggle; needs a new region rollup), Rhythm over many days (range switch on the Rhythm tab), scatter placement next to the map. None needs a new tab.
 - **Docs/UI:** `features-reference.md` "Views / tabs", About `alarms` text, `releases.ts` day 2026-11-05.
 
+## DREAM recovery view on /alarms (2026-11-06) ✅
+
+Owner decision: keep all war-related stats on the one `/alarms` route, so DREAM became a new tab, not a new route. Research (licences of reukraine.shtab.net, ACLED and DREAM) concluded: shtab.net has no licence (link only), ACLED needs a registered EULA (not built), DREAM has a public API.
+
+- **Data:** migration `0102_dream_projects.sql` / `dreamProjects`; `pnpm ingest:dream` (job `dream`, cron 05:10, incremental by `updated_at`, `--full` for the first load). Verified live: 16,172 projects, API needs no key, details one call per project, locations are KATOTTG codes (no coordinates), committed funding in UAH.
+- **API:** `GET /api/dream/summary` (per plate region + country; cancelled left out); contract `packages/shared/src/dream.ts`.
+- **UI:** `?view=recovery` (`RecoveryView`): alarm map + a marker per region (projects or funding) + region / country card with status and kind-of-work breakdown; strings `alarms.recovery.*`, About `SOURCES` credit, `/data-status` row.
+- **Not built:** ACLED (licence), shtab.net (no licence), sector split, community level.
+
 ## UI polish round, faster war-loss sync, data-status notes (2026-11-06) ✅
 
 Triggered by a phone review of the home page, /read, /auctions and /alarms.
@@ -4725,7 +4734,7 @@ Plan: `docs/wiki-recolor-plan.md`. The hero photo of a model is repainted to the
 - **UI:** pill `[swatch] Colour filter: on|off` top-right of `WikiHeroImage`, note under the photo, credit "(modified: colour)"; i18n `wiki.recolorOn|Off|Note`, `wiki.imageCreditModified` (ua/ru/en), colour names from `vehicleColor.*`.
 - **Store:** `wikiRecolorEnabled` + `carplates.wikiRecolor` (default on).
 - **Tests:** `wiki-recolor.helpers.test.ts` (every skip case, cover-crop maths, layer), `WikiHeroImage.test.tsx` (button only when applicable, off state, mask / request error, toggle). Canvas pixels are not covered by jsdom.
-- **Browser-checked (2026-11-06, Audi A1 2012, white photo):** red plate -> canvas and `<img>` have the identical box (700x320, `object-fit: cover`), opacity transition 0.3s, pill `aria-pressed`, credit "(изменено: цвет)` and the note show; toggling off removes canvas, note and credit, persists in `carplates.wikiRecolor` across a reload and no mask is fetched while off; a white plate of the same year shows no pill, canvas or credit. No console errors. Nothing to fix. Not covered: the mask alpha is read from a canvas, so very low-alpha shading is quantised by premultiplication (weight is low there, expected invisible).
+- **Browser-checked (2026-11-06, Audi A1 2012, white photo):** red plate -> canvas and `<img>` have the identical box (700x320, `object-fit: cover`), opacity transition 0.3s, pill `aria-pressed`, credit "(изменено: цвет)`and the note show; toggling off removes canvas, note and credit, persists in`carplates.wikiRecolor` across a reload and no mask is fetched while off; a white plate of the same year shows no pill, canvas or credit. No console errors. Nothing to fix. Not covered: the mask alpha is read from a canvas, so very low-alpha shading is quantised by premultiplication (weight is low there, expected invisible).
 
 ## Wiki photo colour filter, rollout (step 9, 2026-11-06)
 

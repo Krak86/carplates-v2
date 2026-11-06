@@ -75,6 +75,14 @@ export const DATASETS: readonly Dataset[] = [
     noteKey: 'dataStatus.note.losses',
     refreshedOn: '2026-11-05'
   },
+  {
+    id: 'dream',
+    name: 'DREAM: recovery projects (dream.gov.ua public API)',
+    to: '/alarms?view=recovery',
+    cadence: 'daily',
+    job: 'dream',
+    refreshedOn: '2026-11-06'
+  },
   { id: 'news', name: 'News (RSS)', to: '/news', cadence: 'daily', job: 'news', refreshedOn: '2026-10-28' },
   {
     id: 'social',

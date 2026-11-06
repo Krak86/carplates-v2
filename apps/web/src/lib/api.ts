@@ -2,6 +2,7 @@ import {
   alarmHistoryResponseSchema,
   alarmStatsResponseSchema,
   alarmsResponseSchema,
+  dreamSummaryResponseSchema,
   lossesHistoryResponseSchema,
   lossesResponseSchema,
   createShareResponseSchema,
@@ -113,6 +114,7 @@ import type {
   AlarmHistoryResponse,
   AlarmStatsResponse,
   AlarmsResponse,
+  DreamSummaryResponse,
   LossCategory,
   LossesHistoryResponse,
   LossesResponse,
@@ -1164,6 +1166,11 @@ export async function getShowroomDetail(brand: string, model: string): Promise<S
 /** Online-only war-loss figures (General Staff approximate numbers, our own daily copy). 404 until the first day is stored. */
 export async function getLosses(): Promise<LossesResponse> {
   return lossesResponseSchema.parse(await getJson('/api/losses'))
+}
+
+/** Online-only DREAM recovery projects per region (our own daily copy). 404 until the first load hides the view. */
+export async function getDreamSummary(): Promise<DreamSummaryResponse> {
+  return dreamSummaryResponseSchema.parse(await getJson('/api/dream/summary'))
 }
 
 /** Online-only: one loss category over time, oldest first. */

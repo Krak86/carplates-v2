@@ -16,6 +16,7 @@ const CarsView = lazy(() => import('@/routes/alarms/CarsView'))
 const RhythmView = lazy(() => import('@/routes/alarms/RhythmView'))
 const RoadsView = lazy(() => import('@/routes/alarms/RoadsView'))
 const FleetView = lazy(() => import('@/routes/alarms/FleetView'))
+const RecoveryView = lazy(() => import('@/routes/alarms/RecoveryView'))
 
 // Lazy-loaded (see App.tsx). Online-only: no `offline-cache.ts` entry. Informational, not a warning system.
 export default function AlarmsRoute(): ReactNode {
@@ -87,6 +88,11 @@ export default function AlarmsRoute(): ReactNode {
       {view === 'fleet' && (
         <Suspense fallback={<StatsMapSkeleton />}>
           <FleetView data={alarms.data} isPending={alarms.isPending} isError={alarms.isError} />
+        </Suspense>
+      )}
+      {view === 'recovery' && (
+        <Suspense fallback={<StatsMapSkeleton />}>
+          <RecoveryView data={alarms.data} isPending={alarms.isPending} isError={alarms.isError} />
         </Suspense>
       )}
     </div>

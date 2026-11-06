@@ -153,6 +153,7 @@ const SOURCES: readonly Source[] = [
   { key: 'alertsInUa', label: 'alerts.in.ua', url: 'https://alerts.in.ua', tile: 'bg-red-800' },
   // No logo cleared for russianwarship.rip: a plain tile.
   { key: 'russianWarship', label: 'russianwarship.rip', url: 'https://russianwarship.rip', tile: 'bg-slate-700' },
+  { key: 'dream', label: 'DREAM', url: 'https://dream.gov.ua', tile: 'bg-emerald-700' },
   {
     key: 'sirenDataset',
     label: 'Ukrainian air raid sirens dataset',

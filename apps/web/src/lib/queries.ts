@@ -20,6 +20,7 @@ import {
   getAlarmHistory,
   getAlarmStats,
   getAlarms,
+  getDreamSummary,
   getLosses,
   getLossesHistory,
   getRoadSafetyCauses,
@@ -980,6 +981,10 @@ export function auctionListQuery(query: AuctionListQuery) {
 /** War-loss totals: one row a day, so an hour is fresh enough. A 404 (nothing stored) hides the section. */
 export const lossesQuery = () =>
   queryOptions({ queryKey: ['losses'], queryFn: getLosses, staleTime: 60 * 60_000, retry: false })
+
+/** DREAM recovery summary: changes once a day. A 404 (nothing stored) hides the view. */
+export const dreamSummaryQuery = () =>
+  queryOptions({ queryKey: ['dream', 'summary'], queryFn: getDreamSummary, staleTime: 60 * 60_000, retry: false })
 
 /** One loss category over time (~1,700 points); changes once a day. */
 export const lossesHistoryQuery = (category: LossCategory, enabled = true) =>

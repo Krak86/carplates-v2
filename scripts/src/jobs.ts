@@ -40,6 +40,9 @@ export const JOBS = {
   // Daily (04:50): pages russianwarship.rip /statistics (~1,700 daily records) into registry.war_losses_daily (upsert, safe to repeat). The API itself
   // fetches only /statistics/latest every 6 h, so run this once by hand after the migration 0100 deploy; the cron repairs gaps and shows on /data-status.
   losses: { command: 'tsx src/ingest-losses.ts', timeoutMin: 10 },
+  // Daily (05:10): DREAM recovery projects (dream.gov.ua public API) into registry.dream_projects. Incremental (only projects changed since the newest stored one);
+  // run `ingest:dream --full` once by hand after the migration 0102 deploy (~16,000 calls, about 15 min).
+  dream: { command: 'tsx src/ingest-dream.ts', timeoutMin: 30 },
   // Wikipedia photo colour filter (docs/wiki-recolor-plan.md): nightly batch of 1 500 photos, most-registered models first, `--rps 1` (the Commons
   // rate limit; measured 2.6 s per photo = about 65 min, timeout 120). Resumable: only never-scanned or older-`algo` photos are picked, so the backlog (~22 000 files) clears in
   // about 15 nights and later runs are near no-ops. Also deletes orphaned paint rows. Needs the SegFormer model (~15 MB, cached in scripts/.data/wiki-paint/hf-cache = the ingest-data mount).

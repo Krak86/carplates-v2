@@ -115,6 +115,7 @@
     "ingest:alarm-history:csv": "pnpm --filter @carplates/scripts ingest:alarm-history:csv",
     "export:alarm-history:csv": "pnpm --filter @carplates/scripts export:alarm-history:csv",
     "ingest:losses": "pnpm --filter @carplates/scripts ingest:losses",
+    "ingest:dream": "pnpm --filter @carplates/scripts ingest:dream",
     "ingest:oem-links": "pnpm --filter @carplates/scripts ingest:oem-links",
     "ingest:oem-links:csv": "pnpm --filter @carplates/scripts ingest:oem-links:csv",
     "export:oem-links:csv": "pnpm --filter @carplates/scripts export:oem-links:csv",

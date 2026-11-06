@@ -540,6 +540,7 @@ the "title mentions the model" guard; a Wikidata `P18` query could replace the l
 
 Plan and handoff: `docs/wiki-recolor-plan.md`. Table `registry.wiki_image_paint` (migration 0101), `/api/wiki/recolor` + `/api/wiki/paint/:id.webp`, shared `applyPaint`.
 
+- [ ] After deploy (DREAM recovery view, 2026-11-06): migration 0102 applied (blue/green safe, new table); run `bash /opt/carsua/compose/run-ingest.sh dream` once with `--full` semantics (first run on an empty table is already a full load, about 15 min); add `/api/dream/summary` to the Cloudflare Cache Rule (`docs/deploy.md`, check MISS then HIT); look at `/alarms?view=recovery` on prod (markers, region card, phone width, light / dark); confirm in writing that DREAM data is CC BY 4.0 if the credit wording should change.
 - [ ] After deploy: migration 0101 applied (blue/green safe, new table); add `/api/wiki/recolor` and `starts_with /api/wiki/paint/` to the Cloudflare Cache Rule (`docs/deploy.md`, check MISS then HIT); the scan job (step 9) is not scheduled yet, so the table stays empty and `recolor` answers `null`.
 - [ ] After deploy: check the filter in a browser on a real plate once the scan has run (canvas aligned with the photo, pill toggles, credit says "modified: colour"); until the scan job runs no photo gets a filter.
 - [ ] Steps 7-9: candidate photos, photo strip, rollout (scan job, `/data-status` row, gallery review).

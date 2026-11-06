@@ -2126,6 +2126,26 @@ export const warLossesDaily = registry.table('war_losses_daily', {
 export type WarLossesDailyRow = typeof warLossesDaily.$inferSelect
 export type WarLossesDailyInsert = typeof warLossesDaily.$inferInsert
 
+/** Recovery projects from DREAM (dream.gov.ua public API), migration 0102. `oblastCode` = KATOTTG prefix (`UA51`); `committedUah` = committed finance lines. */
+export const dreamProjects = registry.table(
+  'dream_projects',
+  {
+    id: text('id').primaryKey(),
+    code: text('code').notNull(),
+    status: text('status').notNull(),
+    projectType: text('project_type'),
+    purpose: text('purpose'),
+    title: text('title'),
+    oblastCode: text('oblast_code'),
+    committedUah: numeric('committed_uah', { precision: 18, scale: 2, mode: 'number' }).notNull().default(0),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull(),
+    fetchedAt: timestamp('fetched_at', { withTimezone: true }).notNull().defaultNow()
+  },
+  t => [index('ix_dream_projects_oblast').on(t.oblastCode), index('ix_dream_projects_updated').on(t.updatedAt)]
+)
+export type DreamProjectRow = typeof dreamProjects.$inferSelect
+export type DreamProjectInsert = typeof dreamProjects.$inferInsert
+
 /**
  * Model catalog (`/cars/:make/:model`): raw registry (brand, model) -> slugs, one row per model with its rollup, one per make.
  * Rebuilt by scripts/src/catalog-build.ts; see migration 0081.

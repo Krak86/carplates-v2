@@ -20,6 +20,12 @@ export const RELEASES: readonly ReleaseDay[] = [
     items: [
       item(
         'new',
+        'На /alarms нова вкладка «Відновлення»: проєкти відбудови з державної системи DREAM по областях (кількість і зобов’язане фінансування) поверх тієї самої карти тривог. Дані оновлюються щодня, лише для інформації.',
+        'На /alarms новая вкладка «Восстановление»: проекты восстановления из государственной системы DREAM по областям (количество и обязанное финансирование) поверх той же карты тревог. Данные обновляются ежедневно, только для информации.',
+        'New "Recovery" tab on /alarms: reconstruction projects from the government system DREAM per region (count and committed funding) on top of the same alert map. Updated daily, informational only.'
+      ),
+      item(
+        'new',
         'Кольоровий фільтр на фото моделі: якщо колір авто в реєстрі інший, ніж на фото, кузов перефарбовується в колір з реєстру (кнопка вгорі праворуч вмикає й вимикає; у підписі «змінено: колір»)',
         'Цветовой фильтр на фото модели: если цвет авто в реестре отличается от цвета на фото, кузов перекрашивается в цвет из реестра (кнопка вверху справа включает и выключает; в подписи «изменено: цвет»)',
         'A colour filter on the model photo: when the registered colour differs from the car in the photo, the body is repainted to the registered colour (a button at the top right turns it on and off; the credit says "modified: colour")'
