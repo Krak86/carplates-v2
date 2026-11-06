@@ -149,7 +149,7 @@ export const DATASETS: readonly Dataset[] = [
     refreshedOn: '2026-10-12'
   },
   { id: 'wikispecs', name: 'Wikipedia: generation specs', to: '/cars', cadence: 'yearly', refreshedOn: '2026-10-12' },
-  { id: 'mot', name: 'DVSA: UK MOT common faults', cadence: 'yearly', refreshedOn: '2026-10-12' },
+  { id: 'mot', name: 'DVSA: UK MOT common faults (2019, 2021-25)', cadence: 'yearly', refreshedOn: '2026-11-06' },
   { id: 'origin', name: 'Brand origin, VIN plants (WMI)', to: '/stats', cadence: 'yearly', refreshedOn: '2026-10-26' },
   { id: 'openEv', name: 'Open EV Data (upstream frozen at 2020-07)', cadence: 'frozen', refreshedOn: '2026-10-09' },
   {
