@@ -93,8 +93,12 @@ describe('catalog', () => {
 describe('scheduled job coverage', () => {
   it('has a dataset for every job in the cron file', async () => {
     const { readFileSync } = await import('node:fs')
+    const { existsSync } = await import('node:fs')
     const { resolve } = await import('node:path')
-    const cron = readFileSync(resolve(process.cwd(), '../../infra/vps/ingest.cron'), 'utf8')
+    // CI runs vitest from the repo root, local runs from apps/web: walk up until the file is found
+    let dir = process.cwd()
+    while (!existsSync(resolve(dir, 'infra/vps/ingest.cron')) && resolve(dir, '..') !== dir) dir = resolve(dir, '..')
+    const cron = readFileSync(resolve(dir, 'infra/vps/ingest.cron'), 'utf8')
     const scheduled = [...cron.matchAll(/^[^#\n]*run-ingest\.sh (\S+)/gm)].map(m => m[1])
     expect(scheduled.length).toBeGreaterThan(0)
     const covered = new Set(DATASETS.map(d => d.job))
