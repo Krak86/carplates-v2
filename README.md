@@ -3,6 +3,22 @@
 Ukrainian vehicle lookup by **plate number** or **VIN**. Rebuild of
 [carsua.app](https://carsua.app).
 
+## Relation to v1
+
+v2 is the spiritual successor of [Krak86/carplates](https://github.com/Krak86/carplates) (v1, kept as-is). Same idea
+(look up a Ukrainian car by plate, offline-first PWA, mobile-first), rebuilt around data we own instead of third-party APIs.
+
+| | v1 | v2 |
+| --- | --- | --- |
+| Plate data | Remote services (RIA Auto API, PlatesMania) | State open-data registry ingested into our own Postgres |
+| VIN | NHTSA decode | NHTSA (proxied) + offline VIN-prefix fallback, VIN anatomy, equipment map |
+| Photo recognition | Plate Recognizer (paid ANPR API) | On-device + optional self-hosted ALPR / OCR (plates and VINs) |
+| Extras | Chat (Disqus), car ads | Crash-test ratings (6 sources), fuel economy, EU specs (RDW), value estimate, wanted check, news, reviews, 3D/360° views, test-drive game |
+| Auth | Google / Facebook OAuth2 | Google, email and Telegram sign-in, own session cookie |
+| Frontend | React 16, Redux + Saga, Material UI, Webpack | React 19, Vite, Tailwind v4, Zustand, TanStack Query |
+| Backend / hosting | Azure Functions + Table Storage, GitHub Pages | NestJS + Fastify, Drizzle + Postgres, self-hosted |
+| Tests / CI | Jest, Cypress, Azure DevOps | Vitest, pnpm monorepo |
+
 - Plate data: the state open-data registry ([data.gov.ua](https://data.gov.ua/dataset/06779371-308f-42d7-895e-5a39833375f0)) → Postgres
 - VIN data: [NHTSA vPIC](https://vpic.nhtsa.dot.gov/api/vehicles/decodevin) (proxied), presented as an Overview
   (VIN anatomy, equipment map with airbags/drive/seats, engine and origin cards, grouped details) or Raw data

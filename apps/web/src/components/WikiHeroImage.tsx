@@ -2,6 +2,7 @@ import { useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { PAINT_HEX, resolveVehicleKind } from '@carplates/shared'
 
+import PhotoZoomDialog from '@/components/PhotoZoomDialog'
 import VehicleKindPlaceholder from '@/components/VehicleKindPlaceholder'
 import UaAuctionHero from '@/components/ua-auctions/UaAuctionHero'
 import { useCarHeroImageActions } from '@/components/use-car-hero-image-actions'
@@ -55,7 +56,8 @@ export default function WikiHeroImage({
   const setRecolorEnabled = useUiStore(s => s.setWikiRecolorEnabled)
   const [loadedUrl, setLoadedUrl] = useState<string | null>(null)
   const [failedUrl, setFailedUrl] = useState<string | null>(null)
-  const hasQuery = Boolean(brand || model)
+  const [zoomed, setZoomed] = useState(false)
+  const hasQuery =Boolean(brand || model)
   const isPending = hasQuery && heroImage.isPending
 
   const lotHero =
@@ -98,6 +100,22 @@ export default function WikiHeroImage({
           />
         )}
         {isLoaded && recolor.mask && recolor.target && <WikiRecolorCanvas mask={recolor.mask} color={recolor.target} />}
+        {isLoaded && image && (
+          <>
+            <button
+              type="button"
+              onClick={() => setZoomed(true)}
+              aria-label={t('photo.zoomOpen')}
+              className="absolute inset-0 cursor-zoom-in rounded-lg"
+            />
+            <span
+              aria-hidden
+              className="pointer-events-none absolute right-2 bottom-2 rounded-full bg-black/60 px-2 py-0.5 text-xs text-white"
+            >
+              🔍
+            </span>
+          </>
+        )}
         {image && heroImage.data?.from && (
           <div className="absolute top-2 left-2 rounded bg-black/60 px-1.5 py-0.5 text-[10px] text-white/80">
             {heroImage.data.from === 'live' ? 'Wiki live' : 'DB'}
@@ -130,11 +148,14 @@ export default function WikiHeroImage({
         </button>
 
         {isLoaded && creditParts.length > 0 && (
-          <div className="absolute right-2 bottom-2 rounded bg-black/60 px-1.5 py-0.5 text-[10px] text-white/80">
+          <div className="absolute right-11 bottom-2 rounded bg-black/60 px-1.5 py-0.5 text-[10px] text-white/80">
             {t(recolor.mask ? 'wiki.imageCreditModified' : 'wiki.imageCredit', { credit: creditParts.join(', ') })}
           </div>
         )}
       </div>
+      {zoomed && image && (
+        <PhotoZoomDialog url={image.url} candidates={[]} active={null} onClose={() => setZoomed(false)} />
+      )}
       {recolor.mask && colorName && (
         <p className="mt-4 text-center text-xs text-muted">
           {t('wiki.recolorNote', { color: colorName.toLowerCase() })}
