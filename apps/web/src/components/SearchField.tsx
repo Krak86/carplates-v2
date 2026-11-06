@@ -2,6 +2,7 @@ import { Suspense, lazy, useState } from 'react'
 import type { FormEvent, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from 'react-router'
+import { denormalizePlate, isUaPlate } from '@carplates/shared'
 
 import { useIdleReady } from '@/hooks/useIdleReady'
 import { useSearchFocus } from '@/hooks/useSearchFocus'
@@ -49,7 +50,10 @@ export default function SearchField({
   const handleSubmit = (e: FormEvent): void => {
     e.preventDefault()
     const q = value.trim()
-    if (q) navigate(`/${encodeURIComponent(q)}`, { viewTransition: true })
+    if (!q) return
+    // A UA plate typed in Cyrillic goes into the URL in Latin, so a copied address bar link matches the share links.
+    const target = isUaPlate(q) ? denormalizePlate(q) : q
+    navigate(`/${encodeURIComponent(target)}`, { viewTransition: true })
   }
 
   return (

@@ -54,10 +54,17 @@ describe('parseCompareRef', () => {
 
 describe('formatCompareRef / compareHref', () => {
   it('round-trips every kind', () => {
-    for (const raw of ['plate:АА1234ВВ', 'vin:WBA8E9C50GK123456', 'm:bmw/3series/2015/diesel', 'm:bmw/3series/2015']) {
+    for (const raw of ['plate:AA1234BB', 'vin:WBA8E9C50GK123456', 'm:bmw/3series/2015/diesel', 'm:bmw/3series/2015']) {
       const ref = parseCompareRef(raw)
       expect(ref && formatCompareRef(ref)).toBe(raw)
     }
+  })
+
+  it('writes a plate in Latin letters (no %-escapes in a shared link) and reads the Cyrillic one back', () => {
+    const cyrillic = parseCompareRef('plate:ВЕ6756НЕ')
+    expect(cyrillic).toEqual({ kind: 'plate', plate: 'ВЕ6756НЕ' })
+    expect(cyrillic && formatCompareRef(cyrillic)).toBe('plate:BE6756HE')
+    expect(compareHref(cyrillic, null)).toBe('/compare?a=plate:BE6756HE')
   })
 
   it('keeps ":" and "/" readable in the URL and leaves an empty slot out', () => {

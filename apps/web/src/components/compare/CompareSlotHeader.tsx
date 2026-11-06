@@ -1,14 +1,18 @@
 import { useState } from 'react'
 import type { ReactNode } from 'react'
-import { resolveFuelCategories } from '@carplates/shared'
+import { denormalizePlate, resolveFuelCategories } from '@carplates/shared'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
+import { Link } from 'react-router'
 
 import BrandLogo from '@/components/BrandLogo'
+import InfoPopover from '@/components/InfoPopover'
+import InfoText from '@/components/InfoText'
 import { cn } from '@/lib/cn'
 import { wikiImageQuery } from '@/lib/queries'
 
 import { coverageOf } from './coverage'
+import CompareChip from './CompareChip'
 import { ModelPicker } from './CompareSlotPicker'
 import { carTitle } from './resolve'
 import { COMPARE_SOURCES } from './types'
@@ -45,6 +49,14 @@ export default function CompareSlotHeader({ slot, loaded, onClear, onPick }: Pro
   if (!car) return null
 
   const coverage = coverageOf(loaded)
+  const queueLabel = [carTitle(car), car.year, inputLabel(loaded, t)].filter(Boolean).join(' ')
+  // A plate or a VIN has a card of its own; a typical car (model ref) has none.
+  const carPage =
+    car.ref.kind === 'plate'
+      ? `/${encodeURIComponent(denormalizePlate(car.ref.plate))}`
+      : car.ref.kind === 'vin'
+        ? `/${car.ref.vin}`
+        : null
   const credit = [photo?.attribution?.author, photo?.attribution?.license].filter(Boolean).join(' · ')
 
   const header = (
@@ -57,28 +69,47 @@ export default function CompareSlotHeader({ slot, loaded, onClear, onPick }: Pro
             {car.year ? <span className="ml-1.5 font-normal text-[var(--color-muted)]">{car.year}</span> : null}
           </h2>
         </div>
-        <p className="mt-1 text-sm text-[var(--color-muted)]">{inputLabel(loaded, t)}</p>
-
-        <ul className="mt-2 flex flex-wrap gap-1.5" aria-label={t('compare.coverage.label')}>
-          {COMPARE_SOURCES.map(source => (
-            <li
-              key={source}
-              className={cn(
-                'rounded-full border px-2 py-0.5 text-xs',
-                coverage[source]
-                  ? 'border-[var(--color-primary)] text-[var(--color-fg)]'
-                  : 'border-[var(--color-border)] text-[var(--color-muted)] line-through'
-              )}
+        <p className="mt-1 flex items-center gap-1.5 text-sm text-[var(--color-muted)]">
+          {inputLabel(loaded, t)}
+          {carPage && (
+            <Link
+              to={carPage}
+              viewTransition
+              title={t('compare.openCar', { name: inputLabel(loaded, t) })}
+              aria-label={t('compare.openCar', { name: inputLabel(loaded, t) })}
+              className="rounded-full border border-[var(--color-border)] px-1.5 text-[var(--color-primary)] hover:border-[var(--color-primary)]"
             >
-              <span className="sr-only">
-                {t(coverage[source] ? 'compare.coverage.matched' : 'compare.coverage.missing')}:{' '}
-              </span>
-              {t(`compare.source.${source}`)}
-            </li>
-          ))}
-        </ul>
+              <span aria-hidden>→</span>
+            </Link>
+          )}
+        </p>
 
-        <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+        <div className="mt-2 flex items-start gap-1.5">
+          <ul className="flex flex-wrap gap-1.5" aria-label={t('compare.coverage.label')}>
+            {COMPARE_SOURCES.map(source => (
+              <li
+                key={source}
+                className={cn(
+                  'rounded-full border px-2 py-0.5 text-xs',
+                  coverage[source]
+                    ? 'border-[var(--color-primary)] text-[var(--color-fg)]'
+                    : 'border-[var(--color-border)] text-[var(--color-muted)] line-through'
+                )}
+              >
+                <span className="sr-only">
+                  {t(coverage[source] ? 'compare.coverage.matched' : 'compare.coverage.missing')}:{' '}
+                </span>
+                {t(`compare.source.${source}`)}
+              </li>
+            ))}
+          </ul>
+          <InfoPopover label={t('compare.coverage.label')} title={t('compare.coverage.label')}>
+            <InfoText text={t('compare.coverage.about')} />
+          </InfoPopover>
+        </div>
+
+        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1">
+          <CompareChip from={car.ref} label={queueLabel} showGo={false} />
           <button
             type="button"
             onClick={() => setEditing(v => !v)}

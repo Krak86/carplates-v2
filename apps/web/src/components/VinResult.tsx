@@ -135,7 +135,10 @@ export default function VinResult({ data, searchedPlate = null }: Props): ReactN
           <SteeringChip steering={fields.get('Steering Location')} />
           <CatalogModelChip brand={vehicle.brand} model={vehicle.model} />
           <UaAuctionChip plate={sourcePlate} vin={data.vin} onOpen={() => setUaAuctionOpenSignal(n => n + 1)} />
-          <CompareChip from={{ kind: 'vin', vin: data.vin }} />
+          <CompareChip
+            from={{ kind: 'vin', vin: data.vin }}
+            label={[vehicle.brand, vehicle.model, vehicle.year, data.vin].filter(Boolean).join(' ')}
+          />
         </div>
 
         {registry && (

@@ -2,10 +2,11 @@ import { Suspense, lazy, useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { useLocation, useParams, useSearchParams } from 'react-router'
+import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router'
 import {
   classifyQuery,
   DEFAULT_WEIGHT_GROUP,
+  denormalizePlate,
   isShortSeriesPlate,
   isSovietPlate,
   isUaPlate,
@@ -73,6 +74,7 @@ const PendingShareResume = lazy(() => import('@/components/PendingShareResume'))
 export default function SearchRoute(): ReactNode {
   const { t, i18n } = useTranslation()
   const params = useParams()
+  const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const queryClient = useQueryClient()
   const { user } = useSession()
@@ -97,6 +99,14 @@ export default function SearchRoute(): ReactNode {
 
   const raw = params.query ? decodeURIComponent(params.query) : ''
   const kind = raw ? classifyQuery(raw) : null
+
+  // Whatever route led here (typed URL, history, photo recognition, old link), the address bar holds the Latin form.
+  const latinPlate = raw && isUaPlate(raw) ? denormalizePlate(raw) : null
+  const redirectTo = latinPlate && latinPlate !== raw ? `/${encodeURIComponent(latinPlate)}` : null
+  const { search, hash } = useLocation()
+  useEffect(() => {
+    if (redirectTo) void navigate(`${redirectTo}${search}${hash}`, { replace: true })
+  }, [redirectTo, search, hash, navigate])
   const isSharedSection = searchParams.has('section')
 
   const plate = useQuery({ ...plateQuery(raw), enabled: kind === 'plate' })

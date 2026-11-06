@@ -4692,3 +4692,14 @@ Stage G3 closed (2026-11-06): measured the 2005/2006 files (key census, Lada Sam
 MOT seed auto-load (2026-11-06). The MOT seed was not in the image and `seed-if-empty` skipped filled tables, so a new year never reached prod by itself. Built: `.dockerignore` un-ignores `scripts/seed-data/mot.csv.gz` (+3.9 MB), `mot-store.ts` `readMotSeedYears` / `motSeedNeeded` / `loadMotSeedIfNewer` (replace only when the seed has every loaded year plus at least one more; never a downgrade; equal years = no-op), called last in `seed-if-empty.ts` (runs after `deploy-api.sh` migrations and at the end of `deploy-ingest.yml`). Tests: `mot-store.test.ts` (`motSeedNeeded`). Local run: "mot: loaded years are current, skipped". Data-status row: name lists the years, `refreshedOn` 2026-11-06.
 
 About + releases sync (2026-11-06). New About source `ocha` (UN OCHA COD-AB outlines, CC BY-IGO; it was in `/data-status` but not credited; `AboutRoute.tsx` `SOURCES` + `about.source.ocha` ua/ru/en), `about.source.mot` now names the loaded years (2019 and 2021-25), and a `data` item for MOT 2019 on the 2026-11-06 day of `releases.ts` (`LATEST_RELEASE_DATE` unchanged). The About feature list (`FEATURES`, 50 keys: a brief grid card, then the full list card) already sits between the main card and the sources card, so nothing moved. CLAUDE.md + CLAUDE_RULES.md were re-measured (3.5 KB + 2.4 KB): already slim, no cut that would not lose a guard rail.
+
+## Compare queue, Latin share links, link previews (2026-11-06) ✅
+
+Follow-up to `/compare` after a phone review. Conventions are in `features-reference.md` "Compare queue" and "Share + link preview".
+
+- **Queue chip (`CompareChip`):** "Add to compare" (one chip) -> double chip "Remove from compare" + "⚖️ Compare →" once queued. Store `useCompareTray` is persisted in localStorage (`carsua.compare-tray`, max 6, refs as URL text re-parsed on read). Shown on the plate card, VIN card, model page, size section, **favourites and history rows** (`LocalRecordRow`).
+- **`/compare`:** `CompareQueue` (each queued car a differently coloured chip, A / B buttons, remove, clear), the same chip in every slot header, a → link to the plate / VIN card, a "?" popover explaining the source chips (`compare.coverage.about`), a "Copy link" button, and the saved comparisons list also below the results.
+- **Latin plates in links:** `parseCompareRef` / `formatCompareRef` moved to `@carplates/shared` (`compareRef.ts`), plate written as `plate:BE6756HE`.
+- **Link preview:** `ComparePreviewService` (`apps/api/src/spa/compare-preview.ts`) feeds `SpaController` (title `A vs B | Cars UA`, description, `og:image`) and `OgController` `GET /og/compare.png?a&b&lang`. `noindex`.
+- **Tests:** `compare-tray-store.test.ts`, `compare-preview.test.ts`, `spa.controller.test.ts` (pair tags), `ref.test.ts`.
+- **Not browser-checked** (typecheck + unit tests only): chip colours, the "?" popover, the OG card layout.

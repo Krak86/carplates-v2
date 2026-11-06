@@ -1,18 +1,14 @@
 import type {
   CatalogModel,
+  CompareRef,
   EuroNcapRating,
   GenerationGrowthItem,
   MotBand,
   RdwMatchInfo,
-  VehicleFuel,
   WikiSpecsResponse
 } from '@carplates/shared'
 
-/** What one compare slot was given: a plate, a VIN, or a catalog model (slugs, year, optional fuel class). */
-export type CompareRef =
-  | { kind: 'plate'; plate: string }
-  | { kind: 'vin'; vin: string }
-  | { kind: 'model'; make: string; model: string; year: number; fuel: VehicleFuel | null }
+export type { CompareRef }
 
 export const COMPARE_SLOTS = ['a', 'b'] as const
 export type CompareSlot = (typeof COMPARE_SLOTS)[number]

@@ -112,6 +112,6 @@ Browser-checked 2026-10-30 (dark theme, desktop; Ranges also light and 390px): r
 1. **Browser check** of the rest, `/compare?a=...&b=...` (two plates, plate vs model, two models; light / dark, phone width): safety and CO2, fit, size PNG; slot B suggestions; tray on `/cars/:make` and a model page; save / list / remove; export menu.
 2. **Put the new blocks in the export** (`lib/export-compare.ts`): ranges and fit as tables, curves as `chart` sections (docx / pdf pictures), CO2 and stars as rows; radar and size-overlay pictures too.
 3. **Missing visuals:** depreciation-by-age curve (needs a per-model series), registrations per year (catalog), pills for JNCAP / C-NCAP / KNCAP / IIHS (load their queries in `use-compare-car.ts`), optional 5-year cost bar.
-4. **Tray outside the catalog:** `CompareTrayButton` on `/stats` boards, favourites, history, advanced search (plates / VINs there are `plate:` / `vin:` refs).
+4. **Tray outside the catalog:** ~~favourites, history~~ done 2026-11-06 (`CompareChip` in `LocalRecordRow`, queue persisted in localStorage, listed on `/compare`); still open: `/stats` boards, advanced search.
 5. **Server side (ask the owner first):** `GET /api/compare` bundle with edge cache (CLAUDE.md edge-cache checklist), indexable popular pairs `/compare/bmw-3series-vs-audi-a4` (pre-render like the catalog, `STATIC_PAGES` / sitemap), `/read/*` embeds.
 6. ~~User-facing docs~~ done 2026-10-30: `releases.ts` entries and About (`about.feature.compare`) for phases 2-4.
