@@ -806,7 +806,25 @@ First steps once the path is given: list ZIP entries, profile row counts / class
 
 **G2 follow-up D (2026-10-12, ✅):** keep-list audit: six more post-2021 models extending an older name are kept separate (SX4 S-Cross, Grandland X, Crossland X, DS 3 Crossback, Tiguan Allspace, Tourneo Courier) and abbreviated spellings (Discovery SPT, Range Rover SPT, Tiguan ASPACE) are expanded before folding; all five years rebuilt, 4,459 tracked models. Write-up: `docs/plan-done.md` "UK MOT follow-up D".
 
-**Stage G3 — MOT pre-2018 (2005–2017), parked (2026-10-12).** Not planned; see the "not worth it" reasoning and the forecast under "Stage G2 research" and "Forecast" above. Revisit only if the registry shows many unmatched old models that an old UK file would fix.
+**Stage G3 — MOT pre-2018 (2005–2017), parked (2026-10-12); measured 2026-11-06, decision pending.** Not planned; see the "not worth it" reasoning and the forecast under "Stage G2 research" and "Forecast" above. Revisit only if the registry shows many unmatched old models that an old UK file would fix.
+
+**G3 research (2026-11-06; read-only profiling, nothing written to the repo or DB).** Files in `C:\Users\rkor\Downloads\carsapp_assets\UK_MOT\`: `test_result_2005.txt.gz`, `test_result_2006.txt.gz`, `test_item_2006.txt.gz`, `dft_test_result_2019.zip`, `dft_test_item_2019.zip`. URLs (verified, HEAD is 405 so use GET): `https://data.dft.gov.uk/anonymised-mot-test/test_data/test_{result,item}_<Y>.txt.gz` for 2005–2016, `…/dft_test_{result,item}_<Y>.zip` for 2017–2020 (2019: 1.1 GB + 0.4 GB; 2006: 0.9 GB + 0.2 GB; each other old year ~1.0 GB + 0.3 GB).
+
+- **Layout:** old `.txt.gz` = same 14 result columns / 5 item columns as the new layout, pipe-delimited, header names identical; only the container differs (`mot-zip.ts` reads ZIPs, needs a gzip path; `forEachCsvLine` already handles the pipe delimiter). Every old `rfr_id` (2006: 46M item rows; 2019: 80M) is found in the loose lookup CSV (all "Pre-EU Directive" before 2018, so no Dangerous series; the old `dangerous_mark` is set on 2.5% of 2006 rows, not comparable).
+- **2005 is a partial year** (computerisation: 7k tests in Jan, 1.3M in Dec; 5.8M normal tests). 2006 is the first full old year: 23.9M normal car tests.
+- **Mileage** is miles and plausible in both (median ~29k mi at age 3 in 2006, ~25k in 2019; 0.4–0.7% dropped by the filters).
+- **Era shift:** car fail rate (F only) 2006 = 28.0%, 2005 = 28.8%, 2019 = 24.9%, pooled 2021–25 = ~22.8%. Blending 2006 into the pool would skew the old model years.
+- **Registry coverage (real matcher over 16.7M `current_registration` rows, keys = `mot.csv.gz` + the file's keys with >= 200 tests):** now 68.41%; +2005 alone 69.45% (+173k vehicles); **+2006 alone 69.58% (+195k, +1.2 points)**. Gains: Daewoo Nexia / Leganza / Espero, Lada Samara family (ВАЗ 2113/14/15 via alias `lada/samara`, ~80k, **not yet spot-checked**), Peugeot 605, Kia Clarus, Fiat Tempra, Volvo 740/850. Many of the 403 "new" 2005 keys are old engine-style trim names (Mercedes `C180`, BMW `323`) that probably never match a registry model.
+- **Not measured yet:** whether 2019 adds new models (expected few); old reason wording vs the new reason codes (same fault could split in two); 2005 vs 2006 key overlap; whether `mot-fold` should fold old trim keys (`mot-real-models.json` was built from 2021–22).
+
+**G3 plan (pick up here).**
+
+1. **2019 (cheap, recommended):** same layout, no code change. `pnpm ingest:mot --dir <folder> --years 2019 --merge` (refuses a loaded year). First compare median mileage per age 2019 vs 2021/2022, then `pnpm export:mot:csv`, commit the seed, docs (`features-reference` years note, `mot_meta.years` shows 2019 + 2021–25: label "2019–2025", 2020 missing).
+2. **Decide how to show old-era data (owner decision):** (A) blend into the pool (simple, skews rates), (B) **old era as a fallback only** (recommended): `era` column on `mot_keys` / `mot_stats` / `mot_issues` / `mot_baseline` / `mot_meta` (backward-compatible migration), API uses the new era when the model exists there and falls back to `old` otherwise, baseline per era, UI label "UK inspections in 2006", dangerous row hidden, (C) skip.
+3. **Build B (1–2 days):** gzip reader in `mot-zip.ts`; migration; `--era old` ingest that never mixes eras; no dangerous series; check old reason wording against new codes; API + `packages/shared/src/mot.ts` (`era` `.nullable().optional()`, no offline-cache bust); UI label + i18n ua/ru/en; tests; seed `era` column; docs (`features-reference`, `plan-done`, one line in `PLAN.md`).
+4. **Measure first (before 3):** how many of the 2005/2006 "new" keys are real models vs trim spellings (`mot-fold`); spot-check the Lada Samara alias matches.
+
+Throwaway scripts used (session scratchpad, not in the repo): census + matcher simulation (`KeyCache` / `keyId` from `mot-aggregate.ts`, `matchVdbModelAcrossMakes` over `registry.current_registration` + the seed keys), mileage-per-age median, item-lookup coverage.
 
 **Stage G2 research (2026-10-12; nothing downloaded or built).** Question: add more years, expose the data further, is it worth it?
 
