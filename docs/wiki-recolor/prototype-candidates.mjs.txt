@@ -1,0 +1,22 @@
+import fs from 'node:fs'
+const CARS = [['MAZDA','3',2004,'#c4161c'],['DODGE','AVENGER',2008,'#c4161c'],['KIA',"CEE'D",2012,'#5b3a24'],['CHEVROLET','LACETTI',2005,'#1a1a1a'],['RENAULT','LAGUNA',2007,'#1a1a1a'],['MAZDA','6',2016,'#c4161c'],['HYUNDAI','I30',2009,'#1a1a1a'],['CHEVROLET','EVANDA',2006,'#1a1a1a']]
+const out = []
+for (const [brand, model, year, target] of CARS) {
+  const q = `${brand} ${model}`.toLowerCase().replace(/'/g, '')
+  const url = 'https://commons.wikimedia.org/w/api.php?' + new URLSearchParams({ action: 'query', format: 'json', generator: 'search', gsrsearch: `${q} filetype:bitmap`, gsrnamespace: '6', gsrlimit: '40', prop: 'imageinfo', iiprop: 'url|size|mime', iiurlwidth: '1280' })
+  const j = await (await fetch(url, { headers: { 'User-Agent': 'carsua-proto/0.4 (research)' } })).json()
+  const pages = Object.values(j.query?.pages ?? {}).sort((a, b) => a.index - b.index)
+  const toks = model.toLowerCase().replace(/'/g, '').split(' ')
+  let n = 0
+  for (const p of pages) {
+    const ii = p.imageinfo?.[0]; if (!ii || !/jpeg/.test(ii.mime) || ii.width < 1000) continue
+    const t = p.title.toLowerCase().replace(/'/g, '')
+    if (!t.includes(brand.toLowerCase()) || !toks.every(k => t.includes(k))) continue
+    if (/interior|engine|dashboard|logo|badge|wheel|seat|cockpit|rear.?light|detail/.test(t)) continue
+    out.push({ name: `${brand}_${model}_${year}__c${n++}`.replace(/[^\w]+/g, '_'), url: ii.thumburl, target, title: p.title })
+    if (n >= 14) break
+  }
+  console.log(brand, model, n)
+  await new Promise(r => setTimeout(r, 600))
+}
+fs.writeFileSync(process.argv[2], JSON.stringify(out, null, 1)); console.log('total', out.length)

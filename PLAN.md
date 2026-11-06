@@ -1318,6 +1318,14 @@ Write-up: `docs/plan-done.md` "Market offers (CarAPIS)"; conventions: `docs/feat
 - [ ] **After deploy:** `/data-status` shows "Records in our database" on every row and the history card lists real runs; click a chip and a row (smooth scroll + flash).
 - [ ] Browser-check on a phone: fullscreen alert map, history search box, "Other engines" group on a Kia Ceed page.
 
+## Wiki photo colour filter + extra photos (planned 2026-11-06)
+
+Plan in 9 steps, [docs/wiki-recolor-plan.md](docs/wiki-recolor-plan.md); prototype and findings in `docs/wiki-recolor/`. Recolour the hero photo to the registry colour (toggle top-right, swatch, "colour filter" text, skip when the colour already matches), then candidate photos per model and a photo strip under the hero.
+
+- [ ] Phase A: shared colour model, paint scan CLI, migration, API, web filter, docs (steps 1-6)
+- [ ] Phase B: candidate photos + bottom strip (steps 7-8)
+- [ ] Phase C: rollout scan, job, data-status row (step 9)
+
 ## Later, conditional
 
 Checked and skipped: Derzhstat "Транспорт України" yearbook (2026-11-05) - national transport activity totals, no vehicle/fleet/accident data; see `DATASETS_PLAN.md` "Skipped (with reason)".

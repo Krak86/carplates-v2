@@ -1,0 +1,17 @@
+import fs from 'node:fs'
+const S = process.argv[2]
+const res = JSON.parse(fs.readFileSync(S + '/imgs7/v4-results.json', 'utf8'))
+const order = ['white','gray','black','blue','red','green','beige','brown','yellow','orange','purple']
+let body = ''
+for (const r of res) {
+  body += `<section><h2>${r.name.replace(/_/g, ' ')} <small>photo paint reads as <b>${r.origBucket}</b> (Lab ${r.origLab})</small></h2><div class=row>`
+  body += `<figure class=orig><img src="g/${r.name}__orig.jpg"><figcaption>ORIGINAL</figcaption></figure>`
+  for (const k of order) { const t = r.tiles?.[k]; if (!t) continue
+    body += `<figure class="${t.kept ? 'kept' : ''}"><img loading=lazy src="g/${r.name}__${k}.jpg"><figcaption>${k} - ${t.kept ? '<b>kept original</b> (close, dE ' + t.d + ')' : 'recoloured (dE ' + t.d + ')'}</figcaption></figure>` }
+  body += '</div></section>'
+}
+fs.writeFileSync(S + '/imgs7/gallery.html', `<!doctype html><meta charset=utf-8><title>All colours test</title><style>
+body{font:13px system-ui;background:#16181d;color:#ddd;margin:16px}h2{margin:26px 0 8px}h2 small{font-weight:400;opacity:.7;font-size:12px}
+.row{display:flex;flex-wrap:wrap;gap:8px}figure{margin:0;width:300px;background:#232733;border-radius:6px;overflow:hidden}figure img{width:100%;display:block}
+figcaption{padding:6px;font-size:11px}figure.kept{outline:3px solid #4c4}figure.orig{outline:3px solid #48f}</style>
+<h1>Every registry colour on the same photo</h1><p>Blue = original photo. Green = photo already has that colour (or very close), so it is NOT recoloured.</p>${body}`)
