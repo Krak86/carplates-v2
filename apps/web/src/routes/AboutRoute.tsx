@@ -158,6 +158,7 @@ const SOURCES: readonly Source[] = [
     tile: 'bg-red-900'
   },
   { key: 'oemLinks', label: 'Morgan, Lucid, Koenigsegg, Aston Martin, Lamborghini', tile: 'bg-zinc-700' },
+  { key: 'playElsewhere', label: 'nfsu2.xyz, PhobosLab, wasmarcade.app', tile: 'bg-fuchsia-800' },
   { key: 'sketchfab', label: 'Sketchfab', url: 'https://sketchfab.com', icon: '/icons/sources/sketchfab.webp' },
   {
     key: 'wikimedia',

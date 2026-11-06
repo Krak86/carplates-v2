@@ -498,7 +498,7 @@ Plan, terms, live API findings, rejection path: `docs/alarm-plan.md`. Steps: ✅
 
 Findings and planned shape: `docs/alarm-plan.md` "Research: war-loss figures and Ukrstat data". zsu.gov.ua blocks bots (403); use `russianwarship.rip` (third-party, ~1,700 daily records).
 
-- ✅ Losses (2026-11-05): table, `ingest:losses` backfill, API fetch every 6 h, `GET /api/losses` (+ `/history`), `LossesSection` on `/alarms`; write-up `docs/plan-done.md` "War-loss figures on `/alarms`".
+- ✅ Losses (2026-11-05): table, `ingest:losses` backfill, API fetch every 30 min (6 h until 2026-11-06; edge `LOSSES_CACHE` 30 min), `GET /api/losses` (+ `/history`), `LossesSection` on `/alarms`; write-up `docs/plan-done.md` "War-loss figures on `/alarms`".
 - ✅ Polish (2026-11-05): infographic + details modal for losses, map zoom/drag, alert type labels, collapsed active list, daily `losses` cron (04:50) + `/data-status` row, About/releases updated.
   - [ ] After deploy: `run-ingest.sh losses` once; add `/api/losses` + `/api/losses/history` to the Cloudflare Cache Rule (verify MISS then HIT); look at `/alarms` on prod.
 - [ ] Ukrstat (checked 2026-11-05: `REGION` = KATOTTG, latest year **2022** pre-war, Crimea / Sevastopol end 2014; details in `docs/plan-done.md`): decide whether a pre-war denominator is acceptable, then a static population table in `packages/shared` -> `/read/plates` `RegionsSection` + per-100k metric in `AlarmHistorySection`.
@@ -1302,6 +1302,12 @@ Write-up: `docs/plan-done.md` "Market offers (CarAPIS)"; conventions: `docs/feat
 - [ ] Own AR/XR views later.
 - ✅ ZAKON typeface fetched by `pnpm fetch:zakon-font` (gitignored, not committed); sidebar regrouped into six groups with footer links (`sidebar-groups.ts`). Write-up: `docs/plan-done.md` "Sidebar groups and ZAKON font".
 - [x] (verified 2026-11-05 after `deploy-web`: both .otf files are real fonts (OTTO), served as `application/octet-stream`, both `Zakon` faces `loaded`, body font `Zakon, ui-serif…`, no console errors) **After deploy:** ZAKON font (found missing on prod 2026-11-05: `/fonts/zakon/*.otf` returned the SPA shell). The web app is built in GitHub Actions, not on the VPS, so `deploy-web.yml` now runs `node scripts/src/fetch-zakon-font.ts` before the build. Open: run `deploy-web`, then `curl -sI https://carsua.app/fonts/zakon/Zakon-Regular.otf` must not be text/html (it is octet-stream, which browsers accept).
+
+## UI polish, faster war-loss sync, data-status notes ✅ 2026-11-06, awaiting deploy
+
+✅ Two-line home "new lots" rows, hover-only "+" hint, flatter /read covers on phones, compact auction sums with "?", losses chart skeleton, losses poll 30 min + `LOSSES_CACHE`, `noteKey` on /data-status. Write-up `docs/plan-done.md` "UI polish round…".
+
+- [ ] **After deploy:** `curl -sI https://carsua.app/api/losses | grep -i cache` shows `s-maxage=1800`; if Cloudflare keeps an older `s-maxage`, edit the Cache Rule to respect the origin header. Next morning check /alarms shows the new day within ~1 h of the General Staff post.
 
 ## Later, conditional
 

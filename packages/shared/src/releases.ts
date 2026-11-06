@@ -16,6 +16,29 @@ const item = (group: ReleaseGroup, ua: string, ru: string, en: string): ReleaseI
  */
 export const RELEASES: readonly ReleaseDay[] = [
   {
+    date: '2026-11-06',
+    items: [
+      item(
+        'improved',
+        'Втрати росії оновлюються швидше: нову добу ми підхоплюємо протягом пів години після публікації Генштабу (раніше - до пів дня); на /data-status пояснено, коли джерело публікує дані',
+        'Потери россии обновляются быстрее: новые сутки мы подхватываем в течение получаса после публикации Генштаба (раньше - до полудня); на /data-status объяснено, когда источник публикует данные',
+        'Russian losses update faster: we pick up a new day within half an hour of the General Staff publishing it (it used to take up to half a day); /data-status now explains when the source publishes'
+      ),
+      item(
+        'improved',
+        'Зручніше на телефоні: нові лоти на головній у два рядки (назва й ціна, область і номер), нижчі зображення статей, довгі суми на /auctions скорочено з поясненням у «?», а підказка біля «+» розширеного пошуку більше не залишається після дотику',
+        'Удобнее на телефоне: новые лоты на главной в две строки (название и цена, область и номер), более низкие изображения статей, длинные суммы на /auctions сокращены с пояснением в «?», а подсказка у «+» расширенного поиска больше не остается после касания',
+        'Easier on a phone: new lots on the home page in two lines (name and price, region and plate), shorter article images, long sums on /auctions abbreviated with the exact value behind a "?", and the hint by the advanced-search "+" no longer sticks after a tap'
+      ),
+      item(
+        'fix',
+        'Графік втрат на /alarms показує заглушку під час зміни категорії, тож сторінка більше не підстрибує',
+        'График потерь на /alarms показывает заглушку при смене категории, так что страница больше не подпрыгивает',
+        'The losses chart on /alarms shows a placeholder while the category changes, so the page no longer jumps'
+      )
+    ]
+  },
+  {
     date: '2026-11-05',
     items: [
       item(
