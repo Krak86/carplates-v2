@@ -112,7 +112,7 @@ Phase A (steps 1-6) is the recolour on the existing hero photo. Phase B (7-8) ad
 **Done (steps 1-2).** `packages/shared/src/paintColor.ts` (+ test, exported, shared rebuilt). `scripts/src/wiki-paint-core.ts` (pure `scanPaint`, `applyPaint`, `carComponents`, `gaussianBlur`; constants `PAINT_ALGO` = 1, `PAINT_SCAN_WIDTH` = 640, `SHADE_SCALE`) and `scripts/src/wiki-paint.ts`
 (`pnpm ingest:wiki-paint --limit N --brand X --random --rps 1 --out DIR`: read-only on the DB, writes results.json + mask webp + recolour preview to `scripts/<DIR>`). Tests use synthetic fixtures built in code.
 
-**Mask contract (steps 3-5 must honour it).** RGBA at the scan size: RGB = shading `min(g, 3) * 255 / 3` (decode `g = byte / SHADE_SCALE`), A = paint weight. Client maths = `applyPaint`: `out = target * g^0.9`, highlights above g 1.6 blend to white, composited by alpha.
+**Mask contract (steps 3-5 must honour it).** RGBA at the scan size: RGB = shading `min(g, 3) * 255 / 3` (decode `g = byte / SHADE_SCALE`), A = paint weight. Client maths = `paintTone` / `applyPaint` in `packages/shared/src/paintApply.ts` (moved out of `scripts/` in step 4a; `wiki-paint-core.ts` re-exports them): `out = target * g^0.9`, highlights above g 1.6 blend to white, composited by alpha.
 `scanPaint` returns `{status:'ok', bucket, lab, paintLab, bodyArea, paintShare, mask}` or `{status:'skip', reason, bodyArea}` (reasons = `PAINT_SKIP_REASONS`). The target-dependent skip (`isClosePaint(lab, target)`) is decided at runtime, never stored.
 
 **Gate tuning.** Random samples of 50 photos: `ok` fell from about 83 % (prototype gates) to about 56 % after the glass-band lightness match, `dark_paint` (cluster L < 32), `dark_body` (mid body band median L < 34 and chroma < 18) and `MIN_PAINT_SHARE` 0.20.
@@ -126,5 +126,7 @@ API: `packages/shared/src/wikiRecolor.ts`, `apps/api/src/wiki/wiki-recolor.{serv
 - `GET /api/wiki/paint/<md5>.webp?v=<algo>` -> mask, `immutable` 1 year (`?v` busts it after a rescan). `WIKI_RECOLOR_THROTTLE`.
 - Cloudflare rule in `docs/deploy.md` extended (needs the manual edit in the dashboard).
 
-**Next: step 5 (web).** The hero may show a different photo than `peekImage` finds (`yearOnly`, `source`): the client must apply the filter only when `recolor.imageUrl === hero image.url`. Then 6 (docs, credits).
+**Step 4a done:** shared `paintApply.ts` + test (`paintTone(shadeByte, paintTargetLinear(colour), k)` per pixel for the canvas, composite over the photo with the mask alpha).
+
+**Next: step 5 (web), not started.** Read `WikiHeroImage.tsx`, the `blueprintEnabled` pattern in `useUiStore`, the existing colour labels in i18n, and the Step 5 decisions above first. The hero may show a different photo than `peekImage` finds (`yearOnly`, `source`): the client must apply the filter only when `recolor.imageUrl === hero image.url`. Then 6 (docs, credits).
 Before the rollout (step 9) run `SELECT count(*) FROM registry.wiki_image WHERE status = 'ok'` (67,645 rows, 22,300 files on 2026-11-06). Do not commit unless asked.
