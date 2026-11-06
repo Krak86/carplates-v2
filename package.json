@@ -90,6 +90,7 @@
     "ingest:wiki-images:csv": "pnpm --filter @carplates/scripts ingest:wiki-images:csv",
     "export:wiki-images:csv": "pnpm --filter @carplates/scripts export:wiki-images:csv",
     "wiki-images:coverage": "pnpm --filter @carplates/scripts wiki-images:coverage",
+    "ingest:wiki-paint": "pnpm --filter @carplates/scripts ingest:wiki-paint",
     "ingest:infocar:videos": "pnpm --filter @carplates/scripts ingest:infocar:videos",
     "ingest:infocar:videos:csv": "pnpm --filter @carplates/scripts ingest:infocar:videos:csv",
     "export:infocar:videos:csv": "pnpm --filter @carplates/scripts export:infocar:videos:csv",

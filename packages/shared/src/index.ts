@@ -210,6 +210,22 @@ export {
   isLightVehicleColor,
   type VehicleColor
 } from './vehicleColor.js'
+export {
+  CLOSE_PAINT_DELTA_E,
+  PAINT_HEX,
+  PAINT_LIGHTNESS_WEIGHT,
+  hexToRgb,
+  isClosePaint,
+  labOf,
+  linearToSrgb,
+  luminanceOf,
+  paintBucketOf,
+  paintDeltaE,
+  rgbToLab,
+  srgbToLinear,
+  type Lab,
+  type Rgb
+} from './paintColor.js'
 export { VEHICLE_FUELS, resolveFuelCategories, fuelKeyword, type VehicleFuel } from './vehicleFuel.js'
 export { brandLogoUrl, brandSlug } from './brandLogo.js'
 export { dealerUrl, newCarsUrl, usedCarsUrl } from './dealerUrl.js'
