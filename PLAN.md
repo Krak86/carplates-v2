@@ -1337,7 +1337,9 @@ Plan in 9 steps, [docs/wiki-recolor-plan.md](docs/wiki-recolor-plan.md); prototy
 - [ ] Phase B: candidate photos + bottom strip (steps 7-8)
 - [x] Phase C code (2026-11-06): `wiki-paint` job + cron (00:30) + `/data-status` row + orphan cleanup + popularity order + review contact sheets
 - [ ] After deploy (owner): apply migration 0101 on the VPS; Cloudflare Cache Rule `/api/wiki/recolor` + `starts_with /api/wiki/paint/` (docs/deploy.md); optional healthchecks.io check + secret `HC_PING_WIKI_PAINT` (daily, 1 d + 3 h grace); the first night run downloads the model (check `registry.job_runs` + `/data-status` a day later)
-- [ ] Gallery review of the 100-photo sample (47 ok / 53 skip; 6 sheets) (`scripts/.data/wiki-paint/review-2026-11-06/sheet-*.jpg`): tune gates only after the owner has seen it; then bump `PAINT_ALGO`
+- [x] Gallery review of the 100-photo sample (2026-11-06, 47 ok / 53 skip; `scripts/.data/wiki-paint/review-2026-11-06/sheet-*.jpg`): 12 of 47 ok are bad tints (wrong bucket on dark / teal, livery, neighbour spill, rust), about 16 of 53 skips are wrong (details: plan "R1 findings")
+- [x] Gate tuning R2 round 1 (2026-11-06, uncommitted, `PAINT_ALGO` still 1): saturated-cluster re-pick, hue match, `two_tone` skip, looser share / dark_body chroma; 53 ok of the same 100 (+5 fixed, 5 mis-tints now skipped, 20 good kept); sheets `scripts/.data/wiki-paint/review-2026-11-06-algo2/`
+- [ ] Owner: look at the algo2 sheets, agree, then bump `PAINT_ALGO` to 2 and run a fresh random 100 (`--dry-run --order random --out`) to check for overfitting
 
 ## Later, conditional
 

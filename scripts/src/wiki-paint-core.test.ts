@@ -175,8 +175,20 @@ describe('scanPaint', () => {
     expect(r).toMatchObject({ status: 'skip', reason: 'multiple_cars' })
   })
 
+  it('skips a car whose lower body does not match the paint (two-tone / livery)', () => {
+    // Red across the upper body, but 80 % of the lower body is another colour: the filter would repaint half a car.
+    const r = scan(scene((x, y) => (y >= 49 && x > 44 ? [30, 60, 170] : [190, 30, 30])))
+    expect(r.status).toBe('skip')
+    if (r.status === 'skip') expect(r.reason).toBe('two_tone')
+  })
+
+  it('keeps a plain one-colour car', () => {
+    expect(scan(scene(solid(190, 30, 30))).status).toBe('ok')
+  })
+
   it('only uses documented skip reasons', () => {
     expect(PAINT_SKIP_REASONS).toContain('wrap')
+    expect(PAINT_SKIP_REASONS).toContain('two_tone')
   })
 })
 

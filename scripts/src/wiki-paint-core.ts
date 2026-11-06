@@ -32,6 +32,7 @@ export const PAINT_SKIP_REASONS = [
   'dark_neutral',
   'dark_paint',
   'dark_body',
+  'two_tone',
   'low_coverage'
 ] as const
 export type PaintSkipReason = (typeof PAINT_SKIP_REASONS)[number]
@@ -43,6 +44,8 @@ export type PaintScanInput = {
   height: number
   /** Car probability 0-255 (SegFormer `car` mask resized to the image), `width * height`. */
   prob: Uint8Array
+  /** Tuning only: filled with the intermediate numbers (cluster Lab, chroma, share, mid-band lightness). */
+  debug?: Record<string, number>
 }
 
 export type PaintScanResult =
@@ -67,7 +70,7 @@ const CAR_THRESHOLD = 127
 const K = 5
 const MIN_AREA = 0.08
 const MAX_AREA = 0.92
-const MIN_PAINT_SHARE = 0.2
+const MIN_PAINT_SHARE = 0.18
 /** Upper part of the car box (windows, roof): paint there must also match the body lightness, glass reflections do not. */
 const GLASS_BAND = 0.32
 const GLASS_SIGMA_NEUTRAL = 14
@@ -76,8 +79,17 @@ const GLASS_SIGMA_COLOURED = 22
 const DARK_PAINT_L = 32
 /** Median lightness of the mid body band (below the glass, above the bumper) under this = a dark car whatever the lit patches say. */
 const DARK_BODY_L = 34
-const DARK_BODY_CHROMA = 18
+const DARK_BODY_CHROMA = 15
 const COLOURED_CHROMA = 20
+/** The body band is clearly coloured (median chroma) but the chosen paint cluster is neutral (bright patches of a blue / red car clustered as grey): take the strongest saturated cluster instead. */
+const SATURATED_BAND_CHROMA = 20
+/** Hue-angle match of coloured paint: sigma in radians (about 14 degrees) and the least chroma, relative to the cluster, a pixel needs. */
+const HUE_SIGMA = 0.25
+const HUE_MIN_CHROMA_RATIO = 0.45
+const SATURATED_CLUSTER_CHROMA = 25
+const SATURATED_CLUSTER_L = 30
+/** Share of the lower body (40-72 % of the box height) that must match the paint: a livery, a two-tone or a half-matched car stays below. */
+const MIN_LOWER_BODY_SHARE = 0.24
 const BLUR_SIGMA = 1.1
 
 type Component = { id: number; area: number; center: boolean; x0: number; x1: number; y0: number; y1: number }
@@ -206,7 +218,7 @@ function median(values: number[]): number {
   return values[values.length >> 1] ?? 0
 }
 
-export function scanPaint({ rgb, width: w, height: h, prob }: PaintScanInput): PaintScanResult {
+export function scanPaint({ rgb, width: w, height: h, prob, debug }: PaintScanInput): PaintScanResult {
   const N = w * h
   const { labels, comps } = carComponents(prob, w, h)
   const c0 = comps[0]
@@ -232,6 +244,8 @@ export function scanPaint({ rgb, width: w, height: h, prob }: PaintScanInput): P
       midC.push(Math.hypot(lab[i * 3 + 1]!, lab[i * 3 + 2]!))
     }
   }
+  if (debug)
+    Object.assign(debug, { midL: midL.length ? median([...midL]) : -1, midC: midC.length ? median([...midC]) : -1 })
   if (midL.length && median(midL) < DARK_BODY_L && median(midC) < DARK_BODY_CHROMA) {
     return { status: 'skip', reason: 'dark_body', bodyArea }
   }
@@ -242,20 +256,37 @@ export function scanPaint({ rgb, width: w, height: h, prob }: PaintScanInput): P
   const bh = c0.y1 - c0.y0 + 1
   const bw = c0.x1 - c0.x0 + 1
   const score = new Array<number>(K).fill(0)
+  const raw = new Array<number>(K).fill(0)
   const asg = new Uint8Array(N)
   for (const p of idx) {
     const k = assign(p)
     asg[p] = k
     const fy = (((p / w) | 0) - c0.y0) / bh
     const fx = ((p % w) - c0.x0) / bw
-    if (fy > 0.1 && fy < 0.62 && fx > 0.05 && fx < 0.95) score[k]!++
+    if (fy > 0.1 && fy < 0.62 && fx > 0.05 && fx < 0.95) {
+      score[k]!++
+      raw[k]!++
+    }
   }
   for (let k = 0; k < K; k++) {
     const c = cent[k]!
     if (c[0] < 25) score[k]! *= 0.5
     if (c[0] < 40 && Math.hypot(c[1], c[2]) < 8) score[k]! *= 0.7
   }
-  const pk = score.indexOf(Math.max(...score))
+  let pk = score.indexOf(Math.max(...score))
+  if (
+    Math.hypot(cent[pk]![1], cent[pk]![2]) <= COLOURED_CHROMA &&
+    midL.length &&
+    median([...midC]) >= SATURATED_BAND_CHROMA
+  ) {
+    let best = -1
+    for (let k = 0; k < K; k++) {
+      const ck = cent[k]!
+      if (Math.hypot(ck[1], ck[2]) < SATURATED_CLUSTER_CHROMA || ck[0] < SATURATED_CLUSTER_L) continue
+      if (best < 0 || raw[k]! > raw[best]!) best = k
+    }
+    if (best >= 0) pk = best
+  }
   const c = cent[pk]!
 
   let ss = 0
@@ -279,7 +310,15 @@ export function scanPaint({ rgb, width: w, height: h, prob }: PaintScanInput): P
     let v: number
     if (paintChroma > COLOURED_CHROMA) {
       const dab = (a - c[1]) ** 2 + (b - c[2]) ** 2
-      v = Math.exp(-dab / (2 * Math.max(10, sigma * 0.8) ** 2)) * Math.min(1, Math.max(0, (L - 14) / 14))
+      const lit = Math.min(1, Math.max(0, (L - 14) / 14))
+      const byDistance = Math.exp(-dab / (2 * Math.max(10, sigma * 0.8) ** 2))
+      // Saturated paint keeps its hue but not its chroma between lit and shaded panels: match the hue angle too.
+      const ch = Math.hypot(a, b)
+      let dh = Math.abs(Math.atan2(b, a) - Math.atan2(c[2], c[1]))
+      if (dh > Math.PI) dh = 2 * Math.PI - dh
+      const byHue =
+        ch >= Math.max(15, paintChroma * HUE_MIN_CHROMA_RATIO) ? Math.exp(-(dh ** 2) / (2 * HUE_SIGMA ** 2)) : 0
+      v = Math.max(byDistance, byHue) * lit
     } else {
       const sl = Math.max(16, sigma * 1.5)
       v = Math.exp(-((L - c[0]) ** 2) / (2 * sl * sl)) * Math.exp(-(Math.hypot(a, b) ** 2) / (2 * 16 * 16))
@@ -296,9 +335,21 @@ export function scanPaint({ rgb, width: w, height: h, prob }: PaintScanInput): P
   }
   yMean /= Math.max(strong, 1)
   const paintShare = strong / idx.length
+  let loN = 0
+  let loS = 0
+  for (const p of idx) {
+    const fy = (((p / w) | 0) - c0.y0) / bh
+    const fx = ((p % w) - c0.x0) / bw
+    if (fx < 0.08 || fx > 0.92 || fy <= 0.4 || fy >= 0.72) continue
+    loN++
+    if (weight[p]! > 0.5) loS++
+  }
+  const lowerShare = loS / Math.max(loN, 1)
+  if (debug) Object.assign(debug, { cL: c[0], chroma: paintChroma, share: paintShare, lo: lowerShare })
 
   if (paintChroma <= COLOURED_CHROMA && c[0] < 45) return { status: 'skip', reason: 'dark_neutral', bodyArea }
   if (paintChroma > COLOURED_CHROMA && c[0] < DARK_PAINT_L) return { status: 'skip', reason: 'dark_paint', bodyArea }
+  if (lowerShare < MIN_LOWER_BODY_SHARE) return { status: 'skip', reason: 'two_tone', bodyArea }
   if (paintShare < MIN_PAINT_SHARE || yMean <= 0) return { status: 'skip', reason: 'low_coverage', bodyArea }
 
   const blurred = gaussianBlur(weight, w, h, BLUR_SIGMA)
