@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 
-import { type MotData, mergeMotData } from './mot-store.js'
+import { type MotData, mergeMotData, motSeedNeeded } from './mot-store.js'
 
 const base = (year: number, tests: number, reasons: Record<string, [number, number]>): MotData => ({
   years: [year],
@@ -49,5 +49,19 @@ describe('mergeMotData', () => {
     const m = mergeMotData(base(2023, 10, {}), next)
     expect(m.keys.map(k => k.modelKey).sort()).toEqual(['fiesta', 'focus'])
     expect(m.stats).toHaveLength(2)
+  })
+})
+
+describe('motSeedNeeded', () => {
+  it('loads into empty tables and when the seed adds years', () => {
+    expect(motSeedNeeded([], [2021])).toBe(true)
+    expect(motSeedNeeded([2021, 2022], [2019, 2021, 2022])).toBe(true)
+  })
+
+  it('skips an equal, older or different seed and an empty seed', () => {
+    expect(motSeedNeeded([2019, 2021], [2019, 2021])).toBe(false)
+    expect(motSeedNeeded([2019, 2021, 2022], [2021, 2022])).toBe(false)
+    expect(motSeedNeeded([2019, 2021], [2020, 2021, 2022])).toBe(false)
+    expect(motSeedNeeded([2021], [])).toBe(false)
   })
 })

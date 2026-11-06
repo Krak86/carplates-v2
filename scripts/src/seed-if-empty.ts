@@ -1,6 +1,6 @@
 /**
  * Loads the committed seed CSV of each small "added once" table, but only when the table is empty, so it is safe to run after every deploy
- * (`run-ingest.sh seed-if-empty`). A table that already has rows is left alone (the importers replace the whole table).
+ * (`run-ingest.sh seed-if-empty`); a filled table is left alone. The MOT tables are the exception: replaced only when the seed holds more years (`loadMotSeedIfNewer`).
  *
  *   tsx src/seed-if-empty.ts
  */
@@ -10,6 +10,7 @@ import { count } from 'drizzle-orm'
 import type { PgTable } from 'drizzle-orm/pg-core'
 
 import { importAlarmHistory } from './alarm-history-csv.js'
+import { loadMotSeedIfNewer } from './mot-store.js'
 import { importOemLinks } from './oem-csv.js'
 import { importTuningLinks } from './tuning-csv.js'
 
@@ -33,6 +34,10 @@ async function main(): Promise<void> {
       console.log(`${seed.name}: empty, loading ${seed.file}`)
       await seed.load(db, seed.file)
     }
+    const motLoaded = await loadMotSeedIfNewer(db, 'seed-data/mot.csv.gz')
+    console.log(
+      motLoaded ? 'mot: seed is newer than the loaded years, loaded' : 'mot: loaded years are current, skipped'
+    )
   } finally {
     await close()
   }

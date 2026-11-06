@@ -316,3 +316,30 @@ export async function mergeMot(db: Db, data: MotData): Promise<MotData> {
     return merged
   })
 }
+
+/** Years of the seed CSV's `meta` line (second line), without parsing the whole file. */
+export async function readMotSeedYears(path: string): Promise<number[]> {
+  const raw = await readFile(path)
+  const text = raw[0] === 0x1f && raw[1] === 0x8b ? gunzipSync(raw).toString('utf8') : raw.toString('utf8')
+  const [head, meta] = text.split('\n', 2)
+  const [row] = parseCsv(`${head}\n${meta}`, { columns: true }) as Record<string, string>[]
+  if (row?.part !== 'meta') return []
+  return row.years ? row.years.split(' ').map(Number) : yearRange(Number(row.year_from), Number(row.year_to))
+}
+
+/** The seed replaces the tables only when it holds every loaded year plus at least one more (never a downgrade). */
+export function motSeedNeeded(dbYears: readonly number[], seedYears: readonly number[]): boolean {
+  if (seedYears.length === 0) return false
+  if (dbYears.length === 0) return true
+  const have = new Set(seedYears)
+  return dbYears.every(y => have.has(y)) && seedYears.length > new Set(dbYears).size
+}
+
+/** Loads the MOT seed CSV when it is newer than the loaded tables (safe after every deploy: a no-op when the years match). */
+export async function loadMotSeedIfNewer(db: Db, path: string): Promise<boolean> {
+  const [meta] = await db.select().from(motMeta)
+  const seedYears = await readMotSeedYears(path)
+  if (!motSeedNeeded(meta?.years ?? [], seedYears)) return false
+  await importMot(db, path)
+  return true
+}

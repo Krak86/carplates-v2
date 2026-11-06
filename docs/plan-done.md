@@ -4641,6 +4641,7 @@ Step 5 of `docs/alarm-plan.md`. Built as a section of `/alarms` (no new route, s
 ## War-loss figures on `/alarms` (2026-11-05) ✅
 
 General Staff "approximate" figures of Russian losses, relayed by the community API `russianwarship.rip/api/v2` (third-party, no docs / SLA; `zsu.gov.ua` blocks bots). Decisions (owner, 2026-11-05): section on `/alarms` only (no `/losses` page), full daily history stored, Ukrstat only checked this round.
+
 - **Data:** migration `0100_war_losses_daily.sql` / `warLossesDaily`: `day` PK, `day_number`, `resource`, `stats` + `increase` as jsonb keyed by category (a new upstream category needs no migration). `pnpm ingest:losses [--dry-run]` (`scripts/src/ingest-losses.ts`, job `losses` in `jobs.ts` + `run-ingest.sh`) pages `/statistics` (**limit max 50**, upstream answers 422 above that) and upserts ~1,713 days (2022-02-25 ...). **`increase` can be negative** (upstream corrections), so the contract allows it. No seed CSV (the script is the source and is cheap).
 - **Daily fetch:** `LossesService` (`apps/api/src/losses/`) fetches `/statistics/latest` on start and every 30 min (6 h until 2026-11-06) and upserts; failures are only logged; two instances (blue/green) are harmless. Reads never touch upstream.
 - **API:** `GET /api/losses` (newest day: totals, increase, `sourceUrl` only when http(s)) and `GET /api/losses/history?category=` (one category, oldest first, days without a value skipped). `LOSSES_CACHE` (30 min edge; was `STATS_CACHE`), `LOSSES_THROTTLE`, 404 while the table is empty, not in `PUBLIC_API_PATH_PREFIXES`. Contract + the 15 `LOSS_CATEGORIES` + `LOSSES_SOURCE_URL` in `packages/shared/src/losses.ts` (own file, offline cache untouched).
@@ -4655,11 +4656,13 @@ General Staff "approximate" figures of Russian losses, relayed by the community 
 - **Docs/UI:** About gets a `losses` feature + brief and a fuller `alarms` text; `releases.ts` day 2026-11-05.
 
 ### Ukrstat population - check result (2026-11-05, nothing built)
+
 `DF_POPULATION_STRUCTURE` 8.0.1: `REGION` is **KATOTTG** (`UA` + 2-digit oblast code + zeros + a suffix, e.g. Kharkiv `UA63000000000041885`; `UA00000000000000000` = Ukraine; 28 values: 24 oblasts, Kyiv city `UA80...`, Crimea `UA01...`, Sevastopol `UA85...`), not the plate-region names, so a KATOTTG -> `REGIONS` map is needed. Indicator `PNMI_01` = size of the existing population (`PNMI_02` = permanent; `PNMI_03/04` = averages), key `PNMI_01.<region>._T._T._T.A`. **Latest annual year is 2022** (national 41,167,335, the pre-invasion 1 Jan 2022 figure); Crimea and Sevastopol stop in 2014. Per-100k figures would therefore use a pre-war denominator, which must be said on the page.
 
 ## `/alarms` views: Cars and regions, Rhythm, Roads, Alerts vs fleet (2026-11-05) ✅
 
 Goal (owner): keep the classic alarm page as is and add alternative views on the **same live red / yellow map**.
+
 - **Shell:** `?view=` tabs (`views.ts`, `AlarmsRoute`), `LiveView` = the old page unchanged, `AlarmMapCard` = the shared map card, `AlarmMap` gained `overlay` and `onSelectRegion` / `selectedRegion`. One `alarmsQuery` for all views.
 - **Cars and regions:** fleet chips (5 modes of the `/stats` map, reusing the region rollups and `spreadLogos`) + `RegionCard` (alert status, fleet, last year alerts / hours next to crashes / deaths). No new API. Checked in the browser (desktop, 390 px phone, forced 503: only neutral fills, card says "no data"). Fixes after the check: chips moved above the region names, brand logos on white chips in the card.
 - **Rhythm:** 24-hour chart of today's alerts vs crashes by hour (shares of own totals). Owner chose "today only" (no backend work); the multi-day and hourly-history options stay open.
@@ -4672,6 +4675,7 @@ Goal (owner): keep the classic alarm page as is and add alternative views on the
 ## UI polish round, faster war-loss sync, data-status notes (2026-11-06) ✅
 
 Triggered by a phone review of the home page, /read, /auctions and /alarms.
+
 - **Home "new lots" (`HomeAuctionsSection`):** each row is two lines: name + price, then month/region + plate/VIN link.
 - **Search "+" hint (`SearchField`):** the tooltip shows only for hover-capable pointers (`@media (hover:hover)`) and stays hidden after a click until the pointer leaves / the toggle blurs (touch kept it stuck).
 - **/read hub:** cover images are `aspect-[21/9]` below `sm` (desktop crops unchanged).
@@ -4680,3 +4684,11 @@ Triggered by a phone review of the home page, /read, /auctions and /alarms.
 - **Why /alarms lagged a day:** upstream already had day N while we showed N-1: 6 h API poll + 6 h `STATS_CACHE` at the edge + 1 h SWR (up to ~13 h). Now `LossesService` polls every 30 min and `LOSSES_CACHE` = `max-age=300, s-maxage=1800, stale-while-revalidate=600`. Upstream publishes the new day once, usually in the Kyiv morning (after the General Staff post); the data is JSON (the infographic is not parsed) and past days can be corrected later. If the Cloudflare Cache Rule uses a fixed edge TTL instead of the origin header, it needs the same change.
 - **/data-status:** optional `Dataset.noteKey` prints an extra line under a source; used by `losses` (`dataStatus.note.losses`, ua/ru/en).
 - **Docs/UI:** About `play` text + a "third-party games" source, `releases.ts` day 2026-11-06.
+
+Stage G3 step 1 of `DATASETS_PLAN.md`, 2019 added (2026-11-06). Runbook: mileage-per-age check for cars (class 4, miles) 2019 vs 2021/2022 (median at age 3: 25.5k / 22.1k / 21.3k mi, age 10: 77.6k / 78.8k / 76.7k, so same unit, COVID explains the low 2021-22 young cars), backup (`scripts/.data/mot/backup-before-2019.csv.gz`), `pnpm ingest:mot --dir <folder> --years 2019 --merge` (31.66M tests indexed, 1,991 tracked models in the run, diagnostics `noMileage` 90,822, `implausibleMileage` 71,331, `itemTestMissing` 4,169,745), `pnpm export:mot:csv` (seed 3.59 -> 3.91 MB, 301,898 lines). `mot_meta.years` = 2019, 2021-25 (2020 file is in the folder but not loaded). No code changes.
+
+Stage G3 closed (2026-11-06): measured the 2005/2006 files (key census, Lada Samara alias) and decided to skip the old era; numbers and reasoning in `DATASETS_PLAN.md` "G3 measurements". Only 2019 was added (entry above). No code changes.
+
+MOT seed auto-load (2026-11-06). The MOT seed was not in the image and `seed-if-empty` skipped filled tables, so a new year never reached prod by itself. Built: `.dockerignore` un-ignores `scripts/seed-data/mot.csv.gz` (+3.9 MB), `mot-store.ts` `readMotSeedYears` / `motSeedNeeded` / `loadMotSeedIfNewer` (replace only when the seed has every loaded year plus at least one more; never a downgrade; equal years = no-op), called last in `seed-if-empty.ts` (runs after `deploy-api.sh` migrations and at the end of `deploy-ingest.yml`). Tests: `mot-store.test.ts` (`motSeedNeeded`). Local run: "mot: loaded years are current, skipped". Data-status row: name lists the years, `refreshedOn` 2026-11-06.
+
+About + releases sync (2026-11-06). New About source `ocha` (UN OCHA COD-AB outlines, CC BY-IGO; it was in `/data-status` but not credited; `AboutRoute.tsx` `SOURCES` + `about.source.ocha` ua/ru/en), `about.source.mot` now names the loaded years (2019 and 2021-25), and a `data` item for MOT 2019 on the 2026-11-06 day of `releases.ts` (`LATEST_RELEASE_DATE` unchanged). The About feature list (`FEATURES`, 50 keys: a brief grid card, then the full list card) already sits between the main card and the sources card, so nothing moved. CLAUDE.md + CLAUDE_RULES.md were re-measured (3.5 KB + 2.4 KB): already slim, no cut that would not lose a guard rail.

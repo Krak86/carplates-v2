@@ -705,7 +705,7 @@ needs its licence/permission recorded and attribution on About (VehiclesDB done)
 (estimated value) are built (2026-10-09); stage M (model alias unification, M1–M3) is built (2026-10-10; M4 stats grouping built too — `docs/plan-done.md` "Model alias unification"); stage E (Open EV Data, "Electric" block) is built too (2026-10-09; the upstream data is frozen at 2020); stage F (NHTSA recalls + owner complaints, live API + cache, merged into the Recalls block) is built too (2026-10-10; `DATASETS_PLAN.md` "Stage F — done"); ✅ stage G (UK MOT "Common faults": fail / advisory rates by mileage from DVSA 2021–2023, lazy section `faults`, 64 MB of tables, 3.2 MB seed) is built (2026-10-10; `docs/plan-done.md` "UK MOT Common faults"). Details, licences, URLs, caveats and the skip list:
 `DATASETS_PLAN.md` ("Round 2"). Buildable (all free, own tables, each a
 removable card block, credit on About): **RDW** registered vehicles (CC0; "Specs") + RDW recalls (CC0), **NHTSA** recalls +
-complaints (public domain, live API like `api/safety`), **UK MOT** (OGL v3; "Common faults", years 2021–25 loaded ✅ — Stage G2 in `DATASETS_PLAN.md`), **Transport
+complaints (public domain, live API like `api/safety`), **UK MOT** (OGL v3; "Common faults", years 2019 + 2021–25 loaded ✅ — Stage G2 in `DATASETS_PLAN.md`), **Transport
 Canada** recalls (OGL-Canada, low priority), **Open EV Data** (MIT; "Electric" block). Order: RDW -> NHTSA -> EV -> Canada -> MOT. **Refresh cadences** (RDW specs 6 mo, RDW recalls monthly, NHTSA live + cache
 7/30 d, MOT yearly, Canada quarterly, EV quarterly) are in `DATASETS_PLAN.md`; **each source's ingest, seed, refresh command and
 `SCHEDULE.md` entry are implemented only when its card block is built** — nothing ahead of the feature.
@@ -769,7 +769,7 @@ catalog pages** (see "Car compare" below); no contact with the site owners.
 
 **Group 3 — more open sources (already in DATASETS_PLAN, order unchanged)**
 
-- NHTSA recalls + complaints (stage F, owner call pending), UK MOT "common faults" (OGL, 2021–25 loaded), Transport Canada recalls
+- NHTSA recalls + complaints (stage F, owner call pending), UK MOT "common faults" (OGL, 2019 + 2021–25 loaded), Transport Canada recalls
   (low), RDW recall refresh. Maybe: other national open registers (Norway, Sweden, Estonia, Latvia) as an RDW cross-check for models
   RDW lacks; **each needs a licence read before use**.
 
@@ -1280,11 +1280,13 @@ Write-up: `docs/plan-done.md` "Market offers (CarAPIS)"; conventions: `docs/feat
 
 ## One-off seed tables + `/data-status` "Every minute" ✅ built 2026-11-05, awaiting deploy
 
+- [ ] **MOT seed auto-load (2026-11-06), After deploy:** the deploy-ingest run log shows `mot: seed is newer than the loaded years, loaded` (not `warn: seed-if-empty failed`); then a Ford Focus (ВК2861ІХ) "Common faults" on prod shows 5,928,887 tests and years 2019 + 2021–25; purge `/api/mot` at Cloudflare if the edge still serves the old numbers. Run `SELECT years FROM registry.mot_meta` first (expected 2021–25 before, 2019 + 2021–25 after).
+
 ✅ `run-ingest.sh seed-if-empty` (`scripts/src/seed-if-empty.ts`) loads the 3dtuning / oem-links / alarm-history seed CSVs only into EMPTY tables; runs by itself (non-fatal) after the migration in `deploy-api.sh` and at the end of `deploy-ingest.yml`. The three seed files are let into the ingest image (`.dockerignore`). `/data-status` gained the `minutely` cadence (Ukraine Alarm) and rows for 3DTuning, OEM links, siren history, OCHA outlines; `/stats` prints "Updated <date>". Conventions: `docs/features-reference.md` "Data freshness".
 
 - [ ] **After deploy** (order: `deploy-api`, `deploy-ingest`; either order works, the second one loads whatever the first could not): read both deploy logs for `seed-if-empty: … empty, loading …` / `already there, skipped` and no `warn: seed-if-empty failed`.
 - [ ] **On the VPS**, if a log shows the warning or a table is still empty: `bash /opt/carsua/compose/run-ingest.sh seed-if-empty` (safe to repeat), then check the counts:
-  `docker compose -f /opt/carsua/compose/docker-compose.prod.yml exec -T postgres sh -c 'psql -U $POSTGRES_USER $POSTGRES_DB -tAc "SELECT (SELECT count(*) FROM registry.tuning_links), (SELECT count(*) FROM registry.oem_links), (SELECT count(*) FROM registry.alarm_history_daily)"'` (expect 2462 / 29 / thousands, none 0).
+      `docker compose -f /opt/carsua/compose/docker-compose.prod.yml exec -T postgres sh -c 'psql -U $POSTGRES_USER $POSTGRES_DB -tAc "SELECT (SELECT count(*) FROM registry.tuning_links), (SELECT count(*) FROM registry.oem_links), (SELECT count(*) FROM registry.alarm_history_daily)"'` (expect 2462 / 29 / thousands, none 0).
 - [ ] Confirm the run was logged: `bash /opt/carsua/compose/ingest-status.sh` lists `seed-if-empty` as `ok`.
 - [ ] If `docker compose pull ingest` ran before the image was rebuilt, `seed-if-empty` fails with a missing seed file: re-run `deploy-ingest` (workflow_dispatch) and repeat the step above.
 - [ ] ✅ (verified 2026-11-05 in prod: `/data-status` new rows, `/showroom` Customize 1500 / Official 17, `/alarms` history table, `/stats` coverage line, Customize in 3D on a BMW 530XD 2006 plate page; an old service-worker build shows none of it until Update) Browser checks: `/data-status` shows the "Every minute" group first (Ukraine Alarm, status Live) and the new rows (3DTuning, OEM links, siren history, OCHA outlines); `/stats` coverage line shows "Оновлено <date> Актуальність даних"; a car with a known 3DTuning link (BMW 3 Series sedan 2007) shows "Customize in 3D"; `/showroom` lists the `oem` entries; the history section on `/alarms` has data.

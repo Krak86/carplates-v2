@@ -107,6 +107,8 @@ const SOURCES: readonly Source[] = [
     icon: '/icons/sources/github.webp'
   },
   { key: 'osm', label: 'OpenStreetMap', url: 'https://www.openstreetmap.org', tile: 'bg-green-700' },
+  // No logo: a plain tile (UN OCHA COD-AB outlines on the alerts and fleet maps).
+  { key: 'ocha', label: 'UN OCHA COD-AB', url: 'https://data.humdata.org/dataset/cod-ab-ukr', tile: 'bg-sky-700' },
   { key: 'autoria', label: 'Auto.RIA / OLX', url: 'https://auto.ria.com', tile: 'bg-slate-500' },
   { key: 'infocar', label: 'infocar.ua', url: 'https://www.infocar.ua', icon: '/icons/infocar.png' },
   // Auction link-outs (AuctionCheck): no logos — commercial marks, no licence found in their terms; plain tiles only.
