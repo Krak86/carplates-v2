@@ -248,4 +248,5 @@ export {
 } from './client.js'
 export { runMigrations } from './migrate.js'
 export { findWikiImage, upsertWikiImages } from './wikiImage.js'
+export { findWikiPaint, findWikiPaintMask, wikiPaintMaskId, type WikiPaintInfo } from './wikiImagePaint.js'
 export { recallTextHash } from './recallText.js'

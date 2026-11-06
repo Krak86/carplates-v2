@@ -226,6 +226,12 @@ export {
   type Lab,
   type Rgb
 } from './paintColor.js'
+export {
+  wikiRecolorSchema,
+  wikiRecolorResponseSchema,
+  type WikiRecolor,
+  type WikiRecolorResponse
+} from './wikiRecolor.js'
 export { VEHICLE_FUELS, resolveFuelCategories, fuelKeyword, type VehicleFuel } from './vehicleFuel.js'
 export { brandLogoUrl, brandSlug } from './brandLogo.js'
 export { dealerUrl, newCarsUrl, usedCarsUrl } from './dealerUrl.js'

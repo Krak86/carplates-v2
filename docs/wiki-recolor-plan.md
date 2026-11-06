@@ -116,5 +116,12 @@ Phase A (steps 1-6) is the recolour on the existing hero photo. Phase B (7-8) ad
 **Gate tuning.** Random samples of 50 photos: `ok` fell from about 83 % (prototype gates) to about 56 % after the glass-band lightness match, `dark_paint` (cluster L < 32), `dark_body` (mid body band median L < 34 and chroma < 18) and `MIN_PAINT_SHARE` 0.20.
 Still weak: mottled specular paint (lime Lamborghini, Camaro), a touching neighbour car can be tinted, race / livery cars have no dedicated gate. After any algorithm change re-scan a sample and bump `PAINT_ALGO`.
 
-**Next: step 3** (migration + `schema.ts` + db export + the upsert in `wiki-paint.ts`, `algo` column, skip rows stored too), then 4-6. Read the migrations list for the next free NNNN and the Deploy checklist first.
-Before the rollout (step 9) run `SELECT count(*) FROM registry.wiki_image WHERE status = 'ok'`. Do not commit unless asked.
+**Done (steps 3-4, uncommitted).** Migration `0101_wiki_image_paint.sql` (table + unique index on `md5(image_url)`), `schema.ts`, db helpers `wikiImagePaint.ts` (`findWikiPaint`, `findWikiPaintMask`, `wikiPaintMaskId`), CLI upsert (skip rows stored, rescan `algo` < PAINT_ALGO, `--dry-run`).
+Mask encoding `MASK_WEBP` (quality 50, alpha 60, effort 6) = about 24 KB per mask (quality 80 was 62 KB); about 300 MB projected for 22,300 files, so bytea stays. Sample of 30: 20-22 `ok`.
+API: `packages/shared/src/wikiRecolor.ts`, `apps/api/src/wiki/wiki-recolor.{service,controller}.ts`, `wiki-paint.store.ts`.
+- `GET /api/wiki/recolor?brand&model&year` -> `{ recolor: {imageUrl,bucket,lab,maskUrl,w,h} | null }` (wrapped: Nest answers a bare null with an empty body). Stored rows only (`WikiService.peekImage`), no network. `LOOKUP_CACHE`.
+- `GET /api/wiki/paint/<md5>.webp?v=<algo>` -> mask, `immutable` 1 year (`?v` busts it after a rescan). `WIKI_RECOLOR_THROTTLE`.
+- Cloudflare rule in `docs/deploy.md` extended (needs the manual edit in the dashboard).
+
+**Next: step 5 (web).** The hero may show a different photo than `peekImage` finds (`yearOnly`, `source`): the client must apply the filter only when `recolor.imageUrl === hero image.url`. Then 6 (docs, credits).
+Before the rollout (step 9) run `SELECT count(*) FROM registry.wiki_image WHERE status = 'ok'` (67,645 rows, 22,300 files on 2026-11-06). Do not commit unless asked.

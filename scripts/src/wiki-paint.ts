@@ -32,6 +32,8 @@ import type { PaintScanResult } from './wiki-paint-core.js'
 
 const DATA_DIR = join(import.meta.dirname, '..', '.data', 'wiki-paint')
 const USER_AGENT = 'carsua.app-ingest/1.0 (+https://carsua.app)'
+/** Mask encoding: ~28 KB per photo at 640 px (quality 80 was ~62 KB; error vs it about 2 of 255). Encoding only, the scan algorithm is unchanged. */
+const MASK_WEBP = { quality: 50, alphaQuality: 60, effort: 6 } as const
 const MODEL = 'Xenova/segformer-b0-finetuned-ade-512-512'
 
 const log = (...m: unknown[]): void => {
@@ -79,7 +81,7 @@ async function savePaint(db: Db, url: string, w: number, h: number, scan: PaintS
   const mask =
     scan.status === 'ok'
       ? await sharp(scan.mask, { raw: { width: w, height: h, channels: 4 } })
-          .webp({ quality: 80 })
+          .webp(MASK_WEBP)
           .toBuffer()
       : null
   const row: WikiImagePaintInsert =
@@ -198,7 +200,7 @@ async function main(): Promise<void> {
         })
         if (outDir) {
           await sharp(scan.mask, { raw: { width: w, height: h, channels: 4 } })
-            .webp({ quality: 80 })
+            .webp(MASK_WEBP)
             .toFile(join(outDir, `${name}.mask.webp`))
           await sharp(applyPaint(rgb, scan.mask, preview), { raw: { width: w, height: h, channels: 3 } })
             .jpeg({ quality: 82 })

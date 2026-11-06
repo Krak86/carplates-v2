@@ -20,3 +20,6 @@ CREATE TABLE registry.wiki_image_paint (
   algo smallint NOT NULL,
   scanned_at timestamptz NOT NULL DEFAULT now()
 );
+
+-- The API serves a mask at /api/wiki/paint/<md5(image_url)>.webp: look it up without a scan of the table.
+CREATE UNIQUE INDEX ux_wiki_image_paint_md5 ON registry.wiki_image_paint (md5(image_url));
