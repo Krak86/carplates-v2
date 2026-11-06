@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { useNavigate } from 'react-router'
+import { normalizePlate } from '@carplates/shared'
 import type { PhotoMeta, PlateCandidate, ShareMetaResponse } from '@carplates/shared'
 
 import { ApiError, recognizePlate, recognizeVin, shareImageUrl } from '@/lib/api'
@@ -189,9 +190,14 @@ export function usePlateRecognition({ currentValue, linkedValue }: UsePlateRecog
   useEffect(() => {
     setPhoto(prev => {
       if (!prev) return prev
-      const isConnected = currentValue != null && prev.connected.has(currentValue)
+      // Compare normalized: the route rewrites a plate to its Latin form, the recognizer returns Cyrillic.
+      const isIn = (value: string): boolean => {
+        const key = normalizePlate(value)
+        return Array.from(prev.connected).some(v => normalizePlate(v) === key)
+      }
+      const isConnected = currentValue != null && isIn(currentValue)
       if (isConnected) {
-        if (linkedValue && !prev.connected.has(linkedValue)) {
+        if (linkedValue && !isIn(linkedValue)) {
           return { ...prev, connected: new Set(prev.connected).add(linkedValue) }
         }
         return prev
