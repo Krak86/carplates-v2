@@ -8,13 +8,12 @@
  * is the same maths, used by the CLI preview and the tests).
  */
 import {
-  PAINT_HEX,
-  hexToRgb,
-  linearToSrgb,
+  SHADE_MAX,
+  SHADE_SCALE,
+  applyPaint,
   luminanceOf,
   paintBucketOf,
   rgbToLab,
-  srgbToLinear,
   type Lab,
   type VehicleColor
 } from '@carplates/shared'
@@ -23,9 +22,6 @@ import {
 export const PAINT_SCAN_WIDTH = 640
 /** Bump to make the scan job redo rows made by an older algorithm. */
 export const PAINT_ALGO = 1
-/** Shading byte = `min(g, SHADE_MAX) * SHADE_SCALE`; g is the pixel luminance over the median body luminance. */
-export const SHADE_MAX = 3
-export const SHADE_SCALE = 255 / SHADE_MAX
 
 export const PAINT_SKIP_REASONS = [
   'no_car',
@@ -328,24 +324,4 @@ export function scanPaint({ rgb, width: w, height: h, prob }: PaintScanInput): P
   return { status: 'ok', bucket: paintBucketOf(bodyLab), lab: bodyLab, paintLab: c, bodyArea, paintShare, mask }
 }
 
-/**
- * Recolour: `out = target * g^0.9`, specular highlights (g above about 1.6) blend to white, composited by the mask alpha.
- * The web canvas does the same per pixel; here it feeds the CLI preview and tests. Returns a new RGB buffer.
- */
-export function applyPaint(rgb: Uint8Array, mask: Uint8Array, target: VehicleColor | string): Uint8Array {
-  const hex = target in PAINT_HEX ? PAINT_HEX[target as VehicleColor] : target
-  const t = hexToRgb(hex).map(srgbToLinear)
-  const out = Uint8Array.from(rgb)
-  const N = rgb.length / 3
-  for (let i = 0; i < N; i++) {
-    const al = mask[i * 4 + 3]! / 255
-    if (al < 0.01) continue
-    const g = mask[i * 4]! / SHADE_SCALE
-    const hl = Math.min(1, Math.max(0, (g - 1.6) / 1.4))
-    for (let k = 0; k < 3; k++) {
-      const v = Math.min(1, t[k]! * g ** 0.9) * (1 - hl) + hl * Math.min(1, 0.5 + 0.25 * g)
-      out[i * 3 + k] = Math.round(rgb[i * 3 + k]! * (1 - al) + linearToSrgb(v) * al)
-    }
-  }
-  return out
-}
+export { SHADE_MAX, SHADE_SCALE, applyPaint }

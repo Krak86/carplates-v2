@@ -86,14 +86,16 @@ Phase A (steps 1-6) is the recolour on the existing hero photo. Phase B (7-8) ad
    (`pnpm ingest:wiki-paint --limit N --brand X --rps 1`; reads `wiki_image` rows with `status = 'ok'`, downloads the thumb, writes `wiki_image_paint`). Port from the prototype; `@huggingface/transformers` and `sharp` are already in `scripts/package.json`.
 3. **Migration + schema.** `packages/db/migrations/NNNN_wiki_image_paint.sql`, `schema.ts` table, db index export. Checklist "Deploy" (blue/green safe).
 4. **API.** `wikiRecolor.ts` contract, `wiki.service` / controller endpoints, cache headers, throttle, tests (store, DTO, 404 / null cases).
+   4a. **Shared recolour maths (done).** `packages/shared/src/paintApply.ts` (`applyPaint`, `paintTone`, `paintTargetLinear`, `SHADE_*`) moved out of `scripts/`; the web canvas uses `paintTone` per pixel, a test ties it to `applyPaint`.
 5. **Web filter.** `lib/queries.ts` `wikiRecolorQuery` (online only, silent failure), `use-wiki-recolor.ts` (decides apply / skip), `WikiRecolorCanvas.tsx`, button + swatch + text in `WikiHeroImage.tsx`, store flag, i18n ua / ru / en, colour names from the existing colour labels.
+   Decisions: online only, no `offline-cache.ts` entry (the filter is decoration, the original photo is the offline fallback); `/api/wiki/recolor` stays out of `PUBLIC_API_PATH_PREFIXES`; the card bundle is unchanged (the client asks `recolor` itself after the hero resolves). Apply the filter only when `recolor.imageUrl` equals the hero `image.url`.
    Tests: skip when close colour, no colour, disabled, mask error; component renders the button only when applicable.
 6. **Docs and credits.** `docs/checklists.md` "Docs after a feature": plan-done, PLAN, features-reference section "Wiki photo colour filter", `releases.ts`, About (`FEATURES`, and the CC BY-SA "modified" note under `SOURCES`).
 7. **Candidate photos.** `registry.wiki_image_candidate` (brand, model, year span, url, size, title, author, licence, bucket, lab, status, quality), scan `scripts/src/wiki-candidates.ts`
    (Commons search up to 40 results, drop interior / engine / logo / wheel titles, width at least 1000, filter by the year in the title or the generation from `model_generations`, run step 2's analysis),
    API `GET /api/wiki/photos?brand&model&year&color` (best colour match first, then others), hero uses a colour-matched candidate when one exists (no filter then).
 8. **Bottom strip.** `WikiPhotoStrip.tsx` and zoom, per-photo credit, lazy below the hero (`LazySection` / `HELPER_GROUPS` checklist if it is a section), tests.
-9. **Rollout.** Scan order: top few hundred models by registry count, then the rest. Job in `scripts/src/jobs.ts` + `run-ingest.sh` + `infra/vps/ingest.cron` + a `/data-status` row; Commons rate limit (`--rps`);
+9. **Rollout.** Scan host: needs the SegFormer model download (`scripts/.data/wiki-paint/hf-cache`, about 15 MB q8), a few hundred MB RAM and `sharp`; run it where the other scrape jobs run, one process, `--rps 1`. Orphans: the job also deletes `wiki_image_paint` rows whose `image_url` is no longer in `wiki_image` (`status = 'ok'`). Before turning on for everyone: review a gallery sample of at least 100 (livery / race cars, touching neighbour cars, mottled paint) and tune gates, bumping `PAINT_ALGO`. Cloudflare Cache Rule gets `/api/wiki/recolor` and `starts_with /api/wiki/paint/` (manual, PLAN.md box). Scan order: top few hundred models by registry count, then the rest. Job in `scripts/src/jobs.ts` + `run-ingest.sh` + `infra/vps/ingest.cron` + a `/data-status` row; Commons rate limit (`--rps`);
    set `algo` so a better algorithm rescans; watch the share of `ok` vs `skip` and review a sample gallery before turning it on for everyone.
 
 ## Risks and open questions
@@ -119,6 +121,7 @@ Still weak: mottled specular paint (lime Lamborghini, Camaro), a touching neighb
 **Done (steps 3-4, uncommitted).** Migration `0101_wiki_image_paint.sql` (table + unique index on `md5(image_url)`), `schema.ts`, db helpers `wikiImagePaint.ts` (`findWikiPaint`, `findWikiPaintMask`, `wikiPaintMaskId`), CLI upsert (skip rows stored, rescan `algo` < PAINT_ALGO, `--dry-run`).
 Mask encoding `MASK_WEBP` (quality 50, alpha 60, effort 6) = about 24 KB per mask (quality 80 was 62 KB); about 300 MB projected for 22,300 files, so bytea stays. Sample of 30: 20-22 `ok`.
 API: `packages/shared/src/wikiRecolor.ts`, `apps/api/src/wiki/wiki-recolor.{service,controller}.ts`, `wiki-paint.store.ts`.
+
 - `GET /api/wiki/recolor?brand&model&year` -> `{ recolor: {imageUrl,bucket,lab,maskUrl,w,h} | null }` (wrapped: Nest answers a bare null with an empty body). Stored rows only (`WikiService.peekImage`), no network. `LOOKUP_CACHE`.
 - `GET /api/wiki/paint/<md5>.webp?v=<algo>` -> mask, `immutable` 1 year (`?v` busts it after a rescan). `WIKI_RECOLOR_THROTTLE`.
 - Cloudflare rule in `docs/deploy.md` extended (needs the manual edit in the dashboard).

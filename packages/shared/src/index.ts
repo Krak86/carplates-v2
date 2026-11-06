@@ -232,6 +232,7 @@ export {
   type WikiRecolor,
   type WikiRecolorResponse
 } from './wikiRecolor.js'
+export { SHADE_MAX, SHADE_SCALE, applyPaint, paintTargetLinear, paintTone, type LinearRgb } from './paintApply.js'
 export { VEHICLE_FUELS, resolveFuelCategories, fuelKeyword, type VehicleFuel } from './vehicleFuel.js'
 export { brandLogoUrl, brandSlug } from './brandLogo.js'
 export { dealerUrl, newCarsUrl, usedCarsUrl } from './dealerUrl.js'
