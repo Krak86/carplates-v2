@@ -8,6 +8,7 @@ import { dataStatusQuery } from '@/lib/queries'
 import DatasetGroup from '@/routes/data-status/DatasetGroup'
 import { DATASETS } from '@/routes/data-status/datasets'
 import { countByStatus, datasetStatus, groupByCadence, registryStatus } from '@/routes/data-status/helpers'
+import RunHistory from '@/routes/data-status/RunHistory'
 import StatusChip from '@/routes/data-status/StatusChip'
 import { STATUSES } from '@/routes/data-status/types'
 import { monthYearLabel } from '@/routes/stats/helpers'
@@ -64,6 +65,8 @@ export default function DataStatusRoute(): ReactNode {
             </ul>
           </Card>
 
+          <RunHistory runs={status.data?.history ?? []} />
+
           <div className="grid gap-4 lg:grid-cols-2">
             {groupByCadence(DATASETS).map(group => (
               <DatasetGroup
@@ -72,6 +75,7 @@ export default function DataStatusRoute(): ReactNode {
                 datasets={group.datasets}
                 jobs={jobs}
                 latest={status.data?.latest ?? {}}
+                counts={status.data?.counts ?? {}}
               />
             ))}
           </div>

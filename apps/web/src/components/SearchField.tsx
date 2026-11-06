@@ -36,8 +36,6 @@ export default function SearchField({
   const focus = useSearchFocus(idle)
   const [value, setValue] = useState(initialValue)
   const [advancedOpen, setAdvancedOpen] = useState(false)
-  // After a click the hint stays hidden until the pointer leaves the toggle (touch keeps :hover / :focus stuck on it).
-  const [hintOff, setHintOff] = useState(false)
 
   // The route's query changed (home, plate -> VIN, photo recognition landing on a plate…):
   // reset the input to it, dropping whatever was typed. Derived during render, not an effect.
@@ -62,12 +60,7 @@ export default function SearchField({
         <div className="group relative min-w-0 flex-1">
           <button
             type="button"
-            onClick={() => {
-              setAdvancedOpen(open => !open)
-              setHintOff(true)
-            }}
-            onPointerLeave={() => setHintOff(false)}
-            onBlur={() => setHintOff(false)}
+            onClick={() => setAdvancedOpen(open => !open)}
             aria-expanded={advancedOpen}
             aria-controls="advanced-search-link"
             aria-label={t('search.advancedToggle')}
@@ -88,19 +81,6 @@ export default function SearchField({
               <path d="M12 5v14M5 12h14" />
             </svg>
           </button>
-          <span
-            role="tooltip"
-            className={cn(
-              'pointer-events-none absolute top-full left-0 z-10 mt-1 w-max max-w-[min(13rem,80vw)] rounded-md bg-[var(--color-fg)] px-2 py-1 text-left text-xs text-[var(--color-bg)] opacity-0 shadow transition-opacity delay-300 duration-150',
-              // Hover-capable pointers only; never right after a click (the hint is redundant then).
-              !advancedOpen &&
-                !hintOff &&
-                '[@media(hover:hover)]:group-has-[button:focus-visible]:opacity-100 [@media(hover:hover)]:group-has-[button:hover]:opacity-100'
-            )}
-          >
-            <span className="block font-semibold">{t('search.advancedToggle')}</span>
-            <span className="block opacity-75">{t('search.advancedHint')}</span>
-          </span>
           <input
             name="carplate-search-query"
             value={value}

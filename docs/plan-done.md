@@ -4703,3 +4703,16 @@ Follow-up to `/compare` after a phone review. Conventions are in `features-refer
 - **Link preview:** `ComparePreviewService` (`apps/api/src/spa/compare-preview.ts`) feeds `SpaController` (title `A vs B | Cars UA`, description, `og:image`) and `OgController` `GET /og/compare.png?a&b&lang`. `noindex`.
 - **Tests:** `compare-tray-store.test.ts`, `compare-preview.test.ts`, `spa.controller.test.ts` (pair tags), `ref.test.ts`.
 - **Not browser-checked** (typecheck + unit tests only): chip colours, the "?" popover, the OG card layout.
+
+## Data status counts + run history, small UI rounds (2026-11-06) ✅
+
+Conventions: `features-reference.md` "Data freshness" and "Small UI rounds".
+
+- **/data-status:** "Records in our database: N" under every source (`counts` in `/api/data-status`; OCHA outlines use `staticCount` 1935), "Data update history (N)" card (cadence chips with counts + timeline of the last runs, smooth scroll and flash to the tile), group headings show their size, order `minutely`, `live`, daily ... `frozen`. Test: every cron job has a dataset.
+- **Alert map:** fullscreen shows the whole country (meet), no black bars from the old strip layout.
+- **History:** search box (`filterHistory`).
+- **Engines:** non-matching generation engines collapse into "Other engines".
+- **Search field:** "+" tooltip removed, unused `search.advancedHint` deleted.
+- **Docs:** About `dataStatus` / `account` feature texts extended (no new source), release items on the 2026-11-06 day, CLAUDE.md re-measured (3.5 KB, no cut that would not lose a rule).
+- **Verified:** typecheck (api, web), data-status tests. **Not browser-checked:** the timeline dots, chip scroll animation, fullscreen on a phone.
+- **After deploy:** API first (new `counts` / `history` fields); the page tolerates an old API (both default to empty).

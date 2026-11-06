@@ -1,14 +1,14 @@
 /** How often a source is expected to change, in the order the page lists them. `minutely`: polled by the server about every minute. `frozen`: upstream no longer updates. `live`: asked per request, nothing to sync. */
 export const CADENCES = [
   'minutely',
+  'live',
   'daily',
   'weekly',
   'monthly',
   'quarterly',
   'halfYearly',
   'yearly',
-  'frozen',
-  'live'
+  'frozen'
 ] as const
 export type Cadence = (typeof CADENCES)[number]
 
@@ -42,4 +42,6 @@ export type Dataset = {
   latestByMonth?: boolean
   /** i18n key of an extra line about how this source is synced (shown under its name). */
   noteKey?: string
+  /** Rows of a source held as a static file, not in the database (so the API cannot count it): shown as its record count. */
+  staticCount?: number
 }
