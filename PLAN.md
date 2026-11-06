@@ -1341,6 +1341,20 @@ Plan in 9 steps, [docs/wiki-recolor-plan.md](docs/wiki-recolor-plan.md); prototy
 - [x] Gate tuning R2 round 1 (2026-11-06, uncommitted, `PAINT_ALGO` still 1): saturated-cluster re-pick, hue match, `two_tone` skip, looser share / dark_body chroma; 53 ok of the same 100 (+5 fixed, 5 mis-tints now skipped, 20 good kept); sheets `scripts/.data/wiki-paint/review-2026-11-06-algo2/`
 - [ ] Owner: look at the algo2 sheets, agree, then bump `PAINT_ALGO` to 2 and run a fresh random 100 (`--dry-run --order random --out`) to check for overfitting
 
+## Brand pronunciation (planned 2026-11-06)
+
+Speaker icon beside the brand name on catalog pages; lazy popup with ua / ru / en transcription (parsed from Wikipedia lead wikitext; Wikidata has none) and an on-demand play button for origin-language audio (Commons `.ogg`, then Piper TTS). Plan and research: [docs/brand-pronounce-plan.md](docs/brand-pronounce-plan.md). About 8.5 working days; text-only slice about 4.5.
+
+- [ ] Step 1: coverage probe `brand-pronounce-probe.ts` (en/uk/ru leads of the ~110 catalog makes, no DB writes)
+- [ ] Step 2: parser + tests (`{{IPA}}`, `{{IPAc-en}}`, `{{lang-uk}}`, `МФА:`)
+- [ ] Step 3: migration + schema + ingest CLI/job + seed CSV + `/data-status` + overrides CSV
+- [ ] Step 4: Commons audio finder (author + licence stored)
+- [ ] Step 5: Piper TTS for brands without audio (decide after the probe; skippable)
+- [ ] Step 6: `GET /api/brands/:slug/pronunciation` + `hasPronunciation` on the catalog payload
+- [ ] Step 7: `BrandPronounce` button + lazy `InfoPopover` + audio hook + i18n + tests
+- [ ] Step 8: docs (features-reference, plan-done, releases, About credits)
+- [ ] After deploy (owner): apply the migration on the VPS; run the ingest job once; edge cache rule for `/api/brands/*/pronunciation` (docs/checklists.md); check audio credits on About
+
 ## Later, conditional
 
 Checked and skipped: Derzhstat "Транспорт України" yearbook (2026-11-05) - national transport activity totals, no vehicle/fleet/accident data; see `DATASETS_PLAN.md` "Skipped (with reason)".
