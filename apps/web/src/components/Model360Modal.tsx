@@ -15,6 +15,7 @@ import {
   winner360ShareTab,
   winner360Url
 } from '@/lib/model360'
+import ExternalLink from '@/components/ExternalLink'
 
 type View = 'exterior' | 'interior' | 'alt'
 
@@ -220,23 +221,21 @@ export default function Model360Modal({
         />
 
         <p className="mt-2 text-sm text-[var(--color-muted)]">
-          <a
-            href={isAlt ? winner360Url(currentWinner) : current ? model360PageUrl(current, i18n.language) : undefined}
-            target="_blank"
+          <ExternalLink
+            href={isAlt ? winner360Url(currentWinner) : current ? model360PageUrl(current, i18n.language) : ''}
             rel="noopener noreferrer nofollow"
             className="font-semibold underline"
           >
             {name}
-          </a>{' '}
+          </ExternalLink>{' '}
           {t('model360.on')}{' '}
-          <a
+          <ExternalLink
             href={isAlt ? 'https://stock.winner.ua' : 'https://carshow360.net'}
-            target="_blank"
             rel="noopener noreferrer nofollow"
             className="font-semibold underline"
           >
             {isAlt ? 'Winner Imports' : 'CarShow360'}
-          </a>
+          </ExternalLink>
           . {t(isAlt ? 'model360.noteAlt' : 'model360.note')}
         </p>
       </div>

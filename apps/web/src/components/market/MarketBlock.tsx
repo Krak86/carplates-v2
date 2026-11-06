@@ -98,7 +98,7 @@ export default function MarketBlock({ view, brandName, brand, model, kind, year 
 
       {hidden > 0 && (
         <button type="button" onClick={() => setListOpen(true)} className="mb-1 text-sm text-primary underline">
-          {t('market.showMore', { count: hidden })}
+          {t('market.showMore', { count: hidden })} <span aria-hidden>⤢</span>
         </button>
       )}
 

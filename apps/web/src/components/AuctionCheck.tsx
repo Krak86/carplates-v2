@@ -71,7 +71,7 @@ export default function AuctionCheck({ vin, imported = false, openSignal = 0 }: 
             {site.tier === 'main' && ` · ${t(direct ? 'auctions.modeDirect' : 'auctions.modeManual')}`}
           </span>
         </span>
-        <span aria-hidden>{direct ? '↗' : '📋'}</span>
+        <span aria-hidden>{direct ? '↗' : '⤢'}</span>
       </>
     )
 

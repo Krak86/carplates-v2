@@ -7,6 +7,7 @@ import { LANGS, type Lang } from '@/i18n'
 import { cn } from '@/lib/cn'
 import { aliasCardPath } from '@/routes/share/share-links'
 import { useShareActions } from '@/routes/share/use-share-actions'
+import ExternalLink from '@/components/ExternalLink'
 
 const ALIAS_ICON: Record<ShareAlias, string> = {
   plate: '🔎',
@@ -113,14 +114,9 @@ export default function ShareRoute(): ReactNode {
                   >
                     {isCopied ? t('share.copied') : t('share.copy')}
                   </button>
-                  <a
-                    href={url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-[var(--color-primary)] hover:underline"
-                  >
+                  <ExternalLink href={url} className="text-[var(--color-primary)] hover:underline">
                     {t('share.open')}
-                  </a>
+                  </ExternalLink>
                   <span role="status" className="sr-only">
                     {isCopied ? t('share.copied') : ''}
                   </span>

@@ -27,7 +27,7 @@ export default function RiaCheckLink({ kind, value }: Props): ReactNode {
     <p className="mt-2 text-sm text-[var(--color-muted)]">
       {kind === 'plate' ? t('result.ria.hintPlate') : t('result.ria.hintVin')}{' '}
       <button type="button" onClick={() => setOpen(true)} className="underline">
-        {t('result.ria.link')}
+        {t('result.ria.link')} <span aria-hidden>⤢</span>
       </button>
       {open && (
         <AuctionVinModal

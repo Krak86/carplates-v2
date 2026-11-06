@@ -21,7 +21,7 @@ export default function RaceTestDriveChip({ onOpen }: Props): ReactNode {
       className="inline-flex animate-chip-in cursor-pointer items-center gap-1 rounded-full border chip-tone px-2 py-0.5 text-xs text-[var(--color-fg)] transition-colors chip-view hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-[var(--color-border)] disabled:hover:text-[var(--color-fg)]"
     >
       <span aria-hidden>🏁</span>
-      {t('race.chip')}
+      {t('race.chip')} <span aria-hidden>⤢</span>
     </button>
   )
 }

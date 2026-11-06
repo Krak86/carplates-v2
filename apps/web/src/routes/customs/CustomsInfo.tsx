@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 
 import Card from '@/components/ui/Card'
 import { CUSTOMS_SOURCES, percent } from '@/routes/customs/helpers'
+import ExternalLink from '@/components/ExternalLink'
 
 const rules = UA_IMPORT_2026_1
 
@@ -45,9 +46,9 @@ export default function CustomsInfo(): ReactNode {
         <ul className="list-disc space-y-1 pl-5 text-sm">
           {CUSTOMS_SOURCES.map(source => (
             <li key={source.key}>
-              <a href={source.url} target="_blank" rel="noopener noreferrer" className="text-primary underline">
+              <ExternalLink href={source.url} className="text-primary underline">
                 {t(`customs.sources.${source.key}`)}
-              </a>
+              </ExternalLink>
             </li>
           ))}
         </ul>

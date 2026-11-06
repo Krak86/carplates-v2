@@ -30,6 +30,7 @@ import { scrollElementIntoView } from '@/lib/share-section'
 import SectionSkeleton from '@/components/ui/SectionSkeleton'
 import ReadGuideLink from '@/components/ReadGuideLink'
 import { RECALLS_PATH } from '@/routes/read/links'
+import ExternalLink from '@/components/ExternalLink'
 
 type Props = {
   brand: string | null
@@ -287,14 +288,12 @@ export default function RdwRecalls({ brand, model, year, kind }: Props): ReactNo
                         )}
 
                         {recall.moreInfoUrl && (
-                          <a
+                          <ExternalLink
                             href={recall.moreInfoUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
                             className="mt-2 inline-block text-sm text-[var(--color-primary)] underline hover:no-underline"
                           >
                             {t('recalls.moreInfo')}
-                          </a>
+                          </ExternalLink>
                         )}
                       </details>
                     </li>

@@ -6,6 +6,7 @@ import { useBackgroundMode } from '@/hooks/useBackgroundMode'
 import { useBackgroundParallax } from '@/hooks/useBackgroundParallax'
 import { getBackgroundImages } from '@/lib/background-images'
 import { useBackgroundStore } from '@/store/background-store'
+import ExternalLink from '@/components/ExternalLink'
 
 const IMAGES = getBackgroundImages()
 const SWAP_DELAY_MS = 700
@@ -113,9 +114,9 @@ export default function BackgroundPhotos(): ReactNode {
           {heroOverride?.sourceUrl && (
             <>
               {' '}
-              <a href={heroOverride.sourceUrl} target="_blank" rel="noopener noreferrer" className="underline">
+              <ExternalLink href={heroOverride.sourceUrl} className="underline">
                 {t('wiki.viaCommons')}
-              </a>
+              </ExternalLink>
             </>
           )}
         </div>

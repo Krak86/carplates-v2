@@ -9,6 +9,7 @@ import RdwRecallField from '@/components/RdwRecallField'
 import RecallTranslateAll from '@/components/RecallTranslateAll'
 import { componentKey } from '@/components/NhtsaRecalls.helpers'
 import { formatRecallDate, RECALLS_PREVIEW } from '@/components/RdwRecalls.helpers'
+import ExternalLink from '@/components/ExternalLink'
 
 type Props = {
   /** Null when NHTSA lists no campaign for the model-year (the complaints can still be there). */
@@ -111,14 +112,12 @@ export default function NhtsaRecallList({ data, complaints, locale }: Props): Re
 
                 <RecallTranslateAll texts={[recall.summary, recall.consequence, recall.remedy]} from="en" />
 
-                <a
+                <ExternalLink
                   href={`https://www.nhtsa.gov/recalls?nhtsaId=${encodeURIComponent(recall.code)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
                   className="mt-2 inline-block text-sm text-[var(--color-primary)] underline hover:no-underline"
                 >
                   {t('nhtsa.moreInfo')}
-                </a>
+                </ExternalLink>
               </details>
             </li>
           )

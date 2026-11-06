@@ -40,6 +40,7 @@ import { scrollElementIntoView } from '@/lib/share-section'
 import SectionSkeleton from '@/components/ui/SectionSkeleton'
 import ReadGuideLink from '@/components/ReadGuideLink'
 import { RECALLS_PATH } from '@/routes/read/links'
+import ExternalLink from '@/components/ExternalLink'
 
 type Props = {
   brand: string | null
@@ -188,7 +189,7 @@ export default function MotFaults({ brand, model, year, kind, fuel }: Props): Re
                     className="flex items-center gap-1.5 rounded-full border border-[var(--color-primary)] bg-primary/15 px-3 py-1.5 font-medium text-[var(--color-primary)] hover:bg-primary/25"
                   >
                     <span aria-hidden>🧮</span>
-                    {t('mot.car.open', { name, year })}
+                    {t('mot.car.open', { name, year })} <span aria-hidden>⤢</span>
                   </button>
 
                   <span
@@ -456,9 +457,9 @@ export default function MotFaults({ brand, model, year, kind, fuel }: Props): Re
 
               <p className="mt-3 text-xs text-[var(--color-muted)]">
                 {t('mot.footer', { years })}{' '}
-                <a href={SOURCE_URL} target="_blank" rel="noopener noreferrer" className="underline">
+                <ExternalLink href={SOURCE_URL} className="underline">
                   data.gov.uk
-                </a>
+                </ExternalLink>
               </p>
 
               <ReadGuideLink guide={RECALLS_PATH} />

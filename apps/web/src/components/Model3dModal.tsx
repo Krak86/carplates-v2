@@ -6,6 +6,7 @@ import type { Model3d } from '@carplates/shared'
 
 import ShareButton from '@/components/ShareButton'
 import { cn } from '@/lib/cn'
+import ExternalLink from '@/components/ExternalLink'
 
 type Props = {
   /** Most-liked first. */
@@ -75,32 +76,25 @@ export default function Model3dModal({ models, label, initialUid, hideShare, onC
         />
 
         <p className="mt-2 text-sm text-[var(--color-muted)]">
-          <a
+          <ExternalLink
             href={`https://sketchfab.com/3d-models/${current.uid}`}
-            target="_blank"
             rel="noopener noreferrer nofollow"
             className="font-semibold underline"
           >
             {current.name}
-          </a>{' '}
+          </ExternalLink>{' '}
           {t('model3d.by')}{' '}
-          <a
-            href={current.authorUrl}
-            target="_blank"
-            rel="noopener noreferrer nofollow"
-            className="font-semibold underline"
-          >
+          <ExternalLink href={current.authorUrl} rel="noopener noreferrer nofollow" className="font-semibold underline">
             {current.authorName}
-          </a>{' '}
+          </ExternalLink>{' '}
           {t('model3d.on')}{' '}
-          <a
+          <ExternalLink
             href="https://sketchfab.com"
-            target="_blank"
             rel="noopener noreferrer nofollow"
             className="font-semibold underline"
           >
             Sketchfab
-          </a>
+          </ExternalLink>
           {current.license ? ` · ${current.license}` : ''}. {t('model3d.note')}
         </p>
 

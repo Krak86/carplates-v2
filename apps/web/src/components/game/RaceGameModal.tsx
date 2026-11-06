@@ -21,6 +21,7 @@ import {
   startRegion,
   type RacerConfig
 } from '@/lib/racer/config'
+import ExternalLink from '@/components/ExternalLink'
 
 type Props = {
   /** `#rrggbb` of the looked-up car — the starting paint. */
@@ -122,14 +123,13 @@ export default function RaceGameModal({
 
         <p className="mt-3 text-xs text-[var(--color-muted)]">
           {t('race.credit')}{' '}
-          <a
+          <ExternalLink
             href="https://github.com/jakesgordon/javascript-racer"
-            target="_blank"
             rel="noopener noreferrer nofollow"
             className="underline"
           >
             javascript-racer
-          </a>{' '}
+          </ExternalLink>{' '}
           · Jake Gordon · MIT
         </p>
 

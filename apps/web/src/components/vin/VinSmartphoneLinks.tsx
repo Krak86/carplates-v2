@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import ExternalLink from '@/components/ExternalLink'
 
 const CARPLAY_URL = 'https://www.apple.com/ios/carplay/available-models/'
 const ANDROID_AUTO_URL = 'https://www.android.com/auto/'
@@ -14,13 +15,13 @@ export default function VinSmartphoneLinks(): ReactNode {
   return (
     <p className="m-0 text-sm text-[var(--color-muted)]">
       {t('vin.phone.hint')}{' '}
-      <a href={CARPLAY_URL} target="_blank" rel="noopener noreferrer" className="underline">
+      <ExternalLink href={CARPLAY_URL} className="underline">
         CarPlay
-      </a>
+      </ExternalLink>
       {' · '}
-      <a href={ANDROID_AUTO_URL} target="_blank" rel="noopener noreferrer" className="underline">
+      <ExternalLink href={ANDROID_AUTO_URL} className="underline">
         Android Auto
-      </a>
+      </ExternalLink>
     </p>
   )
 }

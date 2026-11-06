@@ -832,3 +832,13 @@ Plan: [compare-plan.md](compare-plan.md). Phases 1-3 and the client side of phas
 - **History search** (`routes/history/helpers.ts` `filterHistory`): matches value or label as text, and the plate through `normalizePlate` so Latin and Cyrillic input meet.
 - **Generation engines** (`WikiSpecs.tsx`): with at least one engine matching the car, the rest sit in a nested collapsed "Other engines" group; with no match all stay open.
 - The advanced-search "+" has no tooltip (removed on purpose: it covered the chips below); keep the `aria-label` only.
+
+## Link markers (2026-11-06)
+
+One glyph per destination: `→` a route of this app · `↗` another site (new tab) · `↓` / `↑` a jump inside the card · `⤢` opens a popup (modal / dialog) on the same page.
+`▶` stays for "watch video" (opens `YouTubeModal` / `CrashVideoModal`), content emoji stay as the leading icon of chips.
+
+- **External links use `components/ExternalLink.tsx`**: `target="_blank"`, `rel`, trailing `↗`, `sr-only` `field.opensNewTab`. `marker={false}` for image / card links; pass `rel="noopener noreferrer nofollow"` for third-party content.
+  The old `SizeExternalLink` and the local `ExternalLink` copies are gone. Hand-written `<a target="_blank">` that already carry `↗` (card-style links) were left as is.
+- Modal openers (buttons) end in `⤢`: AUTO.RIA / auction-site rows, MOT car calculator, translate dialog, market "show more", 3D / 360° chips, race chip and banner.
+- Not marked on purpose: footer (`QuickLinks`), header, sidebar, inline list rows, image/photo links, the losses infographic download.

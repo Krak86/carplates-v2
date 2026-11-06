@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 
 import type { ExternalGame } from '@/routes/play/games'
+import ExternalLink from '@/components/ExternalLink'
 
 type Props = {
   game: ExternalGame
@@ -36,9 +37,9 @@ export default function ExternalGameModal({ game, onClose }: Props): ReactNode {
         <div className="mb-3 flex items-center justify-between gap-3">
           <div className="truncate font-semibold">{title}</div>
           <div className="flex shrink-0 items-center gap-3 text-sm">
-            <a href={game.url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+            <ExternalLink href={game.url} className="text-primary hover:underline">
               {t('play.external.openTab')}
-            </a>
+            </ExternalLink>
             <button
               type="button"
               onClick={onClose}

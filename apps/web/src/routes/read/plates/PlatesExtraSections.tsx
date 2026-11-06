@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import ExternalLink from '@/components/ExternalLink'
 
 import Card from '@/components/ui/Card'
 import { pick } from '@/routes/read/helpers'
@@ -22,19 +23,6 @@ const LEGACY_PHOTOS = [
   { file: 'tractor-ba', plate: '24320 ВА' },
   { file: 'tractor-ce', plate: '03430 СЕ' }
 ] as const
-
-type LinkProps = {
-  href: string
-  children: ReactNode
-}
-
-function ExternalLink({ href, children }: LinkProps): ReactNode {
-  return (
-    <a href={href} target="_blank" rel="noopener noreferrer" className="text-primary">
-      {children} ↗
-    </a>
-  )
-}
 
 /** Soviet-era plates with photos: what they look like and why the registry rarely has them. */
 export function LegacySection(): ReactNode {
@@ -103,7 +91,9 @@ export function SpecialSection(): ReactNode {
 
               {type.link && (
                 <p className="mt-1 text-sm">
-                  <ExternalLink href={type.link.url}>{pick(type.link.label, i18n.language)}</ExternalLink>
+                  <ExternalLink href={type.link.url} className="text-primary">
+                    {pick(type.link.label, i18n.language)}
+                  </ExternalLink>
                 </p>
               )}
             </li>
@@ -134,15 +124,21 @@ export function OrderSection(): ReactNode {
       <p className="mb-3 text-sm text-muted">{pick(ORDER_RULES, i18n.language)}</p>
 
       <p className="mb-4 flex flex-wrap gap-x-4 gap-y-1">
-        <ExternalLink href={DIIA_ORDER_URL}>{t('read.plates.orderCabinet')}</ExternalLink>
-        <ExternalLink href={ORDER_VIDEO_URL}>{t('read.plates.orderVideo')}</ExternalLink>
+        <ExternalLink href={DIIA_ORDER_URL} className="text-primary">
+          {t('read.plates.orderCabinet')}
+        </ExternalLink>
+        <ExternalLink href={ORDER_VIDEO_URL} className="text-primary">
+          {t('read.plates.orderVideo')}
+        </ExternalLink>
       </p>
 
       <h3 className="mb-1 text-sm font-medium">{t('read.plates.sources')}</h3>
       <ul className="list-disc space-y-0.5 pl-5 text-sm">
         {SOURCES.map(source => (
           <li key={source.url}>
-            <ExternalLink href={source.url}>{pick(source.label, i18n.language)}</ExternalLink>
+            <ExternalLink href={source.url} className="text-primary">
+              {pick(source.label, i18n.language)}
+            </ExternalLink>
           </li>
         ))}
       </ul>

@@ -9,6 +9,7 @@ import { toIntlLocale } from '@/lib/intl'
 import { ALARM_FILL, levelFill } from '@/routes/alarms/helpers'
 import type { AlarmMapOverlayContext } from '@/routes/alarms/AlarmMap'
 import StatsMapSkeleton from '@/routes/stats/StatsMapSkeleton'
+import ExternalLink from '@/components/ExternalLink'
 
 const AlarmMap = lazy(() => import('@/routes/alarms/AlarmMap'))
 
@@ -121,14 +122,12 @@ export default function AlarmMapCard({
 
           <p className="mt-3 text-xs text-[var(--color-muted)]">
             {t('alarms.movement')}{' '}
-            <a
+            <ExternalLink
               href="https://alerts.in.ua"
-              target="_blank"
-              rel="noopener noreferrer"
               className="underline underline-offset-2 hover:text-[var(--color-fg)]"
             >
               {t('alarms.movementLink')}
-            </a>
+            </ExternalLink>
           </p>
 
           {children}
