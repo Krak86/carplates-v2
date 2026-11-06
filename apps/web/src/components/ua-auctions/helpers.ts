@@ -164,6 +164,23 @@ export function formatPrice(
   )
 }
 
+/** Same as `formatPrice` but abbreviated (e.g. "2,3 млрд грн") for tiles too narrow for a nine-figure sum. */
+export function formatPriceCompact(
+  uah: number | null,
+  currency: Currency,
+  rates: Rates | null,
+  locale: string
+): string | null {
+  if (uah === null) return null
+  const shown = effectiveLotCurrency(currency, rates)
+  return new Intl.NumberFormat(locale, {
+    style: 'currency',
+    currency: shown,
+    notation: 'compact',
+    maximumFractionDigits: 1
+  }).format(convertUah(uah, shown, rates))
+}
+
 /** Lots worth a marker in the owner-history timeline: every sold lot, plus the newest lot when it did not sell. */
 export function timelineLots(lots: readonly AuctionLot[]): AuctionLot[] {
   return lots.filter((l, i) => l.sold || i === 0)

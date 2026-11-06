@@ -12,6 +12,8 @@ export const ROLLUP_CACHE = 'public, max-age=300'
 export const STATS_CACHE = 'public, max-age=300, s-maxage=21600, stale-while-revalidate=3600'
 
 /** Air-raid alerts: our own poller refreshes every ~30 s, so the browser and the edge may reuse a copy for 30 s (never longer: stale = wrong). */
+/** War-loss figures: change once a day, but the new day should show within ~half an hour of the upstream publishing it. */
+export const LOSSES_CACHE = 'public, max-age=300, s-maxage=1800, stale-while-revalidate=600'
 export const ALARM_CACHE = 'public, max-age=30, s-maxage=30'
 
 /** Per-model lookups (vdb, rdw, wiki): browser 1 h, Cloudflare edge 1 day (`s-maxage`); the data only changes on ingest or re-scrape. */

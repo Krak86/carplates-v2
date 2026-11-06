@@ -50,30 +50,29 @@ export default function HomeAuctionsSection(): ReactNode {
               const carPath = carPathOf(lot)
 
               return (
-                <li
-                  key={lotKey(lot)}
-                  className={cn('flex flex-wrap items-baseline gap-x-3 gap-y-0.5 py-2 pl-2', lotSourceAccent(lot))}
-                >
-                  <span className="font-semibold">
-                    {[lot.make, lot.model, lot.year].filter(Boolean).join(' ') || lot.title}
-                  </span>
+                <li key={lotKey(lot)} className={cn('flex flex-col gap-0.5 py-2 pl-3', lotSourceAccent(lot))}>
+                  <div className="flex items-baseline justify-between gap-3">
+                    <span className="min-w-0 font-semibold">
+                      {[lot.make, lot.model, lot.year].filter(Boolean).join(' ') || lot.title}
+                    </span>
+                    {price && <span className="shrink-0 text-sm font-medium tabular-nums">{price}</span>}
+                  </div>
 
-                  {carPath && (
-                    <Link
-                      viewTransition
-                      to={carPath}
-                      className="font-mono text-sm text-[var(--color-primary)] underline"
-                    >
-                      {lot.plate ?? lot.vin} <span aria-hidden>→</span>
-                      <span className="sr-only">{t('auctions.page.openCar')}</span>
-                    </Link>
-                  )}
-
-                  <span className="min-w-0 flex-1 text-xs text-[var(--color-muted)]">
-                    {[formatLotMonth(lotMonthOf(lot), locale), lot.region].filter(Boolean).join(' · ')}
-                  </span>
-
-                  {price && <span className="text-sm tabular-nums">{price}</span>}
+                  <div className="flex items-baseline justify-between gap-3 text-xs text-[var(--color-muted)]">
+                    <span className="min-w-0">
+                      {[formatLotMonth(lotMonthOf(lot), locale), lot.region].filter(Boolean).join(' · ')}
+                    </span>
+                    {carPath && (
+                      <Link
+                        viewTransition
+                        to={carPath}
+                        className="shrink-0 font-mono text-sm text-[var(--color-primary)] underline"
+                      >
+                        {lot.plate ?? lot.vin} <span aria-hidden>→</span>
+                        <span className="sr-only">{t('auctions.page.openCar')}</span>
+                      </Link>
+                    )}
+                  </div>
                 </li>
               )
             })}

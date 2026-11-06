@@ -40,4 +40,6 @@ export type Dataset = {
   refreshedOn?: string
   /** The newest record date is a month, not a day (the source publishes whole months): shown as "November 2026". */
   latestByMonth?: boolean
+  /** i18n key of an extra line about how this source is synced (shown under its name). */
+  noteKey?: string
 }
