@@ -350,6 +350,7 @@ const FEATURES = [
   'showroom',
   'alarms',
   'losses',
+  'recovery',
   'auctions',
   'uaAuctions',
   'market',
