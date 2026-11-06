@@ -11,7 +11,7 @@ import { useOfflineAvailability } from '@/components/use-offline-availability'
 import { useIsSyncing } from '@/components/use-saved-sync-actions'
 import { cn } from '@/lib/cn'
 import { historyQuery } from '@/lib/queries'
-import { formatMonthLabel, groupByMonth } from '@/routes/history/helpers'
+import { filterHistory, formatMonthLabel, groupByMonth } from '@/routes/history/helpers'
 import { useHistoryActions } from '@/routes/history/use-history-actions'
 
 // Lazy-loaded (see App.tsx).
@@ -21,6 +21,7 @@ export default function HistoryRoute(): ReactNode {
   const { deleteOne, deleteAll } = useHistoryActions()
   const isSavedOffline = useOfflineAvailability()
   const isSyncing = useIsSyncing()
+  const [query, setQuery] = useState('')
   const [collapsedMonths, setCollapsedMonths] = useState<Set<string>>(new Set())
 
   const handleToggleMonth = (key: string): void => {
@@ -36,7 +37,8 @@ export default function HistoryRoute(): ReactNode {
     if (window.confirm(t('history.confirmClearAll'))) deleteAll.mutate()
   }
 
-  const groups = history.data ? groupByMonth(history.data) : []
+  const groups = history.data ? groupByMonth(filterHistory(history.data, query)) : []
+  const hasEntries = !!history.data && history.data.length > 0
 
   return (
     <div className="mx-auto w-full max-w-6xl">
@@ -65,7 +67,21 @@ export default function HistoryRoute(): ReactNode {
         </p>
       )}
 
-      {history.isSuccess && groups.length === 0 && <p className="text-[var(--color-muted)]">{t('history.empty')}</p>}
+      {hasEntries && (
+        <input
+          type="search"
+          value={query}
+          onChange={e => setQuery(e.target.value)}
+          placeholder={t('history.search')}
+          aria-label={t('history.search')}
+          autoComplete="off"
+          className="mb-3 w-full rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm"
+        />
+      )}
+
+      {history.isSuccess && groups.length === 0 && (
+        <p className="text-[var(--color-muted)]">{t(hasEntries ? 'history.noMatch' : 'history.empty')}</p>
+      )}
 
       <div className="space-y-3">
         {groups.map(group => {

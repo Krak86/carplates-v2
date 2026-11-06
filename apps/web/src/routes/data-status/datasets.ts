@@ -178,7 +178,9 @@ export const DATASETS: readonly Dataset[] = [
     name: 'UN OCHA COD-AB: oblast, raion and community outlines (2020)',
     to: '/alarms',
     cadence: 'frozen',
-    refreshedOn: '2026-11-04'
+    refreshedOn: '2026-11-04',
+    // Shapes in public/ukraine-alarm-{oblasts,raions,hromadas}.geojson: 27 + 139 + 1769
+    staticCount: 1935
   },
 
   // Asked per request

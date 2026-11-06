@@ -85,7 +85,19 @@ describe('catalog', () => {
 
   it('groups by cadence in display order and counts statuses', () => {
     expect(groupByCadence(DATASETS)[0]?.cadence).toBe('minutely')
-    expect(groupByCadence(DATASETS)[1]?.cadence).toBe('daily')
+    expect(groupByCadence(DATASETS)[1]?.cadence).toBe('live')
     expect(countByStatus(['fresh', 'fresh', 'stale'])).toEqual({ fresh: 2, stale: 1 })
+  })
+})
+
+describe('scheduled job coverage', () => {
+  it('has a dataset for every job in the cron file', async () => {
+    const { readFileSync } = await import('node:fs')
+    const { resolve } = await import('node:path')
+    const cron = readFileSync(resolve(process.cwd(), '../../infra/vps/ingest.cron'), 'utf8')
+    const scheduled = [...cron.matchAll(/^[^#\n]*run-ingest\.sh (\S+)/gm)].map(m => m[1])
+    expect(scheduled.length).toBeGreaterThan(0)
+    const covered = new Set(DATASETS.map(d => d.job))
+    expect(scheduled.filter(job => !covered.has(job))).toEqual([])
   })
 })

@@ -84,6 +84,18 @@ export default function WikiSpecs({ brand, model, year, own, kind, openSignal = 
   const span = generationSpanText({ yearFrom: match.yearFrom, yearTo: match.yearTo ?? null }, t)
   const engines = sortEnginesByFit(match.engines ?? [], own)
   const hasMatch = engines.some(e => engineMatchesCar(e, own))
+  // With a match, the engines that do not fit this car sit in a collapsed group; without one, all stay in view.
+  const matchingEngines = hasMatch ? engines.filter(e => engineMatchesCar(e, own)) : engines
+  const otherEngines = hasMatch ? engines.filter(e => !engineMatchesCar(e, own)) : []
+  const renderEngine = (e: (typeof engines)[number]): ReactNode => (
+    <WikiEngineCard
+      key={`${e.raw}-${e.displacementCc}-${e.powerKw}-${e.chassisCodes?.join()}-${e.engineCodes?.join()}`}
+      engine={e}
+      matches={engineMatchesCar(e, own)}
+      vsCar={engineVsCar(e, own, t)}
+      sourceLang={sourceTextLang(match.enginesSource)}
+    />
+  )
   const curated = isCuratedSource(match.enginesSource ?? match.dimensionsSource ?? match.driveSource)
   const yearOf = curated ? null : generationYearOf(year, match.yearFrom, match.yearTo)
   const dims = match.dimensions
@@ -175,17 +187,23 @@ export default function WikiSpecs({ brand, model, year, own, kind, openSignal = 
               }
             >
               <p className="text-xs text-[var(--color-muted)]">{t('wikispec.hint.engines')}</p>
-              <div className="divide-y divide-[var(--color-border)]">
-                {engines.map(e => (
-                  <WikiEngineCard
-                    key={`${e.raw}-${e.displacementCc}-${e.powerKw}-${e.chassisCodes?.join()}-${e.engineCodes?.join()}`}
-                    engine={e}
-                    matches={engineMatchesCar(e, own)}
-                    vsCar={engineVsCar(e, own, t)}
-                    sourceLang={sourceTextLang(match.enginesSource)}
-                  />
-                ))}
-              </div>
+              <div className="divide-y divide-[var(--color-border)]">{matchingEngines.map(renderEngine)}</div>
+              {otherEngines.length > 0 && (
+                <VinToggleSection
+                  nested
+                  bordered={false}
+                  icon="📂"
+                  showLabel={t('vin.group.show')}
+                  hideLabel={t('vin.group.hide')}
+                  title={
+                    <>
+                      {t('wikispec.enginesOther')} <SectionCount count={otherEngines.length} />
+                    </>
+                  }
+                >
+                  <div className="divide-y divide-[var(--color-border)]">{otherEngines.map(renderEngine)}</div>
+                </VinToggleSection>
+              )}
               <WikiSourceLine source={match.enginesSource} />
             </VinToggleSection>
           )}

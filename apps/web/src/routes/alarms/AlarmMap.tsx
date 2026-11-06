@@ -152,10 +152,7 @@ export default function AlarmMap({
     'grid size-8 place-items-center rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] text-lg leading-none hover:bg-[var(--color-border)] disabled:opacity-40'
 
   return (
-    <div
-      ref={frameRef}
-      className={isFullscreen ? 'relative flex h-full w-full items-center bg-[var(--color-bg)]' : 'relative'}
-    >
+    <div ref={frameRef} className={isFullscreen ? 'relative h-full w-full bg-[var(--color-bg)]' : 'relative'}>
       <div className="absolute top-1 right-1 z-10 flex flex-col gap-1">
         <button
           type="button"
@@ -187,11 +184,13 @@ export default function AlarmMap({
       <svg
         ref={svgRef}
         viewBox={`0 0 ${MAP_WIDTH} ${MAP_HEIGHT}`}
-        className="h-auto"
+        // Fullscreen: the svg fills the screen and the whole country stays in view (zoom in for detail).
+        preserveAspectRatio="xMidYMid meet"
+        className={isFullscreen ? undefined : 'h-auto'}
         style={{
           width: '100%',
-          maxHeight: isFullscreen ? '100vh' : undefined,
-          touchAction: zoom > 1 ? 'none' : 'pan-y',
+          height: isFullscreen ? '100%' : undefined,
+          touchAction: zoom > 1 || isFullscreen ? 'none' : 'pan-y',
           cursor: 'grab',
           userSelect: 'none'
         }}
@@ -206,7 +205,7 @@ export default function AlarmMap({
             return
           }
           // Touch keeps scrolling the page at 1x; a mouse can always drag.
-          if (zoom <= 1 && e.pointerType !== 'mouse') return
+          if (zoom <= 1 && e.pointerType !== 'mouse' && !isFullscreen) return
           e.currentTarget.setPointerCapture(e.pointerId)
           dragRef.current = { x: e.clientX, y: e.clientY, ox: offset.x, oy: offset.y }
         }}
@@ -222,7 +221,11 @@ export default function AlarmMap({
           const drag = dragRef.current
           if (!drag) return
           if (Math.hypot(e.clientX - drag.x, e.clientY - drag.y) > 4) movedRef.current = true
-          const scale = MAP_WIDTH / e.currentTarget.getBoundingClientRect().width
+          const rect = e.currentTarget.getBoundingClientRect()
+          const pxPerUnit = isFullscreen
+            ? Math.min(rect.width / MAP_WIDTH, rect.height / MAP_HEIGHT)
+            : rect.width / MAP_WIDTH
+          const scale = 1 / pxPerUnit
           const limitX = (MAP_WIDTH * zoom) / 2
           const limitY = (MAP_HEIGHT * zoom) / 2
           setOffset({

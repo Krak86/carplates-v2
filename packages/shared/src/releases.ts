@@ -20,6 +20,24 @@ export const RELEASES: readonly ReleaseDay[] = [
     items: [
       item(
         'new',
+        'На /data-status: скільки записів ми зберігаємо по кожному джерелу, хронологія останніх оновлень (клік веде до картки джерела) та швидкі посилання на групи за частотою; «Наживо» і «Щохвилини» тепер першими',
+        'На /data-status: сколько записей мы храним по каждому источнику, хронология последних обновлений (клик ведёт к карточке источника) и быстрые ссылки на группы по частоте; «Вживую» и «Каждую минуту» теперь первыми',
+        'On /data-status: how many records we hold per source, a timeline of the latest updates (a click jumps to the source\'s tile) and quick links to the frequency groups; "Live" and "Every minute" now come first'
+      ),
+      item(
+        'new',
+        'Пошук в історії пошуку: введіть номер, VIN, марку чи модель, і список відфільтрується (номер можна вводити кирилицею чи латиницею)',
+        'Поиск по истории поиска: введите номер, VIN, марку или модель, и список отфильтруется (номер можно вводить кириллицей или латиницей)',
+        'Search inside your search history: type a plate, VIN, make or model to filter the list (a plate works in Cyrillic or Latin letters)'
+      ),
+      item(
+        'improved',
+        'Мапа тривог на весь екран показує всю країну й не залишає чорних смуг; у характеристиках покоління двигуни, що не збігаються з вашим авто, згорнуто в групу «Інші двигуни»; підказка біля «+» розширеного пошуку прибрана',
+        'Карта тревог на весь экран показывает всю страну и не оставляет чёрных полос; в характеристиках поколения двигатели, не совпадающие с вашим авто, свёрнуты в группу «Другие двигатели»; подсказка у «+» расширенного поиска убрана',
+        'The full-screen alert map shows the whole country without black bars; in the generation specs the engines that do not match your car are folded into an "Other engines" group; the hint by the advanced-search "+" is gone'
+      ),
+      item(
+        'new',
         'Список порівняння: кнопка «Додати до порівняння» на картці номера, VIN, моделі, в обраному та історії (список зберігається в браузері), на /compare його видно кольоровими мітками з вибором слота A або B. Посилання на порівняння тепер коротке (номери латиницею) і має власний попередній перегляд з обома авто; у слоті є стрілка до картки авто та підказка «?» про джерела даних',
         'Список сравнения: кнопка «Добавить к сравнению» на карточке номера, VIN, модели, в избранном и истории (список хранится в браузере), на /compare он виден цветными метками с выбором слота A или B. Ссылка на сравнение теперь короткая (номера латиницей) и имеет собственный предпросмотр с обоими авто; в слоте есть стрелка к карточке авто и подсказка «?» об источниках данных',
         'Compare list: an "Add to compare" button on the plate card, VIN card, model page, favourites and history (the list is kept in your browser); /compare shows it as colour-coded chips you can put into slot A or B. Compare links are now short (plates in Latin letters) with their own link preview naming both cars; each slot has an arrow to the car page and a "?" explaining the data sources'

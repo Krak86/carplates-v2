@@ -1311,6 +1311,13 @@ Write-up: `docs/plan-done.md` "Market offers (CarAPIS)"; conventions: `docs/feat
 
 - [ ] **After deploy:** `curl -sI https://carsua.app/api/losses | grep -i cache` shows `s-maxage=1800`; if Cloudflare keeps an older `s-maxage`, edit the Cache Rule to respect the origin header. Next morning check /alarms shows the new day within ~1 h of the General Staff post.
 
+## Data status counts + history, history search, small UI ✅ 2026-11-06, awaiting deploy
+
+✅ /data-status record counts, update-history timeline with chips, live groups first; history search; "Other engines" fold; fullscreen alert map shows the whole country; "+" tooltip removed. Write-up `docs/plan-done.md` "Data status counts + run history".
+
+- [ ] **After deploy:** `/data-status` shows "Records in our database" on every row and the history card lists real runs; click a chip and a row (smooth scroll + flash).
+- [ ] Browser-check on a phone: fullscreen alert map, history search box, "Other engines" group on a Kia Ceed page.
+
 ## Later, conditional
 
 Checked and skipped: Derzhstat "Транспорт України" yearbook (2026-11-05) - national transport activity totals, no vehicle/fleet/accident data; see `DATASETS_PLAN.md` "Skipped (with reason)".

@@ -15,29 +15,39 @@ type Props = {
   datasets: readonly Dataset[]
   jobs: readonly JobStatus[]
   latest: Readonly<Record<string, string | null>>
+  /** Rows we hold per dataset id. */
+  counts: Readonly<Record<string, number>>
 }
 
-export default function DatasetGroup({ cadence, datasets, jobs, latest }: Props): ReactNode {
+export default function DatasetGroup({ cadence, datasets, jobs, latest, counts }: Props): ReactNode {
   const { t, i18n } = useTranslation()
+  const numberFormat = new Intl.NumberFormat(toIntlLocale(i18n.language))
   const dateFormat = new Intl.DateTimeFormat(toIntlLocale(i18n.language), { dateStyle: 'medium' })
   const dayFormat = new Intl.DateTimeFormat(toIntlLocale(i18n.language), { dateStyle: 'medium', timeZone: 'UTC' })
 
   return (
-    <Card id={cadence} className="space-y-2">
-      <h2 className="text-lg font-semibold">{t(`dataStatus.cadence.${cadence}`)}</h2>
+    <Card id={cadence} className="scroll-mt-20 space-y-2">
+      <h2 className="text-lg font-semibold">
+        {t(`dataStatus.cadence.${cadence}`)} ({datasets.length})
+      </h2>
       <p className="text-sm text-muted">{t(`dataStatus.cadence.${cadence}.desc`)}</p>
 
       <ul className="divide-y divide-border text-sm">
         {datasets.map(dataset => {
           const synced = lastSync(dataset, jobs)
           const newest = latest[dataset.id]
+          const rows = counts[dataset.id] ?? dataset.staticCount
           const newestLabel = newest
             ? dataset.latestByMonth
               ? monthYearLabel(newest, toIntlLocale(i18n.language))
               : dayFormat.format(new Date(`${newest}T00:00:00Z`))
             : null
           return (
-            <li key={dataset.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 py-2">
+            <li
+              key={dataset.id}
+              id={`dataset-${dataset.id}`}
+              className="flex scroll-mt-20 flex-wrap items-center gap-x-3 gap-y-1 py-2 target:bg-primary/10"
+            >
               <span className="min-w-0 flex-1 basis-56">
                 {dataset.to ? (
                   <Link viewTransition to={dataset.to} className="text-primary hover:underline">
@@ -55,6 +65,11 @@ export default function DatasetGroup({ cadence, datasets, jobs, latest }: Props)
                         ? t('dataStatus.byRequest')
                         : t('dataStatus.byHand')}
                 </span>
+                {rows !== undefined && (
+                  <span className="mt-0.5 block text-xs text-muted">
+                    {t('dataStatus.records', { count: numberFormat.format(rows) })}
+                  </span>
+                )}
                 {dataset.noteKey && <span className="mt-0.5 block text-xs text-muted">{t(dataset.noteKey)}</span>}
               </span>
               <span className="text-muted">

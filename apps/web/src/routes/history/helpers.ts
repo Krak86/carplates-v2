@@ -1,9 +1,24 @@
+import { normalizePlate } from '@carplates/shared'
+
 import type { HistoryEntry } from '@/lib/history-db'
 import { toIntlLocale } from '@/lib/intl'
 
 export type HistoryGroup = {
   key: string
   entries: HistoryEntry[]
+}
+
+/** Entries whose plate / VIN or label contains the query; a plate typed in either alphabet matches. An empty query keeps all. */
+export function filterHistory(entries: HistoryEntry[], query: string): HistoryEntry[] {
+  const text = query.trim().toLowerCase()
+  if (!text) return entries
+  const plate = normalizePlate(text)
+  return entries.filter(
+    e =>
+      e.value.toLowerCase().includes(text) ||
+      (e.label ?? '').toLowerCase().includes(text) ||
+      (plate.length > 0 && normalizePlate(e.value).includes(plate))
+  )
 }
 
 /** Groups already-DESC-sorted entries by calendar month, preserving that order. */
