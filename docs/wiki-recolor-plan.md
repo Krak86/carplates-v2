@@ -1,6 +1,6 @@
 # Wiki photo colour filter + extra photos
 
-Status: **planned 2026-11-06, nothing built yet.** Prototype code and findings are in `docs/wiki-recolor/` (read "What the research showed" first).
+Status: **steps 1-2 built 2026-11-06; steps 3-9 open.** Prototype code and findings are in `docs/wiki-recolor/` (read "What the research showed" first).
 Tracked in PLAN.md "Wiki photo colour filter". Built-state conventions go to features-reference.md when done.
 
 ## Goal
@@ -107,4 +107,14 @@ Phase A (steps 1-6) is the recolour on the existing hero photo. Phase B (7-8) ad
 
 ## Handoff
 
-Next session: read this file and `docs/wiki-recolor/README.md`, then start at step 1. Do not commit unless asked.
+**Done (steps 1-2).** `packages/shared/src/paintColor.ts` (+ test, exported, shared rebuilt). `scripts/src/wiki-paint-core.ts` (pure `scanPaint`, `applyPaint`, `carComponents`, `gaussianBlur`; constants `PAINT_ALGO` = 1, `PAINT_SCAN_WIDTH` = 640, `SHADE_SCALE`) and `scripts/src/wiki-paint.ts`
+(`pnpm ingest:wiki-paint --limit N --brand X --random --rps 1 --out DIR`: read-only on the DB, writes results.json + mask webp + recolour preview to `scripts/<DIR>`). Tests use synthetic fixtures built in code.
+
+**Mask contract (steps 3-5 must honour it).** RGBA at the scan size: RGB = shading `min(g, 3) * 255 / 3` (decode `g = byte / SHADE_SCALE`), A = paint weight. Client maths = `applyPaint`: `out = target * g^0.9`, highlights above g 1.6 blend to white, composited by alpha.
+`scanPaint` returns `{status:'ok', bucket, lab, paintLab, bodyArea, paintShare, mask}` or `{status:'skip', reason, bodyArea}` (reasons = `PAINT_SKIP_REASONS`). The target-dependent skip (`isClosePaint(lab, target)`) is decided at runtime, never stored.
+
+**Gate tuning.** Random samples of 50 photos: `ok` fell from about 83 % (prototype gates) to about 56 % after the glass-band lightness match, `dark_paint` (cluster L < 32), `dark_body` (mid body band median L < 34 and chroma < 18) and `MIN_PAINT_SHARE` 0.20.
+Still weak: mottled specular paint (lime Lamborghini, Camaro), a touching neighbour car can be tinted, race / livery cars have no dedicated gate. After any algorithm change re-scan a sample and bump `PAINT_ALGO`.
+
+**Next: step 3** (migration + `schema.ts` + db export + the upsert in `wiki-paint.ts`, `algo` column, skip rows stored too), then 4-6. Read the migrations list for the next free NNNN and the Deploy checklist first.
+Before the rollout (step 9) run `SELECT count(*) FROM registry.wiki_image WHERE status = 'ok'`. Do not commit unless asked.

@@ -1322,7 +1322,8 @@ Write-up: `docs/plan-done.md` "Market offers (CarAPIS)"; conventions: `docs/feat
 
 Plan in 9 steps, [docs/wiki-recolor-plan.md](docs/wiki-recolor-plan.md); prototype and findings in `docs/wiki-recolor/`. Recolour the hero photo to the registry colour (toggle top-right, swatch, "colour filter" text, skip when the colour already matches), then candidate photos per model and a photo strip under the hero.
 
-- [ ] Phase A: shared colour model, paint scan CLI, migration, API, web filter, docs (steps 1-6)
+- [x] Steps 1-2 (2026-11-06): shared colour model (`paintColor.ts`), paint scan core + CLI (`wiki-paint-core.ts`, `wiki-paint.ts`), gates tuned on 3 random samples of 50
+- [ ] Phase A rest: migration + schema + CLI upsert (3), API (4), web filter (5), docs (6)
 - [ ] Phase B: candidate photos + bottom strip (steps 7-8)
 - [ ] Phase C: rollout scan, job, data-status row (step 9)
 
