@@ -136,6 +136,15 @@ export const DATASETS: readonly Dataset[] = [
   { id: 'videos', name: 'Videos: infocar, YouTube', cadence: 'halfYearly', refreshedOn: '2026-10-11' },
   { id: 'wikiImages', name: 'Wikipedia: model photos', to: '/cars', cadence: 'halfYearly', refreshedOn: '2026-10-13' },
   {
+    id: 'wikiPaint',
+    name: 'Wikipedia: photo colour filter (our own scan)',
+    to: '/cars',
+    cadence: 'daily',
+    job: 'wiki-paint',
+    noteKey: 'dataStatus.note.wikiPaint',
+    refreshedOn: '2026-11-06'
+  },
+  {
     id: 'models3d',
     name: '3D and 360° models: Sketchfab, carshow360, winner360',
     cadence: 'halfYearly',

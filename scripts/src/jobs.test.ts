@@ -13,6 +13,7 @@ describe('jobs', () => {
     expect(isJobName('dtp-hazards')).toBe(true)
     expect(isJobName('rdw-recalls')).toBe(true)
     expect(isJobName('ca-recalls')).toBe(true)
+    expect(isJobName('wiki-paint')).toBe(true)
     expect(isJobName('toString')).toBe(false)
     expect(isJobName('nope')).toBe(false)
   })

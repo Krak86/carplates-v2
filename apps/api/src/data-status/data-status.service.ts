@@ -42,6 +42,7 @@ const COUNT_TABLES: Readonly<Record<string, readonly string[]>> = {
   reviews: ['topgear_reviews', 'press_reviews'],
   videos: ['car_videos', 'youtube_videos', 'site_videos'],
   wikiImages: ['wiki_image'],
+  wikiPaint: ['wiki_image_paint'],
   models3d: ['car_models_3d', 'car_models_360', 'winner_360'],
   generations: ['model_generations'],
   wikispecs: ['model_spec_wiki'],

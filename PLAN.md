@@ -1331,9 +1331,11 @@ Write-up: `docs/plan-done.md` "Market offers (CarAPIS)"; conventions: `docs/feat
 Plan in 9 steps, [docs/wiki-recolor-plan.md](docs/wiki-recolor-plan.md); prototype and findings in `docs/wiki-recolor/`. Recolour the hero photo to the registry colour (toggle top-right, swatch, "colour filter" text, skip when the colour already matches), then candidate photos per model and a photo strip under the hero.
 
 - [x] Steps 1-2 (2026-11-06): shared colour model (`paintColor.ts`), paint scan core + CLI (`wiki-paint-core.ts`, `wiki-paint.ts`), gates tuned on 3 random samples of 50
-- [ ] Phase A rest: migration + schema + CLI upsert (3), API (4), web filter (5), docs (6)
+- [x] Phase A rest (2026-11-06): migration 0101 + schema + CLI upsert (3), API (4), web filter (5, browser-checked on real scanned rows), docs (6)
 - [ ] Phase B: candidate photos + bottom strip (steps 7-8)
-- [ ] Phase C: rollout scan, job, data-status row (step 9)
+- [x] Phase C code (2026-11-06): `wiki-paint` job + cron (00:30) + `/data-status` row + orphan cleanup + popularity order + review contact sheets
+- [ ] After deploy (owner): apply migration 0101 on the VPS; Cloudflare Cache Rule `/api/wiki/recolor` + `starts_with /api/wiki/paint/` (docs/deploy.md); optional healthchecks.io check + secret `HC_PING_WIKI_PAINT` (daily, 1 d + 3 h grace); the first night run downloads the model (check `registry.job_runs` + `/data-status` a day later)
+- [ ] Gallery review of the 100-photo sample (47 ok / 53 skip; 6 sheets) (`scripts/.data/wiki-paint/review-2026-11-06/sheet-*.jpg`): tune gates only after the owner has seen it; then bump `PAINT_ALGO`
 
 ## Later, conditional
 

@@ -28,3 +28,6 @@ PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 # Recall registers: RDW (NL) monthly on the 2nd, Transport Canada quarterly on the 3rd of Jan/Apr/Jul/Oct (~200 MB download, hence the quiet slot).
 55 5 2 * *   bash /opt/carsua/compose/run-ingest.sh rdw-recalls >> /opt/carsua/backups/ingest.log 2>&1
 15 6 3 1,4,7,10 *   bash /opt/carsua/compose/run-ingest.sh ca-recalls >> /opt/carsua/backups/ingest.log 2>&1
+
+# Wikipedia photo colour filter scan: 1 500 photos per night (about 65 min at 2.6 s per photo, --rps 1), most-registered models first, resumable; before the 03:30 backup and clear of the 04:10+ jobs.
+30 0 * * *   bash /opt/carsua/compose/run-ingest.sh wiki-paint >> /opt/carsua/backups/ingest.log 2>&1

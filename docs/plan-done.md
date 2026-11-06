@@ -4725,4 +4725,13 @@ Plan: `docs/wiki-recolor-plan.md`. The hero photo of a model is repainted to the
 - **UI:** pill `[swatch] Colour filter: on|off` top-right of `WikiHeroImage`, note under the photo, credit "(modified: colour)"; i18n `wiki.recolorOn|Off|Note`, `wiki.imageCreditModified` (ua/ru/en), colour names from `vehicleColor.*`.
 - **Store:** `wikiRecolorEnabled` + `carplates.wikiRecolor` (default on).
 - **Tests:** `wiki-recolor.helpers.test.ts` (every skip case, cover-crop maths, layer), `WikiHeroImage.test.tsx` (button only when applicable, off state, mask / request error, toggle). Canvas pixels are not covered by jsdom.
-- **Not browser-checked:** the real canvas alignment over the photo and the fade-in; the mask alpha is read from a canvas, so very low-alpha shading is quantised by premultiplication (weight is low there, expected invisible).
+- **Browser-checked (2026-11-06, Audi A1 2012, white photo):** red plate -> canvas and `<img>` have the identical box (700x320, `object-fit: cover`), opacity transition 0.3s, pill `aria-pressed`, credit "(изменено: цвет)` and the note show; toggling off removes canvas, note and credit, persists in `carplates.wikiRecolor` across a reload and no mask is fetched while off; a white plate of the same year shows no pill, canvas or credit. No console errors. Nothing to fix. Not covered: the mask alpha is read from a canvas, so very low-alpha shading is quantised by premultiplication (weight is low there, expected invisible).
+
+## Wiki photo colour filter, rollout (step 9, 2026-11-06)
+
+Plan: `docs/wiki-recolor-plan.md`. The scan runs as a scheduled job; the owner reviews a sample before the filter is trusted.
+
+- **Job:** `wiki-paint` in `scripts/src/jobs.ts` (`tsx src/wiki-paint.ts --limit 1500 --rps 1`, timeout 120 min), `run-ingest.sh` usage line, `infra/vps/ingest.cron` (nightly 00:30), `HC_PING_WIKI_PAINT` in `deploy-ingest.yml`, `/data-status` row `wikiPaint` (`datasets.ts`, `data-status.service.ts` counts `wiki_image_paint`, note `dataStatus.note.wikiPaint` ua/ru/en), `SCHEDULE.md` row.
+- **CLI:** `--order popular|url|random` (default `popular`: photos of the models with the most `stats_by_model.total_rows` first, unmatched keys last; replaces `--random`), orphan cleanup after every non-dry run (`wiki_image_paint` rows no `ok` `wiki_image` row uses; skipped when there are no `ok` photos at all; `--keep-orphans` opts out), `--out DIR` also writes contact sheets `sheet-N.jpg` (`wiki-paint-sheet.ts`, original beside the red preview, 18 photos per page), run time logged.
+- **Model:** SegFormer q8 (~15 MB) downloads on the first run into `scripts/.data/wiki-paint/hf-cache`, which is the `ingest-data` mount on the VPS (persists between runs; ingest container limit 2 GB).
+- **Owner only:** apply migration 0101 on the VPS, the Cloudflare Cache Rule, schedule the job, gallery review of the sample, commit.
