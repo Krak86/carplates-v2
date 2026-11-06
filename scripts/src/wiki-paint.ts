@@ -5,22 +5,23 @@
  *   pnpm ingest:wiki-paint --brand kia --limit 50 --rps 1
  *
  * Reads distinct `registry.wiki_image.image_url` of `status = 'ok'` rows (read-only), downloads each thumbnail at 640 px,
- * runs SegFormer (ADE20K, `car` class) and `scanPaint` (wiki-paint-core.ts). Nothing is written to the DB yet: the
- * `wiki_image_paint` table arrives with step 3, where this CLI gains the upsert. With `--out DIR` it writes
- * `results.json` (+ the mask webp and a recolour preview per photo) so the gates can be reviewed by eye.
+ * runs SegFormer (ADE20K, `car` class) and `scanPaint` (wiki-paint-core.ts), and upserts the result (skip rows too) into
+ * `registry.wiki_image_paint`. Only photos never scanned or scanned with `algo` < PAINT_ALGO are picked, so a rerun resumes.
+ * With `--out DIR` it also writes `results.json` (+ the mask webp and a recolour preview per photo) for review by eye.
  *
  *   --limit N     photos to scan (default 30)
  *   --brand X     only this normalized brand (repeatable)
  *   --random      random order (default: stable by URL)
  *   --rps N       downloads per second (default 1, max 2)
  *   --out DIR     write results.json, masks and previews here
+ *   --dry-run     scan without writing to the DB
  *   --preview C   colour used for the preview recolour (default red)
  */
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { parseArgs } from 'node:util'
 
-import { createDb } from '@carplates/db'
+import { createDb, schema, type Db, type WikiImagePaintInsert } from '@carplates/db'
 import { VEHICLE_COLORS, isClosePaint, type VehicleColor } from '@carplates/shared'
 import { env, pipeline, RawImage } from '@huggingface/transformers'
 import { sql } from 'drizzle-orm'
@@ -73,26 +74,72 @@ async function scanImage(
   return { rgb, w: info.width, h: info.height, scan }
 }
 
-async function pickUrls(brands: string[], limit: number, random: boolean): Promise<string[]> {
-  const { db, close } = createDb()
-  try {
-    const brandFilter = brands.length
-      ? sql`AND brand IN (${sql.join(
-          brands.map(b => sql`${b}`),
-          sql`, `
-        )})`
-      : sql``
-    const order = random ? sql`random()` : sql`image_url`
-    const { rows } = await db.execute<{ image_url: string }>(sql`
-      SELECT image_url FROM (
-        SELECT DISTINCT image_url FROM registry.wiki_image
-        WHERE status = 'ok' AND image_url IS NOT NULL ${brandFilter}
-      ) u ORDER BY ${order} LIMIT ${limit}
-    `)
-    return rows.map(r => r.image_url)
-  } finally {
-    await close()
-  }
+/** Upsert one scan (skip rows too). The mask is an RGBA webp at the scan size, per the contract in the plan's Handoff. */
+async function savePaint(db: Db, url: string, w: number, h: number, scan: PaintScanResult): Promise<number> {
+  const mask =
+    scan.status === 'ok'
+      ? await sharp(scan.mask, { raw: { width: w, height: h, channels: 4 } })
+          .webp({ quality: 80 })
+          .toBuffer()
+      : null
+  const row: WikiImagePaintInsert =
+    scan.status === 'ok'
+      ? {
+          imageUrl: url,
+          status: 'ok',
+          skipReason: null,
+          bucket: scan.bucket,
+          labL: scan.lab[0],
+          labA: scan.lab[1],
+          labB: scan.lab[2],
+          bodyArea: scan.bodyArea,
+          maskW: w,
+          maskH: h,
+          mask,
+          algo: PAINT_ALGO
+        }
+      : {
+          imageUrl: url,
+          status: 'skip',
+          skipReason: scan.reason,
+          bucket: null,
+          labL: null,
+          labA: null,
+          labB: null,
+          bodyArea: scan.bodyArea,
+          maskW: null,
+          maskH: null,
+          mask: null,
+          algo: PAINT_ALGO
+        }
+  await db
+    .insert(schema.wikiImagePaint)
+    .values(row)
+    .onConflictDoUpdate({
+      target: schema.wikiImagePaint.imageUrl,
+      set: { ...row, scannedAt: sql`now()` }
+    })
+  return mask?.length ?? 0
+}
+
+/** Distinct `ok` photo files never scanned or scanned with an older algorithm (`algo` < PAINT_ALGO). */
+async function pickUrls(db: Db, brands: string[], limit: number, random: boolean): Promise<string[]> {
+  const brandFilter = brands.length
+    ? sql`AND w.brand IN (${sql.join(
+        brands.map(b => sql`${b}`),
+        sql`, `
+      )})`
+    : sql``
+  const order = random ? sql`random()` : sql`image_url`
+  const { rows } = await db.execute<{ image_url: string }>(sql`
+    SELECT image_url FROM (
+      SELECT DISTINCT w.image_url FROM registry.wiki_image w
+      LEFT JOIN registry.wiki_image_paint p ON p.image_url = w.image_url
+      WHERE w.status = 'ok' AND w.image_url IS NOT NULL AND (p.image_url IS NULL OR p.algo < ${PAINT_ALGO})
+        ${brandFilter}
+    ) u ORDER BY ${order} LIMIT ${limit}
+  `)
+  return rows.map(r => r.image_url)
 }
 
 async function main(): Promise<void> {
@@ -103,6 +150,7 @@ async function main(): Promise<void> {
       random: { type: 'boolean', default: false },
       rps: { type: 'string', default: '1' },
       out: { type: 'string' },
+      'dry-run': { type: 'boolean', default: false },
       preview: { type: 'string', default: 'red' }
     },
     strict: true
@@ -113,19 +161,25 @@ async function main(): Promise<void> {
   const outDir = values.out ? join(import.meta.dirname, '..', values.out) : null
   if (outDir) mkdirSync(outDir, { recursive: true })
 
-  const urls = await pickUrls(values.brand, limit, values.random)
-  log(`scanning ${urls.length} photo(s), algo ${PAINT_ALGO}`)
+  const dryRun = values['dry-run']
+  const { db, close } = createDb()
+  const urls = await pickUrls(db, values.brand, limit, values.random)
+  log(`scanning ${urls.length} photo(s), algo ${PAINT_ALGO}${dryRun ? ' (dry run, nothing saved)' : ''}`)
   env.cacheDir = join(DATA_DIR, 'hf-cache')
   const seg = (await pipeline('image-segmentation', MODEL, { dtype: 'q8' })) as unknown as Segmenter
 
   const results: Record<string, unknown>[] = []
   const reasons = new Map<string, number>()
+  let maskTotal = 0
   for (const [n, url] of urls.entries()) {
     const name = String(n + 1).padStart(3, '0')
     try {
       const res = await fetch(url, { headers: { 'User-Agent': USER_AGENT } })
       if (!res.ok) throw new Error(`http ${res.status}`)
       const { rgb, w, h, scan } = await scanImage(seg, Buffer.from(await res.arrayBuffer()))
+      let maskBytes = 0
+      if (!dryRun) maskBytes = await savePaint(db, url, w, h, scan)
+      maskTotal += maskBytes
       const key = scan.status === 'ok' ? 'ok' : `skip: ${scan.reason}`
       reasons.set(key, (reasons.get(key) ?? 0) + 1)
       if (scan.status === 'ok') {
@@ -172,7 +226,9 @@ async function main(): Promise<void> {
   }
   log('\nsummary:')
   for (const [k, v] of [...reasons].sort((a, b) => b[1] - a[1])) log(`  ${String(v).padStart(3)}  ${k}`)
+  if (!dryRun && maskTotal) log(`  masks saved: ${(maskTotal / 1024).toFixed(0)} KB total`)
   if (outDir) writeFileSync(join(outDir, 'results.json'), JSON.stringify(results, null, 1))
+  await close()
 }
 
 main().catch(e => {

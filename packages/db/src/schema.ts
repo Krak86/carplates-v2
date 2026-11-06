@@ -3,6 +3,7 @@ import {
   bigint,
   bigserial,
   boolean,
+  customType,
   date,
   doublePrecision,
   index,
@@ -575,6 +576,31 @@ export const wikiImage = registry.table(
 )
 export type WikiImageRow = typeof wikiImage.$inferSelect
 export type WikiImageInsert = typeof wikiImage.$inferInsert
+
+const bytea = customType<{ data: Buffer; driverData: Buffer }>({ dataType: () => 'bytea' })
+
+/**
+ * Paint scan of a `wiki_image` photo for the colour filter, keyed by `imageUrl`. `mask` = RGBA webp (RGB shading, A paint weight)
+ * at `maskW` x `maskH`; skip rows keep only `skipReason` / `bodyArea`. Rows with `algo` < PAINT_ALGO are rescanned.
+ * See migrations/0101_wiki_image_paint.sql.
+ */
+export const wikiImagePaint = registry.table('wiki_image_paint', {
+  imageUrl: text('image_url').primaryKey(),
+  status: text('status').notNull(),
+  skipReason: text('skip_reason'),
+  bucket: text('bucket'),
+  labL: real('lab_l'),
+  labA: real('lab_a'),
+  labB: real('lab_b'),
+  bodyArea: real('body_area'),
+  maskW: smallint('mask_w'),
+  maskH: smallint('mask_h'),
+  mask: bytea('mask'),
+  algo: smallint('algo').notNull(),
+  scannedAt: timestamp('scanned_at', { withTimezone: true }).notNull().defaultNow()
+})
+export type WikiImagePaintRow = typeof wikiImagePaint.$inferSelect
+export type WikiImagePaintInsert = typeof wikiImagePaint.$inferInsert
 
 /**
  * One tech-press test drive (`scripts/src/press.ts`: itc.ua, mezha.ua), keyed by its primary (Ukrainian) URL. `langs`
