@@ -55,6 +55,7 @@ export default function DatasetGroup({ cadence, datasets, jobs, latest }: Props)
                         ? t('dataStatus.byRequest')
                         : t('dataStatus.byHand')}
                 </span>
+                {dataset.noteKey && <span className="mt-0.5 block text-xs text-muted">{t(dataset.noteKey)}</span>}
               </span>
               <span className="text-muted">
                 {synced

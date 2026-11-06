@@ -11,7 +11,8 @@ import ReadGuideLink from '@/components/ReadGuideLink'
 import RelatedPages from '@/components/RelatedPages'
 import Card from '@/components/ui/Card'
 import AuctionCurrency from '@/components/ua-auctions/AuctionCurrency'
-import { formatPrice } from '@/components/ua-auctions/helpers'
+import InfoPopover from '@/components/InfoPopover'
+import { formatPrice, formatPriceCompact } from '@/components/ua-auctions/helpers'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 import { cn } from '@/lib/cn'
 import { toIntlLocale } from '@/lib/intl'
@@ -45,6 +46,14 @@ export default function AuctionsRoute(): ReactNode {
   const summary = data?.summary
   const numberFormat = new Intl.NumberFormat(locale)
 
+  // A long sum (nine figures) overflows a tile: show it abbreviated and keep the exact value behind a "?".
+  const priceCard = (label: string, uah: number | null): { label: string; value: string; full?: string } => {
+    const full = formatPrice(uah, currency, fx, locale)
+    if (!full) return { label, value: '-' }
+    const short = formatPriceCompact(uah, currency, fx, locale)
+    return full.length > 11 && short ? { label, value: short, full } : { label, value: full }
+  }
+
   const cards = summary
     ? [
         { label: t('auctions.page.card.lots'), value: numberFormat.format(summary.lots) },
@@ -55,14 +64,8 @@ export default function AuctionsRoute(): ReactNode {
         },
         { label: t('auctions.page.card.open'), value: numberFormat.format(summary.open) },
         { label: t('auctions.page.card.avgDelta'), value: formatDelta(summary.avgDeltaPercent, locale) },
-        {
-          label: t('auctions.page.card.medianSale'),
-          value: formatPrice(summary.medianSale, currency, fx, locale) ?? '-'
-        },
-        {
-          label: t('auctions.page.card.totalSale'),
-          value: formatPrice(summary.totalSale, currency, fx, locale) ?? '-'
-        },
+        priceCard(t('auctions.page.card.medianSale'), summary.medianSale),
+        priceCard(t('auctions.page.card.totalSale'), summary.totalSale),
         {
           label: t('auctions.page.card.relisted'),
           value: summary.relistedProceedings == null ? '-' : numberFormat.format(summary.relistedProceedings)
@@ -140,7 +143,14 @@ export default function AuctionsRoute(): ReactNode {
             {cards.map(c => (
               <Card key={c.label}>
                 <div className="text-xs text-[var(--color-muted)] uppercase">{c.label}</div>
-                <div className="text-xl font-semibold tabular-nums">{c.value}</div>
+                <div className="flex items-center gap-1.5 text-xl font-semibold tabular-nums">
+                  <span className="min-w-0 truncate">{c.value}</span>
+                  {c.full && (
+                    <InfoPopover label={c.label} title={c.label}>
+                      <p className="text-sm font-semibold tabular-nums">{c.full}</p>
+                    </InfoPopover>
+                  )}
+                </div>
               </Card>
             ))}
           </div>

@@ -72,6 +72,7 @@ export const DATASETS: readonly Dataset[] = [
     to: '/alarms',
     cadence: 'daily',
     job: 'losses',
+    noteKey: 'dataStatus.note.losses',
     refreshedOn: '2026-11-05'
   },
   { id: 'news', name: 'News (RSS)', to: '/news', cadence: 'daily', job: 'news', refreshedOn: '2026-10-28' },

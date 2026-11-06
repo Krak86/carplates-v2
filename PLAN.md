@@ -498,7 +498,7 @@ Plan, terms, live API findings, rejection path: `docs/alarm-plan.md`. Steps: ✅
 
 Findings and planned shape: `docs/alarm-plan.md` "Research: war-loss figures and Ukrstat data". zsu.gov.ua blocks bots (403); use `russianwarship.rip` (third-party, ~1,700 daily records).
 
-- ✅ Losses (2026-11-05): table, `ingest:losses` backfill, API fetch every 6 h, `GET /api/losses` (+ `/history`), `LossesSection` on `/alarms`; write-up `docs/plan-done.md` "War-loss figures on `/alarms`".
+- ✅ Losses (2026-11-05): table, `ingest:losses` backfill, API fetch every 30 min (6 h until 2026-11-06; edge `LOSSES_CACHE` 30 min), `GET /api/losses` (+ `/history`), `LossesSection` on `/alarms`; write-up `docs/plan-done.md` "War-loss figures on `/alarms`".
 - ✅ Polish (2026-11-05): infographic + details modal for losses, map zoom/drag, alert type labels, collapsed active list, daily `losses` cron (04:50) + `/data-status` row, About/releases updated.
   - [ ] After deploy: `run-ingest.sh losses` once; add `/api/losses` + `/api/losses/history` to the Cloudflare Cache Rule (verify MISS then HIT); look at `/alarms` on prod.
 - [ ] Ukrstat (checked 2026-11-05: `REGION` = KATOTTG, latest year **2022** pre-war, Crimea / Sevastopol end 2014; details in `docs/plan-done.md`): decide whether a pre-war denominator is acceptable, then a static population table in `packages/shared` -> `/read/plates` `RegionsSection` + per-100k metric in `AlarmHistorySection`.
@@ -1055,15 +1055,19 @@ in-memory store resets on restart and isn't shared across instances), body-email
 
 ### Deploy-time security checklist (do when setting up the VPS)
 
-Code-level audit findings and the full pre-deploy gate: [docs/security-checklist.md](docs/security-checklist.md) (2026-10-13). Assessment, pentest-lab runbook and prioritized hardening list: [docs/security-hardening-plan-2026-11.md](docs/security-hardening-plan-2026-11.md) (2026-11-02, plan only; its Phase A folds it into the checklist).
+Code-level audit findings and the full pre-deploy gate: [docs/security-checklist.md](docs/security-checklist.md) (re-verified 2026-11-05; §1b has the infra settings status, finding #2 the CSP report-sink design). Local pentest runbook (never against production): [docs/pentest-lab.md](docs/pentest-lab.md).
 
 - [x] `TRUST_PROXY=true` is set in `infra/docker-compose.prod.yml` (Caddy + Cloudflare in front; Caddy trusts `CF-Connecting-IP` only from Cloudflare's ranges). Set only when the API port is not publicly reachable, else `X-Forwarded-For` is spoofable.
-- [x] Firewall: ✅ verified 2026-10-31 from outside (`Test-NetConnection`, IPv4): 22/80/443 open; 3000 (api), 5432 (Postgres), 6379 (Redis) closed. ✅ SSH key-only (verified 2026-10-27). ✅ IPv6 + Docker verified on the VPS 2026-10-31 (`ss -tln`, `docker ps`): nothing listens on 3000/5432/6379; only Caddy publishes 80/443 (tcp, IPv4 + IPv6) and 443/udp (HTTP/3); api, alpr and Postgres are internal-only; Caddy admin 2019 unpublished; public IPv6 `2a02:c207:2370:1852::1`. Optional, skipped by choice: fail2ban (SSH is key-only), Caddy IP allowlist for `/api/admin/*` (use Cloudflare Access instead if wanted).
+- [x] Firewall: ✅ verified 2026-10-31 from outside (`Test-NetConnection`, IPv4): 22/80/443 open; 3000 (api), 5432 (Postgres), 6379 (Redis) closed. ✅ SSH key-only (verified 2026-10-27). ✅ IPv6 + Docker verified on the VPS 2026-10-31 (`ss -tln`, `docker ps`): nothing listens on 3000/5432/6379; only Caddy publishes 80/443 (tcp, IPv4 + IPv6) and 443/udp (HTTP/3); api, alpr and Postgres are internal-only; Caddy admin 2019 unpublished; public IPv6 `2a02:c207:2370:1852::1`. fail2ban is installed and enabled by `infra/vps/bootstrap.sh` (on top of key-only SSH). Optional, skipped by choice: Caddy IP allowlist for `/api/admin/*` (use Cloudflare Access instead if wanted).
 - [x] ~~Caddy edge limits~~ **Dropped 2026-10-31:** Caddy `rate_limit` needs a custom build; covered by the Cloudflare WAF rule + the Nest throttler (`docs/deploy.md` "Longer term"). The "Rate-limit policy" numbers below are now reference only.
 - [x] Cloudflare (free tier) in front: ✅ Bot Fight Mode, WAF rate-limit rule on `/api/plate*` and `/api/vin*` (30/10 s per IP), HTTP/3, Always Use HTTPS (2026-10-28,
       `docs/deploy.md` step 4). "Under Attack" stays a manual incident toggle. Trust only Cloudflare's IP ranges / `CF-Connecting-IP` (Caddyfile; re-check the ranges occasionally).
 - [x] Cloudflare Turnstile on sign-in "send code" (keys set in production 2026-10-27) and on the feedback/contact submit (`contact.controller.ts`). Discuss is Disqus (own spam protection), so no Turnstile there. Optional: camera recognize — never on plain search.
 - [ ] Headers at Caddy: ✅ `Strict-Transport-Security` and a Report-Only CSP are in `infra/Caddyfile`. Open: ✅ 2026-11-05 `frame-src` now lists carshow360.net, stock.winner.ua, maps.google.com, travic.app, phoboslab.org (the 360 viewer was reported as blocked; deployed and verified live 2026-11-05 in a clean browser context: carshow360, Sketchfab and the Google map embeds load, no frame-src violation; open: a nested Google frame still reports `frame-ancestors` on the 360 page, `travic.app` was link-out only and is dropped from `frame-src` (next `deploy-api`), Winner 360 (Ford Kuga, Alt. interior) and the Wipeout modal on `/play` verified 2026-11-05, no violation; a stale service-worker shell keeps the old headers until updated); **enforce CSP** after ~1 week of clean reports (recheck Lighthouse `inspector-issues` first); verify `Permissions-Policy` (camera/geolocation for self only).
+- [ ] CSP report sink (before enforcing): `POST /api/csp-report` (throttled, Zod, noise-filtered, forwards to Sentry) + `report-uri /api/csp-report` in `infra/Caddyfile`; design in `docs/security-checklist.md` finding #2.
+- [ ] HSTS `includeSubDomains; preload` in `infra/Caddyfile` once all subdomains are confirmed HTTPS.
+- [ ] Origin-level header fallback in `apps/api/src/main.ts` `onSend` (a direct-origin hit is otherwise header-naked).
+- [ ] Postgres least-privilege roles (API user must not own schemas/DDL; separate migration role). Redis throttler: see the line below.
 - [ ] Redis-backed throttler storage (shared counters, survives restarts, covers the blue/green overlap) — **not started**, Redis is not in the compose file; low priority. Global daily counter for paid third-party keys (Plate Recognizer budget is already capped; only needed if a RIA key is added).
 - [x] Swagger is off in production (`swaggerEnabled`: `ENABLE_SWAGGER` or non-production; `/api/docs` serves the SPA shell). [x] `/api/admin/*` verified 2026-10-31: all three admin controllers (`features/admin`, `digest`, `usage-admin`) carry a class-level `@UseGuards(AdminGuard)` (session + `role = 'admin'`, else 401/403); the dev-only `/api/dev/emails` controller is not registered in production. Optional: IP-allowlist at Caddy.
 - [x] Secrets: production `AUTH_SECRET` / `POSTGRES_PASSWORD` differ from dev. Rotation **skipped by choice 2026-10-28**; rotate `POSTHOG_PERSONAL_API_KEY` and any other key shown in chat/screenshots if you consider it exposed.
@@ -1252,7 +1256,7 @@ Write-up: `docs/plan-done.md` "Market offers (CarAPIS)"; conventions: `docs/feat
 - ✅ Cars for sale block on top of `StockSection` (UA first, EU fallback), detail modal, redirect link, budget counter, admin Server tile, `/data-status` row, About, release note
 - ✅ Large view modal (grid / rows / table, sort), USD / EUR / UAH price chip, block skeleton, CarAPIS admin Dashboards link (2026-11-03)
 - [ ] After deploy: compare our "requests used" counter with the usage page at my.carapis.com; confirm the real daily limit (assumed 100) and the reset time (assumed 00:00 UTC), adjust `DAILY_LIMIT` in `market.service.ts` if they differ
-- [ ] After deploy: set the `CARAPIS_API_KEY` GitHub secret (optional vars `MARKET_UA_ENABLED`, `MARKET_SHOW_BUDGET`) ⏳
+- [x] (secret added 2026-11-05; stock listings already live on prod) After deploy: set the `CARAPIS_API_KEY` GitHub secret (optional vars `MARKET_UA_ENABLED`, `MARKET_SHOW_BUDGET`) ⏳
 - [x] Air-raid alerts, step 1 deployed and verified on prod 2026-11-04: `ALARM_API_KEY` secret set, `/api/alarms` returns live regions, Cloudflare Cache Rule includes `/api/alarms` (MISS then HIT)
 - [ ] Air-raid alerts: ask Stfalcon for the per-minute request limit (poller defaults to 30 s and pauses on 429) ⏳
 - [ ] **After deploy** (air-raid steps 2-5): ✅ 2026-11-05 `/api/alarms/history` (+ `/stats`, `/api/losses*`) in the live Cloudflare Cache Rule, MISS then HIT; history table loaded (endpoint answers 200). ✅ history section on `/alarms` checked on prod 2026-11-05. ✅ plate chip (Kharkiv plate) and `/relax?layout=alarm` checked on prod 2026-11-05
@@ -1297,7 +1301,13 @@ Write-up: `docs/plan-done.md` "Market offers (CarAPIS)"; conventions: `docs/feat
 - ✅ (2026-11-04) Release note (`releases.ts`), `AboutRoute.tsx` feature + OEM source entry.
 - [ ] Own AR/XR views later.
 - ✅ ZAKON typeface fetched by `pnpm fetch:zakon-font` (gitignored, not committed); sidebar regrouped into six groups with footer links (`sidebar-groups.ts`). Write-up: `docs/plan-done.md` "Sidebar groups and ZAKON font".
-- [ ] **After deploy:** ZAKON font (found missing on prod 2026-11-05: `/fonts/zakon/*.otf` returned the SPA shell). The web app is built in GitHub Actions, not on the VPS, so `deploy-web.yml` now runs `node scripts/src/fetch-zakon-font.ts` before the build. Open: run `deploy-web`, then `curl -sI https://carsua.app/fonts/zakon/Zakon-Regular.otf` must give `content-type: font/otf` (not text/html).
+- [x] (verified 2026-11-05 after `deploy-web`: both .otf files are real fonts (OTTO), served as `application/octet-stream`, both `Zakon` faces `loaded`, body font `Zakon, ui-serif…`, no console errors) **After deploy:** ZAKON font (found missing on prod 2026-11-05: `/fonts/zakon/*.otf` returned the SPA shell). The web app is built in GitHub Actions, not on the VPS, so `deploy-web.yml` now runs `node scripts/src/fetch-zakon-font.ts` before the build. Open: run `deploy-web`, then `curl -sI https://carsua.app/fonts/zakon/Zakon-Regular.otf` must not be text/html (it is octet-stream, which browsers accept).
+
+## UI polish, faster war-loss sync, data-status notes ✅ 2026-11-06, awaiting deploy
+
+✅ Two-line home "new lots" rows, hover-only "+" hint, flatter /read covers on phones, compact auction sums with "?", losses chart skeleton, losses poll 30 min + `LOSSES_CACHE`, `noteKey` on /data-status. Write-up `docs/plan-done.md` "UI polish round…".
+
+- [ ] **After deploy:** `curl -sI https://carsua.app/api/losses | grep -i cache` shows `s-maxage=1800`; if Cloudflare keeps an older `s-maxage`, edit the Cache Rule to respect the origin header. Next morning check /alarms shows the new day within ~1 h of the General Staff post.
 
 ## Later, conditional
 

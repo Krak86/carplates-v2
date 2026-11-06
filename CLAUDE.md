@@ -31,13 +31,7 @@ Version pins (PLAN.md "Version pins"): never bump to `latest`.
   come from the API, never Vite.
 - **i18n is per-language lazy chunks** (non-ua also loads ua). Tests rendering text `await i18nReady`; never `import '@/i18n'`.
 - **Zod `jitless`**: `@/lib/zod-config` stays the first import of `main.tsx`; `vendor-zod` / `zod-config` stay separate chunks (else CSP `eval`).
-- **Edge cache**: a new cacheable `/api/*` endpoint → `common/cache.ts` headers + Cloudflare Cache Rule (+ `PUBLIC_API_PATH_PREFIXES` if public).
-- **Below-the-fold sections are `LazySection`s**; a new shareable one must list its id in `sections`. Shared pure helpers of lazy
-  chunks go in `vite.config.ts` `HELPER_GROUPS`.
-- **Deploy**: blue/green ⇒ backward-compatible migrations; new env var ⇒ `env.ts` + `deploy-api.yml` + `docs/deploy.md`;
-  new ingest job ⇒ `scripts/src/jobs.ts` + `run-ingest.sh` + `infra/vps/ingest.cron` + a `/data-status` row.
-- **New public route** → `ROUTE_TITLE_KEYS` (`useDocumentTitle.ts`), a `STATIC_PAGES` entry (ua/ru/en) in `apps/api/src/spa/spa-text.ts` (else `noindex`, no sitemap),
-  `max-w-6xl` page width. Add `@Throttle` (`common/throttle.ts`) to any enumerable lookup.
+- **Checklists** (`docs/checklists.md`, read the item before the change): edge cache for a new `/api/*` endpoint, `LazySection`s / `HELPER_GROUPS`, deploy (migrations, env var, ingest job), new public route (title, `STATIC_PAGES`, `@Throttle`).
 
 ## Workflow
 
@@ -45,7 +39,6 @@ Version pins (PLAN.md "Version pins"): never bump to `latest`.
 - After a big update suggest a commit message (subject + bullet per change). Never `git commit` / `git push` unless asked.
 - Seed CSVs mirror scraped tables: after changing one, re-run its `pnpm export:*:csv`.
 - `pnpm format` first (not `scripts/src/fixtures`). Tests: Vitest, colocated `*.test.ts(x)`.
-- Docs: write-up → `plan-done.md`, one-line ✅ → `PLAN.md`, conventions → `features-reference.md`, user-facing → `shared/src/releases.ts`
-  (only `new` mailed; new day ⇒ bump `web/src/routes/releases/latest.ts`); new feature/source → `AboutRoute.tsx` (`FEATURES`/`SOURCES` + `about.brief|feature|source.*`, ua/ru/en).
+- Docs after a feature (plan-done, PLAN, features-reference, releases, About): `docs/checklists.md` "Docs after a feature".
 
 @CLAUDE_RULES.md

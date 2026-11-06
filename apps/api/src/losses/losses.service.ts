@@ -16,8 +16,8 @@ import { loadEnv } from '../env.js'
 
 import { toLossesHistory, toLossesResponse } from './losses.helpers.js'
 
-/** The upstream updates once a day; checking every 6 hours picks the new day up within hours and survives a missed run. */
-const FETCH_EVERY_MS = 6 * 60 * 60_000
+/** The upstream publishes the new day once, usually in the morning (Kyiv); polling every 30 minutes picks it up soon after and survives a missed run. */
+const FETCH_EVERY_MS = 30 * 60_000
 const TIMEOUT_MS = 15_000
 const USER_AGENT = 'carsua.app/1.0 (+https://carsua.app)'
 

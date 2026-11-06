@@ -122,7 +122,10 @@ export default function ReadHubRoute(): ReactNode {
                 {/* Wide rectangular cover; the featured tile gets a more panoramic crop. */}
                 <ArticleBanner
                   article={article}
-                  className={cn('w-full rounded-xl', featured ? 'aspect-video lg:aspect-[21/9]' : 'aspect-video')}
+                  className={cn(
+                    'w-full rounded-xl',
+                    featured ? 'aspect-[21/9] sm:aspect-video lg:aspect-[21/9]' : 'aspect-[21/9] sm:aspect-video'
+                  )}
                 />
 
                 <p className="text-xs text-muted">

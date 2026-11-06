@@ -4,7 +4,7 @@ import { Throttle } from '@nestjs/throttler'
 import { lossesHistoryQuerySchema } from '@carplates/shared'
 import type { LossesHistoryQuery, LossesHistoryResponse, LossesResponse } from '@carplates/shared'
 
-import { lookupCacheInterceptor, STATS_CACHE } from '../common/cache.js'
+import { lookupCacheInterceptor, LOSSES_CACHE } from '../common/cache.js'
 import { LOSSES_THROTTLE } from '../common/throttle.js'
 import { zodParam } from '../common/zod-param.pipe.js'
 
@@ -17,7 +17,7 @@ import { LossesService } from './losses.service.js'
 @ApiTags('losses')
 @Controller('api/losses')
 @Throttle(LOSSES_THROTTLE)
-@UseInterceptors(lookupCacheInterceptor(STATS_CACHE))
+@UseInterceptors(lookupCacheInterceptor(LOSSES_CACHE))
 export class LossesController {
   constructor(@Inject(LossesService) private readonly losses: LossesService) {}
 

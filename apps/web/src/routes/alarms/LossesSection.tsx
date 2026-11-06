@@ -117,24 +117,43 @@ export default function LossesSection(): ReactNode {
         ))}
       </ul>
 
-      {path && first && (
+      {(history.isPending || (path && first)) && (
         <figure className="mt-4">
           <figcaption className="mb-1 text-sm font-medium">
             {t('losses.history', { name: t(`losses.cat.${category}`) })}
           </figcaption>
-          <svg
-            viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`}
-            preserveAspectRatio="none"
-            role="img"
-            aria-label={t('losses.history', { name: t(`losses.cat.${category}`) })}
-            className="h-32 w-full border-b border-l border-[var(--color-border)]"
-          >
-            <path d={path} fill="none" stroke="var(--chip-safety)" strokeWidth={2} vectorEffect="non-scaling-stroke" />
-          </svg>
-          <div className="mt-1 flex justify-between text-[10px] text-[var(--color-muted)]">
-            <span>{date(first.date)}</span>
-            <span>{date(data.date)}</span>
-          </div>
+          {!path || !first ? (
+            // Same footprint as the chart + date row, so switching topics does not shift the layout.
+            <>
+              <div
+                aria-hidden
+                className="h-32 w-full animate-pulse border-b border-l border-[var(--color-border)] bg-[var(--color-border)]/30"
+              />
+              <div aria-hidden className="mt-1 h-[15px]" />
+            </>
+          ) : (
+            <>
+              <svg
+                viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`}
+                preserveAspectRatio="none"
+                role="img"
+                aria-label={t('losses.history', { name: t(`losses.cat.${category}`) })}
+                className="h-32 w-full border-b border-l border-[var(--color-border)]"
+              >
+                <path
+                  d={path}
+                  fill="none"
+                  stroke="var(--chip-safety)"
+                  strokeWidth={2}
+                  vectorEffect="non-scaling-stroke"
+                />
+              </svg>
+              <div className="mt-1 flex justify-between text-[10px] text-[var(--color-muted)]">
+                <span>{date(first.date)}</span>
+                <span>{date(data.date)}</span>
+              </div>
+            </>
+          )}
         </figure>
       )}
 

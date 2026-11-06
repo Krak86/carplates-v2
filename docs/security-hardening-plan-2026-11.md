@@ -326,7 +326,7 @@ Ordered by value/effort. All are infra/ops, not code-architecture; the code-leve
 
 ## Execution plan — who does what (ordered)
 
-Status as of 2026-11-02: assessment complete, **nothing in the app changed**. Remaining work below.
+Status as of 2026-11-05: **Phase A done** (steps 1-4: checklist refreshed, `docs/pentest-lab.md` created, PLAN.md pointers + backlog, fail2ban reconciled). Step 5 (delete this file) awaits the user's OK. **Next: Phase B.** Nothing in the app code or infra changed yet.
 Legend: 👤 = you (Ruslan) · 🤖 = Claude (next session). "[code]" = touches code/config → show the diff first.
 
 **Phase A — docs into the repo (doc-only, safe to do first)**
@@ -350,7 +350,7 @@ Legend: 👤 = you (Ruslan) · 🤖 = Claude (next session). "[code]" = touches 
 
 ## Handoff for the next session
 
-Paste this into a fresh session tomorrow:
+**Superseded 2026-11-05: Phase A is done. The prompt below is the old Phase A one; use the Phase B prompt given in chat / `docs/leftovers.md`.** Original text:
 
 > Continue the carsua.app security-hardening work. Read `docs/security-hardening-plan-2026-11.md`
 > (committed) and `docs/security-checklist.md` first. Context: the assessment is done and the app is
