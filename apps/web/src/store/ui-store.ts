@@ -43,6 +43,24 @@ function persistBlueprintEnabled(enabled: boolean): void {
   }
 }
 
+const WIKI_RECOLOR_STORAGE_KEY = 'carplates.wikiRecolor'
+
+function initialWikiRecolorEnabled(): boolean {
+  try {
+    return localStorage.getItem(WIKI_RECOLOR_STORAGE_KEY) !== 'false'
+  } catch {
+    return true
+  }
+}
+
+function persistWikiRecolorEnabled(enabled: boolean): void {
+  try {
+    localStorage.setItem(WIKI_RECOLOR_STORAGE_KEY, String(enabled))
+  } catch {
+    /* private mode / disabled storage */
+  }
+}
+
 const THEME_STORAGE_KEY = 'carplates.theme'
 const THEME_COLORS: Record<Theme, string> = { light: '#ffffff', dark: '#0f141f' }
 
@@ -187,6 +205,8 @@ interface UiState {
   cardTiltEnabled: boolean
   /** Size drawings in blueprint style (white lines on a scaled grid). */
   blueprintEnabled: boolean
+  /** Recolour the wiki hero photo to the registry colour (the "Colour filter" pill on the photo). */
+  wikiRecolorEnabled: boolean
   setLang: (lang: Lang) => Promise<void>
   setThemeMode: (mode: ThemeMode) => void
   setAccent: (accent: Accent) => void
@@ -196,6 +216,7 @@ interface UiState {
   setZen: (zen: boolean) => void
   toggleCardTilt: () => void
   setBlueprintEnabled: (enabled: boolean) => void
+  setWikiRecolorEnabled: (enabled: boolean) => void
 }
 
 export const useUiStore = create<UiState>((set, get) => ({
@@ -210,6 +231,7 @@ export const useUiStore = create<UiState>((set, get) => ({
   zen: false,
   cardTiltEnabled: initialCardTiltEnabled(),
   blueprintEnabled: initialBlueprintEnabled(),
+  wikiRecolorEnabled: initialWikiRecolorEnabled(),
   setLang: async lang => {
     set({ langLoading: lang })
     try {
@@ -285,6 +307,10 @@ export const useUiStore = create<UiState>((set, get) => ({
   setBlueprintEnabled: (blueprintEnabled): void => {
     persistBlueprintEnabled(blueprintEnabled)
     set({ blueprintEnabled })
+  },
+  setWikiRecolorEnabled: (wikiRecolorEnabled): void => {
+    persistWikiRecolorEnabled(wikiRecolorEnabled)
+    set({ wikiRecolorEnabled })
   }
 }))
 

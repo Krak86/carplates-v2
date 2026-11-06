@@ -106,6 +106,7 @@ import {
   vehiclePhotosResponseSchema,
   vinDecodeResponseSchema,
   wikiImageResponseSchema,
+  wikiRecolorResponseSchema,
   wikiInfoResponseSchema
 } from '@carplates/shared'
 import type {
@@ -240,7 +241,8 @@ import type {
   VehiclePhotosResponse,
   VinDecodeResponse,
   WikiImageResponse,
-  WikiInfo
+  WikiInfo,
+  WikiRecolorResponse
 } from '@carplates/shared'
 import type { Feature, FeatureCollection, Geometry } from 'geojson'
 import { z } from 'zod'
@@ -409,6 +411,30 @@ export async function getWikiImage(
   if (model) params.set('model', model)
   if (year != null) params.set('year', String(year))
   return wikiImageResponseSchema.parse(await getJson(`/api/wiki/image?${params.toString()}`))
+}
+
+/** Paint scan of the stored hero photo (colour filter); `recolor` is null when none. Stored rows only, no Wikimedia call server-side. */
+export async function getWikiRecolor(brand: string, model: string, year: number | null): Promise<WikiRecolorResponse> {
+  const params = new URLSearchParams()
+  if (brand) params.set('brand', brand)
+  if (model) params.set('model', model)
+  if (year != null) params.set('year', String(year))
+  return wikiRecolorResponseSchema.parse(await getJson(`/api/wiki/recolor?${params.toString()}`))
+}
+
+/** The mask of the colour filter: RGBA webp (RGB shading, A paint weight) decoded to raw bytes. Same origin as the API, so no CORS taint. */
+export async function getWikiPaintMask(maskUrl: string): Promise<{ w: number; h: number; data: Uint8ClampedArray }> {
+  const res = await fetch(`${BASE}${maskUrl}`)
+  if (!res.ok) throw new Error(`mask ${res.status}`)
+  const bitmap = await createImageBitmap(await res.blob(), { premultiplyAlpha: 'none', colorSpaceConversion: 'none' })
+  const canvas = document.createElement('canvas')
+  canvas.width = bitmap.width
+  canvas.height = bitmap.height
+  const ctx = canvas.getContext('2d', { willReadFrequently: true })
+  if (!ctx) throw new Error('no 2d context')
+  ctx.drawImage(bitmap, 0, 0)
+  bitmap.close()
+  return { w: canvas.width, h: canvas.height, data: ctx.getImageData(0, 0, canvas.width, canvas.height).data }
 }
 
 export async function getWikiInfo(brand: string, model: string, lang: string, year: number | null): Promise<WikiInfo> {

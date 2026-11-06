@@ -108,6 +108,8 @@ import {
   getVehiclePhotos,
   getWikiImage,
   getWikiInfo,
+  getWikiPaintMask,
+  getWikiRecolor,
   lookupPlate,
   plateHistory,
   searchVehicles,
@@ -289,6 +291,28 @@ export function wikiImageQuery(brand: string, model: string, year: number | null
     queryKey: ['wiki', 'image', brand, model, year],
     queryFn: () => getWikiImage(brand, model, year),
     staleTime: Infinity
+  })
+}
+
+// Paint scan of the stored hero photo for the colour filter. Online only, no offline-cache entry (the filter is decoration,
+// the original photo is the offline fallback), never retried: a failure just means no filter.
+export function wikiRecolorQuery(brand: string, model: string, year: number | null) {
+  return queryOptions({
+    queryKey: ['wiki', 'recolor', brand, model, year],
+    queryFn: () => getWikiRecolor(brand, model, year),
+    staleTime: Infinity,
+    retry: false
+  })
+}
+
+// The decoded mask bytes of a recolour (immutable per URL: `?v=` busts it after a rescan).
+export function wikiPaintMaskQuery(maskUrl: string) {
+  return queryOptions({
+    queryKey: ['wiki', 'paint-mask', maskUrl],
+    queryFn: () => getWikiPaintMask(maskUrl),
+    staleTime: Infinity,
+    gcTime: 5 * 60_000,
+    retry: false
   })
 }
 

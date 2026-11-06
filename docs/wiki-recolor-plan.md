@@ -128,5 +128,6 @@ API: `packages/shared/src/wikiRecolor.ts`, `apps/api/src/wiki/wiki-recolor.{serv
 
 **Step 4a done:** shared `paintApply.ts` + test (`paintTone(shadeByte, paintTargetLinear(colour), k)` per pixel for the canvas, composite over the photo with the mask alpha).
 
-**Next: step 5 (web), not started.** Read `WikiHeroImage.tsx`, the `blueprintEnabled` pattern in `useUiStore`, the existing colour labels in i18n, and the Step 5 decisions above first. The hero may show a different photo than `peekImage` finds (`yearOnly`, `source`): the client must apply the filter only when `recolor.imageUrl === hero image.url`. Then 6 (docs, credits).
-Before the rollout (step 9) run `SELECT count(*) FROM registry.wiki_image WHERE status = 'ok'` (67,645 rows, 22,300 files on 2026-11-06). Do not commit unless asked.
+**Done: steps 5-6 (web filter, docs; uncommitted).** `useWikiRecolor` + `wiki-recolor.helpers.ts` + `WikiRecolorCanvas` + pill / note / credit in `WikiHeroImage`, store flag, i18n, About / releases / features-reference / plan-done. Skips: no colour, close paint, other photo, request or mask error; lot-photo heroes never filter. Mask is fetched only while the filter is on. Gates green: format, lint (0 errors), tsc web, 326 test files. **Not browser-checked** (no scanned rows locally): run `pnpm ingest:wiki-paint` on a few models, open a plate, check alignment, fade and the pill.
+
+**Next: step 7 (candidate photos) or 9 (rollout).** Before the rollout (step 9) run `SELECT count(*) FROM registry.wiki_image WHERE status = 'ok'` (67,645 rows, 22,300 files on 2026-11-06). Do not commit unless asked.

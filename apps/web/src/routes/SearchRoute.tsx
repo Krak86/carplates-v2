@@ -137,6 +137,7 @@ export default function SearchRoute(): ReactNode {
     year: number | null
     rawKind: string | null
     key: string | null
+    color: string | null
   } | null = null
   if (kind === 'plate' && plate.data) {
     const c = plate.data.current
@@ -145,7 +146,8 @@ export default function SearchRoute(): ReactNode {
       model: c.model,
       year: c.makeYear,
       rawKind: c.kind,
-      key: c.vin || plate.data.plate
+      key: c.vin || plate.data.plate,
+      color: c.color
     }
   } else if (kind === 'vin' && vin.data) {
     const vehicle = extractVehicleInfo(vin.data)
@@ -154,7 +156,8 @@ export default function SearchRoute(): ReactNode {
       model: vehicle.model,
       year: vehicle.year,
       rawKind: vin.data.registry?.actions[0]?.kind ?? null,
-      key: vin.data.vin
+      key: vin.data.vin,
+      color: vin.data.registry?.actions[0]?.color ?? null
     }
   }
 
@@ -369,6 +372,7 @@ export default function SearchRoute(): ReactNode {
             year={wikiHeroVehicle.year}
             rawKind={wikiHeroVehicle.rawKind}
             vehicleKey={wikiHeroVehicle.key}
+            color={wikiHeroVehicle.color}
             lotPhotos={lotPhotos}
           />
         )}

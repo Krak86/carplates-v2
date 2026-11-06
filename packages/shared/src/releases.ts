@@ -20,6 +20,12 @@ export const RELEASES: readonly ReleaseDay[] = [
     items: [
       item(
         'new',
+        'Кольоровий фільтр на фото моделі: якщо колір авто в реєстрі інший, ніж на фото, кузов перефарбовується в колір з реєстру (кнопка вгорі праворуч вмикає й вимикає; у підписі «змінено: колір»)',
+        'Цветовой фильтр на фото модели: если цвет авто в реестре отличается от цвета на фото, кузов перекрашивается в цвет из реестра (кнопка вверху справа включает и выключает; в подписи «изменено: цвет»)',
+        'A colour filter on the model photo: when the registered colour differs from the car in the photo, the body is repainted to the registered colour (a button at the top right turns it on and off; the credit says "modified: colour")'
+      ),
+      item(
+        'new',
         'На /data-status: скільки записів ми зберігаємо по кожному джерелу, хронологія останніх оновлень (клік веде до картки джерела) та швидкі посилання на групи за частотою; «Наживо» і «Щохвилини» тепер першими',
         'На /data-status: сколько записей мы храним по каждому источнику, хронология последних обновлений (клик ведёт к карточке источника) и быстрые ссылки на группы по частоте; «Вживую» и «Каждую минуту» теперь первыми',
         'On /data-status: how many records we hold per source, a timeline of the latest updates (a click jumps to the source\'s tile) and quick links to the frequency groups; "Live" and "Every minute" now come first'

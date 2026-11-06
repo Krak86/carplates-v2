@@ -4716,3 +4716,13 @@ Conventions: `features-reference.md` "Data freshness" and "Small UI rounds".
 - **Docs:** About `dataStatus` / `account` feature texts extended (no new source), release items on the 2026-11-06 day, CLAUDE.md re-measured (3.5 KB, no cut that would not lose a rule).
 - **Verified:** typecheck (api, web), data-status tests. **Not browser-checked:** the timeline dots, chip scroll animation, fullscreen on a phone.
 - **After deploy:** API first (new `counts` / `history` fields); the page tolerates an old API (both default to empty).
+
+## Wiki photo colour filter, web (step 5, 2026-11-06)
+
+Plan: `docs/wiki-recolor-plan.md`. The hero photo of a model is repainted to the registry colour when it differs from the photographed paint.
+
+- **Data flow:** `getWikiRecolor` / `getWikiPaintMask` (`lib/api.ts`), `wikiRecolorQuery` / `wikiPaintMaskQuery` (`lib/queries.ts`, `retry: false`, not offline-cached), `use-wiki-recolor.ts`, `wiki-recolor.helpers.ts` (`wikiRecolorTarget`, `coverRect`, `paintLayer`), `WikiRecolorCanvas.tsx`.
+- **UI:** pill `[swatch] Colour filter: on|off` top-right of `WikiHeroImage`, note under the photo, credit "(modified: colour)"; i18n `wiki.recolorOn|Off|Note`, `wiki.imageCreditModified` (ua/ru/en), colour names from `vehicleColor.*`.
+- **Store:** `wikiRecolorEnabled` + `carplates.wikiRecolor` (default on).
+- **Tests:** `wiki-recolor.helpers.test.ts` (every skip case, cover-crop maths, layer), `WikiHeroImage.test.tsx` (button only when applicable, off state, mask / request error, toggle). Canvas pixels are not covered by jsdom.
+- **Not browser-checked:** the real canvas alignment over the photo and the fade-in; the mask alpha is read from a canvas, so very low-alpha shading is quantised by premultiplication (weight is low there, expected invisible).
