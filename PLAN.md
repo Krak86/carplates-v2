@@ -1280,6 +1280,8 @@ Write-up: `docs/plan-done.md` "Market offers (CarAPIS)"; conventions: `docs/feat
 
 ## One-off seed tables + `/data-status` "Every minute" ✅ built 2026-11-05, awaiting deploy
 
+- [ ] **MOT seed auto-load (2026-11-06), After deploy:** the deploy-ingest run log shows `mot: seed is newer than the loaded years, loaded` (not `warn: seed-if-empty failed`); then a Ford Focus (ВК2861ІХ) "Common faults" on prod shows 5,928,887 tests and years 2019 + 2021–25; purge `/api/mot` at Cloudflare if the edge still serves the old numbers. Run `SELECT years FROM registry.mot_meta` first (expected 2021–25 before, 2019 + 2021–25 after).
+
 ✅ `run-ingest.sh seed-if-empty` (`scripts/src/seed-if-empty.ts`) loads the 3dtuning / oem-links / alarm-history seed CSVs only into EMPTY tables; runs by itself (non-fatal) after the migration in `deploy-api.sh` and at the end of `deploy-ingest.yml`. The three seed files are let into the ingest image (`.dockerignore`). `/data-status` gained the `minutely` cadence (Ukraine Alarm) and rows for 3DTuning, OEM links, siren history, OCHA outlines; `/stats` prints "Updated <date>". Conventions: `docs/features-reference.md` "Data freshness".
 
 - [ ] **After deploy** (order: `deploy-api`, `deploy-ingest`; either order works, the second one loads whatever the first could not): read both deploy logs for `seed-if-empty: … empty, loading …` / `already there, skipped` and no `warn: seed-if-empty failed`.
