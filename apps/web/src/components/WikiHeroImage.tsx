@@ -27,7 +27,8 @@ type Props = {
 /**
  * Fills the same hero slot a recognized/attached plate photo occupies (see `PhotoThumbnail`),
  * but with the car photo for its make/model/year (our stored copy first, Wikimedia as the server-side fallback) —
- * only rendered by the caller when no photo is attached.
+ * only rendered by the caller when no photo is attached. With lot photos, the lot carousel comes first and the
+ * model photo follows below it as its own image.
  */
 export default function WikiHeroImage({
   brand,
@@ -47,7 +48,7 @@ export default function WikiHeroImage({
     brand,
     model,
     year,
-    imageUrl: lotPhotos.length > 0 ? null : (image?.url ?? null),
+    imageUrl: image?.url ?? null,
     color
   })
   const colorName = recolor.target ? t(`vehicleColor.${recolor.target}`) : null
@@ -57,19 +58,16 @@ export default function WikiHeroImage({
   const hasQuery = Boolean(brand || model)
   const isPending = hasQuery && heroImage.isPending
 
-  if (lotPhotos.length > 0) {
-    return (
-      <UaAuctionHero
-        docIds={lotPhotos}
-        label={[brand, model, year].filter(Boolean).join(' ')}
-        modelPhoto={image ? { url: image.url, credit: creditParts.join(', ') || null } : null}
-      />
-    )
-  }
+  const lotHero =
+    lotPhotos.length > 0 ? (
+      <UaAuctionHero docIds={lotPhotos} label={[brand, model, year].filter(Boolean).join(' ')} />
+    ) : null
 
   // Settled with no image (or the image failed to load) → a kind placeholder in the same slot,
   // or nothing at all when the registry gave no recognizable kind (e.g. a VIN-only decode).
+  // With lot photos the carousel alone is enough.
   if (!isPending && (!image || failedUrl === image.url)) {
+    if (lotHero) return lotHero
     const kind = resolveVehicleKind(rawKind)
     return kind ? (
       <div className="hero-vt relative -my-3 h-64 w-full max-w-content sm:h-80">
@@ -82,7 +80,8 @@ export default function WikiHeroImage({
 
   return (
     <>
-      <div className="hero-vt relative -my-3 h-64 w-full max-w-content sm:h-80">
+      {lotHero}
+      <div className={`relative h-64 w-full max-w-content sm:h-80 ${lotHero ? '' : 'hero-vt -my-3'}`}>
         {!isLoaded && (
           <div aria-hidden className="absolute inset-0 animate-pulse rounded-lg border border-border bg-surface/70" />
         )}
