@@ -6,6 +6,7 @@ import { Link } from 'react-router'
 import { approxCount } from '@/components/RdwSpecs.helpers'
 import { CO2_BAND_COLOR, co2ReferenceLinks, formatRange, isSmallEmissionsSample } from '@/components/CO2Badge.helpers'
 import InfoPopover from '@/components/InfoPopover'
+import ExternalLink from '@/components/ExternalLink'
 
 type Props = {
   /** Combined-cycle tailpipe CO2 across every matched trim — min/max are equal for a single match. */
@@ -142,14 +143,9 @@ export default function CO2Badge({
               <ul className="mt-1 list-disc space-y-0.5 pl-5">
                 {co2ReferenceLinks(i18n.language).map(link => (
                   <li key={link.href}>
-                    <a
-                      href={link.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-[var(--color-primary)] underline"
-                    >
+                    <ExternalLink href={link.href} className="text-[var(--color-primary)] underline">
                       {t(link.labelKey)}
-                    </a>
+                    </ExternalLink>
                   </li>
                 ))}
               </ul>

@@ -106,7 +106,7 @@ export default function RaceGameButton({
 
             <span className="relative self-center">
               <span className="inline-flex animate-cta-pulse items-center gap-1 rounded-full bg-sky-900 px-3 py-1.5 text-xs font-bold text-white transition-colors group-hover:bg-sky-700">
-                {t('race.banner.cta')} <span aria-hidden>→</span>
+                {t('race.banner.cta')} <span aria-hidden>⤢</span>
               </span>
 
               <span

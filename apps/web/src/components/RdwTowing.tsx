@@ -18,6 +18,7 @@ import {
 import RdwMassSchema from '@/components/RdwMassSchema'
 import type { OwnFigures } from '@/components/RdwSpecs.helpers'
 import { cn } from '@/lib/cn'
+import ExternalLink from '@/components/ExternalLink'
 
 type Props = {
   specs: RdwSpecs
@@ -178,14 +179,9 @@ export default function RdwTowing({ specs, own, truck = false, locale }: Props):
         </ul>
 
         <p className="mt-1">
-          <a
-            href={TRAFFIC_RULES_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-[var(--color-primary)] underline hover:no-underline"
-          >
+          <ExternalLink href={TRAFFIC_RULES_URL} className="text-[var(--color-primary)] underline hover:no-underline">
             {t('rdw.tow.rules.source')}
-          </a>
+          </ExternalLink>
         </p>
       </details>
 

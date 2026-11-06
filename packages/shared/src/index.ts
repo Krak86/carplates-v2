@@ -1,4 +1,20 @@
 export {
+  committedUah,
+  DREAM_EXCLUDED_STATUS,
+  DREAM_SITE_URL,
+  DREAM_SOURCE_URL,
+  dreamIdeaSchema,
+  dreamListSchema,
+  dreamSummaryResponseSchema,
+  firstOblastCode,
+  ideaToRow,
+  KATOTTG_OBLAST_REGIONS,
+  regionForKatottg,
+  type DreamIdea,
+  type DreamProjectInput,
+  type DreamSummaryResponse
+} from './dream.js'
+export {
   DEFAULT_LOSS_CATEGORY,
   LOSSES_SOURCE_URL,
   lossIncrease,
@@ -210,6 +226,29 @@ export {
   isLightVehicleColor,
   type VehicleColor
 } from './vehicleColor.js'
+export {
+  CLOSE_PAINT_DELTA_E,
+  PAINT_HEX,
+  PAINT_LIGHTNESS_WEIGHT,
+  hexToRgb,
+  isClosePaint,
+  labOf,
+  linearToSrgb,
+  luminanceOf,
+  paintBucketOf,
+  paintDeltaE,
+  rgbToLab,
+  srgbToLinear,
+  type Lab,
+  type Rgb
+} from './paintColor.js'
+export {
+  wikiRecolorSchema,
+  wikiRecolorResponseSchema,
+  type WikiRecolor,
+  type WikiRecolorResponse
+} from './wikiRecolor.js'
+export { SHADE_MAX, SHADE_SCALE, applyPaint, paintTargetLinear, paintTone, type LinearRgb } from './paintApply.js'
 export { VEHICLE_FUELS, resolveFuelCategories, fuelKeyword, type VehicleFuel } from './vehicleFuel.js'
 export { brandLogoUrl, brandSlug } from './brandLogo.js'
 export { dealerUrl, newCarsUrl, usedCarsUrl } from './dealerUrl.js'

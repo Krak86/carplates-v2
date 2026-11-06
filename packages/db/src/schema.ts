@@ -3,6 +3,7 @@ import {
   bigint,
   bigserial,
   boolean,
+  customType,
   date,
   doublePrecision,
   index,
@@ -575,6 +576,31 @@ export const wikiImage = registry.table(
 )
 export type WikiImageRow = typeof wikiImage.$inferSelect
 export type WikiImageInsert = typeof wikiImage.$inferInsert
+
+const bytea = customType<{ data: Buffer; driverData: Buffer }>({ dataType: () => 'bytea' })
+
+/**
+ * Paint scan of a `wiki_image` photo for the colour filter, keyed by `imageUrl`. `mask` = RGBA webp (RGB shading, A paint weight)
+ * at `maskW` x `maskH`; skip rows keep only `skipReason` / `bodyArea`. Rows with `algo` < PAINT_ALGO are rescanned.
+ * See migrations/0101_wiki_image_paint.sql.
+ */
+export const wikiImagePaint = registry.table('wiki_image_paint', {
+  imageUrl: text('image_url').primaryKey(),
+  status: text('status').notNull(),
+  skipReason: text('skip_reason'),
+  bucket: text('bucket'),
+  labL: real('lab_l'),
+  labA: real('lab_a'),
+  labB: real('lab_b'),
+  bodyArea: real('body_area'),
+  maskW: smallint('mask_w'),
+  maskH: smallint('mask_h'),
+  mask: bytea('mask'),
+  algo: smallint('algo').notNull(),
+  scannedAt: timestamp('scanned_at', { withTimezone: true }).notNull().defaultNow()
+})
+export type WikiImagePaintRow = typeof wikiImagePaint.$inferSelect
+export type WikiImagePaintInsert = typeof wikiImagePaint.$inferInsert
 
 /**
  * One tech-press test drive (`scripts/src/press.ts`: itc.ua, mezha.ua), keyed by its primary (Ukrainian) URL. `langs`
@@ -2099,6 +2125,26 @@ export const warLossesDaily = registry.table('war_losses_daily', {
 })
 export type WarLossesDailyRow = typeof warLossesDaily.$inferSelect
 export type WarLossesDailyInsert = typeof warLossesDaily.$inferInsert
+
+/** Recovery projects from DREAM (dream.gov.ua public API), migration 0102. `oblastCode` = KATOTTG prefix (`UA51`); `committedUah` = committed finance lines. */
+export const dreamProjects = registry.table(
+  'dream_projects',
+  {
+    id: text('id').primaryKey(),
+    code: text('code').notNull(),
+    status: text('status').notNull(),
+    projectType: text('project_type'),
+    purpose: text('purpose'),
+    title: text('title'),
+    oblastCode: text('oblast_code'),
+    committedUah: numeric('committed_uah', { precision: 18, scale: 2, mode: 'number' }).notNull().default(0),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull(),
+    fetchedAt: timestamp('fetched_at', { withTimezone: true }).notNull().defaultNow()
+  },
+  t => [index('ix_dream_projects_oblast').on(t.oblastCode), index('ix_dream_projects_updated').on(t.updatedAt)]
+)
+export type DreamProjectRow = typeof dreamProjects.$inferSelect
+export type DreamProjectInsert = typeof dreamProjects.$inferInsert
 
 /**
  * Model catalog (`/cars/:make/:model`): raw registry (brand, model) -> slugs, one row per model with its rollup, one per make.

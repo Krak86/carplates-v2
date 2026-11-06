@@ -13,6 +13,7 @@ import Card from '@/components/ui/Card'
 import { toIntlLocale } from '@/lib/intl'
 import { lossesHistoryQuery, lossesQuery } from '@/lib/queries'
 import { CHART_HEIGHT, CHART_WIDTH, lossRows, signed, totalsPath } from '@/routes/alarms/losses-helpers'
+import ExternalLink from '@/components/ExternalLink'
 
 const LossesInfographic = lazy(() => import('@/routes/alarms/LossesInfographic'))
 
@@ -82,9 +83,9 @@ export default function LossesSection(): ReactNode {
         {data.sourceUrl && (
           <>
             {' '}
-            <a href={data.sourceUrl} target="_blank" rel="noopener noreferrer" className="underline">
+            <ExternalLink href={data.sourceUrl} className="underline">
               {t('losses.sourcePost')}
-            </a>
+            </ExternalLink>
           </>
         )}
       </p>

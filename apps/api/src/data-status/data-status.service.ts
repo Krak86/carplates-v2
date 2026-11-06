@@ -25,6 +25,7 @@ const COUNT_TABLES: Readonly<Record<string, readonly string[]>> = {
   prozorroAuctions: ['prozorro_auctions'],
   auctionProceedings: ['auction_proceedings'],
   losses: ['war_losses_daily'],
+  dream: ['dream_projects'],
   news: ['news_items'],
   social: ['social_posts'],
   dtpPatrol: ['dtp_region_year'],
@@ -42,6 +43,7 @@ const COUNT_TABLES: Readonly<Record<string, readonly string[]>> = {
   reviews: ['topgear_reviews', 'press_reviews'],
   videos: ['car_videos', 'youtube_videos', 'site_videos'],
   wikiImages: ['wiki_image'],
+  wikiPaint: ['wiki_image_paint'],
   models3d: ['car_models_3d', 'car_models_360', 'winner_360'],
   generations: ['model_generations'],
   wikispecs: ['model_spec_wiki'],
@@ -102,6 +104,7 @@ export class DataStatusService {
         SELECT 'wanted' AS id, to_char(max(seized_at) FILTER (WHERE seized_at <= current_date), 'YYYY-MM-DD') AS last_date FROM registry.wanted_vehicles
         UNION ALL SELECT 'wantedPlates', to_char(max(seized_at) FILTER (WHERE seized_at <= current_date), 'YYYY-MM-DD') FROM registry.wanted_plates
         UNION ALL SELECT 'losses', to_char(max(day) FILTER (WHERE day <= current_date), 'YYYY-MM-DD') FROM registry.war_losses_daily
+        UNION ALL SELECT 'dream', to_char(max(updated_at) FILTER (WHERE updated_at <= now()), 'YYYY-MM-DD') FROM registry.dream_projects
         UNION ALL SELECT 'news', to_char(max(published_at) FILTER (WHERE published_at <= now()), 'YYYY-MM-DD') FROM registry.news_items
         UNION ALL SELECT 'social', to_char(max(published_at) FILTER (WHERE published_at <= now()), 'YYYY-MM-DD') FROM registry.social_posts
         UNION ALL SELECT 'dtpPatrol', to_char(max(make_date(year, period, 1)), 'YYYY-MM-DD') FROM registry.dtp_region_year

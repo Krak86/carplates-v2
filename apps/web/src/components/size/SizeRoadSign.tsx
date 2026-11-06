@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 
 import InfoPopover from '@/components/InfoPopover'
 import InfoText from '@/components/InfoText'
-import SizeExternalLink from '@/components/size/SizeExternalLink'
+import ExternalLink from '@/components/ExternalLink'
 
 /** ПДР України, section 15 "Зупинка і стоянка": where signs 5.38 and 7.6.x are explained. */
 const PDR_PARKING_URL = 'https://zakon.rada.gov.ua/laws/show/1306-2001-%D0%BF'
@@ -39,7 +39,9 @@ export default function SizeRoadSign(): ReactNode {
       <InfoPopover label={t('vin.info.about', { field: title })} title={title}>
         <InfoText text={t('size.sign.parking.what')} />
         <p className="mt-1.5">
-          <SizeExternalLink href={PDR_PARKING_URL}>{t('size.sign.parking.link')}</SizeExternalLink>
+          <ExternalLink href={PDR_PARKING_URL} className="text-[var(--color-primary)] underline hover:no-underline">
+            {t('size.sign.parking.link')}
+          </ExternalLink>
         </p>
       </InfoPopover>
     </span>

@@ -75,6 +75,14 @@ export const DATASETS: readonly Dataset[] = [
     noteKey: 'dataStatus.note.losses',
     refreshedOn: '2026-11-05'
   },
+  {
+    id: 'dream',
+    name: 'DREAM: recovery projects (dream.gov.ua public API)',
+    to: '/alarms?view=recovery',
+    cadence: 'daily',
+    job: 'dream',
+    refreshedOn: '2026-11-06'
+  },
   { id: 'news', name: 'News (RSS)', to: '/news', cadence: 'daily', job: 'news', refreshedOn: '2026-10-28' },
   {
     id: 'social',
@@ -135,6 +143,15 @@ export const DATASETS: readonly Dataset[] = [
   { id: 'reviews', name: 'Reviews: Top Gear, infocar, press', cadence: 'halfYearly', refreshedOn: '2026-10-03' },
   { id: 'videos', name: 'Videos: infocar, YouTube', cadence: 'halfYearly', refreshedOn: '2026-10-11' },
   { id: 'wikiImages', name: 'Wikipedia: model photos', to: '/cars', cadence: 'halfYearly', refreshedOn: '2026-10-13' },
+  {
+    id: 'wikiPaint',
+    name: 'Wikipedia: photo colour filter (our own scan)',
+    to: '/cars',
+    cadence: 'daily',
+    job: 'wiki-paint',
+    noteKey: 'dataStatus.note.wikiPaint',
+    refreshedOn: '2026-11-06'
+  },
   {
     id: 'models3d',
     name: '3D and 360° models: Sketchfab, carshow360, winner360',

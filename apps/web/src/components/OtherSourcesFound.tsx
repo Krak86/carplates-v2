@@ -236,6 +236,7 @@ export default function OtherSourcesFound({ plate, showPlate }: Props): ReactNod
         year={year}
         rawKind={vehicleType}
         vehicleKey={usableVin ?? plate}
+        color={color}
         lotPhotos={lotPhotos}
       />
 

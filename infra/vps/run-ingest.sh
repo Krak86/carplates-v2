@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Runs one scheduled ingest job in the ingest image:  run-ingest.sh news|social|wanted|wanted-plates|auctions|prozorro-auctions|auction-proceedings|dtp-patrol|dtp-hazards|rdw-recalls|ca-recalls|dtp-seed|seed-if-empty|alarm-history|losses|region-facet|region-brand|plates|catalog
+# Runs one scheduled ingest job in the ingest image:  run-ingest.sh news|social|wanted|wanted-plates|auctions|prozorro-auctions|auction-proceedings|dtp-patrol|dtp-hazards|wiki-paint|rdw-recalls|ca-recalls|dtp-seed|seed-if-empty|alarm-history|losses|dream|region-facet|region-brand|plates|catalog
 # Called by the deploy user's crontab (infra/vps/ingest.cron). What each job runs, and its timeout, live in scripts/src/jobs.ts.
 # After a `plates` run that loaded something new it also runs `backup.sh archive` + `full` (new source ZIPs + a fresh dump).
 set -euo pipefail

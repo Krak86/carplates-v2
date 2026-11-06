@@ -89,7 +89,7 @@ export default function GoogleTranslateLink({ text, from }: Props): ReactNode {
           </button>
         )}
         <button type="button" onClick={handleOpen} className="underline hover:no-underline">
-          {t('translate.open')}
+          {t('translate.open')} <span aria-hidden>⤢</span>
         </button>
         <GoogleTranslateAnchor text={text} from={from} />
         {failed && <span className="text-[var(--color-mot-fail)]">{t('translate.failed')}</span>}

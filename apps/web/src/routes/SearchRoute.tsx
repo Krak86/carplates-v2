@@ -12,6 +12,7 @@ import {
   isUaPlate,
   isVin,
   normalizePlate,
+  prozorroDocumentUrl,
   type WeightBoard
 } from '@carplates/shared'
 
@@ -23,6 +24,7 @@ import NotFoundInfo from '@/components/NotFoundInfo'
 import RiaCheckLink from '@/components/RiaCheckLink'
 import PhotoMetaInfo from '@/components/PhotoMetaInfo'
 import PhotoWarnings from '@/components/PhotoWarnings'
+import PhotoSourcesStrip, { type StripImage } from '@/components/PhotoSourcesStrip'
 import PhotoThumbnail from '@/components/PhotoThumbnail'
 import PlateCandidates from '@/components/PlateCandidates'
 import SearchField from '@/components/SearchField'
@@ -45,7 +47,15 @@ import { recordVisit } from '@/lib/history-db'
 import { hasPendingShare } from '@/lib/pending-share'
 import { MAX_DIMENSION } from '@/lib/image'
 import { toIntlLocale } from '@/lib/intl'
-import { auctionLotsQuery, historyQuery, plateQuery, statsTopQuery, vinQuery, wantedQuery } from '@/lib/queries'
+import {
+  auctionLotsQuery,
+  historyQuery,
+  plateQuery,
+  statsTopQuery,
+  vinQuery,
+  wantedQuery,
+  wikiImageQuery
+} from '@/lib/queries'
 import { capture } from '@/lib/telemetry'
 import { formatVehicleLabel } from '@/lib/vehicle-label'
 import HomeFuelSection from '@/routes/stats/HomeFuelSection'
@@ -137,6 +147,7 @@ export default function SearchRoute(): ReactNode {
     year: number | null
     rawKind: string | null
     key: string | null
+    color: string | null
   } | null = null
   if (kind === 'plate' && plate.data) {
     const c = plate.data.current
@@ -145,7 +156,8 @@ export default function SearchRoute(): ReactNode {
       model: c.model,
       year: c.makeYear,
       rawKind: c.kind,
-      key: c.vin || plate.data.plate
+      key: c.vin || plate.data.plate,
+      color: c.color
     }
   } else if (kind === 'vin' && vin.data) {
     const vehicle = extractVehicleInfo(vin.data)
@@ -154,7 +166,8 @@ export default function SearchRoute(): ReactNode {
       model: vehicle.model,
       year: vehicle.year,
       rawKind: vin.data.registry?.actions[0]?.kind ?? null,
-      key: vin.data.vin
+      key: vin.data.vin,
+      color: vin.data.registry?.actions[0]?.color ?? null
     }
   }
 
@@ -208,6 +221,27 @@ export default function SearchRoute(): ReactNode {
     dismissPhoto,
     selectCandidate
   } = usePlateRecognition({ currentValue: raw || null, linkedValue })
+
+  // Under an attached photo: the photo first, then the car's other images (model photo, lot photos); a click swaps one into the hero.
+  const wikiPhotoUrl =
+    useQuery({
+      ...wikiImageQuery(wikiHeroVehicle?.brand ?? '', wikiHeroVehicle?.model ?? '', wikiHeroVehicle?.year ?? null),
+      enabled: !!photo && !!(wikiHeroVehicle?.brand || wikiHeroVehicle?.model)
+    }).data?.image?.url ?? null
+  const photoOthers: StripImage[] = [
+    ...(wikiPhotoUrl ? [{ key: 'wiki', src: wikiPhotoUrl }] : []),
+    ...lotPhotos.map(id => ({ key: id, src: prozorroDocumentUrl(id) }))
+  ]
+  // The pick is scoped to the photo it was made on, so a new photo starts on itself.
+  const [pick, setPick] = useState<{ photoUrl: string; key: string | null }>({ photoUrl: '', key: null })
+  const selectedOther = photo && pick.photoUrl === photo.url ? photoOthers.find(o => o.key === pick.key) : undefined
+  // Arrows / zoom navigation wrap around the strip order: attached photo (null), then the others.
+  const stripKeys = [null, ...photoOthers.map(o => o.key)]
+  const stepPhoto = (step: number): void => {
+    if (!photo) return
+    const at = stripKeys.indexOf(selectedOther?.key ?? null)
+    setPick({ photoUrl: photo.url, key: stripKeys[(at + step + stripKeys.length) % stripKeys.length] ?? null })
+  }
 
   const sharedPhoto = useSharedPhoto(searchParams.get('p'), openShared)
 
@@ -338,15 +372,30 @@ export default function SearchRoute(): ReactNode {
         <Presence show={!!photo}>
           {photo && (
             <PhotoThumbnail
-              url={photo.url}
-              candidates={photo.candidates}
+              url={selectedOther?.src ?? photo.url}
+              candidates={selectedOther ? [] : photo.candidates}
               active={raw || null}
               pending={isRecognizing}
-              shareFile={isShareable(photo, photo.candidates.length) ? photo.file : null}
+              shareFile={!selectedOther && isShareable(photo, photo.candidates.length) ? photo.file : null}
               onClose={dismissPhoto}
+              onPrev={photoOthers.length > 0 ? () => stepPhoto(-1) : undefined}
+              onNext={photoOthers.length > 0 ? () => stepPhoto(1) : undefined}
+              position={
+                photoOthers.length > 0
+                  ? { n: stripKeys.indexOf(selectedOther?.key ?? null) + 1, total: stripKeys.length }
+                  : undefined
+              }
             />
           )}
         </Presence>
+        {photo && !recognizeErrorKey && (
+          <PhotoSourcesStrip
+            attachedUrl={photo.url}
+            others={photoOthers}
+            selectedKey={selectedOther?.key ?? null}
+            onSelect={key => setPick({ photoUrl: photo.url, key })}
+          />
+        )}
         {sharedPhoto.expired && !photo && <SharedPhotoNotice />}
         {photo?.shared && sharedPhoto.meta && <SharedPhotoNotice expiresAt={sharedPhoto.meta.expiresAt} />}
         <Presence show={!!photo?.meta && photo.mode === 'plate'}>
@@ -369,6 +418,7 @@ export default function SearchRoute(): ReactNode {
             year={wikiHeroVehicle.year}
             rawKind={wikiHeroVehicle.rawKind}
             vehicleKey={wikiHeroVehicle.key}
+            color={wikiHeroVehicle.color}
             lotPhotos={lotPhotos}
           />
         )}

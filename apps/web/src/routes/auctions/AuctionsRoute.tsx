@@ -26,6 +26,7 @@ import { dimensionRows, formatDelta } from '@/routes/auctions/helpers'
 import { AUCTION_DIMENSIONS, AUCTION_DIMENSION_ICONS } from '@/routes/auctions/types'
 import type { FilterableDimension } from '@/routes/auctions/types'
 import { useAuctionFilters } from '@/routes/auctions/use-auction-filters'
+import ExternalLink from '@/components/ExternalLink'
 
 const TAB_ON = 'border-transparent bg-[var(--color-primary)] text-[var(--color-primary-fg)]'
 const TAB_OFF =
@@ -209,17 +210,17 @@ export default function AuctionsRoute(): ReactNode {
 
           <p className="mb-6 text-xs text-[var(--color-muted)]">
             {t('auctions.page.source')}{' '}
-            <a href={AUCTIONS_DATASET_URL} target="_blank" rel="noopener noreferrer nofollow" className={LINK_CLASS}>
+            <ExternalLink href={AUCTIONS_DATASET_URL} rel="noopener noreferrer nofollow" className={LINK_CLASS}>
               data.gov.ua
-            </a>
+            </ExternalLink>
             {' · '}
-            <a href={SETAM_URL} target="_blank" rel="noopener noreferrer nofollow" className={LINK_CLASS}>
+            <ExternalLink href={SETAM_URL} rel="noopener noreferrer nofollow" className={LINK_CLASS}>
               SETAM
-            </a>
+            </ExternalLink>
             {' · '}
-            <a href={PROZORRO_SALE_URL} target="_blank" rel="noopener noreferrer nofollow" className={LINK_CLASS}>
+            <ExternalLink href={PROZORRO_SALE_URL} rel="noopener noreferrer nofollow" className={LINK_CLASS}>
               Prozorro.Sale
-            </a>
+            </ExternalLink>
           </p>
 
           <ReadGuideLink guide={AUCTIONS_GUIDE_PATH} href={`${AUCTIONS_GUIDE_PATH}#check`} className="mt-0 mb-6" />

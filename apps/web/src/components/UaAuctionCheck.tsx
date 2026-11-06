@@ -5,6 +5,7 @@ import { Link, useSearchParams } from 'react-router'
 import { useQuery } from '@tanstack/react-query'
 import { AUCTIONS_DATASET_URL, PROZORRO_SALE_URL, SETAM_URL } from '@carplates/shared'
 import type { Currency } from '@carplates/shared'
+import ExternalLink from '@/components/ExternalLink'
 
 import ReadGuideLink from '@/components/ReadGuideLink'
 import SectionInfo from '@/components/SectionInfo'
@@ -32,15 +33,6 @@ type Props = {
 }
 
 const LINK_CLASS = 'text-[var(--color-primary)] underline'
-
-function ExternalLink({ href, children }: { href: string; children: ReactNode }): ReactNode {
-  const { t } = useTranslation()
-  return (
-    <a href={href} target="_blank" rel="noopener noreferrer nofollow" className={LINK_CLASS}>
-      {children} ↗<span className="sr-only">{t('field.opensNewTab')}</span>
-    </a>
-  )
-}
 
 /**
  * Collapsed "Ukrainian auctions" section (`?section=ua-auctions`; the older US-archive section is `auctions`): SETAM lots of
@@ -179,15 +171,21 @@ export default function UaAuctionCheck({ plate, vin, openSignal = 0, startOpen =
           <span className="text-[var(--color-muted)]">{t('auctions.page.link')}</span>
         </li>
         <li>
-          <ExternalLink href={SETAM_URL}>setam.net.ua</ExternalLink>{' '}
+          <ExternalLink href={SETAM_URL} rel="noopener noreferrer nofollow" className={LINK_CLASS}>
+            setam.net.ua
+          </ExternalLink>{' '}
           <span className="text-[var(--color-muted)]">{t('uaAuctions.link.setam')}</span>
         </li>
         <li>
-          <ExternalLink href={PROZORRO_SALE_URL}>prozorro.sale</ExternalLink>{' '}
+          <ExternalLink href={PROZORRO_SALE_URL} rel="noopener noreferrer nofollow" className={LINK_CLASS}>
+            prozorro.sale
+          </ExternalLink>{' '}
           <span className="text-[var(--color-muted)]">{t('uaAuctions.link.prozorro')}</span>
         </li>
         <li>
-          <ExternalLink href={AUCTIONS_DATASET_URL}>data.gov.ua</ExternalLink>{' '}
+          <ExternalLink href={AUCTIONS_DATASET_URL} rel="noopener noreferrer nofollow" className={LINK_CLASS}>
+            data.gov.ua
+          </ExternalLink>{' '}
           <span className="text-[var(--color-muted)]">{t('uaAuctions.link.dataset')}</span>
         </li>
       </ul>

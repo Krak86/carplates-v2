@@ -7,7 +7,7 @@ import MarketFlag from '@/components/MarketFlag'
 import { fitInBay, linkById, PARKING_REFS, type Dims } from '@/components/size/fit'
 import SizeCarTop from '@/components/size/SizeCarTop'
 import SizeRoadSign from '@/components/size/SizeRoadSign'
-import SizeExternalLink from '@/components/size/SizeExternalLink'
+import ExternalLink from '@/components/ExternalLink'
 import SizeVerdictChip from '@/components/size/SizeVerdictChip'
 import { mmToMetres, type SizeShape } from '@/components/size/VehicleSize.helpers'
 
@@ -56,7 +56,12 @@ export default function SizeParkingTab({ dims, shape, estimated }: Props): React
                     <>
                       <p className="mt-1.5">{t(`size.link.${link.id}.what`)}</p>
                       <p className="mt-1.5">
-                        <SizeExternalLink href={link.url}>{t('size.link.ua-dbn.official')}</SizeExternalLink>
+                        <ExternalLink
+                          href={link.url}
+                          className="text-[var(--color-primary)] underline hover:no-underline"
+                        >
+                          {t('size.link.ua-dbn.official')}
+                        </ExternalLink>
                       </p>
                     </>
                   )}
@@ -112,7 +117,9 @@ export default function SizeParkingTab({ dims, shape, estimated }: Props): React
               </p>
               {link && (
                 <p className="mt-0.5 text-xs">
-                  <SizeExternalLink href={link.url}>{t(`size.link.${link.id}.title`)}</SizeExternalLink>{' '}
+                  <ExternalLink href={link.url} className="text-[var(--color-primary)] underline hover:no-underline">
+                    {t(`size.link.${link.id}.title`)}
+                  </ExternalLink>{' '}
                   <span className="text-[var(--color-muted)]">{link.clause}</span>
                 </p>
               )}

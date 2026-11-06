@@ -36,6 +36,7 @@ export {
   siteVideos,
   topgearReviews,
   wikiImage,
+  wikiImagePaint,
   pressReviews,
   newsItems,
   socialPosts,
@@ -203,6 +204,8 @@ export {
   type StatsSafetyInsert,
   type WikiImageRow,
   type WikiImageInsert,
+  type WikiImagePaintRow,
+  type WikiImagePaintInsert,
   type YoutubeVideoRow,
   type YoutubeVideoInsert,
   type YoutubeModelRunRow,
@@ -216,6 +219,9 @@ export {
   alarmHistoryDaily,
   alarmEvents,
   warLossesDaily,
+  dreamProjects,
+  type DreamProjectInsert,
+  type DreamProjectRow,
   type WarLossesDailyInsert,
   type WarLossesDailyRow,
   type AlarmEventRow,
@@ -245,4 +251,5 @@ export {
 } from './client.js'
 export { runMigrations } from './migrate.js'
 export { findWikiImage, upsertWikiImages } from './wikiImage.js'
+export { findWikiPaint, findWikiPaintMask, wikiPaintMaskId, type WikiPaintInfo } from './wikiImagePaint.js'
 export { recallTextHash } from './recallText.js'

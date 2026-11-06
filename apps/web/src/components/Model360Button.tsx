@@ -49,7 +49,7 @@ export default function Model360Button({ brand, model }: Props): ReactNode {
           className="inline-flex cursor-pointer items-center gap-1 hover:text-[var(--color-primary)] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:text-[var(--color-fg)]"
         >
           <span aria-hidden>🔄</span>
-          {t('model360.open', { n: count })}
+          {t('model360.open', { n: count })} <span aria-hidden>⤢</span>
         </button>
         <InfoPopover label={t('model360.open', { n: count })} title={t('model360.open', { n: count })}>
           {t('chip.tip.view360')}

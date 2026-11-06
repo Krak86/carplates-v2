@@ -11,6 +11,7 @@ import { distanceKm, kmLabel, osmUrl, streetViewUrl } from '@/routes/road-safety
 import HazardMap from '@/routes/road-safety/HazardMap'
 import SectionSkeleton from '@/routes/road-safety/SectionSkeleton'
 import SegmentedTabs from '@/routes/road-safety/SegmentedTabs'
+import ExternalLink from '@/components/ExternalLink'
 
 type Props = {
   year: number | undefined
@@ -143,23 +144,13 @@ export default function HazardsSection({ year, regionNames }: Props): ReactNode 
 
                 {h.lat !== null && h.lon !== null && (
                   <>
-                    <a
-                      href={osmUrl(h.lat, h.lon)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-[var(--color-primary)] underline"
-                    >
+                    <ExternalLink href={osmUrl(h.lat, h.lon)} className="text-[var(--color-primary)] underline">
                       {t('roadSafety.hazards.map')}
-                    </a>
+                    </ExternalLink>
 
-                    <a
-                      href={streetViewUrl(h.lat, h.lon)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-[var(--color-primary)] underline"
-                    >
+                    <ExternalLink href={streetViewUrl(h.lat, h.lon)} className="text-[var(--color-primary)] underline">
                       {t('roadSafety.hazards.streetView')}
-                    </a>
+                    </ExternalLink>
                   </>
                 )}
               </div>

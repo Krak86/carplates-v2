@@ -501,6 +501,8 @@ Findings and planned shape: `docs/alarm-plan.md` "Research: war-loss figures and
 - ✅ Losses (2026-11-05): table, `ingest:losses` backfill, API fetch every 30 min (6 h until 2026-11-06; edge `LOSSES_CACHE` 30 min), `GET /api/losses` (+ `/history`), `LossesSection` on `/alarms`; write-up `docs/plan-done.md` "War-loss figures on `/alarms`".
 - ✅ Polish (2026-11-05): infographic + details modal for losses, map zoom/drag, alert type labels, collapsed active list, daily `losses` cron (04:50) + `/data-status` row, About/releases updated.
   - [ ] After deploy: `run-ingest.sh losses` once; add `/api/losses` + `/api/losses/history` to the Cloudflare Cache Rule (verify MISS then HIT); look at `/alarms` on prod.
+- ✅ DREAM recovery tab (2026-11-06): `?view=recovery` on `/alarms` (all war stats stay on one route), table `dream_projects` (migration 0102), `ingest:dream` (incremental, cron 05:10, `/data-status` row), `GET /api/dream/summary`, markers by projects / committed funding + region card + "What is DREAM?" popover; ACLED (licence) and shtab.net (no licence) not used; write-up `docs/plan-done.md` "DREAM recovery view on /alarms".
+  - [ ] After deploy (DREAM recovery view, 2026-11-06): migration 0102 applied (blue/green safe, new table); run `bash /opt/carsua/compose/run-ingest.sh dream` once with `--full` semantics (first run on an empty table is already a full load, about 15 min); add `/api/dream/summary` to the Cloudflare Cache Rule (`docs/deploy.md`, check MISS then HIT); look at `/alarms?view=recovery` on prod (markers, region card, phone width, light / dark); confirm in writing that DREAM data is CC BY 4.0 if the credit wording should change.
 - [ ] Ukrstat (checked 2026-11-05: `REGION` = KATOTTG, latest year **2022** pre-war, Crimea / Sevastopol end 2014; details in `docs/plan-done.md`): decide whether a pre-war denominator is acceptable, then a static population table in `packages/shared` -> `/read/plates` `RegionsSection` + per-100k metric in `AlarmHistorySection`.
 - ⏳ Fuel prices from Ukrstat: only if `DF_PRICE_CHANGE_CONSUMER_GOODS_SERVICE` has petrol/diesel items (unchecked).
 
@@ -535,6 +537,14 @@ in Postgres + pre-warm").
 **Left (all optional):** (1) ~~resume `--aliased`, `--retry-failed`, export~~ done; (2) spot-check matches visually on real plates (Niva, Priora, Sens, Gazelle, Geely MK, Mercedes 200/230 → E-Class, UAZ 469 — needs plates from the user); (3) remaining `not_found` tail: Geely JL7162 / FE-2, Honda M-NV, СКС RDS-02РП, Fiat Grande Punto / Doblo Panorama, Kia Optima, Renault Taliant, ZAZ T13010 / TF69 (verify Chance), trim words ("307 xs 2.0 e", "pajero wgn 3.2 did") — each model < 300 cars; (4) check the offline `wiki` cap (200 entities) is enough now that every result fetches the photo. Ideas not done:
 search by normalized name for odd spellings ("118 i" → "118i"); non-Latin article titles (zh/ja/ko) are mostly rejected by
 the "title mentions the model" guard; a Wikidata `P18` query could replace the lead-image stage.
+
+### Wiki photo colour filter - steps 1-6 done (2026-11-06), candidates / strip / rollout next
+
+Plan and handoff: `docs/wiki-recolor-plan.md`. Table `registry.wiki_image_paint` (migration 0101), `/api/wiki/recolor` + `/api/wiki/paint/:id.webp`, shared `applyPaint`.
+
+- [ ] After deploy: migration 0101 applied (blue/green safe, new table); add `/api/wiki/recolor` and `starts_with /api/wiki/paint/` to the Cloudflare Cache Rule (`docs/deploy.md`, check MISS then HIT); the scan job (step 9) is not scheduled yet, so the table stays empty and `recolor` answers `null`.
+- [ ] After deploy: check the filter in a browser on a real plate once the scan has run (canvas aligned with the photo, pill toggles, credit says "modified: colour"); until the scan job runs no photo gets a filter.
+- [ ] Steps 7-9: candidate photos, photo strip, rollout (scan job, `/data-status` row, gallery review).
 
 ### Car reviews, videos, 3D & 360° — mostly shipped (2026-10-03 → 05); open items below
 
@@ -1317,6 +1327,33 @@ Write-up: `docs/plan-done.md` "Market offers (CarAPIS)"; conventions: `docs/feat
 
 - [ ] **After deploy:** `/data-status` shows "Records in our database" on every row and the history card lists real runs; click a chip and a row (smooth scroll + flash).
 - [ ] Browser-check on a phone: fullscreen alert map, history search box, "Other engines" group on a Kia Ceed page.
+
+## Wiki photo colour filter + extra photos (planned 2026-11-06)
+
+Plan in 9 steps, [docs/wiki-recolor-plan.md](docs/wiki-recolor-plan.md); prototype and findings in `docs/wiki-recolor/`. Recolour the hero photo to the registry colour (toggle top-right, swatch, "colour filter" text, skip when the colour already matches), then candidate photos per model and a photo strip under the hero.
+
+- [x] Steps 1-2 (2026-11-06): shared colour model (`paintColor.ts`), paint scan core + CLI (`wiki-paint-core.ts`, `wiki-paint.ts`), gates tuned on 3 random samples of 50
+- [x] Phase A rest (2026-11-06): migration 0101 + schema + CLI upsert (3), API (4), web filter (5, browser-checked on real scanned rows), docs (6)
+- [ ] Phase B: candidate photos + bottom strip (steps 7-8)
+- [x] Phase C code (2026-11-06): `wiki-paint` job + cron (00:30) + `/data-status` row + orphan cleanup + popularity order + review contact sheets
+- [ ] After deploy (owner): apply migration 0101 on the VPS; Cloudflare Cache Rule `/api/wiki/recolor` + `starts_with /api/wiki/paint/` (docs/deploy.md); optional healthchecks.io check + secret `HC_PING_WIKI_PAINT` (daily, 1 d + 3 h grace); the first night run downloads the model (check `registry.job_runs` + `/data-status` a day later)
+- [x] Gallery review of the 100-photo sample (2026-11-06, 47 ok / 53 skip; `scripts/.data/wiki-paint/review-2026-11-06/sheet-*.jpg`): 12 of 47 ok are bad tints (wrong bucket on dark / teal, livery, neighbour spill, rust), about 16 of 53 skips are wrong (details: plan "R1 findings")
+- [x] Gate tuning R2 round 1 (2026-11-06, uncommitted, `PAINT_ALGO` still 1): saturated-cluster re-pick, hue match, `two_tone` skip, looser share / dark_body chroma; 53 ok of the same 100 (+5 fixed, 5 mis-tints now skipped, 20 good kept); sheets `scripts/.data/wiki-paint/review-2026-11-06-algo2/`
+- [ ] Owner: look at the algo2 sheets, agree, then bump `PAINT_ALGO` to 2 and run a fresh random 100 (`--dry-run --order random --out`) to check for overfitting
+
+## Brand pronunciation (planned 2026-11-06)
+
+Speaker icon beside the brand name on catalog pages; lazy popup with ua / ru / en transcription (parsed from Wikipedia lead wikitext; Wikidata has none) and an on-demand play button for origin-language audio (Commons `.ogg`, then Piper TTS). Plan and research: [docs/brand-pronounce-plan.md](docs/brand-pronounce-plan.md). About 8.5 working days; text-only slice about 4.5.
+
+- [ ] Step 1: coverage probe `brand-pronounce-probe.ts` (en/uk/ru leads of the ~110 catalog makes, no DB writes)
+- [ ] Step 2: parser + tests (`{{IPA}}`, `{{IPAc-en}}`, `{{lang-uk}}`, `МФА:`)
+- [ ] Step 3: migration + schema + ingest CLI/job + seed CSV + `/data-status` + overrides CSV
+- [ ] Step 4: Commons audio finder (author + licence stored)
+- [ ] Step 5: Piper TTS for brands without audio (decide after the probe; skippable)
+- [ ] Step 6: `GET /api/brands/:slug/pronunciation` + `hasPronunciation` on the catalog payload
+- [ ] Step 7: `BrandPronounce` button + lazy `InfoPopover` + audio hook + i18n + tests
+- [ ] Step 8: docs (features-reference, plan-done, releases, About credits)
+- [ ] After deploy (owner): apply the migration on the VPS; run the ingest job once; edge cache rule for `/api/brands/*/pronunciation` (docs/checklists.md); check audio credits on About
 
 ## Later, conditional
 

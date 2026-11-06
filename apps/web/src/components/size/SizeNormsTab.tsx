@@ -13,7 +13,7 @@ import {
   type Dims,
   type NormLink
 } from '@/components/size/fit'
-import SizeExternalLink from '@/components/size/SizeExternalLink'
+import ExternalLink from '@/components/ExternalLink'
 import { CLASS_CUTS, mmToMetres, type ClassResult, type SizeClass } from '@/components/size/VehicleSize.helpers'
 
 type Props = {
@@ -41,7 +41,9 @@ function LinkLine({ link }: LinkLineProps): ReactNode {
 
   return (
     <span>
-      <SizeExternalLink href={link.url}>{title}</SizeExternalLink>{' '}
+      <ExternalLink href={link.url} className="text-[var(--color-primary)] underline hover:no-underline">
+        {title}
+      </ExternalLink>{' '}
       <span className="text-[var(--color-muted)]">{link.clause}</span>
       <InfoPopover label={t('vin.info.about', { field: title })} title={title}>
         <InfoText text={t(`size.link.${link.id}.what`)} />

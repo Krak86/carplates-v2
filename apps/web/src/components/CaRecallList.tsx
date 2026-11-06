@@ -7,6 +7,7 @@ import { caRecallUrl, systemKey } from '@/components/CaRecalls.helpers'
 import MarketFlag from '@/components/MarketFlag'
 import RdwRecallField from '@/components/RdwRecallField'
 import { formatRecallDate, formatVehicleCount, RECALLS_PREVIEW } from '@/components/RdwRecalls.helpers'
+import ExternalLink from '@/components/ExternalLink'
 
 type Props = {
   data: NonNullable<CaRecallsResponse['match']>
@@ -77,14 +78,12 @@ export default function CaRecallList({ data, year, locale }: Props): ReactNode {
                   <RdwRecallField label={t('ca.code')} value={recall.code} info={t('ca.about.code')} />
                 </dl>
 
-                <a
+                <ExternalLink
                   href={caRecallUrl(recall.code)}
-                  target="_blank"
-                  rel="noopener noreferrer"
                   className="mt-2 inline-block text-sm text-[var(--color-primary)] underline hover:no-underline"
                 >
                   {t('ca.moreInfo')}
-                </a>
+                </ExternalLink>
               </details>
             </li>
           )

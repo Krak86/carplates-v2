@@ -17,6 +17,10 @@ type Props = {
   /** The picked file when this photo may be shared (plate photo, not a certificate); null hides the Share button. */
   shareFile?: File | null
   onClose: () => void
+  /** Step through the car's images (attached photo, model photo, lot photos); arrows and zoom navigation show when set. */
+  onPrev?: () => void
+  onNext?: () => void
+  position?: { n: number; total: number }
 }
 
 const SKIP_AFTER_MS = 8000
@@ -27,7 +31,10 @@ export default function PhotoThumbnail({
   active,
   pending = false,
   shareFile = null,
-  onClose
+  onClose,
+  onPrev,
+  onNext,
+  position
 }: Props): ReactNode {
   const { t } = useTranslation()
   const [zoomed, setZoomed] = useState(false)
@@ -51,7 +58,12 @@ export default function PhotoThumbnail({
         className="flex w-full cursor-zoom-in justify-center rounded-lg bg-black/80"
       >
         <span className="relative block max-w-full">
-          <img src={url} alt="" className="block max-h-64 max-w-full rounded-lg sm:max-h-80" />
+          <img
+            src={url}
+            alt=""
+            referrerPolicy="no-referrer"
+            className="block max-h-64 max-w-full rounded-lg sm:max-h-80"
+          />
           <PhotoPlateBoxes candidates={candidates} active={active} />
         </span>
         <span aria-hidden className="absolute right-2 bottom-2 rounded-full bg-black/60 px-2 py-0.5 text-xs text-white">
@@ -66,6 +78,20 @@ export default function PhotoThumbnail({
       >
         ✕
       </button>
+
+      {([onPrev, onNext] as const).map((go, i) =>
+        go ? (
+          <button
+            key={i}
+            type="button"
+            onClick={go}
+            aria-label={t(i === 0 ? 'uaAuctions.hero.prev' : 'uaAuctions.hero.next')}
+            className={`absolute top-1/2 -translate-y-1/2 rounded-full bg-black/55 px-2.5 py-1 text-lg leading-none text-white hover:bg-black/75 ${i === 0 ? 'left-2' : 'right-2'}`}
+          >
+            {i === 0 ? '‹' : '›'}
+          </button>
+        ) : null
+      )}
 
       {pending && slow && (
         <button
@@ -86,7 +112,17 @@ export default function PhotoThumbnail({
         </p>
       )}
 
-      {zoomed && <PhotoZoomDialog url={url} candidates={candidates} active={active} onClose={() => setZoomed(false)} />}
+      {zoomed && (
+        <PhotoZoomDialog
+          url={url}
+          candidates={candidates}
+          active={active}
+          onClose={() => setZoomed(false)}
+          onPrev={onPrev}
+          onNext={onNext}
+          position={position}
+        />
+      )}
     </div>
   )
 }

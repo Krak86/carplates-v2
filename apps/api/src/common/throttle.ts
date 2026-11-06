@@ -47,3 +47,8 @@ export const UNSUBSCRIBE_THROTTLE = { medium: { limit: 20, ttl: 60_000 } }
 export const CONTACT_THROTTLE = { default: { ttl: 3_600_000, limit: 12 } }
 /** War-loss figures: one small daily row and a per-category history, edge-cached. */
 export const LOSSES_THROTTLE = { medium: { limit: 60, ttl: 60_000 } }
+/** DREAM recovery summary: one small aggregate, edge-cached. */
+export const DREAM_THROTTLE = { medium: { limit: 60, ttl: 60_000 } }
+
+/** Colour-filter lookup + mask for the hero photo: per-model, edge-cached, one of each per result view. */
+export const WIKI_RECOLOR_THROTTLE = { medium: { limit: 120, ttl: 60_000 } }

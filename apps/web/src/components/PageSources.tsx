@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import Card from '@/components/ui/Card'
+import ExternalLink from '@/components/ExternalLink'
 
 export type PageSource = { label: string; url: string; note?: string }
 
@@ -24,9 +25,9 @@ export default function PageSources({ sources, lines = [], footer }: Props): Rea
       <ul className="space-y-1 text-sm">
         {sources.map(source => (
           <li key={source.url}>
-            <a href={source.url} target="_blank" rel="noopener noreferrer nofollow" className="font-medium underline">
+            <ExternalLink href={source.url} rel="noopener noreferrer nofollow" className="font-medium underline">
               {source.label}
-            </a>
+            </ExternalLink>
             {source.note && (
               <>
                 {' '}

@@ -44,7 +44,7 @@ export default function Model3dButton({ brand, model }: Props): ReactNode {
           className="inline-flex cursor-pointer items-center gap-1 hover:text-[var(--color-primary)] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:text-[var(--color-fg)]"
         >
           <span aria-hidden>🧊</span>
-          {t('model3d.open', { n: models.length })}
+          {t('model3d.open', { n: models.length })} <span aria-hidden>⤢</span>
         </button>
         <InfoPopover label={t('model3d.open', { n: models.length })} title={t('model3d.open', { n: models.length })}>
           {t('chip.tip.view3d')}

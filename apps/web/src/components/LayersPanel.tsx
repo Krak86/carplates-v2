@@ -18,6 +18,7 @@ import {
 } from '@/lib/live-background'
 import { useLiveBackgroundStore } from '@/store/live-background-store'
 import { useSettingsStore } from '@/store/settings-store'
+import ExternalLink from '@/components/ExternalLink'
 
 // Lazy-loaded (see LayersButton.tsx).
 export default function LayersPanel(): ReactNode {
@@ -105,14 +106,12 @@ export default function LayersPanel(): ReactNode {
       <ShareLayoutButton className="mt-2 flex w-full border-t border-[var(--color-border)] px-1 pt-2 text-left text-xs text-[var(--color-primary)] underline hover:no-underline" />
 
       {mode === 'map' && (
-        <a
+        <ExternalLink
           href={travicUrl(view)}
-          target="_blank"
-          rel="noopener noreferrer"
           className="mt-2 block border-t border-[var(--color-border)] px-1 pt-2 text-xs text-[var(--color-primary)] underline hover:no-underline"
         >
           {t('layers.map.travic')}
-        </a>
+        </ExternalLink>
       )}
     </div>
   )
