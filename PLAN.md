@@ -1374,7 +1374,7 @@ Speaker icon beside the brand name on catalog pages; lazy popup with ua / ru / e
 - [ ] Step 4: Commons audio finder (author + licence stored)
 - [ ] Step 5: Piper TTS for brands without audio (decide after the probe; skippable)
 - [x] Step 6: `GET /api/brands/:slug/pronunciation` (`apps/api/src/brands/`, contract `packages/shared/src/brandPronunciation.ts`, `LOOKUP_CACHE`, `CATALOG_THROTTLE`, 404 for a make with no rows, `audio` null until step 4) + `hasPronunciation` (`.nullable().optional()`) on the catalog make summary/detail
-- [x] Step 7 (text slice): `BrandPronounce` speaker button (`components/BrandPronounce.tsx`, lazy body in `components/brand-pronounce/`) on the make page `/cars/:make` when `hasPronunciation`, `brandPronunciationQuery` (offline group `brand-pronunciation`), i18n ua/ru/en, tests. **Not yet:** audio play button (needs step 4), the button on the VIN / plate card header and model pages
+- [x] Step 7 (text slice): `BrandPronounce` speaker button (`components/BrandPronounce.tsx`, lazy body in `components/brand-pronounce/`) on the make page `/cars/:make` when `hasPronunciation`, `brandPronunciationQuery` (offline group `brand-pronunciation`), i18n ua/ru/en, tests. also on the plate / VIN-registry card header (`BrandPronounceChip`, make slug from `pronounce` in `/api/catalog/lookup`). **Not yet:** audio play button (needs step 4), the decode-only VIN card (`VinResult`) and model pages
 - [ ] Step 8: docs (features-reference, plan-done, releases, About credits)
 - [ ] After deploy (owner): apply the migration on the VPS; run the ingest job once; edge cache rule for `/api/brands/*/pronunciation` (docs/checklists.md); check audio credits on About
 

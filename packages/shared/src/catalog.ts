@@ -166,6 +166,8 @@ export type CatalogLookupQuery = z.infer<typeof catalogLookupQuerySchema>
 
 /** `page` is null when the model has no catalog page (below `CATALOG_KEEP_MIN_CARS`, a non-passenger kind or an unknown spelling). */
 export const catalogLookupSchema = z.object({
-  page: z.object({ make: z.string(), model: z.string() }).nullable()
+  page: z.object({ make: z.string(), model: z.string() }).nullable(),
+  /** Make slug of the brand when it has a pronunciation (the speaker button), even without a model page. Optional: older cached data. */
+  pronounce: z.string().nullable().optional()
 })
 export type CatalogLookup = z.infer<typeof catalogLookupSchema>

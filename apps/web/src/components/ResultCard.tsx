@@ -16,6 +16,7 @@ import {
 import type { Currency, PlateLookupResponse } from '@carplates/shared'
 
 import BrandLogo from '@/components/BrandLogo'
+import BrandPronounceChip from '@/components/BrandPronounceChip'
 import CatalogModelLink from '@/components/catalog/CatalogModelLink'
 import BrandSiteChip from '@/components/BrandSiteChip'
 import PageShareButton from '@/components/PageShareButton'
@@ -318,6 +319,7 @@ export default function ResultCard({ data }: Props): ReactNode {
                   </CatalogModelLink>{' '}
                   {c.makeYear ? `(${c.makeYear})` : ''}
                 </span>
+                <BrandPronounceChip brand={c.brand} model={c.model} />
                 <CopyAllInfoButton
                   className="shrink-0"
                   vehicle={{ brand: c.brand, model: c.model, year: c.makeYear, body: c.body }}
