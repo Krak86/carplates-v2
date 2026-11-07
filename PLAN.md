@@ -1370,7 +1370,7 @@ Speaker icon beside the brand name on catalog pages; lazy popup with ua / ru / e
 - [x] Step 1: coverage probe `brand-pronounce-probe.ts` (en/uk/ru leads of the ~110 catalog makes, no DB writes): 46% of makes have a form in any language (en 35%, uk 17%, ru 14%), audio file named for 13%; skip Piper at first, overrides CSV of ~110 rows is the main source (see docs/brand-pronounce-plan.md "Probe results")
 - [x] Step 2: parser + tests (`{{IPA}}`, `{{IPAc-en}}`, `{{lang-uk}}`, `МФА:`): `scripts/src/brand-pronounce-parse.ts`; on the 104/87/89 cached en/uk/ru leads it yields IPA for 28/4/14, respelling for 0/11/2, audio for 14/1/0
 - [x] Step 3: migration 0103 (`brand_pronunciation`, `brand_pronunciation_audio`) + schema + `ingest:brand-pronounce` (job `brand-pronounce`, monthly cron) + seed CSV (105 rows, 46 of 109 makes) + `/data-status` row; overrides CSV file exists (`scripts/src/brand-pronounce-overrides.csv`) but is header-only
-- [ ] Step 3b: fill the overrides CSV (~250 cells: ua + ru respelling, IPA for the makes with none), re-run `pnpm ingest:brand-pronounce` and `export:brand-pronounce:csv`; owner reviews the respellings
+- [x] Step 3b: overrides CSV drafted (ua + ru respelling for all 109 makes, en IPA/respelling for the ones Wikipedia lacks or got wrong); ingest + seed re-run: 302 rows, 109 of 109 makes. **Owner review of the respellings pending** (`scripts/src/brand-pronounce-overrides.csv`)
 - [ ] Step 4: Commons audio finder (author + licence stored)
 - [ ] Step 5: Piper TTS for brands without audio (decide after the probe; skippable)
 - [ ] Step 6: `GET /api/brands/:slug/pronunciation` + `hasPronunciation` on the catalog payload
