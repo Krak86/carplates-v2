@@ -35,7 +35,8 @@ export const SHARE_SECTIONS = [
   'assists',
   'wanted',
   'ua-auctions',
-  'losses'
+  'losses',
+  'map'
 ] as const
 export type ShareSection = (typeof SHARE_SECTIONS)[number]
 

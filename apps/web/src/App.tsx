@@ -5,7 +5,7 @@ import { Route, Routes, useLocation } from 'react-router'
 
 import Layout from '@/components/Layout'
 import LoadErrorBoundary from '@/components/LoadErrorBoundary'
-import Spinner from '@/components/ui/Spinner'
+import RouteFallback from '@/components/RouteFallback'
 import { ROUTE_TITLE_KEYS, useDocumentTitle } from '@/hooks/useDocumentTitle'
 import PageShareButton from '@/components/PageShareButton'
 import { isCatalogPath, NO_SHARE_PATHS } from '@/components/use-page-share-actions'
@@ -91,13 +91,7 @@ export default function App(): ReactNode {
       <LoadErrorBoundary resetKey={pathname}>
         {/* Viewport-tall: a bare spinner leaves QuickLinks inside the first screen, and it is pushed out
             (CLS 0.22 on /fuel) when the route chunk renders. */}
-        <Suspense
-          fallback={
-            <div className="min-h-svh">
-              <Spinner />
-            </div>
-          }
-        >
+        <Suspense fallback={<RouteFallback />}>
           <Routes>
             <Route path="/" element={<SearchRoute />} />
             <Route path="/about" element={<AboutRoute />} />

@@ -95,13 +95,18 @@ describe('SpaController meta injection', () => {
           ? { plate: 'AA1234BB', expiresAt: new Date(Date.now() + 86_400_000), width: 1600, height: 900 }
           : null
     }
+    const { LossesService } = await import('../losses/losses.service.js')
+    const losses = {
+      latest: async () => ({ date: '2026-11-05', day: 1350, stats: { personnel_units: 1_200_000 }, increase: {} })
+    }
     const moduleRef = await Test.createTestingModule({
       controllers: [SpaController],
       providers: [
         { provide: PreviewService, useValue: previews },
         ComparePreviewService,
         { provide: CatalogService, useValue: catalog },
-        { provide: SharesService, useValue: shares }
+        { provide: SharesService, useValue: shares },
+        { provide: LossesService, useValue: losses }
       ]
     }).compile()
     app = moduleRef.createNestApplication<NestFastifyApplication>(new FastifyAdapter())
@@ -128,6 +133,18 @@ describe('SpaController meta injection', () => {
   it('keeps the static /compare tags for a half-filled or malformed link', async () => {
     expect(await get('/compare?a=plate:AA1234BB')).toContain('Порівняння двох авто')
     expect(await get('/compare?a=plate:AA1234BB&b=m:BMW')).toContain('Порівняння двох авто')
+  })
+
+  it('gives /alarms the live alert-map card, and its section links their own card and og:url', async () => {
+    const page = await get('/alarms?lang=en')
+    expect(page).toContain('og:image" content="https://carsua.app/og/alarms.png?lang=en"')
+    const losses = await get('/alarms?section=losses&lang=en')
+    expect(losses).toContain('og:image" content="https://carsua.app/og/losses.png?lang=en"')
+    expect(losses).toContain('og:url" content="https://carsua.app/alarms?section=losses&amp;lang=en"')
+    expect(losses).toContain('Day 1,350 · 4 y 8 mo 12 d')
+    const map = await get('/alarms?section=map')
+    expect(map).toContain('og:image" content="https://carsua.app/og/alarms.png"')
+    expect(map).toContain('og:url" content="https://carsua.app/alarms?section=map"')
   })
 
   it('injects per-vehicle tags with noindex on a known plate', async () => {

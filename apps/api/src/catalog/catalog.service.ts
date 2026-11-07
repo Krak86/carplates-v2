@@ -1,5 +1,5 @@
 import { Inject, Injectable, Logger } from '@nestjs/common'
-import { catalogAlias, catalogMake, catalogModel, catalogYearStats } from '@carplates/db'
+import { brandPronunciation, catalogAlias, catalogMake, catalogModel, catalogYearStats } from '@carplates/db'
 import { CATALOG_TOP_MODELS, brandSlug, catalogStatsSchema, catalogYearStatsSchema, modelKey } from '@carplates/shared'
 import type {
   CatalogLookup,
@@ -29,6 +29,8 @@ type Snapshot = {
   /** Every make, biggest first. */
   makes: CatalogMakeSummary[]
   makeDetails: Map<string, CatalogMake>
+  /** Make slugs that have pronunciation rows. */
+  pronounced: Set<string>
 }
 
 const aliasKey = (brand: string, model: string): string => `${brand.trim().toLowerCase()}|${model.trim().toLowerCase()}`
@@ -69,12 +71,15 @@ export class CatalogService {
    * else the plain slugs (a VIN decode says `BMW` / `X5`). Null when no page exists, so the web links only to real pages.
    */
   async lookup(brand: string, model: string): Promise<CatalogLookup> {
-    const { aliases, models } = await this.load()
+    const { aliases, models, pronounced } = await this.load()
     const hit = aliases.get(aliasKey(brand, model))
-    if (hit) return { page: { make: hit[0], model: hit[1] } }
-    const make = brandSlug(brand)
+    const make = hit?.[0] ?? brandSlug(brand)
+    const pronounce = make && pronounced.has(make) ? make : null
+    if (hit) return { page: { make: hit[0], model: hit[1] }, pronounce }
     const slug = modelKey(model)
-    return make && slug && models.has(`${make}/${slug}`) ? { page: { make, model: slug } } : { page: null }
+    return make && slug && models.has(`${make}/${slug}`)
+      ? { page: { make, model: slug }, pronounce }
+      : { page: null, pronounce }
   }
 
   /** The `/cars` index. */
@@ -157,17 +162,24 @@ export class CatalogService {
     for (const a of await this.dbService.db.select().from(catalogAlias)) {
       if (models.has(`${a.makeSlug}/${a.modelSlug}`)) aliases.set(aliasKey(a.brand, a.model), [a.makeSlug, a.modelSlug])
     }
+    const pronounced = new Set(
+      (await this.dbService.db.selectDistinct({ slug: brandPronunciation.brandSlug }).from(brandPronunciation)).map(
+        r => r.slug
+      )
+    )
     const { makes, makeDetails } = this.buildMakes(
       await this.dbService.db.select().from(catalogMake),
-      rows.filter(r => models.has(`${r.makeSlug}/${r.modelSlug}`))
+      rows.filter(r => models.has(`${r.makeSlug}/${r.modelSlug}`)),
+      pronounced
     )
-    return { at: Date.now(), models, indexable, aliases, makes, makeDetails }
+    return { at: Date.now(), models, indexable, aliases, makes, makeDetails, pronounced }
   }
 
   /** The make rollups (`catalog_make`) joined with their model rows, both biggest first. */
   private buildMakes(
     makeRows: (typeof catalogMake.$inferSelect)[],
-    modelRows: (typeof catalogModel.$inferSelect)[]
+    modelRows: (typeof catalogModel.$inferSelect)[],
+    pronounced: ReadonlySet<string>
   ): Pick<Snapshot, 'makes' | 'makeDetails'> {
     const byMake = new Map<string, (typeof catalogModel.$inferSelect)[]>()
     for (const r of modelRows) byMake.set(r.makeSlug, [...(byMake.get(r.makeSlug) ?? []), r])
@@ -182,6 +194,7 @@ export class CatalogService {
         modelCount: m.models,
         topBrand: list[0].topRawBrand,
         indexable: list.some(r => r.indexable),
+        hasPronunciation: pronounced.has(m.makeSlug),
         models: list.map(r => ({
           model: r.modelSlug,
           modelName: r.modelName,

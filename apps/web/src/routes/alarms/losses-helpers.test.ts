@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { CHART_HEIGHT, CHART_WIDTH, lossRows, signed, totalsPath } from '@/routes/alarms/losses-helpers'
+import { CHART_HEIGHT, CHART_WIDTH, lossRows, signed, totalsPath, warDuration } from '@/routes/alarms/losses-helpers'
 
 describe('losses helpers', () => {
   it('keeps a missing counter null, not 0', () => {
@@ -39,5 +39,22 @@ describe('losses helpers', () => {
     const path = totalsPath(points, 100)
     expect(path.split('L').length).toBeLessThanOrEqual(102)
     expect(path.endsWith(' 0.0')).toBe(true)
+  })
+})
+
+describe('warDuration', () => {
+  it('counts years, months and days from 24 Feb 2022', () => {
+    expect(warDuration('2022-02-24')).toEqual({ years: 0, months: 0, days: 0 })
+    expect(warDuration('2026-11-05')).toEqual({ years: 4, months: 8, days: 12 })
+    expect(warDuration('2023-02-24')).toEqual({ years: 1, months: 0, days: 0 })
+  })
+
+  it('borrows days from the previous month', () => {
+    expect(warDuration('2022-03-01')).toEqual({ years: 0, months: 0, days: 5 })
+  })
+
+  it('is null before the start or for a bad date', () => {
+    expect(warDuration('2022-02-23')).toBeNull()
+    expect(warDuration('soon')).toBeNull()
   })
 })

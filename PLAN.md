@@ -1355,20 +1355,26 @@ Plan in 9 steps, [docs/wiki-recolor-plan.md](docs/wiki-recolor-plan.md); prototy
 - [x] Lot-photo carousel: model photo slides get the colour filter too (repainted + pill, then original); source order stays attached photo, auction photos, model photo (filter, original), kind placeholder
 - [x] Deployed 2026-11-07: migration 0101 applied, Cloudflare Cache Rule edited (live check: `/api/wiki/recolor` MISS then HIT, mask webp MISS then HIT, immutable); first nightly `wiki-paint` run ok (job_runs 00:30, finished 01:02)
 - [x] Fix: `GET /api/wiki/paint/:file` returned a 500 for an unknown id (Fastify refuses the JSON error body under the `@Header('Content-Type', 'image/webp')` decorator) and the `@Header` immutable cache-control rode along, so the edge kept the 500 for a year; now `StreamableFile({ type })` + `lookupCacheInterceptor(MASK_CACHE)` (success only), controller test
-- [ ] After the next API deploy (owner): purge in Cloudflare the two cached 500 test URLs `/api/wiki/paint/zzz.webp` and `/api/wiki/paint/00000000000000000000000000000000.webp`, then `curl -I` one of them: expect 404 (not 500), no immutable header
+- [x] API fix deployed (9f9dc88, merged via #144); with a cache-busting query the origin answers 400 (`zzz.webp`) and 404 (`000...0.webp`), no immutable header
+- [x] Cloudflare purge done (owner, 2026-11-07): `zzz.webp` answers 400, `000...0.webp` 404, BYPASS, no `immutable`
+- [x] `wiki-paint.ts --model X` (repeatable, with `--brand`) to scan one model; helper `wiki-paint-scope.ts` + test
+- [x] Touareg single-model scan skipped by the owner (covered by the full scan)
+- [ ] Full local scan (owner runs it in their own terminal, resumable, Ctrl+C safe): PowerShell: `foreach ($i in 1..16) { pnpm ingest:wiki-paint --limit 1500 --rps 1; if ($LASTEXITCODE -ne 0) { break } }` (about 65 min per batch, 16 batches / about 17 h; stop when a run prints `scanning 0 photo(s)`)
+- [ ] Step C, last, after the full scan: `pg_dump --data-only -t registry.wiki_image_paint` locally (about 300-350 MB) and restore on the VPS (owner; `ON CONFLICT DO NOTHING` into a staging table if the VPS already has nightly rows; never TRUNCATE / `db:seed`; not while the 00:30 cron runs), then check `/data-status` and `SELECT status, count(*)`
 - [ ] Check the wiki-paint row on `/data-status` and the `job_runs` batch size over the next nights (1 500 photos each, about 15 nights)
 
 ## Brand pronunciation (planned 2026-11-06)
 
 Speaker icon beside the brand name on catalog pages; lazy popup with ua / ru / en transcription (parsed from Wikipedia lead wikitext; Wikidata has none) and an on-demand play button for origin-language audio (Commons `.ogg`, then Piper TTS). Plan and research: [docs/brand-pronounce-plan.md](docs/brand-pronounce-plan.md). About 8.5 working days; text-only slice about 4.5.
 
-- [ ] Step 1: coverage probe `brand-pronounce-probe.ts` (en/uk/ru leads of the ~110 catalog makes, no DB writes)
-- [ ] Step 2: parser + tests (`{{IPA}}`, `{{IPAc-en}}`, `{{lang-uk}}`, `МФА:`)
-- [ ] Step 3: migration + schema + ingest CLI/job + seed CSV + `/data-status` + overrides CSV
+- [x] Step 1: coverage probe `brand-pronounce-probe.ts` (en/uk/ru leads of the ~110 catalog makes, no DB writes): 46% of makes have a form in any language (en 35%, uk 17%, ru 14%), audio file named for 13%; skip Piper at first, overrides CSV of ~110 rows is the main source (see docs/brand-pronounce-plan.md "Probe results")
+- [x] Step 2: parser + tests (`{{IPA}}`, `{{IPAc-en}}`, `{{lang-uk}}`, `МФА:`): `scripts/src/brand-pronounce-parse.ts`; on the 104/87/89 cached en/uk/ru leads it yields IPA for 28/4/14, respelling for 0/11/2, audio for 14/1/0
+- [x] Step 3: migration 0103 (`brand_pronunciation`, `brand_pronunciation_audio`) + schema + `ingest:brand-pronounce` (job `brand-pronounce`, monthly cron) + seed CSV (105 rows, 46 of 109 makes) + `/data-status` row; overrides CSV file exists (`scripts/src/brand-pronounce-overrides.csv`) but is header-only
+- [x] Step 3b: overrides CSV drafted (ua + ru respelling for all 109 makes, en IPA/respelling for the ones Wikipedia lacks or got wrong); ingest + seed re-run: 302 rows, 109 of 109 makes. **Owner review of the respellings pending** (`scripts/src/brand-pronounce-overrides.csv`)
 - [ ] Step 4: Commons audio finder (author + licence stored)
 - [ ] Step 5: Piper TTS for brands without audio (decide after the probe; skippable)
-- [ ] Step 6: `GET /api/brands/:slug/pronunciation` + `hasPronunciation` on the catalog payload
-- [ ] Step 7: `BrandPronounce` button + lazy `InfoPopover` + audio hook + i18n + tests
+- [x] Step 6: `GET /api/brands/:slug/pronunciation` (`apps/api/src/brands/`, contract `packages/shared/src/brandPronunciation.ts`, `LOOKUP_CACHE`, `CATALOG_THROTTLE`, 404 for a make with no rows, `audio` null until step 4) + `hasPronunciation` (`.nullable().optional()`) on the catalog make summary/detail
+- [x] Step 7 (text slice): `BrandPronounce` speaker button (`components/BrandPronounce.tsx`, lazy body in `components/brand-pronounce/`) on the make page `/cars/:make` when `hasPronunciation`, `brandPronunciationQuery` (offline group `brand-pronunciation`), i18n ua/ru/en, tests. also on the plate / VIN-registry card header (`BrandPronounceChip`, make slug from `pronounce` in `/api/catalog/lookup`). **Not yet:** audio play button (needs step 4), the decode-only VIN card (`VinResult`) and model pages
 - [ ] Step 8: docs (features-reference, plan-done, releases, About credits)
 - [ ] After deploy (owner): apply the migration on the VPS; run the ingest job once; edge cache rule for `/api/brands/*/pronunciation` (docs/checklists.md); check audio credits on About
 

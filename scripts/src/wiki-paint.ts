@@ -11,6 +11,7 @@
  *
  *   --limit N     photos to scan (default 30)
  *   --brand X     only this normalized brand (repeatable)
+ *   --model X     only this normalized model (repeatable; combine with --brand, e.g. --brand volkswagen --model touareg)
  *   --order O     popular (default: most-registered models first) | url | random
  *   --keep-orphans  do not delete wiki_image_paint rows no ok wiki_image row uses any more (default: deleted after the scan)
  *   --rps N       downloads per second (default 1, max 2)
@@ -25,10 +26,11 @@ import { parseArgs } from 'node:util'
 import { createDb, schema, type Db, type WikiImagePaintInsert } from '@carplates/db'
 import { VEHICLE_COLORS, isClosePaint, type VehicleColor } from '@carplates/shared'
 import { env, pipeline, RawImage } from '@huggingface/transformers'
-import { sql } from 'drizzle-orm'
+import { sql, type SQL } from 'drizzle-orm'
 import sharp from 'sharp'
 
 import { writeContactSheets, type SheetEntry } from './wiki-paint-sheet.js'
+import { normalizeScope } from './wiki-paint-scope.js'
 import { PAINT_ALGO, PAINT_SCAN_WIDTH, applyPaint, scanPaint } from './wiki-paint-core.js'
 import type { PaintScanResult } from './wiki-paint-core.js'
 
@@ -135,13 +137,15 @@ type Order = (typeof ORDERS)[number]
  * `popular`: a file's weight is the largest `stats_by_model.total_rows` among the models that use it (`wiki_image` keys are
  * lower-cased, `stats_by_model` is not); models without a match (trim noise in the key) come last.
  */
-async function pickUrls(db: Db, brands: string[], limit: number, order: Order): Promise<string[]> {
-  const brandFilter = brands.length
-    ? sql`AND w.brand IN (${sql.join(
-        brands.map(b => sql`${b}`),
-        sql`, `
-      )})`
-    : sql``
+async function pickUrls(db: Db, brands: string[], models: string[], limit: number, order: Order): Promise<string[]> {
+  const inList = (col: SQL, values: string[]): SQL =>
+    values.length
+      ? sql`AND ${col} IN (${sql.join(
+          values.map(v => sql`${v}`),
+          sql`, `
+        )})`
+      : sql``
+  const brandFilter = sql`${inList(sql.raw('w.brand'), brands)} ${inList(sql.raw('w.model'), models)}`
   const orderBy =
     order === 'random' ? sql`random()` : order === 'url' ? sql`image_url` : sql`weight DESC NULLS LAST, image_url`
   const { rows } = await db.execute<{ image_url: string }>(sql`
@@ -185,6 +189,7 @@ async function main(): Promise<void> {
     options: {
       limit: { type: 'string', default: '30' },
       brand: { type: 'string', multiple: true, default: [] },
+      model: { type: 'string', multiple: true, default: [] },
       order: { type: 'string', default: 'popular' },
       'keep-orphans': { type: 'boolean', default: false },
       rps: { type: 'string', default: '1' },
@@ -203,7 +208,7 @@ async function main(): Promise<void> {
 
   const dryRun = values['dry-run']
   const { db, close } = createDb()
-  const urls = await pickUrls(db, values.brand, limit, order)
+  const urls = await pickUrls(db, normalizeScope(values.brand), normalizeScope(values.model), limit, order)
   log(`scanning ${urls.length} photo(s), algo ${PAINT_ALGO}${dryRun ? ' (dry run, nothing saved)' : ''}`)
   env.cacheDir = join(DATA_DIR, 'hf-cache')
   const seg = (await pipeline('image-segmentation', MODEL, { dtype: 'q8' })) as unknown as Segmenter

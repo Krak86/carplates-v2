@@ -6,6 +6,7 @@ import type { CatalogModel } from '@carplates/shared'
 import Model360Button from '@/components/Model360Button'
 import Model3dButton from '@/components/Model3dButton'
 import RaceTestDriveChip from '@/components/game/RaceTestDriveChip'
+import PartsCatalogChip from '@/components/PartsCatalogChip'
 import TuningChip from '@/components/TuningChip'
 import VdbChips from '@/components/VdbChips'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
@@ -36,6 +37,7 @@ export default function CatalogViewChips({ model }: Props): ReactNode {
         body={model.stats.body[0]?.[0] ?? null}
       />
       <Model360Button brand={model.topBrand} model={model.topModel} />
+      <PartsCatalogChip brand={model.topBrand} />
       <RaceTestDriveChip onOpen={() => setRaceOpen(true)} />
 
       {raceOpen && online && (

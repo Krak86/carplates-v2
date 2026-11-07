@@ -16,6 +16,7 @@ import {
 import type { Currency, PlateLookupResponse } from '@carplates/shared'
 
 import BrandLogo from '@/components/BrandLogo'
+import BrandPronounceChip from '@/components/BrandPronounceChip'
 import CatalogModelLink from '@/components/catalog/CatalogModelLink'
 import BrandSiteChip from '@/components/BrandSiteChip'
 import PageShareButton from '@/components/PageShareButton'
@@ -72,6 +73,7 @@ import { useChipsPending } from '@/components/use-chips-pending'
 import { useCopyFeedback } from '@/components/use-copy-feedback'
 import Card from '@/components/ui/Card'
 import Model3dButton from '@/components/Model3dButton'
+import PartsCatalogChip from '@/components/PartsCatalogChip'
 import TuningChip from '@/components/TuningChip'
 import Model360Button from '@/components/Model360Button'
 import VerificationLinks from '@/components/VerificationLinks'
@@ -317,6 +319,7 @@ export default function ResultCard({ data }: Props): ReactNode {
                   </CatalogModelLink>{' '}
                   {c.makeYear ? `(${c.makeYear})` : ''}
                 </span>
+                <BrandPronounceChip brand={c.brand} model={c.model} />
                 <CopyAllInfoButton
                   className="shrink-0"
                   vehicle={{ brand: c.brand, model: c.model, year: c.makeYear, body: c.body }}
@@ -429,6 +432,7 @@ export default function ResultCard({ data }: Props): ReactNode {
                 <Model3dButton brand={c.brand} model={c.model} />
                 <Model360Button brand={c.brand} model={c.model} />
                 <TuningChip brand={c.brand} model={c.model} year={c.makeYear} body={c.body} />
+                <PartsCatalogChip vin={hasVin ? c.vin : null} brand={c.brand} />
                 <RaceTestDriveChip onOpen={() => setRaceOpenSignal(n => n + 1)} />
               </CollapsibleChips>
               <div className="mt-2 flex flex-wrap items-center gap-2 empty:hidden">

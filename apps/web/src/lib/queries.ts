@@ -30,6 +30,7 @@ import {
   getRoadSafetyHazards,
   getRoadSafetyTime,
   getCatalogLookup,
+  getBrandPronunciation,
   getCatalogMake,
   getCatalogMakes,
   getCatalogModel,
@@ -407,6 +408,16 @@ export function vdbQuery(brand: string, model: string, kind?: string | null) {
     queryKey: ['vdb', brand, model, kind ?? null],
     queryFn: () => getVdb(brand, model, kind),
     staleTime: Infinity
+  })
+}
+
+// Brand pronunciation (pnpm ingest:brand-pronounce) - persisted reference data, cached offline like origin.
+export function brandPronunciationQuery(slug: string) {
+  return queryOptions({
+    queryKey: ['brand-pronunciation', slug],
+    queryFn: () => getBrandPronunciation(slug),
+    staleTime: Infinity,
+    retry: false
   })
 }
 

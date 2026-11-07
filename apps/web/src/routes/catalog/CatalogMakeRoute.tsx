@@ -7,6 +7,7 @@ import { Link, useParams } from 'react-router'
 import { CompareTrayBar, CompareTrayButton } from '@/components/compare/CompareTray'
 
 import BrandLogo from '@/components/BrandLogo'
+import BrandPronounce from '@/components/BrandPronounce'
 import BrandSiteChip from '@/components/BrandSiteChip'
 import CatalogAdvancedSearchNote from '@/components/catalog/CatalogAdvancedSearchNote'
 import CatalogAuctionLine from '@/components/catalog/CatalogAuctionLine'
@@ -94,6 +95,7 @@ export default function CatalogMakeRoute(): ReactNode {
         <div className="mb-2 flex items-center gap-3">
           <BrandLogo brand={make.topBrand} size="sm" placeholder />
           <h1 className="text-xl font-semibold">{t('catalog.title', { name: make.makeName })}</h1>
+          {!!make.hasPronunciation && <BrandPronounce slug={make.make} name={make.makeName} />}
         </div>
         <p className="text-base">
           {t('catalog.makeSummary', {

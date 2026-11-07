@@ -2146,6 +2146,37 @@ export const dreamProjects = registry.table(
 export type DreamProjectRow = typeof dreamProjects.$inferSelect
 export type DreamProjectInsert = typeof dreamProjects.$inferInsert
 
+/** How a make is said, one row per (brand, site language ua/ru/en), migration 0103. `ipaLang` = language the IPA is for. */
+export const brandPronunciation = registry.table(
+  'brand_pronunciation',
+  {
+    brandSlug: text('brand_slug').notNull(),
+    lang: text('lang').notNull(),
+    ipa: text('ipa'),
+    ipaLang: text('ipa_lang'),
+    respell: text('respell'),
+    source: text('source').notNull(),
+    rev: bigint('rev', { mode: 'number' }),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
+  },
+  t => [primaryKey({ columns: [t.brandSlug, t.lang] })]
+)
+export type BrandPronunciationRow = typeof brandPronunciation.$inferSelect
+export type BrandPronunciationInsert = typeof brandPronunciation.$inferInsert
+
+/** Origin-language audio clip of a make (Commons file or generated), migration 0103. */
+export const brandPronunciationAudio = registry.table('brand_pronunciation_audio', {
+  brandSlug: text('brand_slug').primaryKey(),
+  lang: text('lang').notNull(),
+  url: text('url').notNull(),
+  author: text('author'),
+  license: text('license'),
+  kind: text('kind').notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
+})
+export type BrandPronunciationAudioRow = typeof brandPronunciationAudio.$inferSelect
+export type BrandPronunciationAudioInsert = typeof brandPronunciationAudio.$inferInsert
+
 /**
  * Model catalog (`/cars/:make/:model`): raw registry (brand, model) -> slugs, one row per model with its rollup, one per make.
  * Rebuilt by scripts/src/catalog-build.ts; see migration 0081.

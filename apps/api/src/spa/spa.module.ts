@@ -1,8 +1,10 @@
 import { Module } from '@nestjs/common'
 import { ThrottlerModule } from '@nestjs/throttler'
 
+import { AlarmModule } from '../alarm/alarm.module.js'
 import { AuctionsModule } from '../auctions/auctions.module.js'
 import { CatalogModule } from '../catalog/catalog.module.js'
+import { LossesModule } from '../losses/losses.module.js'
 import { PlateModule } from '../plate/plate.module.js'
 import { RdwModule } from '../rdw/rdw.module.js'
 import { SharesModule } from '../shares/shares.module.js'
@@ -16,8 +18,10 @@ import { SpaController } from './spa.controller.js'
 
 @Module({
   imports: [
+    AlarmModule,
     AuctionsModule,
     CatalogModule,
+    LossesModule,
     PlateModule,
     VinModule,
     RdwModule,

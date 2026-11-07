@@ -10,6 +10,7 @@ import { ALARM_FILL, levelFill } from '@/routes/alarms/helpers'
 import type { AlarmMapOverlayContext } from '@/routes/alarms/AlarmMap'
 import StatsMapSkeleton from '@/routes/stats/StatsMapSkeleton'
 import ExternalLink from '@/components/ExternalLink'
+import ShareButton from '@/components/ShareButton'
 
 const AlarmMap = lazy(() => import('@/routes/alarms/AlarmMap'))
 
@@ -84,10 +85,13 @@ export default function AlarmMapCard({
             <span className="font-medium">{t('alarms.count', { count })}</span>
             {time && <span className="text-[var(--color-muted)]">{t('alarms.updated', { time })}</span>}
             <span className="text-xs text-[var(--color-muted)]">{t('alarms.refresh')}</span>
+            <span className="ml-auto">
+              <ShareButton section="map" label={t('alarms.share')} />
+            </span>
             <button
               type="button"
               onClick={() => setShowLabels(v => !v)}
-              className="ml-auto rounded-md border border-[var(--color-border)] px-2 py-0.5 text-xs"
+              className="rounded-md border border-[var(--color-border)] px-2 py-0.5 text-xs"
             >
               {t(showLabels ? 'alarms.hideRegions' : 'alarms.showRegions')}
             </button>

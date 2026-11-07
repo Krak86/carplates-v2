@@ -17,6 +17,8 @@ PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 50 4 * * *   bash /opt/carsua/compose/run-ingest.sh losses >> /opt/carsua/backups/ingest.log 2>&1
 # DREAM recovery projects (dream.gov.ua public API): incremental, only projects changed since the newest stored one.
 10 5 * * *   bash /opt/carsua/compose/run-ingest.sh dream >> /opt/carsua/backups/ingest.log 2>&1
+# Brand pronunciation (Wikipedia leads of the catalog makes, ~6 min): monthly on the 7th; the leads rarely change.
+30 6 7 * *   bash /opt/carsua/compose/run-ingest.sh brand-pronounce >> /opt/carsua/backups/ingest.log 2>&1
 # Debtors register -> reason of each SETAM lot (~800 MB download, streamed): Sundays, before the 03:30 backup. Upserts only.
 10 2 * * 0   bash /opt/carsua/compose/run-ingest.sh auction-proceedings >> /opt/carsua/backups/ingest.log 2>&1
 

@@ -13,7 +13,7 @@ export function resolveLang(raw: unknown): Lang {
   return (LANGS as readonly string[]).includes(raw as string) ? (raw as Lang) : DEFAULT_LANG
 }
 
-type PageText = { title: string; description: string }
+export type PageText = { title: string; description: string }
 
 export const SITE_NAME = 'Cars UA'
 

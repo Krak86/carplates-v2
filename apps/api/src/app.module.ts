@@ -50,6 +50,7 @@ import { SearchModule } from './search/search.module.js'
 import { SpaModule } from './spa/spa.module.js'
 import { StatsModule } from './stats/stats.module.js'
 import { UsageModule } from './usage/usage.module.js'
+import { BrandsModule } from './brands/brands.module.js'
 import { CatalogModule } from './catalog/catalog.module.js'
 import { DataStatusModule } from './data-status/data-status.module.js'
 import { OriginModule } from './origin/origin.module.js'
@@ -77,6 +78,7 @@ import { WikispecsModule } from './wikispecs/wikispecs.module.js'
     UsageModule,
     PlateModule,
     CardModule,
+    BrandsModule,
     CatalogModule,
     OriginModule,
     ShowroomModule,

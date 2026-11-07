@@ -7,7 +7,7 @@ export const OG_WIDTH = 1200
 export const OG_HEIGHT = 630
 
 const BRAND_BLUE = '#1d4ed8'
-const FONT_FAMILY = 'Noto Sans'
+export const FONT_FAMILY = 'Noto Sans'
 
 export type CardInput = {
   /** Big text on the plate: a plate number or a VIN. `null` → the generic site card. */
@@ -25,22 +25,22 @@ export type CardInput = {
   siteIconPng?: Buffer | null
 }
 
-const esc = (s: string): string =>
+export const esc = (s: string): string =>
   s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 
 const clip = (s: string, max: number): string => (s.length > max ? `${s.slice(0, max - 1)}…` : s)
 
 /** Dark translucent backing, so light text stays readable on any car-color gradient. */
-const panel = (x: number, y: number, w: number, h: number): string =>
+export const panel = (x: number, y: number, w: number, h: number): string =>
   `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="20" fill="#0a0f1e" fill-opacity="0.78"/>`
 
 /** The site address, bottom-right on its own backing so it reads on any car-colour gradient. */
-const SITE_URL = `${panel(830, 566, 220, 46)}
+export const SITE_URL = `${panel(830, 566, 220, 46)}
 <text x="1040" y="600" text-anchor="end" font-family="${FONT_FAMILY}" font-size="28" font-weight="700" fill="#fff">carsua.app</text>`
 
 const FAVICON_GLYPH = `<g fill="none" stroke="#fff" stroke-width="44" stroke-linecap="round" stroke-linejoin="round"><path d="M110 168V290a64 64 0 0 0 128 0V168"/><path d="M282 354L342 168L402 354M301 296H383"/></g>`
 
-const header = (siteIconPng?: Buffer | null): string => `
+export const header = (siteIconPng?: Buffer | null): string => `
 ${panel(50, 40, 330, 100)}
 ${
   siteIconPng
@@ -49,7 +49,7 @@ ${
 }
 <text x="165" y="107" font-family="${FONT_FAMILY}" font-size="42" font-weight="700" fill="#fff">Cars UA</text>`
 
-function background(color: VehicleColor): string {
+export function background(color: VehicleColor): string {
   const hex = VEHICLE_COLOR_HEX[color]
   return `<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
 <stop offset="0" stop-color="${hex}"/><stop offset="0.55" stop-color="${hex}" stop-opacity="0.85"/><stop offset="1" stop-color="${BRAND_BLUE}"/>

@@ -12,7 +12,7 @@ import ShareButton from '@/components/ShareButton'
 import Card from '@/components/ui/Card'
 import { toIntlLocale } from '@/lib/intl'
 import { lossesHistoryQuery, lossesQuery } from '@/lib/queries'
-import { CHART_HEIGHT, CHART_WIDTH, lossRows, signed, totalsPath } from '@/routes/alarms/losses-helpers'
+import { CHART_HEIGHT, CHART_WIDTH, lossRows, signed, totalsPath, warDuration } from '@/routes/alarms/losses-helpers'
 import ExternalLink from '@/components/ExternalLink'
 
 const LossesInfographic = lazy(() => import('@/routes/alarms/LossesInfographic'))
@@ -58,6 +58,16 @@ export default function LossesSection(): ReactNode {
   const points = history.data?.points ?? []
   const path = totalsPath(points)
   const first = points[0]
+  const span = warDuration(data.date)
+  const duration = span
+    ? [
+        span.years > 0 && t('losses.years', { count: span.years }),
+        span.months > 0 && t('losses.months', { count: span.months }),
+        span.days > 0 && t('losses.days', { count: span.days })
+      ]
+        .filter(Boolean)
+        .join(' ')
+    : ''
 
   const card = (
     <Card className={isModal ? undefined : 'mb-6'}>
@@ -78,6 +88,9 @@ export default function LossesSection(): ReactNode {
         </span>
       </div>
       <p className="mb-1 text-sm text-[var(--color-muted)]">{t('losses.intro')}</p>
+      {data.day !== null && data.day !== undefined && duration && (
+        <p className="mb-1 text-sm font-medium">{t('losses.war', { day: number.format(data.day), duration })}</p>
+      )}
       <p className="mb-3 text-xs text-[var(--color-muted)]">
         {t('losses.asOf', { date: date(data.date), day: data.day ?? '-' })}
         {data.sourceUrl && (

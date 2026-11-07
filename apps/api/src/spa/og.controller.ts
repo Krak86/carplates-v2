@@ -6,9 +6,13 @@ import { ApiExcludeController } from '@nestjs/swagger'
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler'
 import type { FastifyReply } from 'fastify'
 
+import { AlarmService } from '../alarm/alarm.service.js'
+import { LossesService } from '../losses/losses.service.js'
 import { catalogMakePageText, catalogPageText } from '../catalog/catalog-text.js'
 import { CatalogService } from '../catalog/catalog.service.js'
 import { loadEnv } from '../env.js'
+import type { OblastPath } from './alarm-card.js'
+import { buildAlarmMapCardSvg, buildLossesCardSvg, projectOblasts, readGeoJson } from './alarm-card.js'
 import { ComparePreviewService } from './compare-preview.js'
 import { Lru } from './lru.js'
 import { buildCardSvg, buildPageCardSvg, readLogo, renderPng } from './og-card.js'
@@ -22,6 +26,8 @@ const DEV_PUBLIC_DIR = resolve(import.meta.dirname, '../../../web/public')
 
 const PNG_CACHE_MAX = 300
 const CACHE_OK = 'public, max-age=86400'
+/** Live cards (alert map, daily figures): a few minutes at the edge, not a day. */
+const CACHE_LIVE = 'public, max-age=300'
 const CACHE_FALLBACK = 'public, max-age=300'
 
 /**
@@ -36,12 +42,15 @@ export class OgController {
   private readonly env = loadEnv()
   private readonly assetsDir = this.env.WEB_DIST_DIR ? resolve(this.env.WEB_DIST_DIR) : DEV_PUBLIC_DIR
   private fontFilesFound: string[] = []
+  private oblastPaths: OblastPath[] | null = null
   private readonly pngCache = new Lru<Buffer>(PNG_CACHE_MAX)
 
   constructor(
     @Inject(PreviewService) private readonly previews: PreviewService,
     @Inject(CatalogService) private readonly catalog: CatalogService,
-    @Inject(ComparePreviewService) private readonly compare: ComparePreviewService
+    @Inject(ComparePreviewService) private readonly compare: ComparePreviewService,
+    @Inject(AlarmService) private readonly alarms: AlarmService,
+    @Inject(LossesService) private readonly losses: LossesService
   ) {}
 
   /** `GET /og/page/:slug.png` - share card of a static page (title + description); an unknown slug is a 404. */
@@ -108,6 +117,62 @@ export class OgController {
     reply
       .type('image/png')
       .header('cache-control', fontFiles.length > 0 ? CACHE_OK : CACHE_FALLBACK)
+      .send(png)
+  }
+
+  /**
+   * `GET /og/alarms.png` - share card of the live alert map. Fail closed: a stale or failed feed draws the grey base map with
+   * "no data" (never a calm map) and is neither cached in memory nor kept at the edge for long. Short cache: it is live.
+   */
+  @Get('alarms.png')
+  alarmsCard(@Query('lang') langParam: string | undefined, @Res() reply: FastifyReply): void {
+    const lang = resolveLang(langParam)
+    const alarms = this.currentAlarms()
+    const fontFiles = this.fontFiles()
+    const cacheKey = `alarms:${lang}:${alarms?.fetchedAt ?? 'none'}`
+    let png = this.pngCache.get(cacheKey)
+    if (!png) {
+      this.oblastPaths ??= (() => {
+        const geo = readGeoJson(join(this.assetsDir, 'ukraine-alarm-oblasts.geojson'))
+        return geo ? projectOblasts(geo) : null
+      })()
+      if (!this.oblastPaths) throw new NotFoundException()
+      const siteIconPng = readLogo(join(this.assetsDir, 'brand-icon.png'))
+      png = renderPng(buildAlarmMapCardSvg({ paths: this.oblastPaths, alarms, lang, siteIconPng }), fontFiles)
+      if (fontFiles.length > 0 && alarms) this.pngCache.set(cacheKey, png)
+    }
+    reply
+      .type('image/png')
+      .header('cache-control', fontFiles.length > 0 && alarms ? CACHE_LIVE : CACHE_FALLBACK)
+      .send(png)
+  }
+
+  /** The live feed, or null when it is stale or down (the card then says "no data"). */
+  private currentAlarms(): ReturnType<AlarmService['current']> | null {
+    try {
+      return this.alarms.current()
+    } catch {
+      return null
+    }
+  }
+
+  /** `GET /og/losses.png` - share card of the war-loss figures (day count, years / months, headline counters); 404 while empty. */
+  @Get('losses.png')
+  async lossesCard(@Query('lang') langParam: string | undefined, @Res() reply: FastifyReply): Promise<void> {
+    const lang = resolveLang(langParam)
+    const data = await this.losses.latest()
+    if (!data) throw new NotFoundException()
+    const fontFiles = this.fontFiles()
+    const cacheKey = `losses:${lang}:${data.date}`
+    let png = this.pngCache.get(cacheKey)
+    if (!png) {
+      const siteIconPng = readLogo(join(this.assetsDir, 'brand-icon.png'))
+      png = renderPng(buildLossesCardSvg({ data, lang, siteIconPng }), fontFiles)
+      if (fontFiles.length > 0) this.pngCache.set(cacheKey, png)
+    }
+    reply
+      .type('image/png')
+      .header('cache-control', fontFiles.length > 0 ? CACHE_LIVE : CACHE_FALLBACK)
       .send(png)
   }
 

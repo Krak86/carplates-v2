@@ -27,6 +27,7 @@ import { UkraineAlarmSource } from './ukrainealarm.source.js'
         return env.ALARM_MOCK && env.NODE_ENV !== 'production' ? mock : real
       }
     }
-  ]
+  ],
+  exports: [AlarmService]
 })
 export class AlarmModule {}

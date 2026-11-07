@@ -105,6 +105,19 @@ export {
   type OriginResponse,
   type VinRegion
 } from './origin.js'
+export {
+  BRAND_PRONUNCIATION_LANGS,
+  brandPronunciationAudioSchema,
+  brandPronunciationItemSchema,
+  brandPronunciationParamsSchema,
+  brandPronunciationPath,
+  brandPronunciationSchema,
+  type BrandPronunciation,
+  type BrandPronunciationAudio,
+  type BrandPronunciationItem,
+  type BrandPronunciationLang,
+  type BrandPronunciationParams
+} from './brandPronunciation.js'
 export { extractVins, vinCheckDigitOk, type OcrLine, type VinRead } from './vin-read.js'
 export {
   LEGACY_REGIONS,
@@ -252,6 +265,7 @@ export { SHADE_MAX, SHADE_SCALE, applyPaint, paintTargetLinear, paintTone, type 
 export { VEHICLE_FUELS, resolveFuelCategories, fuelKeyword, type VehicleFuel } from './vehicleFuel.js'
 export { brandLogoUrl, brandSlug } from './brandLogo.js'
 export { dealerUrl, newCarsUrl, usedCarsUrl } from './dealerUrl.js'
+export { bmwSerial, realoemBrandUrl, realoemLink, realoemUrl } from './partsCatalog.js'
 export { showcaseModels } from './newCarShowcase.js'
 export { wikiUrl, wikiDomain, wikiDomainChain } from './wikiUrl.js'
 export {

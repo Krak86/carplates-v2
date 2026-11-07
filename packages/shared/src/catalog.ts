@@ -124,7 +124,9 @@ export const catalogMakeSummarySchema = z.object({
   /** The most common raw registry spelling of the make's biggest model: the input of `BrandLogo`. */
   topBrand: z.string(),
   /** At least one model page of the make is indexable, so the make page is too (else `noindex`). */
-  indexable: z.boolean()
+  indexable: z.boolean(),
+  /** The make has pronunciation rows (the speaker button shows). Optional: offline data saved before the field existed. */
+  hasPronunciation: z.boolean().nullable().optional()
 })
 export type CatalogMakeSummary = z.infer<typeof catalogMakeSummarySchema>
 
@@ -164,6 +166,8 @@ export type CatalogLookupQuery = z.infer<typeof catalogLookupQuerySchema>
 
 /** `page` is null when the model has no catalog page (below `CATALOG_KEEP_MIN_CARS`, a non-passenger kind or an unknown spelling). */
 export const catalogLookupSchema = z.object({
-  page: z.object({ make: z.string(), model: z.string() }).nullable()
+  page: z.object({ make: z.string(), model: z.string() }).nullable(),
+  /** Make slug of the brand when it has a pronunciation (the speaker button), even without a model page. Optional: older cached data. */
+  pronounce: z.string().nullable().optional()
 })
 export type CatalogLookup = z.infer<typeof catalogLookupSchema>
