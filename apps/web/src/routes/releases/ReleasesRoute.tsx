@@ -141,6 +141,9 @@ export default function ReleasesRoute(): ReactNode {
                     <Card key={day.date} className="mb-3 last:mb-0">
                       <h3 className="mb-2 text-lg font-semibold">
                         <time dateTime={day.date}>{formatDate.format(new Date(day.date))}</time>
+                        {day.version && (
+                          <span className="ml-2 text-sm font-normal text-[var(--color-muted)]">{day.version}</span>
+                        )}
                       </h3>
 
                       <ul className="space-y-1.5">
