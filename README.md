@@ -255,13 +255,27 @@ Web build (`apps/web/.env`, read by Vite at dev/build start; **public**, bundled
 `VITE_GOOGLE_MAPS_EMBED_KEY` (restrict to your referrer in Google Cloud), `VITE_DISQUS_SHORT_NAME`, `VITE_ENABLE_TELEMETRY`,
 `VITE_POSTHOG_KEY`, `VITE_POSTHOG_HOST`, `VITE_SENTRY_DSN`, `VITE_GIT_SHA` (set by CI).
 
+App version (footer, About, What's new): not an env var. `vite.config.ts` defines `__APP_VERSION__` as `v2.<commit count of origin/stage or stage>` at build time and falls back to plain `v2` when no git history is available. `deploy-web` checks out with `fetch-depth: 0` for this; a shallow clone gives `v2`.
+
 Scripts only (shell or `apps/api/.env`; none are needed for `pnpm ingest:all`): `GOOGLE_API_KEY` (YouTube Data API v3 for `ingest:youtube-videos`),
 `SKETCHFAB_TOKEN` (optional, raises the Sketchfab rate limit), `CLOUDFLARE_TUNNEL_TOKEN` (`pnpm tunnel --hostname`), `SHRINK_MAX` / `SHRINK_Q`
 (ALPR `eval.mjs --shrink`), `HC_PING_<JOB>` (healthchecks.io ping URLs for the VPS cron jobs, in `/opt/carsua/env/ingest.env`).
 
 CI-only GitHub secrets (never read by the app): `VPS_HOST`, `VPS_USER`, `VPS_SSH_KEY`, `VPS_KNOWN_HOSTS`, `POSTGRES_PASSWORD`,
-`CF_ORIGIN_CERT`, `CF_ORIGIN_KEY`, `CF_API_TOKEN`, `CF_ZONE_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_ENDPOINT`,
+`CF_ORIGIN_CERT`, `CF_ORIGIN_KEY`, `CF_API_TOKEN`, `CF_ZONE_ID`, `CF_ANALYTICS_TOKEN` (maps to the API's `CLOUDFLARE_API_TOKEN`), `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_ENDPOINT`,
 `BACKUP_BUCKET`, `HC_PING_BACKUP` and the `HC_PING_*` list in docs/deploy.md.
+
+How env vars reach the VPS: CI writes them to `/opt/carsua/env/*.env` and compose only reads those files, so changing a GitHub secret does nothing until the matching workflow is re-run. A **new API env var** needs three edits: `apps/api/src/env.ts`, the `env:` block and the `emit` list in `.github/workflows/deploy-api.yml` (details and inspection commands in docs/deploy.md).
+
+### Cloudflare analytics token (optional, admin card)
+
+Shows daily requests, cache share and unique IPs on the admin Statistics tab (GraphQL Analytics, free plan). Unique visitors are counted by IP at the edge, so bots and API clients are included; PostHog counts browsers, expect the Cloudflare number to be several times higher.
+
+1. Cloudflare dashboard → Manage account → **Account API tokens** → Create Token → Custom token. One policy: scope **Specified Domains → carsua.app**, permission **Zone Analytics: Read** (group "Analytics & Logs"), nothing else. Expiry 1 year; no IP filter.
+2. Zone ID: Domains → carsua.app → Overview → right sidebar, "API" (the **Zone** ID, not the Account ID).
+3. Local: `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ZONE_ID` in `apps/api/.env`. Production: add the GitHub environment secret `CF_ANALYTICS_TOKEN` (`CF_ZONE_ID` already exists and is reused), then re-run `deploy-api`. The existing `CF_API_TOKEN` is a different token, do not overwrite it.
+
+Unset = the card says "not connected" and the API makes no calls. Answers are cached 10 minutes.
 
 ### Self-hosted ALPR (optional)
 
