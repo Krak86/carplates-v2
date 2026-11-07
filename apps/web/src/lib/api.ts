@@ -60,6 +60,7 @@ import {
   openEvResponseSchema,
   rdwRecallsResponseSchema,
   rdwResponseSchema,
+  brandPronunciationSchema,
   originResponseSchema,
   vdbResponseSchema,
   vdbStatsResponseSchema,
@@ -186,6 +187,7 @@ import type {
   OpenEvResponse,
   RdwRecallsResponse,
   RdwResponse,
+  BrandPronunciation,
   OriginResponse,
   VdbResponse,
   VdbStatsResponse,
@@ -369,6 +371,11 @@ export async function getImportsStats(): Promise<ImportsStatsResponse> {
 
 export async function getMonthlyStats(): Promise<MonthlyStatsResponse> {
   return monthlyStatsResponseSchema.parse(await getJson('/api/stats/monthly'))
+}
+
+/** How a make is said and written in ua / ru / en (`/api/brands/:slug/pronunciation`). A 404 means the make has none. */
+export async function getBrandPronunciation(slug: string): Promise<BrandPronunciation> {
+  return brandPronunciationSchema.parse(await getJson(`/api/brands/${encodeURIComponent(slug)}/pronunciation`))
 }
 
 export async function getOriginStats(): Promise<OriginStatsResponse> {

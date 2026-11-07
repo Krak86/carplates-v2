@@ -15,6 +15,7 @@ export const OFFLINE_LIMITS = {
   vdb: 400,
   rdw: 400,
   origin: 400,
+  'brand-pronunciation': 200,
   wiki: 200,
   reviews: 400
 } as const
