@@ -57,6 +57,14 @@ Only 2 leads and one Commons search were spot-checked; real coverage comes from 
 - **Step 2 parser scope** (what the numbers justify): `{{IPA|xx|…}}` (with the file name argument), `{{IPAc-en}}`, `{{lang-uk}}`, `МФА:`; the «respelling» rule is worth little (2 makes) and can stay a cheap regex.
 - The text-only slice is still worth shipping, but the icon will show for most makes only after the overrides CSV exists (otherwise 46%).
 
+## Implementation notes (steps 2-3, 2026-11-07)
+
+- Code: `scripts/src/brand-pronounce-{fetch,parse,rows,probe}.ts`, `ingest-brand-pronounce.ts`, `pronounce-csv.ts`; migration `0103_brand_pronunciation.sql`; job `brand-pronounce` (monthly cron, the 7th).
+- Tables: `brand_pronunciation` (PK brand_slug + lang ua|ru|en; `ipa`, `ipa_lang` = language the IPA is for, `respell`, `source` = `wikipedia:<en|uk|ru>` or `override`, `rev` = Wikipedia revid) and `brand_pronunciation_audio` (PK brand_slug; `lang` = origin language, `url`, `author`, `license`, `kind` commons|tts; empty until step 4).
+- Row rules (`buildRows`): the en row prefers the English reading (`{{IPAc-en}}`, UK then US); every row falls back to the native IPA of the en lead (`ipa_lang` says which, e.g. `de`), so the UI can label it; respelling comes only from the language's own lead; an override replaces a cell and marks the row `override`.
+- Result after a fresh fetch: 105 rows, 46 of 109 makes (ua 32, ru 35, en 38). Overrides CSV (`scripts/src/brand-pronounce-overrides.csv`, columns `brand_slug,lang,ipa,ipa_lang,respell`) is header-only: step 3b.
+- The parser extracts the audio file name per lead (`Lead.audio`, 14 en hits) but the ingest does not store it yet; step 4 should read it from the cached leads (`createFetcher().lead`) and add author + licence via the Commons imageinfo API.
+
 ## Open points
 
 - Cyrillic respelling is editorial: derive from IPA only as a last resort (lower quality).
