@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import Spinner from '@/components/ui/Spinner'
 import { brandPronunciationQuery } from '@/lib/queries'
 
+import BrandAudio from './BrandAudio'
 import { ipaLangName, visibleItems } from './helpers'
 
 type Props = { slug: string }
@@ -20,27 +21,30 @@ export default function BrandPronounceBody({ slug }: Props): ReactNode {
   const items = visibleItems(data.items, i18n.language)
 
   return (
-    <ul className="flex flex-col gap-2">
-      {items.map(item => {
-        const ipaLang = ipaLangName(item.ipaLang, i18n.language)
-        return (
-          <li key={item.lang}>
-            {items.length > 1 && (
-              <div className="text-xs text-[var(--color-muted)]">{t(`brandPronounce.${item.lang}`)}</div>
-            )}
-            {item.respell && <div className="text-base font-semibold">{item.respell}</div>}
-            {item.ipa && (
-              <div
-                className="text-xs text-[var(--color-muted)]"
-                title={ipaLang ? t('brandPronounce.ipaIn', { lang: ipaLang }) : t('brandPronounce.ipa')}
-              >
-                {`/${item.ipa}/`}
-                {ipaLang ? ` (${ipaLang})` : ''}
-              </div>
-            )}
-          </li>
-        )
-      })}
-    </ul>
+    <>
+      <ul className="flex flex-col gap-2">
+        {items.map(item => {
+          const ipaLang = ipaLangName(item.ipaLang, i18n.language)
+          return (
+            <li key={item.lang}>
+              {items.length > 1 && (
+                <div className="text-xs text-[var(--color-muted)]">{t(`brandPronounce.${item.lang}`)}</div>
+              )}
+              {item.respell && <div className="text-base font-semibold">{item.respell}</div>}
+              {item.ipa && (
+                <div
+                  className="text-xs text-[var(--color-muted)]"
+                  title={ipaLang ? t('brandPronounce.ipaIn', { lang: ipaLang }) : t('brandPronounce.ipa')}
+                >
+                  {`/${item.ipa}/`}
+                  {ipaLang ? ` (${ipaLang})` : ''}
+                </div>
+              )}
+            </li>
+          )
+        })}
+      </ul>
+      {data.audio && <BrandAudio audio={data.audio} />}
+    </>
   )
 }

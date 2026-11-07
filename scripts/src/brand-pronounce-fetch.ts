@@ -19,7 +19,23 @@ const safe = (s: string): string => s.replace(/[^\w-]/g, '_')
 
 type ParseResponse = { parse?: { title?: string; revid?: number; wikitext: { '*': string } } }
 
+export type CommonsFile = { name: string; url: string; author: string | null; license: string | null }
+
+type CommonsInfoResponse = {
+  query?: {
+    pages: Record<
+      string,
+      {
+        title?: string
+        imageinfo?: { url: string; extmetadata?: Record<string, { value?: string } | undefined> }[]
+      }
+    >
+  }
+}
+
 export type Fetcher = {
+  commonsInfo: (fileName: string) => Promise<CommonsFile | null>
+  commonsSearch: (query: string) => Promise<string[]>
   sitelinks: (qids: string[]) => Promise<Map<string, Titles>>
   searchEn: (name: string) => Promise<string | null>
   lead: (lang: Wiki, title: string) => Promise<LeadPage>
@@ -87,5 +103,36 @@ export function createFetcher(refresh: boolean): Fetcher {
     }
   }
 
-  return { sitelinks, searchEn, lead }
+  /** Direct URL, author and licence of a Commons file (imageinfo + extmetadata); null when the file does not exist. */
+  async function commonsInfo(fileName: string): Promise<CommonsFile | null> {
+    const title = encodeURIComponent(`File:${fileName}`)
+    const data = await cached(`commons-info-${safe(fileName)}`, () =>
+      getJson<CommonsInfoResponse>(
+        `https://commons.wikimedia.org/w/api.php?action=query&format=json&redirects=1&prop=imageinfo&iiprop=url|extmetadata&titles=${title}`
+      ).catch((): CommonsInfoResponse => ({}))
+    )
+    const page = Object.values(data.query?.pages ?? {})[0]
+    const info = page?.imageinfo?.[0]
+    if (!info) return null
+    const meta = info.extmetadata ?? {}
+    return {
+      name: page?.title?.replace(/^File:/, '') ?? fileName,
+      url: info.url,
+      author: meta.Artist?.value ?? null,
+      license: meta.LicenseShortName?.value ?? null
+    }
+  }
+
+  /** File names (no `File:` prefix) of the Commons audio files whose title matches the query. */
+  async function commonsSearch(query: string): Promise<string[]> {
+    const q = encodeURIComponent(query)
+    const data = await cached(`commons-search-${safe(query)}`, () =>
+      getJson<{ query?: { search: { title: string }[] } }>(
+        `https://commons.wikimedia.org/w/api.php?action=query&format=json&list=search&srnamespace=6&srlimit=10&srsearch=${q}`
+      ).catch(() => ({}) as { query?: { search: { title: string }[] } })
+    )
+    return (data.query?.search ?? []).map(h => h.title.replace(/^File:/, ''))
+  }
+
+  return { sitelinks, searchEn, lead, commonsInfo, commonsSearch }
 }

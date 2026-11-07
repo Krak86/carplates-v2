@@ -74,6 +74,14 @@ Only 2 leads and one Commons search were spot-checked; real coverage comes from 
 - **Step 4 hook points:** fill `brand_pronunciation_audio` (PK brand_slug; lang = origin language, url, author, license, kind) and add a seed CSV plus export/import scripts and a job step like `ingest-brand-pronounce.ts`; the API response already carries `audio`, so the web only needs an audio hook + play button in `BrandPronounceBody` and a credit line (author + licence). Wikimedia "LL-Q..." Lingua Libre files may be in another language than the brand's origin.
 - **Not done:** audio (step 4), decode-only VIN card (`VinResult`) and model pages have no button, docs (step 8: features-reference, plan-done, releases, About credits), after-deploy items (PLAN.md).
 
+## Implementation notes (step 4, 2026-11-07)
+
+- **Finder** lives in `ingest-brand-pronounce.ts` (`findAudio`), pure helpers in `brand-pronounce-audio.ts` (+ test). Candidates: the file the en lead names, then Commons title-search hits for "<make> pronunciation". `commonsInfo` / `commonsSearch` are on `createFetcher` (cached in `.data/brand-pronounce/`).
+- **Rules (a wrong clip is worse than none):** the file's subject must be the make itself (`matchesMake`: `De-Opel.ogg` yes; `Gabrielle Giffords` for Ford and `dodge a bullet` no; a trailing Inc / Motors is ignored); the licence must be free (`isFreeLicense`); the file language (`fileLang`: `De-` prefix, `LL-Q... (deu)`, `Pronunciation "X" cs`) must equal the origin language (`originLang` from `brand_origin_period.country_code`, latest period), so an English reading of a German brand is dropped. Lingua Libre "Speaker: X Recorder: X" is shortened to the speaker; the URL is the direct upload.wikimedia.org one without the utm query (hot-linked; the CSP `media-src https:` allows it).
+- **Result:** 26 of 109 makes (24%): volkswagen, skoda, lada, renault, chevrolet, opel, bmw, audi, mercedes-benz, dacia, citroen, peugeot, tesla, jeep, porsche, dodge, uaz, cadillac, rover, chana, lancia, changan, vauxhall, plymouth, mercury, maybach. Mercury / plymouth / rover / dodge are the common word read by an English speaker, which is also how the brand is said. Piper (step 5) stays skipped.
+- **Seed:** `seed-data/brand-pronunciation-audio.csv.gz`; `--export-csv` / `--from-csv` of `ingest:brand-pronounce` handle both tables (`audioSeedPath` derives the audio path).
+- **Web:** `brand-pronounce/BrandAudio.tsx` (play / stop, "Listen (German)", credit "Audio: author, licence, Wikimedia Commons") and `use-brand-pronounce-actions.ts` (`new Audio(url)` created on first press, stopped on unmount); no clip = no button. About already credits Wikimedia Commons; the per-clip credit is in the popover.
+
 ## Open points
 
 - Cyrillic respelling is editorial: derive from IPA only as a last resort (lower quality).

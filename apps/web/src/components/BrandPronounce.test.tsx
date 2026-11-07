@@ -1,6 +1,6 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { ipaLangName, visibleItems } from '@/components/brand-pronounce/helpers'
 import { i18nReady } from '@/i18n'
@@ -57,6 +57,53 @@ describe('BrandPronounce', () => {
     renderButton()
     fireEvent.click(screen.getByRole('button'))
     expect(await screen.findByText(/Could not load|Не вдалося|Не удалось/, {}, { timeout: 5000 })).toBeTruthy()
+  })
+})
+
+describe('BrandPronounce audio', () => {
+  afterEach(cleanup)
+
+  const play = vi.fn().mockResolvedValue(undefined)
+  const created: string[] = []
+
+  beforeEach(() => {
+    play.mockClear()
+    created.length = 0
+    vi.stubGlobal(
+      'Audio',
+      class {
+        paused = true
+        currentTime = 0
+        preload = ''
+        constructor(url: string) {
+          created.push(url)
+        }
+        play = play
+        pause = vi.fn()
+      }
+    )
+  })
+
+  it('shows the credit, loads the clip only on press', async () => {
+    api.getBrandPronunciation.mockResolvedValue({
+      ...SKODA,
+      audio: { lang: 'cs', url: 'https://x/Cs-Skoda.ogg', author: 'Miaow', license: 'CC BY-SA 3.0', kind: 'commons' }
+    })
+    renderButton()
+    fireEvent.click(screen.getByRole('button'))
+    expect(await screen.findByText(/Miaow, CC BY-SA 3.0/, {}, { timeout: 5000 })).toBeTruthy()
+    expect(created).toEqual([])
+    fireEvent.click(screen.getByRole('button', { name: /Listen|Послухати|Послушать/ }))
+    expect(created).toEqual(['https://x/Cs-Skoda.ogg'])
+    expect(play).toHaveBeenCalledOnce()
+  })
+
+  it('has no play button without audio', async () => {
+    api.getBrandPronunciation.mockResolvedValue(SKODA)
+    renderButton()
+    fireEvent.click(screen.getByRole('button'))
+    await screen.findByText('SHKOH-da', {}, { timeout: 5000 })
+    expect(screen.queryByRole('button', { name: /Listen|Послухати|Послушать/ })).toBeNull()
   })
 })
 
