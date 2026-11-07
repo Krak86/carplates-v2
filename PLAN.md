@@ -1355,7 +1355,11 @@ Plan in 9 steps, [docs/wiki-recolor-plan.md](docs/wiki-recolor-plan.md); prototy
 - [x] Lot-photo carousel: model photo slides get the colour filter too (repainted + pill, then original); source order stays attached photo, auction photos, model photo (filter, original), kind placeholder
 - [x] Deployed 2026-11-07: migration 0101 applied, Cloudflare Cache Rule edited (live check: `/api/wiki/recolor` MISS then HIT, mask webp MISS then HIT, immutable); first nightly `wiki-paint` run ok (job_runs 00:30, finished 01:02)
 - [x] Fix: `GET /api/wiki/paint/:file` returned a 500 for an unknown id (Fastify refuses the JSON error body under the `@Header('Content-Type', 'image/webp')` decorator) and the `@Header` immutable cache-control rode along, so the edge kept the 500 for a year; now `StreamableFile({ type })` + `lookupCacheInterceptor(MASK_CACHE)` (success only), controller test
-- [ ] After the next API deploy (owner): purge in Cloudflare the two cached 500 test URLs `/api/wiki/paint/zzz.webp` and `/api/wiki/paint/00000000000000000000000000000000.webp`, then `curl -I` one of them: expect 404 (not 500), no immutable header
+- [x] API fix deployed (9f9dc88, merged via #144); with a cache-busting query the origin answers 400 (`zzz.webp`) and 404 (`000...0.webp`), no immutable header
+- [ ] Purge in Cloudflare (still HIT, Age 768, 500 + immutable on 2026-11-07): `https://carsua.app/api/wiki/paint/zzz.webp` and `https://carsua.app/api/wiki/paint/00000000000000000000000000000000.webp`; then `curl -I` both without a query: expect 400 / 404, no `immutable`
+- [x] `wiki-paint.ts --model X` (repeatable, with `--brand`) to scan one model; helper `wiki-paint-scope.ts` + test
+- [ ] Owner: scan Touareg locally (`pnpm ingest:wiki-paint --brand volkswagen --model touareg --limit 5 --rps 1`, writes the local DB), open ВІ8800СО
+- [ ] Owner decision: full local scan (`pnpm ingest:wiki-paint --limit 1500 --rps 1`, repeat until `p.image_url IS NULL` rows are gone, about 15 runs / 22 300 photos) then `pg_dump --data-only -t registry.wiki_image_paint` restored on the VPS (about 300-350 MB), instead of waiting for the nightly cron
 - [ ] Check the wiki-paint row on `/data-status` and the `job_runs` batch size over the next nights (1 500 photos each, about 15 nights)
 
 ## Brand pronunciation (planned 2026-11-06)
