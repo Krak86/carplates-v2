@@ -15,6 +15,7 @@ import {
   catalogModelSchema,
   catalogYearStatsSchema,
   adminAnalyticsResponseSchema,
+  adminCloudflareResponseSchema,
   adminLinksResponseSchema,
   adminServerResponseSchema,
   adminStatsResponseSchema,
@@ -132,6 +133,7 @@ import type {
   CatalogModel,
   CatalogYearStats,
   AdminAnalyticsResponse,
+  AdminCloudflareResponse,
   AdminLinksResponse,
   AdminServerResponse,
   AdminStatsResponse,
@@ -1056,6 +1058,10 @@ export async function getAdminStats(): Promise<AdminStatsResponse> {
 
 export async function getAdminAnalytics(): Promise<AdminAnalyticsResponse> {
   return adminAnalyticsResponseSchema.parse(await sendJson('GET', '/api/admin/analytics'))
+}
+
+export async function getAdminCloudflare(): Promise<AdminCloudflareResponse> {
+  return adminCloudflareResponseSchema.parse(await sendJson('GET', '/api/admin/cloudflare'))
 }
 
 export async function getAdminLinks(): Promise<AdminLinksResponse> {

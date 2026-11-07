@@ -63,7 +63,8 @@ export default function QuickLinks(): ReactNode {
       <p className="text-xs text-[var(--color-muted)]">
         <Link viewTransition to="/contact" className="hover:text-[var(--color-fg)] hover:underline">
           {t('footer.copyright', { year })}
-        </Link>
+        </Link>{' '}
+        <span>{__APP_VERSION__}</span>
       </p>
     </nav>
   )

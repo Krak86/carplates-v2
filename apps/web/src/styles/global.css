@@ -158,10 +158,17 @@
 /* Games hub poster tile (Steam/Epic library style): portrait cover, gradient from `--hue`. sRGB fallback first, then
    oklch on P3 displays. */
 .game-cover {
-  aspect-ratio: 3 / 4;
+  /* Squarer on phones so a tile does not fill the screen; portrait poster from sm up. */
+  aspect-ratio: 1 / 1;
   background:
     radial-gradient(circle at 30% 20%, hsl(var(--hue) 90% 70% / 0.45), transparent 60%),
     linear-gradient(160deg, hsl(var(--hue) 70% 48%), hsl(calc(var(--hue) + 50) 75% 14%));
+}
+
+@media (min-width: 40rem) {
+  .game-cover {
+    aspect-ratio: 3 / 4;
+  }
 }
 
 @media (color-gamut: p3) {

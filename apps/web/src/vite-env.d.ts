@@ -2,6 +2,7 @@
 /// <reference types="vite-plugin-pwa/react" />
 
 declare const __OFFLINE_CACHE_BUSTER__: string
+declare const __APP_VERSION__: string
 
 interface ImportMetaEnv {
   readonly VITE_API_BASE?: string

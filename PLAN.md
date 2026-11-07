@@ -85,6 +85,14 @@ using an API isn't a viable substitute (ToS risk, fragile against markup
 changes, no stable auth story). Revisit only if a free/affordable token
 becomes available.
 
+**Letter sent 2026-11-07** (ru, text in `docs/platesmania-letter.md`): asks for a free low-limit key for a non-commercial app; fallback = no
+API, write again only if a paid version exists or the audience grows a lot.
+
+- [ ] ⏳ Platesmania reply (free key?). If **yes**, build: hero photo order shared/attached -> Platesmania -> wiki -> type placeholder;
+      a small "add a photo on Platesmania" link under the hero when Platesmania has none; source label + link to their plate page;
+      per-plate cache plus a global daily upstream cap (promised 300/day) and kill switch, same pattern as `MarketService` (CarAPIS).
+      If **no**: leave parked, close this box.
+
 ### Sitemap page `/sitemap` ✅ DONE (2026-11-01) — see `docs/plan-done.md`
 
 ### Data freshness: real data-end label + `/data-status` ✅ DONE (2026-11-01) — see `docs/plan-done.md`
@@ -1084,6 +1092,8 @@ Code-level audit findings and the full pre-deploy gate: [docs/security-checklist
 - [ ] `robots.txt`/sitemap: verify `PUBLIC_SITE_URL` is the real origin, submit `sitemap.xml` in Google Search Console and Bing Webmaster.
 - [ ] Cookie/consent and licence decisions before ads go live (not before): [docs/legal-and-monetization.md](docs/legal-and-monetization.md).
 - [ ] Monitoring: ✅ UptimeRobot on `/healthz` + home (2026-10-28). Open: server Sentry is fully wired in code (`instrument.ts`, `deploy-api.yml`) and the GitHub secret `SENTRY_DSN` + variable `ENABLE_TELEMETRY=true` are set in the `production` environment (seen 2026-10-31). Open: confirm server events actually reach Sentry (re-run `deploy-api` if it ran before they were set; the DSN must be the Node project's), then a Sentry alert on 429 spikes; healthchecks.io checks + `HC_PING_*` secrets for the ingest crons; log retention/rotation.
+
+- [ ] Recovery hardening (2026-11-07, see deploy.md "Recovery cases"): (a) on the VPS `rclone lsf R2:carsua-backups/full` and `…/archive` are non-empty after the 2026-10-28 ingest (else run `backup.sh archive` + `full`); (b) copy every `production` secret value (R2/Cloudflare tokens, `AUTH_SECRET`, `POSTGRES_PASSWORD`, SSH keys, API keys) into a password manager; (c) healthchecks.io `backup` check is green. Contabo Auto Backup deliberately not enabled.
 
 ### Backup policy (Phase 4)
 

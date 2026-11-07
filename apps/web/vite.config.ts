@@ -1,3 +1,4 @@
+import { execSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
@@ -48,6 +49,23 @@ const CODE_GROUPS = [...VENDOR_GROUPS, ...HELPER_GROUPS]
 // Persisted query data is only safe to restore while the response shapes it was saved under still hold.
 const schemasSource = readFileSync(fileURLToPath(new URL('../../packages/shared/src/schemas.ts', import.meta.url)))
 const OFFLINE_CACHE_BUSTER = createHash('sha1').update(schemasSource).digest('hex').slice(0, 12)
+
+// App version shown on the About page: "v2.<stage commit count>" (CI checks out full history for this). Falls back to plain "v2".
+function appVersion(): string {
+  // Count `stage` commits only, whatever branch is built (a merge into `main` adds nothing). The remote ref first:
+  // `origin/stage` exists in CI after a full fetch; locally either may exist.
+  for (const ref of ['origin/stage', 'stage']) {
+    try {
+      const count = execSync(`git rev-list --count ${ref}`, { stdio: ['ignore', 'pipe', 'ignore'] })
+        .toString()
+        .trim()
+      if (/^\d+$/.test(count)) return `v2.${count}`
+    } catch {
+      // ref missing: try the next one
+    }
+  }
+  return 'v2'
+}
 
 // The language dictionary and the hero photo are only requested after the entry script has run (a dynamic `import()` and a
 // CSS background), one round trip late. Their hashed names exist only at build time, so this hook writes the hints into
@@ -103,7 +121,8 @@ function preloadHints(): Plugin {
 
 export default defineConfig({
   define: {
-    __OFFLINE_CACHE_BUSTER__: JSON.stringify(OFFLINE_CACHE_BUSTER)
+    __OFFLINE_CACHE_BUSTER__: JSON.stringify(OFFLINE_CACHE_BUSTER),
+    __APP_VERSION__: JSON.stringify(appVersion())
   },
   plugins: [
     react(),

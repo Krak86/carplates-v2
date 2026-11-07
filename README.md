@@ -8,16 +8,16 @@ Ukrainian vehicle lookup by **plate number** or **VIN**. Rebuild of
 v2 is the spiritual successor of [Krak86/carplates](https://github.com/Krak86/carplates) (v1, kept as-is). Same idea
 (look up a Ukrainian car by plate, offline-first PWA, mobile-first), rebuilt around data we own instead of third-party APIs.
 
-| | v1 | v2 |
-| --- | --- | --- |
-| Plate data | Remote services (RIA Auto API, PlatesMania) | State open-data registry ingested into our own Postgres |
-| VIN | NHTSA decode | NHTSA (proxied) + offline VIN-prefix fallback, VIN anatomy, equipment map |
-| Photo recognition | Plate Recognizer (paid ANPR API) | On-device + optional self-hosted ALPR / OCR (plates and VINs) |
-| Extras | Chat (Disqus), car ads | Crash-test ratings (6 sources), fuel economy, EU specs (RDW), value estimate, wanted check, news, reviews, 3D/360° views, test-drive game |
-| Auth | Google / Facebook OAuth2 | Google, email and Telegram sign-in, own session cookie |
-| Frontend | React 16, Redux + Saga, Material UI, Webpack | React 19, Vite, Tailwind v4, Zustand, TanStack Query |
-| Backend / hosting | Azure Functions + Table Storage, GitHub Pages | NestJS + Fastify, Drizzle + Postgres, self-hosted |
-| Tests / CI | Jest, Cypress, Azure DevOps | Vitest, pnpm monorepo |
+|                   | v1                                            | v2                                                                                                                                        |
+| ----------------- | --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| Plate data        | Remote services (RIA Auto API, PlatesMania)   | State open-data registry ingested into our own Postgres                                                                                   |
+| VIN               | NHTSA decode                                  | NHTSA (proxied) + offline VIN-prefix fallback, VIN anatomy, equipment map                                                                 |
+| Photo recognition | Plate Recognizer (paid ANPR API)              | On-device + optional self-hosted ALPR / OCR (plates and VINs)                                                                             |
+| Extras            | Chat (Disqus), car ads                        | Crash-test ratings (6 sources), fuel economy, EU specs (RDW), value estimate, wanted check, news, reviews, 3D/360° views, test-drive game |
+| Auth              | Google / Facebook OAuth2                      | Google, email and Telegram sign-in, own session cookie                                                                                    |
+| Frontend          | React 16, Redux + Saga, Material UI, Webpack  | React 19, Vite, Tailwind v4, Zustand, TanStack Query                                                                                      |
+| Backend / hosting | Azure Functions + Table Storage, GitHub Pages | NestJS + Fastify, Drizzle + Postgres, self-hosted                                                                                         |
+| Tests / CI        | Jest, Cypress, Azure DevOps                   | Vitest, pnpm monorepo                                                                                                                     |
 
 - Plate data: the state open-data registry ([data.gov.ua](https://data.gov.ua/dataset/06779371-308f-42d7-895e-5a39833375f0)) → Postgres
 - VIN data: [NHTSA vPIC](https://vpic.nhtsa.dot.gov/api/vehicles/decodevin) (proxied), presented as an Overview
@@ -177,20 +177,21 @@ Everything above (plate/VIN search) works with zero external keys. These
 features are optional add-ons, each gated on its own key in `apps/api/.env` —
 absent, the app runs fine and that one feature just answers "unavailable":
 
-| Feature                          | Env var                                                                              | Get a free key at                                                                             |
-| -------------------------------- | ------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------- |
-| Find a plate by photo/camera     | `PLATE_RECOGNIZER_CLOUD_TOKEN`                                                       | [platerecognizer.com](https://platerecognizer.com)                                            |
-| "What it might look like" photos | `PIXABAY_API_KEY`                                                                    | [pixabay.com/api/docs](https://pixabay.com/api/docs/)                                         |
-| Sign in with Google              | `GOOGLE_CLIENT_ID`                                                                   | [console.cloud.google.com](https://console.cloud.google.com/apis/credentials)                 |
-| Sign in with Telegram            | `TELEGRAM_BOT_TOKEN` + `TELEGRAM_BOT_USERNAME`                                       | [@BotFather](https://t.me/BotFather) (`/newbot`, then `/setdomain`, https only)               |
-| Email sign-in (code + link)      | `MAIL_TRANSPORT` (+ `RESEND_API_KEY` or `SMTP_URL`), `MAIL_FROM`, `AUTH_SECRET`      | [resend.com](https://resend.com) (3k mails/month free) · Brevo, Postmark, SES via SMTP        |
-| Bot check on "send code"         | `TURNSTILE_SITE_KEY` + `TURNSTILE_SECRET_KEY`                                        | [dash.cloudflare.com → Turnstile](https://dash.cloudflare.com/?to=/:account/turnstile) (free) |
-| Own-model plate recognition      | `ALPR_LOCAL_URL` (+ `ALPR_API_KEY`)                                                  | no account: `pnpm alpr:build && pnpm alpr:up` (see "Self-hosted ALPR" below)                  |
-| Shared photo links               | `SHARES_R2_ENDPOINT` + `SHARES_R2_ACCESS_KEY_ID` + `SHARES_R2_SECRET_ACCESS_KEY`     | Cloudflare R2 private bucket (needs `ALPR_LOCAL_URL` too, for the face blur); docs/deploy.md  |
-| Admin live analytics             | `POSTHOG_PERSONAL_API_KEY` + `POSTHOG_PROJECT_ID`                                    | [posthog.com](https://posthog.com) → personal API key, scope `query:read`                     |
-| Error reporting (API / web)      | `ENABLE_TELEMETRY=true` + `SENTRY_DSN` / `VITE_ENABLE_TELEMETRY` + `VITE_SENTRY_DSN` | [sentry.io](https://sentry.io)                                                                |
-| AUTO.RIA fallback for old plates | `RIA_CHECK_ENABLED=true`                                                             | no key (unofficial endpoint, 5 calls / 90 s per IP, so off by default)                        |
-| Contact form inbox               | `CONTACT_TO` (or `MAIL_REPLY_TO`)                                                    | any mailbox; neither set = the form is disabled                                               |
+| Feature                          | Env var                                                                              | Get a free key at                                                                                                                                                      |
+| -------------------------------- | ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Find a plate by photo/camera     | `PLATE_RECOGNIZER_CLOUD_TOKEN`                                                       | [platerecognizer.com](https://platerecognizer.com)                                                                                                                     |
+| "What it might look like" photos | `PIXABAY_API_KEY`                                                                    | [pixabay.com/api/docs](https://pixabay.com/api/docs/)                                                                                                                  |
+| Sign in with Google              | `GOOGLE_CLIENT_ID`                                                                   | [console.cloud.google.com](https://console.cloud.google.com/apis/credentials)                                                                                          |
+| Sign in with Telegram            | `TELEGRAM_BOT_TOKEN` + `TELEGRAM_BOT_USERNAME`                                       | [@BotFather](https://t.me/BotFather) (`/newbot`, then `/setdomain`, https only)                                                                                        |
+| Email sign-in (code + link)      | `MAIL_TRANSPORT` (+ `RESEND_API_KEY` or `SMTP_URL`), `MAIL_FROM`, `AUTH_SECRET`      | [resend.com](https://resend.com) (3k mails/month free) · Brevo, Postmark, SES via SMTP                                                                                 |
+| Bot check on "send code"         | `TURNSTILE_SITE_KEY` + `TURNSTILE_SECRET_KEY`                                        | [dash.cloudflare.com → Turnstile](https://dash.cloudflare.com/?to=/:account/turnstile) (free)                                                                          |
+| Own-model plate recognition      | `ALPR_LOCAL_URL` (+ `ALPR_API_KEY`)                                                  | no account: `pnpm alpr:build && pnpm alpr:up` (see "Self-hosted ALPR" below)                                                                                           |
+| Shared photo links               | `SHARES_R2_ENDPOINT` + `SHARES_R2_ACCESS_KEY_ID` + `SHARES_R2_SECRET_ACCESS_KEY`     | Cloudflare R2 private bucket (needs `ALPR_LOCAL_URL` too, for the face blur); docs/deploy.md                                                                           |
+| Admin live analytics             | `POSTHOG_PERSONAL_API_KEY` + `POSTHOG_PROJECT_ID`                                    | [posthog.com](https://posthog.com) → personal API key, scope `query:read`                                                                                              |
+| Admin edge traffic (Cloudflare)  | `CLOUDFLARE_API_TOKEN` + `CLOUDFLARE_ZONE_ID`                                        | Cloudflare token with only Zone > Analytics > Read on the zone (GraphQL Analytics, free plan); production maps it from the `CF_ANALYTICS_TOKEN` + `CF_ZONE_ID` secrets |
+| Error reporting (API / web)      | `ENABLE_TELEMETRY=true` + `SENTRY_DSN` / `VITE_ENABLE_TELEMETRY` + `VITE_SENTRY_DSN` | [sentry.io](https://sentry.io)                                                                                                                                         |
+| AUTO.RIA fallback for old plates | `RIA_CHECK_ENABLED=true`                                                             | no key (unofficial endpoint, 5 calls / 90 s per IP, so off by default)                                                                                                 |
+| Contact form inbox               | `CONTACT_TO` (or `MAIL_REPLY_TO`)                                                    | any mailbox; neither set = the form is disabled                                                                                                                        |
 
 Add whichever you want to `apps/api/.env` (see `apps/api/.env.example`), then
 restart `pnpm dev` — both are read once at process start, so editing `.env`
@@ -243,6 +244,7 @@ setup order: [docs/deploy.md](docs/deploy.md) "Secrets and variables"). **Bold**
 | `TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY`                                                       | unset                                             | Cloudflare Turnstile on "send code"; no secret = check skipped                                                                                                                                      |
 | `ACCOUNT_DELETION_GRACE_DAYS`, `SESSION_TTL_DAYS`                                                  | `14`, `30`                                        | Restore window of a deleted account; sliding session lifetime. Not passed by CI (defaults apply in production)                                                                                      |
 | `POSTHOG_PERSONAL_API_KEY`, `POSTHOG_PROJECT_ID`, `POSTHOG_API_HOST`                               | unset, unset, `https://eu.posthog.com`            | Admin Statistics tab (HogQL). Our project is on the **US** cloud: production sets `https://us.posthog.com` via the `POSTHOG_API_HOST` repository variable (CI passes it); the code default stays EU |
+| `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ZONE_ID`                                                       | unset, unset                                      | Admin Statistics tab, Cloudflare card: daily requests, cache share and unique IPs (30 days). Unique visitors are by IP at the edge, so bots are counted; PostHog counts browsers                    |
 | `SENTRY_ORG_SLUG`                                                                                  | unset                                             | Only builds the Sentry dashboard link on the admin Statistics tab                                                                                                                                   |
 | `ENABLE_TELEMETRY`, `SENTRY_DSN`, `SENTRY_TRACES_SAMPLE_RATE`                                      | off, unset, `0.1`                                 | Sentry is inert unless the flag **and** the DSN are set                                                                                                                                             |
 | `TRUST_PROXY`                                                                                      | `false`                                           | `true` only behind Caddy/Cloudflare (per-IP limits read `X-Forwarded-For`)                                                                                                                          |
@@ -253,13 +255,27 @@ Web build (`apps/web/.env`, read by Vite at dev/build start; **public**, bundled
 `VITE_GOOGLE_MAPS_EMBED_KEY` (restrict to your referrer in Google Cloud), `VITE_DISQUS_SHORT_NAME`, `VITE_ENABLE_TELEMETRY`,
 `VITE_POSTHOG_KEY`, `VITE_POSTHOG_HOST`, `VITE_SENTRY_DSN`, `VITE_GIT_SHA` (set by CI).
 
+App version (footer, About, What's new): not an env var. `vite.config.ts` defines `__APP_VERSION__` as `v2.<commit count of origin/stage or stage>` at build time and falls back to plain `v2` when no git history is available. `deploy-web` checks out with `fetch-depth: 0` for this; a shallow clone gives `v2`.
+
 Scripts only (shell or `apps/api/.env`; none are needed for `pnpm ingest:all`): `GOOGLE_API_KEY` (YouTube Data API v3 for `ingest:youtube-videos`),
 `SKETCHFAB_TOKEN` (optional, raises the Sketchfab rate limit), `CLOUDFLARE_TUNNEL_TOKEN` (`pnpm tunnel --hostname`), `SHRINK_MAX` / `SHRINK_Q`
 (ALPR `eval.mjs --shrink`), `HC_PING_<JOB>` (healthchecks.io ping URLs for the VPS cron jobs, in `/opt/carsua/env/ingest.env`).
 
 CI-only GitHub secrets (never read by the app): `VPS_HOST`, `VPS_USER`, `VPS_SSH_KEY`, `VPS_KNOWN_HOSTS`, `POSTGRES_PASSWORD`,
-`CF_ORIGIN_CERT`, `CF_ORIGIN_KEY`, `CF_API_TOKEN`, `CF_ZONE_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_ENDPOINT`,
+`CF_ORIGIN_CERT`, `CF_ORIGIN_KEY`, `CF_API_TOKEN`, `CF_ZONE_ID`, `CF_ANALYTICS_TOKEN` (maps to the API's `CLOUDFLARE_API_TOKEN`), `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_ENDPOINT`,
 `BACKUP_BUCKET`, `HC_PING_BACKUP` and the `HC_PING_*` list in docs/deploy.md.
+
+How env vars reach the VPS: CI writes them to `/opt/carsua/env/*.env` and compose only reads those files, so changing a GitHub secret does nothing until the matching workflow is re-run. A **new API env var** needs three edits: `apps/api/src/env.ts`, the `env:` block and the `emit` list in `.github/workflows/deploy-api.yml` (details and inspection commands in docs/deploy.md).
+
+### Cloudflare analytics token (optional, admin card)
+
+Shows daily requests, cache share and unique IPs on the admin Statistics tab (GraphQL Analytics, free plan). Unique visitors are counted by IP at the edge, so bots and API clients are included; PostHog counts browsers, expect the Cloudflare number to be several times higher.
+
+1. Cloudflare dashboard → Manage account → **Account API tokens** → Create Token → Custom token. One policy: scope **Specified Domains → carsua.app**, permission **Zone Analytics: Read** (group "Analytics & Logs"), nothing else. Expiry 1 year; no IP filter.
+2. Zone ID: Domains → carsua.app → Overview → right sidebar, "API" (the **Zone** ID, not the Account ID).
+3. Local: `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ZONE_ID` in `apps/api/.env`. Production: add the GitHub environment secret `CF_ANALYTICS_TOKEN` (`CF_ZONE_ID` already exists and is reused), then re-run `deploy-api`. The existing `CF_API_TOKEN` is a different token, do not overwrite it.
+
+Unset = the card says "not connected" and the API makes no calls. Answers are cached 10 minutes.
 
 ### Self-hosted ALPR (optional)
 

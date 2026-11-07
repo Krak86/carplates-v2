@@ -6,7 +6,8 @@ export type ReleaseLang = (typeof RELEASE_LANGS)[number]
 
 export type ReleaseItem = { group: ReleaseGroup } & Record<ReleaseLang, string>
 
-export type ReleaseDay = { date: string; items: readonly ReleaseItem[] }
+/** `version`: `v2.<stage commit count>` at the end of that day (same scheme as the app footer). */
+export type ReleaseDay = { date: string; version?: string; items: readonly ReleaseItem[] }
 
 const item = (group: ReleaseGroup, ua: string, ru: string, en: string): ReleaseItem => ({ group, ua, ru, en })
 
@@ -17,6 +18,7 @@ const item = (group: ReleaseGroup, ua: string, ru: string, en: string): ReleaseI
 export const RELEASES: readonly ReleaseDay[] = [
   {
     date: '2026-11-06',
+    version: 'v2.1097',
     items: [
       item(
         'new',
@@ -82,6 +84,7 @@ export const RELEASES: readonly ReleaseDay[] = [
   },
   {
     date: '2026-11-05',
+    version: 'v2.1063',
     items: [
       item(
         'new',
@@ -111,6 +114,7 @@ export const RELEASES: readonly ReleaseDay[] = [
   },
   {
     date: '2026-11-04',
+    version: 'v2.1020',
     items: [
       item(
         'new',
@@ -170,6 +174,7 @@ export const RELEASES: readonly ReleaseDay[] = [
   },
   {
     date: '2026-11-03',
+    version: 'v2.988',
     items: [
       item(
         'improved',
@@ -235,6 +240,7 @@ export const RELEASES: readonly ReleaseDay[] = [
   },
   {
     date: '2026-11-02',
+    version: 'v2.964',
     items: [
       item(
         'improved',
@@ -372,6 +378,7 @@ export const RELEASES: readonly ReleaseDay[] = [
   },
   {
     date: '2026-11-01',
+    version: 'v2.905',
     items: [
       item(
         'new',
@@ -521,6 +528,7 @@ export const RELEASES: readonly ReleaseDay[] = [
   },
   {
     date: '2026-10-31',
+    version: 'v2.817',
     items: [
       item(
         'new',
@@ -640,6 +648,7 @@ export const RELEASES: readonly ReleaseDay[] = [
   },
   {
     date: '2026-10-30',
+    version: 'v2.752',
     items: [
       item(
         'new',
@@ -723,6 +732,7 @@ export const RELEASES: readonly ReleaseDay[] = [
   },
   {
     date: '2026-10-29',
+    version: 'v2.703',
     items: [
       item(
         'improved',
@@ -902,6 +912,7 @@ export const RELEASES: readonly ReleaseDay[] = [
   },
   {
     date: '2026-10-28',
+    version: 'v2.633',
     items: [
       item(
         'fix',
@@ -1021,6 +1032,7 @@ export const RELEASES: readonly ReleaseDay[] = [
   },
   {
     date: '2026-10-27',
+    version: 'v2.565',
     items: [
       item(
         'fix',
@@ -1086,6 +1098,7 @@ export const RELEASES: readonly ReleaseDay[] = [
   },
   {
     date: '2026-10-26',
+    version: 'v2.525',
     items: [
       item(
         'improved',
@@ -1157,6 +1170,7 @@ export const RELEASES: readonly ReleaseDay[] = [
   },
   {
     date: '2026-10-25',
+    version: 'v2.503',
     items: [
       item(
         'new',
@@ -1228,6 +1242,7 @@ export const RELEASES: readonly ReleaseDay[] = [
   },
   {
     date: '2026-10-17',
+    version: 'v2.494',
     items: [
       item(
         'new',
@@ -1251,6 +1266,7 @@ export const RELEASES: readonly ReleaseDay[] = [
   },
   {
     date: '2026-10-16',
+    version: 'v2.469',
     items: [
       item(
         'improved',
@@ -1346,6 +1362,7 @@ export const RELEASES: readonly ReleaseDay[] = [
   },
   {
     date: '2026-10-15',
+    version: 'v2.440',
     items: [
       item(
         'new',
@@ -1411,6 +1428,7 @@ export const RELEASES: readonly ReleaseDay[] = [
   },
   {
     date: '2026-10-14',
+    version: 'v2.420',
     items: [
       item(
         'new',
@@ -1440,6 +1458,7 @@ export const RELEASES: readonly ReleaseDay[] = [
   },
   {
     date: '2026-10-13',
+    version: 'v2.412',
     items: [
       item(
         'new',
@@ -1487,6 +1506,7 @@ export const RELEASES: readonly ReleaseDay[] = [
   },
   {
     date: '2026-10-12',
+    version: 'v2.377',
     items: [
       item(
         'new',
@@ -1528,6 +1548,7 @@ export const RELEASES: readonly ReleaseDay[] = [
   },
   {
     date: '2026-10-11',
+    version: 'v2.314',
     items: [
       item(
         'new',
@@ -1569,6 +1590,7 @@ export const RELEASES: readonly ReleaseDay[] = [
   },
   {
     date: '2026-10-10',
+    version: 'v2.287',
     items: [
       item(
         'new',
@@ -1604,6 +1626,7 @@ export const RELEASES: readonly ReleaseDay[] = [
   },
   {
     date: '2026-10-09',
+    version: 'v2.260',
     items: [
       item(
         'new',
@@ -1639,6 +1662,7 @@ export const RELEASES: readonly ReleaseDay[] = [
   },
   {
     date: '2026-10-08',
+    version: 'v2.230',
     items: [
       item(
         'new',
@@ -1674,6 +1698,7 @@ export const RELEASES: readonly ReleaseDay[] = [
   },
   {
     date: '2026-10-07',
+    version: 'v2.206',
     items: [
       item(
         'new',
@@ -1709,6 +1734,7 @@ export const RELEASES: readonly ReleaseDay[] = [
   },
   {
     date: '2026-10-06',
+    version: 'v2.185',
     items: [
       item(
         'new',
@@ -1744,6 +1770,7 @@ export const RELEASES: readonly ReleaseDay[] = [
   },
   {
     date: '2026-10-05',
+    version: 'v2.166',
     items: [
       item(
         'new',
@@ -1779,6 +1806,7 @@ export const RELEASES: readonly ReleaseDay[] = [
   },
   {
     date: '2026-10-04',
+    version: 'v2.144',
     items: [
       item(
         'new',
@@ -1802,6 +1830,7 @@ export const RELEASES: readonly ReleaseDay[] = [
   },
   {
     date: '2026-10-03',
+    version: 'v2.134',
     items: [
       item(
         'new',
@@ -1831,6 +1860,7 @@ export const RELEASES: readonly ReleaseDay[] = [
   },
   {
     date: '2026-10-02',
+    version: 'v2.117',
     items: [
       item(
         'new',
@@ -1860,6 +1890,7 @@ export const RELEASES: readonly ReleaseDay[] = [
   },
   {
     date: '2026-10-01',
+    version: 'v2.93',
     items: [
       item(
         'new',
@@ -1884,6 +1915,7 @@ export const RELEASES: readonly ReleaseDay[] = [
   },
   {
     date: '2026-09-30',
+    version: 'v2.77',
     items: [
       item(
         'improved',
@@ -1895,6 +1927,7 @@ export const RELEASES: readonly ReleaseDay[] = [
   },
   {
     date: '2026-09-29',
+    version: 'v2.74',
     items: [
       item(
         'new',
@@ -1912,6 +1945,7 @@ export const RELEASES: readonly ReleaseDay[] = [
   },
   {
     date: '2026-09-28',
+    version: 'v2.69',
     items: [
       item(
         'new',
@@ -1929,6 +1963,7 @@ export const RELEASES: readonly ReleaseDay[] = [
   },
   {
     date: '2026-09-27',
+    version: 'v2.67',
     items: [
       item(
         'new',
@@ -1952,6 +1987,7 @@ export const RELEASES: readonly ReleaseDay[] = [
   },
   {
     date: '2026-09-26',
+    version: 'v2.58',
     items: [
       item(
         'new',
@@ -1975,6 +2011,7 @@ export const RELEASES: readonly ReleaseDay[] = [
   },
   {
     date: '2026-09-25',
+    version: 'v2.50',
     items: [
       item(
         'new',
@@ -1998,6 +2035,7 @@ export const RELEASES: readonly ReleaseDay[] = [
   },
   {
     date: '2026-09-24',
+    version: 'v2.38',
     items: [
       item(
         'new',
@@ -2021,6 +2059,7 @@ export const RELEASES: readonly ReleaseDay[] = [
   },
   {
     date: '2026-09-23',
+    version: 'v2.26',
     items: [
       item(
         'new',
@@ -2044,6 +2083,7 @@ export const RELEASES: readonly ReleaseDay[] = [
   },
   {
     date: '2026-09-22',
+    version: 'v2.17',
     items: [
       item(
         'new',
@@ -2062,6 +2102,7 @@ export const RELEASES: readonly ReleaseDay[] = [
   },
   {
     date: '2026-09-21',
+    version: 'v2.9',
     items: [
       item(
         'improved',
@@ -2079,6 +2120,7 @@ export const RELEASES: readonly ReleaseDay[] = [
   },
   {
     date: '2026-09-09',
+    version: 'v2.2',
     items: [
       item(
         'new',
