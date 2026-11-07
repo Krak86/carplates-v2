@@ -85,6 +85,14 @@ using an API isn't a viable substitute (ToS risk, fragile against markup
 changes, no stable auth story). Revisit only if a free/affordable token
 becomes available.
 
+**Letter sent 2026-11-07** (ru, text in `docs/platesmania-letter.md`): asks for a free low-limit key for a non-commercial app; fallback = no
+API, write again only if a paid version exists or the audience grows a lot.
+
+- [ ] ⏳ Platesmania reply (free key?). If **yes**, build: hero photo order shared/attached -> Platesmania -> wiki -> type placeholder;
+  a small "add a photo on Platesmania" link under the hero when Platesmania has none; source label + link to their plate page;
+  per-plate cache plus a global daily upstream cap (promised 300/day) and kill switch, same pattern as `MarketService` (CarAPIS).
+  If **no**: leave parked, close this box.
+
 ### Sitemap page `/sitemap` ✅ DONE (2026-11-01) — see `docs/plan-done.md`
 
 ### Data freshness: real data-end label + `/data-status` ✅ DONE (2026-11-01) — see `docs/plan-done.md`

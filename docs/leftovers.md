@@ -72,7 +72,7 @@ Each file stays the source of truth; this table is only the map. Check the file'
 
 ## 5. Closed on purpose (do not redo)
 
-- Paid or token-gated: Platesmania, Copart / bid.cars history, auction-api.app, RIA paid services, NICB-style crash data.
+- Paid or token-gated: Platesmania (free-key letter sent 2026-11-07, awaiting reply: see PLAN.md Phase 3), Copart / bid.cars history, auction-api.app, RIA paid services, NICB-style crash data.
 - Researched, nothing to build: average fuel price (a95 licence), distributor price scrapers, extra NHTSA vPIC endpoints, RU/BY/Baltic databases, Window sticker.
 - Replaced: Twitter widget -> Bluesky, news bell -> `/releases`, plate-free model pages -> `/cars` catalog, Dutch recall translation -> live translation.
 - Research only, nothing started: carsized / autosize (PLAN.md "Spec-page ideas").
