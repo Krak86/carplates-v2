@@ -1363,7 +1363,7 @@ Plan in 9 steps, [docs/wiki-recolor-plan.md](docs/wiki-recolor-plan.md); prototy
 - [ ] Step C, last, after the full scan: `pg_dump --data-only -t registry.wiki_image_paint` locally (about 300-350 MB) and restore on the VPS (owner; `ON CONFLICT DO NOTHING` into a staging table if the VPS already has nightly rows; never TRUNCATE / `db:seed`; not while the 00:30 cron runs), then check `/data-status` and `SELECT status, count(*)`
 - [ ] Check the wiki-paint row on `/data-status` and the `job_runs` batch size over the next nights (1 500 photos each, about 15 nights)
 
-## Brand pronunciation (planned 2026-11-06)
+## Brand pronunciation (planned 2026-11-06; live on prod 2026-11-08, only the owner sound check is open)
 
 Speaker icon beside the brand name on catalog pages; lazy popup with ua / ru / en transcription (parsed from Wikipedia lead wikitext; Wikidata has none) and an on-demand play button for origin-language audio (Commons `.ogg`, then Piper TTS). Plan and research: [docs/brand-pronounce-plan.md](docs/brand-pronounce-plan.md). About 8.5 working days; text-only slice about 4.5.
 
@@ -1384,7 +1384,8 @@ Speaker icon beside the brand name on catalog pages; lazy popup with ua / ru / e
   - [x] `hasPronunciation` shows after the catalog reload. Checked 2026-11-08 on prod (English, dark): make page `/cars/skoda`, model page `/cars/skoda/octavia`, plate card `020072`, decode-only VIN card (`3VWFE21C04M000001`, VW Beetle; popover shows IPA, "Listen (German)", Commons credit). Not checked: ua / ru, phone width, light theme. A VIN NHTSA cannot decode (e.g. a Skoda) has no brand + model, so no button there by design.
   - [x] Play one Commons clip on prod and confirm no CSP `media-src` violation in the console (`media-src https:`); the credit line (author, licence) is visible. Checked 2026-11-08 on `/cars/skoda`: the clip request returns 206, no `media-src` violation (audio itself not heard by Claude).
   - [x] `/data-status` returns `brandPronounce: 302` (2026-11-08).
-  - [ ] Owner: `crontab -l` on the VPS lists the monthly `brand-pronounce` line (7th, 06:30); and press play on a clip once with sound (headless Chrome fetched `De-Volkswagen.ogg` with no console error, audio not heard).
+  - [x] The monthly `brand-pronounce` cron line (7th, 06:30) is installed on the VPS (`crontab -l`, 2026-11-08; installed by `deploy-ingest`).
+  - [ ] Owner: press play on a clip once with sound (headless Chrome fetched `De-Volkswagen.ogg` with no console error, audio not heard).
 
 ## Later, conditional
 
