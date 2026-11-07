@@ -103,6 +103,13 @@ pulls without a login. Settings → Actions → "Require approval for all outsid
 
 ## Secrets and variables (Environment `production`)
 
+How they reach the VPS: **CI pushes them, compose only reads files.** `deploy-api` ("Write env files and origin certificate") builds temp files on the runner and
+sends them over SSH (`umask 077`, `.new` then `mv`) to `/opt/carsua/env/`: `api.env` (api-blue/green), `postgres.env`, `alpr.env`, `backup.env` (read by `backup.sh`, not Docker),
+`certs/origin.pem|key` (Caddy); `deploy-ingest` writes `ingest.env`; `compose/.env` holds `GH_OWNER` + image tags (no secrets). Changing a secret in GitHub does nothing
+until the matching workflow is re-run. A new api env var needs the `env:` block + `emit` list in `deploy-api.yml` **and** `apps/api/src/env.ts`.
+Inspect on the VPS without printing values: `ls -la /opt/carsua/env /opt/carsua/env/certs`; names only `for f in /opt/carsua/env/*.env /opt/carsua/compose/.env; do echo "== $f"; cut -d= -f1 "$f"; done`;
+one var set? `grep -c '^AUTH_SECRET=.' /opt/carsua/env/api.env`; what the container sees `docker compose exec api-blue env | cut -d= -f1 | sort`. Never `cat` the files.
+
 | Secrets                                                                                                                                                                                                                                                                                                                                                                     | Notes                                                                                                                                                                                                                                                                                                                                        |
 | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `VPS_HOST`, `VPS_SSH_KEY`, `VPS_KNOWN_HOSTS`                                                                                                                                                                                                                                                                                                                                | CI-only ed25519 key (public half → `CI_PUBKEY` in bootstrap); `ssh-keyscan -t ed25519 <ip>`                                                                                                                                                                                                                                                  |
@@ -226,6 +233,25 @@ docker compose exec -T postgres pg_restore --clean --if-exists --no-owner -U car
 3. `deploy-api` normally, then `deploy-web`; check `/healthz`, a plate, a login.
 
 Registry data lost with the full dumps: re-ingest from `archive/` ZIPs (`backup.sh archive`) or data.gov.ua (`ingest:*`).
+
+### Recovery cases (which section to follow)
+
+Contabo's "Data Protection / Auto Backup" email (2026-11-06) is a generic upsell: the order is deliberately "No Data Protection", R2 is the backup. Auto Backup would only add a faster whole-VPS restore (paid, duplicates R2); enable it only if recovery time starts to matter.
+
+| Case                                                     | Do                                                                                                                                                                               |
+| -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Bad deploy / bug, data fine                              | Re-run `deploy-api` / `deploy-web` on the last good commit (blue/green, additive migrations). A destructive migration has no rollback: use A or B below                          |
+| `app.*` / wanted / news tables lost, VPS alive           | **A** (newest nightly, max 14 days back; loses changes since 03:30)                                                                                                              |
+| `registrations` or whole DB corrupted, VPS alive         | **B** steps 1-3 on the same server (api down), then re-run the `ingest` jobs to catch up on anything newer than the full dump                                                    |
+| Total loss (disk dead, VPS gone or compromised)          | First-time setup 1-3 (new IP into `VPS_HOST` + DNS A/AAAA), then **B**, `deploy-api`, `deploy-web`, `backup.sh nightly` by hand. Plan 2-3 h                                      |
+| Scraped tables lost (wiki, RDW, MOT, safety, VehiclesDB) | No backup: re-import the committed seed CSVs (`scripts/seed-data/`); count `registrations` before any `db:seed`                                                                  |
+| Secrets / accounts lost                                  | GitHub secrets are write-only: restore values from the password manager, re-issue the R2 token and the Cloudflare origin cert; SSH key lost → Contabo rescue console / reinstall |
+| Cloudflare / DNS issue                                   | Fix in the Cloudflare dashboard (origin cert is re-issuable, DNS points at the VPS IP)                                                                                           |
+
+Not backed up (by design): `carsua-shares` photos and `.orig` blur files (temporary), Contabo snapshots (an extra for risky changes only).
+**Known gaps:** the full dump is only as fresh as the last ingest that loaded something; and the secret **values** exist only in GitHub (write-only) and on the VPS,
+so keep one copy of each (R2 and Cloudflare tokens, `AUTH_SECRET`, `POSTGRES_PASSWORD`, SSH keys, API keys) in a password manager, else Case "Total loss" cannot
+re-create the env files. After each ingest verify `rclone lsf R2:carsua-backups/full` and `…/archive` are non-empty.
 
 ## Load testing
 
