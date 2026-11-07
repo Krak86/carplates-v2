@@ -252,9 +252,7 @@ export default function WikiHeroImage({
                 aria-current={isOriginal === viewOriginal}
                 className={cn(
                   'relative block h-12 w-16 overflow-hidden rounded-md border-2 transition-opacity',
-                  isOriginal === viewOriginal
-                    ? 'border-primary'
-                    : 'border-transparent opacity-70 hover:opacity-100'
+                  isOriginal === viewOriginal ? 'border-primary' : 'border-transparent opacity-70 hover:opacity-100'
                 )}
               >
                 <img
@@ -266,7 +264,7 @@ export default function WikiHeroImage({
                   className="h-full w-full object-cover"
                 />
                 {!isOriginal && recolor.mask && recolor.target && (
-                  <WikiRecolorCanvas mask={recolor.mask} color={recolor.target} />
+                  <WikiRecolorCanvas mask={recolor.mask} color={recolor.target} testId="wiki-recolor-canvas-thumb" />
                 )}
               </button>
             </li>

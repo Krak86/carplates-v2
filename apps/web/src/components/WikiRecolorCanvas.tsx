@@ -6,6 +6,8 @@ import { coverRect, paintLayer } from '@/components/wiki-recolor.helpers'
 type Props = {
   mask: { w: number; h: number; data: Uint8ClampedArray }
   color: VehicleColor
+  /** Tells the hero layer from a thumbnail one in tests. */
+  testId?: string
 }
 
 const MAX_DPR = 2
@@ -32,7 +34,7 @@ function layerCanvas(mask: Props['mask'], color: VehicleColor): HTMLCanvasElemen
  * The colour filter layer: the repainted body (mask alpha) drawn in the same `object-fit: cover` box as the hero `<img>`
  * (the mask is the whole photo at the scan size, so it is cropped exactly like the photo), fading in above the photo.
  */
-export default function WikiRecolorCanvas({ mask, color }: Props): ReactNode {
+export default function WikiRecolorCanvas({ mask, color, testId = 'wiki-recolor-canvas' }: Props): ReactNode {
   const ref = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
@@ -61,7 +63,7 @@ export default function WikiRecolorCanvas({ mask, color }: Props): ReactNode {
     <canvas
       ref={ref}
       aria-hidden
-      data-testid="wiki-recolor-canvas"
+      data-testid={testId}
       className="pointer-events-none absolute inset-0 h-full w-full rounded-lg opacity-0 transition-opacity duration-300 data-[ready=true]:opacity-100"
     />
   )

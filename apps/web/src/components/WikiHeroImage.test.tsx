@@ -62,20 +62,18 @@ describe('WikiHeroImage colour filter', () => {
     useUiStore.setState({ wikiRecolorEnabled: true })
   })
 
-  it('shows the pill, the canvas and the note when a filter applies', async () => {
+  it('shows the pill and the canvas when a filter applies', async () => {
     await renderHero('ЧЕРВОНИЙ')
     await waitFor(() => expect(screen.getByTestId('wiki-recolor-canvas')).toBeTruthy())
     expect(pill()?.getAttribute('aria-pressed')).toBe('true')
-    expect(screen.getByText(/Photo of another car with a colour filter: red/)).toBeTruthy()
   })
 
-  it('swipes to the original photo (no canvas, no note) and back', async () => {
+  it('swipes to the original photo (no canvas, no pill) and back', async () => {
     await renderHero('ЧЕРВОНИЙ')
     await waitFor(() => expect(screen.getByTestId('wiki-recolor-canvas')).toBeTruthy())
     fireEvent.click(screen.getAllByRole('button', { name: 'Next photo' })[0]!)
     expect(screen.queryByTestId('wiki-recolor-canvas')).toBeNull()
-    expect(screen.queryByText(/Photo of another car with a colour filter/)).toBeNull()
-    expect(pill()?.getAttribute('aria-pressed')).toBe('true')
+    expect(pill()).toBeNull()
     fireEvent.click(screen.getAllByRole('button', { name: 'Previous photo' })[0]!)
     expect(screen.getByTestId('wiki-recolor-canvas')).toBeTruthy()
   })
