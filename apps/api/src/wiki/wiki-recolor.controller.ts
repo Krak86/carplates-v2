@@ -1,7 +1,6 @@
 import {
   Controller,
   Get,
-  Header,
   Inject,
   NotFoundException,
   Param,
@@ -44,14 +43,15 @@ export class WikiRecolorController {
     return this.recolor.lookup(query.brand, query.model, query.year ?? null)
   }
 
+  // No `@Header`: a header decorator is also sent with error responses, and Fastify refuses the JSON error body under
+  // `image/webp` (a 500) that the edge would then keep for a year. The interceptor sets cache-control on success only.
   @Get('paint/:file')
-  @Header('Content-Type', 'image/webp')
-  @Header('Cache-Control', MASK_CACHE)
+  @UseInterceptors(lookupCacheInterceptor(MASK_CACHE))
   async mask(
     @Param('file', zodParam(z.string().regex(/^[0-9a-f]{32}.webp$/, 'Bad mask id'))) file: string
   ): Promise<StreamableFile> {
     const mask = await this.recolor.mask(file.slice(0, 32))
     if (!mask) throw new NotFoundException('No mask')
-    return new StreamableFile(mask)
+    return new StreamableFile(mask, { type: 'image/webp' })
   }
 }
