@@ -22,7 +22,7 @@ type Props = {
   /** Same identity `useCarHeroImageActions` keys the ambient background override on — VIN when the
    *  result has one, otherwise the plate. */
   vehicleKey: string | null
-  /** Prozorro.Sale lot photo ids of this very car: when present they lead the hero, the model photo follows as the last slide (the real car beats a stock one). */
+  /** Prozorro.Sale lot photo ids of this very car: when present they lead one carousel, the model photo is its last slide (the real car beats a stock one). */
   lotPhotos?: readonly string[]
   /** Raw registry colour: the colour filter repaints the photo's car to it (no filter without one). */
   color?: string | null
@@ -66,16 +66,23 @@ export default function WikiHeroImage({
   const hasQuery = Boolean(brand || model)
   const isPending = hasQuery && heroImage.isPending
 
-  const lotHero =
-    lotPhotos.length > 0 ? (
-      <UaAuctionHero docIds={lotPhotos} label={[brand, model, year].filter(Boolean).join(' ')} />
-    ) : null
+  // With lot photos one carousel holds everything: the lot photos, then the model photo as its last slide
+  // (a model photo that fails to load drops out of the carousel by itself).
+  if (lotPhotos.length > 0) {
+    return (
+      <UaAuctionHero
+        docIds={lotPhotos}
+        label={[brand, model, year].filter(Boolean).join(' ')}
+        modelPhoto={
+          image && failedUrl !== image.url ? { url: image.url, credit: creditParts.join(', ') || null } : null
+        }
+      />
+    )
+  }
 
   // Settled with no image (or the image failed to load) → a kind placeholder in the same slot,
   // or nothing at all when the registry gave no recognizable kind (e.g. a VIN-only decode).
-  // With lot photos the carousel alone is enough.
   if (!isPending && (!image || failedUrl === image.url)) {
-    if (lotHero) return lotHero
     const kind = resolveVehicleKind(rawKind)
     return kind ? (
       <div className="hero-vt relative -my-3 h-64 w-full max-w-content sm:h-80">
@@ -103,11 +110,10 @@ export default function WikiHeroImage({
 
   return (
     <>
-      {lotHero}
       <div
         onPointerDown={onPointerDown}
         onPointerUp={onPointerUp}
-        className={`relative h-64 w-full max-w-content touch-pan-y sm:h-80 ${lotHero ? '' : 'hero-vt -my-3'}`}
+        className="hero-vt relative -my-3 h-64 w-full max-w-content touch-pan-y sm:h-80"
       >
         {!isLoaded && (
           <div aria-hidden className="absolute inset-0 animate-pulse rounded-lg border border-border bg-surface/70" />
