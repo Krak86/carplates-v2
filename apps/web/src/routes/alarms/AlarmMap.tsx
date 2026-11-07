@@ -15,6 +15,9 @@ import StatsMapSkeleton from '@/routes/stats/StatsMapSkeleton'
 const MAP_WIDTH = 800
 const MAP_HEIGHT = 520
 
+/** Smallest label height on screen (px): a phone shows the 800-unit map at about 0.45 px per unit. */
+const MIN_LABEL_PX = 11
+
 const MAX_ZOOM = 8
 const ZOOM_STEP = 1.6
 
@@ -91,6 +94,8 @@ export default function AlarmMap({
   const frameRef = useRef<HTMLDivElement>(null)
   const svgRef = useRef<SVGSVGElement>(null)
   const zoomRef = useRef(zoom)
+  // Screen pixels per map unit (the svg is scaled to its box); labels never drop under MIN_LABEL_PX.
+  const [pxPerUnit, setPxPerUnit] = useState(1)
 
   useEffect(() => {
     zoomRef.current = zoom
@@ -112,6 +117,18 @@ export default function AlarmMap({
     }
     svg.addEventListener('wheel', onWheel, { passive: false })
     return () => svg.removeEventListener('wheel', onWheel)
+  }, [hasMap])
+  useEffect(() => {
+    const svg = svgRef.current
+    if (!svg) return
+    const observer = new ResizeObserver(() => {
+      const rect = svg.getBoundingClientRect()
+      if (rect.width > 0 && rect.height > 0) {
+        setPxPerUnit(Math.min(rect.width / MAP_WIDTH, rect.height / MAP_HEIGHT))
+      }
+    })
+    observer.observe(svg)
+    return () => observer.disconnect()
   }, [hasMap])
   const dragRef = useRef<{ x: number; y: number; ox: number; oy: number } | null>(null)
   // A drag that ends on a region must not select it.
@@ -301,11 +318,11 @@ export default function AlarmMap({
                     y={point[1]}
                     textAnchor="middle"
                     dominantBaseline="middle"
-                    fontSize={9 / zoom}
+                    fontSize={Math.max(9, MIN_LABEL_PX / pxPerUnit) / zoom}
                     fontWeight={600}
                     fill="var(--color-fg)"
                     stroke="var(--color-bg)"
-                    strokeWidth={2.5 / zoom}
+                    strokeWidth={Math.max(2.5, (MIN_LABEL_PX / pxPerUnit) * 0.28) / zoom}
                     paintOrder="stroke"
                   >
                     {(localizeRegion(name, i18n.language) ?? name).replace(OBLAST_SUFFIX, '')}

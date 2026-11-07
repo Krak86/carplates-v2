@@ -1015,3 +1015,9 @@ body {
     animation: none;
   }
 }
+
+/* Header route progress line: sRGB fallback first, then a wide-gamut gradient where oklch() is supported. */
+.route-progress {
+  background: var(--color-primary);
+  background: linear-gradient(90deg, var(--color-primary), oklch(0.78 0.19 230));
+}

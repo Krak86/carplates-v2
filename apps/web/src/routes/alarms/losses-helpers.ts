@@ -40,3 +40,22 @@ export function totalsPath(points: LossesHistoryResponse['points'], maxPoints = 
 
 /** First day of the full-scale invasion: the infographic counts "from" here, though upstream's first record is 25 Feb. */
 export const WAR_START_DATE = '2022-02-24'
+
+export type WarDuration = { years: number; months: number; days: number }
+
+/** Calendar time from `WAR_START_DATE` to an ISO day (`2026-11-05`): whole years, whole months, leftover days. Null before the start or for a bad date. */
+export function warDuration(isoDay: string): WarDuration | null {
+  const [sy, sm, sd] = WAR_START_DATE.split('-').map(Number) as [number, number, number]
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(isoDay)
+  if (!match) return null
+  const [y, m, d] = [Number(match[1]), Number(match[2]), Number(match[3])]
+  let months = (y - sy) * 12 + (m - sm)
+  let days = d - sd
+  if (days < 0) {
+    months -= 1
+    // Days of the month before the end day's month.
+    days += new Date(Date.UTC(y, m - 1, 0)).getUTCDate()
+  }
+  if (months < 0) return null
+  return { years: Math.floor(months / 12), months: months % 12, days }
+}

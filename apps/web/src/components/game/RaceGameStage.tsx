@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { MouseEvent, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import RaceGameSettings from '@/components/game/RaceGameSettings'
+import RaceFullscreenBar from '@/components/game/RaceFullscreenBar'
 import RaceHornButton from '@/components/game/RaceHornButton'
 import RaceMiniMap from '@/components/game/RaceMiniMap'
 import RaceTouchControls from '@/components/game/RaceTouchControls'
@@ -129,6 +130,13 @@ export default function RaceGameStage({ config, onChange, onPickBody }: Props): 
     else setPseudoFullscreen(true)
   }
 
+  // immersive = full screen + sound + auto drive + tilt steering in one tap; the bar at the top switches each off again
+  const handleImmersive = async (): Promise<void> => {
+    setSound(true)
+    onChange({ auto: true })
+    await handleToggleTilt()
+  }
+
   const handleToggleFullscreen = (e: MouseEvent<HTMLButtonElement>): void => {
     e.currentTarget.blur() // keys must keep steering the car
     toggleFullscreen()
@@ -145,6 +153,15 @@ export default function RaceGameStage({ config, onChange, onPickBody }: Props): 
     window.addEventListener('keydown', handleKey)
     return () => window.removeEventListener('keydown', handleKey)
   })
+
+  // a crash buzzes the phone (Android; iOS has no vibration API): short for a bump, long for the wreck
+  const bumps = hud?.bumps ?? 0
+  const wrecked = !!hud?.wrecked
+  const lastBumps = useRef(0)
+  useEffect(() => {
+    if (bumps > lastBumps.current) navigator.vibrate?.(wrecked ? [150, 70, 400] : 70)
+    lastBumps.current = bumps
+  }, [bumps, wrecked])
 
   // the pointer hides over the game after a moment of stillness and returns on movement
   useEffect(() => {
@@ -206,14 +223,14 @@ export default function RaceGameStage({ config, onChange, onPickBody }: Props): 
           )}
 
           {fullscreen && (isTouch || pseudoFullscreen) && (
-            <button
-              type="button"
-              onClick={toggleFullscreen}
-              aria-label={t('race.touch.exitFullscreen')}
-              className="absolute top-3 left-1/2 size-9 -translate-x-1/2 rounded-full bg-black/50 text-white"
-            >
-              ✕
-            </button>
+            <RaceFullscreenBar
+              sound={{ on: sound, onToggle: () => setSound(on => !on) }}
+              tilt={{ on: tilt, onToggle: () => void handleToggleTilt() }}
+              auto={{ on: config.auto, onToggle: () => onChange({ auto: !config.auto }) }}
+              map={{ on: showMap, onToggle: () => setShowMap(on => !on) }}
+              onRestart={handleRestart}
+              onExit={toggleFullscreen}
+            />
           )}
 
           {isTouch && isPortrait && (
@@ -337,7 +354,7 @@ export default function RaceGameStage({ config, onChange, onPickBody }: Props): 
           >
             {sound ? t('race.soundOn') : t('race.soundOff')}
           </button>
-          {(document.fullscreenEnabled || isTouch) && (
+          {document.fullscreenEnabled && !isTouch && (
             <button
               type="button"
               onClick={handleToggleFullscreen}
@@ -349,11 +366,11 @@ export default function RaceGameStage({ config, onChange, onPickBody }: Props): 
           {isTouch && (
             <button
               type="button"
-              onClick={handleToggleTilt}
-              aria-pressed={tilt}
-              className="shrink-0 cursor-pointer rounded-full border border-[var(--color-border)] px-3 py-0.5 hover:border-[var(--color-primary)]"
+              onClick={() => void handleImmersive()}
+              title={t('race.immersiveHint')}
+              className="shrink-0 cursor-pointer rounded-full bg-[var(--color-primary)] px-3 py-0.5 font-semibold text-white"
             >
-              <span aria-hidden>📱</span> {tilt ? t('race.tilt.on') : t('race.tilt.off')}
+              {t('race.immersive')}
             </button>
           )}
           <button
@@ -372,6 +389,7 @@ export default function RaceGameStage({ config, onChange, onPickBody }: Props): 
             {t('race.restart')}
           </button>
         </div>
+        {isTouch && <p className="mt-1 text-xs text-[var(--color-muted)]">{t('race.immersiveHint')}</p>}
       </div>
 
       {isTouch ? (

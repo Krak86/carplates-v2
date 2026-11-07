@@ -842,3 +842,11 @@ One glyph per destination: `→` a route of this app · `↗` another site (new 
   The old `SizeExternalLink` and the local `ExternalLink` copies are gone. Hand-written `<a target="_blank">` that already carry `↗` (card-style links) were left as is.
 - Modal openers (buttons) end in `⤢`: AUTO.RIA / auction-site rows, MOT car calculator, translate dialog, market "show more", 3D / 360° chips, race chip and banner.
 - Not marked on purpose: footer (`QuickLinks`), header, sidebar, inline list rows, image/photo links, the losses infographic download.
+
+## Alerts / losses link previews, immersive racer, route progress (2026-11-07)
+
+- **`/alarms` previews** (`apps/api/src/spa/alarm-card.ts`, `OgController`): `/og/alarms.png` draws the live oblast map (red whole / yellow level / 55% partial; oblast level only, `ukraine-alarm-oblasts.geojson` projected server-side). **Fail closed:** a stale or failed feed draws the grey map with "no data", never a calm map, and is not cached in memory. `/og/losses.png` = day count with years / months + six headline counters (missing = "-"). Both use `CACHE_LIVE` (5 min). `?section=losses|map` get their own `og:url`, noindex (`SpaController.alarmsSectionMeta`); the plain `/alarms` card is the map. `map` is a `SHARE_SECTIONS` entry with a share button on `AlarmMapCard`.
+- **War duration:** `warDuration` (web `losses-helpers.ts`, api `alarm-card.ts`; same start date 2022-02-24) shown in `LossesSection` as "day N · X years Y months Z days" (`losses.years|months|days` plurals).
+- **Map labels** (`AlarmMap`): at least `MIN_LABEL_PX` (11) on screen, measured by a `ResizeObserver` (a phone shows the 800-unit map at about 0.45 px per unit).
+- **Racer, touch:** one "Immersive mode" button = full screen + sound + auto drive + tilt steering; in full screen `RaceFullscreenBar` (top) switches sound / tilt / auto / map / restart / exit. Desktop keeps the plain full-screen button. A bump vibrates (`navigator.vibrate`, 70 ms; wreck 150-70-400; not on iOS).
+- **Route progress** (`RouteProgress` in the header, `lib/route-pending.ts`, `RouteFallback`): a 2 px line absolutely placed over the header border (no layout shift) from a path change until the route chunk (Suspense fallback) and `useIsFetching` are idle. Not a real percentage (creeps to 90%, then 100%).

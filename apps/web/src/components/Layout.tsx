@@ -15,6 +15,7 @@ import OfflineBanner from '@/components/OfflineBanner'
 import PwaUpdatePrompt from '@/components/PwaUpdatePrompt'
 import QuickLinks from '@/components/QuickLinks'
 import SyncBanner from '@/components/SyncBanner'
+import RouteProgress from '@/components/RouteProgress'
 import { useHeaderVehicleLabel } from '@/components/use-header-vehicle-label'
 import { useUserSettingsActions } from '@/components/use-user-settings-actions'
 import { useBackgroundMode } from '@/hooks/useBackgroundMode'
@@ -140,6 +141,7 @@ export default function Layout({ children }: Props): ReactNode {
         <LayersButton />
         <NewsBell />
         <LoginButton />
+        <RouteProgress />
       </header>
 
       <OfflineBanner />

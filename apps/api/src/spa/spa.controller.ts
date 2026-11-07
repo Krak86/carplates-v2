@@ -28,6 +28,8 @@ import {
   catalogSeoBlock,
   injectRoot
 } from '../catalog/catalog-text.js'
+import { lossesPreviewText } from './alarm-card.js'
+import { LossesService } from '../losses/losses.service.js'
 import { CatalogService } from '../catalog/catalog.service.js'
 import { loadEnv } from '../env.js'
 import { SHARE_PRIVACY_HEADERS } from '../shares/share-http.js'
@@ -51,6 +53,7 @@ import {
   SHARE_EXPIRED_PAGE,
   sharedPhotoText,
   STATIC_PAGES,
+  type PageText,
   resolveLang,
   isShareSection,
   sectionPageText,
@@ -118,7 +121,8 @@ export class SpaController {
     @Inject(PreviewService) private readonly previews: PreviewService,
     @Inject(CatalogService) private readonly catalog: CatalogService,
     @Inject(SharesService) private readonly shares: SharesService,
-    @Inject(ComparePreviewService) private readonly compare: ComparePreviewService
+    @Inject(ComparePreviewService) private readonly compare: ComparePreviewService,
+    @Inject(LossesService) private readonly losses: LossesService
   ) {}
 
   @Get()
@@ -287,6 +291,31 @@ export class SpaController {
   }
 
   /**
+   * `/alarms?section=losses|map` share links: the losses card (day count, headline counters) or the live alert-map card, each with
+   * its own `og:url` so Telegram / Facebook cache them apart from the page itself. Never indexed.
+   */
+  private async alarmsSectionMeta(section: 'losses' | 'map', lang: Lang, langQuery: string): Promise<string> {
+    const siteUrl = this.env.PUBLIC_SITE_URL
+    const base = STATIC_PAGES['/alarms']?.[lang] as PageText
+    let text: PageText = base
+    if (section === 'losses') {
+      const data = await this.losses.latest().catch(() => null)
+      if (data) text = lossesPreviewText(lang, data)
+    }
+    const tail = `?section=${section}${lang === DEFAULT_LANG ? '' : `&lang=${lang}`}`
+    return renderMetaTags({
+      siteUrl,
+      path: '/alarms',
+      ogUrl: `${siteUrl}/alarms${tail}`,
+      lang,
+      title: text.title,
+      description: text.description,
+      image: `${siteUrl}/og/${section === 'losses' ? 'losses' : 'alarms'}.png${langQuery}`,
+      noindex: true
+    })
+  }
+
+  /**
    * Plate/VIN deep links get per-vehicle tags (first load only — in-app navigation never hits the
    * server); every other path gets its static page tags, rendered once per path+language and cached.
    */
@@ -367,6 +396,9 @@ export class SpaController {
     }
 
     const path = `/${segments.join('/')}`
+    if (path === '/alarms' && (section === 'losses' || section === 'map')) {
+      return await this.alarmsSectionMeta(section, lang, langQuery)
+    }
     const known = path in STATIC_PAGES
     const cacheKey = `${known ? path : '*'}:${lang}`
     let block = this.staticMetaCache.get(cacheKey)
@@ -377,7 +409,7 @@ export class SpaController {
         path: known && path !== '/' ? path : '',
         lang,
         ...page,
-        image: `${siteUrl}/og/${known && pageCardSlug(path) ? `page/${pageCardSlug(path)}` : 'default'}.png${langQuery}`,
+        image: `${siteUrl}/og/${path === '/alarms' ? 'alarms' : known && pageCardSlug(path) ? `page/${pageCardSlug(path)}` : 'default'}.png${langQuery}`,
         // Unknown paths (typos, not-found plates) shouldn't be indexed under the home page's tags.
         noindex: !known,
         alternates: known && sitemapPaths().includes(path)
