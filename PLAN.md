@@ -1377,7 +1377,13 @@ Speaker icon beside the brand name on catalog pages; lazy popup with ua / ru / e
 - [x] Step 7 (text slice): `BrandPronounce` speaker button (`components/BrandPronounce.tsx`, lazy body in `components/brand-pronounce/`) on the make page `/cars/:make` when `hasPronunciation`, `brandPronunciationQuery` (offline group `brand-pronunciation`), i18n ua/ru/en, tests. also on the plate / VIN-registry card header (`BrandPronounceChip`, make slug from `pronounce` in `/api/catalog/lookup`). (step c adds `VinResult` and model pages)
 - [x] Step 8: docs (features-reference, plan-done, releases 2026-11-07, About feature + brief)
 - [x] Step c (UI follow-ups, done 2026-11-07; icon look unchanged): speaker button on the decode-only VIN card (`VinResult`) and on model pages (`/cars/:make/:model`); consider a larger or labelled icon
-- [ ] After deploy (owner): apply the migration on the VPS; run the ingest job once; edge cache rule for `/api/brands/*/pronunciation` (docs/checklists.md); load the audio seed (`ingest:brand-pronounce:csv` does both tables) and spot-check that a clip plays under the CSP (`media-src https:`)
+- [ ] After deploy (owner, brand pronunciation; stage -> main PR of 2026-11-07, 5 commits):
+  - [ ] Migration `0103_brand_pronunciation` applied on the VPS (blue/green safe, two new tables); the API `pronunciation` endpoint answers 200 for `/api/brands/skoda/pronunciation` (404 before data is loaded).
+  - [ ] Load the data once, either the live job `bash /opt/carsua/compose/run-ingest.sh brand-pronounce` (about 6 min, fills both tables) or the committed seeds (`ingest:brand-pronounce:csv`, loads `brand-pronunciation.csv.gz` + `brand-pronunciation-audio.csv.gz`); expect 302 text rows and 26 audio rows (`SELECT count(*)` on `registry.brand_pronunciation` and `..._audio`).
+  - [ ] Cloudflare Cache Rule: extend "Cache model lookups" with `or starts_with(http.request.uri.path, "/api/brands/")` (`docs/deploy.md`), verify MISS then HIT; purge the `<host>/api/brands/` prefix after the load.
+  - [ ] `hasPronunciation` shows after the hourly catalog reload: open `/cars/skoda` (speaker button), then a plate card, a VIN-only card (`VinResult`) and a model page `/cars/skoda/octavia`; check ua / ru / en text and phone width, light and dark.
+  - [ ] Play one Commons clip on prod and confirm no CSP `media-src` violation in the console (`media-src https:`); the credit line (author, licence) is visible.
+  - [ ] `/data-status` shows the `brandPronounce` row filled; the monthly cron (`ingest.cron`, 7th 06:30) is installed on the VPS.
 
 ## Later, conditional
 
