@@ -36,7 +36,7 @@ export default function AlarmBackground(): ReactNode {
           width={MAP_WIDTH}
           height={MAP_HEIGHT}
           projection={projection}
-          className="h-auto max-h-full w-full max-w-5xl"
+          className="min-h-0 w-full flex-1"
         >
           <Geographies geography={geography.data}>
             {({ geographies }) =>
