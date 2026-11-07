@@ -1356,10 +1356,11 @@ Plan in 9 steps, [docs/wiki-recolor-plan.md](docs/wiki-recolor-plan.md); prototy
 - [x] Deployed 2026-11-07: migration 0101 applied, Cloudflare Cache Rule edited (live check: `/api/wiki/recolor` MISS then HIT, mask webp MISS then HIT, immutable); first nightly `wiki-paint` run ok (job_runs 00:30, finished 01:02)
 - [x] Fix: `GET /api/wiki/paint/:file` returned a 500 for an unknown id (Fastify refuses the JSON error body under the `@Header('Content-Type', 'image/webp')` decorator) and the `@Header` immutable cache-control rode along, so the edge kept the 500 for a year; now `StreamableFile({ type })` + `lookupCacheInterceptor(MASK_CACHE)` (success only), controller test
 - [x] API fix deployed (9f9dc88, merged via #144); with a cache-busting query the origin answers 400 (`zzz.webp`) and 404 (`000...0.webp`), no immutable header
-- [ ] Purge in Cloudflare (still HIT, Age 768, 500 + immutable on 2026-11-07): `https://carsua.app/api/wiki/paint/zzz.webp` and `https://carsua.app/api/wiki/paint/00000000000000000000000000000000.webp`; then `curl -I` both without a query: expect 400 / 404, no `immutable`
+- [x] Cloudflare purge done (owner, 2026-11-07): `zzz.webp` answers 400, `000...0.webp` 404, BYPASS, no `immutable`
 - [x] `wiki-paint.ts --model X` (repeatable, with `--brand`) to scan one model; helper `wiki-paint-scope.ts` + test
-- [ ] Owner: scan Touareg locally (`pnpm ingest:wiki-paint --brand volkswagen --model touareg --limit 5 --rps 1`, writes the local DB), open ВІ8800СО
-- [ ] Owner decision: full local scan (`pnpm ingest:wiki-paint --limit 1500 --rps 1`, repeat until `p.image_url IS NULL` rows are gone, about 15 runs / 22 300 photos) then `pg_dump --data-only -t registry.wiki_image_paint` restored on the VPS (about 300-350 MB), instead of waiting for the nightly cron
+- [x] Touareg single-model scan skipped by the owner (covered by the full scan)
+- [ ] Full local scan (owner runs it in their own terminal, resumable, Ctrl+C safe): PowerShell: `foreach ($i in 1..16) { pnpm ingest:wiki-paint --limit 1500 --rps 1; if ($LASTEXITCODE -ne 0) { break } }` (about 65 min per batch, 16 batches / about 17 h; stop when a run prints `scanning 0 photo(s)`)
+- [ ] Step C, last, after the full scan: `pg_dump --data-only -t registry.wiki_image_paint` locally (about 300-350 MB) and restore on the VPS (owner; `ON CONFLICT DO NOTHING` into a staging table if the VPS already has nightly rows; never TRUNCATE / `db:seed`; not while the 00:30 cron runs), then check `/data-status` and `SELECT status, count(*)`
 - [ ] Check the wiki-paint row on `/data-status` and the `job_runs` batch size over the next nights (1 500 photos each, about 15 nights)
 
 ## Brand pronunciation (planned 2026-11-06)
