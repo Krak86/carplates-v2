@@ -521,6 +521,8 @@
   "uaAuctions.hero.caption": "Фото лота аукціону {{n}} / {{total}} - авто зараз може виглядати інакше",
   "uaAuctions.hero.modelCaption": "Фото моделі - не саме цей автомобіль",
   "uaAuctions.hero.modelCaptionCredit": "Фото моделі - не саме цей автомобіль. Фото: {{credit}}",
+  "uaAuctions.hero.modelCaptionFilter": "Фото моделі, кольоровий фільтр: {{color}} - не саме це авто",
+  "uaAuctions.hero.modelCaptionFilterCredit": "Фото моделі, кольоровий фільтр: {{color}} - не саме це авто. Фото: {{credit}} (змінено: колір)",
   "uaAuctions.hero.prev": "Попереднє фото",
   "uaAuctions.thumb.preview": "Фото моделі",
   "uaAuctions.hero.next": "Наступне фото",

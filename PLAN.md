@@ -1352,6 +1352,7 @@ Plan in 9 steps, [docs/wiki-recolor-plan.md](docs/wiki-recolor-plan.md); prototy
 - [x] Owner agreed ("continue", 2026-11-07); `PAINT_ALGO` = 2; fresh random 100 dry run (49 ok, 17 two_tone, 14 dark_body) in `scripts/.data/wiki-paint/review-algo2-fresh/`
 - [x] Owner approved the fresh sheets (2026-11-07): gates final at `PAINT_ALGO` = 2, no R2d; mask edge quality is known to be imperfect (accepted)
 - [x] Hero: second slide with the original photo (arrows + swipe) when the colour filter applies (`WikiHeroImage.tsx`, test added); browser check: plates АХ9705КР (red), АІ8956МЕ (green), КА1507МН (blue) = ВАЗ 21213 2003 with a stored mask
+- [x] Lot-photo carousel: model photo slides get the colour filter too (repainted + pill, then original); source order stays attached photo, auction photos, model photo (filter, original), kind placeholder
 
 ## Brand pronunciation (planned 2026-11-06)
 

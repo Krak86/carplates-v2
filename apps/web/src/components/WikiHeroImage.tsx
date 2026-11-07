@@ -74,7 +74,22 @@ export default function WikiHeroImage({
         docIds={lotPhotos}
         label={[brand, model, year].filter(Boolean).join(' ')}
         modelPhoto={
-          image && failedUrl !== image.url ? { url: image.url, credit: creditParts.join(', ') || null } : null
+          image && failedUrl !== image.url
+            ? {
+                url: image.url,
+                credit: creditParts.join(', ') || null,
+                recolor:
+                  recolor.target && colorName
+                    ? {
+                        mask: recolor.mask,
+                        color: recolor.target,
+                        colorName,
+                        enabled: recolor.enabled,
+                        onToggle: () => setRecolorEnabled(!recolor.enabled)
+                      }
+                    : null
+              }
+            : null
         }
       />
     )

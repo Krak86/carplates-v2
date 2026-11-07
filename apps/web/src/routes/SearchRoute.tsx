@@ -451,7 +451,7 @@ export default function SearchRoute(): ReactNode {
 
         <Presence show={showNotFound}>
           {notFound && kind === 'plate' ? (
-            <NotFoundInfo value={raw} />
+            <NotFoundInfo value={raw} hasAttachedPhoto={!!photo} />
           ) : (
             <div className="flex flex-col items-center">
               <div className="flex items-center gap-2">
