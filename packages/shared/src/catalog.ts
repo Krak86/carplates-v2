@@ -124,7 +124,9 @@ export const catalogMakeSummarySchema = z.object({
   /** The most common raw registry spelling of the make's biggest model: the input of `BrandLogo`. */
   topBrand: z.string(),
   /** At least one model page of the make is indexable, so the make page is too (else `noindex`). */
-  indexable: z.boolean()
+  indexable: z.boolean(),
+  /** The make has pronunciation rows (the speaker button shows). Optional: offline data saved before the field existed. */
+  hasPronunciation: z.boolean().nullable().optional()
 })
 export type CatalogMakeSummary = z.infer<typeof catalogMakeSummarySchema>
 

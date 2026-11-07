@@ -1373,7 +1373,7 @@ Speaker icon beside the brand name on catalog pages; lazy popup with ua / ru / e
 - [x] Step 3b: overrides CSV drafted (ua + ru respelling for all 109 makes, en IPA/respelling for the ones Wikipedia lacks or got wrong); ingest + seed re-run: 302 rows, 109 of 109 makes. **Owner review of the respellings pending** (`scripts/src/brand-pronounce-overrides.csv`)
 - [ ] Step 4: Commons audio finder (author + licence stored)
 - [ ] Step 5: Piper TTS for brands without audio (decide after the probe; skippable)
-- [ ] Step 6: `GET /api/brands/:slug/pronunciation` + `hasPronunciation` on the catalog payload
+- [x] Step 6: `GET /api/brands/:slug/pronunciation` (`apps/api/src/brands/`, contract `packages/shared/src/brandPronunciation.ts`, `LOOKUP_CACHE`, `CATALOG_THROTTLE`, 404 for a make with no rows, `audio` null until step 4) + `hasPronunciation` (`.nullable().optional()`) on the catalog make summary/detail
 - [ ] Step 7: `BrandPronounce` button + lazy `InfoPopover` + audio hook + i18n + tests
 - [ ] Step 8: docs (features-reference, plan-done, releases, About credits)
 - [ ] After deploy (owner): apply the migration on the VPS; run the ingest job once; edge cache rule for `/api/brands/*/pronunciation` (docs/checklists.md); check audio credits on About

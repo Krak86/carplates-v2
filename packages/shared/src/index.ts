@@ -105,6 +105,19 @@ export {
   type OriginResponse,
   type VinRegion
 } from './origin.js'
+export {
+  BRAND_PRONUNCIATION_LANGS,
+  brandPronunciationAudioSchema,
+  brandPronunciationItemSchema,
+  brandPronunciationParamsSchema,
+  brandPronunciationPath,
+  brandPronunciationSchema,
+  type BrandPronunciation,
+  type BrandPronunciationAudio,
+  type BrandPronunciationItem,
+  type BrandPronunciationLang,
+  type BrandPronunciationParams
+} from './brandPronunciation.js'
 export { extractVins, vinCheckDigitOk, type OcrLine, type VinRead } from './vin-read.js'
 export {
   LEGACY_REGIONS,

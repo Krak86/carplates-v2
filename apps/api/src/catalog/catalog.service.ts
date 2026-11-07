@@ -1,5 +1,5 @@
 import { Inject, Injectable, Logger } from '@nestjs/common'
-import { catalogAlias, catalogMake, catalogModel, catalogYearStats } from '@carplates/db'
+import { brandPronunciation, catalogAlias, catalogMake, catalogModel, catalogYearStats } from '@carplates/db'
 import { CATALOG_TOP_MODELS, brandSlug, catalogStatsSchema, catalogYearStatsSchema, modelKey } from '@carplates/shared'
 import type {
   CatalogLookup,
@@ -157,9 +157,15 @@ export class CatalogService {
     for (const a of await this.dbService.db.select().from(catalogAlias)) {
       if (models.has(`${a.makeSlug}/${a.modelSlug}`)) aliases.set(aliasKey(a.brand, a.model), [a.makeSlug, a.modelSlug])
     }
+    const pronounced = new Set(
+      (await this.dbService.db.selectDistinct({ slug: brandPronunciation.brandSlug }).from(brandPronunciation)).map(
+        r => r.slug
+      )
+    )
     const { makes, makeDetails } = this.buildMakes(
       await this.dbService.db.select().from(catalogMake),
-      rows.filter(r => models.has(`${r.makeSlug}/${r.modelSlug}`))
+      rows.filter(r => models.has(`${r.makeSlug}/${r.modelSlug}`)),
+      pronounced
     )
     return { at: Date.now(), models, indexable, aliases, makes, makeDetails }
   }
@@ -167,7 +173,8 @@ export class CatalogService {
   /** The make rollups (`catalog_make`) joined with their model rows, both biggest first. */
   private buildMakes(
     makeRows: (typeof catalogMake.$inferSelect)[],
-    modelRows: (typeof catalogModel.$inferSelect)[]
+    modelRows: (typeof catalogModel.$inferSelect)[],
+    pronounced: ReadonlySet<string>
   ): Pick<Snapshot, 'makes' | 'makeDetails'> {
     const byMake = new Map<string, (typeof catalogModel.$inferSelect)[]>()
     for (const r of modelRows) byMake.set(r.makeSlug, [...(byMake.get(r.makeSlug) ?? []), r])
@@ -182,6 +189,7 @@ export class CatalogService {
         modelCount: m.models,
         topBrand: list[0].topRawBrand,
         indexable: list.some(r => r.indexable),
+        hasPronunciation: pronounced.has(m.makeSlug),
         models: list.map(r => ({
           model: r.modelSlug,
           modelName: r.modelName,
