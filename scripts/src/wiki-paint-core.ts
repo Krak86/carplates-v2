@@ -21,7 +21,7 @@ import {
 /** Working width of a scan and of the stored mask. */
 export const PAINT_SCAN_WIDTH = 640
 /** Bump to make the scan job redo rows made by an older algorithm. */
-export const PAINT_ALGO = 1
+export const PAINT_ALGO = 2
 
 export const PAINT_SKIP_REASONS = [
   'no_car',

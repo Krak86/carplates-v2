@@ -10,10 +10,12 @@ import { PLATES_PATH } from '@/routes/read/links'
 
 type Props = {
   value: string
+  /** An attached photo already fills the hero slot. */
+  hasAttachedPhoto?: boolean
 }
 
 /** What we can still say about a plate with no registry match: its normalized form, region, and why it may be missing. */
-export default function NotFoundInfo({ value }: Props): ReactNode {
+export default function NotFoundInfo({ value, hasAttachedPhoto = false }: Props): ReactNode {
   const { t } = useTranslation()
   const plate = normalizePlate(value)
   const isPlate = isUaPlate(value)
@@ -30,7 +32,9 @@ export default function NotFoundInfo({ value }: Props): ReactNode {
 
       {/* Old-format plates are the likeliest to be in the wanted lists only, so Soviet shapes are looked up too.
           Its plate line and data list are drawn like the registry card. */}
-      {(isPlate || isSoviet || isShortSeriesPlate(value)) && <OtherSourcesFound plate={plate} showPlate={isPlate} />}
+      {(isPlate || isSoviet || isShortSeriesPlate(value)) && (
+        <OtherSourcesFound plate={plate} showPlate={isPlate} hasAttachedPhoto={hasAttachedPhoto} />
+      )}
 
       <p className="mt-2 text-sm text-[var(--color-muted)]">
         {isPlate ? t('result.notFound.hintPlate') : t('result.notFound.hintFormat')}

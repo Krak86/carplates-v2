@@ -222,15 +222,15 @@ export default function SearchRoute(): ReactNode {
     selectCandidate
   } = usePlateRecognition({ currentValue: raw || null, linkedValue })
 
-  // Under an attached photo: the photo first, then the car's other images (model photo, lot photos); a click swaps one into the hero.
+  // Under an attached photo: the photo first, then the car's other images (lot photos, then the model photo); a click swaps one into the hero.
   const wikiPhotoUrl =
     useQuery({
       ...wikiImageQuery(wikiHeroVehicle?.brand ?? '', wikiHeroVehicle?.model ?? '', wikiHeroVehicle?.year ?? null),
       enabled: !!photo && !!(wikiHeroVehicle?.brand || wikiHeroVehicle?.model)
     }).data?.image?.url ?? null
   const photoOthers: StripImage[] = [
-    ...(wikiPhotoUrl ? [{ key: 'wiki', src: wikiPhotoUrl }] : []),
-    ...lotPhotos.map(id => ({ key: id, src: prozorroDocumentUrl(id) }))
+    ...lotPhotos.map(id => ({ key: id, src: prozorroDocumentUrl(id) })),
+    ...(wikiPhotoUrl ? [{ key: 'wiki', src: wikiPhotoUrl }] : [])
   ]
   // The pick is scoped to the photo it was made on, so a new photo starts on itself.
   const [pick, setPick] = useState<{ photoUrl: string; key: string | null }>({ photoUrl: '', key: null })
@@ -451,7 +451,7 @@ export default function SearchRoute(): ReactNode {
 
         <Presence show={showNotFound}>
           {notFound && kind === 'plate' ? (
-            <NotFoundInfo value={raw} />
+            <NotFoundInfo value={raw} hasAttachedPhoto={!!photo} />
           ) : (
             <div className="flex flex-col items-center">
               <div className="flex items-center gap-2">

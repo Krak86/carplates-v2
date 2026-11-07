@@ -251,6 +251,7 @@ export default function AlarmMap({
                 fill={paint ? levelFill(paint.level, paint.kind === 'fallback') : ALARM_FILL.none}
                 stroke={selectedRegion === region ? 'var(--color-primary)' : 'var(--color-bg)'}
                 strokeWidth={(selectedRegion === region ? 2 : 0.5) / zoom}
+                className={status === 'none' ? undefined : 'alarm-pulse'}
                 aria-label={`${localizeRegion(region, i18n.language) ?? o}: ${t(`alarms.status.${status}`)}`}
                 {...(onSelectRegion
                   ? {
@@ -281,6 +282,7 @@ export default function AlarmMap({
                 fill={levelFill(shape.level, false)}
                 stroke="var(--color-bg)"
                 strokeWidth={0.4 / zoom}
+                className="alarm-pulse"
                 aria-label={`${(feature.properties as unknown as AlarmGeoProperties).n ?? ''}: ${t('alarms.status.partial')}`}
               />
             )

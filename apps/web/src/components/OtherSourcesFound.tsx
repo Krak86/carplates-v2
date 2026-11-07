@@ -48,6 +48,8 @@ type Props = {
   plate: string
   /** A standard-format plate: its badge and region are drawn (a Soviet-shaped one has neither). */
   showPlate: boolean
+  /** A photo is attached: its hero (with the car's other photos in the strip below it) already fills the slot, so no second hero. */
+  hasAttachedPhoto?: boolean
 }
 
 /** The registry card's pointer-tracked glow + tilt shell (its watermark logo and glow are children of the card). */
@@ -125,7 +127,7 @@ function CardHeader({
  * sections keyed on plate AND VIN); without one the sections open by themselves so the page starts with the data visible.
  * Without a hit only the plate line is drawn. Shares its queries with the sections.
  */
-export default function OtherSourcesFound({ plate, showPlate }: Props): ReactNode {
+export default function OtherSourcesFound({ plate, showPlate, hasAttachedPhoto = false }: Props): ReactNode {
   const { t } = useTranslation()
   const [showBasic, setShowBasic] = useState(true)
   const tiltEnabled = useUiStore(s => s.cardTiltEnabled)
@@ -230,15 +232,17 @@ export default function OtherSourcesFound({ plate, showPlate }: Props): ReactNod
       </p>
 
       {/* Same hero slot as a registry hit: the lots' own photos, then the model photo (nothing when neither exists). */}
-      <WikiHeroImage
-        brand={brand}
-        model={model}
-        year={year}
-        rawKind={vehicleType}
-        vehicleKey={usableVin ?? plate}
-        color={color}
-        lotPhotos={lotPhotos}
-      />
+      {!hasAttachedPhoto && (
+        <WikiHeroImage
+          brand={brand}
+          model={model}
+          year={year}
+          rawKind={vehicleType}
+          vehicleKey={usableVin ?? plate}
+          color={color}
+          lotPhotos={lotPhotos}
+        />
+      )}
 
       <Card ref={brand ? glowRef : undefined} className={cn(brand && cardMotionClass)}>
         {brand && (

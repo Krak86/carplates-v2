@@ -1,19 +1,34 @@
 import { useRef, useState } from 'react'
 import type { PointerEvent, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { prozorroDocumentUrl } from '@carplates/shared'
+import { PAINT_HEX, prozorroDocumentUrl } from '@carplates/shared'
+import type { VehicleColor } from '@carplates/shared'
 
 import PhotoZoomDialog from '@/components/PhotoZoomDialog'
+import WikiRecolorCanvas from '@/components/WikiRecolorCanvas'
 import { cn } from '@/lib/cn'
 
 const SWIPE_MIN_PX = 40
 
 /** Stock photo of the car's make/model, shown as the last slide after the lot photos. */
-type ModelPhoto = { url: string; credit: string | null }
+type ModelPhoto = {
+  url: string
+  credit: string | null
+  /** Colour filter of the model photo (docs/wiki-recolor-plan.md): when set the photo gets two slides, repainted then original. */
+  recolor?: {
+    /** Decoded mask, null while the filter is off or the mask is loading. */
+    mask: { w: number; h: number; data: Uint8ClampedArray } | null
+    color: VehicleColor
+    colorName: string
+    enabled: boolean
+    onToggle: () => void
+  } | null
+}
 
 type Slide = { key: string; src: string; isModel: boolean }
 
 const MODEL_KEY = 'model'
+const MODEL_ORIGINAL_KEY = 'model-original'
 
 type Props = {
   /** Prozorro document ids (32 hex), one per photo file. */
@@ -38,19 +53,32 @@ export default function UaAuctionHero({ docIds, label, modelPhoto = null }: Prop
 
   const slides: Slide[] = [
     ...docIds.map(id => ({ key: id, src: prozorroDocumentUrl(id), isModel: false })),
-    ...(modelPhoto ? [{ key: MODEL_KEY, src: modelPhoto.url, isModel: true }] : [])
+    ...(modelPhoto ? [{ key: MODEL_KEY, src: modelPhoto.url, isModel: true }] : []),
+    ...(modelPhoto?.recolor ? [{ key: MODEL_ORIGINAL_KEY, src: modelPhoto.url, isModel: true }] : [])
   ].filter(slide => !failed.has(slide.key))
   if (slides.length === 0) return null
   const current = Math.min(index, slides.length - 1)
   const slide = slides[current] as Slide
   const lotCount = slides.filter(s => !s.isModel).length
+  const recolor = slide.key === MODEL_KEY ? (modelPhoto?.recolor ?? null) : null
   const go = (step: number): void => setIndex((current + step + slides.length) % slides.length)
-  const fail = (key: string): void => setFailed(prev => new Set(prev).add(key))
-  const caption = slide.isModel
+  // Both model slides share one file: it drops out of the carousel as a whole.
+  const fail = (key: string): void =>
+    setFailed(prev =>
+      new Set(prev).add(key).add(key === MODEL_KEY ? MODEL_ORIGINAL_KEY : key === MODEL_ORIGINAL_KEY ? MODEL_KEY : key)
+    )
+  const caption = recolor
     ? modelPhoto?.credit
-      ? t('uaAuctions.hero.modelCaptionCredit', { credit: modelPhoto.credit })
-      : t('uaAuctions.hero.modelCaption')
-    : t('uaAuctions.hero.caption', { n: current + 1, total: lotCount })
+      ? t('uaAuctions.hero.modelCaptionFilterCredit', {
+          color: recolor.colorName.toLowerCase(),
+          credit: modelPhoto.credit
+        })
+      : t('uaAuctions.hero.modelCaptionFilter', { color: recolor.colorName.toLowerCase() })
+    : slide.isModel
+      ? modelPhoto?.credit
+        ? t('uaAuctions.hero.modelCaptionCredit', { credit: modelPhoto.credit })
+        : t('uaAuctions.hero.modelCaption')
+      : t('uaAuctions.hero.caption', { n: current + 1, total: lotCount })
   // Horizontal swipe on touch: `touch-pan-y` leaves vertical page scroll alone; a swipe must not also open the zoom.
   const onPointerDown = (e: PointerEvent<HTMLDivElement>): void => {
     swipe.current = { x: e.clientX, y: e.clientY, moved: false }
@@ -91,6 +119,24 @@ export default function UaAuctionHero({ docIds, label, modelPhoto = null }: Prop
             className="h-full w-full object-cover"
           />
         </button>
+
+        {recolor?.mask && <WikiRecolorCanvas mask={recolor.mask} color={recolor.color} />}
+
+        {recolor && (
+          <button
+            type="button"
+            aria-pressed={recolor.enabled}
+            onClick={recolor.onToggle}
+            className="absolute top-2 right-2 flex items-center gap-1.5 rounded bg-black/60 px-1.5 py-0.5 text-[10px] text-white/80 hover:text-white"
+          >
+            <span
+              aria-hidden
+              className="size-2.5 rounded-full border border-white/60"
+              style={{ backgroundColor: PAINT_HEX[recolor.color] }}
+            />
+            {t(recolor.enabled ? 'wiki.recolorOn' : 'wiki.recolorOff')}
+          </button>
+        )}
 
         {slides.length > 1 &&
           ([-1, 1] as const).map(step => (

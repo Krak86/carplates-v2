@@ -69,6 +69,41 @@ describe('WikiHeroImage colour filter', () => {
     expect(screen.getByText(/Photo of another car with a colour filter: red/)).toBeTruthy()
   })
 
+  it('swipes to the original photo (no canvas, no note) and back', async () => {
+    await renderHero('ЧЕРВОНИЙ')
+    await waitFor(() => expect(screen.getByTestId('wiki-recolor-canvas')).toBeTruthy())
+    fireEvent.click(screen.getAllByRole('button', { name: 'Next photo' })[0]!)
+    expect(screen.queryByTestId('wiki-recolor-canvas')).toBeNull()
+    expect(screen.queryByText(/Photo of another car with a colour filter/)).toBeNull()
+    expect(pill()?.getAttribute('aria-pressed')).toBe('true')
+    fireEvent.click(screen.getAllByRole('button', { name: 'Previous photo' })[0]!)
+    expect(screen.getByTestId('wiki-recolor-canvas')).toBeTruthy()
+  })
+
+  it('with lot photos: model photo slide with the filter, then the original slide', async () => {
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    render(
+      <QueryClientProvider client={client}>
+        <WikiHeroImage
+          brand="KIA"
+          model="CEED"
+          year={2012}
+          rawKind="LIGHT"
+          vehicleKey="K1"
+          color="ЧЕРВОНИЙ"
+          lotPhotos={['a'.repeat(32)]}
+        />
+      </QueryClientProvider>
+    )
+    const next = await screen.findAllByRole('button', { name: 'Next photo' }).then(b => b[0]!)
+    fireEvent.click(next)
+    await waitFor(() => expect(screen.getByTestId('wiki-recolor-canvas')).toBeTruthy())
+    expect(pill()?.getAttribute('aria-pressed')).toBe('true')
+    fireEvent.click(next)
+    expect(screen.queryByTestId('wiki-recolor-canvas')).toBeNull()
+    expect(pill()).toBeNull()
+  })
+
   it('has no pill without a registry colour', async () => {
     await renderHero(null)
     expect(pill()).toBeNull()
