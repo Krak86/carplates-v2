@@ -109,7 +109,7 @@ Phase A (steps 1-6) is the recolour on the existing hero photo. Phase B (7-8) ad
 
 ## Handoff
 
-**Done (steps 1-2).** `packages/shared/src/paintColor.ts` (+ test, exported, shared rebuilt). `scripts/src/wiki-paint-core.ts` (pure `scanPaint`, `applyPaint`, `carComponents`, `gaussianBlur`; constants `PAINT_ALGO` = 1, `PAINT_SCAN_WIDTH` = 640, `SHADE_SCALE`) and `scripts/src/wiki-paint.ts`
+**Done (steps 1-2).** `packages/shared/src/paintColor.ts` (+ test, exported, shared rebuilt). `scripts/src/wiki-paint-core.ts` (pure `scanPaint`, `applyPaint`, `carComponents`, `gaussianBlur`; constants `PAINT_ALGO` = 2 (bumped 2026-11-07), `PAINT_SCAN_WIDTH` = 640, `SHADE_SCALE`) and `scripts/src/wiki-paint.ts`
 (`pnpm ingest:wiki-paint --limit N --brand X --random --rps 1 --out DIR`: read-only on the DB, writes results.json + mask webp + recolour preview to `scripts/<DIR>`). Tests use synthetic fixtures built in code.
 
 **Mask contract (steps 3-5 must honour it).** RGBA at the scan size: RGB = shading `min(g, 3) * 255 / 3` (decode `g = byte / SHADE_SCALE`), A = paint weight. Client maths = `paintTone` / `applyPaint` in `packages/shared/src/paintApply.ts` (moved out of `scripts/` in step 4a; `wiki-paint-core.ts` re-exports them): `out = target * g^0.9`, highlights above g 1.6 blend to white, composited by alpha.
@@ -159,3 +159,5 @@ API: `packages/shared/src/wikiRecolor.ts`, `apps/api/src/wiki/wiki-recolor.{serv
 - **R6. Phase B (only when the owner asks).** Steps 7-8: candidate photos, then the strip.
 
 Do not commit unless asked.
+
+**R2c (2026-11-07, `PAINT_ALGO` = 2).** Fresh random 100 dry run, `--order random --rps 1`, 3.9 min: 49 ok, 51 skip (two_tone 17, dark_body 14, no_car 7, dark_neutral 7, dark_paint 3, low_coverage 2, car_too_small 1). Sheets: `scripts/.data/wiki-paint/review-algo2-fresh/sheet-1..6.jpg`. Bad-tint review of the fresh sample is the owner's (PLAN.md box); two_tone share (17 %) is higher than on the tuning sample, check for wrong skips.
