@@ -17,6 +17,17 @@ const item = (group: ReleaseGroup, ua: string, ru: string, en: string): ReleaseI
  */
 export const RELEASES: readonly ReleaseDay[] = [
   {
+    date: '2026-11-07',
+    items: [
+      item(
+        'new',
+        'Кнопка з динаміком біля назви марки (сторінка марки, картка номера й VIN): як вимовляти марку українською, російською й англійською (з наголосом), а для частини марок ще й запис вимови від носія з Wikimedia Commons.',
+        'Кнопка с динамиком рядом с названием марки (страница марки, карточка номера и VIN): как произносить марку по-украински, по-русски и по-английски (с ударением), а для части марок ещё и запись произношения носителя с Wikimedia Commons.',
+        'A speaker button beside the make name (make page, plate and VIN card): how to say the brand in Ukrainian, Russian and English (with stress), and for some makes a native-speaker recording from Wikimedia Commons.'
+      )
+    ]
+  },
+  {
     date: '2026-11-06',
     version: 'v2.1097',
     items: [

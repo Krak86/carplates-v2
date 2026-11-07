@@ -335,6 +335,7 @@ const FEATURES = [
   'otherSources',
   'vin',
   'origin',
+  'pronounce',
   'recognition',
   'photoShare',
   'share',

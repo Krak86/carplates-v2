@@ -4744,3 +4744,12 @@ Plan: `docs/wiki-recolor-plan.md`. The scan runs as a scheduled job; the owner r
 - **CLI:** `--order popular|url|random` (default `popular`: photos of the models with the most `stats_by_model.total_rows` first, unmatched keys last; replaces `--random`), orphan cleanup after every non-dry run (`wiki_image_paint` rows no `ok` `wiki_image` row uses; skipped when there are no `ok` photos at all; `--keep-orphans` opts out), `--out DIR` also writes contact sheets `sheet-N.jpg` (`wiki-paint-sheet.ts`, original beside the red preview, 18 photos per page), run time logged.
 - **Model:** SegFormer q8 (~15 MB) downloads on the first run into `scripts/.data/wiki-paint/hf-cache`, which is the `ingest-data` mount on the VPS (persists between runs; ingest container limit 2 GB).
 - **Owner only:** apply migration 0101 on the VPS, the Cloudflare Cache Rule, schedule the job, gallery review of the sample, commit.
+
+## Brand pronunciation (2026-11-07) ✅
+
+Speaker button beside the make name: popover with the respelling / IPA in the UI language and, where Commons has one, the origin-language clip with its credit. Conventions are in `features-reference.md` "Brand pronunciation"; plan, probe and step notes in `docs/brand-pronounce-plan.md`.
+
+- **Steps done:** probe (46% of makes had a form on Wikipedia, so the overrides CSV became the main source), parser + tests, migration 0103 + ingest + job + seeds, overrides CSV (302 rows, 109 of 109 makes, owner read it), API + `hasPronunciation`, web popover, Commons audio (26 of 109 makes). Step 5 (Piper TTS) skipped on purpose: weak ja/ko/zh voices and about 100 clips to review by ear.
+- **Tests:** parser / rows / audio helper tests in `scripts`, `brands.service.test.ts`, `BrandPronounce.test.tsx` (lazy fetch, error line, credit, no button without audio).
+- **Not browser-checked:** audio playback under the production CSP, popover layout on a phone.
+- **Left:** button on the decode-only VIN card and model pages; owner steps under PLAN.md "After deploy".
