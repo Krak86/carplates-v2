@@ -83,6 +83,14 @@ export const DATASETS: readonly Dataset[] = [
     job: 'dream',
     refreshedOn: '2026-11-06'
   },
+  {
+    id: 'brandPronounce',
+    name: 'Brand pronunciation (Wikipedia, Wikimedia Commons)',
+    to: '/cars',
+    cadence: 'monthly',
+    job: 'brand-pronounce',
+    refreshedOn: '2026-11-07'
+  },
   { id: 'news', name: 'News (RSS)', to: '/news', cadence: 'daily', job: 'news', refreshedOn: '2026-10-28' },
   {
     id: 'social',

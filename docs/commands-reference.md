@@ -140,6 +140,9 @@ pnpm ingest:generations   # car generations (Wikidata + Wikipedia) for the top 3
 pnpm ingest:generations:csv   # load the committed seed (seed-data/model-generations.csv.gz) — part of ingest:ratings:csv
 pnpm export:generations:csv   # re-dump the table to that CSV — run after every real re-ingest
 pnpm ingest:brand-origin   # vehicle origin (ORIGIN_PLAN.md): Wikidata (CC0) brand country / founded / HQ / ownership -> registry.brand_origin_period + brand_ownership, keyed on brandSlug(); cached in scripts/.data/brand-origin/. --report (no write), --dry-run, --refresh, --top N, --show skoda,volvo. Overrides: scripts/src/brand-origin-overrides.ts
+pnpm ingest:brand-pronounce   # brand pronunciation (docs/brand-pronounce-plan.md): Wikipedia en/uk/ru lead wikitext + scripts/src/brand-pronounce-overrides.csv -> registry.brand_pronunciation for every catalog make; cached in scripts/.data/brand-pronounce/; --dry-run / --refresh. Probe: pnpm --filter @carplates/scripts brand-pronounce:probe [--list].
+pnpm ingest:brand-pronounce:csv   # load the committed seed (seed-data/brand-pronunciation.csv.gz; replaces the table) — part of ingest:ratings:csv
+pnpm export:brand-pronounce:csv   # re-dump the table to that CSV — run after every real re-ingest or overrides edit
 pnpm ingest:brand-origin:csv   # load the committed seed (seed-data/brand-origin.csv.gz + brand-ownership.csv.gz; replaces both tables) — part of ingest:ratings:csv
 pnpm export:brand-origin:csv   # re-dump both tables to those CSVs — run after every real re-ingest
 pnpm ingest:wmi   # VIN world-manufacturer identifiers (NHTSA vPIC) -> registry.wmi_prefix; ~2.7k calls cached in scripts/.data/wmi/ (resumable; NHTSA 403s a throttled IP after a few hundred calls, use a VPN or wait). --dry-run, --refresh. vPIC lacks many non-US WMIs (TMB, JTD, XTA): the API falls back to packages/shared/src/wmi.ts

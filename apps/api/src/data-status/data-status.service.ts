@@ -26,6 +26,7 @@ const COUNT_TABLES: Readonly<Record<string, readonly string[]>> = {
   auctionProceedings: ['auction_proceedings'],
   losses: ['war_losses_daily'],
   dream: ['dream_projects'],
+  brandPronounce: ['brand_pronunciation'],
   news: ['news_items'],
   social: ['social_posts'],
   dtpPatrol: ['dtp_region_year'],

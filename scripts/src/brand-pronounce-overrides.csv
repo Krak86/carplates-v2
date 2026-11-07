@@ -1,0 +1,7 @@
+# Hand-written pronunciation cells for scripts/src/ingest-brand-pronounce.ts (override Wikipedia per cell). `#` lines and blanks are skipped.
+# Columns: brand_slug,lang,ipa,ipa_lang,respell     lang = ua | ru | en (the site language of the row)
+#   ipa       IPA without brackets/slashes (quote the field if it contains a comma); empty = keep Wikipedia's
+#   ipa_lang  language the IPA is for: en = English reading, or the native one (de, fr, it, ja, ko, zh, sv, cs ...)
+#   respell   how to write it in that language's script (Cyrillic for ua / ru, Latin letters for en); empty = keep Wikipedia's
+# Quality rule: only what a native reading supports; respellings are editorial, so keep them short and unmarked by stress unless it matters.
+brand_slug,lang,ipa,ipa_lang,respell

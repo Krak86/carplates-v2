@@ -252,6 +252,7 @@ export { SHADE_MAX, SHADE_SCALE, applyPaint, paintTargetLinear, paintTone, type 
 export { VEHICLE_FUELS, resolveFuelCategories, fuelKeyword, type VehicleFuel } from './vehicleFuel.js'
 export { brandLogoUrl, brandSlug } from './brandLogo.js'
 export { dealerUrl, newCarsUrl, usedCarsUrl } from './dealerUrl.js'
+export { bmwSerial, realoemUrl } from './partsCatalog.js'
 export { showcaseModels } from './newCarShowcase.js'
 export { wikiUrl, wikiDomain, wikiDomainChain } from './wikiUrl.js'
 export {

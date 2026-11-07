@@ -72,6 +72,7 @@ import { useChipsPending } from '@/components/use-chips-pending'
 import { useCopyFeedback } from '@/components/use-copy-feedback'
 import Card from '@/components/ui/Card'
 import Model3dButton from '@/components/Model3dButton'
+import PartsCatalogChip from '@/components/PartsCatalogChip'
 import TuningChip from '@/components/TuningChip'
 import Model360Button from '@/components/Model360Button'
 import VerificationLinks from '@/components/VerificationLinks'
@@ -429,6 +430,7 @@ export default function ResultCard({ data }: Props): ReactNode {
                 <Model3dButton brand={c.brand} model={c.model} />
                 <Model360Button brand={c.brand} model={c.model} />
                 <TuningChip brand={c.brand} model={c.model} year={c.makeYear} body={c.body} />
+                {hasVin && <PartsCatalogChip vin={c.vin} />}
                 <RaceTestDriveChip onOpen={() => setRaceOpenSignal(n => n + 1)} />
               </CollapsibleChips>
               <div className="mt-2 flex flex-wrap items-center gap-2 empty:hidden">

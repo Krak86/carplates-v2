@@ -1367,9 +1367,10 @@ Plan in 9 steps, [docs/wiki-recolor-plan.md](docs/wiki-recolor-plan.md); prototy
 
 Speaker icon beside the brand name on catalog pages; lazy popup with ua / ru / en transcription (parsed from Wikipedia lead wikitext; Wikidata has none) and an on-demand play button for origin-language audio (Commons `.ogg`, then Piper TTS). Plan and research: [docs/brand-pronounce-plan.md](docs/brand-pronounce-plan.md). About 8.5 working days; text-only slice about 4.5.
 
-- [ ] Step 1: coverage probe `brand-pronounce-probe.ts` (en/uk/ru leads of the ~110 catalog makes, no DB writes)
-- [ ] Step 2: parser + tests (`{{IPA}}`, `{{IPAc-en}}`, `{{lang-uk}}`, `МФА:`)
-- [ ] Step 3: migration + schema + ingest CLI/job + seed CSV + `/data-status` + overrides CSV
+- [x] Step 1: coverage probe `brand-pronounce-probe.ts` (en/uk/ru leads of the ~110 catalog makes, no DB writes): 46% of makes have a form in any language (en 35%, uk 17%, ru 14%), audio file named for 13%; skip Piper at first, overrides CSV of ~110 rows is the main source (see docs/brand-pronounce-plan.md "Probe results")
+- [x] Step 2: parser + tests (`{{IPA}}`, `{{IPAc-en}}`, `{{lang-uk}}`, `МФА:`): `scripts/src/brand-pronounce-parse.ts`; on the 104/87/89 cached en/uk/ru leads it yields IPA for 28/4/14, respelling for 0/11/2, audio for 14/1/0
+- [x] Step 3: migration 0103 (`brand_pronunciation`, `brand_pronunciation_audio`) + schema + `ingest:brand-pronounce` (job `brand-pronounce`, monthly cron) + seed CSV (105 rows, 46 of 109 makes) + `/data-status` row; overrides CSV file exists (`scripts/src/brand-pronounce-overrides.csv`) but is header-only
+- [ ] Step 3b: fill the overrides CSV (~250 cells: ua + ru respelling, IPA for the makes with none), re-run `pnpm ingest:brand-pronounce` and `export:brand-pronounce:csv`; owner reviews the respellings
 - [ ] Step 4: Commons audio finder (author + licence stored)
 - [ ] Step 5: Piper TTS for brands without audio (decide after the probe; skippable)
 - [ ] Step 6: `GET /api/brands/:slug/pronunciation` + `hasPronunciation` on the catalog payload

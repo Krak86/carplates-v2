@@ -36,6 +36,27 @@ Only 2 leads and one Commons search were spot-checked; real coverage comes from 
 
 **Slices:** text-only (steps 1-3, 6-7, ~4.5 d) can ship alone; plus Commons audio (4) ~6 d; plus TTS (5) ~8.5 d.
 
+## Probe results (2026-11-07)
+
+`scripts/src/brand-pronounce-probe.ts` (read-only; cache in `scripts/.data/brand-pronounce/`; `--list` prints a per-make table). 109 catalog makes; titles via Wikidata sitelinks (QIDs from the origin seed, 14 makes without one use an en search). Leads are probe-grade regex hits, so treat the numbers as upper bounds (a hit means "a transcription-like form is present", not "parsed cleanly").
+
+| Language | Leads found | Transcription-like form | Forms (share of 109 makes)                                                                 |
+| -------- | ----------- | ----------------------- | ------------------------------------------------------------------------------------------ |
+| en       | 109         | 38 (35%)                | `{{IPA\|xx\|…}}` 26% (all with a language code), `{{IPAc-en}}` 19%, inside `{{efn}}` 8%    |
+| uk       | 89          | 19 (17%)                | `{{lang-uk}}` / "вимова" 17%, `{{IPA}}` 4%, `МФА` 1%                                       |
+| ru       | 91          | 15 (14%)                | `{{IPA}}` 13%, `МФА` 4%, "произношение близко к" 6%, with a «respelling» only 2% (2 makes) |
+
+- **At least one language has a form: 50 of 109 (46%)**; 59 makes have nothing in any of the three. All three languages together: very few (VW, Skoda, Audi, Peugeot, Porsche, Lamborghini).
+- **Audio file name in the en lead: 14 of 109 (13%)**: volkswagen, lada, skoda, bmw, audi, chevrolet, peugeot, honda, citroen, dacia, tesla, porsche, vauxhall, maybach. Among the top 30 makes by volume: 11 of 30. Two of the 14 are Wikimedia "LL-Q…" Lingua Libre `.wav` files (language of the file may differ from the brand's origin, e.g. Chevrolet and Tesla are English readings), the rest are classic `Xx-Brand.ogg`.
+- Coverage is concentrated in big European brands. Japanese, Korean, Chinese, Russian/Soviet and US makes are almost empty.
+
+### Proposals
+
+- **Step 5 (Piper TTS): skip for the first release.** Commons audio covers 13% of makes but 37% of the top 30. Piper would add the ~95 others, yet the likely candidates (ja, ko, zh, ru/ua models for Soviet brands) are the languages where Piper is weak or the brand name is a loanword, and ~100 clips need a manual listen-through (2 days). Reconsider after step 4: the Commons title search may find more files than the en lead names (the probe only sees names written in the template). If still under ~25% of makes, ship text-only plus Commons audio, and hide the play button elsewhere.
+- **Overrides CSV must be the main data source, not a patch**: Wikipedia fills 72 of 327 language cells (109 makes × 3). Plan for **one row per make (~110 rows)** with columns `brand_slug, lang, ipa, respell` and about 250 cells to fill by hand (ua + ru respelling for nearly everyone, IPA for the 59 makes with no source). Draft the ua/ru respellings in one pass (origin-language IPA first, respelling second) and have the owner review them; keep the file in `scripts/src/` like `catalog-overrides.csv`, with the parsed rows overriding Wikipedia per cell.
+- **Step 2 parser scope** (what the numbers justify): `{{IPA|xx|…}}` (with the file name argument), `{{IPAc-en}}`, `{{lang-uk}}`, `МФА:`; the «respelling» rule is worth little (2 makes) and can stay a cheap regex.
+- The text-only slice is still worth shipping, but the icon will show for most makes only after the overrides CSV exists (otherwise 46%).
+
 ## Open points
 
 - Cyrillic respelling is editorial: derive from IPA only as a last resort (lower quality).

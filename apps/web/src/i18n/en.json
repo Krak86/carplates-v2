@@ -904,6 +904,8 @@
   "wiki.viaCommons": "via Wikimedia Commons",
   "model3d.open": "3D view ({{n}})",
   "model3d.title": "3D models - {{label}}",
+  "partsCatalog.title": "Parts catalog",
+  "partsCatalog.hint": "BMW parts catalog on realoem.com for this car's VIN (last 7 characters). Third-party site, opens in a new tab.",
   "tuning3d.title": "Customize in 3D",
   "tuning3d.hint": "A 3D model of this car's generation (from {{year}}) on 3dtuning.com: try wheels, paint and body kits. Opens in a new tab.",
   "model3d.prev": "Previous model",

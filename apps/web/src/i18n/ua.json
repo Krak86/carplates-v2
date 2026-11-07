@@ -1368,6 +1368,8 @@
   "wiki.viaCommons": "через Wikimedia Commons",
   "model3d.open": "3D-перегляд ({{n}})",
   "model3d.title": "3D-моделі - {{label}}",
+  "partsCatalog.title": "Каталог запчастин",
+  "partsCatalog.hint": "Каталог запчастин BMW на realoem.com за VIN цього авто (останні 7 символів). Сторонній сайт, відкриється в новій вкладці.",
   "tuning3d.title": "Налаштувати в 3D",
   "tuning3d.hint": "3D-модель покоління цього авто (з {{year}} року) на 3dtuning.com: приміряйте диски, колір і обвіси. Відкриється в новій вкладці.",
   "model3d.prev": "Попередня модель",
