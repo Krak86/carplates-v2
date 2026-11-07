@@ -69,6 +69,17 @@ describe('WikiHeroImage colour filter', () => {
     expect(screen.getByText(/Photo of another car with a colour filter: red/)).toBeTruthy()
   })
 
+  it('swipes to the original photo (no canvas, no note) and back', async () => {
+    await renderHero('ЧЕРВОНИЙ')
+    await waitFor(() => expect(screen.getByTestId('wiki-recolor-canvas')).toBeTruthy())
+    fireEvent.click(screen.getAllByRole('button', { name: 'Next photo' })[0]!)
+    expect(screen.queryByTestId('wiki-recolor-canvas')).toBeNull()
+    expect(screen.queryByText(/Photo of another car with a colour filter/)).toBeNull()
+    expect(pill()?.getAttribute('aria-pressed')).toBe('true')
+    fireEvent.click(screen.getAllByRole('button', { name: 'Previous photo' })[0]!)
+    expect(screen.getByTestId('wiki-recolor-canvas')).toBeTruthy()
+  })
+
   it('has no pill without a registry colour', async () => {
     await renderHero(null)
     expect(pill()).toBeNull()

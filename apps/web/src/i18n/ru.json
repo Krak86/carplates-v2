@@ -1360,6 +1360,8 @@
   "wiki.recolorOff": "Цветовой фильтр: выкл.",
   "wiki.imageCreditModified": "Фото: {{credit}} (изменено: цвет)",
   "wiki.recolorNote": "Фото другого авто с цветовым фильтром: {{color}}",
+  "wiki.originalPhoto": "Оригинальное фото",
+  "wiki.slideDot": "Фото {{n}} из {{total}}",
   "wiki.noImage": "Фото отсутствует",
   "wiki.imageCreditBg": "Фото на фоне: {{credit}}",
   "wiki.viaCommons": "через Wikimedia Commons",

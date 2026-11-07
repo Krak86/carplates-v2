@@ -1351,6 +1351,7 @@ Plan in 9 steps, [docs/wiki-recolor-plan.md](docs/wiki-recolor-plan.md); prototy
 - [x] Gate tuning R2 round 1 (2026-11-06, uncommitted, `PAINT_ALGO` bumped to 2 on 2026-11-07): saturated-cluster re-pick, hue match, `two_tone` skip, looser share / dark_body chroma; 53 ok of the same 100 (+5 fixed, 5 mis-tints now skipped, 20 good kept); sheets `scripts/.data/wiki-paint/review-2026-11-06-algo2/`
 - [x] Owner agreed ("continue", 2026-11-07); `PAINT_ALGO` = 2; fresh random 100 dry run (49 ok, 17 two_tone, 14 dark_body) in `scripts/.data/wiki-paint/review-algo2-fresh/`
 - [x] Owner approved the fresh sheets (2026-11-07): gates final at `PAINT_ALGO` = 2, no R2d; mask edge quality is known to be imperfect (accepted)
+- [x] Hero: second slide with the original photo (arrows + swipe) when the colour filter applies (`WikiHeroImage.tsx`, test added); browser check: plates АХ9705КР (red), АІ8956МЕ (green), КА1507МН (blue) = ВАЗ 21213 2003 with a stored mask
 
 ## Brand pronunciation (planned 2026-11-06)
 

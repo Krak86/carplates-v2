@@ -896,6 +896,8 @@
   "wiki.recolorOff": "Colour filter: off",
   "wiki.imageCreditModified": "Photo: {{credit}} (modified: colour)",
   "wiki.recolorNote": "Photo of another car with a colour filter: {{color}}",
+  "wiki.originalPhoto": "Original photo",
+  "wiki.slideDot": "Photo {{n}} of {{total}}",
   "wiki.noImage": "No photo available",
   "wiki.imageCreditBg": "Background photo: {{credit}}",
   "wiki.viaCommons": "via Wikimedia Commons",

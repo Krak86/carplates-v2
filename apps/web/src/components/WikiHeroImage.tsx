@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react'
+import { useRef, useState, type PointerEvent, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { PAINT_HEX, resolveVehicleKind } from '@carplates/shared'
 
@@ -8,7 +8,10 @@ import UaAuctionHero from '@/components/ua-auctions/UaAuctionHero'
 import { useCarHeroImageActions } from '@/components/use-car-hero-image-actions'
 import { useWikiRecolor } from '@/components/use-wiki-recolor'
 import WikiRecolorCanvas from '@/components/WikiRecolorCanvas'
+import { cn } from '@/lib/cn'
 import { useUiStore } from '@/store/ui-store'
+
+const SWIPE_MIN_PX = 40
 
 type Props = {
   brand: string | null
@@ -57,6 +60,9 @@ export default function WikiHeroImage({
   const [loadedUrl, setLoadedUrl] = useState<string | null>(null)
   const [failedUrl, setFailedUrl] = useState<string | null>(null)
   const [zoomed, setZoomed] = useState(false)
+  // Second slide = the untouched photo (filter applicable only): a swipe away from the repainted one, so the filter is easy to undo.
+  const [originalUrl, setOriginalUrl] = useState<string | null>(null)
+  const swipe = useRef<{ x: number; y: number; moved: boolean } | null>(null)
   const hasQuery = Boolean(brand || model)
   const isPending = hasQuery && heroImage.isPending
 
@@ -79,11 +85,30 @@ export default function WikiHeroImage({
   }
 
   const isLoaded = !!image && loadedUrl === image.url
+  const hasSlides = isLoaded && !!recolor.target
+  const viewOriginal = hasSlides && originalUrl === image?.url
+  const goSlide = (): void => setOriginalUrl(viewOriginal ? null : (image?.url ?? null))
+  const onPointerDown = (e: PointerEvent<HTMLDivElement>): void => {
+    swipe.current = { x: e.clientX, y: e.clientY, moved: false }
+  }
+  const onPointerUp = (e: PointerEvent<HTMLDivElement>): void => {
+    const start = swipe.current
+    if (!start || !hasSlides) return
+    const dx = e.clientX - start.x
+    if (Math.abs(dx) > SWIPE_MIN_PX && Math.abs(dx) > Math.abs(e.clientY - start.y)) {
+      start.moved = true
+      goSlide()
+    }
+  }
 
   return (
     <>
       {lotHero}
-      <div className={`relative h-64 w-full max-w-content sm:h-80 ${lotHero ? '' : 'hero-vt -my-3'}`}>
+      <div
+        onPointerDown={onPointerDown}
+        onPointerUp={onPointerUp}
+        className={`relative h-64 w-full max-w-content touch-pan-y sm:h-80 ${lotHero ? '' : 'hero-vt -my-3'}`}
+      >
         {!isLoaded && (
           <div aria-hidden className="absolute inset-0 animate-pulse rounded-lg border border-border bg-surface/70" />
         )}
@@ -99,12 +124,16 @@ export default function WikiHeroImage({
             className={`h-full w-full rounded-lg object-cover transition-opacity duration-200 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
           />
         )}
-        {isLoaded && recolor.mask && recolor.target && <WikiRecolorCanvas mask={recolor.mask} color={recolor.target} />}
+        {isLoaded && !viewOriginal && recolor.mask && recolor.target && (
+          <WikiRecolorCanvas mask={recolor.mask} color={recolor.target} />
+        )}
         {isLoaded && image && (
           <>
             <button
               type="button"
-              onClick={() => setZoomed(true)}
+              onClick={() => {
+                if (!swipe.current?.moved) setZoomed(true)
+              }}
               aria-label={t('photo.zoomOpen')}
               className="absolute inset-0 cursor-zoom-in rounded-lg"
             />
@@ -120,6 +149,39 @@ export default function WikiHeroImage({
           <div className="absolute top-2 left-2 rounded bg-black/60 px-1.5 py-0.5 text-[10px] text-white/80">
             {heroImage.data.from === 'live' ? 'Wiki live' : 'DB'}
           </div>
+        )}
+
+        {hasSlides && (
+          <>
+            {([-1, 1] as const).map(step => (
+              <button
+                key={step}
+                type="button"
+                onClick={goSlide}
+                aria-label={t(step < 0 ? 'uaAuctions.hero.prev' : 'uaAuctions.hero.next')}
+                className={cn(
+                  'absolute top-1/2 -translate-y-1/2 rounded-full bg-black/55 px-2.5 py-1 text-lg leading-none text-white hover:bg-black/75',
+                  step < 0 ? 'left-2' : 'right-2'
+                )}
+              >
+                {step < 0 ? '‹' : '›'}
+              </button>
+            ))}
+            <div className="pointer-events-none absolute bottom-9 left-1/2 flex -translate-x-1/2 gap-1.5">
+              {[false, true].map(isOriginal => (
+                <span
+                  key={String(isOriginal)}
+                  role="img"
+                  aria-label={t('wiki.slideDot', { n: isOriginal ? 2 : 1, total: 2 })}
+                  aria-current={isOriginal === viewOriginal}
+                  className={cn(
+                    'size-1.5 rounded-full bg-white',
+                    isOriginal === viewOriginal ? 'opacity-100' : 'opacity-40'
+                  )}
+                />
+              ))}
+            </div>
+          </>
         )}
 
         {isLoaded && recolor.target && colorName && (
@@ -149,14 +211,16 @@ export default function WikiHeroImage({
 
         {isLoaded && creditParts.length > 0 && (
           <div className="absolute right-11 bottom-2 rounded bg-black/60 px-1.5 py-0.5 text-[10px] text-white/80">
-            {t(recolor.mask ? 'wiki.imageCreditModified' : 'wiki.imageCredit', { credit: creditParts.join(', ') })}
+            {t(recolor.mask && !viewOriginal ? 'wiki.imageCreditModified' : 'wiki.imageCredit', {
+              credit: creditParts.join(', ')
+            })}
           </div>
         )}
       </div>
       {zoomed && image && (
         <PhotoZoomDialog url={image.url} candidates={[]} active={null} onClose={() => setZoomed(false)} />
       )}
-      {recolor.mask && colorName && (
+      {recolor.mask && !viewOriginal && colorName && (
         <p className="mt-4 text-center text-xs text-muted">
           {t('wiki.recolorNote', { color: colorName.toLowerCase() })}
         </p>
