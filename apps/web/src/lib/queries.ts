@@ -17,6 +17,7 @@ import type {
 import {
   ApiError,
   getAdminAnalytics,
+  getAdminCloudflare,
   getAlarmHistory,
   getAlarmStats,
   getAlarms,
@@ -908,6 +909,10 @@ export function adminServerQuery() {
     staleTime: 15_000,
     refetchInterval: 30_000
   })
+}
+
+export function adminCloudflareQuery() {
+  return queryOptions({ queryKey: ['admin', 'cloudflare'], queryFn: getAdminCloudflare, staleTime: 5 * 60_000 })
 }
 
 export function adminAnalyticsQuery() {

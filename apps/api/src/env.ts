@@ -114,6 +114,10 @@ const envSchema = z.object({
   POSTHOG_PROJECT_ID: z.string().optional(),
   /** Use https://us.posthog.com for a US-cloud project. */
   POSTHOG_API_HOST: z.string().default('https://eu.posthog.com'),
+  /** Admin Statistics tab: Cloudflare edge traffic (GraphQL Analytics). A token with only "Zone > Analytics > Read" on the
+   *  zone, plus the zone id. Absent → the card shows a "not connected" hint. */
+  CLOUDFLARE_API_TOKEN: z.string().optional(),
+  CLOUDFLARE_ZONE_ID: z.string().optional(),
   /** Sentry organization slug — only used to build the dashboard link on the admin Statistics tab. */
   SENTRY_ORG_SLUG: z.string().optional(),
 
@@ -175,6 +179,8 @@ export const plateRecognizerCloudEnabled = (env: Env): boolean =>
   env.PLATE_RECOGNIZER_CLOUD_ENABLED && Boolean(env.PLATE_RECOGNIZER_CLOUD_TOKEN)
 export const posthogQueryEnabled = (env: Env): boolean =>
   Boolean(env.POSTHOG_PERSONAL_API_KEY) && Boolean(env.POSTHOG_PROJECT_ID)
+export const cloudflareAnalyticsEnabled = (env: Env): boolean =>
+  Boolean(env.CLOUDFLARE_API_TOKEN) && Boolean(env.CLOUDFLARE_ZONE_ID)
 export const alprLocalEnabled = (env: Env): boolean => Boolean(env.ALPR_LOCAL_URL)
 export const sharesStorageConfigured = (env: Env): boolean =>
   Boolean(env.SHARES_R2_ENDPOINT && env.SHARES_R2_ACCESS_KEY_ID && env.SHARES_R2_SECRET_ACCESS_KEY)

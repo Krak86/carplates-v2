@@ -4,13 +4,13 @@ Speaker icon beside the brand name; click opens a small popup with the transcrip
 
 ## Research findings (2026-11-06)
 
-| Source | IPA / transcription | Audio | Use |
-|---|---|---|---|
-| Wikidata | none: 188 car-maker items, 0 with P898 (IPA), 0 with P443 (audio), 0 with P1705 | none | dead end |
-| en.wikipedia lead | `{{IPA\|de\|ˈfɔlksˌvaːɡŋ̍\|German\|de-Volkswagen.ogg}}`; English UK/US `{{IPAc-en\|…}}` often inside an `{{efn}}` footnote | file name inside the IPA template | main source |
-| uk.wikipedia lead | `(вимова: {{lang-uk\|Фольксваґен}}…)`; usually no IPA | none | Ukrainian respelling |
-| ru.wikipedia lead | `МФА: {{IPA\|[pø.ʒo]}}; произношение близко к «пёжо́»` | none | IPA + Cyrillic respelling |
-| Commons | n/a | native `.ogg`: `De-Volkswagen.ogg`, `De-Volkswagen2.ogg`, newer `Pronunciation "X" de.ogg` | audio tier 1, big brands only |
+| Source            | IPA / transcription                                                                                                       | Audio                                                                                      | Use                           |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ----------------------------- |
+| Wikidata          | none: 188 car-maker items, 0 with P898 (IPA), 0 with P443 (audio), 0 with P1705                                           | none                                                                                       | dead end                      |
+| en.wikipedia lead | `{{IPA\|de\|ˈfɔlksˌvaːɡŋ̍\|German\|de-Volkswagen.ogg}}`; English UK/US `{{IPAc-en\|…}}` often inside an `{{efn}}` footnote | file name inside the IPA template                                                          | main source                   |
+| uk.wikipedia lead | `(вимова: {{lang-uk\|Фольксваґен}}…)`; usually no IPA                                                                     | none                                                                                       | Ukrainian respelling          |
+| ru.wikipedia lead | `МФА: {{IPA\|[pø.ʒo]}}; произношение близко к «пёжо́»`                                                                     | none                                                                                       | IPA + Cyrillic respelling     |
+| Commons           | n/a                                                                                                                       | native `.ogg`: `De-Volkswagen.ogg`, `De-Volkswagen2.ogg`, newer `Pronunciation "X" de.ogg` | audio tier 1, big brands only |
 
 Only 2 leads and one Commons search were spot-checked; real coverage comes from step 1 (probe).
 

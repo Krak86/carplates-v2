@@ -89,9 +89,9 @@ becomes available.
 API, write again only if a paid version exists or the audience grows a lot.
 
 - [ ] ⏳ Platesmania reply (free key?). If **yes**, build: hero photo order shared/attached -> Platesmania -> wiki -> type placeholder;
-  a small "add a photo on Platesmania" link under the hero when Platesmania has none; source label + link to their plate page;
-  per-plate cache plus a global daily upstream cap (promised 300/day) and kill switch, same pattern as `MarketService` (CarAPIS).
-  If **no**: leave parked, close this box.
+      a small "add a photo on Platesmania" link under the hero when Platesmania has none; source label + link to their plate page;
+      per-plate cache plus a global daily upstream cap (promised 300/day) and kill switch, same pattern as `MarketService` (CarAPIS).
+      If **no**: leave parked, close this box.
 
 ### Sitemap page `/sitemap` ✅ DONE (2026-11-01) — see `docs/plan-done.md`
 

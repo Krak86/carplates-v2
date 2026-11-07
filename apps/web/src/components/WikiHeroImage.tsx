@@ -57,7 +57,7 @@ export default function WikiHeroImage({
   const [loadedUrl, setLoadedUrl] = useState<string | null>(null)
   const [failedUrl, setFailedUrl] = useState<string | null>(null)
   const [zoomed, setZoomed] = useState(false)
-  const hasQuery =Boolean(brand || model)
+  const hasQuery = Boolean(brand || model)
   const isPending = hasQuery && heroImage.isPending
 
   const lotHero =

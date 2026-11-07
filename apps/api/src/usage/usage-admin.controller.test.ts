@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 import type { AdminServerResponse } from '@carplates/shared'
 
 import type { MarketService } from '../market/market.service.js'
+import type { CloudflareService } from './cloudflare.service.js'
 import type { PosthogService } from './posthog.service.js'
 import type { ServerStatsService } from './server-stats.service.js'
 import { UsageAdminController } from './usage-admin.controller.js'
@@ -14,7 +15,8 @@ function controller(stats: MarketService['stats']): UsageAdminController {
     {} as UsageService,
     {} as PosthogService,
     { snapshot: vi.fn().mockResolvedValue(snapshot) } as unknown as ServerStatsService,
-    { stats } as unknown as MarketService
+    { stats } as unknown as MarketService,
+    {} as CloudflareService
   )
 }
 

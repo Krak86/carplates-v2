@@ -4,14 +4,16 @@ import { useTranslation } from 'react-i18next'
 
 import Card from '@/components/ui/Card'
 import Spinner from '@/components/ui/Spinner'
-import { adminAnalyticsQuery, adminStatsQuery } from '@/lib/queries'
+import { adminAnalyticsQuery, adminCloudflareQuery, adminStatsQuery } from '@/lib/queries'
 
-type TileProps = { label: string; value: number | null }
+type TileProps = { label: string; value: number | null; suffix?: string }
 
-function Tile({ label, value }: TileProps): ReactNode {
+function Tile({ label, value, suffix = '' }: TileProps): ReactNode {
   return (
     <Card>
-      <div className="text-2xl font-bold tabular-nums">{value === null ? '-' : value.toLocaleString()}</div>
+      <div className="text-2xl font-bold tabular-nums">
+        {value === null ? '-' : `${value.toLocaleString()}${suffix}`}
+      </div>
       <div className="text-sm text-[var(--color-muted)]">{label}</div>
     </Card>
   )
@@ -30,6 +32,14 @@ export default function AdminStatsTab(): ReactNode {
   const { t } = useTranslation()
   const stats = useQuery(adminStatsQuery())
   const analytics = useQuery(adminAnalyticsQuery())
+  const cloudflare = useQuery(adminCloudflareQuery())
+  const cf = cloudflare.data
+  const cfDays = cf?.days ?? []
+  const cfToday = cfDays.at(-1)
+  const sum = (rows: typeof cfDays, pick: (d: (typeof cfDays)[number]) => number): number =>
+    rows.reduce((total, d) => total + pick(d), 0)
+  const cfRequests30d = sum(cfDays, d => d.requests)
+  const cfCachedPct = cfRequests30d > 0 ? Math.round((sum(cfDays, d => d.cachedRequests) / cfRequests30d) * 100) : null
 
   if (stats.isPending) return <Spinner />
   if (stats.isError) return <p className="text-red-600">{t('result.error')}</p>
@@ -138,6 +148,43 @@ export default function AdminStatsTab(): ReactNode {
               </a>
             ))}
           </div>
+        )}
+      </Card>
+
+      <Card>
+        <h2 className="mb-3 font-semibold">{t('admin.stats.cloudflare')}</h2>
+        {cloudflare.isPending && <Spinner />}
+        {cf && !cf.configured && <p className="text-sm text-[var(--color-muted)]">{t('admin.stats.cloudflareOff')}</p>}
+        {cf?.error && <p className="text-sm text-red-600">{cf.error}</p>}
+        {cf?.configured && !cf.error && (
+          <>
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+              <Tile label={t('admin.stats.cfVisitorsToday')} value={cfToday?.visitors ?? null} />
+              <Tile label={t('admin.stats.cfRequests7d')} value={sum(cfDays.slice(-7), d => d.requests)} />
+              <Tile label={t('admin.stats.cfRequests30d')} value={cfRequests30d} />
+              <Tile label={t('admin.stats.cfCached')} value={cfCachedPct} suffix="%" />
+            </div>
+            <div className="mt-3 text-sm">
+              <div className="flex justify-between gap-3 text-[var(--color-muted)]">
+                <span>{t('admin.stats.cfDay')}</span>
+                <span>
+                  {t('admin.stats.cfIps')} / {t('admin.stats.cfRequests')}
+                </span>
+              </div>
+              {cfDays
+                .slice(-14)
+                .reverse()
+                .map(d => (
+                  <div key={d.date} className="flex justify-between gap-3 tabular-nums">
+                    <span>{d.date}</span>
+                    <span>
+                      {d.visitors.toLocaleString()} / {d.requests.toLocaleString()}
+                    </span>
+                  </div>
+                ))}
+            </div>
+            <p className="mt-3 text-xs text-[var(--color-muted)]">{t('admin.stats.cloudflareNote')}</p>
+          </>
         )}
       </Card>
     </div>
