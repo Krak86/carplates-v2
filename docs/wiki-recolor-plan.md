@@ -161,3 +161,5 @@ API: `packages/shared/src/wikiRecolor.ts`, `apps/api/src/wiki/wiki-recolor.{serv
 Do not commit unless asked.
 
 **R2c (2026-11-07, `PAINT_ALGO` = 2).** Fresh random 100 dry run, `--order random --rps 1`, 3.9 min: 49 ok, 51 skip (two_tone 17, dark_body 14, no_car 7, dark_neutral 7, dark_paint 3, low_coverage 2, car_too_small 1). Sheets: `scripts/.data/wiki-paint/review-algo2-fresh/sheet-1..6.jpg`. Bad-tint review of the fresh sample is the owner's (PLAN.md box); two_tone share (17 %) is higher than on the tuning sample, check for wrong skips.
+
+**R2 closed (2026-11-07).** Owner approved the fresh sample: gates are final at `PAINT_ALGO` = 2, R2d not needed. Known and accepted: mask quality is not perfect (edges, residual bad tints 004, 008, 010, 020, 058, 064, 094, 098 from the tuning sample). Left: R4-R5 (migration 0101, Cloudflare Cache Rule, cron install, first-night check) are the owner's; R3 / R6 only on request.
