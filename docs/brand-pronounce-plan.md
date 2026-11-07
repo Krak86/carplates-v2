@@ -65,6 +65,15 @@ Only 2 leads and one Commons search were spot-checked; real coverage comes from 
 - Result after a fresh fetch: 105 rows, 46 of 109 makes (ua 32, ru 35, en 38). Overrides CSV (`scripts/src/brand-pronounce-overrides.csv`, columns `brand_slug,lang,ipa,ipa_lang,respell`) was drafted in step 3b (2026-11-07): ua + ru respelling for every make, en IPA (English reading, or native with `ipa_lang`) and a Latin respelling for tricky ones; Wikipedia junk cells (X-SAMPA, multi-word IPA, company-name respellings) are replaced. Result: 302 rows, 109 of 109 makes (ua 109, ru 109, en 84). Unreviewed editorial draft.
 - The parser extracts the audio file name per lead (`Lead.audio`, 14 en hits) but the ingest does not store it yet; step 4 should read it from the cached leads (`createFetcher().lead`) and add author + licence via the Commons imageinfo API.
 
+## Implementation notes (steps 3b, 6, 7, 2026-11-07)
+
+- **Data:** overrides CSV drafted (ua + ru respelling for all 109 makes, stress as a combining acute U+0301 where certain, en IPA / Latin respelling where Wikipedia lacks or is wrong); 302 rows, 109/109 makes. Owner has read it and is fine with it. To change: edit the CSV, then `pnpm ingest:brand-pronounce` + `pnpm export:brand-pronounce:csv`.
+- **API:** `GET /api/brands/:slug/pronunciation` (`apps/api/src/brands/`, contract `packages/shared/src/brandPronunciation.ts`): items ordered ua, ru, en; `audio` is null until step 4 (the service already reads `brand_pronunciation_audio` and maps kind commons|tts); 404 when the make has no rows; `LOOKUP_CACHE`, `CATALOG_THROTTLE`.
+- **Flags:** `hasPronunciation` on the catalog make summary/detail; `pronounce` (make slug) on `/api/catalog/lookup` (works without a model page). Both come from one distinct query per hourly catalog snapshot reload, so a restart is needed to see new data locally.
+- **Web:** `components/BrandPronounce.tsx` (speaker trigger + `InfoPopover`, body lazy in `components/brand-pronounce/`, fetched on first open), `BrandPronounceChip.tsx` (plate / registry-VIN card header via the catalog lookup query), make page `/cars/:make`. The popover shows only the UI language's row (fallback: all rows with content); the IPA is labelled with its language when not the English reading (`ipaLangName`). Query `['brand-pronunciation', slug]`, offline group `brand-pronunciation`. i18n keys `brandPronounce.*` (ua/ru/en).
+- **Step 4 hook points:** fill `brand_pronunciation_audio` (PK brand_slug; lang = origin language, url, author, license, kind) and add a seed CSV plus export/import scripts and a job step like `ingest-brand-pronounce.ts`; the API response already carries `audio`, so the web only needs an audio hook + play button in `BrandPronounceBody` and a credit line (author + licence). Wikimedia "LL-Q..." Lingua Libre files may be in another language than the brand's origin.
+- **Not done:** audio (step 4), decode-only VIN card (`VinResult`) and model pages have no button, docs (step 8: features-reference, plan-done, releases, About credits), after-deploy items (PLAN.md).
+
 ## Open points
 
 - Cyrillic respelling is editorial: derive from IPA only as a last resort (lower quality).
