@@ -430,7 +430,7 @@ export default function ResultCard({ data }: Props): ReactNode {
                 <Model3dButton brand={c.brand} model={c.model} />
                 <Model360Button brand={c.brand} model={c.model} />
                 <TuningChip brand={c.brand} model={c.model} year={c.makeYear} body={c.body} />
-                {hasVin && <PartsCatalogChip vin={c.vin} />}
+                <PartsCatalogChip vin={hasVin ? c.vin : null} brand={c.brand} />
                 <RaceTestDriveChip onOpen={() => setRaceOpenSignal(n => n + 1)} />
               </CollapsibleChips>
               <div className="mt-2 flex flex-wrap items-center gap-2 empty:hidden">

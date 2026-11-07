@@ -1,23 +1,24 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { realoemUrl } from '@carplates/shared'
+import { realoemLink } from '@carplates/shared'
 
 import ExternalLink from '@/components/ExternalLink'
 import InfoPopover from '@/components/InfoPopover'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 
 type Props = {
-  vin: string | null
+  vin?: string | null
+  brand: string | null
 }
 
 /**
- * "Parts catalog" chip: a link-out to RealOEM's catalog for this BMW's VIN. Renders nothing for other makes, without a
- * VIN or offline. Pure string building (`realoemUrl`), no API.
+ * "Parts catalog" chip: a link-out to RealOEM's BMW catalog, on the car's own page when a VIN is known, else on the make
+ * page (catalog routes, plates without a VIN). Renders nothing for other makes or offline. Pure string building, no API.
  */
-export default function PartsCatalogChip({ vin }: Props): ReactNode {
+export default function PartsCatalogChip({ vin = null, brand }: Props): ReactNode {
   const { t } = useTranslation()
   const online = useOnlineStatus()
-  const url = realoemUrl(vin)
+  const url = realoemLink(vin, brand)
   if (!url || !online) return null
 
   const label = t('partsCatalog.title')
