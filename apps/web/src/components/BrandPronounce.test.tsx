@@ -48,7 +48,7 @@ describe('BrandPronounce', () => {
     fireEvent.click(screen.getByRole('button'))
     expect(await screen.findByText('SHKOH-da', {}, { timeout: 5000 })).toBeTruthy()
     expect(api.getBrandPronunciation).toHaveBeenCalledWith('skoda')
-    expect(screen.getAllByText('Шко́да')).toHaveLength(2)
+    expect(screen.queryByText('Шко́да')).toBeNull()
     expect(screen.getByText(/\/ˈʃkoda\/ \(.+\)/)).toBeTruthy()
   })
 
@@ -68,8 +68,13 @@ describe('brand-pronounce helpers', () => {
     expect(ipaLangName('xx-not-a-lang!', 'en')).toBeNull()
   })
 
-  it('drops rows with neither respelling nor IPA', () => {
-    const items = [{ lang: 'ua', ipa: null, ipaLang: null, respell: null }, ...SKODA.items] as never
-    expect(visibleItems(items)).toHaveLength(3)
+  it('keeps only the UI language row, falling back to every row that has content', () => {
+    const items = [
+      { lang: 'ua', ipa: null, ipaLang: null, respell: null },
+      { lang: 'ru', ipa: null, ipaLang: null, respell: 'Шкода' },
+      { lang: 'en', ipa: 'ˈʃkoda', ipaLang: 'cs', respell: null }
+    ] as never
+    expect(visibleItems(items, 'ru').map(i => i.lang)).toEqual(['ru'])
+    expect(visibleItems(items, 'ua').map(i => i.lang)).toEqual(['ru', 'en'])
   })
 })

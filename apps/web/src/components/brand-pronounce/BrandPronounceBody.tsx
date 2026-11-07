@@ -17,13 +17,17 @@ export default function BrandPronounceBody({ slug }: Props): ReactNode {
   if (isPending) return <Spinner />
   if (isError) return <p className="text-[var(--color-muted)]">{t('brandPronounce.error')}</p>
 
+  const items = visibleItems(data.items, i18n.language)
+
   return (
     <ul className="flex flex-col gap-2">
-      {visibleItems(data.items).map(item => {
+      {items.map(item => {
         const ipaLang = ipaLangName(item.ipaLang, i18n.language)
         return (
           <li key={item.lang}>
-            <div className="text-xs text-[var(--color-muted)]">{t(`brandPronounce.${item.lang}`)}</div>
+            {items.length > 1 && (
+              <div className="text-xs text-[var(--color-muted)]">{t(`brandPronounce.${item.lang}`)}</div>
+            )}
             {item.respell && <div className="text-base font-semibold">{item.respell}</div>}
             {item.ipa && (
               <div

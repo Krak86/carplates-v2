@@ -20,7 +20,12 @@ export function ipaLangName(ipaLang: string | null, uiLang: string): string | nu
   }
 }
 
-/** Rows that show something (a respelling or an IPA), in the API's order. */
-export function visibleItems(items: BrandPronunciationItem[]): BrandPronunciationItem[] {
-  return items.filter(i => !!i.respell || !!i.ipa)
+/**
+ * The rows to show: only the UI language's own row when it has something to show (a respelling or an IPA), else every row that
+ * does, in the API's order.
+ */
+export function visibleItems(items: BrandPronunciationItem[], uiLang: string): BrandPronunciationItem[] {
+  const shown = items.filter(i => !!i.respell || !!i.ipa)
+  const own = shown.filter(i => i.lang === uiLang)
+  return own.length ? own : shown
 }
