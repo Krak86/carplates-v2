@@ -205,7 +205,7 @@ export default function WikiHeroImage({
           </>
         )}
 
-        {isLoaded && recolor.target && colorName && (
+        {isLoaded && !viewOriginal && recolor.target && colorName && (
           <button
             type="button"
             aria-pressed={recolor.enabled}
@@ -241,10 +241,37 @@ export default function WikiHeroImage({
       {zoomed && image && (
         <PhotoZoomDialog url={image.url} candidates={[]} active={null} onClose={() => setZoomed(false)} />
       )}
-      {recolor.mask && !viewOriginal && colorName && (
-        <p className="mt-4 text-center text-xs text-muted">
-          {t('wiki.recolorNote', { color: colorName.toLowerCase() })}
-        </p>
+      {hasSlides && image && (
+        <ul className="mt-4 flex gap-1.5">
+          {[false, true].map(isOriginal => (
+            <li key={String(isOriginal)} className="shrink-0">
+              <button
+                type="button"
+                onClick={() => setOriginalUrl(isOriginal ? image.url : null)}
+                aria-label={t('wiki.slideDot', { n: isOriginal ? 2 : 1, total: 2 })}
+                aria-current={isOriginal === viewOriginal}
+                className={cn(
+                  'relative block h-12 w-16 overflow-hidden rounded-md border-2 transition-opacity',
+                  isOriginal === viewOriginal
+                    ? 'border-primary'
+                    : 'border-transparent opacity-70 hover:opacity-100'
+                )}
+              >
+                <img
+                  src={image.url}
+                  alt=""
+                  crossOrigin="anonymous"
+                  loading="lazy"
+                  decoding="async"
+                  className="h-full w-full object-cover"
+                />
+                {!isOriginal && recolor.mask && recolor.target && (
+                  <WikiRecolorCanvas mask={recolor.mask} color={recolor.target} />
+                )}
+              </button>
+            </li>
+          ))}
+        </ul>
       )}
     </>
   )
