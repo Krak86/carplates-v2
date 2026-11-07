@@ -12,6 +12,7 @@ import {
 import type { VinDecodeResponse } from '@carplates/shared'
 
 import BrandLogo from '@/components/BrandLogo'
+import BrandPronounceChip from '@/components/BrandPronounceChip'
 import CatalogModelChip from '@/components/catalog/CatalogModelChip'
 import CompareChip from '@/components/compare/CompareChip'
 import CardTiltToggle from '@/components/CardTiltToggle'
@@ -119,6 +120,7 @@ export default function VinResult({ data, searchedPlate = null }: Props): ReactN
             vinDecodeResults={data.results}
             vinRegistryActions={registry?.actions ?? null}
           />
+          <BrandPronounceChip brand={vehicle.brand} model={vehicle.model} />
         </div>
         <VinBarcode vin={data.vin} />
 

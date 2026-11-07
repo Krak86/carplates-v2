@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { Link, useParams } from 'react-router'
 
 import BrandLogo from '@/components/BrandLogo'
+import BrandPronounceChip from '@/components/BrandPronounceChip'
 import CatalogAdvancedSearchNote from '@/components/catalog/CatalogAdvancedSearchNote'
 import CatalogAuctionLine from '@/components/catalog/CatalogAuctionLine'
 import CatalogBreadcrumb from '@/components/catalog/CatalogBreadcrumb'
@@ -94,6 +95,7 @@ export default function CatalogModelRoute(): ReactNode {
           <h1 className="text-xl font-semibold">
             {t('catalog.title', { name: `${model.makeName} ${model.modelName}`.trim() })}
           </h1>
+          <BrandPronounceChip brand={model.topBrand} model={model.topModel} />
         </div>
         <CatalogSummary model={model} />
         <CatalogAuctionLine makeName={model.makeName} />
