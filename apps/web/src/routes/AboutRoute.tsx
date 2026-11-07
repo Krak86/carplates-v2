@@ -429,7 +429,8 @@ export default function AboutRoute(): ReactNode {
               className="text-[var(--color-primary)] underline"
             >
               carsua.app ↗
-            </a>
+            </a>{' '}
+            <span className="text-xs text-[var(--color-muted)]">{__APP_VERSION__}</span>
           </p>
           <p className="mt-2">{t('about.licensePermission')}</p>
           <p className="mt-2">{t('about.licenseNotice')}</p>
