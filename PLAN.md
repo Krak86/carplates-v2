@@ -1353,6 +1353,10 @@ Plan in 9 steps, [docs/wiki-recolor-plan.md](docs/wiki-recolor-plan.md); prototy
 - [x] Owner approved the fresh sheets (2026-11-07): gates final at `PAINT_ALGO` = 2, no R2d; mask edge quality is known to be imperfect (accepted)
 - [x] Hero: second slide with the original photo (arrows + swipe) when the colour filter applies (`WikiHeroImage.tsx`, test added); browser check: plates АХ9705КР (red), АІ8956МЕ (green), КА1507МН (blue) = ВАЗ 21213 2003 with a stored mask
 - [x] Lot-photo carousel: model photo slides get the colour filter too (repainted + pill, then original); source order stays attached photo, auction photos, model photo (filter, original), kind placeholder
+- [x] Deployed 2026-11-07: migration 0101 applied, Cloudflare Cache Rule edited (live check: `/api/wiki/recolor` MISS then HIT, mask webp MISS then HIT, immutable); first nightly `wiki-paint` run ok (job_runs 00:30, finished 01:02)
+- [x] Fix: `GET /api/wiki/paint/:file` returned a 500 for an unknown id (Fastify refuses the JSON error body under the `@Header('Content-Type', 'image/webp')` decorator) and the `@Header` immutable cache-control rode along, so the edge kept the 500 for a year; now `StreamableFile({ type })` + `lookupCacheInterceptor(MASK_CACHE)` (success only), controller test
+- [ ] After the next API deploy (owner): purge in Cloudflare the two cached 500 test URLs `/api/wiki/paint/zzz.webp` and `/api/wiki/paint/00000000000000000000000000000000.webp`, then `curl -I` one of them: expect 404 (not 500), no immutable header
+- [ ] Check the wiki-paint row on `/data-status` and the `job_runs` batch size over the next nights (1 500 photos each, about 15 nights)
 
 ## Brand pronunciation (planned 2026-11-06)
 
