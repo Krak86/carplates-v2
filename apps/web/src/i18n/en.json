@@ -4829,6 +4829,8 @@
   "photoShare.viewer.report": "Report this photo",
   "photoShare.mine.title": "My shared photos",
   "photoShare.mine.hint": "Private links to photos you shared, up to {{max}} at a time. Delete removes the photo at once.",
+  "photoShare.mine.count": "Active: {{count}} of {{max}}",
+  "photoShare.mine.noLink": "The link exists only on the device where it was created",
   "photoShare.mine.empty": "You have no active shared photos.",
   "photoShare.mine.expires_one": "Expires in {{count}} day",
   "photoShare.mine.expires_other": "Expires in {{count}} days",

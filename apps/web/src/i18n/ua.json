@@ -5315,6 +5315,8 @@
   "photoShare.viewer.report": "Поскаржитися на це фото",
   "photoShare.mine.title": "Мої фото з посиланнями",
   "photoShare.mine.hint": "Приватні посилання на фото, якими ви поділилися, до {{max}} одночасно. «Видалити» прибирає фото одразу.",
+  "photoShare.mine.count": "Активних: {{count}} з {{max}}",
+  "photoShare.mine.noLink": "Посилання є лише на пристрої, де його створено",
   "photoShare.mine.empty": "Активних фото з посиланнями немає.",
   "photoShare.mine.expires_one": "Діє ще {{count}} день",
   "photoShare.mine.expires_few": "Діє ще {{count}} дні",

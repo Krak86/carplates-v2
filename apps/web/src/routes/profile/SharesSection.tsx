@@ -67,6 +67,11 @@ export default function SharesSection(): ReactNode {
     <Card id="shares" className="mb-4 scroll-mt-20">
       <h2 className="text-lg font-semibold">{t('photoShare.mine.title')}</h2>
       <p className="text-sm text-[var(--color-muted)]">{t('photoShare.mine.hint', { max: shares.data?.max ?? 3 })}</p>
+      {shares.isSuccess && (
+        <p className="text-sm font-medium">
+          {t('photoShare.mine.count', { count: list.length, max: shares.data.max })}
+        </p>
+      )}
 
       {shares.isPending && <Spinner />}
       {shares.isError && <p className="text-sm text-red-600">{t('auth.error')}</p>}
@@ -97,7 +102,8 @@ export default function SharesSection(): ReactNode {
                   <ShareRemovedList removed={share.removed} />
                 </details>
               </div>
-              <div className="flex flex-wrap gap-2 max-sm:w-full">
+              <div className="flex flex-wrap items-center gap-2 max-sm:w-full">
+                {!token && <span className="text-xs text-[var(--color-muted)]">{t('photoShare.mine.noLink')}</span>}
                 {token && <CopyLinkButton link={shareUrl(share.plate, token)} />}
                 {token && canNativeShare() && (
                   <button

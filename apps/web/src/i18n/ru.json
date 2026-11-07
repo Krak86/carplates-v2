@@ -5315,6 +5315,8 @@
   "photoShare.viewer.report": "Пожаловаться на это фото",
   "photoShare.mine.title": "Мои фото со ссылками",
   "photoShare.mine.hint": "Приватные ссылки на фото, которыми вы поделились, до {{max}} одновременно. «Удалить» убирает фото сразу.",
+  "photoShare.mine.count": "Активных: {{count}} из {{max}}",
+  "photoShare.mine.noLink": "Ссылка есть только на устройстве, где она создана",
   "photoShare.mine.empty": "Активных фото со ссылками нет.",
   "photoShare.mine.expires_one": "Действует ещё {{count}} день",
   "photoShare.mine.expires_few": "Действует ещё {{count}} дня",
