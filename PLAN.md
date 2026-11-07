@@ -1376,6 +1376,7 @@ Speaker icon beside the brand name on catalog pages; lazy popup with ua / ru / e
 - [x] Step 6: `GET /api/brands/:slug/pronunciation` (`apps/api/src/brands/`, contract `packages/shared/src/brandPronunciation.ts`, `LOOKUP_CACHE`, `CATALOG_THROTTLE`, 404 for a make with no rows, `audio` null until step 4) + `hasPronunciation` (`.nullable().optional()`) on the catalog make summary/detail
 - [x] Step 7 (text slice): `BrandPronounce` speaker button (`components/BrandPronounce.tsx`, lazy body in `components/brand-pronounce/`) on the make page `/cars/:make` when `hasPronunciation`, `brandPronunciationQuery` (offline group `brand-pronunciation`), i18n ua/ru/en, tests. also on the plate / VIN-registry card header (`BrandPronounceChip`, make slug from `pronounce` in `/api/catalog/lookup`). **Not yet:** the decode-only VIN card (`VinResult`) and model pages
 - [x] Step 8: docs (features-reference, plan-done, releases 2026-11-07, About feature + brief)
+- [ ] Step c (optional UI follow-ups): speaker button on the decode-only VIN card (`VinResult`) and on model pages (`/cars/:make/:model`); consider a larger or labelled icon
 - [ ] After deploy (owner): apply the migration on the VPS; run the ingest job once; edge cache rule for `/api/brands/*/pronunciation` (docs/checklists.md); load the audio seed (`ingest:brand-pronounce:csv` does both tables) and spot-check that a clip plays under the CSP (`media-src https:`)
 
 ## Later, conditional
