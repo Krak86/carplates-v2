@@ -411,12 +411,14 @@ export function vdbQuery(brand: string, model: string, kind?: string | null) {
   })
 }
 
-// Brand pronunciation (pnpm ingest:brand-pronounce) - persisted reference data, cached offline like origin.
+// Brand pronunciation (pnpm ingest:brand-pronounce) - persisted reference data, cached offline like origin. Respellings are hand-edited
+// (overrides CSV), so it is not `staleTime: Infinity`: a day, then a refetch. The trailing key part is bumped when the shape or the data
+// of every make changes at once, to drop what is already persisted on users' devices (v2 = English respelling for all makes).
 export function brandPronunciationQuery(slug: string) {
   return queryOptions({
-    queryKey: ['brand-pronunciation', slug],
+    queryKey: ['brand-pronunciation', slug, 'v2'],
     queryFn: () => getBrandPronunciation(slug),
-    staleTime: Infinity,
+    staleTime: 24 * 60 * 60 * 1000,
     retry: false
   })
 }
