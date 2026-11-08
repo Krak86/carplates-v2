@@ -35,10 +35,11 @@ export default function TurnstileSlot({ siteKey, resetKey, onToken }: Props): Re
     }
   }, [siteKey, resetKey, lang, theme, onToken])
 
-  // The widget iframe is a fixed 300x65, wider than the w-64 popover form: scale it to 256px (0.85) instead of clipping it.
+  // The widget is hidden (`interaction-only`) unless a challenge needs a click, so the slot takes no space until then.
+  // The iframe is a fixed 300x65, wider than the w-64 popover form: zoom it to 256px (0.85), which also shrinks its layout box.
   return (
-    <div className="mt-2 h-[56px] w-64 max-w-full overflow-hidden">
-      <div ref={slotRef} className="w-[300px] origin-top-left scale-[0.85]" />
+    <div className="mt-2 w-64 max-w-full overflow-hidden">
+      <div ref={slotRef} className="w-[300px] [zoom:0.85] empty:hidden" />
     </div>
   )
 }

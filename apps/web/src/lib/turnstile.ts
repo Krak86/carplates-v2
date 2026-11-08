@@ -11,6 +11,8 @@ type TurnstileApi = {
       'error-callback'?: () => void
       theme?: 'light' | 'dark' | 'auto'
       language?: string
+      /** `interaction-only`: the widget stays hidden unless the visitor has to click (no lingering "Success!" box). */
+      appearance?: 'always' | 'execute' | 'interaction-only'
     }
   ) => string
   reset: (widgetId?: string) => void
@@ -72,6 +74,7 @@ export async function mountTurnstile(
   const id = api.render(slot, {
     sitekey: siteKey,
     theme,
+    appearance: 'interaction-only',
     language: lang === 'ua' ? 'uk' : lang,
     callback: token => onToken(token),
     'expired-callback': () => onToken(null),

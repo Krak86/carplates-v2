@@ -18,8 +18,14 @@ const item = (group: ReleaseGroup, ua: string, ru: string, en: string): ReleaseI
 export const RELEASES: readonly ReleaseDay[] = [
   {
     date: '2026-11-08',
-    version: 'v2.1150',
+    version: 'v2.1153',
     items: [
+      item(
+        'improved',
+        'Перевірка Cloudflare на формі входу та в контактах більше не показує блок «Успішно»: віджет з’являється лише коли потрібен клік.',
+        'Проверка Cloudflare в форме входа и в контактах больше не показывает блок «Успешно»: виджет появляется только когда нужен клик.',
+        'The Cloudflare check on the sign-in and contact forms no longer shows a lingering "Success!" box: the widget appears only when a click is needed.'
+      ),
       item(
         'improved',
         'Вимова марки: англійський запис для всіх марок, а коли немає запису від носія, кнопка вимовляє назву голосом браузера; на Android у встановленому застосунку кнопка «Слухати» тепер працює.',
