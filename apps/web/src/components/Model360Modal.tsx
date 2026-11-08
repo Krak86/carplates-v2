@@ -216,7 +216,7 @@ export default function Model360Modal({
           }
           title={name}
           className="h-[52dvh] w-full rounded-lg border-0 sm:h-[68dvh]"
-          allow="web-share; fullscreen"
+          allow="web-share; fullscreen; accelerometer; gyroscope"
           allowFullScreen
         />
 

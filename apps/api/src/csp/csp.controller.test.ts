@@ -120,6 +120,19 @@ describe('POST /api/csp-report', () => {
     expect(captureMessage).not.toHaveBeenCalled()
   })
 
+  it('drops the LiveIntent hosts Disqus injects, but not look-alikes', async () => {
+    for (const blocked of [
+      'https://rp.liadm.com/j?did=1',
+      'https://d-code.liadm.com/did-0049.min.js',
+      'https://liadm.com/'
+    ]) {
+      expect((await post(legacy(blocked))).statusCode).toBe(204)
+    }
+    expect(captureMessage).not.toHaveBeenCalled()
+    await post(legacy('https://notliadm.com/x.js'))
+    expect(captureMessage).toHaveBeenCalledTimes(1)
+  })
+
   it('drops a violation whose script comes from an extension', async () => {
     await post(legacy('inline', { 'source-file': 'chrome-extension://abc/content.js' }))
     expect(captureMessage).not.toHaveBeenCalled()

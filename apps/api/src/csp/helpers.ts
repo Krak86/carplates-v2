@@ -23,7 +23,23 @@ const isNoiseUri = (uri: string): boolean => {
 }
 
 /** Dropped before Sentry: an empty/extension/`data`/`about` blocked URI, or a script that lives in an extension. */
-export const isNoise = (v: CspViolation): boolean => isNoiseUri(v.blockedUrl) || isExtensionUri(v.sourceFile)
+export const isNoise = (v: CspViolation): boolean =>
+  isNoiseUri(v.blockedUrl) || isExtensionUri(v.sourceFile) || isIgnoredHost(v.blockedUrl)
+
+/**
+ * Hosts a vendor injects and we block on purpose (never allow-list them). Disqus loads LiveIntent (`liadm.com`) ad / identity
+ * scripts, frames and beacons; under enforcement they stay blocked, so the reports carry no signal.
+ */
+export const IGNORED_BLOCKED_HOSTS = ['liadm.com']
+
+const isIgnoredHost = (uri: string): boolean => {
+  try {
+    const { hostname } = new URL(uri)
+    return IGNORED_BLOCKED_HOSTS.some(h => hostname === h || hostname.endsWith(`.${h}`))
+  } catch {
+    return false
+  }
+}
 
 /**
  * Drops query + hash (share tokens, OAuth params, ids) and opaque path segments from a URL; keywords such as
