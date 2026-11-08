@@ -55,7 +55,7 @@ export default function PhotoThumbnail({
         type="button"
         onClick={() => setZoomed(true)}
         aria-label={t('photo.zoomOpen')}
-        className="flex w-full cursor-zoom-in justify-center rounded-lg bg-black/80"
+        className="flex h-64 w-full cursor-zoom-in items-center justify-center rounded-lg bg-black/80 sm:h-80"
       >
         <span className="relative block max-w-full">
           <img
