@@ -17,8 +17,105 @@ const item = (group: ReleaseGroup, ua: string, ru: string, en: string): ReleaseI
  */
 export const RELEASES: readonly ReleaseDay[] = [
   {
-    date: '2026-11-07',
+    date: '2026-11-08',
+    version: 'v2.1147',
     items: [
+      item(
+        'improved',
+        'Вимова марки: англійський запис для всіх марок, а коли немає запису від носія, кнопка вимовляє назву голосом браузера; на Android у встановленому застосунку кнопка «Слухати» тепер працює.',
+        'Произношение марки: английская запись для всех марок, а когда нет записи носителя, кнопка произносит название голосом браузера; на Android в установленном приложении кнопка «Слушать» теперь работает.',
+        'Brand pronunciation: an English respelling for every make, and when there is no native-speaker clip the button reads the name with the browser voice; the "Listen" button now works in the installed Android app.'
+      ),
+      item(
+        'improved',
+        '«Копіювати все» і експорт тепер містять лоти українських аукціонів (SETAM, Prozorro.Sale): статус, місяць, стартову й продажну ціну та місце.',
+        '«Копировать всё» и экспорт теперь содержат лоты украинских аукционов (SETAM, Prozorro.Sale): статус, месяц, стартовую и продажную цену и место.',
+        '"Copy all info" and exports now include Ukrainian auction lots (SETAM, Prozorro.Sale): status, month, start and sale price, and location.'
+      ),
+      item(
+        'improved',
+        'Форма зворотного зв’язку швидше показує перевірку «Я не робот»: скрипт завантажується, щойно форма відкрилась.',
+        'Форма обратной связи быстрее показывает проверку «Я не робот»: скрипт загружается, как только форма открылась.',
+        'The contact form shows the "I am not a robot" check sooner: the script loads as soon as the form opens.'
+      ),
+      item(
+        'improved',
+        'Вхід через Telegram працює в ізольованому вікні всередині сторінки, тож віджет Telegram не має доступу до решти застосунку.',
+        'Вход через Telegram работает в изолированном окне внутри страницы, так что виджет Telegram не имеет доступа к остальному приложению.',
+        'Telegram sign-in runs in an isolated frame inside the page, so the Telegram widget cannot reach the rest of the app.'
+      ),
+      item(
+        'data',
+        'На /data-status видно, для яких марок ще немає запису вимови.',
+        'На /data-status видно, для каких марок ещё нет записи произношения.',
+        '/data-status shows which makes still have no pronunciation entry.'
+      ),
+      item(
+        'fix',
+        'Старі копії вимови марки на пристроях більше не застрягають: нові записи підвантажуються протягом доби.',
+        'Старые копии произношения марки на устройствах больше не залипают: новые записи подгружаются в течение суток.',
+        'Stale brand-pronunciation copies on devices no longer stick: new entries arrive within a day.'
+      )
+    ]
+  },
+  {
+    date: '2026-11-07',
+    version: 'v2.1133',
+    items: [
+      item(
+        'new',
+        'Кнопка «Запчастини» для BMW на картці номера й VIN та на сторінках марки й моделі: посилання на каталог запчастин realoem.com (з VIN - на сторінку саме цього авто).',
+        'Кнопка «Запчасти» для BMW на карточке номера и VIN и на страницах марки и модели: ссылка на каталог запчастей realoem.com (с VIN - на страницу именно этого авто).',
+        'A "Parts" button for BMW on the plate and VIN card and on make and model pages: a link to the realoem.com parts catalog (from a VIN, to that exact car\'s page).'
+      ),
+      item(
+        'new',
+        'Посилання на /alarms (мапа й втрати) тепер мають власні картки для попереднього перегляду; у втратах - тривалість війни в роках, місяцях і днях, а на мапі - кнопка «Поділитися».',
+        'Ссылки на /alarms (карта и потери) теперь имеют собственные карточки предпросмотра; в потерях - длительность войны в годах, месяцах и днях, а на карте - кнопка «Поделиться».',
+        'Links to /alarms (map and losses) now get their own preview cards; losses show the war duration in years, months and days, and the map has a share button.'
+      ),
+      item(
+        'new',
+        'Гра-гонки: повноекранний режим і вібрація при аварії на телефоні.',
+        'Игра-гонки: полноэкранный режим и вибрация при аварии на телефоне.',
+        'Racing game: an immersive full-screen mode and crash vibration on phones.'
+      ),
+      item(
+        'improved',
+        'Кольоровий фільтр на фото моделі: у каруселі лота модель іде останнім слайдом з перефарбуванням, а під фото з’явились мініатюри «перефарбоване / оригінал»; зі свайпом на оригінал.',
+        'Цветовой фильтр на фото модели: в карусели лота модель идёт последним слайдом с перекраской, а под фото появились миниатюры «перекрашенное / оригинал»; со свайпом на оригинал.',
+        'Colour filter on the model photo: in the lot carousel the model is the last slide, repainted, with "repainted / original" thumbnails under the photo and a swipe to the original.'
+      ),
+      item(
+        'improved',
+        'Мапа тривог: області під тривогою пульсують, а фонова мапа заповнює весь екран; на мапі підписи не стають замалими.',
+        'Карта тревог: области под тревогой пульсируют, а фоновая карта заполняет весь экран; на карте подписи не становятся слишком мелкими.',
+        'Alert map: regions under alert pulse, the background map fills the whole screen, and map labels keep a minimum readable size.'
+      ),
+      item(
+        'improved',
+        'Над шапкою з’являється смужка прогресу, щойно ви натиснули на посилання; у «Мої поширені фото» - лічильник активних посилань.',
+        'В шапке появляется полоска прогресса сразу после нажатия на ссылку; в «Мои расшаренные фото» - счётчик активных ссылок.',
+        'A progress line in the header starts as soon as you click a link; "My shared photos" shows a counter of active links.'
+      ),
+      item(
+        'improved',
+        'У версії застосунку внизу сторінки й на «Що нового» видно номер збірки; ігрові плитки на телефоні нижчі.',
+        'Версия приложения внизу страницы и на «Что нового» показывает номер сборки; игровые плитки на телефоне ниже.',
+        'The footer and "What\'s new" show the app build number; game tiles are shorter on phones.'
+      ),
+      item(
+        'fix',
+        'Фото лотів тепер ідуть перед фото моделі під доданим фото, а на картці «не знайдено» немає зайвого другого фото.',
+        'Фото лотов теперь идут перед фото модели под добавленным фото, а на карточке «не найдено» нет лишнего второго фото.',
+        'Lot photos now come before the model photo under an attached photo, and the "not found" card no longer shows a second photo.'
+      ),
+      item(
+        'fix',
+        'Невідомий файл маски кольору відповідає «не знайдено» замість кешованої помилки.',
+        'Неизвестный файл маски цвета отвечает «не найдено» вместо кэшированной ошибки.',
+        'An unknown colour-mask file now answers "not found" instead of a cached error.'
+      ),
       item(
         'new',
         'Кнопка з динаміком біля назви марки (сторінка марки, картка номера й VIN): як вимовляти марку українською, російською й англійською (з наголосом), а для частини марок ще й запис вимови від носія з Wikimedia Commons.',

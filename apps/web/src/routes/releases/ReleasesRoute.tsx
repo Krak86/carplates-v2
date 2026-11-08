@@ -6,6 +6,7 @@ import { RELEASES } from '@carplates/shared/releases'
 import Card from '@/components/ui/Card'
 import type { Lang } from '@/i18n'
 import { cn } from '@/lib/cn'
+import { LATEST_RELEASE_DATE } from '@/routes/releases/latest'
 import { RELEASE_GROUPS, RELEASE_GROUP_ICON } from '@/routes/releases/types'
 import type { ReleaseGroup } from '@/routes/releases/types'
 
@@ -141,8 +142,10 @@ export default function ReleasesRoute(): ReactNode {
                     <Card key={day.date} className="mb-3 last:mb-0">
                       <h3 className="mb-2 text-lg font-semibold">
                         <time dateTime={day.date}>{formatDate.format(new Date(day.date))}</time>
-                        {day.version && (
-                          <span className="ml-2 text-sm font-normal text-[var(--color-muted)]">{day.version}</span>
+                        {(day.date === LATEST_RELEASE_DATE ? __APP_VERSION__ : day.version) && (
+                          <span className="ml-2 text-sm font-normal text-[var(--color-muted)]">
+                            {day.date === LATEST_RELEASE_DATE ? __APP_VERSION__ : day.version}
+                          </span>
                         )}
                       </h3>
 
