@@ -1,9 +1,10 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import type { Speech } from './helpers'
 import { useBrandSpeechActions } from './use-brand-speech-actions'
 
-type Props = { speech: { text: string; lang: string } }
+type Props = { speech: Speech }
 
 /** Fallback for a make with no Commons clip: reads the respelling with the browser's synthetic voice, labelled as such. */
 export default function BrandSpeech({ speech }: Props): ReactNode {
