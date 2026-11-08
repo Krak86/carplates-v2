@@ -12,6 +12,7 @@ import { buildExportReport } from '@/lib/export-report'
 import type { ExportFormat, ExportInput, ExportVehicleInfo } from '@/lib/export-report'
 import { toCsv, toMarkdown, toPlainText } from '@/lib/record-formats'
 import {
+  auctionLotsQuery,
   caRecallsQuery,
   cncapRatingsQuery,
   euroNcapRatingsQuery,
@@ -117,7 +118,8 @@ export function useCopyAllInfoActions(params: CopyAllInfoParams): UseCopyAllInfo
       stackExchange,
       lemmy,
       stockNews,
-      wanted
+      wanted,
+      auctionLots
     ] = await Promise.all([
       plate ? safe(queryClient.ensureQueryData(plateHistoryQuery(plate))) : Promise.resolve(null),
       params.vinDecodeResults == null && vin ? safe(queryClient.ensureQueryData(vinQuery(vin))) : Promise.resolve(null),
@@ -197,6 +199,9 @@ export function useCopyAllInfoActions(params: CopyAllInfoParams): UseCopyAllInfo
         : Promise.resolve(null),
       plate || vin
         ? safe(queryClient.ensureQueryData({ ...wantedQuery(plate, vin), ...FAIL_FAST_OFFLINE }))
+        : Promise.resolve(null),
+      plate || vin
+        ? safe(queryClient.ensureQueryData({ ...auctionLotsQuery(plate, vin), ...FAIL_FAST_OFFLINE }))
         : Promise.resolve(null)
     ])
 
@@ -255,6 +260,7 @@ export function useCopyAllInfoActions(params: CopyAllInfoParams): UseCopyAllInfo
       stockNews,
       origin,
       wanted,
+      auctionLots,
       lang: i18n.language
     }
   }

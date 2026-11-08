@@ -25,6 +25,23 @@ declare global {
 
 let loading: Promise<TurnstileApi> | null = null
 
+/**
+ * Starts the TLS handshake and the script download before the widget mounts (the contact form first waits for its config
+ * request), so the challenge itself starts as soon as the site key arrives. Safe to call repeatedly.
+ */
+export function warmUpTurnstile(): void {
+  if (document.head.querySelector('link[data-turnstile-warmup]')) return
+  const connect = document.createElement('link')
+  connect.rel = 'preconnect'
+  connect.href = 'https://challenges.cloudflare.com'
+  connect.dataset.turnstileWarmup = ''
+  const preload = document.createElement('link')
+  preload.rel = 'preload'
+  preload.as = 'script'
+  preload.href = SCRIPT_SRC
+  document.head.append(connect, preload)
+}
+
 export function loadTurnstile(): Promise<TurnstileApi> {
   loading ??= new Promise<TurnstileApi>((resolve, reject) => {
     if (window.turnstile) return resolve(window.turnstile)

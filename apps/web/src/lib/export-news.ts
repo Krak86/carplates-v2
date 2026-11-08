@@ -130,7 +130,9 @@ export const SOURCE = {
     label: 'National Police of Ukraine (data.gov.ua)',
     url: 'https://data.gov.ua/dataset/2cd12755-834b-4c43-9026-fe356ce93af5'
   },
-  stolenIn: { label: 'stolen.in.ua', url: 'https://stolen.in.ua' }
+  stolenIn: { label: 'stolen.in.ua', url: 'https://stolen.in.ua' },
+  setam: { label: 'SETAM', url: 'https://setam.net.ua' },
+  prozorro: { label: 'Prozorro.Sale', url: 'https://prozorro.sale' }
 } as const satisfies Record<string, SourceEntry>
 
 const NEWS_OUTLET_URL: Readonly<Record<string, string>> = {
@@ -177,6 +179,15 @@ export function buildSourcesSection(input: ExportInput & ExportNewsInput, t: Tra
   add(SOURCE.nbu, input.fx)
   add(SOURCE.police, input.wanted)
   add(SOURCE.stolenIn, input.wanted?.historySource)
+  const lots = input.auctionLots?.lots ?? []
+  add(
+    SOURCE.setam,
+    lots.some(l => (l.source ?? 'setam') === 'setam')
+  )
+  add(
+    SOURCE.prozorro,
+    lots.some(l => l.source === 'prozorro')
+  )
 
   const outletKeys = new Set(
     (input.news?.items ?? []).map(

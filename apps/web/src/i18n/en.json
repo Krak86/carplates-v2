@@ -2075,6 +2075,8 @@
   "export.allVideos": "All videos",
   "export.wantedStatus": "Status",
   "export.wantedChecked": "Police list refreshed",
+  "export.status": "Status",
+  "export.auctionsSource": "SETAM and Prozorro.Sale auction lots that named this plate or VIN (data.gov.ua open data, CC BY; prozorro.sale). Prices in hryvnias; the month is when the lot last changed in the feed.",
   "export.originSource": "Wikidata (brand country and owners), NHTSA vPIC (plant and VIN prefix), hand-curated model plants",
   "export.wantedSource": "National Police of Ukraine open data: wanted vehicles and \"Garpun\" wanted plates (CC BY, data.gov.ua); history since Aug 2020: stolen.in.ua. Not an official certificate.",
   "export.sources": "Data sources",
