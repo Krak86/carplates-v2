@@ -21,11 +21,28 @@ export function ipaLangName(ipaLang: string | null, uiLang: string): string | nu
 }
 
 /**
- * The rows to show: only the UI language's own row when it has something to show (a respelling or an IPA), else every row that
- * does, in the API's order.
+ * The rows to show: the UI language's own row plus the English one (the KEE-ah style reading), each only when it has something to
+ * show (a respelling or an IPA); when the own row is empty, every row that has content, in the API's order.
  */
 export function visibleItems(items: BrandPronunciationItem[], uiLang: string): BrandPronunciationItem[] {
   const shown = items.filter(i => !!i.respell || !!i.ipa)
   const own = shown.filter(i => i.lang === uiLang)
-  return own.length ? own : shown
+  return own.length ? shown.filter(i => i.lang === uiLang || i.lang === 'en') : shown
+}
+
+/** Site language code -> BCP 47 tag for the browser speech voice. */
+const SPEECH_LANG: Record<string, string> = { ua: 'uk-UA', ru: 'ru-RU', en: 'en-US' }
+
+/** Text and language for the synthetic voice: the first row's respelling (stress marks and capitals dropped), or null. */
+export function speechOf(items: BrandPronunciationItem[]): { text: string; lang: string } | null {
+  const item = items.find(i => !!i.respell)
+  if (!item?.respell) return null
+  return {
+    text: item.respell
+      .normalize('NFD')
+      .replace(/\u0301/g, '')
+      .normalize('NFC')
+      .toLowerCase(),
+    lang: SPEECH_LANG[item.lang] ?? 'en-US'
+  }
 }

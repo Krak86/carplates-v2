@@ -8,7 +8,7 @@
 brand_slug,lang,ipa,ipa_lang,respell
 volkswagen,ua,,,Фо́льксваген
 volkswagen,ru,,,Фо́льксваген
-volkswagen,en,ˈfɔlksvaːɡn̩,de,
+volkswagen,en,ˈfɔlksvaːɡn̩,de,FOLKS-vah-gen
 lada,ua,,,Ла́да
 lada,ru,,,Ла́да
 renault,ua,,,Рено́
@@ -25,7 +25,7 @@ toyota,ru,,,Тойо́та
 toyota,en,,,toy-YOH-ta
 ford,ua,,,Форд
 ford,ru,,,Форд
-ford,en,fɔːd,en,
+ford,en,fɔːd,en,FORD
 mercedes-benz,ua,,,Мерседе́с-Бенц
 mercedes-benz,ru,,,Мерседе́с-Бенц
 mercedes-benz,en,mɛʁˈtseːdəs bɛnts,de,mer-SAY-dess BENZ
@@ -36,7 +36,7 @@ hyundai,ru,,,Хёндэ́
 hyundai,en,ˈhʌndeɪ,en,HUN-day
 nissan,ua,nisːan,ja,Ні́ссан
 nissan,ru,nisːan,ja,Ни́ссан
-nissan,en,ˈnɪsɑːn,en,
+nissan,en,ˈnɪsɑːn,en,NISS-ahn
 bmw,ua,,,Бе-Ем-Ве
 bmw,ru,,,Бэ-Эм-Вэ
 bmw,en,,,bee-em-DUB-ul-yoo
@@ -46,13 +46,13 @@ chevrolet,ua,,,Шевроле́
 chevrolet,ru,,,Шевроле́
 kia,ua,,,Кі́а
 kia,ru,,,Ки́а
-kia,en,ˈkiːə,en,KEE-uh
+kia,en,ˈkiːə,en,KEE-ah
 mitsubishi,ua,,,Міцубі́сі
 mitsubishi,ru,,,Мицуби́си
 mitsubishi,en,mitsɯbiɕi,ja,mit-soo-BEE-shee
 mazda,ua,,,Ма́зда
 mazda,ru,,,Ма́зда
-mazda,en,ˈmæzdə,en,
+mazda,en,ˈmæzdə,en,MAHZ-duh
 peugeot,ua,,,Пежо́
 peugeot,ru,,,Пежо́
 honda,ua,honda,ja,Хо́нда
@@ -62,10 +62,10 @@ citroen,ru,,,Ситрое́н
 citroen,en,,,SEE-tro-en
 fiat,ua,,,Фіа́т
 fiat,ru,,,Фиа́т
-fiat,en,ˈfiːat,it,
+fiat,en,ˈfiːat,it,FEE-aht
 lexus,ua,,,Ле́ксус
 lexus,ru,,,Ле́ксус
-lexus,en,ˈlɛksəs,en,
+lexus,en,ˈlɛksəs,en,LEK-suss
 daewoo,ua,,,Деу́
 daewoo,ru,,,Дэу́
 daewoo,en,,,DAY-woo
@@ -82,10 +82,10 @@ geely,ru,,,Джи́ли
 geely,en,ˈdʒiːli,en,JEE-lee
 jeep,ua,,,Джип
 jeep,ru,,,Джип
-jeep,en,dʒiːp,en,
+jeep,en,dʒiːp,en,JEEP
 volvo,ua,ˈvɔlvʊ,sv,Во́льво
 volvo,ru,ˈvɔlvʊ,sv,Во́льво
-volvo,en,ˈvɒlvoʊ,en,
+volvo,en,ˈvɒlvoʊ,en,VOL-voh
 suzuki,ua,,,Судзу́кі
 suzuki,ru,,,Судзу́ки
 suzuki,en,sʊˈzuːki,en,suh-ZOO-kee
@@ -96,16 +96,16 @@ tesla,ua,,,Те́сла
 tesla,ru,,,Те́сла
 land-rover,ua,,,Ленд Ро́вер
 land-rover,ru,,,Лендро́вер
-land-rover,en,ˈlænd ˌrəʊvə,en,
+land-rover,en,ˈlænd ˌrəʊvə,en,LAND ROH-vur
 seat,ua,,,Сеа́т
 seat,ru,,,Сеа́т
 seat,en,ˈse.at,es,SAY-aht
 dodge,ua,,,Додж
 dodge,ru,,,Додж
-dodge,en,dɒdʒ,en,
+dodge,en,dɒdʒ,en,DODJ
 infiniti,ua,,,Інфіні́ті
 infiniti,ru,,,Инфини́ти
-infiniti,en,ɪnˈfɪnɪti,en,
+infiniti,en,ɪnˈfɪnɪti,en,in-FIN-ih-tee
 porsche,ua,,,По́рше
 porsche,ru,,,По́рше
 porsche,en,,,POR-shuh
@@ -117,7 +117,7 @@ uaz,ru,ʊˈas,ru,УАЗ
 uaz,en,ʊˈas,ru,oo-AHZ
 smart,ua,,,Смарт
 smart,ru,,,Смарт
-smart,en,smɑːt,en,
+smart,en,smɑːt,en,SMART
 byd,ua,,,Бі-Вай-Ді
 byd,ru,,,Би-Вай-Ди
 byd,en,,,bee-why-DEE
@@ -125,13 +125,13 @@ azlk,ua,,,А-Зе-Ел-Ка
 azlk,ru,,,А-Зэ-Эл-Ка
 mini,ua,,,Мі́ні
 mini,ru,,,Ми́ни
-mini,en,ˈmɪni,en,
+mini,en,ˈmɪni,en,MIN-ee
 chrysler,ua,,,Кра́йслер
 chrysler,ru,,,Кра́йслер
-chrysler,en,ˈkraɪzlər,en,
+chrysler,en,ˈkraɪzlər,en,KRY-sler
 acura,ua,,,Аку́ра
 acura,ru,,,Аку́ра
-acura,en,ˈækjʊrə,en,
+acura,en,ˈækjʊrə,en,uh-KYOOR-uh
 jaguar,ua,,,Ягуа́р
 jaguar,ru,,,Ягуа́р
 great-wall,ua,,,Грейт Вол
@@ -141,7 +141,7 @@ izh,ru,ɨʂ,ru,Иж
 izh,en,ɨʂ,ru,ihzh
 lincoln,ua,,,Лі́нкольн
 lincoln,ru,,,Ли́нкольн
-lincoln,en,ˈlɪŋkən,en,
+lincoln,en,ˈlɪŋkən,en,LING-kun
 alfa-romeo,ua,,,А́льфа Роме́о
 alfa-romeo,ru,,,А́льфа Роме́о
 mg,ua,,,Ем-Джі
@@ -171,7 +171,7 @@ saab,ua,,,Сааб
 saab,ru,,,Сааб
 rover,ua,,,Ро́вер
 rover,ru,,,Ро́вер
-rover,en,ˈrəʊvə,en,
+rover,en,ˈrəʊvə,en,ROH-vur
 lancia,ua,,,Ля́нча
 lancia,ru,,,Ля́нча
 gmc,ua,,,Джі-Ем-Сі
@@ -180,18 +180,18 @@ maserati,ua,,,Мазера́ті
 maserati,ru,,,Мазера́ти
 bentley,ua,,,Бе́нтлі
 bentley,ru,,,Бе́нтли
-bentley,en,ˈbɛntli,en,
+bentley,en,ˈbɛntli,en,BENT-lee
 faw,ua,,,ФАВ
 faw,ru,,,ФАВ
 polestar,ua,,,По́лстар
 polestar,ru,,,По́лстар
-polestar,en,ˈpoʊlstɑːr,en,
+polestar,en,ˈpoʊlstɑːr,en,POHL-star
 isuzu,ua,,,Ісу́дзу
 isuzu,ru,,,Ису́дзу
 isuzu,en,isɯzɯ,ja,ee-SOO-zoo
 hummer,ua,,,Ге́ммер
 hummer,ru,,,Ха́ммер
-hummer,en,ˈhʌmər,en,
+hummer,en,ˈhʌmər,en,HUM-ur
 ds,ua,,,Ді-Ес
 ds,ru,,,Ди-Эс
 ds,en,,,dee-ESS
@@ -199,12 +199,12 @@ cupra,ua,,,Ку́пра
 cupra,ru,,,Ку́пра
 samsung,ua,,,Са́мсунг
 samsung,ru,,,Са́мсунг
-samsung,en,ˈsæmsʌŋ,en,
+samsung,en,ˈsæmsʌŋ,en,SAM-sung
 chana,ua,,,Ча́на
 chana,ru,,,Ча́на
 pontiac,ua,,,По́нтіак
 pontiac,ru,,,По́нтиак
-pontiac,en,ˈpɒntiæk,en,
+pontiac,en,ˈpɒntiæk,en,PON-tee-ak
 iveco,ua,,,Іве́ко
 iveco,ru,,,Иве́ко
 iveco,en,iˈvɛko,it,ee-VEH-ko
@@ -212,17 +212,17 @@ denza,ua,,,Де́нза
 denza,ru,,,Де́нза
 rivian,ua,,,Рі́віан
 rivian,ru,,,Ри́виан
-rivian,en,ˈrɪviən,en,
+rivian,en,ˈrɪviən,en,RIV-ee-un
 scion,ua,,,Са́ян
 scion,ru,,,Са́йон
-scion,en,ˈsaɪən,en,
+scion,en,ˈsaɪən,en,SY-un
 jetour,ua,,,Джетур
 jetour,ru,,,Джетур
 changan,ua,,,Чанга́н
 changan,ru,,,Чанга́н
 ram,ua,,,Рам
 ram,ru,,,Рэм
-ram,en,ræm,en,
+ram,en,ræm,en,RAM
 saipa,ua,,,Са́йпа
 saipa,ru,,,Са́йпа
 hafei,ua,,,Хафе́й
@@ -231,7 +231,7 @@ samand,ua,,,Саманд
 samand,ru,,,Саманд
 rolls-royce,ua,,,Ро́ллс-Ро́йс
 rolls-royce,ru,,,Ро́ллс-Ро́йс
-rolls-royce,en,ˌrɒlz ˈrɔɪs,en,
+rolls-royce,en,ˌrɒlz ˈrɔɪs,en,ROLZ ROYSS
 soueast,ua,,,Саутіст
 soueast,ru,,,Саутист
 wartburg,ua,,,Ва́ртбург
@@ -248,25 +248,25 @@ plymouth,ua,,,Плі́мут
 plymouth,ru,,,Пли́мут
 genesis,ua,,,Дже́несіс
 genesis,ru,,,Дже́незис
-genesis,en,ˈdʒɛnəsɪs,en,
+genesis,en,ˈdʒɛnəsɪs,en,JEN-uh-sis
 kraz,ua,,,КрАЗ
 kraz,ru,kras,ru,КрАЗ
 kraz,en,kras,ru,krahz
 man,ua,ɛm aː ɛn,de,Ман
 man,ru,ɛm aː ɛn,de,МАН
-man,en,ɛm aː ɛn,de,
+man,en,ɛm aː ɛn,de,MAHN
 dongfeng,ua,,,Дунфе́н
 dongfeng,ru,,,Дунфэ́н
 abarth,ua,,,А́барт
 abarth,ru,,,А́барт
 proton,ua,,,Про́тон
 proton,ru,,,Про́тон
-proton,en,ˈproʊtɒn,en,
+proton,en,ˈproʊtɒn,en,PROH-ton
 lamborghini,ua,,,Ламборгі́ні
 lamborghini,ru,lamborˈɡiːni,it,Ламборги́ни
 vauxhall,ua,,,Во́ксхолл
 vauxhall,ru,,,Во́ксхолл
-vauxhall,en,ˈvɒksɔːl,en,
+vauxhall,en,ˈvɒksɔːl,en,VOX-hall
 gonow,ua,,,Гоноу
 gonow,ru,,,Гоноу
 zotye,ua,,,Зоті
@@ -277,15 +277,59 @@ baic-motor,ua,,,БАІК
 baic-motor,ru,,,БАИК
 freightliner,ua,,,Фре́йтлайнер
 freightliner,ru,,,Фре́йтлайнер
-freightliner,en,ˈfreɪtlaɪnər,en,
+freightliner,en,ˈfreɪtlaɪnər,en,FRAYT-ly-ner
 daf,ua,,,ДАФ
 daf,ru,,,ДАФ
-daf,en,daf,nl,
+daf,en,daf,nl,DAF
 mercury,ua,,,Ме́рк'юрі
 mercury,ru,,,Ме́ркури
-mercury,en,ˈmɜːrkjʊri,en,
+mercury,en,ˈmɜːrkjʊri,en,MUR-kyuh-ree
 maybach,ua,,,Ма́йбах
 maybach,ru,,,Ма́йбах
 saturn,ua,,,Са́турн
 saturn,ru,,,Са́турн
-saturn,en,ˈsætərn,en,
+saturn,en,ˈsætərn,en,SAT-urn
+lada,en,,,LAH-dah
+opel,en,,,OH-pul
+audi,en,,,OW-dee
+chevrolet,en,,,SHEV-roh-lay
+peugeot,en,,,puh-ZHOH
+honda,en,,,HON-duh
+subaru,en,,,SOO-buh-roo
+tesla,en,,,TESS-luh
+azlk,en,,,ah-zeh-EL-kah
+jaguar,en,,,JAG-wahr
+great-wall,en,,,GRAYT WAWL
+alfa-romeo,en,,,AL-fuh roh-MAY-oh
+zeekr,en,,,ZEE-kur
+cadillac,en,,,KAD-ih-lak
+luaz,en,,,loo-AHZ
+jac,en,,,jay-ay-SEE
+haval,en,,,HAH-vahl
+lifan,en,,,LEE-fahn
+ikco,en,,,IK-koh
+saab,en,,,SAHB
+lancia,en,,,LAN-chah
+gmc,en,,,jee-em-SEE
+maserati,en,,,mah-zeh-RAH-tee
+faw,en,,,eff-ay-DUB-ul-yoo
+cupra,en,,,KOO-prah
+chana,en,,,CHAH-nah
+denza,en,,,DEN-zah
+jetour,en,,,JEH-toor
+changan,en,,,CHAHNG-ahn
+saipa,en,,,SY-pah
+hafei,en,,,HAH-fay
+samand,en,,,sah-MAHND
+soueast,en,,,soo-EEST
+landwind,en,,,LAND-wind
+brilliance,en,,,BRIL-yunss
+plymouth,en,,,PLIM-uth
+dongfeng,en,,,DONG-fung
+abarth,en,,,AH-barth
+lamborghini,en,,,lam-bor-GEE-nee
+gonow,en,,,GOH-now
+zotye,en,,,ZOH-tee-eh
+aston-martin,en,,,ASS-ton MAR-tin
+baic-motor,en,,,bee-ay-eye-SEE MOH-tur
+maybach,en,,,MY-bahk

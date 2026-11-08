@@ -4795,6 +4795,7 @@
   "brandPronounce.ipa": "МФА",
   "brandPronounce.error": "Не удалось загрузить произношение",
   "brandPronounce.listen": "Послушать",
+  "brandPronounce.synthetic": "Синтезированный голос браузера, произношение приблизительное",
   "brandPronounce.listenIn": "Послушать ({{lang}})",
   "brandPronounce.audioError": "Не удалось воспроизвести звук",
   "brandPronounce.credit": "Звук: {{credit}}, Wikimedia Commons",
