@@ -18,8 +18,14 @@ const item = (group: ReleaseGroup, ua: string, ru: string, en: string): ReleaseI
 export const RELEASES: readonly ReleaseDay[] = [
   {
     date: '2026-11-08',
-    version: 'v2.1154',
+    version: 'v2.1155',
     items: [
+      item(
+        'new',
+        'Фото авто в шапці можна гортати свайпом вліво-вправо, як у розділі зі стоковими фото.',
+        'Фото авто в шапке можно листать свайпом влево-вправо, как в разделе со стоковыми фото.',
+        'The car photos in the hero can now be swiped left and right, like the stock photos section.'
+      ),
       item(
         'fix',
         'Фото авто більше не «стрибає» по висоті, коли перемикаєш фото у смузі мініатюр: слот завжди однієї висоти.',

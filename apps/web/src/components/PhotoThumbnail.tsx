@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import type { ReactNode } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import type { PointerEvent, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { PlateCandidate } from '@carplates/shared'
 
@@ -24,6 +24,7 @@ type Props = {
 }
 
 const SKIP_AFTER_MS = 8000
+const SWIPE_MIN_PX = 40
 
 export default function PhotoThumbnail({
   url,
@@ -39,6 +40,21 @@ export default function PhotoThumbnail({
   const { t } = useTranslation()
   const [zoomed, setZoomed] = useState(false)
   const [slow, setSlow] = useState(false)
+  const swipe = useRef<{ x: number; y: number; moved: boolean } | null>(null)
+
+  // Horizontal swipe steps through the images; `touch-pan-y` leaves vertical page scroll alone, and a swipe must not open the zoom.
+  const handlePointerDown = (e: PointerEvent<HTMLButtonElement>): void => {
+    swipe.current = { x: e.clientX, y: e.clientY, moved: false }
+  }
+  const handlePointerUp = (e: PointerEvent<HTMLButtonElement>): void => {
+    const start = swipe.current
+    if (!start || !onPrev || !onNext) return
+    const dx = e.clientX - start.x
+    if (Math.abs(dx) > SWIPE_MIN_PX && Math.abs(dx) > Math.abs(e.clientY - start.y)) {
+      start.moved = true
+      ;(dx < 0 ? onNext : onPrev)()
+    }
+  }
 
   useEffect(() => {
     if (!pending) return
@@ -53,14 +69,19 @@ export default function PhotoThumbnail({
     <div className="relative w-full max-w-content">
       <button
         type="button"
-        onClick={() => setZoomed(true)}
+        onPointerDown={handlePointerDown}
+        onPointerUp={handlePointerUp}
+        onClick={() => {
+          if (!swipe.current?.moved) setZoomed(true)
+        }}
         aria-label={t('photo.zoomOpen')}
-        className="flex h-64 w-full cursor-zoom-in items-center justify-center rounded-lg bg-black/80 sm:h-80"
+        className="flex h-64 w-full cursor-zoom-in touch-pan-y items-center justify-center rounded-lg bg-black/80 sm:h-80"
       >
         <span className="relative block max-w-full">
           <img
             src={url}
             alt=""
+            draggable={false}
             referrerPolicy="no-referrer"
             className="block max-h-64 max-w-full rounded-lg sm:max-h-80"
           />
