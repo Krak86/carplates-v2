@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
@@ -6,6 +7,7 @@ import { CONTACT_COOLDOWN_MINUTES, CONTACT_MAX_LINKS, CONTACT_MESSAGE_MAX, CONTA
 import TurnstileSlot from '@/components/auth/TurnstileSlot'
 import { useContactActions } from '@/components/contact/use-contact-actions'
 import { contactConfigQuery } from '@/lib/queries'
+import { warmUpTurnstile } from '@/lib/turnstile'
 
 const INPUT_CLASS =
   'w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] px-3 py-2 text-sm outline-none focus:border-[var(--color-primary)]'
@@ -16,6 +18,10 @@ export default function ContactForm(): ReactNode {
   const { t } = useTranslation()
   const config = useQuery(contactConfigQuery())
   const form = useContactActions(config.data?.turnstileSiteKey ?? null)
+
+  useEffect(() => {
+    warmUpTurnstile()
+  }, [])
 
   const submitKey = form.signedIn
     ? 'contact.form.submit'

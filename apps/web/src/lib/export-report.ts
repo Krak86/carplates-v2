@@ -36,6 +36,8 @@ import {
 } from '@/components/EstimatedValue.helpers'
 import { buildGenerationSection, buildSizeSection } from '@/lib/export-size'
 import { buildNewsSections, buildSourcesSection } from '@/lib/export-news'
+import { buildAuctionsSection } from '@/lib/export-auctions'
+import type { ExportAuctionsInput } from '@/lib/export-auctions'
 import { buildOriginSection, buildWantedSection, WANTED_TONE, wantedVerdict } from '@/lib/export-verify'
 import type { ExportVerifyInput } from '@/lib/export-verify'
 import type { ExportNewsInput } from '@/lib/export-news'
@@ -168,6 +170,7 @@ export type ExportReport = {
 export type ExportVehicleInfo = { brand: string | null; model: string | null; year: number | null; body: string | null }
 
 export type ExportInput = ExportNewsInput &
+  ExportAuctionsInput &
   ExportVerifyInput & {
     vehicle: ExportVehicleInfo
     plate: string | null
@@ -935,6 +938,7 @@ export function buildExportReport(input: ExportInput, t: Translate): ExportRepor
     buildVdbSection(input, t),
     buildOriginSection(input, t),
     buildWantedSection(input, t),
+    buildAuctionsSection(input, t, input.lang),
     buildRdwSection(input, t),
     buildGenerationSection(input, t),
     buildSizeSection(input, t),

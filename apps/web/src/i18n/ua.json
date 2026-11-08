@@ -2553,6 +2553,8 @@
   "export.allVideos": "Усі відео",
   "export.wantedStatus": "Статус",
   "export.wantedChecked": "Список поліції оновлено",
+  "export.status": "Статус",
+  "export.auctionsSource": "Лоти СЕТАМ і Prozorro.Sale, що згадують цей номер або VIN (відкриті дані data.gov.ua, CC BY; prozorro.sale). Ціни в гривнях; місяць - коли лот востаннє змінився у файлі.",
   "export.originSource": "Wikidata (країна та власники бренду), NHTSA vPIC (завод і префікс VIN), вручну зібрані заводи моделей",
   "export.wantedSource": "Відкриті дані Національної поліції України: авто в розшуку та номерні знаки «Гарпун» (CC BY, data.gov.ua); історія з серпня 2020: stolen.in.ua. Не є офіційною довідкою.",
   "export.sources": "Джерела даних",
