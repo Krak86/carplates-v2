@@ -550,8 +550,8 @@ the "title mentions the model" guard; a Wikidata `P18` query could replace the l
 
 Plan and handoff: `docs/wiki-recolor-plan.md`. Table `registry.wiki_image_paint` (migration 0101), `/api/wiki/recolor` + `/api/wiki/paint/:id.webp`, shared `applyPaint`.
 
-- [ ] After deploy: migration 0101 applied (blue/green safe, new table); add `/api/wiki/recolor` and `starts_with /api/wiki/paint/` to the Cloudflare Cache Rule (`docs/deploy.md`, check MISS then HIT); the scan job (step 9) is not scheduled yet, so the table stays empty and `recolor` answers `null`.
-- [ ] After deploy: check the filter in a browser on a real plate once the scan has run (canvas aligned with the photo, pill toggles, credit says "modified: colour"); until the scan job runs no photo gets a filter.
+- [x] Deployed 2026-11-07 (migration 0101, Cloudflare rule, nightly job); masks loaded on the VPS 2026-11-08.
+- [ ] Check the filter in a browser on a real plate on carsua.app (canvas aligned with the photo, pill toggles, credit says "modified: colour").
 - [ ] Steps 7-9: candidate photos, photo strip, rollout (scan job, `/data-status` row, gallery review).
 
 ### Car reviews, videos, 3D & 360° — mostly shipped (2026-10-03 → 05); open items below
@@ -1365,9 +1365,11 @@ Plan in 9 steps, [docs/wiki-recolor-plan.md](docs/wiki-recolor-plan.md); prototy
 - [x] Cloudflare purge done (owner, 2026-11-07): `zzz.webp` answers 400, `000...0.webp` 404, BYPASS, no `immutable`
 - [x] `wiki-paint.ts --model X` (repeatable, with `--brand`) to scan one model; helper `wiki-paint-scope.ts` + test
 - [x] Touareg single-model scan skipped by the owner (covered by the full scan)
-- [ ] Full local scan (owner runs it in their own terminal, resumable, Ctrl+C safe): PowerShell: `foreach ($i in 1..16) { pnpm ingest:wiki-paint --limit 1500 --rps 1; if ($LASTEXITCODE -ne 0) { break } }` (about 65 min per batch, 16 batches / about 17 h; stop when a run prints `scanning 0 photo(s)`)
-- [ ] Step C, last, after the full scan: `pg_dump --data-only -t registry.wiki_image_paint` locally (about 300-350 MB) and restore on the VPS (owner; `ON CONFLICT DO NOTHING` into a staging table if the VPS already has nightly rows; never TRUNCATE / `db:seed`; not while the 00:30 cron runs), then check `/data-status` and `SELECT status, count(*)`
-- [ ] Check the wiki-paint row on `/data-status` and the `job_runs` batch size over the next nights (1 500 photos each, about 15 nights)
+- [x] Full local scan done (2026-11-08): 22,296 of 22,300 files (13,339 ok, 8,957 skip, 381 MB of masks); the last 4 photos answer HTTP 404 upstream
+- [x] Step C done (2026-11-08): `pg_dump -Fc --data-only -t registry.wiki_image_paint` inside the container (437 MB), `scp`, loaded into a staging table on the VPS, merged with `ON CONFLICT (image_url) DO UPDATE ... WHERE algo < excluded.algo`; VPS now 22,299 rows at algo 2 (13,342 ok, 8,957 skip); staging table and dump files removed
+- [ ] The 4 dead-URL photos (404) are retried by every scan / nightly run: mark them failed in `wiki_image` or have `wiki-paint.ts` store a skip row for a 404 (optional)
+- [ ] Browser check on carsua.app with a real mask plate (00002ХВ Passat): pill, filter, credit
+- [ ] Check the wiki-paint row on `/data-status` and the `job_runs` batch size over the next nights (now only new / algo-bumped photos, so batches are small)
 
 ## Brand pronunciation (planned 2026-11-06; live on prod 2026-11-08, only the owner sound check is open)
 

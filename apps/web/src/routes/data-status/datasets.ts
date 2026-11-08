@@ -159,7 +159,7 @@ export const DATASETS: readonly Dataset[] = [
     cadence: 'daily',
     job: 'wiki-paint',
     noteKey: 'dataStatus.note.wikiPaint',
-    refreshedOn: '2026-11-06'
+    refreshedOn: '2026-11-08'
   },
   {
     id: 'models3d',
