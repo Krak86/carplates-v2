@@ -1388,6 +1388,8 @@ Speaker icon beside the brand name on catalog pages; lazy popup with ua / ru / e
   - [x] Play one Commons clip on prod and confirm no CSP `media-src` violation in the console (`media-src https:`); the credit line (author, licence) is visible. Checked 2026-11-08 on `/cars/skoda`: the clip request returns 206, no `media-src` violation (audio itself not heard by Claude).
   - [x] `/data-status` returns `brandPronounce: 302` (2026-11-08).
   - [x] The monthly `brand-pronounce` cron line (7th, 06:30) is installed on the VPS (`crontab -l`, 2026-11-08; installed by `deploy-ingest`).
+  - [x] 2026-11-08 follow-up (English respelling for all 109 makes, speechSynthesis fallback, gap line): ingest re-run on the VPS (327 rows, no WARNING), `/data-status` `gaps.brandPronounce = 0`, Cloudflare `/api/brands/` purged, origin returns `KEE-ah`; headless Chrome: Listen button + synthetic note, `speechSynthesis.speak` called with the plain respelling
+  - [ ] Owner, after the `brandPronunciationQuery` key bump (`v2`, staleTime 1 day) is deployed: on the phone open Kia (`Кі́а` + `KEE-ah`), press Listen on a make without a clip (synthetic voice) and check the Ukrainian voice exists
   - [ ] Owner: press play on a clip once with sound (headless Chrome fetched `De-Volkswagen.ogg` with no console error, audio not heard).
 
 ## Later, conditional
