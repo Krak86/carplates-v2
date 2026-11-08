@@ -112,6 +112,11 @@ export default tseslint.config(
   // eslint-plugin-react is omitted: 7.37.x calls context.getFilename(), removed
   // in ESLint 10. react-hooks (incl. the React Compiler family) covers what
   // matters here.
+  // Plain browser scripts served as-is from public/ (no bundler, no TS).
+  {
+    files: ['apps/web/public/*.js'],
+    languageOptions: { sourceType: 'script', globals: { ...globals.browser } }
+  },
   {
     files: ['apps/web/**/*.{ts,tsx}'],
     plugins: { 'react-hooks': reactHooks, ...localPlugins },
