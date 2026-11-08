@@ -18,8 +18,14 @@ const item = (group: ReleaseGroup, ua: string, ru: string, en: string): ReleaseI
 export const RELEASES: readonly ReleaseDay[] = [
   {
     date: '2026-11-08',
-    version: 'v2.1153',
+    version: 'v2.1154',
     items: [
+      item(
+        'fix',
+        'Фото авто більше не «стрибає» по висоті, коли перемикаєш фото у смузі мініатюр: слот завжди однієї висоти.',
+        'Фото авто больше не «прыгает» по высоте при переключении фото в полосе миниатюр: слот всегда одной высоты.',
+        'The car photo no longer jumps in height when you switch images in the thumbnail strip: the slot keeps one fixed height.'
+      ),
       item(
         'improved',
         'Перевірка Cloudflare на формі входу та в контактах більше не показує блок «Успішно»: віджет з’являється лише коли потрібен клік.',
