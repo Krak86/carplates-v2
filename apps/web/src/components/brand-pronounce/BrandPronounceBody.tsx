@@ -6,7 +6,8 @@ import Spinner from '@/components/ui/Spinner'
 import { brandPronunciationQuery } from '@/lib/queries'
 
 import BrandAudio from './BrandAudio'
-import { ipaLangName, visibleItems } from './helpers'
+import BrandSpeech from './BrandSpeech'
+import { ipaLangName, speechOf, visibleItems } from './helpers'
 
 type Props = { slug: string }
 
@@ -19,6 +20,7 @@ export default function BrandPronounceBody({ slug }: Props): ReactNode {
   if (isError) return <p className="text-[var(--color-muted)]">{t('brandPronounce.error')}</p>
 
   const items = visibleItems(data.items, i18n.language)
+  const speech = speechOf(items)
 
   return (
     <>
@@ -44,7 +46,7 @@ export default function BrandPronounceBody({ slug }: Props): ReactNode {
           )
         })}
       </ul>
-      {data.audio && <BrandAudio audio={data.audio} />}
+      {data.audio ? <BrandAudio audio={data.audio} /> : speech && <BrandSpeech speech={speech} />}
     </>
   )
 }

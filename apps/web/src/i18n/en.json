@@ -4305,6 +4305,7 @@
   "brandPronounce.ipa": "IPA",
   "brandPronounce.error": "Could not load the pronunciation",
   "brandPronounce.listen": "Listen",
+  "brandPronounce.synthetic": "Synthetic browser voice, pronunciation is approximate",
   "brandPronounce.listenIn": "Listen ({{lang}})",
   "brandPronounce.audioError": "Could not play the audio",
   "brandPronounce.credit": "Audio: {{credit}}, Wikimedia Commons",

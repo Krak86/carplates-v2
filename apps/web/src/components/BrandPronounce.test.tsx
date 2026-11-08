@@ -2,7 +2,7 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { ipaLangName, visibleItems } from '@/components/brand-pronounce/helpers'
+import { ipaLangName, speechOf, visibleItems } from '@/components/brand-pronounce/helpers'
 import { i18nReady } from '@/i18n'
 
 await i18nReady
@@ -61,7 +61,10 @@ describe('BrandPronounce', () => {
 })
 
 describe('BrandPronounce audio', () => {
-  afterEach(cleanup)
+  afterEach(() => {
+    cleanup()
+    vi.unstubAllGlobals()
+  })
 
   const play = vi.fn().mockResolvedValue(undefined)
   const created: string[] = []
@@ -98,6 +101,31 @@ describe('BrandPronounce audio', () => {
     expect(play).toHaveBeenCalledOnce()
   })
 
+  it('falls back to the synthetic voice without audio, speaking the plain respelling', async () => {
+    const speak = vi.fn()
+    vi.stubGlobal('speechSynthesis', { speak, cancel: vi.fn() })
+    vi.stubGlobal(
+      'SpeechSynthesisUtterance',
+      class {
+        lang = ''
+        rate = 1
+        onend = null
+        onerror = null
+        text: string
+        constructor(text: string) {
+          this.text = text
+        }
+      }
+    )
+    api.getBrandPronunciation.mockResolvedValue(SKODA)
+    renderButton()
+    fireEvent.click(screen.getByRole('button'))
+    await screen.findByText('SHKOH-da', {}, { timeout: 5000 })
+    fireEvent.click(screen.getByRole('button', { name: /Listen|Послухати|Послушать/ }))
+    expect(speak).toHaveBeenCalledOnce()
+    expect(speak.mock.calls[0]?.[0]).toMatchObject({ text: 'shkoh-da', lang: 'en-US' })
+  })
+
   it('has no play button without audio', async () => {
     api.getBrandPronunciation.mockResolvedValue(SKODA)
     renderButton()
@@ -121,7 +149,8 @@ describe('brand-pronounce helpers', () => {
       { lang: 'ru', ipa: null, ipaLang: null, respell: 'Шкода' },
       { lang: 'en', ipa: 'ˈʃkoda', ipaLang: 'cs', respell: null }
     ] as never
-    expect(visibleItems(items, 'ru').map(i => i.lang)).toEqual(['ru'])
+    expect(visibleItems(items, 'ru').map(i => i.lang)).toEqual(['ru', 'en'])
+    expect(speechOf(items)).toEqual({ text: 'шкода', lang: 'ru-RU' })
     expect(visibleItems(items, 'ua').map(i => i.lang)).toEqual(['ru', 'en'])
   })
 })
