@@ -33,10 +33,10 @@ export function visibleItems(items: BrandPronunciationItem[], uiLang: string): B
 /** Site language code -> BCP 47 tag for the browser speech voice. */
 const SPEECH_LANG: Record<string, string> = { ua: 'uk-UA', ru: 'ru-RU', en: 'en-US' }
 
-/** Text and language for the synthetic voice: the first row's respelling (stress marks and capitals dropped), or null. */
-export function speechOf(items: BrandPronunciationItem[]): { text: string; lang: string } | null {
-  const item = items.find(i => !!i.respell)
-  if (!item?.respell) return null
+export type Speech = { text: string; lang: string; fallback?: Speech }
+
+function speechOfItem(item: BrandPronunciationItem): Speech | null {
+  if (!item.respell) return null
   return {
     text: item.respell
       .normalize('NFD')
@@ -45,4 +45,17 @@ export function speechOf(items: BrandPronunciationItem[]): { text: string; lang:
       .toLowerCase(),
     lang: SPEECH_LANG[item.lang] ?? 'en-US'
   }
+}
+
+/**
+ * Text and language for the synthetic voice: the first row's respelling (stress marks and capitals dropped), or null. When the
+ * English row differs, it is attached as `fallback` for devices with no voice for the first language (e.g. no Ukrainian voice).
+ */
+export function speechOf(items: BrandPronunciationItem[]): Speech | null {
+  const first = items.find(i => !!i.respell)
+  const speech = first && speechOfItem(first)
+  if (!first || !speech) return null
+  const en = first.lang === 'en' ? null : items.find(i => i.lang === 'en')
+  const fallback = en && speechOfItem(en)
+  return fallback ? { ...speech, fallback } : speech
 }

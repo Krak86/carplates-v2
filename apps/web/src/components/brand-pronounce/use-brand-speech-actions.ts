@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 
+import type { Speech } from './helpers'
+
 /** Without an `onstart` in this time the engine swallowed the request (Android PWA, no voice installed): reset the button. */
 const START_TIMEOUT_MS = 2000
 
@@ -12,7 +14,7 @@ function pickVoice(lang: string): SpeechSynthesisVoice | undefined {
 }
 
 /** Browser speech synthesis on demand: `toggle` speaks / stops, cancelled on unmount. `supported` is false without `speechSynthesis`. */
-export function useBrandSpeechActions(speech: { text: string; lang: string } | null): {
+export function useBrandSpeechActions(speech: Speech | null): {
   supported: boolean
   speaking: boolean
   toggle: () => void
@@ -47,9 +49,14 @@ export function useBrandSpeechActions(speech: { text: string; lang: string } | n
     }
     // A cancel() straight before speak() makes Android Chrome drop the new utterance: cancel only when something is queued.
     if (synth.speaking || synth.pending) synth.cancel()
-    const utterance = new SpeechSynthesisUtterance(speech.text)
-    utterance.lang = speech.lang
-    const voice = pickVoice(speech.lang)
+    // No voice installed for the language (common for Ukrainian on desktop): the engine fails at once, so read the English row.
+    const voices = window.speechSynthesis.getVoices?.() ?? []
+    const own = pickVoice(speech.lang)
+    const useFallback = !own && voices.length > 0 && !!speech.fallback
+    const target = useFallback && speech.fallback ? speech.fallback : speech
+    const voice = useFallback ? pickVoice(target.lang) : own
+    const utterance = new SpeechSynthesisUtterance(target.text)
+    utterance.lang = target.lang
     if (voice) utterance.voice = voice
     utterance.rate = 0.85
     utterance.onstart = clearTimer
