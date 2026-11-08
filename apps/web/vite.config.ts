@@ -193,7 +193,14 @@ export default defineConfig({
           'assets/engine-*.js'
         ],
         navigateFallback: '/index.html',
-        navigateFallbackDenylist: [/^\/api\//, /^\/og\//, /^\/healthz/, /^\/sitemap\.xml$/, /^\/robots\.txt$/],
+        navigateFallbackDenylist: [
+          /^\/api\//,
+          /^\/og\//,
+          /^\/healthz/,
+          /^\/sitemap\.xml$/,
+          /^\/robots\.txt$/,
+          /^\/telegram-frame\.html$/
+        ],
         cleanupOutdatedCaches: true,
         // Without it the first-visit page stays uncontrolled until a reload, so its lazy chunks bypass the precache.
         // Updates still wait for the user's "Update" click (no skipWaiting), so this never swaps code mid-session.
