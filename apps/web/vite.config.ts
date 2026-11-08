@@ -199,7 +199,8 @@ export default defineConfig({
           /^\/healthz/,
           /^\/sitemap\.xml$/,
           /^\/robots\.txt$/,
-          /^\/telegram-frame\.html$/
+          // No `$`: Workbox matches path + query, and the frame URL carries `?bot=…&lang=…`.
+          /^\/telegram-frame\.html/
         ],
         cleanupOutdatedCaches: true,
         // Without it the first-visit page stays uncontrolled until a reload, so its lazy chunks bypass the precache.
