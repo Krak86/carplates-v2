@@ -1396,6 +1396,12 @@ Speaker icon beside the brand name on catalog pages; lazy popup with ua / ru / e
   - [ ] Owner, after the `brandPronunciationQuery` key bump (`v2`, staleTime 1 day) is deployed: on the phone open Kia (`Кі́а` + `KEE-ah`), press Listen on a make without a clip (synthetic voice) and check the Ukrainian voice exists
   - [ ] Owner: press play on a clip once with sound (headless Chrome fetched `De-Volkswagen.ogg` with no console error, audio not heard).
 
+## Assistant + embeddable widget (idea 2026-11-08, to discuss)
+
+Rule-based (no AI, no MCP) Q&A assistant for a plate / VIN built on our own API, one custom element with chat / search / badge views, a floating launcher in the app and an iframe-only embed for other sites (open data + link-out). Plan, local-test recipe and parked ideas: [docs/assistant-plan.md](docs/assistant-plan.md).
+
+- [ ] Discuss and approve the plan (embed scope, data shown on other sites, phasing)
+
 ## Later, conditional
 
 Checked and skipped: Derzhstat "Транспорт України" yearbook (2026-11-05) - national transport activity totals, no vehicle/fleet/accident data; see `DATASETS_PLAN.md` "Skipped (with reason)".
