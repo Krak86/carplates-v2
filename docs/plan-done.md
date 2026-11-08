@@ -4753,3 +4753,17 @@ Speaker button beside the make name: popover with the respelling / IPA in the UI
 - **Tests:** parser / rows / audio helper tests in `scripts`, `brands.service.test.ts`, `BrandPronounce.test.tsx` (lazy fetch, error line, credit, no button without audio).
 - **Not browser-checked:** audio playback under the production CSP, popover layout on a phone.
 - **Left:** button on the decode-only VIN card and model pages; owner steps under PLAN.md "After deploy".
+
+## CSP report sink (2026-11-08) ✅ code
+
+Phase B step 1 of the security hardening: violations of the Report-Only CSP now reach Sentry instead of only whoever has DevTools open. Enforcement is a later, separate step (after about a week of real traffic). Design: `docs/security-checklist.md` finding #2.
+
+- **API:** `POST /api/csp-report` in `apps/api/src/csp/` (`csp.controller.ts`, `csp.service.ts`, `csp.module.ts`, `helpers.ts`, `types.ts`, `csp-parsers.ts`). Accepts `application/csp-report` (`report-uri`) and `application/reports+json` (Reporting API batch; non-`csp-violation` entries are skipped); `registerCspParsers` in `main.ts` adds both Fastify content-type parsers. Zod body (strings capped at 2048, batch at 50), 400 on malformed JSON or shape, **204** otherwise, `Cache-Control: no-store`.
+- **Noise dropped** (never reaches Sentry): `blocked-uri` empty, `data` / `data:`, `about` / `about:`, `chrome-extension:` / `moz-extension:` / `safari-extension:` / `safari-web-extension:`, or a `source-file` inside an extension. `inline` and `eval` are real violations and are kept.
+- **Sentry:** `captureMessage` at `warning` through the existing SDK (`instrument.ts`; no-op unless telemetry is on). Fingerprint = directive + blocked origin (one issue per pair, not per user or page); tags `csp_directive`, `csp_disposition`, `csp_blocked_origin`; context `csp`. Query strings, hashes and opaque 22+ char path segments (share tokens) are stripped from every URL first.
+- **`OriginGuard` exemption:** browsers send reports with whatever `Sec-Fetch-Site` / `Origin` the violating context has, so the guard lets `/api/csp-report` through (`CSP_REPORT_PATH`). Safe: no cookie, no session, writes nothing but Sentry.
+- **Throttle:** `CSP_REPORT_THROTTLE` 60/min per IP (`common/throttle.ts`), on top of the global limits.
+- **Caddy:** `; report-uri /api/csp-report` appended to the (still Report-Only) policy in `infra/Caddyfile`. Same origin, so no new allow-list entry and no Sentry key in the header.
+- **Cache / Cloudflare:** a POST is never cached, the response is `no-store`, and the path is on no Cache Rule. Whether Cloudflare passes the POST was **not** checked (no production scanning); it is an After-deploy step in PLAN.md.
+- **Tests:** `csp.controller.test.ts` over HTTP (both content types, 204 + `no-store`, noise table, extension source, inline/eval kept, URL scrubbing, malformed bodies, `OriginGuard` exemption with a cross-site request, 429 burst per IP).
+- **Left (owner):** deploy api + Caddyfile, one probe POST, about a week of real use, then enforce (PLAN.md "Deploy-time security checklist").

@@ -9,6 +9,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import { cleanupOpenApiDoc } from 'nestjs-zod'
 
 import { AppModule } from './app.module.js'
+import { registerCspParsers } from './csp/csp-parsers.js'
 import { loadEnv, swaggerEnabled } from './env.js'
 import { publicOpenApiDoc } from './openapi/public-doc.js'
 
@@ -38,6 +39,7 @@ async function bootstrap(): Promise<void> {
       reply.header('x-frame-options', 'SAMEORIGIN')
     })
   await app.register(multipart, { limits: { fileSize: 4 * 1024 * 1024, files: 1, fields: 4 } })
+  registerCspParsers(app.getHttpAdapter().getInstance())
   app.enableCors({
     origin: env.NODE_ENV === 'production' ? env.PUBLIC_SITE_URL : true,
     credentials: true

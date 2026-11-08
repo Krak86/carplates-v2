@@ -52,3 +52,5 @@ export const DREAM_THROTTLE = { medium: { limit: 60, ttl: 60_000 } }
 
 /** Colour-filter lookup + mask for the hero photo: per-model, edge-cached, one of each per result view. */
 export const WIKI_RECOLOR_THROTTLE = { medium: { limit: 120, ttl: 60_000 } }
+/** CSP violation sink: open unauthenticated POST, but one page load can legitimately fire a handful of reports. */
+export const CSP_REPORT_THROTTLE = { medium: { limit: 60, ttl: 60_000 } }

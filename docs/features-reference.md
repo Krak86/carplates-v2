@@ -368,6 +368,7 @@ Static page text (`STATIC_PAGES`): title ≤ 65, description ≤ 200 characters,
   Zod reads `jitless` when a schema is _constructed_, so the config has to evaluate before the chunk that builds the schemas; a `z.config()` call in the
   `main.tsx` body ran too late (the entry chunk imports the schemas chunk first) and the CSP flagged two `eval` violations. Check: Lighthouse
   `inspector-issues` passes, or a `Proxy` on `window.Function` sees no constructor call on load.
+- **CSP report sink** (2026-11-08): `POST /api/csp-report` (`apps/api/src/csp/`) takes `application/csp-report` and `application/reports+json` (parsers registered in `main.ts`), drops extension / `data` / `about` / empty noise, strips query strings and token-like path segments, and sends one Sentry message per (directive, blocked origin). It is exempt from `OriginGuard` (`CSP_REPORT_PATH`) and answers 204 `no-store`. A new embed or third-party host goes into the policy in `infra/Caddyfile` first; a report for it means the list is stale. Keep it running after the policy is enforced.
 
 ## Photo search: plate groups (2026-10-26)
 

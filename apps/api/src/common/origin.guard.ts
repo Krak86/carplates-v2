@@ -2,6 +2,7 @@ import { ForbiddenException, Injectable } from '@nestjs/common'
 import type { CanActivate, ExecutionContext } from '@nestjs/common'
 import type { FastifyRequest } from 'fastify'
 
+import { CSP_REPORT_PATH } from '../csp/helpers.js'
 import { loadEnv } from '../env.js'
 
 const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS'])
@@ -30,6 +31,9 @@ export class OriginGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
     const req = context.switchToHttp().getRequest<FastifyRequest>()
     if (SAFE_METHODS.has(req.method) || !req.url.startsWith('/api/')) return true
+    // Browsers send CSP reports with whatever `Sec-Fetch-Site` / `Origin` the violating context has (often cross-site
+    // or absent). The sink uses no cookies and mutates nothing but Sentry, so there is no CSRF to defend.
+    if (req.url.split('?')[0] === CSP_REPORT_PATH) return true
     if (!isTrustedOrigin(req.headers, this.allowed)) throw new ForbiddenException('Cross-site request blocked')
     return true
   }
