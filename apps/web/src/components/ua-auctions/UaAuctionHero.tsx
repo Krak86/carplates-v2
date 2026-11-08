@@ -1,14 +1,13 @@
-import { useRef, useState } from 'react'
-import type { PointerEvent, ReactNode } from 'react'
+import { useState } from 'react'
+import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { PAINT_HEX, prozorroDocumentUrl } from '@carplates/shared'
 import type { VehicleColor } from '@carplates/shared'
 
 import PhotoZoomDialog from '@/components/PhotoZoomDialog'
 import WikiRecolorCanvas from '@/components/WikiRecolorCanvas'
+import { useSwipeSlide } from '@/hooks/useSwipeSlide'
 import { cn } from '@/lib/cn'
-
-const SWIPE_MIN_PX = 40
 
 /** Stock photo of the car's make/model, shown as the last slide after the lot photos. */
 type ModelPhoto = {
@@ -49,13 +48,16 @@ export default function UaAuctionHero({ docIds, label, modelPhoto = null }: Prop
   const [failed, setFailed] = useState<ReadonlySet<string>>(new Set())
   const [index, setIndex] = useState(0)
   const [zoomed, setZoomed] = useState(false)
-  const swipe = useRef<{ x: number; y: number; moved: boolean } | null>(null)
 
   const slides: Slide[] = [
     ...docIds.map(id => ({ key: id, src: prozorroDocumentUrl(id), isModel: false })),
     ...(modelPhoto ? [{ key: MODEL_KEY, src: modelPhoto.url, isModel: true }] : []),
     ...(modelPhoto?.recolor ? [{ key: MODEL_ORIGINAL_KEY, src: modelPhoto.url, isModel: true }] : [])
   ].filter(slide => !failed.has(slide.key))
+  const { slideRef, slideClass, bind, step, wasSwipe } = useSwipeSlide<HTMLImageElement, HTMLDivElement>(
+    slides.length > 1,
+    d => setIndex(i => (Math.min(i, slides.length - 1) + d + slides.length) % slides.length)
+  )
   if (slides.length === 0) return null
   const current = Math.min(index, slides.length - 1)
   const slide = slides[current] as Slide
@@ -79,44 +81,31 @@ export default function UaAuctionHero({ docIds, label, modelPhoto = null }: Prop
         ? t('uaAuctions.hero.modelCaptionCredit', { credit: modelPhoto.credit })
         : t('uaAuctions.hero.modelCaption')
       : t('uaAuctions.hero.caption', { n: current + 1, total: lotCount })
-  // Horizontal swipe on touch: `touch-pan-y` leaves vertical page scroll alone; a swipe must not also open the zoom.
-  const onPointerDown = (e: PointerEvent<HTMLDivElement>): void => {
-    swipe.current = { x: e.clientX, y: e.clientY, moved: false }
-  }
-  const onPointerUp = (e: PointerEvent<HTMLDivElement>): void => {
-    const start = swipe.current
-    if (!start || slides.length < 2) return
-    const dx = e.clientX - start.x
-    if (Math.abs(dx) > SWIPE_MIN_PX && Math.abs(dx) > Math.abs(e.clientY - start.y)) {
-      start.moved = true
-      go(dx < 0 ? 1 : -1)
-    }
-  }
-
   return (
     <div className="hero-vt w-full max-w-content space-y-1.5">
       <div
-        onPointerDown={onPointerDown}
-        onPointerUp={onPointerUp}
+        {...bind}
         className="relative h-64 touch-pan-y overflow-hidden rounded-lg border border-border bg-surface/70 sm:h-80"
       >
         <button
           type="button"
           onClick={() => {
-            if (!swipe.current?.moved) setZoomed(true)
+            if (!wasSwipe()) setZoomed(true)
           }}
           aria-label={t('uaAuctions.photo.open', { n: current + 1, total: slides.length })}
           className="block h-full w-full cursor-zoom-in"
         >
           <img
             key={slide.key}
+            ref={slideRef}
             src={slide.src}
             alt={t('uaAuctions.photo.alt', { label, n: current + 1 })}
             fetchPriority="high"
             decoding="async"
             referrerPolicy="no-referrer"
             onError={() => fail(slide.key)}
-            className="h-full w-full object-cover"
+            draggable={false}
+            className={cn('h-full w-full object-cover will-change-transform', slideClass)}
           />
         </button>
 
@@ -139,18 +128,18 @@ export default function UaAuctionHero({ docIds, label, modelPhoto = null }: Prop
         )}
 
         {slides.length > 1 &&
-          ([-1, 1] as const).map(step => (
+          ([-1, 1] as const).map(dir => (
             <button
-              key={step}
+              key={dir}
               type="button"
-              onClick={() => go(step)}
-              aria-label={t(step < 0 ? 'uaAuctions.hero.prev' : 'uaAuctions.hero.next')}
+              onClick={() => step(dir)}
+              aria-label={t(dir < 0 ? 'uaAuctions.hero.prev' : 'uaAuctions.hero.next')}
               className={cn(
                 'absolute top-1/2 -translate-y-1/2 rounded-full bg-black/55 px-2.5 py-1 text-lg leading-none text-white hover:bg-black/75',
-                step < 0 ? 'left-2' : 'right-2'
+                dir < 0 ? 'left-2' : 'right-2'
               )}
             >
-              {step < 0 ? '‹' : '›'}
+              {dir < 0 ? '‹' : '›'}
             </button>
           ))}
 

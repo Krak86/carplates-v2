@@ -5,6 +5,7 @@ import type { PlateCandidate } from '@carplates/shared'
 
 import PhotoPlateBoxes from '@/components/PhotoPlateBoxes'
 import PhotoZoomDialog from '@/components/PhotoZoomDialog'
+import { useSwipeSlide } from '@/hooks/useSwipeSlide'
 import SharePhotoButton from '@/components/SharePhotoButton'
 import Spinner from '@/components/ui/Spinner'
 
@@ -39,6 +40,10 @@ export default function PhotoThumbnail({
   const { t } = useTranslation()
   const [zoomed, setZoomed] = useState(false)
   const [slow, setSlow] = useState(false)
+  const { slideRef, slideClass, bind, step, wasSwipe } = useSwipeSlide<HTMLSpanElement, HTMLButtonElement>(
+    !!onPrev && !!onNext,
+    d => (d > 0 ? onNext : onPrev)?.()
+  )
 
   useEffect(() => {
     if (!pending) return
@@ -53,14 +58,18 @@ export default function PhotoThumbnail({
     <div className="relative w-full max-w-content">
       <button
         type="button"
-        onClick={() => setZoomed(true)}
+        {...bind}
+        onClick={() => {
+          if (!wasSwipe()) setZoomed(true)
+        }}
         aria-label={t('photo.zoomOpen')}
-        className="flex h-64 w-full cursor-zoom-in items-center justify-center rounded-lg bg-black/80 sm:h-80"
+        className="flex h-64 w-full cursor-zoom-in touch-pan-y items-center justify-center rounded-lg bg-black/80 sm:h-80"
       >
-        <span className="relative block max-w-full">
+        <span key={url} ref={slideRef} className={`relative block max-w-full will-change-transform ${slideClass}`}>
           <img
             src={url}
             alt=""
+            draggable={false}
             referrerPolicy="no-referrer"
             className="block max-h-64 max-w-full rounded-lg sm:max-h-80"
           />
@@ -84,7 +93,7 @@ export default function PhotoThumbnail({
           <button
             key={i}
             type="button"
-            onClick={go}
+            onClick={() => step(i === 0 ? -1 : 1)}
             aria-label={t(i === 0 ? 'uaAuctions.hero.prev' : 'uaAuctions.hero.next')}
             className={`absolute top-1/2 -translate-y-1/2 rounded-full bg-black/55 px-2.5 py-1 text-lg leading-none text-white hover:bg-black/75 ${i === 0 ? 'left-2' : 'right-2'}`}
           >
