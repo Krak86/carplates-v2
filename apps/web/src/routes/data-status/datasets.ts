@@ -89,6 +89,7 @@ export const DATASETS: readonly Dataset[] = [
     to: '/cars',
     cadence: 'monthly',
     job: 'brand-pronounce',
+    gapKey: 'dataStatus.gap.brandPronounce',
     refreshedOn: '2026-11-07'
   },
   { id: 'news', name: 'News (RSS)', to: '/news', cadence: 'daily', job: 'news', refreshedOn: '2026-10-28' },

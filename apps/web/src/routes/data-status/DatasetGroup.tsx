@@ -17,9 +17,10 @@ type Props = {
   latest: Readonly<Record<string, string | null>>
   /** Rows we hold per dataset id. */
   counts: Readonly<Record<string, number>>
+  gaps: Readonly<Record<string, number>>
 }
 
-export default function DatasetGroup({ cadence, datasets, jobs, latest, counts }: Props): ReactNode {
+export default function DatasetGroup({ cadence, datasets, jobs, latest, counts, gaps }: Props): ReactNode {
   const { t, i18n } = useTranslation()
   const numberFormat = new Intl.NumberFormat(toIntlLocale(i18n.language))
   const dateFormat = new Intl.DateTimeFormat(toIntlLocale(i18n.language), { dateStyle: 'medium' })
@@ -71,6 +72,11 @@ export default function DatasetGroup({ cadence, datasets, jobs, latest, counts }
                   </span>
                 )}
                 {dataset.noteKey && <span className="mt-0.5 block text-xs text-muted">{t(dataset.noteKey)}</span>}
+                {dataset.gapKey && !!gaps[dataset.id] && (
+                  <span className="mt-0.5 block text-xs font-medium text-amber-600 dark:text-amber-400">
+                    {t(dataset.gapKey, { count: gaps[dataset.id] })}
+                  </span>
+                )}
               </span>
               <span className="text-muted">
                 {synced

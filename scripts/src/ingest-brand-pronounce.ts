@@ -147,6 +147,14 @@ async function main(): Promise<void> {
       `rows: ${rows.length} (${[...perLang].map(([l, n]) => `${l} ${n}`).join(', ')}); makes with any pronunciation: ${withAny}/${makes.length}`
     )
     log(`audio clips: ${audio.length}/${makes.length} (${audio.map(a => `${a.brandSlug} ${a.lang}`).join(', ')})`)
+    const withRespell = new Map<string, Set<string>>()
+    for (const r of rows)
+      if (r.respell) withRespell.set(r.brandSlug, (withRespell.get(r.brandSlug) ?? new Set()).add(r.lang))
+    const needOverrides = slugs.filter(s => (withRespell.get(s)?.size ?? 0) < 3)
+    if (needOverrides.length)
+      log(
+        `WARNING makes without a ua + ru + en respelling (add them to brand-pronounce-overrides.csv): ${needOverrides.join(', ')}`
+      )
     const unusedOverrides = [...overrides.keys()].filter(k => !slugs.includes(k.split('|')[0]!))
     if (unusedOverrides.length) log(`overrides for makes not in the catalog: ${unusedOverrides.join(', ')}`)
     if (dryRun) return log('dry run: nothing written')
