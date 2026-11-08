@@ -76,6 +76,7 @@ export default function DataStatusRoute(): ReactNode {
                 jobs={jobs}
                 latest={status.data?.latest ?? {}}
                 counts={status.data?.counts ?? {}}
+                gaps={status.data?.gaps ?? {}}
               />
             ))}
           </div>

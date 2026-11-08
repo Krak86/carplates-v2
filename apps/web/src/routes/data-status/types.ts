@@ -42,6 +42,8 @@ export type Dataset = {
   latestByMonth?: boolean
   /** i18n key of an extra line about how this source is synced (shown under its name). */
   noteKey?: string
+  /** i18n key of a warning line (with `{{count}}`) shown while `gaps[id]` from the API is above 0. */
+  gapKey?: string
   /** Rows of a source held as a static file, not in the database (so the API cannot count it): shown as its record count. */
   staticCount?: number
 }

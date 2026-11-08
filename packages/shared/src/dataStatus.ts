@@ -39,6 +39,8 @@ export const dataStatusResponseSchema = z.object({
   latest: z.record(z.string(), isoDateSchema.nullable()).default({}),
   /** Rows held per source (dataset id -> count); a source without a table of its own is absent. */
   counts: z.record(z.string(), z.number().int().nonnegative()).default({}),
+  /** Items needing manual attention per source (dataset id -> count), e.g. catalog makes without a pronunciation respelling; absent or 0 = nothing to do. */
+  gaps: z.record(z.string(), z.number().int().nonnegative()).default({}),
   /** The most recent runs of every scheduled job, newest first. */
   history: z.array(jobRunSchema).default([])
 })

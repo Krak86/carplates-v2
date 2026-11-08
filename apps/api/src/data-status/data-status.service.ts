@@ -83,10 +83,22 @@ export class DataStatusService {
     return Object.fromEntries(entries.filter(e => e !== null))
   }
 
+  /** Per dataset, how many items need hand work: catalog makes lacking a ua / ru / en respelling (the overrides CSV is the only source of those). A failing query is just left out. */
+  private async gaps(): Promise<Record<string, number>> {
+    const res = await this.dbService.db
+      .execute<{ n: string }>(
+        sql`SELECT count(*)::text AS n FROM registry.catalog_make m WHERE (
+          SELECT count(DISTINCT p.lang) FROM registry.brand_pronunciation p
+          WHERE p.brand_slug = m.make_slug AND coalesce(p.respell, '') <> '' AND p.lang IN ('ua', 'ru', 'en')) < 3`
+      )
+      .catch(() => null)
+    return res ? { brandPronounce: Number(res.rows[0]?.n ?? 0) } : {}
+  }
+
   /** The registry's real date span plus the newest run of every job that ever ran (`registry.job_runs`). */
   async get(): Promise<DataStatusResponse> {
     const db = this.dbService.db
-    const [span, runs, latest, counts, history] = await Promise.all([
+    const [span, runs, latest, counts, gaps, history] = await Promise.all([
       db
         .select()
         .from(statsDataSpan)
@@ -112,6 +124,7 @@ export class DataStatusService {
         UNION ALL SELECT 'rdwRecalls', to_char(max(published_at) FILTER (WHERE published_at <= current_date), 'YYYY-MM-DD') FROM registry.rdw_recalls
         UNION ALL SELECT 'caRecalls', to_char(max(recalled_at) FILTER (WHERE recalled_at <= current_date), 'YYYY-MM-DD') FROM registry.ca_recalls`),
       this.counts(),
+      this.gaps(),
       db.execute<{ job: string; status: string; started_at: Date | string }>(sql`
         SELECT job, status, started_at FROM registry.job_runs ORDER BY started_at DESC LIMIT 40`)
     ])
@@ -128,6 +141,7 @@ export class DataStatusService {
       })),
       latest: { plates: span[0]?.lastDate ?? null, ...Object.fromEntries(latest.rows.map(r => [r.id, r.last_date])) },
       counts,
+      gaps,
       history: history.rows.map(r => ({ job: r.job, status: r.status, startedAt: iso(r.started_at) }))
     })
   }

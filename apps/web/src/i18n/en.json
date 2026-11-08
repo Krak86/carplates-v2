@@ -4684,6 +4684,7 @@
   "dataStatus.records": "Records in our database: {{count}}",
   "dataStatus.neverSynced": "No update recorded yet",
   "dataStatus.note.losses": "The source publishes the new day once, usually in the morning (Kyiv time). The server polls it every 30 minutes, so the new day appears soon after publication and a missed run is harmless.",
+  "dataStatus.gap.brandPronounce": "{{count}} makes have no respelling yet: add them to brand-pronounce-overrides.csv, then run the ingest",
   "dataStatus.note.wikiPaint": "The colour filter scan works through the photos of the most registered models first, a batch every night, so the count grows over the first weeks. Photos without a clearly paintable car get no filter.",
   "dataStatus.status.fresh": "Fresh",
   "dataStatus.status.fresh.desc": "updated within its normal rhythm",
