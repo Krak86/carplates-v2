@@ -22,9 +22,9 @@ export const RELEASES: readonly ReleaseDay[] = [
     items: [
       item(
         'new',
-        'Фото авто в шапці можна гортати свайпом вліво-вправо, як у розділі зі стоковими фото.',
-        'Фото авто в шапке можно листать свайпом влево-вправо, как в разделе со стоковыми фото.',
-        'The car photos in the hero can now be swiped left and right, like the stock photos section.'
+        'Фото авто в шапці можна гортати свайпом вліво-вправо: фото їде за пальцем, а наступне плавно з’являється збоку.',
+        'Фото авто в шапке можно листать свайпом влево-вправо: фото едет за пальцем, а следующее плавно появляется сбоку.',
+        'The car photos in the hero can now be swiped left and right: the photo follows your finger and the next one glides in from the side.'
       ),
       item(
         'fix',

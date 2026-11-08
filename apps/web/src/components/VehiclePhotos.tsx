@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import type { MouseEvent, PointerEvent, ReactNode } from 'react'
+import type { MouseEvent, ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router'
@@ -7,12 +7,11 @@ import { useSearchParams } from 'react-router'
 import SectionHeader from '@/components/SectionHeader'
 import SectionInfo from '@/components/SectionInfo'
 import ShareButton from '@/components/ShareButton'
+import { useSwipeSlide } from '@/hooks/useSwipeSlide'
 import { cn } from '@/lib/cn'
 import { vehiclePhotosQuery } from '@/lib/queries'
 import { scrollElementIntoView } from '@/lib/share-section'
 import SectionSkeleton from '@/components/ui/SectionSkeleton'
-
-const SWIPE_MIN_PX = 40
 
 type Props = {
   brand: string | null
@@ -32,7 +31,6 @@ export default function VehiclePhotos({ brand, model, year }: Props): ReactNode 
   const [open, setOpen] = useState(() => isSharedPhotos)
   const [index, setIndex] = useState(0)
   const sectionRef = useRef<HTMLDivElement>(null)
-  const swipeRef = useRef<{ x: number; swiped: boolean } | null>(null)
   const hasQuery = Boolean(brand || model)
   const photos = useQuery({ ...vehiclePhotosQuery(brand ?? '', model ?? '', year), enabled: open && hasQuery })
   const images = photos.data?.images ?? []
@@ -42,24 +40,14 @@ export default function VehiclePhotos({ brand, model, year }: Props): ReactNode 
     if (isSharedPhotos && sectionRef.current) scrollElementIntoView(sectionRef.current)
   }, [isSharedPhotos])
 
-  const step = (delta: number): void => setIndex(i => (i + delta + images.length) % images.length)
-
-  const handleSwipeStart = (e: PointerEvent<HTMLDivElement>): void => {
-    swipeRef.current = { x: e.clientX, swiped: false }
-  }
-
-  const handleSwipeEnd = (e: PointerEvent<HTMLDivElement>): void => {
-    const start = swipeRef.current
-    if (!start || images.length < 2) return
-    const dx = e.clientX - start.x
-    if (Math.abs(dx) < SWIPE_MIN_PX) return
-    start.swiped = true
-    step(dx < 0 ? 1 : -1)
-  }
+  const { slideRef, slideClass, bind, step, wasSwipe } = useSwipeSlide<HTMLAnchorElement, HTMLDivElement>(
+    images.length > 1,
+    d => setIndex(i => (i + d + images.length) % images.length)
+  )
 
   // A swipe ends on the photo's link — don't follow it.
   const handleLinkClick = (e: MouseEvent<HTMLAnchorElement>): void => {
-    if (swipeRef.current?.swiped) e.preventDefault()
+    if (wasSwipe()) e.preventDefault()
   }
 
   if (!hasQuery) return null
@@ -95,16 +83,18 @@ export default function VehiclePhotos({ brand, model, year }: Props): ReactNode 
             {current && (
               <div>
                 <div
-                  onPointerDown={handleSwipeStart}
-                  onPointerUp={handleSwipeEnd}
+                  {...bind}
                   className="relative touch-pan-y overflow-hidden rounded-md border border-[var(--color-border)]"
                 >
                   <a
+                    key={current.webformatURL}
+                    ref={slideRef}
                     href={current.pageURL}
                     target="_blank"
                     rel="noopener noreferrer"
                     draggable={false}
                     onClick={handleLinkClick}
+                    className={cn('block will-change-transform', slideClass)}
                   >
                     <img
                       src={current.webformatURL}

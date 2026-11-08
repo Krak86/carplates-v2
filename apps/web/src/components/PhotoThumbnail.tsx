@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState } from 'react'
-import type { PointerEvent, ReactNode } from 'react'
+import { useEffect, useState } from 'react'
+import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { PlateCandidate } from '@carplates/shared'
 
 import PhotoPlateBoxes from '@/components/PhotoPlateBoxes'
 import PhotoZoomDialog from '@/components/PhotoZoomDialog'
+import { useSwipeSlide } from '@/hooks/useSwipeSlide'
 import SharePhotoButton from '@/components/SharePhotoButton'
 import Spinner from '@/components/ui/Spinner'
 
@@ -24,7 +25,6 @@ type Props = {
 }
 
 const SKIP_AFTER_MS = 8000
-const SWIPE_MIN_PX = 40
 
 export default function PhotoThumbnail({
   url,
@@ -40,21 +40,10 @@ export default function PhotoThumbnail({
   const { t } = useTranslation()
   const [zoomed, setZoomed] = useState(false)
   const [slow, setSlow] = useState(false)
-  const swipe = useRef<{ x: number; y: number; moved: boolean } | null>(null)
-
-  // Horizontal swipe steps through the images; `touch-pan-y` leaves vertical page scroll alone, and a swipe must not open the zoom.
-  const handlePointerDown = (e: PointerEvent<HTMLButtonElement>): void => {
-    swipe.current = { x: e.clientX, y: e.clientY, moved: false }
-  }
-  const handlePointerUp = (e: PointerEvent<HTMLButtonElement>): void => {
-    const start = swipe.current
-    if (!start || !onPrev || !onNext) return
-    const dx = e.clientX - start.x
-    if (Math.abs(dx) > SWIPE_MIN_PX && Math.abs(dx) > Math.abs(e.clientY - start.y)) {
-      start.moved = true
-      ;(dx < 0 ? onNext : onPrev)()
-    }
-  }
+  const { slideRef, slideClass, bind, step, wasSwipe } = useSwipeSlide<HTMLSpanElement, HTMLButtonElement>(
+    !!onPrev && !!onNext,
+    d => (d > 0 ? onNext : onPrev)?.()
+  )
 
   useEffect(() => {
     if (!pending) return
@@ -69,15 +58,14 @@ export default function PhotoThumbnail({
     <div className="relative w-full max-w-content">
       <button
         type="button"
-        onPointerDown={handlePointerDown}
-        onPointerUp={handlePointerUp}
+        {...bind}
         onClick={() => {
-          if (!swipe.current?.moved) setZoomed(true)
+          if (!wasSwipe()) setZoomed(true)
         }}
         aria-label={t('photo.zoomOpen')}
         className="flex h-64 w-full cursor-zoom-in touch-pan-y items-center justify-center rounded-lg bg-black/80 sm:h-80"
       >
-        <span className="relative block max-w-full">
+        <span key={url} ref={slideRef} className={`relative block max-w-full will-change-transform ${slideClass}`}>
           <img
             src={url}
             alt=""
@@ -105,7 +93,7 @@ export default function PhotoThumbnail({
           <button
             key={i}
             type="button"
-            onClick={go}
+            onClick={() => step(i === 0 ? -1 : 1)}
             aria-label={t(i === 0 ? 'uaAuctions.hero.prev' : 'uaAuctions.hero.next')}
             className={`absolute top-1/2 -translate-y-1/2 rounded-full bg-black/55 px-2.5 py-1 text-lg leading-none text-white hover:bg-black/75 ${i === 0 ? 'left-2' : 'right-2'}`}
           >
