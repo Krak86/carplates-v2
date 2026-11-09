@@ -4784,6 +4784,7 @@ Phase B step 1 of the security hardening: violations of the Report-Only CSP now 
 
 - **Web:** `useWikiPhotos` / `wikiPhotosQuery` (`GET /api/wiki/photos`, online only, silent failure). The hero takes the first `colorMatch` photo (no filter, credit "Photo of another car of this model", no refresh button), falls to the next match and then to the stored hero + colour filter when a photo fails to load, and waits for the list so it never flashes a photo it replaces. `WikiPhotoStrip` under the hero: the other photos, 4 + show more, credit link to the Commons page, zoom dialog.
 - **Job:** `wiki-candidates` (80 models per night, `--rps 1`, cron 01:45), `/data-status` row `wikiCandidates`, `/api/wiki/photos` added to the Cloudflare rule text in `docs/deploy.md`, controller test (also runs the Zod query pipe), root `ingest:wiki-candidates` script.
+- **Review fixes (2026-11-09, 100-model dry run):** the `toy` title filter rejected every Toyota (now `btoys?b`); the job searches and analyses once per search term, because the registry holds both `daewoo` / `lanos` and `daewoo  lanos` / `lanos`. Known limits: Cyrillic brands without an alias (`заз`) find nothing; photos with no year in the title cannot be matched to a generation.
 
 ## Competitor comparison page `/alternatives` (2026-11-09)
 
