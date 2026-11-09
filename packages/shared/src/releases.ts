@@ -17,6 +17,18 @@ const item = (group: ReleaseGroup, ua: string, ru: string, en: string): ReleaseI
  */
 export const RELEASES: readonly ReleaseDay[] = [
   {
+    date: '2026-11-09',
+    version: 'v2.1162',
+    items: [
+      item(
+        'fix',
+        'Свайп фото працює лише на сенсорних екранах: на комп’ютері мишею фото більше не «тягнеться».',
+        'Свайп фото работает только на сенсорных экранах: на компьютере мышью фото больше не «тянется».',
+        'Photo swipe is touch-only: dragging a photo with a mouse on desktop no longer moves it.'
+      )
+    ]
+  },
+  {
     date: '2026-11-08',
     version: 'v2.1160',
     items: [

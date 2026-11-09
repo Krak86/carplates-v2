@@ -4,11 +4,13 @@
 
 Users (and partner sites: dealers, forums, insurance blogs) want a simple "ask about this car" helper. It should answer from our own
 DB/API for a plate or VIN, explain what the app can do, and be installable on other sites. Decisions taken:
+
 - **Embedding:** any site may embed it, through an **iframe only**. CORS stays closed.
 - **Data on other sites:** open data plus a link-out to the full card.
 - **In the app:** a floating launcher on all pages.
 
 ### Answers to the open questions
+
 - **Without AI? Yes.** Every question the app can answer has the same shape: one plate or VIN plus a known topic. That is a
   finite intent catalog. The assistant uses three things:
   - chips/buttons to choose a topic
@@ -16,12 +18,14 @@ DB/API for a plate or VIN, explain what the app can do, and be installable on ot
   - `classifyQuery` to detect a plate or VIN in the text
 
   The result is deterministic, free to run, and works offline-ish. No LLM costs and no hallucinated car facts.
+
 - **Single or multiple widgets? One** code base and one page, with **several views** chosen by a parameter:
   - `chat`: Q&A panel
   - `search`: a search box plus a summary card
   - `badge`: a compact one-line lookup
 
   There is one CSP rule and one bundle to keep fast.
+
 - **Plain HTML components? Yes.** Vanilla TS custom element `<carsua-assistant>` with Shadow DOM and native `<form>`, `<input>`,
   `<button>`, `<details>`, `<output>`. No React, no i18next, no Zod.
   - Size budget: **≤ 15 KB gz JS + inline CSS**.
@@ -43,6 +47,7 @@ carsua.app SPA ──lazy import()──► same <carsua-assistant> element (no 
 ```
 
 ### Code layout (new: `apps/web/src/assistant/`, framework-free, no `react` / `@/i18n` imports)
+
 - `intents.ts`: the catalog as a `const INTENTS = [...] as const` array, with
   `type IntentId = (typeof INTENTS)[number]['id']`. Each intent has `needs: 'plate'|'vin'|'any'|'none'`, a keyword list per
   language, its endpoint(s) and an answer builder.
@@ -87,12 +92,14 @@ carsua.app SPA ──lazy import()──► same <carsua-assistant> element (no 
   (fixture responses → answer text, embed mode never requests a scraped endpoint).
 
 ### Shared package
+
 - Add a `"./plate"` subpath export to `packages/shared/package.json`. It points at `dist/plate.js`, which has no imports, so the
   widget imports `classifyQuery` / `normalizePlate` / `isVin` without pulling in the barrel of Zod schemas. The same pattern as
   `./releases` already exists. Then run `pnpm --filter @carplates/shared build`.
 - Region names come from the `/api/plate` response (`region`). The widget does not bundle `regions.ts`.
 
 ### Pages and build (`apps/web/vite.config.ts`)
+
 - **Entry:** add `apps/web/embed/assistant.html` as a second input next to `index.html`. It is a minimal HTML shell containing
   `<carsua-assistant>`, with no `preloadHints` injection.
 - **Size check:** confirm the widget chunk pulls none of the `VENDOR_GROUPS` (react/query/i18n/zod). If the code-splitting groups
@@ -105,6 +112,7 @@ carsua.app SPA ──lazy import()──► same <carsua-assistant> element (no 
   - It handles `postMessage` resize/close and checks `event.origin === 'https://carsua.app'`.
 
 ### In-app launcher
+
 - New `apps/web/src/components/AssistantLauncher.tsx` (default export) is mounted once in `App.tsx`.
   - It renders a small fixed button.
   - On the first click it runs `import('@/assistant/element')` and shows `<carsua-assistant view="chat" lang={current}>` in a native
@@ -116,6 +124,7 @@ carsua.app SPA ──lazy import()──► same <carsua-assistant> element (no 
   rather than duplicating them.
 
 ### API / infra (embedding allowed for `/embed/*` only)
+
 - `apps/api/src/main.ts:39`: skip `x-frame-options` when `req.url` starts with `/embed/`. That path covers static files from
   `WEB_DIST_DIR` via the SPA controller; verify that `embed/assistant.html` is served as a file, not caught by the catch-all.
   Plain `/embed/assistant` → serve `embed/assistant.html`.
@@ -136,16 +145,19 @@ carsua.app SPA ──lazy import()──► same <carsua-assistant> element (no 
   tracking script in the widget).
 
 ### Public route for the integration instructions
+
 - `/assistant` (or `/embed`) is a docs page for site owners. It shows a live preview, a view/lang/theme picker, and copy-paste
   snippets: script loader, plain iframe, zero-JS form. Also a short "what data is shown and attribution" note.
 - Follow the `docs/checklists.md` "New public route" item: `ROUTE_TITLE_KEYS`, a `STATIC_PAGES` entry in
   `apps/api/src/spa/spa-text.ts`, `max-w-6xl`, and a line in `apps/web/public/llms.txt`.
 
 ### i18n
+
 - Add `assistant.*` keys (intents, chips, answer templates, errors, launcher label) to `ua.json`/`ru.json`/`en.json`.
 - User-visible strings use "-", not "—".
 
 ### Docs and release (per `docs/checklists.md`)
+
 - `docs/features-reference.md`: a new "## Assistant and embed widget (2026-11-xx)" section covering:
   - the intent catalog rule: a new feature means a new intent, or at least an `about.feature.*` key
   - the embed data rule: open data only
@@ -154,6 +166,7 @@ carsua.app SPA ──lazy import()──► same <carsua-assistant> element (no 
   works from a test page), `releases.ts` (`new` item ua/ru/en, bump the day `version`, `latest.ts`), and `AboutRoute.tsx` `FEATURES`.
 
 ## Other ideas to discuss later (not in the plan above)
+
 - **Embed allowlist:** a `PARTNER_ORIGINS` env list in place of `frame-ancestors *`. More control, but every partner needs an env
   change.
 - **Embed data variants:**
@@ -171,6 +184,7 @@ carsua.app SPA ──lazy import()──► same <carsua-assistant> element (no 
 - **Per-host analytics** from `Referer` logs; an optional `data-partner` attribute for attribution.
 
 ## Phasing
+
 1. Engine (`intents`, `match`, `answers`, strings plugin) plus tests.
 2. Custom element and the in-app launcher. This ships value in-app first.
 3. Embed page, `embed.js`, API header exception, Caddyfile, and the PWA denylist.
@@ -179,12 +193,14 @@ carsua.app SPA ──lazy import()──► same <carsua-assistant> element (no 
 ## Local testing
 
 **Needed for local testing:**
+
 - `embed.js` does not hard-code `https://carsua.app`. It derives `ORIGIN` from `new URL(document.currentScript.src).origin`, and
   checks `postMessage` against that origin. So the same snippet works against `localhost`, stage and prod.
 - Commit a test host page, `apps/web/dev/embed-test.html` (outside `public/`, so it never ships). It contains the 3 snippets
   (chat launcher, inline search, badge) plus the plain-iframe and zero-JS form variants, and has some dummy page content.
 
 **A. Dev mode (fast loop, HMR):**
+
 1. Run `pnpm dev` (API :3000 + Vite :5173, with `/api` proxied).
 2. In-app: open `http://localhost:5173`, click the launcher, ask questions.
 3. Widget alone: open `http://localhost:5173/embed/assistant?view=chat&lang=ua`.
@@ -196,6 +212,7 @@ carsua.app SPA ──lazy import()──► same <carsua-assistant> element (no 
 5. Dev mode does **not** test production headers: Vite serves the page without `X-Frame-Options`/CSP.
 
 **B. Production build through the API (tests the header exception):**
+
 1. Run `pnpm --filter web build`, then start the API with `WEB_DIST_DIR` pointing at `apps/web/dist`.
 2. Use the test host as above, but with snippets against `http://localhost:3000/embed.js`.
 3. `curl -I http://localhost:3000/embed/assistant` must show no `x-frame-options`. `curl -I http://localhost:3000/` must show
@@ -203,12 +220,14 @@ carsua.app SPA ──lazy import()──► same <carsua-assistant> element (no 
 4. Negative check: the test host iframing `http://localhost:3000/` (the app itself) must be blocked by the browser.
 
 **C. CSP (Caddy-only header):** it can't run without Caddy locally, so check it on **stage** after deploy:
+
 - the browser console on the test host shows no `frame-ancestors` report
 - `/api/csp-report` / Sentry receives nothing new for `/embed/*`
 
 This becomes a PLAN.md "After deploy" box.
 
 **D. Automated checks:** with Chrome DevTools MCP on the test host:
+
 - Before any click: `list_network_requests` shows only `embed.js`, and there is no iframe.
 - After clicking: `take_snapshot` shows the iframe, the answers render, and resize works.
 - Throughout: `list_console_messages` is clean.
@@ -216,6 +235,7 @@ This becomes a PLAN.md "After deploy" box.
 - `lighthouse_audit` on the test host gives the before-click impact.
 
 ## Verification
+
 - `pnpm --filter @carplates/shared build`, `pnpm format`, Vitest for `match.test.ts` / `answers.test.ts` and the existing
   `public-doc.test.ts` / releases tests.
 - `pnpm --filter web build`. Then check:
