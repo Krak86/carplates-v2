@@ -18,7 +18,7 @@ const item = (group: ReleaseGroup, ua: string, ru: string, en: string): ReleaseI
 export const RELEASES: readonly ReleaseDay[] = [
   {
     date: '2026-11-09',
-    version: 'v2.1170',
+    version: 'v2.1172',
     items: [
       item(
         'improved',
