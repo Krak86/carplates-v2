@@ -102,6 +102,13 @@ Phase A (steps 1-6) is the recolour on the existing hero photo. Phase B (7-8) ad
 Files: `packages/db/migrations/0104_wiki_image_candidate.sql`, `scripts/src/wiki-candidates{,-core}.ts`, `scripts/src/wiki-paint-image.ts` (SegFormer helpers shared with `wiki-paint.ts`), `packages/shared/src/wikiPhotos.ts`, `apps/api/src/wiki/wiki-photos.{controller,service,rank}.ts`.
 Still open in step 7: hero picks a colour-matched candidate, scan job + cron + `/data-status` row, Cloudflare cache rule, controller test, review sample.
 
+**Next session, in order.**
+1. Web: `wikiPhotosQuery` in `lib/queries.ts` (online only, silent failure, `?brand&model&year&color`); in `WikiHeroImage.tsx` / `use-wiki-recolor.ts` show the first photo with `colorMatch: true` instead of the hero (no filter, credit from `attribution`, still say it is another car), else the current hero + filter. Tests; i18n ua / ru / en (no em dash).
+2. Step 8: `WikiPhotoStrip.tsx` modelled on `ua-auctions/UaAuctionPhotos.tsx` (originals, per-photo credit, zoom, show more); `LazySection` / `HELPER_GROUPS` checklist in `docs/checklists.md`.
+3. Job: `wiki-candidates` in `scripts/src/jobs.ts` + `run-ingest.sh` + `infra/vps/ingest.cron` + `/data-status` row (mirror `wiki-paint`); `docs/checklists.md` new `/api/*` endpoint + Deploy (migration 0104) items; Cloudflare rule for `/api/wiki/photos`; controller test (pattern `wiki-recolor.controller.test.ts`).
+4. Review a ~100-model sample (`--limit 100 --dry-run` first) before the full scan; then docs after a feature (plan-done, features-reference, releases `version`, About credits).
+Local DB: migration 0104 is applied and only `kia ceed` is scanned (8 rows). `pnpm --filter @carplates/shared build` and `@carplates/db build` are already run. Nothing is committed.
+
 ## Risks and open questions
 
 - Dark / neutral paint is the weak spot; the gates decide how many cars get a filter at all (my guess, unverified: about 40-50 % of photos). Everything else shows the original photo.
