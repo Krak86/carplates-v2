@@ -603,6 +603,55 @@ export type WikiImagePaintRow = typeof wikiImagePaint.$inferSelect
 export type WikiImagePaintInsert = typeof wikiImagePaint.$inferInsert
 
 /**
+ * Extra Commons photos of a model (colour-matched hero + photo strip), keyed like `wikiImage`. Same paint scan as `wikiImagePaint`
+ * (bucket + Lab) but no mask. See migrations/0104_wiki_image_candidate.sql.
+ */
+export const wikiImageCandidate = registry.table(
+  'wiki_image_candidate',
+  {
+    brand: text('brand').notNull(),
+    model: text('model').notNull(),
+    title: text('title').notNull(),
+    imageUrl: text('image_url').notNull(),
+    imageWidth: integer('image_width').notNull(),
+    imageHeight: integer('image_height').notNull(),
+    photoYear: smallint('photo_year'),
+    attrAuthor: text('attr_author'),
+    attrLicense: text('attr_license'),
+    attrLicenseUrl: text('attr_license_url'),
+    status: text('status').notNull(),
+    skipReason: text('skip_reason'),
+    bucket: text('bucket'),
+    labL: real('lab_l'),
+    labA: real('lab_a'),
+    labB: real('lab_b'),
+    bodyArea: real('body_area'),
+    quality: real('quality').notNull().default(0),
+    algo: smallint('algo').notNull(),
+    scannedAt: timestamp('scanned_at', { withTimezone: true }).notNull().defaultNow()
+  },
+  t => [
+    primaryKey({ columns: [t.brand, t.model, t.title] }),
+    index('ix_wiki_image_candidate_pick').on(t.brand, t.model, t.status, t.bucket)
+  ]
+)
+export type WikiImageCandidateRow = typeof wikiImageCandidate.$inferSelect
+export type WikiImageCandidateInsert = typeof wikiImageCandidate.$inferInsert
+
+/** A model was searched for candidates (also when nothing qualified), so the scan resumes. */
+export const wikiImageCandidateScan = registry.table(
+  'wiki_image_candidate_scan',
+  {
+    brand: text('brand').notNull(),
+    model: text('model').notNull(),
+    found: integer('found').notNull(),
+    algo: smallint('algo').notNull(),
+    scannedAt: timestamp('scanned_at', { withTimezone: true }).notNull().defaultNow()
+  },
+  t => [primaryKey({ columns: [t.brand, t.model] })]
+)
+
+/**
  * One tech-press test drive (`scripts/src/press.ts`: itc.ua, mezha.ua), keyed by its primary (Ukrainian) URL. `langs`
  * holds every language edition (`uk`/`ru`/`en`: url, title, blurb). `brandSlug` is our brand slug found in the titles/tags;
  * the model is matched at lookup from `keywords` + titles. Facts + links only — see migrations/0029_press_reviews.sql.

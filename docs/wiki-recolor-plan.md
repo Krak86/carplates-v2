@@ -98,6 +98,10 @@ Phase A (steps 1-6) is the recolour on the existing hero photo. Phase B (7-8) ad
 9. **Rollout.** Scan host: needs the SegFormer model download (`scripts/.data/wiki-paint/hf-cache`, about 15 MB q8), a few hundred MB RAM and `sharp`; run it where the other scrape jobs run, one process, `--rps 1`. Orphans: the job also deletes `wiki_image_paint` rows whose `image_url` is no longer in `wiki_image` (`status = 'ok'`). Before turning on for everyone: review a gallery sample of at least 100 (livery / race cars, touching neighbour cars, mottled paint) and tune gates, bumping `PAINT_ALGO`. Cloudflare Cache Rule gets `/api/wiki/recolor` and `starts_with /api/wiki/paint/` (manual, PLAN.md box). Scan order (done): `--order popular` = every model by registry count, most first. Job (done) in `scripts/src/jobs.ts` + `run-ingest.sh` + `infra/vps/ingest.cron` + a `/data-status` row; Commons rate limit (`--rps`);
    set `algo` so a better algorithm rescans; watch the share of `ok` vs `skip` and review a sample gallery before turning it on for everyone.
 
+**Step 7 built (2026-11-09, data + API).** Deviations from the plan text: candidates store **no mask** (bucket + Lab only; a promoted candidate gets one through the normal `wiki-paint` job), `photo_year` replaces the year span (the API maps the car year to a generation through `GenerationsService` at query time, one year of slack, undated photos stay but rank lower), and `wiki_image_candidate_scan` records searched models so a rerun resumes.
+Files: `packages/db/migrations/0104_wiki_image_candidate.sql`, `scripts/src/wiki-candidates{,-core}.ts`, `scripts/src/wiki-paint-image.ts` (SegFormer helpers shared with `wiki-paint.ts`), `packages/shared/src/wikiPhotos.ts`, `apps/api/src/wiki/wiki-photos.{controller,service,rank}.ts`.
+Still open in step 7: hero picks a colour-matched candidate, scan job + cron + `/data-status` row, Cloudflare cache rule, controller test, review sample.
+
 ## Risks and open questions
 
 - Dark / neutral paint is the weak spot; the gates decide how many cars get a filter at all (my guess, unverified: about 40-50 % of photos). Everything else shows the original photo.

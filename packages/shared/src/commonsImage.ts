@@ -12,6 +12,9 @@ const MIN_ASPECT = 1.2
 const DETAIL_SHOT =
   /interior|engine|dashboard|cockpit|steering|wheel|badge|logo|emblem|seat|trunk|boot|headlight|taillight|detail|speedometer|odometer|console|\b(?:front|rear|second|third|back) rows?\b|cabin|inside|from behind|infotainment|upholstery/i
 
+/** Title of an interior / engine / logo / wheel close-up, not a photo of the whole car. */
+export const isDetailShot = (title: string): boolean => DETAIL_SHOT.test(title)
+
 // Diacritics are folded first, or "Doblò" / "Citroën" would shrink to "dobl" / "citron" and miss "doblo" / "citroen".
 const normalize = (value: string): string =>
   value
