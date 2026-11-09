@@ -22,9 +22,9 @@ export const RELEASES: readonly ReleaseDay[] = [
     items: [
       item(
         'fix',
-        'Рейтинги краш-тестів моделей: дубльовані назви («GX 470 GX 470», «VITARA VITARA») тепер зведено в одну модель, а підказка пояснює, що оцінка 0 - це найгірший результат у тестах, а не відсутність даних.',
-        'Рейтинги краш-тестов моделей: задвоенные названия («GX 470 GX 470», «VITARA VITARA») теперь сведены в одну модель, а подсказка объясняет, что оценка 0 - это худший результат в тестах, а не отсутствие данных.',
-        'Model crash-test rankings: doubled names (“GX 470 GX 470”, “VITARA VITARA”) are now merged into one model, and the help text explains that a score of 0 is the worst grade in the tests, not missing data.'
+        'Рейтинги краш-тестів моделей: дубльовані назви («GX 470 GX 470», «Q7 Q7») зведено в одну модель; IIHS без тесту на удар (лише сидіння чи дах) більше не дає оцінку, тож Lexus GX 470 не має хибного «0».',
+        'Рейтинги краш-тестов моделей: задвоенные названия («GX 470 GX 470», «Q7 Q7») сведены в одну модель; IIHS без теста на удар (только сиденья или крыша) больше не даёт оценку, поэтому у Lexus GX 470 нет ложного «0».',
+        'Model crash-test rankings: doubled names (“GX 470 GX 470”, “Q7 Q7”) are merged into one model; an IIHS entry without an impact test (only seats or roof) no longer yields a score, so the Lexus GX 470 no longer shows a false “0”.'
       ),
       item(
         'new',

@@ -18,6 +18,9 @@ type ModelShape = { brand: string; model: string; n: number; avgScore: number; s
 const AVG = sql`(sum(score * n) FILTER (WHERE score IS NOT NULL) / NULLIF(sum(n) FILTER (WHERE score IS NOT NULL), 0))::float8`
 const COUNTS = sql`sum(n)::float8 AS n, (COALESCE(sum(n) FILTER (WHERE score IS NOT NULL), 0))::float8 AS matched`
 
+/** Brand without a trailing "  MODEL" part (the registry's double-space form). */
+const MAKE_ONLY = sql`split_part(brand, '  ', 1)`
+
 /** Column of `registry.stats_safety` holding each source's own score. */
 const SOURCE_COLUMN: Readonly<Record<CrashSource, string>> = {
   euroncap: 'euroncap_score',
@@ -41,7 +44,7 @@ export class SafetyStatsService {
         sql`SELECT make_year::text AS label, ${COUNTS}, ${AVG} AS "avgScore" FROM registry.stats_safety GROUP BY make_year ORDER BY make_year`
       ),
       db.execute<RowShape>(
-        sql`SELECT brand AS label, ${COUNTS}, ${AVG} AS "avgScore" FROM registry.stats_safety GROUP BY brand
+        sql`SELECT ${MAKE_ONLY} AS label, ${COUNTS}, ${AVG} AS "avgScore" FROM registry.stats_safety GROUP BY 1
             HAVING sum(n) FILTER (WHERE score IS NOT NULL) >= ${MIN_CARS_BRAND} ORDER BY 4 DESC LIMIT 60`
       ),
       Promise.all(CRASH_SOURCES.map(source => this.sourceRow(source))),
@@ -82,10 +85,10 @@ export class SafetyStatsService {
   /** Ties (many models share a perfect 100) go to the better-evidenced model: more sources, then more cars. */
   async modelLeaderboard(direction: 'ASC' | 'DESC'): Promise<ModelShape[]> {
     const order = direction === 'ASC' ? sql`ASC` : sql`DESC`
-    // The registry sometimes repeats the model ("GX 470 GX 470", "VITARA VITARA"); fold those into the plain name so
-    // one car does not take several leaderboard rows.
+    // The registry often stores "BRAND  MODEL" (double space) in the brand column next to the model ("AUDI  Q7" + "Q7");
+    // keep only the make so one car does not take several leaderboard rows.
     const { rows } = await this.dbService.db.execute<ModelShape>(
-      sql`SELECT brand, regexp_replace(model, '^(.+) \\1$', '\\1') AS model, sum(n)::float8 AS n,
+      sql`SELECT ${MAKE_ONLY} AS brand, model, sum(n)::float8 AS n,
                  (sum(score * n) / sum(n))::float8 AS "avgScore", max(sources)::int AS sources
           FROM registry.stats_safety WHERE score IS NOT NULL
           GROUP BY 1, 2 HAVING sum(n) >= ${MIN_CARS_MODEL}
