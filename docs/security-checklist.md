@@ -152,7 +152,7 @@ CSP confirmed still Report-Only (the one gap). Code-level claims in §2-§3 re-r
 - [ ] Session cookie in the browser: HttpOnly ✔ Secure ✔ SameSite=Lax ✔; sign out removes the row from `app.sessions`.
 - [ ] `/api/docs`, `/api/admin/*` (anonymous and non-admin → 401/403), Postgres and ALPR ports unreachable from outside (`nmap` from another host).
 - [x] CSRF probe (local lab 2026-11-09: cross-site `POST /api/auth/logout` and `DELETE /api/auth/me` both 403; re-run once against staging): cross-origin `fetch('/api/auth/logout', {method:'POST', credentials:'include'})` from another origin is rejected.
-- [ ] Rate-limit probe: 200 rapid requests to `/api/plate/*` and `/api/auth/google` return 429; Caddy/Cloudflare limits active.
+- [x] Rate-limit probe (local 2026-11-09: plate 100 × 200 then 429, csp-report 60 then 429; `/api/auth/google` and Cloudflare/Caddy layer not yet probed): 200 rapid requests to `/api/plate/*` and `/api/auth/google` return 429; Caddy/Cloudflare limits active.
 - [ ] ZAP baseline against staging: no medium+ alerts left unexplained.
 - [ ] Backups restore-tested (PLAN.md "Backup policy"); `app` schema nightly dump + PITR as soon as users exist.
 - [ ] Privacy/terms/cookie decisions done ([legal-and-monetization.md](legal-and-monetization.md)); account deletion works and wipes all `app.*` rows.
