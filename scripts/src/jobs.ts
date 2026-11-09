@@ -50,6 +50,10 @@ export const JOBS = {
   // rate limit; measured 2.6 s per photo = about 65 min, timeout 120). Resumable: only never-scanned or older-`algo` photos are picked, so the backlog (~22 000 files) was cleared
   // by a local scan + `pg_dump` restore on 2026-11-08 and nightly runs only handle new / algo-bumped photos (near no-ops). Also deletes orphaned paint rows. Needs the SegFormer model (~15 MB, cached in scripts/.data/wiki-paint/hf-cache = the ingest-data mount).
   'wiki-paint': { command: 'tsx src/wiki-paint.ts --limit 1500 --rps 1', timeoutMin: 120 },
+  // Extra Commons photos per model (docs/wiki-recolor-plan.md step 7: colour-matched hero + photo strip): nightly batch of 80 models, most-registered first, `--rps 1`
+  // (up to 20 photos analysed per model, about 50 s each model = about 70 min, timeout 100). Resumable: a model is skipped once recorded in wiki_image_candidate_scan at the current paint algo.
+  // Shares the SegFormer model cache with wiki-paint. Candidates store no mask (colour only).
+  'wiki-candidates': { command: 'tsx src/wiki-candidates.ts --limit 80 --rps 1', timeoutMin: 100 },
   // Recall registers that refresh themselves (no seed CSV involved): RDW campaigns are upserted by reference code (seconds, the model links are
   // replaced wholesale), Transport Canada replaces both tables after a ~200 MB download (`--refresh`: never trust a cached copy). The seed CSVs
   // are still re-exported by hand (`pnpm export:rdw-recalls:csv`, `export:ca-recalls:csv`) after review.

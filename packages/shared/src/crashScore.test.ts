@@ -45,6 +45,14 @@ describe('per-source normalization', () => {
     ]
     expect(iihsScore(tests)).toBeCloseTo(83.5)
     expect(iihsScore([{ key: 'headlights', rating: 'Good' }])).toBeNull()
+    // Seats / roof alone are not a crash result (Lexus GX 470: only "Head restraints & seats: Poor").
+    expect(iihsScore([{ key: 'head-restraints-and-seats', rating: 'Poor' }])).toBeNull()
+    expect(
+      iihsScore([
+        { key: 'moderate-overlap-front-original-test', rating: 'Poor' },
+        { key: 'head-restraints-and-seats', rating: 'Good' }
+      ])
+    ).toBe(50)
   })
 })
 

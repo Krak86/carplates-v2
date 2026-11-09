@@ -18,8 +18,38 @@ const item = (group: ReleaseGroup, ua: string, ru: string, en: string): ReleaseI
 export const RELEASES: readonly ReleaseDay[] = [
   {
     date: '2026-11-09',
-    version: 'v2.1162',
+    version: 'v2.1180',
     items: [
+      item(
+        'improved',
+        'Підсумок перевірок: якщо IIHS оцінив актуальний краш-тест як «Поганий», картка краш-тестів позначається «Увага».',
+        'Итоги проверок: если IIHS оценил актуальный краш-тест как «Плохой», карточка краш-тестов отмечается «Внимание».',
+        'Checks summary: when IIHS rates an applicable crash test Poor, the crash-test card is flagged Attention.'
+      ),
+      item(
+        'fix',
+        'Рейтинги краш-тестів моделей: дубльовані назви («GX 470 GX 470», «Q7 Q7») зведено в одну модель; IIHS без тесту на удар (лише сидіння чи дах) більше не дає оцінку, тож Lexus GX 470 не має хибного «0».',
+        'Рейтинги краш-тестов моделей: задвоенные названия («GX 470 GX 470», «Q7 Q7») сведены в одну модель; IIHS без теста на удар (только сиденья или крыша) больше не даёт оценку, поэтому у Lexus GX 470 нет ложного «0».',
+        'Model crash-test rankings: doubled names (“GX 470 GX 470”, “Q7 Q7”) are merged into one model; an IIHS entry without an impact test (only seats or roof) no longer yields a score, so the Lexus GX 470 no longer shows a false “0”.'
+      ),
+      item(
+        'new',
+        'Підсумок перевірок угорі картки авто: розшук, реєстр, краш-тести, CO2, аукціони й відкликання. Кожна картка каже «Увага», «Проблем не знайдено» або «Немає даних», і що саме та коли перевірено.',
+        'Итоги проверок вверху карточки авто: розыск, реестр, краш-тесты, CO2, аукционы и отзывы. Каждая карточка говорит «Внимание», «Проблем не найдено» или «Нет данных», и что именно и когда проверено.',
+        'A summary strip at the top of the car card: wanted check, registry, crash tests, CO2, auctions and recalls. Each card says “Attention”, “No problems found” or “No data”, and what was searched and when.'
+      ),
+      item(
+        'new',
+        'Сторінка «Порівняння з іншими сервісами»: що є в нас, а що в baza-gai, Opendatabot, AUTO.RIA, RST, carVertical і CARFAX, у чому наша перевага, чого бракує і що далі.',
+        'Страница «Сравнение с другими сервисами»: что есть у нас, а что в baza-gai, Opendatabot, AUTO.RIA, RST, carVertical и CARFAX, в чём наше преимущество, чего не хватает и что дальше.',
+        'A “Compared to other services” page: what we have versus baza-gai, Opendatabot, AUTO.RIA, RST, carVertical and CARFAX, where we lead, what is missing and what comes next.'
+      ),
+      item(
+        'improved',
+        'Фото моделі: якщо є фото цієї моделі потрібного кольору, воно стає головним (з підписом, що це інше авто), а під ним з’являється стрічка інших фото з Wikimedia Commons з автором і ліцензією.',
+        'Фото модели: если есть фото этой модели нужного цвета, оно становится главным (с подписью, что это другое авто), а под ним появляется лента других фото с Wikimedia Commons с автором и лицензией.',
+        'Model photos: when a photo of the model in the right colour exists it becomes the main photo (captioned as another car), and a strip of more Wikimedia Commons photos with author and licence appears below it.'
+      ),
       item(
         'fix',
         'Свайп фото працює лише на сенсорних екранах: на комп’ютері мишею фото більше не «тягнеться».',

@@ -4779,3 +4779,41 @@ Phase B step 1 of the security hardening: violations of the Report-Only CSP now 
 - **Contact form:** Turnstile script is preconnected and preloaded when the form mounts.
 - **RealOEM parts-catalog chip (BMW only):** `realoemUrl` / `realoemBrandUrl` / `realoemLink` in `packages/shared` (BMW WMIs only; from a VIN the link is that car's page via the last 7 characters), `PartsCatalogChip` on the result card and the catalog model / make pages; link-out, hidden offline and for other makes. i18n `partsCatalog.*`.
 - **Smaller 2026-11-07 items:** alerts / losses link previews (`/og/alarms.png`, `/og/losses.png`, `/alarms?section=` text), war duration, racer immersive mode and crash vibration, header route progress line, alarm-region pulse, Cloudflare edge-traffic card in admin Statistics, active-shares counter, app version in the footer / About / What's new, lot-carousel model slide with the colour filter and original thumbnails, wiki mask 404 for an unknown id, `wiki-paint --model`, PAINT_ALGO 2.
+
+## Wiki extra photos: colour-matched hero + photo strip (steps 7-8, 2026-11-09)
+
+- **Web:** `useWikiPhotos` / `wikiPhotosQuery` (`GET /api/wiki/photos`, online only, silent failure). The hero takes the first `colorMatch` photo (no filter, credit "Photo of another car of this model", no refresh button), falls to the next match and then to the stored hero + colour filter when a photo fails to load, and waits for the list so it never flashes a photo it replaces. `WikiPhotoStrip` under the hero: the other photos, 4 + show more, credit link to the Commons page, zoom dialog.
+- **Job:** `wiki-candidates` (80 models per night, `--rps 1`, cron 01:45), `/data-status` row `wikiCandidates`, `/api/wiki/photos` added to the Cloudflare rule text in `docs/deploy.md`, controller test (also runs the Zod query pipe), root `ingest:wiki-candidates` script.
+- **Review fixes (2026-11-09, 100-model dry run):** the `toy` title filter rejected every Toyota (now `btoys?b`); the job searches and analyses once per search term, because the registry holds both `daewoo` / `lanos` and `daewoo  lanos` / `lanos`. Known limits: Cyrillic brands without an alias (`заз`) find nothing; photos with no year in the title cannot be matched to a generation.
+
+## Competitor comparison page `/alternatives` (2026-11-09)
+
+- **What:** public page `/alternatives` (sidebar "read" group, `/sitemap`, `STATIC_PAGES` ua/ru/en, title key `nav.alternatives`, `max-w-[96rem]` - wider than the usual `max-w-6xl` on purpose, 8 columns) comparing carsua.app with
+  AvtoNomera (ua.carplates.app), baza-gai.com.ua, Opendatabot, AUTO.RIA (check by VIN), RST, carVertical and CARFAX.
+  Cells: ✅ free, 💳 paid report, 🟡 partial or link-only, ➖ not found on their site, ❔ could not check; each column header has a price badge and a scope line.
+- **Data:** `routes/alternatives/helpers.ts` (`ROWS`, one cell per `SERVICES` entry in `types.ts`; `SERVICE_URL`, `SERVICE_PRICE_ICON`). "Only here" (`OUR_EDGE`) and "What we lack" (`OUR_GAPS`) are **derived** from `ROWS`, never typed by hand.
+  Row labels `alt.row.<key>`, columns `alt.service.*` / `alt.scope.*`, ua/ru/en in the i18n JSON.
+- **How the cells were filled (2026-11-09):** from the services' public pages and from screenshots of real lookups (BC6743PH on AvtoNomera, baza-gai, AUTO.RIA; a Passat report on carVertical). Press reviews only for Opendatabot's free part and price.
+  CARFAX answered 403, so its column is mostly ❔. RST's home page had broken encoding: it is kept as a marketplace reference (no plate/VIN check found), not a rival.
+- **Mistake worth remembering:** ua.carplates.app was first taken for our own v1 (README says v1 is `Krak86/carplates`); the screenshots showed it is a separate commercial service (AvtoNomera), so the column and the "v1 is not a rival" rule were removed.
+- **Not added on purpose:** AvtoNomera's free owner block (person/legal entity + address): our open registry has no owner data and we do not want to push toward personal data.
+- Also: roadmap idea "Own sale listings (limited)" (`marketplace` in `CONSIDERING_FEATURES`, shown on `/features`), About feature entry, release entry `v2.1173`, bottom links to `/about` and `/data-status`.
+
+## Result summary strip (carVertical idea 1, 2026-11-09)
+
+- **What:** a strip of six small cards at the top of the result card (under the header, above the value chip): wanted check, registry (last operation), crash tests, CO2, auctions (SETAM / Prozorro), recalls. Each is "Attention", "No problems found" or "No data" (dashed, untinted, `?`), plus one detail line naming the source and the date.
+- **Files:** `components/ResultSummary.tsx` (view), `ResultSummary.helpers.ts` (pure card builders, tested in `ResultSummary.helpers.test.ts`), `ResultSummary.types.ts`, `use-result-summary.ts` (the queries). Strings `summary.*` in ua/ru/en; `chip-attention` tone in `global.css` (sRGB fallback, oklch on P3).
+- **No new endpoints:** every query is the one a section or chip already runs (same keys, shared TanStack cache, offline groups unchanged). Crash tests count a programme only when it has the rating of this car's generation (`applicable*`), NHTSA rows are narrowed by body style like the section does; low stars (<= 2, Euro NCAP or NHTSA) is the flag.
+- **Wording:** never "this car is fine". "Nothing found in <source> on <date>" with the check date; a failed request, a never-loaded list or no rating is "No data". Recalls and crash tests say they are for the model; the note under the strip repeats it.
+- **Cost to know:** the strip runs its queries as soon as the card mounts (6 rating sources, 3 recall sources, fuel, wanted, auctions) instead of when a section opens. They are cached per model, so it is a one-off per model.
+- Also: `/alternatives` row `summary` (carVertical 💳, ours ✅, the rest ❔ until checked), About feature entry, release entry `v2.1175`.
+
+## Crash-test board and summary fixes, API 4xx, touch-only swipe (2026-11-09)
+
+- **Crash boards** (`safety-stats`): doubled model names ("GX 470 GX 470", "Q7 Q7") fold into one model in `modelLeaderboard`; "BRAND  MODEL" duplicates (double space) keep only the make via `split_part` in the model leaderboard and brand averages. The "?" help says score 0 is the worst grade, not missing data (ua/ru/en).
+- **IIHS score** (`crashScore`): `iihsScore` needs a frontal or side impact test; head-restraint or roof-only entries return null (fixed the false "0" on the Lexus GX 470). Tests added.
+- **Summary strip:** the crash tile is `attention` when an applicable IIHS crashworthiness test is Poor (`isIihsCrashTest` exported from `shared`).
+- **API errors:** `AllExceptionsFilter` keeps a numeric 4xx `statusCode` from plain errors (bad CSP report body, 413, unsupported media type) instead of a generic 500 + Sentry event; `all-exceptions.filter.test.ts`. `esc()` also escapes `'`.
+- **Security docs:** pentest pass 3 (two-user IDOR, upload, admin role, stored XSS) in `docs/pentest-lab.md` "Run log"; ranked remaining work in the security docs.
+- **Web:** photo swipe ignores mouse pointers (`useSwipeSlide`, `WikiHeroImage`). `/read/*` English titles are keyword-first ("<keywords> | Cars UA").
+- Release entry `v2.1180` (day 2026-11-09).

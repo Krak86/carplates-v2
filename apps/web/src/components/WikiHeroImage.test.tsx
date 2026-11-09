@@ -10,13 +10,19 @@ import { useUiStore } from '@/store/ui-store'
 await i18nReady
 
 const PHOTO = 'https://upload.example/car.jpg'
-const api = vi.hoisted(() => ({ getWikiImage: vi.fn(), getWikiRecolor: vi.fn(), getWikiPaintMask: vi.fn() }))
+const api = vi.hoisted(() => ({
+  getWikiImage: vi.fn(),
+  getWikiRecolor: vi.fn(),
+  getWikiPaintMask: vi.fn(),
+  getWikiPhotos: vi.fn()
+}))
 
 vi.mock('@/lib/api', async importOriginal => ({
   ...(await importOriginal<typeof import('@/lib/api')>()),
   getWikiImage: api.getWikiImage,
   getWikiRecolor: api.getWikiRecolor,
-  getWikiPaintMask: api.getWikiPaintMask
+  getWikiPaintMask: api.getWikiPaintMask,
+  getWikiPhotos: api.getWikiPhotos
 }))
 
 function recolorFor(imageUrl: string): unknown {
@@ -59,6 +65,7 @@ describe('WikiHeroImage colour filter', () => {
     api.getWikiImage.mockReset().mockResolvedValue({ image: { url: PHOTO, attribution: null }, from: 'db' })
     api.getWikiRecolor.mockReset().mockResolvedValue(recolorFor(PHOTO))
     api.getWikiPaintMask.mockReset().mockResolvedValue({ w: 4, h: 2, data: new Uint8ClampedArray(32) })
+    api.getWikiPhotos.mockReset().mockResolvedValue({ photos: [] })
     useUiStore.setState({ wikiRecolorEnabled: true })
   })
 
@@ -150,5 +157,105 @@ describe('WikiHeroImage colour filter', () => {
     fireEvent.click(pill()!)
     await waitFor(() => expect(screen.queryByTestId('wiki-recolor-canvas')).toBeNull())
     expect(pill()?.getAttribute('aria-pressed')).toBe('false')
+  })
+})
+
+function photo(n: number, colorMatch: boolean): unknown {
+  return {
+    url: `https://upload.example/p${n}.jpg`,
+    width: 1280,
+    height: 853,
+    title: `File:Kia Ceed ${n}.jpg`,
+    year: 2012,
+    bucket: colorMatch ? 'red' : 'white',
+    colorMatch,
+    attribution: { author: 'Ann', license: 'CC BY-SA 4.0', licenseUrl: null }
+  }
+}
+
+function renderWithPhotos(color: string | null): void {
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  render(
+    <QueryClientProvider client={client}>
+      <WikiHeroImage brand="KIA" model="CEED" year={2012} rawKind="LIGHT" vehicleKey="K1" color={color} />
+    </QueryClientProvider>
+  )
+}
+
+describe('WikiHeroImage extra photos', () => {
+  beforeEach(() => {
+    vi.stubGlobal(
+      'ResizeObserver',
+      class {
+        observe(): void {}
+        disconnect(): void {}
+      }
+    )
+    api.getWikiImage.mockReset().mockResolvedValue({ image: { url: PHOTO, attribution: null }, from: 'db' })
+    api.getWikiRecolor.mockReset().mockResolvedValue(recolorFor(PHOTO))
+    api.getWikiPaintMask.mockReset().mockResolvedValue({ w: 4, h: 2, data: new Uint8ClampedArray(32) })
+    api.getWikiPhotos.mockReset().mockResolvedValue({ photos: [photo(1, false), photo(2, true), photo(3, true)] })
+    useUiStore.setState({ wikiRecolorEnabled: true })
+  })
+
+  it('uses the first colour-matched photo as the hero: no filter, other-car credit, strip without it', async () => {
+    renderWithPhotos('ЧЕРВОНИЙ')
+    const hero = await screen.findByAltText('KIA CEED')
+    expect(hero.getAttribute('src')).toBe('https://upload.example/p2.jpg')
+    act(() => {
+      fireEvent.load(hero)
+    })
+    expect(await screen.findByText('Photo of another car of this model: Ann, CC BY-SA 4.0')).toBeTruthy()
+    expect(pill()).toBeNull()
+    expect(screen.queryByTestId('wiki-recolor-canvas')).toBeNull()
+    expect(api.getWikiRecolor).not.toHaveBeenCalled()
+    expect(screen.queryByRole('button', { name: 'Update photo' })).toBeNull()
+    expect(screen.getAllByAltText(/^KIA CEED: photo /)).toHaveLength(2)
+  })
+
+  it('keeps the stored hero and the filter when no photo matches the colour', async () => {
+    api.getWikiPhotos.mockResolvedValue({ photos: [photo(1, false)] })
+    renderWithPhotos('ЧЕРВОНИЙ')
+    const hero = await screen.findByAltText('KIA CEED')
+    expect(hero.getAttribute('src')).toBe(PHOTO)
+    act(() => {
+      fireEvent.load(hero)
+    })
+    await waitFor(() => expect(screen.getByTestId('wiki-recolor-canvas')).toBeTruthy())
+    expect(screen.getAllByAltText(/^KIA CEED: photo /)).toHaveLength(1)
+  })
+
+  it('falls to the next matched photo, then to the stored hero, when a matched photo fails to load', async () => {
+    api.getWikiPhotos.mockResolvedValue({ photos: [photo(2, true), photo(3, true)] })
+    renderWithPhotos('ЧЕРВОНИЙ')
+    const first = await screen.findByAltText('KIA CEED')
+    act(() => {
+      fireEvent.error(first)
+    })
+    await waitFor(() =>
+      expect(screen.getByAltText('KIA CEED').getAttribute('src')).toBe('https://upload.example/p3.jpg')
+    )
+    act(() => {
+      fireEvent.error(screen.getByAltText('KIA CEED'))
+    })
+    await waitFor(() => expect(screen.getByAltText('KIA CEED').getAttribute('src')).toBe(PHOTO))
+  })
+
+  it('keeps the stored hero when the photo request fails', async () => {
+    api.getWikiPhotos.mockRejectedValue(new Error('500'))
+    renderWithPhotos('ЧЕРВОНИЙ')
+    const hero = await screen.findByAltText('KIA CEED')
+    expect(hero.getAttribute('src')).toBe(PHOTO)
+  })
+
+  it('opens the zoom dialog from a strip photo and shows more past the preview count', async () => {
+    api.getWikiPhotos.mockResolvedValue({ photos: [1, 2, 3, 4, 5, 6].map(n => photo(n, false)) })
+    renderWithPhotos(null)
+    await screen.findAllByAltText(/^KIA CEED: photo /)
+    expect(screen.getAllByAltText(/^KIA CEED: photo /)).toHaveLength(4)
+    fireEvent.click(screen.getByRole('button', { name: 'Show more photos (2)' }))
+    expect(screen.getAllByAltText(/^KIA CEED: photo /)).toHaveLength(6)
+    fireEvent.click(screen.getByRole('button', { name: 'Open photo 1 of 6' }))
+    expect(await screen.findByRole('dialog')).toBeTruthy()
   })
 })

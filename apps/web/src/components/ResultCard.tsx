@@ -30,6 +30,7 @@ import ColorSwatch from '@/components/ColorSwatch'
 import CopyAllInfoButton from '@/components/CopyAllInfoButton'
 import CopyButton from '@/components/CopyButton'
 import LastOperationChip from '@/components/LastOperationChip'
+import ResultSummary from '@/components/ResultSummary'
 import CollapsibleChips from '@/components/CollapsibleChips'
 import LazySection from '@/components/LazySection'
 import ReportIssueLink from '@/components/ReportIssueLink'
@@ -94,6 +95,7 @@ import { useRegionLabel } from '@/lib/region-label'
 import { depMapsUrl } from '@/lib/maps'
 import { hasImportOperation } from '@/lib/auction-sites'
 import { plateHistoryQuery, rdwQuery, vinQuery } from '@/lib/queries'
+import { openCardSection } from '@/lib/card-sections'
 import { scrollElementIntoView } from '@/lib/share-section'
 import { formatVehicleLabel } from '@/lib/vehicle-label'
 import { bodyGuideShape, FLEET_PATH, readHref } from '@/routes/read/links'
@@ -464,6 +466,21 @@ export default function ResultCard({ data }: Props): ReactNode {
               />
             </Suspense>
           </div>
+
+          <ResultSummary
+            plate={data.plate}
+            vin={hasVin ? c.vin : null}
+            brand={c.brand}
+            model={c.model}
+            year={c.makeYear}
+            kind={c.kind}
+            fuel={c.fuel}
+            capacity={c.capacity}
+            body={c.body}
+            operCode={c.operCode}
+            dReg={c.dReg}
+            onOpen={(target): void => (target === 'history' ? jumpToSection('history') : openCardSection(target))}
+          />
 
           <EstimatedValueChip
             brand={c.brand}

@@ -326,6 +326,23 @@ export function commonsYearSearchUrl(brand: string, model: string, year: number)
   })
 }
 
+/** Max photos one candidate search asks for (wiki_image_candidate, docs/wiki-recolor-plan.md step 7). */
+export const CANDIDATE_SEARCH_LIMIT = 40
+
+/** Commons search for a model with no year, thumbnails + licences in the same request: the candidate-photo scan. */
+export function commonsCandidatesSearchUrl(brand: string, model: string, limit = CANDIDATE_SEARCH_LIMIT): URL {
+  return apiUrl(COMMONS_API, {
+    action: 'query',
+    generator: 'search',
+    gsrsearch: `"${brand} ${model}" filetype:bitmap`,
+    gsrnamespace: '6',
+    gsrlimit: String(limit),
+    prop: 'imageinfo',
+    iiprop: 'url|size|mime|extmetadata',
+    iiurlwidth: String(THUMB_WIDTH)
+  })
+}
+
 /** Commons search for titles only (cheap, up to 500 per page) — the pre-warm's one request per model. */
 export function commonsTitleSearchUrl(brand: string, model: string, offset = 0): URL {
   return apiUrl(COMMONS_API, {

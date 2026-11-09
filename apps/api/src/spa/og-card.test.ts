@@ -17,6 +17,12 @@ describe('buildCardSvg', () => {
     expect(svg).not.toContain('<b>')
   })
 
+  it('escapes single quotes too, so esc() is safe inside single-quoted attributes', () => {
+    const svg = buildCardSvg({ plate: 'AA1234BB', title: "x' onload='alert(1)", subtitle: 'x', color: 'white' })
+    expect(svg).toContain('x&#39; onload=&#39;alert(1)')
+    expect(svg).not.toContain("' onload=")
+  })
+
   it('shrinks the plate text for a 17-char VIN so it fits the plate box', () => {
     const size = (plate: string): number =>
       Number(

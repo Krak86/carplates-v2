@@ -37,6 +37,8 @@ export {
   topgearReviews,
   wikiImage,
   wikiImagePaint,
+  wikiImageCandidate,
+  wikiImageCandidateScan,
   pressReviews,
   newsItems,
   socialPosts,
@@ -206,6 +208,8 @@ export {
   type WikiImageInsert,
   type WikiImagePaintRow,
   type WikiImagePaintInsert,
+  type WikiImageCandidateRow,
+  type WikiImageCandidateInsert,
   type YoutubeVideoRow,
   type YoutubeVideoInsert,
   type YoutubeModelRunRow,
@@ -258,4 +262,5 @@ export {
 export { runMigrations } from './migrate.js'
 export { findWikiImage, upsertWikiImages } from './wikiImage.js'
 export { findWikiPaint, findWikiPaintMask, wikiPaintMaskId, type WikiPaintInfo } from './wikiImagePaint.js'
+export { findWikiCandidates, type WikiCandidateInfo } from './wikiImageCandidate.js'
 export { recallTextHash } from './recallText.js'

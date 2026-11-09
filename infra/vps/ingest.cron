@@ -35,3 +35,6 @@ PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 # Wikipedia photo colour filter scan: 1 500 photos per night (about 65 min at 2.6 s per photo, --rps 1), most-registered models first, resumable; before the 03:30 backup and clear of the 04:10+ jobs.
 30 0 * * *   bash /opt/carsua/compose/run-ingest.sh wiki-paint >> /opt/carsua/backups/ingest.log 2>&1
+
+# Extra model photos for the colour-matched hero and the photo strip: 80 models per night (about 70 min, --rps 1), most-registered first, resumable; after wiki-paint, done before the 03:30 backup.
+45 1 * * *   bash /opt/carsua/compose/run-ingest.sh wiki-candidates >> /opt/carsua/backups/ingest.log 2>&1

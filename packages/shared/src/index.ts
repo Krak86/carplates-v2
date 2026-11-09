@@ -261,6 +261,13 @@ export {
   type WikiRecolor,
   type WikiRecolorResponse
 } from './wikiRecolor.js'
+export {
+  WIKI_PHOTOS_MAX,
+  wikiPhotoSchema,
+  wikiPhotosResponseSchema,
+  type WikiPhoto,
+  type WikiPhotosResponse
+} from './wikiPhotos.js'
 export { SHADE_MAX, SHADE_SCALE, applyPaint, paintTargetLinear, paintTone, type LinearRgb } from './paintApply.js'
 export { VEHICLE_FUELS, resolveFuelCategories, fuelKeyword, type VehicleFuel } from './vehicleFuel.js'
 export { brandLogoUrl, brandSlug } from './brandLogo.js'
@@ -270,6 +277,7 @@ export { showcaseModels } from './newCarShowcase.js'
 export { wikiUrl, wikiDomain, wikiDomainChain } from './wikiUrl.js'
 export {
   hasStandaloneYear,
+  isDetailShot,
   isModelYearTitle,
   pickCommonsCandidate,
   scoreCommonsCandidate,
@@ -292,6 +300,7 @@ export {
   MAX_ATTEMPTS,
   MAX_RETRY_AFTER_MS,
   MODEL_LEVEL_YEAR,
+  CANDIDATE_SEARCH_LIMIT,
   SEARCH_PAGE_SIZE,
   THUMB_WIDTH,
   WIKI_IMAGE_ORIGINS,
@@ -300,6 +309,7 @@ export {
   attributionFromMeta,
   commonsFilenameFromUrl,
   leadLanguages,
+  commonsCandidatesSearchUrl,
   commonsImageInfoUrl,
   commonsPagesInOrder,
   commonsTitleSearchUrl,
@@ -576,6 +586,7 @@ export {
   cncapScore,
   kncapScore,
   iihsScore,
+  isIihsCrashTest,
   matchRatingRows,
   applicableCrashScore,
   combineCrashScores,

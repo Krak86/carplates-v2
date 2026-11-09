@@ -57,10 +57,28 @@ const IIHS_CRASH_TESTS = new Set([
   'roof-strength',
   'head-restraints-and-seats'
 ])
+/** Whether an IIHS test key is a crashworthiness test (not headlights, crash prevention, child-seat anchors, belts). */
+export const isIihsCrashTest = (key: string): boolean => IIHS_CRASH_TESTS.has(key)
+
 const IIHS_RATING_SCORE: Readonly<Record<string, number>> = { Good: 100, Acceptable: 67, Marginal: 33, Poor: 0 }
 
-/** IIHS has no overall number: the mean of its crashworthiness tests (Good 100 … Poor 0); null when none were rated. */
+/** Frontal and side impact tests: an IIHS entry without one of these (only seats / roof) is no crash result. */
+const IIHS_IMPACT_TESTS = new Set([
+  'moderate-overlap-front-original-test',
+  'moderate-overlap-front-updated-test',
+  'small-overlap-front',
+  'small-overlap-front-driver-side',
+  'small-overlap-front-passenger-side',
+  'side-original-test',
+  'side-updated-test'
+])
+
+/**
+ * IIHS has no overall number: the mean of its crashworthiness tests (Good 100 … Poor 0); null when none were rated,
+ * or when only the seat / roof tests were (old entries such as Lexus GX 470: just "Head restraints & seats: Poor").
+ */
 export function iihsScore(tests: readonly { key: string; rating: string | null }[]): number | null {
+  if (!tests.some(t => IIHS_IMPACT_TESTS.has(t.key) && t.rating != null && t.rating in IIHS_RATING_SCORE)) return null
   const scores = tests.flatMap(t => {
     const s = IIHS_CRASH_TESTS.has(t.key) && t.rating != null ? IIHS_RATING_SCORE[t.rating] : undefined
     return s == null ? [] : [s]

@@ -25,60 +25,22 @@ import { parseArgs } from 'node:util'
 
 import { createDb, schema, type Db, type WikiImagePaintInsert } from '@carplates/db'
 import { VEHICLE_COLORS, isClosePaint, type VehicleColor } from '@carplates/shared'
-import { env, pipeline, RawImage } from '@huggingface/transformers'
 import { sql, type SQL } from 'drizzle-orm'
 import sharp from 'sharp'
 
 import { writeContactSheets, type SheetEntry } from './wiki-paint-sheet.js'
 import { normalizeScope } from './wiki-paint-scope.js'
-import { PAINT_ALGO, PAINT_SCAN_WIDTH, applyPaint, scanPaint } from './wiki-paint-core.js'
+import { PAINT_ALGO, applyPaint } from './wiki-paint-core.js'
+import { PAINT_USER_AGENT, loadSegmenter, scanImage } from './wiki-paint-image.js'
 import type { PaintScanResult } from './wiki-paint-core.js'
 
-const DATA_DIR = join(import.meta.dirname, '..', '.data', 'wiki-paint')
-const USER_AGENT = 'carsua.app-ingest/1.0 (+https://carsua.app)'
 /** Mask encoding: ~28 KB per photo at 640 px (quality 80 was ~62 KB; error vs it about 2 of 255). Encoding only, the scan algorithm is unchanged. */
 const MASK_WEBP = { quality: 50, alphaQuality: 60, effort: 6 } as const
-const MODEL = 'Xenova/segformer-b0-finetuned-ade-512-512'
 
 const log = (...m: unknown[]): void => {
   console.log(...m)
 }
 const sleep = (ms: number): Promise<void> => new Promise(r => setTimeout(r, ms))
-
-type Segmenter = (img: RawImage) => Promise<{ label: string; mask: RawImage }[]>
-
-/** Car probability (0-255) at `w x h`, or null when SegFormer found no `car`. */
-async function carProbability(seg: Segmenter, rgb: Uint8Array, w: number, h: number): Promise<Uint8Array | null> {
-  const out = await seg(new RawImage(Uint8ClampedArray.from(rgb), w, h, 3))
-  const car = out.find(o => o.label === 'car')
-  if (!car) return null
-  const m = car.mask
-  const { data, info } = await sharp(Buffer.from(m.data), { raw: { width: m.width, height: m.height, channels: 1 } })
-    .resize(w, h, { kernel: 'cubic' })
-    .raw()
-    .toBuffer({ resolveWithObject: true })
-  // sharp can return extra channels for 1-channel input after resize: always stride by info.channels.
-  const prob = new Uint8Array(w * h)
-  for (let i = 0; i < prob.length; i++) prob[i] = data[i * info.channels]!
-  return prob
-}
-
-async function scanImage(
-  seg: Segmenter,
-  buf: Buffer
-): Promise<{ rgb: Uint8Array; w: number; h: number; scan: PaintScanResult }> {
-  const { data, info } = await sharp(buf)
-    .resize({ width: PAINT_SCAN_WIDTH })
-    .removeAlpha()
-    .raw()
-    .toBuffer({ resolveWithObject: true })
-  const rgb = new Uint8Array(data)
-  const prob = await carProbability(seg, rgb, info.width, info.height)
-  const scan: PaintScanResult = prob
-    ? scanPaint({ rgb, width: info.width, height: info.height, prob })
-    : { status: 'skip', reason: 'no_car', bodyArea: null }
-  return { rgb, w: info.width, h: info.height, scan }
-}
 
 /** Upsert one scan (skip rows too). The mask is an RGBA webp at the scan size, per the contract in the plan's Handoff. */
 async function savePaint(db: Db, url: string, w: number, h: number, scan: PaintScanResult): Promise<number> {
@@ -210,8 +172,7 @@ async function main(): Promise<void> {
   const { db, close } = createDb()
   const urls = await pickUrls(db, normalizeScope(values.brand), normalizeScope(values.model), limit, order)
   log(`scanning ${urls.length} photo(s), algo ${PAINT_ALGO}${dryRun ? ' (dry run, nothing saved)' : ''}`)
-  env.cacheDir = join(DATA_DIR, 'hf-cache')
-  const seg = (await pipeline('image-segmentation', MODEL, { dtype: 'q8' })) as unknown as Segmenter
+  const seg = await loadSegmenter()
 
   const startedAt = Date.now()
   const results: Record<string, unknown>[] = []
@@ -220,7 +181,7 @@ async function main(): Promise<void> {
   for (const [n, url] of urls.entries()) {
     const name = String(n + 1).padStart(3, '0')
     try {
-      const res = await fetch(url, { headers: { 'User-Agent': USER_AGENT } })
+      const res = await fetch(url, { headers: { 'User-Agent': PAINT_USER_AGENT } })
       if (!res.ok) throw new Error(`http ${res.status}`)
       const { rgb, w, h, scan } = await scanImage(seg, Buffer.from(await res.arrayBuffer()))
       let maskBytes = 0

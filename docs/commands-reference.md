@@ -84,6 +84,7 @@ pnpm export:press:csv  # re-dump the table to that CSV — run after every real 
 
 ```bash
 pnpm ingest:wiki-images  # pre-warm registry.wiki_image (Wikimedia hero photos, metadata only; hotlinked): per model ONE Commons title
+pnpm ingest:wiki-candidates  # extra Commons photos per model (colour only, no masks) for the colour-matched hero + strip; most-registered first, resumable (wiki_image_candidate_scan). `--limit N --brand X --model X --per-model 20 --rps 1 --dry-run`; ~0.6 min per model. Nightly job `wiki-candidates` (01:45, 80 models)
                        # search + batched imageinfo (50/req) + English lead-image fallback; models >= --min-cars (default 1000),
                        # most cars first, resumable; --brand kia, --limit N, --rps 1|2, --dry-run, --refresh. Every failed request
                        # (429/5xx/timeout) is listed in scripts/.data/wiki-images/failed.json; --retry-failed [--all] replays them

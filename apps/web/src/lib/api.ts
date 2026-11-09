@@ -109,6 +109,7 @@ import {
   vehiclePhotosResponseSchema,
   vinDecodeResponseSchema,
   wikiImageResponseSchema,
+  wikiPhotosResponseSchema,
   wikiRecolorResponseSchema,
   wikiInfoResponseSchema
 } from '@carplates/shared'
@@ -248,6 +249,7 @@ import type {
   VinDecodeResponse,
   WikiImageResponse,
   WikiInfo,
+  WikiPhotosResponse,
   WikiRecolorResponse
 } from '@carplates/shared'
 import type { Feature, FeatureCollection, Geometry } from 'geojson'
@@ -431,6 +433,19 @@ export async function getWikiRecolor(brand: string, model: string, year: number 
   if (model) params.set('model', model)
   if (year != null) params.set('year', String(year))
   return wikiRecolorResponseSchema.parse(await getJson(`/api/wiki/recolor?${params.toString()}`))
+}
+
+/** Extra Commons photos of the model, best first (a photo whose paint already matches `color` leads); empty when the model is not scanned. */
+export async function getWikiPhotos(
+  brand: string,
+  model: string,
+  year: number | null,
+  color: string | null
+): Promise<WikiPhotosResponse> {
+  const params = new URLSearchParams({ brand, model })
+  if (year != null) params.set('year', String(year))
+  if (color) params.set('color', color)
+  return wikiPhotosResponseSchema.parse(await getJson(`/api/wiki/photos?${params.toString()}`))
 }
 
 /** The mask of the colour filter: RGBA webp (RGB shading, A paint weight) decoded to raw bytes. Same origin as the API, so no CORS taint. */
