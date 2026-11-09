@@ -111,7 +111,7 @@ export default function WikiHeroImage({
   const viewOriginal = hasSlides && originalUrl === image?.url
   const goSlide = (): void => setOriginalUrl(viewOriginal ? null : (image?.url ?? null))
   const onPointerDown = (e: PointerEvent<HTMLDivElement>): void => {
-    swipe.current = { x: e.clientX, y: e.clientY, moved: false }
+    swipe.current = e.pointerType === 'mouse' ? null : { x: e.clientX, y: e.clientY, moved: false }
   }
   const onPointerUp = (e: PointerEvent<HTMLDivElement>): void => {
     const start = swipe.current

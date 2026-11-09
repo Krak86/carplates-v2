@@ -59,7 +59,8 @@ export function useSwipeSlide<E extends HTMLElement = HTMLElement, C extends HTM
     slideClass: dir > 0 ? 'animate-photo-from-right' : dir < 0 ? 'animate-photo-from-left' : '',
     bind: {
       onPointerDown: (e): void => {
-        start.current = { x: e.clientX, y: e.clientY, moved: false }
+        // Swipe is a touch gesture: a mouse drag on desktop must not move the photo (arrows / thumbnails stay).
+        start.current = e.pointerType === 'mouse' ? null : { x: e.clientX, y: e.clientY, moved: false }
       },
       onPointerMove: (e): void => {
         const s = start.current
