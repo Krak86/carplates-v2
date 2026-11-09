@@ -8,9 +8,21 @@ import type {
   Fetched,
   RecallInputs,
   SummaryCard,
+  SummaryCardId,
   WantedResponse
 } from '@/components/ResultSummary.types'
+import type { ShareSection } from '@/lib/share-section'
 import { operStatus } from '@/lib/oper-info'
+
+/** Section a tile opens and scrolls to (`registry` is the always-mounted history block). */
+export const SUMMARY_TARGET: Readonly<Record<SummaryCardId, ShareSection>> = {
+  wanted: 'wanted',
+  operation: 'history',
+  crash: 'ratings',
+  co2: 'emissions',
+  auction: 'ua-auctions',
+  recalls: 'recalls'
+}
 
 /** Number of crash-test programmes the strip looks at (Euro NCAP, NHTSA, JNCAP, C-NCAP, KNCAP, IIHS). */
 export const CRASH_PROGRAMMES = 6
@@ -89,7 +101,38 @@ export function crashCard(input: CrashInputs): SummaryCard {
 
   // Wait for every programme before saying "no data"; a hit can already be shown while others load.
   if (count === 0) {
-    return all.some(isLoading) ? pending('crash') : { id: 'crash', state: 'nodata', textKey: 'summary.crash.nodata' }
+    if (all.some(isLoading)) return pending('crash')
+    // Other generations of the model were tested: say so (never as this car's rating: its own "other generation" state, not green).
+    const otherEuro = (euro?.ratings ?? [])
+      .filter(r => r.stars != null)
+      .sort((a, b) => (b.ratingYear ?? 0) - (a.ratingYear ?? 0))[0]
+    if (otherEuro?.stars != null) {
+      return {
+        id: 'crash',
+        state: 'other',
+        textKey: 'summary.crash.otherEuroncap',
+        params: { stars: otherEuro.stars, year: otherEuro.ratingYear ?? '?' }
+      }
+    }
+    const otherSources = [
+      ['Euro NCAP', euro?.ratings.length],
+      ['NHTSA', nhtsa?.data?.ratings.length],
+      ['JNCAP', jncap?.data?.ratings.length],
+      ['C-NCAP', cncap?.data?.ratings.length],
+      ['KNCAP', kncap?.data?.ratings.length],
+      ['IIHS', iihs?.data?.ratings.length]
+    ]
+      .filter(([, n]) => !!n)
+      .map(([name]) => name)
+    if (otherSources.length > 0) {
+      return {
+        id: 'crash',
+        state: 'other',
+        textKey: 'summary.crash.other',
+        params: { sources: otherSources.join(', ') }
+      }
+    }
+    return { id: 'crash', state: 'nodata', textKey: 'summary.crash.nodata' }
   }
   const stars = euroApplicable?.stars ?? null
   const lowest = [stars, nhtsaAverage].filter((s): s is number => s != null)

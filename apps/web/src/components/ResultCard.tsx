@@ -95,6 +95,7 @@ import { useRegionLabel } from '@/lib/region-label'
 import { depMapsUrl } from '@/lib/maps'
 import { hasImportOperation } from '@/lib/auction-sites'
 import { plateHistoryQuery, rdwQuery, vinQuery } from '@/lib/queries'
+import { openCardSection } from '@/lib/card-sections'
 import { scrollElementIntoView } from '@/lib/share-section'
 import { formatVehicleLabel } from '@/lib/vehicle-label'
 import { bodyGuideShape, FLEET_PATH, readHref } from '@/routes/read/links'
@@ -478,6 +479,7 @@ export default function ResultCard({ data }: Props): ReactNode {
             body={c.body}
             operCode={c.operCode}
             dReg={c.dReg}
+            onOpen={(target): void => (target === 'history' ? jumpToSection('history') : openCardSection(target))}
           />
 
           <EstimatedValueChip

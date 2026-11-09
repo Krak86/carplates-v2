@@ -8,6 +8,7 @@ import { isCatalogPath, NO_SHARE_PATHS, usePageShareActions } from '@/components
 import { ROUTE_TITLE_KEYS } from '@/hooks/useDocumentTitle'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { useScrolledNow } from '@/hooks/useSideWidgetsVisible'
+import { collapseAllCardSections } from '@/lib/card-sections'
 import { cn } from '@/lib/cn'
 
 /** Phones keep the native scroll; the buttons are for desktop / tablet. */
@@ -34,14 +35,6 @@ function measure(): Position {
   // The stack's bottom edge must stay above the content's bottom.
   const { bottom } = (card ?? page).getBoundingClientRect()
   return { left, bottom: Math.max(GAP_PX, window.innerHeight - bottom + GAP_PX) }
-}
-
-// Section headers are the shared `SectionHeader` rows; an open one carries `data-open`. Clicking the row toggles it.
-// Outer sections go first, and a collapsed parent unmounts its nested ones, so skip any node that is gone by then.
-function collapseAllSections(): void {
-  document.querySelectorAll<HTMLElement>('[data-section-header][data-open]').forEach(header => {
-    if (header.isConnected) header.click()
-  })
 }
 
 /**
@@ -156,7 +149,7 @@ export default function ScrollButtons(): ReactNode {
           aria-label={t('scroll.collapseAll')}
           title={t('scroll.collapseAll')}
           tabIndex={scrolled ? undefined : -1}
-          onClick={collapseAllSections}
+          onClick={collapseAllCardSections}
           className={BUTTON_CLASS}
         >
           <svg

@@ -18,7 +18,7 @@ export const SUMMARY_CARD_IDS = ['wanted', 'operation', 'crash', 'co2', 'auction
 export type SummaryCardId = (typeof SUMMARY_CARD_IDS)[number]
 
 /** `pending` is a query still loading; the other three are what the card says once it is settled. */
-export const SUMMARY_STATES = ['attention', 'ok', 'nodata', 'pending'] as const
+export const SUMMARY_STATES = ['attention', 'ok', 'other', 'nodata', 'pending'] as const
 export type SummaryState = (typeof SUMMARY_STATES)[number]
 
 /** One card of the strip: a state plus the i18n key of its one-line detail (the component translates it). */

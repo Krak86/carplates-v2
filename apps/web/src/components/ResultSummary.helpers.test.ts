@@ -83,9 +83,17 @@ describe('crashCard', () => {
   it('stays pending while a programme loads and nothing was found yet', () => {
     expect(crashCard({ ...none, iihs: loading }).state).toBe('pending')
   })
-  it('ignores a rating of another generation', () => {
-    const other = done({ ratings: [{ assessmentId: 'b', stars: 5 }], applicableAssessmentId: null })
-    expect(crashCard({ ...none, euroncap: other }).state).toBe('nodata')
+  it('ignores a rating of another generation but names it', () => {
+    const other = done({ ratings: [{ assessmentId: 'b', stars: 5, ratingYear: 2019 }], applicableAssessmentId: null })
+    expect(crashCard({ ...none, euroncap: other })).toMatchObject({
+      state: 'other',
+      textKey: 'summary.crash.otherEuroncap',
+      params: { stars: 5, year: 2019 }
+    })
+  })
+  it('names other programmes that only tested another generation', () => {
+    const jncap = done({ ratings: [{ assessmentId: 'j' }], applicableAssessmentId: null })
+    expect(crashCard({ ...none, jncap })).toMatchObject({ state: 'other', params: { sources: 'JNCAP' } })
   })
   it('shows Euro NCAP stars and the programme count', () => {
     expect(crashCard({ ...none, euroncap: euro(5) })).toMatchObject({
