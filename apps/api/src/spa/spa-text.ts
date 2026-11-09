@@ -382,7 +382,7 @@ export const STATIC_PAGES: Record<string, Record<Lang, PageText>> = {
       description: 'Классы A, B, C, D, J, M по длине, влезет ли авто на парковочное место, поиск моделей по размеру.'
     },
     en: {
-      title: 'Cars UA - Car sizes and classes',
+      title: 'Car size classes A-M: does it fit a parking space? | Cars UA',
       description: 'The A, B, C, D, J and M classes by length, whether a car fits a parking space, and a size explorer.'
     }
   },
@@ -412,7 +412,7 @@ export const STATIC_PAGES: Record<string, Record<Lang, PageText>> = {
         'Из чего состоит номер, какие буквы означают какой регион, старые и новые форматы и номера без региона.'
     },
     en: {
-      title: 'Cars UA - Ukrainian number plates: region codes and formats',
+      title: 'Ukrainian number plates: region codes and formats | Cars UA',
       description:
         'What a plate is made of, which letters mean which region, the old and new formats, and plates with no region.'
     }
@@ -429,7 +429,7 @@ export const STATIC_PAGES: Record<string, Record<Lang, PageText>> = {
         'Длина, ширина и колёсная база каждого поколения популярных моделей - насколько «Гольф» и «Октавия» выросли за десятилетия.'
     },
     en: {
-      title: 'Cars UA - How cars grew across generations: Octavia, Golf, Camry',
+      title: 'How cars grew across generations: Octavia, Golf, Camry | Cars UA',
       description:
         'Length, width and wheelbase of every generation of popular models - how much the Golf and the Octavia grew over the decades.'
     }
@@ -565,7 +565,7 @@ export const STATIC_PAGES: Record<string, Record<Lang, PageText>> = {
         'Из чего состоит VIN, как узнать производителя, страну и модельный год, что такое контрольная цифра, где найти VIN на авто, почему он не разбирается и как искать по нему.'
     },
     en: {
-      title: 'Cars UA - VIN explained: what the 17 characters mean',
+      title: 'VIN explained: what the 17 characters mean | Cars UA',
       description:
         'What a VIN is made of, how to read the maker, country and model year off it, the check digit, where to find it on a car, why it may not decode and how to search by it.'
     }
