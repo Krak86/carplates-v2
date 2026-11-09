@@ -30,6 +30,11 @@ describe('candidateTitleScore', () => {
     expect(candidateTitleScore('File:Kia Ceed concept.jpg', 'Ceed')).toBeNull()
   })
 
+  it('rejects toys but not the Toyota brand', () => {
+    expect(candidateTitleScore('File:Toyota Camry toy model.jpg', 'Camry')).toBeNull()
+    expect(candidateTitleScore('File:2019 Toyota Camry.jpg', 'Camry')).not.toBeNull()
+  })
+
   it('ranks front views above rear ones', () => {
     const front = candidateTitleScore('File:Kia Ceed front.jpg', 'Ceed')!
     const rear = candidateTitleScore('File:Kia Ceed rear.jpg', 'Ceed')!

@@ -93,6 +93,8 @@ API, write again only if a paid version exists or the audience grows a lot.
       per-plate cache plus a global daily upstream cap (promised 300/day) and kill switch, same pattern as `MarketService` (CarAPIS).
       If **no**: leave parked, close this box.
 
+### Competitor comparison page `/alternatives` ✅ DONE (2026-11-09) — see `docs/plan-done.md`; carVertical ideas below
+
 ### Sitemap page `/sitemap` ✅ DONE (2026-11-01) — see `docs/plan-done.md`
 
 ### Data freshness: real data-end label + `/data-status` ✅ DONE (2026-11-01) — see `docs/plan-done.md`
@@ -749,6 +751,27 @@ So showing their data/images (hotlinked or re-hosted) needs written permission. 
 - **If only a link/credit is allowed:** store just `source_url` per model, no facts/images.
 - **If no / no reply:** drop it; alternative = Wikidata/Wikipedia infobox dimensions (CC) like the Wikimedia hero photos.
 
+### Ideas from the carVertical report — **researched 2026-11-09 from screenshots, nothing started**
+
+**Policy:** reuse the _shape_ of the report (summary cards, timeline, scales), never their data, wording or photos. Their damage, past-sale photos, odometer and
+owner records come from paid insurer / police / dealer databases we do not have; everything below is built from data we already store.
+
+- [ ] **1. Report-style summary strip at the top of the result card** (best value for effort). carVertical opens with 8 small cards, each "Attention" / "No problems found" / no data.
+      Ours from existing data: wanted (wanted check), last registration operation + registry status, crash-test stars (6 sources), CO2 / fuel badge, auction and debtor flags (SETAM / Prozorro), recalls count.
+      Where: a new `ResultSummary.tsx` in `apps/web/src/components/`, rendered at the top of `ResultCard.tsx`; reuse each section's own query so nothing new is fetched; keep "no data" visibly different from "no problems".
+      Wording rule as for MOT: never "this car is fine", only "nothing found in <source> on <date>".
+- [ ] **2. "Typical mileage for this model and age" + odometer sanity check.** carVertical draws the car's mileage against a typical-for-model line. We have pooled UK MOT mileage bands per model (`mot_stats`, see "UK MOT Common faults" in `docs/features-reference.md`).
+      Where: a card in the MOT section (or the summary strip) with a typical band by age; an optional input "seller says N km" -> "below / within / above the typical range in UK inspections of this model". localStorage only, nothing sent.
+      Caveats: UK market, model level, bands with < `MOT_MIN_BAND_TESTS` stay "not enough data".
+- [ ] **3. One timeline per car.** carVertical's "Chronology" lists 8 dated events. Merge what we already have per plate / VIN: registry operation date, wanted record and found-wanted history (`stolen.in.ua`), SETAM / Prozorro lots, recalls by model year.
+      Where: a lazy `VehicleTimeline` section (`LazySection`, add its id to `sections` + `lib/share-section.ts`); pure merge helper in `helpers.ts` with a test; dates are what the source says, no guessing.
+- [ ] **4. CO2 class bar.** A 0 to 225+ g/km scale with a class badge (A to G, EU WLTP bands) next to the fuel badge, from `registry.fuel_economy` (EPA / EEA). Where: the existing fuel badge popover and `/fuel`. Check the band edges against the EU label rules before shipping.
+- [ ] **5. Depreciation curve with a "best time to sell" hint.** carVertical forecasts price by age. Ours would build on the value estimate (Belastingdienst BPM depreciation table) and the age of the car. **Check first:** listing prices from CarAPIS may only be shown to our own users and cached for days (About, `carapis`), so do not aggregate them into statistics.
+- [ ] **6. Trust counters on the home page.** carVertical shows "330M records, 1000 sources, 48 countries". Ours from `/data-status` and `/stats`: registry rows, number of sources, number of countries with data. Where: a one-line strip on the home page, loaded lazily, cached with the stats endpoints.
+- [ ] **7. Technical-inspection card.** carVertical shows "TO passed 04.2022, Poland". We only link out to the MVS HSC OTK protocol today; keep it a link-out unless an open dataset appears.
+- ⏳ **Not reusable (needs paid or private data):** damage diagram and repair-cost estimate, photos from past sales, odometer rollback verdict, ownership changes, taxi / rental / police checks (no open Ukrainian dataset known, not researched), factory option codes (no open decoder; NHTSA is US only).
+- **Gaps the page already lists** (`OUR_GAPS`): encumbrance check, registration history, owner count, accident history, odometer, history abroad, past sale ads, plate photo gallery (ties to the Platesmania item), commercial use, own listings.
+
 ### Spec-page ideas from carsized.com / autosize.org — **researched 2026-10-10, nothing started**
 
 **Policy: do not scrape or reuse either site.** carsized.com robots.txt blocks only `/cdn-cgi/` (plus Meta crawlers); its terms
@@ -1357,7 +1380,8 @@ Plan in 9 steps, [docs/wiki-recolor-plan.md](docs/wiki-recolor-plan.md); prototy
   - [x] Step 7 data + API (2026-11-09, uncommitted): migration 0104 (`wiki_image_candidate`, `wiki_image_candidate_scan`, no masks stored), `pnpm ingest:wiki-candidates` (`wiki-candidates.ts` + `-core.ts`, shared `wiki-paint-image.ts`), `GET /api/wiki/photos?brand&model&year&color` (colour match, then generation, then quality). Checked on kia ceed locally (30 qualified, 8 analysed, 6 ok)
   - [x] Step 7 rest (2026-11-09, uncommitted): hero uses the first `colorMatch` photo (`useWikiPhotos`, `wikiPhotosQuery`; no filter, credit "another car", falls to the next match / stored hero on a load error), `wiki-candidates` job (80 models, 01:45 cron) + `/data-status` row `wikiCandidates`, `/api/wiki/photos` in the deploy.md Cloudflare expression, controller test (incl. the Zod query pipe), root `ingest:wiki-candidates` script
   - [x] Step 8 (2026-11-09, uncommitted): `WikiPhotoStrip.tsx` under the hero (4 + show more, credit link per photo, zoom), tests in `WikiHeroImage.test.tsx`
-  - [ ] Review the 100-model dry run (`--limit 100 --dry-run`, log in the session scratchpad) before the first real scan; tune `candidateQuality` / title filters if the strip shows interiors or wrong models
+  - [x] Review of the 100-model dry run (2026-11-09, 61 min): found + fixed the `toy` title filter rejecting every Toyota (now `toys?`, test added), and the job now searches / analyses once per search term (registry has `daewoo  lanos` next to `daewoo`; was about 40 % wasted scans). Rest healthy: 5-39 qualified, 40-95 % ok, 2-6 colours; ok photos are 51 % white, 44 % gray (dark paint is gated out, so black cars keep the stored hero + filter). Real scan of 10 models + browser check done (matched hero, strip, zoom, show more, no-match fallback)
+  - [ ] Follow-ups (optional): Cyrillic brands without an alias (`заз lanos`, `заз 110307`) find 0 photos, add `wikiSearchName` aliases; undated matched photos may be another generation (hero for a 2011 Octavia was an Octavia IV, strip started with the 1959 Octavia), consider ranking dated in-generation photos above undated colour matches
   - [ ] After deploy (owner): apply migration 0104 on the VPS; add `/api/wiki/photos` to the Cloudflare "Cache model lookups" expression (docs/deploy.md), check MISS then HIT; the nightly `wiki-candidates` run (00:30 wiki-paint, 01:45 candidates) downloads nothing new but shares the SegFormer cache; optional healthchecks.io secret
   - [x] About page (2026-11-09): `about.feature.media` + `about.source.wikimedia` (ua/ru/en) mention the matched hero, the strip and the nightly Commons search
 - [x] Phase C code (2026-11-06): `wiki-paint` job + cron (00:30) + `/data-status` row + orphan cleanup + popularity order + review contact sheets

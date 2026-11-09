@@ -152,24 +152,37 @@ async function main(): Promise<void> {
 
   const startedAt = Date.now()
   const buckets = new Map<string, number>()
+  // The registry has "daewoo  lanos" / "lanos" next to "daewoo" / "lanos": one search + analysis per search term, rows copied per key.
+  const done = new Map<string, { qualified: number; rows: WikiImageCandidateInsert[] }>()
   for (const key of keys) {
     try {
       const alias = wikiSearchName(key.brand, key.model)
       const searchModel = alias?.model ?? key.model
-      const payload = await fetchWikimediaJson<CommonsPages>(
-        commonsCandidatesSearchUrl(alias?.brand ?? key.brand, searchModel),
-        { userAgent: PAINT_USER_AGENT, timeoutMs: 20_000, sleep, beforeRequest: () => sleep(1000 / rps) }
-      )
-      const qualified = qualifyingCandidates(commonsPagesInOrder(payload), searchModel)
-      const rows: WikiImageCandidateInsert[] = []
-      for (const c of qualified.slice(0, perModel)) {
-        try {
-          const row = await analyse(seg, key, c, rps)
-          if (row) rows.push(row)
-        } catch (e) {
-          log(`  ${c.title}: ${(e as Error).message}`)
+      const searchBrand = (alias?.brand ?? key.brand).split('  ')[0]!.trim()
+      const searchKey = `${searchBrand}|${searchModel}`
+      let hit = done.get(searchKey)
+      if (!hit) {
+        const payload = await fetchWikimediaJson<CommonsPages>(commonsCandidatesSearchUrl(searchBrand, searchModel), {
+          userAgent: PAINT_USER_AGENT,
+          timeoutMs: 20_000,
+          sleep,
+          beforeRequest: () => sleep(1000 / rps)
+        })
+        const qualified = qualifyingCandidates(commonsPagesInOrder(payload), searchModel)
+        const found: WikiImageCandidateInsert[] = []
+        for (const c of qualified.slice(0, perModel)) {
+          try {
+            const row = await analyse(seg, key, c, rps)
+            if (row) found.push(row)
+          } catch (e) {
+            log(`  ${c.title}: ${(e as Error).message}`)
+          }
         }
+        hit = { qualified: qualified.length, rows: found }
+        done.set(searchKey, hit)
       }
+      const qualified = { length: hit.qualified }
+      const rows = hit.rows.map(r => ({ ...r, ...key }))
       const ok = rows.filter(r => r.status === 'ok')
       for (const r of ok) buckets.set(r.bucket ?? '?', (buckets.get(r.bucket ?? '?') ?? 0) + 1)
       log(

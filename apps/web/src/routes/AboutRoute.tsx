@@ -369,6 +369,7 @@ const FEATURES = [
   'news',
   'shares',
   'whatsnew',
+  'alternatives',
   'race',
   'play',
   'relax',

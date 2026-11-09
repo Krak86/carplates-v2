@@ -18,8 +18,14 @@ const item = (group: ReleaseGroup, ua: string, ru: string, en: string): ReleaseI
 export const RELEASES: readonly ReleaseDay[] = [
   {
     date: '2026-11-09',
-    version: 'v2.1172',
+    version: 'v2.1173',
     items: [
+      item(
+        'new',
+        'Сторінка «Порівняння з іншими сервісами»: що є в нас, а що в baza-gai, Opendatabot, AUTO.RIA, RST, carVertical і CARFAX, у чому наша перевага, чого бракує і що далі.',
+        'Страница «Сравнение с другими сервисами»: что есть у нас, а что в baza-gai, Opendatabot, AUTO.RIA, RST, carVertical и CARFAX, в чём наше преимущество, чего не хватает и что дальше.',
+        'A “Compared to other services” page: what we have versus baza-gai, Opendatabot, AUTO.RIA, RST, carVertical and CARFAX, where we lead, what is missing and what comes next.'
+      ),
       item(
         'improved',
         'Фото моделі: якщо є фото цієї моделі потрібного кольору, воно стає головним (з підписом, що це інше авто), а під ним з’являється стрічка інших фото з Wikimedia Commons з автором і ліцензією.',

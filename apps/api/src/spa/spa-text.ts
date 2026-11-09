@@ -338,6 +338,23 @@ export const STATIC_PAGES: Record<string, Record<Lang, PageText>> = {
       description: 'A day-by-day log of Cars UA changes: features, improvements, data.'
     }
   },
+  '/alternatives': {
+    ua: {
+      title: 'Порівняння з іншими сервісами перевірки авто | Cars UA',
+      description:
+        'Що є в Cars UA, а що в baza-gai, Opendatabot, AUTO.RIA, RST, carVertical і CARFAX: перевірка за номером і VIN, розшук, краш-тести, історія авто.'
+    },
+    ru: {
+      title: 'Сравнение с другими сервисами проверки авто | Cars UA',
+      description:
+        'Что есть в Cars UA, а что в baza-gai, Opendatabot, AUTO.RIA, RST, carVertical и CARFAX: проверка по номеру и VIN, розыск, краш-тесты, история авто.'
+    },
+    en: {
+      title: 'Compared to other vehicle-check services | Cars UA',
+      description:
+        'What Cars UA has versus baza-gai, Opendatabot, AUTO.RIA, RST, carVertical and CARFAX: plate and VIN lookup, wanted check, crash tests, vehicle history.'
+    }
+  },
   '/read': {
     ua: {
       title: 'Довідник авто: кузови, розміри, класи, електромобілі | Cars UA',

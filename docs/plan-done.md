@@ -4784,3 +4784,16 @@ Phase B step 1 of the security hardening: violations of the Report-Only CSP now 
 
 - **Web:** `useWikiPhotos` / `wikiPhotosQuery` (`GET /api/wiki/photos`, online only, silent failure). The hero takes the first `colorMatch` photo (no filter, credit "Photo of another car of this model", no refresh button), falls to the next match and then to the stored hero + colour filter when a photo fails to load, and waits for the list so it never flashes a photo it replaces. `WikiPhotoStrip` under the hero: the other photos, 4 + show more, credit link to the Commons page, zoom dialog.
 - **Job:** `wiki-candidates` (80 models per night, `--rps 1`, cron 01:45), `/data-status` row `wikiCandidates`, `/api/wiki/photos` added to the Cloudflare rule text in `docs/deploy.md`, controller test (also runs the Zod query pipe), root `ingest:wiki-candidates` script.
+
+## Competitor comparison page `/alternatives` (2026-11-09)
+
+- **What:** public page `/alternatives` (sidebar "read" group, `/sitemap`, `STATIC_PAGES` ua/ru/en, title key `nav.alternatives`, `max-w-[96rem]` - wider than the usual `max-w-6xl` on purpose, 8 columns) comparing carsua.app with
+  AvtoNomera (ua.carplates.app), baza-gai.com.ua, Opendatabot, AUTO.RIA (check by VIN), RST, carVertical and CARFAX.
+  Cells: ✅ free, 💳 paid report, 🟡 partial or link-only, ➖ not found on their site, ❔ could not check; each column header has a price badge and a scope line.
+- **Data:** `routes/alternatives/helpers.ts` (`ROWS`, one cell per `SERVICES` entry in `types.ts`; `SERVICE_URL`, `SERVICE_PRICE_ICON`). "Only here" (`OUR_EDGE`) and "What we lack" (`OUR_GAPS`) are **derived** from `ROWS`, never typed by hand.
+  Row labels `alt.row.<key>`, columns `alt.service.*` / `alt.scope.*`, ua/ru/en in the i18n JSON.
+- **How the cells were filled (2026-11-09):** from the services' public pages and from screenshots of real lookups (BC6743PH on AvtoNomera, baza-gai, AUTO.RIA; a Passat report on carVertical). Press reviews only for Opendatabot's free part and price.
+  CARFAX answered 403, so its column is mostly ❔. RST's home page had broken encoding: it is kept as a marketplace reference (no plate/VIN check found), not a rival.
+- **Mistake worth remembering:** ua.carplates.app was first taken for our own v1 (README says v1 is `Krak86/carplates`); the screenshots showed it is a separate commercial service (AvtoNomera), so the column and the "v1 is not a rival" rule were removed.
+- **Not added on purpose:** AvtoNomera's free owner block (person/legal entity + address): our open registry has no owner data and we do not want to push toward personal data.
+- Also: roadmap idea "Own sale listings (limited)" (`marketplace` in `CONSIDERING_FEATURES`, shown on `/features`), About feature entry, release entry `v2.1173`, bottom links to `/about` and `/data-status`.

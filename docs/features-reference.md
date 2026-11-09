@@ -560,6 +560,14 @@ Files: `apps/web/src/components/RiaCheckLink.tsx` (used by `NotFoundInfo` and th
 - Sent on the 1st (Kyiv) for the previous month, 3-day catch-up window; `app.digest_sends` is the idempotency claim. Off unless `DIGEST_ENABLED=true` (never enable on dev/stage copies of production data). `MAIL_FROM_NEWS` = optional separate sender (own subdomain + SPF/DKIM/DMARC; it must be a verified Resend domain, a 403 `domain is not verified` in the API log means it is not). On in production since 2026-10-28.
 - Every digest carries `List-Unsubscribe` + one-click POST (`/api/digest/unsubscribe/one-click?t=`) and a footer link to `/unsubscribe#t=`. Token = `unsubscribe-token.ts`.
 
+## Competitor comparison (`/alternatives`, 2026-11-09)
+
+- One table, `routes/alternatives/helpers.ts` `ROWS`: a cell per column of `SERVICES` (`types.ts`), same order; adding a service means a `SERVICES` entry, a `SERVICE_URL` and `SERVICE_PRICE_ICON` entry, `alt.service.<key>` + `alt.scope.<key>` in ua/ru/en, and one cell in every row (the `FeatureRow` tuple fails the type check otherwise).
+- "Only here" and "What we lack" are derived from `ROWS` (`OUR_EDGE`, `OUR_GAPS`); do not hand-write them. Our column is index 0.
+- **Cells are a dated snapshot** (the page says 2026-11-09). ➖ is shown as "not found on their site", never "they do not have it"; use ❔ when the page could not be read (CARFAX). Re-check a service's own page or a real lookup before changing a cell; no logos or brand marks, text names only, and the note says we are not affiliated.
+- Page width is `max-w-[96rem]` (8 columns, horizontal scroll under 70rem); this is an intentional exception to `max-w-6xl`.
+- Do not add a row for personal data (owner name or address): the registry has none and we do not want to.
+
 ## Releases page (`/releases`, 2026-10-15)
 
 - Public "What's new" log, one `ReleaseDay` per working day in `packages/shared/src/releases.ts` (import `@carplates/shared/releases`; items tagged `new | improved | data | fix`, text in ua/ru/en). **After each big update add the day's entry (or extend today's).** Data is bundled in a lazy web chunk, never the main one; the API reads the same file for the [monthly digest](#monthly-digest-mail-2026-10-28).

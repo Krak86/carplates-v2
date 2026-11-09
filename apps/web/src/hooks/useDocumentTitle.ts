@@ -32,6 +32,7 @@ export const ROUTE_TITLE_KEYS: Record<string, string> = {
   '/race': 'nav.race',
   '/relax': 'nav.relax',
   '/releases': 'nav.releases',
+  '/alternatives': 'nav.alternatives',
   '/read': 'nav.read',
   '/read/body-types': 'nav.readBodyTypes',
   '/read/sizes': 'nav.readSizes',

@@ -8,7 +8,7 @@ export const CANDIDATE_MIN_WIDTH = 1000
 const MIN_ASPECT = 1.2
 /** Not an ordinary road car (or not a photo of one): concept, race / rally, tuned, police / taxi, wrecks, toys, drawings, brochures. */
 const NOT_A_ROAD_CAR =
-  /concept|rally|racing|race ?car|\brace\b|tuning|tuned|police|taxi|museum|crash|wreck|damaged|accident|livery|\bwrap\b|model car|toy|miniature|diecast|drawing|illustration|render|poster|brochure|advert|screenshot|diagram|cutaway/i
+  /concept|rally|racing|race ?car|\brace\b|tuning|tuned|police|taxi|museum|crash|wreck|damaged|accident|livery|\bwrap\b|model car|\btoys?\b|miniature|diecast|drawing|illustration|render|poster|brochure|advert|screenshot|diagram|cutaway/i
 
 export type CandidateHit = { title: string; info: Partial<CommonsImageInfo> }
 

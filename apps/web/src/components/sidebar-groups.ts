@@ -46,6 +46,7 @@ export const SIDEBAR_GROUPS: readonly SidebarGroup[] = [
       { to: '/read', icon: '📖', labelKey: 'nav.read' },
       { to: '/about', icon: 'ℹ️', labelKey: 'nav.about' },
       { to: '/releases', icon: '🆕', labelKey: 'nav.releases' },
+      { to: '/alternatives', icon: '🆚', labelKey: 'nav.alternatives' },
       { to: '/news', icon: '📰', labelKey: 'nav.news' },
       { to: '/discuss', icon: '💬', labelKey: 'nav.discuss' }
     ]

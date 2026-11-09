@@ -64,6 +64,7 @@ export const SITEMAP_GROUPS: readonly SitemapGroup[] = [
       ...Object.entries(GUIDE_META).map(([to, meta]) => link(to, meta.icon, meta.titleKey)),
       link('/about', 'ℹ️', 'nav.about'),
       link('/releases', '🆕', 'nav.releases'),
+      link('/alternatives', '🆚', 'nav.alternatives'),
       link('/news', '📰', 'nav.news'),
       link('/discuss', '💬', 'nav.discuss')
     ]
