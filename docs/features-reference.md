@@ -572,7 +572,7 @@ Files: `apps/web/src/components/RiaCheckLink.tsx` (used by `NotFoundInfo` and th
 
 - `ResultSummary` sits at the top of `ResultCard`; one card per entry of `SUMMARY_CARD_IDS` (`ResultSummary.types.ts`), built by pure functions in `ResultSummary.helpers.ts` from `Fetched<T>` answers that `use-result-summary.ts` takes from the same `queryOptions` the sections use. **A new card = an id, a builder + test, `summary.card.<id>` and `summary.<id>.*` in ua/ru/en; reuse an existing query key, never add a fetch.**
 - States: `attention`, `ok` ("No problems found"), `nodata` (failed request, source never loaded, nothing rated), `pending`. `nodata` must stay visually unlike `ok` (dashed, no tint). `ok` text is always "nothing found in <source> on <date>", never "fine". A source still loading keeps the card `pending` instead of an early "nothing found".
-- Crash tests: a programme counts only with the rating of the car's own generation; flag = Euro NCAP or NHTSA average <= `LOW_STARS`. Recalls and CO2 are for the model, not the car. Editing a section's query key changes what the strip shares: keep them in step.
+- Crash tests: a programme counts only with the rating of the car's own generation; flag = Euro NCAP or NHTSA average <= `LOW_STARS`, or an applicable IIHS crashworthiness test rated Poor (`isIihsCrashTest`; `iihsScore` ignores seat/roof-only entries). Model leaderboards fold doubled names ("X X", "BRAND  MODEL") into one. Recalls and CO2 are for the model, not the car. Editing a section's query key changes what the strip shares: keep them in step.
 
 ## Releases page (`/releases`, 2026-10-15)
 

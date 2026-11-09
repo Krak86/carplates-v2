@@ -18,8 +18,14 @@ const item = (group: ReleaseGroup, ua: string, ru: string, en: string): ReleaseI
 export const RELEASES: readonly ReleaseDay[] = [
   {
     date: '2026-11-09',
-    version: 'v2.1177',
+    version: 'v2.1180',
     items: [
+      item(
+        'improved',
+        'Підсумок перевірок: якщо IIHS оцінив актуальний краш-тест як «Поганий», картка краш-тестів позначається «Увага».',
+        'Итоги проверок: если IIHS оценил актуальный краш-тест как «Плохой», карточка краш-тестов отмечается «Внимание».',
+        'Checks summary: when IIHS rates an applicable crash test Poor, the crash-test card is flagged Attention.'
+      ),
       item(
         'fix',
         'Рейтинги краш-тестів моделей: дубльовані назви («GX 470 GX 470», «Q7 Q7») зведено в одну модель; IIHS без тесту на удар (лише сидіння чи дах) більше не дає оцінку, тож Lexus GX 470 не має хибного «0».',

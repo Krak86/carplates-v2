@@ -4618,6 +4618,8 @@
   "about.brief.shares": "Share prices",
   "about.feature.shares": "A Share price section (and a desktop side panel): charts for 1 day, 1 month or 1 year for each instrument of the listed company behind the make or its parent group - ordinary and preferred shares, ADRs, OTC lines, second listings - with what each is, exchange, period and 52-week range, volume, Yahoo Finance and TradingView links and a note on its bonds; also on catalog model and make pages",
   "about.brief.whatsnew": "What’s new bell",
+  "about.brief.alternatives": "Compared to other services",
+  "about.brief.resultSummary": "Checks summary on the car card",
   "about.brief.race": "Racing game",
   "about.brief.play": "Games hub",
   "about.brief.relax": "Relax backdrops",

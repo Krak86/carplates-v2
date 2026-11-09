@@ -4807,3 +4807,13 @@ Phase B step 1 of the security hardening: violations of the Report-Only CSP now 
 - **Wording:** never "this car is fine". "Nothing found in <source> on <date>" with the check date; a failed request, a never-loaded list or no rating is "No data". Recalls and crash tests say they are for the model; the note under the strip repeats it.
 - **Cost to know:** the strip runs its queries as soon as the card mounts (6 rating sources, 3 recall sources, fuel, wanted, auctions) instead of when a section opens. They are cached per model, so it is a one-off per model.
 - Also: `/alternatives` row `summary` (carVertical 💳, ours ✅, the rest ❔ until checked), About feature entry, release entry `v2.1175`.
+
+## Crash-test board and summary fixes, API 4xx, touch-only swipe (2026-11-09)
+
+- **Crash boards** (`safety-stats`): doubled model names ("GX 470 GX 470", "Q7 Q7") fold into one model in `modelLeaderboard`; "BRAND  MODEL" duplicates (double space) keep only the make via `split_part` in the model leaderboard and brand averages. The "?" help says score 0 is the worst grade, not missing data (ua/ru/en).
+- **IIHS score** (`crashScore`): `iihsScore` needs a frontal or side impact test; head-restraint or roof-only entries return null (fixed the false "0" on the Lexus GX 470). Tests added.
+- **Summary strip:** the crash tile is `attention` when an applicable IIHS crashworthiness test is Poor (`isIihsCrashTest` exported from `shared`).
+- **API errors:** `AllExceptionsFilter` keeps a numeric 4xx `statusCode` from plain errors (bad CSP report body, 413, unsupported media type) instead of a generic 500 + Sentry event; `all-exceptions.filter.test.ts`. `esc()` also escapes `'`.
+- **Security docs:** pentest pass 3 (two-user IDOR, upload, admin role, stored XSS) in `docs/pentest-lab.md` "Run log"; ranked remaining work in the security docs.
+- **Web:** photo swipe ignores mouse pointers (`useSwipeSlide`, `WikiHeroImage`). `/read/*` English titles are keyword-first ("<keywords> | Cars UA").
+- Release entry `v2.1180` (day 2026-11-09).

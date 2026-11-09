@@ -95,6 +95,8 @@ API, write again only if a paid version exists or the audience grows a lot.
 
 ### Competitor comparison page `/alternatives` ✅ DONE (2026-11-09) — see `docs/plan-done.md`; carVertical ideas below
 
+### Crash board dedupe, IIHS Poor flag, API 4xx ✅ DONE (2026-11-09) — see `docs/plan-done.md`
+
 ### Sitemap page `/sitemap` ✅ DONE (2026-11-01) — see `docs/plan-done.md`
 
 ### Data freshness: real data-end label + `/data-status` ✅ DONE (2026-11-01) — see `docs/plan-done.md`
