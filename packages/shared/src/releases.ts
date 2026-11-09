@@ -18,8 +18,14 @@ const item = (group: ReleaseGroup, ua: string, ru: string, en: string): ReleaseI
 export const RELEASES: readonly ReleaseDay[] = [
   {
     date: '2026-11-09',
-    version: 'v2.1175',
+    version: 'v2.1177',
     items: [
+      item(
+        'fix',
+        'Рейтинги краш-тестів моделей: дубльовані назви («GX 470 GX 470», «VITARA VITARA») тепер зведено в одну модель, а підказка пояснює, що оцінка 0 - це найгірший результат у тестах, а не відсутність даних.',
+        'Рейтинги краш-тестов моделей: задвоенные названия («GX 470 GX 470», «VITARA VITARA») теперь сведены в одну модель, а подсказка объясняет, что оценка 0 - это худший результат в тестах, а не отсутствие данных.',
+        'Model crash-test rankings: doubled names (“GX 470 GX 470”, “VITARA VITARA”) are now merged into one model, and the help text explains that a score of 0 is the worst grade in the tests, not missing data.'
+      ),
       item(
         'new',
         'Підсумок перевірок угорі картки авто: розшук, реєстр, краш-тести, CO2, аукціони й відкликання. Кожна картка каже «Увага», «Проблем не знайдено» або «Немає даних», і що саме та коли перевірено.',

@@ -82,11 +82,13 @@ export class SafetyStatsService {
   /** Ties (many models share a perfect 100) go to the better-evidenced model: more sources, then more cars. */
   async modelLeaderboard(direction: 'ASC' | 'DESC'): Promise<ModelShape[]> {
     const order = direction === 'ASC' ? sql`ASC` : sql`DESC`
+    // The registry sometimes repeats the model ("GX 470 GX 470", "VITARA VITARA"); fold those into the plain name so
+    // one car does not take several leaderboard rows.
     const { rows } = await this.dbService.db.execute<ModelShape>(
-      sql`SELECT brand, model, sum(n)::float8 AS n,
+      sql`SELECT brand, regexp_replace(model, '^(.+) \\1$', '\\1') AS model, sum(n)::float8 AS n,
                  (sum(score * n) / sum(n))::float8 AS "avgScore", max(sources)::int AS sources
           FROM registry.stats_safety WHERE score IS NOT NULL
-          GROUP BY brand, model HAVING sum(n) >= ${MIN_CARS_MODEL}
+          GROUP BY 1, 2 HAVING sum(n) >= ${MIN_CARS_MODEL}
           ORDER BY 4 ${order}, 5 DESC, 3 DESC LIMIT ${LEADERBOARD_SIZE}`
     )
     return rows
