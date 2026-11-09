@@ -1,15 +1,25 @@
 import { BadRequestException } from '@nestjs/common'
 import type { ArgumentsHost } from '@nestjs/common'
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 
 import { AllExceptionsFilter, fastifyClientStatus } from './all-exceptions.filter.js'
 
 function run(exception: unknown) {
-  const send = vi.fn()
-  const status = vi.fn(() => ({ send }))
-  const host = { switchToHttp: () => ({ getResponse: () => ({ status }) }) } as unknown as ArgumentsHost
+  let code = 0
+  let body = { message: '' }
+  const reply = {
+    status(c: number) {
+      code = c
+      return {
+        send(b: { message: string }) {
+          body = b
+        }
+      }
+    }
+  }
+  const host = { switchToHttp: () => ({ getResponse: () => reply }) } as unknown as ArgumentsHost
   new AllExceptionsFilter().catch(exception, host)
-  return { code: status.mock.calls[0]?.[0] as number, body: send.mock.calls[0]?.[0] as { message: string } }
+  return { code, body }
 }
 
 describe('AllExceptionsFilter', () => {
