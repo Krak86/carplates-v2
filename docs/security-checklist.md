@@ -146,12 +146,12 @@ CSP confirmed still Report-Only (the one gap). Code-level claims in §2-§3 re-r
 ## 7. Pre-deploy gate (tick all before going live)
 
 - [x] §1 findings 1–6 fixed except #2 (CSP enforcement, in progress: report sink → enforce); 7–10 fixed or consciously accepted.
-- [ ] `pnpm audit --prod` shows no high/critical; `trivy image` clean for api/web/alpr images.
+- [x] `pnpm audit --prod` shows no high/critical (2026-11-09: 0 high/critical, 2 moderate + 1 low, all transitive, see pentest-lab.md "Run log"). [ ] `trivy image` clean for api/web/alpr images.
 - [ ] Production env: `NODE_ENV=production`, `PUBLIC_SITE_URL` = real https origin, `TRUST_PROXY=true` only behind Caddy/Cloudflare, `ENABLE_SWAGGER` unset, `GOOGLE_CLIENT_ID` set for the prod origin, all secrets from env/secret store (none in git: `git log -p -S` / gitleaks on full history). `DATABASE_URL` must not be the dev `carplates:carplates@` default — the API refuses to boot in production with it (`assertProductionEnv`).
 - [ ] `curl -sI https://<site>/` and `/api/auth/me` show: HSTS, CSP (enforced, not Report-Only), `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, `frame-ancestors`.
 - [ ] Session cookie in the browser: HttpOnly ✔ Secure ✔ SameSite=Lax ✔; sign out removes the row from `app.sessions`.
 - [ ] `/api/docs`, `/api/admin/*` (anonymous and non-admin → 401/403), Postgres and ALPR ports unreachable from outside (`nmap` from another host).
-- [ ] CSRF probe: cross-origin `fetch('/api/auth/logout', {method:'POST', credentials:'include'})` from another origin is rejected.
+- [x] CSRF probe (local lab 2026-11-09: cross-site `POST /api/auth/logout` and `DELETE /api/auth/me` both 403; re-run once against staging): cross-origin `fetch('/api/auth/logout', {method:'POST', credentials:'include'})` from another origin is rejected.
 - [ ] Rate-limit probe: 200 rapid requests to `/api/plate/*` and `/api/auth/google` return 429; Caddy/Cloudflare limits active.
 - [ ] ZAP baseline against staging: no medium+ alerts left unexplained.
 - [ ] Backups restore-tested (PLAN.md "Backup policy"); `app` schema nightly dump + PITR as soon as users exist.
