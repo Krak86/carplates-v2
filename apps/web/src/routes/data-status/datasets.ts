@@ -162,6 +162,15 @@ export const DATASETS: readonly Dataset[] = [
     refreshedOn: '2026-11-08'
   },
   {
+    id: 'wikiCandidates',
+    name: 'Wikipedia: extra model photos (our own scan)',
+    to: '/cars',
+    cadence: 'daily',
+    job: 'wiki-candidates',
+    noteKey: 'dataStatus.note.wikiCandidates',
+    refreshedOn: '2026-11-09'
+  },
+  {
     id: 'models3d',
     name: '3D and 360° models: Sketchfab, carshow360, winner360',
     cadence: 'halfYearly',

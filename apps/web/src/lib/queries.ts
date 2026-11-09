@@ -112,6 +112,7 @@ import {
   getWikiImage,
   getWikiInfo,
   getWikiPaintMask,
+  getWikiPhotos,
   getWikiRecolor,
   lookupPlate,
   plateHistory,
@@ -303,6 +304,16 @@ export function wikiRecolorQuery(brand: string, model: string, year: number | nu
   return queryOptions({
     queryKey: ['wiki', 'recolor', brand, model, year],
     queryFn: () => getWikiRecolor(brand, model, year),
+    staleTime: Infinity,
+    retry: false
+  })
+}
+
+// Extra photos of the model (hero pick + strip). Online only, no offline-cache entry (decoration), a failure just means no extra photos.
+export function wikiPhotosQuery(brand: string, model: string, year: number | null, color: string | null) {
+  return queryOptions({
+    queryKey: ['wiki', 'photos', brand, model, year, color],
+    queryFn: () => getWikiPhotos(brand, model, year, color),
     staleTime: Infinity,
     retry: false
   })

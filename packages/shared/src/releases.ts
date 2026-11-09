@@ -18,8 +18,14 @@ const item = (group: ReleaseGroup, ua: string, ru: string, en: string): ReleaseI
 export const RELEASES: readonly ReleaseDay[] = [
   {
     date: '2026-11-09',
-    version: 'v2.1162',
+    version: 'v2.1170',
     items: [
+      item(
+        'improved',
+        'Фото моделі: якщо є фото цієї моделі потрібного кольору, воно стає головним (з підписом, що це інше авто), а під ним з’являється стрічка інших фото з Wikimedia Commons з автором і ліцензією.',
+        'Фото модели: если есть фото этой модели нужного цвета, оно становится главным (с подписью, что это другое авто), а под ним появляется лента других фото с Wikimedia Commons с автором и лицензией.',
+        'Model photos: when a photo of the model in the right colour exists it becomes the main photo (captioned as another car), and a strip of more Wikimedia Commons photos with author and licence appears below it.'
+      ),
       item(
         'fix',
         'Свайп фото працює лише на сенсорних екранах: на комп’ютері мишею фото більше не «тягнеться».',

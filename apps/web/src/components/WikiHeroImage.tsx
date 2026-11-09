@@ -6,7 +6,9 @@ import PhotoZoomDialog from '@/components/PhotoZoomDialog'
 import VehicleKindPlaceholder from '@/components/VehicleKindPlaceholder'
 import UaAuctionHero from '@/components/ua-auctions/UaAuctionHero'
 import { useCarHeroImageActions } from '@/components/use-car-hero-image-actions'
+import { useWikiPhotos, firstColorMatch } from '@/components/use-wiki-photos'
 import { useWikiRecolor } from '@/components/use-wiki-recolor'
+import WikiPhotoStrip from '@/components/WikiPhotoStrip'
 import WikiRecolorCanvas from '@/components/WikiRecolorCanvas'
 import { cn } from '@/lib/cn'
 import { useUiStore } from '@/store/ui-store'
@@ -45,26 +47,31 @@ export default function WikiHeroImage({
 }: Props): ReactNode {
   const { t } = useTranslation()
   const { query: heroImage, refresh, isRefreshing } = useCarHeroImageActions({ brand, model, year, key: vehicleKey })
-  const image = heroImage.isSuccess ? heroImage.data.image : null
+  const [loadedUrl, setLoadedUrl] = useState<string | null>(null)
+  const [failedUrls, setFailedUrls] = useState<ReadonlySet<string>>(new Set())
+  const wikiPhotos = useWikiPhotos({ brand, model, year, color })
+  // A scanned photo whose real paint already matches the registry colour leads (no filter needed); it is another car of the model.
+  // One that fails to load falls back to the stored hero + filter. While the photo list loads the hero waits, so it never flashes a photo it replaces.
+  const matched = wikiPhotos.loading ? null : firstColorMatch(wikiPhotos.photos, failedUrls)
+  const storedImage = heroImage.isSuccess && !wikiPhotos.loading ? heroImage.data.image : null
+  const image = matched ? { url: matched.url, attribution: matched.attribution } : storedImage
   const creditParts = [image?.attribution?.author, image?.attribution?.license].filter(Boolean)
 
   const recolor = useWikiRecolor({
     brand,
     model,
     year,
-    imageUrl: image?.url ?? null,
+    imageUrl: matched ? null : (image?.url ?? null),
     color
   })
   const colorName = recolor.target ? t(`vehicleColor.${recolor.target}`) : null
   const setRecolorEnabled = useUiStore(s => s.setWikiRecolorEnabled)
-  const [loadedUrl, setLoadedUrl] = useState<string | null>(null)
-  const [failedUrl, setFailedUrl] = useState<string | null>(null)
   const [zoomed, setZoomed] = useState(false)
   // Second slide = the untouched photo (filter applicable only): a swipe away from the repainted one, so the filter is easy to undo.
   const [originalUrl, setOriginalUrl] = useState<string | null>(null)
   const swipe = useRef<{ x: number; y: number; moved: boolean } | null>(null)
   const hasQuery = Boolean(brand || model)
-  const isPending = hasQuery && heroImage.isPending
+  const isPending = hasQuery && (heroImage.isPending || wikiPhotos.loading)
 
   // With lot photos one carousel holds everything: the lot photos, then the model photo as its last slide
   // (a model photo that fails to load drops out of the carousel by itself).
@@ -74,7 +81,7 @@ export default function WikiHeroImage({
         docIds={lotPhotos}
         label={[brand, model, year].filter(Boolean).join(' ')}
         modelPhoto={
-          image && failedUrl !== image.url
+          image && !failedUrls.has(image.url)
             ? {
                 url: image.url,
                 credit: creditParts.join(', ') || null,
@@ -97,7 +104,7 @@ export default function WikiHeroImage({
 
   // Settled with no image (or the image failed to load) → a kind placeholder in the same slot,
   // or nothing at all when the registry gave no recognizable kind (e.g. a VIN-only decode).
-  if (!isPending && (!image || failedUrl === image.url)) {
+  if (!isPending && (!image || failedUrls.has(image.url))) {
     const kind = resolveVehicleKind(rawKind)
     return kind ? (
       <div className="hero-vt relative -my-3 h-64 w-full max-w-content sm:h-80">
@@ -141,7 +148,7 @@ export default function WikiHeroImage({
             fetchPriority="high"
             decoding="async"
             onLoad={() => setLoadedUrl(image.url)}
-            onError={() => setFailedUrl(image.url)}
+            onError={() => setFailedUrls(prev => new Set(prev).add(image.url))}
             className={`h-full w-full rounded-lg object-cover transition-opacity duration-200 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
           />
         )}
@@ -166,7 +173,7 @@ export default function WikiHeroImage({
             </span>
           </>
         )}
-        {image && heroImage.data?.from && (
+        {image && !matched && heroImage.data?.from && (
           <div className="absolute top-2 left-2 rounded bg-black/60 px-1.5 py-0.5 text-[10px] text-white/80">
             {heroImage.data.from === 'live' ? 'Wiki live' : 'DB'}
           </div>
@@ -221,20 +228,29 @@ export default function WikiHeroImage({
           </button>
         )}
 
-        <button
-          type="button"
-          onClick={refresh}
-          disabled={isRefreshing}
-          className="absolute bottom-2 left-2 rounded bg-black/60 px-1.5 py-0.5 text-[10px] text-white/80 hover:text-white disabled:opacity-60"
-        >
-          {t(isRefreshing ? 'wiki.imageRefreshing' : 'wiki.imageRefresh')}
-        </button>
+        {!matched && (
+          <button
+            type="button"
+            onClick={refresh}
+            disabled={isRefreshing}
+            className="absolute bottom-2 left-2 rounded bg-black/60 px-1.5 py-0.5 text-[10px] text-white/80 hover:text-white disabled:opacity-60"
+          >
+            {t(isRefreshing ? 'wiki.imageRefreshing' : 'wiki.imageRefresh')}
+          </button>
+        )}
 
         {isLoaded && creditParts.length > 0 && (
           <div className="absolute right-11 bottom-2 rounded bg-black/60 px-1.5 py-0.5 text-[10px] text-white/80">
-            {t(recolor.mask && !viewOriginal ? 'wiki.imageCreditModified' : 'wiki.imageCredit', {
-              credit: creditParts.join(', ')
-            })}
+            {t(
+              matched
+                ? 'wiki.imageCreditOther'
+                : recolor.mask && !viewOriginal
+                  ? 'wiki.imageCreditModified'
+                  : 'wiki.imageCredit',
+              {
+                credit: creditParts.join(', ')
+              }
+            )}
           </div>
         )}
       </div>
@@ -271,6 +287,10 @@ export default function WikiHeroImage({
           ))}
         </ul>
       )}
+      <WikiPhotoStrip
+        photos={wikiPhotos.photos.filter(photo => photo.url !== image?.url)}
+        label={[brand, model].filter(Boolean).join(' ')}
+      />
     </>
   )
 }
