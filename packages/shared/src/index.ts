@@ -586,6 +586,7 @@ export {
   cncapScore,
   kncapScore,
   iihsScore,
+  isIihsCrashTest,
   matchRatingRows,
   applicableCrashScore,
   combineCrashScores,

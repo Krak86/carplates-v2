@@ -57,6 +57,9 @@ const IIHS_CRASH_TESTS = new Set([
   'roof-strength',
   'head-restraints-and-seats'
 ])
+/** Whether an IIHS test key is a crashworthiness test (not headlights, crash prevention, child-seat anchors, belts). */
+export const isIihsCrashTest = (key: string): boolean => IIHS_CRASH_TESTS.has(key)
+
 const IIHS_RATING_SCORE: Readonly<Record<string, number>> = { Good: 100, Acceptable: 67, Marginal: 33, Poor: 0 }
 
 /** Frontal and side impact tests: an IIHS entry without one of these (only seats / roof) is no crash result. */

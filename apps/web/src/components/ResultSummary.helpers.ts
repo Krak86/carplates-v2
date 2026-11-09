@@ -1,4 +1,4 @@
-import { co2Band, co2Score } from '@carplates/shared'
+import { co2Band, co2Score, isIihsCrashTest } from '@carplates/shared'
 
 import { averageStarRating, filterByBodyStyle, nhtsaBodyBucket } from '@/components/SafetyRatings.helpers'
 import type {
@@ -136,7 +136,11 @@ export function crashCard(input: CrashInputs): SummaryCard {
   }
   const stars = euroApplicable?.stars ?? null
   const lowest = [stars, nhtsaAverage].filter((s): s is number => s != null)
-  const isLow = lowest.some(s => s <= LOW_STARS)
+  // IIHS has letters, not stars: any "Poor" in a crashworthiness test of this car's generation is a flag too.
+  const iihsPoor = (iihs?.data?.ratings ?? []).some(
+    r => iihsIds.includes(r.assessmentId) && r.tests.some(t => t.rating === 'Poor' && isIihsCrashTest(t.key))
+  )
+  const isLow = iihsPoor || lowest.some(s => s <= LOW_STARS)
   const total = CRASH_PROGRAMMES
   if (stars != null) {
     return {
