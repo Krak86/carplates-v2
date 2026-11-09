@@ -102,13 +102,13 @@ Phase A (steps 1-6) is the recolour on the existing hero photo. Phase B (7-8) ad
 Files: `packages/db/migrations/0104_wiki_image_candidate.sql`, `scripts/src/wiki-candidates{,-core}.ts`, `scripts/src/wiki-paint-image.ts` (SegFormer helpers shared with `wiki-paint.ts`), `packages/shared/src/wikiPhotos.ts`, `apps/api/src/wiki/wiki-photos.{controller,service,rank}.ts`.
 **Done 2026-11-09 (web, job, strip; uncommitted):** hero picks the first `colorMatch` photo (`use-wiki-photos.ts`, no filter, credit `wiki.imageCreditOther`, falls to the next match, then to the stored hero + filter on a load error; waits for the photo list so it never flashes a replaced photo), `WikiPhotoStrip.tsx` (originals, credit link per photo, zoom, show more; excludes the hero photo), job `wiki-candidates` (80 models per night, cron 01:45), `/data-status` row, deploy.md Cloudflare expression, controller test. Still open: the ~100-model dry-run review and the first real scan.
 
-**Next session, in order.**
+**Next session, in order** (steps 7-8 code is done, 2026-11-09, uncommitted: see "Done 2026-11-09" above).
 
-1. Web: `wikiPhotosQuery` in `lib/queries.ts` (online only, silent failure, `?brand&model&year&color`); in `WikiHeroImage.tsx` / `use-wiki-recolor.ts` show the first photo with `colorMatch: true` instead of the hero (no filter, credit from `attribution`, still say it is another car), else the current hero + filter. Tests; i18n ua / ru / en (no em dash).
-2. Step 8: `WikiPhotoStrip.tsx` modelled on `ua-auctions/UaAuctionPhotos.tsx` (originals, per-photo credit, zoom, show more); `LazySection` / `HELPER_GROUPS` checklist in `docs/checklists.md`.
-3. Job: `wiki-candidates` in `scripts/src/jobs.ts` + `run-ingest.sh` + `infra/vps/ingest.cron` + `/data-status` row (mirror `wiki-paint`); `docs/checklists.md` new `/api/*` endpoint + Deploy (migration 0104) items; Cloudflare rule for `/api/wiki/photos`; controller test (pattern `wiki-recolor.controller.test.ts`).
-4. Review a ~100-model sample (`--limit 100 --dry-run` first) before the full scan; then docs after a feature (plan-done, features-reference, releases `version`, About credits).
-   Local DB: migration 0104 is applied and only `kia ceed` is scanned (8 rows). `pnpm --filter @carplates/shared build` and `@carplates/db build` are already run. Nothing is committed.
+1. Review the ~100-model dry run: `pnpm ingest:wiki-candidates --limit 100 --dry-run` (writes nothing; per model: qualified / analysed / ok / colours). A log from the 2026-11-09 session may exist in its scratchpad (unfinished); otherwise rerun it (about 100 min at `--rps 1`, run it in the background). Look for models with 0 qualified, mostly `skip`, or one colour only; tune `wiki-candidates-core.ts` (title filters, `candidateQuality`) and bump `PAINT_ALGO` only if the paint gates change.
+2. Real scan of a small sample on the local DB (`--limit 10`, no `--dry-run`), then check in a browser on a real plate: matched hero (credit says another car, no pill, no refresh button), strip below (credit links, zoom, show more), and a model with no match keeps the stored hero + filter. Not yet browser-checked.
+3. Owner / deploy: migration 0104 on the VPS, `/api/wiki/photos` in the Cloudflare "Cache model lookups" rule (MISS then HIT), first nightly `wiki-candidates` run (cron 01:45) visible in `registry.job_runs` and `/data-status`.
+4. About page: `FEATURES` / `SOURCES` entry (ua / ru / en) once the first scan has run on the VPS; tick the PLAN.md boxes.
+   Local DB: migration 0104 applied, only `kia ceed` scanned (8 rows); shared and db are rebuilt. Nothing is committed.
 
 ## Risks and open questions
 
