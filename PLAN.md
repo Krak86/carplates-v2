@@ -756,10 +756,11 @@ So showing their data/images (hotlinked or re-hosted) needs written permission. 
 **Policy:** reuse the _shape_ of the report (summary cards, timeline, scales), never their data, wording or photos. Their damage, past-sale photos, odometer and
 owner records come from paid insurer / police / dealer databases we do not have; everything below is built from data we already store.
 
-- [ ] **1. Report-style summary strip at the top of the result card** (best value for effort). carVertical opens with 8 small cards, each "Attention" / "No problems found" / no data.
+- [x] **1. Report-style summary strip at the top of the result card** (best value for effort). carVertical opens with 8 small cards, each "Attention" / "No problems found" / no data.
       Ours from existing data: wanted (wanted check), last registration operation + registry status, crash-test stars (6 sources), CO2 / fuel badge, auction and debtor flags (SETAM / Prozorro), recalls count.
       Where: a new `ResultSummary.tsx` in `apps/web/src/components/`, rendered at the top of `ResultCard.tsx`; reuse each section's own query so nothing new is fetched; keep "no data" visibly different from "no problems".
       Wording rule as for MOT: never "this car is fine", only "nothing found in <source> on <date>".
+      ✅ 2026-11-09: built as `ResultSummary.tsx` + `use-result-summary.ts`, see `docs/plan-done.md` "Result summary strip".
 - [ ] **2. "Typical mileage for this model and age" + odometer sanity check.** carVertical draws the car's mileage against a typical-for-model line. We have pooled UK MOT mileage bands per model (`mot_stats`, see "UK MOT Common faults" in `docs/features-reference.md`).
       Where: a card in the MOT section (or the summary strip) with a typical band by age; an optional input "seller says N km" -> "below / within / above the typical range in UK inspections of this model". localStorage only, nothing sent.
       Caveats: UK market, model level, bands with < `MOT_MIN_BAND_TESTS` stay "not enough data".

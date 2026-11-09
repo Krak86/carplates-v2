@@ -569,6 +569,7 @@ body {
   --chip-weight: hsl(38 92% 50%);
   --chip-fuel: hsl(84 70% 42%);
   --chip-safety: hsl(0 84% 58%);
+  --chip-attention: hsl(32 95% 50%);
 }
 
 @media (color-gamut: p3) {
@@ -580,6 +581,7 @@ body {
     --chip-weight: oklch(0.78 0.2 70);
     --chip-fuel: oklch(0.8 0.26 128);
     --chip-safety: oklch(0.64 0.27 25);
+    --chip-attention: oklch(0.76 0.2 60);
   }
 }
 
@@ -615,6 +617,10 @@ body {
 
 @utility chip-safety {
   --chip: var(--chip-safety);
+}
+
+@utility chip-attention {
+  --chip: var(--chip-attention);
 }
 
 /* Header chips that resolve asynchronously ease in instead of popping. */

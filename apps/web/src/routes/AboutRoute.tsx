@@ -370,6 +370,7 @@ const FEATURES = [
   'shares',
   'whatsnew',
   'alternatives',
+  'resultSummary',
   'race',
   'play',
   'relax',

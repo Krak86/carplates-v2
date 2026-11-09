@@ -4798,3 +4798,12 @@ Phase B step 1 of the security hardening: violations of the Report-Only CSP now 
 - **Mistake worth remembering:** ua.carplates.app was first taken for our own v1 (README says v1 is `Krak86/carplates`); the screenshots showed it is a separate commercial service (AvtoNomera), so the column and the "v1 is not a rival" rule were removed.
 - **Not added on purpose:** AvtoNomera's free owner block (person/legal entity + address): our open registry has no owner data and we do not want to push toward personal data.
 - Also: roadmap idea "Own sale listings (limited)" (`marketplace` in `CONSIDERING_FEATURES`, shown on `/features`), About feature entry, release entry `v2.1173`, bottom links to `/about` and `/data-status`.
+
+## Result summary strip (carVertical idea 1, 2026-11-09)
+
+- **What:** a strip of six small cards at the top of the result card (under the header, above the value chip): wanted check, registry (last operation), crash tests, CO2, auctions (SETAM / Prozorro), recalls. Each is "Attention", "No problems found" or "No data" (dashed, untinted, `?`), plus one detail line naming the source and the date.
+- **Files:** `components/ResultSummary.tsx` (view), `ResultSummary.helpers.ts` (pure card builders, tested in `ResultSummary.helpers.test.ts`), `ResultSummary.types.ts`, `use-result-summary.ts` (the queries). Strings `summary.*` in ua/ru/en; `chip-attention` tone in `global.css` (sRGB fallback, oklch on P3).
+- **No new endpoints:** every query is the one a section or chip already runs (same keys, shared TanStack cache, offline groups unchanged). Crash tests count a programme only when it has the rating of this car's generation (`applicable*`), NHTSA rows are narrowed by body style like the section does; low stars (<= 2, Euro NCAP or NHTSA) is the flag.
+- **Wording:** never "this car is fine". "Nothing found in <source> on <date>" with the check date; a failed request, a never-loaded list or no rating is "No data". Recalls and crash tests say they are for the model; the note under the strip repeats it.
+- **Cost to know:** the strip runs its queries as soon as the card mounts (6 rating sources, 3 recall sources, fuel, wanted, auctions) instead of when a section opens. They are cached per model, so it is a one-off per model.
+- Also: `/alternatives` row `summary` (carVertical 💳, ours ✅, the rest ❔ until checked), About feature entry, release entry `v2.1175`.

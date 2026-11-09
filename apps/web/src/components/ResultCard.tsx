@@ -30,6 +30,7 @@ import ColorSwatch from '@/components/ColorSwatch'
 import CopyAllInfoButton from '@/components/CopyAllInfoButton'
 import CopyButton from '@/components/CopyButton'
 import LastOperationChip from '@/components/LastOperationChip'
+import ResultSummary from '@/components/ResultSummary'
 import CollapsibleChips from '@/components/CollapsibleChips'
 import LazySection from '@/components/LazySection'
 import ReportIssueLink from '@/components/ReportIssueLink'
@@ -464,6 +465,20 @@ export default function ResultCard({ data }: Props): ReactNode {
               />
             </Suspense>
           </div>
+
+          <ResultSummary
+            plate={data.plate}
+            vin={hasVin ? c.vin : null}
+            brand={c.brand}
+            model={c.model}
+            year={c.makeYear}
+            kind={c.kind}
+            fuel={c.fuel}
+            capacity={c.capacity}
+            body={c.body}
+            operCode={c.operCode}
+            dReg={c.dReg}
+          />
 
           <EstimatedValueChip
             brand={c.brand}

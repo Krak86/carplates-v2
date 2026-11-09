@@ -54,6 +54,7 @@ export const ROWS: readonly FeatureRow[] = [
   { key: 'abroad', cells: [N, N, N, N, P, N, P, P] },
   { key: 'adHistory', cells: [N, P, N, N, P, N, P, U] },
   { key: 'plateGallery', cells: [N, N, Y, N, N, N, N, N] },
+  { key: 'summary', cells: [Y, U, U, U, U, N, P, U] },
   { key: 'crash', cells: [Y, N, N, N, N, N, P, U] },
   { key: 'fuel', cells: [Y, N, N, N, N, N, H, U] },
   { key: 'specs', cells: [Y, Y, Y, H, H, N, P, U] },

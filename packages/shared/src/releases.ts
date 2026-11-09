@@ -18,8 +18,14 @@ const item = (group: ReleaseGroup, ua: string, ru: string, en: string): ReleaseI
 export const RELEASES: readonly ReleaseDay[] = [
   {
     date: '2026-11-09',
-    version: 'v2.1173',
+    version: 'v2.1175',
     items: [
+      item(
+        'new',
+        'Підсумок перевірок угорі картки авто: розшук, реєстр, краш-тести, CO2, аукціони й відкликання. Кожна картка каже «Увага», «Проблем не знайдено» або «Немає даних», і що саме та коли перевірено.',
+        'Итоги проверок вверху карточки авто: розыск, реестр, краш-тесты, CO2, аукционы и отзывы. Каждая карточка говорит «Внимание», «Проблем не найдено» или «Нет данных», и что именно и когда проверено.',
+        'A summary strip at the top of the car card: wanted check, registry, crash tests, CO2, auctions and recalls. Each card says “Attention”, “No problems found” or “No data”, and what was searched and when.'
+      ),
       item(
         'new',
         'Сторінка «Порівняння з іншими сервісами»: що є в нас, а що в baza-gai, Opendatabot, AUTO.RIA, RST, carVertical і CARFAX, у чому наша перевага, чого бракує і що далі.',
