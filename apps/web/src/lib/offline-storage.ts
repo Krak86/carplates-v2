@@ -55,7 +55,16 @@ export const queryPersister: Persister = {
       const db = await openDb(DB_NAME, DB_VERSION, STORE)
       const record = await getOne<CacheRecord>(db, STORE, RECORD_ID)
       db.close()
-      return record?.client
+      if (!record) return undefined
+      // Entries saved by an older build that are no longer offline-cached (e.g. `wiki/recolor`) must not come back.
+      const { client } = record
+      return {
+        ...client,
+        clientState: {
+          ...client.clientState,
+          queries: client.clientState.queries.filter(query => offlineGroup(query.queryKey) !== null)
+        }
+      }
     } catch {
       return undefined
     }
