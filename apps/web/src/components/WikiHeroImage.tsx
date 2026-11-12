@@ -8,7 +8,6 @@ import UaAuctionHero from '@/components/ua-auctions/UaAuctionHero'
 import { useCarHeroImageActions } from '@/components/use-car-hero-image-actions'
 import { useWikiPhotos, firstColorMatch } from '@/components/use-wiki-photos'
 import { useWikiRecolor } from '@/components/use-wiki-recolor'
-import WikiPhotoStrip from '@/components/WikiPhotoStrip'
 import WikiRecolorCanvas from '@/components/WikiRecolorCanvas'
 import { cn } from '@/lib/cn'
 import { useUiStore } from '@/store/ui-store'
@@ -52,7 +51,12 @@ export default function WikiHeroImage({
   const wikiPhotos = useWikiPhotos({ brand, model, year, color })
   // A scanned photo whose real paint already matches the registry colour leads (no filter needed); it is another car of the model.
   // One that fails to load falls back to the stored hero + filter. While the photo list loads the hero waits, so it never flashes a photo it replaces.
-  const matched = wikiPhotos.loading ? null : firstColorMatch(wikiPhotos.photos, failedUrls)
+  const usablePhotos = wikiPhotos.loading ? [] : wikiPhotos.photos.filter(photo => !failedUrls.has(photo.url))
+  // A thumbnail the user picked leads over the automatic choice (an unfiltered other car of the model).
+  const [pickedUrl, setPickedUrl] = useState<string | null>(null)
+  const picked = usablePhotos.find(photo => photo.url === pickedUrl) ?? null
+  const autoMatched = wikiPhotos.loading ? null : firstColorMatch(wikiPhotos.photos, failedUrls)
+  const matched = picked ?? autoMatched
   const storedImage = heroImage.isSuccess && !wikiPhotos.loading ? heroImage.data.image : null
   const image = matched ? { url: matched.url, attribution: matched.attribution } : storedImage
   const creditParts = [image?.attribution?.author, image?.attribution?.license].filter(Boolean)
@@ -257,13 +261,16 @@ export default function WikiHeroImage({
       {zoomed && image && (
         <PhotoZoomDialog url={image.url} candidates={[]} active={null} onClose={() => setZoomed(false)} />
       )}
-      {hasSlides && image && (
-        <ul className="mt-4 flex gap-1.5">
-          {[false, true].map(isOriginal => (
+      {image && (hasSlides || usablePhotos.length > 0) && (
+        <ul className="mt-4 flex w-full max-w-content gap-1.5 overflow-x-auto pb-1">
+          {(hasSlides ? [false, true] : []).map(isOriginal => (
             <li key={String(isOriginal)} className="shrink-0">
               <button
                 type="button"
-                onClick={() => setOriginalUrl(isOriginal ? image.url : null)}
+                onClick={() => {
+                  setPickedUrl(null)
+                  setOriginalUrl(isOriginal ? image.url : null)
+                }}
                 aria-label={t('wiki.slideDot', { n: isOriginal ? 2 : 1, total: 2 })}
                 aria-current={isOriginal === viewOriginal}
                 className={cn(
@@ -285,12 +292,52 @@ export default function WikiHeroImage({
               </button>
             </li>
           ))}
+          {picked && storedImage && !autoMatched && !hasSlides && (
+            <li className="shrink-0">
+              <button
+                type="button"
+                onClick={() => setPickedUrl(null)}
+                aria-label={t('wiki.photoStored')}
+                className="block h-12 w-16 overflow-hidden rounded-md border-2 border-transparent opacity-70 transition-opacity hover:opacity-100"
+              >
+                <img
+                  src={storedImage.url}
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                  className="h-full w-full object-cover"
+                />
+              </button>
+            </li>
+          )}
+          {usablePhotos.map((photo, i) => {
+            const isActive = matched?.url === photo.url
+            return (
+              <li key={photo.url} className="shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setPickedUrl(photo.url)}
+                  aria-label={t('wiki.photoOpen', { n: i + 1, total: usablePhotos.length })}
+                  aria-current={isActive}
+                  className={cn(
+                    'block h-12 w-16 overflow-hidden rounded-md border-2 transition-opacity',
+                    isActive ? 'border-primary' : 'border-transparent opacity-70 hover:opacity-100'
+                  )}
+                >
+                  <img
+                    src={photo.url}
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                    onError={() => setFailedUrls(prev => new Set(prev).add(photo.url))}
+                    className="h-full w-full object-cover"
+                  />
+                </button>
+              </li>
+            )
+          })}
         </ul>
       )}
-      <WikiPhotoStrip
-        photos={wikiPhotos.photos.filter(photo => photo.url !== image?.url)}
-        label={[brand, model].filter(Boolean).join(' ')}
-      />
     </>
   )
 }

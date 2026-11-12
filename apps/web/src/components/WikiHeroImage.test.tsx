@@ -210,7 +210,7 @@ describe('WikiHeroImage extra photos', () => {
     expect(screen.queryByTestId('wiki-recolor-canvas')).toBeNull()
     expect(api.getWikiRecolor).not.toHaveBeenCalled()
     expect(screen.queryByRole('button', { name: 'Update photo' })).toBeNull()
-    expect(screen.getAllByAltText(/^KIA CEED: photo /)).toHaveLength(2)
+    expect(screen.getAllByRole('button', { name: /^Open photo \d of 3$/ })).toHaveLength(3)
   })
 
   it('keeps the stored hero and the filter when no photo matches the colour', async () => {
@@ -222,7 +222,7 @@ describe('WikiHeroImage extra photos', () => {
       fireEvent.load(hero)
     })
     await waitFor(() => expect(screen.getByTestId('wiki-recolor-canvas')).toBeTruthy())
-    expect(screen.getAllByAltText(/^KIA CEED: photo /)).toHaveLength(1)
+    expect(screen.getAllByRole('button', { name: /^Open photo \d of 1$/ })).toHaveLength(1)
   })
 
   it('falls to the next matched photo, then to the stored hero, when a matched photo fails to load', async () => {
@@ -248,14 +248,16 @@ describe('WikiHeroImage extra photos', () => {
     expect(hero.getAttribute('src')).toBe(PHOTO)
   })
 
-  it('opens the zoom dialog from a strip photo and shows more past the preview count', async () => {
+  it('shows every photo as a small thumbnail (no big grid, no show-more) and a click swaps the hero to it', async () => {
     api.getWikiPhotos.mockResolvedValue({ photos: [1, 2, 3, 4, 5, 6].map(n => photo(n, false)) })
     renderWithPhotos(null)
-    await screen.findAllByAltText(/^KIA CEED: photo /)
-    expect(screen.getAllByAltText(/^KIA CEED: photo /)).toHaveLength(4)
-    fireEvent.click(screen.getByRole('button', { name: 'Show more photos (2)' }))
-    expect(screen.getAllByAltText(/^KIA CEED: photo /)).toHaveLength(6)
-    fireEvent.click(screen.getByRole('button', { name: 'Open photo 1 of 6' }))
-    expect(await screen.findByRole('dialog')).toBeTruthy()
+    const thumb = await screen.findByRole('button', { name: 'Open photo 3 of 6' })
+    expect(screen.getAllByRole('button', { name: /^Open photo \d of 6$/ })).toHaveLength(6)
+    expect(screen.queryByRole('button', { name: /Show more photos/ })).toBeNull()
+    fireEvent.click(thumb)
+    await waitFor(() =>
+      expect(screen.getByAltText('KIA CEED').getAttribute('src')).toBe('https://upload.example/p3.jpg')
+    )
+    expect(screen.getByRole('button', { name: 'Stored photo of the model' })).toBeTruthy()
   })
 })

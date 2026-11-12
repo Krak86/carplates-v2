@@ -556,7 +556,7 @@ Plan and handoff: `docs/wiki-recolor-plan.md`. Table `registry.wiki_image_paint`
 
 - [x] Deployed 2026-11-07 (migration 0101, Cloudflare rule, nightly job); masks loaded on the VPS 2026-11-08.
 - [ ] Check the filter in a browser on a real plate on carsua.app (canvas aligned with the photo, pill toggles, credit says "modified: colour").
-- [ ] Steps 7-9: candidate photos, photo strip, rollout (scan job, `/data-status` row, gallery review).
+- [ ] Steps 7-9: candidate photos, thumbnail row, rollout (scan job, `/data-status` row, gallery review).
 
 ### Car reviews, videos, 3D & 360° — mostly shipped (2026-10-03 → 05); open items below
 
@@ -1375,14 +1375,14 @@ Write-up: `docs/plan-done.md` "Market offers (CarAPIS)"; conventions: `docs/feat
 
 ## Wiki photo colour filter + extra photos (planned 2026-11-06)
 
-Plan in 9 steps, [docs/wiki-recolor-plan.md](docs/wiki-recolor-plan.md); prototype and findings in `docs/wiki-recolor/`. Recolour the hero photo to the registry colour (toggle top-right, swatch, "colour filter" text, skip when the colour already matches), then candidate photos per model and a photo strip under the hero.
+Plan in 9 steps, [docs/wiki-recolor-plan.md](docs/wiki-recolor-plan.md); prototype and findings in `docs/wiki-recolor/`. Recolour the hero photo to the registry colour (toggle top-right, swatch, "colour filter" text, skip when the colour already matches), then candidate photos per model and a thumbnail row under the hero.
 
 - [x] Steps 1-2 (2026-11-06): shared colour model (`paintColor.ts`), paint scan core + CLI (`wiki-paint-core.ts`, `wiki-paint.ts`), gates tuned on 3 random samples of 50
 - [x] Phase A rest (2026-11-06): migration 0101 + schema + CLI upsert (3), API (4), web filter (5, browser-checked on real scanned rows), docs (6)
 - [ ] Phase B: candidate photos + bottom strip (steps 7-8)
   - [x] Step 7 data + API (2026-11-09): migration 0104 (`wiki_image_candidate`, `wiki_image_candidate_scan`, no masks stored), `pnpm ingest:wiki-candidates` (`wiki-candidates.ts` + `-core.ts`, shared `wiki-paint-image.ts`), `GET /api/wiki/photos?brand&model&year&color` (colour match, then generation, then quality). Checked on kia ceed locally (30 qualified, 8 analysed, 6 ok)
   - [x] Step 7 rest (2026-11-09): hero uses the first `colorMatch` photo (`useWikiPhotos`, `wikiPhotosQuery`; no filter, credit "another car", falls to the next match / stored hero on a load error), `wiki-candidates` job (80 models, 01:45 cron) + `/data-status` row `wikiCandidates`, `/api/wiki/photos` in the deploy.md Cloudflare expression, controller test (incl. the Zod query pipe), root `ingest:wiki-candidates` script
-  - [x] Step 8 (2026-11-09): `WikiPhotoStrip.tsx` under the hero (4 + show more, credit link per photo, zoom), tests in `WikiHeroImage.test.tsx`
+  - [x] Step 8 (2026-11-09, reworked 2026-11-12): small thumbnails under the hero that swap it (was `WikiPhotoStrip.tsx`, a big grid with show more, removed), tests in `WikiHeroImage.test.tsx`
   - [x] Review of the 100-model dry run (2026-11-09, 61 min): found + fixed the `toy` title filter rejecting every Toyota (now `toys?`, test added), and the job now searches / analyses once per search term (registry has `daewoo  lanos` next to `daewoo`; was about 40 % wasted scans). Rest healthy: 5-39 qualified, 40-95 % ok, 2-6 colours; ok photos are 51 % white, 44 % gray (dark paint is gated out, so black cars keep the stored hero + filter). Real scan of 10 models + browser check done (matched hero, strip, zoom, show more, no-match fallback)
   - [ ] Follow-ups (optional): Cyrillic brands without an alias (`заз lanos`, `заз 110307`) find 0 photos, add `wikiSearchName` aliases; undated matched photos may be another generation (hero for a 2011 Octavia was an Octavia IV, strip started with the 1959 Octavia), consider ranking dated in-generation photos above undated colour matches
   - [ ] After deploy (owner): apply migration 0104 on the VPS; add `/api/wiki/photos` to the Cloudflare "Cache model lookups" expression (docs/deploy.md), check MISS then HIT; the nightly `wiki-candidates` run (00:30 wiki-paint, 01:45 candidates) downloads nothing new but shares the SegFormer cache; optional healthchecks.io secret

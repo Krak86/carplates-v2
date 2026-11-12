@@ -4782,7 +4782,7 @@ Phase B step 1 of the security hardening: violations of the Report-Only CSP now 
 
 ## Wiki extra photos: colour-matched hero + photo strip (steps 7-8, 2026-11-09)
 
-- **Web:** `useWikiPhotos` / `wikiPhotosQuery` (`GET /api/wiki/photos`, online only, silent failure). The hero takes the first `colorMatch` photo (no filter, credit "Photo of another car of this model", no refresh button), falls to the next match and then to the stored hero + colour filter when a photo fails to load, and waits for the list so it never flashes a photo it replaces. `WikiPhotoStrip` under the hero: the other photos, 4 + show more, credit link to the Commons page, zoom dialog.
+- **Web:** `useWikiPhotos` / `wikiPhotosQuery` (`GET /api/wiki/photos`, online only, silent failure). The hero takes the first `colorMatch` photo (no filter, credit "Photo of another car of this model", no refresh button), falls to the next match and then to the stored hero + colour filter when a photo fails to load, and waits for the list so it never flashes a photo it replaces. `WikiPhotoStrip` under the hero: the other photos, 4 + show more, credit link to the Commons page, zoom dialog (replaced 2026-11-12, see "Wiki photo thumbnails" below).
 - **Job:** `wiki-candidates` (80 models per night, `--rps 1`, cron 01:45), `/data-status` row `wikiCandidates`, `/api/wiki/photos` added to the Cloudflare rule text in `docs/deploy.md`, controller test (also runs the Zod query pipe), root `ingest:wiki-candidates` script.
 - **Review fixes (2026-11-09, 100-model dry run):** the `toy` title filter rejected every Toyota (now `btoys?b`); the job searches and analyses once per search term, because the registry holds both `daewoo` / `lanos` and `daewoo  lanos` / `lanos`. Known limits: Cyrillic brands without an alias (`заз`) find nothing; photos with no year in the title cannot be matched to a generation.
 
@@ -4810,10 +4810,17 @@ Phase B step 1 of the security hardening: violations of the Report-Only CSP now 
 
 ## Crash-test board and summary fixes, API 4xx, touch-only swipe (2026-11-09)
 
-- **Crash boards** (`safety-stats`): doubled model names ("GX 470 GX 470", "Q7 Q7") fold into one model in `modelLeaderboard`; "BRAND  MODEL" duplicates (double space) keep only the make via `split_part` in the model leaderboard and brand averages. The "?" help says score 0 is the worst grade, not missing data (ua/ru/en).
+- **Crash boards** (`safety-stats`): doubled model names ("GX 470 GX 470", "Q7 Q7") fold into one model in `modelLeaderboard`; "BRAND MODEL" duplicates (double space) keep only the make via `split_part` in the model leaderboard and brand averages. The "?" help says score 0 is the worst grade, not missing data (ua/ru/en).
 - **IIHS score** (`crashScore`): `iihsScore` needs a frontal or side impact test; head-restraint or roof-only entries return null (fixed the false "0" on the Lexus GX 470). Tests added.
 - **Summary strip:** the crash tile is `attention` when an applicable IIHS crashworthiness test is Poor (`isIihsCrashTest` exported from `shared`).
 - **API errors:** `AllExceptionsFilter` keeps a numeric 4xx `statusCode` from plain errors (bad CSP report body, 413, unsupported media type) instead of a generic 500 + Sentry event; `all-exceptions.filter.test.ts`. `esc()` also escapes `'`.
 - **Security docs:** pentest pass 3 (two-user IDOR, upload, admin role, stored XSS) in `docs/pentest-lab.md` "Run log"; ranked remaining work in the security docs.
 - **Web:** photo swipe ignores mouse pointers (`useSwipeSlide`, `WikiHeroImage`). `/read/*` English titles are keyword-first ("<keywords> | Cars UA").
 - Release entry `v2.1180` (day 2026-11-09).
+
+## Wiki photo thumbnails (2026-11-12)
+
+- **Fix + redesign:** the strip of other model photos (`WikiPhotoStrip`, step 8) had no width cap, so on prod it stretched to the page width as a grid of big photos with "Show more photos". Replaced by one row of small thumbnails (`h-12 w-16`, like `UaAuctionHero`) inside `WikiHeroImage.tsx`, capped at `max-w-content`, scrolling sideways. A click sets `pickedUrl` and swaps the hero to that photo (no filter, other-car credit in the hero badge); a "Stored photo" thumbnail returns to the stored hero when there was no colour match; the filter slide thumbnails come first when they apply.
+- **Removed:** `WikiPhotoStrip.tsx`, `wiki.photoStrip`, `wiki.photoStripNote`, `wiki.photoMore`, `wiki.photoLess`, `wiki.photoAlt`; added `wiki.photoStored`. The Commons link per photo is gone (the credit is text in the hero badge).
+- **Tests:** `WikiHeroImage.test.tsx` covers the thumbnail row and the swap. `LATEST_RELEASE_DATE` bumped to 2026-11-12.
+- Release entry `v2.1182` (day 2026-11-12).
