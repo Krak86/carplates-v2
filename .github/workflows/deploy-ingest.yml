@@ -6,6 +6,7 @@ on:
     paths:
       - 'scripts/**'
       - 'packages/shared/**'
+      - '!packages/shared/src/releases.ts'
       - 'packages/db/**'
       - 'pnpm-lock.yaml'
       - 'pnpm-workspace.yaml'
