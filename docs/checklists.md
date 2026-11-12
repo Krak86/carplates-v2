@@ -14,6 +14,7 @@ Below-the-fold sections are `LazySection`s; a new shareable one must list its id
 
 - Blue/green ⇒ backward-compatible migrations.
 - New env var ⇒ `env.ts` + `deploy-api.yml` + `docs/deploy.md`.
+- New VPS deploy step ⇒ a script in `infra/vps/` that sources `/opt/carsua/compose/lib.sh` (`set_env`, `wait_healthy`); rsync `lib.sh` first and add the script to the workflow `paths`. Shared CI bits: `.github/actions/` (`ssh-setup`, `build-image`, `cf-purge`), `infra/ci/lib.sh` (`emit`, `push_env`).
 - New ingest job ⇒ `scripts/src/jobs.ts` + `run-ingest.sh` + `infra/vps/ingest.cron` + a `/data-status` row (`datasets.ts`, `data-status.service.ts`).
 
 ## New public route
