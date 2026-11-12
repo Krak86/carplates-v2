@@ -27,8 +27,8 @@ lookups, edge-cacheable), so **disk is the binding constraint, not CPU/RAM**.
 
 Resize CPU/RAM later from observed load. Keep backups off-box (or on a separate volume) so they don't compete with PGDATA for space.
 
-- **Contabo Cloud VPS 6** (6 vCPU / 12 GB / 200 GB SSD _or_ 100 GB NVMe, ~€7.20/mo for the first 24 months, list €9) — current pick. EU
-  (Germany). Renewal price is higher after 24 months; shared/noisy disk, so **off-box backups are mandatory**, not Contabo snapshots alone.
+- **Contabo Cloud VPS 6** (6 vCPU / 12 GB / 200 GB SSD _or_ 100 GB NVMe, $10.80/mo incl. VAT, the price at the time of payment) — current pick. EU
+  (Germany). The price may change on renewal; shared/noisy disk, so **off-box backups are mandatory**, not Contabo snapshots alone.
 - Hetzner (4 vCPU / 8 GB + attached volume, ~€12–20/mo, NVMe) — the more reliable fallback.
 - Ukrainian host kVPS90 (4 vCPU / 8 GB / 90 GB SSD, ~1618 UAH/mo yearly) — only if UAH payment / UA hosting is required; ~5× the price, 100 GB cap.
 
