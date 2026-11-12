@@ -42,6 +42,10 @@ describe('offlineGroup', () => {
     expect(offlineGroup(['search', 'brands', 'ki'])).toBeNull()
     expect(offlineGroup(['photos', 'KIA', 'RIO', 2020])).toBeNull()
     expect(offlineGroup(['history'])).toBeNull()
+    expect(offlineGroup(['wiki', 'image', 'KIA', 'RIO', 2020])).toBe('wiki')
+    expect(offlineGroup(['wiki', 'recolor', 'KIA', 'RIO', 2020])).toBeNull()
+    expect(offlineGroup(['wiki', 'photos', 'KIA', 'RIO', 2020, null])).toBeNull()
+    expect(offlineGroup(['wiki', 'paint-mask', 'u'])).toBeNull()
   })
 })
 

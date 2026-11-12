@@ -24,8 +24,13 @@ export type OfflineGroup = keyof typeof OFFLINE_LIMITS
 
 const OFFLINE_GROUPS = Object.keys(OFFLINE_LIMITS) as OfflineGroup[]
 
+const WIKI_ONLINE_ONLY: ReadonlySet<string> = new Set(['recolor', 'photos', 'paint-mask'])
+
 export function offlineGroup(queryKey: QueryKey): OfflineGroup | null {
   const head = queryKey[0]
+  // Online-only decoration under the `wiki` head (staleTime Infinity): a copy saved from before the scan existed
+  // (`recolor: null`, no extra photos) would hide the colour filter and the thumbnails for the whole max age.
+  if (head === 'wiki' && WIKI_ONLINE_ONLY.has(String(queryKey[1]))) return null
   return OFFLINE_GROUPS.find(group => group === head) ?? null
 }
 
