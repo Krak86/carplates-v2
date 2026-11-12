@@ -26,5 +26,6 @@ updates:
       - dependency-name: python
         update-types: [version-update:semver-major, version-update:semver-minor]
   - package-ecosystem: github-actions
-    directory: /
+    # Composite actions are only scanned when listed; build-image holds the docker/* action versions.
+    directories: ['/', '/.github/actions/build-image', '/.github/actions/cf-purge', '/.github/actions/ssh-setup']
     schedule: { interval: weekly }
