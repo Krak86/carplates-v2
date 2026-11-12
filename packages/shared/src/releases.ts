@@ -17,6 +17,18 @@ const item = (group: ReleaseGroup, ua: string, ru: string, en: string): ReleaseI
  */
 export const RELEASES: readonly ReleaseDay[] = [
   {
+    date: '2026-11-12',
+    version: 'v2.1182',
+    items: [
+      item(
+        'fix',
+        'Стрічка інших фото моделі під головним фото більше не розтягується на всю ширину сторінки.',
+        'Лента других фото модели под главным фото больше не растягивается на всю ширину страницы.',
+        'The strip of more model photos under the hero photo no longer stretches to the full page width.'
+      )
+    ]
+  },
+  {
     date: '2026-11-09',
     version: 'v2.1180',
     items: [

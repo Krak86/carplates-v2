@@ -41,7 +41,7 @@ export default function WikiPhotoStrip({ photos, label }: Props): ReactNode {
   }
 
   return (
-    <section className="mt-3" aria-label={t('wiki.photoStrip')}>
+    <section className="mt-3 w-full max-w-content" aria-label={t('wiki.photoStrip')}>
       <p className="mb-1.5 text-xs text-[var(--color-muted)]">{t('wiki.photoStripNote')}</p>
       <ul className="grid grid-cols-2 gap-x-1.5 gap-y-2 sm:grid-cols-4">
         {shown.map((photo, i) => {
