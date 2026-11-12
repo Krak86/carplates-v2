@@ -13,6 +13,10 @@ on:
       - 'infra/vps/run-ingest.sh'
       - 'infra/vps/ingest-status.sh'
       - 'infra/vps/ingest.cron'
+      - 'infra/vps/deploy-ingest.sh'
+      - 'infra/vps/lib.sh'
+      - 'infra/ci/lib.sh'
+      - '.github/actions/**'
       - '.github/workflows/deploy-ingest.yml'
   workflow_dispatch:
 
@@ -39,23 +43,11 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - id: meta
-        run: echo "owner=${GITHUB_REPOSITORY_OWNER,,}" >> "$GITHUB_OUTPUT"
-      - uses: docker/setup-buildx-action@v4
-      - uses: docker/login-action@v4
+        uses: ./.github/actions/build-image
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - uses: docker/build-push-action@v7
-        with:
-          context: .
+          image: carsua-ingest
           file: scripts/Dockerfile
-          push: true
-          tags: |
-            ghcr.io/${{ steps.meta.outputs.owner }}/carsua-ingest:${{ github.sha }}
-            ghcr.io/${{ steps.meta.outputs.owner }}/carsua-ingest:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          token: ${{ secrets.GITHUB_TOKEN }}
 
   deploy:
     needs: build
@@ -72,7 +64,7 @@ jobs:
           known-hosts: ${{ secrets.VPS_KNOWN_HOSTS }}
 
       - name: Sync compose file and job scripts
-        run: rsync -az --inplace infra/docker-compose.prod.yml infra/vps/run-ingest.sh infra/vps/ingest-status.sh infra/vps/ingest.cron vps:/opt/carsua/compose/
+        run: rsync -az --inplace infra/docker-compose.prod.yml infra/vps/run-ingest.sh infra/vps/ingest-status.sh infra/vps/ingest.cron infra/vps/lib.sh vps:/opt/carsua/compose/
 
       - name: Write ingest env
         env:
@@ -92,27 +84,13 @@ jobs:
           HC_PING_WIKI_PAINT: ${{ secrets.HC_PING_WIKI_PAINT }}
         run: |
           : "${POSTGRES_PASSWORD:?POSTGRES_PASSWORD secret is missing}"
-          emit() { for n in "$@"; do v="${!n:-}"; [ -n "$v" ] && printf '%s=%s\n' "$n" "$v"; done; return 0; }
+          . infra/ci/lib.sh # emit, push_env
           {
             printf 'DATABASE_URL=postgres://carplates:%s@postgres:5432/carplates\n' "$POSTGRES_PASSWORD"
             emit HC_PING_NEWS HC_PING_SOCIAL HC_PING_WANTED HC_PING_WANTED_PLATES HC_PING_AUCTIONS HC_PING_PROZORRO_AUCTIONS HC_PING_AUCTION_PROCEEDINGS HC_PING_PLATES HC_PING_DTP_PATROL HC_PING_DTP_HAZARDS HC_PING_RDW_RECALLS HC_PING_CA_RECALLS HC_PING_WIKI_PAINT
           } > ingest.env
-          ssh vps 'umask 077; cat > /opt/carsua/env/ingest.env.new && mv /opt/carsua/env/ingest.env.new /opt/carsua/env/ingest.env' < ingest.env
+          push_env ingest.env /opt/carsua/env/ingest.env
           rm -f ingest.env
 
       - name: Pull the image and install the crontab
-        run: |
-          ssh vps bash -s -- "$GITHUB_SHA" <<'EOF'
-          set -euo pipefail
-          cd /opt/carsua/compose
-          export COMPOSE_FILE=docker-compose.prod.yml
-          touch .env
-          { grep -v '^INGEST_TAG=' .env || true; echo "INGEST_TAG=$1"; } > .env.tmp && mv .env.tmp .env
-          install -d /opt/carsua/archive /opt/carsua/ingest-data
-          docker compose pull ingest
-          crontab ingest.cron
-          docker image prune -f >/dev/null
-          echo "ingest image $1 ready; crontab installed"
-          # Load the one-off seed CSVs into tables that are still empty (skips filled ones); non-fatal: a table may not exist until the api deploy migrates.
-          bash ./run-ingest.sh seed-if-empty </dev/null || echo "warn: seed-if-empty failed (non-fatal)"
-          EOF
+        run: ssh vps bash -s -- "$GITHUB_SHA" < infra/vps/deploy-ingest.sh

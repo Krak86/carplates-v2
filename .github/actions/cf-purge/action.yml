@@ -1,0 +1,51 @@
+name: cf-purge
+description: Purge Cloudflare cache by exact URL or by prefix. Skips (success) when the token or zone is not configured.
+inputs:
+  token:
+    description: Cloudflare API token
+    required: false
+    default: ''
+  zone-id:
+    description: Cloudflare zone id
+    required: false
+    default: ''
+  site-url:
+    description: Public site URL, e.g. https://carsua.app
+    required: true
+  files:
+    description: Whitespace-separated paths purged by exact URL, e.g. "/robots.txt /sitemap.xml"
+    required: false
+    default: ''
+  prefixes:
+    description: Whitespace-separated paths purged by prefix, e.g. "/og/ /cars"
+    required: false
+    default: ''
+  warn-on-failure:
+    description: When set, a failed purge becomes this warning instead of failing the job
+    required: false
+    default: ''
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      env:
+        CF_API_TOKEN: ${{ inputs.token }}
+        CF_ZONE_ID: ${{ inputs.zone-id }}
+        SITE_URL: ${{ inputs.site-url }}
+        FILES: ${{ inputs.files }}
+        PREFIXES: ${{ inputs.prefixes }}
+        WARN: ${{ inputs.warn-on-failure }}
+      run: |
+        if [ -z "$CF_API_TOKEN" ] || [ -z "$CF_ZONE_ID" ]; then echo "Cloudflare secrets not set; skipping purge"; exit 0; fi
+        host="${SITE_URL#https://}"
+        if [ -n "$FILES" ]; then
+          body=$(jq -nc --arg site "$SITE_URL" --arg v "$FILES" '{files: [$v | splits("\\s+") | select(length > 0) | $site + .]}')
+        else
+          body=$(jq -nc --arg host "$host" --arg v "$PREFIXES" '{prefixes: [$v | splits("\\s+") | select(length > 0) | $host + .]}')
+        fi
+        if curl -fsS -X POST "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/purge_cache" \
+          -H "Authorization: Bearer $CF_API_TOKEN" -H "Content-Type: application/json" --data "$body"; then
+          exit 0
+        fi
+        if [ -n "$WARN" ]; then echo "::warning::$WARN"; exit 0; fi
+        exit 1

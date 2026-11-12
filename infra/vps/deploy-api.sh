@@ -5,11 +5,8 @@
 set -euo pipefail
 
 TAG="${1:?usage: deploy-api.sh <image-tag>}"
-cd /opt/carsua/compose
-export COMPOSE_FILE=docker-compose.prod.yml
-touch .env
+. /opt/carsua/compose/lib.sh
 
-set_env() { { grep -v "^$1=" .env || true; echo "$1=$2"; } > .env.tmp && mv .env.tmp .env; }
 is_running() { [ -n "$(docker compose ps --status running -q "$1")" ]; }
 
 if is_running api-blue; then OLD=blue NEW=green; else OLD=green NEW=blue; fi
@@ -41,14 +38,8 @@ echo "seeding empty one-off tables…"
 bash ./run-ingest.sh seed-if-empty </dev/null || echo "warn: seed-if-empty failed (non-fatal)" >&2
 
 docker compose up -d --no-deps "api-$NEW"
-cid="$(docker compose ps -q "api-$NEW")"
-for _ in $(seq 1 45); do
-  status="$(docker inspect --format '{{.State.Health.Status}}' "$cid" 2>/dev/null || echo none)"
-  [ "$status" = healthy ] && break
-  sleep 2
-done
-if [ "$status" != healthy ]; then
-  echo "new api-$NEW did not become healthy (status=$status); keeping $OLD" >&2
+if ! wait_healthy "api-$NEW"; then
+  echo "new api-$NEW did not become healthy (status=$HEALTH_STATUS); keeping $OLD" >&2
   docker compose logs --tail 80 "api-$NEW" >&2 || true
   docker compose stop "api-$NEW" || true
   exit 1

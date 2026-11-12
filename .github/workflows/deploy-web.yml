@@ -70,13 +70,9 @@ jobs:
           ssh vps bash -s -- "$GITHUB_SHA" < infra/vps/deploy-web.sh
 
       - name: Purge Cloudflare cache for the entry files
-        env:
-          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
-          CF_ZONE_ID: ${{ secrets.CF_ZONE_ID }}
-          URL: ${{ vars.PUBLIC_SITE_URL }}
-        run: |
-          if [ -z "$CF_API_TOKEN" ] || [ -z "$CF_ZONE_ID" ]; then echo "Cloudflare secrets not set; skipping purge"; exit 0; fi
-          files=$(printf '"%s/","%s/index.html","%s/sw.js","%s/registerSW.js","%s/manifest.webmanifest"' "$URL" "$URL" "$URL" "$URL" "$URL")
-          curl -fsS -X POST "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/purge_cache" \
-            -H "Authorization: Bearer $CF_API_TOKEN" -H "Content-Type: application/json" \
-            --data "{\"files\":[$files]}"
+        uses: ./.github/actions/cf-purge
+        with:
+          token: ${{ secrets.CF_API_TOKEN }}
+          zone-id: ${{ secrets.CF_ZONE_ID }}
+          site-url: ${{ vars.PUBLIC_SITE_URL }}
+          files: / /index.html /sw.js /registerSW.js /manifest.webmanifest

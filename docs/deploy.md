@@ -52,6 +52,12 @@ One branch (`main`), three workflows that each run **only when their paths chang
 | `deploy-api.yml`  | `apps/api/**`, `packages/shared/**`, `packages/db/**`, `infra/**`, lockfile | CI → image to GHCR → sync compose/Caddyfile → write env files from secrets → migrate → start idle colour → wait healthy → stop old colour → reload Caddy → check → purge the Cloudflare `/robots.txt` + `/sitemap.xml` (exact URLs) and the `/og/` cards (best-effort; prefix purge may need a paid plan) → ping IndexNow with the sitemap URLs (best-effort; key in `apps/api/src/spa/indexnow.ts`) |
 | `deploy-alpr.yml` | `services/alpr/**`                                                          | image to GHCR → roll the container → wait healthy                                                                                                                                                                                                                                                                                                                                                    |
 
+Shared deploy plumbing, so a fix lands in one place (all code, no manual GitHub/VPS setup):
+
+- `.github/actions/`: `ssh-setup` (`ssh vps`), `build-image` (GHCR build + push, outputs `owner`), `cf-purge` (Cloudflare purge by `files` / `prefixes`, skips when unconfigured).
+- `infra/ci/lib.sh` (runner side: `emit`, `push_env`) and `infra/vps/lib.sh` (VPS side: `set_env`, `wait_healthy`; rsynced to `/opt/carsua/compose/` by each deploy before the script sourcing it runs).
+- The VPS steps are scripts piped into `ssh vps bash -s`: `deploy-api.sh`, `deploy-web.sh`, `deploy-ingest.sh`, `deploy-alpr.sh`. A new deploy script sources `lib.sh` by absolute path and adds it to its workflow's `paths`.
+
 A change in `packages/shared` triggers web **and** api in parallel. New API fields are additive (`.nullable().optional()`), so either order is
 safe; if you ever make a breaking contract change, run the api deploy first, wait, then the web one.
 

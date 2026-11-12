@@ -5,6 +5,9 @@ on:
     branches: [main]
     paths:
       - 'services/alpr/**'
+      - 'infra/vps/deploy-alpr.sh'
+      - 'infra/vps/lib.sh'
+      - '.github/actions/**'
       - '.github/workflows/deploy-alpr.yml'
   workflow_dispatch:
 
@@ -27,22 +30,12 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - id: meta
-        run: echo "owner=${GITHUB_REPOSITORY_OWNER,,}" >> "$GITHUB_OUTPUT"
-      - uses: docker/setup-buildx-action@v4
-      - uses: docker/login-action@v4
+        uses: ./.github/actions/build-image
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - uses: docker/build-push-action@v7
-        with:
+          image: carsua-alpr
           context: services/alpr
-          push: true
-          tags: |
-            ghcr.io/${{ steps.meta.outputs.owner }}/carsua-alpr:${{ github.sha }}
-            ghcr.io/${{ steps.meta.outputs.owner }}/carsua-alpr:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          file: services/alpr/Dockerfile
+          token: ${{ secrets.GITHUB_TOKEN }}
 
   deploy:
     needs: build
@@ -57,22 +50,7 @@ jobs:
           user: ${{ vars.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           known-hosts: ${{ secrets.VPS_KNOWN_HOSTS }}
+      - name: Sync helpers
+        run: rsync -az --inplace infra/vps/lib.sh vps:/opt/carsua/compose/
       - name: Roll the container
-        run: |
-          ssh vps bash -s -- "$GITHUB_SHA" <<'EOF'
-          set -euo pipefail
-          cd /opt/carsua/compose
-          export COMPOSE_FILE=docker-compose.prod.yml
-          touch .env
-          { grep -v '^ALPR_TAG=' .env || true; echo "ALPR_TAG=$1"; } > .env.tmp && mv .env.tmp .env
-          docker compose pull alpr
-          docker compose up -d --no-deps alpr
-          cid="$(docker compose ps -q alpr)"
-          for _ in $(seq 1 45); do
-            [ "$(docker inspect --format '{{.State.Health.Status}}' "$cid")" = healthy ] && { echo "alpr healthy"; exit 0; }
-            sleep 2
-          done
-          docker compose logs --tail 50 alpr >&2
-          echo "alpr did not become healthy" >&2
-          exit 1
-          EOF
+        run: ssh vps bash -s -- "$GITHUB_SHA" < infra/vps/deploy-alpr.sh
