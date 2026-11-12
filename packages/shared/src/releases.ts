@@ -21,10 +21,10 @@ export const RELEASES: readonly ReleaseDay[] = [
     version: 'v2.1182',
     items: [
       item(
-        'fix',
-        'Стрічка інших фото моделі під головним фото більше не розтягується на всю ширину сторінки.',
-        'Лента других фото модели под главным фото больше не растягивается на всю ширину страницы.',
-        'The strip of more model photos under the hero photo no longer stretches to the full page width.'
+        'improved',
+        'Інші фото моделі тепер маленькі мініатюри під головним фото (як в аукціонів): клік підміняє головне фото, великої сітки з «Показати більше» немає.',
+        'Другие фото модели теперь маленькие миниатюры под главным фото (как у аукционов): клик подменяет главное фото, большой сетки с «Показать больше» нет.',
+        'More photos of the model are now small thumbnails under the hero photo (like the auctions): a click swaps the hero, and the big grid with “Show more” is gone.'
       )
     ]
   },

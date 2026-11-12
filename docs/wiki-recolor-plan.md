@@ -15,7 +15,7 @@ of other photos of the model under the hero (same look as the auction lot photos
 - **Toggle button in the top-right corner** of the hero (on / off), with a **swatch of the filter colour next to it**, plus a **text line** saying the photo has a car colour filter.
 - **Skip the filter** when the photo already has that colour (or a close one), when the car is multi-coloured / a wrap / a livery, when the paint is dark or neutral and unreliable, or when no mask exists. Then the original photo is shown, no button.
 - Original photo first, the filter **fades in** when its layer has loaded (the photo is the LCP; a failed layer costs nothing).
-- **A few more photos at the bottom**, same pattern as the auction photos (`UaAuctionPhotos`): thumbnail grid, "show more", zoom dialog.
+- **More photos under the hero**, same pattern as the auction hero (`UaAuctionHero`): one row of small thumbnails, a click swaps the hero (changed 2026-11-12 from a big thumbnail grid with "show more" and zoom, which looked wrong under the hero).
 - Re-scan Commons for **more candidate photos per model** and prefer the one whose real paint already matches the registry colour (then no filter at all).
 
 ## What the research showed (prototype, 2026-11-06)
@@ -75,7 +75,7 @@ Not CSS blend modes. Draw to a `<canvas>` (`object-fit: cover`, same box as the 
 - Text line (bottom or under the photo, ua / ru / en, no em dash): "Photo of another car with a colour filter: <colour>". The credit gets "(modified: colour)" because the photos are CC BY-SA.
 - Setting persists: `useUiStore` field + `localStorage` `carplates.wikiRecolor` (pattern of `blueprintEnabled`), default on.
 - `WikiHeroImage` needs the raw registry colour: `SearchRoute.tsx` and `OtherSourcesFound.tsx` pass it (`resolveVehicleColor`).
-- Strip under the hero: `WikiPhotoStrip.tsx`, modelled on `ua-auctions/UaAuctionPhotos.tsx` (`grid-cols-2 sm:grid-cols-4`, `aspect-[4/3]`, `PHOTO_PREVIEW_COUNT`, show more, `PhotoZoomDialog`), originals without filter, credit per photo.
+- Thumbnail row under the hero (inside `WikiHeroImage.tsx`, modelled on the `UaAuctionHero` thumbnails: `h-12 w-16`, `max-w-content`, scrolls sideways), originals without filter; a click swaps the hero (credit in the hero badge). `WikiPhotoStrip.tsx` (big grid + show more) was removed 2026-11-12.
 
 ## Steps
 
@@ -94,18 +94,18 @@ Phase A (steps 1-6) is the recolour on the existing hero photo. Phase B (7-8) ad
 7. **Candidate photos.** `registry.wiki_image_candidate` (brand, model, year span, url, size, title, author, licence, bucket, lab, status, quality), scan `scripts/src/wiki-candidates.ts`
    (Commons search up to 40 results, drop interior / engine / logo / wheel titles, width at least 1000, filter by the year in the title or the generation from `model_generations`, run step 2's analysis),
    API `GET /api/wiki/photos?brand&model&year&color` (best colour match first, then others), hero uses a colour-matched candidate when one exists (no filter then).
-8. **Bottom strip.** `WikiPhotoStrip.tsx` and zoom, per-photo credit, lazy below the hero (`LazySection` / `HELPER_GROUPS` checklist if it is a section), tests.
+8. **Thumbnail row.** Small thumbnails under the hero that swap it (first built as `WikiPhotoStrip.tsx`, a big grid; replaced 2026-11-12), tests.
 9. **Rollout.** Scan host: needs the SegFormer model download (`scripts/.data/wiki-paint/hf-cache`, about 15 MB q8), a few hundred MB RAM and `sharp`; run it where the other scrape jobs run, one process, `--rps 1`. Orphans: the job also deletes `wiki_image_paint` rows whose `image_url` is no longer in `wiki_image` (`status = 'ok'`). Before turning on for everyone: review a gallery sample of at least 100 (livery / race cars, touching neighbour cars, mottled paint) and tune gates, bumping `PAINT_ALGO`. Cloudflare Cache Rule gets `/api/wiki/recolor` and `starts_with /api/wiki/paint/` (manual, PLAN.md box). Scan order (done): `--order popular` = every model by registry count, most first. Job (done) in `scripts/src/jobs.ts` + `run-ingest.sh` + `infra/vps/ingest.cron` + a `/data-status` row; Commons rate limit (`--rps`);
    set `algo` so a better algorithm rescans; watch the share of `ok` vs `skip` and review a sample gallery before turning it on for everyone.
 
 **Step 7 built (2026-11-09, data + API).** Deviations from the plan text: candidates store **no mask** (bucket + Lab only; a promoted candidate gets one through the normal `wiki-paint` job), `photo_year` replaces the year span (the API maps the car year to a generation through `GenerationsService` at query time, one year of slack, undated photos stay but rank lower), and `wiki_image_candidate_scan` records searched models so a rerun resumes.
 Files: `packages/db/migrations/0104_wiki_image_candidate.sql`, `scripts/src/wiki-candidates{,-core}.ts`, `scripts/src/wiki-paint-image.ts` (SegFormer helpers shared with `wiki-paint.ts`), `packages/shared/src/wikiPhotos.ts`, `apps/api/src/wiki/wiki-photos.{controller,service,rank}.ts`.
-**Done 2026-11-09 (web, job, strip):** hero picks the first `colorMatch` photo (`use-wiki-photos.ts`, no filter, credit `wiki.imageCreditOther`, falls to the next match, then to the stored hero + filter on a load error; waits for the photo list so it never flashes a replaced photo), `WikiPhotoStrip.tsx` (originals, credit link per photo, zoom, show more; excludes the hero photo), job `wiki-candidates` (80 models per night, cron 01:45), `/data-status` row, deploy.md Cloudflare expression, controller test. Dry-run review and local real scan done 2026-11-09 (see PLAN.md).
+**Done 2026-11-09 (web, job, strip):** hero picks the first `colorMatch` photo (`use-wiki-photos.ts`, no filter, credit `wiki.imageCreditOther`, falls to the next match, then to the stored hero + filter on a load error; waits for the photo list so it never flashes a replaced photo), `WikiPhotoStrip.tsx` (originals, credit link per photo, zoom, show more; excludes the hero photo; replaced 2026-11-12 by the thumbnail row in `WikiHeroImage.tsx`), job `wiki-candidates` (80 models per night, cron 01:45), `/data-status` row, deploy.md Cloudflare expression, controller test. Dry-run review and local real scan done 2026-11-09 (see PLAN.md).
 
 **Next session, in order** (steps 7-8 code is done and committed, 2026-11-09: see "Done 2026-11-09" above).
 
 1. Review the ~100-model dry run: `pnpm ingest:wiki-candidates --limit 100 --dry-run` (writes nothing; per model: qualified / analysed / ok / colours). A log from the 2026-11-09 session may exist in its scratchpad (unfinished); otherwise rerun it (about 100 min at `--rps 1`, run it in the background). Look for models with 0 qualified, mostly `skip`, or one colour only; tune `wiki-candidates-core.ts` (title filters, `candidateQuality`) and bump `PAINT_ALGO` only if the paint gates change.
-2. Real scan of a small sample on the local DB (`--limit 10`, no `--dry-run`), then check in a browser on a real plate: matched hero (credit says another car, no pill, no refresh button), strip below (credit links, zoom, show more), and a model with no match keeps the stored hero + filter. Not yet browser-checked.
+2. Real scan of a small sample on the local DB (`--limit 10`, no `--dry-run`), then check in a browser on a real plate: matched hero (credit says another car, no pill, no refresh button), small thumbnail row below (click swaps the hero), and a model with no match keeps the stored hero + filter. Not yet browser-checked.
 3. Owner / deploy: migration 0104 on the VPS, `/api/wiki/photos` in the Cloudflare "Cache model lookups" rule (MISS then HIT), first nightly `wiki-candidates` run (cron 01:45) visible in `registry.job_runs` and `/data-status`.
 4. About page: `FEATURES` / `SOURCES` entry (ua / ru / en) once the first scan has run on the VPS; tick the PLAN.md boxes.
    Local DB: migration 0104 applied, only `kia ceed` scanned (8 rows); shared and db are rebuilt. Nothing is committed.
