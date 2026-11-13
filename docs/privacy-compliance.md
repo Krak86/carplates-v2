@@ -114,7 +114,7 @@ Historical migration is limited on free plans (a support ticket may help). Re-ch
 - [x] `docs/deploy.md` "Restore from R2": restore latest `full`, then latest `nightly`; run the deletion replay after
 - [x] Deletion ledger: on purge write the user UUIDs (no PII) outside the DB (R2 `deleted/<uuid>`, reuse the shares R2 client); a small
       `infra/vps/restore-replay-deletions.sh` deletes those ids from `app.users` after a restore; prune entries older than 14 days (the ledger lives in the shares bucket under `deleted/`; written by `AccountPurgeService`, ledger first, rows kept if the write fails)
-- [ ] After deploy: add the `LEDGER` rclone remote to `backup.env`, a 15-day lifecycle rule on `deleted/`, and scope the existing 8-day rule to `shares/`; the next `backup.sh full` then excludes `app`; delete the old full dumps that still contain it (R2 `full/`) once a new one exists
+- [ ] After deploy: run `deploy-api` (syncs the replay script, writes the LEDGER remote), a 15-day lifecycle rule on `deleted/`, and scope the existing 8-day rule to `shares/`; the next `backup.sh full` then excludes `app`; delete the old full dumps that still contain it (R2 `full/`) once a new one exists
 - [x] Test the ledger write; fix `PLAN.md` "Backup policy"
 
 ### Step 4. Legal pages rewrite (ua/ru/en)
