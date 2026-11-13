@@ -136,14 +136,14 @@ Files: `apps/web/src/routes/LegalRoute.tsx` (section ids, line 10), `en.json` / 
 - [x] Privacy controller section mentions custom site / web-app work (turnkey, via Contact); table of contents on /privacy and /terms (`LegalRoute.tsx`)
 - [x] (done 2026-11-13: new "Data and privacy" section on /install in ua/ru/en, link to /privacy was already in the footer; also fixed `install.cache.1` "not synced anywhere", wrong for signed-in users) `/install` (`routes/install/InstallRoute.tsx`): read what it claims; add a short paragraph that the installed app uses the same browser storage
       (local storage, IndexedDB, offline cache), uninstall / clearing site data removes it, account sync and deletion as on Privacy, link to /privacy
-- [ ] `/about`: short mention of the custom-app service (ua/ru/en); check PostHog / data-source wording against the new facts
+- [x] (done 2026-11-13: `about.custom` paragraph + /contact link in `AboutRoute.tsx`; PostHog "EU cloud, cookieless, nothing stored on your device", Sentry "query strings removed", OpenStreetMap / Google Maps "load only after a click"; `about.p2` already fixed in Step 4) `/about`: short mention of the custom-app service (ua/ru/en); check PostHog / data-source wording against the new facts
 - [ ] `/terms`: check "data" and "sharedPhotos" against the retention table (shares 7 days, 14-day grace); do not duplicate cookies / processors
 - [ ] Third-party note at the click: one shared `ThirdPartyNote` component (provider name, "loading sends your IP to X", link to
       `/privacy#privacy-thirdParty`; Disqus also says it sets cookies) on every gate placeholder / modal: `RegionMap` (OpenStreetMap), `DiscussRoute`
       (Disqus), `NearbyServices` + `LiveBackground` + `SharedLayoutPrompt` (Google Maps / YouTube), Sketchfab and carshow360 modals;
       ua/ru/en, no em dash; tests: note shown before the click
 - [ ] Still open from Step 4: the `google.com` cookie-tree check (user to send the cookie names), then complete the cookie table
-- [ ] Docs after a feature (`docs/checklists.md`): plan-done, PLAN, features-reference, About; version in `releases.ts` (currently v2.1207 = commit count + 1 while uncommitted, recount at commit)
+- [ ] Docs after a feature (`docs/checklists.md`): plan-done, PLAN, features-reference, About; version in `releases.ts` (currently v2.1209 = commit count + 1 while uncommitted, recount at commit)
 
 ### Step 5. Account-deletion test (needs the user: throwaway account + VPS DB access)
 
