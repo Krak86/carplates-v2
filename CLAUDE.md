@@ -36,7 +36,7 @@ Version pins (PLAN.md "Version pins"): never bump to `latest`.
 ## Workflow
 
 - **Open to-dos / "what is left after deploy":** `grep -n "\[ \]" PLAN.md` (`⏳` = blocked). A feature needing a VPS step or prod check adds its boxes under "After deploy".
-- After a big update suggest a commit message (subject + bullet per change). Never `git commit` / `git push` unless asked.
+- After a big update suggest a commit message (subject + bullet per change; **no `Co-Authored-By` / agent attribution line**). Never `git commit` / `git push` unless asked.
 - Seed CSVs mirror scraped tables: after changing one, re-run its `pnpm export:*:csv`.
 - `pnpm format` first (not `scripts/src/fixtures`). Tests: Vitest, colocated `*.test.ts(x)`.
 - Any web app change: also bump the day's `version` in `releases.ts` (`docs/checklists.md` "App version").
