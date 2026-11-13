@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { DiscussionEmbed } from 'disqus-react'
 import { useTranslation } from 'react-i18next'
 import { Link, useSearchParams } from 'react-router'
@@ -14,6 +14,7 @@ export default function DiscussRoute(): ReactNode {
   const { t } = useTranslation()
   const [searchParams] = useSearchParams()
   const { copied, copy } = useCopyFeedback()
+  const [loaded, setLoaded] = useState(false)
   // Fixed page, not per-vehicle — the page path alone is a stable Disqus thread identifier.
   const url = `${window.location.origin}/discuss`
   // `?about=` comes from ReportIssueLink; Disqus can't be prefilled, so offer the line to paste instead.
@@ -41,10 +42,24 @@ export default function DiscussRoute(): ReactNode {
 
       <Card>
         {DISQUS_SHORT_NAME ? (
-          <DiscussionEmbed
-            shortname={DISQUS_SHORT_NAME}
-            config={{ url, identifier: url, title: t('discuss.heading') }}
-          />
+          loaded ? (
+            <DiscussionEmbed
+              shortname={DISQUS_SHORT_NAME}
+              config={{ url, identifier: url, title: t('discuss.heading') }}
+            />
+          ) : (
+            // Disqus sets cookies and sees the IP: load it only after a click.
+            <div className="flex flex-col items-start gap-2">
+              <button
+                type="button"
+                onClick={() => setLoaded(true)}
+                className="rounded-lg bg-[var(--color-primary)]/10 px-3 py-1 text-[var(--color-primary)] hover:bg-[var(--color-primary)]/20"
+              >
+                {t('discuss.load')}
+              </button>
+              <p className="text-sm text-[var(--color-muted)]">{t('discuss.consent')}</p>
+            </div>
+          )
         ) : (
           <p className="text-sm text-[var(--color-muted)]">{t('discuss.unavailable')}</p>
         )}

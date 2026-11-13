@@ -91,9 +91,9 @@ Historical migration is limited on free plans (a support ticket may help). Re-ch
 
 ### Step 2. Click-to-load embeds
 
-- [ ] `RegionMap.tsx`: placeholder + "Show map (OpenStreetMap)" button before the iframe (local `useState`)
-- [ ] `DiscussRoute.tsx`: "Load comments (Disqus sets cookies)" button before the embed
-- [ ] ua/ru/en strings (no em dash in UI text); component tests: no iframe before the click
+- [x] `RegionMap.tsx`: placeholder + "Show map (OpenStreetMap)" button before the iframe (local `useState`)
+- [x] `DiscussRoute.tsx`: "Load comments (Disqus sets cookies)" button before the embed
+- [x] ua/ru/en strings (no em dash in UI text); component tests: no iframe before the click
 
 ### Step 3. Backups: cap account data at 14 days (`infra/vps/backup.sh`)
 
