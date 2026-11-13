@@ -88,6 +88,7 @@ Historical migration is limited on free plans (a support ticket may help). Re-ch
 - [x] After deploy: enable "Enable cookieless tracking" in the PostHog project (done 2026-11-13, EU project 348169; project-level autocapture / heatmaps / web vitals switched off)
 - [x] After deploy (done 2026-11-13; verified: events go to eu.i.posthog.com, no `ph_*` cookie or localStorage key): create the PostHog EU org, set `VITE_POSTHOG_HOST=https://eu.i.posthog.com` + new key (GitHub vars, `deploy-web.yml`),
       point the server HogQL key/host (`apps/api/src/usage/posthog.service.ts`, `env.ts`) at EU, update `features-reference.md:223`
+- [x] Hardening (2026-11-13): `capture_heatmaps: false` and `capture_performance: false` added (option names checked against posthog-js 1.438.21, pin unchanged).
 - Sentry stays (query strings stripped, no device ids); disclose it.
 
 ### Step 2. Click-to-load embeds

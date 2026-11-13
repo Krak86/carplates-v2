@@ -42,6 +42,9 @@ export async function initTelemetry(): Promise<void> {
       disable_session_recording: true,
       disable_surveys: true,
       capture_dead_clicks: false,
+      // Also off in the PostHog project; pinned here so a dashboard toggle cannot re-enable them unnoticed.
+      capture_heatmaps: false,
+      capture_performance: false,
       // SPA: fire $pageview on every router navigation (history API), not only the first load.
       capture_pageview: 'history_change'
     })

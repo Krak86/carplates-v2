@@ -38,6 +38,8 @@ describe('telemetry', () => {
       disable_session_recording: true,
       disable_surveys: true,
       capture_dead_clicks: false,
+      capture_heatmaps: false,
+      capture_performance: false,
       person_profiles: 'identified_only',
       capture_pageview: 'history_change'
     })
