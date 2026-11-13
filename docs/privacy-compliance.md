@@ -143,7 +143,7 @@ Files: `apps/web/src/routes/LegalRoute.tsx` (section ids, line 10), `en.json` / 
       (Disqus), `NearbyServices` + `LiveBackground` + `SharedLayoutPrompt` (Google Maps / YouTube), Sketchfab and carshow360 modals;
       ua/ru/en, no em dash; tests: note shown before the click
 - [ ] Still open from Step 4: the `google.com` cookie-tree check (user to send the cookie names), then complete the cookie table
-- [ ] Docs after a feature (`docs/checklists.md`): plan-done, PLAN, features-reference, About; version in `releases.ts` (currently v2.1206, recount at commit)
+- [ ] Docs after a feature (`docs/checklists.md`): plan-done, PLAN, features-reference, About; version in `releases.ts` (currently v2.1207 = commit count + 1 while uncommitted, recount at commit)
 
 ### Step 5. Account-deletion test (needs the user: throwaway account + VPS DB access)
 
