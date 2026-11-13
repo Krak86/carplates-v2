@@ -46,8 +46,21 @@ export default function LegalRoute({ doc }: Props): ReactNode {
         <p className="text-xs text-[var(--color-muted)]">{t('legal.updated')}</p>
         <p>{t(`legal.${doc}.intro`)}</p>
 
+        <nav aria-label={t('legal.toc')} className="rounded-lg bg-[var(--color-border)]/30 p-3">
+          <p className="text-xs font-medium text-[var(--color-muted)]">{t('legal.toc')}</p>
+          <ol className="mt-1 list-decimal space-y-0.5 pl-5">
+            {SECTIONS[doc].map(id => (
+              <li key={id}>
+                <a href={`#${doc}-${id}`} className="text-[var(--color-primary)] underline">
+                  {t(`legal.${doc}.${id}.h`)}
+                </a>
+              </li>
+            ))}
+          </ol>
+        </nav>
+
         {SECTIONS[doc].map(id => (
-          <section key={id}>
+          <section key={id} id={`${doc}-${id}`} className="scroll-mt-20">
             <h2 className="font-semibold">{t(`legal.${doc}.${id}.h`)}</h2>
             <p className="mt-2">
               {t(`legal.${doc}.${id}.p`)}

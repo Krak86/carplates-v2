@@ -131,6 +131,20 @@ Files: `apps/web/src/routes/LegalRoute.tsx` (section ids, line 10), `en.json` / 
 - [x] Fix `about.p2` ("and their owners") and `privacy.device.p`; update the `account.delete.*` dialog and `legal.updated`
 - [ ] Follow `docs/checklists.md` ("Docs after a feature", "App version")
 
+### Step 4b. Follow-ups from the Step 4 review (added 2026-11-13)
+
+- [x] Privacy controller section mentions custom site / web-app work (turnkey, via Contact); table of contents on /privacy and /terms (`LegalRoute.tsx`)
+- [ ] `/install` (`routes/install/InstallRoute.tsx`): read what it claims; add a short paragraph that the installed app uses the same browser storage
+      (local storage, IndexedDB, offline cache), uninstall / clearing site data removes it, account sync and deletion as on Privacy, link to /privacy
+- [ ] `/about`: short mention of the custom-app service (ua/ru/en); check PostHog / data-source wording against the new facts
+- [ ] `/terms`: check "data" and "sharedPhotos" against the retention table (shares 7 days, 14-day grace); do not duplicate cookies / processors
+- [ ] Third-party note at the click: one shared `ThirdPartyNote` component (provider name, "loading sends your IP to X", link to
+      `/privacy#privacy-thirdParty`; Disqus also says it sets cookies) on every gate placeholder / modal: `RegionMap` (OpenStreetMap), `DiscussRoute`
+      (Disqus), `NearbyServices` + `LiveBackground` + `SharedLayoutPrompt` (Google Maps / YouTube), Sketchfab and carshow360 modals;
+      ua/ru/en, no em dash; tests: note shown before the click
+- [ ] Still open from Step 4: the `google.com` cookie-tree check (user to send the cookie names), then complete the cookie table
+- [ ] Docs after a feature (`docs/checklists.md`): plan-done, PLAN, features-reference, About; version in `releases.ts` (currently v2.1206, recount at commit)
+
 ### Step 5. Account-deletion test (needs the user: throwaway account + VPS DB access)
 
 - [ ] Sign in with a throwaway email account; add a favorite, a setting, a shared photo; note `users.id`
