@@ -16,17 +16,18 @@ reform, bill 8153, is not enacted as of the last sources found; re-check on rada
 ePrivacy Art. 5(3) needs consent for storing or reading anything on the device unless it is strictly necessary. The 2025-26 Digital Omnibus
 talks kept this in Art. 5(3) (consent still required, a few narrow exemptions added); the final text was not confirmed, so re-check.
 
-| Item                                                                                                      | Where                                 | Needs consent?                                   |
-| --------------------------------------------------------------------------------------------------------- | ------------------------------------- | ------------------------------------------------ |
-| `carsua_sid` session cookie (30 days sliding, HttpOnly)                                                   | `apps/api/src/auth/session-cookie.ts` | No, strictly necessary                           |
-| `carsua_did` device cookie (400 days, set at sign-in, outlives logout)                                    | same                                  | No (security / new-device mail), but disclose it |
-| `carplates.*` localStorage, IndexedDB (history, favorites, compare, offline cache), service worker caches | `apps/web/src/store`, `lib/*-db.ts`   | No, user-requested features                      |
-| **PostHog** `ph_*` cookie + localStorage, autocapture and replay on by default                            | `apps/web/src/lib/telemetry.ts`       | **Yes, this is the only blocker**                |
-| Disqus (sets cookies)                                                                                     | `routes/DiscussRoute.tsx`             | Gate behind a click                              |
-| OpenStreetMap iframe, auto-loads                                                                          | `components/RegionMap.tsx`            | Leaks IP to a third party; gate behind a click   |
-| YouTube (nocookie), Google Maps, Sketchfab, carshow360                                                    | modals                                | Already click-to-open                            |
-| Turnstile, Google / Telegram sign-in                                                                      | loaded when the user acts             | Necessary                                        |
-| Cloudflare `__cf_bm` (Bot Fight Mode)                                                                     | edge                                  | Security, exempt                                 |
+| Item                                                                                                      | Where                                      | Needs consent?                                              |
+| --------------------------------------------------------------------------------------------------------- | ------------------------------------------ | ----------------------------------------------------------- |
+| `carsua_sid` session cookie (30 days sliding, HttpOnly)                                                   | `apps/api/src/auth/session-cookie.ts`      | No, strictly necessary                                      |
+| `carsua_did` device cookie (400 days, set at sign-in, outlives logout)                                    | same                                       | No (security / new-device mail), but disclose it            |
+| `carplates.*` localStorage, IndexedDB (history, favorites, compare, offline cache), service worker caches | `apps/web/src/store`, `lib/*-db.ts`        | No, user-requested features                                 |
+| **PostHog** `ph_*` cookie + localStorage, autocapture and replay on by default                            | `apps/web/src/lib/telemetry.ts`            | **Yes, this is the only blocker**                           |
+| Disqus (sets cookies)                                                                                     | `routes/DiscussRoute.tsx`                  | Gate behind a click                                         |
+| OpenStreetMap iframe, auto-loads                                                                          | `components/RegionMap.tsx`                 | Leaks IP to a third party; gate behind a click              |
+| YouTube (nocookie), Google Maps, Sketchfab, carshow360                                                    | modals                                     | Already click-to-open                                       |
+| Google Maps "Nearby services" iframe, live-background map / stream iframes                                | `NearbyServices.tsx`, `LiveBackground.tsx` | Click / user setting, **except shared links** (see Step 2b) |
+| Turnstile, Google / Telegram sign-in                                                                      | loaded when the user acts                  | Necessary                                                   |
+| Cloudflare `__cf_bm` (Bot Fight Mode)                                                                     | edge                                       | Security, exempt                                            |
 
 No IPs are stored in the DB (`usage_events` has no IP / user id). `app.sessions.user_agent` (300 chars) and `known_devices.device_hash` are stored.
 
@@ -95,6 +96,19 @@ Historical migration is limited on free plans (a support ticket may help). Re-ch
 - [x] `DiscussRoute.tsx`: "Load comments (Disqus sets cookies)" button before the embed
 - [x] ua/ru/en strings (no em dash in UI text); component tests: no iframe before the click
 
+### Step 2b. Embeds that can load from a shared link without a click (found while reviewing Step 2; not yet changed)
+
+- `NearbyServices.tsx:30-31`: `?section=nearby` opens the section on load (`isSharedNearby`), so the Google Maps iframe (`nearbyEmbedUrl`,
+  `lib/maps.ts`) loads and the visitor's IP goes to Google without a click. Normal use is click-to-open.
+- `LiveBackground.tsx`: map (`maps.google.com/...&output=embed`) and stream (YouTube etc.) iframes load from the saved layout; a shared layout
+  URL (`useLayoutUrl.ts`, `ShareLayoutButton.tsx`) may set the mode without the visitor choosing it. **Verify first** whether a URL alone can
+  turn it on or only the user's own saved setting can.
+- [ ] Decide with the user: require a click for shared links (placeholder + "Show map (Google Maps)" button, same pattern as `RegionMap.tsx`),
+      or accept and disclose Google as a processor
+- [ ] If gating: `NearbyServices.tsx` (shared link shows the placeholder, the header click or the button loads the iframe), `LiveBackground.tsx`
+      (shared layout asks before loading a third-party iframe), ua/ru/en strings, tests: no iframe before the click
+- [ ] Either way: list Google Maps and YouTube in the Step 4 processors / device-storage sections
+
 ### Step 3. Backups: cap account data at 14 days (`infra/vps/backup.sh`)
 
 - [ ] `full` mode: `--exclude-schema=app` (full has no `-t`, so the exclude works); update the header comment
@@ -111,6 +125,8 @@ Files: `apps/web/src/routes/LegalRoute.tsx` (section ids, line 10), `en.json` / 
       via `/contact`), device storage + cookie table, account data per provider, retention table, processors and transfers
       (Contabo DE, Cloudflare, Resend, PostHog EU, Sentry, Google, Telegram, Disqus), rights (portability "on request" since export is not built;
       authority: Ukrainian Ombudsman or the EU DPA)
+- [ ] Processors list must include Google Maps (nearby services, live background) and YouTube (streams), and say embeds load only on a click
+      (or as decided in Step 2b)
 - [ ] Fix `about.p2` ("and their owners") and `privacy.device.p`; update the `account.delete.*` dialog and `legal.updated`
 - [ ] Follow `docs/checklists.md` ("Docs after a feature", "App version")
 
