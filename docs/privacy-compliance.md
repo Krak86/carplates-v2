@@ -16,17 +16,17 @@ reform, bill 8153, is not enacted as of the last sources found; re-check on rada
 ePrivacy Art. 5(3) needs consent for storing or reading anything on the device unless it is strictly necessary. The 2025-26 Digital Omnibus
 talks kept this in Art. 5(3) (consent still required, a few narrow exemptions added); the final text was not confirmed, so re-check.
 
-| Item | Where | Needs consent? |
-|---|---|---|
-| `carsua_sid` session cookie (30 days sliding, HttpOnly) | `apps/api/src/auth/session-cookie.ts` | No, strictly necessary |
-| `carsua_did` device cookie (400 days, set at sign-in, outlives logout) | same | No (security / new-device mail), but disclose it |
-| `carplates.*` localStorage, IndexedDB (history, favorites, compare, offline cache), service worker caches | `apps/web/src/store`, `lib/*-db.ts` | No, user-requested features |
-| **PostHog** `ph_*` cookie + localStorage, autocapture and replay on by default | `apps/web/src/lib/telemetry.ts` | **Yes, this is the only blocker** |
-| Disqus (sets cookies) | `routes/DiscussRoute.tsx` | Gate behind a click |
-| OpenStreetMap iframe, auto-loads | `components/RegionMap.tsx` | Leaks IP to a third party; gate behind a click |
-| YouTube (nocookie), Google Maps, Sketchfab, carshow360 | modals | Already click-to-open |
-| Turnstile, Google / Telegram sign-in | loaded when the user acts | Necessary |
-| Cloudflare `__cf_bm` (Bot Fight Mode) | edge | Security, exempt |
+| Item                                                                                                      | Where                                 | Needs consent?                                   |
+| --------------------------------------------------------------------------------------------------------- | ------------------------------------- | ------------------------------------------------ |
+| `carsua_sid` session cookie (30 days sliding, HttpOnly)                                                   | `apps/api/src/auth/session-cookie.ts` | No, strictly necessary                           |
+| `carsua_did` device cookie (400 days, set at sign-in, outlives logout)                                    | same                                  | No (security / new-device mail), but disclose it |
+| `carplates.*` localStorage, IndexedDB (history, favorites, compare, offline cache), service worker caches | `apps/web/src/store`, `lib/*-db.ts`   | No, user-requested features                      |
+| **PostHog** `ph_*` cookie + localStorage, autocapture and replay on by default                            | `apps/web/src/lib/telemetry.ts`       | **Yes, this is the only blocker**                |
+| Disqus (sets cookies)                                                                                     | `routes/DiscussRoute.tsx`             | Gate behind a click                              |
+| OpenStreetMap iframe, auto-loads                                                                          | `components/RegionMap.tsx`            | Leaks IP to a third party; gate behind a click   |
+| YouTube (nocookie), Google Maps, Sketchfab, carshow360                                                    | modals                                | Already click-to-open                            |
+| Turnstile, Google / Telegram sign-in                                                                      | loaded when the user acts             | Necessary                                        |
+| Cloudflare `__cf_bm` (Bot Fight Mode)                                                                     | edge                                  | Security, exempt                                 |
 
 No IPs are stored in the DB (`usage_events` has no IP / user id). `app.sessions.user_agent` (300 chars) and `known_devices.device_hash` are stored.
 
@@ -67,61 +67,69 @@ Historical migration is limited on free plans (a support ticket may help). Re-ch
 
 ## Retention table (to publish)
 
-| Data | Kept |
-|---|---|
-| Sessions | 30 days sliding, deleted on logout / account delete |
-| Email sign-in codes | 1 day after expiry |
-| Sync tombstones | 30 days |
-| Shared photos | 7 days (original upload within 1 hour) |
-| Deleted account | 14-day grace, then hard delete (cascade) |
-| Backups | up to 14 more days (after Step 3) |
-| Processors (PostHog, Sentry, Resend) | their own policies; link them |
+| Data                                 | Kept                                                |
+| ------------------------------------ | --------------------------------------------------- |
+| Sessions                             | 30 days sliding, deleted on logout / account delete |
+| Email sign-in codes                  | 1 day after expiry                                  |
+| Sync tombstones                      | 30 days                                             |
+| Shared photos                        | 7 days (original upload within 1 hour)              |
+| Deleted account                      | 14-day grace, then hard delete (cascade)            |
+| Backups                              | up to 14 more days (after Step 3)                   |
+| Processors (PostHog, Sentry, Resend) | their own policies; link them                       |
 
 ## Steps (each separate and committable; stop for review after each)
 
 ### Step 1. Cookieless PostHog, no banner (`apps/web/src/lib/telemetry.ts`)
-- [ ] `posthog.init`: `cookieless_mode: 'always'`, `persistence: 'memory'`, `autocapture: false`, `disable_session_recording: true`,
-  `disable_surveys: true`, `capture_dead_clicks: false` (check names against the installed version; ask before bumping the pin)
-- [ ] Unit test the init options (mock `posthog-js`)
+
+- [x] `posthog.init`: `cookieless_mode: 'always'`, `persistence: 'memory'`, `autocapture: false`, `disable_session_recording: true`,
+      `disable_surveys: true`, `capture_dead_clicks: false` (check names against the installed version; ask before bumping the pin)
+- [x] Unit test the init options (mock `posthog-js`): `apps/web/src/lib/telemetry.test.ts`
 - [ ] After deploy: enable "Enable cookieless tracking" in the PostHog project
 - [ ] After deploy: create the PostHog EU org, set `VITE_POSTHOG_HOST=https://eu.i.posthog.com` + new key (GitHub vars, `deploy-web.yml`),
-  point the server HogQL key/host (`apps/api/src/usage/posthog.service.ts`, `env.ts`) at EU, update `features-reference.md:223`
+      point the server HogQL key/host (`apps/api/src/usage/posthog.service.ts`, `env.ts`) at EU, update `features-reference.md:223`
 - Sentry stays (query strings stripped, no device ids); disclose it.
 
 ### Step 2. Click-to-load embeds
+
 - [ ] `RegionMap.tsx`: placeholder + "Show map (OpenStreetMap)" button before the iframe (local `useState`)
 - [ ] `DiscussRoute.tsx`: "Load comments (Disqus sets cookies)" button before the embed
 - [ ] ua/ru/en strings (no em dash in UI text); component tests: no iframe before the click
 
 ### Step 3. Backups: cap account data at 14 days (`infra/vps/backup.sh`)
+
 - [ ] `full` mode: `--exclude-schema=app` (full has no `-t`, so the exclude works); update the header comment
 - [ ] `docs/deploy.md` "Restore from R2": restore latest `full`, then latest `nightly`; run the deletion replay after
 - [ ] Deletion ledger: on purge write the user UUIDs (no PII) outside the DB (R2 `deleted/<uuid>`, reuse the shares R2 client); a small
-  `infra/vps/restore-replay-deletions.sh` deletes those ids from `app.users` after a restore; prune entries older than 14 days
+      `infra/vps/restore-replay-deletions.sh` deletes those ids from `app.users` after a restore; prune entries older than 14 days
 - [ ] Test the ledger write; fix `PLAN.md` "Backup policy"
 
 ### Step 4. Legal pages rewrite (ua/ru/en)
+
 Files: `apps/web/src/routes/LegalRoute.tsx` (section ids, line 10), `en.json` / `ua.json` / `ru.json`, `AboutRoute.tsx`.
+
 - [ ] New Privacy sections: controller (**user decides what identity to show**), registry / scraped data (sources, legal basis, objection
-  via `/contact`), device storage + cookie table, account data per provider, retention table, processors and transfers
-  (Contabo DE, Cloudflare, Resend, PostHog EU, Sentry, Google, Telegram, Disqus), rights (portability "on request" since export is not built;
-  authority: Ukrainian Ombudsman or the EU DPA)
+      via `/contact`), device storage + cookie table, account data per provider, retention table, processors and transfers
+      (Contabo DE, Cloudflare, Resend, PostHog EU, Sentry, Google, Telegram, Disqus), rights (portability "on request" since export is not built;
+      authority: Ukrainian Ombudsman or the EU DPA)
 - [ ] Fix `about.p2` ("and their owners") and `privacy.device.p`; update the `account.delete.*` dialog and `legal.updated`
 - [ ] Follow `docs/checklists.md` ("Docs after a feature", "App version")
 
 ### Step 5. Account-deletion test (needs the user: throwaway account + VPS DB access)
+
 - [ ] Sign in with a throwaway email account; add a favorite, a setting, a shared photo; note `users.id`
 - [ ] Delete at `/profile`: cookie cleared, `app.sessions` empty, shared photo row + R2 object gone, email received
 - [ ] Sign in again: `deletion_scheduled_at` cleared (restored)
 - [ ] Delete again, set `deletion_scheduled_at = now() - interval '15 days'` for that id only, restart the API or wait 6 h: counts across every
-  `app.*` table are 0 and the ledger object exists
+      `app.*` table are 0 and the ledger object exists
 - [ ] Record results here; close the gate in `docs/security-checklist.md:158` and the open item at `docs/deploy.md:322`
 
 ### Step 6. Docs / release
+
 - [ ] `releases.ts` version + entry; `plan-done.md`; `PLAN.md` / `docs/leftovers.md:27` ticked; `features-reference.md` (Accounts, telemetry);
-  `legal-and-monetization.md` "Cookie / consent" updated to the final state
+      `legal-and-monetization.md` "Cookie / consent" updated to the final state
 
 ## Sources
+
 - [Digital Omnibus / ePrivacy status](https://www.heuking.de/en/news-events/newsletter-articles/detail/cookie-consent-under-the-digital-omnibus-planned-changes-and-technical-implementation.html)
 - [Erasure vs backups (summary)](https://sota.io/blog/gdpr-right-to-erasure-backup-retention-logs-developer-compliance-2026) - secondary source; check ICO / CNIL pages directly
 - [PostHog cookieless tracking](https://posthog.com/docs/product-analytics/cookieless-tracking)
