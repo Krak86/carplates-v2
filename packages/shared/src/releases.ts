@@ -18,8 +18,14 @@ const item = (group: ReleaseGroup, ua: string, ru: string, en: string): ReleaseI
 export const RELEASES: readonly ReleaseDay[] = [
   {
     date: '2026-11-13',
-    version: 'v2.1219',
+    version: 'v2.1222',
     items: [
+      item(
+        'improved',
+        'Сторінка «Стан даних»: історія оновлень тепер показує всі джерела з датою останнього оновлення, а не лише останні запуски.',
+        'Страница «Состояние данных»: история обновлений теперь показывает все источники с датой последнего обновления, а не только последние запуски.',
+        'Data status page: the update history now lists every source with its last update date, not just the latest runs.'
+      ),
       item(
         'improved',
         'Аналітика без cookie: статистика використання йде в хмару PostHog ЄС, на вашому пристрої нічого не зберігається, тому банер cookie не потрібен.',

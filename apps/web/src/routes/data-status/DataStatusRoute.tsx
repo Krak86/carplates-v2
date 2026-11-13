@@ -65,7 +65,7 @@ export default function DataStatusRoute(): ReactNode {
             </ul>
           </Card>
 
-          <RunHistory runs={status.data?.history ?? []} />
+          <RunHistory jobs={jobs} />
 
           <div className="grid gap-4 lg:grid-cols-2">
             {groupByCadence(DATASETS).map(group => (

@@ -203,9 +203,7 @@ export {
 } from './roadSafety.js'
 export {
   dataStatusResponseSchema,
-  jobRunSchema,
   jobStatusSchema,
-  type JobRun,
   registrySpanSchema,
   type DataStatusResponse,
   type JobStatus,
