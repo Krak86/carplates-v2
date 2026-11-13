@@ -154,6 +154,71 @@ Files: `apps/web/src/routes/LegalRoute.tsx` (section ids, line 10), `en.json` / 
       `app.*` table are 0 and the ledger object exists
 - [ ] Record results here; close the gate in `docs/security-checklist.md:158` and the open item at `docs/deploy.md:322`
 
+#### Step 5 runbook (prepared 2026-11-13; the user runs it on the VPS, nothing here was executed by the agent)
+
+Shell helper on the VPS (production DB: only `SELECT`, plus the one `UPDATE` on the throwaway id, never anything unscoped):
+
+```bash
+cd /opt/carsua/compose && export COMPOSE_FILE=docker-compose.prod.yml
+pg() { docker compose exec -T postgres sh -c 'psql -U "$POSTGRES_USER" "$POSTGRES_DB"'; }
+pg <<'SQL'
+SELECT id, email, deletion_scheduled_at FROM app.users WHERE email = 'THROWAWAY@example.com';
+SQL
+```
+
+Count query (paste the id and email; every row is 0 after the final purge; `email_challenges` is by `user_id` OR the address):
+
+```bash
+pg <<'SQL'
+\set uid 'PASTE-UUID'
+\set mail 'THROWAWAY@example.com'
+SELECT 'users' t, count(*) FROM app.users WHERE id = :'uid'
+UNION ALL SELECT 'auth_identities', count(*) FROM app.auth_identities WHERE user_id = :'uid'
+UNION ALL SELECT 'sessions', count(*) FROM app.sessions WHERE user_id = :'uid'
+UNION ALL SELECT 'user_features', count(*) FROM app.user_features WHERE user_id = :'uid'
+UNION ALL SELECT 'user_saved_entries', count(*) FROM app.user_saved_entries WHERE user_id = :'uid'
+UNION ALL SELECT 'user_settings', count(*) FROM app.user_settings WHERE user_id = :'uid'
+UNION ALL SELECT 'known_devices', count(*) FROM app.known_devices WHERE user_id = :'uid'
+UNION ALL SELECT 'digest_sends', count(*) FROM app.digest_sends WHERE user_id = :'uid'
+UNION ALL SELECT 'shared_photos', count(*) FROM app.shared_photos WHERE user_id = :'uid'
+UNION ALL SELECT 'email_challenges', count(*) FROM app.email_challenges WHERE user_id = :'uid' OR email = :'mail';
+SQL
+```
+
+1. **Prepare.** Private window, sign in at carsua.app with the throwaway address (email code). Save a favorite (plate page), change a setting
+   (`/settings`), share a photo (Search by image, then the share link). Run the id query, then the count query: users 1, identities 1, sessions
+   1+, saved entries 1+, settings 1, shared_photos 1 (note its `object_key`: `psql ... -c "SELECT object_key FROM app.shared_photos WHERE user_id = '<id>'"`).
+   Photo object: `set -a; . /opt/carsua/env/backup.env; set +a; rclone lsf LEDGER:carsua-shares/shares/` shows `<id>.jpg` (and `.orig` within 1 h).
+2. **Delete.** `/profile`, Delete account (asks for a fresh email code, sudo mode). Expect: signed out, `carsua_sid` gone in DevTools, email
+   "deletion scheduled" received. Counts: users still 1 with `deletion_scheduled_at` set, sessions 0, shared_photos 0, and the `shares/<id>.jpg`
+   object gone from the `rclone lsf` above. Opening the old share link gives 404.
+3. **Restore.** Sign in again with the same address: `deletion_scheduled_at` is NULL (re-run the id query). Note: this keeps the same `users.id`.
+4. **Purge.** Delete again, then:
+   `pg <<'SQL'` / `UPDATE app.users SET deletion_scheduled_at = now() - interval '15 days' WHERE id = 'PASTE-UUID';` / `SQL`, then restart the
+   live api container (purge also runs 6-hourly, and once at boot). Check `docker compose logs <live api service> --since 5m | grep Purged`
+   ("Purged 1 account(s)"), the count query (all 0), and the ledger: `rclone lsf LEDGER:carsua-shares/deleted/` lists `<id>`.
+   (`email_challenges` rows keyed on the address are removed by the API a day after they expire, not by the purge: re-check the next day.)
+5. **Replay on a scratch DB** (never production). `restore-replay-deletions.sh` now takes `ENV_FILE` and `PG_CMD` overrides (defaults unchanged); the
+   VPS copy updates on the next `deploy-api` (or `scp` the file to `/tmp` and run it from there). On the VPS:
+
+```bash
+docker run -d --name pgscratch -e POSTGRES_USER=scratch -e POSTGRES_PASSWORD=x -e POSTGRES_DB=scratch postgres:18.6 && sleep 8
+docker exec -i pgscratch psql -U scratch scratch <<'SQL'
+CREATE SCHEMA app;
+CREATE TABLE app.users (id uuid PRIMARY KEY);
+CREATE TABLE app.user_settings (user_id uuid PRIMARY KEY REFERENCES app.users ON DELETE CASCADE);
+INSERT INTO app.users VALUES ('PASTE-UUID'), ('00000000-0000-4000-8000-000000000001');
+INSERT INTO app.user_settings SELECT id FROM app.users;
+SQL
+PG_CMD="docker exec -i pgscratch" bash /opt/carsua/compose/restore-replay-deletions.sh
+docker exec -i pgscratch psql -U scratch scratch -c "SELECT id FROM app.users" -c "SELECT count(*) FROM app.user_settings"
+docker rm -f pgscratch
+```
+
+Expect "replayed 1 deletion(s)" (more if other ledger entries exist), only the `...0001` control row left, `user_settings` count 1 (cascade).
+The script's last line prunes real ledger entries older than 14 days: intended, and the new entry is younger. Optional, truer: `pg_restore`
+the newest nightly into the scratch container first (docs/deploy.md "Restore from R2" A, with `-d scratch`), then run the script.
+
 ### Step 6. Docs / release
 
 - [ ] `releases.ts` version + entry; `plan-done.md`; `PLAN.md` / `docs/leftovers.md:27` ticked; `features-reference.md` (Accounts, telemetry);

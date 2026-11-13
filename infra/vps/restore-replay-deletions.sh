@@ -7,11 +7,13 @@ set -euo pipefail
 
 set -a
 # shellcheck disable=SC1091
-. /opt/carsua/env/backup.env
+. "${ENV_FILE:-/opt/carsua/env/backup.env}"
 set +a
 
 BUCKET="${LEDGER_BUCKET:-carsua-shares}"
-PG="docker compose -f /opt/carsua/compose/docker-compose.prod.yml exec -T postgres"
+# PG_CMD overrides the target database for a dry run on a scratch container, e.g. PG_CMD="docker exec -i pgscratch"
+# (the container needs POSTGRES_USER / POSTGRES_DB set). Unset = the production postgres service.
+PG="${PG_CMD:-docker compose -f /opt/carsua/compose/docker-compose.prod.yml exec -T postgres}"
 UUID_RE='^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
 
 ids=$(rclone lsf "LEDGER:$BUCKET/deleted/" | grep -E "$UUID_RE" || true)
