@@ -1132,6 +1132,8 @@ Code-level audit findings and the full pre-deploy gate: [docs/security-checklist
 
 ### Backup policy (Phase 4)
 
+**Current state (2026-11):** nightly `pg_dump` of `app.*` + the irreplaceable registry tables (14 days, R2), `full` dumps after each ingest **without** `app.*` (keeps 2), `archive` for the source ZIPs; see docs/deploy.md "Backups" and "Restore from R2". Purged accounts are re-deleted after a restore via the R2 deletion ledger. The original Phase 4 text below is kept for history.
+
 The DB is fully derived and read-only — every row rebuildable by re-running
 `ingest.ts`. Recovery is _re-ingest_, not _restore_.
 

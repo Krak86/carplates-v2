@@ -183,11 +183,11 @@ variables: `BACKUP_BUCKET` … `VPS_USER`); `VITE_API_BASE` and `VITE_GOOGLE_MAP
 
 ## Backups (free, only what cannot be rebuilt)
 
-| Data                                                                                                                                                                    | Backup                                                                                                                                           |
-| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `app.*` (users, sessions, settings…) + `registry.wanted_vehicles`, `wanted_plates`, `news_items`, `social_posts`, `owner_posts`, `missed_lookups`, `ingested_resources` | `backup.sh nightly` at 03:30 → R2 `nightly/`, 14 days kept (KB–MB)                                                                               |
-| `registry.registrations` + matview                                                                                                                                      | source ZIPs in `/opt/carsua/archive` → `backup.sh archive` (~1.2 GB); one `backup.sh full` after each monthly ingest (keeps 2; size = your dump) |
-| Scraped tables (wiki, RDW, MOT, safety, VehiclesDB…)                                                                                                                    | none — rebuilt from the committed seed CSVs                                                                                                      |
+| Data                                                                                                                                                                    | Backup                                                                                                                                                                                                                                  |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `app.*` (users, sessions, settings…) + `registry.wanted_vehicles`, `wanted_plates`, `news_items`, `social_posts`, `owner_posts`, `missed_lookups`, `ingested_resources` | `backup.sh nightly` at 03:30 → R2 `nightly/`, 14 days kept (KB–MB)                                                                                                                                                                      |
+| `registry.registrations` + matview                                                                                                                                      | source ZIPs in `/opt/carsua/archive` → `backup.sh archive` (~1.2 GB); one `backup.sh full` after each monthly ingest (keeps 2; size = your dump; **excludes the `app` schema**, so account data lives at most 14 days in the nightlies) |
+| Scraped tables (wiki, RDW, MOT, safety, VehiclesDB…)                                                                                                                    | none — rebuilt from the committed seed CSVs                                                                                                                                                                                             |
 
 ## Shared photo links (bucket `carsua-shares`)
 
@@ -235,8 +235,11 @@ docker compose exec -T postgres pg_restore --clean --if-exists --no-owner -U car
    `docker compose cp` it into the container and run, detached:
    `nohup docker compose exec -T postgres pg_restore -j 4 --no-owner -U carplates -d carplates --verbose /tmp/full.dump > /opt/carsua/backups/restore.log 2>&1 &`.
    Over an hour (indexes + `current_registration` refresh ~45 min). Done when no `pg_restore` and no `REFRESH MATERIALIZED VIEW` is active.
-2. `VACUUM (ANALYZE)`, then apply the newest nightly as in A.
+2. `VACUUM (ANALYZE)`, then apply the newest nightly as in A (the full dump has no `app.*`; `pg_restore` of the nightly creates those tables).
+   **Then run the deletion replay (below) before the api goes live.**
 3. `deploy-api` normally, then `deploy-web`; check `/healthz`, a plate, a login.
+
+**Deletion replay (after A or B, api still down):** accounts purged after the dump was taken come back with it. `/opt/carsua/compose/../restore-replay-deletions.sh` is `infra/vps/restore-replay-deletions.sh`: it deletes every id listed as `deleted/<uuid>` in the `carsua-shares` bucket from `app.users` (cascade) and prunes ledger entries older than 14 days. The API writes an entry on every purge (`AccountPurgeService`; no PII, only the UUID). One-time setup: add an R2 token (Object Read & Write, `carsua-shares` only; the shares one can be reused) to `backup.env` as `RCLONE_CONFIG_LEDGER_*` (see the script header) and add a second bucket lifecycle rule: delete `deleted/` objects after 15 days. **Keep the existing 8-day rule scoped to the `shares/` prefix**, or it would also delete ledger entries.
 
 Registry data lost with the full dumps: re-ingest from `archive/` ZIPs (`backup.sh archive`) or data.gov.ua (`ingest:*`).
 

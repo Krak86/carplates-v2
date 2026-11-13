@@ -110,11 +110,12 @@ Historical migration is limited on free plans (a support ticket may help). Re-ch
 
 ### Step 3. Backups: cap account data at 14 days (`infra/vps/backup.sh`)
 
-- [ ] `full` mode: `--exclude-schema=app` (full has no `-t`, so the exclude works); update the header comment
-- [ ] `docs/deploy.md` "Restore from R2": restore latest `full`, then latest `nightly`; run the deletion replay after
-- [ ] Deletion ledger: on purge write the user UUIDs (no PII) outside the DB (R2 `deleted/<uuid>`, reuse the shares R2 client); a small
-      `infra/vps/restore-replay-deletions.sh` deletes those ids from `app.users` after a restore; prune entries older than 14 days
-- [ ] Test the ledger write; fix `PLAN.md` "Backup policy"
+- [x] `full` mode: `--exclude-schema=app` (full has no `-t`, so the exclude works); update the header comment
+- [x] `docs/deploy.md` "Restore from R2": restore latest `full`, then latest `nightly`; run the deletion replay after
+- [x] Deletion ledger: on purge write the user UUIDs (no PII) outside the DB (R2 `deleted/<uuid>`, reuse the shares R2 client); a small
+      `infra/vps/restore-replay-deletions.sh` deletes those ids from `app.users` after a restore; prune entries older than 14 days (the ledger lives in the shares bucket under `deleted/`; written by `AccountPurgeService`, ledger first, rows kept if the write fails)
+- [ ] After deploy: add the `LEDGER` rclone remote to `backup.env`, a 15-day lifecycle rule on `deleted/`, and scope the existing 8-day rule to `shares/`; the next `backup.sh full` then excludes `app`; delete the old full dumps that still contain it (R2 `full/`) once a new one exists
+- [x] Test the ledger write; fix `PLAN.md` "Backup policy"
 
 ### Step 4. Legal pages rewrite (ua/ru/en)
 
