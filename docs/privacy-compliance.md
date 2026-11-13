@@ -85,8 +85,8 @@ Historical migration is limited on free plans (a support ticket may help). Re-ch
 - [x] `posthog.init`: `cookieless_mode: 'always'`, `persistence: 'memory'`, `autocapture: false`, `disable_session_recording: true`,
       `disable_surveys: true`, `capture_dead_clicks: false` (check names against the installed version; ask before bumping the pin)
 - [x] Unit test the init options (mock `posthog-js`): `apps/web/src/lib/telemetry.test.ts`
-- [ ] After deploy: enable "Enable cookieless tracking" in the PostHog project
-- [ ] After deploy: create the PostHog EU org, set `VITE_POSTHOG_HOST=https://eu.i.posthog.com` + new key (GitHub vars, `deploy-web.yml`),
+- [x] After deploy: enable "Enable cookieless tracking" in the PostHog project (done 2026-11-13, EU project 348169; project-level autocapture / heatmaps / web vitals switched off)
+- [x] After deploy (done 2026-11-13; verified: events go to eu.i.posthog.com, no `ph_*` cookie or localStorage key): create the PostHog EU org, set `VITE_POSTHOG_HOST=https://eu.i.posthog.com` + new key (GitHub vars, `deploy-web.yml`),
       point the server HogQL key/host (`apps/api/src/usage/posthog.service.ts`, `env.ts`) at EU, update `features-reference.md:223`
 - Sentry stays (query strings stripped, no device ids); disclose it.
 
@@ -127,6 +127,7 @@ Files: `apps/web/src/routes/LegalRoute.tsx` (section ids, line 10), `en.json` / 
       authority: Ukrainian Ombudsman or the EU DPA)
 - [ ] Processors list must include Google Maps (nearby services, live background) and YouTube (streams), and say embeds load only on a click
       (or as decided in Step 2b)
+- [ ] Cookie table: also list what a DevTools check on carsua.app showed (2026-11-13): `cf_clearance` (Cloudflare challenge, security), `g_state` (Google sign-in), and third-party cookies from Google (`NID`, `__Secure-STRP`, `SEARCH_SAMESITE`) and Telegram (`stel_ssid` on oauth.telegram.org / t.me). **Verify first** in a fresh private window, signed out, that Google / Telegram sign-in scripts load only when the sign-in dialog is opened and not on every page load; if they load on page load, gate them behind the click
 - [ ] Fix `about.p2` ("and their owners") and `privacy.device.p`; update the `account.delete.*` dialog and `legal.updated`
 - [ ] Follow `docs/checklists.md` ("Docs after a feature", "App version")
 
