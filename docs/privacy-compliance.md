@@ -138,12 +138,12 @@ Files: `apps/web/src/routes/LegalRoute.tsx` (section ids, line 10), `en.json` / 
       (local storage, IndexedDB, offline cache), uninstall / clearing site data removes it, account sync and deletion as on Privacy, link to /privacy
 - [x] (done 2026-11-13: `about.custom` paragraph + /contact link in `AboutRoute.tsx`; PostHog "EU cloud, cookieless, nothing stored on your device", Sentry "query strings removed", OpenStreetMap / Google Maps "load only after a click"; `about.p2` already fixed in Step 4) `/about`: short mention of the custom-app service (ua/ru/en); check PostHog / data-source wording against the new facts
 - [x] (done 2026-11-13: "data" needed no change; "sharedPhotos" now says the photo is deleted after 7 days and can be deleted earlier in the profile) `/terms`: check "data" and "sharedPhotos" against the retention table (shares 7 days, 14-day grace); do not duplicate cookies / processors
-- [x] (done 2026-11-13: `components/ThirdPartyNote.tsx` (amber warning chip with ⚠️), old `map.consent` / `nearby.loadMapConsent` / `discuss.consent` keys replaced by `thirdParty.*`; YouTube player modals not covered, they were not in the list) Third-party note at the click: one shared `ThirdPartyNote` component (provider name, "loading sends your IP to X", link to
+- [x] (done 2026-11-13: `components/ThirdPartyNote.tsx` (amber warning chip with ⚠️), old `map.consent` / `nearby.loadMapConsent` / `discuss.consent` keys replaced by `thirdParty.*`; YouTube player modals were added later the same day: `YouTubeModal` shows the note, which covers `VideoStrip`, `EuroNcapRatings` and `JncapRatings`; `YouTubeModal.test.tsx`) Third-party note at the click: one shared `ThirdPartyNote` component (provider name, "loading sends your IP to X", link to
       `/privacy#privacy-thirdParty`; Disqus also says it sets cookies) on every gate placeholder / modal: `RegionMap` (OpenStreetMap), `DiscussRoute`
       (Disqus), `NearbyServices` + `LiveBackground` + `SharedLayoutPrompt` (Google Maps / YouTube), Sketchfab and carshow360 modals;
       ua/ru/en, no em dash; tests: note shown before the click
 - [x] (done 2026-11-13, see Step 4: clean-window check, no google.com cookies on a plain page load, no change needed) The `google.com` cookie-tree check
-- [ ] Docs after a feature (`docs/checklists.md`): plan-done, PLAN, features-reference, About; version in `releases.ts` (currently v2.1211, committed at 1211 commits; a new uncommitted change uses `git rev-list --count stage` + 1)
+- [ ] Docs after a feature (`docs/checklists.md`): plan-done, PLAN, features-reference, About; version in `releases.ts` (currently v2.1215 for the uncommitted YouTube note change; a new uncommitted change uses `git rev-list --count stage` + 1)
 
 ### Step 5. Account-deletion test (needs the user: throwaway account + VPS DB access)
 
