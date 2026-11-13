@@ -119,11 +119,11 @@ API, write again only if a paid version exists or the audience grows a lot.
 
 ### Wanted / stolen vehicle check ✅ DONE (2026-10-15)
 
-Police open data (data.gov.ua) -> `registry.wanted_vehicles` + `/api/wanted` + `WantedCheck` section; write-up in `docs/plan-done.md`. Scheduled daily in `SCHEDULE.md` (VPS job still to set up).
+Police open data (data.gov.ua) -> `registry.wanted_vehicles` + `/api/wanted` + `WantedCheck` section; write-up in `docs/plan-done.md`. Scheduled daily in `docs/SCHEDULE.md` (VPS job still to set up).
 
 ### Wanted vehicles history, stats and `/wanted` page ✅ DONE (2026-10-17)
 
-stolen.in.ua backfill (Aug 2020+), card history, `GET /api/wanted/stats`, `/wanted` page, home teaser; write-up in `docs/plan-done.md`, steps in `WANTED_PLAN.md`.
+stolen.in.ua backfill (Aug 2020+), card history, `GET /api/wanted/stats`, `/wanted` page, home teaser; write-up in `docs/plan-done.md`, steps in `docs/WANTED_PLAN.md`.
 
 ### Plate image recognition (camera/upload) ✅ DONE (2026-09-22) — archived
 
@@ -352,7 +352,7 @@ above once scoped, or dropped if research says no.
 
 ### Actual — ready or in progress
 
-- [ ] **UI / integration / e2e tests (researched 2026-11-04, nothing built)** — real-Postgres integration suite, Playwright smoke (~10 specs), both gating deploy via `ci.yml`. Steps 1-7: [TESTING_PLAN.md](TESTING_PLAN.md).
+- [ ] **UI / integration / e2e tests (researched 2026-11-04, nothing built)** — real-Postgres integration suite, Playwright smoke (~10 specs), both gating deploy via `ci.yml`. Steps 1-7: [docs/TESTING_PLAN.md](docs/TESTING_PLAN.md).
 - ✅ History, favorites, camera/photo search, registry stats (table + map), brand breakdown, kind icon + logo — done, see Phase 1.5 / "Plate image recognition" in `docs/plan-done.md`.
 - ⏳ **Speed round: advanced search + photo recognition on 4G** (researched 2026-10-29; nothing measured yet, estimates from code). Indexes are already
   complete (0012–0015, 0042, 0059), so the cost is the query shape: every page/sort click re-fetches up to 10k wide rows (`SEARCH_COUNT_CAP`) and sorts in Node.
@@ -430,11 +430,11 @@ above once scoped, or dropped if research says no.
 - ✅ **Stock news widget + Social chip, mobile sidebar buttons, viewport-safe info popups, `/install` page, `pnpm tunnel`** (2026-10-13, `ffceeff` … `55a1fcb`) — built, see `docs/plan-done.md` ("Stock news, mobile sidebar…"). **Open:** news rides the same unofficial Yahoo endpoints as the share price (drop the widget if they break).
 - ✅ **Skeleton placeholders** for stats pages and homepage stats (2026-10-06, `de0a53c`) and the **About page sources + icons** (`9b974fd`) — built, see `docs/plan-done.md`.
 - ✅ **Weight rankings, Stack Exchange + Lemmy community posts, richer "Copy all info" export, WebP brand logos** (2026-10-09, `3f7a596` … `bb9f055`) — built, see `docs/plan-done.md` and `docs/features-reference.md`. **Open:** Stack Exchange / Lemmy are unauthenticated public APIs (rate limits unmeasured — judge on real traffic, drop the widget column if they throttle); weight edges for models with few vehicles are percentile-based, so tiny samples are noisy (per-group floor only); Lighthouse/LCP not yet measured after the perf pass (Phase 4).
-- ⏭️ **Feature guide + "What's new" bell** (`/features`-style tour with Playwright screenshots, ua/ru/en) — planned 2026-10-06, **skipped 2026-10-31**: [FEATURES_PLAN.md](FEATURES_PLAN.md). The "What's new" part shipped as the `/releases` page (2026-10-15, no bell). **Conflicts with the
+- ⏭️ **Feature guide + "What's new" bell** (`/features`-style tour with Playwright screenshots, ua/ru/en) — planned 2026-10-06, **skipped 2026-10-31**: [docs/FEATURES_PLAN.md](docs/FEATURES_PLAN.md). The "What's new" part shipped as the `/releases` page (2026-10-15, no bell). **Conflicts with the
   paid-features route** — see Phase 5 "Stage A".
 
 - ✅ **Wanted (stolen) vehicles** — built 2026-10-15 (`5bed8de`), see above and `docs/plan-done.md` (original design archived there).
-- ✅ **Vehicle origin** (flags chip, `?section=origin` timeline, model plants, `/stats` "Where cars come from"; 2026-10-25/26) — built, see `docs/plan-done.md`, `docs/features-reference.md` and [ORIGIN_PLAN.md](ORIGIN_PLAN.md) (open follow-ups listed there).
+- ✅ **Vehicle origin** (flags chip, `?section=origin` timeline, model plants, `/stats` "Where cars come from"; 2026-10-25/26) — built, see `docs/plan-done.md`, `docs/features-reference.md` and [docs/ORIGIN_PLAN.md](docs/ORIGIN_PLAN.md) (open follow-ups listed there).
 - ✅ **Cross-links between result-card sections, About features list** (2026-10-15, `6df9280`, `c1951da`) — see `docs/plan-done.md`.
 - ✅ **Pre-public secrets audit, production DB-credential guard, first Dependabot round** (2026-10-15) — see `docs/plan-done.md`. **Open:** run
   gitleaks over the full history before flipping the repo public; `@tanstack/react-table` 9 migration (v8 held).
@@ -524,7 +524,7 @@ Built: a desktop-only promo banner beside the result card (xl+; a 🎮 circle on
 
 - ✅ (2026-10-09) Standalone **`/race`** route (no plate; random famous car + hardcoded presets per body type in `lib/racer/presets.ts`; HUD km odometer for the session) — see `docs/features-reference.md` "Test-drive racer".
 - ✅ (2026-10-28) **Mini-map** of the generated road (rotating top-down radar, curves/trees/traffic from the engine) — `docs/features-reference.md` "Test-drive racer". [ ] Ideas left: real OSM scenery along the map (forest/village sprites from real data), hills strip, a destination/route mode.
-- ✅ (2026-10-11) **Full screen + mobile virtual buttons** — built, needs real-device testing (`docs/plan-done.md` "Test-drive racer game"). [ ] Still open: tilt steering, landscape lock, lower default resolution on touch — `GAME_PLAN.md`.
+- ✅ (2026-10-11) **Full screen + mobile virtual buttons** — built, needs real-device testing (`docs/plan-done.md` "Test-drive racer game"). [ ] Still open: tilt steering, landscape lock, lower default resolution on touch — `docs/GAME_PLAN.md`.
 - [ ] Optional **music**: the original's track is licensed to that project only (Lucky Lion Studios) — not reusable. A CC0/CC-BY loop would be a separate lazy download (~1-3 MB) behind the sound toggle, with a credit line in the modal.
 - ✅ Credits (javascript-racer, Kenney, and the CC BY 4.0 Sketchfab authors: animanyarty, MaG80, JUFF, mk2design, snafuj, Houdini1561, Han66st, cgart.com) are in `about.source.racer`.
 - ✅ Models (2026-10-08): sedan, hatch, sport, SUV, pickup, van and bus are now CC-BY Sketchfab renders; the owner's other candidates were rejected for licence (CC BY-NC / "Sketchfab Standard") or because the body can't be tinted — see docs/plan-done.md "Racer art pass".
@@ -619,7 +619,7 @@ and the CSV is committed.
 `NewsTicker`, result-card 📰 News section (last) and a desktop-only scroll-in `NewsWidget`. **/news archive built 2026-10-06** (`c04716c`; write-up in
 `docs/plan-done.md`, "Auto news archive"): paged list with outlet chips, date sort and title search, linked from the sidebar and the ticker. **Open:**
 
-- **Schedule it:** cron on the VPS (Phase 4), daily per `SCHEDULE.md` (every ~6 h / hourly only if the tiny-window whole-site feed, mezha, should pay off). Not part of `ingest:all`.
+- **Schedule it:** cron on the VPS (Phase 4), daily per `docs/SCHEDULE.md` (every ~6 h / hourly only if the tiny-window whole-site feed, mezha, should pay off). Not part of `ingest:all`.
 - **Measure** (the plan's step 7): items/day per source, % tagged with a make / model, and for the top-50 registry (brand, model) pairs how many have ≥1 news
   item in 30/180 days — the DB has had one manual run so far.
 - **English sources added 2026-10-05:** Car and Driver, Motor1, Carscoops (news + reviews) — verified, see the table in `docs/plan-done.md`. Open: the Ukrainian UI sends `lang=uk` so it never shows them; decide whether English items should appear for uk/ru users, and re-measure tag rates after a few days.
@@ -635,7 +635,7 @@ and the CSV is committed.
 (no key, no quota) into `registry.social_posts`; `GET /api/social?brand=`; shown in the result card's **Videos** section as an "Official channel" strip under the infocar model
 videos, with a Make / Group toggle where a make has a parent group. **Open:**
 
-- **Schedule it:** daily (`SCHEDULE.md`); until a scheduler exists, run it by hand on every other environment (the strip is empty before the first run). Not part of `ingest:all`.
+- **Schedule it:** daily (`docs/SCHEDULE.md`); until a scheduler exists, run it by hand on every other environment (the strip is empty before the first run). Not part of `ingest:all`.
 - **Coverage gaps (feeds were empty or stale on 2026-10-06):** Land Rover, Triumph, Kawasaki, DS, Dacia (own channel; Renault Group still covers it), Volkswagen Group, JLR (last upload 2023);
   no Stellantis channel found. Re-check from time to time, and add makes outside the table (e.g. Chery, Suzuki, Škoda-group sub-brands) after verifying the channel title with `ingest:social -- --dry-run`.
 - **Regional channels:** Citroën uses Citroën do Brasil, Hyundai/Kia/Mazda/INFINITI the US channels — no active global channel was found. Ukrainian channels exist for Toyota
@@ -713,7 +713,7 @@ combined crash-rating page.
 Catalog (`registry.vdb_models`, CC BY 4.0), shared matcher, `GET /api/vdb` + `/api/vdb/stats`, result-card chips (UA-only, also sold
 in, popularity band, rare elsewhere, "?" popover with all 15 countries), `/stats` Markets panel, About credit. **Coverage: 92.6% of
 passenger cars** (models with a catalog entry). Full write-up: `docs/plan-done.md` "VehiclesDB cross-market data"; status, gaps, matching
-rules and refresh rules: `DATASETS_PLAN.md`. **Built since (2026-10-08):** cross-make alias chip, one decimal for <1% shares, "approximate match" note
+rules and refresh rules: `docs/DATASETS_PLAN.md`. **Built since (2026-10-08):** cross-make alias chip, one decimal for <1% shares, "approximate match" note
 for prefix matches, the full 108-pair plate-region table (stage A), motorcycle/truck/bus matching + per-class `/stats` (stage B) — see
 `docs/plan-done.md`. **Left:** the `plates/ua.yml` cross-check of `normalizePlate`/`regions.ts`; the gor3a/autoevolution specs source
 stays blocked (they want to see the public app first). **Gate before deploy (Phase 4):** every external dataset
@@ -724,17 +724,17 @@ needs its licence/permission recorded and attribution on About (VehiclesDB done)
 - ✅ Stage K leftovers, K-M4 → K-M7 (motorcycles, buses, curated seed; 2026-10-12) — all done; the step log moved to `docs/plan-done.md` ("Stage K-M leftovers log"). Counts at close: generations 1,213 / wikispecs 1,206.
 
 **Built:** ✅ /stats, /fuel, /safety section explanations + sources, collapse-all button on plate/VIN pages only (2026-10-11; `docs/plan-done.md` "/stats, /fuel, /safety explanations"). Spec rankings (power / engine / height / length / fuel tank) + section skeletons (2026-10-11; `docs/plan-done.md` "Spec rankings + section skeletons"). Stage K follow-ups (2026-10-12; `wikiSpecs` in the card bundle, engine/chassis code split, stale alias notes; ✅ engine vs chassis codes stored separately (gearbox words and trailing hyphens dropped); `docs/plan-done.md` "Stage K follow-ups"). Wikipedia generation specs (stage K, 2026-10-11; engines per generation, drive, gap dimensions; `docs/plan-done.md` "Generation specs from Wikipedia"). Car generations (stage I, 2026-10-11; `docs/plan-done.md` "Car generations"). Transport Canada recalls with no US twin (stage H, cut down; `docs/plan-done.md` "Canada recalls"). RDW specs (the "Specs" block, stages C/C2/C3 + regroup) — `docs/plan-done.md` "RDW specs (EU / NL)". RDW recalls (stage D) and C4
-(estimated value) are built (2026-10-09); stage M (model alias unification, M1–M3) is built (2026-10-10; M4 stats grouping built too — `docs/plan-done.md` "Model alias unification"); stage E (Open EV Data, "Electric" block) is built too (2026-10-09; the upstream data is frozen at 2020); stage F (NHTSA recalls + owner complaints, live API + cache, merged into the Recalls block) is built too (2026-10-10; `DATASETS_PLAN.md` "Stage F — done"); ✅ stage G (UK MOT "Common faults": fail / advisory rates by mileage from DVSA 2021–2023, lazy section `faults`, 64 MB of tables, 3.2 MB seed) is built (2026-10-10; `docs/plan-done.md` "UK MOT Common faults"). Details, licences, URLs, caveats and the skip list:
-`DATASETS_PLAN.md` ("Round 2"). Buildable (all free, own tables, each a
+(estimated value) are built (2026-10-09); stage M (model alias unification, M1–M3) is built (2026-10-10; M4 stats grouping built too — `docs/plan-done.md` "Model alias unification"); stage E (Open EV Data, "Electric" block) is built too (2026-10-09; the upstream data is frozen at 2020); stage F (NHTSA recalls + owner complaints, live API + cache, merged into the Recalls block) is built too (2026-10-10; `docs/DATASETS_PLAN.md` "Stage F — done"); ✅ stage G (UK MOT "Common faults": fail / advisory rates by mileage from DVSA 2021–2023, lazy section `faults`, 64 MB of tables, 3.2 MB seed) is built (2026-10-10; `docs/plan-done.md` "UK MOT Common faults"). Details, licences, URLs, caveats and the skip list:
+`docs/DATASETS_PLAN.md` ("Round 2"). Buildable (all free, own tables, each a
 removable card block, credit on About): **RDW** registered vehicles (CC0; "Specs") + RDW recalls (CC0), **NHTSA** recalls +
-complaints (public domain, live API like `api/safety`), **UK MOT** (OGL v3; "Common faults", years 2019 + 2021–25 loaded ✅ — Stage G2 in `DATASETS_PLAN.md`), **Transport
+complaints (public domain, live API like `api/safety`), **UK MOT** (OGL v3; "Common faults", years 2019 + 2021–25 loaded ✅ — Stage G2 in `docs/DATASETS_PLAN.md`), **Transport
 Canada** recalls (OGL-Canada, low priority), **Open EV Data** (MIT; "Electric" block). Order: RDW -> NHTSA -> EV -> Canada -> MOT. **Refresh cadences** (RDW specs 6 mo, RDW recalls monthly, NHTSA live + cache
-7/30 d, MOT yearly, Canada quarterly, EV quarterly) are in `DATASETS_PLAN.md`; **each source's ingest, seed, refresh command and
-`SCHEDULE.md` entry are implemented only when its card block is built** — nothing ahead of the feature.
+7/30 d, MOT yearly, Canada quarterly, EV quarterly) are in `docs/DATASETS_PLAN.md`; **each source's ingest, seed, refresh command and
+`docs/SCHEDULE.md` entry are implemented only when its card block is built** — nothing ahead of the feature.
 Recalls are model-level and market-labelled, never "your car has a recall"; this revisits the 2026-09-24 park in "Phase 3+ —
 recalls" above (open owner call: NHTSA recalls or RDW/EU only). **Skipped:** Eurostat (country totals only), ANCAP / Latin NCAP /
 ASEAN NCAP (no licence/permission), Kaggle sets, DVSA recalls API. Wikidata deferred. data.gov.ua is a separate session.
-**Stage J (other countries' open data: KBA, DataVic, MLIT, Korea) — ⏸ skipped for now (owner, 2026-10-13); research found nothing worth building (country-level totals add little to a result card, DataVic has no model year, MLIT/Korea have no confirmed open data), revisit only if asked;** short licence re-check and findings in `DATASETS_PLAN.md` "Stage J".
+**Stage J (other countries' open data: KBA, DataVic, MLIT, Korea) — ⏸ skipped for now (owner, 2026-10-13); research found nothing worth building (country-level totals add little to a result card, DataVic has no model year, MLIT/Korea have no confirmed open data), revisit only if asked;** short licence re-check and findings in `docs/DATASETS_PLAN.md` "Stage J".
 
 ### Car dimensions (automobiledimension.com) — **waiting for the owner's permission (asked 2026-10-07)**
 
@@ -805,7 +805,7 @@ catalog pages** (see "Car compare" below); no contact with the site owners.
 
 - State: `scripts/src/euroncap.ts` scrapes euroncap.com (sitemap discovery, 1 req/1.5 s, identifying UA, robots-aware) into
   `registry.euroncap_ratings`, committed as `euroncap-ratings.csv.gz`. **No licence/terms review is recorded** for it (the round-2
-  sources each got one). **Terms read 2026-10-10 (`DATASETS_PLAN.md` "Euro NCAP terms"): not cleared** — content is copyrighted,
+  sources each got one). **Terms read 2026-10-10 (`docs/DATASETS_PLAN.md` "Euro NCAP terms"): not cleared** — content is copyrighted,
   commercial reproduction "not authorised", prior permission needed for text and multimedia. **Before deploy: stars + percentages +
   source link only; drop images/videos/logos and copied wording unless Euro NCAP permits.**
 - Ideas: stars + the four percentages (adult / child / vulnerable road users / safety assist) in the spec summary; test year and
@@ -1062,7 +1062,7 @@ Group 1 dimension callouts + garage-fit -> Group 3 (existing order). Owner says 
 
 ## Phase 4 — VPS / production
 
-The recurring-job plan (cadences, locking, run log, alerting, build steps) is drafted in [SCHEDULE.md](SCHEDULE.md) — build it as part of this phase.
+The recurring-job plan (cadences, locking, run log, alerting, build steps) is drafted in [docs/SCHEDULE.md](docs/SCHEDULE.md) — build it as part of this phase.
 
 VPS sizing, provider shortlist (Contabo Cloud VPS 6), static IP and DNS: [docs/deploy.md](docs/deploy.md) "Sizing and provider".
 
@@ -1081,7 +1081,7 @@ VPS sizing, provider shortlist (Contabo Cloud VPS 6), static IP and DNS: [docs/d
 - ✅ Deploy tooling written 2026-10-15 (api/alpr Dockerfiles, `infra/docker-compose.prod.yml` + Caddyfile + maintenance page, blue/green api deploy,
   web symlink releases, 3 path-filtered GitHub workflows, bootstrap + backup scripts, web maintenance banner) — ✅ **first real VPS deploy done 2026-10-27** (`docs/plan-done.md` "First VPS deploy"); ✅ R2 backups (nightly + full, restore-tested), SSH hardening and Turnstile done the same day; ✅ UptimeRobot on `/healthz` and ✅ Cloudflare settings + WAF rate-limit rule (2026-10-28); ✅ security gate (mostly), browser smoke test, Contabo snapshot and Telegram preview refresh (2026-10-28); what is left (account-deletion test, CSP enforce, Dependabot): [docs/deploy.md](docs/deploy.md) "Still open".
   Runbook, secrets list and what is still open: [docs/deploy.md](docs/deploy.md). ✅ Ingest cron live 2026-10-28 (`docs/plan-done.md` "Ingest cron"); still open: healthchecks.io checks + `HC_PING_*` secrets, Redis throttler store.
-- ✅ CKAN plate ingest cron on the VPS, Tue + Fri (done 2026-10-28; no-op unless CKAN has something new, then backfill + stats + backups; SCHEDULE.md)
+- ✅ CKAN plate ingest cron on the VPS, Tue + Fri (done 2026-10-28; no-op unless CKAN has something new, then backfill + stats + backups; docs/SCHEDULE.md)
 - ✅ OG image endpoint — done 2026-10-01 (plate **and** VIN, `resvg-js` + bundled Noto Sans, never
   Puppeteer; see `docs/plan-done.md` "Link previews"). Still for deploy: set `PUBLIC_SITE_URL` to the real
   domain, make sure `fonts/` + `logos/` ship in `WEB_DIST_DIR`, and put a CDN/Caddy cache in front of `/og/`
@@ -1176,7 +1176,7 @@ Full write-up (flow, DB, API, web, tests) in `docs/plan-done.md` ("Accounts, sta
 - **Admin = DB only:** `UPDATE app.users SET role='admin' WHERE email='you@gmail.com';` (the user must have signed in once).
 - **Add a paid feature:** extend `PAID_FEATURES` (`packages/shared/src/account.ts`) + `paid.<id>.*` i18n + `PAID_FEATURE_ICON` + `APPLIES_TO` in `PaidFeatureSections`.
 - **Since 2026-10-08 the site shows no "paid" wording:** nav/page title say "Features", `AVAILABLE_PAID_FEATURES` is empty, so the opt-in toggles, Save button and result-card placeholder are hidden until a feature is built ("Similar ads on AUTO.RIA" is listed under "Under consideration").
-- **⚠ Route clash:** `/features` is the feature-toggle page today, but [FEATURES_PLAN.md](FEATURES_PLAN.md) (planned, not started) wants `/features` for the **feature guide** (+ `/features/changelog`). Decide
+- **⚠ Route clash:** `/features` is the feature-toggle page today, but [docs/FEATURES_PLAN.md](docs/FEATURES_PLAN.md) (planned, not started) wants `/features` for the **feature guide** (+ `/features/changelog`). Decide
   before building the guide: rename the toggles to e.g. `/plan` or `/account/features` (cheap now — it is only `App.tsx`, the sidebar/menu links, `ROUTE_TITLE_KEYS`, the two redirects' source files and the `nav.features` string) or
   rename the guide. The guide also wants a header bell next to the layers/login buttons — mind the right-hand header order (layers · login).
 - Flip the backup policy to nightly `pg_dump --schema=app` the day this ships to prod.
@@ -1465,7 +1465,7 @@ Rule-based (no AI, no MCP) Q&A assistant for a plate / VIN built on our own API,
 
 ## Later, conditional
 
-Checked and skipped: Derzhstat "Транспорт України" yearbook (2026-11-05) - national transport activity totals, no vehicle/fleet/accident data; see `DATASETS_PLAN.md` "Skipped (with reason)".
+Checked and skipped: Derzhstat "Транспорт України" yearbook (2026-11-05) - national transport activity totals, no vehicle/fleet/accident data; see `docs/DATASETS_PLAN.md` "Skipped (with reason)".
 
 SSR for `/:plate` only if organic search traffic matters · region as a real
 indexed column if region filtering is needed · Drizzle v1 upgrade per the

@@ -1,5 +1,5 @@
 /**
- * Parses the hand-curated `seed-data/model-plants.csv` (ORIGIN_PLAN.md Step 3) into `registry.model_plant` rows.
+ * Parses the hand-curated `seed-data/model-plants.csv` (docs/ORIGIN_PLAN.md Step 3) into `registry.model_plant` rows.
  *
  * One CSV row = one plant of one model. `models` lists the registry spellings that share the row, separated by `|`
  * ("OCTAVIA|OCTAVIA A5"); each becomes its own `model_slug` (`modelKey`). `country_code` is the modern ISO code (the API client

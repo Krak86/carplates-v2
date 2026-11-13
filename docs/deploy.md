@@ -9,7 +9,7 @@ Deploy scripts run via `ssh vps bash -s < script`, so bash reads the script from
 
 This file is the single VPS reference: sizing/provider/DNS, architecture, runbook, secrets, backups, and the HTTP/2-3 + compression notes (last
 section). Task checklists and the rate-limit policy stay in [PLAN.md "Phase 4"](../PLAN.md); the pre-deploy security gate is
-[security-checklist.md](security-checklist.md); recurring jobs are [SCHEDULE.md](../SCHEDULE.md).
+[security-checklist.md](security-checklist.md); recurring jobs are [SCHEDULE.md](SCHEDULE.md).
 
 ## Sizing and provider (checked 2026-10-13, prices ex-VAT/promo, verify at purchase)
 

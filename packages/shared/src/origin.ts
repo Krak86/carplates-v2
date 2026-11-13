@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-/** Former states with their own name and flag. Never shown as the modern successor (ORIGIN_PLAN.md). */
+/** Former states with their own name and flag. Never shown as the modern successor (docs/ORIGIN_PLAN.md). */
 export const LEGACY_COUNTRIES = ['SU', 'CSHH', 'DD', 'YU', 'CSXX', 'DE-FRG'] as const
 export type LegacyCountry = (typeof LEGACY_COUNTRIES)[number]
 

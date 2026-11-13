@@ -67,7 +67,7 @@ function pickByYear<T extends Dated>(rows: readonly T[], year: number | null | u
   return started[started.length - 1] ?? sorted[0] ?? null
 }
 
-/** Brands whose Soviet-era country is the Ukrainian SSR (ORIGIN_PLAN.md). */
+/** Brands whose Soviet-era country is the Ukrainian SSR (docs/ORIGIN_PLAN.md). */
 const UKRAINIAN_SSR_BRANDS = ['zaz', 'luaz']
 
 const nonZero = (year: number | null | undefined): number | null => (year ? year : null)

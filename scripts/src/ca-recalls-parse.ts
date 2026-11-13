@@ -127,7 +127,7 @@ export function groupUsByMake(us: Iterable<UsCampaign>): Map<string, UsCampaign[
 /**
  * Is there an NHTSA campaign that is probably the same global recall? Same make, and either the same manufacturer campaign number
  * (within 400 days) or a shared model spelling within 120 days. Heuristic - NHTSA and TC share no id - tuned in the 2026-10-10
- * overlap research (`DATASETS_PLAN.md` "Stage H"): ~75 % of all Canadian recalls since 2010 have a twin.
+ * overlap research (`docs/DATASETS_PLAN.md` "Stage H"): ~75 % of all Canadian recalls since 2010 have a twin.
  */
 export function hasUsTwin(ca: CaCampaign, usByMake: ReadonlyMap<string, readonly UsCampaign[]>): boolean {
   const mfrNo = alnum(ca.mfrRecallNo)

@@ -1,6 +1,6 @@
 /**
  * Backfills the wanted-vehicles history from stolen.in.ua (same National Police open data, robots.txt `Allow: /`). The police feed lists
- * only CURRENT records, so cars found before our first `ingest:wanted` run exist nowhere else. See WANTED_PLAN.md.
+ * only CURRENT records, so cars found before our first `ingest:wanted` run exist nowhere else. See docs/WANTED_PLAN.md.
  *
  *   Phase A (months):  /history/<mon>-<yy> lists every car stolen that month; FOUND cards not yet in our table become
  *                      `source = 'stolen.in.ua'` placeholder rows (`resolved_exact = false`, resolved_at = scrape time).

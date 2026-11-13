@@ -1,6 +1,6 @@
 /**
  * Seed-CSV dump/load of the stolen.in.ua wanted history (`source = 'stolen.in.ua'` rows + the scrape resume ids), so a new
- * setup loads it instead of re-scraping ~8 h. Cumulative snapshot: re-export after every backfill step (WANTED_PLAN.md).
+ * setup loads it instead of re-scraping ~8 h. Cumulative snapshot: re-export after every backfill step (docs/WANTED_PLAN.md).
  *
  *   pnpm export:wanted-history:csv   # -> seed-data/wanted-history.csv.gz + wanted-history-ids.csv.gz
  *   pnpm ingest:wanted-history:csv   # load them (insert-only, safe to repeat)
