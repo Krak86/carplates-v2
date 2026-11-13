@@ -168,6 +168,12 @@ export default tseslint.config(
     }
   },
 
+  // ---- tests : mock factories and vi.fn helpers need no return types ----------
+  {
+    files: ['**/*.test.{ts,tsx}'],
+    rules: { '@typescript-eslint/explicit-function-return-type': 'off' }
+  },
+
   // ---- scripts : CLIs may print ---------------------------------------------
   {
     files: ['scripts/**/*.ts', 'scripts/**/*.mjs'],

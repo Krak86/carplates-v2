@@ -2,6 +2,8 @@ import type { ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 
+import ThirdPartyNote from '@/components/ThirdPartyNote'
+
 type Props = {
   youtubeId: string
   description: string
@@ -48,6 +50,10 @@ export default function YouTubeModal({ youtubeId, description, title, onClose }:
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           allowFullScreen
         />
+
+        <p className="mt-2 text-xs text-[var(--color-muted)]">
+          <ThirdPartyNote provider="YouTube" />
+        </p>
 
         <p className="mt-2 text-xs text-[var(--color-muted)]">
           {t('safety.videoFallback')}:{' '}

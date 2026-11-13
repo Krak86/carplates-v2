@@ -31,7 +31,7 @@ export class AuctionsService {
 
     const { db } = this.dbService
     const lotNo = lot.lotNo
-    const peers = async (year: number | null) => {
+    const peers = async (year: number | null): Promise<{ peers: number; median: number | null }> => {
       const [row] = await db
         .select({
           peers: sql<number>`count(*)::int`,

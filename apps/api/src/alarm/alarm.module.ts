@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common'
 
 import { loadEnv } from '../env.js'
 import { ALARM_SOURCE } from './alarm-source.js'
+import type { AlarmSource } from './alarm-source.js'
 import { AlarmController } from './alarm.controller.js'
 import { AlarmService } from './alarm.service.js'
 import { AlarmEventsController } from './events.controller.js'
@@ -22,7 +23,7 @@ import { UkraineAlarmSource } from './ukrainealarm.source.js'
     {
       provide: ALARM_SOURCE,
       inject: [UkraineAlarmSource, MockAlarmSource],
-      useFactory: (real: UkraineAlarmSource, mock: MockAlarmSource) => {
+      useFactory: (real: UkraineAlarmSource, mock: MockAlarmSource): AlarmSource => {
         const env = loadEnv()
         return env.ALARM_MOCK && env.NODE_ENV !== 'production' ? mock : real
       }
