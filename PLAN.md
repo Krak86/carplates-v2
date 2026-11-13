@@ -1445,6 +1445,18 @@ Speaker icon beside the brand name on catalog pages; lazy popup with ua / ru / e
 - [ ] One SSH on the VPS: `/opt/carsua/compose/lib.sh` exists; `compose/.env` has `GH_OWNER`, `API_TAG_*`, `INGEST_TAG`, `ALPR_TAG` once each; `stat -c '%a' /opt/carsua/env/*.env` is `600`; `crontab -l` still lists the ingest jobs.
 - [ ] Optional: `sync_only` dispatch of Deploy API (fresh-VPS path, only matters for a rebuild).
 
+## CI log cleanup - lint warnings + noisy test output (found in Deploy Web #111 logs, 2026-11-13)
+
+Deploy Web #111 is green (349 test files, 2581 tests); nothing blocks a deploy. `pnpm lint` ends with warnings only (the "Annotations" box on the run page shows the first 10), and `pnpm test` prints expected error logs. Fix in the order below.
+
+- [ ] **P3 (quick win, ~2 min): delete `apps/api/_union-check.ts`.** Tracked scratch script (3 × `console-rules/no-raw-console`, lines 11/15/19) that dumps `unionLots` counts via `createDb()`; it has no importer. Delete it, or move it to `scripts/src/` and add it to the `no-raw-console: 'off'` override block in `eslint.config.mjs` (~line 175) if the query is worth keeping.
+- [ ] **P3: `@typescript-eslint/explicit-function-return-type` (~40+ warnings, all in `apps/api`).** Seen in `alarm/alarm.module.ts:25`, `auctions/auctions.service.ts:34`, `auctions/auctions-stats.service.ts:107`, and in tests: `auctions*.test.ts`, `vehicle-merge.test.ts`, `brands.service.test.ts`, `card.service.test.ts`, `catalog.service.test.ts`, `common/all-exceptions.filter.test.ts`, `common/cache.test.ts`, … (get the full list with `pnpm lint 2>&1 | grep -B1 "return type"`).
+  - Prod files (3): add the explicit return type (a `useFactory` arrow in `alarm.module.ts`, two helpers in the auctions services). Do this first, it is real signal.
+  - Test files (the bulk): mock factories and `vi.fn(() => …)` helpers. Cheapest fix is not to annotate hundreds of mocks but to turn the rule off for tests in `eslint.config.mjs`: add `'@typescript-eslint/explicit-function-return-type': 'off'` to the existing `**/*.test.ts(x)` override. Prefer this over annotating.
+  - Do **not** escalate the rule to `error` until the count is 0, or the lint step starts failing deploys.
+- [ ] **P4 (optional): quiet the expected error logs in the API tests.** Tests that exercise failure paths print Nest `ERROR` / `WARN` lines into the CI log (`Invalid JSON` in `csp-parsers`, `FST_INVALID_MULTIPART_CONTENT_TYPE` in `shares.controller`, `db password in here` / `Error: x` / `boom` in `all-exceptions.filter.test.ts`, `Plate Recognizer rejected the API token`, `r2 down`, `db down`, Wikimedia 429/503). They are intentional, but they look like failures when scanning a log and hide a real one. Fix: in those specs `vi.spyOn(Logger.prototype, 'error').mockImplementation(() => {})` (or `app.useLogger(false)` / `Test.createTestingModule(...).setLogger(false)`), and assert on the spy where the log is the behaviour under test. Not a deploy concern.
+- [ ] **P4 (optional): slow test.** `shares/helpers.test.ts` takes 5.9 s (`downscaleForShare` "steps the quality down…" 5.3 s, image work). If the CI test step (4m 11s total job) needs trimming, shrink the fixture image or raise parallelism; otherwise leave.
+
 ## Assistant + embeddable widget (idea 2026-11-08, to discuss)
 
 Rule-based (no AI, no MCP) Q&A assistant for a plate / VIN built on our own API, one custom element with chat / search / badge views, a floating launcher in the app and an iframe-only embed for other sites (open data + link-out). Plan, local-test recipe and parked ideas: [docs/assistant-plan.md](docs/assistant-plan.md).
