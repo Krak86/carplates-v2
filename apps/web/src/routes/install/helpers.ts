@@ -6,6 +6,7 @@ export const INSTALL_SECTIONS = [
   { id: 'cache', items: 5 },
   { id: 'update', items: 4 },
   { id: 'remove', items: 4 },
+  { id: 'data', items: 4 },
   { id: 'best', items: 9 }
 ] as const
 

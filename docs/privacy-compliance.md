@@ -134,7 +134,7 @@ Files: `apps/web/src/routes/LegalRoute.tsx` (section ids, line 10), `en.json` / 
 ### Step 4b. Follow-ups from the Step 4 review (added 2026-11-13)
 
 - [x] Privacy controller section mentions custom site / web-app work (turnkey, via Contact); table of contents on /privacy and /terms (`LegalRoute.tsx`)
-- [ ] `/install` (`routes/install/InstallRoute.tsx`): read what it claims; add a short paragraph that the installed app uses the same browser storage
+- [x] (done 2026-11-13: new "Data and privacy" section on /install in ua/ru/en, link to /privacy was already in the footer; also fixed `install.cache.1` "not synced anywhere", wrong for signed-in users) `/install` (`routes/install/InstallRoute.tsx`): read what it claims; add a short paragraph that the installed app uses the same browser storage
       (local storage, IndexedDB, offline cache), uninstall / clearing site data removes it, account sync and deletion as on Privacy, link to /privacy
 - [ ] `/about`: short mention of the custom-app service (ua/ru/en); check PostHog / data-source wording against the new facts
 - [ ] `/terms`: check "data" and "sharedPhotos" against the retention table (shares 7 days, 14-day grace); do not duplicate cookies / processors
