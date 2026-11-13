@@ -106,7 +106,7 @@ Historical migration is limited on free plans (a support ticket may help). Re-ch
       or accept and disclose Google as a processor
 - [x] If gating: `NearbyServices.tsx` (shared link shows the placeholder, the header click or the button loads the iframe), `LiveBackground.tsx`
       (shared layout asks before loading a third-party iframe), ua/ru/en strings, tests: no iframe before the click
-- [ ] Either way: list Google Maps and YouTube in the Step 4 processors / device-storage sections
+- [x] Either way: list Google Maps and YouTube in the Step 4 processors / device-storage sections
 
 ### Step 3. Backups: cap account data at 14 days (`infra/vps/backup.sh`)
 
@@ -121,14 +121,14 @@ Historical migration is limited on free plans (a support ticket may help). Re-ch
 
 Files: `apps/web/src/routes/LegalRoute.tsx` (section ids, line 10), `en.json` / `ua.json` / `ru.json`, `AboutRoute.tsx`.
 
-- [ ] New Privacy sections: controller (**user decides what identity to show**), registry / scraped data (sources, legal basis, objection
+- [x] (done 2026-11-13; controller shown as "carsua.app" + Contact page, no personal name, decided by the user; tables rendered by `routes/legal/LegalTable.tsx`) New Privacy sections: controller (**user decides what identity to show**), registry / scraped data (sources, legal basis, objection
       via `/contact`), device storage + cookie table, account data per provider, retention table, processors and transfers
       (Contabo DE, Cloudflare, Resend, PostHog EU, Sentry, Google, Telegram, Disqus), rights (portability "on request" since export is not built;
       authority: Ukrainian Ombudsman or the EU DPA)
-- [ ] Processors list must include Google Maps (nearby services, live background) and YouTube (streams), and say embeds load only on a click
+- [x] Processors list must include Google Maps (nearby services, live background) and YouTube (streams), and say embeds load only on a click
       (or as decided in Step 2b)
-- [ ] Cookie table: also list what a DevTools check on carsua.app showed (2026-11-13): `cf_clearance` (Cloudflare challenge, security), `g_state` (Google sign-in), and third-party cookies from Google (`NID`, `__Secure-STRP`, `SEARCH_SAMESITE`) and Telegram (`stel_ssid` on oauth.telegram.org / t.me). **Checked 2026-11-13** in a fresh private window: signed out, carsua.app holds only `cf_clearance` and empty local storage (no `ph_*`, no Google / Telegram cookies); the Google and Telegram cookies appear only after the sign-in dialog is opened, which loads **both** widgets (so list both even if the visitor uses one). **Still to check:** a `https://www.google.com` entry already shows in the signed-out cookie tree; open it and see which cookies it holds, and find what loads it on a plain page load (nothing in `apps/web/src` does so by default; if it is an embed, gate it)
-- [ ] Fix `about.p2` ("and their owners") and `privacy.device.p`; update the `account.delete.*` dialog and `legal.updated`
+- [ ] (table written with all known cookies, incl. Google and Telegram; **open:** the `google.com` cookie-tree check was skipped, so nothing is listed for it and nothing was gated) Cookie table: also list what a DevTools check on carsua.app showed (2026-11-13): `cf_clearance` (Cloudflare challenge, security), `g_state` (Google sign-in), and third-party cookies from Google (`NID`, `__Secure-STRP`, `SEARCH_SAMESITE`) and Telegram (`stel_ssid` on oauth.telegram.org / t.me). **Checked 2026-11-13** in a fresh private window: signed out, carsua.app holds only `cf_clearance` and empty local storage (no `ph_*`, no Google / Telegram cookies); the Google and Telegram cookies appear only after the sign-in dialog is opened, which loads **both** widgets (so list both even if the visitor uses one). **Still to check:** a `https://www.google.com` entry already shows in the signed-out cookie tree; open it and see which cookies it holds, and find what loads it on a plain page load (nothing in `apps/web/src` does so by default; if it is an embed, gate it)
+- [x] Fix `about.p2` ("and their owners") and `privacy.device.p`; update the `account.delete.*` dialog and `legal.updated`
 - [ ] Follow `docs/checklists.md` ("Docs after a feature", "App version")
 
 ### Step 5. Account-deletion test (needs the user: throwaway account + VPS DB access)
