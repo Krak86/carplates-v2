@@ -4833,4 +4833,5 @@ Phase B step 1 of the security hardening: violations of the Report-Only CSP now 
 - **Scripts:** the inline ingest / alpr heredocs became `infra/vps/deploy-ingest.sh` and `deploy-alpr.sh`; `deploy-api.sh` uses the helpers. The ingest and alpr `paths` triggers gained the new scripts, `lib.sh` and `.github/actions/**`.
 - **Dependabot:** `github-actions` lists the three action directories (composite actions are only scanned when listed).
 - **Verified on prod (run of 2026-11-12):** all four deploys green; api blue/green, migration and `seed-if-empty` ran through `lib.sh`; both Cloudflare purges returned `"success":true`. The public `/healthz` 403 warning is the existing Bot Fight Mode advisory.
+- **Verified by hand (2026-11-13):** Deploy ingest (#87) and Deploy ALPR (#11) dispatched with no path change, both green with no warnings. The `lib.sh` + script rsync worked on its own; ingest logged `ingest image … ready; crontab installed` and `seed-if-empty: ok`, ALPR logged `alpr healthy`.
 - **Gotcha:** Prettier rewrites flow-style `inputs: { description: a, b }` and splits at commas; action inputs are written in block style.

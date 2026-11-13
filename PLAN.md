@@ -1434,12 +1434,12 @@ Speaker icon beside the brand name on catalog pages; lazy popup with ua / ru / e
   - [ ] Owner, after the `brandPronunciationQuery` key bump (`v2`, staleTime 1 day) is deployed: on the phone open Kia (`Кі́а` + `KEE-ah`), press Listen on a make without a clip (synthetic voice) and check the Ukrainian voice exists
   - [ ] Owner: press play on a clip once with sound (headless Chrome fetched `De-Volkswagen.ogg` with no console error, audio not heard).
 
-## Deploy plumbing shared across workflows ✅ 2026-11-12, deployed; two workflow runs left
+## Deploy plumbing shared across workflows ✅ 2026-11-12, deployed; one VPS check left
 
 `build-image` / `cf-purge` actions, `infra/ci/lib.sh`, `infra/vps/lib.sh`, `deploy-ingest.sh`, `deploy-alpr.sh` (write-up: `docs/plan-done.md`).
 
 - [x] Deploy API, Web, ingest and ALPR green on the merge commit; api blue/green, migration and `seed-if-empty` ran through `lib.sh`; both api purges and the web purge returned `"success":true` (checked in the run logs 2026-11-12).
-- [ ] Run **Deploy ingest** and **Deploy ALPR** once by hand ("Run workflow", no path change): the `lib.sh` sync and the new scripts must work when the push did not touch their paths. Check the ingest log for `ingest image … ready; crontab installed` and no `warn: seed-if-empty failed`, the ALPR log for `alpr healthy`.
+- [x] **Deploy ingest** (#87, 1m 14s) and **Deploy ALPR** (#11, 57s) run by hand ("Run workflow", no path change): the `lib.sh` sync and the new scripts work without a path trigger. Ingest log: `ingest image … ready; crontab installed`, `seed-if-empty: ok`, no warn; ALPR log: `alpr healthy` (checked in the run logs 2026-11-13).
 - [ ] One SSH on the VPS: `/opt/carsua/compose/lib.sh` exists; `compose/.env` has `GH_OWNER`, `API_TAG_*`, `INGEST_TAG`, `ALPR_TAG` once each; `stat -c '%a' /opt/carsua/env/*.env` is `600`; `crontab -l` still lists the ingest jobs.
 - [ ] Optional: `sync_only` dispatch of Deploy API (fresh-VPS path, only matters for a rebuild).
 
