@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { Link, useSearchParams } from 'react-router'
 
 import { useCopyFeedback } from '@/components/use-copy-feedback'
+import ThirdPartyNote from '@/components/ThirdPartyNote'
 import Card from '@/components/ui/Card'
 
 const DISQUS_SHORT_NAME = import.meta.env.VITE_DISQUS_SHORT_NAME ?? ''
@@ -57,7 +58,9 @@ export default function DiscussRoute(): ReactNode {
               >
                 {t('discuss.load')}
               </button>
-              <p className="text-sm text-[var(--color-muted)]">{t('discuss.consent')}</p>
+              <p className="text-sm text-[var(--color-muted)]">
+                <ThirdPartyNote provider="Disqus" cookies />
+              </p>
             </div>
           )
         ) : (

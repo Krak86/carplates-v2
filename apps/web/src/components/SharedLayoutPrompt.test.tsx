@@ -24,6 +24,7 @@ describe('SharedLayoutPrompt', () => {
   it('asks before a shared map layout starts, and only the click turns it on', () => {
     const { container } = renderAt('/relax?layout=map')
     expect(container.textContent).toContain('Google')
+    expect(screen.getByRole('link').getAttribute('href')).toBe('/privacy#privacy-thirdParty')
     expect(useLiveBackgroundStore.getState().mode).toBe('images')
 
     fireEvent.click(screen.getAllByRole('button')[0]!)

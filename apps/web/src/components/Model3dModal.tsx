@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import type { Model3d } from '@carplates/shared'
 
 import ShareButton from '@/components/ShareButton'
+import ThirdPartyNote from '@/components/ThirdPartyNote'
 import { cn } from '@/lib/cn'
 import ExternalLink from '@/components/ExternalLink'
 
@@ -96,6 +97,9 @@ export default function Model3dModal({ models, label, initialUid, hideShare, onC
             Sketchfab
           </ExternalLink>
           {current.license ? ` · ${current.license}` : ''}. {t('model3d.note')}
+        </p>
+        <p className="mt-1 text-xs text-[var(--color-muted)]">
+          <ThirdPartyNote provider="Sketchfab" />
         </p>
 
         {models.length > 1 && (

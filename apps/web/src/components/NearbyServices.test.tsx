@@ -30,6 +30,7 @@ describe('NearbyServices', () => {
   it('a shared link opens the section but loads no Google iframe until the button is clicked', () => {
     const { container } = renderAt('/X?section=nearby')
     expect(container.querySelector('iframe')).toBeNull()
+    expect(container.textContent).toMatch(/IP address to Google/)
 
     fireEvent.click(screen.getByRole('button', { name: /Google Maps/ }))
     expect(container.querySelector('iframe')?.getAttribute('src')).toContain('google.com')

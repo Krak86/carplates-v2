@@ -26,6 +26,7 @@ describe('DiscussRoute', () => {
       </MemoryRouter>
     )
     expect(screen.queryByTestId('disqus')).toBeNull()
+    expect(screen.getByText(/Disqus sets cookies/)).toBeTruthy()
     fireEvent.click(screen.getByRole('button'))
     expect(screen.getByTestId('disqus')).toBeTruthy()
   })

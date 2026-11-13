@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import ThirdPartyNote from '@/components/ThirdPartyNote'
 import { regionMapUrl } from '@/lib/region-centers'
 
 type Props = { region: string }
@@ -22,7 +23,9 @@ export default function RegionMap({ region }: Props): ReactNode {
         >
           {t('map.show')}
         </button>
-        <p className="text-sm text-[var(--color-muted)]">{t('map.consent')}</p>
+        <p className="text-sm text-[var(--color-muted)]">
+          <ThirdPartyNote provider="OpenStreetMap" />
+        </p>
       </div>
     )
   }
