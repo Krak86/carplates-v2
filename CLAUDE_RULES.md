@@ -23,7 +23,7 @@ pnpm here forwards a literal `--`: run `pnpm ingest:mot --dir …`, not `pnpm in
   co-locating key + fn; `useState` = local only.
 - Tailwind v4 CSS-first: tokens in `@theme` (`apps/web/src/styles/global.css`), dark = `[data-theme='dark']`.
 - **SQL foreign keys in new migrations: table-level, named** — `CONSTRAINT fk_<table>_<col> FOREIGN KEY (col) REFERENCES schema.parent (id)
-  ON DELETE …` after the columns, not inline `col … REFERENCES`. Never edit applied migrations to convert old inline FKs.
+ON DELETE …` after the columns, not inline `col … REFERENCES`. Never edit applied migrations to convert old inline FKs.
 
 ## Performance (React Compiler)
 

@@ -104,7 +104,7 @@ export class AuctionsStatsService {
     const { db } = this.dbService
     const scope = lotsWhere(source)
 
-    const dim = (expr: string) =>
+    const dim = (expr: string): ReturnType<typeof db.execute<RowOut>> =>
       db.execute<RowOut>(
         sql`WITH l AS (${unionLots})
             SELECT ${sql.raw(expr)} AS label, ${AGGREGATES}
