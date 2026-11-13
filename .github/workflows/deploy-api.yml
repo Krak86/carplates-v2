@@ -65,7 +65,7 @@ jobs:
       - name: Sync compose files
         # --inplace: Caddy bind-mounts single files, and a rename would leave the container on the old inode.
         run: |
-          rsync -az --inplace infra/docker-compose.prod.yml infra/Caddyfile infra/maintenance.html infra/vps/backup.sh infra/vps/lib.sh vps:/opt/carsua/compose/
+          rsync -az --inplace infra/docker-compose.prod.yml infra/Caddyfile infra/maintenance.html infra/vps/backup.sh infra/vps/restore-replay-deletions.sh infra/vps/lib.sh vps:/opt/carsua/compose/
 
       - name: Write env files and origin certificate
         env:
@@ -154,6 +154,15 @@ jobs:
                 "$R2_ACCESS_KEY_ID" "$R2_SECRET_ACCESS_KEY" "$R2_ENDPOINT"
               emit BACKUP_BUCKET HC_PING_BACKUP
             } > backup.env
+            # Deletion ledger (restore-replay-deletions.sh): the shares token, read + delete on deleted/ in the shares bucket.
+            if [ -n "$SHARES_R2_ACCESS_KEY_ID" ] && [ -n "$SHARES_R2_SECRET_ACCESS_KEY" ]; then
+              {
+                printf 'RCLONE_CONFIG_LEDGER_TYPE=s3\nRCLONE_CONFIG_LEDGER_PROVIDER=Cloudflare\nRCLONE_CONFIG_LEDGER_NO_CHECK_BUCKET=true\n'
+                printf 'RCLONE_CONFIG_LEDGER_ACCESS_KEY_ID=%s\nRCLONE_CONFIG_LEDGER_SECRET_ACCESS_KEY=%s\nRCLONE_CONFIG_LEDGER_ENDPOINT=%s\n' \
+                  "$SHARES_R2_ACCESS_KEY_ID" "$SHARES_R2_SECRET_ACCESS_KEY" "$R2_ENDPOINT"
+                printf 'LEDGER_BUCKET=%s\n' "${SHARES_R2_BUCKET:-carsua-shares}"
+              } >> backup.env
+            fi
             push_env backup.env /opt/carsua/env/backup.env
           fi
           rm -f api.env alpr.env postgres.env backup.env

@@ -24,7 +24,7 @@ Keep it short: when an item ships, delete it here and add the ✅ line to PLAN.m
 
 - [ ] **Social search widgets** (Facebook, TikTok, Threads, Instagram) - checklist said researched, but no write-up exists. Write down the decision, or research now (Bluesky is the model).
 - [ ] **Drive2 country filter** (Lithuania, Belarus ..., exclude Russia) - no trace in the plan; research whether possible.
-- [ ] **Cookie consent** - analysis is in `docs/legal-and-monetization.md`; decide before any ads go live.
+- [ ] **Cookie consent / GDPR** - decided: cookieless PostHog, no banner; steps 1-6 in `docs/privacy-compliance.md`. A banner is only needed if ads go live.
 - [ ] **OBD fault-code lookup page** - open code lists; one new public route (route checklist in CLAUDE.md).
 - [ ] **More login providers** - GitHub, Microsoft, Facebook; also passkeys, "add email" on `/profile`, notification opt-out for the new-device mail.
 - [ ] **Driver's-licence-style plate card** - never started; low value.

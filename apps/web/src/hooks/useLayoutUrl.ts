@@ -3,14 +3,20 @@ import { useSearchParams } from 'react-router'
 
 import i18n from '@/i18n'
 import { useLiveMapView } from '@/hooks/useBackgroundMode'
-import { BACKGROUND_MODES, LIVE_STREAMS, isStreamMode, type BackgroundMode } from '@/lib/live-background'
+import {
+  BACKGROUND_MODES,
+  LIVE_STREAMS,
+  isStreamMode,
+  isThirdPartyMode,
+  type BackgroundMode
+} from '@/lib/live-background'
 import { useLiveBackgroundStore } from '@/store/live-background-store'
 import { setFontParam } from '@/store/ui-store'
 
 export const LAYOUT_PARAM = 'layout'
 export const STREAM_PARAM = 'stream'
 
-function parseMode(raw: string | null): BackgroundMode | undefined {
+export function parseMode(raw: string | null): BackgroundMode | undefined {
   return BACKGROUND_MODES.find(m => m === raw)
 }
 
@@ -40,7 +46,8 @@ export function useApplyLayoutFromUrl(): void {
     if (mode === 'map') setMapView(view)
     // Only known ids: the value ends up in an iframe src.
     if (isStreamMode(mode) && rawStream && LIVE_STREAMS[mode].some(s => s.id === rawStream)) setStream(mode, rawStream)
-    setMode(mode)
+    // A link must not contact Google / YouTube by itself: those layers wait for SharedLayoutPrompt's click.
+    if (!isThirdPartyMode(mode)) setMode(mode)
     // `view` is deliberately not a dependency: the map pins to the page it was opened on.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rawMode, rawStream])

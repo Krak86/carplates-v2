@@ -33,6 +33,15 @@ export async function initTelemetry(): Promise<void> {
     posthog.init(env.VITE_POSTHOG_KEY, {
       api_host: env.VITE_POSTHOG_HOST ?? 'https://eu.i.posthog.com',
       person_profiles: 'identified_only',
+      // Cookieless, no consent banner: nothing is written to cookies / localStorage / sessionStorage (needs "Enable
+      // cookieless tracking" in the PostHog project). Visitors are counted from a daily-rotating server-side hash.
+      cookieless_mode: 'always',
+      persistence: 'memory',
+      // No autocapture, replay, surveys or dead-click tracking: only explicit `capture()` calls and pageviews.
+      autocapture: false,
+      disable_session_recording: true,
+      disable_surveys: true,
+      capture_dead_clicks: false,
       // SPA: fire $pageview on every router navigation (history API), not only the first load.
       capture_pageview: 'history_change'
     })

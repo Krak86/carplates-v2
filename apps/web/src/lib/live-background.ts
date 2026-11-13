@@ -67,6 +67,11 @@ export function isStreamMode(mode: BackgroundMode): mode is StreamMode {
   return (STREAM_MODES as readonly string[]).includes(mode)
 }
 
+/** Layers that load a Google / YouTube iframe (the alarm layer only uses our own API). */
+export function isThirdPartyMode(mode: BackgroundMode): boolean {
+  return mode === 'map' || isStreamMode(mode)
+}
+
 export type LiveStream = { id: string; label: string }
 
 /** YouTube live streams offered by each stream layer — add an entry to extend its selector. */

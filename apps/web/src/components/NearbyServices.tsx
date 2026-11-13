@@ -32,6 +32,9 @@ export default function NearbyServices({ brand }: Props): ReactNode {
   const [category, setCategory] = useState<NearbyCategory>(() =>
     isSharedNearby ? parseNearbyCategory(searchParams.get('tab')) : DEFAULT_NEARBY_CATEGORY
   )
+  // The Google Maps iframe sends the visitor's IP to Google: opening the section by hand is the consent,
+  // a shared link (`?section=nearby`) opens it without one and asks via the button instead.
+  const [mapAllowed, setMapAllowed] = useState(false)
   const sectionRef = useRef<HTMLDivElement>(null)
   const { status, coords, handleRequestLocation } = useNearbyLocationActions()
   const query = t(nearbyQueryKey(category, brand), { brand })
@@ -40,6 +43,7 @@ export default function NearbyServices({ brand }: Props): ReactNode {
   const handleToggle = (): void => {
     const next = !open
     setOpen(next)
+    if (next) setMapAllowed(true)
     // Opening is the user gesture the permission prompt is tied to.
     if (next && (status === 'idle' || status === 'unavailable')) handleRequestLocation()
   }
@@ -115,7 +119,20 @@ export default function NearbyServices({ brand }: Props): ReactNode {
               </button>
             )}
 
-            {open && coords && (
+            {open && coords && !mapAllowed && (
+              <div className="flex aspect-video w-full flex-col items-center justify-center gap-2 rounded-md border border-[var(--color-border)] p-4 text-center">
+                <button
+                  type="button"
+                  onClick={() => setMapAllowed(true)}
+                  className="rounded-lg bg-[var(--color-primary)]/10 px-3 py-1 text-[var(--color-primary)] hover:bg-[var(--color-primary)]/20"
+                >
+                  {t('nearby.loadMap')}
+                </button>
+                <p className="text-sm text-[var(--color-muted)]">{t('nearby.loadMapConsent')}</p>
+              </div>
+            )}
+
+            {open && coords && mapAllowed && (
               <iframe
                 key={`${category}-${coords.lat}-${coords.lng}`}
                 title={t('nearby.mapTitle', { query })}

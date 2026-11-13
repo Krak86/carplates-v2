@@ -5,6 +5,9 @@ launching ads or paid features. The project-specific findings are the useful par
 
 ## Cookie / consent
 
+> Updated 2026-11-13: researched decision (cookieless PostHog, no banner), retention and step plan live in
+> [privacy-compliance.md](privacy-compliance.md). The notes below are the older baseline.
+
 - Today the app sets **no advertising or tracking cookies**. Own state (history, favorites, language, theme, offline data) is
   `localStorage`; the login session cookie (`carsua_sid`, Google or Telegram) is strictly necessary. Both are exempt from consent in the EU.
 - **Login providers = personal data**: Google → email, name, avatar URL; Telegram → numeric id, name, avatar URL (no email/phone).

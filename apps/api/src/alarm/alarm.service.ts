@@ -11,6 +11,7 @@ import { isFresh } from './helpers.js'
 
 /** The region tree changes rarely; one call a day (the upstream limit is per minute, so it is spent carefully). */
 const TREE_TTL_MS = 24 * 60 * 60_000
+const FIRST_POLL_DELAY_MS = 5_000
 
 /**
  * One poller keeps the active alerts in memory; visitors read this cache, so the key never reaches the browser and upstream
@@ -27,6 +28,7 @@ export class AlarmService implements OnModuleInit, OnModuleDestroy {
   private indexAt = 0
   private pausedUntil = 0
   private timer: NodeJS.Timeout | undefined
+  private startTimer: NodeJS.Timeout | undefined
 
   constructor(
     @Inject(ALARM_SOURCE) private readonly source: AlarmSource,
@@ -35,12 +37,18 @@ export class AlarmService implements OnModuleInit, OnModuleDestroy {
 
   onModuleInit(): void {
     if (!this.source.enabled || this.env.NODE_ENV === 'test') return
-    void this.poll()
-    this.timer = setInterval(() => void this.poll(), this.env.ALARM_POLL_SECONDS * 1000)
-    this.timer.unref()
+    // Delayed first poll: `tsx watch` restarts on every save and each cold start spends two upstream calls (tree + alerts),
+    // so a burst of restarts would trip the per-minute limit. Only the last process of a burst gets to poll.
+    this.startTimer = setTimeout(() => {
+      void this.poll()
+      this.timer = setInterval(() => void this.poll(), this.env.ALARM_POLL_SECONDS * 1000)
+      this.timer.unref()
+    }, FIRST_POLL_DELAY_MS)
+    this.startTimer.unref()
   }
 
   onModuleDestroy(): void {
+    clearTimeout(this.startTimer)
     clearInterval(this.timer)
   }
 

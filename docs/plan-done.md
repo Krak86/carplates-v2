@@ -4824,3 +4824,14 @@ Phase B step 1 of the security hardening: violations of the Report-Only CSP now 
 - **Removed:** `WikiPhotoStrip.tsx`, `wiki.photoStrip`, `wiki.photoStripNote`, `wiki.photoMore`, `wiki.photoLess`, `wiki.photoAlt`; added `wiki.photoStored`. The Commons link per photo is gone (the credit is text in the hero badge).
 - **Tests:** `WikiHeroImage.test.tsx` covers the thumbnail row and the swap. `LATEST_RELEASE_DATE` bumped to 2026-11-12.
 - Release entry `v2.1182` (day 2026-11-12).
+
+## Deploy plumbing shared across workflows (2026-11-12)
+
+- **Why:** the four deploy workflows (`deploy-api|web|ingest|alpr.yml`) repeated the same GHCR build job, Cloudflare purge `curl`, env-file writing (`emit` + `umask 077` ssh) and the VPS `.env` tag / health-wait snippets.
+- **Composite actions** (`.github/actions/`): `build-image` (buildx, GHCR login, push `:sha` + `:latest`, outputs `owner`), `cf-purge` (purge by `files` or `prefixes`, skips when the token or zone is unset, `warn-on-failure` for the best-effort api steps); `ssh-setup` already existed.
+- **Helpers:** `infra/ci/lib.sh` on the runner (`emit`, `push_env`), `infra/vps/lib.sh` on the VPS (`set_env`, `wait_healthy`, enters `/opt/carsua/compose`). Each deploy rsyncs `lib.sh` to `/opt/carsua/compose/` before the script that sources it runs, so there is no manual VPS step.
+- **Scripts:** the inline ingest / alpr heredocs became `infra/vps/deploy-ingest.sh` and `deploy-alpr.sh`; `deploy-api.sh` uses the helpers. The ingest and alpr `paths` triggers gained the new scripts, `lib.sh` and `.github/actions/**`.
+- **Dependabot:** `github-actions` lists the three action directories (composite actions are only scanned when listed).
+- **Verified on prod (run of 2026-11-12):** all four deploys green; api blue/green, migration and `seed-if-empty` ran through `lib.sh`; both Cloudflare purges returned `"success":true`. The public `/healthz` 403 warning is the existing Bot Fight Mode advisory.
+- **Verified by hand (2026-11-13):** Deploy ingest (#87) and Deploy ALPR (#11) dispatched with no path change, both green with no warnings. The `lib.sh` + script rsync worked on its own; ingest logged `ingest image … ready; crontab installed` and `seed-if-empty: ok`, ALPR logged `alpr healthy`.
+- **Gotcha:** Prettier rewrites flow-style `inputs: { description: a, b }` and splits at commas; action inputs are written in block style.

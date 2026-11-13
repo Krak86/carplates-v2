@@ -1132,6 +1132,8 @@ Code-level audit findings and the full pre-deploy gate: [docs/security-checklist
 
 ### Backup policy (Phase 4)
 
+**Current state (2026-11):** nightly `pg_dump` of `app.*` + the irreplaceable registry tables (14 days, R2), `full` dumps after each ingest **without** `app.*` (keeps 2), `archive` for the source ZIPs; see docs/deploy.md "Backups" and "Restore from R2". Purged accounts are re-deleted after a restore via the R2 deletion ledger. The original Phase 4 text below is kept for history.
+
 The DB is fully derived and read-only — every row rebuildable by re-running
 `ingest.ts`. Recovery is _re-ingest_, not _restore_.
 
@@ -1433,6 +1435,15 @@ Speaker icon beside the brand name on catalog pages; lazy popup with ua / ru / e
   - [x] 2026-11-08 follow-up (English respelling for all 109 makes, speechSynthesis fallback, gap line): ingest re-run on the VPS (327 rows, no WARNING), `/data-status` `gaps.brandPronounce = 0`, Cloudflare `/api/brands/` purged, origin returns `KEE-ah`; headless Chrome: Listen button + synthetic note, `speechSynthesis.speak` called with the plain respelling
   - [ ] Owner, after the `brandPronunciationQuery` key bump (`v2`, staleTime 1 day) is deployed: on the phone open Kia (`Кі́а` + `KEE-ah`), press Listen on a make without a clip (synthetic voice) and check the Ukrainian voice exists
   - [ ] Owner: press play on a clip once with sound (headless Chrome fetched `De-Volkswagen.ogg` with no console error, audio not heard).
+
+## Deploy plumbing shared across workflows ✅ 2026-11-12, deployed; one VPS check left
+
+`build-image` / `cf-purge` actions, `infra/ci/lib.sh`, `infra/vps/lib.sh`, `deploy-ingest.sh`, `deploy-alpr.sh` (write-up: `docs/plan-done.md`).
+
+- [x] Deploy API, Web, ingest and ALPR green on the merge commit; api blue/green, migration and `seed-if-empty` ran through `lib.sh`; both api purges and the web purge returned `"success":true` (checked in the run logs 2026-11-12).
+- [x] **Deploy ingest** (#87, 1m 14s) and **Deploy ALPR** (#11, 57s) run by hand ("Run workflow", no path change): the `lib.sh` sync and the new scripts work without a path trigger. Ingest log: `ingest image … ready; crontab installed`, `seed-if-empty: ok`, no warn; ALPR log: `alpr healthy` (checked in the run logs 2026-11-13).
+- [ ] One SSH on the VPS: `/opt/carsua/compose/lib.sh` exists; `compose/.env` has `GH_OWNER`, `API_TAG_*`, `INGEST_TAG`, `ALPR_TAG` once each; `stat -c '%a' /opt/carsua/env/*.env` is `600`; `crontab -l` still lists the ingest jobs.
+- [ ] Optional: `sync_only` dispatch of Deploy API (fresh-VPS path, only matters for a rebuild).
 
 ## Assistant + embeddable widget (idea 2026-11-08, to discuss)
 
