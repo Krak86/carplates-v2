@@ -18,8 +18,32 @@ const item = (group: ReleaseGroup, ua: string, ru: string, en: string): ReleaseI
 export const RELEASES: readonly ReleaseDay[] = [
   {
     date: '2026-11-13',
-    version: 'v2.1215',
+    version: 'v2.1222',
     items: [
+      item(
+        'improved',
+        'Сторінка «Стан даних»: історія оновлень тепер показує всі джерела з датою останнього оновлення, а не лише останні запуски.',
+        'Страница «Состояние данных»: история обновлений теперь показывает все источники с датой последнего обновления, а не только последние запуски.',
+        'Data status page: the update history now lists every source with its last update date, not just the latest runs.'
+      ),
+      item(
+        'improved',
+        'Аналітика без cookie: статистика використання йде в хмару PostHog ЄС, на вашому пристрої нічого не зберігається, тому банер cookie не потрібен.',
+        'Аналитика без cookie: статистика использования идёт в облако PostHog ЕС, на вашем устройстве ничего не сохраняется, поэтому баннер cookie не нужен.',
+        'Cookieless analytics: usage statistics go to the PostHog EU cloud and nothing is stored on your device, so no cookie banner is needed.'
+      ),
+      item(
+        'improved',
+        'Мапа регіону, коментарі Disqus, сервіси поблизу (Google Maps) і спільні розкладки фону з картою чи трансляцією завантажуються лише після вашого кліку; у вікні відео є примітка про сторонній сервіс.',
+        'Карта региона, комментарии Disqus, сервисы рядом (Google Maps) и общие раскладки фона с картой или трансляцией загружаются только после вашего клика; в окне видео есть примечание о стороннем сервисе.',
+        'The region map, Disqus comments, nearby services (Google Maps) and shared background layouts with a map or stream load only after your click; the video window carries a third-party note.'
+      ),
+      item(
+        'improved',
+        'Видалений обліковий запис стирається через 14 днів пільгового періоду, а з резервних копій зникає ще за 14 днів; дані облікових записів більше не потрапляють у довгі повні копії.',
+        'Удалённый аккаунт стирается через 14 дней льготного периода, а из резервных копий исчезает ещё за 14 дней; данные аккаунтов больше не попадают в долгие полные копии.',
+        'A deleted account is erased after a 14-day grace period and leaves backups 14 days later; account data no longer goes into the long-lived full backups.'
+      ),
       item(
         'improved',
         'Політика конфіденційності переписана: хто відповідає за дані, правові підстави, таблиці cookie та строків зберігання, список обробників (Contabo, Cloudflare, Resend, PostHog ЄС, Sentry, Google, Telegram, Disqus) і ваші права; діалог видалення облікового запису тепер перелічує й синхронізовані дані та фото.',

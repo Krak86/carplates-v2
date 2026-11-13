@@ -1,4 +1,4 @@
--- Run log of the scheduled ingest jobs (scripts/src/run-job.ts, SCHEDULE.md). Backward compatible (blue/green): new table only.
+-- Run log of the scheduled ingest jobs (scripts/src/run-job.ts, docs/SCHEDULE.md). Backward compatible (blue/green): new table only.
 CREATE TABLE registry.job_runs (
   id          bigserial PRIMARY KEY,
   job         text        NOT NULL,

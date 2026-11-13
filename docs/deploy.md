@@ -9,7 +9,7 @@ Deploy scripts run via `ssh vps bash -s < script`, so bash reads the script from
 
 This file is the single VPS reference: sizing/provider/DNS, architecture, runbook, secrets, backups, and the HTTP/2-3 + compression notes (last
 section). Task checklists and the rate-limit policy stay in [PLAN.md "Phase 4"](../PLAN.md); the pre-deploy security gate is
-[security-checklist.md](security-checklist.md); recurring jobs are [SCHEDULE.md](../SCHEDULE.md).
+[security-checklist.md](security-checklist.md); recurring jobs are [SCHEDULE.md](SCHEDULE.md).
 
 ## Sizing and provider (checked 2026-10-13, prices ex-VAT/promo, verify at purchase)
 
@@ -239,7 +239,7 @@ docker compose exec -T postgres pg_restore --clean --if-exists --no-owner -U car
    **Then run the deletion replay (below) before the api goes live.**
 3. `deploy-api` normally, then `deploy-web`; check `/healthz`, a plate, a login.
 
-**Deletion replay (after A or B, api still down):** accounts purged after the dump was taken come back with it. `bash /opt/carsua/compose/restore-replay-deletions.sh` (synced by `deploy-api`): it deletes every id listed as `deleted/<uuid>` in the `carsua-shares` bucket from `app.users` (cascade) and prunes ledger entries older than 14 days. The API writes an entry on every purge (`AccountPurgeService`; no PII, only the UUID). No new secrets: `deploy-api` writes the `LEDGER` rclone remote into `backup.env` from the `SHARES_R2_*` secrets. One-time setup in the R2 dashboard: add a second bucket lifecycle rule: delete `deleted/` objects after 15 days. **Keep the existing 8-day rule scoped to the `shares/` prefix**, or it would also delete ledger entries.
+**Deletion replay (after A or B, api still down):** accounts purged after the dump was taken come back with it. `bash /opt/carsua/compose/restore-replay-deletions.sh` (synced by `deploy-api`): it deletes every id listed as `deleted/<uuid>` in the `carsua-shares` bucket from `app.users` (cascade) and prunes ledger entries older than 14 days. The API writes an entry on every purge (`AccountPurgeService`; no PII, only the UUID). No new secrets: `deploy-api` writes the `LEDGER` rclone remote into `backup.env` from the `SHARES_R2_*` secrets. One-time setup in the R2 dashboard: add a second bucket lifecycle rule: delete `deleted/` objects after 15 days. **Keep the existing 8-day rule scoped to the `shares/` prefix**, or it would also delete ledger entries. The script honours `ENV_FILE` (default `/opt/carsua/env/backup.env`) and `PG_CMD` (default: `psql` in the postgres container), so it can be tried against a scratch container without touching production: `PG_CMD="docker exec -i pgscratch" bash restore-replay-deletions.sh` (tested 2026-11-13, see [privacy-compliance.md](privacy-compliance.md) Step 5).
 
 Registry data lost with the full dumps: re-ingest from `archive/` ZIPs (`backup.sh archive`) or data.gov.ua (`ingest:*`).
 
@@ -322,8 +322,8 @@ Not worth tuning at current traffic (Cloudflare cache + per-IP limits sit in fro
    embeds and the Google sign-in popup), `?lang=` reflection is whitelisted by `resolveLang`, the rest is cache/comment noise. `trivy image` (api/alpr, HIGH+CRITICAL): ~55 Debian OS
    findings per image with no fix available (re-scan after base-image bumps), plus 7 HIGH in the npm bundled with `node:24-slim`, now removed in `apps/api/Dockerfile`.
    Gotcha: Cloudflare Bot Fight Mode challenges GitHub runner IPs (403), so the post-deploy public `/healthz` check in `deploy-api.yml` is advisory only.
-   Still open: enforce CSP (Report-Only in `infra/Caddyfile`, after ~1 week of clean reports), account-deletion test with a throwaway account,
-   re-run `trivy image` after the next base-image update.
+   Account-deletion test with a throwaway account done 2026-11-13 (delete, restore, purge, ledger, scratch replay: [privacy-compliance.md](privacy-compliance.md) Step 5).
+   Still open: enforce CSP (Report-Only in `infra/Caddyfile`, after ~1 week of clean reports), re-run `trivy image` after the next base-image update.
 6. ✅ **Browser smoke test (done 2026-10-28):** home, plate page, link-preview card, Google login (authorised origin `https://carsua.app`), Telegram login (`/setdomain carsua.app`;
    check `TELEGRAM_BOT_USERNAME` is the production bot), a real email through Resend (`MAIL_FROM` is `carsua <noreply@carsua.app>`), VIN lookup, camera recognize
    (ALPR), Maps key restricted to the `carsua.app` referrer, Disqus.

@@ -1,4 +1,4 @@
-# Scheduled ingest jobs (SCHEDULE.md). Installed as the deploy user's crontab by the ingest deploy (`crontab ingest.cron`); server time.
+# Scheduled ingest jobs (docs/SCHEDULE.md). Installed as the deploy user's crontab by the ingest deploy (`crontab ingest.cron`); server time.
 # Each job logs to registry.job_runs and pings its healthchecks.io check (HC_PING_<JOB> in /opt/carsua/env/ingest.env).
 # run-job.ts skips a run while the previous one is still going, so overlaps are harmless.
 SHELL=/bin/bash

@@ -1,7 +1,7 @@
 import type { Dataset } from '@/routes/data-status/types'
 
 /**
- * Every data source the site holds, with how it is kept current. SCHEDULE.md is the operational twin (commands, timeouts).
+ * Every data source the site holds, with how it is kept current. docs/SCHEDULE.md is the operational twin (commands, timeouts).
  * A scheduled one names its `job` and the page reads its last run from the server; a manual one carries `refreshedOn`, the date of its
  * last seed-CSV export (`pnpm export:*:csv`): **bump it in the same commit that re-exports the seed**.
  */
@@ -15,7 +15,7 @@ export const DATASETS: readonly Dataset[] = [
   },
 
   // Scheduled (infra/vps/ingest.cron)
-  // `refreshedOn` of a job = the day its schedule went live (SCHEDULE.md): what is known before the first recorded run.
+  // `refreshedOn` of a job = the day its schedule went live (docs/SCHEDULE.md): what is known before the first recorded run.
   {
     id: 'plates',
     name: 'data.gov.ua: vehicle registrations',

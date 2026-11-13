@@ -17,7 +17,7 @@ type CacheEntry<T> = { value: T; expiresAt: number }
 
 /**
  * US recall campaigns and owner complaints from NHTSA's live API (public domain), behind a bounded in-memory TTL cache
- * (no table, no ingest — see DATASETS_PLAN.md stage F). Model-level: a US campaign says nothing about a particular
+ * (no table, no ingest — see docs/DATASETS_PLAN.md stage F). Model-level: a US campaign says nothing about a particular
  * Ukrainian car. A failed upstream call is a 502 and is never cached, so the web block simply hides.
  */
 @Injectable()

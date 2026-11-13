@@ -24,7 +24,7 @@ type WmiRow = { fromYear: number; toYear: number | null; maker: string | null; c
 export class OriginService {
   constructor(@Inject(DbService) private readonly dbService: DbService) {}
 
-  /** Brand and VIN-prefix facts only where known; nothing is guessed (ORIGIN_PLAN.md). */
+  /** Brand and VIN-prefix facts only where known; nothing is guessed (docs/ORIGIN_PLAN.md). */
   async lookup(query: OriginQuery): Promise<OriginResponse> {
     const slug = brandSlug(query.brand)
     const vin = query.vin?.trim().toUpperCase()
@@ -102,7 +102,7 @@ export class OriginService {
     }))
   }
 
-  /** `model_slug` is the alphanumeric `modelKey` of the registry model (ORIGIN_PLAN.md Step 3). */
+  /** `model_slug` is the alphanumeric `modelKey` of the registry model (docs/ORIGIN_PLAN.md Step 3). */
   private async modelPlants(slug: string, model: string): Promise<ModelPlant[]> {
     const key = modelKey(model)
     if (!key) return []

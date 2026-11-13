@@ -1,4 +1,4 @@
--- Vehicle origin ("Where it comes from", ORIGIN_PLAN.md). New tables only, so a blue/green api keeps working.
+-- Vehicle origin ("Where it comes from", docs/ORIGIN_PLAN.md). New tables only, so a blue/green api keeps working.
 -- Filled by scripts/src/ingest-brand-origin.ts (Wikidata, NHTSA WMI list) and, for model_plant, a hand-curated CSV (release 2).
 --
 -- `brand_slug` is `brandSlug()` from @carplates/shared (the logo / Euro NCAP slug). `country_code` is ISO 3166-1 alpha-2 for a

@@ -12,7 +12,7 @@
  *   pnpm ingest:mot -- --from-csv seed-data/mot.csv.gz        # load the committed seed, no ZIPs needed
  *   pnpm ingest:mot -- --export-csv seed-data/mot.csv.gz       # dump the tables after a real ingest
  *
- * Download (not done by the script): the yearly result + item ZIPs and the lookup — see DATASETS_PLAN.md (2024+: `dft_test_*_extracts_<Y>.zip`
+ * Download (not done by the script): the yearly result + item ZIPs and the lookup — see docs/DATASETS_PLAN.md (2024+: `dft_test_*_extracts_<Y>.zip`
  * + `dft_item_detail_extract.csv` + `dft_item_group_extract.csv`; up to 2023: `dft_test_*_<Y>.zip` + `lookup.zip`) — in one folder.
  * ZIPs over 4 GB need 7-Zip on the machine (Info-ZIP unzip and Windows tar cannot read Zip64 here).
  */
@@ -77,7 +77,7 @@ function findFiles(dir: string, only: number[] | null, exact = false): MotFiles[
   return files.sort((a, b) => a.year - b.year)
 }
 
-/** Years before this use the pre-May-2018 layout / straddle the EU directive (decision 0 in DATASETS_PLAN.md). */
+/** Years before this use the pre-May-2018 layout / straddle the EU directive (decision 0 in docs/DATASETS_PLAN.md). */
 const MIN_SUPPORTED_YEAR = 2019
 
 async function aggregate(dir: string, only: number[] | null, refreshCensus: boolean, exact: boolean): Promise<MotData> {

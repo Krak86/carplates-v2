@@ -105,7 +105,7 @@ recalls (+ NLLB recall translations), Open EV Data, UK MOT common faults, Wikida
 spec tables, VIN WMI prefixes, model plants, auto news + brand YouTube posts, stolen-car history (stolen.in.ua) and the DTP
 road-safety tables. Per-command details: [docs/commands-reference.md](docs/commands-reference.md).
 
-Not seeded on purpose (live feeds, run on a schedule on the VPS, see [SCHEDULE.md](SCHEDULE.md)): `ingest:wanted` (National Police
+Not seeded on purpose (live feeds, run on a schedule on the VPS, see [docs/SCHEDULE.md](docs/SCHEDULE.md)): `ingest:wanted` (National Police
 wanted vehicles), `ingest:wanted-plates` (Garpun), `ingest:auctions` (SETAM), `ingest:prozorro`, `ingest:auction-proceedings` (debtors register, reasons for SETAM lots), `ingest:news`, `ingest:social`,
 `ingest:dtp:patrol`, `ingest:rdw-recalls`, `ingest:ca-recalls`. Run any of them once by hand to fill its card locally.
 Also not seeded: `registry.missed_lookups` (user telemetry), `stats_*` (rebuilt by `db:refresh-derived`) and `app.*` (accounts).
@@ -335,7 +335,7 @@ See [CLAUDE.md](CLAUDE.md) for conventions and [PLAN.md](PLAN.md) for the roadma
 `pnpm ingest:press · ingest:press:csv · export:press:csv` (~10 min cold, 1 req/s) ·
 `pnpm ingest:topgear · ingest:topgear:csv · export:topgear:csv` (~20–25 min cold, 1 req/s) ·
 `pnpm ingest:news` (RSS auto-news; feeds in `scripts/news-sources.json`; `--source`, `--dry-run`, `--list`; no CSV seed — schedule it) ·
-`pnpm ingest:social` (brand + parent-group YouTube channel uploads from public RSS feeds, no key; `--channel`, `--dry-run`, `--list`; no CSV seed — schedule it, see [SCHEDULE.md](SCHEDULE.md)) ·
+`pnpm ingest:social` (brand + parent-group YouTube channel uploads from public RSS feeds, no key; `--channel`, `--dry-run`, `--list`; no CSV seed — schedule it, see [docs/SCHEDULE.md](docs/SCHEDULE.md)) ·
 `pnpm ingest:sketchfab · ingest:sketchfab:csv · export:sketchfab:csv` ·
 `pnpm ingest:carshow360 · ingest:carshow360:csv · export:carshow360:csv` (sitemap only; `--enrich`, `--retry-failed`) ·
 `pnpm ingest:vehiclesdb · ingest:vehiclesdb:csv · export:vehiclesdb:csv · db:refresh-vdb-stats · db:refresh-derived` (VehiclesDB cross-market catalog, CC BY 4.0; `db:refresh-derived` rebuilds the fuel/safety/markets rollups) ·

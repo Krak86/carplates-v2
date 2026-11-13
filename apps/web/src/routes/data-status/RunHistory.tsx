@@ -1,15 +1,15 @@
 import type { MouseEvent, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { JobRun } from '@carplates/shared'
+import type { JobStatus } from '@carplates/shared'
 
 import Card from '@/components/ui/Card'
 import { cn } from '@/lib/cn'
 import { toIntlLocale } from '@/lib/intl'
 import { DATASETS } from '@/routes/data-status/datasets'
-import { groupByCadence } from '@/routes/data-status/helpers'
+import { datasetStatus, groupByCadence, lastSync } from '@/routes/data-status/helpers'
 
 type Props = {
-  runs: readonly JobRun[]
+  jobs: readonly JobStatus[]
 }
 
 /** Smooth-scrolls to the tile and flashes it; plain anchor jumps stay as the no-JS fallback. */
@@ -24,15 +24,15 @@ function jumpTo(e: MouseEvent<HTMLAnchorElement>, id: string): void {
   window.setTimeout(() => el.classList.remove('bg-primary/10'), 1800)
 }
 
-/** Latest scheduled runs, newest first; each row jumps to the dataset's tile below. Runs of jobs without a tile are left out. */
-export default function RunHistory({ runs }: Props): ReactNode {
+/** Every source with its last update, newest first (sources never synced last); each row jumps to the dataset's tile below. */
+export default function RunHistory({ jobs }: Props): ReactNode {
   const { t, i18n } = useTranslation()
   const format = new Intl.DateTimeFormat(toIntlLocale(i18n.language), { dateStyle: 'medium', timeStyle: 'short' })
-  const rows = runs.flatMap(run => {
-    const dataset = DATASETS.find(d => d.job === run.job)
-    return dataset ? [{ run, dataset }] : []
-  })
-  if (rows.length === 0) return null
+  const rows = DATASETS.map(dataset => ({
+    dataset,
+    synced: lastSync(dataset, jobs),
+    status: datasetStatus(dataset, jobs)
+  })).sort((a, b) => (b.synced?.getTime() ?? -1) - (a.synced?.getTime() ?? -1))
 
   return (
     <Card className="space-y-2">
@@ -52,13 +52,13 @@ export default function RunHistory({ runs }: Props): ReactNode {
         ))}
       </nav>
       <ul className="max-h-72 overflow-y-auto pl-1 text-sm">
-        {rows.map(({ run, dataset }) => (
-          <li key={`${run.job}-${run.startedAt}`} className="relative ml-0 border-l border-border pl-4">
+        {rows.map(({ dataset, synced, status }) => (
+          <li key={dataset.id} className="relative ml-0 border-l border-border pl-4">
             <span
               aria-hidden
               className={cn(
                 'absolute top-2.5 left-[-0.28rem] size-2 rounded-full',
-                run.status === 'ok' ? 'bg-primary' : run.status === 'running' ? 'bg-muted' : 'bg-red-500'
+                status === 'failing' ? 'bg-red-500' : synced ? 'bg-primary' : 'bg-muted'
               )}
             />
             <a
@@ -67,7 +67,13 @@ export default function RunHistory({ runs }: Props): ReactNode {
               className="flex flex-wrap items-center gap-x-3 py-1 hover:text-primary"
             >
               <span className="min-w-0">{dataset.name}</span>
-              <span className="text-muted">{format.format(new Date(run.startedAt))}</span>
+              <span className="text-muted">
+                {synced
+                  ? format.format(synced)
+                  : dataset.cadence === 'minutely' || dataset.cadence === 'live'
+                    ? t(`dataStatus.cadence.${dataset.cadence}`)
+                    : t('dataStatus.neverSynced')}
+              </span>
             </a>
           </li>
         ))}

@@ -4,7 +4,7 @@
  *
  *   pnpm db:refresh-origin-stats
  *
- * Same rules as the VIN page (ORIGIN_PLAN.md): the brand country is the `brand_origin_period` row in force in the model year
+ * Same rules as the VIN page (docs/ORIGIN_PLAN.md): the brand country is the `brand_origin_period` row in force in the model year
  * (`pickByYear`), the plant country the `wmi_prefix` row (then the curated `lookupWmi`) of a standard 17-character VIN; both
  * go through `countryAtYear`, so a 1985 Skoda is Czechoslovakia and a Soviet-built car is the USSR. Nothing is guessed: a
  * brand with no origin row or a car with no standard VIN counts under '' (unknown). Re-run after a registry ingest or

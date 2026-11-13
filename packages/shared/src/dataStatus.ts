@@ -19,14 +19,6 @@ export const jobStatusSchema = z.object({
 })
 export type JobStatus = z.infer<typeof jobStatusSchema>
 
-/** One finished or running run of a scheduled job. */
-export const jobRunSchema = z.object({
-  job: z.string(),
-  status: z.string(),
-  startedAt: z.string()
-})
-export type JobRun = z.infer<typeof jobRunSchema>
-
 /**
  * GET /api/data-status: the live half of the "Data status" page. The list of datasets, their cadence and the manual refresh dates
  * are static in the web app; only what the server alone knows (the real registry span and the cron run log) travels here.
@@ -40,8 +32,6 @@ export const dataStatusResponseSchema = z.object({
   /** Rows held per source (dataset id -> count); a source without a table of its own is absent. */
   counts: z.record(z.string(), z.number().int().nonnegative()).default({}),
   /** Items needing manual attention per source (dataset id -> count), e.g. catalog makes without a pronunciation respelling; absent or 0 = nothing to do. */
-  gaps: z.record(z.string(), z.number().int().nonnegative()).default({}),
-  /** The most recent runs of every scheduled job, newest first. */
-  history: z.array(jobRunSchema).default([])
+  gaps: z.record(z.string(), z.number().int().nonnegative()).default({})
 })
 export type DataStatusResponse = z.infer<typeof dataStatusResponseSchema>

@@ -1,4 +1,4 @@
--- Wanted vehicles: history backfill from stolen.in.ua + a region per record (WANTED_PLAN.md). Backward compatible (blue/green):
+-- Wanted vehicles: history backfill from stolen.in.ua + a region per record (docs/WANTED_PLAN.md). Backward compatible (blue/green):
 -- only new columns with defaults and new tables.
 --   source         'feed' (National Police CarsWanted.json) | 'stolen.in.ua' (scraped history, found cars only)
 --   resolved_exact false for a month-card placeholder whose real "removed from wanted" date is unknown

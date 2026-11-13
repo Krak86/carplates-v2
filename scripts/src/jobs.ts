@@ -1,4 +1,4 @@
-/** Scheduled ingest jobs (SCHEDULE.md). The crontab (`infra/vps/ingest.cron`) only says WHEN; what runs and its time limit live here. */
+/** Scheduled ingest jobs (docs/SCHEDULE.md). The crontab (`infra/vps/ingest.cron`) only says WHEN; what runs and its time limit live here. */
 
 export type Job = {
   /** Shell command, run from `scripts/` (the ingest image has `tsx` on PATH). */
@@ -14,11 +14,11 @@ export const JOBS = {
   // Garpun wanted plates (~20 k rows, seconds): after `wanted` (04:40); a skipped day loses resolved history like `wanted`.
   'wanted-plates': { command: 'tsx src/wanted-plates.ts', timeoutMin: 10 },
   // SETAM auction lots (newest 2 monthly CSVs, ~1 000 vehicle lots, seconds). Idempotent and nothing is lost on a skipped day (lots
-  // are snapshots, a later run catches up); the first VPS run needs `--all` once for the history (SCHEDULE.md).
+  // are snapshots, a later run catches up); the first VPS run needs `--all` once for the history (docs/SCHEDULE.md).
   auctions: { command: 'tsx src/auctions.ts', timeoutMin: 15 },
   // Prozorro.Sale vehicle auctions (docs/prozorro-sale-auctions-plan.md): reads the feed from the newest stored change minus 1 day (~370 records a
   // day on average (1 400 on busy days), 4-14 requests, seconds). A skipped day is caught up by the next run; after an outage of weeks the cursor still resumes where it stopped.
-  // The first VPS run needs the history once: `tsx src/prozorro.ts --from 2017-04-01` (SCHEDULE.md).
+  // The first VPS run needs the history once: `tsx src/prozorro.ts --from 2017-04-01` (docs/SCHEDULE.md).
   'prozorro-auctions': { command: 'tsx src/prozorro.ts', timeoutMin: 45 },
   // Debtors register (~800 MB ZIP, 11 M rows streamed once) -> debt category / issuer / bailiff office of each SETAM lot's proceeding. Only OPEN
   // proceedings are listed, so a lot is covered when a run happens while its proceeding is open: weekly. Upserts, never deletes.

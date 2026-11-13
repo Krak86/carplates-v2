@@ -155,7 +155,7 @@ CSP confirmed still Report-Only (the one gap). Code-level claims in §2-§3 re-r
 - [x] Rate-limit probe (local 2026-11-09: plate 100 × 200 then 429, csp-report 60 then 429; `/api/auth/google` and Cloudflare/Caddy layer not yet probed): 200 rapid requests to `/api/plate/*` and `/api/auth/google` return 429; Caddy/Cloudflare limits active.
 - [ ] ZAP baseline against staging: no medium+ alerts left unexplained.
 - [ ] Backups restore-tested (PLAN.md "Backup policy"); `app` schema nightly dump + PITR as soon as users exist.
-- [ ] Privacy/terms/cookie decisions done ([legal-and-monetization.md](legal-and-monetization.md)); account deletion works and wipes all `app.*` rows.
+- [x] Privacy/terms/cookie decisions done ([legal-and-monetization.md](legal-and-monetization.md)); account deletion works and wipes all `app.*` rows (throwaway-account test 2026-11-13, [privacy-compliance.md](privacy-compliance.md) Step 5).
 
 ## 8. Before adding email+password / Telegram / other logins
 
