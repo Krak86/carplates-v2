@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router'
 
+import ThirdPartyNote from '@/components/ThirdPartyNote'
 import {
   DEFAULT_NEARBY_CATEGORY,
   NEARBY_CATEGORIES,
@@ -128,7 +129,9 @@ export default function NearbyServices({ brand }: Props): ReactNode {
                 >
                   {t('nearby.loadMap')}
                 </button>
-                <p className="text-sm text-[var(--color-muted)]">{t('nearby.loadMapConsent')}</p>
+                <p className="text-sm text-[var(--color-muted)]">
+                  <ThirdPartyNote provider="Google" />
+                </p>
               </div>
             )}
 

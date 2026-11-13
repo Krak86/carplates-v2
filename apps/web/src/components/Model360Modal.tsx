@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import type { Model360, Winner360 } from '@carplates/shared'
 
 import ShareButton from '@/components/ShareButton'
+import ThirdPartyNote from '@/components/ThirdPartyNote'
 import { cn } from '@/lib/cn'
 import {
   model360ChipLabel,
@@ -237,6 +238,9 @@ export default function Model360Modal({
             {isAlt ? 'Winner Imports' : 'CarShow360'}
           </ExternalLink>
           . {t(isAlt ? 'model360.noteAlt' : 'model360.note')}
+        </p>
+        <p className="mt-1 text-xs text-[var(--color-muted)]">
+          <ThirdPartyNote provider={isAlt ? 'Winner Imports' : 'CarShow360'} />
         </p>
       </div>
     </div>,

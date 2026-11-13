@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router'
 
+import ThirdPartyNote from '@/components/ThirdPartyNote'
 import { LAYOUT_PARAM, STREAM_PARAM, parseMode } from '@/hooks/useLayoutUrl'
 import { isStreamMode, isThirdPartyMode } from '@/lib/live-background'
 import { useLiveBackgroundStore } from '@/store/live-background-store'
@@ -28,6 +29,7 @@ export default function SharedLayoutPrompt(): ReactNode {
       className="sticky top-14 z-20 flex flex-wrap items-center justify-center gap-2 border-b border-[var(--color-border)] bg-[var(--color-bg)]/70 px-4 py-1.5 text-center text-sm backdrop-blur-md"
     >
       <span>{t(isStreamMode(shared) ? 'sharedLayout.stream' : 'sharedLayout.map')}</span>
+      <ThirdPartyNote provider={isStreamMode(shared) ? 'YouTube' : 'Google'} />
       <button
         type="button"
         onClick={() => setMode(shared)}

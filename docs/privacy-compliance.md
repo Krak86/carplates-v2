@@ -85,8 +85,8 @@ Historical migration is limited on free plans (a support ticket may help). Re-ch
 - [x] `posthog.init`: `cookieless_mode: 'always'`, `persistence: 'memory'`, `autocapture: false`, `disable_session_recording: true`,
       `disable_surveys: true`, `capture_dead_clicks: false` (check names against the installed version; ask before bumping the pin)
 - [x] Unit test the init options (mock `posthog-js`): `apps/web/src/lib/telemetry.test.ts`
-- [ ] After deploy: enable "Enable cookieless tracking" in the PostHog project
-- [ ] After deploy: create the PostHog EU org, set `VITE_POSTHOG_HOST=https://eu.i.posthog.com` + new key (GitHub vars, `deploy-web.yml`),
+- [x] After deploy: enable "Enable cookieless tracking" in the PostHog project (done 2026-11-13, EU project 348169; project-level autocapture / heatmaps / web vitals switched off)
+- [x] After deploy (done 2026-11-13; verified: events go to eu.i.posthog.com, no `ph_*` cookie or localStorage key): create the PostHog EU org, set `VITE_POSTHOG_HOST=https://eu.i.posthog.com` + new key (GitHub vars, `deploy-web.yml`),
       point the server HogQL key/host (`apps/api/src/usage/posthog.service.ts`, `env.ts`) at EU, update `features-reference.md:223`
 - Sentry stays (query strings stripped, no device ids); disclose it.
 
@@ -106,7 +106,7 @@ Historical migration is limited on free plans (a support ticket may help). Re-ch
       or accept and disclose Google as a processor
 - [x] If gating: `NearbyServices.tsx` (shared link shows the placeholder, the header click or the button loads the iframe), `LiveBackground.tsx`
       (shared layout asks before loading a third-party iframe), ua/ru/en strings, tests: no iframe before the click
-- [ ] Either way: list Google Maps and YouTube in the Step 4 processors / device-storage sections
+- [x] Either way: list Google Maps and YouTube in the Step 4 processors / device-storage sections
 
 ### Step 3. Backups: cap account data at 14 days (`infra/vps/backup.sh`)
 
@@ -121,14 +121,29 @@ Historical migration is limited on free plans (a support ticket may help). Re-ch
 
 Files: `apps/web/src/routes/LegalRoute.tsx` (section ids, line 10), `en.json` / `ua.json` / `ru.json`, `AboutRoute.tsx`.
 
-- [ ] New Privacy sections: controller (**user decides what identity to show**), registry / scraped data (sources, legal basis, objection
+- [x] (done 2026-11-13; controller shown as "carsua.app" + Contact page, no personal name, decided by the user; tables rendered by `routes/legal/LegalTable.tsx`) New Privacy sections: controller (**user decides what identity to show**), registry / scraped data (sources, legal basis, objection
       via `/contact`), device storage + cookie table, account data per provider, retention table, processors and transfers
       (Contabo DE, Cloudflare, Resend, PostHog EU, Sentry, Google, Telegram, Disqus), rights (portability "on request" since export is not built;
       authority: Ukrainian Ombudsman or the EU DPA)
-- [ ] Processors list must include Google Maps (nearby services, live background) and YouTube (streams), and say embeds load only on a click
+- [x] Processors list must include Google Maps (nearby services, live background) and YouTube (streams), and say embeds load only on a click
       (or as decided in Step 2b)
-- [ ] Fix `about.p2` ("and their owners") and `privacy.device.p`; update the `account.delete.*` dialog and `legal.updated`
+- [ ] (table written with all known cookies, incl. Google and Telegram; **open:** the `google.com` cookie-tree check was skipped, so nothing is listed for it and nothing was gated) Cookie table: also list what a DevTools check on carsua.app showed (2026-11-13): `cf_clearance` (Cloudflare challenge, security), `g_state` (Google sign-in), and third-party cookies from Google (`NID`, `__Secure-STRP`, `SEARCH_SAMESITE`) and Telegram (`stel_ssid` on oauth.telegram.org / t.me). **Checked 2026-11-13** in a fresh private window: signed out, carsua.app holds only `cf_clearance` and empty local storage (no `ph_*`, no Google / Telegram cookies); the Google and Telegram cookies appear only after the sign-in dialog is opened, which loads **both** widgets (so list both even if the visitor uses one). **Still to check:** a `https://www.google.com` entry already shows in the signed-out cookie tree; open it and see which cookies it holds, and find what loads it on a plain page load (nothing in `apps/web/src` does so by default; if it is an embed, gate it)
+- [x] Fix `about.p2` ("and their owners") and `privacy.device.p`; update the `account.delete.*` dialog and `legal.updated`
 - [ ] Follow `docs/checklists.md` ("Docs after a feature", "App version")
+
+### Step 4b. Follow-ups from the Step 4 review (added 2026-11-13)
+
+- [x] Privacy controller section mentions custom site / web-app work (turnkey, via Contact); table of contents on /privacy and /terms (`LegalRoute.tsx`)
+- [x] (done 2026-11-13: new "Data and privacy" section on /install in ua/ru/en, link to /privacy was already in the footer; also fixed `install.cache.1` "not synced anywhere", wrong for signed-in users) `/install` (`routes/install/InstallRoute.tsx`): read what it claims; add a short paragraph that the installed app uses the same browser storage
+      (local storage, IndexedDB, offline cache), uninstall / clearing site data removes it, account sync and deletion as on Privacy, link to /privacy
+- [x] (done 2026-11-13: `about.custom` paragraph + /contact link in `AboutRoute.tsx`; PostHog "EU cloud, cookieless, nothing stored on your device", Sentry "query strings removed", OpenStreetMap / Google Maps "load only after a click"; `about.p2` already fixed in Step 4) `/about`: short mention of the custom-app service (ua/ru/en); check PostHog / data-source wording against the new facts
+- [x] (done 2026-11-13: "data" needed no change; "sharedPhotos" now says the photo is deleted after 7 days and can be deleted earlier in the profile) `/terms`: check "data" and "sharedPhotos" against the retention table (shares 7 days, 14-day grace); do not duplicate cookies / processors
+- [x] (done 2026-11-13: `components/ThirdPartyNote.tsx` (amber warning chip with ⚠️), old `map.consent` / `nearby.loadMapConsent` / `discuss.consent` keys replaced by `thirdParty.*`; YouTube player modals not covered, they were not in the list) Third-party note at the click: one shared `ThirdPartyNote` component (provider name, "loading sends your IP to X", link to
+      `/privacy#privacy-thirdParty`; Disqus also says it sets cookies) on every gate placeholder / modal: `RegionMap` (OpenStreetMap), `DiscussRoute`
+      (Disqus), `NearbyServices` + `LiveBackground` + `SharedLayoutPrompt` (Google Maps / YouTube), Sketchfab and carshow360 modals;
+      ua/ru/en, no em dash; tests: note shown before the click
+- [ ] Still open from Step 4: the `google.com` cookie-tree check (user to send the cookie names), then complete the cookie table
+- [ ] Docs after a feature (`docs/checklists.md`): plan-done, PLAN, features-reference, About; version in `releases.ts` (currently v2.1211, committed at 1211 commits; a new uncommitted change uses `git rev-list --count stage` + 1)
 
 ### Step 5. Account-deletion test (needs the user: throwaway account + VPS DB access)
 

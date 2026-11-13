@@ -411,6 +411,12 @@ export default function AboutRoute(): ReactNode {
         <p>{t('about.p3')}</p>
         <p>{t('about.p4')}</p>
         <p>{t('about.p5')}</p>
+        <p>
+          {t('about.custom')}{' '}
+          <Link to="/contact" className="text-[var(--color-primary)] underline">
+            {t('contact.heading')}
+          </Link>
+        </p>
         <p className="text-[var(--color-muted)]">
           {t('about.plateNotice')}{' '}
           <a

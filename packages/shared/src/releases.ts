@@ -17,6 +17,18 @@ const item = (group: ReleaseGroup, ua: string, ru: string, en: string): ReleaseI
  */
 export const RELEASES: readonly ReleaseDay[] = [
   {
+    date: '2026-11-13',
+    version: 'v2.1211',
+    items: [
+      item(
+        'improved',
+        'Політика конфіденційності переписана: хто відповідає за дані, правові підстави, таблиці cookie та строків зберігання, список обробників (Contabo, Cloudflare, Resend, PostHog ЄС, Sentry, Google, Telegram, Disqus) і ваші права; діалог видалення облікового запису тепер перелічує й синхронізовані дані та фото.',
+        'Политика конфиденциальности переписана: кто отвечает за данные, правовые основания, таблицы cookie и сроков хранения, список обработчиков (Contabo, Cloudflare, Resend, PostHog ЕС, Sentry, Google, Telegram, Disqus) и ваши права; диалог удаления аккаунта теперь перечисляет и синхронизированные данные, и фото.',
+        'The privacy policy was rewritten: who is responsible for the data, legal bases, cookie and retention tables, the list of processors (Contabo, Cloudflare, Resend, PostHog EU, Sentry, Google, Telegram, Disqus) and your rights; the delete-account dialog now also lists synced data and shared photos.'
+      )
+    ]
+  },
+  {
     date: '2026-11-12',
     version: 'v2.1182',
     items: [

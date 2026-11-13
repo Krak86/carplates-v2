@@ -63,6 +63,8 @@ export default function DeleteAccountDialog({
           <ul className="list-disc space-y-1 pl-5 text-[var(--color-muted)]">
             <li>{t('account.delete.itemProfile')}</li>
             <li>{t('account.delete.itemFeatures')}</li>
+            <li>{t('account.delete.itemSynced')}</li>
+            <li>{t('account.delete.itemPhotos')}</li>
             <li>{t('account.delete.itemSessions')}</li>
           </ul>
           <p className="text-[var(--color-muted)]">{t('account.delete.localKept')}</p>
