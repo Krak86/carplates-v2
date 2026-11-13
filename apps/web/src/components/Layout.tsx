@@ -14,6 +14,7 @@ import NewsBell from '@/components/NewsBell'
 import OfflineBanner from '@/components/OfflineBanner'
 import PwaUpdatePrompt from '@/components/PwaUpdatePrompt'
 import QuickLinks from '@/components/QuickLinks'
+import SharedLayoutPrompt from '@/components/SharedLayoutPrompt'
 import SyncBanner from '@/components/SyncBanner'
 import RouteProgress from '@/components/RouteProgress'
 import { useHeaderVehicleLabel } from '@/components/use-header-vehicle-label'
@@ -147,6 +148,7 @@ export default function Layout({ children }: Props): ReactNode {
       <OfflineBanner />
       <MaintenanceBanner />
       <SyncBanner />
+      <SharedLayoutPrompt />
 
       <div className="flex flex-1">
         {hasOpened && (

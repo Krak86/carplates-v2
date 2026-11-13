@@ -96,16 +96,15 @@ Historical migration is limited on free plans (a support ticket may help). Re-ch
 - [x] `DiscussRoute.tsx`: "Load comments (Disqus sets cookies)" button before the embed
 - [x] ua/ru/en strings (no em dash in UI text); component tests: no iframe before the click
 
-### Step 2b. Embeds that can load from a shared link without a click (found while reviewing Step 2; not yet changed)
+### Step 2b. Embeds that can load from a shared link without a click (done: gated)
 
 - `NearbyServices.tsx:30-31`: `?section=nearby` opens the section on load (`isSharedNearby`), so the Google Maps iframe (`nearbyEmbedUrl`,
   `lib/maps.ts`) loads and the visitor's IP goes to Google without a click. Normal use is click-to-open.
 - `LiveBackground.tsx`: map (`maps.google.com/...&output=embed`) and stream (YouTube etc.) iframes load from the saved layout; a shared layout
-  URL (`useLayoutUrl.ts`, `ShareLayoutButton.tsx`) may set the mode without the visitor choosing it. **Verify first** whether a URL alone can
-  turn it on or only the user's own saved setting can.
-- [ ] Decide with the user: require a click for shared links (placeholder + "Show map (Google Maps)" button, same pattern as `RegionMap.tsx`),
+  URL (`useLayoutUrl.ts`, `ShareLayoutButton.tsx`) may set the mode without the visitor choosing it. **Verified:** a URL alone turned it on (`useApplyLayoutFromUrl` called `setMode`). Now map/stream links only ask (`SharedLayoutPrompt.tsx`); alarm layer is our own API, not gated; a signed-in user's own saved default layer still loads directly.
+- [x] Decide with the user (decision: gate): require a click for shared links (placeholder + "Show map (Google Maps)" button, same pattern as `RegionMap.tsx`),
       or accept and disclose Google as a processor
-- [ ] If gating: `NearbyServices.tsx` (shared link shows the placeholder, the header click or the button loads the iframe), `LiveBackground.tsx`
+- [x] If gating: `NearbyServices.tsx` (shared link shows the placeholder, the header click or the button loads the iframe), `LiveBackground.tsx`
       (shared layout asks before loading a third-party iframe), ua/ru/en strings, tests: no iframe before the click
 - [ ] Either way: list Google Maps and YouTube in the Step 4 processors / device-storage sections
 
