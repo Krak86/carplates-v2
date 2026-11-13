@@ -156,6 +156,10 @@ Files: `apps/web/src/routes/LegalRoute.tsx` (section ids, line 10), `en.json` / 
 
 #### Step 5 runbook (prepared 2026-11-13; the user runs it on the VPS, nothing here was executed by the agent)
 
+Status 2026-11-13: `stage` merged to `main`, `deploy-api` and `deploy-web` green, so the VPS runs the Step 1-4 code and the `restore-replay-deletions.sh`
+overrides. **Waiting on the user** to run the runbook below and send the outputs. Then the agent records them here, ticks the Step 5 boxes, closes
+`docs/security-checklist.md:158` and `docs/deploy.md:322`, and adds the `ENV_FILE` / `PG_CMD` note to the deletion replay in `docs/deploy.md`.
+
 Shell helper on the VPS (production DB: only `SELECT`, plus the one `UPDATE` on the throwaway id, never anything unscoped):
 
 ```bash
