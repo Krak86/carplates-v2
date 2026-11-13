@@ -147,18 +147,44 @@ Files: `apps/web/src/routes/LegalRoute.tsx` (section ids, line 10), `en.json` / 
 
 ### Step 5. Account-deletion test (needs the user: throwaway account + VPS DB access)
 
-- [ ] Sign in with a throwaway email account; add a favorite, a setting, a shared photo; note `users.id`
-- [ ] Delete at `/profile`: cookie cleared, `app.sessions` empty, shared photo row + R2 object gone, email received
-- [ ] Sign in again: `deletion_scheduled_at` cleared (restored)
-- [ ] Delete again, set `deletion_scheduled_at = now() - interval '15 days'` for that id only, restart the API or wait 6 h: counts across every
+- [x] Sign in with a throwaway email account; add a favorite, a setting, a shared photo; note `users.id`
+- [x] Delete at `/profile`: cookie cleared, `app.sessions` empty, shared photo row + R2 object gone, email received
+- [x] Sign in again: `deletion_scheduled_at` cleared (restored)
+- [x] Delete again, set `deletion_scheduled_at = now() - interval '15 days'` for that id only, restart the API or wait 6 h: counts across every
       `app.*` table are 0 and the ledger object exists
-- [ ] Record results here; close the gate in `docs/security-checklist.md:158` and the open item at `docs/deploy.md:322`
+- [x] Record results here; close the gate in `docs/security-checklist.md:158` and the open item at `docs/deploy.md:322`
 
 #### Step 5 runbook (prepared 2026-11-13; the user runs it on the VPS, nothing here was executed by the agent)
 
-Status 2026-11-13: `stage` merged to `main`, `deploy-api` and `deploy-web` green, so the VPS runs the Step 1-4 code and the `restore-replay-deletions.sh`
-overrides. **Waiting on the user** to run the runbook below and send the outputs. Then the agent records them here, ticks the Step 5 boxes, closes
-`docs/security-checklist.md:158` and `docs/deploy.md:322`, and adds the `ENV_FILE` / `PG_CMD` note to the deletion replay in `docs/deploy.md`.
+Status 2026-11-13: **done, all checks passed** (results below). `stage` was merged to `main` and `deploy-api` / `deploy-web` were green, so the VPS ran the
+Step 1-4 code and the `restore-replay-deletions.sh` overrides. Gate closed in `docs/security-checklist.md`, open item closed in `docs/deploy.md` (with the
+`ENV_FILE` / `PG_CMD` note under "Deletion replay").
+
+**Results (throwaway `rukrak86+deltest@gmail.com`, user `a1238920-0ebc-49d4-9cae-cca7d1badf9c`, run 2026-11-13 on the VPS):**
+
+| Count (`app.*` by user) | 1 before delete | 2 after delete (grace)          | 4 after purge |
+| ----------------------- | --------------- | ------------------------------- | ------------- |
+| users                   | 1               | 1 (`deletion_scheduled_at` set) | 0             |
+| auth_identities         | 1               | 1                               | 0             |
+| sessions                | 1               | **0**                           | 0             |
+| user_features           | 0               | 0                               | 0             |
+| user_saved_entries      | 492             | 492                             | 0             |
+| user_settings           | 1               | 1                               | 0             |
+| known_devices           | 2               | 2                               | 0             |
+| digest_sends            | 0               | 0                               | 0             |
+| shared_photos           | 1               | **0**                           | 0             |
+| email_challenges        | 3               | 3                               | 4 (see below) |
+
+- Share photo: `shares/4df17470-0111-4cc6-ad7a-163dcc8362b5.jpg` listed by `rclone lsf` before, **gone right after the delete** (grace period, not at purge).
+  The old share link then shows "link expired / photo deleted" (**HTTP 410**, not 404 as the runbook guessed). `carsua_sid` was gone in DevTools;
+  `carsua_did` (device cookie, documented) stays by design. "Account scheduled for deletion" email received, both times.
+- Restore: signing in again gave the same `users.id` with `deletion_scheduled_at` NULL.
+- Purge: after the back-dated `UPDATE` (1 row) and `docker compose restart api-green`: `[AccountPurgeService] Purged 1 account(s) past the deletion grace period`;
+  every count above is 0 except `email_challenges`; `rclone lsf LEDGER:carsua-shares/deleted/` lists `a1238920-0ebc-49d4-9cae-cca7d1badf9c`.
+- `email_challenges` was **still 4 on day 0** (3 before + the restore sign-in and second delete): rows keyed on the address are removed by the API a day after
+  they expire, not by the purge. **Day-1 recheck pending** (user): expected 0; add the value here when known.
+- Scratch replay (`pgscratch` container, `PG_CMD="docker exec -i pgscratch"`): `DELETE 1`, `replayed 1 deletion(s)`, only the `...0001` control row left,
+  `user_settings` count 1 (cascade). Production DB untouched.
 
 Shell helper on the VPS (production DB: only `SELECT`, plus the one `UPDATE` on the throwaway id, never anything unscoped):
 
@@ -195,7 +221,7 @@ SQL
    Photo object: `set -a; . /opt/carsua/env/backup.env; set +a; rclone lsf LEDGER:carsua-shares/shares/` shows `<id>.jpg` (and `.orig` within 1 h).
 2. **Delete.** `/profile`, Delete account (asks for a fresh email code, sudo mode). Expect: signed out, `carsua_sid` gone in DevTools, email
    "deletion scheduled" received. Counts: users still 1 with `deletion_scheduled_at` set, sessions 0, shared_photos 0, and the `shares/<id>.jpg`
-   object gone from the `rclone lsf` above. Opening the old share link gives 404.
+   object gone from the `rclone lsf` above. Opening the old share link shows "expired" (HTTP 410).
 3. **Restore.** Sign in again with the same address: `deletion_scheduled_at` is NULL (re-run the id query). Note: this keeps the same `users.id`.
 4. **Purge.** Delete again, then:
    `pg <<'SQL'` / `UPDATE app.users SET deletion_scheduled_at = now() - interval '15 days' WHERE id = 'PASTE-UUID';` / `SQL`, then restart the
