@@ -223,6 +223,8 @@ lookups and sign-ins into `app.usage_events` (kind, UI language, found, has-cook
 `POSTHOG_PERSONAL_API_KEY` + `POSTHOG_PROJECT_ID`, optional `POSTHOG_API_HOST` (passed by `deploy-api.yml`; code default and production are the EU cloud: repo variable `https://eu.posthog.com`, not the ingest host `eu.i.posthog.com`; project 348169, since 2026-11-13), `SENTRY_ORG_SLUG` for the link). Add a new counted
 route in `ROUTE_KINDS` + `USAGE_KINDS` (`account.ts`) + the `admin.stats.kind.*` i18n keys.
 
+**Telemetry is cookieless (2026-11-13, `apps/web/src/lib/telemetry.ts`, `telemetry.test.ts`):** `posthog.init` uses `cookieless_mode: 'always'`, `persistence: 'memory'`, no autocapture, replay, surveys or dead clicks, host `VITE_POSTHOG_HOST` (EU ingest `eu.i.posthog.com`). Nothing is written to cookies, localStorage or sessionStorage, so no consent banner; `identify()` and replay do not work in this mode. Changing an option or adding a storing tool means revisiting `docs/privacy-compliance.md` and the cookie table on the Privacy page. Third-party embeds (OSM map, Disqus, Google Maps nearby, shared live-background layouts) load only after a click.
+
 **Telegram login** (`auth/telegram-login.ts`, `POST /api/auth/telegram`, web `TelegramSignInButton` + `lib/telegram-login.ts`):
 Login Widget payload verified by HMAC (key = SHA256(bot token)), `auth_date` ≤ 24 h. Identity `('telegram', <numeric id>)` only —
 **`app.users.email` is nullable** (migration 0066), so `SessionUser.email` can be `null`; never assume it in UI/SQL. Telegram users are
@@ -240,7 +242,7 @@ _after_ the code proves the mailbox. No password, no backup email: linked method
 last one is refused. **Sudo mode**: `SudoGuard` needs `sessions.auth_at` < 10 min (a sign-in counts), else 403 `REAUTH_REQUIRED`; the web
 `ReauthGate` / `useRunSudo(mutation, vars)` opens the dialog and retries. Sudo routes: set-email, link/unlink, `DELETE /api/auth/me`.
 Deleting only _schedules_ (`users.deletion_scheduled_at`, all sessions end, notice mail); any sign-in clears it, `AccountPurgeService` hard-deletes
-after `ACCOUNT_DELETION_GRACE_DAYS` (14). A sign-in from a browser without a known `carsua_did` cookie (`app.known_devices`) on an account that
+after `ACCOUNT_DELETION_GRACE_DAYS` (14); the purge first writes the user UUID to the deletion ledger (R2 `deleted/<uuid>` in the shares bucket, no PII) so `infra/vps/restore-replay-deletions.sh` can re-delete the account after a restore (`ENV_FILE` / `PG_CMD` overrides for a scratch DB), and `full` backups exclude the `app` schema. Shared photos go at once on delete. A sign-in from a browser without a known `carsua_did` cookie (`app.known_devices`) on an account that
 already had a device mails a "new sign-in" notice. Mail: `MAIL_TRANSPORT` = `log` | `smtp` | `resend` (`mail/mail.service.ts`), React Email
 templates in `mail/templates.tsx` with copy in `mail/mail-text.ts` (ua/ru/en; sRGB hex only), preview at `/api/dev/emails` (dev). New mail kind =
 add it to `CODE_MAIL_KINDS`/`NOTICE_MAIL_KINDS` + text; `render.test.ts` covers every kind × language. A global `OriginGuard` rejects cross-site

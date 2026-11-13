@@ -251,7 +251,7 @@ the newest nightly into the scratch container first (docs/deploy.md "Restore fro
 
 ### Step 6. Docs / release
 
-- [ ] `releases.ts` version + entry; `plan-done.md`; `PLAN.md` / `docs/leftovers.md:27` ticked; `features-reference.md` (Accounts, telemetry);
+- [x] `releases.ts` version + entry; `plan-done.md`; `PLAN.md` / `docs/leftovers.md:27` ticked; `features-reference.md` (Accounts, telemetry);
       `legal-and-monetization.md` "Cookie / consent" updated to the final state
 
 ## Sources

@@ -5,8 +5,9 @@ launching ads or paid features. The project-specific findings are the useful par
 
 ## Cookie / consent
 
-> Updated 2026-11-13: researched decision (cookieless PostHog, no banner), retention and step plan live in
-> [privacy-compliance.md](privacy-compliance.md). The notes below are the older baseline.
+> **Final state 2026-11-13:** no cookie banner. PostHog is cookieless (EU cloud, nothing stored on the device), third-party embeds load after a
+> click, backups keep account data at most 14 days, the Privacy page lists cookies, retention and processors. Details, retention table and the
+> deletion test: [privacy-compliance.md](privacy-compliance.md). The notes below are the older baseline; a banner / TCF is only needed if ads go live.
 
 - Today the app sets **no advertising or tracking cookies**. Own state (history, favorites, language, theme, offline data) is
   `localStorage`; the login session cookie (`carsua_sid`, Google or Telegram) is strictly necessary. Both are exempt from consent in the EU.
@@ -16,9 +17,8 @@ launching ads or paid features. The project-specific findings are the useful par
   Adding a provider = update that policy paragraph (ua/ru/en) + an About source entry.
 - Ukraine has no cookie-consent law in force (check: the GDPR-style personal-data bill's status). But `ru`/`en` UI languages attract
   EU/UK visitors, so ePrivacy/GDPR may apply to them.
-- **PostHog** (`apps/web/src/lib/telemetry.ts`) does not set `persistence`, so it defaults to cookie + localStorage. Before enabling
-  telemetry in production, pick one: `persistence: 'memory'` (cookieless), a cookieless tool (Plausible/Umami), or an opt-in banner
-  for PostHog only. Keep the privacy page ("no advertising cookies", PostHog/Sentry wording) in sync.
+- **PostHog** (`apps/web/src/lib/telemetry.ts`): **resolved** with `cookieless_mode: 'always'` + `persistence: 'memory'` (EU cloud), so nothing is
+  stored on the device and no banner is needed. Keep the privacy page (cookie table, PostHog/Sentry wording) in sync with the init options.
 - **Ads change everything:** AdSense and similar require a certified consent platform (TCF) for EEA/UK users, plus a cookie/ads
   section in the privacy policy.
 
