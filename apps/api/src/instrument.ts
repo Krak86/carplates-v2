@@ -13,6 +13,8 @@ if (telemetryEnabled(env)) {
     environment: env.NODE_ENV,
     release: env.GIT_SHA,
     tracesSampleRate: env.SENTRY_TRACES_SAMPLE_RATE,
+    // expected 503 (alarm poller has no fresh snapshot, e.g. upstream rate limit): the service already logs a warning
+    ignoreErrors: ['no alarm data'],
     // scrub request bodies / query strings before they leave the process
     beforeSend(event) {
       if (event.request) {
