@@ -1465,6 +1465,20 @@ Rule-based (no AI, no MCP) Q&A assistant for a plate / VIN built on our own API,
 
 - [ ] Discuss and approve the plan (embed scope, data shown on other sites, phasing)
 
+## AI chat: RAG + pgvector + Gemini free tier, SSE (plan 2026-11-14)
+
+In-app chat that answers from a vector index (app help + Ukrainian registration law), the current plate / VIN and registry tools (Gemini function-calling), streamed over SSE. Supersedes the in-app chat of the assistant plan above (the embed widget stays rule-based). Plan: [docs/ai-chat-plan.md](docs/ai-chat-plan.md).
+
+- [ ] Infra + DB: pgvector image in both compose files, migration `0105_ai_chat.sql`, Drizzle tables
+- [ ] API: `apps/api/src/chat/` (Gemini provider, retrieval, tools, SSE controller, throttle, daily budget), shared `chat.ts` contracts
+- [ ] Corpus + `pnpm ai:index` (chunker, hash-based embedding)
+- [ ] Web: launcher + drawer, SSE parser, i18n `chat.*`
+- [ ] Docs + release: features-reference, About privacy note, `releases.ts`
+- After deploy:
+  - [ ] Swap the VPS Postgres image to pgvector **before** the migration runs
+  - [ ] Set `GEMINI_API_KEY` (and `AI_DAILY_BUDGET`), run `pnpm ai:index` on the VPS
+  - [ ] Check SSE streams through Cloudflare / Caddy (no buffering)
+
 ## Home parking cameras (idea 2026-11-14, plan only, nothing built)
 
 Admin-only `/admin/parking` page: on-demand snapshot from 2 home cameras (Reolink battery + solar via Home Hub, WireGuard from the ASUS router to the VPS, go2rtc on the VPS) with an AI free/taken overlay per drawn parking spot. Camera options by price, network path, code changes, security and verification: [docs/home-parking-cameras.md](docs/home-parking-cameras.md).
