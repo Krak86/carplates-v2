@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { PlateCandidate } from '@carplates/shared'
+import { normalizePlate, type PlateCandidate } from '@carplates/shared'
 
 import { groupCandidates, needsGrouping } from '@/components/plate-groups'
 import { cn } from '@/lib/cn'
@@ -36,6 +36,9 @@ export default function PlateCandidates({ candidates, active, onSelect }: Props)
 
   const groups = groupCandidates(candidates)
   const grouped = needsGrouping(groups)
+  // The route plate is Latin, the candidates may be Cyrillic: compare in canonical form.
+  const activeKey = active ? normalizePlate(active) : null
+  const isActivePlate = (plate: string): boolean => !!activeKey && normalizePlate(plate) === activeKey
   // One plate with other possible readings: say so, instead of the "also found" of separate plates.
   const labelKey = groups.length === 1 ? 'recognize.sameCarReads' : 'recognize.alsoFound'
 
@@ -43,7 +46,7 @@ export default function PlateCandidates({ candidates, active, onSelect }: Props)
     <div className="flex w-full max-w-content flex-wrap items-center gap-2 rounded-md border border-[var(--color-surface)] bg-[var(--color-surface)]/80 px-2.5 py-1.5 backdrop-blur-sm">
       <span className="text-sm font-medium text-[var(--color-fg)]">{t(labelKey)}</span>
       {groups.map(group => {
-        const groupActive = group.candidates.some(c => c.plate === active)
+        const groupActive = group.candidates.some(c => isActivePlate(c.plate))
 
         return (
           <span
@@ -85,7 +88,7 @@ export default function PlateCandidates({ candidates, active, onSelect }: Props)
                   onClick={() => onSelect(c.plate)}
                   className={cn(
                     'rounded-full border px-3 py-1 text-sm',
-                    c.plate === active
+                    isActivePlate(c.plate)
                       ? 'border-[var(--color-primary)] bg-[var(--color-primary)] font-semibold text-black'
                       : 'border-[var(--color-surface)] hover:bg-[var(--color-surface)]/20'
                   )}
