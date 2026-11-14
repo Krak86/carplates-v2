@@ -388,14 +388,16 @@ export default function SearchRoute(): ReactNode {
             />
           )}
         </Presence>
-        {photo && !recognizeErrorKey && (
-          <PhotoSourcesStrip
-            attachedUrl={photo.url}
-            others={photoOthers}
-            selectedKey={selectedOther?.key ?? null}
-            onSelect={key => setPick({ photoUrl: photo.url, key })}
-          />
-        )}
+        <Presence show={!!photo && !recognizeErrorKey && photoOthers.length > 0}>
+          {photo && (
+            <PhotoSourcesStrip
+              attachedUrl={photo.url}
+              others={photoOthers}
+              selectedKey={selectedOther?.key ?? null}
+              onSelect={key => setPick({ photoUrl: photo.url, key })}
+            />
+          )}
+        </Presence>
         {sharedPhoto.expired && !photo && <SharedPhotoNotice />}
         {photo?.shared && sharedPhoto.meta && <SharedPhotoNotice expiresAt={sharedPhoto.meta.expiresAt} />}
         <Presence show={!!photo?.meta && photo.mode === 'plate'}>

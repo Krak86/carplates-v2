@@ -18,8 +18,20 @@ const item = (group: ReleaseGroup, ua: string, ru: string, en: string): ReleaseI
 export const RELEASES: readonly ReleaseDay[] = [
   {
     date: '2026-11-14',
-    version: 'v2.1342',
+    version: 'v2.1345',
     items: [
+      item(
+        'fix',
+        'Фото з кількома номерами: обране авто тепер підсвічується на фото і в списку «Також знайдено», решта тьмяніє.',
+        'Фото с несколькими номерами: выбранное авто теперь подсвечивается на фото и в списке «Также найдено», остальные тускнеют.',
+        'Photos with several plates: the chosen car is now highlighted in the photo and in the "Also found" list, the rest fade.'
+      ),
+      item(
+        'improved',
+        'Мініатюри під фото з’являються і зникають плавно, без різкого зсуву сторінки.',
+        'Миниатюры под фото появляются и исчезают плавно, без резкого сдвига страницы.',
+        'The thumbnails under the photo appear and disappear smoothly, without the page jumping.'
+      ),
       item(
         'new',
         'Картка авто: зведена оцінка краш-тестів зірками (Euro NCAP, NHTSA, JNCAP, KNCAP) - підвантажується у фоні.',
