@@ -1465,6 +1465,13 @@ Rule-based (no AI, no MCP) Q&A assistant for a plate / VIN built on our own API,
 
 - [ ] Discuss and approve the plan (embed scope, data shown on other sites, phasing)
 
+## Home parking cameras (idea 2026-11-14, plan only, nothing built)
+
+Admin-only `/admin/parking` page: on-demand snapshot from 2 home cameras (Reolink battery + solar via Home Hub, WireGuard from the ASUS router to the VPS, go2rtc on the VPS) with an AI free/taken overlay per drawn parking spot. Camera options by price, network path, code changes, security and verification: [docs/home-parking-cameras.md](docs/home-parking-cameras.md).
+
+- [ ] Home parking cameras (admin-only) - see docs/home-parking-cameras.md
+- [ ] ⏳ Owner: check the RT-BE50 supports WireGuard client (VPN Fusion) and pick the cameras (hub + 1x Argus PT Ultra or 2x Argus 4 Pro)
+
 ## Later, conditional
 
 Checked and skipped: Derzhstat "Транспорт України" yearbook (2026-11-05) - national transport activity totals, no vehicle/fleet/accident data; see `docs/DATASETS_PLAN.md` "Skipped (with reason)".
