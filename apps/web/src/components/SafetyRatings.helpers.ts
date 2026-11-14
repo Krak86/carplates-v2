@@ -38,6 +38,25 @@ export function averageStarRating(ratings: readonly (string | null)[]): number |
   return valid.reduce((sum, n) => sum + n, 0) / valid.length
 }
 
+/** Programmes that publish a 1-5 star score; C-NCAP and IIHS use points / awards, so they stay out of the combined number. */
+export const STAR_SOURCES = ['euroncap', 'nhtsa', 'jncap', 'kncap'] as const
+export type StarSource = (typeof STAR_SOURCES)[number]
+
+export type SourceStars = { source: StarSource; stars: number }
+
+/**
+ * One 1-5 value per programme, averaged with equal weight (a programme with more trims must not dominate).
+ * 0 / null / out-of-range (JNCAP's legacy 6-star scale) entries are dropped as "not a real test" - never counted as 0.
+ */
+export function combinedStars(entries: readonly { source: StarSource; stars: number | null }[]): {
+  average: number
+  sources: SourceStars[]
+} | null {
+  const sources = entries.filter((e): e is SourceStars => e.stars != null && e.stars >= 1 && e.stars <= 5)
+  if (sources.length === 0) return null
+  return { average: sources.reduce((sum, e) => sum + e.stars, 0) / sources.length, sources }
+}
+
 /** Rounded stars for the glyphs, exact decimal alongside for precision an integer star count would lose. */
 export function formatAverageStars(average: number | null): string {
   if (average == null) return '-'

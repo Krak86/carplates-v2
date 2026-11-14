@@ -1436,6 +1436,8 @@ Speaker icon beside the brand name on catalog pages; lazy popup with ua / ru / e
   - [ ] Owner, after the `brandPronunciationQuery` key bump (`v2`, staleTime 1 day) is deployed: on the phone open Kia (`Кі́а` + `KEE-ah`), press Listen on a make without a clip (synthetic voice) and check the Ukrainian voice exists
   - [ ] Owner: press play on a clip once with sound (headless Chrome fetched `De-Volkswagen.ogg` with no console error, audio not heard).
 
+- [x] ✅ 2026-11-14: combined crash-test stars chip, CO2 vs human breathing, data-status history lists every source, install page without PWA best practices, About "privacy" entry (write-up: `docs/plan-done.md` "Crash-test stars chip, CO2 vs breathing...").
+
 ## Deploy plumbing shared across workflows ✅ 2026-11-12, deployed; one VPS check left
 
 `build-image` / `cf-purge` actions, `infra/ci/lib.sh`, `infra/vps/lib.sh`, `deploy-ingest.sh`, `deploy-alpr.sh` (write-up: `docs/plan-done.md`).

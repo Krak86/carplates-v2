@@ -68,6 +68,7 @@ import SectionInfo from '@/components/SectionInfo'
 import ShareButton from '@/components/ShareButton'
 import RegionAlarmChip from '@/components/RegionAlarmChip'
 import RegionCrashChip from '@/components/RegionCrashChip'
+import SafetyStarsChip from '@/components/SafetyStarsChip'
 import TopStatBadges from '@/components/TopStatBadges'
 import { useCarHeroImageActions } from '@/components/use-car-hero-image-actions'
 import { useChipsPending } from '@/components/use-chips-pending'
@@ -157,6 +158,7 @@ export default function ResultCard({ data }: Props): ReactNode {
   const [uaAuctionOpenSignal, setUaAuctionOpenSignal] = useState(0)
   // The origin (flags) chip opens the "Where it comes from" section the same way.
   const [originOpenSignal, setOriginOpenSignal] = useState(0)
+  const [ratingsOpenSignal, setRatingsOpenSignal] = useState(0)
   // Links inside the Specs block open the section that goes deeper.
   const [emissionsOpenSignal, setEmissionsOpenSignal] = useState(0)
   const [enginesOpenSignal, setEnginesOpenSignal] = useState(0)
@@ -420,6 +422,13 @@ export default function ResultCard({ data }: Props): ReactNode {
                   onOpenSection={() => setSizeOpenSignal(n => n + 1)}
                 />
                 <TopStatBadges brand={c.brand} model={c.model} color={c.color} region={data.region} kind={c.kind} />
+                <SafetyStarsChip
+                  brand={c.brand}
+                  model={c.model}
+                  year={c.makeYear}
+                  body={c.body}
+                  onOpenSection={() => setRatingsOpenSignal(n => n + 1)}
+                />
                 <RegionAlarmChip region={data.region} />
                 <RegionCrashChip region={data.region} />
                 <VdbChips brand={c.brand} model={c.model} kind={c.kind} />
@@ -912,8 +921,14 @@ export default function ResultCard({ data }: Props): ReactNode {
               openSignal={emissionsOpenSignal}
             />
           </LazySection>
-          <LazySection sections={['ratings']}>
-            <SafetyRatings brand={c.brand} model={c.model} year={c.makeYear} body={c.body} />
+          <LazySection sections={['ratings']} forceMount={ratingsOpenSignal > 0}>
+            <SafetyRatings
+              brand={c.brand}
+              model={c.model}
+              year={c.makeYear}
+              body={c.body}
+              openSignal={ratingsOpenSignal}
+            />
           </LazySection>
           <LazySection sections={['reviews']}>
             <ReviewLinks brand={c.brand} model={c.model} year={c.makeYear} />

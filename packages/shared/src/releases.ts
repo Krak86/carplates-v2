@@ -17,6 +17,36 @@ const item = (group: ReleaseGroup, ua: string, ru: string, en: string): ReleaseI
  */
 export const RELEASES: readonly ReleaseDay[] = [
   {
+    date: '2026-11-14',
+    version: 'v2.1342',
+    items: [
+      item(
+        'new',
+        'Картка авто: зведена оцінка краш-тестів зірками (Euro NCAP, NHTSA, JNCAP, KNCAP) - підвантажується у фоні.',
+        'Карточка авто: сводная оценка краш-тестов звёздами (Euro NCAP, NHTSA, JNCAP, KNCAP) - подгружается в фоне.',
+        'Car card: a combined crash-test star rating (Euro NCAP, NHTSA, JNCAP, KNCAP), loaded in the background.'
+      ),
+      item(
+        'improved',
+        'Викиди: порівняння з тим, скільки CO₂ людина видихає за добу (на 100 км).',
+        'Выбросы: сравнение с тем, сколько CO₂ человек выдыхает за сутки (на 100 км).',
+        'Emissions: a comparison with the CO₂ a person exhales in a day (per 100 km).'
+      ),
+      item(
+        'improved',
+        'Сторінка «Встановлення»: прибрано розділ з практиками для PWA (для розробників, не для користувачів).',
+        'Страница «Установка»: убран раздел с практиками для PWA (для разработчиков, не для пользователей).',
+        'Install page: removed the PWA best-practices section (aimed at developers, not users).'
+      ),
+      item(
+        'improved',
+        'Про застосунок: короткий опис кожної можливості, зокрема приватності без банера cookie, зведених зірок краш-тестів і порівняння CO₂ з диханням людини.',
+        'О приложении: краткое описание каждой возможности, включая приватность без баннера cookie, сводные звёзды краш-тестов и сравнение CO₂ с дыханием человека.',
+        'About page: a short entry for every feature, including privacy without a cookie banner, the combined crash-test stars and the CO₂ vs human breathing comparison.'
+      )
+    ]
+  },
+  {
     date: '2026-11-13',
     version: 'v2.1222',
     items: [

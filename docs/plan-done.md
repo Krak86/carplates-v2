@@ -4845,3 +4845,14 @@ Phase B step 1 of the security hardening: violations of the Report-Only CSP now 
 - **Legal pages:** Privacy rewritten in ua/ru/en (controller shown as "carsua.app" plus the Contact page, legal bases, cookie and retention tables, processors, rights), `routes/LegalRoute.tsx` + `routes/legal/LegalTable.tsx`. Retention: shares 7 days (unblurred original 1 h), deleted account 14-day grace, backups 14 more days, sync tombstones 30 days.
 - **Deletion test (2026-11-13, throwaway account, VPS):** delete ends sessions and removes the shared photo and its R2 object at once; restore on sign-in; after a back-dated purge every `app.*` count is 0 and the ledger lists the id; replay on a scratch DB removes it. Results in `docs/privacy-compliance.md` Step 5. The old share link answers **410**. `email_challenges` for the address are cleaned a day after expiry, not by the purge.
 - Release entry `v2.1219` (day 2026-11-13), About account feature mentions deletion.
+
+## Crash-test stars chip, CO2 vs breathing, data-status history, docs move, About (2026-11-13 / 2026-11-14)
+
+- **Combined crash chip** (`SafetyStarsChip.tsx`, `SafetyRatings.helpers.ts`): one "N / 5 crash test" chip on the result card, the average over the star-based programmes that tested the generation (Euro NCAP, NHTSA, JNCAP, KNCAP; zero and missing ignored, C-NCAP and IIHS excluded). Loaded in the background, click goes to the crash-test section. Tests in `SafetyRatings.helpers.test.ts`.
+- **CO2 vs a person** (`CO2Badge.helpers.ts`): `humanDaysPer100Km` = g/km x 100 / 1000 / 1 kg a day (`HUMAN_CO2_KG_PER_DAY = 1`), shown as "like N people breathing for a day" with an info note that breath is part of the natural carbon cycle.
+- **Install page:** the "Best practice for PWAs" section (`install.best.*`) is gone (developer-facing).
+- **Data status** (`RunHistory.tsx`, `data-status.service.ts`): the update history lists every source with its last update date, not just the latest runs; the unused shared type was removed.
+- **Telemetry:** PostHog heatmaps and performance capture pinned off in `telemetry.ts` (a cookieless-mode requirement).
+- **Docs / CI:** secondary plan files moved from the repo root into `docs/` (`WANTED_PLAN.md` and others; references in migrations, scripts and `ingest.cron` updated); Deploy ingest skips releases.ts-only changes (`deploy-ingest.yml` path ignore); the shared deploy plumbing workflows were also tidied twice. Dependabot minor-and-patch group (35 updates) merged 2026-11-12, pins unchanged.
+- **About:** new `privacy` feature + brief entry (ua/ru/en), safety and fuel entries mention the star chip and the breathing comparison. No new external data source this period: the Wikimedia, PostHog (EU), Disqus, OpenStreetMap, Google Maps and YouTube source texts were already updated on 2026-11-09 and 2026-11-13.
+- Release entry `v2.1342` (day 2026-11-14), `LATEST_RELEASE_DATE` bumped to 2026-11-14.

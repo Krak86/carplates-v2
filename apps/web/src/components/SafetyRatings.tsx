@@ -27,6 +27,8 @@ type Props = {
   model: string | null
   year: number | null
   body: string | null
+  /** Bumped by the crash-test chip: each change opens the section and scrolls to it (0 = never asked). */
+  openSignal?: number
 }
 
 const NCAP_SOURCES = ['euroncap', 'nhtsa', 'jncap', 'cncap', 'kncap', 'iihs'] as const
@@ -103,20 +105,27 @@ function CoverageInfo(): ReactNode {
  * five. Each tab fetches its own data only once this section is expanded AND
  * that tab is the active one.
  */
-export default function SafetyRatings({ brand, model, year, body }: Props): ReactNode {
+export default function SafetyRatings({ brand, model, year, body, openSignal = 0 }: Props): ReactNode {
   const { t } = useTranslation()
   const [searchParams] = useSearchParams()
   const isSharedRatings = searchParams.get('section') === 'ratings'
-  const [open, setOpen] = useState(() => isSharedRatings)
+  const [open, setOpen] = useState(() => isSharedRatings || openSignal > 0)
+  const [seenSignal, setSeenSignal] = useState(openSignal)
   const [source, setSource] = useState<Source>(() =>
     isSharedRatings ? parseNcapSource(searchParams.get('tab')) : DEFAULT_NCAP_SOURCE
   )
   const sectionRef = useRef<HTMLDivElement>(null)
   const hasQuery = Boolean(brand && model && year)
 
+  // A new chip click opens the section (derived during render, no effect).
+  if (openSignal !== seenSignal) {
+    setSeenSignal(openSignal)
+    setOpen(true)
+  }
+
   useEffect(() => {
-    if (isSharedRatings && sectionRef.current) scrollElementIntoView(sectionRef.current)
-  }, [isSharedRatings])
+    if ((isSharedRatings || openSignal > 0) && sectionRef.current) scrollElementIntoView(sectionRef.current)
+  }, [isSharedRatings, openSignal])
 
   if (!hasQuery) return null
 
