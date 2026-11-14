@@ -12,7 +12,7 @@ Docs are huge: **grep `^## ` headings, never read whole**. `PLAN.md` backlog + p
 `packages/shared` (`normalizePlate`, regions, Zod schemas — **single source of truth, never re-implement plate logic**) · `packages/db` ·
 `apps/api` (`src/<feature>/`; serves the SPA + per-plate `<meta>`) · `apps/web` · `scripts/` (ingest/export CLIs, `seed-data/` gzipped CSVs) · `infra/` · `services/alpr/`.
 
-Version pins (PLAN.md "Version pins"): never bump to `latest`.
+Version pins (PLAN.md "Version pins"): never use `latest`.
 
 ## Conventions
 
@@ -31,7 +31,7 @@ Version pins (PLAN.md "Version pins"): never bump to `latest`.
   come from the API, never Vite.
 - **i18n is per-language lazy chunks** (non-ua also loads ua). Tests rendering text `await i18nReady`; never `import '@/i18n'`.
 - **Zod `jitless`**: `@/lib/zod-config` stays the first import of `main.tsx`; `vendor-zod` / `zod-config` stay separate chunks (else CSP `eval`).
-- **Checklists** (`docs/checklists.md`, read the item before the change): edge cache for a new `/api/*` endpoint, `LazySection`s / `HELPER_GROUPS`, deploy (migrations, env var, ingest job), new public route (title, `STATIC_PAGES`, `@Throttle`).
+- **Checklists** (`docs/checklists.md`, read the item before the change): new `/api/*` endpoint (edge cache), `LazySection`s, deploy, new public route, docs after a feature, app version.
 
 ## Workflow
 
@@ -39,7 +39,6 @@ Version pins (PLAN.md "Version pins"): never bump to `latest`.
 - After a big update suggest a commit message (subject + bullet per change; **no `Co-Authored-By` / agent attribution line**). Never `git commit` / `git push` unless asked.
 - Seed CSVs mirror scraped tables: after changing one, re-run its `pnpm export:*:csv`.
 - `pnpm format` first (not `scripts/src/fixtures`). Tests: Vitest, colocated `*.test.ts(x)`.
-- Any web app change: also bump the day's `version` in `releases.ts` (`docs/checklists.md` "App version").
-- Docs after a feature (plan-done, PLAN, features-reference, releases, About): `docs/checklists.md` "Docs after a feature".
+- Any web app change: bump the day's `version` in `releases.ts`; docs after a feature: both in `docs/checklists.md`.
 
 @CLAUDE_RULES.md

@@ -18,7 +18,7 @@ const item = (group: ReleaseGroup, ua: string, ru: string, en: string): ReleaseI
 export const RELEASES: readonly ReleaseDay[] = [
   {
     date: '2026-11-14',
-    version: 'v2.1341',
+    version: 'v2.1342',
     items: [
       item(
         'new',
@@ -37,6 +37,12 @@ export const RELEASES: readonly ReleaseDay[] = [
         'Сторінка «Встановлення»: прибрано розділ з практиками для PWA (для розробників, не для користувачів).',
         'Страница «Установка»: убран раздел с практиками для PWA (для разработчиков, не для пользователей).',
         'Install page: removed the PWA best-practices section (aimed at developers, not users).'
+      ),
+      item(
+        'improved',
+        'Про застосунок: короткий опис кожної можливості, зокрема приватності без банера cookie, зведених зірок краш-тестів і порівняння CO₂ з диханням людини.',
+        'О приложении: краткое описание каждой возможности, включая приватность без баннера cookie, сводные звёзды краш-тестов и сравнение CO₂ с дыханием человека.',
+        'About page: a short entry for every feature, including privacy without a cookie banner, the combined crash-test stars and the CO₂ vs human breathing comparison.'
       )
     ]
   },

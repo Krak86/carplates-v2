@@ -381,6 +381,7 @@ const FEATURES = [
   'appearance',
   'digest',
   'translate',
+  'privacy',
   'pwa',
   'agents',
   'roadmap',
