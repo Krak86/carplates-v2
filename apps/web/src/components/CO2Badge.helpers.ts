@@ -65,3 +65,11 @@ export function similarVehiclesHref(brand: string, model: string, year: number, 
 export const EMISSIONS_SMALL_SAMPLE = 5
 
 export const isSmallEmissionsSample = (matches: number): boolean => matches < EMISSIONS_SMALL_SAMPLE
+
+/** A person exhales roughly 1 kg of CO2 a day (breathing at rest, ~0.9-1.0 kg). */
+export const HUMAN_CO2_KG_PER_DAY = 1
+
+/** How many "person-days of breathing" the CO2 of driving 100 km equals: g/km x 100 km / 1000 / 1 kg a day. */
+export function humanDaysPer100Km(co2GKm: number): number {
+  return (co2GKm * 100) / 1000 / HUMAN_CO2_KG_PER_DAY
+}

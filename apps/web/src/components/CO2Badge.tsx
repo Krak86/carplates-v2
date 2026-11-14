@@ -4,7 +4,13 @@ import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 
 import { approxCount } from '@/components/RdwSpecs.helpers'
-import { CO2_BAND_COLOR, co2ReferenceLinks, formatRange, isSmallEmissionsSample } from '@/components/CO2Badge.helpers'
+import {
+  CO2_BAND_COLOR,
+  co2ReferenceLinks,
+  formatRange,
+  humanDaysPer100Km,
+  isSmallEmissionsSample
+} from '@/components/CO2Badge.helpers'
 import InfoPopover from '@/components/InfoPopover'
 import ExternalLink from '@/components/ExternalLink'
 
@@ -71,6 +77,7 @@ export default function CO2Badge({
   const color = CO2_BAND_COLOR[co2Band(score)]
   const co2 = formatRange(co2GKmMin, co2GKmMax)
   const consumption = formatRange(l100kmMin, l100kmMax, 1)
+  const humanX = Math.round(humanDaysPer100Km(scoreGKm ?? (co2GKmMin + co2GKmMax) / 2))
   const isRdw = source === 'rdw'
   const isSmall = matches != null && (isRdw ? isSmallRdwSample(matches) : isSmallEmissionsSample(matches))
   const count =
@@ -181,6 +188,20 @@ export default function CO2Badge({
           )}
         </span>
       </div>
+
+      {humanX > 0 && (
+        <div className="mt-1.5 flex items-start gap-1.5 text-xs text-[var(--color-muted)]">
+          <p className="min-w-0 flex-1">{t('co2.human', { x: humanX })}</p>
+          <InfoPopover
+            label={t('co2.humanTitle')}
+            title={t('co2.humanTitle')}
+            trigger="?"
+            triggerClassName="inline-flex size-5 shrink-0 items-center justify-center rounded-full border border-[var(--color-muted)] text-xs leading-none font-bold text-[var(--color-muted)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
+          >
+            <p>{t('co2.infoHuman')}</p>
+          </InfoPopover>
+        </div>
+      )}
     </div>
   )
 }

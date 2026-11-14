@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import type { IihsRating } from '@carplates/shared'
 
 import {
+  combinedStars,
   filterByBodyStyle,
   groupIihsRatings,
   iihsBodyBucket,
@@ -159,5 +160,19 @@ describe('groupIihsRatings', () => {
     const ratings = [2020, 2021].map(modelYear => rating({ modelYear, assessmentId: `a/${modelYear}` }))
     const groups = groupIihsRatings(ratings, ['a/2020'])
     expect(groups[0]?.applicable).toBe(true)
+  })
+})
+
+describe('combinedStars', () => {
+  it('averages one value per programme and drops zero / missing / 6-star legacy scores', () => {
+    const result = combinedStars([
+      { source: 'euroncap', stars: 5 },
+      { source: 'nhtsa', stars: 4 },
+      { source: 'jncap', stars: 0 },
+      { source: 'kncap', stars: null }
+    ])
+    expect(result?.average).toBe(4.5)
+    expect(result?.sources.map(s => s.source)).toEqual(['euroncap', 'nhtsa'])
+    expect(combinedStars([{ source: 'jncap', stars: 6 }])).toBeNull()
   })
 })

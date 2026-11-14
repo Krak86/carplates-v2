@@ -17,6 +17,30 @@ const item = (group: ReleaseGroup, ua: string, ru: string, en: string): ReleaseI
  */
 export const RELEASES: readonly ReleaseDay[] = [
   {
+    date: '2026-11-14',
+    version: 'v2.1341',
+    items: [
+      item(
+        'new',
+        'Картка авто: зведена оцінка краш-тестів зірками (Euro NCAP, NHTSA, JNCAP, KNCAP) - підвантажується у фоні.',
+        'Карточка авто: сводная оценка краш-тестов звёздами (Euro NCAP, NHTSA, JNCAP, KNCAP) - подгружается в фоне.',
+        'Car card: a combined crash-test star rating (Euro NCAP, NHTSA, JNCAP, KNCAP), loaded in the background.'
+      ),
+      item(
+        'improved',
+        'Викиди: порівняння з тим, скільки CO₂ людина видихає за добу (на 100 км).',
+        'Выбросы: сравнение с тем, сколько CO₂ человек выдыхает за сутки (на 100 км).',
+        'Emissions: a comparison with the CO₂ a person exhales in a day (per 100 km).'
+      ),
+      item(
+        'improved',
+        'Сторінка «Встановлення»: прибрано розділ з практиками для PWA (для розробників, не для користувачів).',
+        'Страница «Установка»: убран раздел с практиками для PWA (для разработчиков, не для пользователей).',
+        'Install page: removed the PWA best-practices section (aimed at developers, not users).'
+      )
+    ]
+  },
+  {
     date: '2026-11-13',
     version: 'v2.1222',
     items: [
