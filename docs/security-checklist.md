@@ -47,13 +47,15 @@ building storage or adding a vendor.
 ## 1b. Infrastructure settings status (verified, 2026-11-05 review)
 
 Source of truth: `infra/Caddyfile`, `infra/docker-compose.prod.yml`, `infra/vps/bootstrap.sh`, [PLAN.md "Deploy-time security checklist"](../PLAN.md),
-[deploy.md](deploy.md). Stack: `Internet → Cloudflare → VPS:443 → Caddy → api-blue|green → Postgres`.
+[deploy.md](deploy.md), [origin-hardening-plan.md](origin-hardening-plan.md). Stack: `Internet → Cloudflare → VPS:443 → Caddy → api-blue|green → Postgres` (no PgBouncer, no Redis).
 
 | Area       | Setting                                                                                                                                                | Status / verified                                                  |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------ |
 | Cloudflare | SSL **Full (strict)**, Always Use HTTPS, **min TLS 1.2**, HTTP/2 + HTTP/3, Bot Fight Mode, HSTS toggle **off** on purpose (Caddy owns it)              | ✅ 2026-10-28                                                      |
 | Cloudflare | WAF rate-limit `api-lookup-limit`: `/api/plate*` + `/api/vin*`, 30 req / 10 s per IP, block 10 s                                                       | ✅ 2026-10-28 (~30×200 then 429)                                   |
-| Cloudflare | Origin trust: only Cloudflare ranges; client IP from `CF-Connecting-IP`                                                                                | ✅ re-check ranges vs cloudflare.com/ips occasionally              |
+| Cloudflare | Client IP from `CF-Connecting-IP`, trusted only from Cloudflare ranges (Caddy `trusted_proxies`); this is NOT a connection filter                      | ✅ re-check ranges vs cloudflare.com/ips occasionally              |
+| Cloudflare | SSL mode selector is **Automatic SSL/TLS** (running Full strict, 2026-11-16); pin Full (Strict) (origin-hardening-plan H1)                              | ⚠️ open                                                            |
+| Origin     | **Origin accepts any source on 80/443** (ufw), so a leaked VPS IP bypasses WAF/cache/DDoS; lock to Cloudflare via mTLS or allowlist (H2/H3)             | ⚠️ open, Medium, plan in [origin-hardening-plan.md](origin-hardening-plan.md) |
 | Cloudflare | DNSSEC                                                                                                                                                 | ⚠️ off during the nameserver move (optional re-enable + DS record) |
 | Caddy      | Origin cert TLS; `trusted_proxies` = Cloudflare, `header_up X-Forwarded-For {client_ip}` (basis for `TRUST_PROXY=true`); admin API (2019) unpublished  | ✅                                                                 |
 | Caddy      | HSTS `max-age=31536000`; Permissions-Policy; CSP **Report-Only**                                                                                       | ⚠️ HSTS lacks `includeSubDomains`/`preload`; CSP not enforced (#2) |
