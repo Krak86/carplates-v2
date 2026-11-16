@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 
 import {
   completeSize,
+  lightBusAsVan,
   mergeSize,
   parseSizeTab,
   sizeClass,
@@ -141,5 +142,23 @@ describe('parseSizeTab', () => {
     expect(parseSizeTab('garage')).toBe('garage')
     expect(parseSizeTab('nope')).toBe('schema')
     expect(parseSizeTab(null)).toBe('schema')
+  })
+})
+
+describe('lightBusAsVan', () => {
+  const wb = (value: number): SizeFigures => ({ ...NONE, wheelbaseMm: { value, source: 'rdw' } })
+
+  it('draws a Sprinter-class "bus" as a van and forecasts its size', () => {
+    const shape = lightBusAsVan({ shape: 'bus', known: true }, wb(4350))
+    expect(shape?.shape).toBe('van')
+    expect(completeSize(wb(4350), shape)?.figures.lengthMm?.source).toBe('estimate')
+  })
+
+  it('keeps a long-wheelbase bus, a published length and other shapes', () => {
+    expect(lightBusAsVan({ shape: 'bus', known: true }, wb(5800))?.shape).toBe('bus')
+    expect(
+      lightBusAsVan({ shape: 'bus', known: true }, { ...wb(4350), lengthMm: { value: 6000, source: 'rdw' } })?.shape
+    ).toBe('bus')
+    expect(lightBusAsVan({ shape: 'sedan', known: true }, wb(2700))?.shape).toBe('sedan')
   })
 })

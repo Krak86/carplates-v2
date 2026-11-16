@@ -17,6 +17,24 @@ const item = (group: ReleaseGroup, ua: string, ru: string, en: string): ReleaseI
  */
 export const RELEASES: readonly ReleaseDay[] = [
   {
+    date: '2026-11-16',
+    version: 'v2.1348',
+    items: [
+      item(
+        'fix',
+        'Розміри й паркування: мікроавтобуси на кшталт Sprinter, що в реєстрі записані як автобус, тепер мають креслення - відсутні габарити прогнозуються як для фургона.',
+        'Размеры и парковка: микроавтобусы вроде Sprinter, записанные в реестре как автобус, теперь получают чертёж - недостающие габариты прогнозируются как для фургона.',
+        'Size & parking: Sprinter-class minibuses filed as a bus in the registry now get a drawing - the missing dimensions are forecast as for a van.'
+      ),
+      item(
+        'improved',
+        'Вкладка «Креслення»: опис над кресленням отримав той самий фон, що й рядки під ним.',
+        'Вкладка «Чертёж»: описание над чертежом получило тот же фон, что и строки под ним.',
+        'Drawing tab: the description above the drawing has the same background as the rows below it.'
+      )
+    ]
+  },
+  {
     date: '2026-11-14',
     version: 'v2.1345',
     items: [

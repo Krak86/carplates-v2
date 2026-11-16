@@ -103,7 +103,9 @@ export default function SizeSchemaTab({ name, shape, figures, cls, wiki }: Props
 
   return (
     <div>
-      <p className="mt-2 text-sm text-[var(--color-muted)]">{t('size.tab.schema.intro')}</p>
+      <p className="mt-2 rounded bg-[var(--color-surface)]/20 px-1 py-0.5 text-sm text-[var(--color-muted)]">
+        {t('size.tab.schema.intro')}
+      </p>
 
       <VehicleSizeSchema shape={shape} figures={figures} name={name} active={active} onActiveChange={setActive} />
 
