@@ -108,8 +108,8 @@ bucket → access key, secret, endpoint `https://<account-id>.r2.cloudflarestora
 It only notices _missing_ pings; for "site is down" add **UptimeRobot** (free, 5 min) on `https://carsua.app/healthz`.
 
 **GitHub** (public repo) — Settings → Environments → New `production` → deployment branches: `main` only (optionally required reviewers) → add the
-secrets/variables below. After the first image push, set the `carsua-api` and `carsua-alpr` packages to **Public** (Package settings) so the VPS
-pulls without a login. Settings → Actions → "Require approval for all outside collaborators" (public repo; fork PRs never get secrets anyway).
+secrets/variables below. After the first image push, set the `carsua-api`, `carsua-alpr` and `carsua-ingest` packages to **Public** (Package settings; `carsua-ingest`
+confirmed public 2026-11-16) so the VPS pulls without a login. Images are public, so keep secrets out of every layer (env files are written to the VPS at deploy time, never baked in). Settings → Actions → "Require approval for all outside collaborators" (public repo; fork PRs never get secrets anyway).
 
 ## Secrets and variables (Environment `production`)
 
