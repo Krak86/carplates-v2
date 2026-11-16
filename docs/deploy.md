@@ -40,9 +40,13 @@ provider's **reverse DNS (PTR)** to `carsua.app`. Without Cloudflare, Caddy woul
 ## How it fits together
 
 ```
-Internet → Cloudflare (TLS, h3, Brotli, edge cache, WAF) → VPS :443 → Caddy → api-blue | api-green (Nest, also serves the SPA)
-                                                                              ├→ postgres   └→ alpr
+Internet → Cloudflare (TLS #1, h3, Brotli, edge cache, WAF) → VPS :443 → Caddy (TLS #2) → api-blue | api-green (Nest + Drizzle + pg Pool, also serves the SPA)
+                                                                                           ├→ postgres (direct, no PgBouncer)   └→ alpr
 ```
+
+Two separate TLS connections: browser to Cloudflare (Universal edge cert, Let's Encrypt, auto-renewed) and Cloudflare to Caddy (Cloudflare Origin CA cert,
+expires 2041, Full strict). Only Caddy publishes ports; the VPS firewall currently accepts 80/443 from any source, so the origin is not yet locked to
+Cloudflare. Details, the open hardening steps and the PgBouncer/Redis decisions: [origin-hardening-plan.md](origin-hardening-plan.md).
 
 One branch (`main`), three workflows that each run **only when their paths change** (+ a manual "Run workflow" button on each):
 
@@ -355,6 +359,7 @@ Not worth tuning at current traffic (Cloudflare cache + per-IP limits sit in fro
 
 ### Longer term
 
+- Lock the origin to Cloudflare (mTLS / Authenticated Origin Pulls or a firewall allowlist; today 443 accepts any source): [origin-hardening-plan.md](origin-hardening-plan.md).
 - Redis throttler store (not used by the app yet, so Redis is not in the compose file); until then limits are per-process and reset on restart,
   and blue/green briefly runs two api processes.
 - CSP is Report-Only; enforce after a clean week (the Zod `eval` violations are fixed, `lib/zod-config.ts`; recheck Lighthouse `inspector-issues` first). Cloudflare IP ranges in the Caddyfile: re-check against cloudflare.com/ips occasionally.
@@ -372,6 +377,7 @@ and unbundled, so it says nothing about production.
 
 - Enables **h2 and h3 by default** and advertises h3 via `Alt-Svc` (browsers use h2 on the first visit, h3 afterwards).
 - Compose must publish **`80`, `443` and `443/udp`**; the firewall must allow TCP 80, TCP 443 **and UDP 443**. Without UDP, h3 silently falls back to h2.
+  With Cloudflare in front this only matters for direct hits: browsers speak h3 to Cloudflare, which reaches the origin over TCP (to be verified, then 443/udp can be closed: [origin-hardening-plan.md](origin-hardening-plan.md) H4).
 - Stock Caddy 2 ships **zstd and gzip only** — `encode br` fails to load ("module not registered: http.encoders.br", verified 2026-10-15).
   Brotli to browsers comes from Cloudflare, but only when the origin response is **uncompressed**: it passes an already gzip/zstd response
   through (seen 2026-10-28: `content-encoding: gzip` with `accept-encoding: br`). The Caddyfile therefore compresses only requests without

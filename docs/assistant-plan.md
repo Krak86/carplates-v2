@@ -1,5 +1,8 @@
 # Rule-based assistant + embeddable widget (no AI, no MCP)
 
+> **In-app chat: superseded by [ai-chat-plan.md](ai-chat-plan.md)** (RAG + Gemini). The "Without AI? Yes" answer below no longer
+> applies to the in-app chat; the embeddable iframe widget stays rule-based.
+
 ## Context
 
 Users (and partner sites: dealers, forums, insurance blogs) want a simple "ask about this car" helper. It should answer from our own

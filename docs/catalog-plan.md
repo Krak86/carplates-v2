@@ -165,7 +165,7 @@ capacity_p50, power_p50, imported_share, first_reg_by_year jsonb, owners_p50)`.
 - **Load (decided 2026-10-29).** Expected extra load is small and comes from crawlers (tens of thousands of URLs over a few
   weeks), not users. Rules:
   - Keep the taxonomy (makes/models, a few thousand rows) in API process memory, loaded at start and reloaded when the data
-    version changes. Faster than Redis (no network hop). Redis (already in the production compose) only if a cache shared
+    version changes. Faster than Redis (no network hop). Redis (not in the production compose yet) only if a cache shared
     across blue/green api instances is wanted, or together with the Redis throttler store.
   - Top ~300 models, make pages and `/cars` stay in memory.
   - The `LazySection`s load client-side on scroll, so crawlers never trigger the heavy section calls. Keep the SSR block

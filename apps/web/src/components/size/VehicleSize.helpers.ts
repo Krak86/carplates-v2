@@ -137,6 +137,20 @@ export function sizeShape({ kind, body, rdwBodyTypes, vinBodyClass }: ShapeInput
   return { shape: 'car', known: false }
 }
 
+/** A "bus" or "truck" with a wheelbase up to this (mm) is a van-sized vehicle (Sprinter, Transit, Ducato). */
+const LIGHT_BUS_WHEELBASE_MM = 4600
+
+/**
+ * Registries file a Sprinter-class minibus as a bus. Buses have no typical size to forecast from, so such a vehicle
+ * (known wheelbase of a van, no length) is drawn and forecast as a van; a real bus or a published length is untouched.
+ */
+export function lightBusAsVan(shape: ShapeResult | null, figures: SizeFigures): ShapeResult | null {
+  if (!shape || (shape.shape !== 'bus' && shape.shape !== 'truck')) return shape
+  const wheelbase = figures.wheelbaseMm?.value
+  if (figures.lengthMm || wheelbase == null || wheelbase > LIGHT_BUS_WHEELBASE_MM) return shape
+  return { shape: 'van', known: true }
+}
+
 /** inch -> mm. */
 const INCH_MM = 25.4
 

@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import type { Dims } from '@/components/size/fit'
 import {
   completeSize,
+  lightBusAsVan,
   mergeSize,
   SIZE_FIELDS,
   sizeClass,
@@ -71,17 +72,20 @@ export type ComputeSizeInput = {
 
 /** The pure part of `useVehicleSize`, shared with the export report (which holds the same query results). */
 export function computeVehicleSize({ rdw, wiki, kind, body, vinFields }: ComputeSizeInput): VehicleSize | null {
-  const shape = sizeShape({
-    kind,
-    body,
-    rdwBodyTypes: rdw?.specs.bodyTypes ?? null,
-    vinBodyClass: vinFields?.get('Body Class') ?? null
-  })
   const merged = mergeSize({
     rdw: rdw?.specs ?? null,
     wiki: wiki?.dimensions ?? null,
     vinWheelbaseMm: vinWheelbaseMm(vinFields)
   })
+  const shape = lightBusAsVan(
+    sizeShape({
+      kind,
+      body,
+      rdwBodyTypes: rdw?.specs.bodyTypes ?? null,
+      vinBodyClass: vinFields?.get('Body Class') ?? null
+    }),
+    merged
+  )
   const completed = completeSize(merged, shape)
   if (!shape || !completed) return null
 
