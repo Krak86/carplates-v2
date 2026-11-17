@@ -10,7 +10,7 @@ Docs are huge: **grep `^## ` headings, never read whole**. `PLAN.md` backlog + p
 ## Layout
 
 `packages/shared` (`normalizePlate`, regions, Zod schemas — **single source of truth, never re-implement plate logic**) · `packages/db` ·
-`apps/api` (`src/<feature>/`; serves the SPA + per-plate `<meta>`) · `apps/web` · `scripts/` (ingest/export CLIs, `seed-data/` gzipped CSVs) · `infra/` · `services/alpr/`.
+`apps/api` (`src/<feature>/`; serves the SPA + per-plate `<meta>`) · `apps/web` · `scripts/` (ingest/export CLIs, `seed-data/` gzipped CSVs) · `infra/` · `services/alpr/` · `secrets/` (local-only, git-ignored certs/keys, see its README; never commit).
 
 Version pins (PLAN.md "Version pins"): never use `latest`.
 

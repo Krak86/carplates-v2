@@ -359,7 +359,7 @@ Not worth tuning at current traffic (Cloudflare cache + per-IP limits sit in fro
 
 ### Longer term
 
-- Lock the origin to Cloudflare (mTLS / Authenticated Origin Pulls or a firewall allowlist; today 443 accepts any source): [origin-hardening-plan.md](origin-hardening-plan.md).
+- Origin locked to Cloudflare with Authenticated Origin Pulls (done 2026-11-17: Zone-level AOP with our own CA, Caddy `require_and_verify`, secret `CF_AOP_CERT`; a direct hit fails the TLS handshake). Optional second layer, the firewall allowlist `infra/vps/cf-firewall.sh`, is shipped but not applied: [origin-hardening-plan.md](origin-hardening-plan.md) H3.
 - Redis throttler store (not used by the app yet, so Redis is not in the compose file); until then limits are per-process and reset on restart,
   and blue/green briefly runs two api processes.
 - CSP is Report-Only; enforce after a clean week (the Zod `eval` violations are fixed, `lib/zod-config.ts`; recheck Lighthouse `inspector-issues` first). Cloudflare IP ranges in the Caddyfile: re-check against cloudflare.com/ips occasionally.
