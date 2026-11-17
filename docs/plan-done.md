@@ -4856,3 +4856,12 @@ Phase B step 1 of the security hardening: violations of the Report-Only CSP now 
 - **Docs / CI:** secondary plan files moved from the repo root into `docs/` (`WANTED_PLAN.md` and others; references in migrations, scripts and `ingest.cron` updated); Deploy ingest skips releases.ts-only changes (`deploy-ingest.yml` path ignore); the shared deploy plumbing workflows were also tidied twice. Dependabot minor-and-patch group (35 updates) merged 2026-11-12, pins unchanged.
 - **About:** new `privacy` feature + brief entry (ua/ru/en), safety and fuel entries mention the star chip and the breathing comparison. No new external data source this period: the Wikimedia, PostHog (EU), Disqus, OpenStreetMap, Google Maps and YouTube source texts were already updated on 2026-11-09 and 2026-11-13.
 - Release entry `v2.1342` (day 2026-11-14), `LATEST_RELEASE_DATE` bumped to 2026-11-14.
+
+## Strict script-src, phase 1 (2026-11-17) ✅ code
+
+Google CSP Evaluator marked `script-src` red for `'unsafe-inline'` and for host allowlists (`accounts.google.com`, `*.disqus.com` host JSONP). Phase 1 removes the first.
+
+- **No inline scripts left in `index.html`:** the pre-paint theme script is `apps/web/public/theme-init.js` (synchronous `<script src>` in `<head>`, no flash); the language modulepreload script is emitted by `preloadHints()` (`vite.config.ts`, `generateBundle` `order: 'pre'`) as `assets/lang-preload-<hash>.js` and loaded with `async`. Both are precached by the service worker.
+- **`infra/Caddyfile`:** `'unsafe-inline'` dropped from `script-src` (`style-src` keeps it). Still Report-Only.
+- **Why not a nonce / `'strict-dynamic'`:** `/cars/*` HTML is edge-cached for a day and `/index.html` is precached by the PWA, so a per-request nonce would be shared by every visitor. Phase 2 (optional) is a build-time hash of one inline loader + `'strict-dynamic'`, with the header set by the API (`spa.controller.ts`); watch the Cloudflare Web Analytics auto-injected beacon.
+- **Same day, bundle size:** `exifr` (89 KB of the 184 KB entry chunk) is now a dynamic import of its `lite` build in `lib/photo-meta.ts` (type shim in `vite-env.d.ts`): entry 184 KB -> 114 KB (33 KB gzip), lazy chunk 45 KB. `__vite__mapDeps` in the entry is Vite's lazy-import preload map (~10 KB), kept on purpose.

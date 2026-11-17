@@ -18,3 +18,8 @@ interface ImportMetaEnv {
 interface ImportMeta {
   readonly env: ImportMetaEnv
 }
+
+// exifr ships types only for its main entry; the `lite` build (EXIF/GPS only) has the same API.
+declare module 'exifr/dist/lite.esm.mjs' {
+  export * from 'exifr'
+}
