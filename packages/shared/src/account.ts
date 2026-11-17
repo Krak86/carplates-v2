@@ -255,6 +255,19 @@ export const adminAnalyticsResponseSchema = z.object({
   pageviews30d: z.number().nullable(),
   visitors30d: z.number().nullable(),
   topPaths: z.array(z.object({ path: z.string(), views: z.number() })),
+  /** 30-day visitor breakdowns by `$browser` / `$device_type` / `$os`; optional so older cached payloads still parse. */
+  browsers: z
+    .array(z.object({ name: z.string(), visitors: z.number() }))
+    .nullable()
+    .optional(),
+  devices: z
+    .array(z.object({ name: z.string(), visitors: z.number() }))
+    .nullable()
+    .optional(),
+  os: z
+    .array(z.object({ name: z.string(), visitors: z.number() }))
+    .nullable()
+    .optional(),
   /** Dashboards of the connected services (only the ones the API has ids for). */
   links: z.array(z.object({ id: z.string(), label: z.string(), url: z.string() }))
 })

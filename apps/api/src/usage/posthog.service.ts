@@ -19,6 +19,12 @@ const TOP_PATHS_QUERY = `
   WHERE event = '$pageview' AND timestamp > now() - INTERVAL 7 DAY AND properties.$pathname IS NOT NULL
   GROUP BY path ORDER BY views DESC LIMIT 10`
 
+/** Unique visitors per value of a pageview property over 30 days (same window as the 30d tile). */
+const breakdownQuery = (property: '$browser' | '$device_type' | '$os'): string => `
+  SELECT properties.${property} AS name, uniq(distinct_id) AS visitors FROM events
+  WHERE event = '$pageview' AND timestamp > now() - INTERVAL 30 DAY AND properties.${property} IS NOT NULL
+  GROUP BY name ORDER BY visitors DESC LIMIT 8`
+
 /** Dashboards of the services wired in the app; each link only appears when the API knows the id/slug. */
 const dashboardLinks = (): AdminAnalyticsResponse['links'] => {
   const env = loadEnv()
@@ -62,7 +68,14 @@ export class PosthogService {
     }
 
     try {
-      const [summary, paths] = await Promise.all([this.query(SUMMARY_QUERY), this.query(TOP_PATHS_QUERY)])
+      const [summary, paths, browsers, devices, os] = await Promise.all([
+        this.query(SUMMARY_QUERY),
+        this.query(TOP_PATHS_QUERY),
+        this.query(breakdownQuery('$browser')),
+        this.query(breakdownQuery('$device_type')),
+        this.query(breakdownQuery('$os'))
+      ])
+      const toBreakdown = (rows: unknown[][]) => rows.map(r => ({ name: String(r[0]), visitors: Number(r[1]) }))
       const row = summary[0] ?? []
       const value = adminAnalyticsResponseSchema.parse({
         configured: true,
@@ -72,6 +85,9 @@ export class PosthogService {
         pageviews30d: Number(row[2] ?? 0),
         visitors30d: Number(row[3] ?? 0),
         topPaths: paths.map(r => ({ path: String(r[0]), views: Number(r[1]) })),
+        browsers: toBreakdown(browsers),
+        devices: toBreakdown(devices),
+        os: toBreakdown(os),
         links
       })
       this.cache = { at: Date.now(), value }
