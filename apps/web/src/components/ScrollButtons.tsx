@@ -5,7 +5,7 @@ import { Link, useLocation } from 'react-router'
 
 import ShareQrButton from '@/components/ShareQrButton'
 import { isCatalogPath, NO_SHARE_PATHS, usePageShareActions } from '@/components/use-page-share-actions'
-import { ROUTE_TITLE_KEYS } from '@/hooks/useDocumentTitle'
+import { routeTitleKey } from '@/hooks/useDocumentTitle'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { useScrolledNow } from '@/hooks/useSideWidgetsVisible'
 import { collapseAllCardSections } from '@/lib/card-sections'
@@ -47,13 +47,12 @@ export default function ScrollButtons(): ReactNode {
   const scrolled = useScrolledNow()
   // Only a plate / VIN result page (a single segment that is not a static route) has collapsible sections.
   const { pathname } = useLocation()
-  const isResultRoute =
-    pathname !== '/' && pathname.split('/').filter(Boolean).length === 1 && !(pathname in ROUTE_TITLE_KEYS)
+  const isStaticRoute = !!routeTitleKey(pathname)
+  const isResultRoute = pathname !== '/' && pathname.split('/').filter(Boolean).length === 1 && !isStaticRoute
   // On a result page the report carries the plate / VIN (see ReportIssueLink).
   const feedbackTo = isResultRoute ? `/discuss?about=${pathname.slice(1)}` : '/discuss'
   const isShareable =
-    !NO_SHARE_PATHS.has(pathname) &&
-    (pathname === '/' || isResultRoute || pathname in ROUTE_TITLE_KEYS || isCatalogPath(pathname))
+    !NO_SHARE_PATHS.has(pathname) && (pathname === '/' || isResultRoute || isStaticRoute || isCatalogPath(pathname))
   const { copied, share } = usePageShareActions()
   const [pos, setPos] = useState<Position>(measure)
 

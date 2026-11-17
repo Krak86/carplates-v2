@@ -13,6 +13,7 @@ Users should be able to ask questions in plain language, such as "what does the 
 4. **Registry data via tools**: Gemini function-calling into the existing `PlateService` and `VinService`.
 
 Decisions already made:
+
 - **Model provider:** Gemini free tier.
 - **Access:** public, with a per-IP throttle and a global daily cap.
 - **UI:** a floating button that opens a drawer, on every page.

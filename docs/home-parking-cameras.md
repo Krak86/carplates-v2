@@ -26,38 +26,38 @@ Requirement: the camera must give its stream over RTSP (directly or through a hu
 
 **1. Plug-in Wi-Fi (power cable only, always on, native RTSP, no hub)**
 
-| Model | ~Price | Notes |
-|---|---|---|
-| TP-Link Tapo C310 / C320WS | $30-50 | 2K/3MP, RTSP/ONVIF turned on in the app. Fine for snapshots + AI |
-| TP-Link Tapo C325WB | ~$70 | Better colour at night, RTSP |
+| Model                               | ~Price  | Notes                                                                                           |
+| ----------------------------------- | ------- | ----------------------------------------------------------------------------------------------- |
+| TP-Link Tapo C310 / C320WS          | $30-50  | 2K/3MP, RTSP/ONVIF turned on in the app. Fine for snapshots + AI                                |
+| TP-Link Tapo C325WB                 | ~$70    | Better colour at night, RTSP                                                                    |
 | Reolink E1 Outdoor / E1 Outdoor Pro | $55-100 | Pan-tilt (4K on Pro), Wi-Fi or Ethernet. One camera can cover both sides with 2 saved positions |
-| Reolink W320 / RLC-510WA | $60-80 | Fixed 5MP, light at night, stable RTSP |
+| Reolink W320 / RLC-510WA            | $60-80  | Fixed 5MP, light at night, stable RTSP                                                          |
 
 **2. Battery + solar via Reolink Home Hub (no wires, sleeps until asked; the chosen path)**
 
 Hub ~$100, bought once. Not supported: Reolink 2MP battery cameras, 4G cameras. A session lasts up to ~5 min.
 
-| Model | ~Price | Notes |
-|---|---|---|
-| Reolink Argus 3 Pro | $90-130 | 2K, cheapest hub-compatible option (check the list) |
+| Model                  | ~Price   | Notes                                                                                                                                     |
+| ---------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| Reolink Argus 3 Pro    | $90-130  | 2K, cheapest hub-compatible option (check the list)                                                                                       |
 | Reolink Argus PT Ultra | $130-160 | 4K pan-tilt. One camera with 2 saved positions can cover both sides. Turning costs battery. Needs a firmware upgrade to work with the hub |
-| Reolink Argus 4 Pro | $150-200 | 4K 180-degree dual-lens, colour at night. One camera at the fence may see both ways |
-| Reolink Altas PT Ultra | ~$200+ | Big battery, 4K PT. One Reolink post says it pairs with the **Home Hub Pro** |
+| Reolink Argus 4 Pro    | $150-200 | 4K 180-degree dual-lens, colour at night. One camera at the fence may see both ways                                                       |
+| Reolink Altas PT Ultra | ~$200+   | Big battery, 4K PT. One Reolink post says it pairs with the **Home Hub Pro**                                                              |
 
 Totals: hub + 1x Argus PT Ultra ~ $230-260 · hub + 2x Argus 3 Pro ~ $280-360 · hub + 2x Argus 4 Pro ~ $400-500.
 
 **3. Eufy battery/solar: possible, unverified**
 
-| Model | ~Price | Notes |
-|---|---|---|
+| Model             | ~Price   | Notes                                                                                                                                                   |
+| ----------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Eufy SoloCam S340 | $150-200 | Solar, dual lens, no hub. RTSP can be turned on in the app, but on battery it is known to be limited or flaky. Confirm on the exact model before buying |
 
 **4. PoE wired (one cable for power + data; richest and most reliable)**
 
-| Model | ~Price | Notes |
-|---|---|---|
-| Reolink RLC-510A / RLC-811A | $60-120 | 5MP-4K, rock-solid RTSP |
-| Reolink Duo 3 PoE | $150-250 | 16MP 180-degree dual lens. One camera covers the whole street |
+| Model                           | ~Price   | Notes                                                                                |
+| ------------------------------- | -------- | ------------------------------------------------------------------------------------ |
+| Reolink RLC-510A / RLC-811A     | $60-120  | 5MP-4K, rock-solid RTSP                                                              |
+| Reolink Duo 3 PoE               | $150-250 | 16MP 180-degree dual lens. One camera covers the whole street                        |
 | Hikvision / Dahua ColorVu 4-8MP | $100-200 | Colour picture at night with almost no light. Plus a PoE switch or injector ($20-60) |
 
 **Do not fit (no RTSP at all):** Tapo C425 / C460 / C660, Ring, Blink, Arlo, Google Nest, most Ezviz/Imou battery models, and Reolink Go (4G).

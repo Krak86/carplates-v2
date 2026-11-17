@@ -26,10 +26,10 @@ Docker network "carsua"
 
 "Leg" is an informal word for one hop. There are two independent TLS connections, so two certificates (a TLS server must always present one):
 
-| Leg | Server | Certificate | Lifetime |
-| --- | --- | --- | --- |
-| Browser to Cloudflare | Cloudflare | Universal edge cert, Let's Encrypt `YE2` seen 2026-11-16, `carsua.app` + `*.carsua.app`, ECDSA | 90 days, renewed by Cloudflare (CA may change) |
-| Cloudflare to VPS | Caddy | Cloudflare Origin CA (`/certs/origin.pem`), only Cloudflare trusts it | expires 2041-10-23 (checked with openssl/curl on the VPS) |
+| Leg                   | Server     | Certificate                                                                                    | Lifetime                                                  |
+| --------------------- | ---------- | ---------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| Browser to Cloudflare | Cloudflare | Universal edge cert, Let's Encrypt `YE2` seen 2026-11-16, `carsua.app` + `*.carsua.app`, ECDSA | 90 days, renewed by Cloudflare (CA may change)            |
+| Cloudflare to VPS     | Caddy      | Cloudflare Origin CA (`/certs/origin.pem`), only Cloudflare trusts it                          | expires 2041-10-23 (checked with openssl/curl on the VPS) |
 
 Notes:
 
@@ -61,14 +61,14 @@ Only `caddy` publishes ports (`80:80`, `443:443`, `443:443/udp`, line 32). Other
 
 ## 2. Findings
 
-| # | Finding | Severity |
-| --- | --- | --- |
-| F1 | **ufw allows 22/80/443 tcp and 443/udp from anywhere** (`bootstrap.sh:47-54`). Docs said "only Cloudflare ranges" but the only Cloudflare-range list is `trusted_proxies` in the Caddyfile (client IP header). Anyone who learns the VPS IP can bypass the WAF rate limit, Bot Fight Mode, the cache and DDoS filtering. | Medium |
-| F2 | The IP can leak even with the orange cloud: old DNS history, internet-wide scanners that return our cert on :443, any grey-cloud record. | Medium |
-| F3 | Docs wrongly said Redis is "already in the production compose" (`catalog-plan.md`, PLAN.md stack line). It is not; the throttler store is still open. | Docs |
-| F4 | `deploy.md` says the firewall must allow 443/udp for HTTP/3. With Cloudflare in front, browsers speak HTTP/3 to Cloudflare, which talks to the origin over TCP; 443/udp matters only for direct hits (verify before closing, H4). | Low |
-| F5 | SSL mode is held by "Automatic SSL/TLS", not pinned. Today it resolves to Full (strict). | Low |
-| F6 | SSH (22) is open to the world (key-only, no root, fail2ban). Acceptable, but the cheapest further step is restricting it. | Low |
+| #   | Finding                                                                                                                                                                                                                                                                                                                  | Severity |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| F1  | **ufw allows 22/80/443 tcp and 443/udp from anywhere** (`bootstrap.sh:47-54`). Docs said "only Cloudflare ranges" but the only Cloudflare-range list is `trusted_proxies` in the Caddyfile (client IP header). Anyone who learns the VPS IP can bypass the WAF rate limit, Bot Fight Mode, the cache and DDoS filtering. | Medium   |
+| F2  | The IP can leak even with the orange cloud: old DNS history, internet-wide scanners that return our cert on :443, any grey-cloud record.                                                                                                                                                                                 | Medium   |
+| F3  | Docs wrongly said Redis is "already in the production compose" (`catalog-plan.md`, PLAN.md stack line). It is not; the throttler store is still open.                                                                                                                                                                    | Docs     |
+| F4  | `deploy.md` says the firewall must allow 443/udp for HTTP/3. With Cloudflare in front, browsers speak HTTP/3 to Cloudflare, which talks to the origin over TCP; 443/udp matters only for direct hits (verify before closing, H4).                                                                                        | Low      |
+| F5  | SSL mode is held by "Automatic SSL/TLS", not pinned. Today it resolves to Full (strict).                                                                                                                                                                                                                                 | Low      |
+| F6  | SSH (22) is open to the world (key-only, no root, fail2ban). Acceptable, but the cheapest further step is restricting it.                                                                                                                                                                                                | Low      |
 
 ## 3. Plan (ordered; tick when done and verified)
 
