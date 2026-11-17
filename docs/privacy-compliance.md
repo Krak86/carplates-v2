@@ -85,7 +85,11 @@ Historical migration is limited on free plans (a support ticket may help). Re-ch
 - [x] `posthog.init`: `cookieless_mode: 'always'`, `persistence: 'memory'`, `autocapture: false`, `disable_session_recording: true`,
       `disable_surveys: true`, `capture_dead_clicks: false` (check names against the installed version; ask before bumping the pin)
 - [x] Unit test the init options (mock `posthog-js`): `apps/web/src/lib/telemetry.test.ts`
-- [x] After deploy: enable "Enable cookieless tracking" in the PostHog project (done 2026-11-13, EU project 348169; project-level autocapture / heatmaps / web vitals switched off)
+- [x] After deploy: enable "Enable cookieless tracking" in the PostHog project (Settings > Web analytics > Cookieless tracking, then **Save**; project-level autocapture / heatmaps / web vitals switched off).
+      **It was not actually saved on the EU project 348169 until 2026-11-17**: from 2026-11-13 PostHog discarded every cookieless event
+      (668 seen under Activity > Event ingestion warnings, "Discarded cookieless event because cookieless tracking is disabled") while
+      `/e/` still answered 200, so the admin card read 0. Per project: redo it in any new project, and check the ingestion warnings after
+      switching projects.
 - [x] After deploy (done 2026-11-13; verified: events go to eu.i.posthog.com, no `ph_*` cookie or localStorage key): create the PostHog EU org, set `VITE_POSTHOG_HOST=https://eu.i.posthog.com` + new key (GitHub vars, `deploy-web.yml`),
       point the server HogQL key/host (`apps/api/src/usage/posthog.service.ts`, `env.ts`) at EU, update `features-reference.md:223`
 - [x] Hardening (2026-11-13): `capture_heatmaps: false` and `capture_performance: false` added (option names checked against posthog-js 1.438.21, pin unchanged).
