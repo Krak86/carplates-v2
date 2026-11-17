@@ -156,6 +156,13 @@ describe('POST /api/csp-report', () => {
     expect(captureMessage).toHaveBeenCalledTimes(1)
   })
 
+  it('drops the Cloudflare beacon script (CARSUA-29, injected into the Telegram frame), not other script hosts', async () => {
+    await post(legacy('https://static.cloudflareinsights.com/beacon.min.js/vabc'))
+    expect(captureMessage).not.toHaveBeenCalled()
+    await post(legacy('https://evil.example/beacon.min.js'))
+    expect(captureMessage).toHaveBeenCalledTimes(1)
+  })
+
   it('keeps inline and eval violations', async () => {
     await post(legacy('inline'))
     await post(legacy('eval'))

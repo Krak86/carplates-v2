@@ -125,7 +125,15 @@ function opusOption(from: string, to: string): LocalOption {
 }
 
 async function translateWithOpus(text: string, from: string, to: string, onProgress: Progress): Promise<string> {
-  const { pipeline } = await import('@huggingface/transformers')
+  const [{ pipeline, env }, { ortWasmPaths }] = await Promise.all([
+    import('@huggingface/transformers'),
+    import('./ort-wasm-paths')
+  ])
+  // Self-hosted runtime (strict CSP: no cdn.jsdelivr.net, no blob: script). useWasmCache off = transformers imports the glue
+  // from its URL instead of wrapping it in a blob. Must be set before the first pipeline() call.
+  const onnx = env.backends.onnx as { wasm?: { wasmPaths?: unknown } }
+  if (onnx.wasm) onnx.wasm.wasmPaths = ortWasmPaths(navigator.userAgent, 'gpu' in navigator)
+  env.useWasmCache = false
   const pairs = opusSteps(from, to)
   const sentences = splitSentences(text)
   // Per-file download progress, folded into one percentage across all steps.

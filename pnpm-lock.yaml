@@ -322,6 +322,9 @@ importers:
       onnxruntime-web:
         specifier: ^1.31.1
         version: 1.31.1
+      onnxruntime-web-dev:
+        specifier: npm:onnxruntime-web@1.31.0-dev.20260914-8d85527a0
+        version: onnxruntime-web@1.31.0-dev.20260914-8d85527a0
       posthog-js:
         specifier: ^1.447.5
         version: 1.447.5(@types/react@19.3.0)(react@19.3.1)
