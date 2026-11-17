@@ -1,4 +1,3 @@
-import exifr from 'exifr'
 import { photoMetaSchema, type PhotoMeta } from '@carplates/shared'
 
 /** The open-data registry's earliest registration is 2 Jan 2013 — older-only cars aren't in it. */
@@ -12,6 +11,8 @@ const MS_PER_YEAR = 365.25 * 24 * 3600 * 1000
  */
 export async function readPhotoMeta(file: File): Promise<PhotoMeta | null> {
   try {
+    // Lazy + the `lite` build (EXIF/GPS only, no XMP/IPTC/ICC): ~90 KB stays out of the entry chunk until a photo is picked.
+    const exifr = await import('exifr/dist/lite.esm.mjs')
     // `pick` can't select the derived latitude/longitude (it filters them out), so GPS is its own read.
     const [raw, gps]: [Record<string, unknown> | undefined, { latitude?: number; longitude?: number } | undefined] =
       await Promise.all([exifr.parse(file, { pick: ['DateTimeOriginal', 'CreateDate'] }), exifr.gps(file)])

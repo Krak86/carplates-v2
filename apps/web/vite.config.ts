@@ -75,30 +75,43 @@ const LANG_CHUNKS = ['ua', 'ru', 'en'] as const
 const HERO_AVIF = /(^|\/)quilia-[^/]*-crop-[^/]*\.avif$/
 
 function preloadHints(): Plugin {
+  // The preload script is an emitted, content-hashed file (not inline) so the CSP needs no 'unsafe-inline' for scripts.
+  let langScriptUrl: string | null = null
   return {
     name: 'carplates-preload-hints',
-    transformIndexHtml: {
-      order: 'post',
-      handler(_html, ctx): HtmlTagDescriptor[] {
-        const files = Object.values(ctx.bundle ?? {})
+    // Runs before Vite's own HTML plugin, so `langScriptUrl` is set by the time `transformIndexHtml` below reads it.
+    generateBundle: {
+      order: 'pre',
+      handler(_options, bundle): void {
+        langScriptUrl = null
         const langUrls: Record<string, string> = {}
         for (const lang of LANG_CHUNKS) {
-          const chunk = files.find(
+          const chunk = Object.values(bundle).find(
             f => f.type === 'chunk' && f.facadeModuleId?.replaceAll('\\', '/').endsWith(`/src/i18n/${lang}.json`)
           )
           if (chunk) langUrls[lang] = `/${chunk.fileName}`
         }
+        if (!langUrls.ua) return
+        const source =
+          `(function(m){try{var l=new URLSearchParams(location.search).get('lang');` +
+          `if(!m[l]){try{l=localStorage.getItem('carplates.lang')}catch(e){l=null}` +
+          `if(!m[l]){var n=navigator.language.slice(0,2);l=n==='ru'?'ru':n==='uk'||n==='ua'?'ua':'en'}}` +
+          `var u=[m[l]];if(l!=='ua')u.push(m.ua);` +
+          `u.forEach(function(h){if(!h)return;var k=document.createElement('link');k.rel='modulepreload';k.href=h;document.head.appendChild(k)})}catch(e){}})` +
+          `(${JSON.stringify(langUrls)});\n`
+        const hash = createHash('sha1').update(source).digest('hex').slice(0, 8)
+        const fileName = `assets/lang-preload-${hash}.js`
+        this.emitFile({ type: 'asset', fileName, source })
+        langScriptUrl = `/${fileName}`
+      }
+    },
+    transformIndexHtml: {
+      order: 'post',
+      handler(_html, ctx): HtmlTagDescriptor[] {
+        const files = Object.values(ctx.bundle ?? {})
         const tags: HtmlTagDescriptor[] = []
-        if (langUrls.ua) {
-          const script =
-            `(function(m){try{var l=new URLSearchParams(location.search).get('lang');` +
-            `if(!m[l]){try{l=localStorage.getItem('carplates.lang')}catch(e){l=null}` +
-            `if(!m[l]){var n=navigator.language.slice(0,2);l=n==='ru'?'ru':n==='uk'||n==='ua'?'ua':'en'}}` +
-            `var u=[m[l]];if(l!=='ua')u.push(m.ua);` +
-            `u.forEach(function(h){if(!h)return;var k=document.createElement('link');k.rel='modulepreload';k.href=h;document.head.appendChild(k)})}catch(e){}})` +
-            `(${JSON.stringify(langUrls)})`
-          tags.push({ tag: 'script', children: script, injectTo: 'head' })
-        }
+        // `async`: runs as soon as fetched without blocking the parser (the hints only need to land early, not first).
+        if (langScriptUrl) tags.push({ tag: 'script', attrs: { src: langScriptUrl, async: true }, injectTo: 'head' })
         const hero = files.find(f => f.type === 'asset' && HERO_AVIF.test(f.fileName))
         if (hero) {
           tags.push({
