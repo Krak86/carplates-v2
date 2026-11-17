@@ -17,6 +17,18 @@ const item = (group: ReleaseGroup, ua: string, ru: string, en: string): ReleaseI
  */
 export const RELEASES: readonly ReleaseDay[] = [
   {
+    date: '2026-11-17',
+    version: 'v2.1350',
+    items: [
+      item(
+        'fix',
+        'Тривоги: фон сторінок тепер малює області тими самими кольорами, що й мапа /alarms - жовтий і червоний рівні.',
+        'Тревоги: фон страниц теперь рисует области теми же цветами, что и карта /alarms - жёлтый и красный уровни.',
+        'Alarms: the page background now paints oblasts in the same colors as the /alarms map - yellow and red levels.'
+      )
+    ]
+  },
+  {
     date: '2026-11-16',
     version: 'v2.1348',
     items: [

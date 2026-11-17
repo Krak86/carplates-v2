@@ -8,7 +8,7 @@ import { ComposableMap, Geographies, Geography, Marker } from 'react-simple-maps
 import { alarmsQuery, ukraineGeographyQuery } from '@/lib/queries'
 import { localizeRegion } from '@/lib/region-label'
 import type { UkraineRegionProperties } from '@/lib/api'
-import { ALARM_FILL, alarmTypeIcon, statusOf } from '@/routes/alarms/helpers'
+import { ALARM_FILL, alarmTypeIcon, levelFill, statusOf } from '@/routes/alarms/helpers'
 import { REGION_NAME_BY_SHAPE_ISO } from '@/routes/stats/region-geography'
 
 const MAP_WIDTH = 800
@@ -44,11 +44,12 @@ export default function AlarmBackground(): ReactNode {
                 const properties = geo.properties as UkraineRegionProperties
                 const name = REGION_NAME_BY_SHAPE_ISO[properties.shapeISO]
                 const status = statusOf(regions, name)
+                const alerted = regions.find(r => r.region === name)
                 return (
                   <Geography
                     key={geo.rsmKey}
                     geography={geo}
-                    fill={ALARM_FILL[status]}
+                    fill={alerted ? levelFill(alerted.level, alerted.scope === 'partial') : ALARM_FILL.none}
                     stroke="var(--color-bg)"
                     strokeWidth={0.5}
                     className={status === 'none' ? undefined : 'alarm-pulse'}
