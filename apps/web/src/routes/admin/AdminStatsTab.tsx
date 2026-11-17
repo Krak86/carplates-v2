@@ -134,6 +134,28 @@ export default function AdminStatsTab(): ReactNode {
             ))}
           </div>
         )}
+        {a?.configured && !a.error && (
+          <div className="mt-4 grid gap-4 text-sm md:grid-cols-3">
+            {(
+              [
+                ['browsers', a.browsers],
+                ['devices', a.devices],
+                ['os', a.os]
+              ] as const
+            ).map(([key, rows]) => (
+              <div key={key}>
+                <div className="mb-1 text-[var(--color-muted)]">{t(`admin.stats.${key}`)}</div>
+                {!rows?.length && <div className="text-[var(--color-muted)]">-</div>}
+                {rows?.map(r => (
+                  <div key={r.name} className="flex justify-between gap-3 tabular-nums">
+                    <span className="truncate">{r.name}</span>
+                    <span>{r.visitors.toLocaleString()}</span>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        )}
         {a && (
           <div className="mt-4 flex flex-wrap gap-2">
             {a.links.map(l => (

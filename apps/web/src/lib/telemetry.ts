@@ -7,6 +7,7 @@ const env = import.meta.env
 const enabled = env.VITE_ENABLE_TELEMETRY === 'true'
 
 let posthogRef: typeof import('posthog-js').default | null = null
+let lastPageview = { url: '', at: 0 }
 
 export async function initTelemetry(): Promise<void> {
   if (!enabled) return
@@ -46,9 +47,20 @@ export async function initTelemetry(): Promise<void> {
       capture_heatmaps: false,
       capture_performance: false,
       // SPA: fire $pageview on every router navigation (history API), not only the first load.
-      capture_pageview: 'history_change'
+      capture_pageview: 'history_change',
+      // Drops a second $pageview for the same URL fired right after the first (the explicit initial one below vs. the SDK's own).
+      before_send: event => {
+        if (event?.event !== '$pageview') return event
+        const url = String(event.properties?.$current_url ?? '')
+        const now = Date.now()
+        const duplicate = url === lastPageview.url && now - lastPageview.at < 2000
+        lastPageview = { url, at: now }
+        return duplicate ? null : event
+      }
     })
     posthogRef = posthog
+    // PostHog starts late (idle / first interaction), so the SDK never reported the landing page: capture it ourselves.
+    posthog.capture('$pageview')
     for (const [event, props] of pending.splice(0)) posthog.capture(event, props)
   }
 }

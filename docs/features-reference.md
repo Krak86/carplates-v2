@@ -219,7 +219,9 @@ default layer, saved streams (auto-saved when a stream is picked in the layers p
 
 **Admin Statistics** (`/admin?tab=stats`; `apps/api/src/usage/`, migration 0038): a global `UsageInterceptor` logs plate/VIN/photo
 lookups and sign-ins into `app.usage_events` (kind, UI language, found, has-cookie — **never** the plate/VIN, IP or user id);
-`GET /api/admin/stats` aggregates it, `GET /api/admin/analytics` proxies PostHog HogQL (10 min cache; needs
+`GET /api/admin/stats` aggregates it, `GET /api/admin/analytics` proxies PostHog HogQL (pageview/visitor tiles, top paths, and 30d
+unique-visitor breakdowns by `$browser` / `$device_type` / `$os` as optional `browsers`/`devices`/`os`; the UI shows "-" when empty. All
+zeros = no `$pageview` reaches the project, check the `VITE_ENABLE_TELEMETRY` / `VITE_POSTHOG_KEY` build vars first; 10 min cache; needs
 `POSTHOG_PERSONAL_API_KEY` + `POSTHOG_PROJECT_ID`, optional `POSTHOG_API_HOST` (passed by `deploy-api.yml`; code default and production are the EU cloud: repo variable `https://eu.posthog.com`, not the ingest host `eu.i.posthog.com`; project 348169, since 2026-11-13), `SENTRY_ORG_SLUG` for the link). Add a new counted
 route in `ROUTE_KINDS` + `USAGE_KINDS` (`account.ts`) + the `admin.stats.kind.*` i18n keys.
 
