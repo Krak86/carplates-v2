@@ -227,7 +227,9 @@ export default defineConfig({
             options: {
               cacheName: 'carplates-rt-logos',
               expiration: { maxEntries: 100, maxAgeSeconds: 90 * DAY_S },
-              cacheableResponse: { statuses: [200] }
+              cacheableResponse: { statuses: [200] },
+              // A logo never seen online is not cached: answer 404 instead of a thrown no-response (unhandled rejection offline).
+              plugins: [{ handlerDidError: async (): Promise<Response> => new Response(null, { status: 404 }) }]
             }
           },
           {

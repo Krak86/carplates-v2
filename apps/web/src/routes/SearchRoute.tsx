@@ -476,7 +476,7 @@ export default function SearchRoute(): ReactNode {
           </p>
         </Presence>
 
-        <Presence show={showHomeStats && !stats.isError}>
+        <Presence show={showHomeStats && !stats.isError && (online || !!stats.data)}>
           {!stats.data ? (
             <HomeStatsSkeleton variant="top" />
           ) : (
@@ -503,7 +503,7 @@ export default function SearchRoute(): ReactNode {
           </LazySection>
         </Presence>
 
-        <Presence show={showHomeStats && !stats.isError && (!stats.data || !!weightBoard?.heaviest.length)}>
+        <Presence show={showHomeStats && !stats.isError && (stats.data ? !!weightBoard?.heaviest.length : online)}>
           <LazySection fallback={<HomeStatsSkeleton variant="models" />}>
             {weightBoard ? (
               <LoadErrorBoundary compact>
