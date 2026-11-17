@@ -48,3 +48,10 @@ apps/web/public/fonts/zakon/
 
 # load-test sample (pnpm load-test --sample)
 scripts/plates.txt
+
+# local-only certs and keys per domain (see secrets/README.md); only the README is tracked
+secrets/*
+!secrets/README.md
+*.key
+*.p12
+*.pfx
