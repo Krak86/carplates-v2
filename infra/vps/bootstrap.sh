@@ -11,7 +11,7 @@ set -euo pipefail
 
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -y
-apt-get install -y --no-install-recommends ca-certificates curl gnupg ufw fail2ban unattended-upgrades rsync rclone
+apt-get install -y --no-install-recommends ca-certificates curl gnupg ufw ipset fail2ban unattended-upgrades rsync rclone
 
 # --- Docker Engine + compose plugin (official repo) ---
 if ! command -v docker >/dev/null; then
@@ -52,7 +52,31 @@ ufw allow 80/tcp
 ufw allow 443/tcp
 ufw allow 443/udp
 ufw --force enable
-# Note: Docker-published ports bypass ufw. That is fine here (only Caddy publishes), but never add `ports:` to postgres/alpr.
+# Note: Docker-published ports bypass ufw, so the Cloudflare-only allowlist for 80/443 lives in iptables DOCKER-USER (cf-firewall.sh, delivered by the api deploy).
+# Never add `ports:` to postgres/alpr. Enforcement is opt-in: first run `bash /opt/carsua/compose/cf-firewall.sh apply` by hand and verify, then
+# `touch /opt/carsua/env/cf-firewall.enabled` so it is re-applied at boot (after docker) and refreshed daily. Rm the flag + `cf-firewall.sh remove` to undo.
+cat > /etc/systemd/system/cf-firewall.service <<'EOF'
+[Unit]
+Description=Allow only Cloudflare ranges on 80/443 (carsua origin lockdown)
+After=docker.service network-online.target
+Wants=network-online.target
+ConditionPathExists=/opt/carsua/env/cf-firewall.enabled
+ConditionPathExists=/opt/carsua/compose/cf-firewall.sh
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/bash /opt/carsua/compose/cf-firewall.sh apply
+
+[Install]
+WantedBy=multi-user.target
+EOF
+cat > /etc/cron.d/carsua-cf-firewall <<'EOF'
+# daily refresh of the Cloudflare ranges; no-op until the enable flag exists
+17 4 * * * root test -f /opt/carsua/env/cf-firewall.enabled && bash /opt/carsua/compose/cf-firewall.sh apply >> /var/log/cf-firewall.log 2>&1
+EOF
+chmod 644 /etc/cron.d/carsua-cf-firewall
+systemctl daemon-reload
+systemctl enable cf-firewall.service
 
 systemctl enable --now fail2ban
 dpkg-reconfigure -f noninteractive unattended-upgrades

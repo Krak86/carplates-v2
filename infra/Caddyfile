@@ -8,12 +8,26 @@
 }
 
 www.carsua.app {
-	tls /certs/origin.pem /certs/origin.key
+	tls /certs/origin.pem /certs/origin.key {
+		# Authenticated Origin Pulls (docs/origin-hardening-plan.md H2): Cloudflare presents our per-zone client cert on the origin leg.
+		# Rollout: verify_if_given (nothing rejected), then require_and_verify once a direct hit is confirmed to fail and the site still loads.
+		client_auth {
+			mode verify_if_given
+			trust_pool file /certs/cf-aop.pem
+		}
+	}
 	redir https://carsua.app{uri} permanent
 }
 
 carsua.app {
-	tls /certs/origin.pem /certs/origin.key
+	tls /certs/origin.pem /certs/origin.key {
+		# Authenticated Origin Pulls (docs/origin-hardening-plan.md H2): Cloudflare presents our per-zone client cert on the origin leg.
+		# Rollout: verify_if_given (nothing rejected), then require_and_verify once a direct hit is confirmed to fail and the site still loads.
+		client_auth {
+			mode verify_if_given
+			trust_pool file /certs/cf-aop.pem
+		}
+	}
 	# Stock Caddy has no Brotli encoder. Cloudflare passes an already-compressed origin response through unchanged (verified
 	# 2026-10-28: browsers got gzip), but compresses an uncompressed one itself - to Brotli when the browser accepts it.
 	# So requests that came through Cloudflare are sent plain; only direct hits (no CF-Connecting-IP) are compressed here.

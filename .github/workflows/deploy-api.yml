@@ -65,7 +65,7 @@ jobs:
       - name: Sync compose files
         # --inplace: Caddy bind-mounts single files, and a rename would leave the container on the old inode.
         run: |
-          rsync -az --inplace infra/docker-compose.prod.yml infra/Caddyfile infra/maintenance.html infra/vps/backup.sh infra/vps/restore-replay-deletions.sh infra/vps/lib.sh vps:/opt/carsua/compose/
+          rsync -az --inplace infra/docker-compose.prod.yml infra/Caddyfile infra/maintenance.html infra/vps/backup.sh infra/vps/cf-firewall.sh infra/vps/restore-replay-deletions.sh infra/vps/lib.sh vps:/opt/carsua/compose/
 
       - name: Write env files and origin certificate
         env:
@@ -104,6 +104,7 @@ jobs:
           ENABLE_TELEMETRY: ${{ vars.ENABLE_TELEMETRY }}
           CF_ORIGIN_CERT: ${{ secrets.CF_ORIGIN_CERT }}
           CF_ORIGIN_KEY: ${{ secrets.CF_ORIGIN_KEY }}
+          CF_AOP_CERT: ${{ secrets.CF_AOP_CERT }}
           R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
           R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
@@ -146,6 +147,13 @@ jobs:
           if [ -n "$CF_ORIGIN_CERT" ] && [ -n "$CF_ORIGIN_KEY" ]; then
             printf '%s\n' "$CF_ORIGIN_CERT" | ssh vps 'umask 077; cat > /opt/carsua/env/certs/origin.pem'
             printf '%s\n' "$CF_ORIGIN_KEY" | ssh vps 'umask 077; cat > /opt/carsua/env/certs/origin.key'
+          fi
+          # Caddy mounts this as the Authenticated Origin Pulls trust pool (public cert only, the key stays with Cloudflare).
+          # The Caddyfile requires the file, so a missing secret must stop the deploy before Caddy reloads.
+          if [ -n "$CF_AOP_CERT" ]; then
+            printf '%s\n' "$CF_AOP_CERT" | ssh vps 'umask 077; cat > /opt/carsua/env/certs/cf-aop.pem'
+          elif grep -q cf-aop.pem infra/Caddyfile; then
+            echo '::error::Caddyfile references cf-aop.pem but secret CF_AOP_CERT is not set'; exit 1
           fi
           if [ -n "$R2_ACCESS_KEY_ID" ] && [ -n "$BACKUP_BUCKET" ]; then
             {
