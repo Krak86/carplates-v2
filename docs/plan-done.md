@@ -4859,6 +4859,8 @@ Phase B step 1 of the security hardening: violations of the Report-Only CSP now 
 
 ## Strict script-src, phase 1 (2026-11-17) ✅ code
 
+Follow-up the same day (details in PLAN.md "Strict `script-src` phase 1"): prod header verified; Cloudflare's injected JS Detections inline snippet is the only remaining script violation (left on, filtered in the sink via `'report-sample'` + `isNoise`); **regression found and fixed:** the lazy `exifr/dist/lite.esm.mjs` import threw on `parse(file, { pick })` (`undefined is not iterable`), `readPhotoMeta`'s `catch` returned `null`, so photo date + GPS vanished. `pick` is gone; verified in Node against a real Samsung JPEG (lite: date + GPS OK, full build same). Lesson: a bundle-size swap (full to lite build) needs a real-file check of the feature, not only a build. Sentry then showed `wasm-eval` (ONNX / transformers.js) and `blob` script reports that block enforcement.
+
 Google CSP Evaluator marked `script-src` red for `'unsafe-inline'` and for host allowlists (`accounts.google.com`, `*.disqus.com` host JSONP). Phase 1 removes the first.
 
 - **No inline scripts left in `index.html`:** the pre-paint theme script is `apps/web/public/theme-init.js` (synchronous `<script src>` in `<head>`, no flash); the language modulepreload script is emitted by `preloadHints()` (`vite.config.ts`, `generateBundle` `order: 'pre'`) as `assets/lang-preload-<hash>.js` and loaded with `async`. Both are precached by the service worker.
