@@ -6,7 +6,7 @@ import { Route, Routes, useLocation } from 'react-router'
 import Layout from '@/components/Layout'
 import LoadErrorBoundary from '@/components/LoadErrorBoundary'
 import RouteFallback from '@/components/RouteFallback'
-import { ROUTE_TITLE_KEYS, useDocumentTitle } from '@/hooks/useDocumentTitle'
+import { routeTitleKey, useDocumentTitle } from '@/hooks/useDocumentTitle'
 import PageShareButton from '@/components/PageShareButton'
 import { isCatalogPath, NO_SHARE_PATHS } from '@/components/use-page-share-actions'
 import SearchRoute from '@/routes/SearchRoute'
@@ -70,7 +70,7 @@ export default function App(): ReactNode {
   const { pathname } = useLocation()
   const { t } = useTranslation()
   const zen = useUiStore(s => s.zen)
-  const titleKey = ROUTE_TITLE_KEYS[pathname]
+  const titleKey = routeTitleKey(pathname)
   useDocumentTitle(titleKey ? t(titleKey) : undefined)
   // A plate / VIN result page is a single segment that is not a static route; the floating share button is hidden on mobile.
   const isCatalog = isCatalogPath(pathname)

@@ -3,7 +3,7 @@ import { useLocation } from 'react-router'
 import { classifyQuery } from '@carplates/shared'
 
 import { extractVehicleInfo } from '@/components/VinResult.helpers'
-import { ROUTE_TITLE_KEYS } from '@/hooks/useDocumentTitle'
+import { routeTitleKey } from '@/hooks/useDocumentTitle'
 import { plateQuery, vinQuery } from '@/lib/queries'
 
 const withYear = (car: string, year: number | null): string => (car ? `${car}${year ? ` (${year})` : ''}` : '')
@@ -18,7 +18,7 @@ export type HeaderVehicleLabel = { text: string; brand: string | null }
 export function useHeaderVehicleLabel(): HeaderVehicleLabel | null {
   const { pathname } = useLocation()
   const segments = pathname.split('/').filter(Boolean)
-  const raw = segments.length === 1 && !(pathname in ROUTE_TITLE_KEYS) ? decodeURIComponent(segments[0] as string) : ''
+  const raw = segments.length === 1 && !routeTitleKey(pathname) ? decodeURIComponent(segments[0] as string) : ''
   const kind = raw ? classifyQuery(raw) : null
 
   const plate = useQuery({ ...plateQuery(raw), enabled: kind === 'plate' })

@@ -59,6 +59,12 @@ export const ROUTE_TITLE_KEYS: Record<string, string> = {
   '/admin': 'nav.admin'
 }
 
+/** `/cars/` → `/cars` (the router ignores a trailing slash, so the static-route lookups must too); `/` stays `/`. */
+export const stripTrailingSlash = (pathname: string): string => pathname.replace(/\/+$/, '') || '/'
+
+/** The title key of a static route, trailing slash tolerated; undefined for a plate / VIN / unknown path. */
+export const routeTitleKey = (pathname: string): string | undefined => ROUTE_TITLE_KEYS[stripTrailingSlash(pathname)]
+
 /**
  * Sets `document.title` (`"Cars UA - <page>"`, or the app name + tagline when `page` is null)
  * and keeps `<html lang>` in step with the UI language. Re-runs on language change.

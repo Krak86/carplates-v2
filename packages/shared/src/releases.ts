@@ -18,8 +18,14 @@ const item = (group: ReleaseGroup, ua: string, ru: string, en: string): ReleaseI
 export const RELEASES: readonly ReleaseDay[] = [
   {
     date: '2026-11-17',
-    version: 'v2.1350',
+    version: 'v2.1352',
     items: [
+      item(
+        'fix',
+        'Адреса /cars/ зі слешем у кінці більше не шукає "номер" CARS і не дає помилку 404 в мережі.',
+        'Адрес /cars/ со слешем в конце больше не ищет "номер" CARS и не даёт ошибку 404 в сети.',
+        'The /cars/ address with a trailing slash no longer looks up a "plate" named CARS and no longer logs a 404.'
+      ),
       item(
         'fix',
         'Тривоги: фон сторінок тепер малює області тими самими кольорами, що й мапа /alarms - жовтий і червоний рівні.',

@@ -1,9 +1,9 @@
-import { ROUTE_TITLE_KEYS } from '@/hooks/useDocumentTitle'
+import { routeTitleKey } from '@/hooks/useDocumentTitle'
 
 /** Home → section pages → plate/VIN results. Drives the slide direction of a route transition. */
 export function routeDepth(pathname: string): number {
   if (pathname === '/') return 0
-  return pathname in ROUTE_TITLE_KEYS ? 1 : 2
+  return routeTitleKey(pathname) ? 1 : 2
 }
 
 /** Sets `<html data-vt-dir>`; global.css flips the slide shift for `back`. Call inside the DOM update,
