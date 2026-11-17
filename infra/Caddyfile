@@ -36,7 +36,7 @@ carsua.app {
 	# Telegram login widget host (apps/web/public/telegram-frame.html): telegram-widget.js eval()s its data-onauth attribute,
 	# so this one same-origin page gets 'unsafe-eval'; the app itself never does. Own policy, enforce it whenever ready.
 	header /telegram-frame.html {
-		Content-Security-Policy-Report-Only "default-src 'none'; base-uri 'none'; frame-ancestors 'self'; script-src 'self' 'unsafe-eval' https://telegram.org; frame-src https://oauth.telegram.org; connect-src https://oauth.telegram.org; img-src https:; style-src 'self' 'unsafe-inline'; report-uri /api/csp-report"
+		Content-Security-Policy-Report-Only "default-src 'none'; base-uri 'none'; frame-ancestors 'self'; script-src 'self' 'unsafe-eval' https://telegram.org; frame-src https://oauth.telegram.org; connect-src 'self' https://oauth.telegram.org; img-src https:; style-src 'self' 'unsafe-inline'; report-uri /api/csp-report"
 	}
 
 	# Planned maintenance: `touch /opt/carsua/compose/flags/MAINTENANCE`. /healthz stays reachable for the deploy script.

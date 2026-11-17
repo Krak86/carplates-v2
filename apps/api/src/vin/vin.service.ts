@@ -45,6 +45,8 @@ export class VinService {
       if (!res.ok) throw new Error(`status ${res.status}`)
       payload = (await res.json()) as { Results?: NhtsaResult[] }
     } catch (err) {
+      // NHTSA down but our own registry knows the car: answer with the registry rows (not cached, so the decode returns later).
+      if (registry) return { vin, results: [], registry }
       throw new BadGatewayException(`NHTSA decode failed: ${(err as Error).message}`)
     }
 
