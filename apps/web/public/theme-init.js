@@ -11,4 +11,6 @@ try {
   if (a && a !== 'blue') document.documentElement.dataset.accent = a
   var s = localStorage.getItem('carplates.textSize')
   if (s && s !== 'md') document.documentElement.dataset.textSize = s
-} catch (e) {}
+} catch {
+  // localStorage blocked: keep the CSS defaults
+}
