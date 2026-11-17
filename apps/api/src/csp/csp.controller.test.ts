@@ -141,6 +141,8 @@ describe('POST /api/csp-report', () => {
   it('drops the Cloudflare JS Detections inline script, but keeps other inline scripts', async () => {
     await post(legacy('inline', { 'script-sample': '(function(){function c(){var b=a.content' }))
     expect(captureMessage).not.toHaveBeenCalled()
+    await post(legacy('inline', { 'script-sample': "window.__CF$cv$params={r:'a5c03e33abdcb8" }))
+    expect(captureMessage).not.toHaveBeenCalled()
     await post(legacy('inline', { 'script-sample': 'alert(1)' }))
     expect(captureMessage).toHaveBeenCalledTimes(1)
   })

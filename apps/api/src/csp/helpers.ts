@@ -26,10 +26,12 @@ const isNoiseUri = (uri: string): boolean => {
  * Cloudflare JavaScript Detections injects an inline script at the edge (its hash changes per request, so it cannot be
  * allow-listed). Needs `'report-sample'` in `script-src`; the sample is the first 40 characters of the script.
  */
-const CLOUDFLARE_JSD_SAMPLE = '(function(){function c(){var b=a.conten'
+const CLOUDFLARE_JSD_SAMPLES = ['(function(){function c(){var b=a.conten', 'window.__CF$cv$params={r:'] // snippet + the script it writes into its hidden about:blank iframe (CARSUA-2A)
 
 const isCloudflareJsd = (v: CspViolation): boolean =>
-  (v.blockedUrl === 'inline' && v.directive.startsWith('script-src') && v.sample.startsWith(CLOUDFLARE_JSD_SAMPLE)) ||
+  (v.blockedUrl === 'inline' &&
+    v.directive.startsWith('script-src') &&
+    CLOUDFLARE_JSD_SAMPLES.some(p => v.sample.startsWith(p))) ||
   isCloudflareChallengePath(v.blockedUrl)
 
 /** The same snippet's own requests (`/cdn-cgi/challenge-platform/...` script and `oneshot` POST, CARSUA-28) are reported too, even though they are same-origin. */
