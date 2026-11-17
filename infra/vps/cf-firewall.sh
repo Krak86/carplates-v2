@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Origin lockdown (docs/origin-hardening-plan.md H3): only Cloudflare ranges may reach Caddy on 80/443 (tcp) and 443/udp.
-# Run as root on the VPS: `bash cf-firewall.sh apply` (idempotent, also the daily refresh), `status`, or `remove` (escape hatch).
+# Run as root on the VPS: `bash cf-firewall.sh enable` (once, after the first deploy: apply + boot unit + daily cron + self-check + flag),
+# `apply` (idempotent, also the daily refresh), `status`, or `remove` (escape hatch; also `rm /opt/carsua/env/cf-firewall.enabled`).
 # SSH (22) is untouched. Why not ufw: Docker-published ports are DNAT-ed and hit FORWARD, never ufw's INPUT rules, so the rules live in
 # the DOCKER-USER chain (IPv4). IPv6 goes through docker-proxy (INPUT) unless Docker's ip6tables is on, so it is filtered in INPUT and,
 # when the chain exists, DOCKER-USER too. Ranges: https://www.cloudflare.com/ips-v4 and ips-v6 (same data as `trusted_proxies` in the Caddyfile).
@@ -71,7 +72,45 @@ remove_all() {
   for s in "$SET4" "$SET6"; do ipset destroy "$s" 2>/dev/null || true; done
 }
 
+FLAG=/opt/carsua/env/cf-firewall.enabled
+SELF=/opt/carsua/compose/cf-firewall.sh
+
+install_units() { # boot unit (re-applies after docker starts) + daily range refresh; both stay inert without $FLAG. Single source: bootstrap.sh does not repeat this.
+  cat >/etc/systemd/system/cf-firewall.service <<EOF
+[Unit]
+Description=Allow only Cloudflare ranges on 80/443 (carsua origin lockdown)
+After=docker.service network-online.target
+Wants=network-online.target
+ConditionPathExists=$FLAG
+ConditionPathExists=$SELF
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/bash $SELF apply
+
+[Install]
+WantedBy=multi-user.target
+EOF
+  cat >/etc/cron.d/carsua-cf-firewall <<EOF
+# daily refresh of the Cloudflare ranges; no-op until the enable flag exists
+17 4 * * * root test -f $FLAG && bash $SELF apply >> /var/log/cf-firewall.log 2>&1
+EOF
+  chmod 644 /etc/cron.d/carsua-cf-firewall
+  systemctl daemon-reload
+  systemctl enable cf-firewall.service
+}
+
 case "$cmd" in
+  enable) # one command for a new (or already provisioned) VPS, after the first deploy has shipped this script: units + apply + self-check + flag
+    bash "$0" apply
+    iptables -C DOCKER-USER -i "$EXT_IF" -j "$CHAIN" || { echo "FAILED: DOCKER-USER jump missing, flag NOT set" >&2; exit 1; }
+    [ "$(ipset save "$SET4" | grep -c '^add')" -ge 5 ] || { echo "FAILED: $SET4 is empty, flag NOT set" >&2; exit 1; }
+    install_units
+    install -d "$(dirname "$FLAG")"
+    touch "$FLAG"
+    id deploy >/dev/null 2>&1 && chown deploy:deploy "$FLAG"
+    echo "enabled: re-applied at boot and refreshed daily. Now check from OUTSIDE: curl -skv --max-time 10 --resolve <domain>:443:<VPS-IP> https://<domain>/ must time out, the site must still load via Cloudflare. Undo: rm $FLAG; bash $SELF remove"
+    ;;
   apply)
     command -v ipset >/dev/null || { echo "apt-get install -y ipset first" >&2; exit 1; }
     iptables -L DOCKER-USER -n >/dev/null 2>&1 || { echo "DOCKER-USER chain missing: start docker first" >&2; exit 1; }
@@ -88,5 +127,5 @@ case "$cmd" in
     ipset list -n
     ;;
   remove) remove_all; echo "removed: the origin accepts any source again" ;;
-  *) echo "usage: $0 apply|status|remove" >&2; exit 2 ;;
+  *) echo "usage: $0 enable|apply|status|remove" >&2; exit 2 ;;
 esac

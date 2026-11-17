@@ -53,30 +53,8 @@ ufw allow 443/tcp
 ufw allow 443/udp
 ufw --force enable
 # Note: Docker-published ports bypass ufw, so the Cloudflare-only allowlist for 80/443 lives in iptables DOCKER-USER (cf-firewall.sh, delivered by the api deploy).
-# Never add `ports:` to postgres/alpr. Enforcement is opt-in: first run `bash /opt/carsua/compose/cf-firewall.sh apply` by hand and verify, then
-# `touch /opt/carsua/env/cf-firewall.enabled` so it is re-applied at boot (after docker) and refreshed daily. Rm the flag + `cf-firewall.sh remove` to undo.
-cat > /etc/systemd/system/cf-firewall.service <<'EOF'
-[Unit]
-Description=Allow only Cloudflare ranges on 80/443 (carsua origin lockdown)
-After=docker.service network-online.target
-Wants=network-online.target
-ConditionPathExists=/opt/carsua/env/cf-firewall.enabled
-ConditionPathExists=/opt/carsua/compose/cf-firewall.sh
-
-[Service]
-Type=oneshot
-ExecStart=/usr/bin/bash /opt/carsua/compose/cf-firewall.sh apply
-
-[Install]
-WantedBy=multi-user.target
-EOF
-cat > /etc/cron.d/carsua-cf-firewall <<'EOF'
-# daily refresh of the Cloudflare ranges; no-op until the enable flag exists
-17 4 * * * root test -f /opt/carsua/env/cf-firewall.enabled && bash /opt/carsua/compose/cf-firewall.sh apply >> /var/log/cf-firewall.log 2>&1
-EOF
-chmod 644 /etc/cron.d/carsua-cf-firewall
-systemctl daemon-reload
-systemctl enable cf-firewall.service
+# Never add `ports:` to postgres/alpr. The boot unit, daily refresh cron and the flag are NOT created here (no script on the host yet):
+# after the first deploy, as root, run ONCE `bash /opt/carsua/compose/cf-firewall.sh enable` (docs/deploy.md), then check a direct hit times out.
 
 systemctl enable --now fail2ban
 dpkg-reconfigure -f noninteractive unattended-upgrades
