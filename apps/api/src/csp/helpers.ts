@@ -22,9 +22,18 @@ const isNoiseUri = (uri: string): boolean => {
   return value.startsWith('data:') || value.startsWith('about:') || isExtensionUri(value)
 }
 
-/** Dropped before Sentry: an empty/extension/`data`/`about` blocked URI, or a script that lives in an extension. */
+/**
+ * Cloudflare JavaScript Detections injects an inline script at the edge (its hash changes per request, so it cannot be
+ * allow-listed). Needs `'report-sample'` in `script-src`; the sample is the first 40 characters of the script.
+ */
+const CLOUDFLARE_JSD_SAMPLE = '(function(){function c(){var b=a.conten'
+
+const isCloudflareJsd = (v: CspViolation): boolean =>
+  v.blockedUrl === 'inline' && v.directive.startsWith('script-src') && v.sample.startsWith(CLOUDFLARE_JSD_SAMPLE)
+
+/** Dropped before Sentry: an empty/extension/`data`/`about` blocked URI, a script that lives in an extension, or the Cloudflare JSD snippet. */
 export const isNoise = (v: CspViolation): boolean =>
-  isNoiseUri(v.blockedUrl) || isExtensionUri(v.sourceFile) || isIgnoredHost(v.blockedUrl)
+  isNoiseUri(v.blockedUrl) || isExtensionUri(v.sourceFile) || isIgnoredHost(v.blockedUrl) || isCloudflareJsd(v)
 
 /**
  * Hosts a vendor injects and we block on purpose (never allow-list them). Disqus loads LiveIntent (`liadm.com`) ad / identity
