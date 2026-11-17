@@ -20,7 +20,15 @@ type PageQuery = {
 /** Escape LIKE wildcards so the user's text is matched literally. */
 const likePattern = (q: string): string => `%${q.replace(/[\\%_]/g, '\\$&')}%`
 
-const toRow = (r: NewsItemRow): NewsRow => ({ ...r, publishedAt: r.publishedAt.toISOString() })
+/** Feeds still carry `http://i.infocar.ua/...` thumbnails; the host redirects to https and `img-src` blocks plain http (CARSUA-27). */
+const httpsImage = (url: string | null): string | null =>
+  url?.replace(/^http:\/\/(i\.infocar\.ua\/)/i, 'https://$1') ?? null
+
+const toRow = (r: NewsItemRow): NewsRow => ({
+  ...r,
+  imageUrl: httpsImage(r.imageUrl),
+  publishedAt: r.publishedAt.toISOString()
+})
 
 @Injectable()
 export class NewsService {
