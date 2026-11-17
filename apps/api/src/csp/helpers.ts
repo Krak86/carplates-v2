@@ -41,9 +41,26 @@ const isCloudflareChallengePath = (uri: string): boolean => {
   }
 }
 
-/** Dropped before Sentry: an empty/extension/`data`/`about` blocked URI, a script that lives in an extension, or the Cloudflare JSD snippet. */
+/**
+ * Cloudflare Web Analytics is auto-injected into every HTML response, including `/telegram-frame.html`, whose strict policy has
+ * no analytics host (CARSUA-29). The site policy allows the beacon, so any blocked `script-src` report for it comes from the frame.
+ */
+const isFrameBeacon = (v: CspViolation): boolean => {
+  if (!v.directive.startsWith('script-src')) return false
+  try {
+    return new URL(v.blockedUrl).hostname === 'static.cloudflareinsights.com'
+  } catch {
+    return false
+  }
+}
+
+/** Dropped before Sentry: an empty/extension/`data`/`about` blocked URI, a script that lives in an extension, the Cloudflare JSD snippet, or the Cloudflare beacon. */
 export const isNoise = (v: CspViolation): boolean =>
-  isNoiseUri(v.blockedUrl) || isExtensionUri(v.sourceFile) || isIgnoredHost(v.blockedUrl) || isCloudflareJsd(v)
+  isNoiseUri(v.blockedUrl) ||
+  isExtensionUri(v.sourceFile) ||
+  isIgnoredHost(v.blockedUrl) ||
+  isCloudflareJsd(v) ||
+  isFrameBeacon(v)
 
 /**
  * Hosts a vendor injects and we block on purpose (never allow-list them). Disqus loads LiveIntent (`liadm.com`) ad / identity
