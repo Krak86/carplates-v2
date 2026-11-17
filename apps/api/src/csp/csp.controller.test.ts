@@ -145,6 +145,13 @@ describe('POST /api/csp-report', () => {
     expect(captureMessage).toHaveBeenCalledTimes(1)
   })
 
+  it('drops the insecure infocar image (CARSUA-27), but keeps https and other hosts', async () => {
+    await post(legacy('http://i.infocar.ua/img/a.jpg', { 'effective-directive': 'img-src' }))
+    expect(captureMessage).not.toHaveBeenCalled()
+    await post(legacy('http://other.example/a.jpg', { 'effective-directive': 'img-src' }))
+    expect(captureMessage).toHaveBeenCalledTimes(1)
+  })
+
   it('keeps inline and eval violations', async () => {
     await post(legacy('inline'))
     await post(legacy('eval'))

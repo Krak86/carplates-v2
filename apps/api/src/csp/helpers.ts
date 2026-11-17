@@ -31,9 +31,20 @@ const CLOUDFLARE_JSD_SAMPLE = '(function(){function c(){var b=a.conten'
 const isCloudflareJsd = (v: CspViolation): boolean =>
   v.blockedUrl === 'inline' && v.directive.startsWith('script-src') && v.sample.startsWith(CLOUDFLARE_JSD_SAMPLE)
 
-/** Dropped before Sentry: an empty/extension/`data`/`about` blocked URI, a script that lives in an extension, or the Cloudflare JSD snippet. */
+/**
+ * Scraped infocar.ua pages sometimes carry `http://i.infocar.ua/...` image URLs (CARSUA-27). `img-src` allows `https:` only,
+ * so the browser blocks them (a missing thumbnail, no security impact); there is no reliable https twin to rewrite to.
+ */
+const isInsecureInfocarImage = (v: CspViolation): boolean =>
+  v.directive.startsWith('img-src') && v.blockedUrl.trim().toLowerCase().startsWith('http://i.infocar.ua/')
+
+/** Dropped before Sentry: an empty/extension/`data`/`about` blocked URI, a script that lives in an extension, the Cloudflare JSD snippet, or an insecure infocar image. */
 export const isNoise = (v: CspViolation): boolean =>
-  isNoiseUri(v.blockedUrl) || isExtensionUri(v.sourceFile) || isIgnoredHost(v.blockedUrl) || isCloudflareJsd(v)
+  isNoiseUri(v.blockedUrl) ||
+  isExtensionUri(v.sourceFile) ||
+  isIgnoredHost(v.blockedUrl) ||
+  isCloudflareJsd(v) ||
+  isInsecureInfocarImage(v)
 
 /**
  * Hosts a vendor injects and we block on purpose (never allow-list them). Disqus loads LiveIntent (`liadm.com`) ad / identity
