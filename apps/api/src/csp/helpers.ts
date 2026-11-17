@@ -29,7 +29,17 @@ const isNoiseUri = (uri: string): boolean => {
 const CLOUDFLARE_JSD_SAMPLE = '(function(){function c(){var b=a.conten'
 
 const isCloudflareJsd = (v: CspViolation): boolean =>
-  v.blockedUrl === 'inline' && v.directive.startsWith('script-src') && v.sample.startsWith(CLOUDFLARE_JSD_SAMPLE)
+  (v.blockedUrl === 'inline' && v.directive.startsWith('script-src') && v.sample.startsWith(CLOUDFLARE_JSD_SAMPLE)) ||
+  isCloudflareChallengePath(v.blockedUrl)
+
+/** The same snippet's own requests (`/cdn-cgi/challenge-platform/...` script and `oneshot` POST, CARSUA-28) are reported too, even though they are same-origin. */
+const isCloudflareChallengePath = (uri: string): boolean => {
+  try {
+    return new URL(uri).pathname.startsWith('/cdn-cgi/challenge-platform/')
+  } catch {
+    return false
+  }
+}
 
 /** Dropped before Sentry: an empty/extension/`data`/`about` blocked URI, a script that lives in an extension, or the Cloudflare JSD snippet. */
 export const isNoise = (v: CspViolation): boolean =>

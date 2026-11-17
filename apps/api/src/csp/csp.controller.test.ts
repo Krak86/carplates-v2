@@ -145,6 +145,17 @@ describe('POST /api/csp-report', () => {
     expect(captureMessage).toHaveBeenCalledTimes(1)
   })
 
+  it('drops the Cloudflare challenge-platform requests (CARSUA-28), but keeps other /cdn-cgi/ URLs', async () => {
+    await post(
+      legacy('https://carsua.app/cdn-cgi/challenge-platform/h/b/jsd/oneshot/abc/0.1:1:x/y', {
+        'effective-directive': 'connect-src'
+      })
+    )
+    expect(captureMessage).not.toHaveBeenCalled()
+    await post(legacy('https://carsua.app/cdn-cgi/rum', { 'effective-directive': 'connect-src' }))
+    expect(captureMessage).toHaveBeenCalledTimes(1)
+  })
+
   it('keeps inline and eval violations', async () => {
     await post(legacy('inline'))
     await post(legacy('eval'))
