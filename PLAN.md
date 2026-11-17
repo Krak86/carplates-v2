@@ -1110,8 +1110,8 @@ Code-level audit findings and the full pre-deploy gate: [docs/security-checklist
       `docs/deploy.md` step 4). "Under Attack" stays a manual incident toggle. Trust only Cloudflare's IP ranges / `CF-Connecting-IP` (Caddyfile; re-check the ranges occasionally).
 - [x] Cloudflare Turnstile on sign-in "send code" (keys set in production 2026-10-27) and on the feedback/contact submit (`contact.controller.ts`). Discuss is Disqus (own spam protection), so no Turnstile there. Optional: camera recognize — never on plain search.
 - [ ] **Origin lockdown (2026-11-16, plan: [docs/origin-hardening-plan.md](docs/origin-hardening-plan.md)).** Finding: ufw accepts 22/80/443 tcp + 443/udp from any source, so a leaked VPS IP bypasses the Cloudflare WAF, cache and DDoS filtering (the Caddy `trusted_proxies` list only governs the client-IP header). Steps, in order:
-  - [ ] H0 baseline: direct `curl -skI --resolve carsua.app:443:<VPS-IP> https://carsua.app/` from outside (200 today); every DNS record pointing at the VPS is orange-clouded
-  - [ ] H1 pin SSL/TLS to **Full (Strict)** instead of Automatic SSL/TLS
+  - [x] H0 baseline 2026-11-17: direct `curl -skI --resolve carsua.app:443:<VPS-IP> https://carsua.app/` returns 200 (F1 confirmed); DNS audited: A, AAAA and `www` proxied, grey records are only Resend mail CNAMEs/TXT (no VPS IP). Repeat the baseline over IPv6 (`curl -6`) after H2/H3; the firewall step must cover `ip6tables` too
+  - [x] H1 pin SSL/TLS to **Full (Strict)** instead of Automatic SSL/TLS (done 2026-11-17)
   - [ ] H2 Authenticated Origin Pulls (mTLS, per-zone cert) + Caddy `client_auth`, roll out with `verify_if_given` first; or H3 Cloudflare-range allowlist in the `DOCKER-USER` chain
   - [ ] H4 verify, then close 443/udp (and 80 if unneeded); update `bootstrap.sh`, `deploy.md`
   - [ ] H5 decide on restricting SSH; H6 Cloudflare Tunnel (deferred); H7 new VPS IP if the provider allows; H8 origin header fallback (next item)
