@@ -45,6 +45,21 @@ describe('telemetry', () => {
     })
   })
 
+  it('captures the landing $pageview itself and drops an immediate duplicate', async () => {
+    const { initTelemetry } = await load()
+    const started = initTelemetry()
+    window.dispatchEvent(new Event('pointerdown'))
+    await started
+
+    expect(capture).toHaveBeenCalledWith('$pageview')
+    const beforeSend = (init.mock.calls[0]?.[1] as { before_send: (e: unknown) => unknown }).before_send
+    const view = { event: '$pageview', properties: { $current_url: 'https://carsua.app/' } }
+    expect(beforeSend(view)).toBe(view)
+    expect(beforeSend(view)).toBeNull()
+    const other = { event: 'plate_searched', properties: {} }
+    expect(beforeSend(other)).toBe(other)
+  })
+
   it('does not load PostHog when telemetry is off', async () => {
     vi.stubEnv('VITE_ENABLE_TELEMETRY', 'false')
     const { initTelemetry } = await load()
