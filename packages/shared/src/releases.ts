@@ -18,8 +18,14 @@ const item = (group: ReleaseGroup, ua: string, ru: string, en: string): ReleaseI
 export const RELEASES: readonly ReleaseDay[] = [
   {
     date: '2026-11-17',
-    version: 'v2.1353',
+    version: 'v2.1358',
     items: [
+      item(
+        'fix',
+        'Пошук за фото знову показує дату зйомки та місце (GPS) з EXIF фото.',
+        'Поиск по фото снова показывает дату съёмки и место (GPS) из EXIF фото.',
+        'Photo search shows the capture date and place (GPS) from the photo EXIF again.'
+      ),
       item(
         'fix',
         'Адреса /cars/ зі слешем у кінці більше не шукає "номер" CARS і не дає помилку 404 в мережі.',

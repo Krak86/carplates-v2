@@ -13,9 +13,10 @@ export async function readPhotoMeta(file: File): Promise<PhotoMeta | null> {
   try {
     // Lazy + the `lite` build (EXIF/GPS only, no XMP/IPTC/ICC): ~90 KB stays out of the entry chunk until a photo is picked.
     const exifr = await import('exifr/dist/lite.esm.mjs')
-    // `pick` can't select the derived latitude/longitude (it filters them out), so GPS is its own read.
+    // No `pick`: in the lite build `parse(file, { pick })` throws ("undefined is not iterable"), which the catch below
+    // turned into "no metadata" (date and GPS both lost). The GPS read stays separate (`pick` also filters out latitude/longitude).
     const [raw, gps]: [Record<string, unknown> | undefined, { latitude?: number; longitude?: number } | undefined] =
-      await Promise.all([exifr.parse(file, { pick: ['DateTimeOriginal', 'CreateDate'] }), exifr.gps(file)])
+      await Promise.all([exifr.parse(file), exifr.gps(file)])
     const parsed = photoMetaSchema.safeParse({
       takenAt: raw?.DateTimeOriginal ?? raw?.CreateDate ?? null,
       latitude: gps?.latitude ?? null,
