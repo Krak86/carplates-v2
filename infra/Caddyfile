@@ -10,9 +10,9 @@
 www.carsua.app {
 	tls /certs/origin.pem /certs/origin.key {
 		# Authenticated Origin Pulls (docs/origin-hardening-plan.md H2): Cloudflare presents our per-zone client cert on the origin leg.
-		# Rollout: verify_if_given (nothing rejected), then require_and_verify once a direct hit is confirmed to fail and the site still loads.
+		# Enforced: a direct hit without Cloudflare's client cert fails the TLS handshake. Escape hatch: Zone-level AOP toggle off + mode verify_if_given, deploy.
 		client_auth {
-			mode verify_if_given
+			mode require_and_verify
 			trust_pool file /certs/cf-aop.pem
 		}
 	}
@@ -22,9 +22,9 @@ www.carsua.app {
 carsua.app {
 	tls /certs/origin.pem /certs/origin.key {
 		# Authenticated Origin Pulls (docs/origin-hardening-plan.md H2): Cloudflare presents our per-zone client cert on the origin leg.
-		# Rollout: verify_if_given (nothing rejected), then require_and_verify once a direct hit is confirmed to fail and the site still loads.
+		# Enforced: a direct hit without Cloudflare's client cert fails the TLS handshake. Escape hatch: Zone-level AOP toggle off + mode verify_if_given, deploy.
 		client_auth {
-			mode verify_if_given
+			mode require_and_verify
 			trust_pool file /certs/cf-aop.pem
 		}
 	}
