@@ -1499,6 +1499,38 @@ Deploy Web #111 is green (349 test files, 2581 tests); nothing blocks a deploy. 
 - [ ] **P4 (optional): quiet the expected error logs in the API tests.** Tests that exercise failure paths print Nest `ERROR` / `WARN` lines into the CI log (`Invalid JSON` in `csp-parsers`, `FST_INVALID_MULTIPART_CONTENT_TYPE` in `shares.controller`, `db password in here` / `Error: x` / `boom` in `all-exceptions.filter.test.ts`, `Plate Recognizer rejected the API token`, `r2 down`, `db down`, Wikimedia 429/503). They are intentional, but they look like failures when scanning a log and hide a real one. Fix: in those specs `vi.spyOn(Logger.prototype, 'error').mockImplementation(() => {})` (or `app.useLogger(false)` / `Test.createTestingModule(...).setLogger(false)`), and assert on the spy where the log is the behaviour under test. Not a deploy concern.
 - [ ] **P4 (optional): slow test.** `shares/helpers.test.ts` takes 5.9 s (`downscaleForShare` "steps the quality down…" 5.3 s, image work). If the CI test step (4m 11s total job) needs trimming, shrink the fixture image or raise parallelism; otherwise leave.
 
+## Twelve-Factor audit (2026-11-18) - 4 small gaps, the rest compliant
+
+Checked against https://12factor.net. Already compliant: one repo / many deploys (I), Zod env + `assertProductionEnv` fail-fast in
+`apps/api/src/env.ts` (III), every backing service by URL (IV), SHA-tagged images + env file + blue/green, immutable web releases (V),
+`PORT` binding (VII), ingest as its own process type with `pg_try_advisory_lock` (VIII), `enableShutdownHooks` + exec-form `CMD` +
+healthcheck (IX), same Postgres 18.6 in dev and prod (X), stdout logs + rotated json-file + Sentry (XI), migrations / `seed-if-empty` /
+ingest as one-off `docker compose run --rm` with the release image (XII). Following every factor to the letter is not worth it for one VPS
+and one API instance; the items below are the cheap ones.
+
+- [ ] **P2 Rollback by tag (V).** Today an API rollback = revert commit + full CI. `.github/workflows/deploy-api.yml`: add a
+  `workflow_dispatch` input `image_tag` (empty = `$GITHUB_SHA`); when set, skip `ci` / `build` and pass it to `infra/vps/deploy-api.sh`
+  (already takes the tag as `$1`). Relies on the existing "migrations backward compatible" rule. Add a short "Rollback" section to
+  `docs/deploy.md` covering it plus the manual web rollback (`cd /opt/carsua/web && ln -sfn releases/<id> current.tmp && mv -T current.tmp current`,
+  5 releases are kept).
+- [ ] **P2 No `latest` in prod compose (II).** `infra/docker-compose.prod.yml` falls back to `:-latest` for `API_TAG_BLUE`, `API_TAG_GREEN`,
+  `ALPR_TAG`, `INGEST_TAG`: change to `${X:?X not set}`. First confirm `deploy-alpr.sh` / `deploy-ingest.sh` always `set_env` their tag
+  before any `up` / `run` (`infra/vps/lib.sh`), else the first deploy fails. Pin `caddy:2` to an exact `2.x.y` and add it to "Version pins".
+- [ ] **P3 Graceful stop window (IX).** Docker's default 10 s stop grace is shorter than the 60 s Fastify `requestTimeout` (4 MB uploads), and
+  the old colour is stopped 6 s after the switch. Add `stop_grace_period: 30s` to the `x-api` anchor in `infra/docker-compose.prod.yml`.
+- [ ] **P3 Structured logs in production (XI).** `apps/api/src/main.ts`: `NestFactory.create(..., { logger: new ConsoleLogger({ json: env.NODE_ENV === 'production' }) })`
+  (Nest 11 built-in, no new dependency); dev keeps text. Check the admin Server tab / any log grep in `docs/` still works with JSON lines.
+- [ ] **After deploy** (owner, items above): `docker compose config` on the VPS passes; run "Deploy API" by hand with the previous SHA as
+  `image_tag`, `/healthz` green and `GIT_SHA` matches, then redeploy the current SHA; `docker compose logs api-<colour> | head` shows JSON lines.
+
+Not worth it now, revisit only at 2+ API replicas:
+
+- Runtime-injected SPA config instead of build-time `VITE_*` (only matters with a real stage env promoting the same bundle).
+- In-API timers (alarm poller, losses refresh, account purge, shares cleanup, server stats) would run once per replica: move to a
+  `worker` process or guard with an advisory lock. Digest is already safe (claim row in `app.digest_sends`), purge is an idempotent DELETE.
+- `ThrottlerModule` and `contact/contact-limiter.ts` are in memory, so limits are per process: shared store (Postgres / Redis) if scaled.
+- Log shipping / aggregation (Loki or similar): Sentry + `docker compose logs` is enough at this size.
+
 ## Assistant + embeddable widget (idea 2026-11-08, to discuss)
 
 Rule-based (no AI, no MCP) Q&A assistant for a plate / VIN built on our own API, one custom element with chat / search / badge views, a floating launcher in the app and an iframe-only embed for other sites (open data + link-out). Plan, local-test recipe and parked ideas: [docs/assistant-plan.md](docs/assistant-plan.md).
