@@ -293,7 +293,12 @@ const SOURCES: readonly Source[] = [
     url: 'https://github.com/opencv/opencv_zoo',
     icon: '/icons/sources/github.webp'
   },
-  { key: 'uqr', label: 'uqr', url: 'https://github.com/unjs/uqr', icon: '/icons/sources/github.webp' }
+  { key: 'uqr', label: 'uqr', url: 'https://github.com/unjs/uqr', icon: '/icons/sources/github.webp' },
+  { key: 'exifr', label: 'exifr', url: 'https://github.com/MikeKovarik/exifr', icon: '/icons/sources/github.webp' },
+  // No logo: plain tile.
+  { key: 'onnx', label: 'ONNX Runtime Web', url: 'https://onnxruntime.ai', tile: 'bg-slate-500' },
+  // No logo: commercial mark, no licence found; plain tile.
+  { key: 'contabo', label: 'Contabo', url: 'https://contabo.com', tile: 'bg-slate-500' }
 ]
 
 function SourceAvatar({ source }: { source: Source }): ReactNode {
@@ -382,6 +387,7 @@ const FEATURES = [
   'digest',
   'translate',
   'privacy',
+  'security',
   'pwa',
   'agents',
   'roadmap',
