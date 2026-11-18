@@ -46,6 +46,8 @@ export type Racer = {
   setSound: (on: boolean) => void
   /** Drives the same controls as the keyboard (the on-screen buttons); omitted flags keep their state. */
   setInput: (input: Partial<RacerInput>) => void
+  /** Camera height + field of view in one value: -1 low/narrow, 0 default, 1 high/wide (eased; render only). */
+  setCamera: (level: number) => void
   /** The current vehicle's siren (emergency bodies only; a no-op for the rest). Independent of the sound toggle. */
   setSiren: (on: boolean) => void
   /** Read-only view of the road for the mini-map (see ./minimap.ts); stays valid across road rebuilds. */
@@ -65,7 +67,13 @@ const CAMERA_HEIGHT = 1000
 const DRAW_DISTANCE = 300
 const FOG_DENSITY = 5
 const CENTRIFUGAL = 0.3
-const CAMERA_DEPTH = 1 / Math.tan((100 / 2) * (Math.PI / 180))
+const FOV_DEG = 100
+/** Phone-pitch camera range: low and narrow (close to the car) … high and wide (see the traffic ahead). */
+const CAMERA_HEIGHT_MIN = 700
+const CAMERA_HEIGHT_MAX = 2000
+const FOV_MIN_DEG = 90
+const FOV_MAX_DEG = 120
+const CAMERA_DEPTH = 1 / Math.tan((FOV_DEG / 2) * (Math.PI / 180))
 const PLAYER_Z = CAMERA_HEIGHT * CAMERA_DEPTH
 const MAX_SPEED = SEGMENT_LENGTH / STEP
 const ACCEL = MAX_SPEED / 5
@@ -217,6 +225,9 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
   let hillOffset = 0
   let treeOffset = 0
   let playerX = 0
+  let camTarget = 0 // -1 (low, narrow, close) … 1 (high, wide): where the phone's pitch wants the camera
+  let camLevel = 0 // the eased value actually rendered
+  let camDepth = CAMERA_DEPTH // render-only: depends on the field of view
   let position = 0
   let speed = 0
   let driven = 0 // km, never reset: the HUD's session odometer
@@ -368,6 +379,7 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
 
   function update(dt: number): void {
     bumpCooldown -= dt
+    camLevel += (camTarget - camLevel) * Math.min(1, dt * 4)
     updateSmoke(dt)
     const playerSegment = findSegment(position + PLAYER_Z)
     const playerW = atlas.player.straight.w * SPRITE_SCALE
@@ -582,8 +594,19 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
   }
 
   function render(): void {
-    const baseSegment = findSegment(position)
-    const basePercent = percentRemaining(position, SEGMENT_LENGTH)
+    // Camera rig (render only; collisions keep using PLAYER_Z): a higher, wider camera sits further behind the car,
+    // so traffic ahead is no longer hidden by it. Like the camera-height / field-of-view sliders of Jake Gordon's demo.
+    const cameraHeight =
+      camLevel >= 0
+        ? interpolate(CAMERA_HEIGHT, CAMERA_HEIGHT_MAX, camLevel)
+        : interpolate(CAMERA_HEIGHT, CAMERA_HEIGHT_MIN, -camLevel)
+    const fov =
+      camLevel >= 0 ? interpolate(FOV_DEG, FOV_MAX_DEG, camLevel) : interpolate(FOV_DEG, FOV_MIN_DEG, -camLevel)
+    camDepth = 1 / Math.tan((fov / 2) * (Math.PI / 180))
+    const renderPlayerZ = cameraHeight * camDepth
+    const camPosition = increase(position, PLAYER_Z - renderPlayerZ, trackLength)
+    const baseSegment = findSegment(camPosition)
+    const basePercent = percentRemaining(camPosition, SEGMENT_LENGTH)
     const playerSegment = findSegment(position + PLAYER_Z)
     const playerPercent = percentRemaining(position + PLAYER_Z, SEGMENT_LENGTH)
     const playerY = interpolate(playerSegment.p1.world.y, playerSegment.p2.world.y, playerPercent)
@@ -604,15 +627,15 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
       segment.fog = exponentialFog(n / DRAW_DISTANCE, FOG_DENSITY)
       segment.clip = maxy
 
-      const camZ = position - (segment.looped ? trackLength : 0)
-      project(segment.p1, playerX * ROAD_WIDTH - x, playerY + CAMERA_HEIGHT, camZ)
-      project(segment.p2, playerX * ROAD_WIDTH - x - dx, playerY + CAMERA_HEIGHT, camZ)
+      const camZ = camPosition - (segment.looped ? trackLength : 0)
+      project(segment.p1, playerX * ROAD_WIDTH - x, playerY + cameraHeight, camZ)
+      project(segment.p2, playerX * ROAD_WIDTH - x - dx, playerY + cameraHeight, camZ)
 
       x += dx
       dx += segment.curve
 
       if (
-        segment.p1.camera.z <= CAMERA_DEPTH || // behind us
+        segment.p1.camera.z <= camDepth || // behind us
         segment.p2.screen.y >= segment.p1.screen.y || // back face cull
         segment.p2.screen.y >= maxy // clipped by an already rendered hill
       )
@@ -651,10 +674,10 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
 
       if (segment === playerSegment) {
         drawPlayer(
-          CAMERA_DEPTH / PLAYER_Z,
+          camDepth / renderPlayerZ,
           width / 2,
           height / 2 -
-            ((CAMERA_DEPTH / PLAYER_Z) *
+            ((camDepth / renderPlayerZ) *
               interpolate(playerSegment.p1.camera.y, playerSegment.p2.camera.y, playerPercent) *
               height) /
               2,
@@ -670,7 +693,7 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
     p.camera.x = 0 - cameraX
     p.camera.y = p.world.y - cameraY
     p.camera.z = p.world.z - cameraZ
-    p.screen.scale = CAMERA_DEPTH / p.camera.z
+    p.screen.scale = camDepth / p.camera.z
     p.screen.x = Math.round(width / 2 + p.screen.scale * p.camera.x * (width / 2))
     p.screen.y = Math.round(height / 2 - p.screen.scale * p.camera.y * (height / 2))
     p.screen.w = Math.round(p.screen.scale * ROAD_WIDTH * (width / 2))
@@ -1033,6 +1056,9 @@ export function createRacer(canvas: HTMLCanvasElement, initial: RacerConfig, onH
       if (input.right !== undefined) keyRight = input.right
       if (input.faster !== undefined && input.faster !== keyFaster) handleFaster(input.faster, false)
       if (input.slower !== undefined && input.slower !== keySlower) handleSlower(input.slower, false)
+    },
+    setCamera(level): void {
+      camTarget = Math.max(-1, Math.min(1, level))
     },
     getMap: () => mapView,
     destroy(): void {

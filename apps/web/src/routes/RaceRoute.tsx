@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import GamesNav from '@/components/game/GamesNav'
+import RaceCredits from '@/components/game/RaceCredits'
 import RaceGameChip from '@/components/game/RaceGameChip'
 import RaceGameStage from '@/components/game/RaceGameStage'
 import Card from '@/components/ui/Card'
@@ -99,6 +100,7 @@ export default function RaceRoute(): ReactNode {
         ) : (
           <p className="py-6 text-center">{t('offline.needsConnection')}</p>
         )}
+        <RaceCredits />
       </Card>
     </article>
   )
