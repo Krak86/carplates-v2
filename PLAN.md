@@ -1542,10 +1542,14 @@ Rule-based (no AI, no MCP) Q&A assistant for a plate / VIN built on our own API,
 
 In-app chat that answers from a vector index (app help + Ukrainian registration law), the current plate / VIN and registry tools (Gemini function-calling), streamed over SSE. Supersedes the in-app chat of the assistant plan above (the embed widget stays rule-based). Plan: [docs/ai-chat-plan.md](docs/ai-chat-plan.md).
 
-- [ ] Infra + DB: pgvector image in both compose files, migration `0105_ai_chat.sql`, Drizzle tables
-- [ ] API: `apps/api/src/chat/` (Gemini provider, retrieval, tools, SSE controller, throttle, daily budget), shared `chat.ts` contracts
-- [ ] Corpus + `pnpm ai:index` (chunker, hash-based embedding)
-- [ ] Web: launcher + drawer, SSE parser, i18n `chat.*`
+Reordered 2026-11-18: **Phase A (no LLM, local embeddings, semantic search UI) first**, then Phase B (Gemini + SSE chat). Embeddings are local (`multilingual-e5-small`, 384 dims); Gemini only generates.
+
+- [ ] A1 Infra + DB: pgvector image in both compose files, migration `0105_ai_chat.sql` (`vector(384)`), Drizzle tables
+- [ ] A2 Local `embedder.ts` (transformers.js), corpus + `pnpm ai:index` (chunker, hash-based re-embed)
+- [ ] A3 `GET /api/search/semantic` + "Smart search" UI with similarity score (no Gemini key needed)
+- [ ] A4 Optional: "similar models" via make/model embeddings
+- [ ] B1 API: `apps/api/src/chat/` (Gemini provider, retrieval reuse, tools, SSE controller, throttle, daily budget), shared `chat.ts` contracts
+- [ ] B2 Web: launcher + drawer, SSE parser, i18n `chat.*`
 - [ ] Docs + release: features-reference, About privacy note, `releases.ts`
 - After deploy:
   - [ ] Swap the VPS Postgres image to pgvector **before** the migration runs

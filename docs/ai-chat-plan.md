@@ -1,6 +1,41 @@
 # AI chat (RAG + pgvector + Gemini free tier, SSE)
 
-Status: planned 2026-11-14, nothing built yet. Backlog boxes: `PLAN.md` "AI chat: RAG + pgvector + Gemini free tier, SSE".
+Status: planned 2026-11-14, reordered 2026-11-18 (no-LLM phase first), nothing built yet. Backlog boxes: `PLAN.md` "AI chat: RAG + pgvector + Gemini free tier, SSE".
+
+## Phases (2026-11-18: learn vectors first, add the LLM last)
+
+The goal is to learn the "AI era" stack step by step. Each phase is runnable and testable in the UI on its own.
+
+**Phase A - semantic search, no LLM (build first).**
+
+- pgvector image + migration (section 1), a **local embedding model** (see "Embedder" below), `pnpm ai:index` (section 4).
+- API: `GET /api/search/semantic?q=&lang=` embeds the question locally and returns the nearest chunks (title, snippet, url,
+  distance). Zod-validated, throttled, edge-cacheable per `q` (checklist: new `/api/*` endpoint).
+- UI: a "Smart search" box (own page or section) listing results with a similarity score, so you can see how meaning-based search
+  differs from `ILIKE`. A debug toggle shows the raw distance.
+- Optional A2: "similar models" on a car page, nearest neighbours of a make/model embedding (pick the table at implementation time;
+  this is a second `embedding` use, no LLM and no new infra).
+- Learning checks: query in Ukrainian finds an English/Dutch chunk; a misspelling still matches; compare with plain SQL search.
+- No Gemini key, no SSE, no daily budget needed in this phase.
+
+**Phase B - RAG chat with Gemini free tier + SSE (add after A works).**
+
+- Sections 2, 3, 5 below. Retrieval is the Phase A query, now fed to Gemini as context, streamed over SSE.
+- Gemini is used **only for generation** (and function-calling). Embeddings stay local, so no embedding quota and no re-index.
+
+**Phase C - extras (optional).** Registry tools in the chat, "similar cars", live alarms over SSE
+(`docs/microservices-plan.md`), image embeddings.
+
+### Embedder (decision 2026-11-18)
+
+- A local model through `@huggingface/transformers` (transformers.js, ONNX, CPU), same mechanism as the cached
+  `scripts/.cache/models/Xenova/nllb-200-distilled-600M`. Candidate: `multilingual-e5-small` (384 dims, handles ua/ru/en);
+  verify the exact id and the Ukrainian quality on a few test sentences at implementation time, and pin the version.
+- E5 needs prefixes: `query: ` for questions and `passage: ` for stored chunks. Vectors are L2-normalized.
+- One module `embedder.ts` used by both the indexer (scripts) and the API (query time), so the model is always the same.
+  Changing the model means re-embedding everything, so store `model` per row and compare it at query time.
+- The API loads the model lazily on the first query (a few hundred MB of RAM). Check VPS memory before enabling in prod; if too
+  tight, run the embedder in the ALPR-style sidecar instead.
 
 ## Context
 
@@ -44,11 +79,11 @@ Current state: there is no AI, embedding or SSE code anywhere. Postgres is `post
   - `CREATE EXTENSION IF NOT EXISTS vector;`
   - Table `app.ai_chunks`:
     - columns: `id bigserial PK`, `source text` (`'help'|'law'`), `doc_id text`, `lang text CHECK (ua|ru|en)`, `title text`,
-      `url text NULL`, `content text`, `content_hash text UNIQUE`, `embedding vector(768) NOT NULL`, `updated_at timestamptz`;
+      `url text NULL`, `content text`, `content_hash text UNIQUE`, `model text` (embedder id), `embedding vector(384) NOT NULL` (local embedder), `updated_at timestamptz`;
     - HNSW index on `embedding vector_cosine_ops`;
     - index on `(source, doc_id)`.
   - Table `app.ai_usage`: `(day date PK, requests int, tokens int)` holds the global daily budget counter.
-- **Drizzle:** in `packages/db/src/schema.ts`, under the `app` schema (~line 1669), add a `vector(768)` `customType` (same pattern as
+- **Drizzle:** in `packages/db/src/schema.ts`, under the `app` schema (~line 1669), add a `vector(384)` `customType` (same pattern as
   `bytea` at line 580) and both tables, with `$inferSelect` row types.
 
 ## 2. Shared contracts: `packages/shared/src/chat.ts` (own file, so saved offline data isn't discarded)
@@ -65,18 +100,18 @@ Current state: there is no AI, embedding or SSE code anywhere. Postgres is `post
 ## 3. API: `apps/api/src/chat/`
 
 - **`env.ts`:**
-  - variables: `GEMINI_API_KEY` (optional secret), `GEMINI_CHAT_MODEL` (default `gemini-2.5-flash`), `GEMINI_EMBED_MODEL`
-    (default `gemini-embedding-001`), `AI_DAILY_BUDGET` (default 200);
+  - variables: `GEMINI_API_KEY` (optional secret), `GEMINI_CHAT_MODEL` (default `gemini-2.5-flash`), `AI_DAILY_BUDGET`
+    (default 200); embeddings are local (see "Embedder"), so there is no Gemini embed model;
   - gate: `aiChatEnabled = (env) => Boolean(env.GEMINI_API_KEY)`, next to `marketEnabled` (~line 172);
   - list the new variables in `deploy-api.yml` and `docs/deploy.md`.
 - **`gemini.provider.ts`:**
   - a thin wrapper over `@google/genai` (new dependency, pinned version);
-  - `embed(texts, taskType)` requests 768 dimensions (`outputDimensionality`);
+  - generation only (no `embed`; the local embedder does that);
   - `streamChat({ system, contents, tools, signal })`;
   - maps 429 / 5xx to a typed `ChatUpstreamError('rate'|'unavailable')`, following the pattern in
     `market/carapis.provider.ts:50-76`.
 - **`retrieval.service.ts`:**
-  - embeds the question (`RETRIEVAL_QUERY`);
+  - embeds the question with the local embedder (`query: ` prefix); this is the same function Phase A's semantic-search endpoint uses;
   - runs `ORDER BY embedding <=> $1 LIMIT 6` with a filter on `lang` (falling back to `ua`) and a distance cutoff;
   - returns chunks plus source links.
 - **`chat-tools.ts`:**
@@ -125,7 +160,7 @@ Current state: there is no AI, embedding or SSE code anywhere. Postgres is `post
   - Each file has front-matter with `title` and `url`.
 - **`scripts/src/ai-index.ts`** (`pnpm ai:index`):
   - splits each file on headings or articles (~800 tokens, with overlap);
-  - hashes each chunk and **embeds only new or changed hashes**, which saves free-tier quota;
+  - hashes each chunk and **embeds only new or changed hashes**, which saves CPU time (embedding is local, so there is no quota);
   - batch-upserts the rows and deletes chunks whose hash has disappeared.
   - It changes only `app.ai_chunks`, never `registry.*`.
   - The pure chunker goes in `scripts/src/ai-chunk.ts` with tests.
@@ -191,3 +226,20 @@ Current state: there is no AI, embedding or SSE code anywhere. Postgres is `post
    and real registry data. Stop mid-stream: the request should abort. 11 quick messages should give a 429 message.
 6. Without `GEMINI_API_KEY`, the launcher is hidden and `/api/chat` returns `disabled`.
 7. Run `pnpm format`, lint, typecheck and tests.
+
+## Notes: decisions and parked ideas (2026-11-18 discussion)
+
+- **Why RAG here, not fine-tuning:** fine-tuning teaches style / format / vocabulary, not reliable facts, and needs retraining when
+  data changes. RAG (retrieve chunks, paste into the prompt, cite) handles documents; tool calling handles exact registry rows.
+  Fine-tuning is parked until there is an eval set showing a concrete gap.
+- **Which data feeds RAG:** text only (help, law, recall / defect descriptions, wiki). Structured rows (plates, VINs, specs, MOT) go
+  through tools, so mirroring more tables does not improve RAG.
+- **Online-only sources:** do not mirror one just for RAG. Ingest only if it has searchable text, its licence allows storing it, and a
+  real user question needs it. Before scaling the corpus, write 20-30 real questions and check that retrieval finds the right chunk.
+- **Own models later (parked, not planned):** tabular ML on our tables is the realistic path (XGBoost / LightGBM, exported to ONNX and
+  served from the Python sidecar): fair-price band from market offers, MOT failure risk by make / model / age, a small recall-text
+  category classifier, a domain-tuned embedding model if the stock one ranks badly. Check source licences and keep personal data
+  out of training sets. An own LLM from scratch is out of scope.
+- **ALPR is not fine-tuned:** `services/alpr` runs stock ONNX models (yolo-v9-t-384 plate detector, cct-xs-v2 plate OCR, RapidOCR
+  for VIN text, YuNet for faces). Accuracy comes from constrained decoding, alternative reads and fallbacks. A future OCR
+  fine-tune would need a few thousand hand-checked Ukrainian plate crops; `services/alpr/eval` is the starting point.
