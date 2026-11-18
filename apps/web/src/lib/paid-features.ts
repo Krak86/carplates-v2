@@ -14,28 +14,23 @@ export const PAID_FEATURE_ICON: Record<PaidFeature, string> = {
  */
 export const AVAILABLE_PAID_FEATURES: readonly PaidFeature[] = []
 
-/** Planned account features shown as "coming soon" on /features — not toggleable yet. i18n: `paid.soon.<id>`. */
-export const COMING_SOON_FEATURES = [] as const
-
-/** Ideas not yet decided on — listed last on /features under "under consideration". i18n: `paid.soon.<id>`. */
-export const CONSIDERING_FEATURES = [
-  'ria_ads',
-  'ria_avg_price',
-  'platesmania',
-  'auction_history',
-  'plate_alerts',
-  'auction_photos',
-  'marketplace'
+/**
+ * Planned work, ideas and research shown on /features ("What's next"); not toggleable. i18n: `paid.soon.<id>`,
+ * chip `features.status.<status>`. Dropped for now (no plan / skipped / too early): plate alerts, window stickers,
+ * own sale listings, AUTO.RIA ads and average price, Platesmania, foreign auction history.
+ */
+export const UPCOMING_FEATURES = [
+  { id: 'ai_chat', icon: '🤖', status: 'planned' },
+  { id: 'year_pages', icon: '📅', status: 'planned' },
+  { id: 'wiki_photos', icon: '🖼️', status: 'planned' },
+  { id: 'compare_extras', icon: '⚖️', status: 'planned' },
+  { id: 'mileage_check', icon: '🛣️', status: 'idea' },
+  { id: 'car_timeline', icon: '🕒', status: 'idea' },
+  { id: 'co2_class', icon: '🌿', status: 'idea' },
+  { id: 'trust_counters', icon: '🔢', status: 'idea' },
+  { id: 'telegram_bot', icon: '✈️', status: 'idea' },
+  { id: 'embed_widget', icon: '🧩', status: 'idea' },
+  { id: 'race_extras', icon: '🏁', status: 'idea' },
+  { id: 'depreciation', icon: '📉', status: 'research' },
+  { id: 'per_capita', icon: '👥', status: 'research' }
 ] as const
-
-export type FutureFeature = (typeof COMING_SOON_FEATURES)[number] | (typeof CONSIDERING_FEATURES)[number]
-
-export const FUTURE_FEATURE_ICON: Record<FutureFeature, string> = {
-  ria_ads: PAID_FEATURE_ICON.ria_ads,
-  plate_alerts: '🔔',
-  auction_photos: '🖼️',
-  ria_avg_price: PAID_FEATURE_ICON.ria_avg_price,
-  platesmania: PAID_FEATURE_ICON.platesmania,
-  auction_history: PAID_FEATURE_ICON.auction_history,
-  marketplace: '🏷️'
-}

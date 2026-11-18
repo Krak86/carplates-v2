@@ -9,21 +9,9 @@ import AccountNav from '@/components/auth/AccountNav'
 import { useSession } from '@/components/auth/use-session'
 import Card from '@/components/ui/Card'
 import Spinner from '@/components/ui/Spinner'
-import {
-  AVAILABLE_PAID_FEATURES,
-  CONSIDERING_FEATURES,
-  COMING_SOON_FEATURES,
-  FUTURE_FEATURE_ICON,
-  PAID_FEATURE_ICON
-} from '@/lib/paid-features'
+import { AVAILABLE_PAID_FEATURES, PAID_FEATURE_ICON, UPCOMING_FEATURES } from '@/lib/paid-features'
 import { featuresQuery } from '@/lib/queries'
 import { useFeaturesActions } from '@/routes/features/use-features-actions'
-
-/** Read-only lists under the toggles, in page order: planned work first, then ideas still to be decided. */
-const FUTURE_SECTIONS = [
-  { titleKey: 'features.comingSoon', ids: COMING_SOON_FEATURES },
-  { titleKey: 'features.considering', ids: CONSIDERING_FEATURES }
-] as const
 
 /** With nothing live yet the toggles, save button and their query are all hidden. */
 const HAS_TOGGLES = AVAILABLE_PAID_FEATURES.length > 0
@@ -66,9 +54,18 @@ export default function FeaturesRoute(): ReactNode {
       <Card className="mb-4">
         <h1 className="mb-2 text-2xl font-bold">{t('features.title')}</h1>
         <p className="text-[var(--color-muted)]">{t('features.intro')}</p>
-        <Link to="/releases" className="mt-2 inline-block text-[var(--color-primary)] hover:underline">
-          {t('features.releasesLink')}
-        </Link>
+        <ul className="mt-2 list-disc space-y-1 pl-5 marker:text-[var(--color-muted)]">
+          <li>
+            <Link to="/releases" className="text-[var(--color-primary)] hover:underline">
+              {t('features.releasesLink')}
+            </Link>
+          </li>
+          <li>
+            <Link to="/about#brief" className="text-[var(--color-primary)] hover:underline">
+              {t('features.briefLink')}
+            </Link>
+          </li>
+        </ul>
       </Card>
 
       {HAS_TOGGLES && features.isPending && (
@@ -115,27 +112,26 @@ export default function FeaturesRoute(): ReactNode {
         </div>
       )}
 
-      {FUTURE_SECTIONS.map(({ titleKey, ids }) => (
-        <section key={titleKey}>
-          <h2 className="mt-8 mb-2 inline-block rounded-lg bg-[var(--color-surface)] px-3 py-1 text-lg font-semibold">
-            {t(titleKey)}
-          </h2>
-          <Card className="divide-y divide-[var(--color-border)] p-0">
-            {ids.length === 0 && <p className="p-4 text-[var(--color-muted)]">{t('features.comingSoonEmpty')}</p>}
-            {ids.map(id => (
-              <div key={id} className="flex items-center gap-3 p-4 text-[var(--color-muted)]">
-                <span aria-hidden>{FUTURE_FEATURE_ICON[id]}</span>
-                {t(`paid.soon.${id}`)}
-              </div>
-            ))}
-          </Card>
-          {titleKey === 'features.considering' && (
-            <Link to="/discuss" className="mt-2 inline-block text-[var(--color-primary)] hover:underline">
-              {t('features.suggest')}
-            </Link>
-          )}
-        </section>
-      ))}
+      <section>
+        <h2 className="mt-8 mb-2 inline-block rounded-lg bg-[var(--color-surface)] px-3 py-1 text-lg font-semibold">
+          {t('features.upcoming')}
+        </h2>
+        <p className="mb-2 text-sm text-[var(--color-muted)]">{t('features.upcomingDesc')}</p>
+        <Card className="divide-y divide-[var(--color-border)] p-0">
+          {UPCOMING_FEATURES.map(({ id, icon, status }) => (
+            <div key={id} className="flex items-center gap-3 p-4 text-[var(--color-muted)]">
+              <span aria-hidden>{icon}</span>
+              <span className="min-w-0 flex-1">{t(`paid.soon.${id}`)}</span>
+              <span className="shrink-0 rounded-full border border-[var(--color-border)] px-2 py-0.5 text-xs">
+                {t(`features.status.${status}`)}
+              </span>
+            </div>
+          ))}
+        </Card>
+        <Link to="/discuss" className="mt-2 inline-block text-[var(--color-primary)] hover:underline">
+          {t('features.suggest')}
+        </Link>
+      </section>
     </div>
   )
 }
