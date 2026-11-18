@@ -140,6 +140,8 @@ SELECT state, count(*) FROM pg_stat_activity GROUP BY state;   -- sustained use 
 
 **Redis: not in the compose file; reasons it is on the backlog** (PLAN.md "Redis-backed throttler storage", low priority): (1) shared throttler counters that survive restarts and cover the blue/green overlap (today per process, reset on restart), (2) an optional global daily counter for paid third-party keys (e.g. a RIA key, 5000/day), (3) a cache shared between blue and green (the catalog stays in process memory instead). Add it when one of those becomes a real problem.
 
+**Redis: self-hosted, not an external free tier** (decided 2026-11-18, free-tier figures from third-party pages, verify before relying on them). Redis Cloud free: 30 MB, ~100 ops/s, ~30 connections. Upstash free: 256 MB but 500K commands/month, and a throttle check is 2+ commands, so about 8K requests/day. Storage is never the limit (a counter is ~100-200 bytes); commands and latency are. An external provider also adds a network round trip to every API call and a fail-open/fail-closed decision. Use a pinned container (Redis 8 AGPL or Valkey BSD, never `latest`), internal network only, no published port. Coarse per-IP limits can instead be a Cloudflare rate limiting rule (free-plan rule count unverified, check the Cloudflare docs).
+
 **Where things run:** Drizzle and the Pool are libraries inside the NestJS container (each of `api-blue`, `api-green`, `ingest` has its own Pool); the postgres container is only the server.
 
 ## 6. Doc fixes made in the same change
