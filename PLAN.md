@@ -1563,12 +1563,16 @@ Admin-only `/admin/parking` page: on-demand snapshot from 2 home cameras (Reolin
 
 Learning playground, not a need: one VPS and one API are enough today. Rule of thumb: "do this" tasks go to RabbitMQ (queue, ack, retry, DLQ), "this happened" events go to Kafka (log, replay, consumer groups). Everything opt-in behind flags, brokers in a compose profile `mq`, own schema + role per service, inline fallback when a broker is down. Ideas ranked, library notes, memory budget and verification: [docs/microservices-plan.md](docs/microservices-plan.md).
 
+- [ ] Redis first (self-hosted, shared with the throttler item); optional BullMQ mail queue before RabbitMQ, see docs/microservices-plan.md step 0
 - [ ] Infra: `mq` compose profile (RabbitMQ 4.x + Kafka 4.x KRaft + dev UIs), version pins, env flags in `apps/api/src/env.ts`
 - [ ] Contracts: `packages/shared/src/events.ts` (Zod message schemas, topic / queue names)
 - [ ] `apps/mail-service` (RabbitMQ: durable queue, retry with delay, DLQ, idempotency)
 - [ ] `apps/alarm-service` (Kafka `alarm.events`: recorder, SSE `/api/alarms/stream`, history-fold consumer groups)
 - [ ] `apps/watch-service` + `registry.changes` from ingest: "watch this plate / VIN / region" notifications (Kafka -> RabbitMQ -> Telegram / mail)
 - [ ] Optional later: ALPR over RabbitMQ RPC, "Trending now" from a lookup stream, `apps/worker` + admin "Run job now"
+- [ ] Optional: gRPC `api` → `services/alpr` (`.proto`, `ALPR_TRANSPORT=http|grpc`, HTTP fallback), see docs/microservices-plan.md idea 7
+- [ ] Optional: publish the generic plate normalizer as a public npm package (`packages/ua-plate`, provenance), idea 8
+- [ ] Optional: custom SMTP relay instead of Resend (DNS SPF/DKIM/DMARC checklist in idea 1)
 
 ## Later, conditional
 
