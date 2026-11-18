@@ -33,7 +33,8 @@ caddy:
 ```
 
 Stock Caddy 2 ships **zstd and gzip only** — `encode br` fails to load ("module not registered: http.encoders.br", verified 2026-10-15).
-Brotli to browsers comes from Cloudflare, which re-compresses. The real config is `infra/Caddyfile`; deploy flow in [deploy.md](deploy.md).
+Compression to browsers comes from Cloudflare (br / zstd / gzip per `Accept-Encoding`, no Compression Rules on the zone; bodies of about 50 bytes or less
+stay plain). Caddy compresses only requests without `Cf-Connecting-Ip`. Details and the 2026-11-18 check: `deploy.md` "HTTP/2, HTTP/3, compression, caching". The real config is `infra/Caddyfile`; deploy flow in [deploy.md](deploy.md).
 
 ## nginx (alternative)
 

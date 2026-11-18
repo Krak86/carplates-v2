@@ -50,6 +50,9 @@ by re-reading this section before bumping.
   the linter. `eslint-plugin-react-hooks@7` (ESLint-10-native, incl. the React
   Compiler rules) covers what matters. Re-add only if a patched
   `eslint-plugin-react` ships and its extra rules are wanted.
+- **Caddy image** — `infra/docker-compose.prod.yml` uses `caddy:2`, which floats within major 2 (a `docker compose pull` takes the newest 2.x;
+  newest seen 2026-11-05: `2.11.9`). Not held back, but not an exact pin either. Check the running one with
+  `docker compose exec caddy caddy version`; pin to `caddy:2.11.x` if a surprise upgrade mid-deploy ever matters.
 - **tsconfig `incremental`** — deliberately unset (not a version thing): with
   per-package `tsc` its `.tsbuildinfo` lived outside `dist/`, so `rm -rf dist`
   left a stale cache and tsc silently emitted nothing.

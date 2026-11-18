@@ -389,6 +389,19 @@ and unbundled, so it says nothing about production.
   `CF-Connecting-IP` (`@direct`); after deploying it, check `curl -sI -H 'accept-encoding: br' https://carsua.app/assets/<file>.js` shows
   `content-encoding: br` (purge the Cloudflare cache first: the gzip copy is cached for a year). Cloudflare → Speed → Optimization →
   Content Optimization → Brotli must be on.
+- **Who compresses what (checked 2026-11-18, DevTools + curl).** For browser traffic only Cloudflare compresses: Nest sends plain, Caddy skips
+  `Cf-Connecting-Ip` requests (`@direct`), and the zone has **no Compression Rules** (dashboard → Rules → Overview), so the zone default applies.
+  Cloudflare picks br / zstd / gzip from the browser's `Accept-Encoding`; `/api/me` (about 12.7 kB body) came back `content-encoding: zstd`.
+  **Tiny bodies are left plain**: `/api/stats/version` (34 bytes) has no `Content-Encoding` whatever the `Accept-Encoding` (this is Cloudflare's behaviour,
+  our code has no size check). The "1.7 kB" in the DevTools Size column of small calls is mostly response headers (the CSP alone is about 1.5 kB), not the body.
+  The origin leg therefore carries plain bytes on purpose (Cloudflare then picks br/zstd per browser); fine for small JSON.
+- **`Cf-Connecting-Ip` and friends are invisible in DevTools** (browser to Cloudflare leg only). Cloudflare adds `Cf-Connecting-Ip`, `Cf-Ipcountry`, `Cf-Ray`,
+  `Cf-Visitor`, `X-Forwarded-For/Proto`, `Cdn-Loop` on the way to Caddy. To see them, add a temporary `log { output stdout; format json }` block to the
+  `carsua.app` site (there is **no access log today**; check that `Cookie`/`Authorization` are redacted), read it with `docker logs`, then remove it.
+  A direct `curl` to the origin cannot show them: without Cloudflare's client cert (AOP mTLS) the TLS handshake fails.
+- **`/api/stats/version` is deliberately not edge-cached** (excluded in the "Cache API rollups" rule, no `Cache-Control`): it is the "did the data change?" probe
+  (`getDataVersion` in `apps/web/src/lib/api.ts`, offline-copy staleness check), so a cached answer would delay that detection. If origin load ever matters,
+  the only sane option is a very short edge TTL (about 10-30 s) plus a rule entry.
 - Do not add a second `Cache-Control` for `/assets/*` in Caddy — the app already sends the right one. Put a Caddy/CDN cache in front of `/og/*`.
 
 **nginx (alternative, not used)** — `listen 443 ssl;` + `listen 443 quic reuseport;`, `http2 on; http3 on;`,
