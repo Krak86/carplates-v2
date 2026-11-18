@@ -1510,19 +1510,19 @@ ingest as one-off `docker compose run --rm` with the release image (XII). Follow
 and one API instance; the items below are the cheap ones.
 
 - [ ] **P2 Rollback by tag (V).** Today an API rollback = revert commit + full CI. `.github/workflows/deploy-api.yml`: add a
-  `workflow_dispatch` input `image_tag` (empty = `$GITHUB_SHA`); when set, skip `ci` / `build` and pass it to `infra/vps/deploy-api.sh`
-  (already takes the tag as `$1`). Relies on the existing "migrations backward compatible" rule. Add a short "Rollback" section to
-  `docs/deploy.md` covering it plus the manual web rollback (`cd /opt/carsua/web && ln -sfn releases/<id> current.tmp && mv -T current.tmp current`,
-  5 releases are kept).
+      `workflow_dispatch` input `image_tag` (empty = `$GITHUB_SHA`); when set, skip `ci` / `build` and pass it to `infra/vps/deploy-api.sh`
+      (already takes the tag as `$1`). Relies on the existing "migrations backward compatible" rule. Add a short "Rollback" section to
+      `docs/deploy.md` covering it plus the manual web rollback (`cd /opt/carsua/web && ln -sfn releases/<id> current.tmp && mv -T current.tmp current`,
+      5 releases are kept).
 - [ ] **P2 No `latest` in prod compose (II).** `infra/docker-compose.prod.yml` falls back to `:-latest` for `API_TAG_BLUE`, `API_TAG_GREEN`,
-  `ALPR_TAG`, `INGEST_TAG`: change to `${X:?X not set}`. First confirm `deploy-alpr.sh` / `deploy-ingest.sh` always `set_env` their tag
-  before any `up` / `run` (`infra/vps/lib.sh`), else the first deploy fails. Pin `caddy:2` to an exact `2.x.y` and add it to "Version pins".
+      `ALPR_TAG`, `INGEST_TAG`: change to `${X:?X not set}`. First confirm `deploy-alpr.sh` / `deploy-ingest.sh` always `set_env` their tag
+      before any `up` / `run` (`infra/vps/lib.sh`), else the first deploy fails. Pin `caddy:2` to an exact `2.x.y` and add it to "Version pins".
 - [ ] **P3 Graceful stop window (IX).** Docker's default 10 s stop grace is shorter than the 60 s Fastify `requestTimeout` (4 MB uploads), and
-  the old colour is stopped 6 s after the switch. Add `stop_grace_period: 30s` to the `x-api` anchor in `infra/docker-compose.prod.yml`.
+      the old colour is stopped 6 s after the switch. Add `stop_grace_period: 30s` to the `x-api` anchor in `infra/docker-compose.prod.yml`.
 - [ ] **P3 Structured logs in production (XI).** `apps/api/src/main.ts`: `NestFactory.create(..., { logger: new ConsoleLogger({ json: env.NODE_ENV === 'production' }) })`
-  (Nest 11 built-in, no new dependency); dev keeps text. Check the admin Server tab / any log grep in `docs/` still works with JSON lines.
+      (Nest 11 built-in, no new dependency); dev keeps text. Check the admin Server tab / any log grep in `docs/` still works with JSON lines.
 - [ ] **After deploy** (owner, items above): `docker compose config` on the VPS passes; run "Deploy API" by hand with the previous SHA as
-  `image_tag`, `/healthz` green and `GIT_SHA` matches, then redeploy the current SHA; `docker compose logs api-<colour> | head` shows JSON lines.
+      `image_tag`, `/healthz` green and `GIT_SHA` matches, then redeploy the current SHA; `docker compose logs api-<colour> | head` shows JSON lines.
 
 Not worth it now, revisit only at 2+ API replicas:
 
@@ -1558,6 +1558,17 @@ Admin-only `/admin/parking` page: on-demand snapshot from 2 home cameras (Reolin
 
 - [ ] Home parking cameras (admin-only) - see docs/home-parking-cameras.md
 - [ ] ⏳ Owner: check the RT-BE50 supports WireGuard client (VPN Fusion) and pick the cameras (hub + 1x Argus PT Ultra or 2x Argus 4 Pro)
+
+## Microservices + RabbitMQ + Kafka (idea 2026-11-18, plan only, nothing built)
+
+Learning playground, not a need: one VPS and one API are enough today. Rule of thumb: "do this" tasks go to RabbitMQ (queue, ack, retry, DLQ), "this happened" events go to Kafka (log, replay, consumer groups). Everything opt-in behind flags, brokers in a compose profile `mq`, own schema + role per service, inline fallback when a broker is down. Ideas ranked, library notes, memory budget and verification: [docs/microservices-plan.md](docs/microservices-plan.md).
+
+- [ ] Infra: `mq` compose profile (RabbitMQ 4.x + Kafka 4.x KRaft + dev UIs), version pins, env flags in `apps/api/src/env.ts`
+- [ ] Contracts: `packages/shared/src/events.ts` (Zod message schemas, topic / queue names)
+- [ ] `apps/mail-service` (RabbitMQ: durable queue, retry with delay, DLQ, idempotency)
+- [ ] `apps/alarm-service` (Kafka `alarm.events`: recorder, SSE `/api/alarms/stream`, history-fold consumer groups)
+- [ ] `apps/watch-service` + `registry.changes` from ingest: "watch this plate / VIN / region" notifications (Kafka -> RabbitMQ -> Telegram / mail)
+- [ ] Optional later: ALPR over RabbitMQ RPC, "Trending now" from a lookup stream, `apps/worker` + admin "Run job now"
 
 ## Later, conditional
 
