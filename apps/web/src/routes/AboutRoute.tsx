@@ -396,10 +396,12 @@ export default function AboutRoute(): ReactNode {
   const year = new Date().getFullYear()
   const { hash } = useLocation()
   const sourcesRef = useRef<HTMLDivElement>(null)
+  const briefRef = useRef<HTMLDivElement>(null)
 
-  // `/about#sources` (linked from privacy/terms): the router doesn't scroll to hashes itself.
+  // `/about#sources` (linked from privacy/terms) and `/about#brief` (linked from /features): the router doesn't scroll to hashes itself.
   useEffect(() => {
     if (hash === '#sources') sourcesRef.current?.scrollIntoView({ behavior: 'smooth' })
+    if (hash === '#brief') briefRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [hash])
 
   return (
@@ -463,7 +465,7 @@ export default function AboutRoute(): ReactNode {
         </div>
       </Card>
 
-      <Card className="space-y-3 text-sm text-[var(--color-fg)]">
+      <Card ref={briefRef} className="scroll-mt-20 space-y-3 text-sm text-[var(--color-fg)]">
         <h2 className="font-semibold">{t('about.briefHeading')}</h2>
         <ul className="grid list-disc gap-x-6 gap-y-1 pl-5 sm:grid-cols-2 lg:grid-cols-3">
           {FEATURES.map(key => (
