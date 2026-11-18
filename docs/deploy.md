@@ -154,7 +154,7 @@ variables: `BACKUP_BUCKET` … `VPS_USER`); `VITE_API_BASE` and `VITE_GOOGLE_MAP
 ## First-time setup (in this order)
 
 1. **Bootstrap** — `scp infra/vps/bootstrap.sh root@<ip>:` then `ssh root@<ip> 'DEPLOY_PUBKEY="…" CI_PUBKEY="…" bash bootstrap.sh'`. Creates `deploy`,
-   locks SSH (key-only, no root), ufw (22/80/443 tcp, 443 udp), fail2ban, Docker, 4 GB swap, `/opt/carsua`, nightly backup cron. **Open a second terminal
+   locks SSH (key-only, no root), ufw (22 and 443 tcp only), fail2ban, Docker, 4 GB swap, `/opt/carsua`, nightly backup cron. **Open a second terminal
    and `ssh deploy@<ip>` before closing the root session.**
 2. **Cloudflare + GitHub** — as above (DNS can propagate while you continue).
 3. **Images + files** — run `deploy-api` with **`sync_only` ticked** first: it builds the api image, copies compose/Caddyfile, writes
@@ -381,8 +381,8 @@ and unbundled, so it says nothing about production.
 **Caddy (in use)**
 
 - Enables **h2 and h3 by default** and advertises h3 via `Alt-Svc` (browsers use h2 on the first visit, h3 afterwards).
-- Compose must publish **`80`, `443` and `443/udp`**; the firewall must allow TCP 80, TCP 443 **and UDP 443**. Without UDP, h3 silently falls back to h2.
-  With Cloudflare in front this only matters for direct hits: browsers speak h3 to Cloudflare, which reaches the origin over TCP (to be verified, then 443/udp can be closed: [origin-hardening-plan.md](origin-hardening-plan.md) H4).
+- Compose publishes **only `443/tcp`** (origin lockdown H4, code 2026-11-18; 80 and 443/udp are closed). Browsers speak h3 to Cloudflare, which reaches the origin over TCP,
+  so the origin needs no UDP. Without Cloudflare in front (grey cloud, another CDN) you would need `443:443/udp` again for h3: [origin-hardening-plan.md](origin-hardening-plan.md) H4.
 - Stock Caddy 2 ships **zstd and gzip only** — `encode br` fails to load ("module not registered: http.encoders.br", verified 2026-10-15).
   Brotli to browsers comes from Cloudflare, but only when the origin response is **uncompressed**: it passes an already gzip/zstd response
   through (seen 2026-10-28: `content-encoding: gzip` with `accept-encoding: br`). The Caddyfile therefore compresses only requests without

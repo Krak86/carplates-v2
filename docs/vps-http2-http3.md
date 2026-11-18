@@ -19,7 +19,7 @@ carsua.app {
 - Caddy gets Let's Encrypt certificates automatically and enables **h2 and h3 by default**.
 - Compose: publish **both** `443:443` and `443:443/udp` (+ `80:80`). h3 is QUIC over UDP — without the UDP port it silently
   falls back to h2.
-- Firewall / provider security group: allow TCP 80, TCP 443 **and UDP 443**.
+- Firewall / provider security group: allow TCP 80, TCP 443 **and UDP 443**. (This is the standalone recipe: our production origin sits behind Cloudflare and publishes only `443/tcp`, see `deploy.md` and origin-hardening-plan H4.)
 - Caddy advertises h3 through the `Alt-Svc` header; browsers use h2 on the first visit and h3 afterwards.
 - Do not add a second `Cache-Control` for `/assets/*` in Caddy — the app already sends the right one.
 - Put a Caddy/CDN cache in front of `/og/*` (PLAN.md Phase 4).

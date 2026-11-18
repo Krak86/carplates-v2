@@ -29,7 +29,8 @@ services:
   caddy:
     image: caddy:2
     restart: unless-stopped
-    ports: ['80:80', '443:443', '443:443/udp']
+    # Only 443/tcp is published (origin lockdown H4): Cloudflare reaches the origin over TCP, browsers speak h3 to Cloudflare.
+    ports: ['443:443']
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - ./maintenance.html:/srv/maintenance.html:ro
