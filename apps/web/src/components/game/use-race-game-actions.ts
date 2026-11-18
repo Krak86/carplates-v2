@@ -87,7 +87,9 @@ export function useRaceGameActions(config: RacerConfig, sound: boolean, siren: b
 
   const handleInput = (input: Partial<RacerInput>): void => racerRef.current?.setInput(input)
 
+  const handleCamera = (level: number): void => racerRef.current?.setCamera(level)
+
   const getMap = (): MapView | null => racerRef.current?.getMap() ?? null
 
-  return { phase, hud, wasLoaded, handleStart, handleRestart, handleInput, getMap, setCanvas }
+  return { phase, hud, wasLoaded, handleStart, handleRestart, handleInput, handleCamera, getMap, setCanvas }
 }

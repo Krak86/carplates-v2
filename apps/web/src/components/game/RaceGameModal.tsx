@@ -7,6 +7,7 @@ import { regionName, type VehicleKind } from '@carplates/shared'
 import BrandLogo from '@/components/BrandLogo'
 import RegionFlag from '@/components/RegionFlag'
 import ShareButton from '@/components/ShareButton'
+import RaceCredits from '@/components/game/RaceCredits'
 import RaceGameStage from '@/components/game/RaceGameStage'
 import {
   DEFAULT_AUTO,
@@ -21,7 +22,6 @@ import {
   startRegion,
   type RacerConfig
 } from '@/lib/racer/config'
-import ExternalLink from '@/components/ExternalLink'
 
 type Props = {
   /** `#rrggbb` of the looked-up car — the starting paint. */
@@ -121,28 +121,7 @@ export default function RaceGameModal({
 
         <RaceGameStage config={config} onChange={handleChange} />
 
-        <p className="mt-3 text-xs text-[var(--color-muted)]">
-          {t('race.credit')}{' '}
-          <ExternalLink
-            href="https://github.com/jakesgordon/javascript-racer"
-            rel="noopener noreferrer nofollow"
-            className="underline"
-          >
-            javascript-racer
-          </ExternalLink>{' '}
-          · Jake Gordon · MIT
-        </p>
-
-        <p className="mt-1 text-xs text-[var(--color-muted)]">
-          <a
-            href="https://pdr.infotech.gov.ua/"
-            target="_blank"
-            rel="noopener noreferrer nofollow"
-            className="underline"
-          >
-            {t('race.pdr')} ↗
-          </a>
-        </p>
+        <RaceCredits />
       </div>
     </div>,
     document.body

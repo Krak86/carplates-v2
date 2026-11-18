@@ -38,16 +38,13 @@ export default function RaceGameStage({ config, onChange, onPickBody }: Props): 
   const [sirenBody, setSirenBody] = useState<CarBody | null>(null)
   const hasSiren = !!SIRENS[config.body]
   const siren = sirenBody === config.body
-  const { phase, hud, wasLoaded, handleStart, handleRestart, handleInput, getMap, setCanvas } = useRaceGameActions(
-    config,
-    sound,
-    siren
-  )
+  const { phase, hud, wasLoaded, handleStart, handleRestart, handleInput, handleCamera, getMap, setCanvas } =
+    useRaceGameActions(config, sound, siren)
   const [showMap, setShowMap] = useState(true)
   const isTouch = useMediaQuery('(pointer: coarse)')
   // steering by tilting the phone: opt-in each visit, never remembered
   const [tilt, setTilt] = useState(false)
-  useRaceTilt(tilt && isTouch, handleInput)
+  useRaceTilt(tilt && isTouch, handleInput, handleCamera)
   const isPortrait = useMediaQuery('(orientation: portrait)')
 
   const [frame, setFrame] = useState<HTMLDivElement | null>(null)

@@ -17,6 +17,18 @@ const item = (group: ReleaseGroup, ua: string, ru: string, en: string): ReleaseI
  */
 export const RELEASES: readonly ReleaseDay[] = [
   {
+    date: '2026-11-18',
+    version: 'v2.1381',
+    items: [
+      item(
+        'improved',
+        'Гра «Тест-драйв»: нахил телефона вперед/назад піднімає або опускає камеру і змінює поле зору - видно трафік перед авто; кредит рушія і на сторінці гри.',
+        'Игра «Тест-драйв»: наклон телефона вперед/назад поднимает или опускает камеру и меняет поле зрения - виден трафик перед авто; кредит движка и на странице игры.',
+        'Test-drive game: tilting the phone forward/back raises or lowers the camera and changes the field of view, so traffic ahead stays visible; the engine credit is on the game page too.'
+      )
+    ]
+  },
+  {
     date: '2026-11-17',
     version: 'v2.1360',
     items: [
