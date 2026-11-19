@@ -81,9 +81,16 @@ export function renderMetaTags(m: MetaInput): string {
   ].join('\n    ')
 }
 
+const HERO_PRELOAD_MARK = 'fetchpriority="high"'
+
 /** Drop the placeholder <title>/description from index.html and inject the meta block before </head>. */
 export function injectMeta(html: string, metaBlock: string): string {
-  return html
+  // A page that preloads its own hero photo must not also fetch the generic background avif at high priority: both share one
+  // slow link and the background loses nothing by arriving after the photo.
+  const base = metaBlock.includes(HERO_PRELOAD_MARK)
+    ? html.replace(/(<link rel="preload" as="image" type="image\/avif"[^>]*?)\s+fetchpriority="high"/, '$1')
+    : html
+  return base
     .replace(/<title>[\s\S]*?<\/title>\s*/i, '')
     .replace(/<meta\s+name="description"[^>]*>\s*/i, '')
     .replace('</head>', `    ${metaBlock}\n  </head>`)
@@ -94,4 +101,4 @@ export function injectMeta(html: string, metaBlock: string): string {
  * after the plate request resolves. `crossorigin` matches the hero `<img crossOrigin="anonymous">` (else the preload is not reused).
  */
 export const renderHeroPreload = (url: string): string =>
-  `<link rel="preload" as="image" href="${esc(url)}" crossorigin="anonymous" fetchpriority="high">`
+  `<link rel="preload" as="image" href="${esc(url)}" crossorigin="anonymous" ${HERO_PRELOAD_MARK}>`
