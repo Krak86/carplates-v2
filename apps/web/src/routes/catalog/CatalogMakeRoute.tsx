@@ -69,7 +69,7 @@ export default function CatalogMakeRoute(): ReactNode {
   useDocumentTitle(make?.makeName)
 
   if (!params.success || (query.error instanceof ApiError && query.error.status === 404)) return <CatalogMakeNotFound />
-  if (query.isError) {
+  if (query.isError && !query.data) {
     return (
       <Card>
         <p className="text-base text-[var(--color-muted)]">{t('result.error')}</p>

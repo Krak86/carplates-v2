@@ -11,6 +11,7 @@ import {
   shareAliasOfPath,
   shareAliasPath,
   shareTokenSchema,
+  type CatalogEmbed,
   type CatalogMake,
   type CatalogModel
 } from '@carplates/shared'
@@ -26,7 +27,8 @@ import {
   catalogModelCrumbs,
   catalogPageText,
   catalogSeoBlock,
-  injectRoot
+  injectRoot,
+  renderCatalogData
 } from '../catalog/catalog-text.js'
 import { lossesPreviewText } from './alarm-card.js'
 import { LossesService } from '../losses/losses.service.js'
@@ -47,7 +49,7 @@ import {
   shareAliasCardSlug
 } from './page-card.js'
 import { PreviewService } from './preview.service.js'
-import { sitemapPaths } from './sitemap.js'
+import { NOINDEX, sitemapPaths } from './sitemap.js'
 import {
   DEFAULT_LANG,
   SHARE_ALIAS_PAGES,
@@ -60,6 +62,8 @@ import {
   sectionPageText,
   type Lang
 } from './spa-text.js'
+
+type CatalogPage = { meta: string; block: string }
 
 const MIME: Record<string, string> = {
   '.html': 'text/html; charset=utf-8',
@@ -232,24 +236,29 @@ export class SpaController {
    * Meta tags + the `#root` block of a catalog page (`/cars`, `/cars/:make`, `/cars/:make/:model`), or null for any other
    * path or a make/model with no page (those fall through to the normal unknown-path handling).
    */
-  private async catalogPageOf(pathname: string, lang: Lang): Promise<{ meta: string; block: string } | null> {
+  private async catalogPageOf(pathname: string, lang: Lang): Promise<CatalogPage | null> {
     if (isCatalogIndexPath(pathname)) return this.catalogIndexPage(lang)
     const slugs = catalogSlugsOfPath(pathname)
     if (slugs) {
       const model = await this.catalog.get(slugs.make, slugs.model)
-      return model ? { meta: this.catalogMeta(model, lang), block: catalogSeoBlock(model, lang) } : null
+      return model
+        ? this.page(this.catalogMeta(model, lang), catalogSeoBlock(model, lang), { kind: 'model', data: model })
+        : null
     }
     const makeSlug = catalogMakeOfPath(pathname)
     const make = makeSlug ? await this.catalog.make(makeSlug) : null
-    return make ? { meta: this.catalogMakeMeta(make, lang), block: catalogMakeSeoBlock(make, lang) } : null
+    return make
+      ? this.page(this.catalogMakeMeta(make, lang), catalogMakeSeoBlock(make, lang), { kind: 'make', data: make })
+      : null
   }
 
   /** `/cars` is a static page (title, sitemap entry), plus the make list in the block. */
-  private async catalogIndexPage(lang: Lang): Promise<{ meta: string; block: string }> {
+  private async catalogIndexPage(lang: Lang): Promise<CatalogPage> {
     const siteUrl = this.env.PUBLIC_SITE_URL
     const langQuery = lang === DEFAULT_LANG ? '' : `?lang=${lang}`
-    return {
-      meta: renderMetaTags({
+    const makes = await this.catalog.makes()
+    return this.page(
+      renderMetaTags({
         siteUrl,
         path: CATALOG_INDEX_PATH,
         lang,
@@ -258,8 +267,14 @@ export class SpaController {
         alternates: true,
         jsonLd: breadcrumbJsonLd(siteUrl, catalogCrumbs(lang), lang)
       }),
-      block: catalogIndexSeoBlock(await this.catalog.makes(), lang)
-    }
+      catalogIndexSeoBlock(makes, lang),
+      { kind: 'makes', data: { makes } }
+    )
+  }
+
+  /** The page's own data rides in the head (`#root` is cleared by React), so the client renders it without a fetch. */
+  private page(meta: string, block: string, embed: CatalogEmbed): CatalogPage {
+    return { meta: `${meta}\n    ${renderCatalogData(embed)}`, block }
   }
 
   private catalogMakeMeta(make: CatalogMake, lang: Lang): string {
@@ -427,7 +442,7 @@ export class SpaController {
         ...page,
         image: `${siteUrl}/og/${path === '/alarms' ? 'alarms' : known && pageCardSlug(path) ? `page/${pageCardSlug(path)}` : 'default'}.png${langQuery}`,
         // Unknown paths (typos, not-found plates) shouldn't be indexed under the home page's tags.
-        noindex: !known,
+        noindex: !known || NOINDEX.has(path),
         alternates: known && sitemapPaths().includes(path)
       })
       this.staticMetaCache.set(cacheKey, block)

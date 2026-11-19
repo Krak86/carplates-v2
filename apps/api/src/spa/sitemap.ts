@@ -6,8 +6,14 @@ import { LANGS, STATIC_PAGES } from './spa-text.js'
 /** Per-device pages: nothing worth indexing (empty for a crawler). */
 const EXCLUDED = new Set(['/history', '/favorites'])
 
+/**
+ * Known pages that stay `noindex` and out of the sitemap: `/news` is third-party headlines fetched client-side from `/api/news`
+ * (blocked in robots on purpose), so Googlebot renders an empty page and reports Soft 404.
+ */
+export const NOINDEX = new Set(['/news'])
+
 /** Indexable static paths — same set that gets a canonical (non-noindex) meta block. Plate/VIN pages are noindex. */
-export const sitemapPaths = (): string[] => Object.keys(STATIC_PAGES).filter(p => !EXCLUDED.has(p))
+export const sitemapPaths = (): string[] => Object.keys(STATIC_PAGES).filter(p => !EXCLUDED.has(p) && !NOINDEX.has(p))
 
 const esc = (s: string): string => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 

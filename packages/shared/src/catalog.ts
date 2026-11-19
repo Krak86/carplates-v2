@@ -171,3 +171,14 @@ export const catalogLookupSchema = z.object({
   pronounce: z.string().nullable().optional()
 })
 export type CatalogLookup = z.infer<typeof catalogLookupSchema>
+
+/** `id` of the `<script type="application/json">` the API injects into catalog page HTML (the page's own data, so the first render needs no fetch). */
+export const CATALOG_EMBED_ID = 'catalog-data'
+
+/** The embedded catalog data: the same bodies as `/api/catalog/:make/:model`, `/api/catalog/:make` and `/api/catalog/makes`. */
+export const catalogEmbedSchema = z.discriminatedUnion('kind', [
+  z.object({ kind: z.literal('model'), data: catalogModelSchema }),
+  z.object({ kind: z.literal('make'), data: catalogMakeSchema }),
+  z.object({ kind: z.literal('makes'), data: catalogMakesSchema })
+])
+export type CatalogEmbed = z.infer<typeof catalogEmbedSchema>

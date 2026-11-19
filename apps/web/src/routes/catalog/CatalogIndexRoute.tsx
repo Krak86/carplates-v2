@@ -23,7 +23,7 @@ export default function CatalogIndexRoute(): ReactNode {
   const makes = query.data?.makes
   const format = new Intl.NumberFormat(toIntlLocale(i18n.language))
 
-  if (query.isError) {
+  if (query.isError && !query.data) {
     return (
       <Card>
         <p className="text-base text-[var(--color-muted)]">{t('result.error')}</p>

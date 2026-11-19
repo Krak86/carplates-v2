@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import type { CatalogMake, CatalogModel } from '@carplates/shared'
 
 import {
+  renderCatalogData,
   breadcrumbJsonLd,
   catalogCarJsonLd,
   catalogCrumbs,
@@ -189,5 +190,18 @@ describe('make and index blocks', () => {
       expect(catalogMakeSeoBlock(MAKE, lang) + catalogIndexSeoBlock([summary], lang)).not.toContain('—')
       expect(catalogMakePageText(MAKE, lang).description).not.toContain('—')
     }
+  })
+})
+
+describe('renderCatalogData', () => {
+  it('never lets a value close the script element', () => {
+    const html = renderCatalogData({
+      kind: 'makes',
+      data: { makes: [{ make: 'x', makeName: '</script><b>', n: 1, modelCount: 1, topBrand: 'X', indexable: true }] }
+    })
+    expect(html.match(/<[/]script>/g)).toHaveLength(1)
+    expect(JSON.parse(html.replace(/^<script[^>]*>/, '').replace(/<[/]script>$/, '')).data.makes[0].makeName).toBe(
+      '</script><b>'
+    )
   })
 })

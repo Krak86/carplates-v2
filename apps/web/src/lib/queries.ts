@@ -122,6 +122,7 @@ import {
   suggestBrands,
   suggestModels
 } from '@/lib/api'
+import { embeddedCatalogMake, embeddedCatalogMakes, embeddedCatalogModel } from '@/lib/catalog-embed'
 import type { FuelEconomyParams, OriginParams, VehicleSearchFilters } from '@/lib/api'
 import { isFavorited, listFavorites } from '@/lib/favorites-db'
 import type { FavoriteKind } from '@/lib/favorites-db'
@@ -587,15 +588,22 @@ export function catalogLookupQuery(brand: string, model: string) {
   })
 }
 
-// The `/cars` make index and one `/cars/:make` page: online-only like the model page; a 404 is final.
+// The `/cars` make index and one `/cars/:make` page: online-only like the model page; a 404 is final. All three catalog queries
+// start from the data the API embedded in the page HTML (`initialData`, no skeleton, no fetch while it is fresh).
 export function catalogMakesQuery() {
-  return queryOptions({ queryKey: ['catalog-makes'], queryFn: getCatalogMakes, staleTime: Infinity })
+  return queryOptions({
+    queryKey: ['catalog-makes'],
+    queryFn: getCatalogMakes,
+    initialData: embeddedCatalogMakes(),
+    staleTime: Infinity
+  })
 }
 
 export function catalogMakeQuery(make: string) {
   return queryOptions({
     queryKey: ['catalog-make', make],
     queryFn: () => getCatalogMake(make),
+    initialData: embeddedCatalogMake(make),
     staleTime: Infinity,
     retry: (count, error) => !(error instanceof ApiError && error.status === 404) && count < 2
   })
@@ -616,6 +624,7 @@ export function catalogModelQuery(make: string, model: string) {
   return queryOptions({
     queryKey: ['catalog-model', make, model],
     queryFn: () => getCatalogModel(make, model),
+    initialData: embeddedCatalogModel(make, model),
     staleTime: Infinity,
     retry: (count, error) => !(error instanceof ApiError && error.status === 404) && count < 2
   })

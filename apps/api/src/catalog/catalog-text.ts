@@ -1,11 +1,12 @@
 import {
+  CATALOG_EMBED_ID,
   CATALOG_INDEX_PATH,
   catalogMakePath,
   catalogPath,
   localizeRegion,
   localizeRegistryRows
 } from '@carplates/shared'
-import type { CatalogMake, CatalogMakeSummary, CatalogModel } from '@carplates/shared'
+import type { CatalogEmbed, CatalogMake, CatalogMakeSummary, CatalogModel } from '@carplates/shared'
 
 import { langUrl } from '../spa/meta.js'
 import { DEFAULT_LANG, type Lang } from '../spa/spa-text.js'
@@ -343,3 +344,7 @@ export function catalogIndexSeoBlock(makes: CatalogMakeSummary[], lang: Lang): s
 export function injectRoot(html: string, block: string): string {
   return html.replace(/<div id="root">\s*<\/div>/, `<div id="root">${block}</div>`)
 }
+
+/** The page's data as a JSON script (not executed, so CSP-neutral); `<` is escaped so no value can close the element. */
+export const renderCatalogData = (embed: CatalogEmbed): string =>
+  `<script type="application/json" id="${CATALOG_EMBED_ID}">${JSON.stringify(embed).replace(/</g, '\\u003c')}</script>`
