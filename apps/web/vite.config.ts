@@ -77,6 +77,7 @@ const HERO_AVIF = /(^|\/)quilia-[^/]*-crop-[^/]*\.avif$/
 function preloadHints(): Plugin {
   // The preload script is an emitted, content-hashed file (not inline) so the CSP needs no 'unsafe-inline' for scripts.
   let langScriptUrl: string | null = null
+  let uaUrl: string | null = null
   return {
     name: 'carplates-preload-hints',
     // Runs before Vite's own HTML plugin, so `langScriptUrl` is set by the time `transformIndexHtml` below reads it.
@@ -84,6 +85,7 @@ function preloadHints(): Plugin {
       order: 'pre',
       handler(_options, bundle): void {
         langScriptUrl = null
+        uaUrl = null
         const langUrls: Record<string, string> = {}
         for (const lang of LANG_CHUNKS) {
           const chunk = Object.values(bundle).find(
@@ -92,11 +94,12 @@ function preloadHints(): Plugin {
           if (chunk) langUrls[lang] = `/${chunk.fileName}`
         }
         if (!langUrls.ua) return
+        uaUrl = langUrls.ua
         const source =
           `(function(m){try{var l=new URLSearchParams(location.search).get('lang');` +
           `if(!m[l]){try{l=localStorage.getItem('carplates.lang')}catch(e){l=null}` +
           `if(!m[l]){var n=navigator.language.slice(0,2);l=n==='ru'?'ru':n==='uk'||n==='ua'?'ua':'en'}}` +
-          `var u=[m[l]];if(l!=='ua')u.push(m.ua);` +
+          `var u=[];if(l!=='ua')u.push(m[l]);` +
           `u.forEach(function(h){if(!h)return;var k=document.createElement('link');k.rel='modulepreload';k.href=h;document.head.appendChild(k)})}catch(e){}})` +
           `(${JSON.stringify(langUrls)});\n`
         const hash = createHash('sha1').update(source).digest('hex').slice(0, 8)
@@ -110,6 +113,9 @@ function preloadHints(): Plugin {
       handler(_html, ctx): HtmlTagDescriptor[] {
         const files = Object.values(ctx.bundle ?? {})
         const tags: HtmlTagDescriptor[] = []
+        // `ua` is loaded for every language (non-ua also loads it), so it is a static hint: the async script below runs late
+        // (low priority, ~3 s on Slow 4G) and used to delay the 178 KB dictionary, which gates the first render.
+        if (uaUrl) tags.push({ tag: 'link', attrs: { rel: 'modulepreload', href: uaUrl }, injectTo: 'head' })
         // `async`: runs as soon as fetched without blocking the parser (the hints only need to land early, not first).
         if (langScriptUrl) tags.push({ tag: 'script', attrs: { src: langScriptUrl, async: true }, injectTo: 'head' })
         const hero = files.find(f => f.type === 'asset' && HERO_AVIF.test(f.fileName))

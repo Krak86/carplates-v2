@@ -4915,3 +4915,11 @@ Trigger: Lighthouse on `/BC6743PH` (mobile, slow 4G): performance 42, FCP 7.0 s,
 - **Chips:** `CollapsibleChips` collapses to ~3 rows with "show more" on every viewport (was phones only), starts collapsed, and takes `pending={chipsPending}` to reserve ~3 rows while async chips arrive.
 - Dev note: rewriting a component with a shell redirect can leave Vite's HMR with an empty cached module ("does not provide an export named default"); hard reload or restart `pnpm dev`.
 - Not done (ideas from the research): server-side `<link rel="preload">` of the hero from the `spa` meta lookup, Cloudflare Early Hints, `/api/summary` aggregate, cache lifetimes of the 3 MB flagged by Lighthouse.
+
+## Soft 404 root fix: embedded catalog data, `/news` noindex (2026-11-19) ✅
+
+- Search Console reported 320 Soft 404 (`/cars/*?lang=ru|en`, `/news`). `robots` `Allow: /api/catalog/` was not enough: the catalog routes render from a client `/api/catalog` fetch, and a failed or slow fetch in Google's render left an error card or skeleton.
+- **Embed:** `catalogPageOf` injects `<script type="application/json" id="catalog-data">` (`renderCatalogData`, `<` escaped) into the head of `/cars`, `/cars/:make`, `/cars/:make/:model`. Contract `catalogEmbedSchema` / `CATALOG_EMBED_ID` in `packages/shared/src/catalog.ts` (not `schemas.ts`: offline data untouched). The web reads it once (`lib/catalog-embed.ts`, Zod-parsed, same make/model only) as `initialData` of `catalogModelQuery` / `catalogMakeQuery` / `catalogMakesQuery`. The routes show the error card only when there is no data.
+- **Decision:** `staleTime: Infinity` stays, so an embedded page makes no mount fetch (HTML edge-cached at most a day, catalog rebuilt monthly; a refetch would only reintroduce the render-time failure). Pages without a usable embed (in-app navigation, parse failure) fetch as before. For a refresh on mount, set `staleTime: 0` when seeded from the embed.
+- **`/news`:** `NOINDEX` set in `apps/api/src/spa/sitemap.ts` (known page, `noindex`, no `alternates`, out of `sitemapPaths`); `/api/news*` stays blocked in robots (third-party headlines).
+- Tests: `sitemap.test.ts`, `spa.controller.test.ts` (news noindex, embed per page type), `catalog-text.test.ts` (escaping), `lib/catalog-embed.test.ts`. Version `v2.1414`.

@@ -144,6 +144,12 @@ the one real seam is `apps/api` (Node) → `services/alpr` (Python), today `fetc
 
 ## Recommended path (implementation order)
 
+Decided 2026-11-19 (PLAN.md "Build order"): **Twelve-Factor P2/P3 items → Redis throttler → a subset of this plan.** Do the Twelve-Factor
+compose/logging/deploy items first, because every service and broker below is added to the same `infra/docker-compose*.yml`, deploy
+workflow and logger; new services then inherit exact image tags, `stop_grace_period`, JSON logs and rollback by tag, and each gets its own
+`infra/vps/deploy-<svc>.sh`. Subset: BullMQ mail queue (step 0) → idea 1 RabbitMQ `mail-service` → idea 2 Kafka only if still wanted.
+Ideas 3, 4, 5, 7, 8 are deferred; idea 6 (`apps/worker`) only at 2+ API replicas, otherwise a `pg_try_advisory_lock` per timer.
+
 0. **Redis first** (owner decision 2026-11-18): the self-hosted Redis from the throttler item (PLAN.md) lands before any broker. It then
    serves as cache/throttler store, and also gives a near-free messaging option (BullMQ job queue, Redis Streams) with no new
    infrastructure. Consequence: mail-service (idea 1) can first be built on **BullMQ** (retry, delay, failed set, dashboard) and the
