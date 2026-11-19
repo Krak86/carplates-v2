@@ -88,6 +88,7 @@ describe('sitemap', () => {
   it('blocks per-plate cards but allows the generic ones', () => {
     const robots = renderRobots('https://carsua.app')
     expect(robots).toContain('Disallow: /api/')
+    expect(robots).toContain('Allow: /api/catalog/\n')
     expect(robots).toContain('Disallow: /og/\n')
     expect(robots).toContain('Allow: /og/default.png')
     expect(robots).toContain('Allow: /og/page/')

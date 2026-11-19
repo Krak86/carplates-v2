@@ -68,7 +68,8 @@ describe('SpaController meta injection', () => {
               title: 'Cars UA - AA1234BB - Toyota Camry 2015',
               description: 'AA1234BB: Toyota Camry',
               card: {},
-              brandSlug: null
+              brandSlug: null,
+              vehicle: { brand: 'BMW', model: 'X5', year: 2015, kind: null }
             }
           : null,
       describeValue: async (p: { title: string; description: string }) => ({
@@ -99,6 +100,11 @@ describe('SpaController meta injection', () => {
     const losses = {
       latest: async () => ({ date: '2026-11-05', day: 1350, stats: { personnel_units: 1_200_000 }, increase: {} })
     }
+    const { WikiService } = await import('../wiki/wiki.service.js')
+    const wiki = {
+      peekImage: async (brand: string) =>
+        brand === 'BMW' ? { image: { url: 'https://upload.wikimedia.org/x/bmw.jpg', attribution: null } } : null
+    }
     const moduleRef = await Test.createTestingModule({
       controllers: [SpaController],
       providers: [
@@ -106,7 +112,8 @@ describe('SpaController meta injection', () => {
         ComparePreviewService,
         { provide: CatalogService, useValue: catalog },
         { provide: SharesService, useValue: shares },
-        { provide: LossesService, useValue: losses }
+        { provide: LossesService, useValue: losses },
+        { provide: WikiService, useValue: wiki }
       ]
     }).compile()
     app = moduleRef.createNestApplication<NestFastifyApplication>(new FastifyAdapter())
@@ -153,6 +160,12 @@ describe('SpaController meta injection', () => {
     expect(html).toContain('og:image" content="https://carsua.app/og/AA1234BB.png"')
     expect(html).toContain('noindex')
     expect(html).not.toContain('>old<')
+  })
+
+  it('preloads the stored hero photo of a known plate', async () => {
+    expect(await get('/AA1234BB')).toContain(
+      '<link rel="preload" as="image" href="https://upload.wikimedia.org/x/bmw.jpg" crossorigin="anonymous" fetchpriority="high">'
+    )
   })
 
   it('passes ?lang= through to the og:image URL', async () => {
