@@ -52,11 +52,11 @@ describe('injectMeta', () => {
     expect(out.match(/name="description"/g)).toHaveLength(1)
   })
 
-  it('drops the high priority of the background avif preload only when the page preloads its hero photo', () => {
+  it('removes the background avif preload only when the page preloads its hero photo', () => {
     const html =
       '<head><link rel="preload" as="image" type="image/avif" href="/assets/bg.avif" fetchpriority="high"></head>'
     const withHero = injectMeta(html, renderHeroPreload('https://thumb.example/car.jpg'))
-    expect(withHero).toContain('href="/assets/bg.avif">')
+    expect(withHero).not.toContain('bg.avif')
     expect(withHero.match(/fetchpriority="high"/g)).toHaveLength(1)
     expect(injectMeta(html, renderMetaTags(base))).toContain('href="/assets/bg.avif" fetchpriority="high">')
   })
