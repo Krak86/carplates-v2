@@ -51,7 +51,8 @@ export function renderSitemapIndex(siteUrl: string): string {
 /**
  * `/og/<plate|vin>.png` cards are one expensive render per plate (an enumerable set), so they stay blocked; the generic
  * cards that static pages use as `og:image` are allowed, else Twitterbot and Google skip the image. The most specific
- * rule wins, so the `Allow` lines override the `/og/` block.
+ * rule wins, so the `Allow` lines override the `/og/` block. `/api/catalog/` is allowed for the same reason: Googlebot renders the
+ * catalog pages with JS and their data comes from it; blocked, the page showed an error card and Search Console reported soft 404.
  */
 export const renderRobots = (siteUrl: string): string =>
-  `User-agent: *\nDisallow: /api/\nDisallow: /og/\nAllow: /og/default.png\nAllow: /og/page/\n\nSitemap: ${siteUrl}/sitemap.xml\n`
+  `User-agent: *\nDisallow: /api/\nAllow: /api/catalog/\nDisallow: /og/\nAllow: /og/default.png\nAllow: /og/page/\n\nSitemap: ${siteUrl}/sitemap.xml\n`

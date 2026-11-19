@@ -876,6 +876,7 @@ Group 1 dimension callouts + garage-fit -> Group 3 (existing order). Owner says 
       by hand from manufacturer pages, with a citation per row. - **Worth it?** Step 1 yes (cheap, accurate per VIN). Step 2 yes (cheap, honest). Steps 3-4 only if time. Full
       scraped database: no.
 
+- [ ] **After deploy (robots `Allow: /api/catalog/`, 2026-11-19):** URL Inspection > Test live URL on `/cars/bmw/x1?lang=ru` (no blocked resources, real h1 in the screenshot), then Validate Fix on Soft 404 (320, mostly `/cars/*?lang=`; `/news` stays, see features-reference). `/play?game=region` alternate is intentional, do not validate.
 - [ ] **Search Console re-check (about 2026-11-20)**: Soft 404 validation (started 2026-11-09; the 83 URLs were a one-off bad render, live test of `/cars/honda` is clean) passed or which URLs failed; indexed count against 527 (2026-11-06); "Duplicate, Google chose different canonical" for `/read/*?lang=en` gone after the keyword-first English titles (deployed with the api). Noindex 283 / redirect 3 (http, www) are intentional, do not validate. Then decide on the year pages below.
 
 - [ ] **Model catalog year pages `/cars/:make/:model/:year`** (block 4) — model and make pages are live (see the ✅ catalog entry above); year pages wait for Search Console to index the first 300 pages (check about 2026-11-13). Plate-free model pages
