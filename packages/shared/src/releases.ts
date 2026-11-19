@@ -18,8 +18,14 @@ const item = (group: ReleaseGroup, ua: string, ru: string, en: string): ReleaseI
 export const RELEASES: readonly ReleaseDay[] = [
   {
     date: '2026-11-19',
-    version: 'v2.1400',
+    version: 'v2.1401',
     items: [
+      item(
+        'improved',
+        'Сторінка авто завантажується швидше: головне фото не чекає на решту знімків, мініатюри легші й вантажаться після нього, а чипи не зсувають картку.',
+        'Страница авто загружается быстрее: главное фото не ждёт остальные снимки, миниатюры легче и грузятся после него, а чипы не сдвигают карточку.',
+        'The vehicle page loads faster: the main photo no longer waits for the other shots, thumbnails are lighter and load after it, and the chips no longer push the card down.'
+      ),
       item(
         'improved',
         'Безпека: додані заголовки Cross-Origin-Opener-Policy та Origin-Agent-Cluster, суворіша політика CSP (поки в режимі звітів).',

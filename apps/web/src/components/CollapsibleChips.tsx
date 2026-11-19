@@ -7,6 +7,8 @@ import { cn } from '@/lib/cn'
 type Props = {
   children: ReactNode
   className?: string
+  /** Async chips are still arriving: reserve ~3 rows (2 from `md`) so they land without pushing the card down. */
+  pending?: boolean
 }
 
 /** ~3 chip rows (1.5rem chips, 0.375rem gaps) plus a faded sliver of the 4th. */
@@ -16,7 +18,7 @@ const COLLAPSED_PX = 104
  * Phones only: clips a long chip list to three rows plus a faded fourth, with a "show more" toggle underneath.
  * From `md` up it renders the list untouched. The toggle appears only when the content really overflows.
  */
-export default function CollapsibleChips({ children, className }: Props): ReactNode {
+export default function CollapsibleChips({ children, className, pending = false }: Props): ReactNode {
   const { t } = useTranslation()
   const [expanded, setExpanded] = useState(false)
   const [content, setContent] = useState<HTMLDivElement | null>(null)
@@ -30,14 +32,21 @@ export default function CollapsibleChips({ children, className }: Props): ReactN
     return (): void => observer.disconnect()
   }, [content])
 
+  // Before the first measurement (height 0) a phone already starts collapsed, so a long list never renders full and then snaps shut.
+  const collapsedMax = !expanded && (overflowing || height === 0)
   const clipped = overflowing && !expanded
 
   return (
     <div className={className}>
       <div
-        style={overflowing ? ({ '--chips-max': `${expanded ? height : COLLAPSED_PX}px` } as CSSProperties) : undefined}
+        style={
+          overflowing || collapsedMax
+            ? ({ '--chips-max': `${expanded ? height : COLLAPSED_PX}px` } as CSSProperties)
+            : undefined
+        }
         className={cn(
           'max-md:max-h-(--chips-max) max-md:overflow-hidden max-md:transition-[max-height] max-md:duration-300 max-md:ease-in-out',
+          pending && 'min-h-[84px] md:min-h-[54px]',
           clipped && 'max-md:mask-[linear-gradient(to_bottom,black_65%,transparent)]'
         )}
       >
