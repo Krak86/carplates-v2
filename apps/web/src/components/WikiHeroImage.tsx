@@ -4,6 +4,7 @@ import { PAINT_HEX, resolveVehicleKind } from '@carplates/shared'
 
 import PhotoZoomDialog from '@/components/PhotoZoomDialog'
 import VehicleKindPlaceholder from '@/components/VehicleKindPlaceholder'
+import StripThumb from '@/components/StripThumb'
 import UaAuctionHero from '@/components/ua-auctions/UaAuctionHero'
 import { useCarHeroImageActions } from '@/components/use-car-hero-image-actions'
 import { useWikiPhotos, firstColorMatch } from '@/components/use-wiki-photos'
@@ -50,14 +51,15 @@ export default function WikiHeroImage({
   const [failedUrls, setFailedUrls] = useState<ReadonlySet<string>>(new Set())
   const wikiPhotos = useWikiPhotos({ brand, model, year, color })
   // A scanned photo whose real paint already matches the registry colour leads (no filter needed); it is another car of the model.
-  // One that fails to load falls back to the stored hero + filter. While the photo list loads the hero waits, so it never flashes a photo it replaces.
+  // One that fails to load falls back to the stored hero + filter. The stored hero never waits for the photo list (that would put
+  // the list request in front of the LCP image): it paints at once and a colour match, if one arrives, replaces it once loaded.
   const usablePhotos = wikiPhotos.loading ? [] : wikiPhotos.photos.filter(photo => !failedUrls.has(photo.url))
   // A thumbnail the user picked leads over the automatic choice (an unfiltered other car of the model).
   const [pickedUrl, setPickedUrl] = useState<string | null>(null)
   const picked = usablePhotos.find(photo => photo.url === pickedUrl) ?? null
   const autoMatched = wikiPhotos.loading ? null : firstColorMatch(wikiPhotos.photos, failedUrls)
   const matched = picked ?? autoMatched
-  const storedImage = heroImage.isSuccess && !wikiPhotos.loading ? heroImage.data.image : null
+  const storedImage = heroImage.isSuccess ? heroImage.data.image : null
   const image = matched ? { url: matched.url, attribution: matched.attribution } : storedImage
   const creditParts = [image?.attribution?.author, image?.attribution?.license].filter(Boolean)
 
@@ -75,7 +77,7 @@ export default function WikiHeroImage({
   const [originalUrl, setOriginalUrl] = useState<string | null>(null)
   const swipe = useRef<{ x: number; y: number; moved: boolean } | null>(null)
   const hasQuery = Boolean(brand || model)
-  const isPending = hasQuery && (heroImage.isPending || wikiPhotos.loading)
+  const isPending = hasQuery && heroImage.isPending
 
   // With lot photos one carousel holds everything: the lot photos, then the model photo as its last slide
   // (a model photo that fails to load drops out of the carousel by itself).
@@ -118,6 +120,8 @@ export default function WikiHeroImage({
   }
 
   const isLoaded = !!image && loadedUrl === image.url
+  // Some hero photo has painted: the strip below fetches its thumbnails only now, so they never compete with the LCP image.
+  const heroReady = loadedUrl !== null
   const hasSlides = isLoaded && !!recolor.target
   const viewOriginal = hasSlides && originalUrl === image?.url
   const goSlide = (): void => setOriginalUrl(viewOriginal ? null : (image?.url ?? null))
@@ -141,8 +145,18 @@ export default function WikiHeroImage({
         onPointerUp={onPointerUp}
         className="hero-vt relative -my-3 h-64 w-full max-w-content touch-pan-y sm:h-80"
       >
-        {!isLoaded && (
+        {!heroReady && (
           <div aria-hidden className="absolute inset-0 animate-pulse rounded-lg border border-border bg-surface/70" />
+        )}
+        {/* A photo that replaces the one on screen (a colour match arriving late) loads on top of it: no blank flash in between. */}
+        {!isLoaded && loadedUrl && (
+          <img
+            src={loadedUrl}
+            alt=""
+            aria-hidden
+            decoding="async"
+            className="absolute inset-0 h-full w-full rounded-lg object-cover"
+          />
         )}
         {image && (
           <img
@@ -261,81 +275,82 @@ export default function WikiHeroImage({
       {zoomed && image && (
         <PhotoZoomDialog url={image.url} candidates={[]} active={null} onClose={() => setZoomed(false)} />
       )}
-      {image && (hasSlides || usablePhotos.length > 0) && (
+      {/* The strip is always there once there is a hero (one photo = one selected thumbnail), and a same-size placeholder
+          until the hero has painted: its thumbnails (small Commons renditions, low priority) are fetched only then. */}
+      {(image || isPending) && (
         <ul className="mt-4 flex w-full max-w-content gap-1.5 overflow-x-auto pb-1">
-          {(hasSlides ? [false, true] : []).map(isOriginal => (
-            <li key={String(isOriginal)} className="shrink-0">
-              <button
-                type="button"
-                onClick={() => {
-                  setPickedUrl(null)
-                  setOriginalUrl(isOriginal ? image.url : null)
-                }}
-                aria-label={t('wiki.slideDot', { n: isOriginal ? 2 : 1, total: 2 })}
-                aria-current={isOriginal === viewOriginal}
-                className={cn(
-                  'relative block h-12 w-16 overflow-hidden rounded-md border-2 transition-opacity',
-                  isOriginal === viewOriginal ? 'border-primary' : 'border-transparent opacity-70 hover:opacity-100'
-                )}
-              >
-                <img
-                  src={image.url}
-                  alt=""
-                  crossOrigin="anonymous"
-                  loading="lazy"
-                  decoding="async"
-                  className="h-full w-full object-cover"
-                />
-                {!isOriginal && recolor.mask && recolor.target && (
-                  <WikiRecolorCanvas mask={recolor.mask} color={recolor.target} testId="wiki-recolor-canvas-thumb" />
-                )}
-              </button>
-            </li>
-          ))}
-          {picked && storedImage && !autoMatched && !hasSlides && (
-            <li className="shrink-0">
-              <button
-                type="button"
-                onClick={() => setPickedUrl(null)}
-                aria-label={t('wiki.photoStored')}
-                className="block h-12 w-16 overflow-hidden rounded-md border-2 border-transparent opacity-70 transition-opacity hover:opacity-100"
-              >
-                <img
-                  src={storedImage.url}
-                  alt=""
-                  loading="lazy"
-                  decoding="async"
-                  className="h-full w-full object-cover"
-                />
-              </button>
-            </li>
+          {!image || !heroReady
+            ? [0, 1, 2].map(n => (
+                <li key={n} aria-hidden className="shrink-0">
+                  <div className="h-12 w-16 animate-pulse rounded-md border-2 border-transparent bg-border" />
+                </li>
+              ))
+            : null}
+          {image && heroReady && (
+            <>
+              {(hasSlides ? [false, true] : []).map(isOriginal => (
+                <li key={String(isOriginal)} className="shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPickedUrl(null)
+                      setOriginalUrl(isOriginal ? image.url : null)
+                    }}
+                    aria-label={t('wiki.slideDot', { n: isOriginal ? 2 : 1, total: 2 })}
+                    aria-current={isOriginal === viewOriginal}
+                    className={cn(
+                      'relative block h-12 w-16 overflow-hidden rounded-md border-2 transition-opacity',
+                      isOriginal === viewOriginal ? 'border-primary' : 'border-transparent opacity-70 hover:opacity-100'
+                    )}
+                  >
+                    <StripThumb url={image.url} />
+                    {!isOriginal && recolor.mask && recolor.target && (
+                      <WikiRecolorCanvas
+                        mask={recolor.mask}
+                        color={recolor.target}
+                        testId="wiki-recolor-canvas-thumb"
+                      />
+                    )}
+                  </button>
+                </li>
+              ))}
+              {storedImage && !autoMatched && !hasSlides && (
+                <li className="shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => setPickedUrl(null)}
+                    aria-label={t('wiki.photoStored')}
+                    aria-current={!matched}
+                    className={cn(
+                      'block h-12 w-16 overflow-hidden rounded-md border-2 transition-opacity',
+                      matched ? 'border-transparent opacity-70 hover:opacity-100' : 'border-primary'
+                    )}
+                  >
+                    <StripThumb url={storedImage.url} />
+                  </button>
+                </li>
+              )}
+              {usablePhotos.map((photo, i) => {
+                const isActive = matched?.url === photo.url
+                return (
+                  <li key={photo.url} className="shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => setPickedUrl(photo.url)}
+                      aria-label={t('wiki.photoOpen', { n: i + 1, total: usablePhotos.length })}
+                      aria-current={isActive}
+                      className={cn(
+                        'block h-12 w-16 overflow-hidden rounded-md border-2 transition-opacity',
+                        isActive ? 'border-primary' : 'border-transparent opacity-70 hover:opacity-100'
+                      )}
+                    >
+                      <StripThumb url={photo.url} onError={() => setFailedUrls(prev => new Set(prev).add(photo.url))} />
+                    </button>
+                  </li>
+                )
+              })}
+            </>
           )}
-          {usablePhotos.map((photo, i) => {
-            const isActive = matched?.url === photo.url
-            return (
-              <li key={photo.url} className="shrink-0">
-                <button
-                  type="button"
-                  onClick={() => setPickedUrl(photo.url)}
-                  aria-label={t('wiki.photoOpen', { n: i + 1, total: usablePhotos.length })}
-                  aria-current={isActive}
-                  className={cn(
-                    'block h-12 w-16 overflow-hidden rounded-md border-2 transition-opacity',
-                    isActive ? 'border-primary' : 'border-transparent opacity-70 hover:opacity-100'
-                  )}
-                >
-                  <img
-                    src={photo.url}
-                    alt=""
-                    loading="lazy"
-                    decoding="async"
-                    onError={() => setFailedUrls(prev => new Set(prev).add(photo.url))}
-                    className="h-full w-full object-cover"
-                  />
-                </button>
-              </li>
-            )
-          })}
         </ul>
       )}
     </>

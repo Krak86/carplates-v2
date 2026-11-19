@@ -383,7 +383,7 @@ export default function ResultCard({ data }: Props): ReactNode {
                 )}
               </div>
               {/* Reserves one chip-height up front so late-arriving chips never push the card down. */}
-              <CollapsibleChips className="mt-1">
+              <CollapsibleChips className="mt-1" pending={chipsPending}>
                 {chipsPending && <span aria-hidden className="h-6 w-24 animate-pulse rounded-full bg-border" />}
                 <WantedChip
                   plate={data.plate}

@@ -18,8 +18,26 @@ const item = (group: ReleaseGroup, ua: string, ru: string, en: string): ReleaseI
 export const RELEASES: readonly ReleaseDay[] = [
   {
     date: '2026-11-19',
-    version: 'v2.1400',
+    version: 'v2.1406',
     items: [
+      item(
+        'improved',
+        'Поки сторінка авто завантажується, замість порожнього місця показуються заготовки (фото, мініатюри, картка, кнопки пошуку): сторінка більше не «стрибає».',
+        'Пока страница авто загружается, вместо пустого места показываются заготовки (фото, миниатюры, карточка, кнопки поиска): страница больше не «прыгает».',
+        'While the vehicle page loads, placeholders (photo, thumbnails, card, search buttons) hold the space instead of a blank area: the page no longer jumps.'
+      ),
+      item(
+        'improved',
+        'Чипи в картці авто згортаються до трьох рядків із кнопкою «Показати більше» на всіх екранах, не лише на телефоні.',
+        'Чипы в карточке авто сворачиваются до трёх рядов с кнопкой «Показать больше» на всех экранах, не только на телефоне.',
+        'The chips in the vehicle card collapse to three rows with a "Show more" button on every screen size, not only on phones.'
+      ),
+      item(
+        'improved',
+        'Сторінка авто завантажується швидше: головне фото не чекає на решту знімків, мініатюри легші й вантажаться після нього, а чипи не зсувають картку.',
+        'Страница авто загружается быстрее: главное фото не ждёт остальные снимки, миниатюры легче и грузятся после него, а чипы не сдвигают карточку.',
+        'The vehicle page loads faster: the main photo no longer waits for the other shots, thumbnails are lighter and load after it, and the chips no longer push the card down.'
+      ),
       item(
         'improved',
         'Безпека: додані заголовки Cross-Origin-Opener-Policy та Origin-Agent-Cluster, суворіша політика CSP (поки в режимі звітів).',

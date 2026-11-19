@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from 'react-router'
 import { denormalizePlate, isUaPlate } from '@carplates/shared'
 
+import SearchButtonsPlaceholder from '@/components/SearchButtonsPlaceholder'
 import { useIdleReady } from '@/hooks/useIdleReady'
 import { useSearchFocus } from '@/hooks/useSearchFocus'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
@@ -144,8 +145,9 @@ export default function SearchField({
         </div>
       </div>
       <div className={BUTTONS_ROW_CLASS}>
+        {!idle && <SearchButtonsPlaceholder />}
         {idle && (
-          <Suspense fallback={null}>
+          <Suspense fallback={<SearchButtonsPlaceholder />}>
             <SearchButtons
               isRecognizing={isRecognizing}
               online={online}

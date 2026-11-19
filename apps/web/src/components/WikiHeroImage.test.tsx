@@ -200,10 +200,12 @@ describe('WikiHeroImage extra photos', () => {
 
   it('uses the first colour-matched photo as the hero: no filter, other-car credit, strip without it', async () => {
     renderWithPhotos('ЧЕРВОНИЙ')
-    const hero = await screen.findByAltText('KIA CEED')
-    expect(hero.getAttribute('src')).toBe('https://upload.example/p2.jpg')
+    // The stored hero does not wait for the photo list; the colour match replaces it as soon as the list arrives.
+    await waitFor(() =>
+      expect(screen.getByAltText('KIA CEED').getAttribute('src')).toBe('https://upload.example/p2.jpg')
+    )
     act(() => {
-      fireEvent.load(hero)
+      fireEvent.load(screen.getByAltText('KIA CEED'))
     })
     expect(await screen.findByText('Photo of another car of this model: Ann, CC BY-SA 4.0')).toBeTruthy()
     expect(pill()).toBeNull()
@@ -228,7 +230,10 @@ describe('WikiHeroImage extra photos', () => {
   it('falls to the next matched photo, then to the stored hero, when a matched photo fails to load', async () => {
     api.getWikiPhotos.mockResolvedValue({ photos: [photo(2, true), photo(3, true)] })
     renderWithPhotos('ЧЕРВОНИЙ')
-    const first = await screen.findByAltText('KIA CEED')
+    await waitFor(() =>
+      expect(screen.getByAltText('KIA CEED').getAttribute('src')).toBe('https://upload.example/p2.jpg')
+    )
+    const first = screen.getByAltText('KIA CEED')
     act(() => {
       fireEvent.error(first)
     })
@@ -251,6 +256,11 @@ describe('WikiHeroImage extra photos', () => {
   it('shows every photo as a small thumbnail (no big grid, no show-more) and a click swaps the hero to it', async () => {
     api.getWikiPhotos.mockResolvedValue({ photos: [1, 2, 3, 4, 5, 6].map(n => photo(n, false)) })
     renderWithPhotos(null)
+    const heroImg = await screen.findByAltText('KIA CEED')
+    // The strip fetches its thumbnails only after the hero has painted.
+    act(() => {
+      fireEvent.load(heroImg)
+    })
     const thumb = await screen.findByRole('button', { name: 'Open photo 3 of 6' })
     expect(screen.getAllByRole('button', { name: /^Open photo \d of 6$/ })).toHaveLength(6)
     expect(screen.queryByRole('button', { name: /Show more photos/ })).toBeNull()
@@ -259,5 +269,31 @@ describe('WikiHeroImage extra photos', () => {
       expect(screen.getByAltText('KIA CEED').getAttribute('src')).toBe('https://upload.example/p3.jpg')
     )
     expect(screen.getByRole('button', { name: 'Stored photo of the model' })).toBeTruthy()
+  })
+
+  it('with a single photo still shows the strip: one selected thumbnail, only after the hero painted', async () => {
+    api.getWikiPhotos.mockResolvedValue({ photos: [] })
+    renderWithPhotos(null)
+    const hero = await screen.findByAltText('KIA CEED')
+    expect(screen.queryByRole('button', { name: 'Stored photo of the model' })).toBeNull()
+    act(() => {
+      fireEvent.load(hero)
+    })
+    const thumb = await screen.findByRole('button', { name: 'Stored photo of the model' })
+    expect(thumb.getAttribute('aria-current')).toBe('true')
+  })
+
+  it('requests a small Commons rendition for the thumbnails, not the 1280 px file', async () => {
+    const big = 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/Car.jpg/1280px-Car.jpg'
+    api.getWikiPhotos.mockResolvedValue({ photos: [{ ...(photo(1, false) as object), url: big }] })
+    renderWithPhotos(null)
+    const hero = await screen.findByAltText('KIA CEED')
+    act(() => {
+      fireEvent.load(hero)
+    })
+    const thumb = await screen.findByRole('button', { name: 'Open photo 1 of 1' })
+    expect(thumb.querySelector('img')?.getAttribute('src')).toBe(
+      'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/Car.jpg/250px-Car.jpg'
+    )
   })
 })

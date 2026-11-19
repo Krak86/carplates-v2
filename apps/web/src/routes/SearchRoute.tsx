@@ -29,7 +29,6 @@ import PhotoThumbnail from '@/components/PhotoThumbnail'
 import PlateCandidates from '@/components/PlateCandidates'
 import SearchField from '@/components/SearchField'
 import Presence from '@/components/ui/Presence'
-import Spinner from '@/components/ui/Spinner'
 import { isShareable } from '@/components/share-photo.helpers'
 import SharedPhotoNotice from '@/components/SharedPhotoNotice'
 import { usePlateRecognition } from '@/components/use-plate-recognition'
@@ -62,6 +61,8 @@ import HomeFuelSection from '@/routes/stats/HomeFuelSection'
 import HomeAuctionsSection from '@/routes/stats/HomeAuctionsSection'
 import HomeNewsSection from '@/routes/stats/HomeNewsSection'
 import HomeSafetySection from '@/routes/stats/HomeSafetySection'
+import HeroSkeleton from '@/components/HeroSkeleton'
+import ResultCardSkeleton from '@/components/ResultCardSkeleton'
 import HomeStatsSkeleton from '@/routes/stats/HomeStatsSkeleton'
 import HomeWantedSection from '@/routes/stats/HomeWantedSection'
 
@@ -413,6 +414,10 @@ export default function SearchRoute(): ReactNode {
             />
           )}
         </Presence>
+        {/* The hero needs brand/model from the plate/VIN answer: until then a same-size placeholder holds its slot. */}
+        {!photo && !recognizeErrorKey && !wikiHeroVehicle && !!raw && active.isPending && !offlineMiss && (
+          <HeroSkeleton />
+        )}
         {!photo && !recognizeErrorKey && wikiHeroVehicle && (
           <WikiHeroImage
             brand={wikiHeroVehicle.brand}
@@ -429,21 +434,17 @@ export default function SearchRoute(): ReactNode {
         </Presence>
 
         {!recognizeErrorKey && kind === 'plate' && plate.data && (
-          <Suspense fallback={null}>
+          <Suspense fallback={<ResultCardSkeleton />}>
             <ResultCard data={plate.data} />
           </Suspense>
         )}
         {!recognizeErrorKey && kind === 'vin' && vin.data && (
-          <Suspense fallback={null}>
+          <Suspense fallback={<ResultCardSkeleton />}>
             <VinResult data={vin.data} />
           </Suspense>
         )}
 
-        {raw && active.isPending && !offlineMiss && (
-          <p className="flex items-center gap-2 rounded bg-[var(--color-surface)]/20 px-1.5 py-0.5 text-[var(--color-muted)]">
-            <Spinner /> {t('result.loading')}
-          </p>
-        )}
+        {raw && active.isPending && !offlineMiss && <ResultCardSkeleton />}
 
         {offlineMiss && (
           <p className="rounded bg-[var(--color-surface)]/20 px-1.5 py-0.5 text-[var(--color-muted)]">
