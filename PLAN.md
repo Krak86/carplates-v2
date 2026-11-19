@@ -1208,6 +1208,13 @@ owns it). (P2) `/api/ria/similar` 20/60s per IP **+ a global 5000/day Redis
 counter** protecting the shared key. (P5) `/api/auth/login|register` **5/15min
 keyed on the body email** + 20/15min per IP.
 
+## Result page load order and skeletons ✅ 2026-11-19, awaiting deploy
+
+✅ Hero never waits for the photo list, always-on photo strip with 250 px lazy thumbnails, hero / card / search-button skeletons, chips collapse on every viewport. Write-up `docs/plan-done.md` "Result page load order and skeletons"; conventions in `docs/features-reference.md` (wiki photo colour filter, "load order").
+
+- [ ] **After deploy (web only, no migration, no env, no API change):** open a plate page on a phone (390 px) and on desktop with DevTools throttled to Slow 4G and cache disabled: hero skeleton + 3 thumbnail placeholders + card skeleton appear first, the real hero and card replace them with no visible jump, the footer is not visible while loading, the four search buttons are there from the first paint; chips show 3 rows + "Show more" on desktop too. Re-run Lighthouse in incognito (mobile) on `/BC6743PH` and compare with 42 / LCP 21.6 s / CLS 0.112.
+- [ ] Lighthouse follow-ups (not started): expand "Use efficient cache lifetimes" (3 MB) and "Improve image delivery" (2.7 MB) for the URLs; server-side preload of the plate page's hero image from the `spa` meta lookup; decide on Cloudflare Early Hints; explicit `width` / `height` on images; touch-target sizes; an `/api/summary` aggregate only if a trace shows the ~15 model-keyed requests on the critical path.
+
 ## Phase 5 — accounts (login + favorites + search history), conditional
 
 Additive to the Nest + Postgres stack; no rewrite.
