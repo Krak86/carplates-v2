@@ -85,10 +85,10 @@ const HERO_PRELOAD_MARK = 'fetchpriority="high"'
 
 /** Drop the placeholder <title>/description from index.html and inject the meta block before </head>. */
 export function injectMeta(html: string, metaBlock: string): string {
-  // A page that preloads its own hero photo must not also fetch the generic background avif at high priority: both share one
-  // slow link and the background loses nothing by arriving after the photo.
+  // A page that preloads its own hero photo must not also preload the generic background avif (212 KB): both share one slow
+  // link and delay the render-gating JS. The backdrop is a dim blur and still loads from CSS once the app mounts.
   const base = metaBlock.includes(HERO_PRELOAD_MARK)
-    ? html.replace(/(<link rel="preload" as="image" type="image\/avif"[^>]*?)\s+fetchpriority="high"/, '$1')
+    ? html.replace(/<link rel="preload" as="image" type="image\/avif"[^>]*>\s*/, '')
     : html
   return base
     .replace(/<title>[\s\S]*?<\/title>\s*/i, '')
