@@ -63,7 +63,7 @@ carsua.app {
 		csp_frame_default_src "default-src 'none'"
 		csp_frame_base_uri "base-uri 'none'"
 		csp_frame_frame_ancestors "frame-ancestors 'self'"
-		csp_frame_script_src "script-src 'self' 'unsafe-eval' 'report-sample' https://telegram.org"
+		csp_frame_script_src "script-src 'self' 'unsafe-eval' 'report-sample' https://telegram.org https://static.cloudflareinsights.com"
 		csp_frame_frame_src "frame-src https://oauth.telegram.org"
 		csp_frame_connect_src "connect-src 'self' https://oauth.telegram.org"
 		csp_frame_img_src "img-src https:"
