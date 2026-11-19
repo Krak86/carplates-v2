@@ -22,6 +22,18 @@ export const RELEASES: readonly ReleaseDay[] = [
     items: [
       item(
         'improved',
+        'Безпека: сервер тепер приймає трафік лише через Cloudflare, відкритий тільки порт 443; браузери отримують стиснення Brotli.',
+        'Безопасность: сервер теперь принимает трафик только через Cloudflare, открыт только порт 443; браузеры получают сжатие Brotli.',
+        'Security: the server now accepts traffic only through Cloudflare and only port 443 is open; browsers get Brotli compression.'
+      ),
+      item(
+        'improved',
+        'Сторінка «Про застосунок»: нові джерела (exifr, ONNX Runtime Web, Contabo), опис безпеки та оновлений план розвитку.',
+        'Страница «О приложении»: новые источники (exifr, ONNX Runtime Web, Contabo), описание безопасности и обновлённый план развития.',
+        'About page: new sources (exifr, ONNX Runtime Web, Contabo), a security entry and the updated roadmap description.'
+      ),
+      item(
+        'improved',
         'Сторінка «Функції»: єдиний список «Що далі» з позначками (заплановано, ідея, вивчаємо), посилання на «Коротко про можливості» та обговорення.',
         'Страница «Функции»: единый список «Что дальше» с пометками (запланировано, идея, изучаем), ссылки на «Коротко о возможностях» и обсуждение.',
         'Features page: one "What is next" list with Planned / Idea / Researching chips, plus links to "At a glance" and the discussion page.'
@@ -38,6 +50,24 @@ export const RELEASES: readonly ReleaseDay[] = [
     date: '2026-11-17',
     version: 'v2.1360',
     items: [
+      item(
+        'improved',
+        'Швидший старт: основний скрипт сайту зменшено зі 184 до 114 КБ, читання EXIF підвантажується лише для фото; офлайн-переклад більше не тягне рушій з CDN.',
+        'Быстрее старт: основной скрипт сайта уменьшен со 184 до 114 КБ, чтение EXIF подгружается только для фото; офлайн-перевод больше не тянет движок из CDN.',
+        'Faster start: the main script shrank from 184 to 114 KB, EXIF reading loads only for photos, and on-device translation no longer pulls its engine from a CDN.'
+      ),
+      item(
+        'fix',
+        'Пошук за VIN: якщо NHTSA недоступний, але VIN є в нашому реєстрі, показуємо записи реєстру замість помилки.',
+        'Поиск по VIN: если NHTSA недоступен, но VIN есть в нашем реестре, показываем записи реестра вместо ошибки.',
+        'VIN lookup: when NHTSA is down but the VIN is in our registry, the registry rows are shown instead of an error.'
+      ),
+      item(
+        'fix',
+        'Офлайн: головна не показує безкінечні скелети статистики, а відсутній логотип не дає помилку.',
+        'Офлайн: главная не показывает бесконечные скелеты статистики, а отсутствующий логотип не даёт ошибку.',
+        'Offline: the home page no longer shows endless stats skeletons and a missing logo no longer errors.'
+      ),
       item(
         'fix',
         'Пошук за фото знову показує дату зйомки та місце (GPS) з EXIF фото.',

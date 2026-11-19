@@ -50,6 +50,9 @@ by re-reading this section before bumping.
   the linter. `eslint-plugin-react-hooks@7` (ESLint-10-native, incl. the React
   Compiler rules) covers what matters. Re-add only if a patched
   `eslint-plugin-react` ships and its extra rules are wanted.
+- **Caddy image** — `infra/docker-compose.prod.yml` uses `caddy:2`, which floats within major 2 (a `docker compose pull` takes the newest 2.x;
+  newest seen 2026-11-05: `2.11.9`). Not held back, but not an exact pin either. Check the running one with
+  `docker compose exec caddy caddy version`; pin to `caddy:2.11.x` if a surprise upgrade mid-deploy ever matters.
 - **tsconfig `incremental`** — deliberately unset (not a version thing): with
   per-package `tsc` its `.tsbuildinfo` lived outside `dist/`, so `rm -rf dist`
   left a stale cache and tsc silently emitted nothing.
@@ -1071,11 +1074,12 @@ VPS sizing, provider shortlist (Contabo Cloud VPS 6), static IP and DNS: [docs/d
   1. [x] Measured 2026-10-28 on carsua.app (Fast 4G, 4× CPU): LCP 1174 ms, **CLS 0.79** (`Presence` animating open after load; fixed in code) — `docs/plan-done.md` "Load-performance pass". ✅ Re-measured 2026-10-29: **CLS 0.01**, LCP 1362 ms, 103 requests, PostHog 225 ms; Lighthouse mobile a11y 96 / BP 96 / SEO 100. ✅ `color-contrast` fixed and verified 2026-10-29 (`CO2_BAND_TEXT_COLOR`; Lighthouse mobile a11y 100 on `/` and on `/fuel`, light and dark). ✅ Found on `/fuel` and fixed in code 2026-10-29: CLS 0.22 (the bare route `Spinner` left `QuickLinks` in the first screen, pushed out when the chunk rendered; the `Suspense` fallback in `App.tsx` is now `min-h-svh`) and axe `td-has-header` (`PowertrainDetail` name cell is `<th scope="row">`, the empty header has an sr-only label). ✅ Re-measured after deploy 2026-10-29: `/fuel`, `/safety`, `/about` all CLS 0.00 (`docs/plan-done.md` "Load-performance pass"). ✅ `td-has-header` re-checked on `/fuel` after deploy 2026-10-29: passes (mobile a11y 100). ✅ `inspector-issues` found 2026-10-29: two Report-Only CSP `eval` violations from our own Zod chunk (`z.config({ jitless: true })` ran too late: Zod reads it when a schema is constructed, and the schemas chunk evaluated before `main.tsx`); fixed in code (`lib/zod-config.ts` first import + `vendor-zod` / `zod-config` chunks in `vite.config.ts`), ✅ re-measured after deploy 2026-10-29: `/fuel` mobile a11y 100, best practices **100**, SEO 100, console clean. The `deprecations` audit (FencedFrame, StorageType.persistent, Protected Audience) failed on the 77 run (best practices 77 on `/fuel`) and passed on the 100 run: it comes from (FencedFrame, StorageType.persistent, Protected Audience) from Cloudflare's injected `/cdn-cgi/challenge-platform/scripts/jsd/main.js` and is intermittent (not fixable in code, only by turning off the Cloudflare JS Detections injection). Only `llms-txt` and `ai-catalog.json` remain failing (agentic-browsing 50). ✅ `llms.txt` written 2026-10-29 (`apps/web/public/llms.txt`: H1, summary, links to the stable public pages; [ ] verify `https://carsua.app/llms.txt` is served as the file, not the SPA shell, and the `llms-txt` audit passes after deploy). ✅ ARD manifest written 2026-10-29 (`apps/web/public/.well-known/ard.json` + identical `ai-catalog.json`, the path Lighthouse probes; validated against Lighthouse's bundled schema) pointing at a curated public OpenAPI document `/.well-known/openapi.json` (`apps/api/src/openapi/public-doc.ts`, allowlist `PUBLIC_API_PATH_PREFIXES` = `/api/stats*`, `/api/wanted/stats`; Swagger UI stays off). ✅ Verified after deploy 2026-10-29: `llms.txt`, `ard.json`, `ai-catalog.json` and `openapi.json` all 200 with the right content type (no SPA shell), the openapi doc lists only `/api/stats*` + `/api/wanted/stats` (4 schemas, no tags), `/api/docs` stays the SPA shell; mobile Lighthouse on `/about`: agentic-browsing **98** (was 50), `llms-txt` passes, `ard-schema` valid. The remaining 0.9 is a Low note that `application/vnd.oai.openapi+json` is not one of Lighthouse's "standard discovery types" (left as is: it is the correct media type for an OpenAPI document).
   2. [x] Language chunk preload (2026-10-28): `preloadHints()` in `vite.config.ts` injects an inline script into `index.html` that `modulepreload`s the visitor's language chunk (+ `ua` fallback) using the hashed names; its language pick mirrors `initialLang()` in `src/i18n/index.ts` - keep them in step. Re-measure after deploy.
   3. [x] Brotli (2026-10-28): measured, browsers got **gzip** because Cloudflare passes a compressed origin response through. `infra/Caddyfile` now compresses only non-Cloudflare requests (`@direct`), so Cloudflare compresses to Brotli. ✅ Verified 2026-10-29: `content-encoding: br` on `/assets/*.js`.
+     - [x] Re-checked 2026-11-18: br only went to clients that do not offer zstd; Chrome/Edge/Firefox send `zstd` and got it (34,481 B vs br 33,005 B on `index-*.js`, `docs/deploy.md` "HTTP/2, HTTP/3, compression, caching"). ✅ Fixed 2026-11-18: Cloudflare Compression Rule "Prefer Brotli over zstd" (all requests, Brotli and Gzip); Chrome DevTools shows `content-encoding: br` on `/assets/*.js`.
   4. [x] Short-TTL cache for the global rollups (`/api/stats/*` except `version`, `/api/fuel/stats|powertrains`, `/api/safety/stats`, `/api/wanted/stats`): `Cache-Control: public, max-age=300` (`common/cache.ts`, 2026-10-28). ✅ Cloudflare Cache Rule "Cache API rollups" created and verified 2026-10-29 (MISS then HIT on all five rollups, `/api/stats/version` stays DYNAMIC). ✅ vdb / rdw / wiki lookups send `Cache-Control` (`LOOKUP_CACHE` browser 1 h + edge 1 day, recalls 15 min / 1 h, `no-store` on `refresh=true`; 2026-10-29, `common/cache.ts`). ✅ Cloudflare Cache Rule "Cache model lookups" created and verified 2026-10-29 (MISS then HIT on vdb, vdb/stats, rdw, rdw/recalls, wiki, wiki/image; `refresh=true` DYNAMIC). The bare `/api/stats` was missing from "Cache API rollups" (prefix `/api/stats/`) and was added, MISS then HIT. Original note: a Cloudflare Cache Rule ("Eligible for cache", respect origin TTL, path `/api/stats*` etc.; Cloudflare does not cache JSON by default) and vdb / rdw / wiki lookups.
   5. [x] Entry graph trimmed (2026-10-28): `ResultCard` is now `lazy()` in `SearchRoute` (like `VinResult`), which was what pulled the whole result-card graph (specs, wiki, maps, auction, model360 helpers…) into the first load. Static graph from `index.html`: 100 modules / 349 kB gz → 58 modules / 260 kB gz; what is left is mostly vendors (react 79, index 49, query 33, schemas 26). Trade-off: a first plate search fetches the `ResultCard` chunk after the data arrives (could be prefetched on idle).
   6. [x] Hero: the same hook adds `<link rel=preload as=image type=image/avif fetchpriority=high>` for the first background photo (2026-10-28). Measured LCP element is a text badge, not the hero, so the gain is mainly paint of the background; wasted if the visitor turned the background off. ✅ Fonts checked 2026-10-29: no `@font-face`, no font requests (system fonts). ✅ `ResultCard` chunk is prefetched on idle from the home page (`SearchRoute.tsx`, `loadResultCard`), so the first plate search needs no extra round trip.
   7. [x] PostHog (and the recorder / surveys / dead-clicks / web-vitals scripts it loads) now starts on first interaction or browser idle (max 4 s); early `capture()` calls are queued (`lib/telemetry.ts`, 2026-10-28). Sentry still starts at once. Re-measure after deploy.
-- HTTP/2 + HTTP/3 + Brotli + caching setup: [docs/deploy.md](docs/deploy.md) (open UDP 443!)
+- HTTP/2 + HTTP/3 + Brotli + caching setup: [docs/deploy.md](docs/deploy.md) (origin publishes only 443/tcp behind Cloudflare, see origin lockdown H4)
 - Prod `docker-compose` (as built): Caddy (Cloudflare origin cert; no per-IP rate limit, dropped 2026-10-31) · api-blue/api-green (also serve the SPA) · alpr · postgres ·
   ingest (cron, profile `jobs`). Redis (RIA + VIN cache, throttler store) is **not** in the compose file; PgBouncer is not used.
 - ✅ Deploy tooling written 2026-10-15 (api/alpr Dockerfiles, `infra/docker-compose.prod.yml` + Caddyfile + maintenance page, blue/green api deploy,
@@ -1114,8 +1118,8 @@ Code-level audit findings and the full pre-deploy gate: [docs/security-checklist
   - [x] H1 pin SSL/TLS to **Full (Strict)** instead of Automatic SSL/TLS (done 2026-11-17)
   - [x] H2 (done 2026-11-17, direct hit now fails the handshake, site fine via Cloudflare; IPv6 verified from the VPS; open: AOP cert renewal before 2036-11-14) Authenticated Origin Pulls (mTLS, per-zone cert) + Caddy `client_auth`, roll out with `verify_if_given` first; or H3 Cloudflare-range allowlist in the `DOCKER-USER` chain
   - [x] H3 (done 2026-11-17) Cloudflare-range firewall (`infra/vps/cf-firewall.sh`, ipset + `DOCKER-USER`) applied and flag set; direct hit over IPv4 now times out, site, UptimeRobot and Deploy API fine, rules survive Docker restarts and a reboot. Open: IPv6 filter not probed from outside (no IPv6 test source); on this VPS the systemd unit and cron were installed by hand because `bootstrap.sh` only runs on a fresh host
-  - [ ] Next session: start from [origin-hardening-plan.md](docs/origin-hardening-plan.md) section 3a "Manual runbook" (root shell without sudo, outside checks, IPv6 probe, handoff); the agent suggests the commands, the owner runs them. `cf-firewall.sh enable` is the one-command setup for a new VPS (untested on a fresh host)
-  - [ ] H4 verify, then close 443/udp (and 80 if unneeded); update `bootstrap.sh`, `deploy.md`. Let H3 run clean for a few days first
+  - [ ] Next session (evening 2026-11-19, or before 04:00 CET 2026-11-20): H4 is on `stage`, not merged; the first counter test was void (daily cron 04:17 CET flushes `CF-ORIGIN`), rules re-added 2026-11-19 ~09:45 CET; read the "Update 2026-11-19" paragraph in the handoff first (counter result, then merge to `main` in a quiet hour, then post-deploy checks). General start: [origin-hardening-plan.md](docs/origin-hardening-plan.md) section 3a "Manual runbook" (root shell without sudo, outside checks, IPv6 probe, handoff); the agent suggests the commands, the owner runs them. `cf-firewall.sh enable` is the one-command setup for a new VPS (untested on a fresh host)
+  - [ ] H4 code done 2026-11-18 (compose publishes only 443/tcp, `bootstrap.sh` ufw, `deploy.md`); not deployed. After deploy-api (after H3 ran clean a few days): root `ufw delete allow 80/tcp; ufw delete allow 443/udp`, `ss -lntu` shows only 443/tcp, site still h3, UptimeRobot + health check green. IPv6 outside probe deferred (not a blocker)
   - [x] H5 decided 2026-11-18: keep SSH key-only + fail2ban (GitHub runner IPs rule out an allowlist); H8 closed as moot (direct hits never reach the API)
   - [ ] H6 Cloudflare Tunnel (stays deferred); H7 ask Contabo for a new IPv4 after H4 (coordinate with H10)
   - [ ] Decisions recorded (no work): no PgBouncer until `pg_stat_activity` nears `max_connections` or `too many clients` appears; Redis only for the throttler store / shared caches (item below)
@@ -1128,6 +1132,7 @@ Code-level audit findings and the full pre-deploy gate: [docs/security-checklist
   - [ ] Telegram login widget under enforcement: ✅ code 2026-11-08 hosts it in an isolated same-origin frame (`/telegram-frame.html`, per-path CSP with `unsafe-eval`, app policy stays eval-free). Deployed; verified on prod (Report-Only) 2026-11-08: sign-in, sign-out, button returns (after the `frame-src` space and SW denylist fixes, plan-done "CSP report sink"). Open: link, re-auth, share photo, then the enforced view (override with the frame policy under its own entry).
   - [ ] Enforced-view walk (DevTools header override, see plan-done "CSP report sink"): passed 2026-11-08 for Google sign-in, Turnstile, Disqus, Maps, YouTube, Sketchfab, carshow360, market modal, PDF, plate card. Still to check enforced: email sign-in, Winner 360, Wipeout modal on /play, image export, share flow, phone width, Firefox/Safari. Remove the override (`.headers` in carsapp_assets/carsua.app) afterwards.
   - ✅ PostHog data (2026-11-17): cookieless tracking was off in the EU project (every event discarded after a 200) + landing `$pageview` was never sent (late init); both fixed, admin card now also shows browser / device / OS breakdowns. `docs/plan-done.md` "PostHog data finally arrives". Check Activity > Event ingestion warnings after any PostHog project change.
+  - ✅ Origin lockdown H0-H4 code, Brotli-over-zstd rule, race tilt camera, `/features` "What's next", Twelve-Factor audit (2026-11-16 → 18): write-up in `docs/plan-done.md`
   - [ ] Strict `script-src` phase 1 (code and deploy 2026-11-17; still to verify on prod, see below): no inline scripts left (`public/theme-init.js`, emitted `assets/lang-preload-<hash>.js` from `preloadHints()`), `'unsafe-inline'` dropped from `script-src` in `infra/Caddyfile` (still Report-Only; `style-src` keeps it). After deploy (web + Caddy reload): no flash of the wrong theme in dark mode, no new `script-src-elem` Sentry issues over the week. Later, optional: hash + `'strict-dynamic'` loader (nonce is not possible, HTML is edge-cached and precached).
     - Checked on prod 2026-11-17: header has no `'unsafe-inline'` in `script-src`; new HTML served; offline reload and plate page offline work; dark theme set; CSP Evaluator only flags host allowlists (+ optional Trusted Types hint). **Bug found and fixed in code (not deployed):** photo EXIF date and GPS were missing because `exifr` lite `parse(file, { pick })` throws and `readPhotoMeta` swallowed it (`photo-meta.ts`, v2.1358).
     - [x] After deploy (web, api, Caddy reload): upload `20261010_163702.jpg` (has GPS) on `/`: the 📅 taken date and 📍 coordinates line shows under the photo; a screenshot (no EXIF) shows neither. (Header `'report-sample'` confirmed on prod 2026-11-17; upload verified on prod 2026-11-17 (📅 + 📍 shown).)
@@ -1157,7 +1162,7 @@ Code-level audit findings and the full pre-deploy gate: [docs/security-checklist
   - Skip: COEP `require-corp` (breaks the YouTube / Sketchfab / Maps / Disqus embeds), `X-XSS-Protection` (ignored by browsers), `X-DNS-Prefetch-Control`, `X-Download-Options` (legacy IE only).
 - [ ] Origin-level header fallback in `apps/api/src/main.ts` `onSend` (a direct-origin hit is otherwise header-naked).
 - [ ] Postgres least-privilege roles (API user must not own schemas/DDL; separate migration role). Redis throttler: see the line below.
-- [ ] Redis-backed throttler storage (shared counters, survives restarts, covers the blue/green overlap) — **not started**, Redis is not in the compose file; low priority. Global daily counter for paid third-party keys (Plate Recognizer budget is already capped; only needed if a RIA key is added).
+- [ ] Redis-backed throttler storage (shared counters, survives restarts, covers the blue/green overlap) — **not started**, Redis is not in the compose file; low priority. Global daily counter for paid third-party keys (Plate Recognizer budget is already capped; only needed if a RIA key is added). **Decision (2026-11-18):** self-hosted pinned container (Redis 8 or Valkey, BSD), not an external free tier: Redis Cloud free is 30 MB / ~100 ops/s, Upstash free is 500K commands/month (~8K throttled requests/day), and both add a network hop per request. Coarse per-IP limits can go to a Cloudflare rate limiting rule instead.
 - [x] Swagger is off in production (`swaggerEnabled`: `ENABLE_SWAGGER` or non-production; `/api/docs` serves the SPA shell). [x] `/api/admin/*` verified 2026-10-31: all three admin controllers (`features/admin`, `digest`, `usage-admin`) carry a class-level `@UseGuards(AdminGuard)` (session + `role = 'admin'`, else 401/403); the dev-only `/api/dev/emails` controller is not registered in production. Optional: IP-allowlist at Caddy.
 - [x] Secrets: production `AUTH_SECRET` / `POSTGRES_PASSWORD` differ from dev. Rotation **skipped by choice 2026-10-28**; rotate `POSTHOG_PERSONAL_API_KEY` and any other key shown in chat/screenshots if you consider it exposed.
 - [ ] `robots.txt`/sitemap: verify `PUBLIC_SITE_URL` is the real origin, submit `sitemap.xml` in Google Search Console and Bing Webmaster.
@@ -1495,6 +1500,38 @@ Deploy Web #111 is green (349 test files, 2581 tests); nothing blocks a deploy. 
 - [ ] **P4 (optional): quiet the expected error logs in the API tests.** Tests that exercise failure paths print Nest `ERROR` / `WARN` lines into the CI log (`Invalid JSON` in `csp-parsers`, `FST_INVALID_MULTIPART_CONTENT_TYPE` in `shares.controller`, `db password in here` / `Error: x` / `boom` in `all-exceptions.filter.test.ts`, `Plate Recognizer rejected the API token`, `r2 down`, `db down`, Wikimedia 429/503). They are intentional, but they look like failures when scanning a log and hide a real one. Fix: in those specs `vi.spyOn(Logger.prototype, 'error').mockImplementation(() => {})` (or `app.useLogger(false)` / `Test.createTestingModule(...).setLogger(false)`), and assert on the spy where the log is the behaviour under test. Not a deploy concern.
 - [ ] **P4 (optional): slow test.** `shares/helpers.test.ts` takes 5.9 s (`downscaleForShare` "steps the quality down…" 5.3 s, image work). If the CI test step (4m 11s total job) needs trimming, shrink the fixture image or raise parallelism; otherwise leave.
 
+## Twelve-Factor audit (2026-11-18) - 4 small gaps, the rest compliant
+
+Checked against https://12factor.net. Already compliant: one repo / many deploys (I), Zod env + `assertProductionEnv` fail-fast in
+`apps/api/src/env.ts` (III), every backing service by URL (IV), SHA-tagged images + env file + blue/green, immutable web releases (V),
+`PORT` binding (VII), ingest as its own process type with `pg_try_advisory_lock` (VIII), `enableShutdownHooks` + exec-form `CMD` +
+healthcheck (IX), same Postgres 18.6 in dev and prod (X), stdout logs + rotated json-file + Sentry (XI), migrations / `seed-if-empty` /
+ingest as one-off `docker compose run --rm` with the release image (XII). Following every factor to the letter is not worth it for one VPS
+and one API instance; the items below are the cheap ones.
+
+- [ ] **P2 Rollback by tag (V).** Today an API rollback = revert commit + full CI. `.github/workflows/deploy-api.yml`: add a
+      `workflow_dispatch` input `image_tag` (empty = `$GITHUB_SHA`); when set, skip `ci` / `build` and pass it to `infra/vps/deploy-api.sh`
+      (already takes the tag as `$1`). Relies on the existing "migrations backward compatible" rule. Add a short "Rollback" section to
+      `docs/deploy.md` covering it plus the manual web rollback (`cd /opt/carsua/web && ln -sfn releases/<id> current.tmp && mv -T current.tmp current`,
+      5 releases are kept).
+- [ ] **P2 No `latest` in prod compose (II).** `infra/docker-compose.prod.yml` falls back to `:-latest` for `API_TAG_BLUE`, `API_TAG_GREEN`,
+      `ALPR_TAG`, `INGEST_TAG`: change to `${X:?X not set}`. First confirm `deploy-alpr.sh` / `deploy-ingest.sh` always `set_env` their tag
+      before any `up` / `run` (`infra/vps/lib.sh`), else the first deploy fails. Pin `caddy:2` to an exact `2.x.y` and add it to "Version pins".
+- [ ] **P3 Graceful stop window (IX).** Docker's default 10 s stop grace is shorter than the 60 s Fastify `requestTimeout` (4 MB uploads), and
+      the old colour is stopped 6 s after the switch. Add `stop_grace_period: 30s` to the `x-api` anchor in `infra/docker-compose.prod.yml`.
+- [ ] **P3 Structured logs in production (XI).** `apps/api/src/main.ts`: `NestFactory.create(..., { logger: new ConsoleLogger({ json: env.NODE_ENV === 'production' }) })`
+      (Nest 11 built-in, no new dependency); dev keeps text. Check the admin Server tab / any log grep in `docs/` still works with JSON lines.
+- [ ] **After deploy** (owner, items above): `docker compose config` on the VPS passes; run "Deploy API" by hand with the previous SHA as
+      `image_tag`, `/healthz` green and `GIT_SHA` matches, then redeploy the current SHA; `docker compose logs api-<colour> | head` shows JSON lines.
+
+Not worth it now, revisit only at 2+ API replicas:
+
+- Runtime-injected SPA config instead of build-time `VITE_*` (only matters with a real stage env promoting the same bundle).
+- In-API timers (alarm poller, losses refresh, account purge, shares cleanup, server stats) would run once per replica: move to a
+  `worker` process or guard with an advisory lock. Digest is already safe (claim row in `app.digest_sends`), purge is an idempotent DELETE.
+- `ThrottlerModule` and `contact/contact-limiter.ts` are in memory, so limits are per process: shared store (Postgres / Redis) if scaled.
+- Log shipping / aggregation (Loki or similar): Sentry + `docker compose logs` is enough at this size.
+
 ## Assistant + embeddable widget (idea 2026-11-08, to discuss)
 
 Rule-based (no AI, no MCP) Q&A assistant for a plate / VIN built on our own API, one custom element with chat / search / badge views, a floating launcher in the app and an iframe-only embed for other sites (open data + link-out). Plan, local-test recipe and parked ideas: [docs/assistant-plan.md](docs/assistant-plan.md).
@@ -1505,10 +1542,14 @@ Rule-based (no AI, no MCP) Q&A assistant for a plate / VIN built on our own API,
 
 In-app chat that answers from a vector index (app help + Ukrainian registration law), the current plate / VIN and registry tools (Gemini function-calling), streamed over SSE. Supersedes the in-app chat of the assistant plan above (the embed widget stays rule-based). Plan: [docs/ai-chat-plan.md](docs/ai-chat-plan.md).
 
-- [ ] Infra + DB: pgvector image in both compose files, migration `0105_ai_chat.sql`, Drizzle tables
-- [ ] API: `apps/api/src/chat/` (Gemini provider, retrieval, tools, SSE controller, throttle, daily budget), shared `chat.ts` contracts
-- [ ] Corpus + `pnpm ai:index` (chunker, hash-based embedding)
-- [ ] Web: launcher + drawer, SSE parser, i18n `chat.*`
+Reordered 2026-11-18: **Phase A (no LLM, local embeddings, semantic search UI) first**, then Phase B (Gemini + SSE chat). Embeddings are local (`multilingual-e5-small`, 384 dims); Gemini only generates.
+
+- [ ] A1 Infra + DB: pgvector image in both compose files, migration `0105_ai_chat.sql` (`vector(384)`), Drizzle tables
+- [ ] A2 Local `embedder.ts` (transformers.js), corpus + `pnpm ai:index` (chunker, hash-based re-embed)
+- [ ] A3 `GET /api/search/semantic` + "Smart search" UI with similarity score (no Gemini key needed)
+- [ ] A4 Optional: "similar models" via make/model embeddings
+- [ ] B1 API: `apps/api/src/chat/` (Gemini provider, retrieval reuse, tools, SSE controller, throttle, daily budget), shared `chat.ts` contracts
+- [ ] B2 Web: launcher + drawer, SSE parser, i18n `chat.*`
 - [ ] Docs + release: features-reference, About privacy note, `releases.ts`
 - After deploy:
   - [ ] Swap the VPS Postgres image to pgvector **before** the migration runs
@@ -1521,6 +1562,21 @@ Admin-only `/admin/parking` page: on-demand snapshot from 2 home cameras (Reolin
 
 - [ ] Home parking cameras (admin-only) - see docs/home-parking-cameras.md
 - [ ] ⏳ Owner: check the RT-BE50 supports WireGuard client (VPN Fusion) and pick the cameras (hub + 1x Argus PT Ultra or 2x Argus 4 Pro)
+
+## Microservices + RabbitMQ + Kafka (idea 2026-11-18, plan only, nothing built)
+
+Learning playground, not a need: one VPS and one API are enough today. Rule of thumb: "do this" tasks go to RabbitMQ (queue, ack, retry, DLQ), "this happened" events go to Kafka (log, replay, consumer groups). Everything opt-in behind flags, brokers in a compose profile `mq`, own schema + role per service, inline fallback when a broker is down. Ideas ranked, library notes, memory budget and verification: [docs/microservices-plan.md](docs/microservices-plan.md).
+
+- [ ] Redis first (self-hosted, shared with the throttler item); optional BullMQ mail queue before RabbitMQ, see docs/microservices-plan.md step 0
+- [ ] Infra: `mq` compose profile (RabbitMQ 4.x + Kafka 4.x KRaft + dev UIs), version pins, env flags in `apps/api/src/env.ts`
+- [ ] Contracts: `packages/shared/src/events.ts` (Zod message schemas, topic / queue names)
+- [ ] `apps/mail-service` (RabbitMQ: durable queue, retry with delay, DLQ, idempotency)
+- [ ] `apps/alarm-service` (Kafka `alarm.events`: recorder, SSE `/api/alarms/stream`, history-fold consumer groups)
+- [ ] `apps/watch-service` + `registry.changes` from ingest: "watch this plate / VIN / region" notifications (Kafka -> RabbitMQ -> Telegram / mail)
+- [ ] Optional later: ALPR over RabbitMQ RPC, "Trending now" from a lookup stream, `apps/worker` + admin "Run job now"
+- [ ] Optional: gRPC `api` → `services/alpr` (`.proto`, `ALPR_TRANSPORT=http|grpc`, HTTP fallback), see docs/microservices-plan.md idea 7
+- [ ] Optional: publish the generic plate normalizer as a public npm package (`packages/ua-plate`, provenance), idea 8
+- [ ] Optional: custom SMTP relay instead of Resend (DNS SPF/DKIM/DMARC checklist in idea 1)
 
 ## Later, conditional
 

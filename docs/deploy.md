@@ -154,7 +154,7 @@ variables: `BACKUP_BUCKET` … `VPS_USER`); `VITE_API_BASE` and `VITE_GOOGLE_MAP
 ## First-time setup (in this order)
 
 1. **Bootstrap** — `scp infra/vps/bootstrap.sh root@<ip>:` then `ssh root@<ip> 'DEPLOY_PUBKEY="…" CI_PUBKEY="…" bash bootstrap.sh'`. Creates `deploy`,
-   locks SSH (key-only, no root), ufw (22/80/443 tcp, 443 udp), fail2ban, Docker, 4 GB swap, `/opt/carsua`, nightly backup cron. **Open a second terminal
+   locks SSH (key-only, no root), ufw (22 and 443 tcp only), fail2ban, Docker, 4 GB swap, `/opt/carsua`, nightly backup cron. **Open a second terminal
    and `ssh deploy@<ip>` before closing the root session.**
 2. **Cloudflare + GitHub** — as above (DNS can propagate while you continue).
 3. **Images + files** — run `deploy-api` with **`sync_only` ticked** first: it builds the api image, copies compose/Caddyfile, writes
@@ -381,14 +381,34 @@ and unbundled, so it says nothing about production.
 **Caddy (in use)**
 
 - Enables **h2 and h3 by default** and advertises h3 via `Alt-Svc` (browsers use h2 on the first visit, h3 afterwards).
-- Compose must publish **`80`, `443` and `443/udp`**; the firewall must allow TCP 80, TCP 443 **and UDP 443**. Without UDP, h3 silently falls back to h2.
-  With Cloudflare in front this only matters for direct hits: browsers speak h3 to Cloudflare, which reaches the origin over TCP (to be verified, then 443/udp can be closed: [origin-hardening-plan.md](origin-hardening-plan.md) H4).
+- Compose publishes **only `443/tcp`** (origin lockdown H4, code 2026-11-18; 80 and 443/udp are closed). Browsers speak h3 to Cloudflare, which reaches the origin over TCP,
+  so the origin needs no UDP. Without Cloudflare in front (grey cloud, another CDN) you would need `443:443/udp` again for h3: [origin-hardening-plan.md](origin-hardening-plan.md) H4.
 - Stock Caddy 2 ships **zstd and gzip only** — `encode br` fails to load ("module not registered: http.encoders.br", verified 2026-10-15).
   Brotli to browsers comes from Cloudflare, but only when the origin response is **uncompressed**: it passes an already gzip/zstd response
   through (seen 2026-10-28: `content-encoding: gzip` with `accept-encoding: br`). The Caddyfile therefore compresses only requests without
   `CF-Connecting-IP` (`@direct`); after deploying it, check `curl -sI -H 'accept-encoding: br' https://carsua.app/assets/<file>.js` shows
   `content-encoding: br` (purge the Cloudflare cache first: the gzip copy is cached for a year). Cloudflare → Speed → Optimization →
   Content Optimization → Brotli must be on.
+- **Who compresses what (checked 2026-11-18, DevTools + curl).** For browser traffic only Cloudflare compresses: Nest sends plain, Caddy skips
+  `Cf-Connecting-Ip` requests (`@direct`), and the zone's only Compression Rule (added 2026-11-18, see the next bullet) forces br then gzip. Before that rule the zone default applied:
+  Cloudflare picked br / zstd / gzip from the browser's `Accept-Encoding`; `/api/me` (about 12.7 kB body) came back `content-encoding: zstd`.
+  **Tiny bodies are left plain**: `/api/stats/version` (34 bytes) has no `Content-Encoding` whatever the `Accept-Encoding` (this is Cloudflare's behaviour,
+  our code has no size check). The "1.7 kB" in the DevTools Size column of small calls is mostly response headers (the CSP alone is about 1.5 kB), not the body.
+  The origin leg therefore carries plain bytes on purpose (Cloudflare then picks br/zstd per browser); fine for small JSON.
+- **Chrome/Edge/Firefox get zstd, not Brotli** (measured 2026-11-18, `curl` with the `Accept-Encoding` below against `/assets/index-*.js`, 113,724 B raw):
+  `br` or `gzip, deflate, br` → br **33,005 B**; `gzip, deflate, br, zstd` (what current Chrome/Edge/Firefox send) → zstd **34,481 B**; `gzip` → 33,156 B.
+  Cloudflare's zstd is about 4 % larger than its gzip, and its br is about level 4 (local br4 = 32,998 B; br11 = 28,297 B, -15 %). For hashed assets cached
+  at the edge for a year, size beats compression speed, so Brotli is the better pick. **Fixed 2026-11-18:** Cloudflare → Rules → **Compression Rules** → "Prefer Brotli over zstd" (All incoming requests, "Enable Brotli and Gzip Compression", i.e. br then gzip, never zstd).
+  Verified in Chrome DevTools: `content-encoding: br` over h3 on all `/assets/*.js`. Do not delete the rule or Chrome goes back to zstd; re-check with
+  `curl -s -o /dev/null -D - -H 'accept-encoding: gzip, deflate, br, zstd' https://carsua.app/assets/<hash>.js | grep -i content-encoding` (must be `br`).
+  Precompressing br11 at build time would save a further 15 % but needs the origin to serve `.br` files and Cloudflare to pass them through; not done.
+- **`Cf-Connecting-Ip` and friends are invisible in DevTools** (browser to Cloudflare leg only). Cloudflare adds `Cf-Connecting-Ip`, `Cf-Ipcountry`, `Cf-Ray`,
+  `Cf-Visitor`, `X-Forwarded-For/Proto`, `Cdn-Loop` on the way to Caddy. To see them, add a temporary `log { output stdout; format json }` block to the
+  `carsua.app` site (there is **no access log today**; check that `Cookie`/`Authorization` are redacted), read it with `docker logs`, then remove it.
+  A direct `curl` to the origin cannot show them: without Cloudflare's client cert (AOP mTLS) the TLS handshake fails.
+- **`/api/stats/version` is deliberately not edge-cached** (excluded in the "Cache API rollups" rule, no `Cache-Control`): it is the "did the data change?" probe
+  (`getDataVersion` in `apps/web/src/lib/api.ts`, offline-copy staleness check), so a cached answer would delay that detection. If origin load ever matters,
+  the only sane option is a very short edge TTL (about 10-30 s) plus a rule entry.
 - Do not add a second `Cache-Control` for `/assets/*` in Caddy — the app already sends the right one. Put a Caddy/CDN cache in front of `/og/*`.
 
 **nginx (alternative, not used)** — `listen 443 ssl;` + `listen 443 quic reuseport;`, `http2 on; http3 on;`,

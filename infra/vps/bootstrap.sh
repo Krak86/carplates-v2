@@ -48,9 +48,7 @@ sshd -t && systemctl reload ssh
 ufw default deny incoming
 ufw default allow outgoing
 ufw allow 22/tcp
-ufw allow 80/tcp
 ufw allow 443/tcp
-ufw allow 443/udp
 ufw --force enable
 # Note: Docker-published ports bypass ufw, so the Cloudflare-only allowlist for 80/443 lives in iptables DOCKER-USER (cf-firewall.sh, delivered by the api deploy).
 # Never add `ports:` to postgres/alpr. The boot unit, daily refresh cron and the flag are NOT created here (no script on the host yet):
