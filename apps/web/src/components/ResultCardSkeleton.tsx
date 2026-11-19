@@ -14,7 +14,7 @@ export default function ResultCardSkeleton(): ReactNode {
   return (
     <div role="status" aria-busy="true" className="relative w-full max-w-content">
       <span className="sr-only">{t('result.loading')}</span>
-      <Card className="w-full overflow-hidden">
+      <Card className="min-h-svh w-full overflow-hidden">
         <div className="flex items-center gap-2">
           <div className="size-7 animate-pulse rounded-full bg-border" />
           <div className={`${bar} h-6 w-48`} />
