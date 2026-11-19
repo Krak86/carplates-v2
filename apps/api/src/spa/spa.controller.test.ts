@@ -164,7 +164,7 @@ describe('SpaController meta injection', () => {
 
   it('preloads the stored hero photo of a known plate', async () => {
     expect(await get('/AA1234BB')).toContain(
-      '<link rel="preload" as="image" href="https://upload.wikimedia.org/x/bmw.jpg" crossorigin="anonymous" fetchpriority="high">'
+      '<link rel="preload" as="image" href="https://upload.wikimedia.org/x/bmw.jpg" crossorigin="anonymous" fetchpriority="low">'
     )
   })
 
