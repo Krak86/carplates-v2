@@ -197,6 +197,13 @@ describe('SpaController meta injection', () => {
     expect(html).not.toContain('noindex')
   })
 
+  it('keeps /news noindex with a bare canonical and no hreflang alternates', async () => {
+    const html = await get('/news?lang=en')
+    expect(html).toContain('<meta name="robots" content="noindex, follow">')
+    expect(html).toContain('rel="canonical" href="https://carsua.app/news"')
+    expect(html).not.toContain('hreflang')
+  })
+
   it('gives a share alias its own noindex preview with itself as og:url', async () => {
     const html = await get('/go/ar?lang=en')
     expect(html).toContain('AR plate scanner')
@@ -226,6 +233,21 @@ describe('SpaController meta injection', () => {
     expect(res.body).toContain('"@type":"BreadcrumbList"')
     expect(res.body).toContain('"item":"https://carsua.app/cars/bmw/x5"')
     expect(res.headers['cache-control']).toContain('s-maxage=86400')
+  })
+
+  it('embeds the page data as JSON (</ escaped) for the client first render', async () => {
+    const read = (html: string): { kind: string; data: Record<string, unknown> } => {
+      const m = /<script type="application[/]json" id="catalog-data">(.*?)<[/]script>/s.exec(html)
+      return JSON.parse(m?.[1] ?? 'null')
+    }
+    const model = read(await get('/cars/bmw/x5'))
+    expect(model.kind).toBe('model')
+    expect(model.data).toMatchObject({ make: 'bmw', model: 'x5', n: 96119 })
+    expect(read(await get('/cars/bmw')).kind).toBe('make')
+    const index = read(await get('/cars?lang=en'))
+    expect(index.kind).toBe('makes')
+    expect((index.data.makes as unknown[]).length).toBe(1)
+    expect(await get('/about')).not.toContain('catalog-data')
   })
 
   it('serves the /cars index with the make list, breadcrumb data and the static page tags', async () => {

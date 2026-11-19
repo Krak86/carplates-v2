@@ -15,7 +15,6 @@ describe('sitemap', () => {
       '/fuel',
       '/safety',
       '/road-safety',
-      '/news',
       '/play',
       '/race',
       '/relax'
@@ -37,6 +36,7 @@ describe('sitemap', () => {
       expect(paths).toContain(p)
     expect(paths).not.toContain('/history')
     expect(paths).not.toContain('/favorites')
+    expect(paths).not.toContain('/news')
   })
 
   it('renders absolute URLs with the home page as the bare origin', () => {

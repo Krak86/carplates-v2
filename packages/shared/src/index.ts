@@ -1028,8 +1028,11 @@ export type {
   WantedStatsVehicle
 } from './wanted.js'
 export {
+  CATALOG_EMBED_ID,
   CATALOG_INDEX_PATH,
   CATALOG_KEEP_MIN_CARS,
+  catalogEmbedSchema,
+  type CatalogEmbed,
   CATALOG_MIN_CARS,
   CATALOG_TOP_MODELS,
   catalogLookupQuerySchema,
