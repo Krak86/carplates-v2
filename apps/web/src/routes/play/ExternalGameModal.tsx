@@ -56,7 +56,6 @@ export default function ExternalGameModal({ game, onClose }: Props): ReactNode {
           title={title}
           className="aspect-video max-h-[70dvh] min-h-64 w-full rounded-lg bg-black"
           allow="autoplay; fullscreen; gamepad; accelerometer; gyroscope"
-          allowFullScreen
           referrerPolicy="no-referrer"
           sandbox="allow-scripts allow-same-origin allow-pointer-lock allow-popups"
         />

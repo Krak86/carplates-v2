@@ -44,12 +44,12 @@ carsua.app {
 	}
 
 	# CSP directives, one per row (a Caddyfile string cannot span lines); the headers below join them with "; ".
+	# upgrade-insecure-requests is not here on purpose: browsers ignore it in Report-Only and log a console error per frame. Add it when the header is renamed to Content-Security-Policy.
 	vars {
 		csp_site_default_src "default-src 'self'"
 		csp_site_base_uri "base-uri 'self'"
 		csp_site_object_src "object-src 'none'"
 		csp_site_script_src_attr "script-src-attr 'none'"
-		csp_site_upgrade_insecure_requests "upgrade-insecure-requests"
 		csp_site_frame_ancestors "frame-ancestors 'self'"
 		csp_site_form_action "form-action 'self'"
 		csp_site_img_src "img-src 'self' data: blob: https:"
@@ -76,7 +76,7 @@ carsua.app {
 	# header to Content-Security-Policy no longer touches the Telegram page (and vice versa).
 	@notTelegramFrame not path /telegram-frame.html
 	header @notTelegramFrame {
-		Content-Security-Policy-Report-Only "{vars.csp_site_default_src}; {vars.csp_site_base_uri}; {vars.csp_site_object_src}; {vars.csp_site_script_src_attr}; {vars.csp_site_upgrade_insecure_requests}; {vars.csp_site_frame_ancestors}; {vars.csp_site_form_action}; {vars.csp_site_img_src}; {vars.csp_site_media_src}; {vars.csp_site_font_src}; {vars.csp_site_style_src}; {vars.csp_site_script_src}; {vars.csp_site_connect_src}; {vars.csp_site_frame_src}; {vars.csp_site_report_uri}"
+		Content-Security-Policy-Report-Only "{vars.csp_site_default_src}; {vars.csp_site_base_uri}; {vars.csp_site_object_src}; {vars.csp_site_script_src_attr}; {vars.csp_site_frame_ancestors}; {vars.csp_site_form_action}; {vars.csp_site_img_src}; {vars.csp_site_media_src}; {vars.csp_site_font_src}; {vars.csp_site_style_src}; {vars.csp_site_script_src}; {vars.csp_site_connect_src}; {vars.csp_site_frame_src}; {vars.csp_site_report_uri}"
 	}
 
 	# Telegram login widget host (apps/web/public/telegram-frame.html): telegram-widget.js eval()s its data-onauth attribute,

@@ -66,6 +66,29 @@ export function loadGoogleIdentity(hl: string): Promise<GoogleIdApi> {
   return api
 }
 
+let initialised: { api: GoogleIdApi; clientId: string } | null = null
+let onCredentialRef: (credential: string) => void = () => {}
+
+/**
+ * `initialize()` may run once per loaded script (Google logs a warning and ignores later calls), but the button
+ * re-renders on theme / language changes and each sign-in popover mounts its own. So initialise once and route
+ * the credential to whichever button mounted last.
+ */
+export function initGoogleIdentity(
+  api: GoogleIdApi,
+  clientId: string,
+  onCredential: (credential: string) => void
+): void {
+  onCredentialRef = onCredential
+  if (initialised?.api === api && initialised.clientId === clientId) return
+  api.initialize({
+    client_id: clientId,
+    callback: ({ credential }) => onCredentialRef(credential),
+    use_fedcm_for_button: true
+  })
+  initialised = { api, clientId }
+}
+
 /** After sign-out: stop One Tap from silently re-selecting the same account. No-op if the script never loaded. */
 export function disableGoogleAutoSelect(): void {
   window.google?.accounts?.id?.disableAutoSelect()
