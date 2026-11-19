@@ -57,7 +57,7 @@ describe('injectMeta', () => {
       '<head><link rel="preload" as="image" type="image/avif" href="/assets/bg.avif" fetchpriority="high"></head>'
     const withHero = injectMeta(html, renderHeroPreload('https://thumb.example/car.jpg'))
     expect(withHero).not.toContain('bg.avif')
-    expect(withHero.match(/fetchpriority="high"/g)).toHaveLength(1)
+    expect(withHero.match(/fetchpriority="low"/g)).toHaveLength(1)
     expect(injectMeta(html, renderMetaTags(base))).toContain('href="/assets/bg.avif" fetchpriority="high">')
   })
 })

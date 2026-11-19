@@ -81,7 +81,9 @@ export function renderMetaTags(m: MetaInput): string {
   ].join('\n    ')
 }
 
-const HERO_PRELOAD_MARK = 'fetchpriority="high"'
+// `low`: the render-gating JS and dictionary must win the slow link first; the hero `<img fetchpriority="high">` upgrades the
+// in-flight preload once the app mounts (the preload only has to get the request started).
+const HERO_PRELOAD_MARK = 'fetchpriority="low"'
 
 /** Drop the placeholder <title>/description from index.html and inject the meta block before </head>. */
 export function injectMeta(html: string, metaBlock: string): string {
