@@ -30,12 +30,13 @@ import {
 } from '../catalog/catalog-text.js'
 import { lossesPreviewText } from './alarm-card.js'
 import { LossesService } from '../losses/losses.service.js'
+import { WikiService } from '../wiki/wiki.service.js'
 import { CatalogService } from '../catalog/catalog.service.js'
 import { loadEnv } from '../env.js'
 import { SHARE_PRIVACY_HEADERS } from '../shares/share-http.js'
 import { SharesService } from '../shares/shares.service.js'
 import { ComparePreviewService } from './compare-preview.js'
-import { injectMeta, renderMetaTags } from './meta.js'
+import { injectMeta, renderHeroPreload, renderMetaTags } from './meta.js'
 import {
   catalogMakeCardSlug,
   catalogMakeOfPath,
@@ -123,7 +124,8 @@ export class SpaController {
     @Inject(CatalogService) private readonly catalog: CatalogService,
     @Inject(SharesService) private readonly shares: SharesService,
     @Inject(ComparePreviewService) private readonly compare: ComparePreviewService,
-    @Inject(LossesService) private readonly losses: LossesService
+    @Inject(LossesService) private readonly losses: LossesService,
+    @Inject(WikiService) private readonly wiki: WikiService
   ) {}
 
   @Get()
@@ -316,6 +318,14 @@ export class SpaController {
     })
   }
 
+  /** Preload tag of the stored hero photo (storage only, never a live Commons call); '' when none is stored yet. */
+  private async heroPreload(preview: { vehicle?: { brand: string; model: string; year: number } }): Promise<string> {
+    const v = preview.vehicle
+    if (!v) return ''
+    const stored = await this.wiki.peekImage(v.brand, v.model, v.year).catch(() => null)
+    return stored?.image?.url ? renderHeroPreload(stored.image.url) : ''
+  }
+
   /**
    * Plate/VIN deep links get per-vehicle tags (first load only — in-app navigation never hits the
    * server); every other path gets its static page tags, rendered once per path+language and cached.
@@ -357,7 +367,8 @@ export class SpaController {
         const base = section === 'value' ? await this.previews.describeValue(preview, lang) : preview
         const text = section === 'value' ? base : sectionPageText(lang, base, section)
         const platePath = `/${encodeURIComponent(preview.value)}`
-        return renderMetaTags({
+        const hero = await this.heroPreload(preview)
+        const tags = renderMetaTags({
           siteUrl,
           path: platePath,
           ogUrl: isShareSection(section)
@@ -369,6 +380,10 @@ export class SpaController {
           image: `${siteUrl}/og/${encodeURIComponent(preview.value)}.png${langQuery}`,
           noindex: true
         })
+        return hero
+          ? `${tags}
+    ${hero}`
+          : tags
       }
     }
 

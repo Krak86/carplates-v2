@@ -88,3 +88,10 @@ export function injectMeta(html: string, metaBlock: string): string {
     .replace(/<meta\s+name="description"[^>]*>\s*/i, '')
     .replace('</head>', `    ${metaBlock}\n  </head>`)
 }
+
+/**
+ * `<link rel="preload" as="image">` of a plate page's hero photo, so the browser fetches it while the JS bundle loads instead of
+ * after the plate request resolves. `crossorigin` matches the hero `<img crossOrigin="anonymous">` (else the preload is not reused).
+ */
+export const renderHeroPreload = (url: string): string =>
+  `<link rel="preload" as="image" href="${esc(url)}" crossorigin="anonymous" fetchpriority="high">`
