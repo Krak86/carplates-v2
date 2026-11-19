@@ -165,7 +165,7 @@
     "drizzle-orm": "0.45.4",
     "iconv-lite": "^0.7.3",
     "pg": "^8.23.1",
-    "read-excel-file": "9.3.14",
+    "read-excel-file": "9.3.17",
     "unzipper": "^0.12.5",
     "zod": "^4.6.6"
   },
