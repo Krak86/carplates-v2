@@ -7,7 +7,7 @@ import { cn } from '@/lib/cn'
 type Props = {
   children: ReactNode
   className?: string
-  /** Async chips are still arriving: reserve ~3 rows (2 from `md`) so they land without pushing the card down. */
+  /** Async chips are still arriving: reserve ~3 rows so they land without pushing the card down. */
   pending?: boolean
 }
 
@@ -15,8 +15,8 @@ type Props = {
 const COLLAPSED_PX = 104
 
 /**
- * Phones only: clips a long chip list to three rows plus a faded fourth, with a "show more" toggle underneath.
- * From `md` up it renders the list untouched. The toggle appears only when the content really overflows.
+ * Clips a long chip list to three rows plus a faded fourth, with a "show more" toggle underneath (all viewport sizes, so
+ * the card height is the same everywhere and late chips never push the page down). The toggle appears only when the content really overflows.
  */
 export default function CollapsibleChips({ children, className, pending = false }: Props): ReactNode {
   const { t } = useTranslation()
@@ -32,7 +32,7 @@ export default function CollapsibleChips({ children, className, pending = false 
     return (): void => observer.disconnect()
   }, [content])
 
-  // Before the first measurement (height 0) a phone already starts collapsed, so a long list never renders full and then snaps shut.
+  // Before the first measurement (height 0) the list already starts collapsed, so a long list never renders full and then snaps shut.
   const collapsedMax = !expanded && (overflowing || height === 0)
   const clipped = overflowing && !expanded
 
@@ -45,9 +45,9 @@ export default function CollapsibleChips({ children, className, pending = false 
             : undefined
         }
         className={cn(
-          'max-md:max-h-(--chips-max) max-md:overflow-hidden max-md:transition-[max-height] max-md:duration-300 max-md:ease-in-out',
-          pending && 'min-h-[84px] md:min-h-[54px]',
-          clipped && 'max-md:mask-[linear-gradient(to_bottom,black_65%,transparent)]'
+          'max-h-(--chips-max) overflow-hidden transition-[max-height] duration-300 ease-in-out',
+          pending && 'min-h-[84px]',
+          clipped && 'mask-[linear-gradient(to_bottom,black_65%,transparent)]'
         )}
       >
         <div ref={setContent} className="flex min-h-6 flex-wrap items-center gap-1.5">
@@ -60,7 +60,7 @@ export default function CollapsibleChips({ children, className, pending = false 
           type="button"
           aria-expanded={expanded}
           onClick={() => setExpanded(v => !v)}
-          className="mt-1 flex min-h-11 w-full items-center justify-center gap-1.5 rounded-lg text-sm font-medium text-[var(--color-primary)] transition-colors active:bg-[var(--color-border)]/40 md:hidden"
+          className="mt-1 flex min-h-11 w-full items-center justify-center gap-1.5 rounded-lg text-sm font-medium text-[var(--color-primary)] transition-colors active:bg-[var(--color-border)]/40"
         >
           {expanded ? t('result.chipsLess') : t('result.chipsMore')}
           <svg
