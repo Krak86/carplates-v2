@@ -12,6 +12,9 @@ let lastPageview = { url: '', at: 0 }
 export async function initTelemetry(): Promise<void> {
   if (!enabled) return
 
+  // The SDKs (Sentry core alone is ~147 KB) must not share the link with the bytes that gate the first paint.
+  await afterFirstPaint()
+
   if (env.VITE_SENTRY_DSN) {
     const Sentry = await import('@sentry/react')
     Sentry.init({
@@ -63,6 +66,32 @@ export async function initTelemetry(): Promise<void> {
     posthog.capture('$pageview')
     for (const [event, props] of pending.splice(0)) posthog.capture(event, props)
   }
+}
+
+const FIRST_PAINT_FALLBACK_MS = 15000
+
+/** Resolves once first-contentful-paint has happened (or after `FIRST_PAINT_FALLBACK_MS`, or where the paint timing is unsupported). */
+function afterFirstPaint(): Promise<void> {
+  return new Promise(resolve => {
+    const painted = (): boolean => performance.getEntriesByName('first-contentful-paint').length > 0
+    const supported =
+      typeof PerformanceObserver !== 'undefined' && !!PerformanceObserver.supportedEntryTypes?.includes('paint')
+    if (!supported || painted()) return resolve()
+    const timer = setTimeout(done, FIRST_PAINT_FALLBACK_MS)
+    const observer = new PerformanceObserver(() => {
+      if (painted()) done()
+    })
+    function done(): void {
+      clearTimeout(timer)
+      observer.disconnect()
+      resolve()
+    }
+    try {
+      observer.observe({ type: 'paint', buffered: true })
+    } catch {
+      done()
+    }
+  })
 }
 
 const IDLE_TIMEOUT_MS = 4000
