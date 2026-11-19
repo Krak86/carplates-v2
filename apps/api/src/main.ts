@@ -37,6 +37,10 @@ async function bootstrap(): Promise<void> {
       // Not when a route chose its own: shared-photo links send `no-referrer` (the token is in the URL).
       if (!reply.hasHeader('referrer-policy')) reply.header('referrer-policy', 'strict-origin-when-cross-origin')
       reply.header('x-frame-options', 'SAMEORIGIN')
+      // Fallback for a direct-origin hit (Caddy sets the same values in front).
+      reply.header('cross-origin-opener-policy', 'same-origin-allow-popups')
+      reply.header('origin-agent-cluster', '?1')
+      reply.header('x-permitted-cross-domain-policies', 'none')
     })
   await app.register(multipart, { limits: { fileSize: 4 * 1024 * 1024, files: 1, fields: 4 } })
   registerCspParsers(app.getHttpAdapter().getInstance())
