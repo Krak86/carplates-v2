@@ -37,6 +37,38 @@ carsua.app {
 	header {
 		Strict-Transport-Security "max-age=31536000"
 		Permissions-Policy "camera=(self), geolocation=(self), microphone=()"
+		# allow-popups, never same-origin: the Google / Telegram sign-in popups must keep window.opener (PLAN.md Helmet review).
+		Cross-Origin-Opener-Policy "same-origin-allow-popups"
+		Origin-Agent-Cluster "?1"
+		X-Permitted-Cross-Domain-Policies "none"
+	}
+
+	# CSP directives, one per row (a Caddyfile string cannot span lines); the headers below join them with "; ".
+	vars {
+		csp_site_default_src "default-src 'self'"
+		csp_site_base_uri "base-uri 'self'"
+		csp_site_object_src "object-src 'none'"
+		csp_site_script_src_attr "script-src-attr 'none'"
+		csp_site_upgrade_insecure_requests "upgrade-insecure-requests"
+		csp_site_frame_ancestors "frame-ancestors 'self'"
+		csp_site_form_action "form-action 'self'"
+		csp_site_img_src "img-src 'self' data: blob: https:"
+		csp_site_media_src "media-src 'self' https:"
+		csp_site_font_src "font-src 'self' data:"
+		csp_site_style_src "style-src 'self' 'unsafe-inline' https://accounts.google.com"
+		csp_site_script_src "script-src 'self' 'wasm-unsafe-eval' 'report-sample' https://static.cloudflareinsights.com https://accounts.google.com https://telegram.org https://challenges.cloudflare.com https://eu-assets.i.posthog.com https://us-assets.i.posthog.com https://*.disqus.com https://*.disquscdn.com"
+		csp_site_connect_src "connect-src 'self' https://huggingface.co https://*.hf.co https://eu.i.posthog.com https://eu-assets.i.posthog.com https://us.i.posthog.com https://us-assets.i.posthog.com https://*.sentry.io https://accounts.google.com https://api.bsky.app https://api.stackexchange.com https://lemmy.world https://*.wikimedia.org https://*.disqus.com"
+		csp_site_frame_src "frame-src 'self' https://accounts.google.com https://oauth.telegram.org https://challenges.cloudflare.com https://www.youtube-nocookie.com https://www.youtube.com https://sketchfab.com https://carshow360.net https://stock.winner.ua https://maps.google.com https://www.google.com https://phoboslab.org https://disqus.com"
+		csp_site_report_uri "report-uri /api/csp-report"
+		csp_frame_default_src "default-src 'none'"
+		csp_frame_base_uri "base-uri 'none'"
+		csp_frame_frame_ancestors "frame-ancestors 'self'"
+		csp_frame_script_src "script-src 'self' 'unsafe-eval' 'report-sample' https://telegram.org"
+		csp_frame_frame_src "frame-src https://oauth.telegram.org"
+		csp_frame_connect_src "connect-src 'self' https://oauth.telegram.org"
+		csp_frame_img_src "img-src https:"
+		csp_frame_style_src "style-src 'self' 'unsafe-inline'"
+		csp_frame_report_uri "report-uri /api/csp-report"
 	}
 
 	# CSP: Report-Only first; enforce after a week of clean browser consoles (docs/security-checklist.md finding 2).
@@ -44,13 +76,13 @@ carsua.app {
 	# header to Content-Security-Policy no longer touches the Telegram page (and vice versa).
 	@notTelegramFrame not path /telegram-frame.html
 	header @notTelegramFrame {
-		Content-Security-Policy-Report-Only "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; form-action 'self'; img-src 'self' data: blob: https:; media-src 'self' https:; font-src 'self' data:; style-src 'self' 'unsafe-inline' https://accounts.google.com; script-src 'self' 'wasm-unsafe-eval' 'report-sample' https://static.cloudflareinsights.com https://accounts.google.com https://telegram.org https://challenges.cloudflare.com https://eu-assets.i.posthog.com https://us-assets.i.posthog.com https://*.disqus.com https://*.disquscdn.com; connect-src 'self' https://huggingface.co https://*.hf.co https://eu.i.posthog.com https://eu-assets.i.posthog.com https://us.i.posthog.com https://us-assets.i.posthog.com https://*.sentry.io https://accounts.google.com https://api.bsky.app https://api.stackexchange.com https://lemmy.world https://*.wikimedia.org https://*.disqus.com; frame-src 'self' https://accounts.google.com https://oauth.telegram.org https://challenges.cloudflare.com https://www.youtube-nocookie.com https://www.youtube.com https://sketchfab.com https://carshow360.net https://stock.winner.ua https://maps.google.com https://www.google.com https://phoboslab.org https://disqus.com; report-uri /api/csp-report"
+		Content-Security-Policy-Report-Only "{vars.csp_site_default_src}; {vars.csp_site_base_uri}; {vars.csp_site_object_src}; {vars.csp_site_script_src_attr}; {vars.csp_site_upgrade_insecure_requests}; {vars.csp_site_frame_ancestors}; {vars.csp_site_form_action}; {vars.csp_site_img_src}; {vars.csp_site_media_src}; {vars.csp_site_font_src}; {vars.csp_site_style_src}; {vars.csp_site_script_src}; {vars.csp_site_connect_src}; {vars.csp_site_frame_src}; {vars.csp_site_report_uri}"
 	}
 
 	# Telegram login widget host (apps/web/public/telegram-frame.html): telegram-widget.js eval()s its data-onauth attribute,
 	# so this one same-origin page gets 'unsafe-eval'; the app itself never does. Own policy, enforce it whenever ready.
 	header /telegram-frame.html {
-		Content-Security-Policy-Report-Only "default-src 'none'; base-uri 'none'; frame-ancestors 'self'; script-src 'self' 'unsafe-eval' https://telegram.org; frame-src https://oauth.telegram.org; connect-src 'self' https://oauth.telegram.org; img-src https:; style-src 'self' 'unsafe-inline'; report-uri /api/csp-report"
+		Content-Security-Policy-Report-Only "{vars.csp_frame_default_src}; {vars.csp_frame_base_uri}; {vars.csp_frame_frame_ancestors}; {vars.csp_frame_script_src}; {vars.csp_frame_frame_src}; {vars.csp_frame_connect_src}; {vars.csp_frame_img_src}; {vars.csp_frame_style_src}; {vars.csp_frame_report_uri}"
 	}
 
 	# Planned maintenance: `touch /opt/carsua/compose/flags/MAINTENANCE`. /healthz stays reachable for the deploy script.
