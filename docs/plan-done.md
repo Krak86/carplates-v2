@@ -4892,3 +4892,11 @@ Source of truth for the steps: `docs/origin-hardening-plan.md` (runbook + handof
 - **`/features` "What's next":** "Coming soon" and "Under consideration" merged into one list with Planned / Idea / Researching chips (13 PLAN.md items added, blocked or skipped ones dropped); intro links to What's new and `/about#brief`.
 - **Twelve-Factor audit:** compliant on I, III-V, VII-XII; 4 small gaps recorded in `PLAN.md` (rollback by image tag, drop `:-latest` compose fallbacks, `stop_grace_period`, JSON logs).
 - **Docs added:** `docs/ai-chat-plan.md`, `docs/home-parking-cameras.md`, `docs/origin-hardening-plan.md`, Helmet header review and Contabo incident checklist (PLAN.md).
+
+## Helmet-style headers and CSP row layout (2026-11-19) ✅
+
+- Added to the `carsua.app` Caddy block: `Cross-Origin-Opener-Policy: same-origin-allow-popups` (never `same-origin`, it breaks the Google / Telegram popups), `Origin-Agent-Cluster: ?1`, `X-Permitted-Cross-Domain-Policies: none`; the site CSP (still Report-Only) gained `script-src-attr 'none'`. `upgrade-insecure-requests` is deliberately not in Report-Only (ignored there, one red console error per frame); add it with the rename.
+- The CSP is now one directive per row in a Caddy `vars { csp_site_* / csp_frame_* }` block, joined by `{vars.…}` placeholders in each header (a Caddyfile string cannot span lines). Verified on prod with `curl -sI`: same policy text and order.
+- `CARSUA-2A` was Cloudflare's injected JSD snippet on `/telegram-frame.html`: that page's policy had no `'report-sample'`, so `isNoise` could not match the sample. Added `'report-sample'` to the frame policy; the count stayed at 27 afterwards.
+- Lesson: a copy of the headers in the API `onSend` made every value appear twice (`x, x`); a doubled COOP is invalid and ignored. Headers set by Caddy must not also be set by the API (the earlier `Referrer-Policy` / `nosniff` live only in `onSend`).
+- Web: Sketchfab iframe `allow` += `accelerometer; gyroscope`, redundant `allowFullScreen` dropped, Google Identity `initialize()` runs once per loaded script (`initGoogleIdentity`).

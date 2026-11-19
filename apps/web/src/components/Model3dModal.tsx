@@ -72,8 +72,7 @@ export default function Model3dModal({ models, label, initialUid, hideShare, onC
           src={`https://sketchfab.com/models/${current.uid}/embed?autostart=1&ui_infos=0`}
           title={current.name}
           className="aspect-video max-h-[60dvh] w-full rounded-lg sm:max-h-[68dvh]"
-          allow="autoplay; fullscreen; xr-spatial-tracking"
-          allowFullScreen
+          allow="autoplay; fullscreen; xr-spatial-tracking; accelerometer; gyroscope"
         />
 
         <p className="mt-2 text-sm text-[var(--color-muted)]">

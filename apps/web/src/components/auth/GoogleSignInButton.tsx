@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 
 import { useAuthActions } from '@/components/auth/use-auth-actions'
-import { loadGoogleIdentity } from '@/lib/google-identity'
+import { initGoogleIdentity, loadGoogleIdentity } from '@/lib/google-identity'
 import { authConfigQuery } from '@/lib/queries'
 import { useUiStore } from '@/store/ui-store'
 
@@ -40,11 +40,7 @@ export default function GoogleSignInButton({ onCredential }: Props): ReactNode {
     loadGoogleIdentity(GOOGLE_LOCALE[lang] ?? 'en').then(
       api => {
         if (cancelled) return
-        api.initialize({
-          client_id: clientId,
-          callback: ({ credential }) => handlerRef.current(credential),
-          use_fedcm_for_button: true
-        })
+        initGoogleIdentity(api, clientId, credential => handlerRef.current(credential))
         slot.replaceChildren()
         api.renderButton(slot, {
           type: 'standard',

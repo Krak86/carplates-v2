@@ -17,6 +17,24 @@ const item = (group: ReleaseGroup, ua: string, ru: string, en: string): ReleaseI
  */
 export const RELEASES: readonly ReleaseDay[] = [
   {
+    date: '2026-11-19',
+    version: 'v2.1400',
+    items: [
+      item(
+        'improved',
+        'Безпека: додані заголовки Cross-Origin-Opener-Policy та Origin-Agent-Cluster, суворіша політика CSP (поки в режимі звітів).',
+        'Безопасность: добавлены заголовки Cross-Origin-Opener-Policy и Origin-Agent-Cluster, более строгая политика CSP (пока в режиме отчётов).',
+        'Security: added Cross-Origin-Opener-Policy and Origin-Agent-Cluster headers and a stricter CSP (still report-only).'
+      ),
+      item(
+        'fix',
+        '3D-моделі (Sketchfab) тепер можуть користуватися датчиками руху пристрою; вхід через Google ініціалізується один раз.',
+        '3D-модели (Sketchfab) теперь могут пользоваться датчиками движения устройства; вход через Google инициализируется один раз.',
+        '3D models (Sketchfab) can now use the device motion sensors; Google sign-in is initialised only once.'
+      )
+    ]
+  },
+  {
     date: '2026-11-18',
     version: 'v2.1382',
     items: [

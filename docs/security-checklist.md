@@ -59,7 +59,7 @@ Source of truth: `infra/Caddyfile`, `infra/docker-compose.prod.yml`, `infra/vps/
 | Origin     | Authenticated Origin Pulls enforced 2026-11-17 (Zone-level, own CA, Caddy `require_and_verify`): a direct hit to the VPS IP fails the TLS handshake (v4 and v6). Optional H3 firewall allowlist not applied | ✅ done (H2), H3 optional, see [origin-hardening-plan.md](origin-hardening-plan.md) |
 | Cloudflare | DNSSEC                                                                                                                                                                                                      | ⚠️ off during the nameserver move (optional re-enable + DS record)                  |
 | Caddy      | Origin cert TLS; `trusted_proxies` = Cloudflare, `header_up X-Forwarded-For {client_ip}` (basis for `TRUST_PROXY=true`); admin API (2019) unpublished                                                       | ✅                                                                                  |
-| Caddy      | HSTS `max-age=31536000`; Permissions-Policy; CSP **Report-Only**                                                                                                                                            | ⚠️ HSTS lacks `includeSubDomains`/`preload`; CSP not enforced (#2)                  |
+| Caddy      | HSTS `max-age=31536000`; Permissions-Policy; COOP `same-origin-allow-popups`, `Origin-Agent-Cluster`, `X-Permitted-Cross-Domain-Policies` (2026-11-19); CSP **Report-Only**                                                                                                                                            | ⚠️ HSTS lacks `includeSubDomains`/`preload`; CSP not enforced (#2)                  |
 | VPS        | ufw open 22/80/443 tcp + 443/udp; closed/internal: 3000, 5432, 6379, 8088, 2019 (IPv4 and IPv6, outside + `ss -tln`)                                                                                        | ✅ 2026-10-31                                                                       |
 | VPS        | SSH key-only, no root, password login off (`00-carsua.conf`); `deploy` user has no sudo; **fail2ban** installed + enabled by `bootstrap.sh`; 4 GB swap                                                      | ✅ 2026-10-27                                                                       |
 | Postgres   | `postgres:18.6`, internal network only; prod password ≠ dev; `assertProductionEnv` refuses the dev `DATABASE_URL`                                                                                           | ✅                                                                                  |
@@ -74,7 +74,7 @@ Source of truth: `infra/Caddyfile`, `infra/docker-compose.prod.yml`, `infra/vps/
 Gotcha: Bot Fight Mode challenges GitHub-runner IPs (403), so the post-deploy public `/healthz` check is advisory only. Never scan production;
 use the local lab ([pentest-lab.md](pentest-lab.md)).
 
-Origin-level header fallback (open, Medium): Caddy owns CSP/HSTS/Permissions-Policy, so a request that reaches the API origin directly loses them.
+Origin-level header fallback (closed 2026-11-19, not needed: Authenticated Origin Pulls rejects direct hits at TLS; a copy in `onSend` doubled Caddy's COOP and was reverted): Caddy owns CSP/HSTS/Permissions-Policy, so a request that reaches the API origin directly loses them.
 Add a minimal fallback in the Fastify `onSend` hook (`apps/api/src/main.ts`) so the origin is never header-naked.
 
 ### Verifications already performed
