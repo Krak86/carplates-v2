@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState } from 'react'
+import { Suspense, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
@@ -39,8 +39,9 @@ import { cn } from '@/lib/cn'
 import { auctionLotsQuery, vinQuery, wantedQuery } from '@/lib/queries'
 import { useRegionLabel } from '@/lib/region-label'
 import { useUiStore } from '@/store/ui-store'
+import { lazyWithPacks } from '@/i18n/lazy-with-packs'
 
-const VinResult = lazy(() => import('@/components/VinResult'))
+const VinResult = lazyWithPacks(() => import('@/components/VinResult'), 'vin', 'safety')
 
 type Row = { label: string; value: ReactNode; info?: string }
 

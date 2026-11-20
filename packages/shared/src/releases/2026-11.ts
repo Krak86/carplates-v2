@@ -5,8 +5,14 @@ import type { ReleaseDay } from './core.js'
 export const DAYS: readonly ReleaseDay[] = [
   {
     date: '2026-11-20',
-    version: 'v2.1443',
+    version: 'v2.1448',
     items: [
+      item(
+        'improved',
+        'Тексти розшифровки VIN, картки авто та рейтингів безпеки завантажуються лише коли вони потрібні, тож решта сторінок відкривається легше',
+        'Тексты расшифровки VIN, карточки авто и рейтингов безопасности загружаются только когда они нужны, поэтому остальные страницы открываются легче',
+        'The VIN decoding, vehicle card and safety rating texts load only when they are needed, so the other pages open lighter'
+      ),
       item(
         'improved',
         'Путівники «Читати», порівняння авто та статистика завантажують свої тексти лише коли ви на них заходите, а вкладки розмірів - коли їх відкриваєте, тож словник першого екрана ще менший',

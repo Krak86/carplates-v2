@@ -91,6 +91,47 @@ export const PACKS = {
       'size.range',
       'size.source'
     ]
+  },
+  safety: {
+    prefixes: ['safety'],
+    // The rating cards load with the `SafetyRatings` section chunk, the /safety models panel and /read/safety; the report
+    // export loads the pack itself (`use-copy-all-info-actions.ts`).
+    owners: [
+      'src/components/SafetyRatings.tsx',
+      'src/components/CncapRatings.tsx',
+      'src/components/EuroNcapRatings.tsx',
+      'src/components/IihsRatings.tsx',
+      'src/components/JncapRatings.tsx',
+      'src/components/KncapRatings.tsx',
+      'src/components/NhtsaRatings.tsx',
+      'src/routes/safety/',
+      'src/routes/read/safety/',
+      'src/lib/export-report.ts'
+    ],
+    // `safety.viewLink`: QuickLinks (layout); `safety.chip.` / `safety.tab`: SafetyStarsChip in the card header;
+    // `safety.video`: YouTubeModal / CrashVideoModal, also opened from VideoStrip.
+    keep: ['safety.viewLink', 'safety.chip.', 'safety.tab', 'safety.video']
+  },
+  vin: {
+    prefixes: ['vin'],
+    // The plate card, the VIN card and everything in them. `rdw` stays core (RdwSpecs.helpers is eager and builds
+    // `rdw.<key>` labels), and so do the `vin.info.about` labels of the eager FieldRow / SectionInfo / NoRegionBadge.
+    owners: [
+      'src/components/vin/',
+      'src/components/ResultCard.tsx',
+      'src/components/VinResult.tsx',
+      'src/components/PlateSegments.tsx',
+      'src/components/DriverAssistSection.tsx',
+      'src/components/EstimatedValueSection.tsx',
+      'src/components/MotFaults.tsx',
+      'src/components/RdwRecalls.tsx',
+      'src/components/RdwSpecs.tsx',
+      'src/components/WikiSpecs.tsx',
+      'src/components/paid/PaidFeatureSections.tsx',
+      'src/routes/read/vin/',
+      'src/lib/export-report.ts'
+    ],
+    keep: ['vin.info.about']
   }
 } as const satisfies Record<string, PackDef>
 

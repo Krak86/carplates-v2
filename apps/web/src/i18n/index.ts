@@ -33,7 +33,9 @@ const SLICES: Record<Lang, Record<SliceKind, Loader>> = {
     compare: () => import('./ua.compare.pack.json'),
     stats: () => import('./ua.stats.pack.json'),
     read: () => import('./ua.read.pack.json'),
-    size: () => import('./ua.size.pack.json')
+    size: () => import('./ua.size.pack.json'),
+    safety: () => import('./ua.safety.pack.json'),
+    vin: () => import('./ua.vin.pack.json')
   },
   ru: {
     core: () => import('./ru.core.pack.json'),
@@ -52,7 +54,9 @@ const SLICES: Record<Lang, Record<SliceKind, Loader>> = {
     compare: () => import('./ru.compare.pack.json'),
     stats: () => import('./ru.stats.pack.json'),
     read: () => import('./ru.read.pack.json'),
-    size: () => import('./ru.size.pack.json')
+    size: () => import('./ru.size.pack.json'),
+    safety: () => import('./ru.safety.pack.json'),
+    vin: () => import('./ru.vin.pack.json')
   },
   en: {
     core: () => import('./en.core.pack.json'),
@@ -71,11 +75,17 @@ const SLICES: Record<Lang, Record<SliceKind, Loader>> = {
     compare: () => import('./en.compare.pack.json'),
     stats: () => import('./en.stats.pack.json'),
     read: () => import('./en.read.pack.json'),
-    size: () => import('./en.size.pack.json')
+    size: () => import('./en.size.pack.json'),
+    safety: () => import('./en.safety.pack.json'),
+    vin: () => import('./en.vin.pack.json')
   }
 }
 const DELTAS: Partial<Record<Lang, Partial<Record<SliceKind, Loader>>>> = {
-  en: { core: () => import('./en.core.delta.pack.json') }
+  en: {
+    core: () => import('./en.core.delta.pack.json'),
+    safety: () => import('./en.safety.delta.pack.json'),
+    vin: () => import('./en.vin.delta.pack.json')
+  }
 }
 const FALLBACK_LANG: Lang = 'ua'
 

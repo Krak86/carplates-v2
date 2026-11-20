@@ -48,11 +48,12 @@ describe('dictionary slices and fallback', () => {
     expect(Object.keys(enDelta).length).toBeGreaterThan(0)
   })
 
-  // `DELTAS` in `i18n/index.ts` lists en/core only: a language or pack that gains a gap must get an entry there.
-  it('only en/core has gaps, so no other slice needs a delta download', () => {
+  // `DELTAS` in `i18n/index.ts` lists these en slices only: a language or pack that gains a gap must get an entry there.
+  const EN_GAP_SLICES: readonly string[] = [CORE, 'safety', 'vin']
+  it('only the en slices with a DELTAS entry have gaps, so no other slice needs a delta download', () => {
     for (const lang of ['ru', 'en']) {
       for (const slice of SLICES) {
-        if (lang === 'en' && slice === CORE) continue
+        if (lang === 'en' && EN_GAP_SLICES.includes(slice)) continue
         expect(Object.keys(fallbackDelta(lang, slice))).toEqual([])
       }
     }
