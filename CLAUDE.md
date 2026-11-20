@@ -29,7 +29,7 @@ Version pins (PLAN.md "Version pins"): never use `latest`.
   don't — new fields there are `.nullable().optional()`. A new offline-capable `/api/*` query goes into `lib/offline-cache.ts`.
 - **NestJS**: Zod-validated inputs, no logic in controllers, never `@Res()` (except SPA catch-all). Link previews
   come from the API, never Vite.
-- **i18n is per-language lazy chunks** (non-ua also loads ua). Tests rendering text `await i18nReady`; never `import '@/i18n'`.
+- **i18n is per-language lazy chunks** (non-ua loads `ua` as fallback only after window `load`, `loadLang(lang, true)`). Tests rendering text `await i18nReady`; never `import '@/i18n'`.
 - **Zod `jitless`**: `@/lib/zod-config` stays the first import of `main.tsx`; `vendor-zod` / `zod-config` stay separate chunks (else CSP `eval`).
 - **Checklists** (`docs/checklists.md`, read the item before the change): new `/api/*` endpoint (edge cache), `LazySection`s, deploy, new public route, docs after a feature, app version.
 
